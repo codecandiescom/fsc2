@@ -37,19 +37,19 @@
 #define Legal_PAPER  5
 
 
-FD_print *print_form;
+static FD_print *print_form;
 
-char *cmd = NULL;                 /* for storing the last print command */
-int print_type = S2P;             /* the way to print: S2P or P2F */
+static char *cmd = NULL;             /* for storing the last print command */
+static int print_type = S2P;         /* the way to print: S2P or P2F */
 
-int paper_type = A4_PAPER;
-double paper_width;
-double paper_height;
+static int paper_type = A4_PAPER;
+static double paper_width;
+static double paper_height;
 
-bool print_with_color = UNSET;
+static bool print_with_color = UNSET;
 
-double x_0, y_0, w, h;            /* position and size of print area */
-double margin = 25.0;             /* margin (in mm) to leave on all sides */
+static double x_0, y_0, w, h;        /* position and size of print area */
+static double margin = 25.0;         /* margin (in mm) to leave on all sides */
 
 
 static int get_print_file( FILE **fp, char **name );
