@@ -94,7 +94,7 @@ static int dont_exec = 0;
 %token E_EQ E_NE E_LT E_LE E_GT E_GE
 %token <lval> E_PPOS E_PLEN E_PDPOS E_PDLEN
 
-%type <vptr> expr line list1 l1e lhs
+%type <vptr> expr line list1 l1e lhs strs
 %type <lval> plhs
 
 
@@ -243,24 +243,40 @@ expr:    E_INT_TOKEN               { if ( ! dont_exec )
        | expr E_GE expr            { if ( ! dont_exec )
 		                                  $$ = vars_comp( COMP_LESS_EQUAL,
 														  $3, $1 ); }
+       | strs E_EQ strs           { if ( ! dont_exec )
+                                        $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
+       | strs E_NE strs           { if ( ! dont_exec )
+                                      $$ = vars_comp( COMP_UNEQUAL, $1, $3 ); }
+       | strs E_LT strs           { if ( ! dont_exec )
+	                                    $$ = vars_comp( COMP_LESS, $1, $3 ); }
+       | strs E_GT strs           { if ( ! dont_exec )
+	                                    $$ = vars_comp( COMP_LESS, $3, $1 ); }
+       | strs E_LE strs           { if ( ! dont_exec )
+	                                    $$ = vars_comp( COMP_LESS_EQUAL,
+														$1, $3 ); }
+       | strs E_GE strs           { if ( ! dont_exec )
+	                                     $$ = vars_comp( COMP_LESS_EQUAL,
+														 $3, $1 ); }
        | expr '+' expr             { if ( ! dont_exec )
-		                                  $$ = vars_add( $1, $3 ); }
+		                                 $$ = vars_add( $1, $3 ); }
+       | strs '+' strs             { if ( ! dont_exec )
+		                                 $$ = vars_add( $1, $3 ); }
        | expr '-' expr             { if ( ! dont_exec )
-		                                  $$ = vars_sub( $1, $3 ); }
+		                                 $$ = vars_sub( $1, $3 ); }
        | expr '*' expr             { if ( ! dont_exec )
-		                                  $$ = vars_mult( $1, $3 ); }
+		                                 $$ = vars_mult( $1, $3 ); }
        | expr '/' expr             { if ( ! dont_exec )
-		                                  $$ = vars_div( $1, $3 ); }
+		                                 $$ = vars_div( $1, $3 ); }
        | expr '%' expr             { if ( ! dont_exec )
-		                                  $$ = vars_mod( $1, $3 ); }
+		                                 $$ = vars_mod( $1, $3 ); }
        | expr '^' expr             { if ( ! dont_exec )
-		                                  $$ = vars_pow( $1, $3 ); }
+		                                 $$ = vars_pow( $1, $3 ); }
        | '+' expr %prec E_NEG      { if ( ! dont_exec )
-		                                  $$ = $2; }
+		                                 $$ = $2; }
        | '-' expr %prec E_NEG      { if ( ! dont_exec )
-		                                  $$ = vars_negate( $2 ); }
+		                                 $$ = vars_negate( $2 ); }
        | '(' expr ')'              { if ( ! dont_exec )
-		                                  $$ = $2; }
+		                                 $$ = $2; }
        | expr '?'                  { if ( ! dont_exec )
 	                                 {
 		                                 if ( ! check_result( $1 ) )
@@ -307,15 +323,15 @@ l2e:     exprs
 ;
 
 exprs:   expr                      { }
-       | strs
+       | strs                      { }
 ;
 
 strs:    E_STR_TOKEN               { if ( ! dont_exec )
-		                                  vars_push( STR_VAR, $1 ); }
+		                                 $$ = vars_push( STR_VAR, $1 ); }
        | strs E_STR_TOKEN          { if ( ! dont_exec )
 	                                 {
 		                                  Var *v = vars_push( STR_VAR, $2 );
-										  vars_add( v->prev, v ); }
+										  $$ = vars_add( v->prev, v ); }
 	                               }
 ;
 

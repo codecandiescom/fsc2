@@ -112,7 +112,7 @@ static int dont_exec = 0;
 %token E_EQ E_NE E_LT E_LE E_GT E_GE
 %token <lval> E_PPOS E_PLEN E_PDPOS E_PDLEN
 
-%type <vptr> expr list1 l1e
+%type <vptr> expr list1 l1e strs
 
 %left '?' ':'
 %left E_AND E_OR E_XOR
@@ -218,8 +218,24 @@ expr:    E_INT_TOKEN              { if ( ! dont_exec )
        | expr E_GE expr           { if ( ! dont_exec )
                                         $$ = vars_comp( COMP_LESS_EQUAL,
 														$3, $1 ); }
+       | strs E_EQ strs           { if ( ! dont_exec )
+                                        $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
+       | strs E_NE strs           { if ( ! dont_exec )
+                                      $$ = vars_comp( COMP_UNEQUAL, $1, $3 ); }
+       | strs E_LT strs           { if ( ! dont_exec )
+	                                    $$ = vars_comp( COMP_LESS, $1, $3 ); }
+       | strs E_GT strs           { if ( ! dont_exec )
+	                                    $$ = vars_comp( COMP_LESS, $3, $1 ); }
+       | strs E_LE strs           { if ( ! dont_exec )
+	                                    $$ = vars_comp( COMP_LESS_EQUAL,
+														$1, $3 ); }
+       | strs E_GE strs           { if ( ! dont_exec )
+	                                    $$ = vars_comp( COMP_LESS_EQUAL,
+														 $3, $1 ); }
        | expr '+' expr            { if ( ! dont_exec )
                                         $$ = vars_add( $1, $3 ); }
+       | strs '+' strs             { if ( ! dont_exec )
+		                                $$ = vars_add( $1, $3 ); }
        | expr '-' expr            { if ( ! dont_exec )
                                         $$ = vars_sub( $1, $3 ); }
        | expr '*' expr            { if ( ! dont_exec )
@@ -281,15 +297,15 @@ l2e:     exprs
 ;
 
 exprs:   expr                       { }
-       | strs
+       | strs                       { }
 ;
 
 strs:    E_STR_TOKEN                { if ( ! dont_exec )
-	                                       vars_push( STR_VAR, $1 ); }
+	                                      $$ =vars_push( STR_VAR, $1 ); }
        | strs E_STR_TOKEN           { if ( ! dont_exec )
 	                                  {
-	                                       Var *v = vars_push( STR_VAR, $2 );
-	                                       vars_add( v->prev, v );
+	                                      Var *v = vars_push( STR_VAR, $2 );
+	                                      $$ = vars_add( v->prev, v );
 									  }
 	                                }
 ;

@@ -407,7 +407,16 @@ void vars_arr_create( Var *a, Var *v, int dim, bool is_temp )
 	/* Otherwise we need an array of references to arrays of lower
 	   dimensions */
 
-	a->val.vptr = VAR_PP T_malloc( a->len * sizeof *a->val.vptr );
+	TRY
+	{
+		a->val.vptr = VAR_PP T_malloc( a->len * sizeof *a->val.vptr );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		a->len = 0;
+		RETHROW( );
+	}
 
 	for ( i = 0; i < a->len; i++ )
 		a->val.vptr[ i ] = NULL;
@@ -444,6 +453,9 @@ Var *vars_init_list( Var *v, ssize_t level )
 	Var *cv, *nv;
 	int type = INT_VAR;
 
+
+	CLOBBER_PROTECT( v );
+	CLOBBER_PROTECT( nv );
 
 	/* Find the start of the of list initializers, marked by a variable of
 	   type REF_PTR */
@@ -538,7 +550,18 @@ Var *vars_init_list( Var *v, ssize_t level )
 	nv->flags |= DONT_RECURSE | INIT_ONLY;
 	nv->dim = v->dim + 1;
 	nv->len = count;
-	nv->val.vptr = VAR_PP T_malloc( nv->len * sizeof *nv->val.vptr );
+
+	TRY
+	{
+		nv->val.vptr = VAR_PP T_malloc( nv->len * sizeof *nv->val.vptr );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		nv->len = 0;
+		RETHROW( );
+	}
+
 	for ( i = 0; i < nv->len; v = v->next )
 	{
 		if ( v->dim != level )
@@ -675,8 +698,17 @@ static void vars_do_init( Var *src, Var *dest )
 			if ( dest->flags & IS_DYNAMIC )
 			{
 				dest->len = src->len;
-				dest->val.dpnt = VAR_PP T_malloc( dest->len
+				TRY
+				{
+					dest->val.dpnt = VAR_PP T_malloc( dest->len
 												  * sizeof *dest->val.vptr );
+					TRY_SUCCESS;
+				}
+				OTHERWISE
+				{
+					dest->len = 0;
+					RETHROW( );
+				}
 				for ( i = 0; i < dest->len; i++ )
 					dest->val.vptr[ i ] = NULL;
 			}
@@ -707,8 +739,17 @@ static void vars_do_init( Var *src, Var *dest )
 			if ( dest->flags & IS_DYNAMIC )
 			{
 				dest->len = src->len;
-				dest->val.dpnt = VAR_PP T_malloc( dest->len
-												  * sizeof *dest->val.vptr );
+				TRY
+				{
+					dest->val.dpnt = VAR_PP T_malloc( dest->len
+													* sizeof *dest->val.vptr );
+					TRY_SUCCESS;
+				}
+				OTHERWISE
+				{
+					dest->len = 0;
+					RETHROW( );
+				}
 				for ( i = 0; i < dest->len; i++ )
 					dest->val.vptr[ i ] = NULL;
 			}
@@ -1474,8 +1515,11 @@ static void vars_arr_assign( Var *src, Var *dest )
 		{
 			if ( dest->len > src->len )
 			{
-				for ( i = src->len; i < dest->len; i++ )
+				for ( i = dest->len - 1; i >= src->len; i-- )
+				{
 					vars_free( dest->val.vptr[ i ], SET );
+					dest->len--;
+				}
 
 				if ( src->len > 0 )
 					dest->val.vptr = VAR_PP T_realloc( dest->val.vptr,
@@ -1485,28 +1529,27 @@ static void vars_arr_assign( Var *src, Var *dest )
 					dest->val.vptr = VAR_PP T_free( dest->val.vptr );
 					print( WARN, "Assignment from %dD-array that has no "
 						   "sub-arrays.\n", src->dim );
+					dest->len = 0;
 				}
 			}
 			else if ( dest->len < src->len )
 			{
 				dest->val.vptr = VAR_PP T_realloc( dest->val.vptr,
 										   src->len * sizeof *dest->val.vptr );
-				for ( i = dest->len; i < src->len; i++ )
+				for ( ; dest->len < src->len; dest->len++ )
 				{
-					dest->val.vptr[ i ] = vars_new( NULL );
-					dest->val.vptr[ i ]->from = dest;
-					dest->val.vptr[ i ]->len = 0;
-					dest->val.vptr[ i ]->dim = dest->dim - 1;
-					dest->val.vptr[ i ]->flags |= IS_DYNAMIC;
+					dest->val.vptr[ dest->len ] = vars_new( NULL );
+					dest->val.vptr[ dest->len ]->from = dest;
+					dest->val.vptr[ dest->len ]->len = 0;
+					dest->val.vptr[ dest->len ]->dim = dest->dim - 1;
+					dest->val.vptr[ dest->len ]->flags |= IS_DYNAMIC;
 					if ( dest->dim > 2 )
-						dest->val.vptr[ i ]->type = dest->type;
+						dest->val.vptr[ dest->len ]->type = dest->type;
 					else
-						dest->val.vptr[ i ]->type =
+						dest->val.vptr[ dest->len ]->type =
 										INT_TYPE( dest ) ? INT_ARR : FLOAT_ARR;
 				}
 			}
-
-			dest->len = src->len;
 		}
 
 		/* Now copy the sub-arrays by calling the function recursively */
@@ -1805,6 +1848,8 @@ Var *vars_make( int type, Var *src )
 	ssize_t i;
 
 
+	CLOBBER_PROTECT( nv );
+
 	if ( src->flags & ON_STACK )
 	{
 		nv        = VAR_P T_malloc( sizeof *nv );
@@ -1864,8 +1909,18 @@ Var *vars_make( int type, Var *src )
 			nv->dim = src->dim;
 			if ( nv->len != 0 )
 			{
-				nv->val.vptr = VAR_PP T_malloc(   nv->len
-												* sizeof *nv->val.vptr );
+				TRY
+				{
+					nv->val.vptr = VAR_PP T_malloc(   nv->len
+													* sizeof *nv->val.vptr );
+					TRY_SUCCESS;
+				}
+				OTHERWISE
+				{
+					nv->len = 0;
+					RETHROW( );
+				}
+
 				for ( i = 0; i < nv->len; i++ )
 					nv->val.vptr[ i ] = NULL;
 			}
@@ -1978,7 +2033,17 @@ static void vars_ref_copy_create( Var *nsv, Var *src, bool exact_copy )
 		return;
 	}
 
-	nsv->val.vptr = VAR_PP T_malloc( nsv->len * sizeof *nsv->val.vptr );
+	TRY
+	{
+		nsv->val.vptr = VAR_PP T_malloc( nsv->len * sizeof *nsv->val.vptr );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		nsv->len = 0;
+		RETHROW( );
+	}
+
 	for ( i = 0; i < nsv->len; i++ )
 		nsv->val.vptr[ i ] = NULL;
 

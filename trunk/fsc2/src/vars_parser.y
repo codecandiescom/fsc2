@@ -63,7 +63,7 @@ static int dont_exec = 0;
 %token AND OR XOR NOT
 
 
-%type <vptr> arrass alist alist1 aitem expr list1 list1a list3 l3e
+%type <vptr> arrass alist alist1 aitem expr list1 list1a list3 l3e strs
 
 
 %left '?' ':'
@@ -199,7 +199,23 @@ expr:    INT_TOKEN                 { if ( ! dont_exec )
        | expr GE expr              { if ( ! dont_exec )
 	                                     $$ = vars_comp( COMP_LESS_EQUAL,
 														 $3, $1 ); }
+       | strs EQ strs              { if ( ! dont_exec )
+                                        $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
+       | strs NE strs              { if ( ! dont_exec )
+                                      $$ = vars_comp( COMP_UNEQUAL, $1, $3 ); }
+       | strs LT strs              { if ( ! dont_exec )
+	                                     $$ = vars_comp( COMP_LESS, $1, $3 ); }
+       | strs GT strs              { if ( ! dont_exec )
+	                                     $$ = vars_comp( COMP_LESS, $3, $1 ); }
+       | strs LE strs              { if ( ! dont_exec )
+	                                     $$ = vars_comp( COMP_LESS_EQUAL,
+														 $1, $3 ); }
+       | strs GE strs              { if ( ! dont_exec )
+	                                     $$ = vars_comp( COMP_LESS_EQUAL,
+														 $3, $1 ); }
        | expr '+' expr             { if ( ! dont_exec )
+	                                     $$ = vars_add( $1, $3 ); }
+       | strs '+' strs             { if ( ! dont_exec )
 	                                     $$ = vars_add( $1, $3 ); }
        | expr '-' expr             { if ( ! dont_exec )
 	                                     $$ = vars_sub( $1, $3 ); }
@@ -305,7 +321,16 @@ l4e:      exprs
 ;
 
 exprs:   expr                      { }
-       | STR_TOKEN                 { }
+       | strs                      { }
+;
+
+strs:    STR_TOKEN                 { if ( ! dont_exec )
+		                                  $$ = vars_push( STR_VAR, $1 ); }
+       | strs STR_TOKEN            { if ( ! dont_exec )
+	                                 {
+		                                  Var *v = vars_push( STR_VAR, $2 );
+										  $$ = vars_add( v->prev, v ); }
+	                               }
 ;
 
 %%
