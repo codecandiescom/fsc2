@@ -36,5 +36,3 @@ FOREVER {
 	   dfreq *= -1.0;
 	}
 }
-   
-	   
