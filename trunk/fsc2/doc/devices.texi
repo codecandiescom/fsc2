@@ -2745,8 +2745,8 @@ Returns a string with the name of the DAC being used.
 @findex daq_reserve_dac()
 This function can be used to reserve (or un-reserve) a DAC so that it
 can only be used with a pass-phrase. This will mainly be used by modules
-for other devices that require a DAC to keep an EDL from accdentally
-changing the output of the DAC.
+for other devices that require a DAC to keep an @code{EDL} script from
+accdentally changing the output of the DAC.
 
 For the ME-6000 and ME-6100 card the function expects an output port as
 the first argument specified by one of the symbolic values between
@@ -2853,7 +2853,7 @@ The function can be used in the @code{EXPERIMENT} as well as in the
 This function is only available for the home-built AD and DA converter
 and can be used to reserve (or un-reserve) the ADC so that it can only be
 used with a pass-phrase. This will mainly be used by modules for other
-devices that require a ADC to keep an EDL program from accidentally
+devices that require a ADC to keep an @code{EDL} script from accidentally
 triggering an input conversion.
 
 If there is no argument an integer is returned. If it @code{1} the ADC
@@ -2925,8 +2925,8 @@ Returns a string with the name of the DIO device being used.
 @findex dio_reserve_dio()
 This function can be used to reserve (or un-reserve) a DIO so that it
 can only be used with a pass-phrase. This will mainly be used by modules
-for other devices that require a DIO to keep an EDL from accdentally
-changing the output or reading the input of the DIO.
+for other devices that require a DIO to keep an @code{EDL} script from
+accdentally changing the output or reading the input of the DIO.
 
 The first argument is the DIO to be reserved (or released). This must be
 either a number, @code{1} or @code{2} or, better, a symbolic name,
@@ -4111,7 +4111,6 @@ setting of the attenuation when the experiment was started.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
-
 
 @end table
 
