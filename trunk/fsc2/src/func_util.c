@@ -846,7 +846,7 @@ Var *f_clabel( Var *v )
 		{
 			if ( G.dim == 1 )
 			{
-				print( FATAL, Can't change z-label in 1D-display.\n" );
+				print( FATAL, "Can't change z-label in 1D-display.\n" );
 				T_free( l[ Y ] );
 				T_free( l[ X ] );
 				THROW( EXCEPTION );
