@@ -79,7 +79,8 @@ Features
   experimental techniques.
 
 * The complete sources for the program and all device modules are available
-  under the GPL, so it can be adapted or extended to fit special needs.
+  under the GNU Public License (Copyleft), so they can be adapted or extended
+  to fit all special requirements.
 
 Currently suported devices
 --------------------------

@@ -53,7 +53,8 @@ static inline short d2shrt( double a )
 		return SHRT_MAX_HALF;
 	if ( a < SHRT_MIN_HALF )
 		return SHRT_MIN_HALF;
-	return ( short ) floor( a + 0.5 );
+
+	return ( short ) ( a < 0.0 ? ceil( a - 0.5 ) : floor( a + 0.5 ) );
 }
 
 
@@ -66,6 +67,7 @@ static inline short i2shrt( int a )
 		return SHRT_MAX_HALF;
 	if ( a < SHRT_MIN_HALF )
 		return SHRT_MIN_HALF;
+
 	return ( short ) a;
 }
 
@@ -79,6 +81,7 @@ static inline unsigned short d2ushrt( double a )
 		return USHRT_MAX;
 	if ( a < 0 )
 		return 0;
+
 	return ( unsigned short ) floor( a + 0.5 );
 }
 
@@ -92,6 +95,7 @@ static inline unsigned short i2ushrt( int a )
 		return USHRT_MAX;
 	if ( a < 0 )
 		return 0;
+
 	return ( unsigned short ) a;
 }
 
@@ -118,7 +122,8 @@ static inline long lrnd( double x )
 		return LONG_MAX;
 	if ( x < LONG_MIN )
 		return LONG_MIN;
-	return ( long ) floor( x + 0.5 );
+
+	return ( long ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
 }
 
 
@@ -131,5 +136,6 @@ static inline int irnd( double x )
 		return INT_MAX;
 	if ( x < INT_MIN )
 		return INT_MIN;
-	return ( int ) floor( x + 0.5 );
+
+	return ( int ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
 }
