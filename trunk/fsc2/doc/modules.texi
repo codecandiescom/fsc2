@@ -935,5 +935,5 @@ CATCH( OUT_OF_MEMORY_EXCEPTION )
 @}
 @end example
 
-I would strongly recommend using this functions since they got built in
-some code to help detecting memory leaks etc. which helps in debugging.
+I strongly recommend using this functions since they got built in some
+code to help detecting memory leaks etc. which helps in debugging.
