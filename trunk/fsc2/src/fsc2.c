@@ -1670,7 +1670,7 @@ void main_sig_handler( int signo )
 
 			if ( ! ( Internals.cmdline_flags & NO_MAIL ) )
 			{
-#if ! defined( NDEBUG ) && defined( ADDR2LINE )
+#if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
 				if ( Internals.is_i386 )
 				{
 					asm( "mov %%ebp, %0" : "=g" ( EBP ) );

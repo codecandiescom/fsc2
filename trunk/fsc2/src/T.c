@@ -58,7 +58,7 @@ void *T_malloc( size_t size )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
-#if defined MDEBUG
+#if defined MDEBUG && ! defined __STRICT_ANSI__
 	if ( Internals.is_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
@@ -106,7 +106,7 @@ void *T_calloc( size_t nmemb, size_t size )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
-#if defined MDEBUG
+#if defined MDEBUG && ! defined __STRICT_ANSI__
 	if ( Internals.is_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
@@ -154,7 +154,7 @@ void *T_realloc( void *ptr, size_t size )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
-#if defined MDEBUG
+#if defined MDEBUG && ! defined __STRICT_ANSI__
 	if ( Internals.is_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
@@ -185,7 +185,7 @@ void *T_free( void *ptr )
 	if ( ptr == NULL )
 		return NULL;
 
-#if defined MDEBUG
+#if defined MDEBUG && ! defined __STRICT_ANSI__
 	if ( Internals.is_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
@@ -224,7 +224,7 @@ char *T_strdup( const char *str )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
-#if defined MDEBUG
+#if defined MDEBUG && ! defined __STRICT_ANSI__
 	if ( Internals.is_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );

@@ -66,7 +66,7 @@ enum {
 
 void DumpStack( void )
 {
-#if ! defined( NDEBUG ) && defined( ADDR2LINE )
+#if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
 
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 	int answer_fd[ 2 ];
