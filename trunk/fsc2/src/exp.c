@@ -38,12 +38,13 @@
 #define CHECK_FORMS_AFTER   8192
 
 
-Token_Val_T exp_val;                      /* also used by exp_lexer.l */
-static bool in_for_lex = UNSET;           /* set while handling for loop
+Token_Val_T Exp_Val;                      /* also used by exp_lexer.l */
+
+static bool In_for_lex = UNSET;           /* set while handling for loop
 											 condition part */
-static int in_cond = 0;                   /* counts conditional construts in
+static int In_cond = 0;                   /* counts conditional construts in
 											 conditionals */
-static long token_count;
+static long Token_count;
 static CB_Stack_T *Cb_stack = NULL;       /* curly brace stack */
 
 extern int exp_testparse( void );         /* from exp_parser.y */
@@ -80,7 +81,7 @@ static bool setup_close_brace_in_if_else( long *pos, Prg_Token_T *cur, long i,
 										  bool *in_if );
 static void exp_syntax_check( void );
 static void deal_with_token_in_test( void );
-static const char *get_construct_name( int type );
+static const char *get_construct_name( int token_type );
 
 
 /*-----------------------------------------------------------------------------
@@ -135,23 +136,13 @@ void store_exp( FILE *in )
 
 	EDL.prg_token = NULL;
 
-	/* Get and store all tokens */
+	/* Get and store all tokens (if there are no program tokens at all return
+	   immediately, there's nothing to be checked).*/
 
 	get_and_store_tokens( &parenthesis_count, &square_brace_count );
 
-	/* Now that we know how many tokens there are cut back the length of the
-       array for tokens to the required length (if there are no program
-	   tokens at all return immediately, there's nothing to be checked). */
-
-	if ( EDL.prg_length > 0 )
-		EDL.prg_token = PRG_TOKEN_P T_realloc( EDL.prg_token,
-											   EDL.prg_length
-											   * sizeof *EDL.prg_token );
-	else
-	{
-		EDL.prg_token = PRG_TOKEN_P T_free( EDL.prg_token );
+	if ( EDL.prg_length <= 0 )
 		return;
-	}
 
 	/* Check that all parentheses and braces are balanced */
 
@@ -352,7 +343,7 @@ static void get_and_store_tokens( long *parenthesis_count,
 
 			case E_STR_TOKEN :
 				cur->tv.sptr = NULL;
-				cur->tv.sptr = T_strdup( exp_val.sptr );
+				cur->tv.sptr = T_strdup( Exp_Val.sptr );
 				break;
 
 			case E_FUNC_TOKEN :
@@ -404,11 +395,21 @@ static void get_and_store_tokens( long *parenthesis_count,
 				break;
 
 			default :
-				memcpy( &cur->tv, &exp_val, sizeof cur->tv );
+				memcpy( &cur->tv, &Exp_Val, sizeof cur->tv );
 		}
 
 		EDL.prg_length++;
 	}
+
+	/* Now that we know how many tokens there are cut back the length of the
+       array for tokens to the required length */
+
+	if ( EDL.prg_length > 0 )
+		EDL.prg_token = PRG_TOKEN_P T_realloc( EDL.prg_token,
+											   EDL.prg_length
+											   * sizeof *EDL.prg_token );
+	else
+		EDL.prg_token = PRG_TOKEN_P T_free( EDL.prg_token );
 }
 
 
@@ -744,8 +745,9 @@ static void setup_if_else( long *pos, Prg_Token_T *cur_wr )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*------------------------------------------------------*/
+/* Handling of 'ELSE' during the setup of IF-ELSE loops */
+/*------------------------------------------------------*/
 
 static void setup_else( Prg_Token_T *cur, long i, bool in_if,
 						bool *dont_need_close_parens )
@@ -784,8 +786,9 @@ static void setup_else( Prg_Token_T *cur, long i, bool in_if,
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*---------------------------------------------------*/
+/* Handling of '{' during the setup of IF-ELSE loops */
+/*---------------------------------------------------*/
 
 static void setup_open_brace_in_if_else( Prg_Token_T *cur, long i, bool in_if )
 {
@@ -804,8 +807,9 @@ static void setup_open_brace_in_if_else( Prg_Token_T *cur, long i, bool in_if )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*---------------------------------------------------*/
+/* Handling of '}' during the setup of IF-ELSE loops */
+/*---------------------------------------------------*/
 
 static bool setup_close_brace_in_if_else( long *pos, Prg_Token_T *cur, long i,
 										  bool *in_if )
@@ -900,8 +904,8 @@ void exp_test_run( void )
 
 
 	EDL.Fname = CHAR_P T_free( EDL.Fname );
-	in_for_lex = UNSET;
-	in_cond = 0;
+	In_for_lex = UNSET;
+	In_cond = 0;
 
 	TRY
 	{
@@ -925,20 +929,20 @@ void exp_test_run( void )
 		exp_runparser_init( );
 
 		EDL.cur_prg_token = EDL.prg_token;
-		token_count = 0;
+		Token_count = 0;
 
 		while ( EDL.cur_prg_token != NULL &&
 				EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
 		{
-			token_count++;
+			Token_count++;
 
 			/* Give the 'Stop Test' button a chance to get tested... */
 
 			if ( ! ( Fsc2_Internals.cmdline_flags & TEST_ONLY ) &&
-				 token_count >= CHECK_FORMS_AFTER )
+				 Token_count >= CHECK_FORMS_AFTER )
 			{
 				fl_check_only_forms( );
-				token_count %= CHECK_FORMS_AFTER;
+				Token_count %= CHECK_FORMS_AFTER;
 			}
 
 			/* This will be set by the end() function which simulates
@@ -995,17 +999,16 @@ void exp_test_run( void )
 
 static void deal_with_token_in_test( void )
 {
-	Prg_Token_T *cur;
+	Prg_Token_T *cur = EDL.cur_prg_token;
 
 
-	switch ( EDL.cur_prg_token->token )
+	switch ( cur->token )
 	{
 		case '}' :
-			EDL.cur_prg_token = EDL.cur_prg_token->end;
+			EDL.cur_prg_token = cur->end;
 			break;
 
 		case WHILE_TOK :
-			cur = EDL.cur_prg_token;
 			if ( test_condition( cur ) )
 			{
 				cur->counter = 1;
@@ -1019,7 +1022,6 @@ static void deal_with_token_in_test( void )
 			break;
 
 		case UNTIL_TOK :
-			cur = EDL.cur_prg_token;
 			if ( ! test_condition( cur ) )
 			{
 				cur->counter = 1;
@@ -1033,7 +1035,6 @@ static void deal_with_token_in_test( void )
 			break;
 
 		case REPEAT_TOK :
-			cur = EDL.cur_prg_token;
 			if ( cur->counter == 0 )
 				get_max_repeat_count( cur );
 			if ( ++cur->count.repl.act <= cur->count.repl.max )
@@ -1049,7 +1050,6 @@ static void deal_with_token_in_test( void )
 			break;
 
 		case FOR_TOK :
-			cur = EDL.cur_prg_token;
 			if ( cur->counter == 0 )
 				get_for_cond( cur );
 			if ( test_for_cond( cur ) )
@@ -1065,7 +1065,6 @@ static void deal_with_token_in_test( void )
 			break;
 
 		case FOREVER_TOK :
-			cur = EDL.cur_prg_token;          /* just test once ! */
 			if ( cur->counter )
 			{
 				cur->counter = 0;
@@ -1079,21 +1078,20 @@ static void deal_with_token_in_test( void )
 			break;
 
 		case BREAK_TOK :
-			EDL.cur_prg_token->start->counter = 0;
-			EDL.cur_prg_token = EDL.cur_prg_token->start->end;
+			cur->start->counter = 0;
+			EDL.cur_prg_token = cur->start->end;
 			break;
 
 		case NEXT_TOK :
-			EDL.cur_prg_token = EDL.cur_prg_token->start;
+			EDL.cur_prg_token = cur->start;
 			break;
 
 		case IF_TOK : case UNLESS_TOK :
-			cur = EDL.cur_prg_token;
 			EDL.cur_prg_token = test_condition( cur ) ? cur->start : cur->end;
 			break;
 			
 		case ELSE_TOK :
-			if ( ( EDL.cur_prg_token + 1 )->token == '{' )
+			if ( ( cur + 1 )->token == '{' )
 				EDL.cur_prg_token += 2;
 			else
 				EDL.cur_prg_token++;
@@ -1123,7 +1121,7 @@ int exp_runlex( void )
 	if ( EDL.cur_prg_token != NULL &&
 		 EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
 	{
-		token_count++;
+		Token_count++;
 
 		EDL.Fname = EDL.cur_prg_token->Fname;
 		EDL.Lc    = EDL.cur_prg_token->Lc;
@@ -1195,7 +1193,7 @@ int conditionlex( void )
 	if ( EDL.cur_prg_token != NULL &&
 		 EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
 	{
-		token_count++;
+		Token_count++;
 
 		EDL.Fname = EDL.cur_prg_token->Fname;
 		EDL.Lc    = EDL.cur_prg_token->Lc;
@@ -1206,18 +1204,18 @@ int conditionlex( void )
 				return 0;
 
 			case '?' :
-				in_cond++;
+				In_cond++;
 				EDL.cur_prg_token++;
 				return '?';
 
 			case ':' :                 /* separator in for loop condition */
-				if ( in_cond > 0 )
+				if ( In_cond > 0 )
 				{
-					in_cond--;
+					In_cond--;
 					EDL.cur_prg_token++;
 					return ':';
 				}
-				if ( in_for_lex )
+				if ( In_for_lex )
 					return 0;
 				print( FATAL, "Syntax error in condition at token ':'.\n" );
 				THROW( EXCEPTION );
@@ -1293,8 +1291,7 @@ bool test_condition( Prg_Token_T *cur )
     if ( ! ( EDL.Var_Stack->type & ( INT_VAR | FLOAT_VAR | STR_VAR ) ) )
     {
 		eprint( FATAL, UNSET, "%s:%ld: Invalid condition for %s.\n",
-				cur->Fname, cur->Lc,
-				get_construct_name( cur->token ) );
+				cur->Fname, cur->Lc, get_construct_name( cur->token ) );
 		THROW( EXCEPTION );
 	}
 
@@ -1401,7 +1398,7 @@ void get_for_cond( Prg_Token_T *cur )
 	/* Now get start value to be assigned to loop variable */
 
 	EDL.cur_prg_token +=2;                    /* skip variable and '=' token */
-	in_for_lex = SET;                         /* allow ':' as separator */
+	In_for_lex = SET;                         /* allow ':' as separator */
 	conditionparse( );                        /* get start value */
 	fsc2_assert( EDL.Var_Stack->next == NULL );   /* Paranoia as usual... */
 
@@ -1410,7 +1407,7 @@ void get_for_cond( Prg_Token_T *cur )
 	if ( EDL.cur_prg_token->token != ':' )
 	{
 		cur++;
-		in_for_lex = UNSET;
+		In_for_lex = UNSET;
 		eprint( FATAL, UNSET, "%s:%ld: Missing end value in FOR loop.\n",
 				cur->Fname, cur->Lc );
 		THROW( EXCEPTION );
@@ -1421,7 +1418,7 @@ void get_for_cond( Prg_Token_T *cur )
 	if ( ! ( EDL.Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
 	{
 		cur++;
-		in_for_lex = UNSET;
+		In_for_lex = UNSET;
 		eprint( FATAL, UNSET, "%s:%ld: Invalid start value in FOR loop.\n",
 				cur->Fname, cur->Lc );
 		THROW( EXCEPTION );
@@ -1463,7 +1460,7 @@ void get_for_cond( Prg_Token_T *cur )
 	if ( ! ( EDL.Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
 	{
 		cur++;
-		in_for_lex = UNSET;
+		In_for_lex = UNSET;
 		eprint( FATAL, UNSET, "%s:%ld: Invalid end value in FOR loop.\n",
 				cur->Fname, cur->Lc );
 		THROW( EXCEPTION );
@@ -1475,7 +1472,7 @@ void get_for_cond( Prg_Token_T *cur )
 		 EDL.Var_Stack->type == FLOAT_VAR )
 	{
 		cur++;
-		in_for_lex = UNSET;
+		In_for_lex = UNSET;
 		eprint( FATAL, UNSET, "%s:%ld: End value in FOR loop is floating "
 				"point value while loop variable is an integer.\n",
 				cur->Fname, cur->Lc );
@@ -1512,7 +1509,7 @@ void get_for_cond( Prg_Token_T *cur )
 	{
 		EDL.cur_prg_token++;                    /* skip the ':' */
 		conditionparse( );                      /* get end value */
-		in_for_lex = UNSET;
+		In_for_lex = UNSET;
 		fsc2_assert( EDL.Var_Stack->next == NULL ); /* Paranoia as usual... */
 
 		/* Make sure the increment is either an integer or a float */
@@ -1531,7 +1528,7 @@ void get_for_cond( Prg_Token_T *cur )
 			 EDL.Var_Stack->type == FLOAT_VAR )
 		{
 			cur++;
-			in_for_lex = UNSET;
+			In_for_lex = UNSET;
 			eprint( FATAL, UNSET, "%s:%ld: FOR loop increment is floating "
 					"point value while loop variable is an integer.\n",
 					cur->Fname, cur->Lc );
@@ -1568,7 +1565,7 @@ void get_for_cond( Prg_Token_T *cur )
 		vars_pop( EDL.Var_Stack );
 	}
 
-	in_for_lex = UNSET;
+	In_for_lex = UNSET;
 	EDL.cur_prg_token++;                /* skip the '{' */
 	return;
 
@@ -1631,9 +1628,9 @@ bool test_for_cond( Prg_Token_T *cur )
 
 #ifndef NDEBUG
 	eprint( FATAL, UNSET, "Internal error at %s:%d.\n", __FILE__, __LINE__ );
-	THROW( EXCEPTION );
 #endif
 
+	THROW( EXCEPTION );
 	return FAIL;
 }
 
@@ -1662,9 +1659,9 @@ bool check_result( Var_T *v )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-static const char *get_construct_name( int type )
+static const char *get_construct_name( int token_type )
 {
-	switch ( type )
+	switch ( token_type )
 	{
 		case WHILE_TOK :
 			return "WHILE loop";
@@ -1691,9 +1688,9 @@ static const char *get_construct_name( int type )
 #ifndef NDEBUG
 	eprint( FATAL, UNSET, "Internal error at %s:%d.\n",
 			__FILE__, __LINE__ );
-	THROW( EXCEPTION );
 #endif
 
+	THROW( EXCEPTION );
 	return NULL;                  /* we'll never get here... */
 }
 
