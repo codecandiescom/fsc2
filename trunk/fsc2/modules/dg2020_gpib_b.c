@@ -515,8 +515,6 @@ bool dg2020_make_seq( int num_blocks, BLOCK *block )
 bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 {
 	char *cmd, *cptr;
-	Ticks k;
-	char s = ( state ? '1' : '0' );
 #if defined DMA_SIZE
 	Ticks m, n;
 #endif
@@ -550,9 +548,9 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 
 	/* Assemble rest of command string */
 
-	for ( k = 0, cptr = cmd + strlen( cmd ); k < length; *cptr++ = s, ++k )
-		;
-	strcpy( cptr, "\n" );
+	cptr = cmd + strlen( cmd );
+	memset( cptr, state ? '1' : '0', length );
+	strcpy( cptr + length, "\n" );
 
 	/* Send the command string to the pulser */
 

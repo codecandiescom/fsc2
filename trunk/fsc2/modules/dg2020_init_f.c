@@ -378,7 +378,7 @@ static void dg2020_basic_functions_check( void )
 
 /*---------------------------------------------------------------------------
   Function checks first if there are enough pulser channels and than assigns
-  channels to funcions that haven't been assigned as many as needed
+  channels to functions that haven't been assigned as many as they need
 ----------------------------------------------------------------------------*/
 
 static void dg2020_distribute_channels( void )
