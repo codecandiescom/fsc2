@@ -4,49 +4,174 @@
 @chapter @acronym{EDL}
 @cindex @acronym{EDL}
 
-This chapter describes the @acronym{EDL} language (@b{E}xperiment
-@b{D}escription @b{L}anguage).
-
 @ifinfo
 @menu
 * Basics::                  Basic principles.
 * Sections::                The sections of an EDL program.
-* Devices::                 The layout of the @code{DEVICES} section
+* Syntax::                  Basic syntax of EDL programs.
 * Variables::               Using variables and arrays.
 * Arithmetic::              Doing calculations with variables.
-* Control structures::      Flow control in an EDL program.
+* Control structures::      Flow control in EDL programs.
 @end menu
 @end ifinfo
 
 
 @node Basics, Sections, EDL, EDL
 @section Basics
-@cindex basic @acronym{EDL} structure 
 
 
-
-@acronym{EDL} is in many respects quite similar to other computer
-languages like C, @acronym{FORTRAN} or @acronym{BASIC} etc. You can use
-variables to do computations, you have flow control structures like
-if-else-constructs and for- and while-loops and there is a set of
-built-in functions. On the other hand, since the purpose of
-@acronym{EDL} is to describe an @acronym{EPR} experiment, there are also
-some differences. The most noticeable is the overall structure of an
-@acronym{EDL} program.
-
-Each @acronym{EDL} program is divided into a set of sections that are
-somewhat related to the way an experiment is done. Due to the different
-purposes of the sections there are differences in the syntax to be used
-in the various sections. These are explained in the next sections.
+To do an experiment using @acronym{fsc2} you have to write a program
+describing how the experiment is to be done. While this may seem to be a
+daunting task if you have no programming experience at all this has the
+advantage that you have complete control over the way the experiment is
+done. So you don't have to rely on some programmer (who probably isn't
+around when you need him most) to have got everything right. And writing
+@acronym{EDL} programs isn't that difficult.
 
 
+An @acronym{EDL} program is roughly structured along the way an
+experiment is done. Before you start an experiment you first have to
+select the devices to be used and set them up. So also the first part of
+an @acronym{EDL} program mainly consists of specifying the devices to be
+controlled by the program and setting their parameter, i.e@: the time
+base of the digitizer or which pulses are to be created by the pulser.
+And as you would now start the experiment the second part of the
+@acronym{EDL} program describes how the experiment is to be done.
 
-@node Sections, Devices, Basics, EDL
+To give you an impression here's an example for a simple cw-EPR
+experiment:
+@example
+DEVICES:
+
+er035m_s;              // gaussmeter module
+aeg_x_band;            // magnet module
+sr530;                 // lock-in amplifier module
+
+VARIABLES:
+
+start_field = 3360.0 G;
+end_field   = 3450.0 G;
+field_step  =    0.5 G;
+
+field = start_field;
+I = 1;
+data;
+
+PREPARATIONS:
+
+magnet_setup( start_field, field_step );
+lockin_sensitivity( 5 uV );
+lockin_time_constant( 300 ms );
+init_1d( );
+
+EXPERIMENT:
+
+WHILE field <= end_field
+@{
+    data = lockin_get_data( );
+    display( I, data );
+    save( data );
+    I += 1;
+    field = sweep_up( );
+    wait( 300 ms );
+@}
+@end example
+
+Obviously, the very first section of the program, starting with the
+keyword @code{DEVICES:}, is for specifying the names of the devices to
+be used (everything after the double-slashes are comments). In the
+example these are the Bruker ER035M gaussmeter, the AEG X-band magnet
+and the Standford Research lock-in amplifier SR530.
+
+In the following section, started by the keyword @code{VARIABLES:}, all
+variables that are going to be used in the program are listed and, if
+appropriate, initialized. The first variables are for storing the start
+and end field of the field sweep as well as the step width between the
+data points. The variable @code{field} will later be used for storing the
+current field value and is initialized to the value of the start field.
+Finally, a counter variable @code{I}, initialized to 1, and another
+variable, @code{data}, for storing the data received from the lock-in
+amplifier, are declared.
+
+In the next section, headed by the @code{PREPARATIONS:} keyword, the
+devices are set. In the function @code{magnet_setup} the magnet is setup
+to start with the field stored in the variable @w{@code{start_field}}
+and to use a step size of @w{@code{field_step}}. Next, the lock-in
+amplifier is set to a sensitivity of @w{5 uV} and a time constant of
+@w{300 ms}. The last function call in the section, @code{init_1d()},
+tells the program that this is a 1-dimensional experiment and to use the
+appropriate kind of display for the data.
+
+Now we're already done with the preparations and can start the
+experiment, as indicated by the keyword @code{EXPERIMENT}. The whole
+experiment is done in a loop that is repeated as long as the value
+stored in the variable @code{field} is less or equal to
+@code{end_field}. To tell the program where the loop starts and ends
+all statements belonging to the loop are enclosed in curly braces,
+`@code{@{}' and `@code{@}}'.
+
+The first thing to do in the experiment is to fetch a new data point
+from the lock-in amplifier and to store it in the variable @code{data}.
+Next we need to display the data point, which is done via the call of
+the @code{display} function. Here two arguments are used, the number of
+the point (which is stored in the variable @code{I}) and the data point
+to display.
+
+Of course, we also need to save the data point in a file. This is done
+by the function @code{save} that automatically writes its argument to a
+file. When the function is called the first time it will prompt you for
+the name of the file to use.
+
+What remains to be done is to increment the counter variable @code{I}
+and to sweep up the field. The function @code{sweep_up} returns the new
+value of the field which is then used in the condition of the loop to
+decide if the experiment is finished, i.e.@: the end field is reached.
+
+The last function call of @code{wait} makes the program wait for @w{300
+ms} (the lock-in amplifiers time constant) to give the lock-in amplifier
+time to measure a new data point.
+
+
+When you have written such a program (e.g.@: using a simple ASCII
+editor) you load it into @acronym{fsc2} and press the test or the start
+button. @acronym{fsc2} will now analyze the program very thoroughly. It
+will not only check for misspelt keywords, undefined variables, syntax
+errors etc.@: but will also repeat the loop in the experiment section as
+often as in the real experiment to find out if no errors will happen in
+the experiment. This includes for example checking that the field will
+not be sweeped into regions the magnet or the gaussmeter can not handle
+etc.@: (e.g.@: by incidentally setting an end field value of @w{34500.0
+G} the magnet can't produce). So you can be reasonable sure that the
+experiment will not crash due to a faulty program after it has run for 2
+hours and you have to start all over again.
+
+
+As you can already see form the example most of a @acronym{EDL} program
+consists of function calls. Functions fall into two categories, built-in
+functions and device functions. Built-in functions (like @code{init_1d},
+@code{display}, @code{save} and @code{wait}) are always available, even
+when there is no @code{DEVICES} section. In contrast, device functions
+are bound to certain devices and are only usable when the device they
+belong to is listed in the @code{DEVICE} section. For example, the
+functions @w{@code{lockin_sensitivity}}, @w{@code{lockin_time_constant}}
+and @w{@code{lockin_get_data}} are obviously connected with the lock-in
+amplifier and are only available when a lock-in is specified.
+Fortunately, usually these functions are available for all types of
+lock-in amplifiers (possibly with minor variations) so that using a
+different lock-in does not require a major rewrite of the program except
+changing its name in the @code{DEVICES} section. To find out about all
+built-in and device functions, their arguments and etc.@: have a look at
+the appropriate parts of this manual.
+
+
+@node Sections, Syntax, Basics, EDL
 @section Sections
 @cindex section
 
 
-Each @acronym{EDL} file consists of up to 6 different sections. These are:
+As you already have seen in the example above, an @acronym{EDL} program
+consists of several section. There are up to 6 different sections. These
+are:
 @example
 DEVICES
 VARIABLES
@@ -57,43 +182,50 @@ EXPERIMENT
 @end example
 
 
-In an experiment you will first decide which devices to use. This is
-reflected in the @code{DEVICES} section of an @acronym{EDL} file where
-you simply list all the devices to be used in the experiment (at least
-the ones that are going to be controlled by the computer).
+The first and last two you have already seen: The @code{DEVICES} section
+is simply a list of all the devices that will be used in the experiment
+(or at least the ones that are going to be controlled by the computer).
 
-The next section, @code{VARIABLES}, unfortunately hasn't a real-world
-equivalent -- here you have to declare all variables and arrays you will
-use in the rest of the program and, optionally, initialize them.
+Please note that the section keyword has always to be followed by a
+colon, `@code{:}'. Another important syntax element is the semicolon,
+`@code{;}', that always ends a statement. So, you will also have to write a
+semicolon after each of the device names.
 
-Next, in a pulsed experiment, you will probably set up the pulser. This
-is partly done in the @code{ASSIGNMENTS} section.
+The @code{VARIABLES} section for declaring and initializing variables
+did also appear already in the example.
 
-For a pulsed experiment you may also want to decide about the kind of
-phase-cycling to use in the experiment -- this goes into the
-@code{PHASES} section.
+Because pulses play such an important r@^ole in modern EPR experiments
+lots of elements for handling pulses and the pulser that creates them is
+built-in into @acronym{fsc2}. This is also reflected in two of the sic
+different sections, @code{ASSIGNMENTS} and @code{PHASES} being
+exclusively devoted to the pulser setup. The basic setup of the pulser
+(e.g.@: setting the time base and trigger mode as well as setting up the
+pulser channels) is done in the @code{ASSIGNMENTS} section. And the
+@code{PHASES} section is all about phase-cycling -- here you will have
+to define the phase sequences to be used in the experiment as well as
+the way the resulting echos will be added up. Because this is a rather
+extensive subject (and because of the different ways the pulser is
+integrated into the supported spectrometers, an in-depth explanation of
+these sections is part of a whole chapter.
 
-Now follows the @code{PREPARATIONS} section: here all the devices are
-set up. For example, here you define all pulses, i.e.@: their positions
-and lengths as well as the way they should be changed in the
-experiment. Or you tell the program the start value of the magnetic
-field and the amount the field has to be increased (or decreased)
-between data points.
-
-And when you're done with setting up the devices you will finally start
-the experiment: this coincides with the start of the @code{EXPERIMENT}
-section.
+As you already have seen the @code{PREPARATIONS} section is for setting
+up the other devices and the graphics. But this is also the section
+where the pulses are going to be defined. For more details about this
+see the chapter about pulsers and pulses.
 
 
-While the sections of the @acronym{EDL} file don't have to appear in this
-sequence it is probably best not to experiment to much with this. In any
-case, if it exists the @code{EXPERIMENT} section must always be the
-last.
+Finally, there is the @code{EXPERIMENT} section. As you already have
+seen this section is usually one or more loops (possibly with more loops
+nested into the main loops).
 
-Please note that each section label must be immediately followed by a colon `@code{:}'.
 
-All the section labels can be abbreviated, here's the complete list of
-accepted section keywords:
+While the sections of the @acronym{EDL} file don't have to appear in the
+sequence they are listed above it is probably best not to experiment to
+much with this. In any case, if it exists the @code{EXPERIMENT} section
+must always be the last.
+
+All the section keywords can be abbreviated, here's the complete list of
+valid section keywords:
 
 @itemize @bullet
 @item @code{DEVICES}, @code{DEV}, @code{DEVS}, @code{DEVICE}
@@ -105,37 +237,46 @@ accepted section keywords:
 @end itemize
 
 
-@node Devices, Variables, Sections, EDL
-@section Devices
-@cindex devices
-@cindex @code{DEVICES} section
-@cindex @code{DEV} section
-@cindex @code{DEVS} section
-@cindex @code{DEVICE} section
+@node Syntax, Variables, Sections, EDL
+@section Syntax
 
+There are a few basic rules about the syntax of @acronym{EDL} programs.
+Each program consists of one or more sections that always start with one
+of the section keywords listed in the previous section. Each keyword has
+to be followed immediately (i.e@: without any spaces, tabulator or
+newline characters in between) by a colon, `@code{:}'.
 
-The @code{DEVICES} section has a very simple syntax, after a line with just
+Each section of the program consists of statements. What a valid
+statement is may depend on the section (e.g.@: in the @code{DEVICES}
+section all valid statements are just the names of devices while in
+other sections a valid statement may be a compilcated equation), but in
+all cases a statement must always be ended with a semicolon, `@code{;}'.
+There is nothing special about line endings, i.e.@: a statement can span
+several lines, so @acronym{fsc2} recognizes the end of a statement only
+if it finds a semicolon.
+
+Within a statement all characters like spaces, tabulator characters and
+newlines have no relevance at all (except separating variable names). So
+there's no difference at all between the following statements:
 @example
-DEVICES:
-@end example
-@noindent
-to announce the start of this section, a semicolon separated list of the
-devices to be used in the experiment follows. It doesn't matter if you
-write the device names with lower or upper case letters, they will
-automatically be converted to all lower case.
-
-Here's an example for a typical @code{DEVICES} section (the double
-slash, `@code{//}', starts a comment):
-@example
-DEVICES:
-
-er035m_s;           // gaussmeter
-aeg_x_band;         // magnet
-dg2020;             // pulser
-tds520a;            // digitizer
+start_field = 3360.0 G;
+start_field       =               3360.0G;
+                  start_field=
+        3360.0 G;
 @end example
 
-@node Variables, Arithmetic, Devices, EDL
+@acronym{EDL} programs use lots of function calls. There are no obvious
+differences between variable names and function names (all start with a
+character, followed by more characters, numbers or underscore charcters,
+`@code{_}'). So to make clear that such a word is a function it has to
+be followed by a pair of parenthesis, `@code{(}' and `@code{)}', even if
+the function doesn't accept arguments. If the function does accept more
+than one argument they have to be separated by commas.
+
+
+
+
+@node Variables, Arithmetic, Syntax, EDL
 @section Variables
 @cindex variables
 @cindex @code{VARIABLES} section
@@ -161,11 +302,12 @@ VARIABLES:
 Names of variables must always start with a character, i.e.@: A-Z and
 a-z. The remaining part of the variable name can consist of characters,
 numbers and the underscore character, '@code{_}' (or shorter, if you
-like regular expressions: @code{[A-Za-z][A-Za-z_0-9]*}). Thus,
-'@code{AbC_12x}' and '@code{aBc_12X}' are legal variable names, while
-'@code{12xy}' or '@code{_Yx2}' aren't. Please take note that the
-variable names are case sensitive, i.e.@: '@code{XY}', '@code{Xy}',
-'@code{xY}' and '@code{xy}' are four different variable names!
+like regular expressions, valid names follow the following pattern:
+@code{[A-Za-z][A-Za-z_0-9]*}). Thus, '@code{AbC_12x}' and
+'@code{aBc_12X}' are legal variable names, while '@code{12xy}' or
+'@code{_Yx2}' aren't. Please take note that the variable names are case
+sensitive, i.e.@: '@code{XY}', '@code{Xy}', '@code{xY}' and '@code{xy}'
+are four different variable names!
 
 The name of a variable can, in principle, consist of as many characters
 as you wish (I hope nobody is going to the extent to create a variable
