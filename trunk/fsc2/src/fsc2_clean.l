@@ -560,7 +560,8 @@ static void include_handler( char *file )
 			else
 			{
 				pwe = getpwuid( getuid( ) );
-				incl_file = T_malloc( strlen( pwe->pw_dir ) + strlen( file ) );
+				incl_file = CHAR_P T_malloc(   strlen( pwe->pw_dir ) 
+											 + strlen( file ) );
 				strcpy( incl_file, pwe->pw_dir );
 				strcat( incl_file, file + 2 );
 			}
@@ -568,8 +569,8 @@ static void include_handler( char *file )
 		else
 		{
 			*( file + strlen( file ) - 1 ) = '\0';
-			incl_file = T_malloc( strlen( file )
-								  + strlen( DEF_INCL_DIR ) + 2 );
+			incl_file = CHAR_P T_malloc(   strlen( file )
+										 + strlen( DEF_INCL_DIR ) + 2 );
 			strcpy( incl_file, DEF_INCL_DIR );
 			if ( incl_file[ strlen( incl_file ) - 1 ] != '/' )
 				strcat( incl_file, "/" );
@@ -792,19 +793,19 @@ static void *T_realloc( void *ptr, size_t size )
 
 static char *T_strdup( const char *string )
 {
-	char *new;
+	char *new_mem;
 
 	if ( string == NULL )
 		return NULL;
 
-	if ( ( new = strdup( string ) ) == NULL )
+	if ( ( new_mem = strdup( string ) ) == NULL )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 
 #if defined MDEBUG
-	fprintf( stderr, "strdup:  %p (%u)\n", new, strlen( string ) );
+	fprintf( stderr, "strdup:  %p (%u)\n", new_mem, strlen( string ) );
 #endif
 
-	return new;
+	return new_mem;
 }
 
 
