@@ -147,6 +147,24 @@ gpib:
 	fi
 
 
+# How to install the binaries
+
+install:
+	$(INSTALL) -d $(bindir)
+	$(INSTALL) -d $(libdir)
+
+	$(EXEC_INSTALL) -m 6755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
+	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_clean $(bindir)
+	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_connect $(bindir)
+	$(EXEC_INSTALL) -m  644 -o $(OWNER) -g $(GROUP) *.so $(libdir)
+
+	-$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test \
+					  $(bindir)/fsc2_load
+	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_start
+	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_test
+	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_load
+
+
 # How to get rid of stuff not needed anymore
 
 clean:

@@ -126,7 +126,6 @@ install:
 		$(MAKE) $(INSTALL_MACHINE);                         \
 	fi
 
-
 # Here links to module libraries for often used devices for the different
 # spectrometers are created. If, for example, the spectrometer always uses
 # aeg_x_band.so as the driver for the magnet power supply, creating a link
@@ -203,6 +202,8 @@ install-isaak.physik.fu-berlin.de:
 install-crowley.none:
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
 
+
+# How to clean up the mess we created
 
 clean:
 	-$(RM) $(RMFLAGS) *.o *_lexer.c TAGS cscope.out *~
