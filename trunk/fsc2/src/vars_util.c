@@ -7,14 +7,16 @@
 
 
 static void vars_params( Var *v, long *elems, long **lpnt, double **dpnt );
-static void vars_div_icheck( long val );
-static void vars_div_fcheck( double val );
-static void vars_mod_icheck( long val );
-static void vars_mod_fcheck( double val );
+static void vars_div_check( double val );
+static void vars_mod_check( double val );
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* If passed a integer or floating point variable or array slice the */
+/* function returns the number of elements and a pointer to the data */
+/* (in lpnt or dpntdepending on the type of the data, the other      */
+/* pointer is always set to NULL).                                   */
+/*-------------------------------------------------------------------*/
 
 static void vars_params( Var *v, long *elems, long **lpnt, double **dpnt )
 {
@@ -719,12 +721,12 @@ Var *vars_div_of_int_var( Var *v1, Var *v2 )
 	{
 		if ( v2_lpnt != NULL )
 		{
-			vars_div_icheck( *v2_lpnt );
+			vars_div_check( ( double ) *v2_lpnt );
 			return vars_push( INT_VAR, v1->val.lval / *v2_lpnt );
 		}
 		else
 		{
-			vars_div_fcheck( *v2_dpnt );
+			vars_div_check( *v2_dpnt );
 			return vars_push( FLOAT_VAR, ( double ) v1->val.lval / *v2_dpnt );
 		}
 	}
@@ -734,7 +736,7 @@ Var *vars_div_of_int_var( Var *v1, Var *v2 )
 		lp = T_malloc( elems * sizeof( long ) );
 		for ( i = 0; i < elems; i++ )
 		{
-			vars_div_icheck( *v2_lpnt );
+			vars_div_check( ( double ) *v2_lpnt );
 			lp[ i ] = v1->val.lval / *v2_lpnt++;
 		}
 		new_var = vars_push( INT_TRANS_ARR, lp, elems );
@@ -745,7 +747,7 @@ Var *vars_div_of_int_var( Var *v1, Var *v2 )
 		dp = T_malloc( elems * sizeof( double ) );
 		for ( i = 0; i < elems; i++ )
 		{
-			vars_div_fcheck( *v2_dpnt );
+			vars_div_check( *v2_dpnt );
 			dp[ i ] = ( double ) v1->val.lval / *v2_dpnt++;
 		}
 		new_var = vars_push( FLOAT_TRANS_ARR, dp, elems );
@@ -777,12 +779,12 @@ Var *vars_div_of_float_var( Var *v1, Var *v2 )
 	{
 		if ( v2_is_int )
 		{
-			vars_div_icheck( *v2_lpnt );
+			vars_div_check( ( double ) *v2_lpnt );
 			return vars_push( FLOAT_VAR, v1->val.dval / ( double ) *v2_lpnt );
 		}
 		else
 		{
-			vars_div_fcheck( *v2_dpnt );
+			vars_div_check( *v2_dpnt );
 			return vars_push( FLOAT_VAR, v1->val.dval / *v2_dpnt );
 		}
 	}
@@ -792,12 +794,12 @@ Var *vars_div_of_float_var( Var *v1, Var *v2 )
 	{
 		if ( v2_is_int )
 		{
-			vars_div_icheck( *v2_lpnt );
+			vars_div_check( ( double ) *v2_lpnt );
 			dp[ i ] = v1->val.dval / ( double ) *v2_lpnt++;
 		}
 		else
 		{
-			vars_div_fcheck( *v2_dpnt );
+			vars_div_check( *v2_dpnt );
 			dp[ i ] = v1->val.dval / *v2_dpnt++;
 		}
 	}
@@ -838,7 +840,7 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 	{
 		if ( v2_lpnt != NULL )
 		{
-			vars_div_icheck( *v2_lpnt );
+			vars_div_check( ( double ) *v2_lpnt );
 			lp = T_malloc( v1->len * sizeof( long ) );
 			for ( i = 0; i < v1->len; i++ )
 				lp[ i ] = v1->val.lpnt[ i ] / *v2_lpnt;
@@ -847,7 +849,7 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 		}
 		else
 		{
-			vars_div_fcheck( *v2_dpnt );
+			vars_div_check( *v2_dpnt );
 			dp = T_malloc( v1->len * sizeof( double ) );
 			for ( i = 0; i < v1->len; i++ )
 				dp[ i ] = ( double ) v1->val.lpnt[ i ] / *v2_dpnt;
@@ -870,7 +872,7 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 		lp = T_malloc( v1->len * sizeof( long ) );
 		for ( i = 0; i < v1->len; i++ )
 		{
-			vars_div_icheck( *v2_lpnt );
+			vars_div_check( ( double ) *v2_lpnt );
 			lp[ i ] = v1->val.lpnt[ i ] / *v2_lpnt++;
 		}
 		new_var = vars_push( INT_TRANS_ARR, lp, v1->len );
@@ -881,7 +883,7 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 		dp = T_malloc( v1->len * sizeof( double ) );
 		for ( i = 0; i < v1->len; i++ )
 		{
-			vars_div_fcheck( *v2_dpnt );
+			vars_div_check( *v2_dpnt );
 			dp[ i ] = ( double ) v1->val.lpnt[ i ] / *v2_dpnt++;
 		}
 		new_var = vars_push( FLOAT_TRANS_ARR, dp, v1->len );
@@ -922,9 +924,9 @@ Var *vars_div_of_float_arr( Var *v1, Var *v2 )
 	{
 		dp = T_malloc( v1->len * sizeof( double ) );
 		if ( v2_is_int )
-			vars_div_icheck( *v2_lpnt );
+			vars_div_check( ( double ) *v2_lpnt );
 		else
-			vars_div_fcheck( *v2_dpnt );
+			vars_div_check( *v2_dpnt );
 		for ( i = 0; i < v1->len; i++ )
 			dp[ i ] = v1->val.dpnt[ i ]
 				      / ( v2_is_int ? ( double ) *v2_lpnt : *v2_dpnt );
@@ -945,9 +947,9 @@ Var *vars_div_of_float_arr( Var *v1, Var *v2 )
 	for ( i = 0; i < v1->len; i++ )
 	{
 		if ( v2_is_int )
-			vars_div_icheck( *v2_lpnt );
+			vars_div_check( ( double ) *v2_lpnt );
 		else
-			vars_div_fcheck( *v2_dpnt );
+			vars_div_check( *v2_dpnt );
 		dp[ i ] = v1->val.dpnt[ i ]
 			      / ( v2_is_int ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
 	}
@@ -955,6 +957,18 @@ Var *vars_div_of_float_arr( Var *v1, Var *v2 )
 	T_free( dp );
 
 	return new_var;
+}
+
+
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
+static void vars_div_check( double val )
+{
+	if ( val != 0.0 )
+		return;
+	eprint( FATAL, "%s:%ld: Division by zero.\n", Fname, Lc );
+	THROW( EXCEPTION );
 }
 
 
@@ -978,12 +992,12 @@ Var *vars_mod_of_int_var( Var *v1, Var *v2 )
 	{
 		if ( v2_lpnt != NULL )
 		{
-			vars_mod_icheck( *v2_lpnt );
+			vars_mod_check( ( double ) *v2_lpnt );
 			return vars_push( INT_VAR, v1->val.lval % *v2_lpnt );
 		}
 		else
 		{
-			vars_mod_fcheck( *v2_dpnt );
+			vars_mod_check( *v2_dpnt );
 			return vars_push( FLOAT_VAR, fmod( ( double ) v1->val.lval,
 											   *v2_dpnt ) );
 		}
@@ -994,7 +1008,7 @@ Var *vars_mod_of_int_var( Var *v1, Var *v2 )
 		lp = T_malloc( elems * sizeof( long ) );
 		for ( i = 0; i < elems; i++ )
 		{
-			vars_mod_icheck( *v2_lpnt );
+			vars_mod_check( ( double ) *v2_lpnt );
 			lp[ i ] = v1->val.lval % *v2_lpnt++;
 		}
 		new_var = vars_push( INT_TRANS_ARR, lp, elems );
@@ -1005,7 +1019,7 @@ Var *vars_mod_of_int_var( Var *v1, Var *v2 )
 		dp = T_malloc( elems * sizeof( double ) );
 		for ( i = 0; i < elems; i++ )
 		{
-			vars_mod_fcheck( *v2_dpnt );
+			vars_mod_check( *v2_dpnt );
 			dp[ i ] = fmod( ( double ) v1->val.lval, *v2_dpnt++ );
 		}
 		new_var = vars_push( FLOAT_TRANS_ARR, dp, elems );
@@ -1037,13 +1051,13 @@ Var *vars_mod_of_float_var( Var *v1, Var *v2 )
 	{
 		if ( v2_is_int )
 		{
-			vars_mod_icheck( *v2_lpnt );
+			vars_mod_check( ( double ) *v2_lpnt );
 			return vars_push( FLOAT_VAR, fmod( v1->val.dval,
 											   ( double ) *v2_lpnt ) );
 		}
 		else
 		{
-			vars_mod_fcheck( *v2_dpnt );
+			vars_mod_check( *v2_dpnt );
 			return vars_push( FLOAT_VAR, fmod( v1->val.dval, *v2_dpnt ) );
 		}
 	}
@@ -1053,12 +1067,12 @@ Var *vars_mod_of_float_var( Var *v1, Var *v2 )
 	{
 		if ( v2_is_int )
 		{
-			vars_mod_icheck( *v2_lpnt );
+			vars_mod_check( ( double ) *v2_lpnt );
 			dp[ i ] = fmod( v1->val.dval, ( double ) *v2_lpnt++ );
 		}
 		else
 		{
-			vars_mod_fcheck( *v2_dpnt );
+			vars_mod_check( *v2_dpnt );
 			dp[ i ] = fmod( v1->val.dval, *v2_dpnt++ );
 		}
 	}
@@ -1099,7 +1113,7 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 	{
 		if ( v2_lpnt != NULL )
 		{
-			vars_mod_icheck( *v2_lpnt );
+			vars_mod_check( ( double ) *v2_lpnt );
 			lp = T_malloc( v1->len * sizeof( long ) );
 			for ( i = 0; i < v1->len; i++ )
 				lp[ i ] = v1->val.lpnt[ i ] % *v2_lpnt;
@@ -1108,7 +1122,7 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 		}
 		else
 		{
-			vars_mod_fcheck( *v2_dpnt );
+			vars_mod_check( *v2_dpnt );
 			dp = T_malloc( v1->len * sizeof( double ) );
 			for ( i = 0; i < v1->len; i++ )
 				dp[ i ] = fmod( ( double ) v1->val.lpnt[ i ], *v2_dpnt );
@@ -1121,8 +1135,8 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 
 	if ( elems != 1 && v1->len != elems )
 	{
-		eprint( FATAL, "%s:%ld: Sizes of array slices to be divided differ.\n",
-				Fname, Lc );
+		eprint( FATAL, "%s:%ld: Sizes of array slices modulo is to be "
+				"calculated from differ.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -1131,7 +1145,7 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 		lp = T_malloc( v1->len * sizeof( long ) );
 		for ( i = 0; i < v1->len; i++ )
 		{
-			vars_mod_icheck( *v2_lpnt );
+			vars_mod_check( ( double ) *v2_lpnt );
 			lp[ i ] = v1->val.lpnt[ i ] % *v2_lpnt++;
 		}
 		new_var = vars_push( INT_TRANS_ARR, lp, v1->len );
@@ -1142,7 +1156,7 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 		dp = T_malloc( v1->len * sizeof( double ) );
 		for ( i = 0; i < v1->len; i++ )
 		{
-			vars_mod_fcheck( *v2_dpnt );
+			vars_mod_check( *v2_dpnt );
 			dp[ i ] = fmod( ( double ) v1->val.lpnt[ i ], *v2_dpnt++ );
 		}
 		new_var = vars_push( FLOAT_TRANS_ARR, dp, v1->len );
@@ -1183,9 +1197,9 @@ Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
 	{
 		dp = T_malloc( v1->len * sizeof( double ) );
 		if ( v2_is_int )
-			vars_mod_icheck( *v2_lpnt );
+			vars_mod_check( ( double ) *v2_lpnt );
 		else
-			vars_mod_fcheck( *v2_dpnt );
+			vars_mod_check( *v2_dpnt );
 		for ( i = 0; i < v1->len; i++ )
 			dp[ i ] = fmod( v1->val.dpnt[ i ],
 							v2_is_int ? ( double ) *v2_lpnt : *v2_dpnt );
@@ -1197,8 +1211,8 @@ Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
 
 	if ( elems != 1 && v1->len != elems )
 	{
-		eprint( FATAL, "%s:%ld: Sizes of array slices to be divided differ.\n",
-				Fname, Lc );
+		eprint( FATAL, "%s:%ld: Sizes of array slices modulo is to be "
+				"calculated from differ.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -1206,9 +1220,9 @@ Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
 	for ( i = 0; i < v1->len; i++ )
 	{
 		if ( v2_is_int )
-			vars_mod_icheck( *v2_lpnt );
+			vars_mod_check( ( double ) *v2_lpnt );
 		else
-			vars_mod_fcheck( *v2_dpnt );
+			vars_mod_check( *v2_dpnt );
 		dp[ i ] = fmod( v1->val.dpnt[ i ],
 						v2_is_int ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
 	}
@@ -1222,43 +1236,7 @@ Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
 /*---------------------------------------------------------------------*/
 /*---------------------------------------------------------------------*/
 
-static void vars_div_icheck( long val )
-{
-	if ( val != 0 )
-		return;
-	eprint( FATAL, "%s:%ld: Division by zero.\n", Fname, Lc );
-	THROW( EXCEPTION );
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-static void vars_div_fcheck( double val )
-{
-	if ( val != 0.0 )
-		return;
-	eprint( FATAL, "%s:%ld: Division by zero.\n", Fname, Lc );
-	THROW( EXCEPTION );
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-static void vars_mod_icheck( long val )
-{
-	if ( val != 0 )
-		return;
-	eprint( FATAL, "%s:%ld: Modulo by zero.\n", Fname, Lc );
-	THROW( EXCEPTION );
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-static void vars_mod_fcheck( double val )
+static void vars_mod_check( double val )
 {
 	if ( val != 0.0 )
 		return;
