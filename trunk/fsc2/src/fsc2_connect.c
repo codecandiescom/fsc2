@@ -188,6 +188,15 @@ int open_fsc2_socket( const char *fname )
 	struct sockaddr_un serv_addr;
 
 
+	/* Out of paranoia make sure the name of the socket file isn't
+	   larger than the char array we're going to copy it to... */
+
+	if ( strlen( FSC2_SOCKET ) >= sizeof serv_addr.sun_path )
+	{
+		unlink( fname );
+		exit( -1 );
+	}
+
 	/* Try to get a socket */
 
 	if ( ( sock_fd = socket( AF_UNIX, SOCK_STREAM, 0 ) ) == -1 )

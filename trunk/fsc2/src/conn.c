@@ -58,14 +58,21 @@ pid_t spawn_conn( bool start_state, FILE *in_file_fp )
 
 	is_busy = start_state;
 
+	/* Out of paranoia make sure the name of the socket file isn't
+	   larger than the char array we're going to copy it to... */
+
+	if ( strlen( FSC2_SOCKET ) >= sizeof serv_addr.sun_path )
+		return -1;
+
 	/* Open pipe for communication with child that's going to be spawned */
 
 	if ( pipe( Comm.conn_pd ) < 0 )
 		return -1;
 
-	/* Create UNIX domain socket */
+	/* Try to create a UNIX domain socket */
 
-	listen_fd = socket( AF_UNIX, SOCK_STREAM, 0 );
+	if ( ( listen_fd = socket( AF_UNIX, SOCK_STREAM, 0 ) ) == -1 )
+		return -1;
 
 	raise_permissions( );
 	unlink( FSC2_SOCKET );
