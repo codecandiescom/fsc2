@@ -34,7 +34,9 @@ double margin = 25.0;             /* margin (in mm) to leave on all sides */
 static int get_print_file( FILE **fp, char **name );
 static void print_header( FILE *fp, char *name );
 static void eps_make_scale( FILE *fp, void *cv, int coord, int dim );
+static void eps_color_scale( FILE *fp );
 static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, int dir );
+static void eps_draw_surface( FILE *fp, int cn );
 static void eps_draw_contour( FILE *fp, int cn );
 static void do_print( char *name, const char *command );
 static int start_printing( char **argv );
@@ -103,7 +105,7 @@ void print_1d( FL_OBJECT *obj, long data )
 
 	/* Restrict drawings to the frame */
 
-	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp clip newpath\n",
+	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp clip np\n",
 			 x_0 - 0.1, y_0 - 0.1, h + 0.2, w + 0.2, - ( h + 0.2 ) );
 
 	if ( obj == run_form->print_button )
@@ -161,7 +163,7 @@ void print_2d( FL_OBJECT *obj, long data )
 
 	x_0 = margin + 25.0;
 	y_0 = margin + 20.0;
-	w = paper_height - margin - x_0;
+	w = paper_height - margin - x_0 - 35.0;
 	h = paper_width - margin - y_0;
 
 	/* Draw the frame and the scales */
@@ -172,13 +174,18 @@ void print_2d( FL_OBJECT *obj, long data )
 
 	eps_make_scale( fp, G.curve_2d[ G.active_curve ], X, 2 );
 	eps_make_scale( fp, G.curve_2d[ G.active_curve ], Y, 2 );
+	if ( print_with_color )
+		eps_make_scale( fp, G.curve_2d[ G.active_curve ], Z, 2 );
 
 	/* Restrict drawings to the frame */
 
-	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp clip newpath\n",
+	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp clip np\n",
 			 x_0 - 0.1, y_0 - 0.1, h + 0.2, w + 0.2, - ( h + 0.2 ) );
 
-	eps_draw_contour( fp, G.active_curve );
+	if ( print_with_color )
+		eps_draw_surface( fp, G.active_curve );
+	else
+		eps_draw_contour( fp, G.active_curve );
 
 	fprintf( fp, "showpage\n" );
 	fclose( fp );
@@ -467,35 +474,39 @@ static void print_header( FILE *fp, char *name )
 	/* Some (hopefully) helpful definitions */
 
 	fprintf( fp, "%%%%BeginProlog\n"
-			     "/s { stroke } bind def\n"
-                 "/t { translate } bind def\n"
-			     "/r { rotate} bind def\n"
-			     "/cp { closepath } bind def\n"
-				 "/m { moveto } bind def\n"
-			     "/l { lineto } bind def\n"
-			     "/rm { rmoveto } bind def\n"
-			     "/rl { rlineto } bind def\n"
-			     "/slw { setlinewidth } bind def\n"
-			     "/srgb { setrgbcolor } bind def\n"
-			     "/sd { setdash } bind def\n"
-			     "/sw { stringwidth pop } bind def\n"
-				 "/sf { exch findfont exch scalefont setfont } bind def\n"
-			     "/gs { gsave } bind def\n"
-			     "/gr { grestore } bind def\n"
-			     "/sgr { setgray } bind def\n"
-			     "/slc { setlinecap } bind def\n"
-			     "/ch { gs newpath 0 0 moveto\n"
+			     "/b { bind def } bind def\n"
+			     "/s { stroke } b\n"
+			     "/f { fill } b\n"
+                 "/t { translate } b\n"
+			     "/r { rotate} b\n"
+			     "/cp { closepath } b\n"
+				 "/m { moveto } b\n"
+			     "/l { lineto } b\n"
+			     "/rm { rmoveto } b\n"
+			     "/rl { rlineto } b\n"
+			     "/slw { setlinewidth } b\n"
+			     "/srgb { setrgbcolor } b\n"
+			     "/sd { setdash } b\n"
+			     "/sw { stringwidth pop } b\n"
+				 "/sf { exch findfont exch scalefont setfont } b\n"
+			     "/np { newpath } b\n"
+			     "/cp { closepath } b\n"
+			     "/gs { gsave } b\n"
+			     "/gr { grestore } b\n"
+			     "/sgr { setgray } b\n"
+			     "/slc { setlinecap } b\n"
+			     "/ch { gs np 0 0 m\n"
 			     "      false charpath flattenpath pathbbox\n"
-                 "      exch pop 3 -1 roll pop exch pop gr } bind def\n"
-				 "/cw { gs newpath 0 0 moveto\n"
+                 "      exch pop 3 -1 roll pop exch pop gr } b\n"
+				 "/cw { gs np 0 0 m\n"
 	             "      false charpath flattenpath pathbbox\n"
-	             "      pop exch pop exch pop gr } bind def\n"
+	             "      pop exch pop exch pop gr } b\n"
 			     "/fsc2 { gs /Times-Roman 6 sf\n"
 			     "        (fsc2) ch sub 6 sub exch\n"
 			     "        (fsc2) cw sub 4 sub exch m\n"
 			     "        1 -0.025 0 { sgr gs (fsc2) show gr\n"
 			     "        -0.025 0.025 rm } for\n"
-			     "        1 setgray (fsc2) show gr } bind def\n"
+			     "        1 setgray (fsc2) show gr } b\n"
 			     "%%%%EndProlog\n" );
 
 	/* Rotate and shift for landscape format, scale to mm units, set font
@@ -534,7 +545,7 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, int dim )
 	double rwc_coarse;
 	double x, y;
 	char lstr[ 128 ];
-	double s2d[ 2 ];
+	double s2d[ 3 ];
 	int r_coord;
 	double rwcs, rwcd;
 	char *label;
@@ -545,6 +556,7 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, int dim )
 	{
 		s2d[ X ] = w * ( ( Curve_1d * ) cv )->s2d[ X ] / G.canvas.w;
 		s2d[ Y ] = h * ( ( Curve_1d * ) cv )->s2d[ Y ] / G.canvas.h;
+
 		rwcs = G.rwc_start[ coord ];
 		rwcd = G.rwc_delta[ coord ];
 	}
@@ -552,8 +564,10 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, int dim )
 	{
 		s2d[ X ] = w * ( ( Curve_2d * ) cv )->s2d[ X ] / G.canvas.w;
 		s2d[ Y ] = h * ( ( Curve_2d * ) cv )->s2d[ Y ] / G.canvas.h;
-		rwcs = G.rwc_start[ coord ];
-		rwcd = G.rwc_delta[ coord ];
+		s2d[ Z ] = h * ( ( Curve_2d * ) cv )->s2d[ Z ] / G.z_axis.h;
+
+		rwcs = ( ( Curve_2d * ) cv )->rwc_start[ coord ];
+		rwcd = ( ( Curve_2d * ) cv )->rwc_delta[ coord ];
 	}
 	else
 	{
@@ -675,7 +689,7 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, int dim )
 
 		if ( label != NULL )
 			fprintf( fp, "%f (%s) cw sub %f m (%s) show\n",
-					 paper_height - margin, label, margin, label );
+					 x_0 + w, label, margin, label );
 
 		y = y_0;
 
@@ -710,7 +724,7 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, int dim )
 
 		fprintf( fp, "pop\n" );
 	}
-	else
+	else if ( coord == Y )
 	{
 		/* Draw the y-axis label string */
 
@@ -749,6 +763,79 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, int dim )
 
 		}
 	}
+	else
+	{
+		x = x_0 + w + 15.0;
+
+		if ( G.label[ Z ] != NULL )
+			fprintf( fp, "gs %f (%s) ch sub %f (%s) cw sub t 90 r 0 0 m (%s) "
+					 "show gr\n", x + 30.0, G.label[ Z ],
+					 paper_width - margin, G.label[ Z ], G.label[ Z ] );
+
+		/* Make the color scale */
+
+		eps_color_scale( fp );
+
+		/* Draw all the ticks and numbers */
+
+		fprintf( fp, "%f %f m 0 %f rl s\n", x - 1.0, y_0, h );
+
+		for ( cur_p = d_start_fine; cur_p < h;
+			  medium++, coarse++, cur_p += d_delta_fine )
+		{
+			y = cur_p + y_0;
+
+			if ( coarse % coarse_factor == 0 )         /* long line */
+			{
+				fprintf( fp, "%f %f m\n-3.5 0 rl s\n", x - 0.5, y );
+				rwc_coarse += coarse_factor * rwc_delta;
+
+				make_label_string( lstr, rwc_coarse, ( int ) mag );
+				fprintf( fp, "%f %f (%s) ch 0.5 mul "
+						 "sub m (%s) show\n", x + 0.5, y, lstr, lstr );
+			}
+			else if ( medium % medium_factor == 0 )    /* medium line */
+				fprintf( fp, "%f %f m\n-2.5 0 rl s\n", x - 0.5, y );
+			else                                      /* short line */
+				fprintf( fp, "%f %f m\n-1.5 0 rl s\n", x - 0.5, y );
+
+		}
+	}
+}
+
+
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
+static void eps_color_scale( FILE *fp )
+{
+	double x = x_0 + w + 3.0;
+	double y = y_0;
+	double width = 6.0;
+	double h_inc, c_inc;
+	double c;
+	int i;
+	int rgb[ 3 ];
+
+
+	fprintf( fp, "%f %f m 0 %f rl %f 0 rl 0 %f rl cp s\n",
+			 x - 0.1, y_0 - 0.1, h + 0.2, width + 0.2, - ( h + 0.2 ) );
+
+
+	h_inc = h / ( double ) NUM_COLORS;
+	c_inc = 1.0 / ( double ) ( NUM_COLORS - 1 );
+	for ( i = 0, c = 0.0; i < NUM_COLORS; y += h_inc, c += c_inc, i++ )
+	{
+		i2rgb( c, rgb );
+		fprintf( fp, "%f %f %f srgb\n"
+				     "%f %f m %f 0 rl 0 %f rl %f 0 rl cp f\n",
+				 ( double ) rgb[ RED ] / 255.0,
+				 ( double ) rgb[ GREEN ] / 255.0,
+				 ( double ) rgb[ BLUE ] / 255.0,
+				 x, y, width, h_inc, - width );
+	}
+
+	fprintf( fp, "0 0 0 srgb\n" );
 }
 
 
@@ -812,7 +899,7 @@ static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, int dir )
 	while ( ! cv->points[ k ].exist && k < max_points )
 		k++;
 
-	if ( k >= max_points )/* is there only just one ? */
+	if ( k >= max_points )                  /* is there only just one ? */
 		return;
 
 	fprintf( fp, "%f %f m\n", x_0 + s2d[ X ] * ( k + cv->shift[ X ] ),
@@ -829,6 +916,61 @@ static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, int dir )
 	}
 
 	fprintf( fp, "s gr\n" );
+}
+
+
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
+static void eps_draw_surface( FILE *fp, int cn )
+{
+	Curve_2d *cv = G.curve_2d[ cn ];
+	double s2d[ 2 ] = { w * cv->s2d[ X ] / G.canvas.w,
+						h * cv->s2d[ Y ] / G.canvas.h };
+	double dw = s2d[ X ] / 2,
+		   dh = s2d[ Y ] / 2;
+	long i, j, k;
+	int rgb[ 3 ];
+
+
+	fprintf( fp, "gs\n" );
+
+	/* Print areas gray for which there are no data */
+
+	fprintf( fp, "0.5 sgr\n"
+			 "%f %f m\n"
+			 "0 %f rl\n"
+			 "%f 0 rl\n"
+			 "0 %f rl\n"
+			 "cp f\n",
+			 x_0 - 0.1, y_0 - 0.1, h + 0.2, w + 0.2, - ( h + 0.2 ) );
+
+	/* Now draw the data */
+
+	for ( k = 0, j = 0; j < G.ny; j++ )
+		for ( i = 0; i < G.nx; k++, i++ )
+		{
+			if ( ! cv->points[ k ].exist )
+				continue;
+
+			i2rgb( cv->z_factor * ( cv->points[ k ].v + cv->shift[ Z ] ),
+				   rgb );
+			fprintf( fp, 
+					 "%f %f %f srgb\n"
+					 "%f %f m\n"
+					 "%f 0 rl\n"
+					 "0 %f rl\n"
+					 "%f 0 rl\n"
+					 "cp f\n",
+					 ( double ) rgb[ RED ] / 255.0,
+					 ( double ) rgb[ GREEN ] / 255.0,
+					 ( double ) rgb[ BLUE ] / 255.0,
+					 x_0 + s2d[ X ] * ( i + cv->shift[ X ] ) - dw,
+					 y_0 + s2d[ Y ] * ( j + cv->shift[ Y ] ) - dh,
+					 2.0 * dw, 2.0 * dh, - 2.0 * dw );
+		}
+
+	fprintf( fp, "gr\n" );
 }
 
 
@@ -907,7 +1049,7 @@ static void eps_draw_contour( FILE *fp, int cn )
 							 "%f 0 rl\n"
 							 "neg rl cp fill\n",
 							 x_0 + s2d[ X ] * ( i + cv->shift[ X ] ) - dw,
-							 y_0 + s2d[ Y ] * ( j + cv->shift[ X ] ) - dh,
+							 y_0 + s2d[ Y ] * ( j + cv->shift[ Y ] ) - dh,
 							 2.0 * dh, 2.0 * dw );
 					continue;
 				}
