@@ -24,7 +24,7 @@ float_slice, 1, ALL;          // creates an float array slice
 // Functions exported by the magnet power supply drivers
 
 magnet_setup, 2, ALL;         // set start field and sweep step size
-goto_field, 1, EXP;           // goto to a field value
+set_field, 1, EXP;            // goto to a field value
 sweep_up, 0, EXP;             // sweep magnet up
 sweep_down, 0, EXP;           // sweep magnet down
 

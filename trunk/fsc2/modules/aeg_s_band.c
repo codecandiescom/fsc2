@@ -28,7 +28,7 @@ int s_band_exp_hook( void );
 void s_band_exit_hook( void );
 
 Var *magnet_setup( Var *v );
-Var *goto_field( Var *v );
+Var *set_field( Var *v );
 Var *sweep_up( Var *v );
 Var *sweep_down( Var *v );
 
@@ -285,7 +285,7 @@ Var *magnet_setup( Var *v )
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
 
-Var *goto_field( Var *v )
+Var *set_field( Var *v )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
