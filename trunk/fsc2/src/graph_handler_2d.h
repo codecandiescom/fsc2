@@ -3,7 +3,7 @@
 */
 
 
-#if ! defined GRAPH_HANDLER_D__HEADER
+#if ! defined GRAPH_HANDLER_2D_HEADER
 #define GRAPH_HANDLER_2D_HEADER
 
 

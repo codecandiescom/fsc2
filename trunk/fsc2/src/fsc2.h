@@ -94,6 +94,7 @@
 #include "accept.h"
 #include "graph_handler_1d.h"
 #include "graph_handler_2d.h"
+#include "graph_cut.h"
 #include "print.h"
 #include "func_intact.h"
 #include "conn.h"

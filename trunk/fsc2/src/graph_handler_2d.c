@@ -75,12 +75,12 @@ void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 	long i;
 	Curve_2d *cv;
 	int old_button_state = G.button_state;
-	int dummy;
+	int keymask;
 
 
 	/* In the axes areas two buttons pressed simultaneously doesn't has a
-	special meaning, so don't care about another button. Also don't react if
-	the pressed buttons have lost there meaning */
+	   special meaning, so don't care about another button. Also don't react
+	   if the pressed buttons have lost there meaning */
 
 	if ( ( c != &G.canvas && G.raw_button_state != 0 ) ||
 		 ( G.button_state == 0 && G.raw_button_state != 0 ) ||
@@ -102,23 +102,20 @@ void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 	/* Find out which window gets the mouse events (all following mouse events
 	   go to this window until all buttons are released) */
 	   
-
 	if ( obj == run_form->x_axis )        /* in x-axis window */
 		G.drag_canvas = 1;
 	if ( obj == run_form->y_axis )        /* in y-axis window */
 		G.drag_canvas = 2;
-	if ( obj == run_form->z_axis )        /* in y-axis window */
+	if ( obj == run_form->z_axis )        /* in z-axis window */
 		G.drag_canvas = 4;
 	if ( obj == run_form->canvas )        /* in canvas window */
 		G.drag_canvas = 7;
 
-	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &dummy );
+	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &keymask );
 
 	switch ( G.button_state )
 	{
 		case 1 :                               /* left button */
-			fl_set_cursor( window, G.cur_1 );
-
 			G.start[ X ] = c->ppos[ X ];
 			G.start[ Y ] = c->ppos[ Y ];
 
@@ -127,6 +124,14 @@ void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 			switch ( G.drag_canvas )
 			{
 				case 1 :                       /* in x-axis window */
+					if ( keymask & ShiftMask )
+					{
+						fl_set_cursor( window, G.cur_6 );
+						G.cut_select = CUT_SELECT_X;
+					}
+					else
+						fl_set_cursor( window, G.cur_1 );
+
 					c->box_x = c->ppos[ X ];
 					c->box_w = 0;
 					c->box_y = X_SCALE_OFFSET + 1;
@@ -135,6 +140,14 @@ void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 					break;
 
 				case 2 :                       /* in y-axis window */
+					if ( keymask & ShiftMask )
+					{
+						fl_set_cursor( window, G.cur_7 );
+						G.cut_select = CUT_SELECT_Y;
+					}
+					else
+						fl_set_cursor( window, G.cur_1 );
+
 					c->box_x = c->w
 						       - ( Y_SCALE_OFFSET + ENLARGE_BOX_WIDTH + 1 );
 					c->box_y = c->ppos[ Y ];
@@ -144,6 +157,8 @@ void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 					break;
 
 				case 4 :                       /* in z-axis window */
+					fl_set_cursor( window, G.cur_1 );
+
 					c->box_x = Z_SCALE_OFFSET + 1;
 					c->box_y = c->ppos[ Y ];
 					c->box_w = ENLARGE_BOX_WIDTH;
@@ -152,6 +167,8 @@ void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 					break;
 
 				case 7 :                       /* in canvas window */
+					fl_set_cursor( window, G.cur_1 );
+
 					c->box_x = c->ppos[ X ];
 					c->box_y = c->ppos[ Y ];
 					c->box_w = c->box_h = 0;
@@ -220,7 +237,7 @@ void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 
 void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 {
-	int dummy;
+	int keymask;
 	bool scale_changed = UNSET;
 
 
@@ -238,7 +255,7 @@ void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 
 	/* Get mouse position and restrict it to the canvas */
 
-	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &dummy );
+	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &keymask );
 
 	if ( c->ppos[ X ] < 0 )
 		c->ppos[ X ] = 0;
@@ -261,11 +278,19 @@ void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 			switch ( G.drag_canvas )
 			{
 				case 1 :                       /* x-axis window */
-					scale_changed = change_x_range_2d( c );
+					if ( G.cut_select == NO_CUT_SELECT )
+						scale_changed = change_x_range_2d( c );
+					else if ( G.cut_select == CUT_SELECT_X &&
+							  keymask & ShiftMask )
+						printf( "Show x cut window\n" );
 					break;
 
 				case 2 :                       /* in y-axis window */
-					scale_changed = change_y_range_2d( c );
+					if ( G.cut_select == NO_CUT_SELECT )
+						scale_changed = change_y_range_2d( c );
+					else if ( G.cut_select == CUT_SELECT_Y &&
+							  keymask & ShiftMask )
+						printf( "Show y cut window\n" );
 					break;
 
 				case 4 :
@@ -341,7 +366,7 @@ void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 {
 	XEvent new_ev;
-	int dummy;
+	int keymask;
 	bool scale_changed = UNSET;
 
 	
@@ -368,7 +393,7 @@ void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 	if ( G.active_curve == -1 )
 		return;
 
-	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &dummy );
+	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &keymask );
 
 	switch ( G.button_state )
 	{
@@ -1124,7 +1149,7 @@ void redraw_canvas_2d( Canvas *c )
 											 * ( sp->v + cv->shift[ Z ] ) ) );
 				else
 					XSetForeground( G.d, cv->gc,
-												fl_get_pixel( FL_INACTIVE ) );
+									fl_get_pixel( FL_INACTIVE ) );
 
 				XFillRectangle( G.d, c->pm, cv->gc,
 								xps->x, xps->y, cv->w, cv->h );
@@ -1178,7 +1203,7 @@ void redraw_canvas_2d( Canvas *c )
 void repaint_canvas_2d( Canvas *c )
 {
 	char buf[ 256 ];
-	int x, y;
+	int x, y, x2, y2;
 	long index, index_1, index_2;
 	unsigned int w, h;
 	Curve_2d *cv;
@@ -1210,29 +1235,48 @@ void repaint_canvas_2d( Canvas *c )
 
 	if ( G.button_state == 1 && c->is_box )
 	{
-		if ( c->box_w > 0 )
+		switch ( G.cut_select )
 		{
-			x = c->box_x;
-			w = c->box_w;
-		}
-		else
-		{
-			x = c->box_x + c->box_w;
-			w = - c->box_w;
-		}
+			case NO_CUT_SELECT :
+				if ( c->box_w > 0 )
+				{
+					x = c->box_x;
+					w = c->box_w;
+				}
+				else
+				{
+					x = c->box_x + c->box_w;
+					w = - c->box_w;
+				}
 				
-		if ( c->box_h > 0 )
-		{
-			y = c->box_y;
-			h = c->box_h;
-		}
-		else
-		{
-			y = c->box_y + c->box_h;
-			h = - c->box_h;
-		}
+				if ( c->box_h > 0 )
+				{
+					y = c->box_y;
+					h = c->box_h;
+				}
+				else
+				{
+					y = c->box_y + c->box_h;
+					h = - c->box_h;
+				}
 
-		XDrawRectangle( G.d, pm, c->box_gc, x, y, w, h );
+				XDrawRectangle( G.d, pm, c->box_gc, x, y, w, h );
+				break;
+
+			case CUT_SELECT_X :
+				x = x2 = c->box_x + c->box_w;
+				y = X_SCALE_OFFSET + ENLARGE_BOX_WIDTH;
+				y2 = 0;
+				XDrawLine( G.d, pm, c->box_gc, x, y, x2, y2 );
+				break;
+
+			case CUT_SELECT_Y :
+				y = y2 = c->box_y + c->box_h;
+				x = c->w - ( Y_SCALE_OFFSET + ENLARGE_BOX_WIDTH + 1 );
+				x2 = c->w - 1;
+				XDrawLine( G.d, pm, c->box_gc, x, y, x2, y2 );
+				break;
+		}
 	}
 
 	/* If this is the canvas and the left and either the middle or the right
