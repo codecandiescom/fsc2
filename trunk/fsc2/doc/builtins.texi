@@ -2224,6 +2224,61 @@ FOR I = 1 : 10 @{
 @end example
 
 
+@anchor{mouse_position}
+@item mouse_position()
+@findex mouse_position(
+The function can be used to determine the current mouse position in the
+display windows when the left and middle mouse buttons are pressed at
+once. It accepts no arguments and returns an array with 9 floating point
+values.
+
+The first element of the returned array can have the following values,
+indicating the meaning of the other elements:
+@table @samp
+@item 0
+The mouse pointer is not within the main display area of one of the
+display windows, the left and middle mouse buttons aren't both pressed
+at once, or no curve is shown at the moment in the currently active
+window (possibly because there's no scaling set for the curve). The
+remaining elements of the array have no meaning.
+
+@item 1
+The mouse pointer is in the display area of the 1D display window and
+both the left and middle mouse buttons are pressed. The second and third
+element are the @i{x}- and @i{y}-coordinates of the position of the
+mouse according to the current scaling for the first curve. If there is
+more than one curve the following array elements are the coordinates of
+the mouse position according to the scaling of each of the other curves
+as far as they exist.
+
+@item 2
+The mouse pointer is in the display area of the 2D display window and
+both the left and middle mouse buttons are pressed. The second and third
+element of the array are @i{x}- and @i{y}-coordinates of the mouse
+position according to scaling of the currectly displayed curve. The
+fourth element is the @i{z}-value of the curve at this position. All
+other array elements are meaningless.
+
+@item -2
+The mouse pointer is in the display area of the 2D display window and
+both the left and middle mouse buttons are pressed. The second and third
+element of the array are @i{x}- and @i{y}-coordinates of the mouse
+position according to scaling of the currectly displayed curve. At the
+current mouse position is no displayed point, a @i{z}-value thus cannot
+be given. All other array elements are meaningless.
+
+@item 3
+The mouse pointer is in the display area of the display window showing a
+cross section through a 2-dimensional data set and both the left and
+middle mouse buttons are pressed. The second and third element of the
+array are @i{x}- and @i{y}-coordinates of the mouse position according
+to scaling of the currectly displayed cross section curve. The fourth
+element is the coordinate of the cut through the 2-dimensional curve.
+All other array elements are meaningless.
+
+@end table
+
+
 @anchor{lin_space}
 @item lin_space()
 @findex lin_space()
