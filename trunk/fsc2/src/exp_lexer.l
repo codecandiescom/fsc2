@@ -391,7 +391,7 @@ static Var *exp_get_channel_name( void )
 
 
 	if ( ( func = func_get_long( "digitizer_get_channel_number",
-								 &access, SET ) ) != NULL )
+								 &access, UNSET ) ) != NULL )
 	{
 		if ( ! strcmp( exptext, "LIN" ) )
 			vars_push( STR_VAR, "LINE" );

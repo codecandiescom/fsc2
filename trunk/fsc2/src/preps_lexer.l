@@ -499,7 +499,7 @@ static Var *preps_get_channel_name( void )
 
 
 	if ( ( func = func_get_long( "digitizer_get_channel_number",
-								 &access, SET ) ) != NULL )
+								 &access, UNSET ) ) != NULL )
 	{
 		if ( ! strcmp( prepstext, "LIN" ) )
 			vars_push( STR_VAR, "LINE" );

@@ -25,10 +25,10 @@
 #include "fsc2.h"
 
 
-/* When in the input an identifier is found it is always tried first if it's a
-   function by a calling func_get(). If it is a function, a pointer to a
+/* When in the input an identifier is found it is always tested first if it
+   is a function by a calling func_get(). If it is a function, a pointer to a
    temporary variable on the stack of type FUNC is returned.  The variable's
-   structure contains beside a pointer to the function a copy of the name of
+   structure contains a pointer to the function, a copy of the name of
    the function and the number of arguments and the access flag (the access
    flag tells in which sections the function may be used).
 
@@ -92,16 +92,16 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "random",        f_random,   0, ACCESS_ALL,  NULL, UNSET },
 	{ "grandom",       f_grand,    0, ACCESS_ALL,  NULL, UNSET },
 	{ "set_seed",      f_setseed, -1, ACCESS_ALL,  NULL, UNSET },
-    { "time",          f_time,     0, ACCESS_ALL,  NULL, UNSET },
-    { "date",          f_date,     0, ACCESS_ALL,  NULL, UNSET },
-    { "delta_time",    f_dtime,    0, ACCESS_EXP,  NULL, UNSET },
+	{ "time",          f_time,     0, ACCESS_ALL,  NULL, UNSET },
+	{ "date",          f_date,     0, ACCESS_ALL,  NULL, UNSET },
+	{ "delta_time",    f_dtime,    0, ACCESS_EXP,  NULL, UNSET },
 	{ "print",         f_print,   -1, ACCESS_ALL,  NULL, UNSET },
 	{ "wait",          f_wait,     1, ACCESS_ALL,  NULL, UNSET },
 	{ "init_1d",       f_init_1d, -1, ACCESS_PREP, NULL, UNSET },
 	{ "init_2d",       f_init_2d, -1, ACCESS_PREP, NULL, UNSET },
-    { "change_scale",  f_cscale,  -1, ACCESS_EXP,  NULL, UNSET },
-    { "change_label",  f_clabel,  -1, ACCESS_EXP,  NULL, UNSET },
-    { "rescale",       f_rescale, -1, ACCESS_EXP,  NULL, UNSET },
+	{ "change_scale",  f_cscale,  -1, ACCESS_EXP,  NULL, UNSET },
+	{ "change_label",  f_clabel,  -1, ACCESS_EXP,  NULL, UNSET },
+	{ "rescale",       f_rescale, -1, ACCESS_EXP,  NULL, UNSET },
 	{ "display",       f_display, -1, ACCESS_EXP,  NULL, UNSET },
 	{ "clear_curve",   f_clearcv, -1, ACCESS_EXP,  NULL, UNSET },
 	{ "dim",           f_dim,      1, ACCESS_ALL,  NULL, UNSET },
@@ -121,22 +121,22 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "save_program",  f_save_p,  -1, ACCESS_EXP,  NULL, UNSET },
 	{ "save_output",   f_save_o,  -1, ACCESS_EXP,  NULL, UNSET },
 	{ "save_comment",  f_save_c,  -1, ACCESS_EXP,  NULL, UNSET },
-    { "is_file",       f_is_file,  1, ACCESS_ALL,  NULL, UNSET },
-    { "layout",        f_layout,   1, ACCESS_EXP,  NULL, UNSET },
-    { "button_create", f_bcreate, -1, ACCESS_EXP,  NULL, UNSET },
-    { "button_delete", f_bdelete, -1, ACCESS_EXP,  NULL, UNSET },
-    { "button_state",  f_bstate,  -1, ACCESS_EXP,  NULL, UNSET },
-    { "slider_create", f_screate, -1, ACCESS_EXP,  NULL, UNSET },
-    { "slider_delete", f_sdelete, -1, ACCESS_EXP,  NULL, UNSET },
-    { "slider_value",  f_svalue,  -1, ACCESS_EXP,  NULL, UNSET },
-    { "input_create",  f_icreate, -1, ACCESS_EXP,  NULL, UNSET },
-    { "input_delete",  f_idelete, -1, ACCESS_EXP,  NULL, UNSET },
-    { "input_value",   f_ivalue,  -1, ACCESS_EXP,  NULL, UNSET },
-    { "output_create", f_icreate, -1, ACCESS_EXP,  NULL, UNSET },
-    { "output_delete", f_idelete, -1, ACCESS_EXP,  NULL, UNSET },
-    { "output_value",  f_ivalue,  -1, ACCESS_EXP,  NULL, UNSET },
-    { "object_delete", f_objdel,  -1, ACCESS_EXP,  NULL, UNSET },
-    { "abort",         f_abort,    0, ACCESS_ALL,  NULL, UNSET },
+	{ "is_file",       f_is_file,  1, ACCESS_ALL,  NULL, UNSET },
+	{ "layout",        f_layout,   1, ACCESS_EXP,  NULL, UNSET },
+	{ "button_create", f_bcreate, -1, ACCESS_EXP,  NULL, UNSET },
+	{ "button_delete", f_bdelete, -1, ACCESS_EXP,  NULL, UNSET },
+	{ "button_state",  f_bstate,  -1, ACCESS_EXP,  NULL, UNSET },
+	{ "slider_create", f_screate, -1, ACCESS_EXP,  NULL, UNSET },
+	{ "slider_delete", f_sdelete, -1, ACCESS_EXP,  NULL, UNSET },
+	{ "slider_value",  f_svalue,  -1, ACCESS_EXP,  NULL, UNSET },
+	{ "input_create",  f_icreate, -1, ACCESS_EXP,  NULL, UNSET },
+	{ "input_delete",  f_idelete, -1, ACCESS_EXP,  NULL, UNSET },
+	{ "input_value",   f_ivalue,  -1, ACCESS_EXP,  NULL, UNSET },
+	{ "output_create", f_icreate, -1, ACCESS_EXP,  NULL, UNSET },
+	{ "output_delete", f_idelete, -1, ACCESS_EXP,  NULL, UNSET },
+	{ "output_value",  f_ivalue,  -1, ACCESS_EXP,  NULL, UNSET },
+	{ "object_delete", f_objdel,  -1, ACCESS_EXP,  NULL, UNSET },
+	{ "abort",         f_abort,    0, ACCESS_ALL,  NULL, UNSET },
 	{ NULL,            NULL,       0, 0,           NULL, UNSET }
 	                   /* last set marks the very last entry, don't remove ! */
 };
@@ -231,16 +231,26 @@ void functions_exit( void )
 /* functions. If it finds it it creates a new variable on the variables */ 
 /* stack with a pointer to the function and returns a pointer to the    */
 /* variable. If the function can't be found it returns a NULL pointer.  */
+/* -> 1. Name of the function                                           */
+/*    2. Pointer for returning the access flag, i.e. a flag indicating  */
+/*       in which part of the EDL program the function can be used.     */
+/* <- Pointer to variable on variable stack that can be used to execute */
+/*    the function or NULL if function does not exist. If the function  */
+/*    exists but has not been loaded an exception is thrown.            */
 /*----------------------------------------------------------------------*/
 
 Var *func_get( const char *name, int *access )
 {
-	return func_get_long( name, access, 0 );
+	return func_get_long( name, access, SET );
 }
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* This function is the one really used for finding a function  */
+/* but with an additional argument that indicates if on failure */
+/* for existing but not loaded functions an error message is    */
+/* printed and an exception is thrown or NULL is returned.      */
+/*--------------------------------------------------------------*/
 
 Var *func_get_long( const char *name, int *access, bool flag )
 {
@@ -259,7 +269,7 @@ Var *func_get_long( const char *name, int *access, bool flag )
 
 	if ( f->fnct == NULL )       /* function found but not loaded */
 	{
-		if ( ! flag )
+		if ( flag )
 		{
 			eprint( FATAL, SET, "Function `%s' has not been loaded.\n",
 					f->name );

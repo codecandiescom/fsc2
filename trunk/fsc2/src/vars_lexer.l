@@ -398,7 +398,7 @@ static Var *vars_get_channel_name( void )
 
 
 	if ( ( func = func_get_long( "digitizer_get_channel_number",
-								 &access, SET ) ) != NULL )
+								 &access, UNSET ) ) != NULL )
 	{
 		vars_push( STR_VAR, varstext );
 		v = func_call( func );
