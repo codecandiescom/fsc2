@@ -783,11 +783,11 @@ to return the measured frequency can be used.
 @strong{Description}: Hewlett-Packard RF synthesizer HP8647A (but also
 works with HP8648B) with support for output level normalization via
 frequency/amplitude table files. For safety reasons only output
-attenuations below @w{-5 db} are allowed -- change the configuration
+attenuations below @w{-5 dB} are allowed -- change the configuration
 file to allow higher output levels.
 
-Frequency range is @w{250 kHz} to @w{1 GHz}, attenuation range @w{-136 db}
-to @w{3 db}
+Frequency range is @w{250 kHz} to @w{1 GHz}, attenuation range @w{-136 dB}
+to @w{3 dB} in @w{0.1 dB} steps.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
@@ -833,8 +833,8 @@ to @w{3 db}
 support for output level normalization via frequency/amplitude table
 files.
 
-Frequency range is @w{10 kHz} to @w{2 GHz}, attenuation range @w{-136 db}
-to @w{14.5 db}.
+Frequency range is @w{10 kHz} to @w{2 GHz}, attenuation range @w{-136 dB}
+to @w{14.5 dB} in @w{0.1 dB} steps.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
@@ -878,8 +878,10 @@ to @w{14.5 db}.
 @paragraphindent 0
 @strong{Description}: Hewlett-Packard RF synthesizer HP8672A with
 support for output level normalization via frequency/amplitude table
-files. For safety reasons only output attenuations below @w{-5 db} are
-allowed -- change the configuration file to allow higher output levels.
+files
+
+Frequency range is @w{2 GHz} to @w{9 GHz}, attenuation range @w{-120 dB}
+to @w{10 dB} in @w{1 dB} steps.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
