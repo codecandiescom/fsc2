@@ -91,54 +91,12 @@ expr:    INT_TOKEN unit           { if ( $2 == NULL )
                                     else
 	                                  $$ = vars_mult(
 										    vars_push( FLOAT_VAR, $1 ), $2 ); }
-       | VAR_TOKEN unit           { if ( $2 == NULL )
-                                      $$ = vars_push( $1->type, $1 );
-	                                else
-									{
-									  if ( $1->type & ( INT_VAR | FLOAT_VAR ) )
-			                            $$ = vars_mult( $1, $2 );
-									  else
-									  {
-										eprint( FATAL, "%s:%ld: Can't apply "
-												 "a unit to a non-number.\n",
-												Fname, Lc );
-										THROW( EXCEPTION );
-									  }
-									}
-                                  }
+       | VAR_TOKEN unit           { $$ = apply_unit( $1, $2 ); }
        | VAR_TOKEN '['            { vars_arr_start( $1 ); }
          list3 ']'                { CV = vars_arr_rhs( $4 ); }
-         unit                     { if ( $7 == NULL )
-			                          $$ = CV;
-		                            else
-									{
-									  if ( CV->type & ( INT_VAR | FLOAT_VAR ) )
-			                            $$ = vars_mult( CV, $7 );
-									  else
-									  {
-										eprint( FATAL, "%s:%ld: Can't apply "
-												 "a unit to a non-number.\n",
-												Fname, Lc );
-										THROW( EXCEPTION );
-									  }
-									}
-                                  }
+         unit                     { $$ = apply_unit( CV, $7 ); }
        | FUNC_TOKEN '(' list4 ')' { CV = func_call( $1 ); }
-         unit                     { if ( $6 == NULL )
-			                          $$ = CV;
-		                            else
-									{
-									  if ( CV->type & ( INT_VAR | FLOAT_VAR ) )
-			                            $$ = vars_mult( CV, $6 );
-									  else
-									  {
-										eprint( FATAL, "%s:%ld: Can't apply "
-												 "a unit to a non-number.\n",
-												Fname, Lc );
-										THROW( EXCEPTION );
-									  }
-									}
-                                  }
+         unit                     { $$ = apply_unit( CV, $6 ); }
        | VAR_REF                  { $$ = $1; }
        | VAR_TOKEN '('            { eprint( FATAL, "%s:%ld: `%s' isn't a "
 											"function.\n", Fname, Lc,

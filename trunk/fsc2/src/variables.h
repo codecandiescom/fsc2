@@ -96,6 +96,7 @@ void vars_ass_from_var( Var *src, Var *dest );
 void vars_ass_from_ptr( Var *src, Var *dest );
 void vars_ass_from_trans_ptr( Var *src, Var *dest );
 void vars_arr_init( Var *dest );
+Var * apply_unit( Var *var, Var *unit );
 
 
 #endif  /* ! VARIABLES_HEADER */

@@ -98,55 +98,13 @@ expr:    E_INT_TOKEN unit         { if ( $2 == NULL )
                                     else
 	                                  $$ = vars_mult(
 										    vars_push( FLOAT_VAR, $1 ), $2 ); }
-       | E_VAR_TOKEN unit         { if ( $2 == NULL )
-                                      $$ = vars_push( $1->type, $1 );
-                                    else
-									{
-									  if ( $1->type & ( INT_VAR | FLOAT_VAR ) )
-			                            $$ = vars_mult( $1, $2 );
-									  else
-									  {
-										eprint( FATAL, "%s:%ld: Can't apply "
-												 "a unit to a non-number.\n",
-												Fname, Lc );
-										THROW( EXCEPTION );
-									  }
-									}
-                                  }
+       | E_VAR_TOKEN unit         { $$ = apply_unit( $1, $2 ); }
        | E_VAR_TOKEN '['          { vars_arr_start( $1 ); }
          list1 ']'                { CV = vars_arr_rhs( $4 ); }
-         unit                     { if ( $7 == NULL )
-			                          $$ = CV;
-		                            else
-									{
-									  if ( CV->type & ( INT_VAR | FLOAT_VAR ) )
-			                            $$ = vars_mult( CV, $7 );
-									  else
-									  {
-										eprint( FATAL, "%s:%ld: Can't apply "
-												 "a unit to a non-number.\n",
-												Fname, Lc );
-										THROW( EXCEPTION );
-									  }
-									}
-                                  }
+         unit                     { $$ = apply_unit( $7, CV ); }
        | E_FUNC_TOKEN '(' list2
          ')'                      { CV = func_call( $1 ); }
-         unit                     { if ( $6 == NULL )
-			                          $$ = CV;
-		                            else
-									{
-									  if ( CV->type & ( INT_VAR | FLOAT_VAR ) )
-			                            $$ = vars_mult( CV, $6 );
-									  else
-									  {
-										eprint( FATAL, "%s:%ld: Can't apply "
-												 "a unit to a non-number.\n",
-												Fname, Lc );
-										THROW( EXCEPTION );
-									  }
-									}
-                                  }
+         unit                     { $$ = apply_unit( CV, $6 ); }
        | E_VAR_REF                { $$ = $1; }
        | E_VAR_TOKEN '('          { eprint( FATAL, "%s:%ld: `%s' isn't a "
 											"function.\n", Fname, Lc,
@@ -169,7 +127,7 @@ expr:    E_INT_TOKEN unit         { if ( $2 == NULL )
        | expr '/' expr            { $$ = vars_div( $1, $3 ); }
        | expr '%' expr            { $$ = vars_mod( $1, $3 ); }
        | expr '^' expr            { $$ = vars_pow( $1, $3 ); }
-       | '-' expr %prec E_NEG       { $$ = vars_negate( $2 ); }
+       | '-' expr %prec E_NEG     { $$ = vars_negate( $2 ); }
        | '(' expr ')' unit        { if ( $4 == NULL )
 			                          $$ = $2;
 		                            else
