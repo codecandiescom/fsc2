@@ -162,7 +162,7 @@ sub serve {
 
 	# Check if client accepts PNG, GIF or JPEG files and if it sends a
 	# Host field, don't care for anything else. The client is done when it
-	# sends an empty line
+	# sends an empty line.
 
 	while ( defined( $txt = <$client> ) and $txt !~ /^\r*$/o ) {
 		next unless $txt =~ /^\s*(Accept)|(Host):/io;
@@ -180,7 +180,7 @@ sub serve {
 	exit 0 unless defined $txt;
 
 	# Send a not too rude reply if the client didn't send a Host field but
-	# claims to be HTTP/1.1 compliant
+	# claims to be HTTP/1.1 compliant.
 
 	missing_host_field( $req, $maj, $min )
 		if $maj >= 1 and $min >= 1 and ! $is_host_field;
