@@ -735,7 +735,6 @@ Var *pulser_next_phase( Var *v )
 
 		if ( ++f->next_phase >= f->pc_len )
 			f->next_phase = 0;
-		f->needs_update = SET;
 /*
 		if ( FSC2_MODE == EXPERIMENT )
 			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
@@ -811,7 +810,6 @@ Var *pulser_phase_reset( Var *v )
 		}
 
 		f->next_phase = 0;
-		f->needs_update = SET;
 /*
 		if ( FSC2_MODE == EXPERIMENT )
 			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
