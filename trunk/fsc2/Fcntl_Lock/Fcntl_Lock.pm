@@ -71,7 +71,7 @@ BEGIN {
 			                         "support locking";
 	}
 	if ( $err = eval { &Errno::EOVERFLOW } ) {
-		$fcntl_error_texts{ $err } = "On of the parameters to be returned " .
+		$fcntl_error_texts{ $err } = "One of the parameters to be returned " .
 			                         "can not be represented correctly";
 	}
 	if ( $err = eval { &Errno::ENETUNREACH } ) {
