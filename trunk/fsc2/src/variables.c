@@ -1994,7 +1994,7 @@ void vars_ass_from_var( Var *src, Var *dest )
 			break;
 
 		default :                    /* we never should end up here... */
-			assert ( 1 == 0 );
+			fsc2_assert ( 1 == 0 );
 	}
 }
  
