@@ -28,7 +28,7 @@ Ticks dg2020_double2ticks( double time )
 
 	if ( fabs( ticks - lround( ticks ) ) > 1.0e-2 )
 	{
-		const char *t = T_strdup( dg2020_ptime( time ) );
+		char *t = T_strdup( dg2020_ptime( time ) );
 		eprint( FATAL, "%s:%ld: %s: Specified time of %s is not an integer "
 				"multiple of the pulser time base of %s.", Fname, Lc,
 				pulser_struct.name, t, dg2020_ptime( dg2020.timebase ) );
