@@ -241,8 +241,8 @@ void dg2020_set_pulses( FUNCTION *f )
 				 f->self != PULSER_CHANNEL_PHASE_2 );
 
 	/* Always set the very first bit to LOW state, see the rant about the bugs 
-	   in the pulser firmware at the start of dg2020_gpib.c. Then set the rest
-	   of the channels to off state. */
+	   in the pulser firmware at the start of dg2020_gpib_b.c. Then set the
+	   rest of the channels to off state. */
 
 	for ( i = 0; i < f->num_needed_channels; i++ )
 	{
