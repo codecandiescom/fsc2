@@ -7,14 +7,17 @@
 #define FSC2_GLOBAL
 
 
-
 /* make bool synonymous to unsigned char */
 
 typedef  unsigned char  bool;
 
 
-/* Defines the number of serial ports on the system */
+/* Define the name of fsc2's lock file */
 
+#define LOCKFILE "/tmp/fsc2.lock"
+
+
+/* Defines the number of serial ports on the system */
 
 #define NUM_SERIAL_PORTS 2
 
