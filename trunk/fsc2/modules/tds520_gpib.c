@@ -577,8 +577,10 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 	char reply[ 10 ];
 	long len = 10;
 	char *buffer;
+	char *b;
 	long i;
 	double scale, window;
+	long num_points, len1, len2;
 
 
 	assert( channel >= 0 && channel < TDS520_AUX1 );
@@ -636,40 +638,24 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 			tds520_gpib_failure( );
 	} while ( reply[ 0 ] == '1' ); 
 
+	/* Calculate how long the curve (with header) is going to be and allocate
+       enough memory (data are 2-byte integers) */
 
-	/* Ask digitizer to send the curve */
+	num_points =   ( w != NULL ? w->end_num : tds520.rec_len )
+		         - ( w != NULL ? w->start_num : 1 );
+	*length = 2 * num_points;
+	len2 = 1 + ( long ) floor( log10( *length ) );
+	len1 = 1 + ( long ) floor( log10( len2 ) );
+	*length += len1 + len2 + 2;
 
-	if ( gpib_write( tds520.device, "CURV?\n" ) == FAILURE )
-		tds520_gpib_failure( );
-
-	/* Read just the first two bytes, these are a '#' character plus the
-	   number of digits of the following number */
-
-	len = 2;
-	if ( gpib_read( tds520.device, reply, &len ) == FAILURE )
-		tds520_gpib_failure( );
-
-	/* Get the number of data bytes to follow */
-
-	len = ( long ) ( reply[ 1 ] - '0' );
-	if ( gpib_read( tds520.device, reply, &len ) == FAILURE )
-		tds520_gpib_failure( );
-
-	reply[ len ] = '\0';
-
-	/* The number of data bytes is twice the number of data points plus
-	   one byte for the line feed character */
-
-    len = T_atol( reply );
-	*length = len / 2;
-
-	*data = T_malloc( *length * sizeof( double ) );
-	buffer = T_malloc( len + 1 );
+	*data = T_malloc( num_points * sizeof( double ) );
+	buffer = T_malloc( *length );
+	b = buffer + len1 + len2;
 
 	/* Now get all the data bytes... */
 
-	len = len + 1;
-	if ( gpib_read( tds520.device, buffer, &len ) == FAILURE )
+	if ( gpib_write( tds520.device, "CURV?\n" ) == FAILURE ||
+		 gpib_read_w( tds520.device, buffer, length ) == FAILURE )
 	{
 		T_free( buffer );
 		T_free( *data );
@@ -684,8 +670,8 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	assert( sizeof( short ) == 2 );
 
-	for ( i = 0; i < *length; i++ )
-		*( *data + i ) = scale * ( double ) *( ( short * ) buffer + i );
+	for ( i = 0; i < num_points; i++ )
+		*( *data + i ) = scale * ( double ) *( ( short * ) b + i );
 
 	T_free( buffer );
 

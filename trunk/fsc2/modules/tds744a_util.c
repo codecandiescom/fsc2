@@ -230,7 +230,7 @@ void tds744a_do_pre_exp_checks( void )
 							   + tds744a.trig_pos * window )
 							 * TDS_POINTS_PER_DIV / tds744a.timebase ) + 1;
 
-		if ( w->end_num < w->start_num <= 0 )
+		if ( w->end_num - w->start_num <= 0 )
         {
 			eprint( FATAL, "%s: Window %ld has width of less than 1 point.\n",
 					DEVICE_NAME, w->num );

@@ -229,6 +229,13 @@ void tds754a_do_pre_exp_checks( void )
 		w->end_num = lround( ( w->start + w->width
 							   + tds754a.trig_pos * window )
 							 * TDS_POINTS_PER_DIV / tds754a.timebase ) + 1;
+
+		if ( w->end_num - w->start_num <= 0 )
+        {
+			eprint( FATAL, "%s: Window %ld has width of less than 1 point.\n",
+					DEVICE_NAME, w->num );
+			THROW( EXCEPTION );
+		}
     }
 
 	/* Now that all windows are properly set we switch on gated measurements */
