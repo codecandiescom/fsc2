@@ -792,10 +792,10 @@ Var *pulser_next_phase( Var *v )
 
 Var *pulser_reset( Var *v )
 {
-	vars_pop( pulser_pulse_reset( NULL ) );
 	if ( dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used ||
 		 dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used )
 		vars_pop( pulser_pulse_reset( NULL ) );
+	vars_pop( pulser_pulse_reset( NULL ) );
 
 	return vars_push( INT_VAR, 1 );
 }

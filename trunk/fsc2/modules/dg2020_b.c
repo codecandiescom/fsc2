@@ -1346,7 +1346,6 @@ Var *pulser_reset( Var *v )
 		THROW( EXCEPTION );
 	}
 
-
 	vars_pop( pulser_pulse_reset( NULL ) );
 	if ( dg2020_phs[ 0 ].function != NULL ||
 		 dg2020_phs[ 1 ].function != NULL )

@@ -101,6 +101,7 @@ pulser_channel_state, -1, ALL;  // switches pulser channel on/off
 pulser_update, 0, EXP;          // commits changes
 pulser_shift, -1, EXP;          // shift pulse positions
 pulser_increment, -1, EXP;      // change pulse lengths
+pulser_reset, 0, EXP;           // reset pulses and phases
 pulser_pulse_reset, -1, EXP;    // set back pulses to initial state
 pulser_next_phase, -1, EXP;     // switch to next phase in phase cycling
 pulser_phase_reset, -1, EXP;    // switch back to first phase

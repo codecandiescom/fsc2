@@ -49,6 +49,7 @@ Var *pulser_channel_state( Var *v );
 Var *pulser_update( Var *v );
 Var *pulser_shift( Var *v );
 Var *pulser_increment( Var *v );
+Var *pulser_reset( Var *v );
 Var *pulser_pulse_reset( Var *v );
 Var *pulser_lock_keyboard( Var *v );
 Var *pulser_stop_on_update( Var *v );
