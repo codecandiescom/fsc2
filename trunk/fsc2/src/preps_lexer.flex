@@ -70,11 +70,11 @@ OII         O(THER)?_?2:?
 OIII        O(THER)?_?3:?
 OIV         O(THER)?_?4:?
 
-INT         [+-]?[0-9]+
-EXPO        [EDed]{INT}
-FLOAT       ([+-]?((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?))|({INT}{EXPO})
+INT         [0-9]+
+EXPO        [EDed][+-]?{INT}
+FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
-P           P(ULSE)?_?[0-9]+
+P           P(ULSE)?_?{INT}
 
 F           F(UNC(TION)?)?
 S           S(TART)?
