@@ -34,7 +34,7 @@ close $fh;
 if ( system $Config{cc}, qw( -o fcntl_test fcntl_test.c ) ) {
 	unlink "fcntl_test.c";
 	die "Can't compile a program that uses fcntl(). Does your system " .
-		"really have a fcntl() system call?\n";
+		"really has a fcntl() system call?\n";
 }
 unlink "fcntl_test";
 unlink "fcntl_test.c";
