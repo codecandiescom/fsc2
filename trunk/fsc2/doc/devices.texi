@@ -260,7 +260,7 @@ channel 1
 channel 2
 @item 3
 amplitude of data from channel 1 and 2 in polar coordinates
-@item 3
+@item 4
 phase of data from channel 1 and 2 in polar coordinates
 @end table
 Finally, up to 4 arguments can be passed to the function with the
