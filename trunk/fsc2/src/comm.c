@@ -52,12 +52,6 @@ long reader( void *ret )
 			return 0;
 
 		case C_SHOW_CHOICES :                 /* only to be read by parent */
-			if ( I_am == CHILD )
-			{
-				fprintf( stderr, "CHILD4: In C_SHOW_CHOICES\n" );
-				return 0;
-			}
-
 			/* get number of buttons and number of default button */
 
 			pipe_read( pd[ READ ], &n1, sizeof( int ) );
@@ -213,7 +207,6 @@ void writer( int type, ... )
 
 	if ( I_am == CHILD )
 	{
-		fprintf( stderr, "CHILD2: do_send is %s.\n", do_send ? "SET" : "UNSET" );
 		while ( ! do_send )             /* wait for parent to become ready */
 			pause( );
 		do_send = UNSET;
