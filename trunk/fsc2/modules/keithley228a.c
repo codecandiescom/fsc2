@@ -22,7 +22,6 @@ static const char *lockins[ ] = { "sr510", "sr530", "sr810", "sr830", NULL };
 static       int dac_ports[ ] = { 6,       6,       4,       4      };
 
 
-//#define V_TO_A_FACTOR	      -97.5   /* Conversion factor of voltage at DAC */
 #define V_TO_A_FACTOR	      -96.35  /* Conversion factor of voltage at DAC */
 
 
