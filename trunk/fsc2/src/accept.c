@@ -623,6 +623,8 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 			recalc_XPoints_of_curve_2d( cv );
 	}
 
+	/* Update the cut window if necessary */
+
 	if ( need_cut_redraw )
 		cut_new_data_redraw( );
 

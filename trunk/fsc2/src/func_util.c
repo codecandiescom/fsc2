@@ -412,7 +412,7 @@ Var *f_init_1d( Var *v )
 	}
 
 	if ( G.nx <= 0 )
-		G.nx = DEFAULT_1D__X_POINTS;
+		G.nx = DEFAULT_1D_X_POINTS;
 
 	if ( ( v = v->next ) == NULL )
 		return vars_push( INT_VAR, 1 );

@@ -10,7 +10,7 @@
 #define MAX_CURVES  4
 
 
-#define DEFAULT_2D_X_POINTS  32
+#define DEFAULT_1D_X_POINTS  32
 
 #define DEFAULT_2D_X_POINTS  16
 #define DEFAULT_2D_Y_POINTS  16
