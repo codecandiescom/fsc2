@@ -233,6 +233,8 @@ sub analyze_var_options {
         $hr->{ value } = $res if defined $res;
     }
 
+
+
     ( $res, $str ) = get_string( $str, $hr );
     $hr->{ label } = defined $res ? $res : '""';
 
@@ -395,7 +397,8 @@ sub get_default_value {
                 "line $lino\n";
         }
     } elsif ( $hr->{ type } =~ /^button$/ ) {
-		return ( $val =~ /^on|1$/io, $str ) if $val =~ /^on|off|1|0$/io;
+		return ( $val =~ /^on|1$/io ? 1 : 0, $str )
+			if $val =~ /^on|off|1|0$/io;
 		die "Default value ($val) isn't a valid initializer for a button at " .
 			"line $lino\n";
 	} else {
