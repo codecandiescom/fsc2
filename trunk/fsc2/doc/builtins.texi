@@ -421,7 +421,6 @@ argument is a preset string that appears in the comment editor when it is
 opened - use "@code{\n}" to separate the lines of a multi-line text. The
 last argument is the label string to be shown on top of the editor - it
 defaults to "Please enter a comment:".
-@end table
 
 
 @item is_file()
@@ -429,6 +428,7 @@ defaults to "Please enter a comment:".
 @findex is_file()
 This function expects a file handle as returned by @code{get_file()} and
 checks if it is valid and if the associated file is open for writing.
+@end table
 
 
 @node Interaction functions, Mathematical functions, Output functions, Built-in Functions

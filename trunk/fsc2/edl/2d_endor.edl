@@ -101,7 +101,7 @@ max_time   = min_time + Rec_len * time_res;
 Pretrigger = int( 0.9 * trig_pos * Rec_len );
 change_scale( min_time * 1.0e-3, time_res * 1.0e-3);
 
-/* Get a file for storing all data and write experiments parameter */
+/* Get a file for storing all data and write out experiment parameter */
 
 F1 = get_file( "File for storing complete data sets:" );
 F2 = get_file( "File for storing averaged data sets:" );
