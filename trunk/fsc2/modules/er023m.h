@@ -35,6 +35,7 @@
    when the lock-in can't be accessed - these values must really be
    reasonable ! */
 
+#define ER023M_TEST_DATA          0.0
 #define ER023M_TEST_RG_INDEX      30        /* receiver gain 2.0e5 */
 #define ER023M_TEST_TC_INDEX      15        /* time constant ~ 300 ms */
 #define ER023M_TEST_PHASE         0
@@ -94,6 +95,7 @@ double mf_list[ MAX_MF_INDEX + 1 ];
 extern double mf_list[ MAX_MF_INDEX + 1 ];
 #endif
 
+
 /* Constants for dealing with the conversion time - we dont allow conversion
    times below 3.2 ms because we need to use "single mode" (where the signal
    channel only sends one ADC value when addressed as talker instead of a
@@ -133,6 +135,19 @@ extern double mf_list[ MAX_MF_INDEX + 1 ];
 #define UNDEF_RESONATOR       -1
 
 
+/* Constants for dealing with mode setting */
+
+#define SINGLE_MODE           0
+#define CONTINUOUS_MODE       1
+
+
+/* Constants for dealing with SRQ setting */
+
+#define SRQ_OFF               0
+#define SRQ_ON                1
+
+#define MAX_NB                3          /* maximum number of bytes that get
+											send for a ADC data point */
 
 
 typedef struct
@@ -163,6 +178,8 @@ typedef struct {
 
 	int nb;               /* number of bytes send from ADC */
 	                      /* recheck whenever CT changes */
+	double scale_factor;
+
 } ER023M;
 
 
@@ -180,6 +197,8 @@ int er023m_exp_hook( void );
 int er023m_end_of_exp_hook( void );
 void er023m_exit_hook( void );
 
+Var *lockin_name( Var *v );
+Var *lockin_get_data( Var *v );
 Var *lockin_sensitivity( Var *v );
 Var *lockin_time_constant( Var *v );
 Var *lockin_phase( Var *v );
@@ -198,6 +217,7 @@ Var *lockin_mf( Var *v );
 
 
 bool er023m_init( const char *name );
+unsigned int er023m_get_data( void );
 int er023m_get_rg( void );
 void er023m_set_rg( int rg_index );
 int er023m_get_tc( void );
@@ -216,4 +236,8 @@ int er023m_get_ha( void );
 void er023m_set_ha( int ha );
 int er023m_get_re( void );
 void er023m_set_re( int re );
+int er023m_get_nb( void );
+void er023m_mode( int mode );
+void er023m_srq( int on_off );
+unsigned char er023m_sb( void );
 void er023m_failure( void );

@@ -45,7 +45,7 @@ int er023m_init_hook( void )
 
 	need_GPIB = SET;
 
-	/* Reset several variables in the structure describing the device */
+	/* Device hasn't been assigned a GPIB number yet */
 
 	er023m.device = -1;
 
@@ -71,6 +71,15 @@ int er023m_init_hook( void )
 	for ( i = 1; i <= MAX_MF_INDEX; i++ )
 		mf_list[ i ] = 0.5 * mf_list[ i - 1 ];
 
+	/* Clear the calibration list */
+
+	for ( i = 0; i <= MAX_MF_INDEX; i++ )
+		er023m.calib[ i ].is_ph[ 0 ] = 
+			er023m.calib[ i ].is_ph[ 1 ] = 
+				er023m.calib[ i ].is_ma = UNSET;
+
+	/* Set several more variables in the structure describing the device */
+
 	er023m.rg_index = UNDEF_RG_INDEX;
 	er023m.tc_index = UNDEF_TC_INDEX;
 	er023m.phase    = UNDEF_PHASE;
@@ -81,14 +90,74 @@ int er023m_init_hook( void )
 	er023m.ct_mult  = UNDEF_CT_MULT;
 	er023m.re       = UNDEF_RESONATOR;
 
-	/* Clear the calibration list */
+	return 1;
+}
 
-	for ( i = 0; i <= MAX_MF_INDEX; i++ )
-		er023m.calib[ i ].is_ph[ 0 ] = 
-			er023m.calib[ i ].is_ph[ 1 ] = 
-				er023m.calib[ i ].is_ma = UNSET;
+
+/*--------------------------------------------------*/
+/* Start of experiment hook function for the module */
+/*--------------------------------------------------*/
+
+int er023m_exp_hook( void )
+{
+	/* Store the current state and initialize the lock-in */
+
+	memcpy( &er023m_store, &er023m, sizeof( ER023M ) );
+
+	if ( ! er023m_init( DEVICE_NAME ) )
+	{
+		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
+				DEVICE_NAME, gpib_error_msg );
+		THROW( EXCEPTION )
+	}
 
 	return 1;
+}
+
+
+/*------------------------------------------------*/
+/* End of experiment hook function for the module */
+/*------------------------------------------------*/
+
+int er023m_end_of_exp_hook( void )
+{
+	/* Switch lock-in back to local mode */
+
+	if ( er023m.device >= 0 )
+		gpib_local( er023m.device );
+
+	memcpy( &er023m, &er023m_store, sizeof( ER023M ) );
+	er023m.device = -1;
+
+	return 1;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *lockin_name( Var *v )
+{
+	v = v;
+	return vars_push( STR_VAR, DEVICE_NAME );
+}
+
+
+/*----------------------------------------------------------------------*/
+/* Function returns a lock-in data value, scaled to the interval [-1:1] */
+/*----------------------------------------------------------------------*/
+
+Var *lockin_get_data( Var *v )
+{
+	if ( v != NULL )
+		eprint( WARN, SET, "%s: Useless parameter%s in call of %s().\n",
+				DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+	if ( TEST_RUN )                  /* return dummy value in test run */
+		return vars_push( FLOAT_VAR, ER023M_TEST_DATA );
+	else
+		return vars_push( FLOAT_VAR, 
+						  er023m.scale_factor * er023m_get_data( ) - 1.0 );
 }
 
 
@@ -112,7 +181,7 @@ Var *lockin_sensitivity( Var *v )
 	{
 		if ( TEST_RUN )
 			return vars_push( FLOAT_VAR,
-							  rg_list[ er023m.rg_index == UNDEF_RG_INDEX ?
+						   rg_list[ er023m.rg_index == UNDEF_RG_INDEX ?
 									ER023M_TEST_RG_INDEX : er023m.rg_index ] );
 		else
 		{
