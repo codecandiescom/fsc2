@@ -57,7 +57,8 @@ inline float  f_min( float  a, float  b );
 inline double d_max( double a, double b );
 inline double d_min( double a, double b );
 
-inline long lround( double x );
+inline long lrnd( double x );
+inline int irnd( double x );
 
 
 #endif  /* ! UTIL_HEADER */

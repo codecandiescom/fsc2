@@ -333,7 +333,7 @@ Var *f_floor( Var *v )
 			if ( v->val.dval < LONG_MIN )
 				eprint( SEVERE, SET, "Integer overflow in function %s().\n",
 						Cur_Func );
-			return vars_push( INT_VAR, lround( floor( v->val.dval )  ) );
+			return vars_push( INT_VAR, lrnd( floor( v->val.dval )  ) );
 
 		default :
 			get_array_params( v, &len, &ilp, &idp );
@@ -349,7 +349,7 @@ Var *f_floor( Var *v )
 			if ( *idp < LONG_MIN )
 				eprint( SEVERE, SET, "Integer overflow in function %s().\n",
 						Cur_Func );
-			rlp[ i ] = lround( floor( *idp ) );
+			rlp[ i ] = lrnd( floor( *idp ) );
 		}
 
 		new_var = vars_push( INT_ARR, rlp, len );
@@ -387,7 +387,7 @@ Var *f_ceil( Var *v )
 			if ( v->val.dval > LONG_MAX )
 				eprint( SEVERE, SET, "Integer overflow in function %s().\n",
 						Cur_Func );
-			return vars_push( INT_VAR, lround( ceil( v->val.dval ) ) );
+			return vars_push( INT_VAR, lrnd( ceil( v->val.dval ) ) );
 
 		default :
 			get_array_params( v, &len, &ilp, &idp );
@@ -403,7 +403,7 @@ Var *f_ceil( Var *v )
 			if ( *idp < LONG_MIN )
 				eprint( SEVERE, SET, "Integer overflow in function %s().\n",
 						Cur_Func );
-			rlp[ i ] = lround( ceil( *idp ) );
+			rlp[ i ] = lrnd( ceil( *idp ) );
 		}
 
 		new_var = vars_push( INT_ARR, rlp, len );
@@ -1420,7 +1420,7 @@ Var *f_mean( Var *v )
 		{
 			eprint( WARN, SET, "Float value used as array index in "
 					"function %s().\n", Cur_Func );
-			a_index = lround( v->next->val.dval ) - ARRAY_OFFSET;
+			a_index = lrnd( v->next->val.dval ) - ARRAY_OFFSET;
 		}
 		else
 			a_index = v->next->val.lval - ARRAY_OFFSET;
@@ -1445,7 +1445,7 @@ Var *f_mean( Var *v )
 			{
 				eprint( WARN, SET, "Float value used as length of slice "
 						"parameter in function %s().\n", Cur_Func );
-				slice_len = lround( v->next->next->val.dval );
+				slice_len = lrnd( v->next->next->val.dval );
 			}
 			else
 				slice_len = v->next->next->val.lval;
@@ -1548,7 +1548,7 @@ Var *f_slice( Var *v )
 	{
 		eprint( WARN, SET, "Float value used as array index in function "
 				"%s().\n", Cur_Func );
-		a_index = lround( v->next->val.dval ) - ARRAY_OFFSET;
+		a_index = lrnd( v->next->val.dval ) - ARRAY_OFFSET;
 	}
 	else
 		a_index = v->next->val.lval - ARRAY_OFFSET;
@@ -1568,7 +1568,7 @@ Var *f_slice( Var *v )
 		{
 			eprint( WARN, SET, "Float value used as length of slice "
 					"parameter in function %s().\n", Cur_Func );
-			slice_len = lround( v->next->next->val.dval );
+			slice_len = lrnd( v->next->next->val.dval );
 		}
 		else
 			slice_len = v->next->next->val.lval;
@@ -1681,7 +1681,7 @@ Var *f_islice( Var *v )
 	{
 		eprint( SEVERE, SET, "Float value used as array size in function "
 				"%s().\n", Cur_Func );
-		size = lround( v->val.dval );
+		size = lrnd( v->val.dval );
 	}
 
 	array = T_calloc( size, sizeof( long ) );
@@ -1711,8 +1711,17 @@ Var *f_fslice( Var *v )
 	{
 		eprint( SEVERE, SET, "Float value used as array size in function "
 				"%s().\n", Cur_Func );
-		size = lround( v->val.dval );
+		size = lrnd( v->val.dval );
 	}
+
+	if ( size <= 0 )
+	{
+		if ( v->type == INT_VAR )
+			eprint( FATAL, SET, "Negative value (%d) used as array size in "
+					"function %s().\n", v->val.lval, Cur_Func );
+		else
+			eprint( FATAL, SET, "Negative value (%f) used as array size in "
+					"function %s().\n", v->val.dval, Cur_Func );
 
 	array = T_malloc( size * sizeof( double ) );
 	for( i = 0; i < size; i++ )
