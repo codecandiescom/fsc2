@@ -691,6 +691,7 @@ static bool change_y_range_2d( Canvas *c )
 	double cy1, cy2;
 	double new_s2d_y;
 
+
 	if ( abs( G.start[ Y ] - c->ppos[ Y ] ) <= 4 || G2.active_curve == -1 ||
 		 ! G2.curve_2d[ G2.active_curve ]->is_scale_set )
 		return UNSET;

@@ -43,9 +43,8 @@ static long pathmax = 0;
 void device_add( const char *name )
 {
 	Device_Name *dl;
-	static char *dev_name;
-	static char *real_name;         /* static because otherwise possibly
-									   clobbered by TRY (longjmp) */
+	char *dev_name;
+	char *real_name = NULL;
 	const char *search_name;
 	char *lib_name = NULL;
 	struct stat buf;
@@ -56,8 +55,10 @@ void device_add( const char *name )
 	char *ldc;
 
 
+	CLOBBER_PROTECT( dev_name );
+	CLOBBER_PROTECT( real_name );
+
 	dev_name = string_to_lower( T_strdup( name ) );
-	real_name = NULL;
 
 	/* First we've got to check if the name refers to a device driver that is
 	   a symbolic link to the 'real' device. If so get the real name by

@@ -914,7 +914,7 @@ int gpib_serial_poll( int device, unsigned char *stb )
 
 static void gpib_log_date( void )
 {
-    static char tc[ 26 ];
+    char tc[ 26 ];
 	struct timeb mt;
     time_t t;
 

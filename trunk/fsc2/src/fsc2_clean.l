@@ -90,7 +90,7 @@ static void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 static void unit_spec( char *text, int power );
 static char *T_strdup( const char *string );
 static void *T_malloc( size_t size );
- static void *T_realloc( void *ptr, size_t size );
+static void *T_realloc( void *ptr, size_t size );
 static void *T_free( void *ptr );
 static void lower_permissions( void );
 static ssize_t output( const char *fmt, ... );

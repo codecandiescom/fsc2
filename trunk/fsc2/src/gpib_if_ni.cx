@@ -911,7 +911,7 @@ int gpib_serial_poll( int device, unsigned char *stb )
 
 static void gpib_log_date( void )
 {
-    static char tc[ 26 ];
+    char tc[ 26 ];
 	struct timeb mt;
     time_t t;
 
@@ -1144,13 +1144,13 @@ static int *get_fd_list( void )
 {
 	DIR *dir;
 	struct dirent *de;
-	static int *fd_list;
-	static int num_fds;
+	int *fd_list = NULL;
+	int num_fds = 0;
 	char *dn;
 
 
-	fd_list = NULL;
-	num_fds = 0;
+	CLOBBER_PROTECT( fd_list );
+	CLOBBER_PROTECT( num_fds );
 
 	if ( ( dir = opendir( "/proc/self/fd" ) ) == NULL )
 		return NULL;

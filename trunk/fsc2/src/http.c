@@ -300,8 +300,10 @@ static void http_send_picture( int pd, int type )
 {
 	char filename[ ] = P_tmpdir "/fsc2.http.XXXXXX";
 	char reply[ 2 ];
-	static int tmp_fd = -1;
+	int tmp_fd = -1;
 
+
+	CLOBBER_PROTECT( tmp_fd );
 
 	reply[ 1 ] = '\n';
 

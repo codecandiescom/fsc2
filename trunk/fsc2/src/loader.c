@@ -639,8 +639,10 @@ void run_exp_hooks( void )
 
 void run_end_of_exp_hooks( void )
 {
-	static Device *cd;
+	Device *cd;
 
+
+	CLOBBER_PROTECT( cd );
 
 	/* Each of the end-of-experiment hooks must be run to get all instruments
 	   back into a usable state, even if the function fails for one of them.
@@ -690,8 +692,10 @@ void run_end_of_exp_hooks( void )
 
 void run_exit_hooks( void )
 {
-	static Device *cd;
+	Device *cd;
 
+
+	CLOBBER_PROTECT( cd );
 
 	if ( EDL.Device_List == NULL )
 		return;
