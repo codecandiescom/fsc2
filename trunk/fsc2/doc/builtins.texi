@@ -592,15 +592,15 @@ slider value is set to the next value still within the allowed range.
 @anchor{input_create}
 @item input_create()
 @findex input_create()
-Using iput fields numerical values can be set. There are two different
+Using input fields numerical values can be set. There are two different
 types of input fields, one, that will only accept integer values, while
 the other also allows input of floating point numbers. The first
-argument of the function @code{input_create} is the type of the input
-field. If the first argument is @code{"INT_INPUT"} the input field will
-only accept interger numbers, while with an argument of
-@code{"FLOAT_INPUT"} also floating point numbers can be
-entered. (@code{"INT_INPUT"} can be replaced by the numerical argument 0
-and @code{"FLOAT_INPUT"} by 1.)
+argument of the function for creating an input field,
+@code{input_create()}, is the type of the input field. If the first
+argument is @code{"INT_INPUT"} the input field will only accept interger
+numbers, while with an argument of @code{"FLOAT_INPUT"} also floating
+point numbers can be entered. (@code{"INT_INPUT"} can be replaced by the
+numerical argument 0 and @code{"FLOAT_INPUT"} by 1.)
 
 If the second argument is a number it is taken to be the initial value
 in the input field. If there is either no second argument or the second
