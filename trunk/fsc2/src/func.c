@@ -289,7 +289,6 @@ int func_exists( const char *name )
 
 Var *func_get( const char *name, int *acc )
 {
-	static const char *appendix;
 	char *sec_name;
 	Var *func_ptr;
 
@@ -300,21 +299,34 @@ Var *func_get( const char *name, int *acc )
 	   have no chance to figure out if they need to append a '#' plus the
 	   number of the device to the function name to get the correct
 	   function within the same module.
-	   Thus we check if the last call came from a device function that has
-	   a '#' appended to its name. If this is the case we try to figure out
-	   if a function with the name passed to us by the user exists in this
-	   module and then automatically append the same '#' plus device number,
-	   thus restricting the search to functions from within this module. */
 
-	if ( EDL.Call_Stack != NULL && EDL.Call_Stack->f->device != NULL &&
-		 strrchr( name, '#' ) == NULL &&
-		 ( appendix =  strrchr( EDL.Call_Stack->f->name, '#' ) ) != NULL )
+	   We can here figure out if this is needed and which number to append
+	   by checking the following:
+
+	   1. There's still a function call that has not yet returned in which
+	      case the call stack isn't empty.
+	   2. The function which is still running comes from a module - in thisa
+	      case the device member of the last call stack element isn't NULL.
+	   3. The function that's still running came from a device that's
+	      not the first of a set of devices with the same generic type in
+		  which case the dev_count member of the last call stack element is
+		  larger than 1.
+	   4. The functions name we got as the argument hasn't already a '#'
+	      appended to it.
+
+	   If now a function of the name passed to this function is found in
+	   the module from which the call is we append the '#' plus the device
+	   count number to the name of the function and use this adorned name
+	   as the name of the function the caller is really looking for. */
+
+	if ( EDL.Call_Stack != NULL && EDL.Call_Stack->device != NULL &&
+		 EDL.Call_Stack->dev_count > 1 && strrchr( name, '#' ) == NULL )
 	{
 		dlerror( );
-		dlsym( EDL.Call_Stack->f->device->driver.handle, name );
+		dlsym( EDL.Call_Stack->device->driver.handle, name );
 		if ( dlerror( ) == NULL )
 		{
-			sec_name = get_string( "%s%s", name, appendix );
+			sec_name = get_string( "%s#%d", name, EDL.Call_Stack->dev_count );
 			TRY
 			{
 				func_ptr = func_get_long( sec_name, acc, SET );
@@ -484,8 +496,9 @@ Var *func_call( Var *f )
 	/* Now call the function after storing some information about the
 	   function on the call stack */
 
-	if ( call_push( f->val.fnct,
-					f->val.fnct->device ? f->val.fnct->device->name : NULL )
+	if ( call_push( f->val.fnct, NULL,
+					f->val.fnct->device ? f->val.fnct->device->name : NULL,
+					f->val.fnct->device ? f->val.fnct->device->count : 0 )
 		 == NULL )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 
@@ -558,7 +571,8 @@ Var *func_call( Var *f )
 /* A return value of NULL means we're running out of memory.              */
 /*------------------------------------------------------------------------*/
 
-CALL_STACK *call_push( Func *f, const char *device_name )
+CALL_STACK *call_push( Func *f, Device *device, const char *device_name,
+					   int dev_count )
 {
 	const char *t;
 	static CALL_STACK *cs;
@@ -574,7 +588,12 @@ CALL_STACK *call_push( Func *f, const char *device_name )
 
 	cs->prev = EDL.Call_Stack;
 	cs->f = f;
+	if ( f != NULL )
+		cs->device = f->device;
+	else
+		cs->device = device;
 	cs->dev_name = device_name;
+	cs->dev_count = dev_count;
 
 	/* If this is a function for a pulser figure out the number of the pulser
 	   (there might be more than one pulser) */
