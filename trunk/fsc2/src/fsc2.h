@@ -63,8 +63,8 @@
 #include "ipc.h"
 #include "exceptions.h"
 #include "T.h"
-#include "util.h"
 #include "variables.h"
+#include "util.h"
 #include "vars_util.h"
 #include "func.h"                 /* load before "devices.h" */
 #include "devices.h"              /* load before "loader.h"  */
