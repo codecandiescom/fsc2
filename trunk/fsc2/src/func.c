@@ -74,12 +74,12 @@ Var *f_init_display( Var *v );
    functions from the loaded modules */
 
 
-int num_def_func;    /* number of built-in functions */
-int num_func;        /* number of built-in and listed functions */
-Func *fncts;         /* structure for list of functions */
+int Num_Def_Func;    /* number of built-in functions */
+int Num_Func;        /* number of built-in and listed functions */
+Func *Fncts;         /* structure for list of functions */
 
 
-Func def_fncts[ ] =              /* List of built-in functions */
+Func Def_Fncts[ ] =              /* List of built-in functions */
 {
 	{ "int",          f_int,           1, ACCESS_ALL_SECTIONS, 0 },
 	{ "float",        f_float,         1, ACCESS_ALL_SECTIONS, 0 },
@@ -117,11 +117,11 @@ bool functions_init( void )
 {
 	/* count number of built-in functions */
 
-	for ( num_def_func = 0; def_fncts[ num_def_func ].fnct != NULL;
-		  num_def_func++ )
+	for ( Num_Def_Func = 0; Def_Fncts[ Num_Def_Func ].fnct != NULL;
+		  Num_Def_Func++ )
 		;
 
-	num_func = num_def_func;
+	Num_Func = Num_Def_Func;
 
 	/* 1. Get new memory for the functions structures and copy the built in
 	      functions into it.
@@ -131,10 +131,10 @@ bool functions_init( void )
 
 	TRY
 	{
-		fncts = NULL;
-		fncts = T_malloc( ( num_def_func + 1 ) * sizeof( Func ) );
-		memcpy( fncts, def_fncts, ( num_def_func + 1 ) * sizeof( Func ) );
-		func_list_parse( &fncts, num_def_func, &num_func );
+		Fncts = NULL;
+		Fncts = T_malloc( ( Num_Def_Func + 1 ) * sizeof( Func ) );
+		memcpy( Fncts, Def_Fncts, ( Num_Def_Func + 1 ) * sizeof( Func ) );
+		func_list_parse( &Fncts, Num_Def_Func, &Num_Func );
    		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -156,16 +156,16 @@ void functions_exit( void )
 {
 	int i;
 
-	if ( fncts == NULL )
+	if ( Fncts == NULL )
 		return;
 
 	/* Get rid of the structures for the functions */
 
-	for ( i = num_def_func; i < num_func; i++ )
-		if ( fncts[ i ].name != NULL )
-			T_free( ( char * ) fncts[ i ].name );
-	T_free( fncts );
-	fncts = NULL;
+	for ( i = Num_Def_Func; i < Num_Func; i++ )
+		if ( Fncts[ i ].name != NULL )
+			T_free( ( char * ) Fncts[ i ].name );
+	T_free( Fncts );
+	Fncts = NULL;
 }
 
 
@@ -186,21 +186,21 @@ Var *func_get( const char *name, int *access )
 	   on the variable stack with a pointer to the actual function and the
 	   number of arguments. Also copy the functions name and access flag. */
 
-	for ( i = 0; i < num_func; i++ )
+	for ( i = 0; i < Num_Func; i++ )
 	{
-		if ( fncts[ i ].name != NULL && ! strcmp( fncts[ i ].name, name ) )
+		if ( Fncts[ i ].name != NULL && ! strcmp( Fncts[ i ].name, name ) )
 		{
-			if ( fncts[ i ].fnct == NULL )
+			if ( Fncts[ i ].fnct == NULL )
 			{
 				eprint( FATAL, "%s:%ld: Function `%s' has not (yet) been "
-                        "loaded.\n", Fname, Lc, fncts[ i ].name );
+                        "loaded.\n", Fname, Lc, Fncts[ i ].name );
 				THROW( EXCEPTION );
 			}
 						
-			ret = vars_push( FUNC, fncts[ i ].fnct );
+			ret = vars_push( FUNC, Fncts[ i ].fnct );
 			ret->name = get_string_copy( name );
-			ret->dim = fncts[ i ].nargs;
-			*access = fncts[ i ].access_flag;
+			ret->dim = Fncts[ i ].nargs;
+			*access = Fncts[ i ].access_flag;
 			return ret;
 		}
 	}
@@ -232,11 +232,11 @@ Var *func_call( Var *f )
 		THROW( EXCEPTION );
 	}
 
-	for ( i = 0; i < num_func; i++ )
-		if ( fncts[ i ].fnct == f->val.fnct )
+	for ( i = 0; i < Num_Func; i++ )
+		if ( Fncts[ i ].fnct == f->val.fnct )
 			break;
 	
-	if ( i == num_func )
+	if ( i == Num_Func )
 	{
 		eprint( FATAL, "%s:%ld: Variable passed to `func_call()' is not "
 				"a valid function.\n", Fname, Lc );

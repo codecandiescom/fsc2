@@ -580,6 +580,12 @@ void run_child( void )
 	/* Send parent process a NEW_DATA signal thus indicationg that the child
 	   process is done with all preparations and ready to start the
 	   experiment. Wait for reply by parent process (i.e. a DO_SEND signal). */
+/*
+{
+	int h = 1;
+	while ( h );
+}
+*/
 
 	kill( getppid( ), NEW_DATA );
 	while ( ! do_send )

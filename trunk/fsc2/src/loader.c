@@ -9,15 +9,15 @@
 
 /* Variables imported from func.c */
 
-extern int num_def_func;    /* number of built-in functions */
-extern int num_func;        /* number of built-in and listed functions */
-extern Func *fncts;         /* structure for list of functions */
-extern Func def_fncts[ ];   /* structures for list of built-in functions */
+extern int Num_Def_Func;    /* number of built-in functions */
+extern int Num_Func;        /* number of built-in and listed functions */
+extern Func *Fncts;         /* structure for list of functions */
+extern Func Def_Fncts[ ];   /* structures for list of built-in functions */
 
 
 
 /*------------------------------------------------------------------------*/
-/* Function to be called after the DEVICES section is read in: It links   */
+/* Function to be called after the DEVICES section is read in. It links   */
 /* the library files and tries to resolve the references to the functions */
 /* listed in `Functions' and stores pointers to the functions in `Fncts'. */
 /*------------------------------------------------------------------------*/
@@ -77,10 +77,10 @@ bool exist_function( const char *name )
 	int i;
 
 
-	for ( i = 0; i < num_func; i++ )
-		if ( fncts[ i ].name != NULL &&
-			 ! strcmp( fncts[ i ].name, name ) &&
-			 fncts[ i ].fnct != NULL )			 
+	for ( i = 0; i < Num_Func; i++ )
+		if ( Fncts[ i ].name != NULL &&
+			 ! strcmp( Fncts[ i ].name, name ) &&
+			 Fncts[ i ].fnct != NULL )			 
 			return OK;
 
 	return FAIL;
@@ -172,14 +172,14 @@ void load_functions( Device *dev )
 
 	eprint( NO_ERROR, "Loading functions from module `%s.so'.\n", dev->name );
 
-	for ( num = 0; num < num_func; num++ )
+	for ( num = 0; num < Num_Func; num++ )
 	{
 		/* Don't try to load functions that are not listed in `Functions' */
 
-		if ( ! fncts[ num ].to_be_loaded )
+		if ( ! Fncts[ num ].to_be_loaded )
 			continue;
 
-		cur = dlsym( dev->driver.handle, fncts[ num ].name );
+		cur = dlsym( dev->driver.handle, Fncts[ num ].name );
 
 		if ( dlerror( ) != NULL )     /* function not found in library ? */
 			continue;
@@ -187,33 +187,33 @@ void load_functions( Device *dev )
 		/* Utter strong warning and don't load if function would overload
 		   an already loaded (i.e. non-built-in) function */
 
-		if ( num >= num_def_func && fncts[ num ].fnct != NULL )
+		if ( num >= Num_Def_Func && Fncts[ num ].fnct != NULL )
 		{
 			eprint( SEVERE, " Function `%s()' found in module `%s.so' has "
-					"already been loaded'.\n", fncts[ num ].name, dev->name );
+					"already been loaded'.\n", Fncts[ num ].name, dev->name );
 			continue;
 		}
 
 		/* Allow overloading of built-in functions - but only once, next time
 		   just print severe warning and do nothing */
 
-		if ( num < num_def_func && fncts[ num ].fnct != NULL )
+		if ( num < Num_Def_Func && Fncts[ num ].fnct != NULL )
 		{
-			if ( fncts[ num ].fnct != def_fncts[ num ].fnct )
+			if ( Fncts[ num ].fnct != Def_Fncts[ num ].fnct )
 			{
 				eprint( SEVERE, "  Built-in function `%s()' found in module "
 						"`%s.so' has already been overloaded.\n",
-						fncts[ num ].name, dev->name );
+						Fncts[ num ].name, dev->name );
 				continue;
 			}
 
 			eprint( NO_ERROR, "  Overloading built-in function `%s()' from "
-					"module `%s.so'.\n", fncts[ num ].name, dev->name );
+					"module `%s.so'.\n", Fncts[ num ].name, dev->name );
 		}
 		else
 			eprint( NO_ERROR, "  Loading function `%s()'.\n",
-					fncts[ num ].name );
-		fncts[ num ].fnct = cur;
+					Fncts[ num ].name );
+		Fncts[ num ].fnct = cur;
 	}
 }
 
