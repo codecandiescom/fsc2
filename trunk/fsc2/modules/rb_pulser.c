@@ -246,7 +246,7 @@ int rb_pulser_exp_hook( void )
 
 	/* Now we have to tell the pulser about all the pulses */
 
-	rb_pulser_do_update_pulses( );
+	rb_pulser_do_update( );
 
 	rb_pulser_run( rb_pulser.is_running );
 
