@@ -70,7 +70,4 @@ ifeq ($(RULBUS_EPP_KERNEL_SOURCE),)
 endif
 
 clean:
-	$(RM) $(RMFLAGS) *~
-
-clean:
 	$(RM) $(RMFLAGS) *.o *~
