@@ -3597,6 +3597,11 @@ static void T_fprintf( int file_num, const char *fmt, ... )
     show_message( mess );
 	T_free( mess );
 
+	/* Get a new file name, make user confirm it if he either selected no file
+	   at all or a file that already exists (exception: if the file was
+	   selected to which we were already writing, we assume that the user
+	   deleted some stuff on the disk in between) */
+
 get_repl_retry:
 
 	new_name = get_string_copy( show_fselector( "Replacement file:", NULL,
@@ -3638,6 +3643,8 @@ get_repl_retry:
 		new_name = NULL;
 		goto get_repl_retry;
 	}
+
+	/* Try to open new file */
 
 	new_fp = NULL;
 	if ( ( old_stat.st_dev != new_stat.st_dev ||
@@ -3730,11 +3737,15 @@ get_repl_retry:
 		File_List[ file_num ].fp = new_fp;
 	}
 
+	/* Finally also write the string that failed to be written */
+
 	if ( fprintf( File_List[ file_num ].fp, "%s", p ) == n )
 	{
 		T_free( p );
 		return;
 	}
+
+	/* Ooops, also failed to write to new file */
 
 	mess = get_string( strlen( "Can't write to (replacement) file" )
 					   + strlen( File_List[ file_num ].name )
