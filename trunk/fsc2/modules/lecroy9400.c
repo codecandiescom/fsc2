@@ -492,7 +492,6 @@ Var *digitizer_averaging( Var *v )
 	/* Get the channel to use for averaging */
 
 	vars_check( v, INT_VAR );
-
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
 											v->val.lval );
 
@@ -514,7 +513,6 @@ Var *digitizer_averaging( Var *v )
 	}
 
 	vars_check( v, INT_VAR );
-
 	source_ch = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
 											  v->val.lval );
 
@@ -745,6 +743,10 @@ Var *digitizer_record_length( Var *v )
 				Channel_Names[ LECROY9400_FUNC_F ] );
 		THROW( EXCEPTION )
 	}
+
+	if ( FSC2_MODE == TEST &&
+		 lecroy9400.rec_len[ channel ] == UNDEFINED_REC_LEN )
+		return vars_push( INT_VAR, LECROY9400_TEST_REC_LEN );
 
 	return vars_push( INT_VAR, lecroy9400.rec_len[ channel ] );
 }
