@@ -274,6 +274,7 @@ daq_reserve_adc, -1, ALL;
 daq_set_voltage, -1, ALL;
 daq_get_voltage, -1, ALL;
 daq_dac_parameter, -1, ALL;
+daq_ao_channel_setup, -1, EXP;
 
 daq_ai_channel_setup, -1, EXP;
 daq_ai_acq_setup, -1, EXP;
@@ -289,13 +290,13 @@ daq_stop_counter, 1, EXP;
 daq_single_pulse, 2, EXP;
 daq_continuous_pulses, -1, EXP;
 
-daq_ao_channel_setup, -1, EXP;
-
-daq_freq_out, -1, EXP;
-daq_trigger_setup, -1, EXP;
-
+daq_reserve_dio, -1, ALL;
 daq_dio_read, 1, EXP;
 daq_dio_write, -1, EXP;
+
+daq_reserve_freq_out, -1, ALL;
+daq_freq_out, -1, EXP;
+daq_trigger_setup, -1, EXP;
 
 
 /* Functions exported by event counters (NatInst 6601) */
@@ -378,3 +379,8 @@ mw_attenuator_name, 0, ALL;
 mw_attenuator_load_calibration, -1, PREP;
 mw_attenuator_initial_attenuation, 1, ALL;;
 mw_attenuator_attenuation, -1, EXP;
+
+
+/* Function exported by the chopper module (gg_chopper)
+
+chopper_rotation_frequency, -1, ALL;
