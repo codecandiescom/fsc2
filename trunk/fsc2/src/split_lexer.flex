@@ -152,6 +152,8 @@ bool split( char *file )
 
 	splitin = popen( cmd, "r" );
 
+	if ( Fname != NULL )
+		T_free( Fname );
 	Fname = NULL;
 
 	/* now try to parse the cleaned up contents */
@@ -159,6 +161,7 @@ bool split( char *file )
 	split_error = splitlex( );
 
 	pclose( splitin );
+	T_free( cmd );
 
 	return split_error;
 }

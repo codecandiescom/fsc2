@@ -21,6 +21,11 @@
 #define FSC2_MAIN
 #include "fsc2.h"
 
+#if defined MDEBUG
+#include <mcheck.h>
+#endif
+
+
 #define MAX_INCLUDE_DEPTH  16
 
 
@@ -28,7 +33,7 @@ int yylex( void );
 
 void include_handler( char *file );
 void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
-			 FILE *primary_fp, FILE **fp, int *incl_depth, char *fname );
+			 FILE *primary_fp, FILE **fp, int *incl_depth );
 void time_spec( char *text, long len, const char *unit );
 
 
@@ -91,9 +96,6 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 		/*---------------*/
 %%		/*     RULES     */
 		/*---------------*/
-
-
-
 
 
 			/* handling of string constants (use only in print() function) */
@@ -294,6 +296,10 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 
 int main( int argc, char *argv[ ] )
 {
+#if defined MDEBUG
+	mcheck( NULL );
+#endif
+
 	/* complain if no file name was passed */
 
 	if ( argc < 2 )
@@ -314,7 +320,7 @@ int main( int argc, char *argv[ ] )
 	/* set the global variables and output name of input file */
 
 	printf( "\x01\n%s\n", argv[ 1 ] );
-	Fname = argv[ 1 ];
+	Fname = get_string_copy( argv[ 1 ] );
 	Lc = 1;
 	Eol = SET;
 
@@ -390,16 +396,17 @@ void include_handler( char *file )
 
 		if ( file[ 0 ] == '"' )
 		{
+
+			*( file + strlen( file ) - 1 ) = '\0';
 			incl_file = get_string_copy( file + 1 );
-			*( incl_file + strlen( incl_file ) - 1 ) = '\0';
 		}
 		else
 		{
+			*( file + strlen( file ) - 1 ) = '\0';
 			incl_file = get_string( strlen( file ) + strlen( DEF_INCL_DIR ) );
 			strcpy( incl_file, DEF_INCL_DIR );
 			strcat( incl_file, "/" );
 			strcat( incl_file, file + 1 );
-			*( incl_file + strlen( incl_file ) - 1 ) = '\0';
 		}
 
 		/* the same holds for the case that the file can't be opened. */
@@ -424,7 +431,7 @@ void include_handler( char *file )
 		   set them for the new file to be included and write the new file's
 		   name into the output file... */
 
-		fname[ incl_depth ] = get_string_copy( Fname );
+		fname[ incl_depth ] = Fname;
 		lc[ incl_depth ] = Lc;
 		eol_state[ incl_depth ] = Eol;
 		Fname = incl_file;
@@ -446,15 +453,18 @@ void include_handler( char *file )
 		   (and also restore the it's name, line number and EOL state) */
 
 		if ( incl_depth == -1 )
+		{
+			T_free( Fname );
+			fclose( yyin );
 			exit( EXIT_SUCCESS );
+		}
 		else
 		{
-			free( Fname );
+			T_free( Fname );
 			Fname = fname[ incl_depth ];
 			Lc = lc[ incl_depth ];
 			Eol = eol_state[ incl_depth ];
-			xclose( primary_buf, buf_state, primary_fp, fp,
-					&incl_depth, fname[ incl_depth ] );
+			xclose( primary_buf, buf_state, primary_fp, fp, &incl_depth );
 			printf( "\x01\n%s\n", Fname );
 		}
 	}
@@ -462,7 +472,7 @@ void include_handler( char *file )
 
 
 void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
-			 FILE *primary_fp, FILE **fp, int *incl_depth, char *fname )
+			 FILE *primary_fp, FILE **fp, int *incl_depth )
 {
 	if ( *incl_depth > 0 )
 	{
@@ -470,7 +480,6 @@ void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 		yyin = fp[ *incl_depth - 1 ];
 		fclose( fp[ *incl_depth ] );
 		yy_delete_buffer( buf_state[ *incl_depth ] );
-		free( fname );
 	}
 	else
 	{
