@@ -67,6 +67,10 @@ library supports cards from other companies than National Instruments. You
 may also compile fsc2 without having a GPIB library, but then devices
 controlled via the GPIB bus can't be used for obvious reasons.
 
+Please make sure that the GPIB library you want to use is already compiled
+and installed before trying to compile fsc2 (unless you don't need GPIB
+support built into fsc2).
+
 
 B) Permissions
 ==============
