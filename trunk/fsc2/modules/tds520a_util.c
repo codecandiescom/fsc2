@@ -138,7 +138,7 @@ void tds520a_do_pre_exp_checks( void )
 	for ( w = tds520a.w; w != NULL; w = w->next )
 	{
 		dcs = w->start;
-		dtb = tds520.timebase;
+		dtb = tds520a.timebase;
 		fac = 1.0;
 
 		while ( fabs( dcs ) < 1.0 || fabs( dtb ) < 1.0 )
@@ -156,7 +156,7 @@ void tds520a_do_pre_exp_checks( void )
 			dcs = cs * fac / TDS_POINTS_PER_DIV;
 			eprint( WARN, "%s: Start point of window %ld had to be readjusted "
 					"from %s to %s.\n", DEVICE_NAME, w->num,
-					tds754a_ptime( w->start ), tds520_ptime( dcs ) );
+					tds520a_ptime( w->start ), tds520a_ptime( dcs ) );
 			w->start = dcs;
 		}
 
