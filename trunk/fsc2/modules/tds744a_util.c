@@ -207,18 +207,18 @@ static void tds744a_window_check_1( bool *is_start, bool *is_width )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* It's not possible to set arbitrary cursor positions and distances - */
-/* they've got to be multiples of the smallest time resolution of the  */
-/* digitizer, which is the time base divided by TDS_POINTS_PER_DIV.    */
-/* Rhe function tests if the requested cursor position and distance    */
-/* fit this requirement and if not the values are readjusted. While    */
-/* settings for the position and width of the window not being exact   */
-/* multiples of the resultion are probably no serious errors a window  */
-/* width of less than the resolution is a hint for a real problem. And */
-/* while we're at it we also try to find out if all window widths are  */
-/* equal - than we can use tracking cursors.                           */
-/*---------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* It's not possible to set arbitrary cursor positions and distances -  */
+/* they've got to be multiples of the smallest time resolution of the   */
+/* digitizer, which is the time base divided by TDS744A_POINTS_PER_DIV. */
+/* Rhe function tests if the requested cursor position and distance     */
+/* fit this requirement and if not the values are readjusted. While     */
+/* settings for the position and width of the window not being exact    */
+/* multiples of the resultion are probably no serious errors a window   */
+/* width of less than the resolution is a hint for a real problem. And  */
+/* while we're at it we also try to find out if all window widths are   */
+/* equal - than we can use tracking cursors.                            */
+/*----------------------------------------------------------------------*/
 
 static void tds744a_window_check_2( void )
 {
@@ -243,13 +243,13 @@ static void tds744a_window_check_2( void )
 			dtb *= 1000.0;
 			fac *= 0.001;
 		}
-		cs = lrnd( TDS_POINTS_PER_DIV * dcs );
+		cs = lrnd( TDS744A_POINTS_PER_DIV * dcs );
 		tb = lrnd( dtb );
 
 		if ( cs % tb )        /* window start not multiple of a point ? */
 		{
 			cs = ( cs / tb ) * tb;
-			dcs = cs * fac / TDS_POINTS_PER_DIV;
+			dcs = cs * fac / TDS744A_POINTS_PER_DIV;
 			buffer = T_strdup( tds744a_ptime( dcs ) );
 			eprint( WARN, UNSET, "%s: Start point of window %ld had to be "
 					"readjusted from %s to %s.\n", DEVICE_NAME, w->num,
@@ -268,12 +268,12 @@ static void tds744a_window_check_2( void )
 			dtb *= 1000.0;
 			fac *= 0.001;
 		}
-		cd = lrnd( TDS_POINTS_PER_DIV * dcd );
+		cd = lrnd( TDS744A_POINTS_PER_DIV * dcd );
 		tb = lrnd( dtb );
 
 		if ( labs( cd ) < tb )     /* window smaller than one point ? */
 		{
-			dcd = tds744a.timebase / TDS_POINTS_PER_DIV;
+			dcd = tds744a.timebase / TDS744A_POINTS_PER_DIV;
 			buffer = T_strdup( tds744a_ptime( dcd ) );
 			eprint( SEVERE, UNSET, "%s: Width of window %ld had to be "
 					"readjusted from %s to %s.\n", DEVICE_NAME, w->num,
@@ -284,7 +284,7 @@ static void tds744a_window_check_2( void )
 		else if ( cd % tb )        /* window width not multiple of a point ? */
 		{
 			cd = ( cd / tb ) * tb;
-			dcd = cd * fac / TDS_POINTS_PER_DIV;
+			dcd = cd * fac / TDS744A_POINTS_PER_DIV;
 			buffer = T_strdup( tds744a_ptime( dcd ) );
 			eprint( WARN, UNSET, "%s: Width of window %ld had to be "
 					"readjusted from %s to %s.\n", DEVICE_NAME, w->num,
@@ -313,7 +313,7 @@ static void tds744a_window_check_3( void )
     double window;
 
 
-    window = tds744a.timebase * tds744a.rec_len / TDS_POINTS_PER_DIV;
+    window = tds744a.timebase * tds744a.rec_len / TDS744A_POINTS_PER_DIV;
 
     for ( w = tds744a.w; w != NULL; w = w->next )
     {
@@ -330,10 +330,10 @@ static void tds744a_window_check_3( void )
 		/* Take care: Numbers start from 1 ! */
 
 		w->start_num = lrnd( ( w->start + tds744a.trig_pos * window )
-							 * TDS_POINTS_PER_DIV / tds744a.timebase ) + 1;
+							 * TDS744A_POINTS_PER_DIV / tds744a.timebase ) + 1;
 		w->end_num = lrnd( ( w->start + w->width
 							 + tds744a.trig_pos * window )
-						   * TDS_POINTS_PER_DIV / tds744a.timebase ) + 1;
+						   * TDS744A_POINTS_PER_DIV / tds744a.timebase ) + 1;
 
 		if ( w->end_num - w->start_num <= 0 )
         {

@@ -44,7 +44,7 @@
 
 
 
-#define TDS_POINTS_PER_DIV 50
+#define TDS540_POINTS_PER_DIV 50
 
 #define MAX_CHANNELS  13         /* number of channel names */
 
@@ -140,6 +140,7 @@ void tds540_exit_hook( void );
 Var *digitizer_name( Var *v );
 Var *digitizer_define_window( Var *v );
 Var *digitizer_timebase( Var *v );
+Var *digitizer_time_per_point( Var *v );
 Var *digitizer_sensitivity( Var *v );
 Var *digitizer_num_averages( Var *v );
 Var *digitizer_record_length( Var *v );

@@ -138,6 +138,7 @@ void tds520a_exit_hook( void );
 Var *digitizer_name( Var *v );
 Var *digitizer_define_window( Var *v );
 Var *digitizer_timebase( Var *v );
+Var *digitizer_time_per_point( Var *v );
 Var *digitizer_sensitivity( Var *v );
 Var *digitizer_num_averages( Var *v );
 Var *digitizer_record_length( Var *v );

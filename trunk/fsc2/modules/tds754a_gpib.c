@@ -835,7 +835,7 @@ static double tds754a_get_area_wo_cursor( int channel, WINDOW *w )
 
 	/* Return the integrated area, multiplied by the the time per point */
 
-	return ( area - length * pos ) * tds754a.timebase / TDS_POINTS_PER_DIV;
+	return ( area - length * pos ) * tds754a.timebase / TDS754A_POINTS_PER_DIV;
 }
 
 

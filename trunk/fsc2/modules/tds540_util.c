@@ -210,7 +210,7 @@ static void tds540_window_check_1( bool *is_start, bool *is_width )
 /*---------------------------------------------------------------------*/
 /* It's not possible to set arbitrary cursor positions and distances - */
 /* they've got to be multiples of the smallest time resolution of the  */
-/* digitizer, which is the time base divided by TDS_POINTS_PER_DIV.    */
+/* digitizer, which is the time base divided by TDS540_POINTS_PER_DIV. */
 /* Rhe function tests if the requested cursor position and distance    */
 /* fit this requirement and if not the values are readjusted. While    */
 /* settings for the position and width of the window not being exact   */
@@ -243,13 +243,13 @@ static void tds540_window_check_2( void )
 			dtb *= 1000.0;
 			fac *= 0.001;
 		}
-		cs = lrnd( TDS_POINTS_PER_DIV * dcs );
+		cs = lrnd( TDS540_POINTS_PER_DIV * dcs );
 		tb = lrnd( dtb );
 
 		if ( cs % tb )        /* window start not multiple of a point ? */
 		{
 			cs = ( cs / tb ) * tb;
-			dcs = cs * fac / TDS_POINTS_PER_DIV;
+			dcs = cs * fac / TDS540_POINTS_PER_DIV;
 			buffer = T_strdup( tds540_ptime( dcs ) );
 			eprint( WARN, UNSET, "%s: Start point of window %ld had to be "
 					"readjusted from %s to %s.\n", DEVICE_NAME, w->num,
@@ -268,12 +268,12 @@ static void tds540_window_check_2( void )
 			dtb *= 1000.0;
 			fac *= 0.001;
 		}
-		cd = lrnd( TDS_POINTS_PER_DIV * dcd );
+		cd = lrnd( TDS540_POINTS_PER_DIV * dcd );
 		tb = lrnd( dtb );
 
 		if ( labs( cd ) < tb )     /* window smaller than one point ? */
 		{
-			dcd = tds540.timebase / TDS_POINTS_PER_DIV;
+			dcd = tds540.timebase / TDS540_POINTS_PER_DIV;
 			buffer = T_strdup( tds540_ptime( dcd ) );
 			eprint( SEVERE, UNSET, "%s: Width of window %ld had to be "
 					"readjusted from %s to %s.\n", DEVICE_NAME, w->num,
@@ -284,7 +284,7 @@ static void tds540_window_check_2( void )
 		else if ( cd % tb )        /* window width not multiple of a point ? */
 		{
 			cd = ( cd / tb ) * tb;
-			dcd = cd * fac / TDS_POINTS_PER_DIV;
+			dcd = cd * fac / TDS540_POINTS_PER_DIV;
 			buffer = T_strdup( tds540_ptime( dcd ) );
 			eprint( WARN, UNSET, "%s: Width of window %ld had to be "
 					"readjusted from %s to %s.\n", DEVICE_NAME, w->num,
@@ -314,7 +314,7 @@ static void tds540_window_check_3( void )
     double window;
 
 
-    window = tds540.timebase * tds540.rec_len / TDS_POINTS_PER_DIV;
+    window = tds540.timebase * tds540.rec_len / TDS540_POINTS_PER_DIV;
 
     for ( w = tds540.w; w != NULL; w = w->next )
     {
@@ -331,10 +331,10 @@ static void tds540_window_check_3( void )
 		/* Take care: Numbers start from 1 ! */
 
 		w->start_num = lrnd( ( w->start + tds540.trig_pos * window )
-							 * TDS_POINTS_PER_DIV / tds540.timebase ) + 1;
+							 * TDS540_POINTS_PER_DIV / tds540.timebase ) + 1;
 		w->end_num = lrnd( ( w->start + w->width
 							 + tds540.trig_pos * window )
-						   * TDS_POINTS_PER_DIV / tds540.timebase ) + 1;
+						   * TDS540_POINTS_PER_DIV / tds540.timebase ) + 1;
 
 		if ( w->end_num - w->start_num <= 0 )
         {

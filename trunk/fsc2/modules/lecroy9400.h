@@ -40,10 +40,10 @@
 #define LECROY9400_TEST_NUM_AVG      10
 #define LECROY9400_TEST_TRIG_POS     0.1
 #define LECROY9400_TEST_TRIG_CHANNEL 0
+#define LECROY9400_TEST_REC_LEN      2000
 
 
 #define MAX_CHANNELS       9         /* number of channel names */
-#define DEFAULT_REC_LEN    1250
 #define MAX_USED_CHANNELS  4
 
 
@@ -88,6 +88,8 @@
 #define TRG_CPL_DC         1
 #define TRG_CPL_LF_REJ     2
 #define TRG_CPL_HF_REJ     3
+
+#define UNDEFINED_REC_LEN  -1
 
 #define MAX_DESC_LEN       160
 
@@ -190,6 +192,7 @@ void lecroy9400_exit_hook( void );
 Var *digitizer_name( Var *v );
 Var *digitizer_define_window( Var *v );
 Var *digitizer_timebase( Var *v );
+Var *digitizer_time_per_point( Var *v );
 Var *digitizer_sensitivity( Var *v );
 Var *digitizer_averaging( Var *v );
 Var *digitizer_num_averages( Var *v );
@@ -231,7 +234,7 @@ bool lecroy9400_get_desc( int channel );
 double lecroy9400_get_trigger_pos( void );
 bool lecroy9400_set_trigger_pos( double position );
 void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
-								  long rec_len, bool reject );
+								  bool reject, long rec_len );
 void lecroy9400_finished( void );
 void lecroy9400_start_acquisition( void );
 void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
@@ -262,6 +265,15 @@ double tb[ 21 ] = {                      50.0e-9,
 					  1.0e-3,   2.0e-3,   5.0e-3,
 					 10.0e-3,  20.0e-3,  50.0e-3,
 					100.0e-3, 200.0e-3 };
+
+double tpp[ 21 ] = {                      10.0e-9,
+					  10.0e-9,  10.0e-9,  10.0e-9,
+					  10.0e-9,  10.0e-9,  10.0e-9,
+					  10.0e-9,  10.0e-9,  20.0e-9,
+					  40.0e-9,  80.0e-9, 200.0e-9,
+					 400.0e-9, 800.0e-9,   2.0e-6,
+					   4.0e-6,   8.0e-6,  20.0e-6,
+					  40.0e-6,  80.0e-6 };
 
 /* List of the corresponding sample rates, i.e. the time/point */
 
@@ -299,10 +311,11 @@ extern const char *Channel_Names[ 9 ];
 
 extern double sset[ 10 ];
 extern double tb[ 21 ];
+extern double tpp[ 21 ];
 extern double sr[ 21 ];
 extern int ppd[ 21 ];
 extern long na[ 16 ];
-extern long ca[ 10 ];
+extern long cl[ 10 ];
 
 extern bool lecroy9400_IN_SETUP;
 
