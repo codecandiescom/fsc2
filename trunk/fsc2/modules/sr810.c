@@ -91,7 +91,7 @@ static bool sr810_init( const char *name );
 static double sr810_get_data( void );
 static void sr810_get_xy_data( double data[ 2 ] );
 static double sr810_get_adc_data( long channel );
-static void sr810_set_dac_data( long channel, double voltage );
+static double sr810_set_dac_data( long channel, double voltage );
 static double sr810_get_sens( void );
 static void sr810_set_sens( int Sens );
 static double sr810_get_tc( void );
@@ -918,7 +918,7 @@ static double sr810_get_adc_data( long channel )
 /* -> Voltage to be set (-10.5 V - +10.5 V)                     */
 /*-------------------------- -----------------------------------*/
 
-static void sr810_set_dac_data( long port, double voltage )
+static double sr810_set_dac_data( long port, double voltage )
 {
 	char buffer [ 40 ] = "AUXV ";
 
@@ -933,6 +933,8 @@ static void sr810_set_dac_data( long port, double voltage )
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
+
+	return voltage;
 }
 
 /*-----------------------------------------------------------------------*/
