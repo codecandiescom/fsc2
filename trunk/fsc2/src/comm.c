@@ -755,6 +755,7 @@ long reader( void *ret )
 			retval = 1;
 			break;
 
+
 		default :                         /* this should never be reached... */
 			fsc2_assert( 1 == 0 );
 	}
