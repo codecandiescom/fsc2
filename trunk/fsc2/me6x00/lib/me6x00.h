@@ -98,7 +98,7 @@ int me6x00_wraparound( int board, int dac, int size, unsigned short *buf );
 #define ME6X00_ERR_IBS_MESS "Invalid buffer size"
 #define ME6X00_ERR_BNO_MESS "Board not open"
 #define ME6X00_ERR_ABS_MESS "Operation aborted due to signal"
-#define ME6X00_ERR_DFP_MESS  "Unspecified error when opening device file"
-#define ME6X00_ERR_NDV_MESS  "No driver loaded for board"
+#define ME6X00_ERR_DFP_MESS "Unspecified error when opening device file"
+#define ME6X00_ERR_NDV_MESS "No driver loaded for board"
 
 #define ME6X00_ERR_INT_MESS "Internal library error"

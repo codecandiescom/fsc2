@@ -128,7 +128,7 @@ int me6000_exp_hook( void )
 			print( FATAL, "Invalid board number.\n" );
 			THROW( EXCEPTION );
 
-		case ME6X00_ERR_NSB :
+		case ME6X00_ERR_NDV :
 			print( FATAL, "Driver for board not loaded.\n" );
 			THROW( EXCEPTION );
 

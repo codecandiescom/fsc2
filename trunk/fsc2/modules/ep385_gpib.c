@@ -84,7 +84,7 @@ bool ep385_init( const char *name )
 
 	/* Set infinite repetition of the pulse sequence */
 
-	strcat( cmd, "SPE65535;LPS1;SPL1;MEM16\r" );
+	strcat( cmd, "SPE65535;LPS65535;SPL65535;MEM16\r" );
 
 	ep385_command( cmd );
 

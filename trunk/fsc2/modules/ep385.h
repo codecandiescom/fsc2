@@ -86,7 +86,7 @@ Var *pulser_command( Var *v );
 										   range from 14 to 21 */
 
 
-#define MAX_PULSER_BITS       32767     /* maximum number of bits in channel */
+#define MAX_PULSER_BITS        32766    /* maximum number of bits in channel */
 
 #define MAX_MEMORY_BLOCKS      16       /* maximum number of memory blocks */
 #define BITS_PER_MEMORY_BLOCK  2048     /* length of memory block (in Ticks) */
@@ -388,6 +388,7 @@ void ep385_init_setup( void );
 /* Functions from ep385_util.c */
 
 Ticks ep385_double2ticks( double p_time );
+Ticks ep385_double2ticks_simple( double p_time );
 double ep385_ticks2double( Ticks ticks );
 PULSE *ep385_get_pulse( long pnum );
 const char *ep385_ptime( double p_time );

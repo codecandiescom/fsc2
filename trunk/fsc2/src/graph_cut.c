@@ -566,7 +566,7 @@ void cut_close_callback( FL_OBJECT *a, long b )
 	UNUSED_ARGUMENT( a );
 	UNUSED_ARGUMENT( b );
 
-	delete_all_cut_markers( );
+	delete_all_cut_markers( UNSET );
 	G2.is_cut = is_mapped = UNSET;
 
 	cut_x = GUI.cut_form->cut->x - 1;
@@ -705,7 +705,7 @@ static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 				sp->exist = UNSET;
 	}
 
-	delete_all_cut_markers( );
+	delete_all_cut_markers( UNSET );
 
 	for ( m = scv->marker_2d; m != NULL; m = m->next )
 	{
@@ -788,7 +788,7 @@ void cut_new_curve_handler( void )
 
 	/* Delete all markers that had been shown for the previous curve */
 
-	delete_all_cut_markers( );
+	delete_all_cut_markers( UNSET );
 
 	if ( G2.active_curve == -1 )
 	{
@@ -2792,7 +2792,7 @@ void cut_next_index( FL_OBJECT *a, long b )
 	UNUSED_ARGUMENT( a );
 
 
-	delete_all_cut_markers( );
+	delete_all_cut_markers( UNSET );
 	switch( b )
 	{
 		case 0 :           /* go one curve up */
@@ -2839,7 +2839,7 @@ void cut_change_dir( FL_OBJECT *a, long b )
 	if ( px < 0 || px > GUI.cut_form->cut_canvas->w )
 		return;
 
-	delete_all_cut_markers( );
+	delete_all_cut_markers( UNSET );
 
 	p_index = lrnd( px / cv->s2d[ X ] - cv->shift[ X ] );
 
@@ -2957,7 +2957,7 @@ void delete_cut_marker( long x_pos )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void delete_all_cut_markers( void )
+void delete_all_cut_markers( bool redraw_flag )
 {
 	Marker_1D *m, *mn;
 
@@ -2974,6 +2974,9 @@ void delete_all_cut_markers( void )
 	}
 
 	G2.curve_2d[ CG.curve ]->cut_marker = NULL;
+
+	if ( redraw_flag )
+		redraw_cut_canvas( &G2.cut_canvas );
 }
 
 

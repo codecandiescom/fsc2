@@ -2179,7 +2179,7 @@ void remove_markers_2d( long *curves )
 			repaint_canvas_2d( &G2.canvas );
 
 		if ( G2.is_cut && curves[ j ] == CG.curve )
-			delete_all_cut_markers( );
+			delete_all_cut_markers( SET );
 	}
 
 }

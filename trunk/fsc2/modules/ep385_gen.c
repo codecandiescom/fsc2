@@ -254,9 +254,8 @@ bool ep385_set_repeat_time( double rep_time )
 
 	if ( ep385.is_repeat_time &&
 		 rep_time != 
-		 	( old_rep_time = ( 12800 * ep385.repeat_time 
-								+ BITS_PER_MEMORY_BLOCK * MAX_MEMORY_BLOCKS )
-							 * ep385.timebase ) )
+		 	( old_rep_time = REPEAT_TICKS * ep385.repeat_time 
+			  				 * ep385.timebase ) )
 	{
 		print( FATAL, "A different repeat time/frequency of %s/%g Hz has "
 			   "already been set.\n", ep385_ptime( old_rep_time ),
@@ -273,10 +272,8 @@ bool ep385_set_repeat_time( double rep_time )
 		THROW( EXCEPTION );
 	}
 
-	min_repeat_time	= ( BITS_PER_MEMORY_BLOCK * MAX_MEMORY_BLOCKS
-						+ MIN_REPEAT_TIMES * REPEAT_TICKS ) * ep385.timebase;
-	max_repeat_time	= ( BITS_PER_MEMORY_BLOCK * MAX_MEMORY_BLOCKS
-						+ MAX_REPEAT_TIMES * REPEAT_TICKS ) * ep385.timebase;
+	min_repeat_time	= ( MIN_REPEAT_TIMES * REPEAT_TICKS ) * ep385.timebase;
+	max_repeat_time	= ( MAX_REPEAT_TIMES * REPEAT_TICKS ) * ep385.timebase;
 
 	if ( rep_time < min_repeat_time * 0.99 ||
 		 rep_time > max_repeat_time * 1.01 )
@@ -286,7 +283,7 @@ bool ep385_set_repeat_time( double rep_time )
 		TRY
 		{
 			tmin = T_strdup( ep385_ptime( min_repeat_time ) );
-			tmin = T_strdup( ep385_ptime( max_repeat_time ) );
+			tmax = T_strdup( ep385_ptime( max_repeat_time ) );
 
 			print( FATAL, "Repeat time/frequency of %s/%g Hz is not within "
 				   "range of %s/%g Hz to %s/%g Hz.\n", ep385_ptime( rep_time ),
@@ -304,21 +301,16 @@ bool ep385_set_repeat_time( double rep_time )
 		}
 	}
 
-	/* We will always use the whole available memory but no sweeps and loops,
-	   so the SHOT-repetition time (i.e. the time between the End-Of-SHOT-
-	   signal (at the rising edge of the ZTM-Out) and the start of the
-	   internal triggering of the next shot) we've got to set is the
-	   repetition time minus the time required for outputting the whole
-	   memory. And, of course, this time can only be set in multiples of
-	   REPEAT_TICKS times the time base. */
+	/* Now we've got to set the repetition time. This can be only done in
+	   units of the SRT time (102.4 us or 12800 ticks). The manual clains
+	   that also the memory read-out ime has taken into account but this
+	   seems to be false, at least a simple experiment did show that the
+	   repetition time was exactly identical to the SRT settings and wasn't
+	   influenced at all by the number of memory blocks used... */
 
-	ep385.repeat_time = Ticksrnd(
-						  ceil( ( ep385_double2ticks( rep_time )
-								  - BITS_PER_MEMORY_BLOCK * MAX_MEMORY_BLOCKS )
-							    / ( double ) REPEAT_TICKS ) );
-	new_rep_time = ( ep385.repeat_time * REPEAT_TICKS 
-					 + BITS_PER_MEMORY_BLOCK * MAX_MEMORY_BLOCKS )
-				   * ep385.timebase;
+	ep385.repeat_time = Ticksrnd( ceil( ep385_double2ticks_simple( rep_time )
+										/ ( double ) REPEAT_TICKS ) );
+	new_rep_time = ep385.repeat_time * REPEAT_TICKS * ep385.timebase;
 
 	/* If the adjusted repetition time doesn't fit within 1% with the
 	   requested time print a warning */
