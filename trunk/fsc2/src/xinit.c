@@ -28,8 +28,11 @@
 
 static int main_form_close_handler( FL_FORM *a, void *b );
 static void setup_app_options( FL_CMD_OPT app_opt[ ] );
+
+#if 0
 static int fsc2_x_error_handler( Display *d, XErrorEvent *err );
 static int fsc2_xio_error_handler( Display *d );
+#endif
 
 
 #if ( SIZE == HI_RES )

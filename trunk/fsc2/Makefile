@@ -246,7 +246,7 @@ endif
 
 ifeq ($(machine_name),crowley.none)
 	 RESOLUTION      = HIGH
-	 GPIB_LIBRARY    = NONE
+	 GPIB_LIBRARY    = JTT
 	 INSTALL_MACHINE = install-$(machine_name)
 endif
 

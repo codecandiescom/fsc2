@@ -54,6 +54,7 @@ void *get_shm( int *shm_id, long len )
 	if ( geteuid( ) != EUID )
 	{
 		seteuid( EUID );
+		setegid( EGID );
 		must_reset = SET;
 	}
 
@@ -65,7 +66,10 @@ void *get_shm( int *shm_id, long len )
 		else                                      /* non-recoverable failure */
 		{
 			if ( must_reset )
+			{
 				seteuid( getuid( ) );
+				setegid( getgid( ) );
+			}
 			return ( void * ) -1;
 		}
 	}
@@ -76,7 +80,10 @@ void *get_shm( int *shm_id, long len )
 	if ( ( buf = shmat( *shm_id, NULL, 0 ) ) == ( void * ) - 1 )
 	{
 		if ( must_reset )
+		{
 			seteuid( getuid( ) );
+			setegid( getgid( ) );
+		}
 		return ( void * ) -1;
 	}
 
@@ -87,7 +94,10 @@ void *get_shm( int *shm_id, long len )
 	buf += 4;
 
 	if ( must_reset )
+	{
 		seteuid( getuid( ) );
+		setegid( getgid( ) );
+	}
 
 	return buf;
 }
@@ -108,6 +118,7 @@ void *attach_shm( int key )
 	if ( geteuid( ) != EUID )
 	{
 		seteuid( EUID );
+		setegid( EGID );
 		must_reset = SET;
 	}
 
@@ -115,12 +126,18 @@ void *attach_shm( int key )
 	{
 		shmctl( key, IPC_RMID, NULL );       /* delete the segment */
 		if ( must_reset )
+		{
 			seteuid( getuid( ) );
+			setegid( getgid( ) );
+		}
 		return ( void * ) -1;
 	}
 
 	if ( must_reset )
+	{
 		seteuid( getuid( ) );
+		setegid( getgid( ) );
+	}
 
 	return buf + 4;
 }
@@ -140,6 +157,7 @@ void detach_shm( void *buf, int *key )
 	if ( geteuid( ) != EUID )
 	{
 		seteuid( EUID );
+		setegid( EGID );
 		must_reset = SET;
 	}
 	
@@ -151,7 +169,10 @@ void detach_shm( void *buf, int *key )
 	}
 
 	if ( must_reset )
+	{
 		seteuid( getuid( ) );
+		setegid( getgid( ) );
+	}
 }
 
 
@@ -173,6 +194,7 @@ void delete_all_shm( void )
 	if ( geteuid( ) != EUID )
 	{
 		seteuid( EUID );
+		setegid( EGID );
 		must_reset = SET;
 	}
 
@@ -195,7 +217,10 @@ void delete_all_shm( void )
 		detach_shm( Key, &Key_ID );
 
 	if ( must_reset )
+	{
 		seteuid( getuid( ) );
+		setegid( getgid( ) );
+	}
 }
 
 
@@ -283,6 +308,7 @@ int sema_create( void )
 	if ( geteuid( ) != EUID )
 	{
 		seteuid( EUID );
+		setegid( EGID );
 		must_reset = SET;
 	}
 
@@ -290,7 +316,10 @@ int sema_create( void )
 							 IPC_CREAT | IPC_EXCL | SEM_R | SEM_A ) ) < 0 )
 	{
 		if ( must_reset )
+		{
 			seteuid( getuid( ) );
+			setegid( getgid( ) );
+		}
 		return -1;
 	}
 
@@ -299,12 +328,18 @@ int sema_create( void )
 	{
 		semctl( sema_id, 0, IPC_RMID, sema_arg );
 		if ( must_reset )
+		{
 			seteuid( getuid( ) );
+			setegid( getgid( ) );
+		}
 		return -1;
 	}
 
 	if ( must_reset )
+	{
 		seteuid( getuid( ) );
+		setegid( getgid( ) );
+	}
 	return sema_id;
 }
 
@@ -323,18 +358,25 @@ int sema_destroy( int sema_id )
 	if ( geteuid( ) != EUID )
 	{
 		seteuid( EUID );
+		setegid( EGID );
 		must_reset = SET;
 	}
 
 	if ( semctl( sema_id, 0, IPC_RMID, sema_arg ) < 0 )
 	{
 		if ( must_reset )
+		{
 			seteuid( getuid( ) );
+			setegid( getgid( ) );
+		}
 		return -1;
 	}
 
 	if ( must_reset )
+	{
 		seteuid( getuid( ) );
+		setegid( getgid( ) );
+	}
 	return 0;
 }
 
@@ -355,6 +397,7 @@ int sema_wait( int sema_id )
 	if ( geteuid( ) != EUID )
 	{
 		seteuid( EUID );
+		setegid( EGID );
 		must_reset = SET;
 	}
 
@@ -362,12 +405,18 @@ int sema_wait( int sema_id )
 		if ( errno != EINTR )
 		{
 			if ( must_reset )
+			{
 				seteuid( getuid( ) );
+				setegid( getgid( ) );
+			}
 			return -1;
 		}
 
 	if ( must_reset )
+	{
 		seteuid( getuid( ) );
+		setegid( getgid( ) );
+	}
 	return 0;
 }
 
@@ -387,6 +436,7 @@ int sema_post( int sema_id )
 	if ( geteuid( ) != EUID )
 	{
 		seteuid( EUID );
+		setegid( EGID );
 		must_reset = SET;
 	}
 
@@ -394,11 +444,17 @@ int sema_post( int sema_id )
 		if ( errno != EINTR )
 		{
 			if ( must_reset )
+			{
 				seteuid( getuid( ) );
+				setegid( getgid( ) );
+			}
 			return -1;
 		}
 
 	if ( must_reset )
+	{
 		seteuid( getuid( ) );
+		setegid( getgid( ) );
+	}
 	return 0;
 }
