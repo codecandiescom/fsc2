@@ -147,8 +147,14 @@ static int __init ni6601_init( void )
 
 static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 {
+	board->dev = NULL;
+	board->irq = 0;
+
         if ( pci_enable_device( dev ) )
-		return -EIO;
+	{
+		PDEBUG( "Failed to enable board %d\n", board - boards );
+		return -1;
+	}
 
 	pci_set_master( dev );
 
@@ -157,10 +163,9 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 	if ( pci_request_regions( dev, NI6601_NAME ) ) {
 		PDEBUG( "Failed to lock memory regions for board %d\n",
 			board - boards );
-		return -1;
+		goto init_failure;
 	}
 
-	board->mite = board->addr = NULL;
 
 	/* Remap the MITE memory region as well as the memory region at
 	   which we're going to access the TIO */
@@ -190,13 +195,13 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 
 	/* Request the interrupt used by the board */
 
-	board->irq = dev->irq;
 	if ( request_irq( dev->irq, ni6601_irq_handler, SA_SHIRQ,
 			  NI6601_NAME, board ) ) {
 		PDEBUG( "Can't obtain IRQ %d\n", dev->irq );
 		dev->irq = 0;
 		goto init_failure;
 	}
+	board->irq = dev->irq;
 
 	spin_lock_init( &board->spinlock );
 
