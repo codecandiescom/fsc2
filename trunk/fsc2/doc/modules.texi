@@ -1589,31 +1589,41 @@ CATCH( EXCEPTION )
 @{
     ...                  /* the error handling code goes here */
 @}
+OTHERWISE
+    RETHROW( );
 @end example
+
 @findex TRY
 @findex TRY_SUCCESS
 @findex CATCH()
-@noindent
+@findex OTHERWISE
+@findex RETHROW()
 With @code{TRY} the program is told that the following code might throw
 an exception. If everything works out well and no exception is thrown
-the @code{CATCH()} block is never executed and in this case
-@code{TRY_SUCCESS} must be called to do some cleaning up. But if an
-error happens and an exception gets thrown the flow of control is
-changed immediately from the function the exception is thrown in to the
-first statements in the @code{CATCH()} block.
+the @code{CATCH()} and @code{OTHERWISE} blocks are never executed and in
+this case @code{TRY_SUCCESS} must be called to do some cleaning up. But
+if an error happens and an exception (of whatever type, there are more
+than the simply named @code{EXCEPTION}) gets thrown the flow of control
+is changed immediately from the function the exception is thrown in to
+the @code{CATCH()} line.
 
 @code{CATCH} can be used to catch a specific exception and you can have
-several of them for different types of exceptions. If you want to catch
-all types of exceptions in one go you can use @code{OTHERWISE}
-@findex OTHERWISE
-instead of @code{CATCH}.  Finally, if you can not really deal with the
-error condition but need to do some cleaning up but before bailing out
-you can catch the exception using either @code{CATCH} or
-@code{OTHERWISE} and then re-throw the exception by calling
-@code{RETHROW()}
-@findex RETHROW()
-to pass it on to higher level routines that are supposed to take care of
-the problem. Here's some example code
+several of them for different types of exceptions listed one after the
+other. But because flow of control will be transferred to the
+@code{CATCH()} line on every possible type of exception, not only the
+one specified as the arguments of the @code{CATCH()} calls, a
+@code{CATCH()} should always followed finally by an @code{OTHERWISE}
+(unless you are absolutely sure no other exceptions than the one you're
+catching could happen). The block following @code{OTHERWISE} will deal
+with all other exceptions not dealt with yet.  Normally, you just
+rethrow the exception you're not interested in by calling
+@code{RETHROW()}.
+
+In cases where you aren't interested in a special type of exception but
+want to catch every exception, e.g.@: to just do some cleaning up before
+bailing out to pass the problem on to some higher level routines, you
+can use just an @code{OTEHRWISE} block without a @code{CATCH()}. Here's
+sanother example:
 @example
 TRY
 @{
@@ -1636,10 +1646,10 @@ OUT_OF_MEMORY_EXCEPTION
 USER_BREAK_EXCEPTION
 @end example
 @noindent
-@code{EXCEPTION} stands for all kinds of exceptions not covered by one
-of the other two types. @code{OUT_OF_MEMORY_EXCEPTION} will only be
-thrown by @code{fsc2}s special functions for memory allocation (see next
-section), so don't throw it yourself without a very good reason. A
+@code{EXCEPTION} is a kind of cacth-all exceptions not covered by the
+other two types. @code{OUT_OF_MEMORY_EXCEPTION} gets only thrown by
+@code{fsc2}s special functions for memory allocation (see next section),
+so don't throw it yourself without a very good reason. A
 @code{USER_BREAK_EXCEPTION} can be thrown from within a module when the
 module is doing something rather time consuming (e.g.@: waiting for a
 device to become ready or doing some calibration) and the user has
@@ -1665,23 +1675,25 @@ void check_user_request( void )
 @end example
 @noindent
 It will return @code{true} if the @code{STOP} button has been pressed.
-You then should do your cleanup actions and immediately afterwards throw
-a @code{USER_BREAK_EXCEPTION} yourself.
+You then should do your cleanup and immediately afterwards throw a
+@code{USER_BREAK_EXCEPTION} yourself.
 
 
 Here's some code taken from the module for a digitizer. It waits
 indefinitely in a loop for the digitizer to become finished with a
 measurement. To allow the user to get out of this loop (when, for
-example, he realizes that he forgot to connect the trigger input and the
-digitizer) within the loop @code{stop_on_user_request()} is called each
-time:
+example, he realizes that he forgot to connect the trigger input to the
+digitizer and the function will never end) @code{stop_on_user_request()}
+is called each time the loop is repeated.  When the user presses the
+@code{STOP} button the function will break out of the loop by throwing
+an @code{USER_BREAK_EXCEPTION}.
 @example
 while ( 1 )                   /* loop forever */
 @{
     stop_on_user_request( );
 
+    fsc2_sleep( 100000, UNSET );   /* give the device a bit if time */
     length = 40;
-    usleep( 100000 );
 
     if ( gpib_write( tds754a.device, "BUSY?\n", 6 ) == FAILURE ||
          gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
@@ -1703,9 +1715,9 @@ are not necessarily saved. But an optimizing compiler usually stores the
 values of often used variables in CPU registers, i.e.@: the value of a
 variable in memory is not necessarily identical to its 'real' value (or
 variables might even not exist in memory, they may have gotten optimized
-away.). When the program now reaches the @code{CATCH()} part the values
+out.). When the program now reaches the @code{CATCH()} part the values
 of these variables can be completely bogus and if you would try to use
-their values nearly impossible to find errors might happen.
+their values nearly impossible to find errors might result.
 
 Fortunately, when the compiler gets invoked with its warning level set
 to a suitable level it will recognize such potential problems and utter
