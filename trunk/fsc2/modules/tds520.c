@@ -1118,6 +1118,10 @@ Var *digitizer_lock_keyboard( Var *v )
 				THROW( EXCEPTION )
 			}
 		}
+
+		if ( ( v = vars_pop( v ) ) != NULL )
+			eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
+					DEVICE_NAME, Cur_Func );
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )

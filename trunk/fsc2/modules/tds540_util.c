@@ -55,15 +55,15 @@ const char *tds540_ptime( double p_time )
 /* Deletes a window by removing it from the linked list of windows */
 /*-----------------------------------------------------------------*/
 
-void tds540_delete_windows( void )
+void tds540_delete_windows( TDS540 *s )
 {
 	WINDOW *w;
 
 
-	while ( tds540.w != NULL )
+	while ( s->w != NULL )
 	{
-		w = tds540.w;
-		tds540.w = w->next;
+		w = s->w;
+		s->w = w->next;
 		T_free( w );
 	}
 }
@@ -549,6 +549,42 @@ long tds540_translate_channel( int dir, long channel )
 
 	fsc2_assert( 1 == 0 );
 	return -1;
+}
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+void tds540_store_state( TDS540 *dest, TDS540 *src )
+{
+	WINDOW *w;
+	int i;
+
+
+	while ( dest->w != NULL )
+	{
+		w = dest->w;
+		dest->w = w->next;
+		T_free( w );
+	}
+
+	memcpy( dest, src, sizeof( TDS540 ) );
+
+	if ( src->num_windows == 0 )
+	{
+		dest->w = 0;
+		return;
+	}
+
+	dest->w = T_malloc( src->num_windows * sizeof( WINDOW ) );
+	for ( i = 0, w = src->w; w != NULL; i++, w = w->next )
+	{
+		memcpy( dest->w + i, w, sizeof( WINDOW ) );
+		if ( i != 0 )
+			dest->w->prev = dest->w - 1;
+		if ( w->next != NULL )
+			dest->w->next = dest->w + 1;
+	}
 }
 
 

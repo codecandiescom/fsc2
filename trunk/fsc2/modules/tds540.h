@@ -132,6 +132,7 @@ typedef struct
 /* declaration of exported functions */
 
 int tds540_init_hook( void );
+int tds540_test_hook( void );
 int tds540_exp_hook( void );
 int tds540_end_of_exp_hook( void );
 void tds540_exit_hook( void );
@@ -161,12 +162,13 @@ Var *digitizer_lock_keyboard( Var *v );
 /* declaration of internally used functions */
 
 const char *tds540_ptime( double p_time );
-void tds540_delete_windows( void );
+void tds540_delete_windows( TDS540 *s );
 void tds540_do_pre_exp_checks( void );
 void tds540_set_meas_window( WINDOW *w );
 void tds540_set_curve_window( WINDOW *w );
 void tds540_set_window( WINDOW *w );
 long tds540_translate_channel( int dir, long channel );
+void tds540_store_state( TDS540 *dest, TDS540 *src );
 
 bool tds540_init( const char *name );
 double tds540_get_timebase( void );

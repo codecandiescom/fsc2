@@ -64,29 +64,7 @@ static double max_sens = 1e-3,
               min_sens = 10.0;
 
 
-static struct {
-	bool is_equal_width;
-
-	bool is_timebase;
-	double timebase;
-
-	bool is_num_avg;
-	long num_avg;
-
-	bool is_rec_len;
-	long rec_len;
-
-	bool is_trig_pos;
-	double trig_pos;
-
-	int data_source;
-	int meas_source;
-
-	bool lock_state;
-
-	bool is_sens[ MAX_CHANNELS ];
-	double sens[ MAX_CHANNELS ];
-} tds540_store;
+static TDS540 tds540_stored;
 
 
 
@@ -128,6 +106,22 @@ int tds540_init_hook( void )
 		tds540.sens[ i ] = 1.0;
 	}
 
+	tds540_stored.w = NULL;
+
+	return 1;
+}
+
+
+/*-----------------------------------*/
+/* Test hook function for the module */
+/*-----------------------------------*/
+
+int tds540_test_hook( void )
+{
+	/* Store the state of the digitizer structure it was set to in the
+	   PREPARATIONS section */
+
+	tds540_store_state( &tds540_stored, &tds540 );
 	return 1;
 }
 
@@ -138,36 +132,11 @@ int tds540_init_hook( void )
 
 int tds540_exp_hook( void )
 {
-	int i;
+	/* Reset the digitizer structure to the state it was set to in the
+	   preparations section - changes done to it in the test run are to
+	   be undone... */
 
-
-	/* Store the state the digitizer was set to in the preparations section -
-	   we need this when starting the same experiment again... */
-
-	tds540_store.is_equal_width = tds540.is_equal_width;
-
-	tds540_store.is_timebase    = tds540.is_timebase;
-	tds540_store.timebase       = tds540.timebase;
-
-	tds540_store.is_num_avg     = tds540.is_num_avg;
-	tds540_store.num_avg        = tds540.num_avg;
-
-	tds540_store.is_rec_len     = tds540.is_rec_len;
-	tds540_store.rec_len        = tds540.rec_len;
-
-	tds540_store.is_trig_pos    = tds540.is_trig_pos;
-	tds540_store.trig_pos       = tds540.trig_pos;
-
-	tds540_store.data_source    = tds540.data_source;
-	tds540_store.meas_source    = tds540.meas_source;
-
-	tds540_store.lock_state     = tds540.lock_state;
-
-	for ( i = TDS540_CH1; i <= TDS540_CH4; i++ )
-	{
-		tds540_store.is_sens[ i ] = tds540.is_sens[ i ];
-		tds540_store.sens[ i ]    = tds540.sens[ i ];
-	}
+	tds540_store_state( &tds540, &tds540_stored );
 
 	if ( ! tds540_init( DEVICE_NAME ) )
 	{
@@ -188,41 +157,7 @@ int tds540_exp_hook( void )
 
 int tds540_end_of_exp_hook( void )
 {
-	int i;
-
-
 	tds540_finished( );
-
-	/* Reset the digitizer to the state it was set to in the preparations
-	   section - we need this when starting the same experiment again... */
-
-	tds540.is_reacting          = UNSET;
-
-	tds540_store.is_equal_width = tds540.is_equal_width;
-
-	tds540.is_timebase          = tds540_store.is_timebase;
-	tds540.timebase             = tds540_store.timebase;
-
-	tds540_store.is_num_avg     = tds540.is_num_avg;
-	tds540.num_avg              = tds540_store.num_avg;
-
-	tds540.is_rec_len           = tds540_store.is_rec_len;
-	tds540.rec_len              = tds540_store.rec_len;
-
-	tds540.is_trig_pos          = tds540_store.is_trig_pos;
-	tds540.trig_pos             = tds540_store.trig_pos;
-
-	tds540.data_source          = tds540_store.data_source;
-	tds540.meas_source          = tds540_store.meas_source;
-
-	tds540.lock_state = tds540_store.lock_state;
-
-	for ( i = TDS540_CH1; i <= TDS540_CH4; i++ )
-	{
-		tds540.is_sens[ i ] = tds540_store.is_sens[ i ];
-		tds540.sens[ i ]    = tds540_store.sens[ i ];
-	}
-
 	return 1;
 }
 
@@ -234,7 +169,8 @@ int tds540_end_of_exp_hook( void )
 
 void tds540_exit_hook( void )
 {
-	tds540_delete_windows( );
+	tds540_delete_windows( &tds540 );
+	tds540_delete_windows( &tds540_stored );
 }
 
 
@@ -275,19 +211,18 @@ Var *digitizer_define_window( Var *v )
 		vars_check( v, INT_VAR | FLOAT_VAR );
 		win_start = VALUE( v );
 		is_win_start = SET;
-		v = vars_pop( v );
 
 		/* If there's a second parameter take it to be the window width */
 
-		if ( v != NULL )
+		if ( ( v = vars_pop( v ) ) != NULL )
 		{
 			vars_check( v, INT_VAR | FLOAT_VAR );
 			win_width = VALUE( v );
 
 			/* Allow window width to be zero in test run... */
 
-			if ( ( TEST_RUN && win_width < 0.0 ) ||
-				 ( ! TEST_RUN && win_width <= 0.0 ) )
+			if ( ( FSC2_MODE == TEST && win_width < 0.0 ) ||
+				 ( FSC2_MODE != TEST && win_width <= 0.0 ) )
 			{
 				eprint( FATAL, SET, "%s: Zero or negative width for window "
 						"in %s().\n", DEVICE_NAME, Cur_Func );
@@ -296,13 +231,8 @@ Var *digitizer_define_window( Var *v )
 			is_win_width = SET;
 
 			if ( ( v = vars_pop( v ) ) != NULL )
-			{
 				eprint( WARN, SET, "%s: Superfluous arguments in call of "
 						"function %s().\n", DEVICE_NAME, Cur_Func );
-
-				while ( ( v = vars_pop( v ) ) != NULL )
-					;
-			}
 		}
 	}
 
@@ -352,36 +282,26 @@ Var *digitizer_timebase( Var *v )
 	
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
+		switch ( FSC2_MODE )
 		{
-			if ( tds540.is_timebase )
+			case PREPARATION :
+				if ( tds540.is_timebase )
+					return vars_push( FLOAT_VAR, tds540.timebase );
+
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
+				THROW( EXCEPTION )
+
+			case TEST :
+				return vars_push( FLOAT_VAR, tds540.is_timebase ?
+								  tds540.timebase : TDS540_TEST_TIME_BASE );
+
+			case EXPERIMENT :
+				tds540.timebase = tds540_get_timebase( );
+				tds540.is_timebase = SET;
 				return vars_push( FLOAT_VAR, tds540.timebase );
-			else
-				return vars_push( FLOAT_VAR, TDS540_TEST_TIME_BASE );
 		}
-		else if ( I_am == PARENT )
-		{
-			if ( tds540.is_timebase )
-				return vars_push( FLOAT_VAR, tds540.timebase );
-
-			eprint( FATAL, SET, "%s: Function %s() with no argument can "
-					"only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
-
-		tds540.timebase = tds540_get_timebase( );
-		tds540.is_timebase = SET;
-		return vars_push( FLOAT_VAR, tds540.timebase );
-	}
-
-	if ( I_am == CHILD || TEST_RUN )
-	{
-		eprint( FATAL, SET, "%s: Digitizer time base can only be set before"
-				" the EXPERIMENT section starts.\n", DEVICE_NAME );
-		THROW( EXCEPTION )
-	}
 
 	if ( tds540.is_timebase )
 	{
@@ -392,7 +312,6 @@ Var *digitizer_timebase( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	timebase = VALUE( v );
-	vars_pop( v );
 
 	if ( timebase <= 0 )
 	{
@@ -441,8 +360,15 @@ Var *digitizer_timebase( Var *v )
 		T_free( t );
 	}
 
+	if ( ( v = vars_pop( v ) ) != NULL )
+		eprint( WARN, SET, "%s: Superfluous arguments in call of "
+				"function %s().\n", DEVICE_NAME, Cur_Func );
+
 	tds540.timebase = tb[ TB ];
 	tds540.is_timebase = SET;
+
+	if ( FSC2_MODE == EXPERIMENT )
+		tds540_set_timebase( tds540.time_base );
 
 	return vars_push( FLOAT_VAR, tds540.timebase );
 }
@@ -486,29 +412,26 @@ Var *digitizer_sensitivity( Var *v )
 	}
 
 	if ( ( v = vars_pop( v ) ) == NULL )
-	{
-		if ( TEST_RUN )
+		switch ( FSC2_MODE )
 		{
-			if ( tds540.is_sens[ channel ] )
-				return vars_push( FLOAT_VAR, tds540.sens[ channel ] );
-			else
-				return vars_push( FLOAT_VAR, TDS540_TEST_SENSITIVITY );
-		}
-		else if ( I_am == PARENT )
-		{
-			if ( tds540.is_sens[ channel ] )
-				return vars_push( FLOAT_VAR, tds540.sens[ channel ] );
+			case PREPARATION :
+				if ( tds540.is_sens[ channel ] )
+					return vars_push( FLOAT_VAR, tds540.sens[ channel ] );
 
-			eprint( FATAL, SET, "%s: Function %s() with no argument can "
-					"only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
+				THROW( EXCEPTION )
 
-		tds540.sens[ channel ] = tds540_get_sens( channel );
-		tds540.is_sens[ channel ] = SET;
-		return vars_push( FLOAT_VAR, tds540.sens[ channel ] );
-	}
+			case TEST :
+				return vars_push( FLOAT_VAR, tds540.is_sens[ channel ] :
+							tds540.sens[ channel ] : TDS540_TEST_SENSITIVITY );
+
+			case EXPERIMENT :
+				tds540.sens[ channel ] = tds540_get_sens( channel );
+				tds540.is_sens[ channel ] = SET;
+				return vars_push( FLOAT_VAR, tds540.sens[ channel ] );
+		}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	sens = VALUE( v );
@@ -520,15 +443,15 @@ Var *digitizer_sensitivity( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	tds540.sens[ channel ] = sens;
-	tds540.is_sens[ channel ] = SET;
-
-	if ( ! TEST_RUN )
-		tds540_set_sens( channel, sens );
-
 	if ( ( v = vars_pop( v ) ) != NULL )
 		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
 				DEVICE_NAME, Cur_Func );
+
+	tds540.sens[ channel ] = sens;
+	tds540.is_sens[ channel ] = SET;
+
+	if ( FSC2_MODE == EXPERIMENT )
+		tds540_set_sens( channel, sens );
 
 	return vars_push( FLOAT_VAR, tds540.sens[ channel ] );
 }
@@ -543,29 +466,26 @@ Var *digitizer_num_averages( Var *v )
 	
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
+		switch ( FSC2_MODE )
 		{
-			if ( tds540.is_num_avg )
-				return vars_push( INT_VAR, tds540.num_avg );
-			else
-				return vars_push( INT_VAR, TDS540_TEST_NUM_AVG );
-		}
-		else if ( I_am == PARENT )
-		{
-			if ( tds540.is_num_avg )
-				return vars_push( INT_VAR, tds540.num_avg );
+			case PREPARATION :
+				if ( tds540.is_num_avg )
+					return vars_push( INT_VAR, tds540.num_avg );
 
-			eprint( FATAL, SET, "%s: Function %s() with no argument can "
-					"only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
+				THROW( EXCEPTION )
 
-		tds540.num_avg = tds540_get_num_avg( );
-		tds540.is_num_avg = SET;
-		return vars_push( INT_VAR, tds540.num_avg );
-	}
+			case TEST :
+				return vars_push( INT_VAR, tds540.is_num_avg ?
+								  tds540.num_avg : TDS540_TEST_NUM_AVG );
+
+			case EXPERIMENT :
+				tds540.num_avg = tds540_get_num_avg( );
+				tds540.is_num_avg = SET;
+				return vars_push( INT_VAR, tds540.num_avg );
+		}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
@@ -576,7 +496,6 @@ Var *digitizer_num_averages( Var *v )
 				"of averages in %s().\n", DEVICE_NAME, Cur_Func );
 		num_avg = lrnd( v->val.dval );
 	}
-	vars_pop( v );
 
 	if ( num_avg == 0 )
 	{
@@ -592,11 +511,15 @@ Var *digitizer_num_averages( Var *v )
 		THROW( EXCEPTION )
 	}
 
+	if ( ( v = vars_pop( v ) ) != NULL )
+		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
+				DEVICE_NAME, Cur_Func );
+
 	tds540.num_avg = num_avg;
-	if ( I_am == CHILD )
+	tds540.is_num_avg = SET;
+
+	if ( FSC2_MODE == EXPERIMENT )
 		tds540_set_num_avg( num_avg );
-	if ( ! TEST_RUN )                 // store value if in PREPARATIONS section
-		tds540.is_num_avg = SET;
 
 	return vars_push( INT_VAR, tds540.num_avg );
 }
@@ -615,32 +538,29 @@ Var *digitizer_record_length( Var *v )
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
+		switch ( FSC2_MODE )
 		{
-			if ( tds540.is_rec_len )
+			case PREPARATION :
+				if ( tds540.is_rec_len )
+					return vars_push( INT_VAR, tds540.rec_len );
+
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
+				THROW( EXCEPTION )
+
+			case TEST :
+				return vars_push( INT_VAR, tds540.is_rec_len ?
+								  tds540.rec_len : TDS540_TEST_REC_LEN );
+
+			case EXPERIMENT :
+				if ( ! tds540_get_record_length( &rec_len ) )
+					tds540_gpib_failure( );
+
+				tds540.rec_len = rec_len;
+				tds540.is_rec_len = SET;
 				return vars_push( INT_VAR, tds540.rec_len );
-			else
-				return vars_push( INT_VAR, TDS540_TEST_REC_LEN );
 		}
-		else if ( I_am == PARENT )
-		{
-			if ( tds540.is_rec_len )
-				return vars_push( INT_VAR, tds540.rec_len );
-
-			eprint( FATAL, SET, "%s: Function %s() with no argument can "
-					"only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
-
-		if ( ! tds540_get_record_length( &rec_len ) )
-			tds540_gpib_failure( );
-
-		tds540.rec_len = rec_len;
-		tds540.is_rec_len = SET;
-		return vars_push( INT_VAR, tds540.rec_len );
-	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -680,7 +600,8 @@ Var *digitizer_record_length( Var *v )
 	tds540.rec_len = record_lengths[ i ];
 	tds540.is_rec_len = SET;
 
-	if ( I_am == CHILD && ! tds540_set_record_length( tds540.rec_len ) )
+	if ( FSC2_MODE == EXPERIMENT &&
+		 ! tds540_set_record_length( tds540.rec_len ) )
 		tds540_gpib_failure( );
 
 	return vars_push( INT_VAR, tds540.rec_len );
@@ -699,36 +620,32 @@ Var *digitizer_trigger_position( Var *v )
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
+		switch ( FSC2_MODE )
 		{
-			if ( tds540.is_trig_pos )
+			case PREPARATION :
+				if ( tds540.is_trig_pos )
+					return vars_push( FLOAT_VAR, tds540.trig_pos );
+
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
+				THROW( EXCEPTION )
+
+			case TEST :
+				return vars_push( FLOAT_VAR, tds540.is_trig_pos :
+								  tds540.trig_pos : TDS540_TEST_TRIG_POS );
+
+			case EXPERIMENT :
+				if ( ! tds540_get_trigger_pos( &trig_pos ) )
+					tds540_gpib_failure( );
+
+				tds540.trig_pos = trig_pos;
+				tds540.is_trig_pos = SET;
 				return vars_push( FLOAT_VAR, tds540.trig_pos );
-			else
-				return vars_push( FLOAT_VAR, TDS540_TEST_TRIG_POS );
 		}
-		else if ( I_am == PARENT )
-		{
-			if ( tds540.is_trig_pos )
-				return vars_push( FLOAT_VAR, tds540.trig_pos );
-
-			eprint( FATAL, SET, "%s: Function %s() with no argument can "
-					"only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
-
-		if ( ! tds540_get_trigger_pos( &trig_pos ) )
-			tds540_gpib_failure( );
-
-		tds540.trig_pos = trig_pos;
-		tds540.is_trig_pos = SET;
-		return vars_push( FLOAT_VAR, tds540.trig_pos );
-	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	trig_pos = VALUE( v );
-	vars_pop( v );
 
 	if ( trig_pos < 0.0 || trig_pos > 1.0 )
 	{
@@ -737,10 +654,15 @@ Var *digitizer_trigger_position( Var *v )
 		THROW( EXCEPTION )
 	}
 
+	if ( ( v = vars_pop( v ) ) != NULL )
+		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
+				DEVICE_NAME, Cur_Func );
+
 	tds540.trig_pos = trig_pos;
 	tds540.is_trig_pos = SET;
 
-	if ( I_am == CHILD && ! tds540_set_trigger_pos( tds540.trig_pos ) )
+	if ( FSC2_MODE == EXPERIMENT &&
+		 ! tds540_set_trigger_pos( tds540.trig_pos ) )
 		tds540_gpib_failure( );
 
 	return vars_push( FLOAT_VAR, tds540.trig_pos );
@@ -779,45 +701,40 @@ Var *digitizer_trigger_channel( Var *v )
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
+		switch ( FSC2_MODE )
 		{
-			if ( tds540.is_trigger_channel )
-				return vars_push( INT_VAR, tds540_translate_channel(
-								 TDS540_TO_GENERAL, tds540.trigger_channel ) );
-			else
-				return vars_push( INT_VAR, tds540_translate_channel(
-							   TDS540_TO_GENERAL, TDS540_TEST_TRIG_CHANNEL ) );
-		}
-		else if ( I_am == PARENT )
-		{
-			if ( tds540.is_trigger_channel )
-				return vars_push( INT_VAR, tds540_translate_channel(
+			case PREPARATION :
+				if ( tds540.is_trigger_channel )
+					return vars_push( INT_VAR, tds540_translate_channel(
 								 TDS540_TO_GENERAL, tds540.trigger_channel ) );
 
-			eprint( FATAL, SET, "%s: Function %s() with no argument can "
-					"only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
+				THROW( EXCEPTION )
 
-		return vars_push( INT_VAR, tds540_translate_channel( TDS540_TO_GENERAL,
-											 tds540_get_trigger_channel( ) ) );
-	}
+			case TEST :
+				return vars_push( INT_VAR, tds540_translate_channel(
+								 TDS540_TO_GENERAL, tds540.is_trigger_channel ?
+								 tds540.trigger_channel :
+								 TDS540_TEST_TRIG_CHANNEL ) );
+
+			case EXPERIMENT :
+				return vars_push( INT_VAR, tds540_translate_channel(
+						  TDS540_TO_GENERAL, tds540_get_trigger_channel( ) ) );
+		}
 
 	vars_check( v, INT_VAR );
 	channel = tds540_translate_channel( GENERAL_TO_TDS540, v->val.lval );
-	vars_pop( v );
 
     switch ( channel )
     {
         case TDS540_CH1 : case TDS540_CH2 : case TDS540_CH3 :
 		case TDS540_CH4 : case TDS540_AUX : case TDS540_LIN :
 			tds540.trigger_channel = channel;
-			if ( I_am == CHILD )
+			tds540.is_trigger_channel = SET;
+			if ( FSC2_MODE == EXPERIMENT )
 				tds540_set_trigger_channel( Channel_Names[ channel ] );
-			if ( ! TEST_RUN )
-				tds540.is_trigger_channel = SET;
             break;
 
 		default :
@@ -826,6 +743,10 @@ Var *digitizer_trigger_channel( Var *v )
 					Channel_Names[ channel ], Cur_Func );
 			THROW( EXCEPTION )
     }
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
+				DEVICE_NAME, Cur_Func );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -838,8 +759,9 @@ Var *digitizer_start_acquisition( Var *v )
 {
 	v = v;
 
-	if ( ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 		tds540_start_acquisition( );
+
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -882,7 +804,6 @@ static Var *get_area( Var *v, bool use_cursor )
 
 	vars_check( v, INT_VAR );
 	ch = ( int ) tds540_translate_channel( GENERAL_TO_TDS540, v->val.lval );
-	v = vars_pop( v );
 
 	if ( ch > TDS540_REF4 )
 	{
@@ -895,7 +816,7 @@ static Var *get_area( Var *v, bool use_cursor )
 
 	/* Now check if there's a variable with a window number and check it */
 
-	if ( v != NULL )
+	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check( v, INT_VAR );
 
@@ -911,7 +832,6 @@ static Var *get_area( Var *v, bool use_cursor )
 			if ( w->num == v->val.lval )
 			{
 				w->is_used = SET;
-				v = vars_pop( v );
 				break;
 			}
 			w = w->next;
@@ -927,21 +847,18 @@ static Var *get_area( Var *v, bool use_cursor )
 	else
 		w = NULL;
 
-	if ( v != NULL )
-	{
+	if ( ( v = vars_pop( v ) ) != NULL )
 		eprint( WARN, SET, "%s: Superfluous arguments in call of "
 				"function %s().\n", DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   value */
 
-	if ( I_am == CHILD )
-		return vars_push( FLOAT_VAR, tds540_get_area( ch, w, use_cursor ) );
+	if ( FSC2_MODE != EXPERIMENT )
+		return vars_push( FLOAT_VAR, 1.234e-8 );
 
-	return vars_push( FLOAT_VAR, 1.234e-8 );
+	return vars_push( FLOAT_VAR, tds540_get_area( ch, w, use_cursor ) );
+
 }
 
 
@@ -986,7 +903,6 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 	vars_check( v, INT_VAR );
 	ch = ( int ) tds540_translate_channel( GENERAL_TO_TDS540, v->val.lval );
-	v = vars_pop( v );
 
 	if ( ch > TDS540_REF4 )
 	{
@@ -997,11 +913,9 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 	tds540.channels_in_use[ ch ] = SET;
 
-	v = vars_pop( v );
-
 	/* Now check if there's a variable with a window number and check it */
 
-	if ( v != NULL )
+	if ( ( v  = vars_pop( v ) ) != NULL )
 	{
 		vars_check( v, INT_VAR );
 		if ( ( w = tds540.w ) == NULL )
@@ -1016,7 +930,6 @@ static Var *get_curve( Var *v, bool use_cursor )
 			if ( w->num == v->val.lval )
 			{
 				w->is_used = SET;
-				v = vars_pop( v );
 				break;
 			}
 			w = w->next;
@@ -1032,34 +945,31 @@ static Var *get_curve( Var *v, bool use_cursor )
 	else
 		w = NULL;
 
-	if ( v != NULL )
-	{
+	if ( ( v = vars_pop( v ) ) != NULL )
 		eprint( WARN, SET, "%s: Superfluous arguments in call of "
 				"function %s().\n", DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   array */
 
-	if ( I_am == CHILD )
+	if ( FSC2_MODE == EXPERIMENT )
 	{
 		tds540_get_curve( ch, w, &array, &length, use_cursor );
 		nv = vars_push( FLOAT_ARR, array, length );
-		T_free( array );
-		return nv;
+	}
+	else
+	{
+		if ( tds540.is_rec_len  )
+			length = tds540.rec_len;
+		else
+			length = TDS540_TEST_REC_LEN;
+		array = T_malloc( length * sizeof( double ) );
+		for ( i = 0; i < length; i++ )
+			array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
+		nv = vars_push( FLOAT_ARR, array, length );
+		nv->flags |= IS_DYNAMIC;
 	}
 
-	if ( tds540.is_rec_len  )
-		length = tds540.rec_len;
-	else
-		length = TDS540_TEST_REC_LEN;
-	array = T_malloc( length * sizeof( double ) );
-	for ( i = 0; i < length; i++ )
-		array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
-	nv = vars_push( FLOAT_ARR, array, length );
-	nv->flags |= IS_DYNAMIC;
 	T_free( array );
 	return nv;
 }
@@ -1090,7 +1000,6 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 {
 	WINDOW *w;
 	int ch;
-	Var *nv;
 
 
 	/* The first variable got to be a channel number */
@@ -1104,7 +1013,6 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 
 	vars_check( v, INT_VAR );
 	ch = ( int ) tds540_translate_channel( GENERAL_TO_TDS540, v->val.lval );
-	v = vars_pop( v );
 
 	if ( ch > TDS540_REF4 )
 	{
@@ -1115,11 +1023,9 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 
 	tds540.channels_in_use[ ch ] = SET;
 
-	v = vars_pop( v );
-
 	/* Now check if there's a variable with a window number and check it */
 
-	if ( v != NULL )
+	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check( v, INT_VAR );
 		if ( ( w = tds540.w ) == NULL )
@@ -1134,7 +1040,6 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 			if ( w->num == v->val.lval )
 			{
 				w->is_used = SET;
-				v = vars_pop( v );
 				break;
 			}
 			w = w->next;
@@ -1150,26 +1055,17 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	else
 		w = NULL;
 
-	if ( v != NULL )
-	{
+	if ( ( v = vars_pop( v ) ) != NULL )
 		eprint( WARN, SET, "%s: Superfluous arguments in call of "
 				"function %s().\n", DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   array */
 
-	if ( I_am == CHILD )
-	{
-		nv = vars_push( FLOAT_VAR,
-						tds540_get_amplitude( ch, w, use_cursor ) );
-		return nv;
-	}
+	if ( FSC2_MODE != EXPERIMENT )
+		return vars_push( FLOAT_VAR, 1.23e-7 );
 
-	nv = vars_push( FLOAT_VAR, 1.23e-7 );
-	return nv;
+	return vars_push( FLOAT_VAR, tds540_get_amplitude( ch, w, use_cursor ) );
 }
 
 
@@ -1179,8 +1075,10 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 Var *digitizer_run( Var *v )
 {
 	v = v;
-	if ( ! TEST_RUN )
+
+	if ( FSC2_MODE == EXPERIMENT  )
 		tds540_free_running( );
+
 	return vars_push( INT_VAR,1 );
 }
 
@@ -1216,9 +1114,13 @@ Var *digitizer_lock_keyboard( Var *v )
 				THROW( EXCEPTION )
 			}
 		}
+
+		if ( ( v = vars_pop( v ) ) != NULL )
+			eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
+					DEVICE_NAME, Cur_Func );
 	}
 
-	if ( ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 		tds540_lock_state( lock );
 
 	tds540.lock_state = lock;
