@@ -682,8 +682,8 @@ when the lock-in-amplifier is running in auto-acquisition mode and the
 CH2 display is set to display Y noise.
 @end table
 
-A maximum of 6 different channels can be passed to the function which
-must all be different. If there is more than one argument an
+A maximum of 6 different channels can be passed to the function (which
+must be be different). If there is more than one argument an
 1-dimensional array is returned with as many data as there were
 arguments (in the same sequence as the arguments).
 
@@ -696,29 +696,31 @@ No argument is allowed -- the function returns a floating point value.
 @item lockin_auto_setup()
 @findex lockin_auto_setup()
 This function is only available for the Stanford Research lock-in
-amplifiers @strong{SR810} and @strong{SR830}. Both these lock-in
-amplifiers have the capability to automatically acquire data at fixed
-time intervals (or on receiving an external trigger) and store the data
-into an internal buffer. Using this acquisition mode one can be sure
-that the data have been sampled at well-defined times (in contrast to
-normal measurements where the exact time interval can vary slightly
-depending on how busy the computer is). Data can be acquired in this
-mode only from the channel(s) displayed at the front side, which means
-that the @code{SR810} can only sample only one data type in this mode
-(because it only has one displayable channel) while the @code{SR830} can
-sample two data types simultaneously.
+amplifiers @strong{SR810} and @strong{SR830}. Both lock-in amplifiers
+can automatically acquire data at fixed time intervals (or on receiving
+an external trigger) and store the data into an internal buffer. By
+using this acquisition mode one can be sure that the data have been
+sampled at well-defined times (in contrast to normal measurements where
+the exact timing can vary slightly depending on how busy the computer
+is). Data can be acquired in this mode only from the channel(s)
+displayed at the front side, which means that the @code{SR810} can only
+sample one data type in this mode (because it only has one displayable
+channel), while the @code{SR830} can sample two data channels
+simultaneously.
 
-@code{lockin_auto_setup()} must be used to setup the auto-acquisition
-(if not called auto-acquisition can't be started). The first parameter
-passed to the function is the sample time, i.e.@: the time interval at
-which data are sampled. Sample times can range between @w{1.953125 ms}
-(@w{512 Hz}) and @w{16 s}. Allowed values are powers of 2, multiplied by
-the shortest sample time. As an alternative an @strong{integer} value
-of @code{0} or @code{-1} can be passed to the function. If it is
-@code{0} a sample time equal or larger than the lock-in's time constant
-is used. If @code{-1} is passed to the function it is assumed that an
+@code{lockin_auto_setup()} @strong{must} be invoked to setup
+auto-acquisition (if not called auto-acquisition can't be started). The
+first parameter passed to the function is the sample time, i.e.@: the
+time interval at which data are sampled. Sample times can range between
+@w{1.953125 ms} (@w{512 Hz}) and @w{16 s}. Allowed values are powers of
+2, multiplied by the shortest sample time (i.e.@: only sample rates of
+@w{512 Hz}, @w{256 Hz}, @code{128 Hz} etc.@: can be used). As an
+alternative an @strong{integer} value of @code{0} or @code{-1} can be
+passed to the function. If the vakue is @code{0} the nearest allowed
+sample time equal to or larger than the lock-in's time constant is
+used. If @code{-1} is passed to the function it is assumed that an
 external trigger, applied to the rear trigger input, is going to be used
-- the user has to take care that the trigger input rate is not larger
+-- the user has to take care that the trigger input rate is not larger
 than @w{512 Hz}.
 
 The next one or two parameter define which data type should be sampled
@@ -728,7 +730,7 @@ numbers with exactly the same meaning as the arguments to the function
 @code{lockin_get_data()}. This will also automatically switch the type
 of data displayed on the front side channels to the specified values.
 Not all combinations are possible, the following list shows which
-values are allowed
+combinations are posiible:
 @multitable @columnfractions 0.1 .35 .35
 @item @tab 1st argument @tab 2nd argument
 @item @tab @code{1} (X) @tab @code{2} (Y)
@@ -743,11 +745,10 @@ Additionally, you also may specify a value of @code{0}, indicating that
 the function to be displayed should not be changed, i.e.@: the data type
 already set manually should be used.
 
-This function can be used in all sections of an @code{EDL}
-program. If the auto-acquisition setup is changed during an already
-running auto-acquisition all data stored in the lock-in's internal
-buffer are discarded before the measurement continues using the new
-settings.
+This function can be used in all sections of an @code{EDL} program. If
+the auto-acquisition setup is changed during an already running
+auto-acquisition all data stored in the lock-in's internal buffer are
+discarded before the measurement continues using the new settings.
 
 
 @anchor{lockin_auto_acquisition}
