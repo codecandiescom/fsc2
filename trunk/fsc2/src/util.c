@@ -26,6 +26,7 @@ void eprint( int severity, const char *fmt, ... )
 
 	compilation.error[ severity ] = SET;
 
+	printf( "%c ", severity[ "FSW " ] );   /* Kids, don't do this at home... */
 	va_start( ap, fmt );
 	vprintf( fmt, ap );
 	va_end( ap );
