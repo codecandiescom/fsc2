@@ -207,12 +207,12 @@ typedef struct {
 	Var *Var_List;               /* List of all user declared EDL variables */
 	Var *Var_Stack;              /* Stack of variables used in the evaluation
 									of expressions and function calls */
-	volatile bool do_quit;       /* Becomes set when a running EDL program has
-									to be stopped (because STOP button has
-									been pressed) */
-	bool react_to_do_quit;       /* Is set when program should not react to
-									the STOP button anymore (after the ON_STOP
-									label has been processed) */
+	volatile sig_atomic_t do_quit;  /* Becomes set when a running EDL program
+									has to be stopped (because STOP button
+									has been pressed) */
+	volatile sig_atomic_t react_to_do_quit;  /* Is set when program should not
+									react to the STOP button anymore (after the
+									ON_STOP label has been processed) */
 	FILE_LIST *File_List;        /* List of all files the user opened */
 	int File_List_Len;           /* Length of this file list */
 

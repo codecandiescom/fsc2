@@ -46,10 +46,10 @@ static time_t in_file_mod = 0;
 static char *title = NULL;
 static bool delete_file = UNSET;
 static bool delete_old_file = UNSET;
-static volatile int fsc2_death = 0;
+static volatile sig_atomic_t fsc2_death = 0;
 
 extern FL_resource xresources[ ];    /* from xinit.c */
-volatile bool conn_child_replied;
+volatile sig_atomic_t conn_child_replied;
 
 
 /* Locally used functions */

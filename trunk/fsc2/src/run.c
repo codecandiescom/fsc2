@@ -58,12 +58,12 @@ static void deal_with_program_tokens( void );
 
 /* Locally used global variables used in parent, child and signal handlers */
 
-static volatile bool child_is_quitting;
+static volatile sig_atomic_t child_is_quitting;
 sigjmp_buf alrm_env;
 volatile sig_atomic_t can_jmp_alrm = 0;
 static struct sigaction sigchld_old_act,
 	                    quitting_old_act;
-static int child_return_status;
+static volatile sig_atomic_t child_return_status;
 
 
 /*------------------------------------------------------------------*/

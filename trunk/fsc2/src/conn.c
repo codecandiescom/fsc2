@@ -37,7 +37,7 @@ static void conn_sig_handler( int signo );
 
 static volatile bool is_busy;
 
-extern volatile bool conn_child_replied;
+extern volatile sig_atomic_t conn_child_replied;
 
 
 /* Stuff needed if we're still running an old libc */

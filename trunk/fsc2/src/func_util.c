@@ -38,7 +38,6 @@ static DPoint *eval_display_args( Var *v, int *npoints );
 
 extern sigjmp_buf alrm_env;
 extern volatile sig_atomic_t can_jmp_alrm;
-extern volatile bool is_alrm;
 
 
 /*------------------------------------------------------------------------

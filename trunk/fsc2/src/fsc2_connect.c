@@ -108,7 +108,7 @@ ssize_t read_line( int fd, void *vptr, size_t max_len );
 ssize_t do_read( int fd, char *ptr );
 
 
-volatile int sig_type = 0;
+static volatile sig_atomic sig_type = 0;
 
 
 /*-----------------------------------------------------------*/
