@@ -1007,7 +1007,7 @@ Var *f_wait( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	how_long = VALUE( v->val.lval );
+	how_long = VALUE( v );
 
 	while ( ( v = vars_pop( v ) ) )
 		;
