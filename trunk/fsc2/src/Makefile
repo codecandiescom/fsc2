@@ -2,8 +2,8 @@
 
 c_sources     = fsc2.c pulser.c util.c exceptions.c variables.c vars_util.c \
 			  	func.c func_basic.c func_util.c func_intact.c T.c phases.c  \
-			  	exp.c devices.c run.c gpib_if.c comm.c chld_func.c          \
-			  	graphics.c accept.c graph_handler_1d.c graph_handler_2d.c   \
+			  	exp.c devices.c run.c gpib_if.c chld_func.c graphics.c      \
+				comm.c accept.c graph_handler_1d.c graph_handler_2d.c       \
 			  	graph_cut.c loader.c bugs.c print.c conn.c ipc.c fsc2_rsc.c
 bison_sources = $(wildcard *_parser.y)
 flex_sources  = $(wildcard *_lexer.l)
@@ -16,12 +16,12 @@ export headers             # export headers to the modules Makefile
 
 
 .SUFFIXES:
-.PHONY: all clean hi_res low_res gpib_old gpib_jtt gpib_ni \
-		pion.anorg.chemie.uni-frankfurt.de                 \
-		moebi.physik.fu-berlin.de                          \
-		door.physik.fu-berlin.de                           \
-		crowley.physik.fu-berlin.de                        \
-		crowley.none
+.PHONY:    all clean hi_res low_res gpib_old gpib_jtt gpib_ni \
+		   pion.anorg.chemie.uni-frankfurt.de                 \
+		   moebi.physik.fu-berlin.de                          \
+		   door.physik.fu-berlin.de                           \
+		   crowley.physik.fu-berlin.de                        \
+		   crowley.none
 
 
 all:
@@ -123,37 +123,43 @@ low_res:
 
 
 # How to create the GPIB interface files - they need making if either
-# gpib_if.[ch] doesn't exit or the files they're made from are newer
+# gpib_if.[ch] doesn't exit or the files they're made from are newer.
+# When using the NI driver additionally the parser and lexer for the
+# GPIB configuration file are needed
 
 gpib_old:
-	if [ ! -e gpib_if.c -o ! -e gpib_if.h          \
-		 -o -nt gpib_if_old.c gpib_if.c            \
-		 -o -nt gpib_if_old.h gpib_if.h ]; then    \
-		$(RM) $(RMFLAGS) gpib_if.[ch];             \
-		cp gpib_if_old.c gpib_if.c;                \
-		cp gpib_if_old.h gpib_if.h;                \
+	if [ ! -e gpib_if.c -o ! -e gpib_if.h            \
+		 -o -nt gpib_if_old.c gpib_if.c              \
+		 -o -nt gpib_if_old.h gpib_if.h ]; then      \
+		$(RM) $(RMFLAGS) gpib_if.[ch];               \
+		cp gpib_if_old.c gpib_if.c;                  \
+		cp gpib_if_old.h gpib_if.h;                  \
 	fi
 
 gpib_jtt:
-	if [ ! -e gpib_if.c -o ! -e gpib_if.h          \
-		 -o -nt gpib_if_jtt.c gpib_if.c            \
-		 -o -nt gpib_if_jtt.h gpib_if.h ]; then    \
-		$(RM) $(RMFLAGS) gpib_if.[ch];             \
-		cp gpib_if_jtt.c gpib_if.c;                \
-		cp gpib_if_jtt.h gpib_if.h;                \
+	if [ ! -e gpib_if.c -o ! -e gpib_if.h            \
+		 -o -nt gpib_if_jtt.c gpib_if.c              \
+		 -o -nt gpib_if_jtt.h gpib_if.h ]; then      \
+		$(RM) $(RMFLAGS) gpib_if.[ch];               \
+		cp gpib_if_jtt.c gpib_if.c;                  \
+		cp gpib_if_jtt.h gpib_if.h;                  \
 	fi
 
 gpib_ni:
-	if [ ! -e gpib_if.c -o ! -e gpib_if.h          \
-		 -o -nt gpib_if_ni.c gpib_if.c             \
-		 -o -nt gpib_if_ni.h gpib_if.h             \
-		 -o -nt gpib_parser.yy gpib_parser.y       \
-		 -o -nt gpib_lexer.ll gpib_lexer.l ]; then \
-		$(RM) $(RMFLAGS) gpib_if.[ch];             \
-		cp gpib_if_ni.c gpib_if.c;                 \
-		cp gpib_if_ni.h gpib_if.h;                 \
-		cp gpib_parser.yy gpib_parser.y;           \
-		cp gpib_lexer.ll gpib_lexer.l;             \
+	if [ ! -e gpib_if.c -o ! -e gpib_if.h            \
+		 -o -nt gpib_if_ni.c gpib_if.c               \
+		 -o -nt gpib_if_ni.h gpib_if.h ]; then       \
+		$(RM) $(RMFLAGS) gpib_if.[ch];               \
+		cp gpib_if_ni.c gpib_if.c;                   \
+		cp gpib_if_ni.h gpib_if.h;                   \
+	fi
+	if [ ! -e gpib_parser.y                          \
+		 -o -nt gpib_parser.yy gpib_parser.y ]; then \
+		cp gpib_parser.yy gpib_parser.y;             \
+	fi
+	if [ ! -e gpib_lexer.l                           \
+	     -o -nt gpib_lexer.ll gpib_lexer.l ]; then   \
+		cp gpib_lexer.ll gpib_lexer.l;               \
 	fi
 
 
