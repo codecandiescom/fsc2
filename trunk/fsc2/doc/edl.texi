@@ -1038,7 +1038,7 @@ the factorial of 6 also could have been written as
   I = 6;
   Fact = 1;
 
-  UNLESS I == 0 @{
+  UNTIL I == 0 @{
       Fact *= I;
       I -= 1;
   @}
