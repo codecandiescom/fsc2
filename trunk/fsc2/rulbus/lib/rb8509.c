@@ -75,8 +75,8 @@ struct RULBUS_ADC12_CARD {
 #define ADC12_DELAY                    18            /* 18 us */
 
 
-static RULBUS_ADC12_CARD *rulbus_adc12_card;
-static int rulbus_num_adc12_cards;
+static RULBUS_ADC12_CARD *rulbus_adc12_card = NULL;
+static int rulbus_num_adc12_cards = 0;
 
 
 static RULBUS_ADC12_CARD *rulbus_adc12_card_find( int handle );

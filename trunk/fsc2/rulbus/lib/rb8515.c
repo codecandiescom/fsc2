@@ -36,8 +36,8 @@ struct RULBUS_CLOCK_CARD {
 };
 
 
-static RULBUS_CLOCK_CARD *rulbus_clock_card;
-static int rulbus_num_clock_cards;
+static RULBUS_CLOCK_CARD *rulbus_clock_card = NULL;
+static int rulbus_num_clock_cards = 0;
 
 
 static RULBUS_CLOCK_CARD *rulbus_clock_card_find( int handle );

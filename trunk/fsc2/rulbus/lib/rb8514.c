@@ -59,8 +59,8 @@ struct RULBUS_DELAY_CARD {
 #define INVALID_DELAY             ( RULBUS_DELAY_CARD_MAX + 1 )
 
 
-static RULBUS_DELAY_CARD *rulbus_delay_card;
-static int rulbus_num_delay_cards;
+static RULBUS_DELAY_CARD *rulbus_delay_card = NULL;
+static int rulbus_num_delay_cards = 0;
 
 
 static RULBUS_DELAY_CARD *rulbus_delay_card_find( int handle );

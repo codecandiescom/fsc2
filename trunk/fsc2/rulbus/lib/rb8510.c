@@ -50,8 +50,8 @@ static double Vmin[ ] = { 0.0, 0.0, 0.0, -5.12, -10.24 };
 #define DAC12_LSB    1
 
 
-static RULBUS_DAC12_CARD *rulbus_dac12_card;
-static int rulbus_num_dac12_cards;
+static RULBUS_DAC12_CARD *rulbus_dac12_card = NULL;
+static int rulbus_num_dac12_cards = 0;
 
 
 static RULBUS_DAC12_CARD *rulbus_dac12_card_find( int handle );
