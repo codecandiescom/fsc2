@@ -203,9 +203,8 @@ static Var *vars_float_var_mult( Var *v1, Var *v2 )
 		case INT_ARR :
 			new_var = vars_push( FLOAT_ARR, NULL, v2->len );
 
-			if ( v1->val.dval != 1.0 )
-				for ( i = 0; i < new_var->len; i++ )
-					new_var->val.dpnt[ i ]
+			for ( i = 0; i < new_var->len; i++ )
+				new_var->val.dpnt[ i ]
 								 = v1->val.dval * ( double ) v2->val.lpnt[ i ];
 
 			vars_pop( v1 );
