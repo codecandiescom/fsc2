@@ -588,8 +588,7 @@ static void print_header( FILE *fp, char *name )
 			     "        (fsc2) cw sub 4 sub exch m\n"
 			     "        1 -0.025 0 { dup dup srgb gs (fsc2) show gr\n"
 			     "        -0.025 0.025 rm } for\n"
-			     "        1 1 1 srgb (fsc2) show gr } b\n"
-			     "%%%%EndProlog\n" );
+			     "        1 1 1 srgb (fsc2) show gr } b\n" );
 	else
 		fprintf( fp, 
 			     "/fsc2 { gs /Times-Roman 6 sf\n"
@@ -597,9 +596,11 @@ static void print_header( FILE *fp, char *name )
 			     "        (fsc2) cw sub 4 sub exch m\n"
 			     "        1 -0.025 0 { sgr gs (fsc2) show gr\n"
 			     "        -0.025 0.025 rm } for\n"
-			     "        1 setgray (fsc2) show gr } b\n"
-			     "%%%%EndProlog\n" );
+			     "        1 setgray (fsc2) show gr } b\n" );
 
+	/* Done with the header, tell the Postscript interpreter */
+
+	frintf( fp, "%%%%EndProlog\n" );
 
 	/* Rotate and shift for landscape format, scale to mm units, set font
 	   and draw logo, date and user name */
