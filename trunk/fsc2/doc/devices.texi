@@ -236,7 +236,7 @@ For the @strong{AEG} magnets this is only a convenience function that
 just calls a function supplied by the gaussmeter used together with the
 magnet power supply to determine the current field. In contrast, for the
 @strong{ER032M Field Controller} this function returns the current field
-setting.
+setting in Gauss.
 
 @end table
 
