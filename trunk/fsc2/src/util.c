@@ -249,7 +249,7 @@ void eprint( int severity, const char *fmt, ... )
 		cp = buffer;
 		space_left = BROWSER_MAXLINE - 1;
 	}
-	else
+	else                               // simple test run
 	{
 		if ( severity != NO_ERROR )
 			fprintf( stdout, "%c ", severity[ "FSW" ] );      /* Hehe... */
@@ -257,6 +257,7 @@ void eprint( int severity, const char *fmt, ... )
 		va_start( ap, fmt );
 		vfprintf( stdout, fmt, ap );
 		va_end( ap );
+		fprintf( stdout, "\n" );
 		fflush( stdout );
 	}
 }
