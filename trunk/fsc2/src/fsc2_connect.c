@@ -26,15 +26,15 @@
   which fsc2 is supposed to listen. If this succeeds it sends fsc2 the
   invoking users UID, followed by a letter that depends on the name the
   program was invocated with - if it was started as 'fsc2_start' it sends an
-  'S', if as 'fsc2_test' it sends 'T' and if invocated as either 'fsc2_load'
-  or 'fsc2_connect' it sends an 'L', thus indicating what fsc2 is supposed to
-  do, i.e. either start the EDL program immediately, to test it or only to
-  load it. It also sends a second letter, 'd' to tell fsc2 to delete the
-  temporary file when it's done with it. Finally it sends the file name.
-  fsc2 can react in different ways: It can indicate that it is either run by
-  a user with a different UID, that it is busy, or that it couldn't read the
-  messages, which in turn is returned by this program via its return value
-  (see list below).
+  'S', if as 'fsc2_test' it sends 'T', if as 'fsc2_iconic_start' it sends 'I'
+  and if invocated as either 'fsc2_load' or 'fsc2_connect' it sends an 'L',
+  thus indicating what fsc2 is supposed to do, i.e. either start the EDL
+  program immediately, to test it or only to load it. It also sends a second
+  letter, 'd' to tell fsc2 to delete the temporary file when it's done with
+  it. Finally it sends the file name. fsc2 can react in different ways: It
+  can indicate that it is either run by a user with a different UID, that it
+  is busy, or that it couldn't read the messages, which in turn is returned
+  by this program via its return value (see list below).
 
   If, on the other hand, the program finds that fsc2 isn't running (because
   it can't connect to fsc2) it will try to start fsc2 with the '--delete'
@@ -242,7 +242,7 @@ void start_fsc2( char *pname, char *fname )
 	int ac = 0;
 	char *prog_name;
 	pid_t new_pid;
-	char flags[ 4 ][ 9 ] = { "--delete", "-s", "-S", "-T" };
+	char flags[ 5 ][ 9 ] = { "--delete", "-s", "-S", "-T", "-I" };
 
 
 	if ( NULL == ( av[ 0 ] =
@@ -270,6 +270,8 @@ void start_fsc2( char *pname, char *fname )
 		av[ ac++ ] = flags[ 2 ];
 	else if ( ! strcmp( prog_name, "fsc2_test" ) )
 		av[ ac++ ] = flags[ 3 ];
+	else if ( ! strcmp( prog_name, "fsc2_iconic_start" ) )
+		av[ ac++ ] = flags[ 4 ];
 	else if ( strcmp( prog_name, "fsc2_load" ) &&
 			  strcmp( prog_name, "fsc2_connect" ) )
 	{
@@ -353,10 +355,11 @@ void contact_fsc2( int sock_fd, char *pname, char *fname )
 		clean_up( fname, sock_fd, -1 );
 
 	/* Assemble second string to send, the first character is the method ('S'
-	   for start, 'T' for test or 'L' for load). The method is deduced from
-	   the name the program was called with - if a non-standard name was used
-	   this is an error. The second character is always 'd', telling fsc2 to
-	   delete the temporary files when it's done with it */
+	   for start, 'T' for test, 'I' to start with the main window in iconic
+	   state or 'L' for load). The method is deduced from the name the program
+	   was called with - if a non-standard name was used this is an error. The
+	   second character is always 'd', telling fsc2 to delete the temporary
+	   files when it's done with it. */
 
 	if ( ( prog_name = strrchr( pname, '/' ) ) != NULL )
 		prog_name++;
@@ -368,6 +371,8 @@ void contact_fsc2( int sock_fd, char *pname, char *fname )
 		line[ 0 ] = 'S';
 	if ( ! strcmp( prog_name, "fsc2_test" ) )
 		line[ 0 ] = 'T';
+	if ( ! strcmp( prog_name, "fsc2_iconic_start" ) )
+		line[ 0 ] = 'I';
 	if ( ! strcmp( prog_name, "fsc2_load" ) ||
 		 ! strcmp( prog_name, "fsc2_connect" ) )
 		line[ 0 ] = 'L';
