@@ -6,7 +6,7 @@
 #define HP8647A_MAIN
 
 #include "hp8647a.h"
-#include "gpib.h"
+#include "gpib_if.h"
 
 
 static HP8647A hp8647a_backup;

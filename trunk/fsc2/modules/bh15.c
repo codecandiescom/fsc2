@@ -3,7 +3,7 @@
 */
 
 #include "fsc2.h"
-#include "gpib.h"
+#include "gpib_if.h"
 
 
 int bh15_init_hook( void );

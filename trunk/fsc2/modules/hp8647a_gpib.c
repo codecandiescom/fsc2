@@ -14,7 +14,7 @@
 
 
 #include "hp8647a.h"
-#include "gpib.h"
+#include "gpib_if.h"
 
 
 static void hp8647a_comm_failure( void );

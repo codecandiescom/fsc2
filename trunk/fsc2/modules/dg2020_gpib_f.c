@@ -116,7 +116,7 @@
 
 
 #include "dg2020_f.h"
-#include "gpib.h"
+#include "gpib_if.h"
 
 typedef struct _dg2020_store_ {
 	int channel;

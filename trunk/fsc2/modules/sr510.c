@@ -9,7 +9,7 @@
 
 
 #include "fsc2.h"
-#include "gpib.h"
+#include "gpib_if.h"
 
 
 /* name of device as given in GPIB configuration file /etc/gpib.conf */
