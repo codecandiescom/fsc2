@@ -45,20 +45,20 @@ bool hfs9000_do_update( void )
 	if ( ! hfs9000_is_needed )
 		return OK;
 
-	/* Resort the pulses,check that the new pulse settings are reasonable
+	/* Resort the pulses, check that the new pulse settings are reasonable
 	   and finally commit all changes */
 
 	if ( hfs9000.is_running && hfs9000.stop_on_update )
 	{
 		restart = SET;
-		if ( ! TEST_RUN )
+		if ( FSC2_MODE == EXPERIMENT )
 			hfs9000_run( STOP );
 	}
 
-	state = hfs9000_update_pulses( TEST_RUN );
+	state = hfs9000_update_pulses( FSC2_MODE == TEST );
 
 	hfs9000.needs_update = UNSET;
-	if ( restart && ! TEST_RUN )
+	if ( restart && FSC2_MODE == EXPERIMENT )
 		hfs9000_run( START );
 
 	return state;
@@ -144,9 +144,9 @@ void hfs9000_do_checks( FUNCTION *f )
 		{
 			f->max_seq_len = Ticks_max( f->max_seq_len, p->pos + p->len );
 			if ( f->delay + f->max_seq_len > 
-				         ( TEST_RUN ? MAX_PULSER_BITS : hfs9000.max_seq_len ) )
+				( FSC2_MODE == TEST ? MAX_PULSER_BITS : hfs9000.max_seq_len ) )
 			{
-				if ( TEST_RUN )
+				if ( FSC2_MODE == TEST )
 					eprint( FATAL, SET, "%s: Pulse sequence for function "
 							"`%s' does not fit into the pulsers memory.\n",
 							pulser_struct.name, Function_Names[ f->self ] );
