@@ -155,7 +155,8 @@ void tds520a_do_pre_exp_checks( void )
 			cs = ( cs / tb ) * tb;
 			dcs = cs * fac / TDS_POINTS_PER_DIV;
 			eprint( WARN, "%s: Start point of window %ld had to be readjusted "
-					"to %s.\n", DEVICE_NAME, w->num, tds520_ptime( dcs ) );
+					"from %s to %s.\n", DEVICE_NAME, w->num,
+					tds754a_ptime( w->start ), tds520_ptime( dcs ) );
 			w->start = dcs;
 		}
 
@@ -174,16 +175,19 @@ void tds520a_do_pre_exp_checks( void )
 
 		if ( labs( cd ) < tb )     /* window smaller than one point ? */
 		{
-			w->width = tds520a.timebase / TDS_POINTS_PER_DIV;
-			eprint( SEVERE, "%s: Width of window %ld had to be readjusted to "
-					"%s.\n", DEVICE_NAME, w->num, tds520a_ptime( w->width  ) );
+			dcd = tds520a.timebase / TDS_POINTS_PER_DIV;
+			eprint( SEVERE, "%s: Width of window %ld had to be readjusted "
+					"from %s to %s.\n", DEVICE_NAME, w->num,
+					tds520a_ptime( w->width  ), tds520a_ptime( dcd ) );
+			w->width = dcd;
 		}
 		else if ( cd % tb )        /* window width not multiple of a point ? */
 		{
 			cd = ( cd / tb ) * tb;
 			dcd = cd * fac / TDS_POINTS_PER_DIV;
-			eprint( WARN, "%s: Width of window %ld had to be readjusted to "
-					"%s.\n", DEVICE_NAME, w->num, tds520a_ptime( dcd ) );
+			eprint( WARN, "%s: Width of window %ld had to be readjusted from "
+					"%s to %s.\n", DEVICE_NAME, w->num,
+					tds520a_ptime( w->width  ), tds520a_ptime( dcd ) );
 			w->width = dcd;
 		}
 
