@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  *
- *  Copyright (C) 2003-2004 Jens Thoms Toerring
+ *  Copyright (C) 2003-2005 Jens Thoms Toerring
  *
  *  Library for Rulbus (Rijksuniversiteit Leiden BUS)
  *

@@ -3,7 +3,7 @@
  * 
  *  Driver for National Instruments DAQ boards based on a DAQ-STC
  * 
- *  Copyright (C) 2003-2004 Jens Thoms Toerring
+ *  Copyright (C) 2003-2005 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

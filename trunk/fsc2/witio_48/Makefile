@@ -4,7 +4,7 @@
 #
 # Makefile for Wasco WITIO-48 ISA DIO card module and library
 #
-# Copyright (C) 2003-2004 Jens Thoms Toerring
+# Copyright (C) 2003-2005 Jens Thoms Toerring
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

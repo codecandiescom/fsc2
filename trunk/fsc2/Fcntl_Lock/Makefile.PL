@@ -3,7 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 #
-# Copyright (C) 2002-2004 Jens Thoms Toerring
+# Copyright (C) 2002-2005 Jens Thoms Toerring
 #               <Jens.Toerring@physik.fu-berlin.de>
 #
 # $Id$
