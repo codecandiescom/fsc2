@@ -103,7 +103,7 @@ static double er032m_set_sw( double sweep_width );
 static double er032m_get_sw( void );
 static int er032m_set_swa( int sweep_address );
 #if 0
-static int er032m_get_swa( void );        // currently not needed
+static int er032m_get_swa( void );        /* currently not needed */
 #endif
 static void er032m_test_leds( void );
 static void er032m_failure( void );

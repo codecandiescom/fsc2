@@ -603,14 +603,14 @@ static PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth,
 static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 												PULSE *p, int nth )
 {
-	PULSE **pppl;                 // list of phase pulses for previous pulse
-	int ppp_num;                  // and the length of this list
+	PULSE **pppl;                 /* list of phase pulses for previous pulse */
+	int ppp_num;                  /* and the length of this list */
 	PULSE *pp, *pn;
 	int i;
 	static PULSE *for_pulse;
 
 
-	if ( nth == 0 )                           // for first pulse ?
+	if ( nth == 0 )                           /* for first pulse ? */
 	{
 		/* We try to start the phase pulse for the first pulse as early as
 		   possible, i.e. even within the delay for the phase function */
@@ -707,7 +707,7 @@ static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 	   in the test run, thus we flag our missing knowledge by setting the
 	   length to a negative value */
 
-	if ( nth == p->function->num_active_pulses - 1 )    // last active pulse ?
+	if ( nth == p->function->num_active_pulses - 1 )  /* last active pulse ? */
 		np->len = np->initial_len = -1;
 	else
 	{

@@ -1002,7 +1002,7 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 
 	switch ( comp_type )
 	{
-#if ! defined IS_STILL_LIBC1     // libc2 *has* nextafter()
+#if ! defined IS_STILL_LIBC1     /* libc2 *has* nextafter() */
 		case COMP_EQUAL :
 			if ( v1->type == INT_VAR && v2->type == INT_VAR )
 				new_var = vars_push( INT_VAR, v1->INT == v2->INT );

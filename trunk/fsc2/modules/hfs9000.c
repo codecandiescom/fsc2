@@ -458,7 +458,7 @@ Var *pulser_shift( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		if ( p->pos == p->old_pos )       // nothing really changed ?
+		if ( p->pos == p->old_pos )       /* nothing really changed ? */
 			p->is_old_pos = UNSET;
 
 		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );

@@ -601,65 +601,69 @@ int gpib_trigger( int device )
 /*  * SUCCESS: OK, FAILURE: error                                  */
 /*-----------------------------------------------------------------*/
 
-//int gpib_wait( int device, int mask, int *status )
-//{
-//	  int old_timeout = timeout;
-//	  char *dev_name;
-//
-//
-//	  TEST_BUS_STATE;              /* bus not initialised yet ? */
-//
-//	  if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
-//	  {
-//		  sprintf( gpib_error_msg, "Call of gpib_wait for unknown device "
-//				   "(device number %d)\n", device );
-//		  return FAILURE;
-//	  }
-//
-//	  if ( ll > LL_ERR )
-//	  {
-//		  gpib_log_function_start( "gpib_wait", dev_name );
-//		  seteuid( Internals.EUID );
-//		  fprintf( gpib_log, "wait mask = 0x0%X\n", mask );
-//		  if ( mask & ~( GPIB_TIMO | GPIB_END | GPIB_RQS | GPIB_CMPL ) )
-//			  fprintf( gpib_log, "=> Setting mask to 0x%X <=\n",
-//					   mask & ( GPIB_TIMO | GPIB_END | GPIB_RQS | GPIB_CMPL ) );
-//		  fflush( gpib_log );
-//		  seteuid( getuid( ) );
-//	  }
-//
-//	  mask &= GPIB_TIMO | GPIB_END | GPIB_RQS | GPIB_CMPL;    /* remove invalid bits */
-//
-//	  if ( ! ( mask & GPIB_TIMO ) && timeout != TNONE )
-//		  gpib_timeout( device, TNONE );
-//
-//	  gpib_wait( device, mask );
-//
-//	  if ( status != NULL )
-//		  *status = gpib_status;
-//
-//	  if ( ll > LL_ERR )
-//	  {
-//		  seteuid( Internals.EUID );
-//		  fprintf( gpib_log, "wait return status = 0x0%X\n", gpib_status );
-//		  seteuid( getuid( ) );
-//	  }
-//
-//	  if ( ! ( mask & GPIB_TIMO ) && old_timeout != TNONE )
-//		  gpib_timeout( device, old_timeout );
-//
-//	  if ( ll > LL_NONE )
-//		  gpib_log_function_end( "gpib_wait", dev_name );
-//
-//	  if ( gpib_status & GPIB_ERR )
-//	  {
-//		  sprintf( gpib_error_msg, "Can't wait for device %s, status = 0x%x",
-//				   dev_name, gpib_status );
-//		  return FAILURE;
-//	  }
-//
-//	  return SUCCESS;
-//}
+#if 0
+
+int gpib_wait( int device, int mask, int *status )
+{
+	int old_timeout = timeout;
+	char *dev_name;
+
+
+	TEST_BUS_STATE;              /* bus not initialised yet ? */
+
+	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+	{
+		sprintf( gpib_error_msg, "Call of gpib_wait for unknown device "
+				 "(device number %d)\n", device );
+		return FAILURE;
+	}
+
+	if ( ll > LL_ERR )
+	{
+		gpib_log_function_start( "gpib_wait", dev_name );
+		seteuid( Internals.EUID );
+		fprintf( gpib_log, "wait mask = 0x0%X\n", mask );
+		if ( mask & ~( GPIB_TIMO | GPIB_END | GPIB_RQS | GPIB_CMPL ) )
+			fprintf( gpib_log, "=> Setting mask to 0x%X <=\n",
+					 mask & ( GPIB_TIMO | GPIB_END | GPIB_RQS | GPIB_CMPL ) );
+		fflush( gpib_log );
+		seteuid( getuid( ) );
+	}
+
+	mask &= GPIB_TIMO | GPIB_END | GPIB_RQS | GPIB_CMPL;    /* remove invalid bits */
+
+	if ( ! ( mask & GPIB_TIMO ) && timeout != TNONE )
+		gpib_timeout( device, TNONE );
+
+	gpib_wait( device, mask );
+
+	if ( status != NULL )
+		*status = gpib_status;
+
+	if ( ll > LL_ERR )
+	{
+		seteuid( Internals.EUID );
+		fprintf( gpib_log, "wait return status = 0x0%X\n", gpib_status );
+		seteuid( getuid( ) );
+	}
+
+	if ( ! ( mask & GPIB_TIMO ) && old_timeout != TNONE )
+		gpib_timeout( device, old_timeout );
+
+	if ( ll > LL_NONE )
+		gpib_log_function_end( "gpib_wait", dev_name );
+
+	if ( gpib_status & GPIB_ERR )
+	{
+		sprintf( gpib_error_msg, "Can't wait for device %s, status = 0x%x",
+				 dev_name, gpib_status );
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
+#endif
 
 
 /*---------------------------------------------------*/

@@ -221,7 +221,7 @@ bool dg2020_find_phase_pulse( PULSE *p, PULSE ***pl, int *num )
 	PULSE *pp = dg2020_Pulses;
 
 
-	fsc2_assert( p->num >= 0 );    // is it really a normal pulse ?
+	fsc2_assert( p->num >= 0 );    /* is it really a normal pulse ? */
 
 	*pl = NULL;
 	*num = 0;

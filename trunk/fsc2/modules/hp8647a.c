@@ -61,7 +61,7 @@ int hp8647a_init_hook( void )
 	hp8647a.use_table = UNSET;
 	hp8647a.att_table = NULL;
 	hp8647a.att_table_len = 0;
-	hp8647a.real_attenuation = MAX_ATTEN - 100.0;  // invalid value !
+	hp8647a.real_attenuation = MAX_ATTEN - 100.0;  /* invalid value ! */
 
 	hp8647a.att_ref_freq = DEF_ATT_REF_FREQ;
 

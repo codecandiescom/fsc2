@@ -60,8 +60,8 @@ static char *pc_string = NULL;
 static bool get_print_file( FILE **fp, char **name, long data );
 static void get_print_comm( void );
 static void start_printing( FILE *fp, char *name, long what );
-static void start_printing_1d( FILE *fp, char *name, long what );
-static void start_printing_2d( FILE *fp, char *name );
+static void do_printing_1d( FILE *fp, char *name, long what );
+static void do_printing_2d( FILE *fp, char *name );
 static FILE *spawn_print_prog( const char *command );
 static void print_header( FILE *fp, char *name );
 static void eps_make_scale( FILE *fp, void *cv, int coord, long dim );
@@ -475,9 +475,9 @@ static void start_printing( FILE *fp, char *name, long what )
 		_exit( EXIT_FAILURE );
 
 	if ( what == 2 )
-		start_printing_2d( fp, name );
+		do_printing_2d( fp, name );
 	else
-		start_printing_1d( fp, name, what );
+		do_printing_1d( fp, name, what );
 
 	fclose( fp );
 	_exit( EXIT_SUCCESS );
@@ -539,10 +539,16 @@ static FILE *spawn_print_prog( const char *command )
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*------------------------------------------------------------*/
+/* This function writes out the Postscript code for all kinds */
+/* of 1D graphics, i.e. the normal 1D window as well as cross */
+/* section windows. What it got to output it sees from the    */
+/* last argument which is set to 1 for a normal 1D window, to */
+/* 0 for a cross section in x-direction and -1 for a cross    */
+/* section in y-direction.                                    */
+/*------------------------------------------------------------*/
 
-static void start_printing_1d( FILE *fp, char *name, long what )
+static void do_printing_1d( FILE *fp, char *name, long what )
 {
 	int i;
 
@@ -609,10 +615,14 @@ static void start_printing_1d( FILE *fp, char *name, long what )
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* This function writes out the Postscript code for 2D windows. */
+/* Because I wasn't able to come up yet with any useful method  */
+/* on how to draw a contour in b&w this part has currently been */
+/* disabled (the user can't select b&w).                        */
+/*--------------------------------------------------------------*/
 
-static void start_printing_2d( FILE *fp, char *name )
+static void do_printing_2d( FILE *fp, char *name )
 {
 	print_header( fp, name );
 
@@ -754,8 +764,8 @@ static void print_header( FILE *fp, char *name )
 
 	fprintf( fp, "%%%%EndProlog\n\n" );
 
-	/* Try to setup the font so that it also supports umlauts etc., thanks
-	   to Adobe Systems Inc., "PostScript Language Reference", 3rd edition */
+	/* Try to setup the font that also supports umlauts etc., thanks to
+	   Adobe Systems Inc., "PostScript Language Reference", 3rd edition */
 
 	fprintf( fp, "/Times-Roman findfont\n"
 				 "dup length dict begin\n"

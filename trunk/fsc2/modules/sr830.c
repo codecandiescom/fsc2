@@ -44,7 +44,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define SR830_TEST_MOD_FREQUENCY 5.0e3
 #define SR830_TEST_MOD_LEVEL     1.0
 #define SR830_TEST_HARMONIC      1
-#define SR830_TEST_MOD_MODE      1         // this must be INTERNAL, i.e. 1
+#define SR830_TEST_MOD_MODE      1         /* this must be INTERNAL, i.e. 1 */
 
 #define NUM_ADC_PORTS         4
 #define NUM_DAC_PORTS         4
@@ -77,8 +77,8 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define DSP_CH_AUX2           6
 #define DSP_CH_AUX3           7
 #define DSP_CH_AUX4           8
-#define DSP_CH_Xnoise         9         // only to be used in auto mode
-#define DSP_CH_Ynoise        10         // only to be used in auto mode
+#define DSP_CH_Xnoise         9         /* only to be used in auto mode */
+#define DSP_CH_Ynoise        10         /* only to be used in auto mode */
 
 #define MAX_DATA_AT_ONCE      6
 #define MAX_STORED_DATA   16383

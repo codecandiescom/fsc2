@@ -250,8 +250,8 @@ void dg2020_reorganize_phases( FUNCTION *f, bool flag )
 void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 								PULSE *p, int nth, bool flag )
 {
-	PULSE **pppl;                 // list of phase pulses for previous pulse
-	int ppp_num;                  // and the length of this list
+	PULSE **pppl;                 /* list of phase pulses for previous pulse */
+	int ppp_num;                  /* and the length of this list */
 	PULSE *pp, *pn;
 	int i;
 	static PULSE *for_pulse = NULL;
@@ -454,10 +454,10 @@ set_length:
 		phase_p->is_old_len = SET;
 	}
 
-	if ( nth == p->function->num_pulses - 1 ||
-		 ! p->function->pulses[ nth  + 1 ]->is_active )  // last active pulse ?
+	if ( nth == p->function->num_pulses - 1 ||        /* last active pulse ? */
+		 ! p->function->pulses[ nth  + 1 ]->is_active )
 	{
-		if ( flag )                // in test run
+		if ( flag )                /* in test run */
 			phase_p->len = -1;
 		else
 			/* Take care: the variable 'dg2020.max_seq_len' already

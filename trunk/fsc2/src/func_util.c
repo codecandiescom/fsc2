@@ -62,10 +62,10 @@ Var *f_print( Var *v )
 	char *ep;
 	Var *cv;
 	char *sptr;
-	int in_format,               // number of wild cards characters
-		on_stack,                // number of arguments (beside format string )
-		percs,                   // number of '%' characters
-		n = 0;                   // number of variables printed
+	int in_format,            /* number of wild cards characters */
+		on_stack,             /* number of arguments (beside format string ) */
+		percs,                /* number of '%' characters */
+		n = 0;                /* number of variables printed */
 	bool print_anyway = UNSET;
 
 

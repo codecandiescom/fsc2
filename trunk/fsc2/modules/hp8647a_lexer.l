@@ -277,7 +277,7 @@ static void hp8647a_new_table_entry( int type, double val )
 		/* Check that we're not expecting another attenuation or frequency
 		   while the end of the file is already reached */
 
-		if ( is_freq ^ is_att )                 // one of them is still set ?
+		if ( is_freq ^ is_att )                /* one of them is still set ? */
 		{
 			print( FATAL, "Missing final %s in table file '%s'.\n",
 				   is_freq ? "attenuation" : "frequency", hp8647a.table_file );
@@ -365,7 +365,7 @@ static void hp8647a_new_table_entry( int type, double val )
 	    hp8647a.att_table[ hp8647a.att_table_len ].freq = val;
 		is_freq = SET;
 	}
-	else                // IS_ATT
+	else                /* IS_ATT */
 	{
 		if ( val > hp8647a.min_attenuation - MAX_ATTEN )
 		{
