@@ -32,8 +32,8 @@ static void do_measurement( void );
 
 /* Locally used global variables used in parent, child and signal handlers */
 
-static bool child_is_ready;
-static volatile int child_is_quitting;
+static volatile bool child_is_ready;
+static volatile bool child_is_quitting;
 
 
 
@@ -105,6 +105,7 @@ bool run( void )
 		run_exit_hooks( );
 		if ( need_GPIB )
 			gpib_shutdown( );
+		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 		return FAIL;
 	}
 
@@ -118,40 +119,42 @@ bool run( void )
 
 	fl_add_signal_callback( NEW_DATA, new_data_handler, NULL );
 	fl_add_signal_callback( QUITTING, quitting_handler, NULL );
+
+	fl_remove_signal_callback( SIGCHLD );
 	fl_add_signal_callback( SIGCHLD, run_sigchld_handler, NULL );
+
+	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 
 	if ( ( child_pid = fork( ) ) == 0 )     /* fork the child */
 		run_child( );
 
 	close_all_files( );              /* only child is going to write to them */
 
+	close( pd[ READ ] );
+	close( pd[ 3 ] );
+	pd[ READ ] = pd[ 2 ];
+
 	if ( child_pid != -1 )           /* if fork() succeeded */
-	{
-		usleep( 100000 );
-		close( pd[ 0 ] );
-		close( pd[ 3 ] );
-		pd[ 0 ] = pd[ 2 ];
-		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 		return OK;
-	}
 
 	switch ( errno )
 	{
 		case EAGAIN :
 			eprint( FATAL, "Not enough system resources left to run the "
 					"experiment.\n" );
+			fl_show_alert( "FATAL Error", "Not enough system resources",
+						   "left to run the experiment.", 1 );			
 			break;
 
 		case ENOMEM :
 			eprint( FATAL, "Not enough memory left to run the experiment.\n" );
+			fl_show_alert( "FATAL Error", "Not enough memory left",
+						   "to run the experiment.", 1 );			
 			break;
 	}
 
 	child_pid = 0;
 
-	close( pd[ 0 ] );
-	close( pd[ 3 ] );
-	pd[ 0 ] = pd[ 2 ];
 	end_comm( );
 
 	fl_remove_signal_callback( SIGCHLD );
@@ -159,7 +162,6 @@ bool run( void )
 	run_exit_hooks( );
 	if ( need_GPIB )
 		gpib_shutdown( );
-	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 	stop_measurement( NULL, 1 );
 	return FAIL;
 }
@@ -168,7 +170,7 @@ bool run( void )
 /*-------------------------------------------------------------------*/
 /* new_data_handler() is the handler for the NEW_DATA signal sent by */
 /* the child to the parent if there are new data - only exception:   */
-/* the first instance of the signal (when 'child_is_ready' is still  */
+/* the first instance of the signal (while 'child_is_ready' is still */
 /* zero) just tells the parent that the child has now installed its  */
 /* signal handlers and is ready to accept signals. The handler       */
 /* always sends the DO_SEND signal to the child to allow it to       */
@@ -184,7 +186,7 @@ void new_data_handler( int sig_type, void *data )
 	if ( sig_type != NEW_DATA )
 		return;
 
-	if ( ! child_is_ready )         /* is this the very first signal ? */
+	if ( ! child_is_ready )         /* if this is the very first signal */
 	{
 		child_is_ready = SET;
 		kill( child_pid, DO_SEND );
@@ -302,7 +304,6 @@ void stop_measurement( FL_OBJECT *a, long b )
 		else                             /* child has already exited */
 		{
 			stop_graphics( );
-			fl_set_object_helper( run_form->stop, "Stop the running program" );
 			set_buttons_for_run( 1 );
 		}
 
@@ -319,9 +320,12 @@ void stop_measurement( FL_OBJECT *a, long b )
 	if ( need_GPIB )
 		gpib_shutdown( );
 
+	fl_freeze_form( run_form->run );
 	fl_set_object_label( run_form->stop, "Close" );
-	fl_set_object_helper( run_form->stop, "Close the window" );
+	fl_set_button_shortcut( run_form->stop, "C", 1 );
+	fl_set_object_helper( run_form->stop, "Remove this window" );
 	fl_set_cursor( FL_ObjWin( run_form->stop ), XC_left_ptr );
+	fl_unfreeze_form( run_form->run );
 }
 
 
@@ -393,9 +397,9 @@ void run_child( void )
 
     /* Set up pipes for communication with parent process */
 
-	close( pd[ 1 ] );
+	close( pd[ WRITE ] );
 	close( pd[ 2 ] );
-	pd[ 1 ] = pd[ 3 ];
+	pd[ WRITE ] = pd[ 3 ];
 
 	/* Set up pointers and global variables used with the signal handlers
 	   and set handler for DO_SEND signals */
@@ -406,9 +410,9 @@ void run_child( void )
 	signal( DO_SEND, do_send_handler );
 	signal( DO_QUIT, do_quit_handler );
 
-	/* Send parent process a NEW_DATA signal thus indicationg that the child
-	   process is done with all preparations and ready to start the
-	   experiment. Wait for reply by parent process (i.e. a DO_SEND signal). */
+	/* Send parent process a NEW_DATA signal thus indicating that the child
+	   process is done with preparations and ready to start the experiment.
+	   Wait for reply by parent process (i.e. a DO_SEND signal). */
 
 	kill( getppid( ), NEW_DATA );
 	while ( ! do_send )

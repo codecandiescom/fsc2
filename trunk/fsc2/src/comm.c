@@ -250,7 +250,7 @@ void new_data_callback( FL_OBJECT *a, long b )
 	{
 		if ( Message_Queue[ message_queue_low ].type == REQUEST )
 		{
-			/* Increment of the queue pointer must come first ! */
+			/* Increment of queue pointer must come first ! */
 
 			message_queue_low = ( message_queue_low + 1 ) % QUEUE_SIZE;
 			reader( NULL );
@@ -837,6 +837,11 @@ void writer( int type, ... )
 			nc =  va_arg( ap, long );
 			nx = va_arg( ap, long );
 			ny = va_arg( ap, long );
+			rwc_x_start = va_arg( ap, double );
+			rwc_x_delta = va_arg( ap, double );
+			rwc_y_start = va_arg( ap, double );
+			rwc_y_delta = va_arg( ap, double );
+
 			for ( i = 0; i < 2; i++ )
 			{
 				str[ i ] = va_arg( ap, char * );

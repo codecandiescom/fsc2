@@ -74,6 +74,9 @@ typedef struct {
 	double s2d_x;
 	double s2d_y;
 
+	long x_shift;
+	long y_shift;
+
 	Display *d;             /* pointer to display structure */
 	Canvas x_axis;
 	Canvas y_axis;

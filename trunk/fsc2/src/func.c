@@ -109,40 +109,40 @@ Func *Fncts;         /* structure for list of functions */
 
 Func Def_Fncts[ ] =              /* List of built-in functions */
 {
-	{ "int",          f_int,           1, ACCESS_ALL, 0 },
-	{ "float",        f_float,         1, ACCESS_ALL, 0 },
-	{ "round",        f_round,         1, ACCESS_ALL, 0 },
-	{ "floor",        f_floor,         1, ACCESS_ALL, 0 },
-	{ "ceil",         f_ceil,          1, ACCESS_ALL, 0 },
-	{ "abs",          f_abs,           1, ACCESS_ALL, 0 },
-	{ "sin",          f_sin,           1, ACCESS_ALL, 0 },
-	{ "cos",          f_cos,           1, ACCESS_ALL, 0 },
-	{ "tan",          f_tan,           1, ACCESS_ALL, 0 },
-	{ "asin",         f_asin,          1, ACCESS_ALL, 0 },
-	{ "acos",         f_acos,          1, ACCESS_ALL, 0 },
-	{ "atan",         f_atan,          1, ACCESS_ALL, 0 },
-	{ "sinh",         f_sinh,          1, ACCESS_ALL, 0 },
-	{ "cosh",         f_cosh,          1, ACCESS_ALL, 0 },
-	{ "tanh",         f_tanh,          1, ACCESS_ALL, 0 },
-	{ "exp",          f_exp,           1, ACCESS_ALL, 0 },
-	{ "ln",           f_ln,            1, ACCESS_ALL, 0 },
-	{ "log",          f_log,           1, ACCESS_ALL, 0 },
-	{ "sqrt",         f_sqrt,          1, ACCESS_ALL, 0 },
-	{ "print",        f_print,        -1, ACCESS_ALL, 0 },
-	{ "wait",         f_wait,          1, ACCESS_ALL, 0 },
-	{ "init_1d",      f_init_1d,      -1, ACCESS_ALL, 0 },
-	{ "init_2d",      f_init_2d,      -1, ACCESS_ALL, 0 },
-	{ "display",      f_display,      -1, ACCESS_EXP, 0 },
-	{ "dim",          f_dim,           1, ACCESS_ALL, 0 },
-	{ "size",         f_size,          2, ACCESS_ALL, 0 },
-	{ "sizes",        f_sizes,         1, ACCESS_ALL, 0 },
-	{ "get_file",     f_getf,         -1, ACCESS_EXP, 0 },
-	{ "save",         f_save,         -1, ACCESS_EXP, 0 },
-	{ "fsave",        f_fsave,        -1, ACCESS_EXP, 0 },
-	{ "save_program", f_save_p,       -1, ACCESS_EXP, 0 },
-	{ "save_output",  f_save_o,       -1, ACCESS_EXP, 0 },
-	{ "save_comment", f_save_c,       -1, ACCESS_EXP, 0 },
-	{ NULL,           NULL,            0, 0,          0 }
+	{ "int",          f_int,           1, ACCESS_ALL,  0 },
+	{ "float",        f_float,         1, ACCESS_ALL,  0 },
+	{ "round",        f_round,         1, ACCESS_ALL,  0 },
+	{ "floor",        f_floor,         1, ACCESS_ALL,  0 },
+	{ "ceil",         f_ceil,          1, ACCESS_ALL,  0 },
+	{ "abs",          f_abs,           1, ACCESS_ALL,  0 },
+	{ "sin",          f_sin,           1, ACCESS_ALL,  0 },
+	{ "cos",          f_cos,           1, ACCESS_ALL,  0 },
+	{ "tan",          f_tan,           1, ACCESS_ALL,  0 },
+	{ "asin",         f_asin,          1, ACCESS_ALL,  0 },
+	{ "acos",         f_acos,          1, ACCESS_ALL,  0 },
+	{ "atan",         f_atan,          1, ACCESS_ALL,  0 },
+	{ "sinh",         f_sinh,          1, ACCESS_ALL,  0 },
+	{ "cosh",         f_cosh,          1, ACCESS_ALL,  0 },
+	{ "tanh",         f_tanh,          1, ACCESS_ALL,  0 },
+	{ "exp",          f_exp,           1, ACCESS_ALL,  0 },
+	{ "ln",           f_ln,            1, ACCESS_ALL,  0 },
+	{ "log",          f_log,           1, ACCESS_ALL,  0 },
+	{ "sqrt",         f_sqrt,          1, ACCESS_ALL,  0 },
+	{ "print",        f_print,        -1, ACCESS_ALL,  0 },
+	{ "wait",         f_wait,          1, ACCESS_ALL,  0 },
+	{ "init_1d",      f_init_1d,      -1, ACCESS_PREP, 0 },
+	{ "init_2d",      f_init_2d,      -1, ACCESS_PREP, 0 },
+	{ "display",      f_display,      -1, ACCESS_EXP,  0 },
+	{ "dim",          f_dim,           1, ACCESS_ALL,  0 },
+	{ "size",         f_size,          2, ACCESS_ALL,  0 },
+	{ "sizes",        f_sizes,         1, ACCESS_ALL,  0 },
+	{ "get_file",     f_getf,         -1, ACCESS_EXP,  0 },
+	{ "save",         f_save,         -1, ACCESS_EXP,  0 },
+	{ "fsave",        f_fsave,        -1, ACCESS_EXP,  0 },
+	{ "save_program", f_save_p,       -1, ACCESS_EXP,  0 },
+	{ "save_output",  f_save_o,       -1, ACCESS_EXP,  0 },
+	{ "save_comment", f_save_c,       -1, ACCESS_EXP,  0 },
+	{ NULL,           NULL,            0, 0,           0 }
 	                   /* last set marks the very last entry, don't remove ! */
 };
 
@@ -1051,7 +1051,7 @@ void f_wait_alarm_handler( int sig_type )
 /* 1-dimensional experiments.                                        */
 /* Arguments:                                                        */
 /* 1. Number of curves to be shown (optional, defaults to 1)         */
-/* 2. Number of points (optional, 0 or negative if unknown)          */
+/* 2. Number of points (optional, 0 if unknown, negative if a guess) */
 /* 3. Real world coordinate and increment (optional)                 */
 /* 4. x-axis label (optional)                                        */
 /*-------------------------------------------------------------------*/

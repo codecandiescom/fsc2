@@ -541,8 +541,11 @@ void exp_test_run( void )
 
 			/* Give the `Stop Test' button a chance to get tested... */
 
-			if ( ! just_testing && token_count % 256 == 0 )
+			if ( ! just_testing && token_count >= 256 )
+			{
 				fl_check_only_forms( );
+				token_count %= 256;
+			}
 
 			switch ( cur_prg_token->token )
 			{
