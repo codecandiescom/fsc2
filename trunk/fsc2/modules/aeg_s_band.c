@@ -347,6 +347,7 @@ Var *set_field( Var *v )
 {
 	double field;
 	bool err_flag = UNSET;
+	double error = 0.0;
 
 
 	if ( v == NULL )
