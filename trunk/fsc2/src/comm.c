@@ -166,7 +166,7 @@ bool setup_comm( void )
 	   when the child is allowed to send data and messages. It has to be
 	   initialized to zero. */
 
-	if ( ( semaphore = sema_create( 0 ) ) < 0 )
+	if ( ( semaphore = sema_create( ) ) < 0 )
 	{
 		Message_Queue = T_free( Message_Queue );
 		for ( i = 0; i < 4; i++ )

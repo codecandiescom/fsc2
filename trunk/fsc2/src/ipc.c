@@ -250,7 +250,7 @@ void delete_stale_shms( void )
 
 /*------------------------------------------------------------*/
 /* Function creates a (System V) semaphore (with one set) and */
-/* initializes to 'val'. It returns either the ID number of   */
+/* initializes it to 0. It returns either the ID number of    */
 /* the new semaphore or -1 on error.                          */
 /*------------------------------------------------------------*/
 
@@ -275,7 +275,7 @@ int sema_create( int val )
 		return -1;
 	}
 
-	sema_arg.val = val;
+	sema_arg.val = 0
 	if ( ( semctl( sema_id, 0, SETVAL, sema_arg ) ) < 0 )
 	{
 		semctl( sema_id, 0, IPC_RMID, sema_arg );
@@ -329,7 +329,7 @@ int sema_destroy( int sema_id )
 
 int sema_wait( int sema_id )
 {
-	struct sembuf sema_buf = { 0, -1, SEM_UNDO };
+	struct sembuf sema_buf = { 0, -1, 0 };
 	bool must_reset = UNSET;
 
 
@@ -360,7 +360,7 @@ int sema_wait( int sema_id )
 
 int sema_post( int sema_id )
 {
-	struct sembuf sema_buf = { 0, 1, SEM_UNDO };
+	struct sembuf sema_buf = { 0, 1, 0 };
 	bool must_reset = UNSET;
 
 
