@@ -10,6 +10,12 @@
 
 
 typedef struct {
+	int var[ 4 ][ 2 ];
+	bool is_var[ 4 ][ 2 ];
+} PHS;
+
+
+typedef struct {
 
 	char *name;
 	bool is_trigger_out;
@@ -50,7 +56,7 @@ typedef struct {
 	bool ( *get_pulse_phase_cycle )( long pulse_number, int *cycle );
 	bool ( *get_pulse_maxlen )( long pulse_number, double *time );
 
-	bool ( *pulser_struct.setup_phase )( int function, PHS phs );
+	bool ( *setup_phases )( int function, PHS phs );
 
 } Pulser_Struct;
 
@@ -66,12 +72,6 @@ enum {
 	P_MAXLEN  = ( 1 << 6 ),
 	P_REPL    = ( 1 << 7 )
 };
-
-
-typedef struct {
-	int var[ 4 ][ 2 ];
-	bool is_var[ 4 ][ 2 ];
-} PHS;
 
 
 void pulser_struct_init( void );

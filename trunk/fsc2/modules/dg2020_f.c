@@ -71,6 +71,8 @@ int dg2020_init_hook( void )
 	pulser_struct.get_pulse_phase_cycle = get_pulse_phase_cycle;
 	pulser_struct.get_pulse_maxlen = get_pulse_maxlen;
 
+	pulser_struct.setup_phase = setup_phase;
+
 	/* Finally, we initialize variables that store the state of the pulser */
 
 	dg2020.is_timebase = UNSET;
@@ -91,6 +93,7 @@ int dg2020_init_hook( void )
 		dg2020.function[ i ].is_used = UNSET;
 		dg2020.function[ i ].is_needed = UNSET;
 		dg2020.function[ i ].pod = NULL;
+		dg2020.function[ i ].is_phs = UNSET;
 		dg2020.function[ i ].num_channels = 0;
 		dg2020.function[ i ].num_pulses = 0;
 		dg2020.function[ i ].pulses = NULL;
@@ -1002,6 +1005,26 @@ static bool get_pulse_maxlen( long pnum, double *time )
 
 
 /*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+static bool setup_phases( int func, PHS phs )
+{
+	assert( func == PULSER_CHANNEL_PHASE_1 || func == PULSER_CHANNEL_PHASE_2 );
+
+	if ( dg2020.function[ func ].is_phs )
+	{
+		eprint( WARN, "%s:%ld: DG2020: Phase setup for function `%s' has "
+				"already been done.\n", Fname, Lc, Function_Names[ func ] );
+		return FAIL;
+	}
+
+	memcpy( dg2020.function[ func].phs, phs, sizeof( PHS ) );
+	dg2020.function[ func ].is_phs = SET;
+
+	return OK;
+}
+
+/*-----------------------------------------------------------------*/
 /* Converts a time into the internal type of a time specification, */
 /* i.e. a integer multiple of the time base                        */
 /*-----------------------------------------------------------------*/
@@ -1459,6 +1482,16 @@ static void basic_functions_check( void )
 			{
 				eprint( FATAL, "DG2020: Function `%s' needs two pods "
 						"assigned to it.\n", Function_Names[ i ] );
+				THROW( EXCEPTION );
+			}
+
+			/* No phase setup has been done for the function */
+
+			if ( ! f->is_phs )
+			{
+				eprint( FATAL, "DG2020: Missing data on how to convert the "
+						"pulse phases into pod outputs for function `%s'.\n",
+						Function_Names[ i ] );
 				THROW( EXCEPTION );
 			}
 		}

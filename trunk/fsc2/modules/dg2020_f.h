@@ -39,6 +39,7 @@
 
 
 typedef struct _F_ {
+
 	int self;                    // the functions number
 
 	bool is_used;                // set if the function has been declared in
@@ -49,6 +50,10 @@ typedef struct _F_ {
 	struct _P_ *pod;             // points to the pod assigned to the function
 	struct _P_ *pod2;            // points to the second pod assigned to the 
 	                             // function (phase functions only)
+
+	PHS phs;                     // phase functions only: how to translate
+	                             // phases to pod outputs
+	bool is_phs;
 
 	int num_channels;            // number of channels assigned to function
 	int num_needed_channels;     // number of channels really needed
@@ -182,6 +187,8 @@ static bool get_pulse_position_change( long pnum, double *time );
 static bool get_pulse_length_change( long pnum, double *time );
 static bool get_pulse_phase_cycle( long pnum, int *cycle );
 static bool get_pulse_maxlen( long pnum, double *time );
+
+static bool setup_phase( int func, PHS phs );
 
 static Ticks double2ticks( double time );
 static double ticks2double( Ticks ticks );
