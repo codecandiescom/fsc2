@@ -330,8 +330,6 @@ const char *dg2020_pticks( Ticks ticks );
 CHANNEL *dg2020_get_next_free_channel( void );
 int dg2020_start_compare( const void *A, const void *B );
 bool dg2020_find_phase_pulse( PULSE *p, PULSE ***pl, int *num );
-int dg2020_get_phase_pulse_list( FUNCTION *f, CHANNEL *channel,
-								 PULSE ***list );
 Ticks dg2020_get_max_seq_len( void );
 void dg2020_calc_padding( void );
 bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length );
