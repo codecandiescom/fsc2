@@ -47,6 +47,7 @@ static int res_list[ 3 ] = { 0.1, 0.01, 0.001 };
 /* exported functions and symbols */
 
 int er035m_init_hook( void );
+int er035m_test_hook( void );
 int er035m_exp_hook( void );
 int er035m_end_of_exp_hook( void );
 void er035m_exit_hook( void );
@@ -79,7 +80,7 @@ typedef struct
 } NMR;
 
 
-static NMR nmr;
+static NMR nmr, nmr_stored;
 
 
 
@@ -126,42 +127,54 @@ enum {
 
 int er035m_init_hook( void )
 {
-	/* Set global flag to tell magnet power supply driver that the
-	   gaussmeter has already been loaded */
+	/* Set global flag to tell magnet power supply driver that a
+	   gaussmeter has been loaded */
 
 	is_gaussmeter = SET;
 
 	if ( exists_device( "bh15" ) )
 	{
-		print( FATAL, "Driver for Bruker BH15 field controller is already "
-			   "loaded - there can only be one gaussmeter.\n" );
+		print( FATAL, "Driver for BH15 field controller is already loaded - "
+			   "only one field control gaussmeter can be used.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( exists_device( "er035m_s" ) )
 	{
-		print( FATAL, "Driver for ER035 gaussmeter connected to serial port "
-			   "is already loaded - there can only be one gaussmeter.\n" );
+		print( FATAL, "Driver for ER035M gaussmeter (serial port version) is "
+			   "already loaded - only one field controllibg gaussmeter can be "
+			   "used.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( exists_device( "er035m_sa" ) || exists_device( "er035m_sas" ) )
+	{
+		print( FATAL, "Driver for ER035M field controlling gaussmeter must "
+			   "be first gaussmeter in DEVICES list.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( ! exists_device( "aeg_s_band" ) && ! exists_device( "aeg_x_band" ) )
-	{	
 		print( WARN, "Driver for NMR gaussmeter is loaded but no appropriate "
 			   "magnet power supply driver.\n" );
-		nmr.is_needed = UNSET;
-	}
-	else
-	{
-		need_GPIB = SET;
-		nmr.is_needed = SET;
-		nmr.name = DEVICE_NAME;
-	}
 
+	need_GPIB = SET;
+	nmr.is_needed = SET;
+	nmr.name = DEVICE_NAME;
 	nmr.state = ER035M_UNKNOWN;
 	nmr.resolution = UNDEF_RES;
 	nmr.device = -1;
 
+	return 1;
+}
+
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
+int er035m_test_hook( void )
+{
+	memcpy( &nmr_stored, &nmr, sizeof( NMR ) );
 	return 1;
 }
 
@@ -177,6 +190,8 @@ int er035m_exp_hook( void )
 	int cur_res;
 	Var *v;
 
+
+	memcpy( &nmr, &nmr_stored, sizeof( NMR ) );
 
 	if ( ! nmr.is_needed )
 		return 1;
@@ -199,7 +214,7 @@ int er035m_exp_hook( void )
 	usleep( ER035M_WAIT );
 
 	/* Find out the curent resolution, and if necessary, change it to the
-	   value requested by the user */
+	   value requested by the user. */
 
 	cur_res = er035m_get_resolution( );
 
