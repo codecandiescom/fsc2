@@ -102,22 +102,22 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 	if ( obj == run_form->canvas )        /* in canvas window */
 		G.drag_canvas = 3;
 
-	fl_get_win_mouse( window, &c->x_cur, &c->y_cur, &dummy );
+	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &dummy );
 
 	switch ( G.button_state )
 	{
 		case 1 :                               /* left button */
 			fl_set_cursor( window, G.cur_1 );
 
-			G.x_start = c->x_cur;
-			G.y_start = c->y_cur;
+			G.start[ X ] = c->ppos[ X ];
+			G.start[ Y ] = c->ppos[ Y ];
 
 			/* Set up variables for drawing the rubber boxes */
 
 			switch ( G.drag_canvas )
 			{
 				case 1 :                       /* in x-axis window */
-					c->box_x = c->x_cur;
+					c->box_x = c->ppos[ X ];
 					c->box_w = 0;
 					c->box_y = c->h / 2 - 1;
 					c->box_h = 2;
@@ -126,15 +126,15 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 
 				case 2 :                       /* in y-axis window */
 					c->box_x = c->w / 2 - 1;
-					c->box_y = c->y_cur;
+					c->box_y = c->ppos[ Y ];
 					c->box_w = 2;
 					c->box_h = 0;
 					c->is_box = SET;
 					break;
 
 				case 3 :                       /* in canvas window */
-					c->box_x = c->x_cur;
-					c->box_y = c->y_cur;
+					c->box_x = c->ppos[ X ];
+					c->box_y = c->ppos[ Y ];
 					c->box_w = c->box_h = 0;
 					c->is_box = SET;
 					break;
@@ -146,8 +146,8 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 		case 2 :                               /* middle button */
 			fl_set_cursor( window, G.cur_2 );
 
-			G.x_start = c->x_cur;
-			G.y_start = c->y_cur;
+			G.start[ X ] = c->ppos[ X ];
+			G.start[ Y ] = c->ppos[ Y ];
 
 			/* Store data for undo operation */
 
@@ -174,8 +174,8 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 		case 4 :                               /* right button */
 			fl_set_cursor( window, G.cur_3 );
 
-			G.x_start = c->x_cur;
-			G.y_start = c->y_cur;
+			G.start[ X ] = c->ppos[ X ];
+			G.start[ Y ] = c->ppos[ Y ];
 			break;
 
 		case 5 :                               /* left and right button */
@@ -183,8 +183,8 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 
 			if ( G.canvas.is_box == UNSET && old_button_state != 4 )
 			{
-				G.x_start = c->x_cur;
-				G.y_start = c->y_cur;
+				G.start[ X ] = c->ppos[ X ];
+				G.start[ Y ] = c->ppos[ Y ];
 			}
 			else
 				G.canvas.is_box = UNSET;
@@ -217,17 +217,17 @@ void release_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 
 	/* Get mouse position and restrict it to the canvas */
 
-	fl_get_win_mouse( window, &c->x_cur, &c->y_cur, &dummy );
+	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &dummy );
 
-	if ( c->x_cur < 0 )
-		c->x_cur = 0;
-	if ( c->x_cur >= ( int ) G.canvas.w )
-		c->x_cur = G.canvas.w - 1;
+	if ( c->ppos[ X ] < 0 )
+		c->ppos[ X ] = 0;
+	if ( c->ppos[ X ] >= ( int ) G.canvas.w )
+		c->ppos[ X ] = G.canvas.w - 1;
 
-	if ( c->y_cur < 0 )
-		c->y_cur = 0;
-	if ( c->y_cur >= ( int ) G.canvas.h )
-		c->y_cur = G.canvas.h - 1;
+	if ( c->ppos[ Y ] < 0 )
+		c->ppos[ Y ] = 0;
+	if ( c->ppos[ Y ] >= ( int ) G.canvas.h )
+		c->ppos[ Y ] = G.canvas.h - 1;
 
 	switch ( G.button_state )
 	{
@@ -320,14 +320,14 @@ void motion_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 		fl_XNextEvent( ev );                  /* get the next event */
 	}
 
-	fl_get_win_mouse( window, &c->x_cur, &c->y_cur, &dummy );
+	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &dummy );
 
 	switch ( G.button_state )
 	{
 		case 1 :                               /* left mouse button */
 			if ( G.drag_canvas & 1 )           /* x-axis or canvas window */
 			{
-				c->box_w = c->x_cur - G.x_start;
+				c->box_w = c->ppos[ X ] - G.start[ X ];
 
 				if ( c->box_x + c->box_w >= ( int ) c->w )
 					c->box_w = c->w - c->box_x - 1;
@@ -338,7 +338,7 @@ void motion_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 
 			if ( G.drag_canvas & 2 )           /* y-axis or canvas window */
 			{
-				c->box_h = c->y_cur - G.y_start ;
+				c->box_h = c->ppos[ Y ] - G.start[ Y ] ;
 
 				if ( c->box_y + c->box_h >= ( int ) c->h )
 					c->box_h = c->h - c->box_y - 1;
@@ -364,8 +364,8 @@ void motion_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 				scale_changed = SET;
 			}
 
-			G.x_start = c->x_cur;
-			G.y_start = c->y_cur;
+			G.start[ X ] = c->ppos[ X ];
+			G.start[ Y ] = c->ppos[ Y ];
 
 			if ( G.is_fs && scale_changed )
 			{
@@ -388,10 +388,10 @@ void motion_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 
 void save_scale_state( Curve_1d *cv )
 {
-	cv->old_s2d_x = cv->s2d_x;
-	cv->old_s2d_y = cv->s2d_y;
-	cv->old_x_shift = cv->x_shift;
-	cv->old_y_shift = cv->y_shift;
+	cv->old_s2d[ X ] = cv->s2d[ X ];
+	cv->old_s2d[ Y ] = cv->s2d[ Y ];
+	cv->old_shift[ X ] = cv->shift[ X ];
+	cv->old_shift[ Y ] = cv->shift[ Y ];
 
 	cv->can_undo = SET;
 }
@@ -408,7 +408,7 @@ bool change_x_range( Canvas *c )
 	double x1, x2;
 
 
-	if ( abs( G.x_start - c->x_cur ) > 4 )
+	if ( abs( G.start[ X ] - c->ppos[ X ] ) > 4 )
 	{
 		for ( i = 0; i < G.nc; i++ )
 		{
@@ -419,11 +419,11 @@ bool change_x_range( Canvas *c )
 
 			save_scale_state( cv );
 
-			x1 = G.x_start / cv->s2d_x - cv->x_shift;
-			x2 = c->x_cur / cv->s2d_x - cv->x_shift;
+			x1 = G.start[ X ] / cv->s2d[ X ] - cv->shift[ X ];
+			x2 = c->ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ];
 
-			cv->x_shift = - d_min( x1, x2 );
-			cv->s2d_x = ( double ) ( G.canvas.w - 1 ) / fabs( x1 - x2 );
+			cv->shift[ X ] = - d_min( x1, x2 );
+			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) / fabs( x1 - x2 );
 
 			recalc_XPoints_of_curve( cv );
 			scale_changed = SET;
@@ -445,7 +445,7 @@ bool change_y_range( Canvas *c )
 	double y1, y2;
 
 
-	if ( abs( G.y_start - c->y_cur ) > 4 )
+	if ( abs( G.start[ Y ] - c->ppos[ Y ] ) > 4 )
 	{
 		for ( i = 0; i < G.nc; i++ )
 		{
@@ -456,11 +456,11 @@ bool change_y_range( Canvas *c )
 
 			save_scale_state( cv );
 
-			y1 = 1.0 - G.y_start / cv->s2d_y - cv->y_shift;
-			y2 = 1.0 - c->y_cur / cv->s2d_y - cv->y_shift;
+			y1 = 1.0 - G.start[ Y ] / cv->s2d[ Y ] - cv->shift[ Y ];
+			y2 = 1.0 - c->ppos[ Y ] / cv->s2d[ Y ] - cv->shift[ Y ];
 
-			cv->y_shift = 1.0 - d_max( y1, y2 );
-			cv->s2d_y = ( double ) ( G.canvas.h - 1 ) / fabs( y1 - y2 );
+			cv->shift[ Y ] = 1.0 - d_max( y1, y2 );
+			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / fabs( y1 - y2 );
 
 			recalc_XPoints_of_curve( cv );
 			scale_changed = SET;
@@ -492,28 +492,28 @@ bool change_xy_range( Canvas *c )
 		save_scale_state( cv );
 		cv->can_undo = UNSET;
 
-		if ( abs( G.x_start - c->x_cur ) > 4 )
+		if ( abs( G.start[ X ] - c->ppos[ X ] ) > 4 )
 		{
 			cv->can_undo = SET;
 
-			x1 = G.x_start / cv->s2d_x - cv->x_shift;
-			x2 = c->x_cur / cv->s2d_x - cv->x_shift;
+			x1 = G.start[ X ] / cv->s2d[ X ] - cv->shift[ X ];
+			x2 = c->ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ];
 
-			cv->x_shift = - d_min( x1, x2 );
-			cv->s2d_x = ( double ) ( G.canvas.w - 1 ) / fabs( x1 - x2 );
+			cv->shift[ X ] = - d_min( x1, x2 );
+			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) / fabs( x1 - x2 );
 
 			scale_changed = SET;
 		}
 
-		if ( abs( G.y_start - c->y_cur ) > 4 )
+		if ( abs( G.start[ Y ] - c->ppos[ Y ] ) > 4 )
 		{
 			cv->can_undo = SET;
 
-			y1 = 1.0 - G.y_start / cv->s2d_y - cv->y_shift;
-			y2 = 1.0 - c->y_cur / cv->s2d_y - cv->y_shift;
+			y1 = 1.0 - G.start[ Y ] / cv->s2d[ Y ] - cv->shift[ Y ];
+			y2 = 1.0 - c->ppos[ Y ] / cv->s2d[ Y ] - cv->shift[ Y ];
 
-			cv->y_shift = 1.0 - d_max( y1, y2 );
-			cv->s2d_y = ( double ) ( G.canvas.h - 1 ) / fabs( y1 - y2 );
+			cv->shift[ Y ] = 1.0 - d_max( y1, y2 );
+			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / fabs( y1 - y2 );
 
 			scale_changed = SET;
 		}
@@ -537,7 +537,7 @@ bool zoom_x( Canvas *c )
 	double px;
 
 
-	if ( abs( G.x_start - c->x_cur ) > 4 )
+	if ( abs( G.start[ X ] - c->ppos[ X ] ) > 4 )
 	{
 		for ( i = 0; i < G.nc; i++ )
 		{
@@ -548,17 +548,17 @@ bool zoom_x( Canvas *c )
 
 			save_scale_state( cv );
 
-			px = G.x_start / cv->s2d_x - cv->x_shift;
-			if ( G.x_start > c->x_cur )
-				cv->s2d_x *= d_min( 4.0,
-							  1.0 + 3.0 * ( double ) ( G.x_start - c->x_cur ) /
+			px = G.start[ X ] / cv->s2d[ X ] - cv->shift[ X ];
+			if ( G.start[ X ] > c->ppos[ X ] )
+				cv->s2d[ X ] *= d_min( 4.0,
+					   1.0 + 3.0 * ( double ) ( G.start[ X ] - c->ppos[ X ] ) /
 								                       ( double ) G.x_axis.w );
 			else
-				cv->s2d_x /= d_min( 4.0,
-							  1.0 + 3.0 * ( double ) ( c->x_cur - G.x_start ) /
+				cv->s2d[ X ] /= d_min( 4.0,
+					   1.0 + 3.0 * ( double ) ( c->ppos[ X ] - G.start[ X ] ) /
 								                       ( double ) G.x_axis.w );
 
-			cv->x_shift = G.x_start / cv->s2d_x - px;
+			cv->shift[ X ] = G.start[ X ] / cv->s2d[ X ] - px;
 
 			recalc_XPoints_of_curve( cv );
 			scale_changed = SET;
@@ -580,7 +580,7 @@ bool zoom_y( Canvas *c )
 	double py;
 
 
-	if ( abs( G.y_start - c->y_cur ) > 4 )
+	if ( abs( G.start[ Y ] - c->ppos[ Y ] ) > 4 )
 	{
 		for ( i = 0; i < G.nc; i++ )
 		{
@@ -591,17 +591,17 @@ bool zoom_y( Canvas *c )
 
 			save_scale_state( cv );
 
-			py = 1.0 - G.y_start / cv->s2d_y - cv->y_shift;
-			if ( G.y_start < c->y_cur )
-				cv->s2d_y *= d_min( 4.0,
-							  1.0 + 3.0 * ( double ) ( c->y_cur - G.y_start ) /
+			py = 1.0 - G.start[ Y ] / cv->s2d[ Y ] - cv->shift[ Y ];
+			if ( G.start[ Y ] < c->ppos[ Y ] )
+				cv->s2d[ Y ] *= d_min( 4.0,
+					   1.0 + 3.0 * ( double ) ( c->ppos[ Y ] - G.start[ Y ] ) /
 								                       ( double ) G.y_axis.h );
 			else
-				cv->s2d_y /= d_min( 4.0,
-							  1.0 + 3.0 * ( double ) ( G.y_start - c->y_cur ) /
+				cv->s2d[ Y ] /= d_min( 4.0,
+					   1.0 + 3.0 * ( double ) ( G.start[ Y ] - c->ppos[ Y ] ) /
 								                       ( double ) G.y_axis.h );
 
-			cv->y_shift = 1.0 - G.y_start / cv->s2d_y - py;
+			cv->shift[ Y ] = 1.0 - G.start[ Y ] / cv->s2d[ Y ] - py;
 
 			recalc_XPoints_of_curve( cv );
 			scale_changed = SET;
@@ -633,41 +633,41 @@ bool zoom_xy( Canvas *c )
 		save_scale_state( cv );
 		cv->can_undo = UNSET;
 
-		if ( abs( G.x_start - c->x_cur ) > 4 )
+		if ( abs( G.start[ X ] - c->ppos[ X ] ) > 4 )
 		{
 			cv->can_undo = SET;
 
-			px = G.x_start / cv->s2d_x - cv->x_shift;
+			px = G.start[ X ] / cv->s2d[ X ] - cv->shift[ X ];
 
-			if ( G.x_start > c->x_cur )
-				cv->s2d_x *= d_min( 4.0,
-							  1.0 + 3.0 * ( double ) ( G.x_start - c->x_cur ) /
+			if ( G.start[ X ] > c->ppos[ X ] )
+				cv->s2d[ X ] *= d_min( 4.0,
+					   1.0 + 3.0 * ( double ) ( G.start[ X ] - c->ppos[ X ] ) /
 								                       ( double ) G.x_axis.w );
 			else
-				cv->s2d_x /= d_min( 4.0,
-							  1.0 + 3.0 * ( double ) ( c->x_cur - G.x_start ) /
+				cv->s2d[ X ] /= d_min( 4.0,
+					   1.0 + 3.0 * ( double ) ( c->ppos[ X ] - G.start[ X ] ) /
 								                       ( double ) G.x_axis.w );
 
-			cv->x_shift = G.x_start / cv->s2d_x - px;
+			cv->shift[ X ] = G.start[ X ] / cv->s2d[ X ] - px;
 
 			scale_changed = SET;
 		}
 
-		if ( abs( G.y_start - c->y_cur ) > 4 )
+		if ( abs( G.start[ Y ] - c->ppos[ Y ] ) > 4 )
 		{
 			cv->can_undo = SET;
 
-			py = 1.0 - G.y_start / cv->s2d_y - cv->y_shift;
-			if ( G.y_start < c->y_cur )
-				cv->s2d_y *= d_min( 4.0,
-							  1.0 + 3.0 * ( double ) ( c->y_cur - G.y_start ) /
+			py = 1.0 - G.start[ Y ] / cv->s2d[ Y ] - cv->shift[ Y ];
+			if ( G.start[ Y ] < c->ppos[ Y ] )
+				cv->s2d[ Y ] *= d_min( 4.0,
+					   1.0 + 3.0 * ( double ) ( c->ppos[ Y ] - G.start[ Y ] ) /
 								                       ( double ) G.y_axis.h );
 			else
-				cv->s2d_y /= d_min( 4.0,
-							  1.0 + 3.0 * ( double ) ( G.y_start - c->y_cur ) /
+				cv->s2d[ Y ] /= d_min( 4.0,
+					   1.0 + 3.0 * ( double ) ( G.start[ Y ] - c->ppos[ Y ] ) /
 								                       ( double ) G.y_axis.h );
 
-			cv->y_shift = 1.0 - G.y_start / cv->s2d_y - py;
+			cv->shift[ Y ] = 1.0 - G.start[ Y ] / cv->s2d[ Y ] - py;
 
 			scale_changed = SET;
 		}
@@ -705,14 +705,14 @@ void shift_XPoints_of_curve( Canvas *c, Curve_1d *cv )
 
 	if ( G.drag_canvas & 1 )                      /* x-axis or canvas window */
 	{
-		dx = factor * ( c->x_cur - G.x_start );
-		cv->x_shift += ( double ) dx / cv->s2d_x;
+		dx = factor * ( c->ppos[ X ] - G.start[ X ] );
+		cv->shift[ X ] += ( double ) dx / cv->s2d[ X ];
 	}
 
 	if ( G.drag_canvas & 2 )                      /* y-axis or canvas window */
 	{
-		dy = factor * ( c->y_cur - G.y_start );
-		cv->y_shift -= ( double ) dy / cv->s2d_y;
+		dy = factor * ( c->ppos[ Y ] - G.start[ Y ] );
+		cv->shift[ Y ] -= ( double ) dy / cv->s2d[ Y ];
 	}
 
 	/* Add the shifts to the XPoints */

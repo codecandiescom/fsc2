@@ -38,6 +38,7 @@ void accept_new_data( void )
 	int shm_id;
 
 
+	
 	while ( 1 )
 	{
 		/* Attach to the shared memory segment */
@@ -217,7 +218,9 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 
 	/* If the number of points exceeds the size of the arrays for the curves
 	   we print an error message if the number was fixed by the call to
-	   init_1d(), otherwise we have to increase the sizes for all curves */
+	   init_1d(), otherwise we have to increase the sizes for all curves.
+	   But take care: While x_index + len may be greater than G.nx x_index
+	   can still be smaller than G.nx ! */
 
 	if ( x_index + len > G.nx )
 	{
@@ -236,10 +239,12 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 								  ( x_index + len ) * sizeof( Scaled_Point ) );
 			cv->xpoints = T_realloc( cv->xpoints,
 										( x_index + len ) * sizeof( XPoint ) );
-			for ( j = x_index; j < x_index + len; j++ )
+
+			for ( j = G.nx; j < x_index + len; j++ )
 				cv->points[ j ].exist = UNSET;
-			cv->s2d_x = ( double ) ( G.canvas.w - 1 ) /
-				                                       ( double ) ( G.nx - 1 );
+
+			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
+				                              ( double ) ( x_index + len - 1 );
 		}
 
 		G.scale_changed = SET;
@@ -267,7 +272,7 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 		rw_y_min = d_min( data, rw_y_min );
 	}
 
-	/* If the minimum or maximum changed rescale all old scaled data */
+	/* If the minimum or maximum has changed rescale all old scaled data */
 
 	if ( G.rw_y_max < rw_y_max || G.rw_y_min > rw_y_min )
 	{
@@ -289,10 +294,11 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 
 				if ( ! G.is_fs )
 				{
-					cv->s2d_y *= G.rw2s / new_y_scale;
-					cv->y_shift *= new_y_scale / G.rw2s;
+					cv->s2d[ Y ] *= G.rw2s / new_y_scale;
+					cv->shift[ Y ] *= new_y_scale / G.rw2s;
 					if ( rw_y_max > G.rw_y_max )
-						cv->y_shift += ( rw_y_max - G.rw_y_max ) * new_y_scale;
+						cv->shift[ Y ] += 
+							( rw_y_max - G.rw_y_max ) * new_y_scale;
 				}
 			}
 
@@ -323,6 +329,12 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 		G.rw_y_max = rw_y_max;
 		G.scale_changed = SET;
 	}
+
+	/* Now we're finished with rescaling and can set the new number of points
+	   if necessary */
+
+	if ( x_index + len > G.nx )
+		G.nx = x_index + len;
 
 	/* Include the new data into the scaled data */
 

@@ -598,17 +598,21 @@ void redraw_x_axis( void )
 
 void make_x_scale( Curve_1d *cv )
 {
-	double rwc_delta,        /* distance between small ticks (in rwc) */
-		   order;            /* and its order of magitude */
-	double d_delta_fine,     /* distance between small ticks (in points) */
-		   d_start_fine,     /* position of leftmost small tick (in points) */
-		   d_start_medium,   /* position of leftmost medium tick (in points) */
-		   d_start_coarse,   /* position of leftmost large tick (in points) */
-		   d;
-	int medium_factor,
-		coarse_factor;
-	int medium, coarse;
-	double rwc_start, rwc_start_fine, rwc_start_medium, rwc_start_coarse;
+	double rwc_delta,          /* distance between small ticks (in rwc) */
+		   order;              /* and its order of magitude */
+	double d_delta_fine,       /* distance between small ticks (in points) */
+		   d_start_fine,       /* position of first small tick (in points) */
+		   d_start_medium,     /* position of first medium tick (in points) */
+		   d_start_coarse,     /* position of first large tick (in points) */
+		   cur_x;              /* loop variable with position */
+	int medium_factor,         /* number of small tick spaces between medium */
+		coarse_factor;         /* and large tick spaces */
+	int medium,                /* loop counters for medium and large ticks */
+		coarse;
+	double rwc_start,          /* rwc value of first point */
+		   rwc_start_fine,     /* rwc value of first small tick */
+		   rwc_start_medium,   /* rwc value of first medium tick */
+		   rwc_start_coarse;   /* rwc value of first large tick */
 	short x, y;
 
 
@@ -622,12 +626,12 @@ void make_x_scale( Curve_1d *cv )
 	order = pow( 10.0, floor( log10( rwc_delta ) ) );
 	modf( rwc_delta / order, &rwc_delta );
 
-	/* Now get a `smoth' value for the ticks distance, i.e. either 2, 2.5, 5
-	   or 10 and convert it to real world coordinates */
+	/* Now get a `smooth' value for the ticks distance, i.e. either 2, 2.5,
+	   5 or 10 and convert it to real world coordinates */
 
 	if ( rwc_delta <= 2.0 )       /* in [ 1, 2 ] -> units of 2 */
 	{
-		medium_factor = 5;        /* unused */
+		medium_factor = 5;
 		coarse_factor = 25;
 		rwc_delta = 2.0 * order;
 	}
@@ -650,9 +654,11 @@ void make_x_scale( Curve_1d *cv )
 		rwc_delta = 10.0 * order;
 	}
 
+
 	/* Calculate the distance between the small ticks (in points) */
 
 	d_delta_fine = cv->s2d[ X ] * rwc_delta / fabs( G.rwc_delta[ X ] );
+
 
 	/* `rwc_start' is the leftmost value in the display, `rwc_start_fine' the
 	   position of the leftmost small tick (in real world coordinates) and,
@@ -668,7 +674,8 @@ void make_x_scale( Curve_1d *cv )
 	if ( d_start_fine < 0 )
 		d_start_fine += d_delta_fine;
 
-	/* Find index of leftmost medium tick */
+
+	/* Calculate start index for leftmost medium tick */
 
 	modf( rwc_start / ( medium_factor * rwc_delta ), &rwc_start_medium );
 	rwc_start_medium *= medium_factor * rwc_delta;
@@ -678,9 +685,9 @@ void make_x_scale( Curve_1d *cv )
 	if ( d_start_medium < 0 )
 		d_start_medium += medium_factor * d_delta_fine;
 
-	medium = - rnd( ( d_start_medium - d_start_fine ) / d_delta_fine );
+	medium = rnd( ( d_start_fine - d_start_medium ) / d_delta_fine );
 
-	/* Find index of leftmost large tick */
+	/* Calculate start index for leftmost large tick */
 
 	modf( rwc_start / ( coarse_factor * rwc_delta ), &rwc_start_coarse );
 	rwc_start_coarse *= coarse_factor * rwc_delta;
@@ -690,21 +697,21 @@ void make_x_scale( Curve_1d *cv )
 	if ( d_start_coarse < 0 )
 		d_start_coarse += coarse_factor * d_delta_fine;
 
-	coarse = - rnd( ( d_start_coarse - d_start_fine ) / d_delta_fine );
+	coarse = rnd( ( d_start_fine - d_start_coarse ) / d_delta_fine );
 
 
 	/* Now, finally we can strt drawing the axis... */
 
-	for ( d = d_start_fine; d < G.x_axis.w;
-		  medium++, coarse++, d += d_delta_fine )
+	for ( cur_x = d_start_fine; cur_x < G.x_axis.w;
+		  medium++, coarse++, cur_x += d_delta_fine )
 	{
-		x = d2shrt( d );
+		x = d2shrt( cur_x );
 		y = G.x_axis.h / 2;
 
 		if ( coarse % coarse_factor == 0 )
 			XDrawLine( G.d, G.x_axis.pm, cv->gc, x, y + 3, x, y - 12 );
 		else if ( medium % medium_factor == 0 )
-			XDrawLine( G.d, G.x_axis.pm, cv->gc, x, y, x, y - 8 );
+			XDrawLine( G.d, G.x_axis.pm, cv->gc, x, y, x, y - 9 );
 		else
 			XDrawLine( G.d, G.x_axis.pm, cv->gc, x, y, x, y - 5 );
 	}
