@@ -222,8 +222,6 @@ int ni_daq_perror( const char *s )
 
 const char *ni_daq_strerror( void )
 {
-	fprintf( stderr, "ni_daq_errno = %d\n", ni_daq_errno );
-
     return ni_daq_errlist[ - ni_daq_errno ];
 }
 
