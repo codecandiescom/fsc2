@@ -40,8 +40,8 @@ bool lecroy9400_init( const char *name )
 
     /* Set digitizer to short form of replies, make it only send a line feed
 	   at the end of replies, switch off debugging, transmit data in one block
-	   without an END block (#I) and set the data format to binary with 1 byte
-	   length. Then ask it for the status byte 1 to test if the device
+	   without an END block marker (#I) and set the data format to binary with
+	   1 byte length. Then ask it for the status byte 1 to test if the device
 	   reacts. */
 
     if ( gpib_write( lecroy9400.device,

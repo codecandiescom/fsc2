@@ -833,11 +833,11 @@ the digitizer:
 @item @code{FUNC_E} or @code{FUNC_F}
 @end itemize
 @end table
-Except for the models @code{TDS520} and @code[LECROY9400}, this function
+Except for the models @code{TDS520} and @code{LECROY9400}, this function
 positions the cursors at the start and end point of the specified window
 (or the first and last point if no window as been specified) and uses
 the function built into the digitizer to compute the area. For the
-models @code{TDS520} and @code[LECROY9400}, that miss this built-in
+models @code{TDS520} and @code{LECROY9400}, that miss this built-in
 function, the curve in the interval is fetched which is than used to
 compute the area. To give some visual feedback also for the @code{TDS520}
 the cursors are moved to the borders of the interval.
