@@ -139,8 +139,7 @@ typedef struct _C_ {
 } CHANNEL;
 
 
-typedef struct
-{
+typedef struct {
 	bool is_used;
 	char blk_name[ 9 ];
 	Ticks start;
@@ -148,8 +147,7 @@ typedef struct
 } BLOCK;
 
 
-typedef struct _PHS_
-{
+typedef struct _PHS_ {
 	bool is_set[ PHASE_CW - PHASE_PLUS_X + 1 ];
 	bool is_needed[ PHASE_CW - PHASE_PLUS_X + 1 ];
 	POD *pod[ PHASE_CW - PHASE_PLUS_X + 1 ];
@@ -157,8 +155,7 @@ typedef struct _PHS_
 } PHASE_SETUP;
 
 
-typedef struct
-{
+typedef struct {
 	int device;              // GPIB number of the device
 
 	double timebase;         // time base of the digitizer
