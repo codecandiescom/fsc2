@@ -52,6 +52,7 @@ static PFI_States PFI_state[ 10 ];
 
 
 /*-----------------------------------------------------------*/
+/* Function resets the MSC subsystem back into a known state */
 /*-----------------------------------------------------------*/
 
 void MSC_reset_all( Board *board )
