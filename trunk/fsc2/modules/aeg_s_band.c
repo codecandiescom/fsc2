@@ -114,7 +114,8 @@ int s_band_init_hook( void )
 
 	/* Check if there's a field meter */
 
-	if ( ! exist_device( "er035m" ) && ! exist_device( "er035m_s" ) &&
+	if ( ! exist_device( "er035m" ) &&
+		 ! exist_device( "er035m_s" ) &&
 		 ! exist_device( "bh15" ) )
 	{
 		eprint( FATAL, "S_BAND: Can't find a field meter." );
