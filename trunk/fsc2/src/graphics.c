@@ -128,6 +128,9 @@ void start_graphics( void )
 
 	if ( G.dim & 2 )
 	{
+		for ( i = 0; i < G2.nc; i++ )
+			G2.curve_2d[ i ] = NULL;
+
 		G2.nx = G2.nx_orig;
 		G2.ny = G2.ny_orig;
 
@@ -1338,12 +1341,17 @@ void stop_graphics( void )
 	}
 
 	for ( i = 0; i < G2.nc; i++ )
+	{
+		if ( G2.curve_2d[ i ] == NULL )
+			break;
+;
 		for ( m2 = G2.curve_2d[ i ]->marker_2d; m2 != NULL; m = mn )
 		{
 			XFreeGC( G.d, m2->gc );
 			mn2 = m2->next;
 			m2 = MARKER_2D_P T_free( m2 );
 		}
+	}
 
 	if ( G_stored )
 	{
