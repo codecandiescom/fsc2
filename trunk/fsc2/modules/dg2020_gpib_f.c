@@ -152,39 +152,39 @@ bool dg2020_init( const char *name )
 
     /* Set pulser to short form of replies */
 
-    if ( gpib_write( dg2020.device, "VERB OFF\n" ) == FAILURE ||
-         gpib_write( dg2020.device, "HEAD OFF\n" ) == FAILURE )
+    if ( gpib_write( dg2020.device, "VERB OFF\n", 9 ) == FAILURE ||
+         gpib_write( dg2020.device, "HEAD OFF\n", 9 ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	/* Make sure the pulser is stopped */
 
-	if ( gpib_write( dg2020.device, "STOP\n" ) == FAILURE )
+	if ( gpib_write( dg2020.device, "STOP\n", 5 ) == FAILURE )
 		dg2020_gpib_failure( );
 	dg2020.is_running = 0;
 
 	/* Switch off remote command debugging function */
 
-	if ( gpib_write( dg2020.device, "DEB:SNO:STAT OFF\n" ) == FAILURE )
+	if ( gpib_write( dg2020.device, "DEB:SNO:STAT OFF\n", 17 ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	/* Switch on phase lock for internal oscillator */
 
-	if ( gpib_write( dg2020.device, "SOUR:OSC:INT:PLL ON\n" ) == FAILURE )
+	if ( gpib_write( dg2020.device, "SOUR:OSC:INT:PLL ON\n", 20 ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	/* Delete all blocks */
 
-	if ( gpib_write( dg2020.device, "DATA:BLOC:DEL:ALL\n" ) == FAILURE )
+	if ( gpib_write( dg2020.device, "DATA:BLOC:DEL:ALL\n", 18 ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	/* Remove all sequence definitions */
 
-	if ( gpib_write( dg2020.device, "DATA:SEQ:DEL:ALL\n" ) == FAILURE )
+	if ( gpib_write( dg2020.device, "DATA:SEQ:DEL:ALL\n", 17 ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	/* Switch to manual update mode */
 
-	if ( gpib_write( dg2020.device, "MODE:UPD MAN\n" ) == FAILURE )
+	if ( gpib_write( dg2020.device, "MODE:UPD MAN\n", 13 ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	/* Set the time base */
@@ -203,12 +203,12 @@ bool dg2020_init( const char *name )
 
 	if ( dg2020.trig_in_mode == INTERNAL )
 	{
-		if ( gpib_write( dg2020.device, "MODE:STAT REP\n" ) == FAILURE )
+		if ( gpib_write( dg2020.device, "MODE:STAT REP\n", 14 ) == FAILURE )
 			dg2020_gpib_failure( );
 	}
 	else
 	{
-		if ( gpib_write( dg2020.device, "MODE:STAT ENH\n" ) == FAILURE )
+		if ( gpib_write( dg2020.device, "MODE:STAT ENH\n", 14 ) == FAILURE )
 			dg2020_gpib_failure( );
 		if ( dg2020.is_trig_in_level )
 			dg2020_set_trigger_in_level( dg2020.trig_in_level );
@@ -283,7 +283,7 @@ bool dg2020_run( bool flag )
 	if ( flag == dg2020.is_running )          // if in requested state
 		return OK;
 
-	if ( gpib_write( dg2020.device, flag ? "*WAI;STAR\n": "*WAI;STOP\n" )
+	if ( gpib_write( dg2020.device, flag ? "*WAI;STAR\n": "*WAI;STOP\n", 10 )
 		 == FAILURE )
 		dg2020_gpib_failure( );
 
@@ -313,7 +313,7 @@ bool dg2020_set_timebase( double timebase )
 
 	gcvt( 1.0 / timebase, 4, cmd + strlen( cmd ) );
 	strcat( cmd, "\n" );
-	if ( gpib_write( dg2020.device, cmd ) == FAILURE )
+	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	return OK;
@@ -339,7 +339,7 @@ bool dg2020_set_memory_size( long mem_size )
 		return FAIL;
 
 	sprintf( cmd + strlen( cmd ), "%ld\n", mem_size );
-	if ( gpib_write( dg2020.device, cmd ) == FAILURE )
+	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	return OK;
@@ -368,7 +368,7 @@ bool dg2020_channel_assign( int channel, int pod )
 	sprintf( cmd + strlen( cmd ), "%d:ASSIGN ", pod );
 	sprintf( cmd + strlen( cmd ), "%d\n", channel );
 
-	if ( gpib_write( dg2020.device, cmd ) == FAILURE )
+	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	return OK;
@@ -386,7 +386,7 @@ bool dg2020_channel_assign( int channel, int pod )
 
 bool dg2020_update_data( void )
 {
-	if ( gpib_write( dg2020.device, "DATA:UPD\n" ) == FAILURE )
+	if ( gpib_write( dg2020.device, "DATA:UPD\n", 9 ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	return dg2020_gpib_check( );
@@ -428,17 +428,17 @@ bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 	}
 	cmd[ strlen( cmd ) - 1 ] = '\0';
 
-	if ( gpib_write( dg2020.device, cmd ) == FAILURE )
+	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
 
-	if ( gpib_write( dg2020.device, "*ESR?\n" ) == FAILUE )
+	if ( gpib_write( dg2020.device, "*ESR?\n", 6 ) == FAILUE )
 		dg2020_gpib_failure( );
 	l = 100;
 	if ( gpib_read( dg2020.device, dummy, &l ) == FAILURE )
 		dg2020_gpib_failure( );
 	if ( dummy[ 0 ] != '0' || l != 2 )
 	{
-		gpib_write( dg2020.device, "ALLE?\n" );
+		gpib_write( dg2020.device, "ALLE?\n", 6 );
 		l = 1000;
 		if ( gpib_read( dg2020.device, dummy, &l ) == FAILURE )
 			dg2020_gpib_failure( );
@@ -458,14 +458,14 @@ bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 	sprintf( cmd + strlen( cmd ), "%ld,%s\n",
 			 block[ 0 ].start, block[ 0 ].blk_name );
 
-	if ( gpib_write( dg2020.device, cmd ) == FAILURE )
+	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	for ( i = 1; i < num_blocks; ++i )
 	{
 		sprintf( cmd, "DATA:BLOC:ADD %ld,\"%s\"\n",
 				 block[ i ].start, block[ i ].blk_name );
-		if ( gpib_write( dg2020.device, cmd ) == FAILURE )
+		if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 			dg2020_gpib_failure( );
 	}
 
@@ -507,14 +507,14 @@ bool dg2020_make_seq( int num_blocks, BLOCK *block )
 				 block[ i ].blk_name, block[ i ].repeat );
 	cmd[ strlen( cmd ) - 1 ] = '\0';
 
-	if ( gpib_write( dg2020.device, cmd ) == FAILURE )
+	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	/* For external trigger mode set trigger wait for first (and only) block */
 
 	if ( dg2020.trig_in_mode == EXTERNAL &&
-		 ( gpib_write( dg2020.device, "DATA:SEQ:REP 0,1\n" ) == FAILURE ||
-		   gpib_write( dg2020.device, "DATA:SEQ:TWAIT 0,1\n" ) == FAILURE )
+		 ( gpib_write( dg2020.device, "DATA:SEQ:REP 0,1\n", 17 ) == FAILURE ||
+		   gpib_write( dg2020.device, "DATA:SEQ:TWAIT 0,1\n", 19 ) == FAILURE )
 		)
 		dg2020_gpib_failure( );
 
@@ -579,7 +579,7 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 
 	/* Send the command string to the pulser */
 
-	if ( gpib_write( dg2020.device, cmd ) == FAILURE )
+	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	T_free( cmd );       /* free memory used for command string */
@@ -599,7 +599,7 @@ bool dg2020_set_pod_high_level( int pod, double voltage )
 			 fabs( voltage ) >= 1 ? voltage : 1000.0 * voltage,
 			 fabs( voltage ) >= 1 ? "V" : "mV" );
 
-	if ( gpib_write( dg2020.device, cmd ) == FAILURE )
+	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	return OK;
@@ -617,7 +617,7 @@ bool dg2020_set_pod_low_level( int pod, double voltage )
 			 fabs( voltage ) >= 1 ? voltage : 1000.0 * voltage,
 			 fabs( voltage ) >= 1 ? "V" : "mV" );
 
-	if ( gpib_write( dg2020.device, cmd ) == FAILURE )
+	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	return OK;
@@ -635,7 +635,7 @@ bool dg2020_set_trigger_in_level( double voltage )
 			 fabs( voltage ) >= 1 ? voltage : 1000.0 * voltage,
 			 fabs( voltage ) >= 1 ? "V" : "mV" );
 
-	if ( gpib_write( dg2020.device, cmd ) == FAILURE )
+	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	return OK;
@@ -652,7 +652,7 @@ bool dg2020_set_trigger_in_slope( int slope )
 	sprintf( cmd, "TRIG:SLO %s\n",
 			 slope == POSITIVE ? "POS" : "NEG" );
 
-	if ( gpib_write( dg2020.device, cmd ) == FAILURE )
+	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	return OK;
@@ -669,7 +669,7 @@ bool dg2020_set_trigger_in_impedance( int state )
 	sprintf( cmd, "TRIG:IMP %s\n",
 			 state == LOW ? "LOW" : "HIGH" );
 
-	if ( gpib_write( dg2020.device, cmd ) == FAILURE )
+	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	return OK;
@@ -904,7 +904,7 @@ static bool dg2020_gpib_do_check( DG2020_STORE *params )
 
 	/* Send command and receive reply */
 
-	if ( gpib_write( dg2020.device, cmd ) == FAILURE ||
+	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE ||
 		 gpib_read( dg2020.device, reply, &length ) == FAILURE )
 	{
 		T_free( reply );
@@ -972,7 +972,7 @@ bool dg2020_lock_state( bool lock )
 	char cmd[ 100 ];
 
 	sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
-	if ( gpib_write( dg2020.device, cmd ) == FAILURE )
+	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	return OK;

@@ -33,7 +33,7 @@ bool hp8647a_init( const char *name )
 	if ( gpib_init_device( name, &hp8647a.device ) == FAILURE )
         return FAIL;
 
-	if ( gpib_write( hp8647a.device, "*OPC\n" ) == FAILURE )
+	if ( gpib_write( hp8647a.device, "*OPC\n", 5 ) == FAILURE )
 		return FAIL;
 
 	HP8647A_INIT = SET;
@@ -124,7 +124,7 @@ bool hp8647a_set_output_state( bool state )
 
 
 	sprintf( cmd, "OUTP:STAT %s\n", state ? "ON" : "OFF" );
-	if ( gpib_write( hp8647a.device, cmd ) == FAILURE )
+	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
 		hp8647a_comm_failure( );
 	hp8647a_check_complete( );
 
@@ -141,7 +141,7 @@ bool hp8647a_get_output_state( void )
 	long length = 10;
 
 
-	if ( gpib_write( hp8647a.device, "OUTP:STAT?\n" ) == FAILURE ||
+	if ( gpib_write( hp8647a.device, "OUTP:STAT?\n", 11 ) == FAILURE ||
 		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
 		hp8647a_comm_failure( );
 
@@ -160,7 +160,7 @@ double hp8647a_set_frequency( double freq )
 	assert( freq >= MIN_FREQ && freq <= MAX_FREQ );
 
 	sprintf( cmd, "FREQ:CW %.0f\n", freq );
-	if ( gpib_write( hp8647a.device, cmd ) == FAILURE )
+	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
 		hp8647a_comm_failure( );
 	hp8647a_check_complete( );
 
@@ -177,7 +177,7 @@ double hp8647a_get_frequency( void )
 	long length = 100;
 
 
-	if ( gpib_write( hp8647a.device, "FREQ:CW?\n" ) == FAILURE ||
+	if ( gpib_write( hp8647a.device, "FREQ:CW?\n", 9 ) == FAILURE ||
 		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
 		hp8647a_comm_failure( );
 
@@ -196,7 +196,7 @@ double hp8647a_set_attenuation( double att )
 	assert( att >= MAX_ATTEN && att <= MIN_ATTEN );
 
 	sprintf( cmd, "POW:AMPL %6.1f\n", att );
-	if ( gpib_write( hp8647a.device, cmd ) == FAILURE )
+	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
 		hp8647a_comm_failure( );
 	hp8647a_check_complete( );
 
@@ -212,7 +212,7 @@ double hp8647a_get_attenuation( void )
 	char buffer[ 100 ];
 	long length = 100;
 
-	if ( gpib_write( hp8647a.device, "POW:AMPL?\n" ) == FAILURE ||
+	if ( gpib_write( hp8647a.device, "POW:AMPL?\n", 10 ) == FAILURE ||
 		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
 		hp8647a_comm_failure( );
 
@@ -242,12 +242,12 @@ int hp8647a_set_mod_type( int type )
 	{
 		sprintf( cmd, "%s:STAT OFF\n", 
 				 types[ ( type + i ) % NUM_MOD_TYPES ] );
-		if ( gpib_write( hp8647a.device, cmd ) == FAILURE )
+		if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
 			hp8647a_comm_failure( );
 	}
 
 	sprintf( cmd, "%s:STAT ON\n", types[ type ] );
-	if ( gpib_write( hp8647a.device, cmd ) == FAILURE )
+	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
 		hp8647a_comm_failure( );
 	hp8647a_check_complete( );
 
@@ -282,7 +282,7 @@ int hp8647a_get_mod_type( void )
 	{
 		length = 100;
 		sprintf( cmd, "%s:STAT?\n", types[ i ] );
-		if ( gpib_write( hp8647a.device, cmd ) == FAILURE ||
+		if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE ||
 			 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
 			hp8647a_comm_failure( );
 
@@ -353,8 +353,8 @@ int hp8647a_set_mod_source( int type, int source )
 	if ( I_am == PARENT && ! HP8647A_INIT )
 		return source;
 
-	if ( gpib_write( hp8647a.device, cmd1 ) == FAILURE ||
-		 gpib_write( hp8647a.device, cmd2 ) == FAILURE )
+	if ( gpib_write( hp8647a.device, cmd1, strlen( cmd1 ) ) == FAILURE ||
+		 gpib_write( hp8647a.device, cmd2, strlen( cmd2 ) ) == FAILURE )
 		hp8647a_comm_failure( );
 	hp8647a_check_complete( );
 
@@ -387,7 +387,7 @@ int hp8647a_get_mod_source( int type )
 
 	sprintf( cmd, "%s:SOUR?\n", types[ type ] );
 	length = 100;
-	if ( gpib_write( hp8647a.device, cmd ) == FAILURE ||
+	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE ||
 		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
 		hp8647a_comm_failure( );
 
@@ -397,7 +397,7 @@ int hp8647a_get_mod_source( int type )
 	if ( source == 0 )
 	{
 		sprintf( cmd, "%s:INT:FREQ?\n", types[ type ] );
-		if ( gpib_write( hp8647a.device, cmd ) == FAILURE ||
+		if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE ||
 			 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
 			hp8647a_comm_failure( );
 		freq = lround( T_atof ( buffer ) );
@@ -406,7 +406,7 @@ int hp8647a_get_mod_source( int type )
 	else
 	{
 		sprintf( cmd, "%s:EXT:COUP?\n", types[ type ] );
-		if ( gpib_write( hp8647a.device, cmd ) == FAILURE ||
+		if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE ||
 			 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
 			hp8647a_comm_failure( );
 		source = buffer[ 0 ] == 'A' ? MOD_SOURCE_AC : MOD_SOURCE_DC;
@@ -505,7 +505,7 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 	if ( I_am == PARENT && ! HP8647A_INIT )
 		return ampl;
 
-	if ( gpib_write( hp8647a.device, cmd ) == FAILURE )
+	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
 		hp8647a_comm_failure( );
 	hp8647a_check_complete( );
 
@@ -534,7 +534,8 @@ double hp8647a_get_mod_ampl( int type )
 			return defaults[ type ];
 	}
 
-	if ( gpib_write( hp8647a.device, cmds[ type ] ) == FAILURE ||
+	if ( gpib_write( hp8647a.device, cmds[ type ], strlen( cmds[ type] ) )
+		 == FAILURE ||
 		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
 		hp8647a_comm_failure( );
 
@@ -562,7 +563,7 @@ static void hp8647a_check_complete( void )
 
 
 	do {
-		if ( gpib_write( hp8647a.device, "*OPC?\n" ) == FAILURE ||
+		if ( gpib_write( hp8647a.device, "*OPC?\n", 6 ) == FAILURE ||
 			 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
 			hp8647a_comm_failure( );
 	} while ( buffer[ 1 ] != '1' );

@@ -150,7 +150,7 @@ int sr510_end_of_exp_hook( void )
 
 	if ( sr510.device >= 0 )
 	{
-		gpib_write( sr510.device, "I0\n" );
+		gpib_write( sr510.device, "I0\n", 3 );
 		gpib_local( sr510.device );
 	}
 
@@ -673,13 +673,13 @@ bool sr510_init( const char *name )
 
 	/* Ask lock-in to send status byte and test if it does */
 
-	if ( gpib_write( sr510.device, "Y\n" ) == FAILURE ||
+	if ( gpib_write( sr510.device, "Y\n", 2 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 		return FAIL;
 
 	/* Lock the keyboard */
 
-	if ( gpib_write( sr510.device, "I1\n" ) == FAILURE )
+	if ( gpib_write( sr510.device, "I1\n", 3 ) == FAILURE )
 		return FAIL;
 
 	/* If sensitivity, time constant or phase were set in one of the
@@ -711,7 +711,7 @@ double sr510_get_data( void )
 	long length = 20;
 
 
-	if ( gpib_write( sr510.device, "Q\n" ) == FAILURE ||
+	if ( gpib_write( sr510.device, "Q\n", 2 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
@@ -740,7 +740,7 @@ double sr510_get_adc_data( long channel )
 
 	buffer[ 1 ] = ( char ) channel + '0';
 
-	if ( gpib_write( sr510.device, buffer ) == FAILURE ||
+	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
@@ -765,7 +765,7 @@ double sr510_get_sens( void )
 
 	/* Ask lock-in for the sensitivity setting */
 
-	if ( gpib_write( sr510.device, "G\n" ) == FAILURE ||
+	if ( gpib_write( sr510.device, "G\n", 2 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
@@ -780,7 +780,7 @@ double sr510_get_sens( void )
 	   by a factor of 10 */
 
 	length = 10;
-	if ( gpib_write( sr510.device, "E\n" ) == FAILURE ||
+	if ( gpib_write( sr510.device, "E\n", 2 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
@@ -819,7 +819,7 @@ void sr510_set_sens( int Sens )
 
 	if ( Sens <= 3 )
 	{
-		if ( gpib_write( sr510.device, "E1\n" ) == FAILURE )
+		if ( gpib_write( sr510.device, "E1\n", 3 ) == FAILURE )
 		{
 			eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 					DEVICE_NAME );
@@ -829,7 +829,7 @@ void sr510_set_sens( int Sens )
 	}
 	else
 	{
-		if ( gpib_write( sr510.device, "E0\n" ) == FAILURE )
+		if ( gpib_write( sr510.device, "E0\n", 3 ) == FAILURE )
 		{
 			eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 					DEVICE_NAME );
@@ -841,7 +841,7 @@ void sr510_set_sens( int Sens )
 
 	sprintf( buffer, "G%d\n", Sens );
 
-	if ( gpib_write( sr510.device, buffer ) == FAILURE )
+	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
@@ -862,7 +862,7 @@ double sr510_get_tc( void )
 	long length = 10;
 
 
-	if ( gpib_write( sr510.device, "T1\n" ) == FAILURE ||
+	if ( gpib_write( sr510.device, "T1\n", 3 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
@@ -888,7 +888,7 @@ void sr510_set_tc( int TC )
 
 
 	sprintf( buffer, "T1,%d\n", TC );
-	if ( gpib_write( sr510.device, buffer ) == FAILURE )
+	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
@@ -898,7 +898,7 @@ void sr510_set_tc( int TC )
 	/* Also set the POST time constant where 'T2,0' switches it off, 'T2,1'
 	   sets it to 100ms and 'T1,2' to 1s */
 
-	if ( TC <= 4 && gpib_write( sr510.device, "T2,0\n" ) == FAILURE )
+	if ( TC <= 4 && gpib_write( sr510.device, "T2,0\n", 5 ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
@@ -906,14 +906,14 @@ void sr510_set_tc( int TC )
 	}
 
 	if ( TC > 4 && TC <= 6 &&
-		 gpib_write( sr510.device, "T2,1\n" ) == FAILURE )
+		 gpib_write( sr510.device, "T2,1\n", 5 ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
-	if ( TC > 6 && gpib_write( sr510.device, "T2,2\n" ) == FAILURE )
+	if ( TC > 6 && gpib_write( sr510.device, "T2,2\n", 5 ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
@@ -934,7 +934,7 @@ double sr510_get_phase( void )
 	double phase;
 
 
-	if ( gpib_write( sr510.device, "P\n" ) == FAILURE ||
+	if ( gpib_write( sr510.device, "P\n", 2 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
@@ -965,7 +965,7 @@ double sr510_set_phase( double phase )
 
 
 	sprintf( buffer, "P%.2f\n", phase );
-	if ( gpib_write( sr510.device, buffer ) == FAILURE )
+	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
@@ -985,7 +985,7 @@ static double sr510_get_ref_freq( void )
 	char buffer[ 50 ];
 	long length = 50;
 
-	if ( gpib_write( sr510.device, "F\n" ) == FAILURE ||
+	if ( gpib_write( sr510.device, "F\n", 2 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
@@ -1020,7 +1020,7 @@ static double sr510_set_dac_voltage( long channel, double voltage )
 	}
 
 	sprintf( buffer, "X%1ld,%f\n", channel, voltage );
-	if ( gpib_write( sr510.device, buffer ) == FAILURE )
+	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
@@ -1040,7 +1040,7 @@ static void sr510_lock_state( bool lock )
 
 
 	sprintf( cmd, "I%c\n", lock ? '2' : '0' );
-	if ( gpib_write( sr510.device, cmd ) == FAILURE )
+	if ( gpib_write( sr510.device, cmd, strlen( cmd ) ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
