@@ -57,9 +57,7 @@ void *T_malloc( size_t size )
 	}
 #endif
 
-	mem = malloc( size );
-
-	if ( mem == NULL )
+	if ( ( mem = malloc( size ) == NULL )
 	{
 		print( FATAL, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
@@ -119,9 +117,7 @@ void *T_calloc( size_t nmemb, size_t size )
 	}
 #endif
 
-	mem = calloc( nmemb, size );
-
-	if ( mem == NULL )
+	if ( ( mem = calloc( nmemb, size ) ) == NULL )
 	{
 		print( FATAL, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
@@ -172,9 +168,7 @@ void *T_realloc( void *ptr, size_t size )
 	}
 #endif
 
-	new_ptr = realloc( ptr, size );
-
-	if ( new_ptr == NULL )
+	if ( ( new_ptr = realloc( ptr, size ) ) == NULL )
 	{
 		print( FATAL, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
