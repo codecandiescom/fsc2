@@ -58,7 +58,7 @@ html: fsc2.html
 fsc2.html: $(docs) $(figures)
 	./texi2html -split chapter -menu -number -sec_nav -iso fsc2.texi
 
-	@echo -e '<div id="level0">\n  <div id="links">\n  <img src="fsc2.gif" alt="fsc2 logo">\n  <br><br>' >> TOC
+	@echo -e '  <div id="links">\n  <img src="fsc2.gif" alt="fsc2 logo">\n  <br><br>' >> TOC
 	@for i in fsc2.html fsc2_[1-9].html; do \
 		if [ -z "`grep -h '^<TITLE>fsc2: Index:' $$i`" ]; then \
 			echo -n '  <a href="'$$i'">' >> TOC; \
@@ -78,12 +78,12 @@ fsc2.html: $(docs) $(figures)
 	sed 's/^<TITLE>fsc2: \([^<]*\)<\/TITLE>$$/\1<\/a><br><br>/' >> TOC;
 	@echo '  <a href="http://www.physik.fu-berlin.de/~toerring/fsc2.html">Download</a><br>' >> TOC
 	@echo '  <a href="mailto:Jens.Toerring@physik.fu-berlin.de">Contact</a>' >> TOC
-	@echo -e '  </div>\n  <div id="level1">\n    <div id="main">' >> TOC
+	@echo -e '  </div>\n  <div id="main">' >> TOC
 	@for i in *.html; do \
 		sed '1,/BODY/!d' $$i > $$i.x; \
 		cat TOC >> $$i.x; \
 		sed '1,/<BODY>/d;/<\/BODY/,$$d' $$i >> $$i.x; \
-		echo -e '    </div>\n  </div>\n</div>\n</BODY>\n</HTML>' >> $$i.x; \
+		echo -e '  </div>\n</BODY>\n</HTML>' >> $$i.x; \
 		mv $$i.x $$i; \
 	done
 	-@$(RM) TOC
