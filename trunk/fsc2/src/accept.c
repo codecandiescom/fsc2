@@ -87,8 +87,8 @@ void accept_new_data( bool empty_queue )
 
 	/* Clear the flags that later tell us what really needs to be redrawn */
 
-	memset( scale_1d_changed, 0, 2 * sizeof *scale_1d_changed );
-	memset( scale_2d_changed, 0, 2 * sizeof *scale_2d_changed );
+	memset( scale_1d_changed, 0, sizeof scale_1d_changed );
+	memset( scale_2d_changed, 0, sizeof scale_2d_changed );
 	need_2d_redraw = need_cut_redraw = UNSET;
 
 	while ( 1 )
