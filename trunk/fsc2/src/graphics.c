@@ -169,7 +169,7 @@ void start_graphics( void )
 			fl_set_pixmapbutton_file( run_form->undo_button, pixmap_file );
 			fl_set_object_lsize( run_form->undo_button,
 								 GI_sizes.SMALL_FONT_SIZE );
-			if ( ! ( cmdline_flags & NO_BALLOON )
+			if ( ! ( cmdline_flags & NO_BALLOON ) )
 				 fl_set_object_helper( run_form->undo_button,
 									   "Undo last rescaling operation" );
 
@@ -231,6 +231,8 @@ void start_graphics( void )
 		else if ( stop_button_mask == FL_RIGHT_MOUSE )
 			fl_set_object_helper( run_form->stop, "Stop the experiment\n"
 			                                      "Use right mouse button" );
+	}
+
 	if ( G.dim == 2 && ! ( cmdline_flags & NO_BALLOON ) )
 	{
 		fl_set_object_helper( cut_form->cut_close_button,

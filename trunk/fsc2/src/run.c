@@ -608,12 +608,12 @@ static void run_child( void )
 	do_quit = UNSET;
 	set_child_signals( );
 
-//#if 0                                    /* used for child process debugging */
+#if 0                                    /* used for child process debugging */
 	{
 		bool h = SET;
 		while ( h );
 	}
-//#endif
+#endif
 
 	TRY {
 		do_measurement( );               /* run the experiment */
