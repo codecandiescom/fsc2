@@ -175,8 +175,8 @@ int s_band_init_hook( void )
 
 	if ( SERIAL_PORT >= NUM_SERIAL_PORTS )
 	{
-		eprintf( FATAL, "s_band: Serial port number out of valid "
-				 "range (0-%d).", NUM_SERIAL_PORTS - 1 );
+		eprint( FATAL, "s_band: Serial port number out of valid range (0-%d).",
+				NUM_SERIAL_PORTS - 1 );
 		THROW( EXCEPTION );
 	}
 
