@@ -29,7 +29,7 @@
 # on why these rules have this rather complicated form.
 
 ##.so: $(##:.c=.o)
-	if [ -z "$($(patsubst %.so,%_libs,$@))" ]; then                \
+	@if [ -z "$($(patsubst %.so,%_libs,$@))" ]; then               \
 		echo "$(CC) $(LFLAGS) $^ -o $@";                           \
 		$(CC) $(LFLAGS) $^ -o $@;                                  \
 		chmod 644 $@;                                              \
@@ -54,7 +54,7 @@
 	fi
 
 $(##:.c=.o): %.o: %.c ##.h $(cdir)/##.conf $(src_headers)
-	incl="$(foreach i,$(##_incl),-I$(i))";                         \
+	@incl="$(foreach i,$(##_incl),-I$(i))";                        \
 	echo "$(CC) $$incl $(CFLAGS) -c $(LFLAGS) $< -o $@";           \
 	$(CC) $(CFLAGS) -c $(LFLAGS) $< -o $@
 
