@@ -349,6 +349,9 @@ Var *digitizer_record_length( Var *v )
 		}
 		else if ( I_am == PARENT )
 		{
+			if ( tds754a.is_rec_len )
+				return vars_push( INT_VAR, tds754a.rec_len );
+
 			eprint( FATAL, "%s:%ld: %s: Function `digitizer_record_length' "
 					"with no argument can only be used in the EXPERIMENT "
 					"section.\n", Fname, Lc, DEVICE_NAME );
