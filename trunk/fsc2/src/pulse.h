@@ -8,7 +8,7 @@
 
 
 
-typedef Pulse_ {
+typedef struct Pulse_ {
 
 	int num;                  /* number of pulse */
 
@@ -22,13 +22,19 @@ typedef Pulse_ {
 
 	Phase_Sequence *phase;    /* phase sequence for pulse */
 
-	Pulse_ * rp;              /* list of replacement pulses */
+	struct Pulse_ * rp;       /* list of replacement pulses */
 	int n_rp;                 /* number of replacement pulses */
 
-	Pulse_ *next;             /* pointer to next pulse in list */
-	Pulse_ *prev;             /* pointer to previous pulse in list */
+	struct Pulse_ *next;      /* pointer to next pulse in list */
+	struct Pulse_ *prev;      /* pointer to previous pulse in list */
 
 } Pulse;
+
+
+
+Pulse *pulse_new( int num );
+Pulse *pulse_find( int num );
+void pulse_set_func( Pulse *p, long func );
 
 
 #endif  /* ! PULSE_HEADER */

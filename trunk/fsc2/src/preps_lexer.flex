@@ -24,7 +24,6 @@
 }
 
 #include "fsc2.h"
-/* #include "preps.h" */
 #include "preps_parser.h"
 
 
@@ -54,15 +53,35 @@ EXP         ^[ \t]*EXP(ERIMENT)?:
 ESTR        \x5.*\x3\n.*\n
 STR         \x5.*\x6
 
+MW          M(ICRO)?_?W(AVE)?:?
+TWT         T(RAVELING)?_?W(AVE)?_?T(UBE)?:?
+TWT_GATE    T(RAVELING)?_?W(AVE)?_?T(UBE)?_?G(ATE)?:?
+DET         DET(ECTION)?:?
+DET_GATE    DET(ECTION)?_?G(ATE)?:?
+RF          R(ADIO)?_?F(REQUENCY)?:?
+RF_GATE     R(ADIO)?_?F(REQUENCY)?_?G(ATE)?:?
+
 INT         [0-9]+
 EXPO        [EDed][+-]?{INT}
 FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
+
+P           P(ULSE)?_?{INT}
+
+F           F(UNC(TION)?)?
+S           S(TART)?
+L			L(ENGTH)?
+DS          D(EL(TA)?)?_?S(TART)?
+DL          D(EL(TA)?)?_?L(EN(GTH)?)?
+PH          PH(ASE(SEQ(UENCE)?)?)?_?{INT}?
+ML          M(AX(IMUM)?)?_?L(EN(GTH)?)?
+RP          R(EPL(ACEMENT)?)?_?P((ULSE)?S?)?
+
 
 WS          [\n \t]+
 
 IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
-UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^]+
+UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 
 
 		/*---------------*/
@@ -138,6 +157,64 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^]+
 				prepslval.sptr = prepstext + 1;
 				return( STR_TOKEN );
 			}
+
+
+			/* all pulse related keywords... */
+
+{P}":"?     {
+				register char *p = prepstext;
+
+				while ( ! isdigit( *++p ) )
+			        ;
+
+			    Cur_Pulse = pulse_new( atoi( p ) );
+				return( P_TOK );
+			}
+
+{F}         return( F_TOK );
+{S}			return( S_TOK );
+{L}			return( L_TOK );
+{DS}        return( DS_TOK );
+{DL}        return( DL_TOK );
+{PH}        return( PH_TOK );
+{ML}        return( ML_TOK );
+{RP}        return( RP_TOK );
+
+{P}?"."{S}  
+{P}?"."{L}
+{P}?"."{DS}
+{P}?"."{DL}
+{P}?"."{ML}
+
+{MW}        {
+				prepslval.lval = PULSER_CHANNEL_MW;
+				return( FUNC_TOK );
+			}
+{TWT}       {
+				prepslval.lval = PULSER_CHANNEL_TWT;
+				return( FUNC_TOK );
+			}
+{TWT_GATE}  {
+				prepslval.lval = PULSER_CHANNEL_TWT_GATE;
+				return( FUNC_TOK );
+			}
+{DET}       {
+				prepslval.lval = PULSER_CHANNEL_DET;
+				return( FUNC_TOK );
+			}
+{DET_GATE}  {
+				prepslval.lval = PULSER_CHANNEL_DET;
+				return( FUNC_TOK );
+			}
+{RF}        {
+				prepslval.lval = PULSER_CHANNEL_RF;
+				return( FUNC_TOK );
+			}
+{RF_GATE}   {
+				prepslval.lval = PULSER_CHANNEL_RF_GATE;
+				return( FUNC_TOK );
+			}
+
 
 			/* handling of function, variable and array identifiers */
 {IDENT}     {
