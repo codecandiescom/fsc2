@@ -1053,6 +1053,7 @@ bool spex_cd2a_read_state( void )
 	double val[ 2 ];
 	int i = 0;
 	bool in_comment = UNSET;
+	bool found_end = UNSET;
 
 
 	dn = fsc2_config_dir( );
@@ -1072,10 +1073,8 @@ bool spex_cd2a_read_state( void )
 		switch ( c )
 		{
 			case EOF :
-				print( FATAL, "Invalid calibration file '%s'.\n", fn );
-				T_free( fn );
-				fsc2_fclose( fp );
-				THROW( EXCEPTION );
+				found_end = SET;
+				break;
 
 			case '#' :
 				in_comment = SET;
@@ -1090,31 +1089,44 @@ bool spex_cd2a_read_state( void )
 					break;
 
 				fsc2_fseek( fp, -1, SEEK_CUR );
-				if ( ( i == 0 &&
-					   ( ( spex_cd2a.mode & WN_MODES &&
-						   ( fsc2_fscanf( fp, "%lf[ \t]", val + i++ ) != 1 ||
-							 fgetc( fp ) != 'c' || fgetc( fp ) != 'm' ||
-							 fgetc( fp ) != '^' || fgetc( fp ) != '-' ||
-							 fgetc( fp ) != '1' ) )
-						 ||
-						 ( spex_cd2a.mode == WL &&
-						   ( fsc2_fscanf( fp, "%lf[ \t]", val + i++ ) != 1 ||
-							 fgetc( fp ) != 'n' || fgetc( fp ) != 'm' ) ) )
-					 ) || ( i == 1 && (
-							fsc2_fscanf( fp, "%lf[ \t]", val + i++ ) != 1 ||
-							fgetc( fp ) != 'c' || fgetc( fp ) != 'm' ||
-							fgetc( fp ) != '^' || fgetc( fp ) != '-' ||
-							fgetc( fp ) != '1' ) ) )
+
+				if ( ( i > 0 && spex_cd2a.mode & WL ) || i > 1 ||
+					 fsc2_fscanf( fp, "%lf", val + i++ ) != 1 )
 				{
 					print( FATAL, "Invalid calibration file '%s'.\n", fn );
 					T_free( fn );
 					fsc2_fclose( fp );
 					THROW( EXCEPTION );
 				}
+
+				while ( ( c = fsc2_fgetc( fp ) ) != EOF && isspace( c ) )
+					/* empty */ ;
+
+				if ( c == EOF || ( spex_cd2a.mode & WN_MODES && c != 'c' ) ||
+					 ( spex_cd2a.mode & WL && c != 'n' ) )
+				{
+					print( FATAL, "Invalid calibration file '%s'.\n", fn );
+					T_free( fn );
+					fsc2_fclose( fp );
+					THROW( EXCEPTION );
+				}
+				
+				if ( fsc2_fgetc( fp ) != 'm' ||
+					 ( spex_cd2a.mode & WN_MODES && 
+					   ( fsc2_fgetc( fp ) != '^' ||
+						 fsc2_fgetc( fp ) != '-' ||
+						 fsc2_fgetc( fp ) != '1' ) ) )
+				{
+					print( FATAL, "Invalid calibration file '%s'.\n", fn );
+					T_free( fn );
+					fsc2_fclose( fp );
+					THROW( EXCEPTION );
+				}
+
 				break;
 		}
 
-	} while ( i < ( spex_cd2a.mode & WN_MODES ? 2 : 1 ) );
+	} while ( ! found_end );
 
 	T_free( fn );
 	fsc2_fclose( fp );
