@@ -2229,7 +2229,7 @@ FOR I = 1 : 10 @{
 @findex mouse_position()
 The function can be used to determine the current mouse position in the
 display windows when the left and middle mouse buttons are pressed at
-once. It accepts no arguments and returns an array with 9 floating point
+once. It accepts no arguments and returns an array with 10 floating point
 values.
 
 The first element of the returned array can have the following values,
@@ -2240,7 +2240,7 @@ The mouse pointer is not within the main display area of one of the
 display windows, the left and middle mouse buttons aren't both pressed
 at once, or no curve is shown at the moment in the currently active
 window (possibly because there's no scaling set for the curve). The
-remaining elements of the array have no meaning.
+remaining elements (except the last) of the array have no meaning.
 
 @item 1
 The mouse pointer is in the display area of the 1D display window and
@@ -2257,7 +2257,7 @@ both the left and middle mouse buttons are pressed. The second and third
 element of the array are @i{x}- and @i{y}-coordinates of the mouse
 position according to scaling of the currectly displayed curve. The
 fourth element is the @i{z}-value of the curve at this position. All
-other array elements are meaningless.
+other array elements (except the last one) are meaningless.
 
 @item -2
 The mouse pointer is in the display area of the 2D display window and
@@ -2265,7 +2265,7 @@ both the left and middle mouse buttons are pressed. The second and third
 element of the array are @i{x}- and @i{y}-coordinates of the mouse
 position according to scaling of the currectly displayed curve. At the
 current mouse position is no displayed point, a @i{z}-value thus cannot
-be given. All other array elements are meaningless.
+be given. All other array elements (except the last one) are meaningless.
 
 @item 3
 The mouse pointer is in the display area of the display window showing a
@@ -2274,9 +2274,65 @@ middle mouse buttons are pressed. The second and third element of the
 array are @i{x}- and @i{y}-coordinates of the mouse position according
 to scaling of the currectly displayed cross section curve. The fourth
 element is the coordinate of the cut through the 2-dimensional curve.
-All other array elements are meaningless.
+All other array elements (except the last one) are meaningless.
 
 @end table
+
+The tenth and last element of the array can be used to figure out if one
+of the modifier keys on the keyboard is currently pressed. Modifier keys
+are the Shift keys, the Shift-Lock key, the Control keys and other keys
+like the Alternate key. The value returned consists of values for:
+
+@table @samp
+
+@item @code{0}
+No modifier key is pressed
+
+@item @code{1}
+Shift modifier key (typically one of the Shift keys) is pressed.
+
+@item @code{2}
+Shift-lock modifier (typically the Shift-lock key) is pressed.
+
+@item @code{4}
+Control modifier (typically one of the Control keys) is pressed.
+
+@item @code{8}
+Modifier-1 (typically the Alternate key) is pressed.
+
+@item @code{16}
+Modifier-2 key is pressed.
+
+@item @code{32}
+Modifier-3 key is pressed.
+
+@item @code{64}
+Modifier-4 key is pressed.
+
+@item @code{128}
+Modifier-5 key is pressed.
+
+@end table
+
+The value returned in last array element is the sum of the above values
+for the keys currently pressed. I.e.@: when someone holds down both the
+Shift modifier key and the Control modifier key the returned value will
+be 5. To find out if e.g.@: the Control modifier key is pressed you
+could use:
+@example
+pos_arr = mouse_position( );
+IF ( pos_arry[ 10 ] / 4 ) % 2 @{
+    print( "The Control modifier key is pressed.\n" );
+@}
+@end example
+
+Please note: since under X it is easy to remap keys the returned value
+does not represent physical keys on the keyboard but the function the
+user has assigned to a key. If, for example, the user has mapped the
+function "Shift" to the (physical) Control key, pressing the (physical)
+Control key would be reported as a press of the Shift modifier key.  The
+Modifier-2 to Modifier-5 functions usually are not even mapped to a
+physical key.
 
 
 @anchor{lin_space}

@@ -1915,7 +1915,7 @@ double *exp_getpos( char *buffer, ptrdiff_t len  )
 		}
 
 		T_free( buffer );
-		result = LONG_P T_malloc( ( 2 * MAX_CURVES + 1 ) * sizeof *result );
+		result = LONG_P T_malloc( ( 2 * MAX_CURVES + 2 ) * sizeof *result );
 
 		if ( ! reader( ( void * ) result ) )
 		{
@@ -1928,10 +1928,11 @@ double *exp_getpos( char *buffer, ptrdiff_t len  )
 	else
 	{
 		char *pos;
-		double result[ ( 2 * MAX_CURVES + 1 ) ];
+		double result[ 2 * MAX_CURVES + 2 ];
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
 		int i;
+		unsigned int keys;
 
 
 		pos = buffer;
@@ -1942,14 +1943,32 @@ double *exp_getpos( char *buffer, ptrdiff_t len  )
 
 		
 		if ( G.coord_display == 1 )
-			result[ 0 ] = ( double ) get_mouse_pos_1d( result + 1 );
+			result[ 0 ] = ( double ) get_mouse_pos_1d( result + 1, &keys );
 		else if ( G.coord_display == 2 )
-			result[ 0 ] = ( double ) get_mouse_pos_2d( result + 1 );
+			result[ 0 ] = ( double ) get_mouse_pos_2d( result + 1, &keys );
 		else if ( G.coord_display == 4 )
-			result[ 0 ] = ( double ) get_mouse_pos_cut( result + 1 );
+			result[ 0 ] = ( double ) get_mouse_pos_cut( result + 1, &keys );
 		else
 			for ( i = 0; i < 2 * MAX_CURVES + 1; i++ )
 				result[ i ] = 0.0;
+
+		result[ 2 * MAX_CURVES + 1 ] = 0;
+		if ( keys & ShiftMask )
+			result[ 2 * MAX_CURVES + 1 ] += 1;
+		if ( keys & LockMask )
+			result[ 2 * MAX_CURVES + 1 ] += 2;
+		if ( keys & ControlMask )
+			result[ 2 * MAX_CURVES + 1 ] += 4;
+		if ( keys & Mod1Mask )
+			result[ 2 * MAX_CURVES + 1 ] += 8;
+		if ( keys & Mod2Mask )
+			result[ 2 * MAX_CURVES + 1 ] += 16;
+		if ( keys & Mod3Mask )
+			result[ 2 * MAX_CURVES + 1 ] += 32;
+		if ( keys & Mod4Mask )
+			result[ 2 * MAX_CURVES + 1 ] += 64;
+		if ( keys & Mod5Mask )
+			result[ 2 * MAX_CURVES + 1 ] += 128;
 
 		writer( C_GETPOS, sizeof result, result );
 
