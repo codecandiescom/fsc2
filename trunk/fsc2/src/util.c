@@ -636,7 +636,7 @@ inline short d2shrt( double a )
 		return SHRT_MAX_HALF;
 	if ( a < SHRT_MIN_HALF )
 		return SHRT_MIN_HALF;
-	return ( short ) a;                         /* Leads to compiler warning */
+	return ( short ) a;
 }
 
 
@@ -656,7 +656,7 @@ inline unsigned short d2ushrt( double a )
 		return USHRT_MAX;
 	if ( a < 0 )
 		return 0;
-	return ( unsigned short ) a;                /* Leads to compiler warning */
+	return ( unsigned short ) a;
 }
 
 

@@ -92,7 +92,7 @@ CFLAGS           := -ggdb -O2 -I/usr/X11R6/include/X11 \
 					-Wmissing-declarations -W -Wshadow \
 					-Wpointer-arith -Wsign-compare -Waggregate-return \
 					-Wnested-externs -Wsign-compare -Wcast-align \
-					-Wbad-function-cast
+				    -Wbad-function-cast # fails in two places in src/util.c
 				    # -Wcast-qual # fails in a few places
 				    # -Wundef     # fails due in bison and lex created files
 				    # -ansi       # fails due to inline
