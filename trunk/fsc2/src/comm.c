@@ -267,7 +267,7 @@ void new_data_callback( FL_OBJECT *a, long b )
 /* that contains at least information about the type of message. Many   */
 /* of the messages can only be read by the parent. These are:           */
 /* C_EPRINT, C_SHOW_MESSAGE, C_SHOW_ALERT, C_SHOW_CHOICES,              */
-/* C_SHOW_FSELECTOR, C_INIT_GRAPHICS, C_PROG and C_OUTPUT.              */
+/* C_SHOW_FSELECTOR, C_PROG and C_OUTPUT.                               */
 /* These are the implemented requests.                                  */
 /* The remaining types are used for passing the replies to the request  */
 /* back to the child process. THese are also the ones where a return    */
@@ -291,10 +291,8 @@ long reader( void *ret )
 	long dim;
 	int i;
 	int n1, n2;
-	long nc, nx, ny;
 	long retval;
 	static char *retstr = NULL;
-	double rwc_x_start, rwc_x_delta, rwc_y_start, rwc_y_delta;
 
 
 	/* Get the header - failure indicates that the child is dead */
@@ -471,52 +469,6 @@ long reader( void *ret )
 			retval = 0;
 			break;
 
-		case C_INIT_GRAPHICS :
-			assert( I_am == PARENT );       /* only to be read by the parent */
-
-			/* read the dimension, numbers of points and the real word
-			   coordinate stuff */
-
-			pipe_read( pd[ READ ], &dim, sizeof( long ) );
-			pipe_read( pd[ READ ], &nc, sizeof( long ) );
-			pipe_read( pd[ READ ], &nx, sizeof( long ) );
-			pipe_read( pd[ READ ], &ny, sizeof( long ) );
-			pipe_read( pd[ READ ], &rwc_x_start, sizeof( double ) );
-			pipe_read( pd[ READ ], &rwc_x_delta, sizeof( double ) );
-			pipe_read( pd[ READ ], &rwc_y_start, sizeof( double ) );
-			pipe_read( pd[ READ ], &rwc_y_delta, sizeof( double ) );
-
-			/* get length of both label strings from header and read them */
-
-			for ( i = 0; i < 2 ; i++ )
-				if ( header.data.str_len[ i ] > 0 )
-				{
-					str[ i ] = get_string( header.data.str_len[ i ] );
-					pipe_read( pd[ READ ], str[ i ],
-							   header.data.str_len[ i ] );
-					str[ i ][ header.data.str_len[ i ] ] = '\0';
-				}
-				else if ( header.data.str_len[ i ] == 0 )
-					str[ i ] = get_string_copy( "" );
-				else
-					str[ i ] = NULL;
-
-			/* call the function with the parameters just read */
-
-			graphics_init( dim, nc, nx, ny, rwc_x_start, rwc_x_delta,
-						   rwc_y_start, rwc_y_delta, str[ 0 ], str[ 1 ] );
-
-			/* get rid of the label strings and return */
-
-			for ( i = 0; i < 2 ; i++ )
-				if ( str[ i ] != NULL )
-					T_free( str[ i ] );
-			retval = 0;
-
-			kill( child_pid, DO_SEND );
-
-			break;
-
 		case C_PROG : case C_OUTPUT :
 			assert( I_am == PARENT );       /* only to be read by the parent */
 
@@ -687,10 +639,6 @@ bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 /*                    (3 int), 3 strings with texts for buttons (char *),  */
 /*                    number of default button (int) (parameter as in      */
 /*                    fl_show_choices())                                   */
-/* C_INIT_GRAPHICS  : dimensionality of experiment (1 or 2) (long), number */
-/*                    of curves and of points in x- and y-direction (long),*/
-/*                    4 real world cooordinates (double) and the x- and    */
-/*                    y-label strings (char *)                             */
 /* C_SHOW_FSELECTOR : 4 strings (4 char *) with identical meaning as the   */
 /*                    parameter for fl_show_fselector()                    */
 /* C_PROG, C_OUTPUT : None at all                                          */
@@ -700,9 +648,9 @@ bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 /* C_FLOAT          : float data (float)                                   */
 /* C_DOUBLE         : double data (double)                                 */
 /*                                                                         */
-/* The types C_EPRINT, C_SHOW_MESSAGE, C_SHOW_ALERT, C_SHOW_CHOICES,       */
-/* C_SHOW_FSELECTOR, C_INIT_GRAPHICS are only to be used by the child      */
-/* process, the other only by the parent!                                  */
+/* The types C_EPRINT, C_SHOW_MESSAGE, C_SHOW_ALERT, C_SHOW_CHOICES and    */
+/* C_SHOW_FSELECTOR are only to be used by the child process, the other    */
+/* only by the parent!                                                     */
 /*-------------------------------------------------------------------------*/
 
 
@@ -713,10 +661,8 @@ void writer( int type, ... )
 	char *str[ 4 ];
 	long dim;
 	int n1, n2;
-	long nc, nx, ny;
 	int i;
 	char ack;
-	double rwc_x_start, rwc_x_delta, rwc_y_start, rwc_y_delta;
 
 
 	/* The child process has to wait for the parent process to become ready to
@@ -826,47 +772,6 @@ void writer( int type, ... )
 			write( pd[ WRITE ], &n2, sizeof( int ) );
 
 			for ( i = 0; i < 4; i++ )
-				if ( header.data.str_len[ i ] > 0 )
-					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
-			break;
-
-		case C_INIT_GRAPHICS :
-			assert( I_am == CHILD );      /* only to be written by the child */
-
-			dim = va_arg( ap, long );
-			nc =  va_arg( ap, long );
-			nx = va_arg( ap, long );
-			ny = va_arg( ap, long );
-			rwc_x_start = va_arg( ap, double );
-			rwc_x_delta = va_arg( ap, double );
-			rwc_y_start = va_arg( ap, double );
-			rwc_y_delta = va_arg( ap, double );
-
-			for ( i = 0; i < 2; i++ )
-			{
-				str[ i ] = va_arg( ap, char * );
-				if ( str[ i ] == NULL )
-					header.data.str_len[ i ] = -1;
-				else if ( *str[ i ] == '\0' )
-					header.data.str_len[ i ] = 0;
-				else
-					header.data.str_len[ i ] = strlen( str[ i ] );
-			}
-
-			/* Send header, dimension, numbers of points, real world
-               coordinate stuff and the label strings */
-
-			write( pd[ WRITE ], &header, sizeof( CS ) );
-			write( pd[ WRITE ], &dim, sizeof( long ) );
-			write( pd[ WRITE ], &nc, sizeof( long ) );
-			write( pd[ WRITE ], &nx, sizeof( long ) );
-			write( pd[ WRITE ], &ny, sizeof( long ) );
-			write( pd[ WRITE ], &rwc_x_start, sizeof( double ) );
-			write( pd[ WRITE ], &rwc_x_delta, sizeof( double ) );
-			write( pd[ WRITE ], &rwc_y_start, sizeof( double ) );
-			write( pd[ WRITE ], &rwc_y_delta, sizeof( double ) );
-
-			for ( i = 0; i < 2; i++ )
 				if ( header.data.str_len[ i ] > 0 )
 					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
 			break;

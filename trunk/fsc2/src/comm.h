@@ -16,7 +16,6 @@ enum {
 	C_SHOW_MESSAGE,
 	C_SHOW_ALERT,
 	C_SHOW_CHOICES,
-	C_INIT_GRAPHICS,
 	C_SHOW_FSELECTOR,
 	C_PROG,
 	C_OUTPUT,
@@ -62,7 +61,6 @@ bool setup_comm( void );
 void end_comm( void );
 long reader( void *ret );
 void writer( int type, ... );
-
 
 
 #endif  /* ! COMM_HEADER */

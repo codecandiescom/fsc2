@@ -19,6 +19,10 @@ typedef struct {
 
 static void f_wait_alarm_handler( int sig_type );
 DPoint *eval_display_args( Var *v, int *npoints );
+static void graphics_init( long dim, long nc, long nx, long ny,
+						   double rwc_x_start, double rwc_x_delta,
+						   double rwc_y_start, double rwc_y_delta,
+						   char *x_label, char *y_label );
 static int get_save_file( Var **v, const char *calling_function );
 static void print_array( Var *v, long cur_dim, long *start, int fid );
 static void print_slice( Var *v, int fid );
@@ -1275,6 +1279,102 @@ labels_2d:
 	graphics_init( 2, nc, nx, ny, rwc_x_start, rwc_x_delta,
 				   rwc_y_start, rwc_y_delta, l1, l2 );
 	return vars_push( INT_VAR, 1 );
+}
+
+
+/*-----------------------------------------------------------*/
+/* Function sets up the variables in the structure used for  */
+/* the graphic, `G', according to the data given in the call */
+/* to `init_1d()' or `init_2d()'.                            */
+/*-----------------------------------------------------------*/
+
+void graphics_init( long dim, long nc, long nx, long ny,
+					double rwc_x_start, double rwc_x_delta,
+					double rwc_y_start, double rwc_y_delta,
+					char *x_label, char *y_label )
+{
+	long i;
+
+
+	G.x_label = G.y_label = NULL;
+	for ( i = 0; i < MAX_CURVES; i++ )
+		G.curve[ i ] = NULL;
+	G.is_init = SET;
+
+	/* Store dimension of experiment (1 or 2) and number of curves */
+
+	G.dim = dim;
+	G.nc = nc;
+
+	/* For `nx', i.e. the number of points in x direction, being greater than
+	   zero the user already knows the exact number of points, zero means
+	   (s)he didn't got ny idea and a negative number is treated as a guess */
+
+	if ( nx > 0 )
+	{
+		G.is_nx = SET;
+		G.nx = nx;
+	}
+	else
+	{
+		G.is_nx = UNSET;
+		if ( nx == 0 )
+			G.nx = DEFAULT_X_POINTS;
+		else
+			G.nx = labs( nx );
+	}
+
+	/* Same for the number of points in y direction `ny' */
+
+	if ( ny > 0 )
+	{
+		G.is_ny = SET;
+		G.ny = ny;
+	}
+	else
+	{
+		G.is_ny = UNSET;
+		if ( ny == 0 )
+			G.ny = DEFAULT_Y_POINTS;
+		else
+			G.ny = labs( ny );
+	}
+
+	/* Check if there are `real world' coordinates for x and y direction (if
+       both the start and the increment value are zero this means there aren't
+       any) */
+
+	G.rwc_x_start = rwc_x_start;
+	G.rwc_x_delta = rwc_x_delta;
+
+	if ( rwc_x_start == 0.0 && rwc_x_delta == 0.0 )
+		G.is_rwc_x = UNSET;
+	else
+		G.is_rwc_x = SET;
+
+	G.rwc_y_start = rwc_y_start;
+	G.rwc_y_delta = rwc_y_delta;
+
+	if ( rwc_y_start == 0.0 && rwc_y_delta == 0.0 )
+		G.is_rwc_y = UNSET;
+	else
+		G.is_rwc_y = SET;
+
+	/* Store the labels for x and y direction */
+
+	if ( x_label != NULL )
+	{
+		if ( G.x_label != NULL )
+			T_free( G.x_label );
+		G.x_label = get_string_copy( x_label );
+	}
+
+	if ( dim == 2 && y_label != NULL )
+	{
+		if ( G.y_label != NULL )
+			T_free( G.y_label );
+		G.y_label = get_string_copy( y_label );
+	}
 }
 
 
