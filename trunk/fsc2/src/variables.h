@@ -98,7 +98,7 @@ void vars_arr_extend( Var *a, Var *s );
 void vars_arr_init( Var *a, Var *d );
 void vars_push_astack( Var *v );
 Var *vars_pop_astack( void );
-Var *vars_arr_assign( Var *a, Var *v );
+void vars_arr_assign( Var *a, Var *v );
 void vars_del_top_astack( void );
 void vars_del_astack( void );
 void vars_update_astack( Var *v );
