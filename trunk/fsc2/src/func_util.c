@@ -690,7 +690,7 @@ Var_T *f_init_1d( Var_T *v )
 		goto labels_1d;
 
 	/* If next value is an integer or a float this is the real world
-	   x coordinate followed by the increment */
+	   x-coordinate followed by the increment */
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -721,12 +721,12 @@ Var_T *f_init_1d( Var_T *v )
  labels_1d:
 
 	vars_check ( v, STR_VAR );
-	G_1d.label[ X ] = T_strdup( v->val.sptr );
+	G_1d.label_orig[ X ] = T_strdup( v->val.sptr );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check ( v, STR_VAR );
-		G_1d.label[ Y ] = T_strdup( v->val.sptr );
+		G_1d.label_orig[ Y ] = T_strdup( v->val.sptr );
 	}
 
  init_1d_done:
@@ -734,12 +734,6 @@ Var_T *f_init_1d( Var_T *v )
 	G_1d.nx_orig = G_1d.nx;
 	G_1d.rwc_start_orig[ X ] = G_1d.rwc_start[ X ];
 	G_1d.rwc_delta_orig[ X ] = G_1d.rwc_delta[ X ];
-
-	for ( i = X; i <= Y; i++ )
-	{
-		G_1d.label_orig[ i ] = G_1d.label[ i ];
-		G_1d.label[ i ] = NULL;
-	}
 
 	return vars_push( INT_VAR, 1L );
 }
@@ -875,34 +869,29 @@ Var_T *f_init_2d( Var_T *v )
  labels_2d:
 
 	vars_check( v, STR_VAR );
-	G_2d.label[ X ] = T_strdup( v->val.sptr );
-
-	if ( ( v = vars_pop( v ) ) == NULL )
-		return vars_push( INT_VAR, 1L );
-
-	vars_check( v, STR_VAR );
-	G_2d.label[ Y ] = T_strdup( v->val.sptr );
+	G_2d.label_orig[ X ] = T_strdup( v->val.sptr );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check( v, STR_VAR );
-		G_2d.label[ Z ] = T_strdup( v->val.sptr );
+		G_2d.label_orig[ Y ] = T_strdup( v->val.sptr );
+
+		if ( ( v = vars_pop( v ) ) != NULL )
+		{
+			vars_check( v, STR_VAR );
+			G_2d.label_orig[ Z ] = T_strdup( v->val.sptr );
+		}
 	}
 
  init_2d_done:
 
 	G_2d.nx_orig = G_2d.nx;
 	G_2d.ny_orig = G_2d.ny;
+
 	for ( i = X; i <= Y; i++ )
 	{
 		G_2d.rwc_start_orig[ i ] = G_2d.rwc_start[ i ];
 		G_2d.rwc_delta_orig[ i ] = G_2d.rwc_delta[ i ];
-	}
-
-	for ( i = X; i <= Z; i++ )
-	{
-		G_2d.label_orig[ i ] = G_2d.label[ i ];
-		G_2d.label[ i ] = NULL;
 	}
 
 	return vars_push( INT_VAR, 1L );

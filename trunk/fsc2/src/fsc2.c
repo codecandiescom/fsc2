@@ -277,9 +277,9 @@ int main( int argc, char *argv[ ] )
 	else
 		fprintf( stderr, "fsc2: Internal failure on startup.\n" );
 
-	T_free( Fsc2_Internals.title );
 	clean_up( );
 	xforms_close( );
+	T_free( Fsc2_Internals.title );
 
 	return EXIT_SUCCESS;
 }
@@ -1878,10 +1878,12 @@ void clean_up( void )
 	/* Get rid of the last remains of graphics */
 
 	for ( i = X; i <= Y; i++ )
-		G_1d.label_orig[ i ] = CHAR_P T_free( G_1d.label_orig[ i ] );
+		if ( G_1d.label_orig[ i ] )
+			G_1d.label_orig[ i ] = CHAR_P T_free( G_1d.label_orig[ i ] );
 
 	for ( i = X; i <= Z; i++ )
-		G_2d.label_orig[ i ] = CHAR_P T_free( G_2d.label_orig[ i ] );
+		if ( G_2d.label_orig[ i ] )
+			G_2d.label_orig[ i ] = CHAR_P T_free( G_2d.label_orig[ i ] );
 
 	G.is_init = UNSET;
 	G.dim = 0;
