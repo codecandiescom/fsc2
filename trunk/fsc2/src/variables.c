@@ -1262,7 +1262,7 @@ long vars_calc_index( Var *a, Var *v )
 
 	for ( i = 0, index = 0; v != NULL; i++, v = vars_pop( v ) )
 	{
-		/* We can't use an undefined variable as an index...*/
+		/* We may use an undefined variable as the very last index...*/
 
 		if ( v->type == UNDEF_VAR )
 			break;
@@ -1316,11 +1316,16 @@ long vars_calc_index( Var *a, Var *v )
 		index = index * a->sizes[ i ] + cur;
 	}
 
-	if ( v != NULL )                       /* i.e. UNDEF_VAR as an index */
+	if ( v != NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing array index for array `%s'.",
-				Fname, Lc, a->name );
-		THROW( EXCEPTION );
+		if ( v->next != NULL )        /* i.e. UNDEF_VAR not as last index */
+		{
+			eprint( FATAL, "%s:%ld: Missing array index for array `%s'.",
+					Fname, Lc, a->name );
+			THROW( EXCEPTION );
+		}
+		else
+			vars_pop( v );
 	}
 
 	/* For slices we need another update of the index */
