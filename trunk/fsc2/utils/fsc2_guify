@@ -26,12 +26,16 @@
 #  an "enhanced" EDL script and creates from it a Perl script which, in turn,
 #  when run allows the user to set parameters via a GUI and then creates an
 #  EDL script from these parameters and sends it to fsc2 for execution.
-#  Unfortunately, neither this script nor the scripts created by it are
-#  very easy to read or understand...
 
 
 use strict;
 use warnings;
+
+# By changing the next three variables the layout of the form can be changed!
+
+my $label_width = 20;         # width of labels at the left of the input field
+my $entry_width = 10;         # width of the input fields
+my $unit_width  = 5;          # width for e.g. unit to right of the input field
 
 my @lines;
 my @vars;
@@ -45,12 +49,6 @@ my $endif_entry = $guify_entry . 'endif\s*$';
 my $if_level = 0;
 my $lino;
 my $need_file_sel = 0;
-
-# By changing the following variables the layout of the form can be changed!
-
-my $label_width = 20;         # width of labels at the left of the input field
-my $entry_width = 10;         # width of the input fields
-my $unit_width  = 5;          # width for e.g. unit to right of the input field
 
 my $if = *STDIN;
 my $of = *STDOUT;
@@ -192,7 +190,7 @@ select $of;
 
 write_script( );
 
-# Finally make the new script executable
+# Finally make the new script executable (unless we wrote to STDOUT)
 
 chmod( 0755, $ARGV[ 1 ] ) if $ARGV[ 1 ];
 
@@ -200,6 +198,7 @@ chmod( 0755, $ARGV[ 1 ] ) if $ARGV[ 1 ];
 
 
 ################################################################
+# Function prints out usage info
 
 sub usage {
     print "Usage: fsc2_guify [ IN_FILE [ OUT_FILE ] ]\n" .
@@ -209,6 +208,8 @@ sub usage {
 
 
 ################################################################
+# Function to figure out the options specified with the variables
+# that the program understands
 
 sub analyze_var_options {
     my ( $hr, $str ) = @_;
@@ -327,6 +328,7 @@ sub get_int_limits {
 
 
 ################################################################
+# Function for parsing the menu entries passed for meu variables
 
 sub get_menu_entries {
     my ( $hr, $str ) = @_;
@@ -354,6 +356,8 @@ sub get_menu_entries {
 
 
 ################################################################
+# Function for parsing the default values that can be specified
+# for integer or float variables
 
 sub get_default_value {
 
@@ -407,6 +411,7 @@ sub get_default_value {
 
 
 ################################################################
+# Function for extracting a double-quote-enclosed string
 
 sub get_string {
     my $str = shift;
@@ -424,8 +429,8 @@ sub get_string {
 ################################################################
 # Routine checks all conditions found in the input file by calling eval()
 # on them (after prepending some code to create and initialize possibly
-# needed variables and putting a $ in front of the variable names).
-# If the eval() fails we know that there must be some syntax error...
+# needed variables and putting a '$' in front of the variable names).
+# If the eval() fails we know that there must be some Perl syntax error.
 
 sub cond_check {
 
@@ -691,7 +696,7 @@ EOT
     # function comes quite handy because we can simply treat the conditions
     # as some Perl code after prepending a $ to the variable name...
     # This way the user can use even rather complicated expressions as
-    # conditions (actually, even complete scripts ;-)
+    # conditions (actually, even complete Perl scripts ;-)
 
     print "\n    print \$fh \"";
 
