@@ -1893,10 +1893,10 @@ whole intermediate time interval). If you try to set a time that is
 shorter than the default minimum time distance (as set in the
 configuration file for the module) a warning is printed.
 
-This function can be used in all sections of the program and allows to
-change the minimum time repeatedly during an experiment. Please note
+This function can be used in all sections of the program and even allows
+to change the minimum time multiple during an experiment. Please note
 that setting a new minimum TWT pulse distance does not automatically
-change the current state the pulses, they only get changed to reflect
+change the current state of the pulses, they only get changed to reflect
 the new setting when either @code{pulser_update()} is called or another
 function that automatically updates the pulser, i.e.@: either
 @code{pulser_reset}, @code{pulser_next_phase()} or
