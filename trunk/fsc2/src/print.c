@@ -502,8 +502,8 @@ static FILE *spawn_print_prog( const char *command )
 		return NULL;
 
 	/* Create a temporary file for the data because some programs don't work
-	   well with a non-seekable stream (but unlink the file immediately so
-	   it won't survive in case of any future problems) */
+	   well with a non-seekable stream like a simple pipe (but unlink the file
+	   immediately so it won't survive in case of any future problems) */
 
 	if ( ( tmp_fd = mkstemp( filename ) ) < 0 ||
 		 ( tmp_fp = fdopen( tmp_fd, "w" ) ) == NULL )
@@ -524,7 +524,7 @@ static FILE *spawn_print_prog( const char *command )
 		return NULL;
 	}
 
-	if ( pid > 0 )
+	if ( pid > 0 )          /* parent has done everything it needed to do... */
 		return tmp_fp;
 
 	args[ 0 ] = ( char * ) "sh";
