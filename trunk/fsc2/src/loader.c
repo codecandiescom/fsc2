@@ -45,11 +45,11 @@ static void resolve_device_name( Device_T *dev );
 static void resolve_generic_type( Device_T *dev );
 
 
-/*-------------------------------------------------------------------------*/
-/* Function is called after the DEVICES section has been read in. It loads */
-/* the library files and tries to resolve the references to the functions  */
-/* listed in 'Functions' and stores pointers to the functions in 'Fncts'.  */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function is called after the DEVICES section has been read in. It loads
+ * the library files and tries to resolve the references to the functions
+ * listed in 'Functions' and stores pointers to the functions in 'Fncts'.
+ *-------------------------------------------------------------------------*/
 
 void load_all_drivers( void )
 {
@@ -171,10 +171,10 @@ void load_all_drivers( void )
 }
 
 
-/*----------------------------------------------------------*/
-/* Function for comparing two functions by there name, used */
-/* for sorting the function names by binary search.         */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function for comparing two functions by there name, used
+ * for sorting the function names by binary search.
+ *----------------------------------------------------------*/
 
 static int func_cmp( const void *a, const void *b )
 {
@@ -183,11 +183,11 @@ static int func_cmp( const void *a, const void *b )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function tests if the device driver passed to the function by */
-/* name is loaded. If it exists it returns the number that needs */
-/* to be appended to the function names, otherwise 0.            */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function tests if the device driver passed to the function by
+ * name is loaded. If it exists it returns the number that needs
+ * to be appended to the function names, otherwise 0.
+ *---------------------------------------------------------------*/
 
 int exists_device( const char *name )
 {
@@ -203,10 +203,10 @@ int exists_device( const char *name )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function tests if a device driver for a device of the generic */
-/* type passed to the function by 'type' is loaded.              */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function tests if a device driver for a device of the generic
+ * type passed to the function by 'type' is loaded.
+ *---------------------------------------------------------------*/
 
 bool exists_device_type( const char *type )
 {
@@ -221,9 +221,9 @@ bool exists_device_type( const char *type )
 	return FAIL;
 }
 
-/*-------------------------------------------------------------------*/
-/* Routine tests if a function passed to the routine by name exists. */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Routine tests if a function passed to the routine by name exists.
+ *-------------------------------------------------------------------*/
 
 bool exists_function( const char *name )
 {
@@ -239,12 +239,12 @@ bool exists_function( const char *name )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function dlopens a library file with the name passed to it  */
-/* (after adding the extension '.fsc2_so') and then tries to   */
-/* find all references to functions listed in the function     */
-/* data base 'Functions'.                                      */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function dlopens a library file with the name passed to it
+ * (after adding the extension '.fsc2_so') and then tries to
+ * find all references to functions listed in the function
+ * data base 'Functions'.
+ *-------------------------------------------------------------*/
 
 static void load_functions( Device_T *dev )
 {
@@ -305,10 +305,10 @@ static void load_functions( Device_T *dev )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function tries to find out which hook functions exist for a device */
-/* and determines the pointers to these functions.                    */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function tries to find out which hook functions exist for a device
+ * and determines the pointers to these functions.
+ *--------------------------------------------------------------------*/
 
 static void resolve_hook_functions( Device_T *dev )
 {
@@ -394,10 +394,10 @@ static void resolve_hook_functions( Device_T *dev )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Run through all the functions in the function list and if they need */
-/* to be resolved try to find them in the device driver functions.     */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Run through all the functions in the function list and if they need
+ * to be resolved try to find them in the device driver functions.
+ *---------------------------------------------------------------------*/
 
 static void resolve_functions( Device_T *dev )
 {
@@ -443,14 +443,14 @@ static void resolve_functions( Device_T *dev )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* This function is called when a function found in a device driver has */
-/* already been defined by a different device driver. In this case we   */
-/* have to extend the function list for this function, adding '#n' to   */
-/* the name of the function (with 'n' being the number of times the     */
-/* function has already been defined) and all functions defined for the */
-/* current device.                                                      */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * This function is called when a function found in a device driver has
+ * already been defined by a different device driver. In this case we
+ * have to extend the function list for this function, adding '#n' to
+ * the name of the function (with 'n' being the number of times the
+ * function has already been defined) and all functions defined for the
+ * current device.
+ *----------------------------------------------------------------------*/
 
 static void add_function( int num, void *new_func, Device_T *new_dev )
 {
@@ -481,12 +481,12 @@ static void add_function( int num, void *new_func, Device_T *new_dev )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* In each device module a device name string should be defined that */
-/* is going to be used in warnings and error messages. This function */
-/* tries to locate the variable with the name 'device_name' within   */
-/* the module and stores it in the Device structure.                 */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * In each device module a device name string should be defined that
+ * is going to be used in warnings and error messages. This function
+ * tries to locate the variable with the name 'device_name' within
+ * the module and stores it in the Device structure.
+ *-------------------------------------------------------------------*/
 
 static void resolve_device_name( Device_T *dev )
 {
@@ -499,16 +499,16 @@ static void resolve_device_name( Device_T *dev )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* In each device module a generic type string should be defined. This  */
-/* string should be the same for devices with the same function, i.e.   */
-/* for all lock-in amplifiers the string is "lockin" etc. Here we try   */
-/* to get a pointer to this string from the library. If none exists the */
-/* pointer is set to NULL. If it exist we also run through the list of  */
-/* devices for which functions have already been loaded and try to find */
-/* out if this is the first of a generic type or how many there already */
-/* are - the result is stored in the Device structure.                  */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * In each device module a generic type string should be defined. This
+ * string should be the same for devices with the same function, i.e.
+ * for all lock-in amplifiers the string is "lockin" etc. Here we try
+ * to get a pointer to this string from the library. If none exists the
+ * pointer is set to NULL. If it exist we also run through the list of
+ * devices for which functions have already been loaded and try to find
+ * out if this is the first of a generic type or how many there already
+ * are - the result is stored in the Device structure.
+ *----------------------------------------------------------------------*/
 
 static void resolve_generic_type( Device_T *dev )
 {
@@ -539,9 +539,9 @@ static void resolve_generic_type( Device_T *dev )
 }
 
 
-/*-------------------------------------------------------*/
-/* Functions runs the test hook functions of all modules */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Functions runs the test hook functions of all modules
+ *-------------------------------------------------------*/
 
 void run_test_hooks( void )
 {
@@ -588,9 +588,9 @@ void run_test_hooks( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Functions runs the end-of-test hook functions of all modules */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Functions runs the end-of-test hook functions of all modules
+ *--------------------------------------------------------------*/
 
 void run_end_of_test_hooks( void )
 {
@@ -636,9 +636,9 @@ void run_end_of_test_hooks( void )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Functions runs the experiment hook functions of all modules */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Functions runs the experiment hook functions of all modules
+ *-------------------------------------------------------------*/
 
 void run_exp_hooks( void )
 {
@@ -698,9 +698,9 @@ void run_exp_hooks( void )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Functions runs the end-of-experiment hook functions of all modules */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Functions runs the end-of-experiment hook functions of all modules
+ *--------------------------------------------------------------------*/
 
 void run_end_of_exp_hooks( void )
 {
@@ -763,9 +763,9 @@ void run_end_of_exp_hooks( void )
 }
 
 
-/*-------------------------------------------------------*/
-/* Functions runs the exit hook functions of all modules */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Functions runs the exit hook functions of all modules
+ *-------------------------------------------------------*/
 
 void run_exit_hooks( void )
 {
@@ -824,9 +824,9 @@ void run_exit_hooks( void )
 }
 
 
-/*---------------------------------------------------*/
-/* Function runs the child exit hooks in all modules */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function runs the child exit hooks in all modules
+ *---------------------------------------------------*/
 
 void run_child_exit_hooks( void )
 {
@@ -881,24 +881,24 @@ void run_child_exit_hooks( void )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* This function is intended to allow user defined modules access to the  */
-/* symbols defined in another module. Probably it's a BAD thing if they   */
-/* do, but sometimes it might be inevitable, so we better include this    */
-/* instead of having the writer of a module trying to figure out some     */
-/* other and probably more difficult or dangerous method to do it anyway. */
-/*                                                                        */
-/* ->                                                                     */
-/*    1. Name of the module (without the '.fsc2_so' extension) the symbol */
-/*       is to be loaded from                                             */
-/*    2. Name of the symbol to be loaded                                  */
-/*    3. Pointer to void pointer for returning the address of the symbol  */
-/*                                                                        */
-/* <-                                                                     */
-/*    Return value indicates success or failure (see global.h for defi-   */
-/*    nition of the the return codes). On success 'symbol_ptr' contains   */
-/*    the address of the symbol.                                          */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * This function is intended to allow user defined modules access to the
+ * symbols defined in another module. Probably it's a BAD thing if they
+ * do, but sometimes it might be inevitable, so we better include this
+ * instead of having the writer of a module trying to figure out some
+ * other and probably more difficult or dangerous method to do it anyway.
+ *
+ * ->
+ *    1. Name of the module (without the '.fsc2_so' extension) the symbol
+ *       is to be loaded from
+ *    2. Name of the symbol to be loaded
+ *    3. Pointer to void pointer for returning the address of the symbol
+ *
+ * <-
+ *    Return value indicates success or failure (see global.h for defi-
+ *    nition of the the return codes). On success 'symbol_ptr' contains
+ *    the address of the symbol.
+ *------------------------------------------------------------------------*/
 
 int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 {
@@ -927,11 +927,11 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 }
 
 
-/*-------------------------------------------------------------*/
-/* The function runs the exit hook functions for a modules (if */
-/* this hasn't already been done and if there exists one) and  */
-/* than closes the connection to the modules.                  */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * The function runs the exit hook functions for a modules (if
+ * this hasn't already been done and if there exists one) and
+ * than closes the connection to the modules.
+ *-------------------------------------------------------------*/
 
 void unload_device( Device_T *dev )
 {

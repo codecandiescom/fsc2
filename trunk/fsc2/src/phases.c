@@ -31,9 +31,9 @@ PA_Seq_T PA_Seq = { NULL, { { UNSET, NULL, 0 }, { UNSET, NULL, 0 } } };
 static long cur_aseq;
 
 
-/*-------------------------------------------------------*/
-/* Called when an acquisition sequence keyword is found. */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Called when an acquisition sequence keyword is found.
+ *-------------------------------------------------------*/
 
 void acq_seq_start( long acq_num, long acq_type )
 {
@@ -70,11 +70,11 @@ void acq_seq_start( long acq_num, long acq_type )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Called for each element in a list of signs for an acquisition sequence. */
-/* ->                                                                      */
-/*    * either ACQ_PLUS_A, ACQ_MINUS_A, ACQ_PLUS_B or ACQ_MINUS_B          */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Called for each element in a list of signs for an acquisition sequence.
+ * ->
+ *    * either ACQ_PLUS_A, ACQ_MINUS_A, ACQ_PLUS_B or ACQ_MINUS_B
+ *-------------------------------------------------------------------------*/
 
 void acq_seq_cont( long acq_type )
 {
@@ -103,11 +103,11 @@ void acq_seq_cont( long acq_type )
 }
 
 
-/*----------------------------------------------*/
-/* Called when a phase sequence token is found. */
-/* ->                                           */
-/*    * number of the phase sequence            */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Called when a phase sequence token is found.
+ * ->
+ *    * number of the phase sequence
+ *----------------------------------------------*/
 
 Phs_Seq_T *phase_seq_start( long phase_seq_num )
 {
@@ -152,12 +152,12 @@ Phs_Seq_T *phase_seq_start( long phase_seq_num )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Called for each element in a list of phases for a phase sequence  */
-/* ->                                                                */
-/* * pointer to phase sequence                                       */
-/* * either PHASE_PLUS_X, PHASE_MINUS_X, PHASE_PLUS_Y, PHASE_MINUS_Y */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Called for each element in a list of phases for a phase sequence
+ * ->
+ * * pointer to phase sequence
+ * * either PHASE_PLUS_X, PHASE_MINUS_X, PHASE_PLUS_Y, PHASE_MINUS_Y
+ *-------------------------------------------------------------------*/
 
 void phases_add_phase( Phs_Seq_T *p, int phase_type )
 {
@@ -172,10 +172,10 @@ void phases_add_phase( Phs_Seq_T *p, int phase_type )
 }
 
 
-/*---------------------------------------------------*/
-/* Called if an aquisition sequence keyword is found */
-/* without a corresponding list of signs.            */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Called if an aquisition sequence keyword is found
+ * without a corresponding list of signs.
+ *---------------------------------------------------*/
 
 void acq_miss_list( void )
 {
@@ -184,10 +184,10 @@ void acq_miss_list( void )
 }
 
 
-/*---------------------------------------------*/
-/* Called if a phase sequence keyword is found */
-/* without a corresponding list of phases.     */
-/*---------------------------------------------*/
+/*---------------------------------------------*
+ * Called if a phase sequence keyword is found
+ * without a corresponding list of phases.
+ *---------------------------------------------*/
 
 void phase_miss_list( Phs_Seq_T *p )
 {
@@ -196,8 +196,8 @@ void phase_miss_list( Phs_Seq_T *p )
 }
 
 
-/*--------------------------------------------------*/
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ *--------------------------------------------------*/
 
 void phases_clear( void )
 {
@@ -223,10 +223,10 @@ void phases_clear( void )
 }
 
 
-/*--------------------------------------------------*/
-/* Called after a PHASES section is parsed to check */
-/* that the results are reasonable.                 */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Called after a PHASES section is parsed to check
+ * that the results are reasonable.
+ *--------------------------------------------------*/
 
 void phases_end( void )
 {

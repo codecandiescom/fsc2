@@ -85,9 +85,9 @@ static bool is_mapped = UNSET;  /* set while form is mapped */
 static bool cut_has_been_shown = UNSET;
 
 
-/*--------------------------------------------------------------------*/
-/* Function to initialize the minimum sizes of the cut graphic window */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function to initialize the minimum sizes of the cut graphic window
+ *--------------------------------------------------------------------*/
 
 void cut_init( void )
 {
@@ -104,16 +104,16 @@ void cut_init( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function gets called whenever in the 2D display the left mouse button */
-/* has been pressed with one of the shift keys pressed down in the x- or */
-/* y-axis canvas and than is released again (with the shift key is still */
-/* being hold down). It opens up a new window displaying a cross section */
-/* through the data at the positon the mouse button was released. If the */
-/* window with the cross section is already shown the cut at the mouse   */
-/* position is shown.                                                    */
-/* dir: axis canvas the mouse button was pressed in (X or Y)             */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function gets called whenever in the 2D display the left mouse button
+ * has been pressed with one of the shift keys pressed down in the x- or
+ * y-axis canvas and than is released again (with the shift key is still
+ * being hold down). It opens up a new window displaying a cross section
+ * through the data at the positon the mouse button was released. If the
+ * window with the cross section is already shown the cut at the mouse
+ * position is shown.
+ * dir: axis canvas the mouse button was pressed in (X or Y)
+ *-----------------------------------------------------------------------*/
 
 void cut_show( int dir, long u_index )
 {
@@ -266,8 +266,8 @@ void cut_show( int dir, long u_index )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static void cut_setup_canvas( Canvas_T *c, FL_OBJECT *obj )
 {
@@ -328,8 +328,8 @@ static void cut_setup_canvas( Canvas_T *c, FL_OBJECT *obj )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 static void cut_canvas_off( Canvas_T *c, FL_OBJECT *obj )
 {
@@ -351,8 +351,8 @@ static void cut_canvas_off( Canvas_T *c, FL_OBJECT *obj )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 void G_init_cut_curve( void )
 {
@@ -497,8 +497,8 @@ void G_init_cut_curve( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ *----------------------------------------------------------------------*/
 
 static int cut_form_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
 {
@@ -507,8 +507,8 @@ static int cut_form_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 void cut_form_close( void )
 {
@@ -568,11 +568,11 @@ void cut_form_close( void )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Instead of calling fl_hide_form() directly unmap the window */
-/* to make it easier to show it again (otherwise we'd have to  */
-/* first delete and later to recreate lots of stuff).          */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Instead of calling fl_hide_form() directly unmap the window
+ * to make it easier to show it again (otherwise we'd have to
+ * first delete and later to recreate lots of stuff).
+ *-------------------------------------------------------------*/
 
 void cut_close_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
@@ -604,11 +604,11 @@ void cut_close_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*----------------------------------------------------------*/
-/* Extracts the points of the 2d-surface in direction 'dir' */
-/* at point 'index', writes them into a 1d-curve and scales */
-/* this curve.                                              */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Extracts the points of the 2d-surface in direction 'dir'
+ * at point 'index', writes them into a 1d-curve and scales
+ * this curve.
+ *----------------------------------------------------------*/
 
 static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 {
@@ -746,12 +746,12 @@ static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 }
 
 
-/*-------------------------------------------------------*/
-/* The function calculates the points as to be displayed */
-/* from the scaled points. As a side effect it also sets */
-/* the flags that indicate if out of range arrows have   */
-/* be shown and counts the number of displayed points.   */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * The function calculates the points as to be displayed
+ * from the scaled points. As a side effect it also sets
+ * the flags that indicate if out of range arrows have
+ * be shown and counts the number of displayed points.
+ *-------------------------------------------------------*/
 
 static void cut_recalc_XPoints( void )
 {
@@ -786,9 +786,9 @@ static void cut_recalc_XPoints( void )
 }
 
 
-/*------------------------------------------------------*/
-/* Called whenever a different curve is to be displayed */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Called whenever a different curve is to be displayed
+ *------------------------------------------------------*/
 
 void cut_new_curve_handler( void )
 {
@@ -888,10 +888,10 @@ void cut_new_curve_handler( void )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/* Function is called by accept_2d_data() whenever the z-scaling has changed */
-/* and thus also the y-scaling of the cut curve                              */
-/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * Function is called by accept_2d_data() whenever the z-scaling has changed
+ * and thus also the y-scaling of the cut curve
+ *---------------------------------------------------------------------------*/
 
 bool cut_data_rescaled( long curve, double y_min, double y_max )
 {
@@ -974,14 +974,14 @@ bool cut_data_rescaled( long curve, double y_min, double y_max )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Function gets called by accept_2d_data() whenever the number of points */
-/* in x- or y-direction changes. The first argument is the direction the  */
-/* data set changed (i.e. if there are new data in x- or in y-direction)  */
-/* while the second is the new number of points in this direction. This   */
-/* function does not get the new data, it just extends and initializes    */
-/* the memory that will be used for them.                                 */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function gets called by accept_2d_data() whenever the number of points
+ * in x- or y-direction changes. The first argument is the direction the
+ * data set changed (i.e. if there are new data in x- or in y-direction)
+ * while the second is the new number of points in this direction. This
+ * function does not get the new data, it just extends and initializes
+ * the memory that will be used for them.
+ *------------------------------------------------------------------------*/
 
 bool cut_num_points_changed( int dir, long num_points )
 {
@@ -1029,12 +1029,12 @@ bool cut_num_points_changed( int dir, long num_points )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* This function gets called with new data that might need to be displayed. */
-/* Before this function gets called the function cut_num_points_changed()   */
-/* has already been executed if the new data don't overwrite existing data  */
-/* but are for positions where no data have been shown yet.                 */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * This function gets called with new data that might need to be displayed.
+ * Before this function gets called the function cut_num_points_changed()
+ * has already been executed if the new data don't overwrite existing data
+ * but are for positions where no data have been shown yet.
+ *--------------------------------------------------------------------------*/
 
 bool cut_new_points( long curve, long x_index, long y_index, long len )
 {
@@ -1079,8 +1079,8 @@ bool cut_new_points( long curve, long x_index, long y_index, long len )
 }
 
 
-/*-------------------------------------------------------*/
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ *-------------------------------------------------------*/
 
 static void cut_integrate_point( long p_index, double val )
 {
@@ -1161,9 +1161,9 @@ static void cut_integrate_point( long p_index, double val )
 }
 
 
-/*------------------------------------------------------------*/
-/* Handler for all events the cut graphics window may receive */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Handler for all events the cut graphics window may receive
+ *------------------------------------------------------------*/
 
 static int cut_canvas_handler( FL_OBJECT *obj, Window window, int w, int h,
 							   XEvent *ev, void *udata )
@@ -1201,9 +1201,9 @@ static int cut_canvas_handler( FL_OBJECT *obj, Window window, int w, int h,
 }
 
 
-/*----------------------------------------------------------------*/
-/* Handler for ConfigureNotify events the cut graphic window gets */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Handler for ConfigureNotify events the cut graphic window gets
+ *----------------------------------------------------------------*/
 
 static void cut_reconfigure_window( Canvas_T *c, int w, int h )
 {
@@ -1333,9 +1333,9 @@ static void cut_reconfigure_window( Canvas_T *c, int w, int h )
 }
 
 
-/*-----------------------------------------------------*/
-/* Handler for ButtonPress events the cut graphic gets */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Handler for ButtonPress events the cut graphic gets
+ *-----------------------------------------------------*/
 
 static void cut_press_handler( FL_OBJECT *obj, Window window,
 							   XEvent *ev, Canvas_T *c )
@@ -1498,9 +1498,9 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 }
 
 
-/*--------------------------------------------------------------*/
-/* Handler for ButtonRelease events the cut graphic window gets */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Handler for ButtonRelease events the cut graphic window gets
+ *--------------------------------------------------------------*/
 
 static void cut_release_handler( UNUSED_ARG FL_OBJECT *obj, Window window,
 								 XEvent *ev, Canvas_T *c )
@@ -1687,9 +1687,9 @@ static void cut_release_handler( UNUSED_ARG FL_OBJECT *obj, Window window,
 }
 
 
-/*-------------------------------------------------------------*/
-/* Handler for MotionNotify events the cut graphic window gets */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Handler for MotionNotify events the cut graphic window gets
+ *-------------------------------------------------------------*/
 
 static void cut_motion_handler( UNUSED_ARG FL_OBJECT *obj, Window window,
 								XEvent *ev, Canvas_T *c )
@@ -1809,9 +1809,9 @@ static void cut_motion_handler( UNUSED_ARG FL_OBJECT *obj, Window window,
 }
 
 
-/*-------------------------------------------------------*/
-/* Handler for the undo button in the cut graphic window */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Handler for the undo button in the cut graphic window
+ *-------------------------------------------------------*/
 
 void cut_undo_button_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
@@ -1852,9 +1852,9 @@ void cut_undo_button_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Handler for the full scale button in the cut graphic window */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Handler for the full scale button in the cut graphic window
+ *-------------------------------------------------------------*/
 
 void cut_fs_button_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
@@ -1888,8 +1888,8 @@ void cut_fs_button_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 void redraw_all_cut_canvases( void )
 {
@@ -1903,8 +1903,8 @@ void redraw_all_cut_canvases( void )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 static void redraw_cut_canvas( Canvas_T *c )
 {
@@ -1970,8 +1970,8 @@ static void redraw_cut_canvas( Canvas_T *c )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 static void repaint_cut_canvas( Canvas_T *c )
 {
@@ -2112,8 +2112,8 @@ static void repaint_cut_canvas( Canvas_T *c )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 int get_mouse_pos_cut( double *pa, unsigned int *keymask )
 {
@@ -2153,8 +2153,8 @@ int get_mouse_pos_cut( double *pa, unsigned int *keymask )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 void redraw_cut_axis( int coord )
 {
@@ -2216,8 +2216,8 @@ void redraw_cut_axis( int coord )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 static void cut_make_scale( Canvas_T *c, int coord )
 {
@@ -2503,11 +2503,11 @@ static void cut_make_scale( Canvas_T *c, int coord )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* This is basically a simplified version of 'cut_recalc_XPoints()'  */
-/* because we need to do much less calculations, i.e. just adding an */
-/* offset to all XPoints instead of going through all the scalings...*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * This is basically a simplified version of 'cut_recalc_XPoints()'
+ * because we need to do much less calculations, i.e. just adding an
+ * offset to all XPoints instead of going through all the scalings...
+ *-------------------------------------------------------------------*/
 
 static void shift_XPoints_of_cut_curve( Canvas_T *c )
 {
@@ -2566,8 +2566,8 @@ static void shift_XPoints_of_cut_curve( Canvas_T *c )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 static bool cut_change_x_range( Canvas_T *c )
 {
@@ -2590,8 +2590,8 @@ static bool cut_change_x_range( Canvas_T *c )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 static bool cut_change_y_range( Canvas_T *c )
 {
@@ -2617,8 +2617,8 @@ static bool cut_change_y_range( Canvas_T *c )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 static bool cut_change_xy_range( Canvas_T *c )
 {
@@ -2666,8 +2666,8 @@ static bool cut_change_xy_range( Canvas_T *c )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 static bool cut_zoom_x( Canvas_T *c )
 {
@@ -2705,8 +2705,8 @@ static bool cut_zoom_x( Canvas_T *c )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 static bool cut_zoom_y( Canvas_T *c )
 {
@@ -2747,8 +2747,8 @@ static bool cut_zoom_y( Canvas_T *c )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 static bool cut_zoom_xy( Canvas_T *c )
 {
@@ -2809,8 +2809,8 @@ static bool cut_zoom_xy( Canvas_T *c )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 static void cut_save_scale_state( void )
 {
@@ -2828,8 +2828,8 @@ static void cut_save_scale_state( void )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 void cut_clear_curve( long curve )
 {
@@ -2846,8 +2846,8 @@ void cut_clear_curve( long curve )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 void cut_next_index( UNUSED_ARG FL_OBJECT *a, long b )
 {
@@ -2874,8 +2874,8 @@ void cut_next_index( UNUSED_ARG FL_OBJECT *a, long b )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 void cut_change_dir( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
@@ -2938,9 +2938,9 @@ void cut_change_dir( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*-------------------------------------------*/
-/* Gets called to create a marker at 'x_pos' */
-/*-------------------------------------------*/
+/*-------------------------------------------*
+ * Gets called to create a marker at 'x_pos'
+ *-------------------------------------------*/
 
 void set_cut_marker( long x_pos, long color )
 {
@@ -2980,15 +2980,16 @@ void set_cut_marker( long x_pos, long color )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 void delete_cut_marker( long x_pos )
 {
 	Marker_1d_T *m, *mn = NULL;
 
 
-	for ( m = G_2d.curve_2d[ G_cut.curve ]->cut_marker; m != NULL; m = m->next )
+	for ( m = G_2d.curve_2d[ G_cut.curve ]->cut_marker; m != NULL;
+		  m = m->next )
 	{
 		if ( m->x_pos == x_pos )
 			break;
@@ -3010,8 +3011,8 @@ void delete_cut_marker( long x_pos )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 void delete_all_cut_markers( bool redraw_flag )
 {

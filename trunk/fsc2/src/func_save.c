@@ -43,10 +43,10 @@ static long print_include( int fid, char *cp, const char *comment,
 						   const char *cur_file );
 
 
-/*----------------------------------------------------------------*/
-/* Using this function is deprecated (and not necessary anymore), */
-/* so just return value indicating success.                       */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Using this function is deprecated (and not necessary anymore),
+ * so just return value indicating success.
+ *----------------------------------------------------------------*/
 
 Var_T *f_is_file( UNUSED_ARG Var_T *v )
 {
@@ -54,19 +54,19 @@ Var_T *f_is_file( UNUSED_ARG Var_T *v )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/* Function allows to get a file with a predefined name for saving data. If  */
-/* the file already exists and the user does not want it to be overwritten   */
-/* (or the file name is an empty string) the function works exactly as the   */
-/* the f_getf() function, see below.                                         */
-/* Arguments:                                                                */
-/* 1. File name                                                              */
-/* 2. Message string (optional, not allowed to start with a backslash '\'!)  */
-/* 3. Default pattern for file name (optional)                               */
-/* 4. Default directory (optional)                                           */
-/* 5. Default file name (optional)                                           */
-/* 6. Default extension to add (in case it's not already there) (optional)   */
-/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * Function allows to get a file with a predefined name for saving data. If
+ * the file already exists and the user does not want it to be overwritten
+ * (or the file name is an empty string) the function works exactly as the
+ * the f_getf() function, see below.
+ * Arguments:
+ * 1. File name
+ * 2. Message string (optional, not allowed to start with a backslash '\'!)
+ * 3. Default pattern for file name (optional)
+ * 4. Default directory (optional)
+ * 5. Default file name (optional)
+ * 6. Default extension to add (in case it's not already there) (optional)
+ *---------------------------------------------------------------------------*/
 
 Var_T *f_openf( Var_T *var )
 {
@@ -208,21 +208,21 @@ Var_T *f_openf( Var_T *var )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/* Function allows the user to select a file using the file selector. If the */
-/* file already exists a confirmation by the user is required. Then the file */
-/* is opened - if this fails the file selector is shown again. The FILE      */
-/* pointer returned is stored in an array of FILE pointers for each of the   */
-/* open files. The returned value is an INT_VAR with the index in the FILE   */
-/* pointer array or -1 if no file was selected.                              */
-/* Optional input variables (each will replaced by a default string if the   */
-/* argument is either NULL or the empty string) are:                         */
-/* 1. Message string (not allowed to start with a backslash '\'!)            */
-/* 2. Default pattern for file name                                          */
-/* 3. Default directory                                                      */
-/* 4. Default file name                                                      */
-/* 5. Default extension to add (in case it's not already there)              */
-/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * Function allows the user to select a file using the file selector. If the
+ * file already exists a confirmation by the user is required. Then the file
+ * is opened - if this fails the file selector is shown again. The FILE
+ * pointer returned is stored in an array of FILE pointers for each of the
+ * open files. The returned value is an INT_VAR with the index in the FILE
+ * pointer array or -1 if no file was selected.
+ * Optional input variables (each will replaced by a default string if the
+ * argument is either NULL or the empty string) are:
+ * 1. Message string (not allowed to start with a backslash '\'!)
+ * 2. Default pattern for file name
+ * 3. Default directory
+ * 4. Default file name
+ * 5. Default extension to add (in case it's not already there)
+ *---------------------------------------------------------------------------*/
 
 Var_T *f_getf( Var_T *var )
 {
@@ -444,11 +444,11 @@ getfile_retry:
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function called for the 'clone_file()' EDL function to open a new */
-/* file with a name made up from the one of an already opened file   */
-/* after applying some changes according to the input arguments.     */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function called for the 'clone_file()' EDL function to open a new
+ * file with a name made up from the one of an already opened file
+ * after applying some changes according to the input arguments.
+ *-------------------------------------------------------------------*/
 
 Var_T *f_clonef( Var_T *v )
 {
@@ -530,9 +530,9 @@ Var_T *f_clonef( Var_T *v )
 }
 
 
-/*--------------------------------------------------------*/
-/* Function for opening a file when running in batch mode */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Function for opening a file when running in batch mode
+ *--------------------------------------------------------*/
 
 static Var_T *batch_mode_file_open( char *name )
 {
@@ -658,12 +658,12 @@ static Var_T *batch_mode_file_open( char *name )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* This function is called by the functions for saving. If they didn't */
-/* get a file identifier it is assumed the user wants just one file    */
-/* that is opened at the first call of a function of the 'save_xxx()'  */
-/* family of functions.                                                */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * This function is called by the functions for saving. If they didn't
+ * get a file identifier it is assumed the user wants just one file
+ * that is opened at the first call of a function of the 'save_xxx()'
+ * family of functions.
+ *---------------------------------------------------------------------*/
 
 static int get_save_file( Var_T **v )
 {
@@ -743,9 +743,9 @@ static int get_save_file( Var_T **v )
 }
 
 
-/*--------------------------------*/
-/* Closes all opened output files */
-/*--------------------------------*/
+/*--------------------------------*
+ * Closes all opened output files
+ *--------------------------------*/
 
 void close_all_files( void )
 {
@@ -770,15 +770,15 @@ void close_all_files( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Saves data to a file. If 'get_file()' hasn't been called yet it will */
-/* be called now - in this case the file opened this way is the only    */
-/* file to be used and no file identifier is allowed as first argument  */
-/* to 'save()'. This version of save writes the data in an unformatted  */
-/* way, i.e. each on its own line with the only exception of arrays of  */
-/* more than one dimension where an empty line is put between the       */
-/* slices. It returns the number of characters written.                 */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Saves data to a file. If 'get_file()' hasn't been called yet it will
+ * be called now - in this case the file opened this way is the only
+ * file to be used and no file identifier is allowed as first argument
+ * to 'save()'. This version of save writes the data in an unformatted
+ * way, i.e. each on its own line with the only exception of arrays of
+ * more than one dimension where an empty line is put between the
+ * slices. It returns the number of characters written.
+ *----------------------------------------------------------------------*/
 
 Var_T *f_save( Var_T *v )
 {
@@ -828,10 +828,10 @@ Var_T *f_save( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function called when a one- or more-dimensional variable is passed to   */
-/* the 'save()' EDL function. It writes out the array one element per line */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function called when a one- or more-dimensional variable is passed to
+ * the 'save()' EDL function. It writes out the array one element per line
+ *-------------------------------------------------------------------------*/
 
 static long arr_save( long file_num, Var_T *v )
 {
@@ -865,14 +865,14 @@ static long arr_save( long file_num, Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Saves data to a file. If 'get_file()' hasn't been called yet it will be  */
-/* called now - in this case the file opened this way is the only file to   */
-/* be used and no file identifier is allowed as first argument to 'save()'. */
-/* This function is the formated save with the same meaning of the format   */
-/* string as in 'print()'.                                                  */
-/* The function returns the number of chars it wrote to the file.           */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Saves data to a file. If 'get_file()' hasn't been called yet it will be
+ * called now - in this case the file opened this way is the only file to
+ * be used and no file identifier is allowed as first argument to 'save()'.
+ * This function is the formated save with the same meaning of the format
+ * string as in 'print()'.
+ * The function returns the number of chars it wrote to the file.
+ *--------------------------------------------------------------------------*/
 
 Var_T *f_fsave( Var_T *v )
 {
@@ -904,10 +904,10 @@ Var_T *f_fsave( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* This function gets called from f_fsave() to make from its format string */
-/* a format string that can be passed to fprintf()'s format string.        */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * This function gets called from f_fsave() to make from its format string
+ * a format string that can be passed to fprintf()'s format string.
+ *-------------------------------------------------------------------------*/
 
 static void f_format_check( Var_T *v )
 {
@@ -1013,17 +1013,17 @@ static void f_format_check( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* This function writes data to a file according to a format string, which */
-/* resembles strongly the format string that printf() and friends accepts. */
-/* The only things not supported (because they don't make sense here) are  */
-/* printing of chars, unsigned quantities and pointers and pointers (i.e.  */
-/* the 'c', 'o', 'x', 'X', 'u' and 'p' conversion specifiers cannot be     */
-/* used) and no length specifiers (i.e. 'h', 'l' and 'L') are accepted.    */
-/* Everything else should work, including all escape sequences (with the   */
-/* exception of trigraph sequences).                                       */
-/* The function returns the number of chars written to the file.           */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * This function writes data to a file according to a format string, which
+ * resembles strongly the format string that printf() and friends accepts.
+ * The only things not supported (because they don't make sense here) are
+ * printing of chars, unsigned quantities and pointers and pointers (i.e.
+ * the 'c', 'o', 'x', 'X', 'u' and 'p' conversion specifiers cannot be
+ * used) and no length specifiers (i.e. 'h', 'l' and 'L') are accepted.
+ * Everything else should work, including all escape sequences (with the
+ * exception of trigraph sequences).
+ * The function returns the number of chars written to the file.
+ *-------------------------------------------------------------------------*/
 
 Var_T *f_ffsave( Var_T *v )
 {
@@ -1055,12 +1055,12 @@ Var_T *f_ffsave( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Function is used by ff_save( ) to check that the format string is well-  */
-/* formed and to find out if there are at least as many arguments as needed */
-/* by the format string (if there are more a warning is printed and the     */
-/* superfluous arguments are discarded).                                    */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Function is used by ff_save( ) to check that the format string is well-
+ * formed and to find out if there are at least as many arguments as needed
+ * by the format string (if there are more a warning is printed and the
+ * superfluous arguments are discarded).
+ *--------------------------------------------------------------------------*/
 
 static void ff_format_check( Var_T *v )
 {
@@ -1256,13 +1256,13 @@ static void ff_format_check( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* This function is called by f_fsave() and f_ffsave() to do the actual  */
-/* printing. It loops over the format string and prints it argument by   */
-/* argument (unfortunately, there's no portable way to create a variable */
-/* argument list, so it must be done this way). The function returns     */
-/* the number of character written.                                      */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * This function is called by f_fsave() and f_ffsave() to do the actual
+ * printing. It loops over the format string and prints it argument by
+ * argument (unfortunately, there's no portable way to create a variable
+ * argument list, so it must be done this way). The function returns
+ * the number of character written.
+ *-----------------------------------------------------------------------*/
 
 static long do_printf( long file_num, Var_T *v )
 {
@@ -1562,15 +1562,15 @@ static long do_printf( long file_num, Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Saves the EDL program to a file. If 'get_file()' hasn't been called yet */
-/* it will be called now - in this case the file opened this way is the    */
-/* only file to be used and no file identifier is allowed as first argu-   */
-/* ment to 'save()'.                                                       */
-/* Beside the file identifier the other (optional) parameter is a string   */
-/* that gets prepended to each line of the EDL program (i.e. a comment     */
-/* character).                                                             */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Saves the EDL program to a file. If 'get_file()' hasn't been called yet
+ * it will be called now - in this case the file opened this way is the
+ * only file to be used and no file identifier is allowed as first argu-
+ * ment to 'save()'.
+ * Beside the file identifier the other (optional) parameter is a string
+ * that gets prepended to each line of the EDL program (i.e. a comment
+ * character).
+ *-------------------------------------------------------------------------*/
 
 Var_T *f_save_p( Var_T *v )
 {
@@ -1595,14 +1595,14 @@ Var_T *f_save_p( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Saves the content of the output window to a file. If 'get_file()' hasn't */
-/* been called yet it will be called now - in this case the file opened     */
-/* this way is the only file to be used and no file identifier is allowed   */
-/* as first argument to 'save()'.                                           */
-/* Beside the file identifier the other (optional) parameter is a string    */
-/* that gets prepended to each line of the output (i.e. a comment char).    */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Saves the content of the output window to a file. If 'get_file()' hasn't
+ * been called yet it will be called now - in this case the file opened
+ * this way is the only file to be used and no file identifier is allowed
+ * as first argument to 'save()'.
+ * Beside the file identifier the other (optional) parameter is a string
+ * that gets prepended to each line of the output (i.e. a comment char).
+ *--------------------------------------------------------------------------*/
 
 Var_T *f_save_o( Var_T *v )
 {
@@ -1627,13 +1627,13 @@ Var_T *f_save_o( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Writes the content of the program or the error browser into a file. */
-/* Input parameter:                                                    */
-/* 1. 0: writes program browser, 1: error browser                      */
-/* 2. File identifier                                                  */
-/* 3. Comment string to prepend to each line                           */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Writes the content of the program or the error browser into a file.
+ * Input parameter:
+ * 1. 0: writes program browser, 1: error browser
+ * 2. File identifier
+ * 3. Comment string to prepend to each line
+ *---------------------------------------------------------------------*/
 
 static long print_browser( int browser, int fid, const char* comment )
 {
@@ -1688,10 +1688,10 @@ static long print_browser( int browser, int fid, const char* comment )
 }
 
 
-/*------------------------------------------------------*/
-/* Function for (recursively if necessary) printing out */
-/* a file specified in an #INCLUDE directive.           */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function for (recursively if necessary) printing out
+ * a file specified in an #INCLUDE directive.
+ *------------------------------------------------------*/
 
 #define MAX_INCLUDE_DEPTH 16         /* should be identical to the same
 										value in fsc2_clean.l */
@@ -1864,14 +1864,14 @@ static long print_include( int fid, char *cp, const char *comment,
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Writes a comment into a file.                                       */
-/* Arguments:                                                          */
-/* 1. If first argument is a number it's treated as a file identifier. */
-/* 2. It follows a comment string to prepend to each line of text      */
-/* 3. A text to appear in the editor                                   */
-/* 4. The label for the editor                                         */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Writes a comment into a file.
+ * Arguments:
+ * 1. If first argument is a number it's treated as a file identifier.
+ * 2. It follows a comment string to prepend to each line of text
+ * 3. A text to appear in the editor
+ * 4. The label for the editor
+ *---------------------------------------------------------------------*/
 
 Var_T *f_save_c( Var_T *v )
 {
@@ -1956,16 +1956,16 @@ Var_T *f_save_c( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function that does all the actual printing. It does a lot of tests */
-/* in order to make sure that really everything get written to a file */
-/* and tries to handle situations gracefully where there isn't enough */
-/* room left on a disk by asking for a replacement file and copying   */
-/* everything already written to the file on the full disk into the   */
-/* replacement file. The function returns the number of chars written */
-/* to the file (but not the copied bytes in case a replacement file   */
-/* had to be used).                                                   */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function that does all the actual printing. It does a lot of tests
+ * in order to make sure that really everything get written to a file
+ * and tries to handle situations gracefully where there isn't enough
+ * room left on a disk by asking for a replacement file and copying
+ * everything already written to the file on the full disk into the
+ * replacement file. The function returns the number of chars written
+ * to the file (but not the copied bytes in case a replacement file
+ * had to be used).
+ *--------------------------------------------------------------------*/
 
 static long T_fprintf( long fn, const char *fmt, ... )
 {

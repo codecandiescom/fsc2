@@ -28,11 +28,11 @@
 static void start_help_browser( void );
 
 
-/*-------------------------------------------------------------*/
-/* This function is the callback function for the help button. */
-/* It forks a process that execs a browser displaying the HTML */
-/* documentation.                                              */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * This function is the callback function for the help button.
+ * It forks a process that execs a browser displaying the HTML
+ * documentation.
+ *-------------------------------------------------------------*/
 
 void run_help( FL_OBJECT *a, UNUSED_ARG long b )
 {
@@ -77,14 +77,14 @@ void run_help( FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*--------------------------------------------------------------*/
-/* This function starts a browser with the HTML documantation.  */
-/* It is called after a fork(), so it may not return. Which     */
-/* browser is used depends on the environment variable BROWSER, */
-/* currently the program only knows how to deal with Netscape,  */
-/* mozilla, opera, konqueror, galeon, lnyx or w3m. If BROWSER   */
-/* isn't set Netscape is used as the default.                   */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * This function starts a browser with the HTML documantation.
+ * It is called after a fork(), so it may not return. Which
+ * browser is used depends on the environment variable BROWSER,
+ * currently the program only knows how to deal with Netscape,
+ * mozilla, opera, konqueror, galeon, lnyx or w3m. If BROWSER
+ * isn't set Netscape is used as the default.
+ *--------------------------------------------------------------*/
 
 static void start_help_browser( void )
 {

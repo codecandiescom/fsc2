@@ -77,17 +77,17 @@ static void print_markers_1d( FILE *fp );
 static void print_markers_2d( FILE *fp );
 
 
-/*------------------------------------------------------------------------*/
-/* This function gets called as the callback routine for the print button */
-/* It shows a form that lets the user choose where to print the resulting */
-/* Postscript file to (sending it to a printer with a command like "lpr"  */
-/* or saving to a file), the paper size (either A4, A3, Legal, Letter or  */
-/* A5 or A6) and to switch between b&w and color.                         */
-/* For drawing the curves from the main 1D display window the parameter   */
-/* 'data' is expected to be 1, for 2D display to be 2 and for cross       */
-/* section curves 'data' must be 0 for cross sections through the x-axis  */
-/* and -1 for the y-axis!                                                 */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * This function gets called as the callback routine for the print button
+ * It shows a form that lets the user choose where to print the resulting
+ * Postscript file to (sending it to a printer with a command like "lpr"
+ * or saving to a file), the paper size (either A4, A3, Legal, Letter or
+ * A5 or A6) and to switch between b&w and color.
+ * For drawing the curves from the main 1D display window the parameter
+ * 'data' is expected to be 1, for 2D display to be 2 and for cross
+ * section curves 'data' must be 0 for cross sections through the x-axis
+ * and -1 for the y-axis!
+ *------------------------------------------------------------------------*/
 
 void print_it( FL_OBJECT *obj, long data )
 {
@@ -137,10 +137,10 @@ void print_it( FL_OBJECT *obj, long data )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Shows a form that allows the user to select the way to print */
-/* and, for printing to file mode, select the file              */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Shows a form that allows the user to select the way to print
+ * and, for printing to file mode, select the file
+ *--------------------------------------------------------------*/
 
 static bool get_print_file( FILE **fp, char **name, long data )
 {
@@ -350,8 +350,8 @@ static bool get_print_file( FILE **fp, char **name, long data )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ *----------------------------------------------------------------------*/
 
 static int print_form_close_handler( UNUSED_ARG FL_FORM *a,
 									 UNUSED_ARG void *b )
@@ -360,9 +360,9 @@ static int print_form_close_handler( UNUSED_ARG FL_FORM *a,
 }
 
 
-/*------------------------------------------------------*/
-/* Callback function for the objects in the print form. */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Callback function for the objects in the print form.
+ *------------------------------------------------------*/
 
 void print_callback( FL_OBJECT *obj, UNUSED_ARG long data )
 {
@@ -438,10 +438,10 @@ void print_callback( FL_OBJECT *obj, UNUSED_ARG long data )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Asks the user for a comment to print into the EPS file - the  */
-/* resulting string is stored in the global variable 'pc_string' */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Asks the user for a comment to print into the EPS file - the
+ * resulting string is stored in the global variable 'pc_string'
+ *---------------------------------------------------------------*/
 
 static void get_print_comm( long data )
 {
@@ -498,10 +498,10 @@ static void get_print_comm( long data )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Closing the form via the window buttons simulates clearing all text */
-/* and then pressing the "Done" button.                                */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Closing the form via the window buttons simulates clearing all text
+ * and then pressing the "Done" button.
+ *---------------------------------------------------------------------*/
 
 static int print_comment_close_handler( UNUSED_ARG FL_FORM *a,
 										UNUSED_ARG void *b )
@@ -512,10 +512,10 @@ static int print_comment_close_handler( UNUSED_ARG FL_FORM *a,
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function forks of a child for doing the actually printing,   */
-/* while the main program can continue taking care of new data. */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function forks of a child for doing the actually printing,
+ * while the main program can continue taking care of new data.
+ *--------------------------------------------------------------*/
 
 static void start_printing( FILE *fp, char *name, long what )
 {
@@ -607,9 +607,9 @@ static void start_printing( FILE *fp, char *name, long what )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Prints the header of the EPS-file as well as date, user and fsc2 logo. */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Prints the header of the EPS-file as well as date, user and fsc2 logo.
+ *------------------------------------------------------------------------*/
 
 static void print_header( FILE *fp, char *name )
 {
@@ -737,14 +737,14 @@ static void print_header( FILE *fp, char *name )
 }
 
 
-/*------------------------------------------------------------*/
-/* This function writes out the Postscript code for all kinds */
-/* of 1D graphics, i.e. the normal 1D window as well as cross */
-/* section windows. What it got to output it sees from the    */
-/* last argument which is set to 1 for a normal 1D window, to */
-/* 0 for a cross section in x-direction and -1 for a cross    */
-/* section in y-direction.                                    */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * This function writes out the Postscript code for all kinds
+ * of 1D graphics, i.e. the normal 1D window as well as cross
+ * section windows. What it got to output it sees from the
+ * last argument which is set to 1 for a normal 1D window, to
+ * 0 for a cross section in x-direction and -1 for a cross
+ * section in y-direction.
+ *------------------------------------------------------------*/
 
 static void do_1d_printing( FILE *fp, long what )
 {
@@ -808,12 +808,12 @@ static void do_1d_printing( FILE *fp, long what )
 }
 
 
-/*--------------------------------------------------------------*/
-/* This function writes out the Postscript code for 2D windows. */
-/* Because I wasn't able to come up yet with any useful method  */
-/* on how to draw a contour in b&w this part has currently been */
-/* disabled (the user can't select b&w).                        */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * This function writes out the Postscript code for 2D windows.
+ * Because I wasn't able to come up yet with any useful method
+ * on how to draw a contour in b&w this part has currently been
+ * disabled (the user can't select b&w).
+ *--------------------------------------------------------------*/
 
 static void do_2d_printing( FILE *fp )
 {
@@ -868,9 +868,9 @@ static void do_2d_printing( FILE *fp )
 }
 
 
-/*----------------------------------------------*/
-/* Draws the scales for both 1D and 2D graphics */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Draws the scales for both 1D and 2D graphics
+ *----------------------------------------------*/
 
 static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 {
@@ -1194,10 +1194,10 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 }
 
 
-/*-------------------------------------------------------*/
-/* Creates the scale for the color coding printed for 2D */
-/* output in color mode.                                 */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Creates the scale for the color coding printed for 2D
+ * output in color mode.
+ *-------------------------------------------------------*/
 
 static void eps_color_scale( FILE *fp )
 {
@@ -1231,8 +1231,8 @@ static void eps_color_scale( FILE *fp )
 }
 
 
-/*-------------------------------------------------------*/
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ *-------------------------------------------------------*/
 
 static void eps_draw_curve_1d( FILE *fp, Curve_1d_T *cv, int i, long dir )
 {
@@ -1317,8 +1317,8 @@ static void eps_draw_curve_1d( FILE *fp, Curve_1d_T *cv, int i, long dir )
 }
 
 
-/*-------------------------------------------------------*/
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ *-------------------------------------------------------*/
 
 static void eps_draw_surface( FILE *fp, int cn )
 {
@@ -1371,9 +1371,10 @@ static void eps_draw_surface( FILE *fp, int cn )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* A rather useless try to draw a 2D curve in gray scale, using contours... */
-/*--------------------------------------------------------------------------*/
+/*-----------------------------------------------------*
+ * A rather useless attempt to draw a 2D curve in gray
+ * scale, using contours...
+ *-----------------------------------------------------*/
 
 static void eps_draw_contour( FILE *fp, int cn )
 {
@@ -1475,10 +1476,10 @@ static void eps_draw_contour( FILE *fp, int cn )
 }
 
 
-/*---------------------------------------------------------------*/
-/* This routine prints a comment text into a field in the middle */
-/* of the page below the x-axis.                                 */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * This routine prints a comment text into a field in the middle
+ * of the page below the x-axis.
+ *---------------------------------------------------------------*/
 
 static void print_comm( FILE *fp )
 {
@@ -1525,14 +1526,14 @@ static void print_comm( FILE *fp )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* The comment text to be printed is a single string with embedded   */
-/* newline characters. This routine splits this string into an array */
-/* of strings, each of them holding one line of text. The function   */
-/* returns an array of strings (the calling routine must T_free()    */
-/* both all the strings as well as the array of string pointers) and */
-/* the number of lines to be printed (through the pointer argument). */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * The comment text to be printed is a single string with embedded
+ * newline characters. This routine splits this string into an array
+ * of strings, each of them holding one line of text. The function
+ * returns an array of strings (the calling routine must T_free()
+ * both all the strings as well as the array of string pointers) and
+ * the number of lines to be printed (through the pointer argument).
+ *-------------------------------------------------------------------*/
 
 static char **split_into_lines( int *num_lines )
 {
@@ -1645,14 +1646,14 @@ static char **split_into_lines( int *num_lines )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Routine returns a string that is basically the copy of the input */
-/* string but with a backslash prepended to all parenthesis (which  */
-/* the PostScript interpreter might otherwise choke on). At the     */
-/* same time all characters that aren't Clean8Bit (i.e. all charac- */
-/* ters below 0x1B (except TAB, LF and CR) and 0x7F) are replaced   */
-/* by a space character.                                            */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Routine returns a string that is basically the copy of the input
+ * string but with a backslash prepended to all parenthesis (which
+ * the PostScript interpreter might otherwise choke on). At the
+ * same time all characters that aren't Clean8Bit (i.e. all charac-
+ * ters below 0x1B (except TAB, LF and CR) and 0x7F) are replaced
+ * by a space character.
+ *------------------------------------------------------------------*/
 
 static char *paren_replace( const char *str )
 {
@@ -1694,9 +1695,9 @@ static char *paren_replace( const char *str )
 }
 
 
-/*-----------------------------------------------------*/
-/* Function for drawing the markers in 1D graphic mode */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function for drawing the markers in 1D graphic mode
+ *-----------------------------------------------------*/
 
 static void print_markers_1d( FILE *fp )
 {
@@ -1763,9 +1764,9 @@ static void print_markers_1d( FILE *fp )
 }
 
 
-/*-----------------------------------------------------*/
-/* Function for drawing the markers in 2D graphic mode */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function for drawing the markers in 2D graphic mode
+ *-----------------------------------------------------*/
 
 static void print_markers_2d( FILE *fp )
 {

@@ -89,20 +89,20 @@ static unsigned short get_ushort( const unsigned char *p );
 #endif
 
 
-/*--------------------------------------------------------------------*/
-/* Function for sending mails with the mail body taken from the file  */
-/* pointed to by 'fp' from user 'from' with subject line 'subject' to */
-/* address 'to' and, if non-zero also to 'cc_to'.                     */
-/* There are two versions of the function, one that is used when the  */
-/* 'USE_FSC2_MTA' variable isn't defined in the main makefile and     */
-/* that relies on the availability of a working MTA being available   */
-/* on the machine. The other version tries to do everything required  */
-/* with as little external help as possible. The function is also     */
-/* written in a way *not* to use dynamically allocated memory etc.    */
-/* because it may be called in situations where we got a segmentation */
-/* fault due to memory problems and still want to be able to send out */
-/* mails without provoking another segmentation fault.                */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for sending mails with the mail body taken from the file
+ * pointed to by 'fp' from user 'from' with subject line 'subject' to
+ * address 'to' and, if non-zero also to 'cc_to'.
+ * There are two versions of the function, one that is used when the
+ * 'USE_FSC2_MTA' variable isn't defined in the main makefile and
+ * that relies on the availability of a working MTA being available
+ * on the machine. The other version tries to do everything required
+ * with as little external help as possible. The function is also
+ * written in a way *not* to use dynamically allocated memory etc.
+ * because it may be called in situations where we got a segmentation
+ * fault due to memory problems and still want to be able to send out
+ * mails without provoking another segmentation fault.
+ *--------------------------------------------------------------------*/
 
 #if defined MAIL_PROGRAM
 
@@ -196,10 +196,10 @@ int send_mail( const char *subject, const char *from, const char* cc_to,
 }
 
 
-/*-----------------------------------------------------------*/
-/* Function for connecting to the machine receiving mail for */
-/* the domain and then sending the mail, see RFC 821 etc.    */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function for connecting to the machine receiving mail for
+ * the domain and then sending the mail, see RFC 821 etc.
+ *-----------------------------------------------------------*/
 
 static int do_send( const char *rec_host, const char *to,
 					const char *from, const char *local_host,
@@ -385,11 +385,11 @@ static int do_send( const char *rec_host, const char *to,
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Function for making a connection to a machine prepared to receive mail */
-/* for the domain passed to the function in 'remote'. The function also   */
-/* needs to know about the local machine avoid creating a loop.           */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function for making a connection to a machine prepared to receive mail
+ * for the domain passed to the function in 'remote'. The function also
+ * needs to know about the local machine avoid creating a loop.
+ *------------------------------------------------------------------------*/
 
 static int open_mail_socket( const char *remote, const char *local )
 {
@@ -483,30 +483,30 @@ static int open_mail_socket( const char *remote, const char *local )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Function for trying to figure out which machine takes care of mail for */
-/* the domain passed to the function in 'remote'. To find out we have to  */
-/* query a DNS server and interpret the reply according to RFC 1035 and   */
-/* RFC 974 (and take into account that RFC 1123 tells that, in contrast   */
-/* to what's written in RFC 974, we're not supposed to check for the WKS  */
-/* records for the machine anymore but instead simply try to connect to   */
-/* it and test if it works).                                              */
-/* The function might be called several times in a row to get another     */
-/* mail-receiving machine each time round if no connection could be made  */
-/* to the machine that was returned the last time round. The first time   */
-/* it must be called with the remote machine name as the first argument,  */
-/* while on further invocations for the same remote host the 'remote'     */
-/* argument must be NULL. The function returns NULL if there's no machine */
-/* left that would accept mail, otherwise a pointer to the name of the    */
-/* next machine that should be tried.                                     */
-/* The second argument must be the name of the machine we're trying to    */
-/* send the mail from. It also must only be set each time a new mail      */
-/* accepting machine is asked for the first time, in later calls it can   */
-/* be a NULL pointer.                                                     */
-/* In case of errors the function also returns NULL, so an error can't be */
-/* distinguished from the case that there are no machines prepared to     */
-/* accept mail for the remote machine.                                    */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function for trying to figure out which machine takes care of mail for
+ * the domain passed to the function in 'remote'. To find out we have to
+ * query a DNS server and interpret the reply according to RFC 1035 and
+ * RFC 974 (and take into account that RFC 1123 tells that, in contrast
+ * to what's written in RFC 974, we're not supposed to check for the WKS
+ * records for the machine anymore but instead simply try to connect to
+ * it and test if it works).
+ * The function might be called several times in a row to get another
+ * mail-receiving machine each time round if no connection could be made
+ * to the machine that was returned the last time round. The first time
+ * it must be called with the remote machine name as the first argument,
+ * while on further invocations for the same remote host the 'remote'
+ * argument must be NULL. The function returns NULL if there's no machine
+ * left that would accept mail, otherwise a pointer to the name of the
+ * next machine that should be tried.
+ * The second argument must be the name of the machine we're trying to
+ * send the mail from. It also must only be set each time a new mail
+ * accepting machine is asked for the first time, in later calls it can
+ * be a NULL pointer.
+ * In case of errors the function also returns NULL, so an error can't be
+ * distinguished from the case that there are no machines prepared to
+ * accept mail for the remote machine.
+ *------------------------------------------------------------------------*/
 
 static const char *get_mail_server( const char *remote, const char *local )
 {
@@ -603,15 +603,15 @@ static const char *get_mail_server( const char *remote, const char *local )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Checks that the header of the reply from the DNS server didn't report  */
-/* errors and extracts the numbers of entries in the different sections,  */
-/* storing them in 'sec_entries'. Then it also reads the question section */
-/* records (if there are any). Unless there is an error (in which case    */
-/* the function returns -1) '*buf' points to the first byte after the     */
-/* question section of the reply, i.e. the start of the answers section,  */
-/* on return.                                                             */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Checks that the header of the reply from the DNS server didn't report
+ * errors and extracts the numbers of entries in the different sections,
+ * storing them in 'sec_entries'. Then it also reads the question section
+ * records (if there are any). Unless there is an error (in which case
+ * the function returns -1) '*buf' points to the first byte after the
+ * question section of the reply, i.e. the start of the answers section,
+ * on return.
+ *------------------------------------------------------------------------*/
 
 static unsigned char *analyze_dns_reply_header( unsigned char *buf, int len,
                                                 unsigned short *sec_entries,
@@ -706,11 +706,11 @@ static unsigned char *analyze_dns_reply_header( unsigned char *buf, int len,
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function loops over all resource records looking for a CNAME RR. */
-/* If one is found the canonical name is copied into 'host' and the */
-/* function returns 1. If none is found returns 0 and -1 on errors. */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function loops over all resource records looking for a CNAME RR.
+ * If one is found the canonical name is copied into 'host' and the
+ * function returns 1. If none is found returns 0 and -1 on errors.
+ *------------------------------------------------------------------*/
 
 static int check_cname_rr( unsigned char *buf, int len, unsigned char *ans_sec,
                            char *host, unsigned short *sec_entries )
@@ -752,13 +752,13 @@ static int check_cname_rr( unsigned char *buf, int len, unsigned char *ans_sec,
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Loops over all entries in the answer section, checking if the host */
-/* itself is listed as being prepared to accept mail, and if it does  */
-/* sets the priority of all hosts with equal or lower priority to the */
-/* lowest possible priority. RRs with that low a priority will never  */
-/* be used.                                                           */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Loops over all entries in the answer section, checking if the host
+ * itself is listed as being prepared to accept mail, and if it does
+ * sets the priority of all hosts with equal or lower priority to the
+ * lowest possible priority. RRs with that low a priority will never
+ * be used.
+ *--------------------------------------------------------------------*/
 
 static int weed_out( unsigned char *buf, int len, unsigned char *ans_sec,
                      unsigned short num_ans, const char *local )
@@ -830,12 +830,12 @@ static int weed_out( unsigned char *buf, int len, unsigned char *ans_sec,
 }
 
 
-/*------------------------------------------------------------------*/
-/* Loops over the list of records in the answer section to find the */
-/* machine with the highest priority. If one is found its name is   */
-/* returned and its priority level is lowered to the minimum value  */
-/* to keep it from getting used it again.                           */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Loops over the list of records in the answer section to find the
+ * machine with the highest priority. If one is found its name is
+ * returned and its priority level is lowered to the minimum value
+ * to keep it from getting used it again.
+ *------------------------------------------------------------------*/
 
 static const char *get_host( unsigned char *buf, int len,
                              unsigned short num_ans, unsigned char *ans_sec )
@@ -876,12 +876,12 @@ static const char *get_host( unsigned char *buf, int len,
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function expects that '*rr' is pointing to the start of the NAME field. */
-/* It returns a static buffer with the name of the machine, leaving '*rr'  */
-/* pointing to the byte following the name in the RR. On errors NULL is    */
-/* returned (and '*rr' remains unchanged).                                 */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function expects that '*rr' is pointing to the start of the NAME field.
+ * It returns a static buffer with the name of the machine, leaving '*rr'
+ * pointing to the byte following the name in the RR. On errors NULL is
+ * returned (and '*rr' remains unchanged).
+ *-------------------------------------------------------------------------*/
 
 static const char *get_name( unsigned char *buf, int len, unsigned char **rr )
 {
@@ -918,10 +918,10 @@ static const char *get_name( unsigned char *buf, int len, unsigned char **rr )
 }
 
 
-/*----------------------------------------------*/
-/* Function for getting an unsigned short value */
-/* from the reply of the DNS server             */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Function for getting an unsigned short value
+ * from the reply of the DNS server
+ *----------------------------------------------*/
 
 static unsigned short get_ushort( const unsigned char *p )
 {

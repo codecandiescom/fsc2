@@ -46,9 +46,9 @@ static void recalc_XPoints_1d( void );
 static void delete_marker_1d( long x_pos );
 
 
-/*--------------------------------------------------------*/
-/* Handler for all kinds of X events the canvas receives. */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Handler for all kinds of X events the canvas receives.
+ *--------------------------------------------------------*/
 
 int canvas_handler_1d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 					   void *udata )
@@ -86,10 +86,10 @@ int canvas_handler_1d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 }
 
 
-/*-------------------------------------------------------*/
-/* Handler that gets called for pressing on of the mouse */
-/* buttons in the axis areas or the camvas               */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Handler that gets called for pressing on of the mouse
+ * buttons in the axis areas or the camvas
+ *-------------------------------------------------------*/
 
 static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 							  Canvas_T *c )
@@ -265,10 +265,10 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 }
 
 
-/*--------------------------------------------------------*/
-/* Handler that gets called for releasing on of the mouse */
-/* buttons in the axis areas or the camvas                */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Handler that gets called for releasing on of the mouse
+ * buttons in the axis areas or the camvas
+ *--------------------------------------------------------*/
 
 static void release_handler_1d( UNUSED_ARG FL_OBJECT *obj, Window window,
 								XEvent *ev, Canvas_T *c )
@@ -486,10 +486,10 @@ static void release_handler_1d( UNUSED_ARG FL_OBJECT *obj, Window window,
 }
 
 
-/*------------------------------------------------------------*/
-/* Handler that gets called for moving the mouse after one of */
-/* the buttons was pressed in the axis areas or the camvas    */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Handler that gets called for moving the mouse after one of
+ * the buttons was pressed in the axis areas or the camvas
+ *------------------------------------------------------------*/
 
 static void motion_handler_1d( UNUSED_ARG FL_OBJECT *obj, Window window,
 							   XEvent *ev, Canvas_T *c )
@@ -608,10 +608,10 @@ static void motion_handler_1d( UNUSED_ARG FL_OBJECT *obj, Window window,
 }
 
 
-/*----------------------------------------------------------*/
-/* Saves the current state of scaling before changes to the */
-/* scaling are applied - needed for the UNDO button.        */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Saves the current state of scaling before changes to the
+ * scaling are applied - needed for the UNDO button.
+ *----------------------------------------------------------*/
 
 void save_scale_state_1d( Curve_1d_T *cv )
 {
@@ -624,8 +624,8 @@ void save_scale_state_1d( Curve_1d_T *cv )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 static bool change_x_range_1d( Canvas_T *c )
 {
@@ -661,8 +661,8 @@ static bool change_x_range_1d( Canvas_T *c )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 static bool change_y_range_1d( Canvas_T *c )
 {
@@ -700,8 +700,8 @@ static bool change_y_range_1d( Canvas_T *c )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 static bool change_xy_range_1d( Canvas_T *c )
 {
@@ -757,8 +757,8 @@ static bool change_xy_range_1d( Canvas_T *c )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 static bool zoom_x_1d( Canvas_T *c )
 {
@@ -807,8 +807,8 @@ static bool zoom_x_1d( Canvas_T *c )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 static bool zoom_y_1d( Canvas_T *c )
 {
@@ -862,8 +862,8 @@ static bool zoom_y_1d( Canvas_T *c )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 static bool zoom_xy_1d( Canvas_T *c )
 {
@@ -933,11 +933,11 @@ static bool zoom_xy_1d( Canvas_T *c )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* This is basically a simplified version of 'recalc_XPoints_of_curve()' */
-/* because we need to do much less calculations, i.e. just adding an     */
-/* offset to all XPoints instead of going through all the scalings...    */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * This is basically a simplified version of 'recalc_XPoints_of_curve()'
+ * because we need to do much less calculations, i.e. just adding an
+ * offset to all XPoints instead of going through all the scalings...
+ *-----------------------------------------------------------------------*/
 
 static bool shift_XPoints_of_curve_1d( Canvas_T *c, Curve_1d_T *cv )
 {
@@ -997,9 +997,9 @@ static bool shift_XPoints_of_curve_1d( Canvas_T *c, Curve_1d_T *cv )
 }
 
 
-/*-------------------------------------*/
-/* Handles changes of the window size. */
-/*-------------------------------------*/
+/*-------------------------------------*
+ * Handles changes of the window size.
+ *-------------------------------------*/
 
 static void reconfigure_window_1d( Canvas_T *c, int w, int h )
 {
@@ -1102,10 +1102,10 @@ static void reconfigure_window_1d( Canvas_T *c, int w, int h )
 }
 
 
-/*---------------------------------------------------------*/
-/* Recalculates the points to be displayed from the scaled */
-/* points for all curves.                                  */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Recalculates the points to be displayed from the scaled
+ * points for all curves.
+ *---------------------------------------------------------*/
 
 static void recalc_XPoints_1d( void )
 {
@@ -1117,10 +1117,10 @@ static void recalc_XPoints_1d( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Recalculates the graphic data for a curve using the the curves */
-/* settings for the scale and the offset.                         */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Recalculates the graphic data for a curve using the the curves
+ * settings for the scale and the offset.
+ *----------------------------------------------------------------*/
 
 void recalc_XPoints_of_curve_1d( Curve_1d_T *cv )
 {
@@ -1150,9 +1150,9 @@ void recalc_XPoints_of_curve_1d( Curve_1d_T *cv )
 }
 
 
-/*-----------------------------------------*/
-/* Does a complete redraw of all canvases. */
-/*-----------------------------------------*/
+/*-----------------------------------------*
+ * Does a complete redraw of all canvases.
+ *-----------------------------------------*/
 
 void redraw_all_1d( void )
 {
@@ -1162,9 +1162,9 @@ void redraw_all_1d( void )
 }
 
 
-/*-------------------------------------*/
-/* Does a complete redraw of a canvas. */
-/*-------------------------------------*/
+/*-------------------------------------*
+ * Does a complete redraw of a canvas.
+ *-------------------------------------*/
 
 void redraw_canvas_1d( Canvas_T *c )
 {
@@ -1258,9 +1258,9 @@ void redraw_canvas_1d( Canvas_T *c )
 }
 
 
-/*-----------------------------------------------*/
-/* Copies the background pixmap onto the canvas. */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Copies the background pixmap onto the canvas.
+ *-----------------------------------------------*/
 
 void repaint_canvas_1d( Canvas_T *c )
 {
@@ -1395,10 +1395,10 @@ void repaint_canvas_1d( Canvas_T *c )
 }
 
 
-/*---------------------------------------------------------*/
-/* Function for returning th current mouse position to the */
-/* user for the EDL function mouse_position()              */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function for returning th current mouse position to the
+ * user for the EDL function mouse_position()
+ *---------------------------------------------------------*/
 
 int get_mouse_pos_1d( double *pa, unsigned int *keymask )
 {
@@ -1430,10 +1430,10 @@ int get_mouse_pos_1d( double *pa, unsigned int *keymask )
 }
 
 
-/*---------------------------------------------------------*/
-/* Does a rescale of the data for 1d graphics so that all  */
-/* curves fit into the canvas and occupy the whole canvas. */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Does a rescale of the data for 1d graphics so that all
+ * curves fit into the canvas and occupy the whole canvas.
+ *---------------------------------------------------------*/
 
 void fs_rescale_1d( void )
 {
@@ -1512,9 +1512,9 @@ void fs_rescale_1d( void )
 }
 
 
-/*---------------------------------------------------*/
-/* Function creates the axis scales for 1D displays. */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function creates the axis scales for 1D displays.
+ *---------------------------------------------------*/
 
 void make_scale_1d( Curve_1d_T *cv, Canvas_T *c, int coord )
 {
@@ -1715,9 +1715,9 @@ void make_scale_1d( Curve_1d_T *cv, Canvas_T *c, int coord )
 }
 
 
-/*-------------------------------------------*/
-/* Gets called to create a marker at 'x_pos' */
-/*-------------------------------------------*/
+/*-------------------------------------------*
+ * Gets called to create a marker at 'x_pos'
+ *-------------------------------------------*/
 
 void set_marker_1d( long x_pos, long color )
 {
@@ -1763,8 +1763,8 @@ void set_marker_1d( long x_pos, long color )
 }
 
 
-/*------------------------------------------*/
-/*------------------------------------------*/
+/*------------------------------------------*
+ *------------------------------------------*/
 
 static void delete_marker_1d( long x_pos )
 {
@@ -1787,9 +1787,9 @@ static void delete_marker_1d( long x_pos )
 }
 
 
-/*-----------------------------------*/
-/* Gets called to delete all markers */
-/*-----------------------------------*/
+/*-----------------------------------*
+ * Gets called to delete all markers
+ *-----------------------------------*/
 
 void remove_markers_1d( void )
 {

@@ -39,10 +39,10 @@ static void is_pulser_driver( void );
 static P_List_T *plist;
 
 
-/*--------------------------------------------------------------*/
-/* Function clears the complete pulser structure that has to be */
-/* set up by the init_hook( ) function of the pulser driver     */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function clears the complete pulser structure that has to be
+ * set up by the init_hook( ) function of the pulser driver
+ *--------------------------------------------------------------*/
 
 void pulser_struct_init( void )
 {
@@ -107,8 +107,8 @@ void pulser_struct_init( void )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
 
 void pulser_cleanup( void )
 {
@@ -128,10 +128,10 @@ void pulser_cleanup( void )
 }
 
 
-/*------------------------------------------------------------*/
-/* Extracts the pulse number from a pulse name, i.e. a string */
-/* of the form '/^P(ULSE)?_?[0-9]+$/i' (in Perl speak)        */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Extracts the pulse number from a pulse name, i.e. a string
+ * of the form '/^P(ULSE)?_?[0-9]+$/i' (in Perl speak)
+ *------------------------------------------------------------*/
 
 long p_num( char *txt )
 {
@@ -144,10 +144,10 @@ long p_num( char *txt )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* This function is called at the start of each pulser specific function */
-/* to avoid using a pulser function if there's no pulser driver          */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * This function is called at the start of each pulser specific function
+ * to avoid using a pulser function if there's no pulser driver
+ *-----------------------------------------------------------------------*/
 
 static void is_pulser_driver( void )
 {
@@ -169,17 +169,17 @@ static void is_pulser_driver( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* This function is called to determine if a certain pulser function    */
-/* needed by the experiment is supplied by the pulser driver. The first */
-/* argument is the functions address, the second a piece of text to be  */
-/* inserted in the error message - some function may become disabled    */
-/* during the test run and the experiment, so a different error message */
-/* is printed depending on the context. For convenience it is also      */
-/* tested if there's a driver at all so that not each function has to   */
-/* test for this even when the name of the pulser isn't explicitely     */
-/* needed).                                                             */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * This function is called to determine if a certain pulser function
+ * needed by the experiment is supplied by the pulser driver. The first
+ * argument is the functions address, the second a piece of text to be
+ * inserted in the error message - some function may become disabled
+ * during the test run and the experiment, so a different error message
+ * is printed depending on the context. For convenience it is also
+ * tested if there's a driver at all so that not each function has to
+ * test for this even when the name of the pulser isn't explicitely
+ * needed).
+ *----------------------------------------------------------------------*/
 
 static void is_pulser_func( void *func, const char *text )
 {
@@ -199,11 +199,11 @@ static void is_pulser_func( void *func, const char *text )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* This function is called for the assignment of a function for a pod - it */
-/* can't be called when there are no pods, in this case the assignment has */
-/* to be done via the p_assign_channel() function                          */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * This function is called for the assignment of a function for a pod - it
+ * can't be called when there are no pods, in this case the assignment has
+ * to be done via the p_assign_channel() function
+ *-------------------------------------------------------------------------*/
 
 void p_assign_pod( long func, Var_T *v )
 {
@@ -258,13 +258,13 @@ void p_assign_pod( long func, Var_T *v )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* This function has a double purpose: For pulsers that have pods and     */
-/* channels, the pod to channel assignment is done via this function. For */
-/* pulsers that have just channels the assignment of a function to a      */
-/* channel is done here (instead of p_assign_pod() as for the other type  */
-/* of pulsers)                                                            */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * This function has a double purpose: For pulsers that have pods and
+ * channels, the pod to channel assignment is done via this function. For
+ * pulsers that have just channels the assignment of a function to a
+ * channel is done here (instead of p_assign_pod() as for the other type
+ * of pulsers)
+ *------------------------------------------------------------------------*/
 
 void p_assign_channel( long func, Var_T *v )
 {
@@ -319,9 +319,9 @@ void p_assign_channel( long func, Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function for setting a delay (in seconds) for an output connector */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for setting a delay (in seconds) for an output connector
+ *-------------------------------------------------------------------*/
 
 void p_set_delay( long func, Var_T *v )
 {
@@ -368,9 +368,9 @@ void p_set_delay( long func, Var_T *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function for inverting the polarity for an output connector */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function for inverting the polarity for an output connector
+ *-------------------------------------------------------------*/
 
 void p_inv( long func )
 {
@@ -403,10 +403,10 @@ void p_inv( long func )
 }
 
 
-/*-----------------------------------------------------*/
-/* Function for setting the high voltage trigger level */
-/* for one of the output connector                     */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function for setting the high voltage trigger level
+ * for one of the output connector
+ *-----------------------------------------------------*/
 
 void p_set_v_high( long func, Var_T *v )
 {
@@ -451,10 +451,10 @@ void p_set_v_high( long func, Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/* Function for setting the low voltage trigger level */
-/* for one of the output connectors                   */
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ * Function for setting the low voltage trigger level
+ * for one of the output connectors
+ *----------------------------------------------------*/
 
 void p_set_v_low( long func, Var_T *v )
 {
@@ -499,9 +499,9 @@ void p_set_v_low( long func, Var_T *v )
 }
 
 
-/*-------------------------------------------------*/
-/* Function for setting the timebase of the pulser */
-/*-------------------------------------------------*/
+/*-------------------------------------------------*
+ * Function for setting the timebase of the pulser
+ *-------------------------------------------------*/
 
 void p_set_timebase( Var_T *v )
 {
@@ -545,9 +545,9 @@ void p_set_timebase( Var_T *v )
 }
 
 
-/*-------------------------------------------------*/
-/* Function for setting the timebase of the pulser */
-/*-------------------------------------------------*/
+/*-------------------------------------------------*
+ * Function for setting the timebase of the pulser
+ *-------------------------------------------------*/
 
 void p_set_timebase_level( int level_type )
 {
@@ -584,9 +584,9 @@ void p_set_timebase_level( int level_type )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function for setting the trigger in mode (EXTERNAL or INTERNAL) */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function for setting the trigger in mode (EXTERNAL or INTERNAL)
+ *-----------------------------------------------------------------*/
 
 void p_set_trigger_mode( Var_T *v )
 {
@@ -634,9 +634,9 @@ void p_set_trigger_mode( Var_T *v )
 	call_pop( );
 }
 
-/*------------------------------------------------------------------*/
-/* Function for setting the trigger in slope (POSITIVE or NEGATIVE) */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for setting the trigger in slope (POSITIVE or NEGATIVE)
+ *------------------------------------------------------------------*/
 
 void p_set_trigger_slope( Var_T *v )
 {
@@ -685,9 +685,9 @@ void p_set_trigger_slope( Var_T *v )
 }
 
 
-/*---------------------------------------------------*/
-/* Function for setting the trigger in level voltage */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function for setting the trigger in level voltage
+ *---------------------------------------------------*/
 
 void p_set_trigger_level( Var_T *v )
 {
@@ -730,9 +730,9 @@ void p_set_trigger_level( Var_T *v )
 }
 
 
-/*----------------------------------------*/
-/* Function sets the trigger in impedance */
-/*----------------------------------------*/
+/*----------------------------------------*
+ * Function sets the trigger in impedance
+ *----------------------------------------*/
 
 void p_set_trigger_impedance( Var_T *v )
 {
@@ -775,9 +775,9 @@ void p_set_trigger_impedance( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function for setting the (minimum) repeat time for the experiment */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for setting the (minimum) repeat time for the experiment
+ *-------------------------------------------------------------------*/
 
 void p_set_rep_time( Var_T *v )
 {
@@ -828,9 +828,9 @@ void p_set_rep_time( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Function for setting the (maximum) repeat frequency for the experiment */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function for setting the (maximum) repeat frequency for the experiment
+ *------------------------------------------------------------------------*/
 
 void p_set_rep_freq( Var_T *v )
 {
@@ -891,11 +891,11 @@ void p_set_rep_freq( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* 'func' is either the phase functions number (pulser with phase switch) */
-/* or the number of the PHASE_SETUP (pulser without phase switch). 'ref'  */
-/* is the function the phase stuff is meant for.                          */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * 'func' is either the phase functions number (pulser with phase switch)
+ * or the number of the PHASE_SETUP (pulser without phase switch). 'ref'
+ * is the function the phase stuff is meant for.
+ *------------------------------------------------------------------------*/
 
 void p_phase_ref( int func, int ref )
 {
@@ -972,9 +972,9 @@ void p_phase_ref( int func, int ref )
 }
 
 
-/*-----------------------------------*/
-/* Function for creating a new pulse */
-/*-----------------------------------*/
+/*-----------------------------------*
+ * Function for creating a new pulse
+ *-----------------------------------*/
 
 long p_new( long pnum )
 {
@@ -1027,9 +1027,9 @@ long p_new( long pnum )
 }
 
 
-/*-------------------------------------------------------*/
-/* Function for setting one of the properties of a pulse */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function for setting one of the properties of a pulse
+ *-------------------------------------------------------*/
 
 void p_set( long pnum, int type, Var_T *v )
 {
@@ -1153,9 +1153,10 @@ void p_set( long pnum, int type, Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function for asking the pulser driver about the properties of a pulse */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for asking the pulser driver about the properties of a pulse
+ * specified by the EDL pulse name (i.e. "P12")
+ *-----------------------------------------------------------------------*/
 
 Var_T *p_get( char *txt, int type )
 {
@@ -1163,8 +1164,10 @@ Var_T *p_get( char *txt, int type )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for asking the pulser driver about the properties of a pulse
+ * specified by pulse number
+ *-----------------------------------------------------------------------*/
 
 Var_T *p_get_by_num( long pnum, int type )
 {
@@ -1276,19 +1279,19 @@ Var_T *p_get_by_num( long pnum, int type )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* 'function' is the phase function the data are to be used for (i.e. 0 */
-/*	means PHASE_1, 1 means PHASE_2, 2 means both)                       */
-/* 'type' means the type of phase, see global.h (PHASE_PLUS/MINUS_X/Y)  */
-/* 'pod' means if the value is for the first or the second pod channel  */
-/* (0: first pod channel, 1: second pod channel, -1: pick the one not   */
-/* set yet)                                                             */
-/* 'val' means high or low to be set on the pod channel to set the      */
-/* requested phase (0: low, !0: high)                                   */
-/* The last parameter indicates if this function was invoked with a POD */
-/* keyword - this would be at least dubious for pulsers that don't have */
-/* pods but just channels.                                              */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * 'function' is the phase function the data are to be used for (i.e. 0
+ *	means PHASE_1, 1 means PHASE_2, 2 means both)
+ * 'type' means the type of phase, see global.h (PHASE_PLUS/MINUS_X/Y)
+ * 'pod' means if the value is for the first or the second pod channel
+ * (0: first pod channel, 1: second pod channel, -1: pick the one not
+ * set yet)
+ * 'val' means high or low to be set on the pod channel to set the
+ * requested phase (0: low, !0: high)
+ * The last parameter indicates if this function was invoked with a POD
+ * keyword - this would be at least dubious for pulsers that don't have
+ * pods but just channels.
+ *----------------------------------------------------------------------*/
 
 void p_phs_setup( int func, int type, int pod, long val, bool is_pod )
 {
@@ -1335,9 +1338,9 @@ void p_phs_setup( int func, int type, int pod, long val, bool is_pod )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function called by the parser at the end of a phase setup command */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function called by the parser at the end of a phase setup command
+ *-------------------------------------------------------------------*/
 
 void p_phs_end( int func )
 {
@@ -1367,10 +1370,10 @@ void p_phs_end( int func )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Checks if a function keyword is PHASE and if it is if the */
-/* the pulser driver supports phase switches.                */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Checks if a function keyword is PHASE and if it is checks
+ * if the the pulser driver supports phase switches.
+ *-----------------------------------------------------------*/
 
 void p_exists_function( int function )
 {
@@ -1395,11 +1398,11 @@ void p_exists_function( int function )
 /* will be removed sometime.                                    */
 /****************************************************************/
 
-/*----------------------------------------------------------*/
-/* Function for setting the phase switch delay.             */
-/* 'func' is the phase function the data are to be used for */
-/* (i.e. 0 means PHASE_1, 1 means PHASE_2)                  */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function for setting the phase switch delay.
+ * 'func' is the phase function the data are to be used for
+ * (i.e. 0 means PHASE_1, 1 means PHASE_2)
+ *----------------------------------------------------------*/
 
 void p_set_psd( int func, Var_T *v )
 {
@@ -1440,9 +1443,9 @@ void p_set_psd( int func, Var_T *v )
 }
 
 
-/*----------------------------------------------------------*/
-/* Function for setting the grace period following a pulse. */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function for setting the grace period following a pulse.
+ *----------------------------------------------------------*/
 
 void p_set_gp( Var_T *v )
 {
@@ -1483,12 +1486,12 @@ void p_set_gp( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function for setting a user defined maximum pattern length for */
-/* the pulser. This is needed when in the EDL program FOREVER     */
-/* loops are used because in this case in the test the maximum    */
-/* length can't be determined.                                    */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for setting a user defined maximum pattern length for
+ * the pulser. This is needed when in the EDL program FOREVER
+ * loops are used because in this case in the test the maximum
+ * length can't be determined.
+ *----------------------------------------------------------------*/
 
 void p_set_max_seq_len( Var_T *v )
 {
@@ -1537,10 +1540,10 @@ void p_set_max_seq_len( Var_T *v )
 }
 
 
-/*---------------------------------------------------------*/
-/* Function gets called when the keyword 'KEEP_ALL_PULSES' */
-/* is found in the ASSIGNMENTS section                     */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function gets called when the keyword 'KEEP_ALL_PULSES'
+ * is found in the ASSIGNMENTS section
+ *---------------------------------------------------------*/
 
 void keep_all_pulses( void )
 {
@@ -1575,10 +1578,10 @@ void keep_all_pulses( void )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function to ask the pulser driver to convert a number associated */
-/* with a symbolic channel name to an internaly used channel number */
-/*------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function to ask the pulser driver to convert a number associated
+ * with a symbolic channel name to an internally used channel number
+ *-------------------------------------------------------------------*/
 
 long p_ch2num( long channel )
 {

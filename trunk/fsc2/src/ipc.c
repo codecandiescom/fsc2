@@ -40,14 +40,14 @@ union semun {
 #endif
 
 
-/*-------------------------------------------------------------------*/
-/* Routine tries to get a shared memory segment - if this fails and  */
-/* the reason is that no segments or no memory for segments are left */
-/* it waits for some time hoping for the parent process to remove    */
-/* other segments in the mean time. On success it writes the "magic" */
-/* string "fsc2" into the start of the segment and returns a pointer */
-/* to the following memory. If it fails completely it returns NULL.  */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Routine tries to get a shared memory segment - if this fails and
+ * the reason is that no segments or no memory for segments are left
+ * it waits for some time hoping for the parent process to remove
+ * other segments in the mean time. On success it writes the "magic"
+ * string "fsc2" into the start of the segment and returns a pointer
+ * to the following memory. If it fails completely it returns NULL.
+ *-------------------------------------------------------------------*/
 
 void *get_shm( int *shm_id, long len )
 {
@@ -93,11 +93,11 @@ void *get_shm( int *shm_id, long len )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function tries to attach to the shared memory associated with */
-/* 'key'. On success it returns a pointer to the memory region   */
-/* (skipping the magic string "fsc2"), on error it returns NULL. */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function tries to attach to the shared memory associated with
+ * 'key'. On success it returns a pointer to the memory region
+ * (skipping the magic string "fsc2"), on error it returns NULL.
+ *---------------------------------------------------------------*/
 
 char *attach_shm( int key )
 {
@@ -124,11 +124,11 @@ char *attach_shm( int key )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function detaches from a shared memory segment and, if a valid key  */
-/* (i.e. a non-negative key) is passed to the function it also deletes */
-/* the shared memory region.                                           */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function detaches from a shared memory segment and, if a valid key
+ * (i.e. a non-negative key) is passed to the function it also deletes
+ * the shared memory region.
+ *---------------------------------------------------------------------*/
 
 void detach_shm( void *buf, int *key )
 {
@@ -145,14 +145,14 @@ void detach_shm( void *buf, int *key )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function tries to delete all shared memory. Shared memory is    */
-/* used for data with the identifier stored in the message queue.  */
-/* So if the message queue exists (i.e. isn't NULL) we run through */
-/* all identifiers, and if they're non-negative we delete the thus */
-/* indexed segment. Finally, we delete the memory segment used for */
-/* the 'master key'.                                               */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function tries to delete all shared memory. Shared memory is
+ * used for data with the identifier stored in the message queue.
+ * So if the message queue exists (i.e. isn't NULL) we run through
+ * all identifiers, and if they're non-negative we delete the thus
+ * indexed segment. Finally, we delete the memory segment used for
+ * the 'master key'.
+ *-----------------------------------------------------------------*/
 
 void delete_all_shm( void )
 {
@@ -181,18 +181,18 @@ void delete_all_shm( void )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* If fsc2 crashes while running an experiment shared memory segments may */
-/* remain undeleted. To get rid of them we now check all shared segments  */
-/* for the ones that belong to the user 'fsc2' and start with the "magic" */
-/* string "fsc2". They are obviously debris from a crash and have to be   */
-/* deleted to avoid using up all segments after some time. Since the      */
-/* segments belong to the user 'fsc2' this routine must be run with the   */
-/* effective UID and GID of fsc2.                                         */
-/* This routine is more or less a copy of the code from the ipcs utility, */
-/* hopefully it will continue to work with newer versions of Linux (it    */
-/* seems to work with 2.0, 2.2 and 2.4 kernels)                           */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * If fsc2 crashes while running an experiment shared memory segments may
+ * remain undeleted. To get rid of them we now check all shared segments
+ * for the ones that belong to the user 'fsc2' and start with the "magic"
+ * string "fsc2". They are obviously debris from a crash and have to be
+ * deleted to avoid using up all segments after some time. Since the
+ * segments belong to the user 'fsc2' this routine must be run with the
+ * effective UID and GID of fsc2.
+ * This routine is more or less a copy of the code from the ipcs utility,
+ * hopefully it will continue to work with newer versions of Linux (it
+ * seems to work with 2.0, 2.2 and 2.4 kernels)
+ *------------------------------------------------------------------------*/
 
 /* These defines seem to be needed for older Linux versions, i.e. 2.0.36 */
 
@@ -259,11 +259,11 @@ void delete_stale_shms( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function creates a (System V) semaphore with one set and initializes */
-/* it to the value supplied to the function. It returns either the ID   */
-/* of the new semaphore or -1 on error.                                 */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function creates a (System V) semaphore with one set and initializes
+ * it to the value supplied to the function. It returns either the ID
+ * of the new semaphore or -1 on error.
+ *----------------------------------------------------------------------*/
 
 int sema_create( int size )
 {
@@ -292,10 +292,10 @@ int sema_create( int size )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function deletes the semaphore with the ID number 'sema_id'. */
-/* It returns 0 on success and -1 on error.                     */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function deletes the semaphore with the ID number 'sema_id'.
+ * It returns 0 on success and -1 on error.
+ *--------------------------------------------------------------*/
 
 int sema_destroy( int sema_id )
 {
@@ -315,12 +315,12 @@ int sema_destroy( int sema_id )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function waits until the value of the semapore with ID number 'sema_id' */
-/* becomes greater than 0 (and then decrement the semaphore by 1). It      */
-/* returns 0 or -1 on error. The function will not return but continue to  */
-/* wait when signals are received.                                         */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function waits until the value of the semapore with ID number 'sema_id'
+ * becomes greater than 0 (and then decrement the semaphore by 1). It
+ * returns 0 or -1 on error. The function will not return but continue to
+ * wait when signals are received.
+ *-------------------------------------------------------------------------*/
 
 int sema_wait( int sema_id )
 {
@@ -348,11 +348,11 @@ int sema_wait( int sema_id )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function increments the semaphore with ID number 'sema_id' by one. */
-/* It returns 0 on success and -1 on errors. The function will not    */
-/* return but continue to wait when signals are received.             */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function increments the semaphore with ID number 'sema_id' by one.
+ * It returns 0 on success and -1 on errors. The function will not
+ * return but continue to wait when signals are received.
+ *--------------------------------------------------------------------*/
 
 int sema_post( int sema_id )
 {

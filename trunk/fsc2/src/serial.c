@@ -46,7 +46,7 @@ void fsc2_request_serial_port( UNUSED_ARG int sn, const char *dev_name )
 
 /*--------------------*
  * Nothing to be done
- *--------------------*
+ *--------------------*/
 
 void fsc2_serial_init( void )
 {

@@ -44,10 +44,10 @@ enum {
 };
 
 
-/*------------------------------------------------------------*/
-/* This function is the callback button for the "WWW" button  */
-/* in the main form for starting and stopping the HTTP server */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * This function is the callback button for the "WWW" button
+ * in the main form for starting and stopping the HTTP server
+ *------------------------------------------------------------*/
 
 void server_callback( FL_OBJECT *obj, UNUSED_ARG long a )
 {
@@ -105,12 +105,12 @@ void server_callback( FL_OBJECT *obj, UNUSED_ARG long a )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function execs the web server as a child process with its standard */
-/* input and output redirected to two pipes. We're going to check the */
-/* read end of one of the pipes regularly to see if the server needs  */
-/* some data and then send them via the other pipe.                   */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function execs the web server as a child process with its standard
+ * input and output redirected to two pipes. We're going to check the
+ * read end of one of the pipes regularly to see if the server needs
+ * some data and then send them via the other pipe.
+ *--------------------------------------------------------------------*/
 
 static void spawn_server( void )
 {
@@ -176,10 +176,10 @@ static void spawn_server( void )
 }
 
 
-/*------------------------------------------------*/
-/* This function gets called from an idle handler */
-/* to check if the web server has asked for data. */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * This function gets called from an idle handler
+ * to check if the web server has asked for data.
+ *------------------------------------------------*/
 
 void http_check( void )
 {
@@ -258,13 +258,13 @@ void http_check( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Sends the contents of the error browser (or at least the last  */
-/* MAX_LINES_TO_SEND) to the server. The server expects each line */
-/* to end with a newline character and treats a line consisting   */
-/* of a newline only as the end of the message. Thus we have to   */
-/* look out for empty lines and send a space char for these.      */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Sends the contents of the error browser (or at least the last
+ * MAX_LINES_TO_SEND) to the server. The server expects each line
+ * to end with a newline character and treats a line consisting
+ * of a newline only as the end of the message. Thus we have to
+ * look out for empty lines and send a space char for these.
+ *----------------------------------------------------------------*/
 
 static void http_send_error_browser( int pd )
 {
@@ -291,8 +291,8 @@ static void http_send_error_browser( int pd )
 }
 
 
-/*----------------------------------------------------------------*/
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ *----------------------------------------------------------------*/
 
 static void http_send_picture( int pd, int type )
 {

@@ -26,10 +26,10 @@
 #include "fsc2.h"
 
 
-/*-----------------------------------------------------*/
-/* This function is called by modules to determine the */
-/* current mode without them being able to change it.  */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * This function is called by modules to determine the
+ * current mode without them being able to change it.
+ *-----------------------------------------------------*/
 
 int get_mode( void )
 {
@@ -37,10 +37,10 @@ int get_mode( void )
 }
 
 
-/*-------------------------------------------------------------*/
-/* This function is called by modules to determine if this is  */
-/* just a check run without graphical interface or a check run */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * This function is called by modules to determine if this is
+ * just a check run without graphical interface or a check run
+ *-------------------------------------------------------------*/
 
 int get_check_state( void )
 {
@@ -49,10 +49,10 @@ int get_check_state( void )
 }
 
 
-/*-------------------------------------------------------------*/
-/* This function is called by modules to determine if this is  */
-/* we're running in batch mode.                                */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * This function is called by modules to determine if this is
+ * we're running in batch mode.
+ *-------------------------------------------------------------*/
 
 int get_batch_state( void )
 {
@@ -60,11 +60,11 @@ int get_batch_state( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function returns true if the user has hit the "Stop" button. */
-/* It's the users resonsibility to throw a USER_BREAK_EXCEPTION */
-/* in this case.                                                */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function returns true if the user has hit the "Stop" button.
+ * It's the users resonsibility to throw a USER_BREAK_EXCEPTION
+ * in this case.
+ *--------------------------------------------------------------*/
 
 bool check_user_request( void )
 {
@@ -74,10 +74,10 @@ bool check_user_request( void )
 }
 
 
-/*------------------------------------------------------*/
-/* Function tests if the user has hit the "Stop" button */
-/* and throws an USER_BREAK_EXCEPTION in this case.     */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function tests if the user has hit the "Stop" button
+ * and throws an USER_BREAK_EXCEPTION in this case.
+ *------------------------------------------------------*/
 
 void stop_on_user_request( void )
 {
@@ -88,11 +88,11 @@ void stop_on_user_request( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* This function might be called to check if there are any more */
-/* variables on the variable stack, representing superfluous    */
-/* arguments to a function.                                     */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * This function might be called to check if there are any more
+ * variables on the variable stack, representing superfluous
+ * arguments to a function.
+ *--------------------------------------------------------------*/
 
 void too_many_arguments( Var_T *v )
 {
@@ -107,11 +107,11 @@ void too_many_arguments( Var_T *v )
 }
 
 
-/*------------------------------------------------------------*/
-/* This function just tells the user that a function can't be */
-/* called ithout an argument (unless we are in the EXPERIMENT */
-/* section) and then trows an exception.                      */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * This function just tells the user that a function can't be
+ * called ithout an argument (unless we are in the EXPERIMENT
+ * section) and then trows an exception.
+ *------------------------------------------------------------*/
 
 void no_query_possible( void )
 {
@@ -121,8 +121,8 @@ void no_query_possible( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 long get_long( Var_T *v, const char *snippet )
 {
@@ -139,8 +139,8 @@ long get_long( Var_T *v, const char *snippet )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 double get_double( Var_T *v, const char *snippet )
 {
@@ -153,13 +153,13 @@ double get_double( Var_T *v, const char *snippet )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* This function can be called to get the value of a variable that must */
-/* be an integer variable. If it isn't an error message is printed and  */
-/* only when the program is interpreting the EXPERIMENT section and the */
-/* variable is a floating point variable no exception is thrown but its */
-/* value is converted to an int and this value returned.                */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * This function can be called to get the value of a variable that must
+ * be an integer variable. If it isn't an error message is printed and
+ * only when the program is interpreting the EXPERIMENT section and the
+ * variable is a floating point variable no exception is thrown but its
+ * value is converted to an int and this value returned.
+ *----------------------------------------------------------------------*/
 
 long get_strict_long( Var_T *v, const char *snippet )
 {
@@ -189,15 +189,15 @@ long get_strict_long( Var_T *v, const char *snippet )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/* This function can be called when a variable that should contain a boolean */
-/* is expected, where boolean means either an integer (where 0 corresponds   */
-/* to FALSE and a non-zero value means TRUE) or a string, either "ON" or     */
-/* "OFF" (capitalization doesn't matter). If the value is a floating point   */
-/* it is accepted (after printing an error message) during the EXPERIMENT    */
-/* only, otherwise an exception is thrown. When it's a string and doesn't    */
-/* match either "ON" or "OFF" and exception is thrown in every case.         */
-/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * This function can be called when a variable that should contain a boolean
+ * is expected, where boolean means either an integer (where 0 corresponds
+ * to FALSE and a non-zero value means TRUE) or a string, either "ON" or
+ * "OFF" (capitalization doesn't matter). If the value is a floating point
+ * it is accepted (after printing an error message) during the EXPERIMENT
+ * only, otherwise an exception is thrown. When it's a string and doesn't
+ * match either "ON" or "OFF" and exception is thrown in every case.
+ *---------------------------------------------------------------------------*/
 
 bool get_boolean( Var_T *v )
 {
@@ -233,8 +233,8 @@ bool get_boolean( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 Var_T *get_element( Var_T *v, int len, ... )
 {
@@ -284,13 +284,13 @@ Var_T *get_element( Var_T *v, int len, ... )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/* Function tests if the time (in seconds) it gets passed is a reasonable    */
-/* integer multiple of 1 ns and tries to reduce rounding errors. If the time */
-/* is more than 10 ps off from a multiple of a nanosecond an error message   */
-/* is output, using the piece of text passed to the function as the second   */
-/* argument.                                                                 */
-/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * Function tests if the time (in seconds) it gets passed is a reasonable
+ * integer multiple of 1 ns and tries to reduce rounding errors. If the time
+ * is more than 10 ps off from a multiple of a nanosecond an error message
+ * is output, using the piece of text passed to the function as the second
+ * argument.
+ *---------------------------------------------------------------------------*/
 
 double is_mult_ns( double val, const char *text )
 {
@@ -321,8 +321,8 @@ double is_mult_ns( double val, const char *text )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 char *translate_escape_sequences( char *str )
 {
@@ -330,21 +330,21 @@ char *translate_escape_sequences( char *str )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* This function can be used by modules to get a very rough estimate */
-/* of the time since the start of the test run. This is useful for   */
-/* example in cases where an automatic sweep is done and during the  */
-/* test run an estimate for the swept value has to be returned that  */
-/* is not completely bogus. But take care, the value returned by the */
-/* function might easily be off by an order of magnitude.            */
-/* The method to estimate the time is as simple as possible: To the  */
-/* real time used for interpretating the EDL program is added the    */
-/* time spend in calls of the EDL function wait() (see f_wait() in   */
-/* func_util.c) plus the value MODULE_CALL ESTIMATE (defined in the  */
-/* header file) for each module function call.                       */
-/* During the experiment the fucntion returns the correct time since */
-/* the start of the experiment.                                      */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * This function can be used by modules to get a very rough estimate
+ * of the time since the start of the test run. This is useful for
+ * example in cases where an automatic sweep is done and during the
+ * test run an estimate for the swept value has to be returned that
+ * is not completely bogus. But take care, the value returned by the
+ * function might easily be off by an order of magnitude.
+ * The method to estimate the time is as simple as possible: To the
+ * real time used for interpretating the EDL program is added the
+ * time spend in calls of the EDL function wait() (see f_wait() in
+ * func_util.c) plus the value MODULE_CALL ESTIMATE (defined in the
+ * header file) for each module function call.
+ * During the experiment the fucntion returns the correct time since
+ * the start of the experiment.
+ *-------------------------------------------------------------------*/
 
 double experiment_time( void )
 {
@@ -365,9 +365,9 @@ double experiment_time( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function for opening files with the full permissions of fsc2 */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function for opening files with the full permissions of fsc2
+ *--------------------------------------------------------------*/
 
 FILE *fsc2_fopen( const char *path, const char *mode )
 {
@@ -381,10 +381,10 @@ FILE *fsc2_fopen( const char *path, const char *mode )
 }
 
 
-/*---------------------------------------------------------*/
-/* Function for formated reading from a file with the full */
-/* permissions of fsc2                                     */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function for formated reading from a file with the full
+ * permissions of fsc2
+ *---------------------------------------------------------*/
 
 #if ! defined vfscanf
 extern int vfscanf(FILE *s, const char *format, va_list arg );
@@ -405,10 +405,10 @@ int fsc2_fscanf( FILE *stream, const char *format, ... )
 }
 
 
-/*--------------------------------------------------*/
-/* Function for unformated reading from a file with */
-/* the full permissions of fsc2                     */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Function for unformated reading from a file with
+ * the full permissions of fsc2
+ *--------------------------------------------------*/
 
 size_t fsc2_fread( void  *ptr, size_t size, size_t nmemb, FILE *stream )
 {
@@ -422,10 +422,10 @@ size_t fsc2_fread( void  *ptr, size_t size, size_t nmemb, FILE *stream )
 }
 
 
-/*-------------------------------------------------------*/
-/* Function for formated writing to a file with the full */
-/* permissions of fsc2                                   */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function for formated writing to a file with the full
+ * permissions of fsc2
+ *-------------------------------------------------------*/
 
 int fsc2_fprintf( FILE *stream, const char *format, ... )
 {
@@ -443,10 +443,10 @@ int fsc2_fprintf( FILE *stream, const char *format, ... )
 }
 
 
-/*------------------------------------------------*/
-/* Function for unformated writing to a file with */
-/* the full permissions of fsc2                   */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * Function for unformated writing to a file with
+ * the full permissions of fsc2
+ *------------------------------------------------*/
 
 size_t fsc2_fwrite( void  *ptr, size_t size, size_t nmemb, FILE *stream )
 {
@@ -461,10 +461,10 @@ size_t fsc2_fwrite( void  *ptr, size_t size, size_t nmemb, FILE *stream )
 }
 
 
-/*------------------------------------------------*/
-/* Function for reading a single char from a file */
-/* with the full permissions of fsc2              */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * Function for reading a single char from a file
+ * with the full permissions of fsc2
+ *------------------------------------------------*/
 
 int fsc2_fgetc( FILE *stream )
 {
@@ -478,10 +478,10 @@ int fsc2_fgetc( FILE *stream )
 }
 	
 
-/*------------------------------------------------*/
-/* Function for reading a single char from a file */
-/* with the full permissions of fsc2              */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * Function for reading a single char from a file
+ * with the full permissions of fsc2
+ *------------------------------------------------*/
 
 int fsc2_getc( FILE *stream )
 {
@@ -494,10 +494,10 @@ int fsc2_getc( FILE *stream )
 }
 
 
-/*-------------------------------------------*/
-/* Function for reading a string from a file */
-/* with the full permissions of fsc2         */
-/*-------------------------------------------*/
+/*-------------------------------------------*
+ * Function for reading a string from a file
+ * with the full permissions of fsc2
+ *-------------------------------------------*/
 
 char *fsc2_fgets( char *s, int size, FILE *stream )
 {
@@ -511,10 +511,10 @@ char *fsc2_fgets( char *s, int size, FILE *stream )
 }
 
 
-/*---------------------------------------------------*/
-/* Function for pushing back a character into a file */
-/* with the full permissions of fsc2                 */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function for pushing back a character into a file
+ * with the full permissions of fsc2
+ *---------------------------------------------------*/
 
 int fsc2_ungetc( int c, FILE *stream )
 {
@@ -528,10 +528,10 @@ int fsc2_ungetc( int c, FILE *stream )
 }
 
 
-/*---------------------------------------------*/
-/* Function for positioning in a file with the */
-/* full permissions of fsc2                    */
-/*---------------------------------------------*/
+/*---------------------------------------------*
+ * Function for positioning in a file with the
+ * full permissions of fsc2
+ *---------------------------------------------*/
 
 int fsc2_fseek( FILE *stream, long offset, int whence )
 {
@@ -544,10 +544,10 @@ int fsc2_fseek( FILE *stream, long offset, int whence )
 }
 
 
-/*-------------------------------------------------*/
-/* Function for determining the position in a file */
-/* with the full permissions of fsc2               */
-/*-------------------------------------------------*/
+/*-------------------------------------------------*
+ * Function for determining the position in a file
+ * with the full permissions of fsc2
+ *-------------------------------------------------*/
 
 long fsc2_ftell( FILE *stream )
 {
@@ -561,10 +561,10 @@ long fsc2_ftell( FILE *stream )
 }
 
 
-/*----------------------------------------------*/
-/* Function for writing a single char to a file */
-/* with the full permissions of fsc2            */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Function for writing a single char to a file
+ * with the full permissions of fsc2
+ *----------------------------------------------*/
 
 int fsc2_fputc( int c, FILE *stream )
 {
@@ -579,10 +579,10 @@ int fsc2_fputc( int c, FILE *stream )
 }
 
 
-/*-----------------------------------------*/
-/* Function for writing a string to a file */
-/* with the full permissions of fsc2       */
-/*-----------------------------------------*/
+/*-----------------------------------------*
+ * Function for writing a string to a file
+ * with the full permissions of fsc2
+ *-----------------------------------------*/
 
 int fsc2_fputs( const char *s, FILE *stream )
 {
@@ -597,10 +597,10 @@ int fsc2_fputs( const char *s, FILE *stream )
 }
 
 
-/*----------------------------------------------*/
-/* Function for writing a single char to a file */
-/* with the full permissions of fsc2            */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Function for writing a single char to a file
+ * with the full permissions of fsc2
+ *----------------------------------------------*/
 
 int fsc2_putc( int c, FILE *stream )
 {
@@ -615,9 +615,9 @@ int fsc2_putc( int c, FILE *stream )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function for closing a file with the full permissions of fsc2 */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for closing a file with the full permissions of fsc2
+ *---------------------------------------------------------------*/
 
 int fsc2_fclose( FILE *stream )
 {
@@ -631,8 +631,8 @@ int fsc2_fclose( FILE *stream )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 const char *fsc2_config_dir( void )
 {

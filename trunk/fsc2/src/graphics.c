@@ -82,9 +82,9 @@ static struct {
 } GI;
 
 
-/*----------------------------------------------------------------------*/
-/* Initializes and shows the window for displaying measurement results. */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Initializes and shows the window for displaying measurement results.
+ *----------------------------------------------------------------------*/
 
 void start_graphics( void )
 {
@@ -257,10 +257,10 @@ void start_graphics( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Loads user defined font for the axis and label. If this font can't be */
-/* loaded tries some fonts hopefully available on all machines.          */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Loads user defined font for the axis and label. If this font can't be
+ * loaded tries some fonts hopefully available on all machines.
+ *-----------------------------------------------------------------------*/
 
 static void fonts_init( void )
 {
@@ -287,10 +287,10 @@ static void fonts_init( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function tries to figure out reasonable values for the sizes */
-/* and positions of the display windows.                        */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function tries to figure out reasonable values for the sizes
+ * and positions of the display windows.
+ *--------------------------------------------------------------*/
 
 static void set_default_sizes( void )
 {
@@ -445,10 +445,10 @@ static void set_default_sizes( void )
 }
 
 
-/*-------------------------------------------------*/
-/* Function for setting lots of default values for */
-/* properties of the display windows.              */
-/*-------------------------------------------------*/
+/*-------------------------------------------------*
+ * Function for setting lots of default values for
+ * properties of the display windows.
+ *-------------------------------------------------*/
 
 static void set_defaults( void )
 {
@@ -501,10 +501,10 @@ static void set_defaults( void )
 }
 
 
-/*---------------------------------------------------------*/
-/* Function for adapting the forms for the display windows */
-/* according to the current requirements.                  */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function for adapting the forms for the display windows
+ * according to the current requirements.
+ *---------------------------------------------------------*/
 
 static void forms_adapt( void )
 {
@@ -768,13 +768,13 @@ static void forms_adapt( void )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function that gets invoked when the close button (not the one in */
-/* the display window but the one from the windows menu) is clicked */
-/* on. While the experiment is still running it ignores the event,  */
-/* when the experiment is already finished it does the same as      */
-/* clicking  on the "Close" button within the display window.       */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function that gets invoked when the close button (not the one in
+ * the display window but the one from the windows menu) is clicked
+ * on. While the experiment is still running it ignores the event,
+ * when the experiment is already finished it does the same as
+ * clicking  on the "Close" button within the display window.
+ *------------------------------------------------------------------*/
 
 int run_form_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
 {
@@ -789,10 +789,10 @@ int run_form_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
 }
 
 
-/*---------------------------------------------------------*/
-/* Function initializes several structures for storing the */
-/* internal state of the graphics during an experiment.    */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function initializes several structures for storing the
+ * internal state of the graphics during an experiment.
+ *---------------------------------------------------------*/
 
 static void G_struct_init( void )
 {
@@ -934,9 +934,9 @@ static void G_struct_init( void )
 }
 
 
-/*-----------------------------------------*/
-/* Function for initializing the 1D curves */
-/*-----------------------------------------*/
+/*-----------------------------------------*
+ * Function for initializing the 1D curves
+ *-----------------------------------------*/
 
 static void G_init_curves_1d( void )
 {
@@ -1036,9 +1036,9 @@ static void G_init_curves_1d( void )
 }
 
 
-/*-----------------------------------------*/
-/* Function for initializing the 2D curves */
-/*-----------------------------------------*/
+/*-----------------------------------------*
+ * Function for initializing the 2D curves
+ *-----------------------------------------*/
 
 static void G_init_curves_2d( void )
 {
@@ -1170,12 +1170,12 @@ static void G_init_curves_2d( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* This routine creates a pixmap with the label for either the y- or z- */
-/* axis (set 'coord' to 1 for y and 2 for z). The problem is that it's  */
-/* not possible to draw rotated text so we have to write the text to a  */
-/* pixmap and then rotate this pixmap 'by hand'.                        */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * This routine creates a pixmap with the label for either the y- or z-
+ * axis (set 'coord' to 1 for y and 2 for z). The problem is that it's
+ * not possible to draw rotated text so we have to write the text to a
+ * pixmap and then rotate this pixmap 'by hand'.
+ *----------------------------------------------------------------------*/
 
 void create_label_pixmap( Canvas_T *c, int coord, char *label )
 {
@@ -1248,9 +1248,9 @@ void create_label_pixmap( Canvas_T *c, int coord, char *label )
 }
 
 
-/*--------------------------------------------------------*/
-/* Removes the window for displaying measurement results. */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Removes the window for displaying measurement results.
+ *--------------------------------------------------------*/
 
 void stop_graphics( void )
 {
@@ -1394,8 +1394,8 @@ void stop_graphics( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static void graphics_free( void )
 {
@@ -1473,8 +1473,8 @@ static void graphics_free( void )
 }
 
 
-/*---------------------------------------------------------*/
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ *---------------------------------------------------------*/
 
 static void canvas_off( Canvas_T *c, FL_OBJECT *obj )
 {
@@ -1505,8 +1505,8 @@ static void canvas_off( Canvas_T *c, FL_OBJECT *obj )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static void setup_canvas( Canvas_T *c, FL_OBJECT *obj )
 {
@@ -1568,9 +1568,9 @@ static void setup_canvas( Canvas_T *c, FL_OBJECT *obj )
 }
 
 
-/*----------------------------------------------*/
-/* Creates a pixmap for a canvas for buffering. */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Creates a pixmap for a canvas for buffering.
+ *----------------------------------------------*/
 
 void create_pixmap( Canvas_T *c )
 {
@@ -1606,9 +1606,9 @@ void create_pixmap( Canvas_T *c )
 }
 
 
-/*------------------------------------------------*/
-/* Deletes the pixmap for a canvas for buffering. */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * Deletes the pixmap for a canvas for buffering.
+ *------------------------------------------------*/
 
 void delete_pixmap( Canvas_T *c )
 {
@@ -1620,9 +1620,9 @@ void delete_pixmap( Canvas_T *c )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function for redrawing the axes areas of a the 1D display window */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for redrawing the axes areas of a the 1D display window
+ *------------------------------------------------------------------*/
 
 void redraw_axis_1d( int coord )
 {
@@ -1677,9 +1677,9 @@ void redraw_axis_1d( int coord )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function for redrawing the axes areas of a the 2D display window */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for redrawing the axes areas of a the 2D display window
+ *------------------------------------------------------------------*/
 
 void redraw_axis_2d( int coord )
 {
@@ -1732,10 +1732,10 @@ void redraw_axis_2d( int coord )
 }
 
 
-/*-----------------------------------------------------*/
-/* Function creates number strings for labels with the */
-/* correct number of digits after the decimal point    */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function creates number strings for labels with the
+ * correct number of digits after the decimal point
+ *-----------------------------------------------------*/
 
 void make_label_string( char *lstr, double num, int res )
 {
@@ -1777,14 +1777,14 @@ void make_label_string( char *lstr, double num, int res )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/* This routine is called from functions (like the function showing the file */
-/* selector box) to switch off the special states entered by pressing one or */
-/* more of the mouse buttons. Otherwise, after these functions are finished  */
-/* (usually with all mouse buttons released) the drawing routines would      */
-/* think that the buttons are still pressed, forcing the user to press the   */
-/* buttons again, just to get the ButtonRelease event.                       */
-/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * This routine is called from functions (like the function showing the file
+ * selector box) to switch off the special states entered by pressing one or
+ * more of the mouse buttons. Otherwise, after these functions are finished
+ * (usually with all mouse buttons released) the drawing routines would
+ * think that the buttons are still pressed, forcing the user to press the
+ * buttons again, just to get the ButtonRelease event.
+ *---------------------------------------------------------------------------*/
 
 void switch_off_special_cursors( void )
 {
@@ -1847,9 +1847,9 @@ void switch_off_special_cursors( void )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Undoes the last action in the 1d window as far as possible. */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Undoes the last action in the 1d window as far as possible.
+ *-------------------------------------------------------------*/
 
 void undo_button_callback_1d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
@@ -1900,9 +1900,9 @@ void undo_button_callback_1d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Undoes the last action in the 2d window as far as possible. */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Undoes the last action in the 2d window as far as possible.
+ *-------------------------------------------------------------*/
 
 void undo_button_callback_2d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
@@ -1951,9 +1951,9 @@ void undo_button_callback_2d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Rescales the 1D display so that the canvas is completely used. */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Rescales the 1D display so that the canvas is completely used.
+ *----------------------------------------------------------------*/
 
 void fs_button_callback_1d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
@@ -1998,9 +1998,9 @@ void fs_button_callback_1d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Rescales the 2D display so that the canvas is completely used. */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Rescales the 2D display so that the canvas is completely used.
+ *----------------------------------------------------------------*/
 
 void fs_button_callback_2d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
@@ -2042,9 +2042,9 @@ void fs_button_callback_2d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Callback function for the curve buttons in the 1D display window */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Callback function for the curve buttons in the 1D display window
+ *------------------------------------------------------------------*/
 
 void curve_button_callback_1d( FL_OBJECT *obj, long data )
 {
@@ -2071,9 +2071,9 @@ void curve_button_callback_1d( FL_OBJECT *obj, long data )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Callback function for the curve buttons in the 2D display window */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Callback function for the curve buttons in the 2D display window
+ *------------------------------------------------------------------*/
 
 void curve_button_callback_2d( FL_OBJECT *obj, long data )
 {
@@ -2186,9 +2186,9 @@ void curve_button_callback_2d( FL_OBJECT *obj, long data )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function does the work for the clear_curve_1d() EDL function */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function does the work for the clear_curve_1d() EDL function
+ *--------------------------------------------------------------*/
 
 void clear_curve_1d( long curve )
 {
@@ -2202,9 +2202,9 @@ void clear_curve_1d( long curve )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function does the work for the clear_curve_2d() EDL function */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function does the work for the clear_curve_2d() EDL function
+ *--------------------------------------------------------------*/
 
 void clear_curve_2d( long curve )
 {
@@ -2219,9 +2219,9 @@ void clear_curve_2d( long curve )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function does the work for the change_scale_1d() EDL function */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function does the work for the change_scale_1d() EDL function
+ *---------------------------------------------------------------*/
 
 void change_scale_1d( int is_set, void *ptr )
 {
@@ -2237,9 +2237,9 @@ void change_scale_1d( int is_set, void *ptr )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function does the work for the change_scale_2d() EDL function */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function does the work for the change_scale_2d() EDL function
+ *---------------------------------------------------------------*/
 
 void change_scale_2d( int is_set, void *ptr )
 {
@@ -2279,9 +2279,9 @@ void change_scale_2d( int is_set, void *ptr )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function does the work for the change_label_1d() EDL function */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function does the work for the change_label_1d() EDL function
+ *---------------------------------------------------------------*/
 
 void change_label_1d( char **label )
 {
@@ -2311,9 +2311,9 @@ void change_label_1d( char **label )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function does the work for the change_label_2d() EDL function */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function does the work for the change_label_2d() EDL function
+ *---------------------------------------------------------------*/
 
 void change_label_2d( char **label )
 {
@@ -2395,9 +2395,9 @@ void change_label_2d( char **label )
 }
 
 
-/*----------------------------------------------------------*/
-/* Function does the work for the rescale_1d() EDL function */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function does the work for the rescale_1d() EDL function
+ *----------------------------------------------------------*/
 
 void rescale_1d( long new_nx )
 {
@@ -2473,9 +2473,9 @@ void rescale_1d( long new_nx )
 }
 
 
-/*----------------------------------------------------------*/
-/* Function does the work for the rescale_2d() EDL function */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function does the work for the rescale_2d() EDL function
+ *----------------------------------------------------------*/
 
 void rescale_2d( long *new_dims )
 {
@@ -2587,9 +2587,9 @@ void rescale_2d( long *new_dims )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function for toggling 1D display between normal and sliding window mode */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function for toggling 1D display between normal and sliding window mode
+ *-------------------------------------------------------------------------*/
 
 void change_mode( long mode, long width )
 {
