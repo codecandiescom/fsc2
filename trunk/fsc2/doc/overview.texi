@@ -76,22 +76,22 @@ floor) or with automatically changing the lock-in amplifiers sensitivity
 or time constant in between.
 
 But one does not have to write a new script for every experiment one is
-going to do -- for the standard experiments, once such a script has
-been written, only the relevant parameters have to be changed. And
-because one can use variables in the script it's easy to have a block
-for defining the parameters somewhere at the start of the script and
-change only these if necessary. If this is still too much hassle it is
-even possible to automatically create from the (slightly modified)
-@code{EDL} script a script which allows to set the parameters via a
-graphical user interface and then have the script generate the
-@code{EDL} script which in turn is passed directly to @code{fsc2}
-without any further user interaction. Of course, you don't have to use
-the conversion tools but also can write such scripts yourself using
-@code{fsc2} built-in interface to accept @code{EDL} scripts from
-external sources. Once such a script has been created the users don't
-even have to learn how to write @code{EDL} scripts and have all the
+going to do -- for the standard experiments, once such a script has been
+written, only the relevant parameters have to be changed. And because
+one can use variables in the script it's easy to have a block for
+defining the parameters somewhere at the start of the script and change
+only these if necessary. If this is still too much hassle it is even
+possible to automatically create from the (slightly modified) @code{EDL}
+script a script which allows to set the parameters via a graphical user
+interface and then have the script generate the @code{EDL} script which
+in turn is passed directly to @code{fsc2} without any further user
+interaction. Once such a script has been created the users don't even
+have to learn how to write @code{EDL} scripts and have all the
 convenience of the traditional type of programs without sacrificing the
-flexibility of @code{fsc2}.
+flexibility of @code{fsc2}. Of course, you don't have to use the
+conversion tools mentioned above but you can also write such scripts
+yourself using @code{fsc2}s built-in interface to accept @code{EDL}
+scripts from external sources.
 
 Another common problem with the traditional type of programs is the use
 of different devices or the integration of new ones. Usually, a fixed
@@ -114,10 +114,11 @@ there is no danger of introducing new bugs into @code{fsc2} itself.
 
 The advantages of the approach taken in @code{fsc2} have made it
 possible to use it successfully to control spectrometers in S-, X- and
-W-band and at 360 GHz, using completely different hardware, and for
-all kinds of experiments, ranging from cw-EPR, ENDOR, EPR on transient
+W-band and at 360 GHz, using completely different hardware, and for all
+kinds of experiments, ranging from cw-EPR, ENDOR, EPR on transient
 signals to experiments with pulsed microwave excitation and phase
-cycling.
+cycling. It is also used to control an experiment for (optical) single
+molecule spectroscopy.
 
 The manual is organized along the following lines: the next chapter
 (@pxref{GUI}) explains in detail the graphical user interface used for

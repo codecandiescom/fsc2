@@ -27,9 +27,11 @@
 It often can be quite useful to be able to find out about the current
 state of an experiment without having to sit around in the lab all the
 time or constantly coming back just to check that everything is still
-working fine. @code{fsc2} allows this when you start its built-in web
-server by simply clicking on the @code{WWW server} button. The button
-stays green instead of grey while the web server is running.
+working fine. Instead @code{fsc2} lets you start a built-in web server
+that allows to monitor the current state of the experiment via a browser
+via the internet. The web server gets switched in by clicking on the
+@code{WWW server} button. The button stays green instead of grey while
+the web server is running.
 
 Normal web servers listen for incoming requests from the outside world
 on a predefined port, numbered 80. Thus you usually don't have to tell
