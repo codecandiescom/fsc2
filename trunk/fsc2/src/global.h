@@ -93,6 +93,7 @@ enum {
 
 /* Define the different functions pulses can have */
 
+
 enum {
 	PULSER_CHANNEL_NO_TYPE = -1,
 	PULSER_CHANNEL_MW,
@@ -109,6 +110,11 @@ enum {
 	PULSER_CHANNEL_OTHER_3,
 	PULSER_CHANNEL_OTHER_4
 };
+
+
+#define PULSER_CHANNEL_FUNC_MIN PULSER_CHANNEL_MW
+#define PULSER_CHANNEL_FUNC_MAX PULSER_CHANNEL_OTHER_4
+
 
 
 /* Define access types for functions in certain sections */
