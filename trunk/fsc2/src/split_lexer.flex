@@ -36,7 +36,6 @@ LNUM        \x2\n[0-9]+\n
 ERR         \x3\n.+\n
 
 ASS         ^[\t ]*ASS(IGNMENT)?S?:
-DEF         ^[\t ]*DEF(AULT)?S?:
 VAR         ^[\t ]*VAR(IABLE)?S?:
 PHAS        ^[\t ]*PHA(SES)?:
 PREP        ^[\t ]*PREP(ARATION)?S?:
@@ -70,12 +69,6 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 			/* handling of ASSIGNMENTS: label */
 {ASS}		{
 				if ( ! section_parser( ASSIGNMENTS_SECTION ) )
-					return FAIL;
-			}
-
-			/* handling of DEFAULTS: label */
-{DEF}		{
-				if ( ! section_parser( DEFAULTS_SECTION ) )
 					return FAIL;
 			}
 
@@ -197,10 +190,6 @@ bool section_parser( int section )
 		{
 			case ASSIGNMENTS_SECTION :
 				section = assignments_parser( splitin );
-				break;
-
-			case DEFAULTS_SECTION :
-				section = defaults_parser( splitin );
 				break;
 
 			case VARIABLES_SECTION :

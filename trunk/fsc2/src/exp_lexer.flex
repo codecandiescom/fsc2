@@ -51,7 +51,6 @@ ESTR        \x5.*\x3\n.*\n
 STR         \x5[^\x6]*\x6
 
 ASS         ^[ \t]*ASS(IGNMENT)?S?:
-DEF         ^[ \t]*DEF(AULT)?S?:
 VAR         ^[ \t]*VAR(IABLE)?S?:
 PHAS        ^[ \t]*PHA(SE)?S?:
 PREP        ^[ \t]*PREP(ARATION)?S?:
@@ -110,12 +109,6 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			/* handling of ASSIGNMENTS: labels */
 {ASS}		{
 				Prim_Exp_Next_Section = ASSIGNMENTS_SECTION;
-				return 0;
-			}
-
-			/* handling of DEFAULTS: labels */
-{DEF}		{
-				Prim_Exp_Next_Section = DEFAULTS_SECTION;
 				return 0;
 			}
 
@@ -253,6 +246,11 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 ";"			return ';';
 
 {WS}        /* skip white space */
+
+"\x4nsec"   return E_NS_TOKEN;
+"\x4usec"   return E_US_TOKEN;
+"\x4msec"   return E_MS_TOKEN;
+"\x4sec"    return E_S_TOKEN;
 
 			/* handling of invalid input */
 .           THROW( INVALID_INPUT_EXCEPTION );

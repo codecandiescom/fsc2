@@ -3,7 +3,6 @@
 */
 
 
-
 #include "fsc2.h"
 
 
@@ -218,39 +217,19 @@ Var *pulse_get_by_addr( Pulse *p, int type )
 			return vars_push( INT_VAR, p->func );
 
 		case P_POS :
-			if ( p->pos % Time_Unit )
-				return vars_push( FLOAT_VAR,( double ) p->pos /
-								            ( double ) Time_Unit );
-			else
-				return vars_push( INT_VAR, p->pos / Time_Unit );
+			return vars_push( INT_VAR, p->pos );
 
 		case P_LEN :
-			if ( p->len % Time_Unit )
-				return vars_push( FLOAT_VAR, ( double ) p->len /
-								             ( double ) Time_Unit );
-			else
-				return vars_push( INT_VAR, p->len / Time_Unit );
+			return vars_push( INT_VAR, p->len );
 
 		case P_DPOS :
-			if ( p->dpos % Time_Unit )
-				return vars_push( FLOAT_VAR, ( double ) p->dpos /
-								             ( double ) Time_Unit );
-			else
-				return vars_push( INT_VAR, p->dpos / Time_Unit );
+			return vars_push( INT_VAR, p->dpos );
 
 		case P_DLEN :
-			if ( p->dlen % Time_Unit )
-				return vars_push( FLOAT_VAR, ( double ) p->dlen /
-								             ( double ) Time_Unit );
-			else
-				return vars_push( INT_VAR, p->dlen / Time_Unit );
+			return vars_push( INT_VAR, p->dlen );
 
 		case P_MAXLEN :
-			if ( p->maxlen % Time_Unit )
-				return vars_push( FLOAT_VAR, ( double ) p->maxlen /
-								             ( double ) Time_Unit );
-			else
-				return vars_push( INT_VAR, p->maxlen / Time_Unit );
+			return vars_push( INT_VAR, p->maxlen );
 	}
 
 	assert( 1 == 0 );      /* this should never happen... */
@@ -465,5 +444,3 @@ void pulse_set_maxlen( Pulse *p, Var *v )
 	p->maxlen = val;
 	p->set_flags |= P_MAXLEN;
 }
-
-

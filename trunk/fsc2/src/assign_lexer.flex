@@ -46,7 +46,6 @@ LNUM        \x2\n[0-9]+\n
 ERR         \x3\n.+\n
 
 ASS         ^[ \t]*ASS(IGNMENT)?S?:
-DEF         ^[ \t]*DEF(AULT)?S?:
 VAR         ^[ \t]*VAR(IABLE)?S?:
 PHAS        ^[ \t]*PHA(SE)?S?:
 PREP        ^[ \t]*PREP(ARATION)?S?:
@@ -119,12 +118,6 @@ WS          [\n=: ]+
 			/* handling of ASSIGNMENTS: labels */
 {ASS}		{
 				Assign_Next_Section = ASSIGNMENTS_SECTION;
-				return SECTION_LABEL;
-			}
-
-			/* handling of DEFAULTS: labels */
-{DEF}		{
-				Assign_Next_Section = DEFAULTS_SECTION;
 				return SECTION_LABEL;
 			}
 

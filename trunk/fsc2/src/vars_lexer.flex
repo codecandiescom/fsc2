@@ -53,7 +53,6 @@ LNUM        \x2\n[0-9]+\n
 ERR         \x3\n.+\n
 
 ASS         ^[ \t]*ASS(IGNMENT)?S?:
-DEF         ^[ \t]*DEF(AULT)?S?:
 VAR         ^[ \t]*VAR(IABLE)?S?:
 PHAS        ^[ \t]*PHA(SE)?S?:
 PREP        ^[ \t]*PREP(ARATION)?S?:
@@ -110,12 +109,6 @@ WS          [\n \t]+
 			/* handling of ASSIGNMENTS: label */
 {ASS}		{
 				Vars_Next_Section = ASSIGNMENTS_SECTION;
-				return SECTION_LABEL;
-			}
-
-			/* handling of DEFAULTS: label */
-{DEF}		{
-				Vars_Next_Section = DEFAULTS_SECTION;
 				return SECTION_LABEL;
 			}
 
@@ -257,6 +250,11 @@ WS          [\n \t]+
 ";"			return ';';
 
 {WS}        /* skip white space */
+
+"\x4nsec"   return NS_TOKEN;
+"\x4usec"   return US_TOKEN;
+"\x4msec"   return MS_TOKEN;
+"\x4sec"    return S_TOKEN;
 
 			/* handling of invalid input */
 .           THROW( INVALID_INPUT_EXCEPTION );

@@ -1004,14 +1004,14 @@ bool test_for_cond( Prg_Token *cur )
 
 	if ( cur->count.forl.act->type == INT_VAR )
 	{
-		if ( ! sign )
+		if ( ! sign )     /* `incr' has positive sign */
 		{
 			if ( cur->count.forl.act->val.lval <= cur->count.forl.end.lval )
 				return OK;
 			else
 				return FAIL;
 		}
-		else
+		else              /* `incr' has negative sign */
 		{
 			if ( cur->count.forl.act->val.lval >= cur->count.forl.end.lval )
 				return OK;
@@ -1021,7 +1021,7 @@ bool test_for_cond( Prg_Token *cur )
 	}
 	else
 	{
-		if ( ! sign )
+		if ( ! sign )     /* `incr' has positive sign */
 		{
 			if ( cur->count.forl.act->val.dval <= 
 				   ( cur->count.forl.end.type == INT_VAR ?
@@ -1030,7 +1030,7 @@ bool test_for_cond( Prg_Token *cur )
 			else
 				return FAIL;
 		}
-		else
+		else              /* `incr' has negative sign */
 		{
 			if ( cur->count.forl.act->val.dval >=
 				   ( cur->count.forl.end.type == INT_VAR ?
@@ -1051,9 +1051,10 @@ bool test_for_cond( Prg_Token *cur )
 /* is set the variables are saved, otherwise they are copied back from the  */
 /* backup into the normal variables space. Don't use the saved variables -  */
 /* the internal pointers are not adjusted. Currently, for string variables  */
-/* the string is not saved but just the pointer to the string but since the */
-/* are never changed this shouldn't be a problem.                           */
-/* Never ever change the memory locations of the variables in between !!!   */
+/* the string is not saved but just the pointer to the string but since     */
+/* they should never change this shouldn't be a problem.                    */
+/* Never ever change the memory locations of the variables between saving   */
+/* and restoring !!!                                                        */
 /*--------------------------------------------------------------------------*/
 
 void save_restore_variables( bool flag )
@@ -1066,7 +1067,7 @@ void save_restore_variables( bool flag )
 
 	if ( flag )
 	{
-		assert( var_list_copy == NULL );
+		assert( var_list_copy == NULL );          /* don't save twice ! */
 
 		/* count the number of variables and get memory for storing them */
 
@@ -1086,8 +1087,8 @@ void save_restore_variables( bool flag )
 	}
 	else
 	{
-		assert( var_list_copy != NULL );
-		assert( var_list == paranoia );
+		assert( var_list_copy != NULL ); /* don't restore without save ! */
+		assert( var_list == paranoia );  /* check var_list hasn't been moved */
 
 		/* copy all backuped variables back into their former positions */
 

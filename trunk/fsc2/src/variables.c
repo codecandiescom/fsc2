@@ -690,7 +690,7 @@ Var *vars_push_copy( Var *v )
 		}
 		else
 		{
-			eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s:%d.\n",
+			eprint( FATAL, "%s:%ld:fsc2:INTERNAL ERROR detected at %s:%d.\n",
 					__FILE__, __LINE__ );
 			exit( EXIT_FAILURE );
 		}

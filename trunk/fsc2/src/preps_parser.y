@@ -21,8 +21,7 @@ extern char *prepstext;
 
 void prepserror( const char *s );
 
-Var *P_Var;
-
+static Var *CV;
 
 %}
 
@@ -57,7 +56,7 @@ Var *P_Var;
 %token EQ LT LE GT GE
 
 %token NS_TOKEN US_TOKEN MS_TOKEN S_TOKEN
-%type <vptr> expr time unit list1
+%type <vptr> expr unit list1
 
 
 %left EQ LT LE GT GE
@@ -96,21 +95,11 @@ line:    P_TOK prop
 
 prop:   /* empty */
        | prop F_TOK sep1 expr sep2  { pulse_set( Cur_Pulse, P_FUNC, $4 ); }
-       | prop S_TOK sep1 time sep2  { pulse_set( Cur_Pulse, P_POS, $4 ); }
-       | prop L_TOK sep1 time sep2  { pulse_set( Cur_Pulse, P_LEN,$4 ); }
-       | prop DS_TOK sep1 time sep2 { pulse_set( Cur_Pulse, P_DPOS, $4 ); }
-       | prop DL_TOK sep1 time sep2 { pulse_set( Cur_Pulse, P_DLEN, $4 ); }
-       | prop ML_TOK sep1 time sep2 { pulse_set( Cur_Pulse, P_MAXLEN, $4 ); }
-;
-
-time:    expr unit                 { $$ = vars_mult( $1, $2 ); }
-;
-
-unit:    /* empty */               { $$ = vars_push( INT_VAR, Time_Unit ); }
-       | NS_TOKEN                  { $$ = vars_push( INT_VAR, 1L ); }
-       | US_TOKEN                  { $$ = vars_push( INT_VAR, 1000L ); }
-       | MS_TOKEN                  { $$ = vars_push( INT_VAR, 1000000L ); }
-       | S_TOKEN                   { $$ = vars_push( INT_VAR, 1000000000L ); }
+       | prop S_TOK sep1 expr sep2  { pulse_set( Cur_Pulse, P_POS, $4 ); }
+       | prop L_TOK sep1 expr sep2  { pulse_set( Cur_Pulse, P_LEN,$4 ); }
+       | prop DS_TOK sep1 expr sep2 { pulse_set( Cur_Pulse, P_DPOS, $4 ); }
+       | prop DL_TOK sep1 expr sep2 { pulse_set( Cur_Pulse, P_DLEN, $4 ); }
+       | prop ML_TOK sep1 expr sep2 { pulse_set( Cur_Pulse, P_MAXLEN, $4 ); }
 ;
 
 /* separator between keyword and value */
@@ -126,28 +115,60 @@ sep2:    /* empty */
        | ','
 ;
 
-expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, $1 ); }
-       | FLOAT_TOKEN               { $$ = vars_push( FLOAT_VAR, $1 ); }
-       | VAR_TOKEN                 { $$ = vars_push_copy( $1 ); }
-       | VAR_REF                   { $$ = $1; }
-       | VAR_TOKEN '['             { vars_arr_start( $1 ); }
-         list1 ']'                 { $$ = vars_arr_rhs( $4 ); }
-       | FUNC_TOKEN '(' list2 ')'  { $$ = func_call( $1 ); }
-       | expr EQ expr              { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
-       | expr LT expr              { $$ = vars_comp( COMP_LESS, $1, $3 ); }
-       | expr GT expr              { $$ = vars_comp( COMP_LESS, $3, $1 ); }
-       | expr LE expr              { $$ = vars_comp( COMP_LESS_EQUAL,
-													 $1, $3 ); }
-       | expr GE expr              { $$ = vars_comp( COMP_LESS_EQUAL,
-													 $3, $1 ); }
-       | expr '+' expr             { $$ = vars_add( $1, $3 ); }
-       | expr '-' expr             { $$ = vars_sub( $1, $3 ); }
-       | expr '*' expr             { $$ = vars_mult( $1, $3 ); }
-       | expr '/' expr             { $$ = vars_div( $1, $3 ); }
-       | expr '%' expr             { $$ = vars_mod( $1, $3 ); }
-       | expr '^' expr             { $$ = vars_pow( $1, $3 ); }
-       | '-' expr %prec NEG        { $$ = vars_negate( $2 ); }
-       | '(' expr ')'              { $$ = $2 }
+
+expr:    INT_TOKEN unit           { $$ = vars_mult( vars_push( INT_VAR, $1 ), 
+													$2 ); }
+       | FLOAT_TOKEN unit         { $$ = vars_mult( vars_push( FLOAT_VAR, $1 ),
+													$2 ); }
+       | VAR_TOKEN unit           { $$ = vars_mult( $1, $2 ); }
+       | VAR_TOKEN '['            { vars_arr_start( $1 ); }
+         list1 ']'                { CV = vars_arr_rhs( $4 ); }
+         unit                     { if ( CV->type & ( INT_VAR | FLOAT_VAR ) )
+			                            $$ = vars_mult( CV, $7 );
+		                            else
+									{
+										vars_pop( $7 );
+									    $$ = CV;
+									} }
+       | FUNC_TOKEN '(' list2 ')' { CV = func_call( $1 ); }
+         unit                     { if ( CV->type & ( INT_VAR | FLOAT_VAR ) )
+			                            $$ = vars_mult( CV, $6 );
+		                            else
+									{
+										vars_pop( $6 );
+									    $$ = CV;
+									} }
+       | VAR_REF                  { $$ = $1; }
+       | VAR_TOKEN '('            { eprint( FATAL, "%s:%ld: `%s' isn't a "
+											"function.\n", Fname, Lc,
+											$1->name );
+	                                 THROW( UNKNOWN_FUNCTION_EXCEPTION ); }
+       | FUNC_TOKEN '['           { eprint( FATAL, "%s:%ld: `%s' is a "
+											"predefined function.\n",
+											Fname, Lc, $1->name );
+	                                THROW( VARIABLES_EXCEPTION ); }
+       | expr EQ expr             { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
+       | expr LT expr             { $$ = vars_comp( COMP_LESS, $1, $3 ); }
+       | expr GT expr             { $$ = vars_comp( COMP_LESS, $3, $1 ); }
+       | expr LE expr             { $$ = vars_comp( COMP_LESS_EQUAL,
+													$1, $3 ); }
+       | expr GE expr             { $$ = vars_comp( COMP_LESS_EQUAL, 
+													$3, $1 ); }
+       | expr '+' expr            { $$ = vars_add( $1, $3 ); }
+       | expr '-' expr            { $$ = vars_sub( $1, $3 ); }
+       | expr '*' expr            { $$ = vars_mult( $1, $3 ); }
+       | expr '/' expr            { $$ = vars_div( $1, $3 ); }
+       | expr '%' expr            { $$ = vars_mod( $1, $3 ); }
+       | expr '^' expr            { $$ = vars_pow( $1, $3 ); }
+       | '-' expr %prec NEG       { $$ = vars_negate( $2 ); }
+       | '(' expr ')' unit        { $$ = vars_mult( $2, $4 ); }
+;
+
+unit:    /* empty */               { $$ = vars_push( INT_VAR, 1L ); }
+       | NS_TOKEN                  { $$ = vars_push( INT_VAR, 1L ); }
+       | US_TOKEN                  { $$ = vars_push( INT_VAR, 1000L ); }
+       | MS_TOKEN                  { $$ = vars_push( INT_VAR, 1000000L ); }
+       | S_TOKEN                   { $$ = vars_push( INT_VAR, 1000000000L ); }
 ;
 
 /* list of indices for access of an array element */

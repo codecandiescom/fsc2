@@ -21,7 +21,6 @@
 #include <limits.h>
 
 
-
 /* inclusion of programs own header files */
 
 #include "global.h"               /* must be the very first to be included ! */
@@ -31,7 +30,6 @@
 #include "variables.h"
 #include "func.h"
 #include "assign.h"
-#include "defaults.h"
 #include "phases.h"
 #include "pulse.h"
 #include "ppcheck.h"
@@ -42,7 +40,6 @@
 
 bool split( char *file );
 int assignments_parser( FILE *in );
-int defaults_parser( FILE *in );
 int variables_parser( FILE *in );
 int phases_parser( FILE *in );
 int preparations_parser( FILE *in );
@@ -62,9 +59,6 @@ Compilation compilation;
 Prg_Token *prg_token = NULL;
 long prg_length = 0;
 Prg_Token *cur_prg_token;
-
-long Time_Unit = DEFAULT_TIME_UNIT;
-long Time_Base = DEFAULT_TIME_UNIT;
 
 Var *var_list = NULL;
 Var *var_list_copy;
