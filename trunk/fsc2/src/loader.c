@@ -178,6 +178,8 @@ void load_functions( Device *dev )
 		dev->driver.is_exit_hook = SET;
 	T_free( hook_func_name );
 
+	exit_hooks_are_run = UNSET;
+
 	/* Run through all the functions in the function list and if they need
 	   to be resolved try to find them in the device driver functions - check
 	   that the function has not already been loaded (but overloading built-in

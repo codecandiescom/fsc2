@@ -16,6 +16,7 @@
 
 int sr510_init_hook( void );
 int sr510_exp_hook( void );
+int sr510_end_of_exp_hook( void );
 void sr510_exit_hook( void );
 
 Var *lockin_get_data( Var *v );
@@ -82,6 +83,8 @@ int sr510_init_hook( void )
 
 	/* Reset several variables in the structure describing the device */
 
+	sr510.device = -1;
+
 	sr510.Sens = -1;             /* no sensitivity has to be set at start of */
 	sr510.Sens_warn = UNSET;     /* experiment and no warning concerning the */
                                  /* sensitivity setting has been printed yet */
@@ -121,12 +124,29 @@ int sr510_exp_hook( void )
 /* End of experiment hook function for the module */
 /*------------------------------------------------*/
 
-void sr510_exit_hook( void )
+int sr510_end_of_exp_hook( void )
 {
 	/* Switch lock-in back to local mode */
 
-	gpib_write( sr510.device, "I0\n", 3 );
-	gpib_local( sr510.device );
+	if ( sr510.device >= 0 )
+	{
+		gpib_write( sr510.device, "I0\n", 3 );
+		gpib_local( sr510.device );
+	}
+
+	sr510.device = -1;
+
+	return 1;
+}
+
+
+/*-----------------------------------------*/
+/* Called before device driver is unloaded */
+/*-----------------------------------------*/
+
+void sr510_exit_hook( void )
+{
+	sr510_end_of_exp_hook( );
 }
 
 
@@ -526,6 +546,8 @@ bool lockin_init( const char *name )
 	char buffer[ 20 ];
 	long length = 20;
 
+
+	assert( sr510.device < 0 );
 
 	if ( gpib_init_device( name, &sr510.device ) == FAILURE )
         return FAIL;

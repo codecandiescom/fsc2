@@ -25,6 +25,7 @@ static TDS754A tds754a;
 int tds754a_init_hook( void );
 int tds754a_test_hook( void );
 int tds754a_exp_hook( void );
+int tds754a_end_of_exp_hook( void );
 void tds754a_exit_hook( void );
 
 
@@ -70,6 +71,17 @@ int tds754a_exp_hook( void )
 /*------------------------------------------------*/
 /* End of experiment hook function for the module */
 /*------------------------------------------------*/
+
+int tds754a_end_of_exp_hook( void )
+{
+	return 1;
+}
+
+
+/*-----------------------------------------------------------------*/
+/* Final chance to do reset of device before driver is unloaded... */
+/*-----------------------------------------------------------------*/
+
 
 void tds754a_exit_hook( void )
 {
