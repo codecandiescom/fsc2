@@ -41,7 +41,7 @@
 
 struct {
     int fd;                        /* file descriptor for board */
-	WITIO_48_MODE mode[ 2 ];       /* current I/O modes of DIOs */
+	WITIO_48_MODE mode[ 2 ];       /* current I/O modes of the DIOs */
 } dev_info = { -1, { WITIO_48_MODE_3x8, WITIO_48_MODE_3x8 } };
 
 static const char *error_message = "";
