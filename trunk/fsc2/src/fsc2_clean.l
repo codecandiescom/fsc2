@@ -213,8 +213,8 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 
 <comm>{
 
-{REM4}		/* Skip everything that's not a '*' */
-{REM5}      /* Skip all '*'s not followed by '/'s */
+{REM4}		/* Skips everything that's not a '*' */
+{REM5}      /* Skips all '*'s not followed by '/'s */
 
 			/* End of line character in a comment */
 \n			{
@@ -230,7 +230,7 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 
 			/* End of comment and end of line */
 {EREM2}     {
-				/* On end of comment in #include-statement don't dump '\n' */
+				/* On end of comment in #INCLUDE-statement don't dump '\n' */
 
 				if ( yy_top_state( ) == incl )
 				   unput( '\n' );
@@ -265,16 +265,16 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 				printf( "\n" );
 			}
 
-            /* "#exit" means that rest of current file is to be discarded */
+            /* "#EXIT" means that rest of current file is to be discarded */
 {EXIT}		{
 				YY_FLUSH_BUFFER;
 				include_handler( NULL );
 			}
 
-   		   /* "#quit" means that all following input is to be discarded */
+   		   /* "#QUIT" means that all following input is to be discarded */
 {QUIT}		exit( EXIT_SUCCESS );
 
-		    /* Handling of lines starting with "#include" */
+		    /* Handling of lines starting with "#INCLUDE" */
 {INCL}      {
 				Incl_Lc = Lc;
 				BEGIN( incl );
@@ -310,7 +310,7 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 				   yy_push_state( comm );
 				else
 				{
-					printf( "\x03\n%s:%ld: `#include' expects \"FILENAME\" "
+					printf( "\x03\n%s:%ld: `#INCLUDE' expects \"FILENAME\" "
 							"or <FILENAME>.\n", Fname, Incl_Lc );
 					exit( EXIT_FAILURE );
 				}
@@ -495,7 +495,7 @@ static void include_handler( char *file )
 
 	if ( file != NULL )		      /* at the start of an include file */
 	{
-		/* If all the files we are prepared to open are already open
+		/* If all the files the program is prepared to open are already open
 		   this is a fatal error (most probably it's due to an infinite
 		   recurrsion) */
 
@@ -503,7 +503,7 @@ static void include_handler( char *file )
 			THROW( TOO_DEEPLY_NESTED_EXCEPTION );
 
 		/* Now check if file name is enclosed by `"' or '<' and '>' - in the
-		   later case we have to prepend the default directory */
+		   later case prepend the default directory */
 
 		if ( file[ 0 ] == '"' )
 		{
@@ -531,7 +531,7 @@ static void include_handler( char *file )
 			exit( EXIT_FAILURE );
 		}
 
-		/* If this is the very first include we store the current state in
+		/* If this is the very first include store the current state in
 		   some special variables... */
 
 		if ( ++incl_depth == 0 )
@@ -561,8 +561,8 @@ static void include_handler( char *file )
 	}
 	else						            /* at the end of an include file */
 	{
-		/* If the end of the very first file is reached we exit signaling
-		   success, otherwise we switch back to the previous buffer and file
+		/* If the end of the very first file is reached exit signaling
+		   success, otherwise switch back to the previous buffer and file
 		   (and also restore the it's name, line number and EOL state) */
 
 		if ( incl_depth == -1 )
@@ -609,9 +609,9 @@ static void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Takes combinations like "100ns" apart and writes them out as "100 nsec" */
-/*-------------------------------------------------------------------------*/
+/*----------------------------------------------------*/
+/* Rewrites combinations like "100ns" as "0.0000001". */
+/*----------------------------------------------------*/
 
 static void unit_spec( char *text, int power )
 {
