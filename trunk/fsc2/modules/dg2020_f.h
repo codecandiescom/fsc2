@@ -126,6 +126,8 @@ typedef struct _p_ {
 	long num_repl;
 	long *repl_list;
 
+	bool is_a_repl;
+
 	bool is_function;
 	bool is_pos;
 	bool is_len;
@@ -194,3 +196,5 @@ static void basic_pulse_check( void );
 static void basic_functions_check( void );
 static void distribute_channels( void );
 static CHANNEL *get_next_free_channel( void );
+static void pulse_start_setup( void );
+static int start_compare( const void *A, const void *B );

@@ -524,6 +524,14 @@ static bool set_repeat_time( double time )
 		THROW( EXCEPTION );
 	}
 
+	if ( time <= 0 )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Invalid repeat time %s.\n",
+				Fname, Lc, ptime( time ) );
+		THROW( EXCEPTION );
+	}
+
+
 	dg2020.repeat_time = double2ticks( time );
 	dg2020.is_repeat_time = SET;
 
@@ -552,7 +560,7 @@ static bool set_phase_reference( int phase, int function )
 
 	if ( f->phase_func != NULL )
 	{
-		eprint( FATAL, "%s:%ld: FG2020: Function `%s' has already been "
+		eprint( FATAL, "%s:%ld: DG2020: Function `%s' has already been "
 				"associated with phase function `%s'.\n", Fname, Lc,
 				Function_Names[ f->self ],
 				Function_Names[ f->phase_func->self ] );
@@ -611,6 +619,7 @@ static bool new_pulse( long pnum )
 	cp->is_dlen = UNSET;
 	cp->is_maxlen = UNSET;
 	cp->num_repl = 0;
+	cp->is_a_repl = UNSET;
 
 	return OK;
 }
@@ -665,6 +674,13 @@ static bool set_pulse_position( long pnum, double time )
 		THROW( EXCEPTION );
 	}
 
+	if ( time < 0 )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Invalid (negative) start position "
+				"for pulse %ld: %s.\n", Fname, Lc, pnum, ptime( time ) );
+		THROW( EXCEPTION );
+	}
+
 	p->pos = double2ticks( time );
 	p->is_pos = SET;
 
@@ -684,6 +700,13 @@ static bool set_pulse_length( long pnum, double time )
 		eprint( FATAL, "%s:%ld: DG2020: The length of pulse %ld has "
 				"already been set to %s.\n", Fname, Lc, pnum,
 				pticks( p->len ) );
+		THROW( EXCEPTION );
+	}
+
+	if ( time <= 0 )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Invalid length for pulse "
+				"%ld: %s.\n", Fname, Lc, pnum, ptime( time ) );
 		THROW( EXCEPTION );
 	}
 
@@ -788,6 +811,13 @@ static bool set_pulse_maxlen( long pnum, double time )
 		eprint( FATAL, "%s:%ld: DG2020: The maximum length of pulse %ld has "
 				"already been set to %s.\n", Fname, Lc, pnum,
 				pticks( p->maxlen ) );
+		THROW( EXCEPTION );
+	}
+
+	if ( time < 0 )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Invalid (negative) maximum length for "
+				"pulse %ld: %s.\n", Fname, Lc, pnum, ptime( time ) );
 		THROW( EXCEPTION );
 	}
 
@@ -1081,11 +1111,11 @@ static const char *ptime( double time )
 {
 	static char buffer[ 128 ];
 
-	if ( time >= 1.0 )
+	if ( fabs( time ) >= 1.0 )
 		sprintf( buffer, "%g s", time );
-	else if ( time >= 1.e-3 )
+	else if ( fabs( time ) >= 1.e-3 )
 		sprintf( buffer, "%g ms", 1.e3 * time );
-	else if ( time >= 1.e-6 )
+	else if ( fabs( time ) >= 1.e-6 )
 		sprintf( buffer, "%g us", 1.e6 * time );
 	else
 		sprintf( buffer, "%g ns", 1.e9 * time );
@@ -1111,6 +1141,7 @@ static void check_consistency( void )
 	basic_pulse_check( );
 	basic_functions_check( );
 	distribute_channels( );
+	pulse_start_setup( );
 }
 
 
@@ -1252,16 +1283,20 @@ static void basic_pulse_check( void )
 			}
 		}
 
-		/* Check the replacement pulses */
+		/* Check the replacement pulse settings */
 
 		if ( p->num_repl != 0 )
 		{
+			/* No maximum length - no replacement pulses... */
+
 			if ( ! p->is_maxlen )
 			{
 				eprint( FATAL, "DG2020: For pulse %ld has replacement pulses "
 						"but no maximum length is set.\n", p->num );
 				THROW( EXCEPTION );
 			}
+
+			/* Check the replacement pulses */
 
 			for ( i = 0; i < p->num_repl; i++ )
 			{
@@ -1276,7 +1311,7 @@ static void basic_pulse_check( void )
 				if ( cp == NULL )             /* replacement pulse not found */
 				{
 					eprint( FATAL, "DG2020: The %d. replacement pulse (%ld) "
-							"for pulse %ld does not exist.\n",
+							"of pulse %ld does not exist.\n",
 							i + 1, p->repl_list[ i ], p->num );
 					THROW( EXCEPTION );
 				}
@@ -1306,6 +1341,8 @@ static void basic_pulse_check( void )
 							cp->num, i + 1, p->num );
 					THROW( EXCEPTION );
 				}
+
+				cp->is_a_repl = SET;
 			}
 		}
 	}
@@ -1321,6 +1358,8 @@ static void basic_pulse_check( void )
 	 have been defined.
   2. Each function needs a pod again with the exception of the PHASES
      functions that need two.
+  Phase functions that are associated with useless functions or functions
+  that don't have pulses with phase cycling have to be removed.
   Next, a list of pulses for each channel is set up. Now we also can count
   the number of channels needed for the function.
   Each time when we find that a function isn't needed we always have to put
@@ -1356,6 +1395,8 @@ static void basic_functions_check( void )
 		if ( f->self != PULSER_CHANNEL_PHASE_1 &&
 			 f->self != PULSER_CHANNEL_PHASE_2 )
 		{
+			/* Function has no pulses ? */
+
 			if ( f->is_used && ! f->is_needed )
 			{
 				eprint( WARN, "DG2020: No pulses have been assigned to "
@@ -1374,6 +1415,8 @@ static void basic_functions_check( void )
 		}
 		else
 		{
+			/* No phase sequences have been defined ? */
+
 			if ( PSeq == NULL )
 			{
 				eprint( WARN, "DG2020: Phase functions `%s' isn't be needed, "
@@ -1391,6 +1434,8 @@ static void basic_functions_check( void )
 				continue;
 			}
 
+			/* Phase function isn't associated with a function ? */
+
 			if ( f->phase_func == NULL )
 			{
 				eprint( WARN, "DG2020: Phase function `%s' isn't be needed, "
@@ -1407,6 +1452,8 @@ static void basic_functions_check( void )
 
 				continue;
 			}
+
+			/* No secoond pod assigned to phase function ? */
 
 			if ( f->pod2 == NULL)
 			{
@@ -1452,11 +1499,20 @@ static void basic_functions_check( void )
 			}
 
 			/* If none of the pulses needs phase cycling but a phase function
-			   is associated with the function reove the association and put
+			   is associated with the function remove the association and put
 			   all channels of the phase function back into the pool (we don't
 			   need to check for the case that some pulses need phase cycling
 			   but no phase function is associated with the function, because
 			   this is already tested in the basic pulse check*/
+
+			if ( need_phases && f->num_needed_channels == 2 )
+			{
+				eprint( FATAL, "DG2020: Some of the pulses of function `%s' "
+						"need phase cycling while others need replacement "
+						"pulses. This is not implemented (yet?).\n",
+						Function_Names[ f->self ] );
+				THROW( EXCEPTION );
+			}
 
 			if ( ! need_phases && f->phase_func != NULL )
 			{
@@ -1612,4 +1668,77 @@ static CHANNEL *get_next_free_channel( void )
 
 
 /*-----------------------------------------------------------------------------
+  In this function the pulses for all the functions are sorted and further
+  consistency checks are done.
 -----------------------------------------------------------------------------*/
+
+static void pulse_start_setup( void )
+{
+	int i, j;
+	FUNCTION *f;
+	PULSE *p;
+
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = &dg2020.function[ i ];
+
+		if ( ! f->is_used ||
+			 f->self == PULSER_CHANNEL_PHASE_1 ||
+			 f->self == PULSER_CHANNEL_PHASE_2 )
+			continue;
+
+		/* Set the inital state values of all pulses */
+
+		for ( j = 0; j < f->num_pulses; j++ )
+		{
+			p = f->pulses[ j ];
+			p->initial_pos = p->pos;
+			p->initial_len = p->len;
+			p->initial_dpos = p->dpos;
+			p->initial_dlen = p->dlen;
+		}
+
+		/* Now sort the pulses of this channel by their start times, move
+		   replacement pulses to the end of the list */
+
+		qsort( f->pulses, f->num_pulses, sizeof( PULSE * ), start_compare );
+
+		/* Check that the relevant pulses are separated */
+
+		for ( j = 0; j < f->num_pulses; j++ )
+		{
+			p = f->pulses[ j ];
+			if ( j + 1 == f->num_pulses || f->pulses[ j + 1 ]->is_a_repl )
+				break;
+			if ( p->len + p->pos >= f->pulses[ j + 1 ]->pos )
+			{
+				eprint( FATAL, "DG2020: Pulses %ld and %ld %s.\n",
+						p->num, f->pulses[ j + 1 ]->num,
+						p->len + p->pos == f->pulses[ j + 1 ]->pos ?
+						"are not separated" : "overlap");
+				THROW( EXCEPTION );
+			}
+		}
+	}
+}
+
+
+static int start_compare( const void *A, const void *B )
+{
+	PULSE *a = *( PULSE ** ) A,
+		  *b = *( PULSE ** ) B;
+
+	if ( a->is_a_repl )
+	{
+		if ( b->is_a_repl )
+			return 0;
+		else
+			return 1;
+	}
+
+	if ( b->is_a_repl || a->pos <= b->pos )
+		return -1;
+
+	return 1;
+}
