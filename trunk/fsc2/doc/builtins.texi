@@ -2321,7 +2321,7 @@ be 5. To find out if e.g.@: the Control modifier key is pressed you
 could use:
 @example
 pos_arr = mouse_position( );
-IF ( pos_arry[ 10 ] / 4 ) % 2 @{
+IF ( int( pos_arry[ 10 ] ) / 4 ) % 2 @{
     print( "The Control modifier key is pressed.\n" );
 @}
 @end example
