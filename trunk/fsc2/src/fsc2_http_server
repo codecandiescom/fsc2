@@ -486,7 +486,8 @@ sub def_txt {
 	my $reply = "Date: $date$crlf" .
 				"Server: fsc2/$version$crlf" .
 				"Connection: close$crlf" .
-				"Allow: GET$crlf" .
+				"Allow: GET, HEAD$crlf" .
+				"Accept-Ranges: none$crlf" .
 				"Expires: $exp_date$crlf";
 
 	$reply .= "Cache-Control: no-cache$crlf" if @_ == 0;
