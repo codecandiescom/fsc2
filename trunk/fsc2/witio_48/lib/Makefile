@@ -53,9 +53,6 @@ libwitio_48.a: ${sources:.c=.o} $(headers)
 %.o: %.c $(headers)
 	$(CC) -ggdb $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
-witio_48_test: witio_48_test.c libwitio_48.so
-	$(CC) -ggdb $(CFLAGS) $(INCLUDES) -o $@ $< -L. -lwitio_48
-
 install:
 	install -d $(lib_dir)
 	install -d $(incl_dir)
@@ -64,4 +61,4 @@ install:
 	install -m 644 witio_48.h $(incl_dir)
 
 clean:
-	rm -f *.o witio_48_test *.so *.a *~
+	rm -f *.o *.so *.a *~

@@ -58,4 +58,6 @@ clean:
 	rm -f *~
 
 distclean:
-	$(MAKE) clean
+	$(MAKE) -C driver clean
+	$(MAKE) -C lib clean
+	rm -f driver/autoconf.h

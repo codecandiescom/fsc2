@@ -78,4 +78,4 @@ endif
 	install -m 644 ni6601_drv.h $(incl_dir)
 
 clean:
-	rm -f *.o autoconf.h *~
+	rm -f *.o *~
