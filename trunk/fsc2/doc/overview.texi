@@ -84,29 +84,26 @@ possible to write a program (not an @acronym{EDL} program but for
 example a Perl script) where the parameters can be set via a graphical
 user interface, an @acronym{EDL} program is created from a template and
 then this passed directly to @acronym{fsc2}. If such a utility exists
-one doesn't even have to learn how to write an experiment description
-program.
+one doesn't even have to learn how to write an @acronym{EDL} program.
 
 
-Another problem with the traditional type of program is the use of
+Another problem with the traditional type of programs is the use of
 different devices or the integration of new ones. Usually the devices
 are hard-coded into the program and just changing one device requires a
-major rewrite. In contrast, in @code{fsc2} devices are organized as
-modules that get only loaded if in the program describing the experiment
-the corresponding device is listed. Thus changing the experiment to work
+major rewrite. In contrast, in @code{fsc2} the handling of devices has
+been moved into separate modules that get only loaded if the the device
+is listed @acronym{EDL} program. Thus changing the experiment to work
 with e.g.@: a different lock-in amplifier or digitizer does not require
 more than changing a line of the @acronym{EDL} program (at least as long
 as the devices are not too different in their capabilities). This is
-also a major advantage when a completely new device has to be
-integrated. Instead of rewriting the whole program that controls the
-experiment, only a new module for the device has to be written. A module
-is mainly a set of functions that then can be called from the
-@acronym{EDL} program describing the experiment. Writing such a module
-does not require a thorough understanding of the way @acronym{fsc2}
-works but just knowledge about a few conventions which are explained in
-one of later parts of this manual. Thus the module can be tested
-extensively on its own and there's no danger of introducing new bugs
-into @code{fsc2} itself.
+also a major advantage when a new device has to be integrated. Instead
+of changing the whole program that controls the experiment, only a new
+module for the device has to be written. Writing such a module does not
+require a thorough understanding of the way @acronym{fsc2} works but
+just needs knowledge about a few conventions which are explained
+extensively in one of later parts of the manual. Thus the module can be
+tested independent of the main program and there's no danger of
+introducing new bugs into @code{fsc2} itself.
 
 The manual is organized along the following lines: the next chapter
 explains in detail the graphical user interface for controlling the
