@@ -782,8 +782,8 @@ like '@code{invalid lvalue in assignment}'.}, called @code{FSC2_MODE},
 which tells you in which context your module function is called. There
 are three different contexts: the program can be either interpreting the
 @code{VARIABLES} or @code{PREPARATIONS} section, do a test run, or do
-the experiment. While the program is interpreting the @code{VARIABLES}
-or @code{PREPARATIONS} section @code{FSC2_MODE} is set to the predefined
+the experiment. While the program interprets the @code{VARIABLES} or
+@code{PREPARATIONS} section @code{FSC2_MODE} is set to the predefined
 value @code{PREPARATION}. At this stage the devices are not initialized
 yet and can't be accessed.
 
@@ -935,7 +935,7 @@ with the number of the serial port (0 stands for the device file
 for @file{/dev/ttyS1} or for @code{COM2} etc.@:) as the first and the
 device name as the second argument. If the requested serial port has
 already been claimed by a different device the function will print an
-error message and stop the @code{EDL} program, so you don't have to
+error message and stop the @code{EDL} script, so you don't have to
 deal with error handling.
 
 For all functions that deal directly with file descriptors for the
@@ -1023,7 +1023,7 @@ As you already know the interpretation of an @code{EDL} file consists of
 several steps. When the file is tested and a @code{DEVICES} section is
 found all modules for the devices listed are loaded. When in the test
 the @code{EXPERIMENT} section is found the test run is started in which
-the program is tested as far as possible. When the test was successful
+the script is tested as far as possible. When the test was successful
 the experiment may be run repeatedly. To allow initialization of the
 modules internal parameters, initialization of the devices etc.@: for
 each of these stages hook functions can be defined in the modules that
@@ -1106,7 +1106,7 @@ There is one rather nasty problem with the test run. In the test run the
 @code{EDL} script is checked extensively and, as far as possible,
 everything is done as in the real experiment. But this leads to the
 problem that the functions in the module must return data even though
-they can't talk to the devices yet. If the program asks for the measured
+they can't talk to the devices yet. If the script asks for the measured
 value from a device reasonable data most be returned.  This can be quite
 tricky, because it sometimes may be not completely clear what will be
 reasonable data in all imaginable situations.
@@ -1118,7 +1118,7 @@ make them stand out they are always defined as macros at some prominent
 place at the start of the module. If necessary the users must be made
 aware of possible problems, i.e.@: if they test values returned from
 within the @code{EDL} file they must be prepared to write the @code{EDL}
-program to accept some unexpected values.
+script to accept some unexpected values.
 
 
 @subsection How to compile a module
@@ -1304,7 +1304,7 @@ section. In contrast, @code{lockin_sensitivity} can be called with a
 variable number of arguments (if called without an argument it returns
 the sensitivity setting of the lock-in, if called with an argument the
 function treats this as the new sensitivity to be set). This function
-can be used in all parts of the @code{EDL} program - but because
+can be used in all parts of the @code{EDL} script - but because
 querying the lock-in for its sensitivity won't work as long as the
 program can't talk with the lock-in, i.e.@: while not in the
 @code{EXPERIMENT} section the function must test for this case and emit
@@ -1831,7 +1831,7 @@ just a set of functions for setting different pulse properties etc.@:
 but this would make the programs much harder to write and understand.
 Instead many aspects of dealing with pulses and pulsers are integrated
 directly into the @code{EDL} language. While this makes it easier for
-the user writing @code{EDL} programs it requires more work by the
+the user writing @code{EDL} scripts it requires more work by the
 writer of the module for a pulsers.
 
 If, for example, the user defines a new pulse in the @code{PREPARATIONS}
@@ -2206,7 +2206,7 @@ automatically (and thus you have set the variable
 @code{needs_phase_pulses} in the pulser structure), this function will
 be called when in the definition of a phase function the function, the
 phase pulses will be used with, is set. That means if the @code{EDL}
-program contains a line like
+script contains a line like
 @example
 ASSIGNMENTS:
   PHASE_2: MICROWAVE, POD = 2, 3, ....
@@ -2235,7 +2235,7 @@ In this case @code{MICROWAVE} is again the function that has to be phase
 cycled and is passed to the function as the second argument. The first
 argument is either @code{0} or @code{1}, depending on if the this for the
 first phase cycled function (i.e.@: when the command in @code{EDL}
-program starts with either @code{PHASE_SETUP} or @code{PASE_SETUP_1}) or
+script starts with either @code{PHASE_SETUP} or @code{PASE_SETUP_1}) or
 for the second phase cycled function (i.e.@: for @code{PHASE_SETUP_2}).
 
 
@@ -2253,7 +2253,7 @@ PHASE_SETUP_1:  +X: POD_1 = ON, POD2 = OFF,
                 -Y: 1, 1;
 @end example
 @noindent
-is expected in the @code{EDL} program. The first line indicates that
+is expected in the @code{EDL} script. The first line indicates that
 the phase function 1 is to be used to control phase pulses for microwave
 pulses and the output pods to be used are the pods 2 and 3. The
 following lines are supposed to tell the module that in order to create
@@ -2288,7 +2288,7 @@ one one the two pods has been set.
 The fourth and final argument is the state of the output for the put
 when the pulse is output. In our example this means that it will be
 @code{1} when a @code{1} or @code{ON} is found in the @code{EDL}
-program and @code{0} for @code{OFF} or @code{0}.
+script and @code{0} for @code{OFF} or @code{0}.
 
 Accordingly, the @code{EDL} code for the phase setup given above will
 lead to the following sequence of calls of the function
@@ -2540,12 +2540,12 @@ ASSIGNMENTS:
 @noindent
 If you determine the maximum length of the pulser pattern in your module
 during the test run the value you get can be plain wrong if the
-@code{EDL} program contains e.g.@: @code{FOREVER} loops,
+@code{EDL} script contains e.g.@: @code{FOREVER} loops,
 @code{IF}/@code{ELSE} constructs etc.@: because it is not possible to
-determine during the test run which branches of the @code{EDL}
-program will be run in the real experiment. The
-@code{MAXIMUM_SEQUENCE_LENGTH} command should allow the user to correct
-the possible wrong value when necessary.
+determine during the test run which branches of the @code{EDL} script
+will be run in the real experiment. The @code{MAXIMUM_SEQUENCE_LENGTH}
+command should allow the user to correct the possible wrong value when
+necessary.
 
 The obvious question is why bother at all to determine the maximum
 length of the pulse pattern and not use instead the maximum pattern

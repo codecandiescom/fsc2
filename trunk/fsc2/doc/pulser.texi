@@ -52,7 +52,7 @@ between the Frankfurt S-band and the Berlin X-band spectrometer.
 
 Because of the importance of the pulser for time-resolved experiments
 there are even two additional types of sections in the @code{EDL}
-program in order to set up the pulser. These
+script in order to set up the pulser. These
 are@footnote{@code{ASSIGNMENTS:} can be abbreviated to
 @code{ASSIGNMENT:} or @code{ASS:} and @code{PHASES:} to @code{PHA}.}
 @example
@@ -157,10 +157,10 @@ for the internal clock, @w{4 ns} and larger with an external clock
 @end itemize
 
 If you're using two or more pulsers simultaneously you need as many
-@code{TIMEBASE} statements in your program as you have pulsers. In this
-case you need to append a @code{#} character plus the number of the
-pulser to indicate for which of the pulsers the statement is to be
-used. E.g.@: if you have two pulsers you normally will need two
+@code{TIMEBASE} statements in your @code{EDL} script as you have
+pulsers. In this case you need to append a @code{#} character plus the
+number of the pulser to indicate for which of the pulsers the statement
+is to be used. E.g.@: if you have two pulsers you normally will need two
 @code{TIMEBASE} statements:
 @example
 TIMEBASE#1:  5 ns;
@@ -382,7 +382,7 @@ The names of the functions do not enforce what the connectors that will
 become associated with them are really going to be used for, but it is
 probably a good idea not to use e.g.@: the @code{MICROWAVE} function for
 something completely different (or other people will have major problems
-understanding what your @code{EDL} program is supposed to do and there's
+understanding what your @code{EDL} script is supposed to do and there's
 no obfuscated EDL contest yet;-). Besides, some of the pulser modules
 also define special functions (e.g.@: for automatically setting TWT
 pulses) that only work for some of these functions.
@@ -1027,11 +1027,11 @@ first phase of the associated phase sequence) the function
 @code{pulser_phase_reset()} (see also @ref{Pulser Functions}) can be
 used.
 
-The next (rather simplified) example is the program for a phase cycled
+The next (rather simplified) example is a script for a phase cycled
 (1-dimensional) stimulated echo experiment. We need three microwave
-pulses and a further detection pulse that triggers the digitizer at the right
-moment. During the experiment the first two microwave pulses have to be
-phase cycled.
+pulses and a further detection pulse that triggers the digitizer at the
+right moment. During the experiment the first two microwave pulses have
+to be phase cycled.
 @example
 DEVICES:
 
@@ -1132,7 +1132,7 @@ writing out this loop one could also define an acquisition sequence and
 use the @code{EDL} function @code{get_phase_cycled_area()}. This
 function does everything automatically that had to be spelled out
 explicitely in the loop in the previous example and thus makes the
-program much simpler. The only changes needed are in the @code{PHASES}
+script much simpler. The only changes needed are in the @code{PHASES}
 and @code{EXPERIMENT} section: first, an acquisition sequence must be
 defined and, second, the whole inner loop can be replaced by a single
 function call.
@@ -1187,7 +1187,7 @@ windows as you need. For each of the windows the phase cycled area is
 measured.  Of course, in these cases not just one data value will be
 returned but an array of data values with as many elements as there are
 digitizer windows passed to the function. It is the responsibility of
-the writer of the @code{EDL} program to supply an array long enough
+the writer of the @code{EDL} script to supply an array long enough
 to hold exactly as many data as returned by the function. Here's an
 example:
 @example
