@@ -805,28 +805,36 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 			if ( v1->type == INT_VAR && v2->type == INT_VAR )
 				new_var = vars_push( INT_VAR, v1->INT == v2->INT );
 			else
-				new_var = vars_push( INT_VAR, VALUE( v1 ) == VALUE( v2 ) );
+				new_var = vars_push( INT_VAR, VALUE( v1 ) == VALUE( v2 ) ||
+									 nextafter( VALUE( v1 ), VALUE( v2 ) )
+									 == VALUE( v2 ) );
 			break;
 
 		case COMP_UNEQUAL :
 			if ( v1->type == INT_VAR && v2->type == INT_VAR )
 				new_var = vars_push( INT_VAR, v1->INT != v2->INT );
 			else
-				new_var = vars_push( INT_VAR, VALUE( v1 ) != VALUE( v2 ) );
+				new_var = vars_push( INT_VAR, VALUE( v1 ) != VALUE( v2 ) && 
+									 nextafter( VALUE( v1 ), VALUE( v2 ) )
+									 != VALUE( v2 ) );
 			break;
 
 		case COMP_LESS :
 			if ( v1->type == INT_VAR && v2->type == INT_VAR )
 				new_var = vars_push( INT_VAR, v1->INT < v2->INT );
 			else
-				new_var = vars_push( INT_VAR, VALUE( v1 ) < VALUE( v2 ) );
+				new_var = vars_push( INT_VAR, VALUE( v1 ) < VALUE( v2 ) &&
+									 nextafter( VALUE( v1 ), VALUE( v2 ) )
+									 < VALUE( v2 ) ););
 			break;
 
 		case COMP_LESS_EQUAL :
 			if ( v1->type == INT_VAR && v2->type == INT_VAR )
 				new_var = vars_push( INT_VAR, v1->INT <= v2->INT );
 			else
-				new_var = vars_push( INT_VAR, VALUE( v1 ) <= VALUE( v2 ) );
+				new_var = vars_push( INT_VAR, VALUE( v1 ) <= VALUE( v2 ) ||
+									 nextafter( VALUE( v1 ), VALUE( v2 ) )
+									 <= VALUE( v2 ) ););
 			break;
 
 		case COMP_AND :
