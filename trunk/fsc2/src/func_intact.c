@@ -1572,7 +1572,7 @@ Var *f_icreate( Var *v )
 			type = v->val.lval;
 		else
 		{
-			eprint( WARN, SET, "Float variable used as input or output "
+			eprint( WARN, SET, "Float variable used as in- or output "
 					"object type in function %s().\n", Cur_Func );
 			type = lround( v->val.dval );
 		}
@@ -1580,7 +1580,7 @@ Var *f_icreate( Var *v )
 		if ( type != INT_INPUT && type != FLOAT_INPUT &&
 			 type != INT_OUTPUT && type != FLOAT_OUTPUT )
 		{
-			eprint( FATAL, SET, "Invalid input or output object type (%ld) "
+			eprint( FATAL, SET, "Invalid in- or output object type (%ld) "
 					"in function %s().\n", type, Cur_Func );
 			THROW( EXCEPTION );
 		}
@@ -1597,7 +1597,7 @@ Var *f_icreate( Var *v )
 			type = FLOAT_OUTPUT;
 		else
 		{
-			eprint( FATAL, SET, "Unknown input or output object type (`%s')"
+			eprint( FATAL, SET, "Unknown in- or output object type (`%s')"
 					" in function %s().\n", Cur_Func );
 			THROW( EXCEPTION );
 		}
@@ -1614,7 +1614,7 @@ Var *f_icreate( Var *v )
 			 v->type == FLOAT_VAR )
 		{
 			eprint( SEVERE, SET, "Float value used as initial value for "
-					"new integer input or output object in function %s().\n",
+					"new integer in- or output object in function %s().\n",
 					Cur_Func );
 			lval = lround( v->val.dval );
 		}
@@ -1893,7 +1893,7 @@ Var *f_idelete( Var *v )
 
 			if ( v->type != INT_VAR || v->val.lval < 0 )
 			{
-				eprint( FATAL, SET, "Invalid input or output object "
+				eprint( FATAL, SET, "Invalid in- or output object "
 						"identifier in %s().\n", Cur_Func );
 				THROW( EXCEPTION );
 			}
@@ -1934,7 +1934,7 @@ Var *f_idelete( Var *v )
 
 		if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 		{
-			eprint( FATAL, SET, "No input or output objects have been "
+			eprint( FATAL, SET, "No in- or output objects have been "
 					"defined yet.\n" );
 			THROW( EXCEPTION );
 		}
@@ -1946,7 +1946,7 @@ Var *f_idelete( Var *v )
 			 ( io->type != INT_INPUT && io->type != FLOAT_INPUT &&
 			   io->type != INT_OUTPUT && io->type != FLOAT_OUTPUT ) )
 		{
-			eprint( FATAL, SET, "Invalid input or output object identifier "
+			eprint( FATAL, SET, "Invalid in- or output object identifier "
 					"in %s().\n", Cur_Func );
 			THROW( EXCEPTION );
 		}
@@ -1993,7 +1993,7 @@ Var *f_idelete( Var *v )
 
 			if ( ( v = vars_pop( v ) ) != NULL )
 			{
-				eprint( FATAL, SET, "Invalid input or output object "
+				eprint( FATAL, SET, "Invalid in- or output object "
 						"identifier in %s().\n", Cur_Func );
 				THROW( EXCEPTION );
 			}
@@ -2057,7 +2057,7 @@ Var *f_ivalue( Var *v )
 
 		if ( v->type != INT_VAR || v->val.lval < 0 )
 		{
-			eprint( FATAL, SET, "Invalid input or output object identifier "
+			eprint( FATAL, SET, "Invalid in- or output object identifier "
 					"in %s().\n", Cur_Func );
 			THROW( EXCEPTION );
 		}
@@ -2126,7 +2126,7 @@ Var *f_ivalue( Var *v )
 		else
 			* ( char * ) pos++ = '\0';
 		
-		/* Ask parent to set or get the slider value - it will return a pointer
+		/* Ask parent to set or get the value - it will return a pointer
 		   to an INPUT_RES structure, where the res entry indicates failure
 		   (negative value) and the type of the returned value (0 is integer,
 		   positive non-zero is float), and the second entry is a union for
@@ -2159,7 +2159,7 @@ Var *f_ivalue( Var *v )
 
 	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 	{
-		eprint( FATAL, SET, "No input or output objects have been defined "
+		eprint( FATAL, SET, "No in- or output objects have been defined "
 				"yet.\n" );
 		THROW( EXCEPTION );
 	}
@@ -2171,7 +2171,7 @@ Var *f_ivalue( Var *v )
 		 ( io->type != INT_INPUT && io->type != FLOAT_INPUT &&
 		   io->type != INT_OUTPUT && io->type != FLOAT_OUTPUT ) )
 	{
-		eprint( FATAL, SET, "Invalid input or output object identifier in "
+		eprint( FATAL, SET, "Invalid in- or output object identifier in "
 				"%s().\n", Cur_Func );
 		THROW( EXCEPTION );
 	}
@@ -2193,7 +2193,7 @@ Var *f_ivalue( Var *v )
 	if ( ( io->type == INT_INPUT || io->type == INT_OUTPUT ) &&
 		 v->type == FLOAT_VAR )
 	{
-		eprint( SEVERE, SET, "Float number used as integer input or output "
+		eprint( SEVERE, SET, "Float number used as integer in- or output "
 				"object value in %s().\n", Cur_Func );
 		io->val.lval = lround( v->val.dval );
 	}
