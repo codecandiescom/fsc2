@@ -88,6 +88,8 @@ FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
 CHT         ((CH((1[0-5])|[0-9]))|(AUX[12]?)|(MATH[1-3])|(REF[1-4])|(LIN(E)?)|(MEM_[CD])|(FUNC_[EF])|(EXT(10)?)|(DEFAULT_SOURCE)|(SOURCE_[0-3])|(NEXT_GATE)|(TIMEBASE_[12]))
 
+DIO         DIO_?{INT}
+
 IDENT       [A-Za-z]+[A-Za-z0-9_]*
 FUNC        {IDENT}"#"[0-9]+
 
@@ -199,6 +201,15 @@ WS          [\n \t]+
 {CHT}       {
                 varslval.vptr = convert_to_channel_number( varstext );
 				return VAR_REF;
+            }
+
+{DIO}       {
+				char *txt = varstext;
+
+				while ( ! isdigit( *txt ) )
+					txt++;
+				varslval.lval = T_atol( txt );
+                return INT_TOKEN;
             }
 
 			/* Handling of integer and floating point numbers */

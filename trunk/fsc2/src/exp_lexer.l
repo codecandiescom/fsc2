@@ -97,6 +97,8 @@ PH          PH(ASE(SEQ(UENCE)?)?)?_?([0-9])?
 
 CHT         ((CH((1[0-5])|[0-9]))|(AUX[12]?)|(MATH[1-3])|(REF[1-4])|(LIN(E)?)|(MEM_[CD])|(FUNC_[EF])|(EXT(10)?)|(DEFAULT_SOURCE)|(SOURCE_[0-3])|(NEXT_GATE)|(TIMEBASE_[12]))
 
+DIO         DIO_?{INT}
+
 WS          [\n \t]+
 
 IDENT       [A-Za-z]+[A-Za-z0-9_]*
@@ -237,6 +239,15 @@ FUNC        {IDENT}"#"[0-9]+
 {CHT}       {
                 exp_val.vptr = convert_to_channel_number( exptext );
 				return E_VAR_REF;
+            }
+
+{DIO}       {
+				char *txt = exptext;
+
+				while ( ! isdigit( *txt ) )
+					txt++;
+				varslval.lval = T_atol( txt );
+                return E_INT_TOKEN;
             }
 
 {FUNC}      {
