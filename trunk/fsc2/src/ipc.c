@@ -223,10 +223,18 @@ void delete_stale_shms( void )
 			{
 				shmdt( buf );
 
+				/* Take care: the shm_nattch field in the shmid_ds structure
+				   has different types in different Linux versions, in older
+				   ones it is an unsigned short, nowadays an unsigned long.
+				   To get it right for all versions we simply cast is to the
+				   larger type (this better should be handled by a configure
+				   script, but that's still on the TODO list...). */
+
 				if ( shm_seg.shm_nattch != 0 )          /* attach count != 0 */
 					fprintf( stderr, "Stale shared memory segment has attach "
-							 "count of %ld.\nPossibly one of fsc2's processes "
-							 "survived...\n", shm_seg.shm_nattch );
+							 "count of %lu.\nPossibly one of fsc2's processes "
+							 "survived...\n",
+							 ( unsigned long ) shm_seg.shm_nattch );
 				else
 					shmctl( shm_id, IPC_RMID, NULL );
 			}
