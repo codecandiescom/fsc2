@@ -411,7 +411,15 @@ static void vars_arr_create( Var *a, Var *v, int dim )
 
 /*---------------------------------------------------------------------*/
 /* Function gets called when a list of initializers (enclosed in curly */
-/* braces) gets found in the input of the VARIABLES section.           */
+/* braces) gets found in the input of the VARIABLES section. Since the */
+/* initializer list can contain further list etc. the function can get */
+/* several times until we have reached the highest level list. During  */
+/* this process the variable stack can become quite messed up and for  */
+/* bookkeeping purposes two extra flags, INIT_ONLY and DONT_RECURSE,   */
+/* are used with the stack variables involved. INIT_ONLY signifies     */
+/* that the variable is on the stack for good reasons and DONT_RECURSE */
+/* tells the functions for popping variables not to delete sub-arrays  */
+/* of the variable.                                                    */
 /*---------------------------------------------------------------------*/
 
 Var *vars_init_list( Var *v, ssize_t level )
@@ -445,8 +453,8 @@ Var *vars_init_list( Var *v, ssize_t level )
 	}
 
 	/* Count the number of initializers, skipping variables with too low
-	   a dimension and complaining about variables with too high a
-	   dimensions */
+	   a dimension (if they are left over from previous calls) and
+	   complaining about variables with too high a dimensions */
 
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
@@ -508,7 +516,8 @@ Var *vars_init_list( Var *v, ssize_t level )
 	}
 
 	/* Otherwise create an array of a dimension one higher than the current
-	   level */
+	   level, set flag for variable to avoid that the popping of the variable
+	   also deletes the sub-arrays it's pointing to */
 
 	nv = vars_push( FLOAT_REF, NULL );
 	nv->flags |= DONT_RECURSE | INIT_ONLY;
@@ -568,8 +577,8 @@ void vars_arr_init( Var *v )
 
 	if ( v->dim != dest->dim )
 	{
-		print( FATAL, "Dimensions of variable '%s' and initializer list "
-			   "differ.\n", dest->name );
+		print( FATAL, "Dimension of variable '%s' and initializer list "
+			   "differs.\n", dest->name );
 		vars_del_stack( );
 		THROW( EXCEPTION );
 	}
@@ -579,8 +588,10 @@ void vars_arr_init( Var *v )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Function does the assignment of data from an initializer list,   */
+/* being distributed over the stack to the left hand side variable. */
+/*------------------------------------------------------------------*/
 
 static void vars_do_init( Var *src, Var *dest )
 {
