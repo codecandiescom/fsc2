@@ -64,31 +64,33 @@ int main( int argc, char *argv[ ] )
 	   the shell. For "-h" or "--help" the usage information is printed
 	   and the program exits immediately. */
 
-	if ( argc > 1 )
+	if ( argc != 1 )
 	{
-		if ( ! strcmp( argv[ 1 ], "-t" ) )
-		{
-			/* no file name with "-t" option ? */
-
-			if ( argv[ 1 ][ 2 ] == '\0' && argc == 2 )
-			{
-				fprintf( stderr, "fsc2 -t: No input file.\n" );
-				return EXIT_FAILURE;
-			}
-
-			just_testing = SET;    /* signal "just_testing"-mode to eprint() */
-
-			fname = argv[ 1 ][ 2 ] != '\0' ? &argv[ 1 ][ 2 ] : argv[ 2 ];
-			seteuid( getuid( ) );
-			setegid( getgid( ) );
-			return scan_main( fname ) ? EXIT_SUCCESS : EXIT_FAILURE;
-		}
-
 		cur_arg = 0;
 		while ( ++cur_arg < argc )
+		{
+			if ( ! strcmp( argv[ cur_arg ], "-t" ) )
+			{
+				/* no file name with "-t" option ? */
+
+				if ( ++cur_arg == argc )
+				{
+					fprintf( stderr, "fsc2 -t: No input file.\n" );
+					return EXIT_FAILURE;
+				}
+
+				just_testing = SET;      /* set "just_testing"-mode flag */
+
+				seteuid( getuid( ) );
+				setegid( getgid( ) );
+				return scan_main( argv[ cur_arg ] ) ?
+					EXIT_SUCCESS : EXIT_FAILURE;
+			}
+
 			if ( ! strcmp( argv[ cur_arg ], "-h" ) ||
 				 ! strcmp( argv[ cur_arg ], "--help" ) )
 				usage( );
+		}
 	}
 
 	/* Check via the lock file if there is already a process holding a lock,

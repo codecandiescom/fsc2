@@ -1,10 +1,11 @@
 # $Id$
 
-c_sources     = fsc2.c pulser.c util.c exceptions.c variables.c vars_util.c \
-			  	func.c func_basic.c func_util.c func_intact.c T.c phases.c  \
-			  	exp.c devices.c run.c gpib_if.c chld_func.c graphics.c      \
-				comm.c accept.c graph_handler_1d.c graph_handler_2d.c       \
-			  	graph_cut.c loader.c bugs.c print.c conn.c ipc.c fsc2_rsc.c
+c_sources     = fsc2.c xinit.c pulser.c util.c exceptions.c variables.c   \
+				vars_util.c func.c func_basic.c func_util.c func_intact.c \
+				T.c phases.c exp.c devices.c run.c gpib_if.c chld_func.c  \
+				graphics.c comm.c accept.c graph_handler_1d.c             \
+				graph_handler_2d.c graph_cut.c loader.c bugs.c print.c    \
+				conn.c ipc.c fsc2_rsc.c
 bison_sources = $(wildcard *_parser.y)
 flex_sources  = $(wildcard *_lexer.l)
 sources       = $(bison_sources:.y=.c) $(flex_sources:.l=.c) ${c_sources}
