@@ -71,7 +71,7 @@ case "$1" in
 		fi
 		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
 		if [ $? != 0 ]; then
-			major=`grep ni6601 /proc/devices | awk '{print $1}'`
+			major=`lspci -n | grep -i '1093:2c60' | awk '{print $1}'`
 			if [ $? != 0 ]; then
 				log_failure_msg "Can't determine major device number for NI6601 cards."
 				exit 1
