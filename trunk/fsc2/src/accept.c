@@ -45,7 +45,7 @@ void accept_new_data( void )
 			shmctl( Message_Queue[ message_queue_low ].shm_id,
 					IPC_RMID, NULL );                  /* delete the segment */
 			seteuid( getuid( ) );
-			eprint( FATAL, "Internal communication error at %s:%d.\n",
+			eprint( FATAL, "Internal communication error at %s:%d.",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
 		}
@@ -235,7 +235,7 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 
 	if ( curve >= G.nc )
 	{
-		eprint( FATAL, "$s:%ld: There is no curve %ld.\n", Fname, Lc,
+		eprint( FATAL, "$s:%ld: There is no curve %ld.", Fname, Lc,
 				curve + 1 );
 		THROW( EXCEPTION );
 	}
@@ -443,7 +443,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 
 	if ( curve >= G.nc )
 	{
-		eprint( FATAL, "$s:%ld: There is no curve %ld.\n", Fname, Lc,
+		eprint( FATAL, "$s:%ld: There is no curve %ld.", Fname, Lc,
 				curve + 1 );
 		THROW( EXCEPTION );
 	}

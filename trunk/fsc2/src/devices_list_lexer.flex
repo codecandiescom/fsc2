@@ -119,7 +119,7 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 
 .           {
 				eprint( FATAL, "Syntax error in devices data base `%s' at "
-						"line %ld.\n", Fname, Lc );
+						"line %ld.", Fname, Lc );
 				THROW( EXCEPTION );
 			}
 
@@ -149,7 +149,7 @@ bool device_list_parse( void )
 
 	if ( ( devices_listin = fopen( Fname, "r" ) ) == NULL )
 	{
-		eprint( FATAL, "Can't open device data base `%s'.\n", Fname );
+		eprint( FATAL, "Can't open device data base `%s'.", Fname );
 		return FAIL;
 	}
 
@@ -163,7 +163,7 @@ bool device_list_parse( void )
 	Lc = 1;
 	Eol = SET;
 /*
-	eprint( NO_ERROR, "Parsing device name data base `%s'.\n", Fname );
+	eprint( NO_ERROR, "Parsing device name data base `%s'.", Fname );
 */
 	TRY
 	{

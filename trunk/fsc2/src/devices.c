@@ -32,7 +32,7 @@ void device_add( char *dev_name )
 	if ( dl == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Device `%s' not found in device name data "
-				"base.\n", Fname, Lc, dev_name );
+				"base.", Fname, Lc, dev_name );
 		T_free( dev_name );
 		THROW( EXCEPTION );
 	}

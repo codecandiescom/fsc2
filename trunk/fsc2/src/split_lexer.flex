@@ -109,7 +109,7 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 
 			/* handling of unknown label */
 .+":"       {
-				eprint( FATAL, "%s:%ld: Unknown label: `%s'.\n",
+				eprint( FATAL, "%s:%ld: Unknown label: `%s'.",
 						Fname, Lc, splittext );
 				return FAIL;
 			}
@@ -119,7 +119,7 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 			/* handling of invalid input */
 .   		{
 				eprint( FATAL, "%s:%ld: Missing section label at start of "
-							   "file.\n", Fname, Lc );
+							   "file.", Fname, Lc );
 				return FAIL;
 			}
 
@@ -243,13 +243,13 @@ bool section_parser( int section )
 	}
 	CATCH( SYNTAX_ERROR_EXCEPTION )
 	{
-		eprint( FATAL, "%s:%ld: Syntax error.\n", Fname, Lc ); 
+		eprint( FATAL, "%s:%ld: Syntax error.", Fname, Lc ); 
 		return FAIL;
 	}
 	CATCH( MISSING_SEMICOLON_EXCEPTION )
 	{		
 		eprint( FATAL, "%s:%ld: Missing semicolon before (or on) this "
-				"line.\n", Fname, Lc );
+				"line.", Fname, Lc );
 		return FAIL;
 	}
 	OTHERWISE

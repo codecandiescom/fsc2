@@ -687,6 +687,6 @@ bool dg2020_set_trigger_in_impedance( int state )
 
 void dg2020_gpib_failure( void )
 {
-	eprint( FATAL, "DG2020: Communication with device failed.\n" );
+	eprint( FATAL, "DG2020: Communication with device failed." );
 	THROW( EXCEPTION );
 }

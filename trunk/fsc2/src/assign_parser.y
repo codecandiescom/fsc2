@@ -477,9 +477,9 @@ int assignerror ( const char *s )
 
 	if ( *assigntext == '\0' )
 		eprint( FATAL, "%s:%ld: Unexpected end of file in ASSIGNMENTS "
-				"section.\n", Fname, Lc );
+				"section.", Fname, Lc );
 	else
-		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.\n",
+		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.",
 				Fname, Lc, assigntext );
 	THROW( EXCEPTION );
 }

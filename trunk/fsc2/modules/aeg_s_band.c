@@ -18,8 +18,6 @@
                                      /* set to 50 ms and not to be changed ! */
 
 
-
-
 /* exported functions */
 
 int s_band_init_hook( void );
@@ -118,7 +116,7 @@ int s_band_init_hook( void )
 
 	if ( ! exist_device( "er035m" ) && ! exist_device( "bh15" ) )
 	{
-		eprint( FATAL, "s_band: Can't find a field meter.\n" );
+		eprint( FATAL, "S_BAND: Can't find a field meter." );
 		THROW( EXCEPTION );
 	}
 
@@ -139,15 +137,15 @@ int s_band_init_hook( void )
 
 	if ( ret == LIB_ERR_NO_SYM )
 	{
-		eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s:%d.\n",
+		eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s:%d.",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
 
 	if ( ! *is_gaussmeter )
 	{
-		eprint( FATAL, "s_band: Problem in DEVICES section - driver for "
-				"field meter must be listed before S-band driver.\n" );
+		eprint( FATAL, "S_BAND: Problem in DEVICES section - driver for "
+				"field meter must be listed before S-band driver." );
 		THROW( EXCEPTION );
 	}
 
@@ -156,22 +154,22 @@ int s_band_init_hook( void )
 
 	if ( ! exist_function( "find_field" ) )
 	{
-		eprint( FATAL, "s_band: No function available to do field "
-				"measurements.\n" );
+		eprint( FATAL, "S_BAND: No function available to do field "
+				"measurements." );
 		THROW( EXCEPTION );
 	}
 
 	if ( ! exist_function( "field_meter_wait" ) )
 	{
-		eprint( FATAL, "s_band: Function needed for field measurements not "
-				"available.\n" );
+		eprint( FATAL, "S_BAND: Function needed for field measurements not "
+				"available." );
 		THROW( EXCEPTION );
 	}
 
 	if ( ! exist_function( "field_resolution" ) )
 	{
-		eprint( FATAL, "s_band: Function to determine field measurement "
-				"resolution is missing.\n" );
+		eprint( FATAL, "S_BAND: Function to determine field measurement "
+				"resolution is missing." );
 		THROW( EXCEPTION );
 	}
 
@@ -179,15 +177,15 @@ int s_band_init_hook( void )
 
 	if ( SERIAL_PORT >= NUM_SERIAL_PORTS || SERIAL_PORT < 0 )
 	{
-		eprint( FATAL, "s_band: Serial port number %d out of valid range "
+		eprint( FATAL, "S_BAND: Serial port number %d out of valid range "
 				"(0-%d).", SERIAL_PORT, NUM_SERIAL_PORTS - 1 );
 		THROW( EXCEPTION );
 	}
 
 	if ( need_Serial_Port[ SERIAL_PORT ] )
 	{
-		eprint( FATAL, "s_band: Serial port %d (i.e. /dev/ttyS%d) is already "
-				"in use by another device.\n",
+		eprint( FATAL, "S_BAND: Serial port %d (i.e. /dev/ttyS%d) is already "
+				"in use by another device.",
 				SERIAL_PORT, SERIAL_PORT );
 		THROW( EXCEPTION );
 	}
@@ -231,8 +229,8 @@ int s_band_exp_hook( void )
 
 	if ( ! magnet_init( ) )
 	{
-		eprint( FATAL, "s_band: Can't access the S-band magnet power "
-				"supply.\n" );
+		eprint( FATAL, "S_BAND: Can't access the S-band magnet power "
+				"supply." );
 		THROW( EXCEPTION );
 	}
 
@@ -295,16 +293,16 @@ Var *magnet_setup( Var *v )
 	{
 		if ( VALUE( v ) < S_BAND_WITH_ER035M_MIN_FIELD )
 		{
-			eprint( FATAL, "%s:%ld: Start field (%lf G) too low for Bruker "
-					"ER035M gaussmeter, minimum is %d G.\n", Fname, Lc,
+			eprint( FATAL, "%s:%ld: S_BAND: Start field (%lf G) too low for "
+					"Bruker ER035M gaussmeter, minimum is %d G.", Fname, Lc,
 					VALUE( v ), ( int ) S_BAND_WITH_ER035M_MIN_FIELD );
 			THROW( EXCEPTION );
 		}
         
 		if ( VALUE( v ) > S_BAND_WITH_ER035M_MAX_FIELD )
 		{
-			eprint( FATAL, "%s:%ld: Start field (%lf G) too high for Bruker "
-					"ER035M gaussmeter, maximum is %d G.\n", Fname, Lc,
+			eprint( FATAL, "%s:%ld: S_BAND: Start field (%lf G) too high for "
+					"Bruker ER035M gaussmeter, maximum is %d G.", Fname, Lc,
 					VALUE( v ), ( int ) S_BAND_WITH_ER035M_MAX_FIELD );
 			THROW( EXCEPTION );
 		}
@@ -314,26 +312,26 @@ Var *magnet_setup( Var *v )
 	{
 		if ( VALUE( v ) < S_BAND_WITH_BH15_MIN_FIELD )
 		{
-			eprint( FATAL, "%s:%ld: Start field (%lf G) too low for Bruker "
-					"BH15 field controller, minimum is %d G.\n", Fname, Lc,
-					VALUE( v ), ( int ) S_BAND_WITH_BH15_MIN_FIELD );
+			eprint( FATAL, "%s:%ld: S_BAND: Start field (%lf G) too low for "
+					"Bruker BH15 field controller, minimum is %d G.", Fname,
+					Lc, VALUE( v ), ( int ) S_BAND_WITH_BH15_MIN_FIELD );
 			THROW( EXCEPTION );
 		}
         
 		if ( VALUE( v ) > S_BAND_WITH_BH15_MAX_FIELD )
 		{
-			eprint( FATAL, "%s:%ld: Start field (%lf G) too high for Bruker "
-					"BH15 field controller, maximum is %d G.\n", Fname, Lc,
-					VALUE( v ), ( int ) S_BAND_WITH_BH15_MAX_FIELD );
+			eprint( FATAL, "%s:%ld: S_BAND: Start field (%lf G) too high for "
+					"Bruker BH15 field controller, maximum is %d G.", Fname,
+					Lc, VALUE( v ), ( int ) S_BAND_WITH_BH15_MAX_FIELD );
 			THROW( EXCEPTION );
 		}
 	}
 
 	if ( VALUE( v->next ) < S_BAND_MIN_FIELD_STEP )
 	{
-		eprint( FATAL, "%s:%ld: Field sweep step size (%lf G) too small, "
-				"minimum is %f G.\n", Fname, Lc,
-				VALUE( v->next ), ( int ) S_BAND_MIN_FIELD_STEP );
+		eprint( FATAL, "%s:%ld: S_BAND: Field sweep step size (%lf G) too "
+				"small, minimum is %f G.", Fname, Lc, VALUE( v->next ),
+				( double ) S_BAND_MIN_FIELD_STEP );
 		THROW( EXCEPTION );
 	}
 		
@@ -369,16 +367,16 @@ Var *set_field( Var *v )
 	{
 		if ( VALUE( v ) < S_BAND_WITH_ER035M_MIN_FIELD )
 		{
-			eprint( FATAL, "%s:%ld: Field (%lf G) too low for Bruker ER035M "
-					"gaussmeter, minimum is %d G.\n", Fname, Lc,
+			eprint( FATAL, "%s:%ld: S_BAND: Field (%lf G) too low for Bruker "
+					"ER035M gaussmeter, minimum is %d G.", Fname, Lc,
 					VALUE( v ), ( int ) S_BAND_WITH_ER035M_MIN_FIELD );
 			THROW( EXCEPTION );
 		}
         
 		if ( magnet.field > S_BAND_WITH_ER035M_MAX_FIELD )
 		{
-			eprint( FATAL, "%s:%ld: Field (%lf G) too high for Bruker ER035M "
-					"gaussmeter, maximum is %d G.\n", Fname, Lc,
+			eprint( FATAL, "%s:%ld: S_BAND: Field (%lf G) too high for Bruker "
+					"ER035M gaussmeter, maximum is %d G.", Fname, Lc,
 					VALUE( v ), ( int ) S_BAND_WITH_ER035M_MAX_FIELD );
 			THROW( EXCEPTION );
 		}
@@ -388,16 +386,16 @@ Var *set_field( Var *v )
 	{
 		if ( VALUE( v ) < S_BAND_WITH_BH15_MIN_FIELD )
 		{
-			eprint( FATAL, "%s:%ld: Field (%lf G) too low for Bruker BH15 "
-					"field controller, minimum is %d G.\n", Fname, Lc,
+			eprint( FATAL, "%s:%ld: S_BAND: Field (%lf G) too low for Bruker "
+					"BH15 field controller, minimum is %d G.", Fname, Lc,
 					VALUE( v ), ( int ) S_BAND_WITH_BH15_MIN_FIELD );
 			THROW( EXCEPTION );
 		}
         
 		if ( magnet.field > S_BAND_WITH_BH15_MAX_FIELD )
 		{
-			eprint( FATAL, "%s:%ld: Field (%lf G) too high for Bruker BH15 "
-					"field controller, maximum is %d G.\n", Fname, Lc,
+			eprint( FATAL, "%s:%ld: S_BAND: Field (%lf G) too high for Bruker "
+					"BH15 field controller, maximum is %d G.", Fname, Lc,
 					VALUE( v ), ( int ) S_BAND_WITH_BH15_MAX_FIELD );
 			THROW( EXCEPTION );
 		}
@@ -409,7 +407,7 @@ Var *set_field( Var *v )
 	{
 		if ( ! magnet_goto_field( VALUE( v ) ) )
 		{
-			eprint( FATAL, "s_band: Can't reach requested field of %lf G.\n",
+			eprint( FATAL, "S_BAND: Can't reach requested field of %lf G.",
 					VALUE( v ) );
 			THROW( EXCEPTION );
 		}
@@ -427,7 +425,7 @@ Var *sweep_up( Var *v )
 
 	if ( ! magnet.is_field_step )
 	{
-		eprint( FATAL, "%s:%ld: Sweep step size has not been defined.\n",
+		eprint( FATAL, "%s:%ld: S_BAND: Sweep step size has not been defined.",
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -455,7 +453,7 @@ Var *sweep_down( Var *v )
 
 	if ( ! magnet.is_field_step )
 	{
-		eprint( FATAL, "%s:%ld: Sweep step size has not been defined.\n",
+		eprint( FATAL, "%s:%ld: S_BAND: Sweep step size has not been defined.",
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -482,7 +480,7 @@ Var *reset_field( Var *v )
 
 	if ( ! magnet.is_field )
 	{
-		eprint( FATAL, "%s:%ld: Start field has not been defined.\n",
+		eprint( FATAL, "%s:%ld: S_BAND: Start field has not been defined.",
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -914,7 +912,7 @@ bool magnet_do( int command )
 			break;
 
 		default :
-			eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s:%d.\n",
+			eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s:%d.",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}

@@ -455,7 +455,7 @@ void test_file( FL_OBJECT *a, long b )
 		user_break = SET;
 		delete_devices( );                       /* run the exit hooks ! */
 		eprint( FATAL, "Program test aborted, received user break at "
-				"%s:%ld.\n", Fname, Lc );
+				"%s:%ld.", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 

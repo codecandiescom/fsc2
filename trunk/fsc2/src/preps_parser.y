@@ -92,7 +92,7 @@ line:    P_TOK prop
                                      assert( Var_Stack == NULL ); }
        | FUNC_TOKEN '(' list2 ')'  { vars_pop( func_call( $1 ) ); }
        | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
-											 "predefined function.\n",
+											 "predefined function.",
 											 Fname, Lc, $1->name );
 	                                 THROW( EXCEPTION ); }
 ;
@@ -132,11 +132,11 @@ expr:    INT_TOKEN unit           { $$ = apply_unit( vars_push( INT_VAR, $1 ),
          unit                     { $$ = apply_unit( CV, $6 ); }
        | VAR_REF                  { $$ = $1; }
        | VAR_TOKEN '('            { eprint( FATAL, "%s:%ld: `%s' isn't a "
-											"function.\n", Fname, Lc,
+											"function.", Fname, Lc,
 											$1->name );
 	                                 THROW( EXCEPTION ); }
        | FUNC_TOKEN '['           { eprint( FATAL, "%s:%ld: `%s' is a "
-											"predefined function.\n",
+											"predefined function.",
 											Fname, Lc, $1->name );
 	                                THROW( EXCEPTION ); }
        | expr AND expr       	  { $$ = vars_comp( COMP_AND, $1, $3 ); }
@@ -201,9 +201,9 @@ void prepserror ( const char *s )
 
 	if ( *prepstext == '\0' )
 		eprint( FATAL, "%s:%ld: Unexpected end of file in PREPARATIONS "
-				"section.\n", Fname, Lc );
+				"section.", Fname, Lc );
 	else
-		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.\n",
+		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.",
 				Fname, Lc, prepstext );
 	THROW( EXCEPTION );
 }

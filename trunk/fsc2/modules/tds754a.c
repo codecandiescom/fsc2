@@ -3,106 +3,11 @@
 */
 
 
-#include "fsc2.h"
-#include "gpib.h"
 
+#define TDS754A_MAIN
 
-#define DEVICE_NAME "TDS754A"      /* compare entry in /etc/gpib.conf ! */
+#include "tds754a.h"
 
-
-
-/* declaration of exported functions */
-
-int tds754a_init_hook( void );
-int tds754a_test_hook( void );
-int tds754a_end_of_test_hook( void );
-int tds754a_exp_hook( void );
-int tds754a_end_of_exp_hook( void );
-void tds754a_exit_hook( void );
-
-
-Var *digitizer_define_window( Var *v );
-Var *digitizer_timebase( Var *v );
-Var *digitizer_num_averages( Var *v );
-Var *digitizer_get_channel_number( Var *v );
-Var *digitizer_set_trigger_channel( Var *v );
-
-
-/* declaration of internally used functions */
-
-static bool tds754a_init( const char *name );
-static double tds754a_get_timebase( void );
-static bool tds754a_set_timebase( double timebase);
-static bool tds754a_get_record_length( long *ret );
-static bool tds754a_get_trigger_pos( double *ret );
-static long tds754a_get_num_avg( void );
-static bool tds754a_set_num_avg( long num_avg );
-static int tds754a_get_acq_mode(void);
-static bool tds754a_get_cursor_distance( double *cd );
-static void tds754a_gpib_failure( void );
-static const char *tds754a_ptime( double time );
-static void delete_windows( void );
-static void tds754a_do_pre_exp_checks( void );
-static bool tds754a_clear_SESR( void );
-static void tds754a_finished( void );
-
-
-
-typedef struct _W {
-	long num;
-	double start;
-	double width;
-	bool is_width;
-	struct _W * next;
-} WINDOW;
-
-
-typedef struct
-{
-	int device;
-
-	double timebase;
-	bool is_timebase;
-
-	double num_avg;
-	bool is_num_avg;
-
-	WINDOW *w;
-	int num_windows;
-
-	long rec_len;
-	double trig_pos;
-
-} TDS754A;
-
-
-static TDS754A tds754a;
-
-enum {
-	SAMPLE,
-	AVERAGE
-};
-
-
-#define TDS_POINTS_PER_DIV 50
-
-const char *Channel_Names[ ] = { "CH1", "CH2", "CH3", "CH4", "AUX",
-								 "MATH1", "MATH2", "MATH3", "REF1",
-								 "REF2", "REF3", "REF4" };
-#define MAX_CHANNELS  11         /* number of channel names */
-
-#define TDS754A_CH1    0
-#define TDS754A_CH2    1
-#define TDS754A_CH3    2
-#define TDS754A_CH4    3
-#define TDS754A_AUX    4
-#define TDS754A_MATH1  5
-#define TDS754A_MATH2  6
-#define TDS754A_MATH3  7
-#define TDS754A_REF1   8
-#define TDS754A_REF2   9
-#define TDS754A_REF3  10
-#define TDS754A_REF4  11
 
 
 
@@ -202,7 +107,6 @@ int tds754a_end_of_exp_hook( void )
 {
 #ifndef MAX_DEBUG
 	tds754a_finished( );
-	gpib_local( tds754a.device );
 #endif
 
 	return 1;
@@ -216,7 +120,7 @@ int tds754a_end_of_exp_hook( void )
 
 void tds754a_exit_hook( void )
 {
-	delete_windows( );
+	tds754a_delete_windows( );
 }
 
 
@@ -324,6 +228,7 @@ Var *digitizer_define_window( Var *v )
 	else
 		w->is_width = UNSET;
 
+	w->is_used = UNSET;
 	tds754a.num_windows++;
 
 	return vars_push( INT_VAR, 1 );
@@ -450,8 +355,10 @@ Var *digitizer_num_averages( Var *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* This is not a function that users should usually call but a function  */
+/* that allows the parser to convert symbolic channel names into numbers */
+/*-----------------------------------------------------------------------*/
 
 Var *digitizer_get_channel_number( Var *v )
 {
@@ -468,7 +375,6 @@ Var *digitizer_get_channel_number( Var *v )
 }
 
 
-
 /*-------------------------------------------------------------------*/
 /* digitizer_set_trigger_channel() sets the channel that is used for */
 /* triggering.                                                       */
@@ -476,16 +382,33 @@ Var *digitizer_get_channel_number( Var *v )
 /*-------------------------------------------------------------------*/
 
 
-Var *digitizer_set_trigger_channel( Var *v )
+Var *digitizer_trigger_channel( Var *v )
 {
-    char cmd[ 40 ] = "TRIG:MAI:EDGE:SOU ";
+	if ( v == NULL )
+	{
+		if ( TEST_RUN )
+		{
+			if ( tds754a.is_trigger_channel )
+				return vars_push( INT_VAR, tds754a.trigger_channel );
+			else
+				return vars_push( INT_VAR, 0 );
+		}
+		else if ( I_am == PARENT )
+		{
+			eprint( FATAL, "%s:%ld: TDS754A: Function "
+					"`digitizer_trigger_channel' with no argument can only be "
+					"used in the EXPERIMENT section.", Fname, Lc );
+			THROW( EXCEPTION );
+		}
 
+		return vars_push( tds754a_get_trigger_channel( ) );
+	}
 
 	vars_check( v, INT_VAR );
 
 	if ( v->val.lval < 0 || v->val.lval >= MAX_CHANNELS )
 	{
-		eprint( FATAL, "%s:%ld: TDS754A: Invalid channel name.\n",
+		eprint( FATAL, "%s:%ld: TDS754A: Invalid trigger channel name.\n",
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -493,8 +416,12 @@ Var *digitizer_set_trigger_channel( Var *v )
     switch ( v->val.lval )
     {
         case TDS754A_CH1 : case TDS754A_CH2 : case TDS754A_CH3 :
-		case TDS754A_CH4 : case TDS754A_AUX :
-            strcat( cmd, Channel_Names[ v->val.lval ] );
+		case TDS754A_CH4 : case TDS754A_AUX : case TDS754A_LIN :
+			tds754a.trigger_channel = v->val.lval;
+			if ( I_am == CHILD )
+				tds754a_set_trigger_channel( Channel_Names[ v->val.lval ] );
+			if ( ! TEST_RUN )
+				tds754a.is_trigger_channel = SET;
             break;
 
 		default :
@@ -504,485 +431,6 @@ Var *digitizer_set_trigger_channel( Var *v )
 			THROW( EXCEPTION );
     }
 
-    if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds754a_gpib_failure( );		
-
+	vars_pop( v );
 	return vars_push( INT_VAR, 1 );
-}
-
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
-
-static bool tds754a_init( const char *name )
-{
-	if ( gpib_init_device( name, &tds754a.device ) == FAILURE )
-        return FAIL;
-
-	/* Set digitzer into local lockout state */
-
-	gpib_lock( tds754a.device );
-
-    /* Set digitizer to short form of replies */
-
-    if ( gpib_write( tds754a.device, "VERB OFF", 8 ) == FAILURE ||
-         gpib_write( tds754a.device, "HEAD OFF", 8 ) == FAILURE )
-	{
-		gpib_local( tds754a.device );
-        return FAIL;
-	}
-
-    /* Get record length and trigger position */
-
-    if ( ! tds754a_get_record_length( &tds754a.rec_len ) ||
-         ! tds754a_get_trigger_pos( &tds754a.trig_pos ) )
-	{
-		gpib_local( tds754a.device );
-        return FAIL;
-	}
-
-    /* Set format of data transfer (binary, INTEL format) */
-
-    if ( gpib_write( tds754a.device, "DAT:ENC SRI", 11 ) == FAILURE ||
-         gpib_write( tds754a.device, "DAT:WID 2", 9 )    == FAILURE )
-	{
-		gpib_local( tds754a.device );
-        return FAIL;
-	}
-		
-    /* Set unit for cursor setting commands to seconds, cursor types to VBAR
-       and mode to independent */
-
-    if ( gpib_write( tds754a.device, "CURS:FUNC VBA", 13 )       == FAILURE ||
-         gpib_write( tds754a.device, "CURS:MOD IND", 12 )        == FAILURE ||
-         gpib_write( tds754a.device, "CURS:VBA:UNITS SECO", 19 ) == FAILURE )
-    {
-        gpib_local( tds754a.device );
-        return FAIL;
-    }
-
-    /* Switch off repetitive acquisition mode */
-
-	if ( gpib_write( tds754a.device, "ACQ:REPE OFF", 12 ) == FAILURE )
-    {
-        gpib_local( tds754a.device );
-        return FAIL;
-    }
-
-	/* Check if the the time base has been set in the test run, if so send it
-	   to the device, otherwise get it */
-
-	if ( tds754a.is_timebase )
-		tds754a_set_timebase( tds754a.timebase );
-	else
-		tds754a.timebase = tds754a_get_timebase( );
-
-	/* If the number of averages has been set in the PREPARATIONS section send
-       to the digitizer now */
-
-	if ( tds754a.is_num_avg == SET )
-		tds754a_set_num_avg( tds754a.num_avg );
-
-    /* Switch to running until run/stop button is pressed and start running */
-
-    if ( gpib_write( tds754a.device, "ACQ:STOPA RUNST", 15 ) == FAILURE ||
-         gpib_write( tds754a.device, "ACQ:STATE RUN", 13 ) == FAILURE )
-    {
-        gpib_local( tds754a.device );
-        return( FAIL );
-    }
-
-    /* Now we still have to prepare the digitzer for the measurement:
-       1. set mode that digitizer stops after the number of averages set
-       2. set OPC (operation complete) bit in Device Event Status Enable
-          Register (DESER) -> corresponding bit in Standard Event Status
-          Register (SESR) can be set
-       3. set OPC bit also in Event Status Enable Register (ESER) ->
-          ESB bit in status byte register can be set
-       4. set ESB bit in Service Request Enable Register (SRER)-> SRQ can
-          be flagged due to a set ESB-bit in Status Byte Register (SBR)
-       5. restrict set area for measurements to the area between the cursors
-    */
-
-    if ( gpib_write( tds754a.device, "ACQ:STOPA SEQ", 13 ) == FAILURE ||
-         gpib_write( tds754a.device, "DESE 1", 6 )         == FAILURE ||
-         gpib_write( tds754a.device, "*ESE 1", 6 )         == FAILURE ||
-         gpib_write( tds754a.device, "*SRE 32", 7 )        == FAILURE ||
-         gpib_write( tds754a.device, "DAT SNA", 7 )        == FAILURE ||
-         gpib_write( tds754a.device, "MEASU:GAT ON", 12 ) == FAILURE )
-    {
-        gpib_local( tds754a.device );
-        return FAIL;
-    }
-
-	return OK;
-}
-
-
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
-
-static double tds754a_get_timebase( void )
-{
-	char reply[ 30 ];
-	long length;
-
-
-	if ( gpib_write( tds754a.device, "HOR:MAI:SCA?", 12 ) == FAILURE ||
-		 gpib_read( tds754a.device, reply, &length ) == FAILURE )
-		tds754a_gpib_failure( );
-
-	reply[length - 1] = '\0';
-	return atof( reply );
-}
-
-
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
-
-static bool tds754a_set_timebase( double timebase )
-{
-	char command[40] = "HOR:MAI:SCA ";
-
-
-	gcvt( timebase, 6, command + strlen( command ) );
-	if ( gpib_write( tds754a.device, command, strlen( command ) ) == FAILURE )
-		tds754a_gpib_failure( );
-
-	return OK;
-}
-
-
-/*----------------------------------------------------------------*/
-/* tds754a_get_record_length() returns the current record length. */
-/*----------------------------------------------------------------*/
-
-static bool tds754a_get_record_length( long *ret )
-{
-    char reply[ 30 ];
-    long length = 30;
-
-
-    if ( gpib_write( tds754a.device, "HOR:RECO?", 9 ) == FAILURE ||
-         gpib_read( tds754a.device, reply, &length ) == FAILURE )
-        return FAIL;
-
-    reply[ length - 1 ] = '\0';
-    *ret = strtol( reply, NULL, 10 );
-    return OK;
-}
-
-/*-----------------------------------------------------------------*/
-/* tds754a_get_trigger_pos() returns the current trigger position. */
-/*-----------------------------------------------------------------*/
-
-static bool tds754a_get_trigger_pos( double *ret )
-{
-    char reply[ 30 ];
-    long length = 30;
-
-
-    if ( gpib_write( tds754a.device, "HOR:TRIG:POS?", 13 ) == FAILURE ||
-         gpib_read( tds754a.device, reply, &length ) == FAILURE )
-        return FAIL;
-
-    reply[ length - 1 ] = '\0';
-    *ret = 0.01 * atof( reply );
-    return OK;
-}
-
-
-/*-----------------------------------------*/
-/* Function returns the number of averages */
-/*-----------------------------------------*/
-
-static long tds754a_get_num_avg( void )
-{
-	char reply[30];
-	long length = 30;
-
-
-	if ( tds754a_get_acq_mode() == AVERAGE )
-	{
-		if ( gpib_write( tds754a.device,"ACQ:NUMAV?", 10 ) == FAILURE ||
-			 gpib_read( tds754a.device, reply, &length) == FAILURE )
-			tds754a_gpib_failure( );
-
-		reply[length - 1] = '\0';
-		return atol(reply);
-	}
-	else                            	/* digitizer is in sample mode */
-		return 1;
-}
-
-
-/*-----------------------------------------*/
-/* Function returns the number of averages */
-/*-----------------------------------------*/
-
-static bool tds754a_set_num_avg( long num_avg )
-{
-	char cmd[ 30 ];
-
-
-	/* With number of acquisitions set to zero simply stop the digitizer */
-
-	if ( num_avg == 0 )
-	{
-		if ( gpib_write( tds754a.device, "ACQ:STATE STOP", 14 ) == FAILURE )
-			tds754a_gpib_failure( );
-		return OK;
-	}
-
-	/* With number of acquisitions switch to sample mode, for all other numbers
-	   set the number of acquisitions and switch to average mode */
-
-	if ( num_avg == 1 )
-	{
-		if ( gpib_write( tds754a.device, "ACQ:MOD SAM", 11 ) == FAILURE )
-			tds754a_gpib_failure( );
-	}
-	else
-	{
-		strcpy(cmd, "ACQ:NUMAV ");
-		sprintf( cmd + strlen( cmd ), "%ld", num_avg );
-		if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE ||
-			 gpib_write( tds754a.device, "ACQ:MOD AVE", 11 ) == FAILURE )
-			tds754a_gpib_failure( );
-	}
-
-	/* Finally restart the digitizer */
-
-	if ( gpib_write( tds754a.device, "ACQ:STATE RUN", 13 ) == FAILURE )
-		tds754a_gpib_failure( );
-
-	return OK;
-}
-
-/*-------------------------------------------------------------------------*/
-/* Function returns the data acquisition mode. If the digitizer is neither */
-/* in average nor in sample mode, it is switched to sample mode.           */ 
-/*-------------------------------------------------------------------------*/
-
-static int tds754a_get_acq_mode(void)
-{
-	char reply[30];
-	long length;
-
-
-	if ( gpib_write( tds754a.device, "ACQ:MOD?", 8 ) == FAILURE ||
-		 gpib_read ( tds754a.device, reply, &length ) == FAILURE )
-		tds754a_gpib_failure( );
-
-	if ( *reply == 'A' )		/* digitizer is in average mode */
-		return AVERAGE;
-
-	if ( *reply != 'S' )		/* if not in sample mode set it */
-	{
-		if ( gpib_write( tds754a.device,"ACQ:MOD SAM", 11 ) == FAILURE )
-			tds754a_gpib_failure( );
-	}
-
-	return SAMPLE;
-}
-
-
-/*----------------------------------------------------*/
-/* tds754a_get_cursor_distance() returns the distance */
-/* between the two cursors.                           */
-/*----------------------------------------------------*/
-
-static bool tds754a_get_cursor_distance( double *cd )
-{
-    char reply[ 30 ];
-    long length;
-
-
-    if ( gpib_write( tds754a.device, "CURS:VBA:POSITION2?", 19 ) == FAILURE ||
-         gpib_read( tds754a.device, reply, &length ) == FAILURE )
-		tds754a_gpib_failure( );
-
-    reply[ length - 1 ] = '\0';
-    *cd = atof( reply );
-
-    length = 30;
-    if ( gpib_write( tds754a.device, "CURS:VBA:POSITION1?", 19 ) == FAILURE ||
-         gpib_read( tds754a.device, reply, &length ) == FAILURE )
-		tds754a_gpib_failure( );
-
-    reply[ length - 1 ] = '\0';
-    *cd -= atof( reply );
-
-    return OK;
-}
-
-
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
-
-static void tds754a_gpib_failure( void )
-{
-	eprint( FATAL, "TDS754A: Communication with device failed." );
-	THROW( EXCEPTION );
-}
-
-
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
-
-static const char *tds754a_ptime( double time )
-{
-	static char buffer[ 128 ];
-
-	if ( fabs( time ) >= 1.0 )
-		sprintf( buffer, "%g s", time );
-	else if ( fabs( time ) >= 1.e-3 )
-		sprintf( buffer, "%g ms", 1.e3 * time );
-	else if ( fabs( time ) >= 1.e-6 )
-		sprintf( buffer, "%g us", 1.e6 * time );
-	else
-		sprintf( buffer, "%g ns", 1.e9 * time );
-
-	return buffer;
-}
-
-
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
-
-static void delete_windows( void )
-{
-	WINDOW *w;
-
-	while ( tds754a.w != NULL )
-	{
-		w = tds754a.w;
-		tds754a.w = w->next;
-		T_free( w );
-	}
-}
-
-
-static void tds754a_do_pre_exp_checks( void )
-{
-	WINDOW *w;
-    double width, window, dcd, dtb, fac;
-    long tb, cd;
-
-
-	/* Test if for all window the width is set */
-
-	for ( w = tds754a.w; w != NULL; w = w->next )
-		if ( ! w->is_width )
-			break;
-
-	/* If not get the distance of the cursors on the digitizers screen and
-	   use it as the default width. */
-
-	if ( w != NULL )
-	{
-		tds754a_get_cursor_distance( &width );
-
-		if ( width == 0.0 )
-		{
-			eprint( FATAL, "TDS754A: Can't determine a reasonable value for "
-					"the missing window widths." );
-			THROW( EXCEPTION );
-		}
-
-		for ( w = tds754a.w; w != NULL; w = w->next )
-		{
-			if ( ! w->is_width )
-			{
-				w->width = width;
-				w->is_width = SET;
-			}
-		}
-	}
-
-	/* It's not possible to set arbitrary cursor distances - they've got to be
-	   multiples of the smallest time resolution of the digitizer, which is
-	   1 / TDS_POINTS_PER_DIV of the time base. In the following it is tested
-	   if the requested cursor distance fit this requirement and if not the
-	   values are readjusted. */
-
-	for ( w = tds754a.w; w != NULL; w = w->next )
-	{
-		dcd = w->width;
-		dtb = tds754a.timebase;
-		fac = 1.0;
-		while ( fabs( dcd ) < 1.0 )
-		{
-			dcd *= 1000.0;
-			dtb *= 1000.0;
-			fac *= 0.001;
-		}
-		cd = lround( TDS_POINTS_PER_DIV * dcd );
-		tb = lround( dtb );
-
-		if ( labs( cd ) < tb )
-		{
-			w->width = tds754a.timebase / TDS_POINTS_PER_DIV;
-			eprint( SEVERE, "TDS754A: Width of window %ld has to be "
-					"readjusted to %s.", w->num, tds754a_ptime( w->width  ) );
-		}
-		else if ( cd % tb )
-		{
-			cd = ( cd / tb ) * tb;
-			dcd = cd * fac / TDS_POINTS_PER_DIV;
-			eprint( SEVERE, "TDS754A; Width of window %ld has to be "
-					"readjusted to %s.", w->num, tds754a_ptime( dcd ) );
-			w->width = dcd;
-		}
-	}
-
-	/* Next check: Test if the windows fit into the measurement window */
-
-    window = tds754a.timebase * tds754a.rec_len / TDS_POINTS_PER_DIV;
-
-    for ( w = tds754a.w; w != NULL; w = w->next )
-    {
-        if ( w->start > ( 1.0 - tds754a.trig_pos ) * window ||
-             w->start + w->width > ( 1.0 - tds754a.trig_pos ) * window ||
-             w->start < - tds754a.trig_pos * window ||
-             w->start + w->width < - tds754a.trig_pos * window )
-        {
-			eprint( FATAL, "TDS754A: Window %ld doesn't fit into current "
-					"digitizer time range.", w->num );
-			THROW( EXCEPTION );
-		}
-    }
-}
-
-/*-------------------------------------------------------------------*/
-/* tds754a_clear_SESR() reads the the standard event status register */
-/* and thereby clears it - if this isn't done no SRQs are flagged !  */
-/*-------------------------------------------------------------------*/
-
-static bool tds754a_clear_SESR( void )
-{
-    char reply[ 30 ];
-    long length = 30;
-
-
-    if ( gpib_write( tds754a.device, "*ESR?", 5 ) == FAILURE ||
-		 gpib_read( tds754a.device, reply, &length ) == FAILURE )
-		tds754a_gpib_failure( );
-
-	return OK;
-}
-
-
-/*-----------------------------------------------------------------------*/
-/* tds754a_finished() does all the work after an experiment is finished. */
-/*-----------------------------------------------------------------------*/
-
-static void tds754a_finished( void )
-{
-    tds754a_clear_SESR( );
-    gpib_write( tds754a.device, "ACQ:STATE STOP", 14 );
-
-    gpib_write( tds754a.device, "*SRE 0", 5 );
-    gpib_write( tds754a.device, "ACQ:STOPA RUNST", 15 );
-    gpib_write( tds754a.device, "ACQ:STATE RUN", 13 );
-    gpib_write( tds754a.device, "LOC NON", 7 ); 
 }

@@ -251,7 +251,7 @@ Var *func_get_long( const char *name, int *access, bool flag )
 				if ( ! flag )
 				{
 					eprint( FATAL, "%s:%ld: Function `%s' has not been "
-							"loaded.\n", Fname, Lc, Fncts[ i ].name );
+							"loaded.", Fname, Lc, Fncts[ i ].name );
 					THROW( EXCEPTION );
 				}
 				return NULL;
@@ -287,7 +287,7 @@ Var *func_call( Var *f )
 	if ( f->type != FUNC )
 	{
 		eprint( FATAL, "%s:%ld: Variable passed to `func_call()' isn't "
-				"of type `FUNC'.\n", Fname, Lc );
+				"of type `FUNC'.", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -298,7 +298,7 @@ Var *func_call( Var *f )
 	if ( i == Num_Func )
 	{
 		eprint( FATAL, "%s:%ld: Variable passed to `func_call()' is not "
-				"a valid function.\n", Fname, Lc );
+				"a valid function.", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -317,7 +317,7 @@ Var *func_call( Var *f )
 
 		if ( ac > f->dim )
 		{
-			eprint( SEVERE, "%s:%ld: Too many arguments for function `%s'.\n",
+			eprint( SEVERE, "%s:%ld: Too many arguments for function `%s'.",
 					Fname, Lc, f->name );
 
 			for ( ac = 0, ap = f->next; ac < f->dim; ++ac, ap = ap->next )
@@ -331,7 +331,7 @@ Var *func_call( Var *f )
 		if ( ac < f->dim )
 		{
 			eprint( FATAL, "%s:%ld: Function `%s' needs %d arguments but "
-					"found only %d.\n",
+					"found only %d.",
 					Fname, Lc, f->name, f->dim, ac );
 			THROW( EXCEPTION );
 		}
@@ -374,7 +374,7 @@ Var *f_int( Var *v )
 	else
 	{
 		if ( v->val.dval > LONG_MAX || v->val.dval < LONG_MIN )
-			eprint( SEVERE, "%s:%ld: Integer overflow in function `int()'.\n",
+			eprint( SEVERE, "%s:%ld: Integer overflow in function `int()'.",
 					Fname, Lc );
 		return vars_push( INT_VAR, ( long ) v->val.dval );
 	}
@@ -410,7 +410,7 @@ Var *f_round( Var *v )
 	{
 		if ( v->val.dval >= LONG_MAX - 0.5 || v->val.dval <= LONG_MIN + 0.5 )
 			eprint( SEVERE, "%s:%ld: Integer overflow in function "
-					"`round()'.\n", Fname, Lc );
+					"`round()'.", Fname, Lc );
 		return vars_push( INT_VAR,   ( long ) ( 2 * v->val.dval )
                                    - ( long ) v->val.dval );
 	}
@@ -431,7 +431,7 @@ Var *f_floor( Var *v )
 	{
 		if ( v->val.dval < LONG_MIN )
 			eprint( SEVERE, "%s:%ld: Integer overflow in function "
-					"`floor()'.\n", Fname, Lc );
+					"`floor()'.", Fname, Lc );
 		return vars_push( INT_VAR, ( long ) floor( v->val.dval ) );
 	}
 }
@@ -451,7 +451,7 @@ Var *f_ceil( Var *v )
 	{
 		if ( v->val.dval > LONG_MAX )
 			eprint( SEVERE, "%s:%ld: Integer overflow in function "
-					"`ceil()'.\n", Fname, Lc );
+					"`ceil()'.", Fname, Lc );
 		return vars_push( INT_VAR, ( long ) ceil( v->val.dval ) );
 	}
 }
@@ -468,7 +468,7 @@ Var *f_abs( Var *v )
 	if ( v->type == INT_VAR )
 	{
 		if ( v->val.lval == LONG_MIN )
-			eprint( SEVERE, "%s:%ld: Integer overflow in function `abs()'.\n",
+			eprint( SEVERE, "%s:%ld: Integer overflow in function `abs()'.",
 					Fname, Lc );
 		return vars_push( INT_VAR, labs( v->val.lval ) );
 	}
@@ -523,7 +523,7 @@ Var *f_tan( Var *v )
 		res = tan( v->val.dval );
 
 	if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
-		eprint( SEVERE, "%s:%ld: Overflow in function `tan()'.\n", Fname, Lc );
+		eprint( SEVERE, "%s:%ld: Overflow in function `tan()'.", Fname, Lc );
 
 	return vars_push( FLOAT_VAR, res );
 }
@@ -547,7 +547,7 @@ Var *f_asin( Var *v )
 	if ( fabs( arg ) > 1.0 )
 	{
 		eprint( FATAL, "%s:%ld: Argument of function `asin()' is out of "
-				"range.\n", Fname, Lc );
+				"range.", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -573,7 +573,7 @@ Var *f_acos( Var *v )
 	if ( fabs( arg ) > 1.0 )
 	{
 		eprint( FATAL, "%s:%ld: Argument of function `acos()' is out of "
-				"range.\n",  Fname, Lc );
+				"range.",  Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -612,7 +612,7 @@ Var *f_sinh( Var *v )
 		res = sinh( v->val.dval );
 
 	if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
-		eprint( SEVERE, "%s:%ld: Overflow in function `sinh()'.\n",
+		eprint( SEVERE, "%s:%ld: Overflow in function `sinh()'.",
 				Fname, Lc );
 
 	return vars_push( FLOAT_VAR, res );
@@ -635,7 +635,7 @@ Var *f_cosh( Var *v )
 		res = cosh( v->val.dval );
 
 	if ( res == HUGE_VAL && errno == ERANGE )
-		eprint( SEVERE, "%s:%ld: Overflow in function `cosh()'.\n",
+		eprint( SEVERE, "%s:%ld: Overflow in function `cosh()'.",
 				Fname, Lc );
 
 	return vars_push( FLOAT_VAR, res );
@@ -676,11 +676,11 @@ Var *f_exp( Var *v )
 	res = exp( arg );
 
 	if ( res == 0.0 && errno == ERANGE )
-		eprint( WARN, "%s:%ld: Underflow in function `exp()' - result is 0.\n",
+		eprint( WARN, "%s:%ld: Underflow in function `exp()' - result is 0.",
 				Fname, Lc );
 
 	if ( res == HUGE_VAL && errno == ERANGE )
-		eprint( SEVERE, "%s:%ld: Overflow in function `exp()'.\n", Fname, Lc );
+		eprint( SEVERE, "%s:%ld: Overflow in function `exp()'.", Fname, Lc );
 
 	return vars_push( FLOAT_VAR, res );
 }
@@ -704,14 +704,14 @@ Var *f_ln( Var *v )
 	if ( arg <= 0.0 )
 	{
 		eprint( FATAL, "%s:%ld: Argument of function `ln()' is out of "
-				"range.\n", Fname, Lc );
+				"range.", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
 	res = log( arg );
 
 	if ( res == - HUGE_VAL && errno == ERANGE )
-		eprint( SEVERE, "%s:%ld: Overflow in function `ln()'.\n", Fname, Lc );
+		eprint( SEVERE, "%s:%ld: Overflow in function `ln()'.", Fname, Lc );
 
 	return vars_push( FLOAT_VAR, res );
 }
@@ -735,13 +735,13 @@ Var *f_log( Var *v )
 	if ( arg <= 0.0 )
 	{
 		eprint( FATAL, "%s:%ld: Argument of function `log()' is out of "
-				"range.\n", Fname, Lc );
+				"range.", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 	res = log10( arg );
 
 	if ( res == - HUGE_VAL && errno == ERANGE )
-		eprint( SEVERE, "%s:%ld: Overflow in function `log()'.\n", Fname, Lc );
+		eprint( SEVERE, "%s:%ld: Overflow in function `log()'.", Fname, Lc );
 
 	return vars_push( FLOAT_VAR, res );
 }
@@ -764,7 +764,7 @@ Var *f_sqrt( Var *v )
 
 	if ( arg < 0.0 )
 	{
-		eprint( FATAL, "%s:%ld: Argument of function `sqrt()' is negative.\n", 
+		eprint( FATAL, "%s:%ld: Argument of function `sqrt()' is negative.", 
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -884,13 +884,13 @@ Var *f_print( Var *v )
 
 	if ( on_stack < in_format )
 		eprint( SEVERE, "%s:%ld: Less data than format descriptors in "
-				"`print()' format string.\n", Fname, Lc );
+				"`print()' format string.", Fname, Lc );
 
 	/* utter a warning if there are more data than format descriptors */
 
 	if ( on_stack > in_format )
 		eprint( SEVERE, "%s:%ld: More data than format descriptors in "
-				"`print()' format string.\n", Fname, Lc );
+				"`print()' format string.", Fname, Lc );
 
 	/* count number of `#' */
 
@@ -953,7 +953,7 @@ Var *f_print( Var *v )
 
 			default :
 				eprint( WARN, "%s:%ld: Unknown escape sequence \\%c in "
-						"`print()' format string.\n", Fname, Lc, *( cp + 1 ) );
+						"`print()' format string.", Fname, Lc, *( cp + 1 ) );
 				*cp = *( cp + 1 );
 				break;
 		}
@@ -1048,7 +1048,7 @@ Var *f_wait( Var *v )
 	if ( how_long < 0.0 || how_long > LONG_MAX )
 	{
 		eprint( FATAL, "%s:%ld: Negative time or more than %ld s as argument "
-				"of `wait()' function.\n", Fname, Lc, LONG_MAX );
+				"of `wait()' function.", Fname, Lc, LONG_MAX );
 		THROW( EXCEPTION );
 	}
 
@@ -1134,14 +1134,14 @@ Var *f_init_1d( Var *v )
 	else
 	{
 		eprint( WARN, "%s:%ld: Floating point value used as number of "
-				      "curves in `init_1d()'.\n", Fname, Lc );
+				      "curves in `init_1d()'.", Fname, Lc );
 		G.nc = lround( v->val.dval );
 	}
 
 	if ( G.nc < 1 || G.nc > MAX_CURVES )
 	{
 		eprint( FATAL, "%s:%ld: Invalid number of curves (%ld) in "
-				       "`init_1d()'.\n", Fname, Lc, G.nc );
+				       "`init_1d()'.", Fname, Lc, G.nc );
 		THROW( EXCEPTION );
 	}
 
@@ -1158,7 +1158,7 @@ Var *f_init_1d( Var *v )
 	else
 	{
 		eprint( WARN, "%s:%ld: Floating point value used as number of "
-				      "points in `init_1d()'.\n", Fname, Lc );
+				      "points in `init_1d()'.", Fname, Lc );
 		G.nx = lround( v->val.dval );
 	}
 
@@ -1180,7 +1180,7 @@ Var *f_init_1d( Var *v )
 			 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
 			eprint( FATAL, "%s:%ld: Real word coordinate given but no "
-					       "increment in `init_1d()'.\n" );
+					       "increment in `init_1d()'." );
 			THROW( EXCEPTION );
 		}
 
@@ -1245,14 +1245,14 @@ Var *f_init_2d( Var *v )
 	else
 	{
 		eprint( WARN, "%s:%ld: Floating point value used as number of "
-				      "curves in `init_1d()'.\n", Fname, Lc );
+				      "curves in `init_1d()'.", Fname, Lc );
 		G.nc = lround( v->val.dval );
 	}
 
 	if ( G.nc < 1 || G.nc > MAX_CURVES )
 	{
 		eprint( FATAL, "%s:%ld: Invalid number of curves (%ld) in "
-				"`init_1d()'.\n", Fname, Lc, G.nc );
+				"`init_1d()'.", Fname, Lc, G.nc );
 		THROW( EXCEPTION );
 	}
 
@@ -1269,7 +1269,7 @@ Var *f_init_2d( Var *v )
 	else
 	{
 		eprint( WARN, "%s:%ld: Floating point value used as number of "
-				      "points in x-direction.\n", Fname, Lc );
+				      "points in x-direction.", Fname, Lc );
 		G.nx = lround( v->val.dval );
 	}
 
@@ -1289,7 +1289,7 @@ Var *f_init_2d( Var *v )
 	else
 	{
 		eprint( WARN, "%s:%ld: Floating point value used as number of "
-				      "points in y-direction.\n", Fname, Lc );
+				      "points in y-direction.", Fname, Lc );
 		G.ny = lround( v->val.dval );
 	}
 
@@ -1311,7 +1311,7 @@ Var *f_init_2d( Var *v )
 			 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
 			eprint( FATAL, "%s:%ld: Incomplete real world x coordinates "
-					       "in `init_2d()'.\n", Fname, Lc );
+					       "in `init_2d()'.", Fname, Lc );
 			THROW( EXCEPTION );
 		}
 
@@ -1341,7 +1341,7 @@ Var *f_init_2d( Var *v )
 			 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
 			eprint( FATAL, "%s:%ld: Incomplete real world y coordinates "
-				 	        "in `init_2d()'.\n", Fname, Lc );
+				 	        "in `init_2d()'.", Fname, Lc );
 			THROW( EXCEPTION );
 		}
 
@@ -1402,7 +1402,7 @@ Var *f_display( Var *v )
 		if ( ! G.is_warn )                         /* warn only once */
 		{
 			eprint( WARN, "%s:%ld: Can't display data, missing "
-					"initialisation.\n", Fname, Lc );
+					"initialisation.", Fname, Lc );
 			G.is_warn = SET;
 		}
 
@@ -1453,7 +1453,7 @@ Var *f_display( Var *v )
 
 			default :                   /* this better never happens... */
 				T_free( dp );
-				eprint( FATAL, "Internal communication error at %s:%d.\n",
+				eprint( FATAL, "Internal communication error at %s:%d.",
 						__FILE__, __LINE__ );
 				THROW( EXCEPTION );
 		}
@@ -1468,7 +1468,7 @@ Var *f_display( Var *v )
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
 		T_free( dp );
-		eprint( FATAL, "Internal communication problem at %s:%d.\n",
+		eprint( FATAL, "Internal communication problem at %s:%d.",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -1537,7 +1537,7 @@ Var *f_display( Var *v )
 
 			default :                   /* this better never happens... */
 				T_free( dp );
-				eprint( FATAL, "Internal communication error at %s:%d.\n",
+				eprint( FATAL, "Internal communication error at %s:%d.",
 						__FILE__, __LINE__ );
 				THROW( EXCEPTION );
 		}
@@ -1577,7 +1577,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 	*nsets = 0;
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing x-index in `display()'.\n",
+		eprint( FATAL, "%s:%ld: Missing x-index in `display()'.",
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -1600,7 +1600,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 		if ( dp[ *nsets ].nx < 0 )
 		{
 			T_free( dp );
-			eprint( FATAL, "%s:%ld: Invalid x-index (%ld) in `display()'.\n",
+			eprint( FATAL, "%s:%ld: Invalid x-index (%ld) in `display()'.",
 					Fname, Lc, dp[ *nsets ].nx + ARRAY_OFFSET );
 			THROW( EXCEPTION );
 		}
@@ -1614,7 +1614,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 			if ( v == NULL )
 			{
 				T_free( dp );
-				eprint( FATAL, "%s:%ld: Missing y-index in `display()'.\n",
+				eprint( FATAL, "%s:%ld: Missing y-index in `display()'.",
 						Fname, Lc );
 				THROW( EXCEPTION );
 			}
@@ -1630,7 +1630,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 			{
 				T_free( dp );
 				eprint( FATAL, "%s:%ld: Invalid y-index (%ld) in "
-						"`display()'.\n",
+						"`display()'.",
 						Fname, Lc, dp[ *nsets ].ny + ARRAY_OFFSET );
 				THROW( EXCEPTION );
 			}
@@ -1644,7 +1644,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 		if ( v == NULL )
 		{
 			T_free( dp );
-			eprint( FATAL, "%s:%ld: Missing data in `display()'.\n",
+			eprint( FATAL, "%s:%ld: Missing data in `display()'.",
 					Fname, Lc );
 			THROW( EXCEPTION );
 		}
@@ -1677,7 +1677,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 		{
 			T_free( dp );
 			eprint( FATAL, "%s:%ld: Invalid curve number (%ld) in "
-					"`display()'.\n", Fname, Lc, dp[ *nsets ].nc + 1 );
+					"`display()'.", Fname, Lc, dp[ *nsets ].nc + 1 );
 			THROW( EXCEPTION );
 		}
 
@@ -1744,7 +1744,7 @@ Var *f_clearcv( Var *v )
 		{
 			if ( TEST_RUN )
 				eprint( WARN, "%s:%ld: Floating point value used as curve "
-						"number.\n", Fname, Lc );
+						"number.", Fname, Lc );
 			curve = lround( v->val.dval );
 		}
 
@@ -1754,7 +1754,7 @@ Var *f_clearcv( Var *v )
 		{
 			if ( TEST_RUN )
 				eprint( WARN, "%s:%ld: Can't clear curve %ld, curve does not "
-						"exist.\n", Fname, Lc, curve );
+						"exist.", Fname, Lc, curve );
 
 			if ( ca != NULL )
 				T_free( ca );
@@ -1794,7 +1794,7 @@ Var *f_clearcv( Var *v )
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
 		T_free( ca );
-		eprint( FATAL, "Internal communication problem at %s:%d.\n",
+		eprint( FATAL, "Internal communication problem at %s:%d.",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -1868,7 +1868,7 @@ Var *f_size( Var *v )
 	if ( v->next->type == FLOAT_VAR )
 	{
 		eprint( WARN, "%s:%ld: WARNING: Float value used as index for array "
-				"`%s' in function `size'.\n", Fname, Lc, v->from->name );
+				"`%s' in function `size'.", Fname, Lc, v->from->name );
 		size = ( int ) v->next->val.dval - ARRAY_OFFSET;
 	}
 	else
@@ -1877,7 +1877,7 @@ Var *f_size( Var *v )
 	if ( size >= v->from->dim )
 	{
 		eprint( FATAL, "%s:%ld: Array `%s' has only %d dimensions, can't "
-				"return size of %d. dimension.\n", Fname, Lc, v->from->name,
+				"return size of %d. dimension.", Fname, Lc, v->from->name,
 				v->from->dim, size );
 		THROW( EXCEPTION );
 	}
@@ -1939,7 +1939,7 @@ Var *f_getf( Var *var )
 	if ( No_File_Numbers )
 	{
 		eprint( FATAL, "%s:%ld: Call of `get_filename()' after call of "
-				"`save()' without previous call of `get_filename()'.\n",
+				"`save()' without previous call of `get_filename()'.",
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -2130,14 +2130,14 @@ static int get_save_file( Var **v, const char *calling_function )
 			if ( ( *v )->type != INT_VAR )
 			{
 				eprint( FATAL, "%s:%ld: First argument in `%s' isn't a "
-						"file identifier.\n", Fname, Lc, calling_function );
+						"file identifier.", Fname, Lc, calling_function );
 				THROW( EXCEPTION );
 			}
 			file_num = ( int ) file->val.lval;
 		}
 		else
 		{
-			eprint( WARN, "%s:%ld: Call of `%s' without any arguments.\n",
+			eprint( WARN, "%s:%ld: Call of `%s' without any arguments.",
 					Fname, Lc, calling_function );
 			return -1;
 		}
@@ -2151,13 +2151,13 @@ static int get_save_file( Var **v, const char *calling_function )
 	if ( file_num < 0 )
 	{
 		eprint( WARN, "%s:%ld: File has never been opened, skipping "
-				"`%s' command.\n", Fname, Lc, calling_function );
+				"`%s' command.", Fname, Lc, calling_function );
 		return -1;
 	}
 
 	if ( file_num >= File_List_Len )
 	{
-		eprint( FATAL, "%s:%ld: Invalid file identifier in `%s'.\n",
+		eprint( FATAL, "%s:%ld: Invalid file identifier in `%s'.",
 				Fname, Lc, calling_function );
 		THROW( EXCEPTION );
 	}
@@ -2211,7 +2211,7 @@ Var *f_save( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( WARN, "%s:%ld: Call of `save()' without any data.\n",
+		eprint( WARN, "%s:%ld: Call of `save()' without any data.",
 				Fname, Lc );
 		return vars_push( INT_VAR, 0 );
 	}
@@ -2255,7 +2255,7 @@ Var *f_save( Var *v )
 				if ( v->from->flags && NEED_ALLOC )
 				{
 					eprint( WARN, "%s:%ld: Variable sized array `%s' is still "
-							"undefined - skipping `save()'.\n", 
+							"undefined - skipping `save()'.", 
 							Fname, Lc, v->from->name );
 					break;
 				}
@@ -2343,13 +2343,13 @@ Var *f_fsave( Var *v )
 	if ( v == NULL )
 	{
 		eprint( WARN, "%s:%ld: Call of `fsave()' without format sting and "
-				"data.\n", Fname, Lc );
+				"data.", Fname, Lc );
 		return vars_push( INT_VAR, 0 );
 	}
 
 	if ( v->type != STR_VAR )
 	{
-		eprint( FATAL, "%s:%ld: Missing format string in call of `fsave()'\n",
+		eprint( FATAL, "%s:%ld: Missing format string in call of `fsave()'",
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -2378,13 +2378,13 @@ Var *f_fsave( Var *v )
 
 	if ( on_stack < in_format )
 		eprint( SEVERE, "%s:%ld: Less data than format descriptors in "
-				"`save()' format string.\n", Fname, Lc );
+				"`save()' format string.", Fname, Lc );
 
 	/* Warn if there are more data than format descriptors */
 
 	if ( on_stack > in_format )
 		eprint( SEVERE, "%s:%ld: More data than format descriptors in "
-				"`save()' format string.\n", Fname, Lc );
+				"`save()' format string.", Fname, Lc );
 
 	/* Count number of `#' */
 
@@ -2447,7 +2447,7 @@ Var *f_fsave( Var *v )
 
 			default :
 				eprint( WARN, "%s:%ld: Unknown escape sequence \\%c in "
-						"`save()' format string.\n", Fname, Lc, *( cp + 1 ) );
+						"`save()' format string.", Fname, Lc, *( cp + 1 ) );
 				*cp = *( cp + 1 );
 				break;
 		}

@@ -111,7 +111,7 @@ line:    E_VAR_TOKEN '=' expr      { vars_assign( $3, $1 ); }
                                      assert( Var_Stack == NULL ); }
        | E_FUNC_TOKEN '(' list2 ')'{ vars_pop( func_call( $1 ) ); }
        | E_FUNC_TOKEN '['          { eprint( FATAL, "%s:%ld: `%s' is a "
-											 "predefined function.\n",
+											 "predefined function.",
 											 Fname, Lc, $1->name );
 	                                 THROW( EXCEPTION ); }
        | E_PPOS '=' expr           { p_set( $1, P_POS, $3 ); }
@@ -133,11 +133,11 @@ expr:    E_INT_TOKEN unit          { $$ = apply_unit( vars_push( INT_VAR, $1 ),
          unit                      { $$ = apply_unit( CV, $6 ); }
        | E_VAR_REF                 { $$ = $1; }
        | E_VAR_TOKEN '('           { eprint( FATAL, "%s:%ld: `%s' isn't a "
-											 "function.\n", Fname, Lc,
+											 "function.", Fname, Lc,
 											 $1->name );
 	                                 THROW( EXCEPTION ); }
        | E_FUNC_TOKEN '['          { eprint( FATAL, "%s:%ld: `%s' is a "
-											 "predefined function.\n",
+											 "predefined function.",
 											 Fname, Lc, $1->name );
 	                                 THROW( EXCEPTION ); }
        | E_PPOS                    { $$ = p_get_by_num( $1, P_POS ); }
@@ -207,9 +207,9 @@ int exp_runerror ( const char *s )
 
 	if ( *exptext == '\0' )
 		eprint( FATAL, "%s:%ld: Unexpected end of file in EXPERIMENT "
-				"section.\n", Fname, Lc );
+				"section.", Fname, Lc );
 	else
-		eprint( FATAL, "%s:%ld: Syntax error in EXPERIMENT section.\n",
+		eprint( FATAL, "%s:%ld: Syntax error in EXPERIMENT section.",
 			Fname, Lc );
 	THROW( EXCEPTION );
 }

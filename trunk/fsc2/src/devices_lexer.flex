@@ -140,7 +140,7 @@ WS          [\n\t ]+
 			/* handling of invalid input (i.e. everything else) */
 .           {
 				eprint( FATAL, "%s:%ld: Invalid input in DEVICES section: "
-						"`%s'\n", Fname, Lc, devicestext );
+						"`%s'", Fname, Lc, devicestext );
 				THROW( EXCEPTION );
 			}
 
@@ -166,7 +166,7 @@ int devices_parser( FILE *in )
 	if ( compilation.sections[ DEVICES_SECTION ] )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of DEVICES section "
-		        "label.\n", Fname, Lc );
+		        "label.", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -176,7 +176,7 @@ int devices_parser( FILE *in )
 		    continue;
 
 		eprint( FATAL, "%s:%ld: Sorry, the DEVICES section has to be the very "
-				"first section.\n", Fname, Lc );
+				"first section.", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 

@@ -371,7 +371,7 @@ WS          [\n=: ]+
 					if ( acc == ACCESS_EXP )
 					{
 						eprint( FATAL, "%s:%ld: Function `%s' can only be "
-								"used in the EXPERIMENT section.\n",
+								"used in the EXPERIMENT section.",
 								 Fname, Lc, assigntext );
 						THROW( EXCEPTION );
 					}
@@ -383,7 +383,7 @@ WS          [\n=: ]+
 				if ( ( assignlval.vptr = vars_get( assigntext ) ) == NULL )
 				{
 					eprint(	FATAL, "%s:%ld: Variable `%s' has not been "
-							"declared.\n", Fname, Lc, assigntext );
+							"declared.", Fname, Lc, assigntext );
 					 THROW( EXCEPTION );
 				}
 
@@ -419,7 +419,7 @@ WS          [\n=: ]+
 			/* handling of invalid input (i.e. everything else) */
 .           {
 				eprint( FATAL, "%s:%ld: Invalid input in ASSIGNMENTS section: "
-						"`%s'\n", Fname, Lc, assigntext );
+						"`%s'", Fname, Lc, assigntext );
 				THROW( EXCEPTION );
 			}
 
@@ -442,7 +442,7 @@ int assignments_parser( FILE *in )
 	if ( compilation.sections[ ASSIGNMENTS_SECTION ] )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of ASSIGNMENTS section "
-		        "label.\n", Fname, Lc );
+		        "label.", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 	compilation.sections[ ASSIGNMENTS_SECTION ] = SET;
