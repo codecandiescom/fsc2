@@ -1311,8 +1311,6 @@ void main_sig_handler( int signo )
 	switch ( signo )
 	{
 		case SIGCHLD :
-			fprintf( stderr, "Child died\n" );
-			fflush( stderr );
 			errno_saved = errno;
 			wait( NULL );
 			errno = errno_saved;
