@@ -1403,7 +1403,7 @@ static void sr810_get_xy_data( double *data, long *channels, int num_channels )
 	char cmd[ 100 ] = "SNAP?";
 	char buffer[ 200 ];
 	long length = 200;
-	char *bp_cur, *bp_next;
+	char *bp_cur, *bp_next = NULL;
 	int i;
 
 
@@ -2043,7 +2043,6 @@ static double sr810_get_auto_data( int type )
 	char cmd[ 100 ];
 	char buffer[ 100 ];
 	long length = 100;
-	int channel;
 	char *ptr;
 	bool new_try = SET;
 
@@ -2064,8 +2063,8 @@ static double sr810_get_auto_data( int type )
 
 	if ( sr810.data_fetched >= MAX_STORED_DATA )
 	{
-		print( SEVERE, "Internal lock-in buffer did overflow for CH%1d, "
-			   "data in both channnels may have been lost.\n", channel + 1 );
+		print( SEVERE, "Internal lock-in buffer did overflow, data may have "
+			   "been lost.\n" );
 		if ( gpib_write( sr810.device, "REST\n", 5 ) == FAILURE )
 			sr810_failure( );
 

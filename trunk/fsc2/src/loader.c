@@ -55,8 +55,10 @@ void load_all_drivers( void )
 {
 	Device *cd;
 	bool saved_need_GPIB;
-	CALL_STACK *cs = NULL;
+	static CALL_STACK *cs;
 
+
+	cs = NULL;
 
 	/* Treat "User_Functions" also as a kind of device driver and append
 	   the device structure to the end of the list of devices */
@@ -476,9 +478,10 @@ static void resolve_generic_type( Device *dev )
 void run_test_hooks( void )
 {
 	Device *cd;
-	CALL_STACK *cs = NULL;
+	static CALL_STACK *cs;
 
 
+	cs = NULL;
 	Cur_Pulser = -1;
 	Internals.in_hook = SET;
 
@@ -521,9 +524,10 @@ void run_test_hooks( void )
 void run_end_of_test_hooks( void )
 {
 	Device *cd;
-	CALL_STACK *cs = NULL;
+	static CALL_STACK *cs;
 
 
+	cs = NULL;
 	Cur_Pulser = -1;
 	Internals.in_hook = SET;
 
@@ -566,9 +570,10 @@ void run_end_of_test_hooks( void )
 void run_exp_hooks( void )
 {
 	Device *cd;
-	CALL_STACK *cs = NULL;
+	static CALL_STACK *cs;
 
 
+	cs = NULL;
 	Cur_Pulser = -1;
 	Internals.in_hook = SET;
 

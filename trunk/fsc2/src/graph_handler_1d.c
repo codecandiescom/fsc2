@@ -1170,7 +1170,7 @@ void redraw_all_1d( void )
 void redraw_canvas_1d( Canvas *c )
 {
 	long i;
-	Curve_1d *cv;
+	Curve_1d *cv = NULL;
 	Marker *m;
 	short x;
 
@@ -1182,7 +1182,8 @@ void redraw_canvas_1d( Canvas *c )
 	{
 		if ( c == &G.canvas && G.is_scale_set )
 		{
-			/* First draw the marker */
+			/* First draw the marker - to get the correct scaling one of the
+			   curves must be active */
 
 			for ( i = 0; i < G.nc; i++ )
 				if ( G.curve[ i ]->active )
@@ -1191,7 +1192,7 @@ void redraw_canvas_1d( Canvas *c )
 					break;
 				}
 
-			if ( i != G.nc )
+			if ( cv != NULL )
 				for ( m = G.marker; m != NULL; m = m->next )
 				{
 					x = d2shrt( cv->s2d[ X ]

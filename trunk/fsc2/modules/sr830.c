@@ -1460,7 +1460,7 @@ static void sr830_get_xy_data( double *data, long *channels, int num_channels,
 	char cmd[ 100 ] = "SNAP?";
 	char buffer[ 200 ];
 	long length = 200;
-	char *bp_cur, *bp_next;
+	char *bp_cur, *bp_next = NULL;
 	int i, j;
 
 
