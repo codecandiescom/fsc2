@@ -460,7 +460,7 @@ RF_GATE:   POD = 7           CHANNEL = 17;
 DETECTION: POD = 11;   // leave it to the program to select the channel
 @end example
 
-Please note: the strong{Tektronix HFS9003} has only 4 channels and does
+Please note: the @strong{Tektronix HFS9003} has only 4 channels and does
 not allow assignment of more than one channel to a single function.
 
 Here a list of the pod and/or channel numbers that can be used for the
