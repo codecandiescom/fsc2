@@ -246,7 +246,7 @@ int hp8647a_set_mod_param( Var *v )
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
-		vars_pop( synthesizer_mod_amp( v ) );
+		vars_pop( synthesizer_mod_ampl( v ) );
 		return 1;
 	}
 

@@ -13,6 +13,22 @@
 #define MAX_ATTEN      -136.0            /* -136 db  */
 #define ATT_RESOLUTION  0.1
 
+#define NUM_MOD_TYPES   3
+#define MOD_TYPE_FM     0
+#define MOD_TYPE_AM     1
+#define MOD_TYPE_PHASE  2
+
+#define NUM_MOD_SOURCES 4
+#define MOD_SOURCE_AC   0
+#define MOD_SOURCE_DC   1
+#define MOD_SOURCE_1k   2
+#define MOD_SOURCE_400  3
+
+#define MAX_FM_AMPL     1.0e5
+#define MAX_AM_AMPL     100
+#define MAX_PHASE_AMPL  10
+
+
 #define DEFAULT_TABLE_FILE "hp8647a.table"     /* libdir will be prepended ! */
 
 #define DEF_ATT_REF_FREQ   1.4e7               /* 14 MHz */
@@ -38,7 +54,7 @@ Var *synthesizer_use_table( Var *v );
 Var *synthesizer_attenuation( Var *v );
 Var *synthesizer_att_ref_freq( Var *v );
 Var *synthesizer_modulation( Var *v );
-Var *synthesizer_mod_amp( Var *v );
+Var *synthesizer_mod_ampl( Var *v );
 Var *synthesizer_mod_type( Var *v );
 Var *synthesizer_mod_source( Var *v );
 
@@ -74,6 +90,9 @@ typedef struct
 	double att_at_ref_freq;
 	double real_attenuation;        // might differ from attenuation due to use
 									// of table
+	int mod_type;
+	int mod_source[ NUM_MOD_TYPES ];
+	int mod_ampl[ NUM_MOD_TYPES ];
 
 } HP8647A;
 
@@ -116,3 +135,7 @@ double hp8647a_set_frequency( double freq );
 double hp8647a_get_frequency( void );
 double hp8647a_set_attenuation( double att );
 double hp8647a_get_attenuation( void );
+bool hp8647a_set_mod_state( int type, bool state );
+int hp8647a_get_mod_state( void );
+int hp8647a_set_mod_source( int type, int source );
+double hp8647a_set_mod_ampl( int type, double ampl );

@@ -730,7 +730,7 @@ Var *synthesizer_modulation( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Use functions "
-				"`synthesizer_mod_(type|source|amp)' to determine modulation "
+				"`synthesizer_mod_(type|source|ampl)' to determine modulation "
 				"settings.\n", Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -752,9 +752,9 @@ Var *synthesizer_modulation( Var *v )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-Var *synthesizer_mod_amp( Var *v )
+Var *synthesizer_mod_ampl( Var *v )
 {
-	double amp;
+	double ampl;
 
 
 	if ( v == NULL )
@@ -767,12 +767,12 @@ Var *synthesizer_mod_amp( Var *v )
 		eprint( WARN, "%s:%ld: %s: Integer value used as modulation "
 				"amplitude.\n", Fname, Lc, DEVICE_NAME );
 
-	amp = VALUE( v );
+	ampl = VALUE( v );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-				"function `synthesizer_mod_amp'.\n", Fname, Lc, DEVICE_NAME );
+				"function `synthesizer_mod_ampl'.\n", Fname, Lc, DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
