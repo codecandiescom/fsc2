@@ -23,7 +23,7 @@ int_slice, 1, ALL;              // creates an integer array slice
 float_slice, 1, ALL;            // creates an float array slice
 
 
-// Functions exported by the magnet power supply drivers
+// Functions exported by the magnet power supply drivers (S_BAND)
 
 magnet_setup, 2, ALL;           // set start field and sweep step size
 magnet_fast_init, 0, ALL;       // shortens magnet setup time
@@ -33,23 +33,25 @@ sweep_down, 0, EXP;             // sweep magnet down
 reset_field, 0, EXP;            // go back to start field
 
 
-// Functions exported by the field meter drivers
+// Functions exported by the field meter drivers (BH15, ER035M)
 
 find_field, 0, EXP;             // return current field value
 field_resolution, 0, EXP;       // returns resolution of field meter
 field_meter_wait, 0, EXP;       // wait a bit for field to stabilize
 
 
-// Functions exported by the pulser drivers
+// Functions exported by the pulser drivers (DG2020)
 
 pulser_start, 0, EXP;           // switches the pulser into run mode
+pulser_shift, -1, EXP;          // shift pulse positions
+pulser_increment, -1, EXP;      // change pulse lengths
+pulser_reset, -1, EXP;          // set back pulses to initial state
 
-// Functions exported by the lock-in amplifier drivers
+
+// Functions exported by the lock-in amplifier drivers (SR510)
 
 lockin_get_data, 0, EXP;        // returns the lock-in voltage 
 lockin_get_adc_data, -1, EXP;   // returns the ADC voltage(s)
 lockin_sensitivity, -1, ALL;    // gets or sets the sensitivity
 lockin_time_constant, -1, ALL;  // gets or sets the time constant
 lockin_phase, -1, ALL;          // gets or sets the phase
-
-
