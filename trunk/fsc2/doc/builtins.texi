@@ -2362,6 +2362,24 @@ Modifier-2 to Modifier-5 functions usually are not even mapped to a
 physical key.
 
 
+@anchor{index_of_max}
+@item index_of_max()
+@findex index_of_max()
+The function expects a 1-dimensional array as its only argument and
+returns the index of the largest element in the array. If there's more
+that one element having the maximum value in the array the index
+designates the first of these elements.
+
+
+@anchor{index_of_min}
+@item index_of_min()
+@findex index_of_min()
+The function expects a 1-dimensional array as its only argument and
+returns the index of the smallest element in the array. If there's more
+that one element having the minimum value in the array the index
+designates the first of these elements.
+
+
 @anchor{lin_space}
 @item lin_space()
 @findex lin_space()

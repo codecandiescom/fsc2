@@ -3439,8 +3439,11 @@ Var *f_find_peak( Var *v )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Function returns the index of the largest array of an element. If */
+/* there is more than one element of the largest size the index of   */
+/* the the first of these elements is returned.                      */
+/*-------------------------------------------------------------------*/
 
 Var *f_index_of_max( Var *v )
 {
@@ -3475,8 +3478,11 @@ Var *f_index_of_max( Var *v )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Function returns the index of the smallest array of an element. If */
+/* there is more than one element of the smallest size the index of   */
+/* the the first of these elements is returned.                       */
+/*--------------------------------------------------------------------*/
 
 Var *f_index_of_min( Var *v )
 {
