@@ -73,12 +73,9 @@ input:   /* empty */
        | input error ';'           { THROW( SYNTAX_ERROR_EXCEPTION ); }
        | input line line           { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | input SECTION_LABEL       { YYACCEPT; }
+       | input SECTION_LABEL       { assert( Var_Stack == NULL );
+	                                 YYACCEPT; }
 ;
-
-
-
-/* currently only the variables related stuff */
 
 line:    P_TOK prop
        | VAR_TOKEN '=' expr        { vars_assign( $3, $1 ); }
@@ -93,8 +90,6 @@ line:    P_TOK prop
 	                                 THROW( VARIABLES_EXCEPTION ); }
 ;
 
-
-
 prop:   /* empty */
        | prop F_TOK sep1 expr sep2  { pulse_set( Cur_Pulse, P_FUNC, $4 ); }
        | prop S_TOK sep1 time sep2  { pulse_set( Cur_Pulse, P_POS, $4 ); }
@@ -104,13 +99,10 @@ prop:   /* empty */
        | prop ML_TOK sep1 time sep2 { pulse_set( Cur_Pulse, P_MAXLEN, $4 ); }
 ;
 
-
 time:    expr unit                 { $$ = vars_mult( $1, $2 ); }
 ;
 
-
-unit:    /* empty */               { $$ = vars_push( INT_VAR,
-													 Default_Time_Base ); }
+unit:    /* empty */               { $$ = vars_push( INT_VAR, Time_Unit ); }
        | NS_TOKEN                  { $$ = vars_push( INT_VAR, 1L ); }
        | US_TOKEN                  { $$ = vars_push( INT_VAR, 1000L ); }
        | MS_TOKEN                  { $$ = vars_push( INT_VAR, 1000000L ); }
@@ -124,13 +116,11 @@ sep1:    /* empty */
        | ':'
 ;
 
-
 /* seperator between different keyword-value pairs */
 
 sep2:    /* empty */           
        | ','
 ;
-
 
 expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, $1 ); }
        | FLOAT_TOKEN               { $$ = vars_push( FLOAT_VAR, $1 ); }
@@ -156,9 +146,7 @@ expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, $1 ); }
        | '(' expr ')'              { $$ = $2 }
 ;
 
-
 /* list of indices for access of an array element */
-
 
 list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
 	   | expr                      { $$ = $1; }
