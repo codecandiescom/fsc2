@@ -76,7 +76,7 @@ somewhat contrived example:
 print( "The # of # is: #\n", "sine", x, sin( x ) );
 @end example
 @noindent
-This will print (assuming @code{x} equals 0.5):
+This will print (assuming @code{x} equals @code{0.5}):
 @example
 The sine of 0.500000 is: 0.479426
 @end example
@@ -126,8 +126,9 @@ turns out to be too small it is adjusted automatically in the experiment
 so that all data fit into the display.
 @item
 Start value of the @i{x}-axis. If missing (or undefined, see next point)
-point numbers are printed, starting with 1 (if @acronym{FORTRAN} style
-array offsets are used, for C style arrays the starting value is 0).
+point numbers are printed, starting with @code{1} (if @acronym{FORTRAN}
+style array offsets are used, for C style arrays the starting value is
+@code{0}).
 @item
 Increment for data along the @i{x}-axis (thus restricting the display to
 equally spaced data). Setting it to zero implies that the start value
@@ -189,8 +190,8 @@ value turns out to be too small it is adjusted automatically in the
 experiment so that all data fit into the display.
 @item
 Start value of the @i{x}-axis. If missing (or undefined, see next entry)
-point numbers are printed, starting with 1 (or 0, depending on the
-setting for array start-offsets).
+point numbers are printed, starting with @code{1} (or @code{0},
+depending on the setting for array start-offsets).
 @item
 Increment for data along the @i{x}-axis (thus restricting the display to
 equally spaced data). Setting it to zero implies that the start value
@@ -495,25 +496,25 @@ starting with a backslash character @code{\}, can be used to print
 otherwise unprintable characters. These are
 @table @samp
 @item \a
-prints an alert (bell) character (0x07)
+prints an alert (bell) character (@code{0x07})
 @item \b
-prints a backspace character (0x08)
+prints a backspace character (@code{0x08})
 @item \f
-prints a formfeed character (0x0C)
+prints a formfeed character (@code{0x0C})
 @item \n
-prints a newline character (0x0A)
+prints a newline character (@code{0x0A})
 @item \r
-prints a carriage return character (0x0D)
+prints a carriage return character (@code{0x0D})
 @item \t
-prints a horizontal tab character (0x09)
+prints a horizontal tab character (@code{0x09})
 @item \v
-prints a vertical tab character (0x0B)
+prints a vertical tab character (@code{0x0B})
 @item \\
 prints a backslash @code{\}
 @item \?
 prints a question mark @code{?}
 @item \'
-prints a single quote @code{\'}
+prints a single quote @code{'}
 @item \"
 prints a double quote @code{"}
 @item \@i{ooo}
@@ -697,8 +698,8 @@ assumed that all buttons are not pressed and switched off (unless they
 have been set by the function @code{button_state()}, all sliders are
 assumed to be in the middle position unless a different value has been
 set via the function @code{slider_value()} and all input and output
-fields are initialized to 0 unless an initial value has been passed to
-the functions @code{input_create()} or @code{output_create()}.
+fields are initialized to @code{0} unless an initial value has been
+passed to the functions @code{input_create()} or @code{output_create()}.
 
 
 @table @samp
@@ -858,12 +859,12 @@ first argument of the function for creating an input field,
 argument is @code{"INT_INPUT"} the input field will only accept interger
 numbers, while with an argument of @code{"FLOAT_INPUT"} also floating
 point numbers can be entered. (@code{"INT_INPUT"} can be replaced by the
-numerical argument 0 and @code{"FLOAT_INPUT"} by 1.)
+numerical argument @code{0} and @code{"FLOAT_INPUT"} by 1.)
 
 If the second argument is a number it is taken to be the initial value
 in the input field. If there is either no second argument or the second
 argument is not a number but a string, the input field will be
-initialized to 0.
+initialized to @code{0}.
 
 As in the case of buttons and sliders there are two more (optional)
 arguments, the label to be shown below the input field and a help
@@ -914,7 +915,7 @@ argument 2 and @code{"FLOAT_OUTPUT"} by 3.)
 If the second argument is a number it is taken to be the initial value
 in the output field. If there is either no second argument or the second
 argument is not a number but a string, the output field will be
-initialized to 0.
+initialized to @code{0}.
 
 As in the case of buttons and sliders there are two more (optional)
 arguments, the label to be shown below the input field and a help
