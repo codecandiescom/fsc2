@@ -26,7 +26,7 @@ c_sources     = fsc2.c xinit.c pulser.c util.c exceptions.c variables.c    \
 				func_save.c chld_func.c func_intact.c func_intact_b.c      \
 				func_intact_s.c func_intact_o.c func_intact_m.c T.c        \
 				phases.c devices.c exp.c run.c comm.c accept.c gpib_if.c   \
-				loader.c conn.c ipc.c print.c serial.c graphics.c          \
+				loader.c conn.c mail.c ipc.c print.c serial.c graphics.c   \
 				graph_handler_1d.c graph_handler_2d.c graph_cut.c bugs.c   \
 				fsc2_assert.c dump.c module_util.c
 ifdef WITH_HTTP_SERVER

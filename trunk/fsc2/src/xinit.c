@@ -369,7 +369,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 	/* There's no use for the bug report button if either no mail address
 	   or no mail program has been set */
 
-#if ! defined( MAIL_ADDRESS ) || ! defined( MAIL_PROGRAM )
+#if ! defined( MAIL_ADDRESS )
 	fl_hide_object( GUI.main_form->bug_report );
 #endif
 

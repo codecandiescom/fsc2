@@ -37,7 +37,7 @@ extern int fail_mess_fd;               /* defined in dump.c     */
 
 void bug_report_callback( FL_OBJECT *a, long b )
 {
-#if defined ( MAIL_ADDRESS ) && defined ( MAIL_PROGRAM )
+#if defined ( MAIL_ADDRESS )
 
 	FILE *tmp;
 	int tmp_fd;
@@ -59,7 +59,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	/* Create a temporary file for the mail */
 
 	if ( ( tmp_fd = mkstemp( filename ) ) < 0 ||
-		 ( tmp = fdopen( tmp_fd, "w" ) ) == NULL )
+		 ( tmp = fdopen( tmp_fd, "w+" ) ) == NULL )
 	{
 		if ( tmp_fd >= 0 )
 		{
@@ -126,7 +126,6 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	/* Append output of ulimit */
 
 	fprintf( tmp, "\"ulimit -a -S\" returns:\n\n" );
-	fclose( tmp );
 	cmd = get_string( "ulimit -a -S >> %s", filename );
 	system( cmd );
 	T_free( cmd );
@@ -151,7 +150,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	T_free( cmd );
 
 	cmd = get_string( "cat %s%sversion.ugz >> %s", libdir, slash( libdir ),
-					  filename);
+					  filename );
 	system( cmd );
 	T_free( cmd );
 
@@ -174,6 +173,8 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 	fl_set_cursor( FL_ObjWin( a ), XC_left_ptr );
 
+	fflush( tmp );
+
 	/* Invoke the editor - when finished ask the user how to proceed */
 
 	do
@@ -185,6 +186,10 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 	T_free( cmd );
 
+	fflush( tmp );
+
+ 	unlink( filename );                /* delete the temporary file */
+
 	/* Send the report if the user wants it. */
 
 	if ( res == 1 )
@@ -195,16 +200,11 @@ void bug_report_callback( FL_OBJECT *a, long b )
 			 fl_show_question( "Do you want a copy of the bug report ?", 0 ) )
 			user = ( getpwuid( getuid( ) ) )->pw_name;
 
-		/* Assemble the command for sending the mail */
-
-		cmd = get_string( "%s -s \"fsc2 bug report\" %s %s %s < %s",
-						  MAIL_PROGRAM, user != NULL ? "-c" : "",
-						  user != NULL ? user : "", MAIL_ADDRESS, filename );
-		system( cmd );                 /* send the mail */
-		T_free( cmd );
+		rewind( tmp );
+		send_mail( "fsc2 bug report", "fsc2", user, MAIL_ADDRESS, tmp );
 	}
 
-	unlink( filename );                /* delete the temporary file */
+	close( tmp_fd );
 	sigaction( SIGCHLD, &oact, NULL );
 	notify_conn( UNBUSY_SIGNAL );
 #else
@@ -220,7 +220,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 void death_mail( int signo )
 {
-#if ! defined( NDEBUG ) && defined ( MAIL_ADDRESS ) && defined ( MAIL_PROGRAM )
+#if ! defined( NDEBUG ) && defined ( MAIL_ADDRESS )
 
 #define DM_BUF_SIZE 512
 
@@ -235,8 +235,7 @@ void death_mail( int signo )
 	FILE *vfp;
 
 
-	if ( ( mail = popen( MAIL_PROGRAM " -s 'fsc2 crash' " MAIL_ADDRESS, "w" ) )
-		 == NULL )
+	if ( ( mail = tmpfile( ) ) == NULL )
 		return;
 
 #if defined _GNU_SOURCE
@@ -308,7 +307,9 @@ void death_mail( int signo )
 		fclose( vfp );
 	}
 
-	pclose( mail );
+	rewind( mail );
+	send_mail( "fsc2 crash", "fsc2", NULL, MAIL_ADDRESS, mail );
+	fclose( mail );
 #else
 	UNUSED_ARGUMENT( signo );
 #endif
