@@ -51,6 +51,8 @@ int spectrapro_300i_init_hook( void )
 		spectrapro_300i.grating[ i ].is_installed = SET;
 		spectrapro_300i.grating[ i ].grooves = 1200000;
 		spectrapro_300i.grating[ i ].blaze = 7.5e-7;
+		spectrapro_300i.grating[ i ].init_offset = 0.0;
+		spectrapro_300i.grating[ i ].init_gadjust = 0.0;
 	}
 
 	spectrapro_300i.turret = 0;
@@ -618,8 +620,8 @@ Var *monochromator_wavelength_axis( Var * v )
 			  + sin( grating_angle + inclusion_angle_2 + theta ) )
 		    / spectrapro_300i.grating[ g ].grooves;
 
-	cv->val.dpnt[ 0 ] = wl_low;
 	cv->val.dpnt[ 1 ] = ( wl_hi - wl_low ) / num_pixels;
+	cv->val.dpnt[ 0 ] = wl - 0.5 * cv->val.dpnt[ 1 ] * ( num_pixels - 1 );
 
 	return cv;
 }
@@ -740,6 +742,131 @@ Var *monochromator_set_calibration( Var *v )
 	spectrapro_300i.use_calib = SET;
 
 	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+Var *monochromator_init_offset( Var *v )
+{
+	long grating;
+	double offset;
+
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	grating = get_strict_long( v, "grating number" );
+	if ( grating < 1 && grating > MAX_GRATINGS )
+	{
+		print( FATAL, "Invalid grating number, must be in range between "
+			   "1 and %d.\n", MAX_GRATINGS );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! spectrapro_300i.grating[ grating - 1 ].is_installed )
+	{
+		print( FATAL, "Grating #%ld isn't installed.\n", grating );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+	{
+		if ( FSC2_MODE == TEST )
+			return vars_push( FLOAT_VAR,
+						  spectrapro_300i.grating[ grating - 1 ].init_offset );
+		return vars_push( FLOAT_VAR,
+						  spectrapro_300i_get_offset( grating )
+						  / INIT_OFFSET_RANGE );
+	}
+
+	offset = get_double( v, "grating offset value" );
+
+	if ( abs( lrnd( offset * INIT_OFFSET_RANGE /
+					spectrapro_300i.grating[ grating ].grooves ) ) >
+		 INIT_OFFSET_RANGE / spectrapro_300i.grating[ grating ].grooves )
+	{
+		print( FATAL, "Grating offset value is too large, valid range is "
+			   "[-1,+1].\n" );
+		THROW( EXCEPTION );
+	}
+
+	too_many_arguments( v );
+
+	if ( FSC2_MODE == EXPERIMENT )
+		spectrapro_300i_set_offset( grating,
+								lrnd( offset * INIT_OFFSET_RANGE /
+									 spectrapro_300i.grating[ grating ].grooves
+									 + ( grating % 3 ) * INIT_OFFSET ) );
+
+	spectrapro_300i.grating[ grating - 1 ].init_offset = offset;
+
+	return vars_push( FLOAT_VAR, offset );
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+Var *monochromator_init_adjust( Var *v )
+{
+	long grating;
+	double gadjust;
+
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	grating = get_strict_long( v, "grating number" );
+	if ( grating < 1 && grating > MAX_GRATINGS )
+	{
+		print( FATAL, "Invalid grating number, must be in range between "
+			   "1 and %d.\n", MAX_GRATINGS );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! spectrapro_300i.grating[ grating - 1 ].is_installed )
+	{
+		print( FATAL, "Grating #%ld isn't installed.\n", grating );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+	{
+		if ( FSC2_MODE == TEST )
+			return vars_push( FLOAT_VAR,
+						 spectrapro_300i.grating[ grating - 1 ].init_gadjust );
+		return vars_push( FLOAT_VAR,
+						  spectrapro_300i_get_gadjust( grating )
+						  / INIT_ADJUST_RANGE );
+	}
+
+	gadjust = get_double( v, "grating adjust value" );
+
+	if ( abs( lrnd( gadjust * INIT_ADJUST_RANGE ) ) > INIT_ADJUST_RANGE )
+	{
+		print( FATAL, "Grating adjust value is too large, valid range is "
+			   "[-1,1].\n" );
+		THROW( EXCEPTION );
+	}
+
+	too_many_arguments( v );
+
+	if ( FSC2_MODE == EXPERIMENT )
+		spectrapro_300i_init_gadjust( grating,
+									  lrnd( gadjust * INIT_ADJUST_RANGE
+											+ INIT_ADJUST ) );
+
+	spectrapro_300i.grating[ grating - 1 ].init_gadjust = gadjust;
+
+	return vars_push( FLOAT_VAR, gadjust );
 }
 
 

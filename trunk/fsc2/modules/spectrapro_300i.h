@@ -52,6 +52,8 @@ struct SPECTRAPRO_300I {
 		double inclusion_angle;
 		double focal_length;
 		double detector_angle;
+		double init_offset;
+		double init_gadjust;
 	} grating[ MAX_GRATINGS ];
 };
 
@@ -85,10 +87,15 @@ extern SPECTRAPRO_300I spectrapro_300i;
 
 /* Default start values for calibrations */
 
-#define DEFAULT_INCLUSION_ANGLE  ( 35.0 * atan( 1.0 ) / 45.0 ) /* 35 degree */
-#define DEFAULT_DETECTOR_ANGLE   0.0
-#define DEFAULT_DETECTOR_ANGLE_DELTA ( atan( 1.0 ) / 90.0 )    /* 0.5 degree */
-#define DEFAULT_EPSILON          1.0e-9
+#define DEFAULT_INCLUSION_ANGLE      ( 30.3 * atan( 1.0 ) / 45.0 )
+#define DEFAULT_DETECTOR_ANGLE       0.0
+#define DEFAULT_DETECTOR_ANGLE_DELTA ( atan( 1.0 ) / 180.0 )  /* 0.25 degree */
+#define DEFAULT_EPSILON              1.0e-9
+
+#define INIT_OFFSET                   1536000
+#define INIT_OFFSET_RANGE             ( 1200000.0 * 2500.0 )
+#define INIT_ADJUST                   1000000
+#define INIT_ADJUST_RANGE              100000
 
 
 int spectrapro_300i_init_hook( void );
@@ -105,6 +112,8 @@ Var *monochromator_calibration( Var *v );
 Var *monochromator_wavelength_axis( Var * v );
 Var *monochromator_load_calibration( Var * v );
 Var *monochromator_set_calibration( Var *v );
+Var *monochromator_init_offset( Var *v );
+Var *monochromator_init_adjust( Var *v );
 
 
 FILE *spectrapro_300i_find_calib( char *name );
@@ -117,6 +126,10 @@ void spectrapro_300i_set_turret( long turret );
 long spectrapro_300i_get_grating( void );
 void spectrapro_300i_set_grating( long grating );
 void spectrapro_300i_get_gratings( void );
+long spectrapro_300i_get_offset( long grating );
+void spectrapro_300i_set_offset( long grating, long offset );
+long spectrapro_300i_get_adjust( long grating );
+void spectrapro_300i_set_adjust( long grating, long adjust );
 void spectrapro_300i_install_grating( char *part_no, long grating );
 void spectrapro_300i_uninstall_grating( long grating );
 void spectrapro_300i_send( const char *buf );
