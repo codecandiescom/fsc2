@@ -150,6 +150,9 @@ static void spawn_server( void )
 		dup2( Comm.http_pd[ HTTP_CHILD_READ  ], STDIN_FILENO );
 		dup2( Comm.http_pd[ HTTP_CHILD_WRITE ], STDOUT_FILENO );
 
+		close( Comm.http_pd[ HTTP_CHILD_READ ] );
+		close( Comm.http_pd[ HTTP_CHILD_WRITE ] );
+
 		execv( a[ 0 ], a );
 		_exit( EXIT_FAILURE );
 	}

@@ -530,9 +530,13 @@ FILE *filter_edl( const char *name, FILE *fp )
 			else
 				 write( pd[ 1 ], "\x03\nStarting the test procedure failed, "
 						"internal error detected.\n", 63 );
+			fclose( fp );
 			close( pd[ 1 ] );
 			goto filter_failure;
 		}
+
+		fclose( fp );
+		close( pd[ 1 ] );
 
 		TRY
 		{

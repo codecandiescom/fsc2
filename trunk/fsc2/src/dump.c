@@ -124,6 +124,9 @@ void DumpStack( void )
 		dup2( pipe_fd[ DUMP_CHILD_WRITE ], STDERR_FILENO );
 		dup2( pipe_fd[ DUMP_CHILD_READ  ], STDIN_FILENO );
 
+		close( pipe_fd[ DUMP_CHILD_READ ] );
+		close( pipe_fd[ DUMP_CHILD_WRITE ] );
+
 		if ( Internals.cmdline_flags & DO_CHECK )
 			execl( ADDR2LINE, ADDR2LINE, "-C", "-f", "-e", sdir "fsc2", NULL );
 		else
@@ -162,7 +165,7 @@ void DumpStack( void )
 		   and line number. (This fails for programs competely stripped of
 		   all debugging information as well as for library functions in
 		   which case question marks get returned. But using the address
-		   it is still possible to find outwhere the shit hit the fan using
+		   it is still possible to find out where the shit hit the fan with
 		   a debugger.) */
 
 		sprintf( buf, "%p\n", ( void * ) * ( EBP + 1 ) );
