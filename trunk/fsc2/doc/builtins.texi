@@ -2473,7 +2473,7 @@ of the spike.
 
 The arguments the function takes are the 1-dimensional-array and,
 optionally, the factor by which the standard deviation is multiplied to
-determine what should be taken to be "outliers" (which defaults to code{5})
+determine what should be taken to be "outliers" (which defaults to @code{5})
 and the maximum width a spike can have (in number of points, defaulting to
 @code{3}). What to pick as the second and third argument depends a lot on
 the circumstances. When the spikes don't have a large amplitude (compared
