@@ -354,7 +354,7 @@ Var *ccd_camera_get_picture( Var *v )
 {
 	uns16 *frame;
 	long width, height;
-	long w;
+	long w, mw;
 	unsigned long max_val;
 	Var *nv;
 	long i, j, k;
@@ -383,29 +383,29 @@ Var *ccd_camera_get_picture( Var *v )
 
 	if ( width == 0 )
 	{
-		rs_sec10->ccd.roi[ X ] +=
+		rs_spec10->ccd.roi[ X ] +=
 			( rs_spec10->ccd.roi[ X + 2 ] - rs_spec10->ccd.roi[ X ] + 1 
 			  - rs_spec10->ccd.bin[ X ] ) / 2;
-		rs_sec10->ccd.roi[ X + 2 ] =
-							  rs_sec10->ccd.roi[ X ] + rs_spec10->ccd.bin[ X ];
+		rs_spec10->ccd.roi[ X + 2 ] =
+							 rs_spec10->ccd.roi[ X ] + rs_spec10->ccd.bin[ X ];
 	}
 
 	if ( height == 0 )
 	{
-		rs_sec10->ccd.roi[ Y ] +=
+		rs_spec10->ccd.roi[ Y ] +=
 			( rs_spec10->ccd.roi[ Y + 2 ] - rs_spec10->ccd.roi[ Y ] + 1 
 			  - rs_spec10->ccd.bin[ Y ] ) / 2;
-		rs_sec10->ccd.roi[ Y + 2 ] =
-							  rs_sec10->ccd.roi[ Y ] + rs_spec10->ccd.bin[ Y ];
+		rs_spec10->ccd.roi[ Y + 2 ] =
+							 rs_spec10->ccd.roi[ Y ] + rs_spec10->ccd.bin[ Y ];
 	}
 
 	if ( width == 0 || height == 0 )
 		print( SEVERE, "ROI had to be expanded to LLC = (%ld, %ld) and "
 			   "URC = (%ld, %ld) to fit the binning area.\n",
-			   ( long ) rs_sec10->ccd.roi[ X ],
-			   ( long ) rs_sec10->ccd.roi[ X + 2 ],
-			   ( long ) rs_sec10->ccd.roi[ Y ],
-			   ( long ) rs_sec10->ccd.roi[ Y + 2 ] );
+			   ( long ) rs_spec10->ccd.roi[ X ],
+			   ( long ) rs_spec10->ccd.roi[ X + 2 ],
+			   ( long ) rs_spec10->ccd.roi[ Y ],
+			   ( long ) rs_spec10->ccd.roi[ Y + 2 ] );
 
 	if ( width == 0 )
 		width = 1;
