@@ -300,6 +300,7 @@ void stop_measurement( FL_OBJECT *a, long b )
 		else                             /* child has already exited */
 		{
 			stop_graphics( );
+			fl_set_object_label( run_form->stop, "Stop the running program" );;
 			set_buttons_for_run( 1 );
 		}
 
@@ -317,6 +318,7 @@ void stop_measurement( FL_OBJECT *a, long b )
 		gpib_shutdown( );
 
 	fl_set_object_label( run_form->stop, "Close" );
+	fl_set_object_helper( run_form->stop, "Close the window" );
 	fl_set_cursor( FL_ObjWin( run_form->stop ), XC_left_ptr );
 }
 
