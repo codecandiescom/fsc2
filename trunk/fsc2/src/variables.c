@@ -95,13 +95,13 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
   variable or an array.
 
   What kind of type a variable has, i.e. integer or float, is controlled via
-  the function IF_FUNC(), defined as macro in variables.h, which gets the
-  passed the variable's name - if the function returns TRUE the variable is an
-  integer (or the array is an integer array) otherwise its type is FLOAT. So,
-  changing IF_FUNC() and recompiling will change the behaviour of the program
-  in this respect. Currently, as agreed with Axel and Thomas, IF_FUNC returns
-  TRUE for variables starting with a capital letters, thus making the variable
-  an integer. But this is easily changed...
+  the function VAR_TYPE(), defined as macro in variables.h, which gets the
+  passed the variable's name - if the function returns INT_VAR the variable
+  is an integer (or the array is an integer array) otherwise its type is
+  FLOAT. So, changing VAR_TYPE() and recompiling will change the behaviour of
+  the program in this respect. Currently, as agreed with Axel and Thomas,
+  VAR_TYPE returns INT_VAR for variables starting with a capital letters,
+  thus making the variable an integer. But this is easily changed...
 
   Now, when the input file is read in, lines like
 
@@ -164,7 +164,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
   where 'variable_identifier' is a array name. It calls vars_arr_start()
   where, if the array is still completely new, the type of the array is set to
   INT_CONT_ARR or FLOAT_CONT_ARR (depending on the result of the macro
-  IF_FUNC(), see above). Finally, it pushes a transient variable onto the
+  VAR_TYPE(), see above). Finally, it pushes a transient variable onto the
   stack of type ARR_PTR with the 'from' element in the variable structure
   pointing to the original array. This transient variable serves as a kind of
   marker since the next thing the parser is going to do is to read all indices
@@ -1582,7 +1582,8 @@ Var *vars_arr_start( Var *v )
 
 	if ( v->type == UNDEF_VAR )
 	{
-		v->type = IF_FUNC( v->name ) ? INT_CONT_ARR : FLOAT_CONT_ARR;
+		v->type = ( VAR_TYPE( v->name ) == INT_VAR ) ?
+					INT_CONT_ARR : FLOAT_CONT_ARR;
 		if ( v->type == INT_CONT_ARR )
 			v->val.lpnt = NULL;
 		else
@@ -2102,7 +2103,7 @@ static void vars_ass_from_var( Var *src, Var *dest )
 
 	if ( dest->type == UNDEF_VAR )
 	{
-		dest->type = IF_FUNC( dest->name ) ? INT_VAR : FLOAT_VAR;
+		dest->type = VAR_TYPE( dest->name );
 		dest->flags &= ~NEW_VARIABLE;
 	}
 
