@@ -148,25 +148,25 @@
 
 
 (defvar edl-unit-keywords
-  "\\(\\[0-9\\]\\|\\<\\)\\(\\(n\\|u\\|m\\|k\\|M\\)?\\(s\\|G\\|V\\|A\\|db\\|Hz\\)\\|\\(n\\|u\\|m\\)?T\\)\\>" )
+  "\\([0-9]\\|\\<\\)\\(\\(n\\|u\\|m\\|k\\|M\\)?\\(s\\|G\\|V\\|A\\|db\\|Hz\\)\\|\\(n\\|u\\|m\\)?T\\)\\>" )
 
 
 (defvar edl-font-lock-keywords
   (list
    (cons (concat "\\("
-		 (mapconcat 'identity edl-comments "\\|")
-		 "\\)")
-	 'font-lock-comment-face )
+				 (mapconcat 'identity edl-comments "\\|")
+				 "\\)")
+		 'font-lock-comment-face )
    (cons (mapconcat 'identity edl-strings "\\|")
-	 'font-lock-string-face )
+		 'font-lock-string-face )
    (cons (concat "\\<\\("
-		 (mapconcat 'identity edl-section-keywords "\\|")
-		 "\\)")
-	 'font-lock-function-name-face )
+				 (mapconcat 'identity edl-section-keywords "\\|")
+				 "\\)")
+		 'font-lock-function-name-face )
    (cons (concat "\\<\\("
-		 (mapconcat 'identity edl-reserved-words "\\|")
-		 "\\)\\|{\\|}")
-	 'font-lock-keyword-face)
+				 (mapconcat 'identity edl-reserved-words "\\|")
+				 "\\)\\|{\\|}")
+		 'font-lock-keyword-face)
    (cons "\\(<=\\|>=\\|==\\|!=\\|<\\|>\\|&\\|!\\|~\\)"
 		 'font-lock-builtin-face)
    (cons edl-unit-keywords 'font-lock-type-face)
