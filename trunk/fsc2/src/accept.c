@@ -480,7 +480,8 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 
 	G1.rwc_start[ Y ] = G1.rw_min;
 
-	/* If scale didn't chang redraw only current curve, otherwise all curves */
+	/* If the scale did not change redraw only the current curve, otherwise all
+	   curves */
 
 	if ( ! G1.scale_changed )
 		recalc_XPoints_of_curve_1d( G1.curve[ curve ] );
