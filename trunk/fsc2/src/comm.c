@@ -102,6 +102,8 @@ static bool pipe_read( char *buf, size_t bytes_to_read );
 static bool pipe_write( char *buf, size_t bytes_to_write );
 static bool send_browser( FL_OBJECT *browser );
 
+static bool comm_is_setup = FALSE;
+
 
 /*----------------------------------------------------------------*/
 /* This routine sets up the resources needed for the interprocess */
@@ -176,6 +178,8 @@ void setup_comm( void )
 				"channels.\n" );
 		THROW( EXCEPTION );
 	}
+
+	comm_is_setup = TRUE;
 }
 
 
@@ -186,6 +190,9 @@ void setup_comm( void )
 
 void end_comm( void )
 {
+	if ( ! comm_is_setup )
+		return;
+
 	/* Handle remaining messages */
 
 	if ( Comm.MQ->low != Comm.MQ->high )
