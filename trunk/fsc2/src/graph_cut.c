@@ -6,16 +6,16 @@
 #include "fsc2.h"
 
 
-static void setup_cut_canvas( Canvas *c, FL_OBJECT *obj );
+static void cut_setup_canvas( Canvas *c, FL_OBJECT *obj );
 static int cut_canvas_handler( FL_OBJECT *obj, Window window, int w, int h,
 							   XEvent *ev, void *udata );
-static void repaint_cut_canvas( Canvas *c );
-static void reconfigure_cut_window( Canvas *c, int w, int h );
-static void press_cut_handler( FL_OBJECT *obj, Window window,
+static void cut_repaint_canvas( Canvas *c );
+static void cut_reconfigure_window( Canvas *c, int w, int h );
+static void cut_press_handler( FL_OBJECT *obj, Window window,
 							   XEvent *ev, Canvas *c );
-static void release_cut_handler( FL_OBJECT *obj, Window window,
+static void cut_release_handler( FL_OBJECT *obj, Window window,
 								 XEvent *ev, Canvas *c );
-static void motion_cut_handler( FL_OBJECT *obj, Window window,
+static void cut_motion_handler( FL_OBJECT *obj, Window window,
 								XEvent *ev, Canvas *c );
 static void cut_canvas_off( Canvas *c, FL_OBJECT *obj );
 
@@ -23,10 +23,11 @@ static void cut_canvas_off( Canvas *c, FL_OBJECT *obj );
 static bool is_shown  = UNSET;  /* set on fl_show_form() */
 static bool is_mapped = UNSET;  /* while form is mapped */
 
+
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void show_cut( int dir, int pos )
+void cut_show( int dir, int pos )
 {
 	if ( G.active_curve == -1 )
 		return;
@@ -37,10 +38,10 @@ void show_cut( int dir, int pos )
 					  FL_PLACE_MOUSE | FL_FREE_SIZE, FL_FULLBORDER,
 					  "fsc2: Cross section" );
 
-		setup_cut_canvas( &G.cut_x_axis, cut_form->cut_x_axis );
-		setup_cut_canvas( &G.cut_y_axis, cut_form->cut_y_axis );
-		setup_cut_canvas( &G.cut_z_axis, cut_form->cut_z_axis );
-		setup_cut_canvas( &G.cut_canvas, cut_form->cut_canvas );
+		cut_setup_canvas( &G.cut_x_axis, cut_form->cut_x_axis );
+		cut_setup_canvas( &G.cut_y_axis, cut_form->cut_y_axis );
+		cut_setup_canvas( &G.cut_z_axis, cut_form->cut_z_axis );
+		cut_setup_canvas( &G.cut_canvas, cut_form->cut_canvas );
 
 		fl_winminsize( cut_form->cut->window, 500, 335 );
 
@@ -62,7 +63,7 @@ void show_cut( int dir, int pos )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-static void setup_cut_canvas( Canvas *c, FL_OBJECT *obj )
+static void cut_setup_canvas( Canvas *c, FL_OBJECT *obj )
 {
 	XSetWindowAttributes attributes;
 	FL_HANDLE_CANVAS ch = cut_canvas_handler;
@@ -90,7 +91,8 @@ static void setup_cut_canvas( Canvas *c, FL_OBJECT *obj )
 		fl_add_canvas_handler( c->obj, ButtonRelease, ch, ( void * ) c );
 		fl_add_canvas_handler( c->obj, MotionNotify, ch, ( void * ) c );
 
-		/* Get motion events only when first or second button is pressed */
+		/* Get motion events only when first or second button is pressed
+		   (this got to be set *after* requesting motion events) */
 
 		fl_remove_selected_xevent( FL_ObjWin( obj ),
 								   PointerMotionMask | PointerMotionHintMask |
@@ -123,25 +125,25 @@ static int cut_canvas_handler( FL_OBJECT *obj, Window window, int w, int h,
     {
         case Expose :
             if ( ev->xexpose.count == 0 )     /* only react to last in queue */
-				repaint_cut_canvas( c );
+				cut_repaint_canvas( c );
             break;
 
 		case ConfigureNotify :
             if ( ( int ) c->w == w && ( int ) c->h == h )
 				break;
-            reconfigure_cut_window( c, w, h );
+            cut_reconfigure_window( c, w, h );
             break;
 
 		case ButtonPress :
-			press_cut_handler( obj, window, ev, c );
+			cut_press_handler( obj, window, ev, c );
 			break;
 
 		case ButtonRelease :
-			release_cut_handler( obj, window, ev, c );
+			cut_release_handler( obj, window, ev, c );
 			break;
 
 		case MotionNotify :
-			motion_cut_handler( obj, window, ev, c );
+			cut_motion_handler( obj, window, ev, c );
 			break;
 	}
 
@@ -152,48 +154,48 @@ static int cut_canvas_handler( FL_OBJECT *obj, Window window, int w, int h,
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static void repaint_cut_canvas( Canvas *c )
+static void cut_repaint_canvas( Canvas *c )
 {
-	printf( "repaint_cut_canvas\n" );
+	printf( "cut_repaint_canvas\n" );
 }
 
 
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static void reconfigure_cut_window( Canvas *c, int w, int h )
+static void cut_reconfigure_window( Canvas *c, int w, int h )
 {
-	printf( "reconfigure_cut_window\n" );
+	printf( "cut_reconfigure_window\n" );
 }
 
 
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static void press_cut_handler( FL_OBJECT *obj, Window window,
+static void cut_press_handler( FL_OBJECT *obj, Window window,
 							   XEvent *ev, Canvas *c )
 {
-	printf( "press_cut_handler\n" );
+	printf( "cut_press_handler\n" );
 }
 
 
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static void release_cut_handler( FL_OBJECT *obj, Window window,
+static void cut_release_handler( FL_OBJECT *obj, Window window,
 								 XEvent *ev, Canvas *c )
 {
-	printf( "release_cut_handler\n");
+	printf( "cut_release_handler\n");
 }
 
 
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static void motion_cut_handler( FL_OBJECT *obj, Window window,
+static void cut_motion_handler( FL_OBJECT *obj, Window window,
 								XEvent *ev, Canvas *c )
 {
-	printf( "motion_cut_handler\n" );
+	printf( "cut_motion_handler\n" );
 }
 
 
@@ -204,6 +206,9 @@ void cut_form_close( void )
 {
 	if ( is_shown )
 	{
+		/* Get rid of canvas related stuff (needs to be done *before*
+		   hiding the form) */
+
 		cut_canvas_off( &G.cut_x_axis, cut_form->cut_x_axis );
 		cut_canvas_off( &G.cut_y_axis, cut_form->cut_y_axis );
 		cut_canvas_off( &G.cut_z_axis, cut_form->cut_z_axis );
