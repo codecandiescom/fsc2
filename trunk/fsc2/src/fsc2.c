@@ -92,7 +92,8 @@ int main( int argc, char *argv[ ] )
 
 	/* Figure out the machine type from the value returned by uname(),
 	   currently i[3-6]86 will be treated as having an Intel compatible
-	   processor. */
+	   processor. Only for these types of processors some stuff needing
+	   assembler and used to help with debugging can be used. */
 
 	if ( uname( &utsbuf ) == 0 &&
 		 utsbuf.machine[ 0 ] == 'i' &&
