@@ -227,7 +227,7 @@ installation by running
 
 This will make fsc2 run a set of EDL programs that (hopefully) test most
 of its built-in functions at least once. Be prepared for lots of windows
-popping up during the test run and for seeing some rather strange graphics.
+popping up during the test run, displaying some rather strange graphics.
 Normally, the test should run without any errors, otherwise you probably
 should contact me and complain ;-) All these tests don't access any of the
 devices, writing a test suite for the supported devices is still on my
