@@ -76,7 +76,7 @@ fsc2_connect.o: fsc2_connect.c
 
 
 clean:
-	$(RM) $(RMFLAGS) *.o *.output *_parser.[ch[ *_lexer.c fsc2_clean.c \
+	$(RM) $(RMFLAGS) *.o *.output *_parser.[ch] *_lexer.c fsc2_clean.c \
 					 fsc2 fsc2_clean fsc2_connect mem gpib_if.[ch] \
 					 fsc2_rsc.[ch] *~
 
