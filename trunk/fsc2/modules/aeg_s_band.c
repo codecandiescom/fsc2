@@ -60,7 +60,7 @@ static void magnet_sweep( int dir );
 static bool magnet_do( int command );
 
 
-typedef struct
+static struct
 {
 	double field;           /* the start field given by the user */
 	double field_step;      /* the field steps to be used */
@@ -80,15 +80,11 @@ typedef struct
 	int int_step;           /* used internally */
 
 	bool is_opened;
-    int fd;                 /* file descriptor for serial port */
-    struct termios old_tio, /* serial port terminal interface structures */
-                   new_tio;
+    struct termios *tio;    /* serial port terminal interface structures */
 
 	bool fast_init;         /* if set do a fast initialization */
-} Magnet;
+} magnet;
 
-
-static Magnet magnet;
 
 enum {
 	   SERIAL_INIT,
@@ -1032,30 +1028,26 @@ static bool magnet_do( int command )
 			   should not become the controlling terminal, otherwise line
 			   noise read as a CTRL-C might kill the program. */
 
-			if ( ( magnet.fd = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
-							O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) < 0 )
+			if ( ( magnet.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+						O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
 				return FAIL;
-
-			tcgetattr( magnet.fd, &magnet.old_tio );
-			memcpy( ( void * ) &magnet.new_tio, ( void * ) &magnet.old_tio,
-					sizeof( struct termios ) );
 
 			/* Switch off parity checking (8N1) and use of 2 stop bits and
 			   clear character size mask, then set character size mask to CS8,
 			   allow flow control and finally set the baud rate */
 
-			magnet.new_tio.c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
-			magnet.new_tio.c_cflag |= CS8 | CRTSCTS;
-			cfsetispeed( &magnet.new_tio, SERIAL_BAUDRATE );
-			cfsetospeed( &magnet.new_tio, SERIAL_BAUDRATE );
+			magnet.tio->c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
+			magnet.tio->c_cflag |= CS8 | CRTSCTS;
+			cfsetispeed( magnet.tio, SERIAL_BAUDRATE );
+			cfsetospeed( magnet.tio, SERIAL_BAUDRATE );
 
-			tcflush( magnet.fd, TCIFLUSH );
-			tcsetattr( magnet.fd, TCSANOW, &magnet.new_tio );
+			fsc2_tcflush( SERIAL_PORT, TCIFLUSH );
+			fsc2_tcsetattr( SERIAL_PORT, TCSANOW, magnet.tio );
 			break;
 
 		case SERIAL_TRIGGER :                 /* send trigger pattern */
 			data[ 0 ] = 0x20;
-			write( magnet.fd, ( void * ) &data, 1 );
+			fsc2_serial_write( SERIAL_PORT, data, 1 );
 			usleep( SERIAL_TIME );
 			break;
 
@@ -1064,13 +1056,11 @@ static bool magnet_do( int command )
 		    data[ 0 ] = ( unsigned char ) 
 				( 0x40 | ( ( volt >> 8 ) & 0xF ) | ( ( volt >> 3 ) & 0x10 ) );
 			data[ 1 ] = ( unsigned char ) ( 0x80 | ( volt & 0x07F ) );
-			write( magnet.fd, ( void * ) &data, 2 );
+			fsc2_serial_write( SERIAL_PORT, data, 2 );
 			break;
 
 		case SERIAL_EXIT :                    /* reset and close serial port */
-			tcflush( magnet.fd, TCIFLUSH );
-			tcsetattr( magnet.fd, TCSANOW, &magnet.old_tio );
-			close( magnet.fd );
+			fsc2_serial_close( SERIAL_PORT );
 			break;
 
 		default :

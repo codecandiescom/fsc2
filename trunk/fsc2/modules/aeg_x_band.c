@@ -12,7 +12,7 @@
 
   Fsc2 is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
@@ -62,29 +62,27 @@ static bool magnet_do( int command );
 
 typedef struct
 {
-	double field;           /* the start field given by the user */
-	double field_step;      /* the field steps to be used */
+	double field;			/* the start field given by the user */
+	double field_step;		/* the field steps to be used */
 
-	bool is_field;          /* flag, set if start field is defined */
-	bool is_field_step;     /* flag, set if field step size is defined */
+	bool is_field;			/* flag, set if start field is defined */
+	bool is_field_step;		/* flag, set if field step size is defined */
 
-	double mini_step;       /* the smallest possible field step */
+	double mini_step;		/* the smallest possible field step */
 
-	double target_field;    /* used internally */
-	double act_field;       /* used internally */
+	double target_field;	/* used internally */
+	double act_field;		/* used internally */
 
-	double meas_field;      /* result of last field measurement */
-	double max_deviation;   /* maximum acceptable deviation between measured */
-	                        /* and requested field */
-	double step;            /* the current step width (in bits) */
-	int int_step;           /* used internally */
+	double meas_field;		/* result of last field measurement */
+	double max_deviation;	/* maximum acceptable deviation between measured */
+							/* and requested field */
+	double step;			/* the current step width (in bits) */
+	int int_step;			/* used internally */
 
 	bool is_opened;
-    int fd;                 /* file descriptor for serial port */
-    struct termios old_tio, /* serial port terminal interface structures */
-                   new_tio;
+	struct termios *tio,    /* serial port terminal interface structure */
 
-	bool fast_init;         /* if set do a fast initialization */
+	bool fast_init;			/* if set do a fast initialization */
 } Magnet;
 
 
@@ -100,15 +98,15 @@ enum {
 
 
 /*****************************************************************************/
-/*                                                                           */
-/*                  hook functions                                           */
-/*                                                                           */
+/*																			 */
+/*					hook functions											 */
+/*																			 */
 /*****************************************************************************/
 
 
 /*----------------------------------------------------------------*/
 /* Here we check if also a driver for a field meter is loaded and */
-/* test if this driver will be loaded before the magnet driver.   */
+/* test if this driver will be loaded before the magnet driver.	  */
 /*----------------------------------------------------------------*/
 
 int aeg_x_band_init_hook( void )
@@ -144,7 +142,7 @@ int aeg_x_band_init_hook( void )
 		ret = get_lib_symbol( "bh15", "is_gaussmeter",
 							  ( void ** ) &is_gaussmeter );
 
-	fsc2_assert( ret != LIB_ERR_NO_LIB );      /* this can't happen....*/
+	fsc2_assert( ret != LIB_ERR_NO_LIB );	   /* this can't happen....*/
 
 	if ( ret == LIB_ERR_NO_SYM )
 	{
@@ -263,9 +261,9 @@ void aeg_x_band_exit_hook( void )
 
 
 /*****************************************************************************/
-/*                                                                           */
-/*              exported functions, i.e. EDL functions                       */
-/*                                                                           */
+/*																			 */
+/*				exported functions, i.e. EDL functions						 */
+/*																			 */
 /*****************************************************************************/
 
 
@@ -342,7 +340,7 @@ Var *magnet_setup( Var *v )
 
 /*--------------------------------------------------------------------*/
 /* If called the function reduces the time needed for calibrating the */
-/* magnet sweep but unfortunately also reducing the accuracy.         */
+/* magnet sweep but unfortunately also reducing the accuracy.		  */
 /*--------------------------------------------------------------------*/
 
 Var *magnet_fast_init( Var *v )
@@ -514,9 +512,9 @@ Var *reset_field( Var *v )
 
 
 /*****************************************************************************/
-/*                                                                           */
-/*            internally used functions                                      */
-/*                                                                           */
+/*																			 */
+/*			  internally used functions										 */
+/*																			 */
 /*****************************************************************************/
 
 
@@ -538,7 +536,7 @@ static double aeg_x_band_field_check( double field, bool *err_flag )
 			else
 				THROW( EXCEPTION )
 		}
-        
+		
 		if ( field > AEG_X_BAND_WITH_ER035M_MAX_FIELD )
 		{
 			eprint( FATAL, SET, "%s: Start field (%lf G) too high for "
@@ -571,7 +569,7 @@ static double aeg_x_band_field_check( double field, bool *err_flag )
 			else
 				THROW( EXCEPTION )
 		}
-        
+		
 		if ( field > AEG_X_BAND_WITH_BH15_MAX_FIELD )
 		{
 			eprint( FATAL, SET, "%s: Start field (%lf G) too high for "
@@ -601,13 +599,13 @@ static double aeg_x_band_field_check( double field, bool *err_flag )
    zero or larger ! */
 
 #define MAGNET_ZERO_STEP  ( 0x800 - 0.5 )  /* data for zero sweep speed */
-#define MAGNET_MAX_STEP   ( 0x7FF + 0.5 )  /* maximum sweep speed setting */
+#define MAGNET_MAX_STEP	  ( 0x7FF + 0.5 )  /* maximum sweep speed setting */
 
 
-#define MAGNET_TEST_STEPS      16     /* number of steps to do in test */
-#define MAGNET_FAST_TEST_STEPS 4      /* number of steps to do in fast test */
-#define MAGNET_TEST_WIDTH      0x400  /* sweep speed setting for test */
-#define MAGNET_MAX_TRIES       3      /* number of retries after failure of 
+#define MAGNET_TEST_STEPS	   16	  /* number of steps to do in test */
+#define MAGNET_FAST_TEST_STEPS 4	  /* number of steps to do in fast test */
+#define MAGNET_TEST_WIDTH	   0x400  /* sweep speed setting for test */
+#define MAGNET_MAX_TRIES	   3	  /* number of retries after failure of 
 										 magnet field convergence to target
 										 point */
 
@@ -615,12 +613,12 @@ static double aeg_x_band_field_check( double field, bool *err_flag )
 
 /* The sweep of the magnet is done by applying a voltage for a certain time
    (to be adjusted manually on the front panel but which should be left at
-   the current setting of 50 ms) to the internal sweep circuit.  There are
+   the current setting of 50 ms) to the internal sweep circuit.	 There are
    two types of data to be sent to the home build interface card: First, the
    voltage to be set and, second, a trigger to really set the voltage.
 
    1. The DAC is a 12-bit converter, thus two bytes have to be sent to the
-      interface card. The first byte must have bit 6 set to tell the inter-
+	  interface card. The first byte must have bit 6 set to tell the inter-
 	  face card that this is the first byte. In bit 0 to 3 of the first byte
 	  sent the upper 4 bits of the 12-bit data are encoded, while bit 4
 	  contains the next lower bit (bit 7) of the 12-data word to be sent.
@@ -628,21 +626,21 @@ static double aeg_x_band_field_check( double field, bool *err_flag )
 	  tell the card that this is the second byte, followed by the remaining
 	  lower 7 bits of the data. Thus in order to send the 12-bit data
 
-                       xxxx yzzz zzzz
+					   xxxx yzzz zzzz
 
 	  the 2-byte sequence to be sent to the interface card is (binary)
 
-                  1.   010y xxxx
+				  1.   010y xxxx
 				  2.   1zzz zzzz
 
   2. To trigger the output of the voltage bit 5 of the byte sent to the
-     interface card has to be set, while bit 6 and 7 have to be zeros - all
+	 interface card has to be set, while bit 6 and 7 have to be zeros - all
 	 remaining bits don't matter. So, the (binary) trigger command byte is
 
-                       0010 0000
+					   0010 0000
 
   3. The maximum positive step width is achieved by setting the DAC to
-     0x0, the maximum negative step width by setting it to 0xFFF.
+	 0x0, the maximum negative step width by setting it to 0xFFF.
 
   The sweep according to the data send to the magnet power supply will
   last for the time adjusted on the controllers front panel (in ms).
@@ -653,14 +651,14 @@ static double aeg_x_band_field_check( double field, bool *err_flag )
 
 
 /*--------------------------------------------------------------------------*/
-/* magnet_init() first initializes the serial interface and then tries to   */
+/* magnet_init() first initializes the serial interface and then tries to	*/
 /* figure out what's the current minimal step size is for the magnet - this */
 /* is necessary for every new sweep since the user can adjust the step size */
-/* by setting the sweep rate on the magnets front panel (s/he also might    */
-/* change the time steps but lets hope he doesn't since there's no way to   */
-/* find out about it...). So, we have to make sure that the setting at the  */
-/* front panel is the maximum setting of 5000 Oe/min. Finally we try to go  */
-/* to the start field.                                                      */
+/* by setting the sweep rate on the magnets front panel (s/he also might	*/
+/* change the time steps but lets hope he doesn't since there's no way to	*/
+/* find out about it...). So, we have to make sure that the setting at the	*/
+/* front panel is the maximum setting of 5000 Oe/min. Finally we try to go	*/
+/* to the start field.														*/
 /*--------------------------------------------------------------------------*/
 
 static bool magnet_init( void )
@@ -719,7 +717,7 @@ try_again:
 	/* Calculate the smallest possible step width (in field units) */
 
 	magnet.mini_step = ( magnet.meas_field - start_field ) /
-		                         ( double ) ( MAGNET_TEST_WIDTH * test_steps );
+								 ( double ) ( MAGNET_TEST_WIDTH * test_steps );
 
 	/* Now lets do the same, just in the opposite direction to (hopefully)
 	   increase accuracy */
@@ -747,7 +745,7 @@ try_again:
 	vars_pop( v );
 
 	magnet.mini_step -= ( magnet.meas_field - start_field ) /
-		                         ( double ) ( MAGNET_TEST_WIDTH * test_steps );
+								 ( double ) ( MAGNET_TEST_WIDTH * test_steps );
 	magnet.mini_step *= 0.5;
 
 	/* Check that the sweep speed selector on the magnets front panel is set
@@ -778,12 +776,12 @@ try_again:
 /* On the one hand this function is a wrapper to hide the recursiveness of */
 /* magnet_goto_field_rec(), on the other hand there's something more: The  */
 /* function stores the size of the last field step as well as the number   */
-/* mini_steps that were needed to achieve the field step. When the next    */
+/* mini_steps that were needed to achieve the field step. When the next	   */
 /* field step has the same size (within the error specified by the user)   */
 /* this number of mini_steps is used instead of the one that would result  */
-/* when using the factor determined in the initialization. This way the    */
+/* when using the factor determined in the initialization. This way the	   */
 /* errors for large field steps (where the factor doesn't work well) can   */
-/* be compensated and the sweep can be done faster.                        */
+/* be compensated and the sweep can be done faster.						   */
 /*-------------------------------------------------------------------------*/
 
 static bool magnet_goto_field( double field, double error )
@@ -798,7 +796,7 @@ static bool magnet_goto_field( double field, double error )
 	{
 		if ( last_field_step != 0.0 )
 			 last_mini_steps *= fabs( field - magnet.act_field ) /
-			                    fabs( last_field_step );
+								fabs( last_field_step );
 		if ( sign( field - magnet.act_field ) != sign( last_field_step ) )
 			last_mini_steps *= -1.0;
 	}
@@ -827,7 +825,7 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 	double max_dev;
 	int i;
 	static double last_diff;  /* field difference in last step */
-	static int try;           /* number of steps without conversion */
+	static int try;			  /* number of steps without conversion */
 	Var *v;
 	int acc;
 
@@ -896,22 +894,22 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 	magnet.meas_field = v->val.dval;
 	vars_pop( v );
 
-	if ( rec == 0 )               /* at the very first call of the routine */
+	if ( rec == 0 )				  /* at the very first call of the routine */
 	{
 		last_diff = HUGE_VAL;
 		try = 0;
 	}
-	else                          /* if we're already in the recursion */
-	{                                                       
+	else						  /* if we're already in the recursion */
+	{														
 		if ( fabs( field - magnet.meas_field ) > last_diff )/* got it worse? */
 		{
 			if ( ++try >= MAGNET_MAX_TRIES )
 				return FAIL;
 		}
-		else                                /* difference got smaller */
+		else								/* difference got smaller */
 		{
 			try = 0;
-		    last_diff = fabs( field - magnet.meas_field );
+			last_diff = fabs( field - magnet.meas_field );
 		}
 	}
 
@@ -919,7 +917,7 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 	   otherwise try another (hopefully smaller) step */
 
 	max_dev = magnet.max_deviation > fabs( error ) ?
-		      magnet.max_deviation : error;
+			  magnet.max_deviation : error;
 
 	if ( fabs( field - magnet.meas_field ) > max_dev &&
 		 ! magnet_goto_field_rec( field, error, 1, hint ) )
@@ -954,7 +952,7 @@ static void magnet_sweep( int dir )
 	   never be larger than one bit). */
 
 	over_shot = magnet.act_field - magnet.target_field;
-   	mini_steps = ( dir * magnet.field_step - over_shot ) / magnet.mini_step;
+	mini_steps = ( dir * magnet.field_step - over_shot ) / magnet.mini_step;
 
 	/* If the target field can be achieved by a single step... */
 
@@ -967,8 +965,8 @@ static void magnet_sweep( int dir )
 		}
 		magnet_do( SERIAL_TRIGGER );
 
-		magnet.act_field +=   ( MAGNET_ZERO_STEP - magnet.int_step )
-			                * magnet.mini_step;
+		magnet.act_field +=	  ( MAGNET_ZERO_STEP - magnet.int_step )
+							* magnet.mini_step;
 		magnet.target_field += dir * magnet.field_step;
 		return;
 	}
@@ -994,8 +992,8 @@ static void magnet_sweep( int dir )
 				THROW( USER_BREAK_EXCEPTION )
 
 			magnet_do( SERIAL_TRIGGER );
-			magnet.act_field +=   ( MAGNET_ZERO_STEP - magnet.int_step )
-				                * magnet.mini_step;
+			magnet.act_field +=	  ( MAGNET_ZERO_STEP - magnet.int_step )
+								* magnet.mini_step;
 		}
 	}
 
@@ -1008,17 +1006,17 @@ static void magnet_sweep( int dir )
 		magnet_do( SERIAL_TRIGGER );
 	}
 
-	magnet.act_field +=   ( MAGNET_ZERO_STEP - magnet.int_step )
-		                * magnet.mini_step;
+	magnet.act_field +=	  ( MAGNET_ZERO_STEP - magnet.int_step )
+						* magnet.mini_step;
 	magnet.target_field += dir * magnet.field_step;
 }
 
 
 /*---------------------------------------------------------------------------*/
 /* This is the most basic routine for controlling the field - there are four */
-/* basic commands, i.e. initializing the serial interface, setting a sweep   */
+/* basic commands, i.e. initializing the serial interface, setting a sweep	 */
 /* voltage, triggering a field sweep and finally resetting the serial inter- */
-/* face.                                                                     */
+/* face.																	 */
 /*---------------------------------------------------------------------------*/
 
 bool magnet_do( int command )
@@ -1029,52 +1027,46 @@ bool magnet_do( int command )
 
 	switch ( command )
 	{
-		case SERIAL_INIT :               /* open and initialize serial port */
+		case SERIAL_INIT :				 /* open and initialize serial port */
 			/* We need exclussive access to the serial port and we also need
 			   non-blocking mode to avoid hanging indefinitely if the other
 			   side does not react. O_NOCTTY is set because the serial port
 			   should not become the controlling terminal, otherwise line
 			   noise read as a CTRL-C might kill the program. */
 
-			if ( ( magnet.fd = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
-							O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) < 0 )
+			if ( ( magnet.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+						O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
 				return FAIL;
-
-			tcgetattr( magnet.fd, &magnet.old_tio );
-			memcpy( &magnet.new_tio, &magnet.old_tio,
-					sizeof( struct termios ) );
 
 			/* Switch off parity checking (8N1) and use of 2 stop bits and
 			   clear character size mask, then set character size mask to CS8,
 			   allow flow control and finally set the baud rate */
 
-			magnet.new_tio.c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
-			magnet.new_tio.c_cflag |= CS8 | CRTSCTS;
-			cfsetispeed( &magnet.new_tio, SERIAL_BAUDRATE );
-			cfsetospeed( &magnet.new_tio, SERIAL_BAUDRATE );
+			magnet.tio->c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
+			magnet.tio->c_cflag |= CS8 | CRTSCTS;
+			cfsetispeed( magnet.tio, SERIAL_BAUDRATE );
+			cfsetospeed( magnet.tio, SERIAL_BAUDRATE );
 
-			tcflush( magnet.fd, TCIFLUSH );
-			tcsetattr( magnet.fd, TCSANOW, &magnet.new_tio );
+			fsc2_tcflush( SERIAL_PORT, TCIFLUSH );
+			fsc2_tcsetattr( SERIAL_PORT, TCSANOW, magnet.tio );
 			break;
 
-		case SERIAL_TRIGGER :                 /* send trigger pattern */
+		case SERIAL_TRIGGER :				  /* send trigger pattern */
 			data[ 0 ] = 0x20;
-			write( magnet.fd, ( void * ) &data, 1 );
+			fsc2_serial_write( SERIAL_PORT, data, 1 );
 			usleep( SERIAL_TIME );
 			break;
 
-		case SERIAL_VOLTAGE :                 /* send voltage data pattern */
+		case SERIAL_VOLTAGE :				  /* send voltage data pattern */
 			magnet.int_step = volt = lrnd( MAGNET_ZERO_STEP - magnet.step );
-		    data[ 0 ] = ( unsigned char ) 
+			data[ 0 ] = ( unsigned char ) 
 				( 0x40 | ( ( volt >> 8 ) & 0xF ) | ( ( volt >> 3 ) & 0x10 ) );
 			data[ 1 ] = ( unsigned char ) ( 0x80 | ( volt & 0x07F ) );
-			write( magnet.fd, &data, 2 );
+			fsc2_serial_write( SERIAL_PORT, data, 2 );
 			break;
 
-		case SERIAL_EXIT :                    /* reset and close serial port */
-			tcflush( magnet.fd, TCIFLUSH );
-			tcsetattr( magnet.fd, TCSANOW, &magnet.old_tio );
-			close( magnet.fd );
+		case SERIAL_EXIT :					  /* reset and close serial port */
+			fsc2_serial_close( SERIAL_PORT );
 			break;
 
 		default :
