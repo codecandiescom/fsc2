@@ -128,29 +128,31 @@ how this is done still needs to be written...]
 
 
 All the following functions may be used to control the magnetic field of
-the magnet. Currently, AEG magnets (X-band and S-band) are
-supported. The modules that have to be listed in the @code{DEVICES}
-section to load the functions are
+the magnet. Currently, @strong{AEG} magnets (X-band and S-band) and the
+Bruker @strong{ER032M Field Controller} are supported. The modules that
+have to be listed in the @code{DEVICES} section to load the functions
+are
 @example
 aeg_x_band
 aeg_s_band
+er032m
 @end example
 Because magnets hardly ever get changed (and if the program is set up
 correctly for the experiment) one can use @code{magnet} as the module
 name instead.
 
-Since it is not possible to measure the field using just the magnet
-power supply it is necessary also to specify a gaussmeter to enable
-@acronym{fsc2} to control the magnet. The module name of the gaussmeter
-has to appear @b{before} the magnet module entry in the @code{DEVICES}
-section. See the next section for the implemented gaussmeter and the
-related functions.
+Since it is not possible for the @strong{AEG} magnets to measure the
+field using just the magnet power supply it is necessary also to specify
+a gaussmeter to enable @acronym{fsc2} to control the magnet. The module
+name of the gaussmeter has to appear @b{before} the magnet module entry
+in the @code{DEVICES} section. See the next section for the implemented
+gaussmeter and the related functions.
 
-If a magnet module is listed in the @code{DEVICES} section the program
-will try to calibrate the field sweep parameters at the start of the
-experiment, i.e.@: it will sweep the field up and down for some
-time, please be patient. See below on how to reduce the amount of time
-spent with field calibration.
+If a @strong{AEG} magnet module is listed in the @code{DEVICES} section
+the program will try to calibrate the field sweep parameters at the
+start of the experiment, i.e.@: it will sweep the field up and down for
+some time, please be patient. See below on how to reduce the amount of
+time spent with field calibration.
 
 @table @samp
 @item magnet_name()
@@ -170,30 +172,31 @@ starts.
 @findex magnet_fast_init()
 Calling this functions in the @code{PREPARATIONS} section will shorten
 the time used for the calibration of the field sweep at the start of the
-experiment. Unfortunately, this also reduces the precision of the field
-sweep. Whenever an experiment is restarted (i.e.@: if no new
-@acronym{EDL} file has been loaded in between) this shortened
-calibration is done anyways to check that the parameters didn't change
-significantly since the last run.
+experiment for the @strong{AEG} magnet power supplies. Unfortunately,
+this also reduces the precision of the field sweep. Whenever an
+experiment is restarted (i.e.@: if no new @acronym{EDL} file has been
+loaded in between) this shortened calibration is done anyways to check
+that the parameters didn't change significantly since the last run.
 
 
 @item set_field()
 @findex set_field()
 This function expects one floating point argument for the field value
-and will set the magnetic field to this value. It also accepts a second
-optional paramter, the maximum acceptable deviation of the field from
-the value to be set. For example by the call
+and will set the magnetic field to this value. For the @strong{AEG}
+magnets it also accepts a second optional paramter, the maximum
+acceptable deviation of the field from the value to be set. For example
+by the call
 @example
 set_field( 3421.5 G, 0.2 G );
 @end example
 @noindent
 the field will be set to a value between @w{3421.3 G} and @w{3421.7 G}.
 
-If this second paramter is missing the precision of the gaussmeter used
-for measuring the field is used. If the maximum deviation paramter is
-smaller than the precision of the gaussmeter the precision of the
-gaussmeter is used instead. The function can only be called in the
-@code{EXPERIMENT} section.
+If in the case of @strong{AEG} magnets this second paramter is missing
+the precision of the gaussmeter used for measuring the field is used. If
+the maximum deviation paramter is smaller than the precision of the
+gaussmeter the precision of the gaussmeter is used instead. The function
+can only be called in the @code{EXPERIMENT} section.
 
 
 @item sweep_up()
@@ -204,13 +207,14 @@ before. It doesn't take an argument and will sweep up the magnet by the
 field step size value set in the @code{magnet_setup()} function.  The
 actual size of the step will @b{not} be controlled using the gaussmeter.
 
-The precision of the field sweep depends on the step size. While the
-precision is usually quite good for step sizes of up to @w{1 G}, for
-much larger step sizes it may deteriorate quite significantly. It
-sometimes helps to add a short waiting time (use function @code{wait()})
-after a sweep step to allow the field to settle at the new point. On the
-other hand, it then might be faster (and more reliable) not to use the
-sweep function at all but @code{set_field()} instead.
+For the @strong{AEG} magnets the precision of the field sweep depends on
+the step size. While the precision is usually quite good for step sizes
+of up to @w{1 G}, for much larger step sizes it may deteriorate quite
+significantly. It sometimes helps to add a short waiting time (use
+function @code{wait()}) after a sweep step to allow the field to settle
+at the new point. On the other hand, it then might be faster (and more
+reliable) not to use the sweep function at all but @code{set_field()}
+instead.
 
 @item sweep_down()
 @findex sweep_down()
@@ -225,6 +229,14 @@ defined in @code{magnet_setup()}. The function can only be called in the
 This function resets the magnetic field to the start field value defined
 in @code{magnet_setup()} (which has to be called before). The function
 can only be used in the @code{EXPERIMENT} section.
+
+@item get_field()
+@findex get_field()
+For the @strong{AEG} magnets this is only a convenience function that
+just calls a function supplied by the gaussmeter used together with the
+magnet power supply to determine the current field. In contrast, for the
+@strong{ER032M Field Controller} this function returns the current field
+setting.
 
 @end table
 
