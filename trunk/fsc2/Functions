@@ -79,7 +79,7 @@ digitizer_get_channel_number, 1, ALL;   // only for internal use !
 
 synthesizer_set_frequency, 1, ALL;
 synthesizer_get_frequency, 0, EXP;
-synthesizer_set_step_frequency, 1, ALL;
+synthesizer_step_frequency, -1, ALL;
 synthesizer_sweep_up, 0, EXP;
 synthesizer_sweep_down, 0, EXP;
 synthesizer_reset_frequency, 0, EXP;
