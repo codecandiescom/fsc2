@@ -42,73 +42,42 @@ void rs_spec10_init_camera( void )
 
 	/* Try to figure out how many cameras are attached to the system */
 
-//	  if ( ! pl_cam_get_total( &total_cams ) )
-//		  rs_spec10_error_handling( );
-//
-//	  /* Loop over the cameras until we find the one we're looking for */
-//
-//	  for ( i = 0; i < total_cams; i++ )
-//	  {
-//		  pl_cam_get_name( i, cam_name );
-//		  if ( ! strcmp( cam_name, rs_spec10->dev_file ) )
-//			  break;
-//	  }
-//
-//	  /* Check if we found it, otherwise throw an exception */
-//
-//	  if ( i == total_cams )
-//	  {
-//		  print( FATAL, "No camera device file '/dev/%s' found.\n",
-//				 rs_spec10->dev_file );
-//		  THROW( EXCEPTION );
-//	  }
-//
-//	  /* Try to get a handle for the camera */
-//
-//	  if ( ! pl_cam_open( ( char * ) rs_spec10->dev_file, &rs_spec10->handle,
-//						  OPEN_EXCLUSIVE ) )
-//		  rs_spec10_error_handling( );
-//
-//	  rs_spec10->is_open = SET;
-//
-//	  /* Do a simple checks */
-//
-//	if ( ! pl_cam_check( rs_spec10->handle ) )
-//		rs_spec10_error_handling( );
-
-//	rs_spec10_ccd_init( );
-//	rs_spec10_temperature_init( );
-
-	int16 hCam;
-	rgn_type region = { 0, 1339, 1, 0, 99, 1 };
-	uns32 size;
-	uns16 *frame;
-    int16 status;
-    uns32 not_needed;
-
-    if ( ! pl_cam_get_name( 0, cam_name ) )
-		rs_spec10_error_handling( );
-    if ( ! pl_cam_open(cam_name, &hCam, OPEN_EXCLUSIVE ) )
+	if ( ! pl_cam_get_total( &total_cams ) )
 		rs_spec10_error_handling( );
 
-    if ( ! pl_exp_init_seq() )
-		rs_spec10_error_handling( );
-    if ( ! pl_exp_setup_seq( hCam, 1, 1, &region, TIMED_MODE, 100, &size ) )
-		rs_spec10_error_handling( );
-	if ( !( frame = malloc( size ) ) )
-		rs_spec10_error_handling( );
-	if ( ! pl_exp_start_seq(hCam, frame ) )
-		rs_spec10_error_handling( );
-	while( pl_exp_check_status( hCam, &status, &not_needed ) && 
-		   (status != READOUT_COMPLETE && status != READOUT_FAILED) );
+	/* Loop over the cameras until we find the one we're looking for */
 
-	printf( "Center Three Points: %i, %i, %i\n", 
-			frame[size/sizeof(uns16)/2 - 1],
-			frame[size/sizeof(uns16)/2],
-			frame[size/sizeof(uns16)/2 + 1] );
-    pl_exp_finish_seq( hCam, frame, 0);
-    pl_exp_uninit_seq();
-    free( frame );
+	for ( i = 0; i < total_cams; i++ )
+	{
+		pl_cam_get_name( i, cam_name );
+		if ( ! strcmp( cam_name, rs_spec10->dev_file ) )
+			break;
+	}
+
+	/* Check if we found it, otherwise throw an exception */
+
+	if ( i == total_cams )
+	{
+		print( FATAL, "No camera device file '/dev/%s' found.\n",
+			   rs_spec10->dev_file );
+		THROW( EXCEPTION );
+	}
+
+	/* Try to get a handle for the camera */
+
+	if ( ! pl_cam_open( ( char * ) rs_spec10->dev_file, &rs_spec10->handle,
+						OPEN_EXCLUSIVE ) )
+		rs_spec10_error_handling( );
+
+	rs_spec10->is_open = SET;
+
+	/* Do a simple checks */
+
+	if ( ! pl_cam_check( rs_spec10->handle ) )
+		rs_spec10_error_handling( );
+
+	rs_spec10_ccd_init( );
+	rs_spec10_temperature_init( );
 }
 
 
@@ -355,7 +324,11 @@ uns16 *rs_spec10_get_pic( void )
 	uns16 *frame;
 	int16 status;
 	uns32 dummy;
+	char cur_dir[ PATH_MAX ];
 
+
+	getcwd( cur_dir, PATH_MAX );
+	chdir( "/usr/local/lib" );
 
 	region.s1   = rs_spec10->ccd.roi[ 0 ];
 	region.p1   = rs_spec10->ccd.roi[ 1 ];
@@ -417,6 +390,7 @@ uns16 *rs_spec10_get_pic( void )
 
 	if ( ! pl_exp_start_seq( rs_spec10->handle, frame ) )
 	{
+		chdir( cur_dir );
 		pl_exp_abort( rs_spec10->handle, CCS_HALT );
 		pl_exp_uninit_seq( );
 //		munlock( frame, size );
@@ -441,6 +415,7 @@ uns16 *rs_spec10_get_pic( void )
 		pl_exp_uninit_seq( );
 //		munlock( frame, size );
 		T_free( frame );
+		chdir( cur_dir );
 		RETHROW( );
 	}
 
@@ -449,6 +424,7 @@ uns16 *rs_spec10_get_pic( void )
 
 //	munlock( frame, size );
 
+	chdir( cur_dir );
 	return frame;
 }
 

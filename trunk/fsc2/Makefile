@@ -200,6 +200,7 @@ CFLAGS           := $(OPTIMIZATION) \
 					-Waggregate-return \
 					-Wnested-externs \
 					-Wcast-align \
+					-DLIBC_MDEBUG       # for libc memory debugging
 				    # -DFSC2_MDEBUG       # for built-in malloc debugging
 				    # -DNDEBUG            # switch off built-in debugging code
 				    # -Wconversion
