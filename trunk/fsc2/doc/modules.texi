@@ -1391,8 +1391,9 @@ this is to call either @code{usleep()} or @code{nansleep()}. The second
 function, @code{nanosleep()}, may look like a bit of overkill since both
 functions real time resolution is usually in the @w{10 ms} range, at
 least on Intel machines. On the other hand, @code{usleep()} is marked as
-obsolescent in the the IEEE Standard 1003.1-2001 (SUV3) for several
-reasons and thus should not be used anymore.
+obsolescent in the the IEEE Standard 1003.1-2001 (Single UNIX
+Specification, Version 3) for several reasons and thus should not be
+used anymore.
 
 As a replacement for @code{usleep()} (which you shouldn't use in a
 module) there is a function
