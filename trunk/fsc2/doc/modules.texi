@@ -784,9 +784,15 @@ must be prepared to accept unexpected values.
 @subsection How to call an @acronym{EDL} function from a module
 
 Calling an @acronym{EDL} function (built-in as well as @acronym{EDL}
-functions defined in other modules) consists of three steps:
+functions defined in other modules) consists of three to four steps:
 
 @enumerate
+@item
+You may first want to check if the function you're planning to call
+exists at all. To do so call @code{function_exist()} with the name of
+the function as the argument. It will return @code{0} if the function
+does not exist, otherwise a non-zero value.
+
 @item
 Call @code{function_get()} with the name of the function you want to
 call as the argument --- this will return a variable pointer to the
@@ -816,16 +822,16 @@ Var *func_ptr;
 Var *ret_value;
 int access;
 
-func_ptr = func_get( "foo", &access ); /* get pointer to function */
-if ( func_ptr == NULL )                /* test if function exists */
+if ( function_exist( "foo" )               /* test if function exists */
 @{
     /* do your error handling here */ 
 @}
 else                                  
 @{                                    
-    vars_push( INT_VAR, 5 );           /* push first argument */
-    vars_push( FLOAT_VAR, 3.1415 );    /* push second argument */
-    ret_value = func_call( func_ptr ); /* call the function */
+    func_ptr = func_get( "foo", &access ); /* get pointer to function */
+    vars_push( INT_VAR, 5 );               /* push first argument */
+    vars_push( FLOAT_VAR, 3.1415 );        /* push second argument */
+    ret_value = func_call( func_ptr );     /* call the function */
 @}
 @end example
 
@@ -838,7 +844,7 @@ the function returned by @code{func_get()}
 @findex func_get()
 , @code{func_ptr}, will
 disappear automatically. Thus, when you need to call the function again
-you will have to go through the complete procedure, since the value
+you will have to go through this procedure, since the value
 stored in @code{func_ptr} after the call to @code{func_call()} is
 completely useless and even dangerous to use for any purpose whatsoever!
 @item
@@ -929,7 +935,7 @@ know about exceptions for nearly all cases that have to be handled within
 modules.
 
 
-@subsubsection Programing with exceptions
+@subsubsection More on programing with exceptions
 
 Of course, to allow the `throwing' of exceptions there must be a place that
 will `catch' the exception, otherwise the exception will simply kill the
