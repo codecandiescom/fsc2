@@ -86,9 +86,9 @@ eol:     ';'                       { assert( Var_Stack == NULL ); }
 /* currently only the variables related stuff */
 
 line:    E_VAR_TOKEN '=' expr      { vars_assign( $3, $1 ); }
-       | E_VAR_TOKEN '['           { $$ = vars_arr_start( $1 ); }
-         list1 ']'                 { $$ = vars_arr_lhs( $$ ) }
-         '=' expr                  { vars_assign( $8, $$ );
+       | E_VAR_TOKEN '['           { vars_arr_start( $1 ); }
+         list1 ']'                 { vars_arr_lhs( $4 ) }
+         '=' expr                  { vars_assign( $8, $8->prev );
                                      assert( Var_Stack == NULL ); }
        | E_FUNC_TOKEN '(' list2 ')'{ vars_pop( func_call( $1 ) ); }
        | E_FUNC_TOKEN '['          { eprint( FATAL, "%s:%ld: `%s' is a "

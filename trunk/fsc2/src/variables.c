@@ -1092,8 +1092,9 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
 	{
 		if ( a->dim != 1 )
 			eprint( FATAL, "%s:%ld: Size of array `%s' is still unknown, "
-					"only %d indices are allowed here.\n",
-					Fname, Lc, a->name, a->dim - 1 );
+					"only %d ind%s allowed here.\n",
+					Fname, Lc, a->name, a->dim - 1,
+					( a->dim == 2 ) ? "ex is" : "ices are" );
 		else
 			eprint( FATAL, "%s:%ld: Size of array `%s' is still unknown, "
 					"no indices are allowed here.\n", Fname, Lc, a->name );
@@ -1154,7 +1155,7 @@ long vars_calc_index( Var *a, Var *v )
 		{
 			vn = v->next;
 			vars_pop( v );
-			continue;
+			break;
 		}
 
 		/* check the variable with the size */
@@ -1209,6 +1210,13 @@ long vars_calc_index( Var *a, Var *v )
 
 		vn = v->next;
 		vars_pop( v );
+	}
+
+	if ( vn != NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing array index for array `%s'.\n",
+				Fname, Lc, a->name );
+		THROW( EXCEPTION );
 	}
 
 	/* for slices we need another update of the index */

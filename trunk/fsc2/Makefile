@@ -98,7 +98,7 @@ mods: $(modules:.c=.so)
 
 clean: 
 	-rm *.o fsc_clean fsc2 *.output *_parser.c *_parser.h *_lexer.c \
-	    fsc_clean.c *.lo *.so TAGS
+	    fsc_clean.c *.lo *.so TAGS mem
 
 tags:
 	etags -T ${c_sources} *.flex *.y ${c_sources:.c=.h} $(header)

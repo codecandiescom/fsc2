@@ -154,10 +154,11 @@ typedef struct
 /* convinience macros for accessing the value of simple variables */
 
 
-#define fatal_error  THROW( FUNCTIONS_EXCEPTION );
-#define INT   val.lval
-#define FLOAT val.dval
-
+#define fatal_error  THROW( EXCEPTION );
+#define INT          val.lval
+#define FLOAT        val.dval
+#define VALUE( a )   ( ( a )->type == INT_VAR ?            \
+                       ( a )->val.lval : ( a )->val.dval )
 
 
 /* return codes from function get_lib_symbol() (in func.c) */

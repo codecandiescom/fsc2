@@ -19,6 +19,7 @@ extern Token_Val conditionlval;
 
 extern char *Fname;
 extern long Lc;
+static long var_count = 0;
 
 extern void prim_exprestart( FILE *prim_expin );
 
@@ -443,18 +444,20 @@ void setup_if_else( long *pos, Prg_Token *cur_wr )
 void prim_exp_run( void )
 {
 	Prg_Token *cur;
-
+	int xyz = 3;
 
 	if ( Fname != NULL )
 		T_free( Fname );
 	Fname = NULL;
 
-	save_restore_variables( SET );
 
-	cur_prg_token = prg_token;
-
+	while ( xyz-- ) {
 	TRY
 	{
+		save_restore_variables( SET );
+
+		cur_prg_token = prg_token;
+
 		while ( cur_prg_token != NULL &&
 				cur_prg_token < prg_token + prg_length )
 		{
@@ -540,13 +543,14 @@ void prim_exp_run( void )
 	}
 	OTHERWISE
 	{
-		save_restore_variables( UNSET );
+		delete_var_list_copy( );
 		Fname = NULL;
 		PASSTHROU( );
 	}
 
 	Fname = NULL;
 	save_restore_variables( UNSET );
+}
 }
 
 
@@ -1092,11 +1096,12 @@ bool test_for_cond( Prg_Token *cur )
 
 void save_restore_variables( bool flag )
 {
-	static long var_count = 0;
-	Var *cv;
-	Var *cb;
-	static Var *paranoia;
+	Var *src;
+	Var *cpy;
+	static Var *old_var_list;
 
+
+	assert( Var_Stack == NULL );
 
 	if ( flag )
 	{
@@ -1105,41 +1110,109 @@ void save_restore_variables( bool flag )
 		/* count the number of variables and get memory for storing them */
 
 		if ( var_count == 0 )
-			for ( var_count = 0, cv = var_list; cv != NULL;
-				  var_count++, cv = cv->next )
+			for ( var_count = 0, src = var_list; src != NULL;
+				  var_count++, src = src->next )
 				;
 		prg_token[ prg_length ].tv.vptr = NULL;
 		var_list_copy = T_malloc( var_count * sizeof( Var ) );
 
 		/* copy all of them into the backup region */
 
-		for ( cv = var_list, cb = var_list_copy; cv != NULL;
-			  cb++, cv = cv->next )
-			memcpy( cb, cv, sizeof( Var ) );
+		for ( src = var_list, cpy = var_list_copy; src != NULL;
+			  cpy++, src = src->next )
+		{
+			memcpy( cpy, src, sizeof( Var ) );
 
-		paranoia = var_list;
+			if ( cpy->type == INT_ARR && ! ( cpy->flags & NEED_ALLOC ) )
+			{
+				src->val.lpnt = NULL;
+				src->val.lpnt =
+					  get_memcpy( cpy->val.lpnt, cpy->len * sizeof( long ) );
+			}
+			if ( cpy->type == FLOAT_ARR && ! ( cpy->flags & NEED_ALLOC ) )
+			{
+				src->val.dpnt = NULL;
+				src->val.dpnt =
+					  get_memcpy( cpy->val.dpnt, cpy->len * sizeof( double ) );
+			}
+
+			if ( cpy->type & ( INT_ARR | FLOAT_ARR ) )
+			{
+				src->sizes = NULL;
+				src->sizes
+					      = get_memcpy( cpy->sizes, cpy->dim * sizeof( int ) );
+			}
+		}
+
+		old_var_list = var_list;
 	}
 	else
 	{
-		assert( var_list_copy != NULL ); /* don't restore without save ! */
-		assert( var_list == paranoia );  /* check var_list hasn't been moved */
+		assert( var_list_copy != NULL );    /* don't restore without save ! */
+		assert( var_list == old_var_list );       /* just a bit paranoid... */
 
-		/* copy all backuped variables back into their former positions */
+		/* get rid of memory for array that might have been changed during
+		   the test */
 
-		for ( cv = var_list, cb = var_list_copy; cv != NULL;
-			  cb++, cv = cv->next )
-			memcpy( cv, cb, sizeof( Var ) );
+		for ( cpy = var_list; cpy != NULL; cpy = cpy->next )
+		{
+			if ( cpy->type == INT_ARR && ! ( cpy->flags & NEED_ALLOC ) &&
+				 cpy->val.lpnt != NULL )
+				T_free( cpy->val.lpnt );
+			if ( cpy->type == FLOAT_ARR && ! ( cpy->flags & NEED_ALLOC ) &&
+				 cpy->val.dpnt != NULL )
+				T_free( cpy->val.dpnt );
+			if ( cpy->type & ( INT_ARR | FLOAT_ARR ) && cpy->sizes != NULL )
+				T_free( cpy->sizes );
+		}
+
+		for ( src = var_list_copy, cpy = var_list; cpy != NULL;
+			  cpy = src->next, src++  )
+			memcpy( cpy, src, sizeof( Var ) );
+
+		/* deallocate memory used in arrays */
+
 		T_free( var_list_copy );
 		var_list_copy = NULL;
 	}
 }
 
 
+/*----------------------------------------------------------------------*/
+/* This takes care of deleting the copy of the stored variables when an */
+/* exception happens while the test run is underway (or even if we ran  */
+/* out of memory while we made the copy.                                */
+/*----------------------------------------------------------------------*/
+
+void delete_var_list_copy( void )
+{
+	Var *cpy;
+	long i;
+
+
+	if ( var_list_copy == NULL )
+		return;
+
+	for ( cpy = var_list_copy, i = 0; i < var_count ; i++, cpy++ )
+	{
+		if ( cpy->type == INT_ARR && ! ( cpy->flags & NEED_ALLOC ) &&
+			 cpy->val.lpnt != NULL )
+			T_free( cpy->val.lpnt );
+		if ( cpy->type == FLOAT_ARR && ! ( cpy->flags & NEED_ALLOC ) &&
+			 cpy->val.dpnt != NULL )
+			T_free( cpy->val.dpnt );
+		if ( cpy->type & ( INT_ARR | FLOAT_ARR ) && cpy->sizes != NULL )
+			T_free( cpy->sizes );
+	}
+
+	T_free( var_list_copy );
+	var_list_copy = NULL;
+}
 
 
 /*###########################################################################*/
 
-/* Left in if necessary later... */
+/* Left in if necessary later on... */
 
 void loop_dbg( void );
 void loop_dbg( void )
