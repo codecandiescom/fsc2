@@ -586,8 +586,8 @@ Dummy[ * ];     // variable sized array for values returned by my_function()
 
 ...             // lots of stuff left out
 
-Dummy[ ] = my_function( );   // auto-magically sets dimension 
-                             // of Dummy to 2
+Dummy[ ] = my_function( );   // automagically sets the dimension 
+                             // of array Dummy to 2
 V1 = Dummy[ 1 ];
 V2 = Dummy[ 2 ];
 @end example
@@ -732,7 +732,7 @@ existing devices pick the same device type string, otherwise pick a
 new and descriptive name.
 
 
-@subsection Variables a module should define
+@subsection Variables a module must define
 
 In the previous section the meaning of the device name and type type
 strings has already been discussed. While the definition of the strings
@@ -1193,7 +1193,7 @@ module. That's all that's need done and you can now re-compile to
 create the new module and re-install to make it available to
 @acronym{fsc2}.
 
-If you shoud want to compile a module 'by hand' you'll have to make sure
+If you should want to compile a module 'by hand' you'll have to make sure
 that the @file{src} and the @file{config} directory are in the include
 paths and that both the flags @code{-shared} and @code{-fpic} are set
 both for compiling as well as linking. If you have a @code{C} source
