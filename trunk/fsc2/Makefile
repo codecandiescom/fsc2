@@ -405,7 +405,7 @@ distclean:
 	$(MAKE) -C modules distclean
 	$(MAKE) -C doc distclean
 	$(MAKE) -C utils distclean
-	-$(RM) $(RMFLAGS) version.ugz *~
+	-$(RM) $(RMFLAGS) version.ugz makelog *~
 
 
 # Clean up everything for a distribution and create a zipped tarball

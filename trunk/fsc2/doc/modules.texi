@@ -98,7 +98,9 @@ function data base file called @file{Functions}
 . Also this file is located in the @file{config} subdirectory of the
 source tree and will usually be installed in
 @file{/usr/local/lib/fsc2}. Here one would add lines consisting of two
-or three entries, separated by commas and ending with a semicolon. 
+or three entries, separated by commas and ending with a
+semicolon. Please note that you can't use function names that contain
+a @code{#} character.
 @enumerate
 @item Each line must start with the names of the exported function, i.e.@:
       @code{lockin_get_data}.
