@@ -679,6 +679,12 @@ static void do_measurement( void )
 				continue;
 			}
 
+			/* Don't react to Stop button after ON_STOP label has been
+			   reached */
+
+			if ( cur_prg_token == prg_token + On_Stop_Pos )
+				react_to_quit = UNSET;
+
 			switch ( cur_prg_token->token )
 			{
 				case '}' :
