@@ -576,7 +576,7 @@ bool ep385_change_pulse_length( long pnum, double p_time )
 	Ticks new_len = 0;
 
 
-	CLOBBER_PROTECT( new:len );
+	CLOBBER_PROTECT( new_len );
 
 	if ( p_time < 0 )
 	{
