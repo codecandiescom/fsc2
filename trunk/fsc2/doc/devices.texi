@@ -1999,12 +1999,12 @@ For the @code{HP8672A} no modulation source can be specified.
 Finally you may specify the modulation amplitude, which has to be a
 number (preferably a floating point number). For the @code{HP8647A} FM
 modulation amplitudes have to be in the range between @w{0 Hz} and
-@w{100 kHz}, AM modulation amplitudes between @w{0 %} and @w{100 %} and
+@w{100 kHz}, AM modulation amplitudes between @w{0%} and @w{100%} and
 phase modulation amplitudes between @w{0 degree} and @w{10 degree}.
 
 For the @code{HP8672A} FM modulation can be set to either @w{30 kHz},
 @w{100 kHz}, @w{300 kHz}, @w{1 MHz}, @w{3 MHz} or @w{10 MHz}. AM
-modulation can only be set to either @w{30 %} or @w{100 %}.
+modulation can only be set to either @w{30%} or @w{100%}.
 
 
 Only in the first call of the function all two or three arguments,
@@ -2018,10 +2018,10 @@ If the modulation type becomes changed, the source and amplitude reverts
 to the settings that were specified in previous calls of the function
 when this modulation type was still active. I.e.@: if for the
 @code{HP8647A} at first AM modulation using an external AC coupled
-source and an amplitude of @w{50 %} was set and then the modulation was
+source and an amplitude of @w{50%} was set and then the modulation was
 changed to FM with different settings for source and amplitude, another
 call switching back to AM modulation will also restore the settings of
-external AC coupled source and @w{50 %} amplitude.
+external AC coupled source and @w{50%} amplitude.
 
 
 @anchor{synthesizer_mod_type}
@@ -2069,12 +2069,12 @@ program.
 If the modulation type has been set this function can be used to set the
 modulation amplitude. For the @code{HP8647A} the allowed range of FM
 frequencies is from @w{0 Hz} to @w{100 kHz}, for AM amplitudes between
-@w{0 %} and @w{100 %} are acceptable and for phase modulation values
+@w{0%} and @w{100%} are acceptable and for phase modulation values
 between @w{0 degree} and @w{10 degree} are valid. 
 
 For the @code{HP8672A} FM modulation can be set to either @w{30 kHz},
 @w{100 kHz}, @w{300 kHz}, @w{1 MHz}, @w{3 MHz} or @w{10 MHz}. AM
-modulation can only be set to either @w{30 %} or @w{100 %}.
+modulation can only be set to either @w{30%} or @w{100%}.
 
 If called with no argument, the function will return the amplitude
 setting for the currently active modulation type. You can neither set
