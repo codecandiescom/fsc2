@@ -2810,10 +2810,11 @@ drop to @w{0 V} if the function @code{daq_get_voltage()} (see below)
 is called without a previous call of the function for setting an output
 voltage.
 
-@strong{Please note}: if the DAC channel had previously reserved by a
-call of the function @code{daq_reserve_dac()} the pass-phrase specified
-in that call has to be passed to the function as the very first argument
-if you want to be able to change the output voltage of the DAC channel.
+@strong{Please note}: if the DAC channel had previously been reserved by
+a call of the function @code{daq_reserve_dac()} the pass-phrase
+specified in that call has to be passed to the function as the very
+first argument if you want to be able to change the output voltage of
+the DAC channel.
 
 The function can be used in the @code{EXPERIMENT} as well as in the
 @code{PREPARATIONS} section.
@@ -2838,10 +2839,11 @@ If this function hasn't been called the program will assume that the
 potentiometer is set to its maximum of 10 and output voltages of the
 DA converter are between @w{0 V} and @w{+10 V}.
 
-@strong{Please note}: if the DAC channel had previously reserved by a
-call of the function @code{daq_reserve_dac()} the pass-phrase specified
-in that call has to be passed to the function as the very first argument
-if you want to be able to change the maximum output voltage.
+@strong{Please note}: if the DAC channel had previously been reserved by
+a call of the function @code{daq_reserve_dac()} the pass-phrase
+specified in that call has to be passed to the function as the very
+first argument if you want to be able to change the maximum output
+voltage.
 
 The function can be used in the @code{EXPERIMENT} as well as in the
 @code{PREPARATIONS} section.
@@ -2888,10 +2890,10 @@ output of the DA converter will switch to @w{0 V} automatically. So you
 should call @code{daq_set_voltage()} always before
 @code{daq_get_voltage()} if something is connected to the DA output!
 
-@strong{Note also}: if the ADC had previously reserved by a call of the
-function @code{daq_reserve_adc()} the pass-phrase specified in that call
-has to be passed to the function as the very first argument if you want
-to be able to read in the voltage at the ADC.
+@strong{Note also}: if the ADC had previously been reserved by a call of
+the function @code{daq_reserve_adc()} the pass-phrase specified in that
+call has to be passed to the function as the very first argument if you
+want to be able to read in the voltage at the ADC.
 
 The function can be used in the @code{EXPERIMENT} section only.
 
@@ -2986,10 +2988,10 @@ the function @code{dio_value()}.
 If no mode is set for a DIO the mode for 24-bit input and output is used
 per default.
 
-@strong{Please note}: if the DIO had previously reserved by a call of
-the function @code{dio_reserve_dio()} the pass-phrase specified in that
-call has to be passed to the function as the very first argument if you
-want to be able to change the mode of the DIO.
+@strong{Please note}: if the DIO had previously been reserved by a call
+of the function @code{dio_reserve_dio()} the pass-phrase specified in
+that call has to be passed to the function as the very first argument if
+you want to be able to change the mode of the DIO.
 
 
 
@@ -3064,10 +3066,10 @@ during the test run. During the experiment a too large value will be
 truncated to the allowed range by stripping off the higher order bits
 and a warning message is printed out.
 
-@strong{Note also}: if the DIO had previously reserved by a call of the
-function @code{dio_reserve_dio()} the pass-phrase specified in that call
-has to be passed to the function as the very first argument if you want
-to be able to read from or write to the DIO.
+@strong{Note also}: if the DIO had previously been reserved by a call of
+the function @code{dio_reserve_dio()} the pass-phrase specified in that
+call has to be passed to the function as the very first argument if you
+want to be able to read from or write to the DIO.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
