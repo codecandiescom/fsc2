@@ -86,6 +86,22 @@ bool rs_spec10_param_access( uns32 param, uns16 *acc )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+const char *rs_spec10_ptime( double p_time )
+{
+	static char buffer[ 128 ];
+
+	if ( fabs( p_time ) >= 1.0 )
+		sprintf( buffer, "%g s", p_time );
+	else if ( fabs( p_time ) >= 1.e-3 )
+		sprintf( buffer, "%g ms", 1.e3 * p_time );
+	else
+		sprintf( buffer, "%g us", 1.e6 * p_time );
+
+	return buffer;
+}
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

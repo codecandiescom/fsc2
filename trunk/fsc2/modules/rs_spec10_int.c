@@ -86,12 +86,13 @@ void rs_spec10_init_camera( void )
 
 static void rs_spec10_ccd_init( void )
 {
-	uns32 set_uns32;
-	flt64 ret_flt64;
-
 	uns16 acc;
 	uns16 num_pix;
 	uns32 clear_mode;
+	uns32 exp_res_count;
+	uns32 exp_res_index;
+	uns32 *exp_res_array;
+	uns32 i;
 
 
 	if ( ! rs_spec10_param_access( PARAM_SER_SIZE, &acc ) ||
@@ -141,39 +142,123 @@ static void rs_spec10_ccd_init( void )
 			rs_spec10_error_handling( );
 	}
 
-	/* Set the time resolution for the exposure time to 1 us. The exposure
-	   time argument of pl_exp_setup_seq() must thus be in units of 1 us. */
+	/* Try to get figure out if the exposure time resolution can be set and
+	   how many settings there are */
 
-	if ( ! rs_spec10_param_access( PARAM_EXP_RES, &acc ) )
+	if ( ! rs_spec10_param_access( PARAM_EXP_RES_INDEX, &acc ) ||
+		 ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE ) )
 	{
 		print( FATAL, "Can't determine exposure time resolution.\n" );
 		THROW( EXCEPTION );
 	}
 
-	if ( acc == ACC_READ_WRITE || acc == ACC_WRITE_ONLY )
-	{
-		set_uns32 = EXP_RES_ONE_MICROSEC;
-		if ( ! pl_set_param( rs_spec10->handle, PARAM_EXP_RES,
-							 ( void_ptr ) &set_uns32 ) )
-			rs_spec10_error_handling( );
-	}
-	else if ( acc == ACC_READ_ONLY &&
-			  ! pl_get_param( rs_spec10->handle, PARAM_EXP_RES, ATTR_DEFAULT,
-							  ( void_ptr ) &set_uns32 ) )
+	if ( ! pl_get_param( rs_spec10->handle, PARAM_EXP_RES_INDEX,
+						 ATTR_COUNT, ( void_ptr ) &exp_res_count ) )
 		rs_spec10_error_handling( );
 
-//	  if ( ! pl_get_param( rs_spec10->handle, PARAM_EXP_MIN_TIME, ATTR_ACCESS,
-//						   ( void_ptr ) &ret_uns16 ) )
-//		  rs_spec10_error_handling( );
-//
-//	  if ( ret_uns16 == ACC_READ_WRITE || ret_uns16 == ACC_READ_ONLY )
-//	  {
-//		  if ( ! pl_get_param( rs_spec10->handle, PARAM_EXP_MIN_TIME,
-//							   ATTR_DEFAULT, ( void_ptr ) &ret_flt64 ) )
-//			  rs_spec10_error_handling( );
-//
-//		  fprintf( stderr, "EXP_MIN_TIME = %f\n", ( double ) ret_flt64 );
-//	  }
+	fsc2_assert( exp_res_count > 0 );
+
+	/* If we can set the exposure time resolution determine which values are
+	   available and set the resolution to the highest possible one. Otherwise
+	   just determine the only available setting. */
+
+	if ( acc == ACC_READ_WRITE )
+	{
+		exp_res_array = T_malloc( exp_res_count * sizeof *exp_res_array );
+
+		TRY
+		{
+			for ( i = 0; i < exp_res_count; i++ )
+				if ( ! pl_get_enum_param( rs_spec10->handle,
+										  PARAM_EXP_RES_INDEX,
+										  i, exp_res_array + i, NULL, 0 ) )
+					rs_spec10_error_handling( );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( exp_res_array );
+			RETHROW( );
+		}
+
+		for ( i = 0; i < exp_res_count; i++ )
+			if ( exp_res_array[ i ] == EXP_RES_ONE_MICROSEC )
+			{
+				exp_res_index = i;
+				rs_spec10->ccd.exp_res = 1.0e-6;
+				rs_spec10->ccd.exp_time = 100000;
+				break;
+			}
+
+		if ( i == exp_res_count )
+			for ( i = 0; i < exp_res_count; i++ )
+				if ( exp_res_array[ i ] == EXP_RES_ONE_MILLISEC )
+				{
+					exp_res_index = i;
+					rs_spec10->ccd.exp_res = 1.0e-3;
+					rs_spec10->ccd.exp_time = 100;
+					break;
+				}
+
+		T_free( exp_res_array );
+
+		if ( i == exp_res_count )
+		{
+			print( FATAL, "Can't determine an usuable value for the exposure "
+				   "time resolution.\n" );
+			THROW( EXCEPTION );
+		}
+
+		if ( ! pl_set_param( rs_spec10->handle, PARAM_EXP_RES_INDEX,
+							 &exp_res_index ) )
+			rs_spec10_error_handling( );
+	}
+	else
+	{
+		if ( ! pl_get_enum_param( rs_spec10->handle, PARAM_EXP_RES_INDEX,
+								  0, &exp_res_index, NULL, 0 ) )
+			rs_spec10_error_handling( );
+		if ( exp_res_index == EXP_RES_ONE_MICROSEC )
+		{
+			rs_spec10->ccd.exp_res = 1.0e-6;
+			rs_spec10->ccd.exp_time = 100000;
+		}
+		else if ( exp_res_index == EXP_RES_ONE_MILLISEC )
+		{
+			rs_spec10->ccd.exp_res = 1.0e-3;
+			rs_spec10->ccd.exp_time = 100;
+		}
+		else
+		{
+			print( FATAL, "Camera returns undefined exposure time "
+				   "resolution.\n" );
+			THROW( EXCEPTION );
+		}
+	}
+
+	/* Now also figure out the minimum exposure time */
+
+	if ( ! rs_spec10_param_access( PARAM_EXP_MIN_TIME, &acc ) ||
+		 ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE ) )
+	{
+		print( FATAL, "Can't determine the minimum exposure time.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! pl_get_param( rs_spec10->handle, PARAM_EXP_MIN_TIME, ATTR_DEFAULT,
+						 ( void_ptr ) &rs_spec10->ccd.exp_min_time ) )
+		rs_spec10_error_handling( );
+
+	/* Check that exposure times requested during test can really be set */
+
+	if ( rs_spec10_test.ccd.test_min_exp_time < rs_spec10->ccd.exp_min_time )
+	{
+		print( FATAL, "Shortest exposure time set in test run was smaller "
+			   "than the minimum exposure time of %s.\n",
+			   rs_spec10->ccd.exp_min_time );
+		THROW( EXCEPTION );
+	}
+
 
 
 	/* We might also need to set the shutter mode to OPEN_NO_CHANGE,
@@ -266,18 +351,14 @@ static void rs_spec10_temperature_init( void )
 /*-----------------------------------------*/
 /*-----------------------------------------*/
 
-uns16 *rs_spec10_get_pic( void )
+uns16 *rs_spec10_get_pic( uns32 *size )
 {
 	rgn_type region;
-    uns32 size;
 	uns16 *frame;
 	int16 status;
 	uns32 dummy;
 	char cur_dir[ PATH_MAX ];
 
-
-	getcwd( cur_dir, PATH_MAX );
-	chdir( PVCAM_DATA_DIR );
 
 	region.s1   = rs_spec10->ccd.roi[ 0 ];
 	region.p1   = rs_spec10->ccd.roi[ 1 ];
@@ -295,23 +376,39 @@ uns16 *rs_spec10_get_pic( void )
 		region.pbin = 1;
 	}
 
+	/* The PVCAM library needs some additional data files to get loaded.
+	   Unfortunately, these are looked for only in a single directory,
+	   the current working directory and, moreover, the library crashes
+	   the program when data files are not found. Thus we must make sure
+	   they can get loaded by temporarily switching to the directory where
+	   the files reside. Hopefully, this problem will be solved in the
+	   near future. */
+
+	getcwd( cur_dir, PATH_MAX );
+	chdir( PVCAM_DATA_DIR );
+
 	if ( ! pl_exp_init_seq( ) )
+	{
+		chdir( cur_dir );
 		rs_spec10_error_handling( );
+	}
 
 	if ( ! pl_exp_setup_seq( rs_spec10->handle, 1, 1, &region, TIMED_MODE,
-							 rs_spec10->ccd.exp_time, &size ) )
+							 rs_spec10->ccd.exp_time, size ) )
 	{
 		pl_exp_uninit_seq( );
+		chdir( cur_dir );
 		rs_spec10_error_handling( );
 	}
 
 #ifndef NDEBUG
-	if ( size == 0 )
+	if ( *size == 0 )
 	{
 		print( FATAL, "Internal error detected at %s:%d.\n",
 			   __FILE__, __LINE__ );
 		pl_exp_abort( rs_spec10->handle, CCS_HALT );
 		pl_exp_uninit_seq( );
+		chdir( cur_dir );
 		THROW( EXCEPTION );
 	}
 #endif
@@ -322,8 +419,8 @@ uns16 *rs_spec10_get_pic( void )
 
 	TRY
 	{
-		frame = UNS16_P T_malloc( ( size_t ) size );
-//		  if ( mlock( frame, size ) != 0 )
+		frame = UNS16_P T_malloc( ( size_t ) *size );
+//		  if ( mlock( frame, *size ) != 0 )
 //		  {
 //            T_free( frame );
 //			  print( FATAL, "Failure to obtain properly protected memory.\n" );
@@ -333,6 +430,7 @@ uns16 *rs_spec10_get_pic( void )
 	}
 	OTHERWISE
 	{
+		chdir( cur_dir );
 		pl_exp_abort( rs_spec10->handle, CCS_HALT );
 		pl_exp_uninit_seq( );
 		RETHROW( );
@@ -343,7 +441,7 @@ uns16 *rs_spec10_get_pic( void )
 		chdir( cur_dir );
 		pl_exp_abort( rs_spec10->handle, CCS_HALT );
 		pl_exp_uninit_seq( );
-//		munlock( frame, size );
+//		munlock( frame, *size );
 		T_free( frame );
 		rs_spec10_error_handling( );
 	}
@@ -364,7 +462,7 @@ uns16 *rs_spec10_get_pic( void )
 	{
 		pl_exp_abort( rs_spec10->handle, CCS_HALT );
 		pl_exp_uninit_seq( );
-//		munlock( frame, size );
+//		munlock( frame, *size );
 		T_free( frame );
 		chdir( cur_dir );
 		RETHROW( );
@@ -373,7 +471,7 @@ uns16 *rs_spec10_get_pic( void )
     pl_exp_finish_seq( rs_spec10->handle, frame, 0 );
 	pl_exp_uninit_seq();
 
-//	munlock( frame, size );
+//	munlock( frame, *size );
 
 	chdir( cur_dir );
 	return frame;

@@ -58,7 +58,11 @@ struct RS_SPEC10 {
 		uns16 roi[ 4 ];
 		long bin[ 2 ];
 		bool bin_mode;            /* 0: hardware binning, 1: software bin. */
+		double exp_res;
+		flt64 exp_min_time;
 		uns32 exp_time;           /* exposure time in multiples of 1 us */
+
+		double test_min_exp_time;
 	} ccd;
 
 	struct {
@@ -105,12 +109,13 @@ Var *ccd_camera_binning( Var *v );
 Var *ccd_camera_binning_method( Var *v );
 Var *ccd_camera_exposure_time( Var *v );
 Var *ccd_camera_get_picture( Var *v );
+Var *ccd_camera_get_spectrum( Var *v );
 Var *ccd_camera_temperature( Var *v );
 
 /* Functions from rs_spec10_int.c */
 
 void rs_spec10_init_camera( void );
-uns16 *rs_spec10_get_pic( void );
+uns16 *rs_spec10_get_pic( uns32 *size );
 double rs_spec10_get_temperature( void );
 double rs_spec10_set_temperature( double temp );
 void rs_spec10_error_handling( void );
@@ -122,6 +127,7 @@ double rs_spec10_c2k( double tc );
 int16 rs_spec10_k2ic( double tk );
 double rs_spec10_ic2k( int16 tci );
 bool rs_spec10_param_access( uns32 param, uns16 *acc );
+const char *rs_spec10_ptime( double p_time );
 
 
 #endif /* ! RS_SPEC10_HEADER */

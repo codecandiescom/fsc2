@@ -83,6 +83,11 @@ int rs_spec10_test_hook( void )
 	rs_spec10_test = rs_spec10_prep;
 	rs_spec10 = &rs_spec10_test;
 
+	rs_spec10->ccd.exp_time = 100000;
+	rs_spec10->ccd.exp_res = 1.0e-6;
+
+	rs_spec10->ccd.test_min_exp_time = HUGE_VAL;
+
 	return 1;
 }
 
@@ -150,15 +155,21 @@ Var *ccd_camera_name( Var *v )
 }
 
 
-/*--------------------------------------------------*/
-/*--------------------------------------------------*/
+/*---------------------------------------------------*/
+/* Function for setting the region of interest (ROI) */
+/* for the next picture or spectrum to be fetched.   */
+/* The function expects to get passed an array with  */
+/* 4 elements with the coordinates of the lower left */
+/* hand and the upper right hand corner. If one of   */
+/* the elements is 0 the corresponfing ROI value     */
+/* remains unchanged.                                */
+/*---------------------------------------------------*/
 
 Var *ccd_camera_roi( Var *v )
 {
 	int i;
 	long vroi[ 4 ];
 	long temp;
-	const char c[ 2 ] = { 'X', 'Y' };
 
 
 	for ( i = 0; i < 4; i++ )
@@ -182,11 +193,17 @@ Var *ccd_camera_roi( Var *v )
 		else if ( v->type == FLOAT_ARR && v->val.dpnt[ i ] != 0.0 )
 			vroi[ i ] = lrnd( v->val.dpnt[ i ] );
 
+	/* For values of 0 we use the old ROI value */
+
+	for ( i = 0; i < 4; i++ )
+		if ( vroi[ i ] == 0 )
+			vroi[ i ] = rs_spec10->ccd.roi[ i ] + 1;
+
 	for ( i = 0; i < 2; i++ )
 		if ( vroi[ i ] > vroi[ i + 2 ] )
 		{
 			print( WARN, "LL%c larger than UR%c value, exchanging.\n",
-				   c[ i ], c[ i ] );
+				   'X' + i, 'X' + i );
 			temp = vroi[ i ];
 			vroi[ i ] = vroi[ i + 2 ];
 			vroi[ i + 2 ] = temp;
@@ -194,15 +211,16 @@ Var *ccd_camera_roi( Var *v )
 
 	for ( i = 0; i < 2; i++ )
 	{
-		if ( vroi[ i ] < 1 )
+		if ( vroi[ i ] < 0 )
 		{
-			print( FATAL, "LL%c value smaller than 1.\n", c[ i ] );
+			print( FATAL, "LL%c value smaller than 1.\n", 'X' + i );
 			THROW( EXCEPTION );
 		}
 
 		if ( vroi[ i + 2 ] > ( long ) rs_spec10->ccd.max_size[ i ] )
 		{
-			print( FATAL, "UR%c larger than CCD %c-size.\n", c[ i ], c[ i ] );
+			print( FATAL, "UR%c larger than CCD %c-size.\n",
+				   'X' + i, 'X' + i );
 			THROW( EXCEPTION );
 		}
 	}
@@ -216,14 +234,20 @@ Var *ccd_camera_roi( Var *v )
 }
 
 
-/*--------------------------------------------------*/
-/*--------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Function for setting the binning used with the next picture or */
+/* spectrum to be returned by the camera. The function expects to */
+/* get an array with 2 elements for the vertical and horizontal   */
+/* binning. A value of 0 indicates that the current binning value */
+/* should remain unchanged. Optionally, the function can get      */
+/* passed a second argument, a number or string for the type of   */
+/* binning (i.e. in hardware or software) to be used.             */
+/*----------------------------------------------------------------*/
 
 Var *ccd_camera_binning( Var *v )
 {
 	int i;
 	long vbin[ 2 ];
-	const char c[ 2 ] = { 'X', 'Y' };
 
 
 	for ( i = 0; i < 2; i++ )
@@ -248,17 +272,21 @@ Var *ccd_camera_binning( Var *v )
 			vbin[ i ] = lrnd( v->val.dpnt[ i ] );
 
 	for ( i = 0; i < 2; i++ )
+		if ( vbin[ i ] == 0 )
+			vbin[ i ] = rs_spec10->ccd.bin[ i ];
+
+	for ( i = 0; i < 2; i++ )
 	{
 		if ( vbin[ i ] < 1 )
 		{
-			print( FATAL, "%c binning value smaller than 1.\n", c[ i ] );
+			print( FATAL, "%c binning value smaller than 1.\n", 'X' + i );
 			THROW( EXCEPTION );
 		}
 
 		if ( vbin[ i ] > ( long ) rs_spec10->ccd.max_size[ i ] + 1 )
 		{
 			print( FATAL, "%c binning value larger than CCD %c-size.\n",
-				   c[ i ], c[ i ] );
+				   'X' + i, 'X' + i );
 			THROW( EXCEPTION );
 		}
 	}
@@ -275,8 +303,13 @@ Var *ccd_camera_binning( Var *v )
 }
 
 
-/*--------------------------------------------------*/
-/*--------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Function for setting the binning method (i.e. either via hardware or  */
+/* software) for the next pictures fetched from the camera. The function */
+/* expects either a number (where 0 stands for hardware binning while    */
+/* any other number for software binning) or a string, either "SOFT" or  */
+/* "SOFTWARE" or "HARD" or "HARDWARE".                                   */
+/*-----------------------------------------------------------------------*/
 
 Var *ccd_camera_binning_method( Var *v )
 {
@@ -333,17 +366,42 @@ Var *ccd_camera_exposure_time( Var *v )
 
 	if ( v == NULL )
 		return vars_push( FLOAT_VAR,
-						  rs_spec10->ccd.exp_time * CCD_EXPOSURE_RESOLUTION );
+						  rs_spec10->ccd.exp_time * rs_spec10->ccd.exp_res );
 
 	et = get_double( v, "exposure time" );
 
-	rs_spec10->ccd.exp_time = ( uns32 ) lrnd( et / 
-											  CCD_EXPOSURE_RESOLUTION );
+	rs_spec10->ccd.exp_time = ( uns32 ) lrnd( et / rs_spec10->ccd.exp_res );
+
+	if ( rs_spec10->ccd.exp_time <= 0 )
+	{
+		print( FATAL, "Invalid exposure time of %s.\n",
+			   rs_spec10_ptime( et ) );
+		THROW( EXCEPTION );
+	}
+
+	/* Requiring a maximum exposure time of one hour is a bit arbitrary,
+	   but it's hard to imagine that anyone will ever need such a long
+	   exposure time... ("640 kB will be enough for everyone" ;-) */
+
+	if ( et > 3600.0 )
+	{
+		print( FATAL, "Exposure time of %.1f s is too long.\n", et );
+		THROW( EXCEPTION );
+	}
+
+	if ( fabs( et - rs_spec10->ccd.exp_time * rs_spec10->ccd.exp_res ) / et
+		 > 0.01 )
+		print( SEVERE, "Exposure time had to be adjusted to %s.\n",
+			   rs_spec10_ptime(   rs_spec10->ccd.exp_time
+							    * rs_spec10->ccd.exp_res ) );
 
 	too_many_arguments( v );
 
+	if ( FSC2_MODE == TEST && et < rs_spec10->ccd.test_min_exp_time )
+		rs_spec10->ccd.test_min_exp_time = et;
+
 	return vars_push( FLOAT_VAR,
-					  rs_spec10->ccd.exp_time * CCD_EXPOSURE_RESOLUTION );
+					  rs_spec10->ccd.exp_time * rs_spec10->ccd.exp_res );
 }
 
 
@@ -439,12 +497,22 @@ Var *ccd_camera_get_picture( Var *v )
 		{
 			max_val = ~ ( uns16 ) 0 + 1;
 
-			frame = UNS16_P T_malloc( width * height * sizeof *frame );
+			size = ( uns32 ) ( width * sizeof *frame );
+			frame = UNS16_P T_malloc( size );
 			for ( i = 0; i < width * height; i++ )
 				frame[ i ] = random( ) % max_val;
 		}
 
 		nv = vars_push_matrix( INT_REF, 2, height, width );
+
+		/* There is a bug in the PVCAM library: For some parallel hardware
+		   binning sizes the library needs two more bytes than would be
+		   required to hold all points (when stored as 2-byte values). In
+		   these cases the very first element of the returned array contains
+		   a bogus value and the real data seem to start only at the second
+		   element. This hack tries to avoid this problem.*/
+
+		cf = frame + size / sizeof *frame - width;
 
 		/* During the test run or for hardware binning or without binning (i.e.
 		   if both binning sizes are 1) we can leave most of the work to the
@@ -453,7 +521,7 @@ Var *ccd_camera_get_picture( Var *v )
 		if ( FSC2_MODE == TEST ||
 			 rs_spec10->ccd.bin_mode == HARDWARE_BINNING ||
 			 ( rs_spec10->ccd.bin[ X ] == 1 && rs_spec10->ccd.bin[ Y ] == 1 ) )
-			for ( cf = frame, i = 0; i < height; i++ )
+			for ( i = 0; i < height; i++ )
 			{
 				cl = nv->val.vptr[ i ]->val.lpnt;
 				for ( j = 0; j < width; j++ )
@@ -466,7 +534,7 @@ Var *ccd_camera_get_picture( Var *v )
 
 			bin_arr = LONG_P T_malloc( w * sizeof *bin_arr );
 
-			for ( cf = frame, i = 0; i < height; i++ )
+			for ( i = 0; i < height; i++ )
 			{
 				memset( bin_arr, 0, w * sizeof *bin_arr );
 
@@ -607,7 +675,7 @@ Var *ccd_camera_get_spectrum( Var *v )
 		{
 			max_val = ~ ( uns16 ) 0 + 1;
 
-			size = (uns32 ) ( width * sizeof *frame );
+			size = ( uns32 ) ( width * sizeof *frame );
 			frame = UNS16_P T_malloc( size );
 			for ( i = 0; i < width; i++ )
 				frame[ i ] = random( ) % max_val;
