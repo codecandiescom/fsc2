@@ -16,7 +16,10 @@ static const char *handle_input( const char *content, const char *label );
 void show_message( const char *str )
 {
 	if ( I_am == PARENT )
+	{
+		switch_off_special_cursors( );
 		fl_show_messages( str );
+	}
 	else
 		writer( C_SHOW_MESSAGE, str );
 }
@@ -34,6 +37,8 @@ void show_alert( const char *str )
 
 	if ( I_am == PARENT )
 	{
+		switch_off_special_cursors( );
+
 		strc = get_string_copy( str );
 		strs[ 0 ] = strc;
 		if ( ( strs[ 1 ] = strchr( strs[ 0 ], '\n' ) ) != NULL )
@@ -71,7 +76,10 @@ int show_choices( const char *text, int numb, const char *b1, const char *b2,
 	int ret;
 
 	if ( I_am == PARENT )
+	{
+		switch_off_special_cursors( );
 		return fl_show_choices( text, numb, b1, b2, b3, def );
+	}
 	else
 	{
 		writer( C_SHOW_CHOICES, text, numb, b1, b2, b3, def );
@@ -98,7 +106,10 @@ const char *show_fselector( const char *message, const char *directory,
 	char *ret = NULL;
 
 	if ( I_am == PARENT )
+	{
+		switch_off_special_cursors( );
 		return fl_show_fselector( message, directory, pattern, def );
+	}
 	else
 	{
 		writer( C_SHOW_FSELECTOR, message, directory, pattern, def );
@@ -113,7 +124,10 @@ const char *show_input( const char *content, const char *label )
 	char *ret = NULL;
 
 	if ( I_am == PARENT )
+	{
+		switch_off_special_cursors( );
 		return handle_input( content, label );
+	}
 	else
 	{
 		writer( C_INPUT, content, label );
