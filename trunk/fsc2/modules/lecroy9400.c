@@ -939,8 +939,8 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 		if ( w == NULL )
 		{
-			eprint( FATAL, "%d. measurement window has not been defined.\n",
-					j );
+			print( FATAL, "%d. measurement window has not been defined.\n",
+				   j );
 			THROW( EXCEPTION );
 		}
 	}

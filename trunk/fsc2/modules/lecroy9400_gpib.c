@@ -73,15 +73,15 @@ bool lecroy9400_init( const char *name )
 		if ( lecroy9400.timebase < tb[ 0 ] )
 		{
 			lecroy9400_set_timebase( lecroy9400.timebase = tb[ 0 ] );
-			eprint( SEVERE, UNSET, "%s: Timebase too fast, changing to %s.\n",
-					DEVICE_NAME, lecroy9400_ptime( lecroy9400.timebase ) );
+			print( SEVERE, "Timebase too fast, changing to %s.\n",
+				   lecroy9400_ptime( lecroy9400.timebase ) );
 		}
 		else if ( lecroy9400.timebase > tb[ TB_ENTRIES - 1 ] )
 		{
 			lecroy9400_set_timebase( lecroy9400.timebase
 									 = tb[ TB_ENTRIES - 1 ] );
-			eprint( SEVERE, UNSET, "%s: Timebase too slow, changing to %s.\n",
-					DEVICE_NAME, lecroy9400_ptime( lecroy9400.timebase ) );
+			print( SEVERE, "Timebase too slow, changing to %s.\n",
+				   lecroy9400_ptime( lecroy9400.timebase ) );
 		}
 
 		lecroy9400.tb_index = lecroy9400_get_tb_index( lecroy9400.timebase );
@@ -418,8 +418,8 @@ bool lecroy9400_display( int channel, int on_off )
 
 	if ( on_off && lecroy9400.num_used_channels >= MAX_USED_CHANNELS )
 	{
-		eprint( FATAL, UNSET, "%s: More than %d channels are needed to run "
-				"the experiment.\n", DEVICE_NAME, MAX_USED_CHANNELS );
+		print( FATAL, "More than %d channels are needed to run the "
+			   "experiment.\n", MAX_USED_CHANNELS );
 		THROW( EXCEPTION );
 	}
 
@@ -609,8 +609,7 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 
 	if ( ch >= LECROY9400_CH1 && ch <= LECROY9400_CH2 )
 	{
-		eprint( FATAL, SET, "%s: Getting normal channels is not implemented "
-				"yet.\n", DEVICE_NAME );
+		print( FATAL, "Getting normal channels is not implemented yet.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -618,15 +617,14 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 
 	if ( ! lecroy9400.is_num_avg[ ch ] )
 	{
-		eprint( FATAL, SET, "%s: Averaging has not been initialized for "
-				"channel %s.\n", DEVICE_NAME, Channel_Names[ ch ] );
+		print( FATAL, "Averaging has not been initialized for channel %s.\n"
+			   Channel_Names[ ch ] );
 		THROW( EXCEPTION );
 	}
 
 	if ( ! is_acquiring )
 	{
-		eprint( FATAL, SET, "%s: No acquisition has been started.\n",
-				DEVICE_NAME );
+		print( FATAL, "No acquisition has been started.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -710,8 +708,7 @@ void lecroy9400_gpib_failure( void )
 {
 	is_acquiring = UNSET;
 
-	eprint( FATAL, UNSET, "%s: Communication with device failed.\n",
-			DEVICE_NAME );
+	print( FATAL, "Communication with device failed.\n" );
 	THROW( EXCEPTION );
 }
 
