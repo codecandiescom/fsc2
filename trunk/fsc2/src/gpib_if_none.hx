@@ -34,24 +34,24 @@
 
 /* Timeout values */
 
-#define TNONE		0     /* Infinite timeout (disabled)	 */
-#define T10us		1     /* Timeout of 10 usec		 */
-#define T30us		2     /* Timeout of 30 usec		 */
-#define T100us		3     /* Timeout of 100 usec		 */
-#define T300us		4     /* Timeout of 300 usec		 */
-#define T1ms		5     /* Timeout of 1 msec		 */
-#define T3ms		6     /* Timeout of 3 msec		 */
-#define T10ms		7     /* Timeout of 10 msec		 */
-#define T30ms		8     /* Timeout of 30 msec		 */
-#define T100ms		9     /* Timeout of 100 msec		 */
-#define T300ms	   10     /* Timeout of 300 msec		 */
-#define T1s	       11     /* Timeout of 1 sec		 */
-#define T3s	       12     /* Timeout of 3 sec		 */
-#define T10s	   13     /* Timeout of 10 sec		 */
-#define T30s	   14     /* Timeout of 30 sec		 */
-#define T100s	   15     /* Timeout of 100 sec		 */
-#define T300s	   16     /* Timeout of 300 sec		 */
-#define T1000s	   17     /* Timeout of 1000 sec (maximum)	 */
+#define TNONE		0     /* Infinite timeout (disabled)   */
+#define T10us		1     /* Timeout of 10 usec		       */
+#define T30us		2     /* Timeout of 30 usec		       */
+#define T100us		3     /* Timeout of 100 usec		   */
+#define T300us		4     /* Timeout of 300 usec		   */
+#define T1ms		5     /* Timeout of 1 msec		       */
+#define T3ms		6     /* Timeout of 3 msec		       */
+#define T10ms		7     /* Timeout of 10 msec		       */
+#define T30ms		8     /* Timeout of 30 msec		       */
+#define T100ms		9     /* Timeout of 100 msec		   */
+#define T300ms	   10     /* Timeout of 300 msec		   */
+#define T1s	       11     /* Timeout of 1 sec		       */
+#define T3s	       12     /* Timeout of 3 sec		       */
+#define T10s	   13     /* Timeout of 10 sec		       */
+#define T30s	   14     /* Timeout of 30 sec		       */
+#define T100s	   15     /* Timeout of 100 sec		       */
+#define T300s	   16     /* Timeout of 300 sec		       */
+#define T1000s	   17     /* Timeout of 1000 sec (maximum) */
 
 
 /* End-of-string (EOS) modes for use with gpib_eos() */
