@@ -37,7 +37,7 @@ spectrometer control that tend to have a graphical user interface where
 the experimental parameters are set and then one of a set of predefined
 experiment is started.
 
-The drawback with this traditional approach is that there is always only
+The drawback with the traditional approach is that there is always only
 a fixed set of experiments that can be done using the program. The
 problems start when one needs to do a new experiment for which the
 program was not written for. One either has to find some ways to trick

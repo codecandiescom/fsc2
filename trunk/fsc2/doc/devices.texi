@@ -715,25 +715,25 @@ or @code{FUNC_F}.
 @item digitizer_averaging()
 @findex digitizer_averaging()
 This function only exists for the @code{LeCroy 9400} and must be used to
-set up averaging. It expects at least three arguments. The first argument
-is the channel to be used to do the averaging, i.e.@: either @code{FUNC_E}
-or @code{FUNC_F}. The second is the data source for the curves to be
-averaged, i.e.@: either @code{CH1} or @code{CH2}. The third required
-argument is the number of averages which as to be either @code{10},
-@code{20} or @code{50} or one of these numbers multiplied by @code{10},
-@code{100}, @code{1000}, @code{10000} (the maximum possible number of
-averages that can be done is @code{1000000}). The next, optional
-argument is either an integer number, with a non-zero value representing
-truth and @code{0} falsehood, or a string, either @code{"ON"} or
-@code{"OFF"}, that determines if overflow rejection is switched on or
-off (if switched on all traces that overflowed the ADC range will be
-rejected automatically). The final optional argument is the number of
-points that get included into the average. Usually it doesn't make too
-much sense to set this value because the program will make sure
-automatically that at least as many points of curve as can be read from
-the digitizer are included into the averaging. If the value is set only
-as many points as have been set will be returned by a
-@code{digitizer_get_curve()} command.
+set up averaging. It expects at least three arguments. The first
+argument is the channel to be used to do the averaging, i.e.@: either
+@code{FUNC_E} or @code{FUNC_F}. The second is the data source channel
+for the curves to be averaged, i.e.@: either @code{CH1} or
+@code{CH2}. The third required argument is the number of averages which
+as to be either @code{10}, @code{20} or @code{50} or one of these
+numbers multiplied by @code{10}, @code{100}, @code{1000}, @code{10000}
+(the maximum possible number of averages that can be done is
+@code{1000000}). The next, optional argument is either an integer
+number, with a non-zero value representing truth and @code{0} falsehood,
+or a string, either @code{"ON"} or @code{"OFF"}, that determines if
+overflow rejection is switched on or off (if switched on all traces that
+overflowed the ADC range will be rejected automatically). The final
+optional argument is the number of points that get included into the
+average. Usually it doesn't make too much sense to set this value
+because the program will make sure automatically that at least as many
+points of curve as can be read from the digitizer are included into the
+averaging. If the value is set only as many points as have been set will
+be returned by a @code{digitizer_get_curve()} command.
 
 
 @item digitizer_trigger_channel()
