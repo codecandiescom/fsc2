@@ -91,21 +91,21 @@ static int cut_x, cut_y, cut_w, cut_h;
 static bool cut_has_been_shown = UNSET;
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Function to initialize the minimum sizes of the cut graphic window */
+/*--------------------------------------------------------------------*/
 
 void cut_init( void )
 {
 	if ( G_Funcs.size == LOW )
 	{
-
-		GC_sizes.WIN_MIN_WIDTH   = 430;
-		GC_sizes.WIN_MIN_HEIGHT  = 435;
+		GC_sizes.WIN_MIN_WIDTH   = 350;
+		GC_sizes.WIN_MIN_HEIGHT  = 250;
 	}
 	else
 	{
-		GC_sizes.WIN_MIN_WIDTH   = 380;
-		GC_sizes.WIN_MIN_HEIGHT  = 380;
+		GC_sizes.WIN_MIN_WIDTH   = 500;
+		GC_sizes.WIN_MIN_HEIGHT  = 350;
 	}
 }
 
@@ -562,7 +562,7 @@ void cut_form_close( void )
 /*----------------------------------------------------------------*/
 /* Instead of calling fl_hide_form() we directly unmap the window */
 /* to make it easier to show it again (otherwise we would have to */
-/* dirst delete and later to recreate lots of stuff).             */
+/* first delete and later to recreate lots of stuff).             */
 /*----------------------------------------------------------------*/
 
 void cut_close_callback( FL_OBJECT *a, long b )
@@ -1004,8 +1004,23 @@ bool cut_new_points( long curve, long x_index, long y_index, long len )
 		return FAIL;
 
 	/* We need a different handling for cuts in X and Y direction. If the cut
-	   is in X direction we have to pick no more than one point from the new
-	   data while for Y direction cuts we need either all the data or none */
+	   is in through the x-axis we have to pick no more than one point from
+	   the new data while for cuts through the y-axis we need either all the
+	   data or none at all */
+
+#ifndef NDEBUG
+	/* There was a crash probably from the sp->v stuff in the call to 
+	   cut_integrate_point() call that I didn't find yet. Here I just try
+	   to avoid the problem to keep experiments from crashing. */
+
+	if ( G.curve_2d[ curve ]->points == NULL )
+	{
+		eprint( SEVERE, UNSET, "Internal error detected at %s:%d, ld. Please "
+				"send a bug report immediately!\n",
+				__FILE__, __LINE__, curve );
+		return FAIL;
+	}
+#endif
 
 	if ( CG.cut_dir == X )
 	{
@@ -1113,8 +1128,9 @@ static void cut_integrate_point( long index, double val )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*------------------------------------------------------------*/
+/* Handler for all events the cut graphics window may receive */
+/*------------------------------------------------------------*/
 
 static int cut_canvas_handler( FL_OBJECT *obj, Window window, int w, int h,
 							   XEvent *ev, void *udata )
@@ -1152,8 +1168,9 @@ static int cut_canvas_handler( FL_OBJECT *obj, Window window, int w, int h,
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Handler for ConfigureNotify events the cut graphic window gets */
+/*----------------------------------------------------------------*/
 
 static void cut_reconfigure_window( Canvas *c, int w, int h )
 {
@@ -1289,8 +1306,9 @@ static void cut_reconfigure_window( Canvas *c, int w, int h )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*-----------------------------------------------------*/
+/* Handler for ButtonPress events the cut graphic gets */
+/*-----------------------------------------------------*/
 
 static void cut_press_handler( FL_OBJECT *obj, Window window,
 							   XEvent *ev, Canvas *c )
@@ -1440,8 +1458,9 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Handler for ButtonRelease events the cut graphic window gets */
+/*--------------------------------------------------------------*/
 
 static void cut_release_handler( FL_OBJECT *obj, Window window,
 								 XEvent *ev, Canvas *c )
@@ -1564,8 +1583,9 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Handler for MotionNotify events the cut graphic window gets */
+/*-------------------------------------------------------------*/
 
 static void cut_motion_handler( FL_OBJECT *obj, Window window,
 								XEvent *ev, Canvas *c )
@@ -1678,8 +1698,9 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* Handler for the undo button in the cut graphic window */
+/*-------------------------------------------------------*/
 
 void cut_undo_button_callback( FL_OBJECT *a, long b )
 {
@@ -1723,8 +1744,9 @@ void cut_undo_button_callback( FL_OBJECT *a, long b )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Handler for the full scale button in the cut graphic window */
+/*-------------------------------------------------------------*/
 
 void cut_fs_button_callback( FL_OBJECT *a, long b )
 {
