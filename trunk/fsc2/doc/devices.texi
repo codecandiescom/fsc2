@@ -2266,8 +2266,8 @@ does not accept any parameters and can only by used in the
 @section Multi-Device Functions
 @cindex Multi-Device Functions
 
-There are a few convenience functions that use two or more devices. They
-use the single-device functions (and thus will print error messages if
+Currently, there is just one function that uses two devices at once. It
+uses the single-device functions (and thus will print error messages if
 the modules for the required devices aren't loaded or if the modules
 don't support the needed functions). The module they are defined in is
 automatically loaded, so it needs no special entry in the @code{DEVICES}
@@ -2280,14 +2280,22 @@ section.
 @item get_phase_cycled_area()
 @findex get_phase_cycled_area()
 This function is for doing a complete measurement sequence in a phase
-cycled experiment, It goes through a complete phase cycle, setting the
+cycled experiment. It goes through a complete phase cycle, setting the
 pulser, fetching the data from the digitizer and finally returning the
 measured data, i.e.@: the areas returned by the digitizer and added up
 according to the setting of the @code{ACQUISITION_SEQUENCE}.
 
-This function is for cases where there's only one
-@code{ACQUISITION_SEQUENCE}, if there are two use the function
-@code{get_phase_cycled_area()} instead.
+The function needs both a pulser and a digitizer. It is not possible to
+use the function with more than one pulser or digitizer -- if more than
+one pulser or digitizer is listed in the @code{DEVICES} section it will
+always try to use the first pulser and digitizer listed.
+
+The function can be used both for 1-dimensional and 2-dimensional
+measurements. In the first case there is just one signal channel, in the
+second two, e.g.@: a real and an imaginary part of a signal. Which kind
+of measurement has to be done is determined by the number of acquisition
+sequences. If there's only one it's a 1-dimensional measurement,
+otherwise a 2-dimensional one.
 
 The first argument the function expects is a digitizer channel to be
 used for measuring the area of the signal, see above which channels can
@@ -2309,17 +2317,25 @@ The following arguments are as many window identifiers (as returned by
 argument is given always the area of the complete curve is returned!
 
 The type of the return value depends on the number of window identifiers
-passed to the function. If there is only one window identifier (or none)
-a floating point value with the result of the measurement is returned. If,
-on the other hand, there is more than one window identifier an array
-will be returned with as many elements as there are window identifiers,
-the first element of the returned array containing the result for the
-first window, the second element the value for the second window etc.
+passed to the function and the number of acquisition sequences. If there
+is only one window identifier (or none) and only one acquisition
+sequence a floating point value with the result of the measurement is
+returned. If, on the other hand, there is more than one window
+identifier and a single acquisition sequence an array will be returned
+with as many elements as there are window identifiers, the first element
+of the returned array containing the result for the first window, the
+second element the value for the second window etc.
+
+If, in contrast, there are two acquisition sequences an array of twice
+the number of windows is returned. The first value in the array is the
+result for the first acquistion sequence for the first window, the
+second the result for the second acquistion sequence and the first
+window, then follow the the results of both acquisition sequences for
+the second window, etc.
 
 As an example here parts of an @code{EDL} program for a 1-dimensional
 stimulated echo experiment with phase cycling. The parts with the
 definition of the pulses etc. are left out for sake of brevity.
-
 @example
 DEVICES:
 
@@ -2344,8 +2360,9 @@ ASSIGNMENTS:
 
 PHASES:
 
-PHASE_SEQUENCE_1     = +x, -x, +x, -x;  // sequence for 1st pulse
-PHASE_SEQUENCE_2     = +x, +x, -x, -x;  // sequence for 2nd pulse
+PHASE_SEQUENCE_1     = +x, -x, +x, -x;  // sequence for 2nd pulse
+PHASE_SEQUENCE_2     = +x, +x, -x, -x;  // sequence for 3rd pulse
+
 ACQUISITION_SEQUENCE =  +,  -,  -,  +;
 
 
@@ -2368,34 +2385,31 @@ FOR I = 1 : : Num_points @{
 
 ...
 @end example
-@noindent
+
+The first thing the function does is to do a phase reset to be certain
+the pulser starts with a pulse pattern for the first phase as defined in
+the @code{PHASE_SEQUENCE} declarations. Then it will measure the signals
+areas for both digitizer window areas. In the next step it switched the
+pulser to the pulse pattern for the next phase and repeat the
+measurement of both the signal areas and subtract them from the values
+measured in the first step (because in the @code{ACQUISITION_SEQUNCE}
+command requires subtraction of the data). Then, again the pulse pattern
+is switched to the third phase and a third set of data for both windows
+is measured. Also these data are subtracted according to the settings of
+acquisition sequence. Finally, the fourth and last phase settings are
+send to the pulser and a fourth set of signal areas is measured. These
+data now must, according to the acquisition sequence, be added to the
+previous accumulated data. The result, an array with two elements for
+the first and second window is returned by the function.
+
 You may note, that in this program @code{pulser_update()} isn't called
 after @code{pulser_shift()}. This is possible because
 @code{get_phase_cycled_area()} internally calls @code{pulser_update()}
 before it starts doing the measurement.
 
-
-
-
-@anchor{get_phase_cycled_area_2}
-@item get_phase_cycled_area_2()
-@findex get_phase_cycled_area_2()
-
-This function is very similar to the previous one,
-@code{get_phase_cycled_area()}. The main difference is that instead of
-just one value for each window two are returned, usually the real and
-the imaginary part of a signal. The arguments of the function are
-identical to the one of @code{get_phase_cycled_area()}. But when only
-one window identifier (or none) was passe to the function it returns
-an array with two elements and if there were more window identifiers it
-returns and array with twice as many elements. To be able to use this
-function two @code{ACQUISITION_SEQUENCE}s must have been defined in the
-@code{PHASES} section of the @code{EDL} program and you need quadrature
-detection.
-
-This function would for example be used in an inversion recovery
-experiment with FID detection and phase cycling. Parts of the program
-would look like this:
+Two acquisition sequences would, for example, be used in an inversion
+recovery experiment with FID detection and phase cycling. Parts of the
+@code{EDL} program would look like this:
 @example
 DEVICES:
 
@@ -2422,6 +2436,7 @@ PHASES:
 
 PHASE_SEQUENCE_1       = +x, +x, +x, +x, -x, -x, -x, -x;
 PHASE_SEQUENCE_2       = +x, -x, +y, -y, +x, -x, +y, -y;
+
 ACQUISITION_SEQUENCE_1 = +A, -A, +B, -B, +A, -A, +B, -B;
 ACQUISITION_SEQUENCE_2 = +B, -B, -A, +A, +B, -B, -A, +A;
 
@@ -2436,14 +2451,26 @@ Win_ID_2 = digitizer_define_window( 620 ns, 4 ns );
 
 EXPERIMENT:
 
-FOR I = 1 : : Num_points @{
-    raw_data = get_phase_cycled_area_2( CH1, CH2,
-                                        Win_ID_1, Win_ID_2 );
+FOR I = 1 : Num_points @{
+    raw_data = get_phase_cycled_area( CH1, CH2,
+                                      Win_ID_1, Win_ID_2 );
     data[ I, 1 ] = raw_data[ 1 ] - raw_data[ 3 ];
     data[ I, 2 ] = raw_data[ 2 ] - raw_data[ 4 ];
     display( I, data[ I, 1 ], 1, I, data[ I, 2 ], 2 );
     pulser_shift( );
 @}
 @end example
+@noindent
+We have two acquisition sequences and two digitizer windows, so the
+function returns an array with 4 elements. The first and third element
+of the array are the results for the first acquisition sequence for
+window 1 and 2, the second and fourth are the ones for the second
+acquisition for both windows. Since the data are measured with baseline
+correction, i.e.@: the result for the second, off-resonance window must
+be subtracted from the first windows result, to obtain the value for the
+first acquisition sequence from the first array element the third must
+be subtracted, and for the second acquisition sequence the value if the
+fourth array element from the second.
+
 
 @end table
