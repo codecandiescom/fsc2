@@ -856,6 +856,7 @@ EOT
 
     print <<'EOT';
 	print $fh "$geom\n" if defined $geom;
+
     close $fh;
 };
 
