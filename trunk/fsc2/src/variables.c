@@ -2216,6 +2216,15 @@ void vars_arr_init( Var *v )
 
 Var *apply_unit( Var *var, Var *unit ) 
 {
+	if ( var->type == UNDEF_VAR )
+	{
+		assert( var->name != NULL );              /* just a bit paranoid ? */
+
+		eprint( FATAL, "%s:%ld: The accessed variable `%s' has not been "
+				"assigned a value.\n", Fname, Lc, var->name );
+		THROW( EXCEPTION );
+	}
+
 	if ( unit == NULL )
 	{
 		if ( var->type & ( INT_VAR | FLOAT_VAR ) )
