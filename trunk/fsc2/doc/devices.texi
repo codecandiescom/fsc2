@@ -496,8 +496,7 @@ only if either it has been already called with an argument or in the
 The function queries (if called with no argument) or sets (if called
 with an argument) the amount of pre-trigger, i.e.@ the portion of the
 trace shown with data before the trigger was detected. The function
-accepts or returns values from the interval between (and including)
-0 and 1.
+accepts or returns values from the interval @w{[0, 1]}.
 
 The function can be called in query mode (i.e.@: without an argument)
 only if either it has been already called with an argument or in the
