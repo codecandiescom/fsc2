@@ -1437,7 +1437,7 @@ exception it gets escalated to the @code{section_parser()} function,
 thereby effectively stopping further interpretation of the @code{EDL}
 script. The same happens for other types of exceptions, for example most
 of the functions associated with @code{EDL} functions (both the built-in
-functions and the functions in modules) usually print an eror message
+functions and the functions in modules) usually print an error message
 and then throw an @code{EXCEPTION} to indicate that they got a problem
 that requires a premature end of the interpretation of the @code{EDL}
 script.
