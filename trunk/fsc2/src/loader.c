@@ -193,7 +193,7 @@ bool exists_device_type( const char *type )
 
 	for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded &&
-			 ! strcasecmp( strip_path( cd->generic_type ), name ) )
+			 ! strcasecmp( strip_path( cd->generic_type ), type ) )
 			return OK;
 
 	return FAIL;

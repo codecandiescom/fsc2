@@ -5111,7 +5111,7 @@ between the wavelength or -number displayed by the CD2A console and the
 wavenumber. Once it has been set, all functions will take this offset
 into account when talking with the device.
 
-The second calibration value (the optional second argumumen) to be set
+The second calibration value (the optional second argument) to be set
 by the function for @code{SPEX} monochromators is the wavelength or
 -number difference between two pixels of an attached CCD camera.
 
