@@ -210,6 +210,11 @@ install:
 		ln -s $(libdir)/dg2020_f.so $(libdir)/dg2020.so; \
 		ln -s $(libdir)/aeg_s_band.so $(libdir)/s_band.so; \
 	fi
+	if [ `hostname --fqdn` = "moebi.fu-berlin.de" ]; then \
+		ln -s $(libdir)/dg2020_b.so $(libdir)/pulser.so; \
+		ln -s $(libdir)/aeg_x_band.so $(libdir)/magnet.so; \
+		ln -s $(libdir)/er035m_s.so $(libdir)/gaussmeter.so; \
+	fi
 
 
 # make a tags file, needs still some changes to really work
