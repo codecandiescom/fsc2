@@ -85,37 +85,39 @@ int last_DAC_port = 4;
 typedef struct
 {
 	int device;
-	int Sens;
-	bool Sens_warn;
+	int sens_index;
+	bool sens_warn;
 	double phase;
-	bool P;
-	int TC;
-	bool TC_warn;
+	bool is_phase;
+	int tc_index;
+	bool tc_warn;
 	double ref_freq;
-	bool RF;
+	bool is_ref_freq;
 	double ref_level;
-	bool RL;
+	bool is_ref_level;
 	long harmonic;
-	bool H;
+	bool is_harmonic;
 	double dac_voltage[ NUM_DAC_PORTS ];
 } SR830;
 
 
 static SR830 sr830;
+static SR830 sr830_store;
+
 
 /* Lists of valid sensitivity settings */
 
-static double slist[ ] = { 2.0e-9, 5.0e-9, 1.0e-8, 2.0e-8, 5.0e-8, 1.0e-7,
-						   2.0e-7, 5.0e-7, 1.0e-6, 2.0e-6, 5.0e-6, 1.0e-5,
-						   2.0e-5, 5.0e-5, 1.0e-4, 2.0e-4, 5.0e-4, 1.0e-3,
-						   2.0e-3, 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2, 1.0e-1,
-						   2.0e-1, 5.0e-1, 1.0 };
+static double sens_list[ ] = { 2.0e-9, 5.0e-9, 1.0e-8, 2.0e-8, 5.0e-8, 1.0e-7,
+							   2.0e-7, 5.0e-7, 1.0e-6, 2.0e-6, 5.0e-6, 1.0e-5,
+							   2.0e-5, 5.0e-5, 1.0e-4, 2.0e-4, 5.0e-4, 1.0e-3,
+							   2.0e-3, 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2, 1.0e-1,
+							   2.0e-1, 5.0e-1, 1.0 };
 
 /* List of all available time constants */
 
-static double tcs[ ] = { 1.0e-5, 3.0e-5, 1.0e-4, 3.0e-4, 1.0e-3, 3.0e-3,
-						 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1, 1.0, 3.0, 1.0e1,
-						 3.0e1, 1.0e2, 3.0e2, 1.0e3, 3.0e3, 1.0e4, 3.0e4 };
+static double tc_list[ ] = { 1.0e-5, 3.0e-5, 1.0e-4, 3.0e-4, 1.0e-3, 3.0e-3,
+							 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1, 1.0, 3.0, 1.0e1,
+							 3.0e1, 1.0e2, 3.0e2, 1.0e3, 3.0e3, 1.0e4, 3.0e4 };
 
 
 /* Declaration of all functions used only within this file */
@@ -127,9 +129,9 @@ static void sr830_get_xy_data( double *data, long *channels,
 static double sr830_get_adc_data( long channel );
 static double sr830_set_dac_data( long channel, double voltage );
 static double sr830_get_sens( void );
-static void sr830_set_sens( int Sens );
+static void sr830_set_sens( int sens_index );
 static double sr830_get_tc( void );
-static void sr830_set_tc( int TC );
+static void sr830_set_tc( int tc_index );
 static double sr830_get_phase( void );
 static double sr830_set_phase( double phase );
 static double sr830_get_ref_freq( void );
@@ -161,17 +163,17 @@ int sr830_init_hook( void )
 
 	sr830.device = -1;
 
-	sr830.Sens = -1;             /* no sensitivity has to be set at start of */
-	sr830.Sens_warn = UNSET;     /* experiment and no warning concerning the */
+	sr830.sens_index = -1;       /* no sensitivity has to be set at start of */
+	sr830.sens_warn = UNSET;     /* experiment and no warning concerning the */
                                  /* sensitivity setting has been printed yet */
-	sr830.P = UNSET;             /* no phase has to be set at start of the */
+	sr830.is_phase = UNSET;      /* no phase has to be set at start of the */
 	                             /* experiment */
-	sr830.TC = -1;               /* no time constant has to be set at the */
-	sr830.TC_warn = UNSET;       /* start of the experiment and no warning */
+	sr830.tc_index = -1;         /* no time constant has to be set at the */
+	sr830.tc_warn = UNSET;       /* start of the experiment and no warning */
 	                             /* concerning it has been printed yet */
-	sr830.RF = UNSET;            /* no reference frequency has to be set */
-	sr830.H = UNSET;             /* no harmonics has to be set */
-	sr830.RL = UNSET;            /* no rference level has to b set */
+	sr830.is_ref_freq = UNSET;   /* reference frequency has not to be set */
+	sr830.is_ref_level = UNSET;  /* reference level has not to be set */
+	sr830.is_harmonic = UNSET;   /* harmonics has not to be set */
 
 	for ( i = 0; i < NUM_DAC_PORTS; i++ )
 		sr830.dac_voltage[ i ] = 0.0;
@@ -192,6 +194,8 @@ int sr830_exp_hook( void )
 		return 1;
 
 	/* Initialize the lock-in */
+
+	memcpy( &sr830_store, &sr830, sizeof( SR830 ) );
 
 	if ( ! sr830_init( DEVICE_NAME ) )
 	{
@@ -215,6 +219,7 @@ int sr830_end_of_exp_hook( void )
 	if ( sr830.device >= 0 )
 		gpib_local( sr830.device );
 
+	memcpy( &sr830, &sr830_store, sizeof( SR830 ) );
 	sr830.device = -1;
 
 	return 1;
@@ -227,7 +232,8 @@ int sr830_end_of_exp_hook( void )
 
 void sr830_exit_hook( void )
 {
-//	sr830_end_of_exp_hook( );
+	if ( sr830.device >= 0 )
+		sr830_end_of_exp_hook( );
 }
 
 
@@ -440,7 +446,7 @@ Var *lockin_dac_voltage( Var *v )
 Var *lockin_sensitivity( Var *v )
 {
 	double sens;
-	int Sens = -1;
+	int sens_index = -1;
 	int i;
 
 
@@ -482,65 +488,67 @@ Var *lockin_sensitivity( Var *v )
 	   1 percent, utter a warning message (but only once). */
 
 	for ( i = 0; i < 25; i++ )
-		if ( sens >= slist[ i ] && sens <= slist[ i + 1 ] )
+		if ( sens >= sens_list[ i ] && sens <= sens_list[ i + 1 ] )
 		{
-			Sens = i +
-				   ( ( slist[ i ] / sens > sens / slist[ i + 1 ] ) ? 0 : 1 );
+			sens_index = i +
+				   ( ( sens_list[ i ] / sens >
+					   sens / sens_list[ i + 1 ] ) ? 0 : 1 );
 			break;
 		}
 
-	if ( Sens < 0 && sens < slist[ 26 ] * 1.01 )
-		Sens = 26;
+	if ( sens_index < 0 && sens < sens_list[ 26 ] * 1.01 )
+		sens_index = 26;
 
-	if ( Sens >= 0 &&                                    /* value found ? */
-		 fabs( sens - slist[ Sens ] ) > sens * 1.0e-2 && /* error > 1% ? */
-		 ! sr830.Sens_warn  )                            /* no warning yet ? */
+	if ( sens_index >= 0 &&                                 /* value found ? */
+		 fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2 &&
+                                                            /* error > 1% ? */
+		 ! sr830.sens_warn  )                            /* no warning yet ? */
 	{
 		if ( sens >= 1.0e-3 )
 			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf mV, "
 					"using %.0lf mV instead.\n", DEVICE_NAME,
-					sens * 1.0e3, slist[ Sens ] * 1.0e3 );
+					sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
 		else if ( sens >= 1.0e-6 ) 
 			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf uV, "
 					"using %.0lf uV instead.\n", DEVICE_NAME,
-					sens * 1.0e6, slist[ Sens ] * 1.0e6 );
+					sens * 1.0e6, sens_list[ sens_index ] * 1.0e6 );
 		else
 			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf nV, "
 					"using %.0lf nV instead.\n", DEVICE_NAME,
-					sens * 1.0e9, slist[ Sens ] * 1.0e9 );
-		sr830.Sens_warn = SET;
+					sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
+		sr830.sens_warn = SET;
 	}
 
-	if ( Sens < 0 )                                   /* not found yet ? */
+	if ( sens_index < 0 )                                 /* not found yet ? */
 	{
-		if ( sens < slist[ 0 ] )
-			Sens = 0;
+		if ( sens < sens_list[ 0 ] )
+			sens_index = 0;
 		else
-		    Sens = 26;
+		    sens_index = 26;
 
-		if ( ! sr830.Sens_warn )                      /* no warn message yet */
+		if ( ! sr830.sens_warn )                      /* no warn message yet */
 		{
 			if ( sens >= 1.0 )
 				eprint( WARN, SET, "%s: Sensitivity of %.0lf V is too "
-						"low, using %.0lf V instead.\n",
-						DEVICE_NAME, sens * 1.0e3, slist[ Sens ] * 1.0e3 );
+						"low, using %.0lf V instead.\n", DEVICE_NAME,
+						sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
 			else
 				eprint( WARN, SET, "%s: Sensitivity of %.0lf nV is too "
-						"high, using %.0lf nV instead.\n",
-						DEVICE_NAME, sens * 1.0e9, slist[ Sens ] * 1.0e9 );
-			sr830.Sens_warn = SET;
+						"high, using %.0lf nV instead.\n", DEVICE_NAME,
+						sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
+			sr830.sens_warn = SET;
 		}
 	}
 
 	if ( ! TEST_RUN )
 	{
 		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			sr830_set_sens( Sens );
+			sr830_set_sens( sens_index );
 		else                         /* if called in a preparation sections */ 
-			sr830.Sens = Sens;
+			sr830.sens_index = sens_index;
 	}
 	
-	return vars_push( FLOAT_VAR, slist[ Sens ] );
+	return vars_push( FLOAT_VAR, sens_list[ sens_index ] );
 }
 
 
@@ -553,7 +561,7 @@ Var *lockin_sensitivity( Var *v )
 Var *lockin_time_constant( Var *v )
 {
 	double tc;
-	int TC = -1;
+	int tc_index = -1;
 	int i;
 
 
@@ -595,65 +603,66 @@ Var *lockin_time_constant( Var *v )
 	   within 1 percent, we utter a warning message (but only once). */
 	
 	for ( i = 0; i < 18; i++ )
-		if ( tc >= tcs[ i ] && tc <= tcs[ i + 1 ] )
+		if ( tc >= tc_list[ i ] && tc <= tc_list[ i + 1 ] )
 		{
-			TC = i + ( ( tc / tcs[ i ] < tcs[ i + 1 ] / tc ) ? 0 : 1 );
+			tc_index = i + ( ( tc / tc_list[ i ] <
+							   tc_list[ i + 1 ] / tc ) ? 0 : 1 );
 			break;
 		}
 
-	if ( TC >= 0 &&                                 /* value found ? */
-		 fabs( tc - tcs[ TC ] ) > tc * 1.0e-2 &&    /* error > 1% ? */
-		 ! sr830.TC_warn )                          /* no warning yet ? */
+	if ( tc_index >= 0 &&                                   /* value found ? */
+		 fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2 &&  /* error > 1% ? */
+		 ! sr830.tc_warn )                          /* no warning yet ? */
 	{
 		if ( tc > 1.0e3 )
 			eprint( WARN, SET, "%s: Can't set time constant to %.0lf ks,"
 					" using %.0lf ks instead.\n", DEVICE_NAME,
-					tc * 1.0e-3, tcs[ TC ] );
+					tc * 1.0e-3, tc_list[ tc_index ] );
 		else if ( tc > 1.0 )
 			eprint( WARN, SET, "%s: Can't set time constant to %.0lf s, "
 					"using %.0lf s instead.\n", DEVICE_NAME, tc,
-					tcs[ TC ] );
+					tc_list[ tc_index ] );
 		else if ( tc > 1.0e-3 )
 			eprint( WARN, SET, "%s: Can't set time constant to %.0lf ms,"
 					" using %.0lf ms instead.\n", DEVICE_NAME,
-					tc * 1.0e3, tcs[ TC ] * 1.0e3 );
+					tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
 		else
 			eprint( WARN, SET, "%s: Can't set time constant to %.0lf us,"
 					" using %.0lf us instead.\n", DEVICE_NAME,
-					tc * 1.0e6, tcs[ TC ] * 1.0e6 );
-		sr830.TC_warn = SET;
+					tc * 1.0e6, tc_list[ tc_index ] * 1.0e6 );
+		sr830.tc_warn = SET;
 	}
 	
-	if ( TC < 0 )                                  /* not found yet ? */
+	if ( tc_index < 0 )                                  /* not found yet ? */
 	{
-		if ( tc < tcs[ 0 ] )
-			TC = 0;
+		if ( tc < tc_list[ 0 ] )
+			tc_index = 0;
 		else
-			TC = 19;
+			tc_index = 19;
 
-		if ( ! sr830.TC_warn )                      /* no warn message yet ? */
+		if ( ! sr830.tc_warn )                      /* no warn message yet ? */
 		{
 			if ( tc >= 3.0e4 )
 				eprint( WARN, SET, "%s: Time constant of %.0lf ks is too"
-						" large, using %.0lf ks instead.\n",
-						DEVICE_NAME, tc * 1.0e-3, tcs[ TC ] * 1.0e-3 );
+						" large, using %.0lf ks instead.\n", DEVICE_NAME,
+						tc * 1.0e-3, tc_list[ tc_index ] * 1.0e-3 );
 			else
 				eprint( WARN, SET, "%s: Time constant of %.0lf us is too"
-						" small, using %.0lf us instead.\n",
-						DEVICE_NAME, tc * 1.0e6, tcs[ TC ] * 1.0e6 );
-			sr830.TC_warn = SET;
+						" small, using %.0lf us instead.\n", DEVICE_NAME,
+						tc * 1.0e6, tc_list[ tc_index ] * 1.0e6 );
+			sr830.tc_warn = SET;
 		}
 	}
 
 	if ( ! TEST_RUN )
 	{
 		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			sr830_set_tc( TC );
+			sr830_set_tc( tc_index );
 		else                         /* if called in a preparation sections */ 
-			sr830.TC = TC;
+			sr830.tc_index = tc_index;
 	}
 	
-	return vars_push( FLOAT_VAR, tcs[ TC ] );
+	return vars_push( FLOAT_VAR, tc_list[ tc_index ] );
 }
 
 
@@ -717,7 +726,7 @@ Var *lockin_phase( Var *v )
 		else                         /* if called in a preparation sections */ 
 		{
 			sr830.phase = phase;
-			sr830.P = SET;
+			sr830.is_phase = SET;
 			return vars_push( FLOAT_VAR, phase );
 		}
 	}
@@ -759,7 +768,7 @@ Var *lockin_ref_freq( Var *v )
 	}
 
 	if ( TEST_RUN )
-		harm = sr830.H ? sr830.harmonic : 1;
+		harm = sr830.is_harmonic ? sr830.harmonic : 1;
 	else
 		harm = sr830_get_harmonic( );
 
@@ -843,7 +852,7 @@ Var *lockin_ref_level( Var *v )
 	else                                /* if called in preparation sections */
 	{
 		sr830.ref_level = level;
-		sr830.RL = SET;
+		sr830.is_ref_level = SET;
 		return vars_push( FLOAT_VAR, level );
 	}
 }
@@ -943,17 +952,17 @@ static bool sr830_init( const char *name )
 	   preparation sections only the value was stored and we have to do the
 	   actual setting now because the lock-in could not be accessed before */
 
-	if ( sr830.Sens != -1 )
-		sr830_set_sens( sr830.Sens );
-	if ( sr830.P )
+	if ( sr830.sens_index != -1 )
+		sr830_set_sens( sr830.sens_index );
+	if ( sr830.is_phase )
 		sr830_set_phase( sr830.phase );
-	if ( sr830.TC != -1 )
-		sr830_set_tc( sr830.TC );
-	if ( sr830.H )
+	if ( sr830.tc_index != -1 )
+		sr830_set_tc( sr830.tc_index );
+	if ( sr830.is_harmonic )
 		sr830_set_harmonic( sr830.harmonic );
-	if ( sr830.RF )
+	if ( sr830.is_ref_freq )
 		sr830_set_ref_freq( sr830.ref_freq );
-	if ( sr830.RL )
+	if ( sr830.is_ref_level )
 		sr830_set_ref_level( sr830.ref_level );
 
 	for ( i = 0; i < NUM_DAC_PORTS; i++ )
@@ -1099,7 +1108,7 @@ static double sr830_get_sens( void )
 		sr830_failure( );
 
 	buffer[ length - 1 ] = '\0';
-	sens = slist[ T_atol( buffer ) ];
+	sens = sens_list[ T_atol( buffer ) ];
 
 	return sens;
 }
@@ -1109,15 +1118,15 @@ static double sr830_get_sens( void )
 /* Function sets the sensitivity of the lock-in amplifier to one of the */
 /* valid values. The parameter can be in the range from 0 to 26,  where */
 /* 0 is 2 nV and 26 is 1 V - these and the other values in between are  */
-/* listed in the global array 'slist' at the start of the file.         */
+/* listed in the global array 'sens_list' at the start of the file.     */
 /*----------------------------------------------------------------------*/
 
-static void sr830_set_sens( int Sens )
+static void sr830_set_sens( int sens_index )
 {
 	char buffer[ 20 ];
 
 
-	sprintf( buffer, "SENS %d\n", Sens );
+	sprintf( buffer, "SENS %d\n", sens_index );
 	if ( gpib_write( sr830.device, buffer, strlen( buffer ) ) == FAILURE )
 		sr830_failure( );
 }
@@ -1125,8 +1134,8 @@ static void sr830_set_sens( int Sens )
 
 /*----------------------------------------------------------------------*/
 /* Function returns the current time constant of the lock-in amplifier. */
-/* See also the global array 'tcs' with the possible time constants at  */
-/* the start of the file.                                               */
+/* See also the global array 'tc_list' with the possible time constants */
+/* at the start of the file.                                            */
 /*----------------------------------------------------------------------*/
 
 static double sr830_get_tc( void )
@@ -1140,7 +1149,7 @@ static double sr830_get_tc( void )
 		sr830_failure( );
 
 	buffer[ length - 1 ] = '\0';
-	return tcs[ T_atol( buffer ) ];
+	return tc_list[ T_atol( buffer ) ];
 }
 
 
@@ -1148,15 +1157,15 @@ static double sr830_get_tc( void )
 /* Fuunction sets the time constant to one of the valid values. The  */
 /* parameter can be in the range from 0 to 19, where 0 is 10 us and  */
 /* 19 is 30 ks - these and the other values in between are listed in */
-/* the global array 'tcs' (cf. start of file)                        */
+/* the global array 'tc_list' (cf. start of file).                   */
 /*-------------------------------------------------------------------*/
 
-static void sr830_set_tc( int TC )
+static void sr830_set_tc( int tc_index )
 {
 	char buffer[ 20 ];
 
 
-	sprintf( buffer, "OFLT %d\n", TC );
+	sprintf( buffer, "OFLT %d\n", tc_index );
 	if ( gpib_write( sr830.device, buffer, strlen( buffer ) ) == FAILURE )
 		sr830_failure( );
 }
