@@ -1778,42 +1778,58 @@ The following mathematical function can be used in all section of an
 @code{EDL} script that allow the use of functions.
 
 @table @samp
-@anchor{int}
-@item int()
-@findex int()
-Converts a number (or all the elements of an 1- or more-dimensional
-array) to integer type by truncating all digits following the decimal
-point.
+@anchor{abs}
+@item abs()
+@findex abs()
+Returns the absolute value of an integer or floating point number (or
+all the elements of an 1- or more-dimensional array) .
 
 
-@anchor{float}
-@item float()
-@findex float()
-Converts a number (or all the elements of an 1- or more-dimensional
-array) to floating point type.
+@anchor{acos}
+@item acos()
+@findex acos()
+Returns the inverse of the cosine function of the argument (simple
+number or all elements of an 1- or more-dimensional array) as an angle
+in radian. The argument must be in the interval @w{[-1, 1]}, the result
+an element of the interval @w{[0, pi]}.
 
 
-@anchor{round}
-@item round()
-@findex round()
-Converts a floating point number (or all the elements of an 1- or
-more-dimensional array) to the nearest integer, i.e.@:
-
-@example
-round( 8.5 ) = 9    round( 8.49 ) = 8    round( -1.75 ) = -2
-@end example
+@anchor{acosh}
+@item acosh()
+@findex acosh()
+Returns the inverse of the hyperbolic cosine function of the argument
+(simple number or all elements of an 1- or more-dimensional array ).
 
 
-@anchor{floor}
-@item floor()
-@findex floor()
-Converts a floating point number (or all the elements of an 1- or
-more-dimensional array) to the largest integer that is not larger than
-the argument, i.e.@:
+@anchor{asin}
+@item asin()
+@findex asin()
+Returns the inverse of the sine function of the argument (simple number
+or all elements of an 1- or more-dimensional array) as an angle in
+radian. The argument must be in the interval @w{[-1, 1]}, the result an
+element of the interval @w{[-pi/2, pi/2]}.
 
-@example
-floor( 8.6 ) = 8    floor( -8.6 ) = -9
-@end example
+
+@anchor{asinh}
+@item asinh()
+@findex asinh()
+Returns the inverse of the hyperbolic sine function of the argument
+(simple number or all elements of an 1- or more-dimensional array).
+
+
+@anchor{atan}
+@item atan()
+@findex atan()
+Returns the inverse of the tangent function of the argument (simple
+number or all elements of an 1- or more-dimensional array) as an angle
+in radian, the result an element of the interval @w{[-pi, pi]}.
+
+
+@anchor{atanh}
+@item atanh()
+@findex atanh()
+Returns the inverse of the hyperbolic tangent function of the argument
+(simple number or all elements of an 1- or more-dimensional array).
 
 
 @anchor{ceil}
@@ -1828,25 +1844,93 @@ round( 8.6 ) = 9     round( -8.6 ) = -8
 @end example
 
 
-@anchor{abs}
-@item abs()
-@findex abs()
-Returns the absolute value of an integer or floating point number (or
-all the elements of an 1- or more-dimensional array) .
+@anchor{cos}
+@item cos()
+@findex cos()
+Returns the cosine of the argument (simple number or all elements of an
+1- or more-dimensional array), with the argument interpreted as the
+angle in radian.
+
+
+@anchor{cosh}
+@item cosh()
+@findex cosh()
+Returns the hyperbolic cosine of the argument (simple number or all elements
+of an 1- or more-dimensional array).
+
+
+@anchor{float}
+@item float()
+@findex float()
+Converts a number (or all the elements of an 1- or more-dimensional
+array) to floating point type.
+
+
+@anchor{floor}
+@item floor()
+@findex floor()
+Converts a floating point number (or all the elements of an 1- or
+more-dimensional array) to the largest integer that is not larger than
+the argument, i.e.@:
+
+@example
+floor( 8.6 ) = 8    floor( -8.6 ) = -9
+@end example
+
+
+@anchor{grandom}
+@item grandom()
+@findex grandom()
+If called without an argument the function returns one of a set of
+pseudo-random number with Gaussian distribution, a mean of zero and a
+variance of 1. If called with a non-zero, positive argument it returns
+an array of Gaussian distributed random numbers where the argument
+specifies the size of the array. These random numbers are probably
+better suited for simulating noise than the ones returned by
+@code{random()}.
+
+
+@anchor{index_of_max}
+@item index_of_max()
+@findex index_of_max()
+The function expects a 1-dimensional array as its only argument and
+returns the index of the largest element in the array. If there's more
+that one element having the maximum value in the array the index
+designates the first of these elements.
+
+
+@anchor{index_of_min}
+@item index_of_min()
+@findex index_of_min()
+The function expects a 1-dimensional array as its only argument and
+returns the index of the smallest element in the array. If there's more
+that one element having the minimum value in the array the index
+designates the first of these elements.
+
+
+@anchor{int}
+@item int()
+@findex int()
+Converts a number (or all the elements of an 1- or more-dimensional
+array) to integer type by truncating all digits following the decimal
+point.
+
+
+@anchor{round}
+@item round()
+@findex round()
+Converts a floating point number (or all the elements of an 1- or
+more-dimensional array) to the nearest integer, i.e.@:
+
+@example
+round( 8.5 ) = 9    round( 8.49 ) = 8    round( -1.75 ) = -2
+@end example
 
 
 @anchor{max_of}
 @item max_of()
 @findex max_of()
 Returns the largest value of all arguments. Arguments can be any number
-of numbers or 1- or more-dimensional arrays. If all arguments are integer
-numbers an integer number is returned, otherwise a floating point value.
-
-
-@anchor{min_of}
-@item min_of()
-@findex min_of()
-Returns the smallest value of all arguments. Arguments can be any number
 of numbers or 1- or more-dimensional arrays. If all arguments are integer
 numbers an integer number is returned, otherwise a floating point value.
 
@@ -1865,6 +1949,34 @@ the more-dimensional array are used, otherwise only the number of
 elements or sub-arrays specified as the third argument are used.
 .
 
+@anchor{mean_part_array}
+@item mean_part_array()
+@findex mean_part_array()
+The function expects as its arguments an 1-dimensionl arrays of integers
+or floats and a positive integer, with the length of the array being an
+integer multiple of this number. The array is now split into chunks of
+this size and the chunks are averaged. The resulting 1-dimensional float
+array is returned. This function is meant to speed up calculations in
+cases where a repeated signal, that has been sampled several times and
+is stored in a flat array, is to be averaged.
+
+
+@anchor{min_of}
+@item min_of()
+@findex min_of()
+Returns the smallest value of all arguments. Arguments can be any number
+of numbers or 1- or more-dimensional arrays. If all arguments are integer
+numbers an integer number is returned, otherwise a floating point value.
+
+
+@anchor{random}
+@item random()
+@findex random()
+If called with no argument the function returns a single pseudo-random
+number in the interval @w{[0, 1]}. If called with a non-zero, positive
+argument it returns an array of random numbers where the argument
+specifies the size of the array.
+
 
 @anchor{rms}
 @item rms()
@@ -1878,35 +1990,6 @@ the calculation and the number of elements to be used. If the length
 parameter is missing all elements up to the end of the array or all
 remaining sub-arrays are used, otherwise only as many array elements or
 sub-matrices as specified by the third argument are used..
-
-
-@anchor{sqrt}
-@item sqrt()
-@findex sqrt()
-Returns the square root of an integer or floating point number (or all
-the elements of an 1- or more-dimensional array). The argument must be a
-positive number.
-
-
-@anchor{random}
-@item random()
-@findex random()
-If called with no argument the function returns a single pseudo-random
-number in the interval @w{[0, 1]}. If called with a non-zero, positive
-argument it returns an array of random numbers where the argument
-specifies the size of the array.
-
-
-@anchor{grandom}
-@item grandom()
-@findex grandom()
-If called without an argument the function returns one of a set of
-pseudo-random number with Gaussian distribution, a mean of zero and a
-variance of 1. If called with a non-zero, positive argument it returns
-an array of Gaussian distributed random numbers where the argument
-specifies the size of the array. These random numbers are probably
-better suited for simulating noise than the ones returned by
-@code{random()}.
 
 
 @anchor{set_seed}
@@ -1926,12 +2009,19 @@ or more-dimensional array), with the argument interpreted as the angle
 in radian.
 
 
-@anchor{cos}
-@item cos()
-@findex cos()
-Returns the cosine of the argument (simple number or all elements of an
-1- or more-dimensional array), with the argument interpreted as the
-angle in radian.
+@anchor{sinh}
+@item sinh()
+@findex sinh()
+Returns the hyperbolic sine of the argument (simple number or all elements
+of an 1- or more-dimensional array).
+
+
+@anchor{sqrt}
+@item sqrt()
+@findex sqrt()
+Returns the square root of an integer or floating point number (or all
+the elements of an 1- or more-dimensional array). The argument must be a
+positive number.
 
 
 @anchor{tan}
@@ -1942,72 +2032,12 @@ Returns the tangent of the argument (simple number or all elements of an
 angle in radian.
 
 
-@anchor{asin}
-@item asin()
-@findex asin()
-Returns the inverse of the sine function of the argument (simple number
-or all elements of an 1- or more-dimensional array) as an angle in
-radian. The argument must be in the interval @w{[-1, 1]}, the result an
-element of the interval @w{[-pi/2, pi/2]}.
-
-
-@anchor{acos}
-@item acos()
-@findex acos()
-Returns the inverse of the cosine function of the argument (simple
-number or all elements of an 1- or more-dimensional array) as an angle
-in radian. The argument must be in the interval @w{[-1, 1]}, the result
-an element of the interval @w{[0, pi]}.
-
-
-@anchor{atan}
-@item atan()
-@findex atan()
-Returns the inverse of the tangent function of the argument (simple
-number or all elements of an 1- or more-dimensional array) as an angle
-in radian, the result an element of the interval @w{[-pi, pi]}.
-
-
-@anchor{sinh}
-@item sinh()
-@findex sinh()
-Returns the hyperbolic sine of the argument (simple number or all elements
-of an 1- or more-dimensional array).
-
-
-@anchor{cosh}
-@item cosh()
-@findex cosh()
-Returns the hyperbolic cosine of the argument (simple number or all elements
-of an 1- or more-dimensional array).
-
-
 @anchor{tanh}
 @item tanh()
 @findex tanh()
 Returns the hyperbolic tangent of the argument (simple number or all
 elements of an 1- or more-dimensional array).
 
-
-@anchor{asinh}
-@item asinh()
-@findex asinh()
-Returns the inverse of the hyperbolic sine function of the argument
-(simple number or all elements of an 1- or more-dimensional array).
-
-
-@anchor{acosh}
-@item acosh()
-@findex acosh()
-Returns the inverse of the hyperbolic cosine function of the argument
-(simple number or all elements of an 1- or more-dimensional array ).
-
-
-@anchor{atanh}
-@item atanh()
-@findex atanh()
-Returns the inverse of the hyperbolic tangent function of the argument
-(simple number or all elements of an 1- or more-dimensional array).
 
 @end table
 
@@ -2197,6 +2227,7 @@ Creates an integer array of the size of the first and only argument
 with every element set to @code{0} that can be assigned to an integer
 array of variable length.
 
+
 @anchor{float_slice}
 @item float_slice()
 @findex float_slice()
@@ -2367,24 +2398,6 @@ function "Shift" to the (physical) Control key, pressing the (physical)
 Control key would be reported as a press of the Shift modifier key.  The
 Modifier-2 to Modifier-5 functions usually are not even mapped to a
 physical key.
-
-
-@anchor{index_of_max}
-@item index_of_max()
-@findex index_of_max()
-The function expects a 1-dimensional array as its only argument and
-returns the index of the largest element in the array. If there's more
-that one element having the maximum value in the array the index
-designates the first of these elements.
-
-
-@anchor{index_of_min}
-@item index_of_min()
-@findex index_of_min()
-The function expects a 1-dimensional array as its only argument and
-returns the index of the smallest element in the array. If there's more
-that one element having the minimum value in the array the index
-designates the first of these elements.
 
 
 @anchor{lin_space}
