@@ -22,6 +22,7 @@
 
 s_band_list   := s_band_magnet_narrow s_band_magnet_broad
 tds_list      := tds754a tds744a tds540 tds520c tds520a tds520
+hp864_list    := hp8647a hp8648b
 
 simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c          \
 				 aeg_s_band.c aeg_x_band.c er035m.c er035m_s.c hp5340a.c   \
@@ -38,7 +39,7 @@ simp_modules  += ni6601.c
 endif
 
 comp_modules  := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400  \
-				 hp8647a hp8648b hp8672a $(tds_list)
+				 hp8672a $(hp864_list) $(tds_list)
 
 dg2020_f      := dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c  \
 				 dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
@@ -96,19 +97,29 @@ export        # export all symbols to the sub-makefiles
 
 # Making the modules consisting of just one file is simple, to make the
 # more complicated modules we need to create temporary makefiles from a
-# template and then invoke them. For the Tektronix digitizers also the
-# sources are created from templates.
+# template and then invoke them. For the Tektronix digitizers and the
+# HP864* synthesizers also the sources are created from templates.
 
 all: $(simp_modules:.c=.so)
-	for n in $(tds_list); do                                  \
-		o=`echo $$n | tr "a-z" "A-Z"`;                        \
-		for m in "" _util _gpib; do                           \
-			if [ ! -e $$n$$m.c -o tds$$m.c.tmpl -nt $$n$$m.c  \
-				 -o $$n.h -nt $$n$$m.c ]; then                \
-				sed "s/tds_tmpl/$$n/g;s/TDS_TMPL/$$o/g"       \
-					tds$$m.c.tmpl > $$n$$m.c;                 \
-			fi; \
-		done; \
+	for n in $(tds_list); do                                     \
+		o=`echo $$n | tr "a-z" "A-Z"`;                           \
+		for m in "" _util _gpib; do                              \
+			if [ ! -e $$n$$m.c -o tds$$m.c.tmpl -nt $$n$$m.c     \
+				 -o $$n.h -nt $$n$$m.c ]; then                   \
+				sed "s/tds_tmpl/$$n/g;s/TDS_TMPL/$$o/g"          \
+					tds$$m.c.tmpl > $$n$$m.c;                    \
+			fi;                                                  \
+		done;                                                    \
+	done;
+	for n in $(hp864_list); do                                   \
+		o=`echo $$n | tr "a-z" "A-Z"`;                           \
+		for m in .c _util.c _gpib.c _lexer.l; do                 \
+			if [ ! -e $$n$$m -o hp864$$m.tmpl -nt $$n$$m         \
+				 -o $$n.h -nt $$n$$m ]; then                     \
+				sed "s/hp864_tmpl/$$n/g;s/HP864_TMPL/$$o/g"      \
+					hp864$$m.tmpl > $$n$$m;                      \
+			fi;                                                  \
+		done;                                                    \
 	done;
 	for m in $(shell echo $(comp_modules) | cut -f1- -d' '); do  \
 		sed -e "s/##/$$m/g" Makefile.tmpl > $$m.make &&          \
@@ -285,13 +296,18 @@ clean:
 
 distclean:
 	$(MAKE) clean
-	-for n in $(tds_list); do           \
-		for m in "" _util _gpib; do     \
-			$(RM) $(RMFLAGS) $$n$$m.c;  \
-		done;                           \
+	-for n in $(tds_list); do                    \
+		for m in "" _util _gpib; do              \
+			$(RM) $(RMFLAGS) $$n$$m.c;           \
+		done;                                    \
 	done;
-	-for n in $(s_band_list); do  \
-		$(RM) $(RMFLAGS) $$n.c;   \
+	-for n in $(hp864_list); do                  \
+		for m in .c _util.c _gpib.c _lexer.l; do \
+			$(RM) $(RMFLAGS) $$n$$m;             \
+		done;                                    \
+	done;
+	-for n in $(s_band_list); do                 \
+		$(RM) $(RMFLAGS) $$n.c;                  \
 	done;
 	-$(RM) $(RMFLAGS) *.so
 

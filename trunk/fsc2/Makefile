@@ -548,7 +548,7 @@ export            # export all variables to sub-makes
 .SUFFIXES:
 .PHONY: all install-strip install uninstall  \
 		built version test clean distclean   \
-		mostlyclean tags pack manifest ZIP   \
+		mostlyclean tags pack MANIFEST ZIP   \
 		pion.anorg.chemie.uni-frankfurt.de   \
 		crowley.physik.fu-berlin.de          \
 		door.physik.fu-berlin.de             \
@@ -744,7 +744,7 @@ pack:
 
 # Creates the MANIFEST file with the list of relevant files
 
-manifest:
+MANIFEST:
 	@$(MAKE) distclean
 	@echo '# List of all (necessary) files of the package' > MANIFEST
 	@echo '#' >> MANIFEST

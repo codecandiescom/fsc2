@@ -1,4 +1,4 @@
-/*
+/* -*-C-*-
   $Id$
 
   Copyright (C) 1999-2003 Jens Thoms Toerring
@@ -22,7 +22,7 @@
 */
 
 
-#include "hp8647a.h"
+#include "hp864_tmpl.h"
 
 
 
@@ -33,7 +33,7 @@
 /* memory used for the file name passed to the function is deallocated. */
 /*----------------------------------------------------------------------*/
 
-FILE *hp8647a_find_table( char **name )
+FILE *hp864_tmpl_find_table( char **name )
 {
 	FILE *tfp;
 	char *new_name;
@@ -52,9 +52,9 @@ FILE *hp8647a_find_table( char **name )
 	/* Now try to open the file - set table_file entry in the device structure
 	   to the name and return the file pointer */
 
-	if ( ( tfp = hp8647a_open_table( *name ) ) != NULL )
+	if ( ( tfp = hp864_tmpl_open_table( *name ) ) != NULL )
 	{
-		hp8647a.table_file = T_strdup( *name );
+		hp864_tmpl.table_file = T_strdup( *name );
 		return tfp;
 	}
 
@@ -72,7 +72,7 @@ FILE *hp8647a_find_table( char **name )
 	T_free( *name );
 	*name = new_name;
 
-	if ( ( tfp = hp8647a_open_table( *name ) ) == NULL )
+	if ( ( tfp = hp864_tmpl_open_table( *name ) ) == NULL )
 	{
 		print( FATAL, "Table file '%s' not found in either the current "
 			   "directory or in '%s'.\n", strip_path( *name ), libdir );
@@ -92,7 +92,7 @@ FILE *hp8647a_find_table( char **name )
 /* deallocated.                                                     */
 /*------------------------------------------------------------------*/
 
-FILE *hp8647a_open_table( char *name )
+FILE *hp864_tmpl_open_table( char *name )
 {
 	FILE *tfp;
 
@@ -123,7 +123,7 @@ FILE *hp8647a_open_table( char *name )
 /* a given frequency by interpolation            */
 /*-----------------------------------------------*/
 
-double hp8647a_get_att_from_table( double freq )
+double hp864_tmpl_get_att_from_table( double freq )
 {
 	long i_low, i_high, i_cur;
 	double att;
@@ -133,18 +133,18 @@ double hp8647a_get_att_from_table( double freq )
 	   print out a warning and return attenuation for the smallest or
 	   highest frequency */
 
-	if ( freq < hp8647a.min_table_freq )
+	if ( freq < hp864_tmpl.min_table_freq )
 	{
 		print( WARN, "Frequency of %f MHz not covered by table, "
 			   "interpolating.\n", freq * 1.0e-6 );
-		return hp8647a.att_table[ 0 ].att;
+		return hp864_tmpl.att_table[ 0 ].att;
 	}
 
-	if ( freq > hp8647a.max_table_freq )
+	if ( freq > hp864_tmpl.max_table_freq )
 	{
 		print( WARN, "Frequency of %f MHz not covered by table, "
 			   "interpolating.\n", freq * 1.0e-6 );
-		return hp8647a.att_table[ hp8647a.att_table_len - 1 ].att;
+		return hp864_tmpl.att_table[ hp864_tmpl.att_table_len - 1 ].att;
 	}
 
 	/* Find the indices of the two entries in the table (that has been sorted
@@ -154,22 +154,22 @@ double hp8647a_get_att_from_table( double freq )
 	   frequencies can't be uniformly spaced and we used simple bisecting.*/
 
 	i_low = 0;
-	i_high = hp8647a.att_table_len - 1;
+	i_high = hp864_tmpl.att_table_len - 1;
 
-	if ( freq == hp8647a.att_table[ i_low ].freq )
-		return hp8647a.att_table[ i_low ].att;
-	if ( freq == hp8647a.att_table[ i_high ].freq )
-		return hp8647a.att_table[ i_high ].att;
+	if ( freq == hp864_tmpl.att_table[ i_low ].freq )
+		return hp864_tmpl.att_table[ i_low ].att;
+	if ( freq == hp864_tmpl.att_table[ i_high ].freq )
+		return hp864_tmpl.att_table[ i_high ].att;
 
 	i_cur = lrnd( floor( ( i_high - i_low ) *
-						 ( freq - hp8647a.att_table[ i_low ].freq ) /
-						 ( hp8647a.att_table[ i_high ].freq
-						   - hp8647a.att_table[ i_low ].freq ) ) ) + i_low;
+						 ( freq - hp864_tmpl.att_table[ i_low ].freq ) /
+						 ( hp864_tmpl.att_table[ i_high ].freq
+						   - hp864_tmpl.att_table[ i_low ].freq ) ) ) + i_low;
 
-	if ( freq > hp8647a.att_table[ i_cur ].freq )
+	if ( freq > hp864_tmpl.att_table[ i_cur ].freq )
 	{
 		i_low = i_cur;
-		if ( freq < hp8647a.att_table[ i_cur + 1 ].freq )
+		if ( freq < hp864_tmpl.att_table[ i_cur + 1 ].freq )
 			i_high = i_cur + 1;
 	}
 	else
@@ -177,7 +177,7 @@ double hp8647a_get_att_from_table( double freq )
 
 	while ( i_high - i_low > 1 )
 	{
-		if ( freq > hp8647a.att_table[ i_cur ].freq )
+		if ( freq > hp864_tmpl.att_table[ i_cur ].freq )
 			i_low = i_cur;
 		else
 			i_high = i_cur;
@@ -187,11 +187,12 @@ double hp8647a_get_att_from_table( double freq )
 	/* Now do a linear interpolation for the attenuation between the bracketing
 	   frequencies we have data for */
 
-	att =  ( hp8647a.att_table[ i_high ].att - hp8647a.att_table[ i_low ].att )
-		 * ( freq - hp8647a.att_table[ i_low ].freq )
-		 / (   hp8647a.att_table[ i_high ].freq
-			 - hp8647a.att_table[ i_low ].freq )
-		 + hp8647a.att_table[ i_low ].att;
+	att =   ( hp864_tmpl.att_table[ i_high ].att
+			  - hp864_tmpl.att_table[ i_low ].att )
+		  * ( freq - hp864_tmpl.att_table[ i_low ].freq )
+		  / (   hp864_tmpl.att_table[ i_high ].freq
+			  - hp864_tmpl.att_table[ i_low ].freq )
+		  + hp864_tmpl.att_table[ i_low ].att;
 
 	/* Reduce value to the resolution the attenuation can be set with */
 
@@ -202,15 +203,15 @@ double hp8647a_get_att_from_table( double freq )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-double hp8647a_get_att( double freq )
+double hp864_tmpl_get_att( double freq )
 {
 	double att;
 
-	if ( ! hp8647a.use_table )
-		return hp8647a.attenuation;
+	if ( ! hp864_tmpl.use_table )
+		return hp864_tmpl.attenuation;
 
-	att =   hp8647a.attenuation + hp8647a_get_att_from_table( freq )
-		  - hp8647a.att_at_ref_freq;
+	att =   hp864_tmpl.attenuation + hp864_tmpl_get_att_from_table( freq )
+		  - hp864_tmpl.att_at_ref_freq;
 
 	if ( att < MAX_ATTEN )
 	{
@@ -219,12 +220,12 @@ double hp8647a_get_att( double freq )
 			   freq * 1.0e-6, MAX_ATTEN, att );
 		att = MAX_ATTEN;
 	}
-	if ( att > hp8647a.min_attenuation )
+	if ( att > hp864_tmpl.min_attenuation )
 	{
 		print( SEVERE, "Attenuation dynamic range is insufficient (f = "
 			   "%g MHz), using %f db instead of %f db.\n",
-			   freq * 1.0e-6, hp8647a.min_attenuation, att );
-		att = hp8647a.min_attenuation;
+			   freq * 1.0e-6, hp864_tmpl.min_attenuation, att );
+		att = hp864_tmpl.min_attenuation;
 	}
 
 	return att;
@@ -234,7 +235,7 @@ double hp8647a_get_att( double freq )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-int hp8647a_set_mod_param( Var *v, double *dres, int *ires )
+int hp864_tmpl_set_mod_param( Var *v, double *dres, int *ires )
 {
 	const char *type[ ] =   { "FM", "AM", "PHASE", "OFF" },
 		       *source[ ] = { "EXT AC", "AC", "EXT DC", "DC",

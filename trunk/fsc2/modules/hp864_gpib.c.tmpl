@@ -1,4 +1,4 @@
-/*
+/* -*-C-*-
   $Id$
 
   Copyright (C) 1999-2003 Jens Thoms Toerring
@@ -32,18 +32,18 @@
 
 
 
-#include "hp8647a.h"
+#include "hp864_tmpl.h"
 
 
-static void hp8647a_comm_failure( void );
-static void hp8647a_check_complete( void );
-static bool hp8647a_talk( const char *cmd, char *reply, long *length );
+static void hp864_tmpl_comm_failure( void );
+static void hp864_tmpl_check_complete( void );
+static bool hp864_tmpl_talk( const char *cmd, char *reply, long *length );
 
 
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-bool hp8647a_init( const char *name )
+bool hp864_tmpl_init( const char *name )
 {
 	double att;
 	char buffer[ 10 ];
@@ -51,70 +51,71 @@ bool hp8647a_init( const char *name )
 	int i;
 
 
-	if ( gpib_init_device( name, &hp8647a.device ) == FAILURE )
+	if ( gpib_init_device( name, &hp864_tmpl.device ) == FAILURE )
         return FAIL;
 
-	hp8647a_talk( "*OPC?\n", buffer, &length );
+	hp864_tmpl_talk( "*OPC?\n", buffer, &length );
 
 	/* If frequency and attenuation need to be set do it now, otherwise get
 	   frequency and attenuation set at the synthesizer and store it */
 
-	if ( hp8647a.freq_is_set )
-		hp8647a_set_frequency( hp8647a.freq );
+	if ( hp864_tmpl.freq_is_set )
+		hp864_tmpl_set_frequency( hp864_tmpl.freq );
 	else
-		hp8647a.freq = hp8647a_get_frequency( );
+		hp864_tmpl.freq = hp864_tmpl_get_frequency( );
 
-	if ( hp8647a.attenuation_is_set )
+	if ( hp864_tmpl.attenuation_is_set )
 	{
-		if ( hp8647a.use_table )
+		if ( hp864_tmpl.use_table )
 		{
-			att =   hp8647a.attenuation
-				  + hp8647a_get_att_from_table( hp8647a.freq )
-				  - hp8647a.att_at_ref_freq;
+			att =   hp864_tmpl.attenuation
+				  + hp864_tmpl_get_att_from_table( hp864_tmpl.freq )
+				  - hp864_tmpl.att_at_ref_freq;
 			if ( att < MAX_ATTEN )
 			{
 				print( SEVERE, "Attenuation range is insufficient, using "
 					   "%f db instead of %f db.\n", MAX_ATTEN, att );
 				att = MAX_ATTEN;
 			}
-			if ( att > hp8647a.min_attenuation )
+			if ( att > hp864_tmpl.min_attenuation )
 			{
 				print( SEVERE, "Attenuation range is insufficient, using "
 					   "%f db instead of %f db.\n",
-					   hp8647a.min_attenuation, att );
-				att = hp8647a.min_attenuation;
+					   hp864_tmpl.min_attenuation, att );
+				att = hp864_tmpl.min_attenuation;
 			}
 		}
 		else
-			att = hp8647a.attenuation;
+			att = hp864_tmpl.attenuation;
 
-		hp8647a_set_attenuation( att );
+		hp864_tmpl_set_attenuation( att );
 	}
 	else
-		hp8647a.attenuation = hp8647a_get_attenuation( );
+		hp864_tmpl.attenuation = hp864_tmpl_get_attenuation( );
 
-	hp8647a_set_output_state( hp8647a.state );
+	hp864_tmpl_set_output_state( hp864_tmpl.state );
 
 	/* Now we set the modulation type if it has been set, otherwise ask the
 	   synthesizer for its currents setting */
 
-	if ( hp8647a.mod_type_is_set )
-		hp8647a_set_mod_type( hp8647a.mod_type );
+	if ( hp864_tmpl.mod_type_is_set )
+		hp864_tmpl_set_mod_type( hp864_tmpl.mod_type );
 	else
 	{
-		if ( ( hp8647a.mod_type = hp8647a_get_mod_type( ) ) != UNDEFINED )
-			hp8647a.mod_type_is_set = SET;
+		if ( ( hp864_tmpl.mod_type = hp864_tmpl_get_mod_type( ) )
+			 != UNDEFINED )
+			hp864_tmpl.mod_type_is_set = SET;
 	}
 
 	/* Set source and amplitude for each modulation type as far as it's set */
 
 	for ( i = 0; i < NUM_MOD_TYPES - 1; i++ )
 	{
-		if ( hp8647a.mod_source_is_set[ i ] )
-			hp8647a_set_mod_source( i, hp8647a.mod_source[ i ] );
+		if ( hp864_tmpl.mod_source_is_set[ i ] )
+			hp864_tmpl_set_mod_source( i, hp864_tmpl.mod_source[ i ] );
 
-		if ( hp8647a.mod_ampl_is_set[ i ] )
-			hp8647a_set_mod_ampl( i, hp8647a.mod_ampl[ i ] );
+		if ( hp864_tmpl.mod_ampl_is_set[ i ] )
+			hp864_tmpl_set_mod_ampl( i, hp864_tmpl.mod_ampl[ i ] );
 	}
 
 	return OK;
@@ -124,23 +125,23 @@ bool hp8647a_init( const char *name )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-void hp8647a_finished( void )
+void hp864_tmpl_finished( void )
 {
-	gpib_local( hp8647a.device );
+	gpib_local( hp864_tmpl.device );
 }
 
 
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-bool hp8647a_set_output_state( bool state )
+bool hp864_tmpl_set_output_state( bool state )
 {
 	char cmd[ 100 ];
 
 
 	sprintf( cmd, "OUTP:STAT %s\n", state ? "ON" : "OFF" );
-	hp8647a_command( cmd );
-	hp8647a_check_complete( );
+	hp864_tmpl_command( cmd );
+	hp864_tmpl_check_complete( );
 
 	return state;
 }
@@ -149,13 +150,13 @@ bool hp8647a_set_output_state( bool state )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-bool hp8647a_get_output_state( void )
+bool hp864_tmpl_get_output_state( void )
 {
 	char buffer[ 10 ];
 	long length = 10;
 
 
-	hp8647a_talk( "OUTP:STAT?\n", buffer, &length );
+	hp864_tmpl_talk( "OUTP:STAT?\n", buffer, &length );
 	return buffer[ 0 ] == '1';
 }
 
@@ -163,7 +164,7 @@ bool hp8647a_get_output_state( void )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-double hp8647a_set_frequency( double freq )
+double hp864_tmpl_set_frequency( double freq )
 {
 	char cmd[ 100 ];
 
@@ -171,8 +172,8 @@ double hp8647a_set_frequency( double freq )
 	fsc2_assert( freq >= MIN_FREQ && freq <= MAX_FREQ );
 
 	sprintf( cmd, "FREQ:CW %.0f\n", freq );
-	hp8647a_command( cmd );
-	hp8647a_check_complete( );
+	hp864_tmpl_command( cmd );
+	hp864_tmpl_check_complete( );
 
 	return freq;
 }
@@ -181,13 +182,13 @@ double hp8647a_set_frequency( double freq )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-double hp8647a_get_frequency( void )
+double hp864_tmpl_get_frequency( void )
 {
 	char buffer[ 100 ];
 	long length = 100;
 
 
-	hp8647a_talk( "FREQ:CW?\n", buffer, &length );
+	hp864_tmpl_talk( "FREQ:CW?\n", buffer, &length );
 	return T_atod( buffer );
 }
 
@@ -195,16 +196,16 @@ double hp8647a_get_frequency( void )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-double hp8647a_set_attenuation( double att )
+double hp864_tmpl_set_attenuation( double att )
 {
 	char cmd[ 100 ];
 
 
-	fsc2_assert( att >= MAX_ATTEN && att <= hp8647a.min_attenuation );
+	fsc2_assert( att >= MAX_ATTEN && att <= hp864_tmpl.min_attenuation );
 
 	sprintf( cmd, "POW:AMPL %6.1f\n", att );
-	hp8647a_command( cmd );
-	hp8647a_check_complete( );
+	hp864_tmpl_command( cmd );
+	hp864_tmpl_check_complete( );
 
 	return att;
 }
@@ -213,12 +214,12 @@ double hp8647a_set_attenuation( double att )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-double hp8647a_get_attenuation( void )
+double hp864_tmpl_get_attenuation( void )
 {
 	char buffer[ 100 ];
 	long length = 100;
 
-	hp8647a_talk( "POW:AMPL?\n", buffer, &length );
+	hp864_tmpl_talk( "POW:AMPL?\n", buffer, &length );
 	return T_atod( buffer );
 }
 
@@ -226,7 +227,7 @@ double hp8647a_get_attenuation( void )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-int hp8647a_set_mod_type( int type )
+int hp864_tmpl_set_mod_type( int type )
 {
 	char cmd[ 100 ];
 	const char *types[ ] = { "FM", "AM", "PM", "OFF" };
@@ -243,14 +244,14 @@ int hp8647a_set_mod_type( int type )
 		if ( i == type )
 			continue;
 		sprintf( cmd, "%s:STAT OFF\n", types[ i ] );
-		hp8647a_command( cmd );
+		hp864_tmpl_command( cmd );
 	}
 
 	if ( type != MOD_TYPE_OFF )
 	{
 		sprintf( cmd, "%s:STAT ON\n", types[ type ] );
-		hp8647a_command( cmd );
-		hp8647a_check_complete( );
+		hp864_tmpl_command( cmd );
+		hp864_tmpl_check_complete( );
 	}
 
 	return type;
@@ -263,7 +264,7 @@ int hp8647a_set_mod_type( int type )
 /* or -1 if none is switched on.                                */
 /*--------------------------------------------------------------*/
 
-int hp8647a_get_mod_type( void )
+int hp864_tmpl_get_mod_type( void )
 {
 	const char *types[ ] = { "FM", "AM", "PM" };
 	char cmd[ 100 ];
@@ -276,7 +277,7 @@ int hp8647a_get_mod_type( void )
 	{
 		length = 100;
 		sprintf( cmd, "%s:STAT?\n", types[ i ] );
-		hp8647a_talk( cmd, buffer, &length );
+		hp864_tmpl_talk( cmd, buffer, &length );
 
 		if ( buffer[ 0 ] == '1' )
 			return i;
@@ -289,7 +290,7 @@ int hp8647a_get_mod_type( void )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-int hp8647a_set_mod_source( int type, int source )
+int hp864_tmpl_set_mod_source( int type, int source )
 {
 	const char *types[ ] = { "FM", "AM", "PM" };
 	char cmd1[ 100 ], cmd2[ 100 ];
@@ -336,9 +337,9 @@ int hp8647a_set_mod_source( int type, int source )
 			fsc2_assert( 1 == 0 );
 	}
 
-	hp8647a_command( cmd1 );
-	hp8647a_command( cmd2 );
-	hp8647a_check_complete( );
+	hp864_tmpl_command( cmd1 );
+	hp864_tmpl_command( cmd2 );
+	hp864_tmpl_check_complete( );
 
 	return source;
 }
@@ -347,7 +348,7 @@ int hp8647a_set_mod_source( int type, int source )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-int hp8647a_get_mod_source( int type )
+int hp864_tmpl_get_mod_source( int type )
 {
 	const char *types[ ] = { "FM", "AM", "PM" };
 	char cmd[ 100 ];
@@ -361,7 +362,7 @@ int hp8647a_get_mod_source( int type )
 
 	sprintf( cmd, "%s:SOUR?\n", types[ type ] );
 	length = 100;
-	hp8647a_talk( cmd, buffer, &length );
+	hp864_tmpl_talk( cmd, buffer, &length );
 
 	source = buffer[ 0 ] == 'I' ? 0 : 1;
 
@@ -369,14 +370,14 @@ int hp8647a_get_mod_source( int type )
 	if ( source == 0 )
 	{
 		sprintf( cmd, "%s:INT:FREQ?\n", types[ type ] );
-		hp8647a_talk( cmd, buffer, &length );
+		hp864_tmpl_talk( cmd, buffer, &length );
 		freq = lrnd( T_atod ( buffer ) );
 		source = freq == 400 ? MOD_SOURCE_1k : MOD_SOURCE_400;
 	}
 	else
 	{
 		sprintf( cmd, "%s:EXT:COUP?\n", types[ type ] );
-		hp8647a_talk( cmd, buffer, &length );
+		hp864_tmpl_talk( cmd, buffer, &length );
 		source = buffer[ 0 ] == 'A' ? MOD_SOURCE_AC : MOD_SOURCE_DC;
 	}
 
@@ -387,14 +388,14 @@ int hp8647a_get_mod_source( int type )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-double hp8647a_set_mod_ampl( int type, double ampl )
+double hp864_tmpl_set_mod_ampl( int type, double ampl )
 {
 	char cmd[ 100 ];
 
 
 	fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
 
-	switch ( hp8647a.mod_type )
+	switch ( hp864_tmpl.mod_type )
 	{
 		case MOD_TYPE_FM :
 			sprintf( cmd, "FM:DEV %ld HZ\n", 10 * lrnd( 0.1 * ampl ) );
@@ -412,8 +413,8 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 			fsc2_assert( 1 == 0 );
 	}
 
-	hp8647a_command( cmd );
-	hp8647a_check_complete( );
+	hp864_tmpl_command( cmd );
+	hp864_tmpl_check_complete( );
 
 	return ampl;
 }
@@ -422,7 +423,7 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-double hp8647a_get_mod_ampl( int type )
+double hp864_tmpl_get_mod_ampl( int type )
 {
 	const char *cmds[ ] = { "FM:DEV?\n", "AM:DEPT?\n", "PM:DEV?\n" };
 	char buffer[ 100 ];
@@ -431,7 +432,7 @@ double hp8647a_get_mod_ampl( int type )
 
 	fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
 
-	hp8647a_talk( cmds[ type ], buffer, &length );
+	hp864_tmpl_talk( cmds[ type ], buffer, &length );
 	return T_atod( buffer );
 }
 
@@ -439,7 +440,7 @@ double hp8647a_get_mod_ampl( int type )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-static void hp8647a_comm_failure( void )
+static void hp864_tmpl_comm_failure( void )
 {
 	print( FATAL, "Communication with device failed.\n" );
 	THROW( EXCEPTION );
@@ -449,14 +450,14 @@ static void hp8647a_comm_failure( void )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-static void hp8647a_check_complete( void )
+static void hp864_tmpl_check_complete( void )
 {
 	char buffer[ 10 ];
 	long length = 10;
 
 
 	do {
-		hp8647a_talk( "*OPC?\n", buffer, &length );
+		hp864_tmpl_talk( "*OPC?\n", buffer, &length );
 	} while ( buffer[ 1 ] != '1' );
 }
 
@@ -464,10 +465,10 @@ static void hp8647a_check_complete( void )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-bool hp8647a_command( const char *cmd )
+bool hp864_tmpl_command( const char *cmd )
 {
-	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
-		hp8647a_comm_failure( );
+	if ( gpib_write( hp864_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		hp864_tmpl_comm_failure( );
 	return OK;
 }
 
@@ -475,11 +476,11 @@ bool hp8647a_command( const char *cmd )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-static bool hp8647a_talk( const char *cmd, char *reply, long *length )
+static bool hp864_tmpl_talk( const char *cmd, char *reply, long *length )
 {
-	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( hp8647a.device, reply, length ) == FAILURE )
-		hp8647a_comm_failure( );
+	if ( gpib_write( hp864_tmpl.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( hp864_tmpl.device, reply, length ) == FAILURE )
+		hp864_tmpl_comm_failure( );
 	return OK;
 }
 
