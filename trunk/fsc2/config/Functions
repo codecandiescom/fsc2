@@ -297,14 +297,17 @@ ccd_camera_pixel_area, 0, ALL;
 
 /* Functions exported by monochromators (Acton SpectaPro-300i) */
 
-monochromator_name, 0, ALL;		         // returns the device name
-monochromator_turret, -1, EXP;           // set/query current turret
-monochromator_grating, -1, EXP;          // set/query current grating
-monochromator_wavelength, -1, EXP;       // set/query wavelength
-monochromator_install_grating, 2, EXP;   // install new grating
-monochromator_groove_density, 1, EXP;    // get groove density of grating
-monochromator_load_calibration, -1, EXP; // read in calibration file
-monochromator_wavelength_axis, 0, EXP;   // caclulate wavelength axis
+monochromator_name, 0, ALL;		          // returns the device name
+monochromator_turret, -1, EXP;            // set/query current turret
+monochromator_grating, -1, EXP;           // set/query current grating
+monochromator_wavelength, -1, EXP;        // set/query wavelength
+monochromator_install_grating, 2, EXP;    // install new grating
+monochromator_groove_density, 1, EXP;     // get groove density of grating
+monochromator_wavelength_axis, 0, EXP;    // caclulate wavelength axis
+monochromator_wavelength_to_pixel, 1, EXP;
+monochromator_pixel_to_wavelength, 1, EXP;
+monochromator_set_calibration, -1, EXP;   // manually set calibration
+monochromator_load_calibration, -1, EXP;  // read in calibration file
 
 
 /* Functions exported by the power supply (Thurlby&Thandar PL330DP) */

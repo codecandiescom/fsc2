@@ -70,7 +70,7 @@ int spectrapro_300i_exp_hook( void )
 	if ( ! spectrapro_300i.is_needed )
 		return 1;
 
-//	spectrapro_300i_open( );
+	spectrapro_300i_open( );
 
 	spectrapro_300i.use_calib = 0;
 
@@ -86,7 +86,7 @@ int spectrapro_300i_end_of_exp_hook( void )
 	if ( ! spectrapro_300i.is_needed || ! spectrapro_300i.is_open )
 		return 1;
 
-//	spectrapro_300i_close( );
+	spectrapro_300i_close( );
 
 	return 1;
 }
@@ -1092,7 +1092,7 @@ Var *monochromator_calibration( Var *v )
 
 		too_many_arguments( v );
 
-//		if ( FSC2_MODE == EXPERIMENT )
+		if ( FSC2_MODE == EXPERIMENT )
 		{
 			c.opt = 0;
 			c.focal_length   = x[ 1 ];
