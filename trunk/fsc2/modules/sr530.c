@@ -694,7 +694,7 @@ bool sr530_init( const char *name )
 
 double sr530_get_data( int channel )
 {
-	char cmd[ 4 ] = "Q*\n\r";
+	char cmd[ 5 ] = "Q*\n\r";
 	char buffer[ 20 ];
 	long length = 20;
 
