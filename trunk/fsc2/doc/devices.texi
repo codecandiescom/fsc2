@@ -117,10 +117,10 @@ the last run.
 @findex set_field()
 This function expects one floating point argument for the field value
 and will set the magnetic field to this value. It also accepts a second
-optional paramter, the precision that has to be achieved in setting the
-field, i.e.@: the maximum error. If this second paramter is missing the
-precision of the gaussmeter used for measuring the field is used. If the
-precision is higher than the precision of the gaussmeter the precision
+optional paramter, the maximum acceptable deviation of the field from
+the value to be set. If this second paramter is missing the precision of
+the gaussmeter used for measuring the field is used. If the maximum
+deviation is smaller than the precision of the gaussmeter the precision
 of the gaussmeter is used. The function can only be called in the
 @code{EXPERIMENT} section.
 

@@ -343,6 +343,12 @@ int gpib_init_device( const char *device_name, int *dev )
 }
 
 
+int gpib_local( int device )
+{
+	device = device;
+	return SUCCESS;
+}
+
 /*-----------------------------------------------------------*/
 /* gpib_timeout() sets the period the controller is supposed */
 /* to wait for a reaction from a device before timing out.   */
