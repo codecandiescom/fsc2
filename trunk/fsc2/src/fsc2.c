@@ -185,6 +185,9 @@ int main( int argc, char *argv[ ] )
 
 	/* If there is a file as argument try to load it */
 
+	if ( do_delete )
+		delete_file = delete_old_file = SET;
+
 	if ( do_load )
 	{
 		TRY
@@ -230,8 +233,6 @@ int main( int argc, char *argv[ ] )
 			fl_trigger_object( main_form->test_file );
 		if ( do_start && is_loaded )
 			fl_trigger_object( main_form->run );
-		if ( do_delete )
-			delete_file = delete_old_file = SET;
 
 		/* If required send signal to parent process, then loop until quit
 		   button is pressed */
@@ -476,11 +477,21 @@ void load_file( FL_OBJECT *a, long reload )
 	}
 
 	/* Now that we're sure that we can read the new file we can delete the
-	   old file */
+	   old file (but only if the new and the old file are different !) */
 
-	if ( delete_old_file && old_in_file != NULL )
-		unlink( old_in_file );
-	delete_old_file = delete_file ? SET : UNSET;
+	if ( old_in_file != NULL )
+	{
+		if ( strcmp( old_in_file, in_file ) )
+		{
+			if ( delete_old_file )
+				unlink( old_in_file );
+			delete_old_file = delete_file;
+		}
+		else      /* don't delete reloaded files - they may have been edited */
+			delete_old_file = UNSET;
+	}
+
+	delete_file = UNSET;
 	old_in_file = T_free( old_in_file );
 
 	/* Get modification time of file */
