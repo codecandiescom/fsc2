@@ -25,9 +25,9 @@
 #include "ep385.h"
 
 
-/*----------------------------------------------*/
-/* Function for defining a completely new pulse */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Function for defining a completely new pulse
+ *----------------------------------------------*/
 
 bool ep385_new_pulse( long pnum )
 {
@@ -87,9 +87,9 @@ bool ep385_new_pulse( long pnum )
 }
 
 
-/*--------------------------------------------------*/
-/* Function for setting the function of a new pulse */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Function for setting the function of a new pulse
+ *--------------------------------------------------*/
 
 bool ep385_set_pulse_function( long pnum, int function )
 {
@@ -153,9 +153,9 @@ bool ep385_set_pulse_function( long pnum, int function )
 }
 
 
-/*--------------------------------------------------------*/
-/* Function for setting the start position of a new pulse */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Function for setting the start position of a new pulse
+ *--------------------------------------------------------*/
 
 bool ep385_set_pulse_position( long pnum, double p_time )
 {
@@ -198,9 +198,9 @@ bool ep385_set_pulse_position( long pnum, double p_time )
 }
 
 
-/*------------------------------------------------*/
-/* Function for setting the length of a new pulse */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * Function for setting the length of a new pulse
+ *------------------------------------------------*/
 
 bool ep385_set_pulse_length( long pnum, double p_time )
 {
@@ -239,9 +239,9 @@ bool ep385_set_pulse_length( long pnum, double p_time )
 }
 
 
-/*------------------------------------------------------------*/
-/* Function for setting the position increment of a new pulse */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function for setting the position increment of a new pulse
+ *------------------------------------------------------------*/
 
 bool ep385_set_pulse_position_change( long pnum, double p_time )
 {
@@ -274,9 +274,9 @@ bool ep385_set_pulse_position_change( long pnum, double p_time )
 }
 
 
-/*----------------------------------------------------------*/
-/* Function for setting the length increment of a new pulse */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function for setting the length increment of a new pulse
+ *----------------------------------------------------------*/
 
 bool ep385_set_pulse_length_change( long pnum, double p_time )
 {
@@ -309,9 +309,9 @@ bool ep385_set_pulse_length_change( long pnum, double p_time )
 }
 
 
-/*-----------------------------------------------------*/
-/* Function for setting the phase cycle of a new pulse */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function for setting the phase cycle of a new pulse
+ *-----------------------------------------------------*/
 
 bool ep385_set_pulse_phase_cycle( long pnum, long cycle )
 {
@@ -360,9 +360,9 @@ bool ep385_set_pulse_phase_cycle( long pnum, long cycle )
 }
 
 
-/*-----------------------------------------------*/
-/* Function for querying the function of a pulse */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Function for querying the function of a pulse
+ *-----------------------------------------------*/
 
 bool ep385_get_pulse_function( long pnum, int *function )
 {
@@ -380,9 +380,9 @@ bool ep385_get_pulse_function( long pnum, int *function )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function for querying the current start position of a pulse */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function for querying the current start position of a pulse
+ *-------------------------------------------------------------*/
 
 bool ep385_get_pulse_position( long pnum, double *p_time )
 {
@@ -401,9 +401,9 @@ bool ep385_get_pulse_position( long pnum, double *p_time )
 }
 
 
-/*-----------------------------------------------------*/
-/* Function for querying the current length of a pulse */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function for querying the current length of a pulse
+ *-----------------------------------------------------*/
 
 bool ep385_get_pulse_length( long pnum, double *p_time )
 {
@@ -421,9 +421,9 @@ bool ep385_get_pulse_length( long pnum, double *p_time )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function for querying the current start position increment of a pulse */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for querying the current start position increment of a pulse
+ *-----------------------------------------------------------------------*/
 
 bool ep385_get_pulse_position_change( long pnum, double *p_time )
 {
@@ -442,9 +442,9 @@ bool ep385_get_pulse_position_change( long pnum, double *p_time )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function for querying the current length increment of a pulse */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for querying the current length increment of a pulse
+ *---------------------------------------------------------------*/
 
 bool ep385_get_pulse_length_change( long pnum, double *p_time )
 {
@@ -462,9 +462,9 @@ bool ep385_get_pulse_length_change( long pnum, double *p_time )
 }
 
 
-/*--------------------------------------------------*/
-/* Function for querying the phase cycle of a pulse */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Function for querying the phase cycle of a pulse
+ *--------------------------------------------------*/
 
 bool ep385_get_pulse_phase_cycle( long pnum, long *cycle )
 {
@@ -482,9 +482,9 @@ bool ep385_get_pulse_phase_cycle( long pnum, long *cycle )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/* Function for changing the pulse position while the experiment is running. */
-/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * Function for changing the pulse position while the experiment is running.
+ *---------------------------------------------------------------------------*/
 
 bool ep385_change_pulse_position( long pnum, double p_time )
 {
@@ -568,9 +568,9 @@ bool ep385_change_pulse_position( long pnum, double p_time )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function for changing the pulse length while the experiment is running. */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function for changing the pulse length while the experiment is running.
+ *-------------------------------------------------------------------------*/
 
 bool ep385_change_pulse_length( long pnum, double p_time )
 {
@@ -655,10 +655,10 @@ bool ep385_change_pulse_length( long pnum, double p_time )
 }
 
 
-/*----------------------------------------------------*/
-/* Function for changing the pulse position increment */
-/* while the experiment is running.                   */
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ * Function for changing the pulse position increment
+ * while the experiment is running.
+ *----------------------------------------------------*/
 
 bool ep385_change_pulse_position_change( long pnum, double p_time )
 {
@@ -702,10 +702,10 @@ bool ep385_change_pulse_position_change( long pnum, double p_time )
 }
 
 
-/*--------------------------------------------------*/
-/* Function for changing the pulse length increment */
-/* while the experiment is running.                 */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Function for changing the pulse length increment
+ * while the experiment is running.
+ *--------------------------------------------------*/
 
 bool ep385_change_pulse_length_change( long pnum, double p_time )
 {

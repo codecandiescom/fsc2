@@ -28,8 +28,8 @@
 static int Cur_PHS = -1;                 /* used for internal sanity checks */
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 bool dg2020_store_timebase( double timebase )
 {
@@ -63,8 +63,8 @@ bool dg2020_store_timebase( double timebase )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 bool dg2020_assign_function( int function, long pod )
 {
@@ -117,8 +117,8 @@ bool dg2020_assign_function( int function, long pod )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 bool dg2020_assign_channel_to_function( int function, long channel )
 {
@@ -156,8 +156,8 @@ bool dg2020_assign_channel_to_function( int function, long channel )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 bool dg2020_invert_function( int function )
 {
@@ -166,8 +166,8 @@ bool dg2020_invert_function( int function )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 bool dg2020_set_function_delay( int function, double delay )
 {
@@ -218,8 +218,8 @@ bool dg2020_set_function_delay( int function, double delay )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 bool dg2020_set_function_high_level( int function, double voltage )
 {
@@ -251,8 +251,8 @@ bool dg2020_set_function_high_level( int function, double voltage )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 bool dg2020_set_function_low_level( int function, double voltage )
 {
@@ -284,8 +284,8 @@ bool dg2020_set_function_low_level( int function, double voltage )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 bool dg2020_set_trigger_mode( int mode )
 {
@@ -335,8 +335,8 @@ bool dg2020_set_trigger_mode( int mode )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 bool dg2020_set_trig_in_level( double voltage )
 {
@@ -385,8 +385,8 @@ bool dg2020_set_trig_in_level( double voltage )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 bool dg2020_set_trig_in_slope( int slope )
 {
@@ -422,8 +422,8 @@ bool dg2020_set_trig_in_slope( int slope )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 bool dg2020_set_trig_in_impedance( int state )
 {
@@ -459,8 +459,8 @@ bool dg2020_set_trig_in_impedance( int state )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 bool dg2020_set_repeat_time( double rep_time )
 {
@@ -486,8 +486,8 @@ bool dg2020_set_repeat_time( double rep_time )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 bool dg2020_set_max_seq_len( double seq_len )
 {
@@ -514,8 +514,8 @@ bool dg2020_set_max_seq_len( double seq_len )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 bool dg2020_set_phase_reference( int phase, int function )
 {
@@ -559,21 +559,21 @@ bool dg2020_set_phase_reference( int phase, int function )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* This function is called for each of the definitions of how a phase is */
-/* realized by the combination of pod channel outputs. There are 2 pod   */
-/* channels and each of the 4 phase types has to be realized by a        */
-/* different combination (i.e. both off, both on or one off and the      */
-/* other on).                                                            */
-/* 'function' is the phase function the data are to be used for (i.e. 0  */
-/*   means PHASE_1, 1 means PHASE_2)                                     */
-/* 'type' means the type of phase, see global.h (PHASE_PLUS/MINUX_X/Y)   */
-/* 'pod' tells if the value is for the first or the second pod channel   */
-/*   (0: first pod channel, 1: second pod channel, -1: pick the one not  */
-/*    set yet)                                                           */
-/* 'val' means high or low to be set on the pod channel to set the       */
-/*    requested phase(0: low, non-zero: high)                            */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * This function is called for each of the definitions of how a phase is
+ * realized by the combination of pod channel outputs. There are 2 pod
+ * channels and each of the 4 phase types has to be realized by a
+ * different combination (i.e. both off, both on or one off and the
+ * other on).
+ * 'function' is the phase function the data are to be used for (i.e. 0
+ *   means PHASE_1, 1 means PHASE_2)
+ * 'type' means the type of phase, see global.h (PHASE_PLUS/MINUX_X/Y)
+ * 'pod' tells if the value is for the first or the second pod channel
+ *   (0: first pod channel, 1: second pod channel, -1: pick the one not
+ *    set yet)
+ * 'val' means high or low to be set on the pod channel to set the
+ *    requested phase(0: low, non-zero: high)
+ *-----------------------------------------------------------------------*/
 
 bool dg2020_phase_setup_prep( int func, int type, int pod, long val )
 {
@@ -635,10 +635,10 @@ bool dg2020_phase_setup_prep( int func, int type, int pod, long val )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Now that we got all information there is about the phase setup do all */
-/* possible checks and finally store the state.                          */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Now that we got all information there is about the phase setup do all
+ * possible checks and finally store the state.
+ *-----------------------------------------------------------------------*/
 
 bool dg2020_phase_setup( int func )
 {
@@ -697,8 +697,8 @@ bool dg2020_phase_setup( int func )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
 bool dg2020_phase_setup_finalize( int func, PHS_T p_phs )
 {
@@ -719,8 +719,8 @@ bool dg2020_phase_setup_finalize( int func, PHS_T p_phs )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
 bool dg2020_set_phase_switch_delay( int func, double del_time )
 {
@@ -756,8 +756,8 @@ bool dg2020_set_phase_switch_delay( int func, double del_time )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 bool dg2020_set_grace_period( double gp_time )
 {
@@ -788,10 +788,10 @@ bool dg2020_set_grace_period( double gp_time )
 }
 
 
-/*----------------------------------------------*/
-/* Function that gets called to tell the pulser */
-/* driver to keep all pulses, even unused ones. */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Function that gets called to tell the pulser
+ * driver to keep all pulses, even unused ones.
+ *----------------------------------------------*/
 
 bool dg2020_keep_all( void )
 {

@@ -25,12 +25,12 @@
 #include "ep385.h"
 
 
-/*-----------------------------------------------------------------*/
-/* At many places a correctly set timebase is required, but it can */
-/* also be set implicitely to the default timebase of the pulser   */
-/* by simply not setting it. All functions that require a timebase */
-/* should call this function top make sure it is set correctly.    */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * At many places a correctly set timebase is required, but it can
+ * also be set implicitely to the default timebase of the pulser
+ * by simply not setting it. All functions that require a timebase
+ * should call this function top make sure it is set correctly.
+ *-----------------------------------------------------------------*/
 
 void ep385_timebase_check( void )
 {
@@ -58,10 +58,10 @@ void ep385_timebase_check( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Converts a time into the internal type of a time specification, */
-/* i.e. an integer multiple of the time base                       */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Converts a time into the internal type of a time specification,
+ * i.e. an integer multiple of the time base
+ *-----------------------------------------------------------------*/
 
 Ticks ep385_double2ticks( double p_time )
 {
@@ -98,10 +98,10 @@ Ticks ep385_double2ticks( double p_time )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Converts a time into the internal type of a time specification, */
-/* i.e. an integer multiple of the time base                       */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Converts a time into the internal type of a time specification,
+ * i.e. an integer multiple of the time base
+ *-----------------------------------------------------------------*/
 
 Ticks ep385_double2ticks_simple( double p_time )
 {
@@ -127,9 +127,9 @@ Ticks ep385_double2ticks_simple( double p_time )
 }
 
 
-/*-----------------------------------------------------*/
-/* Does the exact opposite of the previous function... */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Does the exact opposite of the previous function...
+ *-----------------------------------------------------*/
 
 double ep385_ticks2double( Ticks ticks )
 {
@@ -137,9 +137,9 @@ double ep385_ticks2double( Ticks ticks )
 }
 
 
-/*-----------------------------------------------*/
-/* Returns the structure for pulse numbered pnum */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Returns the structure for pulse numbered pnum
+ *-----------------------------------------------*/
 
 Pulse_T *ep385_get_pulse( long pnum )
 {
@@ -169,8 +169,8 @@ Pulse_T *ep385_get_pulse( long pnum )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 const char *ep385_ptime( double p_time )
 {
@@ -189,8 +189,8 @@ const char *ep385_ptime( double p_time )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 const char *ep385_pticks( Ticks ticks )
 {
@@ -198,12 +198,12 @@ const char *ep385_pticks( Ticks ticks )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Comparison function for two pulses: returns 0 if both pulses are  */
-/* inactive, -1 if only the second pulse is inactive or starts at a  */
-/* later time and 1 if only the first pulse is inactive pulse or the */
-/* second pulse starts earlier.                                      */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Comparison function for two pulses: returns 0 if both pulses are
+ * inactive, -1 if only the second pulse is inactive or starts at a
+ * later time and 1 if only the first pulse is inactive pulse or the
+ * second pulse starts earlier.
+ *-------------------------------------------------------------------*/
 
 int ep385_pulse_compare( const void *A, const void *B )
 {
@@ -214,8 +214,8 @@ int ep385_pulse_compare( const void *A, const void *B )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 void ep385_show_pulses( void )
 {
@@ -279,8 +279,8 @@ void ep385_show_pulses( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 void ep385_dump_pulses( void )
 {
@@ -355,8 +355,8 @@ void ep385_dump_pulses( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 void ep385_dump_channels( FILE *fp )
 {
@@ -409,8 +409,8 @@ void ep385_dump_channels( FILE *fp )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 void ep385_duty_check( void )
 {
@@ -436,8 +436,8 @@ void ep385_duty_check( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 Ticks ep385_calc_max_length( Function_T *f )
 {
@@ -461,10 +461,10 @@ Ticks ep385_calc_max_length( Function_T *f )
 }
 
 
-/*-----------------------------------------------*/
-/* This is a no-op function and only implemented */
-/* because some other pulsers also have it.      */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * This is a no-op function and only implemented
+ * because some other pulsers also have it.
+ *-----------------------------------------------*/
 
 bool ep385_set_max_seq_len( UNUSED_ARG double seq_len )
 {

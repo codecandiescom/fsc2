@@ -31,11 +31,11 @@ static void ep385_defense_shape_check( Function_T *shape );
 static void ep385_commit( bool flag );
 
 
-/*-------------------------------------------------------------------------*/
-/* Function is called in the experiment after pulses have been changed to  */
-/* update the pulser accordingly. No checking has to be done except in the */
-/* test run.                                                               */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function is called in the experiment after pulses have been changed to
+ * update the pulser accordingly. No checking has to be done except in the
+ * test run.
+ *-------------------------------------------------------------------------*/
 
 bool ep385_do_update( void )
 {
@@ -63,9 +63,9 @@ bool ep385_do_update( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* This function sorts the pulses and checks that the pulses don't overlap. */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * This function sorts the pulses and checks that the pulses don't overlap.
+ *--------------------------------------------------------------------------*/
 
 static bool ep385_update_pulses( bool flag )
 {
@@ -343,9 +343,9 @@ static bool ep385_update_pulses( bool flag )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* This function simply checks that no pulses of a function overlap. */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * This function simply checks that no pulses of a function overlap.
+ *-------------------------------------------------------------------*/
 
 static void ep385_pulse_check( Function_T *f )
 {
@@ -430,18 +430,18 @@ static void ep385_pulse_check( Function_T *f )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Function checks if the distance between pulse shape pulses and defense */
-/* pulses is large enough. The minimum lengths the shape_2_defense and    */
-/* defense_2_shape members of the ep395 structure. Both are set to rather */
-/* large values at first but can be customized by calling the EDL         */
-/* functions pulser_shape_to_defense_minimum_distance() and               */
-/* pulser_defense_to_shape_minimum_distance() (names are intentionally    */
-/* that long).                                                            */
-/* The function is called only if pulse shape and defense pulses are used */
-/* and either also TWT or TWT_GATE pulses or at least one of both the     */
-/* mentioned EDL functions have been called.                              */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function checks if the distance between pulse shape pulses and defense
+ * pulses is large enough. The minimum lengths the shape_2_defense and
+ * defense_2_shape members of the ep395 structure. Both are set to rather
+ * large values at first but can be customized by calling the EDL
+ * functions pulser_shape_to_defense_minimum_distance() and
+ * pulser_defense_to_shape_minimum_distance() (names are intentionally
+ * that long).
+ * The function is called only if pulse shape and defense pulses are used
+ * and either also TWT or TWT_GATE pulses or at least one of both the
+ * mentioned EDL functions have been called.
+ *------------------------------------------------------------------------*/
 
 static void ep385_defense_shape_check( Function_T *shape )
 {
@@ -533,10 +533,10 @@ static void ep385_defense_shape_check( Function_T *shape )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Function is called after the test run and experiments to reset all the */
-/* variables describing the state of the pulser to their initial values.  */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function is called after the test run and experiments to reset all the
+ * variables describing the state of the pulser to their initial values.
+ *------------------------------------------------------------------------*/
 
 void ep385_full_reset( void )
 {
@@ -609,9 +609,9 @@ void ep385_full_reset( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Checks if shape padding can be set correctly for all pulses of a channel */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Checks if shape padding can be set correctly for all pulses of a channel
+ *--------------------------------------------------------------------------*/
 
 void ep385_shape_padding_check_1( Channel_T *ch )
 {
@@ -678,11 +678,11 @@ void ep385_shape_padding_check_1( Channel_T *ch )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* In the shape padding checks fo single channels it could not be tested */
-/* if pulses with automatic shape padding in different channels would    */
-/* overlap, which needs to be done here.                                 */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * In the shape padding checks fo single channels it could not be tested
+ * if pulses with automatic shape padding in different channels would
+ * overlap, which needs to be done here.
+ *-----------------------------------------------------------------------*/
 
 void ep385_shape_padding_check_2( void )
 {
@@ -750,12 +750,12 @@ void ep385_shape_padding_check_2( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Here we check that TWT pulses don't overlap (if at least one of */
-/* them has been created automatically), if necessary shortening   */
-/* or even eliminating TWT pulses, Then we again lengthen pulses   */
-/* if the time between two TWT gets too short.                     */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Here we check that TWT pulses don't overlap (if at least one of
+ * them has been created automatically), if necessary shortening
+ * or even eliminating TWT pulses, Then we again lengthen pulses
+ * if the time between two TWT gets too short.
+ *-----------------------------------------------------------------*/
 
 void ep385_twt_padding_check( Channel_T *ch )
 {
@@ -895,10 +895,10 @@ void ep385_twt_padding_check( Channel_T *ch )
 }
 
 
-/*------------------------------------------------*/
-/* Function deletes a pulse and returns a pointer */
-/* to the next pulse in the pulse list.           */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * Function deletes a pulse and returns a pointer
+ * to the next pulse in the pulse list.
+ *------------------------------------------------*/
 
 Pulse_T *ep385_delete_pulse( Pulse_T *p, bool warn )
 {
@@ -1000,10 +1000,10 @@ Pulse_T *ep385_delete_pulse( Pulse_T *p, bool warn )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Changes the pulse pattern in all channels so that the data in the */
-/* pulser get in sync with the its internal representation.          */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Changes the pulse pattern in all channels so that the data in the
+ * pulser get in sync with the its internal representation.
+ *-------------------------------------------------------------------*/
 
 static void ep385_commit( bool flag )
 {

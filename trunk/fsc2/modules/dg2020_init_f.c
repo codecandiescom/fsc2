@@ -37,10 +37,10 @@ static void dg2020_set_phase_pulse_pos_and_len( Function_T *f, Pulse_T *np,
 												Pulse_T *p, int nth );
 
 
-/*---------------------------------------------------------------------------
-  Function does everything that needs to be done for checking and completing
-  the internal representation of the pulser at the start of a test run.
----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * Function does everything that needs to be done for checking and completing
+ * the internal representation of the pulser at the start of a test run.
+ *---------------------------------------------------------------------------*/
 
 void dg2020_init_setup( void )
 {
@@ -62,8 +62,8 @@ void dg2020_init_setup( void )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ *-------------------------------------------------------------------------*/
 
 static void dg2020_init_print( FILE *fp )
 {
@@ -94,16 +94,16 @@ static void dg2020_init_print( FILE *fp )
 }
 
 
-/*--------------------------------------------------------------------------
-  Function runs through all pulses and checks that at least:
-  1. the function is set and the function itself has been declared in the
-     ASSIGNMENTS section
-  2. the start position is set
-  3. the length is set (only exception: if pulse function is DETECTION
-     and no length is set it's more or less silently set to one tick)
-  4. the sum of function delay, pulse start position and length does not
-     exceed the pulsers memory
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function runs through all pulses and checks that at least:
+ * 1. the function is set and the function itself has been declared in the
+ *    ASSIGNMENTS section
+ * 2. the start position is set
+ * 3. the length is set (only exception: if pulse function is DETECTION
+ *    and no length is set it's more or less silently set to one tick)
+ * 4. the sum of function delay, pulse start position and length does not
+ *    exceed the pulsers memory
+ *-------------------------------------------------------------------------*/
 
 static void dg2020_basic_pulse_check( void )
 {
@@ -188,24 +188,24 @@ static void dg2020_basic_pulse_check( void )
 }
 
 
-/*-----------------------------------------------------------------------------
-  Function does a consistency check concerning the functions:
-  1. Each function mentioned in the ASSIGMENTS section should have pulses
-     assigned to it, otherwise it's not really needed. The exceptions
-	 are the PHASES functions where the pulses are created automatically. On
-	 the other hand, the PHASES functions aren't needed if no phase sequences
-	 have been defined.
-  2. Each function needs a pod again with the exception of the PHASES
-     functions that need two.
-  Phase functions that are associated with useless functions or functions
-  that don't have pulses with phase cycling have to be removed.
-  Next, a list of pulses for each channel is set up. Now we also can count
-  the number of channels needed for the function.
-  Each time when we find that a function isn't needed we always have to put
-  back all channels that might have been assigned to the function. Also, if
-  there are more channels assigned than needed, the superfluous ones are put
-  back into the free pool.
------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * Function does a consistency check concerning the functions:
+ * 1. Each function mentioned in the ASSIGMENTS section should have pulses
+ *    assigned to it, otherwise it's not really needed. The exceptions
+ *	 are the PHASES functions where the pulses are created automatically. On
+ *	 the other hand, the PHASES functions aren't needed if no phase sequences
+ *	 have been defined.
+ * 2. Each function needs a pod again with the exception of the PHASES
+ *    functions that need two.
+ * Phase functions that are associated with useless functions or functions
+ * that don't have pulses with phase cycling have to be removed.
+ * Next, a list of pulses for each channel is set up. Now we also can count
+ * the number of channels needed for the function.
+ * Each time when we find that a function isn't needed we always have to put
+ * back all channels that might have been assigned to the function. Also, if
+ * there are more channels assigned than needed, the superfluous ones are put
+ * back into the free pool.
+ *---------------------------------------------------------------------------*/
 
 static void dg2020_basic_functions_check( void )
 {
@@ -429,10 +429,10 @@ static void dg2020_basic_functions_check( void )
 }
 
 
-/*---------------------------------------------------------------------------
-  Function checks first if there are enough pulser channels and than assigns
-  channels to functions that haven't been assigned as many as they need
-----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * Function checks first if there are enough pulser channels and than assigns
+ * channels to functions that haven't been assigned as many as they need
+ *---------------------------------------------------------------------------*/
 
 static void dg2020_distribute_channels( void )
 {
@@ -484,10 +484,10 @@ static void dg2020_distribute_channels( void )
 }
 
 
-/*-----------------------------------------------------------------------------
-  In this function the pulses for all the functions are sorted and further
-  consistency checks are done.
------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * In this function the pulses for all the functions are sorted and further
+ * consistency checks are done.
+ *--------------------------------------------------------------------------*/
 
 static void dg2020_pulse_start_setup( void )
 {
@@ -522,11 +522,11 @@ static void dg2020_pulse_start_setup( void )
 }
 
 
-/*-----------------------------------------------------------------------------
-  In this function the additional pulses needed for phase cycling in one of
-  the phase functions are created. As argument only pointers to the phase
-  functions are allowed.
------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * In this function the additional pulses needed for phase cycling in one of
+ * the phase functions are created. As argument only pointers to the phase
+ * functions are allowed.
+ *---------------------------------------------------------------------------*/
 
 static void dg2020_create_phase_pulses( Function_T *f )
 {
@@ -560,12 +560,12 @@ static void dg2020_create_phase_pulses( Function_T *f )
 }
 
 
-/*---------------------------------------------------------------------------
-  f = pointer to the phase function the new pulse belongs to
-  p = pointer to pulse the new phase pulse is associated with
-  pos = position of p in the list of pulses of this function
-  pod = 0 / 1: the pod for the new phase pulse
----------------------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * f = pointer to the phase function the new pulse belongs to
+ * p = pointer to pulse the new phase pulse is associated with
+ * pos = position of p in the list of pulses of this function
+ * pod = 0 / 1: the pod for the new phase pulse
+ *-------------------------------------------------------------*/
 
 static Pulse_T *dg2020_new_phase_pulse( Function_T *f, Pulse_T *p, int nth,
 										int pos, int pod )
@@ -637,8 +637,8 @@ static Pulse_T *dg2020_new_phase_pulse( Function_T *f, Pulse_T *p, int nth,
 }
 
 
-/*---------------------------------------------------------------------------
----------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ *-------------------------------------------------------------------------*/
 
 static void dg2020_set_phase_pulse_pos_and_len( Function_T *f, Pulse_T *np,
 												Pulse_T *p, int nth )

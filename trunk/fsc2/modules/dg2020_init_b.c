@@ -39,11 +39,11 @@ static void dg2020_create_shape_pulses( void );
 static void dg2020_create_twt_pulses( void );
 
 
-/*-------------------------------------------------------------------*/
-/* Function does everything that needs to be done for checking and   */
-/* completing the internal representation of the pulser at the start */
-/* of a test run.                                                    */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function does everything that needs to be done for checking and
+ * completing the internal representation of the pulser at the start
+ * of a test run.
+ *-------------------------------------------------------------------*/
 
 void dg2020_init_setup( void )
 {
@@ -67,8 +67,8 @@ void dg2020_init_setup( void )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ *-------------------------------------------------------------------------*/
 
 static void dg2020_init_print( FILE *fp )
 {
@@ -96,16 +96,16 @@ static void dg2020_init_print( FILE *fp )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function runs through all pulses and checks that at least:              */
-/* 1. A pulse function is set and the function itself has been declared in */
-/*	  the ASSIGNMENTS section											   */
-/* 2. The start position is set											   */
-/* 3. The length is set (only exception: if pulse function is DETECTION	   */
-/*	  and no length is set it's more or less silently set to one tick)	   */
-/* 4. The sum of function delay, pulse start position and length does not  */
-/*	  exceed the pulsers memory											   */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function runs through all pulses and checks that at least:
+ * 1. A pulse function is set and the function itself has been declared in
+ *	  the ASSIGNMENTS section
+ * 2. The start position is set
+ * 3. The length is set (only exception: if pulse function is DETECTION
+ *	  and no length is set it's more or less silently set to one tick)
+ * 4. The sum of function delay, pulse start position and length does not
+ *	  exceed the pulsers memory
+ *-------------------------------------------------------------------------*/
 
 void dg2020_basic_pulse_check( void )
 {
@@ -219,8 +219,8 @@ void dg2020_basic_pulse_check( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
 
 static void dg2020_basic_functions_check( void )
 {
@@ -303,16 +303,16 @@ static void dg2020_basic_functions_check( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* This function tries to figure out how many channels are going     */
-/* to be needed. It's very simple for functions that only have one   */
-/* pod - here one channel will do. On the other hand, for functions  */
-/* with phase cycling we have to consult the phase matrix (set up in */
-/* dg2020_basic_pulse_check()). We need one channel for each used    */
-/* phase type for each stage of the phase cycle and (if not all      */
-/* phase types are used in all stages) one extra channel for the     */
-/* constant voltage.                                                 */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * This function tries to figure out how many channels are going
+ * to be needed. It's very simple for functions that only have one
+ * pod - here one channel will do. On the other hand, for functions
+ * with phase cycling we have to consult the phase matrix (set up in
+ * dg2020_basic_pulse_check()). We need one channel for each used
+ * phase type for each stage of the phase cycle and (if not all
+ * phase types are used in all stages) one extra channel for the
+ * constant voltage.
+ *-------------------------------------------------------------------*/
 
 static int dg2020_calc_channels_needed( Function_T *f )
 {
@@ -352,8 +352,8 @@ static int dg2020_calc_channels_needed( Function_T *f )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
 
 static void dg2020_phase_setup_check( Function_T *f )
 {
@@ -457,11 +457,11 @@ static void dg2020_phase_setup_check( Function_T *f )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function checks first if there are enough pulser channels and then */
-/* assigns channels to funcions that haven't been assigned as many    */
-/* channels as needed.                                                */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function checks first if there are enough pulser channels and then
+ * assigns channels to funcions that haven't been assigned as many
+ * channels as needed.
+ *--------------------------------------------------------------------*/
 
 static void dg2020_distribute_channels( void )
 {
@@ -513,14 +513,14 @@ static void dg2020_distribute_channels( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* The phase matrix created here has as many rows as there are phase types  */
-/* (4 for the Berlin pulser) and as many columns as there are 'stages' in   */
-/* the phase cycle. Its elements are the numbers of the channels to be used */
-/* for the corresponding phase type in the corresponding stage of the phase */
-/* cycle. As lang as there are no repetitions of the same phase pattern in  */
-/* the stages of the phase cycle this is the minimum number of channels.    */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * The phase matrix created here has as many rows as there are phase types
+ * (4 for the Berlin pulser) and as many columns as there are 'stages' in
+ * the phase cycle. Its elements are the numbers of the channels to be used
+ * for the corresponding phase type in the corresponding stage of the phase
+ * cycle. As lang as there are no repetitions of the same phase pattern in
+ * the stages of the phase cycle this is the minimum number of channels.
+ *--------------------------------------------------------------------------*/
 
 static void dg2020_setup_phase_matrix( Function_T *f )
 {
@@ -550,8 +550,8 @@ static void dg2020_setup_phase_matrix( Function_T *f )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
 
 static void dg2020_pulse_start_setup( void )
 {
@@ -650,13 +650,13 @@ static void dg2020_pulse_start_setup( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* For functions that have more than one pod assigned to them but for   */
-/* which no phase setup was found in the EDL script a dummy phase setup */
-/* is created here: only the first of the pods found in the EDL script  */
-/* is going to be used for the pulses of this function, all other pods  */
-/* assigned to it will stay low all of the time.                        */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * For functions that have more than one pod assigned to them but for
+ * which no phase setup was found in the EDL script a dummy phase setup
+ * is created here: only the first of the pods found in the EDL script
+ * is going to be used for the pulses of this function, all other pods
+ * assigned to it will stay low all of the time.
+ *----------------------------------------------------------------------*/
 
 static Phase_Setup_T *dg2020_create_dummy_phase_setup( Function_T *f )
 {
@@ -687,15 +687,15 @@ static Phase_Setup_T *dg2020_create_dummy_phase_setup( Function_T *f )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* This function creates a dummy phase sequence for pulses with no phase */
-/* sequence defined but belonging to a function that has more than one   */
-/* pod assigned to it. This dummy phase sequence consists of just '+X'   */
-/* phases (length is 1 if there are no real phase sequences or equal to  */
-/* the the length of the normal phase sequences otherwise). If such a    */
-/* dummy phase sequence already exists the pulse becomes associated with */
-/* this already existing dummy sequence.                                 */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * This function creates a dummy phase sequence for pulses with no phase
+ * sequence defined but belonging to a function that has more than one
+ * pod assigned to it. This dummy phase sequence consists of just '+X'
+ * phases (length is 1 if there are no real phase sequences or equal to
+ * the the length of the normal phase sequences otherwise). If such a
+ * dummy phase sequence already exists the pulse becomes associated with
+ * this already existing dummy sequence.
+ *-----------------------------------------------------------------------*/
 
 static Phs_Seq_T *dg2020_create_dummy_phase_seq( void )
 {
@@ -744,16 +744,16 @@ static Phs_Seq_T *dg2020_create_dummy_phase_seq( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* The function automatically adds shape pulses for all pulses of functions */
-/* that have been marked by a call of pulser_automatic_shape_pulses() for   */
-/* the automatic creation of shape pulses. Each pulse for which a shape     */
-/* pulse is created is linked with its shape pulse (and also the other way  */
-/* round) by a pointer, 'sp', in the pulse structure. When done with        */
-/* creating shape pulses we still have to check that these automatically    */
-/* created pulses don't overlap with manually set shape pulses or with each */
-/* other, which would beat the purpose of shape pulses.                     */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * The function automatically adds shape pulses for all pulses of functions
+ * that have been marked by a call of pulser_automatic_shape_pulses() for
+ * the automatic creation of shape pulses. Each pulse for which a shape
+ * pulse is created is linked with its shape pulse (and also the other way
+ * round) by a pointer, 'sp', in the pulse structure. When done with
+ * creating shape pulses we still have to check that these automatically
+ * created pulses don't overlap with manually set shape pulses or with each
+ * other, which would beat the purpose of shape pulses.
+ *--------------------------------------------------------------------------*/
 
 static void dg2020_create_shape_pulses( void )
 {
@@ -915,13 +915,13 @@ static void dg2020_create_shape_pulses( void )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* The function automatically adds TWT pulses for all pulses of functions */
-/* that have been marked by a call of pulser_automatic_twt_pulses() for   */
-/* the automatic creation of TWT pulses. In contrast to automatic shape   */
-/* pulses the automatic created TWT pulses may overlap, these overlaps    */
-/* will be taken care of later.                                           */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * The function automatically adds TWT pulses for all pulses of functions
+ * that have been marked by a call of pulser_automatic_twt_pulses() for
+ * the automatic creation of TWT pulses. In contrast to automatic shape
+ * pulses the automatic created TWT pulses may overlap, these overlaps
+ * will be taken care of later.
+ *------------------------------------------------------------------------*/
 
 static void dg2020_create_twt_pulses( void )
 {

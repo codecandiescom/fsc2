@@ -94,14 +94,14 @@ static void bnm12_check_field( void );
 /*                                           */
 /*-------------------------------------------*/
 
-/*--------------------------------------------------------------*/
-/* The gaussmeter outputs its measured results at a 24-bit wide */
-/* digital output in BCD format. To be able to obtain the value */
-/* a DIO device is required, currently only the WITIO-48 card   */
-/* is implemented to do the job. So the first thing the module  */
-/* must do is to check if the witio_48 is already loaded and    */
-/* complain if it isn't.                                        */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * The gaussmeter outputs its measured results at a 24-bit wide
+ * digital output in BCD format. To be able to obtain the value
+ * a DIO device is required, currently only the WITIO-48 card
+ * is implemented to do the job. So the first thing the module
+ * must do is to check if the witio_48 is already loaded and
+ * complain if it isn't.
+ *--------------------------------------------------------------*/
 
 int bnm12_init_hook( void )
 {
@@ -199,10 +199,10 @@ int bnm12_init_hook( void )
 }
 
 
-/*----------------------------------------------------------*/
-/* Just store the current settings in case they get changed */
-/* during the test run.                                     */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Just store the current settings in case they get changed
+ * during the test run.
+ *----------------------------------------------------------*/
 
 int bnm12_test_hook( void )
 {
@@ -211,10 +211,10 @@ int bnm12_test_hook( void )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Restore the settings back to what they were after executing */
-/* the preparations section.                                   */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Restore the settings back to what they were after executing
+ * the preparations section.
+ *-------------------------------------------------------------*/
 
 int bnm12_exp_hook( void )
 {
@@ -226,9 +226,9 @@ int bnm12_exp_hook( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function that gets called just before the module gets unloaded */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function that gets called just before the module gets unloaded
+ *----------------------------------------------------------------*/
 
 void bnm12_exit_hook( void )
 {
@@ -243,9 +243,9 @@ void bnm12_exit_hook( void )
 /*                                           */
 /*-------------------------------------------*/
 
-/*----------------------------------------------------------------*/
-/* Function returns a string variable with the name of the device */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function returns a string variable with the name of the device
+ *----------------------------------------------------------------*/
 
 Var_T *gaussmeter_name( UNUSED_ARG Var_T *v )
 {
@@ -253,9 +253,9 @@ Var_T *gaussmeter_name( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------------------*/
-/* Measure a new field value and return it to the caller */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Measure a new field value and return it to the caller
+ *-------------------------------------------------------*/
 
 Var_T *gaussmeter_field( UNUSED_ARG Var_T *v )
 {
@@ -263,11 +263,11 @@ Var_T *gaussmeter_field( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function for querying or setting the current resolution of the */
-/* device. Since we can't ask the device about it we've got to    */
-/* trust what the user tells us...                                */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for querying or setting the current resolution of the
+ * device. Since we can't ask the device about it we've got to
+ * trust what the user tells us...
+ *----------------------------------------------------------------*/
 
 Var_T *gaussmeter_resolution( Var_T *v )
 {
@@ -329,11 +329,11 @@ Var_T *gaussmeter_resolution( Var_T *v )
 /*                                           */
 /*-------------------------------------------*/
 
-/*---------------------------------------------------------------*/
-/* Function for obtaining a new field value by reading the input */
-/* at the WITIO-48 DIO card. The value still has to be converted */
-/* from BCD format.                                              */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for obtaining a new field value by reading the input
+ * at the WITIO-48 DIO card. The value still has to be converted
+ * from BCD format.
+ *---------------------------------------------------------------*/
 
 static double bnm12_get_field( void )
 {
@@ -387,8 +387,8 @@ static double bnm12_get_field( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 static void bnm12_check_field( void )
 {

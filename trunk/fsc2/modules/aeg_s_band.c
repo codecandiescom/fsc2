@@ -94,17 +94,17 @@ enum {
 };
 
 
-/*****************************************************************************/
-/*                                                                           */
-/*                  hook functions                                           */
-/*                                                                           */
-/*****************************************************************************/
+/******************************************************/
+/*                                                    */
+/*                  hook functions                    */
+/*                                                    */
+/******************************************************/
 
 
-/*----------------------------------------------------------------*/
-/* Here we check if also a driver for a field meter is loaded and */
-/* test if this driver will be loaded before the magnet driver.   */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------
+ * Here we check if also a driver for a field meter is loaded and
+ * test if this driver will be loaded before the magnet driver.
+ *----------------------------------------------------------------*/
 
 int aeg_s_band_init_hook( void )
 {
@@ -189,8 +189,8 @@ int aeg_s_band_init_hook( void )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ *---------------------------------------------------------------------*/
 
 int aeg_s_band_test_hook( void )
 {
@@ -201,9 +201,9 @@ int aeg_s_band_test_hook( void )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Opens connection to the power supply and calibrates the field sweep */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Opens connection to the power supply and calibrates the field sweep
+ *---------------------------------------------------------------------*/
 
 int aeg_s_band_exp_hook( void )
 {
@@ -236,9 +236,9 @@ int aeg_s_band_exp_hook( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Closes the connection to the power supply after an experiment */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Closes the connection to the power supply after an experiment
+ *---------------------------------------------------------------*/
 
 int aeg_s_band_end_of_exp_hook( void )
 {
@@ -260,8 +260,8 @@ int aeg_s_band_end_of_exp_hook( void )
 /******************************************************/
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 Var_T *magnet_name( UNUSED_ARG Var_T *v )
 {
@@ -269,9 +269,9 @@ Var_T *magnet_name( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function for registering the start field and the field step size. */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for registering the start field and the field step size.
+ *-------------------------------------------------------------------*/
 
 Var_T *magnet_setup( Var_T *v )
 {
@@ -321,10 +321,10 @@ Var_T *magnet_setup( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* If called the function reduces the time needed for calibrating the */
-/* magnet sweep but unfortunately also reducing the accuracy.         */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * If called the function reduces the time needed for calibrating the
+ * magnet sweep but unfortunately also reducing the accuracy.
+ *--------------------------------------------------------------------*/
 
 Var_T *magnet_fast_init( UNUSED_ARG Var_T *v )
 {
@@ -333,8 +333,8 @@ Var_T *magnet_fast_init( UNUSED_ARG Var_T *v )
 }
 
 
-/*-----------------------------------------------------*/
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ *-----------------------------------------------------*/
 
 Var_T *set_field( Var_T *v )
 {
@@ -387,9 +387,9 @@ Var_T *set_field( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/* Convenience function: just asks the used gaussmeter for the current field */
-/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * Convenience function: just asks the used gaussmeter for the current field
+ *---------------------------------------------------------------------------*/
 
 Var_T *get_field( UNUSED_ARG Var_T *v )
 {
@@ -403,8 +403,8 @@ Var_T *get_field( UNUSED_ARG Var_T *v )
 }
 
 
-/*-----------------------------------------------------*/
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ *-----------------------------------------------------*/
 
 Var_T *sweep_up( UNUSED_ARG Var_T *v )
 {
@@ -434,8 +434,8 @@ Var_T *sweep_up( UNUSED_ARG Var_T *v )
 }
 
 
-/*-----------------------------------------------------*/
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ *-----------------------------------------------------*/
 
 Var_T *sweep_down( UNUSED_ARG Var_T *v )
 {
@@ -465,8 +465,8 @@ Var_T *sweep_down( UNUSED_ARG Var_T *v )
 }
 
 
-/*-----------------------------------------------------*/
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ *-----------------------------------------------------*/
 
 Var_T *reset_field( UNUSED_ARG Var_T *v )
 {
@@ -487,11 +487,11 @@ Var_T *reset_field( UNUSED_ARG Var_T *v )
 }
 
 
-/*****************************************************************************/
-/*                                                                           */
-/*            internally used functions                                      */
-/*                                                                           */
-/*****************************************************************************/
+/*************************************************************/
+/*                                                           */
+/*            internally used functions                      */
+/*                                                           */
+/*************************************************************/
 
 
 static double aeg_s_band_field_check( double field, bool *err_flag )
@@ -622,15 +622,15 @@ static double aeg_s_band_field_check( double field, bool *err_flag )
 
 
 /*--------------------------------------------------------------------------*/
-/* magnet_init() first initializes the serial interface and then tries to   */
-/* figure out what's the current minimal step size is for the magnet - this */
-/* is necessary for every new sweep since the user can adjust the step size */
-/* by setting the sweep rate on the magnets front panel (s/he also might    */
-/* change the time steps but lets hope s/he doesn't since there's no way to */
-/* find out about it...). We also have to make sure that the setting at the */
-/* front panel is the maximum setting of 6666 Oe/min. Finally we try to go  */
-/* to the start field.                                                      */
-/*--------------------------------------------------------------------------*/
+ * magnet_init() first initializes the serial interface and then tries to
+ * figure out what's the current minimal step size is for the magnet - this
+ * is necessary for every new sweep since the user can adjust the step size
+ * by setting the sweep rate on the magnets front panel (s/he also might
+ * change the time steps but lets hope s/he doesn't since there's no way to
+ * find out about it...). We also have to make sure that the setting at the
+ * front panel is the maximum setting of 6666 Oe/min. Finally we try to go
+ * to the start field.
+ *--------------------------------------------------------------------------*/
 
 static bool magnet_init( void )
 {
@@ -736,17 +736,17 @@ try_again:
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* On the one hand this function is a wrapper to hide the recursiveness of */
-/* magnet_goto_field_rec(), on the other hand there's something more: The  */
-/* function stores the size of the last field step as well as the number   */
-/* mini_steps that were needed to achieve the field step. When the next    */
-/* field step has the same size (within the error specified by the user)   */
-/* this number of mini_steps is used instead of the one that would result  */
-/* when using the factor determined in the initialization. This way the    */
-/* errors for large field steps (where the factor doesn't work well) can   */
-/* be compensated and the sweep can be done faster.                        */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * On the one hand this function is a wrapper to hide the recursiveness of
+ * magnet_goto_field_rec(), on the other hand there's something more: The
+ * function stores the size of the last field step as well as the number
+ * mini_steps that were needed to achieve the field step. When the next
+ * field step has the same size (within the error specified by the user)
+ * this number of mini_steps is used instead of the one that would result
+ * when using the factor determined in the initialization. This way the
+ * errors for large field steps (where the factor doesn't work well) can
+ * be compensated and the sweep can be done faster.
+ *-------------------------------------------------------------------------*/
 
 bool magnet_goto_field( double field, double error )
 {
@@ -777,8 +777,8 @@ bool magnet_goto_field( double field, double error )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
 
 static bool magnet_goto_field_rec( double field, double error, int rec,
 								   double *hint )
@@ -888,8 +888,8 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
 
 static void magnet_sweep( int dir )
 {
@@ -973,12 +973,12 @@ static void magnet_sweep( int dir )
 
 
 
-/*---------------------------------------------------------------------------*/
-/* This is the most basic routine for controlling the field - there are four */
-/* basic commands, i.e. initializing the serial interface, setting a sweep   */
-/* voltage, triggering a field sweep and finally resetting the serial inter- */
-/* face.                                                                     */
-/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * This is the most basic routine for controlling the field - there are four
+ * basic commands, i.e. initializing the serial interface, setting a sweep
+ * voltage, triggering a field sweep and finally resetting the serial inter-
+ * face.
+ *---------------------------------------------------------------------------*/
 
 static bool magnet_do( int command )
 {

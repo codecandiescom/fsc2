@@ -36,13 +36,13 @@ static int dg2020_twt_pulse_compare( const void *A, const void *B );
 static void dg2020_defense_shape_check( Function_T *shape );
 
 
-/*-------------------------------------------------------------------------*/
-/* Function is called in the experiment after pulses have been changed to  */
-/* update the pulser accordingly. Before pulses are set the new values are */
-/* checked. If the check fails in the test run the program aborts while in */
-/* the real experiment an error message is printed and the pulses are      */
-/* reset to their original positions.                                      */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function is called in the experiment after pulses have been changed to
+ * update the pulser accordingly. Before pulses are set the new values are
+ * checked. If the check fails in the test run the program aborts while in
+ * the real experiment an error message is printed and the pulses are
+ * reset to their original positions.
+ *-------------------------------------------------------------------------*/
 
 bool dg2020_do_update( void )
 {
@@ -74,9 +74,9 @@ bool dg2020_do_update( void )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function sorts the pulses and checks that the pulses don't overlap. */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function sorts the pulses and checks that the pulses don't overlap.
+ *---------------------------------------------------------------------*/
 
 bool dg2020_reorganize_pulses( bool flag )
 {
@@ -203,11 +203,11 @@ bool dg2020_reorganize_pulses( bool flag )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function is called after pulses have been changed to check if the new   */
-/* settings are still ok, i.e. that they still fit into the pulsers memory */
-/* and don't overlap.                                                      */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function is called after pulses have been changed to check if the new
+ * settings are still ok, i.e. that they still fit into the pulsers memory
+ * and don't overlap.
+ *-------------------------------------------------------------------------*/
 
 void dg2020_do_checks( Function_T *f )
 {
@@ -326,8 +326,8 @@ void dg2020_do_checks( Function_T *f )
 }
 
 
-/*------------------------------------------------*/
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ *------------------------------------------------*/
 
 static void dg2020_shape_padding_check_1( Function_T *f )
 {
@@ -439,8 +439,8 @@ static void dg2020_shape_padding_check_1( Function_T *f )
 }
 
 
-/*------------------------------------------------*/
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ *------------------------------------------------*/
 
 static void dg2020_shape_padding_check_2( void )
 {
@@ -488,18 +488,18 @@ static void dg2020_shape_padding_check_2( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Does all kinds of checks for TWT pulses. For TWT pulses created directly */
-/* by the user we only check if the distance between them is large enough   */
-/* (as requested by MINIMUM_TWT_PULSE_DISTANCE in the configuration file    */
-/* for the pulser). For automatically created TWT pulses we lengthen the    */
-/* pulses in this case and also check that they don't have to start too     */
-/* early (which might happen of the pulse the TWT pulse was created for     */
-/* starts very early and the left padding thus can't be set), that they     */
-/* don't overlap (pulses may get shortened or even disappear in this case)  */
-/* and that the last TWT pulse isn't too long (i.e. that it would last      */
-/* longer than the repetition time or the maximum pulse sequence duration). */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Does all kinds of checks for TWT pulses. For TWT pulses created directly
+ * by the user we only check if the distance between them is large enough
+ * (as requested by MINIMUM_TWT_PULSE_DISTANCE in the configuration file
+ * for the pulser). For automatically created TWT pulses we lengthen the
+ * pulses in this case and also check that they don't have to start too
+ * early (which might happen of the pulse the TWT pulse was created for
+ * starts very early and the left padding thus can't be set), that they
+ * don't overlap (pulses may get shortened or even disappear in this case)
+ * and that the last TWT pulse isn't too long (i.e. that it would last
+ * longer than the repetition time or the maximum pulse sequence duration).
+ *--------------------------------------------------------------------------*/
 
 static void dg2020_twt_padding_check( Function_T *f )
 {
@@ -724,12 +724,12 @@ static void dg2020_twt_padding_check( Function_T *f )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Comparison function for two pulses: returns 0 if both pulses are */
-/* inactive, -1 if only the second pulse is inactive or starts at a */
-/* later time and 1 if only the first pulse is an inactive pulse or */
-/* the second pulse starts earlier than the first.                  */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Comparison function for two pulses: returns 0 if both pulses are
+ * inactive, -1 if only the second pulse is inactive or starts at a
+ * later time and 1 if only the first pulse is an inactive pulse or
+ * the second pulse starts earlier than the first.
+ *------------------------------------------------------------------*/
 
 static int dg2020_twt_pulse_compare( const void *A, const void *B )
 {
@@ -743,17 +743,17 @@ static int dg2020_twt_pulse_compare( const void *A, const void *B )
 }
 
 /*-------------------------------------------------------------------------*/
-/* Function checks if the distances between pulse shape pulses and defense */
-/* pulses are large enough. The minimum lengths the shape_2_defense and    */
-/* defense_2_shape members of the dg2020 structure. Both are set to        */
-/* rather large values at first but can be customized by calling the EDL   */
-/* functions pulser_shape_to_defense_minimum_distance() and                */
-/* pulser_defense_to_shape_minimum_distance() (names are intentionally     */
-/* that long).                                                             */
-/* The function is called only if pulse shape and defense pulses are used  */
-/* and either also TWT or TWT_GATE pulses or at least one of both the      */
-/* mentioned EDL functions have been called.                               */
-/*-------------------------------------------------------------------------*/
+ * Function checks if the distances between pulse shape pulses and defense
+ * pulses are large enough. The minimum lengths the shape_2_defense and
+ * defense_2_shape members of the dg2020 structure. Both are set to
+ * rather large values at first but can be customized by calling the EDL
+ * functions pulser_shape_to_defense_minimum_distance() and
+ * pulser_defense_to_shape_minimum_distance() (names are intentionally
+ * that long).
+ * The function is called only if pulse shape and defense pulses are used
+ * and either also TWT or TWT_GATE pulses or at least one of both the
+ * mentioned EDL functions have been called.
+ *-------------------------------------------------------------------------*/
 
 static void dg2020_defense_shape_check( Function_T *shape )
 {
@@ -843,10 +843,10 @@ static void dg2020_defense_shape_check( Function_T *shape )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Function creates all active pulses in the channels of the */
-/* pulser assigned to the function passed as argument.       */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function creates all active pulses in the channels of the
+ * pulser assigned to the function passed as argument.
+ *-----------------------------------------------------------*/
 
 void dg2020_set_pulses( Function_T *f )
 {
@@ -920,10 +920,10 @@ void dg2020_set_pulses( Function_T *f )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function is called after the test run to reset all the variables */
-/* describing the state of the pulser to their initial values.      */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function is called after the test run to reset all the variables
+ * describing the state of the pulser to their initial values.
+ *------------------------------------------------------------------*/
 
 void dg2020_full_reset( void )
 {
@@ -972,10 +972,10 @@ void dg2020_full_reset( void )
 }
 
 
-/*------------------------------------------------*/
-/* Function deletes a pulse and returns a pointer */
-/* to the next pulse in the pulse list.           */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * Function deletes a pulse and returns a pointer
+ * to the next pulse in the pulse list.
+ *------------------------------------------------*/
 
 Pulse_T *dg2020_delete_pulse( Pulse_T *p, bool warn )
 {
@@ -1067,12 +1067,12 @@ Pulse_T *dg2020_delete_pulse( Pulse_T *p, bool warn )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Changes the pulse pattern in the channels belonging to function 'f' */
-/* so that the data in the pulser get in sync with the its internal    */
-/* representation. Some care has taken to minimize the number of       */
-/* commands and their length.                                          */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Changes the pulse pattern in the channels belonging to function 'f'
+ * so that the data in the pulser get in sync with the its internal
+ * representation. Some care has taken to minimize the number of
+ * commands and their length.
+ *---------------------------------------------------------------------*/
 
 void dg2020_commit( Function_T *f, bool flag )
 {

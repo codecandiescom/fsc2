@@ -25,10 +25,10 @@
 #include "dg2020_f.h"
 
 
-/*-----------------------------------------------------------------*/
-/* Converts a time into the internal type of a time specification, */
-/* i.e. a integer multiple of the time base                        */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Converts a time into the internal type of a time specification,
+ * i.e. a integer multiple of the time base
+ *-----------------------------------------------------------------*/
 
 Ticks dg2020_double2ticks( double p_time )
 {
@@ -66,9 +66,9 @@ Ticks dg2020_double2ticks( double p_time )
 }
 
 
-/*-----------------------------------------------------*/
-/* Does the exact opposite of the previous function... */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Does the exact opposite of the previous function...
+ *-----------------------------------------------------*/
 
 double dg2020_ticks2double( Ticks ticks )
 {
@@ -77,10 +77,10 @@ double dg2020_ticks2double( Ticks ticks )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Checks if the difference of the levels specified for a pod connector */
-/* are within the valid limits.                                         */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Checks if the difference of the levels specified for a pod connector
+ * are within the valid limits.
+ *----------------------------------------------------------------------*/
 
 void dg2020_check_pod_level_diff( double high, double low )
 {
@@ -108,8 +108,8 @@ void dg2020_check_pod_level_diff( double high, double low )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Pulse_T *dg2020_get_pulse( long pnum )
 {
@@ -139,8 +139,8 @@ Pulse_T *dg2020_get_pulse( long pnum )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 const char *dg2020_ptime( double p_time )
 {
@@ -159,8 +159,8 @@ const char *dg2020_ptime( double p_time )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 const char *dg2020_pticks( Ticks ticks )
 {
@@ -168,13 +168,13 @@ const char *dg2020_pticks( Ticks ticks )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Functions returns a pointer to a free channel - the channels with the   */
-/* lowest numbers are used first since most users probably tend to use the */
-/* high number channels for storing test pulse sequences that they don't   */
-/* like too much being overwritten just because they didn't set a channel- */
-/* to-function-assignment in their EDL program.                            */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Functions returns a pointer to a free channel - the channels with the
+ * lowest numbers are used first since most users probably tend to use the
+ * high number channels for storing test pulse sequences that they don't
+ * like too much being overwritten just because they didn't set a channel-
+ * to-function-assignment in their EDL program.
+ *-------------------------------------------------------------------------*/
 
 Channel_T *dg2020_get_next_free_channel( void )
 {
@@ -190,11 +190,11 @@ Channel_T *dg2020_get_next_free_channel( void )
 }
 
 
-/*---------------------------------------------------------------------------
-  Comparison function for two pulses: returns 0 if both pulses are inactive,
-  -1 if only the second pulse is inactive or starts at a late time and 1 if
-  only the first pulse is inactive pulse or the second pulse starts earlier.
----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * Comparison function for two pulses: returns 0 if both pulses are inactive,
+ * -1 if only the second pulse is inactive or starts at a late time and 1 if
+ * only the first pulse is inactive pulse or the second pulse starts earlier.
+ *---------------------------------------------------------------------------*/
 
 int dg2020_start_compare( const void *A, const void *B )
 {
@@ -216,12 +216,12 @@ int dg2020_start_compare( const void *A, const void *B )
 }
 
 
-/*---------------------------------------------------------------------------
-  Functions searches for the phase pulses associated with the pulse passed as
-  the first argument and belonging to the channels passed as the second and
-  third argument. If pulses are found they are returned in the last to
-  arguments. If at least one was found a postive result is returned.
----------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Functions searches for the phase pulses associated with the pulse passed
+ * as the first argument and belonging to the channels passed as the second
+ * and third argument. If pulses are found they are returned in the last to
+ * arguments. If at least one was found a postive result is returned.
+ *--------------------------------------------------------------------------*/
 
 bool dg2020_find_phase_pulse( Pulse_T *p, Pulse_T ***pl, int *num )
 {
@@ -248,10 +248,10 @@ bool dg2020_find_phase_pulse( Pulse_T *p, Pulse_T ***pl, int *num )
 }
 
 
-/*---------------------------------------------------------------------------
-  This function finds all the pulses of a phase function that belong to the
-  same channel and returns them as a sorted list.
----------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * This function finds all the pulses of a phase function that belong to
+ * the same channel and returns them as a sorted list.
+ *-----------------------------------------------------------------------*/
 
 int dg2020_get_phase_pulse_list( Function_T *f, Channel_T *channel,
 								 Pulse_T ***list )
@@ -276,8 +276,8 @@ int dg2020_get_phase_pulse_list( Function_T *f, Channel_T *channel,
 }
 
 
-/*---------------------------------------------------------------------------
----------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ *-------------------------------------------------------------------------*/
 
 Ticks dg2020_get_max_seq_len( void )
 {
@@ -307,12 +307,12 @@ Ticks dg2020_get_max_seq_len( void )
 }
 
 
-/*---------------------------------------------------------------------------
-  Function calculates the amount of memory needed for padding to achieve the
-  requested repetition time. It then sets up the blocks if they are needed.
-  The additional bit in the memory size is needed because, due to a bug
-  in the pulsers firmware, the first bit can't be used
----------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function calculates the amount of memory needed for padding to achieve
+ * the requested repetition time. It then sets up the blocks if they are
+ * needed. The additional bit in the memory size is needed because, due to
+ * a bug in the pulsers firmware, the first bit can't be used.
+ *-------------------------------------------------------------------------*/
 
 void dg2020_calc_padding( void )
 {
@@ -417,22 +417,22 @@ void dg2020_calc_padding( void )
 }
 
 
-/*----------------------------------------------------------*/
-/* dg2020_prep_cmd() does some preparations in assembling   */
-/* a command string for setting a pulse pattern. It first   */
-/* checks the supplied parameters, allocates memory for the */
-/* command string and finally assembles the start of the    */
-/* command string. If the function returns succesfully one  */
-/* should not forget to free the memory allocated for the   */
-/* command string later on!                                 */
-/* ->                                                       */
-/*  * pointer to pointer to the command string              */
-/*  * number of the pulser channel                          */
-/*  * address of the start of the pulse pattern to be set   */
-/*  * length of the pulse pattern to be set                 */
-/* <-                                                       */
-/*  * 1: ok, 0: error                                       */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * dg2020_prep_cmd() does some preparations in assembling
+ * a command string for setting a pulse pattern. It first
+ * checks the supplied parameters, allocates memory for the
+ * command string and finally assembles the start of the
+ * command string. If the function returns succesfully one
+ * should not forget to free the memory allocated for the
+ * command string later on!
+ * ->
+ *  * pointer to pointer to the command string
+ *  * number of the pulser channel
+ *  * address of the start of the pulse pattern to be set
+ *  * length of the pulse pattern to be set
+ * <-
+ *  * 1: ok, 0: error
+ *----------------------------------------------------------*/
 
 bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length )
 {
@@ -461,8 +461,8 @@ bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 void dg2020_set( char *arena, Ticks start, Ticks len, Ticks offset )
 {
@@ -472,8 +472,8 @@ void dg2020_set( char *arena, Ticks start, Ticks len, Ticks offset )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
 {
@@ -537,8 +537,8 @@ int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 void dg2020_dump_channels( FILE *fp )
 {
@@ -615,8 +615,8 @@ void dg2020_dump_channels( FILE *fp )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 long dg2020_ch_to_num( long channel )
 {

@@ -38,11 +38,11 @@ static void ep385_pulse_init_check( Function_T *f );
 static void ep385_defense_shape_init_check( Function_T *shape );
 
 
-/*-----------------------------------------------------------------*/
-/* Function does everything that needs to be done for checking and */
-/* completing the internal representation of the pulser at the     */
-/* start of a test run.                                            */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function does everything that needs to be done for checking and
+ * completing the internal representation of the pulser at the
+ * start of a test run.
+ *-----------------------------------------------------------------*/
 
 void ep385_init_setup( void )
 {
@@ -115,8 +115,8 @@ void ep385_init_setup( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
 
 static void ep385_init_print( FILE *fp )
 {
@@ -143,10 +143,10 @@ static void ep385_init_print( FILE *fp )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Function checks for all pulses that they have an initialized function,   */
-/* sets the channel(s) for the pulses and checks all other pulse parameters */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Function checks for all pulses that they have an initialized function,
+ * sets the channel(s) for the pulses and checks all other pulse parameters
+ *--------------------------------------------------------------------------*/
 
 static void ep385_basic_pulse_check( void )
 {
@@ -188,16 +188,16 @@ static void ep385_basic_pulse_check( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* The function automatically adds shape pulses for all pulses of functions */
-/* that have been marked by a call of pulser_automatic_shape_pulses() for   */
-/* the automatic creation of shape pulses. Each pulse for which a shape     */
-/* pulse is created is linked with its shape pulse (and also the other way  */
-/* round) by a pointer, 'sp', in the pulse structure. When done with        */
-/* creating shape pulses we still have to check that these automatically    */
-/* created pulses don't overlap with manually set shape pulses or with each */
-/* other, which would beat the purpose of shape pulses.                     */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * The function automatically adds shape pulses for all pulses of functions
+ * that have been marked by a call of pulser_automatic_shape_pulses() for
+ * the automatic creation of shape pulses. Each pulse for which a shape
+ * pulse is created is linked with its shape pulse (and also the other way
+ * round) by a pointer, 'sp', in the pulse structure. When done with
+ * creating shape pulses we still have to check that these automatically
+ * created pulses don't overlap with manually set shape pulses or with each
+ * other, which would beat the purpose of shape pulses.
+ *--------------------------------------------------------------------------*/
 
 static void ep385_create_shape_pulses( void )
 {
@@ -355,13 +355,13 @@ static void ep385_create_shape_pulses( void )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* The function automatically adds TWT pulses for all pulses of functions */
-/* that have been marked by a call of pulser_automatic_twt_pulses() for   */
-/* the automatic creation of TWT pulses. In contrast to automatic shape   */
-/* pulses the automatic created TWT pulses may overlap, these overlaps    */
-/* will be taken care of later.                                           */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * The function automatically adds TWT pulses for all pulses of functions
+ * that have been marked by a call of pulser_automatic_twt_pulses() for
+ * the automatic creation of TWT pulses. In contrast to automatic shape
+ * pulses the automatic created TWT pulses may overlap, these overlaps
+ * will be taken care of later.
+ *------------------------------------------------------------------------*/
 
 static void ep385_create_twt_pulses( void )
 {
@@ -456,8 +456,8 @@ static void ep385_create_twt_pulses( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
 
 static void ep385_basic_functions_check( void )
 {
@@ -545,14 +545,14 @@ static void ep385_basic_functions_check( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function creates a matrix of pulse lists for each phase (columns) and */
-/* each channel (rows) of the function (in case of functions not set up  */
-/* for phase cycling this will be just a 1x1 matrix). The pulse lists    */
-/* are unsorted, i.e. when using the pulse lists we still have to sort   */
-/* them according to there start times and check if they are switched on */
-/* and don't overlap.                                                    */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function creates a matrix of pulse lists for each phase (columns) and
+ * each channel (rows) of the function (in case of functions not set up
+ * for phase cycling this will be just a 1x1 matrix). The pulse lists
+ * are unsorted, i.e. when using the pulse lists we still have to sort
+ * them according to there start times and check if they are switched on
+ * and don't overlap.
+ *-----------------------------------------------------------------------*/
 
 static void ep385_create_phase_matrix( Function_T *f )
 {
@@ -686,8 +686,8 @@ static void ep385_create_phase_matrix( Function_T *f )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
 
 static void ep385_setup_channels( void )
 {
@@ -750,8 +750,8 @@ static void ep385_setup_channels( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
 
 static void ep385_pulse_start_setup( void )
 {
@@ -927,8 +927,8 @@ static void ep385_pulse_start_setup( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
 
 static void ep385_channel_start_check( Channel_T *ch )
 {
@@ -952,8 +952,8 @@ static void ep385_channel_start_check( Channel_T *ch )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
 
 static void ep385_pulse_init_check( Function_T *f )
 {
@@ -1014,18 +1014,18 @@ static void ep385_pulse_init_check( Function_T *f )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Function checks if the distance between pulse shape pulses and defense */
-/* pulses is large enough. The minimum lengths the shape_2_defense and    */
-/* defense_2_shape members of the ep385 structure. Both are set to rather */
-/* large values at first but can be customized by calling the EDL         */
-/* functions pulser_shape_to_defense_minimum_distance() and               */
-/* pulser_defense_to_shape_minimum_distance() (names are intentionally    */
-/* that long).                                                            */
-/* The function is called only if pulse shape and defense pulses are used */
-/* and either also TWT or TWT_GATE pulses or at least one of both the     */
-/* mentioned EDL functions have been called.                              */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function checks if the distance between pulse shape pulses and defense
+ * pulses is large enough. The minimum lengths the shape_2_defense and
+ * defense_2_shape members of the ep385 structure. Both are set to rather
+ * large values at first but can be customized by calling the EDL
+ * functions pulser_shape_to_defense_minimum_distance() and
+ * pulser_defense_to_shape_minimum_distance() (names are intentionally
+ * that long).
+ * The function is called only if pulse shape and defense pulses are used
+ * and either also TWT or TWT_GATE pulses or at least one of both the
+ * mentioned EDL functions have been called.
+ *------------------------------------------------------------------------*/
 
 static void ep385_defense_shape_init_check( Function_T *shape )
 {

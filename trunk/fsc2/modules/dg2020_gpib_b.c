@@ -168,13 +168,13 @@ static void dg2020_gpib_failure( void );
 
 
 
-/*------------------------------------------------------*/
-/* dg2020_init() initializes the Sony/Tektronix DG2020. */
-/* ->                                                   */
-/*  * symbolic name of the device (cf gpib.conf)        */
-/* <-                                                   */
-/*  * 1: ok, 0: error                                   */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * dg2020_init() initializes the Sony/Tektronix DG2020.
+ * ->
+ *  * symbolic name of the device (cf gpib.conf)
+ * <-
+ *  * 1: ok, 0: error
+ *------------------------------------------------------*/
 
 bool dg2020_init( const char *name )
 {
@@ -303,15 +303,15 @@ bool dg2020_init( const char *name )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* dg2020_run() sets the run mode of the the pulser - either running  */
-/* or stopped - after waiting for previous commands to finish (that's */
-/* what the "*WAI;" bit in the command is about)                      */
-/* ->                                                                 */
-/*  * state to be set: 1 = START, 0 = STOP                            */
-/* <-                                                                 */
-/*  * 1: ok, 0: error                                                 */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * dg2020_run() sets the run mode of the the pulser - either running
+ * or stopped - after waiting for previous commands to finish (that's
+ * what the "*WAI;" bit in the command is about)
+ * ->
+ *  * state to be set: 1 = START, 0 = STOP
+ * <-
+ *  * 1: ok, 0: error
+ *--------------------------------------------------------------------*/
 
 bool dg2020_run( bool flag )
 {
@@ -321,15 +321,15 @@ bool dg2020_run( bool flag )
 }
 
 
-/*---------------------------------------------------------------*/
-/* dg2020_set_timebase() sets the internal clock oscillator of   */
-/* othe pulser to the period specified in the pulsers structure. */
-/*  There might be minor deviations (in the order of a promille) */
-/* between the specified period and the actual period.           */
-/* <-                                                            */
-/*  * 1: time base (in seconds) to be set                        */
-/*  * 2: 1: ok, 0: error                                         */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * dg2020_set_timebase() sets the internal clock oscillator of
+ * othe pulser to the period specified in the pulsers structure.
+ *  There might be minor deviations (in the order of a promille)
+ * between the specified period and the actual period.
+ * <-
+ *  * 1: time base (in seconds) to be set
+ *  * 2: 1: ok, 0: error
+ *---------------------------------------------------------------*/
 
 static bool dg2020_set_timebase( double timebase )
 {
@@ -348,15 +348,15 @@ static bool dg2020_set_timebase( double timebase )
 }
 
 
-/*------------------------------------------------------------*/
-/* dg2020_set_memory_size() sets the length (in clock cycles) */
-/* of the complete pulse pattern.                             */
-/* ->                                                         */
-/*  * device number                                           */
-/*  * length of the pulse pattern (between 64 and 64K)        */
-/* <-                                                         */
-/*  * 1: ok, 0: error                                         */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * dg2020_set_memory_size() sets the length (in clock cycles)
+ * of the complete pulse pattern.
+ * ->
+ *  * device number
+ *  * length of the pulse pattern (between 64 and 64K)
+ * <-
+ *  * 1: ok, 0: error
+ *------------------------------------------------------------*/
 
 static bool dg2020_set_memory_size( long mem_size )
 {
@@ -372,15 +372,15 @@ static bool dg2020_set_memory_size( long mem_size )
 }
 
 
-/*-----------------------------------------------------*/
-/* dg2020_channel_assign() assigns one of the channels */
-/* of the pulser to one of the outputs of pod A.       */
-/* ->                                                  */
-/*  * channel number                                   */
-/*  * pod output number                                */
-/* <-                                                  */
-/*  * 1: ok, 0: error                                  */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * dg2020_channel_assign() assigns one of the channels
+ * of the pulser to one of the outputs of pod A.
+ * ->
+ *  * channel number
+ *  * pod output number
+ * <-
+ *  * 1: ok, 0: error
+ *-----------------------------------------------------*/
 
 bool dg2020_channel_assign( int channel, int pod )
 {
@@ -397,14 +397,14 @@ bool dg2020_channel_assign( int channel, int pod )
 }
 
 
-/*--------------------------------------------------------------*/
-/* dg2020_update_data() tells the pulser to update all channels */
-/* according to the data it got send before - this is necessary */
-/* because the pulser is used in manual update mode which this  */
-/* is faster than automatic update.                             */
-/* <-                                                           */
-/*  * 1: ok, 0: error                                           */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * dg2020_update_data() tells the pulser to update all channels
+ * according to the data it got send before - this is necessary
+ * because the pulser is used in manual update mode which this
+ * is faster than automatic update.
+ * <-
+ *  * 1: ok, 0: error
+ *--------------------------------------------------------------*/
 
 bool dg2020_update_data( void )
 {
@@ -438,14 +438,14 @@ bool dg2020_update_data( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* dg2020_make_block() creates a complete new set of 'num_blocks' blocks */
-/* (i.e. old blocks will be deleted) according to the names and start    */
-/* positions given in the array of block descriptors 'block'.            */
-/* No error checking is implemented yet !                                */
-/* <-                                                                    */
-/*  * 1: ok, 0: error                                                    */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * dg2020_make_block() creates a complete new set of 'num_blocks' blocks
+ * (i.e. old blocks will be deleted) according to the names and start
+ * positions given in the array of block descriptors 'block'.
+ * No error checking is implemented yet !
+ * <-
+ *  * 1: ok, 0: error
+ *-----------------------------------------------------------------------*/
 
 bool dg2020_make_blocks( int num_blocks, Block_T *block )
 {
@@ -477,17 +477,17 @@ bool dg2020_make_blocks( int num_blocks, Block_T *block )
 }
 
 
-/*----------------------------------------------------------------*/
-/* dg2020_make_seq() creates a completely new sequence (i.e. old  */
-/* sequences will be lost) consisting of 'num_blocks' blocks with */
-/* names and block repeat counts defined by the array of Block_T  */
-/* structures 'block'                                             */
-/* ->                                                             */
-/*  * number of blocks in sequence                                */
-/*  * array of block structures                                   */
-/* <-                                                             */
-/*  * 1: ok, 0: error                                             */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * dg2020_make_seq() creates a completely new sequence (i.e. old
+ * sequences will be lost) consisting of 'num_blocks' blocks with
+ * names and block repeat counts defined by the array of Block_T
+ * structures 'block'
+ * ->
+ *  * number of blocks in sequence
+ *  * array of block structures
+ * <-
+ *  * 1: ok, 0: error
+ *----------------------------------------------------------------*/
 
 bool dg2020_make_seq( int num_blocks, Block_T *block )
 {
@@ -523,18 +523,18 @@ bool dg2020_make_seq( int num_blocks, Block_T *block )
 }
 
 
-/*-----------------------------------------------------*/
-/* dg2020_set_constant() sets a certain number of bits */
-/* in one of the channels either to high or low.       */
-/* ->                                                  */
-/*  * channel number                                   */
-/*  * start address (-1 to 0xFFFE)                     */
-/*  * length of pattern (1 to 0xFFFF)                  */
-/*    (address + length must be less or equal 0xFFFF)  */
-/*  * either 1 or 0 to set the bits to high or low     */
-/* <-                                                  */
-/*  * 1: ok, 0: error                                  */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * dg2020_set_constant() sets a certain number of bits
+ * in one of the channels either to high or low.
+ * ->
+ *  * channel number
+ *  * start address (-1 to 0xFFFE)
+ *  * length of pattern (1 to 0xFFFF)
+ *    (address + length must be less or equal 0xFFFF)
+ *  * either 1 or 0 to set the bits to high or low
+ * <-
+ *  * 1: ok, 0: error
+ *-----------------------------------------------------*/
 
 bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 {
@@ -590,8 +590,8 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static bool dg2020_set_pod_high_level( int pod, double voltage )
 {
@@ -607,8 +607,8 @@ static bool dg2020_set_pod_high_level( int pod, double voltage )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static bool dg2020_set_pod_low_level( int pod, double voltage )
 {
@@ -624,8 +624,8 @@ static bool dg2020_set_pod_low_level( int pod, double voltage )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static bool dg2020_set_trigger_in_level( double voltage )
 {
@@ -641,8 +641,8 @@ static bool dg2020_set_trigger_in_level( double voltage )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static bool dg2020_set_trigger_in_slope( int slope )
 {
@@ -656,8 +656,8 @@ static bool dg2020_set_trigger_in_slope( int slope )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static bool dg2020_set_trigger_in_impedance( int state )
 {
@@ -671,8 +671,8 @@ static bool dg2020_set_trigger_in_impedance( int state )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static void dg2020_gpib_failure( void )
 {
@@ -681,8 +681,8 @@ static void dg2020_gpib_failure( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 bool dg2020_lock_state( bool lock )
 {
@@ -695,8 +695,8 @@ bool dg2020_lock_state( bool lock )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 bool dg2020_command( const char *cmd )
 {

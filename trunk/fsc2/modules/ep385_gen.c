@@ -28,11 +28,11 @@
 static int Cur_PHS = -1;                 /* used for internal sanity checks */
 
 
-/*------------------------------------------------------------------*/
-/* Function is called via the TIMEBASE command to set the timebase  */
-/* used with the pulser - got to be called first because all nearly */
-/* all other functions depend on the timebase setting !             */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function is called via the TIMEBASE command to set the timebase
+ * used with the pulser - got to be called first because all nearly
+ * all other functions depend on the timebase setting !
+ *------------------------------------------------------------------*/
 
 bool ep385_store_timebase( double timebase )
 {
@@ -80,9 +80,9 @@ bool ep385_store_timebase( double timebase )
 }
 
 
-/*------------------------------------------------*/
-/* Function for assigning a channel to a function */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * Function for assigning a channel to a function
+ *------------------------------------------------*/
 
 bool ep385_assign_channel_to_function( int function, long channel )
 {
@@ -146,10 +146,10 @@ bool ep385_assign_channel_to_function( int function, long channel )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function for setting a delay for a function - negative delays */
-/* are only possible for INTERNAL trigger mode!                  */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for setting a delay for a function - negative delays
+ * are only possible for INTERNAL trigger mode!
+ *---------------------------------------------------------------*/
 
 bool ep385_set_function_delay( int function, double delay )
 {
@@ -198,9 +198,9 @@ bool ep385_set_function_delay( int function, double delay )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function for setting the trigger mode, either INTERNAL or EXTERNAL */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for setting the trigger mode, either INTERNAL or EXTERNAL
+ *--------------------------------------------------------------------*/
 
 bool ep385_set_trigger_mode( int mode )
 {
@@ -227,9 +227,9 @@ bool ep385_set_trigger_mode( int mode )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function for setting the repetition time for the pulse sequences */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for setting the repetition time for the pulse sequences
+ *------------------------------------------------------------------*/
 
 bool ep385_set_repeat_time( double rep_time )
 {
@@ -325,9 +325,9 @@ bool ep385_set_repeat_time( double rep_time )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Fucntion associates a phase sequence with one of the functions */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Fucntion associates a phase sequence with one of the functions
+ *----------------------------------------------------------------*/
 
 bool ep385_set_phase_reference( int phs, int function )
 {
@@ -385,10 +385,10 @@ bool ep385_set_phase_reference( int phs, int function )
 }
 
 
-/*-------------------------------------------------------------*/
-/* This funcion gets called for setting a phase type - channel */
-/* association in a PHASE_SETUP commmand.                      */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * This funcion gets called for setting a phase type - channel
+ * association in a PHASE_SETUP commmand.
+ *-------------------------------------------------------------*/
 
 bool ep385_phase_setup_prep( int phs, int type, UNUSED_ARG int dummy,
 							 long channel )
@@ -433,10 +433,10 @@ bool ep385_phase_setup_prep( int phs, int type, UNUSED_ARG int dummy,
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function does a primary sanity check after a PHASE_SETUP command */
-/* has been parsed.                                                 */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function does a primary sanity check after a PHASE_SETUP command
+ * has been parsed.
+ *------------------------------------------------------------------*/
 
 bool ep385_phase_setup( int phs )
 {
@@ -506,10 +506,10 @@ bool ep385_phase_setup( int phs )
 }
 
 
-/*----------------------------------------------*/
-/* Function that gets called to tell the pulser */
-/* driver to keep all pulses, even unused ones. */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Function that gets called to tell the pulser
+ * driver to keep all pulses, even unused ones.
+ *----------------------------------------------*/
 
 bool ep385_keep_all( void )
 {
