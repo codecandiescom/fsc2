@@ -72,7 +72,7 @@ int spex_cd2a_init_hook( void )
 
 	/* Read in the file where the state of the monochromator gets stored
 	   to find out about the offset between the values displayed at the
-	   CD2A and the "true" wavelengths or -numbers and, for wavnumber-
+	   CD2A and the "true" wavelengths or -numbers and, for wavenumber-
 	   driven monochromators the setting of the laser line position as
 	   used in the previous invocation of the program. (The file has also
 	   to be read each time at the start of an experiment since it's
@@ -291,7 +291,7 @@ int spex_cd2a_exp_hook( void )
 	spex_cd2a = spex_cd2a_stored;
 
 	/* Read in the file where the state of the monochromator gets stored,
-	   it might have been canged during a previous experiment */
+	   it might have been changed during a previous experiment */
 
 	spex_cd2a_read_state( );
 
@@ -894,8 +894,8 @@ Var *monochromator_offset( Var *v )
 	if ( spex_cd2a.mode & WN_MODES && offset > SPEX_CD2A_MAX_OFFSET )
 	{
 		print( FATAL, "Offset of %.4f cm^-^ is unrealistically high. If this "
-			   "isn't an error change the \"MAX_OFFSET\" setting in the "
-			   "device configuration file and recompile.\n", new_offset );
+			   "isn't an error change the \"SPEX_CD2A_MAX_OFFSET\" setting in "
+			   "the device configuration file and recompile.\n", new_offset );
 		THROW( EXCEPTION );
 	}
 
@@ -903,8 +903,8 @@ Var *monochromator_offset( Var *v )
 		 											   > SPEX_CD2A_MAX_OFFSET )
 	{
 		print( FATAL, "Offset of %.5f nm is unrealistically high. If this "
-			   "isn't an error change the \"MAX_OFFSET\" setting in the "
-			   "device configuration file and recompile.\n",
+			   "isn't an error change the \"SPEX_CD2A_MAX_OFFSET\" setting in "
+			   "the device configuration file and recompile.\n",
 			   1.0e9 * new_offset );
 		THROW( EXCEPTION );
 	}
