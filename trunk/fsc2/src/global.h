@@ -41,7 +41,8 @@
 
 /******************************************************************/
 /* The following definitions are for internal use in the program, */
-/* so don't change them if not really necessary                   */
+/* so don't change them if its not really necessary (and I mean   */
+/* really, really necessary !)                                    */
 /******************************************************************/
 
 
@@ -57,46 +58,64 @@ typedef  unsigned char  bool;
 #define OK    ( ( bool ) 1 )
 #define SET   ( ( bool ) 1 )
 
-
+#define UNDEFINED -1
 
 /* Define error severity types */
 
 enum {
-	   FATAL = 0,
-	   SEVERE,
-	   WARN,
-	   NO_ERROR
+	FATAL = 0,
+	SEVERE,
+	WARN,
+	NO_ERROR,
+};
+
+/* definitions for slopes (e.g. trigger slopes etc.) */
+
+enum {
+	NEGATIVE = 0,
+	POSITIVE,
+};
+
+/* definition for trigger modes etc. */
+
+enum {
+	INTERNAL = 0,
+	EXTERNAL,
+};
+
+/* some definitions used in graphic */
+
+enum {
+	X = 0,
+	Y,
+	Z,
 };
 
 
 enum {
-	   X = 0,
-	   Y,
-	   Z
+	RED = 0,
+	GREEN,
+	BLUE,
 };
 
+
+/* define the different section types */
 
 enum {
-	   RED = 0,
-	   GREEN,
-	   BLUE
+	NO_SECTION = ( int ) OK + 1,
+	DEVICES_SECTION,
+	ASSIGNMENTS_SECTION,
+	VARIABLES_SECTION,
+	PHASES_SECTION,
+	PREPARATIONS_SECTION,
+	EXPERIMENT_SECTION,
 };
 
 
-/* Define the different section types */
-
-enum {
-	  NO_SECTION = ( int ) OK + 1,
-	  DEVICES_SECTION,
-	  ASSIGNMENTS_SECTION,
-	  VARIABLES_SECTION,
-	  PHASES_SECTION,
-	  PREPARATIONS_SECTION,
-	  EXPERIMENT_SECTION
-};
-
-
-/* Define the different functions pulses can have */
+/* Define the different functions pulses may have (it's not too dangerous here
+   to add further ones as long as the immediately following defined remain
+   intact)
+*/
 
 enum {
 	PULSER_CHANNEL_NO_TYPE = -1,
@@ -112,7 +131,7 @@ enum {
 	PULSER_CHANNEL_OTHER_1,
 	PULSER_CHANNEL_OTHER_2,
 	PULSER_CHANNEL_OTHER_3,
-	PULSER_CHANNEL_OTHER_4
+	PULSER_CHANNEL_OTHER_4,
 };
 
 
@@ -125,27 +144,27 @@ enum {
 /* Define access types for functions in certain sections */
 
 enum {
-	  ACCESS_EXP,
-	  ACCESS_PREP,
-	  ACCESS_ALL
+	ACCESS_EXP,
+	ACCESS_PREP,
+	ACCESS_ALL,
 };
 
 
 /* Define the types of phases used in phase cycling */
 
 enum {
-	   PHASE_PLUS_X,
-	   PHASE_MINUS_X,
-	   PHASE_PLUS_Y,
-	   PHASE_MINUS_Y
+	PHASE_PLUS_X,
+	PHASE_MINUS_X,
+	PHASE_PLUS_Y,
+	PHASE_MINUS_Y,
 };
 
 
 /* Define the acquisition types used in phase cycling */
 
 enum {
-	   ACQ_PLUS,
-	   ACQ_MINUS
+	ACQ_PLUS,
+	ACQ_MINUS,
 };
 
 
@@ -162,7 +181,7 @@ enum {
 	ARR_PTR         = ( 1 << 6 ),
 	INT_TRANS_ARR   = ( 1 << 7 ),
 	FLOAT_TRANS_ARR = ( 1 << 8 ),
-	ARR_REF         = ( 1 << 9 )
+	ARR_REF         = ( 1 << 9 ),
 };
 
 
@@ -187,6 +206,7 @@ typedef struct
 	   multiple instances of the same section */
 
 	bool sections[ EXPERIMENT_SECTION + 1 ];
+
 } Compilation;
 
 
@@ -194,17 +214,20 @@ typedef struct
 
 enum {
 	READ = 0,
-	WRITE
+	WRITE,
 };
 
 
 enum {
 	PARENT = 0,
-	CHILD  = 1
+	CHILD  = 1,
 };
 
 
-/* convinience macros for accessing the value of simple variables */
+/* convenience macros for accessing the value of simple variables
+   (but be careful with the VALUE macro: the returned value is always
+   a double !)
+*/
 
 
 #define fatal_error  THROW( EXCEPTION );
@@ -219,7 +242,7 @@ enum {
 enum {
 	LIB_OK          =  0,
 	LIB_ERR_NO_LIB  = -1,
-	LIB_ERR_NO_SYM  = -2
+	LIB_ERR_NO_SYM  = -2,
 };
 
 
