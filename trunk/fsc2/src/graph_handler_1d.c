@@ -1658,6 +1658,7 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 
 				make_label_string( lstr, rwc_coarse, ( int ) mag );
 				width = XTextWidth( G.font, lstr, strlen( lstr ) );
+
 				if ( x - width / 2 - 10 > last )
 				{
 					XDrawString( G.d, c->pm, c->font_gc, x - width / 2,
