@@ -91,13 +91,10 @@ fsc2_clean.c: fsc2_clean.l $(headers)
 	$(FLEX) -B -o$@ $<
 
 
-# Make utility for interfacing with fsc2
+# Make utilities for interfacing with fsc2
 
 fsc2_connect: fsc2_connect.o
 	$(CC) -o $@ $^
-
-fsc2_connect.o: fsc2_connect.c
-	$(CC) $(CFLAGS) -c -o $@ $<
 
 
 # Create files and links needed for for graphical interface - they need making
