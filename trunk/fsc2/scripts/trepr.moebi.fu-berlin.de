@@ -45,7 +45,7 @@ my %wp = ( '-side' => 'left',
 
 
 my $mw = MainWindow->new( );
-$mw->title( "cw_epr" );
+$mw->title( "Time resolved EPR" );
 
 
 my $f1 = $mw->Frame( );
