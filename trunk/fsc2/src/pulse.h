@@ -39,7 +39,7 @@ enum {
 };
 
 
-Pulse *fp( char *txt );
+Pulse *n2p( char *txt );
 Pulse *pulse_new( int num );
 Pulse *pulse_find( int num );
 void pulse_set( Pulse *p, int type, Var *v );

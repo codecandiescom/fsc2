@@ -53,7 +53,7 @@ Var *P_Var;
 %token EQ LT LE GT GE
 
 %token NS_TOKEN US_TOKEN MS_TOKEN S_TOKEN
-%type <vptr> expr time unit list3
+%type <vptr> expr time unit list1
 
 
 %left EQ LT LE GT GE
@@ -83,9 +83,10 @@ input:   /* empty */
 line:    P_TOK prop
        | VAR_TOKEN '=' expr        { vars_assign( $3, $1 ); }
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }
-         list3 ']'                 { vars_arr_lhs( $4 ); }
-         '=' expr                  { vars_assign( $8, $8->prev ); }
-       | FUNC_TOKEN '(' list4 ')'  { vars_pop( func_call( $1 ) ); }
+         list1 ']'                 { vars_arr_lhs( $4 ); }
+         '=' expr                  { vars_assign( $8, $8->prev );
+                                     assert( Var_Stack == NULL ); }
+       | FUNC_TOKEN '(' list2 ')'  { vars_pop( func_call( $1 ) ); }
        | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
 											 "predefined function.\n",
 											 Fname, Lc, $1->name );
@@ -136,8 +137,8 @@ expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, $1 ); }
        | VAR_TOKEN                 { $$ = vars_push_copy( $1 ); }
        | VAR_REF                   { $$ = $1; }
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }
-         list3 ']'                 { $$ = vars_arr_rhs( $4 ); }
-       | FUNC_TOKEN '(' list4 ')'  { $$ = func_call( $1 ); }
+         list1 ']'                 { $$ = vars_arr_rhs( $4 ); }
+       | FUNC_TOKEN '(' list2 ')'  { $$ = func_call( $1 ); }
        | expr EQ expr              { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
        | expr LT expr              { $$ = vars_comp( COMP_LESS, $1, $3 ); }
        | expr GT expr              { $$ = vars_comp( COMP_LESS, $3, $1 ); }
@@ -159,16 +160,16 @@ expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, $1 ); }
 /* list of indices for access of an array element */
 
 
-list3:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
+list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
 	   | expr                      { $$ = $1; }
-       | list3 ',' expr            { $$ = $3; }
+       | list1 ',' expr            { $$ = $3; }
 ;
 
 /* list of function arguments */
 
-list4:   /* empty */
+list2:   /* empty */
        | exprs
-	   | list4 ',' exprs
+	   | list2 ',' exprs
 ;
 
 exprs:   expr                      { }

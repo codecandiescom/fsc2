@@ -1,6 +1,46 @@
 #include "fsc2.h"
 
 
+
+
+
+/*----------------------------------------------*/
+/* Extracts the pulse number from a pulse name. */
+/* ->                                           */
+/*    * pulse name string                       */
+/* <-                                           */
+/*    * pulse number or -1 on error             */
+/*----------------------------------------------*/
+
+Pulse *n2p( char *txt )
+{
+	char *tp, *t;
+	int num;
+
+
+	if ( *t == '.' )
+		return Cur_Pulse;
+
+	tp = t = get_string_copy( txt );
+	while ( *t && *t != '.' )
+		t++;
+
+	if ( *t == '.' )
+	    *txt = '\0';
+
+	while( isdigit( *--t ) )
+		;
+
+	if ( isdigit( *++t ) )
+	    num = atoi( t );
+	else
+		num = -1;          /* this should never happen... */
+
+	free( tp );
+	return pulse_find( num );
+}
+
+
 /* Creates a new pulse and appends it to the pulse list. */
 
 Pulse *pulse_new( int num )

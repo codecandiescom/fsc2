@@ -28,8 +28,9 @@ Var *P_Var;
 
 
 %token SECTION_LABEL            /* new section label */
-%token <vptr>  VAR_TOKEN        /* variable */
+%token <vptr> VAR_TOKEN         /* variable */
 %token <vptr> FUNC_TOKEN        /* function */
+%token <vptr> VAR_REF
 %token <lval> INT_TOKEN
 %token <dval> FLOAT_TOKEN
 %token <sptr> STR_TOKEN
@@ -75,6 +76,7 @@ expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, $1 ); }
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }
          list3 ']'                 { $$ = vars_arr_rhs( $4 ); }
        | FUNC_TOKEN '(' list4 ')'  { $$ = func_call( $1 ); }
+       | VAR_REF                   { $$ = $1; }
        | VAR_TOKEN '('             { eprint( FATAL, "%s:%ld: `%s' isn't a "
 											 "function.\n", Fname, Lc,
 											 $1->name );

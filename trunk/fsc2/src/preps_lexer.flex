@@ -2,6 +2,9 @@
   $Id$
 
   $Log$
+  Revision 1.12  1999/07/28 21:19:26  jens
+  *** empty log message ***
+
   Revision 1.11  1999/07/27 22:19:11  jens
   *** empty log message ***
 
@@ -43,9 +46,6 @@
 
 int prepslex( void );
 extern void prepsparse( void );
-
-Pulse *fp( char *txt );
-
 
 /* locally used global variables */
 
@@ -174,7 +174,6 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 				return STR_TOKEN;
 			}
 
-
 			/* all pulse related keywords... */
 
 {P}":"?     {
@@ -201,32 +200,32 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 			/* combinations of pulse and property, e.g. `P3.LEN' */
 
 {P}?"."{F}  {
-				prepslval.vptr = pulse_get_by_addr( fp( prepstext ), P_FUNC );
+				prepslval.vptr = pulse_get_by_addr( n2p( prepstext ), P_FUNC );
 				return VAR_REF;
             }
 
 {P}?"."{S}  {
-				prepslval.vptr = pulse_get_by_addr( fp( prepstext ), P_POS );
+				prepslval.vptr = pulse_get_by_addr( n2p( prepstext ), P_POS );
 				return VAR_REF;
             }
 
 {P}?"."{L}  {
-				prepslval.vptr = pulse_get_by_addr( fp( prepstext ), P_LEN );
+				prepslval.vptr = pulse_get_by_addr( n2p( prepstext ), P_LEN );
 				return VAR_REF;
             }
 
 {P}?"."{DS} {
-				prepslval.vptr = pulse_get_by_addr( fp( prepstext ), P_DPOS );
+				prepslval.vptr = pulse_get_by_addr( n2p( prepstext ), P_DPOS );
 				return VAR_REF;
             }
 
 {P}?"."{DL} {
-				prepslval.vptr = pulse_get_by_addr( fp( prepstext ), P_DLEN );
+				prepslval.vptr = pulse_get_by_addr( n2p( prepstext ), P_DLEN );
 				return VAR_REF;
             }
 
 {P}?"."{ML} {
-				prepslval.vptr = pulse_get_by_addr( fp( prepstext ),
+				prepslval.vptr = pulse_get_by_addr( n2p( prepstext ),
 													P_MAXLEN );
 				return VAR_REF;
             }
@@ -378,42 +377,4 @@ int preparations_parser( FILE *in )
 		return FAIL;
 
 	return Preps_Next_Section;
-}
-
-
-
-/*----------------------------------------------*/
-/* Extracts the pulse number from a pulse name. */
-/* ->                                           */
-/*    * pulse name string                       */
-/* <-                                           */
-/*    * pulse number or -1 on error             */
-/*----------------------------------------------*/
-
-Pulse *fp( char *txt )
-{
-	char *tp, *t;
-	int num;
-
-
-	if ( *t == '.' )
-		return Cur_Pulse;
-
-	tp = t = get_string_copy( txt );
-	while ( *t && *t != '.' )
-		t++;
-
-	if ( *t == '.' )
-	    *txt = '\0';
-
-	while( isdigit( *--t ) )
-		;
-
-	if ( isdigit( *++t ) )
-	    num = atoi( t );
-	else
-		num = -1;          /* this should never happen... */
-
-	free( tp );
-	return pulse_find( num );
 }

@@ -2,6 +2,9 @@
   $Id$
 
   $Log$
+  Revision 1.11  1999/07/28 21:24:03  jens
+  *** empty log message ***
+
   Revision 1.10  1999/07/27 22:21:11  jens
   *** empty log message ***
 
@@ -84,6 +87,16 @@ EXPO        [EDed][+-]?{INT}
 FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
 IDENT       [A-Za-z]+[A-Za-z0-9_]*
+
+P           P(ULSE)?_?{INT}
+
+F           F(UNC(TION)?)?
+S           S(TART)?
+L			L(EN(GTH)?)?
+DS          D(EL(TA)?)?_?S(TART)?
+DL          D(EL(TA)?)?_?L(EN(GTH)?)?
+ML          M(AX(IMUM)?)?_?L(EN(GTH)?)?
+
 WS          [\n \t]+
 UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 
@@ -150,6 +163,44 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 				Vars_Next_Section = EXPERIMENT_SECTION;
 				return SECTION_LABEL;
 			}
+
+			/* all needed pulse related keywords... */
+
+{P}?"."{F}  {
+				defaultslval.vptr
+				           = pulse_get_by_addr( n2p( variablestext ), P_FUNC );
+				return VAR_REF;
+            }
+
+{P}?"."{S}  {
+				defaultslval.vptr
+				            = pulse_get_by_addr( n2p( variablestext ), P_POS );
+				return VAR_REF;
+            }
+
+{P}?"."{L}  {
+				defaultslval.vptr
+				            = pulse_get_by_addr( n2p( variablestext ), P_LEN );
+				return VAR_REF;
+            }
+
+{P}?"."{DS} {
+				defaultslval.vptr
+				           = pulse_get_by_addr( n2p( variablestext ), P_DPOS );
+				return VAR_REF;
+            }
+
+{P}?"."{DL} {
+				defaultslval.vptr
+				           = pulse_get_by_addr( n2p( variablestext ), P_DLEN );
+				return VAR_REF;
+            }
+
+{P}?"."{ML} {
+				defaultslval.vptr
+				         = pulse_get_by_addr( n2p( variablestext ), P_MAXLEN );
+				return VAR_REF;
+            }
 
 			/* handling of integer numbers */
 {INT}       {
