@@ -803,7 +803,7 @@ static void spex_cd2a_read_cmd_ack( const char *cmd )
 
 static void spex_cd2a_read_set_pos_ack( void )
 {
-	char *bp = spex_cd2a_read_mess( spex_cd2a_pos_mess_len );
+	char *bp; 
 
 
 	/* Repeatedly read in the current position until the final position has
@@ -811,6 +811,8 @@ static void spex_cd2a_read_set_pos_ack( void )
 
 	while ( 1 )
 	{
+		bp = spex_cd2a_read_mess( spex_cd2a_pos_mess_len );
+
 		switch ( *bp++ )
 		{
 			case '*' :          /* final position reached ? */
@@ -835,7 +837,7 @@ static void spex_cd2a_read_set_pos_ack( void )
 
 static void spex_cd2a_read_start_scan_ack( void )
 {
-	char *bp = spex_cd2a_read_mess( spex_cd2a_pos_mess_len );
+	char *bp;
 
 	
 	/* Repeatedly read in the current position until the start position for
@@ -843,6 +845,8 @@ static void spex_cd2a_read_start_scan_ack( void )
 
 	while ( 1 )
 	{
+		bp = spex_cd2a_read_mess( spex_cd2a_pos_mess_len );
+
 		switch ( *bp++ )
 		{
 			case 'S' :          /* final position reached ? */
@@ -867,13 +871,15 @@ static void spex_cd2a_read_start_scan_ack( void )
 
 static void spex_cd2a_read_scan_ack( void )
 {
-	char *bp = spex_cd2a_read_mess( spex_cd2a_pos_mess_len );
+	char *bp;
 
 	
 	/* Repeatedly read in the position until the burst movement is complete */
 
 	while ( 1 )
 	{
+		bp = spex_cd2a_read_mess( spex_cd2a_pos_mess_len );
+
 		switch ( *bp++ )
 		{
 			case 'B' :          /* final position reached ? */
