@@ -33,7 +33,7 @@ my $max_reqs = 16;     # how many simultaneous requests get accepted
 my $crlf = "\r\n";     # RFC 2616 requires this as the newline
 my $has_pnmtopng;      # does the pnmtopng utility exist?
 my $has_ppmtojpeg;     # does the ppmtojpeg utility exist?
-my $version = 0.2;
+my $version = 0.3;
 my $hostname = `hostname -f`;
 
 chomp $hostname;
@@ -146,7 +146,7 @@ sub serve {
 
 	# The "server" only handles well-formed GET requests...
 
-	illegal_request( $1 )
+	illegal_request( $1, $3, $4 )
 		if $txt !~ m|^\s*([^ \t]+)\s+([^ \t]+)\s+HTTP/(\d+)\.(\d+)\s*\r*$|io;
 
 	my ( $req, $file, $maj, $min ) = ( $1, $2, $3, $4 );
@@ -158,7 +158,7 @@ sub serve {
 
 	# Stop on unsupported types of requests (anything except GET and HEAD)
 
-	unsupported_request( $req ) unless $req =~ /^(GET)|(HEAD)$/io;
+	unsupported_request( $req, $maj, $min ) unless $req =~ /^(GET)|(HEAD)$/io;
 
 	# Check if client accepts PNG, GIF or JPEG files and skip the rest of
 	# the noise, we're done listening when we get an empty line
@@ -181,19 +181,19 @@ sub serve {
 	# Send a not too rude reply if the client didn't send a Host field but
 	# claims to be HTTP/1.1 compliant
 
-	missing_host_field( $req )
+	missing_host_field( $req, $maj, $min )
 		if $maj >= 1 and $min >= 1 and ! $is_host_field;
 
 	# Ok, now it's finally our turn to send something back to the client...
 
 	if ( $file =~ /^(index.html*)*$/io ) {
-		serve_main( \%f, $req );
+		serve_main( \%f, $req, $maj, $min );
 	} elsif ( $file =~ m{^(fsc2\.(png|gif|jpeg))$}o ) {
-		serve_logo( $1, $2, $req );
+		serve_logo( $1, $2, $req, $maj, $min );
 	} elsif ( $file =~ m{^fsc2_(a|b)\.(png|jpeg)$}o ) {
-		serve_pics( $1, $2, $req );
+		serve_pics( $1, $2, $req, $maj, $min );
 	} else {
-		not_found( $file, $req );
+		not_found( $file, $req, $maj, $min );
 	}
 
 	close $client;
@@ -207,7 +207,7 @@ sub serve {
 
 sub serve_main {
 
-	my ( $f, $req ) = @_;
+	my ( $f, $req, $maj, $min ) = @_;
 	my @st1 = ( "IDLE", "RUNNING" , "WAITING", "FINISHED" );
 	my @st2 = ( "Idle", "Experiment running",
 				"<FONT COLOR=#FF0000>Waiting for user input</FONT>",
@@ -228,7 +228,7 @@ sub serve_main {
 
 	# First send some meta-information for the browser
 
-	print "HTTP/1.1 200 OK$crlf" . def_txt( 0 ) .
+	print "HTTP/1.1 200 OK$crlf" . def_txt( 0, $maj, $min ) .
 		  "Content-Type: text/html; charset=ISO-8859-1$crlf";
 
 	return unless $req =~ /^GET$/io;
@@ -346,9 +346,8 @@ sub serve_main {
 
 	$body .= "<H2>Output browser:</H2>$crlf<P><PRE>$txt</PRE></P>$crlf"
 		if defined $txt;
-	$body .= "<HR><ADDRESS>fsc2/$version at $hostname Port " .
-		     "$port</ADDRESS>$crlf" .
-			 "</BODY></HTML>$crlf";
+	$body .= "<HR><ADDRESS>fsc2 web server v$version at $hostname Port " .
+			 "$port</ADDRESS>$crlf</BODY></HTML>$crlf";
 
 	print "Content-Length: " . length( $body ) . "$crlf$crlf";
 	print $body;
@@ -362,14 +361,14 @@ sub serve_main {
 
 sub serve_logo {
 
-	my ( $file, $ext, $req ) = @_;
+	my ( $file, $ext, $req, $maj, $min ) = @_;
 	my $fh;
 
 
 	open( $fh, "$auxdir/$file" ) or
 		return not_found( $file, $req );
 
-	print "HTTP/1.1 200 OK$crlf" . def_txt( 1 ) .
+	print "HTTP/1.1 200 OK$crlf" . def_txt( 1, $maj, $min ) .
 		  "Accept-Ranges: none$crlf" .
 		  "Content-Type: image/$ext$crlf" .
 		  "Content-Length: " . ( -s "$auxdir/$file" ) . "$crlf$crlf";
@@ -388,7 +387,7 @@ sub serve_logo {
 # in which case we send the "Not available" picture.
 
 sub serve_pics {
-	my ( $which, $ext, $req ) = @_;
+	my ( $which, $ext, $req, $maj, $min ) = @_;
 	my ( $state, $fh, $file, @data );
 
 
@@ -431,7 +430,7 @@ sub serve_pics {
 	}
 	stdout_lock( 0 );
 
-	print "HTTP/1.1 200 OK$crlf" . def_txt( 0 ) .
+	print "HTTP/1.1 200 OK$crlf" . def_txt( 0, $maj, $min ) .
 		  "Accept-Ranges: none$crlf" .
 		  "Content-Type: image/$ext$crlf";
 
@@ -452,19 +451,18 @@ sub serve_pics {
 # Deals with requests for pages we don't know about...
 
 sub not_found {
-	my ( $file, $req ) = @_;
+	my ( $file, $req, $maj, $min ) = @_;
 
 	my $body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">$crlf" .
 		       "<HTML><HEAD>$crlf" .
 			   "<TITLE>404 Not Found</TITLE>$crlf" .
 			   "</HEAD><BODY>$crlf" .
 			   "<H1>Not Found</H1>$crlf" .
-			   "<P>The requested URL ($file) was not found.</P><HR>$crlf" .
-			   "<ADDRESS>fsc2/$version at $hostname Port " .
-			   "$port</ADDRESS>$crlf" .
-			   "</BODY></HTML>$crlf";
+			   "<P>The requested URL ($file) was not found.</P>$crlf" .
+			   "<HR><ADDRESS>fsc2 web server v$version at $hostname " .
+			   "Port $port</ADDRESS>$crlf</BODY></HTML>$crlf";
 
-	print "HTTP/1.1 404 Not Found$crlf" . def_txt( 0 ) .
+	print "HTTP/1.1 404 Not Found$crlf" . def_txt( 0, $maj, $min ) .
 		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
 		  "Content-Length: " . length( $body ) . "$crlf$crlf";
 
@@ -480,21 +478,20 @@ sub not_found {
 
 sub unsupported_request {
 
-	my $req = shift;
+	my ( $req, $maj, $min ) = @_;
 
     my $body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">$crlf" .
 		       "<HTML><HEAD>$crlf" .
 		       "<TITLE>501 Not implemented</TITLE>$crlf" .
 		       "</HEAD><BODY>$crlf" .
 		       "<H1>Not implemented</H1>$crlf" .
-		       "<P>Sorry, the server understands GET and HEAD requests "
-			   "only.</P></HR>$crlf" .
-		       "<ADDRESS>fsc2/$version at $hostname " . 
-			   "Port $port</ADDRESS>$crlf" .
-		       "</BODY></HTML>$crlf";
+		       "<P>Sorry, the server understands GET and HEAD requests " .
+			   "only.</P>$crlf" .
+		       "</HR><ADDRESS>fsc2 web server v$version at $hostname " .
+			   "Port $port</ADDRESS>$crlf</BODY></HTML>$crlf";
 
-	print "HTTP/1.1 501 Not implemented$crlf" . def_txt( 0 ) .
-		  "Content-Type: text/html; charset=iso-8859-1$crlf" . 
+	print "HTTP/1.1 501 Not implemented$crlf" . def_txt( 0, $maj, $min ) .
+		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
 		  "Content-Length: "  . length( $body ) . "$crlf$crlf";
 
 	print $body if $req =~ /^GET$/io;
@@ -509,7 +506,7 @@ sub unsupported_request {
 
 sub illegal_request {
 
-	my $req = shift;
+	my ( $req, $maj, $min ) = @_;
 
 	my $body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">$crlf" .
 		       "<HTML><HEAD>$crlf" .
@@ -517,12 +514,11 @@ sub illegal_request {
 		       "</HEAD><BODY>$crlf" .
 		       "<H1>Bad Request</H1>$crlf" .
 		       "<P>Your browser send a request that this server could not " .
-		       "understand</P></HR>$crlf" .
-		       "<ADDRESS>fsc2/$version at $hostname " . 
-			   "Port $port</ADDRESS>$crlf" .
-		       "</BODY></HTML>$crlf";
+		       "understand</P>$crlf" .
+		       "<HR><ADDRESS>fsc2 web server v$version at $hostname " .
+			   "Port $port</ADDRESS>$crlf</BODY></HTML>$crlf";
 
-	print "HTTP/1.1 400 Bad Request$crlf" . def_txt( 0 ) .
+	print "HTTP/1.1 400 Bad Request$crlf" . def_txt( 0, $maj, $min ) .
 		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
           "Content-Lenght: " . length( $body ) . "$crlf$crlf";
 
@@ -539,7 +535,7 @@ sub illegal_request {
 
 sub missing_host_field {
 
-	my $req = shift;
+	my ( $req, $maj, $min ) = @_;
 
 	my $body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 4.0//EN\">$crlf" .
 		   	   "<HTML>$crlf<HEAD>$crlf" .
@@ -549,11 +545,11 @@ sub missing_host_field {
 		   	   "<P>Your browser send a request that this server could not " .
 		   	   "understand:$crlf" .
 		   	   "Client sent HTTP/1.1 request without hostname (see RFC2616 " .
-		   	   "section 14.23)</P></HR>$crlf" .
-		   	   "<ADDRESS>fsc2/$version at $hostname Port $port</ADDRESS>" .
-		   	   "</BODY></HTML>$crlf";
+		   	   "section 14.23)</P>$crlf" .
+			   "</HR><ADDRESS>fsc2 web server v$version at $hostname " .
+			   "Port $port</ADDRESS>$crlf</BODY></HTML>$crlf";
 
-	print "HTTP/1.1 400 Bad Request$crlf" . def_txt( 0 ) .
+	print "HTTP/1.1 400 Bad Request$crlf" . def_txt( 0, $maj, $min ) .
 		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
 		  "Content-Lenght: " . length( $body ) . "$crlf$crlf";
 
@@ -568,7 +564,7 @@ sub missing_host_field {
 # Returns some text we always have to send to the client in the meta data
 
 sub def_txt {
-	my ( $no_expire ) = @_;
+	my ( $no_expire, $maj, $min ) = @_;
 
 	my $date = rfc_1123_date( );
 	my $exp_date = $no_expire ? rfc_1123_date( 'next_year' ) : $date;
@@ -577,8 +573,9 @@ sub def_txt {
 				"Server: fsc2/$version$crlf" .
 				"Allow: GET, HEAD$crlf" .
 				"Accept-Ranges: none$crlf" .
-				"Connection: close$crlf" .
 				"Expires: $exp_date$crlf";
+
+	$reply .= "Connection: close$crlf" if $maj >= 1 and $min >= 1;
 	$reply .= "Cache-Control: no-cache$crlf" unless $no_expire;
 	return $reply
 }
