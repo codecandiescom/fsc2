@@ -149,7 +149,7 @@ bool exists_function( const char *name )
 static void load_functions( Device *dev )
 {
 	char *lib_name;
-	char *dev_name;
+	const char *dev_name;
 
 
 	/* Assemble name of library to be loaded - this will also work for cases
