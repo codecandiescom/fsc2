@@ -235,7 +235,7 @@ Var *f_print( Var *v )
 /* signals - only exception: If a DO_QUIT signal is delivered to the */
 /* caller of f_wait() (i.e. the child) it returns immediately.       */
 /* ->                                                                */
-/*  * number of nanoseconds to sleep                                 */
+/*  * number of seconds to sleep                                     */
 /*-------------------------------------------------------------------*/
 
 Var *f_wait( Var *v )
@@ -249,12 +249,18 @@ Var *f_wait( Var *v )
 
 	how_long = VALUE( v );
 
-	while ( ( v = vars_pop( v ) ) )
-		;
-
-	if ( how_long < 0.0 || how_long > LONG_MAX )
+	if ( how_long < 0.0 )
 	{
-		eprint( FATAL, "%s:%ld: Negative time or more than %ld s as argument "
+		eprint( WARN, "%s:%ld: Negative time in call of function `wait'.\n",
+				Fname, Lc );
+		if ( TEST_RUN )
+			return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, do_quit ? 0 : 1 );
+	}
+
+	if ( how_long > LONG_MAX )
+	{
+		eprint( FATAL, "%s:%ld: Time of more that %ld seconds as argument "
 				"of `wait()' function.\n", Fname, Lc, LONG_MAX );
 		THROW( EXCEPTION );
 	}
