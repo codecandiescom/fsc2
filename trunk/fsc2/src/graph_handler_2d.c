@@ -1058,7 +1058,6 @@ static void reconfigure_window_2d( Canvas *c, int w, int h )
 		else
 			need_redraw[ Z ] = SET;
 	}
-
 }
 
 
