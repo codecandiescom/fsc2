@@ -319,9 +319,9 @@ section.
 Modules for five different lock-in amplifiers are implemented. Most are
 by Stanford Research and have the model names @strong{SR510},
 @strong{SR530}, @strong{SR810} and @strong{SR830}. The fifth is the
-@strong{ER023M Signal Channel} to be found in Bruker spectrometers of
-the ESP series. The module names to be specified in the @code{DEVICES}
-section are
+@strong{ER023M Signal Channel} used in Bruker spectrometers of the ESP
+series. The module names to be specified in the @code{DEVICES} section
+are
 @example
 sr510
 sr530
