@@ -1,148 +1,316 @@
+#!/usr/local/bin/fsc2 -T
+
+/***************************************************************************/
+/*                                                                         */
+/*    EDL program for running cw-EPR test measurements with the 360 GHz    */
+/*    spectrometer.                                                        */
+/*                                                                         */
+/*    $Id$                                                                 */
+/*                                                                         */
+/***************************************************************************/
+
+
 DEVICES:
 
-sr830;
-ips20_4;
-
+sr830;                         // load module for the lock-in
+ips20_4;                       // load module for the sweep power supply
 
 
 VARIABLES:
 
-current = 0 A;
-sweep_rate = 50 mV / 60 s;
-acq_rate = 2 Hz;
+current;                       // last measured current
+sweep_rate;                    // current sweep rate
+acq_rate;                      // current acquisition rate
 
-Sweep_State = 0;
+Sweep_State = 0;               // sweep state, 1 = up, -1 = down, 0 = stopped
 
+Cur_Acq_Rate;                  // currently setected acquisition rate menu item
 
-I = 1;
-new_current, new_sweep_rate, new_acq_rate;
-Sweep_Up, Sweep_Stop, Sweep_Down;
-Current, Sweep_Rate, Acq_Rate;
-Clear, Close;
-Sweep_State = 0;
-del_time;
+MAX_POINTS = 65000;            // maximum number of data points
+data[ MAX_POINTS ];            // array of data points
+I = 0;                         // count of data points
+File;                          // file handler for storing data
+
+new_current;                   // current as set by user
+new_sweep_rate;                // sweep rate as set by user
+New_Acq_Rate;                  // user selected acquisition rate menu item
+
+/* Variables for all buttons etc. */
+
+Sweep_Up, Sweep_Stop, Sweep_Down,
+Current, Sweep_Rate, Acq_Rate,
+Save, Clear, Close;
+
+/* List of all useful acquisition rates */
+
+acq_rates_list[ 10 ] = { 32 Hz, 16 Hz, 8 Hz, 4 Hz, 2 Hz, 1 Hz, 500 mHz,
+						 250 mHz, 125 mHz, 62.5 mHz };
+
+/* Some variables to make the program  easier to read */
+
+STOPPED = 0;
+UP = 1;
+DOWN = -1;
+SWITCH_ON = 1;
+SWITCH_OFF = 0;
 
 
 PREPARATIONS:
 
+/* We need just 1D graphics and 1 curve */
 
 init_1d( 1, "Points", "Signal [mV]" );
 
 
-
 EXPERIMENT:
 
+/* We start with asking the magnet for the current and the sweep rate after
+   having made sure that the magnet isn't sweeping */
+
+IF ( magnet_sweep( ) != STOPPED ) {
+	magnet_sweep( STOPPED );
+}
 current = get_field( );
+sweep_rate = magnet_sweep_rate( );
+IF sweep_rate < 1.0e-2 A / 60.0 s
+{
+	sweep_rate = 1.0e-2 A / 60.0 s;
+}
+
+/* Now ask the lock-in for the current setting of the acquisition rate for
+   auto-acquisition, then figure out the index in the array of allowed
+   values (which is used later to set up the menu), if necessary reduce
+   the maximum acquisition rate to 32 Hz and finally tell the lock-in to
+   use this acquisition rate for auto-acqusition of channel 1. */
+
 acq_rate = 1.0 / lockin_get_sample_time( );
-lockin_auto_setup( 1.0 / acq_rate, 1 );
-lockin_lock_keyboard( 0 );
 
+IF acq_rate >= acq_rates_list[ 1 ]
+{
+	acq_rate = acq_rates_list[ 1 ];
+	Cur_Acq_Rate = 1;
+}
+ELSE
+{
+	FOR I = 2 : size( acq_rates_list )
+	{
+		IF abs( acq_rates_list[ I ] - acq_rate ) < 0.0001 Hz
+		{
+			Cur_Acq_Rate = I;
+			BREAK;
+		}
+	}
+}
 
+lockin_auto_setup( 1.0 / acq_rates_list[ Cur_Acq_Rate ], 1 );
+
+/* Unlock the lock-ins keyboard */
+
+lockin_lock_keyboard( SWITCH_OFF );
+
+/* Finally, create the form with the buttons for sweeping etc. */
 
 Sweep_Up   = button_create( "RADIO_BUTTON", "Sweep up" );
 Sweep_Stop = button_create( "RADIO_BUTTON", Sweep_Up, "Stop sweep" );
 Sweep_Down = button_create( "RADIO_BUTTON", Sweep_Up, "Sweep Down" );
-button_state( Sweep_Stop, 1 );
+button_state( Sweep_Stop, SWITCH_ON );
 
 Current    = input_create( "FLOAT_INPUT", current, "Set new current (in A)" );
 Sweep_Rate = input_create( "FLOAT_INPUT", sweep_rate * 60.0,
 						   "Set new sweep rate (in A/min)" );
-Acq_Rate   = input_create( "FLOAT_INPUT", acq_rate, 	
-						   "Set new acqusition rate (in Hz)" );
+Acq_Rate   = menu_create( "Lock-in acquisition rate", "32 Hz", "16 Hz", "8 Hz",
+						   "4 Hz", "2 Hz", "1 Hz", "1/2 Hz", "1/4 Hz",
+						   "1/8 Hz", "1/16 Hz" );
+menu_choice( Acq_Rate, Cur_Acq_Rate );
 
-Clear = button_create( "NORMAL_BUTTON", "Clear Screen" );
-Close = button_create( "NORMAL_BUTTON", "Close" );
+Save  = button_create( "NORMAL_BUTTON", "Save data" );
+Clear = button_create( "NORMAL_BUTTON", "Clear screen" );
 
 
-FOREVER {
+/* Now we're done with all preparations and can start to run the experiment
+   within an endless loop */
 
-	IF button_state( Sweep_Up ) & Sweep_State != 1 {
-		IF Sweep_State == 0 {
-			magnet_sweep( 1 );
-			Sweep_State = 1;
-			lockin_auto_acquisition( 1 );
+FOREVER
+{
+	/* Check if the sweep up button has been pressed and we're not already	
+	   sweeping up - distinguish between the start of a sweep and the reversal
+	   of the sweep direction, in the later case also stop and restart the
+	   lock-in's auto-acquisition to empty its internal data buffer. */
+
+	IF button_state( Sweep_Up ) & Sweep_State != UP & I < MAX_POINTS
+	{
+		IF Sweep_State == STOPPED
+		{
+			magnet_sweep( UP );
+			Sweep_State = UP;
+			lockin_auto_acquisition( SWITCH_ON );
 		}
 
-		IF Sweep_State == -1 {
-			lockin_auto_acquisition( 0 );
-			magnet_sweep( 1 );
-			Sweep_State = 1;
-			lockin_auto_acquisition( 1 );
-		}
-	}
-
-	IF button_state( Sweep_Down ) & Sweep_State != -1 {
-		IF Sweep_State == 0 {
-			magnet_sweep( -1 );
-			Sweep_State = -1;
-			lockin_auto_acquisition( 1 );
-		}
-
-		IF Sweep_State == 1 {
-			lockin_auto_acquisition( 0 );
-			magnet_sweep( -1 );
-			Sweep_State = -1;
-			lockin_auto_acquisition( 1 );
+		IF Sweep_State == DOWN
+		{
+			lockin_auto_acquisition( SWITCH_OFF );
+			magnet_sweep( UP );
+			Sweep_State = UP;
+			lockin_auto_acquisition( SWITCH_ON );
 		}
 	}
 
-	IF button_state( Sweep_Stop ) & Sweep_State != 0 {
-		lockin_auto_acquisition( 0 );	
-		magnet_sweep( 0 );
-		Sweep_State = 0;
+	/* Check if the sweep down button has been pressed and we're not already
+	   sweeping down  - distinguish between the start of a sweep and the
+	   reversal of the sweep direction, in the later case also stop and restart
+	   the lock-in's auto-acquisition to empty its internal data buffer. */
+
+	IF button_state( Sweep_Down ) & Sweep_State != DOWN & I < MAX_POINTS
+	{
+
+		IF Sweep_State == STOPPED
+		{
+			magnet_sweep( DOWN );
+			Sweep_State = DOWN;
+			lockin_auto_acquisition( SWITCH_ON );
+		}
+
+		IF Sweep_State == UP
+		{
+			lockin_auto_acquisition( SWITCH_OFF );
+			magnet_sweep( DOWN );
+			Sweep_State = DOWN;
+			lockin_auto_acquisition( SWITCH_ON );
+		}
 	}
+
+	/* Check if the sweep stop button has been pressed while we're sweeping */
+
+	IF button_state( Sweep_Stop ) & Sweep_State != STOPPED
+	{
+		lockin_auto_acquisition( SWITCH_OFF );
+		magnet_sweep( STOPPED );
+		Sweep_State = STOPPED;
+	}
+
+	/* Check if a new current has been set - if yes go to the new current
+	   (which automatically stops a sweep) after checking that it's within
+	   the allowed limits */
 
 	new_current = input_value( Current );
-	IF abs( current - new_current ) > 0.00001 {
-		IF new_current > 7.0 | new_current < -7.0 {
+	IF abs( current - new_current ) > 0.01 mA
+	{
+		IF new_current > 7.0 A | new_current < -7.0 A
+		{
 			current = get_field( );
-			input_value( Current, current );
-		} ELSE {
-			current = new_current;
-			set_field( current );
-			button_state( Sweep_Stop, 1 );
-			Sweep_State = 0;
 		}
+		ELSE
+		{
+			lockin_auto_acquisition( SWITCH_OFF );
+			button_state( Sweep_Stop, SWITCH_ON );
+			current = set_field( new_current );
+			Sweep_State = STOPPED;
+		}
+
+		input_value( Current, current );
 	}
+
+	/* Check if a new sweep rate has been set - if yes set the new rate after
+	   checking that it's within the allowed limits - take care: the user
+	   input is in A/min while the magnet driver expects sweep rates in A/s.
+	   Because any data stored in the lock-ins internal data buffer have
+	   become meaningless stop and restart auto-acquisition to clean out the
+	   buffer. */
 
 	new_sweep_rate = input_value( Sweep_Rate );
-	IF abs( sweep_rate - new_sweep_rate ) > 0.001 {
-		IF new_current / 60 s <= 1 A & new_current / 60 s >= -1 A {
-			sweep_rate = new_sweep_rate / 60.0;
-			magnet_sweep_rate( sweep_rate );
+	IF abs( sweep_rate * 60.0 - new_sweep_rate ) > 0.0001
+	{
+		IF new_sweep_rate <= 1.0 & new_sweep_rate >= -1.0
+		{
+			sweep_rate = magnet_sweep_rate( sweep_rate / 60.0 );
+			IF Sweep_State != STOPPED
+			{
+				lockin_auto_acquisition( SWITCH_OFF );
+				lockin_auto_acquisition( SWITCH_ON );
+			}
 		}
-		input_value( Sweep_Rate, sweep_rate );
+
+		input_value( Sweep_Rate, sweep_rate * 60.0 );
 	}
 
-	new_acq_rate = input_value( Acq_Rate );	
-	IF abs( acq_rate - new_acq_rate ) > 0.0001 {
-		IF new_acq_rate <= 512 & new_acq_rate >= 0.0625 {
-			lockin_auto_setup( 1.0 / acq_rate, 1 );
-			acq_rate = 1.0 / lockin_get_sample_time( );
-		}
-		input_value( Acq_Rate, acq_rate );
-	}			
+	/* Check if a new acquisition rate for the lock-in has been selected -
+	   also in this case the data in the lock-ins buffer aren't useful any-
+	   more so clean them by stopping and restarting the auto-acquisition. */
 
-	IF button_state( Clear ) {
+	New_Acq_Rate = menu_choice( Acq_Rate );	
+	IF New_Acq_Rate != Cur_Acq_Rate
+	{
+		Cur_Acq_Rate = New_Acq_Rate;
+		acq_rate = acq_rates_list[ Cur_Acq_Rate ];
+		lockin_auto_setup( 1.0 / acq_rate, 1 );
+		IF Sweep_State != STOPPED
+		{
+			lockin_auto_acquisition( SWITCH_OFF );
+			lockin_auto_acquisition( SWITCH_ON );
+		}
+	}
+
+	/* Check if the Save button has been pressed (but save only as many points
+	   has have been measured, not the complete array) */
+
+	IF button_state( Save )
+	{
+		File = get_file( );
+		IF is_file( File )
+		{
+			save( File, slice( data, 1, I ) );
+		}
+	}
+
+	/* Check if the clear curve button has been pressed - if yes also clear
+	   the lock-ins internal buffer. */
+
+	IF button_state( Clear )
+	{
 		clear_curve( );
 		rescale( 32 );
-		I = 1;
-	}
-
-	IF button_state( Close ) {
-		IF Sweep_State != 0 {
-			lockin_auto_acquisition( 0 );	
-			magnet_sweep( 0 );
+		I = 0;
+		IF Sweep_State != STOPPED
+		{
+			lockin_auto_acquisition( SWITCH_OFF );
+			lockin_auto_acquisition( SWITCH_ON );
 		}
-		BREAK;
 	}
 
-	IF Sweep_State != 0 {
-		display( I, lockin_get_data( 1 ) * 1.0e3 );
+	/* If the magnet is sweeping the field get a new data point, otherwise
+	   wait a short moment to keep the program from using up the complete
+	   computer time. If we already have acquired MAX_POINTS data points or the
+	   magnet sweep has been haltet because one of the current limits had been
+	   reached also stop the sweep without further user intervention. */
+
+	IF Sweep_State != STOPPED
+	{
 		I += 1;
-		del_time = 1.0 / acq_rate - delta_time( );
-		IF del_time > 0.0 {
-			wait( del_time );
+		data[ I ] = lockin_get_data( 1 );
+		display( I, data[ I ] * 1.0e3 );
+
+		IF I >= MAX_POINTS | magnet_sweep( ) == STOPPED
+		{
+			lockin_auto_acquisition( SWITCH_OFF );
+			magnet_sweep( STOPPED );
+			Sweep_State = STOPPED;
+			button_state( Sweep_Stop, SWITCH_ON );
 		}
 	}
-}	
+	ELSE
+	{
+		wait( 0.25 s );
+	}
+}
+
+
+ON_STOP:
+
+/* At the and of the experiment make sure the sweep is stopped and the
+   lock-ins auto-acquisition gets stopped. */
+
+IF Sweep_State != STOPPED
+{
+	magnet_sweep( STOPPED );
+	lockin_auto_acquisition( SWITCH_OFF );
+}

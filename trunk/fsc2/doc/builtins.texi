@@ -1165,6 +1165,45 @@ second value the output field is set to this value. Obviously, the value
 must be number.
 
 
+@anchor{menu_create}
+@item menu_create()
+@findex menu_create()
+This function creates a popup-menu button to allow the selection of one
+of two or more alternatives. The first argument must be a label string,
+followed by as many strings as necessary (but at least two) for the
+items shown when the popup-menu button gets pressed. This widget does
+not allow setting a help string.
+
+As usual, the value returned is an integer ID for the popup-menu button
+that has to be used in further commands dealing with the widget.
+
+
+@anchor{menu_delete}
+@item menu_delete()
+@findex menu_delete()
+This function deletes one or more popup-menu buttons. It expects one or
+a list of popup-menu button identifiers as returned by the function
+@code{menu_create()}.
+
+
+@anchor{menu_choice}
+@item menu_choice()
+@findex menu_choice()
+This function either selects a new item from the list of items of the
+popup-menu button or returns the number of the currently selected item.
+The first argument must be a valid popup-menu button identifiers as
+returned by the function @code{menu_create()}. If there is no second
+argument the currently selected item is returned, an integer number
+between @code{1}, indicating that the first item is selected, and the
+total number of items, indicating that the last item is selected.
+
+If called with a second argument this must be an integer number between
+@code{1} and the total number of items of the popup-menu button. The
+number indicates which of the itens has to become marked as selected
+(where, obviously, @code{1} will select the first item, @code{2} the
+second etc.).
+
+
 @anchor{object_delete}
 @item object_delete()
 @findex object_delete()

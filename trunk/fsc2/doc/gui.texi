@@ -533,8 +533,12 @@ value sliders. The only difference between these is that value sliders
 have an additional field displaying a number that indicates the value
 the slider is currently set to.
 
-Finally there are in- and output objects. Input objects are boxes into
-which the user can enter numbers, while output objects are used to
-display numerical values. Both object types come in two variants, one
-that allows the input or display of integer values only and one for
-floating point numbers.
+Beside sliders also in- and output objects can be used to set numerical
+values. Input objects are boxes into which the user can enter numbers,
+while output objects are used to display numerical values. Both object
+types come in two variants, one that allows the input or display of
+integer values only and one for floating point numbers.
+
+Finally, there are popup-menu buttons. If clicked on a menu with two or
+more items to select pops up and allows the user to chose one of several
+alternatives.

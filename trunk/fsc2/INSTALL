@@ -219,12 +219,13 @@ without any devices, these are
   zz.edl
   2d_endor_test.edl
   2_td.edl
+  tools.edl
 
 Just start by typing 'fsc2 a.edl' or 'fsc2 z.edl' and click onto the "Start"
 button to get an idea about how fsc2 displays 1-dimensional and 2-dimensional
 data sets.
 
-             22-12-2001             Have fun, Jens
+             January 14, 2002             Have fun, Jens
 
 -----------------------------------------------------------------------------
        _  _____  _____

@@ -951,6 +951,16 @@ operators. Here is a list of these operators and their meaning:
 @end multitable
 @end quotation
 
+Please note: For all binary logical operators both expressions are
+evaluated even when evaluating the first one only would already
+determine the result. For example, for the expression
+@example
+   A == 3 & B == 7
+@end example
+@noindent
+both comparisons are executed even when @code{A} has a value different
+from @code{3} and this already determines that the end result will be false.
+
 
 @anchor{UNTIL loops}
 @subsection UNTIL loops
