@@ -837,7 +837,7 @@ void ep385_twt_padding_check( CHANNEL *ch )
 				pp = ppp;
 			}
 			else
-				ppp->len = pp->pos - ppp->len;
+				ppp->len = pp->pos - ppp->pos;
 		}
 	}
 
