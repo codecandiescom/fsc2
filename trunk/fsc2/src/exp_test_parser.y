@@ -40,7 +40,7 @@ static int exp_testerror( const char *s );
 %}
 
 
-/* the following union and the token definitions MUST be identical to the ones
+/* The following union and the token definitions MUST be identical to the ones
    in `exp.h' ! */
 
 %union {
@@ -118,7 +118,7 @@ static int exp_testerror( const char *s );
 %left '+' '-'
 %left '*' '/'
 %left '%'
-%right E_NEG E_NOT
+%right E_NEG
 %right '^'
 
 
@@ -161,58 +161,60 @@ et:      '{'
        | IF_TOK expr '{'
 ;
 
-line:    E_VAR_TOKEN '=' expr                         { }
-       | E_VAR_TOKEN E_PLSA expr                      { }
-       | E_VAR_TOKEN E_MINA expr                      { }
-       | E_VAR_TOKEN E_MULA expr                      { }
-       | E_VAR_TOKEN E_DIVA expr                      { }
-       | E_VAR_TOKEN E_MODA expr                      { }
-       | E_VAR_TOKEN E_EXPA expr                      { }
-       | E_VAR_TOKEN '[' list1 ']' ass                { }
+/* Valid syntax of normal line: either assignment or function call */
+
+line:    lhs ass_op expr	                          { }
        | E_FUNC_TOKEN '(' list2 ')'                   { }
        | E_FUNC_TOKEN '['
           { eprint( FATAL, SET, "`%s' is a predefined function.\n", $1->name );
 	        THROW( EXCEPTION ); }
-       | E_PPOS '=' expr                              { }
-       | E_PPOS E_PLSA expr   						  { }
-       | E_PPOS E_MINA expr   						  { }
-       | E_PPOS E_MULA expr   						  { }
-       | E_PPOS E_DIVA expr   						  { }
-       | E_PPOS E_MODA expr   						  { }
-       | E_PPOS E_EXPA expr   						  { }
-       | E_PLEN '=' expr      						  { }
-       | E_PLEN E_PLSA expr   						  { }
-       | E_PLEN E_MINA expr   						  { }
-       | E_PLEN E_MULA expr   						  { }
-       | E_PLEN E_DIVA expr   						  { }
-       | E_PLEN E_MODA expr   						  { }
-       | E_PLEN E_EXPA expr   						  { }
-       | E_PDPOS '=' expr     						  { }
-       | E_PDPOS E_PLSA expr  						  { }
-       | E_PDPOS E_MINA expr  						  { }
-       | E_PDPOS E_MULA expr  						  { }
-       | E_PDPOS E_DIVA expr  						  { }
-       | E_PDPOS E_MODA expr  						  { }
-       | E_PDPOS E_EXPA expr  						  { }
-       | E_PDLEN '=' expr     						  { }
-       | E_PDLEN E_PLSA expr  						  { }
-       | E_PDLEN E_MINA expr  						  { }
-       | E_PDLEN E_MULA expr  						  { }
-       | E_PDLEN E_DIVA expr  						  { }
-       | E_PDLEN E_MODA expr  						  { }
-       | E_PDLEN E_EXPA expr  						  { }
 ;
 
-ass:     '=' expr
-       | E_PLSA expr
-       | E_MINA expr
-       | E_MULA expr
-       | E_DIVA expr
-       | E_MODA expr
-       | E_EXPA expr
+/* Left hand side of assignments */ 
+
+lhs:     lhs_var
+       | E_PPOS
+       | E_PLEN
+       | E_PDPOS
+       | E_PDLEN
 ;
 
-expr:    E_INT_TOKEN unit                             { }
+lhs_var: E_VAR_TOKEN                                  { }
+       | E_VAR_TOKEN '[' list1 ']'                    { }
+       | E_VAR_TOKEN '('
+          { eprint( FATAL, SET, "`%s' is a variable, not a function.\n",
+					$1->name );
+	        THROW( EXCEPTION ); }
+       | E_FUNC_TOKEN
+          { eprint( FATAL, SET, "Function `%s' can't be assigned a value.\n",
+					$1->name );
+	        THROW( EXCEPTION ); }
+;
+
+/* Assignment operators */
+
+ass_op:  '='
+       | E_PLSA
+       | E_MINA
+       | E_MULA
+       | E_DIVA
+       | E_MODA
+       | E_EXPA
+;
+
+/* Right hand side expressions */
+
+expr:    una_op u_expr %prec E_NEG
+       | expr bin_op una_op u_expr
+;
+
+u_expr:  bt
+       | '(' expr ')'
+;
+
+/* basic tokens of a right hand side expression */
+
+bt:      E_INT_TOKEN unit                             { }
        | E_FLOAT_TOKEN unit                           { }
        | E_VAR_TOKEN unit                             { }
        | E_VAR_TOKEN '[' list1 ']' unit               { }
@@ -228,26 +230,36 @@ expr:    E_INT_TOKEN unit                             { }
        | E_PLEN                                       { }
        | E_PDPOS                                      { }
        | E_PDLEN                                      { }
-       | expr E_AND expr                              { }
-       | expr E_OR expr                               { }
-       | expr E_XOR expr                              { }
-       | E_NOT expr                                   { }
-       | expr E_EQ expr                               { }
-       | expr E_NE expr                               { }
-       | expr E_LT expr                               { }
-       | expr E_GT expr                               { }
-       | expr E_LE expr                               { }
-       | expr E_GE expr                               { }
-       | expr '+' expr                                { }
-       | expr '-' expr                                { }
-       | expr '*' expr                                { }
-       | expr '/' expr                                { }
-       | expr '%' expr                                { }
-       | expr '^' expr                                { }
-       | '+' expr %prec E_NEG                         { }
-       | '-' expr %prec E_NEG                         { }
-       | '(' expr ')' unit                            { }
 ;
+
+/* Unary operators */
+
+una_op:  /* empty */
+       | '+'
+       | '-'
+       | E_NOT
+;
+
+/* Binary operators */
+
+bin_op:  '+'
+       | '-'
+       | '*'
+       | '/'
+       | '%'
+       | '^'
+       | E_AND
+       | E_OR
+       | E_XOR
+       | E_EQ
+       | E_NE
+       | E_LT
+       | E_GT
+       | E_LE
+       | E_GE
+;
+
+/* Unit tokens */
 
 unit:    /* empty */
        | E_NT_TOKEN
@@ -264,14 +276,14 @@ unit:    /* empty */
 ;
 
 
-/* list of indices for access of an array element */
+/* List of indices for accessing array elements */
 
 list1:   /* empty */
 	   | expr
        | list1 ',' expr
 ;
 
-/* list of function arguments */
+/* List of function arguments */
 
 list2:   /* empty */
        | exprs
