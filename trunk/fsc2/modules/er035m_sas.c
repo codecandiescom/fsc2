@@ -589,6 +589,34 @@ Var *gaussmeter_probe_orientation( Var *v )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *gaussmeter_command( Var *v )
+{
+	static char *cmd;
+
+
+	cmd = NULL;
+	vars_check( v, STR_VAR );
+	
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+		if ( er035m_sas_write( cmd ) == FAIL )
+		{
+			T_free( cmd );
+			er035m_sas_comm_fail( );
+		}
+
+		fsc2_usleep( ER035M_S_WAIT, UNSET );
+		T_free( cmd );
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
 
 /*****************************************************************************/
 /*                                                                           */
