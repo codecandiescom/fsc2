@@ -124,10 +124,14 @@ void start_graphics( void )
 	/* Create the forms for running experiments */
 
 	run_form = create_form_run( );
+	run_main_form = run_form->run;
 
 	CG.is_shown = UNSET;
 	if ( G.dim == 2 )
+	{
 		cut_form = create_form_cut( );
+		cut_main_form = cut_form->cut;
+	}
 
 	/* The forms still need some modifications - first set the pixmaps
 	   and help texts for the Undo and Print buttons */
@@ -311,7 +315,7 @@ void start_graphics( void )
 			if ( display_h < WIN_MIN_HEIGHT )
 				display_h = WIN_MIN_HEIGHT;
 
-			fl_set_form_size( run_form->run, display_w, display_h );
+			fl_set_form_size( run_main_form, display_w, display_h );
 		}
 
 		if ( XValue & flags && YValue & flags )
@@ -319,7 +323,7 @@ void start_graphics( void )
 			display_x += border_offset_x - 1;
 			display_y += border_offset_y - 1;
 
-			fl_set_form_position( run_form->run, display_x, display_y );
+			fl_set_form_position( run_main_form, display_x, display_y );
 			needs_pos = SET;
 		}
 	}
@@ -332,25 +336,25 @@ void start_graphics( void )
 				display_w = WIN_MIN_2D_WIDTH;
 		}
 
-		fl_set_form_geometry( run_form->run, display_x, display_y,
+		fl_set_form_geometry( run_main_form, display_x, display_y,
 							  display_w, display_h );
 		needs_pos = SET;
 	}
 
-	fl_show_form( run_form->run, needs_pos ?
+	fl_show_form( run_main_form, needs_pos ?
 				  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE, 
 				  FL_FULLBORDER, "fsc2: Display" );
 	display_has_been_shown = SET;
 
-	G.d = FL_FormDisplay( run_form->run );
+	G.d = FL_FormDisplay( run_main_form );
 
 	/* Set minimum size for display window and switch on full scale button */
 
 	if ( G.dim == 1 )
-		fl_winminsize( run_form->run->window,
+		fl_winminsize( run_main_form->window,
 					   WIN_MIN_1D_WIDTH, WIN_MIN_HEIGHT );
 	else
-		fl_winminsize( run_form->run->window,
+		fl_winminsize( run_mainform->window,
 					   WIN_MIN_2D_WIDTH, WIN_MIN_HEIGHT );
 
 	fl_set_button( run_form->full_scale_button, 1 );
@@ -391,14 +395,14 @@ void start_graphics( void )
 
 	if ( G.is_init )
 	{
-		fl_set_form_atclose( run_form->run, run_form_close_handler, NULL );
+		fl_set_form_atclose( run_main_form, run_form_close_handler, NULL );
 		G_struct_init( );
 	}
 
 	if ( G.dim == 1 )
 		redraw_all_1d( );
 
-	fl_raise_form( run_form->run );
+	fl_raise_form( run_main_form );
 	XFlush( G.d );
 }
 
@@ -847,21 +851,21 @@ void stop_graphics( void )
 		}
 	}
 
-	if ( run_form && fl_form_is_visible( run_form->run ) )
+	if ( run_form && fl_form_is_visible( run_main_form ) )
 	{
-		display_x = run_form->run->x;
-		display_y = run_form->run->y;
-		display_w = run_form->run->w;
-		display_h = run_form->run->h;
+		display_x = run_main_form->x;
+		display_y = run_main_form->y;
+		display_w = run_main_form->w;
+		display_h = run_main_form->h;
 
-		fl_hide_form( run_form->run );
+		fl_hide_form( run_main_form );
 	}
 	else
 		display_has_been_shown = UNSET;
 
 	if ( run_form )
 	{
-		fl_free_form( run_form->run );
+		fl_free_form( run_main_form );
 		run_form = NULL;
 	}
 

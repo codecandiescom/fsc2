@@ -170,9 +170,13 @@ bool need_Serial_Port[ NUM_SERIAL_PORTS ];
 bool just_testing = UNSET;
 
 FD_fsc2 *main_form;
+FL_FORM *fsc2_main_form
 FD_run *run_form;
+FL_FORM *run_main_form;
 FD_input_form *input_form;
+FL_FORM *input_main_form;
 FD_cut *cut_form;
+FD_FORM *cut_main_form;
 
 int I_am = PARENT;
 int pd[ 4 ];                    /* pipe descriptors */
@@ -236,11 +240,15 @@ extern bool need_GPIB;
 extern bool need_Serial_Port[ NUM_SERIAL_PORTS ];
 
 extern bool just_testing;
-extern FD_fsc2 *main_form;
-extern FD_run *run_form;
-extern FD_input_form *input_form;
-extern FD_cut *cut_form;
 
+extern FD_fsc2 *main_form;
+extern FL_FORM *fsc2_main_form
+extern FD_run *run_form;
+extern FL_FORM *run_main_form;
+extern FD_input_form *input_form;
+extern FL_FORM *input_main_form;
+extern FD_cut *cut_form;
+extern FD_FORM *cut_main_form;
 
 extern int I_am;
 extern int pd[ ];                  /* pipe descriptors */
