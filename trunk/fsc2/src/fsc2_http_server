@@ -347,7 +347,7 @@ sub serve_main {
 
 	$body .= "<H2>Output browser:</H2>$crlf<P><PRE>$txt</PRE></P>$crlf"
 		if defined $txt;
-	$body .= "<HR><ADDRESS>fsc2 web server v$version at $hostname Port " .
+	$body .= "<HR><ADDRESS>fsc2 HTTP server v$version at $hostname Port " .
 			 "$port</ADDRESS>$crlf</BODY></HTML>$crlf";
 
 	print "Content-Length: " . length( $body ) . "$crlf$crlf";
@@ -460,7 +460,7 @@ sub not_found {
 			   "</HEAD><BODY>$crlf" .
 			   "<H1>Not Found</H1>$crlf" .
 			   "<P>The requested URL ($file) was not found.</P>$crlf" .
-			   "<HR><ADDRESS>fsc2 web server v$version at $hostname " .
+			   "<HR><ADDRESS>fsc2 HTTP server v$version at $hostname " .
 			   "Port $port</ADDRESS>$crlf</BODY></HTML>$crlf";
 
 	print "HTTP/1.1 404 Not Found$crlf" . def_txt( 0, $maj, $min ) .
@@ -488,7 +488,7 @@ sub unsupported_request {
 		       "<H1>Not implemented</H1>$crlf" .
 		       "<P>Sorry, the server understands GET and HEAD requests " .
 			   "only.</P>$crlf" .
-		       "</HR><ADDRESS>fsc2 web server v$version at $hostname " .
+		       "</HR><ADDRESS>fsc2 HTTP server v$version at $hostname " .
 			   "Port $port</ADDRESS>$crlf</BODY></HTML>$crlf";
 
 	print "HTTP/1.1 501 Not implemented$crlf" . def_txt( 0, $maj, $min ) .
@@ -516,7 +516,7 @@ sub illegal_request {
 		       "<H1>Bad Request</H1>$crlf" .
 		       "<P>Your browser send a request that this server could not " .
 		       "understand</P>$crlf" .
-		       "<HR><ADDRESS>fsc2 web server v$version at $hostname " .
+		       "<HR><ADDRESS>fsc2 HTTP server v$version at $hostname " .
 			   "Port $port</ADDRESS>$crlf</BODY></HTML>$crlf";
 
 	print "HTTP/1.1 400 Bad Request$crlf" . def_txt( 0, $maj, $min ) .
@@ -547,7 +547,7 @@ sub missing_host_field {
 		   	   "understand:$crlf" .
 		   	   "Client sent HTTP/1.1 request without hostname (see RFC2616 " .
 		   	   "section 14.23)</P>$crlf" .
-			   "</HR><ADDRESS>fsc2 web server v$version at $hostname " .
+			   "</HR><ADDRESS>fsc2 HTTP server v$version at $hostname " .
 			   "Port $port</ADDRESS>$crlf</BODY></HTML>$crlf";
 
 	print "HTTP/1.1 400 Bad Request$crlf" . def_txt( 0, $maj, $min ) .
