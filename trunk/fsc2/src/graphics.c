@@ -290,7 +290,7 @@ static void set_default_sizes( void )
 					display_1d_w = GI_sizes.WIN_MIN_1D_WIDTH;
 				if ( display_1d_h < GI_sizes.WIN_MIN_HEIGHT )
 					display_1d_h = GI_sizes.WIN_MIN_HEIGHT;
-				is_1d_pos = SET;
+				is_1d_size = SET;
 			}
 
 			if ( XValue & flags && YValue & flags )
@@ -311,10 +311,10 @@ static void set_default_sizes( void )
 			if ( WidthValue & flags && HeightValue & flags )
 			{
 				if ( display_2d_w < GI_sizes.WIN_MIN_2D_WIDTH )
-					display_2d_w = GI_sizes.WIN_MIN_1D_WIDTH;
+					display_2d_w = GI_sizes.WIN_MIN_2D_WIDTH;
 				if ( display_2d_h < GI_sizes.WIN_MIN_HEIGHT )
 					display_2d_h = GI_sizes.WIN_MIN_HEIGHT;
-				is_2d_pos = SET;
+				is_2d_size = SET;
 			}
 
 			if ( XValue & flags && YValue & flags )
@@ -1244,24 +1244,49 @@ void stop_graphics( void )
 		}
 	}
 
+	/* Store positions and sizes of display windows (unless they have
+	   been set via command line options, we don't want to override the
+	   user settings). Afterwards remove the windows. */
+
 	if ( GUI.run_form_1d && fl_form_is_visible( GUI.run_form_1d->run_1d ) )
 	{
-		display_1d_x = GUI.run_form_1d->run_1d->x;
-		display_1d_y = GUI.run_form_1d->run_1d->y;
-		display_1d_w = GUI.run_form_1d->run_1d->w;
-		display_1d_h = GUI.run_form_1d->run_1d->h;
+		if ( ! is_1d_pos )
+		{
+			display_1d_x = GUI.run_form_1d->run_1d->x;
+			display_1d_y = GUI.run_form_1d->run_1d->y;
+		}
+
+		if ( ! is_1d_size )
+		{
+			display_1d_w = GUI.run_form_1d->run_1d->w;
+			display_1d_h = GUI.run_form_1d->run_1d->h;
+		}
+
 		is_1d_pos = is_1d_size = SET;
 		fl_hide_form( GUI.run_form_1d->run_1d );
+		fl_free_form( GUI.run_form_1d->run_1d );
+		GUI.run_form_1d = NULL;
 	}
 
 	if ( GUI.run_form_2d && fl_form_is_visible( GUI.run_form_2d->run_2d ) )
 	{
-		display_2d_x = GUI.run_form_2d->run_2d->x;
-		display_2d_y = GUI.run_form_2d->run_2d->y;
-		display_2d_w = GUI.run_form_2d->run_2d->w;
-		display_2d_h = GUI.run_form_2d->run_2d->h;
+		if ( ! is_2d_pos )
+		{
+			display_2d_x = GUI.run_form_2d->run_2d->x;
+			display_2d_y = GUI.run_form_2d->run_2d->y;
+		}
+
+		if ( ! is_2d_size )
+		{
+			display_2d_w = GUI.run_form_2d->run_2d->w;
+			display_2d_h = GUI.run_form_2d->run_2d->h;
+		}
+
 		is_2d_pos = is_2d_size = SET;
 		fl_hide_form( GUI.run_form_2d->run_2d );
+
+		fl_free_form( GUI.run_form_2d->run_2d );
+		GUI.run_form_2d = NULL;
 	}
 
 	for ( m = G1.marker; m != NULL; m = mn )
@@ -1269,18 +1294,6 @@ void stop_graphics( void )
 		XFreeGC( G.d, m->gc );
 		mn = m->next;
 		m = MARKER_P T_free( m );
-	}
-
-	if ( GUI.run_form_1d )
-	{
-		fl_free_form( GUI.run_form_1d->run_1d );
-		GUI.run_form_1d = NULL;
-	}
-
-	if ( GUI.run_form_2d )
-	{
-		fl_free_form( GUI.run_form_2d->run_2d );
-		GUI.run_form_2d = NULL;
 	}
 
 	if ( G_stored )

@@ -75,8 +75,17 @@ see also the man page for X for a description of correct formats of
 geometry strings.
 
 @item @option{-displayGeometry geometry_string}
-Sets the preferred size and position for the display window, i.e.@: the
-window with the measured data.
+Sets the preferred size and position for the display windows, i.e.@: the
+windows with the measured data. This setting is used for both the 1D and
+2D data display window unless one of the next two options is given.
+
+@item @option{-display1dGeometry geometry_string}
+Sets the preferred size and position for the 1D data display windows,
+overrides the setting of the @option{-displayGeometry} option.
+
+@item @option{-display2dGeometry geometry_string}
+Sets the preferred size and position for the 2D data display windows,
+overrides the setting of the @option{-displayGeometry} option.
 
 @item @option{-cutGeometry geometry_string}
 Sets the preferred size and position for the window with the

@@ -45,7 +45,7 @@ anymore.
 Displays a short help text and exits.
 .TP
 \fB\-size\fR \fIsize\fP
-This option specifies the sizes of the window to be used etc. Use either
+This option specifies the sizes of the windows to be used etc. Use either
 \'Small\' for low resolution displays or \'Large\' for high resolution
 displays.  If not specified \fB\size\fR will default to \'Small\' for
 displays with a resolution of less than 1152x870, for all other to \'Large\'.
@@ -55,7 +55,13 @@ This option specifies the preferred size and position of the main window;
 see \fIX(1)\fP.
 .TP
 \fB\-displayGeometry\fR \fIgeometry\fP
-Specifies the preferred size and position of the display window.
+Specifies the preferred size and position of the display windows.
+.TP
+\fB\-display1dGeometry\fR \fIgeometry\fP
+Specifies the preferred size and position of the 1D data display window.
+.TP
+\fB\-display2dGeometry\fR \fIgeometry\fP
+Specifies the preferred size and position of the 2D data display window.
 .TP
 \fB\-cutGeometry\fR \fIgeometry\fP
 Specifies the preferred size and position of the cross section window.
@@ -83,7 +89,7 @@ Sets the size (in pixels) of the font to be used in the popup help texts.
 Size (in pixels) of the font to be used for the file selector.
 .TP
 \fB\-axisFont\fR \fIfont\fP
-This option sets the font to be used in the axes in the display window.  You
+This option sets the font to be used in the axes in the display windows.  You
 will find the various X fonts in the /usr/lib/X11/fonts directory.  To find
 out about available X fonts the tools \fIxlsfonts(1)\fP, \fIxfontsel(1)\fP and
 \fIxfd(1)\fP can be rather useful. When you specify a font be sure to enclose
@@ -115,7 +121,13 @@ The program understands the following X resource names:
 Specifies the preferred size and position of the main window.
 .TP
 \fBdisplayGeometry\fR
-Specifies the preferred size and position of the display window.
+Specifies the preferred size and position of the display windows.
+.TP
+\fBdisplay1dGeometry\fR
+Specifies the preferred size and position of the 1D data display window.
+.TP
+\fBdisplay2dGeometry\fR
+Specifies the preferred size and position of the 2D data display window.
 .TP
 \fBcutGeometry\fR
 Specifies the preferred size and position of the cross section window.
@@ -148,7 +160,7 @@ Sets the size (in pixels) of the font to be used in the popup help texts.
 Size (in pixels) of the font to be used for the file selector.
 .TP
 \fBaxisFont\fR
-This option sets the font to be used in the axes in the display window.
+This option sets the font to be used in the axes in the display windows.
 .TP
 \fBstopMouseButton\fR
 Specifies the mouse button that must be used to activate the stop button while

@@ -66,9 +66,9 @@ FL_resource xresources[ N_APP_OPT ] = {
 	  "0", sizeof( int ) },
 	{ "displayGeometry", "*.displayGeometry", FL_STRING, xdisplayGeoStr,
 	  "", 64 },
-	{ "1d-displayGeometry", "*.1d-displayGeometry", FL_STRING,
+	{ "display1dGeometry", "*.display1dGeometry", FL_STRING,
 	  x_1d_displayGeoStr, "", 64 },
-	{ "2d-displayGeometry", "*.2d-displayGeometry", FL_STRING,
+	{ "display2dGeometry", "*.display2dGeometry", FL_STRING,
 	  x_2d_displayGeoStr, "", 64 },
 	{ "cutGeometry", "*.cutGeometry", FL_STRING, xcutGeoStr, "", 64 },
 	{ "toolGeometry", "*.toolGeometry", FL_STRING, xtoolGeoStr, "", 64 },
@@ -505,13 +505,13 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 	app_opt[ DISPLAYGEOMETRY ].argKind    = XrmoptionSepArg;
 	app_opt[ DISPLAYGEOMETRY ].value      = ( caddr_t ) NULL;
 
-	app_opt[ DISPLAY1DGEOMETRY ].option   = T_strdup( "-1d-displayGeometry" );
-	app_opt[ DISPLAY1DGEOMETRY ].specifier= T_strdup( "*.1d-displayGeometry" );
+	app_opt[ DISPLAY1DGEOMETRY ].option   = T_strdup( "-display1dGeometry" );
+	app_opt[ DISPLAY1DGEOMETRY ].specifier= T_strdup( "*.display1dGeometry" );
 	app_opt[ DISPLAY1DGEOMETRY ].argKind  = XrmoptionSepArg;
 	app_opt[ DISPLAY1DGEOMETRY ].value    = ( caddr_t ) NULL;
 
-	app_opt[ DISPLAY2DGEOMETRY ].option   = T_strdup( "-2d-displayGeometry" );
-	app_opt[ DISPLAY2DGEOMETRY ].specifier= T_strdup( "*.2d-displayGeometry" );
+	app_opt[ DISPLAY2DGEOMETRY ].option   = T_strdup( "-display2dGeometry" );
+	app_opt[ DISPLAY2DGEOMETRY ].specifier= T_strdup( "*.display2dGeometry" );
 	app_opt[ DISPLAY2DGEOMETRY ].argKind  = XrmoptionSepArg;
 	app_opt[ DISPLAY2DGEOMETRY ].value    = ( caddr_t ) NULL;
 
