@@ -444,9 +444,15 @@ machine_name     := $(shell                                 \
 # Try to include a configuration file for machines that are listed in the
 # 'machines' subdirectory. This makes configuring a new fsc2 version for a
 # certain machine much simpler since only the configuration file must be
-# copied instead of having always to edit this Makefile.
+# copied instead of always having to edit this Makefile. The variable
+# 'MACHINE_INCLUDE' gets set to the name of the machine specific file
+# to be included (if one exists, and only then we can include it;-) in
+# order to be able to automatically recompile when the file changed.
 
--include $(mchdir)/$(machine_name)
+MACHINE_INCLUDE := $(shell ls $(mchdir)/$(machine_name) 2>/dev/null)
+ifneq ($(MACHINE_INCLUDE),)
+	include $(MACHINE_INCLUDE)
+endif
 
 
 # Pass lots of variables to the source files...
@@ -647,11 +653,10 @@ export            # export all variables to sub-makes
 
 .SUFFIXES:
 
-.PHONY: all config src modules utils docs built      \
-		install-strip install uninstall http_server  \
-		version test clean distclean                 \
-		mostlyclean tags pack MANIFEST               \
-		me6x00 ni6601 witio_48                       \
+.PHONY: all config src modules utils docs built        \
+		install-strip install uninstall http_server    \
+		version test cleanup clean pack tags MANIFEST  \
+		me6x00 ni6601 ni_daq rulbus witio_48
 
 
 ############## End of configuration section ##############
@@ -708,6 +713,14 @@ ni6601:
 	cd ni6601; ./INSTALL; cd $(fdir)
 
 
+ni_daq:
+	cd ni_daq; ./INSTALL; cd $(fdir)
+
+
+rulbus:
+	cd rulbus; ./INSTALL; cd $(fdir)
+
+
 witio_48:
 	cd witio_48; ./INSTALL; cd $(fdir)
 
@@ -715,7 +728,7 @@ witio_48:
 # Create a header file with configuration information from the contents of
 # CONFFLAGS if either the Makefile got changed or it does not already exist
 
-fsc2_config.h: Makefile
+fsc2_config.h: Makefile $(MACHINE_INCLUDE)
 	@if [ -e fsc2_config.h ]; then           \
 		echo "Recreating fsc2_config.h...";  \
 	else                                     \
@@ -823,44 +836,36 @@ version:
 	fi
 
 
-# 'clean' deletes all the files remaining from the compilation and not needed
-# for an installation while 'distclean' also removes all executables, shared
-# libraries and documentation. 'mostly_clean' is nearly identical to
-# 'distclean' but does not remove the documentation.
+# 'cleanup' deletes all the files created during the compilation but not
+# needed for an installation, while 'clean' also removes all executables,
+# shared libraries and documentation.
+
+cleanup:
+	$(MAKE) -C $(sdir) cleanup
+	$(MAKE) -C $(mdir) cleanup
+	$(MAKE) -C $(ddir) cleanup
+	$(MAKE) -C me6x00 cleanup
+	$(MAKE) -C ni6601 cleanup
+	$(MAKE) -C ni_daq cleanup
+	$(MAKE) -C rulbus cleanup
+	$(MAKE) -C witio_48 cleanup
 
 clean:
 	$(MAKE) -C $(sdir) clean
 	$(MAKE) -C $(mdir) clean
 	$(MAKE) -C $(ddir) clean
-	$(MAKE) -C me6x00 clean
-	$(MAKE) -C ni6601 clean
-	$(MAKE) -C witio_48 clean
-	$(MAKE) -C ni_daq clean
-	$(MAKE) -C rulbus clean
-
-distclean:
-	$(MAKE) -C $(sdir) distclean
-	$(MAKE) -C $(mdir) distclean
-	$(MAKE) -C $(ddir) distclean
 ifdef WITH_HTTP_SERVER
 	if [ -e $(ldir)/Makefile ]; then   \
 		$(MAKE) -C $(ldir) distclean;  \
 	fi
 endif
-	$(MAKE) -C $(udir) distclean
+	$(MAKE) -C $(udir) clean
 	$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog fsc2_config.h *~
-	$(MAKE) -C me6x00 distclean
-	$(MAKE) -C ni6601 distclean
-	$(MAKE) -C witio_48 distclean
-	$(MAKE) -C ni_daq distclean
-	$(MAKE) -C rulbus distclean
-
-mostlyclean:
-	$(MAKE) -C $(sdir) distclean
-	$(MAKE) -C $(mdir) distclean
-	$(MAKE) -C $(ddir) clean
-	$(MAKE) -C $(udir) distclean
-	$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog *~
+	$(MAKE) -C me6x00 clean
+	$(MAKE) -C ni6601 clean
+	$(MAKE) -C ni_daq clean
+	$(MAKE) -C rulbus clean
+	$(MAKE) -C witio_48 clean
 
 
 # Create a tags file to be used with emacs or vi
@@ -878,7 +883,7 @@ test:
 # Clean up everything for a distribution and create a zipped tarball
 
 pack:
-	@$(MAKE) distclean
+	@$(MAKE) clean
 	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tar.gz
 
 
@@ -886,7 +891,7 @@ pack:
 
 packages:
 	@for dir in Fcntl_Lock me6x00 ni6601 ni_daq rulbus witio_48; do  \
-		$(MAKE) -C $$dir distclean;                                  \
+		$(MAKE) -C $$dir clean;                                      \
 		tar -c $$dir | gzip -c -9 > ../$$dir.tar.gz;                 \
 	done
 
@@ -894,7 +899,7 @@ packages:
 # Creates the MANIFEST file with the list of relevant files
 
 MANIFEST:
-	@$(MAKE) distclean
+	@$(MAKE) clean
 	@echo '# List of all (necessary) files of the package' > MANIFEST
 	@echo '#' >> MANIFEST
 	@echo -n '# $$Id' >> MANIFEST
