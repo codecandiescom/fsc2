@@ -406,7 +406,7 @@ Var *f_wait( Var *v )
 
 
 /*-------------------------------------------------------------------*/
-/* f_init_1d() has to be called to initialise the display system for */
+/* f_init_1d() has to be called to initialize the display system for */
 /* 1-dimensional experiments.                                        */
 /* Arguments:                                                        */
 /* 1. Number of curves to be shown (optional, defaults to 1)         */
@@ -522,7 +522,7 @@ Var *f_init_1d( Var *v )
 
 
 /*-------------------------------------------------------------------*/
-/* f_init_2d() has to be called to initialise the display system for */
+/* f_init_2d() has to be called to initialize the display system for */
 /* 2-dimensional experiments.                                        */
 /*-------------------------------------------------------------------*/
 
