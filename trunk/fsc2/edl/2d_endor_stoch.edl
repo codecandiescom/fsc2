@@ -185,7 +185,6 @@ FOR I = 1 : N_steps {
 }
 
 fsave( F1, "\# List of frequencies in a run (in MHz)\n\n" );
-ffsave( F1, "\n" );
 save( F1, Stoch * 1.0e-6 );
 fsave( F1, "\n" );
 
