@@ -16,12 +16,12 @@
 Function prints text into the output browser in the main form of
 @b{fsc2}.  It needs a @i{format string}
 @cindex format string
-as its very first argument. Ths @i{format string} can contain any text
+as its very first argument. The @i{format string} can contain any text
 as well as a special character, @code{#},
 @findex # @r{(in @code{print()} function)}
 that is used as a placeholder for data to be printed in its place.
 Here's a first simple example: You want to print the value of a variable
-called @code{I}, that just has a value of 3. Now,
+called @code{I}, that has been assigned a value of 3. Now,
 
 @example
 print( "The value of I is #.", I );
@@ -55,7 +55,7 @@ The sine of 0.500000 is: 0.479426
 
 There are special sequences allowed in the @i{format string}. They all
 start with an @i{escape character}, the backslash @code{\}. Here's a
-list of all the recognized special sequences:
+list of all the recognised special sequences:
 
 @table @samp
 @cindex escape characters (in @code{print()} function)
@@ -68,7 +68,7 @@ Embed a tabulator character, tab stops are set at every eighth character.
 Prints a backslash, @code{\}, thus switching off the special meaning of the
 backslash as an escape character.
 @item \"
-Prints a quote - use it to be able to embed quotes into the @i{format
+Prints a quote - use it to embed quotes into the @i{format
 string}.
 @item \#
 Prints a @code{#}, thus switching off the special meaning of the
@@ -82,7 +82,7 @@ the test run.
 
 @item init_1d()
 @findex init_1d()
-Initializes the display for one-dimensional experiments - without a call to
+Initialises the display for one-dimensional experiments - without a call to
 this function no data will be displayed. The function takes up to six
 arguments but all of them are optional. They are:
 
@@ -117,7 +117,7 @@ init_1d( [ n_curves [ , n_points [ , start, increment ] ], ]
          [ x_label [ , y_label ] ] )
 @end example
 @noindent
-This means that the function can be called in all of the follwing ways:
+This means that the function can be called in all of the following ways:
 
 @example
 init_1d( n_curves, n_points, start, increment, x_label, y_label )
@@ -134,12 +134,12 @@ init_1d( )
 @end example
 
 In error messages the start value and the increment of the data displayed at
-the x-axis are (in contrast to the point numbers) refered to as `real world
+the x-axis are (in contrast to the point numbers) referred to as `real world
 coordinates'.
 
 @item init_2d()
 @findex init_2d()
-Initializes the display for two-dimensional experiments - without a call to
+Initialises the display for two-dimensional experiments - without a call to
 this function no data will be displayed. The function takes up to nine
 arguments but all of them are optional. They are:
 
@@ -226,9 +226,9 @@ as arguments, no argument defaults to the first curve.
 @item get_file( )
 @findex get_file()
 Opens a new file and returns a unique identifier for the file that can
-be stored in an integer variable ans is to be used in calls to functions
+be stored in an integer variable and is to be used in calls to functions
 of the @code{save_xxx()}-family. If no argument is given a file selector
-is shown and to let the user choose a file. If an argment s given (that
+is shown and to let the user choose a file. If an argument s given (that
 has to be a string!) the file with this name is opened.  If opening the
 file fails the user is asked to select a different file name.  If the
 user cancels the selection of a file she is asked for confirmation since
@@ -259,13 +259,13 @@ Floating point data
 Strings (with no interpretation of escape sequences, see also
 @code{fsave()})
 @item
-One-dimensional arrays (or slices of arrays) of integer or floationg point
+One-dimensional arrays (or slices of arrays) of integer or floating point
 type
 @item
 Complete more-dimensional arrays
 @end itemize
 
-This form of the function saves data in an unformated fashion, i.e.@:
+This form of the function saves data in an unformatted fashion, i.e.@:
 each data value is written onto a new line. The only exception is
 more-dimensional arrays - here a empty line is printed between the
 individual slices of the array. Here's an example: The array
@@ -332,7 +332,7 @@ X[ 3, 2 ] = 6
 @item save_program()
 @findex save_program()
 This functions writes the @b{EDL} program into a file. As usual, the
-first arguiment may be a file identifier - the same rules apply as for
+first argument may be a file identifier - the same rules apply as for
 @code{save()} and @code{fsave()}. The second argument may be a string
 that is prepended to each line of the program, i.e.@: a comment character
 to make other programs like @code{MATHLAB} or @code{octave} skip these
@@ -353,13 +353,13 @@ written into the file.
 
 The first argument may as usual be a file identifier. The second
 argument is again a string to be prepended to each line of the
-comment. The third argument is a string that wil appear in the comment
-editor when it is opened - use "@code{\n}" to seperate the lines of a
+comment. The third argument is a string that will appear in the comment
+editor when it is opened - use "@code{\n}" to separate the lines of a
 multi-line text. The last argument is the label string to be shown on
 top of the editor - it defaults to "Please enter a comment:".
 @end table
 
-@subsection Auxillary functions
+@subsection Auxiliary functions
 
 @table @samp
 @item wait()
@@ -383,14 +383,14 @@ it will return 3.
 @item size()
 @findex size()
 The function takes two arguments, an array and one of the dimensions of the
-aray, and returns the size of this dimension. I.e.@: for an array defined as
+array, and returns the size of this dimension. I.e.@: for an array defined as
 @code{X[ 4, 2, 5 ]} @code{size( X, 3 )} will return 5.
 
 @item sizes()
 @findex sizes()
-Ths function is similar to @code{size()} but only takes an array as
+This function is similar to @code{size()} but only takes an array as
 argument an returns a new one-dimensional array with the sizes of the
-different dimensions. I.e.@:, use it the follwing way:
+different dimensions. I.e.@:, use it the following way:
 
 @example
 X[ 4, 2, 5 ]
@@ -443,7 +443,7 @@ round( 8.6 ) = 9     round( -8.6 ) = -8
 
 @item abs()
 @findex abs()
-Returns the absolut value of an integer or floating point number.
+Returns the absolute value of an integer or floating point number.
 
 @item sqrt()
 @findex sqrt()
@@ -457,7 +457,7 @@ Returns a pseudo-random number in the interval @w{[0, 1]}.
 @item set_seed()
 @findex set_seed()
 Sets a seed for the random number generator used in the function
-@code{random()} function. The argument has to be a positve integer.
+@code{random()} function. The argument has to be a positive integer.
 
 @item sin()
 @findex sin()
