@@ -204,7 +204,7 @@ static void unpack_and_accept( char *ptr )
 				break;
 
 			default :
-				eprint( UNSET, FATAL, "Internal communication error at "
+				eprint( FATAL, UNSET, "Internal communication error at "
 						"%s:%d.\n", __FILE__, __LINE__ );
 				THROW( EXCEPTION )
 		}
