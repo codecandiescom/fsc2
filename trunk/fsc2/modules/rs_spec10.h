@@ -108,7 +108,7 @@ Var *ccd_camera_binning( Var *v );
 Var *ccd_camera_binning_method( Var *v );
 Var *ccd_camera_exposure_time( Var *v );
 Var *ccd_camera_clear_cycles( Var *v );
-Var *ccd_camera_get_picture( Var *v );
+Var *ccd_camera_get_image( Var *v );
 Var *ccd_camera_get_spectrum( Var *v );
 Var *ccd_camera_temperature( Var *v );
 Var *ccd_camera_pixel_size( Var *v );
