@@ -42,6 +42,7 @@ static Var *CV;
 
 
 %token NS_TOKEN US_TOKEN MS_TOKEN S_TOKEN
+%token NV_TOKEN UV_TOKEN MV_TOKEN V_TOKEN
 %type <vptr> expr line arrass list1 list2 list3 unit
 
 %left EQ LT LE GT GE
@@ -132,6 +133,10 @@ unit:    /* empty */               { $$ = vars_push( INT_VAR, 1L ); }
        | US_TOKEN                  { $$ = vars_push( INT_VAR, 1000L ); }
        | MS_TOKEN                  { $$ = vars_push( INT_VAR, 1000000L ); }
        | S_TOKEN                   { $$ = vars_push( INT_VAR, 1000000000L ); }
+       | NV_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
+       | UV_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
+       | MV_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
+       | V_TOKEN                   { $$ = vars_push( FLOAT_VAR, 1.o ); }
 ;
 
 arhs:    /* empty */               { vars_arr_init( vars_push( UNDEF_VAR ) ); }

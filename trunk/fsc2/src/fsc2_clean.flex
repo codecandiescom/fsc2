@@ -60,20 +60,35 @@ INT      [+-]?[0-9]+
 EXPO     [EDed][+-]?{INT}
 FLOAT    ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
-NS       N(ANO)?_?S(ECOND(S)?)?
-US       (MICRO?_?S(ECOND(S)?)?)|(US)
-MS       M(ILLI)?_?S(SECOND(S)?)?
-S        S(ECOND(S)?)?
-		 
+NS       N(ANO)?S(ECOND(S)?)?
+US       (MICRO?S(ECOND(S)?)?)|(US)
+MS       M(ILLI)?S(SECOND(S)?)?
+S        S(ECOND(S)?)
+
+NV       N(ANO)?V(OLT(S)?)?
+UV       (MICRO?V(OLT(S)?)?)|(UV)
+MV       M(ILLI)?V(OLT(S)?)?
+V        V(OLT(S)?)
+
 INS      {INT}{NS}
 IUS      {INT}{US}
 IMS      {INT}{MS}
 IS       {INT}{S}
-		 
+
+INV      {INT}{NV}
+IUV      {INT}{UV}
+IMV      {INT}{MV}
+IV       {INT}{V}
+
 FNS      {FLOAT}{NS}
 FUS      {FLOAT}{US}
 FMS      {FLOAT}{MS}
 FS       {FLOAT}{S}
+
+FNS      {FLOAT}{NV}
+FUS      {FLOAT}{UV}
+FMS      {FLOAT}{MV}
+FS       {FLOAT}{V}
 
 WLWS     ^[\t ]*\n
 LWS      ^[\t ]+
@@ -274,6 +289,31 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 {FMS}       time_spec( yytext, yyleng, "\x04msec" );
 {FS}/(;|,)  time_spec( yytext, yyleng, "\x04sec" );
 {FS}        time_spec( yytext, yyleng, "\x04sec" );
+
+{NV}/(,|;)  printf( "\x04nsec" );
+{NV}        printf( "\x04nsec" );
+{UV}/(;|,)  printf( "\x04usec" );
+{UV}        printf( "\x04usec" );
+{MV}/(;|,)  printf( "\x04msec" );
+{MV}        printf( "\x04msec" );
+{V}/(;|,)   printf( "\x04sec" );
+{V}         printf( "\x04sec" );
+{INV}/(;|,) time_spec( yytext, yyleng, "\x04nvolt" );
+{INV}       time_spec( yytext, yyleng, "\x04nvolt" );
+{IUV}/(;|,) time_spec( yytext, yyleng, "\x04uvolt" );
+{IUV}       time_spec( yytext, yyleng, "\x04uvolt" );
+{IMV}/(;|,) time_spec( yytext, yyleng, "\x04mvolt" );
+{IMV}       time_spec( yytext, yyleng, "\x04mvolt" );
+{IV}/(;|,)  time_spec( yytext, yyleng, "\x04volt" );
+{IV}        time_spec( yytext, yyleng, "\x04volt" );
+{FNV}/(;|,) time_spec( yytext, yyleng, "\x04volt" );
+{FNV}       time_spec( yytext, yyleng, "\x04volt" );
+{FUV}/(;|,) time_spec( yytext, yyleng, "\x04volt" );
+{FUV}       time_spec( yytext, yyleng, "\x04volt" );
+{FMV}/(;|,) time_spec( yytext, yyleng, "\x04volt" );
+{FMV}       time_spec( yytext, yyleng, "\x04volt" );
+{FV}/(;|,)  time_spec( yytext, yyleng, "\x04volt" );
+{FV}        time_spec( yytext, yyleng, "\x04volt" );
 
 			/* all the rest is simply copied to the output */
 

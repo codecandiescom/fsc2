@@ -57,6 +57,7 @@ static Var *CV;
 %token EQ LT LE GT GE
 
 %token NS_TOKEN US_TOKEN MS_TOKEN S_TOKEN
+%token NV_TOKEN UV_TOKEN MV_TOKEN V_TOKEN
 %type <vptr> expr unit list1
 
 
@@ -180,6 +181,10 @@ unit:    /* empty */               { $$ = vars_push( INT_VAR, 1L ); }
        | US_TOKEN                  { $$ = vars_push( INT_VAR, 1000L ); }
        | MS_TOKEN                  { $$ = vars_push( INT_VAR, 1000000L ); }
        | S_TOKEN                   { $$ = vars_push( INT_VAR, 1000000000L ); }
+       | NV_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
+       | UV_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
+       | MV_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
+       | V_TOKEN                   { $$ = vars_push( FLOAT_VAR, 1.o ); }
 ;
 
 /* list of indices for access of an array element */

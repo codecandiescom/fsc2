@@ -322,6 +322,12 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "\x4msec"   return MS_TOKEN;
 "\x4sec"    return S_TOKEN;
 
+"\x4nvolt"  return NV_TOKEN;
+"\x4uvolt"  return UV_TOKEN;
+"\x4mvolt"  return MV_TOKEN;
+"\x4volt"   return V_TOKEN;
+
+
 			/* handling of invalid input */
 .           {
 				eprint( FATAL, "%s:%ld: Invalid input in PREPARATIONS "
