@@ -445,10 +445,10 @@ static void set_default_sizes( void )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Function fo setting lots of default values for properties */
-/* of the display windows.                                   */
-/*-----------------------------------------------------------*/
+/*-------------------------------------------------*/
+/* Function for setting lots of default values for */
+/* properties of the display windows.              */
+/*-------------------------------------------------*/
 
 static void set_defaults( void )
 {
@@ -822,7 +822,7 @@ static void G_struct_init( void )
 	if ( keymask & Button3Mask )
 		G.raw_button_state |= 4;
 
-	/* Define colours for the curves (this could be made user-configurable)
+	/* Define colors for the curves (this could be made user-configurable)
 	   - this must happen before color creation */
 
 	G.colors[ 0 ] = FL_TOMATO;
@@ -830,7 +830,7 @@ static void G_struct_init( void )
 	G.colors[ 2 ] = FL_YELLOW;
 	G.colors[ 3 ] = FL_CYAN;
 
-	/* Create the different cursors and the colours needed for 2D displays */
+	/* Create the different cursors and the colors needed for 2D displays */
 
 	if ( first_time )
 	{
@@ -965,7 +965,7 @@ static void G_init_curves_1d( void )
 		cv->points = NULL;
 		cv->xpoints = NULL;
 
-		/* Create a GC for drawing the curve and set its colour */
+		/* Create a GC for drawing the curve and set its color */
 
 		cv->gc = XCreateGC( G.d, G1.canvas.pm, 0, 0 );
 		XSetForeground( G.d, cv->gc, fl_get_pixel( G.colors[ i ] ) );
@@ -1007,7 +1007,7 @@ static void G_init_curves_1d( void )
 		G.right_arrow_w = right_arrow_width;
 		G.right_arrow_h = right_arrow_width;
 
-		/* Create a GC for the font and set the appropriate colour */
+		/* Create a GC for the font and set the appropriate color */
 
 		cv->font_gc = XCreateGC( G.d, FL_ObjWin( G1.canvas.obj ), 0, 0 );
 		if ( G.font != NULL )
@@ -1082,7 +1082,7 @@ static void G_init_curves_2d( void )
 		cv->needs_recalc = UNSET;
 		cv->w = cv->h = 0;
 
-		/* Create a GC for drawing the curve and set its colour */
+		/* Create a GC for drawing the curve and set its color */
 
 		cv->gc = XCreateGC( G.d, G2.canvas.pm, 0, 0 );
 		XSetForeground( G.d, cv->gc, fl_get_pixel( G.colors[ i ] ) );
@@ -1124,7 +1124,7 @@ static void G_init_curves_2d( void )
 		G.right_arrow_w = right_arrow_width;
 		G.right_arrow_h = right_arrow_width;
 
-		/* Create a GC for the font and set the appropriate colour */
+		/* Create a GC for the font and set the appropriate color */
 
 		cv->font_gc = XCreateGC( G.d, FL_ObjWin( G2.canvas.obj ), 0, 0 );
 		if ( G.font != NULL )
@@ -1203,7 +1203,7 @@ void create_label_pixmap( Canvas *c, int coord, char *label )
 	width = XTextWidth( G.font, label, strlen( label ) ) + 10;
 	height = G.font_asc + G.font_desc + 5;
 
-	/* Create the intermediate pixmap, fill with the colour of the axis canvas
+	/* Create the intermediate pixmap, fill with the color of the axis canvas
 	   and draw the text */
 
     pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), width, height,
@@ -1969,7 +1969,7 @@ void fs_button_callback_1d( FL_OBJECT *a, long b )
 	UNUSED_ARGUMENT( a );
 	UNUSED_ARGUMENT( b );
 
-	/* Rescaling is useless if graphic isn't initialised */
+	/* Rescaling is useless if graphic isn't initialized */
 
 	if ( ! G.is_init )
 		return;
@@ -2018,7 +2018,7 @@ void fs_button_callback_2d( FL_OBJECT *a, long b )
 	UNUSED_ARGUMENT( a );
 	UNUSED_ARGUMENT( b );
 
-	/* Rescaling is useless if graphic isn't initialised */
+	/* Rescaling is useless if graphic isn't initialized */
 
 	if ( ! G.is_init )
 		return;
@@ -2444,7 +2444,7 @@ void rescale_1d( long new_nx )
 		max_x = MIN_1D_X_POINTS;
 
 	/* Make sure we don't rescale to less than the current number of
-	   points (or the minumum value, if larger) */
+	   points (or the minimum value, if larger) */
 
 	if ( new_nx < MIN_1D_X_POINTS )
 	{
