@@ -86,6 +86,14 @@ NUM_SERIAL_PORTS = 2
 IS_I386          = 1
 
 
+# This variable controls to whom mail with bug reports and crash messages will
+# be send - if not set no "Bug report" button will be shown. Please change
+# this only if you apply changes to the program yourself in which case sending
+# me bug reports or mails informing me about crashes wouldn't make sense.
+
+MAIL_ADDRESS   = Jens.Toerring@physik.fu-berlin.de
+
+
 ##############################################################################
 # Here follow settings determining the make process - which compiler and
 # tools to use as well as their respective options. Better leave this alone
@@ -127,11 +135,6 @@ mdir    := $(shell pwd)
 sdir    := $(mdir)/src
 adir    := $(mdir)/aux
 cdir    := $(mdir)/config
-
-
-# To whom mail with bug reports and crash messages will get send
-
-MAIL_ADDRESS   = Jens.Toerring@physik.fu-berlin.de
 
 
 # Set up a variable with the machines FQDN

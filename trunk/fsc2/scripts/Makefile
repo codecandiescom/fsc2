@@ -42,7 +42,7 @@ install_it:
 
 uninstall:
 	if [ -n "$(scripts)" ]; then  \
-		$(MAKE) uninstall_it;       \
+		$(MAKE) uninstall_it;     \
 	fi
 
 uninstall_it:
