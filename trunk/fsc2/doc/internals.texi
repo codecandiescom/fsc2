@@ -53,11 +53,11 @@ the experiment is run. When an experiment is restarted (without
 reloading the @code{EDL} file) only this third step is repeated.
 
 
-In the following what happens during the three steps of the execution
-of an @code{EDL} script will be explained in some more details. Then
-follows a real long section that tour de force through the sources of
-the porgram. This is hopefully going to be helpful for people that try
-eliminate bugs or even extend @code{fsc2}.
+In the following what happens during the three steps of the execution of
+an @code{EDL} script will be explained in some more details. Then
+follows a real long section that's a @i{tour de force} through the
+sources of the porgram. This is hopefully going to be helpful for people
+that try eliminate bugs or even extend @code{fsc2}.
 
 
 
@@ -531,19 +531,19 @@ debugging to allow access by all users (or at least you). Don't forget
 to reset the permissions when you're done.
 
 
-This point out of the way I'll now want to start a tour de force through
-the sources. When @code{fsc2} is invoked it starts at the code in
-@code{main()} in the file @file{fsc2.c}. After setting up lots of global
-variables and checking the command line options it tries to connect to a
-kind of daemon process or starts it if it's not already running.  This
-daemon is taking care of situations where @code{fsc2} is running in
-non-exclusive mode, i.e.@: more than instance of @code{fsc2} is to be
-run at the same time, and it will tell new instances about what they are
-allowed to do and what not to avoid more than one instance trying to
-access the same devices at the same time. It also is supposed to remove
-things like lock files, shared memory segments etc.@: should it ever
-happen that @code{fsc2} crashes that badly that it isn't able to do it
-itself.
+This point out of the way I'll now want to start the @i{tour de force}
+through the sources. When @code{fsc2} is invoked it starts with the
+@code{main()} function in the file @file{fsc2.c}. After setting up lots
+of global variables and checking the command line options it tries to
+connect to a kind of daemon process or starts it if it's not already
+running.  This daemon is taking care of situations where @code{fsc2} is
+running in non-exclusive mode, i.e.@: more than instance of @code{fsc2}
+is to be run at the same time, and it will tell new instances about what
+they are allowed to do and what not to avoid more than one instance
+trying to access the same devices at the same time. It also is supposed
+to remove things like lock files, shared memory segments etc.@: should
+it ever happen that @code{fsc2} crashes that badly that it isn't able to
+do it itself.
 
 
 When this hurdle has been taken the initialization of the graphics is
