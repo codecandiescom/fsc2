@@ -236,6 +236,7 @@ udir             := $(fdir)/utils
 ddir             := $(fdir)/doc
 cdir             := $(fdir)/config
 ldir             := $(fdir)/Fcntl_Lock
+mchdir           := $(fdir)/machines
 
 #MPATROL          := YES                  # define this in order to use mpatrol
 
@@ -304,10 +305,6 @@ EXEC_INSTALL     := install
 
 tagsfile         := $(fdir)/TAGS
 
-# Set up a variable with the machines FQDN
-
-machine_name     := $(shell hostname -f)
-
 
 # Check that the machine has a new libc, i.e. at least version 2 (which means
 # that /lib/libc.so.6 should exist), otherwise some problems with the older
@@ -318,131 +315,16 @@ ifneq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
 endif
 
 
-# Here's some stuff that makes it more convenient to make and install on
-# machines that are known well enough - for these machines one doesn't has
-# to edit the Makefile all the time...
+# Set up a variable with the machines FQDN
 
-INSTALL_MACHINE        := install-unknown
-UNINSTALL_MACHINE      := uninstall-unknown
+machine_name     := $(shell hostname -f 2>/dev/null)
 
-ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
-	OWNER              := fsc2
-	GROUP              := uucp
-	GPIB_LIBRARY       := JTT
-	NUM_SERIAL_PORTS   := 2
-	SERIAL_LOCK_DIR    := /var/lock
-	INSTALL_MACHINE    := install-$(machine_name)
-	UNINSTALL_MACHINE  := uninstall-$(machine_name)
-endif
 
-ifeq ($(machine_name),crowley.physik.fu-berlin.de)
-	OWNER              := fsc2
-	GROUP              := uucp
-	GPIB_LIBRARY       := JTT
-	GPIB_LOG_FILE      := /scratch/tmp/gpib.log
-	NUM_SERIAL_PORTS   := 1
-	SERIAL_LOCK_DIR    := /var/lock
-	INSTALL_MACHINE    := install-$(machine_name)
-	UNINSTALL_MACHINE  := uninstall-$(machine_name)
-endif
+# Here we try to include a Makefile for machines that we know well enough
+# so that we don't have to change this Makefile whenever there's a new
+# version
 
-ifeq ($(machine_name),door.physik.fu-berlin.de)
-	OWNER              := fsc2
-	GROUP              := uucp
-	GPIB_LIBRARY       := JTT
-	GPIB_LOG_FILE      := /scratch/tmp/gpib.log
-	NUM_SERIAL_PORTS   := 2
-	SERIAL_LOCK_DIR    := /var/lock
-	INSTALL_MACHINE    := install-$(machine_name)
-	UNINSTALL_MACHINE  := uninstall-$(machine_name)
-endif
-
-ifeq ($(machine_name),isaak.physik.fu-berlin.de)
-	OWNER              := fsc2
-	GROUP              := uucp
-	GPIB_LIBRARY       := JTT
-	GPIB_LOG_FILE      := /scratch/tmp/gpib.log
-	NUM_SERIAL_PORTS   := 2
-	SERIAL_LOCK_DIR    := /var/lock
-	INSTALL_MACHINE    := install-$(machine_name)
-	UNINSTALL_MACHINE  := uninstall-$(machine_name)
-endif
-
-ifeq ($(machine_name),moebpc3.physik.fu-berlin.de)
-	OWNER              := fsc2
-	GROUP              := uucp
-	GPIB_LIBRARY       := JTT
-	NUM_SERIAL_PORTS   := 2
-	SERIAL_LOCK_DIR    := /var/lock
-	INSTALL_MACHINE    := install-$(machine_name)
-	UNINSTALL_MACHINE  := uninstall-$(machine_name)
-endif
-
-ifeq ($(machine_name),single.physik.fu-berlin.de)
-	OWNER              := fsc2
-	GROUP              := uucp
-	GPIB_LIBRARY       := NONE
-	NUM_SERIAL_PORTS   := 2
-	SERIAL_LOCK_DIR    := /var/lock
-	WITH_NI6601        := yes
-	ni6601_libs        := libni6601.so
-	WITH_ME6000        := yes
-	me6000_libs        := libme6x00.so
-	WITH_SPEC10        := yes
-	rs_spec10_incl     := /usr/local/include/pvcam
-	rs_spec10_libs     := libpvcam.so
-	INSTALL_MACHINE    := install-$(machine_name)
-	UNINSTALL_MACHINE  := uninstall-$(machine_name)
-endif
-
-ifeq ($(machine_name),sunone.chemie.unibas.ch)
-	OWNER              := exp
-	GROUP              := exp
-	GPIB_LIBRARY       := NI
-	NUM_SERIAL_PORTS   := 2
-	SERIAL_LOCK_DIR    := /var/lock
-	INSTALL_MACHINE    := install-$(machine_name)
-	UNINSTALL_MACHINE  := uninstall-$(machine_name)
-endif
-
-ifeq ($(machine_name),tresr.physik.fu-berlin.de)
-	OWNER              := fsc2
-	GROUP              := uucp
-	GPIB_LIBRARY       := LLP
-	NUM_SERIAL_PORTS   := 2
-	SERIAL_LOCK_DIR    := /var/lock
-	INSTALL_MACHINE    := install-$(machine_name)
-	UNINSTALL_MACHINE  := uninstall-$(machine_name)
-endif
-
-ifeq ($(machine_name),crowley.none)
-	OWNER              := fsc2
-	GROUP              := uucp
-	GPIB_LIBRARY       := JTT
-	NUM_SERIAL_PORTS   := 2
-	SERIAL_LOCK_DIR    := /var/lock
-	INSTALL_MACHINE    := install-$(machine_name)
-	UNINSTALL_MACHINE  := uninstall-$(machine_name)
-endif
-
-ifeq ($(machine_name),dorimare.nowhere)
-	OWNER              := fsc2
-	GROUP              := uucp
-	GPIB_LIBRARY       := JTT
-	NUM_SERIAL_PORTS   := 2
-	SERIAL_LOCK_DIR    := /var/lock
-	WITH_NI6601        := yes
-	ni6601_libs        := libni6601.so
-	WITH_ME6000        := yes
-	me6000_libs        := libme6x00.so
-	WITH_SPEC10        := yes
-	rs_spec10_incl     := /usr/local/include/pvcam
-	rs_spec10_libs     := libpvcam.so
-	WITH_WITIO_48      := yes
-	witio_48_libs      := libwitio_48.so
-	INSTALL_MACHINE    := install-$(machine_name)
-	UNINSTALL_MACHINE  := uninstall-$(machine_name)
-endif
+-include $(mchdir)/$(machine_name)
 
 
 # Pass lots of variables to the source files...
@@ -587,17 +469,7 @@ export            # export all variables to sub-makes
 		install-strip install uninstall http_server  \
 		version test clean distclean                 \
 		mostlyclean tags pack MANIFEST ZIP           \
-		pion.anorg.chemie.uni-frankfurt.de           \
-		crowley.physik.fu-berlin.de                  \
-		door.physik.fu-berlin.de                     \
-		isaak.physik.fu-berlin.de                    \
-		moebpc3.physik.fu-berlin.de                  \
-		tresr.physik.fu-berlin.de                    \
-		sunone.chemie.unibas.ch                      \
-		single.physik.fu-berlin.de                   \
-		crowley.none                                 \
-		dorimare.nowhere                             \
-		me6x00 ni6601 witio_48
+		me6x00 ni6601 witio_48                       \
 
 
 ############## End of configuration section ##############
@@ -618,9 +490,11 @@ all:
 
 
 config: fsc2_config.h
-	@if [ $(INSTALL_MACHINE) != "install-unknown" ]; then   \
+	@if [ -n $(machine_name) ]; then                        \
 		echo "Configuring for machine $(machine_name)...";  \
-		$(MAKE) $(machine_name);                            \
+		if [ -x $(mchdir)/$(machine_name)-config ]; then    \
+			. $(mchdir)/$(machine_name)-config;             \
+		fi                                                  \
 	fi
 	$(MAKE) -C $(sdir) gpib_setup
 	$(MAKE) built
@@ -849,44 +723,6 @@ MANIFEST:
 		'ls' -1F $$dir | grep -v '/$$' | sed "s|^|$$dir/|" | \
 		sed "s|^$$fdir/||" | sed 's|\./||' | sed 's|\*$$||' >> MANIFEST; \
 	done;
-
-
-# Some actions specific to the different well-known machines
-
-pion.anorg.chemie.uni-frankfurt.de:
-
-crowley.physik.fu-berlin.de:
-	sed 's/^#define SERIAL_PORT[ \t].*$$/#define SERIAL_PORT     0/'  \
-		$(cdir)/er035m_sas.conf > $(cdir)/er035m_sas.conf.new
-	mv $(cdir)/er035m_sas.conf.new $(cdir)/er035m_sas.conf
-
-door.physik.fu-berlin.de:
-
-isaak.physik.fu-berlin.de:
-	sed 's/^#define SERIAL_PORT[ \t].*$$/#define SERIAL_PORT     1/'  \
-		$(cdir)/er035m_sas.conf > $(cdir)/er035m_sas.conf.new
-	mv $(cdir)/er035m_sas.conf.new $(cdir)/er035m_sas.conf
-
-moebpc3.physik.fu-berlin.de:
-
-single.physik.fu-berlin.de:
-	sed 's|^#define DEFAULT_CALIB_FILE[ \t].*$$|#define DEFAULT_CALIB_FILE "/home/studier/edl/calib/spectrapro_300i.calib"|' \
-		$(cdir)/spectrapro_300i.conf > $(cdir)/spectrapro_300i.conf.new
-	mv $(cdir)/spectrapro_300i.conf.new $(cdir)/spectrapro_300i.conf
-
-tresr.physik.fu-berlin.de:
-	sed 's/\"ER032M\"/\"Field\"/'                           \
-		$(cdir)/er032m.conf > $(cdir)/er032m.conf.new
-	mv $(cdir)/er032m.conf.new $(cdir)/er032m.conf
-	sed 's/\"LECROY9400\"/\"LeCroy9450\"/'                  \
-		$(cdir)/lecroy9400.conf > $(cdir)/lecroy9400.conf.new
-	mv $(cdir)/lecroy9400.conf.new $(cdir)/lecroy9400.conf
-
-sunone.chemie.unibas.ch:
-
-crowley.none:
-
-dorimare.nowhere:
 
 
 # Create zipped tarball and write it to the ZIP drive (at home or on isaak

@@ -114,6 +114,7 @@ void load_all_drivers( void )
 					eprint( WARN, UNSET, "Initialisation of module '%s.so' "
 							"failed.\n", cd->name );
 				call_pop( );
+				vars_del_stack( );
 			}
 
 			if ( need_GPIB == UNSET && saved_need_GPIB == SET )
@@ -125,6 +126,7 @@ void load_all_drivers( void )
 	OTHERWISE
 	{
 		call_pop( );
+		vars_del_stack( );
 		Internals.in_hook = UNSET;
 		RETHROW( );
 	}
@@ -517,6 +519,7 @@ void run_test_hooks( void )
 					eprint( SEVERE, UNSET, "Initialisation of test run failed "
 							"for module '%s'.\n", cd->name );
 				call_pop( );
+				vars_del_stack( );
 			}
 		}
 
@@ -525,6 +528,7 @@ void run_test_hooks( void )
 	OTHERWISE
 	{
 		call_pop( );
+		vars_del_stack( );
 		Internals.in_hook = UNSET;
 		RETHROW( );
 	}
@@ -563,6 +567,7 @@ void run_end_of_test_hooks( void )
 					eprint( SEVERE, UNSET, "Final checks after test run "
 							"failed for module '%s'.\n", cd->name );
 				call_pop( );
+				vars_del_stack( );
 			}
 		}
 
@@ -571,6 +576,7 @@ void run_end_of_test_hooks( void )
 	OTHERWISE
 	{
 		call_pop( );
+		vars_del_stack( );
 		Internals.in_hook = UNSET;
 		RETHROW( );
 	}
@@ -612,6 +618,7 @@ void run_exp_hooks( void )
 					cd->driver.exp_hook_is_run = SET;
 
 				call_pop( );
+				vars_del_stack( );
 			}
 			else
 				cd->driver.exp_hook_is_run = SET;
@@ -628,6 +635,7 @@ void run_exp_hooks( void )
 	OTHERWISE
 	{
 		call_pop( );
+		vars_del_stack( );
 		Internals.in_hook = UNSET;
 		RETHROW( );
 	}
@@ -679,10 +687,14 @@ void run_end_of_exp_hooks( void )
 				eprint( SEVERE, UNSET, "Resetting module '%s' after "
 						"experiment failed.\n", cd->name );
 			call_pop( );
+			vars_del_stack( );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
+		{
 			call_pop( );
+			vars_del_stack( );
+		}
 	}
 
 	Internals.in_hook = UNSET;
@@ -728,10 +740,14 @@ void run_exit_hooks( void )
 			call_push( NULL, cd, cd->device_name, cd->count );
 			cd->driver.exit_hook( );
 			call_pop( );
+			vars_del_stack( );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
+		{
 			call_pop( );
+			vars_del_stack( );
+		}
 
 		if ( cd->generic_type != NULL &&
 			 ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
@@ -861,10 +877,14 @@ void unload_device( Device *dev )
 			call_push( NULL, dev, dev->device_name, dev->count );
 			dev->driver.exit_hook( );
 			call_pop( );
+			vars_del_stack( );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
+		{
 			call_pop( );
+			vars_del_stack( );
+		}
 
 		if ( dev->generic_type != NULL &&
 			 ! strcasecmp( dev->generic_type, PULSER_GENERIC_TYPE ) )

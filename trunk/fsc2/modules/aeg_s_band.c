@@ -376,9 +376,16 @@ Var *set_field( Var *v )
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		error = get_double( v, "magnetic field precision" );
+
 		if ( error > 0.1 * field )
 			print( SEVERE, "Field precision larger than 10% of field "
 				   "value.\n" );
+
+		if ( error < 0.0 )
+		{
+			print( SEVERE, "Field precision is negative.\n ");
+			error = fabs( error );
+		}
 	}
 
 	too_many_arguments( v );

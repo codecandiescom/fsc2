@@ -297,17 +297,22 @@ Var *set_field( Var *v )
 
 	if ( v == NULL )
 	{
-		print( FATAL, "Missing arguments.\n" );
+		print( FATAL, "Missing argument.\n" );
 		THROW( EXCEPTION );
 	}
 
 	field = get_double( v, "magnetic field" );
 
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		print( SEVERE, "This module does not allow setting a field precision, "
+			   "discarding second argument.\n" );
+		too_many_arguments( v );
+	}
+
 	/* Check the new field value */
 
 	field = s_band_magnet_tmpl_field_check( field, &err_flag );
-
-	too_many_arguments( v );
 
 	if ( FSC2_MODE == TEST )
 	{

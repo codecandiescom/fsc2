@@ -28,7 +28,7 @@ simp_modules  := User_Functions sr510 sr530 sr810 sr830 aeg_s_band        \
 				 aeg_x_band er035m er035m_s hp5340a er035m_sa er035m_sas  \
 				 bh15 keithley228a egg4402 kontron4060 lakeshore330       \
 				 pt2025 er032m ips20_4 $(s_band_list) thurlby330          \
-				 hjs_daadc bnm12
+				 hjs_daadc bnm12 hjs_sfc hjs_fc
 
 ifdef WITH_ME6000
 simp_modules  += me6000
@@ -87,26 +87,6 @@ export        # export all symbols to the sub-makefiles
 .SUFFIXES:
 
 .PHONY: all modules install uninstall clean distclean   \
-		install-pion.anorg.chemie.uni-frankfurt.de      \
-		install-crowley.physik.fu-berlin.de             \
-		install-door.physik.fu-berlin.de                \
-		install-isaak.physik.fu-berlin.de               \
-		install-moebpc3.physik.fu-berlin.de             \
-		install-single.physik.fu-berlin.de              \
-		install-tresr.physik.fu-berlin.de               \
-		install-sunone.chemie.unibas.ch                 \
-		install-crowley.none                            \
-		install-dorimare.nowhere                        \
-		uninstall-pion.anorg.chemie.uni-frankfurt.de    \
-		uninstall-crowley.physik.fu-berlin.de           \
-		uninstall-door.physik.fu-berlin.de              \
-		uninstall-isaak.physik.fu-berlin.de             \
-		uninstall-moebpc3.physik.fu-berlin.de           \
-		uninstall-single.physik.fu-berlin.de            \
-		uninstall-tresr.physik.fu-berlin.de             \
-		uninstall-sunone.chemie.unibas.ch               \
-		uninstall-crowley.none                          \
-		uninstall-dorimare.nowhere
 
 
 # Making the modules consisting of just one file is simple, to make the
@@ -208,96 +188,14 @@ $(addsuffix .c,$(s_band_list)): %.c: s_band_magnet.c.tmpl
 
 # How to install the modules
 
+-include $(mchdir)/$(machine_name)-install
+
 install:
 	$(INSTALL) -d $(libdir)
 	$(EXEC_INSTALL) -m  644 -o $(OWNER) -g $(GROUP) *.so $(libdir)
-	if [ "$(INSTALL_MACHINE)" != "install-unknown" ]; then         \
-		$(MAKE) $(INSTALL_MACHINE);                                \
+	if [ -r $(mchdir)/$(machine_name)-install ]; then  \
+		$(MAKE) install-$(machine_name);               \
 	fi
-
-# Here links to module libraries for often used devices for the different
-# spectrometers are created. If, for example, the spectrometer always uses
-# aeg_x_band.so as the driver for the magnet power supply, creating a link
-# with the name magnet.so allows to use 'magnet' as an alternative name for
-# the power supply in EDL programs. Already existing links must be deleted
-# before creating new ones!
-
-install-pion.anorg.chemie.uni-frankfurt.de:
-	$(MAKE) $(UNINSTALL_MACHINE)
-	-$(LN) $(LNFLAGS) $(libdir)/dg2020_f.so $(libdir)/dg2020.so
-	-chown $(OWNER).$(GROUP) $(libdir)/dg2020.so
-	-$(LN) $(LNFLAGS) $(libdir)/dg2020_f.so $(libdir)/pulser.so
-	-chown $(OWNER).$(GROUP) $(libdir)/pulser.so
-	-$(LN) $(LNFLAGS) $(libdir)/aeg_s_band.so $(libdir)/s_band.so
-	-chown $(OWNER).$(GROUP) $(libdir)/s_band.so
-	-$(LN) $(LNFLAGS) $(libdir)/s_band_magnet_broad.so $(libdir)/magnet_b.so
-	-chown $(OWNER).$(GROUP) $(libdir)/magnet_b.so
-	-$(LN) $(LNFLAGS) $(libdir)/s_band_magnet_narrow.so $(libdir)/magnet_n.so
-	-chown $(OWNER).$(GROUP) $(libdir)/magnet_n.so
-	-$(LN) $(LNFLAGS) $(libdir)/bh15.so $(libdir)/gaussmeter.so
-	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
-	-$(LN) $(LNFLAGS) $(libdir)/sr530.so $(libdir)/lockin.so
-	-chown $(OWNER).$(GROUP) $(libdir)/lockin.so
-
-install-crowley.physik.fu-berlin.de:
-	$(MAKE) $(UNINSTALL_MACHINE)
-	-$(LN) $(LNFLAGS) $(libdir)/er035m_sas.so $(libdir)/gaussmeter.so
-	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
-	-$(LN) $(LNFLAGS) $(libdir)/hp8647a.so $(libdir)/synthesizer.so
-	-chown $(OWNER).$(GROUP) $(libdir)/synthesizer.so
-	-$(LN) $(LNFLAGS) $(libdir)/egg4402so $(libdir)/boxcar.so
-	-chown $(OWNER).$(GROUP) $(libdir)/boxcar.so
-
-install-door.physik.fu-berlin.de:
-	$(MAKE) $(UNINSTALL_MACHINE)
-	-$(LN) $(LNFLAGS) $(libdir)/hfs9000.so $(libdir)/hfs9003.so
-	-chown $(OWNER).$(GROUP) $(libdir)/hfs9003.so
-	-$(LN) $(LNFLAGS) $(libdir)/keithley228a.so $(libdir)/w_band.so
-	-chown $(OWNER).$(GROUP) $(libdir)/w_band.so
-	-$(LN) $(LNFLAGS) $(libdir)/keithley228a.so $(libdir)/magnet.so
-	-chown $(OWNER).$(GROUP) $(libdir)/magnet.so
-
-install-isaak.physik.fu-berlin.de:
-	$(MAKE) $(UNINSTALL_MACHINE)
-	-$(LN) $(LNFLAGS) $(libdir)/dg2020_b.so $(libdir)/pulser.so
-	-chown $(OWNER).$(GROUP) $(libdir)/pulser.so
-	-$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.so $(libdir)/magnet.so
-	-chown $(OWNER).$(GROUP) $(libdir)/magnet.so
-	-$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
-	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
-
-install-moebpc3.physik.fu-berlin.de:
-	$(MAKE) $(UNINSTALL_MACHINE)
-	-$(LN) $(LNFLAGS) $(libdir)/ips20_4.so $(libdir)/magnet.so
-	-chown $(OWNER).$(GROUP) $(libdir)/magnet.so
-	-$(LN) $(LNFLAGS) $(libdir)/sr830.so $(libdir)/lockin.so
-	-chown $(OWNER).$(GROUP) $(libdir)/lockin.so
-
-install-single.physik.fu-berlin.de:
-	$(MAKE) $(UNINSTALL_MACHINE)
-	-$(LN) $(LNFLAGS) $(libdir)/ni6601.so $(libdir)/counter.so
-	-chown $(OWNER).$(GROUP) $(libdir)/counter.so
-	-$(LN) $(LNFLAGS) $(libdir)/me6000.so $(libdir)/dac.so
-	-chown $(OWNER).$(GROUP) $(libdir)/dac.so
-
-install-tresr.physik.fu-berlin.de:
-	$(MAKE) $(UNINSTALL_MACHINE)
-	-$(LN) $(LNFLAGS) $(libdir)/er032m.so $(libdir)/magnet.so
-	-chown $(OWNER).$(GROUP) $(libdir)/magnet.so
-	-$(LN) $(LNFLAGS) $(libdir)/er023m.so $(libdir)/lockin.so
-	-chown $(OWNER).$(GROUP) $(libdir)/lockin.so
-
-install-sunone.chemie.unibas.ch:
-	$(MAKE) $(UNINSTALL_MACHINE)
-	-$(LN) $(LNFLAGS) $(libdir)/er032m.so $(libdir)/magnet.so
-	-chown $(OWNER).$(GROUP) $(libdir)/magnet.so
-
-install-crowley.none:
-	$(MAKE) $(UNINSTALL_MACHINE)
-
-install-dorimare.nowhere:
-	$(MAKE) $(UNINSTALL_MACHINE)
-
 
 # How to uninstall the modules
 
@@ -305,51 +203,9 @@ uninstall:
 	-for f in *.so; do                     \
 		$(RM) $(RMFLAGS) $(libdir)/$$f;    \
 	done
-	if [ "$(UNINSTALL_MACHINE)" != "uninstall-unknown" ]; then  \
-		$(MAKE) $(UNINSTALL_MACHINE);                           \
+	if [ -r $(mchdir)/$(machine_name)-install ]; then  \
+		$(MAKE) uninstall-$(machine_name);             \
 	fi
-
-uninstall-pion.anorg.chemie.uni-frankfurt.de:
-	-$(RM) $(RMFLAGS) $(libdir)/dg2020.so
-	-$(RM) $(RMFLAGS) $(libdir)/pulser.so
-	-$(RM) $(RMFLAGS) $(libdir)/s_band.so
-	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
-	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
-	-$(RM) $(RMFLAGS) $(libdir)/lockin.so
-
-uninstall-crowley.physik.fu-berlin.de:
-	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
-	-$(RM) $(RMFLAGS) $(libdir)/synthesizer.so
-	-$(RM) $(RMFLAGS) $(libdir)/boxcar.so
-
-uninstall-door.physik.fu-berlin.de:
-	-$(RM) $(RMFLAGS) $(libdir)/hfs9003.so
-	-$(RM) $(RMFLAGS) $(libdir)/w_band.so
-	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
-
-uninstall-isaak.physik.fu-berlin.de:
-	-$(RM) $(RMFLAGS) $(libdir)/pulser.so
-	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
-	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
-
-uninstall-moebpc3.physik.fu-berlin.de:
-	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
-	-$(RM) $(RMFLAGS) $(libdir)/lockin.so
-
-uninstall-single.physik.fu-berlin.de:
-	-$(RM) $(RMFLAGS) $(libdir)/counter.so
-	-$(RM) $(RMFLAGS) $(libdir)/dac.so
-
-uninstall-tresr.physik.fu-berlin.de:
-	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
-	-$(RM) $(RMFLAGS) $(libdir)/lockin.so
-
-uninstall-sunone.chemie.unibas.ch:
-	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
-
-uninstall-crowley.none:
-
-uninstall-dorimare.nowhere::
 
 
 # How to clean up the mess we created
