@@ -33,7 +33,7 @@
 #define MLA      0x20
 #define TLA      0x40
 #define SRQ      0x40    /* SRQ bit in device status register */
-#define TIMEOUT  T3s     /* GPIB timeout period set at initialisation */
+#define TIMEOUT  T10s    /* GPIB timeout period set at initialisation */
 
 
 #define ON  1
@@ -544,10 +544,12 @@ int gpib_wait( int device, int mask, int *status )
     mask &= TIMO | END | RQS | CMPL;    /* remove invalid bits */
 
     if ( ! ( mask & TIMO ) && timeout != TNONE )
-        gpib_timeout( TNONE );
+        gpib_timeout( T3s );//NONE );
 
     ibwait( device, mask );
 
+
+printf( "STATUS = %x, IBSTA = %x\n", status, ibsta );
     if ( status != NULL )
         *status = ibsta;
 
