@@ -97,6 +97,7 @@ GPIB_VARIABLE char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
 
 #define GPIB_IS_TIMEOUT    ( ( gpib_status & GPIB_TIMO ) ? 1 : 0 )
 
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

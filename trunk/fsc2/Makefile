@@ -341,14 +341,26 @@ ifeq ($(machine_name),moebpc3.physik.fu-berlin.de)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
+ifeq ($(machine_name),single.physik.fu-berlin.de)
+	OWNER              := fsc2
+	GROUP              := uucp
+	GPIB_LIBRARY       := NONE
+	NUM_SERIAL_PORTS   := 2
+	SERIAL_LOCK_DIR    := /var/lock
+	ME6000_SUPPORT     := NO
+	NI6601_SUPPORT     := NO
+	INSTALL_MACHINE    := install-$(machine_name)
+	UNINSTALL_MACHINE  := uninstall-$(machine_name)
+endif
+
 ifeq ($(machine_name),sunone.chemie.unibas.ch)
 	OWNER              := exp
 	GROUP              := exp
 	GPIB_LIBRARY       := NI
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
-	ME6000_SUPPORT     := NO
-	NI6601_SUPPORT     := NO
+	ME6000_SUPPORT     := YES
+	NI6601_SUPPORT     := YES
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -757,6 +769,8 @@ isaak.physik.fu-berlin.de:
 	mv $(cdir)/er035m_sas.conf.new $(cdir)/er035m_sas.conf
 
 moebpc3.physik.fu-berlin.de:
+
+single.physik.fu-berlin.de:
 
 tresr.physik.fu-berlin.de:
 	sed -e 's/\"ER032M\"/\"Field\"/'                           \

@@ -103,6 +103,13 @@ GPIB_VARIABLE char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
 #define  LL_ALL   3    /* log calls with parameters and function exits */
 
 
+/*-------------------------------*/
+/* Definitions of utility macros */
+/*-------------------------------*/
+
+#define GPIB_IS_TIMEOUT     0
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

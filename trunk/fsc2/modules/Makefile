@@ -76,6 +76,7 @@ export        # export all symbols to the sub-makefiles
 		install-door.physik.fu-berlin.de                \
 		install-isaak.physik.fu-berlin.de               \
 		install-moebpc3.physik.fu-berlin.de             \
+		install-single.physik.fu-berlin.de              \
 		install-tresr.physik.fu-berlin.de               \
 		install-sunone.chemie.unibas.ch                 \
 		install-crowley.none                            \
@@ -85,6 +86,7 @@ export        # export all symbols to the sub-makefiles
 		uninstall-door.physik.fu-berlin.de              \
 		uninstall-isaak.physik.fu-berlin.de             \
 		uninstall-moebpc3.physik.fu-berlin.de           \
+		uninstall-single.physik.fu-berlin.de            \
 		uninstall-tresr.physik.fu-berlin.de             \
 		uninstall-sunone.chemie.unibas.ch               \
 		uninstall-crowley.none                          \
@@ -196,6 +198,8 @@ install-moebpc3.physik.fu-berlin.de:
 	-$(LN) $(LNFLAGS) $(libdir)/sr830.so $(libdir)/lockin.so
 	-chown $(OWNER).$(GROUP) $(libdir)/lockin.so
 
+install-single.physik.fu-berlin.de:
+
 install-tresr.physik.fu-berlin.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
 	-$(LN) $(LNFLAGS) $(libdir)/er032m.so $(libdir)/magnet.so
@@ -251,6 +255,8 @@ uninstall-isaak.physik.fu-berlin.de:
 uninstall-moebpc3.physik.fu-berlin.de:
 	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
 	-$(RM) $(RMFLAGS) $(libdir)/lockin.so
+
+uninstall-single.physik.fu-berlin.de:
 
 uninstall-tresr.physik.fu-berlin.de:
 	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
