@@ -262,9 +262,9 @@ void *get_shm( int *shm_id, long len )
 /* a REQUEST or storing and displaying DATA from the child.   */
 /* Actually, this routine is the handler for an idle call-    */
 /* back.                                                      */
-/* The message queue is read if the low marker hasn't reached */
-/* the high marker, both being incremented in a wrap-around   */
-/* fashion.                                                   */
+/* The message queue is read as long as the low marker hasn't */
+/* reached the high marker, both being incremented in a wrap- */
+/* around fashion.                                            */
 /*------------------------------------------------------------*/
 
 int new_data_callback( XEvent *a, void *b )
@@ -272,7 +272,7 @@ int new_data_callback( XEvent *a, void *b )
 	a = a;
 	b = b;
 
-	if ( message_queue_low != message_queue_high )
+	while ( message_queue_low != message_queue_high )
 	{
 		if ( Message_Queue[ message_queue_low ].type == REQUEST )
 		{
