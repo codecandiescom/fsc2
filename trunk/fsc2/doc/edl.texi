@@ -27,18 +27,18 @@
 @ifinfo
 @menu
 * Basics::                  Basic principles.
-* Sections::                The sections of an EDL program.
-* Syntax::                  Basic syntax of EDL programs.
+* Sections::                The sections of an EDL script.
+* Syntax::                  Basic syntax of EDL scripts.
 * Variables::               Using variables and arrays.
 * Assignment operations::   Assigning to variables.
 * Arithmetic::              Doing calculations with variables.
 * Conditional  operator::   Using the '? : ' construct
-* Control structures::      Flow control in EDL programs.
+* Control structures::      Flow control in EDL scripts.
 * Miscellaneous::           Additional syntactic elements
 @end menu
 @end ifinfo
 
-To do an experiment using @code{fsc2} you have to write a program
+To do an experiment using @code{fsc2} you have to write a script
 describing the experiment. While this may look like a daunting task if
 you have no programming experience at all it has the advantage that you
 have complete control over the way the experiment will be done. You
@@ -51,18 +51,18 @@ really isn't that difficult.
 @node Basics, Sections, EDL, EDL
 @section Basics
 
-An @code{EDL} program is structured similarly to the way an experiment
+An @code{EDL} script is structured similarly to the way an experiment
 is done. Before you start an experiment you first have to select the
 devices to be used and set them up. So the first part of an @code{EDL}
 script are just a few lines specifying the devices to be controlled by
 the program and then setting their parameters, e.g.@: the time base of
 the digitizer, the sensitivity of the lock-in amplifier or which pulses
 are to be created by the pulse generator. And as you would now start the
-experiment the second part of the @code{EDL} program describes how the
+experiment the second part of the @code{EDL} script describes how the
 experiment is to be done.
 
-To give you a first impression how an @code{EDL} program may look like
-here's a program for a simple cw-EPR experiment:
+To give you a first impression how an @code{EDL} script may look like
+here's a script for a simple cw-EPR experiment:
 @example
 DEVICES:
   er035m_s;                    // gaussmeter module
@@ -94,7 +94,7 @@ EXPERIMENT:
   @}
 @end example
 
-Obviously, the very first section of the program, starting with the
+Obviously, the very first section of the script, starting with the
 section keyword @code{DEVICES}, specifies the names of the devices to be used
 (everything after the double-slashes are comments). In the example these are
 the Bruker ER035M gaussmeter, the AEG X-band magnet and the Stanford
@@ -102,7 +102,7 @@ Research lock-in amplifier SR530.
 
 In the following section, starting with the section keyword
 @code{VARIABLES}, all variables that are going to be used in the
-@code{EDL} program are listed and, if appropriate, initialized. The
+@code{EDL} script are listed and, if appropriate, initialized. The
 first three variables are for storing the start and end field of the
 field sweep as well as the field step width to do between measuring new
 data points. The next variable @code{field} will later be used for
@@ -155,9 +155,9 @@ function @code{lockin_time_constant()} as the argument makes the program
 wait for the time constant of the lock-in amplifier to give it enough
 time to measure a new data point.
 
-When you have written such a program (using, for example, a simple ASCII
+When you have written such a script (using, for example, a simple ASCII
 editor) you load it into @code{fsc2} and press the @code{Test} or the
-@code{Start} button. @code{fsc2} will now analyze the program very
+@code{Start} button. @code{fsc2} will now analyze the script very
 thoroughly. It will not only check for misspelt keywords, undefined
 variables, non-existent functions, syntax errors etc.@: but will also
 repeat the loop in the experiment section as often as in the real
@@ -183,7 +183,7 @@ amplifiers and are only available when a lock-in amplifier module is
 specified in the @code{DEVICES} section. Most of these functions are
 available for all types of lock-in amplifiers (possibly with minor
 variations) so that using a different lock-in amplifier usually doesn't
-require a major rewrite of the @code{EDL} program but just changing the
+require a major rewrite of the @code{EDL} script but just changing the
 lock-in's name in the @code{DEVICES} section.
 
 To find out about all built-in and device functions, their arguments and
@@ -314,7 +314,7 @@ break between a number and its unit (e.g.@: between the @code{3360.0}
 and the @code{G}), only space and tabulator characters are allowed as
 separators.
 
-@code{EDL} programs use lots of function calls. There are no obvious
+@code{EDL} scripts use lots of function calls. There are no obvious
 differences between variable names and function names (all start with a
 character, followed by more characters, numbers or underscore
 characters). To make clear that a word is a function it has to
@@ -927,7 +927,7 @@ right of the expression:
 @end example
 @noindent
 To make your intentions more clear to human readers of your
-@code{EDL} programs it's probably a good idea to use parenthesis in
+@code{EDL} scripts it's probably a good idea to use parenthesis in
 these cases even if they are not strictly required.
 
 The operators with the second-lowest precedence are the comparison operators
@@ -959,7 +959,7 @@ statement you don't have to worry about the order of evaluation.
 Of course, the precedence of operators and the sequence they are
 evaluated in can always be changed by using parenthesis. So, if in
 doubt, use parenthesis -- this won't slow down the program but will
-often make the program easier to understand.
+often make the script easier to understand.
 
 
 @anchor{Arithmetic with arrays and matrices}
@@ -1155,7 +1155,7 @@ array when arithmetic with arrays is used.
 @cindex Conditional operator
 
 Quite often it is necessary to make decide which part of the code of a
-program to execute and have this decision depend on the result of a
+script to execute and have this decision depend on the result of a
 calculation or external input. For these cases a constructs is required
 that allows to tell the program to do something if e.g.@: the result of
 a calculation is less then @code{0} and to do something else if the
@@ -1349,11 +1349,11 @@ Again, an example:
   @}
 @end example
 
-This program snippet (that also could have been written using a
-@code{REPEAT} loop) calculates the factorial of 6. After initializing
-the variables @code{I} and @code{Fact} it is tested in the loop
-condition if @code{I} is still not larger that 6. If this is true, the
-following block of statements is executed.
+This snippet (that also could have been written using a @code{REPEAT}
+loop) calculates the factorial of 6. After initializing the variables
+@code{I} and @code{Fact} it is tested in the loop condition if @code{I}
+is still not larger that 6. If this is true, the following block of
+statements is executed.
 
 Here is now an example for using simple numbers in a condition,
 using the fact that a non-zero value is always interpreted as TRUE:
@@ -1555,7 +1555,7 @@ the loop variable @code{I} has the value @code{11} and not @code{9}.
 There are situations where one wants to have the program running as long
 as the STOP button hasn't been pressed. While something like this can be
 realized by using i.e.@: a @code{REPEAT} loop with a huge number of
-repeats, this would take extremely long to test the program before the
+repeats, this would take extremely long to test the script before the
 @code{EXPERIMENT} is started. In these cases a @code{FOREVER} loop is
 more convenient because the content of the loop is only tested once so
 the experiment can start much faster. For obvious reasons, a
@@ -1677,7 +1677,7 @@ much sense).
 @cartouche
 As already mentioned for @code{FOREVER} loops also @code{IF-ELSE} and
 @code{UNLESS-ELSE} constructs introduce some problems for testing an
-@code{EDL} program before the real experiment is done. This happens
+@code{EDL} script before the real experiment is done. This happens
 when the condition to be tested depends either on user input (e.g.@:
 tests if the user pressed a button etc.) or on the results of a
 measurement itself. In these cases the flow of control of the program
@@ -1699,11 +1699,11 @@ that didn't fit into any of the previous sections.
 @subsection @code{#INCLUDE} statement
 @cindex #INCLUDE statement
 
-Everywhere within an @code{EDL} program one can include another
+Everywhere within an @code{EDL} script one can include another
 @code{EDL} file. This is done using the @code{#INCLUDE} keyword,
 followed by the name of the file to be included, and has the same effect
 as if the included file had been pasted into the current @code{EDL}
-program. Included files may also contain @code{#INCLUDE} statements, up
+script. Included files may also contain @code{#INCLUDE} statements, up
 to 16 levels deep.
 
 The name of the file to be included must follow the @code{#INCLUDE}
@@ -1738,10 +1738,10 @@ interpretation of the script is abandoned.
 @subsection @code{#EXIT} statement
 @cindex #EXIT statement
 
-When the @code{#EXIT} statement is found in an @code{EDL} program this
+When the @code{#EXIT} statement is found in an @code{EDL} script this
 is equivalent to the end of the file - everything following the
-statement is discarded. In the main file of an @code{EDL} program this
-means that this is the end of the @code{EDL} program. If instead the
+statement is discarded. In the main file of an @code{EDL} script this
+means that this is the end of the @code{EDL} script. If instead the
 file containing the @code{#EXIT} statement is an included file (see the
 @code{#INCLUDE} statement) @code{fsc2} will immediately return to
 reading the file the file was included from.
@@ -1752,7 +1752,7 @@ reading the file the file was included from.
 @cindex #QUIT statement
 
 When the @code{#QUIT} statement is encountered in a file @code{fsc2}
-immediately treats this as the complete end of the @code{EDL} program
+immediately treats this as the complete end of the @code{EDL} script
 and won't read any further lines. In the main file of an @code{EDL}
 this is equivalent to the @code{#EXIT} statement. But while in an
 included @code{EDL} file @code{#EXIT} will induce @code{fsc2} to

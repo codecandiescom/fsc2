@@ -562,7 +562,7 @@ Now here is the complete @code{EDL} script:
 141 @}
 @end example
 
-I hope that this program doesn't look too daunting, but most of its
+I hope that this script doesn't look too daunting, but most of its
 length is due to checking and reacting for user input, the real content
 is rather small as you will see.
 
@@ -583,7 +583,7 @@ discuss their meaning later.
 
 The variables defined on line 17 to 20 for the minimum and maximum field
 and field step size are not strictly necessary. We also could have
-hard-coded the values into the program but at the cost of
+hard-coded the values into the script but at the cost of
 readability. Also, it is going to be easier to adapt the script for
 using a different field controller with a different set of limits when
 such values can be found in just one place instead of having them
@@ -738,7 +738,7 @@ data. To be able to display both the @i{x}- and @i{y}-phase signal we
 tell it to return data for both channel @code{1} and @code{2}. Of
 course, it must return 2 values, which it stores in an array with two
 elements, @code{data}. Please note, that not all lock-in amplifiers have
-two channels, for these we would have to change the program a bit to
+two channels, for these we would have to change the script a bit to
 fetch and display only one data point.
 
 After having gotten both the new measured data points we draw them in

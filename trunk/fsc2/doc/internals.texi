@@ -30,7 +30,7 @@ to write a new module for a device (or if you get upset about things
 @code{fsc2} does differently from the way you would like it to).
 
 As you will already have understood, @code{fsc2} is basically an
-interpreter for @code{EDL} programs. Normal interpreters interpret each
+interpreter for @code{EDL} scripts. Normal interpreters interpret each
 line of input individually, i.e.@: analyze a line, and, if the line is
 syntactically correct, execute it. That's what @code{fsc2} also does,
 but only for the parts before the @code{EXPERIMENT} section. In
@@ -38,14 +38,14 @@ contrast, the interpretation of the @code{EXPERIMENT} section of an
 @code{EDL} file consists of several steps. In the first step the
 @code{EXPERIMENT} section as a whole is read in and only syntax checks
 are done. In the second step a complete test run of @code{EXPERIMENT}
-section of the program is done to avoid that the experiment will have to
-be stopped due to obvious logical errors in the @code{EDL} program. The
+section of the script is done to avoid that the experiment will have to
+be stopped due to obvious logical errors in the @code{EDL} script. The
 device modules are involved, i.e.@: they already can do all kinds of
 checks on what can be expected to happen during the real experiment and
 detect possible problems.
 
 Only if all these tests succeeded the third step, the execution of the
-@code{EXPERIMENT} section of the @code{EDL} program, is started, i.e.@:
+@code{EXPERIMENT} section of the @code{EDL} script, is started, i.e.@:
 the experiment is run. When an experiment is restarted (without
 reloading the @code{EDL} file) only this third step is repeated.
 
@@ -63,12 +63,12 @@ reloading the @code{EDL} file) only this third step is repeated.
 @section First stage of interpretation
 
 
-In the first stage of the interpretation the program is read in in a
-token by token fashion, where tokens are e.g.@: variable or function
-names, numbers, braces, semicolons, section labels etc. This is mainly
-done by the code within the files which you'll find in the @file{src}
-directory, having an extension of @code{.l}. As you will see there's
-such a file for each of the different sections an @code{EDL} program may
+In the first stage of the interpretation the script is read in a token
+by token fashion, where tokens are e.g.@: variable or function names,
+numbers, braces, semicolons, section labels etc. This is mainly done by
+the code within the files which you'll find in the @file{src} directory,
+having an extension of @code{.l}. As you will see there's such a file
+for each of the different sections an @code{EDL} script may
 contain. Actually, there are some extra ones, @file{split_lexer.l} is
 the central switch for the first stage that calls the individual
 tokenizers in turn when finding a section label and also deals with
@@ -83,7 +83,7 @@ for interpreting the tokens).
 Finally, there is @file{fsc2_clean.l}. @code{EDL} itself expects its
 input to be a single file in a certain format. Thus it does not deal
 directly with the input files (there can be more than one when there are
-@code{#INCLUDE} statements in an @code{EDL} program). Therefore, there's
+@code{#INCLUDE} statements in an @code{EDL} script). Therefore, there's
 an extra program, @file{fsc2_clean} that translates the input @code{EDL}
 script into a form that the main program understands. @code{fsc2_clean}
 for example removes all comments, includes files for @code{#INCLUDE}
@@ -101,11 +101,11 @@ non-printable characters).
 
 
 In the sections preceeding the @code{EXPERIMENT} section the lines of
-the @code{EDL} program are also already executed. E.g.@: during the
+the @code{EDL} script are also already executed. E.g.@: during the
 handling of the @code{DEVICES} section the modules for the listed
 devices are loaded and the functions defined in the modules are included
 into @code{fsc2}'s internal list of functions that can be used from
-within the @code{EDL} program. While reading the @code{VARIABLES}
+within the @code{EDL} script. While reading the @code{VARIABLES}
 section the newly defined variables are added to @code{fsc2}'s list of
 variables, and, if necessary, also initialized.
 
@@ -122,7 +122,7 @@ what is not.
 
 
 To give you an example, here's a very simple statement from an
-@code{EDL} program:
+@code{EDL} script:
 @example
 a = B_x + 3;
 @end example
@@ -187,7 +187,7 @@ accessing the device because neither the GPIB bus nor the serials ports
 are configured at this moment.
 
 
-While handling the part of the @code{EDL} program up to the start of
+While handling the part of the @code{EDL} script up to the start of
 the @code{EXPERIMENT} section, functions from the modules may be called
 (unless they have been explicitely declared to be used only during the
 experiment). Usually, such function calls will be used to define the
@@ -232,11 +232,11 @@ changed during the experiment.
 @node Second stage of interpretation, Third stage of interpretation, First stage of interpretation, Internals
 @section Second stage of interpretation
 
-The second stage of the interpretation of an @code{EDL} program is
+The second stage of the interpretation of an @code{EDL} script is
 the test run of the @code{EXPERIMENT} section. A test run is necessary
 for two reasons. First, only a very rudimentary syntax check has been
 done for the @code{EXPERIMENT} section until now. Second, and much more
-important, the program may contain logical errors and it would be rather
+important, the script may contain logical errors and it would be rather
 annoying if these would only be found after the experiment had already
 been run for several hours, necessitating the premature end of the
 experiment. For example, without a "dry" run it could happen that only
@@ -245,7 +245,7 @@ requested to be set to a value that the magnet can't produce. In this
 case there usually are only few alternatives, if any, to aborting the
 experiment. Foreseeing and taking the appropriate measures for such
 possibly fatal situation would complicate both the writing of modules
-and @code{EDL} programs enormously and probably would still not catch
+and @code{EDL} scripts enormously and probably would still not catch
 all of them.
 
 
@@ -280,7 +280,7 @@ One real-world example of this case are the settings for a "window" for
 the digitizers, defining the part of a curve that get returned or that
 is integrated over etc. Because during the test run neither the time
 base nor the amount of pre-trigger the digitizer is set to are known
-(unless both have been set explicitely from the @code{EDL} program) it
+(unless both have been set explicitely from the @code{EDL} script) it
 can't be tested if the windows start and end position are within the
 time slice the digitizer measures. Thus the module can just store these
 settings and tell @code{fsc2} that they seem to be reasonable. Only when
@@ -300,7 +300,7 @@ the test run and after the test run finished successfully.
 
 
 The third and final stage of the interpretation of an @code{EDL}
-program is running the real experiment. This third stage may be repeated
+script is running the real experiment. This third stage may be repeated
 several times if the user restarts an experiment without reloading the
 @code{EDL} file.
 
@@ -334,7 +334,7 @@ user requests to allow maximum execution speed and to make the timing of
 the experiment less dependent on user interruptions. Take for example
 the case that the user starts to move one of @code{fsc2}s windows around
 on the screen. As long as she is moving the window no other instructions
-of the program can be executed, which effectively would stop the
+of the script can be executed, which effectively would stop the
 experiment for this time even though nothing really relevant happens. By
 having one task for the actual execution of the experiment and one for
 the user interaction this problem vanishes because the task for the

@@ -70,7 +70,7 @@ new_data = tds754a_get_curve( 1 );        // get curve from channel 1
 @end example
 @noindent
 and changing dozens of references to the TDS754A oscilloscope in each
-and every @code{EDL} program when someone else needs just this
+and every @code{EDL} script when someone else needs just this
 oscilloscope for a few days and one has to do with the TDS520
 oscilloscope in between.
 
@@ -83,7 +83,7 @@ all devices of the same type. Thus, while the names of the functions
 remain identical, the arguments the functions are called with sometimes
 may differ for different devices. But while this can be annoyingly
 enough it at least reduces the amount of changes to be done to an
-@code{EDL} program considerably.
+@code{EDL} script considerably.
 
 But what if you need to use for example two digitizers simultaneously?
 When the names of the functions for accessing both the digitizers are
@@ -750,7 +750,7 @@ Additionally, you also may specify a value of @code{0}, indicating that
 the function to be displayed should not be changed, i.e.@: the data type
 already set manually should be used.
 
-This function can be used in all sections of an @code{EDL} program. If
+This function can be used in all sections of an @code{EDL} script. If
 the auto-acquisition setup is changed during an already running
 auto-acquisition all data stored in the lock-in's internal buffer are
 discarded before the measurement continues using the new settings.
@@ -975,7 +975,7 @@ ER023M:   1-2
 Usually, during an experiment the keyboard of the lock-in amplifier is
 locked. But for situations where it would be useful to be able to control
 the lock-in also via its keyboard it can be unlocked (and also re-locked)
-from within the program. To unlock the keyboard call this function with
+from within the script. To unlock the keyboard call this function with
 an argument of @code{0} or @code{"OFF"}, to re-lock the keyboard call it
 again with a non-zero argument, @code{"ON"} or no argument at all.
 
@@ -1708,7 +1708,7 @@ the channel can be switched on or off.
 Usually, during an experiment the keyboard of the pulser is locked. But
 for situations where it would be useful to be able to control the pulser
 also via its keyboard it can be unlocked (and also re-locked) from within
-the program. To unlock the keyboard call this function with an argument
+the script. To unlock the keyboard call this function with an argument
 of @code{0} or @code{"OFF"}, to re-lock the keyboard call it again with
 a non-zero argument, @code{"ON"} or no argument at all. This command is
 only available for the @strong{Sony/Tektronix DG2020}.
@@ -1830,7 +1830,7 @@ function requires the user to explicitely confirm the new value before
 an experiment is started.
 
 This function can only be called during the @code{PREPARATIONS} section
-of an @code{EDL} program.
+of an @code{EDL} script.
 
 
 @anchor{pulser_defense_to_shape_minimum_distance}
@@ -1852,7 +1852,7 @@ the user to explicitely confirm the new value before an experiment is
 started.
 
 This function can only be called during the @code{PREPARATIONS} section
-of an @code{EDL} program.
+of an @code{EDL} script.
 
 
 @anchor{pulser_automatic_shape_pulses}
@@ -1873,7 +1873,7 @@ automatically lengthened a bit to make them start before their shape
 pulses and also to last longer.
 
 The amount of time the pulse a pulse with an automatically generated
-shape pulse will start earlier than specified in the @code{EDL} program
+shape pulse will start earlier than specified in the @code{EDL} script
 ("left padding") can be set by the second function argument, if it is
 missing a default value (set in the configuration file for the pulser)
 is used. In the same way the third argument specifies how much longer
@@ -1905,7 +1905,7 @@ automatically and manually created ones) don't overlap during the
 experiment.
 
 This function can only be called during the @code{PREPARATIONS} section
-of an @code{EDL} program.
+of an @code{EDL} script.
 
 
 @anchor{pulser_automatic_twt_pulses}
@@ -1942,7 +1942,7 @@ can be adjusted in the configuration file for the module) is used as
 the minimum TWT pulse distance.
 
 This function can only be called during the @code{PREPARATIONS} section
-of an @code{EDL} program.
+of an @code{EDL} script.
 
 
 @anchor{pulser_minimum_twt_pulse_distance}
@@ -1957,7 +1957,7 @@ whole intermediate time interval). If you try to set a time that is
 shorter than the default minimum time distance (as set in the
 configuration file for the module) a warning is printed.
 
-This function can be used in all sections of the program and even allows
+This function can be used in all sections of the script and even allows
 to change the minimum time multiple during an experiment. Please note
 that setting a new minimum TWT pulse distance does not automatically
 change the current state of the pulses, they only get changed to reflect
@@ -2122,7 +2122,7 @@ settings. @code{fsc2_pulses} only works if both Perl and Perl/Tk (in not
 too ancient a version) is installed on the system.
 
 This function can only be called during the @code{PREPARATIONS} section
-of an @code{EDL} program.
+of an @code{EDL} script.
 
 
 @anchor{pulser_dump_pulses}
@@ -2133,7 +2133,7 @@ all pulse settings during the test run into the file in a format
 suitable to be used as input for the @code{fsc2_pulses} utility.
 
 This function can only be called during the @code{PREPARATIONS} section
-of an @code{EDL} program.
+of an @code{EDL} script.
 
 @end table
 
@@ -2206,8 +2206,8 @@ between @w{+14.5 db} and @w{-136 db} (with the same resolution) and for
 the @code{HP8672A} between @w{+3 db} and @w{-120 db} with a resolution
 of @w{1 db}.
 
-Currently for the @code{HP8647A} the minimum attenuation that can be
-set from the program is reduced to @w{-5 db}, should you need lower
+Currently for the @code{HP8647A} the minimum attenuation that can be set
+from an @code{EDL} script is limited to @w{-5 db}, should you need lower
 attenuations change the definition of @code{MIN_ATTEN} in the
 configuration file for the device.
 
@@ -2462,7 +2462,7 @@ lakeshore330
 @noindent
 in the @code{DEVICES} section. All functions for the temperature
 controller can only be used in the @code{EXPERIMENT} section of
-the @code{EDL} program.
+the @code{EDL} script.
 
 
 @table @samp
@@ -2509,7 +2509,7 @@ for Ohms or @code{4} for milli-Volts.
 Usually, during an experiment the keyboard of the temperature controller
 is locked. But for situations where it would be useful to be able to
 control the device also via its keyboard it can be unlocked (and also
-re-locked) from within the program. To unlock the keyboard call this
+re-locked) from within the script. To unlock the keyboard call this
 function with an argument of @code{0} or @code{"OFF"}, to re-lock the
 keyboard call it again with a non-zero argument, @code{"ON"} or no
 argument at all.
@@ -2569,7 +2569,7 @@ egg4402
 @noindent
 in the @code{DEVICES} section. All functions for the boxcar integrator
 can only be used in the @code{EXPERIMENT} section of the @code{EDL}
-program.
+script.
 
 @table @samp
 
@@ -3138,7 +3138,7 @@ second the result for the second acquistion sequence and the first
 window, then follow the the results of both acquisition sequences for
 the second window, etc.
 
-As an example here parts of an @code{EDL} program for a 1-dimensional
+As an example here parts of an @code{EDL} script for a 1-dimensional
 stimulated echo experiment with phase cycling. The parts with the
 definition of the pulses etc. are left out for sake of brevity.
 @example
@@ -3207,14 +3207,14 @@ data now must, according to the acquisition sequence, be added to the
 previous accumulated data. The result, an array with two elements for
 the first and second window is returned by the function.
 
-You may note, that in this program @code{pulser_update()} isn't called
+You may note that in this script @code{pulser_update()} isn't called
 after @code{pulser_shift()}. This is possible because
 @code{get_phase_cycled_area()} internally calls @code{pulser_update()}
 before it starts doing the measurement.
 
 Two acquisition sequences would, for example, be used in an inversion
 recovery experiment with FID detection and phase cycling. Parts of the
-@code{EDL} program would look like this:
+@code{EDL} script would look like this:
 @example
 DEVICES:
 
