@@ -110,7 +110,7 @@ char gpib_error_buffer[ 1024 ];
 int gpib_init( const char *log_file_name, int log_level )
 {
 	GPIB_DEV *cur_dev;
-	bool must_reset:
+	bool must_reset;
 
 
 	if ( gpib_is_active )

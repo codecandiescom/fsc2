@@ -87,6 +87,7 @@
 #include "print.h"
 #include "func_intact.h"
 #include "conn.h"
+#include "serial.h"
 
 
 /* Some global functions */

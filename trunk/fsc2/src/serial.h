@@ -25,9 +25,11 @@
 #if ! defined SERIAL_HEADER
 #define SERIAL_HEADER
 
+#include <termios.h>
+
 
 int fsc2_serial_open( const char *dev_name, int flags );
-ssize_t int fsc2_serial_write( int fd, const void *buf, size_t count );
+ssize_t fsc2_serial_write( int fd, const void *buf, size_t count );
 ssize_t fsc2_serial_read( int fd, void *buf, size_t count );
 int fsc2_serial_close( int fd );
 int fsc2_tcgetattr( int fd, struct termios *termios_p );

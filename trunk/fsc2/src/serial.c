@@ -45,7 +45,7 @@ int fsc2_serial_open( const char *dev_name, int flags )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-ssize_t int fsc2_serial_write( int fd, const void *buf, size_t count )
+ssize_t fsc2_serial_write( int fd, const void *buf, size_t count )
 {
 	ssize_t ret_count;
 	bool must_reset = UNSET;
