@@ -119,8 +119,8 @@ static int __init ni6601_init( void )
 	}
 
 	if ( board_count == NI6601_MAX_BOARDS )
-		printk( KERN_WARNING NI6601_NAME ": Possibly more than %d "
-			"boards!\n", NI6601_MAX_BOARDS );
+		printk( KERN_WARNING NI6601_NAME ": There could be more than "
+			"the %d supported boards!\n", NI6601_MAX_BOARDS );
 
 #ifdef CONFIG_DEVFS_FS
 	if ( ( major = devfs_register_chrdev( major, NI6601_NAME,

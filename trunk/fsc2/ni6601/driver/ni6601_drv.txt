@@ -330,7 +330,7 @@ counting, otherwise to 0.
 
   NI6601_IOC_DISARM
 
-This iocth() request allows to stop a counter, i.e. to disarm it. The
+This ioctl() request allows to stop a counter, i.e. to disarm it. The
 argument for the ioctl() call is a structure of type NI6601_DISARM,
 which is a typedef of
 
