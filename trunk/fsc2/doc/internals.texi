@@ -523,12 +523,12 @@ Please note that because @code{fsc2} is normally running as a setuid-ed
 process you must not try to debug the already installed and setuid-ed
 version (that's not allowed for security reason) but only a version
 which belongs to you and for which you have unlimited execution
-permissions. This might require that you temporarily change the
-permissions to allow access by all users for all the device files (for
-the GPIB board, the serial ports and, possibly, cards installed in the
-computer and used by @code{fsc2}) of devices that are controlled by the
-@code{EDL} script you use during debugging. Don't forget to reset the
-permissions when you're done.
+permissions. This might require that you temporarily relax the
+permissions on the device files (for the GPIB board, the serial ports
+and, possibly, cards installed in the computer and used by @code{fsc2})
+of devices that are controlled by the @code{EDL} script you use during
+debugging to allow access by all users (or at least you). Don't forget
+to reset the permissions when you're done.
 
 
 This point out of the way I'll now want to start a tour de force through
@@ -1717,6 +1717,18 @@ reply by listening on its read side of the pipe by calling
 actions associated with a request and then call @code{writer()} to send
 back either just an acknowledgment or a set of data to the child process
 waiting in @code{reader()} for the reply.
+
+
+Another thing that might get done while the parent process is running
+its idle handler and if there aren't any more data by the child process
+to be dealt with is checking if the HTTP server, that might have gotten
+switched of by the user is asking for either information about the
+current state of @code{fsc2} or even a file with a copy of what's
+currently displayed on the screen. This is done in the function
+@code{http_check()} in @file{http.c}. Please note that never more than a
+single request by the HTTP server is serviced to keep @code{fsc2} from
+being slowed down too much during the experiment from a large number of
+such requests.
 
 
 When the child exits the parent has again to do a bit of work. It

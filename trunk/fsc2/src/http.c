@@ -208,12 +208,12 @@ void http_check( void )
 
 		switch ( query )
 		{
-			case 'S' :
+			case 'S' :                             /* state of the program ? */
 				reply[ 0 ]  = ( char ) Internals.state + '0';
 				write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
 				break;
 
-			case 'W' :
+			case 'W' :                       /* wich windows are displayed ? */
 				if ( ! G.is_init )
 					reply[ 0 ] = '0';
 				else
@@ -229,24 +229,24 @@ void http_check( void )
 				write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
 				break;
 
-			case 'C' :
+			case 'C' :            /* which 2D curve is currently displayed ? */
 				reply[ 0 ] = ( char ) ( G2.active_curve + 1 ) + '0';
 				write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
 				break;
 
-			case 'E' :
+			case 'E' :             /* send the contents of the error browser */
 				http_send_error_browser( Comm.http_pd[ HTTP_PARENT_WRITE ] );
 				break;
 
-			case 'a' :
+			case 'a' :                         /* create file with 1D window */
 				http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ], 1 );
 				break;
 
-			case 'b' :
+			case 'b' :                         /* create file with 2D window */
 				http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ], 2 );
 				break;
 
-			case 'c' :
+			case 'c' :              /* create file with cross section window */
 				http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ], 3 );
 				break;
 
