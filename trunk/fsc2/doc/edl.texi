@@ -513,9 +513,10 @@ the range of representable values, convert the values to floating point
 type (using the function @code{float()}) before you do the potentially
 problematic arithmetic operation.
 
-Of course, there are also limits to the range of numbers representable by a
-floating point number. Fortunately, these limits are much larger - typically
-the maximum size of the floating point numbers is in the range of 10^300.
+Of course, there are also limits to the range of numbers representable
+by a floating point number. Fortunately, these limits are much larger -
+typically the maximum size of floating point numbers is in the range of
+10^300.
 @cindex floating point numbers, range of
 @cindex range of floating point numbers
 @cindex floating point overflow
@@ -548,7 +549,7 @@ operation the percent sign @code{%}
 @cindex modulo operator
 is used and the result is the remainder of the division, e.g.@
 @example
-7 % 3 = 2         6.5 % 2.5 = 1.5 
+7 % 3 = 1         6.5 % 2.5 = 1.5 
 @end example
 
 
@@ -601,16 +602,16 @@ Usually one doesn't think about the precedence of operators. We already
 learned in primary school that multiplication and division have higher
 precedence than addition or subtraction. Of course, a programming
 language should follow this rules. But sometimes there are cases where
-it is necessary to know exactly the precedence, i.e.@: the exact
+it is necessary to know the precedence exactly, i.e.@: the exact
 sequence an expression is evaluated.
 
-The unary `@code{+}' and `@code{-}' operators (unary in the sense that
-they apply only to just one number or variable) have the highest
-precedence, i.e.@: the operators defining the sign of a number. There is
-a further operator, to be discussed later, having the same precedence,
-the logical negation operator, `@code{!}'. The evaluation of an
-expression with more than one of these operators is from the right to
-the left, i.e.@:
+The unary operators (unary in the sense that they apply only to one
+number or variable) `@code{+}' and `@code{-}', i.e.@: the operators
+defining the sign of a number, have the highest precedence. There is a
+further operator, to be discussed later, having the same precedence, the
+logical negation operator, `@code{!}'. The evaluation of an expression
+with more than one of these operators is from the right to the left,
+i.e.@:
 @example
  !-x    @r{will be treated as if written as}    ! ( - x )
 @end example
@@ -669,7 +670,7 @@ right of the expression:
 
 To make your intentions more clear to human readers of your
 @acronym{EDL} programs it's probably a good idea to use parenthesis in
-these cases even when they are not required.
+these cases even if they are not required.
 
 Finally, the lowest precedence operators are the comparison operators
 (also the be discussed below in more detail), i.e.@: the test for equality,
@@ -687,15 +688,16 @@ parenthesis. And since only one assignment operator is allowed in a
 statement you don't have to worry about the order of evaluation.
 
 Of course, the precedence of operators and the sequence they are
-evaluated in can always be changed by using parenthesis. So, if in doubt,
-use parenthesis -- this won't slow down the program significantly.
+evaluated in can always be changed by using parenthesis. So, if in
+doubt, use parenthesis -- this won't slow down the program but make the
+program much easier to understand.
 
 
 @subsection Arithmetic with arrays
 @cindex Arithmetic with arrays
 
 Beside the usual arithmetic with numbers it is also possible to use
-arithmetic with (one-dimensional) arrays. As long as the sizes of two
+arithmetic with one-dimensional arrays. As long as the sizes of two
 arrays are identical they can be added or subtracted. If the arrays
 @code{a} and @code{b} are defined as
 @example
@@ -703,7 +705,7 @@ arrays are identical they can be added or subtracted. If the arrays
   b[ 3 ] = @{ 1.0, -2.0, -3.0 @};
 @end example
 @noindent
-they can be added and subtracted in a element-by-element fashion,
+they can be added and subtracted in an element-by-element fashion,
 resulting in
 @example
   a + b      ->   @{  1.5, -1.0, -1.0 @}
