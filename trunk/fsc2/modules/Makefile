@@ -45,68 +45,64 @@ src_headers    = $(addprefix ../src/,$(headers))
 CFLAGS        += -I../src
 LFLAGS         = -shared -fpic
 
+define libmake
+	$(LD) $(LFLAGS) $^ -o $@
+	chmod 644 $@
+endef
+
 
 .SUFFIXES:
 .PHONY: all clean distclean
 
 
-all: $(comp_modules:=.so) $(simp_modules:.c=.so)
+all: $(addsuffix .so,$(comp_modules)) $(simp_modules:.c=.so)
 
 
-dg2020_f.so: ${dg2020_f:.c=.o}
-	$(LD) $(LFLAGS) $^ -o $@
-	chmod 644 $@
+dg2020_f.so: $(dg2020_f:.c=.o)
+	$(libmake)
 
-dg2020_b.so: ${dg2020_b:.c=.o}
-	$(LD) $(LFLAGS) $^ -o $@
-	chmod 644 $@
+dg2020_b.so: $(dg2020_b:.c=.o)
+	$(libmake)
 
-hfs9000.so: ${hfs9000:.c=.o}
-	$(LD) $(LFLAGS) $^ -o $@
-	chmod 644 $@
+hfs9000.so: $(hfs9000:.c=.o)
+	$(libmake)
 
-tds754a.so: ${tds754a:.c=.o}
-	$(LD) $(LFLAGS) $^ -o $@
-	chmod 644 $@
+tds754a.so: $(tds754a:.c=.o)
+	$(libmake)
 
-tds744a.so: ${tds744a:.c=.o}
-	$(LD) $(LFLAGS) $^ -o $@
-	chmod 644 $@
+tds744a.so: $(tds744a:.c=.o)
+	$(libmake)
 
-tds540.so: ${tds540:.c=.o}
-	$(LD) $(LFLAGS) $^ -o $@
-	chmod 644 $@
+tds540.so: $(tds540:.c=.o)
+	$(libmake)
 
-tds520c.so: ${tds520c:.c=.o}
-	$(LD) $(LFLAGS) $^ -o $@
-	chmod 644 $@
+tds520c.so: $(tds520c:.c=.o)
+	$(libmake)
 
-tds520a.so: ${tds520a:.c=.o}
-	$(LD) $(LFLAGS) $^ -o $@
-	chmod 644 $@
+tds520a.so: $(tds520a:.c=.o)
+	$(libmake)
 
-tds520.so: ${tds520:.c=.o}
-	$(LD) $(LFLAGS) $^ -o $@
-	chmod 644 $@
+tds520.so: $(tds520:.c=.o)
+	$(libmake)
 
-hp8647a.so: ${hp8647a:.c=.o}
-	$(LD) $(LFLAGS) $^ -o $@
-	chmod 644 $@
+hp8647a.so: $(hp8647a:.c=.o)
+	$(libmake)
 
-%.so: %.o
-	$(LD) $(LFLAGS) $^ -o $@
-	chmod 644 $@
 
-${dg2020_f:.c=.o}: dg2020_f.h
-${dg2020_b:.c=.o}: dg2020_b.h
-${hfs9000:.c=.o}:  hfs9000.h
-${tds754a:.c=.o}:  tds754a.h
-${tds744a:.c=.o}:  tds744a.h
-${tds540:.c=.o}:   tds540.h
-${tds520c:.c=.o}:  tds520c.h
-${tds520a:.c=.o}:  tds520a.h
-${tds520:.c=.o}:   tds520.h
-${hp8647a:.c=.o}:  hp8647a.h
+$(dg2020_f:.c=.o): %.o: dg2020_f.h dg2020_f.conf
+$(dg2020_b:.c=.o): %.o: dg2020_b.h dg2020_b.conf
+$(hfs9000:.c=.o):  %.o: hfs9000.h  hfs9000.conf
+$(tds754a:.c=.o):  %.o: tds754a.h  tds754a.conf
+$(tds744a:.c=.o):  %.o: tds744a.h  tds744a.conf
+$(tds540:.c=.o):   %.o: tds540.h   tds540.conf
+$(tds520c:.c=.o):  %.o: tds520c.h  tds520c.conf
+$(tds520a:.c=.o):  %.o: tds520a.h  tds520a.conf
+$(tds520:.c=.o):   %.o: tds520.h   tds520.conf
+$(hp8647a:.c=.o):  %.o: hp8647a.h  hp8647a.conf
+
+
+%.o: %.c $(src_headers)
+	$(CC) -c $(CFLAGS) $(LFLAGS) $< -o $@
 
 hp8647a_lexer.c: hp8647a_lexer.l $(src_header)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %lexer.l,%,$<) -o$@ $<
@@ -114,9 +110,11 @@ hp8647a_lexer.c: hp8647a_lexer.l $(src_header)
 			register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
 	mv -f $@.x $@
 
-%.o: %.c $(src_headers)
+$(simp_modules:.c=.o): %.o: %.c %.conf $(src_headers)
 	$(CC) $(CFLAGS) -c $(LFLAGS) $< -o $@
 
+%.so: %.o
+	$(libmake)
 
 clean:
 	-$(RM) $(RMFLAGS) *.o *_lexer.c TAGS cscope.out *~
