@@ -19,10 +19,6 @@ typedef struct {
 
 static void f_wait_alarm_handler( int sig_type );
 DPoint *eval_display_args( Var *v, int *npoints );
-static void graphics_init( long dim, long nc, long nx, long ny,
-						   double rwc_x_start, double rwc_x_delta,
-						   double rwc_y_start, double rwc_y_delta,
-						   char *x_label, char *y_label );
 static int get_save_file( Var **v, const char *calling_function );
 static void print_array( Var *v, long cur_dim, long *start, int fid );
 static void print_slice( Var *v, int fid );
@@ -1057,7 +1053,7 @@ void f_wait_alarm_handler( int sig_type )
 /* 1-dimensional experiments.                                        */
 /* Arguments:                                                        */
 /* 1. Number of curves to be shown (optional, defaults to 1)         */
-/* 2. Number of points (optional, 0 if unknown, negative if a guess) */
+/* 2. Number of points (optional, 0 or negative if unknown)          */
 /* 3. Real world coordinate and increment (optional)                 */
 /* 4. x-axis label (optional)                                        */
 /* 5. y-axis label (optional)                                        */
@@ -1065,109 +1061,107 @@ void f_wait_alarm_handler( int sig_type )
 
 Var *f_init_1d( Var *v )
 {
-	if ( v != NULL )
+	/* Set some default values */
+
+	G.dim = 1;
+	G.is_init = SET;
+	G.nc = 1;
+	G.nx = DEFAULT_X_POINTS;
+	G.rwc_start[ X ] = ( double ) ARRAY_OFFSET;
+	G.rwc_delta[ X ] = 1.0;
+
+
+	if ( v == NULL )
+		return vars_push( INT_VAR, 1 );
+
+	if ( v->type == STR_VAR )
+		goto labels_1d;
+
+	vars_check( v, INT_VAR | FLOAT_VAR );             /* number of curves */
+
+	if ( v->type == INT_VAR )
+		G.nc = v->val.lval;
+	else
 	{
-		if ( v->type == STR_VAR )
-		{
-			G.nc = 0;
-			G.nx = 0;
-			G.is_nx = UNSET;
-			G.rwc_start[ X ] = ARRAY_OFFSET;
-			G.rwc_delta[ X ] = 1.0;
-			goto label_1d;
-		}
+		eprint( WARN, "%s:%ld: Floating point value used as number of "
+				      "curves in `init_1d()'.\n", Fname, Lc );
+		G.nc = lround( v->val.dval );
+	}
 
-		vars_check( v, INT_VAR | FLOAT_VAR );             /* get # of curves */
+	if ( G.nc < 1 || G.nc > MAX_CURVES )
+	{
+		eprint( FATAL, "%s:%ld: Invalid number of curves (%ld) in "
+				       "`init_1d()'.\n", Fname, Lc, G.nc );
+		THROW( EXCEPTION );
+	}
 
-		if ( v->type == INT_VAR )
-			G.nc = v->val.lval;
-		else
-		{
-			eprint( WARN, "%s:%ld: Floating point value used as number of "
-					"curves in `init_1d()'.\n", Fname, Lc );
-			G.nc = lround( v->val.dval );
-		}
+	if ( ( v = v->next ) == NULL )
+		return vars_push( INT_VAR, 1 );
 
-		if ( G.nc < 1 || G.nc > MAX_CURVES )
+	if ( v->type == STR_VAR )
+		goto labels_1d;
+
+	vars_check( v, INT_VAR | FLOAT_VAR );      /* # of points in x-direction */
+
+	if ( v->type == INT_VAR )
+		G.nx = v->val.lval;
+	else
+	{
+		eprint( WARN, "%s:%ld: Floating point value used as number of "
+				      "points in `init_1d()'.\n", Fname, Lc );
+		G.nx = lround( v->val.dval );
+	}
+
+	if ( G.nx <= 0 )
+		G.nx = DEFAULT_X_POINTS;
+
+	if ( ( v = v->next ) == NULL )
+		return vars_push( INT_VAR, 1 );
+
+	if ( v->type == STR_VAR )
+		goto labels_1d;
+
+	/* If next value is an integer or a float this is the real world
+	   x coordinate followed by the increment */
+
+	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+	{
+		if ( v->next == NULL || 
+			 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
-			eprint( FATAL, "%s:%ld: Invalid number of curves (%ld) in "
-					"`init_1d()'.\n", Fname, Lc, G.nc );
+			eprint( FATAL, "%s:%ld: Real word coordinate given but no "
+					       "increment in `init_1d()'.\n" );
 			THROW( EXCEPTION );
 		}
 
+		G.rwc_start[ X ] = VALUE( v );
 		v = v->next;
-	}
+		G.rwc_delta[ X ] = VALUE( v );
 
-	if ( v != NULL )
-	{
-		if ( v->type == STR_VAR )
+		if ( G.rwc_start[ X ] == 0.0 && G.rwc_delta[ X ] == 0.0 )
 		{
-			G.nx = 0;
-			G.is_nx = UNSET;
 			G.rwc_start[ X ] = ARRAY_OFFSET;
 			G.rwc_delta[ X ] = 1.0;
-			goto label_1d;
-		}
-
-		vars_check( v, INT_VAR | FLOAT_VAR );  /* # of points in x-direction */
-
-		if ( v->type == INT_VAR )
-			G.nx = v->val.lval;
-		else
-		{
-			eprint( WARN, "%s:%ld: Floating point value used as number of "
-					"points in `init_1d()'.\n", Fname, Lc );
-			G.nx = lround( v->val.dval );
-		}
-
-		v = v->next;
-	}
-
-	if ( v != NULL )
-	{
-
-		/* If next value is an integer or a float this is the real world
-		   coordinate followed by the increment */
-
-		if ( v->type & ( INT_VAR | FLOAT_VAR ) )
-		{
-			if ( v->next == NULL || 
-				 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
-			{
-				eprint( FATAL, "%s:%ld: Real word coordinate given but no "
-						"increment in `init_1d()'.\n" );
-				THROW( EXCEPTION );
-			}
-
-			G.rwc_start[ X ] = VALUE( v );
-			G.rwc_delta[ X ] = VALUE( v->next );
-			if ( G.rwc_start[ X ] == 0.0 && G.rwc_delta[ X ] == 0.0 )
-			{
-				G.rwc_start[ X ] = ARRAY_OFFSET;
-				G.rwc_delta[ X ] = 1.0;
-			}
-			v = v->next->next;
-		}
-
-label_1d:
-
-		if ( v != NULL )
-		{
-			vars_check ( v, STR_VAR );
-			G.label[ X ] = get_string_copy( v->val.sptr );
-			v = v->next;
-		}
-
-		if ( v != NULL )
-		{
-			vars_check ( v, STR_VAR );
-			G.label[ Y ] = get_string_copy( v->val.sptr );
 		}
 	}
+
+	if ( ( v = v->next ) == NULL )
+		return vars_push( INT_VAR, 1 );
+
+labels_1d:
+
+	if ( ( v = v->next ) == NULL )
+		return vars_push( INT_VAR, 1 );
+
+	vars_check ( v, STR_VAR );
+	G.label[ X ] = get_string_copy( v->val.sptr );
+
+	if ( ( v = v->next ) == NULL )
+		return vars_push( INT_VAR, 1 );
+
+	vars_check ( v, STR_VAR );
+	G.label[ Y ] = get_string_copy( v->val.sptr );
 	
-	G.dim = 1;
-	G.is_init = SET;
-
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -1179,227 +1173,162 @@ label_1d:
 
 Var *f_init_2d( Var *v )
 {
-	long nx = 0,
-		 ny = 0,
-		 nc = 1;
-	double rwc_x_start = 0.0,
-		   rwc_x_delta = 0.0, 
-		   rwc_y_start = 0.0,
-		   rwc_y_delta = 0.0;
-	char *l1 = NULL,
-		 *l2 = NULL;
+	/* Set some default values */
+
+	G.dim = 2;
+	G.is_init = SET;
+	G.nc = 1;
+	G.nx = DEFAULT_X_POINTS;
+	G.ny = DEFAULT_Y_POINTS;
+	G.rwc_start[ X ] = G.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
+	G.rwc_delta[ X ] = G.rwc_delta[ Y ] = 1.0; 
 
 
-	if ( v != NULL )
+	if ( v == NULL )
+		return vars_push( INT_VAR, 1 );
+
+	if ( v->type == STR_VAR )
+		goto labels_2d;
+
+	vars_check( v, INT_VAR | FLOAT_VAR );                /* number of curves */
+
+	if ( v->type == INT_VAR )
+		G.nc = v->val.lval;
+	else
 	{
-		if ( v->type == STR_VAR )
-			goto labels_2d;
+		eprint( WARN, "%s:%ld: Floating point value used as number of "
+				      "curves in `init_1d()'.\n", Fname, Lc );
+		G.nc = lround( v->val.dval );
+	}
 
-		vars_check( v, INT_VAR | FLOAT_VAR );             /* get # of curves */
+	if ( G.nc < 1 || G.nc > MAX_CURVES )
+	{
+		eprint( FATAL, "%s:%ld: Invalid number of curves (%ld) in "
+				"`init_1d()'.\n", Fname, Lc, G.nc );
+		THROW( EXCEPTION );
+	}
 
-		if ( v->type == INT_VAR )
-			nc = v->val.lval;
-		else
+	if ( ( v = v->next ) == NULL )
+		return vars_push( INT_VAR, 1 );
+
+	if ( v->type == STR_VAR )
+		goto labels_2d;
+
+	vars_check( v, INT_VAR | FLOAT_VAR );      /* # of points in x-direction */
+
+	if ( v->type == INT_VAR )
+		G.nx = v->val.lval;
+	else
+	{
+		eprint( WARN, "%s:%ld: Floating point value used as number of "
+				      "points in x-direction.\n", Fname, Lc );
+		G.nx = lround( v->val.dval );
+	}
+
+	if ( G.nx <= 0 )
+		G.nx = DEFAULT_X_POINTS;
+
+	if ( ( v = v->next ) == NULL )
+		return vars_push( INT_VAR, 1 );
+
+	if ( v->type == STR_VAR )
+		goto labels_2d;
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == INT_VAR )
+		G.ny = v->val.lval;
+	else
+	{
+		eprint( WARN, "%s:%ld: Floating point value used as number of "
+				      "points in y-direction.\n", Fname, Lc );
+		G.ny = lround( v->val.dval );
+	}
+
+	if ( G.ny <= 0 )
+		G.ny = DEFAULT_Y_POINTS;
+
+	if ( ( v = v->next ) == NULL )
+		return vars_push( INT_VAR, 1 );
+
+	if ( v->type == STR_VAR )
+		goto labels_2d;
+
+	/* Now we expect 2 real world x coordinates (start and delta for
+	   x-direction) */
+
+	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+	{
+		if ( v->next == NULL ||
+			 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
-			eprint( WARN, "%s:%ld: Floating point value used as number of "
-					"curves in `init_1d()'.\n", Fname, Lc );
-			nc = lround( v->val.dval );
-		}
-
-		if ( nc < 1 || nc > MAX_CURVES )
-		{
-			eprint( FATAL, "%s:%ld: Invalid number of curves (%ld) in "
-					"`init_1d()'.\n", Fname, Lc, nc );
+			eprint( FATAL, "%s:%ld: Incomplete real world x coordinates "
+					       "in `init_2d()'.\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
 
+		G.rwc_start[ X ] = VALUE( v );
 		v = v->next;
+		G.rwc_delta[ X ] = VALUE( v );
+
+		if ( G.rwc_start[ X ] == 0.0 && G.rwc_delta[ X ] == 0.0 )
+		{
+			G.rwc_start[ X ] = ( double ) ARRAY_OFFSET;
+			G.rwc_delta[ X ] = 1.0;
+		}
 	}
 
-	if ( v != NULL )
+	if ( ( v = v->next ) == NULL )
+		return vars_push( INT_VAR, 1 );
+
+	if ( v->type == STR_VAR )
+		goto labels_2d;
+
+	/* Now we expect 2 real world y coordinates (start and delta for
+	   x-direction) */
+
+	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
-		if ( v->type == STR_VAR )
-			goto labels_2d;
-
-		vars_check( v, INT_VAR | FLOAT_VAR );  /* # of points in x-direction */
-
-		if ( v->type == INT_VAR )
-			nx = v->val.lval;
-		else
+		if ( v->next == NULL ||
+			 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
-			eprint( WARN, "%s:%ld: Floating point value used as number of "
-					"points in x-direction.\n", Fname, Lc );
-			nx = lround( v->val.dval );
+			eprint( FATAL, "%s:%ld: Incomplete real world y coordinates "
+				 	        "in `init_2d()'.\n", Fname, Lc );
+			THROW( EXCEPTION );
 		}
 
+		G.rwc_start[ Y ] = VALUE( v );
 		v = v->next;
+		G.rwc_delta[ Y ] = VALUE( v );
+		
+		if ( G.rwc_start[ Y ] == 0.0 && G.rwc_delta[ Y ] == 0.0 )
+		{
+			G.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
+			G.rwc_delta[ Y ] = 1.0;
+		}
 	}
 
-	if ( v != NULL )
-	{
-		if ( v->type == STR_VAR )
-			goto labels_2d;
-
-		vars_check( v, INT_VAR | FLOAT_VAR );
-
-		if ( v->type == INT_VAR )
-			ny = v->val.lval;
-		else
-		{
-			eprint( WARN, "%s:%ld: Floating point value used as number of "
-					"points in y-direction.\n", Fname, Lc );
-			ny = lround( v->val.dval );
-		}
-
-		v = v->next;
-	}
-
-	if ( v != NULL )
-	{
-		/* Now we expect either 4 real world coordinates (start and delta for
-		   x- and y-direction) or none at all - look for labels instead */
-
-		if ( v->type & ( INT_VAR | FLOAT_VAR ) )
-		{
-			if ( v->next == NULL ||
-				 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) ||
-				 v->next->next == NULL ||
-				 ! ( v->next->next->type & ( INT_VAR | FLOAT_VAR ) ) ||
-				 v->next->next->next == NULL ||
-				 ! ( v->next->next->next->type & ( INT_VAR | FLOAT_VAR ) ) )
-			{
-				eprint( FATAL, "%s:%ld: Incomplete real world coordinates in "
-						"`init_2d()'.\n", Fname, Lc );
-				THROW( EXCEPTION );
-			}
-
-			rwc_x_start = VALUE( v );
-			v = v->next;
-			rwc_x_delta = VALUE( v );
-			v = v->next;
-			rwc_y_start = VALUE( v );
-			v = v->next;
-			rwc_y_delta = VALUE( v );
-			v = v->next;
-		}
+	if ( ( v = v->next ) == NULL )
+		return vars_push( INT_VAR, 1 );
 
 labels_2d:
 
-		if ( v != NULL )                  /* get x-label */
-		{
-			vars_check( v, STR_VAR );
-			l1 = v->val.sptr;
-			v = v->next;
-		}
+	vars_check( v, STR_VAR );
+	G.label[ X ] = v->val.sptr;
 
-		if ( v != NULL )                  /* get y-label */
-		{
-			vars_check( v, STR_VAR );
-			l2 = v->val.sptr;
-		}
-	}
+	if ( ( v = v->next ) == NULL )
+		return vars_push( INT_VAR, 1 );
 
-	graphics_init( 2, nc, nx, ny, rwc_x_start, rwc_x_delta,
-				   rwc_y_start, rwc_y_delta, l1, l2 );
+	vars_check( v, STR_VAR );
+	G.label[ Y ] = v->val.sptr;
+
+	if ( ( v = v->next ) == NULL )
+		return vars_push( INT_VAR, 1 );
+
+	vars_check( v, STR_VAR );
+	G.label[ Z ] = v->val.sptr;
+
 	return vars_push( INT_VAR, 1 );
-}
-
-
-/*-----------------------------------------------------------*/
-/* Function sets up the variables in the structure used for  */
-/* the graphic, `G', according to the data given in the call */
-/* to `init_1d()' or `init_2d()'.                            */
-/*-----------------------------------------------------------*/
-
-void graphics_init( long dim, long nc, long nx, long ny,
-					double rwc_x_start, double rwc_x_delta,
-					double rwc_y_start, double rwc_y_delta,
-					char *x_label, char *y_label )
-{
-	long i;
-
-
-	G.label[ X ] = G.label[ Y ] = NULL;
-	for ( i = 0; i < MAX_CURVES; i++ )
-		G.curve[ i ] = NULL;
-	G.is_init = SET;
-
-	/* Store dimension of experiment (1 or 2) and number of curves */
-
-	G.dim = dim;
-	G.nc = nc;
-
-	/* For `nx', i.e. the number of points in x direction, being greater than
-	   zero the user already knows the exact number of points, zero means
-	   (s)he didn't got ny idea and a negative number is treated as a guess */
-
-	if ( nx > 0 )
-	{
-		G.is_nx = SET;
-		G.nx = nx;
-	}
-	else
-	{
-		G.is_nx = UNSET;
-		if ( nx == 0 )
-			G.nx = DEFAULT_X_POINTS;
-		else
-			G.nx = labs( nx );
-	}
-
-	/* Same for the number of points in y direction `ny' */
-
-	if ( ny > 0 )
-	{
-		G.is_ny = SET;
-		G.ny = ny;
-	}
-	else
-	{
-		G.is_ny = UNSET;
-		if ( ny == 0 )
-			G.ny = DEFAULT_Y_POINTS;
-		else
-			G.ny = labs( ny );
-	}
-
-	/* Check if there are `real world' coordinates for x and y direction (if
-       both the start and the increment value are zero this means there aren't
-       any) */
-
-	G.rwc_start[ X ] = rwc_x_start;
-	G.rwc_delta[ X ] = rwc_x_delta;
-
-	if ( rwc_x_start == 0.0 && rwc_y_delta == 0.0 )
-	{
-		G.rwc_start[ X ] = ARRAY_OFFSET;
-		G.rwc_delta[ X ] = 1.0;
-	}
-
-	G.rwc_start[ Y ] = rwc_y_start;
-	G.rwc_delta[ Y ] = rwc_y_delta;
-
-	if ( rwc_y_start == 0.0 && rwc_y_delta == 0.0 )
-	{
-		G.rwc_start[ Y ] = ARRAY_OFFSET;
-		G.rwc_delta[ Y ] = 1.0;
-	}
-
-	/* Store the labels for x and y direction */
-
-	if ( x_label != NULL )
-	{
-		if ( G.label[ X ] != NULL )
-			T_free( G.label[ X ] );
-		G.label[ X ] = get_string_copy( x_label );
-	}
-
-	if ( dim == 2 && y_label != NULL )
-	{
-		if ( G.label[ Y ] != NULL )
-			T_free( G.label[ Y ] );
-		G.label[ Y ] = get_string_copy( y_label );
-	}
 }
 
 
@@ -1732,15 +1661,15 @@ Var *f_clearcv( Var *v )
 		vars_check( v, INT_VAR | FLOAT_VAR );         /* get number of curve */
 
 		if ( v->type == INT_VAR )
-			curve = v->val.lval;
+			curve = v->val.lval - 1;
 		else
 		{
 			eprint( WARN, "%s:%ld: Floating point value used as curve "
 					"number.\n", Fname, Lc );
-			curve = lround( v->val.dval );
+			curve = lround( v->val.dval ) - 1;
 		}
 
-		clear_curve( curve - 1 );
+		clear_curve( curve );
 
 		v = v->next;
 	}
