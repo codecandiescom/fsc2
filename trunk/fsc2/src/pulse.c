@@ -8,7 +8,7 @@
 
 /* local functions */
 
-static Var *pulse_get_by_addr( Pulse *p, int type );
+static Var *get_pulse_by_addr_prop( Pulse *p, int prop );
 static bool pulse_exist( Pulse *p );
 static void pulse_set_func( Pulse *p, Var *v );
 static void pulse_set_pos( Pulse *p, Var *v );
@@ -30,7 +30,7 @@ static void sort_pulse_list( void );
 /*    * pulse number                            */
 /*----------------------------------------------*/
 
-int ps2n( char *txt )
+int get_pulse_num( char *txt )
 {
 	long num;
 
@@ -41,17 +41,10 @@ int ps2n( char *txt )
 	assert( txt != NULL );          /* Paranoia ? */
 
 	num = strtol( txt, NULL, 10 );
-	if ( errno == ERANGE )
+	if ( errno == ERANGE || num >= MAX_PULSE_NUM )
 	{
-		eprint( FATAL, "%s:%ld: Pulse number out of range (legal: 0-%d).\n",
-				Fname, Lc, MAX_PULSE_NUM - 1 );
-		THROW( EXCEPTION );
-	}
-
-	if ( num > INT_MAX )
-	{
-		eprint( FATAL, "%s:%ld: Pulse number %ld out of range "
-				"(legal: 0-%d).\n", Fname, Lc, num, MAX_PULSE_NUM - 1 );
+		eprint( FATAL, "%s:%ld: Pulse number (%s) out of range "
+				"(allowed: 0-%d).\n", Fname, Lc, txt, MAX_PULSE_NUM - 1 );
 		THROW( EXCEPTION );
 	}
 
@@ -66,10 +59,8 @@ int ps2n( char *txt )
 Pulse *pulse_new( char *txt )
 {
 	Pulse *p;
-	int num;
+	int num = get_pulse_num( txt );
 
-
-	num = ps2n( txt );
 
 	/* Check that the pulse does not already exists */
 
@@ -123,7 +114,7 @@ Pulse *pulse_find( int num )
 	if ( num < 0 || num >= MAX_PULSE_NUM )
 	{
 		eprint( FATAL, "%s:%ld: Pulse number (%d) out of range "
-				"(legal: 0-%d).\n", Fname, Lc, num, MAX_PULSE_NUM - 1 );
+				"(allowed: 0-%d).\n", Fname, Lc, num, MAX_PULSE_NUM - 1 );
 		THROW( EXCEPTION );
 	}
 
@@ -199,7 +190,7 @@ void pulse_set( Pulse *p, int type, Var *v )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *pulse_get_by_addr( Pulse *p, int type )
+Var *get_pulse_by_addr_prop( Pulse *p, int prop )
 {
 	const char *type_strings[ ] = { "Function", "Start", "Length",
 									"Position change", "Length change",
@@ -266,16 +257,17 @@ Var *pulse_get_by_addr( Pulse *p, int type )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+/* Returns the specified property of a pulse (as a variable) */
+/*-----------------------------------------------------------*/
 
-Var *pulse_get_prop( char *txt, int type )
+Var *pulse_get_prop( char *txt, int prop )
 {
 	int num;
 	Pulse *cp;
 
 
-	num = ps2n( txt );
+	num = get_pulse_num( txt );
 	cp = pulse_find( num );
 	if ( cp == NULL )
 	{
@@ -284,12 +276,13 @@ Var *pulse_get_prop( char *txt, int type )
 		THROW( EXCEPTION );
 	}
 
-	return pulse_get_by_addr( cp, type );
+	return get_pulse_by_addr_prop( cp, prop );
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*--------------------------*/
+/* Checks if a pulse exists */
+/*--------------------------*/
 
 bool pulse_exist( Pulse *p )
 {
@@ -303,14 +296,15 @@ bool pulse_exist( Pulse *p )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*------------------------------*/
+/* Sets the function of a pulse */
+/*------------------------------*/
 
 void pulse_set_func( Pulse *p, Var *v )
 {
 	if ( v->type != INT_VAR ||
-		 v->val.lval < PULSER_CHANNEL_MW ||
-		 v->val.lval > PULSER_CHANNEL_RF_GATE )
+		 v->val.lval < PULSER_CHANNEL_FUNC_MIN ||
+		 v->val.lval > PULSER_CHANNEL_FUNC_MAX )
 	{
 		eprint( FATAL, "%s:%ld: Invalid function type for pulse %d.\n",
 				Fname, Lc, p->num );
@@ -329,8 +323,9 @@ void pulse_set_func( Pulse *p, Var *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*------------------------------*/
+/* Sets the position of a pulse */
+/*------------------------------*/
 
 void pulse_set_pos( Pulse *p, Var *v )
 {
@@ -366,8 +361,9 @@ void pulse_set_pos( Pulse *p, Var *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*----------------------------*/
+/* Sets the length of a pulse */
+/*----------------------------*/
 
 void pulse_set_len( Pulse *p, Var *v )
 {
@@ -402,8 +398,9 @@ void pulse_set_len( Pulse *p, Var *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*-------------------------------------*/
+/* Sets the position change of a pulse */
+/*-------------------------------------*/
 
 void pulse_set_dpos( Pulse *p, Var *v )
 {
@@ -432,8 +429,9 @@ void pulse_set_dpos( Pulse *p, Var *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*-----------------------------------*/
+/* Sets the length change of a pulse */
+/*-----------------------------------*/
 
 void pulse_set_dlen( Pulse *p, Var *v )
 {
@@ -462,8 +460,9 @@ void pulse_set_dlen( Pulse *p, Var *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*-----------------------------------*/
+/* Sets the aximum length of a pulse */
+/*-----------------------------------*/
 
 void pulse_set_maxlen( Pulse *p, Var *v )
 {
@@ -511,6 +510,7 @@ void pulse_set_repl( Pulse *p, Var *v )
 void basic_pulse_check( void )
 {
 	Pulse *cp;
+	int i;
 
 
 	if ( Plist == NULL )
@@ -524,8 +524,6 @@ void basic_pulse_check( void )
 
 		if ( cp->n_rp != 0 )
 		{
-			int i;
-
 			if ( ! ( cp->set_flags & P_MAXLEN ) )
 			{
 				eprint( WARN, "Replacement pulses for pulse %d have been set "
@@ -737,8 +735,9 @@ void sort_pulse_list( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Deletes all pulses from tje pulse list and frees the allocated memory */
+/*-----------------------------------------------------------------------*/
 
 void delete_pulses( void )
 {

@@ -56,7 +56,7 @@ enum {
 int    get_pulse_num( char *txt );
 Pulse *pulse_new( char *txt );
 Pulse *pulse_find( int num );
-Var   *pulse_get_prop( char *txt, int type );
+Var   *pulse_get_prop( char *txt, int prop );
 void   pulse_set( Pulse *p, int type, Var *v );
 void   basic_pulse_check( void );
 void   save_restore_pulses( bool flag );
