@@ -525,14 +525,10 @@ static void run_child( void )
 }*/
 
 	TRY {
-		do_measurement( );                     /* run the experiment */
+		do_measurement( );                 /* run the experiment */
 		TRY_SUCCESS;
 	}
-	OTHERWISE { };                             /* catch all exceptions */
-
-	/* Experiment ended prematurely if the end of EDL file wasn't reached */
-
-	if ( cur_prg_token != prg_token + prg_length && cur_prg_token != NULL )
+	OTHERWISE                              /* catch all exceptions */
 		return_status = FAIL;
 
 	close( pd[ READ ] );                   /* close read end of pipe */
