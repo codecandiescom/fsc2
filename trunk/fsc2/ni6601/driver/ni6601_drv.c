@@ -398,7 +398,7 @@ static int ni6601_dio_in( Board *board, NI6601_DIO_VALUE *arg )
 
 	/* If necessary switch selected pins to input mode */
 
-	if ( ( ( u8 ) ( board->dio_mask & 0xFF ) ^ dio.mask ) != 0xFF ) {
+	if ( ( u8 ) ( ( board->dio_mask & 0xFF ) ^ dio.mask ) != 0xFF ) {
 		board->dio_mask &= ~ ( u16 ) dio.mask;
 		writew( board->dio_mask, board->regs.dio_control );
 	}
