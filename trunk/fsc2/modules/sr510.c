@@ -408,7 +408,7 @@ Var *lockin_time_constant( Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	tc = VALUE( v ) / 1.0e9;
+	tc = VALUE( v );
 	vars_pop( v );
 
 	if ( tc < 0.0 )
