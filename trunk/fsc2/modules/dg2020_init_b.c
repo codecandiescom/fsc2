@@ -96,7 +96,7 @@ void dg2020_basic_pulse_check( void )
 			THROW( EXCEPTION );
 		}
 
-		/* We need to know which phase types will be needed for this pulse */
+		/* We need to know which phase types will be needed for this pulse. */
 
 		if ( p->pc )
 		{
@@ -136,6 +136,14 @@ void dg2020_basic_pulse_check( void )
 		}
 		else if ( p->function->num_pods > 1 )
 		{
+			if ( p->function->phase_setup == NULL )
+			{
+				eprint( FATAL, "%s: Function `%s' has more than one pod "
+						"but association between pods and phases is "
+						"missing.\n", pulser_struct.name,
+						Function_Names[ p->function->self ] );
+				THROW( EXCEPTION );
+			}
 			p->pc = dg2020_create_dummy_phase_seq( );
 			p->function->phase_setup->is_needed[ PHASE_PLUS_X ] = SET;
 		}
