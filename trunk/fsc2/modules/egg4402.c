@@ -459,7 +459,7 @@ Var *boxcar_stop_acquisition( Var *v )
 /* the data point(s) are to be fetched from.                      */
 /*----------------------------------------------------------------*/
 
-Var *boxcar_single_shot( Var *v );
+Var *boxcar_single_shot( Var *v )
 {
 	long channel_1 = 1, channel_2 = -1;
 	double data[ 2 ];
@@ -467,7 +467,7 @@ Var *boxcar_single_shot( Var *v );
 	char cmd[ 100 ];
 	char reply[ 16 ];
 	char *cn;
-	length = 16;
+	long length = 16;
 
 
 	if ( v == NULL )
@@ -506,7 +506,7 @@ Var *boxcar_single_shot( Var *v );
 
 	egg4402_command( "START\n" );
 	egg4402_command( "NT 1\n" );
-	sprintf( cmd, "CRV %ld %ld\n", 0, channel_1 );
+	sprintf( cmd, "CRV %d %ld\n", 0, channel_1 );
 	egg4402_command( cmd );
 	
 	/* Wait for the BUFFER DATA bit to become set, indicating that there
@@ -534,7 +534,6 @@ Var *boxcar_single_shot( Var *v );
 	cn = strchr( ( char * ) reply, '\r' );
 	if ( cn == NULL )
 	{
-		T_free( buffer );
 		print( FATAL, "Received unexpected data.\n" );
 		THROW( EXCEPTION );
 	}
@@ -551,7 +550,7 @@ Var *boxcar_single_shot( Var *v );
 	/* Otherwise switch to getting data from the second curve and also
 	   get one point */
 
-	sprintf( cmd, "CRV %ld %ld\n", 0, channel_2 );
+	sprintf( cmd, "CRV %d %ld\n", 0, channel_2 );
 	egg4402_command( cmd );
 	egg4402_command( "DC 0 1\n" );
 
@@ -562,7 +561,6 @@ Var *boxcar_single_shot( Var *v );
 	cn = strchr( ( char * ) reply, '\r' );
 	if ( cn == NULL )
 	{
-		T_free( buffer );
 		print( FATAL, "Received unexpected data.\n" );
 		THROW( EXCEPTION );
 	}
@@ -647,8 +645,8 @@ static void egg4402_query( char *buffer, long *length, bool wait_for_stop )
 	{
 		if ( gpib_serial_poll( egg4402.device, &stb ) == FAILURE )
 			egg4402_failure( );
-		if ( ( ! wait_for_stop stb & 0x80 ) ||
-			 ( wait_for_stop && stb & 4 & stb & 0x80 ) )
+		if ( ( ! wait_for_stop && stb & 0x80 ) ||
+			 ( wait_for_stop && stb & 4 && stb & 0x80 ) )
 			break;
 		stop_on_user_request( );
 		fsc2_usleep( 100000, UNSET );

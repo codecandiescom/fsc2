@@ -2628,6 +2628,22 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
+@anchor{boxcar_single_shot}
+@item boxcar_single_shot()
+@findex boxcar_single_shot()
+The function expects either one or two arguments, the number of one or
+two live curves (i.e.@: either @code{1} or @code{2}). The function
+starts an acquisition and immediately stops the acquisition again when
+the dirst data point has been measured. When only one curve was
+specified as the argument the function returns the value of this data
+point. If there were two arguments, the function returns an array with
+two elements, containing the two data points from the specified live
+curves.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
 @end table
 
 

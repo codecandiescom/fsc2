@@ -220,7 +220,7 @@ bool hfs9000_init( const char *name )
 	{
 		sprintf( cmd, "VECT:END %ld\n", hfs9000.max_seq_len - 1 );
 		hfs9000_command( cmd );
-		sprintf( cmd, "VECT:LOOP %d\n", hfs9000.max_seq_len - 1 );
+		sprintf( cmd, "VECT:LOOP %ld\n", hfs9000.max_seq_len - 1 );
 		hfs9000_command( cmd );
 	}
 
