@@ -261,7 +261,7 @@ ifeq ($(machine_name),crowley.physik.fu-berlin.de)
 	OWNER              := fsc2
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
-	NUM_SERIAL_PORTS   := 2
+	NUM_SERIAL_PORTS   := 1
 	SERIAL_LOCK_DIR    := /var/lock
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
@@ -517,7 +517,7 @@ endif
 config.h: Makefile
 	echo "/*--- Created automatically, dont' change ---*/" > config.h
 	@echo " $(CONFFLAGS)" | \
-	sed 's/ \-D\([A-Za-z][A-Za-z0-9_]*\)\=\{0,1\}/~\#define \1 /g' - | \
+	sed 's/ \-D\([A-Za-z][A-Za-z0-9_]*\)\=\{0,1\}/~#define \1 /g' - | \
 	tr '~' '\n' | sort | uniq >> config.h
 
 
@@ -662,11 +662,14 @@ manifest:
 pion.anorg.chemie.uni-frankfurt.de:
 
 crowley.physik.fu-berlin.de:
+	sed -e 's/^#define SERIAL_PORT[ \t]*.*$$/#define SERIAL_PORT     0/' \
+		$(cdir)/er035m_sas.conf > $(cdir)/er035m_sas.conf.new
+	mv $(cdir)/er035m_sas.conf.new $(cdir)/er035m_sas.conf
 
 door.physik.fu-berlin.de:
 
 isaak.physik.fu-berlin.de:
-	sed -e 's/#define SERIAL_PORT[ \t]*0/#define SERIAL_PORT     1/' \
+	sed -e 's/^#define SERIAL_PORT[ \t]*.*$$/#define SERIAL_PORT     1/' \
 		$(cdir)/er035m_sas.conf > $(cdir)/er035m_sas.conf.new
 	mv $(cdir)/er035m_sas.conf.new $(cdir)/er035m_sas.conf
 
@@ -677,8 +680,8 @@ tresr.physik.fu-berlin.de:
 		$(cdir)/er032m.conf > $(cdir)/er032m.conf.new
 	mv $(cdir)/er032m.conf.new $(cdir)/er032m.conf
 	sed -e 's/\"LECROY9400\"/\"LeCroy9450\"/' \
-		$(cdir)/er032m.conf > $(cdir)/er032m.conf.new
-	mv $(cdir)/er032m.conf.new $(cdir)/er032m.conf
+		$(cdir)/lecroy9400.conf > $(cdir)/lecroy9400.conf.new
+	mv $(cdir)/lecroy9400.conf.new $(cdir)/lecroy9400.conf
 
 sunone.chemie.unibas.ch:
 
