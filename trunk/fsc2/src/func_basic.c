@@ -1377,9 +1377,9 @@ Var *f_mean( Var *v )
 
 			/* Test that the slice is within the arrays range */
 
-			if ( slice_len != 1 && index + slice_len > len ) {
+			if ( slice_len != 1 && index + slice_len >= len ) {
 				if ( TEST_RUN && ( v->flags & IS_DYNAMIC ) )
-					slice_len = len - index;
+					slice_len = len - index - 1;
 				else
 				{
 					eprint( FATAL, "%s:%ld: Sum of index and slice length "
