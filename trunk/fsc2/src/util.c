@@ -677,8 +677,10 @@ FILE *filter_edl( const char *name, FILE *fp )
 
 	if ( pid == 0 )
 	{
-		static char *cmd = NULL;
+		char *cmd = NULL;
 
+
+		CLOBBER_PROTECT( cmd );
 
 		/* Make sure we start at the beginnig of the file - the last run
 		   may have been stopped by the user and the file may now be

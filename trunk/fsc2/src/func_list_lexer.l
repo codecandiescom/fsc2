@@ -156,13 +156,14 @@ PREP        return PREP_TOKEN;
 size_t func_list_parse( Func **fncts, size_t num_func )
 {
 	static bool is_restart = UNSET;
-	static size_t nf;
+	size_t nf = num_func;
 	size_t num_predef_func = num_func;
 	size_t num;
 	size_t cur;
 
 
-	nf = num_func;
+	CLOBBER_PROTECT( nf );
+
 	EDL.Fname = CHAR_P T_free( EDL.Fname );
 	EDL.Fname = get_string( "%s%sFunctions", libdir, slash( libdir ) );
 

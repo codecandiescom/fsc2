@@ -695,6 +695,7 @@ static Phase_Sequence *dg2020_create_dummy_phase_seq( void )
 	Phase_Sequence *np, *pn;
 	int i;
 
+
 	/* First check if there's a phase sequence consisting of just '+X' - if it
 	   does use this as the phase sequence for the pulse */
 

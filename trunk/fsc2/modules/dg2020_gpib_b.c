@@ -594,6 +594,7 @@ static bool dg2020_set_pod_high_level( int pod, double voltage )
 {
 	char cmd[ 100 ];
 
+
 	sprintf( cmd, "OUTP:PODA:CH%d:HIGH %f %s\n", pod,
 			 fabs( voltage ) >= 1 ? voltage : 1000.0 * voltage,
 			 fabs( voltage ) >= 1 ? "V" : "mV" );
@@ -609,6 +610,7 @@ static bool dg2020_set_pod_high_level( int pod, double voltage )
 static bool dg2020_set_pod_low_level( int pod, double voltage )
 {
 	char cmd[ 100 ];
+
 
 	sprintf( cmd, "OUTP:PODA:CH%d:LOW %f %s\n", pod,
 			 fabs( voltage ) >= 1 ? voltage : 1000.0 * voltage,
@@ -626,6 +628,7 @@ static bool dg2020_set_trigger_in_level( double voltage )
 {
 	char cmd[ 100 ];
 
+
 	sprintf( cmd, "TRIG:LEV %f %s\n",
 			 fabs( voltage ) >= 1 ? voltage : 1000.0 * voltage,
 			 fabs( voltage ) >= 1 ? "V" : "mV" );
@@ -642,6 +645,7 @@ static bool dg2020_set_trigger_in_slope( int slope )
 {
 	char cmd[ 100 ];
 
+
 	sprintf( cmd, "TRIG:SLO %s\n", slope == POSITIVE ? "POS" : "NEG" );
 	dg2020_command( cmd );
 
@@ -655,6 +659,7 @@ static bool dg2020_set_trigger_in_slope( int slope )
 static bool dg2020_set_trigger_in_impedance( int state )
 {
 	char cmd[ 100 ];
+
 
 	sprintf( cmd, "TRIG:IMP %s\n", state == LOW ? "LOW" : "HIGH" );
 	dg2020_command( cmd );

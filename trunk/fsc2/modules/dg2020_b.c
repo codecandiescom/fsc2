@@ -263,10 +263,14 @@ int dg2020_b_test_hook( void )
 
 int dg2020_b_end_of_test_hook( void )
 {
-	static char *min = NULL;
-	static int i;
-	static FUNCTION *f;
+	char *min = NULL;
+	int i;
+	FUNCTION *f;
 
+
+	CLOBBER_PROTECT( min );
+	CLOBBER_PROTECT( i );
+	CLOBBER_PROTECT( f );
 
 	if ( ! dg2020_is_needed )
 	{
@@ -1546,10 +1550,11 @@ Var *pulser_lock_keyboard( Var *v )
 
 Var *pulser_command( Var *v )
 {
-	static char *cmd;
+	char *cmd = NULL;
 
 
-	cmd = NULL;
+	CLOBBER_PROTECT( cmd );
+
 	vars_check( v, STR_VAR );
 	
 	if ( FSC2_MODE == EXPERIMENT )

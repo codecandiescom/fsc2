@@ -238,10 +238,11 @@ Var *gaussmeter_resolution( Var *v )
 
 Var *gaussmeter_command( Var *v )
 {
-	static char *cmd;
+	char *cmd = NULL;
 
 
-	cmd = NULL;
+	CLOBBER_PROTECT( cmd );
+
 	vars_check( v, STR_VAR );
 	
 	if ( FSC2_MODE == EXPERIMENT )

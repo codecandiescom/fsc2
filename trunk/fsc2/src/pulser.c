@@ -205,8 +205,10 @@ static void is_pulser_func( void *func, const char *text )
 
 void p_assign_pod( long func, Var *v )
 {
-	static long pod;
+	long pod;
 
+
+	CLOBBER_PROTECT( pod );
 
 	is_pulser_driver( );
 
@@ -264,8 +266,10 @@ void p_assign_pod( long func, Var *v )
 
 void p_assign_channel( long func, Var *v )
 {
-	static long channel;
+	long channel;
 
+
+	CLOBBER_PROTECT( channel );
 
 	is_pulser_driver( );
 
@@ -319,8 +323,10 @@ void p_assign_channel( long func, Var *v )
 
 void p_set_delay( long func, Var *v )
 {
-	static double delay;
+	double delay;
 
+
+	CLOBBER_PROTECT( delay );
 
 	is_pulser_driver( );
 
@@ -402,8 +408,10 @@ void p_inv( long func )
 
 void p_set_v_high( long func, Var *v )
 {
-	static double voltage;
+	double voltage;
 
+
+	CLOBBER_PROTECT( voltage );
 
 	is_pulser_driver( );
 
@@ -448,8 +456,10 @@ void p_set_v_high( long func, Var *v )
 
 void p_set_v_low( long func, Var *v )
 {
-	static double voltage;
+	double voltage;
 
+
+	CLOBBER_PROTECT( voltage );
 
 	is_pulser_driver( );
 
@@ -493,8 +503,10 @@ void p_set_v_low( long func, Var *v )
 
 void p_set_timebase( Var *v )
 {
-	static double timebase;
+	double timebase;
 
+
+	CLOBBER_PROTECT( timebase );
 
 	is_pulser_driver( );
 
@@ -576,8 +588,10 @@ void p_set_timebase_level( int level_type )
 
 void p_set_trigger_mode( Var *v )
 {
-	static int mode;
+	int mode;
 
+
+	CLOBBER_PROTECT( mode );
 
 	is_pulser_driver( );
 
@@ -624,8 +638,10 @@ void p_set_trigger_mode( Var *v )
 
 void p_set_trigger_slope( Var *v )
 {
-	static int slope;
+	int slope;
 
+
+	CLOBBER_PROTECT( slope );
 
 	is_pulser_driver( );
 
@@ -673,8 +689,10 @@ void p_set_trigger_slope( Var *v )
 
 void p_set_trigger_level( Var *v )
 {
-	static double level;
+	double level;
 
+
+	CLOBBER_PROTECT( level );
 
 	is_pulser_driver( );
 
@@ -716,8 +734,10 @@ void p_set_trigger_level( Var *v )
 
 void p_set_trigger_impedance( Var *v )
 {
-	static int state;
+	int state;
 
+
+	CLOBBER_PROTECT( state );
 
 	is_pulser_driver( );
 
@@ -759,8 +779,10 @@ void p_set_trigger_impedance( Var *v )
 
 void p_set_rep_time( Var *v )
 {
-	static double rep_time;
+	double rep_time;
 
+
+	CLOBBER_PROTECT( rep_time );
 
 	is_pulser_driver( );
 
@@ -810,8 +832,11 @@ void p_set_rep_time( Var *v )
 
 void p_set_rep_freq( Var *v )
 {
-	static double freq, rep_time;
+	double freq, rep_time;
 
+
+	CLOBBER_PROTECT( freq );
+	CLOBBER_PROTECT( rep_time );
 
 	is_pulser_driver( );
 
@@ -1001,10 +1026,12 @@ void p_set( long pnum, int type, Var *v )
 {
 	long func, phase;
 	double pos, len, dpos, dlen;
-	static long dev_num = -1;
+	long dev_num = -1;
 	P_List *cur_p;
 	long stored_Cur_Pulser;
 
+
+	CLOBBER_PROTECT( dev_num );
 
 	for ( cur_p = plist; cur_p != NULL; cur_p = cur_p->next )
 		if ( cur_p->num == pnum )
@@ -1135,13 +1162,14 @@ Var *p_get_by_num( long pnum, int type )
 	int function;
 	double ptime;
 	long cycle;
-	static Var *v;
-	static long dev_num = -1;
+	Var *v = NULL;
+	long dev_num = -1;
 	P_List *cur_p;
 	long stored_Cur_Pulser;
 
 
-	v = NULL;
+	CLOBBER_PROTECT( v );
+	CLOBBER_PROTECT( dev_num );
 
 	for ( cur_p = plist; cur_p != NULL; cur_p = cur_p->next )
 		if ( cur_p->num == pnum )
@@ -1455,8 +1483,10 @@ void p_set_gp( Var *v )
 
 void p_set_max_seq_len( Var *v )
 {
-	static double seq_len;
+	double seq_len;
 
+
+	CLOBBER_PROTECT( seq_len );
 
 	is_pulser_driver( );
 

@@ -210,10 +210,10 @@ bool scan_main( const char *name, FILE *fp )
 
 bool section_parser( int section )
 {
-	static int s;
+	int s = section;
 
 
-	s = section;
+	CLOBBER_PROTECT( s );
 
 	TRY
 	{
