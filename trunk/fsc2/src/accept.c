@@ -607,7 +607,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 
 	/* Tell the cross section handler about the new data */
 
-	need_cut_redraw |= cut_new_points( curve, i, y_index, len );
+	need_cut_redraw |= cut_new_points( curve, x_index, y_index, len );
 
 	if ( ! cv->is_scale_set )
 		return;
