@@ -476,13 +476,6 @@ Var *magnet_calibration_file( Var *v )
 	char *buf;
 
 
-	if ( v == NULL )
-	{
-		if ( hjs_sfc.calib_file == NULL )
-			return vars_push( STR_VAR, "" );
-		else
-			return vars_push( STR_VAR, hjs_sfc.calib_file );
-	}
 
 	if ( hjs_sfc.calib_file != NULL )
 	{
@@ -490,6 +483,10 @@ Var *magnet_calibration_file( Var *v )
 			   "'%s'.\n", hjs_sfc.calib_file );
 		return vars_push( STR_VAR, hjs_sfc.calib_file );
 	}
+
+	if ( v == NULL )
+		return vars_push( STR_VAR, hjs_sfc.calib_file != NULL ?
+						  hjs_sfc.calib_file : DEFAULT_CALIB_FILE );
 
 	if ( v->type != STR_VAR )
 	{
