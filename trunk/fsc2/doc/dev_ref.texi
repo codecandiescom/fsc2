@@ -56,6 +56,7 @@
 * lecroy9400::      LeCroy Digitizing Oscilloscope 9400
 * me6000::          Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
 * ni6601::          National Instruments 6601 GPCT card
+* pci_mio_16e_1:    National Instruments PCI-MIO-16E-1 DAQ card
 * pt2025::          Metrolab NMR Teslameter PT2025
 * rs_spec10::       Roper Scientific Spec-10 CCD Camera
 * rs690::           Interface Technology RS690 Word Generator (Berlin 360 GHz)
@@ -1302,7 +1303,7 @@ channels, 2 function channels (needed for averaging).
 @c #############################################################
 
 
-@node  me6000, ni6601, lecroy9400, Device Reference
+@node me6000, ni6601, lecroy9400, Device Reference
 @iftex
 @subheading Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
 @end iftex
@@ -1325,8 +1326,8 @@ library are part of the @code{fsc2} package)
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
 @item @code{daq_name()}                   @tab @ref{daq_name}
-@item @code{daq_reserve_dac()}            @tab @ref{daq_reserve_dac}
 @item @code{daq_set_voltage()}            @tab @ref{daq_set_voltage}
+@item @code{daq_reserve_dac()}            @tab @ref{daq_reserve_dac}
 @item @code{daq_dac_parameter()}          @tab @ref{daq_dac_parameter}
 @end multitable
 
@@ -1334,7 +1335,7 @@ library are part of the @code{fsc2} package)
 @c #############################################################
 
 
-@node  ni6601, pt2025, me6000, Device Reference
+@node ni6601, pci_mio_16e_1, me6000, Device Reference
 @iftex
 @subheading National Instruments 6601 GPCT card
 @end iftex
@@ -1373,7 +1374,57 @@ library are part of the @code{fsc2} package)
 @c #############################################################
 
 
-@node pt2025, rs_spec10, ni6601, Device Reference
+@node pci_mio_16e_1, pt2025, ni6601, Device Reference
+@iftex
+@subheading National Instruments PCI-MIO-16E-1 DAQ card
+@end iftex
+@ifnottex
+@section National Instruments PCI-MIO-16E-1 DAQ card
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{pci_mio_16e_1}
+
+@paragraphindent 0
+@strong{Description}: Data acquisition (DAQ) card for analog input and
+output, general purpose counter and timer and digital I/O
+
+@paragraphindent 0
+@strong{Controlled via}: PCI card (required Linux device driver and
+library are part of the @code{fsc2} package)
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{daq_name()}                     @tab @ref{daq_name}
+@item @code{daq_ao_channel_setup()}         @tab @ref{daq_ao_channel_setup}
+@item @code{daq_set_voltage()}              @tab @ref{daq_set_voltage}
+@item @code{daq_get_voltage()}              @tab @ref{daq_get_voltage}
+@item @code{daq_reserve_dac()}              @tab @ref{daq_reserve_dac}
+@item @code{daq_reserve_adc()}              @tab @ref{daq_reserve_adc}
+@item @code{daq_ai_channel_setup()}         @tab @ref{daq_ai_channel_setup}
+@item @code{daq_ai_acq_setup()}             @tab @ref{daq_ai_acq_setup}
+@item @code{daq_ai_start_acquisition()}     @tab @ref{daq_ai_start_acquisition}
+@item @code{daq_ai_get_curve()}             @tab @ref{daq_ai_get_curve}
+@item @code{daq_start_continuous_counter()} @tab @ref{daq_start_continuous_counter}
+@item @code{daq_start_timed_counter()}      @tab @ref{daq_start_timed_counter}
+@item @code{daq_timed_count()}              @tab @ref{daq_timed_count}
+@item @code{daq_intermediate_count()}       @tab @ref{daq_intermediate_count}
+@item @code{daq_final_count()}              @tab @ref{daq_final_count}
+@item @code{daq_stop_counter()}             @tab @ref{daq_stop_counter}
+@item @code{daq_single_pulse()}             @tab @ref{daq_single_pulse}
+@item @code{daq_continuous_pulses()}        @tab @ref{daq_continuous_pulses}
+@item @code{daq_freq_out()}                 @tab @ref{daq_freq_out}
+@item @code{daq_trigger_setup()}            @tab @ref{daq_trigger_setup}
+@item @code{daq_dio_read()}                 @tab @ref{daq_dio_read}
+@item @code{daq_dio_write()}                @tab @ref{daq_dio_write}
+@end multitable
+
+
+@c #############################################################
+
+@node pt2025, pci_mio_16e_1, rs_spec10, Device Reference
+
 @iftex
 @subheading Metrolab NMR Teslameter PT2025
 @end iftex

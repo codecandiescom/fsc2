@@ -294,6 +294,9 @@ daq_ao_channel_setup, -1, EXP;
 daq_freq_out, -1, EXP;
 daq_trigger_setup, -1, EXP;
 
+daq_dio_read, 1, EXP;
+daq_dio_write, -1, EXP;
+
 
 /* Functions exported by event counters (NatInst 6601) */
 
