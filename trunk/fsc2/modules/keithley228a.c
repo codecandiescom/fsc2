@@ -4,6 +4,7 @@
 
 
 #include "fsc2.h"
+#include "gpib_if.h"
 
 
 /* Exported functions */
@@ -13,23 +14,47 @@ int keithley228a_exp_hook( void );
 int keithley228a_end_of_exp_hook( void );
 void keithley228a_exit_hook( void );
 
+Var *magnet_setup( Var *v );
+Var *set_current( Var *v );
+Var *sweep_up( Var *v );
+Var *sweep_down( Var *v );
+Var *reset_current( Var *v );
+
+
+
+static double keithley228a_current_check( double current, bool *err_flag );
+static bool keithley228a_init( const char *name );
+static void keithley228a_gpib_failure( void );
+
 
 
 #define DEVICE_NAME "KEITHLEY228A"         /* name of device */
 
-#define KEITHLEY228A_MAX_CUURENT   10.0
-#define V_TO_A_FACTOR	          -97.5  /* Conversion factor of voltage at DAC
+#define KEITHLEY228A_MAX_CURRENT     10.0  /* admissible current range */
+#define KEITHLEY228A_MAX_SWEEP_SPEED  1.0  /* max. current change per second */
 
+#define V_TO_A_FACTOR	      -97.5   /* Conversion factor of voltage at DAC */
+
+
+#define	STANDBY  ( ( bool ) 0 )      
+#define OPERATE  ( ( bool ) 1 )
+	
 
 
 typedef struct {
-	double curtrent;          /* the start current given by the user */
+	int device;               /* GPIB number of the device */
+
+	bool state;               /* STANDBY (0) or OPERATE (1) */
+
+	double current;           /* the start current given by the user */
 	double current_step;      /* the current steps to be used */
 
 	bool is_current;          /* flag, set if start current is defined */
 	bool is_current_step;     /* flag, set if current step size is defined */
-}
+} Keithley228a;
 
+
+static Keithley228a keithley228a;
 
 
 /*----------------------------------------------------------------*/
@@ -39,7 +64,6 @@ typedef struct {
 
 int keithley228a_init_hook( void )
 {
-	int ret;
 	Var *func_ptr;
 	int access;
 
@@ -66,7 +90,7 @@ int keithley228a_init_hook( void )
 	{
 		eprint( FATAL, "%s:%ld: %s: No lock-in amplifier module loaded "
 				"supplying a function for setting a DAC.\n",
-				Fname, Lc, func_name );
+				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 	vars_pop( func_ptr );
@@ -77,70 +101,73 @@ int keithley228a_init_hook( void )
 
 	/* Set some variables in the magnets structure */
 
-	magnet.is_current = UNSET;
-	magnet.is_current_step = UNSET;
+	keithley228a.is_current = UNSET;
+	keithley228a.is_current_step = UNSET;
 
 	return 1;
 }
 
 
+int keithley228a_exp_hook( void )
+{
+	keithley228a_init( DEVICE_NAME );
+	return 1;
+}
+
+
+int keithley228a_end_of_exp_hook( void )
+{
+	return 1;
+}
 
 
 
-
-
-
-
-
-
-
-
-
-/*****************************************************************************/
-/*                                                                           */
-/*              exported functions, i.e. EDL functions                       */
-/*                                                                           */
-/*****************************************************************************/
-
-
-/*-------------------------------------------------------------------*/
-/* Function for registering the start field and the field step size. */
-/*-------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Function for registering the start current and the current step size. */
+/*-----------------------------------------------------------------------*/
 
 Var *magnet_setup( Var *v )
 {
 	/* Check that both variables are reasonable */
+
+	if ( v->next == NULL )
+	{
+		eprint( FATAL, "%s:%ld: %s: Missing parameter in call of "
+				"`magnet_setup'.\n", Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
 		eprint( WARN, "%s:%ld: %s: Integer value used for magnet current.\n",
 				Fname, Lc, DEVICE_NAME );
 
+	if ( v->next == NULL )
+	{
+		eprint( FATAL, "%s:%ld: %s: Missing magnet current step size in call "
+				"of `magnet_setup'.\n", Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+
 	vars_check( v->next, INT_VAR | FLOAT_VAR );
 	if ( v->next->type == INT_VAR )
-		eprint( WARN, "%s:%ld: %s: Integer value used for magnet curtrent "
+		eprint( WARN, "%s:%ld: %s: Integer value used for magnet current "
 				"step width.\n", Fname, Lc, DEVICE_NAME );
 
 	/* Check that new field value is still within bounds */
 
 	keithley228a_current_check( VALUE( v ), NULL );
 
-	if ( VALUE( v->next ) < 1.0 )
-	{
-		eprint( FATAL, "%s:%ld: %s: Field sweep step size (%lf G) too "
-				"small, minimum is %f G.\n", Fname, Lc, DEVICE_NAME,
-				VALUE( v->next ), ( double ) AEG_S_BAND_MIN_FIELD_STEP );
-		THROW( EXCEPTION );
-	}
-		
-	magnet.field = VALUE( v );
-	magnet.field_step = VALUE( v->next );
-	magnet.is_field = magnet.is_field_step = SET;
+	keithley228a.current = VALUE( v );
+	keithley228a.current_step = VALUE( v->next );
+	keithley228a.is_current = keithley228a.is_current_step = SET;
 
 	return vars_push( INT_VAR, 1 );
 }
 
 
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
 
 static double keithley228a_current_check( double current, bool *err_flag )
 {
@@ -161,4 +188,61 @@ static double keithley228a_current_check( double current, bool *err_flag )
 	}
 
 	return current;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool keithley228a_init( const char *name )
+{
+	char cmd[ 100 ];
+	char reply[ 100 ];
+	long length = 100;
+
+
+	/* Initialize the power supply */
+
+	if ( gpib_init_device( name, &keithley228a.device ) == FAILURE )
+		return FAIL;
+
+	/* The power supply can be a bit slow to react... */
+
+	gpib_timeout( keithley228a.device, T3s );
+
+	/* Default settings:
+	 * 1. No voltage modulation (A0)
+	 * 2. Current modulation on (C1)
+	 * 3. Sink mode off (S0)
+	 * 4. Trigger setting: Start on X (T4)
+	 * 5. Send EOI, do not hold off bus on X (K2)
+	 * 6. Service requests disabled (M0)
+	 * 7. Display shows volts and amps (D0)
+	 * 8. Volt and amp readings without prefix (G5)
+	 (The final 'X' is the execute command)
+	*/
+
+	strcpy( cmd, "A0C1S0T4K2M0D0G5X\r\n");
+	if ( gpib_write( keithley228a.device, cmd, strlen( cmd ) ) == FAILURE )
+		keithley228a_gpib_failure( );
+
+	/* Get state of power supply */
+
+	if ( gpib_write( keithley228a.device, "U0X\r\n", 5 ) == FAILURE ||
+		 gpib_read( keithley228a.device, reply, &length ) == FAILURE )
+		keithley228a_gpib_failure( );
+
+	keithley228a.state = reply[ 0 ] == '1' ? OPERATE : STANDBY;
+
+	return OK;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static void keithley228a_gpib_failure( void )
+{
+	eprint( FATAL, "%s: Communication with device failed.\n", DEVICE_NAME );
+	THROW( EXCEPTION );
 }
