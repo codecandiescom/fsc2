@@ -538,6 +538,7 @@ Var *pulser_next_phase( Var *v )
 					return vars_push( INT_VAR, 0 );
 	}
 
+	dg2020.needs_update = SET;
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -604,6 +605,7 @@ Var *pulser_phase_reset( Var *v )
 					return vars_push( INT_VAR, 0 );
 	}
 
+	dg2020.needs_update = SET;
 	return vars_push( INT_VAR, 1 );
 }
 
