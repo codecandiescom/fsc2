@@ -108,6 +108,7 @@ typedef struct
 	int device;
 
 	bool is_reacting;
+	int data_size;              /* # of bytes transfered for data points */
 
 	bool is_displayed[ MAX_CHANNELS ];
 
