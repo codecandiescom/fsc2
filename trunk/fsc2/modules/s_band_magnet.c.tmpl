@@ -222,7 +222,7 @@ void s_band_magnet_tmpl_exit_hook( void )
 
 Var *magnet_name( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -325,7 +325,7 @@ Var *set_field( Var *v )
 
 Var *get_field( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return vars_push( FLOAT_VAR, magnet.field );
 }
 
@@ -338,7 +338,7 @@ Var *sweep_up( Var *v )
 	bool err_flag = UNSET;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( ! magnet.is_field_step )
 	{
@@ -371,7 +371,7 @@ Var *sweep_down( Var *v )
 	bool err_flag = UNSET;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( ! magnet.is_field_step )
 	{
@@ -401,7 +401,7 @@ Var *sweep_down( Var *v )
 
 Var *reset_field( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( ! magnet.is_start_field )
 	{

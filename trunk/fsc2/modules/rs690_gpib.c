@@ -59,7 +59,7 @@ bool rs690_init( const char *name )
 	char reply[ 100 ];
 	long length = 100;
 #else
-	name = name;
+	UNUSED_ARGUMENT( name );
 #endif
 
 
@@ -517,8 +517,8 @@ static void rs690_check( void )
 static int rs690_write( int device_no, const char *s, long len )
 {
 #ifdef RS690_GPIB_DEBUG
-	device_no = device_no;
-	len = len;
+	UNUSED_ARGUMENT( device_no );
+	UNUSED_ARGUMENT( len );
 #endif
 
 	if ( gpib_write( device_no, s, len ) == FAILURE &&

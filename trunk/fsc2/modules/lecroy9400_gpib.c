@@ -587,7 +587,6 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 	UNUSED_ARGUMENT( w );
 	UNUSED_ARGUMENT( use_cursor );
 
-
 	if ( ch >= LECROY9400_CH1 && ch <= LECROY9400_CH2 )
 	{
 		print( FATAL, "Getting normal channels is not implemented yet.\n" );

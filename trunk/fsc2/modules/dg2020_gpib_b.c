@@ -181,7 +181,7 @@ bool dg2020_init( const char *name )
 	char reply[ 100 ];
 	long len = 100;
 #else
-	name = name;
+	UNUSED_ARGUMENT( name );
 #endif
 
 
