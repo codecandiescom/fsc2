@@ -44,6 +44,8 @@
 #include <time.h>
 #include <fcntl.h>
 #include <forms.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 
 /* inclusion of programs own header files as far as necessary */
