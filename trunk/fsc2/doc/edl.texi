@@ -50,7 +50,7 @@ really isn't that difficult.
 @node Basics, Sections, EDL, EDL
 @section Basics
 
-An @code{EDL} program is roughly structured along the way an experiment
+An @code{EDL} program is structured similarly to the way an experiment
 is done. Before you start an experiment you first have to select the
 devices to be used and set them up. So the first part of an @code{EDL}
 script are just a few lines specifying the devices to be controlled by
@@ -64,9 +64,9 @@ To give you a first impression how an @code{EDL} program may look like
 here's a program for a simple cw-EPR experiment:
 @example
 DEVICES:
-  er035m_s;              // gaussmeter module
-  aeg_x_band;            // magnet module
-  sr530;                 // lock-in amplifier module
+  er035m_s;                    // gaussmeter module
+  aeg_x_band;                  // magnet module
+  sr530;                       // lock-in amplifier module
 
 VARIABLES:
   start_field = 3360.0 G;
@@ -100,14 +100,15 @@ the Bruker ER035M gaussmeter, the AEG X-band magnet and the Stanford
 Research lock-in amplifier SR530.
 
 In the following section, starting with the section keyword
-@code{VARIABLES}, all variables that are used in the program are listed
-and, if appropriate, initialized. The first three variables are for
-storing the start and end field of the field sweep as well as the field
-step width to do between measuring new data points. The next variable
-@code{field} will later be used for storing the actual field value and
-is initialized to the value of the start field. Finally, a counter
-variable @code{I}, initialized to 1, and another variable, @code{data},
-for the data obtained from the lock-in amplifier, are declared.
+@code{VARIABLES}, all variables that are going to be used in the
+@code{EDL} program are listed and, if appropriate, initialized. The
+first three variables are for storing the start and end field of the
+field sweep as well as the field step width to do between measuring new
+data points. The next variable @code{field} will later be used for
+storing the actual field value and is initialized to the value of the
+start field. Finally, a counter variable @code{I}, initialized to 1, and
+another variable, @code{data}, for the data obtained from the lock-in
+amplifier, are declared.
 
 In the next section, following the @code{PREPARATIONS} section keyword,
 the devices are set up. The function @code{magnet_setup()} tells the
@@ -131,20 +132,22 @@ the statements belonging to the loop are enclosed in curly braces,
 The first thing to do in the experiment loop is to fetch a new data
 point from the lock-in amplifier, storing it in the variable @code{data}.
 Next, we have to display the data point, which is done via the call of
-the @code{display()} function. Here two arguments are used, the number
+the function @code{display()}. Here two arguments are used, the number
 of the point, stored in the variable @code{I}, and the value of the
 new data point.
 
 Of course, we also need to write the new data point to a data file. This
 is done by the call of the function @code{save()} that automatically
 writes its argument to a file. When the function is called for the first
-time it prompts you for the name of the file to use.
+time it prompts you for the name of the file to be used.
 
 What remains to be done is to increment the counter variable @code{I}
-and to sweep up the field. The function @code{sweep_up()} returns the new
-value of the field, which is later used in the test of the loop condition
-to decide if the experiment is finished, i.e.@: the end field is
-reached.
+and to sweep up the field. The function @code{sweep_up()} increments the
+field by the amount you specified previously in the call of
+@code{magnet_init()} (in the @code{PREPARATIONS} section) and returns
+the new value of the field, which is later used in the test of the loop
+condition to decide if the experiment is finished, i.e.@: the end field
+is reached.
 
 The last function call of @code{wait()} with the result of a call of the
 function @code{lockin_time_constant()} as the argument makes the program
@@ -153,20 +156,19 @@ time to measure a new data point.
 
 When you have written such a program (using, for example, a simple ASCII
 editor) you load it into @code{fsc2} and press the @code{Test} or the
-@code{Start} button.  @code{fsc2} will now analyze the program very
+@code{Start} button. @code{fsc2} will now analyze the program very
 thoroughly. It will not only check for misspelt keywords, undefined
 variables, non-existent functions, syntax errors etc.@: but will also
 repeat the loop in the experiment section as often as in the real
 experiment to find out if no errors will happen during the
-experiment. This includes, for example, checking that the field will not
-be sweeped into regions the magnet or the gauss-meter can not handle
-(e.g.@: by incidentally setting an end field value of @w{34500.0 G}
-which the magnet can't produce instead of @w{3450.00 G}). So you can be
-reasonable sure that the experiment will not be aborted due to a faulty
-@code{EDL} script after it has run for 2 hours and you have to start all
-over again.
+experiment. This includes, for example, checking that the field is not
+swept into regions the magnet or the gauss-meter can not handle (e.g.@:
+by incidentally setting an end field value of @w{34500.0 G} which the
+magnet can't produce). So you can be reasonable sure that the experiment
+will not be aborted due to a faulty @code{EDL} script after it has
+alredy run for 2 hours and you have to start all over again.
 
-As you can already see form the example most of an @code{EDL} script
+As you can already see from the example most of an @code{EDL} script
 consists of function calls. Functions can be divided into two
 categories, built-in functions and device functions. Built-in functions
 (like @code{init_1d()}, @code{display()}, @code{save()} and
@@ -175,8 +177,8 @@ categories, built-in functions and device functions. Built-in functions
 certain devices and can only be called when the device they are defined
 for is listed in the @code{DEVICES} section. For example, the functions
 @w{@code{lockin_sensitivity()}}, @w{@code{lockin_time_constant()}} and
-@w{@code{lockin_get_data()}} are obviously targeted at the lock-in
-amplifier and are only available when a lock-in amplifier module is
+@w{@code{lockin_get_data()}} are obviously targeted at lock-in
+amplifiers and are only available when a lock-in amplifier module is
 specified in the @code{DEVICES} section. Most of these functions are
 available for all types of lock-in amplifiers (possibly with minor
 variations) so that using a different lock-in amplifier usually doesn't
@@ -690,7 +692,7 @@ z2[ 2, 2 ] = z1[ 2 ];
 Of course, the same also works with arrays of higher dimensions. If you
 have e.g.@: a 3-dimensional matrix, assigning it a number will set all
 of its elements (i.e.@: the elements of the sub-sub-arrays its made up
-from), assigning it a 1-dimensional arrays will set all sub-sub-arrays
+from), assigning it an 1-dimensional arrays will set all sub-sub-arrays
 to be identical to the 1-dimenensional array on the right hand side,
 assigning it a 2-dimensional matrix will set all its sub-matrices and
 assigning it another 3-dimensional matrix will make the matrix on the
@@ -1048,7 +1050,7 @@ a matrix of rank 4x5).
 
 But you can also add a whole 1-dimensional array to each of the
 sub-arrays of a matrix. Lets again assume that @code{M} 3-dimensional,
-e.g. a matrix of rank 3x4x5. If @code{a} is now a 1-dimensional array
+e.g. a matrix of rank 3x4x5. If @code{a} is now an 1-dimensional array
 of length 5 you can add it to all of @code{M}'s 12 sub-sub-arrays by
 writing
 @example
@@ -1096,7 +1098,7 @@ having to write all kinds of loops to get the same effect.
 
 You can also mix objects of different ranks in an expression: if
 @code{M} is, for example, a 3-dimensional matrix, @code{N} is a
-2-dimensional matrix and @code{R} a 1-dimensional array you can write
+2-dimensional matrix and @code{R} an 1-dimensional array you can write
 @example
 M += N - R * 3;
 @end example
