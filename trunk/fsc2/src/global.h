@@ -350,6 +350,13 @@ enum {
 #define WINDOW_START_NUMBER  172438
 
 
+/* This constants are used in converting integer and double numbers to short
+   integers as expected by the X library routines as point coordinates */
+
+#define SHRT_MAX_HALF ( SHRT_MAX >> 1 )
+#define SHRT_MIN_HALF ( SHRT_MIN >> 1 )
+
+
 #endif /* ! FSC2_GLOBAL */
 
 
