@@ -61,6 +61,7 @@
 * pt2025::          Metrolab NMR Teslameter PT2025
 * rs_sml01::        Rohde & Schwarz SML01 Signal Generator
 * rs_spec10::       Roper Scientific Spec-10 CCD Camera
+* rb8509::          Rulbus 12-bit ADC card
 * rs690::           Interface Technology RS690 Word Generator (Berlin 360 GHz)
 * s_band_magnet_broad::   S-band Magnet Power Supply (broad range)
 * s_band_magnet_narrow::  S-band Magnet Power Supply (narrow range)
@@ -1538,7 +1539,7 @@ to @w{13 dB} in @w{0.1 dB} steps.
 @c #############################################################
 
 
-@node rs_spec10, rs690, rs_sml01, Device Reference
+@node rs_spec10, rb8509, rs_sml01, Device Reference
 @iftex
 @subheading Roper Scientific Spec-10 CCD Camera
 @end iftex
@@ -1573,6 +1574,41 @@ from Roper Scientific.
 @item @code{ccd_camera_pixel_size()}      @tab @ref{ccd_camera_pixel_size}
 @item @code{ccd_camera_pixel_area()}      @tab @ref{ccd_camera_pixel_area}
 @end multitable
+
+
+@c #############################################################
+
+
+* rb8509::          Rulbus 12-bit ADC card
+@node rb8509, rs690, rs_spec10, Device Reference
+@iftex
+@subheading Rulbus 12-bit ADC card
+@end iftex
+@ifnottex
+@section Rulbus 12-bit ADC card
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{rb8508}
+
+@paragraphindent 0
+@strong{Description}: 12-bit ADC card for Rulbus (Rijksuniversiteit
+Leiden BUS) - required Linux device driver and library are part of
+the @code{fsc2} package)
+
+@paragraphindent 0
+@strong{Controlled via}: Rulbus
+
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{daq_name()}            @tab @ref{daq_name}
+@item @code{daq_get_voltage()}     @tab @ref{daq_get_voltage}
+@item @code{daq_trigger_mode()}    @tab @ref{daq_trigger_mode}
+@item @code{daq_gain()}            @tab @ref{daq_gain}
+@end multitable
+
 
 
 @c #############################################################

@@ -45,10 +45,16 @@ of implemented:
 @item Bruker EP385 Pulse Programmer (X-band spectrometer, Berlin)
 @item Interface Technology RS690 Word Generator (360 GHz and X-band
 spectrometer, Berlin)
+@item Rulbus pulser (275 GHz spectrometer, Leiden)
 @end itemize
 All pulsers can be used everywhere when no special requirements for
 phase-cycling exist, see the discussion below about the differences
 between the Frankfurt S-band and the Berlin X-band spectrometer.
+
+Please note that the Rubus pulser is a bit different form the rest
+in that it isn't a stand-alone device but is made up from a set of
+delay and clock cards connected to the Rulbus (Rijksuniversiteit
+Leiden BUS) which results in a few restrictions.
 
 Because of the importance of the pulser for time-resolved experiments
 there are even two additional types of sections in the @code{EDL}
@@ -130,6 +136,8 @@ neither of the two keywords is given and the specified time base
 requires an external clock the @code{TTL} level clock input connector is
 used per default.
 
+In the currently used configuration the time base of of the
+@strong{Rulbus pulser} is fixed at @w{10 ns}.
 
 The statement to set the time base, i.e.@: the length of the individual
 time slices is@footnote{Instead of @code{TIMEBASE} one may also write
@@ -284,6 +292,8 @@ for @code{TTL} and one for @code{ECL} level trigger input. To
 distinguish between the two trigger input ports the additional keywords
 @code{TTL} and @code{ECL} may be used. If none is given the @code{TTL}
 level input port is used per default.
+
+The @code{Rulbus pulser} allows to set the trigger slope only.
 
 If you need to control more than one pulser you must have a
 @code{TRIGGER_MODE} statement for each of the pulsers. In this case you
@@ -565,6 +575,15 @@ TWT#2:       CH  = A7;
 @noindent
 to create microwave pulses with the first pulser and TWT pulses with the
 second one.
+
+
+For the @code{Rulbus pulser} the current configuration only allows for
+three function, @code{MICROWAVE}, @code{RADIO_FREQUENCY} and
+@code{DETECTION}. These are fixed to the cards of the pulser, so
+assigning a function to a "channel" isn't possible because there are no
+channels. All that can be set for a certain function is the delay to be
+used with this function.
+
 
 
 @c ########################################################
@@ -864,6 +883,20 @@ PULSE_2:    FUNCTION     = PULSE_1.FUNCTION,
             START        = PULSE_1.START + PULSE_1.LENGTH + 300 ns,
             LENGTH       = 2 * PULSE_1.LENGTH;
 @end example
+
+
+For the @code{Rulbus pulser} there are several restrictions for the
+number of pulses that can be used. The @code{MICROWAVE} function can
+have a maximum of three active pulses at a moment while both the
+@code{RADIO_FREQUENCY} and @code{DETECTION} function allow only a single
+active pulse. Moreover the @code{RADIO_FREQUENCY} and @code{DETECTION}
+can't start before the first @code{MICROWAVE} pulse. Pulses can have a
+maximum length of about @w{167 ms} and also delays between pulses (and
+before the start of a pulse) are restricted to this value. Finally,
+a @code{RADIO_FREQUENCY} pulse can only be created if the pusler is
+connected to the @strong{Rhode & Schwarz SML01} synthesizer, which can
+has a built-in pulse unit.
+
 
 
 @c ########################################################
