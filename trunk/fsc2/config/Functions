@@ -253,13 +253,15 @@ freq_counter_measure, 0, EXP;
 freq_counter_command, 1, EXP;
 
 
-/* Functions exported by DA converters (ME-6000) */
+/* Functions exported by DA converters (ME-6000 and ME6100) */
 
+dac_name, 0, ALL;
 dac_voltage, -1, ALL;
 
 
 /* Functions exported by event counters (NatInst 6601) */
 
+counter_name, 0, ALL;
 counter_start_continuous_counter, -1, EXP;
 counter_start_timed_counter, -1, EXP;
 counter_timed_count, -1, EXP;

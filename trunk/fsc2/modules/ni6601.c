@@ -48,6 +48,7 @@ int ni6601_end_of_exp_hook( void );
 void ni6601_exit_hook( void );
 
 
+Var *counter_name( Var *v );
 Var *counter_start_continuous_counter( Var *v );
 Var *counter_start_timed_counter( Var *v );
 Var *counter_intermediate_count( Var *v );
@@ -151,6 +152,16 @@ void ni6601_exit_hook( void )
 	   the device file for the board is really closed */
 
 	ni6601_close( BOARD_NUMBER );
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+Var *counter_name( Var *v )
+{
+	UNUSED_ARGUMENT( v );
+	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 
