@@ -69,11 +69,11 @@ typedef struct {
 #define SLIDER_WIDTH              210
 #define SLIDER_VERT_OFFSET        15
 
-#define VERT_OFFSET               20
+#define VERT_OFFSET               15
 #define HORI_OFFSET               20
 
-#define OFFSET_X0                 30
-#define OFFSET_Y0                 30
+#define OFFSET_X0                 20
+#define OFFSET_Y0                 20
 
 #define FONT_SIZE                 FL_MEDIUM_SIZE
 

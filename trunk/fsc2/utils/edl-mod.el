@@ -125,6 +125,7 @@
      "ELSE\\>"
      "REPEAT\\>"
      "FOR\\>"
+     "FOREVER\\>"
      "ON\\>"
      "OFF\\>"
      "[+-]?[xX]"
