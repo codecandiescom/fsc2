@@ -1432,3 +1432,123 @@ Var *f_slice( Var *v )
 	else
 		return vars_push( FLOAT_TRANS_ARR, idp + index, slice_len );
 }
+
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+				 
+Var *f_square( Var *v )
+{
+	Var *new_var;
+	long i;
+	long len;
+	long *rlp;
+	double *rdp;
+	long *ilp;
+	double *idp;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
+	switch ( v->type )
+	{
+		case INT_VAR :
+			if ( ( double ) v->val.lval >= sqrt( LONG_MAX ) )
+				eprint( SEVERE, "%s:%ld: Integer overflow in function "
+						"`square()'.\n", Fname, Lc );
+			return vars_push( INT_VAR, v->val.lval * v->val.lval );
+
+		case FLOAT_VAR :
+			return vars_push( FLOAT_VAR, v->val.dval * v->val.dval );
+
+		default :
+			get_array_params( v, "square", &len, &ilp, &idp );
+	}
+
+	if ( ilp != NULL )
+	{
+		rlp = T_malloc( len * sizeof( long ) );
+		for ( i = 0; i < len; ilp++, i++ )
+		{
+			if ( ( double ) *ilp >= sqrt( LONG_MIN ) )
+				eprint( SEVERE, "%s:%ld: Integer overflow in function "
+						"`sqrt()'.\n", Fname, Lc );
+			rlp[ i ] = *ilp * *ilp;
+		}
+		new_var = vars_push( INT_TRANS_ARR, rlp, len );
+		T_free( rlp );
+	}
+	else
+	{
+		rdp = T_malloc( len * sizeof( double ) );
+		for ( i = 0; i < len; idp++, i++ )
+			rdp[ i ] = *idp * idp;
+		new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+		T_free( rdp );
+	}
+
+	new_var->flags |= v->flags & IS_DYNAMIC;
+	return new_var;
+}
+
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+Var *f_islice( Var *v )
+{
+	long *array;
+	long size;
+	Var *ret;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == INT_VAR )
+		size = v->val.lval;
+	else
+	{
+		eprint( SEVERE, "%s:%ld: Float value used as array size in function "
+				"`int_slice()'.\n", Fname, Lc );
+		size = lround( v->val.dval );
+	}
+
+	array = T_calloc( size, sizeof( long ) );
+	ret = vars_push( INT_TRANS_ARR, array, size );
+	T_free( array );
+
+	return ret;
+}
+
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+Var *f_fslice( Var *v )
+{
+	double *array;
+	long size;
+	Var *ret;
+	ling i;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == INT_VAR )
+		size = v->val.lval;
+	else
+	{
+		eprint( SEVERE, "%s:%ld: Float value used as array size in function "
+				"`float_slice()'.\n", Fname, Lc );
+		size = lround( v->val.dval );
+	}
+
+	array = T_malloc( size * sizeof( double ) );
+	for( i = 0; i < size; i++ )
+		*( array + i ) = 0.0;
+	ret = vars_push( FLOAT_TRANS_ARR, array, size );
+	T_free( array );
+
+	return ret;
+}

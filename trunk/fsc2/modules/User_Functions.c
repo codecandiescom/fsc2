@@ -5,9 +5,6 @@
 
 #include "fsc2.h"
 
-Var *square( Var *v );
-Var *int_slice( Var *v );
-Var *float_slice( Var *v );
 Var *get_phase_cycled_area_1d( Var *v );
 Var *get_phase_cycled_area_2d( Var *v );
 
@@ -22,70 +19,6 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 /****************************************************************/
 /* Enter the definition of all needed functions below this line */
 /****************************************************************/
-
-
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
-				 
-Var *square( Var *v )
-{
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		return vars_push( INT_VAR, v->INT * v->INT );
-	else
-		return vars_push( FLOAT_VAR, v->FLOAT * v->FLOAT );
-}
-
-
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
-
-Var *int_slice( Var *v )
-{
-	long *array;
-	long size;
-	Var *ret;
-
-
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		size = v->INT;
-	else
-		size = lround( v->FLOAT );
-
-	array = T_calloc( size, sizeof( long ) );
-	ret = vars_push( INT_TRANS_ARR, array, size );
-	T_free( array );
-
-	return ret;
-}
-
-
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
-
-Var *float_slice( Var *v )
-{
-	long *array;
-	long size;
-	Var *ret;
-
-
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		size = v->INT;
-	else
-		size = lround( v->FLOAT );
-
-	array = T_calloc( size, sizeof( double ) );
-	ret = vars_push( FLOAT_TRANS_ARR, array, size );
-	T_free( array );
-
-	return ret;
-}
 
 
 /*-----------------------------------------------------------------*/

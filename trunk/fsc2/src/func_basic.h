@@ -40,6 +40,9 @@ Var *f_sizes(   Var *v );
 Var *f_mean(    Var *v );
 Var *f_rms(     Var *v );
 Var *f_slice(   Var *v );
+Var *f_square(  Var *v );
+Var *f_islice(  Var *v );
+Var *f_fslice(  Var *v );
 
 
 #endif  /* ! FUNC_BASIC_HEADER */
