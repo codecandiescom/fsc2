@@ -361,25 +361,25 @@ Var *lockin_name( Var *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function returns divers the lock-in signals. If called without an */
-/* argument the value is the X channel voltage is returned. There    */
-/* can be up to six arguments indicating the type of measured data   */
-/* to return. It can be used:                                        */
-/* 1: X signal                                                       */
-/* 2: Y signal                                                       */
-/* 3: Amplitude R of signal                                          */
-/* 4: Phase theta of signal (relative to reference)                  */
-/* 5: Voltage at ADC 1                                               */
-/* 6: Voltage at ADC 2                                               */
-/* 7: Voltage at ADC 3                                               */
-/* 8: Voltage at ADC 4                                               */
-/* 9: X noise (available in auto-acquisition mode only)              */
-/* 10: Y noise (available in auto-acquisition mode only)             */
-/* If there is no or just one argument a single floating point       */
-/* number is returned, otherwise an array of single floating point   */
-/* numbers just large enough to hold all requested data.             */
-/*-----------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function returns the lock-in signals. If called without an argument
+ * the value is the X channel voltage is returned. There can be up to
+ * six arguments indicating the type of measured data to return. It
+ * can be used:
+ * 1: X signal
+ * 2: Y signal
+ * 3: Amplitude R of signal
+ * 4: Phase theta of signal (relative to reference)
+ * 5: Voltage at ADC 1
+ * 6: Voltage at ADC 2
+ * 7: Voltage at ADC 3
+ * 8: Voltage at ADC 4
+ * 9: X noise (available in auto-acquisition mode only)
+ * 10: Y noise (available in auto-acquisition mode only)
+ * If there is no or just one argument a single floating point number
+ * is returned, otherwise an array of single floating point numbers
+ * just large enough to hold all requested data.
+ *---------------------------------------------------------------------*/
 
 Var *lockin_get_data( Var *v )
 {
