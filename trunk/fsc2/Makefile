@@ -17,7 +17,7 @@ all: tags fsc2 mods
 
 
 fsc2: $(objects) fsc_clean $(header)
-	libtool gcc -export-dynamic -o $@ $(objects) -lm -ldl
+	gcc -o $@ $(objects) -Wl,-E -lm -ldl
 
 split_lexer.c: split_lexer.flex $(header)
 	flex -B -Psplit -osplit_lexer.c split_lexer.flex

@@ -59,26 +59,26 @@ static int Num_Libs;              /* number of dynamically loaded libaries */
 */
 
 
-static Var *f_int( Var *v  );
-static Var *f_float( Var *v  );
-static Var *f_round( Var *v  );
-static Var *f_floor( Var *v  );
-static Var *f_ceil( Var *v  );
-static Var *f_abs( Var *v );
-static Var *f_sin( Var *v  );
-static Var *f_cos( Var *v  );
-static Var *f_tan( Var *v  );
-static Var *f_asin( Var *v  );
-static Var *f_acos( Var *v  );
-static Var *f_atan( Var *v  );
-static Var *f_sinh( Var *v  );
-static Var *f_cosh( Var *v  );
-static Var *f_tanh( Var *v  );
-static Var *f_exp( Var *v  );
-static Var *f_ln( Var *v  );
-static Var *f_log( Var *v  );
-static Var *f_sqrt( Var *v  );
-static Var *f_print( Var *v  );
+Var *f_int( Var *v  );
+Var *f_float( Var *v  );
+Var *f_round( Var *v  );
+Var *f_floor( Var *v  );
+Var *f_ceil( Var *v  );
+Var *f_abs( Var *v );
+Var *f_sin( Var *v  );
+Var *f_cos( Var *v  );
+Var *f_tan( Var *v  );
+Var *f_asin( Var *v  );
+Var *f_acos( Var *v  );
+Var *f_atan( Var *v  );
+Var *f_sinh( Var *v  );
+Var *f_cosh( Var *v  );
+Var *f_tanh( Var *v  );
+Var *f_exp( Var *v  );
+Var *f_ln( Var *v  );
+Var *f_log( Var *v  );
+Var *f_sqrt( Var *v  );
+Var *f_print( Var *v  );
 
 
 
@@ -232,7 +232,7 @@ void load_functions( const char *name )
 	free( init_func );
 	if ( dlerror( ) == NULL && lib_init( ) == 0 )
 	{
-		eprint( WARN, "Initialization of library for `%s' failed.\n",
+		eprint( WARN, "Initialization of library `%s.so' failed.\n",
 				name );
 		return;
 	}
@@ -249,7 +249,7 @@ void load_functions( const char *name )
 		Libs[ Num_Libs - 1 ].is_exit_hook = SET;
 	free( exit_func );
 
-	eprint( NO_ERROR, "Loading functions from file `%s'.\n", name );
+	eprint( NO_ERROR, "Loading functions from library `%s.so'.\n", name );
 
 	/* Run trough all the functions in the function list and if they need
 	   loading  store the address of the function - check that the function
