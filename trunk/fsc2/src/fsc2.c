@@ -122,6 +122,12 @@ void xforms_init( int *argc, char *argv[] )
 	FL_Coord h, H;
 	FL_Coord x1, y1, w1, h1, x2, y2, w2, h2;
 
+
+
+	/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+
+	G.dim = 0;
+
 	fl_initialize( argc, argv, "fsc2", 0, 0 );
 
 	/* Create and display the main form */
@@ -702,6 +708,8 @@ void clean_up( void )
 
 	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
 		need_Serial_Port[ i ] = UNSET;
+
+	graphics_free( );
 }
 
 
