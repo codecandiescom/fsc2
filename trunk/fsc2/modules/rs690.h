@@ -63,6 +63,7 @@ Var *pulser_pulse_reset( Var *v );
 Var *pulser_next_phase( Var *v );
 Var *pulser_phase_reset( Var *v );
 Var *pulser_lock_keyboard( Var *v );
+Var *pulser_command( Var *v );
 
 
 /* Definitions needed for the pulser */
@@ -440,6 +441,7 @@ bool rs690_init( const char *name );
 bool rs690_run( bool state );
 bool rs690_lock_state( bool lock );
 bool rs690_set_channels( void );
+bool rs690_command( const char *cmd );
 
 
 /*

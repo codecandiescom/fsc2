@@ -53,6 +53,7 @@ Var *pulser_reset( Var *v );
 Var *pulser_pulse_reset( Var *v );
 Var *pulser_lock_keyboard( Var *v );
 Var *pulser_stop_on_update( Var *v );
+Var *pulser_command( Var *v );
 
 
 /* Definitions needed for the pulser */
@@ -340,6 +341,7 @@ bool hfs9000_set_trig_out_pulse( void );
 bool hfs9000_run( bool flag );
 bool hfs9000_get_channel_state( int channel );
 bool hfs9000_set_channel_state( int channel, bool flag );
+bool hfs9000_command( const char *cmd );
 
 
 /*

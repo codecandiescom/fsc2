@@ -64,6 +64,7 @@ Var *pulser_pulse_reset( Var *v );
 Var *pulser_reset( Var *v );
 Var *pulser_reset( Var *v );
 Var *pulser_lock_keyboard( Var *v );
+Var *pulser_command( Var *v );
 
 
 /* Definitions needed for the pulser */
@@ -485,6 +486,7 @@ bool dg2020_make_seq( int num_blocks, BLOCK *block );
 bool dg2020_set_constant( int channel, Ticks address,
 						  Ticks length, int state );
 bool dg2020_lock_state( bool lock );
+bool dg2020_command( const char *cmd );
 
 
 /*

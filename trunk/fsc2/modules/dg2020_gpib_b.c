@@ -702,6 +702,17 @@ bool dg2020_lock_state( bool lock )
 }
 
 
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+bool dg2020_command( const char *cmd )
+{
+	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
+		dg2020_gpib_failure( );
+	return OK;
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

@@ -63,6 +63,7 @@ Var *pulser_pulse_reset( Var *v );
 Var *pulser_next_phase( Var *v );
 Var *pulser_phase_reset( Var *v );
 Var *pulser_lock_keyboard( Var *v );
+Var *pulser_command( Var *v );
 
 
 /* Definitions needed for the pulser */
@@ -408,6 +409,7 @@ void ep385_twt_padding_check( CHANNEL *ch );
 bool ep385_init( const char *name );
 bool ep385_run( bool state );
 bool ep385_set_channels( void );
+bool ep385_command( const char *cmd );
 
 
 /*

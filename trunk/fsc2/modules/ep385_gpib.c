@@ -172,6 +172,17 @@ bool ep385_set_channels( void )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
+bool ep385_command( const char *cmd )
+{
+	if ( gpib_write( ep385.device, cmd, strlen( cmd ) ) == FAILURE )
+		ep385_gpib_failure( );
+	return OK;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
 static void ep385_gpib_failure( void )
 {
 	print( FATAL, "Communication with device failed.\n" );

@@ -415,6 +415,17 @@ bool hfs9000_set_channel_state( int channel, bool flag )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
+bool hfs9000_command( const char *cmd )
+{
+	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
+		hfs9000_gpib_failure( );
+	return OK;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
 static void hfs9000_gpib_failure( void )
 {
 	print( FATAL, "Communication with device failed.\n" );

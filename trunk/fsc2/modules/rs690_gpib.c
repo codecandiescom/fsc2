@@ -529,6 +529,17 @@ static int rs690_write( int device_no, const char *s, long len )
 }
 
 
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+bool rs690_command( const char *cmd )
+{
+	if ( gpib_write( rs690.device, cmd, strlen( cmd ) ) == FAILURE )
+		rs690_gpib_failure( );
+	return OK;
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
