@@ -30,9 +30,9 @@ win_width  = 100 ns;          // width of integration windows
 
 timebase   =   5 ns;          // timebase of the pulser
 
-I;
 W1, W2;
 data[ 4 ];
+I;
 
 
 ASSIGNMENTS:
