@@ -1136,7 +1136,7 @@ OTHERWISE
 @end example
 
 
-There is a caveat when using exceptions: The values of non-volatile
+There is a caveat when using exceptions: The values of non-static
 automatic variables may differ from the values they were set to after an
 exception got thrown. This could become a problem in cases where you do
 error handling in a @code{CATCH()} or @code{OTHERWISE} block as in the
