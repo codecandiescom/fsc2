@@ -31,13 +31,10 @@
 
 
 /*----------------------------------------------------------------*/
-/* GPIB_LOG_FILE is the name of the default file to which logging */
-/* information about GPIB operations are written - the name can   */
-/* changed by passing a different name to gpib_init().            */
 /*----------------------------------------------------------------*/
 
 
-#define CONTROLLER  "gpib"      /* symbolic name of the controller */
+#define CONTROLLER  "gpib_master_device"  /* symbolic name of the controller */
 
 
 #define SRQ      0x40    /* SRQ bit in device status register */
@@ -87,7 +84,7 @@ int controller;                 /* device number assigned to controller   */
 int timeout;                    /* stores actual timeout period           */
 FILE *gpib_log;                 /* file pointer of GPIB log file          */
 GPIB_DEV *gpib_dev_list = NULL; /* list of symbolic names of devices etc. */
-
+char gpib_error_buffer[ 1024 ];
 
 
 /*-------------------------------------------------------------------------*/
@@ -125,10 +122,24 @@ int gpib_init( const char *log_file_name, int log_level )
 		ll = LL_ALL;
 
     gpib_init_log( log_file_name );             /* initialise logging */
+	gpib_error_setup( gpib_error_buffer, 1024 );
 
     if ( gpib_init_controller( ) != SUCCESS )   /* initialise the controller */
     {
         strcpy( gpib_error_msg, "Initialization of controller failed!" );
+
+		if ( ll > LL_NONE )
+		{
+			gpib_log_date( );
+			seteuid( EUID );
+			fprintf( gpib_log, "%s\n", gpib_error_buffer );
+			gpib_log_date( );
+			seteuid( EUID );
+			fprintf( gpib_log, "Initialization of controller failed.\n\n" );
+			if ( gpib_log != stderr )
+				fclose( gpib_log );                 /* close log file */
+			seteuid( getuid( ) );
+		}
 
 		/* Get rid of the device list if it's already created */
 
@@ -173,7 +184,7 @@ static int gpib_init_controller( void )
 {
 	int state = 0;
 
-    if ( gpib_init_device( CONTROLLER, &controller ) != SUCCESS )
+    if ( gpib_init_device( NULL, &controller ) != SUCCESS )
         return FAILURE;
 
     if ( gpib_ask( controller, GPIB_ASK_IS_MASTER, &state ) & GPIB_ERR )
@@ -492,7 +503,7 @@ int gpib_local( int device )
 
 	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
 	{
-		sprintf( gpib_error_msg, "CALL of gpib_clear_device for unknown "
+		sprintf( gpib_error_msg, "CALL of gpib_local for unknown "
 				 "device (device number %d)\n", device );
 		return FAILURE;
 	}
