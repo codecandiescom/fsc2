@@ -251,7 +251,7 @@ static void prepserror ( const char *s )
 		eprint( FATAL, SET, "Unexpected end of file in PREPARATIONS "
 				"section.\n" );
 	else
-		eprint( FATAL, SET, "Syntax error near token `%s'.\n",
+		eprint( FATAL, SET, "Syntax error near `%s'.\n",
 				isprint( *prepstext ) ? prepstext : prepstext + 1 );
 	THROW( EXCEPTION );
 }
