@@ -43,7 +43,7 @@
 #define WAVELENGTH     1
 
 
-/* Defines for the units used when the device is wave-length driven */
+/* Defines for the units used when the device is wavelength driven */
 
 #define NANOMETER      0
 #define ANGSTROEM      1
@@ -78,22 +78,22 @@
 #include "spex_cd2a.conf"
 
 
-/* Please note: within the module we do all calculations in wave-lengths
-   (in m) and thus nearly all data are also stored as wave-lengths. The
+/* Please note: within the module we do all calculations in wavelengths
+   (in m) and thus nearly all data are also stored as wavelengths. The
    only exception is the position of the laser line, which is stored in
-   wave-numbers (i.e. cm^-1). Data passed to the EDL functions must be
-   in wave-lengths when the monochromator has a wave-length drive, other-
-   wise in wave-numbers. Values returned by the functions follow the same
+   wavenumbers (i.e. cm^-1). Data passed to the EDL functions must be
+   in wavelengths when the monochromator has a wavelength drive, other-
+   wise in wavenumbers. Values returned by the functions follow the same
    pattern. If a laser line position has been set (only possible when in
-   wave-number mode) input and output is in relative wave-numbers, i.e.
-   wave-number of laser line minus absoulte wave-number.
+   wavenumber mode) input and output is in relative wavenumbers, i.e.
+   wavenumber of laser line minus absoulte wavenumber.
 
    Exceptions: monochromator_wavelength() expects and returns data always
-               in wave-length units.
-			   monochromator_wavenumber() handles data in wave-number units
+               in wavelength units.
+			   monochromator_wavenumber() handles data in wavenumber units
 			   only.
 			   monochromator_laser_line() accepts and returns data in
-			   absolute wave-number units only.
+			   absolute wavenumber units only.
 */
 
 
@@ -118,6 +118,8 @@ typedef struct {
 
 	double wavelength;               /* in m */
 	bool is_wavelength;
+
+	double offset;                   /* in m or cm^-1, depending on mode */
 
 	double laser_wavenumber;         /* in cm^-1 */
 
@@ -152,6 +154,7 @@ Var *monochromator_name( Var *v );
 Var *monochromator_scan_setup( Var *v );
 Var *monochromator_wavelength( Var *v );
 Var *monochromator_wavenumber( Var *v );
+Var *monochromator_offset( Var *v );
 Var *monochromator_start_scan( Var *v );
 Var *monochromator_scan_step( Var *v );
 Var *monochromator_laser_line( Var *v );
@@ -174,6 +177,11 @@ void spex_cd2a_close( void );
 double spex_cd2a_wn2wl( double wn );
 double spex_cd2a_wl2wn( double wl );
 double spex_cd2a_wl2mwn( double wl );
+bool spex_cd2a_read_state( void );
+bool spex_cd2a_store_state( void );
+double spex_cd2a_cwl( double wl );
+double spex_cd2a_cwn( double wn );
+double spex_cd2a_cwnm( double wn );
 
 
 #endif /* ! SPEX_CD2A_HEADER */
