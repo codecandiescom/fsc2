@@ -130,7 +130,7 @@ the currently loaded @acronym{EDL} program. If you would prefer
 @acronym{fsc2} @b{not} to send such an email use this option.
 
 @item @option{-noBalloons}
-Normally, whenever the mouse hoovers above a button after some time a
+Normally, whenever the mouse hoovers over a button after some time a
 little help message is shown, explaining what the button does. If you
 get annoyed with this you can switch off the display of the help balloons.
 

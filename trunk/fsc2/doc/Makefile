@@ -22,7 +22,6 @@
 
 docs     := $(wildcard *.texi)
 pngs     := $(wildcard fsc2fig*.png)
-html_png := valid-html401.png
 xbms     := $(wildcard $(adir)/cursor*.xbm)
 figures  := $(pngs) $(notdir $(patsubst %.xbm,%.png,$(xbms)))
 eps_pics := $(patsubst %.png,%.eps,$(figures))
@@ -118,7 +117,7 @@ install:
 	$(INSTALL) -m 444 fsc2.1.gz $(mandir)/man1
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2*.html $(docdir)
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.css $(docdir)
-	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) $(figures) $(html_png) $(docdir)
+	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) $(figures) $(docdir)
 	if [ -f fsc2.ps ]; then \
 		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.ps $(docdir); \
 	fi
