@@ -72,7 +72,7 @@ typedef struct Var_
 	int dim;                       /* dimension of array */
 	unsigned int *sizes;           /* array of sizes of dimensions */
 	size_t len;                    /* total len of array */
-	unsignd long  flags;
+	unsigned long flags;
 
 	struct Var_ *from;
 	struct Var_ *next;       /* next variable in list or stack */

@@ -71,10 +71,11 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
 		struct Var_ *vptr;                          // for array references
 		void   *gptr;                               // generic pointer
 	} val;
-	int    dim;              // dimension of array
-	int    *sizes;           // array of sizes of dimensions
+	int dim;                 // dimension of array
+	unsigned int *sizes;     // array of sizes of dimensions
 	size_t len;              // total len of array
-	long   flags;
+	unsigned long flags;
+
 	struct Var_ *from;
 	struct Var_ *next;       // next variable in list or stack
 	struct Var_ *prev;       // previous variable in list or stack
@@ -1671,7 +1672,7 @@ static Var *vars_get_lhs_pointer( Var *v, int n )
 
 static long vars_calc_index( Var *a, Var *v )
 {
-	int  i, cur;
+	unsigned int i, cur;
 	long a_index;
 
 
@@ -1794,7 +1795,7 @@ static Var *vars_setup_new_array( Var *v, int dim )
 
 	a->dim = dim;
 	a->sizes = NULL;
-	a->sizes = T_malloc( dim * sizeof( int ) );
+	a->sizes = T_malloc( dim * sizeof( unsigned int ) );
 	a->len = 1;
 
 	a->flags &= ~NEW_VARIABLE;
@@ -1853,7 +1854,7 @@ static Var *vars_setup_new_array( Var *v, int dim )
 			THROW( EXCEPTION )
 		}
 
-		a->sizes[ i ] = cur;
+		a->sizes[ i ] = ( unsigned int ) cur;
 		a->len *= cur;
 	}
 
