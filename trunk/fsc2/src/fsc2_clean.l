@@ -903,15 +903,15 @@ static ssize_t output( const char *fmt, ... )
 		bytes_written = write( STDOUT_FILENO, c + already_written,
 							   bytes_to_write );
 
-		/* Non-deadly signal has been received */
+		/* Check if a non-deadly signal has been received */
 
 		if ( bytes_written == -1 && errno == EINTR )
 			continue;
 
-		/* Real error while writing, not a signal */
+		/* Throw an exception on real errors */
 
 		if ( bytes_written <= 0 )
-			break;
+			THROW( EXCEPTION );
 
 		bytes_to_write -= bytes_written;
 		already_written += bytes_written;
