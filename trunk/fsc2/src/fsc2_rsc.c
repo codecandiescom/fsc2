@@ -18,39 +18,39 @@ FD_fsc2 *create_form_fsc2(void)
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
   fdui->Load = obj = fl_add_button(FL_NORMAL_BUTTON,50,70,130,50,"Load");
     fl_set_button_shortcut(obj,"L",1);
-    fl_set_object_color(obj,FL_MCOL,FL_COL1);
+    fl_set_object_color(obj,FL_MCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_callback(obj,load_file,0);
   fdui->reload = obj = fl_add_button(FL_NORMAL_BUTTON,50,150,130,50,"Reload");
     fl_set_button_shortcut(obj,"R",1);
-    fl_set_object_color(obj,FL_MCOL,FL_COL1);
+    fl_set_object_color(obj,FL_MCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_callback(obj,load_file,1);
   fdui->test_file = obj = fl_add_button(FL_NORMAL_BUTTON,50,440,130,50,"Test");
     fl_set_button_shortcut(obj,"T",1);
-    fl_set_object_color(obj,FL_MCOL,FL_COL1);
+    fl_set_object_color(obj,FL_MCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_callback(obj,test_file,0);
   fdui->run = obj = fl_add_button(FL_NORMAL_BUTTON,50,520,130,50,"Start");
     fl_set_button_shortcut(obj,"S",1);
-    fl_set_object_color(obj,FL_MCOL,FL_COL1);
+    fl_set_object_color(obj,FL_MCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_callback(obj,run_file,0);
   fdui->quit = obj = fl_add_button(FL_NORMAL_BUTTON,50,700,130,50,"Quit");
     fl_set_button_shortcut(obj,"Q",1);
-    fl_set_object_color(obj,FL_MCOL,FL_COL1);
+    fl_set_object_color(obj,FL_MCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
   fdui->error_browser = obj = fl_add_browser(FL_NORMAL_BROWSER,230,600,790,190,"");
     fl_set_object_color(obj,FL_WHITE,FL_YELLOW);
     fl_set_object_lsize(obj,FL_MEDIUM_SIZE);
   fdui->Edit = obj = fl_add_button(FL_NORMAL_BUTTON,50,240,130,50,"Edit");
     fl_set_button_shortcut(obj,"E",1);
-    fl_set_object_color(obj,FL_MCOL,FL_COL1);
+    fl_set_object_color(obj,FL_MCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_callback(obj,edit_file,0);
   fdui->device_button = obj = fl_add_button(FL_NORMAL_BUTTON,50,340,130,50,"Devices");
     fl_set_button_shortcut(obj,"D",1);
-    fl_set_object_color(obj,FL_MCOL,FL_COL1);
+    fl_set_object_color(obj,FL_MCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_callback(obj,device_select,0);
   fl_end_form();
@@ -69,13 +69,13 @@ FD_run *create_form_run(void)
   fdui->run = fl_bgn_form(FL_NO_BOX, 1030, 800);
   obj = fl_add_box(FL_UP_BOX,0,0,1030,800,"");
   fdui->stop = obj = fl_add_button(FL_NORMAL_BUTTON,40,700,130,50,"Stop");
-    fl_set_object_color(obj,FL_MCOL,FL_COL1);
+    fl_set_object_color(obj,FL_MCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
 /*
     fl_set_object_callback(obj,stop_measurement,0);
 */
   fdui->save = obj = fl_add_button(FL_NORMAL_BUTTON,40,590,130,50,"Save");
-    fl_set_object_color(obj,FL_MCOL,FL_COL1);
+    fl_set_object_color(obj,FL_MCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
 /*
     fl_set_object_callback(obj,save_data,0);
@@ -141,11 +141,11 @@ FD_device *create_form_device(void)
     fl_set_object_lalign(obj,FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
     fl_set_object_lstyle(obj,FL_NORMAL_STYLE+FL_SHADOW_STYLE);
   fdui->device_select_ok = obj = fl_add_button(FL_NORMAL_BUTTON,590,410,130,50,"Accept");
-    fl_set_object_color(obj,FL_TOP_BCOL,FL_COL1);
+    fl_set_object_color(obj,FL_TOP_BCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_callback(obj,device_select,1);
   fdui->device_select_cancel = obj = fl_add_button(FL_NORMAL_BUTTON,590,320,130,50,"Cancel");
-    fl_set_object_color(obj,FL_TOP_BCOL,FL_COL1);
+    fl_set_object_color(obj,FL_TOP_BCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_callback(obj,device_select,0);
 
