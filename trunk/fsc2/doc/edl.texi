@@ -13,8 +13,9 @@ This chapter describes the @b{EDL} language (@b{E}xperiment
 * Sections::                The sections of an EDL program.
 * Devices::
 * Variables::               Using variables and arrays.
-* Arithmetic::
-* Control structures::      Flow control in an EDL program
+* Arithmetic::              Doing calculations with variables.
+* Arithmetic with arrays::  Calculations involving arrays.
+* Control structures::      Flow control in an EDL program.
 @end menu
 @end ifinfo
 
@@ -189,10 +190,9 @@ contrast, floating point variables can have much larger values (up to ca.@:
 
 
 To distinguish between integer and floating point variables the
-following convention is used:
-@cite{The names of all integer variables start with a upper case letter,
-i.e.@: A-Z, while the names of floating point variables start with a
-lower case character, i.e.@: a-z.}
+following convention is used: The names of all integer variables start
+with a upper case letter, i.e.@: A-Z, while the names of floating point
+variables start with a lower case character, i.e.@: a-z.
 
 
 
@@ -284,13 +284,86 @@ As usual, non-integer exponents can only be used with non-negative bases!
 
 
 
-@node Control structures, , Arithmetic, EDL
+@node Arithmetic on arrays, Arithmetic, Control structures,EDL
+@section Arithmetic
+@cindex arithmetic
+
+
+Beside the usual artithmetic with numbers it is also possible to use
+arithmetic with (one-dimensional) arrays. Also all built-in functions
+can (as far as this makes any sense) can be applied to these kinds of
+arrays.
+
+As long as the sizes of two arrays are identical they can be added or
+subtracted. If the arrays @code{a} and @code{b} are defined as
+@example
+      a[ 3 ] = @{ 0.5, 1.0, 2.0 @};
+      b[ 3 ] = @{ 1.0, -2.0, -3.0 @};
+@end example
+they can be added and subtracted in a element-by-element fashion,
+resulting in
+@example
+      a + b      ->   @{ 1.5, -1.0, -1.0 @}
+      a - b      ->   @{ -0.5, 3.0, 5.0 @}
+@end example
+On the other hand, it is also possible to add or subtract a number from
+each element of an array:
+@example
+      a + 5      ->   @{ 5.5, 6.0, 7.0 @}
+      a - 3      ->   @{ -2.5, -2.0, -1.0 @}
+@end example
+
+Also multiplication and division is possible with arrays. Again, this
+operations are implemented in a element-by-element way, i.e.@:
+multiplying to arrays is not a dot product but results again in an
+array. The same holds for the division. With the arrays @code{a} and
+@code{b} defined above the results are:
+@example
+      a * b      ->   @{ 0.5, -2.0, -6.0 @}
+      a / b      ->   @{ 0.5, -0.5, -0.666667 @}
+      b / a      ->   @{ 2.0, -2.0, -1.5 @}
+@end example
+
+Again, also multiplication and division of an array with a number is
+defined as shown here:
+@example
+      a * 2      ->   @{ 1.0, 2.0, 4.0 @}
+      a / 3      ->   @{ 0.166667, 0.333333, 0.666667 @}
+      3 / a      ->   @{ 6.0, 3.0, 1.5 @}
+@end example
+
+Finally, also calculation of the modulo and exponentiation can be done on
+arrays. Also these operations are implemented as element-by-element
+calculations, i.e.@: resulting in an array:
+@example
+      a % b      ->   @{ 0.5, 1.0, 2.0 @}
+      b % a      ->   @{ 0.0, 0.0, -1.0 @}
+      a ^ b      ->   @{ 0.5, 1.0, 0.125 @}
+      b ^ a      ->   @{ 1.0, -2.0, 9.0 @}
+@end example
+
+Of course, the same operations can also be applied to a mixture of
+arrays and simple numbers, also resulting in arrays:
+@example
+      a % 0.3    ->   @{ 0.2, 0.1, 0.2 @}
+      1.3 % a    ->   @{ 0.3, 0.3, 0.7 @}
+      a ^ 2      ->   @{ 0.25, 1.0, 4.0 @}
+      2 ^ a      ->   @{ 1.414215, 2.0, 4.0 @}
+@end example
+
+All the built-in arithmetic functions can be applied to arrays. In every
+case the function is applied to each element of the array, thus
+resulting in another array. For example, again using the array @code{a}
+defined above, applying the @code{sqrt()} function results in:
+@example
+      sqrt( a )  ->   @{ 0.7071068, 1.0, 1.1414215 @}
+@end example
+
+
+@node Control structures, , Arithmetic on arrays, EDL
 @section Control structures
 @cindex control structures
 @cindex flow control
-
-
-
 
 
 Within the @code{EXPERIMENT} section flow control structures can be

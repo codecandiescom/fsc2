@@ -52,6 +52,7 @@ experiment.
 * Overview::                Basic concepts of fsc2.
 * EDL::                     Description of EDL the language.
 * Functions::               Built-in functions.
+* Devive functions::        Functions for accessing devices.
 * Modules::                 How to create new modules.
 * Index::                   List of all indexed words.
 @end menu
@@ -62,6 +63,7 @@ experiment.
 @include overview.texi
 @include edl.texi
 @include builtins.texi
+@include devices.texi
 @include modules.texi
 
 @node Index, , , Top

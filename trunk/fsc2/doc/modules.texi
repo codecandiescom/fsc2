@@ -1,6 +1,6 @@
 @c $Id$
 
-@node Modules, , Functions, Top
+@node Modules, , Device Functions, Top
 @chapter Modules
 @cindex modules
 

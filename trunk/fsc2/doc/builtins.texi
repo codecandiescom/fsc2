@@ -373,16 +373,17 @@ top of the editor - it defaults to "Please enter a comment:".
 @table @samp
 @item int()
 @findex int()
-Converts a number to integer type by truncating all digits following the
-decimal point.
+Converts a number (or the elements of an array) to integer type by
+truncating all digits following the decimal point.
 
 @item float()
 @findex float()
-Converts a number to floating point type.
+Converts a number (or the elements of an array) to floating point type.
 
 @item round()
 @findex round()
-Converts a floating point number to the nearest integer, i.e.@:
+Converts a floating point number (or the elements of an array) to the
+nearest integer, i.e.@:
 
 @example
 round( 8.5 ) = 9    round( 8.49 ) = 8    round( -1.75 ) = -2
@@ -390,8 +391,8 @@ round( 8.5 ) = 9    round( 8.49 ) = 8    round( -1.75 ) = -2
 
 @item floor()
 @findex floor()
-Converts a floating point number to the largest integer that is not larger
-than the argument, i.e.@:
+Converts a floating point number (or the elements of an array) to the
+largest integer that is not larger than the argument, i.e.@:
 
 @example
 floor( 8.6 ) = 8    floor( -8.6 ) = -9
@@ -399,8 +400,8 @@ floor( 8.6 ) = 8    floor( -8.6 ) = -9
 
 @item ceil()
 @findex ceil()
-Converts a floating point number to the smallest integer that is not less than
-the argument, i.e.@:
+Converts a floating point number (or the elements of an array) to the
+smallest integer that is not less than the argument, i.e.@:
 
 @example
 round( 8.6 ) = 9     round( -8.6 ) = -8
@@ -408,12 +409,13 @@ round( 8.6 ) = 9     round( -8.6 ) = -8
 
 @item abs()
 @findex abs()
-Returns the absolute value of an integer or floating point number.
+Returns the absolute value of an integer or floating point number (or
+the elements of an array) .
 
 @item sqrt()
 @findex sqrt()
-Returns the square root of an integer or floating point number. The
-argument must be a positive number.
+Returns the square root of an integer or floating point number (or the
+elements of an array). The argument must be a positive number.
 
 @item random()
 @findex random()
@@ -426,47 +428,53 @@ Sets a seed for the random number generator used in the function
 
 @item sin()
 @findex sin()
-Returns the sine of the argument, with the argument interpreted as the angle
-in radian.
+Returns the sine of the argument (simple number or elements of an
+array), with the argument interpreted as the angle in radian.
 
 @item cos()
 @findex cos()
-Returns the cosine of the argument, with the argument interpreted as the angle
-in radian.
+Returns the cosine of the argument (simple number or elements of an
+array), with the argument interpreted as the angle in radian.
 
 @item tan()
 @findex tan()
-Returns the tangent of the argument, with the argument interpreted as the angle
-in radian.
+Returns the tangent of the argument (simple number or elements of an
+array), with the argument interpreted as the angle in radian.
 
 @item asin()
 @findex asin()
-Returns the inverse of the sine function of the argument as an angle in
-radian. The argument must be in the interval @w{[-1, 1]}, the
-result an element of the interval @w{[-pi/2, pi/2]}.
+Returns the inverse of the sine function of the argument (simple number
+or elements of an array) as an angle in radian. The argument must be in
+the interval @w{[-1, 1]}, the result an element of the interval
+@w{[-pi/2, pi/2]}.
 
 @item acos()
 @findex acos()
-Returns the inverse of the cosine function of the argument as an angle
-in radian. The argument must be in the interval @w{[-1, 1]}, the result
-an element of the interval @w{[0, pi]}.
+Returns the inverse of the cosine function of the argument (simple
+number or elements of an array) as an angle in radian. The argument must
+be in the interval @w{[-1, 1]}, the result an element of the interval
+@w{[0, pi]}.
 
 @item atan()
 @findex atan()
-Returns the inverse of the tangent function of the argument as an angle in
-radian, the result an element of the interval @w{[-pi, pi]}.
+Returns the inverse of the tangent function of the argument (simple
+number or elements of an array)as an angle in radian, the result an
+element of the interval @w{[-pi, pi]}.
 
 @item sinh()
 @findex sinh()
-Returns the hyperbolic sine of the argument.
+Returns the hyperbolic sine of the argument (simple number or elements
+of an array).
 
 @item cosh()
 @findex cosh()
-Returns the hyperbolic cosine of the argument.
+Returns the hyperbolic cosine of the argument (simple number or elements
+of an array).
 
 @item tanh()
 @findex tanh()
-Returns the hyperbolic tangent of the argument.
+Returns the hyperbolic tangent of the argument (simple number or
+elements of an array).
 
 @end table
 
@@ -481,12 +489,10 @@ Returns the hyperbolic tangent of the argument.
 @findex time()
 Returns a string with the current time the form @code{hh:mm:ss}.
 
-@table @samp
 @item date()
 @findex date()
 Returns a string with the current date in a form like @code{Sun Jun 17, 2000}.
 
-@table @samp
 @item wait()
 @findex wait()
 Waits for the specified time. Times are always to be given in seconds or
