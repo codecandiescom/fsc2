@@ -486,6 +486,60 @@ the experiment.  If called more than once the current of the last call
 will be used.
 
 
+@anchor{magnet_B0}
+@item magnet_B0()
+@findex magnet_B0()
+This function is only available for the module @code{hfs_sfc}. For this
+module the magnet is controlled via the output voltage of a DAC. The
+function allows to tell the module about the field at an output voltage
+of @code{0 V}. The value can't be changed anymore after it has been used
+(e.g.@: to calculate an output voltage required to set a certain field).
+
+When called without an argument the current value of what
+the module assumes to be the field at a DAC output voltage of @code{0 V}.
+
+The function can only be used in the @code{EXPERIMENT} section.
+
+
+@anchor{magnet_slope}
+@item magnet_slope()
+@findex magnet_slope()
+This function is only available for the module @code{hfs_sfc}. For this
+module the magnet is controlled via the output voltage of a DAC. The
+function allows to tell the module about the field change (in Gauss) for
+an output voltage change of @code{1 V}. The value can't be changed
+anymore after the field-to-voltage change ratio has been used (e.g.@: to
+calculate an output voltage required to set a certain field).
+
+When called without an argument the current value of what the module
+assumes to be the field change for a DAC output voltage change of
+@code{1 V}.
+
+The function can only be used in the @code{EXPERIMENT} section.
+
+
+@anchor{magnet_calibration_file}
+@item magnet_calibration_file()
+@findex magnet_calibration_file()
+This function is only available for the module @code{hfs_sfc}. For this
+module the magnet is controlled via the output voltage of a DAC. To find
+out how the field changes with the DAC output voltage, two data are read
+from a calibration file, the field values for the minumum and maximum
+DAC output voltage. Normally, the name of the calibration file is taken
+from the configuration file for the module. Using this function, a
+different calibration file can be used. The function expects the name of
+an existent, readable file that contains two values, first the field (in
+Gauss) at the minimum DAC output voltage and then the field at the
+maximum DAC output voltage. The file may @code{C} and @code{C++} style
+comments. Also lines starting with a hash character ('@code{#}') are
+taken to be comments.
+
+When no argument is passed to the function a string with the name of the
+calibbration file is returned.
+
+The function can only be used in the @code{PREPARATIONS} section.
+
+
 @end table
 
 

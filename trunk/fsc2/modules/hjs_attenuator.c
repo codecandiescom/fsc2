@@ -1,4 +1,4 @@
-/*
+#/*
   $Id$
 
   Copyright (C) 1999-2003 Jens Thoms Toerring
@@ -324,13 +324,17 @@ static bool hjs_attenuator_serial_init( void )
 		 == NULL )
 		return FAIL;
 
-	/* The device uses 8 bit transfers, no parity and one stop bit (8N1),
-	   a baud rate of 9600 and has no control lines (only RTX, DTX and
-	   ground are connected internally). Of course, canonical mode can't
-	   be used here.*/
+	/* The device uses 6 bit transfers, no parity and one stop bit (8N1),
+	   a baud rate of 9600. The settings used here are the ones that one
+	   gets when opening the device file with fopen() and these seem to
+	   be settings that work with the device (there's no manual...) */
 
 	memset( hjs_attenuator.tio, 0, sizeof *hjs_attenuator.tio );
-	hjs_attenuator.tio->c_cflag = CS8 | CSIZE | CREAD | CLOCAL;
+
+	hjs_attenuator.tio->c_iflag = ICRNL | IXON;
+	hjs_attenuator.tio->c_oflag = OPOST | ONLCR;
+	hjs_attenuator.tio->c_cflag = HUPCL | CSIZE| CS6 | CLOCAL;
+	hjs_attenuator.tio->c_lflag = ISIG | ICANON | ECHONL | TOSTOP | IEXTEN;
 
 	cfsetispeed( hjs_attenuator.tio, SERIAL_BAUDRATE );
 	cfsetospeed( hjs_attenuator.tio, SERIAL_BAUDRATE );
@@ -366,7 +370,7 @@ static void hjs_attenuator_set_attenuation( long new_step )
 	len = ( ssize_t ) strlen( cmd );
 
 	if ( fsc2_serial_write( SERIAL_PORT, cmd, ( size_t ) len,
-							0, UNSET ) != len )
+							100000L, UNSET ) != len )
 	{
 		T_free( cmd );
 		hjs_attenuator_comm_failure( );
@@ -374,9 +378,10 @@ static void hjs_attenuator_set_attenuation( long new_step )
 
 	T_free( cmd );
 
-	/* Wait a bit for the motor to move */
+	/* Wait for the motor to move, we were using a speed of 300 steps per
+	   second. */
 
-	fsc2_usleep( labs( steps ) * HJS_ATTENTUATOR_WAIT_PER_STEP, SET );
+	fsc2_usleep( labs( steps / 300.0 * 1000000L ), SET );
 	stop_on_user_request( );
 
 	/* To always reach the end point from the same side we go a bit further
@@ -388,16 +393,16 @@ static void hjs_attenuator_set_attenuation( long new_step )
 		return;
 
 	if ( fsc2_serial_write( SERIAL_PORT, "@01\n@0A +50,100\n", 16,
-							0, UNSET ) != 16 )
+							100000L, UNSET ) != 16 )
 		hjs_attenuator_comm_failure( );
 
-	fsc2_usleep( 50 * HJS_ATTENTUATOR_WAIT_PER_STEP, UNSET );
+	fsc2_usleep( 500000, UNSET );
 
 	if ( fsc2_serial_write( SERIAL_PORT, "@01\n@0A -50,300\n", 16,
-							0, UNSET ) != 16 )
+							100000L, UNSET ) != 16 )
 		hjs_attenuator_comm_failure( );
 
-	fsc2_usleep( 50 * HJS_ATTENTUATOR_WAIT_PER_STEP, UNSET );
+	fsc2_usleep( 166667L, UNSET );
 }
 
 

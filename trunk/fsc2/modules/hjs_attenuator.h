@@ -30,12 +30,6 @@
 #include "hjs_attenuator.conf"
 
 
-/* Define the time to wait for a single step when changing the
-   attenuation (in units of micro-seconds) */
-
-#define HJS_ATTENTUATOR_WAIT_PER_STEP   2000   /* 2 ms */
-
-
 typedef struct HJS_ATTENUATOR HJS_ATTENUATOR;
 typedef struct HJS_ATT_TABLE_ENTRY HJS_ATT_TABLE_ENTRY;
 

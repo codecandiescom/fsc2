@@ -1,0 +1,11 @@
+# -*-Makefile-*-
+#
+# $Id$
+
+OWNER              := fsc2
+GROUP              := uucp
+GPIB_LIBRARY       := NONE
+NUM_SERIAL_PORTS   := 4
+SERIAL_LOCK_DIR    := /var/lock
+WITH_WITIO_48      := yes
+witio_48_libs      := libwitio_48.so

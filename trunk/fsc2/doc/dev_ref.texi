@@ -1010,12 +1010,15 @@ can't be used, it gets reserved automatically for this module.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{magnet_name()}            @tab @ref{magnet_name}
-@item @code{magnet_setup()}           @tab @ref{magnet_setup}
-@item @code{set_field()}              @tab @ref{set_field}
-@item @code{sweep_up()}               @tab @ref{sweep_up}
-@item @code{sweep_down()}             @tab @ref{sweep_down}
-@item @code{reset_field()}            @tab @ref{reset_field}
+@item @code{magnet_name()}             @tab @ref{magnet_name}
+@item @code{magnet_setup()}            @tab @ref{magnet_setup}
+@item @code{set_field()}               @tab @ref{set_field}
+@item @code{sweep_up()}                @tab @ref{sweep_up}
+@item @code{sweep_down()}              @tab @ref{sweep_down}
+@item @code{reset_field()}             @tab @ref{reset_field}
+@item @code{magnet_B0()}               @tab @ref{magnet_B0}
+@item @code{magnet_slope()}            @tab @ref{magnet_slope}
+@item @code{magnet_calibration_file()} @tab @ref{magnet_calibration_file}
 @end multitable
 
 

@@ -22,60 +22,17 @@
 */
 
 
-#include "fsc2_module.h"
+#include "hjs_sfc.h"
 
-
-/* Include configuration information for the device */
-
-#include "hjs_sfc.conf"
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
-
-
-/* Exported functions */
-
-int hjs_sfc_init_hook( void );
-int hjs_sfc_test_hook( void );
-int hjs_sfc_exp_hook( void );
-int hjs_sfc_end_of_exp_hook( void );
-void hjs_sfc_exit_hook( void );
-
-Var *magnet_name( Var *v );
-Var *magnet_setup( Var *v );
-Var *set_field( Var *v );
-Var *get_field( Var *v );
-Var *sweep_up( Var *v );
-Var *sweep_down( Var *v );
-Var *reset_field( Var *v );
-Var *magnet_set_B0( Var *v );
-Var *magnet_set_slope( Var *v );
 
 
 /* Local functions */
 
 static double hjs_sfc_field_check( double field );
 static double hjs_sfc_set_field( double field );
-
-
-struct HJS_SFC {
-	double B0V;             /* Field for DAC voltage of 0 V */
-	double slope;           /* field step for 1 V DAC voltage increment */
-
-	bool B0V_has_been_used;
-	bool slope_has_been_used;
-
-	double field;			/* the start field given by the user */
-	double field_step;		/* the field steps to be used */
-
-	bool is_field;			/* flag, set if start field is defined */
-	bool is_field_step;		/* flag, set if field step size is defined */
-
-	char *dac_func;
-
-	double act_field;		/* used internally */
-	bool is_act_field;
-};
 
 
 struct HJS_SFC hjs_sfc, hjs_sfc_stored;
@@ -101,10 +58,10 @@ int hjs_sfc_init_hook( void )
 	char *func;
 
 
-	/* Set the default values for the structure for the device */
+	/* Set the default values for the structure for the device (the field for
+	   a DAC setting and the slope get read from the configuration file */
 
-	hjs_sfc.B0V = DEFAULT_B0;
-	hjs_sfc.slope = DEFAULT_SLOPE;
+	hjs_sfc.calib_file = NULL;
 
 	hjs_sfc.B0V_has_been_used = UNSET;
 	hjs_sfc.slope_has_been_used = UNSET;
@@ -183,6 +140,18 @@ int hjs_sfc_init_hook( void )
 
 int hjs_sfc_test_hook( void )
 {
+	/* Now is the last moment to read in the calibration file with the
+	   data of the field at the minimum and maximum DAC output voltage */
+
+	hjs_sfc_read_calibration( );
+
+	/* If manget_setup() had been called we couldn't check if the field
+	   was within the allowed range because we need the information from
+	   the calibration file to do so. So do the check now if necessary. */
+
+	if ( hjs_sfc.is_field )
+		hjs_sfc_field_check( hjs_sfc.field );
+
 	hjs_sfc_stored = hjs_sfc;
 
 	if ( hjs_sfc.is_field )
@@ -221,6 +190,9 @@ int hjs_sfc_exp_hook( void )
 
 void hjs_sfc_exit_hook( void )
 {
+	if ( hjs_sfc.calib_file != NULL )
+		hjs_sfc.calib_file = CHAR_P T_free( hjs_sfc.calib_file );
+
 	if ( hjs_sfc.dac_func )
 		T_free( hjs_sfc.dac_func );
 }
@@ -274,10 +246,6 @@ Var *magnet_setup( Var *v )
 	field_step = get_double( v, "field step width" );
 
 	too_many_arguments( v );
-
-	/* Check that field value is still within the limits */
-
-	hjs_sfc_field_check( start_field );
 
 	hjs_sfc.field = start_field;
 	hjs_sfc.field_step = field_step;
@@ -412,7 +380,7 @@ Var *reset_field( Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *magnet_set_B0( Var *v )
+Var *magnet_B0( Var *v )
 {
 	double B0V;
 
@@ -435,6 +403,8 @@ Var *magnet_set_B0( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	too_many_arguments( v );
+
 	hjs_sfc.B0V = B0V;
 			
 	return vars_push( FLOAT_VAR, hjs_sfc.B0V );
@@ -444,7 +414,7 @@ Var *magnet_set_B0( Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *magnet_set_slope( Var *v )
+Var *magnet_slope( Var *v )
 {
 	double slope;
 
@@ -468,9 +438,78 @@ Var *magnet_set_slope( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	too_many_arguments( v );
+
 	hjs_sfc.slope = slope;
 			
 	return vars_push( FLOAT_VAR, hjs_sfc.slope );
+}
+
+
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+Var *magnet_calibration_file( Var *v )
+{
+	char *buf;
+
+
+	if ( v == NULL )
+	{
+		if ( hjs_sfc.calib_file == NULL )
+			return vars_push( STR_VAR, "" );
+		else
+			return vars_push( STR_VAR, hjs_sfc.calib_file );
+	}
+
+	if ( hjs_sfc.calib_file != NULL )
+	{
+		print( SEVERE, "Calibration file has already been set, keeping as "
+			   "'%s'.\n", hjs_sfc.calib_file );
+		return vars_push( STR_VAR, hjs_sfc.calib_file );
+	}
+
+	if ( v->type != STR_VAR )
+	{
+		print( FATAL, "Argument isn't a file name.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( *v->val.sptr == '/' )
+		hjs_sfc.calib_file = T_strdup( v->val.sptr );
+	else if ( *v->val.sptr == '~' )
+		hjs_sfc.calib_file = get_string( "%s%s%s", getenv( "HOME" ),
+										 v->val.sptr[ 1 ] != '/' ? "/" : "",
+										 *v->val.sptr + 1 );
+	else
+	{
+		buf = T_malloc( PATH_MAX );
+
+		if ( getcwd( buf, PATH_MAX ) == NULL )
+		{
+			print( FATAL, "Can't determine current working directory.\n" );
+			T_free( buf );
+			THROW( EXCEPTION );
+		}
+
+		TRY
+		{
+			hjs_sfc.calib_file = get_string( "%s%s%s", buf, slash( buf ),
+											 v->val.sptr );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( buf );
+			RETHROW( );
+		}
+
+		T_free( buf );
+	}
+
+	too_many_arguments( v );
+
+	return vars_push( STR_VAR, hjs_sfc.calib_file );
 }
 
 
