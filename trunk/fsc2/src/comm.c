@@ -258,9 +258,12 @@ int new_data_callback( XEvent *a, void *b )
 			if ( Internals.child_pid > 0 && ! kill( Internals.child_pid, 0 ) )
 				kill( Internals.child_pid, SIGTERM );
 
-			fl_set_idle_callback( 0, NULL );
+			fl_set_idle_callback( idle_handler, NULL );
 			Comm.MQ->low = Comm.MQ->high;
 		}
+
+	if ( Internals.http_pid > 0 )
+		http_check( );
 
 	return 0;
 }
@@ -497,6 +500,7 @@ static bool parent_reader( CommStruct *header )
 				/* Call fl_show_fselector() and send the result back to the
 				   child process (which is waiting to read in the mean time) */
 
+				Internals.state = STATE_WAITING;
 				if ( ! writer( C_STR, fl_show_fselector( str[ 0 ], str[ 1 ],
 													   str[ 2 ], str[ 3 ] ) ) )
 					THROW( EXCEPTION );
@@ -506,11 +510,13 @@ static bool parent_reader( CommStruct *header )
 			{
 				for ( i = 0; i < 4 && str[ i ] != NULL; i++ )
 					T_free( str[ i ] );
+				Internals.state = STATE_RUNNING;
 				return FAIL;
 			}
 
 			for ( i = 0; i < 4; i++ )
 				str[ i ] = T_free( str[ i ] );
+			Internals.state = STATE_RUNNING;
 			break;
 
 		case C_PROG : case C_OUTPUT :

@@ -101,19 +101,30 @@ bool run( void )
 
 	/* Start the GPIB bus (and do some changes to the graphics) */
 
+	Internals.state = STATE_RUNNING;
+
 	if ( ! start_gpib( ) )
+	{
+		Internals.state = STATE_IDLE;
 		return FAIL;
+	}
 
 	/* If there are no commands but an EXPERIMENT section label we just run
 	   all the init hooks, then the exit hooks and are already done. */
 
 	if ( EDL.prg_token == NULL )
+	{
+		Internals.state = STATE_IDLE;
 		return no_prog_to_run( );
+	}
 
 	/* Initialize devices and graphics */
 
 	if ( ! init_devs_and_graphics(  ) )
+	{
+		Internals.state = STATE_IDLE;
 		return FAIL;
+	}
 
 	/* Setup the signal handlers for signals used for communication between
 	   parent and child process and an idle callback function for displaying
@@ -125,8 +136,12 @@ bool run( void )
 
 	/* Here the experiment starts - the child process is forked */
 
+	fl_set_idle_callback( 0, NULL );
+
 	if ( ( Internals.child_pid = fork( ) ) == 0 )
 		run_child( );
+
+	fl_set_idle_callback( new_data_callback, NULL );
 
 	stored_errno = errno;            /* for later dissemination... */
 	close_all_files( );              /* only child is going to write to them */
@@ -379,6 +394,7 @@ static void fork_failure( int stored_errno )
 	Internals.mode = PREPARATION;
 
 	stop_measurement( NULL, 1 );
+	Internals.state = STATE_IDLE;
 }
 
 
@@ -470,21 +486,21 @@ static void quitting_handler( int signo )
 static void run_sigchld_handler( int signo )
 {
 	int return_status;
-#if ! defined NDEBUG
 	int pid;
-#endif
 	int errno_saved;
 
 
 	signo = signo;
 	errno_saved = errno;
 
-#if defined NDEBUG
-	if ( wait( &return_status ) != Internals.child_pid )
-#else
 	if ( ( pid = wait( &return_status ) ) != Internals.child_pid )
-#endif
 	{
+		if ( pid == Internals.http_pid )
+		{
+			Internals.http_pid = -1;
+			fl_trigger_object( GUI.main_form->server );
+		}
+
 		errno_saved = errno;
 		return;                       /* if some other child process died... */
 	}
@@ -504,6 +520,7 @@ static void run_sigchld_handler( int signo )
 	GUI.run_form->sigchld->u_ldata = ( long ) return_status;
 	fl_trigger_object( GUI.run_form->sigchld );
 
+	Internals.state = STATE_FINISHED;
 	errno = errno_saved;
 }
 
@@ -582,9 +599,11 @@ void stop_measurement( FL_OBJECT *a, long b )
 
 	/* Remove the signal handlers */
 
-	fl_set_idle_callback( 0, NULL );
-
 	sigaction( QUITTING, &quitting_oact, NULL );
+
+	/* Go back to using the normal idle handler */
+
+	fl_set_idle_callback( idle_handler, NULL );
 
 	/* Reset all the devices and finally the GPIB bus */
 
