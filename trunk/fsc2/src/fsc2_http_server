@@ -29,10 +29,9 @@ use Fcntl qw( :DEFAULT :flock );
 use Errno;
 
 
-my $client;
+my $client;       # the most important entity ;-)
 
-
-# Check if we got an port as the first argument
+# Check if we got a port as the first argument
 
 my $port = 8080;
 $port = $ARGV[ 0 ] if
@@ -78,8 +77,9 @@ my $server = IO::Socket::INET->new( LocalPort => $port,
 # Now wait for the unwashed masses to hammer on our little server - at least
 # 10 requests will get served simultaneously. This requires the children to
 # look out for locks on STDOUT, i.e. the write-connection to fsc2 (or, to be
-# more precise, each single server has to get a lock on STDOUT before writing
-# to it and must release the lock only after reading the complete reply).
+# more precise, each single server has to get an exclusive lock on STDOUT
+# before writing to it and must release this lock only after reading the
+# complete reply from fsc2).
 
 while ( $client = $server->accept( ) ) {
 	if ( fork( ) == 0 ) {
@@ -160,7 +160,7 @@ sub serve_main {
 
 
 	# Ask the parent for its current state - and don't forget to set a lock on
-	# STDOUT (and later also to release it) or other processes might interfere
+	# STDOUT (and later to also release it) or other processes might interfere
 
 	flock( STDIN, LOCK_EX );
 	print 'S';
@@ -223,7 +223,8 @@ sub serve_main {
 	flock( STDIN, LOCK_UN );
 
 	print $client "<H2>Output browser:</H2>\r\n" .
-		"<P><PRE>$txt</PRE></P>\r\n</BODY></HTML>\r\n";
+		"<P><PRE>$txt</PRE></P>\r\n</BODY></HTML>\r\n"
+			if $txt !~ /^$/;
 }
 
 
