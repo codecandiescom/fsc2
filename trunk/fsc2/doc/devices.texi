@@ -1555,6 +1555,10 @@ called with either a numerical argument or a string of @code{"ON"} or
 @code{"OFF"} the pulser will be started or stopped (a numerical argument
 of @code{0} stops the pulser, a non-zero argument starts it).
 
+This function can also be called during the @code{PREPARATIONS} section
+e.g.@: to keep the pulser to get started immediately at the start of
+the experiment.
+
 
 @anchor{pulser_channel_state}
 @item pulser_channel_state()
