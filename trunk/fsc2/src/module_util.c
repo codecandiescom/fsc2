@@ -334,6 +334,10 @@ FILE *fsc2_fopen( const char *path, const char *mode )
 /* permissions of fsc2                                     */
 /*---------------------------------------------------------*/
 
+#if ! defined vfscanf
+extern int vfscanf(FILE *s, const char *format, va_list arg );
+#endif
+
 int fsc2_fscanf( FILE *stream, const char *format, ... )
 {
 	va_list ap;
@@ -360,7 +364,7 @@ size_t fsc2_fread( void  *ptr, size_t size, size_t nmemb, FILE *stream )
 
 
 	raise_permissions( );
-	num = fread( ptr, size, nmenb, stream );
+	num = fread( ptr, size, nmemb, stream );
 	lower_permissions( );
 	return num;
 }
@@ -380,6 +384,7 @@ int fsc2_fprintf( FILE *stream, const char *format, ... )
 	va_start( ap, format );
 	raise_permissions( );
 	num = vfprintf( stream, format, ap );
+	fflush( stream );
 	lower_permissions( );
 	va_end( ap );
 	return num;
@@ -397,7 +402,8 @@ size_t fsc2_fwrite( void  *ptr, size_t size, size_t nmemb, FILE *stream )
 
 
 	raise_permissions( );
-	num = fwrite( ptr, size, nmenb, stream );
+	num = fwrite( ptr, size, nmemb, stream );
+	fflush( stream );
 	lower_permissions( );
 	return num;
 }
@@ -447,7 +453,7 @@ char *fsc2_fgets( char *s, int size, FILE *stream )
 
 
 	raise_permissions( );
-	num = fgets( s, size, stream );
+	p = fgets( s, size, stream );
 	lower_permissions( );
 	return p;
 }
@@ -503,6 +509,57 @@ long fsc2_ftell( FILE *stream )
 }
 
 
+/*----------------------------------------------*/
+/* Function for writing a single char to a file */
+/* with the full permissions of fsc2            */
+/*----------------------------------------------*/
+
+int fsc2_fputc( int c, FILE *stream )
+{
+	int num;
+
+
+	raise_permissions( );
+	num = fputc( c, stream );
+	lower_permissions( );
+	return num;
+}
+
+
+/*-----------------------------------------*/
+/* Function for writing a string to a file */
+/* with the full permissions of fsc2       */
+/*-----------------------------------------*/
+
+int fsc2_fputs( const char *s, FILE *stream )
+{
+	int num;
+
+
+	raise_permissions( );
+	num = fputs( s, stream );
+	lower_permissions( );
+	return num;
+}
+
+
+/*----------------------------------------------*/
+/* Function for writing a single char to a file */
+/* with the full permissions of fsc2            */
+/*----------------------------------------------*/
+
+int fsc2_putc( int c, FILE *stream )
+{
+	int num;
+
+
+	raise_permissions( );
+	num = putc( c, stream );
+	lower_permissions( );
+	return num;
+}
+
+
 /*---------------------------------------------------------------*/
 /* Function for closing a file with the full permissions of fsc2 */
 /*---------------------------------------------------------------*/
@@ -516,6 +573,15 @@ int fsc2_fclose( FILE *stream )
 	num = fclose( stream );
 	lower_permissions( );
 	return num;
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+const char *fsc2_config_dir( void )
+{
+	return ( Internals.cmdline_flags & DO_CHECK ) ? "../config" : libdir;
 }
 
 
