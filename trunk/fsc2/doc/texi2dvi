@@ -429,7 +429,9 @@ for command_line_filename in ${1+"$@"}; do
   # If clean mode was specified, then move to the temporary directory.
   if test "$clean" = t; then
     $verbose "cd $tmpdir_src"
-	cp fsc2fig*.pdf $tmpdir_src        # hack to get the figures correctly, JTT
+	for f in `ls *.png`; do           # hack to get the figures correctly, JTT
+		cp ${f%.png}.pdf $tmpdir_src;
+	done
     cd "$tmpdir_src" || exit 1
   fi
 
