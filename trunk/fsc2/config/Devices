@@ -115,6 +115,7 @@ hp5340a       // HP5340A frequency counter
 
 me6000        // ME-6000 DAC card
 hjs_daadc     // DA/AD converter from the group of H.-J. Steinhoff (Osnabrueck)
+pci_mio_16e_1 // PCI-MIO-16E-1 DAQ card by National Instruments
 
 
 // Event counter (NI6601 board)

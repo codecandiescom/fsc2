@@ -183,6 +183,18 @@ SERIAL_LOCK_DIR   := /var/lock
 # rs_spec10_libs    := libpvcam.so
 
 
+# The next two lines must be uncommented if you want support for the National
+# Instruments PCI-MIO-16E-1 card. If the library for the card isn't in a place
+# where the linker will find it automatically (e.g. '/usr/lib' and
+# '/usr/local/lib') you need to specify the full absolut path for the
+# library (e.g. '/usr/xxx/yyy/libni_daq.so'). You must make sure that the
+# library for the card is already properly installed if you want to build
+# fsc2 with support for the card.
+
+# WITH_NI_DAQ       := yes
+# ni_daq_libs       := libni_daq.so
+
+
 # Comment out the next two lines if you don't want the ability to run a HTTP
 # server that allows to monitor fsc2s current state via the Internet. The
 # default port number the HTTP server will listen on can be set by the second
@@ -289,7 +301,7 @@ CFLAGS           := $(OPTIMIZATION) \
 
 
 ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
-CFLAGS           := -DLIBC_MDEBUG       # for libc memory debugging
+CFLAGS           += -DLIBC_MDEBUG       # for libc memory debugging
 endif
 
 

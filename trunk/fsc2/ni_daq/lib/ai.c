@@ -334,7 +334,7 @@ int ni_daq_ai_acq_setup( int board, NI_DAQ_INPUT start,
 	/* Check if there was a channel setup */
 
 	if ( ni_daq_dev[ board ].ai_state.num_channels == 0 )
-		return ni_daq_errno = NI_DAQ_ERR_NSS;
+		return ni_daq_errno = NI_DAQ_ERR_NCS;
 
 	/* Basic check of arguments */
 
@@ -346,8 +346,8 @@ int ni_daq_ai_acq_setup( int board, NI_DAQ_INPUT start,
 		 ni_daq_conv_start_check( conv_start ) )
 		return ni_daq_errno = NI_DAQ_ERR_IVS;
 
-	if ( ( scan_start != NI_DAQ_INTERNAL && scan_duration <= 0.0 ) ||
-		 ( conv_start != NI_DAQ_INTERNAL && conv_duration < 0.0 ) )
+	if ( ( scan_start == NI_DAQ_INTERNAL && scan_duration <= 0.0 ) ||
+		 ( conv_start == NI_DAQ_INTERNAL && conv_duration < 0.0 ) )
 		return ni_daq_errno = NI_DAQ_ERR_IVA;
 
 	/* If necessary figure out the timings for the scan and convert
@@ -373,7 +373,7 @@ int ni_daq_ai_acq_setup( int board, NI_DAQ_INPUT start,
 		acq_args.START_source = NI_DAQ_SI_TC;
 		acq_args.SI_source = scan_start;
 		acq_args.SI_start_delay = 2;
-		acq_args.SI_stepping = scan_len - 2;
+		acq_args.SI_stepping = scan_len;
 	}
 	else
 	{
@@ -387,7 +387,7 @@ int ni_daq_ai_acq_setup( int board, NI_DAQ_INPUT start,
 		acq_args.CONVERT_source = NI_DAQ_SI2_TC;
 		acq_args.SI2_source = conv_start;
 		acq_args.SI2_start_delay = 2;
-		acq_args.SI2_stepping = conv_len - 2;
+		acq_args.SI2_stepping = conv_len;
 	}
 	else
 	{
@@ -436,7 +436,7 @@ int ni_daq_ai_start_acq( int board )
 	/* Check if there was a channel and acquisition setup */
 
 	if ( ni_daq_dev[ board ].ai_state.num_channels == 0 )
-		return ni_daq_errno = NI_DAQ_ERR_NSS;
+		return ni_daq_errno = NI_DAQ_ERR_NCS;
 
 	if ( ni_daq_dev[ board ].ai_state.num_scans == 0 )
 		return ni_daq_errno = NI_DAQ_ERR_NAS;
@@ -498,7 +498,7 @@ ssize_t ni_daq_ai_get_acq_data( int board, double *volts[ ],
 	/* Check if there was a channel and acquisition setup */
 
 	if ( ni_daq_dev[ board ].ai_state.num_channels == 0 )
-		return ni_daq_errno = NI_DAQ_ERR_NSS;
+		return ni_daq_errno = NI_DAQ_ERR_NCS;
 
 	if ( ni_daq_dev[ board ].ai_state.num_scans == 0 )
 		return ni_daq_errno = NI_DAQ_ERR_NAS;
@@ -568,8 +568,13 @@ ssize_t ni_daq_ai_get_acq_data( int board, double *volts[ ],
 		free( buf );
 		if ( errno == EINTR )
 			return ni_daq_errno = NI_DAQ_ERR_SIG;
+		else if ( errno == EAGAIN )
+			return 0;
 		else
+		{
+			fprintf( stderr, "errno = %d\n", errno );
 			return ni_daq_errno = NI_DAQ_ERR_INT;
+		}
 	}
 
 	ni_daq_errno = NI_DAQ_OK;
@@ -694,7 +699,7 @@ static int ni_daq_get_ai_timings( int board, NI_DAQ_INPUT *ss, double sd,
 	if ( *ss == NI_DAQ_INTERNAL && *cs == NI_DAQ_INTERNAL )
 		return ni_daq_get_ai_timings2( board, ss, sd, sl, cs, cd, cl );
 
-	if ( *ss != NI_DAQ_INTERNAL )
+	if ( *ss == NI_DAQ_INTERNAL )
 	{
 		src = ss;
 		dur = sd;
