@@ -1568,7 +1568,7 @@ static int T_fprintf( int file_num, const char *fmt, ... )
 	FILE *new_fp;
 	struct stat old_stat, new_stat;
 	char *buffer[ 1024 ];
-	int rw;
+	size_t rw;
 	char *mess;
 	int count;
 
@@ -1605,7 +1605,7 @@ static int T_fprintf( int file_num, const char *fmt, ... )
 
         /* If that worked, try to write out the string */
 
-        if ( n > -1 && n < size )
+        if ( n > -1 && size - n > 0 )
             break;
 
         /* Else try again with more space */
