@@ -36,8 +36,9 @@ infodir        = $(prefix)/info
 # National Instruments GPIB library) and the file for writing logs about
 # the activity on the GPIB bus. These settings are compiled into the program.
 
-GPIB_CONF      = /etc/gpib.conf
-GPIB_LOG       = /tmp/gpib.log
+GPIB_CONF_FILE = /etc/gpib.conf      # defaults to /etc/gpib.conf
+GPIB_LOG_FILE  = /tmp/gpib.log
+GPIB_LOG_LVEL  = HIGH                # set to HIGH, MEDIUM, LOW or OFF
 
 # To whom bug reports and crash messages will get send
 
@@ -90,18 +91,6 @@ endif
 # Pass variables via macros to the source files
 # For directories make sure they end with a `/'.
 
-ifdef GPIB_LOG
-    CFLAGS += -DGPIB_LOG=\"$(GPIB_LOG)\"
-else
-	CFLAGS += -DGPIB_LOG=\"/tmp/gpib.log\"
-endif
-
-ifdef GPIB_CONF
-    CFLAGS += -DGPIB_CONF=\"$(GPIB_CONF)\"
-else
-    CFLAGS += -DGPIB_CONF=\"/etc/gpib.conf\"
-endif
-
 ifdef bindir
 	CFLAGS += -Dbindir=\"$(bindir:/=)/\"
 else
@@ -124,6 +113,32 @@ ifdef docdir
 	CFLAGS += -Ddocdir=\"$(docdir:/=)/\"
 else
 	CFLAGS += -Ddocdir=\"$(shell pwd)/doc/\"
+endif
+
+ifdef GPIB_CONF_FILE
+    CFLAGS += -DGPIB_CONF_FILE=\"$(GPIB_CONF_FILE)\"
+else
+    CFLAGS += -DGPIB_CONF_FILE=\"/etc/gpib.conf\"
+endif
+
+ifdef GPIB_LOG_FILE
+    CFLAGS += -DGPIB_LOG_FILE=\"$(GPIB_LOG_FILE)\"
+end
+
+ifeq ($(GPIB_LOG_LEVEL),HIGH)
+	CFLAGS += -DGPIB_LOG_LEVEL=LL_ALL
+endif
+
+ifeq ($(GPIB_LOG_LEVEL),MEDIUM)
+	CFLAGS += -DGPIB_LOG_LEVEL=LL_CE
+endif
+
+ifeq ($(GPIB_LOG_LEVEL),LOW)
+	CFLAGS += -DGPIB_LOG_LEVEL=LL_ERR
+endif
+
+ifeq ($(GPIB_LOG_LEVEL),OFF)
+	CFLAGS += -DGPIB_LOG_LEVEL=LL_NONE
 endif
 
 ifdef MAIL_ADDRESS

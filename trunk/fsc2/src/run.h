@@ -27,6 +27,17 @@
 
 #include "fsc2.h"
 
+
+/* Settings for GPIB logging */
+
+#if ! defined ( GPIB_LOG_FILE )
+#define GPIB_LOG_FILE NULL
+#end
+
+#if ! defined ( GPIB_LOG_LEVEL )
+#define GPIB_LOG_LEVEL LL_ERR
+#end
+
 /* Signals sent by the parent and accepted by the child */
 
 #define DO_QUIT   SIGUSR2

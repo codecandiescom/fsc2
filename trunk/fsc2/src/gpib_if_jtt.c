@@ -258,29 +258,35 @@ static void gpib_init_log( char *log_file_name )
     if ( ll == LL_NONE )
         return;
 
-    if ( log_file_name != NULL && *log_file_name != '\0' )
-        name = log_file_name;
-    else
-        name = GPIB_LOG_FILE;
-
-	seteuid( EUID );
-
-	access_ok = access( name, W_OK ) == 0 ? SET : UNSET;
-
-	if ( ! access_ok && errno == ENOENT )        /* file doesn't exist yet ? */
-		set_perms = SET;
-
-    if ( ( gpib_log = fopen( name, "w" ) ) == NULL )        /* open fails ? */
-    {
+    if ( log_file_name == NULL || *log_file_name == '\0' )
+	{
         gpib_log = stderr;
-        fprintf( stderr, "Can't open log file %s - using stderr instead.\n",
-                 name );
-    }
-	else if ( set_perms )      /* if file is new set its permissions to 0666 */
-		chmod( name,
-			   S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH );
+		fprintf( stderr, "GPIB log file not specified, using stderr "
+				 "instead\n" );
+	}
+	else
+	{
+        name = log_file_name;
 
-	seteuid( getuid( ) );
+		seteuid( EUID );
+
+		access_ok = access( name, W_OK ) == 0 ? SET : UNSET;
+
+		if ( ! access_ok && errno == ENOENT )    /* file doesn't exist yet ? */
+			set_perms = SET;
+
+		if ( ( gpib_log = fopen( name, "w" ) ) == NULL )     /* open fails ? */
+		{
+			gpib_log = stderr;
+			fprintf( stderr, "Can't open log file %s, using stderr instead.\n",
+					 name );
+		}
+		else if ( set_perms )  /* if file is new set its permissions to 0666 */
+			chmod( name,
+				   S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH );
+
+		seteuid( getuid( ) );
+	}
 
     gpib_log_date( );
 
