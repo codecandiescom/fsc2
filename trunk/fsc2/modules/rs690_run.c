@@ -514,7 +514,7 @@ void rs690_full_reset( void )
 			if ( ch->num_pulses == 0 )
 				continue;
 
-			ch->num_active_pulses = ! ch->num_active_pulses;
+			ch->num_active_pulses = 0;
 		}
 	}
 }
