@@ -11,6 +11,9 @@
 
 #define DEVICE_NAME "SR810"
 
+#define NUM_ADC_PORTS 4
+#define NUM_DAC_PORTS 4
+
 
 /* declaration of exported functions */
 
@@ -41,21 +44,19 @@ typedef struct
 
 static SR810 sr810;
 
-/* lists of valid sensitivity and time constant settings (the last three
-   entries in the sensitivity list are only usable when the EXPAND button
-   is switched on!) */
+/* lists of valid sensitivity settings */
 
-static double slist[ ] = { 5.0e-1, 2.0e-1, 1.0e-1, 5.0e-2, 2.0e-2,
-						   1.0e-2, 5.0e-3, 2.0e-3, 1.0e-3, 5.0e-4,
-						   2.0e-4, 1.0e-4, 5.0e-5, 2.0e-5, 1.0e-5,
-						   5.0e-6, 2.0e-6, 1.0e-6, 5.0e-7, 2.0e-7,
-						   1.0e-7, 5.0e-8, 2.0e-8, 1.0e-8 };
+static double slist[ ] = { 2.0e-9, 5.0e-9, 1.0e-8, 2.0e-8, 5.0e-8, 1.0e-7,
+						   2.0e-7, 5.0e-7, 1.0e-6, 2.0e-6, 5.0e-6, 1.0e-5,
+						   2.0e-5, 5.0e-5, 1.0e-4, 2.0e-4, 5.0e-4, 1.0e-3,
+						   2.0e-3, 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2, 1.0e-1,
+						   2.0e-1, 5.0e-1, 1.0 };
 
 /* list of all available time constants */
 
-static double tcs[ ] = { 1.0e-3, 3.0e-3, 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1,
-						 1.0, 3.0, 10.0, 30.0, 100.0 };
-
+static double tcs[ ] = { 1.0e-5, 3.0e-5, 1.0e-4, 3.0e-4, 1.0e-3, 3.0e-3,
+						 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1, 1.0, 3.0, 1.0e1,
+						 3.0e1, 1.0e2, 3.0e2, 1.0e3, 3.0e3, 1.0e4, 3.0e4 };
 
 /* declaration of all functions used only in this file */
 
@@ -129,10 +130,7 @@ int sr810_end_of_exp_hook( void )
 	/* Switch lock-in back to local mode */
 
 	if ( sr810.device >= 0 )
-	{
-		gpib_write( sr810.device, "I0\n", 3 );
 		gpib_local( sr810.device );
-	}
 
 	sr810.device = -1;
 
@@ -202,11 +200,11 @@ Var *lockin_get_adc_data( Var *v )
 		port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
 		vars_pop( v );
 
-		if ( port < 1 || port > 4 )
+		if ( port < 1 || port > NUM_ADC_PORTS )
 		{
 			eprint( FATAL, "sr810: Invalid ADC channel number (%ld) in call "
 					"of 'lockin_get_adc_data', valid channel are in the "
-					"range 1-4.", port );
+					"range 1-%d.", port, NUM_ADC_PORTS );
 			THROW( EXCEPTION );
 		}
 
@@ -235,11 +233,11 @@ Var *lockin_get_adc_data( Var *v )
 	{
 		port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
 
-		if ( port < 1 || port > 4 )
+		if ( port < 1 || port > NUM_ADC_PORTS )
 		{
 			eprint( FATAL, "sr810: Invalid ADC channel number (%ld) in "
 					"call of 'lockin_get_adc_data', valid channel are in "
-					"the range 1-4.", port );
+					"the range 1-%d.", port, NUM_ADC_PORTS );
 			T_free( voltages );
 			THROW( EXCEPTION );
 		}
@@ -267,8 +265,7 @@ Var *lockin_get_adc_data( Var *v )
 /*-------------------------------------------------------------------------*/
 /* Returns or sets sensitivity of the lock-in amplifier. If called with no */
 /* argument the current sensitivity is returned, otherwise the sensitivity */
-/* is set to the argument. By using the EXPAND button the sensitivity can  */
-/* be increased by a factor of 10.                                         */
+/* is set to the argument.                                                 */
 /*-------------------------------------------------------------------------*/
 
 Var *lockin_sensitivity( Var *v )
@@ -561,15 +558,17 @@ bool lockin_init( const char *name )
 	if ( gpib_init_device( name, &sr810.device ) == FAILURE )
         return FAIL;
 
-	/* Ask lock-in to send status byte and test if it does */
+	/* Tell the loc-in to use the GPIB bus for its outputs and make sure
+	   the keyboard is locked */
 
-	if ( gpib_write( sr810.device, "Y\n", 2 ) == FAILURE ||
-		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
+	if ( gpib_write( sr810.device, "OUTX 1", 6 ) == FAILURE ||
+		 gpib_write( sr810.device, "OVRM 0", 6 ) == FAILURE )
 		return FAIL;
+	   
+	/* Ask lock-in to send the error status byte and test if it does */
 
-	/* Lock the keyboard */
-
-	if ( gpib_write( sr810.device, "I1\n", 3 ) == FAILURE )
+	if ( gpib_write( sr810.device, "ERRS?", 5 ) == FAILURE ||
+		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 		return FAIL;
 
 	/* If sensitivity, time constant or phase were set in one of the
@@ -604,7 +603,7 @@ double sr810_get_data( void )
 		THROW( EXCEPTION );
 	}
 
-	buffer[ length - 2 ] = '\0';
+	buffer[ length - 1 ] = '\0';
 	return T_atof( buffer );
 }
 
@@ -617,20 +616,20 @@ double sr810_get_data( void )
 
 double sr810_get_adc_data( long channel )
 {
-	char buffer[ 16 ] = "X*\n";
+	char buffer[ 16 ] = "OAUX? *";
 	long length = 16;
 
 
-	buffer[ 1 ] = ( char ) channel + '0';
+	buffer[ 6 ] = ( char ) channel + '0';
 
-	if ( gpib_write( sr810.device, buffer, 3 ) == FAILURE ||
+	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
 		THROW( EXCEPTION );
 	}
 
-	buffer[ length - 2 ] = '\0';
+	buffer[ length - 1 ] = '\0';
 	return T_atof( buffer );
 }
 
@@ -641,35 +640,21 @@ double sr810_get_adc_data( long channel )
 
 double sr810_get_sens( void )
 {
-	char buffer[ 10 ];
-	long length = 10;
+	char buffer[ 20 ];
+	long length = 20;
 	double sens;
 
 	/* Ask lock-in for the sensitivity setting */
 
-	if ( gpib_write( sr810.device, "G\n", 2 ) == FAILURE ||
+	if ( gpib_write( sr810.device, "SENS?", 5 ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
 		THROW( EXCEPTION );
 	}
 
-	buffer[ length - 2 ] = '\0';
-	sens = slist[ 24 - atoi( buffer ) ];
-
-    /* Check if EXPAND is switched on - this increases the sensitivity 
-	   by a factor of 10 */
-
-	length = 10;
-	if ( gpib_write( sr810.device, "E\n", 2 ) == FAILURE ||
-		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
-	{
-		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
-		THROW( EXCEPTION );
-	}
-
-	if ( buffer[ 0 ] == '1' )
-		sens *= 0.1;
+	buffer[ length - 1 ] = '\0';
+	sens = slist[ T_atol( buffer ) ];
 
 	return sens;
 }
@@ -735,19 +720,19 @@ void sr810_set_sens( int Sens )
 
 double sr810_get_tc( void )
 {
-	char buffer[10];
+	char buffer[ 10 ];
 	long length = 10;
 
 
-	if ( gpib_write( sr810.device, "T1\n", 3 ) == FAILURE ||
+	if ( gpib_write( sr810.device, "OFLT?", 5 ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
 		THROW( EXCEPTION );
 	}
 
-	buffer[ length - 2 ] = '\0';
-	return tcs[ atoi( buffer ) - 1 ];
+	buffer[ length - 1 ] = '\0';
+	return tcs[ T_atol( buffer ) ];
 }
 
 
@@ -760,7 +745,7 @@ double sr810_get_tc( void )
 
 void sr810_set_tc( int TC )
 {
-	char buffer[10];
+	char buffer[ 10 ];
 
 
 	sprintf( buffer, "T1,%d\n", TC );
@@ -808,16 +793,14 @@ double sr810_get_phase( void )
 	double phase;
 
 
-	if ( gpib_write( sr810.device, "P\n", 2L ) == FAILURE ||
+	if ( gpib_write( sr810.device, "PHAS?\n", 5L ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
 		THROW( EXCEPTION );
 	}
 
-	buffer[ length - 2 ] = '\0';
-fprintf( stderr, "Phase = %s\n", buffer );
-
+	buffer[ length - 1 ] = '\0';
 	phase = T_atof( buffer );
 
 	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
@@ -841,10 +824,10 @@ fprintf( stderr, "Phase = %s\n", buffer );
 
 double sr810_set_phase( double phase )
 {
-	char buffer[20];
+	char buffer[ 20 ];
 
 
-	sprintf( buffer, "P%.2f\n", phase );
+	sprintf( buffer, "PHAS %.2f\n", phase );
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
 		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
