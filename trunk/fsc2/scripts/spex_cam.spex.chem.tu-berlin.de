@@ -2803,9 +2803,13 @@ our ( $laser_line,             # position of laser line (abs. cm^-1)
 	                           # unsymmetric ROI (abs. cm^-1)
 	  $exp_time,               # exposure time
 	  $N_scans,                # number of repetitions of experiment
-	  @units );
+	  @units,
+	  $Dead_Points );          # How many points from the camera to throw away
+							   # (independent of the ROI settings!)
 
 sub run {
+	$Dead_Points = 5;
+
 	my ( $top, $geom, $ccd_w );
 	( $top, $start_wn, $end_wn, $overlap, $exp_time, $N_scans, $geom ) = @_;
 	( $laser_line, $ROI[ 0 ], $ROI[ 1 ], $ROI[ 2 ], $ROI[ 3 ], $BIN[ 0 ],
@@ -2830,6 +2834,12 @@ sub run {
 		 ( $ROI[ 3 ] - $ROI[ 1 ] + 1 ) % $BIN[ 1 ] != 0 ) {
 		main::show_message( "Please set ROI and binning parameters first." );
 		return;
+	}
+
+	if ( $Dead_Points % $BIN[ 0 ] ) {
+		$ROI[ 0 ] += ( int( $Dead_Points / $BIN[ 0 ] ) + 1 ) * $BIN[ 0 ];
+	} else {
+		$ROI[0 ] += $Dead_Points;
 	}
 
 	$wn_width = ( $ROI[ 2 ] - $ROI[ 0 ] + 1 ) * $pixel_diff;
@@ -3214,6 +3224,8 @@ cwn = 0.5 * ( start_wn + end_wn );     // center of spectrum
 ccd_start_wn;                          // start of CCD recorded spectrum
 step_wn;                               // wavenumber spacing between points
 N_Points;                              // points of spectrum
+Dead_Points = $Dead_Points;            // how many points at the start of the
+                                       // spectrum to throw away
 CCD_Points;                            // points of CCD recorded spectrum
 Start_Point;                           // start point of spectrum in spectrum
                                        // recorded by CCD
@@ -3247,6 +3259,7 @@ CCD_size = ccd_camera_pixel_area( );
 ROI = ccd_camera_roi( );
 Bin = ccd_camera_binning( );
 
+ROI[ 1 ] += Dead_Points;
 CCD_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / Bin[ 1 ];
 step_wn = calib[ 2 ] * Bin[ 1 ];
 
@@ -3472,6 +3485,8 @@ N_Points;                              // total number of points of spectrum
 Overlap_Points;                        // number of points of overlap region
 Start_Point;                           // start point of spectrum in spectrum
                                        // recorded by CCD
+Dead_Points = $Dead_Points;            // how many points at the start of the
+                                       // spectrum to throw away
 laser_line;                            // position of laser line
 cwn_offset;                            // offset to monochromator center wave-
                                        // number to adjust for off-center ROI
@@ -3506,6 +3521,7 @@ CCD_size = ccd_camera_pixel_area( );
 ROI = ccd_camera_roi( );
 Bin = ccd_camera_binning( );
 
+ROI[ 1 ] += Dead_Points;
 CCD_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / Bin[ 1 ];
 step_wn = calib[ 2 ] * Bin[ 1 ];
 
@@ -3609,7 +3625,7 @@ FOR I = 1 : N_scans {
 		// Reposition monochromator and get a spectrum from the CCD camera
 
 		monochromator_wavenumber( cur_cwn );
-		spec = ccd_camera_get_spectrum( );
+		spec = slice( ccd_camera_get_spectrum( ), Dead_Points + 1 );
 
 		// Write raw spectral data to file
 
