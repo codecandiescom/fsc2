@@ -1,3 +1,5 @@
+@c $Id$
+
 @node Modules, , Functions, Top
 @chapter Modules
 @cindex modules
