@@ -98,19 +98,19 @@ time. This may take some time. See below on how to reduce this time.
 @findex magnet_setup()
 The function can be called to set the start field and the field step
 size used in sweeps. The function expects two floating point parameters,
-i.e.@: the start field, e.g.@: @w{0.345 T}, and the step size, e.g.@:
-@w{0.35 G}. The function can be called before the @code{EXPERIMENT}
-section starts.
+the start field, e.g.@: @w{0.345 T}, and the step size, e.g.@: @w{0.35
+G}. The function can be called before the @code{EXPERIMENT} section
+starts.
 
 @item magnet_fast_init()
 @findex magnet_fast_init()
 Calling this functions in the @code{PREPARATIONS} section will shorten
-the time @acronym{fsc2} uses for calibration of the field sweep at the
-start of the experiment. Unfortunately, this also reduces the precision
-of the field sweep. Whenever an experiment is restarted (i.e.@: if no
-new @acronym{EDL} file is loaded in between) this shortened calibration
-is done to check that the parameters didn't check significantly since
-the last run.
+the time used for the calibration of the field sweep at the start of the
+experiment. Unfortunately, this also reduces the precision of the field
+sweep. Whenever an experiment is restarted (i.e.@: if no new
+@acronym{EDL} file is loaded in between) this shortened calibration is
+done anyways to check that the parameters didn't check significantly
+since the last run.
 
 
 @item set_field()
@@ -118,32 +118,40 @@ the last run.
 This function expects one floating point argument for the field value
 and will set the magnetic field to this value. It also accepts a second
 optional paramter, the maximum acceptable deviation of the field from
-the value to be set. If this second paramter is missing the precision of
-the gaussmeter used for measuring the field is used. If the maximum
-deviation is smaller than the precision of the gaussmeter the precision
-of the gaussmeter is used. The function can only be called in the
+the value to be set. For example by the call
+@example
+set_field( 3421.5 G, 0.2 G );
+@end example
+@noindent
+the field will be set to a value between @w{3421.3 G} and @w{3421.7 G}.
+
+If this second paramter is missing the precision of the gaussmeter used
+for measuring the field is used. If the maximum deviation paramter is
+smaller than the precision of the gaussmeter the precision of the
+gaussmeter is used instead. The function can only be called in the
 @code{EXPERIMENT} section.
+
 
 @item sweep_up()
 @findex sweep_up()
 The function can be called in the @code{EXPERIMENT} section, but only if
 the function @code{magnet_setup()} (see above) has been called
-previously. It doesn't take an argument and will sweep up the magnet by
+before. It doesn't take an argument and will sweep up the magnet by
 the field step size value set in the @code{magnet_setup()} function.
 
 The precision of the field sweep depends on the step size. While the
 precision is usually quite good for step sizes of up to @w{1 G}, for much
 larger step sizes it may deteriorate quite significantly. It sometimes
-helps to add a short wait period (use function @code{wait()} after a
-sweep step) to allow the field to settle at the new point. On the other
+helps to add a short wait period (use function @code{wait()}) after a
+sweep step to allow the field to settle at the new point. On the other
 hand, it then might be faster (and more reliable) not to use the sweep
 function at all but @code{set_field()} instead.
 
 @item sweep_down()
 @findex sweep_down()
-Analog to @code{sweep_up()} but sweeping the magnetic field down by the
-field step size defined in @code{magnet_setup()}. The function can only
-be called in the @code{EXPERIMENT} section.
+Analog function to @code{sweep_up()} but sweeping the magnetic field
+down by the field step size defined in @code{magnet_setup()}. The
+function can only be called in the @code{EXPERIMENT} section.
 
 @item reset_field()
 @findex reset_field()
