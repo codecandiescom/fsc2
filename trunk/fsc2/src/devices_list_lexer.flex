@@ -162,9 +162,7 @@ bool device_list_parse( void )
 
 	Lc = 1;
 	Eol = SET;
-/*
-	eprint( NO_ERROR, "Parsing device name data base `%s'.", Fname );
-*/
+
 	TRY
 	{
 		while ( devices_listlex( ) )
