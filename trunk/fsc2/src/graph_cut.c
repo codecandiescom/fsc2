@@ -310,36 +310,40 @@ static void cut_calc_curve( int dir, long index, bool has_been_shown )
 
 
 /*----------------------------------------------------------*/
+/* The function calculates the points to be displayed (XPoints) */
+/* from the scaled points  */
 /*----------------------------------------------------------*/
 
 static void cut_recalc_XPoints( void )
 {
 	long k, j;
 	Curve_1d *cv = &G.cut_curve;
+	Scaled_Point *sp = cv->points;
+	XPoint *xp = cv->xpoints;
 
 
 	cv->up = cv->down = cv->left = cv->right = UNSET;
 
-	for ( k = j = 0; j < CG.nx; j++ )
+	for ( k = j = 0; j < CG.nx; sp++, j++ )
 	{
-		if ( ! cv->points[ j ].exist )
+		if ( ! sp->exist )
 			continue;
 
-		cv->xpoints[ k ].x = d2shrt( cv->s2d[ X ]
-									 * ( j + cv->shift[ X ] ) );
-		cv->xpoints[ k ].y = ( short ) G.cut_canvas.h - 1 - 
-			d2shrt( cv->s2d[ Y ] * ( cv->points[ j ].v + cv->shift[ Y ] ) );
-		cv->points[ j ].xp_ref = k;
+		xp->x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
+		xp->y = d2shrt( ( double ) G.cut_canvas.h - 1.0 - cv->s2d[ Y ]
+						* ( cv->points[ j ].v + cv->shift[ Y ] ) );
+		sp->xp_ref = k;
 
-		if ( cv->xpoints[ k ].x < 0 )
+		if ( xp->x < 0 )
 			cv->left = SET;
-		if ( cv->xpoints[ k ].x >= ( int ) G.cut_canvas.w )
+		if ( xp->x >= ( int ) G.cut_canvas.w )
 			cv->right = SET;
-		if ( cv->xpoints[ k ].y < 0 )
+		if ( xp->y < 0 )
 			cv->up = SET;
-		if ( cv->xpoints[ k ].y >= ( int ) G.cut_canvas.h )
+		if ( xp->y >= ( int ) G.cut_canvas.h )
 			cv->down = SET;
 
+		xp++;
 		k++;
 	}
 
@@ -2199,11 +2203,11 @@ static void cut_make_scale( Canvas *c, int coord )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* This is basically a simplified version of `recalc_XPoints_of_curve()' */
-/* because we need to do much less calculations, i.e. just adding an     */
-/* offset to all XPoints instead of going through all the scalings...    */
-/*-----------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* This is basically a simplified version of `cut_recalc_XPoints()'  */
+/* because we need to do much less calculations, i.e. just adding an */
+/* offset to all XPoints instead of going through all the scalings...*/
+/*-------------------------------------------------------------------*/
 
 static void shift_XPoints_of_cut_curve( Canvas *c )
 {
@@ -2281,6 +2285,7 @@ static bool cut_change_x_range( Canvas *c )
 		                   ( double ) ( G.cut_canvas.w - 1 ) / fabs( x1 - x2 );
 	return SET;
 }
+
 
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
