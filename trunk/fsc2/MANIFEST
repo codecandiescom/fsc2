@@ -122,6 +122,7 @@ config/tds754a.conf
 config/thurlby330.conf
 config/User_Functions.conf
 config/witio_48.conf
+config/xx
 
 doc/ack.texi
 doc/background.gif
@@ -154,7 +155,6 @@ doc/help.png
 doc/home.png
 doc/http.texi
 doc/inactive.png
-doc/index.html
 doc/index.png
 doc/internals.texi
 doc/Makefile
