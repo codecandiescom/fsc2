@@ -122,7 +122,7 @@ $T2H_OPTIONS -> {debug} =
  verbose => 'output HTML with debuging information',
 };
 
-$T2H_DOCTYPE = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">';
+$T2H_DOCTYPE = '<!doctype html public "-//w3c//dtd html 4.01 Transitional//en">';
 $T2H_OPTIONS -> {doctype} =
 {
  type => '=s',
@@ -678,7 +678,7 @@ sub T2H_DEFAULT_print_section
   }
 #  else
 #  {
-#    print $fh '<HR SIZE="6">' . "\n";
+#    print $fh '<hr size="6">' . "\n";
 #  }
 }
 
@@ -718,7 +718,7 @@ sub T2H_DEFAULT_print_Top
   if ($T2H_THIS_SECTION)
   {
     # if top-level node has content, then print it with extra header
-    print $fh "<H1>$T2H_NAME{Top}</H1>"
+    print $fh "<h1>$T2H_NAME{Top}</h1>"
       unless ($T2H_HAS_TOP_HEADING);
     t2h_print_lines($fh, $T2H_THIS_SECTION)
   }
@@ -728,20 +728,20 @@ sub T2H_DEFAULT_print_Top
     # print fulltitle, subtitle, author, Overview
 
     print $fh 
-      "<CENTER>\n<H1>" .
-      join("</H1>\n<H1>", split(/\n/,  $T2H_THISDOC{fulltitle})) .
-      "</H1>\n";
-    print $fh "<H2>$T2H_THISDOC{subtitle}</H2>\n" if $T2H_THISDOC{subtitle};
+      "<CENTER>\n<h1>" .
+      join("</h1>\n<h1>", split(/\n/,  $T2H_THISDOC{fulltitle})) .
+      "</h1>\n";
+    print $fh "<h2>$T2H_THISDOC{subtitle}</h2>\n" if $T2H_THISDOC{subtitle};
     print $fh "$T2H_THISDOC{author}\n" if $T2H_THISDOC{author};
     print $fh <<EOT;
 </CENTER>
-<HR>
-<P></P>
-<H2> Overview: </H2>
-<BLOCKQUOTE>
+<hr>
+<p></p>
+<h2> Overview: </h2>
+<blockquote>
 EOT
     t2h_print_lines($fh, $T2H_OVERVIEW);
-    print $fh "</BLOCKQUOTE>\n";
+    print $fh "</blockquote>\n";
   }
   &$T2H_print_Top_footer($fh);
 }
@@ -791,7 +791,7 @@ sub T2H_DEFAULT_print_misc
   my $fh = shift;
   local $T2H_BUTTONS = \@T2H_MISC_BUTTONS;
   &$T2H_print_misc_header($fh);
-  print $fh "<H1>$T2H_NAME{This}</H1>\n";
+  print $fh "<h1>$T2H_NAME{This}</h1>\n";
   t2h_print_lines($fh);
   &$T2H_print_misc_footer($fh);
 }
@@ -820,7 +820,7 @@ sub T2H_DEFAULT_print_chapter_header
     my $fh = shift;
     local $T2H_BUTTONS = \@T2H_CHAPTER_BUTTONS;
     &$T2H_print_navigation($fh);
-    print $fh "\n<HR SIZE=2>\n";
+    print $fh "\n<hr size=2>\n";
   }
 }
 
@@ -835,7 +835,7 @@ sub T2H_DEFAULT_print_chapter_footer
 #
 # Set the default body text, inserted between <BODY ... >
 
-$T2H_BODYTEXT = 'LANG="EN" BGCOLOR="#FFFFFF" TEXT="#000000" LINK="#0000FF" VLINK="#800080" ALINK="#FF0000"';
+$T2H_BODYTEXT = 'lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000"';
 
 # text inserted after <BODY ...>
 
@@ -847,10 +847,10 @@ $T2H_PRE_BODY_CLOSE = '';
 
 # this is used in footer
 
-$T2H_ADDRESS = "by <I>$T2H_USER</I> " if $T2H_USER;
-$T2H_ADDRESS .= "on <I>$T2H_TODAY</I>";
+$T2H_ADDRESS = "by <i>$T2H_USER</i> " if $T2H_USER;
+$T2H_ADDRESS .= "on <i>$T2H_TODAY</i>";
 
-# this is added inside <HEAD></HEAD> after <TITLE> and some META NAME stuff
+# this is added inside <head></head> after <tilte> and some META NAME stuff
 # can be used for <style> <script>, <meta> tags
 
 $T2H_EXTRA_HEAD = '';
@@ -860,21 +860,21 @@ sub T2H_DEFAULT_print_page_head
   my $fh = shift; 
   my $longtitle = "$T2H_THISDOC{title}: $T2H_NAME{This}";
   print $fh <<EOT;
-<HTML>
 $T2H_DOCTYPE
 <!-- Created on $T2H_TODAY by $THISPROG -->
-<HEAD>
-<TITLE>$longtitle</TITLE>
-<META NAME="description" CONTENT="$longtitle">
-<META NAME="keywords" CONTENT="$longtitle">
-<META NAME="resource-type" CONTENT="document">
-<META NAME="distribution" CONTENT="global">
-<META NAME="Generator" CONTENT="$THISPROG">
+<html>
+<head>
+<title>$longtitle</title>
+<meta name="description" content="$longtitle">
+<meta name="keywords" content="$longtitle">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="$THISPROG">
 $T2H_EXTRA_HEAD
 <link rel=stylesheet type="text/css" href="fsc2.css">
-</HEAD>
+</head>
 
-<BODY $T2H_BODYTEXT>
+<body $T2H_BODYTEXT>
 $T2H_AFTER_BODY_OPEN
 EOT
 }
@@ -883,14 +883,18 @@ sub T2H_DEFAULT_print_page_foot
 {
   my $fh = shift;
   print $fh <<EOT;
-<BR>  
-<FONT SIZE="-1">
+<br>  
+<font size="-1">
 This document was generated
 $T2H_ADDRESS
-using <A HREF="$T2H_HOMEPAGE"><I>texi2html</I></A>
+using <a href="$T2H_HOMEPAGE"><i>texi2html</i></a>
 $T2H_PRE_BODY_CLOSE
-</BODY>
-</HTML>
+EOT
+  print_valid( $fh );
+  print $fh <<EOT;
+</font>
+</body>
+</html>
 EOT
 }
 
@@ -906,22 +910,22 @@ sub T2H_DEFAULT_print_head_navigation
   if ($T2H_VERTICAL_HEAD_NAVIGATION)
   {
     print $fh <<EOT;
-<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0">
-<TR VALIGN="TOP">
-<TD ALIGN="LEFT">
+<table border="0" cellpadding="0" cellspacing="0">
+<tr valign="top">
+<td align="left">
 EOT
   }
   &$T2H_print_navigation($fh, $T2H_VERTICAL_HEAD_NAVIGATION);
   if ($T2H_VERTICAL_HEAD_NAVIGATION)
   {
     print $fh <<EOT;
-</TD>
-<TD ALIGN="LEFT">
+</td>
+<td align="left">
 EOT
   }
   elsif ($T2H_SPLIT eq 'section')
   {
-    print $fh "<HR SIZE=1>\n";
+    print $fh "<hr size=1>\n";
   }
 }
 
@@ -938,12 +942,12 @@ sub T2H_DEFAULT_print_foot_navigation
   if ($T2H_VERTICAL_HEAD_NAVIGATION)
   {
     print $fh <<EOT;
-</TD>
-</TR>
-</TABLE>
+</td>
+</tr>
+</table>
 EOT
   }
-  print $fh "<HR SIZE=1>\n";
+  print $fh "<hr size=1>\n";
   &$T2H_print_navigation($fh) if ($nwords >= $T2H_WORDS_IN_PAGE)
 }
 
@@ -1012,7 +1016,7 @@ sub T2H_DEFAULT_button_icon_img
   my $button = shift;
   my $icon = shift;
   my $name = shift;
-  return qq{<IMG SRC="$icon" BORDER="0" ALT="$button: $name" ALIGN="MIDDLE">};
+  return qq{<img src="$icon" border="0" alt="$button: $name" align="middle">};
 }
 
 # Names of text as alternative for icons
@@ -1041,14 +1045,14 @@ sub T2H_DEFAULT_print_navigation
 	my $fh = shift;
 	my $vertical = shift;
 
-	print $fh "<TABLE class=navi>\n";
+	print $fh "<table class=navi>\n";
 
-	print $fh "<TR>" unless $vertical;
+	print $fh "<tr>" unless $vertical;
 	for $button (@$T2H_BUTTONS) {
-		print $fh qq{<TR VALIGN="TOP" ALIGN="LEFT">\n} if $vertical;
-		print $fh qq{<TD VALIGN="MIDDLE" ALIGN="LEFT">};
+		print $fh qq{<tr valign="top" align="left">\n} if $vertical;
+		print $fh qq{<td valign="middle" align="left">};
 
-		if (ref($button) eq 'CODE') {
+		if (ref($button) eq 'code') {
 			&$button($fh, $vertical);
 		} elsif ($button eq ' ') { # handle space button
 			print $fh
@@ -1075,12 +1079,12 @@ sub T2H_DEFAULT_print_navigation
 									 "[" . $T2H_NAVIGATION_TEXT{$button} . "]";
 		}
 
-		print $fh "</TD>\n";
-		print $fh "</TR>\n" if $vertical;
+		print $fh "</td>\n";
+		print $fh "</tr>\n" if $vertical;
 	}
 
-	print $fh "</TR>" unless $vertical;
-	print $fh "</TABLE>\n";
+	print $fh "</tr>" unless $vertical;
+	print $fh "</table>\n";
 }
 
 ######################################################################
@@ -1091,13 +1095,13 @@ sub T2H_DEFAULT_print_frame
 {
   my $fh = shift;
   print $fh <<EOT;
-<HTML>
-<HEAD><TITLE>$T2H_THISDOC{title}</TITLE></HEAD>
-<FRAMESET cols="140,*">
-  <FRAME name=toc  src="$docu_toc_frame_file">
-  <FRAME name=main src="$docu_doc">
-</FRAMESET> 
-</HTML>
+<html>
+<head><title>$T2H_THISDOC{title}</title></head>
+<frameset cols="140,*">
+  <frame name=toc  src="$docu_toc_frame_file">
+  <frame name=main src="$docu_doc">
+</frameset> 
+</html>
 EOT
 }
 
@@ -1106,10 +1110,10 @@ sub T2H_DEFAULT_print_toc_frame
   my $fh = shift;
   &$T2H_print_page_head($fh);
   print $fh <<EOT;
-<H2>Content</H2>
+<h2>Content</h2>
 EOT
-  print $fh map {s/HREF=/target=\"main\" HREF=/; $_;} @stoc_lines;
-  print $fh "</BODY></HTML>\n";
+  print $fh map {s/href=/target=\"main\" href=/; $_;} @stoc_lines;
+  print $fh "</body></html>\n";
 }
 
 ######################################################################
@@ -1120,15 +1124,15 @@ EOT
 
 $T2H_PRE_ABOUT = <<EOT;
 This document was generated $T2H_ADDRESS
-using <A HREF="$T2H_HOMEPAGE"><I>texi2html</I></A>
-<P></P>
+using <a href="$T2H_HOMEPAGE"><i>texi2html</i></a>
+<p></p>
 EOT
 $T2H_AFTER_ABOUT = '';
 
 sub T2H_DEFAULT_about_body
 {
   my $about;
-  if (ref($T2H_PRE_ABOUT) eq 'CODE')
+  if (ref($T2H_PRE_ABOUT) eq 'code')
   {
     $about = &$T2H_PRE_ABOUT();
   }
@@ -1138,70 +1142,70 @@ sub T2H_DEFAULT_about_body
   }
   $about .= <<EOT;
 The buttons in the navigation panels have the following meaning:
-<P></P>
+<p></p>
 <table border = "1">
-<TR>
-<TH> Button </TH>
-<TH> Name </TH>
-<TH> Go to </TH>
-<TH> From 1.2.3 go to</TH>
-</TR>
+<tr>
+<th> Button </th>
+<th> Name </th>
+<th> Go to </th>
+<th> From 1.2.3 go to</th>
+</tr>
 EOT
 
   for $button (@T2H_SECTION_BUTTONS)
   {
-    next if $button eq ' ' || ref($button) eq 'CODE';
+    next if $button eq ' ' || ref($button) eq 'code';
     $about .= <<EOT;
-<TR>
-<TD ALIGN="CENTER">
+<tr>
+<td align="center">
 EOT
     $about .=
       ($T2H_ICONS && $T2H_ACTIVE_ICONS{$button} ?
        &$T2H_button_icon_img($button, $T2H_ACTIVE_ICONS{$button}) :
        " [" . $T2H_NAVIGATION_TEXT{$button} . "] ");
     $about .= <<EOT;
-</TD>
-<TD ALIGN="CENTER">
+</td>
+<td align="center">
 $button
-</TD>
-<TD>
+</td>
+<td>
 $T2H_BUTTONS_GOTO{$button}
-</TD>
-<TD>
+</td>
+<td>
 $T2H_BUTTONS_EXAMPLE{$button}
-</TD>
-</TR>
+</td>
+</tr>
 EOT
   }
 
   $about .= <<EOT;
-</TABLE>
-<P></P>
-where the <STRONG> Example </STRONG> assumes that the current position
-is at <STRONG> Subsubsection One-Two-Three </STRONG> of a document of
+</table>
+<p></p>
+where the <strong> Example </strong> assumes that the current position
+is at <strong> Subsubsection One-Two-Three </strong> of a document of
 the following structure:
-<UL>
-<LI> 1. Section One  </LI>
-<UL>
-<LI>1.1 Subsection One-One</LI>
-<UL>
-<LI> ... </LI>
-</UL>
-<LI>1.2 Subsection One-Two</LI>
-<UL>
-<LI>1.2.1 Subsubsection One-Two-One
-</LI><LI>1.2.2 Subsubsection One-Two-Two
-</LI><LI>1.2.3 Subsubsection One-Two-Three &nbsp; &nbsp; <STRONG>
-&lt;== Current Position </STRONG>
-</LI><LI>1.2.4 Subsubsection One-Two-Four
-</LI></UL>
-<LI>1.3 Subsection One-Three</LI>
-<UL>
-<LI> ... </LI>
-</UL>
-<LI>1.4 Subsection One-Four</LI>
-</UL>
-</UL>
+<ul>
+<li> 1. Section One  </li>
+<ul>
+<li>1.1 Subsection One-One</li>
+<ul>
+<li> ... </li>
+</ul>
+<li>1.2 Subsection One-Two</li>
+<ul>
+<li>1.2.1 Subsubsection One-Two-One
+</li><li>1.2.2 Subsubsection One-Two-Two
+</li><li>1.2.3 Subsubsection One-Two-Three &nbsp; &nbsp; <strong>
+&lt;== Current Position </strong>
+</li><li>1.2.4 Subsubsection One-Two-Four
+</li></ul>
+<li>1.3 Subsection One-Three</li>
+<ul>
+<li> ... </li>
+</ul>
+<li>1.4 Subsection One-Four</li>
+</ul>
+</ul>
 $T2H_AFTER_ABOUT
 EOT
   return $about;
@@ -1785,13 +1789,13 @@ $index_properties =
 
 %simple_map = (
 	       # cf. makeinfo.c
-	       "*", "<BR>",		# HTML+
+	       "*", "<br>",		# HTML+
 	       " ", " ",
 	       "\t", " ",
   	       "-", "&#173;",	# soft hyphen
 	       "\n", "\n",
 	       "|", "",
-	       'tab', '<\/TD><TD>',
+	       'tab', '<\/td><td>',
 	       # spacing commands
 	       ":", "",
 	       "!", "!",
@@ -1806,7 +1810,7 @@ $index_properties =
 
 %things_map = (
 	       'TeX', 'TeX',
-	       'br', '<P>',		# paragraph break
+	       'br', '<p>',		# paragraph break
 	       'bullet', '*',
 	       'copyright', '(C)',
 	       'dots', '<small>...<\/small>',
@@ -1842,31 +1846,31 @@ $index_properties =
 %style_map = (
 	      'acronym', '&do_acronym',
 	      'asis', '',
-	      'b', 'B',
-	      'cite', 'CITE',
-	      'code', 'CODE',
-	      'command', 'CODE',
+	      'b', 'b',
+	      'cite', 'cite',
+	      'code', 'code',
+	      'command', 'code',
 	      'ctrl', '&do_ctrl',	# special case
-	      'dfn', 'EM',		    # DFN tag is illegal in the standard
+	      'dfn', 'em',		    # DFN tag is illegal in the standard
 	      'dmn', '',		    # useless
 	      'email', '&do_email', # insert a clickable email address
-	      'emph', 'EM',
-	      'env', 'CODE',
-	      'file', '"TT',		# will put quotes, cf. &apply_style
+	      'emph', 'em',
+	      'env', 'code',
+	      'file', 'tt',		# will put quotes, cf. &apply_style
 	      'i', 'I',
-	      'kbd', 'KBD',
-	      'key', 'KBD',
+	      'kbd', 'kbd',
+	      'key', 'kbd',
 	      'math', '&do_math',
-	      'option', '"SAMP',    # will put quotes, cf. &apply_style
+	      'option', '"samp',    # will put quotes, cf. &apply_style
 	      'r', '',			    # unsupported
-	      'samp', '"SAMP',		# will put quotes, cf. &apply_style
+	      'samp', '"samp',		# will put quotes, cf. &apply_style
 	      'sc', '&do_sc',		# special case
-	      'strong', 'STRONG',
-	      't', 'TT',
+	      'strong', 'strong',
+	      't', 'tt',
 	      'titlefont', '',		# useless
 	      'uref', '&do_uref',   # insert a clickable URL
 	      'url', '&do_url',     # insert a clickable URL
-	      'var', 'VAR',
+	      'var', 'var',
 	      'w', '',			    # unsupported
 	      'H', '&do_accent',
 	      'dotaccent', '&do_accent',
@@ -1885,13 +1889,13 @@ $index_properties =
 #
 
 %format_map = (
-	       'quotation', 'BLOCKQUOTE',
+	       'quotation', 'blockquote',
 	       # lists
-	       'itemize', 'UL',
-	       'enumerate', 'OL',
+	       'itemize', 'ul',
+	       'enumerate', 'ol',
 	       # poorly supported
-	       'flushleft', 'PRE',
-	       'flushright', 'PRE',
+	       'flushleft', 'pre',
+	       'flushright', 'pre',
 	       );
 
 #
@@ -1902,23 +1906,23 @@ $complex_format_map =
 {
  example =>
  [
-  q{"<TABLE><tr>$T2H_EXAMPLE_INDENT_CELL<td class=example><pre>"},
+  q{"<table><tr>$T2H_EXAMPLE_INDENT_CELL<td class=example><pre>"},
   q{'</pre></td></tr></table>'}
  ],
  smallexample =>
  [
-  q{"<TABLE><tr>$T2H_SMALL_EXAMPLE_INDENT_CELL<td class=smallexample><FONT SIZE=$T2H_SMALL_FONT_SIZE><pre>"},
-  q{'</FONT></pre></td></tr></table>'}
+  q{"<table><tr>$T2H_SMALL_EXAMPLE_INDENT_CELL<td class=smallexample><font size=$T2H_SMALL_FONT_SIZE><pre>"},
+  q{'</font></pre></td></tr></table>'}
  ],
  display =>
  [
-  q{"<TABLE><tr>$T2H_EXAMPLE_INDENT_CELL<td class=display><pre " . 'style="font-family: serif">'},
+  q{"<table><tr>$T2H_EXAMPLE_INDENT_CELL<td class=display><pre " . 'style="font-family: serif">'},
   q{'</pre></td></tr></table>'}
  ],
  smalldisplay =>
  [
-  q{"<TABLE><tr>$T2H_SMALL_EXAMPLE_INDENT_CELL<td class=smalldisplay><FONT SIZE=$T2H_SMALL_FONT_SIZE><pre " . 'style="font-family: serif">'},
-  q{'</pre></FONT></td></tr></table>'}
+  q{"<table><tr>$T2H_SMALL_EXAMPLE_INDENT_CELL<td class=smalldisplay><font size=$T2H_SMALL_FONT_SIZE><pre " . 'style="font-family: serif">'},
+  q{'</pre></font></td></tr></table>'}
  ]
 };
 
@@ -2197,7 +2201,7 @@ elsif ($T2H_EXPAND eq 'tex')
   $to_skip{'end iftex'} = 1;
 }
 
-$T2H_INVISIBLE_MARK = '<IMG SRC="invisible.xbm">' if $T2H_INVISIBLE_MARK eq 'xbm';
+$T2H_INVISIBLE_MARK = '<img src="invisible.xbm">' if $T2H_INVISIBLE_MARK eq 'xbm';
 
 #
 # file name business
@@ -2803,7 +2807,7 @@ sub l2h_FromCache
   my $cached = $l2h_cache{$text};
   if ($cached)
   {
-    while ($cached =~ m/SRC="(.*?)"/g)
+    while ($cached =~ m/src="(.*?)"/g)
     {
       unless (-e "$docu_rdir$1")
       {
@@ -2824,7 +2828,7 @@ sub l2h_ToCache
 {
   my $count = shift;
   my $content = shift;
-  my @images = ($content =~ /SRC="(.*?)"/g);
+  my @images = ($content =~ /src="(.*?)"/g);
   my ($src, $dest);
 
   for $src (@images)
@@ -3110,8 +3114,8 @@ INPUT_LINE: while ($_ = &next_line) {
 	  &normalise_node($node_prev);
 	  &normalise_node($node_up);
 	  $node =~ /\"/ ?
-	    push @lines, &html_debug("<A NAME='$node'></A>\n", __LINE__) :
-	    push @lines, &html_debug("<A NAME=\"$node\"></A>\n", __LINE__);
+	    push @lines, &html_debug("<a name='$node'></a>\n", __LINE__) :
+	    push @lines, &html_debug("<a name=\"$node\"></a>\n", __LINE__);
 	  next;
 	} elsif ($tag eq 'include') {
 	    if (/^\@include\s+($FILERE)\s*$/o) {
@@ -3150,14 +3154,14 @@ INPUT_LINE: while ($_ = &next_line) {
 	    &html_push_if($tag);
 	    push(@lines, &html_debug('', __LINE__));
 	} elsif ($format_map{$tag}) {
-	    $in_pre = 1 if $format_map{$tag} eq 'PRE';
+	    $in_pre = 1 if $format_map{$tag} eq 'pre';
 	    &html_push_if($format_map{$tag});
 	    push(@lines, &html_debug('', __LINE__));
-	    $in_list++ if $format_map{$tag} eq 'UL' || $format_map{$tag} eq 'OL' ;
-#	    push(@lines, &debug("<BLOCKQUOTE>\n", __LINE__))
+	    $in_list++ if $format_map{$tag} eq 'ul' || $format_map{$tag} eq 'ol' ;
+#	    push(@lines, &debug("<blockquote>\n", __LINE__))
 #	      if $tag =~ /example/i;
-	    # sunshine@sunshineco.com: <PRE>bla</PRE> looks better than
-	    # <PRE>\nbla</PRE> (at least on NeXTstep browser
+	    # sunshine@sunshineco.com: <pre>bla</pre> looks better than
+	    # <pre>\nbla</pre> (at least on NeXTstep browser
 	    push(@lines, &debug("<$format_map{$tag}>" .
 				($in_pre ? '' : "\n"), __LINE__));
 	    next;
@@ -3181,11 +3185,11 @@ INPUT_LINE: while ($_ = &next_line) {
 		unshift(@tables, join($;, $table_type, $in_table));
 		if ($table_type eq "multi") {
 		    # don't use borders -- gets confused by empty cells
-		    push(@lines, &debug("<TABLE>\n", __LINE__));
-		    &html_push_if('TABLE');
+		    push(@lines, &debug("<table>\n", __LINE__));
+		    &html_push_if('table');
 		} else {
-		    push(@lines, &debug("<DL COMPACT>\n", __LINE__));
-		    &html_push_if('DL');
+		    push(@lines, &debug("<dl compact>\n", __LINE__));
+		    &html_push_if('dl');
 		}
 		push(@lines, &html_debug('', __LINE__));
 	    } else {
@@ -3242,7 +3246,7 @@ INPUT_LINE: while ($_ = &next_line) {
 	  next;
 	}
 	elsif ($tag eq 'sp') {
-	    push(@lines, &debug("<P>\n", __LINE__));
+	    push(@lines, &debug("<p>\n", __LINE__));
 	    next;
 	} elsif ($tag eq 'center') {
 	    push(@lines, &debug("<center>\n", __LINE__));
@@ -3353,26 +3357,26 @@ INPUT_LINE: while ($_ = &next_line) {
 	    my $name = shift(@args);
 	    $name =~ s/^\{(.*)\}$/$1/;
 	    if ($is_extra) {
-		$_ = &debug("<DT>", __LINE__);
+		$_ = &debug("<dt>", __LINE__);
 	    } else {
-		$_ = &debug("<DL>\n<DT>", __LINE__);
+		$_ = &debug("<dl>\n<dt>", __LINE__);
 	    }
 	    if ($tag eq 'deffn' || $tag eq 'defvr' || $tag eq 'deftp') {
-		$_ .= "<U>$type</U> <B>$name</B>";
-		$_ .= " <I>@args</I>" if @args;
+		$_ .= "<u>$type</u> <b>$name</b>";
+		$_ .= " <i>@args</i>" if @args;
 	    } elsif ($tag eq 'deftypefn' || $tag eq 'deftypevr'
 		     || $tag eq 'defcv' || $tag eq 'defop') {
 		$ftype = $name;
 		$name = shift(@args);
 		$name =~ s/^\{(.*)\}$/$1/;
-		$_ .= "<U>$type</U> $ftype <B>$name</B>";
-		$_ .= " <I>@args</I>" if @args;
+		$_ .= "<u>$type</u> $ftype <b>$name</b>";
+		$_ .= " <i>@args</i>" if @args;
 	    } else {
 		warn "$ERROR Unknown definition type: $tag\n";
-		$_ .= "<U>$type</U> <B>$name</B>";
-		$_ .= " <I>@args</I>" if @args;
+		$_ .= "<u>$type</u> <b>$name</b>";
+		$_ .= " <i>@args</i>" if @args;
 	    }
- 	    $_ .= &debug("\n<DD>", __LINE__);
+ 	    $_ .= &debug("\n<dd>", __LINE__);
 	    $name = &unprotect_html($name);
 	    if ($tag eq 'deffn' || $tag eq 'deftypefn') {
 	      EnterIndexEntry('f', $name, $docu_doc, $section, \@lines);
@@ -3391,10 +3395,10 @@ INPUT_LINE: while ($_ = &next_line) {
 	}
     } elsif ($end_tag) {
 	if ($format_map{$end_tag}) {
-	    $in_pre = 0 if $format_map{$end_tag} eq 'PRE';
-	    $in_list-- if $format_map{$end_tag} eq 'UL' || $format_map{$end_tag} eq 'OL' ;
-	    &html_pop_if('P');
-	    &html_pop_if('LI');
+	    $in_pre = 0 if $format_map{$end_tag} eq 'pre';
+	    $in_list-- if $format_map{$end_tag} eq 'ul' || $format_map{$end_tag} eq 'ol' ;
+	    &html_pop_if('p');
+	    &html_pop_if('li');
 	    &html_pop_if();
 	    push(@lines, &debug("</$format_map{$end_tag}>\n", __LINE__));
 	    push(@lines, &html_debug('', __LINE__));
@@ -3414,18 +3418,18 @@ INPUT_LINE: while ($_ = &next_line) {
 		warn "$ERROR \@end $end_tag without \@*table\n";
 		next;
 	    }
-	    &html_pop_if('P');
+	    &html_pop_if('p');
 	    ($table_type, $in_table) = split($;, shift(@tables));
 	    unless ($1 eq $table_type) {
 		warn "$ERROR \@end $end_tag without matching \@$end_tag\n";
 		next;
 	    }
 	    if ($table_type eq "multi") {
-		push(@lines, "</TR></TABLE>\n");
-		&html_pop_if('TR');
+		push(@lines, "</tr></table>\n");
+		&html_pop_if('tr');
 	    } else {
-		push(@lines, "</DL>\n");
-		&html_pop_if('DD');
+		push(@lines, "</dl>\n");
+		&html_pop_if('dd');
 	    }
 	    &html_pop_if();
 	    if (@tables) {
@@ -3434,7 +3438,7 @@ INPUT_LINE: while ($_ = &next_line) {
 		$in_table = 0;
 	    }
 	} elsif (defined($def_map{$end_tag})) {
- 	    push(@lines, &debug("</DL>\n", __LINE__));
+ 	    push(@lines, &debug("</dl>\n", __LINE__));
 	} elsif ($end_tag eq 'menu') {
 	    &html_pop_if();
 	    push(@lines, $_); # must keep it for pass 2
@@ -3448,7 +3452,7 @@ INPUT_LINE: while ($_ = &next_line) {
       $_ = $`.$';
       my $anchor = $1;
       $anchor = &normalise_node($anchor);
-      push @lines, &html_debug("<A NAME=\"$anchor\"></A>\n");
+      push @lines, &html_debug("<a name=\"$anchor\"></a>\n");
       $node2href{$anchor} = "$docu_doc#$anchor";
       next INPUT_LINE if $_ =~ /^\s*$/;
     }
@@ -3487,7 +3491,7 @@ INPUT_LINE: while ($_ = &next_line) {
 		      $name =~ /index/i);
 		if ($in_top && /heading/){
 		    $T2H_HAS_TOP_HEADING = 1;
-                    $_ = &debug("<H$level>$name</H$level>\n", __LINE__);
+                    $_ = &debug("<h$level>$name</h$level>\n", __LINE__);
 		    &html_push_if('body');
 		    print "# top heading, section $name, level $level\n"
 			if $T2H_DEBUG & $DEBUG_TOC;
@@ -3557,33 +3561,33 @@ INPUT_LINE: while ($_ = &next_line) {
 		    # update TOC
 		    while ($level > $curlevel) {
 		      $curlevel++;
-		      push(@toc_lines, "<UL>\n");
+		      push(@toc_lines, "<ul>\n");
 		    }
 		    while ($level < $curlevel) {
 		      $curlevel--;
-		      push(@toc_lines, "</UL>\n");
+		      push(@toc_lines, "</ul>\n");
 		    }
 		    $_ = &t2h_anchor($tocid, "$docu_doc#$docid", $name, 1);
 		    $_ = &substitute_style($_);
-		    push(@stoc_lines, "$_<BR>\n") if ($level == 1);
+		    push(@stoc_lines, "$_<br>\n") if ($level == 1);
 		    if ($T2H_NUMBER_SECTIONS)
 		    {
-		      push(@toc_lines, $_ . "<BR>\n")
+		      push(@toc_lines, $_ . "<br>\n")
 		    }
 		    else
 		    {
-		      push(@toc_lines, "<LI>" . $_ ."</LI>");
+		      push(@toc_lines, "<li>" . $_ ."</li>");
 		    }
 		  }
 		  else
 		  {
-		    push(@lines, &html_debug("<A NAME=\"$docid\"></A>\n", 
+		    push(@lines, &html_debug("<a name=\"$docid\"></a>\n", 
 					   __LINE__));
 		  }
 		  # update DOC
 		  push(@lines, &html_debug('', __LINE__));
 		  &html_reset;
-		  $_ =  "<H$level> $name </H$level>\n<!--docid::${docid}::-->\n";
+		  $_ =  "<h$level> $name </h$level>\n<!--docid::${docid}::-->\n";
 		  $_ = &debug($_, __LINE__);
 		  push(@lines, &html_debug('', __LINE__));
 		}
@@ -3632,28 +3636,28 @@ INPUT_LINE: while ($_ = &next_line) {
 		{
 		  EnterIndexEntry($table_type, $what, $docu_doc, $section, \@lines);
 		}
-		&html_pop_if('P');
-		if ($html_element eq 'DL' || $html_element eq 'DD') {
+		&html_pop_if('p');
+		if ($html_element eq 'dl' || $html_element eq 'dd') {
 		    if ($things_map{$in_table} && !$what) {
 			# special case to allow @table @bullet for instance
-			push(@lines, &debug("<DT>$things_map{$in_table}\n", __LINE__));
+			push(@lines, &debug("<dt>$things_map{$in_table}\n", __LINE__));
 		    } else {
-			push(@lines, &debug("<DT>\@$in_table\{$what\}\n", __LINE__));
+			push(@lines, &debug("<dt>\@$in_table\{$what\}\n", __LINE__));
 		    }
-		    push(@lines, "<DD>");
-		    &html_push('DD') unless $html_element eq 'DD';
+		    push(@lines, "<dd>");
+		    &html_push('dd') unless $html_element eq 'dd';
 		    if ($table_type) { # add also an index
 			unshift(@input_spool, "\@${table_type}index $what\n");
 		    }
-		} elsif ($html_element eq 'TABLE') {
-		    push(@lines, &debug("<TR><TD>$what</TD>\n", __LINE__));
-		    &html_push('TR');
-		} elsif ($html_element eq 'TR') {
-		    push(@lines, &debug("</TR>\n", __LINE__));
-		    push(@lines, &debug("<TR><TD>$what</TD>\n", __LINE__));
+		} elsif ($html_element eq 'table') {
+		    push(@lines, &debug("<tr><td>$what</td>\n", __LINE__));
+		    &html_push('tr');
+		} elsif ($html_element eq 'tr') {
+		    push(@lines, &debug("</tr>\n", __LINE__));
+		    push(@lines, &debug("<tr><td>$what</td>\n", __LINE__));
 		} else {
-		    push(@lines, &debug("<LI>$what\n", __LINE__));
-		    &html_push('LI') unless $html_element eq 'LI';
+		    push(@lines, &debug("<li>$what\n", __LINE__));
+		    &html_push('li') unless $html_element eq 'li';
 		}
 		push(@lines, &html_debug('', __LINE__));
 		if ($deferred_ref) {
@@ -3662,7 +3666,7 @@ INPUT_LINE: while ($_ = &next_line) {
 		}
 		next;
 	    } elsif (/^\@tab\s+(.*)$/) {
-		push(@lines, "<TD>$1</TD>\n");
+		push(@lines, "<td>$1</td>\n");
 		next;
 	    }
 	}
@@ -3670,18 +3674,18 @@ INPUT_LINE: while ($_ = &next_line) {
     # paragraph separator
     if ($_ eq "\n" && ! $in_pre) {
 	next if $#lines >= 0 && $lines[$#lines] eq "\n";
-	if ($html_element eq 'P') {
-	    push (@lines, &debug("</P><P>\n", __LINE__));
+	if ($html_element eq 'p') {
+	    push (@lines, &debug("<p>\n", __LINE__));
 	}
 # 	else
 # 	{
-# 	  push(@lines, "<P></P>\n");
-# 	  $_ = &debug("<P></P>\n", __LINE__);
+# 	  push(@lines, "<p></p>\n");
+# 	  $_ = &debug("<p></p>\n", __LINE__);
 # 	}
-        elsif ($html_element eq 'body' || $html_element eq 'BLOCKQUOTE' || $html_element eq 'DD' || $html_element eq 'LI') 
+        elsif ($html_element eq 'body' || $html_element eq 'blockquote' || $html_element eq 'dd' || $html_element eq 'li') 
 	{
-	  &html_push('P');
-	  push(@lines, &debug("<P>\n", __LINE__));
+	  &html_push('p');
+	  push(@lines, &debug("<p>\n", __LINE__));
 	}
       }
     # otherwise
@@ -3693,7 +3697,7 @@ INPUT_LINE: while ($_ = &next_line) {
 $level = 0;
 while ($level < $curlevel) {
     $curlevel--;
-    push(@toc_lines, "</UL>\n");
+    push(@toc_lines, "</ul>\n");
 }
 
 print "# end of pass 1\n" if $T2H_VERBOSE;
@@ -3779,7 +3783,7 @@ sub GetIndexEntries
 	for $key (keys %{$index->{$prefix}})
 	{
 	  $entries->{$key} = {%{$index->{$prefix}->{$key}}};
-	  $entries->{$key}->{html_key} = "<CODE>$entries->{$key}->{html_key}</CODE>";
+	  $entries->{$key}->{html_key} = "<code>$entries->{$key}->{html_key}</code>";
 	}
       }
     }
@@ -3904,27 +3908,27 @@ sub PrintIndexPage
   push @$lines, $summary;
 
   push @$lines , <<EOT;
-<P></P>
-<TABLE border=0>
-<TR><TD></TD><TH ALIGN=LEFT>Index Entry</TH><TH ALIGN=LEFT> Section</TH></TR>
-<TR><TD COLSPAN=3> <HR></TD></TR>
+<p></p>
+<table border=0>
+<tr><td></td><th align="left">Index Entry</th><th align="left"> Section</th></tr>
+<tr><td colspan=3> <hr></td></tr>
 EOT
 
   for $letter (@{$page->{Letters}})
   {
-    push @$lines, "<TR><TH><A NAME=\"${name}_$letter\"></A>$letter</TH><TD></TD><TD></TD></TR>\n";
+    push @$lines, "<tr><th><a name=\"${name}_$letter\"></a>$letter</th><td></td><td></td></tr>\n";
     for $entry (@{$page->{EntriesByLetter}->{$letter}})
     {
       push @$lines, 
-      "<TR><TD></TD><TD valign=top>" .
+      "<tr><td></td><td valign=top>" .
 	t2h_anchor('', $entry->{href}, $entry->{html_key}) .
-	  "</TD><TD valign=top>" . 
+	  "</td><td valign=top>" . 
 	    t2h_anchor('', sec_href($entry->{section}), clean_name($entry->{section})) .
-	      "</TD></TR>\n";
+	      "</td></tr>\n";
     }
-    push @$lines, "<TR><TD COLSPAN=3> <HR></TD></TR>\n";
+    push @$lines, "<tr><td colspan=3> <hr></td></tr>\n";
   }
-  push @$lines, "</TABLE><P></P>";
+  push @$lines, "</table><p></p>";
   push @$lines, $summary;
 }
 
@@ -4011,7 +4015,7 @@ sub PrintIndex
   for $page (@$Pages)
   {
     push @$lines, ($T2H_SPLIT eq 'chapter' ? $CHAPTEREND : $SECTIONEND);
-    push @$lines, "<H2 ALIGN=\"Left\">$page->{name}</H2>\n";
+    push @$lines, "<h2 align=\"Left\">$page->{name}</h2>\n";
     PrintIndexPage($lines, $summary, $page, $name);
   }
 }
@@ -4046,16 +4050,16 @@ while (@lines) {
     if ( /^\@menu\b/ ) {
 		$in_menu = 1;
 		$in_menu_listing = 1;
-		push( @lines2, &debug( "<BLOCKQUOTE><TABLE BORDER=0 CELLSPACING=0> \n",
+		push( @lines2, &debug( "<blockquote><table border=0 cellspacing=0> \n",
 							   __LINE__));
 		next;
     }
 
     if ( /^\@end\s+menu\b/ ) {
 		if ( $in_menu_listing ) {
-			push( @lines2, &debug( "</TABLE></BLOCKQUOTE>\n", __LINE__ ) );
+			push( @lines2, &debug( "</table></blockquote>\n", __LINE__ ) );
 		} else {
-			push( @lines2, &debug( "</BLOCKQUOTE>\n", __LINE__ ) );
+			push( @lines2, &debug( "</blockquote>\n", __LINE__ ) );
 		}
 		$in_menu = 0;
 		$in_menu_listing = 0;
@@ -4076,7 +4080,7 @@ while (@lines) {
 		} else {
 			if ( $in_menu_listing ) {
 				$in_menu_listing = 0;
-				push( @lines2, &debug( "</TABLE>\n", __LINE__ ) );
+				push( @lines2, &debug( "</table>\n", __LINE__ ) );
 			}
 
 	    # should be like verbatim -- preseve spaces, etc
@@ -4090,7 +4094,7 @@ while (@lines) {
 			if ( ! $in_menu_listing ) {
 				$in_menu_listing = 1;
 				push( @lines2,
-					  &debug( "<TABLE BORDER=0 CELLSPACING=0>\n", __LINE__ ) );
+					  &debug( "<table border=0 cellspacing=0>\n", __LINE__ ) );
 			}
 
 			# look for continuation
@@ -4205,11 +4209,11 @@ while (@lines) {
 	             LocateIncludeFile( "$base.jpg" ) ||
                  LocateIncludeFile( "$base.gif" );
      warn "$ERROR no image file for $base: $_" unless ( $image && -e $image );
-     if ( $in_line =~ /\s*/ and $next_line =~ /^\s*<\/P><P>\s*$/
+     if ( $in_line =~ /\s*/ and $next_line =~ /^\s*<\/p><p>\s*$/
 		  and $T2H_CENTER_IMAGE ) {
-		 "<CENTER><IMG SRC=\"$image\" ALT=\"$base\"></CENTER>$in_line";
+		 "<CENTER><img src=\"$image\" alt=\"$base\"></CENTER>$in_line";
 	 } else {
-		 "<IMG SRC=\"$image\" ALT=\"$base\">$in_line";
+		 "<img src=\"$image\" alt=\"$base\">$in_line";
 	 }
     }e){};
 
@@ -4217,7 +4221,7 @@ while (@lines) {
     # try to guess bibliography references or glossary terms
     #
 
-    unless (/^<H\d><A NAME=\"SEC\d/) {
+    unless (/^<h\d><a name=\"SEC\d/) {
 		if ($use_bibliography) {
 			$done = '';
 			while (/$BIBRE/o) {
@@ -4323,7 +4327,7 @@ print "# end of pass 3\n" if $T2H_VERBOSE;
 
 @foot_lines = ();			# footnotes
 @doc_lines = ();			# final document
-$end_of_para = 0;			# true if last line is <P>
+$end_of_para = 0;			# true if last line is <p>
 
 while (@lines3) {
     $_ = shift(@lines3);
@@ -4362,16 +4366,16 @@ while (@lines3) {
 	    $docid  = "DOCF$foot_num";
 	    $footid = "FOOT$foot_num";
 	    $foot = "($foot_num)";
-	    push(@foot_lines, "<H3>" . &t2h_anchor($footid, "$d#$docid", $foot) . "</H3>\n");
-	    $text = "<P>$text" unless $text =~ /^\s*<P>/;
+	    push(@foot_lines, "<h3>" . &t2h_anchor($footid, "$d#$docid", $foot) . "</h3>\n");
+	    $text = "<p>$text" unless $text =~ /^\s*<p>/;
 	    push(@foot_lines, "$text\n");
 	    $_ = $before . &t2h_anchor($docid, "$docu_foot#$footid", $foot) . $after;
 	}
     }
     #
-    # remove unnecessary <P>
+    # remove unnecessary <p>
     #
-    if (/^\s*<P>\s*$/) {
+    if (/^\s*<p>\s*$/) {
 	next if $end_of_para++;
     } else {
 	$end_of_para = 0;
@@ -4728,8 +4732,8 @@ if (@stoc_lines)
   $T2H_HREF{This} = $T2H_HREF{Overview};
   $T2H_NAME{This} = $T2H_NAME{Overview};
   $T2H_THIS_SECTION = \@stoc_lines;
-  unshift @$T2H_THIS_SECTION, "<BLOCKQUOTE>\n";
-  push @$T2H_THIS_SECTION, "\n</BLOCKQUOTE>\n";
+  unshift @$T2H_THIS_SECTION, "<blockquote>\n";
+  push @$T2H_THIS_SECTION, "\n</blockquote>\n";
   &$T2H_print_Overview(\*FILE);
   close(FILE) if $T2H_SPLIT;
 }
@@ -4849,7 +4853,7 @@ sub Sec2PrevNode
     $num = $`;
     $i = $1;
     $post = $2;
-    if ($i eq 'A')
+    if ($i eq 'a')
     {
       $i = $normal_sec_num[0];
     }
@@ -5003,7 +5007,7 @@ sub html_push {
 sub html_push_if {
     local($what) = @_;
     push(@html_stack, $html_element)
-	if ($html_element && $html_element ne 'P');
+	if ($html_element && $html_element ne 'p');
     $html_element = $what;
 }
 
@@ -5097,16 +5101,16 @@ sub menu_entry
       $clean_descr =~ s/[^\w]//g;
       $descr = '' if ($clean_entry eq $clean_descr)
     }
-    push(@lines2,&debug('<TR><TD ALIGN="left" VALIGN="TOP">' .
+    push(@lines2,&debug('<tr><td align="left" valign="top">' .
 			&t2h_anchor('', $href, $entry) .
-			'</TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">' .
-			$descr . "</TD></TR>\n", __LINE__));
+			'</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">' .
+			$descr . "</td></tr>\n", __LINE__));
   }
   elsif ($node =~ /^\(.*\)\w+/)
   {
-    push(@lines2,&debug('<TR><TD ALIGN="left" VALIGN="TOP">' .
-			$entry . '</TD><TD ALIGN="left" VALIGN="TOP">' . $descr .
-			"</TD></TR>\n", __LINE__))
+    push(@lines2,&debug('<tr><td align="left" valign="top">' .
+			$entry . '</td><td align="left" valign="top">' . $descr .
+			"</td></tr>\n", __LINE__))
   }
   else
   {
@@ -5133,7 +5137,7 @@ sub do_sc
 sub do_math
 {
   return &l2h_ToLatex("\$".&unprotect_html($_[0])."\$") if ($T2H_L2H);
-  return "<EM>".$text."</EM>";
+  return "<em>".$text."</em>";
 }
 
 sub do_uref {
@@ -5148,7 +5152,7 @@ sub do_url { &t2h_anchor('', $_[0], $_[0]) }
 
 sub do_acronym
 {
-  return '<FONT SIZE="-1">' . $_[0] . '</FONT>';
+  return '<font size="-1">' . $_[0] . '</font>';
 }
 
 sub do_accent
@@ -5231,16 +5235,16 @@ sub t2h_anchor {
     local($name, $href, $text, $newline, $extra_attribs) = @_;
     local($result);
 
-    $result = "<A";
-    $result .= " NAME=\"$name\"" if $name;
+    $result = "<a";
+    $result .= " name=\"$name\"" if $name;
     if ($href)
     {
       $href =~ s|^$T2H_HREF_DIR_INSTEAD_FILE|./|
 	  if ($T2H_HREF_DIR_INSTEAD_FILE);
-      $result .= ($href =~ /\"/ ? " HREF='$href'"  : " HREF=\"$href\"");
+      $result .= ($href =~ /\"/ ? " href='$href'"  : " href=\"$href\"");
     }
     $result .= " $extra_attribs" if $extra_attribs;
-    $result .= ">$text</A>";
+    $result .= ">$text</a>";
     $result .= "\n" if $newline;
     return($result);
 }
@@ -5307,15 +5311,15 @@ sub protect_html {
     $what =~ s/\>/\&\#62;/g;
     # restore anything in quotes
     # this fixes my problem where I had:
-    # < IMG SRC="leftarrow.gif" ALT="<--" >  but what if I wanted &#60; in my ALT text ??
+    # < img src="leftarrow.gif" alt="<--" >  but what if I wanted &#60; in my ALT text ??
     # maybe byte stuffing or some other technique should be used.
     $what =~ s/\"([^\&]+)\&\#60;(.*)\"/"$1<$2"/g;
     $what =~ s/\"([^\&]+)\&\#62;(.*)\"/"$1>$2"/g;
     $what =~ s/\"([^\&]+)\&\#38;(.*)\"/"$1&$2"/g;
     # but recognize some HTML things
-    $what =~ s/\&\#60;\/A\&\#62;/<\/A>/g;	      # </A>
-    $what =~ s/\&\#60;A ([^\&]+)\&\#62;/<A $1>/g;     # <A [^&]+>
-    $what =~ s/\&\#60;IMG ([^\&]+)\&\#62;/<IMG $1>/g; # <IMG [^&]+>
+    $what =~ s/\&\#60;\/a\&\#62;/<\/a>/g;	      # </A>
+    $what =~ s/\&\#60;a ([^\&]+)\&\#62;/<a $1>/g;     # <a [^&]+>
+    $what =~ s/\&\#60;img ([^\&]+)\&\#62;/<img $1>/g; # <img [^&]+>
     return($what);
 }
 
@@ -5347,8 +5351,19 @@ sub t2h_print_label
     my $fh = shift;
     my $href = shift || $T2H_HREF{This};
     $href =~ s/.*#(.*)$/$1/;
-    print $fh qq{<A NAME="$href"></A>\n};
+    print $fh qq{<a name="$href"></a>\n};
 }
+
+sub print_valid {
+  my $fh = shift;
+  print $fh <<EOT;
+<p>
+<img border="0"
+     src="valid-html401.png" alt="Valid HTML 4.01!" height="31" width="88">
+</p>
+EOT
+}
+
 
 ##############################################################################
 
