@@ -16,7 +16,7 @@ headers        = ${c_sources:.c=.h} global.h
 # on moebi a version with low-resolution is needed - add the appropriate
 # graphics files to the c files and set the SIZE flag correctly
 
-ifeq ($(shell hostname -f),moebi.anorg.chemie.uni-frankfurt.de)
+ifeq ($(shell hostname -f),moebi.physik.fu-berlin.de)
 	c_sources += fsc2_rsc_lr.c
 	CFLAGS    += -DSIZE=0
 else
@@ -55,7 +55,8 @@ modules:
 
 %.c: %.flex $(headers)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %_lexer.flex,%,$<) -o$@ $<
-	sed -e 's/register char \*yy_cp, \*yy_bp;/register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
+	sed -e 's/register char \*yy_cp, \*yy_bp;/\
+		register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
 	mv -f $@.x $@
 
 
