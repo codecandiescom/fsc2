@@ -84,8 +84,8 @@ bool er023m_init( const char *name )
 		/* Set the conversion time - if it hasn't been specified by the user
 		   get its value and set it to a value of at least MIN_CTMULT (it
 		   must be set anyway to set up some inportant values needed in the
-		   data conversion) and also exclude the range of CT values where data
-		   might become garbled. */
+		   data conversion) and also exclude the range of CT values where
+		   data might become garbled. */
 
 		if ( er023m.ct_mult == UNDEF_CT_MULT )
 		{
