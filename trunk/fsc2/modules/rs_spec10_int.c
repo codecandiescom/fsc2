@@ -92,6 +92,7 @@ static void rs_spec10_ccd_init( void )
 	uns32 exp_res_count;
 	uns32 exp_res_index;
 	uns32 *exp_res_array;
+	uns16 clear_cycles;
 	uns32 i;
 
 
@@ -169,10 +170,15 @@ static void rs_spec10_ccd_init( void )
 		TRY
 		{
 			for ( i = 0; i < exp_res_count; i++ )
-				if ( ! pl_get_enum_param( rs_spec10->handle,
-										  PARAM_EXP_RES_INDEX,
-										  i, exp_res_array + i, NULL, 0 ) )
+			{
+				if ( ! pl_set_param( rs_spec10->handle,
+									 PARAM_EXP_RES_INDEX, &i ) )
+					 rs_spec10_error_handling( );
+				if ( ! pl_get_param( rs_spec10->handle, PARAM_EXP_RES,
+									 ATTR_CURRENT,
+									 ( void_ptr ) ( exp_res_array + i ) ) )
 					rs_spec10_error_handling( );
+			}
 			TRY_SUCCESS;
 		}
 		OTHERWISE
@@ -186,7 +192,6 @@ static void rs_spec10_ccd_init( void )
 			{
 				exp_res_index = i;
 				rs_spec10->ccd.exp_res = 1.0e-6;
-				rs_spec10->ccd.exp_time = 100000;
 				break;
 			}
 
@@ -196,7 +201,6 @@ static void rs_spec10_ccd_init( void )
 				{
 					exp_res_index = i;
 					rs_spec10->ccd.exp_res = 1.0e-3;
-					rs_spec10->ccd.exp_time = 100;
 					break;
 				}
 
@@ -215,19 +219,13 @@ static void rs_spec10_ccd_init( void )
 	}
 	else
 	{
-		if ( ! pl_get_enum_param( rs_spec10->handle, PARAM_EXP_RES_INDEX,
-								  0, &exp_res_index, NULL, 0 ) )
+		if ( ! pl_get_param( rs_spec10->handle, PARAM_EXP_RES,
+							 ATTR_CURRENT, &exp_res_index ) )
 			rs_spec10_error_handling( );
 		if ( exp_res_index == EXP_RES_ONE_MICROSEC )
-		{
 			rs_spec10->ccd.exp_res = 1.0e-6;
-			rs_spec10->ccd.exp_time = 100000;
-		}
 		else if ( exp_res_index == EXP_RES_ONE_MILLISEC )
-		{
 			rs_spec10->ccd.exp_res = 1.0e-3;
-			rs_spec10->ccd.exp_time = 100;
-		}
 		else
 		{
 			print( FATAL, "Camera returns undefined exposure time "
@@ -236,17 +234,17 @@ static void rs_spec10_ccd_init( void )
 		}
 	}
 
-	/* Now also figure out the minimum exposure time */
+	rs_spec10->ccd.exp_time = lrnd(   CCD_EXPOSURE_TIME
+									/ rs_spec10->ccd.exp_res ) ;
+
+	/* Now also figure out (if possible) the minimum exposure time */
 
 	if ( ! rs_spec10_param_access( PARAM_EXP_MIN_TIME, &acc ) ||
 		 ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE ) )
-	{
-		print( FATAL, "Can't determine the minimum exposure time.\n" );
-		THROW( EXCEPTION );
-	}
-
-	if ( ! pl_get_param( rs_spec10->handle, PARAM_EXP_MIN_TIME, ATTR_DEFAULT,
-						 ( void_ptr ) &rs_spec10->ccd.exp_min_time ) )
+			rs_spec10->ccd.exp_min_time = rs_spec10->ccd.exp_res;
+	else if ( ! pl_get_param( rs_spec10->handle, PARAM_EXP_MIN_TIME,
+							  ATTR_DEFAULT,
+							  ( void_ptr ) &rs_spec10->ccd.exp_min_time ) )
 		rs_spec10_error_handling( );
 
 	/* Check that exposure times requested during test can really be set */
@@ -259,13 +257,43 @@ static void rs_spec10_ccd_init( void )
 		THROW( EXCEPTION );
 	}
 
+	if ( ! rs_spec10_param_access( PARAM_CLEAR_CYCLES, &acc ) ||
+		 acc != ACC_READ_WRITE )
+	{
+		print( FATAL, "Can't determine or set number of clear cycles.\n" );
+		THROW( EXCEPTION );
+	}
 
+	if ( ! pl_get_param( rs_spec10->handle, PARAM_CLEAR_CYCLES,
+						 ATTR_MAX, ( void_ptr ) &clear_cycles ) )
+		rs_spec10_error_handling( );
 
-	/* We might also need to set the shutter mode to OPEN_NO_CHANGE,
-	   set the number of clears (with PARAM_CLEAR_CYCLES).
-	   What about gain settings ?
-	   We probably also should look how long the speed table is...
-	   But all of this can only be done when we have the camera. */
+	if ( clear_cycles != CCD_MAX_CLEAR_CYCLES )
+	{
+		print( FATAL, "Configuration file for camera has invalid maximum "
+			   "number of CCD clear cyces, real number is %ld.\n",
+			   ( long ) clear_cycles );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! pl_get_param( rs_spec10->handle, PARAM_CLEAR_CYCLES,
+						 ATTR_MIN, ( void_ptr ) &clear_cycles ) )
+		rs_spec10_error_handling( );
+
+	if ( clear_cycles != CCD_MIN_CLEAR_CYCLES )
+	{
+		print( FATAL, "Configuration file for camera has invalid minimum "
+			   "number of CCD clear cyces, real number is %ld.\n",
+			   ( long ) clear_cycles );
+		THROW( EXCEPTION );
+	}
+
+	rs_spec10->ccd.clear_cycles = CCD_DEFAULT_CLEAR_CYCLES;
+	rs_spec10_clear_cycles( rs_spec10->ccd.clear_cycles );
+
+	if ( ! pl_set_param( rs_spec10->handle, PARAM_CLEAR_CYCLES,
+						 &rs_spec10->ccd.clear_cycles ) )
+		rs_spec10_error_handling( );
 }
 
 
@@ -351,6 +379,24 @@ static void rs_spec10_temperature_init( void )
 /*-----------------------------------------*/
 /*-----------------------------------------*/
 
+void rs_spec10_clear_cycles( uns16 cycles )
+{
+	long count = cycles;
+
+
+	fsc2_assert( count >= CCD_MIN_CLEAR_CYCLES &&
+				 count <= CCD_MAX_CLEAR_CYCLES );
+
+	if ( ! pl_set_param( rs_spec10->handle, PARAM_CLEAR_CYCLES, &cycles ) )
+		rs_spec10_error_handling( );
+
+	rs_spec10->ccd.clear_cycles = cycles;
+}
+
+
+/*-----------------------------------------*/
+/*-----------------------------------------*/
+
 uns16 *rs_spec10_get_pic( uns32 *size )
 {
 	rgn_type region;
@@ -381,8 +427,8 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 	   the current working directory and, moreover, the library crashes
 	   the program when data files are not found. Thus we must make sure
 	   they can get loaded by temporarily switching to the directory where
-	   the files reside. Hopefully, this problem will be solved in the
-	   near future. */
+	   the files reside. Hopefully, this problem will go away in the near
+	   future... */
 
 	getcwd( cur_dir, PATH_MAX );
 	chdir( PVCAM_DATA_DIR );
@@ -450,6 +496,8 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 
 	TRY
 	{
+		fsc2_usleep( lrnd( floor(   rs_spec10->ccd.exp_time
+								  * rs_spec10->ccd.exp_res ) / 1.0e-6 ), SET );
 		do
 		{
 			stop_on_user_request( );
