@@ -227,18 +227,13 @@ static void load_functions( Device *dev )
 		 ! ( Internals.cmdline_flags & DO_CHECK ) )
 	{
 		if ( dev->name[ 0 ] != '/' )
-		{
 			lib_name = get_string( "%s%s%s.so", libdir, slash( libdir ),
 								   dev->name );
-			dev->driver.handle = dlopen( lib_name, RTLD_NOW );
-			T_free( lib_name );
-		}
 		else
-		{
 			lib_name = get_string( "%s.so", dev->name );
-			dev->driver.handle = dlopen( lib_name, RTLD_NOW );
-			T_free( lib_name );
-		}
+
+		dev->driver.handle = dlopen( lib_name, RTLD_NOW );
+		T_free( lib_name );
 	}
 
 	if ( dev->driver.handle == NULL )
