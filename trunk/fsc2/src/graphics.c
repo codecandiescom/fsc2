@@ -124,7 +124,7 @@ void start_graphics( void )
 		fl_set_object_helper( run_form->curve_4_button, 
 							  "Exempt curve 4 from\nrescaling operations" );
 
-		fl_set_object_callback( run_form->print_button, print_1d, 0 );
+		fl_set_object_callback( run_form->print_button, print_1d, 1 );
 	}
 	else
 	{

@@ -11,7 +11,7 @@ step_freq   = 250 kHz;
 
 attenuation = -5 db;
 
-N_runs      =  2;            // how many times to repeat the whole experiment
+N_runs      =  5;            // how many times to repeat the whole experiment
 N_averages  = 16;            // number of averages per frequency
 
 N_max_base_curves = 10;      // how many curve to use for baseline correction

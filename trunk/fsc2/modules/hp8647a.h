@@ -19,7 +19,7 @@
 #define MAX_ATTEN      -136.0            /* -136 db  */
 #define ATT_RESOLUTION  0.1
 
-#define NUM_MOD_TYPES   3
+#define NUM_MOD_TYPES   4
 #define MOD_TYPE_FM     0
 #define MOD_TYPE_AM     1
 #define MOD_TYPE_PHASE  2
