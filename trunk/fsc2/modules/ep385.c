@@ -46,9 +46,9 @@ int ep385_init_hook( void )
 	pulser_struct.has_pods = UNSET;
 
 	/* Set global variable to indicate that GPIB bus is needed */
-/*
+
 	need_GPIB = SET;
-*/
+
 	/* We have to set up the global structure for the pulser, especially the
 	   pointers for the functions that will get called from pulser.c */
 
@@ -438,7 +438,7 @@ Var *pulser_cw_mode( Var *v )
 /* Public function to change the position of pulses. If called with no  */
 /* argument all active pulses that have a position change time set will */
 /* be moved, otherwise all pulses passed as arguments to the function.  */
-/* Take care: The changes will only commited on the next call of the    */
+/* Take care: The changes will only be commited on the next call of the */
 /*            function pulser_update() !                                */
 /*----------------------------------------------------------------------*/
 
@@ -516,7 +516,7 @@ Var *pulser_shift( Var *v )
 /* Public function for incrementing the length of pulses. If called with   */
 /* no argument all active pulses that have a length change defined are     */
 /* incremented, oltherwise all pulses passed as arguments to the function. */
-/* Take care: The changes will only commited on the next call of the       */
+/* Take care: The changes will only be commited on the next call of the    */
 /*            function pulser_update() !                                   */
 /*-------------------------------------------------------------------------*/
 
@@ -670,9 +670,6 @@ Var *pulser_pulse_reset( Var *v )
 
 Var *pulser_next_phase( Var *v )
 {
-/*
-	int j;
-*/
 	FUNCTION *f;
 	long phase_number;
 
@@ -735,15 +732,6 @@ Var *pulser_next_phase( Var *v )
 
 		if ( ++f->next_phase >= f->pc_len )
 			f->next_phase = 0;
-/*
-		if ( FSC2_MODE == EXPERIMENT )
-			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
-				if ( f->phase_setup->is_set[ j ] &&
-					 ! ep385_channel_assign(
-						 f->pcm[ j * f->pc_len + f->next_phase ]->self,
-						 f->phase_setup->pod[ j ]->self ) )
-					return vars_push( INT_VAR, 0 );
-*/
 	}
 
 	ep385.needs_update = SET;
@@ -810,15 +798,6 @@ Var *pulser_phase_reset( Var *v )
 		}
 
 		f->next_phase = 0;
-/*
-		if ( FSC2_MODE == EXPERIMENT )
-			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
-				if ( f->phase_setup->is_set[ j ] &&
-					 ! ep385_channel_assign(
-						 f->pcm[ j * f->pc_len + 0 ]->self,
-						 f->phase_setup->pod[ j ]->self ) )
-					return vars_push( INT_VAR, 0 );
-*/
 	}
 
 	ep385.needs_update = SET;

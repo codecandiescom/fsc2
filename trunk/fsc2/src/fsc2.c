@@ -625,8 +625,13 @@ static void final_exit_handler( void )
 					 MAIL_ADDRESS );
 		}
 
+#if defined _GNU_SOURCE
 		fprintf( stderr, "fsc2 (%d) killed by %s signal.\n", getpid( ),
 				 strsignal( fsc2_death ) );
+#else
+		fprintf( stderr, "fsc2 (%d) killed by signal %d.\n", getpid( ),
+				 fsc2_death);
+#endif
 	}
 }
 

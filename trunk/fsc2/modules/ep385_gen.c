@@ -281,15 +281,15 @@ bool ep385_set_repeat_time( double rep_time )
 		}
 	}
 
-	ep385.repeat_time = lrnd( ( ep385_double2ticks( rep_time ) - 2048 * 16 )
-							  / 12800 );
+	ep385.repeat_time = lrnd( ceil( ( ep385_double2ticks( rep_time ) 
+									   - 2048 * 16 ) / 12800.0 ) );
 	new_rep_time = ( ep385.repeat_time * 12800 + 2048 * 16 ) * ep385.timebase;
 
-	/* If the adjusted repetition time doesn't fir within 1% with the
+	/* If the adjusted repetition time doesn't fit within 1% with the
 	   requested time print a warning */
 
 	if ( fabs( new_rep_time - rep_time ) > 0.01 * rep_time )
-		print( WARN, "Adjusting repeat time/frequency to %s/%g.\n",
+		print( WARN, "Adjusting repeat time/frequency to %s/%g Hz.\n",
 			   ep385_ptime( new_rep_time ), 1.0 / new_rep_time );
 
 	ep385.is_repeat_time = SET;

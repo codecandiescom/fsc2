@@ -603,6 +603,9 @@ crowley.physik.fu-berlin.de:
 door.physik.fu-berlin.de:
 
 isaak.physik.fu-berlin.de:
+	sed -e 's/#define SERIAL_PORT[ \t]*0/#define SERIAL_PORT     1/' \
+		$(cdir)/er035m_sas.conf > $(cdir)/er035m_sas.conf.new
+	mv $(cdir)/er035m_sas.conf.new $(cdir)/er035m_sas.conf
 
 moebpc3.physik.fu-berlin.de:
 

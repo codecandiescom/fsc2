@@ -133,11 +133,12 @@ const char *ep385_pticks( Ticks ticks )
 }
 
 
-/*---------------------------------------------------------------------------
-  Comparison function for two pulses: returns 0 if both pulses are inactive,
-  -1 if only the second pulse is inactive or starts at a later time and 1 if
-  only the first pulse is inactive pulse or the second pulse starts earlier.
----------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Comparison function for two pulses: returns 0 if both pulses are  */
+/* inactive, -1 if only the second pulse is inactive or starts at a  */
+/* later time and 1 if only the first pulse is inactive pulse or the */
+/* second pulse starts earlier.                                      */
+/*-------------------------------------------------------------------*/
 
 int ep385_pulse_compare( const void *A, const void *B )
 {

@@ -312,8 +312,11 @@ static void ep385_defense_twt_check( void )
 
 void ep385_full_reset( void )
 {
-	int i;
+	int i, j, m;
 	PULSE *p = ep385_Pulses;
+	FUNCTION *f;
+	CHANNEL *ch;
+	PULSE **pm_entry;
 
 
 	while ( p != NULL )
@@ -331,13 +334,13 @@ void ep385_full_reset( void )
 
 		/* Reset pulse properies to their initial values */
 
-		p->pos = p->initial_pos;
-		p->is_pos = p->initial_is_pos;
-		p->len = p->initial_len;
-		p->is_len = p->initial_is_len;
-		p->dpos = p->initial_dpos;
+		p->pos     = p->initial_pos;
+		p->is_pos  = p->initial_is_pos;
+		p->len     = p->initial_len;
+		p->is_len  = p->initial_is_len;
+		p->dpos    = p->initial_dpos;
 		p->is_dpos = p->initial_is_dpos;
-		p->dlen = p->initial_dlen;
+		p->dlen    = p->initial_dlen;
 		p->is_dlen = p->initial_is_dlen;
 
 		p->needs_update = UNSET;
@@ -352,9 +355,60 @@ void ep385_full_reset( void )
 	ep385.is_running = ep385.has_been_running;
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-		ep385.function[ i ].next_phase = 0;
+	{
+		f = ep385.function + i;
+		f->next_phase = 0;
 
-	ep385_pulse_start_setup( );
+		if ( ! f->is_used )
+			continue;
+
+		for ( j = 0; j < f->num_channels; j++ )
+		{
+			ch = f->channel[ j ];
+
+			ch->needs_update = SET;
+
+			if ( ch->num_pulses == 0 )
+				continue;
+
+			/* Copy the old pulse list for the channel so the new state can
+			   be compared to the old state and an update is done only when
+			   needed. */
+
+			memcpy( ch->old_pulse_params, ch->pulse_params,
+					ch->num_active_pulses * sizeof *ch->pulse_params );
+			ch->old_num_active_pulses = ch->num_active_pulses;
+
+			pm_entry = f->pm[ f->next_phase * f->num_channels + j ];
+
+			ch->num_active_pulses = 0;
+			for ( m = 0; ( p = pm_entry[ m ] ) != NULL; m++ )
+				if ( p->is_active )
+				{
+					ch->pulse_params[ ch->num_active_pulses ].pos =
+															 p->pos + f->delay;
+					ch->pulse_params[ ch->num_active_pulses ].len = p->len;
+					ch->pulse_params[ ch->num_active_pulses ].pulse = p;
+					ch->num_active_pulses++;
+				}
+
+			qsort( ch->pulse_params, ch->num_active_pulses,
+				   sizeof *ch->pulse_params, ep385_pulse_compare );
+
+			if ( ch->num_active_pulses == ch->old_num_active_pulses )
+			{
+				for ( m = 0; m < ch->num_active_pulses; m++ )
+				if ( ch->pulse_params[ m ].pos !=
+					 ch->old_pulse_params[ m ].pos ||
+					 ch->pulse_params[ m ].len !=
+					 ch->old_pulse_params[ m ].len )
+					break;
+
+				if ( m == ch->num_active_pulses )
+					continue;
+			}
+		}
+	}
 }
 
 
@@ -461,8 +515,8 @@ static void ep385_commit( bool flag )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
 
 void ep385_cw_setup( void )
 {
