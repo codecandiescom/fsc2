@@ -28,7 +28,7 @@ void acq_seq_start( long acq_num, long acq_type )
 		THROW( EXCEPTION );
 	}
 
-	/* initialize the acquisition sequence */
+	/* Initialize the acquisition sequence */
 
 	ASeq[ acq_num ].defined = SET;
 	ASeq[ acq_num ].sequence = T_malloc( sizeof( int ) );
@@ -106,7 +106,7 @@ Phase_Sequence *phase_seq_start( long phase_seq_num )
 		cp = cp->next;
 	}
 
-	/* create new sequence, append it to end of list and initialize it */
+	/* Create new sequence, append it to end of list and initialize it */
 
 	cp = T_malloc( sizeof( Phase_Sequence ) );
 
@@ -132,7 +132,7 @@ Phase_Sequence *phase_seq_start( long phase_seq_num )
 /*------------------------------------------------------------------*/
 /* Called for each element in a list of phases for a phase sequence */
 /* ->                                                               */
-/*    * number of the phase sequence, 1 or 2                        */
+/*    * pointer to phase sequence                                   */
 /*    * either PHASE_PLUS_X, PHASE_MINUS_X, PHASE_PLUS_Y,           */
 /*	    PHASE_MINUS_Y or PHASE_CW                                   */
 /*------------------------------------------------------------------*/
@@ -141,7 +141,7 @@ void phases_add_phase( Phase_Sequence *p, int phase_type )
 {
 	assert ( phase_type >= PHASE_TYPES_MIN && phase_type <= PHASE_TYPES_MAX );
 
-	/* append the new phase to the sequence */
+	/* Append the new phase to the sequence */
 
 	p->len++;
 	p->sequence = T_realloc ( p->sequence, p->len * sizeof( int ) );
@@ -175,6 +175,9 @@ void phase_miss_list( Phase_Sequence *p )
 }
 
 
+/*--------------------------------------------------*/
+/*--------------------------------------------------*/
+
 void phases_clear( void )
 {
 	Phase_Sequence *p, *pn;
@@ -206,54 +209,59 @@ void phases_clear( void )
 void phases_end( void )
 {
 	Phase_Sequence *p;
+	int i, j;
 
 
-	/* return immediately if no sequences were defined at all */
+	/* Return immediately if no sequences were defined at all */
 
 	if ( ! ASeq[ 0 ].defined && ! ASeq[ 1 ].defined && PSeq == NULL )
 		return;
 
-	/* check that there is a acquisition sequence if there's a phase
-	   sequence */
-
-	if ( PSeq != NULL && ! ASeq[ 0 ].defined && ! ASeq[ 1 ].defined )
-	{
-		eprint( FATAL, "Phase sequences but no acquisition sequence "
-				"defined in PHASES section.\n" );
-		THROW( EXCEPTION );
-	}
-
-	/* check that there is a phase sequence if there's a acquisition
+	/* Check that there is a phase sequence if there's a acquisition
 	   sequence */
 
 	if ( ( ASeq[ 0 ].defined || ASeq[ 1 ].defined ) && PSeq == NULL )
 	{
-		eprint( FATAL, "Aquisition sequences but no phase sequences defined "
+		eprint( FATAL, "Aquisition sequence(s) defined but no phase sequences "
 				"in PHASES section.\n" );
 		THROW( EXCEPTION );
 	}
 
-	/* check that length of both acquisition sequences are identical
-	   (if both were defined) */
+	/* Return if neither phase sequences nor acquisition sequences are
+	   defined */
 
-	if ( ASeq[ 0 ].defined && ASeq[ 1 ].defined &&
-		 ASeq[ 0 ].len != ASeq[ 1 ].len )
-	{
-		eprint( FATAL, "The lengths of both acqusition sequences are "
-				"different.\n" );
-		THROW( EXCEPTION );
-	}
+	if ( PSeq == NULL )
+		return;
 
-	/* check that lengths of acquisition and phase sequences are identical */
+	/* Check that the lengths of all phases sequences are identical */
 
-	for ( p = PSeq; p != NULL; p = p->next )
-	{
-		if ( ASeq[ 0 ].len != p->len )
+	for ( p = PSeq->next; p != NULL; p = p->next )
+		if ( p->len != PSeq->len )
 		{
-			eprint( FATAL, "Lengths of phase sequence %d (%d) and the "
-					"acquisition sequence(s) (%d) are different.\n",
-					p->num, p->len, ASeq[0].len );
+			eprint( FATAL, "Lengths of phase sequences defined in PHASES "
+					"section differ.\n" );
 			THROW( EXCEPTION );
 		}
+
+	/* If one or both acquisition sequences are undefined set it to default
+	   values (+A for first, +B for second) */
+
+	for ( i = 0; i < 2; i++ )
+		if ( ! ASeq[ i ].defined )
+		{
+			ASeq[ i ].defined = SET;
+			ASeq[ i ].len = PSeq->len;
+			ASeq[ i ].sequence = T_malloc( ASeq[ i ].len * sizeof( int ) );
+			for ( j = 0; j < PSeq->len; j++ )
+				ASeq[ i ].sequence[ j ] = ( i == 0 ) ? ACQ_PLUS_A : ACQ_PLUS_B;
+		}
+
+	/* Check that lengths of acquisition and phase sequences are identical */
+
+	if ( ASeq[ 0 ].len != PSeq->len || ASeq[ 1 ].len != PSeq->len )
+	{
+		eprint( FATAL, "Lengths of phase and acquisition sequences defined in "
+				"PHASES section differ.\n" );
+		THROW( EXCEPTION );
 	}
 }

@@ -178,7 +178,7 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 		{
 			/* no file name with "-t" option ? */
 
-			if ( *argc == cur_arg + 1 )
+			if ( argv[ ++cur_arg ] == NULL )
 			{
 				fprintf( stderr, "fsc2 -t: No input file.\n" );
 				exit( EXIT_FAILURE );
