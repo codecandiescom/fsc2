@@ -196,6 +196,7 @@
 @item                         @tab
 @item @code{m}                @tab Unit, Meter
 @item @code{MA}               @tab Unit, Mega-Ampere
+@item @code{max_of}           @tab Built-in function (@ref{max_of})
 @item @code{MdB}              @tab Unit, Mega-Dezibel
 @item @code{Mdb}              @tab Unit, Mega-Dezibel
 @item @code{MATH1}            @tab Digitizer channel name
@@ -209,6 +210,7 @@
 @item @code{MEMD}             @tab Digitizer channel name
 @item @code{MG}               @tab Unit, Mega-Gauss
 @item @code{MHz}              @tab Unit, Mega-Hertz
+@item @code{min_of}           @tab Built-in function (@ref{min_of})
 @item @code{Mm}               @tab Unit, Mega-Meter
 @item @code{Ms}               @tab Unit, Mega-Seconds
 @item @code{MV}               @tab Unit, Mega-Volt
@@ -304,7 +306,6 @@
 @item @code{sin}              @tab Built-in function (@ref{sin})
 @item @code{sinh}             @tab Built-in function (@ref{sinh})
 @item @code{size}             @tab Built-in function (@ref{size})
-@item @code{sizes}            @tab Built-in function (@ref{sizes})
 @item @code{SL}               @tab
 @item @code{slice}            @tab Built-in function (@ref{slice})
 @item @code{slider_create}    @tab Built-in function (@ref{slider_create})
