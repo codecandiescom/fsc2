@@ -203,13 +203,13 @@ bool exp_layout( char *buffer, ptrdiff_t len )
 		char *old_Fname = Fname;
 		long old_Lc = Lc;
 		Var *Func_ptr;
-		int access;
+		int acc;
 		void *pos;
 
 
 		/* Get variable with address of function to create a button */
 
-		Func_ptr = func_get( "layout", &access );
+		Func_ptr = func_get( "layout", &acc );
 
 		/* Unpack parameter and push them onto the stack */
 
@@ -265,14 +265,14 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
 		Var *Func_ptr;
 		Var *ret = NULL;
 		long val;
-		int access;
+		int acc;
 		long result[ 2 ];
 		void *pos;
 
 
 		/* Get variable with address of function to create a button */
 
-		Func_ptr = func_get( "button_create", &access );
+		Func_ptr = func_get( "button_create", &acc );
 
 		/* Unpack parameter and push them onto the stack */
 
@@ -337,13 +337,13 @@ bool exp_bdelete( char *buffer, ptrdiff_t len )
 		char *old_Fname = Fname;
 		long old_Lc = Lc;
 		Var *Func_ptr;
-		int access;
+		int acc;
 		void *pos;
 
 
 		/* Get variable with address of function to create a button */
 
-		Func_ptr = func_get( "button_delete", &access );
+		Func_ptr = func_get( "button_delete", &acc );
 
 		/* Unpack parameter and push them onto the stack */
 
@@ -394,12 +394,12 @@ long exp_bstate( char *buffer, ptrdiff_t len )
 		long val;
 		Var *Func_ptr;
 		Var *ret = NULL;
-		int access;
+		int acc;
 		void *pos;
 
 		/* Get variable with address of function to create a button */
 
-		Func_ptr = func_get( "button_state", &access );
+		Func_ptr = func_get( "button_state", &acc );
 
 		/* Unpack parameter and push them onto the stack */
 
@@ -460,14 +460,14 @@ long *exp_screate( char *buffer, ptrdiff_t len )
 		long old_Lc = Lc;
 		Var *Func_ptr;
 		Var *ret = NULL;
-		int access;
+		int acc;
 		long result[ 2 ];
 		void *pos;
 
 
 		/* Get variable with address of function to create a button */
 
-		Func_ptr = func_get( "slider_create", &access );
+		Func_ptr = func_get( "slider_create", &acc );
 
 		/* Unpack parameter and push them onto the stack */
 
@@ -536,13 +536,13 @@ bool exp_sdelete( char *buffer, ptrdiff_t len )
 		char *old_Fname = Fname;
 		long old_Lc = Lc;
 		Var *Func_ptr;
-		int access;
+		int acc;
 		void *pos;
 
 
 		/* Get variable with address of function to create a button */
 
-		Func_ptr = func_get( "slider_delete", &access );
+		Func_ptr = func_get( "slider_delete", &acc );
 
 		/* Unpack parameter and push them onto the stack */
 
@@ -601,14 +601,14 @@ double *exp_sstate( char *buffer, ptrdiff_t len )
 		long val;
 		Var *Func_ptr;
 		Var *ret = NULL;
-		int access;
-		void *pos;
+		int acc;
+		char *pos;
 		double res[ 2 ];
 
 
 		/* Get variable with address of function to set/get slider value */
 
-		Func_ptr = func_get( "slider_value", &access );
+		Func_ptr = func_get( "slider_value", &acc );
 
 		/* Unpack parameter and push them onto the stack */
 
@@ -625,7 +625,7 @@ double *exp_sstate( char *buffer, ptrdiff_t len )
 			vars_push( FLOAT_VAR, * ( ( double * ) pos ) );
 		pos += sizeof( double );
 
-		Fname = ( char * ) pos;                /* get current file name */
+		Fname = pos;                           /* get current file name */
 
 		/* Call the function */
 
@@ -672,15 +672,15 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
 		long old_Lc = Lc;
 		Var *Func_ptr;
 		Var *ret = NULL;
-		int access;
+		int acc;
 		long result[ 2 ];
-		void *pos;
+		char *pos;
 		long type;
 
 
 		/* Get variable with address of function to create an input object */
 
-		Func_ptr = func_get( "input_create", &access );
+		Func_ptr = func_get( "input_create", &acc );
 
 		/* Unpack parameter and push them onto the stack */
 
@@ -703,13 +703,13 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
 			pos += sizeof( double );
 		}
 
-		Fname = ( char * ) pos;                  /* get current file name */
-		pos += strlen( ( char * ) pos ) + 1;
+		Fname = pos;                             /* get current file name */
+		pos += strlen( pos ) + 1;
 
-		vars_push( STR_VAR, ( char * ) pos );    /* get label string */
-		pos += strlen( ( char * ) pos ) + 1;
+		vars_push( STR_VAR, pos );               /* get label string */
+		pos += strlen( pos ) + 1;
 
-		if ( *( ( char * ) pos ) != '\0' )       /* get help text */
+		if ( *pos != '\0' )                      /* get help text */
 		{
 			if ( * ( ( unsigned char * ) pos ) == 0xff )
 			{
@@ -718,15 +718,15 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
 			}
 			else
 			{
-				vars_push( STR_VAR, ( char * ) pos );
-				pos += strlen( ( char * ) pos ) + 1;
+				vars_push( STR_VAR, pos );
+				pos += strlen( pos ) + 1;
 			}
 		}
 		else
 			pos++;
 
-		if ( *( ( char * ) pos ) != '\0' )       /* get C format string */
-			vars_push( STR_VAR, ( char * ) pos );
+		if ( *pos != '\0' )                      /* get C format string */
+			vars_push( STR_VAR, pos );
 
 		/* Call the function */
 
@@ -768,13 +768,13 @@ bool exp_idelete( char *buffer, ptrdiff_t len )
 		char *old_Fname = Fname;
 		long old_Lc = Lc;
 		Var *Func_ptr;
-		int access;
-		void *pos;
+		int acc;
+		char *pos;
 
 
 		/* Get variable with address of function to delete an input object */
 
-		Func_ptr = func_get( "input_delete", &access );
+		Func_ptr = func_get( "input_delete", &acc );
 
 		/* Unpack parameter and push them onto the stack */
 
@@ -785,7 +785,7 @@ bool exp_idelete( char *buffer, ptrdiff_t len )
 		vars_push( INT_VAR, * ( ( long * ) pos ) );
 		pos += sizeof( long );
 
-		Fname = ( char * ) pos;                /* get current file name */
+		Fname = pos;                           /* get current file name */
 
 		/* Call the function */
 
@@ -830,14 +830,14 @@ INPUT_RES *exp_istate( char *buffer, ptrdiff_t len )
 		long type;
 		Var *Func_ptr;
 		Var *ret = NULL;
-		int access;
-		void *pos;
+		int acc;
+		char *pos;
 		INPUT_RES input_res;
 
 
 		/* Get variable with address of function to set/get slider value */
 
-		Func_ptr = func_get( "input_value", &access );
+		Func_ptr = func_get( "input_value", &acc );
 
 		/* Unpack parameter and push them onto the stack */
 
@@ -862,7 +862,7 @@ INPUT_RES *exp_istate( char *buffer, ptrdiff_t len )
 			pos += sizeof( double );
 		}
 
-		Fname = ( char * ) pos;                /* get current file name */
+		Fname = pos;                                /* get current file name */
 
 		/* Call the function */
 
@@ -911,13 +911,13 @@ bool exp_objdel( char *buffer, ptrdiff_t len )
 		char *old_Fname = Fname;
 		long old_Lc = Lc;
 		Var *Func_ptr;
-		int access;
-		void *pos;
+		int acc;
+		char *pos;
 
 
 		/* Get variable with address of function to delete an input object */
 
-		Func_ptr = func_get( "object_delete", &access );
+		Func_ptr = func_get( "object_delete", &acc );
 
 		/* Unpack parameter and push them onto the stack */
 
@@ -928,7 +928,7 @@ bool exp_objdel( char *buffer, ptrdiff_t len )
 		vars_push( INT_VAR, * ( ( long * ) pos ) );
 		pos += sizeof( long );
 
-		Fname = ( char * ) pos;                /* get current file name */
+		Fname = pos;                           /* get current file name */
 
 		/* Call the function */
 
