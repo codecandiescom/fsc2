@@ -604,7 +604,7 @@ static bool hjs_fc_init( void )
 		if ( test_gauss[ i ] == hjs_fc.B0V )
 		{
 			print( FATAL, "Tests of field sweep indicate that the field can't "
-			   "be sweeped at all.\n" );
+			   "be swept at all.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -619,7 +619,9 @@ static bool hjs_fc_init( void )
 
 	if ( hjs_fc.slope == 0.0 )         /* this should be impossible... */
 	{
-		print( FATAL, "Tests of field sweep failed mysteriously.\n" );
+		print( FATAL, "Tests of field sweep indicate that the field can't be "
+			   "swept at all.\n" );
+		print( FATAL, "Tests of field sweep failed, field did not change.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -712,7 +714,7 @@ static double hjs_fc_set_field( double field, double error_margin )
 
 
 /*-------------------------------------------------------------------*/
-/* Function fir sweeping the field, i.e. just setting a new value of */
+/* Function for sweeping the field, i.e. just setting a new value of */
 /* the DAC output voltage but without checking the field using the   */
 /* gaussmeter.                                                       */
 /*-------------------------------------------------------------------*/
