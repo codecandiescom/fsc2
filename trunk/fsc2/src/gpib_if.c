@@ -232,10 +232,9 @@ int gpib_shutdown( void )
 /*    GPIB_LOG_FILE will be used.                                          */
 /*-------------------------------------------------------------------------*/
 
-static void gpib_init_log( char **log_file_name )
+static void gpib_init_log( char *log_file_name )
 {
     char *name;
-	struct stat file_stat;
 	bool access_ok = UNSET;
 	bool set_perms = UNSET;
 
@@ -255,7 +254,7 @@ static void gpib_init_log( char **log_file_name )
 	if ( ! access_ok && errno == ENOENT )        /* file doesn't exist yet ? */
 		set_perms = SET;
 
-    if ( gpib_log = fopen( name, "a+" ) == NULL )            /* open fails ? */
+    if ( ( gpib_log = fopen( name, "a+" ) ) == NULL )        /* open fails ? */
     {
         gpib_log = stderr;
         fprintf( stderr, "Can't open log file %s - using stderr instead.\n",
