@@ -539,8 +539,8 @@ long tds754a_translate_channel( int dir, long channel )
 				return DIGITIZER_CHANNEL_LINE;
 
 			default :
-				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-						__FILE__, __LINE__ );
+				eprint( FATAL, UNSET, "%s: Internal error detected at "
+						"%s:%d.\n", DEVICE_NAME, __FILE__, __LINE__ );
 				THROW( EXCEPTION );
 		}
 	}
