@@ -2,7 +2,7 @@
 #
 #  Library for National Instruments DAQ boards based on a DAQ-STC
 #
-#  Copyright (C) 2003 Jens Thoms Toerring
+#  Copyright (C) 2003-2004 Jens Thoms Toerring
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ lib_dir   = $(prefix)/lib
 
 CFLAGS    = -ggdb -O0 -Wall -Wwrite-strings -Wstrict-prototypes \
 			-Wmissing-prototypes -Wmissing-declarations -W
-LDFLAGS   = -Wl,--version-script=ni_daq_lib.map
+#LDFLAGS   = -Wl,--version-script=ni_daq_lib.map
 INCLUDES  = -I../include -I.
 
 sources   = $(shell ls *.c)
