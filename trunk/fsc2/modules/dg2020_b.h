@@ -136,19 +136,18 @@ typedef struct {
 
 typedef struct _F_ {
 	int self;                   /* the functions number */
-	const char *name;          /* name of function */
+	const char *name;           /* name of function */
 	bool is_used;               /* set if the function has been declared in
 								   the ASSIGNMENTS section */
-	bool is_needed;             /* set if the function has been assigned
-								   pulses */
 
-	struct _P_ *pod[ MAX_PODS_PER_FUNC ];   /* pods assigned to the function */
+	struct _P_ *pod[ MAX_PODS_PER_FUNC ];   /* list of pointers to pods 
+											   assigned to the function */
 	int num_pods;
 
 	int num_channels;           /* number of channels assigned to function */
 	int num_needed_channels;    /* number of channels really needed */
-	struct _C_ *channel[ MAX_CHANNELS ];
-
+	struct _C_ *channel[ MAX_CHANNELS ];  /* list of pointers to channels
+											 assigned to the function */
 	bool need_constant;
 
 	int num_pulses;             /* number of pulses assigned to the function */
@@ -169,8 +168,8 @@ typedef struct _F_ {
 	double high_level;          /* high and low voltage levels of the pod(s) */
 	double low_level;           /* associated with the function */
 
-	bool is_high_level;
-	bool is_low_level;
+	bool is_high_level;         /* set when high or low volatge level was */
+	bool is_low_level;          /* specified for the function */
 
 	bool *pm;
 	struct _C_ **pcm;           /* phase matrix */
@@ -179,17 +178,19 @@ typedef struct _F_ {
 	PULSE_PARAMS *old_pulse_params;
 	int num_params;
 
-	bool uses_auto_shape_pulses;
-	Ticks left_shape_padding;
-	Ticks right_shape_padding;
-	Ticks min_left_shape_padding;
-	Ticks min_right_shape_padding;
+	bool uses_auto_shape_pulses;     /* set when shape pulses are to be set */
+	Ticks left_shape_padding;        /* left side padding for shape pulses */
+	Ticks right_shape_padding;       /* right  side padding for shape pulses */
+	Ticks min_left_shape_padding;    /* minimum left and right shape padding */
+	Ticks min_right_shape_padding;   /* that could be set (might be lower than
+										what was requested) */
 
-	bool uses_auto_twt_pulses;
-	Ticks left_twt_padding;
-	Ticks right_twt_padding;
-	Ticks min_left_twt_padding;
-	Ticks min_right_twt_padding;
+	bool uses_auto_twt_pulses;       /* set when TWT pulses are to be set */
+	Ticks left_twt_padding;          /* left side padding for TWT pulses */
+	Ticks right_twt_padding;         /* right side padding for TWT pulses */
+	Ticks min_left_twt_padding;      /* minimum left and right TWT padding */
+	Ticks min_right_twt_padding;     /* that could be set (might be lower than
+										what was requested) */
 
 	long max_duty_warning;   /* number of times TWT duty cycle was exceeded */
 

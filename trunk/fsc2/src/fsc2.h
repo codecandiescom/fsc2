@@ -308,7 +308,7 @@ const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ] =
               "OTHER_3",
               "OTHER_4" };
 
-const char *Phase_Types[ NUM_PHASE_TYPES ] = { "+X", "-X", "+Y", "-Y", "CW" };
+const char *Phase_Types[ NUM_PHASE_TYPES ] = { "+X", "-X", "+Y", "-Y" };
 
 
 #else   /*  ! FSC2_MAIN */

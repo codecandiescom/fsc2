@@ -145,7 +145,6 @@ int dg2020_b_init_hook( void )
 		f->self = i;
 		f->name = Function_Names[ i ];
 		f->is_used = UNSET;
-		f->is_needed = UNSET;
 		for ( j = 0; j < MAX_PODS_PER_FUNC; j++ )
 			f->pod[ j ] = NULL;
 		f->num_pods = 0;

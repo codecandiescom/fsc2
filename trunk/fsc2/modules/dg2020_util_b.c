@@ -528,7 +528,7 @@ Ticks dg2020_calc_max_length( FUNCTION *f )
 	Ticks max_len = 0;
 
 
-	if ( ! f->is_needed || f->num_channels == 0 || f->num_params == 0 )
+	if ( f->num_pods == 0 || f->num_channels == 0 || f->num_params == 0 )
 		return 0;
 
 	for ( i = 0; i < f->num_params; i++ )

@@ -83,7 +83,6 @@ PX          "+"?[xX]
 MX          "-"[xX]
 PY          "+"?[yY]
 MY          "-"[yY]
-CW          [cC][wW]
 
 PA          "+"?[aA]
 MA          "-"[aA]
@@ -203,11 +202,6 @@ WS          [\n=,:. ]+
 			}
 {MY}        {
 				phaseslval.lval = PHASE_MINUS_Y;
-				return P_TOKEN;
-			}
-
-{CW}        {
-				phaseslval.lval = PHASE_CW;
 				return P_TOKEN;
 			}
 
