@@ -71,13 +71,13 @@ B4 = button_create( 2, B3, "Radio button 2", "This is another\nradio button" );
 S1 = slider_create( 3, 0, 10, 0.5, "Normal slider",
 					"This is a\nnormal slider" );
 S2 = slider_create( 4, -10, 10, 1, "Value slider", "This is a\nvalue slider" );
-I1 = input_create( 5, 1685, "Integer input object",
+I1 = input_create( 7, 1685, "Integer input object",
 				   "This is an input\nobject for integers" );
-I2 = input_create( 6, -2.7182818, "Float input object",
+I2 = input_create( 8, -2.7182818, "Float input object",
 				   "This is an input\nobject for floats", "%14.7e" );
-O1 = output_create( 7, 1750, "Integer output object",
+O1 = output_create( 9, 1750, "Integer output object",
 					"This is an output\nobject for integers" );
-O2 = output_create( 8, 3.1415927, "Float output object",
+O2 = output_create( 10, 3.1415927, "Float output object",
 					"This is an output\nobject for floats", "%14.7f" );
 M = menu_create( "Menu", "Item1", "Item2", "Item3" );
 
