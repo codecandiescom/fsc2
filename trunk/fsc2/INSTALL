@@ -184,24 +184,28 @@ C) Preparing for Installation
 =============================
 
 After installing the required tools and libraries and extracting the
-archive go into the newly created directory fsc2. You can use two methods
-of doing so. Either you can edit the Makefile directly and change some
-variables at its top. Alternatvely, go into the 'machines' subdirectory
-and copy the file 'template.nowhere' to a file with the fully qualified
-hostname of your machine (i.e. its full name, including the domain name)
-as its name. Now you can edit this file and it will automatically get
-evaluated during the make process. This is probably more convenient. When
-you edit the Makefile you will have to do it again and again whenever you
-install a new version. In contrast the file in the 'machines' subdirectory
-can just be copied from an old installation to a new version and everything
+archive go into the newly created directory fsc2. Now you have to set
+up fsc2 for your system and requirements. You can use two methods. You
+either edit the Makefile directly and change some variables at its top.
+Alternatvely, go into the 'machines' subdirectory and copy the file
+'template.nowhere' to a file with the fully qualified hostname of your
+machine (i.e. its full name, including the domain name) as its name.
+Now edit this file and it will automatically get evaluated during the
+make process. This is probably more convenient. When you edit the
+Makefile you will have to do it again each time you install a new
+version. In contrast the file in the 'machines' subdirectory can just
+be copied from an old installation to a new version and everything
 should stay the same.
 
+
+Now follows a description of the variables that can be set to change
+the way fsc2 is created and installed:
 
 Normally, fsc2 and all auxiliary files needed will be installed below
 /usr/local (in /usr/local/bin, /usr/local/lib/fsc2, /usr/local/info
 and /usr/local/share/doc). To change this location edit the lines
-defining the variable 'prefix' in the Makefile or the file you're setting
-up for your machine.
+defining the variable 'prefix' in the Makefile or the file you're
+setting up for your machine.
 
 
 The next two variables, OWNER and GROUP, will be used when setting the
@@ -237,7 +241,8 @@ either HIGH, MEDIUM, LOW or OFF. To help me find bugs in the device
 modules setting it to HIGH is recommended. But note that the file can
 get rather large, so better have it on a partition where there is a lot
 of free space. In order not to have it grow indefinitely each time a
-new experiment is started the log file is truncated to zero length.
+new experiment is started the log file is truncated to zero length, so
+it contains only information about the last experiment you run.
 
 
 If the header files for the GPIB library aren't in either '/usr/include'
@@ -249,7 +254,7 @@ The next two variables, NUM_SERIAL_PORTS and SERIAL_LOCK_DIR, are used
 for dealing with the serial ports. NUM_SERIAL_PORTS should be set to
 the number of serial ports that your computer has (or to the number you
 want fsc2 to have access to). If the variable is not set (or set to 0)
-no serial ports can be used.
+serial ports can't be used.
 
 
 SERIAL_LOCK_DIR must be a string with the name of the directory where
@@ -316,13 +321,13 @@ each device connected via the serial port there's a line like
 
 #define SERIAL_PORT     1
 
-This tells the program the number of the serial port. Serial ports are
-numbered starting with 0. So setting SERIAL_PORT to 0 means that the
-device will be accessed via the device file '/dev/ttyS0'. In DOS or
-Windows nomenclature this means COM1. The serial port numbered 1 is
-accessed via 'dev/ttyS1' (re COM2 in DOS-speak). Make sure to set the
-correct number or the program will complain when it tries to access
-the device about communication failures.
+which tells the program the number of the serial port the device is
+connected to. Serial ports are numbered starting with 0. So setting
+SERIAL_PORT to 0 means that the device will be accessed via the
+device file '/dev/ttyS0'. In DOS or Windows nomenclature this means
+COM1. The serial port numbered 1 is accessed via 'dev/ttyS1' (or COM2
+in DOS-speak). Make sure to set the correct number or the program will
+complain when it tries to access the device about communication failures.
 
 
 
