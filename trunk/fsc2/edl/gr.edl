@@ -18,4 +18,5 @@ FOR I = 1 : MAX {
 	display( I, g[ I ], 1, I, r[ I ], 2 );
 }
 
+
 print( "g = #, r = #\n", rms( g ), rms( r ) );
