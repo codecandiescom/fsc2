@@ -913,7 +913,7 @@ void vars_check( Var *v, int type )
 	{
 		if ( v->name != NULL )
 		{
-			eprint( FATAL, "%s:%ld: The accessed variable `%s' has never been "
+			eprint( FATAL, "%s:%ld: The accessed variable `%s' has not been "
 					"assigned a value.\n", Fname, Lc, v->name );
 			THROW( EXCEPTION );
 		}
@@ -948,7 +948,7 @@ void vars_warn_new( Var *v )
  	if ( v->flags & NEW_VARIABLE )
 	{
 		if ( v->name != NULL )
-			eprint( WARN, "%s:%ld: WARNING: Variable `%s' has never been "
+			eprint( WARN, "%s:%ld: WARNING: Variable `%s' has not been "
 					"assigned a value.\n", Fname, Lc, v->name );
 		else
 		{
@@ -1473,7 +1473,7 @@ void vars_ass_from_var( Var *src, Var *dest )
 	if ( src->flags & NEW_VARIABLE )
 	{
 		eprint( FATAL, "%s:%ld: On right hand side of assignment a "
-				"variable is used that has never been assigned a value.\n",
+				"variable is used that has not been assigned a value.\n",
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}

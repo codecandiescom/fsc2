@@ -275,7 +275,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 				if ( ( prepslval.vptr = vars_get( prepstext ) ) == NULL )
 				{
-					eprint( FATAL, "%s:%ld: Variable `%s' has never been "
+					eprint( FATAL, "%s:%ld: Variable `%s' has not been "
 							"declared.\n", Fname, Lc, prepstext );
 					THROW( EXCEPTION );
 				}

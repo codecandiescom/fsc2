@@ -222,7 +222,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 				prim_exp_val.vptr = vars_get( prim_exptext );
 				if ( prim_exp_val.vptr == NULL )
 				{
-					eprint( FATAL, "%s:%ld: Variable `%s' has never been "
+					eprint( FATAL, "%s:%ld: Variable `%s' has not been "
 							"declared.\n", Fname, Lc, prim_exptext );
 					 THROW( EXCEPTION );
 				}

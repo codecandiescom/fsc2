@@ -271,7 +271,7 @@ WS          [\n=: ]+
 
 				if ( ( assignlval.vptr = vars_get( assigntext ) ) == NULL )
 				{
-					eprint(	FATAL, "%s:%ld: Variable `%s' has never been "
+					eprint(	FATAL, "%s:%ld: Variable `%s' has not been "
 							"declared.\n", Fname, Lc, assigntext );
 					 THROW( EXCEPTION );
 				}
