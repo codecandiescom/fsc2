@@ -24,6 +24,7 @@
 
 use strict;
 use Tk;
+use Tk::Balloon;
 
 my @version = split /\./, $Tk::VERSION;
 die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
