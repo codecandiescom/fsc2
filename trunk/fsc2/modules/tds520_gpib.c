@@ -723,11 +723,9 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	/* Set start and end point of curve to be fetched */
 
-	sprintf( cmd, "DAT:START %ld\n", w != NULL ? w->start_num : 1 );
-	if ( gpib_write( tds520.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds520_gpib_failure( );
-
-	sprintf( cmd, "DAT:STOP %ld\n", w != NULL ? w->end_num : tds520.rec_len );
+	sprintf( cmd, "DAT:START %ld;:DAT:STOP %ld\n", 
+			 w != NULL ? w->start_num : 1,
+			 w != NULL ? w->end_num : tds520.rec_len );
 	if ( gpib_write( tds520.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds520_gpib_failure( );
 
@@ -748,8 +746,7 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 	/* Calculate how long the curve (with header) is going to be and allocate
        enough memory (data are 2-byte integers) */
 
-	*length =   ( w != NULL ? w->end_num : tds520.rec_len )
-		      - ( w != NULL ? w->start_num : 1 ) + 1;
+	*length =  w != NULL ? w->end_num - w->start_num : tds520.rec_len;
 	len = 2 * *length;
 	len2 = 1 + ( long ) floor( log10( len ) );
 	len1 = 1 + ( long ) floor( log10( len2 ) );

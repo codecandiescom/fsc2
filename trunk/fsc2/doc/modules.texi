@@ -1,6 +1,6 @@
 @c $Id$
 
-@node Modules, Reserved Words, Device Functions, Top
+@node Modules, Reserved Words, Using Pulsers, Top
 @chapter Modules
 @cindex modules
 

@@ -1,6 +1,6 @@
 @c $Id$
 
-@node Device Functions, Modules, Built-in Functions, Top
+@node Device Functions, Using Pulsers, Built-in Functions, Top
 @chapter Device Functions
 
 @ifinfo

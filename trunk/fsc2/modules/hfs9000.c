@@ -24,8 +24,8 @@ int hfs9000_init_hook( void )
 
 	if ( pulser_struct.name != NULL )
 	{
-		eprint( FATAL, "%s:%ld: While loading driver HFS9000 found that "
-				"driver %s is already installed.\n",
+		eprint( FATAL, "%s:%ld: While loading driver HFS9000 found that a"
+				"driver fro pulser %s is already installed.\n",
 				Fname, Lc, pulser_struct.name );
 		THROW( EXCEPTION );
 	}
@@ -56,7 +56,7 @@ int hfs9000_init_hook( void )
 	pulser_struct.set_repeat_time = NULL;
 	pulser_struct.set_trig_in_level = hfs9000_set_trig_in_level;
 	pulser_struct.set_trig_in_slope = hfs9000_set_trig_in_slope;
-	pulser_struct.set_trig_in_impedance = NULL;
+	pulser_struct.set_trig_in_impedance = NULL;    /*!!!!!!!!!!!!!!!!!!!*/
 
 	pulser_struct.set_phase_reference = NULL;
 

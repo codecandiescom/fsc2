@@ -5,24 +5,184 @@
 
 @ifinfo
 @menu
-* Introductio::            
+* Pulser Overview::        Introduction
+* Setting up the Pulser::  @code{ASSIGNMENTS} and @code{PHASES} section
 @end menu
 @end ifinfo
 
 
-@node Introductio, , Using Pulsers, Using Pulsers
-@section Introductio
+@node Pulser Overview, Setting up the Pulser, Using Pulsers, Using Pulsers
+@section Pulser Overview
 
 Using the pulsers has its own chapter because several special methods
 to handle the pulser setup, create pulses und how to do phase cycling
 have to be introduced. Beside, the way the pulser is to be used depends
-rather strongly on the other hardware used in the spectrometer. For this
-reasons, there can even to additional types of sections in the
-@acronym{EDL} in order to setup the pulser. These are
+rather strongly on the other hardware used in the spectrometer.
+Currently, there are three combinations of pulsers and spectrometers
+implemented:
+@itemize @bullet
+@item Sony/Tektronix DG2020 with S-band spectrometer in Frankfurt/Main
+@item Sony/Tektronix DG2020 with X-band spectrometer in Berlin
+@item Tektronix HFS9003 with W-band spectrometer in Berlin
+@end itemize
+Because of the importance of the pulser for time-resolved experiments
+there are even two additional types of sections in the @acronym{EDL} in
+order to setup the pulser. These are
 @example
 ASSIGNMENTS
 PHASES
 @end example
-
 While the first one deals with the basic setup of the pulser the second
-one is only necessary when phase cycling is used.
+one is only necessary when phase cycling is used. Valid statements in
+these sections differ slightly, depending on the type of the pulser and
+the spectrometer it is supposed to work with.
+
+Beside these additional sections there are some other construct for the
+creation of pulses and their subsequent manipulation. These are
+identical for all pulsers.
+
+
+@node Setting up the Pulser, , Pulser Overview, Using Pulsers
+@section Setting up the Pulser
+
+The basic setup of the pulser happens in the @code{ASSIGNMENTS} and the
+@code{PHASES} section. The latter section will be missing if no phase
+cycling is planned for the experinment.
+
+@anchor{ASSIGNMENTS}
+@subsection @code{ASSIGNMENTS} section
+@cindex ASSIGNMENTS section
+
+@anchor{Setting the TIMEBASE}
+@subsubsection Setting the @code{TIMEBASE}
+@cindex Setting the @code{TIMEBASE}
+
+The first statement of the @code{ASSIGNMENTS} section has be the setting
+of the timebase of the pulser. All pulser supported be the pulser work
+similarly: The have a certain number of time slices (actually, it are
+65536) for which the output of the pulser can be either set to a high or
+a low voltage. By setting the output during certain time slices to a
+high voltage and for all the others to a low voltage pulses are created.
+The timebase to be set first in the @code{ASSIGNMENT} section is the
+length of one of these time slices. From the above it is clear, that all
+pulses (as well as all the times between pulses) have to be integer
+multiples of the length of the time slices.
+
+The statement to set the timebase, i.e.@ the length of the individual
+time slices is:
+@example
+TIMEBASE: 5 ns;
+@end example
+Alternatively, one may also write @code{TB:}, @code{T_B}, @code{TBASE:},
+@code{T_BASE:}, @code{TIMEB}, @code{TIME_B:} or @code{TIME_BASE:} insetad
+of @code{TIMEBASE:}. Please note that, whatever form you choose, it has
+to end with a colon.
+
+The minumum and maximum values for the timebase differ for both types of
+pulsers:
+@itemize @bullet
+@item Sony/Tektronix DG2020: @w{5 ns} to @w{0.1 s}
+@item Tektronix HFS9003: @w{1.6 ns} to @w{20 us}
+@end itemize
+
+@anchor{Setting the trigger mode}
+@subsubsection Setting the trigger mode
+@cindex Setting the trigger mode
+
+The next statement new is for the triggering of the pulser. A pulser starts
+a new sequence of pulses either on receiving an external or it is
+triggered internally. Which type of triggering is to be used depends, of
+course, on the experiment. To set either to internal or external trigger
+us a statement like this:
+@example
+TRIGGER_MODE: INTERNAL;
+@end example
+or
+@example
+TRIGGER_MODE: EXTERNAL;
+@end example
+Instead of @code{TRIGGER_MODE} also @code{TM:}, @code{T_M:},
+@code{TRIGM:}, @code{TRIG_M:}, @code{TRIGMODE:}, @code{TRIG_MODE:},
+@code{T_MODE:}, @code{TMODE:}, @code{TRIGGER_M:}, @code{TRIGGERM:} or
+@code{TRIGGERMODE:} can be used. And the keywords @code{INTERNAL} and
+@code{EXTERNAL} can be shortend to @code{INTERN} or @code{INT} and
+@code{EXTERN} or @code{EXT}.
+
+When using the internal trigger it is useful to be able to set the rate
+or the frequency the experiment is repeated. For this type of triggering
+an additional keyword can be specified, either @code{REPEAT_TIME} or
+@code{REPEAT_FREQUENCY}, i.e.@ one may use
+@example
+TRIGGER_MODE: INTERNAL, REPEAT_TIME = 10 ms;
+@end example
+or
+@example
+TRIGGER_MODE: INTERNAL, REPEAT_FREQUENCY = 100 Hz;
+@end example
+to set the repetition rate of the the experiment to @w{100 Hz}. Please
+note that the repeat time must be an intege multiple of the timebase of
+the pulser.
+
+@code{REPEAT_TIME} and @code{REPEAT_FREQUENCY} may also be abbreviated
+to @code{REPT}, @code{REP_T}, @code{REPTIME}, @code{REPEAT_TIME},
+@code{REPEAT_T}, @code{REPEATT} or @code{REPEATTIME} and @code{REPF},
+@code{REP_F}, @code{REPFREQ}, @code{REP_FREQ}, @code{REPFREQUENCY},
+@code{REP_FREQUENCY}, @code{REPEATF}, @code{REPEAT_F},
+@code{REPEATFREQ}, @code{REPEAT_FREQ} or @code{REPEATFREQUENCY}.
+
+On the other hand, when using an external trigger one may want to set the
+trigger level, slope and, possibly, the tripper input impedance. This
+done using a statement similar to one of these:
+@example
+TRIG_MODE: EXTERNAL, LEVEL = 3.5 V, SLOPE = NEGATIVE, IMPEDANCE = LOW;
+@end example
+or
+@example
+TM: EXTERNAL, LEVEL = -1.2 V, SLOPE = POSITIVE, IMPEDANCE = HIGH;
+@end example
+The keywords @code{LEVEL} can be shortend to @code{LEV}, @code{SLOPE} to
+@code{SL}, @code{POSITIVE} to @code{POS}, @code{NEGATIVE} to @code{NEG},
+@code{IMPEDANCE} to @code{IMP} and, finally, @code{HIGH} to @code{H} and
+@code{LOW} to @code{L}.
+
+@anchor{Channel setup}
+@subsubsection Channel setup
+@cindex Channel setup
+
+The following statements described in the following deal with setting up
+the channels of the pulser. The idea is to abstract from the output
+connectors of the pulser and to use symbolic names for the
+channels. This means that instead of specifying to output a pulse from
+the connector @w{numbered 1} of the pulser later on, in the
+@code{ASSIGNMENTS} section symbolic names for the functions of the
+channels are defined and these symbolic names will be used when talking
+about pulses. While this may be only a convenience in simple experiments
+it makes it much simpler when doing e.g.@ phase cycling, because here
+the same pulse must be output on different channels, depending on the
+current phase. And instead of always specifying which output to use in a
+certain situation, the program is told about which channels to use and
+then is is left to the program to do the bookkeeping which output
+channel is to be used for the current phase.
+
+Currently, the following symbolic names for pulse functions are
+defined:
+@itemize @bullet
+@item @code{MICROWAVE} (or @code{MW}, @code{MICRO_WAVE}, @code{MICROW},
+      @code{MICRO_W}, @code{MWAVE}, @code{M_WAVE} or @code{M_W})
+@item @code{TRAVELING_WAVE_TUBE} (or @code{TWT} )
+@item @code{TRAVELING_WAVE_TUBE_GATE}
+@end itemize
+@c T(RAVELING)?_?W(AVE)?_?T(UBE)?:?
+@c TWT_GATE    T(RAVELING)?_?W(AVE)?_?T(UBE)?_?G(ATE)?:?
+@c DET         DET(ECTION)?:?
+@c DET_GATE    DET(ECTION)?_?G(ATE)?:?
+@c DEF         DEF(ENSE)?:?
+@c RF          R(ADIO)?_?F(REQ(UENCY)?)?:?
+@c RF_GATE     R(ADIO)?_?F(REQ(UENCY)?)?_?G(ATE)?:?
+@c PSH         P(ULSE)?_?SH(APE(R)?)?:?
+@c PH1         PH(ASE)?(_?1)?:?
+@c PH2         PH(ASE)?_?2:?
+@c OI          O(THER)?(_?1)?:?
+@c OII         O(THER)?_?2:?
+@c OIII        O(THER)?_?3:?
+@c OIV         O(THER)?_?4:?

@@ -58,6 +58,7 @@ devices to be used in the experiment.
 * EDL::                     Description of EDL the language.
 * Built-in Functions::      Built-in functions.
 * Device Functions::        Functions for accessing devices.
+* Using Pulsers::           How to work with the pulsers
 * Modules::                 How to create new modules.
 * Reserved Words::          List of all reserved words.
 * Index::                   List of all indexed words.
@@ -72,6 +73,7 @@ devices to be used in the experiment.
 @include edl.texi
 @include builtins.texi
 @include devices.texi
+@include pulser.texi
 @include modules.texi
 @include reserved.texi
 
