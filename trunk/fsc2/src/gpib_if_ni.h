@@ -80,16 +80,7 @@ typedef struct {
 #endif
 
 
-/* GPIB_LOG, GPIB_CONF and AWK might be defined via compiler flags -
-   otherwise define it here */
-
-#if defined GPIB_LOG
-#define GPIB_LOG_FILE GPIB_LOG
-#else
-#define GPIB_LOG_FILE  "/tmp/gpib.log"
-#endif
-
-#if defined GPIB_CONF
+#if defined GPIB_CONF_FILE
 #define GPIB_CONF_FILE GPIB_CONF
 #else
 #define GPIB_CONF_FILE  "/etc/gpib.conf"

@@ -99,11 +99,10 @@ GPIB_DEV *gpib_dev_list = NULL; /* list of symbolic names of devices etc. */
 /* of the log file remains unchanged!).                                    */
 /* In order to make opening the log file with write access work for all    */
 /* users it should be created previously and be given the proper access    */
-/* permissions, i.e. r and w for everyone .                                */
+/* permissions, i.e. r and w for everyone.                                 */
 /* ->                                                                      */
 /*  * Pointer to the name of log file - if the pointer is NULL or does not */
-/*    point to a non-empty string the default log file name defined by     */
-/*    GPIB_LOG_FILE will be used.                                          */
+/*    point to a non-empty string stderr is used.                          */
 /*  * log level, either LL_NONE, LL_ERR, LL_CE or LL_ALL                   */
 /*    (if log level is LL_NONE 'log_file_name' is not used at all)         */
 /* <-                                                                      */
@@ -111,7 +110,7 @@ GPIB_DEV *gpib_dev_list = NULL; /* list of symbolic names of devices etc. */
 /*  * FAILURE: error, GPIB bus can't be used                               */
 /*-------------------------------------------------------------------------*/
 
-int gpib_init( char *log_file_name, int log_level )
+int gpib_init( const char *log_file_name, int log_level )
 {
 	GPIB_DEV *cur_dev;
 
@@ -247,8 +246,7 @@ int gpib_shutdown( void )
 /* permissions are set to allow read and write access for everyone.        */
 /* ->                                                                      */
 /*  * Pointer to the name of log file - if the pointer is NULL or does not */
-/*    point to a non-empty string the default log file name defined by     */
-/*    GPIB_LOG_FILE will be used.                                          */
+/*    point to a non-empty string stderr is used.                          */
 /*-------------------------------------------------------------------------*/
 
 static void gpib_init_log( char *log_file_name )

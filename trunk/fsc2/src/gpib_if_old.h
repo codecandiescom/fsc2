@@ -53,16 +53,6 @@
 #endif
 
 
-/* GPIB_LOG, GPIB_CONF and AWK might be defined via compiler flags -
-   otherwise define it here */
-
-#if defined GPIB_LOG
-#define GPIB_LOG_FILE GPIB_LOG
-#else
-#define GPIB_LOG_FILE  "/tmp/gpib.log"
-#endif
-
-
 #define DMA_SIZE 64512    /* compare this with entry in /etc/gpib.conf ! */
 
 
@@ -75,7 +65,7 @@ typedef struct _gd_
 } GPIB_DEV;
 
 
-GPIB_VARIABLE int gpib_init( char *log_file_name, int log_level );
+GPIB_VARIABLE int gpib_init( const char *log_file_name, int log_level );
 GPIB_VARIABLE int gpib_shutdown( void );
 GPIB_VARIABLE int gpib_init_device( const char *device_name, int *dev );
 GPIB_VARIABLE int gpib_local( int device );
