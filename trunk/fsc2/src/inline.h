@@ -27,23 +27,23 @@
 /* to be a good idea...                                             */
 /********************************************************************/
 
-inline void raise_permissions( void );
-inline void lower_permissions( void );
-inline short d2shrt( double a );
-inline short i2shrt( int a );
-inline unsigned short d2ushrt( double a );
-inline unsigned short i2ushrt( int a );
-inline int i_max( int a, int b );
-inline int i_min( int a, int b );
-inline long l_max( long a, long b );
-inline long l_min( long a, long b );
-inline float f_max( float a, float b );
-inline float f_min( float  a, float  b );
-inline double d_max( double a, double b );
-inline double d_min( double a, double b );
-inline size_t s_min( size_t a, size_t b );
-inline long lrnd( double x );
-inline int irnd( double x );
+static inline void raise_permissions( void );
+static inline void lower_permissions( void );
+static inline short d2shrt( double a );
+static inline short i2shrt( int a );
+static inline unsigned short d2ushrt( double a );
+static inline unsigned short i2ushrt( int a );
+static inline int i_max( int a, int b );
+static inline int i_min( int a, int b );
+static inline long l_max( long a, long b );
+static inline long l_min( long a, long b );
+static inline float f_max( float a, float b );
+static inline float f_min( float  a, float  b );
+static inline double d_max( double a, double b );
+static inline double d_min( double a, double b );
+static inline size_t s_min( size_t a, size_t b );
+static inline long lrnd( double x );
+static inline int irnd( double x );
 
 /*---------------------------------------------------------------------*/
 /* The program starts with the EUID and EGID set to the ones of fsc2,  */
@@ -53,7 +53,7 @@ inline int irnd( double x );
 /* fsc2.                                                               */
 /*---------------------------------------------------------------------*/
 
-inline void raise_permissions( void )
+static inline void raise_permissions( void )
 {
 	seteuid( Internals.EUID );
 	setegid( Internals.EGID );
@@ -65,7 +65,7 @@ inline void raise_permissions( void )
 /* the program.                                                        */
 /*---------------------------------------------------------------------*/
 
-inline void lower_permissions( void )
+static inline void lower_permissions( void )
 {
 	seteuid( getuid( ) );
 	setegid( getgid( ) );
@@ -81,7 +81,7 @@ inline void lower_permissions( void )
 /* to half the size of a short int.                                        */
 /*-------------------------------------------------------------------------*/
 
-inline short d2shrt( double a )
+static inline short d2shrt( double a )
 {
 	if ( a > SHRT_MAX_HALF )
 		return SHRT_MAX_HALF;
@@ -91,7 +91,7 @@ inline short d2shrt( double a )
 }
 
 
-inline short i2shrt( int a )
+static inline short i2shrt( int a )
 {
 	if ( a > SHRT_MAX_HALF )
 		return SHRT_MAX_HALF;
@@ -101,7 +101,7 @@ inline short i2shrt( int a )
 }
 
 
-inline unsigned short d2ushrt( double a )
+static inline unsigned short d2ushrt( double a )
 {
 	if ( a > USHRT_MAX )
 		return USHRT_MAX;
@@ -111,7 +111,7 @@ inline unsigned short d2ushrt( double a )
 }
 
 
-inline unsigned short i2ushrt( int a )
+static inline unsigned short i2ushrt( int a )
 {
 	if ( a > USHRT_MAX )
 		return USHRT_MAX;
@@ -120,18 +120,18 @@ inline unsigned short i2ushrt( int a )
 	return ( unsigned short ) a;
 }
 
-inline int    i_max( int    a, int    b ) { return a > b ? a : b; }
-inline int    i_min( int    a, int    b ) { return a < b ? a : b; }
-inline long   l_max( long   a, long   b ) { return a > b ? a : b; }
-inline long   l_min( long   a, long   b ) { return a < b ? a : b; }
-inline float  f_max( float  a, float  b ) { return a > b ? a : b; }
-inline float  f_min( float  a, float  b ) { return a < b ? a : b; }
-inline double d_max( double a, double b ) { return a > b ? a : b; }
-inline double d_min( double a, double b ) { return a < b ? a : b; }
-inline size_t s_min( size_t a, size_t b ) { return a < b ? a : b; }
+static inline int    i_max( int    a, int    b ) { return a > b ? a : b; }
+static inline int    i_min( int    a, int    b ) { return a < b ? a : b; }
+static inline long   l_max( long   a, long   b ) { return a > b ? a : b; }
+static inline long   l_min( long   a, long   b ) { return a < b ? a : b; }
+static inline float  f_max( float  a, float  b ) { return a > b ? a : b; }
+static inline float  f_min( float  a, float  b ) { return a < b ? a : b; }
+static inline double d_max( double a, double b ) { return a > b ? a : b; }
+static inline double d_min( double a, double b ) { return a < b ? a : b; }
+static inline size_t s_min( size_t a, size_t b ) { return a < b ? a : b; }
 
 
-inline long lrnd( double x )
+static inline long lrnd( double x )
 {
 	if ( x > LONG_MAX )
 		return LONG_MAX;
@@ -141,7 +141,7 @@ inline long lrnd( double x )
 }
 
 
-inline int irnd( double x )
+static inline int irnd( double x )
 {
 	if ( x > INT_MAX )
 		return INT_MAX;
