@@ -73,22 +73,22 @@ int Channel_Type;
 
 
 input:   /* empty */
-       | input line                   { Channel_Type =
-											PULSER_CHANNEL_NO_TYPE; }
-       | input SECTION_LABEL          { YYACCEPT; }
+       | input line ';'               { Channel_Type =
+											PULSER_CHANNEL_NO_TYPE;
+                                        assert( Var_Stack == NULL ); }
+       | input SECTION_LABEL          { assert( Var_Stack == NULL );
+	                                    YYACCEPT; }
+       | input error ';'              { THROW ( SYNTAX_ERROR_EXCEPTION ); }
        | input ';'
 ;
 
 
 /* A (non-empty) line has to start with one of the channel keywords */
 
-line:    keywd pcd ';'                { }
+line:    keywd pcd                    { }
        | keywd pcd SECTION_LABEL      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | keywd pcd keywd error ';'    { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | error ';'                    { THROW ( SYNTAX_ERROR_EXCEPTION ); }
-       | VAR_TOKEN ';'                { }    /* no assignment to be done */
-       | VAR_TOKEN '=' expr ';'       { vars_assign( $3, $1 );
-                                        assert( Var_Stack == NULL ); }
+       | keywd pcd keywd error        { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | VAR_TOKEN '=' expr           { vars_assign( $3, $1 ); }
        | VAR_TOKEN '['                { vars_arr_start( $1 ); }
          list1 ']'                    { vars_arr_lhs( $4 ); }
          '=' expr ';'                 { vars_assign( $8, $8->prev );
