@@ -34,10 +34,10 @@ FOR K = 1 : M
 		j[ 3, I ] = a * ( 0.9 + 0.1 * cos( 0.2 * I ) ) - b;
 		j[ 4, I ] = j[ 2, I ] + 0.0002 * random( );
 
-		fsave( "# # # # # #\n", a, b, j[ 1, I ], j[ 2, I ], j[ 3, I ], j[ 4, I ] );
+		fsave( "# # # # # #\n", a, b, j[ 1, I ], j[ 2, I ],
+									  j[ 3, I ], j[ 4, I ] );
 	}
 
-//	fsave( "\n" );
 	display( 1, K, j[ 1 ], 1, 
 			 1, K, j[ 2 ], 2,
 			 1, K, j[ 3 ], 3,
@@ -49,9 +49,8 @@ FOR K = 1 : M
 
 ON_STOP:
 
-/*
 save_comment( "% ", "Na, was denkst\ndu über das?\n", 
 			  "Ihre Meinung zählt:" );
 save_program( "# ");
 save_output( "% " );
-*/
+
