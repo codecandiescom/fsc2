@@ -75,7 +75,7 @@ ifdef AWK
     CFLAGS += -DAWK=\"$(AWK)\"
 endif
 
-CFLAGS += $(patsubst %,-I%,$(subst :, ,$(VPATH))) -Iaux
+CFLAGS += $(patsubst %,-I%,$(subst :, ,$(VPATH)))
 
 ifdef libdir
 	CFLAGS += -Dlibdir=\"$(libdir:/=)/\"

@@ -2,7 +2,7 @@
 
 c_sources      = fsc2.c pulser.c util.c exceptions.c variables.c vars_util.c \
 				 func.c func_basic.c func_util.c T.c phases.c exp.c devices.c \
-				 gpib.c run.c comm.c chld_func.c graphics.c accept.c \
+				 gpib_if.c run.c comm.c chld_func.c graphics.c accept.c \
 				 graph_handler_1d.c graph_handler_2d.c loader.c bugs.c print.c
 
 bison_sources  = $(wildcard *_parser.y)
@@ -36,11 +36,11 @@ fsc2: test $(objects)
 
 test:
 	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" \
-		 -a -e gpib_old.c -a -e gpib_old.h ]; then \
-		mv gpib.c gpib_new.c; \
-		mv gpib.h gpib_new.h; \
-		mv gpib_old.c gpib.c; \
-		mv gpib_old.h gpib.h; \
+		 -a -e gpib_if_old.c -a -e gpib_if_old.h ]; then \
+		mv gpib_if.c gpib_if_new.c; \
+		mv gpib_if.h gpib_if_new.h; \
+		mv gpib_if_old.c gpib_if.c; \
+		mv gpib_if_old.h gpib_if.h; \
 	fi;
 
 modules:
@@ -48,11 +48,11 @@ modules:
 
 untest:
 	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" \
-		 -a -e gpib_new.c -a -e gpib_new.h ]; then \
-		mv gpib.c gpib_old.c; \
-		mv gpib.h gpib_old.h; \
-		mv gpib_new.c gpib.c; \
-		mv gpib_new.h gpib.h; \
+		 -a -e gpib_if_new.c -a -e gpib_if_new.h ]; then \
+		mv gpib_if.c gpib_if_old.c; \
+		mv gpib_if.h gpib_if_old.h; \
+		mv gpib_if_new.c gpib_if.c; \
+		mv gpib_if_new.h gpib_if.h; \
 	fi;
 
 

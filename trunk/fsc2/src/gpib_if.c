@@ -3,11 +3,11 @@
 */
 
 
-#define __GPIB__
+#define __GPIB_IF__
 
 
 #include "fsc2.h"
-#include "gpib.h"
+#include "gpib_if.h"
 
 
 /*----------------------------------------------------------------*/

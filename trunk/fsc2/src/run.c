@@ -4,7 +4,7 @@
 
 
 #include "fsc2.h"
-#include "gpib.h"
+#include "gpib_if.h"
 
 
 extern int exp_runparse( void );              /* from exp_run_parser.y */

@@ -10,10 +10,10 @@
 /*------------------------------------------------------------------------*/
 
 
-#include "/usr/local/include/gpib.h"
+#include <gpib.h>
 
 
-#if defined ( __GPIB__ )
+#if defined ( __GPIB_IF__ )
 	#define GPIB_VARIABLE
 #else
 	#define GPIB_VARIABLE extern
