@@ -68,6 +68,16 @@ Normally, fsc2 and all auxiliary files needed will be installed below
 and /usr/local/share/doc). To change these locations edit the first lines
 of the Makefile.
 
+The next two variables OWNER and GROUP must be set to the owner of all the
+files that will be installed as well as its group. I would strongly recommend
+to create a special account and a special group for fsc2. fsc2 needs to be
+installed setuid'ed, so for security reasons this special user should have as
+low privileges as possible and should not be able to log into the system
+(e.g. by setting its shell in /etc/passwd to /bin/false). Most of the time
+fsc2 runs with the real users ID and group but at a few places (e.g. when
+writing to log files, creating lock files, or accessing shared memory) it
+switches back to the EUID and EGID of fsc2.
+
 The next lines are for setting the GPIB library that you are going to use.
 You may set the first variable, GPIB_LIBRARY either to LLP for the old
 (Linux Lab Project) library, to NI when using the National Instruments
@@ -87,16 +97,6 @@ GPIB bus into a log file. You can change the default log file /tmp/gpib.log
 to something appropriate for your setup (or even to /dev/null). You can also
 set the verbosity of the logs by changing the variable GPIB_LOG_LEVEL to
 either HIGH, MEDIUM, LOW or OFF.
-
-The next two variables OWNER and GROUP must be set to the owner of all the
-files that will be installed as well as its group. I would strongly recommend
-to create a special account and a special group for fsc2. fsc2 needs to be
-installed setuid'ed, so for security reasons this special user should have as
-low privileges as possible and should not be able to log into the system
-(e.g. by setting its shell in /etc/passwd to /bin/false). Most of the time
-fsc2 runs with the real users ID and group but at a few places (e.g. when
-writing to log files, creating lock files, or accessing shared memory) it
-switches back to the EUID and EGID of fsc2.
 
 The final variable to be set is the email address of the person that will
 eceive bug reports and notifications if fsc2 should crash. Usually, you
@@ -139,8 +139,26 @@ If making the documentation failed with an error also the installon may
 fail while installing the documentation, but this is not something to
 worry about...
 
+Please note: If you installed the program and then decide that you don't
+like it and want to get rid of it, you can always de-install it by running
 
-D) Simple Tests
+   make deinstall
+
+as long as you haven't changed the makefiles in between.
+
+
+D) Setting Device File Permissions
+==================================
+
+All users doing experiments with fsc2 need read and write access to the
+device files associated with the devices to be used. These are the serial
+ports (i.e. /dev/ttyS*) and the GPIB controller card. To be able to access
+the device files either read and write permissions must be set to 'other'
+for the device files or read and write permissions must be set for 'group'
+and all fsc2 users must be members of the groups that own the device files.
+
+
+E) Simple Tests
 ===============
 
 The subdirectory 'edl' contains several several EDL programs that you can
@@ -161,6 +179,7 @@ without any devices, these are
 Just start by typing 'fsc2 a.edl' or 'fsc2 z.edl' and click onto the "Start"
 button to get an idea about how fsc2 displays 1-dimensional and 2-dimensional
 data sets.
+
                                             Have fun, Jens
 
                                email: Jens.Toerring@physik.fu-berlin.de
