@@ -249,7 +249,7 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 
 		if ( ! strcmp( argv[ cur_arg ], "-h" ) ||
 			 ! strcmp( argv[ cur_arg ], "--help" ) )
-			usage( );
+			usage( EXIT_SUCCESS );
 
 		if ( ! strcmp( argv[ cur_arg ], "-s" ) )
 		{
@@ -293,13 +293,13 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			{
 				fprintf( stderr, "fsc2: Can't have both flags `-S' and "
 						"`-T'.\n" );
-				usage( );
+				usage( EXIT_FAILURE );
 			}
 
 			if ( argv[ cur_arg ][ 2 ] == '\0' && *argc == cur_arg + 1 )
 			{
 				fprintf( stderr, "fsc2 -S: No input file.\n" );
-				usage( );
+				usage( EXIT_FAILURE );
 			}
 
 			if ( argv[ cur_arg ][ 2 ] != '\0' )
@@ -327,13 +327,13 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			{
 				fprintf( stderr, "fsc2: Can't have both flags `-S' and "
 						"`-T'.\n" );
-				usage( );
+				usage( EXIT_FAILURE );
 			}
 
 			if ( argv[ cur_arg ][ 2 ] == '\0' && *argc == cur_arg + 1 )
 			{
 				fprintf( stderr, "fsc2 -T: No input file\n" );
-				usage( );
+				usage( EXIT_FAILURE );
 			}
 
 			if ( argv[ cur_arg ][ 2 ] != '\0' )
@@ -1298,8 +1298,9 @@ static void set_main_signals( void )
 }
 
 
-/*------------------------------------------------------------*/  
-/*------------------------------------------------------------*/  
+/*-------------------------------------*/  
+/* Signal handler for the main program */
+/*-------------------------------------*/  
 
 void main_sig_handler( int signo )
 {
@@ -1354,8 +1355,12 @@ void main_sig_handler( int signo )
 }
 
 
-/*------------------------------------------------------------*/  
-/*------------------------------------------------------------*/  
+/*-------------------------------------------------------------------*/
+/* Frunction for sending signals to the child process that waits for */
+/* external connections. It sends either BUSY_SIGNAL (aka SIGUSR1)   */
+/* or UNBUSY_SIGNAL (aka SIGUSR2) and then waits for the child       */
+/* to reply with its own signal.                                     */
+/*-------------------------------------------------------------------*/
 
 void notify_conn( int signo )
 {
@@ -1378,10 +1383,11 @@ void notify_conn( int signo )
 }
 
 
-/*------------------------------------------------------------*/  
-/*------------------------------------------------------------*/  
+/*----------------------------------------*/  
+/* Function prints help message and exits */
+/*----------------------------------------*/  
 
-void usage( void )
+void usage( int return_status )
 {
 	fprintf( stderr, "Usage: fsc2 [OPTIONS]... [FILE]\n"
 			 "A program for remote control of EPR spectrometers\n"
@@ -1432,5 +1438,5 @@ void usage( void )
 			 "%s%sfsc2.pdf or %s%sfsc2.html\n"
              "or type \"info fsc2\".\n", docdir, slash( docdir ),
 			 docdir, slash( docdir ), docdir, slash( docdir ) );
-	exit( EXIT_SUCCESS );
+	exit( return_status );
 }

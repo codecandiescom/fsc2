@@ -117,7 +117,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 	if ( *argc > 1 && argv[ 1 ][ 0 ] == '-' )
 	{
 		fprintf( stderr, "Unknown option \"%s\".\n", argv[ 1 ] );
-		usage( );
+		usage( EXIT_FAILURE );
 	}
 
 	fl_get_app_resources( xresources, N_APP_OPT );

@@ -98,7 +98,7 @@ int preparations_parser( FILE *in );
 int experiment_parser( FILE *in );
 void main_sig_handler( int signo );
 void notify_conn( int signo );
-void usage( void );
+void usage( int result_status );
 
 
 /* Global variables */
