@@ -46,7 +46,6 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 /* Enter the definition of all needed functions below this line */
 /****************************************************************/
 
-
 /*-----------------------------------------------------------------*/
 /* This function always uses the first acquisition sequence.       */
 /* Expected arguments:                                             */
