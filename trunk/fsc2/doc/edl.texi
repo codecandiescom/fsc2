@@ -568,24 +568,24 @@ Here is a complete list of the comparison operators between two
 expressions (e.g.@: numbers):
 
 @quotation
-@multitable{==} { compare for equality (don't confuse with single
-`@code{=}' that is used in assignments)}
+@multitable{==} { true if left hand side expression is @i{equal} to the
+right hand side expression }
 @item @code{==} @tab
-compare for equality (don't confuse with single `@code{=}' that is
-used in assignments)
+true if left hand side expression is @i{equal} to the right hand side
+expression
 @item @code{!=} @tab
-TRUE if the numbers are unequal
+true if left and right hand side expression are @i{unequal}
 @item @code{<} @tab
-TRUE if the left side expression is smaller than the
+true if the left side expression is @i{less than} the
 right side expression
 @item @code{<=} @tab
-TRUE if the left side expression is smaller or equal to the
+true if the left side expression is @i{less or equal} to the
 right side expression
 @item @code{>} @tab
-TRUE if the left side expression is larger than the
+true if the left side expression is @i{greater than} the
 right side expression
 @item @code{>=} @tab
-TRUE if the left side expression is larger or equal to the
+true if the left side expression is @i{greater or equal} to the
 right side expression
 @end multitable
 @end quotation
@@ -632,11 +632,15 @@ logical @code{AND}, @code{OR} or @code{XOR} (exclusive or)
 operators. Here is a list of these operators and their meaning:
 
 @quotation
-@multitable{~} {exclusive or: TRUE if left or right hand side expressions are TRUE but not both}
-@item @code{!} @tab not: Negate truth of an expression
-@item @code{&} @tab and: TRUE if left and right hand side expressions are TRUE
-@item @code{|} @tab or: TRUE if left or right hand side expressions are TRUE
-@item @code{~} @tab exclusive or: TRUE if left or right hand side expressions are TRUE but not both
+@multitable{~} {@i{exclusive or}: true if left or right hand side
+expressions are true but not both}
+@item @code{!} @tab @i{not}: negates truth of an expression
+@item @code{&} @tab @i{and}: true if both left and right hand side
+expressions are true
+@item @code{|} @tab @i{or}: true if at least one of the left and right
+hand side expressions is true
+@item @code{~} @tab @i{exclusive or}: true if either left or right hand
+side expression is true (but not both)
 @end multitable
 @end quotation
 @cindex ! (negation operator)
