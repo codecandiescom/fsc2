@@ -217,6 +217,7 @@ Var *boxcar_get_curve( Var *v )
 	CLOBBER_PROTECT( first );
 	CLOBBER_PROTECT( last );
 	CLOBBER_PROTECT( old_timo );
+	CLOBBER_PROTECT( curve_type );
 
 	if ( v == NULL )
 	{
@@ -426,6 +427,8 @@ Var *boxcar_get_curve( Var *v )
 
 Var *boxcar_start_acquisition( Var *v )
 {
+	UNUSED_ARGUMENT( v );
+
 	if ( FSC2_MODE == EXPERIMENT )
 		egg4402_command( "START\n" );
 
@@ -438,6 +441,8 @@ Var *boxcar_start_acquisition( Var *v )
 
 Var *boxcar_stop_acquisition( Var *v )
 {
+	UNUSED_ARGUMENT( v );
+
 	if ( FSC2_MODE == EXPERIMENT )
 		egg4402_command( "STOP\n" );
 
@@ -508,7 +513,6 @@ static void egg4402_failure( void )
 static void egg4402_query( char *buffer, long *length, bool wait_for_stop )
 {
 	unsigned char stb;
-	long dummy = 1;
 
 
 	/* Before trying to read anything from the device check that both the
