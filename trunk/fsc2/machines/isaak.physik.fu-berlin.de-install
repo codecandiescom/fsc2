@@ -4,14 +4,14 @@
 
 install-isaak.physik.fu-berlin.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
-	-$(LN) $(LNFLAGS) $(libdir)/dg2020_b.so $(libdir)/pulser.so
-	-chown $(OWNER).$(GROUP) $(libdir)/pulser.so
-	-$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.so $(libdir)/magnet.so
-	-chown $(OWNER).$(GROUP) $(libdir)/magnet.so
-	-$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
-	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
+	-$(LN) $(LNFLAGS) $(libdir)/dg2020_b.fsc2_so $(libdir)/pulser.fsc2_so
+	-chown $(OWNER).$(GROUP) $(libdir)/pulser.fsc2_so
+	-$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.fsc2_so $(libdir)/magnet.fsc2_so
+	-chown $(OWNER).$(GROUP) $(libdir)/magnet.fsc2_so
+	-$(LN) $(LNFLAGS) $(libdir)/er035m_s.fsc2_so $(libdir)/gaussmeter.fsc2_so
+	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.fsc2_so
 
 uninstall-isaak.physik.fu-berlin.de:
-	-$(RM) $(RMFLAGS) $(libdir)/pulser.so
-	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
-	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
+	-$(RM) $(RMFLAGS) $(libdir)/pulser.fsc2_so
+	-$(RM) $(RMFLAGS) $(libdir)/magnet.fsc2_so
+	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.fsc2_so

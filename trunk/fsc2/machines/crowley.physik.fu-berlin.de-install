@@ -4,14 +4,14 @@
 
 install-crowley.physik.fu-berlin.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
-	-$(LN) $(LNFLAGS) $(libdir)/er035m_sas.so $(libdir)/gaussmeter.so
-	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
-	-$(LN) $(LNFLAGS) $(libdir)/hp8647a.so $(libdir)/synthesizer.so
-	-chown $(OWNER).$(GROUP) $(libdir)/synthesizer.so
-	-$(LN) $(LNFLAGS) $(libdir)/egg4402so $(libdir)/boxcar.so
-	-chown $(OWNER).$(GROUP) $(libdir)/boxcar.so
+	-$(LN) $(LNFLAGS) $(libdir)/er035m_sas.fsc2_so $(libdir)/gaussmeter.fsc2_so
+	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.fsc2_so
+	-$(LN) $(LNFLAGS) $(libdir)/hp8647a.fsc2_so $(libdir)/synthesizer.fsc2_so
+	-chown $(OWNER).$(GROUP) $(libdir)/synthesizer.fsc2_so
+	-$(LN) $(LNFLAGS) $(libdir)/egg4402so $(libdir)/boxcar.fsc2_so
+	-chown $(OWNER).$(GROUP) $(libdir)/boxcar.fsc2_so
 
 uninstall-crowley.physik.fu-berlin.de:
-	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
-	-$(RM) $(RMFLAGS) $(libdir)/synthesizer.so
-	-$(RM) $(RMFLAGS) $(libdir)/boxcar.so
+	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.fsc2_so
+	-$(RM) $(RMFLAGS) $(libdir)/synthesizer.fsc2_so
+	-$(RM) $(RMFLAGS) $(libdir)/boxcar.fsc2_so

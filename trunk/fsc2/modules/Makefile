@@ -234,10 +234,7 @@ $(addsuffix .c,$(s_band_list)): %.c: s_band_magnet.c.tmpl
 	o=`echo $$n | tr "a-z" "A-Z"`;                                 \
 	sed "s/s_band_magnet_tmpl/s_band_magnet_$$n/g;s/S_BAND_MAGNET_TMPL/S_BAND_MAGNET_$$o/g" $^ > $@
 
-
 # How to install the modules
-
--include $(mchdir)/$(machine_name)-install
 
 install:
 	$(INSTALL) -d $(libdir)

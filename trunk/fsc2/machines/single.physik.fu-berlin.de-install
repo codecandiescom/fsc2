@@ -8,11 +8,11 @@ install-single.physik.fu-berlin.de:
 		$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) \
 		$(cdir)/rs_spec10.state $(libdir); \
 	fi
-	-$(LN) $(LNFLAGS) $(libdir)/ni6601.so $(libdir)/counter.so
-	-chown $(OWNER).$(GROUP) $(libdir)/counter.so
-	-$(LN) $(LNFLAGS) $(libdir)/me6000.so $(libdir)/dac.so
-	-chown $(OWNER).$(GROUP) $(libdir)/dac.so
+	-$(LN) $(LNFLAGS) $(libdir)/ni6601.fsc2_so $(libdir)/counter.fsc2_so
+	-chown $(OWNER).$(GROUP) $(libdir)/counter.fsc2_so
+	-$(LN) $(LNFLAGS) $(libdir)/me6000.fsc2_so $(libdir)/dac.fsc2_so
+	-chown $(OWNER).$(GROUP) $(libdir)/dac.fsc2_so
 
 uninstall-single.physik.fu-berlin.de:
-	-$(RM) $(RMFLAGS) $(libdir)/counter.so
-	-$(RM) $(RMFLAGS) $(libdir)/dac.so
+	-$(RM) $(RMFLAGS) $(libdir)/counter.fsc2_so
+	-$(RM) $(RMFLAGS) $(libdir)/dac.fsc2_so
