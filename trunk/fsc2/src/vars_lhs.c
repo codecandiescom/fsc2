@@ -58,7 +58,8 @@ Var *vars_arr_lhs( Var *v )
 	dim = vars_check_lhs_indices( &v, &range_count );
 
 	/* If the array is new (i.e. we're still in the VARIABLES section) set
-	   it up, otherwise return a pointer to the referenced element */
+	   it up, otherwise return a pointer to the referenced element or a
+	   variables of type SUB_REF_PTR if the indices did contain ranges */
 
 	if ( v->from->type == UNDEF_VAR )
 		return vars_setup_new_array( v, dim );
@@ -69,8 +70,12 @@ Var *vars_arr_lhs( Var *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Picks the indices from the stack, does sanity checks on them */
+/* and converts ranges, consistiting of a pair of numbers with  */
+/* a colon in between, into a pair of a positive and a negative */
+/* number.                                                      */
+/*--------------------------------------------------------------*/
 
 static int vars_check_lhs_indices( Var **v, int *range_count )
 {
@@ -798,8 +803,14 @@ static Var *vars_lhs_pointer( Var *v, int dim )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* This function is invoked when the indices on the stack did contain one */
+/* or more ranges. It first checks that the indices/ranges fit the sizes  */
+/* of the indexed aray (or enlarges it if necessary and possible) and the */
+/* pushes a variable of type SUB_REF_PTR onto ths stack that has a 'from' */
+/* field pointing to the indexed array and contains an array of all the   */
+/* indices (with negative values for range start values).                 */
+/*------------------------------------------------------------------------*/
 
 static Var *vars_lhs_sub_pointer( Var *v, int dim, int range_count )
 {
