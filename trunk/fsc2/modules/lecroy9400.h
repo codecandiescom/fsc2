@@ -45,16 +45,21 @@
 
 #define MAX_CHANNELS       9         /* number of channel names */
 
-#define LECROY9400_UNDEF   DIGITIZER_CHANNEL_INVALID
-#define LECROY9400_CH1     DIGITIZER_CHANNEL_CH1
-#define LECROY9400_CH2     DIGITIZER_CHANNEL_CH2
-#define LECROY9400_MEM_C   DIGITIZER_CHANNEL_MEM_C
-#define LECROY9400_MEM_D   DIGITIZER_CHANNEL_MEM_D
-#define LECROY9400_FUNC_E  DIGITIZER_CHANNEL_FUNC_E
-#define LECROY9400_FUNC_F  DIGITIZER_CHANNEL_FUNC_F
-#define LECROY9400_LIN     DIGITIZER_CHANNEL_LINE
-#define LECROY9400_EXT     DIGITIZER_CHANNEL_EXT
-#define LECROY9400_EXT10   DIGITIZER_CHANNEL_EXT10
+#define LECROY9400_UNDEF   -1
+#define LECROY9400_CH1      0
+#define LECROY9400_CH2      1
+#define LECROY9400_MEM_C    2
+#define LECROY9400_MEM_D    3
+#define LECROY9400_FUNC_E   4
+#define LECROY9400_FUNC_F   5
+#define LECROY9400_LIN      6
+#define LECROY9400_EXT      7
+#define LECROY9400_EXT10    8
+
+
+#define GENERAL_TO_LECROY9400 0
+#define LECROY9400_TO_GENERAL 1
+
 
 #define LECROY9400_MIN_TIMEBASE 5.0e-8
 #define LECROY9400_MAX_TIMEBASE 0.2
@@ -176,7 +181,6 @@ Var *digitizer_define_window( Var *v );
 Var *digitizer_timebase( Var *v );
 Var *digitizer_sensitivity( Var *v );
 Var *digitizer_num_averages( Var *v );
-Var *digitizer_get_channel_number( Var *v );
 Var *digitizer_record_length( Var *v );
 Var *digitizer_trigger_position( Var *v );
 Var *digitizer_meas_channel_ok( Var *v );
@@ -198,6 +202,7 @@ int lecroy9400_get_tb_index( double timebase );
 const char *lecroy9400_ptime( double p_time );
 void lecroy9400_delete_windows( void );
 void lecroy9400_do_pre_exp_checks( void );
+long lecroy9400_translate_channel( int dir, long channel );
 
 bool lecroy9400_init( const char *name );
 double lecroy9400_get_timebase( void );
@@ -234,6 +239,7 @@ LECROY9400 lecroy9400;
 
 const char *Channel_Names[ 9 ] = { "CH1", "CH2", "MEM_C", "MEM_D", "FUNC_E",
 								   "FUNC_F", "LINE", "EXT", "EXT10" };
+
 /* List of all timebases (in s/div) - currently only timebases that can be
    used in single shot mode are supported (i.e. neither random interleaved
    sampling nor roll mode) */

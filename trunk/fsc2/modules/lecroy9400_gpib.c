@@ -174,7 +174,7 @@ bool lecroy9400_set_trigger_source( int channel )
 		sprintf( cmd + 4, "C%1d", channel + 1 );
 	else if ( channel == LECROY9400_LIN )
 		strcat( cmd, "LI" );
-	else if ( channel == LECROY9400_LIN )
+	else if ( channel == LECROY9400_EXT )
 		strcat( cmd, "EX" );
 	else
 		strcat( cmd, "E/10" );
@@ -230,7 +230,7 @@ double lecroy9400_get_sens( int channel )
     long length = 30;
 
 
-	fsc2_assert( channel >= LECROY9400_CH1 && channel <= LECROY9400_CH2 );
+	fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
 
 	sprintf( cmd, "C%1dVD,?", channel + 1 );
 	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE ||
@@ -252,9 +252,9 @@ bool lecroy9400_set_sens( int channel, double sens )
     char cmd[ 40 ];
 
 
-	fsc2_assert( channel >= LECROY9400_CH1 && channel <= LECROY9400_CH2 );
+	fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
 
-	sprintf( cmd, "C%1dVD,", channel +1 );
+	sprintf( cmd, "C%1dVD,", channel + 1 );
 	gcvt( sens, 8, cmd + strlen( cmd ) );
 	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy9400_gpib_failure( );
@@ -275,7 +275,7 @@ double lecroy9400_get_offset( int channel )
     long length = 30;
 
 
-	fsc2_assert( channel >= LECROY9400_CH1 && channel <= LECROY9400_CH2 );
+	fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
 
 	sprintf( cmd, "C%1dOF,?", channel + 1 );
 	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE ||
@@ -297,9 +297,9 @@ bool lecroy9400_set_offset( int channel, double offset )
     char cmd[ 40 ];
 
 
-	fsc2_assert( channel >= LECROY9400_CH1 && channel <= LECROY9400_CH2 );
+	fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
 
-	sprintf( cmd, "C%1dOF,", channel +1 );
+	sprintf( cmd, "C%1dOF,", channel + 1 );
 	gcvt( offset, 8, cmd + strlen( cmd ) );
 	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy9400_gpib_failure( );
@@ -319,7 +319,7 @@ int lecroy9400_get_coupling( int channel )
 	int type = INVALID_COUPL;
 
 
-	fsc2_assert( channel >= LECROY9400_CH1 && channel <= LECROY9400_CH2 );
+	fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
 
 	sprintf( cmd, "C%1dCP,?", channel + 1 );
 	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE ||
@@ -350,7 +350,7 @@ bool lecroy9400_set_coupling( int channel, int type )
 	char *cpl[ ] = { "A1M", "D1M", "D50" };
 
 
-	fsc2_assert( channel >= LECROY9400_CH1 && channel <= LECROY9400_CH2 );
+	fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
 	fsc2_assert( type >= AC_1_MOHM && type <= DC_50_OHM );
 
 
