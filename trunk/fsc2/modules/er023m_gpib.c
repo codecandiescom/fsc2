@@ -26,7 +26,7 @@
 
 
 static bool dont_print_on_error = UNSET;
-static bool er023m_talk( const char *cmd, char *reply, long &length );
+static bool er023m_talk( const char *cmd, char *reply, long *length );
 
 
 /*------------------------------------------------------------------------*/
@@ -609,7 +609,7 @@ bool er023m_command( const char *cmd )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-static bool er023m_talk( const char *cmd, char *reply, long &length )
+static bool er023m_talk( const char *cmd, char *reply, long *length )
 {
 	if ( gpib_write( er023m.device, cmd, strlen( cmd ) ) == FAILURE ||
 		 gpib_read( er023m.device, reply, length ) == FAILURE )
