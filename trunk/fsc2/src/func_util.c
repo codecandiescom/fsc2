@@ -834,8 +834,8 @@ Var *f_rescale( Var *v )
 					"in %s().\n", Fname, Lc, new_nx, Cur_Func );
 				THROW( EXCEPTION );
 		}
-	}
-
+	} else if ( G.dim == 2 )
+		new_ny = -1;
 
 	/* In a test run we're already done */
 
