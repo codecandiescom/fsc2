@@ -618,9 +618,9 @@ void tds_tmpl_display_channel( int channel, bool on_flag )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Returns the sensitivity of the channel passed as argument */
-/*-----------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Returns the sensitivity of the channel passed as the argument */
+/*---------------------------------------------------------------*/
 
 double tds_tmpl_get_sens( int channel )
 {
@@ -829,8 +829,17 @@ static double tds_tmpl_get_area_wo_cursor( int channel, WINDOW *w )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Function for fetching a curve from one of the channels of the device. */
+/* The first argument is the channel, the second a pointer to a WINDOW   */
+/* structure holding information about which section of the whole curve  */
+/* is to be fetched, 'data' is a pointer to a a double pointer, that on  */
+/* return from the function will point to an allocated memory area with  */
+/* 'length' double data (thus it is the resonsibility of the user of the */
+/* function to deallocate the memory when it isn't used any more) and    */
+/* 'use_cursors' is a flag that indicates that the section of the curve  */
+/* fetched fromt the device is to be encolsed by two vertical cursors.   */
+/*-----------------------------------------------------------------------*/
 
 void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 						 bool use_cursor )
@@ -960,7 +969,7 @@ void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 	/* ....and copy them to the final destination (the data are INTEL format
 	   2-byte integers, so the following requires sizeof( short ) == 2 and
 	   only works on a machine with INTEL format - there got to be better ways
-	   to do it...) Also scale data so that we get the real measured
+	   to do this...) Also scale data so that we get the real measured
 	   voltage. */
 
 	fsc2_assert( sizeof( short ) == 2 );
