@@ -220,38 +220,31 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 
 
 {MW}        {
-				long data = PULSER_CHANNEL_MW;
-				prepslval.vptr = vars_push( INT_VAR, &data );
+				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_MW );
 				return( VAR_REF );
 			}
 {TWT}       {
-				long data = PULSER_CHANNEL_TWT;
-				prepslval.vptr = vars_push( INT_VAR, &data );
+				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_TWT );
 				return( VAR_REF );
 			}
 {TWT_GATE}  {
-				long data = PULSER_CHANNEL_TWT_GATE;
-				prepslval.vptr = vars_push( INT_VAR, &data );
+				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_TWT_GATE );
 				return( VAR_REF );
 			}
 {DET}       {
-				long data = PULSER_CHANNEL_DET;
-				prepslval.vptr = vars_push( INT_VAR, &data );
+				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DET );
 				return( VAR_REF );
 			}
 {DET_GATE}  {
-				long data = PULSER_CHANNEL_DET_GATE;
-				prepslval.vptr = vars_push( INT_VAR, &data );
+				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DET_GATE );
 				return( VAR_REF );
 			}
 {RF}        {
-				long data = PULSER_CHANNEL_RF;
-				prepslval.vptr = vars_push( INT_VAR, &data );
+				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_RF );
 				return( VAR_REF );
 			}
 {RF_GATE}   {
-				long data = PULSER_CHANNEL_RF_GATE;
-				prepslval.vptr = vars_push( INT_VAR, &data );
+				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_RF_GATE );
 				return( VAR_REF );
 			}
 
@@ -259,11 +252,6 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 			/* handling of function, variable and array identifiers */
 {IDENT}     {
 				int acc;
-
-				/* special treatment for calls of print() function */
-
-				if ( ! strcmp( prepstext, "print" ) )
-				    return( PRINT_TOK );
 
 				/* first check if the identifier is a function name */
 

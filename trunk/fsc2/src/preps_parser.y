@@ -19,11 +19,6 @@ void prepserror( const char *s );
 
 Var *P_Var;
 
-long One      = 1L;
-long Thousand = 1000L;
-long Million  = 1000000L;
-long Billion  = 1000000000L;
-
 
 %}
 
@@ -55,7 +50,6 @@ long Billion  = 1000000000L;
 %token <lval> INT_TOKEN
 %token <dval> FLOAT_TOKEN
 %token <sptr> STR_TOKEN
-%token PRINT_TOK
 %token EQ LT LE GT GE
 
 %token NS_TOKEN US_TOKEN MS_TOKEN S_TOKEN
@@ -94,11 +88,10 @@ line:    P_TOK prop                {}
          list3 ']' '=' expr        { vars_arr_assign( $1, $7 );
                                      assert( Var_Stack == NULL );
 	                                 assert( Arr_Stack == NULL ); }
-       | PRINT_TOK '(' STR_TOKEN   { P_Var = vars_push( UNDEF_VAR, $3 ); }
-         list5 ')'                 { vars_pop( print_args( P_Var ) ); }
-       | PRINT_TOK '['             { eprint( FATAL, "%s:%ld: `print' is a "
+       | FUNC_TOKEN '(' list4 ')'  { vars_pop( func_call( $1 ) ); }
+       | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
 											 "predefined function.\n",
-											 Fname, Lc );
+											 Fname, Lc, $1->name );
 	                                 THROW( VARIABLES_EXCEPTION ); }
 ;
 
@@ -119,11 +112,11 @@ time:    expr unit                 { $$ = vars_mult( $1, $2 ); }
 
 
 unit:    /* empty */               { $$ = vars_push( INT_VAR,
-													 &Default_Time_Base ); }
-       | NS_TOKEN                  { $$ = vars_push( INT_VAR, &One ); }
-       | US_TOKEN                  { $$ = vars_push( INT_VAR, &Thousand ); }
-       | MS_TOKEN                  { $$ = vars_push( INT_VAR, &Million ); }
-       | S_TOKEN                   { $$ = vars_push( INT_VAR, &Billion ); }
+													 Default_Time_Base ); }
+       | NS_TOKEN                  { $$ = vars_push( INT_VAR, 1L ); }
+       | US_TOKEN                  { $$ = vars_push( INT_VAR, 1000L ); }
+       | MS_TOKEN                  { $$ = vars_push( INT_VAR, 1000000L ); }
+       | S_TOKEN                   { $$ = vars_push( INT_VAR, 1000000000L ); }
 ;
 
 /* separator between keyword and value */
@@ -141,27 +134,13 @@ sep2:    /* empty */
 ;
 
 
-expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, &$1 ); }
-       | FLOAT_TOKEN               { $$ = vars_push( FLOAT_VAR, &$1 ); }
+expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, $1 ); }
+       | FLOAT_TOKEN               { $$ = vars_push( FLOAT_VAR, $1 ); }
        | VAR_TOKEN                 { $$ = vars_push_simple( $1 ); }
        | VAR_REF                   { $$ = $1; }
        | VAR_TOKEN '['             { vars_push_astack( $1 ); }
          list3 ']'                 { $$ = vars_pop_astack( ); }
        | FUNC_TOKEN '(' list4 ')'  { $$ = func_call( $1 ); }
-       | VAR_TOKEN '('             { eprint( FATAL, "%s:%ld: `%s' isn't a "
-											 "function.\n", Fname, Lc,
-											 $1->name );
-	                                 THROW( UNKNOWN_FUNCTION_EXCEPTION ); }
-       | PRINT_TOK '(' STR_TOKEN   { P_Var = vars_push( UNDEF_VAR, $3 ); }
-         ',' list5 ')'             { $$ = print_args( P_Var ); }
-       | PRINT_TOK '['             { eprint( FATAL, "%s:%ld: `print' is a "
-											 "predefined function.\n",
-											 Fname, Lc );
-	                                 THROW( PREPARATIONS_EXCEPTION ); }
-       | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
-											 "predefined function.\n",
-											 Fname, Lc, $1->name );
-	                                 THROW( PREPARATIONS_EXCEPTION ); }
        | expr EQ expr              { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
        | expr LT expr              { $$ = vars_comp( COMP_LESS, $1, $3 ); }
        | expr GT expr              { $$ = vars_comp( COMP_LESS, $3, $1 ); }
@@ -190,14 +169,12 @@ list3:   /* empty */
 /* list of function arguments */
 
 list4:   /* empty */
-	   | expr                      { }
-       | list4 ',' expr
+       | exprs
+	   | list4 ',' exprs
 ;
 
-/* list of print function arguments (following the format string) */
-
-list5:   /* empty */
-	   | list5 ',' expr
+exprs:   expr                      { }
+       | STR_TOKEN                 { vars_push( STR_VAR, $1 ); }
 ;
 
 

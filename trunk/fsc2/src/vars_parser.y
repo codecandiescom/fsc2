@@ -33,7 +33,6 @@ Var *P_Var;
 %token <lval> INT_TOKEN
 %token <dval> FLOAT_TOKEN
 %token <sptr> STR_TOKEN
-%token PRINT_TOK
 %token EQ LT LE GT GE
 
 
@@ -65,23 +64,15 @@ line:    VAR_TOKEN                 /* no assignment to be done */
        | VAR_TOKEN '['             { vars_arr_start( Cur_Arr = $1 ); }
          list1 ']' arrass          { assert( Var_Stack == NULL );
 	                                 assert( Arr_Stack == NULL ); }
-       | PRINT_TOK '(' STR_TOKEN   { P_Var = vars_push( UNDEF_VAR, $3 ); }
-         list5 ')'                 { vars_pop( print_args( P_Var ) ); }
-       | PRINT_TOK '['             { eprint( FATAL, "%s:%ld: `print' is a "
-											 "predefined function.\n",
-											 Fname, Lc );
-	                                 THROW( VARIABLES_EXCEPTION ); }
-       | FUNC_TOKEN '('            { eprint( FATAL, "%s:%ld: Not a variable "
-											 "declaration.\n", Fname, Lc );
-	                                 THROW( VARIABLES_EXCEPTION ); }
+       | FUNC_TOKEN '(' list4 ')'  { vars_pop( func_call( $1 ) ); }
        | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
 											 "predefined function.\n",
 											 Fname, Lc, $1->name );
 	                                 THROW( VARIABLES_EXCEPTION ); }
 ;
 
-expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, &$1 ); }
-       | FLOAT_TOKEN               { $$ = vars_push( FLOAT_VAR, &$1 ); }
+expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, $1 ); }
+       | FLOAT_TOKEN               { $$ = vars_push( FLOAT_VAR, $1 ); }
        | VAR_TOKEN                 { $$ = vars_push_simple( $1 ); }
        | VAR_TOKEN '['             { vars_push_astack( $1 ); }
          list3 ']'                 { $$ = vars_pop_astack( ); }
@@ -90,12 +81,6 @@ expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, &$1 ); }
 											 "function.\n", Fname, Lc,
 											 $1->name );
 	                                 THROW( UNKNOWN_FUNCTION_EXCEPTION ); }
-       | PRINT_TOK '(' STR_TOKEN   { P_Var = vars_push( UNDEF_VAR, $3 ); }
-         ',' list5 ')'             { $$ = print_args( P_Var ); }
-       | PRINT_TOK '['             { eprint( FATAL, "%s:%ld: `print' is a "
-											 "predefined function.\n",
-											 Fname, Lc );
-	                                 THROW( VARIABLES_EXCEPTION ); }
        | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
 											 "predefined function.\n",
 											 Fname, Lc, $1->name );
@@ -145,16 +130,13 @@ list3:   /* empty */
 /* list of function arguments */
 
 list4:   /* empty */
-	   | expr                      { }
-       | list4 ',' expr
+       | exprs
+	   | list4 ',' exprs
 ;
 
-/* list of print function arguments (following the format string) */
-
-list5:   /* empty */
-	   | list5 ',' expr
+exprs:   expr                      { }
+       | STR_TOKEN                 { vars_push( STR_VAR, $1 ); }
 ;
-
 
 %%
 

@@ -2,6 +2,9 @@
   $Id$
 
   $Log$
+  Revision 1.8  1999/07/20 23:32:03  jens
+  Changed to reflect new treatment of variables and functions.
+
   Revision 1.7  1999/07/16 22:59:34  jens
   I just learned: no C-style comments on the same line as a definition...
 
@@ -67,7 +70,7 @@ PHAS        ^[ \t]*PHA(SE)?S?:
 PREP        ^[ \t]*PREP(ARATION)?S?:
 EXP         ^[ \t]*EXP(ERIMENT)?S?:
 
-STR         \x5.*\x6
+STR         \x5[^\x6]*\x6
 ESTR        \x5.*\x3\n.*\n
 
 INT         [0-9]+
@@ -165,11 +168,6 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 			/* handling of function, variable and array identifiers */
 {IDENT}     {
 				int acc;
-
-				/* special treatment for calls of print() function */
-
-				if ( ! strcmp( variablestext, "print" ) )
-				    return( PRINT_TOK );
 
 				/* first check if the identifier is a function name */
 
