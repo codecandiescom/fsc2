@@ -1,0 +1,444 @@
+/*
+  $Id$
+
+  Copyright (C) 1999-2002 Jens Thoms Toerring
+
+  This file is part of fsc2.
+
+  Fsc2 is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2, or (at your option)
+  any later version.
+
+  Fsc2 is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with fsc2; see the file COPYING.  If not, write to
+  the Free Software Foundation, 59 Temple Place - Suite 330,
+  Boston, MA 02111-1307, USA.
+*/
+
+
+#include "fsc2.h"
+#include <X11/X.h>
+#include <X11/Xmd.h>
+
+
+static Pixmap get_1d_window( unsigned int *width, unsigned int *height );
+static Pixmap get_2d_window( unsigned int *width, unsigned int *height );
+static Pixmap get_cut_window( unsigned int *width, unsigned int *height );
+static void dump_image_to_file( FILE *dp, XImage *image,
+								G_Hash hash, int hash_size );
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+void dump_window( int type, int fd )
+{
+	XImage *image;
+	unsigned int w, h;
+	Pixmap pm;
+	FILE *fp;
+
+
+	/* With no graphics no pictures can be send */
+
+	if ( ! G.is_init || ! G.is_fully_drawn )
+		THROW( EXCEPTION );
+
+	/* We need a stream because writing with write(2) is maddingly slow
+	   because of missing buffering */
+
+	if ( ( fp = fdopen( fd, "w" ) ) == NULL )
+		THROW( EXCEPTION );
+
+	/* Get a pixmap with the garphic we are supposed to send and convert it
+	   to an XImage */
+
+	if ( type == 1 )
+	{
+		if ( G.dim == 1 )
+			pm = get_1d_window( &w, &h );
+		else
+			pm = get_2d_window( &w, &h );
+	}
+	else
+	{
+		if ( ! G.is_cut )
+			THROW( EXCEPTION );
+		pm = get_cut_window( &w, &h );
+	}
+
+	image = XGetImage( G.d, pm, 0, 0, w, h, AllPlanes, ZPixmap );
+	XFreePixmap( G.d, pm );
+
+	if ( image == NULL )
+	{
+		XDestroyImage( image );
+		THROW( EXCEPTION );
+	}
+
+	/* Write the ppm header and the picture - the webserver is going to take
+	   care of converting it to the appropriate format. We need to distinguish
+	   between 1D and 2D pictures because they need different amounts of
+	   colors (is this really necessary?) */
+
+	fprintf( fp, "P6 %d %d 255\n", w, h );
+
+	TRY
+	{
+		if ( ( type == 1 && G.dim == 1 ) || type == 2 )
+			dump_image_to_file( fp, image, G.hash_1d, G.hash_size_1d );
+		else
+			dump_image_to_file( fp, image, G.hash_2d, G.hash_size_2d );
+	}
+	OTHERWISE
+	{
+		XDestroyImage( image );
+		RETHROW( );
+	}
+
+	XDestroyImage( image );
+	fclose( fp );
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static Pixmap get_1d_window( unsigned int *width, unsigned int *height )
+{
+	Pixmap pm;
+	GC gc;
+
+
+	*width  = G.y_axis.w + G.canvas.w;
+	*height = G.x_axis.h + G.canvas.h;
+
+    pm = XCreatePixmap( G.d, FL_ObjWin( GUI.run_form->canvas ),
+						*width, *height,
+						fl_get_canvas_depth( GUI.run_form->canvas ) );
+	gc = XCreateGC( G.d, pm, 0, 0 );
+
+	/* Draw the background */
+
+	XSetForeground( G.d, gc, fl_get_pixel( FL_COL1 ) );
+	XFillRectangle( G.d, pm, gc, 0, 0, *width,*height );
+
+	/* Draw the canvas and both the axis windows */
+
+	XCopyArea( G.d, G.y_axis.pm, pm, gc, 0, 0, G.y_axis.w, G.y_axis.h, 0, 0 );
+	XCopyArea( G.d, G.canvas.pm, pm, gc, 0, 0, G.canvas.w, G.canvas.h,
+			   G.y_axis.w, 0 );
+	XCopyArea( G.d, G.x_axis.pm, pm, gc, 0, 0, G.x_axis.w, G.x_axis.h,
+			   G.y_axis.w, G.canvas.h );
+
+	/* And finally a bit of 3D-effect */
+
+	XSetForeground( G.d, gc, fl_get_pixel( FL_BLACK ) );
+	XDrawLine( G.d, pm, gc, G.y_axis.w - 1, G.canvas.h,
+			   G.y_axis.w - 1, *height - 1 );
+
+	XSetForeground( G.d, gc, fl_get_pixel( FL_LEFT_BCOL ) );
+	XDrawLine( G.d, pm, gc, 0, G.cut_y_axis.h,
+			   G.y_axis.w - 1, G.cut_y_axis.h );
+
+	XFreeGC( G.d, gc );
+
+	return pm;
+} 
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static Pixmap get_2d_window( unsigned int *width, unsigned int *height )
+{
+	Pixmap pm;
+	GC gc;
+
+
+	*width  = G.y_axis.w + G.canvas.w + G.z_axis.w + 5;
+	*height = G.z_axis.h;
+
+    pm = XCreatePixmap( G.d, FL_ObjWin( GUI.run_form->canvas ),
+						*width, *height,
+						fl_get_canvas_depth( GUI.run_form->canvas ) );
+	gc = XCreateGC( G.d, pm, 0, 0 );
+
+	/* Draw the background */
+
+	XSetForeground( G.d, gc, fl_get_pixel( FL_COL1 ) );
+	XFillRectangle( G.d, pm, gc, 0, 0, *width, *height );
+
+	/* Draw the canvas and the three axis windows */
+
+	XCopyArea( G.d, G.y_axis.pm, pm, gc, 0, 0, G.y_axis.w, G.y_axis.h, 0, 0 );
+	XCopyArea( G.d, G.canvas.pm, pm, gc, 0, 0, G.canvas.w, G.canvas.h,
+			   G.y_axis.w, 0 );
+	XCopyArea( G.d, G.z_axis.pm, pm, gc, 0, 0, G.z_axis.w, G.z_axis.h,
+			   G.y_axis.w + G.canvas.w + 5, 0 );
+	XCopyArea( G.d, G.x_axis.pm, pm, gc, 0, 0, G.x_axis.w, G.x_axis.h,
+			   G.y_axis.w, G.canvas.h );
+
+	/* And finally a bit of 3D-effect */
+
+	XSetForeground( G.d, gc, fl_get_pixel( FL_BLACK ) );
+	XDrawLine( G.d, pm, gc, G.y_axis.w - 1, G.canvas.h,
+			   G.y_axis.w - 1, *height - 1 );
+	XDrawLine( G.d, pm, gc, G.y_axis.w + G.canvas.w + 4, 0,
+			   G.y_axis.w + G.canvas.w + 4, *height - 1 );
+
+	XSetForeground( G.d, gc, fl_get_pixel( FL_LEFT_BCOL ) );
+	XDrawLine( G.d, pm, gc, 0, G.canvas.h,
+			   G.y_axis.w - 1, G.canvas.h );
+	XDrawLine( G.d, pm, gc, G.y_axis.w + G.canvas.w, 0,
+			   G.y_axis.w + G.canvas.w, *height - 1 );
+
+	XFreeGC( G.d, gc );
+
+	return pm;
+} 
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static Pixmap get_cut_window( unsigned int *width, unsigned int *height )
+{
+	Pixmap pm;
+	GC gc;
+
+
+	*width  = G.cut_y_axis.w + G.cut_canvas.w + G.cut_z_axis.w + 5;
+	*height = G.cut_z_axis.h;
+
+    pm = XCreatePixmap( G.d, FL_ObjWin( GUI.cut_form->cut_canvas ),
+						*width, *height,
+						fl_get_canvas_depth( GUI.cut_form->cut_canvas ) );
+	gc = XCreateGC( G.d, pm, 0, 0 );
+
+	/* Draw the background */
+
+	XSetForeground( G.d, gc, fl_get_pixel( FL_COL1 ) );
+	XFillRectangle( G.d, pm, gc, 0, 0, *width, *height );
+
+	/* Draw the canvas and the three axis windows */
+
+	XCopyArea( G.d, G.cut_y_axis.pm, pm, gc, 0, 0,
+			   G.cut_y_axis.w, G.cut_y_axis.h, 0, 0 );
+	XCopyArea( G.d, G.cut_canvas.pm, pm, gc, 0, 0,
+			   G.cut_canvas.w, G.cut_canvas.h, G.cut_y_axis.w, 0 );
+	XCopyArea( G.d, G.cut_z_axis.pm, pm, gc, 0, 0,
+			   G.cut_z_axis.w, G.cut_z_axis.h,
+			   G.cut_y_axis.w + G.cut_canvas.w + 5, 0 );
+	XCopyArea( G.d, G.cut_x_axis.pm, pm, gc, 0, 0,
+			   G.cut_x_axis.w, G.cut_x_axis.h,
+			   G.cut_y_axis.w, G.cut_canvas.h );
+
+	/* And finally a bit of 3D-effect */
+
+	XSetForeground( G.d, gc, fl_get_pixel( FL_BLACK ) );
+	XDrawLine( G.d, pm, gc, G.cut_y_axis.w - 1, G.cut_canvas.h,
+			   G.cut_y_axis.w - 1, *height - 1 );
+	XDrawLine( G.d, pm, gc, G.cut_y_axis.w + G.cut_canvas.w + 4, 0,
+			   G.cut_y_axis.w + G.cut_canvas.w + 4, *height - 1 );
+
+	XSetForeground( G.d, gc, fl_get_pixel( FL_LEFT_BCOL ) );
+	XDrawLine( G.d, pm, gc, 0, G.cut_canvas.h,
+			   G.cut_y_axis.w - 1, G.cut_canvas.h );
+	XDrawLine( G.d, pm, gc, G.cut_y_axis.w + G.cut_canvas.w, 0,
+			   G.cut_y_axis.w + G.cut_canvas.w, *height - 1 );
+
+	XFreeGC( G.d, gc );
+
+	return pm;
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static void dump_image_to_file( FILE *fp, XImage *image,
+								G_Hash hash, int hash_size )
+{
+	int i, j;
+	unsigned long pixel = 0;
+	unsigned long pixel_mask;
+	int key;
+	int bits_used;
+	int bits_per_item;
+	int bits_per_pixel;
+	int bit_order;
+	int bit_shift = 0;
+	CARD8  *bptr;
+	CARD16 *sptr;
+	CARD32 *lptr;
+	char *lineptr;
+
+
+	bits_used = bits_per_item  = image->bitmap_unit;
+	bits_per_pixel = image->bits_per_pixel;
+
+	if ( bits_per_pixel == 32 )
+		pixel_mask = ~ ( ( unsigned long ) 0 );
+	else 
+		pixel_mask = ( ( ( unsigned long ) 1 ) << bits_per_pixel ) - 1;
+
+	bit_order  = image->bitmap_bit_order;
+
+	for ( lineptr = image->data, i = 0; i < image->height;
+		  lineptr += image->bytes_per_line, i++ )
+	{
+		bptr = ( ( CARD8  * ) lineptr ) - 1;
+		sptr = ( ( CARD16 * ) lineptr ) - 1;
+		lptr = ( ( CARD32 * ) lineptr ) - 1;
+
+		bits_used = bits_per_item;
+
+		for ( j = 0; j < image->width; j++ )
+		{
+			/* Get next pixel value from the image data */
+
+			if ( bits_used == bits_per_item )
+			{  
+				bptr++;
+				sptr++;
+				lptr++;
+		   
+				bits_used = 0;
+
+				if ( bit_order == MSBFirst )
+					bit_shift = bits_per_item - bits_per_pixel;
+				else
+					bit_shift = 0;
+			}
+
+			switch ( bits_per_item )
+			{
+				case 8 :
+					pixel = ( *bptr >> bit_shift ) & pixel_mask;
+					break;
+
+				case 16 :
+					pixel = ( *sptr >> bit_shift ) & pixel_mask;
+					break;
+
+				case 32 :
+					pixel = ( *lptr >> bit_shift ) & pixel_mask;
+					break;
+			}
+
+			if ( bit_order == MSBFirst )
+				bit_shift -= bits_per_pixel;
+			else
+				bit_shift += bits_per_pixel;
+
+			bits_used += bits_per_pixel;
+
+			key = pixel % hash_size;
+			while ( hash[ key ].pixel != pixel )
+				key = ( key + 1 ) % hash_size;
+			fwrite( hash[ key ].rgb, 1, 3, fp );
+		}
+	}
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+void create_1d_color_hash( void )
+{
+	int i;
+	int r, g, b;
+	FL_COLOR colors[ NUM_1D_COLS ] = { FL_BLACK, FL_LEFT_BCOL, FL_RED,
+									   FL_WHITE, FL_INACTIVE, FL_COL1 };
+	int key = 0;
+	FL_COLOR pixel;
+	G_Hash hash;
+	int hash_size = 101;
+	bool is_unique = SET;
+
+
+	for ( i = 0; i < MAX_CURVES; i++ )
+		colors[ i + ( NUM_1D_COLS - MAX_CURVES ) ] = G.colors[ i ];
+
+	hash = T_malloc( hash_size * sizeof( G_Hash_Entry ) );
+
+	for ( i = 0; i < hash_size; i++ )
+		hash[ i ].is_used = UNSET;
+
+	for ( i = 0; i < NUM_1D_COLS; i++ )
+	{
+		pixel = fl_get_pixel( colors[ i ] );
+
+		key = pixel % hash_size;
+		while ( hash[ key ].is_used )
+			key = ( key + 1 ) % hash_size;
+
+		hash[ key ].is_used = SET;
+		hash[ key ].pixel = pixel;
+
+		fl_getmcolor( colors[ i ], &r, &g, &b );
+
+		hash[ key ].rgb[ RED   ] = r;
+		hash[ key ].rgb[ GREEN ] = g;
+		hash[ key ].rgb[ BLUE  ] = b;
+	}
+
+	G.hash_1d = hash;
+	G.hash_size_1d = hash_size;
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+void create_2d_color_hash( void )
+{
+	int i;
+	FL_COLOR pixel;
+	int key;
+	int r = 0, g = 0, b = 0;
+	int hash_size = COLOR_HASH_SIZE;
+	G_Hash hash;
+
+
+	hash = T_malloc( hash_size * sizeof( G_Hash_Entry ) );
+
+	for ( i = 0; i < hash_size; i++ )
+		hash[ i ].is_used = UNSET;
+
+	for ( i = 0; i < NUM_COLORS + FL_FREE_COL1 + 2; i++ )
+	{
+		pixel = fl_get_pixel( ( FL_COLOR )  i );
+
+		key = pixel % hash_size;
+		while ( hash[ key ].is_used )
+			key = ( key + 1 ) % hash_size;
+
+		hash[ key ].is_used = SET;
+		hash[ key ].pixel = pixel;
+
+		fl_getmcolor( ( FL_COLOR ) i , &r, &g, &b );
+
+		hash[ key ].rgb[ RED   ] = r;
+		hash[ key ].rgb[ GREEN ] = g;
+		hash[ key ].rgb[ BLUE  ] = b;
+	}
+
+	G.hash_2d = hash;
+	G.hash_size_2d = hash_size;
+}
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */
