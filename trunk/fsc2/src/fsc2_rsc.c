@@ -9,8 +9,8 @@ FD_fsc2 *create_form_fsc2(void)
   FL_OBJECT *obj;
   FD_fsc2 *fdui = (FD_fsc2 *) fl_calloc(1, sizeof(*fdui));
 
-  fdui->fsc2 = fl_bgn_form(FL_NO_BOX, 1030, 800);
-  obj = fl_add_box(FL_UP_BOX,0,0,1030,800,"");
+  fdui->fsc2 = fl_bgn_form(FL_NO_BOX, 1050, 800);
+  obj = fl_add_box(FL_UP_BOX,0,0,1050,800,"");
     fl_set_object_lsize(obj,FL_NORMAL_SIZE);
     fl_set_object_lstyle(obj,FL_FIXED_STYLE);
   fdui->browser = obj = fl_add_browser(FL_NORMAL_BROWSER,230,10,790,580,"");
@@ -53,6 +53,11 @@ FD_fsc2 *create_form_fsc2(void)
     fl_set_object_color(obj,FL_MCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_callback(obj,device_select,0);
+  fdui->win_slider = obj = fl_add_slider(FL_VERT_BROWSER_SLIDER,1020,10,20,780,"");
+    fl_set_object_callback(obj,win_slider_callback,0);
+    fl_set_slider_value(obj, 0.172727);
+    fl_set_slider_size(obj, 0.05);
+     fl_set_slider_return(obj, FL_RETURN_END_CHANGED);
   fl_end_form();
 
   fdui->fsc2->fdui = fdui;

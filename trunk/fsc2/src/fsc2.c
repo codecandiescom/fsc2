@@ -119,6 +119,9 @@ int main( int argc, char *argv[ ] )
 
 void xforms_init( int *argc, char *argv[] )
 {
+	FL_Coord h, H;
+	FL_Coord x1, y1, w1, h1, x2, y2, w2, h2;
+
 	fl_initialize( argc, argv, "fsc2", 0, 0 );
 
 	/* Create and display the main form */
@@ -130,6 +133,14 @@ void xforms_init( int *argc, char *argv[] )
 
 	fl_set_browser_fontsize( main_form->error_browser, FL_NORMAL_SIZE );
 	fl_set_browser_fontstyle( main_form->error_browser, FL_FIXED_STYLE );
+
+	fl_get_object_geometry( main_form->browser, &x1, &y1, &w1, &h1 );
+	fl_get_object_geometry( main_form->error_browser, &x2, &y2, &w2, &h2 );
+	h = y2 - y1 - h1;
+	H = h1 + h2 + h;
+	fl_set_slider_bounds( main_form->win_slider, 30.0, ( double ) H - 30.0 );
+	fl_set_slider_value( main_form->win_slider,
+						 ( double ) ( h1 + h / 2 ) );
 
 	fl_show_form( main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
 				  FL_FULLBORDER, "fsc2" );
@@ -729,4 +740,27 @@ void clean_up( void )
 
 	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
 		need_Serial_Port[ i ] = UNSET;
+}
+
+
+void win_slider_callback( FL_OBJECT *a, long b )
+{
+	FL_Coord h, H;
+	FL_Coord new ;
+	FL_Coord x1, y1, w1, h1, x2, y2, w2, h2;
+
+
+	fl_freeze_form( main_form->fsc2 );
+
+	fl_get_object_geometry( main_form->browser, &x1, &y1, &w1, &h1 );
+	fl_get_object_geometry( main_form->error_browser, &x2, &y2, &w2, &h2 );
+
+	h = y2 - y1 - h1;
+	H = y2 - y1 + h2;
+	new = ( FL_Coord ) fl_get_slider_value( a ) - h / 2;
+
+	fl_set_object_size( main_form->browser, w1, new );
+	fl_set_object_geometry( main_form->error_browser, x2, y1 + new + h,
+							w2, H - ( new + h ) );
+	fl_unfreeze_form( main_form->fsc2 );
 }
