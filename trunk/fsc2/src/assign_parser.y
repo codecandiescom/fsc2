@@ -442,10 +442,10 @@ phsp:    /* empty */
 		| phsp phsv  sep2          { p_phs_setup( Cur_PHS, Cur_PHST, -1, $2,
 												  Cur_PROT ); }
         | phsp POD1_TOK sep1
-		  phsv  sep2               { p_phs_setup( Cur_PHS, Cur_PHST, 0, $4,
+		  phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST, 0, $4,
 												  PHASE_FFM_PROT ); }
         | phsp POD2_TOK sep1
-		  phsv  sep2               { p_phs_setup( Cur_PHS, Cur_PHST, 1, $4,
+		  phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST, 1, $4,
 												  PHASE_FFM_PROT ); }
 		| POD_TOKEN sep1 INT_TOKEN
           sep2                     { p_phs_setup( Cur_PHS, Cur_PHST, 0, $3,
