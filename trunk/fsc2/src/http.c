@@ -209,3 +209,10 @@ static void http_send_error_browser( int pd )
 
 	write( pd, &newline, 1 );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */
