@@ -389,16 +389,16 @@ prepared to also accept an integer, you can use the function
 long get_double( Var *var, const char *snippet )
 @end example
 @noindent
-The arguments to this function are the same you would pass to the
-previous function (i.e. @code{get_long()}) and the only difference is
-that it will return a @code{double} and will print an warning message (if
-the variable is an integer variable instead of the expected floating
-point variable) of
+The arguments of this function are the same you would pass to the
+previous function and the only difference is that it will return a
+@code{double} and print a warning message if the variable is an
+integer variable instead of the expected floating point variable. The
+warning message is
 @example
 foo.edl:17: XYZ: Integer number used as bar in abc().
 @end example
 @noindent
-(assuming that everything else is identical to the above example).
+assuming that everything else is identical to the above example.
 
 If your function can accept integer variables only there's a third
 function:
@@ -414,6 +414,41 @@ converted to the nearest integer, which is then returned (thus avoiding
 the termination of the running experiment). But usually the wrong
 parameter should already have been found during the test run, thus
 forcing the user to correct her/his program.
+
+Finally, there is a function for the case that you want a boolean
+variable, i.e.@: a variable that can be either true or false. This
+function is declared as
+@example
+bool get_boolean( Var *var )
+@end example
+This function will return true (i.e.@: a value of @code{1}) when the
+variable passed to it is either an integer variable with a non-zero
+value or a string variable with the string @code{"ON"} (it is
+case-insensitive, so @code{"on"}, @code{"On"} or even @code{"oN"} will
+also do). False (i.e.@: code{0}= is returned when it receives an integer
+variable with a value of @code{0} or a string with the text @code{"OFF"}
+(again this checked ion a case-insensitive manner). If the variable
+passed to the function is a floating point variable normally an error
+message like
+@example
+foo.edl:17: XYZ: Floating point number found where boolean
+                 value was expected in abc().
+@end example
+@noindent
+Only when @acronym{fsc2} is running the experiment only a similar
+warning message is printed but instead the floating point value is
+copnverted to the next integer value and the truth value of this number
+is returned to avoid stopping the experiment.
+
+Finally, if the function receives a string variable that is neither
+@code{"ON"} nor @code{"OFF"} (including variations of the case the
+characters) an error message is printed:
+@example
+foo.edl:17: XYZ: Invalid boolean argument ("bla") in abc().
+@end example
+@noindent
+(assuming that the string was @code{"bla"}) and an execption is thrown
+in all cases, even dring the experiement.
 
 
 @subsection Returning data from EDL functions
@@ -476,7 +511,7 @@ Var *square( Var *var )
 @}
 @end example
 @noindent
-As you see, first it is checked that the variable passed to the function
+As you see it is checked first that the variable passed to the function
 has the correct type - both integer and floating point values are ok.
 Next we distinguish between the possibilities that the value is
 either an integer or a floating point number by testing the @code{type}
