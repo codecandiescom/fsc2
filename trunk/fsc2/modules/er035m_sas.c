@@ -21,6 +21,7 @@
 
 #define DEVICE_NAME "ER035M_SAS"       /* name of device */
 
+#define TEST_FIELD 2000.0        /* returned as current fireld in test run */
 
 /* exported functions and symbols */
 
@@ -412,7 +413,7 @@ Var *measure_field( Var *v )
 
 	v = v;
 	if ( TEST_RUN )
-		return vars_push( FLOAT_VAR, 0.0 );
+		return vars_push( FLOAT_VAR, TEST_FIELD );
 
 
 	/* If gaussmeter is in oscillator up/down state or the state is unknown
