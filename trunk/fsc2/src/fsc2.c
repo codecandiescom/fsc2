@@ -957,6 +957,8 @@ void clean_up( void )
 	int i;
 
 
+	G.is_init = UNSET;
+
 	/* clear up the compilation structure */
 
 	for ( i = 0; i < 3; ++i )
