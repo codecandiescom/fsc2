@@ -117,6 +117,11 @@ me6000        // ME-6000 DAC card
 ni6601
 
 
-// Roper Scientific Spec-10 CCD camera
+// CCD cameras (Roper Scientific Spec-10)
 
 rs_spec10
+
+
+// Power Supplies (Thurlby&Thandar PL330DP)
+
+thurlby330
