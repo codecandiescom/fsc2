@@ -177,11 +177,12 @@ install:
 	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_connect $(bindir)
 	$(EXEC_INSTALL) -m  644 -o $(OWNER) -g $(GROUP) *.fsc2_so $(libdir)
 
-	$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test     \
-					 $(bindir)/fsc2_load
+	$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test        \
+					 $(bindir)/fsc2_load $(bindir)/fsc2_iconic_start
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_start
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_test
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_load
+	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_iconic_start
 
 ifdef WITH_HTTP_SERVER
 	$(EXEC_INSTALL) -m 755 -o $(OWNER) -g $(GROUP) fsc2_http_server $(bindir)
