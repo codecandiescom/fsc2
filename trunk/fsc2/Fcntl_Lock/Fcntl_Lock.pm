@@ -8,6 +8,8 @@
 # $Id$
 
 
+=pod
+
 =head1 NAME
 
 Fcntl_Lock - Perl extension for file locking with fcntl(2)
