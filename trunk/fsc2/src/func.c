@@ -940,6 +940,10 @@ void f_wait_alarm_handler( int sig_type )
 }
 
 
+/*-------------------------------------------------------------------*/
+/* f_init_1d() has to be called to initialize the display system for */
+/* 1-dimensional experiments.                                        */
+/*-------------------------------------------------------------------*/
 
 Var *f_init_1d( Var *v )
 {
@@ -1006,49 +1010,23 @@ Var *f_init_1d( Var *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* f_init_display() has to be called to initialize the display system. It  */
-/* expects a variable number of arguments but at least two. The first arg- */
-/* ument has to be the dimensionality, 1 or 2. The second argument is the  */
-/* number of points in x-direction, and for 3D graphics the third must be  */
-/* the number of points in y-direction. If the number of points isn't      */
-/* known a 0 has to be used. Then follow optional label strings for the x- */
-/* and y-axis.                                                             */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* f_init_2d() has to be called to initialize the display system for */
+/* 2-dimensional experiments.                                        */
+/*-------------------------------------------------------------------*/
 
 Var *f_init_2d( Var *v )
 {
 	long dim;
 	long nx, ny;
-	char *l1, *l2;
+	double rwc_x_start = 0.0, rwc_x_delta = 0.0, 
+		   rwc_y_start = 0.0, rwc_y_delta = 0.0;
+	char *l1 = NULL, *l2 = NULL;
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing arguments for function "
-				"`init_display()'.\n", Fname, Lc );
-		THROW( EXCEPTION );
-	}
-
-	vars_check( v, INT_VAR | FLOAT_VAR );                /* get dimension */
-
-	if ( v->type == INT_VAR )
-		dim = v->val.lval;
-	else
-		dim = rnd( v->val.dval );
-
-	if ( dim < 1 || dim > 2 )
-	{
-		eprint( FATAL, "%s:%ld: Invalid display dimension (%ld) in "
-				"`init_display()', valid values are 1 or 2.\n",
-				Fname, Lc, dim );
-		THROW( EXCEPTION );
-	}
-
-	v = v->next;
-	if ( v == NULL )
-	{
-		eprint( FATAL, "%s:%ld: Missing number of points in x-direction in "
-				"`init_display()'.\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Missing arguments in `init_2d()'.\n",
+				Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -1057,63 +1035,77 @@ Var *f_init_2d( Var *v )
 	if ( v->type == INT_VAR )
 		nx = v->val.lval;
 	else
-		nx = rnd( v->val.dval );
-
-	if ( nx < 0 )
 	{
-		eprint( FATAL, "%s:%ld: Negative number of points in x-direction - "
-				"use 0 if the number isn't known yet.\n", Fname, Lc );
+		eprint( WARN, "%s:%ld: Floating point value used as number of "
+				"points in x-direction.\n", Fname, Lc );
+		nx = rnd( v->val.dval );
+	}
+
+
+	v = v->next;
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing number of points in y-direction "
+				"in init_2d()'.\n", Fname, Lc );
 		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == INT_VAR )
+		ny = v->val.lval;
+	else
+	{
+		eprint( WARN, "%s:%ld: Floating point value used as number of "
+				"points in y-direction.\n", Fname, Lc );
+		ny = rnd( v->val.dval );
 	}
 
 	v = v->next;
 
-	if ( dim == 2 )                  /* for 3D get # of points in y-direction*/
+	if ( v != NULL )
 	{
-		if ( v == NULL )
+		/* Now we expect either 4 real world coordinates (start and delta for
+		   x- and y-direction) or none at all, labels instead */
+
+		if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 		{
-			eprint( FATAL, "%s:%ld: Missing number of points in y-direction "
-					"in init_display()'.\n", Fname, Lc );
-			THROW( EXCEPTION );
+			if ( v->next == NULL ||
+				 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) ||
+				 v->next->next == NULL ||
+				 ! ( v->next->next->type & ( INT_VAR | FLOAT_VAR ) ) ||
+				 v->next->next->next == NULL ||
+				 ! ( v->next->next->next->type & ( INT_VAR | FLOAT_VAR ) ) )
+			{
+				eprint( FATAL, "%s:%ld: Incomplete real world coordinates in "
+						"`init_2d()'.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+
+			rwc_x_start = VALUE( v );
+			v = v->next;
+			rwc_x_delta = VALUE( v );
+			v = v->next;
+			rwc_y_start = VALUE( v );
+			v = v->next;
+			rwc_y_delta = VALUE( v );
+			v = v->next;
 		}
 
-		vars_check( v, INT_VAR | FLOAT_VAR );
-
-		if ( v->type == INT_VAR )
-			ny = v->val.lval;
-		else
-			ny = rnd( v->val.dval );
-
-		if ( ny < 0 )
+		if ( v != NULL )                  /* get x-label */
 		{
-			eprint( FATAL, "%s:%ld: Negative number of points in y-direction "
-					"- use 0 if the number isn't known yet.\n", Fname, Lc );
-			THROW( EXCEPTION );
+			vars_check( v, STR_VAR );
+			l1 = v->val.sptr;
+			v = v->next;
 		}
 
-		v = v->next;
+		if ( v != NULL )                  /* get y-label */
+		{
+			vars_check( v, STR_VAR );
+			l2 = v->val.sptr;
+		}
 	}
-
-	if ( v != NULL )                  /* get x-label */
-	{
-		vars_check( v, STR_VAR );
-		l1 = v->val.sptr;
-		if ( strlen( l1 ) == 0 )
-			l1 = NULL;
-		v = v->next;
-	}
-	else
-		l1 = NULL;
-
-	if ( v != NULL && dim == 2 )
-	{
-		vars_check( v, STR_VAR );
-		l2 = v->val.sptr;
-		if ( strlen( l2 ) == 0 )
-			l2 = NULL;
-	}
-	else
-		l2 = NULL;
 
 	graphics_init( dim, nx, ny, 0.0, 0.0, 0.0, 0.0, l1, l2 );
 	return vars_push( INT_VAR, 1 );
@@ -1172,7 +1164,7 @@ Var *f_display( Var *v )
 
 	v = v->next;
 
-	if ( G.dim == 2 )                          /* for 3D display get y-index */
+	if ( G.dim == 2 )                       /* for 2D experiment get y-index */
 	{
 		if ( v == NULL )
 		{
