@@ -116,7 +116,7 @@ gid_t EGID;                  /* with (should both translate to fsc2) */
 
 bool is_i386 = UNSET;
 
-int cmdline_flags;
+CmdLine_Flag cmdline_flags;
 
 /* used in compiling and executing the user supplied program */
 
@@ -197,7 +197,7 @@ extern gid_t EGID;
 
 extern bool is_i386;
 
-extern int cmdline_flags;
+extern CmdLine_Flag cmdline_flags;
 
 extern long Lc;
 extern char *Fname;
