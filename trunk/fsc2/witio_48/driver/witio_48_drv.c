@@ -127,6 +127,11 @@ static int __init witio_48_init( void )
 		witio_48_set_crtl( i );
 	}
 
+	/* Finally initialize the spinlock that's used during opening and
+	   closing the board. */
+
+	spin_lock_init( &board.spinlock );
+
 	/* Finally tell the world about the successful installation ;-) */
 
 	printk( KERN_INFO "witio_48: Module succesfully installed.\n" );
