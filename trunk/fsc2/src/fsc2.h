@@ -93,7 +93,10 @@
 #include "func_intact_o.h"
 #include "func_intact_m.h"
 #include "conn.h"
+#if defined WITH_HTTP_SERVER
+#include "dump_graphic.h"
 #include "http.h"
+#endif
 #include "module_util.h"
 
 

@@ -90,7 +90,7 @@ SERIAL_LOCK_DIR   := /var/lock
 
 
 # Comment out the next two lines if you don't want a HTTP server that allows
-# to control fsc2's current state via the internet. The default port number
+# to control fsc2's current state via the Internet. The default port number
 # must be between 1024 and 65535.
 
 WITH_HTTP_SERVER  := yes
@@ -295,6 +295,8 @@ endif
 # Pass lots of variables to the source files...
 # For directories make sure they end with a `/'.
 
+CFLAGS += -Dsdir=\"$(sdir:/=)/\"
+
 ifdef bindir
 	CFLAGS += -Dbindir=\"$(bindir:/=)/\"
 else
@@ -327,7 +329,7 @@ endif
 
 ifdef WITH_HTTP_SERVER
 ifdef DEFAULT_HTTP_PORT
-	CFLAGS += -DWITH_HTTP_SERVERS -DDEFAULT_HTTP_PORT=$(DEFAULT_HTTP_PORT)
+	CFLAGS += -DWITH_HTTP_SERVER -DDEFAULT_HTTP_PORT=$(DEFAULT_HTTP_PORT)
 else
 	CFLAGS += -DWITH_HTTP_SERVER -DDEFAULT_HTTP_PORT=8080
 endif
@@ -472,6 +474,12 @@ install:
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/Functions $(libdir)
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/Devices $(libdir)
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/*.xpm $(auxdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/fsc2.png $(auxdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/fsc2.gif $(auxdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/fsc2.jpeg $(auxdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/na.png $(auxdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/na.gif $(auxdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/na.jpeg $(auxdir)
 
 	$(MAKE) -C src install
 	$(MAKE) -C modules install

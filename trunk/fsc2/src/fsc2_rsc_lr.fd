@@ -11,7 +11,7 @@ SnapGrid: 5
 Name: fsc2
 Width: 620
 Height: 450
-Number of Objects: 13
+Number of Objects: 14
 
 --------------------
 class: FL_BOX
@@ -70,7 +70,7 @@ argument: 0
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 10 70 90 35
+box: 10 68 90 35
 boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -88,7 +88,25 @@ argument: 1
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 10 185 90 35
+box: 10 116 90 35
+boxtype: FL_UP_BOX
+colors: FL_MCOL FL_GREEN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_SMALL_SIZE
+lcol: FL_BLACK
+label: Edit
+shortcut: E
+resize: FL_RESIZE_NONE
+gravity: FL_West FL_West
+name: Edit
+callback: edit_file
+argument: 0
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 10 164 90 35
 boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -106,7 +124,7 @@ argument: 0
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 10 235 90 35
+box: 10 212 90 35
 boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -124,7 +142,7 @@ argument: 0
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 10 295 90 35
+box: 10 260 90 35
 boxtype: FL_UP_BOX
 colors: FL_MCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -138,6 +156,60 @@ gravity: FL_West FL_West
 name: quit
 callback: 
 argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 10 308 90 35
+boxtype: FL_UP_BOX
+colors: FL_MCOL FL_GREEN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_SMALL_SIZE
+lcol: FL_BLACK
+label: WWW server
+shortcut: W
+resize: FL_RESIZE_NONE
+gravity: FL_West FL_West
+name: server
+callback:
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 10 356 90 35
+boxtype: FL_UP_BOX
+colors: FL_MCOL FL_GREEN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_SMALL_SIZE
+lcol: FL_BLACK
+label: Help
+shortcut: H
+resize: FL_RESIZE_NONE
+gravity: FL_West FL_West
+name: help
+callback: run_help
+argument: 0
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 10 404 90 35
+boxtype: FL_UP_BOX
+colors: FL_MCOL FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_SMALL_SIZE
+lcol: FL_BLACK
+label: Bug Report
+shortcut: B
+resize: FL_RESIZE_NONE
+gravity: FL_West FL_West
+name: bug_report
+callback: bug_report_callback
+argument: 0
 
 --------------------
 class: FL_BROWSER
@@ -156,24 +228,6 @@ gravity: FL_West FL_SouthEast
 name: error_browser
 callback: 
 argument: 
-
---------------------
-class: FL_BUTTON
-type: NORMAL_BUTTON
-box: 10 120 90 35
-boxtype: FL_UP_BOX
-colors: FL_MCOL FL_GREEN
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_SMALL_SIZE
-lcol: FL_BLACK
-label: Edit
-shortcut: E
-resize: FL_RESIZE_NONE
-gravity: FL_West FL_West
-name: Edit
-callback: edit_file
-argument: 0
 
 --------------------
 class: FL_SLIDER
@@ -195,42 +249,6 @@ argument: 0
 value: 0.172727
 slsize: 0.05
 return: FL_RETURN_END_CHANGED
-
---------------------
-class: FL_BUTTON
-type: NORMAL_BUTTON
-box: 10 400 90 35
-boxtype: FL_UP_BOX
-colors: FL_MCOL FL_COL1
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_SMALL_SIZE
-lcol: FL_BLACK
-label: Bug Report
-shortcut: B
-resize: FL_RESIZE_NONE
-gravity: FL_West FL_West
-name: bug_report
-callback: bug_report_callback
-argument: 0
-
---------------------
-class: FL_BUTTON
-type: NORMAL_BUTTON
-box: 10 355 90 35
-boxtype: FL_UP_BOX
-colors: FL_MCOL FL_GREEN
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_SMALL_SIZE
-lcol: FL_BLACK
-label: Help
-shortcut: H
-resize: FL_RESIZE_NONE
-gravity: FL_West FL_West
-name: help
-callback: run_help
-argument: 0
 
 --------------------
 class: FL_BUTTON

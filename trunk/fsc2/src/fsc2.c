@@ -154,7 +154,9 @@ int main( int argc, char *argv[ ] )
 
 	if ( ! xforms_init( &argc, argv ) )
 	{
+		raise_permissions( );
 		unlink( FSC2_LOCKFILE );
+		lower_permissions( );
 		return EXIT_FAILURE;
 	}
 
@@ -1674,8 +1676,10 @@ void usage( int return_status )
 			 "display window\n"
 			 "  -noCrashMail\n"
 			 "             don't send email when fsc2 crashes\n"
+#if defined WITH_HTTP_SERVER
 			 "  -httpPort\n"
 			 "             selects HTTP port to be used by web server\n"
+#endif
 			 "  -h, --help\n"
 			 "             display this help text and exit\n\n"
 			 "For a complete documentation see either %s%sfsc2.ps,\n"
@@ -1691,8 +1695,10 @@ int idle_handler( XEvent *a, void *b )
 	a = a;
 	b = b;
 
+#if defined WITH_HTTP_SERVER
 	if ( Internals.http_pid > 0 )
 		http_check( );
+#endif
 
 	return 0;
 }

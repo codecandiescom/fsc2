@@ -39,7 +39,12 @@ static int fsc2_xio_error_handler( Display *d );
 
 /* Some variables needed for the X resources */
 
+#if defined WITH_HTTP_SERVER
 #define N_APP_OPT 17
+#else
+#define N_APP_OPT 16
+#endif
+
 FL_IOPT xcntl;
 
 char xGeoStr[ 64 ], xdisplayGeoStr[ 64 ],
@@ -74,7 +79,9 @@ FL_resource xresources[ N_APP_OPT ] = {
 	{ "stopMouseButton", "*.stopMouseButton", FL_STRING, &xsmb, "", 64 },
 	{ "noCrashMail", "*.noCrashMail", FL_BOOL, &xnocm, "0", sizeof( int ) },
 	{ "size", "*.size", FL_STRING, xsizeStr, "", 64 },
+#if defined WITH_HTTP_SERVER
     { "httpPort", "*.httpPort", FL_INT, &xport, "0", sizeof( int ) }
+#endif
 };
 
 
@@ -288,10 +295,10 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	Internals.http_port = 8080;
 
+#if defined DEFAULT_HTTP_PORT
 	if ( * ( ( int * ) xresources[ HTTPPORT ].var ) >= 1024 &&
 		 * ( ( int * ) xresources[ HTTPPORT ].var ) <= 65535 )
 		Internals.http_port = * ( ( int * ) xresources[ HTTPPORT ].var );
-#if defined DEFAULT_HTTP_PORT
 	else if ( DEFAULT_HTTP_PORT >= 1024 && DEFAULT_HTTP_PORT <= 65535 )
 		Internals.http_port = DEFAULT_HTTP_PORT;
 #endif
@@ -356,9 +363,12 @@ bool xforms_init( int *argc, char *argv[ ] )
 	fl_hide_object( GUI.main_form->bug_report );
 #endif
 
-	/* Don't draw a button for the HTTP server if it's not needed */
+	/* Don't draw a button for the HTTP server if it's not needed, otherwise
+	   add a callback for the server button */
 
-#if ! defined WITH_HTTP_SERVER
+#if defined WITH_HTTP_SERVER
+	fl_set_object_callback( GUI.main_form->server, server_callback, 0 );
+#else
 	fl_hide_object( GUI.main_form->server );
 #endif
 
@@ -537,10 +547,12 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 	app_opt[ RESOLUTION	].argKind         = XrmoptionSepArg;
 	app_opt[ RESOLUTION	].value           = ( caddr_t ) NULL;
 
+#if defined DEFAULT_HTTP_PORT
 	app_opt[ HTTPPORT ].option            = T_strdup( "-httpPort" );
 	app_opt[ HTTPPORT ].specifier         = T_strdup( "*.httpPort" );
 	app_opt[ HTTPPORT ].argKind           = XrmoptionSepArg;
 	app_opt[ HTTPPORT ].value             = ( caddr_t ) "0";
+#endif
 }
 
 
