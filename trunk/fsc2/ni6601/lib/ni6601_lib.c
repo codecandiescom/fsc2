@@ -277,6 +277,13 @@ int ni6601_get_count( int board, int counter, int wait_for_end,
 
 	*count = v.count;
 
+	if ( wait_for_end )
+	{
+		dev_info[ board ].state[ counter ] = NI6601_IDLE;		
+		dev_info[ board ].state[ counter & 1 ? counter - 1 : counter + 1 ]
+			= NI6601_IDLE;
+	}
+
 	return NI6601_OK;
 }
 

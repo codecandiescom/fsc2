@@ -51,7 +51,7 @@ libni6601.a: ${sources:.c=.o} $(headers)
 	ar crs $@ ${sources:.c=.o}
 
 %.o: %.c $(headers)
-	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+	$(CC) -ggdb $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
 ni_test: ni_test.c libni6601.so
 	$(CC) -ggdb $(CFLAGS) $(INCLUDES) -o $@ $< -L. -lni6601

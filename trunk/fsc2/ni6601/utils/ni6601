@@ -86,11 +86,11 @@ case "$1" in
 		fi
 		for i in 0 1 2 3; do
 			mknod /dev/ni6601_$i c $major $i
-			chmod 666 /dev/ni6601_$i
 			if [ $? != 0 ]; then
 				log_failure_msg "Creating device files for NI6601 cards failed."
 				exit 1
 			fi
+			chmod 666 /dev/ni6601_$i
 		done
 		test "$2" = "restart" || log_success_msg "Starting NI6601 support."
 		;;

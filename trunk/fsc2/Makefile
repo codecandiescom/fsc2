@@ -347,8 +347,8 @@ ifeq ($(machine_name),single.physik.fu-berlin.de)
 	GPIB_LIBRARY       := NONE
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
-	ME6000_SUPPORT     := NO
-	NI6601_SUPPORT     := NO
+	ME6000_SUPPORT     := YES
+	NI6601_SUPPORT     := YES
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif

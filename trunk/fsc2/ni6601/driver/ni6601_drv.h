@@ -23,9 +23,7 @@
 #include <linux/ioctl.h>
 
 
-#define NI6601_MAX_BOARDS     4
-
-#define NI6601_ALL_DIO_BITS   0xFF
+#define NI6601_MAX_BOARDS       4
 
 #define NI6601_TIME_RESOLUTION  5.0e-8   /* 50 ns */
 

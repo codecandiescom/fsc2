@@ -748,7 +748,7 @@ Var *pulser_show_pulses( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 
-	if ( FSC2_IS_CHECK_RUN )
+	if ( ! FSC2_IS_CHECK_RUN )
 		rs690.do_show_pulses = SET;
 
 	return vars_push( INT_VAR, 1 );
@@ -762,8 +762,8 @@ Var *pulser_dump_pulses( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 
-	if ( FSC2_IS_CHECK_RUN )
-		rs690.do_show_pulses = SET;
+	if ( ! FSC2_IS_CHECK_RUN )
+		rs690.do_dump_pulses = SET;
 
 	return vars_push( INT_VAR, 1 );
 }

@@ -74,10 +74,10 @@ bool is_gaussmeter = UNSET;         /* tested by magnet power supply driver */
 static double er035m_s_get_field( void );
 static int er035m_s_get_resolution( void );
 static void er035m_s_set_resolution( int res_index );
-static double er035m_s_get_upper_search_limit( void );
-static double er035m_s_get_lower_search_limit( void );
-static void er035m_s_set_upper_search_limit( double ul );
-static void er035m_s_set_lower_search_limit( double ll );
+static long	er035m_s_get_upper_search_limit( void );
+static long	er035m_s_get_lower_search_limit( void );
+static void er035m_s_set_upper_search_limit( long ul );
+static void er035m_s_set_lower_search_limit( long ll );
 static bool er035m_s_open( void );
 static bool er035m_s_close( void );
 static bool er035m_s_write( const char *buf );
@@ -97,8 +97,8 @@ typedef struct
 	char prompt;            /* prompt character send on each reply */
 	int probe_orientation;
 	int probe_type;
-	double upper_search_limit;
-	double lower_search_limit;
+	long upper_search_limit;
+	long lower_search_limit;
 } NMR;
 
 static NMR nmr, nmr_stored;
@@ -131,8 +131,8 @@ static double res_list[ 3 ] = { 0.1, 0.01, 0.001 };
 #define PROBE_TYPE_F1 1
 
 
-double upper_search_limits[ 2 ] = { 3000.0, 18000.0 };
-double lower_search_limits[ 2 ] = { 200.0, 2000.0 };
+long upper_search_limits[ 2 ] = { 2400, 20000 };
+long lower_search_limits[ 2 ] = { 450, 1450 };
 
 
 enum {
@@ -722,19 +722,21 @@ Var *gaussmeter_wait( Var *v )
 
 Var *gaussmeter_upper_search_limit( Var *v )
 {
-	double ul;
+	double val;
+	long ul;
 
 
 	if ( v == NULL )
-		return vars_push( FLOAT_VAR, nmr.upper_search_limit );
+		return vars_push( FLOAT_VAR, ( double ) nmr.upper_search_limit );
 
-	ul = get_double( v, "upper search limit" );
-	
+	val = get_double( v, "upper search limit" );
+	ul = lrnd( ceil( val ) );
+
 	if ( ul > upper_search_limits[ FSC2_MODE == TEST ?
 								   PROBE_TYPE_F1 : nmr.probe_type ] )
 	{
 		print( SEVERE, "Requested upper search limit too high, changing to "
-			   "%.1f G\n",
+			   "%ld G\n",
 			   upper_search_limits[ FSC2_MODE == TEST ?
 								    PROBE_TYPE_F1 : nmr.probe_type ] );
 		ul = upper_search_limits[ FSC2_MODE == TEST ?
@@ -754,7 +756,7 @@ Var *gaussmeter_upper_search_limit( Var *v )
 		er035m_s_set_upper_search_limit( ul );
 	nmr.upper_search_limit = ul;
 
-	return vars_push( FLOAT_VAR, ul );
+	return vars_push( FLOAT_VAR, ( double ) ul );
 }
 
 
@@ -763,19 +765,21 @@ Var *gaussmeter_upper_search_limit( Var *v )
 
 Var *gaussmeter_lower_search_limit( Var *v )
 {
-	double ll;
+	double val;
+	long ll;
 
 
 	if ( v == NULL )
-		return vars_push( FLOAT_VAR, nmr.lower_search_limit );
+		return vars_push( FLOAT_VAR, ( double ) nmr.lower_search_limit );
 
-	ll = get_double( v, "lower search limit" );
+	val = get_double( v, "lower search limit" );
+	ll = lrnd( floor( val ) );
 
 	if ( ll < lower_search_limits[ FSC2_MODE == TEST ?
 								   PROBE_TYPE_F0 : nmr.probe_type ] )
 	{
 		print( SEVERE, "Requested lower search limit too low, changing to "
-			   "%.1f G\n",
+			   "%ld G\n",
 			   lower_search_limits[ FSC2_MODE == TEST ?
 								    PROBE_TYPE_F0 : nmr.probe_type ] );
 		ll = lower_search_limits[ FSC2_MODE == TEST ?
@@ -795,7 +799,7 @@ Var *gaussmeter_lower_search_limit( Var *v )
 		er035m_s_set_lower_search_limit( ll );
 	nmr.lower_search_limit = ll;
 
-	return vars_push( FLOAT_VAR, ll );
+	return vars_push( FLOAT_VAR, ( double ) ll );
 }
 
 
@@ -957,11 +961,12 @@ static void er035m_s_set_resolution( int res_index )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-static double er035m_s_get_upper_search_limit( void )
+static long er035m_s_get_upper_search_limit( void )
 {
 	int retries;
 	char buffer[ 20 ];
 	long length = 20;
+	char *ptr;
 
 
 	for ( retries = FAIL_RETRIES; ; retries-- )
@@ -981,18 +986,30 @@ static double er035m_s_get_upper_search_limit( void )
 			er035m_s_comm_fail( );
 	}
 
-	return T_atod( buffer + 2 );
+	buffer[ length - 2 ] = '\0';
+
+	for ( ptr = buffer; *ptr != '\0'; ptr++ )
+	{
+		if ( ! isdigit( *ptr ) )
+		{
+			print( FATAL, "Undocumented data received.\n" );
+			THROW( EXCEPTION );
+		}
+	}
+
+	return T_atol( buffer );
 }
 
 
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-static double er035m_s_get_lower_search_limit( void )
+static long er035m_s_get_lower_search_limit( void )
 {
 	int retries;
 	char buffer[ 20 ];
 	long length = 20;
+	char *ptr;
 
 
 	for ( retries = FAIL_RETRIES; ; retries-- )
@@ -1012,19 +1029,30 @@ static double er035m_s_get_lower_search_limit( void )
 			er035m_s_comm_fail( );
 	}
 
-	return T_atod( buffer + 2 );
+	buffer[ length - 2 ] = '\0';
+
+	for ( ptr = buffer; *ptr != '\0'; ptr++ )
+	{
+		if ( ! isdigit( *ptr ) )
+		{
+			print( FATAL, "Undocumented data received.\n" );
+			THROW( EXCEPTION );
+		}
+	}
+
+	return T_atol( buffer );
 }
 
 
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-static void er035m_s_set_upper_search_limit( double ul )
+static void er035m_s_set_upper_search_limit( long ul )
 {
 	char buf[ 40 ];
 
 
-	snprintf( buf, 40, "UL%f", ul );
+	snprintf( buf, 40, "UL%ld", ul );
 	if ( er035m_s_write( buf ) == FAIL )
 		er035m_s_comm_fail( );
 
@@ -1035,12 +1063,12 @@ static void er035m_s_set_upper_search_limit( double ul )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-static void er035m_s_set_lower_search_limit( double ll )
+static void er035m_s_set_lower_search_limit( long ll )
 {
 	char buf[ 40 ];
 
 
-	snprintf( buf, 40, "LL%f", ll );
+	snprintf( buf, 40, "LL%ld", ll );
 	if ( er035m_s_write( buf ) == FAIL )
 		er035m_s_comm_fail( );
 

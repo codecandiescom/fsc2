@@ -199,6 +199,11 @@ install-moebpc3.physik.fu-berlin.de:
 	-chown $(OWNER).$(GROUP) $(libdir)/lockin.so
 
 install-single.physik.fu-berlin.de:
+	$(MAKE) $(UNINSTALL_MACHINE)
+	-$(LN) $(LNFLAGS) $(libdir)/ni6601.so $(libdir)/counter.so
+	-chown $(OWNER).$(GROUP) $(libdir)/counter.so
+	-$(LN) $(LNFLAGS) $(libdir)/me6000.so $(libdir)/dac.so
+	-chown $(OWNER).$(GROUP) $(libdir)/dac.so
 
 install-tresr.physik.fu-berlin.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
@@ -257,6 +262,8 @@ uninstall-moebpc3.physik.fu-berlin.de:
 	-$(RM) $(RMFLAGS) $(libdir)/lockin.so
 
 uninstall-single.physik.fu-berlin.de:
+	-$(RM) $(RMFLAGS) $(libdir)/counter.so
+	-$(RM) $(RMFLAGS) $(libdir)/dac.so
 
 uninstall-tresr.physik.fu-berlin.de:
 	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
