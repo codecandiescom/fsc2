@@ -732,7 +732,11 @@ Var *vars_push( int type, ... )
 				get_memcpy( new_stack_var->val.dpnt,
 							new_stack_var->len * sizeof( double ) );
 			break;
-
+/* ????????????????????????????????????????????
+		case INT_ARR: case FLOAT_ARR :
+			new_stack_var->from = va_arg( ap, Var * );
+			break;
+   ???????????????????????????????????????????? */
 		default :
 			assert( 1 == 0 );
 	}
@@ -1869,4 +1873,31 @@ void vars_arr_init( Var *v )
 	}
 
 	vars_pop( v );
+}
+
+
+/*--------------------------------------------------------------------------*/
+/* This function is called from the parsers for variable or function tokens */
+/* possibly followed by a unit. If there was no unit the second argument is */
+/* NULL and nothing has to be done. If it isn't NULL we've got top check    */
+/* that the token is really a simple number and multiply it then with the   */
+/* unit. If the variable or function token is an array we have to drop out  */
+/* of parsing and print an error message instead.                           */
+/*--------------------------------------------------------------------------*/
+
+Var * apply_unit( Var *var, Var *unit ) 
+{
+	if ( unit == NULL )
+		return var;
+	else
+	{
+		if ( var->type & ( INT_VAR | FLOAT_VAR ) )
+		    return vars_mult( var, unit );
+		else
+		{
+			eprint( FATAL, "%s:%ld: Syntax error: Unit is applied to a "
+					"non-number.\n", Fname, Lc );
+			THROW( EXCEPTION );
+		}
+	}
 }
