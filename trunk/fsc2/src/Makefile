@@ -2,9 +2,26 @@
 
 c_sources      = fsc2.c pulser.c util.c exceptions.c variables.c vars_util.c \
 				 func.c func_basic.c func_util.c func_intact.c T.c phases.c  \
-				 exp.c devices.c gpib_if.c run.c comm.c chld_func.c \
-				 graphics.c accept.c graph_handler_1d.c graph_handler_2d.c \
-				 graph_cut.c loader.c bugs.c print.c conn.c ipc.c
+				 exp.c devices.c run.c comm.c chld_func.c graphics.c         \
+                 accept.c graph_handler_1d.c graph_handler_2d.c graph_cut.c  \
+				 loader.c bugs.c print.c conn.c ipc.c
+
+ifeq ($(shell hostname -f),pion.chemie.uni-frankfurt.de)
+	c_sources += gpib_if_old.c
+endif
+
+ifeq ($(shell hostname -f),door.physik.fu-berlin.de)
+	c_sources += gpib_if_ni.c
+endif
+
+ifeq ($(shell hostname -f),moebi.physik.fu-berlin.de)
+	c_sources += gpib_if.c
+endif
+
+ifeq ($(shell hostname -f),crowley.physik.fu-berlin.de)
+	c_sources += gpib_if.c
+endif
+
 bison_sources  = $(wildcard *_parser.y)
 flex_sources   = $(wildcard *_lexer.l)
 sources        = $(bison_sources:.y=.c) $(flex_sources:.l=.c) \
@@ -35,13 +52,10 @@ export headers
 
 
 .SUFFIXES:
-.PHONY: all clean distclean pion
+.PHONY: all clean distclean
 
 
 all:
-	if [ `hostname -f` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
-		$(MAKE) pion; \
-	fi
 	$(MAKE) fsc2 fsc2_clean fsc2_connect modules
 
 
@@ -86,17 +100,6 @@ fsc2_connect.o: fsc2_connect.c
 clean:
 	$(RM) $(RMFLAGS) *.o *.output *_parser.c *_parser.h *_lexer.c \
 					 fsc2_clean.c fsc2 fsc2_clean fsc2_connect mem *~
-
-
-# unfortunately, for the pion we need a different GPIB interface...
-
-pion:
-	if [ ! -e gpib_if_new.c -a ! -e gpib_if_new.h ]; then \
-		mv gpib_if.c gpib_if_new.c; \
-		mv gpib_if.h gpib_if_new.h; \
-		mv gpib_if_old.c gpib_if.c; \
-		mv gpib_if_old.h gpib_if.h; \
-	fi
 
 
 # don't automatically delete intermediate files created by bison and flex
