@@ -425,7 +425,7 @@ the ground of the instrument creating the voltage.
 These use use two AI channels and return the voltage differene between
 the channels. For these setting the channel number specicfied in the
 'channels' argument must be between 0 and 7, 16 and 23, 32 and 39 or
-19 and 55 (of course depending on the number of AI channels the board
+48 and 55 (of course depending on the number of AI channels the board
 has). As the second channel the channel with the the number of the first
 channel plus 8 is than automatically used.
 
