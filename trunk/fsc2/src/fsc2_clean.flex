@@ -76,7 +76,7 @@ IFNE    [^"<\t \n]*\n?
 EXIT    ^[ \t]*#exit
 QUIT    ^[ \t]*#quit
 
-KEEP    [^\t" \n(/*)]+
+KEEP    [^\t" \n(\/*),;]+
 
 
 %x      str
@@ -163,7 +163,7 @@ KEEP    [^\t" \n(/*)]+
 			}
 } /* end of <comm> */
 
-			/* dumps empty line (i.e. just containing tabs and spaces) */
+			/* dump empty line (i.e. just containing tabs and spaces) */
 {WLWS}      Lc++;
 
 {LWS}       /* dumps of leading white space */
@@ -175,7 +175,7 @@ KEEP    [^\t" \n(/*)]+
 				printf( "\n" );
 			}
 
-			/* reduces (other) white space to just one space */
+			/* reduces any amount of (other) white space to just one space */
 {WS}        printf( " " );
 
 			/* writes out EOL character */
@@ -201,7 +201,6 @@ KEEP    [^\t" \n(/*)]+
 			}
 
 <incl>{
-
 			/* handling of C++ style comments */
 {REM2}      Lc++;
 
@@ -239,9 +238,7 @@ KEEP    [^\t" \n(/*)]+
 } /* end of <incl> */
 
             /* here some special handling of time specifications */
-
-
-{NS}/(;|,)  printf( "\x04nsec" );
+{NS}/(,|;)  printf( "\x04nsec" );
 {NS}        printf( "\x04nsec" );
 {US}/(;|,)  printf( "\x04usec" );
 {US}        printf( "\x04usec" );
@@ -249,7 +246,6 @@ KEEP    [^\t" \n(/*)]+
 {MS}        printf( "\x04msec" );
 {S}/(;|,)   printf( "\x04sec" );
 {S}         printf( "\x04sec" );
-
 {INS}/(;|,) time_spec( yytext, yyleng, "\x04nsec" );
 {INS}       time_spec( yytext, yyleng, "\x04nsec" );
 {IUS}/(;|,) time_spec( yytext, yyleng, "\x04usec" );
