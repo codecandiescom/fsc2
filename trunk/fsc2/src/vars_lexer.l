@@ -318,8 +318,7 @@ WS          [\n \t]+
 
 			/* Handling of invalid input */
 .           {
-				print( FATAL, "Invalid input in VARIABLES section near "
-					   "'%s'.\n", varstext );
+				print( FATAL, "Invalid input near '%s'.\n", varstext );
 				THROW( EXCEPTION );
 			}
 

@@ -280,7 +280,7 @@ int phases_parser( FILE *in )
 	}
 	CATCH( INVALID_INPUT_EXCEPTION )
 	{
-		print( FATAL, "Invalid input in near '%s'.\n", phasestext );
+		print( FATAL, "Invalid input near '%s'.\n", phasestext );
 		THROW( EXCEPTION );
 	}
 	OTHERWISE

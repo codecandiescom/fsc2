@@ -544,7 +544,7 @@ WS          [\n=: ]+
 
 			/* handling of invalid input (i.e. everything else) */
 .           {
-				print( FATAL, "Invalid input in ASSIGNMENTS near '%s'.\n",
+				print( FATAL, "Invalid input near '%s'.\n",
 					   assigntext );
 				THROW( EXCEPTION );
 			}

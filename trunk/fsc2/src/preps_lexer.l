@@ -445,8 +445,7 @@ FUNC        {IDENT}"#"[0-9]+
 
 			/* Handling of invalid input */
 .           {
-				print( FATAL, "Invalid input in PREPARATIONS section near "
-					   "'%s'.\n", prepstext );
+				print( FATAL, "Invalid input near '%s'.\n", prepstext );
 				THROW( EXCEPTION );
 			}
 

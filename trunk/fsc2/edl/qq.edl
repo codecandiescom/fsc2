@@ -19,7 +19,7 @@ init_1d( 2, N, sf, df, "Field [ G ]", "Signal [uV]" );
 EXPERIMENT:
 
 
-SLID = slider_create( "VALUE_SLIDER", -180, 180, "Lock-in phase" );
+SLID = slider_create( "SLOW_VALUE_SLIDER", -180, 180, "Lock-in phase" );
 d = ( 100.0 / N ) *( lin_space( 1, N, N ) - N / 2 )
 	* exp( - ( lin_space( 1, N, N ) - N / 2 )^2 / (0.125 * N )^2 );
 
@@ -27,13 +27,13 @@ FOREVER {
 	print( "Starting #. run\n", J );
 
 
-	FOR I = 1 : N { //( I == 1 ? N : N ) {
+	FOR I = 1 : N {
 		g[ 1, I ] = ( ( J - 1 ) * g[ 1, I ] + grandom( ) ) / J;
 		g[ 2, I ] = ( ( J - 1 ) * g[ 2, I ] + grandom( ) ) / J;
 		display( I, g[ 1, I ] - d[ I ] * ca, 1,
 				 I, g[ 2, I ] - d[ I ] * sa, 2 );
 
-		IF slider_changed( SLID ) & N == N ? 1 : 0 {
+		IF slider_changed( SLID ) {
 			ang = slider_value( SLID ) / 45.0 * atan( 1.0 );
 			sa = sin( ang );
 			ca = cos( ang );
@@ -41,13 +41,6 @@ FOREVER {
 					 g[ 1 ] - d * ca, 1,
 				     1, J == 1 ? slice( g[ 2 ] - d * sa, 1, I ) :
 					 g[ 2 ] - d * sa, 2 );
-//			  IF J == 1 {
-//				  display( 1, slice( g[ 1 ] - d * ca, 1, I ), 1,
-//						   1, slice( g[ 2 ] - d * sa, 1, I ) , 2 );
-//			  } ELSE {
-//				  display( 1, g[ 1 ] - d * ca, 1,
-//						   1, g[ 2 ] - d * sa, 2 );
-//			  }
 		}
 		ELSE
 		{
