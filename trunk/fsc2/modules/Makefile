@@ -28,15 +28,7 @@ simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c          \
 				 aeg_s_band.c aeg_x_band.c er035m.c er035m_s.c hp5340a.c   \
 				 er035m_sa.c er035m_sas.c bh15.c keithley228a.c egg4402.c  \
 				 kontron4060.c lakeshore330.c pt2025.c er032m.c ips20_4.c  \
-				 $(addsuffix .c,$(s_band_list))
-
-ifeq ($(ME6000_SUPPORT),YES)
-simp_modules  += me6000.c
-endif
-
-ifeq ($(NI6601_SUPPORT),YES)
-simp_modules  += ni6601.c
-endif
+				 $(addsuffix .c,$(s_band_list)) rs_spec10.c
 
 comp_modules  := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400  \
 				 hp8672a $(hp864_list) $(tds_list)
@@ -62,6 +54,26 @@ hp8648b       := hp8648b.c hp8648b_util.c hp8648b_gpib.c hp8648b_lexer.c
 hp8672a       := hp8672a.c hp8672a_util.c hp8672a_gpib.c hp8672a_lexer.c
 er023m        := er023m.c  er023m_addon.c er023m_gpib.c
 lecroy9400    := lecroy9400.c  lecroy9400_gpib.c  lecroy9400_util.c
+
+
+# For modules that require header files in non-standard places where the
+# compiler would find them automatically (e.g. /usr/include or
+# /usr/local/include) you must specify the full search path(s) here.
+
+rs_spec10_incl := /usr/local/include/pvcam
+#rs_spec10_incl := /usr/local/include/pvcam
+
+
+# For modules that need to be linked against special libraries please
+# define a variable here, starting with the name of the module, and
+# followed by "_libs". Assign to it the name(s) of the required
+# libraries. If a library is not in one of the standard places where the
+# linker looks for libraries (i.e. /usr/lib, /usr/local/lib) it must be
+# specified with the full, absolute path.
+
+me6000_libs    := libme6x00.so
+ni6601_libs    := libni6601.so
+rs_spec10_libs := libpvcam.so
 
 src_headers   := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h
 
@@ -100,7 +112,8 @@ export        # export all symbols to the sub-makefiles
 # template and then invoke them. For the Tektronix digitizers and the
 # HP864* synthesizers also the sources are created from templates.
 
-all: $(simp_modules:.c=.so)
+all:
+	$(MAKE) $(simp_modules:.c=.so)
 	for n in $(tds_list); do                                     \
 		o=`echo $$n | tr "a-z" "A-Z"`;                           \
 		for m in "" _util _gpib; do                              \
@@ -127,12 +140,48 @@ all: $(simp_modules:.c=.so)
 		$(RM) $(RMFLAGS) $$m.make;                               \
 	done;
 
-$(simp_modules:.c=.so): %.so: %.o
-	$(CC) $(LFLAGS) $^ -o $@
-	chmod 644 $@
+# The following rule looks a bit complicated because we have to check if
+# some additional libraries are required by each module. These libraries
+# have to defined by a variables with the name of the module, followed
+# by the string "_libs". If no additional libraries are requires we can
+# compile the module immediately. Otherwise we've got to distinguish
+# between libraries given with a full absolute path (which are passed
+# to gcc just as they are) and libraries without a path, that are supposed
+# to be in the directories searched by the linker. For these we must
+# remove the leading "lib" and the trailing".so" extension and prepend
+# it with "-l". Before we actually use the library we check if they really
+# exist by an extra call of gcc - if it fails the module isn't created.
+
+$(simp_modules:.c=.so): %.so: %.o	
+	if [ -z "$($(patsubst %.so,%_libs,$@))" ]; then              \
+		$(CC) $(LFLAGS) $^ -o $@;                                \
+		chmod 644 $@;                                            \
+	else                                                         \
+		for l in "$($(patsubst %.so,%_libs,$@))"; do             \
+			if [ "$(notdir $$l)" == "$$l" ]; then                \
+				l=$${l%.so};                                     \
+				libs="$$libs -l$${l#lib}";                       \
+			else                                                 \
+				libs="$$libs $$l";                               \
+			fi;                                                  \
+		done;                                                    \
+		$(CC) $$libs -shared -o $@.lib_test 2>/dev/null;         \
+		if [ -e $@.lib_test ]; then                              \
+			$(RM) $(RMFLAGS) $@.lib_test;                        \
+			$(CC) $(LFLAGS) $^ $$libs -o $@;                     \
+			chmod 644 $@;                                        \
+		fi;                                                      \
+	fi
+
+
+# Since some modules may require header files we need to prepend each
+# value in a variable with a name starting with the module name and
+# followed by the string "_incl" with "-I" and pass this to the compiler.
 
 $(simp_modules:.c=.o): %.o: %.c $(cdir)/%.conf $(src_headers)
-	$(CC) $(CFLAGS) -c $(LFLAGS) $< -o $@
+	incl="$(foreach i,$($(patsubst %.o,%_incl,$@)),-I$(i))";     \
+	$(CC) $$incl $(CFLAGS) -c $(LFLAGS) $< -o $@
+
 
 # Also the modules for controlling the Frankfurt S-band magnet are made
 # from a template file

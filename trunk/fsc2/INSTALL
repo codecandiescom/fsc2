@@ -224,8 +224,28 @@ access the device the first time.
 D) Compiling and Installing
 ===========================
 
-Go into the main directory of the package and type 'make'. This may take
-some time to finish. Usually no warnings should show up during the
+If you want support for the National Instruments 6601 GPCT or the Meilhaus
+ME6000 and ME6100 DAC card you must make sure that you already compiled and
+installed the driver for the cards, otherwise the corresponding modules are
+not built. Should you install the libraries for these cards in non-standard
+location you must set the variables "ni6601_libs" or "me6000-libs" in the
+Makefile in the 'modules' subdirectory to the full absolute path of the
+library.
+
+For support for the Roper Scientific CCD Spec-10 camera the PVCAM library
+supplied by Roper Scientific is required and must be installed correctly,
+together with the header files. In a standard install (at least for the
+latest version, 2.6.4.2) the library gets installed in '/usr/lib'. If you
+should install it instead in a directory the linker does not search for
+libraries per default, you have to change the "rs_spec10_libs" variable
+in the Makefile in the 'modules' subdirectory to the full, absolute path
+of the library. The required header files get installed per default in
+'/usr/local/pvcam/examples'. Should you chose a more reasonable place you
+must change the "rs_spec10_incl" variable in the same Makefile to the path
+of the header files.
+
+Now go into the main directory of the package and type 'make'. This may
+take some time to finish. Usually no warnings should show up during the
 compilation (at least on systems with a newer libc and if my GPIB library
 is used), but warnings may occur when the documentation is created and some
 of the required tools are not available. It may even happen that the make
@@ -321,7 +341,7 @@ Just start by typing 'fsc2 edl/qq.edl' or 'fsc2 edl/z.edl' (assuming you're
 still in fsc2's main directory) and click onto the "Start" button to get an
 idea about how fsc2 displays 1- and 2-dimensional data sets.
 
-             January 17, 2003             Much luck, Jens
+             January 21, 2003             Much luck, Jens
 --
        _  _____  _____
       | ||_   _||_   _|         Jens.Toerring@physik.fu-berlin.de

@@ -120,33 +120,6 @@ NUM_SERIAL_PORTS  := 2
 SERIAL_LOCK_DIR   := /var/lock
 
 
-# The next variable controls if support for the ME-6000 DAC card by
-# Meilhaus Electronic GmbH is included. This requires that the kernel
-# module as well as a library, both included into the fsc2 distribution,
-# are installed. Please uncomment this line only if you have such a card
-# and already successfully installed the kernel module and the library.
-
-# WITH_ME6000       := yes
-
-
-# The next variable controls if support for the 6601 GPCT card by
-# National Instruments is included. This requires that the kernel
-# module as well as a library, both included into the fsc2 distribution,
-# are installed. Please uncomment this line only if you have such a card
-# and already successfully installed the kernel module and the library.
-
-# WITH_NI6601       := yes
-
-
-# The next variable controls if support for the Spec-10 CCD camera by
-# Roper Scientific is included. This requires that a library for the
-# PCI controlling the camera gets loaded into fsc2. Please uncomment this
-# line only if you have such a camera and already successfully installed
-# the kernel module for the PCI card and the library.
-
-# WITH RS_SPEC10      := yes
-
-
 # Comment out the next two lines if you don't want the ability to run a HTTP
 # server that allows to monitor fsc2's current state via the Internet. The
 # default port number the HTTP server will listen on can be set by the second
@@ -283,23 +256,6 @@ ifneq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
 	CONFFLAGS += -DIS_STILL_LIBC1
 endif
 
-ifdef WITH_ME6000
-	ME6000_SUPPORT     := YES
-else
-	ME6000_SUPPORT     := NO
-endif
-
-ifdef WITH_NI6601
-	NI6601_SUPPORT     := YES
-else
-	NI6601_SUPPORT     := NO
-endif
-
-ifdef WITH_RS_SPEC10
-	RS_SPEC10_SUPPORT  := YES
-else
-	RS_SPEC10_SUPPORT  := NO
-endif
 
 # Here's some stuff that makes it more convenient to make and install on
 # machines that are known well enough - for these machines one doesn't has
@@ -314,9 +270,6 @@ ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
 	GPIB_LIBRARY       := JTT
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
-	ME6000_SUPPORT     := NO
-	NI6601_SUPPORT     := NO
-	RS_SPEC10_SUPPORT  := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -328,9 +281,6 @@ ifeq ($(machine_name),crowley.physik.fu-berlin.de)
 	GPIB_LOG_FILE      := /scratch/tmp/gpib.log
 	NUM_SERIAL_PORTS   := 1
 	SERIAL_LOCK_DIR    := /var/lock
-	ME6000_SUPPORT     := NO
-	NI6601_SUPPORT     := NO
-	RS_SPEC10_SUPPORT  := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -342,9 +292,6 @@ ifeq ($(machine_name),door.physik.fu-berlin.de)
 	GPIB_LOG_FILE      := /scratch/tmp/gpib.log
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
-	ME6000_SUPPORT     := NO
-	NI6601_SUPPORT     := NO
-	RS_SPEC10_SUPPORT  := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -356,9 +303,6 @@ ifeq ($(machine_name),isaak.physik.fu-berlin.de)
 	GPIB_LOG_FILE      := /scratch/tmp/gpib.log
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
-	ME6000_SUPPORT     := NO
-	NI6601_SUPPORT     := NO
-	RS_SPEC10_SUPPORT  := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -369,9 +313,6 @@ ifeq ($(machine_name),moebpc3.physik.fu-berlin.de)
 	GPIB_LIBRARY       := JTT
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
-	ME6000_SUPPORT     := NO
-	NI6601_SUPPORT     := NO
-	RS_SPEC10_SUPPORT  := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -382,9 +323,6 @@ ifeq ($(machine_name),single.physik.fu-berlin.de)
 	GPIB_LIBRARY       := NONE
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
-	ME6000_SUPPORT     := YES
-	NI6601_SUPPORT     := YES
-	RS_SPEC10_SUPPORT  := YES
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -395,9 +333,6 @@ ifeq ($(machine_name),sunone.chemie.unibas.ch)
 	GPIB_LIBRARY       := NI
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
-	ME6000_SUPPORT     := YES
-	NI6601_SUPPORT     := YES
-	RS_SPEC10_SUPPORT  := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -408,9 +343,6 @@ ifeq ($(machine_name),tresr.physik.fu-berlin.de)
 	GPIB_LIBRARY       := LLP
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
-	ME6000_SUPPORT     := NO
-	NI6601_SUPPORT     := NO
-	RS_SPEC10_SUPPORT  := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -421,9 +353,6 @@ ifeq ($(machine_name),crowley.none)
 	GPIB_LIBRARY       := JTT
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
-	ME6000_SUPPORT     := YES
-	NI6601_SUPPORT     := YES
-	RS_SPEC10_SUPPORT  := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -433,9 +362,6 @@ ifeq ($(machine_name),dorimare.nowhere)
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
 	NUM_SERIAL_PORTS   := 2
-	ME6000_SUPPORT     := YES
-	NI6601_SUPPORT     := YES
-	RS_SPEC10_SUPPORT  := YES
 	SERIAL_LOCK_DIR    := /var/lock
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
@@ -538,21 +464,6 @@ ifndef NO_MAIL
 	endif
 endif
 
-
-# If required link in the necessary libraries for the ME-6000 DAC and the
-# National Instruments 6601 GPCT cards
-
-ifeq ($(ME6000_SUPPORT),YES)
-	LIBS                 += -lme6x00
-endif
-
-ifeq ($(NI6601_SUPPORT),YES)
-	LIBS                 += -lni6601
-endif
-
-ifeq ($(RS_SPEC10_SUPPORT),YES)
-	LIBS                 += -lpvcam
-endif
 
 # Finally take care that the variables for GPIB support are set correctly
 
