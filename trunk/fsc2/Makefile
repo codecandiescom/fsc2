@@ -131,6 +131,7 @@ CFLAGS           := -ggdb $(OPT) -I/usr/X11R6/include \
 					-Wall \
 					-Wwrite-strings \
 					-Wstrict-prototypes \
+					-Wmissing-prototypes \
 					-Wmissing-declarations \
 					-W \
 					-Wshadow \
