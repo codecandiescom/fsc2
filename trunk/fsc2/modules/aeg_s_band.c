@@ -40,7 +40,8 @@ Var *reset_field( Var *v );
 static double aeg_s_band_field_check( double field, bool *err_flag );
 static bool magnet_init( void );
 static bool magnet_goto_field( double field, double error );
-static bool magnet_goto_field_rec( double field, double error, int rec );
+static bool magnet_goto_field_rec( double field, double error, int rec,
+								   double *hint );
 static void magnet_sweep( int dir );
 static bool magnet_do( int command );
 
@@ -662,7 +663,7 @@ static double aeg_s_band_field_check( double field, bool *err_flag )
 /* to the start field.                                                      */
 /*--------------------------------------------------------------------------*/
 
-bool magnet_init( void )
+static bool magnet_init( void )
 {
 	double start_field;
 	int i;
@@ -774,15 +775,35 @@ try_again:
 
 bool magnet_goto_field( double field, double error )
 {
-	if ( ! magnet_goto_field_rec( field, error, 0 ) )
+	static double last_field_step = 0.0;
+	static double last_mini_steps = 0.0;
+
+
+	if ( last_mini_steps != 0.0 &&
+		 fabs( field - magnet.act_field ) <= fabs( last_field_step + error ) &&
+		 fabs( field - magnet.act_field ) >= fabs( last_field_step - error ) )
+	{
+		if ( sign( field - magnet.act_field ) != sign( last_field_step ) )
+			last_mini_steps *= -1.0;
+	}
+	else
+		last_mini_steps = 0.0;
+
+	if ( ! magnet_goto_field_rec( field, error, 0, &last_mini_steps ) )
 		return FAIL;
 
+	last_field_step = magnet.meas_field - magnet.act_field;
 	magnet.act_field = magnet.target_field = magnet.meas_field;
+
 	return OK;
 }
 
 
-bool magnet_goto_field_rec( double field, double error, int rec )
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
+static bool magnet_goto_field_rec( double field, double error, int rec,
+								   double *hint )
 {
 	double mini_steps;
 	int steps;
@@ -804,7 +825,15 @@ bool magnet_goto_field_rec( double field, double error, int rec )
 	/* calculate the number of steps we need using the smallest possible
 	   field increment (i.e. 1 bit) */
 
-	mini_steps = ( field - magnet.meas_field ) / magnet.mini_step;
+	if ( rec == 0 && *hint != 0.0 )
+	{
+		mini_steps = *hint;
+		*hint = 0;
+	}
+	else
+		mini_steps = ( field - magnet.meas_field ) / magnet.mini_step;
+
+	*hint += mini_steps;
 
 	/* how many steps do we need using the maximum step size and how many
 	   steps with the minimum step size remain ? */
@@ -876,7 +905,7 @@ bool magnet_goto_field_rec( double field, double error, int rec )
 		      magnet.max_deviation : error;
 
 	if ( fabs( field - magnet.meas_field ) > max_dev &&
-		 ! magnet_goto_field_rec( field, error, 1 ) )
+		 ! magnet_goto_field_rec( field, error, 1, hint ) )
 		return FAIL;
 
 	return OK;
@@ -886,7 +915,7 @@ bool magnet_goto_field_rec( double field, double error, int rec )
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 
-void magnet_sweep( int dir )
+static void magnet_sweep( int dir )
 {
 	int steps, i;
 	double mini_steps;
@@ -977,7 +1006,7 @@ void magnet_sweep( int dir )
 /* face.                                                                     */
 /*---------------------------------------------------------------------------*/
 
-bool magnet_do( int command )
+static bool magnet_do( int command )
 {
 	unsigned char data[ 2 ];
 	int volt;
