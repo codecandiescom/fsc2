@@ -979,7 +979,7 @@ you will still have to copy the library to the place where
 @acronym{fsc2} expects it, i.e.@: usually @file{/usr/local/lib/fsc2}.
 
 
-@subsection How to call an @acronym{EDL} function from a module
+@subsection Calling @acronym{EDL} functions from modules
 
 Calling an @acronym{EDL} function (built-in as well as @acronym{EDL}
 functions defined in other modules) consists of three to four steps:
