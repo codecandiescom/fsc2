@@ -72,7 +72,7 @@ void rb_pulser_init( void )
 																!= RULBUS_OK ||
 		 rulbus_rb8514_delay_set_raw_delay(
 			 						  rb_pulser.delay_card[ ERT_DELAY ].handle,
-									  0, 1 ) != RULBUS_OK )
+									  0, 1 )					!= RULBUS_OK )
 		rb_pulser_failure( SET, "Failure to stop pulser" );
 
 	/* In external trigger mode set the trigger input slope of the ERT delay
@@ -186,7 +186,7 @@ static void rb_pulser_synthesizer_init( void )
 		rb_pulser_failure( UNSET, "Function for setting synthesizer pulse "
 						   "delay is not available" );
 
-	vars_push( FLOAT_VAR, 2.0e-8 );
+	vars_push( FLOAT_VAR, SYNTHESIZER_MIN_PULSE_DELAY );
 	vars_pop( func_call( func_ptr ) );
 
 	if ( ! rb_pulser.synth_pulse_state )
@@ -266,10 +266,11 @@ void rb_pulser_run( bool state )
 		if ( rb_pulser.trig_in_mode == EXTERNAL )
 		{
 			/* In external trigger mode set the rate of the clock feeding the
-			   ERT delay card to the highest possible rate, set the delay
-			   of that card to 0 (so the end pulse comes as fast as possible
-			   after the input trigger) and make the card output end pulses
-			   on the first start/end pulse output connector */
+			   ERT delay card to the highest possible rate and set the delay
+			   of that card to 0 to make the end pulse appear as fast as
+			   possible after the input trigger from the external source and
+			   make the card output end pulses on the first start/end pulse
+			   output connector. */
 
 			if ( rulbus_rb8515_clock_set_frequency(
 									  rb_pulser.clock_card[ ERT_CLOCK ].handle,
@@ -277,7 +278,7 @@ void rb_pulser_run( bool state )
 				 												!= RULBUS_OK ||
 				 rulbus_rb8514_delay_set_raw_delay(
 					 				  rb_pulser.delay_card[ ERT_DELAY ].handle,
-									  0, 1 ) != RULBUS_OK ||
+									  0, 1 )					!= RULBUS_OK ||
 				 rulbus_rb8514_delay_set_output_pulse(
 					 				  rb_pulser.delay_card[ ERT_DELAY ].handle,
 									  RULBUS_RB8514_DELAY_OUTPUT_1,
@@ -299,7 +300,7 @@ void rb_pulser_run( bool state )
 				 rulbus_rb8514_delay_set_raw_delay(
 					 				  rb_pulser.delay_card[ ERT_DELAY ].handle,
 									  rb_pulser.delay_card[ ERT_DELAY ].delay,
-									  1 ) != RULBUS_OK ||
+									  1 )						!= RULBUS_OK ||
 				 rulbus_rb8514_delay_set_output_pulse(
 					 				  rb_pulser.delay_card[ ERT_DELAY ].handle,
 									  RULBUS_RB8514_DELAY_OUTPUT_BOTH,
@@ -325,10 +326,10 @@ void rb_pulser_run( bool state )
 	}
 	else                        /* stop the pulser */
 	{
-		/* To stop the pulser keep the ERT delay card from emitting end pulses
-		   that would trigger the following cards, then stop the clock card
-		   feeding the ERT delay card and finally set the delay for the card
-		   to 0 */
+		/* To stop the pulser keep the ERT delay card from emitting further
+		   end pulses that would trigger the following cards, then stop the
+		   clock card feeding the ERT delay card and finally set the delay
+		   for ERT card to 0. */
 
 		if ( rulbus_rb8514_delay_set_output_pulse(
 									  rb_pulser.delay_card[ ERT_DELAY ].handle,
@@ -341,18 +342,18 @@ void rb_pulser_run( bool state )
 			 													!= RULBUS_OK ||
 			 rulbus_rb8514_delay_set_raw_delay(
 				 					  rb_pulser.delay_card[ ERT_DELAY ].handle,
-									  0, 1 ) != RULBUS_OK )
+									  0, 1 )					!= RULBUS_OK )
 			rb_pulser_failure( SET, "Failure to stop pulser" );
 	}
 }
 
 
-/*----------------------------------------------------------*
+/*-----------------------------------------------------------*
  * Function for making a card either "active" or "inactive"
- * which just means that it get set up to create end pulses
- * or creation of end pulses is switched off (and the delay
- * is set to 0 to keep it from creating GATE pulses)
- *----------------------------------------------------------*/
+ * which just means that it gets set up to create end pulses
+ * or the creation of end pulses gets switched off (and the
+ * delay is set to 0 to keep it from creating GATE pulses)
+ *-----------------------------------------------------------*/
 
 void rb_pulser_delay_card_state( int handle, bool state )
 {
