@@ -304,12 +304,12 @@ long *exp_bcreate( void *buffer, long len )
 			ret = func_call( Func_ptr );
 			result[ 0 ] = 1;
 			result[ 1 ] = ret->val.lval;
+			vars_pop( ret );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
 			result[ 0 ] = 0;
 
-		vars_pop( ret );
 		Fname = old_Fname;
 		Lc = old_Lc;
 		writer( C_BCREATE_REPLY, 2 * sizeof( long ), result );
@@ -423,6 +423,7 @@ long exp_bstate( void *buffer, long len )
 		{
 			ret = func_call( Func_ptr );
 			writer( C_BSTATE_REPLY, ret->val.lval );
+			vars_pop( ret );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
@@ -430,7 +431,6 @@ long exp_bstate( void *buffer, long len )
 
 		Fname = old_Fname;
 		Lc = old_Lc;
-		vars_pop( ret );
 		return 0;
 	}
 }
@@ -503,6 +503,7 @@ long *exp_screate( void *buffer, long len )
 			ret = func_call( Func_ptr );
 			result[ 0 ] = 1;
 			result[ 1 ] = ret->val.lval;
+			vars_pop( ret );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
@@ -510,7 +511,6 @@ long *exp_screate( void *buffer, long len )
 
 		Fname = old_Fname;
 		Lc = old_Lc;
-		vars_pop( ret );
 		writer( C_SCREATE_REPLY, 2 * sizeof( long ), result );
 
 		return NULL;
@@ -634,12 +634,12 @@ double *exp_sstate( void *buffer, long len )
 			ret = func_call( Func_ptr );
 			res[ 0 ] = 10.0;
 			res[ 1 ] = ret->val.dval;
+			vars_pop( ret );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
 			res[ 0 ] = -10.0;
 
-		vars_pop( ret );
 		Fname = old_Fname;
 		Lc = old_Lc;
 		writer( C_SSTATE_REPLY, 2 * sizeof( double ), res );
@@ -735,12 +735,12 @@ long *exp_icreate( void *buffer, long len )
 			ret = func_call( Func_ptr );
 			result[ 0 ] = 1;
 			result[ 1 ] = ret->val.lval;
+			vars_pop( ret );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
 			result[ 0 ] = 0;
 
-		vars_pop( ret );
 		Fname = old_Fname;
 		Lc = old_Lc;
 		writer( C_ICREATE_REPLY, 2 * sizeof( long ), result );
@@ -879,12 +879,12 @@ INPUT_RES *exp_istate( void *buffer, long len )
 				input_res.res = 1;
 				input_res.val.dval = ret->val.dval;
 			}
+			vars_pop( ret );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
 			input_res.res = -1;
 
-		vars_pop( ret );
 		Fname = old_Fname;
 		Lc = old_Lc;
 		writer( C_ISTATE_REPLY, sizeof( INPUT_RES ), &input_res );
