@@ -10,6 +10,8 @@
 #include "cursor_3.xbm"
 #include "cursor_4.xbm"
 #include "cursor_5.xbm"
+#include "cursor_6.xbm"
+#include "cursor_7.xbm"
 		 
 #include "up_arrow.xbm"             /* arrow bitmaps */
 #include "down_arrow.xbm"
@@ -30,7 +32,9 @@ static int cur_1,
 	       cur_2,
 	       cur_3,
 	       cur_4,
-	       cur_5;
+	       cur_5,
+	       cur_6,
+	       cur_7;
 
 
 /*----------------------------------------------------------------------*/
@@ -65,7 +69,7 @@ void start_graphics( void )
 	strcat( pixmap_file, "printer.xpm" );
     fl_set_pixmapbutton_file( run_form->print_button, pixmap_file );
 	T_free( pixmap_file );
-	fl_set_object_helper( run_form->print_button, "Print results" );
+	fl_set_object_helper( run_form->print_button, "Print window" );
 
 	fl_set_object_helper( run_form->stop, "Stop the experiment" );
 	fl_set_object_helper( run_form->undo_button,
@@ -262,6 +266,12 @@ static void G_struct_init( void )
 		cur_5 = fl_create_bitmap_cursor( cursor_5_bits, cursor_5_bits,
 										 cursor_5_width, cursor_5_height,
 										 cursor_5_x_hot, cursor_5_y_hot );
+		cur_6 = fl_create_bitmap_cursor( cursor_6_bits, cursor_6_bits,
+										 cursor_6_width, cursor_6_height,
+										 cursor_6_x_hot, cursor_6_y_hot );
+		cur_7 = fl_create_bitmap_cursor( cursor_7_bits, cursor_7_bits,
+										 cursor_7_width, cursor_7_height,
+										 cursor_7_x_hot, cursor_7_y_hot );
 	}
 
 	G.cur_1 = cur_1;
@@ -269,6 +279,8 @@ static void G_struct_init( void )
 	G.cur_3 = cur_3;
 	G.cur_4 = cur_4;
 	G.cur_5 = cur_5;
+	G.cur_6 = cur_6;
+	G.cur_7 = cur_7;
 
 	/* On the first call also create the colours needed for 2D displays */
 
@@ -416,6 +428,8 @@ static void G_init_curves_2d( void )
 	fl_set_cursor_color( G.cur_3, FL_BLACK, FL_WHITE );
 	fl_set_cursor_color( G.cur_4, FL_BLACK, FL_WHITE );
 	fl_set_cursor_color( G.cur_5, FL_BLACK, FL_WHITE );
+	fl_set_cursor_color( G.cur_6, FL_BLACK, FL_WHITE );
+	fl_set_cursor_color( G.cur_7, FL_BLACK, FL_WHITE );
 
 	for ( i = 0; i < G.nc; i++ )
 	{
