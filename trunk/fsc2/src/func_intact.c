@@ -915,8 +915,11 @@ Var *f_screate( Var *v )
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check( v, STR_VAR );
-		label = T_strdup( v->val.sptr );
-		convert_escapes( label );
+		if ( *v->val.sptr != '\0' )
+		{
+			label = T_strdup( v->val.sptr );
+			convert_escapes( label );
+		}
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
@@ -2149,6 +2152,9 @@ static void recreate_Tool_Box( void )
 
 	if ( Tool_Box->Tools != NULL )
 	{
+		if ( fl_form_is_visible ( Tool_Box->Tools ) )
+			fl_hide_form( Tool_Box->Tools );
+
 		for ( io = Tool_Box->objs; io != NULL; io = io->next )
 		{
 			if ( io->self )
@@ -2169,13 +2175,7 @@ static void recreate_Tool_Box( void )
 
 	for ( io = Tool_Box->objs; io != NULL; io = io->next )
 		if ( Tool_Box->layout == VERT )
-		{
 			Tool_Box->h += OBJ_HEIGHT + VERT_OFFSET;
-			if ( io->next != NULL && 
-				 ( io->type == INT_INPUT || io->type == FLOAT_INPUT ||
-				   io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT ) )
-				Tool_Box->h += LABEL_VERT_OFFSET;
-		}
 		else
 			Tool_Box->w += OBJ_WIDTH + HORI_OFFSET
 				           - ( io->type == NORMAL_BUTTON ?
@@ -2192,9 +2192,9 @@ static void recreate_Tool_Box( void )
 		Tool_Box->h += OBJ_HEIGHT;
 	}
 
-	if ( fl_form_is_visible ( Tool_Box->Tools ) )
+
+	if ( Tool_Box->Tools != NULL )
 	{
-		fl_hide_form( Tool_Box->Tools );
 		fl_set_form_size( Tool_Box->Tools, Tool_Box->w, Tool_Box->h );
 		fl_addto_form( Tool_Box->Tools );
 	}
@@ -2213,16 +2213,6 @@ static void recreate_Tool_Box( void )
 				fl_set_form_position( Tool_Box->Tools, wx, wy );
 				needs_pos = SET;
 			}
-
-			if ( WidthValue & flags && HeightValue & flags )
-			{
-				if ( ww < WIN_MIN_WIDTH )
-					ww = WIN_MIN_WIDTH;
-				if ( wh < WIN_MIN_HEIGHT )
-					wh = WIN_MIN_HEIGHT;
-
-				fl_set_form_size( Tool_Box->Tools, ww, wh );
-			}
 		}
 	}
 
@@ -2234,7 +2224,7 @@ static void recreate_Tool_Box( void )
 	fl_adjust_form_size( Tool_Box->Tools );
 
 	fl_show_form( Tool_Box->Tools, needs_pos ?
-				  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
+				  FL_PLACE_POSITION : ( FL_PLACE_MOUSE | FL_FREE_SIZE ),
 				  FL_FULLBORDER, "fsc2: Tools" );
 	fl_winminsize( Tool_Box->Tools->window, WIN_MIN_WIDTH, WIN_MIN_HEIGHT );
 }

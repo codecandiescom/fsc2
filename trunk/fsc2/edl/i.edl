@@ -6,7 +6,7 @@ I = 0;
 
 PREPARATIONS:
 
-init_1d( 4 );
+init_1d( 4, "Blödsinn [nT]", "Schwachsinn [V]" );
 
 EXPERIMENT:
 
@@ -17,7 +17,7 @@ BID2 = button_create( "PUSH_BUTTON", "RF On / Off" );
 BID3 = button_create( "RADIO_BUTTON", "Bla3", "Help3" );
 button_state( BID3, 1 );
 BID4 = button_create( "RADIO_BUTTON", BID3, "Bla4", "Help4" );
-SID1 = slider_create( "NORMAL_SLIDER", 0, 1, "Blub1", "Hilfe1" );
+SID1 = slider_create( "NORMAL_SLIDER", 0, 1, 0.2, "Blub1", "Hilfe1" );
 BID5 = button_create( "RADIO_BUTTON", "Sweep RF up" );
 BID6 = button_create( "RADIO_BUTTON", BID5, "Stop RF sweep" );
 button_state( BID6, 1 );

@@ -465,6 +465,9 @@ long *exp_screate( void *buffer, long len )
 		vars_push( FLOAT_VAR, *( ( double * ) pos ) );
 		pos += sizeof( double );
 
+		vars_push( FLOAT_VAR, *( ( double * ) pos ) );
+		pos += sizeof( double );
+
 		Fname = ( char * ) pos;                  /* get current file name */
 		pos += strlen( ( char * ) pos ) + 1;
 

@@ -19,7 +19,6 @@ static bool is_tested = UNSET;       /* set when EDL file has been  tested */
 static bool state = UNSET;           /* set when EDL passed the tests */
 static char *in_file = NULL;         /* name of input file */
 static time_t in_file_mod = 0;
-static double slider_size = 0.05;
 static bool delete_file = UNSET;
 static bool delete_old_file = UNSET;
 
@@ -44,38 +43,47 @@ static int fsc2_xio_error_handler( Display *d );
 #define WIN_MIN_HEIGHT   370
 #define NORMAL_FONT_SIZE FL_LARGE_SIZE
 #define SMALL_FONT_SIZE  FL_SMALL_SIZE
+#define SLIDER_SIZE      0.075
 #else
 #define WIN_MIN_WIDTH    200
 #define WIN_MIN_HEIGHT   320
 #define NORMAL_FONT_SIZE FL_SMALL_SIZE
 #define SMALL_FONT_SIZE  FL_TINY_SIZE
+#define SLIDER_SIZE      0.1
 #endif
 
 
 /* Some variables needed for the X resources */
 
-#define N_APP_OPT 8
+#define N_APP_OPT 11
+FL_IOPT xcntl;
 FL_CMD_OPT app_opt[ N_APP_OPT ];
 
-char fl_GeoStr[ 64 ], fl_displayGeoStr[ 64 ],
-	 fl_cutGeoStr[ 64 ], fl_toolGeoStr[ 64 ];
+char xGeoStr[ 64 ], xdisplayGeoStr[ 64 ],
+	 xcutGeoStr[ 64 ], xtoolGeoStr[ 64 ],
+	 xaxisFont[ 256 ];
 
-int fl_browserfs, fl_buttonfs, fl_inputfs, fl_labelfs;
+int xbrowserfs, xbuttonfs, xinputfs, xlabelfs, xchoicefs, xsliderfs;
 
-FL_resource res[ N_APP_OPT ] = {
-	{ "geometry", "*.geometry", FL_STRING, fl_GeoStr, "", 64 },
-    { "browserFontSize", "*.browserFontSize", FL_INT, &fl_browserfs,
+FL_resource xresources[ N_APP_OPT ] = {
+	{ "geometry", "*.geometry", FL_STRING, xGeoStr, "", 64 },
+    { "browserFontSize", "*.browserFontSize", FL_INT, &xbrowserfs,
 	  "0", sizeof( int ) },
-    { "buttonFontSize", "*.buttonFontSize", FL_INT, &fl_buttonfs,
+    { "buttonFontSize", "*.buttonFontSize", FL_INT, &xbuttonfs,
 	  "0", sizeof( int ) },
-    { "inputFontSize", "*.inputFontSize", FL_INT, &fl_inputfs,
+    { "inputFontSize", "*.inputFontSize", FL_INT, &xinputfs,
 	  "0", sizeof( int ) },
-    { "labelFontSize", "*.labelFontSize", FL_INT, &fl_labelfs,
+    { "labelFontSize", "*.labelFontSize", FL_INT, &xlabelfs,
 	  "0", sizeof( int ) },
-    { "displayGeometry", "*.displayGeometry", FL_STRING, fl_displayGeoStr,
+    { "displayGeometry", "*.displayGeometry", FL_STRING, xdisplayGeoStr,
 	  "", 64 },
-    { "cutGeometry", "*.cutGeometry", FL_STRING, fl_cutGeoStr, "", 64 },
-    { "toolGeometry", "*.toolGeometry", FL_STRING, fl_toolGeoStr, "", 64 }
+    { "cutGeometry", "*.cutGeometry", FL_STRING, xcutGeoStr, "", 64 },
+    { "toolGeometry", "*.toolGeometry", FL_STRING, xtoolGeoStr, "", 64 },
+	{ "axisFont", "*.axisFont", FL_STRING, xaxisFont, "", 256 },
+    { "choiceFontSize", "*.choiceFontSize", FL_INT, &xchoicefs,
+	  "0", sizeof( int ) },
+    { "sliderFontSize", "*.sliderFontSize", FL_INT, &xsliderfs,
+	  "0", sizeof( int ) },
 };
 
 
@@ -111,7 +119,7 @@ int main( int argc, char *argv[ ] )
 
 	if ( argc > 1 )
 	{
-		if ( ! strncmp( argv[ 1 ], "-t", 2 ) )
+		if ( ! strncmp( argv[ 1 ], "-t", 2 ) && strlen( argv[ 1 ] ) == 2 )
 		{
 			/* no file name with "-t" option ? */
 
@@ -347,11 +355,12 @@ static void final_exit_handler( void )
 
 static bool xforms_init( int *argc, char *argv[] )
 {
+	Display *display;
 	FL_Coord h, H;
 	FL_Coord x1, y1, w1, h1, x2, y2, w2, h2;
-	FL_IOPT fl_cntl;
 	int i;
 	int flags, wx, wy, ww, wh;
+	XFontStruct *font;
 
 
 	app_opt[ GEOMETRY ].option            = T_strdup( "-geometry" );
@@ -384,20 +393,36 @@ static bool xforms_init( int *argc, char *argv[] )
 	app_opt[ DISPLAYGEOMETRY ].argKind    = XrmoptionSepArg;
 	app_opt[ DISPLAYGEOMETRY ].value      = ( caddr_t ) NULL;
 
-	app_opt[ CUTGEOMETRY ].option         = T_strdup( "-displayGeometry" );
-	app_opt[ CUTGEOMETRY ].specifier      = T_strdup( "*.displayGeometry" );
+	app_opt[ CUTGEOMETRY ].option         = T_strdup( "-cutGeometry" );
+	app_opt[ CUTGEOMETRY ].specifier      = T_strdup( "*.cutGeometry" );
 	app_opt[ CUTGEOMETRY ].argKind        = XrmoptionSepArg;
 	app_opt[ CUTGEOMETRY ].value          = ( caddr_t ) NULL;
 
-	app_opt[ TOOLGEOMETRY ].option        = T_strdup( "-displayGeometry" );
-	app_opt[ TOOLGEOMETRY ].specifier     = T_strdup( "*.displayGeometry" );
+	app_opt[ TOOLGEOMETRY ].option        = T_strdup( "-toolGeometry" );
+	app_opt[ TOOLGEOMETRY ].specifier     = T_strdup( "*.toolGeometry" );
 	app_opt[ TOOLGEOMETRY ].argKind       = XrmoptionSepArg;
 	app_opt[ TOOLGEOMETRY ].value         = ( caddr_t ) NULL;
 
-	if ( fl_initialize( argc, argv, "Fsc2", app_opt, N_APP_OPT ) == NULL )
+	app_opt[ AXISFONT ].option            = T_strdup( "-axisFont" );
+	app_opt[ AXISFONT ].specifier         = T_strdup( "*.axisFont" );
+	app_opt[ AXISFONT ].argKind           = XrmoptionSepArg;
+	app_opt[ AXISFONT ].value             = ( caddr_t ) NULL;
+
+	app_opt[ CHOICEFONTSIZE ].option      = T_strdup( "-choiceFontSize" );
+	app_opt[ CHOICEFONTSIZE ].specifier   = T_strdup( "*.choiceFontSize" );
+	app_opt[ CHOICEFONTSIZE ].argKind     = XrmoptionSepArg;
+	app_opt[ CHOICEFONTSIZE ].value       = ( caddr_t ) "0";
+
+	app_opt[ SLIDERFONTSIZE ].option      = T_strdup( "-sliderFontSize" );
+	app_opt[ SLIDERFONTSIZE ].specifier   = T_strdup( "*.sliderFontSize" );
+	app_opt[ SLIDERFONTSIZE ].argKind     = XrmoptionSepArg;
+	app_opt[ SLIDERFONTSIZE ].value       = ( caddr_t ) "0";
+
+	if ( ( display = fl_initialize( argc, argv, "Fsc2", app_opt, N_APP_OPT ) )
+		 == NULL )
 		return FAIL;
 
-	fl_get_app_resources( res, N_APP_OPT );
+	fl_get_app_resources( xresources, N_APP_OPT );
 
 	for ( i = 0; i < N_APP_OPT; i++ )
 	{
@@ -421,34 +446,52 @@ static bool xforms_init( int *argc, char *argv[] )
 
 	/* Set default font sizes */
 
-	fl_cntl.browserFontSize = NORMAL_FONT_SIZE;
-	fl_cntl.buttonFontSize = NORMAL_FONT_SIZE;
-	fl_cntl.inputFontSize = NORMAL_FONT_SIZE;
-	fl_cntl.labelFontSize = NORMAL_FONT_SIZE;
+	xcntl.browserFontSize = NORMAL_FONT_SIZE;
+	xcntl.buttonFontSize  = NORMAL_FONT_SIZE;
+	xcntl.inputFontSize   = NORMAL_FONT_SIZE;
+	xcntl.labelFontSize   = NORMAL_FONT_SIZE;
+	xcntl.choiceFontSize  = NORMAL_FONT_SIZE;
+	xcntl.sliderFontSize  = NORMAL_FONT_SIZE;
 
 	/* Set the default font size for browsers */
 
-	if ( * ( ( int * ) res[ BROWSERFONTSIZE ].var ) != 0 )
-		fl_cntl.browserFontSize = * ( ( int * ) res[ BROWSERFONTSIZE ].var );
-	fl_set_defaults( FL_PDBrowserFontSize, &fl_cntl );
+	if ( * ( ( int * ) xresources[ BROWSERFONTSIZE ].var ) != 0 )
+		xcntl.browserFontSize =
+			* ( ( int * ) xresources[ BROWSERFONTSIZE ].var );
+	fl_set_defaults( FL_PDBrowserFontSize, &xcntl );
 
 	/* Set the default font size for buttons */
 
-	if ( * ( ( int * ) res[ BUTTONFONTSIZE ].var ) != 0 )
-		fl_cntl.buttonFontSize = * ( ( int * ) res[ BUTTONFONTSIZE ].var );
-	fl_set_defaults( FL_PDButtonFontSize, &fl_cntl );
+	if ( * ( ( int * ) xresources[ BUTTONFONTSIZE ].var ) != 0 )
+		xcntl.buttonFontSize =
+			* ( ( int * ) xresources[ BUTTONFONTSIZE ].var );
+	fl_set_defaults( FL_PDButtonFontSize, &xcntl );
 
 	/* Set the default font size for input objects */
 
-	if ( * ( ( int * ) res[ INPUTFONTSIZE ].var ) != 0 )
-		fl_cntl.inputFontSize = * ( ( int * ) res[ INPUTFONTSIZE ].var );
-	fl_set_defaults( FL_PDInputFontSize, &fl_cntl );
+	if ( * ( ( int * ) xresources[ INPUTFONTSIZE ].var ) != 0 )
+		xcntl.inputFontSize = * ( ( int * ) xresources[ INPUTFONTSIZE ].var );
+	fl_set_defaults( FL_PDInputFontSize, &xcntl );
 
 	/* Set the default font size for label and texts */
 
-	if ( * ( ( int * ) res[ LABELFONTSIZE ].var ) != 0 )
-		fl_cntl.labelFontSize = * ( ( int * ) res[ LABELFONTSIZE ].var );
-	fl_set_defaults( FL_PDLabelFontSize, &fl_cntl );
+	if ( * ( ( int * ) xresources[ LABELFONTSIZE ].var ) != 0 )
+		xcntl.labelFontSize = * ( ( int * ) xresources[ LABELFONTSIZE ].var );
+	fl_set_defaults( FL_PDLabelFontSize, &xcntl );
+
+	/* Set the default font size for choice objects */
+
+	if ( * ( ( int * ) xresources[ CHOICEFONTSIZE ].var ) != 0 )
+		xcntl.choiceFontSize =
+			* ( ( int * ) xresources[ CHOICEFONTSIZE ].var );
+	fl_set_defaults( FL_PDChoiceFontSize, &xcntl );
+
+	/* Set the default font size for slider */
+
+	if ( * ( ( int * ) xresources[ SLIDERFONTSIZE ].var ) != 0 )
+		xcntl.sliderFontSize =
+			* ( ( int * ) xresources[ SLIDERFONTSIZE ].var );
+	fl_set_defaults( FL_PDSliderFontSize, &xcntl );
 
 	/* Create and display the main form */
 
@@ -473,22 +516,16 @@ static bool xforms_init( int *argc, char *argv[] )
 	h = y2 - y1 - h1;
 	H = h1 + h2 + h;
 
-#if ( SIZE == HI_RES )
-	slider_size = 0.075;
-#else
-	slider_size = 0.10;
-#endif
-
-	fl_set_slider_size( main_form->win_slider, slider_size );
+	fl_set_slider_size( main_form->win_slider, SLIDER_SIZE );
 	fl_set_slider_value( main_form->win_slider,
-						 ( double ) ( h1 + h / 2 - 0.5 * H * slider_size )
-						 / ( ( 1.0 - slider_size ) * H ) );
+						 ( double ) ( h1 + h / 2 - 0.5 * H * SLIDER_SIZE )
+						 / ( ( 1.0 - SLIDER_SIZE ) * H ) );
 
 	/* Now show the form, taking user wishes about the geometry into account */
 
-	if ( * ( ( char * ) res[ DISPLAYGEOMETRY ].var ) != '\0' )
+	if ( * ( ( char * ) xresources[ GEOMETRY ].var ) != '\0' )
 	{
-		flags = XParseGeometry( ( char * ) res[ GEOMETRY ].var,
+		flags = XParseGeometry( ( char * ) xresources[ GEOMETRY ].var,
 								&wx, &wy, &ww, &wh );
 		if ( XValue & flags && YValue & flags )
 			fl_set_form_position( main_form->fsc2, wx, wy );
@@ -514,6 +551,19 @@ static bool xforms_init( int *argc, char *argv[] )
 					  FL_FULLBORDER, "fsc2" );
 
 	fl_winminsize( main_form->fsc2->window, WIN_MIN_WIDTH, WIN_MIN_HEIGHT );
+
+	/* Check if axis font exists */
+
+	if ( * ( ( char * ) xresources[ AXISFONT ].var ) != '\0' )
+	{
+		if ( ( font = XLoadQueryFont( display,
+									  ( char * ) xresources[ AXISFONT ].var ) )
+			 == NULL )
+			fprintf( stderr, "Error: Font '%s' not found.\n",
+					 ( char * ) xresources[ AXISFONT ].var );
+		else
+			XFreeFont( display, font );
+	}
 
 	/* Set close handler for main form */
 
@@ -1298,9 +1348,9 @@ void win_slider_callback( FL_OBJECT *a, long b )
 	h = y2 - y1 - h1;
 	H = y2 - y1 + h2;
 
-	new_h1 = ( FL_Coord ) ( ( 1.0 - slider_size ) * H 
+	new_h1 = ( FL_Coord ) ( ( 1.0 - SLIDER_SIZE ) * H 
 							* fl_get_slider_value( a )
-							+ 0.5 * H * slider_size - h / 2 );
+							+ 0.5 * H * SLIDER_SIZE - h / 2 );
 
 	fl_set_object_size( main_form->browser, w1, new_h1 );
 	fl_set_object_geometry( main_form->error_browser, x2, y1 + new_h1 + h,

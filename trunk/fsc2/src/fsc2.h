@@ -104,15 +104,17 @@ void notify_conn( int signo );
 #define MAXLINE        4096
 
 
-#define GEOMETRY        0
-#define BROWSERFONTSIZE 1
-#define BUTTONFONTSIZE  2
-#define INPUTFONTSIZE   3
-#define LABELFONTSIZE   4
-#define DISPLAYGEOMETRY 5
-#define CUTGEOMETRY     6
-#define TOOLGEOMETRY    7
-#define AXISFONT        8
+#define GEOMETRY         0
+#define BROWSERFONTSIZE  1
+#define BUTTONFONTSIZE   2
+#define INPUTFONTSIZE    3
+#define LABELFONTSIZE    4
+#define DISPLAYGEOMETRY  5
+#define CUTGEOMETRY      6
+#define TOOLGEOMETRY     7
+#define AXISFONT         8
+#define CHOICEFONTSIZE   9
+#define SLIDERFONTSIZE  10
 
 
 /* Global variables */

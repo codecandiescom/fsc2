@@ -36,16 +36,24 @@ static int cur_1,
 	       cur_6,
 	       cur_7;
 
-extern FL_resource res[ ];
+extern FL_resource xresources[ ];
 
 #if ( SIZE == HI_RES )
 #define WIN_MIN_1D_WIDTH   400
 #define WIN_MIN_2D_WIDTH   500
 #define WIN_MIN_HEIGHT     435
+#define DEFAULT_AXISFONT_1 "*-lucida-bold-r-normal-sans-14-*"
+#define DEFAULT_AXISFONT_2 "lucidasanstypewriter-14"
+#define DEFAULT_AXISFONT_3 "9x15"
+#define PIXLABEL_FONTSIZE  FL_SMALL_SIZE
 #else
-#define WIN_MIN_1D_WIDTH   250
+#define WIN_MIN_1D_WIDTH   300
 #define WIN_MIN_2D_WIDTH   350
 #define WIN_MIN_HEIGHT     380
+#define DEFAULT_AXISFONT_1 "*-lucida-bold-r-normal-sans-10-*"
+#define DEFAULT_AXISFONT_2 "lucidasanstypewriter-10"
+#define DEFAULT_AXISFONT_3 "9x10"
+#define PIXLABEL_FONTSIZE  FL_TINY_SIZE
 #endif
 
 
@@ -83,11 +91,8 @@ void start_graphics( void )
 		fl_set_pixmapbutton_file( run_form->undo_button, pixmap_file );
 		fl_set_object_helper( run_form->undo_button,
 							  "Undo last rescaling operation" );
-#if ( SIZE == HI_RES )
-		fl_set_object_lsize( run_form->undo_button, FL_SMALL_SIZE );
-#else
-		fl_set_object_lsize( run_form->undo_button, FL_TINY_SIZE );
-#endif
+		fl_set_object_lsize( run_form->undo_button, PIXLABEL_FONTSIZE );
+
 		if ( G.dim == 2 )
 		{
 			fl_set_pixmapbutton_file( cut_form->cut_undo_button, pixmap_file );
@@ -106,11 +111,8 @@ void start_graphics( void )
 	{
 		fl_set_pixmapbutton_file( run_form->print_button, pixmap_file );
 		fl_set_object_helper( run_form->print_button, "Print window" );
-#if ( SIZE == HI_RES )
-		fl_set_object_lsize( run_form->print_button, FL_SMALL_SIZE );
-#else
-		fl_set_object_lsize( run_form->print_button, FL_TINY_SIZE );
-#endif
+		fl_set_object_lsize( run_form->print_button, PIXLABEL_FONTSIZE );
+
 		if ( G.dim == 2 )
 		{
 			fl_set_pixmapbutton_file( cut_form->cut_print_button,
@@ -221,9 +223,9 @@ void start_graphics( void )
 
 	/* Finally draw the form */
 
-	if ( * ( ( char * ) res[ DISPLAYGEOMETRY ].var ) != '\0' )
+	if ( * ( ( char * ) xresources[ DISPLAYGEOMETRY ].var ) != '\0' )
 	{
-		flags = XParseGeometry( ( char * ) res[ DISPLAYGEOMETRY ].var,
+		flags = XParseGeometry( ( char * ) xresources[ DISPLAYGEOMETRY ].var,
 								&x, &y, &w, &h );
 		if ( XValue & flags && YValue & flags )
 			fl_set_form_position( run_form->run, x, y );
@@ -248,14 +250,14 @@ void start_graphics( void )
 
 		if ( XValue & flags && YValue & flags )
 			fl_show_form( run_form->run, FL_PLACE_POSITION,
-						  FL_FULLBORDER, "Display" );
+						  FL_FULLBORDER, "fsc2: Display" );
 		else
 			fl_show_form( run_form->run, FL_PLACE_MOUSE | FL_FREE_SIZE,
-						  FL_FULLBORDER, "Display" );
+						  FL_FULLBORDER, "fsc2: Display" );
 	}
 	else
 		fl_show_form( run_form->run, FL_PLACE_MOUSE | FL_FREE_SIZE,
-					  FL_FULLBORDER, "fsc2:Display" );
+					  FL_FULLBORDER, "fsc2: Display" );
 
 	G.d = FL_FormDisplay( run_form->run );
 
@@ -275,31 +277,22 @@ void start_graphics( void )
 
 	if ( G.is_init )
 	{
-#if ( SIZE == HI_RES )
-		G.font = XLoadQueryFont( G.d, "*-lucida-bold-r-normal-sans-14-*" );
+		if ( * ( ( char * ) xresources[ AXISFONT ].var ) != '\0' )
+			G.font = XLoadQueryFont( G.d,
+									 ( char * ) xresources[ AXISFONT ].var );
 
 		if ( G.font == NULL )
-			G.font = XLoadQueryFont( G.d, "lucidasanstypewriter-14" );
+			G.font = XLoadQueryFont( G.d, DEFAULT_AXISFONT_1 );
 
 		if ( G.font == NULL )
-			G.font = XLoadQueryFont( G.d, "9x15" );
+			G.font = XLoadQueryFont( G.d, DEFAULT_AXISFONT_2 );
+
+		if ( G.font == NULL )
+			G.font = XLoadQueryFont( G.d, DEFAULT_AXISFONT_3 );
 
 		if ( G.font != NULL )
 			XTextExtents( G.font, "Xp", 2, &dummy, &G.font_asc, &G.font_desc,
 						  &font_prop );
-#else
-		G.font = XLoadQueryFont( G.d, "*-lucida-bold-r-normal-sans-10-*" );
-
-		if ( G.font == NULL )
-			G.font = XLoadQueryFont( G.d, "lucidasanstypewriter-10" );
-
-		if ( G.font == NULL )
-			G.font = XLoadQueryFont( G.d, "9x10" );
-
-		if ( G.font != NULL )
-			XTextExtents( G.font, "Xp", 2, &dummy, &G.font_asc, &G.font_desc,
-						  &font_prop );
-#endif
 
 		/* Create the canvas axes */
 		
