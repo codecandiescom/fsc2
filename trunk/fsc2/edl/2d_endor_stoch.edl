@@ -243,20 +243,18 @@ FOR J = 1 : N_runs
             save( F1, curve );
         }
 
-        /* If this wasn't the very last curve of the run set the new frequency
-           and already start the next masurement, so we're not loosing time 
-           doing all the graphics */
+        /* If this wasn't the very last run set the new frequency and already
+		   start the next masurement, so we're not loosing time doing all the
+		   graphics */
 
         IF I != N_steps {
             freq = start_freq + Stoch[ I + 1 ] * step_freq;
             synthesizer_frequency( freq );
             digitizer_start_acquisition( );
-        } ELSE {
+        } ELSE IF J != N_runs {
 			freq = start_freq + Stoch[ 1 ] * step_freq;
 			synthesizer_frequency( freq );
-			IF J != N_runs {
-				digitizer_start_acquisition( );
-			}
+			digitizer_start_acquisition( );
 		}
 
         /* Add the new curve to the results from previous runs */
@@ -304,7 +302,7 @@ synthesizer_state( "OFF" );
 
 IF ! Is_stored {           // Check if data of last trace were stored
     I -= 1;
-    freq = start_freq + Stochl[ I ] * step_freq;
+    freq = start_freq + Stoch[ I ] * step_freq;
 }
 
 IF is_file( F2 )
