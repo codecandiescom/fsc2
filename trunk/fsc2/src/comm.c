@@ -139,7 +139,7 @@ static void send_browser( FL_OBJECT *browser );
 /* communication. It is called before the child is forked.        */
 /*----------------------------------------------------------------*/
 
-bool setup_comm( void )
+void setup_comm( void )
 {
 	int pr;
 	int i;
@@ -157,7 +157,9 @@ bool setup_comm( void )
 			close( pd[ 1 ] );
 		}
 
-		return FAIL;
+		eprint( FATAL, UNSET, "Can't set up internal communication "
+				"channels.\n" );
+		THROW( EXCEPTION );
 	}
 
 	/* We will need a message queue where the parent stores the keys and
@@ -168,11 +170,14 @@ bool setup_comm( void )
 		Message_Queue = T_malloc( QUEUE_SIZE * sizeof( KEY ) );
 		TRY_SUCCESS;
 	}
-	CATCH( EXCEPTION )
+	OTHERWISE
 	{
 		for ( i = 0; i < 4; i++ )
 			close( pd[ i ] );
-		return FAIL;
+
+		eprint( FATAL, UNSET, "Can't set up internal communication "
+				"channels.\n" );
+		PASSTHROU( );
 	}
 
 	/* Set identifier entry in all elements of the message queue to -1, i.e.
@@ -190,7 +195,10 @@ bool setup_comm( void )
 		Message_Queue = T_free( Message_Queue );
 		for ( i = 0; i < 4; i++ )
 			close( pd[ i ] );
-		return FAIL;
+
+		eprint( FATAL, UNSET, "Can't set up internal communication "
+				"channels.\n" );
+		THROW( EXCEPTION );
 	}
 
 	/* Finally we need a shared memory segment to pass the key to further
@@ -207,12 +215,12 @@ bool setup_comm( void )
 		for ( i = 0; i < 4; i++ )
 			close( pd[ i ] );
 
-		return FAIL;
+		eprint( FATAL, UNSET, "Can't set up internal communication "
+				"channels.\n" );
+		THROW( EXCEPTION );
 	}
 
 	message_queue_low = message_queue_high = 0;
-
-	return OK;
 }
 
 

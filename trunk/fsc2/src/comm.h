@@ -118,7 +118,7 @@ enum {
 };
 
 
-bool setup_comm( void );
+void setup_comm( void );
 void end_comm( void );
 int new_data_callback( XEvent *a, void *b );
 long reader( void *ret );
