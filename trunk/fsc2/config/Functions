@@ -306,6 +306,8 @@ monochromator_groove_density, 1, EXP;     // get groove density of grating
 monochromator_wavelength_axis, 0, EXP;    // caclulate wavelength axis
 monochromator_set_calibration, -1, EXP;   // manually set calibration
 monochromator_load_calibration, -1, EXP;  // read in calibration file
+monochromator_init_offset, -1, EXP;
+monochromator_init_adjust, -1, EXP;
 
 
 /* Functions exported by the power supply (Thurlby&Thandar PL330DP) */

@@ -181,7 +181,7 @@ Var *temp_contr_sample_channel( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
-	if ( v->type & ( INT_VAR || FLOAT_VAR ) )
+	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
 		channel = get_long( v, "channel number" ) - 1;
 

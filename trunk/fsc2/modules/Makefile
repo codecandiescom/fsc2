@@ -27,11 +27,22 @@ hp864_list    := hp8647a hp8648b
 simp_modules  := User_Functions sr510 sr530 sr810 sr830 aeg_s_band        \
 				 aeg_x_band er035m er035m_s hp5340a er035m_sa er035m_sas  \
 				 bh15 keithley228a egg4402 kontron4060 lakeshore330       \
-				 pt2025 er032m ips20_4 $(s_band_list) ni6601 me6000       \
-				 thurlby330
+				 pt2025 er032m ips20_4 $(s_band_list) thurlby330
+
+ifdef WITH_ME6000
+simp_modules  += me6000
+endif
+
+ifdef WITH_NI6601
+simp_modules  += ni6601
+endif
 
 comp_modules    := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400  \
-				   hp8672a $(hp864_list) $(tds_list) rs_spec10 spectrapro_300i
+				   hp8672a $(hp864_list) $(tds_list) spectrapro_300i
+
+ifdef WITH_SPEC10
+comp_modules    += rs_spec10
+endif
 
 dg2020_f        := dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
 			       dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c

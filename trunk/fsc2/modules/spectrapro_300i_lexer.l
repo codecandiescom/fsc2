@@ -42,17 +42,18 @@ static long spectrapro_300i_Lc,
 			spectrapro_300i_Comm_Lc;
 
 static struct {
-	double val[ 4 ];
-	bool is_calib[ 4 ];
+	double val[ 5 ];
+	bool is_calib[ 5 ];
 } spectrapro_300i_calibs[ MAX_GRATINGS ];
 
 
-#define N_ENTRY     1
-#define IA_ENTRY    2
-#define FL_ENTRY    3
-#define DA_ENTRY    4
-#define DATA_TYPE   5
-#define DATA_U_TYPE 6
+#define IO_ENTRY    1
+#define IG_ENTRY    2
+#define IA_ENTRY    3
+#define FL_ENTRY    4
+#define DA_ENTRY    5
+#define DATA_TYPE   6
+#define DATA_U_TYPE 7
 
 
 %}
@@ -72,7 +73,8 @@ INT      [0-9]+
 EXPO     [EDed][+-]?{INT}
 FLOAT    [+-]?((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 D        ([+-]?{INT})|{FLOAT}
-NE       N_?{INT}
+IOE      INIT_OFFSET_?{INT}
+IGE      INIT_ADJUST_?{INT}
 IAE      INCLUSION_ANGLE_?{INT}
 FLE      FOCAL_LENGTH_?{INT}
 DAE      DETECTOR_ANGLE_?{INT}
@@ -121,7 +123,8 @@ DU       (([+-]?{INT})|{FLOAT})[\t ]?("M"|"k"|"m"|"u"|"n")?"m"
 
 {EREM1}     THROW( DANGLING_END_OF_COMMENT );
 
-{NE}        return N_ENTRY;
+{IOE}       return IO_ENTRY;
+{IGE}       return IG_ENTRY;
 {IAE}       return IA_ENTRY;
 {FLE}       return FL_ENTRY;
 {DAE}       return DA_ENTRY;
@@ -170,7 +173,7 @@ void spectrapro_300i_read_calib( FILE *fp, const char *calib_file )
 	}
 
 	for ( i = 0; i < MAX_GRATINGS; i++ )
-		for ( j = 0; j < 4; j++ )
+		for ( j = 0; j < 5; j++ )
 			spectrapro_300i_calibs[ i ].is_calib[ j ] = UNSET;
 
 	/* Keep the lexer happy... */
@@ -213,33 +216,40 @@ void spectrapro_300i_read_calib( FILE *fp, const char *calib_file )
 
 		if ( spectrapro_300i_calibs[ i ].is_calib[ 0 ] )
 		{
-			spectrapro_300i.grating[ i ].n0 =
+			spectrapro_300i.grating[ i ].init_offset =
 										  spectrapro_300i_calibs[ i ].val[ 0 ];
+			num_calibs++;
+		}
+
+		if ( spectrapro_300i_calibs[ i ].is_calib[ 0 ] )
+		{
+			spectrapro_300i.grating[ i ].init_adjust =
+										  spectrapro_300i_calibs[ i ].val[ 1 ];
 			num_calibs++;
 		}
 
 		if ( spectrapro_300i_calibs[ i ].is_calib[ 1 ] )
 		{
 			spectrapro_300i.grating[ i ].inclusion_angle =
-										  spectrapro_300i_calibs[ i ].val[ 1 ];
+										  spectrapro_300i_calibs[ i ].val[ 2 ];
 			num_calibs++;
 		}
 
 		if ( spectrapro_300i_calibs[ i ].is_calib[ 2 ] )
 		{
 			spectrapro_300i.grating[ i ].focal_length =
-										  spectrapro_300i_calibs[ i ].val[ 2 ];
+										  spectrapro_300i_calibs[ i ].val[ 3 ];
 			num_calibs++;
 		}
 
 		if ( spectrapro_300i_calibs[ i ].is_calib[ 3 ] )
 		{
 			spectrapro_300i.grating[ i ].detector_angle =
-										  spectrapro_300i_calibs[ i ].val[ 3 ];
+										  spectrapro_300i_calibs[ i ].val[ 4 ];
 			num_calibs++;
 		}
 
-		spectrapro_300i.grating[ i ].is_calib = num_calibs == 4;
+		spectrapro_300i.grating[ i ].is_calib = num_calibs == 5;
 	}
 }
 
@@ -253,11 +263,12 @@ static void spectrapro_300i_new_entry( int type, const char *calib_file )
 	long grating;
 	double value;
 	int value_type;
-	const char *type_names[ ] = { "center pixel offset", "inclusion angle",
-								  "focal length", "detector angle" };
+	const char *type_names[ ] = { "init offset", "init adjust",
+								  "inclusion angle", "focal length",
+								  "detector angle" };
 
 
-	if ( type < N_ENTRY && type > DA_ENTRY )
+	if ( type < IO_ENTRY && type > DA_ENTRY )
 	{
 		print( FATAL, "Invalid entry in table file '%s' at line %ld.\n",
 			   calib_file, spectrapro_300i_Lc );
@@ -348,6 +359,15 @@ static void spectrapro_300i_new_entry( int type, const char *calib_file )
 	/* Negative values for the inclusion angle or the focal length can't
 	   be right... */
 
+	if ( ( type + 1 == IO_ENTRY || type + 1 == IG_ENTRY ) &&
+		 fabs( value ) > 1.0 )
+	{
+		print( FATAL, "Value for %s at line %ld in calibration file '%s' is "
+			   "not within interval [-1,1].\n", type_names[ type ],
+			   spectrapro_300i_Lc, calib_file );
+		THROW( EXCEPTION );
+	}
+
 	if ( ( type + 1 == IA_ENTRY || type + 1 == FL_ENTRY ) && value <= 0.0 )
 	{
 		print( FATAL, "Invalid negative value for %s at line %ld in "
@@ -356,7 +376,7 @@ static void spectrapro_300i_new_entry( int type, const char *calib_file )
 		THROW( EXCEPTION );
 	}
 
-	if ( type + 1 == N_ENTRY || type + 1 == FL_ENTRY )
+	if ( type + 1 == IO_ENTRY || type + 1 == IG_ENTRY || type + 1 == FL_ENTRY )
 		spectrapro_300i_calibs[ grating ].val[ type ] = value;
 	else
 		spectrapro_300i_calibs[ grating ].val[ type ] =

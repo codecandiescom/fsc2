@@ -268,9 +268,7 @@ FOREVER
 		ig[ CG ] = ig_def[ CG ];
 		ig_new = io[ CG ];
 
-		print( "Setting init offset to start value\n" );
 		monochromator_init_offset( CG, io[ CG ]	);
-		print( "Setting init adjust to start value\n" );
 		monochromator_init_adjust( CG, ig[ CG ]	);
 
 		/* Create the next form for adjusting the pixel offset. */
@@ -332,8 +330,6 @@ FOREVER
 				NEXT;
 			}
 
-			print( "Found peak at #\n", cp0 );
-
 			draw_marker_1d( round( cp0 ) );
 			output_value( LP, cp0 - 1 + scale[ 1 ] );
 
@@ -342,8 +338,6 @@ FOREVER
 			   another run. Then try to find the line at its new position. */
 
 			io_new = io[ CG ] + 0.2 + 0.1 * ( random( ) - 0.5 ); 
-
-			print( "Changing init offset to #\n", io_new );
 
 			monochromator_init_offset( CG, io_new );
 
@@ -369,8 +363,6 @@ FOREVER
 				NEXT;
 			}
 
-			print( "Found peak at #\n", cp1 );
-
 			clear_marker_1d( );
 			draw_marker_1d( round( cp1 ) );
 			output_value( LP, cp1 - 1 + scale[ 1 ] );
@@ -380,8 +372,6 @@ FOREVER
 
 			io_new = io[ CG ] - ( cp0 - 0.5 * ( W[ 1 ] - 1 ) )
 								* ( io_new - io[ CG ] ) / ( cp1 - cp0 );
-
-			print( "Changing init offset to #\n", io_new );
 
 			monochromator_init_offset( CG, io_new );
 
@@ -408,8 +398,6 @@ FOREVER
 				show_message( "Line seems to be too near to the edge.\n" );
 				NEXT;
 			}
-
-			print( "Found peak at #\n", cp1 );
 
 			clear_marker_1d( );
 			draw_marker_1d( round( cp1 ) );
@@ -714,8 +702,6 @@ FOREVER
 				show_message( "Line seems to be too near to the edge.\n" );
 				NEXT;
 			}
-
-			print( "Found peak at #\n", cp0 );
 
 			draw_marker_1d( round( cp0 ) );
 			output_value( LP, (

@@ -389,7 +389,7 @@ Var *f_mchoice( Var *v )
 
 	if ( v == NULL )
 	{
-		print( FATAL, "Missing argumnts.\n" );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -571,7 +571,7 @@ Var *f_mchanged( Var *v )
 
 	if ( v == NULL )
 	{
-		print( FATAL, "Missing argumnts.\n" );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 

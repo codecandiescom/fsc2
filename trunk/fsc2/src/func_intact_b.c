@@ -546,7 +546,7 @@ Var *f_bstate( Var *v )
 
 	if ( v == NULL )
 	{
-		print( FATAL, "Missing argumnts.\n" );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -732,7 +732,7 @@ Var *f_bchanged( Var *v )
 
 	if ( v == NULL )
 	{
-		print( FATAL, "Missing argumnts.\n" );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -825,7 +825,6 @@ static Var *f_bchanged_child( Var *v )
 
 	return vars_push( INT_VAR, chld_changed );
 }
-
 
 
 /*

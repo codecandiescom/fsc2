@@ -56,6 +56,9 @@ Var *f_setmark_2d( Var *v );
 Var *f_clearmark( Var *v );
 Var *f_clearmark_1d( Var *v );
 Var *f_clearmark_2d( Var *v );
+Var *f_find_peak( Var *v );
+Var *f_index_of_max( Var *v );
+Var *f_index_of_min( Var *v );
 
 
 #endif  /* ! FUNC_UTIL_HEADER */

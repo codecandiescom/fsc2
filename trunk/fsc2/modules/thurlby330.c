@@ -70,7 +70,7 @@ static long thurlby330_get_channel( Var *v );
 #define MAX_VOLTAGE         32.0    /* in V */
 #define MIN_VOLTAGE         0.0     /* in V */
 #define VOLTAGE_RESOLUTION  1.0e-2  /* in V */
-#define MAX_CURRENT         3.0     /* in A */
+#define MAX_CURRENT         3.1     /* in A */
 #define MIN_CURRENT         0.0     /* in A */
 #define CURRENT_RESOLUTION  1.0e-3  /* in A */
 
@@ -157,8 +157,6 @@ Var *powersupply_damping( Var *v )
 	long channel;
 	long status;
 	char buffer[ 100 ];
-	char reply[ 100 ];
-	long length = 100;
 
 
 	/* First argument must be the channel number (1 or 2) */
@@ -181,9 +179,6 @@ Var *powersupply_damping( Var *v )
 	sprintf( buffer, "DAMPING%ld %c\n", channel, status ? '1' : '0' );
 	thurlby330_command( buffer );
 
-	thurlby330_talk( "*OPC?\n", reply, &length );
-	reply[ length - 1 ] = '\0';
-
 	return vars_push( INT_VAR, status );
 }
 
@@ -197,8 +192,6 @@ Var *powersupply_channel_state( Var *v )
 	long channel;
 	long status;
 	char buffer[ 100 ];
-	char reply[ 100 ];
-	long length = 100;
 
 
 	/* First argument must be the channel number (1 or 2) */
@@ -220,9 +213,6 @@ Var *powersupply_channel_state( Var *v )
 
 	sprintf( buffer, "OP%ld %c\n", channel, status ? '1' : '0' );
 	thurlby330_command( buffer );
-
-	thurlby330_talk( "*OPC?\n", reply, &length );
-	reply[ length - 1 ] = '\0';
 
 	return vars_push( INT_VAR, status );
 }
@@ -508,7 +498,7 @@ static double thurlby330_set_voltage( long channel, double voltage )
 	fsc2_assert( voltage >= MIN_VOLTAGE &&
 				 voltage <= MAX_VOLTAGE + 0.5 * VOLTAGE_RESOLUTION );
 
-	sprintf( buffer, "V%ld V %.2f\n", channel, voltage );
+	sprintf( buffer, "V%ld %.2f\n", channel, voltage );
 	thurlby330_command( buffer );
 	return voltage;
 }
@@ -617,6 +607,8 @@ static bool thurlby330_command( const char *cmd )
 	if ( gpib_write( thurlby330.device, cmd, strlen( cmd ) ) == FAILURE )
 		thurlby330_failure( );
 
+	fsc2_usleep( 20000, UNSET );
+
 	return OK;
 }
 
@@ -626,9 +618,16 @@ static bool thurlby330_command( const char *cmd )
 
 static bool thurlby330_talk( const char *cmd, char *reply, long *length )
 {
-	if ( gpib_write( thurlby330.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( thurlby330.device, reply, length ) == FAILURE )
+	if ( gpib_write( thurlby330.device, cmd, strlen( cmd ) ) == FAILURE )
 		thurlby330_failure( );
+
+	fsc2_usleep( 20000, UNSET );
+
+	if ( gpib_read( thurlby330.device, reply, length ) == FAILURE )
+		thurlby330_failure( );
+
+	fsc2_usleep( 20000, UNSET );
+
 	return OK;
 }
 

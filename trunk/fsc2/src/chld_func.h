@@ -68,6 +68,7 @@ long *exp_tbchanged( char *buffer, ptrdiff_t len );
 long *exp_tbwait( char *buffer, ptrdiff_t len );
 bool exp_objdel( char *buffer, ptrdiff_t len );
 bool exp_clabel( char *buffer, ptrdiff_t len );
+bool exp_xable( char *buffer, ptrdiff_t len );
 
 
 #endif  /* ! CHLD_FUNC_HEADER */
