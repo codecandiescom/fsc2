@@ -229,7 +229,7 @@ int func_list_parse( Func **fncts, int num_func )
 		fclose( func_listin );
 		PASSTHROU( );
 	}
-	
+
 	fclose( func_listin );
 	return num_func;
 }
@@ -303,6 +303,7 @@ static int ffl_func_cmp2( const void *a, const void *b )
 {
 	return strcmp( ( char * ) a, ( ( Func * ) b )->name );
 }
+
 
 /*------------------------------------------------------------*/
 /* Function runs a second time through the function data base */
@@ -390,12 +391,12 @@ static void fll_get_functions( Func *fncts, int num_predef_func )
 					case EXP_TOKEN :
 						fncts[ act ].access_flag = ACCESS_EXP;
 						break;
-						
+
 					case PREP_TOKEN :
 						fncts[ act ].access_flag = ACCESS_PREP;
 						break;
 				}
-		
+
 				state = 3;
 				break;
 
