@@ -20,6 +20,24 @@ static void eps_draw_curve_1d( FILE *fp, int i );
 
 
 
+/* Some implementation details: If we want to send data directly to the
+   printer it would seem to be the best idea simply create a pipe via popen()
+   to lpr(1) and this way to write the data to be printed to lpr's standard
+   input. Unfortunately, there seems to be a problem with this: Even though
+   the program gets the SIGCHLD signal the exit status is already reaped by
+   pclose(). Thus, if we're running an handler for SIGCHLD signals it will
+   triggered but the handler will wait for the death of another child instead
+   of the process that exited due to the pclose(). While this is ok as long as
+   there are no other child processes while the measurement is running there
+   is another child, the child we forked to do the measurement. Now, after the
+   the pclose() call the parent process will hang in the SIGCHLD signal
+   handler, waiting indefinitely for another child to exit, while to child
+   process doing the measurement is also hanging, waiting for the parent
+   process to send signals allowing the child process to send further data...
+*/
+
+
+
 void print_1d( FL_OBJECT *obj, long data )
 {
 	int print_type;
