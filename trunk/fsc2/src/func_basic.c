@@ -418,10 +418,8 @@ Var *f_lmax( Var *v )
 {
 	double m = - HUGE_VAL;
 	bool all_int = SET;
-	size_t i;
-	size_t len;
-	long *ilp;
-	double *idp;
+	ssize_t i;
+	void *gp;
 
 
 	if ( v == NULL )
@@ -464,13 +462,13 @@ Var *f_lmax( Var *v )
 			case INT_REF :
 				while ( ( gp = vars_iter( v ) ) != NULL )
 					if ( * ( long * ) gp > m )
-						m = * ( long * ) *gp;
+						m = * ( long * ) gp;
 				break;
 
 			case FLOAT_REF :
 				while ( ( gp = vars_iter( v ) ) != NULL )
 					if ( * ( double * ) gp > m )
-						m = * ( double * ) *gp;
+						m = * ( double * ) gp;
 				all_int = UNSET;
 				break;
 		}
@@ -535,13 +533,13 @@ Var *f_lmin( Var *v )
 			case INT_REF :
 				while ( ( gp = vars_iter( v ) ) != NULL )
 					if ( * ( long * ) gp < m )
-						m = * ( long * ) *gp;
+						m = * ( long * ) gp;
 				break;
 
 			case FLOAT_REF :
 				while ( ( gp = vars_iter( v ) ) != NULL )
 					if ( * ( double * ) gp < m )
-						m = * ( double * ) *gp;
+						m = * ( double * ) gp;
 				all_int = UNSET;
 				break;
 		}
@@ -1913,7 +1911,7 @@ Var *f_mean( Var *v )
 	long start;
 	ssize_t len;
 	double sum = 0.0;
-	long count;
+	long count = 0;
 	void *gp;
 
 
@@ -2067,7 +2065,7 @@ Var *f_rms( Var *v )
 	long start;
 	ssize_t len;
 	double sum = 0.0;
-	long count;
+	long count = 0;
 	void *gp;
 
 

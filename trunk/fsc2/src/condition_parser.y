@@ -125,7 +125,7 @@ int condition_gobble;
 
 %token E_NT_TOKEN E_UT_TOKEN E_MT_TOKEN E_T_TOKEN E_KT_TOKEN E_MGT_TOKEN
 %token E_NU_TOKEN E_UU_TOKEN E_MU_TOKEN E_KU_TOKEN E_MEG_TOKEN
-%type <vptr> expr unit list
+%type <vptr> expr unit list1 l1e
 
 
 %left E_AND E_OR E_XOR
@@ -157,11 +157,11 @@ expr:    E_INT_TOKEN unit         { if ( ! condition_gobble )
 		                                vars_arr_start( $1 );
 	                                else
 										vars_pop( $1 ); }
-         list                     { if ( $4 == NULL && ! condition_gobble )
+         list1                    { if ( $4 == NULL && ! condition_gobble )
                                         $$ = vars_push( UNDEF_VAR ); }
 		 ']'                      { if ( ! condition_gobble )
                                         $$ = vars_arr_rhs( $4 ); }
-       | E_FUNC_TOKEN '(' list
+       | E_FUNC_TOKEN '(' list2
          ')'                      { if ( ! condition_gobble )
 			                            $$ = func_call( $1 );
 	                                else
@@ -283,14 +283,34 @@ unit:    /* empty */              { $$ = NULL; }
 ;
 
 
-/* List of indices of an array element or list of function arguments */
+/* list of indices for access of an array element */
 
-list :   /* empty */              { $$ = NULL; }
-       | expr
-       | list ',' expr            { if ( ! condition_gobble )
-                                        $$ = $3; }
+list1:   /* empty */                 { $$ = vars_push( UNDEF_VAR ); }
+	   | l1e
 ;
 
+l1e:     expr                        { $$ = $1; }
+       | l1e ',' expr                { $$ = $3; }
+;
+
+/* list of function arguments */
+
+list2:   /* empty */
+       | l2e
+;
+
+l2e:     exprs
+       | l2e ',' exprs
+;
+
+exprs:   expr                     { }
+       | strs
+;
+
+strs:    E_STR_TOKEN              { vars_push( STR_VAR, $1 ); }
+       | strs E_STR_TOKEN         { Var *v = vars_push( STR_VAR, $2 );
+	                                vars_add( v->prev, v ); }
+;
 
 %%
 

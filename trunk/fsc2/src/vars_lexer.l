@@ -104,6 +104,7 @@ CTRL        (WHILE)|(UNTIL)|(BREAK)|(NEXT)|(IF)|(ELSE)|(REPEAT)|(FOR)
 
 WS          [\n \t]+
 
+UNIT        ("n"|"u"|"m"|"k"|"M")?("m"|"s"|"G"|"V"|"A"|"Hz"|"dB"|"db"|"T")
 
 		/*---------------*/
 %%		/*     Rules     */
@@ -229,6 +230,12 @@ WS          [\n \t]+
 {CTRL}      {
 				print( FATAL, "Flow control structures can't be used "
 					   "in the VARIABLES section.\n" );
+				THROW( EXCEPTION );
+			}
+
+{UNIT}      {
+				print( FATAL, "Unit '%s' used as variable name\n",
+					   varstext );
 				THROW( EXCEPTION );
 			}
 

@@ -85,11 +85,11 @@ set_seed( 243419 );
 
 a1 = random( );
 a2 = random( size( a2 ) );
-a3[ 1 ] = random( size( a3, 2 ) );
+a3[ 1 ] = random( size( a3[ 2 ] ) );
 
 a1 = grandom( );
 a2 = grandom( size( a2 ) );
-a3[ 1 ] = grandom( size( a3, 2 ) );
+a3[ 1 ] = grandom( size( a3[ 2 ] ) );
 
 a1 = asin( sin( a1 ) );
 a1 = acos( cos( a1 ) );

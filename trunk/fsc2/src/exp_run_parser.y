@@ -104,7 +104,7 @@ static void exp_runerror( const char *s );
 
 %token E_NT_TOKEN E_UT_TOKEN E_MT_TOKEN E_T_TOKEN E_KT_TOKEN E_MGT_TOKEN
 %token E_NU_TOKEN E_UU_TOKEN E_MU_TOKEN E_KU_TOKEN E_MEG_TOKEN
-%type <vptr> expr unit line list1 list2 lhs
+%type <vptr> expr unit line list1 l1e lhs
 %type <lval> plhs
 
 
@@ -140,7 +140,7 @@ line:    lhs '=' expr              { vars_assign( $3, $1 ); }
        | lhs E_DIVA expr           { vars_assign( vars_div( $1, $3 ), $1 ); }
        | lhs E_MODA expr           { vars_assign( vars_mod( $1, $3 ), $1 ); }
        | lhs E_EXPA expr           { vars_assign( vars_pow( $1, $3 ), $1 ); }
-       | E_FUNC_TOKEN '(' list3 ')'{ vars_pop( func_call( $1 ) ); }
+       | E_FUNC_TOKEN '(' list2 ')'{ vars_pop( func_call( $1 ) ); }
        | E_FUNC_TOKEN '['          { print( FATAL, "'%s' is a predefined "
 											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
@@ -177,7 +177,7 @@ expr:    E_INT_TOKEN unit          { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | E_VAR_TOKEN               { $$ = vars_push_copy( $1 ); }
        | E_VAR_TOKEN '['           { vars_arr_start( $1 ); }
          list1 ']'                 { $$ = vars_arr_rhs( $4 ); }
-       | E_FUNC_TOKEN '(' list3
+       | E_FUNC_TOKEN '(' list2
          ')'                       { $$ = func_call( $1 ); }
        | E_VAR_REF                 { $$ = $1; }
        | E_VAR_TOKEN '('           { print( FATAL, "'%s' isn't a function.\n", 
@@ -231,29 +231,28 @@ unit:    /* empty */               { $$ = NULL; }
 /* list of indices for access of an array element */
 
 list1:   /* empty */                 { $$ = vars_push( UNDEF_VAR ); }
-	   | list2
+	   | l1e
 ;
 
-list2:   expr                        { $$ = $1; }
-       | list2 ',' expr              { $$ = $3; }
+l1e:     expr                        { $$ = $1; }
+       | l1e ',' expr                { $$ = $3; }
 ;
 
 /* list of function arguments */
 
-list3:   /* empty */
-       | list4
+list2:   /* empty */
+       | l2e
 ;
 
-list4:   exprs
-       | list4 ',' exprs
+l2e:     exprs
+       | l2e ',' exprs
 ;
 
 exprs:   expr                     { }
-       | E_STR_TOKEN              { vars_push( STR_VAR, $1 ); }
-         strs
+       | strs
 ;
 
-strs:    /* empty */
+strs:    E_STR_TOKEN              { vars_push( STR_VAR, $1 ); }
        | strs E_STR_TOKEN         { Var *v = vars_push( STR_VAR, $2 );
 	                                vars_add( v->prev, v ); }
 ;

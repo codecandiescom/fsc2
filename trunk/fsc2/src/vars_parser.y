@@ -35,6 +35,8 @@ static void varserror( const char *s );
 
 extern char *varstext;
 
+static ssize_t max_level;
+static ssize_t level;
 
 %}
 
@@ -60,8 +62,7 @@ extern char *varstext;
 
 %token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN KT_TOKEN MGT_TOKEN
 %token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
-%type <vptr> expr arrass list1 list1a list2 list3 list3a unit
-
+%type <vptr> arrass alist alist1 aitem expr list1 list1a list3 l3e unit
 
 
 %left EQ NE LT LE GT GE
@@ -91,7 +92,8 @@ line:    linet
 linet:   VAR_TOKEN                 { }        /* no assignment to be done */
        | VAR_TOKEN '=' expr        { vars_assign( $3, $1 ); }
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }
-         list1 ']'                 { vars_arr_lhs( $4 ); }
+         list1 ']'                 { vars_arr_lhs( $4 );
+									 max_level = $1->dim; }
          arhs
 	   | FUNC_TOKEN '('            { print( FATAL, "Function calls can only "
 											"be used in variable "
@@ -171,11 +173,6 @@ unit:    /* empty */               { $$ = NULL; }
 ;
 
 
-arhs:    /* empty */               { vars_arr_init( vars_push( UNDEF_VAR ) ); }
-       | '=' arrass                { vars_arr_init( $2 ); }
-       | '=' expr                  { vars_assign( $2, $2->prev ); }
-;
-
 /* list of sizes of newly declared array */
 
 list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
@@ -193,63 +190,53 @@ list1b:   /* empty */
 
 /* list of data for initialization of a newly declared array */
 
-arrass:   '{' '}'                  { $$ = vars_push( UNDEF_VAR ); }
-        | '{' list2 l2e '}'        { $$ = $2; }
-	    | '{' ','                  { print( FATAL, "Superfluous comma in "
-											"initializer list.\n" );
-	                                 THROW( EXCEPTION ); }
+arhs:    /* empty */               { vars_arr_init( NULL ); }
+      | '='                        { level = max_level; }
+	     arrass                    { vars_arr_init( $3 ); }
+       | '=' expr                  { vars_assign( $2, $2->prev ); }
+;
+	     
+arrass:  '{'                       { level--;
+									 vars_push( REF_PTR, NULL ); }
+         alist '}'                 { $$ = vars_init_list( $3,
+														  level++ ); }
 ;
 
-l2e:     /* empty */
-       | ','                       { print( FATAL, "Superfluous comma in "
-											"initializer list.\n" );
-	                                 THROW( EXCEPTION ); }
+alist:   /* empty */               { ( $$ = vars_push( UNDEF_VAR ) )->dim =
+										 							   level; }
+        | alist1                   { $$ = $1; }
 ;
 
-list2:   expr                      { $$ = $1; }
-       | list2 ',' expr            { $$ = $3; }
+alist1:  aitem                     { $$ = $1; }
+       | alist1 ',' aitem          { $$ = $3; }
+;
+
+aitem:   expr                      { $$ = $1; }
+       | arrass                    { $$ = $1; }
 ;
 
 /* list of indices for access of an array element */
 
-list3:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
-	   | list3a l3e                { $$ = $1; }
-	   | ','                       { print( FATAL, "Superfluous comma in "
-											"array index list.\n" );
-	                                 THROW( EXCEPTION ); }
+list3:   /* empty */               { $$ = vars_push( UNDEF_VAR ) };
+       | l3e                       { $$ = $1; }
 ;
 
-l3e:     /* empty */
-       | ','                       { print( FATAL, "Superfluous comma in "
-											"array index list.\n" );
-	                                 THROW( EXCEPTION ); }
-;
-
-list3a:   expr                     { $$ = $1; }
-	    | list3a ',' expr          { $$ = $3; }
+l3e:     expr                      { $$ = $1; }
+       | l3e ',' expr              { $$ = $3; }
 ;
 
 /* list of function arguments */
 
 list4:   /* empty */
-       | list4a l4e
-       | ','                       { print( FATAL, "Superfluous comma in "
-											"function argument list.\n" );
-	                                 THROW( EXCEPTION ); }
+       | l4e
 ;
 
-l4e:     /* empty */
-       | ','                       { print( FATAL, "Superfluous comma in "
-											"function argument list.\n" );
-	                                 THROW( EXCEPTION ); }
-;
-
-list4a:   exprs
-        | list4a ',' exprs
+l4e:      exprs
+        | l4e ',' exprs
 ;
 
 exprs:   expr                      { }
-       | STR_TOKEN                 { vars_push( STR_VAR, $1 ); }
+       | STR_TOKEN                 { }
 ;
 
 %%

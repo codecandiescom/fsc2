@@ -32,6 +32,7 @@
 Var *vars_negate( Var *v );
 Var *vars_comp( int comp_type, Var *v1, Var *v2 );
 Var *vars_lnegate( Var *v );
+void vars_arith_len_check( Var *v1, Var *v2, const char *op );
 
 
 #endif  /* ! VARS_UTIL_HEADER */

@@ -131,8 +131,8 @@ typedef struct {
 	int num_pulses;            /* number of pulses assigned to the function */
 	struct PULSE **pulses;     /* list of pulse pointers */
 
-	struct PULSER ***pl;       /* array of currently active pulse lists */
-	struct PULSER ***pm;       /* (channel x phases) pulse list matrix */
+	struct PULSE ***pl;        /* array of currently active pulse lists */
+	struct PULSE ***pm;        /* (channel x phases) pulse list matrix */
 
 	struct PHASE_SETUP *phase_setup;
 	int next_phase;

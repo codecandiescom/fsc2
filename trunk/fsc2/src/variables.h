@@ -107,7 +107,9 @@ enum {
 	IS_DYNAMIC         = ( 1 << 1 ),       /*    2 */
 	ON_STACK           = ( 1 << 2 ),       /*    4 */
 	IS_TEMP            = ( 1 << 3 ),       /*    8 */
-	EXISTS_BEFORE_TEST = ( 1 << 4 )        /*   16 */
+	EXISTS_BEFORE_TEST = ( 1 << 4 ),       /*   16 */
+	DONT_RECURSE       = ( 1 << 5 ),       /*   32 */
+	INIT_ONLY          = ( 1 << 6 )        /*   64 */
 };
 
 
@@ -136,6 +138,7 @@ Var *vars_arr_start( Var *v );
 Var *vars_arr_lhs( Var *v );
 Var *vars_arr_rhs( Var *v );
 void vars_assign( Var *src, Var *dest );
+Var *vars_init_list( Var *v, ssize_t level );
 void vars_arr_init( Var *dest );
 Var *apply_unit( Var *var, Var *unit );
 void *vars_iter( Var *v );
