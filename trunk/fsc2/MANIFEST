@@ -91,6 +91,7 @@ config/ni6601.conf
 config/pci_mio_16e_1.conf
 config/pt2025.conf
 config/rb8509.conf
+config/rb8510.conf
 config/rb_pulser.conf
 config/rs690.conf
 config/rs_sml01.conf
@@ -270,6 +271,7 @@ modules/pci_mio_16e_1_msc.c
 modules/pci_mio_16e_1_util.c
 modules/pt2025.c
 modules/rb8509.c
+modules/rb8510.c
 modules/rb_pulser.c
 modules/rb_pulser.h
 modules/rb_pulser.map
@@ -379,6 +381,7 @@ src/exp_run_parser.y
 src/exp_test_parser.y
 src/fsc2.c
 src/fsc2.h
+src/fsc2.map
 src/fsc2_assert.c
 src/fsc2_assert.h
 src/fsc2_clean.l
