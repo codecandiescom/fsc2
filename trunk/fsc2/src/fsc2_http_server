@@ -29,7 +29,7 @@ use Fcntl qw( :DEFAULT :flock );
 use Errno;
 
 
-my $client;       # the most important entity ;-)
+my $client;       # The Most Important Entity ;-)
 
 # Check if we got a port as the first argument
 
@@ -226,15 +226,15 @@ sub serve_main {
 
 
 #########################################################
-# If the logo file can be found were we expect it to be simply pass
-# it on to the client (and tell it that the logo won't change in the
-# near future, so it won't has to re-fetch it each time...)
+# Passes the fsc2 logo file on to our client if it can be found where we
+# expect it (also telling the client that the logo won't change anytime
+# in the near future, so it may happily use a cached version)
 
 sub serve_logo {
 
 	my ( $file, $type ) = @_;
 	my $date = rfc_1123_date( );
-	my $edate = rfc_1123_date( 1 );
+	my $edate = rfc_1123_date( 'next_year' );
 	local *F;
 
 
@@ -262,7 +262,7 @@ sub not_found {
 	my $file = shift;
 
 	print $client
-		"HTTP/1.1 404 Not Found\r\n" .
+		"HTTP/1.0 404 Not Found\r\n" .
 		"Date: ". rfc_1123_date( ) . "\r\n" .
 		"Server: fsc2/0.1\r\n" .
 		"Connection: close\r\n" .
