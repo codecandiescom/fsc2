@@ -11,7 +11,7 @@
 
 %{
 
-/* if not defined set default directory for include files */
+/* If not defined set default directory for include files */
 
 #if ! defined DEF_INCL_DIR
 #define DEF_INCL_DIR "/usr/local/lib/fsc2"
@@ -135,7 +135,7 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 		/*---------------*/
 
 
-			/* handling of string constants */
+			/* Handling of string constants */
 \"          {
 				printf( "\x05" );
 				Str_Lc = Lc;
@@ -173,20 +173,20 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 				    THROW( MISPLACED_SHEBANG );
 			}
 
-            /* handling of C++ style comment spanning a whole line */
+            /* Handling of C++ style comment spanning a whole line */
 {REM1}		{
 				Lc++;
 			    Eol = SET;
 			}
 
-			/* handling of C++ style comment not spanning a whole line */
+			/* Handling of C++ style comment not spanning a whole line */
 {REM2}		{
 				Lc++;
 				Eol = SET;
 				printf( "\n" );
 			}
 
-			/* handling of C style comment */
+			/* Handling of C style comment */
 {REM3}		{
 				Comm_Lc = Lc;
 				yy_push_state( comm );
@@ -194,24 +194,24 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 
 <comm>{
 
-{REM4}		/* skipping anything that's not a '*' */
-{REM5}      /* skipping all '*'s not followed by '/'s */
+{REM4}		/* Skip everything that's not a '*' */
+{REM5}      /* Skip all '*'s not followed by '/'s */
 
-			/* end of line character in a comment */
+			/* End of line character in a comment */
 \n			{
 				Lc++;
 				Eol = SET;
 			}
 
-			/* handling of EOF within a comment -> fatal error */
+			/* Handling of EOF within a comment -> fatal error */
 <<EOF>>		THROW( EOF_IN_COMMENT_EXCEPTION );
 
-			/* end of comment but not end of line */
+			/* End of comment but not end of line */
 {EREM1}		yy_pop_state( );
 
-			/* end of comment and end of line */
+			/* End of comment and end of line */
 {EREM2}     {
-				/* on end of comment in #include-statement don't dump '\n' */
+				/* On end of comment in #include-statement don't dump '\n' */
 
 				if ( yy_top_state( ) == incl )
 				   unput( '\n' );
@@ -224,22 +224,22 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 
 {EREM1}     THROW( DANGLING_END_OF_COMMENT )
 
-			/* dump empty line (i.e. just containing tabs and spaces) */
+			/* Dump empty line (i.e. just containing tabs and spaces) */
 {WLWS}      Lc++;
 
-{LWS}       /* dumps of leading white space */
+{LWS}       /* Dumps of leading white space */
 
-			/* dumps trailing white space */
+			/* Dumps trailing white space */
 {TWS}       {
 				Lc++;
 				Eol = SET;
 				printf( "\n" );
 			}
 
-			/* reduces any amount of (other) white space to just one space */
+			/* Reduces any amount of (other) white space to just one space */
 {WS}        printf( " " );
 
-			/* writes out EOL character */
+			/* Writes out EOL character */
 \n			{
 				Lc++;
 				Eol = SET;
@@ -262,12 +262,12 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 			}
 
 <incl>{
-			/* handling of C++ style comments */
+			/* Handling of C++ style comments */
 {REM2}      
 
-{WS}       /* dumps white space */
+{WS}        /* Dumps white space */
 
-            /*  handling of file name */
+            /*  Handling of file name */
 {IFN} 		{
 				register char *q = yytext + yyleng - 1,
 							  *p = yytext;
@@ -285,7 +285,7 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 				include_handler( p );
 			}
 
-			/* either start of C style comment or syntax error */
+			/* Either start of C style comment or syntax error */
 {IFNE}      {
 				if ( yytext[ 0 ] == '/' && yytext[ 1 ] == '*' )
 				   yy_push_state( comm );
@@ -298,7 +298,7 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 			}
 } /* end of <incl> */
 
-            /* here some special handling of numbers with units
+            /* Here some special handling of numbers with units
 			   take care they will be converted to double automatically */
 
 {INANO}/[^a-zA-z_]   unit_spec( yytext, -9 );
@@ -342,7 +342,7 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 "k"{UNIT}/[^a-zA-z_] printf( "\x4kunit" );
 "M"{UNIT}/[^a-zA-z_] printf( "\x4megunit" );
 
-			/* all the rest is simply copied to the output */
+			/* All the rest is simply copied to the output */
 
 {THROU}		{
 				if ( Eol )
@@ -377,7 +377,7 @@ int main( int argc, char *argv[ ] )
 	mcheck( NULL );
 #endif
 
-	/* complain if no file name was passed */
+	/* Complain if no file name was passed */
 
 	if ( argc < 2 )
 	{
@@ -385,7 +385,7 @@ int main( int argc, char *argv[ ] )
 		return EXIT_FAILURE;
 	}
 
-	/* try to open the input file */
+	/* Try to open the input file */
 
 	yyin = fopen( argv[ 1 ], "r" );
 	if ( yyin == NULL )
@@ -394,14 +394,14 @@ int main( int argc, char *argv[ ] )
 		return EXIT_FAILURE;
 	}
 
-	/* set the global variables and output name of input file */
+	/* Set the global variables and output name of input file */
 
 	printf( "\x01\n%s\n", argv[ 1 ] );
 	Fname = T_strdup( argv[ 1 ] );
 	Lc = 1;
 	Eol = SET;
 
-	/* now try to clean up the input and output appropriate error messages
+	/* Now try to clean up the input and output appropriate error messages
 	   if there are problems */
 
 	TRY
@@ -446,7 +446,7 @@ int main( int argc, char *argv[ ] )
 		exit( EXIT_FAILURE );
 	}
 
-	/* we finished succesfully... */
+	/* Finished succesfully... */
 
 	return EXIT_SUCCESS;
 }
@@ -467,14 +467,14 @@ void include_handler( char *file )
 
 	if ( file != NULL )		      /* at the start of an include file */
 	{
-		/* if all the files we are prepared to open are already open
+		/* If all the files we are prepared to open are already open
 		   this is a fatal error (most probably it's due to an infinite
 		   recurrsion) */
 
 		if ( incl_depth + 1 == MAX_INCLUDE_DEPTH )
 			THROW( TOO_DEEPLY_NESTED_EXCEPTION );
 
-		/* now check if file name is enclosed by `"' or '<' and '>' - in the
+		/* Now check if file name is enclosed by `"' or '<' and '>' - in the
 		   later case we have to prepend the default directory */
 
 		if ( file[ 0 ] == '"' )
@@ -492,7 +492,7 @@ void include_handler( char *file )
 			strcat( incl_file, file + 1 );
 		}
 
-		/* the same holds for the case that the file can't be opened. */
+		/* The same holds for the case that the file can't be opened. */
 
 		if ( ( fp[ incl_depth + 1 ] = fopen( incl_file, "r" ) ) == NULL )
 		{
@@ -501,7 +501,7 @@ void include_handler( char *file )
 			exit( EXIT_FAILURE );
 		}
 
-		/* if this is the very first include we store the current state in
+		/* If this is the very first include we store the current state in
 		   some special variables... */
 
 		if ( ++incl_depth == 0 )
@@ -531,7 +531,7 @@ void include_handler( char *file )
 	}
 	else						            /* at the end of an include file */
 	{
-		/* if the end of the very first file is reached we exit signaling
+		/* If the end of the very first file is reached we exit signaling
 		   success, otherwise we switch back to the previous buffer and file
 		   (and also restore the it's name, line number and EOL state) */
 
