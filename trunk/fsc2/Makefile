@@ -502,19 +502,19 @@ export            # export all variables to sub-makes
 
 .SUFFIXES:
 
-.PHONY: all basics src modules utils docs built         \
-		install-strip install uninstall http_server     \
-		version test clean distclean                    \
-		mostlyclean tags pack MANIFEST ZIP              \
-		pion.anorg.chemie.uni-frankfurt.de              \
-		crowley.physik.fu-berlin.de                     \
-		door.physik.fu-berlin.de                        \
-		isaak.physik.fu-berlin.de                       \
-		moebpc3.physik.fu-berlin.de                     \
-		tresr.physik.fu-berlin.de                       \
-		sunone.chemie.unibas.ch                         \
-		single.physik.fu-berlin.de                      \
-		crowley.none                                    \
+.PHONY: all config src modules utils docs built      \
+		install-strip install uninstall http_server  \
+		version test clean distclean                 \
+		mostlyclean tags pack MANIFEST ZIP           \
+		pion.anorg.chemie.uni-frankfurt.de           \
+		crowley.physik.fu-berlin.de                  \
+		door.physik.fu-berlin.de                     \
+		isaak.physik.fu-berlin.de                    \
+		moebpc3.physik.fu-berlin.de                  \
+		tresr.physik.fu-berlin.de                    \
+		sunone.chemie.unibas.ch                      \
+		single.physik.fu-berlin.de                   \
+		crowley.none                                 \
 		dorimare.nowhere
 
 
@@ -527,7 +527,7 @@ export            # export all variables to sub-makes
 # some other, more or less useful stuff
 
 all:
-	$(MAKE) basics
+	$(MAKE) config
 	$(MAKE) -C $(sdir) src
 	$(MAKE) -C $(sdir) modules
 	$(MAKE) http_server
@@ -535,7 +535,7 @@ all:
 	$(MAKE) utils
 
 
-basics: config.h
+config: fsc2_config.h
 	@if [ $(INSTALL_MACHINE) != "install-unknown" ]; then   \
 		echo "Configuring for machine $(machine_name)...";  \
 		$(MAKE) $(machine_name);                            \
@@ -546,12 +546,12 @@ basics: config.h
 
 
 src:
-	$(MAKE) basics
+	$(MAKE) config
 	$(MAKE) -C $(sdir) src
 
 
 modules:
-	$(MAKE) basics
+	$(MAKE) config
 	$(MAKE) -C $(sdir) modules
 
 
@@ -566,21 +566,22 @@ docs:
 # Create a header file with configuration information from the contents of
 # CONFFLAGS if either the Makefile got changed or it does not already exist
 
-config.h: Makefile
-	@if [ -e config.h ]; then           \
-		echo "Recreating config.h...";  \
-	else                                \
-		echo "Creating config.h...";    \
+fsc2_config.h: Makefile
+	@if [ -e fsc2_config.h ]; then           \
+		echo "Recreating fsc2_config.h...";  \
+	else                                     \
+		echo "Creating fsc2_config.h...";    \
 	fi
-	@echo "/*--- Created automatically, dont' change ---*/" > config.h
-	@echo -e $(patsubst -D%,\\n#define %,$(subst =, ,$(CONFFLAGS))) >> config.h
+	@echo "/*--- Created automatically, dont' change ---*/" > fsc2_config.h
+	@echo -e $(patsubst -D%,\\n#define %,$(subst =, ,$(CONFFLAGS))) | \
+		sort | uniq >> fsc2_config.h
 
 
 # Create a file with as much as possible information about the files
 # involved in the make process
 
 built:
-	-@cat config.h > version
+	-@cat fsc2_config.h > version
 	-@echo >> version
 	-@grep '$$Id\: ' Makefile $(sdir)/Makefile $(sdir)/*.[chly]             \
 					 $(mdir)/Makefile $(mdir)/*.[chl]                       \
@@ -699,7 +700,7 @@ ifdef WITH_HTTP_SERVER
 	fi
 endif
 	$(MAKE) -C $(udir) distclean
-	-$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog config.h *~
+	-$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog fsc2_config.h *~
 	$(MAKE) -C me6x00 clean
 	$(MAKE) -C ni6601 clean
 
