@@ -29,25 +29,25 @@ does work internally. I hope that this will help especially if you try
 to write a new module for a device (or if you get upset about things
 @code{fsc2} does differently from the way you would like it to).
 
-As you will already have understood @code{fsc2} is basically an
+As you will already have understood, @code{fsc2} is basically an
 interpreter for @code{EDL} programs. Normal interpreters interpret each
 line of input individually, i.e.@: analyzing a line, and, if the line is
 syntactically correct, execute it. That's what @code{fsc2} also does,
-but only for the parts before the start of the @code{EXPERIMENT}
-section.  In contrast, the interpretation of the @code{EXPERIMENT}
-section of an @code{EDL} file is a consists of several steps. In the
-first step the @code{EXPERIMENT} section as a whole is read in and only
-syntax checks are done. In the second step, a complete test run of
-@code{EXPERIMENT} section of the program is done to avoid that the
-experiment will have to be stopped due obvious logical errors in the
-@code{EDL} program. The device modules are involved, i.e.@: they already
-can do all kinds of checks on what can be expected to happen during the
-real experiment and already detect possible problems.
+but only for the parts before the @code{EXPERIMENT} section. In
+contrast, the interpretation of the @code{EXPERIMENT} section of an
+@code{EDL} file consists of several steps. In the first step the
+@code{EXPERIMENT} section as a whole is read in and only syntax checks
+are done. In the second step, a complete test run of @code{EXPERIMENT}
+section of the program is done to avoid that the experiment will have to
+be stopped due obvious logical errors in the @code{EDL} program. The
+device modules are involved, i.e.@: they already can do all kinds of
+checks on what can be expected to happen during the real experiment and
+detect possible problems.
 
 Only if all these tests succeeded the third step, the execution of the
 @code{EXPERIMENT} section of the @code{EDL} program, is started, i.e.@:
 the experiment is run. If the experiment is restarted (without reloading
-the @code{EDL} file) this third step is repeated.
+the @code{EDL} file) only this third step is repeated.
 
 
 @ifinfo
@@ -83,15 +83,15 @@ tokens).
 Finally, there is @file{fsc2_clean.l}. @code{EDL} expects its input to
 be a single file in a certain format. Thus it does not deal directly
 with the input files (there can be more than one when there are
-@code{#INCLUDE} statements in an @code{EDL} program) but there is an
-extra program, @file{fsc2_clean} that translates the input @code{EDL}
-file into a form that the main program understands. @code{fsc2_clean}
+@code{#INCLUDE} statements in an @code{EDL} program).Therefor, there's
+an extra program, @file{fsc2_clean} that translates the input @code{EDL}
+script into a form that the main program understands. @code{fsc2_clean}
 for example removes all comments, includes files for @code{#INCLUDE}
-statements, adds information about line numbers and file names etc., and
+statements, adds information about line numbers and file names etc.@:, and
 then passes this cleaned-up input to the @code{fsc2} program. If you are
 interested what @code{fsc2} really sees of an @code{EDL} file you can
 run @code{fsc2_clean} with the @code{EDL} file as its standard input,
-i.e.
+i.e.@:
 @example
 fsc2_clean < edl_script.edl
 @end example
@@ -104,9 +104,9 @@ In the sections preceeding the @code{EXPERIMENT} section the lines of
 the @code{EDL} program are also already executed. E.g.@: during the
 handling of the @code{DEVICES} section the modules for the listed
 devices are loaded and the functions defined in the modules are included
-into @code{fsc2}s internal list of functions that can be used from
+into @code{fsc2}'s internal list of functions that can be used from
 within the @code{EDL} program. While reading the @code{VARIABLES}
-section the newly defined variables are added to @code{fsc2}s list of
+section the newly defined variables are added to @code{fsc2}'s list of
 variables, and, if necessary, are also initialized.
 
 
@@ -124,16 +124,16 @@ what is not.
 To give you an example, here's a very simple statement from an
 @code{EDL} program:
 @example
-A = B + 3;
+a = B_x + 3;
 @end example
 The tokenizer doesn't has too much to do in this case, it will output a
-list of the bits of this line, together with some information about the
+list of the tokens of this line, together with some information about the
 class the individual tokens belong to. So, it will pass the following
 kind of information to the parser:
 @example
-Variable, named A
+Floating point variable named 'a'
 Equal operator
-Variable, name 'B'
+Integer variable named 'B_x'
 Plus operator
 Integer number with value 3
 End of statement character
@@ -155,8 +155,8 @@ integer number, end of statement character
 @noindent
 is syntactically correct and that for this sequence of tokens some
 @code{C} code has to be executed that fetches the contents of the
-variable @code{B}, adds to it the value of the integer number and
-finally stores the result into the variable @code{A}. Statements that
+variable @code{B_x}, adds to it the value of the integer number and
+finally stores the result into the variable @code{a}. Statements that
 are not in the parsers list are @i{per definitionem} syntactically
 incorrect. For example, there is no rule on how to deal with a sequence
 of tokens as the one above but with the integer number missing. Because
@@ -178,13 +178,13 @@ is later used to test and execute the @code{EXPERIMENT} section.
 
 
 Writers of modules should know that the modules already get loaded when
-the @code{DEVICES} section (which always must be the first one) is dealt
-with. A module may contain a special function, called a hook function,
-that automatically gets called when the module has just been loaded.
-This allows for example to set the internal variables of the module to a
-well-defined state. This function may not call any functions accessing
-the device because neither the GPIB bus nor the serials ports are
-configured at this moment.
+the @code{DEVICES} section (which always must be the first section) is
+dealt with. A module may contain a special function, called a hook
+function, that automatically gets called when the module has just been
+loaded.  This allows for example to set the internal variables of the
+module to a well-defined state. This function may not call any functions
+accessing the device because neither the GPIB bus nor the serials ports
+are configured at this moment.
 
 
 While handling the part of the @code{EDL} program up to the start of
@@ -331,7 +331,7 @@ as concerned with acquiring data from the devices etc.@: should be
 unimpeded (at least as far as possible) from the task of dealing with
 user requests to allow maximum execution speed and to make the timing of
 the experiment less dependent on user interruptions. Take for example
-the case that the user starts to move one of @code{fsc2}s windows around
+the case that the user starts to move one of @code{fsc2}'s windows around
 on the screen. As long as she is moving the window no other instructions
 of the program can be executed, which effectively would stop the
 experiment for this time even though nothing really relevant happens. By
