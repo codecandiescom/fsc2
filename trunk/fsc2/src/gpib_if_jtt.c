@@ -85,6 +85,8 @@ static int timeout;                 /* stores actual timeout period          */
 static FILE *gpib_log;              /* file pointer of GPIB log file         */
 static GPIB_DEV *gpib_dev_list = NULL;
                                    /* list of symbolic names of devices etc. */
+static char *gpib_error_buffer = NULL;
+static size_t gpib_error_buffer_length = 0;
 
 
 /*-------------------------------------------------------------------------*/
