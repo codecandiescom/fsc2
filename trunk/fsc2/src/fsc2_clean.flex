@@ -136,7 +136,7 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 		/*---------------*/
 
 
-			/* handling of string constants (use only in print() function) */
+			/* handling of string constants */
 \"          {
 				printf( "\x05" );
 				Str_Lc = Lc;
