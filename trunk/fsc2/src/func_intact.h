@@ -41,9 +41,7 @@ typedef struct {
 	int layout;
 	FL_FORM *Tools;
 	FL_OBJECT *background_box;
-	FL_COORD x,                   /* position and dimensions of form */
-		     y,
-		     w,
+	FL_COORD w,
 		     h;
 	IOBJECT *objs;
 } TOOL_BOX;
