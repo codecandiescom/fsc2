@@ -178,10 +178,10 @@ static void spawn_server( void )
 }
 
 
-/*------------------------------------------------*/
-/* This function gets called from an idle handler */
-/* to check if the web server has asked for data. */
-/*------------------------------------------------*/
+/*---------------------------------------------------*/
+/* This function gets called from an idle handler to */
+/* check if the web server has been asked for data.  */
+/*---------------------------------------------------*/
 
 void http_check( void )
 {
