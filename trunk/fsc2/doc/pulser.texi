@@ -601,7 +601,7 @@ experiment), are switched on.
 Now there are several methods to change the properties of pulses. To
 change the start position of pulse 1 by the start position change time
 as defined in the properties of the pulse the function
-@code{pulser_shift()} can be used:
+@code{pulser_shift()} (see also @ref{Pulser Functions}) can be used:
 @example
 pulser_shift( P1 );      // or  pulser_shift( 1 );
 @end example
@@ -611,7 +611,8 @@ called with no argument the start position of all pulses that have a
 @code{DELTA_START} defined are changed.
 
 There is also a similar function for changing the length of a pulse by
-it's @code{DELTA_LENGTH}, @code{pulser_increment()}:
+it's @code{DELTA_LENGTH},@code{pulser_increment()} (see also @ref{Pulser
+Functions}):
 @example
 pulser_increment( P3 );  // or  pulser_increment( 3 );
 @end example
@@ -652,13 +653,14 @@ There is only one point that needs to be taken care of: Just calling any
 of these functions does not change the real pulses immediately. Instead,
 all these changes are stored internally in the program and the changes
 will get only send to the pulser when the function
-@code{pulser_update()} gets called. Therfor, the normal way to change
-the pulse pattern is to change all pulse properties and when everything
-is done @code{pulser_update()} is called to makethe real
-changes. Because the new pulse settings only are checked this also
-avoids getting spurious error messages when, e.g. due to a change
-of a pulse length the pulse becomes to near to the next pulse, but the
-following pulse is moved away with the next command.
+@code{pulser_update()} (see also @ref{Pulser Functions}) gets
+called. Therefor, the normal way to change the pulse pattern is to
+change all pulse properties and when everything is done
+@code{pulser_update()} is called to makethe real changes. Because the
+new pulse settings only are checked this also avoids getting spurious
+error messages when, e.g. due to a change of a pulse length the pulse
+becomes to near to the next pulse, but the following pulse is moved away
+with the next command.
 
 There's also a further function that resets all pulses to their intial
 state, @code{pulser_pulse_reset()}. This function can, for example, be
@@ -724,17 +726,19 @@ FOR J = 1 : 20 @{          // repeat experiment 20 times
 @end example
 
 
-Beside the functions for changing the positions and lengths of pulses there
-are also functions needed to set the phase of the pulses, at least for
-phase cycled experiments. When the experiment starts the pulse phases
-are set to the first phase of the associated phase sequence (as defined
-in the @code{PHASES} section). To switch to the next phase the function
-@code{pulser_next_phase()} has to be used. Again, the necessary changes
-are only send to the pulser when the function @code{pulser_update()} is
-called afterwards. By repeatedly invoking @code{pulser_next_phase()} one
-can run through the complete phase sequence. To reset all pulses to their
-start phases (i.e.@: the first of the associated phase sequence) the
-function @code{pulser_phase_reset()} can be used.
+Beside the functions for changing the positions and lengths of pulses
+there are also functions needed to set the phase of the pulses, at least
+for phase cycled experiments. When the experiment starts the pulse
+phases are set to the first phase of the associated phase sequence (as
+defined in the @code{PHASES} section). To switch to the next phase the
+function @code{pulser_next_phase()} (see also @ref{Pulser Functions})
+has to be used. Again, the necessary changes are only send to the pulser
+when the function @code{pulser_update()} is called afterwards. By
+repeatedly invoking @code{pulser_next_phase()} one can run through the
+complete phase sequence. To reset all pulses to their start phases
+(i.e.@: the first of the associated phase sequence) the function
+@code{pulser_phase_reset()} (see also @ref{Pulser Functions}) can be
+used.
 
 The next (rather simplified) example is a phase cycled (1dimensional)
 stimulated echo experiment. We need three microwave pulses and a
