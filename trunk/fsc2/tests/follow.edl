@@ -9,10 +9,10 @@ VARIABLES:
 
 M = 200;
 em = float( M );
-f[ 4, 2 ] = { {    0.0,    0.0 },
-	          {    0.0, em - 1 },
-			  { em - 1, em - 1 },
-			  { em - 1,    0.0 } };
+f[ 4, 2 ] = { { 1.0, 1.0 },
+	          { 1.0,  em },
+			  {  em,  em },
+			  {  em, 1.0 } };
 d = em;
 v[ * ] = { 0.0, 0.0 };
 vt;
@@ -42,9 +42,9 @@ clear_marker_2d( );
 WHILE  d > sqrt( 2 ) {
 	FOR I = 1 : 4 {
 		f[ I ] += v;
-		K = round( f[ I ] + 1 );
+		K = round( f[ I ] );
 		display_2d( K[ 1 ] , K[ 2 ], I % 4 );
-		vt = -1 * v[ 1 ];
+		vt = - v[ 1 ];
 		v[ 1 ] = v[ 2 ];
 		v[ 2 ] = vt;
 	}
