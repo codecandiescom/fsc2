@@ -235,7 +235,7 @@ int gpib_shutdown( void )
 
 static void gpib_init_log( char *log_file_name )
 {
-    char *name;
+	const char *name;
 	bool access_ok = UNSET;
 	bool set_perms = UNSET;
 
@@ -244,9 +244,9 @@ static void gpib_init_log( char *log_file_name )
         return;
 
     if ( log_file_name != NULL && *log_file_name != '\0' )
-        name = get_string_copy( log_file_name );
+        name = log_file_name;
     else
-        name = get_string_copy( GPIB_LOG_FILE );
+        name = GPIB_LOG_FILE;
 
 	seteuid( EUID );
 
@@ -273,8 +273,6 @@ static void gpib_init_log( char *log_file_name )
     fprintf( gpib_log, "GPIB bus is being initialised.\n" );
     fflush( gpib_log );
 	seteuid( getuid( ) );
-
-	T_free( name );
 }
 
 
