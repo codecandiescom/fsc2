@@ -337,5 +337,5 @@ dio_value, -1, EXP;                    // inputs or ouputs a value
 
 mw_attenuator_name, 0, ALL;
 mw_attenuator_use_table, -1, PREP;
-mw_attenuator_initial_attenuation, 1, ALL;
+mw_attenuator_initial_attenuation, 1, PREP;
 mw_attenuator_attenuation, -1, EXP;
