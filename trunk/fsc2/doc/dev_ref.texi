@@ -46,8 +46,8 @@
 * lakeshore330::  Lake Shore 330 Temperature Controller
 * lecroy9400::    LeCroy Digitizing Oscilloscope 9400
 * pt2025::        Metrolab NMR Teslameter PT2025
-* s_band_magnet_broad:   S-Band magnet controlled via a DAC
-* s_band_magnet_narrow:  S-Band magnet controlled via a DAC
+* s_band_magnet_broad::   S-band Magnet Power Supply (broad range)
+* s_band_magnet_narrow::  S-band Magnet Power Supply (narrow range)
 * sr510::         Stanford Research Lock-In Amplifier SR510
 * sr530::         Stanford Research Lock-In Amplifier SR530
 * sr810::         Stanford Research Lock-In Amplifier SR810
@@ -774,8 +774,8 @@ T. Measured fields are returned in Gauss, not Tesla!
 @strong{Module name}: @code{s_band_magnet_broad}
 
 @paragraphindent 0
-@strong{Description}: Power supply for magnet with home-built
-computer control to be used with an S-band spectrometer. Field range
+@strong{Description}: Power supply for magnet with home-built computer
+control to be used with the Frankfurt S-band spectrometer. Field range
 is 0 G to 2047.5 G with a resolution of 0.5 G.
 
 @paragraphindent 0
@@ -807,9 +807,9 @@ is 0 G to 2047.5 G with a resolution of 0.5 G.
 @strong{Module name}: @code{s_band_magnet_narrow}
 
 @paragraphindent 0
-@strong{Description}: Power supply for magnet with home-built
-computer control to be used with an S-band spectrometer. Field range
-is 1070 G to 1479.5 G with a resolution of 0.1 G.
+@strong{Description}: Power supply for magnet with home-built computer
+control to be used with Frankfurt S-band spectrometer. Field range is
+1070 G to 1479.5 G with a resolution of 0.1 G.
 
 @paragraphindent 0
 @strong{Controlled via}: Serial port (@file{/dev/ttyS1} or @code{COM2}).

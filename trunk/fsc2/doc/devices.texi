@@ -148,6 +148,10 @@ Bruker ER032M Field Controller
 Berlin W-band magnet sweep power supply Keithley 228A
 @item ips20_4
 Berlin 360 GHz spectrometer Oxford magnet sweep power supply
+@item s_band_magnet_broad
+Frankfurt S-band magnet via homebuilt DAC, broad field range
+@item s_band_magnet_narrow
+Frankfurt S-band magnet via homebuilt DAC, narrow field range
 @end table
 @noindent
 Because magnets hardly ever get changed (and if the program is set up
@@ -249,7 +253,8 @@ that the parameters didn't change significantly since the last run.
 @findex set_field()
 This function expects one floating point argument for the field value
 and will set the magnetic field to this value. For the Keithley power
-supply @code{keithley228a} specify a current value. 
+supply (@code{keithley228a}) and the @w{360 GHz} magnet (@code{ips20_4})
+specify a current value.
 
 For the @strong{AEG} magnets the function also accepts a second optional
 parameter, the maximum acceptable deviation of the field from the value
@@ -266,8 +271,8 @@ the maximum deviation parameter is smaller than the precision of the
 gaussmeter the precision of the gaussmeter is used instead. The function
 can only be called in the @code{EXPERIMENT} section.
 
-For the Oxford magnet sweep power supply this function will
-automatically stop a running continuous sweep.
+For the Oxford magnet sweep power supply (@code{ips20_4}) this function will
+automatically stop a running sweep.
 
 
 @anchor{sweep_up}
@@ -386,15 +391,18 @@ returned. Otherwise a (positive) sweep rate in units of @code{A/s} must be
 passed to the function.
 
 
-@anchor{magnet_goto_current_on_end}
-@item magnet_goto_current_on_end()
-@findex magnet_goto_current_on_end()
+@anchor{magnet_goto_field_on_end}
+@item magnet_goto_field_on_end()
+@findex magnet_goto_field_on_end()
 This function is only available for the Oxford magnet sweep power supply
-(@code{ips20_4}) and allows to set a target current that the magnet will
-be swept to @b{after} the experiment has ended (per default the magnet
-would stay at the last field position). This function can be called in
-the @code{PREPARATION} as well the @code{EXPERIMENT} section and returns
-the target current the magnet will sweep to after the end of the experiment.
+(@code{ips20_4}) and the S-band field drivers
+(@code{s_band_magnet_narrow} and @code{s_band_magnet_broad}) to set a
+target current that the magnet will be swept to @b{after} the experiment
+has ended (per default the magnet would stay at the last field position
+for the Oxford magnet supply or move to the middle of the allowed field
+range for both the other drivers). This function can be called in the
+@code{PREPARATION} as well the @code{EXPERIMENT} section and returns the
+target current the magnet will sweep to after the end of the experiment.
 If called more than once the current of the last call will be used.
 
 

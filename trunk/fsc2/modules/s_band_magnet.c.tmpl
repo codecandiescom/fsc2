@@ -49,6 +49,7 @@ Var *get_field( Var *v );
 Var *sweep_up( Var *v );
 Var *sweep_down( Var *v );
 Var *reset_field( Var *v );
+Var *magnet_goto_field_on_end( Var *v );
 
 
 /* Locally used functions */
@@ -60,10 +61,13 @@ static double magnet_goto_field( double field );
 static bool magnet_do( int command );
 
 
-static struct
+typedef struct
 {
 	double start_field;     /* the start field given by the user */
 	double field_step;      /* the field steps to be used */
+
+	double end_field;
+	bool is_end_field;
 
 	double resolution;
 
@@ -76,13 +80,21 @@ static struct
 
 	bool is_opened;
     struct termios *tio;    /* serial port terminal interface structures */
-} magnet;
+} MAGNET;
+
+
+MAGNET magnet, magnet_saved;
+
 
 enum {
 	   SERIAL_INIT,
 	   SERIAL_VOLTAGE,
 	   SERIAL_EXIT
 };
+
+
+#define DAC_MAX_VAL  4095
+#define DAC_HALF_VAL 2047
 
 
 /*****************************************************************************/
@@ -108,14 +120,15 @@ int s_band_magnet_tmpl_init_hook( void )
 	magnet.is_start_field = UNSET;
 	magnet.is_field_step  = UNSET;
 	magnet.is_opened      = UNSET;
+	magnet.is_end_field   = UNSET;
 
 	magnet.DAC_value      = 0;
 	magnet.DAC_step       = 0;
 
 	magnet.resolution     = (   S_BAND_MAGNET_TMPL_MAX_FIELD
-							  - S_BAND_MAGNET_TMPL_MIN_FIELD ) / 4095;
+							  - S_BAND_MAGNET_TMPL_MIN_FIELD ) / DAC_MAX_VAL;
 
-	return 1;
+   	return 1;
 }
 
 
@@ -124,6 +137,8 @@ int s_band_magnet_tmpl_init_hook( void )
 
 int s_band_magnet_tmpl_test_hook( void )
 {
+	magnet_saved = magnet;
+
 	if ( magnet.is_start_field )
 	{
 		magnet.field = magnet.start_field;
@@ -140,6 +155,8 @@ int s_band_magnet_tmpl_test_hook( void )
 
 int s_band_magnet_tmpl_exp_hook( void )
 {
+	magnet = magnet_saved;
+
 	/* Try to initialize the magnet power supply controller */
 
 	if ( ! magnet_do( SERIAL_INIT ) )
@@ -155,7 +172,7 @@ int s_band_magnet_tmpl_exp_hook( void )
 		magnet_goto_field( magnet.start_field );
 	else
 		magnet_goto_field( S_BAND_MAGNET_TMPL_MIN_FIELD
-						   + 2047 * magnet.resolution );
+						   + DAC_HALF_VAL * magnet.resolution );
 
 	/* >>> Should we wait here a bit ? <<< */
 /*
@@ -167,15 +184,19 @@ int s_band_magnet_tmpl_exp_hook( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Closes the connection to the power supply after an experiment */
-/*---------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Closes the connection to the power supply after an experiment   */
+/* According to Axels wishes we set the magnet to the center field */
+/* unless something else had been specified.                       */
+/*-----------------------------------------------------------------*/
 
 int s_band_magnet_tmpl_end_of_exp_hook( void )
 {
 	if ( magnet.is_opened )
 	{
-		magnet_goto_field( S_BAND_MAGNET_TMPL_MIN_FIELD );
+		magnet_goto_field( S_BAND_MAGNET_TMPL_MIN_FIELD
+				 + magnet.is_end_field ? magnet.end_field :
+						   			    ( DAC_HALF_VAL * magnet.resolution ) );
 		magnet_do( SERIAL_EXIT );
 	}
 
@@ -407,6 +428,32 @@ Var *reset_field( Var *v )
 }
 
 
+/*-----------------------------------------------------*/
+/*-----------------------------------------------------*/
+
+Var *magnet_goto_field_on_end( Var *v )
+{
+	double field;
+	bool err_flag = UNSET;
+
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	field = get_double( v, "magnetic field" );
+
+	field = s_band_magnet_tmpl_field_check( field, &err_flag );
+
+	magnet.is_end_field = SET;
+	magnet.end_field = field;
+
+	return vars_push( FLOAT_VAR, magnet.end_field );
+}
+
+
 /*****************************************************************************/
 /*                                                                           */
 /*            Internally used functions                                      */
@@ -472,7 +519,7 @@ static int magnet_field_to_DAC( double field )
 	DAC_value = irnd( ( field - S_BAND_MAGNET_TMPL_MIN_FIELD ) /
 					  magnet.resolution );
 
-	if ( DAC_value < 0 || DAC_value > 4095 )
+	if ( DAC_value < 0 || DAC_value > DAC_MAX_VAL )
 	{
 		print( FATAL, "Internal error detected at %s:%d.\n",
 			   __FILE__, __LINE__ );
@@ -488,7 +535,7 @@ static int magnet_field_to_DAC( double field )
 
 static double magnet_DAC_to_field( int DAC_value )
 {
-	if ( DAC_value < 0 || DAC_value > 4095 )
+	if ( DAC_value < 0 || DAC_value > DAC_MAX_VAL )
 	{
 		print( FATAL, "Internal error detected at %s:%d.\n",
 			   __FILE__, __LINE__ );
