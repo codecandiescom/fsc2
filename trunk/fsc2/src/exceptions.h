@@ -79,7 +79,7 @@ enum {
 	MISSING_SEMICOLON_EXCEPTION = ( 1 <<  8 ),
 	INVALID_INPUT_EXCEPTION     = ( 1 <<  9 ),
 	USER_BREAK_EXCEPTION        = ( 1 << 10 ),
-	ABORT_EXCEPTION             = ( 1 << 11 ),
+	ABORT_EXCEPTION             = ( 1 << 11 )
 };
 
 

@@ -365,11 +365,10 @@ export            # export all variables to sub-makes
 .PHONY: all install-strip install uninstall version   \
 		clean distclean tags pack ZIP                 \
 		specific-pion.anorg.chemie.uni-frankfurt.de   \
-		specific-install-crowley.physik.fu-berlin.de  \
+		specific-crowley.physik.fu-berlin.de          \
 		specific-door.physik.fu-berlin.de             \
 		specific-isaak.physik.fu-berlin.de            \
 		specific-tresr.physik.fu-berlin.de            \
-		install-tresr.physik.fu-berlin.de             \
 		specific-sunone.chemie.unibas.ch              \
 		specific-moebi.physik.fu-berlin.de            \
 		specific-crowley.none
@@ -487,15 +486,13 @@ pack:
 
 specific-pion.anorg.chemie.uni-frankfurt.de:
 
-specific-install-crowley.physik.fu-berlin.de:
+specific-crowley.physik.fu-berlin.de:
 
 specific-door.physik.fu-berlin.de:
 
 specific-isaak.physik.fu-berlin.de:
 
 specific-tresr.physik.fu-berlin.de:
-
-install-tresr.physik.fu-berlin.de:
 	sed -e 's/\"ER032M\"/\"Field\"/' \
 		$(cdir)/er032m.conf > $(cdir)/er032m.conf.new
 	mv $(cdir)/er032m.conf.new $(cdir)/er032m.conf
