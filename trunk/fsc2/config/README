@@ -45,12 +45,12 @@ Currently the following device type names are used:
 You may define as many other macros as you need for a new device. Usually
 you should only include things into the configuration file that you feel
 should be rather simple to find and to be changed by the users of your
-moduleand that you don't want to hide deep down somewhere in the module.
+module so that you don't want to hide it deep down somewhere in the module.
 As an example take the serial port a device is connected to: If this gets
-changed later it should be simple to find the place where to apply changes
-for someone that didn't write the module, so it probably should be defined
-in the configuration file instead somewhere in the innards of the module
-itself.
+changed later it should be as simple as possible to find the place where
+to apply changes for someone that didn't write the module, so it probably
+should be defined in the configuration file instead somewhere in the innards
+of the module itself.
 
 
 Please note: Changes to the configuration file of a device only take effect

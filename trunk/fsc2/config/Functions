@@ -201,7 +201,7 @@ voltmeter_ac_measurement, 0, EXP;
 voltmeter_dc_measurement, 0, EXP;
 
 
-/* Functions exported by the temperature controller (Lake Shore 330) */
+/* Functions exported by the temperature controller (Lakeshore 330) */
 
 temp_contr_name, 0, ALL;
 temp_contr_lock_keyboard, -1, EXP;
