@@ -390,8 +390,8 @@ Var *chopper_create_trigger( Var *v )
 
 	if ( FSC2_MODE == EXPERIMENT )
 	{
-		gg_chopper_set_dac( 5 V );
-		gg_chopper_set_dac( 0 V );
+		gg_chopper_set_dac( 5.0 );
+		gg_chopper_set_dac( 0.0 );
 	}
 
 	return vars_push( INT_VAR, 1L );
