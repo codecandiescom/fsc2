@@ -139,11 +139,11 @@ The parser, in turn, has a list of all syntactically correct
 statements@footnote{Actually, the parser does not really has a list of
 all syntactically correct statements but contains a set of rules that
 define exactly how such statements may look like. One of these rules for
-example is that an equal operator may be followed by either a variable,
-a function call or an integer or floating point number. Everything not
-fitting this pattern is an syntax error.}, together with the information
-what to do for these statements. One of the rules is that a statement
-consisting of sequence of the tokens
+example is that a variable name and an equal operator may be followed by
+either a variable, a function call or an integer or floating point
+number. Everything not fitting this pattern is an syntax error.},
+together with the information what to do for these statements. One of
+the rules is that a statement consisting of sequence of the tokens
 @example
 Variable, Equal operator, Variable, Plus operator,
 integer number, end of statement character
