@@ -94,14 +94,12 @@ else
 endif
 
 
-clean:
-	-$(RM) $(RMFLAGS) fsc2.dvi *.log fsc2fig*.eps fsc2fig*.pdf
-
+# How to install the documentation
 
 install:
+	$(INSTALL) -d $(docdir)
 	$(INSTALL) -d $(mandir)/man1
 	$(INSTALL) -m 444 fsc2.1.gz $(mandir)/man1
-	$(INSTALL) -d $(docdir)
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2*.html $(docdir)
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.css $(docdir)
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2fig*.png $(docdir)
@@ -117,6 +115,11 @@ install:
 	gzip -9 -f $(infodir)/fsc2.info*
 	install-info $(infodir)/fsc2.info $(infodir)/dir
 
+
+# How to clean up the mess we created
+
+clean:
+	-$(RM) $(RMFLAGS) fsc2.dvi *.log fsc2fig*.eps fsc2fig*.pdf
 
 distclean:
 	$(MAKE) clean

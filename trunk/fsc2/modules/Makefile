@@ -116,6 +116,94 @@ $(simp_modules:.c=.o): %.o: %.c $(cdir)/%.conf $(src_headers)
 %.so: %.o
 	$(libmake)
 
+
+# How to install the modules
+
+install:
+	$(INSTALL) -d $(libdir)
+	$(EXEC_INSTALL) -m  644 -o $(OWNER) -g $(GROUP) *.so $(libdir)
+	if [ "$(INSTALL_MACHINE)" != "install-unknown" ]; then  \
+		$(MAKE) $(INSTALL_MACHINE);                         \
+	fi
+
+
+# Here links to module libraries for often used devices for the different
+# spectrometers are created. If, for example, the spectrometer always uses
+# aeg_x_band.so as the driver for the magnet power supply, creating a link
+# with the name magnet.so allows to use 'magnet' as an alternative name for
+# the power supply in EDL programs. Don't forget to delete already existing
+# links before creating new ones!
+
+install-pion.anorg.chemie.uni-frankfurt.de:
+	-$(RM) $(RMFLAGS) $(libdir)/dg2020.so
+	$(LN) $(LNFLAGS)  $(libdir)/dg2020_f.so $(libdir)/dg2020.so
+	chown $(OWNER).$(GROUP) $(libdir)/dg2020.so
+	-$(RM) $(RMFLAGS) $(libdir)/pulser.so
+	$(LN) $(LNFLAGS) $(libdir)/dg2020_f.so $(libdir)/pulser.so
+	chown $(OWNER).$(GROUP) $(libdir)/pulser.so
+	-$(RM) $(RMFLAGS) $(libdir)/s_band.so
+	$(LN) $(LNFLAGS) $(libdir)/aeg_s_band.so $(libdir)/s_band.so
+	chown $(OWNER).$(GROUP) $(libdir)/s_band.so
+	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
+	$(LN) $(LNFLAGS) $(libdir)/aeg_s_band.so $(libdir)/magnet.so
+	chown $(OWNER).$(GROUP) $(libdir)/magnet.so
+	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
+	$(LN) $(LNFLAGS) $(libdir)/bh15.so $(libdir)/gaussmeter.so
+	chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
+	-$(RM) $(RMFLAGS) $(libdir)/lockin.so
+	$(LN) $(LNFLAGS) $(libdir)/sr510.so $(libdir)/lockin.so
+	chown $(OWNER).$(GROUP) $(libdir)/lockin.so
+
+install-crowley.physik.fu-berlin.de:
+	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
+	$(LN) $(LNFLAGS) $(libdir)/er035m_sas.so $(libdir)/gaussmeter.so
+	chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
+	-$(RM) $(RMFLAGS) $(libdir)/synthesizer.so
+	$(LN) $(LNFLAGS) $(libdir)/hp8647a.so $(libdir)/synthesizer.so
+	chown $(OWNER).$(GROUP) $(libdir)/synthesizer.so
+	-$(RM) $(RMFLAGS) $(libdir)/boxcar.so
+	$(LN) $(LNFLAGS) $(libdir)/egg4402so $(libdir)/boxcar.so
+	chown $(OWNER).$(GROUP) $(libdir)/boxcar.so
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
+
+install-moebi.physik.fu-berlin.de:
+	-$(RM) $(RMFLAGS) $(libdir)/pulser.so
+	$(LN) $(LNFLAGS) $(libdir)/dg2020_b.so $(libdir)/pulser.so
+	chown fsc2.fsc2 $(libdir)/pulser.so
+	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
+	$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.so $(libdir)/magnet.so
+	chown fsc2.fsc2 $(libdir)/magnet.so
+	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
+	$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
+	chown fsc2.fsc2 $(libdir)/gaussmeter.so
+
+install-door.physik.fu-berlin.de:
+	-$(RM) $(RMFLAGS) $(libdir)/hfs9003.so
+	$(LN) $(LNFLAGS) $(libdir)/hfs9000.so $(libdir)/hfs9003.so
+	chown fsc2.fsc2 $(libdir)/hfs9003.so
+	-$(RM) $(RMFLAGS) $(libdir)/w_band.so
+	$(LN) $(LNFLAGS) $(libdir)/keithley228a.so $(libdir)/w_band.so
+	chown fsc2.fsc2 $(libdir)/w_band.so
+	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
+	$(LN) $(LNFLAGS) $(libdir)/keithley228a.so $(libdir)/magnet.so
+	chown fsc2.fsc2 $(libdir)/magnet.so
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
+
+install-isaak.physik.fu-berlin.de:
+	-$(RM) $(RMFLAGS) $(libdir)/pulser.so
+	$(LN) $(LNFLAGS) $(libdir)/dg2020_b.so $(libdir)/pulser.so
+	chown fsc2.fsc2 $(libdir)/pulser.so
+	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
+	$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.so $(libdir)/magnet.so
+	chown fsc2.fsc2 $(libdir)/magnet.so
+	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
+	$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
+	chown fsc2.fsc2 $(libdir)/gaussmeter.so
+
+install-crowley.none:
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
+
+
 clean:
 	-$(RM) $(RMFLAGS) *.o *_lexer.c TAGS cscope.out *~
 
