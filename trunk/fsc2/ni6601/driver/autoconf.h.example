@@ -1,0 +1,5 @@
+/* Automatically created - change carefully */
+
+#define NI6601_MAJOR    0
+#define NI6601_DEBUG
+#define NI6601_PREFIX   "/usr/local"

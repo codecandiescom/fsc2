@@ -155,7 +155,7 @@ echo "#define WITIO_48_PREFIX   \"$PREFIX\"" >> driver/autoconf.h
 
 function setup_loop() {
 
-    do_setup $2
+    do_setup $1
     while [ $? -ne  0 ]; do
         do_setup 0
     done
@@ -164,15 +164,13 @@ function setup_loop() {
 
 	# Ask user if she wants the program compiled
 
-	if [ $1 -ne 0 ]; then
-	    dialog --yesno "\
+    dialog --yesno "\
 	Created 'driver/autoconfig.h'\n\
  Continue with compiling everything?\n\n\
 (You can return to this point anytime\n\
 	  you feel like it.)\n" 10 44
 
-	  test $? -eq 0 || exit 0
-	  fi
+	test $? -eq 0 || exit 0
 }
 
 
@@ -455,7 +453,7 @@ dialog --radiolist "\
 
 get_reply MTYPE
 
-test $MTYPE != "Setup" || setup_loop 1 1
+test $MTYPE != "Setup" || setup_loop 1
 
 } # end of pref_comp()
 
@@ -481,7 +479,7 @@ get_reply MTYPE
 
 case $MTYPE in
     Setup  )
-        setup_loop 1 1
+        setup_loop 1
         do_compile 0
         do_install
         ;;
@@ -527,7 +525,7 @@ There may be lots of problems with other kernels.\n\n\
 fi
 
 if [ ! -e driver/autoconf.h ]; then
-   setup_loop 1 0
+   setup_loop 0
    do_compile 0
    do_install
 else

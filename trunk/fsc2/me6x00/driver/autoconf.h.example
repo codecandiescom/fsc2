@@ -1,0 +1,8 @@
+/* Automatically created - change carefully */
+
+#define ME6X00_MAJOR    0
+#define ME6X00_CALL_DEBUG
+#define ME6X00_ISR_DEBUG
+#define ME6X00_PORT_DEBUG
+#define ME6X00_DEBUG
+#define ME6X00_PREFIX   "/usr/local"
