@@ -1701,7 +1701,7 @@ Var *vars_push_matrix( int type, int dim, ... )
 
 	nv = vars_push( type, NULL );
 
-	sizes = malloc( dim * sizeof *sizes );
+	sizes = SSIZE_T_P T_malloc( dim * sizeof *sizes );
 
 	va_start( ap, dim );
 	

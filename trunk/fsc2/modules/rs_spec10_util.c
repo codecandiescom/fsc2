@@ -67,7 +67,7 @@ double rs_spec10_ic2k( int16 tci )
 /*--------------------------------------------------*/
 /*--------------------------------------------------*/
 
-bool rs_spec10_param_access( uns32 param, uns16 *access )
+bool rs_spec10_param_access( uns32 param, uns16 *acc )
 {
 	boolean avail;
 
@@ -79,7 +79,7 @@ bool rs_spec10_param_access( uns32 param, uns16 *access )
 		return FAIL;
 
 	if ( ! pl_get_param( rs_spec10->handle, param, ATTR_ACCESS,
-						 ( void_ptr ) access ) )
+						 ( void_ptr ) acc ) )
 		rs_spec10_error_handling( );
 
 	return OK;

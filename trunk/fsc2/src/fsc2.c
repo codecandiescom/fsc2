@@ -27,7 +27,7 @@
 #include "fsc2.h"
 
 
-#if defined MDEBUG
+#if defined FSC2_MDEBUG
 #include <mcheck.h>
 #endif
 
@@ -74,7 +74,7 @@ int main( int argc, char *argv[ ] )
 	char *fname = NULL;
 
 
-#if defined MDEBUG
+#if defined FSC2_MDEBUG
 	if ( mcheck( NULL ) != 0 )
 	{
 		fprintf( stderr, "Can't start mcheck() !\n" );

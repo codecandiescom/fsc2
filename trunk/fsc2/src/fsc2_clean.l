@@ -61,7 +61,7 @@ typedef enum
 
 #include "exceptions.h"
 
-#if defined MDEBUG
+#if defined FSC2_MDEBUG
 #include <mcheck.h>
 #endif
 
@@ -447,7 +447,7 @@ int main( int argc, char *argv[ ] )
 	struct passwd *pwe;
 
 
-#if defined MDEBUG
+#if defined FSC2_MDEBUG
 	mcheck( NULL );
 #endif
 
@@ -804,7 +804,7 @@ static void *T_malloc( size_t size )
 	if ( ( mem = malloc( size ) ) == NULL )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 
-#if defined MDEBUG
+#if defined FSC2_MDEBUG
 	fprintf( stderr, "malloc:  %p (%u)\n", mem, size );
 #endif
 
@@ -817,7 +817,7 @@ static void *T_malloc( size_t size )
 
 static void *T_free( void *ptr )
 {
-#if defined MDEBUG
+#if defined FSC2_MDEBUG
 	fprintf( stderr, "free:    %p\n", ptr );
 	assert( mprobe( ptr ) == MCHECK_OK );
 #endif
@@ -834,7 +834,7 @@ static void *T_realloc( void *ptr, size_t size )
 {
 	void *new_ptr;
 
-#if defined MDEBUG
+#if defined FSC2_MDEBUG
 	fprintf( stderr, "malloc:  %p (%u)\n", ptr, size );
 #endif
 
@@ -861,7 +861,7 @@ static char *T_strdup( const char *string )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	strcpy( new_mem, string );
 
-#if defined MDEBUG
+#if defined FSC2_MDEBUG
 	fprintf( stderr, "strdup:  %p (%u)\n", new_mem, strlen( string ) );
 #endif
 

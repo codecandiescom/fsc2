@@ -24,7 +24,7 @@
 
 #include "fsc2.h"
 
-#if defined MDEBUG
+#if defined FSC2_MDEBUG
 #include <mcheck.h>
 #endif
 
@@ -35,7 +35,7 @@
 void *T_malloc( size_t size )
 {
 	void *mem;
-#if defined( MDEBUG )
+#if defined FSC2_MDEBUG
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 #endif
 
@@ -58,7 +58,7 @@ void *T_malloc( size_t size )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
-#if defined MDEBUG && ! defined __STRICT_ANSI__
+#if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
 	if ( Internals.is_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
@@ -69,8 +69,6 @@ void *T_malloc( size_t size )
 	else
 		fprintf( stderr, "(%d) malloc:  %p (%u)\n",
 				 Internals.I_am == CHILD, mem, size );
-
-	fflush( stderr );
 #endif
 
 	return mem;
@@ -83,7 +81,7 @@ void *T_malloc( size_t size )
 void *T_calloc( size_t nmemb, size_t size )
 {
 	void *mem;
-#if defined( MDEBUG )
+#if defined FSC2_MDEBUG
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 #endif
 
@@ -106,7 +104,7 @@ void *T_calloc( size_t nmemb, size_t size )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
-#if defined MDEBUG && ! defined __STRICT_ANSI__
+#if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
 	if ( Internals.is_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
@@ -117,8 +115,6 @@ void *T_calloc( size_t nmemb, size_t size )
 	else
 		fprintf( stderr, "(%d) calloc:  %p (%u)\n",
 				 Internals.I_am == CHILD, mem, nmemb * size );
-
-	fflush( stderr );
 #endif
 
 	return mem;
@@ -131,7 +127,7 @@ void *T_calloc( size_t nmemb, size_t size )
 void *T_realloc( void *ptr, size_t size )
 {
 	void *new_ptr;
-#if defined( MDEBUG )
+#if defined FSC2_MDEBUG
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 #endif
 
@@ -154,7 +150,7 @@ void *T_realloc( void *ptr, size_t size )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
-#if defined MDEBUG && ! defined __STRICT_ANSI__
+#if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
 	if ( Internals.is_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
@@ -165,8 +161,6 @@ void *T_realloc( void *ptr, size_t size )
 	else
 		fprintf( stderr, "(%d) realloc: %p -> %p (%u)\n",
 				 Internals.I_am == CHILD, ptr, new_ptr, size );
-
-	fflush( stderr );
 #endif
 
 	return new_ptr;
@@ -178,14 +172,14 @@ void *T_realloc( void *ptr, size_t size )
 
 void *T_free( void *ptr )
 {
-#if defined( MDEBUG )
+#if defined FSC2_MDEBUG
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 #endif
 
 	if ( ptr == NULL )
 		return NULL;
 
-#if defined MDEBUG && ! defined __STRICT_ANSI__
+#if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
 	if ( Internals.is_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
@@ -195,7 +189,6 @@ void *T_free( void *ptr )
 	else
 		fprintf( stderr, "(%d) free:    %p\n", Internals.I_am == CHILD, ptr );
 
-	fflush( stderr );
 	fsc2_assert( mprobe( ptr ) == MCHECK_OK );
 #endif
 
@@ -210,7 +203,9 @@ void *T_free( void *ptr )
 char *T_strdup( const char *str )
 {
 	char *new_str;
-#if defined( MDEBUG )
+	size_t len;
+
+#if defined FSC2_MDEBUG
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 #endif
 
@@ -218,27 +213,27 @@ char *T_strdup( const char *str )
 	if ( str == NULL )
 		return NULL;
 
-	if ( ( new_str = malloc( strlen( str ) + 1 ) ) == NULL )
+	len = strlen( str );
+
+	if ( ( new_str = malloc( len + 1 ) ) == NULL )
 	{
 		print( FATAL, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
+
 	strcpy( new_str, str );
 
-#if defined MDEBUG && ! defined __STRICT_ANSI__
+#if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
 	if ( Internals.is_i386 )
 	{
 		asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 		fprintf( stderr, "(%d) strdup:  %p (%u) from %p\n",
-				 Internals.I_am == CHILD,
-				 ( void * ) new_str, strlen( str ) + 1,
+				 Internals.I_am == CHILD, ( void * ) new_str, len + 1,
 				 ( void * ) * ( EBP + 1 ) );
 	}
 	else
 		fprintf( stderr, "(%d) strdup:  %p (%u)\n",
-			 Internals.I_am == CHILD, ( void * ) new_str, strlen( str ) + 1 );
-
-	fflush( stderr );
+			 Internals.I_am == CHILD, ( void * ) new_str, len + 1 );
 #endif
 
 	return new_str;

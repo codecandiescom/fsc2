@@ -58,11 +58,11 @@ rs_spec10     := rs_spec10.c rs_spec10_int.c rs_spec10_util.c
 
 
 # For modules that require header files in non-standard places where the
-# compiler would find them automatically (e.g. /usr/include or
+# compiler would find them automatically (i.e. /usr/include or
 # /usr/local/include) you must specify the full search path(s) here.
 
 rs_spec10_incl := /usr/local/include/pvcam
-#rs_spec10_incl := /usr/local/include/pvcam
+#rs_spec10_incl := /usr/local/pvcam/examples
 
 
 # For modules that need to be linked against special libraries a variable

@@ -2463,7 +2463,6 @@ Var *f_G2T( Var *v )
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
-	double lmax, dmax;
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
@@ -2479,18 +2478,16 @@ Var *f_G2T( Var *v )
 
 		case INT_ARR :
 			new_var = vars_make( FLOAT_ARR, v );
-			for ( lsrc = v->val.lpnt, ddest = new_var->val.lpnt, i = 0;
+			for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
 				  i < v->len; i++, lsrc++, ldest++ )
 				*ddest = ( double ) *lsrc * 1.0e-4;
 			return new_var;
 
 		case FLOAT_ARR :
 			new_var = vars_make( FLOAT_ARR, v );
-			dmax = sqrt( HUGE_VAL );
 			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
 				  i < v->len; i++, dsrc++, ddest++ )
 				*ddest = *dsrc * 1.0e-4;
-			}
 			return new_var;
 
 		case INT_REF : case FLOAT_REF :
@@ -2520,7 +2517,6 @@ Var *f_T2G( Var *v )
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
-	double lmax, dmax;
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
@@ -2536,18 +2532,16 @@ Var *f_T2G( Var *v )
 
 		case INT_ARR :
 			new_var = vars_make( FLOAT_ARR, v );
-			for ( lsrc = v->val.lpnt, ddest = new_var->val.lpnt, i = 0;
+			for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
 				  i < v->len; i++, lsrc++, ldest++ )
 				*ddest = ( double ) *lsrc * 1.0e4;
 			return new_var;
 
 		case FLOAT_ARR :
 			new_var = vars_make( FLOAT_ARR, v );
-			dmax = sqrt( HUGE_VAL );
 			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
 				  i < v->len; i++, dsrc++, ddest++ )
 				*ddest = *dsrc * 1.0e4;
-			}
 			return new_var;
 
 		case INT_REF : case FLOAT_REF :
@@ -2577,7 +2571,6 @@ Var *f_C2K( Var *v )
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
-	double lmax, dmax;
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
@@ -2593,18 +2586,16 @@ Var *f_C2K( Var *v )
 
 		case INT_ARR :
 			new_var = vars_make( FLOAT_ARR, v );
-			for ( lsrc = v->val.lpnt, ddest = new_var->val.lpnt, i = 0;
+			for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
 				  i < v->len; i++, lsrc++, ldest++ )
 				*ddest = ( double ) *lsrc + C2K_OFFSET;
 			return new_var;
 
 		case FLOAT_ARR :
 			new_var = vars_make( FLOAT_ARR, v );
-			dmax = sqrt( HUGE_VAL );
 			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
 				  i < v->len; i++, dsrc++, ddest++ )
 				*ddest = *dsrc + C2K_OFFSET;
-			}
 			return new_var;
 
 		case INT_REF : case FLOAT_REF :
@@ -2634,7 +2625,6 @@ Var *f_K2C( Var *v )
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
-	double lmax, dmax;
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
@@ -2650,18 +2640,16 @@ Var *f_K2C( Var *v )
 
 		case INT_ARR :
 			new_var = vars_make( FLOAT_ARR, v );
-			for ( lsrc = v->val.lpnt, ddest = new_var->val.lpnt, i = 0;
+			for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
 				  i < v->len; i++, lsrc++, ldest++ )
 				*ddest = ( double ) *lsrc - C2K_OFFSET;
 			return new_var;
 
 		case FLOAT_ARR :
 			new_var = vars_make( FLOAT_ARR, v );
-			dmax = sqrt( HUGE_VAL );
 			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
 				  i < v->len; i++, dsrc++, ddest++ )
 				*ddest = *dsrc - C2K_OFFSET;
-			}
 			return new_var;
 
 		case INT_REF : case FLOAT_REF :
@@ -2691,7 +2679,6 @@ Var *f_D2R( Var *v )
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
-	double lmax, dmax;
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
@@ -2707,18 +2694,16 @@ Var *f_D2R( Var *v )
 
 		case INT_ARR :
 			new_var = vars_make( FLOAT_ARR, v );
-			for ( lsrc = v->val.lpnt, ddest = new_var->val.lpnt, i = 0;
+			for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
 				  i < v->len; i++, lsrc++, ldest++ )
 				*ddest = ( double ) *lsrc * D2R_FACTOR;
 			return new_var;
 
 		case FLOAT_ARR :
 			new_var = vars_make( FLOAT_ARR, v );
-			dmax = sqrt( HUGE_VAL );
 			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
 				  i < v->len; i++, dsrc++, ddest++ )
 				*ddest = *dsrc * D2R_FACTOR;
-			}
 			return new_var;
 
 		case INT_REF : case FLOAT_REF :
@@ -2748,7 +2733,6 @@ Var *f_R2D( Var *v )
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
-	double lmax, dmax;
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
@@ -2764,18 +2748,16 @@ Var *f_R2D( Var *v )
 
 		case INT_ARR :
 			new_var = vars_make( FLOAT_ARR, v );
-			for ( lsrc = v->val.lpnt, ddest = new_var->val.lpnt, i = 0;
+			for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
 				  i < v->len; i++, lsrc++, ldest++ )
 				*ddest = ( double ) *lsrc * R2D_FACTOR;
 			return new_var;
 
 		case FLOAT_ARR :
 			new_var = vars_make( FLOAT_ARR, v );
-			dmax = sqrt( HUGE_VAL );
 			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
 				  i < v->len; i++, dsrc++, ddest++ )
 				*ddest = *dsrc * R2D_FACTOR;
-			}
 			return new_var;
 
 		case INT_REF : case FLOAT_REF :

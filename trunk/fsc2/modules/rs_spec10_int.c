@@ -42,42 +42,73 @@ void rs_spec10_init_camera( void )
 
 	/* Try to figure out how many cameras are attached to the system */
 
-	if ( ! pl_cam_get_total( &total_cams ) )
+//	  if ( ! pl_cam_get_total( &total_cams ) )
+//		  rs_spec10_error_handling( );
+//
+//	  /* Loop over the cameras until we find the one we're looking for */
+//
+//	  for ( i = 0; i < total_cams; i++ )
+//	  {
+//		  pl_cam_get_name( i, cam_name );
+//		  if ( ! strcmp( cam_name, rs_spec10->dev_file ) )
+//			  break;
+//	  }
+//
+//	  /* Check if we found it, otherwise throw an exception */
+//
+//	  if ( i == total_cams )
+//	  {
+//		  print( FATAL, "No camera device file '/dev/%s' found.\n",
+//				 rs_spec10->dev_file );
+//		  THROW( EXCEPTION );
+//	  }
+//
+//	  /* Try to get a handle for the camera */
+//
+//	  if ( ! pl_cam_open( ( char * ) rs_spec10->dev_file, &rs_spec10->handle,
+//						  OPEN_EXCLUSIVE ) )
+//		  rs_spec10_error_handling( );
+//
+//	  rs_spec10->is_open = SET;
+//
+//	  /* Do a simple checks */
+//
+//	if ( ! pl_cam_check( rs_spec10->handle ) )
+//		rs_spec10_error_handling( );
+
+//	rs_spec10_ccd_init( );
+//	rs_spec10_temperature_init( );
+
+	int16 hCam;
+	rgn_type region = { 0, 1339, 1, 0, 99, 1 };
+	uns32 size;
+	uns16 *frame;
+    int16 status;
+    uns32 not_needed;
+
+    if ( ! pl_cam_get_name( 0, cam_name ) )
+		rs_spec10_error_handling( );
+    if ( ! pl_cam_open(cam_name, &hCam, OPEN_EXCLUSIVE ) )
 		rs_spec10_error_handling( );
 
-	/* Loop over the cameras until we find the one we're looking for */
-
-	for ( i = 0; i < total_cams; i++ )
-	{
-		pl_cam_get_name( i, cam_name );
-		if ( ! strcmp( cam_name, rs_spec10->dev_file ) )
-			break;
-	}
-
-	/* Check if we found it, otherwise throw an exception */
-
-	if ( i == total_cams )
-	{
-		print( FATAL, "No camera device file '/dev/%s' found.\n",
-			   rs_spec10->dev_file );
-		THROW( EXCEPTION );
-	}
-
-	/* Try to get a handle for the camera */
-
-	if ( ! pl_cam_open( ( char * ) rs_spec10->dev_file, &rs_spec10->handle,
-						OPEN_EXCLUSIVE ) )
+    if ( ! pl_exp_init_seq() )
 		rs_spec10_error_handling( );
-
-	rs_spec10->is_open = SET;
-
-	/* Do a simple checks */
-
-	if ( ! pl_cam_check( rs_spec10->handle ) )
+    if ( ! pl_exp_setup_seq( hCam, 1, 1, &region, TIMED_MODE, 100, &size ) )
 		rs_spec10_error_handling( );
+	if ( !( frame = malloc( size ) ) )
+		rs_spec10_error_handling( );
+	if ( ! pl_exp_start_seq(hCam, frame ) )
+		rs_spec10_error_handling( );
+	while( pl_exp_check_status( hCam, &status, &not_needed ) && 
+		   (status != READOUT_COMPLETE && status != READOUT_FAILED) );
 
-	rs_spec10_ccd_init( );
-	rs_spec10_temperature_init( );
+	printf( "Center Three Points: %i, %i, %i\n", 
+			frame[size/sizeof(uns16)/2 - 1],
+			frame[size/sizeof(uns16)/2],
+			frame[size/sizeof(uns16)/2 + 1] );
+    pl_exp_finish_seq( hCam, frame, 0);
+    pl_exp_uninit_seq();
+    free( frame );
 }
 
 
@@ -89,15 +120,15 @@ static void rs_spec10_ccd_init( void )
 	uns32 set_uns32;
 	flt64 ret_flt64;
 
-	uns16 access;
+	uns16 acc;
 	uns16 num_pix;
 	uns32 clear_mode;
 
 
-	if ( ! rs_spec10_param_access( PARAM_SER_SIZE, &access ) ||
-		 ( access != ACC_READ_ONLY && access != ACC_READ_WRITE ) ||
-		 ! rs_spec10_param_access( PARAM_PAR_SIZE, &access ) ||
-		 ( access != ACC_READ_ONLY && access != ACC_READ_WRITE ) ||
+	if ( ! rs_spec10_param_access( PARAM_SER_SIZE, &acc ) ||
+		 ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE ) ||
+		 ! rs_spec10_param_access( PARAM_PAR_SIZE, &acc ) ||
+		 ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE ) )
 	{
 		print( FATAL, "Can't determine number of pixels of CCD\n" );
 		THROW( EXCEPTION );
@@ -132,8 +163,8 @@ static void rs_spec10_ccd_init( void )
 	   don't have a shutter and time between exposures is probably rather long
 	   this seems to be the most reasonable mode) */
 
-	if ( rs_spec10_param_access( PARAM_CLEAR_MODE, &access ) &&
-		 ( access == ACC_READ_WRITE || access == ACC_WRITE_ONLY ) )
+	if ( rs_spec10_param_access( PARAM_CLEAR_MODE, &acc ) &&
+		 ( acc == ACC_READ_WRITE || acc == ACC_WRITE_ONLY ) )
 	{
 		clear_mode = CLEAR_PRE_EXPOSURE;
 		if ( ! pl_set_param( rs_spec10->handle, PARAM_CLEAR_MODE, 
@@ -144,20 +175,20 @@ static void rs_spec10_ccd_init( void )
 	/* Set the time resolution for the exposure time to 1 us. The exposure
 	   time argument of pl_exp_setup_seq() must thus be in units of 1 us. */
 
-	if ( ! rs_spec10_param_access( PARAM_EXP_RES, &access ) )
+	if ( ! rs_spec10_param_access( PARAM_EXP_RES, &acc ) )
 	{
 		print( FATAL, "Can't determine exposure time resolution.\n" );
 		THROW( EXCEPTION );
 	}
 
-	if ( access == ACC_READ_WRITE || access == ACC_WRITE_ONLY )
+	if ( acc == ACC_READ_WRITE || acc == ACC_WRITE_ONLY )
 	{
 		set_uns32 = EXP_RES_ONE_MICROSEC;
 		if ( ! pl_set_param( rs_spec10->handle, PARAM_EXP_RES,
 							 ( void_ptr ) &set_uns32 ) )
 			rs_spec10_error_handling( );
 	}
-	else if ( access == ACC_READ_ONLY )
+	else if ( acc == ACC_READ_ONLY )
 	{
 		if ( ! pl_get_param( rs_spec10->handle, PARAM_EXP_RES, ATTR_DEFAULT,
 							 ( void_ptr ) &set_uns32 ) )
@@ -193,17 +224,17 @@ static void rs_spec10_ccd_init( void )
 
 static void rs_spec10_temperature_init( void )
 {
-	uns16 access;
+	uns16 acc;
 	int16 temp;
 
 
-	if ( ! rs_spec10_param_access( PARAM_TEMP_SETPOINT, &access ) )
+	if ( ! rs_spec10_param_access( PARAM_TEMP_SETPOINT, &acc ) )
 	{
 		print( FATAL, "Can't set a temperature setpoint.\n" );
 		THROW( EXCEPTION );
 	}
 
-	rs_spec10->temp.acc_setpoint = access;
+	rs_spec10->temp.acc_setpoint = acc;
 
 	/* Get maximum and minimum temperature that can be set and determine
 	   the current temperature (since the device returns all temperatures
@@ -265,13 +296,14 @@ static void rs_spec10_temperature_init( void )
 
 	/* Check if we can read the current temperature and if yes get it */
 
-	if ( ! rs_spec10_param_access( PARAM_TEMP, &access ) ||
-		 ! ( rs_spec10->temp.acc_temp == ACC_READ_ONLY ||
-			 rs_spec10->temp.acc_temp == ACC_READ_WRITE ) )
+	if ( ! rs_spec10_param_access( PARAM_TEMP, &acc ) ||
+		 ! ( acc == ACC_READ_ONLY || acc == ACC_READ_WRITE ) )
 	{
 		print( FATAL, "Can't determine the current temperature.\n" );
 		THROW( EXCEPTION );
 	}
+
+	rs_spec10->temp.acc_temp = acc;
 
 	if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP, ATTR_CURRENT,
 						 ( void_ptr ) &temp ) )
@@ -368,12 +400,12 @@ uns16 *rs_spec10_get_pic( void )
 
 	TRY
 	{
-		frame = T_malloc( size );
-		if ( mlock( frame, size ) != 0 )
-		{
-			print( FATAL, "Failure to obtain properly protected memory.\n" );
-			THROW( EXCEPTION );
-		}
+		frame = T_malloc( ( size_t ) size );
+//		  if ( mlock( frame, size ) != 0 )
+//		  {
+//			  print( FATAL, "Failure to obtain properly protected memory.\n" );
+//			  THROW( EXCEPTION );
+//		  }
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -387,7 +419,7 @@ uns16 *rs_spec10_get_pic( void )
 	{
 		pl_exp_abort( rs_spec10->handle, CCS_HALT );
 		pl_exp_uninit_seq( );
-		munlock( frame, size );
+//		munlock( frame, size );
 		T_free( frame );
 		rs_spec10_error_handling( );
 	}
@@ -407,7 +439,7 @@ uns16 *rs_spec10_get_pic( void )
 	{
 		pl_exp_abort( rs_spec10->handle, CCS_HALT );
 		pl_exp_uninit_seq( );
-		munlock( frame, size );
+//		munlock( frame, size );
 		T_free( frame );
 		RETHROW( );
 	}
@@ -415,7 +447,7 @@ uns16 *rs_spec10_get_pic( void )
     pl_exp_finish_seq( rs_spec10->handle, frame, 0 );
 	pl_exp_uninit_seq();
 
-	munlock( frame, size );
+//	munlock( frame, size );
 
 	return frame;
 }
