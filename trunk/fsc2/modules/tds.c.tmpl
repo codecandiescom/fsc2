@@ -1421,7 +1421,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 
 	if ( v == NULL )
 	{
-		print( FATAL, "Missing argumnts.\n" );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1552,6 +1552,43 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	}
 
 	return ret;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *digitizer_copy_curve( Var *v )
+{
+	int src, dest;
+
+
+	src = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
+						get_strict_long( v, "source channel number" ), UNSET );
+
+	if ( src >= NUM_MEAS_CHANNELS )
+	{
+		print( FATAL, "Invalid source channel %s, must be one of the normal "
+			   "or the MATH channels.\n", TDS_TMPL_Channel_Names[ src ] );
+		THROW( EXCEPTION );
+	}
+
+	v = vars_pop( v );
+
+	dest = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
+				   get_strict_long( v, "destination channel number" ), UNSET );
+
+	if ( dest < TDS_TMPL_REF1 || dest > TDS_TMPL_REF4 )
+	{
+		print( FATAL, "Invalid destination channel %s, must be one of the REF "
+			   "channel\n", TDS_TMPL_Channel_Names[ dest ] );
+		THROW( EXCEPTION );
+	}
+
+	if ( FSC2_MODE == EXPERIMENT )
+		tds_tmpl_copy_curve( src, dest );
+
+	return vars_push( INT_VAR, 1 );
 }
 
 

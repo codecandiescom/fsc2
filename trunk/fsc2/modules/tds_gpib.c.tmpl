@@ -31,6 +31,7 @@ static double tds_tmpl_get_amplitude_wo_cursor( int channel, WINDOW *w );
 static bool tds_tmpl_talk( const char *cmd, char *reply, long *length );
 
 static bool in_init = UNSET;
+static bool acquisition_is_running = UNSET;
 
 
 /*-----------------------------------------------------------------*/
@@ -372,6 +373,7 @@ void tds_tmpl_set_num_avg( long num_avg )
 	tds_tmpl_command( "ACQ:STATE RUN\n" );
 }
 
+
 /*-------------------------------------------------------------------------*/
 /* Function returns the data acquisition mode. If the digitizer is neither */
 /* in average nor in sample mode, it is switched to sample mode.           */
@@ -699,6 +701,7 @@ void tds_tmpl_start_acquisition( void )
 
 	tds_tmpl_clear_SESR( );
 	tds_tmpl_command( "ACQ:STATE RUN;STOPA SEQ\n" );
+	acquisition_is_running = SET;
 }
 
 
@@ -760,16 +763,19 @@ double tds_tmpl_get_area( int channel, WINDOW *w, bool use_cursor )
 
 	tds_tmpl_set_meas_window( w );
 
-	/* Wait for measurement to finish (use polling) */
+	/* Wait for measurement to finish */
 
-	do
-	{
-		stop_on_user_request( );
+	if ( acquisition_is_running )
+		do
+		{
+			stop_on_user_request( );
 
-		length = 40;
-		usleep( 100000 );
-		tds_tmpl_talk( "BUSY?\n", reply, &length );
-	} while ( reply[ 0 ] == '1' );
+			length = 40;
+			usleep( 100000 );
+			tds_tmpl_talk( "BUSY?\n", reply, &length );
+		} while ( reply[ 0 ] == '1' );
+
+	acquisition_is_running = UNSET;
 
 	/* Get the the area */
 
@@ -908,16 +914,22 @@ void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 	}
 #endif
 
-	/* Wait for measurement to finish (use polling) */
+	/* Wait for measurement to finish using polling (unless the channel is
+	   a reference channel) */
 
-	do
+	if ( acquisition_is_running && channel < NUM_MEAS_CHANNELS )
 	{
-		stop_on_user_request( );
+		do
+		{
+			stop_on_user_request( );
 
-		len = 10;
-		usleep( 100000 );
-		tds_tmpl_talk( "BUSY?\n", reply, &len );
-	} while ( reply[ 0 ] == '1' );
+			len = 10;
+			usleep( 100000 );
+			tds_tmpl_talk( "BUSY?\n", reply, &len );
+		} while ( reply[ 0 ] == '1' );
+
+		acquisition_is_running = UNSET;
+	}
 
 	/* Calculate how long the curve (with header) is going to be and allocate
        enough memory (data are 2-byte integers) */
@@ -1021,15 +1033,17 @@ double tds_tmpl_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 
 	/* Wait for measurement to finish (use polling) */
 
-	do
-	{
-		stop_on_user_request( );
+	if ( acquisition_is_running )
+		do
+		{
+			stop_on_user_request( );
 
-		length = 40;
-		usleep( 100000 );
-		tds_tmpl_talk( "BUSY?\n", reply, &length );
-	} while ( reply[ 0 ] == '1' );
+			length = 40;
+			usleep( 100000 );
+			tds_tmpl_talk( "BUSY?\n", reply, &length );
+		} while ( reply[ 0 ] == '1' );
 
+	acquisition_is_running = UNSET;
 
 	/* Get the the amplitude */
 
@@ -1111,6 +1125,39 @@ void tds_tmpl_lock_state( bool lock )
 	sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
 	tds_tmpl_command( cmd );
 	tds_tmpl.lock_state = lock;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+void tds_tmpl_copy_curve( int src, int dest )
+{
+	char cmd[ 100 ] = "SAV:WAVEFORM ";
+	long length;
+	char reply[ 20 ];
+
+
+	fsc2_assert( src < NUM_MEAS_CHANNELS );
+	fsc2_assert( dest >= TDS_TMPL_REF1 && dest < TDS_TMPL_REF4 );
+
+	/* Wiat until a still running acquisition is finished */
+
+	if ( acquisition_is_running )
+		do
+		{
+			stop_on_user_request( );
+
+			length = 40;
+			usleep( 100000 );
+			tds_tmpl_talk( "BUSY?\n", reply, &length );
+		} while ( reply[ 0 ] == '1' );
+
+	acquisition_is_running = UNSET;
+
+	sprintf( cmd, "SAV:WAVEFORM %s,%s\n", TDS_TMPL_Channel_Names[ src ],
+			 TDS_TMPL_Channel_Names[ dest ] );
+	tds_tmpl_command( cmd );
 }
 
 
