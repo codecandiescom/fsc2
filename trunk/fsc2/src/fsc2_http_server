@@ -464,9 +464,9 @@ sub serve_pics {
 			unless defined $info[ 4 ] and $info[ 4 ] == $<;
 
 		if ( $ext eq "png" ) {
-			$data = `pnmtopng -compression 9 $file`;
+			$data = `pnmtopng -compression 9 $file 2>/dev/null`;
 		} else {
-			$data = `pnmtojpeg $file`;
+			$data = `pnmtojpeg $file 2>/dev/null`;
 		}
 		unlink $file;
 	} elsif ( $state =~ /^0$/o ) {
