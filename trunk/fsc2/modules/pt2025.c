@@ -381,7 +381,7 @@ static double pt2025_get_field( void )
 		stop_on_user_request( );
 
 		if ( count > 1 )
-			usleep( 250000 );
+			fsc2_usleep( 250000, UNSET );
 	} while ( --count > 0 );
 
 	if ( count == 0 )

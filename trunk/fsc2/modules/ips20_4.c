@@ -657,7 +657,7 @@ static bool ips20_4_init( const char *name )
 	if ( gpib_clear_device( ips20_4.device ) == FAILURE )
 		ips20_4_comm_failure( );
 
-	usleep( 250000 );
+	fsc2_usleep( 250000, UNSET );
 
 	/* Bring both the GPIB master device (ITC 503) as well as the sweep power
 	   supply in remote state */
@@ -1305,7 +1305,7 @@ static double ips20_4_goto_current( double current )
 	while ( lrnd( ( current -  ips20_4_get_act_current( ) ) /
 				  CURRENT_RESOLUTION ) != 0 )
 	{
-		usleep( 50000 );
+		fsc2_usleep( 50000, UNSET );
 		stop_on_user_request( );
 	}
 
@@ -1380,7 +1380,7 @@ static long ips20_4_talk( const char *message, char *reply, long length )
 
 		stop_on_user_request( );
 
-		usleep( 500 );
+		fsc2_usleep( 500, UNSET );
 
 		if ( gpib_serial_poll( ips20_4.device, &stb ) == FAILURE )
 			ips20_4_comm_failure( );

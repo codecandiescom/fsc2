@@ -311,7 +311,7 @@ static double bh15_get_field( void )
 	{
 		stop_on_user_request( );
 
-		usleep( 100000 );
+		fsc2_usleep( 100000, UNSET );
 
 		if ( gpib_write( bh15.device, "LE\r", 3 ) == FAILURE )
 		{
@@ -335,7 +335,7 @@ static double bh15_get_field( void )
 	{
 		stop_on_user_request( );
 
-		usleep( 100000 );
+		fsc2_usleep( 100000, UNSET );
 
 		if ( gpib_write( bh15.device, "FV\r", 3 ) == FAILURE )
 		{

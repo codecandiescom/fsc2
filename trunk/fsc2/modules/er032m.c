@@ -982,7 +982,7 @@ static void er032m_test_leds( void )
 			break;
 
 		if ( max_retries-- > 0  )
-			usleep( ER032M_WAIT_TIME );
+			fsc2_usleep( ER032M_WAIT_TIME, UNSET );
 		else
 		{
 			print( FATAL, "Field regulation loop not balanced.\n" );

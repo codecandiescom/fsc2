@@ -336,7 +336,7 @@ static bool lakeshore330_init( const char *name )
 	sprintf(buf, "SCHN %c\n", ( char ) ( lakeshore330.sample_channel + 'A' ) );
 	if ( gpib_write( lakeshore330.device, buf, strlen( buf ) ) == FAILURE )
 		return FAIL;
-	usleep( 500000 );
+	fsc2_usleep( 500000, UNSET );
 
 	/* Switch device to remote state with local lockout */
 
@@ -429,7 +429,7 @@ static long lakeshore330_sample_channel( long channel )
 	if ( gpib_write( lakeshore330.device, buf, strlen( buf ) ) == FAILURE )
 		lakeshore330_gpib_failure( );
 
-	usleep( 500000);
+	fsc2_usleep( 500000, UNSET );
 	return lakeshore330.sample_channel = channel;
 }
 

@@ -638,7 +638,7 @@ static bool keithley228a_set_state( bool new_state )
 	   of timeout */
 
 	if ( new_state == STANDBY )
-		usleep( 500000 );
+		fsc2_usleep( 500000, UNSET );
 
 	return keithley228a.state = new_state;
 }
@@ -702,7 +702,7 @@ static double keithley228a_goto_current( double new_current )
 	{
 		keithley228a.current += del_amps;
 		keithley228a_set_current( keithley228a.current );
-		usleep( 100000 );
+		fsc2_usleep( 100000, UNSET );
 	}
 
 	/* Do the final step (smaller than the previously used current steps)
@@ -710,7 +710,7 @@ static double keithley228a_goto_current( double new_current )
 	   otherwise the Keithley starts acting up... */
 
 	keithley228a.current = keithley228a_set_current( new_current );
-	usleep( 100000 );
+	fsc2_usleep( 100000, UNSET );
 
 	/* Wait for the current to stabilize at the requested value (checking
 	   also the voltage to go down to zero won't do because there is some
@@ -721,7 +721,7 @@ static double keithley228a_goto_current( double new_current )
 	{
 		do
 		{
-			usleep( 100000 );
+			fsc2_usleep( 100000, UNSET );
 			length = 100;
 			if ( gpib_read( keithley228a.device, reply, &length ) == FAILURE )
 				keithley228a_gpib_failure( );

@@ -189,17 +189,17 @@ int er035m_sas_exp_hook( void )
 
 	if ( ! er035m_sas_open( ) )
 		er035m_sas_comm_fail( );
-	usleep( ER035M_SAS_WAIT );
+	fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
 	if ( ! er035m_sas_write( "REM" ) )
 		er035m_sas_comm_fail( );
-	usleep( ER035M_SAS_WAIT );
+	fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
 	/* Switch the display on */
 
 	if ( er035m_sas_write( "ED" ) == FAIL )
 		er035m_sas_comm_fail( );
-	usleep( ER035M_SAS_WAIT );
+	fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
 	/* Find out the curent resolution, and if necessary, change it to the
 	   value requested by the user */
@@ -226,7 +226,7 @@ try_again:
 
 		if ( er035m_sas_write( "PS" ) == FAIL )
 			er035m_sas_comm_fail( );
-		usleep( ER035M_SAS_WAIT );
+		fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
 		length = 20;
 		if ( er035m_sas_read( buffer, &length ) == OK )
@@ -402,7 +402,7 @@ Var *measure_field( Var *v )
 		   nmr.state == ER035M_SAS_UNKNOWN ) &&
 		 er035m_sas_write( "SD" ) == FAIL )
 		er035m_sas_comm_fail( );
-	usleep( ER035M_SAS_WAIT );
+	fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
 	/* Wait for gaussmeter to go into lock state (or FAIL) */
 
@@ -419,7 +419,7 @@ Var *measure_field( Var *v )
 
 			if ( er035m_sas_write( "PS" ) == FAIL )
 				er035m_sas_comm_fail( );
-			usleep( ER035M_SAS_WAIT );
+			fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
 			length = 20;
 			if ( er035m_sas_read( buffer, &length ) == FAIL )
@@ -636,7 +636,7 @@ static double er035m_sas_get_field( void )
 
 			if ( er035m_sas_write( "PF" ) == FAIL )
 				er035m_sas_comm_fail( );
-			usleep( ER035M_SAS_WAIT );
+			fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
 			length = 20;
 			if ( er035m_sas_read( buffer, &length ) == OK )
@@ -701,7 +701,7 @@ static int er035m_sas_get_resolution( void )
 		if ( er035m_sas_write( "RS" ) == FAIL )
 			er035m_sas_comm_fail( );
 
-		usleep( ER035M_SAS_WAIT );
+		fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
 		length = 20;
 		if ( er035m_sas_read( buffer, &length ) == OK )
@@ -742,7 +742,7 @@ static void er035m_sas_set_resolution( int res_index )
 	if ( er035m_sas_write( buf ) == FAIL )
 		er035m_sas_comm_fail( );
 
-	usleep( ER035M_SAS_WAIT );
+	fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
 }
 
@@ -921,7 +921,7 @@ static bool er035m_sas_comm( int type, ... )
 			do
 			{
 				if ( len < 0 )
-					usleep( ER035M_SAS_WAIT );
+					fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 				len = fsc2_serial_read( SERIAL_PORT, buf, *lptr );
 			}
 			while ( len < 0 && errno == EAGAIN && read_retries-- > 0 );

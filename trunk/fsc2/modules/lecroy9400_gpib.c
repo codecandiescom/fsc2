@@ -643,7 +643,7 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 
 		stop_on_user_request( );
 
-		usleep( 20000 );
+		fsc2_usleep( 20000, UNSET );
 
 		lecroy9400_get_desc( ch );
 		for ( cur_avg = 0, j = 0; j < 4; j++ )

@@ -183,13 +183,13 @@ int er035m_sa_exp_hook( void )
 		nmr.device = -1;
 		er035m_sa_failure( );
 	}
-	usleep( ER035M_SA_WAIT );
+	fsc2_usleep( ER035M_SA_WAIT, UNSET );
 
 	/* Send a "Selected Device Clear" - otherwise the gaussmeter does not
 	   work ... */
 
 	gpib_clear_device( nmr.device );
-	usleep( ER035M_SA_WAIT );
+	fsc2_usleep( ER035M_SA_WAIT, UNSET );
 
 	/* Find out the curent resolution, and if necessary, change it to the
 	   value requested by the user */
@@ -211,7 +211,7 @@ try_again:
 
 	if ( gpib_write( nmr.device, "PS\r", 3 ) == FAILURE )
 		er035m_sa_failure( );
-	usleep( ER035M_SA_WAIT );
+	fsc2_usleep( ER035M_SA_WAIT, UNSET );
 
 	length = 20;
 	if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
@@ -314,7 +314,7 @@ try_again:
 
 	if ( gpib_write( nmr.device, "ED\r", 3 ) == FAILURE )
 		er035m_sa_failure( );
-	usleep( ER035M_SA_WAIT );
+	fsc2_usleep( ER035M_SA_WAIT, UNSET );
 
 	/* If the gaussmeter is already locked just get the field value, other-
 	   wise try to achieve locked state */
@@ -401,7 +401,7 @@ Var *measure_field( Var *v )
 		   nmr.state == ER035M_SA_UNKNOWN ) &&
 		 gpib_write( nmr.device, "SD\r", 3 ) == FAILURE )
 		er035m_sa_failure( );
-	usleep( ER035M_SA_WAIT );
+	fsc2_usleep( ER035M_SA_WAIT, UNSET );
 
 	/* wait for gaussmeter to go into lock state (or FAILURE) */
 
@@ -413,7 +413,7 @@ Var *measure_field( Var *v )
 
 		if ( gpib_write( nmr.device, "PS\r", 3 ) == FAILURE )
 			er035m_sa_failure( );
-		usleep( ER035M_SA_WAIT );
+		fsc2_usleep( ER035M_SA_WAIT, UNSET );
 
 		length = 20;
 		if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
@@ -580,7 +580,7 @@ double er035m_sa_get_field( void )
 
 		if ( gpib_write( nmr.device, "PF\r", 3 ) == FAILURE )
 			er035m_sa_failure( );
-		usleep( ER035M_SA_WAIT );
+		fsc2_usleep( ER035M_SA_WAIT, UNSET );
 
 		length = 20;
 		if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
@@ -631,7 +631,7 @@ static int er035m_sa_get_resolution( void )
 	if ( gpib_write( nmr.device, "RS\r", 3 ) == FAILURE )
 		er035m_sa_failure( );
 
-	usleep( ER035M_SA_WAIT );
+	fsc2_usleep( ER035M_SA_WAIT, UNSET );
 
 	if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
 		er035m_sa_failure( );
@@ -667,7 +667,7 @@ static void er035m_sa_set_resolution( int res_index )
 	if ( gpib_write( nmr.device, buf, 4 ) == FAILURE )
 		er035m_sa_failure( );
 
-	usleep( ER035M_SA_WAIT );
+	fsc2_usleep( ER035M_SA_WAIT, UNSET );
 
 }
 
