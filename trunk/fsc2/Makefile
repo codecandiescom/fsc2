@@ -153,25 +153,25 @@ endif
 ifdef bindir
 	CFLAGS += -Dbindir=\"$(bindir:/=)/\"
 else
-	CFLAGS += -Dbindir=\"$(shell pwd)/bin/\"
+	CFLAGS += -Dbindir=\"$(mdir)/bin/\"
 endif
 
 ifdef libdir
 	CFLAGS += -Dlibdir=\"$(libdir:/=)/\"
 else
-	CFLAGS += -Dlibdir=\"$(shell pwd)/lib/fsc2/\"
+	CFLAGS += -Dlibdir=\"$(mdir)/lib/fsc2/\"
 endif
 
 ifdef auxdir
-	CFLAGS += -Dauxdir=\"$(auxdir:/=)/\" -I$(shell pwd)/aux
+	CFLAGS += -Dauxdir=\"$(auxdir:/=)/\" -I$(adir)
 else
-	CFLAGS += -Dauxdir=\"$(shell pwd)/lib/fsc2/aux/\" -I$(shell pwd)/aux
+	CFLAGS += -Dauxdir=\"$(mdir)/lib/fsc2/aux/\" -I$(adir)
 endif
 
 ifdef docdir
 	CFLAGS += -Ddocdir=\"$(docdir:/=)/\"
 else
-	CFLAGS += -Ddocdir=\"$(shell pwd)/share/doc/\"
+	CFLAGS += -Ddocdir=\"$(mdir)/share/doc/\"
 endif
 
 ifdef GPIB_LOG_FILE
