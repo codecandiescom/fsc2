@@ -12,9 +12,9 @@ delta_tau = 20 ns;
 pi_half_pulse_len = 50 ns;
 Num_Points   = 512;
 Num_Averages = 100;
-W1, W2;
+Win[ 2 ];
 I;
-data;
+data[ * ];
 
 ASSIGNMENTS:
 
@@ -70,11 +70,11 @@ digitizer_num_averages( Num_Averages );
 
 // Define a window covering the center of the echo...
 
-W1 = digitizer_define_window( -5 ns, 10 ns );
+Win[ 1 ] = digitizer_define_window( -5 ns, 10 ns );
 
 // ...and a second window far off from the echo for measuring the background
 
-W2 = digitizer_define_window( 200 ns, 10 ns );
+Win[ 2 ] = digitizer_define_window( 200 ns, 10 ns );
 
 init_1d( 1, Num_Points, 0, delta_tau * 1e9, "Pulse separation [ns]",
 		 "Echo intensity" );
@@ -89,9 +89,9 @@ FOR I = 1 : Num_Points {
 	// is expected on channel 1 of the digitizer)
 
 	digitizer_start_acquisition( );
-	data = digitizer_get_area( CH1, W1 ) - digitizer_get_area( CH1, W2 );
+	data = digitizer_get_area( CH1, Win );
 
-	display( I, data );
+	display( I, data[ 1 ] - data[ 2 ] );
 
 	// All left to be done is shifting all pulses
 

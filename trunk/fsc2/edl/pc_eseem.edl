@@ -117,8 +117,7 @@ FOR I = 1 : 1024 {
 	FOR J = 1 : 4 {
 
 		digitizer_start_acquisition( );
-		data[ 1 ] = digitizer_get_area( CH1, W1 );
-		data[ 2 ] = digitizer_get_area( CH1, W2 );
+		data = digitizer_get_area( CH1, W1, W2 );
 
 		IF ( J == 1 | J == 4 ) {
 			res += data[ 1 ] - data[ 2 ];

@@ -1186,10 +1186,10 @@ static Var *get_area( Var *v, bool use_cursor )
 
 	if ( FSC2_MODE != EXPERIMENT )
 	{
-		if ( v == NULL )
+		if ( win_count == 0 )
 			return vars_push( FLOAT_VAR, 1.234e-8 );
 
-		for ( i = 0; v != NULL; v = vars_pop( v ) )
+		for ( i = 0; i < win_count; v = vars_pop( v ) )
 		{
 			if ( v->type == INT_VAR )
 			{
@@ -1225,7 +1225,7 @@ static Var *get_area( Var *v, bool use_cursor )
 	   here we return the area of the whole curve. Don't forget to reread
 	   the digitizer settings if the keyboard isn't locked. */
 
-	if ( v == NULL )
+	if ( win_count == 0 )
 	{
 		if ( ! tds_tmpl.lock_state )
 			tds_tmpl_state_check( 0.0, 0, 0.0 );
@@ -1236,7 +1236,7 @@ static Var *get_area( Var *v, bool use_cursor )
 	/* Otherwise loop over the window numbers and fill the array with areas
 	   for the different windows. */
 
-	for ( i = 0; v != NULL; v = vars_pop( v ) )
+	for ( i = 0; i < win_count; v = vars_pop( v ) )
 	{
 		if ( v->type == INT_VAR )
 		{
@@ -1474,10 +1474,10 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 
 	if ( FSC2_MODE != EXPERIMENT )
 	{
-		if ( v == NULL )
+		if ( win_count == 0 )
 			return vars_push( FLOAT_VAR, 1.23e-7 );
 
-		for ( i = 0; v != NULL; v = vars_pop( v ) )
+		for ( i = 0; i < win_count; v = vars_pop( v ) )
 		{
 			if ( v->type == INT_VAR )
 			{
@@ -1508,7 +1508,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 		return ret;
 	}
 
-	if ( v == NULL )
+	if ( win_count == 0 )
 	{
 		if ( ! tds_tmpl.lock_state )
 			tds_tmpl_state_check( 0.0, 0, 0.0 );
@@ -1516,7 +1516,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 						  tds_tmpl_get_amplitude( ch, NULL, use_cursor ) );
 	}
 
-	for ( i = 0; v != NULL; v = vars_pop( v ) )
+	for ( i = 0; i < win_count; v = vars_pop( v ) )
 	{
 		if ( v->type == INT_VAR )
 		{

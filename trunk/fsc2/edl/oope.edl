@@ -30,8 +30,8 @@ win_width  = 100 ns;          // width of integration windows
 
 timebase   =   5 ns;          // timebase of the pulser
 
-W1, W2;
-data[ 4 ];
+Win[ 2 ];
+data[ 2, 2 ];
 I;
 
 
@@ -120,8 +120,8 @@ init_1d( 2, Steps, t0* 10^6, delta_t * 10^6,
 digitizer_num_averages( Num_avg );
 digitizer_trigger_channel( AUX2 );
 
-W1 = digitizer_define_window( win1_start, win_width );
-W2 = digitizer_define_window( win2_start );
+Win[ 1 ] = digitizer_define_window( win1_start, win_width );
+Win[ 2 ] = digitizer_define_window( win2_start );
 
 
 EXPERIMENT:
@@ -134,15 +134,14 @@ FOR I = 1 : Steps {
     pulser_update( );
 
     digitizer_start_acquisition( );
-    data[ 1 ] = digitizer_get_area_fast( CH1, W1 );        // x-channel
-    data[ 2 ] = digitizer_get_area_fast( CH1, W2 );
-    data[ 3 ] = digitizer_get_area_fast( CH2, W1 );        // y-channel
-    data[ 4 ] = digitizer_get_area_fast( CH2, W2 );
+    data[ 1 ] = digitizer_get_area_fast( CH1, Win );             // x-channel
+    data[ 2 ] = digitizer_get_area_fast( CH2, Win );             // y-channel
 
-    display( I, 10^12 * ( data[ 1 ] - data[ 2 ] ), 1,      // x-channel
-	         I, 10^12 * ( data[ 3 ] - data[ 4 ] ), 2 );    // y-channel
+    display( I, 10^12 * ( data[ 1, 1 ] - data[ 1, 2 ] ), 1,      // x-channel
+	         I, 10^12 * ( data[ 2, 1 ] - data[ 2, 2 ] ), 2 );    // y-channel
 
-    fsave( "# # # #\n", data[ 1 ], data[ 2 ], data[ 3 ], data[ 4 ] );
+    fsave( "# # # #\n", data[ 1, 1 ], data[ 1, 2 ],
+						data[ 2, 1 ], data[ 2, 2 ] );
 
     pulser_shift( );
     pulser_increment( );
