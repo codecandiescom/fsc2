@@ -288,7 +288,7 @@ last experiment you run.
 
 
 The WITH_NI6601, WITH_PCI_MIO_16E_1, WITH_ME6000, WITH_WITIO_48 and
-WITH_SPEC10 variables are only needed when support for the National
+WITH_RS_SPEC10 variables are only needed when support for the National
 Instruments 6601 GPCT or PCI-MIO-16E-1 cards, the Meilhaus Electronic
 6000 or 6100 DAC card, the Wasco WITIO-48 DIO card or the Roper
 Scientific Spec-10 CCD camera are required. In these cases the lines
@@ -296,7 +296,7 @@ where these variables are defined must be uncommented and the
 additional variables for the include paths and the exact locations
 for the required libraries may have to be changed. Please see the
 comments in the Makefile or the template file in the 'machines'
-directory for details. Please note that defining WITH_SPEC10 will
+directory for details. Please note that defining WITH_RS_SPEC10 will
 lead to a few warnings during the compilation of the corresponding
 module of fsc2 since the header files for the pvcam library for
 the Roper Scientific Spec-10 CCD have some issues I can't do any-

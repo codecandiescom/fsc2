@@ -212,7 +212,7 @@ BROWSER            := netscape
 # and the library for the camera are already properly installed if you want
 # to build fsc2 with support for the camera.
 
-# WITH_SPEC10        := yes
+# WITH_RS_SPEC10     := yes
 # rs_spec10_incl     := /usr/local/include/pvcam
 # rs_spec10_libs     := libpvcam.so
 
@@ -765,26 +765,8 @@ install:
 
 	$(MAKE) -C $(sdir) install
 	$(MAKE) -C $(mdir) install
+	$(MAKE) -C $(cdir) install
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) version.ugz $(libdir)
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/hp8647a.table $(libdir)
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/hp8648b.table $(libdir)
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/hjs_attenuator.calib \
-						 $(libdir)
-	spex_cd2a_calib=`grep '^[ \t]*#define[ \t]\{1,\}SPEX_CD2A_CALIB_FILE' $(cdir)/spex_cd2a.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}SPEX_CD2A_CALIB_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                   \
-	if [      -n "$$spex_cd2a_calib"                                      \
-		 -a   -e $(cdir)/$$spex_cd2a_calib                                \
-		 -a ! -e $(libdir)/$$spex_cd2a_calib ]; then                      \
-		$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/spex_cd2a.calib \
-							 $(libdir)/$$spex_cd2a_calib;                 \
-	fi
-ifdef WITH_WITIO_48
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/hjs_fc.calib $(libdir)
-endif
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/hjs_sfc.calib $(libdir)
-ifdef WITH_SPEC10
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/spectrapro_300i.calib \
-						 $(libdir)
-endif
 ifdef WITH_HTTP_SERVER
 	$(MAKE) -C Fcntl_Lock install
 endif
@@ -794,26 +776,14 @@ endif
 
 
 # How to get rid of everything that got installed - requires that the
-# Makefile hasn't been changed significantly since the installation!
+# Makefile and the device configuration files haven't been changed
+# significantly since the installation!
 
 uninstall:
-	$(RM) $(RMFLAGS) $(libdir)/hp8647a.table
-	$(RM) $(RMFLAGS) $(libdir)/hp8648b.table
-ifdef WITH_SPEC10
-	$(RM) $(RMFLAGS) $(libdir)/spectrapro_300i.calib
-endif
-	spex_cd2a_calib=`grep '^[ \t]*#define[ \t]\{1,\}SPEX_CD2A_CALIB_FILE' $(cdir)/spex_cd2a.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}SPEX_CD2A_CALIB_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                 \
-	if [ -n "$$spex_cd2a_calib" ]; then                 \
-		$(RM) $(RMFLAGS) $(libdir)/$$spex_cd2a_calib;   \
-	fi
-	$(RM) $(RMFLAGS) $(libdir)/hjs_attenuator.calib
-ifdef WITH_WITIO_48
-	$(RM) $(RMFLAGS) $(libdir)//hjs_fc.calib
-endif
-	$(RM) $(RMFLAGS) $(libdir)/hjs_sfc.calib
 	$(RM) $(RMFLAGS) $(libdir)/version.ugz
 	$(RM) $(RMFLAGS) $(libdir)/Functions
 	$(RM) $(RMFLAGS) $(libdir)/Devices
+	$(MAKE) -C $(cdir) uninstall
 	for file in $(adir)/*.xpm $(adir)/*.jpeg $(adir)/*.png $(adir)/*.gif; do  \
 		$(RM) $(RMFLAGS) $(auxdir)/`basename $$file`;                         \
 	done

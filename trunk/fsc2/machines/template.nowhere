@@ -187,7 +187,7 @@ SERIAL_LOG_LEVEL   := HIGH
 # camera is already installed if you want to build fsc2 with support for the
 # camera.
 
-# WITH_SPEC10       := yes
+# WITH_RS_SPEC10    := yes
 # rs_spec10_incl    := /usr/local/include/pvcam
 # rs_spec10_libs    := libpvcam.so
 

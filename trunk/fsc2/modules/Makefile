@@ -101,7 +101,7 @@ simp_modules    += witio_48 bnm12
 comp_modules    += hjs_fc
 endif
 
-ifdef WITH_SPEC10
+ifdef WITH_RS_SPEC10
 comp_modules    += rs_spec10
 endif
 
