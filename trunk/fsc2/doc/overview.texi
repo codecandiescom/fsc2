@@ -30,7 +30,7 @@ spectrometers. It is basically an interpreter that executes a program
 written by the experimentator to describe the experiment, in the
 following called an @acronym{EDL}
 @cindex @acronym{EDL}
-file (@b{E}xperiment @b{D}escription @b{L}anguage) program. This is quite
+(@b{E}xperiment @b{D}escription @b{L}anguage) program. This is quite
 different from the usual programs for remote spectrometer control that
 have a graphical user interface where one sets some parameters to be
 used and then starts the experiment.
