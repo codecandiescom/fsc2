@@ -1055,7 +1055,7 @@ sub find_by_key {
 	my ( $self, $key ) = ( shift, shift );
 
 	for ( @{ $self->{ 'channels' } } ) {
-		return $_ if $_->key =~ /^$key$/;
+		return $_ if $_->key =~ /^$key\s*$/;
 	}
 
 	return undef;
@@ -1153,7 +1153,6 @@ sub new {
 				 'delay' => shift,
 				 'inv'   => shift,
 			     'plist' => [ ] };
-
 	return bless $self, $class;
 }
 
