@@ -3083,19 +3083,20 @@ According to the above discussion here's a list of all required and
 optional arguments to the function when used with the different trigger
 and timing modes. Optional arguments are enclosed in square braces:
 @example
-daq_ai_acq_setup( Num_Scans, "TRIGGER_NONE", t_scan [ , t_conv ] );
-
-daq_ai_acq_setup( Num_Scans, "TRIGGER_SCAN", T_scan [ , P_scan ]
+daq_ai_acq_setup( Num_Scans, "TRIGGER_NONE", t_scan
                   [ , t_conv ] );
 
-daq_ai_acq_setup( Num_Scans, "TRIGGER_SCAN_CONV", T_scan, [ P_scan , ]
-                  T_conv [ , P_conv ] );
+daq_ai_acq_setup( Num_Scans, "TRIGGER_SCAN", T_scan
+                  [ , P_scan ] [ , t_conv ] );
+
+daq_ai_acq_setup( Num_Scans, "TRIGGER_SCAN_CONV", T_scan,
+                  [ P_scan , ] T_conv [ , P_conv ] );
 
 daq_ai_acq_setup( Num_Scans, "TRIGGER_CONV", t_scan,
                   TS_conv [ , P_conv ] );
 
-daq_ai_acq_setup( Num_Scans, "TRIGGER_START", T_start, [ P_start, ]
-                   t_scan [ , t_conv ] );
+daq_ai_acq_setup( Num_Scans, "TRIGGER_START", T_start,
+                  [ P_start, ] t_scan [ , t_conv ] );
 
 daq_ai_acq_setup( Num_Scans, "TRIGGER_START_SCAN", T_start,
                   [ P_start, ] T_scan [ , P_scan ] [ , t_conv ] );
