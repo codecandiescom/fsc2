@@ -112,6 +112,7 @@ void notify_conn( int signo );
 #define DISPLAYGEOMETRY 5
 #define CUTGEOMETRY     6
 #define TOOLGEOMETRY    7
+#define AXISFONT        8
 
 
 /* Global variables */
