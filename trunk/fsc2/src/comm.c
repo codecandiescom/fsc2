@@ -256,7 +256,6 @@ void new_data_callback( FL_OBJECT *a, long b )
 
 		message_queue_low++;
 		message_queue_low %= QUEUE_SIZE;
-
 	}
 }
 
@@ -330,6 +329,9 @@ long reader( void *ret )
 			if ( str[ 0 ] != NULL )
 				T_free( str[ 0 ] );
 			retval = 0;
+
+			kill( child_pid, DO_SEND );
+
 			break;
 
 		case C_SHOW_MESSAGE :
@@ -348,6 +350,8 @@ long reader( void *ret )
 				str[ 0 ] = NULL;
 
 			fl_show_messages( str[ 0 ] );
+
+			kill( child_pid, DO_SEND );
 
 			/* send back just one character as indicator that the message has
 			   been read by the user */
@@ -375,6 +379,8 @@ long reader( void *ret )
 				str[ 0 ] = get_string_copy( "" );
 			else
 				str[ 0 ] = NULL;
+
+			kill( child_pid, DO_SEND );
 
 			/* send back just one character as indicator that the alert has
 			   been acknowledged by the user */
@@ -413,6 +419,8 @@ long reader( void *ret )
 					str[ i ] = NULL;
 			}
 
+			kill( child_pid, DO_SEND );
+
 			/* show the question, get the button number and pass it back to
 			   the child process (which does a read in the mean time) */
 
@@ -445,6 +453,8 @@ long reader( void *ret )
 				else
 					str[ i ] = NULL;
 			}
+
+			kill( child_pid, DO_SEND );
 
 			/* call fl_show_fselector() and send the result back to the child
 			   process (which does a read in the mean time) */
@@ -501,10 +511,15 @@ long reader( void *ret )
 				if ( str[ i ] != NULL )
 					T_free( str[ i ] );
 			retval = 0;
+
+			kill( child_pid, DO_SEND );
+
 			break;
 
 		case C_PROG : case C_OUTPUT :
 			assert( I_am == PARENT );       /* only to be read by the parent */
+
+			kill( child_pid, DO_SEND );
 
 			send_browser( header.type == C_PROG ?
 						  main_form->browser : main_form->error_browser );
@@ -529,6 +544,8 @@ long reader( void *ret )
 					str[ i ] = get_string_copy( "" );
 				else
 					str[ i ] = NULL;
+
+			kill( child_pid, DO_SEND );
 
 			/* send string from input form to child */
 
@@ -570,6 +587,7 @@ long reader( void *ret )
 
 			if ( ret != NULL )
 				*( ( int * ) ret ) = header.data.int_data;
+
 			retval = 1;
 			break;
 
@@ -600,12 +618,6 @@ long reader( void *ret )
 			assert( 1 == 0 );
 	}
 
-	/* The parent process now tells the child process that it's again ready
-	   to accept further data */
-
-	if ( I_am == PARENT )
-		kill( child_pid, DO_SEND );
-
 	return retval;
 }
 
@@ -621,14 +633,40 @@ long reader( void *ret )
 
 bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 {
-	size_t bytes_read;
-	size_t already_read = 0;
+	long bytes_read;
+	long already_read = 0;
 
 	while ( bytes_to_read > 0 )
 	{
 		bytes_read = read( fd, buf + already_read, bytes_to_read );
+
+		/* From man 2 read(): POSIX allows a read that is interrupted after
+		   reading some data to return -1 (with errno set to EINTR) or to
+		   return the number of bytes already read.
+
+		   The first happens on a Linux system with kernel 2.0.36 while the
+		   latter happens on a newer system with 2.2.12. On the older system
+		   this leads to trouble: While the child is waiting for data the
+		   parent first sends its data but before the child can read them
+		   the parent also sents a DO_SEND signal. This interrupts the child
+		   and read() returns -1 with errno set to EINTR but nothing has
+		   been read yet. Alas, ignoring the -1 and restarting the read does
+		   only work if the signal comes in BEFORE the first byte is read in
+		   since nothing tells us how many bytes actually have been read. To
+		   make sure, at least for the DO_SEND signal, that the signal is
+		   received before the read starts the parent sends the signal
+		   always before replying to a request. Quite another problem is the
+		   DO_QUIT signal - let's hope the read is atomic or it's never
+		   going to happen... The only real solution here would be to block
+		   all signals just before the read() and handle them directly
+		   afterwards. */
+
+		if ( bytes_read == -1 && errno == EINTR )
+			continue;
+
 		if ( bytes_read == 0 )
 			return FAIL;
+
 		bytes_to_read -= bytes_read;
 		already_read += bytes_read;
 	}
