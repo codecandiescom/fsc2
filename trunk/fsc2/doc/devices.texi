@@ -598,7 +598,8 @@ In contrast, the four other modules, @code{er035m_sa},
 for field measurements but not for direct field control.
 
 The Bruker BNM12 NMR gaussmeter can only be read out when the WITIO-48
-DIO card is present and its module @code{witio_48} has already been
+DIO card (module @code{witio_48}and the home-built DA/AD converter
+(@code{hjs_daadc} are available and their modules have already been
 loaded.
 
 

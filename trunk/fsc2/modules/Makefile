@@ -39,12 +39,12 @@ simp_modules  += ni6601
 endif
 
 ifdef WITH_WITIO_48
-simp_modules  += witio_48 bnm12 hjs_sfc hjs_fc
+simp_modules  += witio_48 bnm12 hjs_fc
 endif
 
 comp_modules    := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400  \
 				   hp8672a $(hp864_list) $(tds_list) spectrapro_300i        \
-				   hjs_attenuator
+				   hjs_attenuator hjs_sfc
 
 ifdef WITH_SPEC10
 comp_modules    += rs_spec10
@@ -75,6 +75,7 @@ rs_spec10       := rs_spec10.c rs_spec10_int.c rs_spec10_util.c
 spectrapro_300i := spectrapro_300i.c spectrapro_300i_ll.c  \
 				   spectrapro_300i_lexer.c
 hjs_attenuator  := hjs_attenuator.c hjs_attenuator_lexer.c
+hjs_sfc         := hjs_sfc.c hjs_sfc_lexer.c
 
 src_headers   := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h
 

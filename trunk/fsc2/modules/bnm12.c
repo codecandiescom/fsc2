@@ -37,13 +37,16 @@
 
 /* Device specific defines */
 
-#define RESOLUTION_LOW     0
-#define RESOLUTION_MEDIUM  1
-#define RESOLUTION_HIGH    2
+#define RESOLUTION_VERY_HIGH       0
+#define RESOLUTION_HIGH            1
+#define RESOLUTION_MEDIUM          2
+#define RESOLUTION_LOW             3
+#define RESOLUTION_VERY_LOW        4
+#define RESOLUTION_EXTREMELY_LOW   5
 
 #define NO_LOCK_BIT        0x800000UL
 
-#define DEFAULT_TEST_FIELD 3100.0
+#define DEFAULT_TEST_FIELD 3400.0
 
 
 /* Global variables */
@@ -56,12 +59,14 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 struct BNM12 {
 	int resolution;
-	double res_list[ 3 ];
+	double res_list[ 6 ];
 	char *dio_value_func;
 };
 
 
-static struct BNM12 bnm12 = { RESOLUTION_MEDIUM, { 1.0, 0.1, 0.01 }, NULL };
+static struct BNM12 bnm12 = { RESOLUTION_MEDIUM,
+							  { 0.0001, 0.001, 0.01, 0.1, 1.0, 10.0 },
+							  NULL };
 static struct BNM12 bnm12_stored;
 
 
@@ -80,6 +85,7 @@ Var *gaussmeter_resolution( Var *v );
 /* Local functions */
 
 static double bnm12_get_field( void );
+static void bnm12_check_field( void );
 
 
 /*-------------------------------------------*/
@@ -105,6 +111,16 @@ int bnm12_init_hook( void )
 	int dev_num;
 	char *func;
 
+
+	/* Check that the module for the home-built DA/AD converter has already
+	   been loaded */
+
+	if ( ! exists_device( "hjs_daadc" ) )
+	{
+		print( FATAL, "Can't find the module for the DA/AD converter "
+			   "(hjs_daadc) - it must be listed before this module.\n" );
+		THROW( EXCEPTION );
+	}
 
 	/* Check that the WITIO-48 module has already been loaded */
 
@@ -189,7 +205,7 @@ int bnm12_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	/* Per default we assume the resolution is set to 0.1 G (medium) */
+	/* Per default we assume the resolution is set to 0.01 G (medium) */
 
 	bnm12.resolution = RESOLUTION_MEDIUM;
 
@@ -217,6 +233,9 @@ int bnm12_test_hook( void )
 int bnm12_exp_hook( void )
 {
 	bnm12 = bnm12_stored;
+
+	bnm12_check_field( );
+
 	return 1;
 }
 
@@ -289,24 +308,25 @@ Var *gaussmeter_resolution( Var *v )
 	/* Try to match the requested resolution, if necessary use the nearest
 	   possible value */
 
-	for ( i = 0; i < 2; i++ )
-		if ( res <= bnm12.res_list[ i ] && res >= bnm12.res_list[ i + 1 ] )
+	for ( i = 0; i < RESOLUTION_LOW; i++ )
+		if ( res >= bnm12.res_list[ i ] && res < bnm12.res_list[ i + 1 ] )
 		{
 			res_index = i +
-				 ( ( res / bnm12.res_list[ i ] >
+				 ( ( res / bnm12.res_list[ i ] <
 					 bnm12.res_list[ i + 1 ] / res ) ? 0 : 1 );
 			break;
 		}
 
 	if ( res_index == -1 )
 	{
-		if ( res >= bnm12.res_list[ RESOLUTION_LOW ] )
-			res_index = RESOLUTION_LOW;
-		if ( res <= bnm12.res_list[ RESOLUTION_HIGH ] )
-			res_index = RESOLUTION_HIGH;
+		if ( res >= bnm12.res_list[ RESOLUTION_EXTREMELY_LOW ] )
+			res_index = RESOLUTION_EXTREMELY_LOW;
+		if ( res <= bnm12.res_list[ RESOLUTION_VERY_HIGH ] )
+			res_index = RESOLUTION_VERY_HIGH;
 	}
 
-	fsc2_assert( res_index >= RESOLUTION_LOW && res_index <= RESOLUTION_HIGH );
+	fsc2_assert( res_index >= RESOLUTION_VERY_HIGH &&
+				 res_index <= RESOLUTION_EXTREMELY_LOW );
 
 	if ( fabs( bnm12.res_list[ res_index ] - res ) >
 										 1.0e-2 * bnm12.res_list[ res_index ] )
@@ -368,18 +388,10 @@ static double bnm12_get_field( void )
 	res = ( unsigned long ) v->val.lval;
 	vars_pop( v );
 
-	/* Check that the gaussmeter is locked onto the field */
-
-	if ( res & NO_LOCK_BIT )
-	{
-		print( FATAL, "Gaussmeter isn't locked to the field.\n" );
-		THROW( EXCEPTION );
-	}
-
-	/* Convert the BCD data (there are 5 digits ) we got from the device
+	/* Convert the BCD data (there are 6 digits ) we got from the device
 	   to an integer */
 
-	for ( raw_field = 0, fac = 1, i = 0; i < 5; res >>= 4, fac *= 10, i++ )
+	for ( raw_field = 0, fac = 1, i = 0; i < 6; res >>= 4, fac *= 10, i++ )
 	{
 		if ( ( res & 0x0FUL ) > 9 )
 		{
@@ -394,6 +406,59 @@ static double bnm12_get_field( void )
 	   resolution factor */
 
 	return raw_field * bnm12.res_list[ bnm12.resolution ];
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static void bnm12_check_field( void )
+{
+	Var *Func_ptr;
+	int acc;
+	Var *v;
+	unsigned long res = ~ 0,
+				  old_res;
+
+
+	/* Get the field again and again until the gaussmeter seems to have a
+	   lock. That assumed when the difference between readings isn't larger
+	   than about 1 G when measured at time intervals of 1 second - while
+	   trying to get a lock the gaussmeter always searches downwards with
+	   a speed of about 1 G per second. */
+
+	do
+	{
+		old_res = res;
+
+		/* Get a value from the gaussmeter via the WITIO-48 DIO card */
+
+		if ( ( Func_ptr = func_get( bnm12.dio_value_func, &acc ) ) == NULL )
+		{
+			print( FATAL, "Internal error detected at %s:%d.\n",
+				   __FILE__, __LINE__ );
+			THROW( EXCEPTION );
+		}
+
+		vars_push( STR_VAR, DEVICE_NAME );        /* push the pass-phrase */
+		vars_push( INT_VAR, DIO_NUMBER );         /* push the DIO number */
+		vars_push( INT_VAR, WITIO_48_CHANNEL_0 ); /* push the channel number */
+
+		if ( ( v = func_call( Func_ptr ) ) == NULL )
+		{
+			print( FATAL, "Internal error detected at %s:%d.\n",
+				   __FILE__, __LINE__ );
+			THROW( EXCEPTION );
+		}
+
+		res = ( unsigned long ) v->val.lval;
+		vars_pop( v );
+
+		stop_on_user_request( );
+
+		fsc2_usleep( 1000000, UNSET );
+
+	} while ( old_res - res > 100 );
 }
 
 
