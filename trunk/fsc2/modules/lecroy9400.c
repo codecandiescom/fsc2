@@ -149,7 +149,8 @@ int lecroy9400_end_of_exp_hook( void )
 void lecroy9400_exit_hook( void )
 {
 #if 0
-	lecroy9400_delete_windows( );
+	lecroy9400_delete_windows( &lecroy9400 );
+	lecroy9400_delete_windows( &lecroy9400_stored );
 #endif
 }
 

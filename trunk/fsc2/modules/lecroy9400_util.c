@@ -72,15 +72,15 @@ const char *lecroy9400_ptime( double p_time )
 /* Deletes a window by removing it from the linked list of windows */
 /*-----------------------------------------------------------------*/
 
-void lecroy9400_delete_windows( void )
+void lecroy9400_delete_windows( LECROY9400 *s )
 {
 	WINDOW *w;
 
 
-	while ( lecroy9400.w != NULL )
+	while ( s->w != NULL )
 	{
-		w = lecroy9400.w;
-		lecroy9400.w = w->next;
+		w = s->w;
+		s->w = w->next;
 		T_free( w );
 	}
 }
@@ -439,6 +439,42 @@ long lecroy9400_translate_channel( int dir, long channel )
 
 	fsc2_assert( 1 == 0 );
 	return -1;
+}
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+void lecroy9400_store_state( LECROY9400 *dest, LECROY9400 *src )
+{
+	WINDOW *w;
+	int i;
+
+
+	while ( dest->w != NULL )
+	{
+		w = dest->w;
+		dest->w = w->next;
+		T_free( w );
+	}
+
+	memcpy( dest, src, sizeof( LECROY9400 ) );
+
+	if ( src->num_windows == 0 )
+	{
+		dest->w = 0;
+		return;
+	}
+
+	dest->w = T_malloc( src->num_windows * sizeof( WINDOW ) );
+	for ( i = 0, w = src->w; w != NULL; i++, w = w->next )
+	{
+		memcpy( dest->w + i, w, sizeof( WINDOW ) );
+		if ( i != 0 )
+			dest->w->prev = dest->w - 1;
+		if ( w->next != NULL )
+			dest->w->next = dest->w + 1;
+	}
 }
 
 

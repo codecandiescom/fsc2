@@ -211,7 +211,7 @@ Var *digitizer_run( Var *v );
 
 int lecroy9400_get_tb_index( double timebase );
 const char *lecroy9400_ptime( double p_time );
-void lecroy9400_delete_windows( void );
+void lecroy9400_delete_windows( LECROY9400 *s );
 void lecroy9400_do_pre_exp_checks( void );
 long lecroy9400_translate_channel( int dir, long channel );
 void lecroy9400_store_state( LECROY9400 *src, LECROY9400 *dest );
@@ -346,6 +346,7 @@ enum {
 #define TB_ENTRIES ( sizeof tb / sizeof tb[ 0 ] )
 #define NA_ENTRIES ( sizeof na / sizeof na[ 0 ] )
 #define CL_ENTRIES ( sizeof cl / sizeof cl[ 0 ] )
+#define ML_ENTRIES ( sizeof ml / sizeof ml[ 0 ] )
 
 
 /*

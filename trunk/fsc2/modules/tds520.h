@@ -125,6 +125,7 @@ typedef struct
 /* declaration of exported functions */
 
 int tds520_init_hook( void );
+int tds520_test_hook( void );
 int tds520_exp_hook( void );
 int tds520_end_of_exp_hook( void );
 void tds520_exit_hook( void );
@@ -154,9 +155,10 @@ Var *digitizer_lock_keyboard( Var *v );
 /* declaration of internally used functions */
 
 const char *tds520_ptime( double p_time );
-void tds520_delete_windows( void );
+void tds520_delete_windows( TDS520 *s );
 void tds520_do_pre_exp_checks( void );
 long tds520_translate_channel( int dir, long channel );
+void tds520_store_state( TDS520 *dest, TDS520 *src );
 
 bool tds520_init( const char *name );
 double tds520_get_timebase( void );

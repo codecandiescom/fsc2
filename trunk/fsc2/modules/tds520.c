@@ -64,27 +64,7 @@ static Var *get_curve( Var *v, bool use_cursor );
 static Var *get_amplitude( Var *v, bool use_cursor );
 
 
-static struct {
-	bool is_timebase;
-	double timebase;
-
-	bool is_num_avg;
-	long num_avg;
-
-	bool is_rec_len;
-	long rec_len;
-
-	bool is_trig_pos;
-	double trig_pos;
-
-	int data_source;
-	int meas_source;
-
-	bool lock_state;
-
-	bool is_sens[ MAX_CHANNELS ];
-	double sens[ MAX_CHANNELS ];
-} tds520_store;
+static TDS520 tds520_stored;
 
 
 /*******************************************/
@@ -125,6 +105,22 @@ int tds520_init_hook( void )
 		tds520.sens[ i ] = 1.0;
 	}
 
+	tds520_stored.w = NULL;
+
+	return 1;
+}
+
+
+/*-----------------------------------*/
+/* Test hook function for the module */
+/*-----------------------------------*/
+
+int tds520_test_hook( void )
+{
+	/* Store the state of the digitizer structure it was set to in the
+	   PREPARATIONS section */
+
+	tds520_store_state( &tds520_stored, &tds520 );
 	return 1;
 }
 
@@ -135,41 +131,11 @@ int tds520_init_hook( void )
 
 int tds520_exp_hook( void )
 {
-	int i;
+	/* Reset the digitizer structure to the state it was set to in the
+	   preparations section - changes done to it in the test run are to
+	   be undone... */
 
-
-	/* Store the state the digitizer was set to in the preparations section -
-	   we need this when starting the same experiment again... */
-
-	tds520_store.is_timebase = tds520.is_timebase;
-	tds520_store.timebase    = tds520.timebase;
-
-	tds520_store.is_num_avg  = tds520.is_num_avg;
-	tds520_store.num_avg     = tds520.num_avg;
-
-	tds520_store.is_rec_len  = tds520.is_rec_len;
-	tds520_store.rec_len     = tds520.rec_len;
-
-	tds520_store.is_trig_pos = tds520.is_trig_pos;
-	tds520_store.trig_pos    = tds520.trig_pos;
-
-	tds520_store.data_source = tds520.data_source;
-	tds520_store.meas_source = tds520.meas_source;
-
-	tds520_store.lock_state  = tds520.lock_state;
-
-	for ( i = TDS520_CH1; i <= TDS520_CH2; i++ )
-	{
-		tds520_store.is_sens[ i ] = tds520.is_sens[ i ];
-		tds520_store.sens[ i ]    = tds520.sens[ i ];
-	}
-
-	if ( ! tds520_init( DEVICE_NAME ) )
-	{
-		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
-				DEVICE_NAME, gpib_error_msg );
-		THROW( EXCEPTION )
-	}
+	tds520_store_state( &tds520, &tds520_stored );
 
 	tds520_do_pre_exp_checks( );
 
@@ -183,38 +149,13 @@ int tds520_exp_hook( void )
 
 int tds520_end_of_exp_hook( void )
 {
-	int i;
-
-
 	tds520_finished( );
 
-	/* Reset the digitizer to the state it was set to in the preparations
-	   section - we need this when starting the same experiment again... */
+	/* Reset the digitizer structure to the state it was set to in the
+	   preparations section - we need this when starting the same experiment
+	   again... */
 
-	tds520.is_reacting      = UNSET;
-
-	tds520.is_timebase      = tds520_store.is_timebase;
-	tds520.timebase         = tds520_store.timebase;
-
-	tds520_store.is_num_avg = tds520.is_num_avg;
-	tds520.num_avg          = tds520_store.num_avg;
-
-	tds520.is_rec_len       = tds520_store.is_rec_len;
-	tds520.rec_len          = tds520_store.rec_len;
-
-	tds520.is_trig_pos      = tds520_store.is_trig_pos;
-	tds520.trig_pos         = tds520_store.trig_pos;
-
-	tds520.data_source      = tds520_store.data_source;
-	tds520.meas_source      = tds520_store.meas_source;
-
-	tds520.lock_state       = tds520_store.lock_state;
-
-	for ( i = TDS520_CH1; i <= TDS520_CH2; i++ )
-	{
-		tds520.is_sens[ i ] = tds520_store.is_sens[ i ];
-		tds520.sens[ i ]    = tds520_store.sens[ i ];
-	}
+	tds520_store_state( &tds520, &tds520_stored );
 
 	return 1;
 }
@@ -227,7 +168,8 @@ int tds520_end_of_exp_hook( void )
 
 void tds520_exit_hook( void )
 {
-	tds520_delete_windows( );
+	tds520_delete_windows( &tds520 );
+	tds520_delete_windows( &tds520_stored );
 }
 
 
@@ -345,31 +287,28 @@ Var *digitizer_timebase( Var *v )
 	
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
+		switch ( FSC2_MODE )
 		{
-			if ( tds520.is_timebase )
-				return vars_push( FLOAT_VAR, tds520.timebase );
-			else
-				return vars_push( FLOAT_VAR, TDS520_TEST_TIME_BASE );
+			case PREPARATION :
+				if ( tds520.is_timebase )
+					return vars_push( FLOAT_VAR, tds520.timebase );
+
+				eprint( FATAL, SET, "%s: Function %s with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
+				THROW( EXCEPTION )
+
+			case TEST :
+				return vars_push( FLOAT_VAR, tds520.is_timebase ?
+								  tds520.timebase : TDS520_TEST_TIME_BASE );
+
+			case EXPERIMENT :
+				tds520.is_timebase = SET;
+				return vars_push( FLOAT_VAR,
+								  tds520.timebase = tds520.timebase );
 		}
-		else if ( I_am == PARENT )
-		{
-			if ( tds520.is_timebase )
-				return vars_push( FLOAT_VAR, tds520.timebase );
 
-			eprint( FATAL, SET, "%s: Function %s with no argument can only "
-					"be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
-
-		tds520.timebase = tds520_get_timebase( );
-		tds520.is_timebase = SET;
-		return vars_push( FLOAT_VAR, tds520.timebase );
-	}
-
-	if ( I_am == CHILD || TEST_RUN )
+	if ( FSC2_MODE != PREPARATION )
 	{
 		eprint( FATAL, SET, "%s: Digitizer time base can only be set before "
 				"the EXPERIMENT section starts.\n", DEVICE_NAME );
@@ -446,6 +385,7 @@ Var *digitizer_timebase( Var *v )
 Var *digitizer_time_per_point( Var *v )
 {
 	v = v;
+
 	return vars_push( FLOAT_VAR, tds520.timebase / TDS520_POINTS_PER_DIV );
 }
 
@@ -477,29 +417,27 @@ Var *digitizer_sensitivity( Var *v )
 	}
 
 	if ( ( v = vars_pop( v ) ) == NULL )
-	{
-		if ( TEST_RUN )
+		switch ( FSC2_MODE )
 		{
-			if ( tds520.is_sens[ channel ] )
-				return vars_push( FLOAT_VAR, tds520.sens[ channel ] );
-			else
-				return vars_push( FLOAT_VAR, TDS520_TEST_SENSITIVITY );
-		}
-		else if ( I_am == PARENT )
-		{
-			if ( tds520.is_sens[ channel ] )
-				return vars_push( FLOAT_VAR, tds520.sens[ channel ] );
+			case PREPARATION :
+				if ( tds520.is_sens[ channel ] )
+					return vars_push( FLOAT_VAR, tds520.sens[ channel ] );
 
-			eprint( FATAL, SET, "%s: Function %s() with no argument can "
-					"only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
+				THROW( EXCEPTION )
 
-		tds520.sens[ channel ] = tds520_get_sens( channel );
-		tds520.is_sens[ channel ] = SET;
-		return vars_push( FLOAT_VAR, tds520.sens[ channel ] );
-	}
+			case TEST :
+				return vars_push( FLOAT_VAR, tds520.is_sens[ channel ] ?
+								  tds520.sens[ channel ] :
+								  TDS520_TEST_SENSITIVITY );
+
+			case EXPERIMENT :
+				tds520.is_sens[ channel ] = SET;
+				return vars_push( FLOAT_VAR,
+							 tds520.sens[ channel ] = tds520.sens[ channel ] );
+		}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	sens = VALUE( v );
@@ -511,15 +449,15 @@ Var *digitizer_sensitivity( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	tds520.sens[ channel ] = sens;
-	tds520.is_sens[ channel ] = SET;
-
-	if ( ! TEST_RUN )
-		tds520_set_sens( channel, sens );
-
 	if ( ( v = vars_pop( v ) ) != NULL )
 		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
 				DEVICE_NAME, Cur_Func );
+
+	tds520.sens[ channel ] = sens;
+	tds520.is_sens[ channel ] = SET;
+
+	if ( FSC2_MODE == EXPERIMENT )
+		tds520_set_sens( channel, sens );
 
 	return vars_push( FLOAT_VAR, tds520.sens[ channel ] );
 }
@@ -534,29 +472,25 @@ Var *digitizer_num_averages( Var *v )
 	
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
+		switch ( FSC2_MODE )
 		{
-			if ( tds520.is_num_avg )
-				return vars_push( INT_VAR, tds520.num_avg );
-			else
-				return vars_push( INT_VAR, TDS520_TEST_NUM_AVG );
-		}
-		else if ( I_am == PARENT )
-		{
-			if ( tds520.is_num_avg )
-				return vars_push( INT_VAR, tds520.num_avg );
+			case PREPARATION :
+				if ( tds520.is_num_avg )
+					return vars_push( INT_VAR, tds520.num_avg );
 
-			eprint( FATAL, SET, "%s: Function %s() with no argument can "
-					"only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
+				THROW( EXCEPTION )
 
-		tds520.num_avg = tds520_get_num_avg( );
-		tds520.is_num_avg = SET;
-		return vars_push( INT_VAR, tds520.num_avg );
-	}
+			case TEST :
+				return vars_push( INT_VAR, tds520.is_num_avg ?
+								  tds520.num_avg : TDS520_TEST_NUM_AVG );
+
+			case EXPERIMENT :
+				tds520.is_num_avg = SET;
+				return vars_push( INT_VAR, tds520.num_avg = tds520.num_avg );
+		}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
@@ -583,11 +517,11 @@ Var *digitizer_num_averages( Var *v )
 		THROW( EXCEPTION )
 	}
 
+	tds520.is_num_avg = SET;
 	tds520.num_avg = num_avg;
-	if ( I_am == CHILD )
+
+	if ( FSC2_MODE == EXPERIMENT )
 		tds520_set_num_avg( num_avg );
-	if ( ! TEST_RUN )                 // store value if in PREPARATIONS section
-		tds520.is_num_avg = SET;
 
 	return vars_push( INT_VAR, tds520.num_avg );
 }
@@ -606,32 +540,29 @@ Var *digitizer_record_length( Var *v )
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
+		switch ( FSC2_MODE )
 		{
-			if ( tds520.is_rec_len )
+			case PREPARATION :
+				if ( tds520.is_rec_len )
+					return vars_push( INT_VAR, tds520.rec_len );
+
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
+				THROW( EXCEPTION )
+
+			case TEST :
+				return vars_push( INT_VAR, tds520.is_rec_len ?
+								  tds520.rec_len : TDS520_TEST_REC_LEN );
+
+			case EXPERIMENT :
+				if ( ! tds520_get_record_length( &rec_len ) )
+					tds520_gpib_failure( );
+
+				tds520.rec_len = rec_len;
+				tds520.is_rec_len = SET;
 				return vars_push( INT_VAR, tds520.rec_len );
-			else
-				return vars_push( INT_VAR, TDS520_TEST_REC_LEN );
 		}
-		else if ( I_am == PARENT )
-		{
-			if ( tds520.is_rec_len )
-				return vars_push( INT_VAR, tds520.rec_len );
-
-			eprint( FATAL, SET, "%s: Function %s() with no argument can "
-					"only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
-
-		if ( ! tds520_get_record_length( &rec_len ) )
-			tds520_gpib_failure( );
-
-		tds520.rec_len = rec_len;
-		tds520.is_rec_len = SET;
-		return vars_push( INT_VAR, tds520.rec_len );
-	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -671,7 +602,8 @@ Var *digitizer_record_length( Var *v )
 	tds520.rec_len = record_lengths[ i ];
 	tds520.is_rec_len = SET;
 
-	if ( I_am == CHILD && ! tds520_set_record_length( tds520.rec_len ) )
+	if ( FSC2_MODE == EXPERIMENT &&
+		 ! tds520_set_record_length( tds520.rec_len ) )
 		tds520_gpib_failure( );
 
 	return vars_push( INT_VAR, tds520.rec_len );
@@ -690,32 +622,30 @@ Var *digitizer_trigger_position( Var *v )
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
+		switch ( FSC2_MODE )
 		{
-			if ( tds520.is_trig_pos )
+			case PREPARATION :
+				if ( tds520.is_trig_pos )
+					return vars_push( FLOAT_VAR, tds520.trig_pos );
+
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
+				THROW( EXCEPTION )
+
+			case TEST :
+				return vars_push( FLOAT_VAR, tds520.is_trig_pos ?
+								  tds520.trig_pos : TDS520_TEST_TRIG_POS );
+
+
+			case EXPERIMENT :
+				if ( ! tds520_get_trigger_pos( &trig_pos ) )
+					tds520_gpib_failure( );
+
+				tds520.trig_pos = trig_pos;
+				tds520.is_trig_pos = SET;
 				return vars_push( FLOAT_VAR, tds520.trig_pos );
-			else
-				return vars_push( FLOAT_VAR, TDS520_TEST_TRIG_POS );
 		}
-		else if ( I_am == PARENT )
-		{
-			if ( tds520.is_trig_pos )
-				return vars_push( FLOAT_VAR, tds520.trig_pos );
-
-			eprint( FATAL, SET, "%s: Function %s() with no argument can "
-					"only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
-
-		if ( ! tds520_get_trigger_pos( &trig_pos ) )
-			tds520_gpib_failure( );
-
-		tds520.trig_pos = trig_pos;
-		tds520.is_trig_pos = SET;
-		return vars_push( FLOAT_VAR, tds520.trig_pos );
-	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	trig_pos = VALUE( v );
@@ -731,7 +661,8 @@ Var *digitizer_trigger_position( Var *v )
 	tds520.trig_pos = trig_pos;
 	tds520.is_trig_pos = SET;
 
-	if ( I_am == CHILD && ! tds520_set_trigger_pos( tds520.trig_pos ) )
+	if ( FSC2_MODE == EXPERIMENT &&
+		 ! tds520_set_trigger_pos( tds520.trig_pos ) )
 		tds520_gpib_failure( );
 
 	return vars_push( FLOAT_VAR, tds520.trig_pos );
@@ -770,31 +701,28 @@ Var *digitizer_trigger_channel( Var *v )
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
+		switch ( FSC2_MODE )
 		{
-			if ( tds520.is_trigger_channel )
-				return vars_push( INT_VAR, tds520_translate_channel(
-								 TDS520_TO_GENERAL, tds520.trigger_channel ) );
-			else
-				return vars_push( INT_VAR, tds520_translate_channel(
-							   TDS520_TO_GENERAL, TDS520_TEST_TRIG_CHANNEL ) );
-		}
-		else if ( I_am == PARENT )
-		{
-			if ( tds520.is_trigger_channel )
-				return vars_push( INT_VAR, tds520_translate_channel(
-								 TDS520_TO_GENERAL, tds520.trigger_channel ) );
+			case PREPARATION :
+				if ( tds520.is_trigger_channel )
+					return vars_push( INT_VAR, tds520_translate_channel(
+						         TDS520_TO_GENERAL, tds520.trigger_channel ) );
 
-			eprint( FATAL, SET, "%s: Function %s() with no argument can "
-					"only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
+				THROW( EXCEPTION )
 
-		return vars_push( INT_VAR, tds520_translate_channel( TDS520_TO_GENERAL,
-											 tds520_get_trigger_channel( ) ) );
-	}
+			case TEST :
+				return vars_push( INT_VAR, tds520_translate_channel(
+					             TDS520_TO_GENERAL, tds520.is_trigger_channel ?
+								 tds520.trigger_channel :
+								 TDS520_TEST_TRIG_CHANNEL ) );
+
+			case EXPERIMENT :
+				return vars_push( INT_VAR, tds520_translate_channel(
+					      TDS520_TO_GENERAL, tds520_get_trigger_channel( ) ) );
+		}
 
 	vars_check( v, INT_VAR );
 	channel = tds520_translate_channel( GENERAL_TO_TDS520, v->val.lval );
@@ -805,10 +733,10 @@ Var *digitizer_trigger_channel( Var *v )
         case TDS520_CH1 : case TDS520_CH2 : case TDS520_AUX1 :
 		case TDS520_AUX2 : case TDS520_LIN :
 			tds520.trigger_channel = channel;
-			if ( I_am == CHILD )
+			tds520.is_trigger_channel = SET;
+
+			if ( FSC2_MODE == EXPERIMENT )
 				tds520_set_trigger_channel( Channel_Names[ channel ] );
-			if ( ! TEST_RUN )
-				tds520.is_trigger_channel = SET;
             break;
 
 		default :
@@ -828,8 +756,9 @@ Var *digitizer_start_acquisition( Var *v )
 {
 	v = v;
 
-	if ( ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 		tds520_start_acquisition( );
+
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -929,10 +858,10 @@ static Var *get_area( Var *v, bool use_cursor )
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   value */
 
-	if ( I_am == CHILD )
-		return vars_push( FLOAT_VAR, tds520_get_area( ch, w, use_cursor ) );
+	if ( FSC2_MODE != EXPERIMENT )
+		return vars_push( FLOAT_VAR, 1.234e-8 );
 
-	return vars_push( FLOAT_VAR, 1.234e-8 );
+	return vars_push( FLOAT_VAR, tds520_get_area( ch, w, use_cursor ) );
 }
 
 
@@ -1032,23 +961,24 @@ static Var *get_curve( Var *v, bool use_cursor )
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   array */
 
-	if ( I_am == CHILD )
+	if ( FSC2_MODE == EXPERIMENT )
 	{
 		tds520_get_curve( ch, w, &array, &length, use_cursor );
 		nv = vars_push( FLOAT_ARR, array, length );
-		T_free( array );
-		return nv;
+	}
+	else
+	{
+		if ( tds520.is_rec_len  )
+			length = tds520.rec_len;
+		else
+			length = TDS520_TEST_REC_LEN;
+		array = T_malloc( length * sizeof( double ) );
+		for ( i = 0; i < length; i++ )
+			array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
+		nv = vars_push( FLOAT_ARR, array, length );
+		nv->flags |= IS_DYNAMIC;
 	}
 
-	if ( tds520.is_rec_len  )
-		length = tds520.rec_len;
-	else
-		length = TDS520_TEST_REC_LEN;
-	array = T_malloc( length * sizeof( double ) );
-	for ( i = 0; i < length; i++ )
-		array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
-	nv = vars_push( FLOAT_ARR, array, length );
-	nv->flags |= IS_DYNAMIC;
 	T_free( array );
 	return nv;
 }
@@ -1149,13 +1079,11 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   array */
 
-	if ( I_am == CHILD )
-	{
+	if ( FSC2_MODE == EXPERIMENT )
 		nv = vars_push( FLOAT_VAR, tds520_get_amplitude( ch, w, use_cursor ) );
-		return nv;
-	}
+	else
+		nv = vars_push( FLOAT_VAR, 1.23e-7 );
 
-	nv = vars_push( FLOAT_VAR, 1.23e-7 );
 	return nv;
 }
 
@@ -1166,8 +1094,10 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 Var *digitizer_run( Var *v )
 {
 	v = v;
-	if ( ! TEST_RUN )
+
+	if ( FSC2_MODE == EXPERIMENT )
 		tds520_free_running( );
+
 	return vars_push( INT_VAR,1 );
 }
 
@@ -1205,7 +1135,7 @@ Var *digitizer_lock_keyboard( Var *v )
 		}
 	}
 
-	if ( ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 		tds520_lock_state( lock );
 
 	tds520.lock_state = lock;
