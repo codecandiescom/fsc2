@@ -111,6 +111,7 @@ static long sr810_get_harmonic( void );
 static long sr810_set_harmonic( long harmonic );
 static double sr810_get_ref_level( void );
 static double sr810_set_ref_level( double level );
+static void sr810_lock_state( bool lock );
 
 
 

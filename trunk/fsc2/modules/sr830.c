@@ -110,6 +110,7 @@ static long sr830_get_harmonic( void );
 static long sr830_set_harmonic( long harmonic );
 static double sr830_get_ref_level( void );
 static double sr830_set_ref_level( double level );
+static void sr830_lock_state( bool lock );
 
 
 
@@ -1397,7 +1398,7 @@ static double sr830_set_ref_level( double level )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-void sr830_lock_state( bool lock )
+static void sr830_lock_state( bool lock )
 {
 	char cmd[ 100 ];
 
