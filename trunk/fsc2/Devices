@@ -39,8 +39,12 @@ er035m_sas    // Bruker NMR gaussmeter (connected to serial port, stand alone)
 
 bh15          // Bruker field controller
 
+pt2025        // Metrolab NMR teslameter
+
 hp8647a       // HP RF synthesizer
 
 egg4402       // EG&G PARC box-car
 
 kontron4060;  // Kontron 4060 voltmeter
+
+lakeshore330; // Lake Shore 330 temperature controller

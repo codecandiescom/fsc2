@@ -1082,6 +1082,19 @@ the strings @code{"A"} or @code{"B"}. Please take note that setting a
 sample channel takes about half a second.
 
 
+@item temp_contr_sensor_unit()
+@findex temp_contr_sensor_unit()
+Function either returns or sets the units returned by the device on
+temperature readings. If used to set a unit the function must be called
+with the value @code{0} or @code{"K"} to set the unit to Kelvin,
+@code{1} or @code{"C"} to set to degree Celsius or, finally, with
+@code{2} or @code{"S"} to set to the unit appropriate for the sensor
+(volts for diodes, Ohms for RTD or Millivolts for thermocouples). It
+will always return the unit setting as an integer value with @code{1}
+for Kelvin, @code{1} for degree Celsius, @code{2} for Volts, @code{3}
+for Ohms or @code{4} for Millivolts.
+
+
 @item temp_contr_lock_keyboard()
 @findex temp_contr_lock_keyboard()
 Usually, during an experiment the keyboard of the temperature controller

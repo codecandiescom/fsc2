@@ -50,8 +50,8 @@ find_field, 0, EXP;             // return current field value
 field_resolution, 0, EXP;       // returns resolution of field meter
 field_meter_wait, 0, EXP;       // wait for field to stabilize
 
-measure_field, 0, EXP;          // return field value (ER035M_SA / ER035M_SAS)
-
+measure_field, 0, EXP;          // return field value (ER035M_SA, ER035M_SAS
+								// and PT2025)
 
 // Functions exported by the pulser drivers (DG2020, HFS9000)
 // (functions involving phases and keyboard for DG2020 only)
@@ -136,3 +136,11 @@ boxcar_get_curve, -1, EXP;
 voltmeter_get_data, 0, EXP;
 voltmeter_ac_measurement, 0, EXP;
 voltmeter_dc_measurement, 0, EXP;
+
+
+// Functions exported by the temperature controller (Lake Shore 330)
+
+temp_contr_lock_keyboard, -1, EXP;
+temp_contr_temperature, 0, EXP;
+temp_contr_sensor_unit, -1, EXP;
+temp_contr_sample_channel, -1, EXP;
