@@ -18,28 +18,37 @@
 /********************************************************************/
 
 
-square, 1, ALL;               // returns the square of a value
-int_slice, 1, ALL;            // creates an integer array slice
-float_slice, 1, ALL;          // creates an float array slice
-filename, -1, ALL;            // asks user for a file name
+square, 1, ALL;                 // returns the square of a value
+int_slice, 1, ALL;              // creates an integer array slice
+float_slice, 1, ALL;            // creates an float array slice
+filename, -1, ALL;              // asks user for a file name
 
 
 // Functions exported by the magnet power supply drivers
 
-magnet_setup, 2, ALL;         // set start field and sweep step size
-set_field, 1, EXP;            // goto to a field value
-sweep_up, 0, EXP;             // sweep magnet up
-sweep_down, 0, EXP;           // sweep magnet down
-reset_field, 0, EXP;          // go back to start field
+magnet_setup, 2, ALL;           // set start field and sweep step size
+set_field, 1, EXP;              // goto to a field value
+sweep_up, 0, EXP;               // sweep magnet up
+sweep_down, 0, EXP;             // sweep magnet down
+reset_field, 0, EXP;            // go back to start field
 
 
 // Functions exported by the field meter drivers
 
-find_field, 0, EXP;           // return current field value
-field_resolution, 0, EXP;     // returns resolution of field meter
-field_meter_wait, 0, EXP;     // wait a bit for field to stabilize
+find_field, 0, EXP;             // return current field value
+field_resolution, 0, EXP;       // returns resolution of field meter
+field_meter_wait, 0, EXP;       // wait a bit for field to stabilize
 
 
 // Functions exported by the pulser drivers
 
-pulser_set_timebase, 1, PREP; // sets timebase for pulser
+pulser_set_timebase, 1, PREP;   // sets timebase for pulser
+
+
+// Functions exported by the lock-in amplifier drivers
+
+lockin_get_data, -1, EXP;       // returns either the voltage or the
+				                // voltage measured at one of the ADCs
+lockin_sensitivity, -1, EXP;    // getss or sets the sensitivity
+lockin_time_constant, -1, EXP;  // gets or sets the time constant
+lockin_phase, -1, EXP;          // gets or sets the phase
