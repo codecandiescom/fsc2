@@ -329,6 +329,12 @@ void rb_pulser_full_reset( void )
 		card->delay = card->old_delay = 0;
 		rb_pulser_delay_card_state( card->handle, STOP );
 	}
+
+	/* The card for the initial delay needs some special handling, otherwise
+	   its delay won't get set even though it should (thanks to Huib for
+	   finding the problem) */
+
+	rb_pulser.delay_card[ INIT_DELAY ].old_delay = -1;
 }
 
 
