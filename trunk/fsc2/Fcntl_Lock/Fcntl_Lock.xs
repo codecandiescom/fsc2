@@ -100,9 +100,9 @@ C_fcntl_lock( fd, function, flock_hash, int_err )
 		if ( fcntl( fd, function, flock_struct ) != 0 )
 			XSRETURN_UNDEF;
 
-		/* If we're here to find out who's holding the lock we now must unpack
-		   the structure we got back from fcntl() and store it in the hash
-		   we got passed. */
+		/* Now to find out who's holding the lock we now must unpack the
+		   structure we got back from fcntl() and store it in the hash we
+		   got passed. */
 
 		if ( function == REAL_F_GETLK )
 		{
