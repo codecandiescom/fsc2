@@ -325,7 +325,6 @@ FILE *fsc2_fopen( const char *path, const char *mode )
 	raise_permissions( );
 	fp = fopen( path, mode );
 	lower_permissions( );
-
 	return fp;
 }
 
