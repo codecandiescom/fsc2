@@ -121,8 +121,6 @@ int gpib_init( const char *log_file_name, int log_level )
 	if ( ll > LL_ALL )
 		ll = LL_ALL;
 
-	raise_permissions( );
-
     gpib_init_log( log_file_name );             /* initialise logging */
 	gpib_error_setup( gpib_error_buffer, 1024 );
 
@@ -132,12 +130,14 @@ int gpib_init( const char *log_file_name, int log_level )
 
 		if ( ll > LL_NONE )
 		{
+			raise_permissions( );
 			gpib_log_date( );
 			fprintf( gpib_log, "%s\n", gpib_error_buffer );
 			gpib_log_date( );
 			fprintf( gpib_log, "Initialization of controller failed.\n\n" );
 			if ( gpib_log != stderr )
 				fclose( gpib_log );                 /* close log file */
+			lower_permissions( );
 		}
 
 		/* Get rid of the device list if it's already created */
@@ -161,12 +161,10 @@ int gpib_init( const char *log_file_name, int log_level )
 			}
 		}
 
-		lower_permissions( );
         return FAILURE;
     }
 
     gpib_is_active = 1;
-	lower_permissions( );
     gpib_timeout( controller, TIMEOUT );
     return SUCCESS;
 }
@@ -230,20 +228,19 @@ int gpib_shutdown( void )
 	T_free( cur_dev );
 	gpib_dev_list = NULL;
 
-	raise_permissions( );
-
     gpib_onl( controller, OFF );       /* "switch off" the controller */
 
     if ( ll > LL_NONE )
     {
+		raise_permissions( );
         gpib_log_date( );
         fprintf( gpib_log, "GPIB bus is being shut down.\n\n" );
         if ( gpib_log != stderr )
             fclose( gpib_log );                 /* close log file */
+		lower_permissions( );
     }
 
     gpib_is_active = 0;
-	lower_permissions( );
     return SUCCESS;
 }
 
@@ -263,12 +260,12 @@ int gpib_shutdown( void )
 static void gpib_init_log( const char *log_file_name )
 {
 	const char *name;
-	bool access_ok = UNSET;
-	bool set_perms = UNSET;
 
 
     if ( ll == LL_NONE )
         return;
+
+	raise_permissions( );
 
     if ( log_file_name == NULL || *log_file_name == '\0' )
 	{
@@ -280,18 +277,13 @@ static void gpib_init_log( const char *log_file_name )
 	{
         name = log_file_name;
 
-		access_ok = access( name, W_OK ) == 0 ? SET : UNSET;
-
-		if ( ! access_ok && errno == ENOENT )    /* file doesn't exist yet ? */
-			set_perms = SET;
-
 		if ( ( gpib_log = fopen( name, "w" ) ) == NULL )     /* open fails ? */
 		{
 			gpib_log = stderr;
 			fprintf( stderr, "Can't open log file %s, using stderr instead.\n",
 					 name );
 		}
-		else if ( set_perms )  /* if file is new set its permissions to 0666 */
+		else
 			chmod( name,
 				   S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH );
 	}
@@ -300,6 +292,8 @@ static void gpib_init_log( const char *log_file_name )
 
     fprintf( gpib_log, "GPIB bus is being initialised.\n" );
     fflush( gpib_log );
+
+	lower_permissions( );
 }
 
 
@@ -346,8 +340,6 @@ int gpib_init_device( const char *device_name, int *dev )
 	cur_dev->name = T_strdup( device_name );
 	cur_dev->next = NULL;
 
-	raise_permissions( );
-
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_init_device", device_name );
 
@@ -366,7 +358,6 @@ int gpib_init_device( const char *device_name, int *dev )
 		T_free( cur_dev );
         sprintf( gpib_error_msg, "Can't initialize device %s, status = 0x%x",
 				 device_name, gpib_status );
-		lower_permissions( );
 		return FAILURE;
 	}
 
@@ -374,7 +365,6 @@ int gpib_init_device( const char *device_name, int *dev )
         gpib_log_function_end( "gpib_init_device", device_name );
 
 	*dev = cur_dev->number;
-	lower_permissions( );
 	return SUCCESS;
 }
 
@@ -411,14 +401,14 @@ int gpib_timeout( int device, int period )
     if ( period > T1000s )
         period = T1000s;
 
-	raise_permissions( );
-
     if ( ll > LL_ERR )
     {
+		raise_permissions( );
         gpib_log_date( );
         fprintf( gpib_log, "Call of gpib_timeout for device %s, ", dev_name );
         fprintf( gpib_log, "-> timeout is set to %s\n", tc[ period ] );
         fflush( gpib_log );
+		lower_permissions( );
     }
 
     gpib_tmo( device, period );
@@ -427,19 +417,19 @@ int gpib_timeout( int device, int period )
     {
         sprintf( gpib_error_msg, "Can't set timeout period for device %s, "
 				 "gpib_status = 0x%x.", dev_name, gpib_status );
-		lower_permissions( );
         return FAILURE;
     }
 
     if ( ll > LL_ERR )
     {
+		raise_permissions( );
         gpib_log_date( );
         fprintf( gpib_log, "EXIT of gpib_timeout\n" );
         fflush( gpib_log );
+		lower_permissions( );
     }
 
     timeout = period;          /* store actual value of timeout period */
-	lower_permissions( );
     return SUCCESS;
 }
 
@@ -468,8 +458,6 @@ int gpib_clear_device( int device )
 		return FAILURE;
 	}
 
-	raise_permissions( );
-
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_clear_device", dev_name );
 
@@ -477,8 +465,6 @@ int gpib_clear_device( int device )
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_clear_device", dev_name );
-
-	lower_permissions( );
 
     if ( gpib_status & GPIB_ERR )
     {
@@ -514,8 +500,6 @@ int gpib_local( int device )
 		return FAILURE;
 	}
 
-	raise_permissions( );
-
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_local", dev_name );
 
@@ -523,8 +507,6 @@ int gpib_local( int device )
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_local", dev_name );
-
-	lower_permissions( );
 
     if ( gpib_status & GPIB_ERR )
     {
@@ -560,8 +542,6 @@ int gpib_trigger( int device )
 		return FAILURE;
 	}
 
-	raise_permissions( );
-
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_trigger", dev_name );
 
@@ -569,8 +549,6 @@ int gpib_trigger( int device )
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_trigger", dev_name );
-
-	lower_permissions( );
 
     if ( gpib_status & GPIB_ERR )
     {
@@ -687,19 +665,18 @@ int gpib_write( int device, const char *buffer, long length )
 		return FAILURE;
 	}
 
-	raise_permissions( );
-
     if ( length <= 0 )           /* check validity of length parameter */
     {
         if ( ll != LL_NONE )
         {
+			raise_permissions( );
             gpib_log_date( );
             fprintf( gpib_log, "ERROR in in call of gpib_write: "
                                "Invalid parameter: %ld bytes.\n", length );
             fflush( gpib_log );
+			lower_permissions( );
         }
 
-		lower_permissions( );
 		sprintf( gpib_error_msg, "Can't write %ld bytes.", length );
 		return FAILURE;
     }
@@ -714,8 +691,6 @@ int gpib_write( int device, const char *buffer, long length )
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_write", dev_name );
-
-	lower_permissions( );
 
     if ( gpib_status & GPIB_ERR )
     {
@@ -740,6 +715,7 @@ static void gpib_write_start( const char *dev_name, const char *buffer,
 							  long length )
 {
     gpib_log_function_start( "gpib_write", dev_name );
+	raise_permissions( );
     fprintf( gpib_log, "-> There are %ld bytes to be sent\n", length );
 
     if ( ll == LL_ALL )
@@ -749,6 +725,7 @@ static void gpib_write_start( const char *dev_name, const char *buffer,
     }
 
     fflush( gpib_log );
+	lower_permissions( );
 }
 
 
@@ -779,19 +756,18 @@ int gpib_read( int device, char *buffer, long *length )
 		return FAILURE;
 	}
 
-	raise_permissions( );
-
     if ( *length <= 0 )          /* check validity of length parameter */
     {
         if ( ll != LL_NONE )
         {
+			raise_permissions( );
             gpib_log_date( );
             fprintf( gpib_log, "ERROR in call of gpib_read: "
                                "Invalid parameter: %ld bytes\n", *length );
             fflush( gpib_log );
+			lower_permissions( );
         }
 
-		lower_permissions( );
         sprintf( gpib_error_msg, "Can't read %ld bytes.", *length );
         return FAILURE;
     }
@@ -799,8 +775,10 @@ int gpib_read( int device, char *buffer, long *length )
     if ( ll > LL_ERR )
     {
         gpib_log_function_start( "gpib_read", dev_name );
+		raise_permissions( );
         fprintf( gpib_log, "-> Expecting up to %ld bytes\n", *length );
         fflush( gpib_log );
+		lower_permissions( );
     }
 
     gpib_rd( device, buffer, expected );
@@ -808,8 +786,6 @@ int gpib_read( int device, char *buffer, long *length )
 
     if ( ll > LL_NONE )
         gpib_read_end( dev_name, buffer, *length, expected );
-
-	lower_permissions( );
 
     if ( gpib_status & GPIB_ERR )
     {
@@ -840,6 +816,7 @@ static void gpib_read_end( const char *dev_name, char *buffer, long received,
     if ( ll < LL_CE )
         return;
 
+	raise_permissions( );
     fprintf( gpib_log, "-> Received %ld of up to %ld bytes\n",
              received, expected );
 
@@ -850,6 +827,8 @@ static void gpib_read_end( const char *dev_name, char *buffer, long received,
     }
 
     fflush( gpib_log );
+	lower_permissions( );
+
 }
 
 
@@ -870,8 +849,6 @@ int gpib_serial_poll( int device, unsigned char *stb )
 		return FAILURE;
 	}
 
-	raise_permissions( );
-
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_serial_poll", dev_name );
 
@@ -882,7 +859,6 @@ int gpib_serial_poll( int device, unsigned char *stb )
 
     if ( gpib_status & GPIB_ERR )
     {
-		lower_permissions( );
         sprintf( gpib_error_msg, "Can't serial poll device %s, "
 				 "gpib_status = 0x%x", dev_name, gpib_status );
         return FAILURE;
@@ -890,11 +866,12 @@ int gpib_serial_poll( int device, unsigned char *stb )
 
     if ( ll >= LL_CE )
 	{
+		raise_permissions( );
 		fprintf( gpib_log, "-> Received status byte = 0x%x\n", *stb );
 		fflush( gpib_log );
+		lower_permissions( );
 	}
 
-	lower_permissions( );
     return SUCCESS;
 }
 
@@ -969,9 +946,11 @@ static void gpib_log_error( const char *type )
 static void gpib_log_function_start( const char *function,
 									 const char *dev_name )
 {
+	raise_permissions( );
     gpib_log_date( );
     fprintf( gpib_log, "Call of %s, dev = %s\n", function, dev_name );
     fflush( gpib_log );
+	lower_permissions( );
 }
 
 
@@ -986,6 +965,7 @@ static void gpib_log_function_start( const char *function,
 static void gpib_log_function_end( const char *function,
 								   const char *dev_name )
 {
+	raise_permissions( );
     if ( gpib_status & GPIB_ERR )
         gpib_log_error( function );
     else
@@ -998,6 +978,7 @@ static void gpib_log_function_end( const char *function,
     }
 
     fflush( gpib_log );
+	lower_permissions( );
 }
 
 
