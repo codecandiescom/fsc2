@@ -108,7 +108,6 @@ const char *show_fselector( const char *message, const char *directory,
 	if ( I_am == PARENT )
 	{
 		switch_off_special_cursors( );
-		fl_set_fselector_placement( FL_PLACE_MOUSE | FL_FREE_SIZE );
 		return fl_show_fselector( message, directory, pattern, def );
 	}
 	else

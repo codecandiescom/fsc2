@@ -306,6 +306,8 @@ static bool xforms_init( int *argc, char *argv[] )
 #endif	
 
 	fl_disable_fselector_cache( 1 );
+	fl_set_fselector_placement( FL_PLACE_MOUSE | FL_FREE_SIZE );
+	fl_set_fselector_border( FL_FULLBORDER );
 
 	/* Create and display the main form */
 
@@ -409,7 +411,6 @@ void load_file( FL_OBJECT *a, long reload )
 		if ( main_form->Load->u_ldata == 0 &&
 			 main_form->Load->u_cdata == NULL )
 		{
-			fl_set_fselector_placement( FL_PLACE_MOUSE | FL_FREE_SIZE );
 			fn = fl_show_fselector( "Select input file:", NULL, "*.edl",
 									NULL );
 			if ( fn == NULL )
