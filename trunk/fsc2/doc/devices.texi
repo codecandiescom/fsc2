@@ -1514,6 +1514,30 @@ Pulsers}. Several of the aspects of the following short descriptions of
 the pulser functions will probably only become understandable after
 reading the chapter about pulsers and pulses.
 
+Please note: Most functions for changing pulses will @strong{not} lead
+to an immediate change of the pulse sequence the pulser outputs. E.g.@:
+calling the function @code{pulser_shift()} (for moving pulses) will not
+shift the pulses immediately. Instead, all changes to pulses are
+recorded and but only executed when the function @code{pulser_update()}
+gets called.
+
+The reason for this is twofold: Changes to only parts of the pulses
+might lead to a pulse sequence, which can't be output, e.g.@: because
+pulses would collide. Thus it is necessary to wait until all changes of
+pulse parameters have been done before trying to create a new pulse
+sequence. The second reason is that updating the pulser can be quite a
+time-consuming activity and if it would be done whenever only parts of a
+more complex change of the pulse sequence is finished might increase the
+time needed to do an experiment a lot.
+
+The only functions that immediately change the pulse sequence are
+@code{pulser_update()}, @code{pulser_reset}, @code{pulser_next_phase()}
+and @code{pulser_phase_reset()}. For all other functions the new state
+of the pulse sequence has to be committed explicitely by calling
+@code{pulser_update()}.
+
+
+
 @table @samp
 @anchor{pulser_name}
 @item pulser_name()
@@ -1552,7 +1576,7 @@ also via its keyboard it can be unlocked (and also re-locked) from within
 the program. To unlock the keyboard call this function with an argument
 of @code{0} or @code{"OFF"}, to re-lock the keyboard call it again with
 a non-zero argument, @code{"ON"} or no argument at all. This command is
-only available for the Sony/Tektronix DG2020.
+only available for the @strong{Sony/Tektronix DG2020}.
 
 
 @anchor{pulser_update}
@@ -1607,6 +1631,8 @@ phase of the phase sequence (defined in the @code{PHASE} section)
 associated with the pulses. By calling this function the phases of the
 pulses are switched to the next phase. By repeatedly calling the
 function one can run through the complete list of phases for the pulses.
+This function also immediately updates the pulse sequence, as it is done
+by calling @code{pulser_update()}.
 
 
 @anchor{pulser_phase_reset}
@@ -1618,6 +1644,8 @@ argument is given the phases of all pulses are reset to their initial
 phase, i.e.@: the first phase of the phase sequence (defined in the
 @code{PHASE} section) associated with the pulses. If one or more pulses
 are passed to the function the phases of only these pulses are reset.
+This function also immediately updates the pulse sequence, as it is done
+by calling @code{pulser_update()}.
 
 
 @anchor{pulser_reset}
@@ -1625,8 +1653,10 @@ are passed to the function the phases of only these pulses are reset.
 @findex pulser_reset()
 This function does not take any arguments at all. It switches the pulser
 back to the initial state it was in at the start of the experiment. It
-is basically identical to calling both  @code{pulser_pulse_reset()} and
-@code{pulser_phase_reset()} without arguments.
+is basically identical to calling both @code{pulser_pulse_reset()} and
+@code{pulser_phase_reset()} without arguments.  This function also
+immediately updates the pulse sequence, as it is done by calling
+@code{pulser_update()}.
 
 
 @anchor{pulser_stop_on_update}
