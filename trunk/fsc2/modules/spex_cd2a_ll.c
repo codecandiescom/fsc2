@@ -1170,7 +1170,7 @@ bool spex_cd2a_store_state( void )
 				  "driver is stored:\n"
 				  "# 1. An offset of the monochromator, i.e. a number that "
 				  "always has to be\n"
-				  "#    added to wavenumbers -or lengths reported by the "
+				  "#    added to wavenumbers or -lengths reported by the "
 				  "monochromator and\n"
 				  "#    subtracted from wavenumbers or -lengths send to the "
 				  "device.\n"
