@@ -4194,7 +4194,7 @@ while (@lines) {
 
     # replace images
 
-    s[\@image\s*{(.+?)}(.*)]
+    while ( s[\@image\s*{(.+?)}(.*)]
 	{
 	 my $in_line = $2;
 	 my $next_line = shift( @lines );
@@ -4211,7 +4211,7 @@ while (@lines) {
 	 } else {
 		 "<IMG SRC=\"$image\" ALT=\"$base\">$in_line";
 	 }
-    }eg;
+    }e){};
 
     #
     # try to guess bibliography references or glossary terms
