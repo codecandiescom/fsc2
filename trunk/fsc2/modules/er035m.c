@@ -109,7 +109,7 @@ int er035m_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	if ( ! exist_device( "s_band" ) && ! exist_device( "aeg_x_band" ) )
+	if ( ! exist_device( "aeg_s_band" ) && ! exist_device( "aeg_x_band" ) )
 	{	
 		eprint( WARN, "ER035M: Driver for NMR gaussmeter is loaded "
 				"but no appropriate magnet power supply driver." );
