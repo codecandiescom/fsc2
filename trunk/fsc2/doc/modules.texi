@@ -789,15 +789,19 @@ functions defined in other modules) consists of three to four steps:
 @enumerate
 @item
 You may first want to check if the function you're planning to call
-exists at all. To do so call @code{function_exist()} with the name of
+exists at all. To do so call @code{func_exists()}
+@findex func_exists()
+with the name of
 the function as the argument. It will return @code{0} if the function
-does not exist, otherwise a non-zero value.
+does not exist and can not be used, otherwise a non-zero value.
 
 @item
-Call @code{function_get()} with the name of the function you want to
-call as the argument --- this will return a variable pointer to the
-function which you have to store. If the returned pointer is @code{NULL}
-the function does not exist or isn't loaded.
+Call @code{func_get()}
+@findex func_get()
+with the name of the function you want to
+call as the argument --- this will return a variable with a pointer to
+the function which you have to store. If the returned pointer is
+@code{NULL} the function does not exist or isn't loaded.
 
 @item
 Now call @code{vars_push()} for each of the arguments of the function -
@@ -822,7 +826,7 @@ Var *func_ptr;
 Var *ret_value;
 int access;
 
-if ( function_exist( "foo" )               /* test if function exists */
+if ( func_exists( "foo" )                  /* test if function exists */
 @{
     /* do your error handling here */ 
 @}
@@ -836,9 +840,7 @@ else
 @end example
 
 
-There are two points that need attention:
-@enumerate
-@item
+There is one point that need attention:
 After the call to @code{func_call()} the variable with the pointer to
 the function returned by @code{func_get()}
 @findex func_get()
@@ -847,37 +849,12 @@ disappear automatically. Thus, when you need to call the function again
 you will have to go through this procedure, since the value
 stored in @code{func_ptr} after the call to @code{func_call()} is
 completely useless and even dangerous to use for any purpose whatsoever!
-@item
-If you just want to test if an @acronym{EDL} function exists at all just do
-only step 1 but after checking the pointer @strong{never} forget to call
-@code{vars_pop()} on the returned variable! I.e.@: do
-@example
-Var *func_ptr;
-int access;
-
-func_ptr = func_get( "foo", &access );    /* get pointer to function */
-if ( func == NULL )                       /* test if function exists */
-    /* do your error handling here */ 
-else                                  
-@{                                    
-    vars_pop( func_ptr );                 /* never ever forget this ! */
-    /* code depending on the existence of `foo()' goes here */
-@}
-@end example
-@noindent
-Don't assume that the value of @code{func_prtr} you got from
+So, don't assume that the value of @code{func_prtr} you got from
 @code{func_get()}
 @findex func_get()
 will have any meaning later on. Not only will the value be invalid but,
 even worse, there is an high probability that hard to trace bugs will
 result if you try to use it.
-@end enumerate
-
-Actually, if you look closely at the code you will see that you have to
-call @code{vars_pop()} on the returned value only if it wasn't the
-@code{NULL} pointer (i.e.@: if the function was not found) --- but nothing
-bad is going to happen if you call @code{vars_pop()}on the @code{NULL}
-pointer, anyway.
 
 
 

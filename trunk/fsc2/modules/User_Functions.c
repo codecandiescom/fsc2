@@ -640,49 +640,41 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 	/* At the very start lets figure out if there are pulser functions for
 	   phase cycling */
 
-	if ( ( func_ptr = func_get( "pulser_next_phase", &access ) ) == NULL )
+	if ( ! func_exists( "pulser_next_phase" ) )
 	{
 		eprint( FATAL, SET, "%s(): No pulser module loaded supplying a "
 				"function to do phase cycling.\n", func_name );
 		THROW( EXCEPTION );
 	}
-	vars_pop( func_ptr );
 
-	if ( ( func_ptr = func_get( "pulser_phase_reset", &access ) ) == NULL )
+	if ( ! func_exists( "pulser_phase_reset" ) )
 	{
 		eprint( FATAL, SET, "%s(): No pulser module loaded supplying a "
 				"function to do phase cycling.\n", func_name );
 		THROW( EXCEPTION );
 	}
-	vars_pop( func_ptr );
 
-	if ( ( func_ptr = func_get( "pulser_update", &access ) ) == NULL )
+	if ( ! func_exists( "pulser_update" ) )
 	{
 		eprint( FATAL, SET, "%s(): No pulser module loaded supplying a "
 				"function to do phase cycling.\n", func_name );
 		THROW( EXCEPTION );
 	}
-	vars_pop( func_ptr );
 
 	/* Check that there's a function for starting the acquisition */
 
-	if ( ( func_ptr = func_get( "digitizer_start_acquisition", &access ) )
-		 == NULL )
+	if ( ! func_exists( "digitizer_start_acquisition", &access ) )
 	{
 		eprint( FATAL, SET, "%s(): No digitizer module loaded supplying a "
 				"function to do an acquisition.\n", func_name );
 		THROW( EXCEPTION );
 	}
-	vars_pop( func_ptr );
 
 	/* Check that both the supplied functions are supported and sets flags
        accordingly */
 
-	*is_1 = ( ( func_ptr = func_get( func_1, &access ) ) != NULL );
-	vars_pop( func_ptr );
-
-	*is_2 = ( ( func_ptr = func_get( func_2, &access) ) != NULL );
-	vars_pop( func_ptr );
+	*is_1 = func_exists( func_1 ) != 0;
+	*is_2 = func_exists( func_2 ) != 0;
 
 	if ( ! is_1 && ! *is_2 )
 	{
