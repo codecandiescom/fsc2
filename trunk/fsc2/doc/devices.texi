@@ -3184,13 +3184,17 @@ the number of pixels in the (vertical) @i{y}-direction.
 @section Monochromator Functions
 @cindex Monochromator Functions
 
-The only monochromator currently supported is the SpectraPro-300i
-(actually its only tested with the 308i) by the Acton Research
-Corporation. The module for the monochromator gets loaded by specifying
+Currently only the SpectraPro-300i series of monochromator is supported
+(actually, the module has only been tested with the 308i) by the Acton
+Research Corporation. The module for the monochromator gets loaded by
+specifying
 @example
 spectrapro_300i;
 @end example
 in the @code{DEVICES} section. 
+
+Some of the functions listed below will only work when the monochromator
+is used in conjunction with the Spec-10 CCD camera by Roper Scientific.
 
 @table @samp
 
@@ -3198,6 +3202,18 @@ in the @code{DEVICES} section.
 @item monochromator_name()
 @findex monochromator_name()
 Returns a string with the name of the monochromator being used.
+
+@c monochromator_turret, -1, EXP;            // set/query current turret
+@c monochromator_grating, -1, EXP;           // set/query current grating
+@c monochromator_wavelength, -1, EXP;        // set/query wavelength
+@c monochromator_install_grating, 2, EXP;    // install new grating
+@c monochromator_groove_density, 1, EXP;     // get groove density of grating
+@c monochromator_wavelength_axis, 0, EXP;    // caclulate wavelength axis
+@c monochromator_set_calibration, -1, EXP;   // manually set calibration
+@c monochromator_load_calibration, -1, EXP;  // read in calibration file
+@c monochromator_init_offset, -1, EXP;
+@c monochromator_init_adjust, -1, EXP;
+
 
 @end table
 
