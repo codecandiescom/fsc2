@@ -190,8 +190,12 @@ int main( int argc, char *argv[ ] )
 }
 
 
-/*------------------------------------------------------------*/  
-/*------------------------------------------------------------*/  
+/*---------------------------------------------------------*/  
+/* Does a preliminary check of the command line arguments. */
+/* The main handling of arguments is only done after the   */
+/* graphics initialisation, but some have to be handled    */
+/* earlier.                                                */
+/*---------------------------------------------------------*/  
 
 static int scan_args( int *argc, char *argv[ ], char **fname )
 {
@@ -328,8 +332,11 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 }
 
 
-/*------------------------------------------------------------*/  
-/*------------------------------------------------------------*/  
+/*----------------------------------------------------------*/  
+/* This function is called after either exit() is called or */
+/* it returns from main(). Here some cleanup is done that   */
+/* is necessary even oif the program crashed.               */
+/*----------------------------------------------------------*/  
 
 static void final_exit_handler( void )
 {
@@ -563,6 +570,10 @@ void edit_file( FL_OBJECT *a, long b )
 
 
 /*---------------------------------------------------------------------*/
+/* This function is called to start the editor on the currently loaded */
+/* file. It is called after a fork(), so it may not return. Which      */
+/* editor is used depends on the environment variable EDITOR. If this  */
+/* variable isn't set vi is used.                                      */
 /*---------------------------------------------------------------------*/
 
 static void start_editor( void )
@@ -915,10 +926,9 @@ void run_file( FL_OBJECT *a, long b )
 
 /*--------------------------------------------------------------------*/
 /* display_file() is used to put the contents of a file into the main */
-/* browser, numbering the lines and expanding tab chars.              */
-/* ->                                                                 */
-/*   * name of the file to be displayed                               */
-/*   * FILE pointer of the file                                       */
+/* browser, numbering the lines and expanding tab chars. Arguments    */
+/* are the name of the file to be displayed and the FILE pointer of   */
+/* the file.                                                          */
 /*--------------------------------------------------------------------*/
 
 static bool display_file( char *name, FILE *fp )
@@ -1107,8 +1117,11 @@ void clean_up( void )
 }
 
 
-/*------------------------------------------------------------*/  
-/*------------------------------------------------------------*/  
+/*-------------------------------------------------------------*/  
+/* This function is the callback function for the help button. */
+/* It forks a process that execs a browser displaying the HTML */
+/* documentation.                                              */
+/*-------------------------------------------------------------*/
 
 void run_help( FL_OBJECT *a, long b )
 {
@@ -1135,8 +1148,14 @@ void run_help( FL_OBJECT *a, long b )
 }
 
 
-/*------------------------------------------------------------*/  
-/*------------------------------------------------------------*/  
+/*--------------------------------------------------------------*/  
+/* This function starts a browser with the HTML documantation.  */
+/* It is called after a fork(), so it may not return. Which     */
+/* browser is used depends on the environment variable BROWSER, */
+/* currently the program only knows how to deal with Netscape,  */
+/* opera, konqueror, lnyx or w3m. If BROWSER isn't set Netscape */
+/* is used.                                                     */
+/*--------------------------------------------------------------*/  
 
 static void start_help_browser( void )
 {
@@ -1192,16 +1211,16 @@ static void start_help_browser( void )
 
 		if ( system( "xwininfo -name Netscape >/dev/null 2>&1" ) )
 		{
-			av[ 1 ] = get_string( 14 + strlen( docdir ) );
-			strcpy( av[ 1 ], "file:" );
+			av[ 1 ] = get_string( 15 + strlen( docdir ) );
+			strcpy( av[ 1 ], "file:/" );
 			strcat( av[ 1 ], docdir );
 			strcat( av[ 1 ], "fsc2.html" );
 		}
 		else
 		{
 			av[ 1 ] = T_strdup( "-remote" );
-			av[ 2 ] = get_string( 34 + strlen( docdir ) );
-			strcpy( av[ 2 ], "openURL(file:" );
+			av[ 2 ] = get_string( 35 + strlen( docdir ) );
+			strcpy( av[ 2 ], "openURL(file:/" );
 			strcat( av[ 2 ], docdir );
 			strcat( av[ 2 ], "fsc2.html,new-window)" );
 		}
