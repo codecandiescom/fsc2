@@ -784,4 +784,47 @@ variable!
 @cindex IF-ELSE
 
 
-Finally there's the @code{IF-ELSE} construct.
+Finally there's the @code{IF-ELSE} construct. It works as in most other
+programming languages. In the simplest case you just have the @code{IF}
+part to execute some instructions only under certain conditions. In this
+case you start with the @code{IF} keyword, followed by the condition
+that has to be met in order to run the following code and, finally, the
+statements enclosed in curly braces. Here's an simple example:
+@example
+IF x < 0 @{
+    x *= -1.0;
+@}
+@end example
+@noindent
+This is a basically a function that calculates the absolute value of the
+variable @code{x} (there's also the built-in function @code{abs()} for
+doing this which is probably a lot faster).
+
+By using the @code{ELSE} you can specify an alternative, with the
+statements to be executed if the @code{IF} condition not being met again
+enclosed in curly braces. One more example:
+@example
+IF x >= 0 @{
+    x = 1.0;
+@} ELSE @{
+    x = 0.0;
+@}
+@end example
+@noindent
+This is basically the Heavyside function that is zero for all arguments
+less than zero and one everywhere else.
+
+But things can get even more complex -- you can follow the @code{ELSE}
+directly by another @code{IF}. Let's assume that you need to set
+@code{x} to 1 if it's larger than 1, to 0 if it belongs to the interval
+@w{[ 0, 1 ]} and to -1 if it's smaller than 0. Then you could use:
+@example
+IF x > 1.0 @{
+    x = 1.0;                 // x is larger than 1
+@} ELSE IF x >= 0.0 @{
+    x = 0.0;                 // x must be element of [ 0, 1 ]
+@} ELSE @{
+    x = -1.0;                // last exit: x is less than 0
+@}
+@end example
+@noindent
