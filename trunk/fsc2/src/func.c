@@ -189,8 +189,8 @@ Var *func_call( Var *f )
 	ret = ( *f->val.fnct )( f->next );
 
 	/* finally do clean up, i.e. for function with a known number of arguments
-	   remove all variables from the stack, and also remove the function
-	   variable und then return the result */
+	   remove all variables from the stack. Finally remove the function
+	   variable und return the result */
 
 	if ( f->dim > 0 )
 	{
