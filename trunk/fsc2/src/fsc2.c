@@ -32,6 +32,10 @@ int main( int argc, char *argv[ ] )
 	split( argv[ 1 ] );
 	clean_up( );
 
+	/* Make sure the TRY/CATCH stuff worked out right */
+
+	assert( exception_env_stack_pos == 0 );
+
 	return EXIT_SUCCESS;
 }
 
@@ -40,10 +44,6 @@ void clean_up( void )
 {
 	int i;
 
-
-	/* Make sure the TRY/CATCH stuff worked out right */
-
-	assert( exception_env_stack_pos == 0 );
 
 	/* clear up the compilation structure */
 
