@@ -88,13 +88,15 @@ line:    linet
 
 ;
 
-linet:   VAR_TOKEN                 { } /* no assignment to be done */
+linet:   VAR_TOKEN                 { }        /* no assignment to be done */
        | VAR_TOKEN '=' expr        { vars_assign( $3, $1 ); }
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }
          list1 ']'                 { vars_arr_lhs( $4 ); }
          arhs
 	   | FUNC_TOKEN '('            { print( FATAL, "Not a variable "
-											"definition.\n" );
+											"definition, funcions can only be "
+											"used in variable "
+											"initialisations.\n" );
 	                                 THROW( EXCEPTION ); }
        | FUNC_TOKEN '['            { print( FATAL, "'%s' is a function and "
 											"not an array.\n", $1->name );
