@@ -181,9 +181,9 @@ void load_all_drivers( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		load_functions( cd );
 
-	/* This done we run the init hooks (if one exists) - warn if it didn't
+	/* This done we run the init hooks (if one exists) and warn if it didn't
 	   return successfully (if the init hook thinks it should kill the whole
-	   program it' supposed to throw an exception) */
+	   program it's supposed to throw an exception) */
 
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded && cd->driver.is_init_hook &&
@@ -256,7 +256,7 @@ void load_functions( Device *dev )
 	T_free( lib_name );
 	if ( dev->driver.handle == NULL )
 	{
-		if ( strcmp( dev->name, "User_Functions" ) )
+		if ( ! strcmp( dev->name, "User_Functions" ) )
 			eprint( FATAL, "Can't open library `User_Functions.so'.\n" );
 		else
 			eprint( FATAL, "Can't open library for device `%s'.\n",
@@ -451,7 +451,7 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 /* If the function can't be found it returns a NULL pointer.              */
 /*------------------------------------------------------------------------*/
 
-Var *func_get( char *name, int *access )
+Var *func_get( const char *name, int *access )
 {
 	int i;
 	Var *ret;

@@ -1,7 +1,7 @@
 bison_sources  = $(wildcard *_parser.y)
 flex_sources   = $(wildcard *_lexer.flex)
 c_sources      = fsc2.c assign.c util.c exceptions.c variables.c func.c T.c \
-				 phases.c ppcheck.c pulse.c prim_exp.c devices.c
+				 phases.c ppcheck.c pulse.c prim_exp.c devices.c gpib.c
 sources        = $(bison_sources:.y=.c) $(flex_sources:.flex=.c) \
 				 ${c_sources}
 objects        = $(sources:.c=.o)
@@ -9,7 +9,8 @@ CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 			     -Wmissing-prototypes -Wmissing-declarations -W \
 				 -DDEBUG \
 				 # -DMDEBUG   # for malloc debugging
-modules        = User_Functions.c dg2020.c tds754a.c sr510.c
+modules        = User_Functions.c dg2020.c tds754a.c sr510.c s_band.c \
+				 er035m.c
 header         = ${c_sources:.c=.h} global.h
 
 
@@ -17,7 +18,7 @@ header         = ${c_sources:.c=.h} global.h
 all: tags fsc2 mods
 
 fsc2: $(objects) fsc2_clean $(header)
-	gcc -o $@ $(objects) -Wl,-E -lm -ldl
+	gcc -o $@ $(objects) -Wl,-E -lm -ldl -lgpib -lfl
 
 %.o: %.c
 	gcc $(CFLAGS) -c -o $@ $<
