@@ -572,8 +572,8 @@ sub evaluate {
 	}
 
 	$sweep_rate = $cs / $kdt;
-	$sweep_rate = 1.39 * 1428.8 / 60 if $sweep_rate > 1.39 * 1428.8 / 60;
 	$sweep_rate = 0.01 * 1428.8 / 60 if $sweep_rate < 0.01 * 1428.8 / 60;
+	$sweep_rate = 1.39 * 1428.8 / 60 if $sweep_rate > 1.39 * 1428.8 / 60;
 
 	if ( $e > $start_field ) {
 		$e = $start_field + ( $num_points - 1 ) * $sweep_rate * $kdt;
@@ -971,9 +971,11 @@ IF J == 1 {
 		fsave( File, \"\\n\" );
 	}
 
-	fsave( File, \"\\n\" );
-	FOR I = 1 : Num_Points {
-		fsave( File, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] );
+	IF J > 1 {
+		fsave( File, \"\\n\" );
+		FOR I = 1 : Num_Points {
+			fsave( File, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] );
+		}
 	}
 }
 

@@ -114,7 +114,10 @@ $SIG{ TERM } = sub { shutdown( $server, 2 ) if $$ == $ppid; exit 0; };
 # stdout_lock() before writing to it and must release the lock only after
 # reading the complete reply from fsc2.
 
-while ( $client = $server->accept( ) ) {
+while ( 1 ) {
+	$client = $server->accept( );
+	next if $! == 10;
+	exit 1 unless $client;
   FORK:
 	if ( my $pid = fork ) {         # parent on success
 		close $client;

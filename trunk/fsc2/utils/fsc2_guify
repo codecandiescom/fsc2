@@ -55,8 +55,8 @@ my $of = *STDOUT;
 
 if ( $ARGV[ 0 ] ) {
     usage( ) if $ARGV[ 0 ] =~ /^-h$/ or $ARGV[ 0 ] =~ /^--h(elp)?$/;
-    open( $if, "<" . $ARGV[ 0 ] )
-        or die "Can't open input file " . $ARGV[ 0 ] . ": $!\n";
+    open( $if, "<$ARGV[ 0 ]" )
+        or die "Can't open input file $ARGV[ 0 ]: $!\n";
 }
 
 # Read in the complete input and do some parsing
@@ -142,8 +142,6 @@ while ( <$if> ) {
     die "Invalid syntax at line $lino near \"$cur_line\"\n";
 }
 
-close $if;
-
 die "Unbalanced if-endif construct(s)\n" if $if_level > 0;
 print STDERR "Warning: No variables found in input\n" if @vars == 0;
 
@@ -187,8 +185,8 @@ cond_check( );
 # Open the output file and write out the script
 
 if ( $ARGV[ 1 ] ) {
-    open( $of, ">" . $ARGV[ 1 ] )
-        or die "Can't open output file " . $ARGV[ 0 ] . ": $!\n";
+    open( $of, ">$ARGV[ 1 ]" )
+        or die "Can't open output file $ARGV[ 1 ]: $!\n";
 }
 
 select $of;

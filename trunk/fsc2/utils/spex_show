@@ -1,0 +1,84 @@
+#!/usr/bin/perl
+
+# Script for displaying scans of the monochromator on spex.chem.tu-berlin.de
+# using gnuplot - the "Reread" buttons allows to refresh the display in
+# order to see newly measured data.
+
+use strict;
+use warnings;
+use Tk;
+
+my $offset_factor = 0.1;
+
+my ( $gp, $size );
+
+die "Missing file name\n" if ! defined $ARGV[ 0 ];
+
+$ARGV[ 0 ] =~ /^(.*?)(\.(scan_\d+(\.(dat)?)?)?)?$/;
+my $name = $1;
+my $file = "$name.scan_1.dat";
+
+die "File '$file' does not exist\n" if ! -e $file;
+
+my $mw = MainWindow->new( );
+$mw->title( "spex_show" );
+$mw->Button( '-text' => "Reread",
+			 '-command' => \&reread )->pack( '-padx' => '2m',
+											 '-pady' => '2m' );
+$mw->Button( '-text' => "Quit",
+			 '-command' => sub { close $gp unless ! defined $gp;
+								 $mw->destroy } )->pack ( '-padx' => '2m',
+														  '-pady' => '2m' );
+reread();
+MainLoop;
+
+
+sub reread {
+	my ( $start, $end, $max, $min );
+
+	my $file = "$name.scan_1.dat";
+
+	if ( ! defined $size or $size != -s $file )
+	{
+		my $df;
+
+		$size = -s $file;
+		open( $df, "<$file" ) or die "Can't open file '$file': $!";
+
+		$_ = <$df>;
+		/^\s*([+-]?\d+\.\d+)\s+([+-]?\d+\.\d+)\s*$/;
+		$start = $1;
+		$min = $max = $2;
+
+		while ( <$df> ) {
+			/^\s*([+-]?\d+\.\d+)\s+([+-]?\d+\.\d+)\s*$/;
+			$end = $1;
+			$max = $2 if $2 > $max;
+			$min = $2 if $2 < $min;
+
+		}
+
+		close $df;
+
+		if ( ! defined $gp ) {
+			open( $gp, "| gnuplot" ) or die "Can't start gnuplot: $!";
+			select $gp;
+			$| = 1;
+			print "set nokey\n";
+			print "f(x,i)=x+(i-1)*off\n";
+		}
+
+		print "off=" . ( $offset_factor * ( $max - $min ) ) . "\n";
+		print "set xr[$start:$end]\n";
+	}
+
+	my $line = "plot '$file' u 1:2 w l";
+
+	for ( my $i = 2; ; $i++ ) {
+		$file = "$name.scan_$i.dat";
+		last unless -e $file or -s $file;
+		$line .= ",'$file' u 1:(f(" . '$2' . ",$i)) w l";
+	}
+
+	print "$line\n";
+}

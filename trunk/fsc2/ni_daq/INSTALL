@@ -312,11 +312,15 @@ Delete existing file and replace with a new one?" 7 54;
 	fi
 
 	# Ask user if the module should be included in /etc/modules.conf (or, on
-	# older installations, in /etc/conf.modules)
+	# older installations, in /etc/conf.modules, or, on newer installations,
+	# in /etc/modules.conf.local)
 
 	MODULECONF="/etc/modules.conf";
 	if [ ! -e $MODULECONF -a -e /etc/conf.modules ]; then
 		MODULECONF="/etc/conf.modules"
+	fi
+	if [ -e $MODULECONF -a -e /etc/modules.conf.local ]; then
+		MODULECONF="/etc/modules.conf.local"
 	fi
 
 	dialog --yesno \

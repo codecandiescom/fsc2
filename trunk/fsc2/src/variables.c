@@ -2419,6 +2419,8 @@ bool vars_exist( Var *v )
 	Var *lp;
 
 
+	fsc2_assert( v != NULL );
+
 	if ( v->flags & ON_STACK )
 		for ( lp = EDL.Var_Stack; lp != NULL && lp != v; lp = lp->next )
 			/* empty */ ;

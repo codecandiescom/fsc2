@@ -502,7 +502,7 @@ analog-to-digital converter.
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
 In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to code{yes} and
+character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @code{set-bin} to @code{no}.
 
 @paragraphindent 0
@@ -550,7 +550,7 @@ the field in older Bruker EPR spectrometers. Maximum field range is from
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
 In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to code{yes} and
+character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @code{set-bin} to @code{no}.
 
 @paragraphindent 0
@@ -590,7 +590,7 @@ range is @w{1460 G} to @w{19900 G}.
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
 In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to code{yes} and
+character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @code{set-bin} to @code{no}.
 
 @paragraphindent 0
@@ -668,7 +668,7 @@ the range is @w{1460 G} to @w{19900 G}.
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
 In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to code{yes} and
+character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @code{set-bin} to @code{no}.
 
 @paragraphindent 0
@@ -1174,7 +1174,7 @@ units!
 @strong{Controlled via}: GPIB bus (IEEE 488) via the Oxford ITC 503
 temperature controller transfering data between GPIB and Oxford ISOBUS.@*
 In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to code{yes} and
+character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @code{set-bin} to @code{no}.
 
 @paragraphindent 0
@@ -1212,7 +1212,7 @@ magnet used for Leiden @w{275 GHz} spektrometer.
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488)@*
 In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to code{yes} and
+character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @code{set-bin} to @code{no}.
 
 @paragraphindent 0

@@ -107,6 +107,7 @@ kontron4060   // Kontron 4060 voltmeter
 // Temperature controllers
 
 lakeshore330  // Lakeshore 330 temperature controller
+itc503;       // Oxford ITC503 temperature controller
 
 
 // Frequency counter

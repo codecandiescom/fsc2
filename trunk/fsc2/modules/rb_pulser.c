@@ -746,7 +746,7 @@ static void rb_pulser_card_setup( void )
 
 	delay_card[ DET_DELAY_1 ].name = DET_DELAY_CARD_1;
 	delay_card[ DET_DELAY_1 ].prev = delay_card + DET_DELAY_0;
-	delay_card[ DET_DELAY_0 ].next = NULL;
+	delay_card[ DET_DELAY_1 ].next = NULL;
 
 	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
 	{

@@ -335,6 +335,9 @@ Var *temp_contr_command( Var *v )
 
 static bool itc503_init( const char *name )
 {
+	char buf[ 10 ];
+
+
 	/* Initialize GPIB communication with the temperature controller */
 
 	if ( gpib_init_device( name, &itc503.device ) == FAILURE )
@@ -342,12 +345,12 @@ static bool itc503_init( const char *name )
 
 	/* Set end of EOS character to '\n' */
 
-	if ( gpib_write( itc503.device, "Q0\n", 3 ) == FAILURE )
+	if ( gpib_write( itc503.device, "Q0\r", 3 ) == FAILURE )
 		return FAIL;
 
 	/* Switch device per default to remote state with local lockout */
 
-	if ( gpib_write( itc503.device, "Q1\n", 3 ) == FAILURE )
+	if ( itc503_talk( "C1\r", buf, 10 ) != 2 )
 		return FAIL;
 
 	return OK;
@@ -363,7 +366,7 @@ static double itc503_sens_data( void )
 	char buf[ 50 ];
 	long len = 50;
 	double temp;
-	char cmd[ ] = "R*\n";
+	char cmd[ ] = "R*\r";
 
 
 	cmd[ 1 ] = itc503.sample_channel + '0';
@@ -400,19 +403,19 @@ static void itc503_lock( int state )
 	switch ( state )
 	{
 		case LOCAL_AND_LOCKED :
-			cmd = "Q0\n";
+			cmd = "Q0\r";
 			break;
 
 		case REMOTE_AND_LOCKED :
-			cmd = "Q1\n";
+			cmd = "Q1\r";
 			break;
 
 		case LOCAL_AND_UNLOCKED :
-			cmd = "Q2\n";
+			cmd = "Q2\r";
 			break;
 
 		case REMOTE_AND_UNLOCKED :
-			cmd = "Q3\n";
+			cmd = "Q3\r";
 			break;
 	}
 
@@ -444,8 +447,7 @@ static long itc503_talk( const char *message, char *reply, long length )
 
  start:
 
-	if ( gpib_write( itc503.device, message, strlen( message ) ) ==
-		 															  FAILURE )
+	if ( gpib_write( itc503.device, message, strlen( message ) ) == FAILURE )
 		itc503_gpib_failure( );
 
  reread:

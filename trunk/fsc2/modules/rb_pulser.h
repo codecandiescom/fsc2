@@ -78,12 +78,6 @@
 #define PRECISION         0.01
 
 
-/* Intrinsic delays introduced by the synthesizer for the RF pulse*/
-
-#define SYNTHESIZER_DELAY 7.0e-8      /* Delay before the synthesizer starts
-										 a pulse, about 70 ns when using the
-										 shortest possible delay */
-
 /* Definitions for dealing with pulse positions and lengths in units of
    the frequency of the clock card driving the delay card */
 

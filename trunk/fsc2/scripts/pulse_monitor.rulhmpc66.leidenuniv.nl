@@ -28,8 +28,11 @@ new_field;
 new_set_field;
 sweep_rate = 1.0;
 new_sweep_rate;
-freq = 10 MHz;
+freq;
+new_freq;
 Sweep_State = 0;
+att;
+new_att;
 
 
 PS[ 5 ];
@@ -37,7 +40,7 @@ PL[ 5 ];
 PSV[ 5 ];
 PLV[ 5 ];
 PMS[ 5 ];
-Freq, Current_Field, New_Field, Sweep_Rate, Sweep_Up,
+Freq, Current_Field, New_Field, RF_ON_OFF, Att, Sweep_Rate, Sweep_Up,
 Sweep_Stop, Sweep_Down, Pause, Clear;
 Acq_Rate, New_Acq_Rate;
 Pause_Display = 1;
@@ -65,11 +68,11 @@ P3:   FUNCTION = MW,
 	  LENGTH   = 100 ns;
 
 P4:   FUNCTION = RF,
-	  START    = 190 ns,
+	  START    = 300 ns,
 	  LENGTH   = 100 ns;
 
 P5:   FUNCTION = DETECTION,
-	  START    = 180 ns,
+	  START    = 250 ns,
 	  LENGTH   = 100 ns;
 
 init_1d( );
@@ -83,36 +86,41 @@ IF magnet_sweep( ) != STOPPED {
 
 current_field = get_field( );
 new_field = current_field;
+att = synthesizer_attenuation( );
+freq = synthesizer_frequency( );
 
 hide_toolbox( "ON" );
-PSV[ 1 ] = int( P1.START / 10 ns );
+PSV[ 1 ] = round( P1.START / 10 ns );
 PS[ 1 ] = input_create( "INT_INPUT", PSV[ 1 ] * 10, "Position of MW pulse 1" );
-PLV[ 1 ] = int( P1.LENGTH / 10 ns );
+PLV[ 1 ] = round( P1.LENGTH / 10 ns );
 PL[ 1 ] = input_create( "INT_INPUT", PLV[ 1 ] * 10, "Length of MW pulse 1" );
 
-PSV[ 2 ] = int( P2.START / 10 ns );
+PSV[ 2 ] = round( P2.START / 10 ns );
 PS[ 2 ] = input_create( "INT_INPUT", PSV[ 2] * 10, "Position MW of pulse 2" );
-PLV[ 2 ] = int( P2.LENGTH / 10 ns );
+PLV[ 2 ] = round( P2.LENGTH / 10 ns );
 PL[ 2 ] = input_create( "INT_INPUT", PLV[ 2 ] * 10, "Length of MW pulse 2" );
 
-PSV[ 3 ] = int( P3.START / 10 ns );
+PSV[ 3 ] = round( P3.START / 10 ns );
 PS[ 3 ] = input_create( "INT_INPUT", PSV[ 3 ] * 10, "Position of MW pulse 3" );
-PLV[ 3 ] = int( P3.LENGTH / 10 ns );
+PLV[ 3 ] = round( P3.LENGTH / 10 ns );
 PL[ 3 ] = input_create( "INT_INPUT", PLV[ 3 ] * 10, "Length of MW pulse 3" );
 
-PSV[ 4 ] = int( P4.START / 10 ns );
+PSV[ 4 ] = round( P4.START / 10 ns );
 PS[ 4 ] = input_create( "INT_INPUT", PSV[ 4 ] * 10, "Position of RF pulse" );
-PLV[ 4 ] = int( P4.LENGTH / 10 ns );
+PLV[ 4 ] = round( P4.LENGTH / 10 ns );
 PL[ 4 ] = input_create( "INT_INPUT", PLV[ 4 ] * 10, "Length of RF pulse" );
 
-PSV[ 5 ] = int( P5.START / 10 ns );
+PSV[ 5 ] = round( P5.START / 10 ns );
 PS[ 5 ] = input_create( "INT_INPUT", PSV[ 5 ] * 10, "Position of DET pulse" );
-PLV[ 5 ] = int( P5.LENGTH / 10 ns );
+PLV[ 5 ] = round( P5.LENGTH / 10 ns );
 PL[ 5 ] = input_create( "INT_INPUT", PLV[ 5 ] * 10, "Length of DET pulse" );
 
 Freq    = input_create( "FLOAT_INPUT", freq / 1 MHz, "RF frequency (MHz)" );
 Current_Field = output_create( "FLOAT_OUTPUT", current_field,
                                "Current field [G]" );
+Att = input_create( "FLOAT_INPUT", att, "RF attenuation (dB)" );
+RF_ON_OFF = button_create( "PUSH_BUTTON", "RF On/Off" );
+button_state( RF_ON_OFF, synthesizer_state( ) );
 New_Field  = input_create( "FLOAT_INPUT", current_field, "New field [G]" );
 Sweep_Rate = input_create( "FLOAT_INPUT", sweep_rate, "Sweep rate [G/s]" );
 Sweep_Up   = button_create( "RADIO_BUTTON", "Sweep up" );
@@ -124,11 +132,13 @@ button_state( Sweep_Stop, "ON" );
 button_state( Pause, "ON" );
 hide_toolbox( "OFF" );
 
-PMS[ 1 ] = int( pulser_pulse_minimum_specs( P1 ) / 10 ns );
-PMS[ 2 ] = int( pulser_pulse_minimum_specs( P2 ) / 10 ns );
-PMS[ 3 ] = int( pulser_pulse_minimum_specs( P3 ) / 10 ns );
-PMS[ 4 ] = int( pulser_pulse_minimum_specs( P4 ) / 10 ns );
-PMS[ 5 ] = int( pulser_pulse_minimum_specs( P5 ) / 10 ns );
+PMS[ 1 ] = round( pulser_pulse_minimum_specs( P1 ) / 10 ns );
+PMS[ 2 ] = round( pulser_pulse_minimum_specs( P2 ) / 10 ns );
+PMS[ 3 ] = round( pulser_pulse_minimum_specs( P3 ) / 10 ns );
+PMS[ 4 ] = round( pulser_pulse_minimum_specs( P4 ) / 10 ns );
+PMS[ 5 ] = round( pulser_pulse_minimum_specs( P5 ) / 10 ns );
+
+synthesizer_frequency( freq );
 
 
 FOREVER {
@@ -156,7 +166,7 @@ FOREVER {
 				} ELSE {
 					PSV[ 1 ] = NP;
 					P1.START = NP * 10 ns;
-					pulser_update( P1 );
+					pulser_update( );
 				}
 			}
 		}
@@ -315,6 +325,36 @@ FOREVER {
 			}
 		}
 
+		/* Deal with RF frequency changes */
+
+		IF input_changed( Freq ) {
+		    new_freq = input_value( Freq ) * 1 MHz;
+			IF new_freq < 9 kHz OR new_freq > 1100 MHz {
+				input_value( Freq, freq );
+			} ELSE {
+				freq = new_freq;
+				synthesizer_frequency( freq );
+			}
+		}
+
+		/* Deal with RF attenuation changes */
+
+		IF input_changed( Att ) {
+			new_att = input_value( Att );
+			IF new_att < -140 dB OR new_att > 13 dB {
+			    input_value( Att, att );
+			} ELSE {
+				att = new_att;
+				synthesizer_attenuation( att );
+			}
+		}
+
+		/* Button for switching RF power on or off */
+
+		IF button_changed( RF_ON_OFF ) {
+		    synthesizer_state( button_state( RF_ON_OFF ) );
+		}
+
 		/* The second section of the loop deals with the buttons and entry
 		   fields for field control.... */
 
@@ -420,6 +460,7 @@ FOREVER {
 
 	IF ! Pause_Display {
 		I += 1;
+		wait( 0.2 s );
 		display( I, daq_get_voltage( CH0 ) );
 	} ELSE {
 		wait( 0.2 s );

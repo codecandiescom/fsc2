@@ -418,15 +418,19 @@ Var *synthesizer_attenuation( Var *v )
 		{
 			if ( ! rs_sml01.attenuation_is_set )
 			{
-				print( FATAL, "RF attenuation has not been set yet.\n" );
-				THROW( EXCEPTION );
+				if ( FSC2_MODE == TEST )
+					return vars_push( FLOAT_VAR, MAX_ATTEN );
+				else
+				{
+					print( FATAL, "RF attenuation has not been set yet.\n" );
+					THROW( EXCEPTION );
+				}
 			}
 			else
 				return vars_push( FLOAT_VAR, rs_sml01.attenuation );
 		}
 
-		rs_sml01.attenuation = MAX_ATTEN -100.0;
-		return vars_push( FLOAT_VAR, rs_sml01.attenuation );
+		return vars_push( FLOAT_VAR, rs_sml01_get_attenuation( ) );
 	}
 
 	att = get_double( v, "RF attenuation" );
