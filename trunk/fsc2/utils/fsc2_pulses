@@ -155,13 +155,7 @@ sub read_input {
 		if ( $line =~ /^===$/ ) {
 			next if $set eq $old_set;
 
-			for ( split /\n/, $set ) {
-				$has_auto_pulses = 1 if /\(\d+\)/;
-				my @bits = split /\s+/;
-				fail( "Invalid input at line $..\n" ) unless $#bits % 3 == 0;
-				$Channels->add_pulse_list( $num, @bits );
-			}
-
+			$has_auto_pulses |= new_pattern( $set, $num );
 			$old_set = $set;
 			$set ="";
 			$num++;
@@ -170,9 +164,30 @@ sub read_input {
 		$set .= $line;
 	}
 
+	$has_auto_pulses |= new_pattern( $set, $num )
+		if $set ne "";
+
 	fail( "No pulses patterns defined in input.\n" ) unless
 			$Channels->num_channels > 0 and $Channels->num_steps >= 0;
 }
+
+#---------------------------------------------------------
+
+sub new_pattern {
+
+	my ( $set, $num ) = @_;
+	my $has_auto_pulses = 0;
+
+	for ( split /\n/, $set ) {
+		$has_auto_pulses = 1 if /\(\d+\)/;
+		my @bits = split /\s+/;
+		fail( "Invalid input at line $..\n" ) unless $#bits % 3 == 0;
+		$Channels->add_pulse_list( $num, @bits );
+	}
+
+	return $has_auto_pulses;
+}
+
 
 #---------------------------------------------------------
 

@@ -294,6 +294,7 @@ ifeq ($(machine_name),crowley.physik.fu-berlin.de)
 	OWNER              := fsc2
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
+	GPIB_LOG_FILE      := /scratch/tmp/gpib.log
 	NUM_SERIAL_PORTS   := 1
 	SERIAL_LOCK_DIR    := /var/lock
 	ME6000_SUPPORT     := NO
@@ -306,6 +307,7 @@ ifeq ($(machine_name),door.physik.fu-berlin.de)
 	OWNER              := fsc2
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
+	GPIB_LOG_FILE      := /scratch/tmp/gpib.log
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
 	ME6000_SUPPORT     := NO
@@ -318,6 +320,7 @@ ifeq ($(machine_name),isaak.physik.fu-berlin.de)
 	OWNER              := fsc2
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
+	GPIB_LOG_FILE      := /scratch/tmp/gpib.log
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
 	ME6000_SUPPORT     := NO
@@ -330,7 +333,6 @@ ifeq ($(machine_name),moebpc3.physik.fu-berlin.de)
 	OWNER              := fsc2
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
-	GPIB_LOG_FILE      := /scratch/tmp/gpib.log
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
 	ME6000_SUPPORT     := NO
