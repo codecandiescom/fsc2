@@ -183,8 +183,21 @@ bool scan_main( const char *name, FILE *fp )
 
 	fclose( splitin );
 
+	/* Wait for the child process doing the filtering to die and also check
+	   it's return status */
+
+	while ( Internals.fsc2_clean_pid != -1 )
+		fsc2_usleep( 10000 );
+
+	if ( WIFEXITED( Internals.fsc2_clean_status ) == 0 )
+	{
+		print( FATAL, "Parsing the EDL script '%s' failed due to some "
+			   "internal problems.\n" );
+		split_error = FAIL;
+	}
+
 	/* In case there was an error and the input file wasn't read until the
-	   end it sometimes is necessary to flush the lexer's input buffer */
+	   end it's sometimes necessary to flush the lexer's input buffer */
 
 	YY_FLUSH_BUFFER;
 
