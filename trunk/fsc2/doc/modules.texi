@@ -160,8 +160,7 @@ typedef struct Var_
 @noindent
 There are only four types of variables you have to know about:
 
-@multitable {FLOAT_TRANS_ARR} {a one-dimensional array of floating point
-values}
+@multitable {FLOAT_TRANS_ARR} {a one-dimensional array of floating point values}
 @item @code{INT_VAR} @tab a variable for integer values
 @item @code{FLOAT_VAR} @tab a variable for floating point values
 @item @code{INT_TRANS_ARR} @tab a one-dimensional array of integer values
@@ -390,7 +389,7 @@ the correct type - both integer and floating point values are ok
 here. Next we distinguish between both the possibilities that the value
 is either an integer or a floating point number by testing the
 @code{type} field of the variable. Then we create either a new integer
-variable by calling code{vars_push()} with the square of the integer
+variable by calling @code{vars_push()} with the square of the integer
 value or a new floating point variable. Finally, we return the variable
 pointer @code{vars_push()} had delivered.
 
@@ -635,32 +634,19 @@ a line in the init hook function similar to
     need_GPIB = SET;
 @end example
 
-As for the case of the GPIB bus there is also a global variable for the
-serial ports. It is called @code{need_Serial_Port}. Since there may be
-several ports this is an array with an element for each port. In a
-module for a device that communicates via one of the serial ports, the
-appropriate element of the array should be tested first to determine if
-the port has already mean claimed by another module. If it hasn't, the
-element has to be set to avoid other modules using the same port
-concurrently. I.e.@: a typical piece of code for the device `ABC123'
-needing the serial port number 1 (possibly labeled COM2 on the backside
-of the computer) would be
+For serial ports things handled a bit differently. In the init_hook you
+should try to request the serial port you need by calling the function
+@code{fsc2_request_serial_port()}
 @example
-    if ( need_Serial_Port[ 1 ] == SET )
-    @{
-        eprint( FATAL, "abc123: Serial port 1 (COM2) has already "
-                       "been claimed by another device.\n" );
-        THROW( EXCEPTION );
-    @}
-
-    need_Serial_Port[ 1 ] = SET;
+    fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 @end example
 @noindent
-Setting this global variable has to be done already in the init hook
-function!  The number of available serial ports is defined in
-@file{global.h} as @code{NUM_SERIAL_PORTS}. You may want to test if the
-serial port you're going to use is smaller than this number.
-
+with the number of the serial port (0 stands for what is called
+@code{COM1} in DOS-speak, 1 for @code{COM2} et.@.) as the first and the
+device name as the second argument. If the requested serial port has
+already been claimed by a different device the function will print an
+error message and stop the @acronym{EDL} program, so you don't have to
+deal with error handling.
 
 
 @subsection How to call an @acronym{EDL} function from a module
