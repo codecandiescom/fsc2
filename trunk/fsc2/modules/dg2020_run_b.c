@@ -332,11 +332,11 @@ static void dg2020_shape_padding_check_1( FUNCTION *f )
 		pod_pp = pp->pulse->function->num_pods == 1 ?
 			pp->pulse->function->pod[ 0 ] :
 			pp->pulse->function->phase_setup->pod[
-				pp->pulse->pc->sequence[ f->next_phase ] - PHASE_PLUS_X ];
+									pp->pulse->pc->sequence[ f->next_phase ] ];
 		pod_ppp = ppp->pulse->function->num_pods == 1 ?
 			ppp->pulse->function->pod[ 0 ] :
 			ppp->pulse->function->phase_setup->pod[
-				ppp->pulse->pc->sequence[ f->next_phase ] - PHASE_PLUS_X ];
+								   ppp->pulse->pc->sequence[ f->next_phase ] ];
 
 		if ( ppp->pos + ppp->len > pp->pos )
 		{

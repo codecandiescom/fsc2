@@ -182,7 +182,7 @@ int dg2020_b_init_hook( void )
 	{
 		dg2020_phs[ i ].is_defined = UNSET;
 		dg2020_phs[ i ].function = NULL;
-		for ( j = 0; j < PHASE_MINUS_Y - PHASE_PLUS_X; j++ )
+		for ( j = 0; j < NUM_PHASE_TYPES; j++ )
 		{
 			dg2020_phs[ i ].is_set[ j ] = UNSET;
 			dg2020_phs[ i ].is_needed[ j ] = UNSET;
@@ -1365,7 +1365,7 @@ Var *pulser_next_phase( Var *v )
 			f->next_phase = 0;
 
 		if ( FSC2_MODE == EXPERIMENT )
-			for ( j = 0; j <= PHASE_MINUS_Y - PHASE_PLUS_X; j++ )
+			for ( j = 0; j < NUM_PHASE_TYPES; j++ )
 				if ( f->phase_setup->is_set[ j ] &&
 					 ! dg2020_channel_assign(
 						 f->pcm[ j * f->pc_len + f->next_phase ]->self,
@@ -1449,7 +1449,7 @@ Var *pulser_phase_reset( Var *v )
 		f->next_phase = 0;
 
 		if ( FSC2_MODE == EXPERIMENT )
-			for ( j = 0; j <= PHASE_MINUS_Y - PHASE_PLUS_X; j++ )
+			for ( j = 0; j < NUM_PHASE_TYPES; j++ )
 				if ( f->phase_setup->is_set[ j ] &&
 					 ! dg2020_channel_assign(
 						 					f->pcm[ j * f->pc_len + 0 ]->self,

@@ -398,13 +398,11 @@ bool ep385_phase_setup_prep( int phs, int type, int dummy, long channel )
 
 	/* Make sure the phase type is supported */
 
-	if  ( type < PHASE_PLUS_X || type > PHASE_MINUS_Y )
+	if  ( type < PHASE_PLUS_X || type >= NUM_PHASE_TYPES )
 	{
 		print( FATAL, "Unknown phase type.\n" );
 		THROW( EXCEPTION );
 	}
-
-	type -= PHASE_PLUS_X;
 
 	/* Complain if a channel has already been assigned for this phase type */
 
@@ -455,7 +453,7 @@ bool ep385_phase_setup( int phs )
 		return FAIL;
 	}
 
-	for ( i = 0; i <= PHASE_MINUS_Y - PHASE_PLUS_X; i++ )
+	for ( i = 0; i < NUM_PHASE_TYPES; i++ )
 	{
 		if ( ! ep385_phs[ phs ].is_set[ i ] )
 			 continue;

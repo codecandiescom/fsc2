@@ -558,7 +558,7 @@ void dg2020_dump_channels( FILE *fp )
 	{
 		f = dg2020.function + i;
 
-		if ( ! f->is_needed || f->num_channels == 0 )
+		if ( f->num_pods == 0 )
 			continue;
 
 		for ( j = 0; j < f->num_pods; j++ )
@@ -578,9 +578,9 @@ void dg2020_dump_channels( FILE *fp )
 					fprintf( fp, " (%ld) %ld %ld",
 							 pp->pulse->tp->num, pp->pos, pp->len );
 				else if ( pp->pulse->pc == NULL ||
-						  f->phase_setup->pod[ 
-							  pp->pulse->pc->sequence[ f->next_phase ]
-							  - PHASE_PLUS_X ] == pod )
+						  f->phase_setup->pod[
+							  pp->pulse->pc->sequence[ f->next_phase ] ]
+						  == pod )
 					fprintf( fp, " %ld %ld %ld",
 							 pp->pulse->num, pp->pos, pp->len );
 			}

@@ -85,7 +85,7 @@ static void dg2020_init_print( FILE *fp )
 	{
 		f = dg2020.function + i;
 
-		if ( ! f->is_needed && f->num_pods == 0 )
+		if ( f->num_pods == 0 )
 			continue;
 
 		for ( j = 0; j < f->num_pods; j++ )
@@ -163,10 +163,8 @@ void dg2020_basic_pulse_check( void )
 			{
 				cur_type = p->pc->sequence[ i ];
 
-				fsc2_assert( cur_type >= PHASE_PLUS_X ||
-							 cur_type <= PHASE_MINUS_Y );     /* Paranoia... */
-
-				cur_type -= PHASE_PLUS_X;
+				fsc2_assert( cur_type >= PHASE_PLUS_X &&
+							 cur_type < NUM_PHASE_TYPES );
 				p->function->phase_setup->is_needed[ cur_type ] = SET;
 			}
 		}
@@ -192,19 +190,18 @@ void dg2020_basic_pulse_check( void )
 		{
 			if ( p->function->pm == NULL )      /* if it doesn't exist yet */
 			{
-				p->function->pm =
-					BOOL_P T_malloc( p->pc->len * sizeof( *p->function->pm )
-									 * ( PHASE_MINUS_Y - PHASE_PLUS_X + 1 ) );
+				p->function->pm = BOOL_P T_malloc( p->pc->len 
+												   * sizeof( *p->function->pm )
+												   * NUM_PHASE_TYPES );
 
-				for ( i = 0; i <= PHASE_MINUS_Y - PHASE_PLUS_X; i++ )
+				for ( i = 0; i < NUM_PHASE_TYPES; i++ )
 					for ( j = 0; j < p->pc->len; j++ )
 						p->function->pm[ i * p->pc->len + j ] = UNSET;
 				p->function->pc_len = p->pc->len;
 			}
 
 			for ( i = 0; i < p->pc->len; i++ )
-				p->function->pm[ ( p->pc->sequence[ i ] - PHASE_PLUS_X )
-							     * p->pc->len + i ] = SET;
+				p->function->pm[ p->pc->sequence[ i ] * p->pc->len + i ] = SET;
 		}
 
 		if ( p->is_active )
@@ -239,16 +236,6 @@ static void dg2020_basic_functions_check( void )
 		if ( ! f->is_used )
 			continue;
 
-		/* Check if the function has pulses assigned to it, otherwise print
-		   a warning and reduce the number of channels it gets to 1 */
-
-		if ( ! f->is_needed )
-		{
-			print( WARN, "No pulses have been assigned to function '%s'.\n",
-				   f->name );
-			f->is_needed = SET;
-		}
-
 		/* Make sure there's at least one pod assigned to the function */
 
 		if ( f->num_pods == 0 )
@@ -276,6 +263,13 @@ static void dg2020_basic_functions_check( void )
 			if ( cp->is_active )
 				f->num_active_pulses++;
 		}
+
+		/* Check if the function has pulses assigned to it, otherwise print
+		   a warning and reduce the number of channels it gets to 1 */
+
+		if ( f->num_pulses == 0 )
+			print( WARN, "No pulses have been assigned to function '%s'.\n",
+				   f->name );
 
 		/* Check that for functions that need phase cycling there was also a
 		   PHASE_SETUP command */
@@ -333,7 +327,7 @@ static int dg2020_calc_channels_needed( FUNCTION *f )
 	num_channels = 0;
 	f->need_constant = UNSET;
 	for ( i = 0; i < f->pc_len; i++ )
-		for ( j = 0; j <= PHASE_MINUS_Y - PHASE_PLUS_X; j++ )
+		for ( j = 0; j < NUM_PHASE_TYPES; j++ )
 		{
 			if ( f->pm[ j * f->pc_len + i ] )
 				num_channels++;
@@ -361,7 +355,7 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 	/* First let's see if the pods mentioned in the phase setup are really
 	   assigned to the function */
 
-	for ( i = 0; i <= PHASE_MINUS_Y - PHASE_PLUS_X; i++ )
+	for ( i = 0; i < NUM_PHASE_TYPES; i++ )
 	{
 		if ( ! f->phase_setup->is_set[ i ] )
 			continue;
@@ -383,13 +377,13 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 	   for the current function. Now we can check if these phase types are
 	   also defined in the phase setup. */
 
-	for ( i = 0; i <= PHASE_MINUS_Y - PHASE_PLUS_X; i++ )
+	for ( i = 0; i < NUM_PHASE_TYPES; i++ )
 	{
 		if ( f->phase_setup->is_needed[ i ] && ! f->phase_setup->is_set[ i ] )
 		{
 			print( FATAL, "Phase type '%s' is needed for function '%s' but "
 				   "has not been not defined in a PHASE_SETUP command.\n",
-				   Phase_Types[ i + PHASE_PLUS_X ], f->name );
+				   Phase_Types[ i ], f->name );
 			THROW( EXCEPTION );
 		}
 	}
@@ -402,15 +396,15 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 	free_pods = 0;
 	for ( i = 0; i < f->num_pods; i++ )
 	{
-		for ( j = 0; j <= PHASE_MINUS_Y - PHASE_PLUS_X; j++ )
+		for ( j = 0; j < NUM_PHASE_TYPES; j++ )
 			if ( f->pod[ i ] == f->phase_setup->pod[ j ] )
 				break;
-		if ( j == PHASE_MINUS_Y - PHASE_PLUS_X + 1 )
+		if ( j == NUM_PHASE_TYPES )
 			free_pod_list[ free_pods++ ] = f->pod[ i ];
 	}
 
 	if ( free_pods != 0 )
-		for ( i = j = 0; i <= PHASE_MINUS_Y - PHASE_PLUS_X; i++ )
+		for ( i = j = 0; i < NUM_PHASE_TYPES; i++ )
 			if ( ! f->phase_setup->is_set[ i ] )
 			{
 				f->phase_setup->is_set[ i ]= SET;
@@ -422,8 +416,8 @@ static void dg2020_phase_setup_check( FUNCTION *f )
        the same pod (exception: the different phase types are never actually
        used for a pulse - that's ok). */
 
-	for ( i = 0; i <= PHASE_MINUS_Y - PHASE_PLUS_X; i++ )
-		for ( j = 0; j <= PHASE_MINUS_Y - PHASE_PLUS_X; j++ )
+	for ( i = 0; i < NUM_PHASE_TYPES; i++ )
+		for ( j = 0; j < NUM_PHASE_TYPES; j++ )
 		{
 			if ( i == j )
 				continue;
@@ -442,13 +436,11 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 					print( FATAL, "Pod %ld can't be used for phase type '%s' "
 						   "and '%s' at the same time.\n",
 						   f->phase_setup->pod[ i ]->self,
-						   Phase_Types[ i + PHASE_PLUS_X ],
-						   Phase_Types[ j + PHASE_PLUS_X ] );
+						   Phase_Types[ i ], Phase_Types[ j ] );
 				else
 					print( FATAL, "Pod %ld is needed for phase type '%s' and "
 						   "can't be also used for other phase types.\n",
-						   f->phase_setup->pod[ i ]->self,
-						   Phase_Types[ i + PHASE_PLUS_X ] );
+						   f->phase_setup->pod[ i ]->self, Phase_Types[ i ] );
 				THROW( EXCEPTION );
 			}
 		}
@@ -533,11 +525,10 @@ static void dg2020_setup_phase_matrix( FUNCTION *f )
 
 	cur_channel = f->need_constant ? 1 : 0;
 
-	f->pcm = CHANNEL_PP T_malloc( f->pc_len
-								  * ( PHASE_MINUS_Y - PHASE_PLUS_X + 1 )
+	f->pcm = CHANNEL_PP T_malloc( f->pc_len * NUM_PHASE_TYPES
 								  * sizeof *f->pcm );
 
-	for ( i = 0; i <= PHASE_MINUS_Y - PHASE_PLUS_X; i++ )
+	for ( i = 0; i < NUM_PHASE_TYPES; i++ )
 		for ( j = 0; j < f->pc_len; j++ )
 			if ( f->pm && f->pm[ i * f->pc_len + j ] )
 				f->pcm[ i * f->pc_len + j ] = f->channel[ cur_channel++ ];
@@ -594,8 +585,8 @@ static void dg2020_pulse_start_setup( void )
 			else
 				for ( k = 0; k < f->pc_len; k++ )
 					f->pulses[ j ]->channel[ k ] =
-						f->pcm[ ( f->pulses[ j ]->pc->sequence[ k ]
-								  - PHASE_PLUS_X ) * f->pc_len + k ];
+									  f->pcm[ f->pulses[ j ]->pc->sequence[ k ]
+									  * f->pc_len + k ];
 		}
 	}
 }

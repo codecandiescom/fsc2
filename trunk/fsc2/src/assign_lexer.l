@@ -121,7 +121,6 @@ PX			"+"?[xX]:?
 PY			"+"?[yY]:?
 PMX			"-"[xX]:?
 PMY			"-"[yY]:?
-PCW         [cC][wW]
 ON          ON
 OFF         OFF
 
@@ -259,10 +258,6 @@ WS          [\n=: ]+
 			}
 {PMY}		{
 				assignlval.lval = PHASE_MINUS_Y;
-				return PXY_TOK;
-			}
-{PCW}       {
-				assignlval.lval = PHASE_CW;
 				return PXY_TOK;
 			}
 

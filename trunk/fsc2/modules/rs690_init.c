@@ -546,7 +546,7 @@ static void rs690_create_phase_matrix( FUNCTION *f )
 
 				for ( l = 0; l < f->num_channels; l++ )
 					if ( f->phase_setup->channels[ PHASE_PLUS_X ] ==
-						 f->channel[ l ] )
+															  f->channel[ l ] )
 						break;
 
 				fsc2_assert( l < f->num_channels );

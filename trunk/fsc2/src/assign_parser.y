@@ -117,7 +117,7 @@ static bool Func_is_set = UNSET;
 %token <lval> INT_TOKEN
 %token <dval> FLOAT_TOKEN
 %token <sptr> STR_TOKEN
-%token <lval> PXY_TOK        /* X, Y, -X, -Y, CW -- for phases */
+%token <lval> PXY_TOK        /* X, Y, -X, -Y -- for phases */
 %token <lval> CHN_TOKEN      /* channels for RS690 */
 %token AND OR XOR NOT
 %token EQ NE LT LE GT GE
