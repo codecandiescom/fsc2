@@ -142,8 +142,6 @@ bool functions_init( void )
 
 	for ( Num_Func = 0; Def_Fncts[ Num_Func ].fnct != NULL; Num_Func++ )
 		;
-	if ( Num_Func != 0 )
-		Num_Func--;
 
 	/*
 	   1. Get new memory for the functions structures and copy the built-in
@@ -155,8 +153,8 @@ bool functions_init( void )
 
 	TRY
 	{
-		Fncts = T_malloc( ( Num_Func + 1 ) * sizeof( Func ) );
-		memcpy( Fncts, Def_Fncts, ( Num_Func + 1 ) * sizeof( Func ) );
+		Fncts = T_malloc( Num_Func * sizeof( Func ) );
+		memcpy( Fncts, Def_Fncts, Num_Func * sizeof( Func ) );
 		qsort( Fncts, Num_Func, sizeof( Func ), func_cmp1 );
 		Num_Func = func_list_parse( &Fncts, Num_Func );
 		qsort( Fncts, Num_Func, sizeof( Func ), func_cmp1 );
@@ -286,8 +284,7 @@ Var *func_call( Var *f )
 
 	if ( f->type != FUNC )
 	{
-		eprint( FATAL, "%s:%ld: Variable passed to `func_call()' isn't "
-				"of type `FUNC'.\n", Fname, Lc );
+		eprint( FATAL, "Internal error at at %s:%d.\n", __FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
 
@@ -295,10 +292,9 @@ Var *func_call( Var *f )
 		if ( Fncts[ i ].fnct == f->val.fnct )
 			break;
 	
-	if ( i == Num_Func )
+	if ( i >= Num_Func )
 	{
-		eprint( FATAL, "%s:%ld: Variable passed to `func_call()' is not "
-				"a known function.\n", Fname, Lc );
+		eprint( FATAL, "Internal error at at %s:%d.\n", __FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
 
@@ -358,8 +354,13 @@ Var *func_call( Var *f )
 
 	if ( ! vars_exist( f ) )
 	{
-		eprint( FATAL, "%s:%ld: Function %s() messed up the variable stack.\n",
-				Fname, Lc, Fncts[ i ].name );
+		if ( ! Fncts[ i ].to_be_loaded )
+			eprint( FATAL, "Internal error at at %s:%d.\n",
+					__FILE__, __LINE__ );
+		else
+			eprint( FATAL, "%s:%ld: Function %s() from module %s.so messed "
+					"up the variable stack at %s:%d.\n", Fname, Lc, f->name,
+					Fncts[ i ].device->name, __FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
 

@@ -202,6 +202,7 @@ static void load_functions( Device *dev )
 static void resolve_hook_functions( Device *dev, char *dev_name )
 {
 	char *hook_func_name;
+	char *app;
 
 
 	dev->driver.is_init_hook =
@@ -216,9 +217,10 @@ static void resolve_hook_functions( Device *dev, char *dev_name )
 	   (the string will be reused for the other hook functions, so make
 	   it long enough that the longest name will fit into it) */
 
-	hook_func_name = get_string( strlen( dev_name ) + 18 );
+	hook_func_name = get_string( strlen( dev_name ) + 17 );
 	strcpy( hook_func_name, dev_name );
-	strcat( hook_func_name, "_init_hook" );	
+	app = hook_func_name + strlen( dev_name );
+	strcat( app, "_init_hook" );
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	dev->driver.init_hook = dlsym( dev->driver.handle, hook_func_name );
@@ -227,8 +229,7 @@ static void resolve_hook_functions( Device *dev, char *dev_name )
 
 	/* Get test hook function if available */
 	
-	strcpy( hook_func_name, dev_name );
-	strcat( hook_func_name, "_test_hook" );	
+	strcpy( app, "_test_hook" );
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	dev->driver.test_hook = dlsym( dev->driver.handle, hook_func_name );
@@ -237,8 +238,7 @@ static void resolve_hook_functions( Device *dev, char *dev_name )
 
 	/* Get end-of-test hook function if available */
 	
-	strcpy( hook_func_name, dev_name );
-	strcat( hook_func_name, "_end_of_test_hook" );	
+	strcpy( app, "_end_of_test_hook" );
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	dev->driver.end_of_test_hook = dlsym( dev->driver.handle, hook_func_name );
@@ -247,8 +247,7 @@ static void resolve_hook_functions( Device *dev, char *dev_name )
 
 	/* Get pre-experiment hook function if available */
 	
-	strcpy( hook_func_name, dev_name );
-	strcat( hook_func_name, "_exp_hook" );	
+	strcpy( app, "_exp_hook" );
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	dev->driver.exp_hook = dlsym( dev->driver.handle, hook_func_name );
@@ -257,8 +256,7 @@ static void resolve_hook_functions( Device *dev, char *dev_name )
 
 	/* Get end-of-experiment hook function if available */
 
-	strcpy( hook_func_name, dev_name );
-	strcat( hook_func_name, "_end_of_exp_hook" );	
+	strcpy( app, "_end_of_exp_hook" );
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	dev->driver.end_of_exp_hook = dlsym( dev->driver.handle, hook_func_name );
@@ -267,8 +265,7 @@ static void resolve_hook_functions( Device *dev, char *dev_name )
 
 	/* Finally check if there's also an exit hook function */
 
-	strcpy( hook_func_name, dev_name );
-	strcat( hook_func_name, "_exit_hook" );	
+	strcpy( app, "_exit_hook" );
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	dev->driver.exit_hook = dlsym( dev->driver.handle, hook_func_name );
@@ -291,16 +288,17 @@ static void resolve_functions( Device *dev )
 	int num;
 	void *cur;
 	char *new_func_name;
-	char buf[ 100 ];
+	char buf[ 12 ];
 	char *temp;
 	long len;
+	Func *f = Fncts;
 
 
-	for ( num = 0; num < Num_Func; num++ )
+	for ( num = 0; num < Num_Func; f++, num++ )
 	{
 		/* Don't try to load functions that are not listed in `Functions' */
 
-		if ( ! Fncts[ num ].to_be_loaded )
+		if ( ! f->to_be_loaded )
 			continue;
 
 		dlerror( );                /* make sure it's NULL before we continue */
@@ -308,13 +306,13 @@ static void resolve_functions( Device *dev )
 		/* If the functions name is still the original one try it, otherwise
 		   first remove the extension with the '#' and the device count */
 
-		if ( ( temp = strchr( Fncts[ num ].name, '#' ) ) == NULL )
-			 cur = dlsym( dev->driver.handle, Fncts[ num ].name );
+		if ( ( temp = strchr( f->name, '#' ) ) == NULL )
+			 cur = dlsym( dev->driver.handle, f->name );
 		else
 		{
-			len = temp - Fncts[ num ].name;
+			len = temp - f->name;
 			temp = T_malloc( len + 1 );
-			strncpy( temp, Fncts[ num ].name, len );
+			strncpy( temp, f->name, len );
 			temp[ len ] = '\0';
 
 			cur = dlsym( dev->driver.handle, temp );
@@ -331,19 +329,19 @@ static void resolve_functions( Device *dev )
 		   of the device to the functions name. Otherwise this is a multiple
 		   defined function and it got to be appended to function list. */
 
-		if ( Fncts[ num ].fnct == NULL )
+		if ( f->fnct == NULL )
 		{
-			Fncts[ num ].fnct = cur;
-			Fncts[ num ].device = ( void * ) dev;
+			f->fnct = cur;
+			f->device = dev;
 			if ( dev->count != 1 )
 			{
-				snprintf( buf, 100, "#%d", dev->count );
-				new_func_name = T_malloc(   strlen( Fncts[ num ].name )
+				snprintf( buf, 12, "#%d", dev->count );
+				new_func_name = T_malloc(   strlen( f->name )
 										  + strlen( buf ) + 1 );
-				strcpy( new_func_name, Fncts[ num ].name );
+				strcpy( new_func_name, f->name );
 				strcat( new_func_name, buf );
-				T_free( ( char * ) Fncts[ num ].name );
-				Fncts[ num ].name = new_func_name;
+				T_free( ( char * ) f->name );
+				f->name = new_func_name;
 			}
 		}
 		else
@@ -365,12 +363,13 @@ static void add_function( int index, void *new_func, Device *new_dev )
 {
 	int i;
 	char *new_func_name;
-	char buf[ 100 ];
+	char buf[ 12 ];
 	long len;
 	char *temp;
+	Func *f;;
 
 
-	/* Because, when adding a multiple defined function, it is appended to
+	/* Because when adding a multiple defined function it is appended to
 	   the function list, the function just added will be found when running
 	   through the list in resolve_functions(). This can be easily recognized
 	   because the 'new' function is from the current library, which can
@@ -397,16 +396,17 @@ static void add_function( int index, void *new_func, Device *new_dev )
 			new_dev->count = atoi( temp + 1 ) + 1;
 		else
 			new_dev->count = 2;
-		for ( i = 0; i < Num_Func; i++ )
-			if ( Fncts[ i ].device == new_dev )
+
+		for ( i = 0, f = Fncts; i < Num_Func; f++, i++ )
+			if ( f->device == new_dev )
 			{
-				snprintf( buf, 100, "#%d", new_dev->count );
-				new_func_name = T_malloc(   strlen( Fncts[ i ].name )
-										  + strlen( buf ) );
-				strcpy( new_func_name, Fncts[ i ].name );
+				snprintf( buf, 12, "#%d", new_dev->count );
+				new_func_name = get_string(   strlen( f->name )
+											+ strlen( buf ) );
+				strcpy( new_func_name, f->name );
 				strcat( new_func_name, buf );
-				T_free( ( char * ) Fncts[ i ].name );
-				Fncts[ i ].name = new_func_name;
+				T_free( ( char * ) f->name );
+				f->name = new_func_name;
 			}
 	}
 	else
@@ -415,43 +415,42 @@ static void add_function( int index, void *new_func, Device *new_dev )
 			 && atoi( temp + 1 ) >= new_dev->count )
 		{
 			new_dev->count++;
-			for ( i = 0; i < Num_Func; i++ )
+			for ( i = 0, f = Fncts; i < Num_Func; f++, i++ )
 				if ( Fncts[ i ].device == new_dev )
 				{
-					len = strchr( Fncts[ i ].name, '#' ) - Fncts[ i ].name;
-					snprintf( buf, 100, "#%d", new_dev->count );
-					new_func_name = T_malloc( len + strlen( buf ) + 1 );
-					strncpy( new_func_name, Fncts[ i ].name, len );
+					len = strchr( f->name, '#' ) - f->name;
+					snprintf( buf, 12, "#%d", new_dev->count );
+					new_func_name = get_string( len + strlen( buf ) );
+					strncpy( new_func_name, f->name, len );
 					strcpy( new_func_name + len, buf );
-					T_free( ( char * ) Fncts[ i ].name );
-					Fncts[ i ].name = new_func_name;
+					T_free( ( char * ) f->name );
+					f->name = new_func_name;
 				}
 		}
 	}
 
 	/* Add an entry for the new function to the list of functions */
 
-	Fncts = T_realloc( Fncts, ( Num_Func + 2 ) * sizeof( Func ) );
-	memcpy( Fncts + Num_Func + 1, Fncts + Num_Func, sizeof( Func ) );
-	memcpy( Fncts + Num_Func, Fncts + index, sizeof( Func ) );
+	Fncts = T_realloc( Fncts, ( Num_Func + 1 ) * sizeof( Func ) );
+	f = Fncts + Num_Func;
+	memcpy( f, Fncts + index, sizeof( Func ) );
 	
-	Fncts[ Num_Func ].fnct = new_func;
-	Fncts[ Num_Func ].device = ( void * ) new_dev;
-	snprintf( buf, 100, "#%d", new_dev->count );
+	f->fnct   = new_func;
+	f->device = new_dev;
+	snprintf( buf, 12, "#%d", new_dev->count );
 	
 	if ( ( temp = strchr( Fncts[ index ].name, '#' ) ) == NULL )
 	{
-		Fncts[ Num_Func ].name = T_malloc(   strlen( Fncts[ index ].name )
-										   + strlen( buf ) + 1 );
-		strcpy( ( char * ) Fncts[ Num_Func ].name, Fncts[ index ].name );
-		strcat( ( char * ) Fncts[ Num_Func ].name, buf );
+		f->name = get_string( strlen( Fncts[ index ].name ) + strlen( buf ) );
+		strcpy( ( char * ) f->name, Fncts[ index ].name );
+		strcat( ( char * ) f->name, buf );
 	}
 	else
 	{
 		len = temp - Fncts[ index ].name;
-		Fncts[ Num_Func ].name = T_malloc( len + strlen( buf ) + 1 );
-		strncpy( ( char * ) Fncts[ Num_Func ].name, Fncts[ index ].name, len );
-		strcpy( ( char * ) Fncts[ Num_Func ].name + len, buf );
+		f->name = get_string( len + strlen( buf ) );
+		strncpy( ( char * ) f->name, Fncts[ index ].name, len );
+		strcpy( ( char * ) f->name + len, buf );
 	}
 
 	Num_Func++;

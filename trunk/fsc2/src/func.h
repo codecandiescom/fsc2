@@ -8,17 +8,6 @@
 #include "fsc2.h"
 
 
-typedef struct
-{
-	const char *name;                 /* name of the function */
-    Var * ( * fnct )( Var * );        /* pointer to the function */
-	long nargs;                       /* number of arguments */
-    int access_flag;                  /* asscessibility flag */
-	void *device;                     /* handle of defining device module */
-	bool to_be_loaded;                /* set if function has to be loaded */
-} Func;
-
-
 typedef struct {
 	void *handle;
 	int ( * init_hook ) ( void );
@@ -34,6 +23,20 @@ typedef struct {
 	void ( * exit_hook ) ( void );
 	bool is_exit_hook;
 } Lib_Struct;
+
+
+#include "devices.h"
+
+
+typedef struct
+{
+	const char *name;                 /* name of the function */
+    Var * ( * fnct )( Var * );        /* pointer to the function */
+	long nargs;                       /* number of arguments */
+    int access_flag;                  /* asscessibility flag */
+	Device *device;                   /* handle of defining device module */
+	bool to_be_loaded;                /* set if function has to be loaded */
+} Func;
 
 
 bool functions_init( void );

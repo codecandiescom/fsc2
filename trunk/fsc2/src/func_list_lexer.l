@@ -14,9 +14,9 @@
 #include "fsc2.h"
 
 int func_listlex( void );
-static int fll_count_functions( Func *fncts, int num_def_func );
+static int fll_count_functions( Func *fncts, int num_predef_func );
 static int ffl_func_cmp2( const void *a, const void *b );
-static void fll_get_functions( Func *fncts, int num_def_func );
+static void fll_get_functions( Func *fncts, int num_predef_func );
 
 static long Comm_Lc;
 static bool Eol;
@@ -151,13 +151,13 @@ PREP        return PREP_TOKEN;
 int func_list_parse( Func **fncts, int num_func )
 {
 	static bool is_restart = UNSET;
-	int num_def_func = num_func;
+	int num_predef_func = num_func;
 	int num;
 	int cur;
 
 
 	T_free( Fname );
-	Fname = get_string( strlen( libdir ) + strlen( "Functions" ) );
+	Fname = get_string( strlen( libdir ) + strlen( "Functions" ) + 1 );
 	strcpy( Fname, libdir );
 	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
 		strcat( Fname, "/" );
@@ -180,7 +180,7 @@ int func_list_parse( Func **fncts, int num_func )
 
 	TRY
 	{
-		num = fll_count_functions( *fncts, num_def_func );
+		num = fll_count_functions( *fncts, num_predef_func );
 		assert( num >= 0 );
 		TRY_SUCCESS;
 	}
@@ -190,16 +190,24 @@ int func_list_parse( Func **fncts, int num_func )
 		PASSTHROU( );
 	}
 
+	/* If no functions were found return immediately */
+
+	if ( num == 0 )
+	{
+		fclose( func_listin );
+		return num_predef_func;
+	}
+
 	/* Rewind input file, allocate memory for the additional functions and
 	   set defaults values */
 
 	rewind( func_listin );
-	num_func = num + num_def_func;
+	num_func = num + num_predef_func;
 
 	if ( num != 0 )
-		*fncts = T_realloc( *fncts, ( num_func + 1 ) * sizeof( Func ) );
+		*fncts = T_realloc( *fncts, num_func * sizeof( Func ) );
 
-	for ( cur = num_def_func; cur <= num_func; cur++ )
+	for ( cur = num_predef_func; cur < num_func; cur++ )
 	{
 		( *fncts )[ cur ].name = NULL;
 		( *fncts )[ cur ].fnct = NULL;
@@ -209,13 +217,11 @@ int func_list_parse( Func **fncts, int num_func )
 		( *fncts )[ cur ].to_be_loaded = SET;
 	}
 
-	( *fncts )[ num_func ].to_be_loaded = UNSET;
-
 	/* Now parse file again */
 
 	TRY
 	{
-		fll_get_functions( *fncts, num_def_func );
+		fll_get_functions( *fncts, num_predef_func );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -234,7 +240,7 @@ int func_list_parse( Func **fncts, int num_func )
 /* file and counts the number of defined functions   */
 /*---------------------------------------------------*/
 
-static int fll_count_functions( Func *fncts, int num_def_func )
+static int fll_count_functions( Func *fncts, int num_predef_func )
 {
 	int ret_token;
 	int last_token = 0;
@@ -253,7 +259,7 @@ static int fll_count_functions( Func *fncts, int num_def_func )
 
 		if ( ret_token == IDENT_TOKEN )
 		{
-			if ( ( f = bsearch( func_listtext, fncts, num_def_func,
+			if ( ( f = bsearch( func_listtext, fncts, num_predef_func,
 								sizeof( Func ), ffl_func_cmp2 ) ) != NULL )
 			{
 				eprint( WARN, "Loadable function `%s()' hides "
@@ -303,7 +309,7 @@ static int ffl_func_cmp2( const void *a, const void *b )
 /* and tries to make sense from the entries                   */
 /*------------------------------------------------------------*/
 
-static void fll_get_functions( Func *fncts, int num_def_func )
+static void fll_get_functions( Func *fncts, int num_predef_func )
 {
 	int ret_token;
 	int state;
@@ -315,7 +321,7 @@ static void fll_get_functions( Func *fncts, int num_def_func )
 	Lc = 1;
 	Eol = SET;
 	state = 0;
-	act = cur = num_def_func;
+	act = cur = num_predef_func;
 
 	while ( ( ret_token = func_listlex( ) ) != 0 )
 	{
@@ -337,7 +343,7 @@ static void fll_get_functions( Func *fncts, int num_def_func )
 				for ( i = 0; i < cur; i++ )
 					if ( ! strcmp( fncts[ i ].name, func_listtext ) )
 					{
-						if ( i < num_def_func )
+						if ( i < num_predef_func )
 							act = i;
 						else
 						{
@@ -349,7 +355,7 @@ static void fll_get_functions( Func *fncts, int num_def_func )
 						break;
 					}
 
-				if ( act >= num_def_func )
+				if ( act >= num_predef_func )
 				    fncts[ act ].name = T_strdup( func_listtext );
 
 				state = 1;
@@ -394,7 +400,7 @@ static void fll_get_functions( Func *fncts, int num_def_func )
 				break;
 
 			case ';' :
-				 if ( state != 0 && state < 2 )
+				if ( state != 0 && state < 2 )
 				{
 					eprint( FATAL, "Missing number of arguments for function "
 							"`%s' at line %ld in function data base `%s'.\n",
@@ -408,8 +414,8 @@ static void fll_get_functions( Func *fncts, int num_def_func )
 					act = cur;
 				break;
 
-			default:
-				assert( 1 == 0 );              /* this can never happen... */
+			default:                             /* this can never happen... */
+				assert( 1 == 0 );
 		}
 	}
 }

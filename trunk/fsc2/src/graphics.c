@@ -47,7 +47,6 @@ static bool display_has_been_shown = UNSET;
 extern FL_resource xresources[ ];
 
 
-
 #if ( SIZE == HI_RES )
 #define WIN_MIN_1D_WIDTH   400
 #define WIN_MIN_2D_WIDTH   500
@@ -76,7 +75,36 @@ void start_graphics( void )
 	char *pixmap_file;
 	int flags;
 	bool needs_pos = UNSET;
+	int i;
 
+
+	if ( G.dim == 1 )
+	{
+		G.nx = G.nx_orig;
+		G.rwc_start[ X ] = G.rwc_start_orig[ X ];
+		G.rwc_delta[ X ] = G.rwc_delta_orig[ X ];
+
+		for ( i = X; i <= Y; i++ )
+			if ( G.label_orig[ i ] != NULL )
+				G.label[ i ] = T_strdup( G.label_orig[ i ] );
+			else
+				G.label[ i ] = NULL;
+	}
+	else
+	{
+		G.nx = G.nx_orig;
+		G.ny = G.ny_orig;
+		G.rwc_start[ X ] = G.rwc_start_orig[ X ];
+		G.rwc_delta[ X ] = G.rwc_delta_orig[ X ];
+		G.rwc_start[ Y ] = G.rwc_start_orig[ Y ];
+		G.rwc_delta[ Y ] = G.rwc_delta_orig[ Y ];
+
+		for ( i = X; i <= Z; i++ )
+			if ( G.label_orig[ i ] != NULL )
+				G.label[ i ] = T_strdup( G.label_orig[ i ] );
+			else
+				G.label[ i ] = NULL;
+	}
 
 	/* Create the forms for running experiments */
 
@@ -747,9 +775,16 @@ void create_label_pixmap( Canvas *c, int coord, char *label )
 
 void stop_graphics( void )
 {
+	int i;
+
+
 	if ( G.is_init )
 	{
 		graphics_free( );
+
+		for ( i = X; i <= Z; i++ )
+			if ( G.label[ i ] != NULL )
+				G.label[ i ] = T_free( G.label[ i ] );
 
 		if ( G.font )
 			XFreeFont( G.d, G.font );
@@ -1552,7 +1587,7 @@ static void change_label_1d( char **label )
 		if ( G.label[ X ] != NULL )
 			G.label[ X ] = T_free( G.label[ X ] );
 
-		G.label[ X ] = label[ X ];
+		G.label[ X ] = T_strdup( label[ X ] );
 		redraw_canvas_1d( &G.x_axis );
 	}
 
@@ -1565,8 +1600,7 @@ static void change_label_1d( char **label )
 				XFreePixmap( G.d, G.label_pm[ Y ] );
 		}
 
-
-		G.label[ Y ] = label[ Y ];
+		G.label[ Y ] = T_strdup( label[ Y ] );
 		if ( G.font != NULL )
 		{
 			create_label_pixmap( &G.y_axis, Y, G.label[ Y ] );
@@ -1592,7 +1626,7 @@ static void change_label_2d( char **label )
 			if ( CG.is_shown && CG.cut_dir == X )
 				XFreePixmap( G.d, G.label_pm[ Z + 3 ] );
 		}
-		G.label[ X ] = label[ X ];
+		G.label[ X ] = T_strdup( label[ X ] );
 
 		redraw_canvas_2d( &G.x_axis );
 
@@ -1619,7 +1653,7 @@ static void change_label_2d( char **label )
 					XFreePixmap( G.d, G.label_pm[ coord ] );
 			}
 
-			G.label[ coord ] = label[ coord ];
+			G.label[ coord ] = T_strdup( label[ coord ] );
 			if ( G.font != NULL )
 				create_label_pixmap( coord == Y ? &G.y_axis : &G.z_axis,
 									 coord, G.label[ coord ] );

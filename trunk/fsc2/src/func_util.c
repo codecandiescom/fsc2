@@ -350,6 +350,9 @@ Var *f_wait( Var *v )
 
 Var *f_init_1d( Var *v )
 {
+	int i;
+
+
 	/* Set some default values */
 
 	G.dim = 1;
@@ -358,8 +361,11 @@ Var *f_init_1d( Var *v )
 	G.nx = DEFAULT_1D_X_POINTS;
 	G.rwc_start[ X ] = ( double ) ARRAY_OFFSET;
 	G.rwc_delta[ X ] = 1.0;
-	G.label[ X ] = G.label[ Z ] = G.label[ Z ] = NULL;
 
+	for ( i = X; i <= Z; i++ )
+		G.label_orig[ i ] = G.label[ i ] = NULL;
+
+	/* Now evaluate the arguments */
 
 	if ( v == NULL )
 		return vars_push( INT_VAR, 1 );
@@ -449,6 +455,19 @@ labels_1d:
 		G.label[ Y ] = T_strdup( v->val.sptr );
 	}
 
+	G.nx_orig = G.nx;
+	G.rwc_start_orig[ X ] = G.rwc_start[ X ];
+	G.rwc_delta_orig[ X ] = G.rwc_delta[ X ];
+
+	for ( i = X; i <= Z; i++ )
+		if ( G.label[ i ] != NULL )
+		{
+			G.label_orig[ i ] = G.label[ i ];
+			G.label[ i ] = NULL;
+		}
+		else
+			G.label_orig[ i ] = NULL;
+
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -460,6 +479,9 @@ labels_1d:
 
 Var *f_init_2d( Var *v )
 {
+	int i;
+
+
 	/* Set some default values */
 
 	G.dim = 2;
@@ -469,8 +491,10 @@ Var *f_init_2d( Var *v )
 	G.ny = DEFAULT_2D_Y_POINTS;
 	G.rwc_start[ X ] = G.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
 	G.rwc_delta[ X ] = G.rwc_delta[ Y ] = 1.0; 
-	G.label[ X ] = G.label[ Z ] = G.label[ Z ] = NULL;
+	for ( i = X; i <= Z; i++ )
+		G.label[ i ] = NULL;
 
+	/* Now evaluate the arguments */
 
 	if ( v == NULL )
 		return vars_push( INT_VAR, 1 );
@@ -615,6 +639,22 @@ labels_2d:
 		vars_check( v, STR_VAR );
 		G.label[ Z ] = T_strdup( v->val.sptr );
 	}
+
+	G.nx_orig = G.nx;
+	G.ny_orig = G.ny;
+	G.rwc_start_orig[ X ] = G.rwc_start[ X ];
+	G.rwc_delta_orig[ X ] = G.rwc_delta[ X ];
+	G.rwc_start_orig[ Y ] = G.rwc_start[ Y ];
+	G.rwc_delta_orig[ Y ] = G.rwc_delta[ Y ];
+
+	for ( i = X; i <= Z; i++ )
+		if ( G.label[ i ] != NULL )
+		{
+			G.label_orig[ i ] = G.label[ i ];
+			G.label[ i ] = NULL;
+		}
+		else
+			G.label_orig[ i ] = NULL;
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -762,7 +802,7 @@ Var *f_cscale( Var *v )
 Var *f_clabel( Var *v )
 {
 	char *l[ 3 ] = { NULL, NULL, NULL };
-	long lengths[ 3 ];
+	long lengths[ 3 ] = { 1, 1, 1 };
 	int shm_id;
 	long len = 0;                    /* total length of message to send */
 	void *buf;
@@ -792,11 +832,13 @@ Var *f_clabel( Var *v )
 	vars_check( v, STR_VAR );
 
 	l[ X ] = T_strdup( v->val.sptr );
+	lengths[ X ] = strlen( l[ X ] ) + 1;
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check( v, STR_VAR );
 		l[ Y ] = T_strdup( v->val.sptr );
+		lengths[ Y ] = strlen( l[ Y ] ) + 1;
 
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
@@ -804,11 +846,14 @@ Var *f_clabel( Var *v )
 			{
 				eprint( FATAL, "%s:%ld: Can't change z-label in 1D-display in "
 						"%s().\n", Fname, Lc, Cur_Func );
+				T_free( l[ Y ] );
+				T_free( l[ X ] );
 				THROW( EXCEPTION );
 			}
 
 			vars_check( v, STR_VAR );
 			l[ Z ] = T_strdup( v->val.sptr );
+			lengths[ Z ] = strlen( l[ Z ] ) + 1;
 		}
 	}
 			
@@ -822,15 +867,10 @@ Var *f_clabel( Var *v )
 	assert( I_am == CHILD );
 
 	len =   sizeof( len )                 /* length field itself */
-		  + 2 * sizeof( int )             /* type field */
+		  + sizeof( int )                 /* type field */
 		  + 3 * sizeof( long );           /* label lengths */
-	for ( i = X; i <= Z; i++ )
-	{
-		if ( l[ i ] )
-			len += lengths[ i ] = strlen( l[ i ] ) + 1;
-		else
-			len += lengths[ i ] = 1;
-	}
+	for ( i = X; i <= Z; i++ )            
+			len += lengths[ i ];
 
 	/* Now try to get a shared memory segment */
 
@@ -838,6 +878,9 @@ Var *f_clabel( Var *v )
 	{
 		eprint( FATAL, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
+		T_free( l[ Z ] );
+		T_free( l[ Y ] );
+		T_free( l[ X ] );
 		THROW( EXCEPTION );
 	}
 
@@ -861,7 +904,7 @@ Var *f_clabel( Var *v )
 			T_free( l[ i ] );
 		}
 		else
-			* (char * ) ptr = '\0';
+			* ( char * ) ptr = '\0';
 		ptr += lengths[ i ];
 	}
 

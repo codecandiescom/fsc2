@@ -171,6 +171,12 @@ typedef struct {
 	double rwc_delta[ 3 ];  /* real world coordinate increment values */
 	char *label[ 6 ];       /* label for x-, y- and z-axis */
 
+	long nx_orig;
+	long ny_orig;
+	double rwc_start_orig[ 3 ];
+	double rwc_delta_orig[ 3 ];
+	char *label_orig[ 3 ];
+
 	double rw_min;          /* minimum of real world y- or z-coordinates */
 	double rw_max;          /* maximum of real world y- or z-coordinates */
 
