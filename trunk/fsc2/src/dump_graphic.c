@@ -395,7 +395,7 @@ void create_color_hash( void )
 		hash[ key ].is_used = SET;
 		hash[ key ].pixel = pixel;
 
-		fl_getmcolor( ( FL_COLOR ) i , &r, &g, &b );
+		fl_getmcolor( i , &r, &g, &b );
 
 		hash[ key ].rgb[ RED   ] = r;
 		hash[ key ].rgb[ GREEN ] = g;
