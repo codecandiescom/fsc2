@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.24  1999/07/23 23:43:59  jens
+   *** empty log message ***
+
    Revision 1.23  1999/07/22 22:07:21  jens
    *** empty log message ***
 
@@ -810,13 +813,31 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* vars_push_simple() creates a new entry on the variable stack as a copy   */
-/* of an already existing variable (this is checked).                       */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* vars_push_copy() creates a new entry on the variable stack   */
+/* as a copy of an already existing variable (this is checked). */
+/*--------------------------------------------------------------*/
 
 Var *vars_push_copy( Var *v )
 {
+	assert( vars_exist( v ) );
+
+	if ( v->type == UNDEF_VAR )
+	{
+		if ( v->name != NULL )
+		{
+			eprint( FATAL, "%s:%ld: The accessed variable `%s' has never been "
+					"assigned a value.\n", Fname, Lc );
+			THROW( VARIABLES_EXCEPTION );
+		}
+		else
+		{
+			eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s:%d.\n",
+					__FILE__, __LINE__ );
+			exit( EXIT_FAILURE );
+		}
+	}
+
 	/* Make sure it's really a simple variable */
 
 	if ( v->type == INT_VAR && v->type == FLOAT_VAR )
@@ -873,10 +894,6 @@ Var *vars_push( int type, ... )
 
 	switch ( type )
 	{
-		case UNDEF_VAR :
-			assert( 1 == 0 );
-			break;
-
 		case INT_VAR :
 			new_stack_var->val.lval = va_arg( ap, long );
 			break;
