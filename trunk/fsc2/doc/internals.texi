@@ -1445,21 +1445,22 @@ script.
 
 But stopping the interpretation of the script isn't always necessary,
 sometimes there are only potential problems the user should be made
-aware of or things that are rather likely to be errors but also could be
-real errors. In these cases the function that should be used to print
-out warnings and error messages, @code{print()} from @file{util.c}, will
-help keeping track of the number of times this happened. @code{print()}
-is, if seen from the user perspective, more or less like the standard
-@code{printf()} function, only with an additional argument, preceeding
-the arguments one would pass to @code{printf()}. This additional
-argument is an integer indicating the severity of the problem and can be
-either @code{NO_ERROR}, @code{WARN}, @code{SEVERE} or @code{FATAL} (with
-the obvious meanings). @code{print()} will now do a few additional
-things: it will first increment a counter for the different types of
-warnings (these counters are in @code{EDL.compilation}) and then prepend
-the message to be printed out with information about the name and the
-line number in the @code{EDL} script that led to the problem and also,
-if appropriate, the @code{EDL} function the problem was detected in.
+aware of or things that are rather likely to be errors but also could
+require only a warning. In these cases the function that should be
+used to print out warnings and error messages, @code{print()} from
+@file{util.c}, will help keeping track of the number of times this
+happened. @code{print()} is, if seen from the user perspective, more
+or less like the standard @code{printf()} function, only with an
+additional argument, preceeding the arguments one would pass to
+@code{printf()}. This additional argument is an integer indicating
+the severity of the problem and can be either @code{NO_ERROR},
+@code{WARN}, @code{SEVERE} or @code{FATAL} (with the obvious
+meanings). @code{print()} will now do a few additional things: it will
+first increment a counter for the different types of warnings (these
+counters are in @code{EDL.compilation}) and then prepend the message
+to be printed out with information about the name and the line number
+in the @code{EDL} script that led to the problem and also, if
+appropriate, the @code{EDL} function the problem was detected in.
 Finally it writes the message into the error browser in @code{fsc2}s
 main form.
 
