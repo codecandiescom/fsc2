@@ -2820,14 +2820,16 @@ this value.
 @node Temperature Controller Functions, Voltmeter Functions, Synthesizer Functions, Device Functions
 @section Temperature Controller Functions
 @cindex Temperature Controller Functions
-The only currently implemented temperature controller is the Lake Shore 330.
-Its module is loaded by specifying
+The only currently implemented temperature controllers are the @code{Lake
+Shore 330} and the @code{Oxford ITC503}. Their modules get loaded by
+specifying
 @example
 lakeshore330
+itc503
 @end example
 @noindent
 in the @code{DEVICES} section. All functions for the temperature
-controller can only be used in the @code{EXPERIMENT} section of
+controllers can only be used in the @code{EXPERIMENT} section of
 the @code{EDL} script.
 
 
@@ -2843,18 +2845,31 @@ Returns a string with the name of the temperature controller being used.
 @item temp_contr_temperature()
 @findex temp_contr_temperature()
 This function accepts no arguments and returns the temperature at the
-currently active sample channel.
+currently active sample channel and with the currently selected unit.
+
+If no sample channel has been selected for the @code{Lake Shore 330}
+channels @code{B} is used by default, while for the @code{Oxford ITC503}
+the default channel is channel @code{1}. When no temperature unit has
+been selected temperatures are returned in Kelvin.
 
 
 @anchor{temp_contr_sample_channel}
 @item temp_contr_sample_channel()
 @findex temp_contr_sample_channel()
 This function returns, when called with no argument, the currently
-selected sample channel. It returns @code{1} for channel @code{A} and
-@code{2} for channel @code{B}. These values can also passed to the
-function to set a new sample channel. Alternatively, one may also use
-the strings @code{"A"} or @code{"B"}. Please take note that setting a
-sample channel takes about half a second.
+selected sample channel. For the @code{Lake Shore 330} it returns
+@code{1} for channel @code{A} and @code{2} for channel @code{B} while
+for the @code{Oxford ITC503} @code{1}, @code{2} or @code{3} get
+returned, indicating which of sample channel is selected. These values
+can also passed to the function to set a new sample channel.
+Alternatively, one may also use the strings @code{"A"} or @code{"B"}
+(and @code{"C"} for the third channel of the @code{Oxford ITC503}).
+
+Please take note that setting a sample channel takes about half a second
+with the @code{Lake Shore 330}. For the @code{Oxford ITC503} not all
+sample channels may be usable, there are models with different numbers
+of channels and this number is a compile time option that has to be set
+in the configuration file for the device.
 
 
 @anchor{temp_contr_sensor_unit}
@@ -2863,12 +2878,15 @@ sample channel takes about half a second.
 The function either returns or sets the units returned by the device on
 temperature readings. If used to set a unit the function must be called
 with the value @code{0} or @code{"K"} to set the unit to Kelvin,
-@code{1} or @code{"C"} to set to degree Celsius or, finally, with
-@code{2} or @code{"S"} to set to the unit appropriate for the sensor
-(volts for diodes, Ohms for RTD or milli-Volts for thermocouples). It
-will always return the unit setting as an integer value with @code{0}
-for Kelvin, @code{1} for degree Celsius, @code{2} for Volts, @code{3}
-for Ohms or @code{4} for milli-Volts.
+@code{1} or @code{"C"} to set to degree Celsius. The @code{Lake Shore
+330} also allows to select the most appropriate unit for the sensor 
+(volts for diodes, Ohms for RTD or milli-Volts for thermocouples) by
+passing the function an argument of @code{2} or @code{"S"}.
+
+The function always return the unit setting as an integer value with
+@code{0} for Kelvin, @code{1} for degree Celsius, or, for the @code{Lake
+Shore 330} only, @code{2} for Volts, @code{3} for Ohms and @code{4} for
+milli-Volts.
 
 
 @anchor{temp_contr_lock_keyboard}

@@ -51,6 +51,7 @@
 * hjs_fc::          Field Control (HJS_FC, Steinhoff group, Osnabrueck)
 * ips20_4::         Oxford Magnet Sweep Power Supply IPS20-4
 * ips120_10::       Oxford Magnet Sweep Power Supply IPS120-10
+* itc503::          Oxford Temperature Controller ITC503
 * keithley228a::    Magnet Power Supply Keithley 228A (Berlin W-Band)
 * kontron4060::     Kontron 4060 Voltmeter
 * lakeshore330::    Lake Shore 330 Temperature Controller
@@ -1151,7 +1152,7 @@ temperature controller transfering data between GPIB and Oxford ISOBUS.
 @c #############################################################
 
 
-@node ips120_10, keithley228a, ips20_4, Device Reference
+@node ips120_10, itc503, ips20_4, Device Reference
 @iftex
 @subheading Oxford Magnet Sweep Power Supply IPS120-10
 @end iftex
@@ -1186,7 +1187,40 @@ magnet used for Leiden @w{275 GHz} spektrometer.
 @c #############################################################
 
 
-@node keithley228a, kontron4060, ips120_10, Device Reference
+@node itc503, keithley228a, ips120_10, Device Reference
+@iftex
+@subheading Oxford Temperature Controller ITC503
+@end iftex
+@ifnottex
+@section Oxford Temperature Controller503
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{itc503}
+
+@paragraphindent 0
+@strong{Description}: Oxford ITC503 temperature controller. Currently
+only temperature measurements are supported, no automatic adjustment of
+the temperature.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{temp_contr_name()}            @tab @ref{temp_contr_name}
+@item @code{temp_contr_temperature()}     @tab @ref{temp_contr_temperature}
+@item @code{temp_contr_sample_channel()}  @tab @ref{temp_contr_sample_channel}
+@item @code{temp_contr_sensor_unit()}     @tab @ref{temp_contr_sensor_unit}
+@item @code{temp_contr_lock_keyboard()}   @tab @ref{temp_contr_lock_keyboard}
+@end multitable
+
+
+@c #############################################################
+
+
+@node keithley228a, kontron4060, itc503, Device Reference
 @iftex
 @subheading Magnet Power Supply Keithley 228A (Berlin W-Band)
 @end iftex
