@@ -35,9 +35,9 @@ char *get_string( size_t len )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Converts all upper case characters in a string to lower case ones. */
-/*--------------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Converts all upper case characters in a string to lower case. */
+/*---------------------------------------------------------------*/
 
 char *string_to_lower( char *str )
 {
@@ -170,8 +170,26 @@ long get_file_length( char *name, int *len )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* This function is used all over the pogram to print error messages. */
+/* Its first argument is the severity of the error, an integer in the */
+/* range between 0 (FATAL) and 3 (NO_ERROR), see also global.h for    */
+/* abbreviations. If the second argument, a boolean value, is set,    */
+/* the name of the currently loaded EDL program and the line number   */
+/* we are at is prepended to the output string. The next argument is  */
+/* a format string having the same syntax as the format string for    */
+/* functions like printf(). Then an unspecified number of arguments   */
+/* may follow (which should correspond to the conversion specifiers   */
+/* in the format string).                                             */
+/* When the program is running with graphics te output goes to the    */
+/* error browser, otherwise to stderr. The maximum line length to be  */
+/* output is FL_BROWSER_LINELENGTH, which was defined to 2048 (at     */
+/* least the last time I checked) in /usr/include/forms.h. Usually,   */
+/* one can't use the complete length, because of the prepended file   */
+/* name, and a few bytes are also used for other purposes. So better  */
+/* keep the expected line length a bit lower (if the line would get   */
+/* too long it gets truncated).                                       */
+/*--------------------------------------------------------------------*/
 
 void eprint( int severity, bool print_fl, const char *fmt, ... )
 {

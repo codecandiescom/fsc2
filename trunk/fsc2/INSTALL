@@ -1,7 +1,7 @@
 A) Requirements
 ===============
 
-The following tools and libraries are needed to compile and install fsc2:
+The following tools and libraries are needed to compile, install and run fsc2:
 
  1) gmake
  2) gcc
@@ -9,26 +9,27 @@ The following tools and libraries are needed to compile and install fsc2:
  4) bison
  5) install
  6) sed
- 7) XFORMS library (version 0.89 or higher)
- 8) GPIB library (will also compile and run without, see below)
+ 7) awk
+ 8) XFORMS library (version 0.89 or higher)
+ 9) GPIB library (will also compile and run without, see below)
 
 Optionally, you should have
 
- 9) mail
-10) addr2line
+10) mail
+11) addr2line
 
 but if it is missing the basic functionality is still there.
 
 To create the complete documentation you also need
 
-11) makeinfo
-12) tex (if missing no Postscript and PDF documentation is created)
-13) convert (from the ImageMagick package, preferred) or
+12) makeinfo
+13) tex (if missing no Postscript and PDF documentation is created)
+14) convert (from the ImageMagick package, preferred) or
 	pngtopnm, pngtops (in this case no PDF documentation can be created)
-14) dvips (if missing no Postscript documentation is created)
-15) perl (version 5.0 or higher)
-16) pdftex (if missing no PDF documentation will be created)
-17) gzip
+15) dvips (if missing no Postscript documentation is created)
+16) perl (version 5.0 or higher)
+17) pdftex (if missing no PDF documentation will be created)
+18) gzip
 
 
 The XFORMS library is available from e.g. (some links may be outdated)
