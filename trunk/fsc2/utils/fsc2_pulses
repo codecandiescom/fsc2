@@ -33,6 +33,7 @@ die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
     if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
 
 my ( $line, $time_base, $Delay, $has_auto_pulses );
+my $verbose = 0;
 my $if = *STDIN;
 my $Channels = Channels->new;
 
@@ -59,6 +60,10 @@ sub read_input {
 							 OTHER_1 OTHER_2 OTHER_3 OTHER_4 );
 
 	if ( $ARGV[ 0 ] ) {
+		if ( $ARGV[ 0 ] =~ /^-v$/ ) {
+			$verbose = 1;
+			shift @ARGV;
+		}
 		usage( ) if $ARGV[ 0 ] =~ /^-h$/ or $ARGV[ 0 ] =~ /^--h(elp)?$/;
 		open( $if, "<" . $ARGV[ 0 ] )
 			or die "Can't open input file " . $ARGV[ 0 ] . ": $!\n";
@@ -66,32 +71,46 @@ sub read_input {
 
 	# Read the time base
 
-#	defined( $line = <$if> ) or die "Premature end of input at line $..\n";
-	defined( $line = <$if> ) or exit 1;
-#	$line =~ /^TB: (\d+(\.\d+)?([eE][+-]?\d+)?)$/
-#		or die "Invalid input at line $..\n";
-	$line =~ /^TB: (\d+(\.\d+)?([eE][+-]?\d+)?)$/ or exit 1;
+	if ( $verbose ) {
+		defined( $line = <$if> ) or die "Premature end of input at line $..\n";
+		$line =~ /^TB: (\d+(\.\d+)?([eE][+-]?\d+)?)$/
+			or die "Invalid input at line $..\n";
+	} else {
+		defined( $line = <$if> ) or exit 1;
+		$line =~ /^TB: (\d+(\.\d+)?([eE][+-]?\d+)?)$/ or exit 1;
+	}
+
 	$time_base = $1;
 
 	# Read the total negative delay
 
-#	defined( $line = <$if> ) or die "Premature end of input at line $..\n";
-	defined( $line = <$if> ) or exit 1;
-#	$line =~ /^D: (\d+)?$/ or die "Invalid input at line $..\n";
-	$line =~ /^D: (\d+)?$/ or exit 1;
+	if ( $verbose ) {
+		defined( $line = <$if> ) or die "Premature end of input at line $..\n";
+		$line =~ /^D: (\d+)?$/ or die "Invalid input at line $..\n";
+	} else {
+		defined( $line = <$if> ) or exit 1;
+		$line =~ /^D: (\d+)?$/ or exit 1;
+	}
+
 	$Delay = $1;
 
-#	defined( $line = <$if> ) or die "Premature end of input at line $..\n";
-	defined( $line = <$if> ) or exit 1;
-#	$line =~ /^===$/ or die "Invalid input at line $..\n";
-	$line =~ /^===$/ or exit 1;
+	if ( $verbose ) {
+		defined( $line = <$if> ) or die "Premature end of input at line $..\n";
+		$line =~ /^===$/ or die "Invalid input at line $..\n";
+	} else {
+		defined( $line = <$if> ) or exit 1;
+		$line =~ /^===$/ or exit 1;
+	}
 
 	# Read in the function/channel information
 
 	while( 1 ) {
-#		defined ( $line = <$if> )
-#			or die "Premature end of input at line $..\n";
-		defined ( $line = <$if> ) or exit 1;
+		if ( $verbose ) {
+			defined ( $line = <$if> )
+				or die "Premature end of input at line $..\n";
+		} else {
+			defined ( $line = <$if> ) or exit 1;
+		}
 		last if $line =~ /^===$/;
 
 		my $i;
@@ -102,9 +121,13 @@ sub read_input {
 				last;
 			}
 		}
-#		die "Invalid input at line $..\n"
-#			unless $i <= $#Function_Names;
-		exit 1 unless $i <= $#Function_Names;
+
+		if ( $verbose ) {
+			die "Invalid input at line $..\n"
+				unless $i <= $#Function_Names;
+		} else {
+			exit 1 unless $i <= $#Function_Names;
+		}
 	}
 
 	# Read the all the pulse settings
@@ -120,14 +143,21 @@ sub read_input {
 
 		$has_auto_pulses = 1 if $line =~ /\(\d+\)/;
 		my @bits = split /\s+/, $line;
-#		die "Invalid input at line $..\n" unless $#bits % 3 == 0;
-		exit 1 unless $#bits % 3 == 0;
+		if ( $verbose ) {
+			die "Invalid input at line $..\n" unless $#bits % 3 == 0;
+		} else {
+			exit 1 unless $#bits % 3 == 0;
+		}
 		$Channels->add_pulse_list( $num, @bits );
 	}
 
-#	die "No pulses patterns defined in input.\n" unless
-#		$Channels->num_channels > 0 and $Channels->num_steps >= 0;
-	exit 1 unless $Channels->num_channels > 0 and $Channels->num_steps >= 0;
+	if ( $verbose ) {
+		die "No pulses patterns defined in input.\n" unless
+			$Channels->num_channels > 0 and $Channels->num_steps >= 0;
+	} else {
+		exit 1
+			unless $Channels->num_channels > 0 and $Channels->num_steps >= 0;
+	}
 }
 
 
@@ -863,8 +893,11 @@ sub add_pulse_list {
 
 	my $ch = $self->find_by_key( $key );
 
-#	die "Invalid input at line $..\n" unless defined $ch;
-	exit 1 unless defined $ch;
+	if ( $verbose ) {
+		die "Invalid input at line $..\n" unless defined $ch;
+	} else {
+		exit 1 unless defined $ch;
+	}
 
 	$ch->add_pulse_list( $step, @_ );
 	$self->{ 'num_steps' } = $step if $step > $self->{ 'num_steps' };
@@ -949,8 +982,11 @@ sub get_pulse_list {
 
 	my ( $self, $step ) = ( shift, shift );
 
-#	die "Invalid pulse list index\n" if $step < 0;
-	exit 1 if $step < 0;
+	if ( $verbose ) {
+		die "Invalid pulse list index\n" if $step < 0;
+	} else {
+		exit 1 if $step < 0;
+	}
 
 	return $self->{ 'plist' }{ $step }
 		if exists $self->{ 'plist' }{ $step };
