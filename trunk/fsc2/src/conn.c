@@ -405,6 +405,7 @@ static void conn_sig_handler( int signo )
 		/* All the remaining signals are deadly... */
 
 		default :
+			unlink( FSC2_SOCKET );
 			_exit( -1 );
 	}
 
