@@ -141,7 +141,8 @@ int hp8647a_end_of_exp_hook( void )
 {
 	HP8647A_INIT = UNSET;
 	hp8647a_finished( );
-	hp8647a.device = -1;
+
+	memcpy( &hp8647a, &hp8647a_backup, sizeof( HP8647A ) );
 
 	return 1;
 }
@@ -166,6 +167,8 @@ void hp8647a_exit_hook( void )
 		T_free( hp8647a.att_table );
 		hp8647a.att_table = NULL;
 	}
+
+	hp8647a.device = -1;
 }
 
 

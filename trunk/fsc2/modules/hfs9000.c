@@ -345,7 +345,7 @@ Var *pulser_state( Var *v )
 		}
 	}
 
-	if ( I_am == PARENT || TEST_RUN )
+	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( INT_VAR, ( long ) ( hfs9000.is_running = state ) );
 
 	hfs9000_run( state );
@@ -408,7 +408,7 @@ Var *pulser_channel_state( Var *v )
 	
 	hfs9000.channel[ channel].state = state;
 
-	if ( I_am != PARENT && ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 		hfs9000_set_channel_state( channel, state );
 
 	return vars_push( INT_VAR, ( long ) state );

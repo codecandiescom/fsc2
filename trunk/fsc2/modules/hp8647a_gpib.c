@@ -296,7 +296,7 @@ int hp8647a_get_mod_type( void )
 	int i;
 
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 	{
 		if ( hp8647a.mod_type_is_set )
 			return hp8647a.mod_type;
@@ -403,7 +403,7 @@ int hp8647a_get_mod_source( int type )
 
 	fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 	{
 		if ( hp8647a.mod_source_is_set[ type ] )
 			return hp8647a.mod_source[ type ];
@@ -554,7 +554,7 @@ double hp8647a_get_mod_ampl( int type )
 
 	fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 	{
 		if ( hp8647a.mod_ampl_is_set[ type ] )
 			return hp8647a.mod_ampl[ type ];
