@@ -361,7 +361,7 @@ Var *pulser_state( Var *v )
 		}
 	}
 
-	if ( I_am == PARENT || TEST_RUN )
+	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( INT_VAR, ( long ) ( dg2020.is_running = state ) );
 
 	dg2020_run( state );
@@ -402,7 +402,7 @@ Var *pulser_update( Var *v )
 
 	/* If we're doing a real experiment also tell the pulser to start */
 
-	if ( ! TEST_RUN && ! dg2020_run( START ) )
+	if ( FSC2_MODE == EXPERIMENT && ! dg2020_run( START ) )
 	{
 		eprint( FATAL, SET, "%s: Communication with pulser failed.\n",
 				pulser_struct.name );
@@ -570,7 +570,7 @@ Var *pulser_next_phase( Var *v )
 	{
 		if ( ! dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used &&
 			 ! dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used &&
-			TEST_RUN )
+			 FSC2_MODE == TEST )
 		{
 			eprint( SEVERE, SET, "%s: No phase functions are in use.\n",
 					pulser_struct.name );
@@ -596,7 +596,7 @@ Var *pulser_next_phase( Var *v )
 		f = &dg2020.function[ v->val.lval == 1 ? PULSER_CHANNEL_PHASE_1 :
 							  PULSER_CHANNEL_PHASE_2 ];
 
-		if ( ! f->is_used && TEST_RUN )
+		if ( ! f->is_used && FSC2_MODE == TEST )
 		{
 			eprint( SEVERE, SET, "%s: Phase function `%s' is not used.\n",
 					pulser_struct.name, Function_Names[ f->self ] );
@@ -606,7 +606,7 @@ Var *pulser_next_phase( Var *v )
 		if ( f->next_phase >= f->num_channels )
 			f->next_phase = 0;
 
-		if ( ! TEST_RUN )
+		if ( FSC2_MODE == EXPERIMENT )
 		{
 			if ( ! dg2020_channel_assign( f->channel[ f->next_phase++ ]->self,
 										  f->pod->self ) ||
@@ -636,7 +636,7 @@ Var *pulser_phase_reset( Var *v )
 	{
 		if ( ! dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used &&
 			 ! dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used &&
-			TEST_RUN )
+			 FSC2_MODE == TEST )
 		{
 			eprint( SEVERE, SET, "%s: No phase functions are in use.\n",
 					pulser_struct.name );
@@ -662,14 +662,14 @@ Var *pulser_phase_reset( Var *v )
 		f = &dg2020.function[ v->val.lval == 1 ? PULSER_CHANNEL_PHASE_1 :
 							  PULSER_CHANNEL_PHASE_2 ];
 
-		if ( ! f->is_used && TEST_RUN )
+		if ( ! f->is_used && FSC2_MODE == TEST )
 		{
 			eprint( SEVERE, SET, "%s: Phase function `%s' is not used.\n",
 					pulser_struct.name, Function_Names[ f->self ] );
 			return vars_push( INT_VAR, 0 );
 		}
 
-		if ( ! TEST_RUN )
+		if ( FSC2_MODE == EXPERIMENT )
 		{
 			if ( ! dg2020_channel_assign( f->channel[ 0 ]->self,
 										  f->pod->self ) ||
@@ -785,7 +785,7 @@ Var *pulser_lock_keyboard( Var *v )
 		}
 	}
 
-	if ( ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 		dg2020_lock_state( lock );
 
 	return vars_push( INT_VAR, lock ? 1 : 0 );

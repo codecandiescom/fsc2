@@ -376,7 +376,7 @@ Var *pulser_state( Var *v )
 		}
 	}
 
-	if ( I_am == PARENT || TEST_RUN )
+	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( INT_VAR, ( long ) ( dg2020.is_running = state ) );
 
 	dg2020_run( state );
@@ -424,7 +424,7 @@ Var *pulser_update( Var *v )
 
 	/* If we're doing a real experiment also tell the pulser to start */
 
-	if ( ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 		dg2020_run( START );
 
 	return vars_push( INT_VAR, state ? 1 : 0 );
@@ -684,7 +684,7 @@ Var *pulser_next_phase( Var *v )
 
 		if ( dg2020_phs[ 0 ].function == NULL &&
 			 dg2020_phs[ 1 ].function == NULL &&
-			 TEST_RUN )
+			 FSC2_MODE == TEST )
 		{
 			eprint( SEVERE, SET, "%s: No phase cycling is used any of the "
 					"functions.\n", pulser_struct.name );
@@ -712,7 +712,7 @@ Var *pulser_next_phase( Var *v )
 
 		if ( ! f->is_used )
 		{
-			if ( TEST_RUN )
+			if ( FSC2_MODE == TEST )
 				eprint( SEVERE, SET, "%s: Function `%s' to be phase cycled "
 						"is not used.\n", pulser_struct.name,
 						Function_Names[ f->self ] );
@@ -722,7 +722,7 @@ Var *pulser_next_phase( Var *v )
 		if ( ++f->next_phase >= f->pc_len )
 			f->next_phase = 0;
 
-		if ( ! TEST_RUN )
+		if ( FSC2_MODE == EXPERIMENT )
 			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
 				if ( f->phase_setup->is_set[ j ] &&
 					 ! dg2020_channel_assign( 
@@ -762,7 +762,7 @@ Var *pulser_phase_reset( Var *v )
 
 		if ( dg2020_phs[ 0 ].function == NULL &&
 			 dg2020_phs[ 1 ].function == NULL &&
-			 TEST_RUN )
+			 FSC2_MODE == TEST )
 		{
 			eprint( SEVERE, SET, "%s: No phase cycling is used any of the "
 					"functions.\n", pulser_struct.name );
@@ -790,7 +790,7 @@ Var *pulser_phase_reset( Var *v )
 
 		if ( ! f->is_used )
 		{
-			if ( TEST_RUN )
+			if ( FSC2_MODE == TEST )
 				eprint( SEVERE, SET, "%s: Function `%s' to be phase cycled "
 						"is not used.\n", pulser_struct.name,
 						Function_Names[ f->self ] );
@@ -799,7 +799,7 @@ Var *pulser_phase_reset( Var *v )
 
 		f->next_phase = 0;
 
-		if ( ! TEST_RUN )
+		if ( FSC2_MODE == EXPERIMENT )
 			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
 				if ( f->phase_setup->is_set[ j ] && 
 					 ! dg2020_channel_assign(
@@ -930,7 +930,7 @@ Var *pulser_lock_keyboard( Var *v )
 		}
 	}
 
-	if ( ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 		dg2020_lock_state( lock );
 
 	return vars_push( INT_VAR, lock ? 1 : 0 );

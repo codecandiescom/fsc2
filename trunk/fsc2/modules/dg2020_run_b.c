@@ -51,7 +51,8 @@ bool dg2020_do_update( void )
 	/* Resort the pulses and check that the new pulse settings are
 	   reasonable and finally commit all changes */
 
-	if ( ( state = dg2020_reorganize_pulses( TEST_RUN ) ) && ! TEST_RUN )
+	if ( ( state = dg2020_reorganize_pulses( FSC2_MODE == TEST ) ) &&
+		 FSC2_MODE == EXPERIMENT )
 		dg2020_update_data( );
 
 	dg2020.needs_update = UNSET;
@@ -142,9 +143,9 @@ void dg2020_do_checks( FUNCTION *f )
 
 			f->max_seq_len = Ticks_max( f->max_seq_len, p->pos + p->len );
 			if ( f->delay + f->max_seq_len >
-						  ( TEST_RUN ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
+				 ( FSC2_MODE == TEST ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
 			{
-				if ( TEST_RUN )
+				if ( FSC2_MODE == TEST )
 					eprint( FATAL, SET, "%s: Pulse sequence for function "
 							"`%s' does not fit into the pulsers memory.\n",
 							pulser_struct.name, Function_Names[ f->self ] );
@@ -165,7 +166,7 @@ void dg2020_do_checks( FUNCTION *f )
 			 p->pos + p->len > f->pulses[ i + 1 ]->pos )
 		{
 			if ( dg2020_IN_SETUP )
-				eprint( TEST_RUN ? FATAL : SEVERE, UNSET,
+				eprint( FSC2_MODE == TEST ? FATAL : SEVERE, UNSET,
 						"%s: Pulses %ld and %ld overlap.\n",
 						pulser_struct.name, p->num, f->pulses[ i + 1 ]->num );
 			else

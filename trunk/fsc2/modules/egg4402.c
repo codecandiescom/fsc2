@@ -146,7 +146,7 @@ Var *boxcar_curve_length( Var *v )
 
 	if ( v == NULL )
 	{
-		if ( TEST_RUN )
+		if ( FSC2_MODE == TEST )
 			return vars_push( INT_VAR, EGG4402_TEST_CURVE_LENGTH );
 
 		if ( gpib_write( egg4402.device, "CL\n", 3 ) == FAILURE )

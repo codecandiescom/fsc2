@@ -48,7 +48,7 @@ bool dg2020_do_update( void )
 	/* Resort the pulses and, while in a test run, we also have to check that
 	   the new pulse settings are reasonable */
 
-	if ( ! dg2020_reorganize_pulses( TEST_RUN ) )
+	if ( ! dg2020_reorganize_pulses( FSC2_MODE == TEST ) )
 	{
 		dg2020.needs_update = UNSET;
 		return FAIL;
@@ -56,7 +56,7 @@ bool dg2020_do_update( void )
 
 	/* Finally commit all changes */
 
-	if ( ! TEST_RUN && ! dg2020_update_data( ) )
+	if ( FSC2_MODE == EXPERIMENT && ! dg2020_update_data( ) )
 	{
 		eprint( FATAL, UNSET, "%s: Setting the pulser failed badly.\n",
 				pulser_struct.name );
@@ -160,9 +160,9 @@ void dg2020_do_checks( FUNCTION *f )
 
 			f->max_seq_len = Ticks_max( f->max_seq_len, p->pos + p->len );
 			if ( f->delay + f->max_seq_len >
-				 		  ( TEST_RUN ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
+				 ( FSC2_MODE == TEST ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
 			{
-				if ( TEST_RUN )
+				if ( FSC2_MODE == TEST )
 					eprint( FATAL, SET, "%s: Pulse sequence for function "
 							"`%s' does not fit into the pulsers memory. "
 							"Maybe, you could try a longer pulser time "
@@ -183,7 +183,7 @@ void dg2020_do_checks( FUNCTION *f )
 			 p->pos + p->len > f->pulses[ i + 1 ]->pos )
 		{
 			if ( dg2020_IN_SETUP )
-				eprint( TEST_RUN ? FATAL : SEVERE, UNSET,
+				eprint( FSC2_MODE == TEST ? FATAL : SEVERE, UNSET,
 						"%s: Pulses %ld and %ld overlap.\n",
 						pulser_struct.name, p->num,
 						f->pulses[ i + 1 ]->num );
@@ -221,7 +221,7 @@ void dg2020_reorganize_phases( FUNCTION *f, bool flag )
 	for ( i = 0; i < f->num_pulses; i++ )
 	{
 		p = f->pulses[ i ];
-		if ( TEST_RUN && p->is_active )
+		if ( FSC2_MODE == TEST && p->is_active )
 			f->max_seq_len = Ticks_max( f->max_seq_len, p->pos + p->len );
 		if ( p->for_pulse->needs_update )
 			need_update = SET;

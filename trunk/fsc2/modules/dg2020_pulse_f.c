@@ -139,7 +139,7 @@ bool dg2020_set_pulse_position( long pnum, double p_time )
 	p->pos = dg2020_double2ticks( p_time );
 	p->is_pos = SET;
 
-	if ( ! p->initial_is_pos && ! TEST_RUN && I_am == PARENT )
+	if ( ! p->initial_is_pos && FSC2_MODE == PREPARATION )
 	{
 		p->initial_pos = p->pos;
 		p->initial_is_pos = SET;
@@ -182,7 +182,7 @@ bool dg2020_set_pulse_length( long pnum, double p_time )
 		p->is_len = SET;
 	}
 
-	if ( ! p->initial_is_len && ! TEST_RUN && I_am == PARENT )
+	if ( ! p->initial_is_len && FSC2_MODE == PREPARATION )
 	{
 		p->initial_len = dg2020_double2ticks( p_time );
 		p->initial_is_len = SET;
@@ -223,7 +223,7 @@ bool dg2020_set_pulse_position_change( long pnum, double p_time )
 	p->dpos = dg2020_double2ticks( p_time );
 	p->is_dpos = SET;
 
-	if ( ! p->initial_is_dpos && ! TEST_RUN && I_am == PARENT )
+	if ( ! p->initial_is_dpos && FSC2_MODE == PREPARATION )
 	{
 		p->initial_dpos = dg2020_double2ticks( p_time );
 		p->initial_is_dpos = SET;
@@ -251,15 +251,15 @@ bool dg2020_set_pulse_length_change( long pnum, double p_time )
 
 	if ( dg2020_double2ticks( p_time ) == 0 )
 	{
-		eprint( SEVERE, SET, "%s: Zero length change value for pulse "
-				"%ld.\n", pulser_struct.name, pnum );
+		eprint( SEVERE, SET, "%s: Zero length change value for pulse %ld.\n",
+				pulser_struct.name, pnum );
 		return FAIL;
 	}
 
 	p->dlen = dg2020_double2ticks( p_time );
 	p->is_dlen = SET;
 
-	if ( ! p->initial_is_dlen && ! TEST_RUN && I_am == PARENT )
+	if ( ! p->initial_is_dlen && FSC2_MODE == PREPARATION )
 	{
 		p->initial_dlen = dg2020_double2ticks( p_time );
 		p->initial_is_dlen = SET;
@@ -444,7 +444,7 @@ bool dg2020_change_pulse_position( long pnum, double p_time )
 		eprint( FATAL, SET, "%s: Invalid (negative) start position for "
 				"pulse %ld: %s.\n", pulser_struct.name, pnum,
 				dg2020_ptime( p_time ) );
-		if ( I_am == CHILD )
+		if ( FSC2_MODE == EXPERIMENT )
 			return FAIL;
 		else
 			THROW( EXCEPTION )
@@ -457,7 +457,7 @@ bool dg2020_change_pulse_position( long pnum, double p_time )
 	}
 	CATCH( EXCEPTION )
 	{
-		if ( I_am == CHILD )
+		if ( FSC2_MODE == EXPERIMENT )
 			return FAIL;
 		else
 			THROW( EXCEPTION )
@@ -503,7 +503,7 @@ bool dg2020_change_pulse_length( long pnum, double p_time )
 		eprint( FATAL, SET, "%s: Invalid (negative) length for pulse %ld: "
 				"%s.\n", pulser_struct.name, pnum,
 				dg2020_ptime( p_time ) );
-		if ( I_am == CHILD )
+		if ( FSC2_MODE == EXPERIMENT )
 			return FAIL;
 		else
 			THROW( EXCEPTION )
@@ -516,7 +516,7 @@ bool dg2020_change_pulse_length( long pnum, double p_time )
 	}
 	CATCH( EXCEPTION )
 	{
-		if ( I_am == CHILD )
+		if ( FSC2_MODE == EXPERIMENT )
 			return FAIL;
 		else
 			THROW( EXCEPTION )
@@ -564,13 +564,13 @@ bool dg2020_change_pulse_position_change( long pnum, double p_time )
 	}
 	CATCH( EXCEPTION )
 	{
-		if ( I_am == CHILD )
+		if ( FSC2_MODE == EXPERIMENT )
 			return FAIL;
 		else
 			THROW( EXCEPTION )
 	}
 
-	if ( new_dpos == 0 && TEST_RUN )
+	if ( new_dpos == 0 && FSC2_MODE == TEST )
 	{
 		eprint( SEVERE, SET, "%s: Zero position change value for pulse "
 				"%ld.\n", pulser_struct.name, pnum );
@@ -600,13 +600,13 @@ bool dg2020_change_pulse_length_change( long pnum, double p_time )
 	}
 	CATCH( EXCEPTION )
 	{
-		if ( I_am == CHILD )
+		if ( FSC2_MODE == EXPERIMENT )
 			return FAIL;
 		else
 			THROW( EXCEPTION )
 	}
 
-	if ( new_dlen == 0 && TEST_RUN )
+	if ( new_dlen == 0 && FSC2_MODE == TEST )
 	{
 		eprint( SEVERE, SET, "%s: Zero length change value for pulse "
 				"%ld.\n", pulser_struct.name, pnum );

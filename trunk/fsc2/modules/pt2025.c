@@ -129,8 +129,10 @@ Var *gaussmeter_name( Var *v )
 Var *measure_field( Var *v )
 {
 	v = v;
-	if ( TEST_RUN )
+
+	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, 34089.3 );
+
 	return vars_push( FLOAT_VAR, pt2025_get_field );
 }
 
