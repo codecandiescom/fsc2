@@ -76,7 +76,8 @@
    area between the pair of cursors */
 
 typedef struct Window Window_T;
-typedef struct TDS754A TDS754A;
+typedef struct TDS754A TDS754A_T;
+
 
 struct Window {
 	long num;                   /* number of window                          */
@@ -148,7 +149,7 @@ enum {
 
 #ifdef TDS754A_MAIN
 
-TDS754A tds754a;
+TDS754A_T tds754a;
 
 /* This array must be set to the available record lengths of the digitizer
    and must always end with a 0 */
@@ -178,9 +179,9 @@ static double tb[ ] = {                     500.0e-12,
    impedance, while for 50 Ohm the minimum sensitivity is only 1V.
    Unfortunately, this can only be tested after the digitizer is online. */
 
-double max_sens = 1e-3,
+double max_sens    = 1e-3,
 	   min_sens_50 = 1.0,
-	   min_sens = 10.0;
+	   min_sens    = 10.0;
 
 
 const char *TDS754A_Channel_Names[ MAX_CHANNELS ] =
@@ -190,7 +191,7 @@ const char *TDS754A_Channel_Names[ MAX_CHANNELS ] =
 								 			"AUX", "LINE" };
 #else
 
-extern TDS754A tds754a;
+extern TDS754A_T tds754a;
 extern const char *TDS754A_Channel_Names[ MAX_CHANNELS ];
 extern double max_sens, min_sens_50, min_sens;
 
@@ -239,7 +240,7 @@ Var_T *digitizer_command( Var_T *v );
 /* Declaration of internally used functions */
 
 const char *tds754a_ptime( double p_time );
-void tds754a_delete_windows( TDS754A *s );
+void tds754a_delete_windows( TDS754A_T *s );
 void tds754a_do_pre_exp_checks( void );
 void tds754a_window_checks( Window_T *w );
 void tds754a_set_tracking( Window_T *w );
@@ -247,7 +248,7 @@ void tds754a_set_meas_window( Window_T *w );
 void tds754a_set_curve_window( Window_T *w );
 void tds754a_set_window( Window_T *w );
 long tds754a_translate_channel( int dir, long channel, bool flag );
-void tds754a_store_state( TDS754A *dest, TDS754A *src );
+void tds754a_store_state( TDS754A_T *dest, TDS754A_T *src );
 void tds754a_state_check( double timebase, long rec_len, double trig_pos );
 Window_T *tds754a_get_window_by_number( long win_number );
 

@@ -55,7 +55,7 @@ const char *tds_tmpl_ptime( double p_time )
 /* Deletes all window by removing them from the linked list of windows */
 /*---------------------------------------------------------------------*/
 
-void tds_tmpl_delete_windows( TDS_TMPL *s )
+void tds_tmpl_delete_windows( TDS_TMPL_T *s )
 {
 	Window_T *w;
 
@@ -639,7 +639,7 @@ long tds_tmpl_translate_channel( int dir, long channel, bool flag )
 /* experiment has to be reset. And that's what this function does. */
 /*-----------------------------------------------------------------*/
 
-void tds_tmpl_store_state( TDS_TMPL *dest, TDS_TMPL *src )
+void tds_tmpl_store_state( TDS_TMPL_T *dest, TDS_TMPL_T *src )
 {
 	Window_T *w, *dw;
 
