@@ -957,7 +957,7 @@ void recalc_XPoints_of_curve_1d( Curve_1d *cv )
 			continue;
 
 		xp->x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
-		xp->y = ( short ) G.canvas.h - 1 - 
+		xp->y = i2shrt G.canvas.h - 1 - 
 			   d2shrt( cv->s2d[ Y ] * ( cv->points[ j ].v + cv->shift[ Y ] ) );
 
 		cv->left  |= ( xp->x < 0 );
@@ -1400,7 +1400,7 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 	{
 		/* Draw coloured line of scale */
 
-		y = ( short ) G.x_scale_offset;
+		y = i2shrt( G.x_scale_offset );
 		XFillRectangle( G.d, c->pm, cv->gc, 0, y - 2, c->w, 3 );
 
 		/* Draw all the ticks and numbers */
@@ -1425,7 +1425,7 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 					XDrawString( G.d, c->pm, c->font_gc, x - width / 2,
 								 y + G.label_dist + G.font_asc, lstr,
 								 strlen( lstr ) );
-					last = ( short ) ( x + width / 2 );
+					last = i2shrt( x + width / 2 );
 				}
 			}
 			else if ( medium % medium_factor == 0 )    /* medium line */
@@ -1440,7 +1440,7 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 	{
 		/* Draw coloured line of scale */
 
-		x = ( short ) ( c->w - G.y_scale_offset );
+		x = i2shrt( c->w - G.y_scale_offset );
 		XFillRectangle( G.d, c->pm, cv->gc, x, 0, 3, c->h );
 
 		/* Draw all the ticks and numbers */

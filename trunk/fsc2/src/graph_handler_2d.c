@@ -945,8 +945,8 @@ static void shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv )
 
 			xp->x = i2shrt( xp->x + dx );
 			xp->y = i2shrt( xp->y + dy );
-			xps->x = xp->x - ( cv->w >> 1 );
-			xps->y = xp->y - ( cv->h >> 1 );
+			xps->x = i2shrt( xp->x - ( cv->w >> 1 ) );
+			xps->y = i2shrt( xp->y - ( cv->h >> 1 ) );
 
 			cv->left &= ( xps->x + cv->w <= 0 );
 			cv->right &= ( xps->x >= ( int ) G.canvas.w );
@@ -1122,8 +1122,8 @@ void recalc_XPoints_of_curve_2d( Curve_2d *cv )
 
 	cv->w = d2ushrt( ceil( cv->s2d[ X ] ) );
 	cv->h = d2ushrt( ceil( cv->s2d[ Y ] ) );
-	dw = cv->w / 2;
-	dh = cv->h / 2;
+	dw = i2shrt( cv->w / 2 );
+	dh = i2shrt( cv->h / 2 );
 
 	for ( sp = cv->points, i = 0, count = cv->count;
 		  i < G.ny && count != 0; i++ )
@@ -1133,10 +1133,10 @@ void recalc_XPoints_of_curve_2d( Curve_2d *cv )
 				count--;
 
 				xp->x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
-				xp->y = ( short ) G.canvas.h - 1
+				xp->y = i2shrt( G.canvas.h ) - 1
 				        - d2shrt( cv->s2d[ Y ] * ( i + cv->shift[ Y ] ) );
-				xps->x = xp->x - dw;
-				xps->y = xp->y - dh;
+				xps->x = i2shrt( xp->x - dw );
+				xps->y = i2shrt( xp->y - dh );
 
 				cv->left  &= ( xps->x + cv->w <= 0 );
 				cv->right &= ( xps->x >= ( int ) G.canvas.w );
@@ -1366,19 +1366,18 @@ void repaint_canvas_2d( Canvas *c )
 
 			strcpy( buf, " x = " );
 			make_label_string( buf + 5, x_pos,
-							   ( int ) lrnd( floor( log10( fabs(
-							   cv->rwc_delta[ X ] ) / cv->s2d[ X ] ) ) - 2 ) );
+							   irnd( floor( log10( fabs( cv->rwc_delta[ X ] )
+												   / cv->s2d[ X ] ) ) - 2 ) );
 			strcat( buf, "   y = " ); 
 			make_label_string( buf + strlen( buf ), y_pos,
-							   ( int ) lrnd( floor( log10(
-								       fabs( cv->rwc_delta[ Y ] )
-								       / cv->s2d[ Y ] ) ) - 2 ) );
+							   irnd( floor( log10( fabs( cv->rwc_delta[ Y ] )
+												   / cv->s2d[ Y ] ) ) - 2 ) );
 			if ( a_index != -1 )
 			{
 				strcat( buf, "   z = " ); 
 				make_label_string( buf + strlen( buf ), z_pos,
-					  ( int ) lrnd( floor( log10( fabs( cv->rwc_delta[ Z ] )
-													/ cv->s2d[ Z ] ) ) - 2 ) );
+					  irnd( floor( log10( fabs( cv->rwc_delta[ Z ] )
+										  / cv->s2d[ Z ] ) ) - 2 ) );
 			}
 			strcat( buf, " " );
 
