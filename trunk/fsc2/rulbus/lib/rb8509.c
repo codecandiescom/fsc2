@@ -40,7 +40,7 @@ struct RULBUS_ADC12_CARD {
 };
 
 
-#define DATA_LOW             0          /* read only */
+#define DATA_LOW_ADDR        0          /* read only */
 #define STATUS_ADDR          1          /* read only */
 #define CONTROL_ADDR         0          /* write only */
 #define TRIGGER_ADDR         1          /* write only */
@@ -151,7 +151,7 @@ int rulbus_adc12_card_init( int handle )
 
 	/* Read the low data byte to make sure the EOC bit is cleared */
 
-	return rulbus_read( handle, DATA_LOW, &dummy, 1 );
+	return rulbus_read( handle, DATA_LOW_ADDR, &dummy, 1 );
 }
 	
 
@@ -217,7 +217,7 @@ int rulbus_adc12_set_channel( int handle, int channel )
 
 	/* Read the low data byte to make sure the EOC bit is cleared */
 
-	return rulbus_read( handle, DATA_LOW, &ctrl, 1 );
+	return rulbus_read( handle, DATA_LOW_ADDR, &ctrl, 1 );
 }
 
 
@@ -263,7 +263,7 @@ int rulbus_adc12_set_gain( int handle, int gain )
 
 	/* Read the low data byte to make sure the EOC bit is cleared */
 
-	return rulbus_read( handle, DATA_LOW, &ctrl, 1 );
+	return rulbus_read( handle, DATA_LOW_ADDR, &ctrl, 1 );
 }
 
 
@@ -302,7 +302,7 @@ int rulbus_adc12_set_trigger_mode( int handle, int mode )
 
 	/* Read the low data byte to make sure the EOC bit is cleared */
 
-	return rulbus_read( handle, DATA_LOW, &ctrl, 1 );
+	return rulbus_read( handle, DATA_LOW_ADDR, &ctrl, 1 );
 }
 
 
@@ -344,7 +344,7 @@ int rulbus_adc12_check_convert( int handle, double *volts )
 	/* If the conversion is already done also get the low data byte and
 	   return the value to the user */
 
-	if ( ( retval = rulbus_read( handle, DATA_LOW, &low, 1 ) ) < 0 )
+	if ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &low, 1 ) ) < 0 )
 		return retval;
 
 	/* Calculate the voltage from the data we just received */
@@ -381,7 +381,7 @@ int rulbus_adc12_convert( int handle, double *volts )
 	   no importance. */
 
 	if ( card->trig_mode == RULBUS_ADC12_INT_TRIG &&
-		 ( ( retval = rulbus_read( handle, DATA_LOW, &trig, 1 ) ) <  0 ||
+		 ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &trig, 1 ) ) <  0 ||
 		   ( retval = rulbus_write( handle, TRIGGER_ADDR, &trig, 1 ) ) < 0 ) )
 		return retval;
 
@@ -395,7 +395,7 @@ int rulbus_adc12_convert( int handle, double *volts )
 
 	/* Get the low data byte */
 
-	if ( ( retval = rulbus_read( handle, DATA_LOW, &low, 1 ) ) < 0 )
+	if ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &low, 1 ) ) < 0 )
 		return retval;
 
 	/* Calculate the voltage from the dat we just received */

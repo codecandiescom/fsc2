@@ -637,9 +637,9 @@ static int rulbus_write_rack( unsigned char rack, unsigned char addr,
 				return RULBUS_NO_MEM;
 
 			case -EIO :
-				return RUBLUS_TIM_OUT;
+				return RULBUS_TIM_OUT;
 
-			default :                     /* catch all for impossible errors */
+			default :                   /* catch all for "impossible" errors */
 				return RULBUS_WRT_ERR;
 		}
 
@@ -667,9 +667,9 @@ static int rulbus_read_rack( unsigned char rack, unsigned char addr,
 				return RULBUS_NO_MEM;
 
 			case -EIO :
-				return RUBLUS_TIM_OUT;
+				return RULBUS_TIM_OUT;
 
-			default :                     /* catch all for impossible errors */
+			default :                   /* catch all for "impossible" errors */
 				return RULBUS_RD_ERR;
 		}
 
