@@ -94,11 +94,11 @@ linet:   VAR_TOKEN                 { }        /* no assignment to be done */
          list1 ']'                 { vars_arr_lhs( $4 ); }
          arhs
 	   | FUNC_TOKEN '('            { print( FATAL, "Not a variable "
-											"definition, funcions can only be "
-											"used in variable "
-											"initialisations.\n" );
+											"definition, function '%s()' can "
+											"only be used in variable "
+											"initialisations.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
-       | FUNC_TOKEN '['            { print( FATAL, "'%s' is a function and "
+       | FUNC_TOKEN '['            { print( FATAL, "'%s()' is a function and "
 											"not an array.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
        | VAR_TOKEN '('             { print( FATAL, "'%s' is an array and not "
@@ -120,7 +120,7 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | VAR_TOKEN '('             { print( FATAL, "'%s' isn't a function.\n",
 											$1->name );
 	                                 THROW( EXCEPTION ); }
-       | FUNC_TOKEN '['            { print( FATAL, "'%s' is a predefined "
+       | FUNC_TOKEN '['            { print( FATAL, "'%s()' is a predefined "
 											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
        | expr AND expr       	   { $$ = vars_comp( COMP_AND, $1, $3 ); }
