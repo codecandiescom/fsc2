@@ -300,6 +300,9 @@ typedef struct {
 	PHASE_SETUP *dummy_phase_setup;
 	int num_dummy_phase_setups;
 
+	bool do_show_pulses;
+	bool do_dump_pulses;
+
 } DG2020;
 
 
@@ -454,6 +457,8 @@ void dg2020_clear( char *arena, Ticks start, Ticks len );
 int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length );
 void dg2020_duty_check( void );
 Ticks dg2020_calc_max_length( FUNCTION *f );
+void dg2020_show_pulses( void );
+void dg2020_dump_pulses( void );
 void dg2020_dump_channels( FILE *fp );
 
 
