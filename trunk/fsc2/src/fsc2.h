@@ -313,10 +313,13 @@ extern bool need_GPIB;
 
 extern Phase_Sequence *PSeq;
 extern Acquisition_Sequence ASeq[ 2 ];
-extern long Cur_Pulser;
 
 extern const char *Channel_Names[ NUM_CHANNEL_NAMES ];
 extern const char *Phase_Types[ NUM_PHASE_TYPES ];
+
+extern Pulser_Struct *pulser_struct;
+extern const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ];
+extern long Cur_Pulser;
 
 
 #endif  /* ! FSC2_HEADER */

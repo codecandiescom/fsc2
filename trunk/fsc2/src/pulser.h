@@ -101,7 +101,6 @@ struct P_List {
 };
 
 
-
 void pulser_struct_init( void );
 void pulser_cleanup( void );
 void p_assign_pod( long func, Var *v );
