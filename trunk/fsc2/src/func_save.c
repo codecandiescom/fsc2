@@ -775,7 +775,7 @@ Var *f_fsave( Var *v )
 
 				case FLOAT_VAR :
 					strcpy( ep, "%#.9g" );
-					coutn += T_fprintf( file_num, cp, cv->val.dval );
+					count += T_fprintf( file_num, cp, cv->val.dval );
 					break;
 
 				case STR_VAR :

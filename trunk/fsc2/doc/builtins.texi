@@ -442,6 +442,9 @@ will be printed as
 6
 @end example
 
+The function returns the total number of characters that have been written to
+the file.
+
 
 @anchor{fsave}
 @item fsave()
@@ -449,7 +452,7 @@ will be printed as
 This function may be used to write data in a formated way into a
 file. As in the case of the @code{save()} function the first argument
 may be a file identifier. The next argument must be a @i{format string}
-with exactly he same syntax as in the @code{print()} function,
+with a syntax similar to the one for the @code{C} @code{print()} function,
 i.e.@: there must be one @code{#} character for each data item. In
 contrast to the @code{save()} function this function can not be used to
 print array slices or complete arrays, but only simple data types. On
@@ -484,6 +487,59 @@ X[ 2, 2 ] = 4
 X[ 3, 1 ] = 5
 X[ 3, 2 ] = 6
 @end example
+
+The function returns the total number of characters that have been written to
+the file.
+
+@anchor{printf}
+@item printf()
+@findec printf()
+This function can also be used to write data into a file using a format
+string. In comparison to the @code{fsave()} function it gives you even
+more control over the format that is used by accepting a format string
+that is nearly identical to the one of the @code{C} @code{printf()} family
+of functions, missing only some elements that wouldn't make sense here.
+As in the case of the @code{save()} and @code{fsave()} function the
+first argument may be a file identifier.
+
+The format string may contain two types of objects: ordinary characters,
+which are copied to the file, and conversion specifications, each of
+which conversion and printing of the next successive argument. Each
+cionversion specifier begins with the character @code{%} and ends with
+a conversion character. In between there may first a flag, which
+modifies the specification:
+@itemize
+@item @code{-} which specifies left adjustment of the converted argument
+      in its field,
+@item @code{+} which specifies that a number will always printed with a
+      sign,
+@item @i{space}: if the first character is not a sign, a space will be
+      prefixed,
+@item @code{0}: for numeric conversions, specifies padding the field
+      with leading zeros,
+@item @code{#}, which specifies an alternate output form: for @code{e},
+      @code{E}, @code{f}, @code{g} and @code{G}, the output will always
+      have a decimal point, for @code{f} and @code{G}, trailing zeros
+      will not be removed.
+@end itemize
+
+Following the flags a number specifying the minimum field width may be
+specified. The converted argument will be printed in a field at least
+this wide, and wider if necessary. If the converted argument has fewer
+characters tahn the field width it will be padded on the left (or on the
+right, if left adjustment has been requested) to make up for the field
+with. The padding character os normally space, butis @code{0} if the
+zero padding flag is present.
+
+The next character can be a period, which separates the field width from
+the precision.
+
+
+
+
+
+
+
 
 
 @anchor{save_program}
