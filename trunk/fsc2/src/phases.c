@@ -118,7 +118,7 @@ Phase_Sequence *phase_seq_start( long phase_seq_num )
 	{
 		if ( cp->num == phase_seq_num )
 		{
-			eprint( FATAL, SET, "Phase sequence %ld has already been "
+			eprint( FATAL, SET, "Phase sequence numbered %ld has already been "
 					"defined.\n", cp->num );
 			THROW( EXCEPTION );
 		}
