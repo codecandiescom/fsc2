@@ -434,7 +434,7 @@ Var *func_call( Var *f )
 #ifndef NDEBUG
 		if ( ! vars_exist( f ) )
 		{
-			if ( ! Call_Stack->f->to_be_loaded )
+			if ( Call_Stack->f != NULL && ! Call_Stack->f->to_be_loaded )
 				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 						__FILE__, __LINE__ );
 			else
@@ -459,7 +459,7 @@ Var *func_call( Var *f )
 
 	if ( ! vars_exist( f ) )
 	{
-		if ( ! Call_Stack->f->to_be_loaded )
+		if ( Call_Stack->f != NULL && ! Call_Stack->f->to_be_loaded )
 			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 					__FILE__, __LINE__ );
 		else
@@ -495,6 +495,9 @@ CALL_STACK *call_push( Func *f, const char *device_name )
 	cs->prev = Call_Stack;
 	cs->f = f;
 	cs->dev_name = device_name;
+
+	if ( f && f->to_be_loaded )
+		printf( "%s\n", cs->f->device->name );
 
 	return Call_Stack = cs;
 }
