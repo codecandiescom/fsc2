@@ -268,8 +268,6 @@ void store_exp( FILE *in )
 				}
 				break;
 
-				break;
-
 			case E_STR_TOKEN :
 				prg_token[ prg_length ].tv.sptr = NULL;
 				prg_token[ prg_length ].tv.sptr = T_strdup( exp_val.sptr );

@@ -37,8 +37,7 @@ static void convert_escapes( char *str );
 
 extern FL_resource xresources[ ];
 extern FL_IOPT xcntl;
-
-static int tool_x, tool_y, tool_w, tool_h;
+static int tool_x, tool_y;
 static bool tool_has_been_shown = UNSET;
 
 
@@ -2309,6 +2308,7 @@ static void recreate_Tool_Box( void )
 	IOBJECT *io, *last_io = NULL;
 	bool needs_pos = SET;
 	int flags;
+	unsigned int tool_w, tool_h;
 
 
 	if ( TEST_RUN )        /* just to make sure... */

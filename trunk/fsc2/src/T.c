@@ -43,7 +43,7 @@ void *T_malloc( size_t size )
 #ifndef NDEBUG
 	if ( size == 0 )
 	{
-		eprint( FATAL, Fname != NULL,
+		eprint( FATAL, Fname != NULL ? SET : UNSET,
 				"Internal error detected at %s:%d (malloc with size 0).\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION )
@@ -54,7 +54,8 @@ void *T_malloc( size_t size )
 
 	if ( mem == NULL )
 	{
-		eprint( FATAL, Fname != NULL, "Running out of memory.\n" );
+		eprint( FATAL, Fname != NULL ? SET : UNSET,
+				"Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION )
 	}
 
@@ -89,7 +90,7 @@ void *T_calloc( size_t nmemb, size_t size )
 #ifndef NDEBUG
 	if ( size == 0 )
 	{
-		eprint( FATAL, Fname != NULL,
+		eprint( FATAL, Fname != NULL ? SET : UNSET,
 				"Internal error detected at %s:%d (calloc with size 0).\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION )
@@ -100,7 +101,8 @@ void *T_calloc( size_t nmemb, size_t size )
 
 	if ( mem == NULL )
 	{
-		eprint( FATAL, Fname != NULL, "Running out of memory.\n" );
+		eprint( FATAL, Fname != NULL ? SET : UNSET,
+				"Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION )
 	}
 
@@ -136,7 +138,7 @@ void *T_realloc( void *ptr, size_t size )
 #ifndef NDEBUG
 	if ( size == 0 )
 	{
-		eprint( FATAL, Fname != NULL,
+		eprint( FATAL, Fname != NULL ? SET : UNSET,
 				"Internal error detected at %s:%d (realloc with size 0).\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION )
@@ -147,7 +149,8 @@ void *T_realloc( void *ptr, size_t size )
 
 	if ( new_ptr == NULL )
 	{
-		eprint( FATAL, Fname != NULL, "Running out of memory.\n" );
+		eprint( FATAL, Fname != NULL ? SET : UNSET,
+				"Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION )
 	}
 
@@ -216,7 +219,8 @@ char *T_strdup( const char *str )
 
 	if ( ( new_str = strdup( str ) ) == NULL )
 	{
-		eprint( FATAL, Fname != NULL, "Running out of memory.\n" );
+		eprint( FATAL, Fname != NULL ? SET : UNSET,
+				"Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION )
 	}
 

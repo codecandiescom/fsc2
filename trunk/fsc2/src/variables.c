@@ -2590,6 +2590,8 @@ Var *apply_unit( Var *var, Var *unit )
 				"not a number.\n" );
 		THROW( EXCEPTION )
 	}
+
+	return NULL;
 }
 
 
