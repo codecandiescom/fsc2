@@ -125,6 +125,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "clear_curve",     f_clearcv,  	    -4, ACCESS_EXP,  NULL, UNSET },
 	{ "clear_curve_1d",  f_clearcv_1d, 	    -4, ACCESS_EXP,  NULL, UNSET },
 	{ "clear_curve_2d",  f_clearcv_2d, 	    -4, ACCESS_EXP,  NULL, UNSET },
+    { "display_mode",    f_dmode,           -2, ACCESS_ALL,  NULL, UNSET },
 	{ "dim",             f_dim,      	     1, ACCESS_ALL,  NULL, UNSET },
 	{ "size",            f_size,     	    -2, ACCESS_ALL,  NULL, UNSET },
 	{ "sizes",           f_sizes,    	     1, ACCESS_ALL,  NULL, UNSET },
@@ -169,7 +170,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "object_delete",   f_objdel,	   INT_MIN, ACCESS_EXP,  NULL, UNSET },
     { "hide_toolbox",    f_freeze,           1, ACCESS_EXP,  NULL, UNSET },
 	{ "show_message",    f_showm,            1, ACCESS_EXP,  NULL, UNSET },
-    { "draw_marker",     f_setmark,          2, ACCESS_EXP,  NULL, UNSET },
+    { "draw_marker",     f_setmark,         -2, ACCESS_EXP,  NULL, UNSET },
     { "clear_marker",    f_clearmark,        0, ACCESS_EXP,  NULL, UNSET },
 	{ "end",             f_stopsim,          0, ACCESS_EXP,  NULL, UNSET },
 	{ "abort",           f_abort,            0, ACCESS_EXP,  NULL, UNSET },
@@ -499,8 +500,8 @@ Var *func_call( Var *f )
 		if ( f->dim >= 0 && ac < f->dim )
 		{
 			print( FATAL, "%s(): Function expects %d argument%s but only %d "
-				   "where found.\n",
-				   f->name, f->dim, f->dim == 1 ? "" : "s", ac );
+				   "%s found.\n", f->name, f->dim, f->dim == 1 ? "" : "s",
+				   ac, ac == 1 ? "was" : "were" );
 			THROW( EXCEPTION );
 		}
 	}

@@ -1207,7 +1207,7 @@ void redraw_canvas_1d( Canvas *c )
 				for ( m = G1.marker; m != NULL; m = m->next )
 				{
 					x = d2shrt( cv->s2d[ X ]
-								* ( m->position + cv->shift[ X ] ) );
+								* ( m->x_pos + cv->shift[ X ] ) );
 					XDrawLine( G.d, c->pm, m->gc, x, 0, x, c->h );
 				}
 
@@ -1427,7 +1427,7 @@ void fs_rescale_1d( void )
 	if ( ! G1.is_scale_set )
 		return;
 
-	/* Find minimum and maximum value of all scaled data */
+	/* Find minimum and maximum value of all data */
 
 	for ( i = 0; i < G1.nc; i++ )
 	{
@@ -1689,11 +1689,11 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 }
 
 
-/*----------------------------------------------*/
-/* Gets called to create a marker at 'position' */
-/*----------------------------------------------*/
+/*-------------------------------------------*/
+/* Gets called to create a marker at 'x_pos' */
+/*-------------------------------------------*/
 
-void set_marker( long position, long color )
+void set_marker( long x_pos, long color )
 {
 	Marker *m, *cm;
 	XGCValues gcv;
@@ -1724,7 +1724,10 @@ void set_marker( long position, long color )
 	else
 		XSetForeground( G.d, m->gc, fl_get_pixel( FL_BLACK ) );
 
-	m->position = position;
+	if ( G.mode == NORMAL_DISPLAY )
+		m->x_pos = x_pos;
+	else
+		m->x_pos = G1.curve[ 0 ]->count - 1;
 }
 
 

@@ -1760,7 +1760,7 @@ static void print_markers( FILE *fp )
 		fprintf( fp, "[ 1 1 ] 0 sd " );
 		
 		fprintf( fp, "%.2f %.2f m 0 %.2f rl s\n",
-				 x_0 + s2d * ( m->position + cv->shift[ X ] ), y_0, h );
+				 x_0 + s2d * ( m->x_pos + cv->shift[ X ] ), y_0, h );
 	}
 }
 

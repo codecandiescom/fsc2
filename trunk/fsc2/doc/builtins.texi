@@ -242,6 +242,12 @@ The (@i{x}) point number (coordinate) where the data point (if only a
 single number is given as the third argument) or the coordinate where
 the first data point of an data array passed as the third argument is to
 be shown.
+
+Please note: in "sliding window" display mode this first argument won't
+be used at all (but it must be given and must be larger than @code{0}),
+new data will @strong{always} be appended to the right side of the
+display. I.e.@: in "sliding window" display mode you have no direct
+control about where the data will be displayed.
 @item
 The data point or a (one-dimensional) array of data (to be displayed
 left to right).
@@ -333,6 +339,38 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
 
 
+@anchor{ display_mode}
+@item display_mode( )
+@findex display_mode()
+Beside the normal display mode, where data get rescaled automatically to
+fit onto the 1D display window (at least as long as the @code{FS} button
+is switched on), there's also a second display mode, where a rescaling
+is done for the @i{y}-direction only. In this mode, when the new data
+wouldn't fit into the display window anymore, the whole data set is
+shifted to the left to make room for the new data, and some of the old
+data vanish.
+
+To switch between the normal display mode and the "sliding window"
+display mode the function @code{display_mode()} has to be used. The
+function expects at least one argument, the mode to be used. You have to
+specify the string @code{"NORMAL_DISPLAY"} (or @code{"NORMAL"} or simply
+the number @code{0}) to switch to the normal display mode (which is the
+default mode to be used) and the string @code{"SLIDING_DISPLAY"} (or
+@code{"SLIDING"} or the number @code{1}) to switch to "sliding window"
+mode.
+
+The second, optional argument is the number of points to display in
+@i{x}-direction. If this argument isn't specified the previous number of
+already displayed points will be used (but at least 32).
+
+When the function gets called all previously displayed data will be
+cleared from the screen as well as all markers possibly shown. The
+scaling in @i{y}-directions remains unchanged.
+
+This fucntion can be used in both the @code{PREPARATIONS} as well as the
+@code{EXPERIMENT} section of an @code{EDL} program.
+
+
 @anchor{change_scale_1d}
 @item change_scale_1d()
 @findex change_scale_1d()
@@ -391,6 +429,7 @@ characters, i.e.@: @code{" "}.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
+
 
 @anchor{change_label_2d}
 @item change_label_2d()
@@ -539,6 +578,11 @@ The last color, black, is invisible on the background and can be used to
 make an already drawn marker invisible (markers set at the same
 @i{x}-position are drawn on top of each other, with the latest set
 marker drawn last).
+
+Please note: in "sliding window" display mode, the coordinate for the
+marker is not used at all (butot must be given and must be larger than
+@code{0}), the marker will always be drawn at the newest point for the
+first displayed curve.
 
 
 @anchor{clear_marker}

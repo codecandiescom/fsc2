@@ -174,7 +174,9 @@ void start_graphics( void )
 	{
 		fl_show_form( GUI.run_form_1d->run_1d, GI.is_pos || GI.is_1d_pos ?
 					  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
-					  FL_FULLBORDER, "fsc2: 1D-Display" );
+					  FL_FULLBORDER, G.mode == NORMAL_DISPLAY ?
+					  "fsc2: 1D-Display" :
+					  "fsc2: 1D-Display (sliding window)" );
 		G.d = FL_FormDisplay( GUI.run_form_1d->run_1d );
 	}
 
@@ -2371,8 +2373,8 @@ void rescale_1d( long new_nx )
 			}
 
 	for ( m = G1.marker; m != NULL; m = m->next )
-		if ( m->position > max_x )
-			max_x = m->position;
+		if ( m->x_pos > max_x )
+			max_x = m->x_pos;
 
 	if ( max_x != 0 )
 		max_x++;
@@ -2533,6 +2535,69 @@ void rescale_2d( void *new_dims )
 	redraw_all_cut_canvases( );
 }
 
+
+/*-------------------------------------------------------------------------*/
+/* Function for toggling 1D display between normal and sliding window mode */
+/*-------------------------------------------------------------------------*/
+
+void change_mode( long mode, long width )
+{
+	long curves;
+	long i;
+	Scaled_Point *sp;
+	Marker *m, *mn;
+	Curve_1d *cv;
+
+
+	if ( G.mode == mode )
+	{
+		print( WARN, "Display is already in \"%s\" mode.\n",
+			   G.mode ? "SLIDING WINDOW" : "NORMAL" );
+		return;
+	}
+
+	/* Clear all curves and markers */
+
+	for ( curves = 0; curves < G1.nc; curves++ )
+	{
+		cv = G1.curve[ curves ];
+
+		if ( width != G1.nx )
+		{
+			cv->points = SCALED_POINT_P T_realloc( cv->points,
+												  width * sizeof *cv->points );
+			cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
+											  width * sizeof *cv->xpoints );
+		}
+
+		for ( sp = cv->points, i = 0; i < width; sp++, i++ )
+			sp->exist = UNSET;
+
+		cv->can_undo = UNSET;
+		cv->shift[ X ] = 0.0;
+		cv->count = 0;
+		cv->s2d[ X ] = ( double ) ( G1.canvas.w - 1 )
+					   / ( double ) ( width - 1 );
+	}
+
+	for ( m = G1.marker; m != NULL; m = mn )
+	{
+		XFreeGC( G.d, m->gc );
+		mn = m->next;
+		m = MARKER_P T_free( m );
+	}
+
+	G1.marker = NULL;
+
+	G.mode = mode;
+	G1.nx = width;
+
+	fl_set_form_title( GUI.run_form_1d->run_1d, mode == NORMAL_DISPLAY ?
+					   "fsc2: 1D-Display" : 
+					   "fsc2: 1D-Display (sliding window)" );
+
+	redraw_all_1d( );
+}
 
 
 /*

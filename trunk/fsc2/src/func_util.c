@@ -425,6 +425,8 @@ Var *f_init_1d( Var *v )
 
 	G.dim |= 1;
 	G.is_init = SET;
+	G.mode = NORMAL_DISPLAY;
+
 	G1.nc = 1;
 	G1.nx = DEFAULT_1D_X_POINTS;
 	G1.rwc_start[ X ] = ( double ) ARRAY_OFFSET;
@@ -674,6 +676,145 @@ Var *f_init_2d( Var *v )
 		G2.label_orig[ i ] = G2.label[ i ];
 		G2.label[ i ] = NULL;
 	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*------------------------------------*/
+/* Function to change 1D display mode */
+/*------------------------------------*/
+
+Var *f_dmode( Var *v )
+{
+	long mode;
+	long width = 0;
+	int shm_id;
+	long len = 0;                    /* total length of message to send */
+	void *buf;
+	char *ptr;
+	int type = D_CHANGE_MODE;
+
+
+	/* No rescaling without graphics... */
+
+	if ( ! G.is_init )
+	{
+		print( SEVERE, "Can't change display mode, missing graphics "
+			   "initialization.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	/* No change of display mode for 2D graphics possible */
+
+	if ( G.dim == 2 )
+	{
+		print( SEVERE, "Display mode can only be changed for 1D display.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	/* Check the arguments */
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_VAR | STR_VAR );
+
+	if ( v->type == INT_VAR )
+		mode = v->val.lval == 0 ? NORMAL_DISPLAY : SLIDING_DISPLAY;
+	else
+	{
+		if ( ! strcasecmp( v->val.sptr, "NORMAL" ) ||
+			 ! strcasecmp( v->val.sptr, "NORMAL_DISPLAY" ) )
+			 mode = NORMAL_DISPLAY;
+		else if ( ! strcasecmp( v->val.sptr, "SLIDING" ) ||
+				  ! strcasecmp( v->val.sptr, "SLIDING_DISPLAY" ) )
+			 mode = SLIDING_DISPLAY;
+		else
+		{
+			print( FATAL, "Invalid argument: '%s'.\n", v->val.sptr );
+			THROW( EXCEPTION );
+		}
+	}
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		width = get_long( v , "display width\n" );
+		if ( width < DEFAULT_1D_X_POINTS )
+			width = DEFAULT_1D_X_POINTS;
+	}
+
+	if ( width == 0 )
+		width = G1.nx;
+
+	too_many_arguments( v );
+
+	/* In a test run we're already done */
+
+	if ( Internals.mode == TEST )
+	{
+		G1.nx = width;
+		return vars_push( INT_VAR, 1 );
+	}
+
+	/* If we get here as the parent we're still in the PREPARATIONS phase
+	   and we just store the values in the graphics main structure. */
+
+	if ( Internals.I_am == PARENT )
+	{
+		if ( G.mode == mode )
+			print( WARN, "Display is already in \"%s\" mode.\n",
+				   G.mode ? "SLIDING" : "NORMAL" );
+		else
+		{
+			G.mode = mode;
+			G1.nx_orig = G1.nx = width;
+		}
+
+		return vars_push( INT_VAR, 1 );
+	}
+
+	/* Otherwise we're running the experiment and must tell the parent to
+	   do all necessary changes */
+
+	len = sizeof len + sizeof type + sizeof mode + sizeof width;
+
+	/* Now try to get a shared memory segment */
+
+	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	{
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	/* Copy the data to the segment */
+
+	ptr = CHAR_P buf;
+
+	memcpy( ptr, &len, sizeof len );                   /* total length */
+	ptr += sizeof len;
+
+	memcpy( ptr, &type, sizeof type );                 /* type indicator  */
+	ptr += sizeof type;
+
+	memcpy( ptr, &mode, sizeof mode );                 /* new mode */
+	ptr += sizeof mode;
+
+	memcpy( ptr, &width, sizeof width );               /* new width */
+	ptr += sizeof width;
+
+	/* Detach from the segment with the data segment */
+
+	detach_shm( buf, NULL );
+
+	/* Wait for parent to become ready to accept new data, then store
+	   identifier and send signal to tell parent about the data */
+
+	send_data( DATA_1D, shm_id );
 
 	return vars_push( INT_VAR, 1 );
 }

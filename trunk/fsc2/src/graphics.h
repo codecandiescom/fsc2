@@ -48,7 +48,7 @@
 #define ARROW_RIGHT_CURSOR 6
 #define ARROW_LEFT_CURSOR  7
 
-#define MAX_LABEL_LEN     128   /* maximum length of tick label string */
+#define MAX_LABEL_LEN     128       /* maximum length of label strings */
 
 #define DRAG_NONE   0
 
@@ -65,6 +65,9 @@
 #define DRAG_CUT_X  9
 #define DRAG_CUT_Y 10
 #define DRAG_CUT_C 11
+
+#define NORMAL_DISPLAY 0
+#define SLIDING_DISPLAY 1
 
 #define NUM_1D_COLS ( MAX_CURVES + 6 )
 
@@ -175,7 +178,7 @@ typedef struct {
 
 
 typedef struct MRKR_ {
-	long position;
+	long x_pos;
 	long color;
 	GC gc;
 	struct MRKR_ *next;
@@ -195,6 +198,8 @@ typedef struct {
 	bool is_init;           /* has init_1d() or init_2d() been run ? */
 	bool is_fully_drawn;
 	bool is_warn;
+
+	int mode;               /* relevant for 1d only - normal or sliding mode */
 
 	long dim;               /* dimensionality of display, 1 for 1d only,
 							   2 for 2d only, 3 for both 1d and 2d */
@@ -365,6 +370,7 @@ void change_label_2d( char **label );
 void rescale_1d( long new_nx );
 void rescale_2d( void *new_dims );
 void redraw_canvas_2d( Canvas *c );
+void change_mode( long mode, long width );
 
 
 #endif   /* ! GRAPHICS_HEADER */
