@@ -25,9 +25,28 @@
 # Boston, MA 02111-1307, USA.
 
 
+# See the comment for the correspondig rule for simple modules
+# on why this rule has the form it has...
+
 ##.so: $(##:.c=.o)
-	$(CC) $(LFLAGS) $^ -o $@
-	chmod 644 $@
+	if [ -z "$($(patsubst %.so,%_libs,$@))" ]; then              \
+		$(CC) $(LFLAGS) $^ -o $@;                                \
+		chmod 644 $@;                                            \
+	else                                                         \
+		for l in "$($(patsubst %.so,%_libs,$@))"; do             \
+			if [ "$(notdir $$l)" == "$$l" ]; then                \
+				libs="$$libs $(patsubst lib%.so,-l%,$$l)";       \
+			else                                                 \
+				libs="$$libs $$lib";                             \
+			fi;                                                  \
+		done;                                                    \
+		$(CC) $$libs -shared -o $@.lib_test 2>/dev/null;         \
+		if [ -e $@.lib_test ]; then                              \
+			$(RM) $(RMFLAGS) $@.lib_test;                        \
+			$(CC) $(LFLAGS) $^ $$libs -o $@;                     \
+			chmod 644 $@;                                        \
+		fi;                                                      \
+	fi
 
 $(##:.c=.o): %.o: %.c ##.h $(cdir)/##.conf $(src_headers)
 	$(CC) $(CFLAGS) -c $(LFLAGS) $< -o $@
