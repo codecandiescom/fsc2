@@ -8,16 +8,16 @@
 
 /* local functions */
 
-static Var   *pulse_get_by_addr( Pulse *p, int type );
-static bool   pulse_exist( Pulse *p );
-static void   pulse_set_func( Pulse *p, Var *v );
-static void   pulse_set_pos( Pulse *p, Var *v );
-static void   pulse_set_len( Pulse *p, Var *v );
-static void   pulse_set_dpos( Pulse *p, Var *v );
-static void   pulse_set_dlen( Pulse *p, Var *v );
-static void   pulse_set_maxlen( Pulse *p, Var *v );
-static void   pulse_set_repl( Pulse *p, Var *v );
-static void   sort_pulse_list( void );
+static Var *pulse_get_by_addr( Pulse *p, int type );
+static bool pulse_exist( Pulse *p );
+static void pulse_set_func( Pulse *p, Var *v );
+static void pulse_set_pos( Pulse *p, Var *v );
+static void pulse_set_len( Pulse *p, Var *v );
+static void pulse_set_dpos( Pulse *p, Var *v );
+static void pulse_set_dlen( Pulse *p, Var *v );
+static void pulse_set_maxlen( Pulse *p, Var *v );
+static void pulse_set_repl( Pulse *p, Var *v );
+static void sort_pulse_list( void );
 
 
 /*----------------------------------------------*/
@@ -71,7 +71,7 @@ Pulse *pulse_new( char *txt )
 
 	num = ps2n( txt );
 
-	/* check that the pulse does not already exists */
+	/* Check that the pulse does not already exists */
 
 	if ( pulse_find( num ) != NULL )
 	{
@@ -80,7 +80,7 @@ Pulse *pulse_new( char *txt )
 		THROW( EXCEPTION );
 	}
 
-	/* allocate memory for the new pulse, set its number and link it
+	/* Allocate memory for the new pulse, set its number and link it
 	   to the top of the pulse list */
 
 	p = T_malloc( sizeof( Pulse ) );
@@ -91,7 +91,7 @@ Pulse *pulse_new( char *txt )
 	if ( Plist != NULL )
 		Plist->prev = p;
 
-	/* set pulse number and associate it with no function yet */
+	/* Set pulse number and associate it with no function yet */
 
 	p->num = num;
 	p->set_flags = 0;
@@ -118,7 +118,7 @@ Pulse *pulse_find( int num )
 {
 	Pulse *p = Plist;
 
-	/* check that the pulse number is in the allowed range */
+	/* Check that the pulse number is in the allowed range */
 
 	if ( num < 0 || num >= MAX_PULSE_NUM )
 	{
@@ -140,7 +140,7 @@ Pulse *pulse_find( int num )
 
 /*------------------------------------------------------------*/
 /* This function is the main interface for setting properties */
-/* with simple interger or float numbers of a pulse.          */
+/* with simple integer or float numbers of a pulse.           */
 /* ->                                                         */
 /*    * pointer to pulse                                      */
 /*    * type of data to be set (cf. pulse.h for constants)    */
@@ -207,7 +207,7 @@ Var *pulse_get_by_addr( Pulse *p, int type )
 	int i, j;
 
 
-	/* test that the referenced pulse exists */
+	/* Test that the referenced pulse exists */
 
 	if ( ! pulse_exist( p ) )
 	{
@@ -215,14 +215,14 @@ Var *pulse_get_by_addr( Pulse *p, int type )
 		THROW( EXCEPTION );
 	}
 
-	/* make sure the accessed property of the pulse has been set */
+	/* Make sure the accessed property of the pulse has been set */
 
 	if ( ! ( p->set_flags & type ) )
 	{
 		for ( j = 0, i = type; ! ( i & 1 ) && i != 0; i >>=  1 )
 			j++;
 
-		/* <PARANOIA> check for unreasonable value of type variable */
+		/* Check for unreasonable value of type variable */
 
 		if ( i != 1 )
 		{
@@ -238,7 +238,7 @@ Var *pulse_get_by_addr( Pulse *p, int type )
 		THROW( EXCEPTION );
 	}
 
-	/* now return the appropriate data */
+	/* Now return the appropriate data */
 
 	switch ( type )
 	{
@@ -498,7 +498,7 @@ void pulse_set_maxlen( Pulse *p, Var *v )
 
 void pulse_set_repl( Pulse *p, Var *v )
 {
-	/* no checking needed, already done by parser... */
+	/* No checking needed, already done by parser... */
 
 	p->nrp = T_realloc( p->nrp, ( p->n_rp + 1 ) * sizeof( int ) );
 	p->nrp[ p->n_rp++ ] = ( int ) v->val.lval;
@@ -613,6 +613,7 @@ void basic_pulse_check( void )
     /* Now check if at least all relevant properties are set */
 
 cont_check:
+
 	for ( cp = Plist; cp != NULL; cp = cp->next )
 	{
 		if ( ! ( cp->set_flags & P_FUNC ) )

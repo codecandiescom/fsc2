@@ -32,7 +32,6 @@ typedef struct Pulse_ {
 
 	Phase_Sequence *phase;    /* phase sequence for pulse */
 
-
 	int *nrp;                 /* list of numbers of replacement pulses */
 	struct Pulse_ **rp;       /* list of replacement pulses */
 	int n_rp;                 /* number of replacement pulses */
