@@ -748,9 +748,11 @@ static int set_intr_delay( double intr_delay )
 	if ( card->type != RB8514_DELAY )
 		return RULBUS_CF_CARD_PROPERTY_INVALID;
 
-	/* Check that the card hasn't already been assigned a type */
+	/* Check that the card hasn't already been assigned a delay that differs
+	   by more than a ns */
 
-	if ( card->intr_delay > 0.0 && card->intr_delay != intr_delay )
+	if ( card->intr_delay >= 0.0 &&
+		 lrnd( card->intr_delay * 1e9) != lrnd( intr_delay * 1e9 ) )
 		return RULBUS_CF_INTR_DELAY_DUPLICATE;
 
 	/* Check that the argument isn't completely unreasonable */
