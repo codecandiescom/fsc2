@@ -77,8 +77,7 @@ digitizer_get_channel_number, 1, ALL;   // only for internal use !
 
 // functions exported by the rf synthesizer (HP8647A)
 
-synthesizer_set_frequency, 1, ALL;
-synthesizer_get_frequency, 0, EXP;
+synthesizer_frequency, -1, ALL;
 synthesizer_step_frequency, -1, ALL;
 synthesizer_sweep_up, 0, EXP;
 synthesizer_sweep_down, 0, EXP;
