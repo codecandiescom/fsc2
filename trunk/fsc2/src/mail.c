@@ -834,13 +834,12 @@ static const char *get_host( unsigned char *buf, int len,
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Function expects that '*rr' is pointing to the start of the NAME field */
-/* of a resource record. It returns a static buffer with the name of the  */
-/* machine addressed by the record, leaving '*rr' pointing to the byte    */
-/* following the name in the RR. On errors NULL is returned (and '*rr'    */
-/* remains unchanged).                                                    */
-/*------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* Function expects that '*rr' is pointing to the start of the NAME field. */
+/* It returns a static buffer with the name of the machine, leaving '*rr'  */
+/* pointing to the byte following the name in the RR. On errors NULL is    */
+/* returned (and '*rr' remains unchanged).                                 */
+/*-------------------------------------------------------------------------*/
 
 static const char *get_name( unsigned char *buf, int len, unsigned char **rr )
 {
