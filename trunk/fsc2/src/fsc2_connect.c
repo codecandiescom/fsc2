@@ -357,26 +357,26 @@ void contact_fsc2( int sock_fd, char *pname, char *fname )
        "OK\n" */
 
 	if ( writen( sock_fd, line, strlen( line ) )
-		 != ( ssize_t ) strlen( line ) )
+		 != ( ssize_t ) strlen( line ) )                 /* can't write */
 		clean_up( fname, sock_fd, -1 );
 
-	if ( read_line( sock_fd, line, MAXLINE ) <= 0 )
+	if ( read_line( sock_fd, line, MAXLINE ) <= 0 )      /* unexpected reply */
 		clean_up( fname, sock_fd, -1 );
 
 	if ( ! strcmp( line, "BUSY\n" ) )
 		clean_up( fname, sock_fd, 2 );
 
-	if ( strcmp( line, "OK\n" ) )                /* unexpected reply */
+	if ( strcmp( line, "OK\n" ) )                        /* unexpected reply */
 		clean_up( fname, sock_fd, -1 );
 
 	/* Finally tell fsc2 the name of the temporary file */
 
 	snprintf( line, MAXLINE - 2, "%s\n", fname );
 	if ( writen( sock_fd, line, strlen( line ) )
-		 != ( ssize_t ) strlen( line ) )
+		 != ( ssize_t ) strlen( line ) )                 /* can't write */
 		clean_up( fname, sock_fd, -1 );
 
-	if ( read_line( sock_fd, line, MAXLINE - 2 ) <= 0 )
+	if ( read_line( sock_fd, line, MAXLINE - 2 ) <= 0 )  /* unexpected reply */
 		clean_up( fname, sock_fd, -1 );
 
 	if ( ! strcmp( line, "FAIL\n" ) )
@@ -385,7 +385,7 @@ void contact_fsc2( int sock_fd, char *pname, char *fname )
 	if ( ! strcmp( line, "BUSY\n" ) )
 		clean_up( fname, sock_fd, 2 );
 
-	if ( strcmp( line, "OK\n" ) )                /* unexpected reply */
+	if ( strcmp( line, "OK\n" ) )                        /* unexpected reply */
 		clean_up( fname, sock_fd, -1 );
 
 	close( sock_fd );
