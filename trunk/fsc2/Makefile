@@ -19,7 +19,7 @@ GPIB_LOG       = /tmp/gpib.log
 # if you don't have a really good reason...
 ##############################################################################
 
-SHELL          = /bin/sh
+SHELL          = /bin/bash
 CC             = gcc
 CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 				 -Wmissing-prototypes -Wmissing-declarations -W \
