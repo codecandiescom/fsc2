@@ -1979,8 +1979,8 @@ static void store_toolbox_position( void )
 {
 	get_form_position( Toolbox->Tools, &GUI.toolbox_x, &GUI.toolbox_y );
 
-	GUI.toolbox_x += GUI.border_offset_x - 1;
-	GUI.toolbox_y += GUI.border_offset_y - 1;
+	GUI.toolbox_x += GUI.border_offset_x;
+	GUI.toolbox_y += GUI.border_offset_y;
 	GUI.toolbox_has_pos = SET;
 }
 

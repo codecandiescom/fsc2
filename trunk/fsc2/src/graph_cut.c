@@ -151,13 +151,13 @@ void cut_show( int dir, long u_index )
 
 			if ( XValue & flags && YValue & flags )
 			{
-				GUI.cut_win_x = x + GUI.border_offset_x - 1;
-				GUI.cut_win_y = y + GUI.border_offset_y - 1;
+				GUI.cut_win_x = x + GUI.border_offset_x;
+				GUI.cut_win_y = y + GUI.border_offset_y;
 				GUI.cut_win_has_pos = SET;
 			}
 		}
 
-		if ( ! cut_has_been_shown && GUI.cut_win_has_size )
+		if ( /*! cut_has_been_shown && */GUI.cut_win_has_size )
 		{
 			if ( GUI.cut_win_width < GC_sizes.WIN_MIN_WIDTH )
 				GUI.cut_win_width = GC_sizes.WIN_MIN_WIDTH;
@@ -170,7 +170,7 @@ void cut_show( int dir, long u_index )
 		}
 
 
-		if ( ! cut_has_been_shown && GUI.cut_win_has_pos )
+		if ( /* ! cut_has_been_shown && */GUI.cut_win_has_pos )
 			fl_set_form_geometry( GUI.cut_form->cut, GUI.cut_win_x,
 								  GUI.cut_win_y, GUI.cut_win_width,
 								  GUI.cut_win_height );
@@ -549,8 +549,8 @@ void cut_form_close( void )
 	{
 		get_form_position( GUI.cut_form->cut, &GUI.cut_win_x, &GUI.cut_win_y );
 
-		GUI.cut_win_x += GUI.border_offset_x - 1;
-		GUI.cut_win_y += GUI.border_offset_y - 1;
+		GUI.cut_win_x += GUI.border_offset_x;
+		GUI.cut_win_y += GUI.border_offset_y;
 		GUI.cut_win_has_pos = SET;
 
 		GUI.cut_win_width = GUI.cut_form->cut->w;
@@ -582,14 +582,13 @@ void cut_close_callback( FL_OBJECT *a, long b )
 	G.coord_display &= ~ 4;
 	G.dist_display  &= ~ 4;
 	delete_all_cut_markers( UNSET );
-	G2.is_cut = is_mapped = UNSET;
 
 	if ( GUI.cut_form && fl_form_is_visible( GUI.cut_form->cut ) && is_mapped )
 	{
 		get_form_position( GUI.cut_form->cut, &GUI.cut_win_x, &GUI.cut_win_y );
 
-		GUI.cut_win_x += GUI.border_offset_x - 1;
-		GUI.cut_win_y += GUI.border_offset_y - 1;
+		GUI.cut_win_x += GUI.border_offset_x;
+		GUI.cut_win_y += GUI.border_offset_y;
 		GUI.cut_win_has_pos = SET;
 
 		GUI.cut_win_width = GUI.cut_form->cut->w;
@@ -598,6 +597,7 @@ void cut_close_callback( FL_OBJECT *a, long b )
 	}
 
 	XUnmapWindow( G.d, GUI.cut_form->cut->window );
+	G2.is_cut = is_mapped = UNSET;
 
 	for ( i = 0; i < MAX_CURVES; i++ )
 		CG.has_been_shown[ i ] = UNSET;
