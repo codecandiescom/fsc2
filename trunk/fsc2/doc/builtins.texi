@@ -316,7 +316,8 @@ a file name to the function as the default file that appears in the
 entry for the selected file. Finally, the fifth and last argument can be
 a default extension for the file. This extension will be appended
 automatically to the name of the file the user selected unless the name
-has already this extension.
+has already this extension. This way one can enforce an extension for
+the filename.
 
 But there's also an alternative. If the very first string (that is
 usually used for the prompt string) starts with a backslash `@code{\}'
@@ -332,6 +333,42 @@ from the @code{save_xxx()}-family the user is asked to select a file and
 this file is used exclusively in further @code{save_xxx()}-calls.
 I.e.@: either @code{get_file()} is called before any save-operation or
 never at all!
+
+
+@anchor{clone_file}
+@item clone_file( )
+@findex clone_file()
+Sometimes two output files are needed that should only differ in their
+extension but not in the filename. In this case the function
+@code{clone_file()} can be useful. It expects exactly three
+arguments. The first one is an identifier for an already existing file as
+returned by the function @code{get_file()}. (If in the call of
+@code{get_file()} the user did @b{not} to choose a file, i.e. pressed
+the @code{Cancel}-button, it is silently assumed that also the second
+file is @b{not} to be used.)
+
+The second and third arguments both have to be strings. The second
+argument is the expected extension of the file that was selected via the
+previous call of @code{get_file()}. And the third argument is the
+replacement for the extension of the previously selected file. If the
+second argument does not fit with the extension of the file the user had
+choosen, the new extension from the third argument is appended to the
+file name (instead of replacing the extension).
+
+A typical piece of code to open two files, the first with the extension
+@code{dat} and the second with the same name but the extension
+@code{list} would be:
+@example
+FILE1 = get_file( "", "*.dat", "", "", "dat" );
+FILE2 = clone_file( FILE1, "dat", "list" );
+@end example
+If the user chooses @code{experiment.dat} as the first file, a second
+file with the name @code{experiment.list} will be opened automatically.
+
+The function also takes care that no files will be overwritten
+accidentally. If the second file already exists the user gets asked to
+select different file. The program enforces that the extension of the
+new file is identical to the one passed as the third argument.
 
 
 @anchor{save}

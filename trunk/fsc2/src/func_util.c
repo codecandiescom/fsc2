@@ -1784,6 +1784,81 @@ getfile_retry:
 
 
 /*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
+Var *f_clonef( Var *v )
+{
+	char *fn;
+	char *n;
+	Var *new_v, *arg[ 5 ];
+	int i;
+
+
+	/* If the file handle passed to the function is -1 opening a file for
+	   this file handle did not happen, so we also don't open the new file */
+
+	if ( v->type == INT_VAR && v->val.lval == -1 )
+		return vars_push( INT_VAR, -1 );
+
+	/* Check all the parameter */
+
+	if ( v->type != INT_VAR ||
+		 v->val.lval < 0 || v->val.lval >= File_List_Len )
+	{
+		 eprint( FATAL, "%s:%ld: First argument in call of %s() isn't a vaild "
+				 "file identifier.\n", Fname, Lc, Cur_Func );
+		 THROW( EXCEPTION );
+	}
+
+	if ( v->next->type != STR_VAR || v->next->next->type != STR_VAR ||
+		 *v->next->next->val.sptr == '\0' )
+	{
+		eprint( FATAL, "%s:%ld: Invalid second and third argument in call of "
+				"%s().\n", Fname, Lc, Cur_Func );
+		 THROW( EXCEPTION );
+	}
+
+	if ( TEST_RUN )
+		return vars_push( INT_VAR, File_List_Len++ );
+
+	fn = get_string(   strlen( File_List[ v->val.lval ].name )
+					 + strlen( v->next->next->val.sptr ) + 2 );
+	strcpy( fn, "\\" );
+	strcat( fn, File_List[ v->val.lval ].name );
+
+	n = fn + strlen( fn ) - strlen( v->next->val.sptr );
+	if ( n > fn + 1 && *( n - 1 ) == '.' && 
+		 ! strcmp( n, v->next->val.sptr ) )
+		strcpy( n, v->next->next->val.sptr );
+	else
+	{
+		strcat( n, "." );
+		strcat( n, v->next->next->val.sptr );
+	}
+
+	arg[ 0 ] = vars_push( STR_VAR, fn );
+	T_free( fn );
+
+	n = get_string( strlen( v->next->next->val.sptr ) + 2 );
+	strcpy( n, "*." );
+	strcat( n, v->next->next->val.sptr );
+	arg[ 1 ] = vars_push( STR_VAR, n );
+	T_free( n );
+
+	arg[ 2 ] = vars_push( STR_VAR, "" );
+	arg[ 3 ] = vars_push( STR_VAR, "" );
+	arg[ 4 ] = vars_push( STR_VAR, v->next->next->val.sptr );
+
+	new_v = f_getf( arg[ 0 ] );
+
+	for ( i = 4; i >= 0; i-- )
+		vars_pop( arg[ i ] );
+
+	return new_v;
+}
+
+
+/*---------------------------------------------------------------------*/
 /* This function is called by the functions for saving. If they didn't */
 /* get a file identifier it is assumed the user wants just one file    */
 /* that is opened at the first call of a function of the `save_xxx()'  */
