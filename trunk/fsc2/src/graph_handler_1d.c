@@ -1435,7 +1435,7 @@ int get_mouse_pos_1d( double *pa, unsigned int *keymask )
  * curves fit into the canvas and occupy the whole canvas.
  *---------------------------------------------------------*/
 
-void fs_rescale_1d( void )
+void fs_rescale_1d( bool vert_only )
 {
 	long i, j;
 	double min = 1.0,
@@ -1467,7 +1467,7 @@ void fs_rescale_1d( void )
 
 	/* If there are no points yet... */
 
-	if ( min == 1.0 && max == 0.0 )
+	if ( min >= max )
 	{
 		G_1d.rw_min = HUGE_VAL;
 		G_1d.rw_max = - HUGE_VAL;
@@ -1489,9 +1489,14 @@ void fs_rescale_1d( void )
 	{
 		cv = G_1d.curve[ i ];
 
-		cv->shift[ X ] = cv->shift[ Y ] = 0.0;
-		cv->s2d[ X ] = ( G_1d.canvas.w - 1.0 ) / ( G_1d.nx - 1 );
+		cv->shift[ Y ] = 0.0;
 		cv->s2d[ Y ] = G_1d.canvas.h - 1.0;
+
+		if ( ! vert_only )
+		{
+			cv->shift[ X ] = 0.0;
+			cv->s2d[ X ] = ( G_1d.canvas.w - 1.0 ) / ( G_1d.nx - 1 );
+		}
 
 		cv->up = cv->down = cv->left = cv->right = UNSET;
 

@@ -35,7 +35,7 @@ void recalc_XPoints_of_curve_2d( Curve_2d_T *cv );
 void redraw_all_2d( void );
 void repaint_canvas_2d( Canvas_T *c );
 int get_mouse_pos_2d( double *pa, unsigned int *keymask );
-void fs_rescale_2d( Curve_2d_T *cv );
+void fs_rescale_2d( Curve_2d_T *cv, bool z_only );
 void make_scale_2d( Curve_2d_T *cv, Canvas_T *c, int coord );
 void save_scale_state_2d( Curve_2d_T *cv );
 void set_marker_2d( long x_pos, long y_pos, long color, long curve );

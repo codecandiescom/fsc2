@@ -1797,7 +1797,7 @@ int get_mouse_pos_2d( double *pa, unsigned int *keymask )
  * curves fit into the canvas and occupy the whole canvas.
  *---------------------------------------------------------*/
 
-void fs_rescale_2d( Curve_2d_T *cv )
+void fs_rescale_2d( Curve_2d_T *cv, bool z_only )
 {
 	long i, count;
 	double min = 1.0,
@@ -1826,7 +1826,7 @@ void fs_rescale_2d( Curve_2d_T *cv )
 
 	/* If there are no points yet... */
 
-	if ( min == 1.0 && max == 0.0 )
+	if ( min >= max )
 	{
 		cv->rw_min = HUGE_VAL;
 		cv->rw_max = - HUGE_VAL;
@@ -1844,10 +1844,15 @@ void fs_rescale_2d( Curve_2d_T *cv )
 
 	new_rwc_delta_z = rw_max - rw_min;
 
-	cv->shift[ X ] = cv->shift[ Y ] = cv->shift[ Z ] = 0.0;
-	cv->s2d[ X ] = ( G_2d.canvas.w - 1.0 ) / ( G_2d.nx - 1 );
-	cv->s2d[ Y ] = ( G_2d.canvas.h - 1.0 ) / ( G_2d.ny - 1 );
+	cv->shift[ Z ] = 0.0;
 	cv->s2d[ Z ] = G_2d.z_axis.h - 1.0;
+
+	if ( ! z_only )
+	{
+		cv->shift[ X ] = cv->shift[ Y ] = 0.0;
+		cv->s2d[ X ] = ( G_2d.canvas.w - 1.0 ) / ( G_2d.nx - 1 );
+		cv->s2d[ Y ] = ( G_2d.canvas.h - 1.0 ) / ( G_2d.ny - 1 );
+	}
 
 	cv->up = cv->down = cv->left = cv->right = UNSET;
 

@@ -1959,9 +1959,10 @@ void undo_button_callback_2d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*----------------------------------------------------------------*
- * Rescales the 1D display so that the canvas is completely used.
- *----------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Rescales the 1D display so that the canvas is completely used in
+ * vertical direction (the horizontal scaling is left unchanged)
+ *------------------------------------------------------------------*/
 
 void fs_vert_rescale_1d( void )
 {
@@ -1973,13 +1974,14 @@ void fs_vert_rescale_1d( void )
 
 	/* ... and rescale to full scale */
 
-	fs_rescale_1d( );
+	fs_rescale_1d( SET );
 	redraw_all_1d( );
 }
 
 
-/*----------------------------------------------------------------*
- * Rescales the 2D display so that the canvas is completely used.
+/*---------------------------------------------------------------*
+ * Rescales the 2D display so that the canvas is completely used
+ * in z-direction (the other directions are left unchanged)
  *----------------------------------------------------------------*/
 
 void fs_vert_rescale_2d( void )
@@ -1987,7 +1989,7 @@ void fs_vert_rescale_2d( void )
 	if ( G_2d.active_curve != -1 )
 	{
 		save_scale_state_2d( G_2d.curve_2d[ G_2d.active_curve ] );
-		fs_rescale_2d( G_2d.curve_2d[ G_2d.active_curve ] );
+		fs_rescale_2d( G_2d.curve_2d[ G_2d.active_curve ], SET );
 		redraw_all_2d( );
 	}
 }
@@ -2023,7 +2025,7 @@ void fs_button_callback_1d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 
 		/* ... and rescale to full scale */
 
-		fs_rescale_1d( );
+		fs_rescale_1d( UNSET );
 		redraw_all_1d( );
 		if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
 			fl_set_object_helper( GUI.run_form_1d->full_scale_button_1d,
@@ -2068,7 +2070,7 @@ void fs_button_callback_2d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 		{
 			save_scale_state_2d( G_2d.curve_2d[ G_2d.active_curve ] );
 			G_2d.curve_2d[ G_2d.active_curve ]->is_fs = SET;
-			fs_rescale_2d( G_2d.curve_2d[ G_2d.active_curve ] );
+			fs_rescale_2d( G_2d.curve_2d[ G_2d.active_curve ], UNSET );
 			redraw_all_2d( );
 		}
 	}
