@@ -118,7 +118,7 @@ void detach_shm( void *buf, int *key )
 {
 	raise_permissions( );
 	
-	shmdt( ( void * ) ( ( char * ) buf - 4 ) ) ;
+	shmdt( ( void * ) ( ( char * ) buf - 4 ) );
 	if ( key != NULL )
 	{
 		shmctl( *key, IPC_RMID, NULL );
