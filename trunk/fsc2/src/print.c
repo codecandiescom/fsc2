@@ -486,14 +486,15 @@ static void start_printing( FILE *fp, char *name, long what )
 			 	 "end %% fsc2Dict\n"
 				 "%%%%EOF\n" );
 	fclose( fp );
+
 	_exit( EXIT_SUCCESS );
 }
 
 
-/*----------------------------------------------------------------*/
-/* For real printing (as opposed to just writing a file) a new    */
-/* process for the pogram that does the printing is spawned here. */
-/*----------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* For real printing (as opposed to just writing a file) a new process */
+/* for the program that does the printing is spawned here.             */
+/*---------------------------------------------------------------------*/
 
 static FILE *spawn_print_prog( const char *command )
 {
@@ -530,8 +531,8 @@ static FILE *spawn_print_prog( const char *command )
 		return NULL;
 	}
 
-	if ( pid > 0 )          /* parent has done everything it needed to do... */
-		return tmp_fp;
+	if ( pid > 0 )          /* parent has done everything it needed to do, */
+		return tmp_fp;      /* now it just got to write out the PS code... */
 
 	args[ 0 ] = ( char * ) "sh";
 	args[ 1 ] = ( char * ) "-c";
@@ -782,7 +783,7 @@ static void print_header( FILE *fp, char *name )
 			 72.0 / INCH, - paper_width );
 
 	if ( paper_type == A5_PAPER )
-		fprintf( fp, "10 10 t\n1 2 sqrt div dup scale\n" );
+		fprintf( fp, "10 10 t\n0.5 sqrt dup scale\n" );
 
 	if ( paper_type == A6_PAPER )
 		fprintf( fp, "10 10 t\n0.5 dup scale\n" );
@@ -793,18 +794,14 @@ static void print_header( FILE *fp, char *name )
 	TRY
 	{
 		tstr = T_strdup( ctime( &d ) );
+		tstr[ strlen( tstr ) - 1 ] = '\0';
+		fprintf( fp, "5 5 m (%s %s) show\n", tstr,
+				 getpwuid( getuid( ) )->pw_name );
+		T_free( tstr );
 		TRY_SUCCESS;
 	}
 	CATCH( OUT_OF_MEMORY_EXCEPTION )
-	{
 		fprintf( fp, "5 5 m (%s) show\n", getpwuid( getuid( ) )->pw_name );
-		return;
-	}
-
-	tstr[ strlen( tstr ) - 1 ] = '\0';
-	fprintf( fp, "5 5 m (%s %s) show\n", tstr,
-			 getpwuid( getuid( ) )->pw_name );
-	T_free( tstr );
 }
 
 
