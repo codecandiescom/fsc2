@@ -177,7 +177,7 @@ void setup_comm( void )
 
 		eprint( FATAL, UNSET, "Can't set up internal communication "
 				"channels.\n" );
-		PASSTHROU( );
+		PASSTHROU( )
 	}
 
 	/* Set identifier entry in all elements of the message queue to -1, i.e.

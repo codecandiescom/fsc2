@@ -427,7 +427,7 @@ Var *func_call( Var *f )
 			Cur_Func = NULL;
 		for ( ap = f; ap != NULL; ap = vars_pop( ap ) )
 			;
-		PASSTHROU( );
+		PASSTHROU( )
 	}
 
 	if ( --in_call == 0 )

@@ -712,7 +712,7 @@ Var *synthesizer_use_table( Var *v )
 		CATCH( EXCEPTION )
 		{
 			T_free( tfname );
-			PASSTHROU( );
+			PASSTHROU( )
 		}
 	}
 
@@ -726,7 +726,7 @@ Var *synthesizer_use_table( Var *v )
 		fclose( tfp );
 		T_free( hp8647a.table_file );
 		hp8647a.table_file = NULL;
-		PASSTHROU( );
+		PASSTHROU( )
 	}
 
 	fclose( tfp );

@@ -793,7 +793,7 @@ static void exp_syntax_check( void )
 	OTHERWISE
 	{
 		Fname = NULL;
-		PASSTHROU( );
+		PASSTHROU( )
 	}
 
 	Fname = NULL;
@@ -997,7 +997,7 @@ void exp_test_run( void )
 		close_all_files( );
 			
 		TEST_RUN = UNSET;
-		PASSTHROU( );
+		PASSTHROU( )
 	}
 
 	Fname = NULL;

@@ -204,7 +204,7 @@ int func_list_parse( Func **fncts, int num_func )
 	OTHERWISE
 	{
 		fclose( func_listin );
-		PASSTHROU( );
+		PASSTHROU( )
 	}
 
 	/* If no functions were found return immediately */
@@ -244,7 +244,7 @@ int func_list_parse( Func **fncts, int num_func )
 	OTHERWISE
 	{
 		fclose( func_listin );
-		PASSTHROU( );
+		PASSTHROU( )
 	}
 
 	fclose( func_listin );

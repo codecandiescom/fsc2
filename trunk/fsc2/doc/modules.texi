@@ -1076,9 +1076,9 @@ if ( non_recoverable_error )
 @noindent
 and @acronym{fsc2} will take care of all error handling (please note
 that there is no semicolon following the @code{THROW( EXCEPTION )}
-because @code{THROW} is defined as a macro). That's all you need to know
-about exceptions for nearly all cases that have to be handled within
-modules.
+because @code{THROW} is defined as a block macro). That's all you need
+to know about exceptions for nearly all cases that have to be handled
+within modules.
 
 
 @subsubsection More on programming with exceptions
@@ -1133,10 +1133,11 @@ TRY
 OTHERWISE
 @{
     do_cleanup();       /* e.g. deallocate memory */
-    PASSTHROU();
+    PASSTHROU()
 @}
 @end example
-
+Please note that also @code{PASSTHROU()} does not need to be followed by
+a semicolon because it is also a block macro.
 
 There is a caveat when using exceptions: The values of non-static
 automatic variables may differ from the values they were set to after an
