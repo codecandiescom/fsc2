@@ -39,9 +39,9 @@ static double am_ampl[ ] = { 30.0, 100.0 };
 static HP8672A_T hp8672a_backup;
 
 
-/*------------------------------------*/
-/* Init hook function for the module. */
-/*------------------------------------*/
+/*------------------------------------*
+ * Init hook function for the module.
+ *------------------------------------*/
 
 int hp8672a_init_hook( void )
 {
@@ -80,9 +80,9 @@ int hp8672a_init_hook( void )
 }
 
 
-/*------------------------------------*/
-/* Test hook function for the module. */
-/*------------------------------------*/
+/*------------------------------------*
+ * Test hook function for the module.
+ *------------------------------------*/
 
 int hp8672a_test_hook( void )
 {
@@ -114,9 +114,9 @@ int hp8672a_test_hook( void )
 }
 
 
-/*--------------------------------------------------*/
-/* Start of experiment hook function for the module */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Start of experiment hook function for the module
+ *--------------------------------------------------*/
 
 int hp8672a_exp_hook( void )
 {
@@ -135,9 +135,9 @@ int hp8672a_exp_hook( void )
 }
 
 
-/*------------------------------------------------*/
-/* End of experiment hook function for the module */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * End of experiment hook function for the module
+ *------------------------------------------------*/
 
 int hp8672a_end_of_exp_hook( void )
 {
@@ -148,9 +148,9 @@ int hp8672a_end_of_exp_hook( void )
 }
 
 
-/*------------------------------------------*/
-/* For final work before module is unloaded */
-/*------------------------------------------*/
+/*------------------------------------------*
+ * For final work before module is unloaded
+ *------------------------------------------*/
 
 
 void hp8672a_exit_hook( void )
@@ -163,8 +163,8 @@ void hp8672a_exit_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *synthesizer_name( UNUSED_ARG Var_T *v )
 {
@@ -172,8 +172,8 @@ Var_T *synthesizer_name( UNUSED_ARG Var_T *v )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ *---------------------------------------------------------------------*/
 
 Var_T *synthesizer_state( Var_T *v )
 {
@@ -207,16 +207,16 @@ Var_T *synthesizer_state( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function sets or returns (if called with no argument) the frequency */
-/* of the synthesizer. If called for setting the frequency before the  */
-/* experiment is started the frequency value is stored and set in the  */
-/* setup phase of the experiment. The frequency set the first time the */
-/* function is called is also set as the start frequency to be used in */
-/* calls of 'synthesizer_reset_frequency'. The function can only be    */
-/* called once in the PREPARATIONS section, further calls just result  */
-/* in a warning and the new value isn't accepted.                      */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function sets or returns (if called with no argument) the frequency
+ * of the synthesizer. If called for setting the frequency before the
+ * experiment is started the frequency value is stored and set in the
+ * setup phase of the experiment. The frequency set the first time the
+ * function is called is also set as the start frequency to be used in
+ * calls of 'synthesizer_reset_frequency'. The function can only be
+ * called once in the PREPARATIONS section, further calls just result
+ * in a warning and the new value isn't accepted.
+ *---------------------------------------------------------------------*/
 
 Var_T *synthesizer_frequency( Var_T *v )
 {
@@ -317,14 +317,14 @@ Var_T *synthesizer_frequency( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function sets or returns (if called with no argument) the attenuation */
-/* of the synthesizer. If called for setting the attenuation before the  */
-/* experiment is started the attenuation value is stored and set in the  */
-/* setup phase of the attenuation. The function can only be called once  */
-/* in the PREPARATIONS section, further calls just result in a warning   */
-/* and the new value isn't accepted.                                     */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function sets or returns (if called with no argument) the attenuation
+ * of the synthesizer. If called for setting the attenuation before the
+ * experiment is started the attenuation value is stored and set in the
+ * setup phase of the attenuation. The function can only be called once
+ * in the PREPARATIONS section, further calls just result in a warning
+ * and the new value isn't accepted.
+ *-----------------------------------------------------------------------*/
 
 Var_T *synthesizer_attenuation( Var_T *v )
 {
@@ -387,9 +387,9 @@ Var_T *synthesizer_attenuation( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Sets (or returns) the minimum attentuation that can be set. */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Sets (or returns) the minimum attentuation that can be set.
+ *-------------------------------------------------------------*/
 
 Var_T *synthesizer_minimum_attenuation( Var_T *v )
 {
@@ -422,10 +422,10 @@ Var_T *synthesizer_minimum_attenuation( Var_T *v )
 	return vars_push( FLOAT_VAR, hp8672a.min_attenuation );
 }
 
-/*-----------------------------------------------------------*/
-/* Function sets or returns (if called with no argument) the */
-/* step frequency for RF sweeps.                             */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function sets or returns (if called with no argument) the
+ * step frequency for RF sweeps.
+ *-----------------------------------------------------------*/
 
 Var_T *synthesizer_step_frequency( Var_T *v )
 {
@@ -456,9 +456,9 @@ Var_T *synthesizer_step_frequency( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/* This function may only be called in the EXPERIMENT section! */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * This function may only be called in the EXPERIMENT section!
+ *-------------------------------------------------------------*/
 
 Var_T *synthesizer_sweep_up( UNUSED_ARG Var_T *v )
 {
@@ -513,9 +513,9 @@ Var_T *synthesizer_sweep_up( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/* This function may only be called in the EXPERIMENT section! */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * This function may only be called in the EXPERIMENT section!
+ *-------------------------------------------------------------*/
 
 Var_T *synthesizer_sweep_down( UNUSED_ARG Var_T *v )
 {
@@ -529,9 +529,9 @@ Var_T *synthesizer_sweep_down( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/* This function may only be called in the EXPERIMENT section! */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * This function may only be called in the EXPERIMENT section!
+ *-------------------------------------------------------------*/
 
 Var_T *synthesizer_reset_frequency( UNUSED_ARG Var_T *v )
 {
@@ -551,8 +551,8 @@ Var_T *synthesizer_reset_frequency( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
 
 Var_T *synthesizer_use_table( Var_T *v )
 {
@@ -624,8 +624,8 @@ Var_T *synthesizer_use_table( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
 
 Var_T *synthesizer_att_ref_freq( Var_T *v )
 {
@@ -680,12 +680,12 @@ Var_T *synthesizer_att_ref_freq( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function for setting some or all modulation parameters at once. */
-/* The sequence the parameters are set in don't matter. If the     */
-/* function succeeds 1 (as variable) is returned, otherwise an     */
-/* exception is thrown.                                            */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function for setting some or all modulation parameters at once.
+ * The sequence the parameters are set in don't matter. If the
+ * function succeeds 1 (as variable) is returned, otherwise an
+ * exception is thrown.
+ *-----------------------------------------------------------------*/
 
 Var_T *synthesizer_modulation( Var_T *v )
 {
@@ -745,8 +745,8 @@ Var_T *synthesizer_modulation( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
 
 Var_T *synthesizer_mod_type( Var_T *v )
 {
@@ -804,8 +804,8 @@ Var_T *synthesizer_mod_type( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
 
 Var_T *synthesizer_mod_ampl( Var_T *v )
 {
@@ -862,8 +862,8 @@ Var_T *synthesizer_mod_ampl( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *synthesizer_command( Var_T *v )
 {

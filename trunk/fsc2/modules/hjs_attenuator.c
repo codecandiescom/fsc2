@@ -55,9 +55,9 @@ static long hjs_attenuator_att_to_step( double att );
 /*                                           */
 /*-------------------------------------------*/
 
-/*------------------------------------------------------*/
-/* Function called when the module has just been loaded */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function called when the module has just been loaded
+ *------------------------------------------------------*/
 
 int hjs_attenuator_init_hook( void )
 {
@@ -75,9 +75,9 @@ int hjs_attenuator_init_hook( void )
 }
 
 
-/*----------------------------------------------*/
-/* Function called at the start of the test run */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Function called at the start of the test run
+ *----------------------------------------------*/
 
 int hjs_attenuator_test_hook( void )
 {
@@ -86,9 +86,9 @@ int hjs_attenuator_test_hook( void )
 }
 
 
-/*-----------------------------------------------*/
-/* Function called at the start of an experiment */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Function called at the start of an experiment
+ *-----------------------------------------------*/
 
 int hjs_attenuator_exp_hook( void )
 {
@@ -104,9 +104,9 @@ int hjs_attenuator_exp_hook( void )
 }
 
 
-/*---------------------------------------------*/
-/* Function called at the end of an experiment */
-/*---------------------------------------------*/
+/*---------------------------------------------*
+ * Function called at the end of an experiment
+ *---------------------------------------------*/
 
 int hjs_attenuator_end_of_exp_hook( void )
 {
@@ -118,9 +118,9 @@ int hjs_attenuator_end_of_exp_hook( void )
 }
 
 
-/*------------------------------------------------------*/
-/* Function called just before the module gets unloaded */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function called just before the module gets unloaded
+ *------------------------------------------------------*/
 
 void hjs_attenuator_exit_hook( void )
 {
@@ -132,10 +132,10 @@ void hjs_attenuator_exit_hook( void )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function called at the very end of the experiment within the     */
-/* child process. It set the attenuator to the maximum attenuation. */
-/*------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function called at the very end of the experiment within the child
+ * process. It set the attenuator to the maximum attenuation.
+ *--------------------------------------------------------------------*/
 
 void hjs_attenuator_child_exit_hook( void )
 {
@@ -152,9 +152,9 @@ void hjs_attenuator_child_exit_hook( void )
 /*                                           */
 /*-------------------------------------------*/
 
-/*----------------------------------------------------------------*/
-/* Function returns a string variable with the name of the device */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function returns a string variable with the name of the device
+ *----------------------------------------------------------------*/
 
 Var_T *mw_attenuator_name( UNUSED_ARG Var_T *v )
 {
@@ -162,16 +162,16 @@ Var_T *mw_attenuator_name( UNUSED_ARG Var_T *v )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Function allows to load a new list of attenuations versus */
-/* stepper motor positions from a file. When called without  */
-/* an argument the default calibration file is loaded, which */
-/* is defined in the configuration file for the module.      */
-/* The default calibration file is loaded immediately when   */
-/* the module got loaded, so it's not necessary to call the  */
-/* function unless a different calibration file is to be     */
-/* used.                                                     */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function allows to load a new list of attenuations versus
+ * stepper motor positions from a file. When called without
+ * an argument the default calibration file is loaded, which
+ * is defined in the configuration file for the module.
+ * The default calibration file is loaded immediately when
+ * the module got loaded, so it's not necessary to call the
+ * function unless a different calibration file is to be
+ * used.
+ *-----------------------------------------------------------*/
 
 Var_T *mw_attenuator_load_calibration( Var_T *v )
 {
@@ -263,12 +263,12 @@ Var_T *mw_attenuator_load_calibration( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function that must be called before any other function to set or get */
-/* the current attenuation, and then never again. It informs the module */
-/* about the attenuation currently set. This information is required to */
-/* calculate the number of steps needed to change to a new attenuation. */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function that must be called before any other function to set or get
+ * the current attenuation, and then never again. It informs the module
+ * about the attenuation currently set. This information is required to
+ * calculate the number of steps needed to change to a new attenuation.
+ *----------------------------------------------------------------------*/
 
 Var_T *mw_attenuator_initial_attenuation( Var_T *v )
 {
@@ -292,12 +292,12 @@ Var_T *mw_attenuator_initial_attenuation( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/* EDL function for querying or setting the attenuation. Calling  */
-/* the function requires that mw_attenuator_initial_attenuation() */
-/* has been called before to tell the module about the initial    */
-/* attenuation set at the device.                                 */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * EDL function for querying or setting the attenuation. Calling
+ * the function requires that mw_attenuator_initial_attenuation()
+ * has been called before to tell the module about the initial
+ * attenuation set at the device.
+ *----------------------------------------------------------------*/
 
 Var_T *mw_attenuator_attenuation( Var_T *v )
 {
@@ -337,9 +337,9 @@ Var_T *mw_attenuator_attenuation( Var_T *v )
 /*                                           */
 /*-------------------------------------------*/
 
-/*---------------------------------------------------------------*/
-/* Initialization of the serial port the device is connected to. */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Initialization of the serial port the device is connected to.
+ *---------------------------------------------------------------*/
 
 static bool hjs_attenuator_serial_init( void )
 {
@@ -370,9 +370,9 @@ static bool hjs_attenuator_serial_init( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function for setting the new attenuation by moving the stepper motor. */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for setting the new attenuation by moving the stepper motor.
+ *-----------------------------------------------------------------------*/
 
 static void hjs_attenuator_set_attenuation( long new_step )
 {
@@ -429,8 +429,8 @@ static void hjs_attenuator_set_attenuation( long new_step )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
 
 static void hjs_attenuator_comm_failure( void )
 {
@@ -439,12 +439,12 @@ static void hjs_attenuator_comm_failure( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* If the function succeeds it returns a file pointer to the calibration    */
-/* file and sets the calib_file entry in the device structure to the name   */
-/* of the calibration file. Otherwise an exception is thrown. In any case   */
-/* the memory used for the file name passed to the function is deallocated. */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * If the function succeeds it returns a file pointer to the calibration
+ * file and sets the calib_file entry in the device structure to the name
+ * of the calibration file. Otherwise an exception is thrown. In any case
+ * the memory used for the file name passed to the function is deallocated.
+ *--------------------------------------------------------------------------*/
 
 static FILE *hjs_attenuator_find_calibration( char **name )
 {
@@ -496,14 +496,14 @@ static FILE *hjs_attenuator_find_calibration( char **name )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Tries to open the file with the given name and returns the file  */
-/* pointer, returns NULL if file does not exist returns, or throws  */
-/* an exception if the file can't be read (either because of prob-  */
-/* lems with the permissions or other, unknoen reasons). If opening */
-/* the file fails with an exception memory used for its name is     */
-/* deallocated.                                                     */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Tries to open the file with the given name and returns the file
+ * pointer, returns NULL if file does not exist returns, or throws
+ * an exception if the file can't be read (either because of prob-
+ * lems with the permissions or other, unknoen reasons). If opening
+ * the file fails with an exception memory used for its name is
+ * deallocated.
+ *------------------------------------------------------------------*/
 
 static FILE *hjs_attenuator_open_calibration( char *name )
 {
@@ -532,15 +532,15 @@ static FILE *hjs_attenuator_open_calibration( char *name )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function for determining the stepper motor position for a certain  */
-/* attenuation. The attenuation can't be negative and must be between */
-/* the minimum and maximum attenuation in the array of attenuation/   */
-/* motor position settings in the array read in from the calibration  */
-/* file. For attenutaions where there is no entry in the list linear  */
-/* interpolation (and rounded to the next integer position) between   */
-/* the neighboring entries is used.                                   */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for determining the stepper motor position for a certain
+ * attenuation. The attenuation can't be negative and must be between
+ * the minimum and maximum attenuation in the array of attenuation/
+ * motor position settings in the array read in from the calibration
+ * file. For attenutaions where there is no entry in the list linear
+ * interpolation (and rounded to the next integer position) between
+ * the neighboring entries is used.
+ *--------------------------------------------------------------------*/
 
 static long hjs_attenuator_att_to_step( double att )
 {
@@ -593,11 +593,11 @@ static long hjs_attenuator_att_to_step( double att )
 		{
 			if ( att >= hjs_attenuator.att_table[ ind - 1 ].att )
 				return lrnd( hjs_attenuator.att_table[ ind - 1 ].step +
-							( hjs_attenuator.att_table[ ind - 1 ].step
-							  -  hjs_attenuator.att_table[ ind ].step ) /
-							( hjs_attenuator.att_table[ ind - 1 ].att
-							  -  hjs_attenuator.att_table[ ind ].att ) *
-							( att - hjs_attenuator.att_table[ ind - 1 ].att ) );
+						   ( hjs_attenuator.att_table[ ind - 1 ].step
+							 -  hjs_attenuator.att_table[ ind ].step ) /
+						   ( hjs_attenuator.att_table[ ind - 1 ].att
+						     -  hjs_attenuator.att_table[ ind ].att ) *
+						   ( att - hjs_attenuator.att_table[ ind - 1 ].att ) );
 					
 			max_index = ind;
 			ind /= 2;

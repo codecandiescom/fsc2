@@ -48,15 +48,15 @@ struct HJS_FC hjs_fc;
 /*                                           */
 /*-------------------------------------------*/
 
-/*-------------------------------------------------------------------*/
-/* Function that gets called when the module is loaded. Since this   */
-/* module does not control a real device but relies on the existence */
-/* of both the BNM12 gaussmeter and the home-built DA/AD converter   */
-/* the main purpose of this function is to check that the modules    */
-/* for these devices are already loaded and then to get a lock on    */
-/* the DA-channel of the DA/AD converter. Of course, also some       */
-/* internally used data are initialized by the function.             */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function that gets called when the module is loaded. Since this
+ * module does not control a real device but relies on the existence
+ * of both the BNM12 gaussmeter and the home-built DA/AD converter
+ * the main purpose of this function is to check that the modules
+ * for these devices are already loaded and then to get a lock on
+ * the DA-channel of the DA/AD converter. Of course, also some
+ * internally used data are initialized by the function.
+ *-------------------------------------------------------------------*/
 
 int hjs_fc_init_hook( void )
 {
@@ -220,8 +220,8 @@ int hjs_fc_init_hook( void )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
 
 int hjs_fc_test_hook( void )
 {
@@ -234,19 +234,19 @@ int hjs_fc_test_hook( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function gets called when the experiment is started. First of */
-/* all we need to do some initialization. This mainly includes   */
-/* setting the field to some positions, covering the whole range */
-/* of possible values, to figure out the maximum field range and */
-/* the relationship between the DAC output voltage and the       */
-/* resulting field. When we then know the field range we have to */
-/* check that during the test run the field never was set to a   */
-/* value that can't be reached. If the function magnet_setup()   */
-/* had been called during the PREPARATIONS section we also have  */
-/* to make sure that the sweep step size isn't smaller than the  */
-/* minimum field step we can set with the DAC resolution.        */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function gets called when the experiment is started. First of
+ * all we need to do some initialization. This mainly includes
+ * setting the field to some positions, covering the whole range
+ * of possible values, to figure out the maximum field range and
+ * the relationship between the DAC output voltage and the
+ * resulting field. When we then know the field range we have to
+ * check that during the test run the field never was set to a
+ * value that can't be reached. If the function magnet_setup()
+ * had been called during the PREPARATIONS section we also have
+ * to make sure that the sweep step size isn't smaller than the
+ * minimum field step we can set with the DAC resolution.
+ *---------------------------------------------------------------*/
 
 int hjs_fc_exp_hook( void )
 {
@@ -318,9 +318,9 @@ int hjs_fc_exp_hook( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function that is called just before the module gets unloaded */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function that is called just before the module gets unloaded
+ *--------------------------------------------------------------*/
 
 void hjs_fc_exit_hook( void )
 {
@@ -335,11 +335,11 @@ void hjs_fc_exit_hook( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function gets executed just before the child process commits */
-/* suicide to bring the field back to the value it has for a    */
-/* DAC output voltage of 0 V.                                   */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function gets executed just before the child process commits
+ * suicide to bring the field back to the value it has for a
+ * DAC output voltage of 0 V.
+ *--------------------------------------------------------------*/
 
 void hjs_fc_child_exit_hook( void )
 {
@@ -380,9 +380,9 @@ void hjs_fc_child_exit_hook( void )
 /*                                           */
 /*-------------------------------------------*/
 
-/*----------------------------------------------------------------*/
-/* Function returns a string variable with the name of the device */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function returns a string variable with the name of the device
+ *----------------------------------------------------------------*/
 
 Var_T *magnet_name( UNUSED_ARG Var_T *v )
 {
@@ -390,9 +390,9 @@ Var_T *magnet_name( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function for registering the start field and the field step size. */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for registering the start field and the field step size.
+ *-------------------------------------------------------------------*/
 
 Var_T *magnet_setup( Var_T *v )
 {
@@ -406,8 +406,8 @@ Var_T *magnet_setup( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 Var_T *magnet_calibration_file( Var_T *v )
 {
@@ -473,8 +473,8 @@ Var_T *magnet_calibration_file( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 Var_T *set_field( Var_T *v )
 {
@@ -513,9 +513,9 @@ Var_T *set_field( Var_T *v )
 }
 
 
-/*---------------------------------------------------------*/
-/* Function asks the used gaussmeter for the current field */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function asks the used gaussmeter for the current field
+ *---------------------------------------------------------*/
 
 Var_T *get_field( UNUSED_ARG Var_T *v )
 {
@@ -526,8 +526,8 @@ Var_T *get_field( UNUSED_ARG Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 Var_T *sweep_up( UNUSED_ARG Var_T *v )
 {
@@ -545,8 +545,8 @@ Var_T *sweep_up( UNUSED_ARG Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 Var_T *sweep_down( UNUSED_ARG Var_T *v )
 {
@@ -564,8 +564,8 @@ Var_T *sweep_down( UNUSED_ARG Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 Var_T *reset_field( UNUSED_ARG Var_T *v )
 {
@@ -582,8 +582,8 @@ Var_T *reset_field( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 Var_T *magnet_B0( Var_T *v )
 {
@@ -605,8 +605,8 @@ Var_T *magnet_B0( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 Var_T *magnet_slope( Var_T *v )
 {
@@ -634,11 +634,11 @@ Var_T *magnet_slope( Var_T *v )
 /*                                           */
 /*-------------------------------------------*/
 
-/*--------------------------------------------------------------------*/
-/* In the initialization process with use of measured data we need to */
-/* figure out the field for an output voltage of the DAC of 0 V and   */
-/* how the field changes with the DAC voltage.                        */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * In the initialization process with use of measured data we need to
+ * figure out the field for an output voltage of the DAC of 0 V and
+ * how the field changes with the DAC voltage.
+ *--------------------------------------------------------------------*/
 
 static void hjs_fc_init_with_measured_data( void )
 {
@@ -732,10 +732,10 @@ static void hjs_fc_init_with_measured_data( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* In the initialization process using a calibration file we have to */
-/* read in the calibration file and measure the actual field.        */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * In the initialization process using a calibration file we have to
+ * read in the calibration file and measure the actual field.
+ *-------------------------------------------------------------------*/
 
 static void hjs_fc_init_with_calib_file( void )
 {
@@ -783,10 +783,10 @@ static void hjs_fc_init_with_calib_file( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function tries to set a new field and checks if the field was */
-/* reached by measuring the new field via the BNM12 gaussmeter.  */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function tries to set a new field and checks if the field was
+ * reached by measuring the new field via the BNM12 gaussmeter.
+ *---------------------------------------------------------------*/
 
 static double hjs_fc_set_field( double field, double error_margin )
 {
@@ -873,11 +873,11 @@ static double hjs_fc_set_field( double field, double error_margin )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function for sweeping the field, i.e. just setting a new value of */
-/* the DAC output voltage but without checking the field using the   */
-/* gaussmeter.                                                       */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for sweeping the field, i.e. just setting a new value of
+ * the DAC output voltage but without checking the field using the
+ * gaussmeter.
+ *-------------------------------------------------------------------*/
 
 static double hjs_fc_sweep_to( double new_field )
 {
@@ -944,15 +944,15 @@ static double hjs_fc_sweep_to( double new_field )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function tries to get a consistent reading from the gaussmeter by */
-/* repeatedly fetching new values until it stays unchanged for at    */
-/* least MIN_NUM_IDENTICAL_READINGS times. If the readings stay      */
-/* unstable for more than MAX_GET_FIELD_RETRIES times the function   */
-/* throws an exception. Between fetching new values from the gauss-  */
-/* meter the function pauses for WAIT_LENGTH microseconds. Each of   */
-/* the three constants need to be defined at the top of this file.   */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function tries to get a consistent reading from the gaussmeter by
+ * repeatedly fetching new values until it stays unchanged for at
+ * least MIN_NUM_IDENTICAL_READINGS times. If the readings stay
+ * unstable for more than MAX_GET_FIELD_RETRIES times the function
+ * throws an exception. Between fetching new values from the gauss-
+ * meter the function pauses for WAIT_LENGTH microseconds. Each of
+ * the three constants need to be defined at the top of this file.
+ *-------------------------------------------------------------------*/
 
 static double hjs_fc_get_field( void )
 {
@@ -1000,8 +1000,8 @@ static double hjs_fc_get_field( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 static double hjs_fc_field_check( double field )
 {
@@ -1029,8 +1029,8 @@ static double hjs_fc_field_check( double field )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 static void hjs_fc_set_dac( double volts )
 {

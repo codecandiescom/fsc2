@@ -109,10 +109,10 @@ static struct {
 
 
 
-/*----------------------------------------------------------------*/
-/* Here we check if also a driver for a field meter is loaded and */
-/* test if this driver will be loaded before the magnet driver.   */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Here we check if also a driver for a field meter is loaded and
+ * test if this driver will be loaded before the magnet driver.
+ *----------------------------------------------------------------*/
 
 int keithley228a_init_hook( void )
 {
@@ -237,8 +237,8 @@ int keithley228a_init_hook( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 int keithley228a_exp_hook( void )
 {
@@ -255,8 +255,8 @@ int keithley228a_exp_hook( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 int keithley228a_end_of_exp_hook( void )
 {
@@ -265,9 +265,9 @@ int keithley228a_end_of_exp_hook( void )
 }
 
 
-/*------------------------------------------*/
-/* For final work before module is unloaded */
-/*------------------------------------------*/
+/*------------------------------------------*
+ * For final work before module is unloaded
+ *------------------------------------------*/
 
 
 void keithley228a_exit_hook( void )
@@ -276,15 +276,15 @@ void keithley228a_exit_hook( void )
 }
 
 
-/***********************************************************************/
-/*                                                                     */
-/*           exported functions, i.e. EDL functions                    */
-/*                                                                     */
-/***********************************************************************/
+/****************************************************************/
+/*                                                              */
+/*           exported functions, i.e. EDL functions             */
+/*                                                              */
+/****************************************************************/
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 Var_T *magnet_name( UNUSED_ARG Var_T *v )
 {
@@ -292,9 +292,9 @@ Var_T *magnet_name( UNUSED_ARG Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function for registering the start current and the current step size. */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for registering the start current and the current step size.
+ *-----------------------------------------------------------------------*/
 
 Var_T *magnet_setup( Var_T *v )
 {
@@ -332,9 +332,9 @@ Var_T *magnet_setup( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function for switching use of corrections to the field on and off. */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for switching use of corrections to the field on and off.
+ *--------------------------------------------------------------------*/
 
 Var_T *magnet_use_correction( Var_T *v )
 {
@@ -353,10 +353,10 @@ Var_T *magnet_use_correction( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function for selecting the DAC port of the lock-in amplifier */
-/* to be used for the corrections to the field.                 */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function for selecting the DAC port of the lock-in amplifier
+ * to be used for the corrections to the field.
+ *--------------------------------------------------------------*/
 
 Var_T *magnet_use_dac_port( Var_T *v )
 {
@@ -391,8 +391,8 @@ Var_T *magnet_use_dac_port( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 Var_T *set_field( Var_T *v )
 {
@@ -419,9 +419,9 @@ Var_T *set_field( Var_T *v )
 }
 
 
-/*------------------------------------------------*/
-/* Convenience function: just returns the current */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * Convenience function: just returns the current
+ *------------------------------------------------*/
 
 Var_T *get_field( UNUSED_ARG Var_T *v )
 {
@@ -429,8 +429,8 @@ Var_T *get_field( UNUSED_ARG Var_T *v )
 }
 
 
-/*-----------------------------------------------------*/
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ *-----------------------------------------------------*/
 
 Var_T *sweep_up( UNUSED_ARG Var_T *v )
 {
@@ -453,8 +453,8 @@ Var_T *sweep_up( UNUSED_ARG Var_T *v )
 }
 
 
-/*-----------------------------------------------------*/
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ *-----------------------------------------------------*/
 
 Var_T *sweep_down( UNUSED_ARG Var_T *v )
 {
@@ -477,8 +477,8 @@ Var_T *sweep_down( UNUSED_ARG Var_T *v )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 Var_T *reset_field( UNUSED_ARG Var_T *v )
 {
@@ -493,8 +493,8 @@ Var_T *reset_field( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *magnet_command( Var_T *v )
 {
@@ -531,8 +531,8 @@ Var_T *magnet_command( Var_T *v )
 /*                                                   */
 /*****************************************************/
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static bool keithley228a_init( const char *name )
 {
@@ -592,10 +592,10 @@ static bool keithley228a_init( const char *name )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Brings the power supply back into local state after sweeping down the */
-/* current down to 0 A.                                                  */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Brings the power supply back into local state after sweeping down the
+ * current down to 0 A.
+ *-----------------------------------------------------------------------*/
 
 static void keithley228a_to_local( void )
 {
@@ -607,10 +607,10 @@ static void keithley228a_to_local( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Sets the power supply in either STANDBY or OPERATE mode. If switching */
-/* into STANDBY mode the current is first reset to 0 A.                  */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Sets the power supply in either STANDBY or OPERATE mode. If switching
+ * into STANDBY mode the current is first reset to 0 A.
+ *-----------------------------------------------------------------------*/
 
 static bool keithley228a_set_state( bool new_state )
 {
@@ -675,30 +675,29 @@ static bool keithley228a_set_state( bool new_state )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* In principle, the Keithley power supply is not supposed to drive  */
-/* large inductive loads. On the other hand, the sweep coil of the   */
-/* magnet has an inductance of about 4 H and a very low resistance   */
-/* (mainly just due to the leads). The inductance reaction voltage   */
-/* (the voltage induced by the coil due to the current change as     */
-/* imposed by the power supply) and given by the product of the      */
-/* inductance of the coil, multiplied by the currents rate of        */
-/* change, should not exceed 10 V for the normally used current      */
-/* range of the power supply of 10 A. This means that the maximum    */
-/* rate of current change must be below 2.5 A/s, or, to be on the    */
-/* safe side, below 1 A/s (defined as KEITHLEY228A_MAX_SWEEP_SPEED). */
-/* While I think, that because of the output voltage being limited   */
-/* to 5 V also the inductance reaction voltage can't be larger, I    */
-/* prefer to be real careful and thus setting the new current is     */
-/* done in several steps of changes of 0.1 A, after which the power  */
-/* supply is given a settling time of 100 ms.                        */
-/* The only situation where this could become critical is when       */
-/* switching from OPERATE to STANDBY state. In this case the voltage */
-/* applied to the terminals and the current are suddenly set to zero */
-/* which would lead to huge induced voltages. Therefore one has to   */
-/* be very careful to sweep the current down to 0 A before switching */
-/* to STANDBY state !                                                */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * In principle, the Keithley power supply is not supposed to drive
+ * large inductive loads. On the other hand, the sweep coil of the
+ * magnet has an inductance of about 4 H and a very low resistance
+ * (mainly just due to the leads). The inductance reaction voltage
+ * (the voltage induced by the coil due to the current change as
+ * imposed by the power supply), given by the product of the
+ * inductance of the coil and the currents rate of change, should
+ * not exceed 10 V for the normally used current range of the power
+ * supply of 10 A. This means that the maximum rate of current
+ * change must be below 2.5 A/s, or, to be on the safe side, below 1
+ * A/s (defined as KEITHLEY228A_MAX_SWEEP_SPEED).  While I think
+ * that - because of the output voltage is limited to 5 V - also the
+ * inductance reaction voltage can't be larger, I prefer to be real
+ * careful and thus setting the new current is done in several steps
+ * of changes of 0.1 A, after which the power supply is given a
+ * settling time of 100 ms. The only situation where this could
+ * become critical is when switching from OPERATE to STANDBY state.
+ * In this case the voltage applied to the terminals and the
+ * current are suddenly set to zero which would lead to huge induced
+ * voltages. Therefore one has to be very careful to sweep the
+ * current down to 0 A before switching to STANDBY state!
+ *--------------------------------------------------------------------*/
 
 static double keithley228a_goto_current( double new_current )
 {
@@ -771,22 +770,22 @@ static double keithley228a_goto_current( double new_current )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* In the normally used range of 10 V and 10 A the current resolution */
-/* of the power supply is just 10 mA. This would limit the field      */
-/* resolution to about 1 G which isn't good enough. Therefore, an     */
-/* additional voltage is applied to the current modulation input of   */
-/* the power supply. This additional voltage is created by one of the */
-/* DACs of the lock-in amplifier. Because the voltages needed are in  */
-/* the 100 mV range but the output of the DAC is in the 10 V range    */
-/* (with a 12 bit resolution) the DAC is connected to the modulation  */
-/* input with a parallel resistor of 100 Ohm (the exact value plus a  */
-/* sign for taking care of the correct polarity) is defined by        */
-/* V_TO_A_FACTOR.                                                     */
-/* Another problem is that very near to 0 A (below about 40 mA) the   */
-/* power supply doesn't work correctly anymore except when the        */
-/* current is set via the current modulation input.                   */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * In the normally used range of 10 V and 10 A the current resolution
+ * of the power supply is just 10 mA. This would limit the field
+ * resolution to about 1 G which isn't good enough. Therefore, an
+ * additional voltage is applied to the current modulation input of
+ * the power supply. This additional voltage is created by one of the
+ * DACs of the lock-in amplifier. Because the voltages needed are in
+ * the 100 mV range but the output of the DAC is in the 10 V range
+ * (with a 12 bit resolution) the DAC is connected to the modulation
+ * input with a parallel resistor of 100 Ohm (the exact value plus a
+ * sign for taking care of the correct polarity) is defined by
+ * V_TO_A_FACTOR.
+ * Another problem is that very near to 0 A (below about 40 mA) the
+ * power supply doesn't work correctly anymore except when the
+ * current is set via the current modulation input.
+ *--------------------------------------------------------------------*/
 
 static double keithley228a_set_current( double new_current )
 {
@@ -853,8 +852,8 @@ static double keithley228a_set_current( double new_current )
 	return new_current;
 }
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static bool keithley228a_command( const char *cmd )
 {
@@ -865,8 +864,8 @@ static bool keithley228a_command( const char *cmd )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static void keithley228a_gpib_failure( void )
 {
@@ -875,8 +874,8 @@ static void keithley228a_gpib_failure( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static double keithley228a_current_check( double current )
 {
@@ -895,80 +894,84 @@ static double keithley228a_current_check( double current )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* The following function for calculating corrections to reduce non-        */
-/* linearities and small jumps has been directly taken from the previous    */
-/* program. Here's the comment from this program about the rationale and    */
-/* the way it is done (sorry, to lazy to translate it especially since I'm  */
-/* not sure if it still is a reasonable approach and the data used still    */
-/* valid):                                                                  */
-/* Nun zu den weiteren Feinheiten : Leider stellte sich heraus, dass das    */
-/* Power Supply zwar sein Spezifikationen erfuellt, aber eben nur gerade.   */
-/* Die erreichte Genauigkeit von 10 mA beim Sweepbereich von 10 A ist	    */
-/* aber bei weitem nicht ausreichend, da dies bereits einem Fehler von	    */
-/* ca. 1 G entspricht. Allerdings sind die Abweichungen von der Lineari-    */
-/* taet einigermassen reproduzierbar, was dazu genutzt wird, diese Nicht-   */
-/* linearitaeten per Software durch Anlegen der passenden Spannungen am	    */
-/* Modulationseingang des Power Supplys wieder auszugleichen.			    */
-/* Die Nichtlinearitaeten bestehen aus zwei Teilen, einmal einer langsamen  */
-/* Drift in Abhaengigkeit vom gesetzten Strom und vielen ca. 3 mA grossen   */
-/* Stromspruengen, die in (nicht ganz regelmaessigen) Abstaenden von 0.12 A	*/
-/* bis 0.14 A auftreten.												    */
-/* Die langsame Drift wurde mehrfach gemessen und dann die sich ergebende   */
-/* Kurve stueckweise durch Gerade approximiert - die Endpunkte dieser In-   */
-/* tervalle sind im Array 'ranges' gespeichert, der zu den jeweiligen In-   */
-/* tervallen gehoerende Anstieg und Offset der angepassten Geraden in den   */
-/* beiden Arrays 'slopes' und 'offsets'. Bei der Berechnung der vom DAC	    */
-/* auszugebenden Spannung wird zuerst bestimmt, in welches Intervall der zu */
-/* setzende Strom gehoert und anschliessend die zugehoerige Korrektur auf   */
-/* die Spannung fuer den DAC 'dac_volts' aufgeschlagen.					    */
-/* Fuer die oben genannten kleinen Spruenge stellte sich heraus, dass diese */
-/* bei negativen Stroemen immer in Abstaenden von 0.12 A oder 0.13 A auf-	*/
-/* traten, und zwar jeweils mehrere Spruenge in Abstaenden von 0.13 A, ge-  */
-/* folgt von einem Sprung nach 0.12 A, die Amplitude der Spruenge betraegt  */
-/* im negativen Strombereich 3.2 mA. Im positiven Strombereich traten	    */
-/* ebenfalls jeweils mehrere Spruenge in 0.13 A Abstaenden auf, gefolgt von */
-/* einem im Abstand von 0.14 A. Die Amplitude der Spruenge betraegt 3.0 mA. */
-/* Genauer gesagt heisst das, dass der Sweep nicht linear ist, sondern zwi- */
-/* schen den Sprungpunkten der Sweep nicht steil genug ist, was dann	    */
-/* durch den Stromsprung ausgeglichen ist -	der Sweep stellt also mehr	    */
-/* oder minder eine Art Treppenfunktion dar, mit allerdings nicht waage-    */
-/* rechten 'Treppenstufen'.												    */
-/* Hier die vollstaendige Liste der am Power Supply gesetzten Stroeme, bei  */
-/* denen Spruenge im ausgegebenen Strom auftraten :						    */
-/* -9.98, -9.85, -9.72, -9.60, -9.47, -9.35, -9.22, -9.09, -8.97, -8.84,    */
-/* -8.71, -8.59, -8.46, -8.34, -8.21, -8.08, -7.96, -7.83, -7.70, -7.58,    */
-/* -7.45, -7.33, -7.20, -7.07, -6.95, -6.82, -6.69, -6.57, -6.44, -6.32,    */
-/* -6.19, -6.06, -5.94, -5.81, -5.69, -5.56, -5.43, -5.31, -5.18, -5.05,    */
-/* -4.93, -4.80, -4.68, -4.55, -4.42, -4.30, -4.17, -4.04, -3.92, -3.79,    */
-/* -3.67, -3.54, -3.41, -3.29, -3.16, -3.03, -2.91, -2.78, -2.66, -2.53,    */
-/* -2.40, -2.28, -2.15, -2.02, -1.90, -1.77, -1.65, -1.52, -1.39, -1.27,    */
-/* -1.14, -1.01, -0.89, -0.76, -0.64, -0.51, -0.38, -0.26, -0.13,  0.00,    */
-/* 0.14, 0.27, 0.40, 0.53, 0.66, 0.79, 0.92, 1.06, 1.19, 1.32, 1.45,	    */
-/* 1.58, 1.71, 1.84, 1.97, 2.11, 2.24, 2.37, 2.50, 2.63, 2.76, 2.89,	    */
-/* 3.02, 3.16, 3.29, 3.42, 3.55, 3.68, 3.81, 3.94, 4.07, 4.21, 4.34,	    */
-/* 4.47, 4.60, 4.73, 4.86, 4.99, 5.12, 5.26, 5.39, 5.52, 5.65, 5.78,	    */
-/* 5.91, 6.04, 6.18, 6.31, 6.44, 6.57, 6.70, 6.83, 6.96, 7.09, 7.23,	    */
-/* 7.36, 7.49, 7.62, 7.75, 7.88, 8.01, 8.14, 8.28, 8.41, 8.54, 8.67,	    */
-/* 8.80, 8.93, 9.06, 9.19, 9.33, 9.46, 9.59, 9.72, 9.85, 9.98			    */
-/****************************************************************************/
-/* New positions of 3 mA jumps measured 11.3.2003 with Metrolab Teslameter  */
-/* (only in region from 0 to 10A)                                           */
-/* 0.14, 0.27, 0.40, 0.53, 0.67, 0.80, 0.93, 1.06, 1.20, 1.33, 1.46, 1.59,  */
-/* 1.73, 1.86, 1.99, 2.12, 2.25, 2.39, 2.52, 2.65, 2.78, 2.92, 3.05, 3.18,  */
-/* 3.31, 3.45, 3.58, 3.71, 3.84, 3.98, 4.11, 4.24, 4.37, 4.50, 4.64, 4.77,  */
-/* 4.90, 5.03, 5.17, 5.30, 5.43, 5.56, 5.70, 5.83, 5.96, 6.09, 6.23, 6.36,  */
-/* 6.49, 6.62, 6.75, 6.89, 7.02, 7.15, 7.28, 7.42, 7.55, 7.68, 7.81, 7.95,  */
-/* 8.08, 8.21, 8.34, 8.47, 8.61, 8.74, 8.87, 9.00, 9.14, 9.27, 9.40, 9.53,  */
-/* 9.67, 9.8, 9.93                                                          */ 
-/****************************************************************************/
-/* In den beiden Listen 'neg_jumps' und 'pos_jumps' sind jeweils die	    */
-/* Punkte gespeichert, bei denen sich die Abstaende zwischen den Spruengen  */
-/* aendern. Hieraus wird dann die notwendige Korrektur berechnet. Im Be-	*/
-/* reich direkt um Null wird keine Korrektur vorgenommen, da dort die	    */
-/* Nichtlinearitaeten des Power Supply selbst mit allem Tricks nicht aus-   */
-/* zugleichen sind.														    */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * The following function for calculating corrections to reduce non-
+ * linearities and small jumps has been directly taken from the previous
+ * program. Here's the comment from this program about the rationale and
+ * the way it is done (sorry, to lazy to translate it especially since I'm
+ * not sure if it still is a reasonable approach and the data used still
+ * valid):
+ * Nun zu den weiteren Feinheiten : Leider stellte sich heraus, dass das
+ * Power Supply zwar sein Spezifikationen erfuellt, aber eben nur gerade.
+ * Die erreichte Genauigkeit von 10 mA beim Sweepbereich von 10 A ist
+ * aber bei weitem nicht ausreichend, da dies bereits einem Fehler von
+ * ca. 1 G entspricht. Allerdings sind die Abweichungen von der Lineari-
+ * taet einigermassen reproduzierbar, was dazu genutzt wird, diese Nicht-
+ * linearitaeten per Software durch Anlegen der passenden Spannungen am
+ * Modulationseingang des Power Supplys wieder auszugleichen.
+ * Die Nichtlinearitaeten bestehen aus zwei Teilen, einmal einer langsamen
+ * Drift in Abhaengigkeit vom gesetzten Strom und vielen ca. 3 mA grossen
+ * Stromspruengen, die in (nicht ganz regelmaessigen) Abstaenden von 0.12 A
+ * bis 0.14 A auftreten.
+ * Die langsame Drift wurde mehrfach gemessen und dann die sich ergebende
+ * Kurve stueckweise durch Gerade approximiert - die Endpunkte dieser In-
+ * tervalle sind im Array 'ranges' gespeichert, der zu den jeweiligen In-
+ * tervallen gehoerende Anstieg und Offset der angepassten Geraden in den
+ * beiden Arrays 'slopes' und 'offsets'. Bei der Berechnung der vom DAC
+ * auszugebenden Spannung wird zuerst bestimmt, in welches Intervall der zu
+ * setzende Strom gehoert und anschliessend die zugehoerige Korrektur auf
+ * die Spannung fuer den DAC 'dac_volts' aufgeschlagen.
+ * Fuer die oben genannten kleinen Spruenge stellte sich heraus, dass diese
+ * bei negativen Stroemen immer in Abstaenden von 0.12 A oder 0.13 A auf-
+ * traten, und zwar jeweils mehrere Spruenge in Abstaenden von 0.13 A, ge-
+ * folgt von einem Sprung nach 0.12 A, die Amplitude der Spruenge betraegt
+ * im negativen Strombereich 3.2 mA. Im positiven Strombereich traten
+ * ebenfalls jeweils mehrere Spruenge in 0.13 A Abstaenden auf, gefolgt von
+ * einem im Abstand von 0.14 A. Die Amplitude der Spruenge betraegt 3.0 mA.
+ * Genauer gesagt heisst das, dass der Sweep nicht linear ist, sondern zwi-
+ * schen den Sprungpunkten der Sweep nicht steil genug ist, was dann
+ * durch den Stromsprung ausgeglichen ist -	der Sweep stellt also mehr
+ * oder minder eine Art Treppenfunktion dar, mit allerdings nicht waage-
+ * rechten 'Treppenstufen'.
+ * Hier die vollstaendige Liste der am Power Supply gesetzten Stroeme, bei
+ * denen Spruenge im ausgegebenen Strom auftraten :
+ *
+ * -9.98, -9.85, -9.72, -9.60, -9.47, -9.35, -9.22, -9.09, -8.97, -8.84,
+ * -8.71, -8.59, -8.46, -8.34, -8.21, -8.08, -7.96, -7.83, -7.70, -7.58,
+ * -7.45, -7.33, -7.20, -7.07, -6.95, -6.82, -6.69, -6.57, -6.44, -6.32,
+ * -6.19, -6.06, -5.94, -5.81, -5.69, -5.56, -5.43, -5.31, -5.18, -5.05,
+ * -4.93, -4.80, -4.68, -4.55, -4.42, -4.30, -4.17, -4.04, -3.92, -3.79,
+ * -3.67, -3.54, -3.41, -3.29, -3.16, -3.03, -2.91, -2.78, -2.66, -2.53,
+ * -2.40, -2.28, -2.15, -2.02, -1.90, -1.77, -1.65, -1.52, -1.39, -1.27,
+ * -1.14, -1.01, -0.89, -0.76, -0.64, -0.51, -0.38, -0.26, -0.13,  0.00,
+ * 0.14, 0.27, 0.40, 0.53, 0.66, 0.79, 0.92, 1.06, 1.19, 1.32, 1.45,
+ * 1.58, 1.71, 1.84, 1.97, 2.11, 2.24, 2.37, 2.50, 2.63, 2.76, 2.89,
+ * 3.02, 3.16, 3.29, 3.42, 3.55, 3.68, 3.81, 3.94, 4.07, 4.21, 4.34,
+ * 4.47, 4.60, 4.73, 4.86, 4.99, 5.12, 5.26, 5.39, 5.52, 5.65, 5.78,
+ * 5.91, 6.04, 6.18, 6.31, 6.44, 6.57, 6.70, 6.83, 6.96, 7.09, 7.23,
+ * 7.36, 7.49, 7.62, 7.75, 7.88, 8.01, 8.14, 8.28, 8.41, 8.54, 8.67,
+ * 8.80, 8.93, 9.06, 9.19, 9.33, 9.46, 9.59, 9.72, 9.85, 9.98
+ *
+ ***************************************************************************
+ * New positions of 3 mA jumps measured 11.3.2003 with Metrolab Teslameter
+ * (only in region from 0 to 10A)
+ *
+ * 0.14, 0.27, 0.40, 0.53, 0.67, 0.80, 0.93, 1.06, 1.20, 1.33, 1.46, 1.59,
+ * 1.73, 1.86, 1.99, 2.12, 2.25, 2.39, 2.52, 2.65, 2.78, 2.92, 3.05, 3.18,
+ * 3.31, 3.45, 3.58, 3.71, 3.84, 3.98, 4.11, 4.24, 4.37, 4.50, 4.64, 4.77,
+ * 4.90, 5.03, 5.17, 5.30, 5.43, 5.56, 5.70, 5.83, 5.96, 6.09, 6.23, 6.36,
+ * 6.49, 6.62, 6.75, 6.89, 7.02, 7.15, 7.28, 7.42, 7.55, 7.68, 7.81, 7.95,
+ * 8.08, 8.21, 8.34, 8.47, 8.61, 8.74, 8.87, 9.00, 9.14, 9.27, 9.40, 9.53,
+ * 9.67, 9.8, 9.93
+ *
+ ***************************************************************************
+ * In den beiden Listen 'neg_jumps' und 'pos_jumps' sind jeweils die
+ * Punkte gespeichert, bei denen sich die Abstaende zwischen den Spruengen
+ * aendern. Hieraus wird dann die notwendige Korrektur berechnet. Im Be-
+ * reich direkt um Null wird keine Korrektur vorgenommen, da dort die
+ * Nichtlinearitaeten des Power Supply selbst mit allem Tricks nicht aus-
+ * zugleichen sind.
+ *--------------------------------------------------------------------------*/
 
 static void keithley228a_get_corrected_current( double c, double *psc,
 												double *dacv )

@@ -25,12 +25,12 @@
 #include "hp8672a.h"
 
 
-/*----------------------------------------------------------------------*/
-/* If the function succeeds it returns a file pointer to the table file */
-/* and sets the table_file entry in the device structure to the name of */
-/* the table file. Otherwise an exception is thrown. In any case the    */
-/* memory used for the file name passed to the function is deallocated. */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * If the function succeeds it returns a file pointer to the table file
+ * and sets the table_file entry in the device structure to the name of
+ * the table file. Otherwise an exception is thrown. In any case the
+ * memory used for the file name passed to the function is deallocated.
+ *----------------------------------------------------------------------*/
 
 FILE *hp8672a_find_table( char **name )
 {
@@ -82,14 +82,14 @@ FILE *hp8672a_find_table( char **name )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Tries to open the file with the given name and returns the file  */
-/* pointer, returns NULL if file does not exist returns, or throws  */
-/* an exception if the file can't be read (either because of prob-  */
-/* lems with the permissions or other, unknoen reasons). If opening */
-/* the file fails with an exception memory used for its name is     */
-/* deallocated.                                                     */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Tries to open the file with the given name and returns the file
+ * pointer, returns NULL if file does not exist returns, or throws
+ * an exception if the file can't be read (either because of prob-
+ * lems with the permissions or other, unknoen reasons). If opening
+ * the file fails with an exception memory used for its name is
+ * deallocated.
+ *------------------------------------------------------------------*/
 
 FILE *hp8672a_open_table( char *name )
 {
@@ -117,10 +117,10 @@ FILE *hp8672a_open_table( char *name )
 }
 
 
-/*-----------------------------------------------*/
-/* Calculates from the table the attenuation for */
-/* a given frequency by interpolation            */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Calculates from the table the attenuation for
+ * a given frequency by interpolation
+ *-----------------------------------------------*/
 
 double hp8672a_get_att_from_table( double freq )
 {
@@ -198,8 +198,8 @@ double hp8672a_get_att_from_table( double freq )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ *----------------------------------------------------------------------*/
 
 double hp8672a_get_att( double freq )
 {
@@ -230,8 +230,8 @@ double hp8672a_get_att( double freq )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ *----------------------------------------------------------------------*/
 
 int hp8672a_set_mod_param( Var_T *v, double *dres, int *ires )
 {
@@ -273,8 +273,8 @@ int hp8672a_set_mod_param( Var_T *v, double *dres, int *ires )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ *----------------------------------------------------------------------*/
 
 int hp8672_mod_ampl_check( double ampl )
 {

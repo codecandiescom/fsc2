@@ -89,9 +89,9 @@ struct HJS_DAADC hjs_daadc, hjs_daadc_stored;
 /*                                           */
 /*-------------------------------------------*/
 
-/*------------------------------------------------------*/
-/* Function called when the module has just been loaded */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function called when the module has just been loaded
+ *------------------------------------------------------*/
 
 int hjs_daadc_init_hook( void )
 {
@@ -109,9 +109,9 @@ int hjs_daadc_init_hook( void )
 }
 
 
-/*----------------------------------------------*/
-/* Function called at the start of the test run */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Function called at the start of the test run
+ *----------------------------------------------*/
 
 int hjs_daadc_test_hook( void )
 {
@@ -129,9 +129,9 @@ int hjs_daadc_test_hook( void )
 }
 
 
-/*-----------------------------------------------*/
-/* Function called at the start of an experiment */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Function called at the start of an experiment
+ *-----------------------------------------------*/
 
 int hjs_daadc_exp_hook( void )
 {
@@ -164,9 +164,9 @@ int hjs_daadc_exp_hook( void )
 }
 
 
-/*---------------------------------------------*/
-/* Function called at the end of an experiment */
-/*---------------------------------------------*/
+/*---------------------------------------------*
+ * Function called at the end of an experiment
+ *---------------------------------------------*/
 
 int hjs_daadc_end_of_exp_hook( void )
 {
@@ -177,9 +177,9 @@ int hjs_daadc_end_of_exp_hook( void )
 }
 
 
-/*------------------------------------------------------*/
-/* Function called just before the module gets unloaded */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function called just before the module gets unloaded
+ *------------------------------------------------------*/
 
 void hjs_daadc_exit_hook( void )
 {
@@ -201,9 +201,9 @@ void hjs_daadc_exit_hook( void )
 /*                                           */
 /*-------------------------------------------*/
 
-/*----------------------------------------------------------------*/
-/* Function returns a string variable with the name of the device */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function returns a string variable with the name of the device
+ *----------------------------------------------------------------*/
 
 Var_T *daq_name( UNUSED_ARG Var_T *v )
 {
@@ -211,12 +211,12 @@ Var_T *daq_name( UNUSED_ARG Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Functions allows to reserve (or un-reserve) the DAC so that in the */
-/* following setting the DAC requires a pass-phrase as the very first */
-/* argument to the functions daq_maximum_output_voltage() and         */
-/* daq_set_voltage().                                                 */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Functions allows to reserve (or un-reserve) the DAC so that in the
+ * following setting the DAC requires a pass-phrase as the very first
+ * argument to the functions daq_maximum_output_voltage() and
+ * daq_set_voltage().
+ *--------------------------------------------------------------------*/
 
 Var_T *daq_reserve_dac( Var_T *v )
 {
@@ -275,11 +275,11 @@ Var_T *daq_reserve_dac( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function allows to reserve (or un-reserve) the ADC so that in the  */
-/* following setting the DAC requires a pass-phrase as the very first */
-/* argument to the function daq_get_voltage().                        */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function allows to reserve (or un-reserve) the ADC so that in the
+ * following setting the DAC requires a pass-phrase as the very first
+ * argument to the function daq_get_voltage().
+ *--------------------------------------------------------------------*/
 
 Var_T *daq_reserve_adc( Var_T *v )
 {
@@ -338,19 +338,19 @@ Var_T *daq_reserve_adc( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function can be used to inform the module about the current settinng */
-/* of the potentiometer at the front panel. It takes a floating point   */
-/* input argument between 0 and 10 (that should be identical to the     */
-/* scale of the potentiometer). In later calls of daq_set_voltage() it  */
-/* will be then assumed that this is the correct potentiometer setting  */
-/* and the output voltage is adjusted accordingly. If, for example, the */
-/* function is called with an argument of 2.5 and later the function    */
-/* daq_set_voltage() is called with an argument of 1.25 V the value     */
-/* send to the DAC is halve of the maximum value instead of an eigth of */
-/* it, thus the real output voltage is 1.25 V (at least if the value    */
-/* passed to the function about the potentiometer setting was correct.  */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function can be used to inform the module about the current settinng
+ * of the potentiometer at the front panel. It takes a floating point
+ * input argument between 0 and 10 (that should be identical to the
+ * scale of the potentiometer). In later calls of daq_set_voltage() it
+ * will be then assumed that this is the correct potentiometer setting
+ * and the output voltage is adjusted accordingly. If, for example, the
+ * function is called with an argument of 2.5 and later the function
+ * daq_set_voltage() is called with an argument of 1.25 V the value
+ * send to the DAC is halve of the maximum value instead of an eigth of
+ * it, thus the real output voltage is 1.25 V (at least if the value
+ * passed to the function about the potentiometer setting was correct.
+ *----------------------------------------------------------------------*/
 
 Var_T *daq_maximum_output_voltage( Var_T *v )
 {
@@ -424,13 +424,13 @@ Var_T *daq_maximum_output_voltage( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function for either querying the current output voltage or setting a */
-/* new output voltage. The output voltage must be between 0 V and the   */
-/* maximum voltage set by the function daq_maximum_output_voltage() (if */
-/* the function hasn't been called the maximum output voltage defaults  */
-/* to the highest possible value of 10 V).                              */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function for either querying the current output voltage or setting a
+ * new output voltage. The output voltage must be between 0 V and the
+ * maximum voltage set by the function daq_maximum_output_voltage() (if
+ * the function hasn't been called the maximum output voltage defaults
+ * to the highest possible value of 10 V).
+ *----------------------------------------------------------------------*/
 
 Var_T *daq_set_voltage( Var_T *v )
 {
@@ -507,14 +507,14 @@ Var_T *daq_set_voltage( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function for determining the input voltage at the ADC input. It can */
-/* be between -10 V and +10 V. Please note that, because a conversion  */
-/* is only done when a new output voltage is set, getting a new input  */
-/* voltage may require setting the output voltage of the DAC to a      */
-/* default value (this happens when daq_get_voltage() has never been   */
-/* called yet).                                                        */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function for determining the input voltage at the ADC input. It can
+ * be between -10 V and +10 V. Please note that, because a conversion
+ * is only done when a new output voltage is set, getting a new input
+ * voltage may require setting the output voltage of the DAC to a
+ * default value (this happens when daq_get_voltage() has never been
+ * called yet).
+ *---------------------------------------------------------------------*/
 
 Var_T *daq_get_voltage( Var_T *v )
 {
@@ -564,10 +564,10 @@ Var_T *daq_get_voltage( Var_T *v )
 }
 
 
-/*------------------------------------------------------*/
-/* Function for returning the DAC settings (minimum and */
-/* maximum output voltage and voltage resolution).      */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function for returning the DAC settings (minimum and
+ * maximum output voltage and voltage resolution).
+ *------------------------------------------------------*/
 
 Var_T *daq_dac_parameter( Var_T *v )
 {
@@ -602,9 +602,9 @@ Var_T *daq_dac_parameter( Var_T *v )
 /*                                           */
 /*-------------------------------------------*/
 
-/*-----------------------------------------------*/
-/* Conversion of a voltage to a DAC output value */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Conversion of a voltage to a DAC output value
+ *-----------------------------------------------*/
 
 static int hjs_daadc_da_volts_to_val( double volts )
 {
@@ -615,9 +615,9 @@ static int hjs_daadc_da_volts_to_val( double volts )
 }
 
 
-/*-----------------------------------------------*/
-/* Conversion of an ADC input value to a voltage */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Conversion of an ADC input value to a voltage
+ *-----------------------------------------------*/
 
 static double hjs_daadc_val_to_ad_volts( int val )
 {
@@ -625,9 +625,9 @@ static double hjs_daadc_val_to_ad_volts( int val )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Initialization of the serial port the device is connected to. */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Initialization of the serial port the device is connected to.
+ *---------------------------------------------------------------*/
 
 static bool hjs_daadc_serial_init( void )
 {
@@ -654,9 +654,9 @@ static bool hjs_daadc_serial_init( void )
 }
 
 
-/*---------------------------------------------------*/
-/* Function for outputting a value at the DAC output */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function for outputting a value at the DAC output
+ *---------------------------------------------------*/
 
 static void hjs_daadc_out( int out )
 {
@@ -666,9 +666,9 @@ static void hjs_daadc_out( int out )
 }
 
 
-/*-----------------------------------------------*/
-/* Function for getting a new value from the ADC */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Function for getting a new value from the ADC
+ *-----------------------------------------------*/
 
 static int hjs_daadc_in( void )
 {
@@ -676,8 +676,8 @@ static int hjs_daadc_in( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
 
 static int hjs_daadc_in_out( int out )
 {
@@ -724,8 +724,8 @@ static int hjs_daadc_in_out( int out )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
 
 static void hjs_daadc_comm_failure( void )
 {

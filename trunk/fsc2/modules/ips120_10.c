@@ -157,9 +157,9 @@ enum {
 static struct IPS120_10 ips120_10, ips120_10_stored;
 
 
-/*-----------------------------------*/
-/* Init hook function for the module */
-/*-----------------------------------*/
+/*-----------------------------------*
+ * Init hook function for the module
+ *-----------------------------------*/
 
 int ips120_10_init_hook( void )
 {
@@ -182,9 +182,9 @@ int ips120_10_init_hook( void )
 }
 
 
-/*-----------------------------------*/
-/* Test hook function for the module */
-/*-----------------------------------*/
+/*-----------------------------------*
+ * Test hook function for the module
+ *-----------------------------------*/
 
 int ips120_10_test_hook( void )
 {
@@ -213,9 +213,9 @@ int ips120_10_test_hook( void )
 }
 
 
-/*--------------------------------------------------*/
-/* Start of experiment hook function for the module */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Start of experiment hook function for the module
+ *--------------------------------------------------*/
 
 int ips120_10_exp_hook( void )
 {
@@ -232,9 +232,9 @@ int ips120_10_exp_hook( void )
 }
 
 
-/*------------------------------------------------*/
-/* End of experiment hook function for the module */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * End of experiment hook function for the module
+ *------------------------------------------------*/
 
 int ips120_10_end_of_exp_hook( void )
 {
@@ -246,9 +246,9 @@ int ips120_10_end_of_exp_hook( void )
 }
 
 
-/*---------------------------------------------------*/
-/* Function returns the name the device is known as. */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function returns the name the device is known as.
+ *---------------------------------------------------*/
 
 Var_T *magnet_name( UNUSED_ARG Var_T *v )
 {
@@ -256,9 +256,9 @@ Var_T *magnet_name( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function for registering the start current and the sweep rate. */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for registering the start current and the sweep rate.
+ *----------------------------------------------------------------*/
 
 Var_T *magnet_setup( Var_T *v )
 {
@@ -294,11 +294,11 @@ Var_T *magnet_setup( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function returns the momentary field. During the test run an estimate */
-/* of the field is returned, based on the sweep rate and a guess of the  */
-/* time spent since the last call for determining the field.             */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function returns the momentary field. During the test run an estimate
+ * of the field is returned, based on the sweep rate and a guess of the
+ * time spent since the last call for determining the field.
+ *-----------------------------------------------------------------------*/
 
 Var_T *get_field( UNUSED_ARG Var_T *v )
 {
@@ -356,10 +356,10 @@ Var_T *get_field( UNUSED_ARG Var_T *v )
 }
 
 
-/*------------------------------------------------------*/
-/* Function for setting a new field value. Please note  */
-/* that setting a new field also stops a running sweep. */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function for setting a new field value. Please note
+ * that setting a new field also stops a running sweep.
+ *------------------------------------------------------*/
 
 Var_T *set_field( Var_T *v )
 {
@@ -391,10 +391,10 @@ Var_T *set_field( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/* This is the EDL function for starting or stopping sweeps or */
-/* inquiring about the current sweep state.                    */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * This is the EDL function for starting or stopping sweeps or
+ * inquiring about the current sweep state.
+ *-------------------------------------------------------------*/
 
 Var_T *magnet_sweep( Var_T *v )
 {
@@ -456,9 +456,9 @@ Var_T *magnet_sweep( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/* Function for starting an upward sweep of the field */
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ * Function for starting an upward sweep of the field
+ *----------------------------------------------------*/
 
 static void magnet_sweep_up( void )
 {
@@ -493,9 +493,9 @@ static void magnet_sweep_up( void )
 }
 
 
-/*-----------------------------------------------------*/
-/* Function for starting a downward sweep of the field */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function for starting a downward sweep of the field
+ *-----------------------------------------------------*/
 
 static void magnet_sweep_down( void )
 {
@@ -530,9 +530,9 @@ static void magnet_sweep_down( void )
 }
 
 
-/*----------------------------------------------------*/
-/* Function for stopping a running sweep of the field */
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ * Function for stopping a running sweep of the field
+ *----------------------------------------------------*/
 
 static void magnet_stop_sweep( void )
 {
@@ -555,9 +555,9 @@ static void magnet_stop_sweep( void )
 }
 
 
-/*---------------------------------------------*/
-/* Function to query or set a field sweep rate */
-/*---------------------------------------------*/
+/*---------------------------------------------*
+ * Function to query or set a field sweep rate
+ *---------------------------------------------*/
 
 Var_T *magnet_sweep_rate( Var_T *v )
 {
@@ -596,10 +596,10 @@ Var_T *magnet_sweep_rate( Var_T *v )
 }
 
 
-/*--------------------------------------------------------*/
-/* Function to bring the field back to its initial value, */
-/* i.e. at the very start of the experiment               */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Function to bring the field back to its initial value,
+ * i.e. at the very start of the experiment
+ *--------------------------------------------------------*/
 
 Var_T *reset_field( UNUSED_ARG Var_T *v )
 {
@@ -608,11 +608,11 @@ Var_T *reset_field( UNUSED_ARG Var_T *v )
 }
 
 
-/*-----------------------------------------------------------*/
-/* This function was added on Martin Fuchs' request to allow */
-/* to keep sweeping the magnet to a predefined current after */
-/* the experiment has ended.                                 */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * This function was added on Martin Fuchs' request to allow
+ * to keep sweeping the magnet to a predefined current after
+ * the experiment has ended.
+ *-----------------------------------------------------------*/
 
 Var_T *magnet_goto_field_on_end( Var_T *v )
 {
@@ -627,10 +627,10 @@ Var_T *magnet_goto_field_on_end( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function to allow sending a GPIB command string directly to */
-/* the magent - only use for debugging or testing purposes!    */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function to allow sending a GPIB command string directly to
+ * the magent - only use for debugging or testing purposes!
+ *-------------------------------------------------------------*/
 
 Var_T *magnet_command( Var_T *v )
 {
@@ -662,8 +662,8 @@ Var_T *magnet_command( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 static bool ips120_10_init( const char *name )
 {
@@ -788,8 +788,8 @@ static bool ips120_10_init( const char *name )
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ *-----------------------------------------------------------*/
 
 static void ips120_10_to_local( void )
 {
@@ -821,9 +821,9 @@ static void ips120_10_to_local( void )
 }
 
 
-/*-------------------------------------------------------*/
-/* Function that asks the magnet about its current state */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function that asks the magnet about its current state
+ *-------------------------------------------------------*/
 
 static void ips120_10_get_complete_status( void )
 {
@@ -1061,10 +1061,10 @@ static void ips120_10_get_complete_status( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function for making the magnet sweep up (at least if it's not */
-/* already sweeping up or very near to the maximum current)      */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for making the magnet sweep up (at least if it's not
+ * already sweeping up or very near to the maximum current)
+ *---------------------------------------------------------------*/
 
 static void ips120_10_sweep_up( void )
 {
@@ -1096,10 +1096,10 @@ static void ips120_10_sweep_up( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function for making the magnet sweep down (at least if it's not */
-/* already sweeping down or very near to the minimum current)      */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function for making the magnet sweep down (at least if it's not
+ * already sweeping down or very near to the minimum current)
+ *-----------------------------------------------------------------*/
 
 static void ips120_10_sweep_down( void )
 {
@@ -1130,10 +1130,10 @@ static void ips120_10_sweep_down( void )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function that's always called before a new current value is */
-/* accepted to test if it's within the limits of the magnet    */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function that's always called before a new current value is
+ * accepted to test if it's within the limits of the magnet
+ *-------------------------------------------------------------*/
 
 static double ips120_10_current_check( double current )
 {
@@ -1178,10 +1178,10 @@ static double ips120_10_current_check( double current )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Function that's always called before a sweep speed is set */
-/* to test if it's within the magnets limits.                */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function that's always called before a sweep speed is set
+ * to test if it's within the magnets limits.
+ *-----------------------------------------------------------*/
 
 static double ips120_10_sweep_rate_check( double sweep_rate )
 {
@@ -1231,9 +1231,9 @@ static double ips120_10_sweep_rate_check( double sweep_rate )
 }
 
 
-/*--------------------------------------------------*/
-/* Function for asking the magnet about the current */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Function for asking the magnet about the current
+ *--------------------------------------------------*/
 
 static double ips120_10_get_act_current( void )
 {
@@ -1248,10 +1248,10 @@ static double ips120_10_get_act_current( void )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Function for setting the target current, i.e. the current */
-/* the magnet is supposed to sweep to.                       */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function for setting the target current, i.e. the current
+ * the magnet is supposed to sweep to.
+ *-----------------------------------------------------------*/
 
 static double ips120_10_set_target_current( double current )
 {
@@ -1266,9 +1266,9 @@ static double ips120_10_set_target_current( double current )
 	return current;
 }
 
-/*---------------------------------------------------------------*/
-/* Function for asking the current setting of the target current */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for asking the current setting of the target current
+ *---------------------------------------------------------------*/
 
 static double ips120_10_get_target_current( void )
 {
@@ -1282,9 +1282,9 @@ static double ips120_10_get_target_current( void )
 }
 
 
-/*---------------------------------------*/
-/* Function for setting a new sweep rate */
-/*---------------------------------------*/
+/*---------------------------------------*
+ * Function for setting a new sweep rate
+ *---------------------------------------*/
 
 static double ips120_10_set_sweep_rate( double sweep_rate )
 {
@@ -1299,9 +1299,9 @@ static double ips120_10_set_sweep_rate( double sweep_rate )
 	return sweep_rate;
 }
 
-/*-------------------------------------------------------------*/
-/* Function for asking the magnet about its current sweep rate */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function for asking the magnet about its current sweep rate
+ *-------------------------------------------------------------*/
 
 static double ips120_10_get_sweep_rate( void )
 {
@@ -1315,12 +1315,12 @@ static double ips120_10_get_sweep_rate( void )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Function to make the magnet to a certain currrent setting */
-/* as fast as savely possible. Can be aborted in which case  */
-/* a running sweep will be stopped by the end-of-experiment  */
-/* handler function that's then invoked automatically.       */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function to make the magnet to a certain currrent setting
+ * as fast as savely possible. Can be aborted in which case
+ * a running sweep will be stopped by the end-of-experiment
+ * handler function that's then invoked automatically.
+ *-----------------------------------------------------------*/
 
 static double ips120_10_goto_current( double current )
 {
@@ -1347,10 +1347,10 @@ static double ips120_10_goto_current( double current )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function to either stop a sweep, make the magnet sweep to a */
-/* certain field value or make it sweep to zero.               */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function to either stop a sweep, make the magnet sweep to a
+ * certain field value or make it sweep to zero.
+ *-------------------------------------------------------------*/
 
 static int ips120_10_set_activity( int activity )
 {
@@ -1386,9 +1386,9 @@ static int ips120_10_set_activity( int activity )
 }
 
 
-/*---------------------------------------------------*/
-/* Function for talking with the magnet via the GPIB */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function for talking with the magnet via the GPIB
+ *---------------------------------------------------*/
 
 static long ips120_10_talk( const char *message, char *reply, long length )
 {
@@ -1454,12 +1454,19 @@ static long ips120_10_talk( const char *message, char *reply, long length )
 }
 
 
-/*---------------------------------------------------*/
-/* Function called in case of communication failures */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function called in case of communication failures
+ *---------------------------------------------------*/
 
 static void ips120_10_comm_failure( void )
 {
 	print( FATAL, "Communication with device failed.\n" );
 	THROW( EXCEPTION );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */
