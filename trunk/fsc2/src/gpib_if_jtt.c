@@ -1003,7 +1003,7 @@ static void gpib_log_function_end( const char *function,
         {
             gpib_log_date( );
 			seteuid( EUID );
-            fprintf( gpib_log, "EXIT of %s, dev = %s\n", function, dev_name );
+            fprintf( gpib_log, "Exit of %s, dev = %s\n", function, dev_name );
 			seteuid( getuid( ) );
         }
     }
