@@ -1423,7 +1423,7 @@ library are part of the @code{fsc2} package)
 
 @c #############################################################
 
-@node pt2025, pci_mio_16e_1, rs_spec10, Device Reference
+@node pt2025, rs_spec10, pci_mio_16e_1, Device Reference
 
 @iftex
 @subheading Metrolab NMR Teslameter PT2025
