@@ -737,7 +737,7 @@ Var *monochromator_wavelength_axis( Var *v )
 
 	if ( ! spectrapro_300i.grating[ gn ].is_calib )
 	{
-		print( SEVERE, "No (complete) calibration for current grating #%ld "
+		print( SEVERE, "No (complete) calibration for grating #%ld "
 			   "found.\n", gn + 1 );
 		cv = vars_push( FLOAT_ARR, NULL, 2 );
 		cv->val.dpnt[ 0 ] = - 0.5 * ( double ) ( num_pixels - 1 );
@@ -747,7 +747,7 @@ Var *monochromator_wavelength_axis( Var *v )
 
 	if ( ( v = vars_pop( v ) ) )
 	{
-		wl = get_double( v, "wavelength" );
+		wl = get_double( v, "center wavelength" );
 		if ( wl < 0.0 )
 		{
 			print( FATAL, "Invalid negative center wavelength.\n" );

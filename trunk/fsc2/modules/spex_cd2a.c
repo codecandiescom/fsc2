@@ -1005,7 +1005,6 @@ Var *monochromator_shutter_limits( Var *v )
  * been done.
  *--------------------------------------------------------------------*/
 
-
 Var *monochromator_calibrate( Var *v )
 {
 	double pixel_diff;
