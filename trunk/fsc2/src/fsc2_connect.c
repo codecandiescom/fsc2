@@ -1,61 +1,61 @@
 /*
-  $Id$
-
-  Copyright (C) 1999-2004 Jens Thoms Toerring
-
-  This file is part of fsc2.
-
-  Fsc2 is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  Fsc2 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with fsc2; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-
-
-  This program expects an EDL program on standard input. It will then read it
-  in, write it to a temporary file and try to connect to fsc2 via a socket on
-  which fsc2 is supposed to listen. If this succeeds it sends fsc2 the
-  invoking users UID, followed by a letter that depends on the name the
-  program was invocated with - if it was started as 'fsc2_start' it sends an
-  'S', if as 'fsc2_test' it sends 'T', if as 'fsc2_iconic_start' it sends 'I'
-  and if invocated as either 'fsc2_load' or 'fsc2_connect' it sends an 'L',
-  thus indicating what fsc2 is supposed to do, i.e. either start the EDL
-  program immediately, to test it or only to load it. It also sends a second
-  letter, 'd' to tell fsc2 to delete the temporary file when it's done with
-  it. Finally it sends the file name. fsc2 can react in different ways: It
-  can indicate that it is either run by a user with a different UID, that it
-  is busy, or that it couldn't read the messages, which in turn is returned
-  by this program via its return value (see list below).
-
-  If, on the other hand, the program finds that fsc2 isn't running (because
-  it can't connect to fsc2) it will try to start fsc2 with the '--delete'
-  flag (to make fsc2 delete its input file when done with it) and, depending
-  on the name this program was invocated with, with the '-S' or '-T' flag or
-  no flag and the name of the temporary file. If fsc2 can't be started
-  properly this program will return a return value to indicate it.
-
-  The best way to use this program is to create the EDL program to send to
-  fsc2 and send it to this program using a popen() call. The success can be
-  obtained by examining the return status of the following call of pclose().
-
-  Return codes:
-
-   0: Everything ok
-  -1: Internal error
-   1: Different user is running fsc2
-   2: fsc2 is busy
-   3: Internal error in fsc2
-   4: fsc2 could not be started
-*/
+ *  $Id$
+ * 
+ *  Copyright (C) 1999-2004 Jens Thoms Toerring
+ * 
+ *  This file is part of fsc2.
+ * 
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ * 
+ * 
+ *  This program expects an EDL program on standard input. It will then read it
+ *  in, write it to a temporary file and try to connect to fsc2 via a socket on
+ *  which fsc2 is supposed to listen. If this succeeds it sends fsc2 the
+ *  invoking users UID, followed by a letter that depends on the name the
+ *  program was invocated with - if it was started as 'fsc2_start' it sends an
+ *  'S', if as 'fsc2_test' it sends 'T', if as 'fsc2_iconic_start' it sends 'I'
+ *  and if invocated as either 'fsc2_load' or 'fsc2_connect' it sends an 'L',
+ *  thus indicating what fsc2 is supposed to do, i.e. either start the EDL
+ *  program immediately, to test it or only to load it. It also sends a second
+ *  letter, 'd' to tell fsc2 to delete the temporary file when it's done with
+ *  it. Finally it sends the file name. fsc2 can react in different ways: It
+ *  can indicate that it is either run by a user with a different UID, that it
+ *  is busy, or that it couldn't read the messages, which in turn is returned
+ *  by this program via its return value (see list below).
+ * 
+ *  If, on the other hand, the program finds that fsc2 isn't running (because
+ *  it can't connect to fsc2) it will try to start fsc2 with the '--delete'
+ *  flag (to make fsc2 delete its input file when done with it) and, depending
+ *  on the name this program was invocated with, with the '-S' or '-T' flag or
+ *  no flag and the name of the temporary file. If fsc2 can't be started
+ *  properly this program will return a return value to indicate it.
+ * 
+ *  The best way to use this program is to create the EDL program to send to
+ *  fsc2 and send it to this program using a popen() call. The success can be
+ *  obtained by examining the return status of the following call of pclose().
+ * 
+ *  Return codes:
+ * 
+ *   0: Everything ok
+ *  -1: Internal error
+ *   1: Different user is running fsc2
+ *   2: fsc2 is busy
+ *   3: Internal error in fsc2
+ *   4: fsc2 could not be started
+ */
 
 
 #include <stdio.h>
@@ -109,13 +109,14 @@ ssize_t read_line( int fd, void *vptr, size_t max_len );
 ssize_t do_read( int fd, char *ptr );
 
 
-static volatile sig_atomic_t sig_type = 0;
+static volatile sig_atomic_t Sig_type = 0;
 
 #if defined __GNUC__
 #define UNUSED_ARG __attribute__ ((unused))
 #else
 #define UNUSED_ARG
 #endif
+
 
 /*-----------------------------------------------------------*/
 /*-----------------------------------------------------------*/
@@ -299,11 +300,11 @@ void start_fsc2( char *pname, char *fname )
 		exit( -1 ) ;
 	}
 
-	while ( ! sig_type )
+	while ( ! Sig_type )
 	{
 		pause( );                    /* wait for fsc2 to send signal or fail */
 
-		if ( sig_type == SIGCHLD )   /* fsc2 failed to start */
+		if ( Sig_type == SIGCHLD )   /* fsc2 failed to start */
 		{
 			unlink( fname );
 			exit( 4 );
@@ -322,7 +323,7 @@ void sig_handler( int signo )
 	if ( signo != SIGCHLD && signo != SIGUSR1 )
 		exit( -1 );
 
-	sig_type = signo;
+	Sig_type = signo;
 }
 
 

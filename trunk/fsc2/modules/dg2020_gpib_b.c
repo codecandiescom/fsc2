@@ -1,140 +1,143 @@
 /*
-  $Id$
+ *  $Id$
+ * 
+ *  Copyright (C) 1999-2004 Jens Thoms Toerring
+ * 
+ *  This file is part of fsc2.
+ * 
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
-  Copyright (C) 1999-2004 Jens Thoms Toerring
-
-  This file is part of fsc2.
-
-  Fsc2 is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  Fsc2 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with fsc2; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
    STILL COMPLETELY UNTESTED: Handling of EXTERNAL trigger mode by creating one
    block with "DATA:SEQ:TWAIT" for this block and running in enhanced mode. I
    urgently need access to a real device for testing if this is the way to do
    it - the manual is no help at all at trying to figure out what to do...
 
+   Is this still valid?  2000/7/9
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
 
-
 /*
-  <RANT>
-  The guys that wrote the firmware of this digitizer as well as the
-  documentation are not only a fucking bunch of morons but should be
-  quartered, hanged and burned. Not only did they introduce some very annoying
-  bugs but also made live a hell for the programmers that have no choice but
-  to try to use their piece of crap.
+ *  <RANT>
+ *  The guys that wrote the firmware of this digitizer as well as the
+ *  documentation are not only a fucking bunch of morons but should be
+ *  quartered, hanged and burned. Not only did they introduce some very
+ *  annoying bugs but also made live a hell for the programmers that have no
+ *  choice but to try to use their piece of crap.
+ * 
+ *  Here a few of the bugs as far as I found them yet (text taken from an email
+ *  I sent to Tektronix/Sony):
+ * 
+ *  In run mode : Repeat
+ *   When I create a data pattern starting with a high state (1) at the very
+ *   first address in one of the channels and then start data pattern output
+ *   by pressing the START/STOP button (or sending the START command via the
+ *   GPIB interface) the DG2020 will output a pulse of 250 us length before
+ *   starting to output the data pattern. It doesn't matter if there is a
+ *   sequence defined or not, the 250 us pulse is always there and is easy
+ *   visible with a digital oscilloscope when using resolutions and data
+ *   pattern lengths in the nanosecond range.
+ * 
+ *  In run mode : Single
+ *   In the same situation as above, i.e. a data pattern starting with high at
+ *   the very first address, pressing the START/STOP button leads to an
+ *   obviously infinite pulse (at least more than a minute) and no data
+ *   pattern output is to be seen. If there is no data pattern bit set to high
+ *   at the first address there is no output at all. This renders the Single
+ *   mode complete unusable.
+ * 
+ *  I also had lots of problems using the GBIP commands as given in the
+ *  manual. Some of the ones I tried to use don't work as described there.
+ *  For example:
+ * 
+ *     a.) DATA:BLOCK:DEFINE <Blockinfo>
+ *         this command works if one defines just one block but if one tries to
+ *         define several blocks at once as described in the manual the command
+ *         fails. E.g. the command
+ *                  DATA:BLOC:DEF #2110,B1<LF>328,B2
+ *         (where <LF> is the the line feed character 0x0A) results in a
+ *               2075,"Illegal block size"
+ *         error message (as returned by "ALLEV?") - and, of course, no blocks
+ *         are defined.
+ *
+ *         The only way around this error is to define the first block with
+ *         DATA:BLOCK:DEFINE and use DATA:BLOCK:ADD to define the other
+ *         blocks.  (There is also a rather strange irregularity in these
+ *         commands: while in the DEFINE command one has to enter the block
+ *         name without quotes in the ADD command one needs quotes around the
+ *         block name...)
 
-  Here a few of the bugs as far as I found them yet (text taken from an email
-  I sent to Tektronix/Sony):
+ *
+ *     b.) DATA:PATTERN:BIT ...
+ *         Normally this command results in a
+ *               2022,"Pattern data byte count error"
+ *         but works on some occasions - I was not able to figure out under
+ *         what conditions (of course I checked and rechecked that the numbers
+ *         given in the command were correct). Just by chance I found, that
+ *         the command always seems to work if one preceeds it by a semicolon,
+ *         i.e. as if it would be part of a concatenated command.
+ *
+ *  Ok, so far about some real stupid fuck-ups in the firmware as well as in
+ *  the documentation. But these guys also obviously spend so much time
+ *  writing a more or less completely useless user interface that they didn't
+ *  had the time to implement reasonable GPIB commands. E.g., who can be that
+ *  stupid to write a command for setting pattern bits in a way that you have
+ *  to send a complete byte over the already slow enough GPIB bus just to set
+ *  one single bit of a pulser channel? And why isn't there at least a command
+ *  to set a block of pattern bits by sending the start end length plus the
+ *  state? And, finally, why isn't there for more than 90% of the stuff that
+ *  you can do via the keyboard an equivalent GPIB command?
+ *
 
-  In run mode : Repeat
-   When I create a data pattern starting with a high state (1) at the very
-   first address in one of the channels and then start data pattern output
-   by pressing the START/STOP button (or sending the START command via the
-   GPIB interface) the DG2020 will output a pulse of 250 us length before
-   starting to output the data pattern. It doesn't matter if there is a
-   sequence defined or not, the 250 us pulse is always there and is easy
-   visible with a digital oscilloscope when using resolutions and data
-   pattern lengths in the nanosecond range.
-
-  In run mode : Single
-   In the same situation as above, i.e. a data pattern starting with high at
-   the very first address, pressing the START/STOP button leads to an
-   obviously infinite pulse (at least more than a minute) and no data
-   pattern output is to be seen. If there is no data pattern bit set to high
-   at the first address there is no output at all. This renders the Single
-   mode complete unusable.
-
-  I also had lots of problems using the GBIP commands as given in the
-  manual. Some of the ones I tried to use don't work as described there.
-  For example:
-
-     a.) DATA:BLOCK:DEFINE <Blockinfo>
-         this command works if one defines just one block but if one tries to
-         define several blocks at once as described in the manual the command
-         fails. E.g. the command
-                  DATA:BLOC:DEF #2110,B1<LF>328,B2
-         (where <LF> is the the line feed character 0x0A) results in a
-               2075,"Illegal block size"
-         error message (as returned by "ALLEV?") - and, of course, no blocks
-         are defined.
-
-         The only way around this error is to define the first block with
-         DATA:BLOCK:DEFINE and use DATA:BLOCK:ADD to define the other blocks.
-         (There is also a rather strange irregularity in these commands: while
-         in the DEFINE command one has to enter the block name without quotes
-         in the ADD command one needs quotes around the block name...)
-
-     b.) DATA:PATTERN:BIT ...
-         Normally this command results in a
-               2022,"Pattern data byte count error"
-         but works on some occasions - I was not able to figure out under what
-         conditions (of course I checked and rechecked that the numbers
-         given in the command were correct). Just by chance I found, that
-         the command always seems to work if one preceeds it by a semicolon,
-         i.e. as if it would be part of a concatenated command.
-
-  Ok, so far about some real stupid fuck-ups in the firmware as well as in the
-  documentation. But these guys also obviously spend so much time writing a
-  more or less completely useless user interface that they didn't had the time
-  to implement reasonable GPIB commands. E.g., who can be that stupid to write
-  a command for setting pattern bits in a way that you have to send a complete
-  byte over the already slow enough GPIB bus just to set one single bit of a
-  pulser channel? And why isn't there at least a command to set a block of
-  pattern bits by sending the start end length plus the state? And, finally,
-  why isn't there for more than 90% of the stuff that you can do via the
-  keyboard an equivalent GPIB command?
-
-  Ok, they implemented the possibility to simulate all the things that you can
-  do via the keyboard with the "ABSTouch" command but than made it complete
-  useless by not giving the programmer a chance to find out in which mode the
-  display is and where the cursors currently are etc...  That makes writing
-  stuff using this feature like manually setting the digitizer without being
-  able to watch the display. And even if this would be possible I really don't
-  want to sent 25 commands down the GPIB bus just to simulate a complete
-  rotation of a knobs (when you may need 20 rotations or more), or 35 commands
-  just to move the cursor from channel 35 up to channel 0. Fucking idiots!
-
-  Why do they have to have a minimum block size of 64 bits? Without this
-  limitation you could do a lot of things in a real nice way, but so all you
-  can do is to write a lot of bloody hacks and really cool things are simply
-  impossible to do.
-
-  Just another problem with the documentation: Why is there no comprehensible
-  explanation of how to run the pulser in repeat mode but each repetition of
-  the sequence starting on a trigger in event? Am I supposed to be clairvoyant
-  or do these guys expect that I spend hours writing test programs until I
-  find out what mode to use which what kinds of settings?
-
-  And when you sent them emails (via their local distributor) to ask about
-  these problems they not only let you wait for eternities (in my case half a
-  year) but don't answer the most important question at all (the problem with
-  the 250 us/infinitely long pulses) and with lots of bullshit about the
-  others. And all this in a nearly incomprehensible english. Before this I had
-  the impression that Tektronix's devices are quite good and especially the
-  programming interface was real good but since they have been bought up by
-  Sony much seems to have gone down the drain. Obviously, people at Sony have
-  a problem understanding the difference between a walkman and a pulse data
-  generator...
-
-  </RANT>
-
+ *  Ok, they implemented the possibility to simulate all the things that you
+ *  can do via the keyboard with the "ABSTouch" command but than made it
+ *  complete useless by not giving the programmer a chance to find out in
+ *  which mode the display is and where the cursors currently are etc...  That
+ *  makes writing stuff using this feature like manually setting the digitizer
+ *  without being able to watch the display. And even if this would be
+ *  possible I really don't want to sent 25 commands down the GPIB bus just to
+ *  simulate a complete rotation of a knobs (when you may need 20 rotations or
+ *  more), or 35 commands just to move the cursor from channel 35 up to
+ *  channel 0. Fucking idiots!
+ *
+ *  Why do they have to have a minimum block size of 64 bits? Without this
+ *  limitation you could do a lot of things in a real nice way, but so all you
+ *  can do is to write a lot of bloody hacks and really cool things are simply
+ *  impossible to do.
+ *
+ *  Just another problem with the documentation: Why is there no
+ *  comprehensible explanation of how to run the pulser in repeat mode but
+ *  each repetition of the sequence starting on a trigger in event? Am I
+ *  supposed to be clairvoyant or do these guys expect that I spend hours
+ *  writing test programs until I find out what mode to use which what kinds
+ *  of settings?
+ *
+ *  And when you sent them emails (via their local distributor) to ask about
+ *  these problems they not only let you wait for eternities (in my case half
+ *  a year) but don't answer the most important question at all (the problem
+ *  with the 250 us/infinitely long pulses) and with lots of bullshit about
+ *  the others. And all this in a nearly incomprehensible english. Before this
+ *  I had the impression that Tektronix's devices are quite good and
+ *  especially the programming interface was real good but since they have
+ *  been bought up by Sony much seems to have gone down the drain. Obviously,
+ *  people at Sony have a problem understanding the difference between a
+ *  walkman and a pulse data generator...
+ *  </RANT>
 */
 
 

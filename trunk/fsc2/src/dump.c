@@ -1,30 +1,30 @@
 /*
-  $Id$
-
-  Copyright (C) 1999-2004 Jens Thoms Toerring
-
-  This file is part of fsc2.
-
-  Fsc2 is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  Fsc2 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with fsc2; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
+ *  $Id$
+ * 
+ *  Copyright (C) 1999-2004 Jens Thoms Toerring
+ * 
+ *  This file is part of fsc2.
+ * 
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
 
 #include "fsc2.h"
 
-int fail_mess_fd = -1;
+int Fail_Mess_Fd = -1;
 
 #if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
 static void write_dump( int *pipe_fd, int *answer_fd, int k, void * addr );
@@ -56,7 +56,7 @@ enum {
 /* (asuming the executable was compiled with the -g flag and wasn't      */
 /* stripped). The result is written to the write end of a pipe that is   */
 /* (mis)used as a temporary buffer, from which the results will be read  */
-/* later (the read end is a global variable named 'fail_mess_fd').       */
+/* later (the read end is a global variable named 'Fail_Mess_Fd').       */
 /* If the macro ADDR2LINE isn't defined the function will do nothing.    */
 /* If it is defined it must be the complete path to 'addr2line'. The     */
 /* best way to set it correctly is probably to have lines like           */
@@ -222,7 +222,7 @@ void DumpStack( void *crash_address )
 
 	close( answer_fd[ DUMP_ANSWER_WRITE ] );
 
-	fail_mess_fd = answer_fd[ DUMP_ANSWER_READ ];
+	Fail_Mess_Fd = answer_fd[ DUMP_ANSWER_READ ];
 }
 #else
 void DumpStack( UNUSED_ARG void *crash_address )
@@ -320,7 +320,7 @@ void DumpStack( void )
 	size = backtrace( buf, 100 );
 	if ( size != 0 )
 	{
-		fail_mess_fd = p[ 0 ];
+		Fail_Mess_Fd = p[ 0 ];
 		backtrace_symbols_fd( buf, size, p[ 1 ] );
 		close( p[ 1 ] );
 	}

@@ -1,90 +1,95 @@
 /*
-  $Id$
-
-  Copyright (C) 1999-2004 Jens Thoms Toerring
-
-  This file is part of fsc2.
-
-  Fsc2 is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  Fsc2 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with fsc2; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
+ *  $Id$
+ * 
+ *  Copyright (C) 1999-2004 Jens Thoms Toerring
+ * 
+ *  This file is part of fsc2.
+ * 
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
 
 /*
-   The main problem with the communication between the parent and the child
-   process is that there can be situations where the child has new data it
-   needs to pass to the parent before it can continue while the parent process
-   is too busy to accept the data immediately. To avoid (or at least to reduce
-   the impact of the problem) pointers to the data as well as the data are
-   stored in shared memory buffers that can be written to by the child also
-   when the parent is busy and that the parent reads out when it's got time.
-
-   The buffer with pointers, the message queue, is a basically a ring buffer
-   with slots into which the type of the data and a pointer to a shared memory
-   segment, containing the data, are written by the child process. Besides,
-   there are two pointers to the slots of the message queue, one pointer,
-   updated by the child only, which indicates the last slot written to by the
-   child, and a second which points to the next slot that the parent process
-   has to remove from the message queue and which is updated by the parent
-   process. When both pointers are identical the message queue is empty.
-
-   To avoid the child process overflowing the message queue with more data
-   than the parent can handle there is also a data semaphore that gets
-   initialized to the number of slots in the message queue. Before the child
-   may write into the next slot it must wait on the semaphore. In turn, the
-   parent always posts the semaphore when a slot has become free. The removal
-   of the data from the message queue by the parent is done in an idle handler,
-   i.e. when it's not busy doing something else.
-
-   There are two types of messages to be exchanged between the child and the
-   parent. The first one is mainly data to be displayed by the parent. These
-   should be accepted as fast as possible so that the child can continue
-   immediately with the measurement. The other type of messages are requests
-   by the child for the parent to do something for it, e.g. display an alert
-   box, and possibly return the users input. The protocol for requests is
-   quite simple - the child sends the request and waits for the answer by the
-   parent, knowing exactly what kind of data to expect.
-
-   The exchange of data for REQUESTs isn't done via shared memory segments but
-   using a pair of pipes. For a request the child has first to put a REQUEST
-   message into the mesage queue. The parent, in turn, will execute some
-   action of behalf of the child and return some kind of answer (either data
-   or just an acknowledgment) which the child must read from the pipe before
-   it continues.
-
-   This scheme will work as long as the parent doesn't get to much behind with
-   handling DATA messages. But if the parent is very busy and the child very
-   fast creating (and sending) new data we will finally run out of shared
-   memory segments. Thus, if getting a new shared memory segment fails for the
-   child it will sleep a short while and then retry, hoping that the parent
-   removes one of the previously used segments in the mean time.
-
-   The only problem still un-addressed is data sets exceeding the maximum
-   size of a shared memory segment. But this limit seems to be rather high
-   (32768 kB!), so I hope this is never going to happen...  If it should ever
-   happen this will result in the measurement getting stopped with an
-   'internal communication error' message printed out.
-
-   A final problem that can't be handled by the program is what happens if the
-   program gets killed in a way that it can't release the shared memory
-   segments. In this case these memory segments will remain intact since the
-   system won't remove them. To make it simpler to find and then remove
-   orphaned shared memory segments, i.e. segments that no process is
-   interested in anymore, each memory segment allocated by fsc2 is labelled by
-   the four byte magic number 'fsc2' at its very start. Using this label at
-   the next start of fsc2 all orphaned segments can be identified and released.  */
+ *   The main problem with the communication between the parent and the child
+ *   process is that there can be situations where the child has new data it
+ *   needs to pass to the parent before it can continue while the parent
+ *   process is too busy to accept the data immediately. To avoid (or at least
+ *   to reduce the impact of the problem) pointers to the data as well as the
+ *   data are stored in shared memory buffers that can be written to by the
+ *   child also when the parent is busy and that the parent reads out when
+ *   it's got time.
+ *
+ *   The buffer with pointers, the message queue, is a basically a ring buffer
+ *   with slots into which the type of the data and a pointer to a shared
+ *   memory segment, containing the data, are written by the child
+ *   process. Besides, there are two pointers to the slots of the message
+ *   queue, one pointer, updated by the child only, which indicates the last
+ *   slot written to by the child, and a second which points to the next slot
+ *   that the parent process has to remove from the message queue and which is
+ *   updated by the parent process. When both pointers are identical the
+ *   message queue is empty.
+ *
+ *   To avoid the child process overflowing the message queue with more data
+ *   than the parent can handle there is also a data semaphore that gets
+ *   initialized to the number of slots in the message queue. Before the child
+ *   may write into the next slot it must wait on the semaphore. In turn, the
+ *   parent always posts the semaphore when a slot has become free. The
+ *   removal of the data from the message queue by the parent is done in an
+ *   idle handler, i.e. when it's not busy doing something else.
+ *
+ *   There are two types of messages to be exchanged between the child and the
+ *   parent. The first one is mainly data to be displayed by the parent. These
+ *   should be accepted as fast as possible so that the child can continue
+ *   immediately with the measurement. The other type of messages are requests
+ *   by the child for the parent to do something for it, e.g. display an alert
+ *   box, and possibly return the users input. The protocol for requests is
+ *   quite simple - the child sends the request and waits for the answer by
+ *   the parent, knowing exactly what kind of data to expect.
+ * 
+ *   The exchange of data for REQUESTs isn't done via shared memory segments
+ *   but using a pair of pipes. For a request the child has first to put a
+ *   REQUEST message into the mesage queue. The parent, in turn, will execute
+ *   some action of behalf of the child and return some kind of answer (either
+ *   data or just an acknowledgment) which the child must read from the pipe
+ *   before it continues.
+ *
+ *   This scheme will work as long as the parent doesn't get to much behind
+ *   with handling DATA messages. But if the parent is very busy and the child
+ *   very fast creating (and sending) new data we will finally run out of
+ *   shared memory segments. Thus, if getting a new shared memory segment
+ *   fails for the child it will sleep a short while and then retry, hoping
+ *   that the parent removes one of the previously used segments in the mean
+ *   time.
+ *
+ *   The only problem still un-addressed is data sets exceeding the maximum
+ *   size of a shared memory segment. But this limit seems to be rather high
+ *   (32768 kB!), so I hope this is never going to happen...  If it should
+ *   ever happen this will result in the measurement getting stopped with an
+ *   'internal communication error' message printed out.
+ *
+ *   A final problem that can't be handled by the program is what happens if
+ *   the program gets killed in a way that it can't release the shared memory
+ *   segments. In this case these memory segments will remain intact since the
+ *   system won't remove them. To make it simpler to find and then remove
+ *   orphaned shared memory segments, i.e. segments that no process is
+ *   interested in anymore, each memory segment allocated by fsc2 is labelled
+ *   by the four byte magic number 'fsc2' at its very start. Using this label
+ *   at the next start of fsc2 all orphaned segments can be identified and
+ *   released.
+ */
 
 
 #include "fsc2.h"
@@ -98,7 +103,7 @@ static void pipe_read( char *buf, size_t bytes_to_read );
 static bool pipe_write( char *buf, size_t bytes_to_write );
 static bool send_browser( FL_OBJECT *browser );
 
-static bool comm_is_setup = UNSET;
+static bool Comm_is_setup = UNSET;
 
 
 /*----------------------------------------------------------------*/
@@ -166,7 +171,7 @@ void setup_comm( void )
 		THROW( EXCEPTION );
 	}
 
-	comm_is_setup = SET;
+	Comm_is_setup = SET;
 }
 
 
@@ -177,10 +182,10 @@ void setup_comm( void )
 
 void end_comm( void )
 {
-	if ( ! comm_is_setup )
+	if ( ! Comm_is_setup )
 		return;
 
-	comm_is_setup = UNSET;
+	Comm_is_setup = UNSET;
 
 	/* Handle remaining messages */
 

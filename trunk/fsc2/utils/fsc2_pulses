@@ -1,54 +1,54 @@
 #!/usr/bin/perl
 # -*- cperl -*-
 #
-# $Id$
+#  $Id$
 #
-# Copyright (C) 1999-2004 Jens Thoms Toerring
+#  Copyright (C) 1999-2004 Jens Thoms Toerring
 #
-# This file is part of fsc2.
+#  This file is part of fsc2.
 #
-# Fsc2 is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
+#  Fsc2 is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2, or (at your option)
+#  any later version.
 #
-# Fsc2 is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#  Fsc2 is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License
-# along with fsc2; see the file COPYING.  If not, write to
-# the Free Software Foundation, 59 Temple Place - Suite 330,
-# Boston, MA 02111-1307, USA.
+#  You should have received a copy of the GNU General Public License
+#  along with fsc2; see the file COPYING.  If not, write to
+#  the Free Software Foundation, 59 Temple Place - Suite 330,
+#  Boston, MA 02111-1307, USA.
 
-# This script allows to display the pulse settings during an experiment.
-# It takes the output of the pulser_dump_pulses() EDL function (or gets
-# invoked directly by the pulser_show_pulses() function) and draws a
-# graphical representation of the pulses. Using buttons in the window,
-# the mouse buttons or the keyboard one can move through all pulse
-# settings during the experiment (at least as far as fsc2 can figure
-# them out from the test run).
+#  This script allows to display the pulse settings during an experiment.
+#  It takes the output of the pulser_dump_pulses() EDL function (or gets
+#  invoked directly by the pulser_show_pulses() function) and draws a
+#  graphical representation of the pulses. Using buttons in the window,
+#  the mouse buttons or the keyboard one can move through all pulse
+#  settings during the experiment (at least as far as fsc2 can figure
+#  them out from the test run).
 #
-# Key bindings:
-# Page Up:     next pulse settings
-# Page Down:   previous pulse settings
-# Home:        initial pulse settings
-# End:         final pulse settings
-# Cursor keys: move around in the canvas if it doesn't completely fit into
-#              the window
-# Control-D:   toggle on/off displaying settings with delays
-# Control-Q:   quit program
-# Control-L:   redraw
+#  Key bindings:
+#  Page Up:     next pulse settings
+#  Page Down:   previous pulse settings
+#  Home:        initial pulse settings
+#  End:         final pulse settings
+#  Cursor keys: move around in the canvas if it doesn't completely fit into
+#               the window
+#  Control-D:   toggle on/off displaying settings with delays
+#  Control-Q:   quit program
+#  Control-L:   redraw
 #
-# Mouse bindings:
-# Middle button: next pulse settings
-# Right button:  previous pulse settings
-# Scroll up:     next pulse settings
-# Scroll down:   previous pulse settings
+#  Mouse bindings:
+#  Middle button: next pulse settings
+#  Right button:  previous pulse settings
+#  Scroll up:     next pulse settings
+#  Scroll down:   previous pulse settings
 #
-# Please note that this script may use lots of memory and also may take
-# quite some time before it starts displaying the pulses.
+#  Please note that this script may use lots of memory and also may take
+#  quite some time before it starts displaying the pulses.
 
 
 use warnings;

@@ -3,7 +3,7 @@
 #########################################################################
 #
 #  If you are using this template file for setting up an installation of
-#  fsc2 taylored for your machine please copy it to a file with your
+#  fsc2 tailored for your machine please copy it to a file with your
 #  machines fully qualified host name as its name (just type 'hostname -f'
 #  on the command line to find out its name, or, if you're too lazy try
 #  the command "cp template.nowhere `hostname -f`"). Then edit this file,

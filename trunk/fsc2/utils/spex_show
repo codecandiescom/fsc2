@@ -1,8 +1,8 @@
 #!/usr/bin/perl
 
-# Script for displaying scans of the monochromator on spex.chem.tu-berlin.de
-# using gnuplot - the "Reread" buttons allows to refresh the display in
-# order to see newly measured data.
+#  Script for displaying scans of the monochromator on spex.chem.tu-berlin.de
+#  using gnuplot - the "Reread" buttons allows to refresh the display in
+#  order to see newly measured data.
 
 use strict;
 use warnings;

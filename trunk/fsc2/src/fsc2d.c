@@ -1,25 +1,25 @@
 /*
-  $Id$
-
-  Copyright (C) 1999-2004 Jens Thoms Toerring
-
-  This file is part of fsc2.
-
-  Fsc2 is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  Fsc2 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with fsc2; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
+ *  $Id$
+ * 
+ *  Copyright (C) 1999-2004 Jens Thoms Toerring
+ * 
+ *  This file is part of fsc2.
+ * 
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
 
 #include "fsc2.h"
@@ -49,24 +49,26 @@ typedef unsigned int socklen_t;
 #define FSC2D_CHECK_TIME  5
 
 
-typedef struct {
+typedef struct Fsc2_Instance Fsc2_Instance_T;
+
+struct Fsc2_Instance {
 	unsigned long pid;
 	char user_name[ MAX_LOGIN_NAME + 1 ];
 	bool exclusive;
 	bool with_conn;
-} FSC2_INSTANCE;
+};
 
 
-static volatile sig_atomic_t fsc2d_replied;
-static int cwd_ok;
+static volatile sig_atomic_t Fsc2d_replied;
+static int Cwd_ok;
 
 static int connect_to_fsc2d( void );
 static int start_fsc2d( bool exclusive, FILE *in_file_fp );
 static void fsc2d_sig_handler( int signo );
 static void fsc2d( int fd, bool exclusive, struct passwd *ui );
-static int check_instances( FSC2_INSTANCE *instances, int num_instances,
+static int check_instances( Fsc2_Instance_T *instances, int num_instances,
 							int is_new_connect );
-static int new_client( int fd, FSC2_INSTANCE *instances, int num_instances );
+static int new_client( int fd, Fsc2_Instance_T *instances, int num_instances );
 static void set_fs2d_signals( void );
 
 
@@ -307,7 +309,7 @@ static int start_fsc2d( bool exclusive, FILE *in_file_fp )
 
 	lower_permissions( );
 
-	while ( ! fsc2d_replied )
+	while ( ! Fsc2d_replied )
 		fsc2_usleep( 20000, SET );
 
 	return 1;
@@ -321,7 +323,7 @@ static int start_fsc2d( bool exclusive, FILE *in_file_fp )
 static void fsc2d_sig_handler( int signo )
 {
 	if ( signo == SIGUSR2 )
-		fsc2d_replied = 1;
+		Fsc2d_replied = 1;
 }
 
 
@@ -336,7 +338,7 @@ static void fsc2d_sig_handler( int signo )
 
 static void fsc2d( int fd, bool exclusive, struct passwd *ui )
 {
-	FSC2_INSTANCE instances[ FSC2_MAX_INSTANCES + 1 ];
+	Fsc2_Instance_T instances[ FSC2_MAX_INSTANCES + 1 ];
 	fd_set fds;
 	int num_instances = 1;
 	struct timeval timeout;
@@ -360,7 +362,7 @@ static void fsc2d( int fd, bool exclusive, struct passwd *ui )
 	/* We're running with the default temporary directory as our current
 	   working directory */
 
-	cwd_ok = chdir( P_tmpdir );
+	Cwd_ok = chdir( P_tmpdir );
 
 	/* We're done with initialization, send signal to parent */
 
@@ -391,10 +393,10 @@ static void fsc2d( int fd, bool exclusive, struct passwd *ui )
 /*---------------------------------------------------------------------*/
 /*---------------------------------------------------------------------*/
 
-static int check_instances( FSC2_INSTANCE *instances, int num_instances,
+static int check_instances( Fsc2_Instance_T *instances, int num_instances,
 							int is_new_connect )
 {
-	FSC2_INSTANCE *ip = instances;
+	Fsc2_Instance_T *ip = instances;
 	int i = 0;
 	DIR *dir;
 	struct dirent *ent;
@@ -434,7 +436,7 @@ static int check_instances( FSC2_INSTANCE *instances, int num_instances,
 	{
 		unlink( FSC2D_SOCKET );
 
-		if ( cwd_ok == 0 && ( dir = opendir( "." ) ) != NULL )
+		if ( Cwd_ok == 0 && ( dir = opendir( "." ) ) != NULL )
 		{
 			while ( ( ent = readdir( dir ) ) != NULL )
 				if ( strlen( ent->d_name ) == 15 &&
@@ -454,14 +456,14 @@ static int check_instances( FSC2_INSTANCE *instances, int num_instances,
 /*---------------------------------------------------------------------*/
 /*---------------------------------------------------------------------*/
 
-static int new_client( int fd, FSC2_INSTANCE *instances, int num_instances )
+static int new_client( int fd, Fsc2_Instance_T *instances, int num_instances )
 {
 	socklen_t cli_len;
 	struct sockaddr_un cli_addr;
 	int cli_fd;
 	char line[ MAX_LINE_LENGTH ];
-	FSC2_INSTANCE *cur_inst = instances + num_instances;
-	FSC2_INSTANCE *ip;
+	Fsc2_Instance_T *cur_inst = instances + num_instances;
+	Fsc2_Instance_T *ip;
 	ssize_t len;
 	int i;
 

@@ -1,25 +1,25 @@
 /*
-  $Id$
-
-  Copyright (C) 1999-2004 Jens Thoms Toerring
-
-  This file is part of fsc2.
-
-  Fsc2 is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  Fsc2 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with fsc2; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
+ *  $Id$
+ * 
+ *  Copyright (C) 1999-2004 Jens Thoms Toerring
+ * 
+ *  This file is part of fsc2.
+ * 
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
 
 #include "fsc2.h"
@@ -27,7 +27,7 @@
 
 Toolbox_T *Toolbox = NULL;
 
-struct {
+static struct {
 	int	VERT_OFFSET;
 	int	HORI_OFFSET;
 
@@ -54,10 +54,10 @@ struct {
 } FI_sizes;
 
 
-extern FL_resource Xresources[ ];
-extern FL_IOPT xcntl;
-static bool is_frozen = UNSET;
-static bool has_been_shown = UNSET;
+extern FL_resource Xresources[ ];        /* defined in xinit.c */
+
+static bool Is_frozen = UNSET;
+static bool Has_been_shown = UNSET;
 
 static Var_T *f_layout_child( long layout );
 static void f_objdel_child( Var_T *v );
@@ -223,11 +223,11 @@ void parent_freeze( int freeze )
 
 	if ( Toolbox == NULL || Toolbox->Tools == NULL )
 	{
-		is_frozen = freeze ? SET : UNSET;
+		Is_frozen = freeze ? SET : UNSET;
 		return;
 	}
 
-	if ( is_frozen && ! freeze )       /* unfreeze the toolbox */
+	if ( Is_frozen && ! freeze )       /* unfreeze the toolbox */
 	{
 		if ( GUI.toolbox_has_pos )
 		{
@@ -248,7 +248,7 @@ void parent_freeze( int freeze )
 
 		fl_set_form_atclose( Toolbox->Tools, toolbox_close_handler, NULL );
 
-		has_been_shown = SET;
+		Has_been_shown = SET;
 
 		/* The following shouldn't be necessary, but there seems to be
 		   some bug that keeps some of the objects from getting disabled
@@ -268,13 +268,13 @@ void parent_freeze( int freeze )
 				fl_set_object_lcol( io->self, FL_INACTIVE_COL );
 			}
 	}
-	else if ( ! is_frozen && freeze && fl_form_is_visible( Toolbox->Tools ) )
+	else if ( ! Is_frozen && freeze && fl_form_is_visible( Toolbox->Tools ) )
 	{
 		store_toolbox_position( );
 		fl_hide_form( Toolbox->Tools );
 	}
 
-	is_frozen = freeze ? SET : UNSET;
+	Is_frozen = freeze ? SET : UNSET;
 }
 
 
@@ -856,7 +856,7 @@ void tools_clear( void )
 	long i;
 
 
-	is_frozen = UNSET;
+	Is_frozen = UNSET;
 
 	if ( Toolbox == NULL )
 		return;
@@ -945,7 +945,7 @@ void recreate_Toolbox( void )
 	{
 		Toolbox->Tools = fl_bgn_form( FL_UP_BOX, 1, 1 );
 
-		if ( ! has_been_shown &&
+		if ( ! Has_been_shown &&
 			 * ( char * ) Xresources[ TOOLGEOMETRY ].var != '\0' )
 		{
 			flags = XParseGeometry( ( char * ) Xresources[ TOOLGEOMETRY ].var,
@@ -976,7 +976,7 @@ void recreate_Toolbox( void )
 	if ( GUI.toolbox_has_pos )
 		fl_set_form_position( Toolbox->Tools, GUI.toolbox_x, GUI.toolbox_y );
 
-	if ( ! is_frozen )
+	if ( ! Is_frozen )
 	{
 		if ( GUI.toolbox_has_pos )
 		{
@@ -997,7 +997,7 @@ void recreate_Toolbox( void )
 
 		fl_set_form_atclose( Toolbox->Tools, toolbox_close_handler, NULL );
 
-		has_been_shown = SET;
+		Has_been_shown = SET;
 	}
 }
 

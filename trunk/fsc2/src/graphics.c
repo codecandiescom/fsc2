@@ -1,25 +1,25 @@
 /*
-  $Id$
-
-  Copyright (C) 1999-2004 Jens Thoms Toerring
-
-  This file is part of fsc2.
-
-  Fsc2 is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  Fsc2 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with fsc2; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
+ *  $Id$
+ * 
+ *  Copyright (C) 1999-2004 Jens Thoms Toerring
+ * 
+ *  This file is part of fsc2.
+ * 
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
 
 #include "fsc2.h"
@@ -58,7 +58,7 @@ static Graphics_1d_T *G_1d_stored = NULL;
 static Graphics_2d_T *G_2d_stored = NULL;
 
 
-extern FL_resource xresources[ ];
+extern FL_resource Xresources[ ];
 
 static bool display_has_been_shown = UNSET;
 
@@ -271,8 +271,8 @@ static void fonts_init( void )
 	if ( ! G.is_init )
 		return;
 
-	if ( * ( ( char * ) xresources[ AXISFONT ].var ) != '\0' )
-		G.font = XLoadQueryFont( G.d, ( char * ) xresources[ AXISFONT ].var );
+	if ( * ( ( char * ) Xresources[ AXISFONT ].var ) != '\0' )
+		G.font = XLoadQueryFont( G.d, ( char * ) Xresources[ AXISFONT ].var );
 
 	if ( ! G.font )
 		G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_1 );
@@ -307,10 +307,10 @@ static void set_default_sizes( void )
 
 	if ( ! display_has_been_shown )
 	{
-		if ( * ( ( char * ) xresources[ DISPLAYGEOMETRY ].var ) != '\0' )
+		if ( * ( ( char * ) Xresources[ DISPLAYGEOMETRY ].var ) != '\0' )
 		{
 			flags = XParseGeometry(
-								( char * ) xresources[ DISPLAYGEOMETRY ].var,
+								( char * ) Xresources[ DISPLAYGEOMETRY ].var,
 								&GI.display_x, &GI.display_y,
 								&GI.display_w, &GI.display_h );
 
@@ -325,10 +325,10 @@ static void set_default_sizes( void )
 			}
 		}
 
-		if ( * ( ( char * ) xresources[ DISPLAY1DGEOMETRY ].var ) != '\0' )
+		if ( * ( ( char * ) Xresources[ DISPLAY1DGEOMETRY ].var ) != '\0' )
 		{
 			flags = XParseGeometry(
-							   ( char * ) xresources[ DISPLAY1DGEOMETRY ].var,
+							   ( char * ) Xresources[ DISPLAY1DGEOMETRY ].var,
 							   &x, &y, &w, &h );
 
 			if ( WidthValue & flags && HeightValue & flags )
@@ -346,10 +346,10 @@ static void set_default_sizes( void )
 			}
 		}
 
-		if ( * ( ( char * ) xresources[ DISPLAY2DGEOMETRY ].var ) != '\0' )
+		if ( * ( ( char * ) Xresources[ DISPLAY2DGEOMETRY ].var ) != '\0' )
 		{
 			flags = XParseGeometry(
-							   ( char * ) xresources[ DISPLAY2DGEOMETRY ].var,
+							   ( char * ) Xresources[ DISPLAY2DGEOMETRY ].var,
 							   &x, &y, &w, &h );
 
 			if ( WidthValue & flags && HeightValue & flags )

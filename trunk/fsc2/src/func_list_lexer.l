@@ -1,25 +1,25 @@
 /* -*-C-*-
-  $Id$
-
-  Copyright (C) 1999-2004 Jens Thoms Toerring
-
-  This file is part of fsc2.
-
-  Fsc2 is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  Fsc2 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with fsc2; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
+ *  $Id$
+ * 
+ *  Copyright (C) 1999-2004 Jens Thoms Toerring
+ * 
+ *  This file is part of fsc2.
+ * 
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
 
 		/*---------------------*/
@@ -33,11 +33,12 @@
 #include "fsc2.h"
 
 int func_listlex( void );
+
 static size_t fll_count_functions( Func_T *fncts, size_t num_predef_func );
 static int ffl_func_cmp2( const void *a, const void *b );
 static void fll_get_functions( Func_T *fncts, size_t num_predef_func );
 
-static long Comm_Lc;
+static long Comm_lc;
 
 #define INT_TOKEN    256
 #define ALL_TOKEN    257
@@ -81,7 +82,7 @@ IDENT    [A-Za-z][A-Za-z_0-9]*
 
 			/* handling of C style comment */
 {REM3}		{
-				Comm_Lc = EDL.Lc;
+				Comm_lc = EDL.Lc;
 				yy_push_state( comm );
 			}
 
@@ -96,7 +97,7 @@ IDENT    [A-Za-z][A-Za-z_0-9]*
 			/* handling of EOF within a comment -> fatal error */
 <<EOF>>     {
 				eprint( FATAL, UNSET, "%s: End of file in comment starting at "
-						"line %ld.\n", EDL.Fname, Comm_Lc );
+						"line %ld.\n", EDL.Fname, Comm_lc );
 				THROW( EXCEPTION );
 			}
 

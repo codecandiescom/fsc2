@@ -1,25 +1,25 @@
 /*
-  $Id$
-
-  Copyright (C) 1999-2004 Jens Thoms Toerring
-
-  This file is part of fsc2.
-
-  Fsc2 is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  Fsc2 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with fsc2; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
+ *  $Id$
+ * 
+ *  Copyright (C) 1999-2004 Jens Thoms Toerring
+ * 
+ *  This file is part of fsc2.
+ * 
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
 
 #include "fsc2.h"
@@ -40,12 +40,17 @@
 
 Token_Val_T Exp_Val;                      /* also used by exp_lexer.l */
 
+
 static bool In_for_lex = UNSET;           /* set while handling for loop
 											 condition part */
 static int In_cond = 0;                   /* counts conditional construts in
 											 conditionals */
 static long Token_count;
-static CB_Stack_T *Cb_stack = NULL;       /* curly brace stack */
+
+static struct CB_Stack {
+	Prg_Token_T *where;
+	struct CB_Stack *next;
+} *Cb_stack = NULL;                        /* curly braces stack */
 
 extern int exp_testparse( void );         /* from exp_parser.y */
 extern void exp_test_init( void );
@@ -68,7 +73,7 @@ extern Token_Val_T conditionlval;         /* from condition_parser.y */
 
 static void get_and_store_tokens( long *parenthesis_count, 
 								  long *square_brace_count );
-static void push_curly_brace( const char *fname, long lc );
+static void push_curly_brace( Prg_Token_T *where );
 static bool pop_curly_brace( void );
 static void loop_setup( void );
 static void setup_while_or_repeat( int type, long *pos );
@@ -86,22 +91,20 @@ static const char *get_construct_name( int token_type );
 
 /*-----------------------------------------------------------------------------
   This routine stores the experiment section of an EDL file in the form of
-  tokens (together with their semantic values if there are any) as returned
-  by the lexer. This is necessary for two reasons: First, the experiment
-  section may contain loops. Without having the EDL program stored internally
-  it would be rather difficult to run through the loops since we would have to
-  re-read and re-tokenise the input file again and again, which not only would
-  be painfully slow but also difficult since what we read is not the real EDL
-  file(s) but a pipe that passes to us what remains from the input files (there
-  could even be more than one when #include directives had been used) after
-  filtering through the program 'fsc2_clean'. Second, we will have to run
-  through the experiment section at least three times, first for syntax and
-  sanity checks, then for the test run and finally for really doing the
-  experiment. Third, handling of loops becomes rather simple because we only
-  have to feed them to the parser again and again. Of course, beside storing
+  tokens together with their semantic values as returned by the lexer. This
+  is necessary for two reasons: First, the experiment section may contain
+  loops. Without having the EDL program stored internally it would be rather
+  difficult to run through the loops since we would have to re-read and
+  re-tokenise the input file again and again, which not only would be
+  painfully slow but also difficult since what we read is not the real EDL
+  file(s) but a pipe that passes to us what remains from the input files
+  (there could even be more than one when #include directives had been used)
+  after filtering through the program 'fsc2_clean' (of course, beside storing
   the experiment section in tokenised form as done by this function, we also
-  need routines that later pass the stored tokens to the parsers,
-  exp_testlex() and exp_runlex().
+  need routines that later pass the stored tokens to the parsers, exp_testlex()
+  and exp_runlex()). Second, we will have to run through the experiment section
+  at least three times, first for syntax and sanity checks, then for the test
+  run and finally for really doing the experiment. .
 
   The function does the following:
   1. It stores each token (with the semantic values it receives from the
@@ -128,7 +131,7 @@ void store_exp( FILE *in )
 
 	expin = in;
 
-	/* Let's keep the lexer happy... */
+	/* Let's try to keep the lexer happy... */
 
 	if ( is_restart )
 	    exprestart( expin );
@@ -138,12 +141,14 @@ void store_exp( FILE *in )
 	EDL.prg_token = NULL;
 
 	/* Get and store all tokens (if there are no program tokens at all return
-	   immediately, there's nothing to be checked).*/
+	   immediately, then there's nothing left to be done or checked). */
 
 	get_and_store_tokens( &parenthesis_count, &square_brace_count );
 
 	if ( EDL.prg_length <= 0 )
 		return;
+
+	/* Make all the tokens a linked list (but that's not used yet) */
 
 	EDL.prg_token->end = EDL.prg_token + 1;
 
@@ -164,7 +169,8 @@ void store_exp( FILE *in )
 	if ( Cb_stack != NULL  )
 	{
 		eprint( FATAL, UNSET, "Block starting with '{' at %s:%ld has no "
-				"closing '}'.\n", Cb_stack->Fname, Cb_stack->Lc );
+				"closing '}'.\n",
+				Cb_stack->where->Fname, Cb_stack->where->Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -180,9 +186,9 @@ void store_exp( FILE *in )
 	loop_setup( );
 
 	/* Now we have to do a syntax check - some syntax errors can not be found
-	   when running the test because some IF or UNLESS conditions might never
-	   get triggered. It has also the advantage that syntax erors will be
-	   found immediately instead after a long test run. */
+	   when running the test because some branches of IF or UNLESS conditions
+	   might never get triggered. It has also the advantage that syntax erors
+	   will be found immediately instead after a long test run. */
 
 	exp_syntax_check( );
 }
@@ -307,7 +313,7 @@ static void get_and_store_tokens( long *parenthesis_count,
 					THROW( EXCEPTION );
 				}
 
-				push_curly_brace( cur_Fname, EDL.Lc );
+				push_curly_brace( cur );
 				if ( in_loop )
 					curly_brace_in_loop_count++;
 				break;
@@ -428,15 +434,14 @@ static void get_and_store_tokens( long *parenthesis_count,
 /* print more informative error messages if the braces don't match up.     */
 /*-------------------------------------------------------------------------*/
 
-static void push_curly_brace( const char *fname, long lc )
+static void push_curly_brace( Prg_Token_T *where )
 {
-	CB_Stack_T *new_cb;
+	struct CB_Stack *new_cb;
 
 
 	new_cb = CB_STACK_P T_malloc( sizeof *new_cb );
 	new_cb->next = Cb_stack;
-	new_cb->Fname = T_strdup( fname );
-	new_cb->Lc = lc;
+	new_cb->where = where;
 	Cb_stack = new_cb;
 }
 
@@ -452,7 +457,7 @@ static void push_curly_brace( const char *fname, long lc )
 
 static bool pop_curly_brace( void )
 {
-	CB_Stack_T *old_cb;
+	struct CB_Stack *old_cb;
 
 
 	if ( Cb_stack == NULL )
@@ -460,7 +465,6 @@ static bool pop_curly_brace( void )
 
 	old_cb = Cb_stack;
 	Cb_stack = old_cb->next;
-	T_free( old_cb->Fname );
 	T_free( old_cb );
 
 	return OK;
@@ -529,6 +533,8 @@ void forget_prg( void )
 
 	while ( pop_curly_brace( ) )
 		/* empty */ ;
+
+	Cb_stack = NULL;
 }
 
 

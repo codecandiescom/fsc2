@@ -1,25 +1,26 @@
 /* -*-C-*-
-  $Id$
+ *  $Id$
+ * 
+ *  Copyright (C) 1999-2004 Jens Thoms Toerring
+ * 
+ *  This file is part of fsc2.
+ * 
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
-  Copyright (C) 1999-2004 Jens Thoms Toerring
-
-  This file is part of fsc2.
-
-  Fsc2 is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  Fsc2 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with fsc2; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
 
 /****************************************************************/
 /* This is the lexer for the ASSIGNMENTS section of an EDL file */
@@ -62,8 +63,8 @@ extern void assignparse( void );
 
 /* locally used global variables */
 
-static int Assign_Next_Section;
-static bool in_phs = UNSET;
+static int Assign_next_section;
+static bool In_phs = UNSET;
 
 /* locally used functions */
 
@@ -197,49 +198,49 @@ WS          [\n=: ]+
 
 			/* handling of DEVICES: labels */
 {DEV}		{
-				Assign_Next_Section = DEVICES_SECTION;
+				Assign_next_section = DEVICES_SECTION;
 				return SECTION_LABEL;
 			}
 
 			/* handling of ASSIGNMENTS: labels */
 {ASS}		{
-				Assign_Next_Section = ASSIGNMENTS_SECTION;
+				Assign_next_section = ASSIGNMENTS_SECTION;
 				return SECTION_LABEL;
 			}
 
 			/* handling of VARIABLES: labels */
 {VAR}		{
-				Assign_Next_Section = VARIABLES_SECTION;
+				Assign_next_section = VARIABLES_SECTION;
 				return SECTION_LABEL;
 			}
 
 			/* handling of PHASES: labels */
 {PHAS}		{
-				Assign_Next_Section = PHASES_SECTION;
+				Assign_next_section = PHASES_SECTION;
 				return SECTION_LABEL;
 			}
 
 			/* handling of PREPARATIONS: labels */
 {PREP}		{
-				Assign_Next_Section = PREPARATIONS_SECTION;
+				Assign_next_section = PREPARATIONS_SECTION;
 				return SECTION_LABEL;
 			}
 
 			/* handling of EXPERIMENT: labels */
 {EXP}		{
-				Assign_Next_Section = EXPERIMENT_SECTION;
+				Assign_next_section = EXPERIMENT_SECTION;
 				return SECTION_LABEL;
 			}
 
 {PHS1}		{
 			    set_cur_pulser( );
-				in_phs = SET;
+				In_phs = SET;
   				assignlval.lval = 0;
 				return PHS_TOK;
 			}
 {PHS2}		{
 			    set_cur_pulser( );
-				in_phs = SET;
+				In_phs = SET;
 				assignlval.lval = 1;
 				return PHS_TOK;
 			}
@@ -505,7 +506,7 @@ WS          [\n=: ]+
 {WS}        /* skip prettifying characters */
 
 ";"         {
-				in_phs = UNSET;
+				In_phs = UNSET;
 				return ';';
 			}
 
@@ -517,7 +518,7 @@ WS          [\n=: ]+
 			}
 
 <<EOF>>	    {
-				Assign_Next_Section = NO_SECTION;
+				Assign_next_section = NO_SECTION;
 				return 0;
 			}
 
@@ -557,7 +558,7 @@ int assignments_parser( FILE *in )
 
 	assignparse( );
 
-	return Assign_Next_Section;
+	return Assign_next_section;
 }
 
 
@@ -569,7 +570,7 @@ static void set_cur_pulser( void )
 	const char *t;
 
 
-	if ( in_phs )
+	if ( In_phs )
 		return;
 
 	Cur_Pulser = 0;

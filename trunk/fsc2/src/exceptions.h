@@ -1,25 +1,25 @@
 /*
-  $Id$
-
-  Copyright (C) 1999-2004 Jens Thoms Toerring
-
-  This file is part of fsc2.
-
-  Fsc2 is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  Fsc2 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with fsc2; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
+ *  $Id$
+ * 
+ *  Copyright (C) 1999-2004 Jens Thoms Toerring
+ * 
+ *  This file is part of fsc2.
+ * 
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
 
 /*******************************************************************/
@@ -57,7 +57,9 @@
 #include <setjmp.h>
 
 
-typedef enum {
+typedef enum Exception_Types Exception_Types_T;
+
+enum Exception_Types {
 	EXCEPTION,
 	OUT_OF_MEMORY_EXCEPTION,
 	TOO_DEEPLY_NESTED_EXCEPTION,
@@ -69,13 +71,13 @@ typedef enum {
 	INVALID_INPUT_EXCEPTION,
 	USER_BREAK_EXCEPTION,
 	ABORT_EXCEPTION
-} Exception_Types;
+};
 
 
 jmp_buf *push_exception_frame( const char *file, int line );
 void pop_exception_frame( const char *file, int line );
-jmp_buf *throw_exception( Exception_Types exception_type );
-Exception_Types get_exception_type( const char *file, int line );
+jmp_buf *throw_exception( Exception_Types_T type );
+Exception_Types_T get_exception_type( const char *file, int line );
 
 
 #define TRY         \

@@ -1,25 +1,25 @@
 /*
-  $Id$
-
-  Copyright (C) 1999-2004 Jens Thoms Toerring
-
-  This file is part of fsc2.
-
-  Fsc2 is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  Fsc2 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with fsc2; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
+ *  $Id$
+ * 
+ *  Copyright (C) 1999-2004 Jens Thoms Toerring
+ * 
+ *  This file is part of fsc2.
+ * 
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
 
 #include "fsc2.h"
@@ -29,15 +29,15 @@
 #endif
 
 
-/*----------------------------------------------------------------*/
-/* Replacement for malloc(), throws an OUT_OF_MEMORY_EXCEPTION if */
-/* malloc() does not succeed, checks (as long as NDEBUG isn't     */
-/* defined) that the 'size' argument isn't zero (which would be   */
-/* a hint that there's some bug in the calling code) and, if      */
-/* FSC2_MDEBUG writes out information about the address of the    */
-/* new memory segment, the amount of memory allocated and the     */
-/* address the call came from to stderr.                          */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Replacement for malloc(), throws an OUT_OF_MEMORY_EXCEPTION if
+ * malloc() does not succeed, checks (as long as NDEBUG isn't
+ * defined) that the 'size' argument isn't zero (which would be
+ * a hint that there's some bug in the calling code) and, if
+ * FSC2_MDEBUG writes out information about the address of the
+ * new memory segment, the amount of memory allocated and the
+ * address the call came from to stderr.
+ *----------------------------------------------------------------*/
 
 void *T_malloc( size_t size )
 {
@@ -80,15 +80,15 @@ void *T_malloc( size_t size )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Replacement for calloc(), throws an OUT_OF_MEMORY_EXCEPTION if */
-/* calloc() does not succeed, checks (as long as NDEBUG isn't     */
-/* defined) that both the 'nmemb' and 'size' arguments aren't     */
-/* zero (which would be a hint that there's some bug in the       */
-/* calling code) and, if FSC2_MDEBUG writes out information about */
-/* the address of the new memory segment, the amount of memory    */
-/* allocated and the address the call came from to stderr.        */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Replacement for calloc(), throws an OUT_OF_MEMORY_EXCEPTION if
+ * calloc() does not succeed, checks (as long as NDEBUG isn't
+ * defined) that both the 'nmemb' and 'size' arguments aren't
+ * zero (which would be a hint that there's some bug in the
+ * calling code) and, if FSC2_MDEBUG writes out information about
+ * the address of the new memory segment, the amount of memory
+ * allocated and the address the call came from to stderr.
+ *----------------------------------------------------------------*/
 
 void *T_calloc( size_t nmemb, size_t size )
 {
@@ -140,15 +140,15 @@ void *T_calloc( size_t nmemb, size_t size )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Replacement for realloc(), throws an OUT_OF_MEMORY_EXCEPTION if */
-/* realloc() does not succeed, checks (as long as NDEBUG isn't     */
-/* defined) that the 'size' argument isn't zero (which would be a  */
-/* hint that there's some bug in the calling code) and, if         */
-/* FSC2_MDEBUG writes out information about the previous and the   */
-/* new address of the memory segment, the amount of memory         */
-/* allocated and the address the call came from to stderr.         */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Replacement for realloc(), throws an OUT_OF_MEMORY_EXCEPTION if
+ * realloc() does not succeed, checks (as long as NDEBUG isn't
+ * defined) that the 'size' argument isn't zero (which would be a
+ * hint that there's some bug in the calling code) and, if
+ * FSC2_MDEBUG writes out information about the previous and the
+ * new address of the memory segment, the amount of memory
+ * allocated and the address the call came from to stderr.
+ *-----------------------------------------------------------------*/
 
 void *T_realloc( void *ptr, size_t size )
 {
@@ -191,12 +191,12 @@ void *T_realloc( void *ptr, size_t size )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Replacement for free() with the difference that it returns NULL. */
-/* If FSC2_MDEBUG is defined information about the address of the   */
-/* freed memory segment and the addres the call came from is        */
-/* written th stderr.                                               */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Replacement for free() with the difference that it returns NULL.
+ * If FSC2_MDEBUG is defined information about the address of the
+ * freed memory segment and the addres the call came from is
+ * written to stderr.
+ *------------------------------------------------------------------*/
 
 void *T_free( void *ptr )
 {
@@ -226,13 +226,13 @@ void *T_free( void *ptr )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Replacement for strdup() (returning NULL if the argument is NULL), */
-/* throwing an OUT_OF_MEMORY_EXCEPTION if strdup() does not succeed.  */
-/* If FSC2_MDEBUG writes out information about the address of the     */
-/* new memory string, the amount of memory allocated for the string   */
-/* and the address the call came from to stderr.                      */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Replacement for strdup() (returning NULL if the argument is NULL),
+ * throwing an OUT_OF_MEMORY_EXCEPTION if strdup() does not succeed.
+ * If FSC2_MDEBUG writes out information about the address of the
+ * new memory string, the amount of memory allocated for the string
+ * and the address the call came from to stderr.
+ *--------------------------------------------------------------------*/
 
 char *T_strdup( const char *str )
 {
@@ -274,13 +274,13 @@ char *T_strdup( const char *str )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Replacement for atol() and strtol(), throwing an EXCEPTION if the  */
-/* string passed as argument can't be converted to a long. If NDEBUG  */
-/* isn't defined the string pointer is also tested for being not NULL */
-/* or just pointing to an empty string, which indicates a serious bug */
-/* in the calling function.                                           */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Replacement for atol() and strtol(), throwing an EXCEPTION if the
+ * string passed as argument can't be converted to a long. If NDEBUG
+ * isn't defined the string pointer is also tested for being not NULL
+ * or just pointing to an empty string, which indicates a serious bug
+ * in the calling function.
+ *--------------------------------------------------------------------*/
 
 long T_atol( const char *txt )
 {
@@ -315,13 +315,13 @@ long T_atol( const char *txt )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Replacement for atoi(), throwing an EXCEPTION if the string passed */
-/* as argument can't be converted to an int. If NDEBUG isn't defined  */
-/* the string pointer is also tested for being not NULL or pointing   */
-/* to an empty string, which indicates a serious bug in the calling   */
-/* function.                                                          */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Replacement for atoi(), throwing an EXCEPTION if the string passed
+ * as argument can't be converted to an int. If NDEBUG isn't defined
+ * the string pointer is also tested for being not NULL or pointing
+ * to an empty string, which indicates a serious bug in the calling
+ * function.
+ *--------------------------------------------------------------------*/
 
 int T_atoi( const char *txt )
 {
@@ -356,13 +356,13 @@ int T_atoi( const char *txt )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Replacement for atof() and strtod(), throwing an EXCEPTION if the  */
-/* string passed as the argument can't be converted to a double. If   */
-/* NDEBUG isn't defined the string pointer is also tested for being   */
-/* not NULL or pointing to an empty string, which indicates a serious */
-/* bug in the calling function.                                       */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Replacement for atof() and strtod(), throwing an EXCEPTION if the
+ * string passed as the argument can't be converted to a double. If
+ * NDEBUG isn't defined the string pointer is also tested for being
+ * not NULL or pointing to an empty string, which indicates a serious
+ * bug in the calling function.
+ *--------------------------------------------------------------------*/
 
 double T_atod( const char *txt )
 {

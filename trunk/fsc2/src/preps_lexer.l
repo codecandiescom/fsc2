@@ -1,25 +1,25 @@
 /* -*-C-*-
-  $Id$
-
-  Copyright (C) 1999-2004 Jens Thoms Toerring
-
-  This file is part of fsc2.
-
-  Fsc2 is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  Fsc2 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with fsc2; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
+ *  $Id$
+ * 
+ *  Copyright (C) 1999-2004 Jens Thoms Toerring
+ * 
+ *  This file is part of fsc2.
+ * 
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
 
 /*****************************************************************/
@@ -62,7 +62,7 @@ extern void prepsparse( void );
 
 /* Locally used global variables */
 
-int Preps_Next_Section;
+int Preps_next_section;
 
 
 %}
@@ -157,13 +157,13 @@ FUNC        {IDENT}"#"[0-9]+
 
 			/* Handling of DEVICES: labels */
 {DEV}		{
-				Preps_Next_Section = DEVICES_SECTION;
+				Preps_next_section = DEVICES_SECTION;
 				return SECTION_LABEL;
 			}
 
 			/* Handling of ASSIGNMENTS: labels */
 {ASS}		{
-				Preps_Next_Section = ASSIGNMENTS_SECTION;
+				Preps_next_section = ASSIGNMENTS_SECTION;
 				return SECTION_LABEL;
 			}
 
@@ -205,19 +205,19 @@ FUNC        {IDENT}"#"[0-9]+
 
 			/* Handling of VARIABLES: labels */
 {VAR}		{
-				Preps_Next_Section = VARIABLES_SECTION;
+				Preps_next_section = VARIABLES_SECTION;
 				return SECTION_LABEL;
 			}
 
 			/* Handling of PHASES: labels */
 {PHAS}		{
-				Preps_Next_Section = PHASES_SECTION;
+				Preps_next_section = PHASES_SECTION;
 				return SECTION_LABEL;
 			}
 
 			/* Handling of EXPERIMENT: labels */
 {EXP}		{
-				Preps_Next_Section = EXPERIMENT_SECTION;
+				Preps_next_section = EXPERIMENT_SECTION;
 				return SECTION_LABEL;
 			}
 
@@ -460,7 +460,7 @@ FUNC        {IDENT}"#"[0-9]+
 			}
 
 <<EOF>>	    {
-				Preps_Next_Section = NO_SECTION;
+				Preps_next_section = NO_SECTION;
 				return 0;
 			}
 
@@ -499,7 +499,7 @@ int preparations_parser( FILE *in )
 
 	prepsparse( );
 
-	return Preps_Next_Section;
+	return Preps_next_section;
 }
 
 

@@ -1,25 +1,25 @@
 /*
-  $Id$
-
-  Copyright (C) 1999-2004 Jens Thoms Toerring
-
-  This file is part of fsc2.
-
-  Fsc2 is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  Fsc2 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with fsc2; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
+ *  $Id$
+ * 
+ *  Copyright (C) 1999-2004 Jens Thoms Toerring
+ * 
+ *  This file is part of fsc2.
+ * 
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
 
 /********************************************************************/
@@ -57,19 +57,19 @@
 
 #define MAX_NESTED_EXCEPTION 64
 
-extern char *prog_name;
+extern char *Prog_Name;        /* defined in global.c */
 
-struct EXCEPTION_STRUCT {
-	const char      *file;
-	unsigned int    line;
-	Exception_Types exception_type;
-	unsigned char   is_thrown;
-	jmp_buf         env;
+struct Exception_Struct {
+	const char        *file;
+	unsigned int      line;
+	Exception_Types_T type;
+	unsigned char     is_thrown;
+	jmp_buf           env;
 };
 
-static struct EXCEPTION_STRUCT exception_stack[ MAX_NESTED_EXCEPTION ],
-							   stored_exceptions[ MAX_NESTED_EXCEPTION ];
-static int exception_stack_pos = -1;
+static struct Exception_Struct Exception_stack[ MAX_NESTED_EXCEPTION ],
+							   Stored_exceptions[ MAX_NESTED_EXCEPTION ];
+static int Exception_stack_pos = -1;
 
 
 /*--------------------------------------------------------------------------*/
@@ -92,12 +92,12 @@ static int exception_stack_pos = -1;
 
 jmp_buf *push_exception_frame( const char *file, int line )
 {
-	if ( exception_stack_pos + 1 >= MAX_NESTED_EXCEPTION )
+	if ( Exception_stack_pos + 1 >= MAX_NESTED_EXCEPTION )
 	{
 		fprintf( stderr, "%s: Too many nested exceptions at %s:%d.\n",
-				 prog_name, file, line );
+				 Prog_Name, file, line );
 	    syslog( LOG_ERR, "%s: Too many nested exceptions at %s:%d.\n",
-				prog_name, file, line );
+				Prog_Name, file, line );
 #ifdef FSC2_HEADER
 		if ( Fsc2_Internals.I_am == CHILD )
 			_exit( FAIL );
@@ -105,13 +105,13 @@ jmp_buf *push_exception_frame( const char *file, int line )
 		exit( EXIT_FAILURE );
 	}
 
-	++exception_stack_pos;
-	stored_exceptions[ exception_stack_pos ] =
-										exception_stack[ exception_stack_pos ];
-	exception_stack[ exception_stack_pos ].file = file;
-	exception_stack[ exception_stack_pos ].line = line;
-	exception_stack[ exception_stack_pos ].is_thrown = 0;
-	return &exception_stack[ exception_stack_pos ].env;
+	++Exception_stack_pos;
+	Stored_exceptions[ Exception_stack_pos ] =
+										Exception_stack[ Exception_stack_pos ];
+	Exception_stack[ Exception_stack_pos ].file = file;
+	Exception_stack[ Exception_stack_pos ].line = line;
+	Exception_stack[ Exception_stack_pos ].is_thrown = 0;
+	return &Exception_stack[ Exception_stack_pos ].env;
 }
 
 
@@ -122,12 +122,12 @@ jmp_buf *push_exception_frame( const char *file, int line )
 
 void pop_exception_frame( const char *file, int line )
 {
-	if ( exception_stack_pos < 0 )
+	if ( Exception_stack_pos < 0 )
 	{
 		fprintf( stderr, "%s: Exception stack empty at %s:%d.\n",
-				 prog_name, file, line );
+				 Prog_Name, file, line );
 		syslog( LOG_ERR, "%s: Exception stack empty at %s:%d.\n",
-				prog_name, file, line );
+				Prog_Name, file, line );
 #ifdef FSC2_HEADER
 		if ( Fsc2_Internals.I_am == CHILD )
 			_exit( FAIL );
@@ -135,9 +135,9 @@ void pop_exception_frame( const char *file, int line )
 		exit( EXIT_FAILURE );
 	}
 
-	exception_stack[ exception_stack_pos ] =
-									  stored_exceptions[ exception_stack_pos ];
-	exception_stack_pos--;
+	Exception_stack[ Exception_stack_pos ] =
+									  Stored_exceptions[ Exception_stack_pos ];
+	Exception_stack_pos--;
 }
 
 
@@ -150,9 +150,9 @@ void pop_exception_frame( const char *file, int line )
 /* because setjmp() was never called) the program is stopped immediately. */
 /*------------------------------------------------------------------------*/
 
-jmp_buf *throw_exception( Exception_Types exception_type )
+jmp_buf *throw_exception( Exception_Types_T type )
 {
-	if ( exception_stack_pos < 0 )
+	if ( Exception_stack_pos < 0 )
 	{
 #ifdef FSC2_HEADER
 		if ( Fsc2_Internals.I_am == CHILD )
@@ -165,9 +165,9 @@ jmp_buf *throw_exception( Exception_Types exception_type )
 	lower_permissions( );
 #endif
 
-	exception_stack[ exception_stack_pos ].exception_type = exception_type;
-	exception_stack[ exception_stack_pos ].is_thrown = 1;
-	return &exception_stack[ exception_stack_pos-- ].env;
+	Exception_stack[ Exception_stack_pos ].type = type;
+	Exception_stack[ Exception_stack_pos ].is_thrown = 1;
+	return &Exception_stack[ Exception_stack_pos-- ].env;
 }
 
 
@@ -176,15 +176,15 @@ jmp_buf *throw_exception( Exception_Types exception_type )
 /* exception has been thrown the program is stopped immediately.           */
 /*-------------------------------------------------------------------------*/
 
-Exception_Types get_exception_type( const char *file, int line )
+Exception_Types_T get_exception_type( const char *file, int line )
 {
-	if ( exception_stack_pos + 1 >= MAX_NESTED_EXCEPTION ||
-		 ! exception_stack[ exception_stack_pos + 1 ].is_thrown )
+	if ( Exception_stack_pos + 1 >= MAX_NESTED_EXCEPTION ||
+		 ! Exception_stack[ Exception_stack_pos + 1 ].is_thrown )
 	{
 	    fprintf( stderr, "%s: Request for type of exception that never got "
-				 "thrown at %s:%d.\n", prog_name, file, line );
+				 "thrown at %s:%d.\n", Prog_Name, file, line );
 	    syslog( LOG_ERR, "%s: Request for type of exception that never got "
-				"thrown at %s:%d.\n", prog_name, file, line );
+				"thrown at %s:%d.\n", Prog_Name, file, line );
 #ifdef FSC2_HEADER
 		if ( Fsc2_Internals.I_am == CHILD )
 			_exit( FAIL );
@@ -192,12 +192,12 @@ Exception_Types get_exception_type( const char *file, int line )
 		exit( EXIT_FAILURE );
 	}
 
-	if ( exception_stack_pos < -1 )
+	if ( Exception_stack_pos < -1 )
 	{
 	    fprintf( stderr, "%s: Exception stack is empty at %s:%d.\n",
-				 prog_name, file, line );
+				 Prog_Name, file, line );
 	    syslog( LOG_ERR, "%s: Exception stack is empty at %s:%d.\n",
-				prog_name, file, line );
+				Prog_Name, file, line );
 #ifdef FSC2_HEADER
 		if ( Fsc2_Internals.I_am == CHILD )
 			_exit( FAIL );
@@ -205,7 +205,7 @@ Exception_Types get_exception_type( const char *file, int line )
 		exit( EXIT_FAILURE );
 	}
 
-	return exception_stack[ exception_stack_pos + 1 ].exception_type;
+	return Exception_stack[ Exception_stack_pos + 1 ].type;
 }
 
 

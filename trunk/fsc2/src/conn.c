@@ -1,25 +1,25 @@
 /*
-  $Id$
-
-  Copyright (C) 1999-2004 Jens Thoms Toerring
-
-  This file is part of fsc2.
-
-  Fsc2 is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  Fsc2 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with fsc2; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
+ *  $Id$
+ * 
+ *  Copyright (C) 1999-2004 Jens Thoms Toerring
+ * 
+ *  This file is part of fsc2.
+ * 
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
 
 #include "fsc2.h"
@@ -30,7 +30,7 @@ static void connect_handler( int listen_fd );
 static void set_conn_signals( void );
 static void conn_sig_handler( int signo );
 
-static volatile bool is_busy;
+static volatile bool Is_busy;
 
 /* Stuff needed if we're still running an old libc */
 
@@ -53,7 +53,7 @@ pid_t spawn_conn( bool start_state, FILE *in_file_fp )
 	pid_t new_pid;
 
 
-	is_busy = start_state;
+	Is_busy = start_state;
 
 	/* Out of paranoia make sure the name of the socket file isn't
 	   larger than the char array we're going to copy it to... */
@@ -197,7 +197,7 @@ static void connect_handler( int listen_fd )
 		   differs from fsc2s effective UID send "FAIL\n" and otherwise
 		   send "OK\n". On write failure simply close the connection. */
 
-		if ( is_busy )
+		if ( Is_busy )
 			strcpy( line, "BUSY\n" );
 		else
 			strcpy( line, ( unsigned int ) extern_UID == getuid( ) ?
@@ -205,7 +205,7 @@ static void connect_handler( int listen_fd )
 
 		if ( writen( conn_fd, line, strlen( line ) )
 			 != ( ssize_t ) strlen( line ) ||
-			 is_busy || ( unsigned int ) extern_UID != getuid( ) )
+			 Is_busy || ( unsigned int ) extern_UID != getuid( ) )
 		{
 			close( conn_fd );
 			continue;
@@ -230,9 +230,9 @@ static void connect_handler( int listen_fd )
 
 		/* Return "OK\n" unless parent has become busy */
 
-		strcpy( line + 2, is_busy ? "BUSY\n" : "OK\n" );
+		strcpy( line + 2, Is_busy ? "BUSY\n" : "OK\n" );
 		if ( writen( conn_fd, line + 2, strlen( line + 2 ) )
-			 != ( ssize_t ) strlen( line + 2 ) || is_busy )
+			 != ( ssize_t ) strlen( line + 2 ) || Is_busy )
 		{
 			close( conn_fd );
 			continue;
@@ -264,7 +264,7 @@ static void connect_handler( int listen_fd )
 		/* Now inform parent about it (but check that it hasn't become busy
 		   in the mean time) and also send reply to client */
 
-		if ( ! is_busy )
+		if ( ! Is_busy )
 		{
 			kill( getppid( ), SIGUSR1 );
 			if ( write( Comm.conn_pd[ WRITE ], line, strlen( line ) )
@@ -315,7 +315,7 @@ static void set_conn_signals( void )
 
 
 /*-----------------------------------------------------*/
-/* Set variable 'is_busy' depending on type of signal. */
+/* Set variable 'Is_busy' depending on type of signal. */
 /*-----------------------------------------------------*/
 
 static void conn_sig_handler( int signo )
@@ -323,11 +323,11 @@ static void conn_sig_handler( int signo )
 	switch( signo )
 	{
 		case BUSY_SIGNAL :
-			is_busy = SET;
+			Is_busy = SET;
 			break;
 
 		case UNBUSY_SIGNAL :
-			is_busy = UNSET;
+			Is_busy = UNSET;
 			break;
 
 		/* Ignored signals : */

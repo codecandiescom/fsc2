@@ -1,25 +1,26 @@
 /* -*-C-*-
-  $Id$
+ *  $Id$
+ * 
+ *  Copyright (C) 1999-2004 Jens Thoms Toerring
+ * 
+ *  This file is part of fsc2.
+ * 
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
-  Copyright (C) 1999-2004 Jens Thoms Toerring
-
-  This file is part of fsc2.
-
-  Fsc2 is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  Fsc2 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with fsc2; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
 
 /****************************************************************/
 /* This is the lexer for the EXPERIMENTS section of an EDL file */
@@ -55,12 +56,12 @@
 
 int explex( void );
 
-extern Token_Val_T exp_val;
+extern Token_Val_T Exp_Val;        /* defined in exp.c */
 
 
 /* Locally used global variables */
 
-int Exp_Next_Section;
+int Exp_next_section;
 
 
 %}
@@ -138,13 +139,13 @@ FUNC        {IDENT}"#"[0-9]+
 
 			/* Handling of DEVICES: labels */
 {DEV}		{
-				Exp_Next_Section = DEVICES_SECTION;
+				Exp_next_section = DEVICES_SECTION;
 				return 0;
 			}
 
 			/* Handling of ASSIGNMENTS: labels */
 {ASS}		{
-				Exp_Next_Section = ASSIGNMENTS_SECTION;
+				Exp_next_section = ASSIGNMENTS_SECTION;
 				return 0;
 			}
 
@@ -185,25 +186,25 @@ FUNC        {IDENT}"#"[0-9]+
 
 			/* Handling of VARIABLES: labels */
 {VAR}		{
-				Exp_Next_Section = VARIABLES_SECTION;
+				Exp_next_section = VARIABLES_SECTION;
 				return 0;
 			}
 
 			/* Handling of PHASES: labels */
 {PHAS}		{
-				Exp_Next_Section = PHASES_SECTION;
+				Exp_next_section = PHASES_SECTION;
 				return 0;
 			}
 
 			/* Handling of PREPARATIONS: labels */
 {PREP}		{
-				Exp_Next_Section = PREPARATIONS_SECTION;
+				Exp_next_section = PREPARATIONS_SECTION;
 				return 0;
 			}
 
 			/* Handling of EXPERIMENT: labels */
 {EXP}		{
-				Exp_Next_Section = EXPERIMENT_SECTION;
+				Exp_next_section = EXPERIMENT_SECTION;
 				return 0;
 			}
 
@@ -223,60 +224,60 @@ FUNC        {IDENT}"#"[0-9]+
 "}"         return '}';          /* block end delimiter */
 
 {INT}/[^_a-zA-Z] {
-				exp_val.lval = T_atol( exptext );
+				Exp_Val.lval = T_atol( exptext );
                 return E_INT_TOKEN;
             }
 
 {FLOAT}/[^_a-zA-Z] {
-                exp_val.dval = T_atod( exptext );
+                Exp_Val.dval = T_atod( exptext );
                 return E_FLOAT_TOKEN;
             }
 
 {STR}       {
 				exptext[ expleng - 1 ] = '\0';
-				exp_val.sptr = exptext + 1;
+				Exp_Val.sptr = exptext + 1;
 				return E_STR_TOKEN;
 			}
 
 {P}			{
-				exp_val.lval = p_num( exptext );
+				Exp_Val.lval = p_num( exptext );
 				return E_INT_TOKEN;
 			}
 
 			/* Combinations of pulse and property, e.g. 'P3.LEN' */
 
 {P}"."{F}   {
-				exp_val.vptr = p_get( exptext, P_FUNC );
+				Exp_Val.vptr = p_get( exptext, P_FUNC );
 				return E_VAR_REF;
             }
 
 {P}"."{S}   {
-				exp_val.lval = p_num( exptext );
+				Exp_Val.lval = p_num( exptext );
 				return E_PPOS;
             }
 
 {P}"."{L}   {
-				exp_val.lval = p_num( exptext );
+				Exp_Val.lval = p_num( exptext );
 				return E_PLEN;
             }
 
 {P}"."{DS}  {
-				exp_val.lval = p_num( exptext );
+				Exp_Val.lval = p_num( exptext );
 				return E_PDPOS;
             }
 
 {P}"."{DL}  {
-				exp_val.lval = p_num( exptext );
+				Exp_Val.lval = p_num( exptext );
 				return E_PDLEN;
             }
 
 {CHT}       {
-                exp_val.vptr = convert_to_channel_number( exptext );
+                Exp_Val.vptr = convert_to_channel_number( exptext );
 				return E_VAR_REF;
             }
 
 {DIO}       {
-				exp_val.lval = T_atol( exptext + 3 );
+				Exp_Val.lval = T_atol( exptext + 3 );
                 return E_INT_TOKEN;
             }
 
@@ -288,8 +289,8 @@ FUNC        {IDENT}"#"[0-9]+
                 if ( t != NULL && ! strcmp( t, "#1" ) )
                     *t = '\0';
 
-				exp_val.vptr = func_get( exptext, &acc );
-				if ( exp_val.vptr != NULL )
+				Exp_Val.vptr = func_get( exptext, &acc );
+				if ( Exp_Val.vptr != NULL )
 				{
 					if ( acc == ACCESS_PREP )
 					{
@@ -317,8 +318,8 @@ FUNC        {IDENT}"#"[0-9]+
 {IDENT}     {
 				int acc;
 
-				exp_val.vptr = func_get( exptext, &acc );
-				if ( exp_val.vptr != NULL )
+				Exp_Val.vptr = func_get( exptext, &acc );
+				if ( Exp_Val.vptr != NULL )
 				{
 					if ( acc == ACCESS_PREP )
 					{
@@ -337,8 +338,8 @@ FUNC        {IDENT}"#"[0-9]+
 					return E_FUNC_TOKEN;
 				}
 
-				exp_val.vptr = vars_get( exptext );
-				if ( exp_val.vptr == NULL )
+				Exp_Val.vptr = vars_get( exptext );
+				if ( Exp_Val.vptr == NULL )
 				{
 					print( FATAL, "Variable or function '%s' has not been "
 						   "declared or loaded.\n", exptext );
@@ -360,7 +361,7 @@ FUNC        {IDENT}"#"[0-9]+
 			}
 
 <<EOF>>	    {
-				Exp_Next_Section = NO_SECTION;
+				Exp_next_section = NO_SECTION;
 				return 0;
 			}
 
@@ -386,14 +387,14 @@ int experiment_parser( FILE *in )
 	store_exp( in );
 	exp_test_run( );
 
-	if ( Exp_Next_Section != NO_SECTION )
+	if ( Exp_next_section != NO_SECTION )
 	{
 		print( FATAL, "EXPERIMENT section has to be the very last "
 			   "section.\n" );
 		THROW( EXCEPTION );
 	}
 
-	return Exp_Next_Section;
+	return Exp_next_section;
 }
 
 

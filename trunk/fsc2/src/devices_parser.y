@@ -31,9 +31,9 @@
 
 #include "fsc2.h"
 
-extern int deviceslex( void );
+extern int deviceslex( void );   /* defined in devices_lexer.l */
+extern char *devicestext;        /* defined in devices_lexer.l */
 
- extern char *devicestext;       /* defined in devices_lexer.l */
 
 /* locally used functions */
 
