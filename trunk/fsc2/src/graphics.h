@@ -51,7 +51,7 @@ typedef struct {
 
 typedef struct {
 	Scaled_Point *points;
-	XPoint *xpoints;
+	XRectangle *xpoints;
 	long count;            /* points in curve */
 
 	GC gc;
@@ -131,7 +131,7 @@ typedef struct {
 	int drag_canvas;        /* canvas that currently gets the mouse events */
 
 	Curve_1d *curve[ MAX_CURVES ];
-	Curve_2d *curve2[ MAX_CURVES ];
+	Curve_2d *curve_2d[ MAX_CURVES ];
 
 	FL_COLOR colors[ MAX_CURVES ];
 
