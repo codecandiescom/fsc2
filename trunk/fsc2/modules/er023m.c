@@ -434,7 +434,7 @@ Var *lockin_phase( Var *v )
 								  ( er023m.phase == UNDEF_PHASE ?
 									ER023M_TEST_PHASE : er023m.phase ) );
 
-			case PREPARATION :
+			case EXPERIMENT :
 				return vars_push( FLOAT_VAR, ( double ) er023m_get_ph( ) );
 
 		}
