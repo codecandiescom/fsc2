@@ -342,10 +342,10 @@ bool fsc2_locking( void )
 /* ID of fsc2.                                                            */
 /* This routine is more or less a copy of the code from the ipcs utility, */
 /* hopefully it will continue to work with newer versions of Linux (it    */
-/* works with 2.0 and 2.2 kernels)                                        */
+/* seems to work with 2.0, 2.2 and 2.4 kernels)                           */
 /*------------------------------------------------------------------------*/
 
-/* These defines seems to be needed for older Linux versions, i.e. 2.0.36 */
+/* These defines seem to be needed for older Linux versions, i.e. 2.0.36 */
 
 #if ( ! defined ( SHM_STAT ) )
 #define SHM_STAT 13
@@ -384,18 +384,16 @@ void delete_stale_shms( void )
 
 			if ( ! strncmp( ( char * ) buf, "fsc2", 4 ) )
 			{
-				if ( shm_seg.shm_nattch != 0 )     /* attach count != 0 */
-					fprintf( stderr, "Something fishy is going on here!\n"
-							 "Stale shm has attach count of %d.\n"
-							 "-- Please send a bug report --\n",
-							 shm_seg.shm_nattch );
+				shmdt( buf );
+
+				if ( shm_seg.shm_nattch != 0 )          /* attach count != 0 */
+					fprintf( stderr, "Stale shared memory segment has attach "
+							 "count of %d.\nPossibly one of fsc2s processes "
+							 "survived...\n", shm_seg.shm_nattch );
 				else
-				{
-					shmdt( buf );
 					shmctl( shm_id, IPC_RMID, NULL );
-				}
 			}
-			else                                  /* wrong magic */
+			else                                        /* wrong magic */
 				shmdt( buf );
 		}
 	}
