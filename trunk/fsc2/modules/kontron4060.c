@@ -200,8 +200,6 @@ Var *voltmeter_get_data( Var *v )
 
 static bool kontron4060_init( const char *name )
 {
-	fsc2_assert( kontron4060.device < 0 );
-
 	if ( gpib_init_device( name, &kontron4060.device ) == FAILURE )
         return FAIL;
 
