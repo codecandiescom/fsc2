@@ -83,7 +83,7 @@ acq:     AS_TOKEN A_TOKEN             { acq_seq_start( $1, $2 ); }
 ;
 
 a_list:  /* empty */
-       | a_list A_TOKEN               { acq_seq_cont( $2 ) ; }
+       | a_list A_TOKEN               { acq_seq_cont( $2 ); }
 ;
 
 phase:   PS_TOKEN                     { Phase_Seq = phase_seq_start( $1 ); }

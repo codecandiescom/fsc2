@@ -1158,7 +1158,7 @@ static int *get_fd_list( void )
 	while ( ( de = readdir( dir ) ) != NULL )
 	{
 		for ( dn = de->d_name; *dn && isdigit( *dn ); dn++ )
-			; /* empty */
+			/* empty */ ;
 
 		if ( *dn != '\0' )
 			continue;

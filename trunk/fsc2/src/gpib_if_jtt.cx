@@ -149,7 +149,7 @@ int gpib_init( const char *log_file_name, int log_level )
 		{
 			for ( cur_dev = gpib_dev_list; cur_dev->next != NULL;
 				  cur_dev = cur_dev->next )
-				;
+				/* empty */ ;
 
 			while ( 1 )
 			{
@@ -223,7 +223,7 @@ int gpib_shutdown( void )
 
 	for ( cur_dev = gpib_dev_list; cur_dev->next != NULL;
 		  cur_dev = cur_dev->next )
-		;
+		/* empty */ ;
 
 	while ( 1 )
 	{
@@ -343,7 +343,8 @@ int gpib_init_device( const char *device_name, int *dev )
 	{
 		for ( cur_dev = gpib_dev_list; cur_dev->next != NULL;
 			  cur_dev = cur_dev->next )
-			;
+			/* empty */ ;
+
 		cur_dev->next = GPIB_DEV_P T_malloc( sizeof( GPIB_DEV ) );
 		cur_dev->next->prev = cur_dev;
 		cur_dev = cur_dev->next;
