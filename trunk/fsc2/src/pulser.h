@@ -65,7 +65,7 @@ struct Pulser_Struct {
 	bool ( *set_pulse_length )( long /* pulse_number */, double /* ptime */ );
 	bool ( *set_pulse_position_change )( long /* pulse_number */,
 										 double /* ptime */ );
-	bool ( *set_pulse_length_change )( long /* pulse_number */
+	bool ( *set_pulse_length_change )( long /* pulse_number */,
 									   double /* ptime */ );
 	bool ( *set_pulse_phase_cycle )( long /* pulse_number */,
 									 long /* cycle */ );
