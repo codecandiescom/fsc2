@@ -64,6 +64,8 @@ void load_all_drivers( void )
 	   which always comes last) and try to resolve the functions from the
 	   function list */
 
+	Max_Devices_of_a_Kind = 1;
+
 	num_func = Num_Func;
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		load_functions( cd );
@@ -406,6 +408,8 @@ static void resolve_generic_type( Device *dev )
 		if ( cd->generic_type != NULL &&
 			 ! strcmp( cd->generic_type, dev->generic_type ) )
 			dev->count++;
+
+	Max_Devices_of_a_Kind = i_max( Max_Devices_of_a_Kind, dev->count );
 }
 
 

@@ -133,6 +133,7 @@ Var *Var_Stack = NULL;       /* list for stack of variables used in evaluation
 
 Device *Device_List = NULL;
 Device_Name *Device_Name_List = NULL;
+int Max_Devices_of_a_Kind;
 
 Pulser_Struct pulser_struct;
 
@@ -204,6 +205,7 @@ extern long On_Stop_Pos;
 
 extern Device *Device_List;
 extern Device_Name *Device_Name_List;
+extern int Max_Devices_of_a_Kind;
 
 extern Var *var_list;
 extern Var *Var_Stack;
