@@ -14,7 +14,6 @@
 
 #define SERIAL_PORT     0            /* serial port number (i.e. COM1) */
 #define SERIAL_BAUDRATE B1200        /* baud rate of field controller */
-#define SERIAL_FLAGS    CS8 | CRTSCTS
 #define SERIAL_TIME     50000        /* time in us set at timer box front
 										panel - currently set to 50 ms and
 										probably not to be changed ! */
@@ -1061,7 +1060,15 @@ bool magnet_do( int command )
 			tcgetattr( magnet.fd, &magnet.old_tio );
 			memcpy( &magnet.new_tio, &magnet.old_tio,
 					sizeof( struct termios ) );
-			magnet.new_tio.c_cflag = SERIAL_BAUDRATE | SERIAL_FLAGS;
+
+			/* Switch off parity checking and use of 2 stop bits and clear
+			   character size mask, then set character size mask to CS8,
+			   allow flow control and finally set the baud rate */
+
+			nmr.new_tio.c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
+			nmr.new_tio.c_cflag |= CS8 | CRTSCTS;
+			cfsetospeed( &nmr.new_tio, SERIAL_BAUDRATE );
+
 			tcflush( magnet.fd, TCIFLUSH );
 			tcsetattr( magnet.fd, TCSANOW, &magnet.new_tio );
 			break;

@@ -14,7 +14,6 @@
 
 #define SERIAL_PORT     1            /* serial port number (i.e. COM2) */
 #define SERIAL_BAUDRATE B1200        /* baud rate of field controller */
-#define SERIAL_FLAGS    CS8 | CRTSCTS
 #define SERIAL_TIME     50000        /* time in us set at magnet front panel */
                                      /* set to 50 ms and not to be changed ! */
 
@@ -1040,14 +1039,22 @@ static bool magnet_do( int command )
 	switch ( command )
 	{
 		case SERIAL_INIT :               /* open and initialize serial port */
-			if ( ( magnet.fd =
-				  open( serial_port, O_WRONLY | O_NOCTTY | O_NONBLOCK ) ) < 0 )
+			if ( ( magnet.fd = open( serial_port,
+									 O_WRONLY | O_NOCTTY | O_NONBLOCK ) ) < 0 )
 				return FAIL;
 
 			tcgetattr( magnet.fd, &magnet.old_tio );
 			memcpy( ( void * ) &magnet.new_tio, ( void * ) &magnet.old_tio,
 					sizeof( struct termios ) );
-			magnet.new_tio.c_cflag = SERIAL_BAUDRATE | SERIAL_FLAGS;
+
+			/* Switch off parity checking and use of 2 stop bits and clear
+			   character size mask, then set character size mask to CS8,
+			   allow flow control and finally set the baud rate */
+
+			nmr.new_tio.c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
+			nmr.new_tio.c_cflag |= CS8 | CRTSCTS;
+			cfsetospeed( &nmr.new_tio, SERIAL_BAUDRATE );
+
 			tcflush( magnet.fd, TCIFLUSH );
 			tcsetattr( magnet.fd, TCSANOW, &magnet.new_tio );
 			break;

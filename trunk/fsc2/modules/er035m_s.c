@@ -17,7 +17,6 @@
 
 #define SERIAL_PORT     1            /* serial port number (i.e. COM2) */
 #define SERIAL_BAUDRATE B9600        /* baud rate of field controller */
-#define SERIAL_FLAGS    CS8 | CLOCAL | CREAD
 
 
 #define DEVICE_NAME "ER035M_S"       /* name of device */
@@ -698,7 +697,13 @@ static bool er035m_s_write( const char *buf )
 	if ( er035m_s_eol != NULL && strlen( er035m_s_eol ) > 0 )
 	{
 		wlen += strlen( er035m_s_eol );
-		wbuf = get_string( wlen );
+
+		TRY
+		{
+			wbuf = get_string( wlen );
+			TRY_SUCCESS;
+		}
+
 		strcpy( wbuf, buf );
 		strcat( wbuf, er035m_s_eol );
 
@@ -775,17 +780,32 @@ static bool er035m_s_comm( int type, ... )
 	switch ( type )
 	{
 		case SERIAL_INIT :
-			if ( ( nmr.fd =
-				   open( serial_port, O_RDWR | O_NOCTTY | O_NONBLOCK ) ) < 0 )
+			if ( ( nmr.fd = open( serial_port,
+								  O_RDWR | O_NOCTTY | O_NONBLOCK ) ) < 0 )
 				return FAIL;
 
 			tcgetattr( nmr.fd, &nmr.old_tio );
 			memcpy( &nmr.new_tio, &nmr.old_tio,
 					sizeof( struct termios ) );
-			nmr.new_tio.c_cflag = SERIAL_BAUDRATE | SERIAL_FLAGS;
+
+			/* Switch off parity checking and use of 2 stop bits and clear
+			   character size mask, then set character size mask to CS8,
+			   set flag for ignorinmg modem lines, enable reading and finally
+			   set the baud rate (input and output baud rate are identical) */
+
+			nmr.new_tio.c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
+
+			nmr.new_tio.c_cflag |= CS8 | CLOCAL | CREAD;
+			cfsetospeed( &nmr.new_tio, SERIAL_BAUDRATE );
+			cfsetispeed( &nmr.new_tio, 0 );
+
 			nmr.new_tio.c_iflag = IGNBRK;
 			nmr.new_tio.c_oflag = 0;
+
+			/* I don't think we can use canonical mode here... */
+
 			nmr.new_tio.c_lflag = 0;
+
 			tcflush( nmr.fd, TCIOFLUSH );
 			tcsetattr( nmr.fd, TCSANOW, &nmr.new_tio );
 			break;
