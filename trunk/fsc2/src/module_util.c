@@ -207,6 +207,15 @@ bool get_boolean( Var *v )
 
 
 /*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+char *translate_escape_sequences( char *str )
+{
+	return handle_escape( str );
+}
+
+
+/*-------------------------------------------------------------------*/
 /* This function can be used by modules to get a very rough estimate */
 /* of the time since the start of the test run. This is useful for   */
 /* example in cases where an automatic sweep is done and during the  */

@@ -506,7 +506,7 @@ void lower_permissions( void )
 /* it stands for - all C type escape sequences are supported.      */
 /*-----------------------------------------------------------------*/
 
-static char *handle_escape( char *str )
+char *handle_escape( char *str )
 {
 	char *cp;
 	int esc_len;
