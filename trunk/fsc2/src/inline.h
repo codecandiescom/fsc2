@@ -45,12 +45,6 @@ static inline int irnd( double x );
 
 
 /*-------------------------------------------------------------------------*/
-/* The next two functions do a conversion of double or integer values to   */
-/* short. Both are exclusively used in the conversion of data to points to */
-/* be drawn on the screen via a XPoint structure which contains two short  */
-/* ints. To avoid overflows in the calculations we restrict the values to  */
-/* half the allowed range of short ints - thus allowing canvas sizes of up */
-/* to half the size of a short int.                                        */
 /*-------------------------------------------------------------------------*/
 
 static inline short d2shrt( double a )
@@ -63,6 +57,9 @@ static inline short d2shrt( double a )
 }
 
 
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
 static inline short i2shrt( int a )
 {
 	if ( a > SHRT_MAX_HALF )
@@ -72,6 +69,9 @@ static inline short i2shrt( int a )
 	return ( short ) a;
 }
 
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
 
 static inline unsigned short d2ushrt( double a )
 {
@@ -83,6 +83,9 @@ static inline unsigned short d2ushrt( double a )
 }
 
 
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
 static inline unsigned short i2ushrt( int a )
 {
 	if ( a > USHRT_MAX )
@@ -91,6 +94,9 @@ static inline unsigned short i2ushrt( int a )
 		return 0;
 	return ( unsigned short ) a;
 }
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
 
 static inline int    i_max( int    a, int    b ) { return a > b ? a : b; }
 static inline int    i_min( int    a, int    b ) { return a < b ? a : b; }
@@ -103,6 +109,9 @@ static inline double d_min( double a, double b ) { return a < b ? a : b; }
 static inline size_t s_min( size_t a, size_t b ) { return a < b ? a : b; }
 
 
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
 static inline long lrnd( double x )
 {
 	if ( x > LONG_MAX )
@@ -112,6 +121,9 @@ static inline long lrnd( double x )
 	return ( long ) floor( x + 0.5 );
 }
 
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
 
 static inline int irnd( double x )
 {
