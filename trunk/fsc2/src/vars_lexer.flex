@@ -177,6 +177,8 @@ WS          [\n \t]+
 				return VAR_REF;
             }
 
+{CHT}       return vars_get_channel_name( );
+
 			/* handling of integer numbers */
 {INT}       {
 				varslval.lval = T_atol( varstext );
