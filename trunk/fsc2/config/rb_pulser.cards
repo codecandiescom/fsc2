@@ -1,25 +1,25 @@
-# The following settings define which cards are used for what purposes.
+# In this file it is defined which cards are used for what purposes.
 # The names used here in double quotes are the ones that get assigned
 # to the cards in the RULBUS configuration file '/etc/rulbus.conf' and
 # which should resemble what's written on the labels at the front sides
 # of the cards, i.e. the delay card with the number 0 should have the
 # name "DELAY_0" etc.
 
-# Each line in thos file should contain one of a set of predefined
+# Each line in this file should contain one of a set of predefined
 # names for the card functions, followed by the card name (always in
-# double quotes). The file may also contain comments like this -
-# everything following a '#' is discarded as a comment and beside
-# this also C and C++ stype comments may be used. Empty line will
-# also be discarded when the file is interpreted.
+# double quotes). The file may also contain comments - everything
+# following a '#' is discarded as a comment and beside this also C
+# and C++ stype comments may be used. Empty line are also discarded
+# when the file is interpreted.
 
 # This file gets read in each time the module for the RULBUS pulser is
 # loaded anew (i.e. whenever a new EDL file is loaded and then at least
 # a test run is done). This way the configuration of the RULBUS pulser
-# can be changed "on the fly" without even leaving fsc2.
+# can be changed "on the fly" without even exiting fsc2.
 
 
 # 1) Name of the card creating the main trigger of the experiment (i.e.
-#    the Experiment Repetition Time card)
+#    the 'Experiment Repetition Time' card)
 
 ERT_DELAY_CARD   "DELAY_0"
 
@@ -29,8 +29,8 @@ ERT_DELAY_CARD   "DELAY_0"
 INIT_DELAY_CARD  "DELAY_1"
 
 
-# 3) Name of the card creating the first microwave pulse, i.e. which
-#    determines its length
+# 3) Name of the card creating the first microwave pulse, i.e. the card
+#    which determines its length
 
 MW_DELAY_CARD_0	 "DELAY_2"
 
@@ -58,15 +58,15 @@ MW_DELAY_CARD_3	 "DELAY_5"
 MW_DELAY_CARD_4	 "DELAY_6"
 
 
-# 8) Name of the delay card that creates the delay between the start of the
-#    first microwave pulse and thestart of the RF pulse (the length of the
+# 8) Name of the delay card that creates the additional delay between the end
+#    of the initial delay and the start of the RF pulse (the length of this
 #    pulse is set using the pulse mode of the Rhode & Schwarz synthesizer)
 
 RF_DELAY_CARD    "DELAY_7"
 
 
-# 9) Name of the delay cards creating the delay between the start of the first
-#    microwave pulse and the start of the detection trigger pulse
+# 9) Name of the delay cards creating the delay between the end of the intial
+#    delay and the start of the detection trigger pulse
 
 DET_DELAY_CARD_0 "DELAY_8"
 

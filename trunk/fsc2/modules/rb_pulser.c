@@ -709,6 +709,8 @@ static void rb_pulser_card_setup( void )
 	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
 		rb_pulser.delay_card[ i ].name = NULL;
 
+	/* Get the names of all cards from the configuration file */
+
 	rb_pulser_read_configuration( );
 
 	rb_pulser.delay_card[ ERT_DELAY ].prev = NULL;
@@ -753,6 +755,9 @@ static void rb_pulser_card_setup( void )
 											rb_pulser.delay_card + DET_DELAY_0;
 	rb_pulser.delay_card[ DET_DELAY_1 ].next = NULL;
 
+	/* Get handles for all the delay cards and determine their intrinsic
+	   delays */
+
 	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
 	{
 		rb_pulser.delay_card[ i ].handle = -1;
@@ -771,8 +776,10 @@ static void rb_pulser_card_setup( void )
 }
 
 
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for free()ing memory that is used for the name of the
+ * configuration file and storing the names of the cards
+ *---------------------------------------------------------------*/
 
 void rb_pulser_cleanup( void )
 {
