@@ -25,7 +25,7 @@ not supported.
 ****************************************************************************
 
 The 24-bit wide DIOs can be split up into either three 8-bit DIOs, two
-12-bit DIO, one 24-bit DIOs or one 16-bit and one 8-bit DIO. Splitting
+12-bit DIOs, one 24-bit DIO or one 16-bit and one 8-bit DIO. Splitting
 is done programatically whenever necessary. Each of (split up) DIOs can
 be used for input as well as output and the direction can be changed.
 
@@ -34,7 +34,8 @@ To use the kernel module and the library you need a device file for
 the board called 'witio_48' in the '/dev' directory.
 
 
-To use the library your program must include the header file 'witio_48.h'.
+To use the library your program must include the header file 'witio_48.h'
+and you must link against the library.
 
 
 The library supplies the following functions:

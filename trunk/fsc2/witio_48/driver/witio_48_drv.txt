@@ -6,31 +6,32 @@
  ==================================
 
 
-The driver only supports a subset of the functionality of the board.
-It only supports simple DIO using the two 82C55A chips on the board in
-mode 0 ("Betriebsart 0"). The 8254/82C54 timer/counter chips also on
-the board are not supported.
+The driver only supports a subset of the functionality of the board,
+i.e. simple DIO using the two 82C55A chips on the board in mode 0
+("Betriebsart 0"). The 8254/82C54 timer/counter chips also on the
+board are not supported.
 
 * Please note: It is impossible to figure out if there's really a *
 * card in the computer (or at the address that has been specified *
 * as the I/O port base address). Thus it is possible to load the  *
 * driver even if no card exists at all (or it is jumpered to use  *
-* a different base address from the one the driver uses).         *
+* a different base address from the one the driver has been told  *
+* to use).                                                        *
 
 Each of the two 24-bit DIOs can be split up independently into sub-DIOs,
 which then can be used indendently for input or output. There exist
-four modes, each of the tow DIOs can be in:
+four modes, each of the two DIOs can be running under:
 
-WITIO_48_MODE_3x8:   The DIO is split into three 8-bit wide DIOs
-WITIO_48_MODE_2x12:  The DIO is split into two 12-bit wide DIOs
-WITIO_48_MODE_1x24:  The DIO isn't split up but used as a 24-bit wide DIO
-WITIO_48_MODE_16_8:  The DIO is split into a 16-bit and an 8-bit wide DIO
+WITIO_48_MODE_3x8:   the DIO is split into three 8-bit wide DIOs
+WITIO_48_MODE_2x12:  the DIO is split into two 12-bit wide DIOs
+WITIO_48_MODE_1x24:  the DIO is used as a single 24-bit wide DIO
+WITIO_48_MODE_16_8:  the DIO is split into a 16-bit and an 8-bit wide DIO
 
 When the module gets loaded the board gets initialized to mode
 'WITIO_48_MODE_1x24' with all set up as inputs.
 
-Depending on the mode, one, two or three channels can be used to out-
-or input values in different ranges:
+Depending on the mode, one, two or three channels can be used to
+output or input values in different ranges:
 
  |--------------------|--------------------|-------------------------|
  |        mode        |     channels       |       ranges            |
@@ -93,12 +94,13 @@ typedef'ed as
         WITIO_48_MODE mode;
     } WITIO_48_DIO_MODE;
 
-The first member specifies for which of the two DIOs the mode is to
-be changed. It is an unsigned integer number, either 0 or 1 or, as
-a symbolic name 'WITIO_48_DIO_1' or 'WITIO_48_DIO_2'. The second
-member specifies the mode, an unsigned integer number between 0 and 3,
-where 0 can be replaced by 'WITIO_48_MODE_3x8', 1 by 'WITIO_48_MODE_2x12',
-2 by 'WITIO_48_MODE_1x24' and, finally, 3 by 'WITIO_48_MODE_16_8'.
+The first member specifies for which of the two DIOs the mode is
+to be changed. It is an unsigned integer number, either 0 or 1 or,
+using symbolic name 'WITIO_48_DIO_1' or 'WITIO_48_DIO_2'. The second
+member specifies the mode, an unsigned integer number between 0 and 3
+or with 'WITIO_48_MODE_3x8' as as a symbolic name for 0,
+'WITIO_48_MODE_2x12' for 1, 'WITIO_48_MODE_1x24' for 2 and, finally,
+'WITIO_48_MODE_16_8' for 3.
 
 
 ===================================================================
@@ -141,16 +143,16 @@ The first member specifies at which of the two DIOs the value is to
 be output. It is an unsigned integer number, either 0 or 1 or, as
 a symbolic name 'WITIO_48_DIO_1' or 'WITIO_48_DIO_2'.
 
-The second member is an unsigned integer number, specifying the sub-DIO,
- between 0 and 2, where 0 can also be written as 'WITIO_48_CHANNEL_0',
+The second member is an unsigned integer number specifying the sub-DIO,
+between 0 and 2, where 0 can also be written as 'WITIO_48_CHANNEL_0',
 1 as 'WITIO_48_CHANNEL_1' and 2 as 'WITIO_48_CHANNEL_2'. The range of
 allowed values depends on the current I/O mode, please see the table
-in the introduction to determine which channels are allowed and to
+in the introduction to find out which channels are allowed and at
 which pins of the connectors the bits of the value to be output will
 appear.
 
-The last member, is obviously, the value to be output. Depending on the
-mode and the selected channel only some of the lower bits (8, 12, 18 or
+The last member is, obviously, the value to be output. Depending on the
+mode and the selected channel only some of the lower bits (8, 12, 16 or
 24) of the value will appear at the output pins.
 
 
@@ -169,16 +171,16 @@ structure which is typedef'ed as
     } WITIO_48_DATA;
 
 The first member specifies from which of the two DIOs the value is to
-be read. It is an unsigned integer number, either 0 or 1 or, as a
-symbolic name 'WITIO_48_DIO_1' or 'WITIO_48_DIO_2'.
+be read. It is an unsigned integer number, either 0 or 1 or, as the
+symbolic names 'WITIO_48_DIO_1' or 'WITIO_48_DIO_2'.
 
 The second member is an unsigned integer number, specifying the sub-DIO,
 between 0 and 2, where 0 can also be written as 'WITIO_48_CHANNEL_0',
 1 as 'WITIO_48_CHANNEL_1' and 2 as 'WITIO_48_CHANNEL_2'. The range of
 allowed values depends on the current I/O mode, please see the table
 in the introduction to determine which channels are allowed and about
-the mapping of the pins of the connectors the bits of the value to be
-fetched.
+the mapping of the pins of the connectors to the bits of the value to
+be fetched.
 
 In the last member of the structure the input value is stored after a
 successful return of the ioctl() call.
