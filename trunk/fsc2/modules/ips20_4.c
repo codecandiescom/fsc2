@@ -781,7 +781,7 @@ static void ips20_4_to_local( void )
 	{
 		ips20_4_set_target_current( ips20_4.final_target_current );
 		ips20_4_set_sweep_rate( ips20_4.fast_sweep_rate );
-		ips20_4.activity = ips20_4_set_activity( TO_SET_POINT );
+		ips20_4_set_activity( TO_SET_POINT );
 	}
 	else
 	{	
