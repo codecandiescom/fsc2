@@ -2,9 +2,9 @@ Fcntl_Lock version 0.01
 =======================
 
 Fcntl_Lock is a module to do file locking using the fcntl(2) system call.
-This allows locks on parts of files as well of whole files and overcomes
-some known problems with flock(2), on which the Perl flock function often
-is based.
+This allows a lock on parts of a file as well as the whole file and
+overcomes some known problems with flock(2), on which the Perl flock
+function often is based.
 
 Obviously, to use the module you need a system that supports the fcntl()
 system call.
@@ -39,14 +39,14 @@ data passed by the user.
 
 Unfortunately, it isn't always that simple. E.g., on my system Perl has
 been built with the flags LARGEFILE_SOURCE and FILE_OFFSET_BITS=64, which
-aren't the ones used for compiling the kernel. This results in the
-declaration of the flock structure to be different when including fcntl.h
-in the XS file from the one needed to call fcntl(). Thus, before the
-XS file is compiled a C program is run (without the flags that automati-
-cally get set when compiling in the Perl context) that determines the
-real size and alignment of the flock structure and writes out an include
-file, that in turn is used to populate (or extract data from) the flock
-structure of the correct type.
+differ from the settings that have been used when compiling the kernel.
+This results in the declaration of the flock structure to be different
+when including fcntl.h in the XS file from the one needed to call fcntl().
+Thus, before the XS file is compiled a C program is run (without the
+flags that automatically get set when compiling in the Perl context)
+that determines the real size and alignment of the flock structure and
+writes out an include file, that in turn is used to populate (or extract
+data from) the flock structure of the correct type.
 
 COPYRIGHT AND LICENCE
 
