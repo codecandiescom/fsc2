@@ -68,6 +68,7 @@ static double er035m_get_field( void );
 static int er035m_get_resolution( void );
 static void er035m_set_resolution( int res_index );
 static bool er035m_command( const char *cmd );
+static bool er035m_talk( const char *cmd, char *reply, long *length );
 static void er035m_failure( void );
 
 
@@ -237,10 +238,8 @@ try_again:
 
 	stop_on_user_request( );
 
-	er035m_command( "PS\r" );
 	length = 20;
-	if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
-		er035m_failure( );
+	er035m_talk( "PS\r", buffer, &length );
 
 	/* Now look if the status byte says that device is OK where OK means that
 	   for the X-band magnet the F1 probe and for the S-band the F0 probe is
@@ -425,10 +424,8 @@ Var *find_field( Var *v )
 
 		/* Get status byte and check if lock was achieved */
 
-		er035m_command( "PS\r" );
 		length = 20;
-		if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
-		er035m_failure( );
+		er035m_talk( "PS\r", buffer, &length );
 
 		bp = buffer + 2;   /* skip first two chars of status byte */
 
@@ -657,10 +654,8 @@ double er035m_get_field( void )
 
 		/* Ask gaussmeter to send the current field and read result */
 
-		er035m_command( "PF\r" );
 		length = 20;
-		if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
-			er035m_failure( );
+		er035m_talk( "PF\r" buffer, &length );
 
 		/* Disassemble field value and flag showing the state */
 
@@ -704,9 +699,7 @@ static int er035m_get_resolution( void )
 	long length = 20;
 
 
-	er035m_command( "RS\r" );
-	if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
-		er035m_failure( );
+	er035m_talk( "RS\r", buffer, &length );
 
 	switch ( buffer[ 2 ] )
 	{
@@ -749,6 +742,21 @@ static bool er035m_command( const char *cmd )
 	if ( gpib_write( nmr.device, cmd, strlen( cmd ) ) == FAILURE )
 		er035m_failure( );
 	fsc2_usleep( ER035M_WAIT, UNSET );
+
+	return OK;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool er035m_talk( const char *cmd, char *reply, long *length )
+{
+	if ( gpib_write( nmr.device, cmd, strlen( cmd ) ) == FAILURE )
+		er035m_failure( );
+	fsc2_usleep( ER035M_WAIT, UNSET );
+	if ( gpib_read( nmr.device, reply, length ) == FAILURE )
+		er035m_failure( );
 
 	return OK;
 }
