@@ -975,13 +975,11 @@ static double sr510_set_dac_voltage( long channel, double voltage )
        function... */
 
 	fsc2_assert( channel >= first_DAC_port || channel <= last_DAC_port );
-	if ( fabs( voltage ) >= 10.24 )
-	{
-		if ( voltage > 0.0 )
-			voltage = 10.24;
-		else
-			voltage = -10.24;
-	}
+
+	if ( voltage > 10.24 )
+		voltage = 10.24;
+	if ( voltage < -10.24 )
+		voltage = -10.24;
 
 	sprintf( buffer, "X%1ld,%f\n", channel, voltage );
 	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )

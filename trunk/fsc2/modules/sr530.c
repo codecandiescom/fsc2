@@ -698,7 +698,6 @@ Var *lockin_lock_keyboard( Var *v )
 	{
 		lock = get_boolean( v, DEVICE_NAME );
 		too_many_arguments( v, DEVICE_NAME );
-		}
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )
