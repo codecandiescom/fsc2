@@ -149,11 +149,13 @@ bool setup_comm( void )
 	   further shared memory segments used to send data from the child to the
 	   parent */
 
+	seteuid( EUID );
 	Key_Area = shmget( IPC_PRIVATE, 4 * sizeof( char ) + 2 * sizeof( int ),
 					   IPC_CREAT | 0600 );
 
 	if ( Key_Area < 0 )
 	{
+		seteuid( getuid( ) );
 		for ( i = 0; i < 4; i++ )
 			close( pd[ i ] );
 		return FAIL;
@@ -165,8 +167,10 @@ bool setup_comm( void )
 			close( pd[ i ] );
 
 		shmctl( Key_Area, IPC_RMID, &shm_buf );
+		seteuid( getuid( ) );
 		return FAIL;
 	}
+	seteuid( getuid( ) );
 
 	/* Finally we need a message queue where the parent stores the keys and
 	   message types it gets from the child for later handling */
@@ -181,8 +185,11 @@ bool setup_comm( void )
 		for ( i = 0; i < 4; i++ )
 			close( pd[ i ] );
 
+		seteuid( EUID );
 		shmdt( ( void * ) raw_key );
 		shmctl( Key_Area, IPC_RMID, &shm_buf );
+		seteuid( getuid( ) );
+
 		return FAIL;
 	}
 
@@ -216,8 +223,10 @@ void end_comm( void )
 
 	/* Detach and remove shared memory segment used for the message queue */
 
+	seteuid( EUID );
 	shmdt( ( void * ) ( ( char * ) Key - 4 ) );
 	shmctl( Key_Area, IPC_RMID, NULL );
+	seteuid( getuid( ) );
 
 	/* Close parents side of read and write pipe */
 
@@ -238,19 +247,28 @@ void *get_shm( int *shm_id, long len )
 	void *buf;
 
 
+	seteuid( EUID );
 	while ( ( *shm_id = shmget( IPC_PRIVATE, len, IPC_CREAT | 0600 ) ) < 0 )
 	{
 		if ( errno == ENOSPC || errno == ENOMEM)  /* wait for 10 ms */
 			usleep( 10000 );
 		else                                      /* non-recoverable failure */
+		{
+			seteuid( getuid( ) );
 			return ( void * ) -1;
+		}
 	}
 
 	/* Attach to the shared memory segment - if this should fail (improbable)
 	   return -1 and let the calling routine handle the mess... */
 
 	if ( ( buf = shmat( *shm_id, NULL, 0 ) ) == ( void * ) - 1 )
+	{
+		seteuid( getuid( ) );
 		return ( void * ) -1;
+	}
+
+	seteuid( getuid( ) );
 
 	return buf;
 }

@@ -1553,10 +1553,8 @@ Var *f_display( Var *v )
 	
 	/* Finally tell parent about the identifier etc. */
 
-	seteuid( EUID );
 	Key->shm_id = shm_id;
 	Key->type = DATA;
-	seteuid( getuid( ) );
 
 	kill( getppid( ), NEW_DATA );           /* signal parent the new data */
 
@@ -1829,10 +1827,8 @@ Var *f_clearcv( Var *v )
 	
 	/* Finally tell parent about the identifier etc. */
 
-	seteuid( EUID );
 	Key->shm_id = shm_id;
 	Key->type = DATA;
-	seteuid( getuid( ) );
 
 	kill( getppid( ), NEW_DATA );           /* signal parent the new data */
 

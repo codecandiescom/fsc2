@@ -242,19 +242,39 @@ void eprint( int severity, const char *fmt, ... )
 }
 
 
-/*-----------------------------------------------------*/
-/*-----------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* There should be only one instance of fsc2 running (except simple test  */
+/* runs that only do a syntax check of an EDL program). To check if there */
+/* is another instance already running a lock file is used - the file is  */
+/* created at the very start of the program and a write lock is set on    */
+/* the whole length of the file. Then the PID and user name are written   */
+/* into the lock file. Thus fsc2 can find out who is currently holding    */
+/* the lock and tell the user about it. Te lock automatically expires     */
+/* fsc2 exits (it may also delete the lock file).                         */
+/* To make this work correctly for more then one user the lock file must  */
+/* belong to a special user (e.g. a user named `fsc2' belonging to a      */
+/* also named `fsc2') and the program belong to this user and have the    */
+/* setuid and the setgid bit set, i.e. install it with                    */
+/*                                                                        */
+/*            chown fsc2.fsc2 fsc2                                        */
+/*            chmod 6755 fsc2                                             */
+/*                                                                        */
+/* Another purpose of this scheme is to get rid of shared memory segments */
+/* that remain after fsc2 crashed or was killed. Therefore, all shared    */
+/* memory segment have to be created with the EUID of fsc2 so that even   */
+/* another user may delete them when he starts fsc2.                      */
+/*------------------------------------------------------------------------*/
 
 
 bool fsc2_locking( void )
 {
 	int fd, flags;
 	struct flock lock;
-	char buf[ 10 ];
-	int i;
+	char buf[ 128 ];
+	char *name, *name_end;
 
 
-	/* Open a lock file */
+	/* Try to open a lock file */
 
 	if ( ( fd = open( LOCKFILE, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR ) ) < 0 )
 	{
@@ -274,16 +294,21 @@ bool fsc2_locking( void )
 		fprintf( stderr, "Error: fsc2 is already running." );
 
 		/* Try to read from the lock file the PID of the process holding
-		   the lock and append it to the error message */
+		   the lock as well as the user name and append it to the error
+		   message */
 
-		i = 0;
-		do
-			read( fd, ( void * ) ( buf + i ), sizeof( char ) );
-		while ( buf[ i ] != '\n' && i++ < 10 );
-		if ( i != 10 )
+		if ( read( fd, ( void * ) buf, 127 * sizeof( char ) ) != -1 &&
+			 ( name = strchr( buf, '\n' ) + 1 ) != NULL )
 		{
-			buf[ i ] = '\0';
-			fprintf( stderr, " Its PID is %s.\n", buf );
+			*( name - 1 ) = '\0';
+			fprintf( stderr, " Its PID is %s", buf );
+			if ( ( name_end = strchr( name, '\n' ) ) != NULL )
+			{
+				*name_end = '\0';
+				fprintf( stderr, " and the user is `%s'.\n", name );
+			}
+			else
+				fprintf( stderr, ".\n" );
 		}
 		else
 			fprintf( stderr, "\n" );
@@ -293,7 +318,7 @@ bool fsc2_locking( void )
 	/* Truncate to zero length, write process ID into the lock file and
 	   get the close-on-exec flag*/
 
-	sprintf( buf, "%d\n", getpid( ) );
+	sprintf( buf, "%d\n%s\n", getpid( ), getpwuid( getuid( ) )->pw_name );
 	if ( ftruncate( fd, 0 ) < 0 ||
 		 write( fd, buf, strlen( buf ) ) != ( ssize_t ) strlen( buf ) ||
 		 ( flags = fcntl( fd, F_GETFD, 0 ) ) < 0 )
@@ -318,8 +343,14 @@ bool fsc2_locking( void )
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* If fsc2 crashes while running an experiment shared memory segments may */
+/* remain undeleted. To get rid of them we now check all shared segments  */
+/* if they belong to fsc2 and start with the magic 'fsc2'. If they do     */
+/* they are debris from a crashes and have to be deleted to avoid using   */
+/* up all segments after some time. Since the segments belong to the user */
+/* fsc2 this routine must be run with the effective ID of fsc2.           */
+/*------------------------------------------------------------------------*/
 
 void delete_stale_shms( void )
 {
@@ -330,7 +361,8 @@ void delete_stale_shms( void )
 
 
 	/* Get the maximum shared memory segment id (the following is more or
-	   less a copy of the code from ipcs utility) */
+	   less a copy of the code from the ipcs utility, hopefully this will
+	   continue to work with newer versions of Linux...) */
 
     max_id = shmctl ( 0, SHM_INFO, ( struct shmid_ds * ) &shm_seg );
 
@@ -343,16 +375,23 @@ void delete_stale_shms( void )
         if ( shm_id  < 0 ) 
             continue;
 
-		if ( shm_seg.shm_perm.uid == euid )
+		if ( shm_seg.shm_perm.uid == euid )     /* segment belongs to fsc2 ? */
 		{
 			if ( ( buf = shmat( shm_id, NULL, 0 ) ) == ( void * ) - 1 )
 				continue;
 			if ( ! strncmp( ( char * ) buf, "fsc2", 4 ) )
 			{
-				shmdt( buf );
-				shmctl( shm_id, IPC_RMID, NULL );
+				if ( shm_seg.shm_nattch != 0 )
+					fprintf( stderr, "Something fishy is going on here!\n"
+							 "Orphaned shm has attach count of %d.\n", 
+							 shm_seg.shm_nattch );
+				else
+				{
+					shmdt( buf );
+					shmctl( shm_id, IPC_RMID, NULL );
+				}
 			}
-			else
+			else                                  /* wrong magic */
 				shmdt( buf );
 		}
 	}

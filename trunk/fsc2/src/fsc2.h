@@ -94,6 +94,8 @@ void sigchld_handler( int sig_type, void *data );
 
 #if defined ( FSC2_MAIN )
 
+int EUID;
+
 
 /* used in compiling the user supplied program */
 
@@ -148,6 +150,7 @@ int File_List_Len = 0;
 
 #else   /*  ! FSC2_MAIN */
 
+extern int EUID;
 
 extern long Lc;
 extern char *Fname;

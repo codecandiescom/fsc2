@@ -96,7 +96,6 @@ void accept_new_data( void )
 
   		/* Swap current REQUEST with next DATA set */
 
-		seteuid( EUID );
   		shm_id = Message_Queue[ mq_next ].shm_id;
 
   		Message_Queue[ mq_next ].shm_id =
@@ -105,7 +104,6 @@ void accept_new_data( void )
 
   		Message_Queue[ message_queue_low ].shm_id = shm_id;
   		Message_Queue[ message_queue_low ].type = DATA;
-		seteuid( getuid( ) );
   	}
 
 	/* Finally display the new data by redrawing the canvas */
