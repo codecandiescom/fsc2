@@ -7,6 +7,9 @@
 
 
 @multitable { @code{REPEAT_FREQUENCY} and a bit } { Starts the @code{PREPARATIONS} section and lots more of text... }
+@item @code{#exit}            @tab Miscellaneous (@pxref{exit})
+@item @code{#include          @tab Miscellaneous (@pxref{include})
+@item @code{#quit}            @tab Miscellaneous (@pxref{quit})
 @item @code{A}                @tab Unit, Ampere
 @item @code{abort}            @tab Built-in function (@pxref{abort})
 @item @code{abs}              @tab Built-in function (@pxref{abs})
