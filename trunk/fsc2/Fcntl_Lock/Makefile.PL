@@ -4,11 +4,14 @@ use ExtUtils::MakeMaker;
 # version that also can deal with 'long long, then the one that only tests
 # for 'long').
 
-die "Can't create the necessary header file.\n"
-if ( system( "make sizes1 >/dev/null 2>&1" ) or
-	 system( "./sizes1 >/dev/null 2>&1" ) ) and
-	( system( "make sizes2 >/dev/null 2>&1" ) or
-	  system( "./sizes2 >/dev/null 2>&1" ) );
+if ( ( system( "make sizes1 >/dev/null 2>&1" ) or
+	   system( "./sizes1 >/dev/null 2>&1" ) ) and
+	 ( system( "make sizes2 >/dev/null 2>&1" ) or
+	   system( "./sizes2 >/dev/null 2>&1" ) ) ) {
+	unlink( "./sizes1" );
+	unlink( "./sizes2" );
+	die "Can't create the necessary header file.\n";
+}
 	
 unlink( "./sizes1" );
 unlink( "./sizes2" );
