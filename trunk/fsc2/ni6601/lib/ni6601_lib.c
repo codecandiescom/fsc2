@@ -571,7 +571,7 @@ static int check_board( int board )
 
 		/* Try to open it in non-blocking mode */
 
-		if ( ( dev_info[ board ].fd = open( name, O_RDWR | O_NONBLOCK ) )< 0 )
+		if ( ( dev_info[ board ].fd = open( name, O_RDWR | O_NONBLOCK ) ) < 0 )
 			switch ( errno )
 			{
 				case ENODEV : case ENXIO :
