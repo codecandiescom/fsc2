@@ -54,10 +54,7 @@ incl_dir = $(prefix)/include
 all:
 	$(MAKE) $(MODULE)
 
-$(MODULE): $(SOURCES:.c=.o)
-	ld -r -o $@ $(SOURCES:.c=.o)
-
-%.o: %.c $(HEADERS)
+$(MODULE): $(SOURCES)
 	$(CC) $(CFLAGS) $(DBGFLAGS) $(INCLUDES) -c -o $@ $<
 
 install:
