@@ -49,7 +49,7 @@ Var *f_screate( Var *var )
 	IOBJECT *ioi;
 	long type;
 	double start_val, end_val;
-	double step 0.0;
+	double step = 0.0;
 	char *label = NULL;
 	char *help_text = NULL;
 
