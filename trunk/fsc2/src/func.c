@@ -61,7 +61,7 @@
 /* The following variables are shared with loader.c which adds further 
    functions from the loaded modules */
 
-int Num_Func;        /* number of built-in and listed functions */
+size_t Num_Func;     /* number of built-in and listed functions */
 Func *Fncts;         /* structure for list of functions */
 
 
@@ -219,7 +219,8 @@ static int func_cmp1( const void *a, const void *b )
 
 void functions_exit( void )
 {
-	int i;
+	size_t i;
+
 
 	if ( Fncts == NULL )
 		return;
@@ -339,7 +340,7 @@ Var *func_call( Var *f )
 	long abs_len;
 #ifndef NDEBUG
 	Func *cur_func;
-	int i;
+	size_t i;
 
 
 	/* Check (and double-check) that it's really a function variable - one

@@ -75,6 +75,6 @@ void close_all_files( void );
 
 /* from func_list_lexer.flex */
 
-int func_list_parse( Func **fncts, int num_func );
+size_t func_list_parse( Func **fncts, size_t num_func );
 
 #endif  /* ! FUNC_HEADER */

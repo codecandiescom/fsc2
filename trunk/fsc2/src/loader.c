@@ -28,12 +28,12 @@
 
 /* Variables imported from func.c */
 
-extern int Num_Func;        /* number of built-in and listed functions */
+extern size_t Num_Func;     /* number of built-in and listed functions */
 extern Func *Fncts;         /* structure for list of functions */
 extern Func Def_Fncts[ ];   /* structures for list of built-in functions */
 
 
-static int num_func;
+static size_t num_func;
 
 static void resolve_hook_functions( Device *dev, const char *dev_name );
 static void load_functions( Device *dev );
@@ -129,7 +129,7 @@ bool exists_device( const char *name )
 
 bool exists_function( const char *name )
 {
-	int i;
+	size_t i;
 
 
 	for ( i = 0; i < Num_Func; i++ )
@@ -295,7 +295,7 @@ static void resolve_hook_functions( Device *dev, const char *dev_name )
 
 static void resolve_functions( Device *dev )
 {
-	int num;
+	size_t num;
 	void *cur;
 	Func *f = Fncts;
 

@@ -33,9 +33,9 @@
 #include "fsc2.h"
 
 int func_listlex( void );
-static int fll_count_functions( Func *fncts, int num_predef_func );
+static size_t fll_count_functions( Func *fncts, size_t num_predef_func );
 static int ffl_func_cmp2( const void *a, const void *b );
-static void fll_get_functions( Func *fncts, int num_predef_func );
+static void fll_get_functions( Func *fncts, size_t num_predef_func );
 
 static long Comm_Lc;
 static bool Eol;
@@ -167,13 +167,13 @@ PREP        return PREP_TOKEN;
 		/*----------------------*/
 
 
-int func_list_parse( Func **fncts, int num_func )
+size_t func_list_parse( Func **fncts, size_t num_func )
 {
 	static bool is_restart = UNSET;
-	static int nf;
-	int num_predef_func = num_func;
-	int num;
-	int cur;
+	static size_t nf;
+	size_t num_predef_func = num_func;
+	size_t num;
+	size_t cur;
 
 
 	nf = num_func;
@@ -257,11 +257,11 @@ int func_list_parse( Func **fncts, int num_func )
 /* file and counts the number of defined functions   */
 /*---------------------------------------------------*/
 
-static int fll_count_functions( Func *fncts, int num_predef_func )
+static size_t fll_count_functions( Func *fncts, size_t num_predef_func )
 {
 	int ret_token;
 	int last_token = 0;
-	int num = 0;
+	size_t num = 0;
 	Func *f = NULL;
 
 
@@ -327,13 +327,13 @@ static int ffl_func_cmp2( const void *a, const void *b )
 /* and tries to make sense from the entries                   */
 /*------------------------------------------------------------*/
 
-static void fll_get_functions( Func *fncts, int num_predef_func )
+static void fll_get_functions( Func *fncts, size_t num_predef_func )
 {
 	int ret_token;
 	int state;
-	int cur;
-	int act;
-	int i;
+	size_t cur;
+	size_t act;
+	size_t i;
 
 
 	Lc = 1;
