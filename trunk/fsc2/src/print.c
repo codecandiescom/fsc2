@@ -63,17 +63,15 @@ static void do_print( char *name, const char *command );
 static void start_printing( char **argv, char *name );
 
 
-
 /*-------------------------------------------------------------------------*/
 /* This function gets called as the callback routine for the print button  */
 /* in either the main display window in 1D display or in the cross section */
-/* window in for 2D graphics. It shows a form that lets the user select if */
-/* he/she wants to "print" the resulting PostScript ile (using whatever    */
-/* command the user specifies in the form) or to save it in a location     */
-/* selected by the user. Other things the use can choose in this form is   */
-/* the paper size (A4, A3, Legal, Letter or A5 or A6 as size reduced       */
-/* version of A4 created for a A4 printer) as well as if (s)he wants a b/w */
-/* or color output.                                                        */
+/* window for 2D graphics. It shows a form that lets the user select if    */
+/* (s)he wants to "print" the resulting PostScript file (using whatever    */
+/* command the user specifies in the form) or to save it in as a file.     */
+/* Other things the user can choose in this form is the paper size (A4,    */
+/* A3, Legal, Letter or A5 or A6 as size reduced version of A4 created for */
+/* a A4 printer) and b/w or color output.                                  */
 /* For drawing the curves from the main 1D display window the parameter    */
 /* 'data' is expected to be 1, while for cross section curves 'data' must  */
 /* be 0 for cross sections through the x-axis and -1 for the y-axis!       */
