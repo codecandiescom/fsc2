@@ -263,6 +263,8 @@ freq_counter_command, 1, EXP;
    build DA and ADC from Heinz-Juergen Steinhoffs group) */
 
 daq_name, 0, ALL;
+daq_reserve_dac, -1, ALL;
+daq_reserve_adc, -1, ALL;
 daq_set_voltage, -1, ALL;
 daq_get_voltage, -1, ALL;
 
@@ -329,6 +331,7 @@ powersupply_command, 1, EXP;
 /* Functions exported by DIOs (Wasco WITIO-48 card) */
 
 dio_name, 0, ALL;                      // returns the device name
+dio_reserve_dio, -1, ALL;              // get a lock on one of the DIOs
 dio_mode, -1, ALL;                     // sets the DIO mode
 dio_value, -1, EXP;                    // inputs or ouputs a value
 

@@ -54,6 +54,7 @@ int me6000_end_of_exp_hook( void );
 void me6000_exit_hook( void );
 
 Var *daq_name( Var *v );
+Var *daq_reserve_dac( Var *v );
 Var *daq_set_voltage( Var *v );
 
 
@@ -69,6 +70,7 @@ struct ME6000 {
 	struct {
 		bool is_used;
 		double volts;
+		char *reserved_by;
 	} dac[ MAX_NUMBER_OF_DACS ];
 };
 
@@ -86,10 +88,11 @@ int me6000_init_hook( void )
 
 	me6000.num_dacs = MAX_NUMBER_OF_DACS;
 	
-	for ( i = 0; i < 16; i++ )
+	for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
 	{
 		me6000.dac[ i ].is_used = UNSET;
 		me6000.dac[ i ].volts = 0.0;
+		 me6000.dac[ i ].reserved_by = NULL;
 	}
 
 	return 1;
@@ -101,7 +104,15 @@ int me6000_init_hook( void )
 
 int me6000_test_hook( void )
 {
+	int i;
+
+
 	me6000_stored = me6000;
+
+	for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
+		if ( me6000.dac[ i ].reserved_by )
+			me6000_stored.dac[ i ].reserved_by =
+									   T_strdup( me6000.dac[ i ].reserved_by );
 	return 1;
 }
 
@@ -117,7 +128,17 @@ int me6000_exp_hook( void )
 
 	/* Restore state from before the start of the test run */
 
+	for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
+		if ( me6000.dac[ i ].reserved_by )
+			me6000.dac[ i ].reserved_by =
+								  CHAR_P T_free( me6000.dac[ i ].reserved_by );
+
 	me6000 = me6000_stored;
+
+	for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
+		if ( me6000_stored.dac[ i ].reserved_by )
+			me6000.dac[ i ].reserved_by =
+								T_strdup( me6000_stored.dac[ i ].reserved_by );
 
 	/* Try to get the number of DACs the boards has, this is also a test to
 	   see if it can be opened and accessed */
@@ -206,10 +227,21 @@ int me6000_end_of_exp_hook( void )
 
 void me6000_exit_hook( void )
 {
+	int i;
+
+
 	/* This shouldn't be necessary, I just want to make 100% sure that
 	   the device file for the board is really closed */
 
 	me6x00_close( BOARD_NUMBER );
+
+	for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
+	{
+		if ( me6000.dac[ i ].reserved_by )
+			T_free( me6000.dac[ i ].reserved_by );
+		if ( me6000_stored.dac[ i ].reserved_by )
+			T_free( me6000_stored.dac[ i ].reserved_by );
+	}
 }
 
 
@@ -223,6 +255,83 @@ Var *daq_name( Var *v )
 }
 
 
+/*-------------------------------------------------------------------*/
+/* Functions allows to reserve (or un-reserve) a DAC channel so that */
+/* in the following setting the DAC channel requires a pass-phrase   */
+/* as the very first argument to the function daq_set_voltage().     */
+/*-------------------------------------------------------------------*/
+
+Var *daq_reserve_dac( Var *v )
+{
+	bool lock_state = SET;
+	long channel;
+	int dac;
+
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	channel = get_strict_long( v, "channel number" );
+
+	dac = me6000_channel_number( channel );
+
+	if ( dac >= me6000.num_dacs )
+	{
+		print( FATAL, "Can't reserve CH%d, board has only %d channels.\n",
+			   dac, me6000.num_dacs );
+		THROW( EXCEPTION );
+	}
+
+	if ( v == NULL )
+		return vars_push( INT_VAR, me6000.dac[ dac ].reserved_by ? 1L : 0L );
+
+	if ( v->type != STR_VAR )
+	{
+		print( FATAL, "First argument isn't a string.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( v->next != NULL )
+	{
+		lock_state = get_boolean( v->next );
+		too_many_arguments( v->next );
+	}
+	else
+		too_many_arguments( v );
+
+	if ( me6000.dac[ dac ].reserved_by )
+	{
+		if ( lock_state == SET )
+		{
+			if ( ! strcmp( me6000.dac[ dac ].reserved_by, v->val.sptr ) )
+				return vars_push( INT_VAR, 1L );
+			else
+				return vars_push( INT_VAR, 0L );
+		}
+		else
+		{
+			if ( ! strcmp( me6000.dac[ dac ].reserved_by, v->val.sptr ) )
+			{
+				me6000.dac[ dac ].reserved_by =
+								CHAR_P T_free( me6000.dac[ dac ].reserved_by );
+				return vars_push( INT_VAR, 1L );
+			}
+			else
+				return vars_push( INT_VAR, 0L );
+		}
+	}
+
+	if ( ! lock_state )
+		return vars_push( INT_VAR, 1L );
+
+	me6000.dac[ dac ].reserved_by = T_strdup( v->val.sptr );
+	return vars_push( INT_VAR, 1L );
+}
+
+
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
@@ -231,7 +340,20 @@ Var *daq_set_voltage( Var *v )
 	long channel;
 	int dac;
 	double volts;
+	char *pass = NULL;
 
+
+	if ( v != NULL && v->type == STR_VAR )
+	{
+		pass = v->val.sptr;
+		v = v->next;
+	}
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
 
 	channel = get_strict_long( v, "channel number" );
 
@@ -263,6 +385,20 @@ Var *daq_set_voltage( Var *v )
 
 		return vars_push( FLOAT_VAR, me6000.dac[ dac ].volts );
 	}
+
+	if ( me6000.dac[ dac ].reserved_by )
+	{
+		if ( pass == NULL )
+		{
+			print( FATAL, "CH%ld is reserved, phase-phrase required.\n", dac );
+			THROW( EXCEPTION );
+		}
+		else if ( strcmp( me6000.dac[ dac ].reserved_by, pass ) )
+		{
+			print( FATAL, "CH%ld is reserved, wrong phase-phrase.\n", dac );
+			THROW( EXCEPTION );
+		}
+	}		
 
 	volts = get_double( v, "DAC output voltage" );
 

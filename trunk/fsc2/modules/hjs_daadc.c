@@ -51,6 +51,8 @@ int hjs_daadc_end_of_exp_hook( void );
 void hjs_daadc_exit_hook( void );
 
 Var *daq_name( Var *v );
+Var *daq_reserve_dac( Var *v );
+Var *daq_reserve_adc( Var *v );
 Var *daq_maximum_output_voltage( Var *v );
 Var *daq_set_voltage( Var *v );
 Var *daq_get_voltage( Var *v );
@@ -74,6 +76,9 @@ struct HJS_DAADC {
 	bool is_volts_out;
 	int out_val;
 	bool has_dac_been_set;;
+
+	char *dac_reserved_by;
+	char *adc_reserved_by;
 };
 
 
@@ -94,6 +99,9 @@ int hjs_daadc_init_hook( void )
 	hjs_daadc.volts_out = MAX_OUT_VOLTS * DEF_OUT_VAL / 4095.0;
 	hjs_daadc.has_dac_been_set = UNSET;
 
+	hjs_daadc.dac_reserved_by = NULL;
+	hjs_daadc.adc_reserved_by = NULL;
+
 	return 1;
 }
 
@@ -105,6 +113,15 @@ int hjs_daadc_init_hook( void )
 int hjs_daadc_test_hook( void )
 {
 	hjs_daadc_stored = hjs_daadc;
+
+	if ( hjs_daadc.dac_reserved_by )
+		hjs_daadc_stored.dac_reserved_by =
+										 T_strdup( hjs_daadc.dac_reserved_by );
+
+	if ( hjs_daadc.adc_reserved_by )
+		hjs_daadc_stored.adc_reserved_by =
+										 T_strdup( hjs_daadc.adc_reserved_by );
+
 	return 1;
 }
 
@@ -118,7 +135,22 @@ int hjs_daadc_exp_hook( void )
 	/* Restore state from before the start of the test run (or the
 	   last experiment) */
 
+	if ( hjs_daadc.dac_reserved_by )
+		hjs_daadc.dac_reserved_by = CHAR_P T_free( hjs_daadc.dac_reserved_by );
+
+	if ( hjs_daadc.adc_reserved_by )
+		hjs_daadc.adc_reserved_by = CHAR_P T_free( hjs_daadc.adc_reserved_by );
+
 	hjs_daadc = hjs_daadc_stored;
+
+	if ( hjs_daadc_stored.dac_reserved_by )
+		hjs_daadc.dac_reserved_by =
+								  T_strdup( hjs_daadc_stored.dac_reserved_by );
+
+	if ( hjs_daadc_stored.adc_reserved_by )
+		hjs_daadc.adc_reserved_by =
+								  T_strdup( hjs_daadc_stored.adc_reserved_by );
+
 
 	if ( ! ( hjs_daadc.is_open = hjs_daadc_serial_init( ) ) )
 		hjs_daadc_comm_failure( );
@@ -152,6 +184,16 @@ void hjs_daadc_exit_hook( void )
 	if ( hjs_daadc.is_open )
 		fsc2_serial_close( SERIAL_PORT );
 	hjs_daadc.is_open = UNSET;
+
+	if ( hjs_daadc.dac_reserved_by )
+		T_free( hjs_daadc.dac_reserved_by );
+	if ( hjs_daadc_stored.dac_reserved_by )
+		T_free( hjs_daadc_stored.dac_reserved_by );
+
+	if ( hjs_daadc.adc_reserved_by )
+		T_free( hjs_daadc.adc_reserved_by );
+	if ( hjs_daadc_stored.adc_reserved_by )
+		T_free( hjs_daadc_stored.adc_reserved_by );
 }
 
 
@@ -163,6 +205,123 @@ Var *daq_name( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
+}
+
+
+/*--------------------------------------------------------------------*/
+/* Functions allows to reserve (or un-reserve) the DAC so that in the */
+/* following setting the DAC requires a pass-phrase as the very first */
+/* argument to the functions daq_maximum_output_voltage() and         */
+/* daq_set_voltage().                                                 */
+/*--------------------------------------------------------------------*/
+
+Var *daq_reserve_dac( Var *v )
+{
+	bool lock_state = SET;
+
+
+	if ( v == NULL )
+		return vars_push( INT_VAR, hjs_daadc.dac_reserved_by ? 1L : 0L );
+
+	if ( v->type != STR_VAR )
+	{
+		print( FATAL, "First argument isn't a string.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( v->next != NULL )
+	{
+		lock_state = get_boolean( v->next );
+		too_many_arguments( v->next );
+	}
+	else
+		too_many_arguments( v );
+
+	if ( hjs_daadc.dac_reserved_by )
+	{
+		if ( lock_state == SET )
+		{
+			if ( ! strcmp( hjs_daadc.dac_reserved_by, v->val.sptr ) )
+				return vars_push( INT_VAR, 1L );
+			else
+				return vars_push( INT_VAR, 0L );
+		}
+		else
+		{
+			if ( ! strcmp( hjs_daadc.dac_reserved_by, v->val.sptr ) )
+			{
+				hjs_daadc.dac_reserved_by =
+									CHAR_P T_free( hjs_daadc.dac_reserved_by );
+				return vars_push( INT_VAR, 1L );
+			}
+			else
+				return vars_push( INT_VAR, 0L );
+		}
+	}
+
+	if ( ! lock_state )
+		return vars_push( INT_VAR, 1L );
+
+	hjs_daadc.dac_reserved_by = T_strdup( v->val.sptr );
+	return vars_push( INT_VAR, 1L );
+}
+
+
+/*--------------------------------------------------------------------*/
+/* Function allows to reserve (or un-reserve) the ADC so that in the  */
+/* following setting the DAC requires a pass-phrase as the very first */
+/* argument to the function daq_get_voltage().                        */
+/*--------------------------------------------------------------------*/
+
+Var *daq_reserve_adc( Var *v )
+{
+	bool lock_state = SET;
+
+
+	if ( v == NULL )
+		return vars_push( INT_VAR, hjs_daadc.adc_reserved_by ? 1L : 0L );
+
+	if ( v->type != STR_VAR )
+	{
+		print( FATAL, "First argument isn't a string.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( v->next != NULL )
+	{
+		lock_state = get_boolean( v->next );
+		too_many_arguments( v->next );
+	}
+	else
+		too_many_arguments( v );
+
+	if ( hjs_daadc.adc_reserved_by )
+	{
+		if ( lock_state == SET )
+		{
+			if ( ! strcmp( hjs_daadc.adc_reserved_by, v->val.sptr ) )
+				return vars_push( INT_VAR, 1L );
+			else
+				return vars_push( INT_VAR, 0L );
+		}
+		else
+		{
+			if ( ! strcmp( hjs_daadc.adc_reserved_by, v->val.sptr ) )
+			{
+				hjs_daadc.adc_reserved_by =
+									CHAR_P T_free( hjs_daadc.adc_reserved_by );
+				return vars_push( INT_VAR, 1L );
+			}
+			else
+				return vars_push( INT_VAR, 0L );
+		}
+	}
+
+	if ( ! lock_state )
+		return vars_push( INT_VAR, 1L );
+
+	hjs_daadc.adc_reserved_by = T_strdup( v->val.sptr );
+	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -183,12 +342,33 @@ Var *daq_name( Var *v )
 Var *daq_maximum_output_voltage( Var *v )
 {
 	double volts;
+	char *pass = NULL;
 
+
+	if ( v != NULL && v->type == STR_VAR )
+	{
+		pass = v->val.sptr;
+		v = v->next;
+	}
 
 	if ( v == NULL )
 		return vars_push( FLOAT_VAR, hjs_daadc.max_volts );
 
 	volts = get_double( v, "DAC output voltage" );
+
+	if ( hjs_daadc.dac_reserved_by )
+	{
+		if ( pass == NULL )
+		{
+			print( FATAL, "DAC is reserved, phase-phrase required.\n" );
+			THROW( EXCEPTION );
+		}
+		else if ( strcmp( hjs_daadc.dac_reserved_by, pass ) )
+		{
+			print( FATAL, "DAC is reserved, wrong phase-phrase.\n" );
+			THROW( EXCEPTION );
+		}
+	}		
 
 	too_many_arguments( v );
 
@@ -230,7 +410,14 @@ Var *daq_maximum_output_voltage( Var *v )
 Var *daq_set_voltage( Var *v )
 {
 	double volts;
+	char *pass = NULL;
 
+
+	if ( v != NULL && v->type == STR_VAR )
+	{
+		pass = v->val.sptr;
+		v = v->next;
+	}
 
 	if ( v == NULL )
 	{
@@ -245,6 +432,20 @@ Var *daq_set_voltage( Var *v )
 	}
 
 	volts = get_double( v, "DAC output voltage" );
+
+	if ( hjs_daadc.dac_reserved_by )
+	{
+		if ( pass == NULL )
+		{
+			print( FATAL, "DAC is reserved, phase-phrase required.\n" );
+			THROW( EXCEPTION );
+		}
+		else if ( strcmp( hjs_daadc.dac_reserved_by, pass ) )
+		{
+			print( FATAL, "DAC is reserved, wrong phase-phrase.\n" );
+			THROW( EXCEPTION );
+		}
+	}		
 
 	too_many_arguments( v );
 
@@ -288,8 +489,33 @@ Var *daq_set_voltage( Var *v )
 
 Var *daq_get_voltage( Var *v )
 {
-	UNUSED_ARGUMENT ( v );
+	char *pass = NULL;
 
+
+	if ( v != NULL )
+	{
+		if ( v->type == STR_VAR )
+			pass = v->val.sptr;
+		else
+		{
+			print( FATAL, "Invalid argument.\n" );
+			THROW( EXCEPTION );
+		}
+	}
+
+	if ( hjs_daadc.adc_reserved_by )
+	{
+		if ( pass == NULL )
+		{
+			print( FATAL, "ADC is reserved, phase-phrase required.\n" );
+			THROW( EXCEPTION );
+		}
+		else if ( strcmp( hjs_daadc.adc_reserved_by, pass ) )
+		{
+			print( FATAL, "ADC is reserved, wrong phase-phrase.\n" );
+			THROW( EXCEPTION );
+		}
+	}		
 
 	if ( ! hjs_daadc.has_dac_been_set )
 		print( SEVERE, "AD conversion requires DA conversion, setting "
