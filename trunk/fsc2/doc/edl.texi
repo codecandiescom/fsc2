@@ -392,7 +392,11 @@ Integer variables (on machines with 32-bit processors) can hold data in
 the interval @w{[-2^31, 2^31 - 1]}, i.e.@: they run from @w{-2147483648}
 all the way up to @w{+2147483647}. In contrast, floating point variables
 can have much larger values (typically up to ca.@: 10^300), the exact
-limits depending on the machine @code{fsc2} is running on.
+limits depending on the machine @code{fsc2} is running on. The larger
+range for floating point numbers comes with a price: they have only a
+lilited precision, normally not more than about 14 to 15 digits can be
+trusted and rounding errors can lead to quite large errors if not used
+with great care in calculations.
 
 To distinguish between integer and floating point variables the case of
 the first character of the variables name is important: if the name
@@ -460,11 +464,13 @@ F[ 2, 3, 4 ] = @{ @{ @{ 1, 2, 3, 4 @},
                    E
                @};
 G[ 4, 3, 4 ] = @{ @{ @},
-                  E
+                  @{ E[ 3 ], E[ 2 ], E[ 1 ] @}
                @};
 @end example
 @noindent
-You also need not to specify as many initilaizer elements as there are
+In the last statment of the example sub-arrays of the matrix @code{E}
+are used, e.g.@: @code{E[3]} is the whole third sub-array of @code{E}.
+You also need not to specify as many initializer elements as there are
 elements in the matrix to be initialized, for missing elements the
 matrix remains uninitialized.
 
@@ -496,10 +502,10 @@ h[ 2, * ];
 I[ *, *, * ];
 @end example
 @noindent
-This defines an 1-dimensional integer array @code{G} with a still
-undefined number of elements, a 2-dimensional floating point matrix
-@code{h} with two rows of unknown length and a 3-dimensional array with
-all sizes being variable sized.
+This defines an 1-dimensional integer array @code{G} with a non-fixed
+(and still unknown) number of elements, a 2-dimensional floating point
+matrix @code{h} with two rows of unknown length and a 3-dimensional
+array with all sizes being variable sized.
 
 The only restriction in declaring variable sized matrices is that you
 can't declare matrices with only the higher dimensions being variable
@@ -509,12 +515,13 @@ sized but the lower ones fixed. I.e.@: the following definition is
 h[ *, 2 ];  /* WRONG! */
 @end example
 
-The length of array @code{M} in the above example remains indertermined
-until a value is assigned to at least one of the array element. If you
-now assign a value to the 25th element like this
+The length of the 1-dimensional array @code{M} from the above example
+remains indetermined until a value is assigned to at least one of the
+array element. If you now assign a value to the 25th element like this
 @example
 M[ 25 ] = 42;
 @end example
+@noindent
 the array will suddenly have 25 elements with the first 24 being set to
 zero and the 25th set to @code{42}. You can also lengthen the array at
 a later time by assigning a value to an element with an higher index,
@@ -522,8 +529,9 @@ e.g.
 @example
 M[ 50 ] = 84;
 @end example
-Now the array has 50 elements and now also all elements between the
-25th and the 50th are initialized to zero.
+@noindent
+Now the array has 50 elements, the newly added elements between and
+including the 25th and 49th being initialized to zero.
 
 But there's also another way to change the size of the array. You can
 assign another array to @code{M} and in this case the length of @code{M}
@@ -532,19 +540,21 @@ you had an array defined as
 @example
 H[ 10 ] = @{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 @};
 @end example
+@noindent
 and you now assign @code{H} to @code{M}
 @example
 M = H;
 @end example
+@noindent
 @code{M} will also have 10 elements afterwards, with the same values as
 the elements of @code{H}.
 
 Some care has to be taken: it is also possible to shrink the length of a
 variable sized array by assigning a another arrray to it. If @code{M}
 had already been given a length by e.g.@: assigning a value to its 25th
-element then assigning the shorter array @code{H} to it will
-automatically shorten @code{M} to 10 elements and the values of the
-11th to the 25th element are lost.
+element then assigning it the shorter array @code{H} will automatically
+shorten it to 10 elements and the values stored in the 11th to the 25th
+element are lost.
 
 To understand how more-dimensional, variable sized arrays work it is
 probably best to think of them not in terms of matrices but of arrays
@@ -552,12 +562,14 @@ of arrays (of arrays... etc.). For example, a two-dimensional array like
 @example
 j[ *, * ];
 @end example
+@noindent
 can be thought of as an array (of still undetermined length) of arrays
 which also have no length yet (or a length of 0). When you now assign
 a value to one of the lowest-level arrays like
 @example
 j[ 7, 9 ] = 3.1415927;
 @end example
+@noindent
 the third sub-array of @code{j} will suddenly spring into existence,
 having a length of 9 (with all elements of this sub-array except the 9th
 being initialized to 0). But this does @strong{not} also create other
@@ -569,10 +581,10 @@ sub-arrays it will start to exist, e.g.@: by having
 @example
 j[ 3, 2 ] = 2.7182818;
 @end example
+@noindent
 Now the 3rd and the 7th sub-array of @code{j} exist - but no others.
 And both these sub-arrays have different lengths, the 3rd sub-array has
 a length of only 2, while the 9th sub-array has a length of 9.
-
 
 Of course, the sub-arrays can also be created by assigning another
 array. E.g.
@@ -580,6 +592,7 @@ array. E.g.
 k[ 3 ] = @{ -1.0, 0. 1.0 @};
 j[ 5 ] = k;
 @end example
+@noindent
 will create the 5th sub-array of @code{j} with a length of 3 and its
 values being identical to the ones of the array @code{k}. From this
 example you can also see, that sub-arrays of an array can be simply
@@ -593,6 +606,7 @@ to it.
 l[ 3, 2 ] = @{ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 @};
 j = l;
 @end example
+@noindent
 Since @code{l} is a matrix of rank 3x2 after the assignment @code{j}
 will have the same rank (and the elements of @code{j} and @code{l}
 will, of course, be identical).
@@ -626,6 +640,7 @@ set to this number. To repeat:
 B[ 3 ] = 9;
 b[ 2, 9 ] = sin( atan( 1.0 ) );
 @end example
+@noindent
 sets all elements of the array @code{B} to 9 and all 18 elements of the
 2-dimensional matrix @code{b} to the sine of 45 degrees (atan(1)
 evaluates to a quarter of pi).
@@ -644,6 +659,7 @@ matrix. If you have in the @code{VARIABLES} section:
 z1[ 2 ] = @{ 3, 5 @};
 z2[ 2, * ] = xx;
 @end example
+@noindent
 this will set up both the sub-arrays of @code{z2} to have 2 elements each
 and set both sub-arrays to the same values as the ones of @code{z1}.
 
@@ -653,11 +669,13 @@ at once by just writing
 @example
 z2 = z1;
 @end example
+@noindent
 It's basically just a abbreviation for the longer form
 @example
 z2[ 1 ] = z1;
 z2[ 2 ] = z1;
 @end example
+@noindent
 or the even longer form of
 @example
 z2[ 1, 1 ] = z1[ 1 ];
@@ -999,6 +1017,7 @@ simply writing
 @example
 M += 3;
 @end example
+@noindent
 Of course, this also works with all the other kinds of arithmetic
 operations. The only requirement is, if @code{M} is a variable sized
 matrix, all elements exist, i.e.@: if for example a sub-array isn't yet
@@ -1009,6 +1028,7 @@ If you want to add a number to only a sub-array of the matrix
 @example
 M[ 2 ] += 3;
 @end example
+@noindent
 would add 3 to each elements of the 2nd sub-array of @code{M} (which is
 a matrix of rank 4x5).
 
@@ -1020,6 +1040,7 @@ writing
 @example
 M += a;
 @end example
+@noindent
 If you would have to write the same using just the elements you would
 have to write 60 additions instead, i.e.@:
 @example
@@ -1032,6 +1053,7 @@ M[ 1, 2, 1 ] += a[ 1 ];
 ...
 M[ 3, 4, 5 ] += a[ 5 ];
 @end example
+@noindent
 Of course, this could also be done using a @code{FOR} loop, see below,
 but would still be a lot longer.
 
@@ -1040,6 +1062,7 @@ in the 2nd set of sub-arrays of @code{M} you could simply write
 @example
 M[ 2 ] += a;
 @end example
+@noindent
 instead of doing it explicitely in the longer form
 @example
 M[ 2, 1 ] += a;
@@ -1048,15 +1071,14 @@ M[ 2, 3 ] += a;
 M[ 2, 4 ] += a;
 @end example
 
-Finally, you can also directly add a 2-dimensional matrix to all
-sub-matrices of a 3-dimensional matrix, or, generally, you can add an
-n-dimensional matrix to all n-dimensional sub-matrices of a
-m-dimensional matrix, given that m is larger than n and that the ranks
-of the sub-matrices are identical, by just writing them as if they were
-simple numbers. The same holds for all the other types of arithmetic
-operations. In all cases @code{fsc2} will automatically try to get it
-right and spare you from having to write all kinds of loops to get the
-same effect.
+You can also directly add a 2-dimensional matrix to all sub-matrices of
+a 3-dimensional matrix, or, generally, you can add a n-dimensional
+matrix to all n-dimensional sub-matrices of a m-dimensional matrix,
+given that m is larger than n and that the ranks of the sub-matrices are
+identical, by just writing them as if they were simple numbers. The same
+holds for all the other types of arithmetic operations. In all cases
+@code{fsc2} will automatically try to get it right and spare you from
+having to write all kinds of loops to get the same effect.
 
 You can also mix objects of different ranks in an expression: if
 @code{M} is, for example, a 3-dimensional matrix, @code{N} is a
@@ -1064,6 +1086,7 @@ You can also mix objects of different ranks in an expression: if
 @example
 M += N - R * 3;
 @end example
+@noindent
 In this case each element of @code{R} will first be multiplied by 3 and
 the resulting array is then subtracted from each of the sub-arrays of
 @code{N}. Finally, @code{N} is added to each of the sub-matrices of
@@ -1199,14 +1222,11 @@ expressions (e.g.@: numbers):
 @end quotation
 
 Please note, that using comparisons between floating point numbers may
-not work as you expect them to do. This is a result of the way floating
-point numbers are stored by computers internally, i.e.@: as binary
-numbers. Many numbers, that can be expressed easily in the decimal
-system, e.g.@: @code{0.1}, are, when expressed using the binary system,
-infinite fractions. But because the computer can only store a finite
-number of bits for the number rounding errors will occur. Thus
-@code{0.1} and the result of e.g.@: @code{0.7 / 7} can be different
-numbers, in which case a comparison for equality will fail.
+not work as expected. This is a result of the finite precision of
+floating point numbers.  Thus, for example, @code{0.1} and the result of
+e.g.@: @code{0.7 / 7} can be different numbers, in which case a
+comparison for equality will fail. Thus comparison for equality should
+in principle only with integer numbers.
 
 Here is now an example for using simple numbers in a condition,
 using the fact that a non-zero value is always interpreted as TRUE:

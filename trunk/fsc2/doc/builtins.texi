@@ -1985,14 +1985,14 @@ will return an array with 4 elements containing the data
 @end example
 
 
-@anchor{ int_slice }
+@anchor{int_slice}
 @item int_slice()
 @findex int_slice()
 Creates an integer array of the size of the first and only argument
 with every element set to @code{0} that can be assigned to an integer
 array of variable length.
 
-@anchor{ float_slice }
+@anchor{float_slice}
 @item float_slice()
 @findex float_slice()
 Creates an float array of the size of the first and only argument with
@@ -2015,34 +2015,18 @@ it will return @code{3}.
 @anchor{size}
 @item size()
 @findex size()
-The function normally takes two arguments, an array and one of the
-dimensions of the array, and returns the size of this dimension. I.e.@:
+The function normally takes one arguments, an array, and returns its
+length. I.e.@:
 for an array defined as
 @example
 @code{X[ 4, 2, 5 ]}
 @end example
 @noindent
-@code{size( X, 3 )} will return @code{5}.
-Only for one-dimensional arrays a single argument, the name of the
-array, is sufficient (i.e.@: the only possible value of @code{1} for
-the second parameter can be omitted) and the function returns the length
-of the one-dimensional array.
+@code{size( X )} will return @code{4}, @code{size( X[ 4 ] )} returns
+@code{2} and @code{size( X[ 4, 2 ] )} returns @code{5}.
 
-
-@anchor{sizes}
-@item sizes()
-@findex sizes()
-This function is similar to @code{size()} but only takes an array as
-argument and returns a new one-dimensional array with the sizes of the
-different dimensions of the input array.
-@example
-X[ 4, 2, 5 ]
-Dim_X[ * ];
-
-Dim_X = size( X );
-@end example
-@noindent
-will set the array @code{Dim_X} to @code{4, 2, 5}.
+For variable sized arrays for which the length is still unknown the
+function returns @code{0}.
 
 
 @end table
