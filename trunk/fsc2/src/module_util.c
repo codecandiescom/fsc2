@@ -199,6 +199,8 @@ inline bool get_boolean( Var *v )
 /* time spend in calls of the EDL function wait() (see f_wait() in   */
 /* func_util.c) plus the value MODULE_CALL ESTIMATE (defined in the  */
 /* header file) for each module function call.                       */
+/* During the experiment the fucntion returns the correct time since */
+/* the start of the experiment.                                      */
 /*-------------------------------------------------------------------*/
 
 double experiment_time( void )
@@ -216,9 +218,7 @@ double experiment_time( void )
 	t_old.tv_sec = t_new.tv_sec;
 	t_old.tv_usec = t_new.tv_usec;
 
-	EDL.experiment_time += ( double ) dsec + 1.e-6 * ( double ) dusec;
-
-	return EDL.experiment_time;
+	return EDL.experiment_time += ( double ) dsec + 1.e-6 * ( double ) dusec;
 }
 
 

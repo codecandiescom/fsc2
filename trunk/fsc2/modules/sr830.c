@@ -2195,7 +2195,6 @@ static double sr830_get_auto_data( int type )
 		{
 			double new_time, delta_time;
 
-
 			new_time = experiment_time( );
 			delta_time = new_time - sr830.auto_time;
 

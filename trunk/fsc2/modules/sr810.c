@@ -134,6 +134,8 @@ typedef struct
 
 	bool is_auto_running;
 	bool is_auto_setup;
+	double auto_time;
+
 	long st_index;
 	bool set_sample_time_to_tc;
 	long dsp_ch;
@@ -2027,6 +2029,8 @@ static void sr810_auto( int flag )
 		sr810.data_fetched = 0;
 		sr810.stored_data = 0;
 	}
+	else
+		sr810.auto_time = experiment_time( );
 }
 
 
@@ -2040,20 +2044,8 @@ static double sr810_get_auto_data( int type )
 	long length = 100;
 	int channel;
 	char *ptr;
+	bool new_try = SET;
 
-
-#if 0
-	if ( gpib_write( sr810.device, "*STB?\n", 6 ) == FAILURE ||
-		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
-		sr810_failure( );
-	buffer[ length - 1 ] = '\0';
-	if ( dont && ( T_atol( buffer ) & 1 ) )
-	{
-		sr810.data_fetched = l_max( sr810.data_fetched - 12, 0 );
-		dont = UNSET;
-	}
-	length = 100;
-#endif
 
 #ifndef NDEBUG
 	if ( sr810.dsp_ch != type )
@@ -2089,6 +2081,25 @@ static double sr810_get_auto_data( int type )
 
 	while ( sr810.stored_data <= sr810.data_fetched )
 	{
+		/* When we freshly arrive here we measure the time since the last call
+		   (or since the start of the auto-acquisition) and if this time is
+		   smaller than the auto-acquisition time we sleep until new data are
+		   to be expected - this way we don't have to constantly poll the
+		   lock-in (which also keeps the log file smaller ;-) */
+
+		if ( new_try )
+		{
+			double new_time, delta_time;
+
+			new_time = experiment_time( );
+			delta_time = new_time - sr810.auto_time;
+
+			if ( delta_time < st_list[ sr810.st_index ] )
+				usleep( floor( ( st_list[ sr810.st_index ] - delta_time )
+							   * 1000000.0 ) );
+			new_try = UNSET;
+		}
+
 		stop_on_user_request( );
 
 		length = 100;
