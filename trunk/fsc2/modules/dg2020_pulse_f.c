@@ -119,8 +119,19 @@ bool dg2020_set_pulse_position( long pnum, double time )
 		THROW( EXCEPTION );
 	}
 
-	p->pos = p->initial_pos = dg2020_double2ticks( time );
-	p->is_pos = p->initial_is_pos = SET;
+	p->pos = dg2020_double2ticks( time );
+	p->is_pos = SET;
+
+	if ( ! p->initial_is_pos && ! TEST_RUN && I_am == PARENT )
+	{
+		p->initial_pos = p->pos;
+		p->initial_is_pos = SET;
+	}
+	else if ( ! p->is_old_pos )
+	{
+		p->old_pos = p->pos;
+		p->is_old_pos = SET;
+	}
 
 	return OK;
 }
@@ -155,8 +166,16 @@ bool dg2020_set_pulse_length( long pnum, double time )
 		p->is_len = SET;
 	}
 
-	p->initial_len = dg2020_double2ticks( time );
-	p->initial_is_len = SET;
+	if ( ! p->initial_is_len && ! TEST_RUN && I_am == PARENT )
+	{
+		p->initial_len = dg2020_double2ticks( time );
+		p->initial_is_len = SET;
+	}
+	else if ( ! p->is_old_len )
+	{
+		p->old_len = p->len;
+		p->is_old_len = SET;
+	}
 
 	return OK;
 }
@@ -185,8 +204,14 @@ bool dg2020_set_pulse_position_change( long pnum, double time )
 		return FAIL;
 	}
 
-	p->dpos = p->initial_dpos = dg2020_double2ticks( time );
-	p->is_dpos = p->initial_is_dpos = SET;
+	p->dpos = dg2020_double2ticks( time );
+	p->is_dpos = SET;
+
+	if ( ! p->initial_is_dpos && ! TEST_RUN && I_am == PARENT )
+	{
+		p->initial_dpos = dg2020_double2ticks( time );
+		p->initial_is_dpos = SET;
+	}
 
 	return OK;
 }
@@ -215,8 +240,14 @@ bool dg2020_set_pulse_length_change( long pnum, double time )
 		return FAIL;
 	}
 
-	p->dlen = p->initial_dlen = dg2020_double2ticks( time );
-	p->is_dlen = p->initial_is_dlen = SET;
+	p->dlen = dg2020_double2ticks( time );
+	p->is_dlen = SET;
+
+	if ( ! p->initial_is_dlen && ! TEST_RUN && I_am == PARENT )
+	{
+		p->initial_dlen = dg2020_double2ticks( time );
+		p->initial_is_dlen = SET;
+	}
 
 	return OK;
 }

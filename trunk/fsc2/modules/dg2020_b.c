@@ -238,12 +238,7 @@ int dg2020_b_exp_hook( void )
 	   update mode) and than switch the pulser into run mode */
 
 	dg2020_update_data( );
-	if ( ! dg2020_run( START ) )
-	{
-		eprint( FATAL, "%s:%ld: %s: Communication with pulser failed.\n",
-				Fname, Lc, pulser_struct.name );
-		THROW( EXCEPTION );
-	}
+	dg2020_run( START );
 
 	return 1;
 }
@@ -318,12 +313,8 @@ Var *pulser_update( Var *v )
 
 	/* If we're doing a real experiment also tell the pulser to start */
 
-	if ( ! TEST_RUN && ! dg2020_run( START ) )
-	{
-		eprint( FATAL, "%s:%ld: %s: Communication with pulser failed.\n",
-				Fname, Lc, pulser_struct.name );
-		THROW( EXCEPTION );
-	}
+	if ( ! TEST_RUN )
+		dg2020_run( START );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -538,17 +529,12 @@ Var *pulser_next_phase( Var *v )
 			f->next_phase = 0;
 
 		if ( ! TEST_RUN )
-		{
 			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
 				if ( f->phase_setup->is_set[ j ] &&
 					 ! dg2020_channel_assign( 
 						 f->pcm[ j * f->pc_len + f->next_phase ]->self,
 						 f->phase_setup->pod[ j ]->self ) )
 					return vars_push( INT_VAR, 0 );
-
-			if ( ! dg2020_update_data( ) )
-				return vars_push( INT_VAR, 0 );
-		}
 	}
 
 	return vars_push( INT_VAR, 1 );
@@ -609,16 +595,12 @@ Var *pulser_phase_reset( Var *v )
 		f->next_phase = 0;
 
 		if ( ! TEST_RUN )
-		{
 			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X + 1; j++ )
 				if ( f->phase_setup->is_set[ j ] && 
 					 ! dg2020_channel_assign(
 						 f->pcm[ j * f->pc_len + 0 ]->self,
 						 f->phase_setup->pod[ j ]->self ) )
 					return vars_push( INT_VAR, 0 );
-			if ( ! dg2020_update_data( ) )
-				return vars_push( INT_VAR, 0 );
-		}
 	}
 
 	return vars_push( INT_VAR, 1 );
@@ -640,9 +622,15 @@ Var *pulser_pulse_reset( Var *v )
        inactive ones) */
 
 	if ( v == NULL )
+	{
+		if ( dg2020_phs[ 0 ].function != NULL ||
+			 dg2020_phs[ 1 ].function != NULL )
+			pulser_phase_reset( NULL );
+
 		for( p = dg2020_Pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 )
 				pulser_pulse_reset( vars_push( INT_VAR, p->num ) );
+	}
 
 	/* Otherwise run through the supplied pulse list */
 
@@ -653,15 +641,16 @@ Var *pulser_pulse_reset( Var *v )
 
 		/* Reset all changeable properties back to their initial values */
 
-		if ( p->is_pos )
+		if ( p->is_pos && ! p->is_old_pos )
 		{
 			p->old_pos = p->pos;
 			p->is_old_pos = SET;
 		}
+
 		p->pos = p->initial_pos;
 		p->is_pos = p->initial_is_pos;
 
-		if ( p->is_len || p->is_len )
+		if ( p->is_len && ! p->is_old_len )
 		{
 			p->old_len = p->len;
 			p->is_old_len = SET;
@@ -670,10 +659,12 @@ Var *pulser_pulse_reset( Var *v )
 		p->len = p->initial_len;
 		p->is_len = p->initial_is_len;
 
-		p->dpos = p->initial_dpos;
+		if ( p->initial_is_dpos )
+			p->dpos = p->initial_dpos;
 		p->is_dpos = p->initial_is_dpos;
 
-		p->dlen = p->initial_dlen;
+		if ( p->initial_is_dlen )
+			p->dlen = p->initial_dlen;
 		p->is_dlen = p->initial_is_dlen;
 
 		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );

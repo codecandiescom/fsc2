@@ -22,7 +22,7 @@ GPIB_LOG       = /tmp/gpib.log
 # here one defines if the program is for a high or a low resolution screen
 # (set SIZE to either `HI_RES' or `LOW_RES')
 
-SIZE           = LOW_RES
+SIZE           = HI_RES
 
 
 # The name of the awk tool is passed to the programs via a macro
@@ -123,7 +123,7 @@ install:
 	install -m 755 -o fsc2 -g fsc2 -s fsc2_clean $(libdir)
 	install -m 644 -o fsc2 -g fsc2 Functions $(libdir)
 	install -m 644 -o fsc2 -g fsc2 Devices $(libdir)
-	install -m 644 -o fsc2 -g fsc2 -s *.so $(libdir)
+	install -m 644 -o fsc2 -g fsc2  *.so $(libdir)
 	install -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
 	install -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
 	install -m 444 -o fsc2 -g fsc2 doc/fsc2.html $(docdir)
