@@ -1632,7 +1632,7 @@ from Roper Scientific.
 
 @paragraphindent 0
 @strong{Description}: 12-bit ADC card for Rulbus (Rijksuniversiteit
-Leiden BUS) - requires Linux device driver and library are part of
+Leiden BUS) - requires Linux device driver and library that are part of
 the @code{fsc2} package)
 
 @paragraphindent 0
@@ -1665,7 +1665,7 @@ the @code{fsc2} package)
 
 @paragraphindent 0
 @strong{Description}: 12-bit DAC card for Rulbus (Rijksuniversiteit
-Leiden BUS) - requires Linux device driver and library are part of
+Leiden BUS) - requires Linux device driver and library that are part of
 the @code{fsc2} package)
 
 @paragraphindent 0
@@ -1696,8 +1696,8 @@ the @code{fsc2} package)
 
 @paragraphindent 0
 @strong{Description}: Pseudo-pulser using Rulbus (Rijksuniversiteit
-Leiden BUS) - requires Linux device driver and library are part of the
-@code{fsc2} package). This pulser isn't a stand-alone device but
+Leiden BUS) - requires Linux device driver and library that are part of
+the @code{fsc2} package). This pulser isn't a stand-alone device but
 consists of a combination of (currently) 10 Rulbus delay cards and 2
 clock cards (one fixed frequency 100 MHz card and a card with adjustable
 frequency) as well as requiring the @strong{Rhode & Schwarz SML01}
