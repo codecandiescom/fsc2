@@ -374,12 +374,12 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 {IKILO}/[^a-zA-z0-9_]   unit_spec( yytext,  3, 0.0 );
 {IMEGA}/[^a-zA-z0-9_]   unit_spec( yytext,  6, 0.0 );
 
-{INANOC}/[^a-zA-z0-9_]  unit_spec( yytext, -9, -273.15 );
-{IMICROC}/[^a-zA-z0-9_] unit_spec( yytext, -6, -273.15 );
-{IMILLIC}/[^a-zA-z0-9_] unit_spec( yytext, -3, -273.15 );
-{INONEC}/[^a-zA-z0-9_]  unit_spec( yytext,  0, -273.15 );
-{IKILOC}/[^a-zA-z0-9_]  unit_spec( yytext,  3, -273.15 );
-{IMEGAC}/[^a-zA-z0-9_]  unit_spec( yytext,  6, -273.15 );
+{INANOC}/[^a-zA-z0-9_]  unit_spec( yytext, -9, -273.16 );
+{IMICROC}/[^a-zA-z0-9_] unit_spec( yytext, -6, -273.16 );
+{IMILLIC}/[^a-zA-z0-9_] unit_spec( yytext, -3, -273.16 );
+{INONEC}/[^a-zA-z0-9_]  unit_spec( yytext,  0, -273.16 );
+{IKILOC}/[^a-zA-z0-9_]  unit_spec( yytext,  3, -273.16 );
+{IMEGAC}/[^a-zA-z0-9_]  unit_spec( yytext,  6, -273.16 );
 
 {FNANO}/[^a-zA-z0-9_]   unit_spec( yytext, -9, 0.0 );
 {FMICRO}/[^a-zA-z0-9_]  unit_spec( yytext, -6, 0.0 );
