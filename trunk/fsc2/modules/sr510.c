@@ -157,7 +157,9 @@ void sr510_exit_hook( void )
 
 Var *lockin_get_data( Var *v )
 {
-	v = v;
+	if ( v != NULL )
+		eprintf( WARN, "%s:%ld: sr510: Useless parameter in call of "
+				 "lockin_get_data().", Fname, Lc );
 
 	if ( TEST_RUN )                  /* return dummy value in test run */
 		return vars_push( FLOAT_VAR, 0.0 );
