@@ -148,6 +148,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 				return 0;
 			}
 
+"ON_QUIT:"  return ON_QUIT_TOK;
 "WHILE"     return WHILE_TOK;
 "BREAK"     return BREAK_TOK;
 {CONT}      return CONT_TOK;
