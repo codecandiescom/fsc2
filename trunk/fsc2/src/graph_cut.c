@@ -932,10 +932,14 @@ bool cut_data_rescaled( long curve, double y_min, double y_max )
 }
 
 
-/*-------------------------------------------------------*/
-/* Function gets called by accept_2d_data() whenever the */
-/* number of points in x- or y-direction changes         */
-/*-------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* Function gets called by accept_2d_data() whenever the number of points */
+/* in x- or y-direction changes. The first argument is the direction the  */
+/* data set changed (i.e. if there are new data in x- or in y-direction)  */
+/* while the second is the new number of points in this direction.        */
+/* This function does not get the new data, it just has to extend and     */
+/* initialize the memory that will be used for them.                      */
+/*------------------------------------------------------------------------*/
 
 bool cut_num_points_changed( int dir, long num_points )
 {
@@ -944,7 +948,10 @@ bool cut_num_points_changed( int dir, long num_points )
 	long k;
 
 
-	if ( ! G.is_cut || dir == CG.cut_dir || CG.curve == -1 )
+	/* Nothing to be done if the number of points didn't change in the cut
+	   direction or no curve is displayed */
+
+	if ( dir == CG.cut_dir || ! G.is_cut || CG.curve == -1 )
 		return FAIL;
 
 	/* Extend the arrays for the (scaled) data and the array of XPoints */
@@ -977,8 +984,12 @@ bool cut_num_points_changed( int dir, long num_points )
 }
 
 
-/*-------------------------------------------------------*/
-/*-------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+/* This function gets called with new data that might need to be displayed. */
+/* Before this function gets called the function cut_num_points_changed()   */
+/* has already been executed if the new data don't overwrite existing data  */
+/* but are for positions where no data have been shown yet.                 */
+/*--------------------------------------------------------------------------*/
 
 bool cut_new_points( long curve, long x_index, long y_index, long len )
 {
@@ -989,7 +1000,7 @@ bool cut_new_points( long curve, long x_index, long y_index, long len )
 	/* Nothing to be done if either the cross section isn't drawn or the new
 	   points do not belong to the currently shown curve */
 
-	if ( ! G.is_cut || curve != G.active_curve )
+	if ( ! G.is_cut || CG.curve == -1 || curve != G.active_curve )
 		return FAIL;
 
 	/* We need a different handling for cuts in X and Y direction. If the cut
