@@ -2174,6 +2174,8 @@ static void recreate_Tool_Box( void )
 
 	fl_end_form( );
 
+	fl_adjust_form_size( Tool_Box->Tools );
+
 	fl_show_form( Tool_Box->Tools, needs_pos ?
 				  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
 				  FL_FULLBORDER, "fsc2: Tools" );

@@ -5,6 +5,7 @@
 #define FSC2_MAIN
 
 #include "fsc2.h"
+#include <X11/Xresource.h>
 
 #if defined MDEBUG
 #include <mcheck.h>
@@ -36,6 +37,46 @@ static void set_main_signals( void );
 static void usage( void );
 static int fsc2_x_error_handler( Display *d, XErrorEvent *err );
 static int fsc2_xio_error_handler( Display *d );
+
+
+#if ( SIZE == HI_RES )
+#define WIN_MIN_WIDTH    200
+#define WIN_MIN_HEIGHT   370
+#define NORMAL_FONT_SIZE FL_LARGE_SIZE
+#define SMALL_FONT_SIZE  FL_SMALL_SIZE
+#else
+#define WIN_MIN_WIDTH    200
+#define WIN_MIN_HEIGHT   320
+#define NORMAL_FONT_SIZE FL_SMALL_SIZE
+#define SMALL_FONT_SIZE  FL_TINY_SIZE
+#endif
+
+
+/* Some variables needed for the X resources */
+
+#define N_APP_OPT 8
+FL_CMD_OPT app_opt[ N_APP_OPT ];
+
+char fl_GeoStr[ 64 ], fl_displayGeoStr[ 64 ],
+	 fl_cutGeoStr[ 64 ], fl_toolGeoStr[ 64 ];
+
+int fl_browserfs, fl_buttonfs, fl_inputfs, fl_labelfs;
+
+FL_resource res[ N_APP_OPT ] = {
+	{ "geometry", "*.geometry", FL_STRING, fl_GeoStr, "", 64 },
+    { "browserFontSize", "*.browserFontSize", FL_INT, &fl_browserfs,
+	  "0", sizeof( int ) },
+    { "buttonFontSize", "*.buttonFontSize", FL_INT, &fl_buttonfs,
+	  "0", sizeof( int ) },
+    { "inputFontSize", "*.inputFontSize", FL_INT, &fl_inputfs,
+	  "0", sizeof( int ) },
+    { "labelFontSize", "*.labelFontSize", FL_INT, &fl_labelfs,
+	  "0", sizeof( int ) },
+    { "displayGeometry", "*.displayGeometry", FL_STRING, fl_displayGeoStr,
+	  "", 64 },
+    { "cutGeometry", "*.cutGeometry", FL_STRING, fl_cutGeoStr, "", 64 },
+    { "toolGeometry", "*.toolGeometry", FL_STRING, fl_toolGeoStr, "", 64 }
+};
 
 
 /**************************/
@@ -95,72 +136,8 @@ int main( int argc, char *argv[ ] )
 				usage( );
 				return EXIT_SUCCESS;
 			}
-
-			if ( ! strcmp( argv[ cur_arg ], "-s" ) )
-			{
-				do_signal = SET;
+			else
 				cur_arg++;
-				continue;
-			}
-
-			if ( ! strcmp( argv[ cur_arg ], "-d" ) )
-			{
-				do_delete = SET;
-				cur_arg++;
-				continue;
-			}
-
-			if ( ! strncmp( argv[ cur_arg ], "-S", 2 ) )
-			{
-				if ( do_test )
-				{
-					fprintf( stderr, "fsc2: Can't have both flags `-S' and "
-							 "`-T'.\n" );
-					return EXIT_FAILURE;
-				}
-
-				if ( argv[ cur_arg ][ 2 ] == '\0' && cur_arg + 1 >= argc )
-				{
-					fprintf( stderr, "fsc2 -S: No input file.\n" );
-					return EXIT_FAILURE;
-				}
-
-				fname = argv[ cur_arg ][ 2 ] != '\0' ?
-					    &argv[ cur_arg ][ 2 ] : argv[ ++cur_arg ];
-
-				do_load = SET;
-				do_start = SET;
-				cur_arg++;
-				continue;
-			}
-
-			if ( ! strncmp( argv[ cur_arg ], "-T", 2 ) )
-			{
-				if ( do_start )
-				{
-					fprintf( stderr, "fsc2: Can't have both flags `-S' and "
-							 "`-T'.\n" );
-					return EXIT_FAILURE;
-				}
-
-				if ( argv[ cur_arg ][ 2 ] == '\0' && cur_arg + 1 >= argc )
-				{
-					fprintf( stderr, "fsc2 -T: No input file\n" );
-					return EXIT_FAILURE;
-				}
-
-				fname = argv[ cur_arg ][ 2 ] != '\0' ?
-					    &argv[ cur_arg ][ 2 ] : argv[ ++cur_arg ];
-
-				do_load = SET;
-				do_test = SET;
-				cur_arg++;
-				continue;
-			}
-
-			do_load = SET;
-			fname = argv[ cur_arg ];
-			break;
 		}
 	}
 
@@ -191,6 +168,83 @@ int main( int argc, char *argv[ ] )
 	{
 		unlink( LOCKFILE );
 		return EXIT_FAILURE;
+	}
+
+	if ( argc != 1 )
+	{
+		cur_arg = 1;
+		while ( cur_arg < argc )
+		{
+			if ( ! strcmp( argv[ cur_arg ], "-s" ) )
+			{
+				do_signal = SET;
+				cur_arg++;
+				continue;
+			}
+
+			if ( ! strcmp( argv[ cur_arg ], "-d" ) )
+			{
+				do_delete = SET;
+				cur_arg++;
+				continue;
+			}
+
+			if ( ! strncmp( argv[ cur_arg ], "-S", 2 ) )
+			{
+				if ( do_test )
+				{
+					eprint( FATAL, "fsc2: Can't have both flags `-S' and "
+							        "`-T'.\n" );
+					cur_arg++;
+					continue;
+				}
+
+				if ( argv[ cur_arg ][ 2 ] == '\0' && cur_arg + 1 >= argc )
+				{
+					eprint( FATAL, "fsc2 -S: No input file.\n" );
+					cur_arg++;
+					continue;
+				}
+
+				fname = argv[ cur_arg ][ 2 ] != '\0' ?
+					    &argv[ cur_arg ][ 2 ] : argv[ ++cur_arg ];
+
+				do_load = SET;
+				do_start = SET;
+				cur_arg++;
+				continue;
+			}
+
+			if ( ! strncmp( argv[ cur_arg ], "-T", 2 ) )
+			{
+				if ( do_start )
+				{
+					eprint( FATAL, "fsc2: Can't have both flags `-S' and "
+							"`-T'.\n" );
+					cur_arg++;
+					continue;
+				}
+
+				if ( argv[ cur_arg ][ 2 ] == '\0' && cur_arg + 1 >= argc )
+				{
+					eprint( FATAL, "fsc2 -T: No input file\n" );
+					cur_arg++;
+					continue;
+				}
+
+				fname = argv[ cur_arg ][ 2 ] != '\0' ?
+					    &argv[ cur_arg ][ 2 ] : argv[ ++cur_arg ];
+
+				do_load = SET;
+				do_test = SET;
+				cur_arg++;
+				continue;
+			}
+
+			do_load = SET;
+			fname = argv[ cur_arg ];
+			break;
+		}
 	}
 
 	/* If '-d' was given on the command line store flags that are tested to
@@ -295,31 +349,106 @@ static bool xforms_init( int *argc, char *argv[] )
 {
 	FL_Coord h, H;
 	FL_Coord x1, y1, w1, h1, x2, y2, w2, h2;
+	FL_IOPT fl_cntl;
+	int i;
+	int flags, wx, wy, ww, wh;
 
 
-	if ( fl_initialize( argc, argv, "fsc2", 0, 0 ) == NULL )
+	app_opt[ GEOMETRY ].option            = T_strdup( "-geometry" );
+	app_opt[ GEOMETRY ].specifier         = T_strdup( "*.geometry" );
+	app_opt[ GEOMETRY ].argKind           = XrmoptionSepArg;
+	app_opt[ GEOMETRY ].value             = ( caddr_t ) NULL;
+
+	app_opt[ BROWSERFONTSIZE ].option     =  T_strdup( "-browserFontSize" );
+	app_opt[ BROWSERFONTSIZE ].specifier  = T_strdup( "*.browserFontSize" );
+	app_opt[ BROWSERFONTSIZE ].argKind    = XrmoptionSepArg;
+	app_opt[ BROWSERFONTSIZE ].value      = ( caddr_t ) "0";
+
+	app_opt[ BUTTONFONTSIZE	].option      = T_strdup( "-buttonFontSize" );
+	app_opt[ BUTTONFONTSIZE	].specifier   = T_strdup( "*.buttonFontSize" );
+	app_opt[ BUTTONFONTSIZE	].argKind     = XrmoptionSepArg;
+	app_opt[ BUTTONFONTSIZE	].value       = ( caddr_t ) "0";
+
+	app_opt[ INPUTFONTSIZE ].option       = T_strdup( "-inputFontSize" );
+	app_opt[ INPUTFONTSIZE ].specifier    = T_strdup( "*.inputFontSize" );
+	app_opt[ INPUTFONTSIZE ].argKind      = XrmoptionSepArg;
+	app_opt[ INPUTFONTSIZE ].value        = ( caddr_t ) "0";
+
+	app_opt[ LABELFONTSIZE ].option       = T_strdup( "-labelFontSize" );
+	app_opt[ LABELFONTSIZE ].specifier    = T_strdup( "*.labelFontSize" );
+	app_opt[ LABELFONTSIZE ].argKind      = XrmoptionSepArg;
+	app_opt[ LABELFONTSIZE ].value        = ( caddr_t ) "0";
+
+	app_opt[ DISPLAYGEOMETRY ].option     = T_strdup( "-displayGeometry" );
+	app_opt[ DISPLAYGEOMETRY ].specifier  = T_strdup( "*.displayGeometry" );
+	app_opt[ DISPLAYGEOMETRY ].argKind    = XrmoptionSepArg;
+	app_opt[ DISPLAYGEOMETRY ].value      = ( caddr_t ) NULL;
+
+	app_opt[ CUTGEOMETRY ].option         = T_strdup( "-displayGeometry" );
+	app_opt[ CUTGEOMETRY ].specifier      = T_strdup( "*.displayGeometry" );
+	app_opt[ CUTGEOMETRY ].argKind        = XrmoptionSepArg;
+	app_opt[ CUTGEOMETRY ].value          = ( caddr_t ) NULL;
+
+	app_opt[ TOOLGEOMETRY ].option        = T_strdup( "-displayGeometry" );
+	app_opt[ TOOLGEOMETRY ].specifier     = T_strdup( "*.displayGeometry" );
+	app_opt[ TOOLGEOMETRY ].argKind       = XrmoptionSepArg;
+	app_opt[ TOOLGEOMETRY ].value         = ( caddr_t ) NULL;
+
+	if ( fl_initialize( argc, argv, "Fsc2", app_opt, N_APP_OPT ) == NULL )
 		return FAIL;
+
+	fl_get_app_resources( res, N_APP_OPT );
+
+	for ( i = 0; i < N_APP_OPT; i++ )
+	{
+		T_free( app_opt[ i ].option );
+		T_free( app_opt[ i ].specifier );
+	}
 
 //	XSetErrorHandler( fsc2_x_error_handler );
 //	XSetIOErrorHandler( fsc2_xio_error_handler );
 
 	/* Set some properties of goodies */
 
-#if ( SIZE == HI_RES )
-	fl_set_tooltip_font( FL_NORMAL_STYLE, FL_MEDIUM_SIZE );
-	fl_set_fselector_fontsize( FL_LARGE_SIZE );
-	fl_set_goodies_font( FL_NORMAL_STYLE, FL_LARGE_SIZE );
-	fl_set_oneliner_font( FL_NORMAL_STYLE, FL_LARGE_SIZE );
-#else
-	fl_set_tooltip_font( FL_NORMAL_STYLE, FL_TINY_SIZE );
-	fl_set_fselector_fontsize( FL_SMALL_SIZE );
-	fl_set_goodies_font( FL_NORMAL_STYLE, FL_SMALL_SIZE );
-	fl_set_oneliner_font( FL_NORMAL_STYLE, FL_SMALL_SIZE );
-#endif	
+	fl_set_tooltip_font( FL_NORMAL_STYLE, SMALL_FONT_SIZE );
+	fl_set_fselector_fontsize( NORMAL_FONT_SIZE );
+	fl_set_goodies_font( FL_NORMAL_STYLE, NORMAL_FONT_SIZE );
+	fl_set_oneliner_font( FL_NORMAL_STYLE, NORMAL_FONT_SIZE );
 
 	fl_disable_fselector_cache( 1 );
 	fl_set_fselector_placement( FL_PLACE_MOUSE | FL_FREE_SIZE );
 	fl_set_fselector_border( FL_FULLBORDER );
+
+	/* Set default font sizes */
+
+	fl_cntl.browserFontSize = NORMAL_FONT_SIZE;
+	fl_cntl.buttonFontSize = NORMAL_FONT_SIZE;
+	fl_cntl.inputFontSize = NORMAL_FONT_SIZE;
+	fl_cntl.labelFontSize = NORMAL_FONT_SIZE;
+
+	/* Set the default font size for browsers */
+
+	if ( * ( ( int * ) res[ BROWSERFONTSIZE ].var ) != 0 )
+		fl_cntl.browserFontSize = * ( ( int * ) res[ BROWSERFONTSIZE ].var );
+	fl_set_defaults( FL_PDBrowserFontSize, &fl_cntl );
+
+	/* Set the default font size for buttons */
+
+	if ( * ( ( int * ) res[ BUTTONFONTSIZE ].var ) != 0 )
+		fl_cntl.buttonFontSize = * ( ( int * ) res[ BUTTONFONTSIZE ].var );
+	fl_set_defaults( FL_PDButtonFontSize, &fl_cntl );
+
+	/* Set the default font size for input objects */
+
+	if ( * ( ( int * ) res[ INPUTFONTSIZE ].var ) != 0 )
+		fl_cntl.inputFontSize = * ( ( int * ) res[ INPUTFONTSIZE ].var );
+	fl_set_defaults( FL_PDInputFontSize, &fl_cntl );
+
+	/* Set the default font size for label and texts */
+
+	if ( * ( ( int * ) res[ LABELFONTSIZE ].var ) != 0 )
+		fl_cntl.labelFontSize = * ( ( int * ) res[ LABELFONTSIZE ].var );
+	fl_set_defaults( FL_PDLabelFontSize, &fl_cntl );
 
 	/* Create and display the main form */
 
@@ -335,18 +464,7 @@ static bool xforms_init( int *argc, char *argv[] )
 	fl_set_object_helper( main_form->help, "Show documentation" );
 	fl_set_object_helper( main_form->bug_report, "Mail a bug report" );
 
-#if ( SIZE == HI_RES )
-	fl_set_browser_fontsize( main_form->browser, FL_LARGE_SIZE );
-#else
-	fl_set_browser_fontsize( main_form->browser, FL_SMALL_SIZE );
-#endif
 	fl_set_browser_fontstyle( main_form->browser, FL_FIXED_STYLE );
-
-#if ( SIZE == HI_RES )
-	fl_set_browser_fontsize( main_form->error_browser, FL_LARGE_SIZE );
-#else
-	fl_set_browser_fontsize( main_form->error_browser, FL_SMALL_SIZE );
-#endif
 	fl_set_browser_fontstyle( main_form->error_browser, FL_FIXED_STYLE );
 
 	fl_get_object_geometry( main_form->browser, &x1, &y1, &w1, &h1 );
@@ -366,8 +484,36 @@ static bool xforms_init( int *argc, char *argv[] )
 						 ( double ) ( h1 + h / 2 - 0.5 * H * slider_size )
 						 / ( ( 1.0 - slider_size ) * H ) );
 
-	fl_show_form( main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
-				  FL_FULLBORDER, "fsc2" );
+	/* Now show the form, taking user wishes about the geometry into account */
+
+	if ( * ( ( char * ) res[ DISPLAYGEOMETRY ].var ) != '\0' )
+	{
+		flags = XParseGeometry( ( char * ) res[ GEOMETRY ].var,
+								&wx, &wy, &ww, &wh );
+		if ( XValue & flags && YValue & flags )
+			fl_set_form_position( main_form->fsc2, wx, wy );
+		if ( WidthValue & flags && HeightValue & flags )
+		{
+			if ( ww < WIN_MIN_WIDTH )
+				ww = WIN_MIN_WIDTH;
+			if ( wh < WIN_MIN_HEIGHT )
+				wh = WIN_MIN_HEIGHT;
+
+			fl_set_form_size( main_form->fsc2, ww, wh );
+		}
+
+		if ( XValue & flags && YValue & flags )
+			fl_show_form( main_form->fsc2, FL_PLACE_POSITION,
+						  FL_FULLBORDER, "fsc2" );
+		else
+			fl_show_form( main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
+						  FL_FULLBORDER, "fsc2" );
+	}
+	else
+		fl_show_form( main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
+					  FL_FULLBORDER, "fsc2" );
+
+	fl_winminsize( main_form->fsc2->window, WIN_MIN_WIDTH, WIN_MIN_HEIGHT );
 
 	/* Set close handler for main form */
 
@@ -1369,6 +1515,7 @@ void usage( void )
 			 "  -S FILE      start interpreting FILE (i.e. start the "
 			 "experiment)\n"
 			 "  -d FILE      delete input file FILE when fsc2 is done with "
+			 "  -g geometry  Specifies preferred size and position\n"
 			 "it.\n\n"
 			 "For a complete documentation see either %s/fsc2.ps,\n"
 			 "%s/fsc2.pdf or %s/fsc2_frame.html\n"

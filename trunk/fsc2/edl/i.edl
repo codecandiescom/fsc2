@@ -6,7 +6,7 @@ I = 0;
 
 PREPARATIONS:
 
-init_1d( );
+init_1d( 4 );
 
 EXPERIMENT:
 
@@ -24,10 +24,10 @@ button_state( BID6, 1 );
 BID7 = button_create( "RADIO_BUTTON", BID5, "Sweep RF down" );
 SID2 = slider_create( "VALUE_SLIDER", -100.0, -3.0, "Attenuation",
 					  "Adjusts RF attenuation" );
-I1   = input_create( "INT_INPUT", 17, "Na, was wohl?", "Weiss auch nicht..." );
+I1   = input_create( "INT_INPUT", 17, "Na, was wohl", "Weiss auch nicht..." );
 I2   = input_create( "FLOAT_INPUT", -13, "Noch eins", "Foobar", "%.2f" );
 I3   = output_create( "INT_OUTPUT", 17, "", "Weiss auch nicht..." );
-I4   = output_create( "FLOAT_OUTPUT", -13, "Noch eins", "Foobar", "%.5f A" );
+I4   = output_create( "FLOAT_OUTPUT", -13, "Noch eins", "", "%.5f" );
 
 FOREVER {
 

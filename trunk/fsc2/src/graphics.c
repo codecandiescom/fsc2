@@ -36,6 +36,18 @@ static int cur_1,
 	       cur_6,
 	       cur_7;
 
+extern FL_resource res[ ];
+
+#if ( SIZE == HI_RES )
+#define WIN_MIN_1D_WIDTH   400
+#define WIN_MIN_2D_WIDTH   500
+#define WIN_MIN_HEIGHT     435
+#else
+#define WIN_MIN_1D_WIDTH   250
+#define WIN_MIN_2D_WIDTH   350
+#define WIN_MIN_HEIGHT     380
+#endif
+
 
 /*----------------------------------------------------------------------*/
 /* Initialises and shows the window for displaying measurement results. */
@@ -46,6 +58,7 @@ void start_graphics( void )
 	XCharStruct font_prop;
 	int dummy;
 	char *pixmap_file;
+	int flags, x, y, w, h;
 
 
 	/* Create the forms for running experiments */
@@ -70,6 +83,11 @@ void start_graphics( void )
 		fl_set_pixmapbutton_file( run_form->undo_button, pixmap_file );
 		fl_set_object_helper( run_form->undo_button,
 							  "Undo last rescaling operation" );
+#if ( SIZE == HI_RES )
+		fl_set_object_lsize( run_form->undo_button, FL_SMALL_SIZE );
+#else
+		fl_set_object_lsize( run_form->undo_button, FL_TINY_SIZE );
+#endif
 		if ( G.dim == 2 )
 		{
 			fl_set_pixmapbutton_file( cut_form->cut_undo_button, pixmap_file );
@@ -88,6 +106,11 @@ void start_graphics( void )
 	{
 		fl_set_pixmapbutton_file( run_form->print_button, pixmap_file );
 		fl_set_object_helper( run_form->print_button, "Print window" );
+#if ( SIZE == HI_RES )
+		fl_set_object_lsize( run_form->print_button, FL_SMALL_SIZE );
+#else
+		fl_set_object_lsize( run_form->print_button, FL_TINY_SIZE );
+#endif
 		if ( G.dim == 2 )
 		{
 			fl_set_pixmapbutton_file( cut_form->cut_print_button,
@@ -198,17 +221,53 @@ void start_graphics( void )
 
 	/* Finally draw the form */
 
-	fl_show_form( run_form->run, FL_PLACE_MOUSE | FL_FREE_SIZE, FL_FULLBORDER,
-				  "fsc2: Display" );
+	if ( * ( ( char * ) res[ DISPLAYGEOMETRY ].var ) != '\0' )
+	{
+		flags = XParseGeometry( ( char * ) res[ DISPLAYGEOMETRY ].var,
+								&x, &y, &w, &h );
+		if ( XValue & flags && YValue & flags )
+			fl_set_form_position( run_form->run, x, y );
+		if ( WidthValue & flags && HeightValue & flags )
+		{
+			if ( G.dim == 1 )
+			{
+				if ( w < WIN_MIN_1D_WIDTH )
+					w = WIN_MIN_1D_WIDTH;
+			}
+			else
+			{
+				if ( w < WIN_MIN_2D_WIDTH )
+					w = WIN_MIN_2D_WIDTH;
+			}
+
+			if ( h < WIN_MIN_HEIGHT )
+				h = WIN_MIN_HEIGHT;
+
+			fl_set_form_size( run_form->run, w, h );
+		}
+
+		if ( XValue & flags && YValue & flags )
+			fl_show_form( run_form->run, FL_PLACE_POSITION,
+						  FL_FULLBORDER, "Display" );
+		else
+			fl_show_form( run_form->run, FL_PLACE_MOUSE | FL_FREE_SIZE,
+						  FL_FULLBORDER, "Display" );
+	}
+	else
+		fl_show_form( run_form->run, FL_PLACE_MOUSE | FL_FREE_SIZE,
+					  FL_FULLBORDER, "fsc2:Display" );
 
 	G.d = FL_FormDisplay( run_form->run );
 
 	/* Set minimum size for display window and switch on full scale button */
 
 	if ( G.dim == 1 )
-		fl_winminsize( run_form->run->window, 400, 335 );
+		fl_winminsize( run_form->run->window,
+					   WIN_MIN_1D_WIDTH, WIN_MIN_HEIGHT );
 	else
-		fl_winminsize( run_form->run->window, 500, 335 );
+		fl_winminsize( run_form->run->window,
+					   WIN_MIN_2D_WIDTH, WIN_MIN_HEIGHT );
+
 	fl_set_button( run_form->full_scale_button, 1 );
 
 	/* Load a font hopefully available on all machines (we try at least three,
