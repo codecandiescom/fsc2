@@ -693,15 +693,23 @@ void rs690_shape_padding_check_2( void )
 }
 
 
-/*------------------------------------------------*/
-/*------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Here we check that TWT pulses don't overlap (if at least one of */
+/* them has been created automatically), if necessary shortening   */
+/* or even eliminating TWT pulses, Then we again lengthen pulses   */
+/* if the time between two TWT gets too short.                     */
+/*-----------------------------------------------------------------*/
 
 void rs690_twt_padding_check( CHANNEL *ch )
 {
 	PULSE_PARAMS *pp, *ppp;
 	int i;
 
+
 	fsc2_assert( ch->function->self == PULSER_CHANNEL_TWT );
+
+	if ( ch->num_active_pulses == 0 )
+		return;
 
 	/* Check that first TWT pulse doesn't start too early (this only can
 	   happen for automatically created pulses) */
@@ -735,6 +743,9 @@ void rs690_twt_padding_check( CHANNEL *ch )
 		ppp = pp;
 		pp = pp + 1;
 
+		/* Check for negative start times (can only happen for automatically
+		   created pulses) */
+
 		if ( pp->pos < 0 )
 		{
 			if ( ! pp->pulse->left_twt_warning )
@@ -762,22 +773,22 @@ void rs690_twt_padding_check( CHANNEL *ch )
 			else
 				memmove( pp, pp + 1,
 						 ( ch->num_active_pulses-- - --i ) * sizeof *pp );
-			continue;
+			pp = ppp;
 		}
-
-		if ( ppp->pos + ppp->len > pp->pos )
+		else if ( ppp->pos + ppp->len > pp->pos )
 		{
 			if ( ppp->pos + ppp->len >= pp->pos + pp->len )
 			{
 				memmove( pp, pp + 1,
-					  ( --ch->num_active_pulses - --i ) * sizeof *pp );
+						 ( --ch->num_active_pulses - --i ) * sizeof *pp );
+				pp = ppp;
 			}
 			else
-				ppp->len -= ppp->pos + ppp->len - pp->pos;
+				ppp->len = pp->pos - ppp->pos;
 		}
 	}
 
-	/* Finally check if the pulses are far enough apart - for automatically
+	/* Finally check if the pulses are too far enough apart - for automatically
 	   created pulses lengthen them if necessary, for user created pulses
 	   print a warning */
 
@@ -789,11 +800,9 @@ void rs690_twt_padding_check( CHANNEL *ch )
 		pp = pp + 1;
 
 		if ( pp->pos - ( ppp->pos + ppp->len )
-			 < rs690.minimum_twt_pulse_distance )
+			 							   < rs690.minimum_twt_pulse_distance )
 		{
-			if ( pp->pulse->tp != NULL || ppp->pulse->tp != NULL )
-				ppp->len = pp->pos - ppp->pos;
-			else
+			if ( pp->pulse->tp == NULL && ppp->pulse->tp == NULL )
 			{
 				if ( rs690.twt_distance_warning++ != 0 )
 					print( SEVERE, "Distance between TWT pulses #%ld and #%ld "
@@ -801,6 +810,8 @@ void rs690_twt_padding_check( CHANNEL *ch )
 						   pp->pulse->num, rs690_pticks(
 										  rs690.minimum_twt_pulse_distance ) );
 			}
+			else
+				ppp->len = pp->pos - ppp->pos;
 		}
 	}
 }
