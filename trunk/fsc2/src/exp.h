@@ -101,7 +101,7 @@ typedef struct
 
 typedef struct PT_ {
 	int       token;          /* type of current token */
-	Token_Val tv;             /* token's value as needed by the parser */
+	Token_Val tv;             /* tokens value as needed by the parser */
 	struct    PT_ *start;     /* used in IF, WHILE etc. [1] */
 	struct    PT_ *end;       /* used in WHILE, IF etc. [2] */
 	union {
@@ -116,15 +116,15 @@ typedef struct PT_ {
 		} forl;
 	} count;
 	long      counter;        /* counts number of loop repetitions [3] */
-	char      *Fname;         /* name of file the token comes from */
-	long      Lc;             /* number of line the token comes from */
+	char      *Fname;         /* name of file the token was found in */
+	long      Lc;             /* number of line the token was found in */
 } Prg_Token;
 
 
-typedef struct CB_ {
+typedef struct CBS_ {
 	char *Fname;
 	long Lc;
-	struct CB_ *next;
+	struct CBS_ *next;
 } CB_Stack;
 
 
@@ -144,7 +144,7 @@ typedef struct CB_ {
 	  directly following the IF-ELSE construct.
   [3] Actually, it does not only count the number of repetitions but also
       indicates by a value of 0 that the loop condition has not to be simply
-	  checked but reevaluated, e.g. if counter for a FOR loop is zero the
+	  checked but reevaluated, e.g. if the counter for a FOR loop is zero the
 	  loop variable has to be initialized. Thus it has always to be reset to
 	  zero at the end of a loop (either when the end condition is met or a
 	  BREAK statement is executed).
