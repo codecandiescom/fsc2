@@ -16,8 +16,10 @@ static void get_array_params( Var *v, const char *name, long *len,
 
 Var *f_abort( Var *v )
 {
-	v = v;                       /* keeps the compiler happy */
+	char *str;
 
+
+	v = v;                       /* keeps the compiler happy */
 
 	eprint( NO_ERROR, "%s:%ld: Exit due to call of abort().\n", Fname, Lc );
 
@@ -1453,9 +1455,6 @@ Var *f_slice( Var *v )
 	double *idp;
 	long index;
 	long slice_len;
-	Var *new_var;
-	double *ndp;
-	long *nlp;
 
 
 	if ( v == NULL || v->next == NULL )
