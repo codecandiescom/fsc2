@@ -149,7 +149,7 @@ enum {
 #ifdef TDS520_MAIN
 
 	TDS520 tds520;
-	const char *Channel_Names[ MAX_CHANNELS ] = {
+	const char *TDS520_Channel_Names[ MAX_CHANNELS ] = {
 								 			"CH1", "CH2", "CH3", "CH4",
 								 			"MATH1", "MATH2", "MATH3",
 								 			"REF1", "REF2", "REF3", "REF4",
@@ -191,7 +191,7 @@ enum {
 #else
 
 	extern TDS520 tds520;
-	extern const char *Channel_Names[ MAX_CHANNELS ];
+	extern const char *TDS520_Channel_Names[ MAX_CHANNELS ];
 	extern const char *User_Channel_Names[ MAX_CHANNELS ];
 
 #endif

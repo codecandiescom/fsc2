@@ -582,7 +582,7 @@ Var *digitizer_display_channel( Var *v )
 		if( channel >= NUM_DISPLAYABLE_CHANNELS )
 		{
 			print( FATAL, "Channel \"%s\" can't be displayed.\n",
-				   Channel_Names[ channel ] );
+				   TDS_TMPL_Channel_Names[ channel ] );
 			THROW( EXCEPTION );
 		}
 
@@ -729,7 +729,7 @@ Var *digitizer_sensitivity( Var *v )
 	if ( channel >= NUM_NORMAL_CHANNELS )
 	{
 		print( FATAL, "Can't set or obtain sensitivity for channel %s.\n",
-			   Channel_Names[ channel ] );
+			   TDS_TMPL_Channel_Names[ channel ] );
 		THROW( EXCEPTION );
 	}
 
@@ -1086,7 +1086,7 @@ Var *digitizer_trigger_channel( Var *v )
 		default :
 			if ( channel >= 0 && channel < MAX_CHANNELS )
 				print( FATAL, "Channel \"%s\" can't be used as trigger "
-					   "channel.\n", Channel_Names[ channel ] );
+					   "channel.\n", TDS_TMPL_Channel_Names[ channel ] );
 			else
 				print( FATAL, "Invalid channel number %ld.\n", in_channel );
 			THROW( EXCEPTION );
@@ -1152,7 +1152,7 @@ static Var *get_area( Var *v, bool use_cursor )
 
 	if ( ch >= NUM_DISPLAYABLE_CHANNELS )
 	{
-		print( FATAL, "Invalid channel %s.\n", Channel_Names[ ch ] );
+		print( FATAL, "Invalid channel %s.\n", TDS_TMPL_Channel_Names[ ch ] );
 		THROW( EXCEPTION );
 	}
 
@@ -1246,7 +1246,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 	if ( ch >= NUM_DISPLAYABLE_CHANNELS )
 	{
-		print( FATAL, "Invalid channel %s.\n", Channel_Names[ ch ] );
+		print( FATAL, "Invalid channel %s.\n", TDS_TMPL_Channel_Names[ ch ] );
 		THROW( EXCEPTION );
 	}
 
@@ -1353,7 +1353,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 
 	if ( ch >= NUM_DISPLAYABLE_CHANNELS )
 	{
-		print( FATAL, "Invalid channel %s.\n", Channel_Names[ ch ] );
+		print( FATAL, "Invalid channel %s.\n", TDS_TMPL_Channel_Names[ ch ] );
 		THROW( EXCEPTION );
 	}
 

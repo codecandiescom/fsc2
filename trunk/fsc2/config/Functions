@@ -251,3 +251,8 @@ temp_contr_command, 1, EXP;
 freq_counter_name, 0, ALL;
 freq_counter_measure, 0, EXP;
 freq_counter_command, 1, EXP;
+
+
+/* Functions exported by DA converters (ME-6000) */
+
+dac_voltage, -1, ALL;

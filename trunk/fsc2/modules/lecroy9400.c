@@ -374,7 +374,7 @@ Var *digitizer_sensitivity( Var *v )
 	if ( channel > LECROY9400_CH2 )
 	{
 		print( FATAL, "Can't set or obtain sensitivity for channel %s.\n",
-			   Channel_Names[ channel ] );
+			   LECROY9400_Channel_Names[ channel ] );
 		THROW( EXCEPTION );
 	}
 
@@ -429,7 +429,7 @@ Var *digitizer_sensitivity( Var *v )
 	if ( coupl == DC_50_OHM && sens > LECROY9400_MIN_SENS_50 )
 	{
 		print( FATAL, "Sensitivity is out of range for the current impedance "
-			   "of 50 Ohm for %s.\n", Channel_Names[ channel ] );
+			   "of 50 Ohm for %s.\n", LECROY9400_Channel_Names[ channel ] );
 		THROW( EXCEPTION );
 	}
 	else if ( coupl != DC_50_OHM && sens > LECROY9400_MIN_SENS_1M )
@@ -485,8 +485,8 @@ Var *digitizer_averaging( Var *v )
 	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
 	{
 		print( FATAL, "Averaging can only be done using channels %s and %s.\n",
-			   Channel_Names[ LECROY9400_FUNC_E ],
-			   Channel_Names[ LECROY9400_FUNC_F ] );
+			   LECROY9400_Channel_Names[ LECROY9400_FUNC_E ],
+			   LECROY9400_Channel_Names[ LECROY9400_FUNC_F ] );
 		THROW( EXCEPTION );
 	}
 
@@ -504,8 +504,9 @@ Var *digitizer_averaging( Var *v )
 	if ( source_ch != LECROY9400_CH1 && source_ch != LECROY9400_CH2 )
 	{
 		print( FATAL, "Averaging can only be done using channels %s and %s as "
-			   "source channels.\n", Channel_Names[ LECROY9400_CH1 ],
-			   Channel_Names[ LECROY9400_CH2 ] );
+			   "source channels.\n",
+			   LECROY9400_Channel_Names[ LECROY9400_CH1 ],
+			   LECROY9400_Channel_Names[ LECROY9400_CH2 ] );
 		THROW( EXCEPTION );
 	}
 
@@ -618,8 +619,8 @@ Var *digitizer_num_averages( Var *v )
 	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
 	{
 		print( FATAL, "Averaging can only be done using channels %s and %s.\n",
-			   Channel_Names[ LECROY9400_FUNC_E ],
-			   Channel_Names[ LECROY9400_FUNC_F ] );
+			   LECROY9400_Channel_Names[ LECROY9400_FUNC_E ],
+			   LECROY9400_Channel_Names[ LECROY9400_FUNC_F ] );
 		THROW( EXCEPTION );
 	}
 
@@ -826,7 +827,7 @@ Var *digitizer_trigger_channel( Var *v )
 
 		default :
 			print( FATAL, "Channel %s can't be used as trigger channel.\n",
-				   Channel_Names[ channel ] );
+				   LECROY9400_Channel_Names[ channel ] );
 			THROW( EXCEPTION );
     }
 

@@ -97,7 +97,7 @@ extern long Cur_Pulser;
 extern bool need_GPIB;
 
 
-extern const char *Digitizer_Channel_Names[ NUM_DIGITIZER_CHANNEL_NAMES ];
+extern const char *Channel_Names[ NUM_CHANNEL_NAMES ];
 extern const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ];
 extern const char *Phase_Types[ NUM_PHASE_TYPES ];
 

@@ -43,7 +43,7 @@ int fsc2_usleep( unsigned long us_dur, bool quit_on_signal );
 int is_in( const char *supplied_in, const char **alternatives, int max );
 void i2rgb( double h, int *rgb );
 void create_colors( void );
-Var *get_digitizer_channel_number( const char *channel_name );
+Var *convert_to_channel_number( const char *channel_name );
 
 
 #endif  /* ! UTIL_HEADER */

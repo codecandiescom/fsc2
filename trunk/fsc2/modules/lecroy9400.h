@@ -240,8 +240,9 @@ void lecroy9400_gpib_failure( void );
 
 LECROY9400 lecroy9400;
 
-const char *Channel_Names[ 9 ] = { "CH1", "CH2", "MEM_C", "MEM_D", "FUNC_E",
-								   "FUNC_F", "LINE", "EXT", "EXT10" };
+const char *LECROY9400_Channel_Names[ 9 ] = { "CH1", "CH2", "MEM_C", "MEM_D",
+											  "FUNC_E", "FUNC_F", "LINE",
+											  "EXT", "EXT10" };
 
 double sset[ 10 ] = { 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2, 1.0e-1, 2.0e-1, 5.0e-1,
 					  1.0, 2.0, 5.0 };
@@ -313,7 +314,7 @@ bool lecroy9400_IN_SETUP = UNSET;
 
 extern LECROY9400 lecroy9400;
 
-extern const char *Channel_Names[ 9 ];
+extern const char *LECROY9400_Channel_Names[ 9 ];
 
 extern double sset[ 10 ];
 extern double tb[ 21 ];

@@ -86,7 +86,7 @@ INT         [0-9]+
 EXPO        [EDed][+-]?{INT}
 FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
-CHT         ((CH[1-4])|(AUX[12]?)|(MATH[1-3])|(REF[1-4])|(LIN(E)?)|(MEM_[CD])|(FUNC_[EF])|(EXT(10)?))
+CHT         ((CH((1[0-5])|[0-9]))|(AUX[12]?)|(MATH[1-3])|(REF[1-4])|(LIN(E)?)|(MEM_[CD])|(FUNC_[EF])|(EXT(10)?))
 
 IDENT       [A-Za-z]+[A-Za-z0-9_]*
 FUNC        {IDENT}"#"[0-9]+
@@ -198,7 +198,7 @@ WS          [\n \t]+
             }
 
 {CHT}       {
-                varslval.vptr = get_digitizer_channel_number( varstext );
+                varslval.vptr = convert_to_channel_number( varstext );
 				return VAR_REF;
             }
 

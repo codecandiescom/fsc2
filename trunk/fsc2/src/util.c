@@ -1026,28 +1026,28 @@ void create_colors( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Converts a string with a digitizer channel name into a number */
-/*---------------------------------------------------------------*/
+/*-----------------------------------------------------*/
+/* Converts a string with a channel name into a number */
+/*-----------------------------------------------------*/
 
-Var *get_digitizer_channel_number( const char *channel_name )
+Var *convert_to_channel_number( const char *channel_name )
 {
 	long channel;
 
 
-	for ( channel = 0; channel < NUM_DIGITIZER_CHANNEL_NAMES; channel++ )
-		if ( ! strcmp( channel_name, Digitizer_Channel_Names[ channel ] ) )
+	for ( channel = 0; channel < NUM_CHANNEL_NAMES; channel++ )
+		if ( ! strcmp( channel_name, Channel_Names[ channel ] ) )
 			break;
 
 	/* If the name was not recognized the reason might by that the
 	   abbreviation "LIN" may have been used for "LINE"...*/
 
-	if ( channel == NUM_DIGITIZER_CHANNEL_NAMES &&
+	if ( channel == NUM_CHANNEL_NAMES &&
 		 ! strcmp( channel_name, "LIN" ) )
-		channel = DIGITIZER_CHANNEL_LINE;
+		channel = CHANNEL_LINE;
 
 #ifndef NDEBUG
-	if ( channel == NUM_DIGITIZER_CHANNEL_NAMES )
+	if ( channel == NUM_CHANNEL_NAMES )
 	{
 		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );

@@ -110,6 +110,24 @@ NUM_SERIAL_PORTS  := 2
 SERIAL_LOCK_DIR   := /var/lock
 
 
+# The next variable controls if support for the ME-6000 DAC card by
+# Meilhaus Electronic GmbH is included. This requires that the kernel
+# module as well as a library, both available from my web page, are
+# installed. Please uncomment this line only if you have such a card
+# and already successfully installed the kernel module and the library.
+
+# WITH_ME6000       := yes
+
+
+# The next variable controls if support for the 6601 GPCT card by
+# National Instruments is included. This requires that the kernel
+# module as well as a library, both available from my web page, are
+# installed. Please uncomment this line only if you have such a card
+# and already successfully installed the kernel module and the library.
+
+# WITH_NI6601       := yes
+
+
 # Comment out the next two lines if you don't want the ability to run a HTTP
 # server that allows to monitor fsc2's current state via the Internet. The
 # default port number the HTTP server will listen on can be set by the second
@@ -241,6 +259,17 @@ ifneq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
 	CONFFLAGS += -DIS_STILL_LIBC1
 endif
 
+ifdef WITH_ME6000
+	ME6000_SUPPORT     := YES
+else
+	ME6000_SUPPORT     := NO
+endif
+
+ifdef WITH_NI6601
+	NI6601_SUPPORT     := YES
+else
+	NI6601_SUPPORT     := NO
+endif
 
 # Here's some stuff that makes it more convenient to make and install on
 # machines that are known well enough - for these machines one doesn't has
@@ -255,6 +284,8 @@ ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
 	GPIB_LIBRARY       := JTT
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
+	ME6000_SUPPORT     := NO
+	NI6601_SUPPORT     := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -265,6 +296,8 @@ ifeq ($(machine_name),crowley.physik.fu-berlin.de)
 	GPIB_LIBRARY       := JTT
 	NUM_SERIAL_PORTS   := 1
 	SERIAL_LOCK_DIR    := /var/lock
+	ME6000_SUPPORT     := NO
+	NI6601_SUPPORT     := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -275,6 +308,8 @@ ifeq ($(machine_name),door.physik.fu-berlin.de)
 	GPIB_LIBRARY       := JTT
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
+	ME6000_SUPPORT     := NO
+	NI6601_SUPPORT     := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -285,6 +320,8 @@ ifeq ($(machine_name),isaak.physik.fu-berlin.de)
 	GPIB_LIBRARY       := JTT
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
+	ME6000_SUPPORT     := NO
+	NI6601_SUPPORT     := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -296,6 +333,8 @@ ifeq ($(machine_name),moebpc3.physik.fu-berlin.de)
 	GPIB_LOG_FILE      := /scratch/tmp/gpib.log
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
+	ME6000_SUPPORT     := NO
+	NI6601_SUPPORT     := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -304,9 +343,11 @@ ifeq ($(machine_name),sunone.chemie.unibas.ch)
 	OWNER              := exp
 	GROUP              := exp
 	GPIB_LIBRARY       := NI
-	INSTALL_MACHINE    := install-$(machine_name)
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
+	ME6000_SUPPORT     := NO
+	NI6601_SUPPORT     := NO
+	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
@@ -316,6 +357,8 @@ ifeq ($(machine_name),tresr.physik.fu-berlin.de)
 	GPIB_LIBRARY       := LLP
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
+	ME6000_SUPPORT     := NO
+	NI6601_SUPPORT     := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -326,6 +369,8 @@ ifeq ($(machine_name),crowley.none)
 	GPIB_LIBRARY       := JTT
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
+	ME6000_SUPPORT     := YES
+	NI6601_SUPPORT     := YES
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -335,6 +380,8 @@ ifeq ($(machine_name),dorimare.nowhere)
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
 	NUM_SERIAL_PORTS   := 2
+	ME6000_SUPPORT     := YES
+	NI6601_SUPPORT     := NO
 	SERIAL_LOCK_DIR    := /var/lock
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
@@ -380,6 +427,7 @@ else
 		endif
 	endif
 endif
+
 
 
 ifdef GPIB_HEADER_DIR
@@ -429,6 +477,17 @@ ifndef NO_MAIL
 	ifneq ($(word 1,$(ADDR2LINE)),which:)
 		CONFFLAGS += -DADDR2LINE=\"$(ADDR2LINE)\"
 	endif
+endif
+
+
+# If required link in the necessary libraries for ME-6000 and 6601 cards
+
+ifeq ($(WITH_ME6000),YES)
+	LIBS                 += -lme6x00
+endif
+
+ifeq ($(WITH_NI6601),YES)
+	LIBS                 += -lni6601
 endif
 
 

@@ -340,49 +340,61 @@ long lecroy9400_translate_channel( int dir, long channel, bool flag )
 	{
 		switch ( channel )
 		{
-			case DIGITIZER_CHANNEL_CH1 :
+			case CHANNEL_CH1 :
 				return LECROY9400_CH1;
 
-			case DIGITIZER_CHANNEL_CH2 :
+			case CHANNEL_CH2 :
 				return LECROY9400_CH2;
 
-			case DIGITIZER_CHANNEL_MEM_C :
+			case CHANNEL_MEM_C :
 				return LECROY9400_MEM_C;
 
-			case DIGITIZER_CHANNEL_MEM_D :
+			case CHANNEL_MEM_D :
 				return LECROY9400_MEM_D;
 
-			case DIGITIZER_CHANNEL_FUNC_E :
+			case CHANNEL_FUNC_E :
 				return LECROY9400_FUNC_E;
 
-			case DIGITIZER_CHANNEL_FUNC_F :
+			case CHANNEL_FUNC_F :
 				return LECROY9400_FUNC_F;
 
-			case DIGITIZER_CHANNEL_LINE :
+			case CHANNEL_LINE :
 				return LECROY9400_LIN;
 
-			case DIGITIZER_CHANNEL_EXT :
+			case CHANNEL_EXT :
 				return LECROY9400_EXT;
 
-			case DIGITIZER_CHANNEL_EXT10 :
+			case CHANNEL_EXT10 :
 				return LECROY9400_EXT10;
 
-			case DIGITIZER_CHANNEL_CH3   :
-			case DIGITIZER_CHANNEL_CH4   :
-			case DIGITIZER_CHANNEL_MATH1 :
-			case DIGITIZER_CHANNEL_MATH2 :
-			case DIGITIZER_CHANNEL_MATH3 :
-			case DIGITIZER_CHANNEL_REF1  :
-			case DIGITIZER_CHANNEL_REF2  :
-			case DIGITIZER_CHANNEL_REF3  :
-			case DIGITIZER_CHANNEL_REF4  :
-			case DIGITIZER_CHANNEL_AUX   :
-			case DIGITIZER_CHANNEL_AUX1  :
-			case DIGITIZER_CHANNEL_AUX2  :
+			case CHANNEL_CH3   :
+			case CHANNEL_CH4   :
+			case CHANNEL_MATH1 :
+			case CHANNEL_MATH2 :
+			case CHANNEL_MATH3 :
+			case CHANNEL_REF1  :
+			case CHANNEL_REF2  :
+			case CHANNEL_REF3  :
+			case CHANNEL_REF4  :
+			case CHANNEL_AUX   :
+			case CHANNEL_AUX1  :
+			case CHANNEL_AUX2  :
+			case CHANNEL_CH0   :
+			case CHANNEL_CH5   :
+			case CHANNEL_CH6   :
+			case CHANNEL_CH7   :
+			case CHANNEL_CH8   :
+			case CHANNEL_CH9   :
+			case CHANNEL_CH10  :
+			case CHANNEL_CH11  :
+			case CHANNEL_CH12  :
+			case CHANNEL_CH13  :
+			case CHANNEL_CH14  :
+			case CHANNEL_CH15  :
 				if ( flag )
 					return -1;
 				print( FATAL, "Digitizer has no channel %s.\n",
-					   Digitizer_Channel_Names[ channel ] );
+					   Channel_Names[ channel ] );
 				THROW( EXCEPTION );
 
 			default :
@@ -397,31 +409,31 @@ long lecroy9400_translate_channel( int dir, long channel, bool flag )
 		switch ( channel )
 		{
 			case LECROY9400_CH1 :
-				return DIGITIZER_CHANNEL_CH1;
+				return CHANNEL_CH1;
 
 			case LECROY9400_CH2 :
-				return DIGITIZER_CHANNEL_CH2;
+				return CHANNEL_CH2;
 
 			case LECROY9400_MEM_C :
-				return DIGITIZER_CHANNEL_MEM_C;
+				return CHANNEL_MEM_C;
 
 			case LECROY9400_MEM_D :
-				return DIGITIZER_CHANNEL_MEM_D;
+				return CHANNEL_MEM_D;
 
 			case LECROY9400_FUNC_E :
-				return DIGITIZER_CHANNEL_FUNC_E;
+				return CHANNEL_FUNC_E;
 
 			case LECROY9400_FUNC_F :
-				return DIGITIZER_CHANNEL_FUNC_F;
+				return CHANNEL_FUNC_F;
 
 			case LECROY9400_LIN :
-				return DIGITIZER_CHANNEL_LINE;
+				return CHANNEL_LINE;
 
 			case LECROY9400_EXT :
-				return DIGITIZER_CHANNEL_EXT;
+				return CHANNEL_EXT;
 
 			case LECROY9400_EXT10 :
-				return DIGITIZER_CHANNEL_EXT10;
+				return CHANNEL_EXT10;
 
 			default :
 				print( FATAL, "Internal error detected at %s:%d.\n",

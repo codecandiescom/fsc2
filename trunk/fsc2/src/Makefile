@@ -58,7 +58,7 @@ all:
 
 # Make the main program from the c, flex and bison source files
 # When linking all symbols must be added to the dynamic symbol table,
-# the dynamically loded libraries need to see at least some of them.
+# the dynamically loaded libraries need to see at least some of them.
 
 fsc2: $(objects)
 	$(CC) -o $@ $(objects) $(LIBS) -Wl,-E

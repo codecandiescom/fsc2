@@ -179,7 +179,7 @@ enum {
 		   min_sens_50 = 1.0,
            min_sens = 10.0;
 
-	const char *Channel_Names[ MAX_CHANNELS  ] = {
+	const char *TDS744A_Channel_Names[ MAX_CHANNELS  ] = {
 											"CH1", "CH2", "CH3", "CH4",
 								 			"MATH1", "MATH2", "MATH3", "REF1",
 								 			"REF2", "REF3", "REF4",
@@ -187,12 +187,12 @@ enum {
 #else
 
 	extern TDS744A tds744a;
-	extern const char *Channel_Names[ MAX_CHANNELS ];
+	extern const char *TDS744A_Channel_Names[ MAX_CHANNELS ];
 	extern double max_sens, min_sens_50, min_sens;
 
 #endif
 
-#define User_Channel_Names Channel_Names
+#define User_Channel_Names TDS744A_Channel_Names
 
 
 /* Declaration of exported functions */

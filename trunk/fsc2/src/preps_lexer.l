@@ -112,7 +112,7 @@ PC          PH(ASE)?_?C(YCLE)?
 
 PS          PH(ASE)?_?S(EQ(UENCE)?)?(_?[0-9])?
 
-CHT         ((CH[1-4])|(AUX[12]?)|(MATH[1-3])|(REF[1-4])|(LIN(E)?)|(MEM_[CD])|(FUNC_[EF])|(EXT(10)?))
+CHT         ((CH((1[0-5])|[0-9]))|(AUX[12]?)|(MATH[1-3])|(REF[1-4])|(LIN(E)?)|(MEM_[CD])|(FUNC_[EF])|(EXT(10)?))
 
 
 CTRL        (WHILE)|(UNTIL)|(BREAK)|(NEXT)|(IF)|(ELSE)|(REPEAT)|(FOR)
@@ -341,7 +341,7 @@ FUNC        {IDENT}"#"[0-9]+
 
 
 {CHT}       {
-                prepslval.vptr = get_digitizer_channel_number( prepstext );
+                prepslval.vptr = convert_to_channel_number( prepstext );
                 return VAR_REF;
             }
 

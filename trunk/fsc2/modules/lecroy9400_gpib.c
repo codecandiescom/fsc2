@@ -622,7 +622,7 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 	if ( ! lecroy9400.is_num_avg[ ch ] )
 	{
 		print( FATAL, "Averaging has not been initialized for channel %s.\n",
-			   Channel_Names[ ch ] );
+			   LECROY9400_Channel_Names[ ch ] );
 		THROW( EXCEPTION );
 	}
 

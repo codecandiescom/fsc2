@@ -29,6 +29,14 @@ simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c \
 				 kontron4060.c lakeshore330.c pt2025.c er032m.c ips20_4.c \
 				 $(addsuffix .c,$(s_band_list))
 
+ifeq ($(ME6000_SUPPORT),YES)
+simp_modules  += me6000.c
+endif
+
+ifeq ($(NI6601_SUPPORT),YES)
+simp_modules  += ni6601.c
+endif
+
 comp_modules  := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400 \
 				 hp8647a hp8672a $(tds_list)
 

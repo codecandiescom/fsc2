@@ -442,7 +442,7 @@ void tds_tmpl_set_trigger_channel( int ch )
 				 ch == TDS_TMPL_LIN );
 #endif
 
-	sprintf( cmd, "TRIG:MAI:EDGE:SOU %s\n", Channel_Names[ ch ] );
+	sprintf( cmd, "TRIG:MAI:EDGE:SOU %s\n", TDS_TMPL_Channel_Names[ ch ] );
 	tds_tmpl_command( cmd );
 }
 
@@ -577,7 +577,7 @@ bool tds_tmpl_display_channel_state( int channel )
 	fsc2_assert( channel >= TDS_TMPL_CH1 &&
 				 channel < NUM_DISPLAYABLE_CHANNELS );
 
-	sprintf( cmd, "SEL:%s?\n", Channel_Names[ channel ] );
+	sprintf( cmd, "SEL:%s?\n", TDS_TMPL_Channel_Names[ channel ] );
 	tds_tmpl_talk( cmd, reply, &length );
 	return reply[ 0 ] != '0';
 }
@@ -607,7 +607,7 @@ void tds_tmpl_display_channel( int channel, bool on_flag )
 
     if ( tds_tmpl_display_channel_state( channel ) != on_flag )
     {
-        sprintf( cmd, "SEL:%s %s\n", Channel_Names[ channel ],
+        sprintf( cmd, "SEL:%s %s\n", TDS_TMPL_Channel_Names[ channel ],
 				 on_flag ? "ON" : "OFF" );
 		tds_tmpl_command( cmd );
     }
@@ -627,7 +627,7 @@ double tds_tmpl_get_sens( int channel )
 
 	fsc2_assert( channel >= TDS_TMPL_CH1 && channel < NUM_NORMAL_CHANNELS );
 
-	sprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
+	sprintf( cmd, "%s:SCA?\n", TDS_TMPL_Channel_Names[ channel ] );
 	tds_tmpl_talk( cmd, reply, &length );
 
     reply[ length - 1 ] = '\0';
@@ -679,7 +679,7 @@ void tds_tmpl_set_sens( int channel, double sens )
 	}
 #endif
 
-	sprintf( cmd, "%s:SCA %8.3E\n", Channel_Names[ channel ], sens );
+	sprintf( cmd, "%s:SCA %8.3E\n", TDS_TMPL_Channel_Names[ channel ], sens );
 	tds_tmpl_command( cmd );
 }
 
@@ -748,7 +748,8 @@ double tds_tmpl_get_area( int channel, WINDOW *w, bool use_cursor )
 
 	if ( channel != tds_tmpl.meas_source )
 	{
-		sprintf( cmd, "MEASU:IMM:SOURCE %s\n", Channel_Names[ channel ] );
+		sprintf( cmd, "MEASU:IMM:SOURCE %s\n",
+				 TDS_TMPL_Channel_Names[ channel ] );
 		tds_tmpl_command( cmd );
 		tds_tmpl.meas_source = channel;
 	}
@@ -881,7 +882,7 @@ void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	if ( channel != tds_tmpl.data_source )
 	{
-		sprintf( cmd, "DAT:SOU %s\n", Channel_Names[ channel ] );
+		sprintf( cmd, "DAT:SOU %s\n", TDS_TMPL_Channel_Names[ channel ] );
 		tds_tmpl_command( cmd );
 		tds_tmpl.data_source = channel;
 	}
@@ -1006,7 +1007,8 @@ double tds_tmpl_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 
 	if ( channel != tds_tmpl.meas_source )
 	{
-		sprintf( cmd, "MEASU:IMM:SOURCE %s\n", Channel_Names[ channel ] );
+		sprintf( cmd, "MEASU:IMM:SOURCE %s\n",
+				 TDS_TMPL_Channel_Names[ channel ] );
 		tds_tmpl_command( cmd );
 		tds_tmpl.meas_source = channel;
 	}
