@@ -19,7 +19,7 @@ init_1d( 2, N, sf, df, "Field [ G ]", "Signal [uV]" );
 EXPERIMENT:
 
 
-SLID = slider_create( "SLOW_VALUE_SLIDER", -180, 180, "Lock-in phase" );
+SLID = slider_create( "VALUE_SLIDER", -180, 180, "Lock-in phase" );
 d = ( 100.0 / N ) *( lin_space( 1, N, N ) - N / 2 )
 	* exp( - ( lin_space( 1, N, N ) - N / 2 )^2 / (0.125 * N )^2 );
 
