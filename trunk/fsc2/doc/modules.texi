@@ -1003,14 +1003,15 @@ ssize_t fsc2_serial_read( int sn, void *buf, size_t count,
 @noindent
 where @code{sn} is the number of the serial port as already used in
 @code{fsc2_request_serial_port()}, @code{buf} is a buffer of length
-@code{count}. @code{us_wait} is the time in microseconds you are
-prepared to wait for data from the serial port. Specifying a value of
-@code{0} is interpreted to mean that you want to wait indefinitely for
-data, while a negative value for @code{us_wait} means not to wait at
-all. Finally, @code{quit_on_signal} determines if the function returns
-immediately when a signal has been received before any data could be
-read. This might for example happen when the user pressed the
-@code{Stop} buttonh while the function was waiting for data.
+@code{count} for storing the read in data. @code{us_wait} is the time in
+microseconds you are prepared to wait for data from the serial
+port. Specifying a value of @code{0} is interpreted to mean that you
+want to wait indefinitely for data, while a negative value for
+@code{us_wait} means not to wait at all. Finally, @code{quit_on_signal}
+determines if the function returns immediately when a signal has been
+received before any data could be read. This might for example happen
+when the user pressed the @code{Stop} buttonh while the function was
+waiting for data.
 
 @code{fsc2_serial_close()} expects just one argument, the serial port
 number. Before closing the serial port device file it flushes it and
