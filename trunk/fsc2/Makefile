@@ -232,8 +232,9 @@ tagsfile         := $(fdir)/TAGS
 machine_name     := $(shell hostname -f)
 
 
-# Check that the machine has a new libc, i.e. at least version 2, otherwise
-# some problems with the older libc have to be dealt within the program
+# Check that the machine has a new libc, i.e. at least version 2 (which means
+# that /lib/libc.so.6 should exist), otherwise some problems with the older
+# libc have to be dealt with from within the program
 
 ifneq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
 	CONFFLAGS += -DIS_STILL_LIBC1
@@ -465,17 +466,17 @@ export            # export all variables to sub-makes
 # Switch off all implicit rules
 
 .SUFFIXES:
-.PHONY: all install-strip install uninstall \
-		built version test clean distclean  \
-		mostlyclean tags pack manifest ZIP  \
-		pion.anorg.chemie.uni-frankfurt.de  \
-		crowley.physik.fu-berlin.de         \
-		door.physik.fu-berlin.de            \
-		isaak.physik.fu-berlin.de           \
-		moebpc3.physik.fu-berlin.de         \
-		tresr.physik.fu-berlin.de           \
-		sunone.chemie.unibas.ch             \
-		crowley.none                        \
+.PHONY: all install-strip install uninstall  \
+		built version test clean distclean   \
+		mostlyclean tags pack manifest ZIP   \
+		pion.anorg.chemie.uni-frankfurt.de   \
+		crowley.physik.fu-berlin.de          \
+		door.physik.fu-berlin.de             \
+		isaak.physik.fu-berlin.de            \
+		moebpc3.physik.fu-berlin.de          \
+		tresr.physik.fu-berlin.de            \
+		sunone.chemie.unibas.ch              \
+		crowley.none                         \
 		dorimare.nowhere
 
 
@@ -488,17 +489,17 @@ export            # export all variables to sub-makes
 # or less useful stuff
 
 all: config.h
-	@if [ $(INSTALL_MACHINE) != "install-unknown" ]; then                \
-		echo "Configuring for machine $(machine_name)...";               \
-		$(MAKE) $(machine_name);                                         \
+	@if [ $(INSTALL_MACHINE) != "install-unknown" ]; then   \
+		echo "Configuring for machine $(machine_name)...";  \
+		$(MAKE) $(machine_name);                            \
 	fi
 	$(MAKE) -C src gpib_setup
 	$(MAKE) built
 	$(MAKE) tags
 	$(MAKE) -C src all
 ifdef WITH_HTTP_SERVER
-	cd $(ldir);       \
-	perl Makefile.PL; \
+	cd $(ldir);        \
+	perl Makefile.PL;  \
 	cd $(fdir)
 	$(MAKE) -C Fcntl_Lock
 endif
@@ -510,10 +511,10 @@ endif
 # CONFFLAGS if either the Makefile got changed or it does not already exist
 
 config.h: Makefile
-	@if [ -e config.h ]; then          \
-		echo "Recreating config.h..."; \
-	else                               \
-		echo "Creating config.h...";   \
+	@if [ -e config.h ]; then           \
+		echo "Recreating config.h...";  \
+	else                                \
+		echo "Creating config.h...";    \
 	fi
 	@echo "/*--- Created automatically, dont' change ---*/" > config.h
 	@echo -e $(patsubst -D%,\\n#define %,$(subst =, ,$(CONFFLAGS))) >> config.h
@@ -675,24 +676,24 @@ manifest:
 pion.anorg.chemie.uni-frankfurt.de:
 
 crowley.physik.fu-berlin.de:
-	sed -e 's/^#define SERIAL_PORT[ \t]*.*$$/#define SERIAL_PORT     0/' \
+	sed -e 's/^#define SERIAL_PORT[ \t]*.*$$/#define SERIAL_PORT     0/'  \
 		$(cdir)/er035m_sas.conf > $(cdir)/er035m_sas.conf.new
 	mv $(cdir)/er035m_sas.conf.new $(cdir)/er035m_sas.conf
 
 door.physik.fu-berlin.de:
 
 isaak.physik.fu-berlin.de:
-	sed -e 's/^#define SERIAL_PORT[ \t]*.*$$/#define SERIAL_PORT     1/' \
+	sed -e 's/^#define SERIAL_PORT[ \t]*.*$$/#define SERIAL_PORT     1/'  \
 		$(cdir)/er035m_sas.conf > $(cdir)/er035m_sas.conf.new
 	mv $(cdir)/er035m_sas.conf.new $(cdir)/er035m_sas.conf
 
 moebpc3.physik.fu-berlin.de:
 
 tresr.physik.fu-berlin.de:
-	sed -e 's/\"ER032M\"/\"Field\"/' \
+	sed -e 's/\"ER032M\"/\"Field\"/'                           \
 		$(cdir)/er032m.conf > $(cdir)/er032m.conf.new
 	mv $(cdir)/er032m.conf.new $(cdir)/er032m.conf
-	sed -e 's/\"LECROY9400\"/\"LeCroy9450\"/' \
+	sed -e 's/\"LECROY9400\"/\"LeCroy9450\"/'                  \
 		$(cdir)/lecroy9400.conf > $(cdir)/lecroy9400.conf.new
 	mv $(cdir)/lecroy9400.conf.new $(cdir)/lecroy9400.conf
 
