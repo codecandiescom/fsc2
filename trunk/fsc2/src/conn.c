@@ -390,12 +390,6 @@ static void conn_sig_handler( int signo )
 		/* All the remaining signals are deadly... */
 
 		default :
-			/* Test if parent still exists and if not (i.e. the parent died
-			   without sending the child a SGTERM signal) destroy the
-			   semaphore and the shared memory segments */
-
-			if ( kill( getppid( ), 0 ) == -1 && errno == ESRCH )
-				sema_destroy( semaphore );
 			_exit( -1 );
 	}
 

@@ -672,8 +672,7 @@ Var *f_display( Var *v )
 
 	/* Determine the needed amount of shared memory */
 
-	len =   4 * sizeof( char )            /* identifier 'fsc2' */
-		  + sizeof( len )                 /* length field itself */
+	len =   sizeof( len )                 /* length field itself */
 		  + sizeof( int )                 /* number of sets to be sent */
 		  + 3 * nsets * sizeof( long )    /* x-, y-index and curve */
 		  + nsets * sizeof( int );        /* data type */
@@ -736,12 +735,6 @@ Var *f_display( Var *v )
 		}
 	}
 
-	/* Using a pause() here is tempting but there exists a race condition
-	   between the determination of the value of 'do_send' and the start of
-	   pause() - and it happens... */
-
-	sema_wait( semaphore );
-
 	/* Now try to get a shared memory segment */
 
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
@@ -755,9 +748,6 @@ Var *f_display( Var *v )
 	/* Copy the data to the segment */
 
 	ptr = buf;
-
-	memcpy( ptr, "fsc2", 4 * sizeof( char ) );         /* magic id */
-	ptr += 4 * sizeof( char );
 
 	memcpy( ptr, &len, sizeof( long ) );               /* total length */
 	ptr += sizeof( long );
@@ -876,18 +866,19 @@ Var *f_display( Var *v )
 
 	/* Detach from the segment with the data segment */
 
-	detach_shm( -1, buf );
+	detach_shm( buf, NULL );
 
 	/* Get rid of the array of structures returned by eval_display_args() */
 
 	T_free( dp );
 	
-	/* Finally tell parent about the identifier etc. */
+	/* Wait for parent to become ready to accept new data, then store
+	   identifier and send signal to tell parent about the data */
 
+	sema_wait( semaphore );
 	Key->shm_id = shm_id;
 	Key->type = DATA;
-
-	kill( getppid( ), NEW_DATA );           /* signal parent the new data */
+	kill( getppid( ), NEW_DATA );
 
 	/* That's all, folks... */
 
@@ -1116,15 +1107,9 @@ Var *f_clearcv( Var *v )
 
 	assert( I_am == CHILD );
 
-	/* Using a pause() here is tempting but there exists a race condition
-	   between the determination of the value of 'do_send' and the start of
-	   pause() - and it happens... */
-
-	sema_wait( semaphore );
-
 	/* Now try to get a shared memory segment */
 
-	len = 4 * sizeof( char ) + sizeof( int ) + count * sizeof( long );
+	len = sizeof( int ) + count * sizeof( long );
 
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
@@ -1137,9 +1122,6 @@ Var *f_clearcv( Var *v )
 	/* Copy all data into the shared memory segment */
 
 	ptr = buf;
-
-	memcpy( ptr, "fsc2", 4 * sizeof( char ) );     /* magic id */
-	ptr += 4 * sizeof( char );
 
 	memcpy( ptr, &len, sizeof( long ) );           /* total length */
 	ptr += sizeof( long );
@@ -1154,18 +1136,19 @@ Var *f_clearcv( Var *v )
 
 	/* Detach from the segment with the data */
 
-	detach_shm( -1, buf );
+	detach_shm( buf, NULL );
 
 	/* Get rid of the array of curve numbers */
 
 	T_free( ca );
 	
-	/* Finally tell parent about the identifier etc. */
+	/* Wait for parent to become ready to accept new data, then store
+	   identifier and send signal to tell it about them */
 
+	sema_wait( semaphore );
 	Key->shm_id = shm_id;
 	Key->type = DATA;
-
-	kill( getppid( ), NEW_DATA );           /* signal parent the new data */
+	kill( getppid( ), NEW_DATA );
 
 	/* All the rest has now to be done by the parent process... */
 

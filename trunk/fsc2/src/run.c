@@ -255,7 +255,11 @@ void check_for_further_errors( Compilation *c_old, Compilation *c_all )
 
 static void new_data_handler( int signo )
 {
+	int errno_saved;
+
+
 	signo = signo;
+	errno_saved = errno;
 
 	Message_Queue[ message_queue_high ].shm_id = Key->shm_id;
 	Message_Queue[ message_queue_high ].type = Key->type;
@@ -263,6 +267,8 @@ static void new_data_handler( int signo )
 
 	if ( Key->type == DATA )
 		sema_post( semaphore );
+
+	errno = errno_saved;
 }
 
 
@@ -274,10 +280,14 @@ static void new_data_handler( int signo )
 
 static void quitting_handler( int signo )
 {
-	signo = signo;
+	int errno_saved;
 
+
+	signo = signo;
+	errno_saved = errno;
 	child_is_quitting = SET;
 	kill( child_pid, DO_QUIT );
+	errno = errno_saved;
 }
 
 
@@ -294,12 +304,17 @@ static void run_sigchld_handler( int signo )
 {
 	int return_status;
 	int pid;
+	int errno_saved;
 
 
 	signo = signo;
+	errno_saved = errno;
 
 	if ( ( pid = wait( &return_status ) ) != child_pid )
+	{
+		errno_saved = errno;
 		return;                       /* if some other child process died... */
+	}
 
 #if defined ( DEBUG )
 	if ( WIFSIGNALED( return_status ) )
@@ -312,6 +327,8 @@ static void run_sigchld_handler( int signo )
 
 	run_form->sigchld->u_ldata = ( long ) return_status;
 	fl_trigger_object( run_form->sigchld );
+
+	errno = errno_saved;
 }
 
 
@@ -476,7 +493,7 @@ static int return_status;
 /* that just sets a global variable and starts to try to acquire    */
 /* data. If this fails or the program reached its end (indicated    */
 /* by a zero return of the function 'do_measurement) or it received */
-/* a DO_QUIT signal in the  meantime (as indicated by the global    */
+/* a DO_QUIT signal in the  mean time (as indicated by the global   */
 /* variable 'do_quit') it exits. After switching back to the "real" */
 /* DO_QUIT handler as the next and final step of the loop it waits  */
 /* for the global variable indicating a DO_SEND signal to become    */
@@ -502,21 +519,16 @@ static void run_child( void )
 	do_quit = UNSET;
 	set_child_signals( );
 
-	/* Set up signals */
-
-/*
-{
+/*{
 	bool h = SET;
 	while ( h );
-}
-*/
+}*/
 
 	do_measurement( );                     /* run the experiment */
 
 	/* Experiment ended prematurely if the end of EDL file wasn't reached */
 
-	if ( cur_prg_token != prg_token + prg_length &&
-		 cur_prg_token != NULL )
+	if ( cur_prg_token != prg_token + prg_length && cur_prg_token != NULL )
 		return_status = FAIL;
 
 	close( pd[ READ ] );                   /* close read end of pipe */
@@ -623,10 +635,15 @@ void child_sig_handler( int signo )
 		default :
 			/* Test if parent still exists and if not (i.e. the parent died
 			   without sending the child a SGTERM signal) destroy the
-			   semaphore and the shared memory segments */
+			   semaphore and shared memory (as far as the child knows about
+			   it) */
 
 			if ( kill( getppid( ), 0 ) == -1 && errno == ESRCH )
+			{
+				delete_all_shm( );
 				sema_destroy( semaphore );
+			}
+
 			_exit( -1 );
 	}
 }

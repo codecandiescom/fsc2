@@ -170,7 +170,8 @@ bool exit_hooks_are_run = UNSET;
 
 Graphics G;
 KEY *Key;
-KEY *Message_Queue;
+int Key_ID = -1;
+KEY *Message_Queue = NULL;
 volatile int message_queue_low, message_queue_high;
 
 FILE_LIST *File_List = NULL;
@@ -226,6 +227,7 @@ extern bool exit_hooks_are_run;
 
 extern Graphics G;
 extern KEY *Key;
+extern int Key_ID;
 extern KEY *Message_Queue;
 extern volatile int message_queue_low, message_queue_high;
 extern volatile bool conn_child_replied;

@@ -45,13 +45,13 @@ void accept_new_data( void )
 			THROW( EXCEPTION );
 		}
 
-		/* Unpack and accept the data sets */
+		/* Unpack and accept the data sets (skip the length field) */
 
-		result = unpack_and_accept( buf );
+		result = unpack_and_accept( buf + sizeof( long ) );
 
 		/* Detach from shared memory segment and remove it */
 
-		detach_shm( Message_Queue[ message_queue_low ].shm_id, buf );
+		detach_shm( buf, &Message_Queue[ message_queue_low ].shm_id );
 
 		/* If accepting the data failed throw an exception */
 
@@ -118,7 +118,7 @@ static bool unpack_and_accept( void *ptr )
 	long len;
 
 
-	nsets = *( ( int * ) ptr);
+	nsets = *( ( int * ) ptr );
 	ptr += sizeof( int );
 
 	if ( nsets < 0 )
@@ -196,7 +196,7 @@ static bool other_data_request( int type, void * ptr )
 	if ( type != D_CLEAR_CURVE )
 		return FAIL;
 
-	count = *( ( long * ) ptr );
+	count = * ( ( long * ) ptr );
 	ptr += sizeof( long );
 	ca = ( long * ) ptr;
 

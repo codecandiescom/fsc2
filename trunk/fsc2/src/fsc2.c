@@ -263,8 +263,9 @@ static void final_exit_handler( void )
 		unlink( in_file );
 	unlink( FSC2_SOCKET );
 
-	/* Delete semaphore if it still exists */
+	/* Delete all shared memory and also semaphore (if it still exists) */
 
+	delete_all_shm( );
 	if ( semaphore >= 0 )
 		sema_destroy( semaphore );
 
@@ -1158,33 +1159,34 @@ void main_sig_handler( int signo )
 {
 	char line[ MAXLINE ];
 	int count;
+	int errno_saved;
 
-
-	signal( signo, main_sig_handler );
 
 	switch ( signo )
 	{
 		case SIGCHLD :
+			errno_saved = errno;
 			wait( NULL );
-			break;
+			errno = errno_saved;
+			return;
 
 		case SIGUSR2 :
 			conn_child_replied = SET;
-			break;
+			return;
 
 		case SIGUSR1 :
+			errno_saved = errno;
 			while ( ( count = read( conn_pd[ READ ], line, MAXLINE ) ) == -1 &&
 					errno == EINTR )
 				;
-
 			line[ count - 1 ] = '\0';
 			main_form->Load->u_ldata = ( long ) line[ 0 ];
 			if ( line[ 1 ] == 'd' )
 				delete_file = SET;
 			main_form->Load->u_cdata = get_string_copy( line + 2 );
 			fl_trigger_object( main_form->Load );
-
-			break;
+			errno = errno_saved;
+			return;
 
 		/* Ignored signals : */
 

@@ -11,7 +11,7 @@
 
 
 /* Maximum number of shared memory segments - I didn't find a better way to
-   determine tkis number yet. In principal, it should be taken from one of the
+   determine this number yet. In principal, it should be taken from one of the
    include files, but alas, for the current version of Linux the header files
    seem to be broken in this respect... */
 

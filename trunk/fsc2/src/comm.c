@@ -6,18 +6,18 @@
 /* 
    There are two types of messages to be exchanged between the child and the
    parent. The first one is data to be displayed by the parent. These should
-   be accepted as fast as possible so that the child can continue with the
-   measurement immediately. The other type of messages are requests by the
-   child for the parent to do some things for it, e.g. display an alert box,
-   and possibly return the users input. The protocol for requests is quite
-   simple - the child sends the request and waits for the answer by the
-   parent, knowing exactly what kind of data to expect.
+   be accepted as fast as possible so that the child can continue immediately
+   with the measurement. The other type of messages are requests by the child
+   for the parent to do something for it, e.g. display an alert box, and
+   possibly return the users input. The protocol for requests is quite simple
+   - the child sends the request and waits for the answer by the parent,
+   knowing exactly what kind of data to expect.
 
    The first problem to be addressed is how to make the parent aware of data
-   or requests send by the child. This is handled by a signals, NEW_DATA. 
-   The NEW_DATA signal is send by the child whenever it is sending new data.
+   or requests send by the child. This is handled by a signal, NEW_DATA. 
+   The NEW_DATA signal is raised by the child whenever it is sending new data.
    Before it may send data it must wait on a semaphore that is posted by the
-   parent when it is prepared to accept new data.
+   parent when it is ready to accept new data.
 
    The communication path for request type of messages is easy to implement -
    a simple pair of pipes will do. All needed beside is a protocol for the
@@ -33,23 +33,24 @@
    to the pipe. The parent will also have to post the semaphore to allow the
    child to send further data or requests.
 
-   The implementation for the exchange of data is a bit more complicated. Here
-   the child should not be forced to wait for the parent process to finally
-   react to a (self-created) event since this may take quite some time while
-   the parent is busy updating the display or is even waiting while the user
-   resizes one of the windows. On the other hand, the parent can't store the
-   data already in the handler for the NEW_DATA signal, because it would have
-   to call malloc(), which is, unfortunately, not reentrant. Thus, the
-   alternative is to use shared memory segments.
+   The implementation for the exchange of data to be displayed is a bit more
+   complicated. Here the child should not be forced to wait for the parent
+   process to finally react to a (self-created) event since this may take
+   quite some time while the parent is busy updating the display or is even
+   waiting while the user resizes one of the windows. On the other hand, the
+   parent can't store the data already in the handler for the NEW_DATA signal,
+   because it would have to call malloc() to store the data, which is not
+   reentrant. Thus, the alternative is to use shared memory segments.
 
-   Thus, when the child process needs to send data to the parent it gets a new
-   shared memory segment, copies the data into the segment and then sends the
-   parent just the identifier of the memory segment. Within the NEW_DATA
-   signal handler all the parent does is to store this identifier in a message
-   queue (that should have at least as many slots as there are shared memory
-   segments, see below) and then posts the semaphore immediately. This way the
-   child can continue with the measurement while the parent has time to handle
-   the new data whenever it is ready to do so.
+   Thus, when the child process needs to send data to display to the parent it
+   gets a new shared memory segment, copies the data into the segment and then
+   sends the parent just the identifier of the memory segment (see f_display()
+   and f_clearcv() in func_util.c) and raises the NEW_DATA signal. Within the
+   parents NEW_DATA signal handler all the parent does is to store this
+   identifier in a message queue (that should have at least as many slots as
+   there are shared memory segments, see below) and then posts the semaphore
+   immediately. This way the child can continue with the measurement while the
+   parent has time to handle the new data whenever it is ready to do so.
 
    How does the child send memory segment identifiers to the parent? This
    also is done via a shared memory segment created before the child is
@@ -60,14 +61,14 @@
    message it is going to receive.
 
    Thus, in the NEW_DATA signal handler the parent just copies the segment
-   identifier and the type flag and, for DATA messages, posts the semaophore.
+   identifier and the type flag and, for DATA messages, posts the semaphore.
    Finally, it creates a synthetic event for the invisible button. Where do
    the segment identifiers get stored? Together with the segment for storing
    the identifiers a queue is created for storing the the identifiers and
-   message type flags. The size of the queue can be rather limited since there
-   is only a limited amount of shared memory segments. Thus this queue to has
-   have only the maximum number of shared memory segments plus one entries
-   (the extra entry is for REQUEST messages - there can always be only
+   message type flags. The size of the queue can be rather limited since
+   there is only a limited amount of shared memory segments. Thus this queue
+   has to have only the maximum number of shared memory segments plus one
+   entries (the extra entry is for REQUEST messages - there can always only be
    one). Beside the message queue also two pointers are needed, on pointing to
    the oldest un-handled entry and one just above the newest one.
 
@@ -92,13 +93,14 @@
    `internal communication error'.
 
    A final problem that can't be handled by the program is what happens if the
-   program crashes without releasing the shared memory segments. In this case
-   these memory segments will remain intact since the system won't remove
-   them. To make it simpler to find and then remove orphaned shared memory
-   segments, i.e. segments that no process is interested in anymore, each
-   memory segment allocated by fsc2 is labelled by the four byte magic number
-   'fsc2' at its very start. Using this label at the next start of fsc2 all
-   orphaned segments can be identified and released.
+   program gets killed in a way that it can't release the shared memory
+   segments. In this case these memory segments will remain intact since the
+   system won't remove them. To make it simpler to find and then remove
+   orphaned shared memory segments, i.e. segments that no process is
+   interested in anymore, each memory segment allocated by fsc2 is labelled by
+   the four byte magic number 'fsc2' at its very start. Using this label at
+   the next start of fsc2 all orphaned segments can be identified and
+   released.
 
 */
 
@@ -112,8 +114,6 @@
 static bool pipe_read( int fd, void *buf, size_t bytes_to_read );
 static void send_browser( FL_OBJECT *browser );
 
-static int Key_Area;
-
 
 /*----------------------------------------------------------------*/
 /* This routine sets up the resources needed for the interprocess */
@@ -124,8 +124,6 @@ bool setup_comm( void )
 {
 	int pr;
 	int i;
-	struct shmid_ds shm_buf;
-	void *raw_key;
 
 
 	/* Open pipes for passing data between child and parent process - we need
@@ -134,7 +132,7 @@ bool setup_comm( void )
 
     if ( ( pr = pipe( pd ) ) < 0 || pipe( pd + 2 ) < 0 )      /* open pipes */
 	{
-		if ( pr == 0 )
+		if ( pr == 0 )                    /* if first open did succeed */
 		{
 			close( pd[ 0 ] );
 			close( pd[ 1 ] );
@@ -143,53 +141,7 @@ bool setup_comm( void )
 		return FAIL;
 	}
 
-
-	/* Beside the pipes we need a semaphore which allows the parent to control
-	   when the child is allowed to send data and messages. It has to be
-	   initialized to zero. */
-
-	if ( ( semaphore = sema_create( 0 ) ) < 0 )
-	{
-		for ( i = 0; i < 4; i++ )
-			close( pd[ i ] );
-		return FAIL;
-	}
-
-	/* Finally we need a shared memory segment to pass the key to further
-	   shared memory segments used to send data from the child to the parent */
-
-	seteuid( EUID );
-	Key_Area = shmget( IPC_PRIVATE, 4 * sizeof( char ) + 2 * sizeof( int ),
-					   IPC_CREAT | SHM_R | SHM_A );
-
-	if ( Key_Area < 0 )
-	{
-		seteuid( getuid( ) );
-
-		sema_destroy( semaphore );
-		semaphore = -1;
-
-		for ( i = 0; i < 4; i++ )
-			close( pd[ i ] );
-		return FAIL;
-	}
-
-	if ( ( raw_key = shmat( Key_Area, NULL, 0 ) ) == ( void * ) - 1 )
-	{
-		for ( i = 0; i < 4; i++ )
-			close( pd[ i ] );
-
-		sema_destroy( semaphore );
-		semaphore = -1;
-
-		shmctl( Key_Area, IPC_RMID, &shm_buf );
-		seteuid( getuid( ) );
-
-		return FAIL;
-	}
-	seteuid( getuid( ) );
-
-	/* Finally we need a message queue where the parent stores the keys and
+	/* We will need a message queue where the parent stores the keys and
 	   message types it gets from the child for later handling */
 
 	TRY
@@ -201,23 +153,43 @@ bool setup_comm( void )
 	{
 		for ( i = 0; i < 4; i++ )
 			close( pd[ i ] );
+		return FAIL;
+	}
+
+	/* Set identifier entry in all elements of the message queue to -1, i.e.
+	   invalid */
+
+	for ( i = 0; i < QUEUE_SIZE; i++ )
+		Message_Queue[ i ].shm_id = -1;
+
+	/* Beside the pipes we need a semaphore which allows the parent to control
+	   when the child is allowed to send data and messages. It has to be
+	   initialized to zero. */
+
+	if ( ( semaphore = sema_create( 0 ) ) < 0 )
+	{
+		Message_Queue = T_free( Message_Queue );
+		for ( i = 0; i < 4; i++ )
+			close( pd[ i ] );
+		return FAIL;
+	}
+
+	/* Finally we need a shared memory segment to pass the key to further
+	   shared memory segments used to send data from the child to the parent */
+
+	if ( ( Key = ( KEY * ) get_shm( &Key_ID, sizeof( KEY ) ) )
+		 == ( KEY * ) - 1 )
+	{
+		Message_Queue = T_free( Message_Queue );
 
 		sema_destroy( semaphore );
 		semaphore = -1;
 
-		seteuid( EUID );
-		shmdt( ( void * ) raw_key );
-		shmctl( Key_Area, IPC_RMID, &shm_buf );
-		seteuid( getuid( ) );
+		for ( i = 0; i < 4; i++ )
+			close( pd[ i ] );
 
 		return FAIL;
 	}
-
-	/* As every other shared memory segment we start it with the magic number
-	   'fsc2' so we can identify it later */
-
-	memcpy( raw_key, "fsc2", 4 * sizeof( char ) );
-	Key = ( KEY * ) ( ( char * ) raw_key + 4 );
 
 	message_queue_low = message_queue_high = 0;
 
@@ -237,16 +209,13 @@ void end_comm( void )
 	if ( message_queue_low != message_queue_high )
 		new_data_callback( NULL, 0 );
 
+	/* Get rid of all the shared memory segments */
+
+	delete_all_shm( );
+
 	/* Deallocate the message queue */
 
-	T_free( Message_Queue );
-
-	/* Detach and remove shared memory segment used for the message queue */
-
-	seteuid( EUID );
-	shmdt( ( void * ) ( ( char * ) Key - 4 ) );
-	shmctl( Key_Area, IPC_RMID, NULL );
-	seteuid( getuid( ) );
+	Message_Queue = T_free( Message_Queue );
 
 	/* Delete the semaphore */
 
@@ -707,6 +676,15 @@ static bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 	sigset_t new_mask, old_mask;
 
 
+	/* From man 2 read(): POSIX allows a read that is interrupted after
+	   reading some data to return -1 (with errno set to EINTR) or to
+	   return the number of bytes already read.
+
+	   The latter happens on Linux system with kernel 2.0.36 while the first
+	   happens on a newer system, e.g. 2.2.12. Blocking all expected signals
+	   while reading and using this rather lengthy loop tries to get it right
+	   for both kinds of systems. */
+
 	sigemptyset( &new_mask );
 	if ( I_am == CHILD )
 		sigaddset( &new_mask, DO_QUIT );
@@ -717,27 +695,9 @@ static bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 	}
 	sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
-
 	while ( bytes_to_read > 0 )
 	{
 		bytes_read = read( fd, buf + already_read, bytes_to_read );
-
-		/* From man 2 read(): POSIX allows a read that is interrupted after
-		   reading some data to return -1 (with errno set to EINTR) or to
-		   return the number of bytes already read.
-
-		   The first happens on a Linux system with kernel 2.0.36 while the
-		   latter happens on a newer system, e.g. 2.2.12. On the older system
-		   this leads to trouble: After the parent sent its data and while the
-		   child is still waiting for data or has just started to read, the
-		   parent also sends a DO_SEND signal. This may interrupt the child's
-		   read(), returning -1 with errno set to EINTR while nothing or not
-		   everything has been read yet. Unfortunately, ignoring the -1 and
-		   restarting the read would only work if the signal is raised BEFORE
-		   the first byte has been read by the child since nothing tells us
-		   how many bytes already have been read. To make sure (at least for
-		   the DO_SEND signal) that the signal is received before the read
-		   starts the parent sends it always before replying to a request. */
 
 		if ( bytes_read == -1 && errno == EINTR )
 			continue;
@@ -799,12 +759,7 @@ void writer( int type, ... )
 
 	if ( I_am == CHILD )
 	{
-		/* Using a pause() here is tempting but there exists a race condition
-		   between the determination of the value of 'do_send' and the start
-		   of pause() - and it happens... */
-
 		sema_wait( semaphore );
-
 		Key->type = REQUEST;
 		kill( getppid( ), NEW_DATA );   /* tell parent to expect new data */
 	}
