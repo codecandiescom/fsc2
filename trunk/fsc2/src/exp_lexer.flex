@@ -61,9 +61,9 @@ ON_STOP		^[ \t]*ON_STOP:
 
 CONT        CONT(INUE)?
 
-INT         [0-9]+
-EXPO        [EDed][+-]?{INT}
-FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
+INT         [+-]?[0-9]+
+EXPO        [EDed]{INT}
+FLOAT       ([+-]?((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?))|({INT}{EXPO})
 
 P           P(ULSE)?_?{INT}
 

@@ -62,9 +62,9 @@ EXP         ^[ \t]*EXP(ERIMENT)?S?:
 STR         \x5[^\x6]*\x6
 ESTR        \x5.*\x3\n.*\n
 
-INT         [0-9]+
-EXPO        [EDed][+-]?{INT}
-FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
+INT         [+-]?[0-9]+
+EXPO        [EDed]{INT}
+FLOAT       ([+-]?((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?))|({INT}{EXPO})
 
 IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
