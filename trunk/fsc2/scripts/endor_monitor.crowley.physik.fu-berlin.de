@@ -1,0 +1,163 @@
+#!/usr/local/bin/fsc2
+
+/* $Id$ */
+
+DEVICES:
+
+hp8647a;
+sr810;
+
+
+VARIABLES:
+
+freq          =   14 MHz;
+min_freq      =    1 MHz;
+max_freq      =   40 MHz;
+
+step_freq     =   20 kHz;
+min_step_freq =    5 kHz;
+max_step_freq =    1 MHz;
+
+atten      	  =  -80 db;
+min_atten  	  = -100 db;
+max_atten  	  =   -3 db;
+
+
+I = 1;
+B0, B1, B2, B3, B4, B5;
+I1, I2, I3;
+
+old_freq;
+new_step_freq;
+new_atten;
+STATE = 0;
+
+
+PREPARATIONS:
+
+
+synthesizer_frequency( freq );
+synthesizer_attenuation( atten );
+synthesizer_use_table( );
+
+init_1d( );
+
+
+EXPERIMENT:
+
+lockin_lock_keyboard( 0 );
+
+hide_toolbox( 1 );
+B0 = button_create( "NORMAL_BUTTON", "Clear curve" );
+I1 = input_create( "FLOAT_INPUT", freq * 1.0e-6, "RF frequency in MHz",
+				   "", "%.3f" );
+B1 = button_create( "RADIO_BUTTON", "Sweep frequency up" );
+B2 = button_create( "RADIO_BUTTON", B1, "Stop frequency sweep" );
+B3 = button_create( "RADIO_BUTTON", B1, "Sweep frequency down" );
+button_state( B2, 1 );
+I2 = input_create( "FLOAT_INPUT", step_freq * 1.0e-3,
+				   "Step frequency in kHz" );
+B4 = button_create( "PUSH_BUTTON", "RF power on/off" );
+I3 = input_create( "FLOAT_INPUT", atten, "Attenuation in db" );
+B5 = button_create( "PUSH_BUTTON", "Pause" );
+hide_toolbox( 0 );
+
+FOREVER {
+
+	/* Remove curve if "Clear curve" button has been pressed */
+
+	IF button_state( B0 ) {
+		clear_curve( );
+		I = 1;
+	}
+
+	/* If the frequency has been changed set the new frequency */
+
+	old_freq = freq;
+	freq = input_value( I1 ) * 1.0e6;
+	IF freq < min_freq | freq > max_freq {
+		freq = old_freq;
+		input_value( I1, freq * 1.0e-6 );
+	} ELSE IF freq != old_freq {
+		synthesizer_frequency( freq );
+	}
+
+	/* Check value of step frequency */
+
+	new_step_freq = input_value( I2 ) * 1.0e3;
+	IF new_step_freq < min_step_freq | new_step_freq > max_step_freq {
+		input_value( I2, step_freq * 1.0e-3 );
+	} ELSE {
+		step_freq = new_step_freq;
+	}
+
+	/* Check if RF power on/off state has changed */
+
+	IF button_state( B4 ) != STATE {
+		STATE = STATE ~ 1;
+		synthesizer_state( STATE );
+	}
+
+	/* Check if attenuation has been changed */
+
+	new_atten = input_value( I3 );
+	IF new_atten < min_atten | new_atten > max_atten {
+		input_value( I3, atten );
+	} ELSE IF atten != new_atten {
+		atten = new_atten;
+		synthesizer_attenuation( atten );
+	}
+
+	/* If pause is on or frequency has been changed go back to start
+	   after short sleeping period */
+
+	IF button_state( B5 ) | old_freq != freq {
+		wait( 0.5 s );
+		NEXT;
+	}
+
+	/* If sweep up button is pressed calculate new frequency. If it's still
+	   within the limits set synthesizer and input field accordingly, other-
+	   wise set to maximum frequency and activate sweep stopped button */
+
+	IF button_state( B1 ) {
+		old_freq = freq;
+		freq += step_freq;
+		IF freq > max_freq {
+			freq = max_freq;
+			button_state( B2, 1 );
+		}
+		IF freq != old_freq {
+			input_value( I1, freq * 1.0e-6 );
+			synthesizer_frequency( freq );
+		}
+	}
+
+	/* If sweep down button is pressed calculate new frequency. If it's still
+	   within the limits set synthesizer and input field accordingly, other-
+	   wise set to minimum frequency and activate sweep stopped button */
+
+	IF button_state( B3 ) {
+		old_freq = freq;
+		freq -= step_freq;
+		IF freq < min_freq {
+			freq = min_freq;
+			button_state( B2, 1 );
+		}
+		IF freq != old_freq {
+			input_value( I1, freq * 1.0e-6 );
+			synthesizer_frequency( freq );
+		}
+	}
+
+	/* Get new value from lock-in, display it and wait for duration of
+	   lock-ins time constant */
+
+	display( I, lockin_get_data( ) );
+	I += 1;
+	wait( lockin_time_constant( ) )
+}
+
+ON_STOP:
+
+synthesizer_state( "OFF" );
