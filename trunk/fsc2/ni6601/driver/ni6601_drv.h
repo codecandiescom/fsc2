@@ -250,12 +250,15 @@ typedef struct {
 	unsigned long mite_len;
 	unsigned long addr_phys;
 	unsigned long addr_len;
-#if 0
-	unsigned int irq;
-#endif
+
 	int in_use;
 	uid_t owner;
 	spinlock_t spinlock;
+
+	unsigned int irq;
+	int irq_enabled[ 4 ];
+	int TC_irq_raised[ 4 ];
+	wait_queue_head_t waitqueue;
 
 	u16 dio_mask;
 
@@ -386,16 +389,25 @@ int ni6601_input_source( int source, u16 *bits );
 #define G1_COUNTING                        ( 1 <<  3 )
 #define G0_COUNTING                        ( 1 <<  2 )
 
+#define Gi_ARMED( x )                      ( 1 << ( 8 + ( ( x ) & 1 ) ) )
+#define Gi_NEXT_LOAD_SOURCE_A( x )         0
+#define Gi_NEXT_LOAD_SOURCE_B( x )         ( 1 << ( 4 + ( ( x ) & 1 ) ) )
+#define Gi_COUNTING( x )                   ( 1 << ( 2 + ( ( x ) & 1 ) ) )
+
+
 /* G01/G23 Joint Reset Register */
 
 #define G0_RESET                           ( 1 <<  2 )
 #define G1_RESET                           ( 1 <<  3 )
+
+#define Gi_Reset( x )                      ( 1 << ( 2 + ( ( x ) & 1 ) ) )
 
 /* Gi Interrupt Enable Register */
 
 #define G1_TC_INTERRUPT_ENABLE             ( 1 <<  9 )
 #define G0_TC_INTERRUPT_ENABLE             ( 1 <<  6 )
 
+#define Gi_TC_INTERRUPT_ENABLE( x )        ( 1 << ( 6 + ( ( x ) & 1 ) * 3 ) )
 
 
 #if defined NI6601_DEBUG

@@ -23,8 +23,9 @@
 #include "ni6601_drv.h"
 
 
-/*-------------------------------------------------------*/
-/*-------------------------------------------------------*/
+/*--------------------------------------------------------*/
+/* Function releases all resources allocated to the board */
+/*--------------------------------------------------------*/
 
 void ni6601_release_resources( Board *boards, int board_count )
 {
@@ -40,12 +41,12 @@ void ni6601_release_resources( Board *boards, int board_count )
 			iounmap( boards[ i ].addr );
 			boards[ i ].addr = NULL;
 		}
-#if 0
+
 		if ( boards[ i ].irq ) {
 			free_irq( boards[ i ].irq, boards + i );
 			boards[ i ].irq = 0;
 		}
-#endif
+
 		if ( boards[ i ].dev ) {
 			pci_release_regions( boards[ i ].dev );
 			boards[ i ].dev = NULL;
@@ -54,8 +55,10 @@ void ni6601_release_resources( Board *boards, int board_count )
 }
 
 
-/*-------------------------------------------------------*/
-/*-------------------------------------------------------*/
+/*----------------------------------------------------------*/
+/* Function for setting up the structure with the addresses */
+/* of the boards registers                                  */
+/*----------------------------------------------------------*/
 
 void ni6601_register_setup( Board *board )
 {

@@ -38,6 +38,8 @@ static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg );
 static int ni6601_start_pulses( Board *board, NI6601_PULSES *arg );
 static int ni6601_start_counting( Board *board, NI6601_COUNTER *arg );
 static int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg );
+static void ni6601_irq_enable( Board *board, int counter );
+static void ni6601_irq_disable( Board *board, int counter );
 static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy );
 
 
@@ -146,6 +148,9 @@ static void __exit ni6601_cleanup( void )
 
 static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 {
+	int i;
+
+
 	board->dev = dev;
 	board->irq = 0;
 
@@ -197,7 +202,14 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 		goto init_failure;
 	}
 
+	/* Initialize variables for interrupt handling */
+
 	board->irq = dev->irq;
+	for ( i = 0; i < 4; i++ ) {
+		board->irq_enabled[ i ] = 0;
+		board->TC_irq_raised[ i ] = 0;
+	}
+	init_waitqueue_head( &board->waitqueue );
 
 	spin_lock_init( &board->spinlock );
 
@@ -483,16 +495,21 @@ static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
 	   reset both counters. */
 
 	if ( cs.wait_for_end ) {
-		wait_queue_head_t waitqueue;
 
-		init_waitqueue_head( &waitqueue );
-		while ( readw( board->regs.joint_status[ cs.counter ] ) &
-			( cs.counter & 1 ? G0_COUNTING : G1_COUNTING ) ) {
-			interruptible_sleep_on_timeout( &waitqueue, 1 );
-			if ( signal_pending( current ) ) {
-				PDEBUG( "Aborted by signal\n" );
-				return -EINTR;
-			}
+		int oc = ( cs.counter & ~1 ) | ( ( cs.counter & 1 ) ^ 1 );
+
+		ni6601_irq_enable( board, oc );
+
+		if ( ! ( readw( board->regs.joint_status[ oc ] ) &
+			 Gi_COUNTING( oc ) ) )
+		     wait_event_interruptible( board->waitqueue,
+					       board->TC_irq_raised[ oc ] );
+
+		ni6601_irq_disable( board, oc );
+
+		if ( signal_pending( current ) ) {
+			PDEBUG( "Aborted by signal\n" );
+			return -EINTR;
 		}
 
 		writew( G1_RESET | G0_RESET,
@@ -507,7 +524,7 @@ static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
 	   readings are identical */
 
 	if ( readw( board->regs.joint_status[ cs.counter ] ) &
-	     ( cs.counter & 1 ? G1_ARMED : G0_ARMED ) )
+	     Gi_ARMED( cs.counter & 1 ) )
 		while ( cs.count != ( next_val =
 				 readl( board->regs.sw_save[ cs.counter ] ) ) )
 			cs.count = next_val;
@@ -555,7 +572,7 @@ static int ni6601_start_pulses( Board *board, NI6601_PULSES *arg )
 		return -EINVAL;
 	}
 
-	if ( p.low_ticks == 0 || p.high_ticks == 0 ) {
+	if ( p.low_ticks < 2 || p.high_ticks < 2 ) {
 		PDEBUG( "Invalid low or high ticks\n" );
 		return -EINVAL;
 	}
@@ -699,7 +716,7 @@ static int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg )
 	/* Test if the counter is armed */
 
 	a.state =  ( readw( board->regs.joint_status[ a.counter ] ) &
-		     ( ( a.counter & 1 ) ? G1_ARMED : G0_ARMED ) ) ? 1 : 0;
+		     Gi_ARMED( a.counter & 1 ) ) ? 1 : 0;
 	
 	if ( copy_to_user( arg, &a, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
@@ -710,13 +727,39 @@ static int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg )
 }
 
 
-/*----------------------------------------------------------*/
-/* Interrupt handler for all boards, not doing anything yet */
-/*----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+/* Function to enable TC interrupts from one of the counters */
+/*-----------------------------------------------------------*/
+
+static void ni6601_irq_enable( Board *board, int counter )
+{
+	board->TC_irq_raised[ counter ] = 0;
+	writew( Gi_TC_INTERRUPT_ENABLE( counter ),
+		board->regs.irq_enable[ counter ] );
+	board->irq_enabled[ counter ] = 1;
+}
+
+
+/*------------------------------------------------------------*/
+/* Function to disable TC interrupts from one of the counters */
+/*------------------------------------------------------------*/
+
+static void ni6601_irq_disable( Board *board, int counter )
+{
+	writew( 0, board->regs.irq_enable[ counter ] );
+	board->irq_enabled[ counter ] = 0;
+}
+
+
+/*-------------------------------------------------------------------*/
+/* Interrupt handler for all boards, raising a flag on TC interrupts */
+/*-------------------------------------------------------------------*/
 
 static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
 {
 	Board *board = ( Board * ) data;
+	u16 mask = Gi_INTERRUPT | Gi_TC_STATUS;
+	int i;
 
 
 	if ( irq != board->irq ) {
@@ -725,6 +768,11 @@ static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
 	}
 
 	PDEBUG( "Got interrupt\n" );
+
+	for ( i = 0; i < 4; i++ )
+		if ( board->irq_enabled[ i ] &&
+		     mask == ( readw( board->regs.status[ i ] ) & mask ) )
+			board->TC_irq_raised[ i ] = 1;
 }
 
 
