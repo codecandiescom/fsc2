@@ -608,7 +608,7 @@ Var *counter_continuous_pulses( Var *v )
 				break;
 
 			case NI6601_ERR_CBS :
-				print( FATAL, "Counter CH%d requested for continnuous pulses "
+				print( FATAL, "Counter CH%d requested for continuous pulses "
 					   "is already running.\n", counter );
 				THROW( EXCEPTION );
 
@@ -619,7 +619,7 @@ Var *counter_continuous_pulses( Var *v )
 	else if ( FSC2_MODE == TEST &&
 			  states[ counter ] == COUNTER_IS_BUSY )
 	{
-		print( FATAL, "Counter CH%d requested for continnuous pulses is "
+		print( FATAL, "Counter CH%d requested for continuous pulses is "
 			   "already running.\n", counter );
 		THROW( EXCEPTION );
 	}
