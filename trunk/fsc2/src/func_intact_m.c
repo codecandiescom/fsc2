@@ -316,10 +316,10 @@ static void f_mdelete_child( Var *v )
 }
 
 
-/*----------------------------------------------------------*/
-/* Part of the f_medelete() function only run by the parent */
-/* process, which actually removes the menu.                */
-/*----------------------------------------------------------*/
+/*---------------------------------------------------------*/
+/* Part of the f_mdelete() function only run by the parent */
+/* process, which actually removes the menu.               */
+/*---------------------------------------------------------*/
 
 static void f_mdelete_parent( Var *v )
 {
