@@ -23,7 +23,6 @@
 
 
 ################################################################
-#
 # Utility function
 
 function get_reply() {
@@ -150,7 +149,6 @@ echo "#define WITIO_48_PREFIX   \"$PREFIX\"" >> driver/autoconf.h
 
 
 ################################################################
-#
 # Run setup of parameter until the user is satisfied
 
 function setup_loop() {
@@ -175,7 +173,6 @@ function setup_loop() {
 
 
 ################################################################
-#
 # Function that starts the make process after some more checks
 
 function do_compile() {
@@ -250,10 +247,19 @@ fi
 
 
 ################################################################
-#
 # Does everything needed for the installation
 
 function do_install() {
+
+# Check that user has root privileges
+
+if [ `id -u` != "0" ]; then
+	dialog --msgbox \
+"Sorry, you need root privileges to install\n\
+ the driver and the library etc. Please\n\
+    become root and then try again.\n" 7 48
+	exit 1;
+fi
 
 # Ask user if he wants to install the library, driver and include files etc.
 
@@ -272,16 +278,6 @@ directories that don't exist:\n\n\
 		Do you want to continue ?" 15 70
 
 test $? -eq 0 || exit 0
-
-# Check that user has root privileges
-
-if [ `id -u` != "0" ]; then
-	dialog --msgbox \
-"Sorry, you need root privileges to install\n\
- the driver and the library etc. Please\n\
-    become root and then try again.\n" 7 48
-	exit 1;
-fi
 
 # Do the basic installation (covered by the makefile) and
 # find out if user wants to update the modules dependency file
@@ -403,7 +399,6 @@ fi
 
 
 ################################################################
-#
 # Removes entries for drivers with the same major number device
 # number from /etc/modules.conf (or, if this is still used,
 # /etc/conf.modules) and adds the WITIO-48 driver instead. The old
@@ -437,7 +432,6 @@ echo "alias char-major-$MAJOR witio_48" >> $MODULECONF
 
 
 ################################################################
-#
 # Chooses either compiling or installing (called at the start
 # when the include/autoconf.h and driver/board exist)
 
@@ -459,7 +453,6 @@ test $MTYPE != "Setup" || setup_loop 1
 
 
 ################################################################
-#
 # Chooses between setup, compilation or installation (called at
 # the start when include/autoconf.h and driver/board as well as
 # the compiled library and driver exist)
