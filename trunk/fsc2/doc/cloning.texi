@@ -91,6 +91,10 @@ update the GPIB configuration file manually (usually, it's
 /etc/gpib.conf). Just copy the section for the old device,
 replace the device name by `SR510_B' and change the GPIB
 address to the one of the new device.
+
+If the device is accessed via the serial port you will have
+edit its configuration file ('sr510_b.conf' in the 'config'
+directory) in order to set the serial port it's attached to.
 @end example
 
 When you have run the script you will have to @code{cd} back from the
@@ -101,10 +105,16 @@ to install it. To do so you must become @code{root} (type "su" and then
 enter the root password) and, still from @code{fsc2}s main directory,
 run @w{@code{make install}}.
 
-If the device isn't controlled via the GPIB bus you're already
-done. Otherwise you will have also to edit (still with @code{root}
-privileges) the GPIB configuration file (which usually is
-@file{/etc/gpib.conf}) and copy the entry for the cloned device. In this
-copy change the device name to the one you had entered while running the
-script (i.e.@: in the example @code{SR510}) to the new device name
-@code{SR510_B} and finally set the GPIB address entry correctly.
+For devices controlled via the GPIB bus will  have also to edit
+(still with @code{root} privileges) the GPIB configuration file (which
+usually is @file{/etc/gpib.conf}) and copy the entry for the cloned
+device. In this copy change the device name to the one you had entered
+while running the script (i.e.@: in the example @code{SR510}) to the new
+device name @code{SR510_B} and finally set the GPIB address entry
+correctly.
+
+For devices attached to the serial port you must change the serial port
+setting in the configuration file for the device (the configuration
+files for all devices are in the @file{conf} subdirectory below
+@code{fsc2}s main directory and the file name is identical to the device
+name and has the extension @code{.conf}).
