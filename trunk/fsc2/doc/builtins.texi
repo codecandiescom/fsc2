@@ -2278,6 +2278,21 @@ For variable sized arrays for which the length is still unknown the
 function returns @code{0}.
 
 
+@anchor{reverse}
+@item reverse()
+@findex reverse()
+The function takes a single argument, normally a one- or
+more-dimensional array. For a one-dimensional array it returns another
+array with the order of the elements of the input array reversed. For
+a multi-dimensional array it returns a multi-dimensional array of the
+same rank as the input array and the order of all the elements of all
+one-dimensional arrays making up the multi-dimensional array being
+reversed.
+
+If the argument is a simple integer or floating point number the same
+number gets returned.
+
+
 @anchor{sprint}
 @item sprint()
 @findex sprint()
@@ -2405,12 +2420,11 @@ IF ( int( pos_arry[ 10 ] ) / 4 ) % 2 @{
 @end example
 
 Please note: since under X it is easy to remap keys the returned value
-does not represent physical keys on the keyboard but the function the
-user has assigned to a key. If, for example, the user has mapped the
-function "Shift" to the (physical) Control key, pressing the (physical)
-Control key would be reported as a press of the Shift modifier key.  The
-Modifier-2 to Modifier-5 functions usually are not even mapped to a
-physical key.
+does not represent how a keys is labeled on the keyboard but the
+function the user has assigned to it. If, for example, the user has
+mapped the function "Shift" to the key labeled "Ctrl", pressing this
+key will be reported as a press of the Shift modifier key. The
+Modifier-2 to Modifier-5 functions often are not mapped to a key.
 
 
 @anchor{lin_space}
