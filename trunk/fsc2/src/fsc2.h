@@ -177,7 +177,7 @@ extern volatile bool do_quit;
 extern bool exit_hooks_are_run;
 
 extern Graphics G;
-extern Data_Buffer *dbuf;
+extern Data_Buffer *DBuf;
 
 #endif
 
