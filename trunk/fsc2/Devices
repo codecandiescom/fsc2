@@ -35,3 +35,5 @@ er035m_sa     // Bruker NMR gaussmeter (connected to IEEE bus, stand alone)
 bh15          // Bruker field controller
 
 hp8647a       // HP RF synthesizer
+
+egg4402       // EG&G PARC box-car
