@@ -609,7 +609,7 @@ Var *gaussmeter_command( Var *v )
 			er035m_sas_comm_fail( );
 		}
 
-		fsc2_usleep( ER035M_S_WAIT, UNSET );
+		fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 		T_free( cmd );
 	}
 
