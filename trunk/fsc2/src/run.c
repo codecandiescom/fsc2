@@ -1080,7 +1080,7 @@ static void do_measurement( void )
 /* be handled by the parser directly, i.e. tokens for flow control.      */
 /* Control is transfered back to this function whenever the parser finds */
 /* the end-of-line delimiter (a colon), a closing curly brace or one of  */
-/*  flow control tokens.                                                 */
+/* the flow control tokens.                                              */
 /*-----------------------------------------------------------------------*/
 
 static void deal_with_program_tokens( void )

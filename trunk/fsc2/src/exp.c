@@ -313,11 +313,18 @@ void store_exp( FILE *in )
 				}
 				break;
 
-			case BREAK_TOK : case NEXT_TOK :
+			case BREAK_TOK :
 				if ( ! in_loop )
 				{
-					print( FATAL, "%s statement not within a loop.\n",
-						   ret == BREAK_TOK ? "BREAK" : "NEXT" );
+					print( FATAL, "BREAK statement not within a loop.\n" );
+					THROW( EXCEPTION );
+				}
+				break;
+
+			case NEXT_TOK :
+				if ( ! in_loop )
+				{
+					print( FATAL, "NEXT statement not within a loop.\n" );
 					THROW( EXCEPTION );
 				}
 				break;
