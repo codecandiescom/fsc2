@@ -288,6 +288,11 @@ minimize these deviations use a start field that is a multiple of @w{50
 mG} and avoid sweeps with more than about 2000 steps away from the start
 field.
 
+Please note that at least with some of the drivers it is not possible to
+specify a negative field step size or sweep rate. Therefore it is
+probably prudent never to try this and use in all cases the functions
+for sweeping down if a sweep to lower field values is required.
+
 
 @anchor{magnet_fast_init}
 @item magnet_fast_init()
