@@ -196,9 +196,9 @@ static void load_functions( Device *dev )
 	/* Now that we know that the module exists and can be used try to resolve
 	   all functions we may need */
 
+	resolve_generic_type( dev );
 	resolve_hook_functions( dev, dev_name );
 	resolve_functions( dev );
-	resolve_generic_type( dev );
 }
 
 
@@ -625,8 +625,8 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 
 
 /*------------------------------------------------------------------------*/
-/* This routine expects the name of a device and returns the the position */
-/* in the list of devices with the same function, as indicated by the     */
+/* This routine expects the name of a device and returns the position in  */
+/* the list of devices with the same function, as indicated by the        */
 /* generic type string. I.e. if you have loaded modules for three lock-in */
 /* amplifiers and you pass this function the name of one of them it looks */
 /* at the sequence the devices were listed in the DEVICES section and     */
@@ -639,7 +639,7 @@ int get_lib_number( const char *name )
 {
 	Device *cd;
 	Device *sd = NULL;                   /* the device we're looking for */
-	int num = 1;
+	int num;;
 
 
 	for ( cd = Device_List; cd != 0; cd = cd->next )
@@ -653,7 +653,7 @@ int get_lib_number( const char *name )
 	if ( cd == NULL || sd == NULL )
 		return 0;
 
-	for ( cd = Device_List; cd != 0; cd = cd->next )
+	for ( num  = 1, cd = Device_List; cd != 0; cd = cd->next )
 	{
 		if ( ! cd->is_loaded )
 			continue;
@@ -661,7 +661,7 @@ int get_lib_number( const char *name )
 		if ( cd == sd )             /* device found -> we're done */
 			return num;
 
-		if ( cd->generic_type != NULL &&
+		if ( cd->generic_type != NULL && sd->generic_type != NULL &&
 			 ! strcasecmp( cd->generic_type, sd->generic_type ) )
 			num++;
 	}
