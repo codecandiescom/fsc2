@@ -127,13 +127,10 @@ static bool no_error_print = UNSET;
 
 %%
 
-all:     /* empty */
-       | input
-;
-
-input:   eol
-       | cond
-       | line eol
+input:   /* empty */
+       | input eol
+       | input cond
+       | input line eol
 ;
 
 eol:     ';'
@@ -144,13 +141,13 @@ eol:     ';'
 	                                 THROW( EXCEPTION ); }
 ;
 
-cond:    FOR_TOK E_VAR_TOKEN '=' expr ':' expr fi '{'
-       | FOREVER_TOK '{'
-       | REPEAT_TOK expr '{'
-       | WHILE_TOK expr '{'
-       | UNTIL_TOK expr '{'
-       | IF_TOK expr '{'
-       | UNLESS_TOK expr '{'
+cond:    FOR_TOK E_VAR_TOKEN '=' expr ':' expr fi ls
+       | FOREVER_TOK ls
+       | REPEAT_TOK expr ls
+       | WHILE_TOK expr ls
+       | UNTIL_TOK expr ls
+       | IF_TOK expr ls
+       | UNLESS_TOK expr ls
        | ELSE_TOK et
 ;
 
@@ -158,8 +155,15 @@ fi:      /* empty */
 	   | ':' expr
 ;
 
-et:      '{'
-       | IF_TOK expr '{'
+ls:      '{'
+       |                           { no_error_print = SET; }
+         error                     { eprint( FATAL, SET, "Invalid loop, IF "
+											 "or UNLESS condition.\n" );
+	                                 THROW( EXCEPTION ); }
+;
+
+et:      ls
+       | IF_TOK expr ls
 
 
 line:    E_VAR_TOKEN ass                              { }
