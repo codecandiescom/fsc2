@@ -85,53 +85,53 @@ may differ for different devices. But while this can be annoyingly
 enough it at least reduces the amount of changes to be done to an
 @code{EDL} program considerably.
 
-But what if you need to use for example two lock-in amplifiers
-simultaneously? When the names of the functions for accessing both the
-lock-ins are identical how does one specify which one to use for a
-command? Actually, it's quite simple. In the @code{DEVICES} section the
-two lock-in amplifiers will be listed as
+But what if you need to use for example two digitizers simultaneously?
+When the names of the functions for accessing both the digitizers are
+identical how does one specify which one to use for a command? Actually,
+it's quite simple. In the @code{DEVICES} section the two digitizers will
+be listed as
 @example
-sr510;         // first lock-in amplifier
-sr830;         // second lock-in amplifier
+tds754a;         // first digitizing oscilloscope
+tds520c;         // second digitizing oscilloscope
 @end example
 @noindent
-If now data from the first lock-in amplifier are needed one simply may
-uses the normal way to get data, i.e.@: the usual function name:
+If now a curve from the first digitizer is needed one simply uses the
+normal way to fetch it, i.e.@: the usual function name:
 @example
-data_from_1st_lockin = lockin_get_data( );
+curve1 = digitizer_get_curve( );
 @end example
 @noindent
-But to get data from the second only the string @code{"#2"} needs to
-be appended to the function name:
+And to get a curve from the second only @code{"#2"} needs to be appended
+to the function name:
 @example
-data_from_2nd_lockin = lockin_get_data#2( );
+curve2 = digitizer_get_curve#2( );
 @end example
 @noindent
 and @code{fsc2} will automatically know that now the second of the
-lock-in amplifiers from the list of devices is meant.
+digitizers from the list of devices is meant.
 
-Of course, if there are three lock-ins listed in the DEVICE section for
-the third one would have to append @code{"#3"} to the function name
-etc. (One also can append the string @code{"#1"} to the name of the
-function for the first lock-in amplifier, but that's optional.)
+Of course, if there are three digitizers listed in the DEVICE section
+you would append @code{"#3"} to the function name for the third one
+etc. (You can also append @code{"#1"} to the name of the function for
+the first digitizer, but that's optional.)
 
 In situations where only the module of the second of two similar devices
 defines a function (e.g.@: because the first device doesn't has the
-necessary capabilities) the function can be used with and without
+necessary capability) the function can be used with and without
 appending the @code{"#2"} to the function name. To remind you about this
-a short message is printed.
+a short message is printed out when the module gets loaded.
 
 
-The only situation that still is a bit more problematical are cases
-where two absolutely identical devices are to be used
-simultaneously. Due to limitations not only of @code{fsc2} but already
-to the way the libraries used for accessing the GPIB bus works you can't
-simply list the same device twice in the @code{DEVICES} section and then
-use these as outlined above. Instead, two device modules with different
-names have to be created for the identical devices and made known to the
-program.  Fortunately, there's a Perl script that will automatically
-deal with this problem, please see one of the later chapters
-(@pxref{Cloning Devices})
+The only situation that's a bit more problematical is the case where two
+absolutely identical devices are to be used simultaneously. Due to
+limitations not only of @code{fsc2} but already to the way the libraries
+used for accessing the GPIB bus work you can't simply list the same
+device twice in the @code{DEVICES} section and then use them as outlined
+above. Instead, two device modules with different names have to be
+created for the identical devices and made known to the program.
+Fortunately, there's a Perl script that can automatically clone a module
+of an already exsiting device, please see one of the following chapters
+(@pxref{Cloning Devices}) on how this is done.
 
 
 @node Magnet Functions, Gaussmeter Functions, Introduction, Device Functions
