@@ -219,8 +219,8 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 								Fname, Lc, varstext );
 						THROW( EXCEPTION );
 					}
-					return FUNC_TOKEN;
 					return E_FUNC_TOKEN;
+				}
 
 				prim_exp_val.vptr = vars_get( prim_exptext );
 				if ( prim_exp_val.vptr == NULL )

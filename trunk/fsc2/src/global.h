@@ -88,7 +88,7 @@ enum {
 
 enum {
 	  ACCESS_EXP,
-	  ACCESS_PREP
+	  ACCESS_PREP,
 	  ACCESS_ALL
 };
 

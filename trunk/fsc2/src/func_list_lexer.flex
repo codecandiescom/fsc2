@@ -201,7 +201,7 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 		( *fncts )[ cur ].name = NULL;
 		( *fncts )[ cur ].fnct = NULL;
 		( *fncts )[ cur ].nargs = 0;
-		( *fncts )[ cur ].access_flag = ACCESS_RESTRICTED;
+		( *fncts )[ cur ].access_flag = ACCESS_EXP;
 		( *fncts )[ cur ].to_be_loaded = UNSET;
 	}
 

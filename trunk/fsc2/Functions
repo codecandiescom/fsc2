@@ -11,7 +11,9 @@
 /* is the access flag, where ALL means that it can be used in all   */
 /* sections of an EDL file while EXP says that the function can     */
 /* be used only in the EXPERIMENTS section, i.e. it's probably a    */
-/* function that accesses a device. The default is EXP.             */
+/* function that accesses a device. The default is EXP. Finally,    */
+/* PREP says that the function may only be used in the preparation  */
+/* of an experiment.                                                */
 /*                                                                  */
 /********************************************************************/
 
@@ -36,3 +38,8 @@ reset_field, 0, EXP;          // go back to start field
 find_field, 0, EXP;           // return current field value
 field_resolution, 0, EXP;     // returns resolution of field meter
 field_meter_wait, 0, EXP;     // wait a bit for field to stabilize
+
+
+// Functions exported by the pulser drivers
+
+pulser_set_timebase, 1, PREP; // sets timebase for pulser
