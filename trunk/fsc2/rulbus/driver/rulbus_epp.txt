@@ -7,7 +7,9 @@ Rulbus EPP Device Driver Description
 
 The driver supports the parallel port EPP interface for the Rulbus
 (Rijksuniversiteit Leiden BUS). The driver supports the open(),
-close() and ioctl() system calls.
+close() and ioctl() system calls. Please note that that driver will
+probably work with PC style hardware only. It also requires the
+parallel port being set up to EPP mode (probably from BIOS)!
 
 All ioctl() data are passed via the following structure
 
