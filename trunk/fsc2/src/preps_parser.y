@@ -143,7 +143,8 @@ prop:   /* empty */
        | prop L_TOK sep1 expr sep2  { p_set( Cur_Pulse, P_LEN,$4 ); }
        | prop DS_TOK sep1 expr sep2 { p_set( Cur_Pulse, P_DPOS, $4 ); }
        | prop DL_TOK sep1 expr sep2 { p_set( Cur_Pulse, P_DLEN, $4 ); }
-       | prop PC_TOK sep1 VAR_REF sep2 { p_set( Cur_Pulse, P_PHASE, $4 ); }
+       | prop PC_TOK sep1 VAR_REF
+         sep2                       { p_set( Cur_Pulse, P_PHASE, $4 ); }
 ;
 
 /* separator between keyword and value */
@@ -214,7 +215,7 @@ unit:    /* empty */              { $$ = NULL; }
        | MEG_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
 ;
 
-/* list of indices for access of an array element */
+/* list of indices for access of array element */
 
 list1:   /* empty */              { $$ = vars_push( UNDEF_VAR ); }
 	   | expr
