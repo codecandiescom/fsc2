@@ -106,7 +106,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "grandom",             f_grand,    	    -1, ACCESS_ALL,  NULL, UNSET },
 	{ "set_seed",            f_setseed,  	    -1, ACCESS_ALL,  NULL, UNSET },
 	{ "time",                f_time,     		-1, ACCESS_ALL,  NULL, UNSET },
-	{ "date",                f_date,     		 0, ACCESS_ALL,  NULL, UNSET },
+	{ "date",                f_date,     		-1, ACCESS_ALL,  NULL, UNSET },
 	{ "delta_time",          f_dtime,    		 0, ACCESS_EXP,  NULL, UNSET },
 	{ "find_peak",           f_find_peak, 		 1, ACCESS_ALL,  NULL, UNSET },
 	{ "index_of_max",        f_index_of_max, 	 1, ACCESS_ALL,  NULL, UNSET },
