@@ -30,7 +30,7 @@
 
 
 ##.so: $(##:.c=.o)
-	if [ -z "$($(patsubst %.so,%_libs,$@))" ]; then                   \
+	@if [ -z "$($(patsubst %.so,%_libs,$@))" ]; then                  \
 		echo "$(CC) $(LFLAGS) $^ -o $@";                              \
 		$(CC) $(LFLAGS) $^ -o $@;                                     \
 		chmod 644 $@;                                                 \
