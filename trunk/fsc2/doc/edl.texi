@@ -36,18 +36,18 @@
 @end menu
 @end ifinfo
 
-
-@node Basics, Sections, EDL, EDL
-@section Basics
-
 To do an experiment using @acronym{fsc2} you have to write a program
 describing the experiment. While this may look like a daunting task if
 you have no programming experience at all it has the advantage that you
 have complete control over the way the experiment is done. You don't
 have to rely on some programmer (who probably isn't around when you need
-him most) to have got everything right before you even started planning
-the experiment. And writing @acronym{EDL} programs really isn't that
-difficult.
+him or her most) to have got everything right before you even started
+planning the experiment. And writing @acronym{EDL} programs really isn't
+that difficult.
+
+
+@node Basics, Sections, EDL, EDL
+@section Basics
 
 An @acronym{EDL} program is roughly structured along the way an
 experiment is done. Before you start an experiment you first have to
@@ -120,8 +120,8 @@ experiment and to use the appropriate kind of display for the data.
 
 Now we're already done with the preparations and can start the
 experiment, as indicated by the keyword @code{EXPERIMENT:}. The whole
-experiment is done in a loop that is repeated as long as the field (
-stored in the variable @code{field}) is less or equal to
+experiment is done in a loop that is repeated as long as the field
+(stored in the variable @code{field}) is less or equal to
 @code{end_field}. To tell the program where the loop starts and ends all
 statements belonging to the loop are enclosed in curly braces,
 `@code{@{}' and `@code{@}}'.
