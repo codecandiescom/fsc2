@@ -233,6 +233,17 @@ void functions_exit( void )
 }
 
 
+/*-------------------------------------------------------------------*/
+/* This function is thought for modules that just need to check if a */
+/* fnction exists.                                                   */
+/*-------------------------------------------------------------------*/
+
+int function_exist( const char *name )
+{
+	return NULL != bsearch( name, Fncts, Num_Func, sizeof( Func ), func_cmp2 );
+}
+
+
 /*----------------------------------------------------------------------*/
 /* Function tries to find a function in the list of built-in and loaded */
 /* functions. If it finds it it creates a new variable on the variables */ 
