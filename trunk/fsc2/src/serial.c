@@ -32,6 +32,10 @@
 
 #if ! defined( NUM_SERIAL_PORTS ) || NUM_SERIAL_PORTS < 1
 
+/*-----------------------------------------------*/
+/* Just tell user about the errors of his way... */
+/*-----------------------------------------------*/
+
 void fsc2_request_serial_port( int sn, const char *devname )
 {
 	UNUSED_ARGUMENT( sn );
@@ -42,20 +46,37 @@ void fsc2_request_serial_port( int sn, const char *devname )
 }
 
 
+/*--------------------*/
+/* Nothing to be done */
+/*--------------------*/
+
 void fsc2_serial_init( void )
 {
 }
 
+
+/*--------------------*/
+/* Nothing to be done */
+/*--------------------*/
 
 void fsc2_serial_cleanup( void )
 {
 }
 
 
+/*--------------------*/
+/* Nothing to be done */
+/*--------------------*/
+
 void fsc2_final_serial_cleanup( void )
 {
 }
 
+
+/*-------------------------------------------------------------*/
+/* Return NULL to indicate failure, a correctly written module */
+/* would never call the function anyway.                       */
+/*-------------------------------------------------------------*/
 
 struct termios *fsc2_serial_open( int sn, const char *devname, int flags )
 {
@@ -68,11 +89,19 @@ struct termios *fsc2_serial_open( int sn, const char *devname, int flags )
 }
 
 
+/*--------------------*/
+/* Nothing to be done */
+/*--------------------*/
+
 void fsc2_serial_close( int sn )
 {
 	UNUSED_ARGUMENT( sn );
 }
 
+
+/*-------------------------------*/
+/* Return -1 to indicate failure */
+/*-------------------------------*/
 
 ssize_t fsc2_serial_write( int sn, const void *buf, size_t count,
 						   long us_wait, bool quit_on_signal )
@@ -88,6 +117,10 @@ ssize_t fsc2_serial_write( int sn, const void *buf, size_t count,
 }
 
 
+/*-------------------------------*/
+/* Return -1 to indicate failure */
+/*-------------------------------*/
+
 ssize_t fsc2_serial_read( int sn, void *buf, size_t count,
 						  long us_wait, bool quit_on_signal )
 {
@@ -102,6 +135,10 @@ ssize_t fsc2_serial_read( int sn, void *buf, size_t count,
 }
 
 
+/*-------------------------------*/
+/* Return -1 to indicate failure */
+/*-------------------------------*/
+
 int fsc2_tcgetattr( int sn, struct termios *termios_p )
 {
 	UNUSED_ARGUMENT( sn );
@@ -111,6 +148,10 @@ int fsc2_tcgetattr( int sn, struct termios *termios_p )
 	return -1;
 }
 
+
+/*-------------------------------*/
+/* Return -1 to indicate failure */
+/*-------------------------------*/
 
 int fsc2_tcsetattr( int sn, int optional_actions, struct termios *termios_p )
 {
@@ -123,6 +164,10 @@ int fsc2_tcsetattr( int sn, int optional_actions, struct termios *termios_p )
 }
 
 
+/*-------------------------------*/
+/* Return -1 to indicate failure */
+/*-------------------------------*/
+
 int fsc2_tcsendbreak( int sn, int duration )
 {
 	UNUSED_ARGUMENT( sn );
@@ -132,6 +177,11 @@ int fsc2_tcsendbreak( int sn, int duration )
 	return -1;
 }
 
+
+/*-------------------------------*/
+/* Return -1 to indicate failure */
+/*-------------------------------*/
+
 int fsc2_tcdrain( int sn )
 {
 	UNUSED_ARGUMENT( sn );
@@ -139,6 +189,11 @@ int fsc2_tcdrain( int sn )
 	errno = EBADF;
 	return -1;
 }
+
+
+/*-------------------------------*/
+/* Return -1 to indicate failure */
+/*-------------------------------*/
 
 int fsc2_tcflush( int sn, int queue_selector )
 {
@@ -148,6 +203,11 @@ int fsc2_tcflush( int sn, int queue_selector )
 	errno = EBADF;
 	return -1;
 }
+
+
+/*-------------------------------*/
+/* Return -1 to indicate failure */
+/*-------------------------------*/
 
 int fsc2_tcflow( int sn, int action )
 {
