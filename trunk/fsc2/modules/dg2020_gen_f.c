@@ -341,7 +341,12 @@ bool dg2020_set_trigger_mode( int mode )
 
 bool dg2020_set_trig_in_level( double voltage )
 {
-	voltage = VOLTAGE_RESOLUTION * lrnd( voltage / VOLTAGE_RESOLUTION );
+	long v;
+
+
+	v = lrnd( voltage / VOLTAGE_RESOLUTION );
+
+	voltage = VOLTAGE_RESOLUTION * v;
 
 	if ( dg2020.is_trig_in_level && dg2020.trig_in_level != voltage )
 	{
@@ -366,7 +371,8 @@ bool dg2020_set_trig_in_level( double voltage )
 		THROW( EXCEPTION );
 	}
 
-	if ( voltage > MAX_TRIG_IN_LEVEL || voltage < MIN_TRIG_IN_LEVEL )
+	if ( v > lrnd( MAX_TRIG_IN_LEVEL / VOLTAGE_RESOLUTION ) ||
+		 v < lrnd( MIN_TRIG_IN_LEVEL / VOLTAGE_RESOLUTION ) )
 	{
 		print( FATAL, "Invalid level for trigger of %g V, valid range is %g V "
 			   "to %g V.\n", MIN_TRIG_IN_LEVEL, MAX_TRIG_IN_LEVEL );
