@@ -4,15 +4,17 @@
 # by 'make install' as well as the name of the GPIB configuration and log file
 # together with its ownerships
 
-prefix         = /usr/local
-bindir         = $(prefix)/bin
-libdir         = $(prefix)/lib/fsc2
-auxdir         = $(libdir)/aux
+#prefix         = /usr/local
+#bindir         = $(prefix)/bin
+#libdir         = $(prefix)/lib/fsc2
+#auxdir         = $(libdir)/aux
+#docdir         = $(libdir)/doc
 
-#prefix         = $(shell pwd)
-#bindir         = $(prefix)
-#libdir         = $(prefix)
-#auxdir         = $(prefix)/aux
+prefix         = $(shell pwd)
+bindir         = $(prefix)
+libdir         = $(prefix)
+auxdir         = $(prefix)/aux
+docdir         = $(prefix)/doc
 
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log
@@ -85,6 +87,9 @@ ifdef auxdir
 	CFLAGS += -Dauxdir=\"$(auxdir:/=)/\" -I../aux
 endif
 
+ifdef docdir
+	CFLAGS += -Ddocdir=\"$(docdir:/=)/\"
+endif
 
 export            # export all variables to sub-makes
 
@@ -103,6 +108,7 @@ all:
 	cp src/fsc2 .
 	cp src/fsc2_clean .
 	cp modules/*.so .
+	$(MAKE) -C doc all
 
 
 # Install the program in $bindir and all the other stuff in $libdir and $auxdir
@@ -113,11 +119,15 @@ install:
 	install -m 6755 -o fsc2 -g fsc2 -s fsc2 $(bindir)
 	install -d $(libdir)
 	install -d $(auxdir)
+	install -d $(docdir)
 	install -m 755 -o fsc2 -g fsc2 -s fsc2_clean $(libdir)
 	install -m 644 -o fsc2 -g fsc2 Functions $(libdir)
 	install -m 644 -o fsc2 -g fsc2 Devices $(libdir)
 	install -m 644 -o fsc2 -g fsc2 -s *.so $(libdir)
 	install -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
+	install -m 444 -o fsc2 -g fsc2 doc/fsc2_*.html $(docdir)
+	install -m 444 -o fsc2 -g fsc2 doc/fsc2.ps $(docdir)
+	install -m 444 -o fsc2 -g fsc2 doc/fsc2.pdf $(docdir)
 	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
         rm -rf $(libdir)/dg2020.so $(libdir)/s_band.so \
                $(libdir)/lockin.so $(libdir)/gaussmeter.so \
@@ -160,7 +170,7 @@ tags:
 # make all documentation
 
 all-docs:
-	$(MAKE) -C doc html ps
+	$(MAKE) -C doc all
 
 # make just the info documentation
 
