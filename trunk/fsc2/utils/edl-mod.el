@@ -82,6 +82,8 @@
      "T\\(RAVELING\\)?_?W\\(AVE\\)?_?T\\(UBE\\)?\\>"
      "DET\\(ECTION\\)?_?G\\(ATE\\)?\\>"
      "DET\\(ECTION\\)?\\>"
+	 "DEF\\(ENSE\\)?\\>"
+	 "P\\(ULSE\\)?_?SH\\(APE\\(R\\)?\\)?\\>"
      "R\\(ADIO\\)?_?F\\(REQ\\(UENCY\\)?\\)?_?G\\(ATE\\)?\\>"
      "R\\(ADIO\\)?_?F\\(REQ\\(UENCY\\)?\\)?\\>"
      "PH\\(ASE\\)?\\(_?[12]\\)?\\>"
