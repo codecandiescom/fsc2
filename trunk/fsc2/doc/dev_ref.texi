@@ -1601,7 +1601,7 @@ nm}.
 @paragraphindent 0
 @strong{Description}: Monochromators by SPEX controlled by the computer
 via the CD2A Compudrive (i.e.@: 1249, 1403, 1404, 1680B, 1681B, 1701,
-1702, 1703, 1704m 1870B, 1870C).
+1702, 1703, 1704, 1870B, 1870C).
 
 @paragraphindent 0
 @strong{Controlled via}:  Serial port

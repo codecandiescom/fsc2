@@ -389,7 +389,7 @@ Var *monochromator_wavenumber( Var *v )
 		if ( FSC2_MODE == EXPERIMENT )
 			spectrapro_300i.wavelength = spectrapro_300i_get_wavelength( );
 		return vars_push( FLOAT_VAR,
-						  spectrapro_300_wl2wn( spectrapro_300i.wavelength ) );
+						 spectrapro_300i_wl2wn( spectrapro_300i.wavelength ) );
 	}
 
 	wn = get_double( v, "wavenumber" );

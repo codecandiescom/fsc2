@@ -263,6 +263,11 @@ void spex_cd2a_set_shutter_limits( void )
 
 	fsc2_assert( spex_cd2a.has_shutter );
 
+	/* Halt a running scan */
+
+	if ( spex_cd2a.in_scan )
+		spex_cd2a_halt( );
+
 	if ( FSC2_MODE != EXPERIMENT )
 		return;
 
@@ -291,6 +296,11 @@ void spex_cd2a_scan_start( void )
 {
 	char mess[ 11 ] = "ST";
 
+
+	/* If a scan is already running halt it first */
+
+	if ( spex_cd2a.in_scan )
+		spex_cd2a_halt( );
 
 	if ( FSC2_MODE != EXPERIMENT )
 		return;

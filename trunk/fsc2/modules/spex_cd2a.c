@@ -825,15 +825,6 @@ Var *monochromator_shutter_limits( Var *v )
 	{
 		l[ 0 ] = get_double( v, "lower shutter limit" );
 
-		if ( spex_cd2a.mode == WND )
-			l[ 0 ] = spex_cd2a.laser_wavenumber - l[ 0 ];
-
-		if ( l[ 0 ] <= 0.0 )
-		{
-			print( FATAL, "Invalid lower shutter limit.\n" );
-			THROW( EXCEPTION );
-		}
-
 		if ( ( v = vars_pop( v ) ) == NULL )
 		{
 			print( FATAL, "Missing upper shutter limit.\n ");
@@ -842,14 +833,7 @@ Var *monochromator_shutter_limits( Var *v )
 
 		l[ 1 ] = get_double( v, "uppper shutter limit" );
 		
-		if ( spex_cd2a.mode == WND )
-			l[ 1 ] = spex_cd2a.laser_wavenumber - l[ 1 ];
-
-		if ( l[ 1 ] <= 0.0 )
-		{
-			print( FATAL, "Invalid upper shutter limit.\n" );
-			THROW( EXCEPTION );
-		}
+		too_many_arguments( v );
 
 		if ( l[ 0 ] > l[ 1 ] )
 		{
@@ -858,10 +842,15 @@ Var *monochromator_shutter_limits( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		if ( spex_cd2a.mode & WN_MODES )
+		if ( spex_cd2a.mode & WND )
 		{
 			tl[ 0 ] = spex_cd2a_wn2wl( l[ 1 ] );
 			tl[ 1 ] = spex_cd2a_wn2wl( l[ 0 ] );
+		}
+		else if ( spex_cd2a.mode == WND )
+		{
+			tl[ 0 ] = spex_cd2a_wn2wl( spex_cd2a.laser_wavenumber - l[ 0 ] );
+			tl[ 1 ] = spex_cd2a_wn2wl( spex_cd2a.laser_wavenumber - l[ 1 ] );
 		}
 		else
 		{
@@ -871,8 +860,11 @@ Var *monochromator_shutter_limits( Var *v )
 
 		if ( tl[ 0 ] < spex_cd2a.lower_limit )
 		{
-			if ( spex_cd2a.mode & WN_MODES )
+			if ( spex_cd2a.mode == WN )
 				print( WARN, "Upper shutter limit larger than upper "
+					   "wave-number limit of monochromator.\n" );
+			else if ( spex_cd2a.mode == WND )
+				print( WARN, "Lower shutter limit lower than lower "
 					   "wave-number limit of monochromator.\n" );
 			else
 				print( WARN, "Lower shutter limit lower than lower "
@@ -882,8 +874,11 @@ Var *monochromator_shutter_limits( Var *v )
 
 		if ( tl[ 1 ] > spex_cd2a.upper_limit )
 		{
-			if ( spex_cd2a.mode & WN_MODES )
+			if ( spex_cd2a.mode == WN )
 				print( WARN, "Lower shutter limit lower than lower "
+					   "wave-number limit of monochromator.\n" );
+			else if ( spex_cd2a.mode == WND )
+				print( WARN, "Upper shutter limit larger than upper "
 					   "wave-number limit of monochromator.\n" );
 			else
 				print( WARN, "Upper shutter limit larger than upper "
@@ -891,35 +886,33 @@ Var *monochromator_shutter_limits( Var *v )
 			tl[ 1 ] = spex_cd2a.upper_limit;
 		}
 
-		spex_cd2a.shutter_low_limit = tl[ 0 ];
-		spex_cd2a.shutter_high_limit = tl[ 1 ];
-		spex_cd2a.shutter_limits_are_set = SET;
-
 		if ( spex_cd2a.mode == WND )
 		{
 			lwl = spex_cd2a_wn2wl( spex_cd2a.laser_wavenumber );
-			if ( lwl < spex_cd2a.shutter_low_limit ||
-				 lwl > spex_cd2a.shutter_high_limit )
+			if ( lwl < tl[ 0 ] || lwl > tl[ 1 ] )
 			{
-				print( FATAL, "Now shutter limits do not cover the laser "
+				print( FATAL, "New shutter limits do not cover the laser "
 					   "line position.\n" );
 				THROW( EXCEPTION );
 			}
 		}
 
+		spex_cd2a.shutter_low_limit = tl[ 0 ];
+		spex_cd2a.shutter_high_limit = tl[ 1 ];
+		spex_cd2a.shutter_limits_are_set = SET;
+
 		spex_cd2a_set_shutter_limits( );
 	}
 
-	if ( spex_cd2a.mode & WN_MODES )
+	if ( spex_cd2a.mode == WN )
 	{
 		l[ 0 ] = spex_cd2a_wl2wn( spex_cd2a.shutter_high_limit );
 		l[ 1 ] = spex_cd2a_wl2wn( spex_cd2a.shutter_low_limit );
-
-		if ( spex_cd2a.mode == WND )
-		{
-			l[ 0 ] = spex_cd2a.laser_wavenumber - l[ 0 ];
-			l[ 1 ] = spex_cd2a.laser_wavenumber - l[ 1 ];
-		}
+	}
+	else if ( spex_cd2a.mode == WND )
+	{
+		l[ 0 ] = spex_cd2a_wl2mwn( spex_cd2a.shutter_low_limit );
+		l[ 1 ] = spex_cd2a_wl2mwn( spex_cd2a.shutter_high_limit );
 	}
 	else
 	{
