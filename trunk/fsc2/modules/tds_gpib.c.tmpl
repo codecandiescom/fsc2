@@ -711,7 +711,7 @@ void tds_tmpl_start_acquisition( void )
 double tds_tmpl_get_area( int channel, WINDOW *w, bool use_cursor )
 {
 #ifdef NO_GATED_MEASUREMENTS
-	/* Some older devices (TDS520) can't do gated measuements at all, so
+	/* Some older devices (TDS520) can't do gated measurements at all, so
 	   we've got to get the curve 'by hand'. If the user asked to mark the
 	   window position using cursors (as would be done with the newer
 	   oszilloscopes and gated measurements) set the cursors to the start
@@ -850,7 +850,7 @@ void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 				 channel < NUM_DISPLAYABLE_CHANNELS );
 
 #ifdef NO_GATED_MEASUREMENTS
-	/* Some older devices (TDS520) can't do gated measuements at all, so
+	/* Some older devices (TDS520) can't do gated measurements at all, so
 	   we've got to get the curve 'by hand'. If the user asked to mark the
 	   window position using cursors (as would be done with the newer
 	   oszilloscopes and gated measurements) set the cursors to the start
@@ -980,7 +980,7 @@ void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 double tds_tmpl_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 {
 #ifdef NO_GATED_MEASUREMENTS
-	/* Some older devices (TDS520) can't do gated measuements at all, so
+	/* Some older devices (TDS520) can't do gated measurements at all, so
 	   we've got to calculate the area 'by hand'. If the user asked to
 	   simulate using cursors (as would be done with the newer oszilloscopes
 	   and gated measurements) set the cursors to the start and end position
@@ -1141,7 +1141,7 @@ void tds_tmpl_copy_curve( int src, int dest )
 	fsc2_assert( src < NUM_MEAS_CHANNELS );
 	fsc2_assert( dest >= TDS_TMPL_REF1 && dest < TDS_TMPL_REF4 );
 
-	/* Wiat until a still running acquisition is finished */
+	/* Wait until a still running acquisition is finished */
 
 	if ( acquisition_is_running )
 		do
