@@ -272,7 +272,7 @@ enum {
    forget to also extend the array of of phase type names). */
 
 enum {
-	PHASE_PLUS_X = 0,
+	PHASE_PLUS_X = 0,           /* this must always be 0 ! */
 	PHASE_MINUS_X,
 	PHASE_PLUS_Y,
 	PHASE_MINUS_Y,
