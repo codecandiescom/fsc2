@@ -115,14 +115,14 @@ int gpib_init( const char *log_file_name, int log_level )
 	GPIB_DEV *cur_dev;
 
 
-     if ( gpib_is_active )
-         return SUCCESS;
+	if ( gpib_is_active )
+		return SUCCESS;
 
-     ll = log_level;
-     if ( ll < LL_NONE )
-         ll = LL_NONE;
-     if ( ll > LL_ALL )
-         ll = LL_ALL;
+	ll = log_level;
+	if ( ll < LL_NONE )
+		ll = LL_NONE;
+	if ( ll > LL_ALL )
+		ll = LL_ALL;
 
     gpib_init_log( log_file_name );             /* initialise logging */
 
