@@ -248,7 +248,7 @@ WS          [\n=: ]+
 
 {P}"."{F}   {
 				assignlval.vptr = p_get( assigntext, P_FUNC );
-				return PFUNC;
+				return VAR_REF;
             }
 
 {P}"."{S}   {
