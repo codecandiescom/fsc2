@@ -28,16 +28,16 @@
 @code{fsc2} is a program for the remote control of cw- and pulsed EPR
 spectrometers. (Actually, the design of @code{fsc2} should make it
 also easy to use it to a broad range of experiments not releated to
-EPR.) It is basically an interpreter that executes a program to describe
+EPR.) It is basically an interpreter that executes a program describing
 the experiment in a language which in the following will be called
 @code{EDL}
 @cindex @code{EDL}
 (@b{E}xperiment @b{D}escription @b{L}anguage). Making the execution of
-the experiment completely controllable in this way is quite different
-from the approach usually taken in programs for remote spectrometer
-control which tend to have a graphical user interface where just the
-experimental parameters can be set and then a predefined experiment is
-started.
+the experiment completely controllable by the user in this way is quite
+different from the approach usually taken in programs for remote
+spectrometer control which tend to have a graphical user interface where
+just the experimental parameters can be set and then one of a set of
+hard-coded experiments is started.
 
 The obvious drawback with the traditional approach is that there is
 always only a fixed set of experiments that can be done. The problems
@@ -98,20 +98,19 @@ of different devices or the integration of new ones. Usually, the
 devices are hard-coded into the program and changing just one device
 requires a major rewrite. In contrast, @code{fsc2} has a strictly
 modular approach to the handling of devices. For each device a separate
-module exists that only gets used if it is listed explicitely in the
-@code{EDL} program. Thus changing the experiment to work with e.g.@:
-a different lock-in amplifier or digitizer usually does not require more
+module exists that only gets loaded if it is listed explicitely in the
+@code{EDL} program. Thus changing the experiment to work with e.g.@: a
+different lock-in amplifier or digitizer usually does not require more
 than changing one line of the @code{EDL} program (at least as long as
 the devices aren't too different in their capabilities). Moreover, this
-is also a major advantage when a new device has to be
-integrated. Instead of changing the whole program that controls the
-experiment only a module for the new device has to be written. Writing
-such a module does not even require a thorough understanding of the way
-@code{fsc2} works but only some knowledge about a few conventions
-(which are explained in detail in one of the later parts of this
-manual). This also allows the module to be tested independently of the
-main program and there is no danger of introducing new bugs into
-@code{fsc2} itself.
+is also a major advantage when a new device has to be integrated.
+Instead of changing the whole program that controls the experiment only
+a module for the new device has to be written. Writing such a module
+does not even require a thorough understanding of the way @code{fsc2}
+works but only some knowledge about a few conventions (which are
+explained in detail in one of the later parts of this manual). This also
+allows the module to be tested independently of the main program and
+there is no danger of introducing new bugs into @code{fsc2} itself.
 
 The advantages of the approach taken in @code{fsc2} have made it
 possible to use it successfully to control spectrometers in S-, X- and
