@@ -27,19 +27,8 @@
 #include <sys/shm.h>
 
 
-#if ! defined ( SEM_R )
-#define SEM_R 0400
-#endif
-#if ! defined ( SEM_A )
-#define SEM_A 0200
-#endif
-#if ! defined ( SHM_R )
-#define SHM_R 0400
-#endif
-#if ! defined ( SHM_A )
-#define SHM_A 0200
-#endif
-
+/* SUSv3 does not require that the semun union is defined and newer
+   Linux versions don't do so, but some older versions defined it... */
 
 #if defined ( _SEM_SEMUN_UNDEFINED ) && ( _SEM_SEMUN_UNDEFINED == 1 )
 union semun {
@@ -68,7 +57,7 @@ void *get_shm( int *shm_id, long len )
 	raise_permissions( );
 
 	while ( ( *shm_id = shmget( IPC_PRIVATE, len + 4,
-								IPC_CREAT | SHM_R | SHM_A ) ) < 0 )
+								IPC_CREAT | S_IRUSR | S_IWUSR ) ) < 0 )
 	{
 		if ( errno == ENOSPC || errno == ENOMEM ) /* wait for 10 ms */
 			fsc2_usleep( 10000, SET );
@@ -283,7 +272,7 @@ int sema_create( int size )
 	raise_permissions( );
 
 	if ( ( sema_id = semget( IPC_PRIVATE, 1,
-							 IPC_CREAT | IPC_EXCL | SEM_R | SEM_A ) ) < 0 )
+							 IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR ) ) < 0 )
 	{
 		lower_permissions( );
 		return -1;
