@@ -98,6 +98,7 @@ char *Fname = NULL;
 Compilation compilation;
 Prg_Token *prg_token = NULL;
 long prg_length = 0;
+long token_count = 0;
 Prg_Token *cur_prg_token;
 long On_Stop_Pos = -1;
 
@@ -150,6 +151,7 @@ extern char *Fname;
 extern Compilation compilation;
 extern Prg_Token *prg_token;
 extern long prg_length;
+extern long token_count;
 extern Prg_Token *cur_prg_token;
 extern long On_Stop_Pos;
 
