@@ -242,11 +242,12 @@ void start_graphics( void )
 		setup_canvas( &G2.canvas, GUI.run_form_2d->canvas_2d );
 	}
 
+	if ( ! G.is_init || G.dim & 1 )
+		fl_set_form_atclose( GUI.run_form_1d->run_1d,
+							 run_form_close_handler, NULL );
+
 	if ( G.is_init )
 	{
-		if ( G.dim & 1 )
-			fl_set_form_atclose( GUI.run_form_1d->run_1d,
-								 run_form_close_handler, NULL );
 		if ( G.dim & 2 )
 			fl_set_form_atclose( GUI.run_form_2d->run_2d,
 								 run_form_close_handler, NULL );
@@ -298,8 +299,10 @@ static void fonts_init( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Function tries to figure out reasonable values for the sizes */
+/* and positions of the display windows.                        */
+/*--------------------------------------------------------------*/
 
 static void set_default_sizes( void )
 {
@@ -451,8 +454,10 @@ static void set_default_sizes( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+/* Function fo setting lots of default values for properties */
+/* of the display windows.                                   */
+/*-----------------------------------------------------------*/
 
 static void set_defaults( void )
 {
@@ -512,8 +517,10 @@ static void set_defaults( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*---------------------------------------------------------*/
+/* Function for adapting the forms for the display windows */
+/* according to the current requirements.                  */
+/*---------------------------------------------------------*/
 
 static void forms_adapt( void )
 {
@@ -777,8 +784,13 @@ static void forms_adapt( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Function that gets invoked when the close button (not the one in */
+/* the display window but the one from the windows menu) is clicked */
+/* on. While the experiment is still running it ignores the event,  */
+/* when the experiment is already finished it does the same as      */
+/* clicking  on the "Close" button within the display window.       */
+/*------------------------------------------------------------------*/
 
 int run_form_close_handler( FL_FORM *a, void *b )
 {
@@ -786,13 +798,20 @@ int run_form_close_handler( FL_FORM *a, void *b )
 	UNUSED_ARGUMENT( b );
 
 	if ( Internals.child_pid == 0 )          /* if child has already exited */
-		run_close_button_callback( GUI.run_form_1d->stop_1d, 0 );
+	{
+		if ( ! G.is_init || G.dim & 1 )
+			run_close_button_callback( GUI.run_form_1d->stop_1d, 0 );
+		else if ( G.dim & 2 )
+			run_close_button_callback( GUI.run_form_2d->stop_2d, 0 );
+	}
 	return FL_IGNORE;
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*---------------------------------------------------------*/
+/* Function initializes several structures for storing the */
+/* internal state of the graphics during an experiment.    */
+/*---------------------------------------------------------*/
 
 static void G_struct_init( void )
 {
@@ -938,8 +957,9 @@ static void G_struct_init( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*-----------------------------------------*/
+/* Function for initializing the 1D curves */
+/*-----------------------------------------*/
 
 static void G_init_curves_1d( void )
 {
@@ -1039,8 +1059,9 @@ static void G_init_curves_1d( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*-----------------------------------------*/
+/* Function for initializing the 2D curves */
+/*-----------------------------------------*/
 
 static void G_init_curves_2d( void )
 {
@@ -1615,8 +1636,9 @@ void delete_pixmap( Canvas *c )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Function for redrawing the axes areas of a the 1D display window */
+/*------------------------------------------------------------------*/
 
 void redraw_axis_1d( int coord )
 {
@@ -1671,8 +1693,9 @@ void redraw_axis_1d( int coord )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Function for redrawing the axes areas of a the 2D display window */
+/*------------------------------------------------------------------*/
 
 void redraw_axis_2d( int coord )
 {
@@ -1725,8 +1748,10 @@ void redraw_axis_2d( int coord )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*-----------------------------------------------------*/
+/* Function creates number strings for labels with the */
+/* correct number of digits after the decimal point    */
+/*-----------------------------------------------------*/
 
 void make_label_string( char *lstr, double num, int res )
 {
@@ -2045,8 +2070,9 @@ void fs_button_callback_2d( FL_OBJECT *a, long b )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Callback function for the curve buttons in the 1D display window */
+/*------------------------------------------------------------------*/
 
 void curve_button_callback_1d( FL_OBJECT *obj, long data )
 {
@@ -2073,8 +2099,9 @@ void curve_button_callback_1d( FL_OBJECT *obj, long data )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Callback function for the curve buttons in the 2D display window */
+/*------------------------------------------------------------------*/
 
 void curve_button_callback_2d( FL_OBJECT *obj, long data )
 {
