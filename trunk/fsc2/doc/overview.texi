@@ -14,7 +14,7 @@ file (@b{E}xperiment @b{D}escription @b{L}anguage)).
 
 This approach is a bit different from the one usually used for remote
 control programs with a graphical user interface where you set the
-parameters to be used in the experiment and than start the experiment.
+parameters to be used in the experiment and then start the experiment.
 
 The disadvantage of the traditional kind of programs is that they
 usually have to be rewritten or at least severely changed if either a
