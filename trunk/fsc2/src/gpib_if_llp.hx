@@ -22,12 +22,12 @@
  */
 
 
-/*------------------------------------------------------------------------*/
-/* Contains all declarations possibly needed by routines using the GPIB   */
-/* functions. Each of the functions returns either SUCCESS or FAILURE, in */
-/* the latter case in 'gpib_error_msg' a short text is stored explaining  */
-/* the cause of the error.                                                */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Contains all declarations possibly needed by routines using the GPIB
+ * functions. Each of the functions returns either SUCCESS or FAILURE, in
+ * the latter case in 'gpib_error_msg' a short text is stored explaining
+ * the cause of the error.
+ *------------------------------------------------------------------------*/
 
 
 #define ! GPIB_IF_LPP_HEADER
@@ -93,9 +93,9 @@ extern char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
 #endif
 
 
-/*----------------------------------------------------------*/
-/* Definition of log levels allowed in calls of gpib_init() */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Definition of log levels allowed in calls of gpib_init()
+ *----------------------------------------------------------*/
 
 #define  LL_NONE  0    /* log nothing */
 #define  LL_ERR   1    /* log errors only */
@@ -103,9 +103,9 @@ extern char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
 #define  LL_ALL   3    /* log calls with parameters and function exits */
 
 
-/*-------------------------------*/
-/* Definitions of utility macros */
-/*-------------------------------*/
+/*-------------------------------*
+ * Definitions of utility macros
+ *-------------------------------*/
 
 #define GPIB_IS_TIMEOUT    ( ( ibsta & TIMO ) ? 1 : 0 )
 

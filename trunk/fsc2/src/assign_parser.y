@@ -625,9 +625,9 @@ gp:       GP_TOKEN expr            { p_set_gp( $2 ); }
 %%
 
 
-/*---------------------------------*/
-/* Called in case of syntax errors */
-/*---------------------------------*/
+/*---------------------------------*
+ * Called in case of syntax errors
+ *---------------------------------*/
 
 static void assignerror ( UNUSED_ARG const char *s )
 {
@@ -639,9 +639,9 @@ static void assignerror ( UNUSED_ARG const char *s )
 }
 
 
-/*----------------------------------------------------*/
-/* Called when a pulse function token has been found. */
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ * Called when a pulse function token has been found.
+ *----------------------------------------------------*/
 
 static void ass_func( int function )
 {
@@ -691,8 +691,8 @@ static void ass_func( int function )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 void assignparser_init( void )
 {

@@ -154,6 +154,9 @@ PREP        return PREP_TOKEN;
 		/*----------------------*/
 
 
+/*-------------------------------------------*
+ *-------------------------------------------*/
+
 size_t func_list_parse( Func_T **fncts, size_t num_func )
 {
 	static bool is_restart = UNSET;
@@ -240,10 +243,10 @@ size_t func_list_parse( Func_T **fncts, size_t num_func )
 }
 
 
-/*---------------------------------------------------*/
-/* Function runs once through the function data base */
-/* file and counts the number of defined functions   */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function runs once through the function data base
+ * file and counts the number of defined functions
+ *---------------------------------------------------*/
 
 static size_t fll_count_functions( Func_T *fncts, size_t num_predef_func )
 {
@@ -300,9 +303,9 @@ static size_t fll_count_functions( Func_T *fncts, size_t num_predef_func )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Function for comparing function names, used in sorting the function list */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Function for comparing function names, used in sorting the function list
+ *--------------------------------------------------------------------------*/
 
 static int ffl_func_cmp2( const void *a, const void *b )
 {
@@ -310,10 +313,10 @@ static int ffl_func_cmp2( const void *a, const void *b )
 }
 
 
-/*------------------------------------------------------------*/
-/* Function runs a second time through the function data base */
-/* and tries to make sense from the entries                   */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function runs a second time through the function data base
+ * and tries to make sense from the entries
+ *------------------------------------------------------------*/
 
 static void fll_get_functions( Func_T *fncts, size_t num_predef_func )
 {

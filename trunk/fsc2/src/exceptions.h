@@ -22,33 +22,33 @@
  */
 
 
-/*******************************************************************/
-/* The basic ideas for the following code came from an article by  */
-/* Peter Simons in the iX magazine No. 5, 1998, pp. 160-162. It    */
-/*  hasbeen changed a lot thanks to very constructive criticism by */
-/* Chris Torek <nospam@elf.eng.bsdi.com> on comp.lang.c.           */
-/*                                                                 */
-/* In order to avoid overflows of the fixed size exception frame   */
-/* stack (i.e. after MAX_NESTED_EXCEPTIONS successful TRY's) it is */
-/* necessary to manually remove an exception frame (in contrast to */
-/* C++ where this is handled automatically) by calling TRY_SUCCESS */
-/* if the code of the TRY block finished successfully. A typical   */
-/* TRY block sequence is thus:                                     */
-/*                                                                 */
-/* TRY {                                                           */
-/*     statement;                                                  */
-/*     TRY_SUCCESS;                                                */
-/* }                                                               */
-/* CATCH( exception ) {                                            */
-/*     ...                                                         */
-/* }                                                               */
-/* OTHERWISE                                                       */
-/*     RETHROW( );                                                 */
-/*                                                                 */
-/* Don't use this exception mechanism from within signal handlers  */
-/* or other code invoked asynchronously, it easily could trigger a */
-/* race condition.                                                 */
-/*******************************************************************/
+/*******************************************************************
+ * The basic ideas for the following code came from an article by  *
+ * Peter Simons in the iX magazine No. 5, 1998, pp. 160-162. It    *
+ *  hasbeen changed a lot thanks to very constructive criticism by *
+ * Chris Torek <nospam@elf.eng.bsdi.com> on comp.lang.c.           *
+ *                                                                 *
+ * In order to avoid overflows of the fixed size exception frame   *
+ * stack (i.e. after MAX_NESTED_EXCEPTIONS successful TRY's) it is *
+ * necessary to manually remove an exception frame (in contrast to *
+ * C++ where this is handled automatically) by calling TRY_SUCCESS *
+ * if the code of the TRY block finished successfully. A typical   *
+ * TRY block sequence is thus:                                     *
+ *                                                                 *
+ * TRY {                                                           *
+ *     statement;                                                  *
+ *     TRY_SUCCESS;                                                *
+ * }                                                               *
+ * CATCH( exception ) {                                            *
+ *     ...                                                         *
+ * }                                                               *
+ * OTHERWISE                                                       *
+ *     RETHROW( );                                                 *
+ *                                                                 *
+ * Don't use this exception mechanism from within signal handlers  *
+ * or other code invoked asynchronously, it easily could trigger a *
+ * race condition.                                                 *
+ *******************************************************************/
 
 
 #ifndef EXCEPTIONS_HEADER

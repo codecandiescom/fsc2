@@ -345,17 +345,17 @@ WS          [\n \t]+
 		/*----------------------*/
 
 
-/*---------------------------------------------------------------*/
-/* variables_parser() first checks that it wasn't called before, */
-/* initializes a few variables and then starts the lexer/parser  */
-/* combination. If this works out ok, either the number of the   */
-/* next section or, on end of file, NO_SECTION is stored in the  */
-/* global variable 'Vars_next_section', which is returned to the */
-/* calling section_parser(). Otherwise, some special exceptions  */
-/* are caught here (resulting in FAIL return state) or, for the  */
-/* more comman exceptions, are caught in section_parser() (in    */
-/* this case, an OK state is returned).                          */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * variables_parser() first checks that it wasn't called before,
+ * initializes a few variables and then starts the lexer/parser
+ * combination. If this works out ok, either the number of the
+ * next section or, on end of file, NO_SECTION is stored in the
+ * global variable 'Vars_next_section', which is returned to the
+ * calling section_parser(). Otherwise, some special exceptions
+ * are caught here (resulting in FAIL return state) or, for the
+ * more comman exceptions, are caught in section_parser() (in
+ * this case, an OK state is returned).
+ *---------------------------------------------------------------*/
 
 int variables_parser( FILE *in )
 {

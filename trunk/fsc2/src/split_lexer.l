@@ -151,6 +151,9 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 		/*----------------------*/
 
 
+/*-------------------------------------------*
+ *-------------------------------------------*/
+
 bool scan_main( const char *name, FILE *fp )
 {
 	bool split_error;
@@ -216,21 +219,21 @@ bool scan_main( const char *name, FILE *fp )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* This routine is the central distributor that starts the different  */
-/* parsers for all of the sections in the EDL file. It is called once */
-/* from splitlex(), which just finds the very first section label and */
-/* passes it to this routine. Here the appropriate lexers are called, */
-/* which return the next label if they finish successfully. This new  */
-/* label is used to call the next lexer. On failure errors are caught */
-/* (if the lexer didn't do it by itself) and the failure is signaled  */
-/* back to splitlex(). On success we only return to splitlex() on end */
-/* of the input file(s).                                              */
-/* ->                                                                 */
-/*    * number (label) of first section found by splitlex()           */
-/* <-                                                                 */
-/*    * flag for success (OK) or failure (FAIL)                       */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * This routine is the central distributor that starts the different
+ * parsers for all of the sections in the EDL file. It is called once
+ * from splitlex(), which just finds the very first section label and
+ * passes it to this routine. Here the appropriate lexers are called,
+ * which return the next label if they finish successfully. This new
+ * label is used to call the next lexer. On failure errors are caught
+ * (if the lexer didn't do it by itself) and the failure is signaled
+ * back to splitlex(). On success we only return to splitlex() on end
+ * of the input file(s).
+ * ->
+ *    * number (label) of first section found by splitlex()
+ * <-
+ *    * flag for success (OK) or failure (FAIL)
+ *--------------------------------------------------------------------*/
 
 bool section_parser( int section )
 {
