@@ -204,7 +204,7 @@ long tds754a_get_num_avg( void )
 	long length = 30;
 
 
-	if ( tds754a_get_acq_mode() == AVERAGE )
+	if ( tds754a_get_acq_mode( ) == AVERAGE )
 	{
 		if ( gpib_write( tds754a.device,"ACQ:NUMAV?\n" ) == FAILURE ||
 			 gpib_read( tds754a.device, reply, &length) == FAILURE )
@@ -265,7 +265,7 @@ bool tds754a_set_num_avg( long num_avg )
 /* in average nor in sample mode, it is switched to sample mode.           */ 
 /*-------------------------------------------------------------------------*/
 
-int tds754a_get_acq_mode(void)
+int tds754a_get_acq_mode( void )
 {
 	char reply[ 30 ];
 	long length = 30;
@@ -362,7 +362,7 @@ int tds754a_get_trigger_channel( void )
 		 gpib_read( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
-    reply[3] = '\0';
+    reply[ 3 ] = '\0';
 
 	/* Possible replies are "CH1", "CH2", "CH3", "CH4", "AUX" or "LIN" */
 
@@ -544,7 +544,7 @@ bool tds754a_display_channel( int channel )
 double tds754a_get_sens( int channel )
 {
     char cmd[ 20 ];
-    char reply[30];
+    char reply[ 30 ];
     long length = 30;
 
 

@@ -3,12 +3,10 @@
 */
 
 
-
 #include "fsc2.h"
 
 
-
-#define DEVICE_NAME "TDS520A"      /* compare entry in /etc/gpib.conf ! */
+#define DEVICE_NAME "TDS520A"    /* compare entry in /etc/gpib.conf ! */
 
 #define TDS_POINTS_PER_DIV 50
 
@@ -34,14 +32,14 @@
    area between the pair of cursors */
 
 typedef struct _W {
-	long num;                   // number of window
-	bool is_used;               // flag, set when window has been used
-	double start;               // start of window (in time units)
-	double width;               // width of window (in time units)
-	bool is_width;              // flag, set if width of window has been set
-	long num_points;            // number of data points between the cursors
-	struct _W *next;            // pointer to next window structure
-	struct _W *prev;            // pointer to previous window structure
+	long num;                   /* number of window                          */
+	bool is_used;               /* flag, set when window has been used       */
+	double start;               /* start of window (in time units)           */
+	double width;               /* width of window (in time units)           */
+	bool is_width;              /* flag, set if width of window has been set */
+	long num_points;            /* number of data points between the cursors */
+	struct _W *next;            /* pointer to next window structure          */
+	struct _W *prev;            /* pointer to previous window structure      */
 } WINDOW;
 
 
@@ -55,11 +53,11 @@ typedef struct
 	double num_avg;
 	bool is_num_avg;
 
-	WINDOW *w;                // start element of list of windows
+	WINDOW *w;               /* start element of list of windows             */
 	int num_windows;
-	bool is_equal_width;      // all windows have equal width -> tracking
-	                          // cursors can be used without further checking
-	bool gated_state;         // Gated measurements ?
+	bool is_equal_width;     /* all windows have equal width -> tracking     */
+							 /* cursors can be used without further checking */
+	bool gated_state;        /* Gated measurements ?                         */
 	bool snap_state;
 
 	int trigger_channel;
@@ -68,10 +66,10 @@ typedef struct
 	long rec_len;
 	double trig_pos;
 
-	double cursor_pos;        // current position of cursor 1
+	double cursor_pos;     /* current position of cursor 1                   */
 
-	int meas_source;          // currently selected measurements source channel
-	int data_source;          // currently selected data source channel
+	int meas_source;       /* currently selected measurements source channel */
+	int data_source;       /* currently selected data source channel         */
 
 	bool channels_in_use[ MAX_CHANNELS ];
 	double channel_sens[ MAX_CHANNELS ];

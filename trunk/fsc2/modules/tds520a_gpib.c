@@ -204,7 +204,7 @@ long tds520a_get_num_avg( void )
 	long length = 30;
 
 
-	if ( tds520a_get_acq_mode() == AVERAGE )
+	if ( tds520a_get_acq_mode( ) == AVERAGE )
 	{
 		if ( gpib_write( tds520a.device,"ACQ:NUMAV?\n" ) == FAILURE ||
 			 gpib_read( tds520a.device, reply, &length) == FAILURE )
@@ -265,7 +265,7 @@ bool tds520a_set_num_avg( long num_avg )
 /* in average nor in sample mode, it is switched to sample mode.           */ 
 /*-------------------------------------------------------------------------*/
 
-int tds520a_get_acq_mode(void)
+int tds520a_get_acq_mode( void )
 {
 	char reply[ 30 ];
 	long length = 30;
@@ -296,6 +296,7 @@ bool tds520a_get_cursor_position( int cur_no, double *cp )
 	char cmd[ 30 ] = "CURS:VBA:POSITION";
     char reply[ 30 ];
     long length = 30;
+
 
 	assert( cur_no == 1 || cur_no == 2 );
 
@@ -334,14 +335,13 @@ bool tds520a_get_cursor_distance( double *cd )
 
 bool tds520a_set_trigger_channel( const char *name )
 {
-	char cmd[ 40 ] = "TRIG:MAI:EDGE:SOU ";
+	char cmd[ 40 ];
+
 
 	if ( strlen( name ) > 20 )
 		return FAIL;
 
-	strcat( cmd, name );
-	strcat( cmd, "\n" );
-
+	sprintf( cmd, "TRIG:MAI:EDGE:SOU %s\n", name );
 	if ( gpib_write( tds520a.device, cmd ) == FAILURE )
 		tds520a_gpib_failure( );
 
@@ -363,12 +363,10 @@ int tds520a_get_trigger_channel( void )
 		 gpib_read( tds520a.device, reply, &length ) == FAILURE )
 		tds520a_gpib_failure( );
 
-    reply[3] = '\0';
-
 	/* Possible replies are "CH1", "CH2", "CH3", "CH4", or "LIN", where
 	   "CH3" or "CH4" really mean "AUX1" or "AUX2", respectively */
 
-    if ( ! strcmp( reply, "LIN" ) )
+    if ( ! strncmp( reply, "LIN", 3 ) )
         return TDS520A_LIN;
 
     val = ( int ) ( reply[ 2 ] - '1' );
@@ -454,9 +452,10 @@ bool tds520a_set_cursor( int cur_num, double pos )
 
 bool tds520a_set_track_cursors( bool flag )
 {
-	char cmd[ 20 ] = "CURS:MODE ";
+	char cmd[ 20 ];
 
-	strcat( cmd, flag ? "TRAC\n" : "IND\n" );
+
+	sprintf( cmd, "CURS:MODE %s\n", flag ? "TRAC" : "IND" );
     if ( gpib_write( tds520a.device, cmd ) == FAILURE )
 		tds520a_gpib_failure( );
 
@@ -469,9 +468,10 @@ bool tds520a_set_track_cursors( bool flag )
 
 bool tds520a_set_gated_meas( bool flag )
 {
-	char cmd[ 20 ] = "MEASU:GAT ";
+	char cmd[ 20 ];
 
-	strcat( cmd, flag ? "ON\n" : "OFF\n" );
+
+	sprintf( cmd, "MEASU:GAT %s\n", flag ? "ON" : "OFF" );
     if ( gpib_write( tds520a.device, cmd ) == FAILURE )
 		tds520a_gpib_failure( );
 
@@ -485,6 +485,7 @@ bool tds520a_set_gated_meas( bool flag )
 bool tds520a_set_snap( bool flag )
 {
 	char cmd[ 50 ];
+
 
 	if ( flag )
 	{
@@ -547,7 +548,7 @@ bool tds520a_display_channel( int channel )
 double tds520a_get_sens( int channel )
 {
     char cmd[ 20 ];
-    char reply[30];
+    char reply[ 30 ];
     long length = 30;
 
 
