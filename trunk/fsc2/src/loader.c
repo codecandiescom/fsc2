@@ -238,7 +238,7 @@ static void load_functions( Device *dev )
 		else
 			lib_name = get_string( "%s.so", dev->name );
 
-		if ( ( dev->driver.handle = dlopen( lib_name, RTLD_LAZY ) ) != NULL )
+		if ( ( dev->driver.handle = dlopen( lib_name, RTLD_NOW ) ) != NULL )
 			dev->driver.lib_name = lib_name;
 		else
 			T_free( lib_name );

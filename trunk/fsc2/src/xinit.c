@@ -738,7 +738,7 @@ bool dl_fsc2_rsc( void )
 		{
 			lib_name = get_string( "%s%sfsc2_rsc_%cr.so", ldc, slash( ldc ),
 								   GUI.G_Funcs.size == LOW ? 'l' : 'h' );
-			if ( ( Internals.rsc_handle = dlopen( lib_name, RTLD_LAZY ) )
+			if ( ( Internals.rsc_handle = dlopen( lib_name, RTLD_NOW ) )
 				 != NULL )
 				break;
 			lib_name = CHAR_P T_free( lib_name );
@@ -751,7 +751,7 @@ bool dl_fsc2_rsc( void )
 	{
 		lib_name = get_string( "%s%sfsc2_rsc_%cr.so", libdir, slash( libdir ),
 							   GUI.G_Funcs.size == LOW ? 'l' : 'h' );
-		Internals.rsc_handle = dlopen( lib_name, RTLD_LAZY );
+		Internals.rsc_handle = dlopen( lib_name, RTLD_NOW );
 	}
 
 	if ( Internals.rsc_handle == NULL )
