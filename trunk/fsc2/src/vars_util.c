@@ -1577,3 +1577,90 @@ static void vars_pow_check( double v1, double v2 )
 		THROW( EXCEPTION );
 	}
 }
+
+
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
+Var *vars_array_check( Var *v1, Var *v2 )
+{
+	Var *v;
+	long length;
+
+
+	/* If size of array is already known nothing is to be done */
+
+	if ( ! ( v2->type &
+			 ( ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR ) )
+		 || ( v2->type & ( INT_TRANS_ARR | FLOAT_TRANS_ARR ) &&
+			  v2->flags & NEED_ALLOC )
+		 || ( v2->type & ( ARR_REF | ARR_PTR ) &&
+			  v2->from->flags & NEED_ALLOC ) )
+	{
+		eprint( FATAL, "%s:%ld: Size of array can't be determined.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	switch ( v2->type )
+	{
+		case ARR_REF :
+			if ( v2->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
+						"on numbers or array slices.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			vars_check( v2->from, INT_ARR | FLOAT_ARR );
+			length = v2->from->len;
+			break;
+
+		case ARR_PTR :
+			vars_check( v2->from, INT_ARR | FLOAT_ARR );
+			length = v2->from->sizes[ v2->from->dim - 1 ];
+			break;
+
+		case INT_TRANS_ARR : case FLOAT_TRANS_ARR :
+			length = v2->len;
+			break;
+
+		default :
+			assert( 1 == 0 );
+	}
+
+	switch ( v1->type )
+	{
+		case INT_ARR : case INT_TRANS_ARR :
+			if ( ! ( v1->flags & NEED_ALLOC ) )
+				return v1;
+			v = vars_push( INT_TRANS_ARR, NULL, length );
+			break;
+
+		case FLOAT_ARR : case FLOAT_TRANS_ARR :
+			if ( ! ( v1->flags & NEED_ALLOC ) )
+				return v1;
+			v = vars_push( FLOAT_TRANS_ARR, NULL, length );
+			break;
+
+		case ARR_REF :
+			if ( v1->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
+						"on array slices.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			if ( ! ( v1->from->flags & NEED_ALLOC ) )
+				return v1;
+			if ( v1->from->type == INT_ARR )
+				v = vars_push( INT_TRANS_ARR, NULL, length );
+			else
+				v = vars_push( FLOAT_TRANS_ARR, NULL, length );
+			break;
+
+		default :
+			assert( 1 == 0 );
+	}
+
+	vars_pop( v1 );
+	return v;
+}
