@@ -397,7 +397,7 @@ previous function and the only difference is that it will return a
 integer variable instead of the expected floating point variable. The
 warning message is
 @example
-foo.edl:17: XYZ: Integer number used as bar in abc().
+foo.edl:17: XYZ: Integer number used as baz in abc().
 @end example
 @noindent
 assuming that everything else is identical to the above example.
@@ -409,13 +409,14 @@ long get_strict_long( Var *var, const char *snippet )
 @end example
 @noindent
 This function has the same arguments as the two other functions but it
-will usually throw an exception to stop the interpretation of the
-@acronym{EDL} program (see below) except while doing the experiment, in
-which case a warning message is printed and the floating point number is
-converted to the nearest integer, which is then returned (thus avoiding
-the termination of the running experiment). But usually the wrong
-parameter should already have been found during the test run, thus
-forcing the user to correct her/his program.
+will throw an exception when getting passed a floating point number,
+stopping the interpretation of the @acronym{EDL} program (see below)
+except while doing the experiment, in which case only a warning message
+is printed and the floating point number is converted to the nearest
+integer, which is then returned (thus avoiding the termination of the
+running experiment). But usually the wrong parameter should already have
+been found during the test run, thus forcing the user to correct her/his
+program.
 
 Finally, there is a function for the case that you want a boolean
 variable, i.e.@: a variable that can be either true or false. This
