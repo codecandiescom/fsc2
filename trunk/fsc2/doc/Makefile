@@ -117,7 +117,7 @@ install:
 	$(INSTALL) -m 444 fsc2.1.gz $(mandir)/man1
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2*.html $(docdir)
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.css $(docdir)
-	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) $(figures) $(docdir)
+	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) $(wildcard *.png) $(docdir)
 	if [ -f fsc2.ps ]; then \
 		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.ps $(docdir); \
 	fi
