@@ -63,7 +63,9 @@ Var *f_is_file( Var *v )
 		THROW( EXCEPTION );
 	}
 
-    if ( v->val.lval < 0 || v->val.lval >= EDL.File_List_Len ||
+    if ( ( v->val.lval != FILE_NUMBER_NOT_OPEN &&
+		   ( v->val.lval < FILE_NUMBER_OFFSET ||
+			 v->val.lval >= EDL.File_List_Len + FILE_NUMBER_OFFSET ) ) ||
 		 ( Internals.mode != TEST &&
 		   EDL.File_List[ v->val.lval ].fp == NULL ) )
 		return vars_push( INT_VAR, 0 );
@@ -107,7 +109,7 @@ Var *f_openf( Var *var )
 	if ( No_File_Numbers )
 	{
 		print( FATAL, "Function can't be called if one save()-type functions "
-			   "akready has been invoked.\n" );
+			   "already has been invoked.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -281,7 +283,7 @@ Var *f_getf( Var *var )
 		if ( i > 0 && *var->val.sptr == '\\' )
 			print( WARN, "Use of hard-coded file names is deprecated, please "
 				   "use open_file() instead.\n" );
-		return vars_push( INT_VAR, EDL.File_List_Len++ );
+		return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 	}
 
 	/* Check the arguments and supply default values if necessary */
@@ -376,7 +378,7 @@ getfile_retry:
 		for ( i = 0; i < 5; i++ )
 			T_free( s[ i ] );
 		Dont_Save = SET;
-		return vars_push( INT_VAR, -1 );
+		return vars_push( INT_VAR, FILE_NUMBER_NOT_OPEN );
 	}
 
 	/* If given append default extension to the file name (but only if the
@@ -477,7 +479,7 @@ getfile_retry:
 
 	setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
 
-	return vars_push( INT_VAR, EDL.File_List_Len++ );
+	return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 }
 
 
@@ -492,11 +494,12 @@ Var *f_clonef( Var *v )
 	int i;
 
 
-	/* If the file handle passed to the function is -1 opening a file for
-	   this file handle did not happen, so we also don't open the new file */
+	/* If the file handle passed to the function is FILE_NUMBER_NOT_OPEN
+	   opening a file for this file handle did not happen, so we also don't
+	   open the new file */
 
-	if ( v->type == INT_VAR && v->val.lval == -1 )
-		return vars_push( INT_VAR, -1 );
+	if ( v->type == INT_VAR && v->val.lval == FILE_NUMBER_NOT_OPEN )
+		return vars_push( INT_VAR, FILE_NUMBER_NOT_OPEN );
 
 	/* Check all the parameter */
 
@@ -515,7 +518,7 @@ Var *f_clonef( Var *v )
 	}
 
 	if ( Internals.mode == TEST )
-		return vars_push( INT_VAR, EDL.File_List_Len++ );
+		return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 
 	fn = CHAR_P T_malloc(   strlen( EDL.File_List[ v->val.lval ].name )
 						  + strlen( v->next->next->val.sptr ) + 3 );
@@ -574,7 +577,7 @@ static int get_save_file( Var **v )
 	if ( EDL.File_List_Len == 0 )
 	{
 		if ( Dont_Save )
-			return -1;
+			return FILE_NUMBER_NOT_OPEN;
 
 		No_File_Numbers = UNSET;
 
@@ -583,14 +586,15 @@ static int get_save_file( Var **v )
 
 		No_File_Numbers = SET;
 
-		if ( file->val.lval < 0 )
+		if ( file->val.lval == FILE_NUMBER_NOT_OPEN )
 		{
 			vars_pop( file );
 			Dont_Save = SET;
-			return -1;
+			return FILE_NUMBER_NOT_OPEN;
 		}
+
 		vars_pop( file );
-		file_num = 0;
+		file_num = FILE_NUMBER_OFFSET;
 	}
 	else if ( ! No_File_Numbers )                    /* file number is given */
 	{
@@ -609,23 +613,24 @@ static int get_save_file( Var **v )
 		else
 		{
 			print( WARN, "Missing arguments.\n" );
-			return -1;
+			return FILE_NUMBER_NOT_OPEN;
 		}
 		*v = ( *v )->next;
 	}
 	else
-		file_num = 0;
+		file_num = FILE_NUMBER_OFFSET;
 
 	/* Check that the file identifier is reasonable */
 
-	if ( file_num < 0 )
+	if ( file_num == FILE_NUMBER_NOT_OPEN )
 	{
 		if ( ! Dont_Save )
 			print( WARN, "File has never been opened, skipping command.\n" );
-		return -1;
+		return FILE_NUMBER_NOT_OPEN;
 	}
 
-	if ( file_num >= EDL.File_List_Len )
+	if ( file_num < FILE_NUMBER_OFFSET ||
+		 file_num >= EDL.File_List_Len + FILE_NUMBER_OFFSET )
 	{
 		print( FATAL, "Invalid file handle.\n" );
 		THROW( EXCEPTION );
@@ -683,7 +688,7 @@ Var *f_save( Var *v )
 
 	/* Determine the file identifier */
 
-	if ( ( file_num = get_save_file( &v ) ) == -1 )
+	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
 		return vars_push( INT_VAR, 0 );
 
 	if ( v == NULL )
@@ -827,7 +832,7 @@ Var *f_fsave( Var *v )
 
 	/* Determine the file identifier */
 
-	if ( ( file_num = get_save_file( &v ) ) == -1 )
+	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
 		return vars_push( INT_VAR, 0 );
 
 	if ( v == NULL )
@@ -978,7 +983,7 @@ Var *f_ffsave( Var *v )
 
 	/* Determine the file identifier */
 
-	if ( ( file_num = get_save_file( &v ) ) == -1 )
+	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
 		return vars_push( INT_VAR, 0 );
 
 	if ( v == NULL )
@@ -1520,7 +1525,7 @@ Var *f_save_p( Var *v )
 
 	/* Determine the file identifier */
 
-	if ( ( file_num = get_save_file( &v ) ) == -1 )
+	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
 		return vars_push( INT_VAR, 0 );
 
 	if ( v != NULL )
@@ -1552,7 +1557,7 @@ Var *f_save_o( Var *v )
 
 	/* Determine the file identifier */
 
-	if ( ( file_num = get_save_file( &v ) ) == -1 )
+	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
 		return vars_push( INT_VAR, 0 );
 
 	if ( v != NULL )
@@ -1636,7 +1641,7 @@ Var *f_save_c( Var *v )
 
 	/* Determine the file identifier */
 
-	if ( ( file_num = get_save_file( &v ) ) == -1 )
+	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
 		return vars_push( INT_VAR, 0 );
 
 	if ( Internals.mode == TEST )
@@ -1718,11 +1723,12 @@ Var *f_save_c( Var *v )
 /* had to be used).                                                   */
 /*--------------------------------------------------------------------*/
 
-static int T_fprintf( int file_num, const char *fmt, ... )
+static int T_fprintf( int fn, const char *fmt, ... )
 {
 	int n;                      /* number of bytes we need to write */
 	static size_t size;         /* guess for number of characters needed */
 	static char *p;
+	static int file_num;
 	va_list ap;
 	char *new_name;
 	FILE *new_fp;
@@ -1733,20 +1739,28 @@ static int T_fprintf( int file_num, const char *fmt, ... )
 	int count;
 
 
-	/* If the file has been closed because of insufficient place and no
+	file_num = fn;
+
+	/* If the file has been closed because of insufficient space and no
        replacement file has been given just don't print */
 
 	if ( Internals.mode != TEST )
 	{
-		if ( file_num < 0 || file_num >= EDL.File_List_Len )
+		if ( file_num == FILE_NUMBER_NOT_OPEN )
+			return 0;
+
+		if ( file_num < FILE_NUMBER_OFFSET ||
+			 file_num >= EDL.File_List_Len + FILE_NUMBER_OFFSET )
 		{
 			print( FATAL, "Invalid file handle.\n" );
 			THROW( EXCEPTION );
 		}
 
-		if ( EDL.File_List[ file_num ].fp == NULL )
+		if ( EDL.File_List[ file_num - FILE_NUMBER_OFFSET ].fp == NULL )
 			return 0;
 	}
+
+	file_num -= FILE_NUMBER_OFFSET;
 
 	size = 1024;
 

@@ -442,8 +442,7 @@ of the @w{@code{save_xxx()}}-family. Usually, a file selector is shown
 that lets the user choose a file. If opening the selected file fails the
 user is asked to select a different file name. If the user cancels the
 selection of a file (s)he is asked for confirmation since data may get
-lost. If the user decided not to select a file the function returns an
-(invalid) file identifier of @code{-1}.
+lost.
 
 The function accepts up to five arguments, all of them optional. The
 first one is usually the prompt string to be printed in the file
@@ -487,7 +486,7 @@ shown and,on user request will show up a file selector to allow
 selecting a different file, just as the @code{get_file()}. Thus the
 arguments that the function accepts are identical to the ones of
 @code{get_file()} with the only exception that the first argument is an
-additional argument woth a string for the file name.
+additional argument with a string for the file name.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
