@@ -370,16 +370,8 @@ bool rs690_set_trig_in_slope( int slope )
 		return FAIL;
 	}
 
-	if ( rs690.is_repeat_time )
-	{
-		print( FATAL, "Setting a trigger slope and requesting a fixed "
-			   "repetition time or frequency is mutually exclusive.\n" );
-		THROW( EXCEPTION );
-	}
-
 	if ( rs690.is_neg_delay &&
-		 ! ( ( rs690.is_trig_in_mode && rs690.trig_in_mode == INTERNAL ) ||
-			 rs690.is_repeat_time ) )
+		 ! ( rs690.is_trig_in_mode && rs690.trig_in_mode == INTERNAL ) )
 	{
 		print( FATAL, "Setting a trigger slope (requiring EXTERNAL "
 			   "trigger mode) and using negative delays for functions is "
@@ -428,16 +420,8 @@ bool rs690_set_trig_in_level_type( double type )
 		return FAIL;
 	}
 
-	if ( rs690.is_repeat_time )
-	{
-		print( FATAL, "Setting a trigger input level type and requesting a "
-			   "fixed repetition time or frequency is mutually exclusive.\n" );
-		THROW( EXCEPTION );
-	}
-
 	if ( rs690.is_neg_delay &&
-		 ! ( ( rs690.is_trig_in_mode && rs690.trig_in_mode == INTERNAL ) ||
-			 rs690.is_repeat_time ) )
+		 ! ( rs690.is_trig_in_mode && rs690.trig_in_mode == INTERNAL ) )
 	{
 		print( FATAL, "Setting a trigger level type (thus implicitly "
 			   "selecting EXTERNAL trigger mode) and using negative delays "
@@ -468,15 +452,6 @@ bool rs690_set_repeat_time( double rep_time )
 		print( FATAL, "A different repeat time/frequency of %s/%g Hz has "
 			   "already been set.\n", rs690_pticks( rs690.repeat_time ),
 			   1.0 / rs690_ticks2double( rs690.repeat_time ) );
-		THROW( EXCEPTION );
-	}
-
-	/* We can't set a repetition time when using an external trigger */
-
-	if ( rs690.is_trig_in_mode && rs690.trig_in_mode == EXTERNAL )
-	{
-		print( FATAL, "Setting a repeat time/frequency and trigger mode to "
-			   "EXTERNAL isn't possible.\n" );
 		THROW( EXCEPTION );
 	}
 

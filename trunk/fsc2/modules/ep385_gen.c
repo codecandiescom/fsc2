@@ -264,15 +264,6 @@ bool ep385_set_repeat_time( double rep_time )
 		THROW( EXCEPTION );
 	}
 
-	/* We can't set a repetition time with external trigger */
-
-	if ( ep385.is_trig_in_mode && ep385.trig_in_mode == EXTERNAL )
-	{
-		print( FATAL, "Setting a repeat time/frequency and trigger mode to "
-			   "EXTERNAL isn't possible.\n" );
-		THROW( EXCEPTION );
-	}
-
 	/* Check that the repetition time is within the allowed limits */
 
 	if ( rep_time <= 0 )

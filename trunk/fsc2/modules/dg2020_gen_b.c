@@ -315,21 +315,11 @@ bool dg2020_set_trigger_mode( int mode )
 			THROW( EXCEPTION );
 		}
 	}
-	else
+	else if ( dg2020.is_neg_delay )
 	{
-		if ( dg2020.is_repeat_time )
-		{
-			print( FATAL, "EXTERNAL trigger mode and setting a repeat time or "
-				   "frequency isn't possible.\n" );
-			THROW( EXCEPTION );
-		}
-
-		if ( dg2020.is_neg_delay )
-		{
-			print( FATAL, "EXTERNAL trigger mode and using negative delays "
-				   "for functions isn't possible.\n" );
-			THROW( EXCEPTION );
-		}
+		print( FATAL, "EXTERNAL trigger mode and using negative delays "
+			   "for functions isn't possible.\n" );
+		THROW( EXCEPTION );
 	}
 
 	dg2020.trig_in_mode = mode;
@@ -353,8 +343,7 @@ bool dg2020_set_trig_in_level( double voltage )
 		THROW( EXCEPTION );
 	}
 
-	if ( ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) ||
-		 dg2020.is_repeat_time )
+	if ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL )
 	{
 		print( SEVERE, "Setting a trigger level is useless in INTERNAL "
 			   "trigger mode.\n" );
@@ -362,8 +351,7 @@ bool dg2020_set_trig_in_level( double voltage )
 	}
 
 	if ( dg2020.is_neg_delay &&
-		 ! ( ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) ||
-			 dg2020.is_repeat_time ) )
+		 ! ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) )
 	{
 		print( FATAL, "Setting a trigger level (thus implicitly selecting "
 			   "EXTERNAL trigger mode) and using negative delays for "
@@ -399,8 +387,7 @@ bool dg2020_set_trig_in_slope( int slope )
 		THROW( EXCEPTION );
 	}
 
-	if ( ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) ||
-		 dg2020.is_repeat_time)
+	if ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL )
 	{
 		print( SEVERE, "Setting a trigger slope is useless in INTERNAL "
 			   "trigger mode.\n" );
@@ -408,8 +395,7 @@ bool dg2020_set_trig_in_slope( int slope )
 	}
 
 	if ( dg2020.is_neg_delay &&
-		 ! ( ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) ||
-			 dg2020.is_repeat_time ) )
+		 ! ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) )
 	{
 		print( FATAL, "Setting a trigger slope (implicitly selecting EXTERNAL "
 			   "trigger mode) and using negative delays for functions is "
@@ -438,8 +424,7 @@ bool dg2020_set_trig_in_impedance( int state )
 		THROW( EXCEPTION );
 	}
 
-	if ( ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) ||
-		 dg2020.is_repeat_time )
+	if ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL )
 	{
 		print( SEVERE, "Setting a trigger impedance is useless in INTERNAL "
 			   "trigger mode.\n" );
@@ -447,8 +432,7 @@ bool dg2020_set_trig_in_impedance( int state )
 	}
 
 	if ( dg2020.is_neg_delay &&
-		 ! ( ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) ||
-			 dg2020.is_repeat_time ) )
+		 ! ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) )
 	{
 		print( FATAL, "Setting a trigger impedance (implicitly selecting "
 			   "EXTERNAL trigger mode) and using negative delays for "
@@ -474,20 +458,6 @@ bool dg2020_set_repeat_time( double rep_time )
 		print( FATAL, "A different repeat time/frequency of %s/%g Hz has "
 			   "already been set.\n", dg2020_pticks( dg2020.repeat_time ),
 			   1.0 / dg2020_ticks2double( dg2020.repeat_time ) );
-		THROW( EXCEPTION );
-	}
-
-	if ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == EXTERNAL )
-	{
-		print( FATAL, "Setting a repeat time/frequency and trigger mode to "
-			   "EXTERNAL isn't possible.\n" );
-		THROW( EXCEPTION );
-	}
-
-	if ( dg2020.is_trig_in_slope || dg2020.is_trig_in_level )
-	{
-		print( FATAL, "Setting a repeat time/frequency and a trigger slope or "
-			   "level isn't possible.\n" );
 		THROW( EXCEPTION );
 	}
 
