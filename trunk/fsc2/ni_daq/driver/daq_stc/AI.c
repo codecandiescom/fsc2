@@ -143,6 +143,14 @@ static void AI_daq_reset( Board *board )
 
 
 	data = board->stc.Joint_Reset | AI_Reset;
+
+	/* Don't interrupt when DMA is in progress - it sometimes (?) seems
+	   to leave the board in a garbled state */
+
+	while ( board->func->stc_readw( board, STC_AI_Status_1 ) &
+		AI_FIFO_Request_St )
+		/* empty */ ;
+
 	board->func->stc_writew( board, STC_Joint_Reset, AI_Reset );
 	board->stc.Joint_Reset &= ~ AI_Reset;
 
@@ -1096,8 +1104,6 @@ static int AI_acq_stop( Board *board )
 		       NI_DAQ_PFI_UNUSED );
 
 	board->func->dma_shutdown( board, NI_DAQ_AI_SUBSYSTEM );
-	board->func->dma_buf_release( board, NI_DAQ_AI_SUBSYSTEM );
-	board->func->clear_ADC_FIFO( board );
 
 	return 0;
 }
