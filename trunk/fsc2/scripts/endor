@@ -19,8 +19,6 @@ my $N_runs     = 20;
 my $how        = 'Start program';
 
 
-my $old_val;
-
 # Create all the graphic stuff
 
 my $mw = MainWindow->new( );
@@ -281,9 +279,6 @@ MainLoop;
 sub is_numeric {
 
 	my $new_val = shift;
-	shift;
-	my $old_val = shift;
-
 	return $new_val =~ /^[+-]?([0-9]+(\.[0-9]*)?)?$/;
 }
 
@@ -324,7 +319,7 @@ VARIABLES:
 
 start_freq  = $start_freq MHz;
 end_freq    = $end_freq MHz;
-step_freq   = $step_freq kHz;          
+step_freq   = $step_freq kHz;
 
 attenuation = $atten db;
 
