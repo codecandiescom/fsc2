@@ -242,7 +242,7 @@ void functions_exit( void )
 #ifndef NDEBUG
 	if ( EDL.Call_Stack != NULL )
 	{
-		eprint( SEVERE, UNSET, "Internal error detected at %s:%u.\n",
+		eprint( SEVERE, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
 		while ( call_pop( ) )
 			/* empty */ ;
@@ -364,7 +364,7 @@ Var *func_call( Var *f )
 
 	if ( f->type != FUNC )
 	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -375,7 +375,7 @@ Var *func_call( Var *f )
 
 	if ( i >= Num_Func )
 	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}

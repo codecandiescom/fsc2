@@ -27,7 +27,7 @@
 
 typedef struct {
 	const char *expression;
-	unsigned int line;
+	int line;
 	const char *filename;
 } Fsc2_Assert;
 

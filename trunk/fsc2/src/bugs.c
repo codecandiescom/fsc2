@@ -243,7 +243,7 @@ void death_mail( int signo )
 
 #ifndef NDEBUG
 	if ( signo == SIGABRT )
-		fprintf( mail, "%s:%u: failed assertion: %s\n\n",
+		fprintf( mail, "%s:%d: failed assertion: %s\n\n",
 				 Assert_struct.filename, Assert_struct.line,
 				 Assert_struct.expression );
 #endif

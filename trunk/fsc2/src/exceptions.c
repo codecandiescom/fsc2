@@ -78,11 +78,11 @@ static int exception_stack_pos = -1;
 /* case the pogram is stopped immediatedly.                                 */
 /*--------------------------------------------------------------------------*/
 
-jmp_buf *push_exception_frame( const char *file, unsigned int line )
+jmp_buf *push_exception_frame( const char *file, int line )
 {
 	if ( exception_stack_pos >= MAX_NESTED_EXCEPTION )
 	{
-	    syslog( LOG_ERR, "%s: Too many nested exceptions at %s:%u.\n",
+	    syslog( LOG_ERR, "%s: Too many nested exceptions at %s:%d.\n",
 				prog_name, file, line );
 #ifdef FSC2_HEADER
 		if ( Internals.I_am == CHILD )
@@ -103,11 +103,11 @@ jmp_buf *push_exception_frame( const char *file, unsigned int line )
 /* (and calls exit() immediately) if the exception stack is already empty. */
 /*-------------------------------------------------------------------------*/
 
-void pop_exception_frame( const char *file, int unsigned line )
+void pop_exception_frame( const char *file, int line )
 {
 	if ( exception_stack_pos < 0 )
 	{
-		syslog( LOG_ERR, "%s: Exception stack empty at %s:%u.\n",
+		syslog( LOG_ERR, "%s: Exception stack empty at %s:%d.\n",
 				prog_name, file, line );
 #ifdef FSC2_HEADER
 		if ( Internals.I_am == CHILD )
@@ -155,13 +155,13 @@ jmp_buf *throw_exception( Exception_Types exception_type )
 /* exception has been thrown the program is stopped immediately.           */
 /*-------------------------------------------------------------------------*/
 
-Exception_Types get_exception_type( const char *file, int unsigned line )
+Exception_Types get_exception_type( const char *file, int line )
 {
 	if ( exception_stack_pos + 1 >= MAX_NESTED_EXCEPTION ||
 		 ! exception_stack[ exception_stack_pos + 1 ].is_thrown )
 	{
 	    syslog( LOG_ERR, "%s: Request for type of exception that never got "
-				"thrown at %s:%u.\n", prog_name, file, line );
+				"thrown at %s:%d.\n", prog_name, file, line );
 #ifdef FSC2_HEADER
 		if ( Internals.I_am == CHILD )
 			_exit( FAIL );
@@ -171,7 +171,7 @@ Exception_Types get_exception_type( const char *file, int unsigned line )
 
 	if ( exception_stack_pos < -1 )
 	{
-	    syslog( LOG_ERR, "%s: Exception stack is empty at %s:%u.\n",
+	    syslog( LOG_ERR, "%s: Exception stack is empty at %s:%d.\n",
 				prog_name, file, line );
 #ifdef FSC2_HEADER
 		if ( Internals.I_am == CHILD )
