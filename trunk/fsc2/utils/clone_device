@@ -48,7 +48,7 @@ die "\nThis program must be started from within the utils subdirectory\n" .
 #
 
 print "\nThis program allows you to automatically create a new device\n" .
-      "module from an already existing device. This is necessary only\n" .
+      "module from an already existing module. This is necessary only\n" .
       "in cases where two identical devices must be used simultaneously.\n\n" .
 	  "You will have to enter the name of the device you want to clone\n" .
 	  "in exactly the same way as it would appear in the DEVICES section\n" .
