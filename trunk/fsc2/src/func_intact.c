@@ -2250,9 +2250,9 @@ static IOBJECT *find_object_from_ID( long ID )
 
 	for ( io = Tool_Box->objs; io != NULL; io = io->next )
 		if ( io->ID == ID )
-			return io;
+			break;
 
-	return NULL;
+	return io;
 }
 
 
@@ -2796,9 +2796,6 @@ static void convert_escapes( char *str )
 
 Var *f_objdel( Var *v )
 {
-	IOBJECT *io = NULL;
-
-
 	if ( ! FI_sizes.is_init )
 		func_intact_init( );
 
@@ -2816,7 +2813,7 @@ Var *f_objdel( Var *v )
 	{
 		/* Since the object 'belong' to the parent, the child needs to ask
 		   the parent to delete the object. The ID of each object to be deleted
-		   gets passed to te parent in a buffer and the parent is asked to
+		   gets passed to the parent in a buffer and the parent is asked to
 		   delete the object */
 
 		if ( I_am == CHILD )
@@ -2845,11 +2842,11 @@ Var *f_objdel( Var *v )
 
 			memcpy( pos, &Lc, sizeof( long ) );       /* current line number */
 			pos += sizeof( long );
-			memcpy( pos, &v->val.lval, sizeof( long ) );  /* object ID */
+			memcpy( pos, &v->val.lval, sizeof( long ) );        /* object ID */
 			pos += sizeof( long );
 			if ( Fname )
 			{
-				strcpy( ( char * ) pos, Fname );    /* current file name */
+				strcpy( ( char * ) pos, Fname );      /* current file name */
 				pos += strlen( Fname ) + 1;
 			}
 			else
@@ -2864,52 +2861,57 @@ Var *f_objdel( Var *v )
 
 			continue;
 		}
-
-		/* No tool box -> no objects -> no objects to delete... */
-
-		if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+		else
 		{
-			eprint( FATAL, SET, "No objects have been defined yet.\n" );
-			THROW( EXCEPTION );
-		}
+			IOBJECT *io = NULL;
 
-		/* Do checks on parameters */
 
-		if ( v->type != INT_VAR || v->val.lval < 0 ||
-			 ( io = find_object_from_ID( v->val.lval ) ) == NULL )
-		{
-			eprint( FATAL, SET, "Invalid object identifier in %s().\n",
-					Cur_Func );
-			THROW( EXCEPTION );
-		}
+			/* No tool box -> no objects -> no objects to delete... */
 
-		switch ( io->type )
-		{
-			case NORMAL_BUTTON :
-			case PUSH_BUTTON :
-			case RADIO_BUTTON :
-				vars_pop( f_bdelete( vars_push( INT_VAR, v->val.lval ) ) );
-				break;
-
-			case NORMAL_SLIDER :
-			case VALUE_SLIDER :
-				vars_pop( f_sdelete( vars_push( INT_VAR, v->val.lval ) ) );
-				break;
-
-			case INT_INPUT :
-			case FLOAT_INPUT :
-			case INT_OUTPUT :
-			case FLOAT_OUTPUT :
-				vars_pop( f_idelete( vars_push( INT_VAR, v->val.lval ) ) );
-				break;
-
-			default :
-				eprint( FATAL, UNSET, "Internal error at %s:%d.\n",
-						__FILE__, __LINE__ );
+			if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+			{
+				eprint( FATAL, SET, "No objects have been defined yet.\n" );
 				THROW( EXCEPTION );
-		}
+			}
 
-		v = vars_pop( v );
+			/* Do checks on parameters */
+
+			if ( v->type != INT_VAR || v->val.lval < 0 ||
+				 ( io = find_object_from_ID( v->val.lval ) ) == NULL )
+			{
+				eprint( FATAL, SET, "Invalid object identifier in %s().\n",
+						Cur_Func );
+				THROW( EXCEPTION );
+			}
+
+			switch ( io->type )
+			{
+				case NORMAL_BUTTON :
+				case PUSH_BUTTON :
+				case RADIO_BUTTON :
+					vars_pop( f_bdelete( vars_push( INT_VAR, v->val.lval ) ) );
+					break;
+
+				case NORMAL_SLIDER :
+				case VALUE_SLIDER :
+					vars_pop( f_sdelete( vars_push( INT_VAR, v->val.lval ) ) );
+					break;
+
+				case INT_INPUT :
+				case FLOAT_INPUT :
+				case INT_OUTPUT :
+				case FLOAT_OUTPUT :
+					vars_pop( f_idelete( vars_push( INT_VAR, v->val.lval ) ) );
+					break;
+
+				default :
+					eprint( FATAL, UNSET, "Internal error at %s:%d.\n",
+							__FILE__, __LINE__ );
+					THROW( EXCEPTION );
+			}
+
+			v = vars_pop( v );
+		}
 	}
 
 	return vars_push( INT_VAR, 1 );
