@@ -175,10 +175,10 @@ int ep385_init_hook( void )
 
 int ep385_test_hook( void )
 {
-	/* Make sure that a timebase is set (shouldn't really be needed) */
-
 	if ( ep385.is_cw_mode )
 		return 1;
+
+	/* Make sure that a timebase is set (shouldn't really be needed) */
 
 	if ( ! ep385.is_timebase )
 	{

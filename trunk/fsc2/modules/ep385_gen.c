@@ -64,7 +64,6 @@ bool ep385_store_timebase( double timebase )
 				T_free( min );
 			RETHROW( );
 		}
-					
 	}
 
 	ep385.is_timebase = SET;
