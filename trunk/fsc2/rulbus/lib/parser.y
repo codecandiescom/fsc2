@@ -308,8 +308,8 @@ static int finalize_rack( void )
 	int i = 0;
 
 
-	/* No further checks needed if there are no cards without a valid
-	   rack address (i.e there are no racks in the rack) */
+	/* No further checks needed if there are no cards without a valid rack
+	   address (i.e there are no cards in the rack we're dealing with) */
 
 	if ( rulbus_num_cards == 0 ||
 		 rulbus_card[ rulbus_num_cards - 1 ].rack != RULBUS_INV_RACK_ADDR )
@@ -352,7 +352,7 @@ static int new_card( int type, char *name )
 		if ( ! strcmp( name, rulbus_card[ i ].name ) )
 			 return RULBUS_CF_CARD_NAME_CONFLICT;
 
-	/* Set up a new structure for the card */
+	/* Append a new structure for the card to the list */
 
 	if ( ( tmp = realloc( rulbus_card,
 						  ( rulbus_num_cards + 1 ) * sizeof *tmp ) ) == NULL )
@@ -424,9 +424,9 @@ static int set_defaults( RULBUS_CARD_LIST *card )
 
 	for ( i = 0; i < rulbus_num_cards; i++ )
 	{
-		if ( rulbus_card[ i ].type == RB_GENERIC ||
-			 rulbus_card + i == card ||
-			 rulbus_card[ i ].rack != card->rack )
+		if ( rulbus_card + i == card ||
+			 rulbus_card[ i ].rack != card->rack ||
+			 rulbus_card[ i ].type == RB_GENERIC )
 			continue;
 
 		if ( ( rulbus_card[ i ].addr < card->addr &&
@@ -451,7 +451,7 @@ static int set_rb8509_defaults( RULBUS_CARD_LIST *card )
 
 
 	/* If the card hasn't been assigned an address take the default address
-	   (unless it hasn't been assigned to another card) */
+	   (unless that one hasn't been assigned to another card) */
 
 	if ( card->addr == RULBUS_INV_CARD_ADDR )
 	{
@@ -492,7 +492,7 @@ static int set_rb8510_defaults( RULBUS_CARD_LIST *card )
 
 
 	/* If the card hasn't been assigned an address take the default address
-	   (unless it hasn't been assigned to another card) */
+	   (unless that one hasn't been assigned to another card) */
 
 	if ( card->addr == RULBUS_INV_CARD_ADDR )
 	{
@@ -527,7 +527,7 @@ static int set_rb8514_defaults( RULBUS_CARD_LIST *card )
 
 
 	/* If the card hasn't been assigned an address take the default address
-	   (unless it hasn't been assigned to another card) */
+	   (unless that hasn't been assigned to another card) */
 
 	if ( card->addr == RULBUS_INV_CARD_ADDR )
 	{
@@ -559,7 +559,7 @@ static int set_rb8515_defaults( RULBUS_CARD_LIST *card )
 
 
 	/* If the card hasn't been assigned an address take the default address
-	   (unless it hasn't been assigned to another card) */
+	   (unless that one hasn't been assigned to another card) */
 
 	if ( card->addr == RULBUS_INV_CARD_ADDR )
 	{
@@ -816,8 +816,9 @@ void rulbus_parser_clean_up( void )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------*/
+/*-----------------------------------------*
+ * Utility function: rounds double to long
+ *-----------------------------------------*/
 
 static inline long lrnd( double x )
 {
