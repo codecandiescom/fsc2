@@ -70,6 +70,7 @@ void pulser_struct_init( void )
 		pulser_struct[ i ].set_function_high_level    = NULL;
 		pulser_struct[ i ].set_function_low_level     = NULL;
 		pulser_struct[ i ].set_timebase               = NULL;
+		pulser_struct[ i ].set_timebase_level         = NULL;
 		pulser_struct[ i ].set_trigger_mode           = NULL;
 		pulser_struct[ i ].set_repeat_time            = NULL;
 		pulser_struct[ i ].set_trig_in_level          = NULL;
@@ -532,7 +533,7 @@ void p_set_timebase( Var *v )
 	/* Finally call the function (if it exists...) */
 
 	is_pulser_func( pulser_struct[ Cur_Pulser ].set_timebase,
-					"setting the timebase" );
+					"setting the time base" );
 
 	TRY
 	{
@@ -544,6 +545,45 @@ void p_set_timebase( Var *v )
 	TRY
 	{
 		pulser_struct[ Cur_Pulser ].set_timebase( timebase );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		RETHROW( );
+	}
+
+	call_pop( );
+}
+
+
+/*-------------------------------------------------*/
+/* Function for setting the timebase of the pulser */
+/*-------------------------------------------------*/
+
+void p_set_timebase_level( int level_type )
+{
+	is_pulser_driver( );
+
+	/* Check the variable and get its value */
+
+	fsc2_assert( level_type == TTL_LEVEL || level_type == ECL_LEVEL );
+
+	/* Finally call the function (if it exists...) */
+
+	is_pulser_func( pulser_struct[ Cur_Pulser ].set_timebase,
+					"setting external clock inpugt level" );
+
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
+
+	TRY
+	{
+		pulser_struct[ Cur_Pulser ].set_timebase_level( level_type );
 		TRY_SUCCESS;
 	}
 	OTHERWISE

@@ -448,6 +448,10 @@ tmp:      /* empty */
 		  sl_val sep2              { p_set_trigger_slope( $4 ); }
         | tmp THRESH_TOKEN sep1
 		  expr sep2                { p_set_trigger_level( $4 ); }
+		| tmp TTL_TOKEN sep2       { p_set_trigger_level( vars_push( 
+										 FLOAT_VAR, ( double ) TTL_LEVEL ) ); }
+		| tmp ECL_TOKEN sep2       { p_set_trigger_level( vars_push( 
+										 FLOAT_VAR, ( double ) ECL_LEVEL ) ); }
         | tmp REPT_TOKEN sep1
 		  expr sep2                { p_set_rep_time( $4 ); }
         | tmp REPF_TOKEN sep1
