@@ -231,7 +231,7 @@ void cut_show( int dir, long u_index )
 		}
 
 		fl_set_object_callback( GUI.cut_form->cut_print_button,
-                                print_1d, - dir );
+                                print_it, - dir );
 	}
 
 	/* Calculate all the points of the cross section curve */
