@@ -31,6 +31,13 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
+static void spectrapro_300i_arr_conv( long g, double cwl, long num_pixels,
+									  double pixel_width,
+									  Var *src, Var *dest );
+static double spectrapro_300i_conv( long g, double cwl, long num_pixels,
+									double pixel_width, double px );
+
+
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 
@@ -571,20 +578,12 @@ Var *monochromator_wavelength_axis( Var * v )
 	Var *cv;
 	double pixel_width;
 	long num_pixels;
-	size_t g;
-	double inclusion_angle_2;
-	double focal_length;
-	double detector_angle;
-	double grating_angle;
+	long g;
 	double wl;
 	double wl_low;
 	double wl_hi;
-	double x;
-	double theta;
 	int acc;
 
-
-	UNUSED_ARGUMENT( v );
 
 	/* Check that we can talk with the camera */
 
@@ -651,7 +650,17 @@ Var *monochromator_wavelength_axis( Var * v )
 		return cv;
 	}
 
-	g = spectrapro_300i.current_grating;
+	if ( v != NULL )
+	{
+		g = get_strict_long( v, "grating number" ) - 1;
+		if ( g < 0 || g >= MAX_GRATINGS )
+		{
+			print( FATAL, "Invalid grating #%ld.\n", g + 1 );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+		g = spectrapro_300i.current_grating;
 
 	if ( ! spectrapro_300i.grating[ g ].is_calib )
 	{
@@ -662,32 +671,239 @@ Var *monochromator_wavelength_axis( Var * v )
 		return cv;
 	}
 
-	wl = spectrapro_300i.wavelength;
-	inclusion_angle_2 = 0.5 * spectrapro_300i.grating[ g ].inclusion_angle;
-	focal_length = spectrapro_300i.grating[ g ].focal_length;
-	detector_angle = spectrapro_300i.grating[ g ].detector_angle;
+	if ( ( v = vars_pop( v ) ) )
+	{
+		wl = get_double( v, "wavelength" );
+		if ( wl < 0.0 )
+		{
+			print( FATAL, "Invalid negative wavelength.\n" );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+		wl = spectrapro_300i.wavelength;
 
-	grating_angle = asin( 0.5 * wl * spectrapro_300i.grating[ g ].grooves
-						  / cos( inclusion_angle_2 ) );
+	too_many_arguments( v );
 
-	x = - pixel_width * ( 0.5 * ( double ) ( num_pixels - 1 ) );
-	theta = atan(   x * cos( detector_angle )
-				  / ( focal_length + x * sin( detector_angle ) ) );
-	wl_low = (   sin( grating_angle - inclusion_angle_2 )
-			   + sin( grating_angle + inclusion_angle_2 + theta ) )
-		     / spectrapro_300i.grating[ g ].grooves;
-
-	x = pixel_width * ( 0.5 * ( double ) ( num_pixels - 1 ) );
-	theta = atan(   x * cos( detector_angle )
-				  / ( focal_length + x * sin( detector_angle ) ) );
-	wl_hi = (   sin( grating_angle - inclusion_angle_2 )
-			  + sin( grating_angle + inclusion_angle_2 + theta ) )
-		    / spectrapro_300i.grating[ g ].grooves;
+	wl_low = spectrapro_300i_conv( g, wl, num_pixels, pixel_width, 1 );
+	wl_hi = spectrapro_300i_conv( g, wl, num_pixels, pixel_width, num_pixels );
 
 	cv->val.dpnt[ 1 ] = ( wl_hi - wl_low ) / num_pixels;
 	cv->val.dpnt[ 0 ] = wl - 0.5 * cv->val.dpnt[ 1 ] * ( num_pixels - 1 );
 
 	return cv;
+}
+
+
+/*------------------------------------------------------------------------*/
+/* Function allows to calculate the exact wavelength for a pixel position */
+/* on the CCD cameras chip. It takes up to three arguments. The first     */
+/* argument is either a single value or an array of pixel positions for   */
+/* which the corresponding wavelength is to be calculated. The second,    */
+/* optional argument is the grating used and the third, optional argument */
+/* is the center wavelength. If the center wavelength or both optional    */
+/* arguments are not specified the currently set values are used.         */
+/*------------------------------------------------------------------------*/
+
+Var *monochromator_calc_wavelength( Var *v )
+{
+	long g;
+	double cwl;
+	Var *cv;
+	long num_pixels;
+	double pixel_width;
+	ssize_t i;
+	int acc;
+
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing argument(s).\n" );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
+
+	if ( v->type & ( INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF ) &&
+		 v->len == 0 )
+	{
+		print( FATAL, "Array of pixel positions has no defined size.\n ");
+		THROW( EXCEPTION );
+	}
+
+	if ( v->next != NULL )
+	{
+		g = get_strict_long( v, "grating number" ) - 1;
+		if ( g < 0 || g >= MAX_GRATINGS )
+		{
+			print( FATAL, "Invalid grating #%ld.\n", g + 1 );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+		g = spectrapro_300i.current_grating;
+		
+	if ( ! spectrapro_300i.grating[ g ].is_calib )
+	{
+		print( SEVERE, "No (complete) calibration for current grating #%ld "
+			   "found.\n", g + 1 );
+		switch( v->type )
+		{
+			case INT_VAR :
+				return vars_push( FLOAT_VAR, ( double ) v->val.lval );
+
+			case FLOAT_VAR :
+				return vars_push( FLOAT_VAR, v->val.lval );
+
+			case INT_ARR :
+				cv = vars_push( FLOAT_ARR, NULL, v->len );
+				for ( i = 0; i < v->len; i++ )
+					cv->val.dpnt[ i ] = ( double ) v->val.lpnt[ i ];
+				return cv;
+
+			case FLOAT_ARR :
+				return vars_push( FLOAT_ARR, v->val.dpnt, v->len );
+
+			case INT_REF : case FLOAT_REF :
+				return vars_push( FLOAT_REF, v );
+		}
+	}
+
+	if ( v->next->next != NULL )
+	{  
+		cwl = get_double( v->next->next, "center wavelength" );
+		if ( cwl < 0.0 )
+		{
+			print( FATAL, "Invalid negative center wavelength.\n" );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+		cwl = spectrapro_300i.wavelength;
+
+	/* Get the width (in pixels) of the chip of the camera */
+
+	if ( ! func_exists( "ccd_camera_pixel_area" ) )
+	{
+		print( FATAL, "CCD camera has no function for determining the "
+			   "size of the chip.\n" );
+		THROW( EXCEPTION );
+	}
+
+	cv = func_call( func_get( "ccd_camera_pixel_area", &acc ) );
+
+	if ( cv->type != INT_ARR ||
+		 cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
+	{
+		print( FATAL, "Function of CCD for determining the size of the chip "
+			   "does not return a useful value.\n" );
+		THROW( EXCEPTION );
+	}
+
+	num_pixels = cv->val.lpnt[ 0 ];
+	vars_pop( cv );
+
+	/* Get the pixel size of the camera */
+
+	if ( ! func_exists( "ccd_camera_pixel_size" ) )
+	{
+		print( FATAL, "CCD camera has no function for determining the "
+			   "pixel size.\n" );
+		THROW( EXCEPTION );
+	}
+
+	cv = func_call( func_get( "ccd_camera_pixel_size", &acc ) );
+
+	if ( cv->type != FLOAT_VAR || cv->val.dval <= 0.0 )
+	{
+		print( FATAL, "Function of CCD for determining the pixel size "
+			   "does not return a useful value.\n" );
+		THROW( EXCEPTION );
+	}
+
+	pixel_width = cv->val.dval;
+	vars_pop( cv );
+
+	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+		return vars_push( FLOAT_VAR,
+						  spectrapro_300i_conv( g, cwl, num_pixels,
+												pixel_width, VALUE( v ) ) );
+
+	if ( v->type & ( INT_ARR | FLOAT_ARR ) )
+		cv = vars_push( FLOAT_ARR, NULL, v->len );
+	else
+		cv = vars_push( FLOAT_REF, v );
+
+	spectrapro_300i_arr_conv( g, cwl, num_pixels, pixel_width, v, cv );
+
+	return v;
+}
+
+
+/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+
+static void spectrapro_300i_arr_conv( long g, double cwl, long num_pixels,
+									  double pixel_width, Var *src, Var *dest )
+{
+	ssize_t i;
+	double px;
+
+
+	fsc2_assert( src->type & ( INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF ) );
+	fsc2_assert( dest->type & ( FLOAT_ARR | FLOAT_REF ) );
+
+	if ( dest->type == FLOAT_ARR )
+	{
+		fsc2_assert( src->type & ( INT_ARR | FLOAT_ARR ) );
+
+		for ( i = 0; i < src->len; i++ )
+		{
+			if ( src->type == INT_ARR )
+				px = ( double ) src->val.lpnt[ i ];
+			else
+				px = src->val.dpnt[ i ];
+			dest->val.dpnt[ i ] = spectrapro_300i_conv( g, cwl, num_pixels,
+														pixel_width, px );
+		}
+		return;
+	}
+
+	fsc2_assert( src->type & ( INT_REF | FLOAT_REF ) );
+
+	for ( i = 0; i < src->len; i++ )
+		spectrapro_300i_arr_conv( g, cwl, num_pixels, pixel_width, src, dest );
+}
+
+
+/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+
+static double spectrapro_300i_conv( long g, double cwl, long num_pixels,
+									double pixel_width, double px )
+{
+	double inclusion_angle_2;
+	double focal_length;
+	double detector_angle;
+	double grating_angle;
+	double theta;
+	double x;
+
+
+	inclusion_angle_2 = 0.5 * spectrapro_300i.grating[ g ].inclusion_angle;
+	focal_length = spectrapro_300i.grating[ g ].focal_length;
+	detector_angle = spectrapro_300i.grating[ g ].detector_angle;
+
+	grating_angle = asin( 0.5 * cwl * spectrapro_300i.grating[ g ].grooves
+						  / cos( inclusion_angle_2 ) );
+
+	x = pixel_width * ( px - 0.5 * ( double ) ( num_pixels + 1 ) );
+	theta = atan(   x * cos( detector_angle )
+				  / ( focal_length + x * sin( detector_angle ) ) );
+	return (   sin( grating_angle - inclusion_angle_2 )
+			   + sin( grating_angle + inclusion_angle_2 + theta ) )
+		   / spectrapro_300i.grating[ g ].grooves;
 }
 
 
