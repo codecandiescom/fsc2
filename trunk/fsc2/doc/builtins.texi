@@ -854,9 +854,9 @@ As in the case of buttons there are two more (optional) arguments, the
 label to be shown below the slider and a help text. The same escape
 sequences as for button labels and help texts.
 
-All sliders start of as set to the middle of the defined range. If a
-step size is given for the slider the allowed value nearest to the
-middle value is used as the sliders initial value.
+All sliders start of set to the middle of their range. If a step size is
+given for the slider the allowed value nearest to the middle value is
+used as the sliders initial value.
 
 
 @anchor{slider_delete}
