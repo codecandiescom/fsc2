@@ -36,8 +36,8 @@ const char generic_type[ ] = DEVICE_TYPE;
 int hjs_fc_init_hook( void );
 int hjs_fc_test_hook( void );
 int hjs_fc_exp_hook( void );
-int hjs_fc_end_of_exp_hook( void );
 void hjs_fc_exit_hook( void );
+void hjs_fc_child_exit_hook( void );
 
 Var *magnet_name( Var *v );
 Var *magnet_setup( Var *v );
@@ -50,11 +50,12 @@ Var *reset_field( Var *v );
 
 /* Local functions */
 
-static bool hjs_fc_init( void );
+static void hjs_fc_init( void );
 static double hjs_fc_set_field( double field, double error_margin );
 static double hjs_fc_sweep_to( double new_field );
 static double hjs_fc_get_field( void );
 static double hjs_fc_field_check( double field );
+static void hjs_fc_set_dac( double volts );
 
 
 static struct HJS_FC {
@@ -93,12 +94,6 @@ static struct HJS_FC {
    that the the field is stable */
 
 #define MIN_NUM_IDENTICAL_READINGS      3
-
-
-/* Define the maximum sweep speed (in Gauss per second), so that gaussmeter
-   does not loose track of the field */
-
-#define MAX_SWEEP_SPEED     8        /* in G/s */
 
 
 /* Time (in microseconds) that we'll wait between fetching new values
@@ -299,8 +294,16 @@ int hjs_fc_exp_hook( void )
 	   output voltage is and how (and how fast) the field changes with
 	   the DAC output voltage */
 
-	if ( ! hjs_fc_init( ) )
+	TRY
+	{
+		hjs_fc_init( );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		hjs_fc_child_exit_hook( );
 		THROW( EXCEPTION );
+	}
 
 	/* If we found in the test run that the requested field is going to
 	   be not within the limits of the field we can set give up */
@@ -351,69 +354,6 @@ int hjs_fc_exp_hook( void )
 
 
 /*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
-
-int hjs_fc_end_of_exp_hook( void )
-{
-	Var *Func_ptr;
-	Var *v;
-	int acc;
-	double steps;
-	double cur_volts;
-	double mini_step;
-
-
-	if ( hjs_fc.cur_volts == 0.0 )
-		return 1;
-
-	steps = 10 * ( hjs_fc.B_max - hjs_fc.B_min ) /
-		   ( MAX_SWEEP_SPEED * ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) );
-
-	/* If the constants for the field at a DAC voltage of 0 V and for
-	   the change of the field with the DAC voltage as measured during
-	   intitalization are correct we should arrive at the target field
-	   with just one try. But if this isn't the case we retry by
-	   adjusting the output voltage according to the measured difference
-	   from the target field (at least as the deviation is larger than
-	   'error_margin'). */
-
-	cur_volts = hjs_fc.cur_volts;
-	mini_step = cur_volts / steps;
-
-	while ( cur_volts > 0.0 )
-	{
-		if ( ( cur_volts -= mini_step ) < 0.0 )
-			cur_volts = 0.0;
-
-		if ( ( Func_ptr = func_get( hjs_fc.dac_func, &acc ) ) == NULL )
-		{
-			print( FATAL, "Internal error detected at %s:%d.\n",
-				   __FILE__, __LINE__ );
-			THROW( EXCEPTION );
-		}
-
-		vars_push( STR_VAR, DEVICE_NAME );       /* push the pass-phrase */
-		vars_push( FLOAT_VAR, cur_volts );
-
-		if ( ( v = func_call( Func_ptr ) ) == NULL )
-		{
-			print( FATAL, "Internal error detected at %s:%d.\n",
-				   __FILE__, __LINE__ );
-			THROW( EXCEPTION );
-		}
-
-		vars_pop( v );
-
-		fsc2_usleep( 100000, UNSET );
-
-		stop_on_user_request( );
-	}
-
-	return 1;
-}
-
-
-/*--------------------------------------------------------------*/
 /* Function that is called just before the module gets unloaded */
 /*--------------------------------------------------------------*/
 
@@ -425,6 +365,48 @@ void hjs_fc_exit_hook( void )
 		T_free( hjs_fc.gm_gf_func );
 	if ( hjs_fc.gm_res_func )
 		T_free( hjs_fc.gm_res_func );
+}
+
+
+/*--------------------------------------------------------------*/
+/* Function gets executed just before the child process commits */
+/* suicide to bring the field back to the value it has for a    */
+/* DAC output voltage of 0 V.                                   */
+/*--------------------------------------------------------------*/
+
+void hjs_fc_child_exit_hook( void )
+{
+	double cur_volts;
+	double mini_step;
+
+
+	if ( ( cur_volts = hjs_fc.cur_volts ) == 0.0 )
+		return;
+/*
+	mini_step = 0.1 * MAX_SWEEP_SPEED * ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE )
+				/ ( hjs_fc.B_max - hjs_fc.B_min );
+*/
+	mini_step = ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) / 4095.0;
+
+	/* If the constants for the field at a DAC voltage of 0 V and for
+	   the change of the field with the DAC voltage as measured during
+	   intitalization are correct we should arrive at the target field
+	   with just one try. But if this isn't the case we retry by
+	   adjusting the output voltage according to the measured difference
+	   from the target field (at least as the deviation is larger than
+	   'error_margin'). */
+
+	while ( cur_volts > 0.0 )
+	{
+		if ( ( cur_volts -= mini_step ) < 0.0 )
+			cur_volts = 0.0;
+
+		hjs_fc_set_dac( cur_volts );
+
+		hjs_fc.cur_volts = 0.0;
+
+		fsc2_usleep( 20000, UNSET );
+	}
 }
 
 
@@ -507,9 +489,9 @@ Var *set_field( Var *v )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/* Convenience function: just asks the used gaussmeter for the current field */
-/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------*/
+/* Function asks the used gaussmeter for the current field */
+/*---------------------------------------------------------*/
 
 Var *get_field( Var *v )
 {
@@ -594,18 +576,14 @@ Var *reset_field( Var *v )
 /* the DAC voltage.                                                   */
 /*--------------------------------------------------------------------*/
 
-static bool hjs_fc_init( void )
+static void hjs_fc_init( void )
 {
-	Var *Func_ptr;
-	Var *v;
-	int acc;
 	size_t i;
 	double test_volts[ ] = { DAC_MIN_VOLTAGE, 1.0, 2.0, 7.5, DAC_MAX_VOLTAGE };
 	size_t num_test_data = 	sizeof test_volts / sizeof test_volts[ 0 ];
 	double test_gauss[ num_test_data + 1 ];
 	double cur_volts;
 	double mini_step;
-	double steps;
 
 
 	/* We can be sure that the output of the DAC is set to 0 V */
@@ -613,9 +591,11 @@ static bool hjs_fc_init( void )
 	hjs_fc.B0V = test_gauss[ 0 ] = hjs_fc_get_field( );
 
 	cur_volts = DAC_MIN_VOLTAGE;
-
-	steps = 10 * FIELD_RANGE_GUESS /
-		   ( MAX_SWEEP_SPEED * ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) );
+/*
+	mini_step = 0.05 * MAX_SWEEP_SPEED * ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE )
+				/ FIELD_RANGE_GUESS;
+*/
+	mini_step = ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) / 4095.0;
 
 	/* For the test voltages set in 'test_volts' get the magnetic field */
 
@@ -631,43 +611,29 @@ static bool hjs_fc_init( void )
 			THROW( EXCEPTION );
 		}
 
-		mini_step = ( test_volts[ i ] - cur_volts ) / steps;
-
 		while ( cur_volts < test_volts[ i ] )
 		{
 			cur_volts += mini_step;
 			if ( cur_volts > test_volts[ i ] )
 				cur_volts = test_volts[ i ];
 
-			if ( ( Func_ptr = func_get( hjs_fc.dac_func, &acc ) ) == NULL )
-			{
-				print( FATAL, "Internal error detected at %s:%d.\n",
-					   __FILE__, __LINE__ );
-				THROW( EXCEPTION );
-			}
+			hjs_fc_set_dac( cur_volts );
 
-			vars_push( STR_VAR, DEVICE_NAME );       /* push the pass-phrase */
-			vars_push( FLOAT_VAR, cur_volts );
+			hjs_fc.cur_volts = cur_volts;
 
-			if ( ( v = func_call( Func_ptr ) ) == NULL )
-			{
-				print( FATAL, "Internal error detected at %s:%d.\n",
-					   __FILE__, __LINE__ );
-				THROW( EXCEPTION );
-			}
-
-			vars_pop( v );
-
-			fsc2_usleep( 100000, UNSET );
-
+			fsc2_usleep( 20000, SET );
 			stop_on_user_request( );
 		}
 
 		/* Get a consistent reading and finally calculate how long it took  */
 
+		fsc2_usleep( 1000000L, SET );
+		stop_on_user_request( );
+
 		test_gauss[ i ] = hjs_fc_get_field( );
 	}
 
+#if 0
 	hjs_fc.slope = 0.0;
 
 	for ( i = 1; i < num_test_data; i++ )
@@ -684,6 +650,10 @@ static bool hjs_fc_init( void )
 	}
 
 	hjs_fc.slope /= num_test_data - 1;
+#endif
+
+	hjs_fc.slope = ( test_gauss[ num_test_data - 1 ] - hjs_fc.B0V ) /
+				   ( test_volts[ num_test_data - 1 ] - test_volts[ 0 ] );
 
 	if ( hjs_fc.slope == 0.0 )         /* this should be impossible... */
 	{
@@ -714,9 +684,6 @@ static bool hjs_fc_init( void )
 	}
 
 	hjs_fc.act_field = test_gauss[ num_test_data - 1 ];
-	hjs_fc.cur_volts = test_volts[ num_test_data - 1 ];
-
-	return OK;
 }
 
 
@@ -728,17 +695,21 @@ static bool hjs_fc_init( void )
 static double hjs_fc_set_field( double field, double error_margin )
 {
 	double v_step = 0.0;
-	Var *Func_ptr;
-	Var *v;
-	int acc;
 	double cur_field = hjs_fc.B0V;
 	double cur_volts;
-	double steps;
 	double mini_step;
 
 
-	steps = 10 * ( hjs_fc.B_max - hjs_fc.B_min ) /
-		   ( MAX_SWEEP_SPEED * ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) );
+	if ( FSC2_MODE == TEST )
+		return field;
+
+	if ( error_margin < 0.2 )
+		error_margin = 0.2;
+/*
+	mini_step = 0.1 * MAX_SWEEP_SPEED * ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE )
+				/ ( hjs_fc.B_max - hjs_fc.B_min );
+*/
+	mini_step = ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) / 4095.0;
 
 	/* If the constants for the field at a DAC voltage of 0 V and for
 	   the change of the field with the DAC voltage as measured during
@@ -750,47 +721,32 @@ static double hjs_fc_set_field( double field, double error_margin )
 
 	do
 	{
-
 		v_step += ( field - cur_field ) / hjs_fc.slope;
 		cur_volts = hjs_fc.cur_volts;
-		mini_step = ( v_step - cur_volts ) / steps;
 
-		while ( ( v_step > hjs_fc.cur_volts && cur_volts < v_step ) ||
-				( v_step < hjs_fc.cur_volts && cur_volts > v_step ) )
+		if ( v_step > cur_volts )
+			mini_step = fabs( mini_step );
+		else
+			mini_step = - fabs( mini_step );
+
+		while ( ( mini_step > 0.0 && cur_volts < v_step ) ||
+				( mini_step < 0.0  && cur_volts > v_step ) )
 		{
 			cur_volts += mini_step;
 
-			if ( ( v_step > hjs_fc.cur_volts && cur_volts > v_step ) ||
-				 ( v_step < hjs_fc.cur_volts && cur_volts < v_step ) )
+			if ( ( mini_step > 0.0 && cur_volts > v_step ) ||
+				 ( mini_step < 0.0 && cur_volts < v_step ) )
 				cur_volts = v_step;
 
-			if ( ( Func_ptr = func_get( hjs_fc.dac_func, &acc ) ) == NULL )
-			{
-				print( FATAL, "Internal error detected at %s:%d.\n",
-					   __FILE__, __LINE__ );
-				THROW( EXCEPTION );
-			}
+			hjs_fc_set_dac( cur_volts );
 
-			vars_push( STR_VAR, DEVICE_NAME );       /* push the pass-phrase */
-			vars_push( FLOAT_VAR, cur_volts );
+			hjs_fc.cur_volts = v_step;
 
-			if ( ( v = func_call( Func_ptr ) ) == NULL )
-			{
-				print( FATAL, "Internal error detected at %s:%d.\n",
-					   __FILE__, __LINE__ );
-				THROW( EXCEPTION );
-			}
-
-			vars_pop( v );
-
-			fsc2_usleep( 100000, UNSET );
-
+			fsc2_usleep( 20000, UNSET );
 			stop_on_user_request( );
 		}
 
 		cur_field = hjs_fc_get_field( );
-
-		hjs_fc.cur_volts = v_step;
 
 		if ( FSC2_MODE == TEST )
 		{
@@ -798,7 +754,7 @@ static double hjs_fc_set_field( double field, double error_margin )
 			break;
 		}
 
-	} while ( lrnd( 10.0 * labs( cur_field - field ) ) >
+	} while ( lrnd( 10.0 * fabs( cur_field - field ) ) >
 			  lrnd( 10.0 * error_margin ) );
 
 	return cur_field;
@@ -814,63 +770,44 @@ static double hjs_fc_set_field( double field, double error_margin )
 static double hjs_fc_sweep_to( double new_field )
 {
 	double v_step;
-	Var *Func_ptr;
-	Var *v;
-	int acc;
 	double cur_volts;
-	double steps;
 	double mini_step;
 
 
 	if ( FSC2_MODE == TEST )
 		return new_field;
-
-	steps = 10 * ( hjs_fc.B_max - hjs_fc.B_min ) /
-		   ( MAX_SWEEP_SPEED * ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) );
+/*
+	mini_step = 0.1 * MAX_SWEEP_SPEED * ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE )
+				/ ( hjs_fc.B_max - hjs_fc.B_min );
+*/
+	mini_step = ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) / 4095.0;
 
 	/* Set the DAC voltage for the new field */
 
-	v_step = ( new_field - hjs_fc.B0V ) / hjs_fc.slope;
 	cur_volts = hjs_fc.cur_volts;
-	if ( steps > 1 )
-		mini_step = ( v_step - cur_volts ) / steps;
-	else
-		mini_step = v_step - cur_volts;
+	v_step = cur_volts + ( new_field - hjs_fc.act_field ) / hjs_fc.slope;
 
-	while ( ( v_step > hjs_fc.cur_volts && cur_volts < v_step ) ||
-			( v_step < hjs_fc.cur_volts && cur_volts > v_step ) )
+	if ( v_step > cur_volts )
+		mini_step = fabs( mini_step );
+	else
+		mini_step = - fabs( mini_step );
+
+	while ( ( mini_step > 0.0 && cur_volts < v_step ) ||
+			( mini_step < 0.0 && cur_volts > v_step ) )
 	{
 		cur_volts += mini_step;
 
-		if ( ( v_step > hjs_fc.cur_volts && cur_volts > v_step ) ||
-			 ( v_step < hjs_fc.cur_volts && cur_volts < v_step ) )
+		if ( ( mini_step > 0.0 && cur_volts > v_step ) ||
+			 ( mini_step < 0.0 && cur_volts < v_step ) )
 			cur_volts = v_step;
 
-		if ( ( Func_ptr = func_get( hjs_fc.dac_func, &acc ) ) == NULL )
-		{
-			print( FATAL, "Internal error detected at %s:%d.\n",
-				   __FILE__, __LINE__ );
-			THROW( EXCEPTION );
-		}
+		hjs_fc_set_dac( cur_volts );
 
-		vars_push( STR_VAR, DEVICE_NAME );       /* push the pass-phrase */
-		vars_push( FLOAT_VAR, v_step );
+		hjs_fc.cur_volts = cur_volts;
 
-		if ( ( v = func_call( Func_ptr ) ) == NULL )
-		{
-			print( FATAL, "Internal error detected at %s:%d.\n",
-				   __FILE__, __LINE__ );
-			THROW( EXCEPTION );
-		}
-
-		vars_pop( v );
-
-		fsc2_usleep( 100000, UNSET );
-
+		fsc2_usleep( 20000, UNSET );
 		stop_on_user_request( );
 	}
-
-	hjs_fc.cur_volts = v_step;
 
 	return new_field;
 }
@@ -958,6 +895,37 @@ static double hjs_fc_field_check( double field )
 	}
 
 	return field;
+}
+
+
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+static void hjs_fc_set_dac( double volts )
+{
+	Var *Func_ptr;
+	int acc;
+	Var *v;
+
+
+	if ( ( Func_ptr = func_get( hjs_fc.dac_func, &acc ) ) == NULL )
+	{
+		print( FATAL, "Internal error detected at %s:%d.\n",
+			   __FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	vars_push( STR_VAR, DEVICE_NAME );       /* push the pass-phrase */
+	vars_push( FLOAT_VAR, volts );
+
+	if ( ( v = func_call( Func_ptr ) ) == NULL )
+	{
+		print( FATAL, "Internal error detected at %s:%d.\n",
+			   __FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	vars_pop( v );
 }
 
 

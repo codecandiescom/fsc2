@@ -49,6 +49,12 @@ static FILE *hjs_attenuator_open_calibration( char *name );
 static long hjs_attenuator_att_to_step( double att );
 
 
+/*-------------------------------------------*/
+/*                                           */
+/*            Hook functions                 */
+/*                                           */
+/*-------------------------------------------*/
+
 /*------------------------------------------------------*/
 /* Function called when the module has just been loaded */
 /*------------------------------------------------------*/
@@ -132,6 +138,25 @@ void hjs_attenuator_exit_hook( void )
 	hjs_attenuator.is_open = UNSET;
 }
 
+
+/*------------------------------------------------------------------*/
+/* Function called at the very end of the experiment within the     */
+/* child process. It set the attenuator to the maximum attenuation. */
+/*------------------------------------------------------------------*/
+
+void hjs_attenuator_child_exit_hook( void )
+{
+	if ( hjs_attenuator.is_step )
+		hjs_attenuator_set_attenuation(
+		   hjs_attenuator.att_table[ hjs_attenuator.att_table_len - 1 ].step );
+}
+
+
+/*-------------------------------------------*/
+/*                                           */
+/*             EDL functions                 */
+/*                                           */
+/*-------------------------------------------*/
 
 /*----------------------------------------------------------------*/
 /* Function returns a string variable with the name of the device */
@@ -313,6 +338,12 @@ Var *mw_attenuator_attenuation( Var *v )
 }
 
 
+/*-------------------------------------------*/
+/*                                           */
+/*           Low level functions             */
+/*                                           */
+/*-------------------------------------------*/
+
 /*---------------------------------------------------------------*/
 /* Initialization of the serial port the device is connected to. */
 /*---------------------------------------------------------------*/
@@ -381,8 +412,7 @@ static void hjs_attenuator_set_attenuation( long new_step )
 	/* Wait for the motor to move, we were using a speed of 300 steps per
 	   second. */
 
-	fsc2_usleep( labs( steps / 300.0 * 1000000L ), SET );
-	stop_on_user_request( );
+	fsc2_usleep( labs( steps / 300.0 * 1000000L ), UNSET );
 
 	/* To always reach the end point from the same side we go a bit further
 	   up when we come from below and then back down again (obviously, the

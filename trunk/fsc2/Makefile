@@ -608,6 +608,7 @@ install:
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/hp8647a.table $(libdir)
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/hp8648b.table $(libdir)
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/hjs_attenuator.calib $(libdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/hjs_sfc.calib $(libdir)
 ifdef WITH_SPEC10
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/spectrapro_300i.calib $(libdir)
 endif

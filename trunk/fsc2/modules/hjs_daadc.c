@@ -73,7 +73,6 @@ struct HJS_DAADC {
 	double volts_out;
 	bool is_volts_out;
 	int out_val;
-	bool has_dac_been_set;
 
 	char *dac_reserved_by;
 	char *adc_reserved_by;
@@ -81,6 +80,12 @@ struct HJS_DAADC {
 
 struct HJS_DAADC hjs_daadc, hjs_daadc_stored;
 
+
+/*-------------------------------------------*/
+/*                                           */
+/*            Hook functions                 */
+/*                                           */
+/*-------------------------------------------*/
 
 /*------------------------------------------------------*/
 /* Function called when the module has just been loaded */
@@ -94,7 +99,6 @@ int hjs_daadc_init_hook( void )
 	hjs_daadc.out_val   = DEF_OUT_VAL;
 	hjs_daadc.max_volts = MAX_OUT_VOLTS;
 	hjs_daadc.volts_out = MAX_OUT_VOLTS * DEF_OUT_VAL / 4095.0;
-	hjs_daadc.has_dac_been_set = UNSET;
 
 	hjs_daadc.dac_reserved_by = NULL;
 	hjs_daadc.adc_reserved_by = NULL;
@@ -151,6 +155,8 @@ int hjs_daadc_exp_hook( void )
 
 	if ( ! ( hjs_daadc.is_open = hjs_daadc_serial_init( ) ) )
 		hjs_daadc_comm_failure( );
+
+	hjs_daadc_out( DEF_OUT_VAL );
 	
 	return 1;
 }
@@ -193,6 +199,12 @@ void hjs_daadc_exit_hook( void )
 		T_free( hjs_daadc_stored.adc_reserved_by );
 }
 
+
+/*-------------------------------------------*/
+/*                                           */
+/*             EDL functions                 */
+/*                                           */
+/*-------------------------------------------*/
 
 /*----------------------------------------------------------------*/
 /* Function returns a string variable with the name of the device */
@@ -444,16 +456,7 @@ Var *daq_set_voltage( Var *v )
 	   (if it's possible) */
 
 	if ( v == NULL )
-	{
-		if ( ! hjs_daadc.has_dac_been_set )
-		{
-			print( FATAL, "DAC hasn't been set before, can't determine the "
-				   "current output voltage.\n" );
-			THROW( EXCEPTION );
-		}
-
 		return vars_push( FLOAT_VAR, hjs_daadc.volts_out );
-	}
 
 	/* Get the new output voltage */
 
@@ -505,7 +508,6 @@ Var *daq_set_voltage( Var *v )
 		hjs_daadc_out( hjs_daadc_da_volts_to_val( volts ) );
 
 	hjs_daadc.volts_out = volts;
-	hjs_daadc.has_dac_been_set = SET;
 
 	return vars_push( FLOAT_VAR, hjs_daadc.volts_out );
 }
@@ -560,10 +562,6 @@ Var *daq_get_voltage( Var *v )
 	   setting the DAC to a default output voltage and we better tell
 	   the user about it */
 
-	if ( ! hjs_daadc.has_dac_been_set )
-		print( SEVERE, "AD conversion requires DA conversion, setting "
-			   "DAC output voltage to %.2lf V.\n", hjs_daadc.volts_out );
-
 	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( FLOAT_VAR, HJS_DAADC_ADC_TEST_VOLTAGE );
 
@@ -571,6 +569,12 @@ Var *daq_get_voltage( Var *v )
 					  hjs_daadc_val_to_ad_volts( hjs_daadc_in( ) ) );
 }
 
+
+/*-------------------------------------------*/
+/*                                           */
+/*           Low level functions             */
+/*                                           */
+/*-------------------------------------------*/
 
 /*-----------------------------------------------*/
 /* Conversion of a voltage to a DAC output value */

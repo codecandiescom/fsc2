@@ -65,6 +65,7 @@ int hjs_attenuator_test_hook( void );
 int hjs_attenuator_exp_hook( void );
 int hjs_attenuator_end_of_exp_hook( void );
 void hjs_attenuator_exit_hook( void );
+void hjs_attenuator_child_exit_hook( void );
 
 
 Var *mw_attenuator_name( Var *v );

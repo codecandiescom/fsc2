@@ -329,7 +329,7 @@ static void resolve_hook_functions( Device *dev )
 	if ( dlerror( ) == NULL )
 		dev->driver.is_end_of_exp_hook = SET;
 
-	/* Finally check if there's also an exit hook function */
+	/* Get the exit hook function if available */
 
 	strcpy( app, "_exit_hook" );
 	dlerror( );
@@ -338,9 +338,18 @@ static void resolve_hook_functions( Device *dev )
 	if ( dlerror( ) == NULL )
 		dev->driver.is_exit_hook = SET;
 
-	T_free( hook_func_name );
-
 	Internals.exit_hooks_are_run = UNSET;
+
+	/* Finally check if there's also an exit hook function for the child */
+
+	strcpy( app, "_child_exit_hook" );
+	dlerror( );
+	dev->driver.child_exit_hook =
+			( void ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
+	if ( dlerror( ) == NULL )
+		dev->driver.is_child_exit_hook = SET;
+
+	T_free( hook_func_name );
 }
 
 
@@ -759,6 +768,63 @@ void run_exit_hooks( void )
 	/* Set global variable to show that exit hooks already have been run */
 
 	Internals.exit_hooks_are_run = SET;
+}
+
+
+/*---------------------------------------------------*/
+/* Function runs the child exit hooks in all modules */
+/*---------------------------------------------------*/
+
+void run_child_exit_hooks( void )
+{
+	Device *cd;
+
+
+	CLOBBER_PROTECT( cd );
+
+	if ( EDL.Device_List == NULL )
+		return;
+
+	/* Run all hook functions starting with the last device and ending with
+	   the very first one in the list. Also make sure that all child exit
+	   hooks are run even if some of them fail with an exception. */
+
+	for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
+		/* empty */ ;
+
+	Internals.in_hook = SET;
+
+	for ( ; cd != NULL; cd = cd->prev )
+	{
+		fsc2_assert( EDL.Call_Stack == NULL );
+
+		if ( cd->generic_type != NULL &&
+			 ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+			Cur_Pulser = EDL.Num_Pulsers - 1;
+
+		if ( ! cd->is_loaded || ! cd->driver.is_child_exit_hook )
+			continue;
+
+		TRY
+		{
+			call_push( NULL, cd, cd->device_name, cd->count );
+			cd->driver.child_exit_hook( );
+			call_pop( );
+			vars_del_stack( );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			call_pop( );
+			vars_del_stack( );
+		}
+
+		if ( cd->generic_type != NULL &&
+			 ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+			EDL.Num_Pulsers--;
+	}
+
+	Internals.in_hook = UNSET;
 }
 
 

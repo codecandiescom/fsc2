@@ -1900,8 +1900,7 @@ bool exp_xable( char *buffer, ptrdiff_t len )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-
-double *exp_getpos( char *buffer, ptrdiff_t len  )
+double *exp_getpos( char *buffer, ptrdiff_t len )
 {
 	if ( Internals.I_am == CHILD )
 	{
@@ -1970,7 +1969,7 @@ double *exp_getpos( char *buffer, ptrdiff_t len  )
 		if ( keys & Mod5Mask )
 			result[ 2 * MAX_CURVES + 1 ] += 128;
 
-		writer( C_GETPOS, sizeof result, result );
+		writer( C_GETPOS_REPLY, sizeof result, result );
 
 		EDL.Fname = old_Fname;
 		EDL.Lc = old_Lc;

@@ -162,7 +162,7 @@ input:   /* empty */
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
 	                                 Func_is_set = UNSET;
-		                             THROW ( SYNTAX_ERROR_EXCEPTION ); };
+		                             THROW ( SYNTAX_ERROR_EXCEPTION ); }
        | input ';'                 { Channel_Type = PULSER_CHANNEL_NO_TYPE;
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
