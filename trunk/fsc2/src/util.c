@@ -4,16 +4,6 @@
 
 #include "fsc2.h"
 
-/* This seems to be needed for older Linux versions, i.e. 2.0.36 */
-
-#if ! defined SHM_STAT
-#define SHM_STAT 13
-#endif
-
-#if ! defined SHM_INFO
-#define SHM_INFO 14
-#endif
-
 
 /*-------------------------------------*/
 /* Function returns a copy of a string */
@@ -375,14 +365,26 @@ bool fsc2_locking( void )
 /*------------------------------------------------------------------------*/
 /* If fsc2 crashes while running an experiment shared memory segments may */
 /* remain undeleted. To get rid of them we now check all shared segments  */
-/* if they belong to the user `fsc2' and start with the magic 'fsc2'. If  */
-/* they do they are obviously debris from a crash and have to be deleted  */
+/* for the ones that belong to the user `fsc2' and start with the magic   */
+/* 'fsc2'. They are obviously debris from a crash and have to be deleted  */
 /* to avoid using up all segments after some time. Since the segments     */
 /* belong to the user `fsc2' this routine must be run with the effective  */
 /* ID of fsc2.                                                            */
 /* This routine is more or less a copy of the code from the ipcs utility, */
-/* hopefully it will continue to work with newer versions of Linux...     */
+/* hopefully it will continue to work with newer versions of Linux (it    */
+/* works with 2.0 and 2.2 kernels)                                        */
 /*------------------------------------------------------------------------*/
+
+/* These defines seem to be needed for older Linux versions, i.e. 2.0.36 */
+
+#if ( ! defined ( SHM_STAT ) )
+#define SHM_STAT 13
+#endif
+
+#if ( ! defined ( SHM_INFO ) )
+#define SHM_INFO 14
+#endif
+
 
 void delete_stale_shms( void )
 {
