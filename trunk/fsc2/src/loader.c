@@ -14,6 +14,10 @@ extern Func *Fncts;         /* structure for list of functions */
 extern Func Def_Fncts[ ];   /* structures for list of built-in functions */
 
 
+
+static void resolve_hook_functions( Device *dev, char *dev_name );
+static void load_functions( Device *dev );
+static void resolve_functions( Device *dev );
 static void add_function( int index, void *new_func, Device *new_dev );
 static int func_cmp( const void *a, const void *b );
 
@@ -77,6 +81,15 @@ void load_all_drivers( void )
 }
 
 
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+static int func_cmp( const void *a, const void *b )
+{
+	return strcmp( ( ( Func * ) a )->name, ( ( Func * ) b )->name );
+}
+
+
 /*--------------------------------------------*/
 /* Function tests if the device driver passed */
 /* to the function by name is loaded.         */
@@ -115,23 +128,16 @@ bool exists_function( const char *name )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function links a library file with the name passed to it (after       */
-/* adding the extension `.so') and then tries to find still unresolved   */
-/* references to functions listed in the function data base `Functions'. */
-/*-----------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Function links a library file with the name passed to it (after   */
+/* adding the extension `.so') and then tries to find all references */
+/* to functions listed in the function data base `Functions'.        */
+/*-------------------------------------------------------------------*/
 
-void load_functions( Device *dev )
+static void load_functions( Device *dev )
 {
-	int num;
 	char *lib_name;
-	char *hook_func_name;
 	char *dev_name;
-	void *cur;
-	char *new_func_name;
-	char buf[ 100 ];
-	char *temp;
-	long len;
 
 
 	/* Assemble name of library to be loaded - this will also work for cases
@@ -173,9 +179,6 @@ void load_functions( Device *dev )
 	T_free( lib_name );
 
 	dev->is_loaded = SET;
-	dev->driver.is_init_hook = dev->driver.is_test_hook =
-		dev->driver.is_end_of_test_hook = dev->driver.is_exp_hook =
-		dev->driver.is_end_of_exp_hook = dev->driver.is_exit_hook = UNSET;
 
 	/* The device name used as prefix in the hook functions may not contain
 	   a path */
@@ -184,6 +187,29 @@ void load_functions( Device *dev )
 		dev_name = strrchr( dev->name, '/' ) + 1;
 	else
 		dev_name = dev->name;
+
+	/* Now that we know that the module exists and can be used try to resolve
+	   all functions we may need */
+
+	resolve_hook_functions( dev, dev_name );
+	resolve_functions( dev );
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+static void resolve_hook_functions( Device *dev, char *dev_name )
+{
+	char *hook_func_name;
+
+
+	dev->driver.is_init_hook =
+		dev->driver.is_test_hook =
+			dev->driver.is_end_of_test_hook =
+				dev->driver.is_exp_hook =
+					dev->driver.is_end_of_exp_hook =
+						dev->driver.is_exit_hook = UNSET;
 
 	/* If there is function with the name of the library file and the
 	   appended string "_init_hook" store it and set corresponding flag
@@ -248,12 +274,27 @@ void load_functions( Device *dev )
 	dev->driver.exit_hook = dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_exit_hook = SET;
+
 	T_free( hook_func_name );
 
 	exit_hooks_are_run = UNSET;
+}
 
-	/* Run through all the functions in the function list and if they need
-	   to be resolved try to find them in the device driver functions */
+
+/*----------------------------------------------------------------------*/
+/* Runs through all the functions in the function list and if they need */
+/* to be resolved it tries to find them in the device driver functions. */
+/*----------------------------------------------------------------------*/
+
+static void resolve_functions( Device *dev )
+{
+	int num;
+	void *cur;
+	char *new_func_name;
+	char buf[ 100 ];
+	char *temp;
+	long len;
+
 
 	for ( num = 0; num < Num_Func; num++ )
 	{
@@ -311,15 +352,6 @@ void load_functions( Device *dev )
 }
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
-
-static int func_cmp( const void *a, const void *b )
-{
-	return strcmp( ( ( Func * ) a )->name, ( ( Func * ) b )->name );
-}
-
-
 /*----------------------------------------------------------------------*/
 /* This function is called when a function found in a device driver has */
 /* already been defined by a different device driver. In this case we   */
@@ -340,7 +372,7 @@ static void add_function( int index, void *new_func, Device *new_dev )
 
 	/* Because, when adding a multiple defined function, it is appended to
 	   the function list, the function just added will be found when running
-	   through the list in load_functions(). This can be easily recognized
+	   through the list in resolve_functions(). This can be easily recognized
 	   because the 'new' function is from the current library, which can
 	   never happen (or the linker would complain about multiple defined
 	   functions). So, if the function has already been defined in the
@@ -349,15 +381,15 @@ static void add_function( int index, void *new_func, Device *new_dev )
 	if ( Fncts[ index ].device == new_dev )
 		return;
 
-	/* Find out the correct device number - this is the next integer after
-	   the highrest device number of all devices that had twins in the current
+	/* Find out the correct device number - this is the next number after
+	   the highest device number of all devices that had twins in the current
 	   library. I.e., if module A exported th functions a1() and a2() and
 	   module B exported b1() and b2() then the functions in module C,
 	   also exporting a1() and b1() can be accessed as a1#2() and a2#2().
 	   This device number is, following a '#', appended to the function name
-	   (and the names of all functions from the currnt module).
+	   (and the names of all functions from the current module).
 	   While not being bulletproof this method hopefully will work correctly
-	   with all modules writen in a reasonable way... */
+	   with all modules written in a reasonable way... */
 
 	if ( new_dev->count == 1 )
 	{

@@ -37,6 +37,4 @@ void delete_device_name_list( void );
 bool device_list_parse( void );
 
 
-void load_functions( Device *dev );
-
 #endif  /* ! DEVICE_HEADER */
