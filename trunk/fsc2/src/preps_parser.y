@@ -41,7 +41,6 @@ extern char *prepstext;
 static void prepserror( const char *s );
 
 static int dont_exec = 0;
-static char *f_error = NULL;
 
 %}
 
@@ -102,13 +101,6 @@ input:   /* empty */
 	                                  fsc2_assert( EDL.Var_Stack == NULL );
 									  fsc2_assert( dont_exec == 0 );
 	                                  YYACCEPT; }
-       | input error ';'            { if ( f_error != NULL )
-	                                  {
-										  print( FATAL, "'%s' is a predefined "
-												 "function.\n", f_error );
-										  THROW( EXCEPTION );
-									  }
-		   							  THROW( SYNTAX_ERROR_EXCEPTION ); }
 ;
 
 line:    P_TOK prop
@@ -163,9 +155,7 @@ expr:    INT_TOKEN                { if ( ! dont_exec )
 		                                vars_arr_start( $1 ); }
          list1 ']'                { if ( ! dont_exec )
 		                                $$ = vars_arr_rhs( $4 ); }
-       | FUNC_TOKEN               { f_error = $1->name; }
-	     '('                      { f_error = NULL; }
-	     list2 ')'                { if ( ! dont_exec )
+       | FUNC_TOKEN '(' list2 ')' { if ( ! dont_exec )
 		                                $$ = func_call( $1 ); }
        | FUNC_TOKEN               { print( FATAL, "'%s' is a predefined "
 										   "function.\n", $1->name );
@@ -342,7 +332,6 @@ static void prepserror ( const char *s )
 void prepsparser_init( void )
 {
 	dont_exec = 0;
-	f_error = NULL;
 }
 
 

@@ -215,10 +215,10 @@ bool scan_main( const char *name, FILE *fp )
 /* from splitlex(), which just finds the very first section label and */
 /* passes it to this routine. Here the appropriate lexers are called, */
 /* which return the next label if they finish successfully. This new  */
-/* label is used to call the next lexer. On failure several common    */
-/* errors are caught (if the lexer didn't do it by itself) and the    */
-/* failure is signaled back to splitlex(). On success we only return  */
-/* to splitlex() on end of the input file(s).                         */
+/* label is used to call the next lexer. On failure errors are caught */
+/* (if the lexer didn't do it by itself) and the failure is signaled  */
+/* back to splitlex(). On success we only return to splitlex() on end */
+/* of the input file(s).                                              */
 /* ->                                                                 */
 /*    * number (label) of first section found by splitlex()           */
 /* <-                                                                 */
@@ -270,16 +270,8 @@ bool section_parser( int section )
 			}
 		} while ( s != NO_SECTION );
 
-		/* Finally, we have to do all the checks that only can be done
-		   after the EDL file has been completely parsed */
-
 		TRY_SUCCESS;
 		return OK;
-	}
-	CATCH( SYNTAX_ERROR_EXCEPTION )
-	{
-		print( FATAL, "Syntax error.\n" );
-		return FAIL;
 	}
 	CATCH( MISSING_SEMICOLON_EXCEPTION )
 	{
