@@ -246,7 +246,7 @@ Ticks dg2020_get_max_seq_len( void )
 			 f->self == PULSER_CHANNEL_PHASE_2 )
 			continue;
 
-		max = Ticks_max( max, f->max_seq_len );
+		max = Ticks_max( max, f->max_seq_len + f->delay );
 	}
 
 	return max + dg2020.grace_period;

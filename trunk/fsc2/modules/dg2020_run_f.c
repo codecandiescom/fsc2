@@ -249,7 +249,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 
 			if ( p->pos - f->delay < f->psd )
 			{
-				eprint( FATAL, "%s:%ld: DG2020: Pulse %ld nwo starts too "
+				eprint( FATAL, "%s:%ld: DG2020: Pulse %ld now starts too "
 						"early to allow setting of a phase pulse.\n",
 						Fname, Lc, p->num );
 				THROW( EXCEPTION );
@@ -285,7 +285,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 			   pulses associated with the previous pulse (if there are
 			   any). Again, there's the exception for the case that the pulse
 			   and its predecessor use the same phase sequence and thus both
-			   their phase pulses get merged into one pulse. */
+			   their phase pulses get merged into one pulse anyway. */
 
 			if ( p->pos - phase_p->pos < f->psd && p->pc != pp->pc )
 			{
@@ -295,6 +295,11 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 					for ( i = 0; i < ppp_num; i++ )
 						if ( pppl[ i ]->is_len )
 						{
+							if ( ! pppl[ i ]->is_old_len )
+							{
+								pppl[ i ]->old_len = pppl[ i ]->len;
+								pppl[ i ]->is_old_len = SET;
+							}
 							pppl[ i ]->len = phase_p->pos - pppl[ i ]->pos;
 							pppl[ i ]->needs_update = SET;
 						}
@@ -329,7 +334,10 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 			if ( flag )                // in test run
 				phase_p->len = -1;
 			else
-				phase_p->len = dg2020.max_seq_len - phase_p->pos;
+				/* Take care: the variable `dg2020.max_seq_len' already
+				   includes the delay for the function... */
+
+				phase_p->len = dg2020.max_seq_len - f->delay - phase_p->pos;
 		}
 		else
 		{
@@ -483,11 +491,17 @@ void dg2020_finalize_phase_pulses( int func )
 	if ( ! f->is_used )
 		return;
 
+	/* Find the last active pahse pulses and set their length to the maximum
+	   posible amount, i.e. to the maximum sequence length - take care,
+	   the variable `dg2020.max_seq_len' already includes the delay for
+	   the function... */
+
+
 	for ( i = 0; i < f->num_pulses; i++ )
 	{
 		p = f->pulses[ i ];
 		if ( p->is_active && p->is_pos && p->is_len && p->len < 0 )
-			p->len = dg2020.max_seq_len - p->pos;
+			p->len = dg2020.max_seq_len - f->delay - p->pos;
 	}
 }
 
