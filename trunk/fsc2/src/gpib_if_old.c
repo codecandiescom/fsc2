@@ -666,8 +666,7 @@ static void gpib_write_start( const char *dev_name, const char *buffer,
 
     if ( ll == LL_ALL )
     {
-        for ( i = 0; i < length; ++i )
-            fputc( ( int ) buffer[ i ], gpib_log );
+		fwrite( buffer, sizeof( char ), length, gpib_log );
         fputc( ( int) '\n', gpib_log );
     }
     fflush( gpib_log );
@@ -770,8 +769,7 @@ static void gpib_read_end( const char *dev_name, char *buffer, long received,
 
     if ( ll == LL_ALL )
     {
-        for ( i = 0; i < received; ++i )
-            fputc( ( int ) buffer[ i ], gpib_log );
+		fwrite( buffer, sizeof( char ), received, gpib_log );
         fputc( ( int ) '\n', gpib_log );
     }
 
