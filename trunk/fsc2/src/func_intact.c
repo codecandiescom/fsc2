@@ -288,6 +288,7 @@ Var *f_bcreate( Var *v )
 
 		new_ID = result[ 1 ];
 		T_free( result );           /* free result buffer */
+
 		return vars_push( INT_VAR, new_ID );
 	}
 
@@ -320,6 +321,7 @@ Var *f_bcreate( Var *v )
 	new_io->ID = ID;
 	new_io->type = ( int ) type;
 	new_io->state = 0;
+	new_io->self = NULL;
 	new_io->group = NULL;
 	new_io->label = label;
 	new_io->help_text = help_text;
@@ -340,6 +342,7 @@ Var *f_bcreate( Var *v )
 			fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
 						  FL_FULLBORDER, "fsc2: Tools" );
 		}
+
 		XFlush( fl_get_display( ) );
 	}
 
@@ -422,7 +425,7 @@ Var *f_bdelete( Var *v )
 
 		/* No tool box -> no buttons -> no buttons to delete... */
 
-		if ( Tool_Box == NULL )
+		if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 		{
 			eprint( FATAL, "%s:%ld: No buttons have been defined yet.\n",
 					Fname, Lc );
@@ -635,7 +638,7 @@ Var *f_bstate( Var *v )
 
 	/* No tool box -> no buttons -> no button state to set or get... */
 
-	if ( Tool_Box == NULL )
+	if ( Tool_Box == NULL || Tool_Box->objs == NULL)
 	{
 		eprint( FATAL, "%s:%ld: No buttons have been defined yet.\n",
 				Fname, Lc );
@@ -897,6 +900,10 @@ Var *f_screate( Var *v )
 		Tool_Box = T_malloc( sizeof( TOOL_BOX ) );
 		Tool_Box->layout = VERT;
 		Tool_Box->Tools = NULL;
+	}
+
+	if ( Tool_Box->objs == NULL )
+	{
 		new_io = Tool_Box->objs = T_malloc( sizeof( IOBJECT ) );
 		new_io->next = new_io->prev = NULL;
 	}
@@ -1001,7 +1008,7 @@ Var *f_sdelete( Var *v )
 			continue;
 		}
 
-		if ( Tool_Box == NULL )
+		if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 		{
 			eprint( FATAL, "%s:%ld: No sliders have been defined yet.\n",
 					Fname, Lc );
@@ -1179,7 +1186,7 @@ Var *f_svalue( Var *v )
 		return vars_push( FLOAT_VAR, val );
 	}
 
-	if ( Tool_Box == NULL )
+	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 	{
 		eprint( FATAL, "%s:%ld: No slider have been defined yet.\n",
 				Fname, Lc );
@@ -1277,7 +1284,7 @@ void tools_clear( void )
 	{
 		next = io->next;
 
-		if ( Tool_Box->Tools )
+		if ( Tool_Box->Tools && io->self )
 		{
 			fl_delete_object( io->self );
 			fl_free_object( io->self );
@@ -1330,8 +1337,12 @@ static void recreate_Tool_Box( void )
 
 		for ( io = Tool_Box->objs; io != NULL; io = io->next )
 		{
-			fl_delete_object( io->self );
-			fl_free_object( io->self );
+			if ( io->self )
+			{
+				fl_delete_object( io->self );
+				fl_free_object( io->self );
+				io->self = NULL;
+			}
 			io->group = NULL;
 		}
 		
@@ -1350,7 +1361,7 @@ static void recreate_Tool_Box( void )
 		if ( Tool_Box->layout == VERT )
 			Tool_Box->h += OBJ_HEIGHT + VERT_OFFSET;
 		else
-			Tool_Box->w += OBJ_WIDTH * HORI_OFFSET
+			Tool_Box->w += OBJ_WIDTH + HORI_OFFSET
 				           - ( io->type == NORMAL_BUTTON ?
 							   2 * NORMAL_BUTTON_DELTA : 0 );
 
