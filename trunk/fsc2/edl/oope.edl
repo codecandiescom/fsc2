@@ -1,3 +1,9 @@
+/*
+  $Id$
+
+  Simple program for out-of-phase-echo experiments with quadrature detection
+*/
+
 DEVICES:
 
 dg2020_b;
@@ -6,45 +12,53 @@ tds520a;
 
 VARIABLES:
 
-timebase  =   5 ns;
-delta_t   =  10 ns;
-dead_time = 600 ns;
-t0        = 250 ns;
-pi_len    =  30 ns;
-Num_avg   =  10;
+pi_len     =  30 ns;          // length of pi-pulse
+t0         = 250 ns;          // pulse separation at start of experiment
+	                          // (edge-to-edge separation)
 
-Repeats   = 128;
+delta_t    =  10 ns;          // increment of pulse separation
+dead_time  = 600 ns;          // separation between trigger and first pulse
+                              // (rather long because TWT gate must open
+	                          // quite a large time before the first pulse)
+Num_avg    =  10;             // number of averages
+
+Steps      = 128;             // number of data points
+
+win1_start = 300 ns;          // position of first integration window
+win2_start = 500 ns;          // position of second integration window
+win_width  = 100 ns;          // width of integration windows
+
+timebase   =   5 ns;          // timebase of the pulser
 
 I;
 W1, W2;
-x_data[ 2 ], y_data[ 2 ];
+data[ 4 ];
 
 
 ASSIGNMENTS:
 
 TIME_BASE:      timebase;
-TRIGGER_MODE:   INTERNAL, REP_FREQ = 200 Hz;
+TRIGGER_MODE:   EXTERNAL;
 
-
-MICROWAVE:      POD =  1, 2, 3, 4, 5, CH = 1, 2, 3, 4, 5,
+MICROWAVE:      POD =  1, 2, 3, 4, 5,
                 V_HIGH = 5 V, V_LOW = 0 V,
                 INVERTED;
 
-PULSE_SHAPE:    POD = 6, CH = 6,
+PULSE_SHAPE:    POD = 6,
                 V_HIGH = 5 V, V_LOW = 0 V,
                 INVERTED;
 
-TWT_GATE:       POD = 11, CH = 11,
+TWT_GATE:       POD = 11,
                 V_HIGH = 5 V, V_LOW = 0 V;
 
-DEFENSE:        POD = 7, CH = 7
+DEFENSE:        POD = 7,
                 V_HIGH = 5 V, V_LOW = 0 V,
                 INVERTED;
 
-DETECTION:      POD = 0, CH = 0,
+DETECTION:      POD = 0,
                 V_HIGH = 5 V, V_LOW = 0 V;   
 
-PHASE_SETUP_1:  MW,
+PHASE_SETUP:    MW,
                  X: POD = 1,
                 +Y: POD = 2,
                 -X: POD = 3,
@@ -54,34 +68,46 @@ PHASE_SETUP_1:  MW,
 
 PREPARATIONS:
 
+// Please note: the 'real' pulses are created by the pulse shaper, the
+// microwave pulses should start shortly before the pulse shaper opens
+// and should be a bit longer.
 
 P30:  FUNCTION     = PULSE_SHAPE,
       START        = dead_time,
       LEN          = pi_len / 2;
 
 P31:  FUNCTION     = PULSE_SHAPE,
-      START        = P30.START + P30.LENGTH + t0,
-      DELTA_START  = delta_t,
-      LEN          = 2 * P30.LENGTH ;
+      START        = t0 + P30.START + P30.LENGTH,
+      LEN          = 2 * P30.LENGTH,
+      DELTA_START  = delta_t;
 
 P0:   FUNCTION     = MICROWAVE,
       START        = P30.START - 10 ns,
       LENGTH       = P30.LENGTH + 30 ns;
 
-P1:   FUNCTION     = P0.FUNC,
+P1:   FUNCTION     = MICROWAVE,
       START        = P31.START - 10 ns,
-      DELTA_START  = P31.DELTA_START,
-      LENGTH       = P31.LENGTH + 30 ns ns;
+      LENGTH       = P31.LENGTH + 30 ns,
+      DELTA_START  = P31.DELTA_START;
+
+// The TWT gate pulse can end already 290 ns before the end of the
+// second microwave pulses.
 
 P4:   FUNCTION     = TWT_GATE,
       START        = 0 ns,
-      LENGTH       = P31.START + P31.LENGTH - 290 ns,
+      LENGTH       = P1.START + P1.LENGTH - 290 ns,
       DELTA_LENGTH = delta_t;
 
+// The defense pulse should only start 430 ns after the end of the
+// TWT gate pulse.
+
 P10:  FUNCTION     = DEFENSE,
-      START        = P31.START + P31.LENGTH + 140 ns,
+      START        = P4.START + P4.LENGTH + 430 ns,
       DELTA_START  = 2 * delta_t,
       LENGTH       = 1 us;
+
+// The detection (that triggers the digitizer) starts about 200 ns before
+// the expected position of the echo
 
 P20:  FUNCTION     = DETECTION,
       START        = P31.START + P31.LENGTH + t0 - 200 ns,
@@ -89,14 +115,14 @@ P20:  FUNCTION     = DETECTION,
       LENGTH       = 10 ns;
 
 
-init_1d( 2, Repeats, ( P31.START - ( P30.START + P30.LEN ) ) * 10^6,
-	     delta_t * 10^6, "Pulse separation [ us ]", "Signal [ pVs ]" );
+init_1d( 2, Steps, t0* 10^6, delta_t * 10^6,
+	     "Pulse separation [ us ]", "Signal [ pVs ]" );
 
 digitizer_num_averages( Num_avg );
 digitizer_trigger_channel( AUX2 );
 
-W1 = digitizer_define_window( 300ns, 10ns );
-W2 = digitizer_define_window( 500ns, 10ns );
+W1 = digitizer_define_window( win1_start, win_width );
+W2 = digitizer_define_window( win2_start );
 
 
 EXPERIMENT:
@@ -104,20 +130,20 @@ EXPERIMENT:
 digitizer_lock_keyboard( 0 );
 pulser_lock_keyboard( 0 );
 
-FOR I = 1 : Repeats {
+FOR I = 1 : Steps {
 
     pulser_update( );
 
     digitizer_start_acquisition( );
-    x_data[ 1 ] = digitizer_get_area_fast( CH1, W1 );
-    x_data[ 2 ] = digitizer_get_area_fast( CH1, W2 );
-    y_data[ 1 ] = digitizer_get_area_fast( CH2, W1 );
-    y_data[ 2 ] = digitizer_get_area_fast( CH2, W2 );
+    data[ 1 ] = digitizer_get_area_fast( CH1, W1 );        // x-channel
+    data[ 2 ] = digitizer_get_area_fast( CH1, W2 );
+    data[ 3 ] = digitizer_get_area_fast( CH2, W1 );        // y-channel
+    data[ 4 ] = digitizer_get_area_fast( CH2, W2 );
 
-    display( I, 10^12 * ( x_data[ 1 ] - x_data[ 2 ] ), 1,
-	         I, 10^12 * ( y_data[ 1 ] - y_data[ 2 ] ), 2 );
+    display( I, 10^12 * ( data[ 1 ] - data[ 2 ] ), 1,      // x-channel
+	         I, 10^12 * ( data[ 3 ] - data[ 4 ] ), 2 );    // y-channel
 
-    fsave( "# # # #\n", x_data[ 1 ], x_data[ 2 ], y_data[ 1 ], y_data[ 2 ] );
+    fsave( "# # # #\n", data[ 1 ], data[ 2 ], data[ 3 ], data[ 4 ] );
 
     pulser_shift( );
     pulser_increment( );
