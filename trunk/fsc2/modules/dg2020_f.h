@@ -358,18 +358,9 @@ void dg2020_set( bool *arena, Ticks start, Ticks len, Ticks offset );
 int dg2020_diff( bool *old, bool *new, Ticks *start, Ticks *length );
 
 
-/* The functions from dg2020_init.c */
+/* Functions from dg2020_init.c */
 
 void dg2020_init_setup( void );
-void dg2020_basic_pulse_check( void );
-void dg2020_basic_functions_check( void );
-void dg2020_distribute_channels( void );
-void dg2020_pulse_start_setup( void );
-void dg2020_create_phase_pulses( FUNCTION *f );
-PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth,
-							   int pos, int pod );
-void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
-										 PULSE *p, int nth );
 
 
 /* Functions from dg2020_run.c */

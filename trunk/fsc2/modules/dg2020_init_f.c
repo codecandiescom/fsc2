@@ -3,8 +3,18 @@
 */
 
 
-
 #include "dg2020_f.h"
+
+
+static void dg2020_basic_pulse_check( void );
+static void dg2020_basic_functions_check( void );
+static void dg2020_distribute_channels( void );
+static void dg2020_pulse_start_setup( void );
+static void dg2020_create_phase_pulses( FUNCTION *f );
+static PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth,
+									  int pos, int pod );
+static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
+												PULSE *p, int nth );
 
 
 /*---------------------------------------------------------------------------
@@ -32,7 +42,7 @@ void dg2020_init_setup( void )
      exceed the pulsers memory
 --------------------------------------------------------------------------*/
 
-void dg2020_basic_pulse_check( void )
+static void dg2020_basic_pulse_check( void )
 {
 	PULSE *p;
 
@@ -138,7 +148,7 @@ void dg2020_basic_pulse_check( void )
   back into the free pool.
 -----------------------------------------------------------------------------*/
 
-void dg2020_basic_functions_check( void )
+static void dg2020_basic_functions_check( void )
 {
 	int i, j;
 	FUNCTION *f;
@@ -371,7 +381,7 @@ void dg2020_basic_functions_check( void )
   channels to funcions that haven't been assigned as many as needed
 ----------------------------------------------------------------------------*/
 
-void dg2020_distribute_channels( void )
+static void dg2020_distribute_channels( void )
 {
 	int i;
 	FUNCTION *f;
@@ -426,7 +436,7 @@ void dg2020_distribute_channels( void )
   consistency checks are done.
 -----------------------------------------------------------------------------*/
 
-void dg2020_pulse_start_setup( void )
+static void dg2020_pulse_start_setup( void )
 {
 	FUNCTION *f;
 	int i, j;
@@ -465,8 +475,7 @@ void dg2020_pulse_start_setup( void )
   functions are allowed.
 -----------------------------------------------------------------------------*/
 
-
-void dg2020_create_phase_pulses( FUNCTION *f )
+static void dg2020_create_phase_pulses( FUNCTION *f )
 {
 	int i, j, l;
 	PULSE *p;
@@ -505,8 +514,8 @@ void dg2020_create_phase_pulses( FUNCTION *f )
   pod = 0 / 1: the pod for the new phase pulse
 ---------------------------------------------------------------------------*/
 
-PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth, int pos,
-							   int pod )
+static PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth,
+									  int pos, int pod )
 {
 	PULSE *np, *cp;
 	int type;
@@ -578,8 +587,8 @@ PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth, int pos,
 /*---------------------------------------------------------------------------
 ---------------------------------------------------------------------------*/
 
-void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
-										 PULSE *p, int nth )
+static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
+												PULSE *p, int nth )
 {
 	PULSE **pppl;                 // list of phase pulses for previous pulse
 	int ppp_num;                  // and the length of this list
