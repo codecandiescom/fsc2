@@ -724,6 +724,7 @@ bool sr530_init( const char *name )
 {
 	char buffer[ 20 ];
 	long length = 20;
+	int i;
 
 
 	assert( sr530.device < 0 );
@@ -744,7 +745,8 @@ bool sr530_init( const char *name )
 
 	/* If sensitivity, time constant or phase were set in one of the
 	   preparation sections only the value was stored and we have to do the
-	   actual setting now because the lock-in could not be accessed before */
+	   actual setting now because the lock-in could not be accessed before
+	   Finally set the DAC output voltages to a defined value (default 0 V).*/
 
 	if ( sr530.Sens != -1 )
 		sr530_set_sens( sr530.Sens );
@@ -752,6 +754,8 @@ bool sr530_init( const char *name )
 		sr530_set_phase( sr530.phase );
 	if ( sr530.TC != -1 )
 		sr530_set_tc( sr530.TC );
+	for ( i = 0; i < 2; i++ )
+		sr530_set_dac_voltage( i + first_DAC_port, sr530.dac_voltage[ i ] );
 
 	return OK;
 }

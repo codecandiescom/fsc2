@@ -581,17 +581,19 @@ Var *lockin_dac_voltage( Var *v )
 	channel = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
 	v = vars_pop( v );
 
-	if ( channel != 5 && channel != 6 )
+	if ( channel < first_DAC_port || channel > last_DAC_port )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid lock-in DAC channel number %ld, "
-				"valid are 5 or 6.\n", Fname, Lc, DEVICE_NAME, channel );
+				"valid channels are in the range from %d to %d.\n", Fname, Lc,
+				DEVICE_NAME, channel, first_DAC_port, last_DAC_port );
 		THROW( EXCEPTION );
 	}
 
 	/* If no second argument is specified return the current DAC setting */
 
 	if ( v == NULL )
-		return vars_push( FLOAT_VAR, sr510.dac_voltage[ channel - 5 ] );
+		return vars_push( FLOAT_VAR,
+						  sr510.dac_voltage[ channel - first_DAC_port ] );
 
 	/* Second argument must be a voltage between -10.24 V and +10.24 V */
 
@@ -617,7 +619,7 @@ Var *lockin_dac_voltage( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	sr510.dac_voltage[ channel - 5 ] = voltage;
+	sr510.dac_voltage[ channel - first_DAC_port ] = voltage;
 
 	if ( TEST_RUN || I_am == PARENT)
 		return vars_push( FLOAT_VAR, voltage );
@@ -699,7 +701,7 @@ bool sr510_init( const char *name )
 	if ( sr510.TC != -1 )
 		sr510_set_tc( sr510.TC );
 	for ( i = 0; i < 2; i++ )
-		sr510_set_dac_voltage( i + 5, sr510.dac_voltage[ i ] );
+		sr510_set_dac_voltage( i + first_DAC_port, sr510.dac_voltage[ i ] );
 		
 
 	return OK;
@@ -1015,7 +1017,7 @@ static double sr510_set_dac_voltage( long channel, double voltage )
 	/* Just some more sanity checks, should already been done by calling
        function... */
 
-	assert( channel == 5 || channel == 6 );
+	assert( channel >= first_DAC_port || channel <= last_DAC_port );
 	if ( fabs( voltage ) >= 10.24 )
 	{
 		if ( voltage > 0.0 )
