@@ -205,7 +205,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 		/* Assemble the command for sending the mail */
 
 		cmd = get_string( strlen( "mail -s \"fsc2 bug report\" -c    < " ) +
-						  + strlen( jens ) + strlen( filename ) +
+						  + strlen( MAIL_ADDRESS ) + strlen( filename ) +
 						  ( cc ? strlen( user ) : 0 ) );
 		strcpy( cmd, "mail -s \"fsc2 bug report\" " );
 
@@ -216,7 +216,6 @@ void bug_report_callback( FL_OBJECT *a, long b )
 			strcat( cmd, " " );
 		}
 		strcat( cmd, MAIL_ADDRESS );
-		T_free( jens );
 
 		strcat( cmd, " < " );          /* append the file name to be mailed */
 		strcat( cmd, filename );
