@@ -130,7 +130,7 @@ pulser_dump_pulses, 0, PREP;
 pulser_automatic_shape_pulses, -1, PREP;
 pulser_automatic_twt_pulses, -1, PREP;
 pulser_command, 1, EXP;
-pulser_pulse_minimum_specs, 1, ALL;        // rb_pulser only!
+pulser_pulse_minimum_specs, 1, EXP;        // rb_pulser only!
 
 /* Functions exported by DG2020 and HFS9000 only */
 
