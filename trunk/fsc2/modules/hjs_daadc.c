@@ -328,7 +328,7 @@ static bool hjs_daadc_serial_init( void )
 		return FAIL;
 
 	/* The device uses 8 bit transfers, no parity and one stop bit (8N1),
-	   a baud rate of 9600 and had no control lines (only RTX, DTX and
+	   a baud rate of 9600 and has no control lines (only RTX, DTX and
 	   ground are connected internally). Of course, canonical mode can't
 	   be used here.*/
 
@@ -372,6 +372,7 @@ static int hjs_daadc_in_out( int out )
 {
 	unsigned char out_bytes[ 4 ] = { 0x00, 0x60, 0xd0, 0x70 };
 	unsigned char in_bytes[ 4 ];
+	unsigned int in_val;
 
 
 	/* Split up the 12 bit input data into 4-bit chunks and store them in
@@ -399,7 +400,15 @@ static int hjs_daadc_in_out( int out )
 	   subtract 2048 because a value of 0 corresponds to an input voltage
 	   of -10 V and a value of 4095 to a voltage of +10 V. */
 
-	return ( in_bytes[ 1 ] << 4 ) + ( in_bytes[ 2 ] >> 4 ) - 2048;
+	in_val = ( in_bytes[ 1 ] << 4 ) + ( in_bytes[ 2 ] >> 4 );
+
+	if ( in_val & ~ 0xFFF )
+	{
+		print( FATAL, "ADC returned flawed data.\n" );
+		THROW( EXCEPTION );
+	}
+
+	return in_val - 2048;
 }
 
 
