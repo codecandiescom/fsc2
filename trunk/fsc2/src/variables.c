@@ -747,7 +747,7 @@ static void vars_do_init( Var *src, Var *dest )
 		case FLOAT_REF :
 			if ( dest->flags & IS_DYNAMIC )
 			{
-				dest->val.VPTR = VAR_PP T_malloc( src->len
+				dest->val.vptr = VAR_PP T_malloc( src->len
 												  * sizeof *dest->val.vptr );
 				for ( ; dest->len < src->len; dest->len++ )
 					dest->val.vptr[ dest->len ] = NULL;

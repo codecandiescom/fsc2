@@ -127,10 +127,12 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 	fprintf( tmp, "\"ulimit -a -S\" returns:\n\n" );
 	cmd = get_string( "ulimit -a -S >> %s", filename );
+	fflush( tmp );
 	system( cmd );
 	T_free( cmd );
 
 	cmd = get_string( "echo >> %s", filename );
+	fflush( tmp );
 	system( cmd );
 	T_free( cmd );
 
@@ -138,6 +140,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	   full disk */
 
 	cmd = get_string( "df >> %f", filename );
+	fflush( tmp );
 	system( cmd );
 	T_free( cmd );
 
@@ -146,13 +149,16 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 	cmd = get_string( "echo \"\nVersion (use uudecode file "
 					  "| gunzip -c to unpack):\n\" >> %s", filename );
+	fflush( tmp );
 	system( cmd );
 	T_free( cmd );
 
 	cmd = get_string( "cat %s%sversion.ugz >> %s", libdir, slash( libdir ),
 					  filename );
+	fflush( tmp );
 	system( cmd );
 	T_free( cmd );
+	fflush( tmp );
 
 	/* Assemble the command for invoking the editor */
 
