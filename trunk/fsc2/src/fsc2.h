@@ -119,7 +119,7 @@ FD_device *device_form;
 
 
 int I_am = PARENT;
-int pd[ 2 ];                    /* pipe descriptors */
+int pd[ 4 ];                    /* pipe descriptors */
 int child_pid = 0;              /* pid of child */
 volatile bool do_send = UNSET;  /* globals used with the signal handlers */
 volatile bool do_quit = UNSET;
