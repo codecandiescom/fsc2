@@ -9,7 +9,7 @@
 #libdir         = $(prefix)/lib/fsc2
 #auxdir         = $(libdir)/aux
 
-prefix         = .
+prefix         = $(shell pwd)
 bindir         = $(prefix)
 libdir         = $(prefix)
 auxdir         = $(libdir)/aux
@@ -198,17 +198,20 @@ tags:
 		  ${tds754a} tds754a.h ${tds520a} tds520a.h
 
 
-# make the html documentation
+# make all documentation
+
+all-docs:
+	$(MAKE) -C doc html ps
+
+# make just the html documentation
 
 html-docs:
-	cd doc; \
-	$(MAKE) html
+	$(MAKE) -C doc html
 
-# make the Postscript documentation
+# make just the Postscript documentation
 
 ps-docs:
-	cd doc; \
-	$(MAKE) ps
+	$(MAKE) -C doc ps
 
 
 # `clean' deletes just all the files remaining from the compilation while
@@ -221,11 +224,12 @@ clean:
 distclean:
 	$(MAKE) clean
 	$(RM) $(RMFLAGS) fsc2 fsc2_clean *.so TAGS *~
-	cd doc; $(MAKE) distclean
+	$(MAKE) -C doc distclean
 
 
 pack:
-	cd .; $(MAKE) distclean; cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
+	$(MAKE) distclean
+	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
 
 # don't automatically delete intermediate files created by bison and flex
 

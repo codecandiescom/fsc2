@@ -1,11 +1,14 @@
 # $Id$
 
 
-html: $(wildcard fsc2_*.texi)
+docs           = $(wildcard fsc2_*.texi)
+
+
+html: $(docs)
 	texi2html -split_node -menu -number -expandinfo -glossary -acc fsc2.texi
 
 
-ps: $(wildcard fsc2_*.texi)
+ps: $(docs)
 	texi2dvi -c fsc2.texi
 	dvips fsc2.dvi
 
