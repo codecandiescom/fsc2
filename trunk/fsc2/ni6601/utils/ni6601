@@ -72,7 +72,7 @@ case "$1" in
 		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
 		if [ $? != 0 ]; then
 			major=`grep ni6601 /proc/devices | awk '{print $1}'`
-			if [ $? != 0 ]; then
+			if [ -z $major ]; then
 				log_failure_msg "Can't determine major device number for NI6601 cards."
 				exit 1
 			fi
