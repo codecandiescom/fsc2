@@ -5,6 +5,8 @@
 #include "gpib.h"
 
 
+#define SHMMNI 128
+
 extern int prim_exp_runparse( void );     /* from prim_exp__run_parser.y */
 
 /* Routines of the main process exclusively used in this file */
@@ -12,8 +14,6 @@ extern int prim_exp_runparse( void );     /* from prim_exp__run_parser.y */
 static void new_data_handler( int sig_type, void *data );
 static void quitting_handler( int sig_type, void *data );
 static void run_sigchld_handler( int sig_type, void *data );
-static FILE *get_save_file( void );
-static void clear_up_after_measurement( void );
 static void set_buttons_for_run( int active );
 
 
@@ -27,9 +27,7 @@ static void do_measurement( void );
 
 /* Locally used global variables used in parent, child and signal handlers */
 
-static bool is_data_saved;
 static bool child_is_ready;
-static FILE *tf = NULL;
 static volatile int quitting;
 
 
@@ -46,8 +44,6 @@ static volatile int quitting;
 
 bool run( void )
 {
-	const char *line;
-	int i;
     char *gpib_log = ( char * ) GPIB_LOG_FILE;
 
 
@@ -93,10 +89,6 @@ bool run( void )
 		return FAIL;
 	}
 
-	/* Open window for displaying measured data and disable save button */
-
-	start_graphics( );
-
 	/* Open pipes for passing data between child and parent process - we need
 	 two pipes, one for the parent process to write to the child process and
 	 another one for the other way round.*/
@@ -107,29 +99,16 @@ bool run( void )
 		run_exit_hooks( );
 		if ( need_GPIB )
 			gpib_shutdown( );
-		is_data_saved = SET;
-		clear_up_after_measurement( );
 		return FAIL;
 	}
 
-	/* Save current content of the browser into temporary file 'tf' so that
-	   new files can be read in while an experiment is still running (adding
-	   "%%" to start of every line makes writing out MATHLAB compatible files
-	   easier later on) */
+	/* Open window for displaying measured data */
 
-	if ( tf != NULL )
-		fclose( tf );
-	if ( ( tf = tmpfile( ) ) != NULL )
-	{
-		i = 0;
-		while ( ( line = fl_get_browser_line( main_form->browser, ++i ) )
-			    != NULL )
-			fprintf( tf, "%% %s\n", line );
-	}
+	start_graphics( );
 
 	/* Here the experiment really starts - process for doing it is forked. */
 
-	is_data_saved = child_is_ready = quitting = UNSET;
+	child_is_ready = quitting = UNSET;
 
 	fl_add_signal_callback( NEW_DATA, new_data_handler, NULL );
 	fl_add_signal_callback( QUITTING, quitting_handler, NULL );
@@ -142,6 +121,7 @@ bool run( void )
 
 	if ( child_pid != -1 )                  /* return if fork() succeeded */
 	{
+		close_all_files( );
 		close( pd[ 0 ] );
 		close( pd[ 3 ] );
 		pd[ 0 ] = pd[ 2 ];
@@ -162,6 +142,9 @@ bool run( void )
 	}
 
 
+	child_pid = 0;
+
+	close_all_files( );
 	close( pd[ 0 ] );
 	close( pd[ 3 ] );
 	pd[ 0 ] = pd[ 2 ];
@@ -174,8 +157,6 @@ bool run( void )
 		gpib_shutdown( );
 	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 	stop_measurement( NULL, 1 );
-	is_data_saved = SET;
-	clear_up_after_measurement( );
 	return FAIL;
 }
 
@@ -247,6 +228,7 @@ void quitting_handler( int sig_type, void *data )
 void run_sigchld_handler( int sig_type, void *data )
 {
 	int return_status;
+	int no;
 
 
 	data = data;
@@ -254,9 +236,16 @@ void run_sigchld_handler( int sig_type, void *data )
 	if ( sig_type != SIGCHLD )
 		return;
 
-	if ( wait( &return_status ) != child_pid )
+	if ( ( no = wait( &return_status ) ) != child_pid )
 		return;                       /* if some other child process died... */
 
+#if defined ( DEBUG )
+	if ( WIFSIGNALED( return_status ) )
+		fprintf( stderr, "Child process died due to signal type %d\n",
+				 WTERMSIG( return_status ) );
+#endif
+
+	child_pid = 0;                    /* child is dead... */
 	fl_remove_signal_callback( SIGCHLD );
 	fl_add_signal_callback( SIGCHLD, sigchld_handler, NULL );
 
@@ -286,7 +275,6 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 		fl_show_alert( "FATAL Error", "Experiment had to be stopped.", "", 1 );
 
 	stop_measurement( NULL, 1 );
-	child_pid = 0;               /* experiment is completely finished */
 }
 
 
@@ -303,18 +291,14 @@ void stop_measurement( FL_OBJECT *a, long b )
 {
 	a = a;
 
-	if ( b == 0 )                      /* callback from stop button ? */
+	if ( b == 0 )                /* callback from stop button ? */
 	{
-		if ( child_pid != 0 )          /* is child still alive ? */
-		{
-			fl_set_cursor( FL_ObjWin( run_form->stop ), XC_watch );
+		if ( child_pid != 0 )            /* child is still kicking... */
 			kill( child_pid, DO_QUIT );
-		}
-		else
+		else                             /* child has already exited */
 		{
-			fl_activate_object( run_form->save );
-			fl_set_object_lcol( run_form->save, FL_BLACK );
-			clear_up_after_measurement( );
+			stop_graphics( );
+			set_buttons_for_run( 1 );
 		}
 
 		return;
@@ -330,158 +314,8 @@ void stop_measurement( FL_OBJECT *a, long b )
 	if ( need_GPIB )
 		gpib_shutdown( );
 
-	fl_activate_object( run_form->save );
-	fl_set_object_lcol( run_form->save, FL_BLACK );
-	fl_set_object_label( run_form->stop, "Quit" );
+	fl_set_object_label( run_form->stop, "Close" );
 	fl_set_cursor( FL_ObjWin( run_form->stop ), XC_left_ptr );
-}
-
-
-/*----------------------------------------------------------*/
-/* save_data() allowes to store the measured data after the */
-/* measurement is finished.                                 */
-/*----------------------------------------------------------*/
-
-void save_data( FL_OBJECT *a, long b )
-{
-/*	FILE *sf;
-	long i;
-	int key;
-*/
-
-	a = a;
-	b = b;
-
-	/* First, get a file name for saving the data */
-/*
-	if ( ( sf = get_save_file( ) ) == NULL )
-		return;
-*/
-	/* Write program describing the experiment to the file */
-/*
-	if ( tf != NULL )
-	{
-		rewind( tf );
-		while ( ( key = fgetc( tf ) ) != EOF )
-			fputc( key, sf );
-		fclose( tf );
-		fprintf( sf, "%%\n" );
-	}
-	else
-		fl_show_alert( "Warning", "Sorry, can't save program together",
-					   "with the experimental data.", 1 );
-*/
-	/* Now add factor used for scaling of the data... */
-/*
-	if ( dev_list.digitizer )
-		fprintf( sf, "%% SCALE FACTOR : %e Vs\n%%\n\n",
-				 1.0 / digitizer.scale_factor );
-	else
-		fprintf( sf, "%%\n\n" );
-*/
-	/* ...and follow with all data (this currently assumes that DataTye is
-	   simple long... !!!!!!) */
-/*
-	for ( i = 0; i < m.act_point; ++i )
-		fprintf( sf, "%ld\n", ( long ) *( m.data + i ) );
-
-	fclose( sf );
-*/
-	is_data_saved = SET;
-}
-
-
-/*------------------------------------------------------------------*/
-/* get_svae_file() returns a file pointer or NULL of an opened file */
-/* for saving the data. It asks the user for a file name, warns him */
-/* if the file already exists and opens the file.                   */
-/*------------------------------------------------------------------*/
-
-FILE *get_save_file( void )
-{
-	const char *save_file;
-	FILE *sf = NULL;
-	char *err_msg;
-	int result;
-
-
-	while ( sf == NULL )
-	{
-		save_file = fl_show_fselector( "Select file:", NULL, "*.*", NULL );
-			
-		/* No file was selected - ask if user changed her mind about saving
-		   the data */
-
-		if ( save_file == NULL )
-		{
-			if ( fl_show_question( "Save data ?", 1 ) == 0 )
-			{
-				is_data_saved = 1;
-				return NULL;
-			}
-			else
-				continue;
-		}
-
-		/* Test if file does already exists - if it does ask for confirmation
-		   that overwriting the file is really what the user wants to do */
-
-		if ( access( save_file, F_OK ) == 0 && errno != ENOENT )
-		{
-			if ( ( err_msg = ( char * ) malloc( ( strlen( save_file ) + 200 )
-											    * sizeof( char ) ) ) == NULL )
-			{
-				strcpy( err_msg, "File " );
-				strcat( err_msg, save_file );
-				strcat( err_msg, "\ndoes already exist.\n"
-					             "Really overwrite the file ?" );
-				result = fl_show_question( err_msg, 0 );
-				free( err_msg );
-				if ( ! result )
-					continue;
-			}
-			else
-			{
-				if ( ! fl_show_question( "File does already exist.\n"
-										 "Really overwrite the file ?", 0 ) )
-					continue;
-			}
-		}
-
-		/* Test if the file can be opened for writing - if not tell user */
-
-		if ( ( sf = fopen( save_file, "w" ) ) == NULL )
-			fl_show_alert( "Error:", "Sorry, write access denied for file:",
-						   save_file, 1 );
-	}
-
-	return sf;
-}
-
-
-/*--------------------------------------------------------------*/
-/* clear_up_after_measurement() allows the experimental data to */
-/* be stored, frees the memory needed for the data and deletes  */
-/* the window for displaying the measured data.                 */
-/*--------------------------------------------------------------*/
-
-void clear_up_after_measurement( void )
-{
-	if ( ! is_data_saved && 
-		fl_show_question( "Data are not saved yet.\nSave them now ?", 1 ) )
-		save_data( NULL, 0 );
-
-	if ( tf != NULL )
-	{
-		fclose( tf );
-		tf = NULL;
-	}
-
-	fl_set_object_label( run_form->stop, "Stop" );
-
-	stop_graphics( );
-	set_buttons_for_run( 1 );
-	child_pid = 0;
 }
 
 
@@ -569,33 +403,30 @@ void run_child( void )
 	/* Send parent process a NEW_DATA signal thus indicationg that the child
 	   process is done with all preparations and ready to start the
 	   experiment. Wait for reply by parent process (i.e. a DO_SEND signal). */
-/*
-{
-	int h = 1;
-	while ( h );
-}
-*/
 
 	kill( getppid( ), NEW_DATA );
 	while ( ! do_send )
 		pause( );
 
-	do_measurement( );                      /* run the experiment */
+	do_measurement( );                     /* run the experiment */
 
-	if ( cur_prg_token != prg_token + prg_length && ! do_quit ) /* failure ? */
+	/* Experiment ended prematurely if the end of EDL file wasn't reached */
+
+	if ( cur_prg_token != prg_token + prg_length &&
+		 cur_prg_token != NULL )
 		return_status = FAIL;
 
-	close( pd[ READ ] );                    /* close read end of pipe */
-	close( pd[ WRITE ] );                   /* close also write end of pipe */
+	close( pd[ READ ] );                   /* close read end of pipe */
+	close( pd[ WRITE ] );                  /* close also write end of pipe */
 
-	signal( DO_QUIT, do_quit_handler );     /* set signal handler */
+	close_all_files( );
+
 	do_quit = UNSET;
-
-	kill( getppid( ), QUITTING );    /* signal parent that child is exiting */
-	while ( ! do_quit )              /* wait for acceptance of this signal  */
+	kill( getppid( ), QUITTING );          /* tell parent that we're exiting */
+	while ( ! do_quit )                    /* wait for acceptance of signal  */
 		pause( );
 
-	_exit( return_status );          /* ...and that's the end of it */
+	_exit( return_status );                /* ...and that's it ! */
 }
 
 
@@ -626,6 +457,7 @@ void do_quit_handler( int sig_type )
 	if ( sig_type != DO_QUIT )
 		return;
 
+	signal( DO_QUIT, do_quit_handler );
 	do_quit = SET;
 }
 
@@ -638,20 +470,26 @@ void do_quit_handler( int sig_type )
 void do_measurement( void )
 {
 	Prg_Token *cur;
+	bool react_to_do_quit = SET;
 
 
 	TRY
 	{
-		if ( cur_prg_token == prg_token )
-		{
-			save_restore_variables( SET );
-			save_restore_pulses( SET );
-		}
-
 		while ( cur_prg_token != NULL &&
-				cur_prg_token < prg_token + prg_length &&
-				! do_quit )
+				cur_prg_token < prg_token + prg_length )
 		{
+			if ( do_quit && react_to_do_quit )
+			{
+				react_to_do_quit = UNSET;
+
+				if ( On_Stop_Pos < 0 )
+					cur_prg_token = NULL;
+				else
+					cur_prg_token = prg_token + On_Stop_Pos;
+
+				continue;
+			}
+
 			switch ( cur_prg_token->token )
 			{
 				case '}' :
@@ -734,7 +572,4 @@ void do_measurement( void )
 
 		TRY_SUCCESS;
 	}
-
-	save_restore_pulses( UNSET );
-	save_restore_variables( UNSET );
 }
