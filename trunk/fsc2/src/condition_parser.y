@@ -47,15 +47,15 @@ static Var *CV;
 %token E_US_TOKEN	  270
 %token E_MS_TOKEN	  271
 %token E_S_TOKEN	  272
-%token E_NV_TOKEN	  273
-%token E_UV_TOKEN	  274
-%token E_MV_TOKEN	  275
-%token E_V_TOKEN	  276
-%token E_MG_TOKEN	  277
-%token E_G_TOKEN	  278
-%token E_MHZ_TOKEN	  279
-%token E_KHZ_TOKEN	  280
-%token E_HZ_TOKEN	  281
+%token E_NT_TOKEN	  273
+%token E_UT_TOKEN	  274
+%token E_MT_TOKEN	  275
+%token E_T_TOKEN	  276
+%token E_NU_TOKEN	  277
+%token E_UU_TOKEN	  278
+%token E_MU_TOKEN	  279
+%token E_KU_TOKEN	  280
+%token E_MEG_TOKEN	  281
 %token E_NEG		  282
 
 
@@ -68,9 +68,8 @@ static Var *CV;
 %token E_EQ E_LT E_LE E_GT E_GE
 
 %token E_NS_TOKEN E_US_TOKEN E_MS_TOKEN E_S_TOKEN
-%token E_NV_TOKEN E_UV_TOKEN E_MV_TOKEN E_V_TOKEN
-%token E_MG_TOKEN E_G_TOKEN
-%token E_MHZ_TOKEN E_KHZ_TOKEN E_HZ_TOKEN
+%token E_NT_TOKEN E_UT_TOKEN E_MT_TOKEN E_T_TOKEN
+%token E_NU_TOKEN E_UU_TOKEN E_MU_TOKEN E_KU_TOKEN E_MEG_TOKEN
 %type <vptr> expr unit list1
 
 
@@ -134,20 +133,20 @@ expr:    E_INT_TOKEN unit         { if ( $2 == NULL )
 									  $$ = vars_mult( $2, $4 ); }
 ;
 
-unit:    /* empty */              { $$ = NULL; }
-       | E_NS_TOKEN               { $$ = vars_push( INT_VAR, 1L ); }
-       | E_US_TOKEN               { $$ = vars_push( INT_VAR, 1000L ); }
-       | E_MS_TOKEN               { $$ = vars_push( INT_VAR, 1000000L ); }
-       | E_S_TOKEN                { $$ = vars_push( INT_VAR, 1000000000L ); }
-       | E_NV_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
-       | E_UV_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
-       | E_MV_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | E_V_TOKEN                { $$ = vars_push( INT_VAR, 1 ); }
-       | E_MG_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | E_G_TOKEN                { $$ = vars_push( INT_VAR, 1 ); }
-       | E_MHZ_TOKEN              { $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
-       | E_KHZ_TOKEN              { $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
-       | E_HZ_TOKEN               { $$ = vars_push( INT_VAR, 1 ); }
+unit:    /* empty */               { $$ = NULL; }
+       | E_NS_TOKEN                { $$ = vars_push( INT_VAR, 1L ); }
+       | E_US_TOKEN                { $$ = vars_push( INT_VAR, 1000L ); }
+       | E_MS_TOKEN                { $$ = vars_push( INT_VAR, 1000000L ); }
+       | E_S_TOKEN                 { $$ = vars_push( INT_VAR, 1000000000L ); }
+       | E_NT_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
+       | E_UT_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
+       | E_MT_TOKEN                { $$ = vars_push( FLOAT_VAR, 10.0 ); }
+       | E_T_TOKEN                 { $$ = vars_push( INT_VAR, 1.0e4 ); }
+       | E_NU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
+       | E_UU_TOKEN                { $$ = vars_push( INT_VAR, 1.0e-6 ); }
+       | E_MU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
+       | E_KU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
+       | E_MEG_TOKEN               { $$ = vars_push( INT_VAR, 1.0e6 ); }
 ;
 
 

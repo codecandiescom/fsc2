@@ -38,7 +38,7 @@ box: 230 10 790 580
 boxtype: FL_DOWN_BOX
 colors: FL_WHITE FL_YELLOW
 alignment: FL_ALIGN_BOTTOM
-style: FL_NORMAL_STYLE
+style: FL_FIXED_STYLE
 size: FL_LARGE_SIZE
 lcol: FL_BLACK
 label: 
@@ -146,8 +146,8 @@ box: 230 600 790 190
 boxtype: FL_DOWN_BOX
 colors: FL_WHITE FL_YELLOW
 alignment: FL_ALIGN_BOTTOM
-style: FL_NORMAL_STYLE
-size: FL_MEDIUM_SIZE
+style: FL_FIXED_STYLE
+size: FL_LARGE_SIZE
 lcol: FL_BLACK
 label: 
 shortcut: 
@@ -204,7 +204,7 @@ boxtype: FL_UP_BOX
 colors: FL_MCOL FL_COL1
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_MEDIUM_SIZE
+size: FL_LARGE_SIZE
 lcol: FL_BLACK
 label: Bug Report
 shortcut: B
@@ -396,7 +396,7 @@ boxtype: FL_DOWN_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_TOP_LEFT
 style: FL_NORMAL_STYLE
-size: FL_MEDIUM_SIZE
+size: FL_LARGE_SIZE
 lcol: FL_BLACK
 label: Enter your comments:
 shortcut: 
@@ -409,12 +409,12 @@ argument: 0
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 250 415 120 30
+box: 265 415 120 30
 boxtype: FL_UP_BOX
 colors: FL_TOP_BCOL FL_GREEN
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
-size: FL_MEDIUM_SIZE
+size: FL_LARGE_SIZE
 lcol: FL_BLACK
 label: Done
 shortcut: 

@@ -300,7 +300,7 @@ void stop_measurement( FL_OBJECT *a, long b )
 		else                             /* child has already exited */
 		{
 			stop_graphics( );
-			fl_set_object_label( run_form->stop, "Stop the running program" );
+			fl_set_object_helper( run_form->stop, "Stop the running program" );
 			set_buttons_for_run( 1 );
 		}
 

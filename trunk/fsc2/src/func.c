@@ -959,66 +959,65 @@ void f_wait_alarm_handler( int sig_type )
 /* f_init_1d() has to be called to initialize the display system for */
 /* 1-dimensional experiments.                                        */
 /* Arguments:                                                        */
-/* 1. Number of curves to be shown                                   */
-/* 2. Number of points (0 or negative  if unknown)                   */
+/* 1. Number of curves to be shown (optional, defaults to 1)         */
+/* 2. Number of points (optional, 0 or negative if unknown)          */
 /* 3. Real world coordinate and increment (optional)                 */
 /* 4. x-axis label (optional)                                        */
 /*-------------------------------------------------------------------*/
 
 Var *f_init_1d( Var *v )
 {
-	long nc;
+	long nc = 1;
 	long n = -1;
-	double rwc_start = 0.0, rwc_delta = 0.0;
-	char *label;
+	double rwc_start = 0.0,
+		   rwc_delta = 0.0;
+	char *label = NULL;
 
 
-	if ( v == NULL )
+	if ( v != NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing number of curves in `init_1d()'.\n",
-				Fname, Lc );
-		THROW( EXCEPTION );
-	}
-	
-	vars_check( v, INT_VAR | FLOAT_VAR );              /* get # of curves */
+		if ( v->type == STR_VAR )
+			goto label_1d;
 
-	if ( v->type == INT_VAR )
-		nc = v->val.lval;
-	else
-	{
-		eprint( WARN, "%s:%ld: Floating point value used as number of "
-				"curves in `init_1d()'.\n", Fname, Lc );
-		nc = rnd( v->val.dval );
-	}
+		vars_check( v, INT_VAR | FLOAT_VAR );             /* get # of curves */
 
-	if ( nc < 1 || nc > MAX_CURVES )
-	{
-		eprint( FATAL, "%s:%ld: Invalid number of curves (%ld) in "
-				"`init_1d()'.\n", Fname, Lc, nc );
-		THROW( EXCEPTION );
-	}
+		if ( v->type == INT_VAR )
+			nc = v->val.lval;
+		else
+		{
+			eprint( WARN, "%s:%ld: Floating point value used as number of "
+					"curves in `init_1d()'.\n", Fname, Lc );
+			nc = rnd( v->val.dval );
+		}
 
-	v = v->next;
+		if ( nc < 1 || nc > MAX_CURVES )
+		{
+			eprint( FATAL, "%s:%ld: Invalid number of curves (%ld) in "
+					"`init_1d()'.\n", Fname, Lc, nc );
+			THROW( EXCEPTION );
+		}
 
-	if ( v == NULL )
-	{
-		eprint( FATAL, "%s:%ld: Missing number of points in `init_1d()'.\n",
-				Fname, Lc );
-		THROW( EXCEPTION );
+		v = v->next;
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );  /* get # of points in x-direction */
-
-	if ( v->type == INT_VAR )
-		n = v->val.lval;
-	else
+	if ( v != NULL )
 	{
-		eprint( WARN, "%s:%ld: Floating point value used as number of "
-				"points in `init_1d()'.\n", Fname, Lc );
-		n = rnd( v->val.dval );
-	}
+		if ( v->type == STR_VAR )
+			goto label_1d;
 
-	v = v->next;
+		vars_check( v, INT_VAR | FLOAT_VAR );  /* # of points in x-direction */
+
+		if ( v->type == INT_VAR )
+			n = v->val.lval;
+		else
+		{
+			eprint( WARN, "%s:%ld: Floating point value used as number of "
+					"points in `init_1d()'.\n", Fname, Lc );
+			n = rnd( v->val.dval );
+		}
+
+		v = v->next;
+	}
 
 	if ( v != NULL )
 	{
@@ -1041,13 +1040,13 @@ Var *f_init_1d( Var *v )
 			v = v->next->next;
 		}
 
+label_1d:
+
 		if ( v != NULL )
 		{
 			vars_check ( v, STR_VAR );
 			label = get_string_copy( v->val.sptr );
 		}
-		else
-			label = NULL;
 	}
 	
 	graphics_init( 1, nc, n, 0, rwc_start, rwc_delta, 0.0, 0.0, label, NULL );
@@ -1064,7 +1063,7 @@ Var *f_init_2d( Var *v )
 {
 	long nx = -1,
 		 ny = -1,
-		 nc;
+		 nc = 1;
 	double rwc_x_start = 0.0,
 		   rwc_x_delta = 0.0, 
 		   rwc_y_start = 0.0,
@@ -1073,72 +1072,69 @@ Var *f_init_2d( Var *v )
 		 *l2 = NULL;
 
 
-	if ( v == NULL )
+	if ( v != NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing number of curves in `init_2d()'.\n",
-				Fname, Lc );
-		THROW( EXCEPTION );
-	}
-	
-	vars_check( v, INT_VAR | FLOAT_VAR );              /* get # of curves */
+		if ( v->type == STR_VAR )
+			goto labels_2d;
 
-	if ( v->type == INT_VAR )
-		nc = v->val.lval;
-	else
-	{
-		eprint( WARN, "%s:%ld: Floating point value used as number of "
-				"curves in `init_1d()'.\n", Fname, Lc );
-		nc = rnd( v->val.dval );
-	}
+		vars_check( v, INT_VAR | FLOAT_VAR );             /* get # of curves */
 
-	if ( nc < 1 || nc > MAX_CURVES )
-	{
-		eprint( FATAL, "%s:%ld: Invalid number of curves (%ld) in "
-				"`init_1d()'.\n", Fname, Lc, nc );
-		THROW( EXCEPTION );
-	}
+		if ( v->type == INT_VAR )
+			nc = v->val.lval;
+		else
+		{
+			eprint( WARN, "%s:%ld: Floating point value used as number of "
+					"curves in `init_1d()'.\n", Fname, Lc );
+			nc = rnd( v->val.dval );
+		}
 
-	v = v->next;
+		if ( nc < 1 || nc > MAX_CURVES )
+		{
+			eprint( FATAL, "%s:%ld: Invalid number of curves (%ld) in "
+					"`init_1d()'.\n", Fname, Lc, nc );
+			THROW( EXCEPTION );
+		}
 
-	if ( v == NULL )
-	{
-		eprint( FATAL, "%s:%ld: Missing arguments in `init_2d()'.\n",
-				Fname, Lc );
-		THROW( EXCEPTION );
+		v = v->next;
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );  /* get # of points in x-direction */
-
-	if ( v->type == INT_VAR )
-		nx = v->val.lval;
-	else
+	if ( v != NULL )
 	{
-		eprint( WARN, "%s:%ld: Floating point value used as number of "
-				"points in x-direction.\n", Fname, Lc );
-		nx = rnd( v->val.dval );
+		if ( v->type == STR_VAR )
+			goto labels_2d;
+
+		vars_check( v, INT_VAR | FLOAT_VAR );  /* # of points in x-direction */
+
+		if ( v->type == INT_VAR )
+			nx = v->val.lval;
+		else
+		{
+			eprint( WARN, "%s:%ld: Floating point value used as number of "
+					"points in x-direction.\n", Fname, Lc );
+			nx = rnd( v->val.dval );
+		}
+
+		v = v->next;
 	}
 
-	v = v->next;
-
-	if ( v == NULL )
+	if ( v != NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing number of points in y-direction "
-				"in init_2d()'.\n", Fname, Lc );
-		THROW( EXCEPTION );
+		if ( v->type == STR_VAR )
+			goto labels_2d;
+
+		vars_check( v, INT_VAR | FLOAT_VAR );
+
+		if ( v->type == INT_VAR )
+			ny = v->val.lval;
+		else
+		{
+			eprint( WARN, "%s:%ld: Floating point value used as number of "
+					"points in y-direction.\n", Fname, Lc );
+			ny = rnd( v->val.dval );
+		}
+
+		v = v->next;
 	}
-
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		ny = v->val.lval;
-	else
-	{
-		eprint( WARN, "%s:%ld: Floating point value used as number of "
-				"points in y-direction.\n", Fname, Lc );
-		ny = rnd( v->val.dval );
-	}
-
-	v = v->next;
 
 	if ( v != NULL )
 	{
@@ -1168,6 +1164,8 @@ Var *f_init_2d( Var *v )
 			rwc_y_delta = VALUE( v );
 			v = v->next;
 		}
+
+labels_2d:
 
 		if ( v != NULL )                  /* get x-label */
 		{

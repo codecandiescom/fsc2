@@ -16,6 +16,7 @@ FD_fsc2 *create_form_fsc2(void)
   fdui->browser = obj = fl_add_browser(FL_NORMAL_BROWSER,230,10,790,580,"");
     fl_set_object_color(obj,FL_WHITE,FL_YELLOW);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
+    fl_set_object_lstyle(obj,FL_FIXED_STYLE);
     fl_set_object_gravity(obj, FL_NorthWest, FL_East);
   fdui->Load = obj = fl_add_button(FL_NORMAL_BUTTON,50,60,130,50,"Load");
     fl_set_button_shortcut(obj,"L",1);
@@ -53,7 +54,8 @@ FD_fsc2 *create_form_fsc2(void)
     fl_set_object_resize(obj, FL_RESIZE_NONE);
   fdui->error_browser = obj = fl_add_browser(FL_NORMAL_BROWSER,230,600,790,190,"");
     fl_set_object_color(obj,FL_WHITE,FL_YELLOW);
-    fl_set_object_lsize(obj,FL_MEDIUM_SIZE);
+    fl_set_object_lsize(obj,FL_LARGE_SIZE);
+    fl_set_object_lstyle(obj,FL_FIXED_STYLE);
     fl_set_object_gravity(obj, FL_West, FL_SouthEast);
   fdui->Edit = obj = fl_add_button(FL_NORMAL_BUTTON,50,240,130,50,"Edit");
     fl_set_button_shortcut(obj,"E",1);
@@ -72,7 +74,7 @@ FD_fsc2 *create_form_fsc2(void)
   fdui->bug_report = obj = fl_add_button(FL_NORMAL_BUTTON,50,730,130,40,"Bug Report");
     fl_set_button_shortcut(obj,"B",1);
     fl_set_object_color(obj,FL_MCOL,FL_COL1);
-    fl_set_object_lsize(obj,FL_MEDIUM_SIZE);
+    fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_gravity(obj, FL_West, FL_West);
     fl_set_object_resize(obj, FL_RESIZE_NONE);
     fl_set_object_callback(obj,bug_report_callback,0);
@@ -132,12 +134,12 @@ FD_input_form *create_form_input_form(void)
   fdui->input_form = fl_bgn_form(FL_NO_BOX, 665, 455);
   obj = fl_add_box(FL_UP_BOX,0,0,665,455,"");
   fdui->comm_input = obj = fl_add_input(FL_MULTILINE_INPUT,15,45,635,360,"Enter your comments:");
-    fl_set_object_lsize(obj,FL_MEDIUM_SIZE);
+    fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_lalign(obj,FL_ALIGN_TOP_LEFT);
     fl_set_object_gravity(obj, FL_NorthWest, FL_SouthEast);
-  fdui->comm_done = obj = fl_add_button(FL_NORMAL_BUTTON,250,415,120,30,"Done");
+  fdui->comm_done = obj = fl_add_button(FL_NORMAL_BUTTON,265,415,120,30,"Done");
     fl_set_object_color(obj,FL_TOP_BCOL,FL_GREEN);
-    fl_set_object_lsize(obj,FL_MEDIUM_SIZE);
+    fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_gravity(obj, FL_South, FL_South);
     fl_set_object_resize(obj, FL_RESIZE_NONE);
   fl_end_form();
