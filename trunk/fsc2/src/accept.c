@@ -327,7 +327,7 @@ static void other_data_request( int dim, int type, char *ptr )
 			if ( dim == DATA_1D )
 				remove_markers_1d( );
 			else
-				remove_markers_2d( );
+				remove_markers_2d( ( long * ) ptr );
 			break;
 
 		case D_CHANGE_MODE :

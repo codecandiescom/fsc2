@@ -2147,16 +2147,22 @@ static void delete_marker_2d( long x_pos, long y_pos, long curve )
 /* Gets called to delete all markers */
 /*-----------------------------------*/
 
-void remove_markers_2d( void )
+void remove_markers_2d( long *curves )
 {
 	Marker_2D *m, *mn;
 	Curve_2d *cv;
-	int i;
+	int i, j;
+	long c[ MAX_CURVES ];
 
 
-	for ( i = 0; i < G2.nc; i++ )
+	memcpy( c, curves, MAX_CURVES * sizeof *curves );
+	if ( c[ 0 ] == -1 )
+		for ( i = 0; i < G2.nc; i++ )
+			c[ i ] = i;
+
+	for ( i = 0; i < G2.nc && ( j = c[ i ] ) != -1; i++ )
 	{
-		cv = G2.curve_2d[ i ];
+		cv = G2.curve_2d[ j ];
 
 		if ( cv->marker_2d == NULL )
 			continue;
@@ -2171,10 +2177,11 @@ void remove_markers_2d( void )
 
 		if ( i == G2.active_curve )
 			repaint_canvas_2d( &G2.canvas );
+
+		if ( G2.is_cut && curves[ j ] = CG.curve )
+			delete_all_cut_markers( );
 	}
 
-	if ( G2.is_cut )
-		delete_all_cut_markers( );
 }
 
 

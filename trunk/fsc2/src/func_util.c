@@ -2920,8 +2920,6 @@ Var *f_clearmark_1d( Var *v )
 	int shm_id;
 
 
-	UNUSED_ARGUMENT( v );
-
 	/* This function can only be called in the EXPERIMENT section and needs
 	   a previous graphics initialisation */
 
@@ -2938,6 +2936,10 @@ Var *f_clearmark_1d( Var *v )
 			   "instead.\n" );
         return vars_push( INT_VAR, 0 );
     }
+
+	if ( v != NULL )
+		print( SEVERE, "Superfluous argument%s.\n",
+			   v->next != NULL ? "s" : "" );
 
 	/* In a test run this all there is to be done */
 
@@ -2995,6 +2997,8 @@ Var *f_clearmark_2d( Var *v )
 	char *ptr;
 	int type = D_CLEAR_MARKERS;
 	int shm_id;
+	int i;
+	long curves[ MAX_CURVES ] = { -1, -1, -1, -1 };
 
 
 	UNUSED_ARGUMENT( v );
@@ -3018,6 +3022,20 @@ Var *f_clearmark_2d( Var *v )
 
 	/* In a test run this all there is to be done */
 
+	for ( i = 0; v != NULL && i < MAX_CURVES, i++, v = vars_pop( v ) )
+	{
+		curves[ i ] = get_strict_long( v, "curve number" ) - 1;
+
+		if ( curves[ i ] < 0 || curves[ i ] > G2.nc )
+		{
+			print( FATAL, "There is no curve numbered %ld\n",
+				   curves[ i ] + 1 );
+			THROW( EXCEPTION );
+		}
+	}
+
+	too_many_arguments( v );
+
 	if ( Internals.mode == TEST )
 		return vars_push( INT_VAR, 1 );
 	
@@ -3028,7 +3046,7 @@ Var *f_clearmark_2d( Var *v )
 
 	/* Now try to get a shared memory segment */
 
-	len = sizeof len + sizeof type;
+	len = sizeof len + sizeof type + MAX_CURVES * sizeof *curves;
 
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
@@ -3045,6 +3063,9 @@ Var *f_clearmark_2d( Var *v )
 	ptr += sizeof len;
 
 	memcpy( ptr, &type, sizeof type );             /* type indicator  */
+	ptr += sizeof type;
+
+	memcpy( ptr, curves, MAX_CURVES * sizeof curves );
 
 	/* Detach from the segment with the data */
 
