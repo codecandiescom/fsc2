@@ -485,19 +485,15 @@ CONFFLAGS += -Dauxdir=\"$(auxdir:/=)/\"
 CONFFLAGS += -Ddocdir=\"$(docdir:/=)/\"
 
 
-# Make sure settings for GPIB bus are reasonable
+# Make sure the GPIB settings are reasonable
 
 ifdef GPIB_LIBRARY
-	GPIB_LIBRARY := $(patsubst % ,%,$(GPIB_LIBRARY))
-endif
-
-ifdef GPIB_LOG_LEVEL
-	GPIB_LOG_FILE := $(patsubst % ,%,$(GPIB_LOG_LEVEL))
+	GPIB_LIBRARY   := $(patsubst % ,%,$(GPIB_LIBRARY))
 endif
 
 ifneq ($(GPIB_LIBRARY),NONE)
 	ifdef GPIB_HEADER_DIR
-		INCLUDES         += -I$(GPIB_HEADER_DIR)
+		INCLUDES  += -I$(patsubst % ,%,$(GPIB_HEADER_FIR))
 	endif
 
 	ifdef GPIB_CONF_FILE
@@ -505,50 +501,54 @@ ifneq ($(GPIB_LIBRARY),NONE)
 	else
 		CONFFLAGS += -DGPIB_CONF_FILE=\"/etc/gpib.conf\"
 	endif
-endif
 
-ifdef GPIB_LOG_FILE
-	CONFFLAGS += -DGPIB_LOG_FILE=\"$(patsubst % ,%,$(GPIB_LOG_FILE))\"
-else
-	CONFFLAGS += -DGPIB_LOG_FILE=\"/tmp/gpib.log\"
-endif
+	LIBS += -lgpib
 
-ifeq ($(GPIB_LOG_LEVEL),HIGH)
-	CONFFLAGS += -DGPIB_LOG_LEVEL=LL_ALL
-else
-	ifeq ($(GPIB_LOG_LEVEL),MEDIUM)
-		CONFFLAGS += -DGPIB_LOG_LEVEL=LL_CE
+	ifdef GPIB_LOG_FILE
+		CONFFLAGS += -DGPIB_LOG_FILE=\"$(patsubst % ,%,$(GPIB_LOG_FILE))\"
 	else
-		ifeq ($(GPIB_LOG_LEVEL),OFF)
-			CONFFLAGS += -DGPIB_LOG_LEVEL=LL_NONE
+		CONFFLAGS += -DGPIB_LOG_FILE=\"/tmp/gpib.log\"
+	endif
+
+	ifdef GPIB_LOG_LEVEL
+		GPIB_LOG_LEVEL := $(patsubst % ,%,$(GPIB_LOG_LEVEL))
+	endif
+
+	ifeq ($(GPIB_LOG_LEVEL),HIGH)
+		CONFFLAGS += -DGPIB_LOG_LEVEL=LL_ALL
+	else
+		ifeq ($(GPIB_LOG_LEVEL),MEDIUM)
+			CONFFLAGS += -DGPIB_LOG_LEVEL=LL_CE
 		else
-			CONFFLAGS += -DGPIB_LOG_LEVEL=LL_ERR
+			ifeq ($(GPIB_LOG_LEVEL),OFF)
+				CONFFLAGS += -DGPIB_LOG_LEVEL=LL_NONE
+			else
+				CONFFLAGS += -DGPIB_LOG_LEVEL=LL_ERR
+			endif
 		endif
 	endif
-endif
 
-ifeq ($(GPIB_LIBRARY),LLP)
-	GPIB_LIBRARY         := llp
-	ifndef GPIB_HEADER_DIR
-		INCLUDES         += -I/usr/local/include/gpib
-	endif
-	LIBS                 += -lfl
-else
-	ifeq ($(GPIB_LIBRARY),NI)
-		GPIB_LIBRARY     := ni
+	ifeq ($(GPIB_LIBRARY),LLP)
+		GPIB_LIBRARY         := llp
+		ifndef GPIB_HEADER_DIR
+			INCLUDES         += -I/usr/local/include/gpib
+		endif
+		LIBS                 += -lfl
 	else
-		ifeq ($(GPIB_LIBRARY),JTT)
-			GPIB_LIBRARY := jtt
+		ifeq ($(GPIB_LIBRARY),NI)
+			GPIB_LIBRARY     := ni
 		else
-			GPIB_LIBRARY := none
+			ifeq ($(GPIB_LIBRARY),JTT)
+				GPIB_LIBRARY := jtt
+			endif
 		endif
 	endif
+else
+	GPIB_LIBRARY := none
 endif
 
-LIBS                     += -lgpib
 
-
-# Make sure settings for serial port are reasonable
+# Make sure settings for the serial ports are reasonable
 
 ifdef NUM_SERIAL_PORTS
 	CONFFLAGS += -DNUM_SERIAL_PORTS=$(patsubst % ,%,$(NUM_SERIAL_PORTS))
@@ -756,6 +756,7 @@ fsc2_config.h: Makefile $(MACHINE_INCLUDE_FILE)
 		echo "Creating fsc2_config.h...";    \
 	fi
 	@echo "/*--- Created automatically, don't change ---*/" > fsc2_config.h
+	@echo $(CONFFLAGS)
 	@echo -e $(patsubst -D%,\\n#define %,$(subst =, ,$(CONFFLAGS))) >> \
 		  fsc2_config.h
 
