@@ -4,6 +4,9 @@
 
 #include "tds520.h"
 
+static bool tds520_window_check_1( void );
+static void tds520_window_check_2( void );
+static void tds520_window_check_3( void );
 
 
 /*-----------------------------------------------------------*/
@@ -48,12 +51,10 @@ void tds520_delete_windows( void )
 
 void tds520_do_pre_exp_checks( void )
 {
-	WINDOW *w, *wn;
+	WINDOW *w;
 	bool is_width = SET;
-    double width, window, dcs, dcd, dtb, fac;
-    long tb, cs, cd;
+    double width;
 	int i;
-	char *buffer;
 
 
 	/* If a trigger channel has been set in the PREPARATIONS section send
@@ -68,8 +69,53 @@ void tds520_do_pre_exp_checks( void )
 		if ( tds520.channels_in_use[ i ] )
 			tds520_display_channel( i );
 
-	/* Remove all unused windows and test if for all other windows the width
-	   is set */
+	/* Remove all unused windows and test if for all other windows the
+	   width is set */
+
+	is_width = tds520_window_check_1( );
+
+	/* If no width is set for all windows get the distance of the cursors on
+	   the digitizers screen and use it as the default width. */
+
+	if ( tds520.w != NULL && ! is_width )
+	{
+		tds520_get_cursor_distance( &width );
+
+		width = fabs( width );
+
+		if ( width == 0.0 )
+		{
+			eprint( FATAL, "%s: Can't determine a reasonable value for "
+					"still undefined window widths.\n", DEVICE_NAME );
+			THROW( EXCEPTION );
+		}
+
+		for ( w = tds520.w; w != NULL; w = w->next )
+			if ( ! w->is_width )
+			{
+				w->width = width;
+				w->is_width = SET;
+			}
+	}
+
+	/* Make sure the windows are ok, i.e. cursorsd can be positioned exactly
+	   and are still within the range of the digitizers record length */
+
+	tds520_window_check_2( );
+	tds520_window_check_3( );
+}
+
+
+/*---------------------------------------------------------------*/
+/* Removes unused windows and checks if for all the used windows */
+/* a width is set - this is returned to the calling function     */
+/*---------------------------------------------------------------*/
+
+bool tds520_window_check_1( void )
+{
+	WINDOW *w, *wn;
+	bool is_width = SET;
+
 
 	for ( w = tds520.w; w != NULL; )
 	{
@@ -91,35 +137,30 @@ void tds520_do_pre_exp_checks( void )
 		w = w->next;
 	}
 
-	/* If no width is set for all windows get the distance of the cursors on
-	   the digitizers screen and use it as the default width. */
+	return is_width;
+}
 
-	if ( tds520.w != NULL && ! is_width )
-	{
-		tds520_get_cursor_distance( &width );
 
-		width = fabs( width );
+/*---------------------------------------------------------------------*/
+/* It's not possible to set arbitrary cursor positions and distances - */
+/* they've got to be multiples of the smallest time resolution of the  */
+/* digitizer, which is the time base divided by TDS_POINTS_PER_DIV.    */
+/* Rhe function tests if the requested cursor position and distance    */
+/* fit this requirement and if not the values are readjusted. While    */
+/* settings for the position and width of the window not being exact   */
+/* multiples of the resultion are probably no serious errors a window  */
+/* width of less than the resolution is a hint for a real problem. And */
+/* while we're at it we also try to find out if all window widths are  */
+/* equal - than we can use tracking cursors.                           */
+/*---------------------------------------------------------------------*/
 
-		if ( width == 0.0 )
-		{
-			eprint( FATAL, "%s: Can't determine a reasonable value for "
-					"still undefined window widths.\n", DEVICE_NAME );
-			THROW( EXCEPTION );
-		}
+void tds520_window_check_2( void )
+{
+	WINDOW *w;
+    double dcs, dcd, dtb, fac;
+    long tb, cs, cd;
+	char *buffer;
 
-		for ( w = tds520.w; w != NULL; w = w->next )
-			if ( ! w->is_width )
-				w->width = width;
-	}
-
-	/* It's not possible to set arbitrary cursor positions and distances -
-	   they've got to be multiples of the smallest time resolution of the
-	   digitizer, which is the time base divided by TDS_POINTS_PER_DIV. In the
-	   following it is tested if the requested cursor position and distance
-	   fit this requirement and if not the values are readjusted. While
-	   settings for the position and width of the window not being exact
-	   multiples of the resultion are probably no serious errors a window
-	   width of less than the resolution is a hint for a real problem. */
 
 	for ( w = tds520.w; w != NULL; w = w->next )
 	{
@@ -184,9 +225,20 @@ void tds520_do_pre_exp_checks( void )
 			w->width = dcd;
 		}
 	}
+}
 
-	/* Test if the windows fit into the measurement window and calculate start
-	   and end point of window */
+
+/*-------------------------------------------------------------*/
+/* This function checks if the windows fit into the digitizers */
+/* measurement window and calculate the positions of the start */
+/* and the end of the windows in units of points.              */
+/*-------------------------------------------------------------*/
+
+void tds520_window_check_3( void )
+{
+	WINDOW *w;
+    double window;
+
 
     window = tds520.timebase * tds520.rec_len / TDS_POINTS_PER_DIV;
 

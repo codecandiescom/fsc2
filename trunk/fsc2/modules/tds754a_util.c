@@ -5,6 +5,10 @@
 #include "tds754a.h"
 
 
+static bool tds754a_window_check_1( void );
+static void tds754a_window_check_2( void );
+static void tds754a_window_check_3( void );
+
 
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
@@ -47,12 +51,10 @@ void tds754a_delete_windows( void )
 
 void tds754a_do_pre_exp_checks( void )
 {
-	WINDOW *w, *wn;
-	bool is_width = SET;
-    double width, window, dcs, dcd, dtb, fac;
-    long tb, cs, cd;
+	WINDOW *w;
+	bool is_width;
+    double width;
 	int i;
-	char *buffer;
 
 
 	/* If a trigger channel has been set in the PREPARATIONS section send
@@ -71,25 +73,7 @@ void tds754a_do_pre_exp_checks( void )
 	/* Remove all unused windows and test if for all other windows the width
 	   is set */
 
-	for ( w = tds754a.w; w != NULL; )
-	{
-		if ( ! w->is_used )
-		{
-			if ( w == tds754a.w )
-				wn = tds754a.w = w->next;
-			else
-				wn = w->prev->next = w->next;
-
-			T_free( w );
-			tds754a.num_windows--;
-			w = wn;
-			continue;
-		}
-
-		if ( ! w->is_width )
-			is_width = UNSET;
-		w = w->next;
-	}
+	is_width = tds754a_window_check_1( );
 
 	/* That's all if no windows have been defined we switch off gated
 	   measurement mode, i.e. all measurement operations are done on the
@@ -120,19 +104,93 @@ void tds754a_do_pre_exp_checks( void )
 
 		for ( w = tds754a.w; w != NULL; w = w->next )
 			if ( ! w->is_width )
+			{
 				w->width = width;
+				w->is_width = SET;
+			}
 	}
 
-	/* It's not possible to set arbitrary cursor positions and distances -
-	   they've got to be multiples of the smallest time resolution of the
-	   digitizer, which is the time base divided by TDS_POINTS_PER_DIV. In the
-	   following it is tested if the requested cursor position and distance
-	   fit this requirement and if not the values are readjusted. While
-	   settings for the position and width of the window not being exact
-	   multiples of the resultion are probably no serious errors a window
-	   width of less than the resolution is a hint for a real problem. And
-	   while we're at it we also try to find out if all window widths are
-	   equal - than we can use tracking cursors */
+	/* Make sure the windows are ok, i.e. cursorsd can be positioned exactly
+	   and are still within the range of the digitizers record length */
+
+	tds754a_window_check_2( );
+	tds754a_window_check_3( );
+
+	/* Now that all windows are properly set we switch on gated measurements */
+
+	tds754a_set_gated_meas( SET );
+	tds754a.gated_state = SET;
+
+	/* If the widths of all windows are equal we switch on tracking cursor
+	   mode and set the cursors to the position of the first window */
+
+	if ( tds754a.is_equal_width )
+	{
+		tds754a_set_cursor( 1, tds754a.w->start );
+		tds754a_set_cursor( 2, tds754a.w->start + tds754a.w->width );
+		tds754a_set_track_cursors( SET );
+		tds754a.cursor_pos = tds754a.w->start;
+	}
+	else
+		tds754a_set_track_cursors( UNSET );
+}
+
+
+/*---------------------------------------------------------------*/
+/* Removes unused windows and checks if for all the used windows */
+/* a width is set - this is returned to the calling function     */
+/*---------------------------------------------------------------*/
+
+bool tds754a_window_check_1( void )
+{
+	WINDOW *w, *wn;
+	bool is_width = SET;
+
+
+	for ( w = tds754a.w; w != NULL; )
+	{
+		if ( ! w->is_used )
+		{
+			if ( w == tds754a.w )
+				wn = tds754a.w = w->next;
+			else
+				wn = w->prev->next = w->next;
+
+			T_free( w );
+			tds754a.num_windows--;
+			w = wn;
+			continue;
+		}
+
+		if ( ! w->is_width )
+			is_width = UNSET;
+		w = w->next;
+	}
+
+	return is_width;
+}
+
+
+/*---------------------------------------------------------------------*/
+/* It's not possible to set arbitrary cursor positions and distances - */
+/* they've got to be multiples of the smallest time resolution of the  */
+/* digitizer, which is the time base divided by TDS_POINTS_PER_DIV.    */
+/* Rhe function tests if the requested cursor position and distance    */
+/* fit this requirement and if not the values are readjusted. While    */
+/* settings for the position and width of the window not being exact   */
+/* multiples of the resultion are probably no serious errors a window  */
+/* width of less than the resolution is a hint for a real problem. And */
+/* while we're at it we also try to find out if all window widths are  */
+/* equal - than we can use tracking cursors.                           */
+/*---------------------------------------------------------------------*/
+
+void tds754a_window_check_2( void )
+{
+	WINDOW *w;
+    double dcs, dcd, dtb, fac;
+    long tb, cs, cd;
+	char *buffer;
+
 
 	tds754a.is_equal_width = SET;
 
@@ -204,9 +262,20 @@ void tds754a_do_pre_exp_checks( void )
 		if ( w != tds754a.w && w->width != tds754a.w->width )
 			tds754a.is_equal_width = UNSET;
 	}
+}
 
-	/* Test if the windows fit into the measurement window and calculate start
-	   and end point of window */
+
+/*-------------------------------------------------------------*/
+/* This function checks if the windows fit into the digitizers */
+/* measurement window and calculate the positions of the start */
+/* and the end of the windows in units of points.              */
+/*-------------------------------------------------------------*/
+
+void tds754a_window_check_3( void )
+{
+	WINDOW *w;
+    double window;
+
 
     window = tds754a.timebase * tds754a.rec_len / TDS_POINTS_PER_DIV;
 
@@ -237,24 +306,6 @@ void tds754a_do_pre_exp_checks( void )
 			THROW( EXCEPTION );
 		}
     }
-
-	/* Now that all windows are properly set we switch on gated measurements */
-
-	tds754a_set_gated_meas( SET );
-	tds754a.gated_state = SET;
-
-	/* If the widths of all windows are equal we switch on tracking cursor
-	   mode and set the cursors to the position of the first window */
-
-	if ( tds754a.is_equal_width )
-	{
-		tds754a_set_cursor( 1, tds754a.w->start );
-		tds754a_set_cursor( 2, tds754a.w->start + tds754a.w->width );
-		tds754a_set_track_cursors( SET );
-		tds754a.cursor_pos = tds754a.w->start;
-	}
-	else
-		tds754a_set_track_cursors( UNSET );
 }
 
 

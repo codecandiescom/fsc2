@@ -5,6 +5,10 @@
 #include "tds540.h"
 
 
+static bool tds540_window_check_1( void );
+static void tds540_window_check_2( void );
+static void tds540_window_check_3( void );
+
 
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
@@ -47,12 +51,10 @@ void tds540_delete_windows( void )
 
 void tds540_do_pre_exp_checks( void )
 {
-	WINDOW *w, *wn;
-	bool is_width = SET;
-    double width, window, dcs, dcd, dtb, fac;
-    long tb, cs, cd;
+	WINDOW *w;
+	bool is_width;
+	double width;
 	int i;
-	char *buffer;
 
 
 	/* If a trigger channel has been set in the PREPARATIONS section send
@@ -68,8 +70,82 @@ void tds540_do_pre_exp_checks( void )
 		if ( tds540.channels_in_use[ i ] )
 			tds540_display_channel( i );
 
-	/* Remove all unused windows and test if for all other windows the width
-	   is set */
+	/* Remove all unused windows and test if for all other windows the
+	   width is set */
+
+	is_width = tds540_window_check_1( );
+
+	/* That's all if no windows have been defined we switch off gated
+	   measurement mode, i.e. all measurement operations are done on the
+	   whole curve */
+
+	if ( tds540.w == NULL )
+	{
+		tds540_set_gated_meas( UNSET );
+		tds540.gated_state = UNSET;
+		return;
+	}
+
+	/* If the width wasn't defined for all windows get the distance of the
+	   cursors on the screen and use it as the default width */
+
+	if ( ! is_width )
+	{
+		tds540_get_cursor_distance( &width );
+
+		width = fabs( width );
+
+		if ( width == 0.0 )
+		{
+			eprint( FATAL, "%s: Can't determine a reasonable value for "
+					"the missing window widths.\n", DEVICE_NAME );
+			THROW( EXCEPTION );
+		}
+
+		for ( w = tds540.w; w != NULL; w = w->next )
+			if ( ! w->is_width )
+			{
+				w->width = width;
+				w->is_width = SET;
+			}
+	}
+
+	/* Make sure the windows are ok, i.e. cursorsd can be positioned exactly
+	   and are still within the range of the digitizers record length */
+
+	tds540_window_check_2( );
+	tds540_window_check_3( );
+
+	/* Now that all windows are properly set we switch on gated measurements */
+
+	tds540_set_gated_meas( SET );
+	tds540.gated_state = SET;
+
+	/* If the widths of all windows are equal we switch on tracking cursor
+	   mode and set the cursors to the position of the first window */
+
+	if ( tds540.is_equal_width )
+	{
+		tds540_set_cursor( 1, tds540.w->start );
+		tds540_set_cursor( 2, tds540.w->start + tds540.w->width );
+		tds540_set_track_cursors( SET );
+		tds540.cursor_pos = tds540.w->start;
+	}
+	else
+		tds540_set_track_cursors( UNSET );
+}
+
+
+/*---------------------------------------------------------------*/
+/* Removes unused windows and checks if for all the used windows */
+/* a width is set - this is returned to the calling function     */
+/*---------------------------------------------------------------*/
+
+bool tds540_window_check_1( void )
+{
+	WINDOW *w, *wn;
+	bool is_width = SET;
+
 
 	for ( w = tds540.w; w != NULL; )
 	{
@@ -91,48 +167,30 @@ void tds540_do_pre_exp_checks( void )
 		w = w->next;
 	}
 
-	/* That's all if no windows have been defined we switch off gated
-	   measurement mode, i.e. all measurement operations are done on the
-	   whole curve */
+	return is_width;
+}
 
-	if ( tds540.w == NULL )
-	{
-		tds540_set_gated_meas( UNSET );
-		tds540.gated_state = UNSET;
-		return;
-	}
 
-	/* If not get the distance of the cursors on the digitizers screen and
-	   use it as the default width. */
+/*---------------------------------------------------------------------*/
+/* It's not possible to set arbitrary cursor positions and distances - */
+/* they've got to be multiples of the smallest time resolution of the  */
+/* digitizer, which is the time base divided by TDS_POINTS_PER_DIV.    */
+/* Rhe function tests if the requested cursor position and distance    */
+/* fit this requirement and if not the values are readjusted. While    */
+/* settings for the position and width of the window not being exact   */
+/* multiples of the resultion are probably no serious errors a window  */
+/* width of less than the resolution is a hint for a real problem. And */
+/* while we're at it we also try to find out if all window widths are  */
+/* equal - than we can use tracking cursors.                           */
+/*---------------------------------------------------------------------*/
 
-	if ( tds540.w != NULL && ! is_width )
-	{
-		tds540_get_cursor_distance( &width );
+void tds540_window_check_2( void )
+{
+	WINDOW *w;
+    double dcs, dcd, dtb, fac;
+    long tb, cs, cd;
+	char *buffer;
 
-		width = fabs( width );
-
-		if ( width == 0.0 )
-		{
-			eprint( FATAL, "%s: Can't determine a reasonable value for "
-					"the missing window widths.\n", DEVICE_NAME );
-			THROW( EXCEPTION );
-		}
-
-		for ( w = tds540.w; w != NULL; w = w->next )
-			if ( ! w->is_width )
-				w->width = width;
-	}
-
-	/* It's not possible to set arbitrary cursor positions and distances -
-	   they've got to be multiples of the smallest time resolution of the
-	   digitizer, which is the time base divided by TDS_POINTS_PER_DIV. In the
-	   following it is tested if the requested cursor position and distance
-	   fit this requirement and if not the values are readjusted. While
-	   settings for the position and width of the window not being exact
-	   multiples of the resultion are probably no serious errors a window
-	   width of less than the resolution is a hint for a real problem. And
-	   while we're at it we also try to find out if all window widths are
-	   equal - than we can use tracking cursors */
 
 	tds540.is_equal_width = SET;
 
@@ -205,8 +263,20 @@ void tds540_do_pre_exp_checks( void )
 			tds540.is_equal_width = UNSET;
 	}
 
-	/* Test if the windows fit into the measurement window and calculate start
-	   and end point of window */
+}
+
+
+/*-------------------------------------------------------------*/
+/* This function checks if the windows fit into the digitizers */
+/* measurement window and calculate the positions of the start */
+/* and the end of the windows in units of points.              */
+/*-------------------------------------------------------------*/
+
+void tds540_window_check_3( void )
+{
+	WINDOW *w;
+    double window;
+
 
     window = tds540.timebase * tds540.rec_len / TDS_POINTS_PER_DIV;
 
@@ -237,24 +307,6 @@ void tds540_do_pre_exp_checks( void )
 			THROW( EXCEPTION );
 		}
     }
-
-	/* Now that all windows are properly set we switch on gated measurements */
-
-	tds540_set_gated_meas( SET );
-	tds540.gated_state = SET;
-
-	/* If the widths of all windows are equal we switch on tracking cursor
-	   mode and set the cursors to the position of the first window */
-
-	if ( tds540.is_equal_width )
-	{
-		tds540_set_cursor( 1, tds540.w->start );
-		tds540_set_cursor( 2, tds540.w->start + tds540.w->width );
-		tds540_set_track_cursors( SET );
-		tds540.cursor_pos = tds540.w->start;
-	}
-	else
-		tds540_set_track_cursors( UNSET );
 }
 
 

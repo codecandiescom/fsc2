@@ -129,8 +129,8 @@ bool tds540_init( const char *name )
 		if ( tds540.is_sens[ ch ] )
 			tds540_set_sens( ch, tds540.sens[ ch ] );
 
-	/* If the number of averages has been set in the PREPARATIONS section send
-       it to the digitizer now */
+	/* If the number of averages has been set in the PREPARATIONS section
+	   send it to the digitizer now */
 
 	if ( tds540.is_num_avg == SET )
 		tds540_set_num_avg( tds540.num_avg );
