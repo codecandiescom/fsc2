@@ -106,8 +106,9 @@ int main( int argc, char *argv[ ] )
 	   care of shared memory segments. */
 
 	if ( ( Internals.conn_pid =
-			  check_spawn_fsc2d( ! ( Internals.cmdline_flags & NON_EXCLUSIVE ),
-								 in_file_fp ) ) == -1 )
+				   	 ( pid_t ) check_spawn_fsc2d( ! ( Internals.cmdline_flags &
+													  NON_EXCLUSIVE ),
+												  in_file_fp ) ) == -1 )
 		return EXIT_FAILURE;
 
 	/* Initialize xforms stuff, quit on error */

@@ -84,6 +84,8 @@ int check_spawn_fsc2d( bool exclusive, FILE *in_file_fp )
 	int sock_fd;
 	char line[ MAX_LINE_LENGTH ];
 	ssize_t len;
+	long pid;
+	char *ep;
 
 
 	/* If there's no fsc2 "daemon" process running yet start one. */
@@ -151,7 +153,6 @@ int check_spawn_fsc2d( bool exclusive, FILE *in_file_fp )
 		if ( len < 6 )
 		{
 			fprintf( stderr, ".\n" );
-			close( sock_fd );
 			return -1;
 		}
 
@@ -480,9 +481,9 @@ static int new_client( int fd, FSC2_INSTANCE *instances, int num_instances )
 		return num_instances;
 	}
 
-	/* String we got by client has to consist of digits and end with a
-	   newline character and must represent an integer that we now try to
-	   figure out */
+	/* The string we just got from the client has to consist of digits and end
+	   with a newline character and must represent an integer that we now try
+	   to figure out */
 
 	if ( line[ len - 1 ] == '\n' )
 		line[ len - 1 ] = '\0';
