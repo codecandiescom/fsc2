@@ -92,7 +92,7 @@ typedef struct
 
 
 static Magnet magnet;
-static char serial_port[ ] = "/dev/ttyS*";
+static char serial_port[ ] = "/dev/ttyS**";
 
 enum {
 	   SERIAL_INIT,
@@ -207,12 +207,12 @@ int aeg_x_band_init_hook( void )
 	}
 
 	need_Serial_Port[ SERIAL_PORT ] = SET;
-	if ( SERIAL_PORT < 10 )
-		*strrchr( serial_port, '*' ) = ( char ) ( SERIAL_PORT + '0' );
+	if ( SERIAL_PORT < 100 )
+		snprintf( strchr( serial_port, '*' ), 3, "%d", SERIAL_PORT );
 	else
 	{
 		eprint( FATAL, UNSET, "%s: Serial port numbers %d (i.e /dev/ttyS%d or "
-				"COM%d) is too large, 9 is maximum.\n", DEVICE_NAME,
+				"COM%d) is too large, 99 is maximum.\n", DEVICE_NAME,
 				SERIAL_PORT, SERIAL_PORT, SERIAL_PORT + 1 );
 		THROW( EXCEPTION );
 	}
