@@ -55,7 +55,7 @@ have to carefully check all function calls in the @code{EDL} scripts and
 adjust the names of the functions to fit the new digitizer.
 
 Thus it's more reasonable to have generic functions for similar devices
-that usually have a lot in common. It's not only much more convenient to
+that usually have a lot in common. It's much more convenient just to
 write
 @example
 new_data = digitizer_get_curve( CH1 );    // get curve from channel 1
@@ -66,8 +66,8 @@ instead of
 new_data = tds754a_get_curve( 1 );        // get curve from channel 1
 @end example
 @noindent
-nad not to change dozens of references to the TDS754A oscilloscope in
-each and every @code{EDL} program when someone else needs just this
+and changing dozens of references to the TDS754A oscilloscope in each
+and every @code{EDL} program when someone else needs just this
 oscilloscope for a few days and one has to do with the TDS520
 oscilloscope in between.
 
