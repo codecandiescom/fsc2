@@ -49,6 +49,7 @@ int gg_chopper_test_hook( void );
 int gg_copper_exp_hook( void );
 int gg_chopper_end_of_exp_hook( void );
 void gg_chopper_exit_hook( void );
+Var *chopper_name( Var *v );
 Var *chopper_rotation_frequency( Var *v );
 static void gg_chopper_set_dio( long val );
 static void gg_chopper_set_freq_out( double freq );
@@ -243,6 +244,17 @@ void gg_chopper_exit_hook( void )
 		gg_chopper.dio_func = CHAR_P T_free( gg_chopper.dio_func );
 	if ( gg_chopper.freq_out_func )
 		gg_chopper.freq_out_func = CHAR_P T_free( gg_chopper.freq_out_func );
+}
+
+
+/*----------------------------------------------------------------*/
+/* Function returns a string variable with the name of the device */
+/*----------------------------------------------------------------*/
+
+Var *chopper_name( Var *v )
+{
+	UNUSED_ARGUMENT( v );
+	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 
