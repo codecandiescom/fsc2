@@ -152,6 +152,7 @@ void hp8647a_exit_hook( void )
 Var *synthesizer_state( Var *v )
 {
 	bool state;
+	int res;
 
 
 	if ( v == NULL )              /* i.e. return the current state */
@@ -171,18 +172,41 @@ Var *synthesizer_state( Var *v )
 										 hp8647a_get_output_state( ) ) );
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
-	if ( v->type != INT_VAR )
+	if ( v->type == FLOAT_VAR )
 	{
 		eprint( WARN, "%s:%ld: %s: Float variable used for synthesizer "
 				"state.\n", Fname, Lc, DEVICE_NAME );
 		state = ( v->val.dval != 0.0 );
 	}
-	else
+	else if ( v->type == INT_VAR )
 		state = ( v->val.lval != 0 );
+	else
+	{
+		res = hp8647a_is_in( v->val.sptr, "OFF\0ON\0\0" );
+
+		if ( res == -1 )
+		{
+			eprint( FATAL, "%s:%ld: Invalid parameter \"s\" in call of "
+					"function `synthesizer_state'.\n", Fname, Lc, DEVICE_NAME,
+					v->val.sptr );
+			THROW( EXCEPTION );
+		}
+
+		state = res ? SET : UNSET;
+	}
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
+				"function `synthesizer_state'.\n", Fname, Lc, DEVICE_NAME );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
 
 	hp8647a.state = state;
+
 	if ( TEST_RUN || I_am == PARENT )
 		return vars_push( INT_VAR, ( long )state );
 
@@ -687,4 +711,59 @@ Var *synthesizer_att_ref_freq( Var *v )
 	}
 
 	return vars_push( FLOAT_VAR, freq );
+}
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+
+Var *synthesizer_modulation( Var *v )
+{
+	int res;
+	int set = 0;
+	const char *str[ 4 ] = { "amplitude", "type", "input", "state" };
+
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: %s: Use functions "
+				"`synthesizer_mod_(type)|(source)|(amp)|(state)' to determine "
+				"modulation settings.\n", Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+
+	while ( v )
+	{
+		if ( ( 1 << ( res = hp8647a_set_mod_param( v ) - 1 ) ) & set )
+			eprint( SEVERE, "%s:%ld: %s: Parameter for modulation %s set more "
+					"than once in call of `synthesizer_modulation'.\n",
+					Fname, Lc, DEVICE_NAME, str[ res ] );
+		set |= ( 1 << ( res - 1 ) );
+		v = vars_pop( v );
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+Var *synthesizer_mod_amp( Var *v )
+{
+	if ( v == NULL )
+
+	vars_pop( v );
+
+	return vars_push( FLOAT_VAR, 1.0 );
+}
+
+Var *synthesizer_mod_type( Var *v )
+{
+	vars_pop( v );
+	return vars_push( STR_VAR, "AM" );
+}
+
+Var *synthesizer_mod_source( Var *v )
+{
+	vars_pop( v );
+	return vars_push( STR_VAR, "EXT AC" );
 }

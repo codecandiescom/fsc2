@@ -37,6 +37,10 @@ Var *synthesizer_reset_frequency( Var *v );
 Var *synthesizer_use_table( Var *v );
 Var *synthesizer_attenuation( Var *v );
 Var *synthesizer_att_ref_freq( Var *v );
+Var *synthesizer_modulation( Var *v );
+Var *synthesizer_mod_amp( Var *v );
+Var *synthesizer_mod_type( Var *v );
+Var *synthesizer_mod_source( Var *v );
 
 
 typedef struct {
@@ -94,6 +98,8 @@ FILE *hp8647a_find_table( char **name );
 FILE *hp8647a_open_table( char *name );
 double hp8647a_get_att_from_table( double freq );
 double hp8647a_get_att( double freq );
+int hp8647a_set_mod_param( Var *v );
+int hp8647a_is_in( const char *sup_in, const char *altern );
 
 
 /* functions defined in "hp8647a_lexer.flex" */

@@ -229,3 +229,108 @@ double hp8647a_get_att( double freq )
 
 	return att;
 }
+
+
+
+int hp8647a_set_mod_param( Var *v )
+{
+	/* If the variable is an integer of floating value this means a amplitude
+	   setting */
+
+	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+	{
+		vars_pop( synthesizer_mod_amp( v ) );
+		return 1;
+	}
+
+	/* Otherwise its got to be a string */
+
+	vars_check( v, STR_VAR );
+
+	switch ( hp8647a_is_in( v->val.sptr, "FM\0AM\0PHASE\0\0" ) )
+	{
+		case 0 :
+			vars_pop( synthesizer_mod_type( vars_push( STR_VAR, "FM" ) ) );
+			return 2;
+
+		case 1 :
+			vars_pop(  synthesizer_mod_type( vars_push( STR_VAR, "AM" ) ) );
+			return 2;
+
+		case 3 :
+			vars_pop( synthesizer_mod_type( vars_push( STR_VAR, "PHASE" ) ) );
+			return 2;
+	}
+
+	switch ( hp8647a_is_in( v->val.sptr,
+							"EXT AC\0AC\0"
+							"EXT DC\0DC\0"
+							"INT 1kHz\0INT 1 kHz\0INT 1\01kHz\01 kHz\01\0"
+							"INT 400Hz\0INT 400 Hz\0INT 400\n400Hz\0"
+							"400 Hz\0400\0\0" ) )
+	{
+
+		case 0 : case 1 :
+			vars_pop( synthesizer_mod_source( vars_push( STR_VAR,
+														 "EXT_AC" ) ) );
+			return 3;
+
+		case 2 : case 3 :
+			vars_pop( synthesizer_mod_type( vars_push( STR_VAR, "EXT_DC" ) ) );
+			return 3;
+
+		case 4 : case 5 : case 6 : case 7 : case 8 : case 9 :
+			vars_pop( synthesizer_mod_type( vars_push( STR_VAR,
+													   "INT 1kHz" ) ) );
+			return 3;
+
+		case 10 : case 11 : case 12 : case 13 : case 14 : case 15 :
+			vars_pop( synthesizer_mod_type( vars_push( STR_VAR,
+													   "INT 400 Hz" ) ) );
+			return 3;
+	}
+
+	eprint( FATAL, "%s:%ld: %s: Invalid parameter \"%s\" in call of "
+			"function `synthesizer_modulation'.\n", Fname, Lc, DEVICE_NAME,
+			v->val.sptr );
+	THROW( EXCEPTION );
+
+	return -1;
+}
+
+
+
+int hp8647a_is_in( const char *sup_in, const char *altern )
+{
+	char *in, *cpy;
+	const char *a;
+	int count;
+
+
+	cpy = get_string_copy( sup_in );
+	in = cpy;
+
+	/* Get rid of leading and trailing white space */
+
+	while ( isspace( *in ) )
+		in++;
+	while( isspace( cpy[ strlen( cpy ) - 1 ] ) )
+		cpy[ strlen( cpy ) - 1 ] = '\0';
+
+	a = altern;
+	count = 0;
+
+	while ( a )
+	{
+		if ( ! strcasecmp( in, a ) )
+			break;
+
+		count++;
+		while ( *a++ )
+			;
+	}
+
+	T_free( cpy );
+
+	return a ?  count : -1;
+}
