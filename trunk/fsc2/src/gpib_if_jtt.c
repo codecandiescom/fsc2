@@ -184,7 +184,7 @@ static int gpib_init_controller( void )
 {
 	int state = 0;
 
-    if ( gpib_init_device( NULL, &controller ) != SUCCESS )
+    if ( gpib_init_device( CONTROLLER, &controller ) != SUCCESS )
         return FAILURE;
 
     if ( gpib_ask( controller, GPIB_ASK_IS_MASTER, &state ) & GPIB_ERR )
