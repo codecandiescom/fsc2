@@ -403,7 +403,6 @@ void hjs_fc_child_exit_hook( void )
 			cur_volts = 0.0;
 
 		hjs_fc_set_dac( cur_volts );
-
 		hjs_fc.cur_volts = 0.0;
 
 		fsc2_usleep( 20000, UNSET );
@@ -477,14 +476,8 @@ Var *set_field( Var *v )
 				   "value.\n" );
 	}
 
-	if ( FSC2_MODE == TEST )
-		hjs_fc.act_field = hjs_fc.target_field = field;
-	else
-	{
-		hjs_fc.target_field = hjs_fc_field_check( field );
-		hjs_fc.act_field = hjs_fc_set_field( hjs_fc.target_field,
-											 error_margin );
-	}
+	hjs_fc.target_field = hjs_fc_field_check( field );
+	hjs_fc.act_field = hjs_fc_set_field( hjs_fc.target_field, error_margin );
 
 	return vars_push( FLOAT_VAR, hjs_fc.act_field );
 }
@@ -518,7 +511,8 @@ Var *sweep_up( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	hjs_fc.target_field += hjs_fc.field_step;
+	hjs_fc.target_field =
+				 hjs_fc_field_check( hjs_fc.target_field + hjs_fc.field_step );
 	hjs_fc.act_field = hjs_fc_sweep_to( hjs_fc.target_field );
 
 	return vars_push( FLOAT_VAR, hjs_fc.act_field );
@@ -538,7 +532,8 @@ Var *sweep_down( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	hjs_fc.target_field -= hjs_fc.field_step;
+	hjs_fc.target_field =
+				 hjs_fc_field_check( hjs_fc.target_field - hjs_fc.field_step );
 	hjs_fc.act_field = hjs_fc_sweep_to( hjs_fc.target_field );
 
 	return vars_push( FLOAT_VAR, hjs_fc.act_field );
@@ -626,7 +621,7 @@ static void hjs_fc_init( void )
 			stop_on_user_request( );
 		}
 
-		/* Get a consistent reading and finally calculate how long it took  */
+		/* Get a consistent reading */
 
 		fsc2_usleep( 1000000L, SET );
 		stop_on_user_request( );
@@ -835,7 +830,6 @@ static double hjs_fc_sweep_to( double new_field )
 			cur_volts = v_step;
 
 		hjs_fc_set_dac( cur_volts );
-
 		hjs_fc.cur_volts = cur_volts;
 
 		fsc2_usleep( 20000, UNSET );
@@ -907,7 +901,7 @@ static double hjs_fc_get_field( void )
 
 static double hjs_fc_field_check( double field )
 {
-	if ( FSC2_MODE == EXPERIMENT )
+	if ( FSC2_MODE == TEST )
 	{
 		hjs_fc.max_test_field = d_max( hjs_fc.max_test_field, field );
 		hjs_fc.min_test_field = d_min( hjs_fc.min_test_field, field );
