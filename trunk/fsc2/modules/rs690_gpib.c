@@ -35,10 +35,10 @@ static void rs690_check( void );
 
 #define UNUSED_BIT -1
 
-
+/*
 #define gpib_write( a, b, c ) fprintf( stderr, "%s\n", ( b ) )
 #define gpib_init_device( a, b ) 1
-
+*/
 
 
 /*------------------------------*/
@@ -57,11 +57,11 @@ bool rs690_init( const char *name )
 
 	/* Try to read the device indentification string to check if the pulser
 	   responds. */
-/*
+
 	if ( gpib_write( rs690.device, "RUI!", 4 ) == FAILURE ||
 		 gpib_read( rs690.device, reply, &length ) == FAILURE )
 		rs690_gpib_failure( );
-*/
+
 	/* Disable the front panel and stop the pulser */
 
 	rs690_lock_state( SET );
