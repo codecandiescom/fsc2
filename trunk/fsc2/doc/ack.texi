@@ -43,15 +43,16 @@ it into the distribution.
 All the people using the program so far have from time to time been
 (mis)used as alpha-testers. The first one accepting this unpleasant role
 has been Axel Weber in Frankfurt/Main, who already dealt with the bugs
-and shortcomings of the very first version. Then, in Berlin, Stefan
-Weber, Chris W.@: M.@: Kay, Gerriet Eilers, Andreas Kuppig, Heike
-M@"ogling, Michael Fuhs, Anton Savitsky, Alexander Schnegg, Radek
-Kowalczyk, Martin Fuchs, Celine Els@"asser, Marc Brecht and Hauke
-Studier took over. Finally, also Iwo Gatlik, Tomasz Motylewski and
-Daniela Hristova (University Basel) got some share of the fun. I would
-like to thank them not only for the constant stream of bug reports and
-proposals for improvements or new features (and I sometimes needed quite
-a lot of convincing even though they where right) but especially for
-their enduring patience. Much too often, when they had to do an
-important experiment things didn't work and they had to wait until I got
-it fixed. Lots of thanks to all of them!
+and shortcomings of the very first version. Later also Burkhard
+Endeward had to deal with it. Then, in Berlin, Stefan Weber, Chris
+W.@: M.@: Kay, Gerriet Eilers, Andreas Kuppig, Heike M@"ogling,
+Michael Fuhs, Anton Savitsky, Alexander Schnegg, Radek Kowalczyk,
+Martin Fuchs, Celine Els@"asser, Marc Brecht and Hauke Studier took
+over. Finally, also Iwo Gatlik, Tomasz Motylewski and Daniela Hristova
+(University Basel) got some share of the fun. I would like to thank
+them not only for the constant stream of bug reports and proposals for
+improvements or new features (and I sometimes needed quite a lot of
+convincing even though they where right) but especially for their
+enduring patience. Much too often, when they had to do an important
+experiment things didn't work and they had to wait until I got it fixed.
+Lots of thanks to all of them!
