@@ -973,14 +973,14 @@ static void check_consistency( void )
 		if ( dg2020.function[ i ].is_used && ! dg2020.function[ i ].is_needed )
 		{
 			eprint( WARN, "DG2020: No pulses have been assigned to function "
-					"%s.\n", Function_Names[ i ] );
+					"`%s'.\n", Function_Names[ i ] );
 		}
 
 		if ( dg2020.function[ i ].is_needed &&
 			 dg2020.function[ i ].pod == NULL )
 		{
 			eprint( FATAL, "DG2020: No pod has been assigned to "
-					"function %s.\n", Function_Names[ i ] );
+					"function `%s'.\n", Function_Names[ i ] );
 			THROW( EXCEPTION );
 		}
 	}
