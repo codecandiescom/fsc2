@@ -260,45 +260,6 @@ void end_comm( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* This routine tries to get a shared memory segment - if this fails and */
-/* the reason is that no segments or no memory for segments are left it  */
-/* waits for some time hoping for the parent process to remove other     */
-/* segments in the mean time.                                            */
-/*-----------------------------------------------------------------------*/
-
-void *get_shm( int *shm_id, long len )
-{
-	void *buf;
-
-
-	seteuid( EUID );
-	while ( ( *shm_id = shmget( IPC_PRIVATE, len, IPC_CREAT | 0600 ) ) < 0 )
-	{
-		if ( errno == ENOSPC || errno == ENOMEM)  /* wait for 10 ms */
-			usleep( 10000 );
-		else                                      /* non-recoverable failure */
-		{
-			seteuid( getuid( ) );
-			return ( void * ) -1;
-		}
-	}
-
-	/* Attach to the shared memory segment - if this should fail (improbable)
-	   return -1 and let the calling routine handle the mess... */
-
-	if ( ( buf = shmat( *shm_id, NULL, 0 ) ) == ( void * ) - 1 )
-	{
-		seteuid( getuid( ) );
-		return ( void * ) -1;
-	}
-
-	seteuid( getuid( ) );
-
-	return buf;
-}
-
-
 /*------------------------------------------------------------*/
 /* new_data_callback() is responsible for either honouring a  */
 /* a REQUEST or storing and displaying DATA from the child.   */

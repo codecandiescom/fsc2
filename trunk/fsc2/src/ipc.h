@@ -30,6 +30,9 @@ union semun {
 #endif
 
 
+void *get_shm( int *shm_id, long len );
+void *attach_shm( int key );
+void detach_shm( int key, void *buf );
 int sema_create( int val );
 int sema_destroy( int sema_id );
 int sema_wait( int sema_id );

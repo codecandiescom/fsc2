@@ -8,6 +8,108 @@
 
 
 
+/*-------------------------------------------------------------------*/
+/* Routine tries to get a shared memory segment - if this fails and  */
+/* the reason is that no segments or no memory for segments are left */
+/* it waits for some time hoping for the parent process to remove    */
+/* other segments in the mean time.                                  */
+/*-------------------------------------------------------------------*/
+
+void *get_shm( int *shm_id, long len )
+{
+	void *buf;
+	bool must_reset = UNSET;
+
+
+	if ( geteuid( ) != EUID )
+	{
+		seteuid( EUID );
+		must_reset = SET;
+	}
+
+	while ( ( *shm_id = shmget( IPC_PRIVATE, len,
+								IPC_CREAT | SHM_R | SHM_A ) ) < 0 )
+	{
+		if ( errno == ENOSPC || errno == ENOMEM)  /* wait for 10 ms */
+			usleep( 10000 );
+		else                                      /* non-recoverable failure */
+		{
+			if ( must_reset )
+				seteuid( getuid( ) );
+			return ( void * ) -1;
+		}
+	}
+
+	/* Attach to the shared memory segment - if this should fail (improbable)
+	   return -1 and let the calling routine handle the mess... */
+
+	if ( ( buf = shmat( *shm_id, NULL, 0 ) ) == ( void * ) - 1 )
+	{
+		if ( must_reset )
+			seteuid( getuid( ) );
+		return ( void * ) -1;
+	}
+
+	if ( must_reset )
+		seteuid( getuid( ) );
+
+	return buf;
+}
+
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+void *attach_shm( int key )
+{
+	void *buf;
+	bool must_reset = UNSET;
+
+
+	if ( geteuid( ) != EUID )
+	{
+		seteuid( EUID );
+		must_reset = SET;
+	}
+
+	if ( ( buf = shmat( key, NULL, SHM_RDONLY ) ) == ( void * ) - 1 )
+	{
+		shmctl( key, IPC_RMID, NULL );                 /* delete the segment */
+		if ( must_reset )
+			seteuid( getuid( ) );
+		return ( void * ) -1;
+	}
+
+	if ( must_reset )
+		seteuid( getuid( ) );
+
+	return buf;
+}
+
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+void detach_shm( int key, void *buf )
+{
+	bool must_reset = UNSET;
+
+
+	if ( geteuid( ) != EUID )
+	{
+		seteuid( EUID );
+		must_reset = SET;
+	}
+	
+	shmdt( buf );
+	if ( key >= 0 )
+		shmctl( key, IPC_RMID, NULL );
+
+	if ( must_reset )
+		seteuid( getuid( ) );
+}
+
+
 /*------------------------------------------------------------*/
 /* Function creates a (System V) semaphore (with one set) and */
 /* initializes to 'val'. It returns either the ID number of   */

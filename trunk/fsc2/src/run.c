@@ -12,15 +12,16 @@ extern int exp_runparse( void );              /* from exp_run_parser.y */
 /* Routines of the main process exclusively used in this file */
 
 void check_for_further_errors( Compilation *c_old, Compilation *c_all );
-static void new_data_handler( int sig_type );
-static void quitting_handler( int sig_type );
-static void run_sigchld_handler( int sig_type );
+static void new_data_handler( int signo	);
+static void quitting_handler( int signo	);
+static void run_sigchld_handler( int signo );
 static void set_buttons_for_run( int active );
 
 
 /* Routines of the child process doing the measurement */
 
 static void run_child( void );
+static void set_child_signals( void );
 void child_sig_handler( int signo );
 static void do_measurement( void );
 
@@ -31,6 +32,10 @@ static volatile bool child_is_quitting;
 
 jmp_buf alrm_env;
 volatile sig_atomic_t can_jmp_alrm = 0;
+
+static struct sigaction sigchld_oact,
+	                    new_data_oact,
+	                    quitting_oact;
 
 
 /*-------------------------------------------------------------------*/
@@ -47,6 +52,7 @@ volatile sig_atomic_t can_jmp_alrm = 0;
 bool run( void )
 {
 	Compilation compile_test;
+	struct sigaction sact;
 
 
 	/* If there are no commands we're already done */
@@ -117,16 +123,22 @@ bool run( void )
 
 	child_is_quitting = UNSET;
 
-	/* Set the signal handlers - for NEW_DATA signals we can't use XForms
-	signal handlers because they become blocked by when the display is busy
-	and no SEND_DATA is send back to the child, effectively stopping it
-	completely, so we have to use the traditional approach for this type of
-	signal. Also with SIGCHLD there was a problem - the XForms signal handler
-	wasn't reliable enough, so... */
+	/* Set the signal handlers */
 
-	signal( NEW_DATA, new_data_handler );
-	signal( QUITTING, quitting_handler );
-	signal( SIGCHLD, run_sigchld_handler );
+	sact.sa_handler = new_data_handler;
+	sigemptyset( &sact.sa_mask );
+	sact.sa_flags = 0;
+	sigaction( NEW_DATA, &sact, &new_data_oact );
+
+	sact.sa_handler = quitting_handler;
+	sigemptyset( &sact.sa_mask );
+	sact.sa_flags = 0;
+	sigaction( QUITTING, &sact, &quitting_oact );
+
+	sact.sa_handler = run_sigchld_handler;
+	sigemptyset( &sact.sa_mask );
+	sact.sa_flags = 0;
+	sigaction( SIGCHLD, &sact, &sigchld_oact );
 
 	fl_set_idle_callback( new_data_callback, NULL );
 
@@ -149,9 +161,9 @@ bool run( void )
 		return OK;
 	}
 
-	signal( SIGCHLD, main_sig_handler );
-	signal( SIGUSR1, main_sig_handler );
-	signal( SIGUSR2, main_sig_handler );
+	sigaction( SIGCHLD,  &sigchld_oact,  NULL );
+	sigaction( NEW_DATA, &new_data_oact, NULL );
+	sigaction( QUITTING, &quitting_oact, NULL );
 
 	switch ( errno )
 	{
@@ -241,15 +253,14 @@ void check_for_further_errors( Compilation *c_old, Compilation *c_all )
 /* parent with excessive amounts of data and signals).               */
 /*-------------------------------------------------------------------*/
 
-static void new_data_handler( int sig_type )
+static void new_data_handler( int signo )
 {
-	assert( sig_type == NEW_DATA );
+	signo = signo;
 
 	Message_Queue[ message_queue_high ].shm_id = Key->shm_id;
 	Message_Queue[ message_queue_high ].type = Key->type;
 	message_queue_high = ( message_queue_high + 1 ) % QUEUE_SIZE;
 
-	signal( NEW_DATA, new_data_handler );
 	if ( Key->type == DATA )
 		sema_post( semaphore );
 }
@@ -261,10 +272,10 @@ static void new_data_handler( int sig_type )
 /* and reacts by sending (another) DO_QUIT signal.                */
 /*----------------------------------------------------------------*/
 
-static void quitting_handler( int sig_type )
+static void quitting_handler( int signo )
 {
-	assert( sig_type == QUITTING );
-	signal( QUITTING, quitting_handler );
+	signo = signo;
+
 	child_is_quitting = SET;
 	kill( child_pid, DO_QUIT );
 }
@@ -279,15 +290,13 @@ static void quitting_handler( int sig_type )
 /* of its callback function run_sigchld_callback().                  */
 /*-------------------------------------------------------------------*/
 
-static void run_sigchld_handler( int sig_type )
+static void run_sigchld_handler( int signo )
 {
 	int return_status;
 	int pid;
 
 
-	assert( sig_type == SIGCHLD );
-
-	signal( SIGCHLD, run_sigchld_handler );
+	signo = signo;
 
 	if ( ( pid = wait( &return_status ) ) != child_pid )
 		return;                       /* if some other child process died... */
@@ -299,7 +308,7 @@ static void run_sigchld_handler( int sig_type )
 #endif
 
 	child_pid = 0;                          /* the child is dead... */
-	signal( SIGCHLD, main_sig_handler );
+	sigaction( SIGCHLD, &sigchld_oact, NULL );
 
 	run_form->sigchld->u_ldata = ( long ) return_status;
 	fl_trigger_object( run_form->sigchld );
@@ -341,9 +350,9 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 
 void stop_measurement( FL_OBJECT *a, long b )
 {
-	a = a;
+	a = a;                               /* keeps the compiler happy */
 
-	if ( b == 0 )                /* callback from stop button ? */
+	if ( b == 0 )                        /* callback from stop button ? */
 	{
 		if ( child_pid != 0 )            /* child is still kicking... */
 		{
@@ -365,8 +374,8 @@ void stop_measurement( FL_OBJECT *a, long b )
 
 	fl_set_idle_callback( 0, NULL );
 
-	signal( SIGUSR1, main_sig_handler );
-	signal( SIGUSR2, main_sig_handler );
+	sigaction( NEW_DATA, &new_data_oact, NULL );
+	sigaction( QUITTING, &quitting_oact, NULL );
 
 	/* reset all the devices and finally the GPIB bus */
 
@@ -478,9 +487,6 @@ static int return_status;
 
 static void run_child( void )
 {
-	struct sigaction sact;
-
-
 	I_am = CHILD;
 
     /* Set up pipes for communication with parent process */
@@ -489,36 +495,14 @@ static void run_child( void )
 	close( pd[ 2 ] );
 	pd[ WRITE ] = pd[ 3 ];
 
-	/* Set up pointers and global variables used with the signal handlers */
+	/* Set up pointers, global variables and signal handlers */
 
 	return_status = OK;
 	cur_prg_token = prg_token;
 	do_quit = UNSET;
+	set_child_signals( );
 
 	/* Set up signals */
-
-	signal( SIGQUIT, child_sig_handler );
-	signal( SIGILL,  child_sig_handler );
-	signal( SIGABRT, child_sig_handler );
-	signal( SIGFPE,  child_sig_handler );
-	signal( SIGSEGV, child_sig_handler );
-	signal( SIGTERM, child_sig_handler );
-	signal( SIGPIPE, child_sig_handler );
-	signal( SIGTERM, child_sig_handler );
-	signal( SIGBUS,  child_sig_handler );
-
-	sact.sa_handler = child_sig_handler;
-	sigemptyset( &sact.sa_mask );
-	sigaddset( &sact.sa_mask, SIGALRM );
-	sact.sa_flags = 0;
-	if ( sigaction( DO_QUIT, &sact, NULL ) < 0 )
-		_exit( -1 );
-
-	sact.sa_handler = child_sig_handler;
-	sigemptyset( &sact.sa_mask );
-	sact.sa_flags = 0;
-	if ( sigaction( SIGALRM, &sact, NULL ) < 0 )
-		_exit( -1 );
 
 /*
 {
@@ -552,26 +536,71 @@ static void run_child( void )
 }
 
 
-/*------------------------------------------------------------*/
-/* This is the signal handler for the signals the child is    */
-/* interested in.                                             */
-/* There's a twist: The SIGALRM signal can only come from the */
-/* f_wait() function (see func_util.c). Here we we wait in a  */
-/* pause() for SIGALRM to get a reliable timer. On the other  */
-/* hand, the pause() also has to be interruptible by the	  */
-/* DO_QUIT signal, so by falling through from the switch of	  */
-/* for this signal it is guaranteed that also this signal	  */
-/* will end the pause() - it works even when the handler,	  */
-/* while handling a SIGALRM signal, is interrupted by a		  */
-/* DO_QUIT signal. In all other cases (i.e. when we're not	  */
-/* waiting in the pause() in f_wait()) nothing bad happens.   */
-/*------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Sets up the signal handlers for all kinds of signals the child may */
+/* receive. This probably looks a bit like overkill, but I just wan't */
+/* to sure the child doesn't get killed by some meaningless signals   */
+/* and, on the other hand, that on deadly signals it still gets a     */
+/* chance to try to get rid of shared memory that the parent didn't   */
+/* destroyed (in case it was killed by an signal it couldn't catch).  */
+/*--------------------------------------------------------------------*/
+
+static void set_child_signals( void )
+{
+	struct sigaction sact;
+	int sig_list[ ] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE,
+						SIGSEGV, SIGPIPE, SIGTERM, SIGUSR1, SIGCHLD, SIGCONT,
+						SIGTTIN, SIGTTOU, SIGBUS, SIGVTALRM, 0 };
+	int i;
+
+
+	for ( i = 0; sig_list[ i ] != 0; i++ )
+	{
+		sact.sa_handler = child_sig_handler;
+		sigemptyset( &sact.sa_mask );
+		sact.sa_flags = 0;
+		if ( sigaction( sig_list[ i ], &sact, NULL ) < 0 )
+			_exit( -1 );
+	}
+
+	sact.sa_handler = child_sig_handler;
+	sigemptyset( &sact.sa_mask );
+	sigaddset( &sact.sa_mask, SIGALRM );
+	sact.sa_flags = 0;
+	if ( sigaction( DO_QUIT, &sact, NULL ) < 0 )    /* aka SIGUSR2 */
+		_exit( -1 );
+
+	sact.sa_handler = child_sig_handler;
+	sigemptyset( &sact.sa_mask );
+	sact.sa_flags = 0;
+	if ( sigaction( SIGALRM, &sact, NULL ) < 0 )
+		_exit( -1 );
+}
+
+
+/*----------------------------------------------------------------*/
+/* This is the signal handler for the signals the child receives. */
+/* There are only two that are important, SIGUSR2 (aka DO_QUIT )  */
+/* and SIGALRM. The other are either ignored or kill the child    */
+/* (but in a controlled way to allow deletion of shared memory if */
+/* the parent didn't do it as expected.                           */
+/* There's a twist: The SIGALRM signal can only come from the     */
+/* f_wait() function (see func_util.c). Here we we wait in a	  */
+/* pause() for SIGALRM to get a reliable timer. On the other	  */
+/* hand, the pause() also has to be interruptible by the		  */
+/* DO_QUIT signal, so by falling through from the switch for	  */
+/* this signal it is guaranteed that also this signal will end	  */
+/* the pause() - it works even when the handler, while handling	  */
+/* a SIGALRM signal, is interrupted by a DO_QUIT signal. In all	  */
+/* other cases (i.e. when we're not waiting in the pause() in	  */
+/* f_wait()) nothing unexpected happens.                          */
+/*----------------------------------------------------------------*/
 
 void child_sig_handler( int signo )
 {
 	switch ( signo )
 	{
-		case DO_QUIT :
+		case DO_QUIT :                /* aka SIGUSR2 */
 			do_quit = SET;
 			/* fall through ! */
 
@@ -582,6 +611,14 @@ void child_sig_handler( int signo )
 				siglongjmp( alrm_env, 1 );
 			}
 			return;
+
+		/* Ignored signals : */
+
+		case SIGHUP :  case SIGINT :  case SIGUSR1 : case SIGCHLD :
+		case SIGCONT : case SIGTTIN : case SIGTTOU : case SIGVTALRM :
+			return;
+			
+		/* All the remaining signals are deadly... */
 
 		default :
 			/* Test if parent still exists and if not (i.e. the parent died

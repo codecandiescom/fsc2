@@ -13,7 +13,8 @@ static void connect_handler( int listen_fd );
 static ssize_t read_line( int fd, char *ptr, ssize_t max_len );
 static ssize_t do_read( int fd, char *ptr );
 static ssize_t writen( int fd, const char *ptr, ssize_t n );
-static void comm_sig_handler( int signo );
+static void set_conn_signals( void );
+static void conn_sig_handler( int signo );
 
 static volatile bool is_busy;
 
@@ -94,16 +95,7 @@ static void connect_handler( int listen_fd )
 	ssize_t i;
 
 
-	signal( BUSY_SIGNAL, comm_sig_handler );
-	signal( UNBUSY_SIGNAL, comm_sig_handler );
-	signal( SIGILL,  SIG_DFL );
-	signal( SIGABRT, SIG_DFL );
-	signal( SIGFPE,  SIG_DFL );
-	signal( SIGSEGV, SIG_DFL );
-	signal( SIGPIPE, SIG_DFL );
-	signal( SIGTERM, SIG_DFL );
-	signal( SIGBUS,  SIG_DFL );
-
+	set_conn_signals( );
 	close( conn_pd[ READ ] );
 
 	/* Signal parent that child is up and running and can accept signals */
@@ -342,11 +334,42 @@ static ssize_t writen( int fd, const char *ptr, ssize_t n )
 }
 
 
+/*---------------------------------------------------------------------*/
+/* Sets up the signal handlers for all kinds of signals the connection */
+/* process may receive. This probably looks a bit like overkill, but I */
+/* just wan't to sure the child doesn't get killed by some meaningless */
+/* signals and, on the other hand, that on deadly signals it still     */
+/* gets a chance to try to get rid of shared memory that the parent    */
+/* didn't destroyed (in case it was killed by an signal it couldn't    */
+/* catch).                                                             */
+/*---------------------------------------------------------------------*/
+
+static void set_conn_signals( void )
+{
+	struct sigaction sact;
+	int sig_list[ ] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE,
+						SIGSEGV, SIGPIPE, SIGTERM, SIGUSR1, SIGUSR2,
+						SIGCHLD, SIGCONT, SIGTTIN, SIGTTOU, SIGBUS,
+						SIGVTALRM, 0 };
+	int i;
+
+
+	for ( i = 0; sig_list[ i ] != 0; i++ )
+	{
+		sact.sa_handler = conn_sig_handler;
+		sigemptyset( &sact.sa_mask );
+		sact.sa_flags = 0;
+		if ( sigaction( sig_list[ i ], &sact, NULL ) < 0 )
+			_exit( -1 );
+	}
+}
+
+
 /*-----------------------------------------------------*/
-/* Set variable 'is_busy' depenming on type of signal. */
+/* Set variable 'is_busy' depending on type of signal. */
 /*-----------------------------------------------------*/
 
-static void comm_sig_handler( int signo )
+static void conn_sig_handler( int signo )
 {
 	switch( signo )
 	{
@@ -358,9 +381,23 @@ static void comm_sig_handler( int signo )
 			is_busy = UNSET;
 			break;
 
+		/* Ignored signals : */
+
+		case SIGHUP :  case SIGINT :  case SIGCHLD : case SIGCONT :
+		case SIGTTIN : case SIGTTOU : case SIGVTALRM :
+			return;
+			
+		/* All the remaining signals are deadly... */
+
 		default :
-			assert( 1 == 0 );
+			/* Test if parent still exists and if not (i.e. the parent died
+			   without sending the child a SGTERM signal) destroy the
+			   semaphore and the shared memory segments */
+
+			if ( kill( getppid( ), 0 ) == -1 && errno == ESRCH )
+				sema_destroy( semaphore );
+			_exit( -1 );
 	}
-	signal( signo, comm_sig_handler );
+
 	kill( getppid( ), SIGUSR2 );
 }

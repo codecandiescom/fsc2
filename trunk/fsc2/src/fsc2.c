@@ -33,6 +33,7 @@ static void xforms_close( void );
 static bool display_file( char *name, FILE *fp );
 static void start_editor( void );
 static void start_help_browser( void );
+static void set_main_signals( void );
 
 
 
@@ -204,12 +205,7 @@ int main( int argc, char *argv[ ] )
 	/* Set handler for signal that's going to be send by the process that
 	   accepts external connections (to be spawned next) */
 
-	signal( SIGCHLD, main_sig_handler );
-	signal( SIGUSR1, main_sig_handler );
-	signal( SIGUSR2, main_sig_handler );
-	signal( SIGHUP,  SIG_IGN );
-	signal( SIGINT,  SIG_IGN );
-
+	set_main_signals( );
 	atexit( final_exit_handler );
 
 	/* If starting the server for external connections succeeds we can
@@ -218,14 +214,6 @@ int main( int argc, char *argv[ ] )
 	if ( ( conn_pid = spawn_conn( ( do_test || do_start ) && is_loaded ) )
 		 != -1 )
 	{
-		signal( SIGILL,  main_sig_handler );
-		signal( SIGABRT, main_sig_handler );
-		signal( SIGFPE,  main_sig_handler );
-		signal( SIGSEGV, main_sig_handler );
-		signal( SIGPIPE, main_sig_handler );
-		signal( SIGTERM, main_sig_handler );
-		signal( SIGBUS,  main_sig_handler );
-
 		/* Trigger test or start of current EDL program if the appropriate
 		   flags were passed to the program on the command line */
 
@@ -507,7 +495,7 @@ void load_file( FL_OBJECT *a, long reload )
 	/* Set a new window title */
 
 	T_free( title );
-	title = T_malloc( 7 + strlen( in_file ) );
+	title = get_string( 6 + strlen( in_file ) );
 	strcpy( title, "fsc2: " );
 	strcat( title, in_file );
 	fl_set_form_title( main_form->fsc2, title );
@@ -1129,6 +1117,37 @@ static void start_help_browser( void )
 }
 
 
+/*-----------------------------------------------------------------------*/
+/* Sets up the signal handlers for all kinds of signals the main process */
+/* could receive. This probably looks a bit like overkill, but I just    */
+/* wan't to sure it doesn't get killed by some meaningless singnals and, */
+/* on the other hand, that on deadly signals it still gets a chance to   */
+/* try to get rid of shared memory and kill the other processes etc.     */
+/*-----------------------------------------------------------------------*/
+
+static void set_main_signals( void )
+{
+	struct sigaction sact;
+	int sig_list[ ] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE,
+						SIGSEGV, SIGPIPE, SIGTERM, SIGUSR1, SIGUSR2, SIGCHLD,
+						SIGCONT, SIGTTIN, SIGTTOU, SIGBUS, SIGVTALRM, 0 };
+	int i;
+
+
+	for ( i = 0; sig_list[ i ] != 0; i++ )
+	{
+		sact.sa_handler = main_sig_handler;
+		sigemptyset( &sact.sa_mask );
+		sact.sa_flags = 0;
+		if ( sigaction( sig_list[ i ], &sact, NULL ) < 0 )
+		{
+			fprintf( stderr, "Failed to initialize fsc2.\n" );
+			exit( -1 );
+		}
+	}
+}
+
+
 /*------------------------------------------------------------*/  
 /*------------------------------------------------------------*/  
 
@@ -1163,6 +1182,14 @@ void main_sig_handler( int signo )
 			fl_trigger_object( main_form->Load );
 
 			break;
+
+		/* Ignored signals : */
+
+		case SIGHUP  : case SIGINT  : case SIGALRM : case SIGCONT :
+		case SIGTTIN : case SIGTTOU : case SIGVTALRM :
+			return;
+
+		/* All the remaining signals are deadly... */
 
 		default :
 			final_exit_handler( );
