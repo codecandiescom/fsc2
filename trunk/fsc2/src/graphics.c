@@ -65,6 +65,8 @@ void start_graphics( void )
 							  "Extempt curve 3 from\nrescaling operations" );
 		fl_set_object_helper( run_form->curve_4_button, 
 							  "Extempt curve 4 from\nrescaling operations" );
+
+		fl_set_object_callback( run_form->print_button, print_1d, 0 );
 	}
 	else
 	{
