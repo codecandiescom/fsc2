@@ -396,6 +396,20 @@ DETECTION: POD = 11;   // leave it to the program to select the channel
 @end example
 
 
+In contrast, for the @strong{Tektronix HFS9003} and the @strong{Bruker
+EP385} not @code{POD}s but channels get associated with a function,
+e.g.@:
+@example
+MICROWAVE: CH = 0, 1, 2, 3;
+RF:        CH = 5;
+RF_GATE:   CH = 6;
+DETECTION: CH = 7;
+@end example
+@noindent
+(This example will only work with the @strong{Bruker EP385}, the
+@strong{Tektronix HFS9003} has only 4 channels and does not allow teh
+assignment of more than one channel to a single function.)
+
 Here a list of the pod and/or channel numbers that can be used for the
 pulsers:
 @itemize @bullet
