@@ -29,7 +29,7 @@ fsc2: $(objects) fsc2_clean $(header)
 	flex -B -P$(patsubst %_lexer.flex,%,$<) -o$@ $<
 
 mods: $(modules:.c=.so)
-	export LD_LIBRARY_PATH=$(shell pwd)
+	# export LD_LIBRARY_PATH=$(shell pwd)
 
 %.so: %.c $(header)
 	gcc $(CFLAGS) -c -fPIC -DPIC $< -o $*.lo
