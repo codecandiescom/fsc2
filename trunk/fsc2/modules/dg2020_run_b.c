@@ -166,7 +166,7 @@ static void dg2020_defense_twt_check( void )
 
 			if ( twt_p->pos > defense_p->pos &&
 				 defense_p->pos + defense_p->len + defense_2_twt > twt_p->pos )
-				eprint( SEVERE, "%s:%ld: %s: DEFENCE pulse %ld gets "
+				eprint( SEVERE, "%s:%ld: %s: DEFENSE pulse %ld gets "
 						"dangerously near to TWT_GATE pulse %ld.\n",
 						Fname, Lc, pulser_struct.name, defense_p->num,
 						twt_p->num );
