@@ -343,7 +343,7 @@ static int exp_get_channel_name( void )
 	{
 		vars_push( STR_VAR, exptext );
 		v = func_call( func );
-		if ( v !=NULL && v->val.lval != UNDEFINED )
+		if ( v != NULL && v->val.lval != UNDEFINED )
 			 return E_VAR_REF;
 	}
 
