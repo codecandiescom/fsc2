@@ -20,6 +20,8 @@
 #include "right_arrow.xbm"
 
 
+static void cut_calc_curve( int dir, long index );
+static void cut_recalc_XPoints( void );
 static void G_init_cut_curve( void );
 static int cut_form_close_handler( FL_FORM *a, void *b );
 static void cut_setup_canvas( Canvas *c, FL_OBJECT *obj );
@@ -54,18 +56,33 @@ static int cur_1,
 	       cur_8;
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Function gets called whenever in the 2D display the left mouse button */
+/* has been pressed with one of the shift keys pressed down in the x- or */
+/* y-axis canvas and than is released again (with the shift key is still */
+/* being hold down). It opens up a new window displaying a cross section */
+/* through the data at the positon the mouse button was released. If the */
+/* window with the cross section is already shown the cut at the mouse   */
+/* position is shown.                                                    */
+/* dir: axis the mouse button was pressed in (X or Y)                    */
+/* pos: x- or y- position the mouse was pressed (for x- or y-axis,       */
+/*      respectively)                                                    */
+/*-----------------------------------------------------------------------*/
 
 void cut_show( int dir, int pos )
 {
+	long index;
+	Curve_1d *cv = &G.cut_curve;
+	Curve_2d *scv = G.curve_2d[ G.active_curve ];
+
+
 	/* Don't do anything if no curve is currently displayed */
 
 	if ( G.active_curve == -1 )
 		return;
 
 	/* If the cross section window hasn't been shown before create and
-	   initialize it now, otherwise, if it's just unmapped make it visible
+	   initialize now, otherwise, it's just unmapped, so make it visible
 	   again */
 
 	if ( ! is_shown )
@@ -84,6 +101,10 @@ void cut_show( int dir, int pos )
 
 		G_init_cut_curve( );
 
+		cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
+			           ( double ) ( CG.nx - 1 );
+		cv->s2d[ Y ] = ( double ) ( G.cut_canvas.h - 1 );
+
 		is_shown = is_mapped = SET;
 	}
 	else if ( ! is_mapped )
@@ -96,6 +117,361 @@ void cut_show( int dir, int pos )
 	G.is_cut = SET;
 
 	fl_raise_form( cut_form->cut );
+
+	/* Calculate index into curve where cut is to be shown */
+
+	if ( dir == X )
+		index = lround( ( double ) pos / scv->s2d[ X ] - scv->shift[ X ] );
+	else
+		index = lround( ( double ) ( G.canvas.h - 1 - pos ) / scv->s2d[ Y ]
+						- scv->shift[ Y ] );
+
+	/* Calculate all the points of the cross section curve */
+
+	cut_calc_curve( dir, index );
+
+	/* Draw the curve and the axes */
+
+	redraw_all_cut_canvases( );
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+static void cut_calc_curve( int dir, long index )
+{
+	long i, j;
+	Curve_1d *cv = &G.cut_curve;
+	Curve_2d *scv = G.curve_2d[ G.active_curve ];
+
+
+	/* Store direction of cross section - if called unreasonable direction
+	   (i.e. not X or Y) it means keep the old direction) */
+
+	if ( dir == X || dir == Y )
+		CG.cut_dir = dir;
+
+	/* Set maximum number of points of cut curve number and also set the x
+	   scale factor if the number changed of points changed and we're in
+	   full scale mode */
+
+	if ( CG.cut_dir == X )
+	{
+		if ( CG.nx != G.ny && CG.is_fs )
+			cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
+				           ( double ) ( G.ny - 1 );
+		CG.nx = G.ny;
+	}
+	else
+	{
+		if ( CG.nx != G.nx && CG.is_fs )
+			cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
+				           ( double ) ( G.nx - 1 );
+		CG.nx = G.nx;
+	}
+
+	/* If the index is resonable store it (if called with index less the 0
+	   that means keep the old index) */
+
+	if ( index >= 0 )
+		CG.index = index;
+
+	/* Allocate memory for storing of scaled data and points for display */
+
+	cv->points = T_realloc( cv->points, CG.nx * sizeof( Scaled_Point ) );
+	cv->xpoints = T_realloc( cv->xpoints, CG.nx * sizeof( XPoint ) );
+
+	/* Extract the existing scaled data of the cut from the 2d curve */
+
+	if ( CG.cut_dir == X )
+	{
+		for ( i = 0, j = CG.index; i < CG.nx; j += G.nx, i++ )
+		{
+			if ( scv->points[ j ].exist )
+				memcpy( cv->points + i, scv->points + j,
+						sizeof( Scaled_Point ) );
+			else
+				cv->points[ i ].exist = UNSET;
+		}
+	}
+	else
+	{
+		for ( i = 0, j = CG.index * G.nx; i < CG.nx; j++, i++ )
+			if ( scv->points[ j ].exist )
+				memcpy( cv->points + i, scv->points + j,
+						sizeof( Scaled_Point ) );
+			else
+				cv->points[ i ].exist = UNSET;
+	}
+
+	cut_recalc_XPoints( );
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+static void cut_recalc_XPoints( void )
+{
+	long k, j;
+	Curve_1d *cv = &G.cut_curve;
+
+
+	cv->up = cv->down = cv->left = cv->right = UNSET;
+
+	for ( k = j = 0; j < CG.nx; j++ )
+	{
+		if ( cv->points[ j ].exist )
+		{
+			cv->xpoints[ k ].x = d2shrt( cv->s2d[ X ]
+										 * ( j + cv->shift[ X ] ) );
+			cv->xpoints[ k ].y = ( short ) G.cut_canvas.h - 1 - 
+			   d2shrt( cv->s2d[ Y ] * ( cv->points[ j ].v + cv->shift[ Y ] ) );
+			cv->points[ j ].xp_ref = k;
+
+			if ( cv->xpoints[ k ].x < 0 )
+				cv->left = SET;
+			if ( cv->xpoints[ k ].x >= ( int ) G.cut_canvas.w )
+				cv->right = SET;
+			if ( cv->xpoints[ k ].y < 0 )
+				cv->up = SET;
+			if ( cv->xpoints[ k ].y >= ( int ) G.cut_canvas.h )
+				cv->down = SET;
+
+			k++;
+		}
+	}
+
+	G.cut_curve.count = k;
+}
+
+
+/*------------------------------------------------------*/
+/* Called whenever a different curve is to be displayed */
+/*------------------------------------------------------*/
+
+void cut_new_curve_handler( void )
+{
+	Curve_1d *cv = &G.cut_curve;
+
+
+	if ( ! G.is_cut )
+		return;
+
+	if ( G.active_curve == -1 )
+	{
+		cv->points = T_free( cv->points );
+		cv->xpoints = T_free( cv->xpoints );
+		cv->count = 0;
+	}
+	else
+	{
+		fl_set_cursor_color( CG.cur_1, FL_BLACK, G.colors[ G.active_curve ] );
+		fl_set_cursor_color( CG.cur_2, FL_BLACK, G.colors[ G.active_curve ] );
+		fl_set_cursor_color( CG.cur_3, FL_BLACK, G.colors[ G.active_curve ] );
+		fl_set_cursor_color( CG.cur_4, FL_BLACK, G.colors[ G.active_curve ] );
+		fl_set_cursor_color( CG.cur_5, FL_BLACK, G.colors[ G.active_curve ] );
+		fl_set_cursor_color( CG.cur_6, FL_BLACK, G.colors[ G.active_curve ] );
+		fl_set_cursor_color( CG.cur_7, FL_BLACK, G.colors[ G.active_curve ] );
+		fl_set_cursor_color( CG.cur_8, FL_BLACK, G.colors[ G.active_curve ] );
+
+		cv->up_arrow    = CG.up_arrows[ G.active_curve ];
+		cv->down_arrow  = CG.down_arrows[ G.active_curve ];
+		cv->left_arrow  = CG.left_arrows[ G.active_curve ];
+		cv->right_arrow = CG.right_arrows[ G.active_curve ];
+
+		XSetForeground( G.d, cv->gc,
+						fl_get_pixel( G.colors[ G.active_curve ] ) );
+		XSetForeground( G.d, cv->font_gc,
+						fl_get_pixel( G.colors[ G.active_curve ] ) );
+
+		cut_calc_curve( -1, -1 );
+	}
+
+	redraw_all_cut_canvases( );
+}
+
+
+bool cut_data_rescaled( long curve )
+{
+	long i, j;
+	Curve_1d *cv = &G.cut_curve;
+	Curve_2d *scv = G.curve_2d[ G.active_curve ];
+
+
+	if ( ! G.is_cut || curve != G.active_curve )
+		return FAIL;
+
+	/* Get the rescaled data of the cut from the 2d curve */
+
+	if ( CG.cut_dir == X )
+	{
+		for ( i = 0, j = CG.index; i < CG.nx; j += G.nx, i++ )
+			if ( scv->points[ j ].exist )
+			{
+				cv->points[ i ].v = scv->points[ j ].v;
+				cv->xpoints[ cv->points[ i ].xp_ref ].y =
+				           ( short ) G.cut_canvas.h - 1
+				               - d2shrt( cv->s2d[ Y ] * ( cv->points[ i ].v
+														  + cv->shift[ Y ] ) );
+			}
+	}
+	else
+	{
+		for ( i = 0, j = CG.index * G.nx; i < CG.nx; j++, i++ )
+			if ( scv->points[ j ].exist )
+			{
+				cv->points[ i ].v = scv->points[ j ].v;
+				cv->xpoints[ cv->points[ i ].xp_ref ].y =
+				           ( short ) G.cut_canvas.h - 1
+				               - d2shrt( cv->s2d[ Y ] * ( cv->points[ i ].v
+														  + cv->shift[ Y ] ) );
+			}
+	}
+
+	return OK;
+}
+
+
+/*-------------------------------------------------------*/
+/* Function gets called by accept_2d_data() whenever the */
+/* number of points in x- or y-direction changes         */
+/*-------------------------------------------------------*/
+
+bool cut_num_points_changed( int dir, long num_points )
+{
+	Curve_1d *cv = &G.cut_curve;
+	Scaled_Point *sp;
+	long k;
+
+
+	if ( ! G.is_cut || dir == CG.cut_dir )
+		return FAIL;
+
+	/* Extend the arrays for the (scaled) data and the array of XPoints */
+
+	cv->points = T_realloc( cv->points, num_points * sizeof( Scaled_Point ) );
+	cv->xpoints = T_realloc( cv->xpoints, num_points * sizeof( XPoint ) );
+
+	/* The new entries are not set yet */
+
+	for ( k = CG.nx, sp = G.cut_curve.points + k ; k < num_points; sp++, k++ )
+		sp->exist = UNSET;
+
+	/* In full scale mode the x-axis needs to be rescaled */
+
+	if ( CG.is_fs )
+	{
+		cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
+			           ( double ) ( num_points - 1 );
+		for ( sp = G.cut_curve.points, k = 0; k < CG.nx; sp++, k++ )
+			if ( sp->exist )
+				cv->xpoints[ sp->xp_ref ].x = d2shrt( cv->s2d[ X ] * k );
+	}
+
+	CG.nx = num_points;
+
+	return CG.is_fs;
+}
+
+
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
+bool cut_new_point( long curve, long x_index, long y_index, double val )
+{
+	long index;
+	long xp_index;
+	long i, j;
+	Curve_1d *cv = &G.cut_curve;
+	Scaled_Point *cvp;
+
+
+	/* Nothing to be done if either the cross section isn't drawn, the new
+	   point does not belong to the currently shown curve or if the new
+	   point isn't laying on the cross section */
+
+	if ( ! G.is_cut || curve != G.active_curve ||
+		 ( CG.cut_dir == X && x_index != CG.index ) ||
+		 ( CG.cut_dir == Y && y_index != CG.index ) )
+		return FAIL;
+
+	/* Calculate index of new point in data set and set the value */
+
+	index = CG.cut_dir == X ? y_index : x_index;
+	cv->points[ index ].v = val;
+
+	/* If this is a completely new point it as to be integrated into the
+	   array of XPoints (which have to be sorted in ascending order of the
+	   x-coordinate), otherwise the XPoint just needs to be updated */
+
+	if ( ! cv->points[ index ].exist )
+	{
+		cv->points[ index ].exist = SET;
+
+		/* Find next existing point to the left */
+
+		for ( i = index - 1, cvp = cv->points + i;
+			  i >= 0 && ! cvp->exist; cvp--, i-- )
+			;
+
+		if ( i == -1 )                  /* new points is first to be drawn */
+		{
+			memmove( cv->xpoints + 1, cv->xpoints,
+					 cv->count * sizeof( XPoint ) );
+			for ( cvp = cv->points + 1, j = 1; j < cv->count + 1; cvp++, j++ )
+				cvp->xp_ref++;
+			cv->points[ index ].xp_ref = xp_index = 0;
+		}
+		else if ( i == cv->count - 1 )   /* new point is last to be drawn */
+			cv->points[ index ].xp_ref = xp_index = cv->count;
+		else                             /* new point is in between */
+		{
+			cv->points[ index ].xp_ref = xp_index = i + 1;
+			memmove( cv->xpoints + xp_index + 1, cv->xpoints + xp_index,
+					 ( cv->count - xp_index ) * sizeof( XPoint ) );
+			for ( j = index + 1, cvp = cv->points + j; j < CG.nx; cvp++, j++ )
+				cvp->xp_ref++;
+		}
+
+		cv->points[ index ].exist = SET;
+		cv->count++;
+
+		/* Calculate the x-coordiante of the new point and figure out if it
+		   exceeds the borders of the canvas */
+
+		cv->xpoints[ xp_index ].x = d2shrt( cv->s2d[ X ]
+											* ( index + cv->shift[ X ] ) );
+		if ( cv->xpoints[ xp_index ].x < 0 )
+			cv->left = SET;
+		if ( cv->xpoints[ xp_index ].x >= ( int ) G.cut_canvas.w )
+			cv->right = SET;
+	}
+	else
+		xp_index = cv->points[ index ].xp_ref;
+
+	/* Calculate the y-coordinate of the (new) point and figure out if it
+	   exceeds the borders of the canvas */
+
+	cv->xpoints[ xp_index ].y = ( short ) G.cut_canvas.h - 1 - 
+		                d2shrt( cv->s2d[ Y ]
+								* ( cv->points[ index ].v + cv->shift[ Y ] ) );
+
+	if ( cv->xpoints[ xp_index ].y < 0 )
+		cv->up = SET;
+	if ( cv->xpoints[ xp_index ].y >= ( int ) G.cut_canvas.h )
+		cv->down = SET;
+
+	return OK;
+}
+
+
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
+void cut_new_data_redraw( void )
+{
 	redraw_all_cut_canvases( );
 }
 
@@ -220,10 +596,10 @@ void G_init_cut_curve( void )
 					fl_get_pixel( G.colors[ G.active_curve ] ) );
 	XSetBackground( G.d, cv->font_gc, fl_get_pixel( FL_BLACK ) );
 
-	cv->count = 0;
-	cv->active = SET;
 	cv->can_undo = UNSET;
 
+	CG.is_fs = SET;
+	CG.nx = -1;
 	CG.label_pm[ Y ] = G.label_pm[ Z ];
 }
 
@@ -484,6 +860,9 @@ void cut_fs_button_callback( FL_OBJECT *a, long b )
 }
 
 
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
 static void redraw_all_cut_canvases( void )
 {
 	redraw_cut_canvas( &G.cut_canvas );
@@ -492,6 +871,9 @@ static void redraw_all_cut_canvases( void )
 	redraw_cut_canvas( &G.cut_z_axis );
 }
 
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
 
 static void redraw_cut_canvas( Canvas *c )
 {
@@ -503,14 +885,22 @@ static void redraw_cut_canvas( Canvas *c )
 }
 
 
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
 static void repaint_cut_canvas( Canvas *c )
 {
 	Pixmap pm;
+	Curve_1d *cv = &G.cut_curve;
 
 
 	pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), c->w, c->h,
 						fl_get_canvas_depth( c->obj ) );
 	XCopyArea( G.d, c->pm, pm, c->gc, 0, 0, c->w, c->h, 0, 0 );
+
+	if ( c == &G.cut_canvas && cv->count > 1 )
+		XDrawLines( G.d, pm, cv->gc, cv->xpoints, cv->count, 
+					CoordModeOrigin );
 
 	/* Finally copy the buffer pixmap onto the screen */
 
@@ -520,9 +910,16 @@ static void repaint_cut_canvas( Canvas *c )
 	XFlush( G.d );
 }
 
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
 static void redraw_cut_center_canvas( Canvas *c )
 {
 }
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
 
 static void redraw_cut_axis( int coord )
 {
