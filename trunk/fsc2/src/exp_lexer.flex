@@ -263,6 +263,12 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "&"         return E_AND;     /* logical and operator */
 "|"         return E_OR;      /* logical or operator */
 "~"         return E_XOR;     /* logical exclusive or (xor) operator */
+"+="        return E_PLSA;
+"-="        return E_MINA;
+"*="        return E_MULA;
+"/="        return E_DIVA;
+"%="        return E_MODA;
+
 
 			/* handling of end of statement character */
 ";"			return ';';

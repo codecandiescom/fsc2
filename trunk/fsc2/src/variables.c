@@ -2071,8 +2071,18 @@ Var *vars_val( Var *v )
 {
 	vars_check( v, ARR_PTR );
 
-	if ( v->from->type ==INT_ARR )
+	if ( v->flags & NEED_SLICE )
+	{
+		eprint( FATAL, "%s:%ld: Left hand side of assignment must be an "
+				"integer or float variable, not a slice.", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	if ( v->from->type == INT_ARR )
 		return vars_push( INT_VAR, *( ( long * ) v->val.gptr ) );
-	else
+	else if ( v->from->type == FLOAT_ARR )
 		return vars_push( FLOAT_VAR, *( ( double * ) v->val.gptr ) );
+
+	assert( 1 == 0 );
+	return NULL;
 }

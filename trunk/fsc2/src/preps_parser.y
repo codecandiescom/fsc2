@@ -16,6 +16,7 @@ extern int prepslex( void );
 
 extern char *prepstext;
 
+extern Var *vars_val( Var *v );
 
 /* locally used functions */
 
@@ -53,6 +54,7 @@ static Var *CV;
 %token <sptr> STR_TOKEN
 %token EQ NE LT LE GT GE
 %token AND OR XOR NOT
+%token PLSA MINA MULA DIVA MODA
 
 %token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN
 %token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
@@ -86,16 +88,39 @@ input:   /* empty */
 
 line:    P_TOK prop
        | VAR_TOKEN '=' expr        { vars_assign( $3, $1 ); }
+       | VAR_TOKEN PLSA expr       { vars_assign( vars_add( $1, $3 ), $1 ); }
+       | VAR_TOKEN MINA expr       { vars_assign( vars_sub( $1, $3 ), $1 ); }
+       | VAR_TOKEN MULA expr       { vars_assign( vars_mult( $1, $3 ), $1 ); }
+       | VAR_TOKEN DIVA expr       { vars_assign( vars_div( $1, $3 ), $1 ); }
+       | VAR_TOKEN MODA expr       { vars_assign( vars_mod( $1, $3 ), $1 ); }
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }
          list1 ']'                 { vars_arr_lhs( $4 ); }
-         '=' expr                  { vars_assign( $8, $8->prev );
-                                     assert( Var_Stack == NULL ); }
+         xxx                       { assert( Var_Stack == NULL ); }
        | FUNC_TOKEN '(' list2 ')'  { vars_pop( func_call( $1 ) ); }
        | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
 											 "predefined function.",
 											 Fname, Lc, $1->name );
 	                                 THROW( EXCEPTION ); }
 ;
+
+xxx:     '=' expr                  { vars_assign( $2, $2->prev ); }
+       | PLSA expr                 { Var **C = &( $2->prev );
+	                                 vars_assign( vars_add( vars_val( *C ),
+															$2 ), *C ); }
+       | MINA expr                 { Var **C = &( $2->prev );
+	                                 vars_assign( vars_sub( vars_val( *C ),
+															$2 ), *C ); }
+       | MULA expr                 { vars_assign( vars_mult( $2->prev, $2 ),
+												  $2->prev ); }
+       | DIVA expr                 { Var **C = &( $2->prev );
+	                                 vars_assign( vars_div( vars_val( *C ),
+															$2 ), *C ); }
+       | MODA expr                 { Var **C = &( $2->prev );
+	                                 vars_assign( vars_div( vars_val( *C ),
+															$2 ), *C ); }
+;                                     
+
+
 
 prop:   /* empty */
        | prop F_TOK sep1 expr sep2  { p_set( Cur_Pulse, P_FUNC, $4 ); }
