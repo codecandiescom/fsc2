@@ -160,9 +160,9 @@ install:
 
 	-$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test \
 					  $(bindir)/fsc2_load
-	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_start
-	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_test
-	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_load
+	-$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_start
+	-$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_test
+	-$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_load
 
 
 uninstall:
