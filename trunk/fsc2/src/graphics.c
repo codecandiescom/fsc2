@@ -1629,10 +1629,13 @@ void clear_curve( long curve )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void change_scale( int is_set, double *vals )
+void change_scale( int is_set, void *ptr )
 {
 	int i;
+	double vals[ 4 ];
 
+
+	memcpy( vals, ptr, sizeof vals );
 
 	if ( is_set & 1 )
 	{
@@ -1801,12 +1804,21 @@ static void change_label_2d( char **label )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void rescale( long *new_dims )
+void rescale( void *new_dims )
 {
+	long dims[ 2 ];
+
+
 	if ( G.dim == 1 )
-		rescale_1d( *new_dims );
+	{
+		memcpy( dims, new_dims, sizeof dims[ 0 ] );
+		rescale_1d( dims[ 0 ] );
+	}
 	else
-		rescale_2d( new_dims[ 0 ], new_dims[ 1 ] );
+	{
+		memcpy( dims, new_dims, sizeof dims );
+		rescale_2d( dims[ 0 ], dims[ 1 ] );
+	}
 }
 
 

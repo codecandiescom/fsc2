@@ -344,13 +344,7 @@ Var *f_bcreate( Var *v )
 
 	if ( v->type == INT_VAR || v->type == FLOAT_VAR )
 	{
-		if ( v->type == INT_VAR )
-			type = v->val.lval;
-		else
-		{
-			print( WARN, "Float variable used as button type.\n" );
-			type = lrnd( v->val.dval );
-		}
+		type = get_strict_long( v, "button type" );
 
 		if ( type != NORMAL_BUTTON &&
 			 type != PUSH_BUTTON   &&
@@ -384,15 +378,7 @@ Var *f_bcreate( Var *v )
 	{
 		if ( v != NULL && v->type & ( INT_VAR | FLOAT_VAR ) )
 		{
-			vars_check( v, INT_VAR | FLOAT_VAR );
-
-			if ( v->type == FLOAT_VAR )
-			{
-				print( WARN, "Float variable used as button ID.\n" );
-				coll = lrnd( v->val.dval );
-			}
-			else
-				coll = v->val.lval;
+			coll = get_strict_long( v, "radio button group leader ID" );
 
 			/* Checking that the referenced group leader button exists
 			   and is also a RADIO_BUTTON can only be done by the parent */
@@ -408,11 +394,11 @@ Var *f_bcreate( Var *v )
 					THROW( EXCEPTION );
 				}
 
-				/* The other group members must also be radio buttons */
+				/* The group leader must also be radio buttons */
 
 				if ( cio->type != RADIO_BUTTON )
 				{
-					print( FATAL, "Button speciied as goup leader isn't a "
+					print( FATAL, "Button specified as group leader isn't a "
 						   "RADIO_BUTTON.\n", coll );
 					THROW( EXCEPTION );
 				}
@@ -574,13 +560,7 @@ Var *f_bcreate( Var *v )
 
 	/* Warn and get rid of superfluous arguments */
 
-	if ( v != NULL )
-	{
-		print( WARN, "Too many arguments, discarding superfluous "
-			   "arguments.\n" );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v );
 
 	/* Now that we're done with checking the parameters we can create the new
        button - if the Tool_Box doesn't exist yet we've got to create it now */
@@ -677,11 +657,14 @@ Var *f_bdelete( Var *v )
 		{
 			char *buffer, *pos;
 			size_t len;
+			long ID;
 
-
+			
 			/* Do all possible checking of the parameter */
 
-			if ( v->type != INT_VAR || v->val.lval < 0 )
+			ID = get_strict_long( v, "button ID" );
+
+			if ( ID < 0 )
 			{
 				print( FATAL, "Invalid button identifier.\n" );
 				THROW( EXCEPTION );
@@ -701,8 +684,8 @@ Var *f_bdelete( Var *v )
 			memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
 			pos += sizeof EDL.Lc;
 
-			memcpy( pos, &v->val.lval, sizeof v->val.lval );  /* button ID */
-			pos += sizeof v->val.lval;
+			memcpy( pos, &ID, sizeof ID );           /* button ID */
+			pos += sizeof ID;
 
 			if ( EDL.Fname )
 			{
@@ -730,8 +713,9 @@ Var *f_bdelete( Var *v )
 
 			/* Check the parameters */
 
-			if ( v->type != INT_VAR || v->val.lval < 0 ||
-				 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
+			io = find_object_from_ID( get_strict_long( v, "button ID" ) );
+
+			if ( io == NULL ||
 				 ( io->type != NORMAL_BUTTON &&
 				   io->type != PUSH_BUTTON   &&
 				   io->type != RADIO_BUTTON ) )
@@ -862,12 +846,13 @@ Var *f_bstate( Var *v )
 
 		/* Basic check of button identifier - always the first parameter */
 
-		if ( v->type != INT_VAR || v->val.lval < 0 )
+		ID = get_strict_long( v, "button ID" );
+
+		if ( ID < 0 )
 		{
 			print( FATAL, "Invalid button identifier.\n" );
 			THROW( EXCEPTION );
 		}
-		ID = v->val.lval;
 
 		/* If there's a second parameter it's the state of button to set */
 
@@ -876,13 +861,7 @@ Var *f_bstate( Var *v )
 
 		/* No more parameters accepted... */
 
-		if ( ( v = vars_pop( v ) ) != NULL )
-		{
-			print( WARN, "Too many arguments, discarding superfluous "
-				   "arguments.\n" );
-			while ( ( v = vars_pop( v ) ) != NULL )
-				;
-		}
+		too_many_arguments( v );
 
 		/* Make up buffer to send to parent process */
 
@@ -942,8 +921,9 @@ Var *f_bstate( Var *v )
 
 	/* Check the button ID parameter */
 
-	if ( v->type != INT_VAR || v->val.lval < 0 ||
-		 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
+	io = find_object_from_ID( get_strict_long( v, "button ID" ) );
+
+	if ( io == NULL ||
 		 ( io->type != NORMAL_BUTTON &&
 		   io->type != PUSH_BUTTON   &&
 		   io->type != RADIO_BUTTON ) )
@@ -984,8 +964,7 @@ Var *f_bstate( Var *v )
 	if ( io->type == RADIO_BUTTON && io->state == 0 &&
 		 fl_get_button( io->self ) )
 	{
-		print( FATAL, "Can't switch off an active RADIO_BUTTON, switch on "
-			   "another one instead.\n" );
+		print( FATAL, "Can't switch off a RADIO_BUTTON.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1011,13 +990,7 @@ Var *f_bstate( Var *v )
 		}
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		print( WARN, "Too many arguments, discarding superfluous "
-			   "arguments.\n" );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v );
 
 	return vars_push( INT_VAR, io->state );
 }
@@ -1056,13 +1029,7 @@ Var *f_screate( Var *v )
 
 	if ( v->type == INT_VAR || v->type == FLOAT_VAR )
 	{
-		if ( v->type == INT_VAR )
-			type = v->val.lval;
-		else
-		{
-			print( WARN, "Float variable used as slider type.\n" );
-			type = lrnd( v->val.dval );
-		}
+		type = get_strict_long( v, "slider type" );
 
 		if ( type != NORMAL_SLIDER && type != VALUE_SLIDER )
 		{
@@ -1274,13 +1241,7 @@ Var *f_screate( Var *v )
 		}
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		print( WARN, "Too many arguments, discarding superfluous "
-			   "arguments.\n" );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v );
 
 	/* Now that we're done with checking the parameters we can create the new
        button - if the Tool_Box doesn't exist yet we've got to create it now */
@@ -1373,11 +1334,14 @@ Var *f_sdelete( Var *v )
 		{
 			char *buffer, *pos;
 			size_t len;
+			long ID;
 
 
 			/* Very basic sanity check */
 
-			if ( v->type != INT_VAR || v->val.lval < 0 )
+			ID = get_strict_long( v, "slider ID" );
+
+			if ( ID < 0 )
 			{
 				print( FATAL, "Invalid slider identifier.\n" );
 				THROW( EXCEPTION );
@@ -1395,8 +1359,8 @@ Var *f_sdelete( Var *v )
 			memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
 			pos += sizeof EDL.Lc;
 
-			memcpy( pos, &v->val.lval, sizeof v->val.lval );
-			pos += sizeof v->val.lval;              /* slider ID */
+			memcpy( pos, &ID, sizeof ID );          /* slider ID */
+			pos += sizeof ID;
 
 			if ( EDL.Fname )
 			{
@@ -1423,8 +1387,9 @@ Var *f_sdelete( Var *v )
 
 			/* Check that slider with the ID exists */
 
-			if ( v->type != INT_VAR || v->val.lval < 0 ||
-				 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
+			io = find_object_from_ID( get_strict_long( v, "slider ID" ) );
+
+			if ( io == NULL ||
 				 ( io->type != NORMAL_SLIDER &&
 				   io->type != VALUE_SLIDER ) )
 			{
@@ -1532,12 +1497,13 @@ Var *f_svalue( Var *v )
 
 		/* Very basic sanity check... */
 
-		if ( v->type != INT_VAR || v->val.lval < 0 )
+		ID = get_strict_long( v, "slider ID" );
+
+		if ( v->val.lval < 0 )
 		{
 			print( FATAL, "Invalid slider identifier.\n" );
 			THROW( EXCEPTION );
 		}
-		ID = v->val.lval;
 
 		/* Another arguments means that the slider value is to be set */
 
@@ -1548,13 +1514,7 @@ Var *f_svalue( Var *v )
 			val = VALUE( v );
 		}
 
-		if ( ( v = vars_pop( v ) ) != NULL )
-		{
-			print( WARN, "Too many arguments, discarding superfluous "
-				   "arguments.\n" );
-			while ( ( v = vars_pop( v ) ) != NULL )
-				;
-		}
+		too_many_arguments( v );
 
 		len = sizeof EDL.Lc + sizeof ID + sizeof state + sizeof val;
 
@@ -1614,8 +1574,9 @@ Var *f_svalue( Var *v )
 
 	/* Check that ID is ID of a slider */
 
-	if ( v->type != INT_VAR || v->val.lval < 0 ||
-		 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
+	io = find_object_from_ID( get_strict_long( v, "slider ID" ) );
+
+	if ( io == NULL ||
 		 ( io->type != NORMAL_SLIDER &&
 		   io->type != VALUE_SLIDER ) )
 	{
@@ -1658,13 +1619,7 @@ Var *f_svalue( Var *v )
 	if ( Internals.mode != TEST )
 		fl_set_slider_value( io->self, io->value );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		print( WARN, "Too many arguments, discarding superfluous "
-			   "arguments.\n" );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v );
 
 	return vars_push( FLOAT_VAR, io->value );
 }
@@ -1704,14 +1659,7 @@ Var *f_icreate( Var *v )
 
 	if ( v->type == INT_VAR || v->type == FLOAT_VAR )
 	{
-		if ( v->type == INT_VAR )
-			type = v->val.lval;
-		else
-		{
-			print( WARN, "Float variable used as input or output object "
-				   "type.\n" );
-			type = lrnd( v->val.dval );
-		}
+		type = get_strict_long( v, "input or output object type" );
 
 		if ( type != INT_INPUT && type != FLOAT_INPUT &&
 			 type != INT_OUTPUT && type != FLOAT_OUTPUT )
@@ -1985,19 +1933,11 @@ Var *f_icreate( Var *v )
 			T_free( label );
 			RETHROW( );
 		}
-			
-		v = vars_pop( v );
 	}
 
 	/* Warn and get rid of superfluous arguments */
 
-	if ( v != NULL )
-	{
-		print( WARN, "Too many arguments, discarding superfluous "
-			   "arguments.\n" );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v );
 
 	/* Now that we're done with checking the parameters we can create the new
        button - if the Tool_Box doesn't exist yet we've got to create it now */
@@ -2094,7 +2034,7 @@ Var *f_idelete( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* Loop over all object numbers */
+	/* Loop over all variables */
 
 	do
 	{
@@ -2107,10 +2047,13 @@ Var *f_idelete( Var *v )
 		{
 			char *buffer, *pos;
 			size_t len;
+			long ID;
+
 
 			/* Do all possible checking of the parameter */
 
-			if ( v->type != INT_VAR || v->val.lval < 0 )
+			ID = get_strict_long( v, "input or output object ID" );
+			if ( ID < 0 )
 			{
 				print( FATAL, "Invalid input or output object identifier.\n" );
 				THROW( EXCEPTION );
@@ -2130,8 +2073,8 @@ Var *f_idelete( Var *v )
 			memcpy( pos, &EDL.Lc, sizeof EDL.Lc );    /* current line number */
 			pos += sizeof EDL.Lc;
 
-			memcpy( pos, &v->val.lval, sizeof v->val.lval );  /* object ID */
-			pos += sizeof v->val.lval;
+			memcpy( pos, &ID, sizeof ID );            /* object ID */
+			pos += sizeof ID;
 
 			if ( EDL.Fname )
 			{
@@ -2159,8 +2102,10 @@ Var *f_idelete( Var *v )
 
 			/* Do checks on parameters */
 
-			if ( v->type != INT_VAR || v->val.lval < 0 ||
-				 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
+			io = find_object_from_ID( get_strict_long( v,
+											   "input or output object ID" ) );
+
+			if ( io == NULL ||
 				 ( io->type != INT_INPUT  && io->type != FLOAT_INPUT &&
 				   io->type != INT_OUTPUT && io->type != FLOAT_OUTPUT ) )
 			{
@@ -2273,12 +2218,13 @@ Var *f_ivalue( Var *v )
 
 		/* Very basic sanity check... */
 
-		if ( v->type != INT_VAR || v->val.lval < 0 )
+		ID = get_strict_long( v, "input or output object ID" );
+
+		if ( ID < 0 )
 		{
 			print( FATAL, "Invalid input or output object identifier.\n" );
 			THROW( EXCEPTION );
 		}
-		ID = v->val.lval;
 
 		/* Another argument means that the objects value is to be set */
 
@@ -2298,13 +2244,7 @@ Var *f_ivalue( Var *v )
 			}
 		}
 
-		if ( ( v = vars_pop( v ) ) != NULL )
-		{
-			print( WARN, "Too many arguments, discarding superfluous "
-				   "arguments.\n" );
-			while ( ( v = vars_pop( v ) ) != NULL )
-				;
-		}
+		too_many_arguments( v );
 
 		len =   sizeof EDL.Lc + sizeof ID + sizeof state
 			  + ( state <= 1 ? sizeof lval : sizeof dval );
@@ -2383,9 +2323,10 @@ Var *f_ivalue( Var *v )
 
 	/* Check that ID is ID of an input or output object */
 
-	if ( v->type != INT_VAR || v->val.lval < 0 ||
-		 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
-		 ( io->type != INT_INPUT && io->type != FLOAT_INPUT &&
+	io = find_object_from_ID( get_strict_long( v,
+											   "input or output object ID" ) );
+	if ( io == NULL ||
+		 ( io->type != INT_INPUT  && io->type != FLOAT_INPUT &&
 		   io->type != INT_OUTPUT && io->type != FLOAT_OUTPUT ) )
 	{
 		print( FATAL, "Invalid input or output object identifier.\n" );
@@ -2435,13 +2376,7 @@ Var *f_ivalue( Var *v )
 		}
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		print( WARN, "Too many arguments, discarding superfluous "
-			   "arguments.\n" );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v );
 
 	if ( io->type == INT_INPUT || io->type == INT_OUTPUT )
 		return vars_push( INT_VAR, io->val.lval );
@@ -2665,11 +2600,14 @@ Var *f_mdelete( Var *v )
 		{
 			char *buffer, *pos;
 			size_t len;
+			long ID;
 
 
 			/* Very basic sanity check */
 
-			if ( v->type != INT_VAR || v->val.lval < 0 )
+			ID = get_strict_long( v, "menu ID" );
+
+			if ( ID < 0 )
 			{
 				print( FATAL, "Invalid slider identifier.\n" );
 				THROW( EXCEPTION );
@@ -2687,8 +2625,8 @@ Var *f_mdelete( Var *v )
 			memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
 			pos += sizeof EDL.Lc;
 
-			memcpy( pos, &v->val.lval, sizeof v->val.lval );
-			pos += sizeof v->val.lval;                   /* menu ID */
+			memcpy( pos, &ID, sizeof ID );          /* menu ID */
+			pos += sizeof ID;
 
 			if ( EDL.Fname )
 			{
@@ -2715,9 +2653,9 @@ Var *f_mdelete( Var *v )
 
 			/* Check that menu with the ID exists */
 
-			if ( v->type != INT_VAR || v->val.lval < 0 ||
-				 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
-				 io->type != MENU )
+			io = find_object_from_ID( get_strict_long( v, "menu ID" ) );
+
+			if ( io == NULL || io->type != MENU )
 			{
 				print( FATAL, "Invalid menu identifier.\n" );
 				THROW( EXCEPTION );
@@ -2824,12 +2762,13 @@ Var *f_mchoice( Var *v )
 
 		/* Basic check of menu identifier - always the first parameter */
 
-		if ( v->type != INT_VAR || v->val.lval < 0 )
+		ID = get_strict_long( v, "menu ID" );
+
+		if ( ID < 0 )
 		{
 			print( FATAL, "Invalid menu identifier.\n" );
 			THROW( EXCEPTION );
 		}
-		ID = v->val.lval;
 
 		/* If there's a second parameter it's the item in the menu to set */
 
@@ -2851,13 +2790,7 @@ Var *f_mchoice( Var *v )
 
 		/* No more parameters accepted... */
 
-		if ( ( v = vars_pop( v ) ) != NULL )
-		{
-			print( WARN, "Too many arguments, discarding superfluous "
-				   "arguments.\n" );
-			while ( ( v = vars_pop( v ) ) != NULL )
-				;
-		}
+		too_many_arguments( v );
 
 		/* Make up buffer to send to parent process */
 
@@ -2915,9 +2848,9 @@ Var *f_mchoice( Var *v )
 
 	/* Check the button ID parameter */
 
-	if ( v->type != INT_VAR || v->val.lval < 0 ||
-		 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
-		 io->type != MENU )
+	io = find_object_from_ID( get_strict_long( v, "menu ID" ) );
+
+	if ( io == NULL || io->type != MENU )
 	{
 		print( FATAL, "Invalid menu identifier.\n" );
 		THROW( EXCEPTION );
@@ -2966,13 +2899,7 @@ Var *f_mchoice( Var *v )
 	if ( Internals.mode != TEST )
 		fl_set_choice( io->self, select_item );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		print( WARN, "Too many arguments, discarding superfluous "
-			   "arguments.\n" );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v );
 
 	return vars_push( INT_VAR, select_item );
 }
@@ -3008,10 +2935,14 @@ Var *f_objdel( Var *v )
 		{
 			char *buffer, *pos;
 			size_t len;
+			long ID;
+
 
 			/* Do all possible checking of the parameter */
 
-			if ( v->type != INT_VAR || v->val.lval < 0 )
+			ID = get_strict_long( v, "object ID" );
+
+			if ( ID < 0 )
 			{
 				print( FATAL, "Invalid object identifier.\n" );
 				THROW( EXCEPTION );
@@ -3031,8 +2962,8 @@ Var *f_objdel( Var *v )
 			memcpy( pos, &EDL.Lc, sizeof EDL.Lc );    /* current line number */
 			pos += sizeof EDL.Lc;
 
-			memcpy( pos, &v->val.lval, sizeof v->val.lval );    /* object ID */
-			pos += sizeof v->val.lval;
+			memcpy( pos, &ID, sizeof ID );            /* object ID */
+			pos += sizeof ID;
 
 			if ( EDL.Fname )
 			{
@@ -3062,8 +2993,9 @@ Var *f_objdel( Var *v )
 
 			/* Do checks on parameters */
 
-			if ( v->type != INT_VAR || v->val.lval < 0 ||
-				 ( io = find_object_from_ID( v->val.lval ) ) == NULL )
+			io = find_object_from_ID(  get_strict_long( v, "object ID" ) );
+
+			if ( io == NULL )
 			{
 				print( FATAL, "Invalid object identifier.\n" );
 				THROW( EXCEPTION );
@@ -3115,6 +3047,9 @@ static IOBJECT *find_object_from_ID( long ID )
 
 
 	if ( Tool_Box == NULL )            /* no objects defined yet ? */
+		return NULL;
+
+	if ( ID < 0 )                       /* all IDs are >= 0 */
 		return NULL;
 
 	/* Loop through linked list to find the object */

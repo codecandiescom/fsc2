@@ -861,7 +861,7 @@ Var *f_cscale( Var *v )
 Var *f_clabel( Var *v )
 {
 	char *l[ 3 ] = { NULL, NULL, NULL };
-	size_t lengths[ 3 ] = { 1, 1, 1 };
+	long lengths[ 3 ] = { 1, 1, 1 };
 	int shm_id;
 	long len = 0;                    /* total length of message to send */
 	void *buf;
@@ -889,13 +889,13 @@ Var *f_clabel( Var *v )
 	vars_check( v, STR_VAR );
 
 	l[ X ] = T_strdup( v->val.sptr );
-	lengths[ X ] = strlen( l[ X ] ) + 1;
+	lengths[ X ] = ( long ) strlen( l[ X ] ) + 1;
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check( v, STR_VAR );
 		l[ Y ] = T_strdup( v->val.sptr );
-		lengths[ Y ] = strlen( l[ Y ] ) + 1;
+		lengths[ Y ] = ( long ) strlen( l[ Y ] ) + 1;
 
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
@@ -909,7 +909,7 @@ Var *f_clabel( Var *v )
 
 			vars_check( v, STR_VAR );
 			l[ Z ] = T_strdup( v->val.sptr );
-			lengths[ Z ] = strlen( l[ Z ] ) + 1;
+			lengths[ Z ] = ( long ) strlen( l[ Z ] ) + 1;
 		}
 	}
 
@@ -924,7 +924,7 @@ Var *f_clabel( Var *v )
 
 	len = sizeof len + sizeof type;
 	for ( i = X; i <= Z; i++ )
-		len += sizeof *lengths + lengths[ i ];
+		len += sizeof lengths[ i ] + lengths[ i ];
 
 	/* Now try to get a shared memory segment */
 
@@ -950,8 +950,8 @@ Var *f_clabel( Var *v )
 
 	for ( i = X; i <= Z; i++ )
 	{
-		memcpy( ptr, lengths + i, sizeof *lengths );
-		ptr += sizeof *lengths;
+		memcpy( ptr, lengths + i, sizeof lengths[ i ] );
+		ptr += sizeof lengths[ i ];
 		if ( lengths[ i ] > 1 )
 		{
 			memcpy( ptr, l[ i ], lengths[ i ] );
@@ -1144,10 +1144,11 @@ Var *f_display( Var *v )
 
 	/* Determine the needed amount of shared memory */
 
-	len =   sizeof len                    /* length field itself */
-		  + sizeof nsets                  /* number of sets to be sent */
-		  + 3 * nsets * sizeof( long )    /* x-, y-index and curve number */
-		  + nsets * sizeof( int );        /* data type */
+	len =   sizeof len                  /* length field itself */
+		  + sizeof nsets                /* number of sets to be sent */
+		  + nsets * (                   /* x-, y-index, number and data type */
+			    sizeof dp->nx + sizeof dp->ny + sizeof dp->nc 
+			  + sizeof dp->v->type );
 
 	for ( i = 0; i < nsets; i++ )
 	{
@@ -1242,8 +1243,9 @@ Var *f_display( Var *v )
 			case INT_VAR :
 				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
 				ptr += sizeof dp[ i ].v->type;
-				memcpy( ptr, &dp[ i ].v->val.lval, sizeof dp[ i ].v->type );
-				ptr += sizeof dp[ i ].v->type;
+				memcpy( ptr, &dp[ i ].v->val.lval,
+						sizeof dp[ i ].v->val.lval );
+				ptr += sizeof dp[ i ].v->val.lval;
 				break;
 
 			case FLOAT_VAR :
@@ -1258,7 +1260,8 @@ Var *f_display( Var *v )
 				fsc2_assert( dp[ i ].v->from->type == INT_CONT_ARR ||
 							 dp[ i ].v->from->type == FLOAT_CONT_ARR );
 
-				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
+				memcpy( ptr, &dp[ i ].v->from->type,
+						sizeof dp[ i ].v->from->type );
 				ptr += sizeof dp[ i ].v->from->type;
 
 				len = dp[ i ].v->from->sizes[ dp[ i ].v->from->dim - 1 ];
@@ -1281,7 +1284,8 @@ Var *f_display( Var *v )
 				fsc2_assert( dp[ i ].v->from->type == INT_CONT_ARR ||
 							 dp[ i ].v->from->type == FLOAT_CONT_ARR );
 
-				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->from->type );
+				memcpy( ptr, &dp[ i ].v->from->type,
+						sizeof dp[ i ].v->from->type );
 				ptr += sizeof dp[ i ].v->from->type;
 
 				len = dp[ i ].v->from->sizes[ 0 ];

@@ -121,6 +121,8 @@ inline double get_double( Var *v, const char *snippet )
 
 inline long get_strict_long( Var *v, const char *snippet )
 {
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
 	if ( v->type == FLOAT_VAR )
 	{
 		if ( Internals.mode == EXPERIMENT )
@@ -128,7 +130,6 @@ inline long get_strict_long( Var *v, const char *snippet )
 			if ( snippet != NULL )
 				print( SEVERE, "Floating point number used as %s, "
 					   "trying to continue!\n", snippet );
-			vars_check( v, FLOAT_VAR );
 			return lrnd( v->val.dval );
 		}
 
@@ -138,7 +139,6 @@ inline long get_strict_long( Var *v, const char *snippet )
 		THROW( EXCEPTION );
 	}
 
-	vars_check( v, INT_VAR );
 	return v->val.lval;
 }
 

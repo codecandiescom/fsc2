@@ -157,8 +157,8 @@ static void unpack_and_accept( char *ptr )
 	   is negative, in whih case these aren't data to be displayed but
 	   special commands for clearing curves, scale changes etc. */
 
-	nsets = * ( int * ) ptr;
-	ptr += sizeof( int );
+	memcpy( &nsets, ptr, sizeof nsets );
+	ptr += sizeof nsets;
 
 	if ( nsets < 0 )                /* special for clear curve commands etc. */
 	{
@@ -170,17 +170,17 @@ static void unpack_and_accept( char *ptr )
 
 	for ( i = 0; i < nsets; ptr = ptr_next, i++ )
 	{
-		x_index = * ( long * ) ptr;
-		ptr += sizeof( long );
+		memcpy( &x_index, ptr, sizeof x_index );
+		ptr += sizeof x_index;
 
-		y_index = * ( long * ) ptr;
-		ptr += sizeof( long );
+		memcpy( &y_index, ptr, sizeof y_index );
+		ptr += sizeof y_index;
 
-		curve = * ( long * ) ptr;
-		ptr += sizeof( long );
+		memcpy( &curve, ptr, sizeof curve );
+		ptr += sizeof curve;
 
-		type = * ( int * ) ptr;
-		ptr += sizeof( int );
+		memcpy( &type, ptr, sizeof type );
+		ptr += sizeof type;
 
 		switch ( type )
 		{
@@ -193,13 +193,13 @@ static void unpack_and_accept( char *ptr )
 				break;
 
 			case INT_CONT_ARR :
-				len = * ( long * ) ptr;
-				ptr_next = ptr + ( len + 1 ) * sizeof( long );
+				memcpy( &len, ptr, sizeof len );
+				ptr_next = ptr + sizeof len + len * sizeof( long );
 				break;
 
 			case FLOAT_CONT_ARR :
-				len = * ( long * ) ptr;
-				ptr_next = ptr + sizeof( long ) + len * sizeof( double );
+				memcpy( &len, ptr, sizeof len );
+				ptr_next = ptr + sizeof len + len * sizeof( double );
 				break;
 
 			default :
@@ -226,7 +226,7 @@ static void other_data_request( int type, char *ptr )
 {
 	long i;
 	long count;
-	long *ca;
+	long ca;
 	int is_set;
 	char *label[ 3 ];
 	long lengths[ 3 ];
@@ -234,30 +234,30 @@ static void other_data_request( int type, char *ptr )
 
 	switch( type )
 	{
-		case D_CLEAR_CURVE :                  /* clear curve command */
-			count = * ( long * ) ptr;         /* length of list of curves */
-			ptr += sizeof( long );
-			ca = ( long * ) ptr;              /* list of curve numbers */
+		case D_CLEAR_CURVE :                     /* clear curve command */
+			memcpy( &count, ptr, sizeof count ); /* length of list of curves */
+			ptr += sizeof count;
 
-			for ( i = 0; i < count; i++ )
+			for ( i = 0; i < count; ptr += sizeof ca, i++ )
 			{
-				clear_curve( ca[ i ] );
-				cut_clear_curve( ca[ i ] );
+				memcpy( &ca, ptr, sizeof ca );    /* current curve number */
+				clear_curve( ca );
+				cut_clear_curve( ca );
 			}
 
 			break;
 
-		case D_CHANGE_SCALE :                 /* change scale command */
-			is_set = * ( int * ) ptr;         /* flags */
-			ptr += sizeof( int );
-			change_scale( is_set, ( double * ) ptr );
+		case D_CHANGE_SCALE :                       /* change scale command */
+			memcpy( &is_set, ptr, sizeof is_set );  /* flags */
+			ptr += sizeof is_set;
+			change_scale( is_set, ( void * ) ptr );
 			break;
 
 		case D_CHANGE_LABEL :                 /* change label command */
 			for ( i = X; i <= Z; i++ )
 			{
-				lengths[ i ] = * ( long * ) ptr;
-				ptr += sizeof( long );
+				memcpy( lengths + i, ptr, sizeof lengths[ i ] );
+				ptr += sizeof lengths[ i ];
 				label[ i ] = ( char * ) ptr;
 				ptr += lengths[ i ];
 			}
@@ -265,7 +265,7 @@ static void other_data_request( int type, char *ptr )
 			break;
 
 		case D_CHANGE_POINTS :                /* rescale command */
-			rescale( ( long * ) ptr );
+			rescale( ( void * ) ptr );
 			break;
 
 		default :                             /* unknown command */
@@ -286,6 +286,7 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 	long len = 0;
 	char *cur_ptr;
 	double data;
+	long ldata;
 	double new_rwc_delta_y;
 	double old_rw_min;
 	double fac, off;
@@ -403,13 +404,14 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 	{
 		if ( type & ( INT_VAR | INT_CONT_ARR ) )
 		{
-			data = ( double ) * ( long * ) cur_ptr;
-			cur_ptr += sizeof( long );
+			memcpy( &ldata, cur_ptr, sizeof ldata );
+			data = ( double ) ldata;
+			cur_ptr += sizeof ldata;
 		}
 		else
 		{
-			data = * ( double * ) cur_ptr;
-			cur_ptr += sizeof( double );
+			memcpy( &data, cur_ptr, sizeof data );
+			cur_ptr += sizeof data;
 		}
 
 		if ( G.is_scale_set )
@@ -456,6 +458,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	long len = 0, count;
 	char *cur_ptr;
 	double data;
+	long ldata;
 	double new_rwc_delta_z, fac, off, old_rw_min;
 	Curve_2d *cv;
 	long i;
@@ -569,13 +572,14 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	{
 		if ( type & ( INT_VAR | INT_CONT_ARR ) )
 		{
-			data = ( double ) * ( long * ) cur_ptr;
-			cur_ptr += sizeof( long );
+			memcpy( &ldata, cur_ptr, sizeof ldata );
+			data = ( double ) ldata;
+			cur_ptr += sizeof ldata;
 		}
 		else
 		{
-			data = * ( double * ) cur_ptr;
-			cur_ptr += sizeof( double );
+			memcpy( &data, cur_ptr, sizeof data );
+			cur_ptr += sizeof data;
 		}
 
 		if ( cv->is_scale_set )
@@ -641,8 +645,8 @@ static long get_number_of_new_points( char **ptr, int type )
 			break;
 
 		case INT_CONT_ARR : case FLOAT_CONT_ARR :
-			len = * ( long * ) *ptr;
-			*ptr += sizeof( long );
+			memcpy( &len, *ptr, sizeof len );
+			*ptr += sizeof len;
 			break;
 
 		default :
@@ -674,6 +678,7 @@ static bool get_new_extrema( double *max, double *min, char *ptr,
 {
 	double data, old_max, old_min;
 	long i;
+	long ldata;
 
 
 	old_max = *max;
@@ -683,13 +688,14 @@ static bool get_new_extrema( double *max, double *min, char *ptr,
 	{
 		if ( type & ( INT_VAR | INT_CONT_ARR ) )
 		{
-			data = ( double ) * ( long * ) ptr;
-			ptr += sizeof( long );
+			memcpy( &ldata, ptr, sizeof ldata );
+			data = ( double ) ldata;
+			ptr += sizeof ldata;
 		}
 		else
 		{
-			data = * ( double * ) ptr;
-			ptr += sizeof( double );
+			memcpy( &data, ptr, sizeof data );
+			ptr += sizeof data;
 		}
 
 		*max = d_max( data, *max );
