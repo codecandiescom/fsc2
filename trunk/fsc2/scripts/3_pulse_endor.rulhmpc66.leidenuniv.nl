@@ -627,6 +627,7 @@ synthesizer_attenuation( att );
 freq = synthesizer_frequency( start_freq );
 synthesizer_state( \"ON\" );
 pulser_state( \"ON\" );
+daq_gain( 8 );
 
 FOR I = 1 : N_Points {
 	wait( 1.1 * repeat_time * N_Avg );
