@@ -97,6 +97,7 @@
      "CH[0-9]\\>"
      "CH1[0-5]\\>"
 	 "SOURCE_[0-3]\\>"
+	 "DIO[1-2]\\>"
 	 "DEFAULT_SOURCE\\>"
 	 "NEXT_GATE\\>"
 	 "TIMEBASE_[12]\\>"

@@ -214,7 +214,7 @@ Var *dio_reserve_dio( Var *v )
 	if ( dio < 0 || dio > 1 )
 	{
 		print( FATAL, "Invalid DIO number %ld, must be 1 or 2 "
-			   "(or DIO_1 or DIO_2).\n", dio + 1 );
+			   "(or DIO1 or DIO2).\n", dio + 1 );
 		THROW( EXCEPTION );
 	}
 
@@ -299,7 +299,7 @@ Var *dio_mode( Var *v )
 	if ( dio < 0 || dio > 1 )
 	{
 		print( FATAL, "Invalid DIO number %ld, must be 1 or 2 "
-			   "(or DIO_1 or DIO_2).\n", dio + 1 );
+			   "(or DIO or DIO2).\n", dio + 1 );
 		THROW( EXCEPTION );
 	}
 
@@ -307,13 +307,13 @@ Var *dio_mode( Var *v )
 	{
 		if ( pass == NULL )
 		{
-			print( FATAL, "DIO_%ld is reserved, phase-phrase required.\n",
+			print( FATAL, "DIO%ld is reserved, phase-phrase required.\n",
 				   dio + 1 );
 			THROW( EXCEPTION );
 		}
 		else if ( strcmp( witio_48.reserved_by[ dio ], pass ) )
 		{
-			print( FATAL, "DIO_%ld is reserved, wrong phase-phrase.\n",
+			print( FATAL, "DIO%ld is reserved, wrong phase-phrase.\n",
 				   dio + 1 );
 			THROW( EXCEPTION );
 		}
@@ -403,7 +403,7 @@ Var *dio_value( Var *v )
 
 	if ( dio < 0 || dio > 1 )
 	{
-		print( FATAL, "Invalid DIO number %ld, must be 'DIO_1' or 'DIO_2' "
+		print( FATAL, "Invalid DIO number %ld, must be 'DIO1' or 'DIO2' "
 			   "(or 1 or 2).\n", dio + 1 );
 		THROW( EXCEPTION );
 	}
@@ -412,13 +412,13 @@ Var *dio_value( Var *v )
 	{
 		if ( pass == NULL )
 		{
-			print( FATAL, "DIO_%ld is reserved, phase-phrase required.\n",
+			print( FATAL, "DIO%ld is reserved, phase-phrase required.\n",
 				   dio + 1 );
 			THROW( EXCEPTION );
 		}
 		else if ( strcmp( witio_48.reserved_by[ dio ], pass ) )
 		{
-			print( FATAL, "DIO_%ld is reserved, wrong phase-phrase.\n",
+			print( FATAL, "DIO%ld is reserved, wrong phase-phrase.\n",
 				   dio + 1 );
 			THROW( EXCEPTION );
 		}

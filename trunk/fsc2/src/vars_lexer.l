@@ -204,11 +204,7 @@ WS          [\n \t]+
             }
 
 {DIO}       {
-				char *txt = varstext;
-
-				while ( ! isdigit( *txt ) )
-					txt++;
-				varslval.lval = T_atol( txt );
+				varslval.lval = T_atol( varstext + 3 );
                 return INT_TOKEN;
             }
 
