@@ -314,7 +314,6 @@ Var *func_call( Var *f )
 		ret = ( *f->val.fnct )( f->next );
 	else
 		ret = ( *f->val.fnct )( NULL );
-	TRY_SUCCESS;
 
 	/* Finally do a clean up, i.e. remove the variable with the function and
 	   all parameters - just keep the return value. Before starting to delete
