@@ -210,6 +210,25 @@ bool exist_device( const char *name )
 }
 
 
+/*---------------------------------------------------------------------*/
+/* Routine tests if a function, passed to the routine by name, exists. */
+/*---------------------------------------------------------------------*/
+
+bool exist_function( const char *name )
+{
+	int i;
+
+
+	for ( i = 0; i < num_func; i++ )
+		if ( fncts[ i ].name != NULL &&
+			 ! strcmp( fncts[ i ].name, name ) &&
+			 fncts[ i ].fnct != NULL )			 
+			return OK;
+
+	return FAIL;
+}
+
+
 /*----------------------------------------------------------------------*/
 /* Function links a library file with the name passed to it (after      */
 /* adding the extension `so') and then tries to find still unresolved   */
