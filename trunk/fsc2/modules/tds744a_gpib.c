@@ -45,8 +45,7 @@ bool tds744a_init( const char *name )
 
     /* Set format of data transfer (binary, INTEL format) */
 
-    if ( gpib_write( tds744a.device, "DAT:ENC SRI\n" ) == FAILURE ||
-         gpib_write( tds744a.device, "DAT:WID 2\n" )    == FAILURE )
+    if ( gpib_write( tds744a.device, "DAT:ENC SRI;WID 2\n" ) == FAILURE )
 	{
 		gpib_local( tds744a.device );
         return FAIL;
@@ -54,8 +53,8 @@ bool tds744a_init( const char *name )
 		
     /* Set unit for cursor setting commands to seconds, cursor types to VBAR */
 
-    if ( gpib_write( tds744a.device, "CURS:FUNC VBA\n" ) == FAILURE ||
-         gpib_write( tds744a.device, "CURS:VBA:UNITS SECO\n" ) == FAILURE )
+    if ( gpib_write( tds744a.device, "CURS:FUNC VBA;VBA:UNITS SECO\n" )
+		 == FAILURE )
     {
         gpib_local( tds744a.device );
         return FAIL;
@@ -104,8 +103,8 @@ bool tds744a_init( const char *name )
 
     /* Switch to running until run/stop button is pressed and start running */
 
-    if ( gpib_write( tds744a.device, "ACQ:STOPA RUNST\n" ) == FAILURE ||
-         gpib_write( tds744a.device, "ACQ:STATE RUN\n" ) == FAILURE )
+    if ( gpib_write( tds744a.device, "ACQ:STOPA RUNST;STATE RUN\n" )
+		 == FAILURE )
     {
         gpib_local( tds744a.device );
         return FAIL;
@@ -409,12 +408,8 @@ bool tds744a_clear_SESR( void )
 void tds744a_finished( void )
 {
     tds744a_clear_SESR( );
-
-    gpib_write( tds744a.device, "ACQ:STATE STOP\n" );
-    gpib_write( tds744a.device, "*SRE 0\n" );
-    gpib_write( tds744a.device, "ACQ:STOPA RUNST\n" );
-    gpib_write( tds744a.device, "ACQ:STATE RUN\n" );
-
+    gpib_write( tds744a.device,
+				"ACQ:STATE STOP;*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n" );
 	gpib_local( tds744a.device );
 }
 
@@ -488,10 +483,7 @@ bool tds744a_set_snap( bool flag )
 	}
 	else
 	{
-		if ( gpib_write( tds744a.device, "DAT STAR 1\n" ) == FAILURE )
-			tds744a_gpib_failure( );
-		strcpy( cmd, "DAT STOP " );
-		sprintf( cmd + strlen( cmd ), "%ld\n", tds744a.rec_len );
+		sprintf( cmd, "DAT STAR 1;:DAT STOP %ld\n", tds744a.rec_len );
 		if ( gpib_write( tds744a.device, cmd ) == FAILURE )
 			tds744a_gpib_failure( );
 	}		
@@ -572,8 +564,7 @@ bool tds744a_start_aquisition( void )
 	   3. set stop after sequence */
 
     if ( ! tds744a_clear_SESR( ) ||
-         gpib_write( tds744a.device, "ACQ:STATE RUN\n" ) == FAILURE ||
-		 gpib_write( tds744a.device, "ACQ:STOPA SEQ\n" ) == FAILURE )
+         gpib_write( tds744a.device, "ACQ:STATE RUN;STOPA SEQ\n" ) == FAILURE )
 		tds744a_gpib_failure( );
 
 

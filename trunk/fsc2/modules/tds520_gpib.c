@@ -396,12 +396,8 @@ bool tds520_clear_SESR( void )
 void tds520_finished( void )
 {
     tds520_clear_SESR( );
-    gpib_write( tds520.device, "ACQ:STATE STOP\n" );
-
-    gpib_write( tds520.device, "*SRE 0\n" );
-    gpib_write( tds520.device, "ACQ:STOPA RUNST\n" );
-    gpib_write( tds520.device, "ACQ:STATE RUN\n" );
-
+    gpib_write( tds520.device,
+				"ACQ:STATE STOP;*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n" );
 	gpib_local( tds520.device );
 }
 
