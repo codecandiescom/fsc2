@@ -540,8 +540,8 @@ Var *f_bdelete( Var *v )
 						nio->partner = new_anchor;
 		}
 
-		T_free( io->label );
-		T_free( io->help_text );
+		T_free( ( void * ) io->label );
+		T_free( ( void * ) io->help_text );
 		T_free( io );
 
 		if ( Tool_Box->objs == NULL )
@@ -1201,8 +1201,8 @@ Var *f_sdelete( Var *v )
 			fl_free_object( io->self );
 		}
 
-		T_free( io->label );
-		T_free( io->help_text );
+		T_free( ( void * ) io->label );
+		T_free( ( void * ) io->help_text );
 		T_free( io );
 
 		/* If this was the very last object delete also the form */
@@ -1853,8 +1853,8 @@ Var *f_idelete( Var *v )
 			fl_free_object( io->self );
 		}
 
-		T_free( io->label );
-		T_free( io->help_text );
+		T_free( ( void * ) io->label );
+		T_free( ( void * ) io->help_text );
 		T_free( io->form_str );
 		T_free( io );
 
@@ -2168,8 +2168,8 @@ void tools_clear( void )
 			fl_free_object( io->self );
 		}
 
-		T_free( io->label );
-		T_free( io->help_text );
+		T_free( ( void * ) io->label );
+		T_free( ( void * ) io->help_text );
 		T_free( io );
 	}
 
@@ -2200,6 +2200,9 @@ static void recreate_Tool_Box( void )
 
 	if ( Tool_Box->Tools != NULL )
 	{
+		tool_x = Tool_Box->Tools->x;
+		tool_y = Tool_Box->Tools->y;
+
 		if ( fl_form_is_visible( Tool_Box->Tools ) )
 			fl_hide_form( Tool_Box->Tools );
 
@@ -2214,14 +2217,11 @@ static void recreate_Tool_Box( void )
 
 			io->group = NULL;
 		}
-	}
 
-	if ( Tool_Box->Tools != NULL )
-	{
+		fl_free_form( Tool_Box->Tools );
+
 		needs_pos = SET;
-		tool_x = Tool_Box->Tools->x;
-		tool_y = Tool_Box->Tools->y;
-		fl_addto_form( Tool_Box->Tools );
+		Tool_Box->Tools = fl_bgn_form( FL_UP_BOX, 1, 1 );
 	}
 	else
 	{
@@ -2264,14 +2264,23 @@ static void recreate_Tool_Box( void )
 	fl_set_form_size( Tool_Box->Tools, Tool_Box->w, Tool_Box->h );
 	fl_adjust_form_size( Tool_Box->Tools );
 
-	/* This seems to be needed to get around a bug in XForms... */
+	/* The following  loop is be needed to get around what looks like bugs
+	   in XForms... */
 
 	for ( io = Tool_Box->objs; io != NULL; io = io->next )
+	{
 		fl_set_object_size( io->self, io->w, io->h );
+		if ( ( io->type == INT_INPUT   ||
+			   io->type == FLOAT_INPUT ||
+			   io->type == INT_OUTPUT  ||
+			   io->type == FLOAT_OUTPUT   ) &&
+			 io->label != NULL )
+			fl_set_object_label( io->self, io->label );
+	}
 
 	if ( needs_pos )
 	{
-		fl_set_form_position( Tool_Box->Tools, tool_x, tool_y);
+		fl_set_form_position( Tool_Box->Tools, tool_x, tool_y );
 		fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
 					  FL_FULLBORDER, "fsc2: Tools" );
 	}
@@ -2409,7 +2418,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			io->w = INPUT_WIDTH;
 			io->h = INPUT_HEIGHT;
 			io->self = fl_add_input( FL_INT_INPUT, io->x, io->y, io->w, io->h,
-									 io->label );
+									 NULL );
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_END_CHANGED );
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
@@ -2421,7 +2430,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			io->w = INPUT_WIDTH;
 			io->h = INPUT_HEIGHT;
 			io->self = fl_add_input( FL_FLOAT_INPUT, io->x, io->y,
-									 io->w, io->h, io->label );
+									 io->w, io->h, NULL );
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_END_CHANGED );
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
@@ -2433,7 +2442,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			io->w = INPUT_WIDTH;
 			io->h = INPUT_HEIGHT;
 			io->self = fl_add_input( FL_INT_INPUT, io->x, io->y, io->w, io->h,
-									 io->label );
+									 NULL );
 			fl_set_object_boxtype( io->self, FL_EMBOSSED_BOX );
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_ALWAYS );
@@ -2448,7 +2457,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			io->w = INPUT_WIDTH;
 			io->h = INPUT_HEIGHT;
 			io->self = fl_add_input( FL_FLOAT_INPUT, io->x, io->y,
-									 io->w, io->h, io->label );
+									 io->w, io->h, NULL );
 			fl_set_object_boxtype( io->self, FL_EMBOSSED_BOX );
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_ALWAYS );
