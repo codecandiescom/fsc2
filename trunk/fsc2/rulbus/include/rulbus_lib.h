@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <math.h>
 #include "rulbus.h"
 
 
@@ -73,15 +74,14 @@ typedef enum
 
 
 
-enum {
-	RB8509 = 8509,      /* 12 bit ADC */
-	RB8510 = 8510,      /* 12 bit DAC */
-    RB8514 = 8514,      /* Delay card */
-	RB8515 = 8515,      /* Clock card */
-};
+
+#define RB8509   8509       /* 12-bit ADC card */
+#define RB8510   8510       /* 12-bit DAC card */
+#define RB8514   8514       /* Delay card */
+#define RB8515   8515       /* Clock card */
 
 #define RB8509_WIDTH 2
-#define RB8510_WIDTH 4
+#define RB8510_WIDTH 2
 #define RB8514_WIDTH 4
 #define RB8515_WIDTH 1
 
@@ -96,8 +96,11 @@ struct RULBUS_CARD_LIST {
 	unsigned char width;
 	struct RULBUS_CARD_HANDLER *handler;
 	bool in_use;
+	int range;
+	int polar;
 };
 
+extern RULBUS_CARD_LIST *rulbus_card;
 
 int rulbus_write( int handle, unsigned char offset, unsigned char *data,
 				  size_t len );
@@ -105,16 +108,30 @@ int rulbus_read( int handle, unsigned char offset, unsigned char *data,
 				 size_t len );
 
 
-/* Internal functions for delay cards */
+/* Internal functions for delay cards (RB8514) */
 
 int rulbus_delay_init( void );
 void rulbus_delay_exit( void );
 int rulbus_delay_card_init( int handle );
 void rulbus_delay_card_exit( int handle );
 
-/* Internal functions for clock cards */
+/* Internal functions for clock cards (RB8515) */
 
 int rulbus_clock_init( void );
 void rulbus_clock_exit( void );
 int rulbus_clock_card_init( int handle );
 void rulbus_clock_card_exit( int handle );
+
+/* Internal functions for 12-bit ADC cards (RB8509) */
+
+int rulbus_adc12_init( void );
+void rulbus_adc12_exit( void );
+int rulbus_adc12_card_init( int handle );
+void rulbus_adc12_card_exit( int handle );
+
+/* Internal functions for 12-bit DAC cards (RB8510) */
+
+int rulbus_dac12_init( void );
+void rulbus_dac12_exit( void );
+int rulbus_dac12_card_init( int handle );
+void rulbus_dac12_card_exit( int handle );

@@ -76,43 +76,67 @@ int rulbus_clock_set_frequency( int handle, int freq );
 #define RULBUS_CLOCK_FREQ_100MHz    7
 
 
-/* Functions for the 12-bit ADC card module (RB8509) */
+/* Functions and definitions for the 12-bit ADC card module (RB8509) */
 
 int rulbus_adc12_set_channel( int handle, int channel );
 int rulbus_adc12_set_gain( int handle, int gain );
+int rulbus_adc12_set_trigger_mode( int handle, int mode );
+int rulbus_adc12_conversion_done( int handle );
 int rulbus_adc12_convert( int handle, double *volts );
+
+#define RULBUS_ADC12_INT_TRIG       0
+#define RULBUS_ADC12_EXT_TRIG       1
+
+
+/* Functions and definitions for the 12-bit DAC card module (RB8510) */
+
+int rulbus_dac12_set_voltage( int handle, double volts );
+
+#define RULBUS_DAC12_UNIPOLAR       0
+#define RULBUS_DAC12_BIPOLAR        1
 
 
 /* Error codes of the library */
 
 #define RULBUS_OK         0
-#define RULBUS_OPN_CFG   -1
-#define RULBUS_OPN_DVF   -2
-#define RULBUS_STX_ERR   -3
-#define RULBUS_NO_MEM    -4
-#define RULBUS_RCK_CNT   -5
-#define RULBUS_RCK_DUP   -6
-#define RULBUS_NO_RCK    -7
-#define RULBUS_INV_RCK   -8
-#define RULBUS_DVF_CNT   -9
-#define RULBUS_MAX_CRD  -10
-#define RULBUS_ADD_DUP  -11
-#define RULBUS_TYP_DUP  -12
-#define RULBUS_CRD_ADD  -13
-#define RULBUS_NAM_DUP  -14
-#define RULBUS_DUP_NAM  -15
-#define RULBUS_CRD_CNT  -16
-#define RULBUS_NO_CRD   -17
-#define RULBUS_CRD_NAM  -18
-#define RULBUS_INV_TYP  -19
-#define RULBUS_ADD_CFL  -20
-#define RULBUS_TYP_HND  -21
-#define RULBUS_NO_INIT  -22
-#define RULBUS_INV_ARG  -23
-#define RULBUS_INV_CRD  -24
-#define RULBUS_INV_HND  -25
-#define RULBUS_CRD_NOP  -26
-#define RULBUS_INV_OFF  -27
-#define RULBUS_WRT_ERR  -28
-#define RULBUS_RD_ERR   -29
-#define RULBUS_CRD_BSY  -30
+#define RULBUS_CFG_ACC   -1
+#define RULBUS_INV_CFG   -2
+#define RULBUS_OPN_CFG   -3
+#define RULBUS_DVF_ACC   -4
+#define RULBUS_DVF_CFG   -5
+#define RULBUS_DVF_OPN   -6
+#define RULBUS_STX_ERR   -7
+#define RULBUS_NO_MEM    -8
+#define RULBUS_RCK_CNT   -9
+#define RULBUS_RCK_DUP  -10
+#define RULBUS_NO_RCK   -11
+#define RULBUS_INV_RCK  -12
+#define RULBUS_DVF_CNT  -13
+#define RULBUS_MAX_CRD  -14
+#define RULBUS_CRD_ADD  -15
+#define RULBUS_NAM_DUP  -16
+#define RULBUS_DUP_NAM  -17
+#define RULBUS_ADD_DUP  -18
+#define RULBUS_TYP_DUP  -19
+#define RULBUS_CRD_CNT  -20
+#define RULBUS_NO_CRD   -21
+#define RULBUS_CRD_NAM  -22
+#define RULBUS_INV_TYP  -23
+#define RULBUS_ADD_CFL  -24
+#define RULBUS_TYP_HND  -25
+#define RULBUS_NO_INIT  -26
+#define RULBUS_INV_ARG  -27
+#define RULBUS_INV_CRD  -28
+#define RULBUS_INV_HND  -29
+#define RULBUS_CRD_NOP  -30
+#define RULBUS_INV_OFF  -31
+#define RULBUS_WRT_ERR  -32
+#define RULBUS_RD_ERR   -33
+#define RULBUS_CRD_BSY  -34
+#define RULBUS_RNG_DUP  -35
+#define RULBUS_POL_DUP  -36
+#define RULBUS_INV_POL  -37
+#define RULBUS_NO_RNG   -38
+#define RULBUS_INV_RNG  -39
+#define RULBUS_NO_POL   -40
+#define RULBUS_INV_VLT  -41
