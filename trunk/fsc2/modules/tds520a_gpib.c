@@ -143,7 +143,7 @@ double tds520a_get_timebase( void )
 
 bool tds520a_set_timebase( double timebase )
 {
-	char cmd[40] = "HOR:MAI:SCA ";
+	char cmd[ 40 ] = "HOR:MAI:SCA ";
 
 
 	gcvt( timebase, 6, cmd + strlen( cmd ) );
@@ -246,8 +246,7 @@ bool tds520a_set_num_avg( long num_avg )
 	}
 	else
 	{
-		strcpy(cmd, "ACQ:NUMAV ");
-		sprintf( cmd + strlen( cmd ), "%ld\n", num_avg );
+		sprintf( cmd, "ACQ:NUMAV %ld\n", num_avg );
 		if ( gpib_write( tds520a.device, cmd ) == FAILURE ||
 			 gpib_write( tds520a.device, "ACQ:MOD AVE\n" ) == FAILURE )
 			tds520a_gpib_failure( );
@@ -511,7 +510,7 @@ bool tds520a_set_snap( bool flag )
 
 bool tds520a_display_channel( int channel )
 {
-	char cmd[ 30 ] = "SEL:";
+	char cmd[ 30 ];
     char reply[ 10 ];
     long length = 10;
 
@@ -524,8 +523,7 @@ bool tds520a_display_channel( int channel )
 
 	/* Check if channel is already displayed */
 
-    strcat( cmd, Channel_Names[ channel ] );
-    strcat( cmd, "?\n" );
+	sprintf( cmd, "SEL:%s?\n", Channel_Names[ channel ] );
     if ( gpib_write( tds520a.device, cmd ) == FAILURE ||
          gpib_read( tds520a.device, reply, &length ) == FAILURE )
 		tds520a_gpib_failure( );
@@ -556,7 +554,6 @@ double tds520a_get_sens( int channel )
 	assert( channel >= 0 && channel < TDS520A_AUX1 );
 
 	stprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
-
 	if ( gpib_write( tds520a.device, cmd ) == FAILURE ||
 		 gpib_read( tds520a.device, reply, &length ) == FAILURE )
 		tds520a_gpib_failure( );
@@ -573,9 +570,6 @@ double tds520a_get_sens( int channel )
 
 bool tds520a_start_aquisition( void )
 {
-//	int status;
-
-
     /* Start an acquisition:
        1. clear the SESR register to allow SRQs
        2. set state to run

@@ -155,7 +155,7 @@ int er035m_sa_exp_hook( void )
 
 try_again:
 
-	if ( gpib_write( nmr.device, "PS", 2 ) == FAILURE )
+	if ( gpib_write( nmr.device, "PS\r" ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", nmr.name );
 		THROW( EXCEPTION );
@@ -265,7 +265,7 @@ try_again:
 
 	/* Switch the display on */
 
-	if ( gpib_write( nmr.device, "ED", 2 ) == FAILURE )
+	if ( gpib_write( nmr.device, "ED\r" ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", nmr.name );
 		THROW( EXCEPTION );
@@ -274,7 +274,7 @@ try_again:
 
 	/* Find out the resolution and set it to at least 2 digits */
 
-	if ( gpib_write( nmr.device, "RS", 2 ) == FAILURE )
+	if ( gpib_write( nmr.device, "RS\r" ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", nmr.name );
 		THROW( EXCEPTION );
@@ -291,7 +291,7 @@ try_again:
 	switch ( buffer[ 2 ] )
 	{
 		case '1' :                    /* set resolution to 2 digits */
-			if ( gpib_write( nmr.device, "RS2", 3 ) == FAILURE )
+			if ( gpib_write( nmr.device, "RS2\r" ) == FAILURE )
 			{
 				eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n",
 						nmr.name );
@@ -389,7 +389,7 @@ Var *measure_field( Var *v )
 	if ( ( nmr.state == ER035M_SA_OU_ACTIVE ||
 		   nmr.state == ER035M_SA_OD_ACTIVE ||
 		   nmr.state == ER035M_SA_UNKNOWN ) &&
-		 gpib_write( nmr.device, "SD", 2 ) == FAILURE )
+		 gpib_write( nmr.device, "SD\r" ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", nmr.name );
 		THROW( EXCEPTION );
@@ -402,7 +402,7 @@ Var *measure_field( Var *v )
 	{
 		/* Get status byte and check if lock was achieved */
 
-		if ( gpib_write( nmr.device, "PS", 2 ) == FAILURE )
+		if ( gpib_write( nmr.device, "PS\r" ) == FAILURE )
 		{
 			eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n",
 					nmr.name );
@@ -506,7 +506,7 @@ double er035m_sa_get_field( void )
 	{
 		/* Ask gaussmeter to send the current field and read result */
 
-		if ( gpib_write( nmr.device, "PF", 2 ) == FAILURE )
+		if ( gpib_write( nmr.device, "PF\r" ) == FAILURE )
 		{
 			eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n",
 					nmr.name );

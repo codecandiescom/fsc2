@@ -849,15 +849,15 @@ static bool sr810_init( const char *name )
 	/* Tell the lock-in to use the GPIB bus for communication, clear all
 	   the relevant registers  and make sure the keyboard is locked */
 
-	if ( gpib_write( sr810.device, "OUTX 1", 6 ) == FAILURE ||
-		 gpib_write( sr810.device, "*CLS", 4 )   == FAILURE ||
-		 gpib_write( sr810.device, "OVRM 0", 6 ) == FAILURE )
+	if ( gpib_write( sr810.device, "OUTX 1\n" ) == FAILURE ||
+		 gpib_write( sr810.device, "*CLS\n" )   == FAILURE ||
+		 gpib_write( sr810.device, "OVRM 0\n" ) == FAILURE )
 		return FAIL;
 	   
 	/* Ask lock-in to send the error status byte and test if it does */
 
 	length = 20;
-	if ( gpib_write( sr810.device, "ERRS?", 5 ) == FAILURE ||
+	if ( gpib_write( sr810.device, "ERRS?\n" ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 		return FAIL;
 
@@ -902,11 +902,11 @@ static bool sr810_init( const char *name )
 
 static double sr810_get_data( void )
 {
-	char buffer[ 50 ] = "OUTP?1";
+	char buffer[ 50 ] = "OUTP?1\n";
 	long length = 50;
 
 
-	if ( gpib_write( sr810.device, buffer, 6 ) == FAILURE ||
+	if ( gpib_write( sr810.device, buffer ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
@@ -941,14 +941,14 @@ static void sr810_get_xy_data( double *data, long *channels, int num_channels )
 		assert( channels[ i ] > 0 && channels[ i ] <= NUM_CHANNELS );
 
 		if ( i == 0 )
-			sprintf( cmd + strlen( cmd ), "%ld", channels[ i ] );
+			sprintf( cmd + strlen( cmd ), "%ld\n", channels[ i ] );
 		else
-			sprintf( cmd + strlen( cmd ), ",%ld", channels[ i ] );
+			sprintf( cmd + strlen( cmd ), ",%ld\n", channels[ i ] );
 	}
 
 	/* Get the data from the lock-in */
 
-	if ( gpib_write( sr810.device, cmd, strlen( cmd ) ) == FAILURE ||
+	if ( gpib_write( sr810.device, cmd ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
@@ -987,14 +987,14 @@ static void sr810_get_xy_data( double *data, long *channels, int num_channels )
 
 static double sr810_get_adc_data( long channel )
 {
-	char buffer[ 16 ] = "OAUX?*";
+	char buffer[ 16 ] = "OAUX?*\n";
 	long length = 16;
 
 
 	assert( channel >= 1 && channel <= 4 );
 	buffer[ 5 ] = ( char ) channel + '0';
 
-	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE ||
+	if ( gpib_write( sr810.device, buffer ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
@@ -1015,14 +1015,13 @@ static double sr810_get_adc_data( long channel )
 
 static double sr810_set_dac_data( long port, double voltage )
 {
-	char buffer [ 40 ] = "AUXV ";
+	char buffer [ 40 ];
 
 	assert( port >= 1 && port <= 4 );
 	assert( voltage >= DAC_MIN_VOLTAGE && voltage <= DAC_MAX_VOLTAGE );
 
-	sprintf( buffer + 5, "%ld,%f", port, voltage );
-
-	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
+	sprintf( buffer, "AUXV %ld,%f\n", port, voltage );
+	if ( gpib_write( sr810.device, buffer ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
@@ -1044,7 +1043,7 @@ static double sr810_get_sens( void )
 
 	/* Ask lock-in for the sensitivity setting */
 
-	if ( gpib_write( sr810.device, "SENS?", 5 ) == FAILURE ||
+	if ( gpib_write( sr810.device, "SENS?\n" ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
@@ -1068,11 +1067,11 @@ static double sr810_get_sens( void )
 
 static void sr810_set_sens( int Sens )
 {
-	char buffer[ 10 ] = "SENS ";
+	char buffer[ 20 ]";
 
 
-	sprintf( buffer + 5, "%d", Sens );
-	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
+	sprintf( buffer, "SENS %d\n", Sens );
+	if ( gpib_write( sr810.device, buffer ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
@@ -1093,7 +1092,7 @@ static double sr810_get_tc( void )
 	long length = 10;
 
 
-	if ( gpib_write( sr810.device, "OFLT?", 5 ) == FAILURE ||
+	if ( gpib_write( sr810.device, "OFLT?\n" ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
@@ -1118,8 +1117,8 @@ static void sr810_set_tc( int TC )
 	char buffer[ 10 ] = "OFLT ";
 
 
-	sprintf( buffer + 5, "%d", TC );
-	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
+	sprintf( buffer + 5, "%d\n", TC );
+	if ( gpib_write( sr810.device, buffer ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
@@ -1140,7 +1139,7 @@ static double sr810_get_phase( void )
 	double phase;
 
 
-	if ( gpib_write( sr810.device, "PHAS?", 5L ) == FAILURE ||
+	if ( gpib_write( sr810.device, "PHAS?\n" ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
@@ -1175,8 +1174,8 @@ static double sr810_set_phase( double phase )
 	char buffer[ 20 ];
 
 
-	sprintf( buffer, "PHAS %.2f", phase );
-	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
+	sprintf( buffer, "PHAS %.2f\n", phase );
+	if ( gpib_write( sr810.device, buffer ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
@@ -1196,7 +1195,7 @@ static double sr810_get_ref_freq( void )
 	long length = 40;
 
 
-	if ( gpib_write( sr810.device, "FREQ?", 5L ) == FAILURE ||
+	if ( gpib_write( sr810.device, "FREQ?\n" ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
@@ -1219,8 +1218,8 @@ static double sr810_set_ref_freq( double freq )
 	double real_freq;
 
 
-	sprintf( buffer, "FREQ %.4f", freq );
-	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
+	sprintf( buffer, "FREQ %.4f\n", freq );
+	if ( gpib_write( sr810.device, buffer ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
@@ -1253,7 +1252,7 @@ static long sr810_get_ref_mode( void )
 	long length = 10;
 
 
-	if ( gpib_write( sr810.device, "FMOD?", 5L ) == FAILURE ||
+	if ( gpib_write( sr810.device, "FMOD?\n" ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
@@ -1275,7 +1274,7 @@ static long sr810_get_harmonic( void )
 	long length = 20;
 
 
-	if ( gpib_write( sr810.device, "HARM?", 5L ) == FAILURE ||
+	if ( gpib_write( sr810.device, "HARM?\n" ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
@@ -1298,8 +1297,8 @@ static long sr810_set_harmonic( long harmonic )
 
 	assert( harmonic >= MIN_HARMONIC && harmonic <= MAX_HARMONIC );
 
-	sprintf( buffer, "HARM %ld", harmonic );
-	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
+	sprintf( buffer, "HARM %ld\n", harmonic );
+	if ( gpib_write( sr810.device, buffer ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
@@ -1331,7 +1330,7 @@ static double sr810_get_ref_level( void )
 	long length = 20;
 
 
-	if ( gpib_write( sr810.device, "SLVL?", 5L ) == FAILURE ||
+	if ( gpib_write( sr810.device, "SLVL?\n" ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
@@ -1354,8 +1353,8 @@ static double sr810_set_ref_level( double level )
 
 	assert( level >= MIN_REF_LEVEL && level <= MAX_REF_LEVEL );
 
-	sprintf( buffer, "SLVL %f", level );
-	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
+	sprintf( buffer, "SLVL %f\n", level );
+	if ( gpib_write( sr810.device, buffer ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
