@@ -1003,11 +1003,18 @@ Var *vars_arr_start( Var *v )
 
 	assert( vars_exist( v ) );
 
-	/* check if the array is completely new (type is still UNDEF_VAR) or
-	   otherwise if its really an array */
+	/* Check if the array is completely new (type is still UNDEF_VAR). In this
+	   case set its type and zero the pointer to the data so we know no memory
+	   has been allocated yet. Otherwise check if its really an array. */
 
 	if ( v->type == UNDEF_VAR )
+	{
 		v->type = IF_FUNC( v->name ) ? INT_ARR : FLOAT_ARR;
+		if ( v->type == INT_ARR )
+			v->val.lpnt = NULL;
+		else
+			v->val.dpnt = NULL;
+	}
 	else
 		vars_check( v, INT_ARR | FLOAT_ARR );
 
