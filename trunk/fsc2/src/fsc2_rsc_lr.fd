@@ -1091,7 +1091,7 @@ label: Printer type:
 shortcut: 
 resize: FL_RESIZE_NONE
 gravity: FL_NoGravity FL_NoGravity
-name: 
+name: printer_type_label
 callback: 
 argument: 
 

@@ -137,9 +137,6 @@ void print_it( FL_OBJECT *obj, long data )
 			return;
 		}
 
-		if ( data == 2 )
-			print_with_color = SET;
-
 		start_printing( fp, name, data );
 
 		if ( fp != NULL )
@@ -173,13 +170,15 @@ static bool get_print_file( FILE **fp, char **name, long data )
 
 	fl_set_form_atclose( print_form->print, print_form_close_handler, NULL );
 
-	/* There's no good way to draw 2D in black and white so make the b&w
-	   button invisible and activate the color button */
+	/* There's no good way to draw 2D in black and white so make the color
+	   choice buttons and the corresponding label invisible */
 
 	if ( data == 2 )
 	{
+		fl_hide_object( print_form->printer_type_label );
 		fl_hide_object( print_form->col_button );
 		fl_hide_object( print_form->bw_button );
+		print_with_color = SET;
 	}
 
 	/* If a printer command has already been set put it into the input object,
@@ -255,15 +254,18 @@ static bool get_print_file( FILE **fp, char **name, long data )
 		fl_deactivate_object( print_form->s2p_input );
 	}
 
-	if ( print_with_color )
+	if ( data != 2 )
 	{
-		fl_set_button( print_form->bw_button, 0 );
-		fl_set_button( print_form->col_button, 1 );
-	}
-	else
-	{
-		fl_set_button( print_form->bw_button, 1 );
-		fl_set_button( print_form->col_button, 0 );
+		if ( print_with_color )
+		{
+			fl_set_button( print_form->bw_button, 0 );
+			fl_set_button( print_form->col_button, 1 );
+		}
+		else
+		{
+			fl_set_button( print_form->bw_button, 1 );
+			fl_set_button( print_form->col_button, 0 );
+		}
 	}
 
 	switch ( data )
