@@ -294,7 +294,7 @@ ifeq ($(machine_name),dorimare.nowhere)
 	OWNER              := fsc2
 	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
-	NUM_SERIAL_PORTS   := 1
+	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
