@@ -58,8 +58,10 @@
 #if defined IS_STILL_LIBC1
 
 #define AF_LOCAL AF_UNIX
+#define sockaddr_un sockaddr
 
 typedef unsigned int socklen_t;
+
 
 #endif
 
@@ -176,13 +178,8 @@ int open_socket( const char *fname )
 	   file (or it exists but isn't a socket file) it means fsc2 isn't running
 	   and we've got to start it */
 
-#if ! defined IS_STILL_LIBC1
 	if ( connect( sock_fd, ( struct sockaddr_un * ) &serv_addr,
 				  sizeof( serv_addr ) ) == -1 )
-#else
-	if ( connect( sock_fd, ( struct sockaddr * ) &serv_addr,
-				  sizeof( serv_addr ) ) == -1 )
-#endif
 	{
 		if ( errno == ECONNREFUSED || errno == ENOENT || errno == ENOTSOCK )
 		{
