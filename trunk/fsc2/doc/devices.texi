@@ -1797,6 +1797,122 @@ This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} program.
 
 
+@anchor{pulser_keep_all_pulses}
+@item pulser_keep_all_pulses()
+@findex pulser_keep_all_pulses()
+This function only exists for the @strong{Sony/Tektronix DG2020} pulser
+(both the @code{dg2020_b} and @code{dg2020_b} module) and the
+@strong{Tektronix HFS9003} pulser.
+
+Usually pulses that in the test run are found to be unused are deleted
+and a warning message is printed indicating this. Any further reference
+to or use of these deleted pulses leads to the immediate termination of
+the experiment. But there are a few situations where it can't be
+detected in the test run that a pulse is actually needed (e.g.@: if it
+is only used in an untestable @code{IF} construct) and thus the pulse
+gets deleted even though it is needed. In this case you have to force
+the program to keep all pulses even if they seem to be unused by calling
+this function (without an argument).
+
+
+@anchor{pulser_maximum_pattern_length}
+@item pulser_maximum_pattern_length()
+@findex pulser_maximum_pattern_length()
+This function only exists for the @strong{Sony/Tektronix DG2020} pulser
+(both the @code{dg2020_b} and @code{dg2020_b} module) and the
+@strong{Tektronix HFS9003} pulser. For the @strong{Bruker EP385} no
+maximum pattern length can be specified, it is fixed to 32768 times the
+clocks oscillation period (i.e.@: @w{262.144 us} when using the internal
+clock). The @strong{Interface Technology RS690} uses a rather different
+concept and, in principle, there is no maximum pattern length.
+
+In most cases the program will be able to figure out automatically how
+long the length of the longest pulse pattern in the experiment is going
+to be when doing the test run. The longest pulse pattern length is
+needed to set up the pulser correctly. Unfortunately, there are certain
+syntax constructs that make it difficult or even impossible to find out
+this maximum pattern length. These constructs are @code{FOREVER} loops
+and sometimes cases, where changes of pulse positions or lengths are
+done within @code{IF-ELSE} or @code{UNLESS-ELSE} constructs (please also
+see the discussion of the problems introduced by @code{FOREVER} loops
+and @code{IF} and @code{ELSE} constructs, @pxref{Control structures}).
+
+Whenever there is a reason to suspect that these problems may occur one
+can set the maximum pulse pattern length manually (i.e.@: the end point
+of the last pulse when it has been set to its latest position in the
+experiment by calling @code{pulser_maximum_pattern_length()} with the
+the maximum pulse pattern length as the only argument.
+
+Unless in the test run an even longer pattern length is found, this
+value is used. It is not a problem to specify too long a maximum pattern
+length, so a conservative guess will do. The only penalty incurred is
+are longer times needed to set up the pulser at the start of the
+experiment. On the other hand, too short a pattern length will lead to
+the experiment being stopped with an error message when the actual
+pattern length becomes larger than the one specified.
+
+
+@anchor{pulser_phase_switch_delay}
+@item pulser_phase_switch_delay()
+@findex pulser_phase_switch_delay()
+This function is only implemented for the Frankfurt version the
+@strong{Sony/Tektronix DG2020} pulser, @code{dg2020_f}. It lets you
+specify the time a phase pulse has to be set to a new phase before the
+microwave pulses (or other phase cycled pulses) start (the phase switch
+needs some small amount of time to settle).
+
+The function takes two arguments, the first one is the phase function
+the phase switch delay is to be applied to (i.e.@: either @code{PHASE_1}
+(or @code{PHASE} for short) or @code{PHASE_2}). The second argument is
+the amount of time.
+
+When this function hasn't been called a default value of @w{20 ns} is
+used for both Phase functions.
+
+When the program does its tests it will always check if the distances
+between the pulses are large enough to allow setting the phase
+pulses. If the pulse distances get too short to set the phase switch
+delays the program will abort with an error message.
+
+
+@anchor{pulser_grace_period}
+@item pulser_grace_period()
+@findex pulser_grace_period()
+This function is only implemented for the Frankfurt version the
+@strong{Sony/Tektronix DG2020} pulser, @code{dg2020_f}. Like the time a
+phase pulse must start before the pulse it was set for can be set via
+the @code{pulser_phase_switch_delay()} function, you also may set how
+much longer a phase pulse has to be set after the oiginal pulse ended.
+
+The function takes only one argument, the time the phase pulses will last
+longer. It applies automatically to both phase functions. 
+
+If this function isn't called a default grace period of @w{10 ns} will
+be used.
+
+Here's a diagram that shows the phase switch delay and the grace period
+(assuming that the microwave pulses are to be phase-cycled):
+@example
+                   ____________________________
+                  |                            |
+Phase pulse       |                            |
+             _____|                            |_________
+                           _________________
+                          |                 |
+Microwave pulse           |                 |
+             _____________|                 |____________
+         
+                ->|       |<-             ->|  |<-
+               phase switch delay        grace period
+@end example
+
+
+When the program does its tests it will always check if the distances
+between the pulses are large enough to allow setting the phase
+pulses. If the pulse distances get very small it may drop the grace
+period.
+
+
 @anchor{pulser_show_pulses}
 @item pulser_show_pulses()
 @findex pulser_show_pulses()
