@@ -23,6 +23,7 @@ comp_modules   = dg2020_f dg2020_b hfs9000 tds754a tds744a tds540 tds520c \
 src_headers    = $(addprefix ../src/,$(headers))
 
 CFLAGS        += -I../src
+LFLAGS         = -nostdlib -shared -fpic 
 
 
 .SUFFIXES:
@@ -33,47 +34,47 @@ all: $(comp_modules:=.so) $(simp_modules:.c=.so)
 
 
 dg2020_f.so: ${dg2020_f:.c=.o}
-	$(LD) -shared -fpic -o $@ ${dg2020_f:.c=.o} -lm
+	$(LD) $(LFLAGS) $^ -o $@
 	chmod 644 $@
 
 dg2020_b.so: ${dg2020_b:.c=.o}
-	$(LD) -shared -fpic -o $@ ${dg2020_b:.c=.o} -lm
+	$(LD) $(LFLAGS) $^ -o $@
 	chmod 644 $@
 
 hfs9000.so: ${hfs9000:.c=.o}
-	$(LD) -shared -fpic -o $@ ${hfs9000:.c=.o} -lm
+	$(LD) $(LFLAGS) $^ -o $@
 	chmod 644 $@
 
 tds754a.so: ${tds754a:.c=.o}
-	$(LD) -shared -fpic -o $@ ${tds754a:.c=.o} -lm
+	$(LD) $(LFLAGS) $^ -o $@
 	chmod 644 $@
 
 tds744a.so: ${tds744a:.c=.o}
-	$(LD) -shared -fpic -o $@ ${tds744a:.c=.o} -lm
+	$(LD) $(LFLAGS) $^ -o $@
 	chmod 644 $@
 
 tds540.so: ${tds540:.c=.o}
-	$(LD) -shared -fpic -o $@ ${tds540:.c=.o} -lm
+	$(LD) $(LFLAGS) $^ -o $@
 	chmod 644 $@
 
 tds520c.so: ${tds520c:.c=.o}
-	$(LD) -shared -fpic -o $@ ${tds520c:.c=.o} -lm
+	$(LD) $(LFLAGS) $^ -o $@
 	chmod 644 $@
 
 tds520a.so: ${tds520a:.c=.o}
-	$(LD) -shared -fpic -o $@ ${tds520a:.c=.o} -lm
+	$(LD) $(LFLAGS) $^ -o $@
 	chmod 644 $@
 
 tds520.so: ${tds520:.c=.o}
-	$(LD) -shared -fpic -o $@ ${tds520:.c=.o} -lm
+	$(LD) $(LFLAGS) $^ -o $@
 	chmod 644 $@
 
 hp8647a.so: ${hp8647a:.c=.o}
-	$(LD) -shared -fpic -o $@ ${hp8647a:.c=.o} -lm
+	$(LD) $(LFLAGS) $^ -o $@
 	chmod 644 $@
 
 %.so: %.o
-	$(LD) -shared -fpic -o $@ $*.o -lm
+	$(LD) $(LFLAGS) $^ -o $@
 	chmod 644 $@
 
 ${dg2020_f:.c=.o}: dg2020_f.h
@@ -94,7 +95,7 @@ hp8647a_lexer.c: hp8647a_lexer.l $(src_header)
 	mv -f $@.x $@
 
 %.o: %.c $(src_headers)
-	$(CC) $(CFLAGS) -c -shared -fpic -o $@ $<
+	$(CC) $(CFLAGS) -c $(LFLAGS) $< -o $@
 
 
 clean:
