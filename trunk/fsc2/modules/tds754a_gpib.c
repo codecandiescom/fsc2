@@ -720,7 +720,7 @@ bool tds754a_set_sens( int channel, double sens )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds754a_start_aquisition( void )
+bool tds754a_start_acquisition( void )
 {
     /* Start an acquisition:
        1. clear the SESR register to allow SRQs

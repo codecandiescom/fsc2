@@ -192,7 +192,7 @@ bool tds754a_set_snap( bool flag );
 bool tds754a_display_channel( int channel );
 double tds754a_get_sens( int channel );
 bool tds754a_set_sens( int channel, double val );
-bool tds754a_start_aquisition( void );
+bool tds754a_start_acquisition( void );
 double tds754a_get_area( int channel, WINDOW *w, bool use_cursor );
 bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 						bool use_cursor );

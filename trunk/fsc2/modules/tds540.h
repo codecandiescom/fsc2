@@ -191,7 +191,7 @@ bool tds540_set_snap( bool flag );
 bool tds540_display_channel( int channel );
 bool tds540_set_sens( int channel, double val );
 double tds540_get_sens( int channel );
-bool tds540_start_aquisition( void );
+bool tds540_start_acquisition( void );
 double tds540_get_area( int channel, WINDOW *w, bool use_cursors );
 bool tds540_get_curve( int channel, WINDOW *w, double **data, long *length,
 					   bool use_cursor );

@@ -692,7 +692,7 @@ bool tds540_set_sens( int channel, double sens )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds540_start_aquisition( void )
+bool tds540_start_acquisition( void )
 {
     /* Start an acquisition:
        1. clear the SESR register to allow SRQs

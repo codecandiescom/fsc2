@@ -819,7 +819,7 @@ Var *digitizer_start_acquisition( Var *v )
 	v = v;
 
 	if ( ! TEST_RUN )
-		tds520_start_aquisition( );
+		tds520_start_acquisition( );
 	return vars_push( INT_VAR, 1 );
 }
 

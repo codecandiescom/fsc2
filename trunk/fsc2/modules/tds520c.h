@@ -189,7 +189,7 @@ bool tds520c_set_snap( bool flag );
 bool tds520c_display_channel( int channel );
 bool tds520c_set_sens( int channel, double val );
 double tds520c_get_sens( int channel );
-bool tds520c_start_aquisition( void );
+bool tds520c_start_acquisition( void );
 double tds520c_get_area( int channel, WINDOW *w, bool use_cursor );
 bool tds520c_get_curve( int channel, WINDOW *w, double **data, long *length,
 						bool use_cursor );
