@@ -681,7 +681,7 @@ bool fsc2_locking( void )
 	   file and get the close-on-exec flag */
 
 	snprintf( buf, sizeof( buf ), "%ld\n%s\n", ( long ) getpid( ),
-			 getpwuid( getuid( ) )->pw_name );
+			  getpwuid( getuid( ) )->pw_name );
 	if ( ftruncate( fd, 0 ) < 0 ||
 		 write( fd, buf, strlen( buf ) ) != ( ssize_t ) strlen( buf ) ||
 		 ( flags = fcntl( fd, F_GETFD, 0 ) ) < 0 )
@@ -695,9 +695,7 @@ bool fsc2_locking( void )
 
 	/* Finally set the close-on-exec flag */
 
-	flags |= FD_CLOEXEC;
-
-	if ( fcntl( fd, F_GETFD, flags ) < 0 )
+	if ( fcntl( fd, F_SETFD, flags | FD_CLOEXEC ) < 0 )
 	{
 		unlink( FSC2_LOCKFILE );
 		lower_permissions( );
