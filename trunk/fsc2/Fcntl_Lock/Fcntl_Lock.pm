@@ -69,8 +69,8 @@ our @EXPORT = qw( F_GETLK F_SETLK F_SETLKW
 our $VERSION = '0.05';
 
 # Set up an hash with the error messages, but only for errno's that Errno
-# knows about. The texts represent what's written in the man pages for
-# Linux and TRUE64.
+# knows about. The texts represent what's written in SUSV3 and in the man
+# pages for Linux and TRUE64.
 
 my %fcntl_error_texts;
 
@@ -78,16 +78,17 @@ BEGIN {
 	my $err;
 
 	if ( $err = eval { &Errno::EACCES } ) {
-		$fcntl_error_texts{ $err } = "File or segment already locked or " .
-			                         "memory-mapped by other process(es)";
+		$fcntl_error_texts{ $err } = "File or segment already locked " .
+			                         "by other process(es)";
 	}
 	if ( $err = eval { &Errno::EAGAIN } ) {
-		$fcntl_error_texts{ $err } = "File or segment already locked or " .
-			                         "memory-mapped by other process(es)";
+		$fcntl_error_texts{ $err } = "File or segment already locked " .
+			                         "by other process(es)";
 	}
 	if ( $err = eval { &Errno::EBADF } ) {
 		$fcntl_error_texts{ $err } = "Not an open file handle or descriptor " .
-			                         "or not open or writing (with F_WRLCK)";
+			                         "or not open or writing (with F_WRLCK) "
+									 "or reading (with F_RDLCK)";
 	}
 	if ( $err = eval { &Errno::EDEADLK } ) {
 		$fcntl_error_texts{ $err } = "Operation would cause a deadlock";
@@ -251,15 +252,13 @@ sub l_start {
 =item B<l_len>
 
 Queries or sets the length of the region (in bytes) in the file to be
-locked. A value of 0 means a lock (starting at B<l_start>) to the very end of
-the file.
+locked. A value of 0 means a lock (starting at B<l_start>) to the very
+end of the file.
 
-Because on some systems also negative values for B<l_start> are allowed
-(resulting in a lock ranging from B<l_start + l_len> to B<l_start - 1>)
-the function does not keep you from passing it negative values. On other
-systems this, unfortunately, is not allowed and will result in an error
-when you try to obtain the lock, please read the fcntl(2) man page carefully
-for details.
+According to SUSV3 negative values for B<l_start> are allowed (resulting
+in a lock ranging from B<l_start + l_len> to B<l_start - 1>) Unfortunately,
+not all systems allow this and will return an error when you try to obtain
+the lock, so please read the fcntl(2) man page carefully for details.
 
 =cut
 
@@ -404,10 +403,10 @@ sub fcntl_errno {
 
 The function returns a short description of the error that happened during the
 latest call of B<fcntl_lock> with the flock structure object. Please take the
-messages with a grain of salt, they represent what the Linux and TRUE64 man
-pages tell what the error numbers mean, there could be differences (and
-additional error numbers) on other systems. If there was no error the
-function returns 'undef'.
+messages with a grain of salt, they represent what SUSV3 (IEEE 1003.1-2001)
+and the Linux and TRUE64 man pages tell what the error numbers mean, there
+could be differences (and additional error numbers) on other systems. If
+there was no error the function returns 'undef'.
 
 =cut
 
@@ -424,10 +423,11 @@ sub fcntl_error {
 =item B<fcntl_system_error>
 
 The previous function, B<fcntl_error>, tries to return a string with some
-relevance to the locking operation (i.e. "Lock is held by other processes"
-instead of "Permission denied"). If instead you want to obtain the normal
-system error message one gets when using $! B<fcntl_system_error> can be
-called instead. Also this function returns 'undef' if there was no error.
+relevance to the locking operation (i.e. "File or segment already locked
+by other process(es)" instead of "Permission denied"). If instead you want
+to obtain the normal system error message one gets when using $!
+B<fcntl_system_error> can be called instead. Also this function returns
+'undef' if there was no error.
 
 =back
 
