@@ -165,20 +165,19 @@ FOREVER {
 		NEXT;
 	}
 
-	/* Calculate how much time we needed to get here */
-
-    new_dt = delta_time( );
-    st += new_dt - dt;
-	dt = new_dt;
-
 	/* If displaying data isn't stopped get as many points as there are in
 	   the lock-ins buffer and display them. */
 
 	IF ! Pause_State & ( Sweep_State != STOPPED | Draw_While_Stopped ) {
-		WHILE st >= 1.0 / acq_rate {
+
+	    new_dt = delta_time( );
+    	st += new_dt - dt;
+		dt = new_dt;
+
+		WHILE st >= 1 / acq_rate {
 			I += 1;
 			display( I, lockin_get_data( 1 ) * 1.0e6 );
-			st -= 1.0 / acq_rate;
+			st -= 1 / acq_rate;
 		}
 	}
 
@@ -230,7 +229,7 @@ FOREVER {
 
 	/* Check if "Stop Sweep" button has been pressed */
 
-	IF Sweep_State != STOPPED & button_state( Sweep_Stop ) {
+	IF button_state( Sweep_Stop ) & Sweep_State != STOPPED {
 
 		IF ! Pause_State {
 			lockin_auto_acquisition( "OFF" );
@@ -254,7 +253,7 @@ FOREVER {
 
 		new_set_field = input_value( New_Field );
 
-		IF new_set_field <= 114304 G & new_set_field <= 0 G &
+		IF new_set_field <= 114304 G & new_set_field >= 0 G &
 		   abs( new_set_field - new_field ) >= 0.14288 G {
 
 			new_field = set_field( new_set_field );
@@ -286,8 +285,8 @@ FOREVER {
 
 		new_sweep_rate = abs( input_value( Sweep_Rate ) );
 
-		IF abs( sweep_rate - new_sweep_rate ) >= 0.01 &
-		   new_sweep_rate <= 33.1 & new_sweep_rate >= 0.23814 {
+		IF  new_sweep_rate <= 33.1 & new_sweep_rate >= 0.23814 &
+		    abs( sweep_rate - new_sweep_rate ) >= 0.01 {
 
 			sweep_rate = magnet_sweep_rate( new_sweep_rate );
 
