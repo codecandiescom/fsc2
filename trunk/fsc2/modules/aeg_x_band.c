@@ -299,7 +299,7 @@ Var *magnet_setup( Var *v )
 	if ( v->type == INT_VAR )
 		eprint( WARN, SET, "%s: Integer value used for magnetic field in "
 				"%s().\n", DEVICE_NAME, Cur_Func );
-	start_field = VALUE( v )
+	start_field = VALUE( v );
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
