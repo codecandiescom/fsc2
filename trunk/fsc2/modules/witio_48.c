@@ -286,16 +286,35 @@ Var *dio_value( Var *v )
 			 ( witio_48.mode[ dio ] == WITIO_48_MODE_16_8
 			   && ch == WITIO_48_CHANNEL_1 ) ) && uval > 1UL << 8 ) )
 	{
-		print( FATAL, "Value of %ld to be output is too large for the current "
-			   "I/O mode of the DIO.\n", val );
-		THROW( EXCEPTION );
+		if ( FSC2_MODE != EXPERIMENT )
+		{
+			print( FATAL, "Value of %ld to be output is too large for the "
+				   "current I/O mode of the DIO.\n", val );
+			THROW( EXCEPTION );
+		}
+		else
+		{
+			if ( witio_48.mode[ dio ] == WITIO_48_MODE_1x24 )
+				uval &= 0xFFFFFFUL;
+			else if ( witio_48.mode[ dio ] == WITIO_48_MODE_16_8 &&
+					  ch == WITIO_48_CHANNEL_0 )
+				uval &= 0xFFFFUL;
+			else if ( witio_48.mode[ dio ] == WITIO_48_MODE_2x12 )
+				uval &= 0xFFFUL;
+			else
+				uval &= 0xFFUL;
+
+			print( SEVER, "Value of %ld to be output is too large for the "
+				   "current I/O mode of the DIO, truncating it to %lu.\n",
+				   val, uval );
+		}
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )
 		check_ret( witio_48_dio_out( ( WITIO_48_DIO ) dio,
 									 ( WITIO_48_CHANNEL ) ch, uval ) );
 
-	return vars_push( INT_VAR, val );
+	return vars_push( INT_VAR, ( long ) uval );
 }
 
 /*--------------------------------------------------------------*/

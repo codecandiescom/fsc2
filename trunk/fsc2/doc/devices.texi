@@ -37,6 +37,7 @@
 * Boxcar Integrator Functions::
 * Frequency Counter Functions::
 * DAQ Functions::
+* DIO Functions::
 * Event Counter Functions::
 * CCD Camera Functions::
 * Monochromator Functions::
@@ -2706,7 +2707,7 @@ does not accept any parameters and can only by used in the
 @end table
 
 
-@node DAQ Functions, Event Counter Functions, Frequency Counter Functions, Device Functions
+@node DAQ Functions, DIO Functions, Frequency Counter Functions, Device Functions
 @section DAQ Functions
 @cindex DAQ Functions
 Currently, there's support for digital-to-analog converter cards,
@@ -2762,11 +2763,142 @@ The function can be used in the @code{EXPERIMENT} as well as in the
 @end table
 
 
-@node Event Counter Functions, CCD Camera Functions, DAQ Functions, Device Functions
+@node DIO Functions, Event Counter Functions, DAQ Functions, Device Functions
+@section DIO Functions
+@cindex DIO Functions
+Currently, there's only one DIO device, the @strong{Wasco WITIO-48}
+ISA card. It can be used for digital input and output. The module for the
+card gets loaded by specifying
+@example
+witio_48
+@end example
+in the @code{DEVICES} section. 
+
+Use of this card requires that a kernel module and an additional
+library (both coming with @code{fsc2}) have been successfully installed.
+
+@table @samp
+
+@anchor{dio_name}
+@item dio_name()
+@findex dio_name()
+Returns a string with the name of the DIO device being used.
+
+@anchor{dio_mode}
+@item dio_mode()
+@findex dio_mode()
+The WITIO-48 card has two DIO chips, both allowing 24 bit wide input and
+output. These DIOs can be further split up into sub-DIOs of smaller
+width. By calling this function you can set the way a DIO is split up.
+
+The function expects at least one argument, the DIO to be used with the
+function. This must be either a number, @code{1} or @code{2} or, better,
+a symbolic name, @code{DIO1} or @code{DIO2}. When called without another
+argument the current mode is returned as an integer number (as they
+could also be specified to set a mode, see below). If there is a second
+argument this is the mode to be set. You can use either a number or a
+string to specify the new mode:
+@table @samp
+@item @code{0} or @code{"3x8"}
+The DIO is split up into three independent 8-bit DIOs, which then can be
+addressed as channels in calls of the function @code{dio_value()}.
+
+@item @code{1} or @code{"2x12"}
+The DIO is split up into two independent 12-bit DIOs, which then can be
+addressed as channels in calls of the function @code{dio_value()}.
+
+@item @code{2} or @code{"1x24"}
+The DIO isn't split up at all but used as a 24-bit wide DIO.
+
+@item @code{3} or @code{"16_8"}
+The DIO is split up into two independent DIOs, one with a width of 16
+bit and one 8-bit wide. These can be addressed as channels in calls of
+the function @code{dio_value()}.
+
+@end table
+
+
+@anchor{dio_value}
+@item dio_value()
+@findex dio_value()
+This function is used to either input or output a value. It expects at
+least two arguments, the DIO to be used (preferably use the symbolic
+names @code{DIO1} and @code{DIO2}) and a channel. Depending on the mode
+the DIO has been set to using the function @code{dio_mode()}, either
+one, two or three channels can be used. Use the symbolic names
+@code{CH1}, @code{CH2} and @code{CH3}. If there is no further argument
+data will be read in from the DIO and pass it back to the @code{EDL}
+script as the return value of the function.
+
+If there's a third argument it is taken as the value to output at the
+DIO (or, to be precise, the sub-DIO specified by the channel argument).
+How many channels can be used, what range of data can be output and how
+each bit the value is mapped to the output pins depends on the mode
+the DIO is been set to:
+@table @samp
+@item @code{"3x8"} mode
+Since in this mode there are three independent sub-DIOs, three channels,
+@code{CH1}, @code{CH2} and @code{CH3}, can be used. Each channel is
+8-bit wide, so the range of values that can be output (or input) is
+restricted to numbers between @code{0} and @code{255}.
+
+If the channel is @code{CH1} the bits of the value are output at the
+pins labeled @code{1PA7} to @code{1PA0} for @code{DIO1} and at the pins
+@code{2PA7} to @code{2PA0} for @code{DIO2}, where the most significant
+bit goes to the highest numbered pin and the least sigificant bit.  If a
+channel of @code{CH2} has been selected the bits are mapped to the pins
+@code{1PB7} to @code{1PB0} or @code{2PB7} to @code{2PB0} and for
+@code{CH3} to the pins @code{1PC7} to @code{1PC0} or @code{2PC7} to
+@code{2PC0}.
+
+@item @code{"2x12"} mode
+In this mode the DIO is split into two 12-bit wide sub-DIOs, so only
+@code{CH1} and @code{CH2} can be used to output a value between @code{0}
+and @code{4096}. For @code{CH1} the topmost 4 bits of the value are
+mapped to the pins @code{1PC7} to @code{1PC4} or @code{2PC7} to
+@code{2PC4} (with the most sigificant bit at @code{1PC7} or @code{2PC7})
+while the lower 8 bits go to the pins @code{1PA7} to @code{1PA0} or
+@code{2PA7} to @code{2PA0} (depending on the selected DIO). For
+@code{CH2} the topmost 4 bits of the value appear at the pins
+@code{1PC3} to @code{1PC0} or @code{2PC3} to @code{2PC0} and the lower
+8 bits are mapped to the @code{B}-pins, @code{1PB7} to @code{1PB0} or
+@code{2PB7} to @code{2PB0}.
+
+@item @code{"1x24"} mode
+The DIO isn't split into sub-DIOs, so the only allowed channel in this
+mode is @code{CH1} and the range of valid values is @code{0} to
+@code{16777215}. The highest 8 bits of the value go to the @code{C}-pins
+(i.e.@: @code{1PC7} to @code{1PC0} for @code{DIO} or @code{2PC7} to
+@code{2PC0} for @code{DIO2}), the middle byte is mapped to the
+@code{B}-pins and the lowest byte of the value to the @code{A}-pins.
+
+@item @code{"16_8"} mode
+In this mode the DIO is split into a 16-bit and an 8-bit wide
+DIO. @code{CH1} is the 16-bit DIO, allowing to output values between
+@code{0} and @code{65535}, and @code{CH2} is the 8-bit DIO, allowing a
+the value to be between @code{0} and @code{255}. For @code{CH1} the
+upper byte of the value is mapped to the @code{B}-pins while the lower
+byte appears at the @code{A}-pins. The @code{C}-pins are used to
+output the value for @code{CH2}.
+
+@end table
+
+Please note: trying to output a negative value will make program stop
+immediately as will trying to output too large a value during the test
+run. During the experiment a too large value will be truncated to the
+allowed range by stripping off the higher bits and an warning message is
+printed out.
+
+
+@end table
+
+
+
+@node Event Counter Functions, CCD Camera Functions, DIO Functions, Device Functions
 @section Event Counter Functions
 @cindex Event Counter Functions
-The only currently supported event counter is the @code{National
-Instruments} GPCT 6601 card. It can be used for counting as well as for
+The only currently supported event counter is the @strong{National
+Instruments GPCT 6601} card. It can be used for counting as well as for
 creating pulses. The module for this card is loaded by specifying
 @example
 ni6601

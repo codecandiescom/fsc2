@@ -68,6 +68,7 @@
 * tds744a::       Tektronix Digitizing Oscilloscope TDS744A
 * tds754a::       Tektronix Digitizing Oscilloscope TDS754A
 * thurlby330::    Thurlby & Thandar Power Supply PL330DP
+* witio_48::      Wasco WITIO-48 DIO card
 @end menu
 @end ifinfo
 
@@ -1686,7 +1687,7 @@ only), 3 math channels and 4 reference channels.
 @end multitable
 
 
-@node thurlby330, , tds754a, Device Reference
+@node thurlby330, witio_48, tds754a, Device Reference
 @iftex
 @subheading Thurlby & Thandar Power Supply PL330DP
 @end iftex
@@ -1717,3 +1718,30 @@ mV}, current range: @w{0 A} to @w{3 A} with resolution of @w{1 mA}.
 @item @code{powersupply_current()}        @tab @ref{powersupply_current}
 @item @code{powersupply_current_limit()}  @tab @ref{powersupply_current_limit}
 @end multitable
+
+
+@node witio_48, ,thurlby330, Device Reference
+@iftex
+@subheading Wasco WITIO-48 DIO card
+@end iftex
+@ifnottex
+@section Wasco WITIO-48 DIO card
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{witio_48}
+
+@paragraphindent 0
+@strong{Description}: DIO card with 2 24-bit wide DIOs, that can be
+split into independent sub-DIOs.
+
+@paragraphindent 0
+@strong{Controlled via}: ISA card (required Linux device driver and
+library are part of the @code{fsc2} package)
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{dio_name()}           @tab @ref{dio_name}
+@item @code{dio_mode()}           @tab @ref{dio_mode}
+@item @code{dio_value()}          @tab @ref{dio_value}
