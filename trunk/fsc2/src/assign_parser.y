@@ -93,6 +93,8 @@ static Var *CV;
 %type <dval> 
 %type <vptr> expr list1 unit sl_val
 
+%left AND OR XOR
+%left NOT
 %left EQ LT LE GT GE
 %left '+' '-'
 %left '*' '/'
