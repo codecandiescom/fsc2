@@ -995,7 +995,7 @@ of the variable on to the parser.
 
 
 The parser knows that functions always have to be followed by an opening
-parenthesis and thus will ask the lexwer for the next token. If this
+parenthesis and thus will ask the lexer for the next token. If this
 isn't a "@code{(}" the parser will give up, complaining about a syntax
 error. Otherwise the parser has to look out for the function
 argument(s), asking the lexer for more tokens. The next one it gets is a
