@@ -10,6 +10,9 @@
 #endif
 
 
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
 void *T_malloc( size_t size )
 {
 	void *mem;
@@ -30,6 +33,9 @@ void *T_malloc( size_t size )
 }
 
 
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
 void *T_calloc( size_t nmemb, size_t size )
 {
 	void *mem;
@@ -49,6 +55,11 @@ void *T_calloc( size_t nmemb, size_t size )
 }
 
 
+/*--------------------------------------------------------------------*/
+/* In contrast to the normal realloc function this function frees the */
+/* previously used memory if the reallocation fails!                  */
+/*--------------------------------------------------------------------*/
+
 void *T_realloc( void *ptr, size_t size )
 {
 	void *new_ptr;
@@ -57,6 +68,8 @@ void *T_realloc( void *ptr, size_t size )
 
 	if ( new_ptr == NULL )
 	{
+		if ( ptr != NULL )
+			T_free( ptr );
 		eprint( FATAL, "%s:%ld: Running out of memory.\n", Fname, Lc );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
@@ -69,6 +82,9 @@ void *T_realloc( void *ptr, size_t size )
 }
 
 
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
 void T_free( void *ptr )
 {
 #if defined MDEBUG
@@ -80,6 +96,9 @@ void T_free( void *ptr )
 	free( ptr );
 }
 
+
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
 
 long T_atol( const char *txt )
 {
@@ -97,6 +116,9 @@ long T_atol( const char *txt )
 	return ret;
 }
 
+
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
 
 double T_atof( const char *txt )
 {
