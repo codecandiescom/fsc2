@@ -90,7 +90,7 @@ pulser_stop_on_update, 1, ALL;  // sets stop during updates (HFS9000 only)
 
 
 // Functions exported by the lock-in amplifier drivers
-// (SR510, SR530, SR810, SR830)
+// (Stanford Research 510, 530, 810, 830, and Bruker ER 023 M signal channel)
 
 lockin_name, 0, ALL;            // returns the device name
 lockin_get_data, -1, EXP;       // returns the lock-in voltage 
@@ -103,8 +103,9 @@ lockin_ref_freq, -1, ALL;       // Get/set mod. frequency (SR8x0, ER023M)
 lockin_ref_mode, 0, EXP;        // Get mod. mode (SR8x0, ER023M)
 lockin_ref_level, -1, EXP;      // Get/set mod. level (SR8x0 only)
 lockin_harmonic, -1, EXP;       // Get/set harmonic (SR8x0, ER023M)
-lockin_lock_keyboard, -1, EXP;  // Lock or unlock the keyboard
+lockin_lock_keyboard, -1, EXP;  // Lock or unlock the keyboard (SRxy0)
 
+lockin_is_overload, 0, EXP;     // (ER023M)
 lockin_offset, -1, ALL;         // (ER023M)
 lockin_conversion_time, -1, ALL;// (ER023M)
 lockin_resonator, -1, ALL;      // (ER023M)

@@ -24,14 +24,18 @@
 
 #include "er023m.h"
 
+
 static bool dont_print_on_error = UNSET;
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* Here everything is done to bring the device into a known, useful state */
+/*------------------------------------------------------------------------*/
 
 bool er023m_init( const char *name )
 {
+	/* Bring device in remote state */
+
 	if ( gpib_init_device( name, &er023m.device ) == FAILURE )
 	{
 		er023m.device = -1;
@@ -44,7 +48,8 @@ bool er023m_init( const char *name )
 
 		/* Make lock-in send its status byte to test that it reacts */
 
-		er023m_st( );
+		er032m.st = er023m_st( );
+		er023m.st_is_valid = SET;
 
 		/* Switch off service requests */
 
@@ -72,19 +77,20 @@ bool er023m_init( const char *name )
 		}
 
 		/* Set the conversion time - if it hasn't been specified by the user
-		   set it to a value as near as possible to the time constant */
+		   get its value and set it to a value of at least MIN_CT_MULT */
 
 		if ( er023m.ct_mult != UNDEF_CT_MULT )
 			er023m_set_ct( er023m.ct_mult );
 		else
 		{
-			er023m.ct_mult = irnd( er023m.tc_index / BASE_CT );
+			er023m.ct_mult = er023m_set_ct( );
 			if ( er023m.ct_mult < MIN_CT_MULT )
-				er023m.ct_mult = MIN_CT_MULT;
-			if ( er023m.ct_mult > MAX_CT_MULT )
-				er023m.ct_mult = MAX_CT_MULT;
-			er023m_set_ct( er023m.ct_mult );
+				er023m_set_ct( er023m.ct_mult = MIN_CT_MULT );
 		}
+
+		/* Get the number of bytes to be expected for ADC data */
+
+		er023m.nb = er023m_nb( );
 
 		/* Set or fetch the modulation frequency */
 
@@ -114,7 +120,7 @@ bool er023m_init( const char *name )
 		else
 			er023m.of = er023m_get_of( );
 
-		/* Set or fetch the harmonic */
+		/* Set or fetch the harmonic setting */
 
 		if ( er023m.ha != UNDEF_HARMONIC )
 			er023m_set_ha( er023m.ha );
@@ -146,10 +152,11 @@ bool er023m_init( const char *name )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Tis function only works if the data fit into an unsigned int - but */
-/* has already been checked when er023m.nb was determined...          */
-/*--------------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* This function only works if the data fit into an unsigned int  */
+/* but has already been checked when er023m_nb() was called (when */
+/* setting the conversion time)                                   */
+/*----------------------------------------------------------------*/
 
 unsigned int er023m_get_data( void )
 {
@@ -159,6 +166,10 @@ unsigned int er023m_get_data( void )
 	int fac;
 	int val = 0;
 
+
+	/* Reading new data resets the overload indicator in the status bit */
+
+	er023m.st_is_valid = UNSET;
 
 	/* Bring lock-in into talker mode, this should make it send one ADC data
 	   point automatically (when in SINGLE mode) */
@@ -175,15 +186,18 @@ unsigned int er023m_get_data( void )
 
 	/* The device sends positive numbers only, LSB first */
 
-	for ( val = 0, i = 0, fac = 1; i < er023m.nb; fac *= 0x100, i++ )
+	for ( val = 0, i = 0, fac = 1; i < er023m.nb; fac <<= 8, i++ )
 		val += fac * ( unsigned int ) buf[ i ];
 
 	return val;
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Asks the device for the current receiver gain setting, a value */
+/* between 0 and 57 (corresponding to receiver gains between 2e+1 */
+/* and 1e+7) is returned.                                         */
+/*----------------------------------------------------------------*/
 
 int er023m_get_rg( void )
 {
@@ -200,8 +214,9 @@ int er023m_get_rg( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------*/
+/* Sets a receiver gain, allowed range of values is 0 - 57 */
+/*---------------------------------------------------------*/
 
 void er023m_set_rg( int rg_index )
 {
@@ -216,8 +231,11 @@ void er023m_set_rg( int rg_index )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Asks the device for the current time constant setting, a value */
+/* between 0 and 19 is returned (corresponding to time constants  */
+/* between 10 ms and 5.24288 s)                                   */
+/*----------------------------------------------------------------*/
 
 int er023m_get_tc( void )
 {
@@ -234,8 +252,11 @@ int er023m_get_tc( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------*/
+/* Sets a time constant, allowed range of values is 8 - 19 */
+/* (values below 8, i.e. below 2.56 ms don't make too much */
+/* sense because the minimum conversion time is 3.2 ms)    */
+/*---------------------------------------------------------*/
 
 void er023m_set_tc( int tc_index )
 {
@@ -247,115 +268,14 @@ void er023m_set_tc( int tc_index )
 	sprintf( buf, "TC%d\r", tc_index );
 	if ( gpib_write( er023m.device, buf, strlen( buf ) ) == FAILURE )
 		er023m_failure( );
-
-	er023m_get_nb( );
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
-
-int er023m_get_ph( void )
-{
-	char buf[ 30 ];
-	long len = 30;
-
-
-	if ( gpib_write( er023m.device, "PH\r", 3 ) == FAILURE ||
-		 gpib_read( er023m.device, buf, &len ) == FAILURE )
-		er023m_failure( );
-
-	buf[ len - 1 ] = '\0';
-	return T_atoi( buf + 2 );
-}
-
-
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
-
-void er023m_set_ph( int ph_index )
-{
-	char buf[ 30 ];
-
-
-	fsc2_assert( ph_index >= 0 && ph_index <= 359 );
-
-	sprintf( buf, "PH%d\r", ph_index );
-	if ( gpib_write( er023m.device, buf, strlen( buf ) ) == FAILURE )
-		er023m_failure( );
-}
-
-
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
-
-int er023m_get_ma( void )
-{
-	char buf[ 30 ];
-	long len = 30;
-
-
-	if ( gpib_write( er023m.device, "MA\r", 3 ) == FAILURE ||
-		 gpib_read( er023m.device, buf, &len ) == FAILURE )
-		er023m_failure( );
-
-	buf[ len - 1 ] = '\0';
-	return T_atoi( buf + 2 );
-}
-
-
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
-
-void er023m_set_ma( int ma )
-{
-	char buf[ 30 ];
-
-
-	fsc2_assert( ma >= MIN_MOD_ATT && ma <= MOD_OFF );
-
-	sprintf( buf, "MA%d\r", ma );
-	if ( gpib_write( er023m.device, buf, strlen( buf ) ) == FAILURE )
-		er023m_failure( );
-}
-
-
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
-
-int er023m_get_of( void )
-{
-	char buf[ 30 ];
-	long len = 30;
-
-
-	if ( gpib_write( er023m.device, "OF\r", 3 ) == FAILURE ||
-		 gpib_read( er023m.device, buf, &len ) == FAILURE )
-		er023m_failure( );
-
-	buf[ len - 1 ] = '\0';
-	return T_atoi( buf + 2 );
-}
-
-
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
-
-void er023m_set_of( int of )
-{
-	char buf[ 30 ];
-
-
-	fsc2_assert( of >= MIN_OF && of <= MAX_OF );
-
-	sprintf( buf, "OF%d\r", of );
-	if ( gpib_write( er023m.device, buf, strlen( buf ) ) == FAILURE )
-		er023m_failure( );
-}
-
-
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Asks the device for the current conversion time setting, a value */
+/* between 1 and 9999 is returned (corresponding to time constants  */
+/* between 320 us and 3.19968 s)                                    */
+/*------------------------------------------------------------------*/
 
 int er023m_get_ct( void )
 {
@@ -372,8 +292,13 @@ int er023m_get_ct( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Sets the conversion time, input must be between 10 and 9999 */
+/* (values below 10, i.e. 3.2 ms would make it impossible to   */
+/* fetch data in single mode (SM)). Because the CT setting has */
+/* an influence on the number of bytes returned as ADC data we */
+/* als have to (re)read this number of bytes.                  */
+/*-------------------------------------------------------------*/
 
 void er023m_set_ct( int ct_mult )
 {
@@ -386,12 +311,128 @@ void er023m_set_ct( int ct_mult )
 	if ( gpib_write( er023m.device, buf, strlen( buf ) ) == FAILURE )
 		er023m_failure( );
 
-	er023m_get_nb( );
+	er023m.nb = er023m_nb( );
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*------------------------------------------------*/
+/* Asks the device fro the current phase setting, */
+/* a value between 0 and 259 will be returned.    */
+/*------------------------------------------------*/
+
+int er023m_get_ph( void )
+{
+	char buf[ 30 ];
+	long len = 30;
+
+
+	if ( gpib_write( er023m.device, "PH\r", 3 ) == FAILURE ||
+		 gpib_read( er023m.device, buf, &len ) == FAILURE )
+		er023m_failure( );
+
+	buf[ len - 1 ] = '\0';
+	return T_atoi( buf + 2 );
+}
+
+
+/*------------------------------------------------------*/
+/* Sets the phase, allowed values are between 0 and 359 */
+/*------------------------------------------------------*/
+
+void er023m_set_ph( int ph_index )
+{
+	char buf[ 30 ];
+
+
+	fsc2_assert( ph_index >= 0 && ph_index <= 359 );
+
+	sprintf( buf, "PH%d\r", ph_index );
+	if ( gpib_write( er023m.device, buf, strlen( buf ) ) == FAILURE )
+		er023m_failure( );
+}
+
+
+/*----------------------------------------------------------------*/
+/* Asks the device for the current modulation attenation setting, */
+/* returned values are in the range between 0 and 80.             */
+/*----------------------------------------------------------------*/
+
+int er023m_get_ma( void )
+{
+	char buf[ 30 ];
+	long len = 30;
+
+
+	if ( gpib_write( er023m.device, "MA\r", 3 ) == FAILURE ||
+		 gpib_read( er023m.device, buf, &len ) == FAILURE )
+		er023m_failure( );
+
+	buf[ len - 1 ] = '\0';
+	return T_atoi( buf + 2 );
+}
+
+
+/*----------------------------------------------------------------------*/
+/* Sets the modulation attenuation, allowed values are between 0 and 80 */
+/*----------------------------------------------------------------------*/
+
+void er023m_set_ma( int ma )
+{
+	char buf[ 30 ];
+
+
+	fsc2_assert( ma >= MIN_MOD_ATT && ma <= MOD_OFF );
+
+	sprintf( buf, "MA%d\r", ma );
+	if ( gpib_write( er023m.device, buf, strlen( buf ) ) == FAILURE )
+		er023m_failure( );
+}
+
+
+/*-----------------------------------------------------------------*/
+/* Asks the device for the current offset setting, returned values */
+/* are in the range between 0 and 99 (50 corresponds to a zero     */
+/* offset, smaller values to negative offsets and larger ones to a */
+/* positive offset.                                                */
+/*-----------------------------------------------------------------*/
+
+int er023m_get_of( void )
+{
+	char buf[ 30 ];
+	long len = 30;
+
+
+	if ( gpib_write( er023m.device, "OF\r", 3 ) == FAILURE ||
+		 gpib_read( er023m.device, buf, &len ) == FAILURE )
+		er023m_failure( );
+
+	buf[ len - 1 ] = '\0';
+	return T_atoi( buf + 2 );
+}
+
+
+/*------------------------------------------------------*/
+/* Sets the offset, allowed values are between 0 and 99 */
+/*------------------------------------------------------*/
+
+void er023m_set_of( int of )
+{
+	char buf[ 30 ];
+
+
+	fsc2_assert( of >= MIN_OF && of <= MAX_OF );
+
+	sprintf( buf, "OF%d\r", of );
+	if ( gpib_write( er023m.device, buf, strlen( buf ) ) == FAILURE )
+		er023m_failure( );
+}
+
+
+/*----------------------------------------------------------------*/
+/* Asks the device for the current modulation frequency, returned */
+/* values are in the range between 0 and 6 (corresponding to      */
+/* modulation frequencioes between 100 kHz and 1.5625 kHz)        */
+/*----------------------------------------------------------------*/
 
 int er023m_get_mf( void )
 {
@@ -407,8 +448,9 @@ int er023m_get_mf( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Sets the modulation frequency, allowed values are between 0 and 6 */
+/*-------------------------------------------------------------------*/
 
 void er023m_set_mf( int mf_index )
 {
@@ -423,8 +465,9 @@ void er023m_set_mf( int mf_index )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+/* Returns the currently used harmonic, returns either 1 or 2 */
+/*------------------------------------------------------------*/
 
 int er023m_get_ha( void )
 {
@@ -441,8 +484,9 @@ int er023m_get_ha( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*------------------------------------------*/
+/* Sets the harmonic, accepts either 1 or 2 */
+/*------------------------------------------*/
 
 void er023m_set_ha( int ha )
 {
@@ -457,8 +501,9 @@ void er023m_set_ha( int ha )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Returns the currently used resonator, returns either 1 or 2 */
+/*-------------------------------------------------------------*/
 
 int er023m_get_re( void )
 {
@@ -475,8 +520,9 @@ int er023m_get_re( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*-------------------------------------------*/
+/* Sets the resonator, accepts either 1 or 2 */
+/*-------------------------------------------*/
 
 void er023m_set_re( int re )
 {
@@ -491,15 +537,20 @@ void er023m_set_re( int re )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*----------------------------------------------------------*/
+/* Returns the number of bytes to be expected when fetching */
+/* ADC data in single mode (SM) - again the manual is lying */
+/* by teling that the maximum number is 3 while in reality  */
+/* it seems to be 4.                                        */
+/*----------------------------------------------------------*/
 
-int er023m_get_nb( void )
+int er023m_nb( void )
 {
 	char buf[ 30 ];
 	long len = 30;
 	unsigned int fac;
 	int i;
+	int nb;
 
 
 	if ( gpib_write( er023m.device, "NB\r", 3 ) == FAILURE ||
@@ -507,22 +558,23 @@ int er023m_get_nb( void )
 		er023m_failure( );
 
 	buf[ len - 1 ] = '\0';
-	er023m.nb = T_atoi( buf + 2 );
+	nb = T_atoi( buf + 2 );
 
-	fsc2_assert( er023m.nb > 0 && er023m.nb <= MAX_NB &&
-				 er023m.nb <= ( int ) sizeof( unsigned int ) );
+	fsc2_assert( nb > 0 && nb <= MAX_NB &&
+				 nb <= ( int ) sizeof( unsigned int ) );
 
-	for ( fac = 255, i = 1; i < er023m.nb; i++ )
+	for ( fac = 255, i = 1; i < nb; i++ )
 		fac = fac * 256 + 255;
 
 	er023m.scale_factor = 2.0 / ( double ) fac;
 
-	return er023m.nb;
+	return nb;
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* Switches the service request option on (1) or off (0) */
+/*-------------------------------------------------------*/
 
 void er023m_srq( int on_off )
 {
@@ -537,14 +589,15 @@ void er023m_srq( int on_off )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------*/
+/* Reads the status byte from the device */
+/*---------------------------------------*/
 
 unsigned char er023m_st( void )
 {
 	char buf[ 30 ];
 	long len = 30;
-	int sb;
+	int st;
 
 
 	if ( gpib_write( er023m.device, "ST\r", 3 ) == FAILURE ||
@@ -552,21 +605,22 @@ unsigned char er023m_st( void )
 		er023m_failure( );
 
 	buf[ len - 1 ] = '\0';
-	sb = T_atoi( buf + 2 );
+	st = T_atoi( buf + 2 );
 
-	fsc2_assert( sb >= 0 && sb <= 255 );
+	fsc2_assert( st >= 0 && sb <= 255 );
 
-	return ( unsigned char ) ( sb & 0xFF );
+	return ( unsigned char ) ( st & 0xFF );
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Called whenever there are communication problems with the device */
+/*------------------------------------------------------------------*/
 
 void er023m_failure( void )
 {
 	if ( ! dont_print_on_error )
-		eprint( FATAL, UNSET, "%s: Can't access the lock-in amplifier.\n",
+		eprint( FATAL, UNSET, "%s: Can't access the signal channel.\n",
 				DEVICE_NAME );
 	THROW( EXCEPTION )
 }

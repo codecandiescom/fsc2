@@ -857,3 +857,28 @@ Var *lockin_resonator( Var *v )
 	
 	return vars_push( INT_VAR, ( long ) ( re + 1 ) );
 }
+
+
+/*-----------------------------------------------------------------------*/
+/* Function returns an integer variable with a value of 1 if the for the */
+/* last data fetched from the device an overload occurred, otherwise 0.  */
+/*-----------------------------------------------------------------------*/
+
+Var *lockin_is_overload( Var *v )
+{
+	long res;
+
+
+	v = v;
+
+	if ( TEST_RUN )
+		return vars_push( INT_VAR, 0 );
+
+	if ( er023m.st_is_valid )
+		return vars_push( INT_VAR, ( long ) ( er023m.st & 1 ) );
+
+	res = ( long ) ( er023m_st( ) & 1 );
+	er023m.st_is_valid = SET;
+
+	return vars_push( INT_VAR, res );
+}

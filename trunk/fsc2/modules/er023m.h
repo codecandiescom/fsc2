@@ -180,6 +180,10 @@ typedef struct {
 	                      /* recheck whenever CT changes */
 	double scale_factor;
 
+	unsigned char st;     /* status byte */
+	bool st_is_valid;     /* when set use the stored value of the status byte,
+							 otherwise fetch from device */
+
 } ER023M;
 
 
@@ -207,6 +211,7 @@ Var *lockin_conversion_time( Var *v );
 Var *lockin_ref_freq( Var *v );
 Var *lockin_harmonic( Var *v );
 Var *lockin_resonator( Var *v );
+Var *lockin_is_overload( Var *v );
 
 
 Var *lockin_rg( Var *v );
@@ -236,7 +241,7 @@ int er023m_get_ha( void );
 void er023m_set_ha( int ha );
 int er023m_get_re( void );
 void er023m_set_re( int re );
-int er023m_get_nb( void );
+int er023m_nb( void );
 void er023m_srq( int on_off );
 unsigned char er023m_st( void );
 void er023m_failure( void );
