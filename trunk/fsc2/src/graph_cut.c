@@ -2466,8 +2466,8 @@ static bool cut_change_xy_range( Canvas *c )
 	{
 		CG.can_undo[ G.active_curve ] = SET;
 
-		x1 = G.start[ X ] / cv->s2d[ X ] - cv->shift[ X ];
-		x2 = c->ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ];
+		cx1 = G.start[ X ] / cv->s2d[ X ] - cv->shift[ X ];
+		cx2 = c->ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ];
 
 		CG.shift[ G.active_curve ][ X ] = cv->shift[ X ] = - d_min( cx1, cx2 );
 		CG.s2d[ G.active_curve ][ X ] = cv->s2d[ X ] =
