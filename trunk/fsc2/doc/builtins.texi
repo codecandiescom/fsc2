@@ -766,11 +766,6 @@ automatically to the name of the file the user selects unless the file
 name already has this extension. This way one can enforce an extension
 for the file name.
 
-The function used to support also an alternative method, where a hard-
-coded file name could be used. While this still works it is deprecated
-and shouldn't be used anymore. Please use the @code{open_file()}
-function instead!
-
 If @code{get_file()} has never been called on the first call to a
 function from the @code{save_xxx()}-family the user is asked to select a
 file and this file is used exclusively in further

@@ -296,13 +296,6 @@ Var *f_getf( Var *var )
 
 	/* First string is the message */
 
-	if ( s[ 0 ] != NULL && s[ 0 ][ 0 ] == '\\' )
-	{
-		print( WARN, "Use of hard-coded file names is deprecated, please "
-			   "use open_file() instead.\n" );
-		r = T_strdup( s[ 0 ] + 1 );
-	}
-
 	if ( s[ 0 ] == NULL || s[ 0 ][ 0 ] == '\0' || s[ 0 ][ 0 ] == '\\' )
 		s[ 0 ] = T_strdup( "Please select a file name:" );
 	else
