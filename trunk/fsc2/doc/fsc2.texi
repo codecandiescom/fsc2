@@ -54,6 +54,7 @@ devices to be used in the experiment.
 
 @menu
 * Overview::                Basic concepts of fsc2.
+* Command Line Options::    Different ways to invoke @acronym{fsc2}
 * EDL::                     Description of EDL the language.
 * Built-in Functions::      Built-in functions.
 * Device Functions::        Functions for accessing devices.
@@ -67,6 +68,7 @@ devices to be used in the experiment.
 @contents
 
 @include overview.texi
+@include cmd.texi
 @include edl.texi
 @include builtins.texi
 @include devices.texi

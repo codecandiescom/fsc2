@@ -1,6 +1,6 @@
 @c $Id$
 
-@node EDL, Built-in Functions, Overview, Top
+@node EDL, Built-in Functions, Command Line Options, Top
 @chapter @acronym{EDL}
 @cindex @acronym{EDL}
 
