@@ -104,6 +104,7 @@ Var *lockin_auto_setup( Var *v );
 Var *lockin_get_sample_time( Var *v );
 Var *lockin_auto_acquisition( Var *v );
 Var *lockin_lock_keyboard( Var *v );
+Var *lockin_command( Var *v );
 
 
 /* Exported symbols (used by W-band power supply driver) */
@@ -230,6 +231,7 @@ static long sr810_get_display_channel( void );
 static void sr810_auto( int flag );
 static double sr810_get_auto_data( int type );
 static void sr810_lock_state( bool lock );
+static bool sr810_command( const char *cmd );
 static void sr810_failure( void );
 
 
@@ -2192,7 +2194,7 @@ static void sr810_lock_state( bool lock )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-bool sr810_command( const char *cmd )
+static bool sr810_command( const char *cmd )
 {
 	if ( gpib_write( sr810.device, cmd, strlen( cmd ) ) == FAILURE )
 		sr810_gpib_failure( );

@@ -493,6 +493,17 @@ static void hp8647a_check_complete( void )
 }
 
 
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+bool hp8647a_command( const char *cmd )
+{
+	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
+		hp8647a_gpib_failure( );
+	return OK;
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

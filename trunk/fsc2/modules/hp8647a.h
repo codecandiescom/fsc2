@@ -78,6 +78,7 @@ Var *synthesizer_modulation( Var *v );
 Var *synthesizer_mod_ampl( Var *v );
 Var *synthesizer_mod_type( Var *v );
 Var *synthesizer_mod_source( Var *v );
+Var *synthesizer_command( Var *v );
 
 
 typedef struct {
@@ -170,6 +171,7 @@ int hp8647a_set_mod_source( int type, int source );
 int hp8647a_get_mod_source( int type );
 double hp8647a_set_mod_ampl( int type, double ampl );
 double hp8647a_get_mod_ampl( int type );
+bool hp8647a_command( const char *cmd );
 
 
 /*

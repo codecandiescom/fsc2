@@ -61,6 +61,7 @@ Var *lockin_phase( Var *v );
 Var *lockin_ref_freq( Var *v );
 Var *lockin_dac_voltage( Var *v );
 Var *lockin_lock_keyboard( Var *v );
+Var *lockin_command( Var *v );
 
 
 /* Exported symbols (used by W-band power supply driver) */
@@ -124,6 +125,7 @@ static double sr510_set_phase( double phase );
 static double sr510_get_ref_freq( void );
 static double sr510_set_dac_voltage( long channel, double voltage );
 static void sr510_lock_state( bool lock );
+static bool sr510_command( const char *cmd );
 static void sr510_failure( void );
 
 
@@ -1036,7 +1038,7 @@ static void sr510_lock_state( bool lock )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-bool sr510_command( const char *cmd )
+static bool sr510_command( const char *cmd )
 {
 	if ( gpib_write( sr510.device, cmd, strlen( cmd ) ) == FAILURE )
 		sr510_gpib_failure( );

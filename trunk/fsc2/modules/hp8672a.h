@@ -84,6 +84,7 @@ Var *synthesizer_modulation( Var *v );
 Var *synthesizer_mod_ampl( Var *v );
 Var *synthesizer_mod_type( Var *v );
 Var *synthesizer_mod_source( Var *v );
+Var *synthesizer_command( Var *v );
 
 
 typedef struct {
@@ -173,6 +174,7 @@ bool hp8672a_get_output_state( void );
 double hp8672a_set_frequency( double freq );
 double hp8672a_set_attenuation( double att );
 int hp8672a_set_modulation( void );
+bool hp8672a_command( const char *cmd );
 
 
 /*

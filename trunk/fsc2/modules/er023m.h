@@ -224,6 +224,7 @@ Var *lockin_ref_level( Var *v );
 Var *lockin_harmonic( Var *v );
 Var *lockin_resonator( Var *v );
 Var *lockin_is_overload( Var *v );
+Var *lockin_command( Var *v );
 
 
 Var *lockin_rg( Var *v );
@@ -256,6 +257,7 @@ void er023m_set_re( int re );
 int er023m_nb( void );
 void er023m_srq( int on_off );
 unsigned char er023m_st( void );
+bool er023m_command( const char *cmd );
 void er023m_failure( void );
 
 

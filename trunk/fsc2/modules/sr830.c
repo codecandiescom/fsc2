@@ -243,7 +243,7 @@ static long sr830_get_display_channel( int channel );
 static void sr830_auto( int flag );
 static double sr830_get_auto_data( int type );
 static void sr830_lock_state( bool lock );
-static bool sr830_command( const char *cmd )
+static bool sr830_command( const char *cmd );
 static void sr830_failure( void );
 
 
