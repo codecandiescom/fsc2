@@ -107,7 +107,7 @@ variables used within @code{fsc2}.
 All functions in a module that are going to be invoked from @code{EDL}
 scripts get their input parameters in the form of a special type of
 variable and @code{fsc2} also expects that each function returns a
-value in the this form.
+value in this form.
 
 Let's start with a look at the way @code{fsc2} internally stores
 variables. Here is the (actually somewhat simplified) @code{typedef} of
@@ -1008,17 +1008,17 @@ where @code{sn} is the number of the serial port as already used in
 @code{fsc2_request_serial_port()}, @code{buf} is a buffer of length
 @code{count} for the data to be written or read. @code{us_wait} is the
 time in microseconds you are prepared to wait the serial port becoming
-ready for writing or reading the the data. Specifying a negative value
-is interpreted to mean that you want to wait indefinitely for data,
-while a value of @code{0} for @code{us_wait} means not to wait at
-all. Finally, @code{quit_on_signal} determines if the function returns
-immediately when a signal has been received before any data could be
-read. This might for example happen when the user pressed the
-@code{Stop} button while the function was waiting for data.  The
-function returns on success the number of bytes written or read,
-@code{0} if no data could be written or read (e.g.@: because the maximum
-time to wait was exceeded or a signal was received before the data could
-be written or read), and @code{-1} on any other form of error.
+ready for writing or reading the data. Specifying a negative value is
+interpreted to mean that you want to wait indefinitely for data, while a
+value of @code{0} for @code{us_wait} means not to wait at all. Finally,
+@code{quit_on_signal} determines if the function returns immediately
+when a signal has been received before any data could be read. This
+might for example happen when the user pressed the @code{Stop} button
+while the function was waiting for data.  The function returns on
+success the number of bytes written or read, @code{0} if no data could
+be written or read (e.g.@: because the maximum time to wait was exceeded
+or a signal was received before the data could be written or read), and
+@code{-1} on any other form of error.
 
 @code{fsc2_serial_close()} expects just one argument, the serial port
 number. Before closing the serial port device file it flushes it and
@@ -1516,7 +1516,7 @@ result if you try to use it.
 
 If you should be wondering what happens if you call an @code{EDL}
 function defined in your own module from within the module you can be
-sure that you will always get the function from the this module even if
+sure that you will always get the function from this module even if
 there are other modules with the same generic type and thus supplying a
 function of the same name. I.e.@: if there are e.g.@: two lock-in
 amplifier modules loaded, both having a @code{lockin_get_data()}
@@ -1530,10 +1530,10 @@ care about appending a @code{#} and a device number to the function name
 @node Programming Utils, Pulser Modules, New Modules, Modules
 @section Additional utilities provided by fsc2
 
-When writing a module some of the following information might be useful.
-First a special function for printing out messages to the user is
-discussed. Second a function that simulates @code{usleep()} but does
-not share some of its shortcomings.
+When writing a module some of the following information might be useful:
+first a special function for printing out messages to the user is
+discussed, second a function that simulates @code{usleep()} but does not
+share some of its shortcomings.
 
 The third topic, exceptions, is a well-known concept implemented for
 example in @code{C++}. Unfortunately, @code{C} does not have this kind
@@ -1548,10 +1548,10 @@ fails). You might find it useful to also use these routines for your
 modules.
 
 Finally, a boolean type is something that was missing until the new C99
-standard (and which only a few compilers already support), so there's
-already a @code{typedef} for this type included in @code{fsc2} that
-you can use. It's also documented here in order to avoid confusion
-should you accidentally try to redefine it.
+standard (which only a few compilers support yet), so there's already a
+@code{typedef} for this type included in @code{fsc2} that you can
+use. It's also documented here in order to avoid confusion should you
+accidentally try to redefine it.
 
 
 @subsection Printing out messages
@@ -1616,9 +1616,9 @@ double experiment_time( void )
 @cindex fsc2_usleep()
 @findex fsc2_usleep()
 
-When writing code that deals with real devices on often needs to wait
+When writing code that deals with real devices one often needs to wait
 for times with a resolution of less than a second. The usual way to do
-this is to call either @code{usleep()} or @code{nansleep()}. The second
+this is to call either @code{usleep()} or @code{nanosleep()}. The second
 function, @code{nanosleep()}, may look like a bit of overkill since both
 functions real time resolution is usually in the @w{10 ms} range, at
 least on Intel machines. On the other hand, @code{usleep()} is marked as
@@ -1643,31 +1643,32 @@ on signals.  The function is actually nothing else than a wrapper around
 @subsection Error handling with exceptions
 @cindex exceptions
 
-One of the most annoying things in programming is error handling. In
-order to make a program failsafe in every place where there is even the
-remotest chance something may go wrong one has to include error handling
-code. This is especially tedious within deeply nested function calls
-where the type of the error has to be "bubble up" several levels before
-it reaches a function prepared to deal with the problem.
+One of the most important but also tedious things in programming is
+error handling. In order to make a program failsafe in every place where
+there is even the remotest chance something may go wrong one has to
+include error handling code everywhere. This is especially annoying
+within deeply nested function calls where the type of the error has to
+"bubble up" several levels before it reaches a function prepared to deal
+with the problem.
 
 In order to alleviate this problem in @code{fsc2} there is a mechanism
 called exceptions@footnote{The basic ideas for the exceptions code came
 from an article by Peter Simons in the iX magazine
 (@uref{http://www.heise.de/ix/}), No. 5, 1998, pp. 160-162, but also
-several other people implemented similar solutions. It has been changed
-quite a lot thanks to the very constructive criticism by Chris Torek
-(@email{nospam@@elf.eng.bsdi.com}) on @uref{news:comp.lang.c}.}, similar
-to the mechanism in @code{C++} by the same name. An exception can be
-seen as a kind of flag that can be raised at any instance in the program
-and leads to the flow of control being changed to a place were the error
-can be handled (another way to see it is as a non-local @code{goto}
-which knows all by itself were to go to).
+several other people implemented similar solutions. My version has
+benefited quite a lot thanks to the very constructive criticism by Chris
+Torek (@email{nospam@@elf.eng.bsdi.com}) on @uref{news:comp.lang.c}.},
+similar to the mechanism in @code{C++} by the same name. An exception
+can be seen as a kind of flag that can be raised at any instance in the
+program and leads to the flow of control being changed to a place were
+the error can be handled (another way to see it is as a non-local
+@code{goto} which knows all by itself were to go to).
 
 You may @strong{not} use exceptions from within code that might get
 called asynchronously, like signal handlers. But this is probably not an
 important restriction when writing a module.
 
-As far as raising exceptions in a module is concerned it's very
+As far as raising exceptions in a module is concerned it's usually very
 simple. If you run into an error that you can't handle within the module
 just use
 @example
@@ -1689,8 +1690,8 @@ gets 'caught', otherwise the exception will simply kill the program. You
 don't have to care about catching exceptions, @code{fsc2} will do this
 for you. But in some situations you might prefer to do it yourself. So
 lets assume that you have a function @code{foo()} that might run into a
-non-recoverable errors that can't be handled within @code{foo()}
-itself. However you may need to do some cleaning-up before your alerts
+non-recoverable error that can't be handled within the module itself.
+However you may need to do some cleaning-up before you alert
 @code{fsc2}. The following example demonstrates how to catch an
 exception in the calling function:
 @example
@@ -1731,8 +1732,8 @@ one specified as the arguments of the @code{CATCH()} calls, a
 (unless you are absolutely sure no other exceptions than the one you're
 catching could happen). The block following @code{OTHERWISE} will deal
 with all other exceptions not dealt with yet.  Normally, you just will
-rethrow the exception you're not interested in by calling
-@code{RETHROW()}.
+rethrow the exception you're not interested in or unable to handle
+yourself by calling @code{RETHROW()}.
 
 In cases where you aren't interested in a special type of exception but
 want to catch every exception, e.g.@: to just do some cleaning up before
@@ -2391,12 +2392,13 @@ ASSIGNMENTS:
   PHASE_SETUP_2:  MICROWAVE, ...
 @end example
 @noindent
-In this case @code{MICROWAVE} is again the function that has to be phase
-cycled and is passed to the function as the second argument. The first
-argument is either @code{0} or @code{1}, depending on if the this for the
-first phase cycled function (i.e.@: when the command in @code{EDL}
-script starts with either @code{PHASE_SETUP} or @code{PASE_SETUP_1}) or
-for the second phase cycled function (i.e.@: for @code{PHASE_SETUP_2}).
+are found. In this case @code{MICROWAVE} is again the function that is
+to be phase cycled and is passed to the function as the second
+argument. The first argument is either @code{0} or @code{1}, depending
+on if this pertains to the first phase cycled function (i.e.@: when the
+command in @code{EDL} script starts with either @code{PHASE_SETUP} or
+@code{PASE_SETUP_1}) or the second phase cycled function (i.e.@: for
+@code{PHASE_SETUP_2}).
 
 
 @item bool phase_setup_prep(int func, int type, int pod, long val)
