@@ -1004,26 +1004,28 @@ bool cut_new_points( long curve, long x_index, long y_index, long len )
 	   the new data while for cuts through the y-axis we need either all the
 	   data or none at all */
 
-#ifndef NDEBUG
-	/* There was a crash, probably from the sp->v in the cut_integrate_point()
-	   call, which I didn't find the reason for yet. Here I just try to avoid
-	   the problem in order to keep experiments from crashing. */
-
-	if ( G.curve_2d[ curve ]->points == NULL )
-	{
-		eprint( SEVERE, UNSET, "Internal error detected at %s:%d, ld. Please "
-				"send a bug report immediately!\n",
-				__FILE__, __LINE__, curve );
-		return FAIL;
-	}
-#endif
-
 	if ( CG.cut_dir == X )
 	{
 		if ( x_index > CG.index || x_index + len <= CG.index )
 			return FAIL;
 
 		sp = G.curve_2d[ curve ]->points + y_index * G.nx + CG.index;
+
+#ifndef NDEBUG
+		/* There was a crash, probably from the sp->v in the following
+		   cut_integrate_point() call, which I didn't find the reason for
+		   yet. Here I just try to avoid the problem in order to keep
+		   experiments from crashing. */
+
+		if ( sp == NULL )
+		{
+			eprint( SEVERE, UNSET, "Internal error detected at %s:%d, %ld. "
+					"Please send a bug report immediately, including this "
+					"error message!\n", __FILE__, __LINE__, CG.index );
+			return FAIL;
+		}
+#endif
+
 		cut_integrate_point( y_index, sp->v );
 	}
 	else
@@ -2695,19 +2697,19 @@ void cut_next_index( FL_OBJECT *a, long b )
 
 	switch( b )
 	{
-		case 0 :
+		case 0 :           /* go one curve up */
 			cut_show( CG.cut_dir, CG.index + 1 );
 			break;
 
-		case 1 :
+		case 1 :           /* go one curve down */
 			cut_show( CG.cut_dir, CG.index - 1 );
 			break;
 
-		case 2:
+		case 2:            /* go to top curve */
 			cut_show( CG.cut_dir, CG.cut_dir == X ? G.nx - 1 : G.ny - 1 );
 			break;
 
-		case 3 :
+		case 3 :           /* go to bottom curve */
 			cut_show( CG.cut_dir, 0 );
 			break;
 	}

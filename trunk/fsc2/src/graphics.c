@@ -165,7 +165,11 @@ void start_graphics( void )
 	run_form = G_Funcs.create_form_run( );
 
 	G.font = NULL;
+
 	CG.is_shown = UNSET;
+	CG.curve = -1;
+	CG.index = 0;
+
 	if ( G.dim == 2 )
 		cut_form = G_Funcs.create_form_cut( );
 
