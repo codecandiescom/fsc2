@@ -16,7 +16,7 @@ GPIB_LOG       = /tmp/gpib.log
 ##############################################################################
 # Here follow settings determining the make process - which compiler and
 # tools to use as well as the respective options. Better leave them alone
-# if you don't have really good reasons...
+# if you don't have a really good reason...
 ##############################################################################
 
 SHELL          = /bin/sh
@@ -36,8 +36,8 @@ FLEXFLAGS      = -B -P
 RM             = -rm
 RMFLAGS        = -f
 AWK            = /usr/bin/awk
-INSTALL        = install
-EXEC_INSTALL   = install
+INSTALL        = install             # command for installing non-executables
+EXEC_INSTALL   = install             # command for installing executables
 
 
 ############################################################################
