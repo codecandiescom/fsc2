@@ -4,18 +4,18 @@
 
 
 
-#include "tds520a.h"
+#include "tds520c.h"
 #include "gpib_if.h"
 
 
-static double tds520a_get_area_wo_cursor( int channel, WINDOW *w );
-static double tds520a_get_amplitude_wo_cursor( int channel, WINDOW *w );
+static double tds520c_get_area_wo_cursor( int channel, WINDOW *w );
+static double tds520c_get_amplitude_wo_cursor( int channel, WINDOW *w );
 
 
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds520a_init( const char *name )
+bool tds520c_init( const char *name )
 {
 	int ch;
 	double cp1, cp2;
@@ -23,134 +23,134 @@ bool tds520a_init( const char *name )
 	long len = 100;
 
 
-	tds520a.meas_source = -1;
+	tds520c.meas_source = -1;
 
-	if ( gpib_init_device( name, &tds520a.device ) == FAILURE )
+	if ( gpib_init_device( name, &tds520c.device ) == FAILURE )
         return FAIL;
 
     /* Set digitizer to short form of replies */
 
-    if ( gpib_write( tds520a.device, "VERB OFF;:HEAD OFF\n", 19 ) == FAILURE ||
-		 gpib_write( tds520a.device, "*STB?\n", 6 ) == FAILURE ||
-		 gpib_read( tds520a.device, buffer, &len ) == FAILURE )
+    if ( gpib_write( tds520c.device, "VERB OFF;:HEAD OFF\n", 19 ) == FAILURE ||
+		 gpib_write( tds520c.device, "*STB?\n", 6 ) == FAILURE ||
+		 gpib_read( tds520c.device, buffer, &len ) == FAILURE )
 	{
-		gpib_local( tds520a.device );
+		gpib_local( tds520c.device );
         return FAIL;
 	}
 
-	tds520a.is_reacting = SET;
+	tds520c.is_reacting = SET;
 
     /* Get record length and trigger position */
 
-	if ( tds520a.is_rec_len )
+	if ( tds520c.is_rec_len )
 	{
-		if ( ! tds520a_set_record_length( tds520a.rec_len ) )
+		if ( ! tds520c_set_record_length( tds520c.rec_len ) )
 		{
-			gpib_local( tds520a.device );
+			gpib_local( tds520c.device );
 			return FAIL;
 		}		
 	}
 	else
 	{
-		if ( ! tds520a_get_record_length( &tds520a.rec_len ) )
+		if ( ! tds520c_get_record_length( &tds520c.rec_len ) )
 		{
-			gpib_local( tds520a.device );
+			gpib_local( tds520c.device );
 			return FAIL;
 		}
 
-		tds520a.is_rec_len = SET;
+		tds520c.is_rec_len = SET;
 	}
 
-	if ( tds520a.is_trig_pos )
+	if ( tds520c.is_trig_pos )
 	{
-		if ( ! tds520a_set_trigger_pos( tds520a.trig_pos ) )
+		if ( ! tds520c_set_trigger_pos( tds520c.trig_pos ) )
 		{
-			gpib_local( tds520a.device );
+			gpib_local( tds520c.device );
 			return FAIL;
 		}
 	}
 	else
 	{
-		if ( ! tds520a_get_trigger_pos( &tds520a.trig_pos ) )
+		if ( ! tds520c_get_trigger_pos( &tds520c.trig_pos ) )
 		{
-			gpib_local( tds520a.device );
+			gpib_local( tds520c.device );
 			return FAIL;
 		}
 
-		tds520a.is_trig_pos = SET;
+		tds520c.is_trig_pos = SET;
 	}
 
     /* Set format of data transfer (binary, INTEL format) */
 
-    if ( gpib_write( tds520a.device, "DAT:ENC SRI;DAT:WID 2\n", 22 )
+    if ( gpib_write( tds520c.device, "DAT:ENC SRI;DAT:WID 2\n", 22 )
 		 == FAILURE )
 	{
-		gpib_local( tds520a.device );
+		gpib_local( tds520c.device );
         return FAIL;
 	}
 		
     /* Set unit for cursor setting commands to seconds, cursor types to VBAR */
 
-    if ( gpib_write( tds520a.device, "CURS:FUNC VBA;VBA:UNITS SECO\n", 29 )
+    if ( gpib_write( tds520c.device, "CURS:FUNC VBA;VBA:UNITS SECO\n", 29 )
 		 == FAILURE )
     {
-        gpib_local( tds520a.device );
+        gpib_local( tds520c.device );
         return FAIL;
     }
 
 	/* Make sure cursor 1 is the left one */
 
-	tds520a_get_cursor_position( 1, &cp1 );
-	tds520a_get_cursor_position( 2, &cp2 );
+	tds520c_get_cursor_position( 1, &cp1 );
+	tds520c_get_cursor_position( 2, &cp2 );
 	if ( cp1 > cp2 )
 	{
-		tds520a_set_cursor( 1, cp2 );
-		tds520a_set_cursor( 2, cp1 );
+		tds520c_set_cursor( 1, cp2 );
+		tds520c_set_cursor( 2, cp1 );
 	}
 
     /* Switch off repetitive acquisition mode */
 
-	if ( gpib_write( tds520a.device, "ACQ:REPE OFF\n", 13 ) == FAILURE )
+	if ( gpib_write( tds520c.device, "ACQ:REPE OFF\n", 13 ) == FAILURE )
     {
-        gpib_local( tds520a.device );
+        gpib_local( tds520c.device );
         return FAIL;
     }
 
 	/* Check if the the time base has been set in the test run, if so send it
 	   to the device, otherwise get it */
 
-	if ( tds520a.is_timebase )
-		tds520a_set_timebase( tds520a.timebase );
+	if ( tds520c.is_timebase )
+		tds520c_set_timebase( tds520c.timebase );
 	else
-		tds520a.timebase = tds520a_get_timebase( );
+		tds520c.timebase = tds520c_get_timebase( );
 
 	/* If sensitivities have been set in the preparation set them now */
 
-	for ( ch = TDS520A_CH1; ch <= TDS520A_CH2; ch++ )
-		if ( tds520a.is_sens[ ch ] )
-			tds520a_set_sens( ch, tds520a.sens[ ch ] );
+	for ( ch = TDS520C_CH1; ch <= TDS520C_CH2; ch++ )
+		if ( tds520c.is_sens[ ch ] )
+			tds520c_set_sens( ch, tds520c.sens[ ch ] );
 
 	/* If the number of averages has been set in the PREPARATIONS section send
        to the digitizer now */
 
-	if ( tds520a.is_num_avg == SET )
-		tds520a_set_num_avg( tds520a.num_avg );
+	if ( tds520c.is_num_avg == SET )
+		tds520c_set_num_avg( tds520c.num_avg );
 	else
-		tds520a.num_avg = tds520a_get_num_avg( );
+		tds520c.num_avg = tds520c_get_num_avg( );
 
 	/* Switch on all channels that have been used in the experiment section
 	   and that aren't already switched on */
 
 	for ( ch = 0; ch < MAX_CHANNELS; ch++ )
-		if ( tds520a.channels_in_use[ ch ] )
-			tds520a_display_channel( ch );
+		if ( tds520c.channels_in_use[ ch ] )
+			tds520c_display_channel( ch );
 
     /* Switch to running until run/stop button is pressed and start running */
 
-    if ( gpib_write( tds520a.device, "ACQ:STOPA RUNST;STATE RUN\n", 26 )
+    if ( gpib_write( tds520c.device, "ACQ:STOPA RUNST;STATE RUN\n", 26 )
 		 == FAILURE )
     {
-        gpib_local( tds520a.device );
+        gpib_local( tds520c.device );
         return FAIL;
     }
 
@@ -161,15 +161,15 @@ bool tds520a_init( const char *name )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-double tds520a_get_timebase( void )
+double tds520c_get_timebase( void )
 {
 	char reply[ 30 ];
 	long length = 30;
 
 
-	if ( gpib_write( tds520a.device, "HOR:MAI:SCA?\n", 13 ) == FAILURE ||
-		 gpib_read( tds520a.device, reply, &length ) == FAILURE )
-		tds520a_gpib_failure( );
+	if ( gpib_write( tds520c.device, "HOR:MAI:SCA?\n", 13 ) == FAILURE ||
+		 gpib_read( tds520c.device, reply, &length ) == FAILURE )
+		tds520c_gpib_failure( );
 
 	reply[ length - 1 ] = '\0';
 	return T_atof( reply );
@@ -179,31 +179,31 @@ double tds520a_get_timebase( void )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds520a_set_timebase( double timebase )
+bool tds520c_set_timebase( double timebase )
 {
 	char cmd[ 40 ] = "HOR:MAI:SCA ";
 
 
 	gcvt( timebase, 6, cmd + strlen( cmd ) );
 	strcat( cmd, "\n" );
-	if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds520a_gpib_failure( );
+	if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds520c_gpib_failure( );
 
 	return OK;
 }
 
 
 /*-----------------------------------------------------*/
-/* tds520a_set_record_length() sets the record length. */
+/* tds520c_set_record_length() sets the record length. */
 /*-----------------------------------------------------*/
 
-bool tds520a_set_record_length( long num_points )
+bool tds520c_set_record_length( long num_points )
 {
     char cmd[ 100 ];
 
 
 	sprintf( cmd, "HOR:RECO %ld\n", num_points );
-    if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
+    if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE )
         return FAIL;
 
     return OK;
@@ -211,17 +211,17 @@ bool tds520a_set_record_length( long num_points )
 
 
 /*----------------------------------------------------------------*/
-/* tds520a_get_record_length() returns the current record length. */
+/* tds520c_get_record_length() returns the current record length. */
 /*----------------------------------------------------------------*/
 
-bool tds520a_get_record_length( long *ret )
+bool tds520c_get_record_length( long *ret )
 {
     char reply[ 30 ];
     long length = 30;
 
 
-    if ( gpib_write( tds520a.device, "HOR:RECO?\n", 10 ) == FAILURE ||
-         gpib_read( tds520a.device, reply, &length ) == FAILURE )
+    if ( gpib_write( tds520c.device, "HOR:RECO?\n", 10 ) == FAILURE ||
+         gpib_read( tds520c.device, reply, &length ) == FAILURE )
         return FAIL;
 
     reply[ length - 1 ] = '\0';
@@ -231,16 +231,16 @@ bool tds520a_get_record_length( long *ret )
 
 
 /*------------------------------------------------------*/
-/* tds520a_set_trigger_pos() sets the trigger position. */
+/* tds520c_set_trigger_pos() sets the trigger position. */
 /*------------------------------------------------------*/
 
-bool tds520a_set_trigger_pos( double pos )
+bool tds520c_set_trigger_pos( double pos )
 {
     char cmd[ 100 ];
 
 
 	sprintf( cmd, "HOR:TRIG:POS %f\n", 100.0 * pos );
-    if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
+    if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE )
 		return FAIL;
 
     return OK;
@@ -248,17 +248,17 @@ bool tds520a_set_trigger_pos( double pos )
 
 
 /*-----------------------------------------------------------------*/
-/* tds520a_get_trigger_pos() returns the current trigger position. */
+/* tds520c_get_trigger_pos() returns the current trigger position. */
 /*-----------------------------------------------------------------*/
 
-bool tds520a_get_trigger_pos( double *ret )
+bool tds520c_get_trigger_pos( double *ret )
 {
     char reply[ 30 ];
     long length = 30;
 
 
-    if ( gpib_write( tds520a.device, "HOR:TRIG:POS?\n", 14 ) == FAILURE ||
-         gpib_read( tds520a.device, reply, &length ) == FAILURE )
+    if ( gpib_write( tds520c.device, "HOR:TRIG:POS?\n", 14 ) == FAILURE ||
+         gpib_read( tds520c.device, reply, &length ) == FAILURE )
         return FAIL;
 
     reply[ length - 1 ] = '\0';
@@ -271,17 +271,17 @@ bool tds520a_get_trigger_pos( double *ret )
 /* Function returns the number of averages */
 /*-----------------------------------------*/
 
-long tds520a_get_num_avg( void )
+long tds520c_get_num_avg( void )
 {
 	char reply[ 30 ];
 	long length = 30;
 
 
-	if ( tds520a_get_acq_mode( ) == AVERAGE )
+	if ( tds520c_get_acq_mode( ) == AVERAGE )
 	{
-		if ( gpib_write( tds520a.device,"ACQ:NUMAV?\n", 11 ) == FAILURE ||
-			 gpib_read( tds520a.device, reply, &length) == FAILURE )
-			tds520a_gpib_failure( );
+		if ( gpib_write( tds520c.device,"ACQ:NUMAV?\n", 11 ) == FAILURE ||
+			 gpib_read( tds520c.device, reply, &length) == FAILURE )
+			tds520c_gpib_failure( );
 
 		reply[ length - 1 ] = '\0';
 		return T_atol( reply );
@@ -295,7 +295,7 @@ long tds520a_get_num_avg( void )
 /* Function returns the number of averages */
 /*-----------------------------------------*/
 
-bool tds520a_set_num_avg( long num_avg )
+bool tds520c_set_num_avg( long num_avg )
 {
 	char cmd[ 30 ];
 
@@ -304,8 +304,8 @@ bool tds520a_set_num_avg( long num_avg )
 
 	if ( num_avg == 0 )
 	{
-		if ( gpib_write( tds520a.device, "ACQ:STATE STOP\n", 15 ) == FAILURE )
-			tds520a_gpib_failure( );
+		if ( gpib_write( tds520c.device, "ACQ:STATE STOP\n", 15 ) == FAILURE )
+			tds520c_gpib_failure( );
 		return OK;
 	}
 
@@ -314,21 +314,21 @@ bool tds520a_set_num_avg( long num_avg )
 
 	if ( num_avg == 1 )
 	{
-		if ( gpib_write( tds520a.device, "ACQ:MOD SAM\n", 12 ) == FAILURE )
-			tds520a_gpib_failure( );
+		if ( gpib_write( tds520c.device, "ACQ:MOD SAM\n", 12 ) == FAILURE )
+			tds520c_gpib_failure( );
 	}
 	else
 	{
 		sprintf( cmd, "ACQ:NUMAV %ld\n", num_avg );
-		if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE ||
-			 gpib_write( tds520a.device, "ACQ:MOD AVE\n", 12 ) == FAILURE )
-			tds520a_gpib_failure( );
+		if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE ||
+			 gpib_write( tds520c.device, "ACQ:MOD AVE\n", 12 ) == FAILURE )
+			tds520c_gpib_failure( );
 	}
 
 	/* Finally restart the digitizer */
 
-	if ( gpib_write( tds520a.device, "ACQ:STATE RUN\n", 14 ) == FAILURE )
-		tds520a_gpib_failure( );
+	if ( gpib_write( tds520c.device, "ACQ:STATE RUN\n", 14 ) == FAILURE )
+		tds520c_gpib_failure( );
 
 	return OK;
 }
@@ -338,23 +338,23 @@ bool tds520a_set_num_avg( long num_avg )
 /* in average nor in sample mode, it is switched to sample mode.           */ 
 /*-------------------------------------------------------------------------*/
 
-int tds520a_get_acq_mode( void )
+int tds520c_get_acq_mode( void )
 {
 	char reply[ 30 ];
 	long length = 30;
 
 
-	if ( gpib_write( tds520a.device, "ACQ:MOD?\n", 9 ) == FAILURE ||
-		 gpib_read ( tds520a.device, reply, &length ) == FAILURE )
-		tds520a_gpib_failure( );
+	if ( gpib_write( tds520c.device, "ACQ:MOD?\n", 9 ) == FAILURE ||
+		 gpib_read ( tds520c.device, reply, &length ) == FAILURE )
+		tds520c_gpib_failure( );
 
 	if ( *reply == 'A' )		/* digitizer is in average mode */
 		return AVERAGE;
 
 	if ( *reply != 'S' )		/* if not in sample mode set it */
 	{
-		if ( gpib_write( tds520a.device,"ACQ:MOD SAM\n", 12 ) == FAILURE )
-			tds520a_gpib_failure( );
+		if ( gpib_write( tds520c.device,"ACQ:MOD SAM\n", 12 ) == FAILURE )
+			tds520c_gpib_failure( );
 	}
 
 	return SAMPLE;
@@ -364,7 +364,7 @@ int tds520a_get_acq_mode( void )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds520a_get_cursor_position( int cur_no, double *cp )
+bool tds520c_get_cursor_position( int cur_no, double *cp )
 {
 	char cmd[ 30 ] = "CURS:VBA:POSITION";
     char reply[ 30 ];
@@ -374,9 +374,9 @@ bool tds520a_get_cursor_position( int cur_no, double *cp )
 	assert( cur_no == 1 || cur_no == 2 );
 
 	strcat( cmd, cur_no == 1 ? "1?\n" : "2?\n" );
-    if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE ||
-         gpib_read( tds520a.device, reply, &length ) == FAILURE )
-		tds520a_gpib_failure( );
+    if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE ||
+         gpib_read( tds520c.device, reply, &length ) == FAILURE )
+		tds520c_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
     *cp = T_atof( reply );
@@ -386,17 +386,17 @@ bool tds520a_get_cursor_position( int cur_no, double *cp )
 
 
 /*----------------------------------------------------*/
-/* tds520a_get_cursor_distance() returns the distance */
+/* tds520c_get_cursor_distance() returns the distance */
 /* between the two cursors.                           */
 /*----------------------------------------------------*/
 
-bool tds520a_get_cursor_distance( double *cd )
+bool tds520c_get_cursor_distance( double *cd )
 {
 	double cp2;
 
 
-	tds520a_get_cursor_position( 1, cd );
-	tds520a_get_cursor_position( 2, &cp2 );
+	tds520c_get_cursor_position( 1, cd );
+	tds520c_get_cursor_position( 2, &cp2 );
     *cd -= cp2;
 
     return OK;
@@ -406,7 +406,7 @@ bool tds520a_get_cursor_distance( double *cd )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds520a_set_trigger_channel( const char *name )
+bool tds520c_set_trigger_channel( const char *name )
 {
 	char cmd[ 40 ];
 
@@ -415,8 +415,8 @@ bool tds520a_set_trigger_channel( const char *name )
 		return FAIL;
 
 	sprintf( cmd, "TRIG:MAI:EDGE:SOU %s\n", name );
-	if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds520a_gpib_failure( );
+	if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds520c_gpib_failure( );
 
 	return OK;
 }
@@ -425,27 +425,27 @@ bool tds520a_set_trigger_channel( const char *name )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-int tds520a_get_trigger_channel( void )
+int tds520c_get_trigger_channel( void )
 {
     char reply[ 30 ];
     long length = 30;
 	int val;
 
 
-    if ( gpib_write( tds520a.device, "TRIG:MAI:EDGE:SOU?\n", 19 ) == FAILURE ||
-		 gpib_read( tds520a.device, reply, &length ) == FAILURE )
-		tds520a_gpib_failure( );
+    if ( gpib_write( tds520c.device, "TRIG:MAI:EDGE:SOU?\n", 19 ) == FAILURE ||
+		 gpib_read( tds520c.device, reply, &length ) == FAILURE )
+		tds520c_gpib_failure( );
 
 	/* Possible replies are "CH1", "CH2", "CH3", "CH4", or "LIN", where
 	   "CH3" or "CH4" really mean "AUX1" or "AUX2", respectively */
 
     if ( ! strncmp( reply, "LIN", 3 ) )
-        return TDS520A_LIN;
+        return TDS520C_LIN;
 
     val = ( int ) ( reply[ 2 ] - '1' );
 
 	if ( val >= 2 )
-		val = TDS520A_AUX1 + val - 2;
+		val = TDS520C_AUX1 + val - 2;
 
 	return val;
 }
@@ -454,7 +454,7 @@ int tds520a_get_trigger_channel( void )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-void tds520a_gpib_failure( void )
+void tds520c_gpib_failure( void )
 {
 	eprint( FATAL, "%s: Communication with device failed.\n", DEVICE_NAME );
 	THROW( EXCEPTION );
@@ -462,46 +462,46 @@ void tds520a_gpib_failure( void )
 
 
 /*-------------------------------------------------------------------*/
-/* tds520a_clear_SESR() reads the the standard event status register */
+/* tds520c_clear_SESR() reads the the standard event status register */
 /* and thereby clears it - if this isn't done no SRQs are flagged !  */
 /*-------------------------------------------------------------------*/
 
-bool tds520a_clear_SESR( void )
+bool tds520c_clear_SESR( void )
 {
     char reply[ 30 ];
     long length = 30;
 
 
-    if ( gpib_write( tds520a.device, "*ESR?\n", 6 ) == FAILURE ||
-		 gpib_read( tds520a.device, reply, &length ) == FAILURE )
-		tds520a_gpib_failure( );
+    if ( gpib_write( tds520c.device, "*ESR?\n", 6 ) == FAILURE ||
+		 gpib_read( tds520c.device, reply, &length ) == FAILURE )
+		tds520c_gpib_failure( );
 
 	return OK;
 }
 
 
 /*-----------------------------------------------------------------------*/
-/* tds520a_finished() does all the work after an experiment is finished. */
+/* tds520c_finished() does all the work after an experiment is finished. */
 /*-----------------------------------------------------------------------*/
 
-void tds520a_finished( void )
+void tds520c_finished( void )
 {
 	const char *cmd = "ACQ:STATE STOP;*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n";
 
-	if ( ! tds520a.is_reacting )
+	if ( ! tds520c.is_reacting )
 		return;
 
-    tds520a_clear_SESR( );
-    gpib_write( tds520a.device, cmd, strlen( cmd ) );
-	gpib_local( tds520a.device );
-	tds520a.is_reacting = UNSET;
+    tds520c_clear_SESR( );
+    gpib_write( tds520c.device, cmd, strlen( cmd ) );
+	gpib_local( tds520c.device );
+	tds520c.is_reacting = UNSET;
 }
 
 
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds520a_set_cursor( int cur_num, double pos )
+bool tds520c_set_cursor( int cur_num, double pos )
 {
     char cmd[ 60 ];
 
@@ -513,8 +513,8 @@ bool tds520a_set_cursor( int cur_num, double pos )
 	sprintf( cmd, "CURS:VBA:POSITION%d ", cur_num );
     gcvt( pos, 9, cmd + strlen( cmd ) );
 	strcat( cmd, "\n" );
-    if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds520a_gpib_failure( );
+    if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds520c_gpib_failure( );
 
 	return OK;
 }
@@ -523,14 +523,14 @@ bool tds520a_set_cursor( int cur_num, double pos )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds520a_set_track_cursors( bool flag )
+bool tds520c_set_track_cursors( bool flag )
 {
 	char cmd[ 20 ];
 
 
 	sprintf( cmd, "CURS:MODE %s\n", flag ? "TRAC" : "IND" );
-    if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds520a_gpib_failure( );
+    if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds520c_gpib_failure( );
 
 	return OK;
 }
@@ -539,14 +539,14 @@ bool tds520a_set_track_cursors( bool flag )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool tds520a_set_gated_meas( bool flag )
+bool tds520c_set_gated_meas( bool flag )
 {
 	char cmd[ 20 ];
 
 
 	sprintf( cmd, "MEASU:GAT %s\n", flag ? "ON" : "OFF" );
-    if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds520a_gpib_failure( );
+    if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds520c_gpib_failure( );
 
 	return OK;
 }
@@ -555,21 +555,21 @@ bool tds520a_set_gated_meas( bool flag )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool tds520a_set_snap( bool flag )
+bool tds520c_set_snap( bool flag )
 {
 	char cmd[ 50 ];
 
 
 	if ( flag )
 	{
-		if ( gpib_write( tds520a.device, "DAT SNA\n", 8 ) == FAILURE )
-			tds520a_gpib_failure( );
+		if ( gpib_write( tds520c.device, "DAT SNA\n", 8 ) == FAILURE )
+			tds520c_gpib_failure( );
 	}
 	else
 	{
-		sprintf( cmd, "DAT STAR 1;:DAT STOP %ld\n", tds520a.rec_len );
-		if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
-			tds520a_gpib_failure( );
+		sprintf( cmd, "DAT STAR 1;:DAT STOP %ld\n", tds520c.rec_len );
+		if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE )
+			tds520c_gpib_failure( );
 	}
 
 	return OK;
@@ -580,33 +580,33 @@ bool tds520a_set_snap( bool flag )
 /* Function switches on a channel of the digitizer */
 /*-------------------------------------------------*/
 
-bool tds520a_display_channel( int channel )
+bool tds520c_display_channel( int channel )
 {
 	char cmd[ 30 ];
     char reply[ 10 ];
     long length = 10;
 
 
-	assert( channel >= 0 && channel < TDS520A_AUX1 );
+	assert( channel >= 0 && channel < TDS520C_AUX1 );
 
 	/* Get the channels sensitivity */
 
-	tds520a_get_sens( channel );
+	tds520c_get_sens( channel );
 
 	/* Check if channel is already displayed */
 
 	sprintf( cmd, "SEL:%s?\n", Channel_Names[ channel ] );
-    if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE ||
-         gpib_read( tds520a.device, reply, &length ) == FAILURE )
-		tds520a_gpib_failure( );
+    if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE ||
+         gpib_read( tds520c.device, reply, &length ) == FAILURE )
+		tds520c_gpib_failure( );
 
     /* If it's not already switch it on */
 
     if ( reply[ 0 ] == '0' )
     {
 		sprintf( cmd, "SEL:%s ON\n", Channel_Names[ channel ] );
-        if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
-			tds520a_gpib_failure( );
+        if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE )
+			tds520c_gpib_failure( );
     }
 
 	return OK;
@@ -616,41 +616,68 @@ bool tds520a_display_channel( int channel )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-double tds520a_get_sens( int channel )
+double tds520c_get_sens( int channel )
 {
     char cmd[ 20 ];
     char reply[ 30 ];
     long length = 30;
 
 
-	assert( channel >= TDS520A_CH1 && channel < TDS520A_AUX1 );
+	assert( channel >= TDS520C_CH1 && channel < TDS520C_AUX1 );
 
 	sprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
-	if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( tds520a.device, reply, &length ) == FAILURE )
-		tds520a_gpib_failure( );
+	if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( tds520c.device, reply, &length ) == FAILURE )
+		tds520c_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
-	tds520a.sens[ channel ] = T_atof( reply );
+	tds520c.sens[ channel ] = T_atof( reply );
 
-	return tds520a.sens[ channel ];
+	return tds520c.sens[ channel ];
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
 
-bool tds520a_set_sens( int channel, double sens )
+bool tds520c_set_sens( int channel, double sens )
 {
     char cmd[ 40 ];
+	char reply[ 40 ];
+	long length = 40;
 
 
-	assert( channel >= TDS520A_CH1 && channel <= TDS520A_CH2 );
+	assert( channel >= TDS520C_CH1 && channel <= TDS520C_CH2 );
+
+	/* On this digitizer the sensitivity can only be set to higher values than
+	   1 V when using 50 Ohm input impedance */ 
+
+	if ( sens > 1.0 )
+	{
+		sprintf( cmd, "CH%1d:IMP?\n", channel );
+		if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE ||
+			 gpib_read_w( tds520c.device, reply, &length ) == FAILURE )
+			tds520c_gpib_failure( );
+
+		if ( strncmp( reply, "MEG", 3 ) )
+		{
+			if ( I_am == PARENT )
+				eprint( FATAL, "%s: Can't set sensitivity of channel %s to "
+						"%f V while input impedance is 50 Ohm.\n", DEVICE_NAME,
+						Channel_Names[ channel ], sens );
+			else
+				eprint( FATAL, "%s:%ld: %s: Can't set sensitivity of channel "
+						"%s to %f V while input impedance is 50 Ohm.\n",
+						Fname, Lc, DEVICE_NAME,
+						Channel_Names[ channel ], sens );
+			THROW( EXCEPTION );
+		}
+	}
 
 	sprintf( cmd, "%s:SCA ", Channel_Names[ channel ] );
 	gcvt( sens, 8, cmd + strlen( cmd ) );
-	if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds520a_gpib_failure( );
+	if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds520c_gpib_failure( );
 
 	return OK;
 }
@@ -659,17 +686,17 @@ bool tds520a_set_sens( int channel, double sens )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds520a_start_aquisition( void )
+bool tds520c_start_aquisition( void )
 {
     /* Start an acquisition:
        1. clear the SESR register to allow SRQs
        2. set state to run
 	   3. set stop after sequence */
 
-    if ( ! tds520a_clear_SESR( ) ||
-		 gpib_write( tds520a.device, "ACQ:STOPA SEQ;STATE RUN\n", 24 )
+    if ( ! tds520c_clear_SESR( ) ||
+		 gpib_write( tds520c.device, "ACQ:STOPA SEQ;STATE RUN\n", 24 )
 		 == FAILURE )
-		tds520a_gpib_failure( );
+		tds520c_gpib_failure( );
 
 
 	return OK;
@@ -679,7 +706,7 @@ bool tds520a_start_aquisition( void )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-double tds520a_get_area( int channel, WINDOW *w, bool use_cursor )
+double tds520c_get_area( int channel, WINDOW *w, bool use_cursor )
 {
 	char cmd[ 50 ] = "MEASU:IMM:SOURCE ";
 	char reply[ 40 ];
@@ -687,29 +714,29 @@ double tds520a_get_area( int channel, WINDOW *w, bool use_cursor )
 
 
 	if ( ! use_cursor )
-		return tds520a_get_area_wo_cursor( channel, w );
+		return tds520c_get_area_wo_cursor( channel, w );
 
 	/* Set measurement type to area */
 
-    if ( gpib_write( tds520a.device, "MEASU:IMM:TYP ARE\n", 18 ) == FAILURE )
-		tds520a_gpib_failure( );
+    if ( gpib_write( tds520c.device, "MEASU:IMM:TYP ARE\n", 18 ) == FAILURE )
+		tds520c_gpib_failure( );
 
-	assert( channel >= 0 && channel < TDS520A_AUX1 );
+	assert( channel >= 0 && channel < TDS520C_AUX1 );
 
 	/* Set channel (if the channel is not already set) */
 
-	if ( channel != tds520a.meas_source )
+	if ( channel != tds520c.meas_source )
 	{
 		strcat( cmd, Channel_Names[ channel ] );
 		strcat( cmd, "\n" );
-		if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
-			tds520a_gpib_failure( );
-		tds520a.meas_source = channel;
+		if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE )
+			tds520c_gpib_failure( );
+		tds520c.meas_source = channel;
 	}
 
 	/* Set the cursors */
 
-	tds520a_set_meas_window( w );
+	tds520c_set_meas_window( w );
 
 	/* Wait for measurement to finish (use polling) */
 
@@ -720,19 +747,19 @@ double tds520a_get_area( int channel, WINDOW *w, bool use_cursor )
 
 		length = 40;
 		usleep( 100000 );
-		if ( gpib_write( tds520a.device, "BUSY?\n", 6 ) == FAILURE ||
-			 gpib_read( tds520a.device, reply, &length ) == FAILURE )
-			tds520a_gpib_failure( );
+		if ( gpib_write( tds520c.device, "BUSY?\n", 6 ) == FAILURE ||
+			 gpib_read( tds520c.device, reply, &length ) == FAILURE )
+			tds520c_gpib_failure( );
 	} while ( reply[ 0 ] == '1' ); 
 
 
 	/* Get the the area */
 
 	length = 40;
-	if ( gpib_write( tds520a.device, "*WAI\n", 5 ) == FAILURE ||
-		 gpib_write( tds520a.device, "MEASU:IMM:VAL?\n", 15 ) == FAILURE ||
-		 gpib_read( tds520a.device, reply, &length ) == FAILURE )
-		tds520a_gpib_failure( );
+	if ( gpib_write( tds520c.device, "*WAI\n", 5 ) == FAILURE ||
+		 gpib_write( tds520c.device, "MEASU:IMM:VAL?\n", 15 ) == FAILURE ||
+		 gpib_read( tds520c.device, reply, &length ) == FAILURE )
+		tds520c_gpib_failure( );
 
 	reply[ length - 1 ] = '\0';
 	return T_atof( reply );
@@ -744,13 +771,13 @@ double tds520a_get_area( int channel, WINDOW *w, bool use_cursor )
 /* by fetching the curve in the window and integrating it 'by hand'. */
 /*-------------------------------------------------------------------*/
 
-static double tds520a_get_area_wo_cursor( int channel, WINDOW *w )
+static double tds520c_get_area_wo_cursor( int channel, WINDOW *w )
 {
 	double *data, area;
 	long length, i;
 
 
-	tds520a_get_curve( channel, w, &data, &length, UNSET );
+	tds520c_get_curve( channel, w, &data, &length, UNSET );
 
 	for ( area = 0.0, i = 0; i < length; i++ )
 		area += data[ i ];
@@ -759,14 +786,14 @@ static double tds520a_get_area_wo_cursor( int channel, WINDOW *w )
 
 	/* Return the integrated area, multiplied by the the time per point */
 
-	return area * tds520a.timebase / TDS_POINTS_PER_DIV;
+	return area * tds520c.timebase / TDS_POINTS_PER_DIV;
 }
 
 
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length,
+bool tds520c_get_curve( int channel, WINDOW *w, double **data, long *length,
 						bool use_cursor)
 {
 	char cmd[ 50 ];
@@ -779,34 +806,34 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length,
 	long len1, len2;
 
 
-	assert( channel >= 0 && channel < TDS520A_AUX1 );
+	assert( channel >= 0 && channel < TDS520C_AUX1 );
 
 	/* Calculate the scale factor for converting the data returned by the
 	   digitizer (2-byte integers) into real voltage levels */
 
-	scale = 10.24 * tds520a.sens[ channel ] / ( double ) 0xFFFF;
+	scale = 10.24 * tds520c.sens[ channel ] / ( double ) 0xFFFF;
 
 	/* Set the data source channel (if it's not already set correctly) */ 
 
-	if ( channel != tds520a.data_source )
+	if ( channel != tds520c.data_source )
 	{
 		sprintf( cmd, "DATA:SOURCE %s\n", Channel_Names[ channel ] );
-		if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
-			tds520a_gpib_failure( );
-		tds520a.data_source = channel;
+		if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE )
+			tds520c_gpib_failure( );
+		tds520c.data_source = channel;
 	}
 
 	/* Set the cursors or start and end point of interval */
 
 	if ( use_cursor )
-		tds520a_set_curve_window( w );
+		tds520c_set_curve_window( w );
 	else
 	{
 		sprintf( cmd, "DAT:START %ld;:DAT:STOP %ld\n", 
 				 w != NULL ? w->start_num : 1,
-				 w != NULL ? w->end_num : tds520a.rec_len );
-		if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
-			tds520a_gpib_failure( );
+				 w != NULL ? w->end_num : tds520c.rec_len );
+		if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE )
+			tds520c_gpib_failure( );
 	}
 
 	/* Wait for measurement to finish (use polling) */
@@ -818,15 +845,15 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 		len = 10;
 		usleep( 100000 );
-		if ( gpib_write( tds520a.device, "BUSY?\n", 6 ) == FAILURE ||
-			 gpib_read( tds520a.device, reply, &len ) == FAILURE )
-			tds520a_gpib_failure( );
+		if ( gpib_write( tds520c.device, "BUSY?\n", 6 ) == FAILURE ||
+			 gpib_read( tds520c.device, reply, &len ) == FAILURE )
+			tds520c_gpib_failure( );
 	} while ( reply[ 0 ] == '1' ); 
 
 	/* Calculate how long the curve (with header) is going to be and allocate
        enough memory (data are 2-byte integers) */
 
-	*length =   ( w != NULL ? w->end_num : tds520a.rec_len )
+	*length =   ( w != NULL ? w->end_num : tds520c.rec_len )
 		      - ( w != NULL ? w->start_num : 1 ) + 1;
 	len = 2 * *length;
 	len2 = 1 + ( long ) floor( log10( len ) );
@@ -838,12 +865,12 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	/* Now get all the data bytes... */
 
-	if ( gpib_write( tds520a.device, "CURV?\n", 6 ) == FAILURE ||
-		 gpib_read( tds520a.device, buffer, &len ) == FAILURE )
+	if ( gpib_write( tds520c.device, "CURV?\n", 6 ) == FAILURE ||
+		 gpib_read( tds520c.device, buffer, &len ) == FAILURE )
 	{
 		T_free( buffer );
 		T_free( *data );
-		tds520a_gpib_failure( );
+		tds520c_gpib_failure( );
 	}
 
 	/* ....and copy them to the final destination (the data are INTEL format
@@ -867,7 +894,7 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length,
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-double tds520a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
+double tds520c_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 {
 	char cmd[ 50 ] = "MEASU:IMM:SOURCE ";
 	char reply[ 40 ];
@@ -875,29 +902,29 @@ double tds520a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 
 
 	if ( ! use_cursor )
-		return tds520a_get_amplitude_wo_cursor( channel, w );
+		return tds520c_get_amplitude_wo_cursor( channel, w );
 
 	/* Set measurement type to area */
 
-    if ( gpib_write( tds520a.device, "MEASU:IMM:TYP AMP\n", 18 ) == FAILURE )
-		tds520a_gpib_failure( );
+    if ( gpib_write( tds520c.device, "MEASU:IMM:TYP AMP\n", 18 ) == FAILURE )
+		tds520c_gpib_failure( );
 
-	assert( channel >= 0 && channel < TDS520A_AUX1 );
+	assert( channel >= 0 && channel < TDS520C_AUX1 );
 
 	/* Set channel (if the channel is not already set) */
 
-	if ( channel != tds520a.meas_source )
+	if ( channel != tds520c.meas_source )
 	{
 		strcat( cmd, Channel_Names[ channel ] );
 		strcat( cmd, "\n" );
-		if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
-			tds520a_gpib_failure( );
-		tds520a.meas_source = channel;
+		if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE )
+			tds520c_gpib_failure( );
+		tds520c.meas_source = channel;
 	}
 
 	/* Set the cursors */
 
-	tds520a_set_meas_window( w );
+	tds520c_set_meas_window( w );
 
 	/* Wait for measurement to finish (use polling) */
 
@@ -908,19 +935,19 @@ double tds520a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 
 		length = 40;
 		usleep( 100000 );
-		if ( gpib_write( tds520a.device, "BUSY?\n", 6 ) == FAILURE ||
-			 gpib_read( tds520a.device, reply, &length ) == FAILURE )
-			tds520a_gpib_failure( );
+		if ( gpib_write( tds520c.device, "BUSY?\n", 6 ) == FAILURE ||
+			 gpib_read( tds520c.device, reply, &length ) == FAILURE )
+			tds520c_gpib_failure( );
 	} while ( reply[ 0 ] == '1' ); 
 
 
 	/* Get the the amplitude */
 
 	length = 40;
-	if ( gpib_write( tds520a.device, "*WAI\n", 5 ) == FAILURE ||
-		 gpib_write( tds520a.device, "MEASU:IMM:VAL?\n", 15 ) == FAILURE ||
-		 gpib_read( tds520a.device, reply, &length ) == FAILURE )
-		tds520a_gpib_failure( );
+	if ( gpib_write( tds520c.device, "*WAI\n", 5 ) == FAILURE ||
+		 gpib_write( tds520c.device, "MEASU:IMM:VAL?\n", 15 ) == FAILURE ||
+		 gpib_read( tds520c.device, reply, &length ) == FAILURE )
+		tds520c_gpib_failure( );
 
 	reply[ length - 1 ] = '\0';
 	return T_atof( reply );
@@ -932,13 +959,13 @@ double tds520a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 /* fetching the curve in the window and integrating it 'by hand'.    */
 /*-------------------------------------------------------------------*/
 
-static double tds520a_get_amplitude_wo_cursor( int channel, WINDOW *w )
+static double tds520c_get_amplitude_wo_cursor( int channel, WINDOW *w )
 {
 	double *data, min, max;
 	long length, i;
 
 
-	tds520a_get_curve( channel, w, &data, &length, UNSET );
+	tds520c_get_curve( channel, w, &data, &length, UNSET );
 
 	min = HUGE_VAL;
 	max = - HUGE_VAL;
@@ -959,13 +986,13 @@ static double tds520a_get_amplitude_wo_cursor( int channel, WINDOW *w )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-bool tds520a_lock_state( bool lock )
+bool tds520c_lock_state( bool lock )
 {
 	char cmd[ 100 ];
 
 	sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
-	if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds520a_gpib_failure( );
+	if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds520c_gpib_failure( );
 
 	return OK;
 }

@@ -624,7 +624,7 @@ double tds540_get_sens( int channel )
     long length = 30;
 
 
-	assert( channel >= 0 && channel < TDS540_AUX );
+	assert( channel >= TDS540_CH1 && channel < TDS540_AUX );
 
 	sprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
 	if ( gpib_write( tds540.device, cmd, strlen( cmd ) ) == FAILURE ||

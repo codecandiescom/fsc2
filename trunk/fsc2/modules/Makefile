@@ -55,7 +55,7 @@ tds540.so: ${tds540:.c=.o}
 	$(CC) -shared -o $@ ${tds540:.c=.o} -lm $(LDFLAGS)
 	chmod 644 $@
 
-tds520c.so: ${tds52ca:.c=.o}
+tds520c.so: ${tds520c:.c=.o}
 	$(CC) -shared -o $@ ${tds520c:.c=.o} -lm $(LDFLAGS)
 	chmod 644 $@
 

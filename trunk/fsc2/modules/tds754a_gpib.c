@@ -626,7 +626,7 @@ double tds754a_get_sens( int channel )
     long length = 30;
 
 
-	assert( channel >= 0 && channel < TDS754A_AUX );
+	assert( channel >= TDS754A_CH1 && channel < TDS754A_AUX );
 
 	sprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
 	if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE ||
