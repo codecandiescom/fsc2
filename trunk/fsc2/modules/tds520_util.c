@@ -366,8 +366,8 @@ long tds520_translate_channel( int dir, long channel )
 			case DIGITIZER_CHANNEL_FUNC_F :
 			case DIGITIZER_CHANNEL_EXT    :
 			case DIGITIZER_CHANNEL_EXT10  :
-				eprint( FATAL, SET, "%s: Digitizer has no %s channel used in "
-						"%s().\n", DEVICE_NAME,
+				eprint( FATAL, SET, "%s: Digitizer has s %no channel as used "
+						"in %s().\n", DEVICE_NAME,
 						Digitizer_Channel_Names[ channel ], Cur_Func );
 				THROW( EXCEPTION )
 

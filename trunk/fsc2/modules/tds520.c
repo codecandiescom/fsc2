@@ -889,7 +889,7 @@ static Var *get_area( Var *v, bool use_cursor )
 
 		while ( w != NULL )
 		{
-			if ( w->num == val.lval )
+			if ( w->num == v->val.lval )
 			{
 				w->is_used = SET;
 				v = vars_pop( v );

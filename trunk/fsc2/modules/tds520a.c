@@ -874,7 +874,7 @@ static Var *get_area( Var *v, bool use_cursor )
 	if ( ch > TDS520A_REF4 )
 	{
 		eprint( FATAL, SET, "%s: Invalid channel %s used in %s().\n",
-				DEVICE_NAME, Channel_Names[ channel ], Cur_Func );
+				DEVICE_NAME, Channel_Names[ ch ], Cur_Func );
 		THROW( EXCEPTION )
 	}
 
@@ -978,7 +978,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	if ( ch > TDS520A_REF4 )
 	{
 		eprint( FATAL, SET, "%s: Invalid channel %s used in %s().\n",
-				DEVICE_NAME, Channel_Names[ channel ], Cur_Func );
+				DEVICE_NAME, Channel_Names[ ch ], Cur_Func );
 		THROW( EXCEPTION )
 	}
 
@@ -1094,7 +1094,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	if ( ch > TDS520A_REF4 )
 	{
 		eprint( FATAL, SET, "%s: Invalid channel %s used %s().\n",
-				DEVICE_NAME, Channel_Names[ channel ], Cur_Func );
+				DEVICE_NAME, Channel_Names[ ch ], Cur_Func );
 		THROW( EXCEPTION )
 	}
 

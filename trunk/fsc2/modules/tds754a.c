@@ -773,21 +773,24 @@ Var *digitizer_meas_channel_ok( Var *v )
 
 Var *digitizer_trigger_channel( Var *v )
 {
+	long channel;
+
+
 	if ( v == NULL )
 	{
 		if ( TEST_RUN )
 		{
 			if ( tds754a.is_trigger_channel )
-				return vars_push( INT_VAR, tds754A_translate_channel(
+				return vars_push( INT_VAR, tds754a_translate_channel(
 							   TDS754A_TO_GENERAL, tds754a.trigger_channel ) );
 			else
-				return vars_push( INT_VAR, tds754A_translate_channel(
+				return vars_push( INT_VAR, tds754a_translate_channel(
 							 TDS754A_TO_GENERAL, TDS754A_TEST_TRIG_CHANNEL ) );
 		}
 		else if ( I_am == PARENT )
 		{
 			if ( tds754a.is_trigger_channel )
-				return vars_push( INT_VAR, tds754A_translate_channel(
+				return vars_push( INT_VAR, tds754a_translate_channel(
 							   TDS754A_TO_GENERAL, tds754a.trigger_channel ) );
 
 			eprint( FATAL, SET, "%s: Function %s() with no argument can "
@@ -796,7 +799,7 @@ Var *digitizer_trigger_channel( Var *v )
 			THROW( EXCEPTION )
 		}
 
-		return vars_push( INT_VAR, tds754A_translate_channel(
+		return vars_push( INT_VAR, tds754a_translate_channel(
 						TDS754A_TO_GENERAL, tds754a_get_trigger_channel( ) ) );
 	}
 

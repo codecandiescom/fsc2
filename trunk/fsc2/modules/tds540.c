@@ -774,16 +774,16 @@ Var *digitizer_trigger_channel( Var *v )
 		{
 			if ( tds540.is_trigger_channel )
 				return vars_push( INT_VAR, tds540_translate_channel(
-								 TDS540_TO_CHANNEL, tds540.trigger_channel ) );
+								 TDS540_TO_GENERAL, tds540.trigger_channel ) );
 			else
 				return vars_push( INT_VAR, tds540_translate_channel(
-							   TDS540_TO_CHANNEL, TDS540_TEST_TRIG_CHANNEL ) );
+							   TDS540_TO_GENERAL, TDS540_TEST_TRIG_CHANNEL ) );
 		}
 		else if ( I_am == PARENT )
 		{
 			if ( tds540.is_trigger_channel )
 				return vars_push( INT_VAR, tds540_translate_channel(
-								 TDS540_TO_CHANNEL, tds540.trigger_channel ) );
+								 TDS540_TO_GENERAL, tds540.trigger_channel ) );
 
 			eprint( FATAL, SET, "%s: Function %s() with no argument can "
 					"only be used in the EXPERIMENT section.\n",
@@ -791,7 +791,7 @@ Var *digitizer_trigger_channel( Var *v )
 			THROW( EXCEPTION )
 		}
 
-		return vars_push( INT_VAR, tds540_translate_channel( TDS540_TO_CHANNEL,
+		return vars_push( INT_VAR, tds540_translate_channel( TDS540_TO_GENERAL,
 											 tds540_get_trigger_channel( ) ) );
 	}
 
