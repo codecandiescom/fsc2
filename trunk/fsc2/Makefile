@@ -23,16 +23,28 @@
 # The following variables determine where the program, auxiliary files and
 # the documentation will be copied to by 'make install'.
 
-prefix         = /usr/local
-bindir         = $(prefix)/bin
-libdir         = $(prefix)/lib/fsc2
-auxdir         = $(libdir)/aux
-docdir         = $(prefix)/share/doc/fsc2
-mandir         = $(prefix)/man
-infodir        = $(prefix)/info
+prefix           := /usr/local
+bindir           := $(prefix)/bin
+libdir           := $(prefix)/lib/fsc2
+auxdir           := $(libdir)/aux
+docdir           := $(prefix)/share/doc/fsc2
+mandir           := $(prefix)/man
+infodir          := $(prefix)/info
 
 
-# The first variable sets the GPIB library to use, it must be set to either
+# Here the owner of the program of all files that will be installed as well
+# as the group the owner belongs to has to be set. It is highly recommended
+# to create a special account and group for the program, with 'fsc2' being
+# the natural choice. For a local install, i.e. if the program will be used
+# by one person only and everything is installed in his/her home directory
+# this persons account and group can be used. The owner and group ID will be
+# used when accessing lock and log files and shared memory segments. 
+
+OWNER            := fsc2
+GROUP            := fsc2
+
+
+# The next variable sets the GPIB library to use, it must be set to either
 # LLP, NI or JTT for the LLP library, the National Instruments library or
 # the library written by me. Alternatively, if no GPIB support is needed
 # define GPIB_LIBRARY as NONE (which is also the default if not set).
@@ -44,43 +56,24 @@ infodir        = $(prefix)/info
 # Finally, set the verbosity level of the GPIB logs, use HIGH, MEDIUM, LOW
 # or OFF. If not set it defaults to LOW, i.e. only errors will be logged.
 
-GPIB_LIBRARY     = JTT
-GPIB_CONF_FILE   = /etc/gpib.conf
-GPIB_LOG_FILE    = /tmp/gpib.log
-GPIB_LOG_LEVEL   = HIGH
-
-
-# Here the owner of the program of all files that will be installed as well
-# as the group the owner belongs to has to be set. It is highly recommended
-# to create a special account and group for the program, with 'fsc2' being
-# the natural choice (which is also the default). For a local install, i.e.
-# if the program will be used by one person only and everything is installed
-# in his/her home directory this persons account and group can be used.
-#
-# A further important point is that due to the necessity to access physical
-# devices the program needs the permissions to access these devices, i.e.
-# the corresponding device files. Therefor the permissions for these device
-# files must be set so that either everyone is allowed to access these files
-# or (which is probably the saver alternative) that fsc2 itself is allowed
-# to access the devices, i.e. by including just fsc2 (and not everyone) into
-# the group that has the necessary access permissions.
-
-OWNER            = fsc2
-GROUP            = fsc2
+GPIB_LIBRARY     := JTT
+GPIB_CONF_FILE   := /etc/gpib.conf
+GPIB_LOG_FILE    := /tmp/gpib.log
+GPIB_LOG_LEVEL   := HIGH
 
 
 # This variable defines the number of serial ports that are available on
 # the computer.
 
-NUM_SERIAL_PORTS = 2
+NUM_SERIAL_PORTS := 2
 
 
 # This variable controls to whom mail with bug reports and crash messages will
 # be send - if not set no "Bug report" button will be shown. Please change
-# this only if you apply changes to the program yourself in which case sending
-# me bug reports or mails informing me about crashes wouldn't make sense.
+# this only if you change the program yourself (in which case sending me bug
+# reports or mails about crashes would not make too much sense).
 
-MAIL_ADDRESS   = Jens.Toerring@physik.fu-berlin.de
+MAIL_ADDRESS     := Jens.Toerring@physik.fu-berlin.de
 
 
 ##############################################################################
@@ -127,7 +120,7 @@ cdir    := $(mdir)/config
 
 # Set up a variable with the machines FQDN
 
-machine_name = $(shell hostname -f)
+machine_name := $(shell hostname -f)
 
 
 # Check that the machine has a new libc, i.e. at least version 2, otherwise
@@ -208,8 +201,8 @@ endif
 # and make sure the mail program and addr2line got found by 'which', otherwise
 # don't set the variables
 
-MAIL_PROGRAM   = $(shell which mail)
-ADDR2LINE      = $(shell which addr2line)
+MAIL_PROGRAM  := $(shell which mail)
+ADDR2LINE     := $(shell which addr2line)
 
 ifneq ($(word 1,$(MAIL_PROGRAM)),which:)
 	CFLAGS += -DMAIL_PROGRAM=\"$(MAIL_PROGRAM)\"
@@ -224,55 +217,55 @@ endif
 # machines that I know well enough - for these machines I don't have
 # to edit the Makefile all the time...
 
-INSTALL_MACHINE   = install-unknown
-UNINSTALL_MACHINE = uninstall-unknown
+INSTALL_MACHINE   := install-unknown
+UNINSTALL_MACHINE := uninstall-unknown
 
 ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
-	GPIB_LIBRARY       = LLP
-	INSTALL_MACHINE    = install-$(machine_name)
-	UNINSTALL_MACHINE  = uninstall-$(machine_name)
+	GPIB_LIBRARY       := LLP
+	INSTALL_MACHINE    := install-$(machine_name)
+	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),moebi.physik.fu-berlin.de)
-	GPIB_LIBRARY       = JTT
-	INSTALL_MACHINE    = install-$(machine_name)
-	UNINSTALL_MACHINE  = uninstall-$(machine_name)
+	GPIB_LIBRARY       := JTT
+	INSTALL_MACHINE    := install-$(machine_name)
+	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),crowley.physik.fu-berlin.de)
-	GPIB_LIBRARY       = JTT
-	INSTALL_MACHINE    = install-$(machine_name)
-	UNINSTALL_MACHINE  = uninstall-$(machine_name)
+	GPIB_LIBRARY       := JTT
+	INSTALL_MACHINE    := install-$(machine_name)
+	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),door.physik.fu-berlin.de)
-	GPIB_LIBRARY       = JTT
-	INSTALL_MACHINE    = install-$(machine_name)
-	UNINSTALL_MACHINE  = uninstall-$(machine_name)
+	GPIB_LIBRARY       := JTT
+	INSTALL_MACHINE    := install-$(machine_name)
+	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),isaak.physik.fu-berlin.de)
-	GPIB_LIBRARY       = JTT
-	INSTALL_MACHINE    = install-$(machine_name)
-	UNINSTALL_MACHINE  = uninstall-$(machine_name)
+	GPIB_LIBRARY       := JTT
+	INSTALL_MACHINE    := install-$(machine_name)
+	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),crowley.none)
-	GPIB_LIBRARY      = JTT
-	INSTALL_MACHINE   = install-$(machine_name)
-	UNINSTALL_MACHINE = uninstall-$(machine_name)
+	GPIB_LIBRARY       := JTT
+	INSTALL_MACHINE    := install-$(machine_name)
+	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
 
 # Finally the definition of further needed variables
 
 ifeq ($(GPIB_LIBRARY),LLP)
-	GPIB_LIBRARY          = old
+	GPIB_LIBRARY         := old
 	CFLAGS               += -I/usr/local/include/gpib
 	LIBS                 += -lgpib -lfl
 else
 	ifeq ($(GPIB_LIBRARY),NI)
-		GPIB_LIBRARY      = ni
+		GPIB_LIBRARY     := ni
 		LIBS             += -lgpib
 		ifdef GPIB_CONF_FILE
 			CFLAGS       += -DGPIB_CONF_FILE=\"$(GPIB_CONF_FILE)\"
@@ -281,10 +274,10 @@ else
 		endif
 	else
 		ifeq ($(GPIB_LIBRARY),JTT)
-			GPIB_LIBRARY  = jtt
+			GPIB_LIBRARY := jtt
 			LIBS         += -lgpib
 		else
-			GPIB_LIBRARY  = none
+			GPIB_LIBRARY := none
 		endif
 	endif
 endif
