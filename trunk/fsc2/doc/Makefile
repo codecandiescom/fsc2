@@ -12,9 +12,11 @@ ps: $(docs)
 	texi2dvi -c fsc2.texi
 	dvips fsc2.dvi
 
+pdf: $(docs)
+	texi2dvi --pdf -c fsc2.texi
 
 clean:
 	$(RM) $(RMFLAGS) fsc2.dvi
 
 distclean:
-	$(RM) $(RMFLAGS) fsc2_*.html fsc2.ps *~
+	$(RM) $(RMFLAGS) fsc2_*.html fsc2.ps fsc2.pdf *~

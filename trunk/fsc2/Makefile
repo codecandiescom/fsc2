@@ -172,6 +172,8 @@ html-docs:
 ps-docs:
 	$(MAKE) -C doc ps
 
+pdf-docs:
+	$(MAKE) -C doc pdf
 
 # `clean' deletes just all the files remaining from the compilation while
 # `distclean' also removes all executables and shared libraries
