@@ -273,7 +273,6 @@ sub init {
 	$self->top->bind( '<Down>' => sub {
 						  $self->{ 'canvas' }->yviewScroll( 1, 'unit' ); } );
 
-
 	# Create a second frame with the buttons etc.
 
 	my $f2 = $self->top->Frame;
