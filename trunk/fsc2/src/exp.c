@@ -13,7 +13,7 @@
 
 static bool in_for_lex = UNSET;
 
-extern int prim_exp_runparse( void );     /* from prim_exp__run_parser.y */
+extern int prim_exp_runparse( void );     /* from prim_exp_run_parser.y */
 extern int conditionparse( void );        /* from condition_parser.y */
 
 
@@ -534,6 +534,7 @@ void prim_exp_run( void )
 		while ( cur_prg_token != NULL &&
 				cur_prg_token < prg_token + prg_length )
 		{
+
 			if ( ! just_testing && prg_length % 8 == 0 )
 				fl_check_only_forms( );
 
@@ -657,7 +658,7 @@ int prim_exp_runlex( void )
 
 	if ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
 	{
-		if ( TEST_RUN && ! just_testing &&
+		if ( TEST_RUN && ! just_testing && 
 			 ( cur_prg_token - prg_token ) % 8 == 0 )
 			fl_check_only_forms( );
 
