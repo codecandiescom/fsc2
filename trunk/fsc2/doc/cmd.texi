@@ -137,4 +137,9 @@ little help message is shown, explaining what the button is supposed to
 do. If you get annoyed with this you can switch off the display of the
 help balloons.
 
+@item @option{-httpPort}
+This option tells @acronym{fsc2}s webserver on which port to listen for
+incoming connections. Per default it is 8080 but using this option a
+different port (in the range between 1024 and 65535) can be set.
+
 @end table
