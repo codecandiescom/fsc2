@@ -166,14 +166,14 @@ typedef struct {
 	unsigned int label_w[ 3 ],
 		         label_h[ 3 ];
 
-	unsigned int ua_w,      /* sizes of out of range markers */
-		         ua_h,
-		         da_w,
-		         da_h,
-		         la_w,
-		         la_h,
-		         ra_w,
-		         ra_h;
+	unsigned int up_arrow_w,      /* sizes of out of range markers */
+		         up_arrow_h,
+		         down_arrow_w,
+		         down_arrow_h,
+		         left_arrow_w,
+		         left_arrow_h,
+		         right_arrow_w,
+		         right_arrow_h;
 
 	int active_curve;       /* curve shown in 2d display (or -1 if none) */
 } Graphics;

@@ -2,11 +2,11 @@
   $Id$
 */
 
-#define c5_width 16
-#define c5_height 16
-#define c5_x_hot 7
-#define c5_y_hot 7
-static unsigned char c5_bits[] = {
+#define cursor_5_width 16
+#define cursor_5_height 16
+#define cursor_5_x_hot 7
+#define cursor_5_y_hot 7
+static unsigned char cursor_5_bits[] = {
   0x80, 0x00,
   0x80, 0x00,
   0xC0, 0x01,

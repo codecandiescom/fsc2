@@ -2,11 +2,11 @@
   $Id$
 */
 
-#define c1_width 21
-#define c1_height 21
-#define c1_x_hot 5
-#define c1_y_hot 5
-static unsigned char c1_bits[] = {
+#define cursor_1_width 21
+#define cursor_1_height 21
+#define cursor_1_x_hot 5
+#define cursor_1_y_hot 5
+static unsigned char cursor_1_bits[] = {
   0x00, 0x00, 0x00,
   0xF8, 0x00, 0x00,
   0x04, 0x01, 0x00,

@@ -2,9 +2,9 @@
   $Id$
 */
 
-#define ua_width 16
-#define ua_height 16
-static unsigned char ua_bits[] = {
+#define up_arrow_width 16
+#define up_arrow_height 16
+static unsigned char up_arrow_bits[] = {
   0x80, 0x00,
   0xC0, 0x01,
   0xE0, 0x03,

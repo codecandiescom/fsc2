@@ -5,16 +5,16 @@
 
 #include "fsc2.h"
 
-#include "c1.xbm"             /* bitmaps for cursors */
-#include "c2.xbm"
-#include "c3.xbm"
-#include "c4.xbm"
-#include "c5.xbm"
+#include "cursor_1.xbm"             /* bitmaps for cursors */
+#include "cursor_2.xbm"
+#include "cursor_3.xbm"
+#include "cursor_4.xbm"
+#include "cursor_5.xbm"
 		 
-#include "ua.xbm"             /* arrow bitmaps */
-#include "da.xbm"
-#include "la.xbm"
-#include "ra.xbm"
+#include "up_arrow.xbm"             /* arrow bitmaps */
+#include "down_arrow.xbm"
+#include "left_arrow.xbm"
+#include "right_arrow.xbm"
 
 
 static void G_struct_init( void );
@@ -227,16 +227,21 @@ static void G_struct_init( void )
 
 	/* Create the  different cursors */
 
-	G.cur_1 = fl_create_bitmap_cursor( c1_bits, c1_bits, c1_width,
-									   c1_height, c1_x_hot, c1_y_hot );
-	G.cur_2 = fl_create_bitmap_cursor( c2_bits, c2_bits, c2_width,
-									   c2_height, c2_x_hot, c2_y_hot );
-	G.cur_3 = fl_create_bitmap_cursor( c3_bits, c3_bits, c3_width,
-									   c3_height, c3_x_hot, c3_y_hot );
-	G.cur_4 = fl_create_bitmap_cursor( c4_bits, c4_bits, c4_width,
-									   c4_height, c4_x_hot, c4_y_hot );
-	G.cur_5 = fl_create_bitmap_cursor( c5_bits, c5_bits, c5_width,
-									   c5_height, c5_x_hot, c5_y_hot );
+	G.cur_1 = fl_create_bitmap_cursor( cursor_1_bits, cursor_1_bits,
+									   cursor_1_width, cursor_1_height,
+									   cursor_1_x_hot, cursor_1_y_hot );
+	G.cur_2 = fl_create_bitmap_cursor( cursor_2_bits, cursor_2_bits,
+									   cursor_2_width, cursor_2_height,
+									   cursor_2_x_hot, cursor_2_y_hot );
+	G.cur_3 = fl_create_bitmap_cursor( cursor_3_bits, cursor_3_bits,
+									   cursor_3_width, cursor_3_height,
+									   cursor_3_x_hot, c3_y_hot );
+	G.cur_4 = fl_create_bitmap_cursor( cursor_4_bits, cursor_4_bits,
+									   cursor_4_width, cursor_4_height,
+									   cursor_4_x_hot, cursor_4_y_hot );
+	G.cur_5 = fl_create_bitmap_cursor( cursor_5_bits, cursor_5_bits,
+									   cursor_5_width, cursor_5_height,
+									   cursor_5_x_hot, cursor_5_y_hot );
 
 	/* On the first call also create the colours needed for 2D displays */
 
@@ -312,39 +317,39 @@ static void G_init_curves_1d( void )
 		/* Create pixmaps for the out-of-display arrows */
 
 		cv->up_arr =
-			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, ua_bits,
-										 ua_width, ua_height,
+			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, up_arrow_bits,
+										 up_arrow_width, up_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
 										 fl_get_pixel( FL_BLACK ), depth );
-		G.ua_w = ua_width;
-		G.ua_h = ua_width;
+		G.up_arrow_w = up_arrow_width;
+		G.up_arrow_h = up_arrow_width;
 
 		cv->down_arr =
-			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, da_bits,
-										 da_width, da_height,
+			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, down_arrow_bits,
+										 down_arrow_width, down_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
 										 fl_get_pixel( FL_BLACK ), depth );
 
-		G.da_w = da_width;
-		G.da_h = da_width;
+		G.down_arrow_w = down_arrow_width;
+		G.down_arrow_h = down_arrow_width;
 
 		cv->left_arr =
-			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, la_bits,
-										 la_width, la_height,
+			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, left_arrow_bits,
+										 left_arrow_width, left_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
 										 fl_get_pixel( FL_BLACK ), depth );
 
-		G.la_w = la_width;
-		G.la_h = la_width;
+		G.left_arrow_w = left_arrow_width;
+		G.left_arrow_h = left_arrow_width;
 
 		cv->right_arr = 
-			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, ra_bits,
-										 ra_width, ra_height,
+			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, right_arrow_bits,
+										 right_arrow_width, right_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
 										 fl_get_pixel( FL_BLACK ), depth );
 
-		G.ra_w = ra_width;
-		G.ra_h = ra_width;
+		G.right_arrow_w = right_arrow_width;
+		G.right_arrow_h = right_arrow_width;
 
 		/* Create a GC for the font and set the appropriate colour */
 
@@ -410,39 +415,39 @@ static void G_init_curves_2d( void )
 		/* Create pixmaps for the out-of-display arrows */
 
 		cv->up_arr =
-			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, ua_bits,
-										 ua_width, ua_height,
+			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, up_arrow_bits,
+										 up_arrow_width, up_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
 										 fl_get_pixel( FL_INACTIVE ), depth );
-		G.ua_w = ua_width;
-		G.ua_h = ua_width;
+		G.up_arrow_w = up_arrow_width;
+		G.up_arrow_h = up_arrow_width;
 
 		cv->down_arr =
-			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, da_bits,
-										 da_width, da_height,
+			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, down_arrow_bits,
+										 down_arrow_width, down_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
 										 fl_get_pixel( FL_INACTIVE ), depth );
 
-		G.da_w = da_width;
-		G.da_h = da_width;
+		G.down_arrow_w = down_arrow_width;
+		G.down_arrow_h = down_arrow_width;
 
 		cv->left_arr =
-			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, la_bits,
-										 la_width, la_height,
+			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, left_arrow_bits,
+										 left_arrow_width, left_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
 										 fl_get_pixel( FL_INACTIVE ), depth );
 
-		G.la_w = la_width;
-		G.la_h = la_width;
+		G.left_arrow_w = left_arrow_width;
+		G.left_arrow_h = left_arrow_width;
 
 		cv->right_arr = 
-			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, ra_bits,
-										 ra_width, ra_height,
+			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, right_arrow_bits,
+										 right_arrow_width, right_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
 										 fl_get_pixel( FL_INACTIVE ), depth );
 
-		G.ra_w = ra_width;
-		G.ra_h = ra_width;
+		G.right_arrow_w = right_arrow_width;
+		G.right_arrow_h = right_arrow_width;
 
 		/* Create a GC for the font and set the appropriate colour */
 
