@@ -3729,8 +3729,8 @@ the number of pixels in the (vertical) @i{y}-direction.
 @section Monochromator Functions
 @cindex Monochromator Functions
 
-Currently only the SpectraPro-300i series of monochromator (actually,
-the module has only been tested with the 308i) by the Acton Research
+Currently the SpectraPro-300i series of monochromator (actually, the
+module has only been tested with the 308i) by the Acton Research
 Corporation and monochromators by SPEX controlled via the CD2A
 Compudrive interface are supported. The modules for the monochromators
 get loaded by specifying
@@ -3741,16 +3741,31 @@ spex_cd2a
 in the @code{DEVICES} section. 
 
 There are two different types of monochromators by SPEX. They are either
-wavelength or wavenumber driven. In case of wavelength driven
+wavelength- or wavenumber-driven. In case of wavelength-driven
 monochromators functions accepting or returning spectral positions
 etc.@: expect or return them in units of wavelengths, i.e.@: in
-@code{m}. In contrast, for wavenumber driven monochromators the
+@code{m}. In contrast, for wavenumber-driven monochromators the
 functions expect or return values in wavenumber units, i.e.@: in
 @code{cm^-1}. To make things even more interesting, for wavenumber
 driven monochromators a laser line position can be set. If such a laser
-line position is set, values are expected or returned in relative
+line position is set values are expected or returned in relative
 wavenumber units, i.e.@: as differences between the wavenumber of the
 laser line and the absolute wavenumber.
+
+Another important point is that for SPEX type monochromators an offset
+(between the wavelength or -number displayed by the CD2A unit and the
+"real" wavelength or -number is automatically taken into account. Thus
+the position reported by the program and at the console of the CD2A unit
+may differ because the program tries to take care of the offset (see the
+description of the function @code{monochromator_offset()} below for more
+information). Furthermore, for wavenumber-driven SPEX monochromators
+also the position of the laser line gets remembered between
+experiments. These informations are stored in a file in the same
+directory where the module for the device resides (under the name
+@file{spex_cd2a.calib} unless specified differently in the configuration
+file for the device). This file gets automatically read in when the
+module is loaded and at the start of each experiment and rewritten at
+the end of the experiment.
 
 Some of the functions listed below will only work when a monochromator
 is used in conjunction with a CCD camera (and have been tested only with
@@ -3797,7 +3812,7 @@ automatically aborts the currently running scan.
 @anchor{monochromator_laser_line}
 @item monochromator_laser_line()
 @findex monochromator_laser_line()
-The function is only supported for wavenumber driven SPEX
+The function is only supported for wavenumber-driven SPEX
 monochromators. It allows to set (or query if the function is called
 without an argument) to set a laser line position. If such a laser line
 has been set the device automatically switches to using relative
@@ -3812,8 +3827,51 @@ positions in relative wavenumbers!). To switch use of a laser line
 position off (and thus revert to spectral positions in absolute a zero
 or negative value must be passed to the function.
 
+The module will store the current value of the laser line position at
+the end of an experiment and start off with this value when the next
+experiment is started (even if the setting has been changed manually at
+the CD2A console, so make sure you call this function at least once
+after installing a new laser with a different line position).
+
 Please note: for monochromators doing a scan calling this function
 automatically aborts the currently running scan.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{monochromator_offset}
+@item monochromator_offset()
+@findex monochromator_offset()
+The function is only supported for SPEX monochromators. It can be used
+to tell the module about an offset between the wavelength or -number
+displayed by the CD2A console and the "real" wavelength or -number.
+Once it has been set, all functions will take this offset into account
+when talking with the device.
+
+The offset is taken to be the difference between the "real" position of
+a line and the position where it appears when measured with @code{fsc2}.
+Thus the usual procedure to set the offset is to measure the position of
+a well-known line using @code{fsc2} and then to call the function with
+the difference between the "real" position and the observed position.
+Afterwards @code{fsc2} will automatically take the offset into account
+and in a new measurement the line should seem to appear at the expected
+position.
+
+The function can also be used to determine the current value of the
+offset when called without an argument. Please don't be too surprised
+if this value differs from the one you have just set: since an offset
+may already have been used while you did the measurement off the new
+offset, the newly set offset may only have been added to the old value
+and by quering the new value you get the sum of the old and the new
+offset.
+
+The value of the offset is read in at the start of an experiment from a
+file and again written to the file at the end of the experiment, so it
+does not need to be set every time an experiment is started.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
 
 
 @anchor{monochromator_scan_setup}
@@ -3823,15 +3881,16 @@ The function is only supported for SPEX monochromators. These have a
 special scan mode, where scans can be done going from low to high
 wavelengths or from high to low wavenumbers (during a scan the
 monochromator doesn't have to do backslash removal, making the slew to a
-new position faster). For doing a scan the start position and the step
-width for the scan must be defined, which can be done using this
-function. To set the scan parameter the function expects to arguments,
-first the start position of the scan, given in wavelength units for
-wavelength driven monochromators and in wavenumbers (absolute, if no
-laser line position has been set, otherwise in relative units). The
+new position faster). For being able to start a scan the start position
+and the step width for the scan must be defined, which can be done using
+this function. To set the scan parameter the function expects to
+arguments, first the start position of the scan, given in wavelength
+units for wavelength-driven monochromators and in wavenumbers (absolute,
+if no laser line position is set, otherwise in relative units). The
 second argument is the step width, which must be a positive wavelength
-step size for wavelength driven monochromators and a @strong{negative}
-wavenumber step size for wavenumber driven ones.
+or wavenumber step size (even though for wavenumber-driven
+monochromators the scan is always in the direction of lower
+wavenumbers!).
 
 If called without an argument, the function returns a two-dinemsional
 array, with the first argument being the start position and the second
@@ -3890,7 +3949,6 @@ to values that don't cover the laser line. When called without an
 argument the function returns a two-dimensional array, with the first
 element being the lower shutter limit and the second the upper shutter
 limit.
-
 
 Please note: for monochromators doing a scan calling this function
 automatically aborts the currently running scan.
