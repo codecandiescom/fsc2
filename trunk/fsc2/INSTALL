@@ -80,18 +80,22 @@ a few places (e.g. when writing to log files, manipulating lock files or
 accessing shared memory or device files) it sets back the EUID and EGID
 to the one of fsc2.
 
-When deciding about the group fsc2 shall belong to I would recommend to use
-the group that has read and write access for the serial port device files,
-(/dev/ttyS* where * stands for a positive number). On most Linux systems
-I have seen this group was either 'uucp' or 'dialout'. If fsc2 belongs to
-this group it automatically has the permisssion to access these device
-files. Otherwise you will have to either change the modes of the files to
-allow access by 'other', i.e. by every account, or to make all users of
-fsc2 belong to this group (probably as one of their supplementary groups).
+What group the fsc2 account belongs to does not matter. Relevant is only
+the group of the executable, i.e the file itself. I would recommend to
+use the group that has read and write access for the serial port device
+files, (/dev/ttyS* where * stands for a positive number). On most Linux
+systems I have seen this group was either 'uucp' or 'dialout'. If the
+fsc2 executable file is owned by this group teh program automatically has
+the permisssion to access the device files. Otherwise you will have to
+either change the modes of the files to allow access by 'other', i.e.
+make them world readable and writable, or to make all users of fsc2 belong
+to this group (probably as one of their supplementary groups).
 
 By setting the group of the device file for the GPIB board to the group
-fsc2 belongs to also access permissions to the board don't have to be set
-to allow access by 'other' but can be restricted to this group.
+that owns the executable file of fsc2 (i.e. usually 'uucp' or 'dialout')
+also the access permissions to the boards device file don't have to be
+set to allow either access by 'other' or to make all users members of
+the group that has access permissions but can be restricted to this group.
 
 
 C) Preparing for Installation
