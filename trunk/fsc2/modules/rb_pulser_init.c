@@ -42,13 +42,14 @@ void rb_pulser_init_setup( void )
 	rb_pulser_basic_pulse_check( );
 	rb_pulser_basic_functions_check( );
 	rb_pulser_rf_synth_init( );
-	rb_pulser_update_pulses( SET );
 
 	if ( rb_pulser.dump_file != NULL )
 		rb_pulser_init_print( rb_pulser.dump_file );
 
 	if ( rb_pulser.show_file != NULL )
 		rb_pulser_init_print( rb_pulser.show_file );
+
+	rb_pulser_update_pulses( SET );
 }
 
 
@@ -67,10 +68,10 @@ static void rb_pulser_init_print( FILE *fp )
 			 Ticks_rnd( rb_pulser.neg_delay / rb_pulser.timebase ) );
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
 		if ( rb_pulser.function[ i ].is_used )
-			fprintf( fp, "%s:  0\n", rb_pulser.function[ i ].name );
-	}
+			fprintf( fp, "%s:  %ld\n", rb_pulser.function[ i ].name,
+					 Ticks_rnd( rb_pulser.function[ i ].delay /
+								rb_pulser.timebase ) );
 }
 
 
