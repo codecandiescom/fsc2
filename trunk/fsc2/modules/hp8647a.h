@@ -99,7 +99,6 @@ FILE *hp8647a_open_table( char *name );
 double hp8647a_get_att_from_table( double freq );
 double hp8647a_get_att( double freq );
 int hp8647a_set_mod_param( Var *v );
-int hp8647a_is_in( const char *sup_in, const char *altern );
 
 
 /* functions defined in "hp8647a_lexer.flex" */
