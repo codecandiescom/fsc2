@@ -1390,11 +1390,11 @@ Var *synthesizer_pulse_trigger_slope( Var *v )
 
 	vars_check( v, STR_VAR );
 
-	if ( ! strcmp( v->val.sptr, "POS" ) ||
-		 ! strcmp( v->val.sptr, "POSITIVE" ) )
+	if ( ! strcasecmp( v->val.sptr, "POS" ) ||
+		 ! strcasecmp( v->val.sptr, "POSITIVE" ) )
 		state = SLOPE_RAISE;
-	else if ( ! strcmp( v->val.sptr, "NEG" ) ||
-			  ! strcmp( v->val.sptr, "NEGATIVE" ) )
+	else if ( ! strcasecmp( v->val.sptr, "NEG" ) ||
+			  ! strcasecmp( v->val.sptr, "NEGATIVE" ) )
 		state = SLOPE_FALL;
 	else
 	{
