@@ -477,7 +477,7 @@ void print( int severity, const char *fmt, ... )
 /*-------------------------------------------------------------------------*/
 /* This routine takes the input file and feeds it to 'fsc2_clean' which is */
 /* running as a child process. The output of fsc2_clean gets written to a  */
-/* pipe for which an immediately readable stream (the imeediately bit is   */
+/* pipe for which an immediately readable stream (the immediately bit is   */
 /* important because otherwise the lexer just sees an EOF instead of the   */
 /* output of fsc2_clean...) is returned by the function (or NULL instead   */
 /* on errors within the parent process).                                   */

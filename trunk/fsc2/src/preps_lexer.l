@@ -43,7 +43,7 @@
 #define YY_INPUT( buf, result, max_size )                   \
 {                                                           \
 	int c;                                                  \
-	while ( ( c = fgetc( expin ) ) == EOF )                 \
+	while ( ( c = fgetc( prepsin ) ) == EOF )               \
 		/* empty */ ;                                       \
 	result = ( c == 0x07 ) ? YY_NULL : ( buf[ 0 ] = c, 1 ); \
 }

@@ -79,8 +79,10 @@ static void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 static void unit_spec( char *text, int power );
 static char *T_strdup( const char *string );
 static void *T_malloc( size_t size );
+ static void *T_realloc( void *ptr, size_t size );
 static void *T_free( void *ptr );
 static void lower_permissions( void );
+static ssize_t output( const char *fmt, ... );
 static void usage( void );
 
 
@@ -142,21 +144,21 @@ LWS      ^[\t ]+
 WS       [\t ]+
 TWS      [\t ]+\n
 
-SHEBANG ^#!.*\n
-INCL    ^[ \t]*#INCLUDE[\t ]*
-IFN     \"[^"\n]*\"[\t ]*\n?|<[^>\n]*>[\t ]*\n?
-IFNE    [^"<\t \n]*\n?
-EXIT    ^[ \t]*#EXIT[\t ]*
-QUIT    ^[ \t]*#QUIT[\t ]*
+SHEBANG  ^#!.*\n
+INCL     ^[ \t]*#INCLUDE[\t ]*
+IFN      \"[^"\n]*\"[\t ]*\n?|<[^>\n]*>[\t ]*\n?
+IFNE     [^"<\t \n]*\n?
+EXIT     ^[ \t]*#EXIT[\t ]*
+QUIT     ^[ \t]*#QUIT[\t ]*
 
 
-THROU   [+-][A-Za-z]+
-KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
+THROU    [+-][A-Za-z]+
+KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 
 
-%x      str
-%x      comm
-%x		incl
+%x       str
+%x       comm
+%x		 incl
 
 
 		/*---------------*/
@@ -164,20 +166,30 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 		/*---------------*/
 
 
+            /* Drop characters used for internal purposes */
+
+\001        /* Indicates that next item is a file name */
+\002        /* Indicates that next item is a line number */
+\003        /* Indicates a fatal error */
+\004        /* Indicates a unit */
+\005        /* Indicates a start of string */
+\006        /* Indicates an end of string */
+\007        /* Indicates end of input (we can't rely on EOF) */
+
 			/* Handling of string constants */
 \"          {
-				printf( "\x05" );
+				output( "\x05" );
 				Str_Lc = Lc;
 				yy_push_state( str );
 			}
 
 <str>{
 
-\\\"        printf( "\\\"" );
+\\\"        output( "\\\"" );
 
 
 \"          {
-				printf( "\x06" );
+				output( "\x06" );
 				yy_pop_state( );
 			}
 
@@ -186,7 +198,8 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 				Eol = SET;
 			}
 
-[^"\\\n]+   printf( "%s", yytext );
+[^"\\\n]+   output( "%s", yytext );
+"\\n"       output( "%s", yytext );
 
 <<EOF>>		THROW( EOF_IN_STRING_EXCEPTION );
 
@@ -212,7 +225,7 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 {REM2}		{
 				Lc++;
 				Eol = SET;
-				printf( "\n" );
+				output( "\n" );
 			}
 
 			/* Handling of C style comment */
@@ -262,17 +275,17 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 {TWS}       {
 				Lc++;
 				Eol = SET;
-				printf( "\n" );
+				output( "\n" );
 			}
 
 			/* Reduces any amount of (other) white space to just one space */
-{WS}        printf( " " );
+{WS}        output( " " );
 
 			/* Writes out EOL character */
-\n			{
+\n		    {
 				Lc++;
 				Eol = SET;
-				printf( "\n" );
+				output( "\n" );
 			}
 
             /* "#EXIT" means that rest of current file is to be discarded */
@@ -281,8 +294,11 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 				include_handler( NULL );
 			}
 
-   		   /* "#QUIT" means that all following input is to be discarded */
-{QUIT}		exit( EXIT_SUCCESS );
+   		    /* "#QUIT" means that all following input is to be discarded */
+{QUIT}		{
+				output( "\x07" );
+				exit( EXIT_SUCCESS );
+			}
 
 		    /* Handling of lines starting with "#INCLUDE" */
 {INCL}      {
@@ -320,8 +336,8 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 				   yy_push_state( comm );
 				else
 				{
-					printf( "\x03\n%s:%ld: '#INCLUDE' expects \"FILENAME\" "
-							"or <FILENAME>.\n", Fname, Incl_Lc );
+					output( "\x03\n%s:%ld: '#INCLUDE' expects \"FILENAME\" "
+							"or <FILENAME>.\n\x07", Fname, Incl_Lc );
 					exit( EXIT_FAILURE );
 				}
 			}
@@ -357,39 +373,41 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 {FKT}/[^a-zA-z0-9_]     unit_spec( yytext,  7 );
 {FMGT}/[^a-zA-z0-9_]    unit_spec( yytext, 10 );
 
-"nT"/[^a-zA-z0-9_]      printf( "\x4ntesla" );
-"uT"/[^a-zA-z0-9_]      printf( "\x4utesla" );
-"mT"/[^a-zA-z0-9_]      printf( "\x4mtesla" );
-"T"/[^a-zA-z0-9_]       printf( "\x4tesla" );
-"kT"/[^a-zA-z0-9_]      printf( "\x4ktesla" );
-"MT"/[^a-zA-z0-9_]      printf( "\x4Mtesla" );
+"nT"/[^a-zA-z0-9_]      output( "\x4ntesla" );
+"uT"/[^a-zA-z0-9_]      output( "\x4utesla" );
+"mT"/[^a-zA-z0-9_]      output( "\x4mtesla" );
+"T"/[^a-zA-z0-9_]       output( "\x4tesla" );
+"kT"/[^a-zA-z0-9_]      output( "\x4ktesla" );
+"MT"/[^a-zA-z0-9_]      output( "\x4Mtesla" );
 
-"n"{UNIT}/[^a-zA-z0-9_] printf( "\x4nunit" );
-"u"{UNIT}/[^a-zA-z0-9_] printf( "\x4uunit" );
-"m"{UNIT}/[^a-zA-z0-9_] printf( "\x4munit" );
+"n"{UNIT}/[^a-zA-z0-9_] output( "\x4nunit" );
+"u"{UNIT}/[^a-zA-z0-9_] output( "\x4uunit" );
+"m"{UNIT}/[^a-zA-z0-9_] output( "\x4munit" );
 {UNIT}/[^a-zA-z0-9_]
-"k"{UNIT}/[^a-zA-z0-9_] printf( "\x4kunit" );
-"M"{UNIT}/[^a-zA-z0-9_] printf( "\x4megunit" );
+"k"{UNIT}/[^a-zA-z0-9_] output( "\x4kunit" );
+"M"{UNIT}/[^a-zA-z0-9_] output( "\x4megunit" );
 
 			/* All the rest is simply copied to the output */
 
 {THROU}		{
 				if ( Eol )
 				{
-					printf( "\x02\n%ld\n", Lc );
+					output( "\x02\n%ld\n", Lc );
 					Eol = UNSET;
 				}
-				printf( "%s", yytext );
+				output( "%s", yytext );
 			}
 
 {KEEP}		{
 				if ( Eol )
 				{
-					printf( "\x02\n%ld\n", Lc );
+					output( "\x02\n%ld\n", Lc );
 					Eol = UNSET;
 				}
-				printf( "%s", yytext );
+				output( "%s", yytext );
 			}
+
+.           output( "%s", yytext );
 
 <<EOF>>		include_handler( NULL );
 
@@ -418,11 +436,11 @@ int main( int argc, char *argv[ ] )
 		yyin = stdin;
 		if ( yyin == NULL )
 		{
-			printf( "\x03\nCan't read from stdin.\n" );
+			output( "\x03\nCan't read from stdin.\n\x07" );
 			return EXIT_FAILURE;
 		}
 
-		printf( "\x01\n" );
+		output( "\x01\n" );
 		Fname = T_strdup( "" );
 	}
 	else if ( argc == 2 )
@@ -436,13 +454,13 @@ int main( int argc, char *argv[ ] )
 		yyin = stdin;
 		if ( yyin == NULL )
 		{
-			printf( "\x03\nCan't read input file %s.\n", argv[ 1 ] );
+			output( "\x03\nCan't read input file %s.\n\x07", argv[ 1 ] );
 			return EXIT_FAILURE;
 		}
 
 		/* Set the global variables and output name of input file */
 
-		printf( "\x01\n%s\n", argv[ 1 ] );
+		output( "\x01\n%s\n", argv[ 1 ] );
 		Fname = T_strdup( argv[ 1 ] );
 	}
 	else
@@ -460,41 +478,42 @@ int main( int argc, char *argv[ ] )
 	TRY
 	{
 		yylex( );
+		output( "\x07" );
 		TRY_SUCCESS;
 	}
 	CATCH( OUT_OF_MEMORY_EXCEPTION )
 	{
-		printf( "\x03\n%s:%ld: Running out of memory.\n", Fname, Lc );
+		output( "\x03\n%s:%ld: Running out of memory.\n\x07", Fname, Lc );
 		exit( EXIT_FAILURE );
 	}
 	CATCH( TOO_DEEPLY_NESTED_EXCEPTION )
 	{
-		printf( "\x03\n%s:%ld: Include levels too deeply nested.\n",
+		output( "\x03\n%s:%ld: Include levels too deeply nested.\n\x07",
 				Fname, Lc );
 		exit( EXIT_FAILURE );
 	}
 	CATCH( EOF_IN_COMMENT_EXCEPTION )
 	{
-		printf( "\x03\n%s: End of file in comment starting at line %ld.\n",
+		output( "\x03\n%s: End of file in comment starting at line %ld.\n\x07",
 				Fname, Comm_Lc );
 		exit( EXIT_FAILURE );
 	}
 	CATCH( EOF_IN_STRING_EXCEPTION )
 	{
-		printf( "\x03\n%s: End of line in string constant starting at "
-				"line %ld.\n", Fname, Str_Lc );
+		output( "\x03\n%s: End of line in string constant starting at "
+				"line %ld.\n\x07", Fname, Str_Lc );
 		exit( EXIT_FAILURE );
 	}
 	CATCH( DANGLING_END_OF_COMMENT )
 	{
-		printf( "\x03\n%s: End of comment found in program text at "
-				"line %ld.\n", Fname, Lc );
+		output( "\x03\n%s: End of comment found in program text at "
+				"line %ld.\n\x07", Fname, Lc );
 		exit( EXIT_FAILURE );
 	}
 	CATCH( MISPLACED_SHEBANG )
 	{
-		printf( "\x03\n%s: '#!' must appear on the very first line instead of "
-				"line %ld.\n", Fname, Lc );
+		output( "\x03\n%s: '#!' must appear on the very first line instead of "
+				"line %ld.\n\x07", Fname, Lc );
 		exit( EXIT_FAILURE );
 	}
 
@@ -561,7 +580,7 @@ static void include_handler( char *file )
 
 		if ( ( fp[ incl_depth + 1 ] = fopen( incl_file, "r" ) ) == NULL )
 		{
-			printf( "\x03\n%s:%ld: Can't open include file %s.\n",
+			output( "\x03\n%s:%ld: Can't open include file %s.\n\x07",
 					Fname, Lc, incl_file );
 			exit( EXIT_FAILURE );
 		}
@@ -585,7 +604,7 @@ static void include_handler( char *file )
 		Fname = incl_file;
 		Lc = 1;
 		Eol = SET;
-		printf( "\x01\n%s\n", Fname );
+		output( "\x01\n%s\n", Fname );
 
 		/* ...and switch to the new file after allocating a buffer for it */
 
@@ -603,7 +622,7 @@ static void include_handler( char *file )
 		if ( incl_depth == -1 )
 		{
 			T_free( Fname );
-			fclose( yyin );
+			output( "\x07" );
 			exit( EXIT_SUCCESS );
 		}
 		else
@@ -613,7 +632,7 @@ static void include_handler( char *file )
 			Lc = lc[ incl_depth ];
 			Eol = eol_state[ incl_depth ];
 			xclose( primary_buf, buf_state, primary_fp, fp, &incl_depth );
-			printf( "\x01\n%s\n", Fname );
+			output( "\x01\n%s\n", Fname );
 		}
 	}
 }
@@ -656,59 +675,59 @@ static void unit_spec( char *text, int power )
 	dval = strtod( text, NULL );
 	if ( ( dval == HUGE_VAL || dval == 0.0 ) && errno == ERANGE )
 	{
-		printf( "\x03\n%s:%ld: Overflow or underflow occurred while "
-				"reading a number.\n", Fname, Lc );
+		output( "\x03\n%s:%ld: Overflow or underflow occurred while "
+				"reading a number.\n\x07", Fname, Lc );
 		exit( EXIT_FAILURE );
 	}
 
 	switch ( power )
 	{
 		case -9 :
-			 printf( "%.12f", dval * 1.0e-9 );
+			 output( "%.12f", dval * 1.0e-9 );
 			 break;
 
 		case -6 :
-			 printf( "%.12f", dval * 1.0e-6 );
+			 output( "%.12f", dval * 1.0e-6 );
 			 break;
 
 		case -5 :
-			 printf( "%.12f", dval * 1.0e-5 );
+			 output( "%.12f", dval * 1.0e-5 );
 			 break;
 
 		case -3 :
-			 printf( "%.12f", dval * 1.0e-3 );
+			 output( "%.12f", dval * 1.0e-3 );
 			 break;
 
 		case -2 :
-			 printf( "%.12f", dval * 1.0e-2 );
+			 output( "%.12f", dval * 1.0e-2 );
 			 break;
 
 		case 0 :
-			 printf( "%.12f", dval );
+			 output( "%.12f", dval );
 			 break;
 
 		case 1 :
-			 printf( "%.12f", dval * 10.0 );
+			 output( "%.12f", dval * 10.0 );
 			 break;
 
 		case 3 :
-			 printf( "%.12f", dval * 1.0e3 );
+			 output( "%.12f", dval * 1.0e3 );
 			 break;
 
 		case 4 :
-			 printf( "%.12f", dval * 1.0e4 );
+			 output( "%.12f", dval * 1.0e4 );
 			 break;
 
 		case 6 :
-			 printf( "%.12f", dval * 1.0e6 );
+			 output( "%.12f", dval * 1.0e6 );
 			 break;
 
 		case 9 :
-			 printf( "%f", dval * 1.0e9 );
+			 output( "%f", dval * 1.0e9 );
 			 break;
 
 		default :
-			 fprintf( stderr, "\x03\n%s:%ld: Internal error in fsc2_clean.\n",
+			 output( "\x03\n%s:%ld: Internal error in fsc2_clean.\n\x07",
 					 Fname, Lc );
 			 exit( EXIT_FAILURE );
 	}
@@ -741,12 +760,31 @@ static void *T_free( void *ptr )
 {
 #if defined MDEBUG
 	fprintf( stderr, "free:    %p\n", ptr );
-	fflush( stderr );
 	assert( mprobe( ptr ) == MCHECK_OK );
 #endif
 
 	free( ptr );
 	return NULL;
+}
+
+
+/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+
+static void *T_realloc( void *ptr, size_t size )
+{
+	void *new_ptr;
+
+#if defined MDEBUG
+	fprintf( stderr, "malloc:  %p (%u)\n", ptr, size );
+#endif
+
+	new_ptr = realloc( ptr, size );
+
+	if ( new_ptr == NULL )
+		THROW( OUT_OF_MEMORY_EXCEPTION );
+
+	return new_ptr;
 }
 
 
@@ -778,6 +816,74 @@ static void lower_permissions( void )
 {
 	seteuid( getuid( ) );
 	setegid( getgid( ) );
+}
+
+
+/*---------------------------------------------------------------------------*/
+/* Most of the time the program will write to a pipe and not to a real file. */
+/* To avoid writting only parts of the text when the pipe should get full we */
+/* loop over a write() call until all bytes got written.                     */
+/*---------------------------------------------------------------------------*/
+
+#define OUTPUT_TRY_LENGTH 128
+
+static ssize_t output( const char *fmt, ... )
+{
+	char *c = NULL;
+	size_t len = OUTPUT_TRY_LENGTH;
+	va_list ap;
+	int wr;
+	size_t bytes_to_write;
+	ssize_t bytes_written = 0;
+	size_t already_written = 0;
+
+
+
+	while ( 1 )
+	{
+		c = T_realloc( c, len );
+		va_start( ap, fmt );
+		wr = vsnprintf( c, len, fmt, ap );
+		va_end( ap );
+
+		if ( wr < 0 )         /* indicates not enough space with older glibs */
+		{
+			len *= 2;
+			continue;
+		}
+
+		if ( ( size_t ) wr + 1 > len )   /* newer glibs return the number of */
+		{	                             /* chars needed, not counting the   */
+			len = wr + 1;                /* trailing '\0'                    */
+			continue;
+		}
+
+		break;
+	}
+
+	bytes_to_write = strlen( c );
+
+	while ( bytes_to_write > 0 )
+	{
+		bytes_written = write( STDOUT_FILENO, c + already_written,
+							   bytes_to_write );
+
+		/* Non-deadly signal has been received */
+
+		if ( bytes_written == -1 && errno == EINTR )
+			continue;
+
+		/* Real error while writing, not a signal */
+
+		if ( bytes_written <= 0 )
+			break;
+
+		bytes_to_write -= bytes_written;
+		already_written += bytes_written;
+	}
+
+	T_free( c );
+	return bytes_written;
 }
 
 
