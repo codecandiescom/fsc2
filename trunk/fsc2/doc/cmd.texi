@@ -197,7 +197,7 @@ Starts @code{fsc2} in graphics mode and loads FILE (or also tests
 and/or starts the program when used in conjunction with the @code{-T} or
 @code{-S} flags). The input file will be @strong{automatically deleted}
 when @code{fsc2} is done with it, i.e.@ when either @code{fsc2}
-exits or a new file is loaded. This flag is only useful for cases where
+exits or a new file is loaded. This flag is only useful for cases were
 the input file is a temporary file that needs to be deleted when it
 isn't needed anymore, so better be @strong{really careful}.
 
