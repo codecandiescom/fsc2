@@ -343,7 +343,7 @@ Var *daq_set_voltage( Var *v )
 
 	if ( v != NULL && v->type == STR_VAR )
 	{
-		pass = v->val.sptr;
+		pass = T_strdup( v->val.sptr );
 		if ( ( v = vars_pop( v ) ) == NULL )
 		{
 			print( FATAL, "Missing arguments.\n" );
@@ -364,10 +364,13 @@ Var *daq_set_voltage( Var *v )
 		}
 		else if ( strcmp( pci_mio_16e_1.ao_state.reserved_by[ dac ], pass ) )
 		{
+			T_free( pass );
 			print( FATAL, "CH%ld is reserved, wrong phase-phrase.\n", dac );
 			THROW( EXCEPTION );
 		}
 	}
+
+	T_free( pass );
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{

@@ -644,11 +644,11 @@ static int AI_SI_setup( Board *board, NI_DAQ_ACQ_SETUP *a )
 
 	/* The start delay (i.e. the number of counts before the first SI TC
 	   event is reached, which raises the first START signal) gets loaded
-	   into the SI Load B register and the count for delays between scans
-	   into A, into the counter from SI Load B Register */
+	   into the SI Load A register and the count for delays between scans
+	   into SI Load B Register */
 
-	acq_setup.si_load_a = a->SI_stepping - 1;
-	acq_setup.si_load_b = a->SI_start_delay - 1;
+	acq_setup.si_load_a = a->SI_start_delay - 1;
+	acq_setup.si_load_b = a->SI_stepping - 1;
 
 	/* Make all loads except the very first one come from the A register,
 	   i.e. the one with the time delay between START signals */
@@ -836,8 +836,8 @@ static void AI_acq_register_setup( Board *board )
 					 acq_setup.si_load_b );
 
 		board->func->stc_writew( board, STC_AI_Mode_2,
-					 board->stc.AI_Mode_2 |
-					 AI_SI_Initial_Load_Source );
+					 board->stc.AI_Mode_2 &
+					 ~ AI_SI_Initial_Load_Source );
 
 		board->func->stc_writew( board, STC_AI_Command_1,
 					 board->stc.AI_Command_1 |
@@ -845,8 +845,8 @@ static void AI_acq_register_setup( Board *board )
 		board->stc.AI_Command_1 &= ~ AI_SI_Load;
 
 		board->func->stc_writew( board, STC_AI_Mode_2,
-					 board->stc.AI_Mode_2 &
-					 ~ AI_SI_Initial_Load_Source );
+					 board->stc.AI_Mode_2 |
+					 AI_SI_Initial_Load_Source );
 	}
 
 	if ( acq_setup.need_si2_load )

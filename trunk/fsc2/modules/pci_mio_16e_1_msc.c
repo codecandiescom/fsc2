@@ -192,6 +192,8 @@ Var *daq_freq_out( Var *v )
 		return vars_push( FLOAT_VAR, 0.0 );
 	}
 
+	on_off = NI_DAQ_ENABLED;
+
 	/* Now comes the tricky part - we need to figure out if it's possible
 	   to output the requested frequency (or a frequency not deviating too
 	   much from what the user wants) and how to do it. We have four
@@ -220,7 +222,7 @@ Var *daq_freq_out( Var *v )
 	/* Since the ranges that can be produced with the fast and the slow
 	   clock don't overlap we can concentrate on one of the alternatives. */
 
-	if ( indx[ 0 ] == 0 )
+	if ( indx[ 0 ] == 0 && indx[ 1 ] == 0 )
 	{
 		freq = 2.0e5;
 		daq_clock = NI_DAQ_SLOW_CLOCK;
@@ -252,7 +254,7 @@ Var *daq_freq_out( Var *v )
 	else
 		freq /= divider;
 
-	/* Warn teh user about deviations of more than a promille from the
+	/* Warn the user about deviations of more than a promille from the
 	   requested frequency */
 
 	if ( fabs( freq - new_freq ) > 0.001 * new_freq )
@@ -349,7 +351,7 @@ Var *daq_trigger_setup( Var *v )
 			THROW( EXCEPTION );
 	}
 
-	/* All trigger types except "Digital" require at least one triger level
+	/* All trigger types except "TTL" require at least one trigger level
 	   argument */
 
 	if ( trigger_type != NI_DAQ_TRIG_TTL )

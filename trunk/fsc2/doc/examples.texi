@@ -1076,14 +1076,20 @@ continue or if the end field has already been reached.
 @node ESEEM script, Time-resolved EPR script, Hahn-echo detected EPR script, Example EDL Scripts
 @section ESEEM script
 
-The following script is for a 3-pulse ESEEM experiment.
+The following script is for a 3-pulse (stimulated echo) ESEEM
+experiment. It uses the Oxford magnet for the @w{275 GHz} spectrometer
+at the Rijksuniversiteit Leiden, a special pulser used there and the
+RB8509 ADC (which converts the voltage measured via a boxcar integrator,
+that can't be connected directly to the computer). As you will see there
+aren't too many differences to the previous script, the most interesting
+part is probably how the pulses are moved during the experiment.
 
 @example
  1DEVICES:
  2
  3 ips120_10;
- 4 rb8509;
- 5 rb_pulser;
+ 4 rb_pulser;
+ 5 rb8509;
  6
  7 VARIABLES:
  8
@@ -1137,7 +1143,7 @@ The following script is for a 3-pulse ESEEM experiment.
 56 pulser_state( "ON" );
 57 daq_gain( 4 );
 58 
-59 FOREVER {
+59 FOREVER @{
 60     wait( 1.1 * repeat_time * N_Avg );
 61     data = daq_get_voltage( CH0 );
 62     display( I, data );
@@ -1146,7 +1152,7 @@ The following script is for a 3-pulse ESEEM experiment.
 65     pulser_shift( );
 66     pulser_update( );	
 67     I += 1;
-68 }
+68 @}
 69 
 70 ON_STOP:
 71 

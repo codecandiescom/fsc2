@@ -1,0 +1,12 @@
+# -*-Makefile-*-
+#
+# $Id$
+
+OWNER              := fsc2
+GROUP              := uucp
+GPIB_LIBRARY       := NI
+NUM_SERIAL_PORTS   := 2
+SERIAL_LOCK_DIR    := /var/lock
+WITH_PCI_MIO_16E_1 := yes
+pci_mio_16e_1_libs := libni_daq.so
+MAIL_ADDRESS       := jens

@@ -334,15 +334,15 @@ Var *daq_ai_channel_setup( Var *v )
 
 		switch ( type )
 		{
-			case 2 :
+			case NI_DAQ_AI_TYPE_Differential :
 				types[ num_channels - 1 ] = NI_DAQ_AI_TYPE_Differential;
 				break;
 
-			case 1 :
+			case NI_DAQ_AI_TYPE_NRSE :
 				types[ num_channels - 1 ] = NI_DAQ_AI_TYPE_NRSE;
 				break;
 
-			case 0 :
+			case NI_DAQ_AI_TYPE_RSE :
 			default :
 				types[ num_channels - 1 ] = NI_DAQ_AI_TYPE_RSE;
 		}
@@ -586,7 +586,11 @@ Var *daq_ai_start_acquisition( Var *v )
 			 ni_daq_two_channel_pulses( trig.delay_duration,
 										trig.scan_duration );
 
-		if ( ( ret = ni_daq_ai_start_acq( pci_mio_16e_1.board ) )
+		/* Start the acquisition (unless the board starts the acquisition all
+		   by itself, i.e. in TRIGGER_NONE mode) */
+
+		if ( trig.type != TRIGGER_NONE &&
+			 ( ret = ni_daq_ai_start_acq( pci_mio_16e_1.board ) )
 			 													 != NI_DAQ_OK )
 		{
 			if ( ret == NI_DAQ_ERR_NEM )

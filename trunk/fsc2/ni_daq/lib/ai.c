@@ -405,7 +405,7 @@ int ni_daq_ai_acq_setup( int board, NI_DAQ_INPUT start,
 
 	ni_daq_dev[ board ].ai_state.num_scans = num_scans;
 
-	if ( start != NI_DAQ_NOW )
+	if ( start == NI_DAQ_NOW )
 	{
 		a.cmd = NI_DAQ_AI_ACQ_START;
 
@@ -571,10 +571,7 @@ ssize_t ni_daq_ai_get_acq_data( int board, double *volts[ ],
 		else if ( errno == EAGAIN )
 			return 0;
 		else
-		{
-			fprintf( stderr, "errno = %d\n", errno );
 			return ni_daq_errno = NI_DAQ_ERR_INT;
-		}
 	}
 
 	ni_daq_errno = NI_DAQ_OK;

@@ -54,7 +54,7 @@ Var *daq_reserve_dio( Var *v )
 
 	if ( pci_mio_16e_1.dio_state.reserved_by )
 	{
-		if ( lock_state == SET )
+		if ( lock_state )
 		{
 			if ( ! strcmp( pci_mio_16e_1.dio_state.reserved_by, v->val.sptr ) )
 				return vars_push( INT_VAR, 1L );

@@ -39,7 +39,6 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 static struct {
 	char *dio_func;
-	char *dac_func;
 	char *freq_out_func;
 	unsigned char dio_value;
 } gg_chopper, gg_chopper_reserved;
@@ -47,14 +46,12 @@ static struct {
 
 int gg_chopper_init_hook( void );
 int gg_chopper_test_hook( void );
-int gg_copper_exp_hook( void );
+int gg_chopper_exp_hook( void );
 int gg_chopper_end_of_exp_hook( void );
 void gg_chopper_exit_hook( void );
 Var *chopper_name( Var *v );
-Var *chopper_rotation_frequency( Var *v );
-Var *chopper_create_trigger( Var *v );
+Var *chopper_sector_frequency( Var *v );
 static void gg_chopper_set_dio( long val );
-static void gg_chopper_set_dac( double val );
 static void gg_chopper_set_freq_out( double freq );
 
 
@@ -111,38 +108,6 @@ int gg_chopper_init_hook( void )
 
 	vars_pop( v );
 
-	/* Get a lock on the DA channel of the DAQ device used to control trigger
-	   unit of the chopper */
-
-	if ( dev_num )
-		func = T_strdup( "daq_reserve_dac" );
-	else
-		func = get_string( "daq_reserve_dac#%d", dev_num );
-
-	if ( ! func_exists( func ) ||
-		 ( Func_ptr = func_get( func, &acc ) ) == NULL )
-	{
-		T_free( func );
-		print( FATAL, "Function for reserving a DA channel is missing from "
-			   "module '%s'.\n", DAQ_MODULE );
-		THROW( EXCEPTION );
-	}
-
-	T_free( func );
-	vars_push( INT_VAR, START_TRIGGER_DAC ); /* push the DA channel number */
-	vars_push( STR_VAR, DEVICE_NAME );       /* push the new pass-phrase */
-
-	v = func_call( Func_ptr );
-
-	if ( v->val.lval != 1 )
-	{
-		print( FATAL, "Can't reserve an DA channel CH%d using module '%s'.\n",
-			   START_TRIGGER_DAC, DAQ_MODULE );
-		THROW( EXCEPTION );
-	}
-
-	vars_pop( v );
-
 	/* Get a lock on the FREQ_OUT pin of the DAQ device to be used to control
 	   the chopper */
 
@@ -190,23 +155,6 @@ int gg_chopper_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	/* Get the name for the function for setting an output voltage at the DAC
-	   channel and check if it exists */
-
-	if ( dev_num == 1 )
-		gg_chopper.dac_func = T_strdup( "daq_set_voltage" );
-	else
-		gg_chopper.dac_func = get_string( "daq_set_voltage#%d", dev_num );
-
-	if ( ! func_exists( gg_chopper.dac_func ) )
-	{
-		gg_chopper.dio_func = CHAR_P T_free( gg_chopper.dio_func );
-		gg_chopper.dac_func = CHAR_P T_free( gg_chopper.dac_func );
-		print( FATAL, "Function for setting the DAC output voltage is missing "
-			   "from module '%s'.\n", DAQ_MODULE ); 
-		THROW( EXCEPTION );
-	}
-
 	/* Get the name for the function for setting a value at the FREQ_OUT pin
 	   and check if it exists */
 
@@ -218,7 +166,6 @@ int gg_chopper_init_hook( void )
 	if ( ! func_exists( gg_chopper.freq_out_func ) )
 	{
 		gg_chopper.dio_func = CHAR_P T_free( gg_chopper.dio_func );
-		gg_chopper.dac_func = CHAR_P T_free( gg_chopper.dac_func );
 		gg_chopper.freq_out_func = CHAR_P T_free( gg_chopper.freq_out_func );
 		print( FATAL, "Function for setting the frequency of the FREQ_OUT "
 			   "pin is missing from module '%s'.\n", DAQ_MODULE );
@@ -244,19 +191,17 @@ int gg_chopper_test_hook( void )
 
 /*------------------------------------------------------------------*
  * Function gets called at the start of the experiment. It sets the
- * frequency of the FREQ_OUT pin of the DAQ device card to 10 MHz
- * and then sets the chopper rotation frequency (if this was requested
- * during the PREPARATIONS section).
+ * frequency of the FREQ_OUT pin of the DAQ device card to 1 MHz
+ * and then sets the chopper sector frequency (if this was requested
+ * during the PREPARATIONS section). Take note: the chopper sector
+ * frequency is twice the chopper rotation speed because it has two
+ * openings (of 45 degree each).
  *------------------------------------------------------------------*/
 
-int gg_copper_exp_hook( void )
+int gg_chopper_exp_hook( void )
 {
 	gg_chopper = gg_chopper_reserved;
 
-
-	/* Set the DACs output voltage to 0 V */
-
-	gg_chopper_set_dac( 0.0 );
 
 	/* Make sure the chopper is stopped (by setting the DIO value to 0)
 	   before adjusting the FREQ_OUT frequency */
@@ -265,7 +210,7 @@ int gg_copper_exp_hook( void )
 
 	/* Set the frequency of the FREQ_OUT pin of the DAQ device to 10 MHz */
 
-	gg_chopper_set_freq_out( 1.0e7 );
+	gg_chopper_set_freq_out( 1.0e6 );
 
 	/* If a choppper frequency had been set during the PREPARATIONS section
 	   set it now by outputting a value at the  DIO of the DAQ device */
@@ -300,8 +245,6 @@ void gg_chopper_exit_hook( void )
 {
 	if ( gg_chopper.dio_func )
 		gg_chopper.dio_func = CHAR_P T_free( gg_chopper.dio_func );
-	if ( gg_chopper.dac_func )
-		gg_chopper.dac_func = CHAR_P T_free( gg_chopper.dac_func );
 	if ( gg_chopper.freq_out_func )
 		gg_chopper.freq_out_func = CHAR_P T_free( gg_chopper.freq_out_func );
 }
@@ -320,10 +263,10 @@ Var *chopper_name( Var *v )
 
 /*---------------------------------------------------------------*
  * The only EDL function of the module: It can be used to either
- * determine or set the rotation frequency of the chopper.
+ * determine or set the sector frequency of the chopper.
  *---------------------------------------------------------------*/
 
-Var *chopper_rotation_frequency( Var *v )
+Var *chopper_sector_frequency( Var *v )
 {
 	double freq;
 	long dio_value;
@@ -337,7 +280,7 @@ Var *chopper_rotation_frequency( Var *v )
 		return vars_push( FLOAT_VAR, 1.0e4 / gg_chopper.dio_value );
 	}
 
-	freq = get_double( v, "chopper rotation frequency" );
+	freq = get_double( v, "chopper sector frequency" );
 
 	too_many_arguments( v );
 
@@ -349,22 +292,22 @@ Var *chopper_rotation_frequency( Var *v )
 
 		if ( dio_value > MAX_DIO_VALUE || dio_value < MIN_DIO_VALUE )
 		{
-			print( FATAL, "Invalid chopper rotation frequency of %.2f Hz, it "
+			print( FATAL, "Invalid chopper sector frequency of %.2f Hz, it "
 				   "must be between %.2f Hz and %.2f Hz (or 0 Hz to stop the "
 				   "chopper).\n", freq, 1.0e4 / MAX_DIO_VALUE,
 				   1.0e4 / MIN_DIO_VALUE );
 			THROW( EXCEPTION );
 		}
 
-		/* Warn the user if the rotation frequency we're going to set deviates
+		/* Warn the user if the sector frequency we're going to set deviates
 		   by more than 1% from the requested frequency. */
 
 		if ( fabs( freq - 1.0e4 / dio_value ) > 0.01 * freq )
-			print( WARN, "Chopper rotation frequency had to be adjusted from "
+			print( WARN, "Chopper sector frequency had to be adjusted from "
 				   "%.2f Hz to %.2f Hz.\n", freq, 1.0e4 / dio_value );
 	}
 
-	/* Set the rotational speed of the chopper by outputting a value at
+	/* Set the sector frequency of the chopper by outputting a value at
 	   the DIO of the DAQ device card */
 
 	if ( FSC2_MODE == EXPERIMENT )
@@ -373,27 +316,6 @@ Var *chopper_rotation_frequency( Var *v )
 	gg_chopper.dio_value = ( unsigned char ) dio_value;
 
 	return vars_push( FLOAT_VAR, 1.0e4 / dio_value );
-}
-
-
-/*---------------------------------------------------------------*
- * Function makes the electronics controlling the chopper output
- * a TTL trigger signal the next time the light path gets opened.
- * This requires sending a short TTL pulse via one of the DACs of
- * the DAQ device.
- *---------------------------------------------------------------*/
-
-Var *chopper_create_trigger( Var *v )
-{
-	UNUSED_ARGUMENT( v );
-
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		gg_chopper_set_dac( 5.0 );
-		gg_chopper_set_dac( 0.0 );
-	}
-
-	return vars_push( INT_VAR, 1L );
 }
 
 
@@ -416,30 +338,6 @@ static void gg_chopper_set_dio( long val )
 
 	vars_push( STR_VAR, DEVICE_NAME );         /* push the pass-phrase */
 	vars_push( INT_VAR, val );
-	vars_pop( func_call( Func_ptr ) );
-}
-
-
-/*---------------------------------------------------------------*
- * Internally used function to output a voltage at the DAC of the
- * DAQ device.
- *--------------------------------------------------------------*/
-
-static void gg_chopper_set_dac( double val )
-{
-	Var *Func_ptr;
-	int acc;
-
-	if ( ( Func_ptr = func_get( gg_chopper.dac_func, &acc ) ) == NULL )
-	{
-		print( FATAL, "Internal error detected at %s:%d.\n",
-			   __FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
-
-	vars_push( STR_VAR, DEVICE_NAME );         /* push the pass-phrase */
-	vars_push( INT_VAR, START_TRIGGER_DAC );   /* push the DA channel number */
-	vars_push( FLOAT_VAR, val );               /* push the output voltage */
 	vars_pop( func_call( Func_ptr ) );
 }
 
