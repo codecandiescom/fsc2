@@ -30,7 +30,7 @@ incl_dir  = $(prefix)/include
 
 CFLAGS    = -ggdb -O2 -Wall -Wwrite-strings -Wstrict-prototypes \
 			-Wmissing-prototypes -Wmissing-declarations -W
-LDFLAGS   = -Wl,-E
+LDFLAGS   = --version-script=ni6601_lib.map
 INCLUDES  = -I../driver -I.
 
 sources   = ni6601_lib.c
@@ -42,7 +42,7 @@ headers   = ni6601.h ../driver/ni6601_drv.h
 all: libni6601.so libni6601.a
 
 
-libni6601.so: ${sources:.c=.o} $(headers)
+libni6601.so: ${sources:.c=.o} $(headers) ni6601_lib.map
 	$(CC) -shared -o $@ ${sources:.c=.o} $(LDFLAGS)
 
 libni6601.a: ${sources:.c=.o} $(headers)

@@ -515,6 +515,7 @@ me6x00/lib/Makefile
 me6x00/lib/me6x00.h
 me6x00/lib/me6x00.texi
 me6x00/lib/me6x00_lib.c
+me6x00/lib/me6x00_lib.map
 me6x00/lib/me6x00_lib.txt
 me6x00/lib/me_test.c
 
@@ -536,6 +537,7 @@ ni6601/driver/utils.c
 ni6601/lib/Makefile
 ni6601/lib/ni6601.h
 ni6601/lib/ni6601_lib.c
+ni6601/lib/ni6601_lib.map
 ni6601/lib/ni6601_lib.txt
 
 ni6601/utils/ni6601
@@ -555,6 +557,7 @@ witio_48/driver/witio_48_drv.txt
 witio_48/lib/Makefile
 witio_48/lib/witio_48.h
 witio_48/lib/witio_48_lib.c
+witio_48/lib/witio_48_lib.map
 witio_48/lib/witio_48_lib.txt
 
 witio_48/utils/witio_48
@@ -605,6 +608,7 @@ ni_daq/lib/gpct.c
 ni_daq/lib/msc.c
 ni_daq/lib/ni_daq_lib.c
 ni_daq/lib/ni_daq_lib.h
+ni_daq/lib/ni_daq_lib.map
 ni_daq/lib/ni_daq_lib.txt
 
 ni_daq/misc_doc/clocks
@@ -631,6 +635,7 @@ rulbus/lib/rb8510.c
 rulbus/lib/rb8514.c
 rulbus/lib/rb8515.c
 rulbus/lib/rulbus_lib.c
+rulbus/lib/rulbus_lib.map
 rulbus/lib/rulbus_lib.txt
 
 rulbus/util/rulbus_epp
