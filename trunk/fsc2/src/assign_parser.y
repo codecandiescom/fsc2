@@ -313,13 +313,11 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | FUNC_TOKEN '(' list2 ')'  { CV = func_call( $1 ); }
          unit                      { $$ = apply_unit( CV, $6 ); }
        | VAR_REF                   { $$ = $1; }
-       | VAR_TOKEN '('             { eprint( FATAL, "%s:%ld: `%s' isn't a "
-											 "function.\n", Fname, Lc,
-											 $1->name );
+       | VAR_TOKEN '('             { eprint( FATAL, SET, "`%s' isn't a "
+											 "function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
-       | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
-											 "predefined function.\n",
-											 Fname, Lc, $1->name );
+       | FUNC_TOKEN '['            { eprint( FATAL, SET, "`%s' is a predefined"
+                                             " function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
        | expr AND expr       	   { $$ = vars_comp( COMP_AND, $1, $3 ); }
        | expr OR expr        	   { $$ = vars_comp( COMP_OR, $1, $3 ); }
@@ -496,11 +494,10 @@ int assignerror ( const char *s )
 	s = s;                                 /* avoid compiler warning */
 
 	if ( *assigntext == '\0' )
-		eprint( FATAL, "%s:%ld: Unexpected end of file in ASSIGNMENTS "
-				"section.\n", Fname, Lc );
+		eprint( FATAL, SET, "Unexpected end of file in ASSIGNMENTS "
+				"section.\n" );
 	else
-		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.\n",
-				Fname, Lc, assigntext );
+		eprint( FATAL, SET, "Syntax error near token `%s'.\n", assigntext );
 	THROW( EXCEPTION );
 }
 
@@ -538,7 +535,7 @@ void ass_func( int function )
 			break;
 
 		default :                         /* this better never happens... */
-			eprint( FATAL, "Internal error detected at %s:%d.\n",
+			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}
@@ -557,8 +554,8 @@ void set_protocol( long prot )
 {
 	if ( Cur_PROT != PHASE_UNKNOWN_PROT && Cur_PROT != prot )
 	{
-		eprint( FATAL, "%s:%ld: Mixing of Berlin and Frankfurt version "
-				"phase syntax.\n", Fname, Lc );
+		eprint( FATAL, SET, "Mixing of Berlin and Frankfurt version "
+				"phase syntax.\n" );
 		THROW( EXCEPTION );
 	}
 

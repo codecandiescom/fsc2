@@ -154,13 +154,13 @@ WS          [\n=: ]+
 
 			/* handling of error messages from the cleaner */
 {ERR}		{
-				eprint( FATAL, "%s\n", assigntext + 2 );
+				eprint( FATAL, UNSET, "%s\n", assigntext + 2 );
 				THROW( EXCEPTION );
 			}
 
 {ESTR}		{
 				assigntext = strchr( assigntext, '\x03' );
-				eprint( FATAL, "%s\n", assigntext + 2 );
+				eprint( FATAL, UNSET, "%s\n", assigntext + 2 );
 				THROW( EXCEPTION );
 			}
 
@@ -372,8 +372,8 @@ WS          [\n=: ]+
 			}
 
 {CTRL}      {
-				eprint( FATAL, "%s:%ld: Flow control structures can't be used "
-						"in the ASSIGNMENTS section.\n", Fname, Lc );
+				eprint( FATAL, SET, "Flow control structures can't be used "
+						"in the ASSIGNMENTS section.\n" );
 				THROW( EXCEPTION );
 			}
 
@@ -398,9 +398,8 @@ WS          [\n=: ]+
 
 					if ( acc == ACCESS_EXP )
 					{
-						eprint( FATAL, "%s:%ld: Function `%s' can only be "
-								"used in the EXPERIMENT section.\n",
-								 Fname, Lc, assigntext );
+						eprint( FATAL, SET, "Function `%s' can only be used "
+                                "in the EXPERIMENT section.\n", assigntext );
 						THROW( EXCEPTION );
 					}
 					return FUNC_TOKEN;
@@ -410,9 +409,8 @@ WS          [\n=: ]+
 
 				if ( ( assignlval.vptr = vars_get( assigntext ) ) == NULL )
 				{
-					eprint(	FATAL, "%s:%ld: Variable or function `%s' has not "
-								   "been declared or loaded.\n",
-								   Fname, Lc, assigntext );
+					eprint(	FATAL, SET, "Variable or function `%s' has not "
+								   "been declared or loaded.\n", assigntext );
 					 THROW( EXCEPTION );
 				}
 
@@ -448,8 +446,8 @@ WS          [\n=: ]+
 
 			/* handling of invalid input (i.e. everything else) */
 .           {
-				eprint( FATAL, "%s:%ld: Invalid input in ASSIGNMENTS section: "
-						"`%s'.\n", Fname, Lc, assigntext );
+				eprint( FATAL, SET, "Invalid input in ASSIGNMENTS section: "
+						"`%s'.\n", assigntext );
 				THROW( EXCEPTION );
 			}
 
@@ -471,8 +469,8 @@ int assignments_parser( FILE *in )
 
 	if ( compilation.sections[ ASSIGNMENTS_SECTION ] )
 	{
-		eprint( FATAL, "%s:%ld: Multiple instances of ASSIGNMENTS section "
-		        "label.\n", Fname, Lc );
+		eprint( FATAL, SET, "Multiple instances of ASSIGNMENTS section "
+		        "label.\n" );
 		THROW( EXCEPTION );
 	}
 	compilation.sections[ ASSIGNMENTS_SECTION ] = SET;

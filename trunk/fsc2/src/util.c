@@ -154,11 +154,12 @@ long get_file_length( char *name, int *len )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-void eprint( int severity, const char *fmt, ... )
+void eprint( int severity, bool print_fl, const char *fmt, ... )
 {
 	char buffer[ FL_BROWSER_LINELENGTH + 1 ];
 	char *cp = buffer;
 	int space_left = FL_BROWSER_LINELENGTH;
+	int count;
 	va_list ap;
 
 
@@ -188,6 +189,13 @@ void eprint( int severity, const char *fmt, ... )
 			space_left -= 5;
 		}
 
+		if ( print_fl && Fname )
+		{
+			count = snprintf( cp, space_left, "%s:%ld: ", Fname, Lc );
+			space_left -= count;
+			cp += count;
+		}
+
 		va_start( ap, fmt );
 		vsnprintf( cp, space_left, fmt, ap );
 		va_end( ap );
@@ -210,6 +218,9 @@ void eprint( int severity, const char *fmt, ... )
 	{
 		if ( severity != NO_ERROR )
 			fprintf( stdout, "%c ", severity[ "FSW" ] );      /* Hehe... */
+
+		if ( print_fl && Fname )
+			fprintf( stdout, "%s:%ld: ", Fname, Lc );
 
 		va_start( ap, fmt );
 		vfprintf( stdout, fmt, ap );

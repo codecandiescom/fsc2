@@ -40,7 +40,7 @@ void accept_new_data( void )
 		if ( ( buf = attach_shm( Message_Queue[ message_queue_low ].shm_id ) )
 			 == ( void * ) - 1 )
 		{
-			eprint( FATAL, "Internal communication error at %s:%d.\n",
+			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
 		}
@@ -175,8 +175,8 @@ static void unpack_and_accept( void *ptr )
 				break;
 
 			default :
-				eprint( FATAL, "Internal communication error at %s:%d.\n",
-						__FILE__, __LINE__ );
+				eprint( UNSET, FATAL, "Internal communication error at "
+						"%s:%d.\n", __FILE__, __LINE__ );
 				THROW( EXCEPTION );
 		}
 
@@ -238,7 +238,7 @@ static void other_data_request( int type, void *ptr )
 			break;
 
 		default :                             /* unknown command */
-			eprint( FATAL, "Internal communication error at %s:%d.\n",
+			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}
@@ -267,8 +267,7 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 
 	if ( curve >= G.nc )
 	{
-		eprint( FATAL, "%s:%ld: There is no curve %ld.\n", Fname, Lc,
-				curve + 1 );
+		eprint( FATAL, SET, "There is no curve %ld.\n", curve + 1 );
 		THROW( EXCEPTION );
 	}
 
@@ -299,7 +298,7 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 			break;
 
 		default :
-			eprint( FATAL, "Internal communication error at %s:%d.\n",
+			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}
@@ -480,8 +479,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 
 	if ( curve >= G.nc )
 	{
-		eprint( FATAL, "%s:%ld: There is no curve %ld.\n", Fname, Lc,
-				curve + 1 );
+		eprint( FATAL, SET, "There is no curve %ld.\n", curve + 1 );
 		THROW( EXCEPTION );
 	}
 
@@ -514,7 +512,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 			break;
 
 		default :
-			eprint( FATAL, "Internal communication error at %s:%d.\n",
+			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}
