@@ -47,12 +47,12 @@ was not written in a way that allows it to be changed to accommodate the
 new requirements, in which case the old program becomes useless and has
 to be rewritten from scratch.
 
-@acronym{fsc2} is rather different because it wasn't written with a
-certain set of experiments in mind but was developed to make it as easy
-as possible to do all kinds of experiments, possibly even ones that
-weren't even invented when it was written. Of course, this comes with a
-price: one has to specify clearly how the experiment is to be done. This
-is done by writing a usually rather small program that defines the
+@acronym{fsc2} is rather different because it wasn't developed with a
+certain set of experiments in mind but to make it as easy as possible to
+do @strong{all} kinds of experiments, possibly even ones that weren't
+even conceived when it was written. Of course, this comes with a price:
+one has to specify clearly how the experiment is to be done. This is
+done by writing a usually rather small program that defines the
 experiment. @acronym{fsc2} will interpret this program and do the
 experiment accordingly.
 
