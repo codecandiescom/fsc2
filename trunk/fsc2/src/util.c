@@ -433,7 +433,7 @@ int is_in( const char *supplied_in, const char **altern, int max )
 
 	T_free( cpy );
 
-	return ( a && count < max ) ? count : 0;
+	return ( a && count < max ) ? count : -1;
 }
 
 
