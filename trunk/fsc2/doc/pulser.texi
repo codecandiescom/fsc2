@@ -200,9 +200,10 @@ TRIGGER_MODE: EXTERNAL;
 @end example
 
 When using the internal trigger it is useful to be able to set the rate
-or the frequency with which the experiment is repeated. Thus, for
-internal triggering, for the @strong{Sony/Tektronix DG2020} an
-additional keyword can be specified, either @code{REPEAT_TIME} or
+or the frequency with which the experiment is repeated. Thus for the
+@strong{Sony/Tektronix DG2020}, the @code{Bruker EP385} and
+@strong{Interface Technology RS690} an additional keyword can be
+specified, either @code{REPEAT_TIME} or
 @code{REPEAT_FREQUENCY}@footnote{@code{REPEAT_TIME} and
 @code{REPEAT_FREQUENCY} may also be abbreviated to @code{REPT},
 @code{REP_T}, @code{REPTIME}, @code{REPEAT_TIME}, @code{REPEAT_T},
@@ -220,9 +221,14 @@ or
 TRIGGER_MODE: INTERNAL, REPEAT_FREQUENCY = 100 Hz;
 @end example
 @noindent
-to set the repetition rate of the the experiment to @w{100 Hz}. Please
-note that the repeat time must be an integer multiple of the time base of
-the pulser.
+to set the repetition rate of the the experiment to @w{100 Hz}. The
+repeat time must be an integer multiple of the time base of the pulser.
+
+When a repetition time is specified when using an external trigger
+a repetition time or frequency obviously can't be enforced. It can only
+be guaranteed that the pulse sequence is as long as the repetition time,
+thus keeping the pulser from accepting a new trigger before the end of
+the repetition time.
 
 Please note: Unfortunately, for the @strong{Tektronix HFS9000} no
 frequency or rate can be set, so an external trigger has to be used to
@@ -236,7 +242,6 @@ length of the minimum repeat time). Repetition times can be only set in
 increments of @w{102.4 us} of the shortest repeat time (or in increments
 of 12800 times the external clocks oscillation period). If necessary,
 repetition frequencies are set to the next lower allowed value.
-
 
 On the other hand, when using an external trigger one may want to set
 the trigger level, slope and, possibly, the trigger input impedance. For

@@ -224,15 +224,21 @@ bool dg2020_set_function_delay( int function, double delay )
 
 bool dg2020_set_function_high_level( int function, double voltage )
 {
-	voltage = VOLTAGE_RESOLUTION * lrnd( voltage / VOLTAGE_RESOLUTION );
+	long v;
 
-	if ( voltage < MIN_POD_HIGH_VOLTAGE || voltage > MAX_POD_HIGH_VOLTAGE )
+
+	v = lrnd( voltage / VOLTAGE_RESOLUTION );
+
+	if ( v < lrnd( MIN_POD_HIGH_VOLTAGE / VOLTAGE_RESOLUTION ) ||
+		 v > ( MAX_POD_HIGH_VOLTAGE / VOLTAGE_RESOLUTION ) )
 	{
 		print( FATAL, "Invalid high level of %g V for function '%s', valid "
 			   "range is %g V to %g V.\n", voltage, Function_Names[ function ],
 			   MIN_POD_HIGH_VOLTAGE, MAX_POD_HIGH_VOLTAGE );
 		THROW( EXCEPTION );
 	}
+
+	voltage = VOLTAGE_RESOLUTION * v;
 
 	if ( dg2020.function[ function ].is_low_level )
 		dg2020_check_pod_level_diff( voltage,
@@ -251,15 +257,21 @@ bool dg2020_set_function_high_level( int function, double voltage )
 
 bool dg2020_set_function_low_level( int function, double voltage )
 {
-	voltage = VOLTAGE_RESOLUTION * lrnd( voltage / VOLTAGE_RESOLUTION );
+	long v;
 
-	if ( voltage < MIN_POD_LOW_VOLTAGE || voltage > MAX_POD_LOW_VOLTAGE )
+
+	v = lrnd( voltage / VOLTAGE_RESOLUTION );
+
+	if ( v < lrnd( MIN_POD_LOW_VOLTAGE / VOLTAGE_RESOLUTION ) ||
+		 v > lrnd( MAX_POD_LOW_VOLTAGE / VOLTAGE_RESOLUTION ) )
 	{
 		print( FATAL, "Invalid low level of %g V for function '%s', valid "
 			   "range is %g V to %g V.\n", voltage, Function_Names[ function ],
 			   MIN_POD_LOW_VOLTAGE, MAX_POD_LOW_VOLTAGE );
 		THROW( EXCEPTION );
 	}
+
+	voltage = VOLTAGE_RESOLUTION * v;
 
 	if ( dg2020.function[ function ].is_high_level )
 		dg2020_check_pod_level_diff( dg2020.function[ function ].high_level,
