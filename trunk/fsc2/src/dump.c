@@ -24,6 +24,7 @@
 
 #include "fsc2.h"
 
+int fail_mess_fd = -1;
 
 enum {
 	DUMP_PARENT_READ = 0,
@@ -39,16 +40,17 @@ enum {
 
 
 /*-----------------------------------------------------------------------*/
-/* This function is highly hardware depended, i.e. it will only work on  */
-/* i386 type processors, so it returns immediately if the machine is not */
-/* a i386.                                                               */
+/* This function is hardware depended, i.e. it will only work on i386    */
+/* type processors, so it returns immediately without doing anything if  */
+/* the machine is not a i386.                                            */
 /* This function is called from the signal handler for 'deadly' signals, */
-/* e.g. SIGSEGV etc. It tries to figure out where this signal happend    */
-/* and creating a backtrace by running through the stackframes and       */
-/* determining from the return addresses and with the help of the GNU    */
-/* utility 'addr2line' the function name and the source file and line    */
-/* number. The result is written to the write end of a pipe that is      */
-/* (mis)used as a temporary buffer, from which the results can be read   */
+/* e.g. SIGSEGV etc. It tries to figure out where this signal happend,   */
+/* creates a backtrace by running through the stackframes and determines */
+/* from the return addresses and with the help of the GNU utility        */
+/* 'addr2line' the function name and the source file and line number     */
+/* (asuming the executable was compiled with the -g flag and wasn't      */
+/* stripped). The result is written to the write end of a pipe that is   */
+/* (mis)used as a temporary buffer, from which the results will be read  */
 /* later (the read end is a global variable named 'fail_mess_fd').       */
 /* If the macro ADDR2LINE isn't defined the function will do nothing.    */
 /* If it is defined it must be the complete path to 'addr2line'. The     */
