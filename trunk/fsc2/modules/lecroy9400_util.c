@@ -23,10 +23,11 @@
 
 #include "lecroy9400.h"
 
+#if 0
 static void lecroy9400_window_check_1( bool *is_start, bool *is_width );
 static void lecroy9400_window_check_2( void );
 static void lecroy9400_window_check_3( void );
-
+#endif
 
 
 /*-----------------------------------------------------------*/
@@ -34,7 +35,7 @@ static void lecroy9400_window_check_3( void );
 
 int lecroy9400_get_tb_index( double timebase )
 {
-	int i;
+	unsigned int i;
 
 	for ( i = 0; i < TB_ENTRIES - 1; i++ )
 		if ( timebase >= tb[ i ] && timebase <= tb[ i + 1 ] )
@@ -90,9 +91,11 @@ void lecroy9400_delete_windows( void )
 
 void lecroy9400_do_pre_exp_checks( void )
 {
+#if 0
 	WINDOW *w;
 	bool is_start, is_width;
     double width;
+#endif
 	int i;
 
 
@@ -100,24 +103,26 @@ void lecroy9400_do_pre_exp_checks( void )
 	   it to the digitizer */
 
 	if ( lecroy9400.is_trigger_channel )
-		lecroy9400_set_trigger_channel(
-			Channel_Names[ lecroy9400.trigger_channel ] );
+		lecroy9400_set_trigger_source( lecroy9400.trigger_channel );
 
 	/* Switch on all channels that are used in the measurements */
 
-	for ( i = 0; i <= LECROY9400_REF4; i++)
-		if ( lecroy9400.channels_in_use[ i ] )
-			lecroy9400_display_channel( i );
+	for ( lecroy9400.num_used_channels = 0, i = 0; i <= LECROY9400_FUNC_F; i++)
+		lecroy9400_display( i, lecroy9400.channels_in_use[ i ] );
 
 	/* Remove all unused windows and test if for all other windows the
 	   start position and width is set */
 
+#if 0
 	lecroy9400_window_check_1( &is_start, &is_width);
 
 	/* If there are no windows we're already done */
 
 	if ( lecroy9400.w == NULL )
+#endif
 		return;
+
+#if 0
 
 	/* If start position isn't set for all windows set it to the position of
 	   the left cursor */
@@ -159,9 +164,11 @@ void lecroy9400_do_pre_exp_checks( void )
 
 	lecroy9400_window_check_2( );
 	lecroy9400_window_check_3( );
+
+#endif
 }
 
-
+#if 0
 /*---------------------------------------------------------------*/
 /* Removes unused windows and checks if for all the used windows */
 /* a width is set - this is returned to the calling function     */
@@ -214,7 +221,7 @@ static void lecroy9400_window_check_1( bool *is_start, bool *is_width )
 /*---------------------------------------------------------------------*/
 
 static void lecroy9400_window_check_2( void )
-{
+
 	WINDOW *w;
     double dcs, dcd, dtb, fac;
     long tb, cs, cd;
@@ -329,6 +336,8 @@ static void lecroy9400_window_check_3( void )
 		}
     }
 }
+
+#endif
 
 
 /*-------------------------------------------------------------*/

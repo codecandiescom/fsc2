@@ -35,7 +35,6 @@
    when the digitizer can't be accessed - these values must really be
    reasonable ! */
 
-#define LECROY9400_TEST_REC_LEN      32000
 #define LECROY9400_TEST_TB_ENTRY     19        /* i.e. 100 ms */
 #define LECROY9400_TEST_SENSITIVITY  0.01
 #define LECROY9400_TEST_NUM_AVG      10
@@ -44,6 +43,9 @@
 
 
 #define MAX_CHANNELS       9         /* number of channel names */
+#define DEFAULT_REC_LEN    1250
+#define MAX_USED_CHANNELS  4
+
 
 #define LECROY9400_UNDEF   -1
 #define LECROY9400_CH1      0
@@ -90,6 +92,7 @@
 #define MAX_DESC_LEN       160
 
 
+
 /* Structure for description of a `window' on the digitizer, made up from the
    area between the pair of cursors */
 
@@ -117,11 +120,13 @@ typedef struct
 
 	bool is_displayed[ MAX_CHANNELS ];
 
+	int num_used_channels;
+
 	double timebase;
 	int tb_index;
 	bool is_timebase;
 
-	unsigned char wv_desc[ LECROY9400_FUNC_F + 1 ][ MAX_DESC_LEN ];
+	unsigned char wv_desc[ MAX_CHANNELS ][ MAX_DESC_LEN ];
 
 	double sens[ MAX_CHANNELS ];
 	double is_sens[ MAX_CHANNELS ];
@@ -150,8 +155,14 @@ typedef struct
 	double trig_pos;
 	bool is_trig_pos;
 
+	long source_ch[ MAX_CHANNELS ];
+
+	long rec_len[ MAX_CHANNELS ];
+
 	long num_avg[ MAX_CHANNELS ];
 	bool is_num_avg[ MAX_CHANNELS ];
+
+	bool is_reject[ MAX_CHANNELS ];
 
 	WINDOW *w;               /* start element of list of windows             */
 	int num_windows;
@@ -180,20 +191,16 @@ Var *digitizer_name( Var *v );
 Var *digitizer_define_window( Var *v );
 Var *digitizer_timebase( Var *v );
 Var *digitizer_sensitivity( Var *v );
+Var *digitizer_averaging( Var *v );
 Var *digitizer_num_averages( Var *v );
 Var *digitizer_record_length( Var *v );
 Var *digitizer_trigger_position( Var *v );
 Var *digitizer_meas_channel_ok( Var *v );
 Var *digitizer_trigger_channel( Var *v );
 Var *digitizer_start_acquisition( Var *v );
-Var *digitizer_get_area( Var *v );
-Var *digitizer_get_area_fast( Var *v );
 Var *digitizer_get_curve( Var *v );
 Var *digitizer_get_curve_fast( Var *v );
-Var *digitizer_get_amplitude( Var *v );
-Var *digitizer_get_amplitude_fast( Var *v );
 Var *digitizer_run( Var *v );
-Var *digitizer_lock_keyboard( Var *v );
 
 
 /* declaration of internally used functions */
@@ -221,6 +228,15 @@ bool lecroy9400_is_displayed( int channel );
 bool lecroy9400_display( int channel, int on_off );
 long lecroy9400_get_num_avg( int channel );
 bool lecroy9400_get_desc( int channel );
+double lecroy9400_get_trigger_pos( void );
+bool lecroy9400_set_trigger_pos( double position );
+void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
+								  long rec_len, bool reject );
+void lecroy9400_finished( void );
+void lecroy9400_start_acquisition( void );
+void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
+						   bool use_cursor );
+void lecroy9400_free_running( void );
 void lecroy9400_gpib_failure( void );
 
 
@@ -230,6 +246,9 @@ LECROY9400 lecroy9400;
 
 const char *Channel_Names[ 9 ] = { "CH1", "CH2", "MEM_C", "MEM_D", "FUNC_E",
 								   "FUNC_F", "LINE", "EXT", "EXT10" };
+
+double sset[ 10 ] = { 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2, 1.0e-1, 2.0e-1, 5.0e-1,
+					  1.0, 2.0, 5.0 };
 
 /* List of all timebases (in s/div) - currently only timebases that can be
    used in single shot mode are supported (i.e. neither random interleaved
@@ -247,9 +266,9 @@ double tb[ 21 ] = {                      50.0e-9,
 /* List of the corresponding sample rates, i.e. the time/point */
 
 double sr[ 21 ] = {						 10.0e-9,
-					 10.0e.9,  10.0e.9,  10.0e.9,
-					 10.0e.9,  10.0e.9,  10.0e.9,
-					 10.0e.9,  10.0e.9,  20.0e-9,
+					 10.0e-9,  10.0e-9,  10.0e-9,
+					 10.0e-9,  10.0e-9,  10.0e-9,
+					 10.0e-9,  10.0e-9,  20.0e-9,
 					 40.0e-9,  80.0e-9, 200.0e-9,
 					400.0e-9, 800.0e-9,   2.0e-6,
 					  4.0e-6,   8.0e-6,  20.0e-6,
@@ -264,8 +283,13 @@ int ppd[ 21 ] = { 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 2500,
 /* List of number of averages that can be done using the WP01 Waveform
    Processing option */
 
-static long na[ 16 ] = { 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000,
-						 20000, 50000, 100000, 200000, 500000, 1000000 };
+long na[ 16 ] = { 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000,
+				  20000, 50000, 100000, 200000, 500000, 1000000 };
+
+long cl[ 10 ] = { 50, 125, 250, 625, 1250, 2500, 6250, 12500, 25000, 32000 };
+
+bool lecroy9400_IN_SETUP = UNSET;
+
 
 #else
 
@@ -273,10 +297,14 @@ extern LECROY9400 lecroy9400;
 
 extern const char *Channel_Names[ 9 ];
 
-external double tb[ 21 ];
-external double sr[ 21 ];
-external int ppd[ 21 ];
-external int long na[ 16 ];
+extern double sset[ 10 ];
+extern double tb[ 21 ];
+extern double sr[ 21 ];
+extern int ppd[ 21 ];
+extern long na[ 16 ];
+extern long ca[ 10 ];
+
+extern bool lecroy9400_IN_SETUP;
 
 #endif
 
@@ -289,3 +317,4 @@ enum {
 
 #define TB_ENTRIES ( sizeof tb / sizeof tb[ 0 ] )
 #define NA_ENTRIES ( sizeof na / sizeof na[ 0 ] )
+#define CL_ENTRIES ( sizeof cl / sizeof cl[ 0 ] )

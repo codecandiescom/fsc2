@@ -28,7 +28,10 @@
 
 
 const char generic_type[ ] = DEVICE_TYPE;
+LECROY9400 lecroy9400_store;
 
+
+static Var *get_curve( Var *v, bool use_cursor );
 
 
 
@@ -52,22 +55,31 @@ int lecroy9400_init_hook( void )
 	/* Initialize some variables in the digitizers structure */
 
 	lecroy9400.is_reacting = UNSET;
+	lecroy9400.num_used_channels = 0;
+
 	lecroy9400.w           = NULL;
 	lecroy9400.is_timebase = UNSET;
-	lecroy9400.is_num_avg  = UNSET;
-	lecroy9400.is_rec_len  = UNSET;
 	lecroy9400.is_trig_pos = UNSET;
 	lecroy9400.num_windows = 0;
 	lecroy9400.data_source = LECROY9400_UNDEF;
 	lecroy9400.meas_source = LECROY9400_UNDEF;
 	lecroy9400.lock_state  = SET;
 
+	for ( i = LECROY9400_CH1; i <= LECROY9400_FUNC_F; i++ )
+		lecroy9400.channels_in_use[ i ] = UNSET;
 	for ( i = LECROY9400_CH1; i <= LECROY9400_CH2; i++ )
 		lecroy9400.is_sens[ i ] = UNSET;
 	for ( i = LECROY9400_MEM_C; i <= LECROY9400_FUNC_F; i++ )
 	{
 		lecroy9400.is_sens[ i ] = SET;
 		lecroy9400.sens[ i ] = 1.0;
+	}
+	for ( i = LECROY9400_FUNC_E; i <= LECROY9400_FUNC_F; i++ )
+	{
+		lecroy9400.source_ch[ i ]  = LECROY9400_CH1 + i - LECROY9400_FUNC_E;
+		lecroy9400.is_num_avg[ i ] = UNSET;
+		lecroy9400.rec_len[ i ]    = DEFAULT_REC_LEN;
+		lecroy9400.is_reject[ i ]  = UNSET;
 	}
 
 	return 1;
@@ -86,15 +98,11 @@ int lecroy9400_exp_hook( void )
 	/* Store the state the digitizer was set to in the preparations section -
 	   we need this when starting the same experiment again... */
 
+	lecroy9400_store.num_used_channels = lecroy9400.num_used_channels;
+
 	lecroy9400_store.is_timebase = lecroy9400.is_timebase;
 	lecroy9400_store.tb_index    = lecroy9400.tb_index;
 	lecroy9400_store.timebase    = lecroy9400.is_timebase;
-
-	lecroy9400_store.is_num_avg  = lecroy9400.is_num_avg;
-	lecroy9400_store.num_avg     = lecroy9400.num_avg;
-
-	lecroy9400_store.is_rec_len  = lecroy9400.is_rec_len;
-	lecroy9400_store.rec_len     = lecroy9400.rec_len;
 
 	lecroy9400_store.is_trig_pos = lecroy9400.is_trig_pos;
 	lecroy9400_store.trig_pos    = lecroy9400.trig_pos;
@@ -102,18 +110,33 @@ int lecroy9400_exp_hook( void )
 	lecroy9400_store.data_source = lecroy9400.data_source;
 	lecroy9400_store.meas_source = lecroy9400.meas_source;
 
+	for ( i = LECROY9400_CH1; i <= LECROY9400_FUNC_F; i++ )
+		lecroy9400_store.channels_in_use[ i ] =
+			lecroy9400.channels_in_use[ i ];
+
 	for ( i = LECROY9400_CH1; i <= LECROY9400_CH2; i++ )
 	{
 		lecroy9400_store.is_sens[ i ] = lecroy9400.is_sens[ i ];
 		lecroy9400_store.sens[ i ]    = lecroy9400.sens[ i ];
 	}
 
+	for ( i = LECROY9400_FUNC_E; i <= LECROY9400_FUNC_F; i++ )
+	{
+		lecroy9400_store.is_num_avg[ i ] = lecroy9400.is_num_avg[ i ];
+		lecroy9400_store.num_avg[ i ]    = lecroy9400.num_avg[ i ];
+		lecroy9400_store.source_ch[ i ]  = lecroy9400.source_ch[ i ];
+		lecroy9400_store.rec_len[ i ]    = lecroy9400.rec_len[ i ];
+		lecroy9400_store.is_reject[ i ]  = lecroy9400.is_reject[ i ];
+	}
+
+	lecroy9400_IN_SETUP = SET;
 	if ( ! lecroy9400_init( DEVICE_NAME ) )
 	{
 		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
 				DEVICE_NAME, gpib_error_msg );
 		THROW( EXCEPTION )
 	}
+	lecroy9400_IN_SETUP = UNSET;
 
 	lecroy9400_do_pre_exp_checks( );
 
@@ -137,14 +160,10 @@ int lecroy9400_end_of_exp_hook( void )
 
 	lecroy9400.is_reacting      = UNSET;
 
+	lecroy9400.num_used_channels = lecroy9400_store.num_used_channels;
+
 	lecroy9400.is_timebase      = lecroy9400_store.is_timebase;
 	lecroy9400.timebase         = lecroy9400_store.timebase;
-
-	lecroy9400_store.is_num_avg = lecroy9400.is_num_avg;
-	lecroy9400.num_avg          = lecroy9400_store.num_avg;
-
-	lecroy9400.is_rec_len       = lecroy9400_store.is_rec_len;
-	lecroy9400.rec_len          = lecroy9400_store.rec_len;
 
 	lecroy9400.is_trig_pos      = lecroy9400_store.is_trig_pos;
 	lecroy9400.trig_pos         = lecroy9400_store.trig_pos;
@@ -154,10 +173,23 @@ int lecroy9400_end_of_exp_hook( void )
 
 	lecroy9400.lock_state       = lecroy9400_store.lock_state;
 
+	for ( i = LECROY9400_CH1; i <= LECROY9400_FUNC_F; i++ )
+		lecroy9400.channels_in_use[ i ] =
+			lecroy9400_store.channels_in_use[ i ];
+
 	for ( i = LECROY9400_CH1; i <= LECROY9400_CH2; i++ )
 	{
 		lecroy9400.is_sens[ i ] = lecroy9400_store.is_sens[ i ];
 		lecroy9400.sens[ i ]    = lecroy9400_store.sens[ i ];
+	}
+
+	for ( i = LECROY9400_FUNC_E; i <= LECROY9400_FUNC_F; i++ )
+	{
+		lecroy9400.is_num_avg[ i ] = lecroy9400_store.is_num_avg[ i ];
+		lecroy9400.num_avg[ i ]    = lecroy9400_store.num_avg[ i ];
+		lecroy9400.source_ch[ i ]  = lecroy9400_store.source_ch[ i ];
+		lecroy9400.rec_len[ i ]    = lecroy9400_store.rec_len[ i ];
+		lecroy9400.is_reject[ i ]  = lecroy9400_store.is_reject[ i ];
 	}
 
 	return 1;
@@ -171,7 +203,9 @@ int lecroy9400_end_of_exp_hook( void )
 
 void lecroy9400_exit_hook( void )
 {
+#if 0
 	lecroy9400_delete_windows( );
+#endif
 }
 
 
@@ -189,6 +223,7 @@ Var *digitizer_name( Var *v )
 /*------------------------------------------*/
 /*------------------------------------------*/
 
+#if 0
 Var *digitizer_define_window( Var *v )
 {
 	double win_start = 0,
@@ -275,6 +310,7 @@ Var *digitizer_define_window( Var *v )
 
 	return vars_push( INT_VAR, w->num );
 }
+#endif
 
 
 /*-----------------------------------------------------------------*/
@@ -284,7 +320,7 @@ Var *digitizer_timebase( Var *v )
 {
 	double timebase;
 	int TB = -1;
-	int i;
+	unsigned int i;
 	char *t;
 	
 
@@ -295,7 +331,7 @@ Var *digitizer_timebase( Var *v )
 			if ( lecroy9400.is_timebase )
 				return vars_push( FLOAT_VAR, lecroy9400.timebase );
 			else
-				return vars_push( FLOAT_VAR, LECROY9400_TEST_TIME_BASE );
+				return vars_push( FLOAT_VAR, tb[ LECROY9400_TEST_TB_ENTRY ] );
 		}
 		else if ( I_am == PARENT )
 		{
@@ -395,6 +431,8 @@ Var *digitizer_sensitivity( Var *v )
 {
 	long channel;
 	double sens;
+	int coupl;
+
 	
 
 	if ( v == NULL )
@@ -451,7 +489,7 @@ Var *digitizer_sensitivity( Var *v )
 			;
 	}
 
-	/* Check that the sensitivity setting is'nt out of range */
+	/* Check that the sensitivity setting isn't out of range */
 
 	if ( sens < LECROY9400_MAX_SENS )
 	{
@@ -506,65 +544,76 @@ Var *digitizer_sensitivity( Var *v )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-Var *digitizer_num_averages( Var *v )
+Var *digitizer_averaging( Var *v )
 {
-	long num_avg;
 	long channel;
-	long src_channel;
-	
+	long source_ch;
+	long num_avg;
+	long rec_len;
+	bool reject;
+	unsigned int i;
+
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "%s: Insufficient number of arguments in call of "
+		eprint( FATAL, SET, "%s: Missing arguments in call of function "
 				"%s().\n", DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION )
 	}
 
-	/* If there's no second argument this is a query and the argument is
-	   a channel number. Otherwise the first number is the number of averages,
-	   the second the channel number. */
+	/* Get the channel to use for averaging */
 
-	if ( v->next == NULL )
-		vars_check( INT_VAR, v->next == NULL ? v : v->next );
+	vars_check( v, INT_VAR );
 
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-						   v->next == NULL ? v->val.lval : v->next->val.lval );
+											v->val.lval );
 
 	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
 	{
-		eprint( FATAL, SET, "%s: Averaging can only be done with channel %s "
+		eprint( FATAL, SET, "%s: Averaging can only be done using channels %s "
 				"and %s.\n", DEVICE_NAME, Channel_Names[ LECROY9400_FUNC_E ],
 				Channel_Names[ LECROY9400_FUNC_F ] );
 		THROW( EXCEPTION )
 	}
 
-	if ( v->next == NULL )                    /* Query form of call */
+	v = vars_pop( v );
+
+	/* Get the source channel */
+
+	if ( v == NULL )
 	{
-		if ( TEST_RUN )
-		{
-			if ( lecroy9400.is_num_avg[ channel ] )
-				return vars_push( INT_VAR, lecroy9400.num_avg[ channel ] );
-			else
-				return vars_push( INT_VAR, LECROY9400_TEST_NUM_AVG );
-		}
-		else if ( I_am == PARENT )
-		{
-			if ( lecroy9400.is_num_avg[ channel ] )
-				return vars_push( INT_VAR, lecroy9400.num_avg[ channel ] );
+		eprint( FATAL, SET, "%s: Missing source channel argument in call of "
+				"function %s().\n", DEVICE_NAME, Cur_Func );
+		THROW( EXCEPTION )
+	}
 
-			eprint( FATAL, SET, "%s: Function %s() with no argument can "
-					"only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
+	vars_check( v, INT_VAR );
 
-		lecroy9400.num_avg[ channel ] = lecroy9400_get_num_avg( channel );
-		if ( lecroy9400.num_avg[ channel ] != -1 )
-			lecroy9400.is_num_avg[ channel ] = SET;
-		return vars_push( INT_VAR, lecroy9400.num_avg[ channel ] );
+	source_ch = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
+											  v->val.lval );
+
+	if ( source_ch != LECROY9400_CH1 && source_ch != LECROY9400_CH2 )
+	{
+		eprint( FATAL, SET, "%s: Averaging can only be done using channels "
+				"%s and %s as source channels.\n", DEVICE_NAME,
+				Channel_Names[ LECROY9400_CH1 ],
+				Channel_Names[ LECROY9400_CH2 ] );
+		THROW( EXCEPTION )
+	}
+	
+	v = vars_pop( v );
+
+	/* Get the number of averages to use */
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, SET, "%s: Missing number of averages in call of "
+				"function %s().\n", DEVICE_NAME, Cur_Func );
+		THROW( EXCEPTION )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
+
 	if ( v->type == INT_VAR )
 		num_avg = v->val.lval;
 	else
@@ -573,60 +622,185 @@ Var *digitizer_num_averages( Var *v )
 				"of averages in %s().\n", DEVICE_NAME, Cur_Func );
 		num_avg = lrnd( v->val.dval );
 	}
-	v = vars_pop( vars_pop( v ) );
 
-	if ( num_avg == 0 )
+	if ( num_avg <= 0 )
 	{
-		eprint( FATAL, SET, "%s: Can't do zero averages. If you want "
-				"single acqusitions specify 1 as number of averages.\n",
-				DEVICE_NAME );
-		THROW( EXCEPTION )
-	}
-	else if ( num_avg < 0 )
-	{
-		eprint( FATAL, SET, "%s: Negative number of averages (%ld) in "
-				"%s().\n", DEVICE_NAME, num_avg, Cur_Func );
+		eprint( FATAL, SET, "%s: Zero or negative number of averages (%ld) "
+				"in function %s().\n", DEVICE_NAME, num_avg, Cur_Func );
 		THROW( EXCEPTION )
 	}
 
-	/* Third argument must be the channel to be averaged, either CH1 or CH2 */
+	i = 0;
+	while ( 1 )
+	{
+		if ( i >= ( int ) NA_ENTRIES )
+		{
+			eprint( FATAL, SET, "%s: Number of averages (%ld) too long in "
+					"%s().\n", DEVICE_NAME, num_avg, Cur_Func );
+			THROW( EXCEPTION )
+		}
+
+		if ( num_avg == na[ i ] )
+			break;
+
+		if ( num_avg < na[ i ] )
+		{
+			eprint( SEVERE, SET, "%s: Can't set number of averages to %ld, "
+					"using next larger allowed value of %ld instead.\n",
+					DEVICE_NAME, num_avg, na[ i ] );
+			num_avg = na[ i ];
+			break;
+		}
+
+		i++;
+	}
+
+	v = vars_pop( v );
+
+	/* If there is a further argument this has to be the record length */
+
+	rec_len = lecroy9400.rec_len[ channel ];
+	reject = lecroy9400.is_reject[ channel ];
+
+	if ( v != NULL )
+	{
+		vars_check( v, INT_VAR );
+
+		rec_len = v->val.lval;
+
+		if ( rec_len <= 0 )
+		{
+			eprint( FATAL, SET, "%s: Invalid zero or negative record length "
+					"in function %s().\n", DEVICE_NAME, Cur_Func );
+			THROW( EXCEPTION )
+		}
+
+		i = 0;
+		while ( 1 )
+		{
+			if ( i >= ( int ) NA_ENTRIES )
+			{
+				eprint( FATAL, SET, "%s: Record length %ld too long in "
+						"%s().\n", DEVICE_NAME, rec_len, Cur_Func );
+				THROW( EXCEPTION )
+			}
+
+			if ( rec_len == cl[ i ] )
+				break;
+
+			if ( rec_len < cl[ i ] )
+			{
+				eprint( SEVERE, SET, "%s: Can't set record length to %ld, "
+						"using next larger allowed value of %ld instead.\n",
+						DEVICE_NAME, rec_len, cl[ i ] );
+				rec_len = cl[ i ];
+				break;
+			}
+
+			i++;
+		}
+
+		v = vars_pop( v );
+
+		/* Finally, there can be a boolean argument for setting rejection */
+
+		if ( v != NULL )
+		{
+			vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+
+			if ( v->type == INT_VAR )
+				reject = v->val.lval != 0;
+			else if ( v->type == FLOAT_VAR )
+				reject = v->val.dval != 0.0;
+			else
+			{
+				if ( ! strcasecmp( v->val.sptr, "OFF" ) )
+					reject = UNSET;
+				else if ( ! strcasecmp( v->val.sptr, "ON" ) )
+					reject = SET;
+				else
+				{
+					eprint( FATAL, SET, "%s: Invalid argument in call of "
+							"function %s().\n", DEVICE_NAME, Cur_Func );
+					THROW( EXCEPTION )
+				}
+			}
+
+			v = vars_pop( v );
+		}
+
+		if ( v != NULL )
+		{
+			eprint( WARN, SET, "%s: Superfluous parameter%s in call of "
+					"function %s().\n",
+					DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+			while ( ( v = vars_pop( v ) ) != NULL )
+				;
+		}
+	}
+
+	lecroy9400_set_up_averaging( channel, source_ch, num_avg, rec_len,
+								 reject );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+Var *digitizer_num_averages( Var *v )
+{
+	long channel;
+	
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "%s: Channel to be averaged is missing in call of "
-				"%s().\n", DEVICE_NAME, Cur_Func );
+		eprint( FATAL, SET, "%s: Missing argument in call of %s().\n",
+				DEVICE_NAME, Cur_Func );
+		THROW( EXCEPTION )
+	}
+
+	if ( v->next != NULL )
+	{
+		eprint( FATAL, SET, "%s: Function %s() can only be used for queries"
+				".\n", DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION )
 	}
 
 	vars_check( v, INT_VAR );
-	src_channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-												v->val.lval );
+	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
+											v->val.lval );
 
-	if ( src_channel != LECROY9400_CH1 && src_channel != LECROY9400_CH2 )
+	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
 	{
-		eprint( FATAL, SET, "%s: Invalid source channel for averaging in "
-				"%s(), only %s and %s can be used.\n", DEVICE_NAME, Cur_Func,
-				Channel_Names[ LECROY9400_CH1 ],
-				Channel_Names[ LECROY9400_CH2 ] );
+		eprint( FATAL, SET, "%s: Averaging can only be done using channels %s "
+				"and %s.\n", DEVICE_NAME, Channel_Names[ LECROY9400_FUNC_E ],
+				Channel_Names[ LECROY9400_FUNC_F ] );
 		THROW( EXCEPTION )
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
+	if ( TEST_RUN )
 	{
-		eprint( WARN, SET, "%s: Superfluous parameter%s in call of %s().\n",
-				DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
+		if ( lecroy9400.is_num_avg[ channel ] )
+			return vars_push( INT_VAR, lecroy9400.num_avg[ channel ] );
+		else
+			return vars_push( INT_VAR, LECROY9400_TEST_NUM_AVG );
+	}
+	else if ( I_am == PARENT )
+	{
+		if ( lecroy9400.is_num_avg[ channel ] )
+			return vars_push( INT_VAR, lecroy9400.num_avg[ channel ] );
+
+		eprint( FATAL, SET, "%s: Function %s() can only be used in the "
+				"EXPERIMENT section.\n", DEVICE_NAME, Cur_Func );
+		THROW( EXCEPTION )
 	}
 
-	lecroy9400.num_avg[ channel ] = num_avg;
-	lecroy9400.avg_src[ channel ] = src_channel;
-	if ( I_am == CHILD )
-		lecroy9400_set_num_avg( num_avg );
-	if ( ! TEST_RUN )                 // store value if in PREPARATIONS section
-		lecroy9400.is_num_avg = SET;
-
-	return vars_push( INT_VAR, lecroy9400.num_avg );
+	lecroy9400.num_avg[ channel ] = lecroy9400_get_num_avg( channel );
+	if ( lecroy9400.num_avg[ channel ] != -1 )
+		lecroy9400.is_num_avg[ channel ] = SET;
+	return vars_push( INT_VAR, lecroy9400.num_avg[ channel ] );
 }
 
 
@@ -638,18 +812,36 @@ Var *digitizer_num_averages( Var *v )
 
 Var *digitizer_record_length( Var *v )
 {
-	long rec_len;
-	int i;
+	long channel;
 
 
 	if ( v == NULL )
-		return vars_push( INT_VAR, 32000 );
+	{
+		eprint( FATAL, SET, "%s: Missing argument in call of %s().\n",
+				DEVICE_NAME, Cur_Func );
+		THROW( EXCEPTION )
+	}
 
-	eprint( FATAL, SET, "%s: Digitizer does not allow to set record "
-			"lengths.\n", DECVICE_NAME );
-	THROW( EXCEPTION )
+	if ( v->next != NULL )
+	{
+		eprint( FATAL, SET, "%s: Function %s() can only be used for queries"
+				".\n", DEVICE_NAME, Cur_Func );
+		THROW( EXCEPTION )
+	}
 
-	return NULL;
+	vars_check( v, INT_VAR );
+	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
+											v->val.lval );
+
+	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
+	{
+		eprint( FATAL, SET, "%s: Averaging can only be done using channels %s "
+				"and %s.\n", DEVICE_NAME, Channel_Names[ LECROY9400_FUNC_E ],
+				Channel_Names[ LECROY9400_FUNC_F ] );
+		THROW( EXCEPTION )
+	}
+
+	return vars_push( INT_VAR, lecroy9400.rec_len[ channel ] );
 }
 
 
@@ -684,10 +876,7 @@ Var *digitizer_trigger_position( Var *v )
 			THROW( EXCEPTION )
 		}
 
-		if ( ! lecroy9400_get_trigger_pos( &trig_pos ) )
-			lecroy9400_gpib_failure( );
-
-		lecroy9400.trig_pos = trig_pos;
+		lecroy9400.trig_pos = lecroy9400_get_trigger_pos( );
 		lecroy9400.is_trig_pos = SET;
 		return vars_push( FLOAT_VAR, lecroy9400.trig_pos );
 	}
@@ -751,7 +940,7 @@ Var *digitizer_trigger_channel( Var *v )
 		{
 			if ( lecroy9400.is_trigger_channel )
 				return vars_push( INT_VAR, lecroy9400_translate_channel(
-					       LECROY9400_TO_GENERAL, lecroy9400.trigger_channel );
+					     LECROY9400_TO_GENERAL, lecroy9400.trigger_channel ) );
 			else
 				return vars_push( INT_VAR, lecroy9400_translate_channel(
 					   LECROY9400_TO_GENERAL, LECROY9400_TEST_TRIG_CHANNEL ) );
@@ -769,7 +958,7 @@ Var *digitizer_trigger_channel( Var *v )
 		}
 
 		return vars_push( INT_VAR, lecroy9400_translate_channel(
-				  LECROY9400_TO_GENERAL, lecroy9400_get_trigger_channel( ) ) );
+				  LECROY9400_TO_GENERAL, lecroy9400_get_trigger_source( ) ) );
 	}
 
 	vars_check( v, INT_VAR );
@@ -790,7 +979,7 @@ Var *digitizer_trigger_channel( Var *v )
 		case LECROY9400_EXT : case LECROY9400_EXT10 :
 			lecroy9400.trigger_channel = channel;
 			if ( I_am == CHILD )
-				lecroy9400_set_trigger_channel( Channel_Names[ channel ] );
+				lecroy9400_set_trigger_source( channel );
 			if ( ! TEST_RUN )
 				lecroy9400.is_trigger_channel = SET;
             break;
@@ -814,111 +1003,8 @@ Var *digitizer_start_acquisition( Var *v )
 	v = v;
 
 	if ( ! TEST_RUN )
-		lecroy9400_start_aquisition( );
+		lecroy9400_start_acquisition( );
 	return vars_push( INT_VAR, 1 );
-}
-
-
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
-
-
-Var *digitizer_get_area( Var *v )
-{
-	return get_area( v, lecroy9400.w != NULL ? SET : UNSET );
-}
-
-
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
-
-Var *digitizer_get_area_fast( Var *v )
-{
-	return get_area( v, UNSET );
-}
-
-
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
-
-static Var *get_area( Var *v, bool use_cursor )
-{
-	WINDOW *w;
-	int ch;
-
-
-	/* The first variable got to be a channel number */
-
-	if ( v == NULL )
-	{
-		eprint( FATAL, SET, "%s: Missing arguments in call of "
-				"function $s().\n", DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
-	}
-
-	vars_check( v, INT_VAR );
-	ch = ( int ) lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-											   v->val.lval );
-	v = vars_pop( v );
-
-	if ( ch > LECROY9400_REF4 )
-	{
-		eprint( FATAL, SET, "%s: Invalid channel specification in %s().\n",
-				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
-	}
-
-	lecroy9400.channels_in_use[ ch ] = SET;
-
-	/* Now check if there's a variable with a window number and check it */
-
-	if ( v != NULL )
-	{
-		vars_check( v, INT_VAR );
-
-		if ( ( w = lecroy9400.w ) == NULL )
-		{
-			eprint( FATAL, SET, "%s: No measurement windows have been "
-					"defined for %s().\n", DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
-
-		while ( w != NULL )
-		{
-			if ( w->num == v->val.lval )
-			{
-				w->is_used = SET;
-				v = vars_pop( v );
-				break;
-			}
-			w = w->next;
-		}
-
-		if ( w == NULL )
-		{
-			eprint( FATAL, SET, "%s: Measurement window has not been "
-					"defined for %s().\n", DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
-	}
-	else
-		w = NULL;
-
-	if ( v != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous arguments in call of "
-				"%s().\n", DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
-
-	/* Talk to digitizer only in the real experiment, otherwise return a dummy
-	   value */
-
-	if ( I_am == CHILD )
-		return vars_push( FLOAT_VAR, lecroy9400_get_area( ch, w, use_cursor ) );
-
-	return vars_push( FLOAT_VAR, 1.234e-8 );
 }
 
 
@@ -966,7 +1052,9 @@ static Var *get_curve( Var *v, bool use_cursor )
 											   v->val.lval );
 	v = vars_pop( v );
 
-	if ( ch > LECROY9400_REF4 )
+	if ( ch < LECROY9400_CH1 ||
+		 ( ch > LECROY9400_CH2 && ch < LECROY9400_FUNC_E ) ||
+		 ch > LECROY9400_FUNC_F )
 	{
 		eprint( FATAL, SET, "%s: Invalid channel specification in %s().\n",
 				DEVICE_NAME, Cur_Func );
@@ -975,6 +1063,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 	lecroy9400.channels_in_use[ ch ] = SET;
 
+#if 0
 	/* Now check if there's a variable with a window number and check it */
 
 	if ( v != NULL )
@@ -1006,6 +1095,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 		}
 	}
 	else
+#endif
 		w = NULL;
 
 	if ( v != NULL )
@@ -1027,123 +1117,13 @@ static Var *get_curve( Var *v, bool use_cursor )
 		return nv;
 	}
 
-	if ( lecroy9400.is_rec_len  )
-		length = lecroy9400.rec_len;
-	else
-		length = LECROY9400_TEST_REC_LEN;
+	length = lecroy9400.rec_len[ ch ];
 	array = T_malloc( length * sizeof( double ) );
 	for ( i = 0; i < length; i++ )
 		array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
 	nv = vars_push( FLOAT_ARR, array, length );
 	nv->flags |= IS_DYNAMIC;
 	T_free( array );
-	return nv;
-}
-
-
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
-
-Var *digitizer_get_amplitude( Var *v )
-{
-	return get_amplitude( v, SET );
-}
-
-
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
-
-Var *digitizer_get_amplitude_fast( Var *v )
-{
-	return get_amplitude( v, UNSET );
-}
-
-
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
-
-static Var *get_amplitude( Var *v, bool use_cursor )
-{
-	WINDOW *w;
-	int ch;
-	Var *nv;
-
-
-	/* The first variable got to be a channel number */
-
-	if ( v == NULL )
-	{
-		eprint( FATAL, SET, "%s: Missing arguments in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
-	}
-
-	vars_check( v, INT_VAR );
-	ch = ( int ) lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-											   v->val.lval );
-	v = vars_pop( v );
-
-	if ( ch > LECROY9400_REF4 )
-	{
-		eprint( FATAL, SET, "%s: Invalid channel specification in %s().\n",
-				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
-	}
-
-	lecroy9400.channels_in_use[ ch ] = SET;
-
-	/* Now check if there's a variable with a window number and check it */
-
-	if ( v != NULL )
-	{
-		vars_check( v, INT_VAR );
-		if ( ( w = lecroy9400.w ) == NULL )
-		{
-			eprint( FATAL, SET, "%s: No measurement windows have been "
-					"defined for %s().\n", DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
-
-		while ( w != NULL )
-		{
-			if ( w->num == v->val.lval )
-			{
-				w->is_used = SET;
-				v = vars_pop( v );
-				break;
-			}
-			w = w->next;
-		}
-
-		if ( w == NULL )
-		{
-			eprint( FATAL, SET, "%s: Measurement window has not been "
-					"defined for %s().\n", DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
-	}
-	else
-		w = NULL;
-
-	if ( v != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous arguments in call of "
-				"function %s().\n", DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
-
-	/* Talk to digitizer only in the real experiment, otherwise return a dummy
-	   array */
-
-	if ( I_am == CHILD )
-	{
-		nv = vars_push( FLOAT_VAR, lecroy9400_get_amplitude( ch, w,
-															 use_cursor ) );
-		return nv;
-	}
-
-	nv = vars_push( FLOAT_VAR, 1.23e-7 );
 	return nv;
 }
 

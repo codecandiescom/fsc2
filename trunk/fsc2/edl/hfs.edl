@@ -1,6 +1,6 @@
 DEVICES:
 
-hfs9003;    // pulser
+hfs9000;    // pulser
 tds540;     // digitizer
 
 
@@ -38,7 +38,7 @@ P1: FUNC   = MW,
 P2: FUNC   = MW,
 	START  = 380 ns,
 	LENGTH = 20 ns,
-	DSTART = -20 ns,
+	DSTART = 20 ns,
 ;//	DLEN   = 10 ns;
 
 P21: FUNC  = MW;

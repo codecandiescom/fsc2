@@ -1,0 +1,54 @@
+DEVICES:
+
+lecroy9400;
+er032m;
+
+
+VARIABLES:
+
+start_field = 3495 G;
+end_field = 3515 G;
+field_step = 0.5 G;
+
+
+field = start_field;
+
+data[ * ];
+I = 1;
+J;
+F1, F2;
+
+
+PREPARATIONS:
+
+init_2d( 1, 0, 0, 0, 0, start_field, field_step, "Time axis", "Field [G]" );
+
+magnet_setup( start_field, field_step );
+digitizer_averaging( FUNC_E, CH1, 50 );
+
+
+EXPERIMENT:
+
+F1 = get_file( "Enter data file name:", "*.dat", "", "", "dat" );
+F2 = clone_file( F1, "dat", "par" );
+
+save_comment( F2 );
+fsave( F2, "Start field = # G\n", start_field );
+fsave( F2, "End field   = # G\n", end_field );
+fsave( F2, "Field step  = # G\n", field_step );
+fsave( F2, "Time scale  = # us\n", digitizer_timebase( ) * 1.0e6 );
+save_program( F2 );
+
+
+WHILE field <= end_field {
+	digitizer_start_acquisition( );
+	data = digitizer_get_curve( FUNC_E );
+	FOR J = 1 : size( data, 1 ) {
+		fsave( F1, "# ", data[ J ] );
+	}
+	fsave( F1, "\n" );
+	display( 1, I, data );
+	field = sweep_up( );
+	I +=1;
+
+}

@@ -22,6 +22,6 @@ P0: FUNC        = MW,
 EXPERIMENT:
 
 	pulser_update( );
-	pulser_shift;
+	pulser_shift( );
 	pulser_update( );
-	pulser_reset( );
+	pulser_pulse_reset( );

@@ -171,48 +171,64 @@ INSTALL_MACHINE   := install-unknown
 UNINSTALL_MACHINE := uninstall-unknown
 
 ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
+	OWNER              := fsc2
+	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),moebi.physik.fu-berlin.de)
+	OWNER              := fsc2
+	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),crowley.physik.fu-berlin.de)
+	OWNER              := fsc2
+	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),door.physik.fu-berlin.de)
+	OWNER              := fsc2
+	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),isaak.physik.fu-berlin.de)
+	OWNER              := fsc2
+	GROUP              := uucp
 	GPIB_LIBRARY       := JTT
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),sunone.chemie.unibas.ch)
-	 GPIB_LIBRARY       := NI
-	 INSTALL_MACHINE    := install-$(machine_name)
-	 UNINSTALL_MACHINE  := uninstall-$(machine_name)
+	OWNER              := exp
+	GROUP              := exp
+	GPIB_LIBRARY       := NI
+	INSTALL_MACHINE    := install-$(machine_name)
+	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),tresr.physik.fu-berlin.de)
+	OWNER              := fsc2
+	GROUP              := uucp
 	 GPIB_LIBRARY       := LLP
 	 INSTALL_MACHINE    := install-$(machine_name)
 	 UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
 ifeq ($(machine_name),crowley.none)
+	OWNER              := fsc2
+	GROUP              := uucp
 	 GPIB_LIBRARY       := JTT
 	 INSTALL_MACHINE    := install-$(machine_name)
 	 UNINSTALL_MACHINE  := uninstall-$(machine_name)

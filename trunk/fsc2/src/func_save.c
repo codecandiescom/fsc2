@@ -559,7 +559,7 @@ Var *f_save( Var *v )
 				break;
 
 			case ARR_REF :
-				if ( v->from->flags && NEED_ALLOC )
+				if ( v->from->flags & NEED_ALLOC )
 				{
 					eprint( WARN, SET, "Variable sized array `%s' is still "
 							"undefined in %s() - skipping'.\n",

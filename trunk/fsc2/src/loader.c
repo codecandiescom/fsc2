@@ -167,13 +167,18 @@ static void load_functions( Device *dev )
 	   path. The last possibility is that the device name already contains a
 	   absolute path, probably because it's set via a link. */
 
+	dlerror( );               /* make sure it's NULL before we continue */
 	dev->driver.handle = dlopen( lib_name, RTLD_NOW );
 
 	if ( dev->driver.handle == NULL )
+	{
+		dlerror( );           /* make sure it's NULL before we continue */
 		dev->driver.handle = dlopen( strip_path( lib_name ), RTLD_NOW );
+	}
 
 	if ( dev->driver.handle == NULL )
 	{
+		dlerror( );           /* make sure it's NULL before we continue */
 		strcpy( lib_name, dev->name );
 		strcat( lib_name, ".so" );
 		dev->driver.handle = dlopen( lib_name, RTLD_NOW );

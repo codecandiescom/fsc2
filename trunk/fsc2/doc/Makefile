@@ -30,10 +30,10 @@ pdf_pics := $(patsubst %.png,%.pdf,$(figures))
 
 all:
 	$(MAKE) man
-	$(MAKE) info
 	$(MAKE) html
 	$(MAKE) ps
 	$(MAKE) pdf
+	$(MAKE) info
 
 
 man: fsc2.1.gz
