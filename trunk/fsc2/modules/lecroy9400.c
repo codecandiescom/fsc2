@@ -115,8 +115,8 @@ int lecroy9400_exp_hook( void )
 	lecroy9400_IN_SETUP = SET;
 	if ( ! lecroy9400_init( DEVICE_NAME ) )
 	{
-		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
-				DEVICE_NAME, gpib_error_msg );
+		print( FATAL, "Initialization of device failed: %s\n",
+			   gpib_error_msg );
 		THROW( EXCEPTION );
 	}
 	lecroy9400_IN_SETUP = UNSET;
@@ -178,8 +178,8 @@ Var *digitizer_define_window( Var *v )
 
 	if ( lecroy9400.num_windows >= MAX_NUM_OF_WINDOWS )
 	{
-		eprint( FATAL, SET, "%s: Maximum number of digitizer windows (%ld) "
-				"exceeded.\n", DEVICE_NAME, MAX_NUM_OF_WINDOWS );
+		print( FATAL, "Maximum number of digitizer windows (%ld) exceeded.\n",
+			   MAX_NUM_OF_WINDOWS );
 		THROW( EXCEPTION );
 	}
 
@@ -201,8 +201,7 @@ Var *digitizer_define_window( Var *v )
 			if ( ( FSC2_MODE == TEST && win_width < 0.0 ) ||
 				 ( FSC2_MODE != TEST && win_width <= 0.0 ) )
 			{
-				eprint( FATAL, SET, "%s: Zero or negative width for "
-						"window in %s.\n", DEVICE_NAME, Cur_Func );
+				print( FATAL, "Zero or negative window width.\n" );
 				THROW( EXCEPTION );
 			}
 			is_win_width = SET;
@@ -278,15 +277,14 @@ Var *digitizer_timebase( Var *v )
 
 	if ( FSC2_MODE != PREPARATION )
 	{
-		eprint( FATAL, SET, "%s: Digitizer time base can only be set before "
-				"the EXPERIMENT section starts.\n", DEVICE_NAME );
+		print( FATAL, "Digitizer time base can only be set in the "
+			   "PREPARATION section.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( lecroy9400.is_timebase )
 	{
-		eprint( FATAL, SET, "%s: Digitizer time base has already been "
-				"set.\n", DEVICE_NAME );
+		print( FATAL, "Digitizer time base has already been set.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -294,8 +292,8 @@ Var *digitizer_timebase( Var *v )
 
 	if ( timebase <= 0 )
 	{
-		eprint( FATAL, SET, "%s: Invalid zero or negative time base: %s.\n",
-				DEVICE_NAME, lecroy9400_ptime( timebase ) );
+		print( FATAL, "Invalid zero or negative time base: %s.\n",
+			   lecroy9400_ptime( timebase ) );
 		THROW( EXCEPTION );
 	}
 
@@ -313,8 +311,8 @@ Var *digitizer_timebase( Var *v )
 		 fabs( timebase - tb[ TB ] ) > timebase * 1.0e-2 )  /* error > 1% ?  */
 	{
 		t = T_strdup( lecroy9400_ptime( timebase ) );
-		eprint( WARN, SET, "%s: Can't set timebase to %s, using %s "
-				"instead.\n", DEVICE_NAME, t, lecroy9400_ptime( tb[ TB ] ) );
+		print( WARN, "Can't set timebase to %s, using %s instead.\n",
+			   t, lecroy9400_ptime( tb[ TB ] ) );
 		T_free( t );
 	}
 
@@ -325,16 +323,14 @@ Var *digitizer_timebase( Var *v )
 		if ( timebase < tb[ 0 ] )
 		{
 			TB = 0;
-			eprint( WARN, SET, "%s: Timebase of %s is too low, using %s "
-					"instead.\n", DEVICE_NAME, t,
-					lecroy9400_ptime( tb[ TB ] ) );
+			print( WARN, "Timebase of %s is too low, using %s instead.\n",
+				   t, lecroy9400_ptime( tb[ TB ] ) );
 		}
 		else
 		{
 		    TB = TB_ENTRIES - 1;
-			eprint( WARN, SET, "%s: Timebase of %s is too large, using %s "
-					"instead.\n", DEVICE_NAME, t,
-					lecroy9400_ptime( tb[ TB ] ) );
+			print( WARN, "Timebase of %s is too large, using %s instead.\n",
+				   t, lecroy9400_ptime( tb[ TB ] ) );
 		}
 
 		T_free( t );
@@ -372,8 +368,7 @@ Var *digitizer_sensitivity( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "%s: No channel specified in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
+		print( FATAL, "No channel specified.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -382,8 +377,8 @@ Var *digitizer_sensitivity( Var *v )
 
 	if ( channel > LECROY9400_CH2 )
 	{
-		eprint( FATAL, SET, "%s: Can't set or obtain sensitivity for channel "
-				"%s.\n", DEVICE_NAME, Channel_Names[ channel ] );
+		print( FATAL, "Can't set or obtain sensitivity for channel %s.\n",
+			   Channel_Names[ channel ] );
 		THROW( EXCEPTION );
 	}
 
@@ -412,8 +407,7 @@ Var *digitizer_sensitivity( Var *v )
 
 	if ( sens < LECROY9400_MAX_SENS )
 	{
-		eprint( FATAL, SET, "%s: Sensitivity setting is out of range.\n",
-				DEVICE_NAME );
+		print( FATAL, "Sensitivity setting is out of range.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -438,15 +432,13 @@ Var *digitizer_sensitivity( Var *v )
 
 	if ( coupl == DC_50_OHM && sens > LECROY9400_MIN_SENS_50 )
 	{
-		eprint( FATAL, SET, "%s: Sensitivity is out of range for the "
-				"current impedance of 50 Ohm for %s.\n", DEVICE_NAME,
-				Channel_Names[ channel ] );
+		print( FATAL, "Sensitivity is out of range for the current impedance "
+			   "of 50 Ohm for %s.\n", Channel_Names[ channel ] );
 		THROW( EXCEPTION );
 	}
 	else if ( coupl != DC_50_OHM && sens > LECROY9400_MIN_SENS_1M )
 	{
-		eprint( FATAL, SET, "%s: Sensitivity setting is out of range.\n",
-				DEVICE_NAME );
+		print( FATAL, "Sensitivity setting is out of range.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -485,8 +477,7 @@ Var *digitizer_averaging( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "%s: Missing arguments in call of function "
-				"%s().\n", DEVICE_NAME, Cur_Func );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -497,9 +488,9 @@ Var *digitizer_averaging( Var *v )
 
 	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
 	{
-		eprint( FATAL, SET, "%s: Averaging can only be done using channels %s "
-				"and %s.\n", DEVICE_NAME, Channel_Names[ LECROY9400_FUNC_E ],
-				Channel_Names[ LECROY9400_FUNC_F ] );
+		print( FATAL, "Averaging can only be done using channels %s and %s.\n",
+			   Channel_Names[ LECROY9400_FUNC_E ],
+			   Channel_Names[ LECROY9400_FUNC_F ] );
 		THROW( EXCEPTION );
 	}
 
@@ -507,8 +498,7 @@ Var *digitizer_averaging( Var *v )
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
-		eprint( FATAL, SET, "%s: Missing source channel argument in call of "
-				"function %s().\n", DEVICE_NAME, Cur_Func );
+		print( FATAL, "Missing source channel argument.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -517,10 +507,9 @@ Var *digitizer_averaging( Var *v )
 
 	if ( source_ch != LECROY9400_CH1 && source_ch != LECROY9400_CH2 )
 	{
-		eprint( FATAL, SET, "%s: Averaging can only be done using channels "
-				"%s and %s as source channels.\n", DEVICE_NAME,
-				Channel_Names[ LECROY9400_CH1 ],
-				Channel_Names[ LECROY9400_CH2 ] );
+		print( FATAL, "Averaging can only be done using channels %s and %s as "
+			   "source channels.\n", Channel_Names[ LECROY9400_CH1 ],
+			   Channel_Names[ LECROY9400_CH2 ] );
 		THROW( EXCEPTION );
 	}
 	
@@ -529,8 +518,7 @@ Var *digitizer_averaging( Var *v )
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
-		eprint( FATAL, SET, "%s: Missing number of averages in call of "
-				"function %s().\n", DEVICE_NAME, Cur_Func );
+		print( FATAL, "Missing number of averages.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -538,8 +526,8 @@ Var *digitizer_averaging( Var *v )
 
 	if ( num_avg <= 0 )
 	{
-		eprint( FATAL, SET, "%s: Zero or negative number of averages (%ld) "
-				"in function %s().\n", DEVICE_NAME, num_avg, Cur_Func );
+		print( FATAL, "Zero or negative number of averages (%ld).\n",
+			   num_avg );
 		THROW( EXCEPTION );
 	}
 
@@ -548,8 +536,7 @@ Var *digitizer_averaging( Var *v )
 	{
 		if ( i >= ( int ) NA_ENTRIES )
 		{
-			eprint( FATAL, SET, "%s: Number of averages (%ld) too long in "
-					"%s().\n", DEVICE_NAME, num_avg, Cur_Func );
+			print( FATAL, "Number of averages (%ld) too large.\n", num_avg );
 			THROW( EXCEPTION );
 		}
 
@@ -558,9 +545,9 @@ Var *digitizer_averaging( Var *v )
 
 		if ( num_avg < na[ i ] )
 		{
-			eprint( SEVERE, SET, "%s: Can't set number of averages to %ld, "
-					"using next larger allowed value of %ld instead.\n",
-					DEVICE_NAME, num_avg, na[ i ] );
+			print( SEVERE, "Can't set number of averages to %ld, using next "
+				   "larger allowed value of %ld instead.\n",
+				   num_avg, na[ i ] );
 			num_avg = na[ i ];
 			break;
 		}
@@ -587,8 +574,7 @@ Var *digitizer_averaging( Var *v )
 
 			if ( rec_len <= 0 )
 			{
-				eprint( FATAL, SET, "%s: Invalid zero or negative record "
-						"length in function %s().\n", DEVICE_NAME, Cur_Func );
+				print( FATAL, "Invalid zero or negative record length.\n" );
 				THROW( EXCEPTION );
 			}
 
@@ -597,8 +583,7 @@ Var *digitizer_averaging( Var *v )
 			{
 				if ( i >= ( int ) CL_ENTRIES )
 				{
-					eprint( FATAL, SET, "%s: Record length %ld too long in "
-							"%s().\n", DEVICE_NAME, rec_len, Cur_Func );
+					print( FATAL, "Record length %ld too long.\n", rec_len );
 					THROW( EXCEPTION );
 				}
 
@@ -607,9 +592,8 @@ Var *digitizer_averaging( Var *v )
 
 				if ( rec_len < cl[ i ] )
 				{
-					eprint( SEVERE, SET, "%s: Can't set record length to %ld "
-							"in %s(), using %ld instead.\n", DEVICE_NAME,
-							rec_len, Cur_Func, cl[ i ] );
+					print( SEVERE, "Can't set record length to %ld, using %ld "
+						   "instead.\n", rec_len, cl[ i ] );
 					rec_len = cl[ i ];
 					break;
 				}
@@ -638,15 +622,13 @@ Var *digitizer_num_averages( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "%s: Missing argument in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( v->next != NULL )
 	{
-		eprint( FATAL, SET, "%s: Function %s() can only be used for queries"
-				".\n", DEVICE_NAME, Cur_Func );
+		print( FATAL, "Function can only be used for queries.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -655,9 +637,9 @@ Var *digitizer_num_averages( Var *v )
 
 	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
 	{
-		eprint( FATAL, SET, "%s: Averaging can only be done using channels %s "
-				"and %s.\n", DEVICE_NAME, Channel_Names[ LECROY9400_FUNC_E ],
-				Channel_Names[ LECROY9400_FUNC_F ] );
+		print( FATAL, "Averaging can only be done using channels %s and %s.\n",
+			   Channel_Names[ LECROY9400_FUNC_E ],
+			   Channel_Names[ LECROY9400_FUNC_F ] );
 		THROW( EXCEPTION );
 	}
 
@@ -675,8 +657,8 @@ Var *digitizer_num_averages( Var *v )
 		if ( lecroy9400.is_num_avg[ channel ] )
 			return vars_push( INT_VAR, lecroy9400.num_avg[ channel ] );
 
-		eprint( FATAL, SET, "%s: Function %s() can only be used in the "
-				"EXPERIMENT section.\n", DEVICE_NAME, Cur_Func );
+		print( FATAL, "Function can only be used in the EXPERIMENT "
+			   "section.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -700,15 +682,13 @@ Var *digitizer_record_length( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "%s: Missing argument in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
+		print( FATAL, "Missing argument.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( v->next != NULL )
 	{
-		eprint( FATAL, SET, "%s: Function %s() can only be used for "
-				"queries.\n", DEVICE_NAME, Cur_Func );
+		print( FATAL, "Function can only be used for queries.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -717,9 +697,9 @@ Var *digitizer_record_length( Var *v )
 
 	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
 	{
-		eprint( FATAL, SET, "%s: Averaging can only be done using channels %s "
-				"and %s.\n", DEVICE_NAME, Channel_Names[ LECROY9400_FUNC_E ],
-				Channel_Names[ LECROY9400_FUNC_F ] );
+		print( FATAL, "Averaging can only be done using channels %s and %s.\n",
+			   Channel_Names[ LECROY9400_FUNC_E ],
+			   Channel_Names[ LECROY9400_FUNC_F ] );
 		THROW( EXCEPTION );
 	}
 
@@ -763,8 +743,8 @@ Var *digitizer_trigger_position( Var *v )
 
 	if ( trig_pos < 0.0 || trig_pos > 1.0 )
 	{
-		eprint( FATAL, SET, "%s: Invalid trigger position: %f, must be in "
-				"interval [0,1].\n", DEVICE_NAME, trig_pos );
+		print( FATAL, "Invalid trigger position: %f, must be in interval "
+			   "[0,1].\n", trig_pos );
 		THROW( EXCEPTION );
 	}
 
@@ -838,8 +818,7 @@ Var *digitizer_trigger_channel( Var *v )
 
 	if ( channel >= MAX_CHANNELS )
 	{
-		eprint( FATAL, SET, "%s: Invalid trigger channel name in %s().\n",
-				DEVICE_NAME, Cur_Func );
+		print( FATAL, "Invalid trigger channel name.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -854,9 +833,8 @@ Var *digitizer_trigger_channel( Var *v )
             break;
 
 		default :
-			eprint( FATAL, SET, "%s: Channel %s can't be used as "
-					"trigger channel.\n", DEVICE_NAME,
-					Channel_Names[ channel ] );
+			print( FATAL, "Channel %s can't be used as trigger channel.\n",
+				   Channel_Names[ channel ] );
 			THROW( EXCEPTION );
     }
 
@@ -908,14 +886,14 @@ static Var *get_curve( Var *v, bool use_cursor )
 	double *array;
 	long length;
 	Var *nv;
+	int j = 0;
 
 
 	/* The first variable got to be a channel number */
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "%s: Missing arguments in call of "
-				"function %s().\n", DEVICE_NAME, Cur_Func );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -926,8 +904,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 		 ( ch > LECROY9400_CH2 && ch < LECROY9400_FUNC_E ) ||
 		 ch > LECROY9400_FUNC_F )
 	{
-		eprint( FATAL, SET, "%s: Invalid channel specification in %s().\n",
-				DEVICE_NAME, Cur_Func );
+		print( FATAL, "Invalid channel specification.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -940,10 +917,11 @@ static Var *get_curve( Var *v, bool use_cursor )
 	{
 		long win_num;
 
+		j++;
+
 		if ( ( w = lecroy9400.w ) == NULL )
 		{
-			eprint( FATAL, SET, "%s: No measurement windows have been "
-					"defined for %s().\n", DEVICE_NAME, Cur_Func );
+			print( FATAL, "No measurement windows have been defined.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -961,8 +939,8 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 		if ( w == NULL )
 		{
-			eprint( FATAL, SET, "%s: Measurement window has not been "
-					"defined for %s().\n", DEVICE_NAME, Cur_Func );
+			eprint( FATAL, "%d. measurement window has not been defined.\n",
+					j );
 			THROW( EXCEPTION );
 		}
 	}
