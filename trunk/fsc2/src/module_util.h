@@ -39,6 +39,7 @@ double is_mult_ns( double val, const char * text );
 char *translate_escape_sequences( char *str );
 double experiment_time( void );
 
+
 #define MODULE_CALL_ESTIMATE   0.02   /* 20 ms per module function call -
 										 estimate for calculation of time in
 										 test run via experiment_time() */

@@ -843,9 +843,6 @@ int get_lib_number( const char *name )
 
 void unload_device( Device *dev )
 {
-	int i;
-
-
 	fsc2_assert( EDL.Call_Stack == NULL );
 
 	if ( dev->driver.handle &&

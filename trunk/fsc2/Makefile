@@ -131,14 +131,21 @@ SERIAL_LOCK_DIR   := /var/lock
 
 # The next variable controls if support for the 6601 GPCT card by
 # National Instruments is included. This requires that the kernel
-# module as well as a library, both included into the fsc2 disreibution,
+# module as well as a library, both included into the fsc2 distribution,
 # are installed. Please uncomment this line only if you have such a card
 # and already successfully installed the kernel module and the library.
 
 # WITH_NI6601       := yes
 
 
-WITH RS_SPEC10      := yes
+# The next variable controls if support for the Spec-10 CCD camera by
+# Roper Scientific is included. This requires that a library for the
+# PCI controlling the camera gets loaded into fsc2. Please uncomment this
+# line only if you have such a camera and already successfully installed
+# the kernel module for the PCI card and the library.
+
+# WITH RS_SPEC10      := yes
+
 
 # Comment out the next two lines if you don't want the ability to run a HTTP
 # server that allows to monitor fsc2's current state via the Internet. The
