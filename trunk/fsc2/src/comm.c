@@ -1052,7 +1052,7 @@ void writer( int type, ... )
 			header.data.len = va_arg( ap, ptrdiff_t );
 
 			if ( write( pd[ WRITE ], &header, sizeof( CommStruct ) ) < 0 &&
-				 errno == EPIPE;  )
+				 errno == EPIPE )
 			{
 				va_end( ap );
 				return;
