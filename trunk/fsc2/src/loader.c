@@ -491,12 +491,20 @@ void run_exp_hooks( void )
 	Device *cd;
 
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
+	{
 		if ( cd->is_loaded && cd->driver.is_exp_hook &&
 			 ! cd->driver.exp_hook( ) )
 			eprint( SEVERE, UNSET, "Initialisation of experiment failed for "
 					"module `%s'.\n", cd->name );
 		else
 			cd->driver.exp_hook_is_run = SET;
+
+		/* Give user a chance to break while running the experiment hooks */
+
+		fl_check_only_forms( );
+		if ( DO_STOP )
+			THROW( USER_BREAK_EXCEPTION );
+	}
 }
 
 
