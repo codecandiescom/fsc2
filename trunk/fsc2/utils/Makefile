@@ -20,15 +20,17 @@
 # Boston, MA 02111-1307, USA.
 
 
+emacs_dir = /usr/share/emacs/site-lisp
+
 all: edl-mod.elc
 
 edl-mod.elc: edl-mod.el
 	emacs -batch -f batch-byte-compile edl-mod.el
 
 install:
-	$(INSTALL) -d /usr/share/emacs/site-lisp
-	$(INSTALL) -m 644 edl-mod.el /usr/share/emacs/site-lisp
-	$(INSTALL) -m 444 edl-mod.elc /usr/share/emacs/site-lisp
+	$(INSTALL) -d $(emacs_dir)
+	$(INSTALL) -m 644 edl-mod.el $(emacs_dir)
+	$(INSTALL) -m 444 edl-mod.elc $(emacs_dir)
 
 distclean:
 	$(RM) $(RMFLAGS) edl-mod.elc
