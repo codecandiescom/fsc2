@@ -276,6 +276,7 @@ Var *func_get_long( const char *name, int *access, bool flag )
 	Var *ret;
 
 
+
 	/* Try to find the function by its name and if found create a variable on
 	   the variable stack with a pointer to the function and the number of
 	   arguments. Also copy the functions name and access flag. */
@@ -300,7 +301,8 @@ Var *func_get_long( const char *name, int *access, bool flag )
 	ret = vars_push( FUNC, f->fnct );
 	ret->name = T_strdup( name );
 	ret->dim = f->nargs;
-	*access = f->access_flag;
+	if ( access != NULL )
+		*access = f->access_flag;
 
 	return ret;
 }

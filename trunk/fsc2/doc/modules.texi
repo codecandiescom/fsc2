@@ -798,10 +798,14 @@ does not exist and can not be used, otherwise a non-zero value.
 @item
 Call @code{func_get()}
 @findex func_get()
-with the name of the function you want to
-call as the argument --- this will return a variable with a pointer to
-the function which you have to store. If the returned pointer is
-@code{NULL} the function does not exist or isn't loaded.
+with the name of the function you want to call as the first argument and
+the address of an integer variable for returning the access flags (you
+may specify also @code{NULL} instead if you're not interested in the
+access flag) --- this will return a variable with a pointer to the
+function which you have to store. If the returned pointer is @code{NULL}
+the function does not exist or isn't loaded.  The variable pointed to by
+the second argument will be set to either @code{ALL}, @code{PREP} or
+@code{EXP}.
 
 @item
 Now call @code{vars_push()} for each of the arguments of the function -

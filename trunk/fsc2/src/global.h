@@ -197,9 +197,9 @@ extern const char *Function_Names[ ];
 /* Define access types for functions in certain sections */
 
 enum {
-	ACCESS_EXP,         // only in experiment phase
-	ACCESS_PREP,        // only in preparation phase
-	ACCESS_ALL,         // everywhere
+	ACCESS_PREP = 1,         // only in preparation phase
+	ACCESS_EXP  = 2,         // only in experiment phase
+	ACCESS_ALL  = 3          // everywhere
 };
 
 

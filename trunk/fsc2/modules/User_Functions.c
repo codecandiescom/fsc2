@@ -633,10 +633,6 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 							bool *is_1, const char *func_2, bool *is_2,
 							const char *str )
 {
-	Var *func_ptr;
-	int access;
-
-
 	/* At the very start lets figure out if there are pulser functions for
 	   phase cycling */
 
@@ -663,7 +659,7 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 
 	/* Check that there's a function for starting the acquisition */
 
-	if ( ! func_exists( "digitizer_start_acquisition", &access ) )
+	if ( ! func_exists( "digitizer_start_acquisition" ) )
 	{
 		eprint( FATAL, SET, "%s(): No digitizer module loaded supplying a "
 				"function to do an acquisition.\n", func_name );
