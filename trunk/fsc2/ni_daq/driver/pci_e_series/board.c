@@ -1,28 +1,28 @@
 /*
-  $Id$
- 
-  Driver for National Instruments PCI E Series DAQ boards
-
-  Copyright (C) 2003-2004 Jens Thoms Toerring
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-
-  To contact the author send email to
-  Jens.Toerring@physik.fu-berlin.de
-*/
+ *  $Id$
+ * 
+ *  Driver for National Instruments PCI E Series DAQ boards
+ * 
+ *  Copyright (C) 2003-2004 Jens Thoms Toerring
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ * 
+ *  To contact the author send email to
+ *  Jens.Toerring@physik.fu-berlin.de
+ */
 
 
 #include "ni_daq_board.h"
@@ -39,10 +39,10 @@ static void pci_irq_B_handler( Board *board, u16 status );
 #endif
 
 
-/*----------------------------------------------------------------*/
-/* Function called at initialization time to set up the structure */
-/* with board register addresses                                  */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function called at initialization time to set up the structure
+ * with board register addresses
+ *----------------------------------------------------------------*/
 
 void pci_board_register_setup( Board *board )
 {
@@ -112,8 +112,8 @@ void pci_board_register_setup( Board *board )
 }
 
 
-/*----------------------------------------------------------------*/
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ *----------------------------------------------------------------*/
 
 void pci_board_irq_handling_setup( Board *board )
 {
@@ -263,9 +263,9 @@ void pci_board_irq_handling_setup( Board *board )
 }
 
 
-/*-------------------------------------------------------*/
-/* Function to bring the board into a known, quite state */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function to bring the board into a known, quite state
+ *-------------------------------------------------------*/
 
 void pci_board_reset_all( Board *board )
 {
@@ -293,10 +293,10 @@ void pci_board_reset_all( Board *board )
 }
 
 
-/*------------------------------------------------------------*/
-/* Function clears the configuration memory by writing to the */
-/* Write_Strobe_0 register.                                   */
-/*------------------------------------------------------------*/
+/*---------------------------------------------*
+ * Function clears the configuration memory by
+ * writing to the Write_Strobe_0 register.
+ *---------------------------------------------*/
 
 void pci_clear_configuration_memory( Board *board )
 {
@@ -304,9 +304,9 @@ void pci_clear_configuration_memory( Board *board )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function clears the ADC FIFO by writing to the Write_Strobe_1 register. */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function clears the ADC FIFO by writing to the Write_Strobe_1 register.
+ *-------------------------------------------------------------------------*/
 
 void pci_clear_ADC_FIFO( Board *board )
 {
@@ -314,9 +314,9 @@ void pci_clear_ADC_FIFO( Board *board )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function clears the DAC FIFO by writing to the Write_Strobe_1 register. */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function clears the DAC FIFO by writing to the Write_Strobe_1 register.
+ *-------------------------------------------------------------------------*/
 
 void pci_clear_DAC_FIFO( Board *board )
 {
@@ -324,9 +324,9 @@ void pci_clear_DAC_FIFO( Board *board )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function for setting up the Configuration Memory High Register */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for setting up the Configuration Memory High Register
+ *----------------------------------------------------------------*/
 
 int pci_configuration_high( Board *board, unsigned int channel, 
 			    NI_DAQ_AI_TYPE channel_type )
@@ -364,9 +364,9 @@ int pci_configuration_high( Board *board, unsigned int channel,
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function for setting up the Configuration Memory Low Register */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for setting up the Configuration Memory Low Register
+ *---------------------------------------------------------------*/
 
 int pci_configuration_low( Board *board, unsigned int last_channel,
 			   NI_DAQ_STATE generate_trigger,
@@ -414,9 +414,9 @@ int pci_configuration_low( Board *board, unsigned int last_channel,
 }
 
 
-/*-------------------------------------------------------*/
-/* Function for setting up the AO Configuration Register */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function for setting up the AO Configuration Register
+ *-------------------------------------------------------*/
 
 int pci_ao_configuration( Board *board, unsigned int channel,
 			  NI_DAQ_STATE ground_ref,
@@ -455,12 +455,12 @@ int pci_ao_configuration( Board *board, unsigned int channel,
 	return 0;
 }
 
-/*----------------------------------------------------------------------*/
-/* Function for writing directly to the DAC via the DAC0 or DAC1 Direct */
-/* Data Register. Depending on how the channel is set up the value is   */
-/* taken to be either in straight binary form (for unipolar output) or  */
-/* in two's complement form (for bipolar output).                       */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function for writing directly to the DAC via the DAC0 or DAC1 Direct
+ * Data Register. Depending on how the channel is set up the value is
+ * taken to be either in straight binary form (for unipolar output) or
+ * in two's complement form (for bipolar output).
+ *----------------------------------------------------------------------*/
 
 int pci_dac_direct_data( Board *board, unsigned int channel, int value )
 {
@@ -479,9 +479,9 @@ int pci_dac_direct_data( Board *board, unsigned int channel, int value )
 }
 
 
-/*---------------------------------------------*/
-/* Handler for interrupts raised by the boards */
-/*---------------------------------------------*/
+/*---------------------------------------------*
+ * Handler for interrupts raised by the boards
+ *---------------------------------------------*/
 
 void pci_board_irq_handler( int irq, void *data, struct pt_regs *dummy )
 {
@@ -501,10 +501,10 @@ void pci_board_irq_handler( int irq, void *data, struct pt_regs *dummy )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function for handling and acknowledging interrupts of group A  */
-/* (i.e. from the AI subsystem and general purpose counter 0).    */
-/*----------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for handling and acknowledging interrupts of group A
+ * (i.e. from the AI subsystem and general purpose counter 0).
+ *---------------------------------------------------------------*/
 
 static void pci_irq_A_handler( Board *board, u16 status )
 {
@@ -538,10 +538,10 @@ static void pci_irq_A_handler( Board *board, u16 status )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function for handling and acknowledging interrupts of group B  */
-/* (i.e. from the AO subsystem and general purpose counter 1).    */
-/*----------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for handling and acknowledging interrupts of group B
+ * (i.e. from the AO subsystem and general purpose counter 1).
+ *---------------------------------------------------------------*/
 
 static void pci_irq_B_handler( Board *board, u16 status )
 {

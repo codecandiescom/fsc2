@@ -1,28 +1,28 @@
 /*
-  $Id$
- 
-  Driver for National Instruments PCI E Series DAQ boards
-
-  Copyright (C) 2003-2004 Jens Thoms Toerring
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-
-  To contact the author send email to
-  Jens.Toerring@physik.fu-berlin.de
-*/
+ *  $Id$
+ * 
+ *  Driver for National Instruments PCI E Series DAQ boards
+ * 
+ *  Copyright (C) 2003-2004 Jens Thoms Toerring
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ * 
+ *  To contact the author send email to
+ *  Jens.Toerring@physik.fu-berlin.de
+ */
 
 
 #include "ni_daq_board.h"
@@ -72,9 +72,9 @@ static unsigned int num_pci_e_series_boards =
 		sizeof pci_e_series_boards / sizeof pci_e_series_boards[ 0 ];
 
 
-/*-------------------------------------------------------*/
-/* Function that gets executed when the module is loaded */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function that gets executed when the module is loaded
+ *-------------------------------------------------------*/
 
 static int __init pci_e_series_init( void )
 {
@@ -147,9 +147,9 @@ static int __init pci_e_series_init( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Initialization of a board (only use while loading the module) */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Initialization of a board (only use while loading the module)
+ *---------------------------------------------------------------*/
 
 static int __init pci_e_series_init_board( struct pci_dev *dev, Board *board )
 {
@@ -226,9 +226,9 @@ static int __init pci_e_series_init_board( struct pci_dev *dev, Board *board )
 }
 
 
-/*------------------------------------------------------*/
-/* Function gets executed when the module gets unloaded */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function gets executed when the module gets unloaded
+ *------------------------------------------------------*/
 
 static void __exit pci_e_series_cleanup( void )
 {
@@ -248,9 +248,9 @@ static void __exit pci_e_series_cleanup( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function for releasing all resources requested for the boards */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for releasing all resources requested for the boards
+ *---------------------------------------------------------------*/
 
 static void pci_e_series_release_resources( Board *boards, int board_count )
 {
@@ -283,8 +283,8 @@ static void pci_e_series_release_resources( Board *boards, int board_count )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 static void pci_e_series_init_all( Board *board )
 {

@@ -1,28 +1,28 @@
 /*
-  $Id$
- 
-  Driver for National Instruments PCI E Series DAQ boards
-
-  Copyright (C) 2003-2004 Jens Thoms Toerring
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-
-  To contact the author send email to
-  Jens.Toerring@physik.fu-berlin.de
-*/
+ *  $Id$
+ * 
+ *  Driver for National Instruments PCI E Series DAQ boards
+ * 
+ *  Copyright (C) 2003-2004 Jens Thoms Toerring
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ * 
+ *  To contact the author send email to
+ *  Jens.Toerring@physik.fu-berlin.de
+ */
 
 
 #include "ni_daq_board.h"
@@ -41,9 +41,9 @@ static void calib_5( Board *board );
 static void calib_6( Board *board );
 
 
-/*------------------------------------------------*/
-/* Function for setting the analog trigger levels */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * Function for setting the analog trigger levels
+ *------------------------------------------------*/
 
 void pci_set_trigger_levels( Board *board, u16 high, u16 low )
 {
@@ -54,9 +54,9 @@ void pci_set_trigger_levels( Board *board, u16 high, u16 low )
 }
 
 
-/*------------------------------------------------*/
-/*  Function for reading out data from the EEPROM */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ *  Function for reading out data from the EEPROM
+ *------------------------------------------------*/
 
 static u8 eeprom_read( Board *board, u16 addr )
 {
@@ -107,9 +107,9 @@ static u8 eeprom_read( Board *board, u16 addr )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function for writing data to (one of) the CalDAC(s) of the board */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for writing data to (one of) the CalDAC(s) of the board
+ *------------------------------------------------------------------*/
 
 static void caldac_write( Board *board, u8 ser_dac, CALDAC_TYPES type,
 			  u8 addr, u16 val )
@@ -148,8 +148,8 @@ static void caldac_write( Board *board, u8 ser_dac, CALDAC_TYPES type,
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
 
 static void caldac_send( Board *board, u8 ser_dac, u16 data, int num_bits )
 {
@@ -176,8 +176,8 @@ static void caldac_send( Board *board, u8 ser_dac, u16 data, int num_bits )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
 
 void caldac_calibrate( Board *board )
 {
@@ -208,10 +208,10 @@ void caldac_calibrate( Board *board )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function for setting the CalDAC of the PCI-MIO-16E-1, PCI-MIO-16E-4 */
-/* and PCI-6071E to the values from the EEPROM                         */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function for setting the CalDAC of the PCI-MIO-16E-1, PCI-MIO-16E-4
+ * and PCI-6071E to the values from the EEPROM
+ *---------------------------------------------------------------------*/
 
 static void calib_1( Board *board )
 {
@@ -253,10 +253,10 @@ static void calib_1( Board *board )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function for setting the CalDAC of the PCI-MIO-16XE-10, PCI-6031E, */
-/* PCI-6032E and PCI-6033E to the values from the EEPROM              */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for setting the CalDAC of the PCI-MIO-16XE-10, PCI-6031E,
+ * PCI-6032E and PCI-6033E to the values from the EEPROM
+ *--------------------------------------------------------------------*/
 
 static void calib_2( Board *board )
 {
@@ -293,10 +293,10 @@ static void calib_2( Board *board )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function for setting the CalDAC of the PCI-MIO-16XE-50 to the values */
-/* from the EEPROM                                                      */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function for setting the CalDAC of the PCI-MIO-16XE-50 to the values
+ * from the EEPROM
+ *----------------------------------------------------------------------*/
 
 static void calib_3( Board *board )
 {
@@ -330,10 +330,10 @@ static void calib_3( Board *board )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function for setting the CalDAC of the PCI-6023E to the values */
-/* from the EEPROM                                                */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for setting the CalDAC of the PCI-6023E to the values
+ * from the EEPROM
+ *----------------------------------------------------------------*/
 
 static void calib_4( Board *board )
 {
@@ -354,10 +354,10 @@ static void calib_4( Board *board )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function for setting the CalDAC of the PCI-6024E and PCI-6025E */
-/* to the values from the EEPROM                                  */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for setting the CalDAC of the PCI-6024E and PCI-6025E
+ * to the values from the EEPROM
+ *----------------------------------------------------------------*/
 
 static void calib_5( Board *board )
 {
@@ -396,10 +396,10 @@ static void calib_5( Board *board )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function for setting the CalDAC of the PCI-6052E to the values */
-/* from the EEPROM                                                */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for setting the CalDAC of the PCI-6052E to the values
+ * from the EEPROM
+ *----------------------------------------------------------------*/
 
 static void calib_6( Board *board )
 {

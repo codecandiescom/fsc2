@@ -120,11 +120,11 @@ static char *DAQ_reg_names[ ] = { "Window_Address",
 #endif
 
 
-/*------------------------------------------------------------------*/
-/* Function for writing to one of the 16-bit wide DAQ-STC registers */
-/* Interrupts must be disabled between setting the window address   */
-/* and writing to the window data register.                         */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for writing to one of the 16-bit wide DAQ-STC registers
+ * Interrupts must be disabled between setting the window address
+ * and writing to the window data register.
+ *------------------------------------------------------------------*/
 
 #if defined NI_DAQ_DEBUG
 inline void pci_stc_writew( const char *fn, Board *board, u16 offset,
@@ -165,11 +165,11 @@ inline void pci_stc_writew( Board *board, u16 offset, u16 data )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function for writing to one of the 32-bit wide DAQ-STC registers */
-/* Interrupts must be disabled between setting the window address   */
-/* and writing to the window data register.                         */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for writing to one of the 32-bit wide DAQ-STC registers
+ * Interrupts must be disabled between setting the window address
+ * and writing to the window data register.
+ *------------------------------------------------------------------*/
 
 #if defined NI_DAQ_DEBUG
 inline void pci_stc_writel( const char *fn, Board *board, u16 offset,
@@ -202,11 +202,11 @@ inline void pci_stc_writel( Board *board, u16 offset, u32 data )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function for reading from one of the 16-bit wide DAQ-STC registers */
-/* Interrupts must be disabled between setting the window address and */
-/* reading from the window data register.                             */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for reading from one of the 16-bit wide DAQ-STC registers
+ * Interrupts must be disabled between setting the window address and
+ * reading from the window data register.
+ *--------------------------------------------------------------------*/
 
 inline u16 pci_stc_readw( Board *board, u16 offset )
 {
@@ -239,11 +239,11 @@ inline u16 pci_stc_readw( Board *board, u16 offset )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function for reading from one of the 32-bit wide DAQ-STC registers */
-/* Interrupts must be disabled between setting the window address and */
-/* reading from the window data register.                             */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for reading from one of the 32-bit wide DAQ-STC registers
+ * Interrupts must be disabled between setting the window address and
+ * reading from the window data register.
+ *--------------------------------------------------------------------*/
 
 inline u32 pci_stc_readl( Board *board, u16 offset )
 {
@@ -269,10 +269,10 @@ inline u32 pci_stc_readl( Board *board, u16 offset )
 }
 
 
-/*------------------------------------------------------------*/
-/* Initialization of the data structure used in protection of */
-/* parts of code that may not become interrupted.             */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Initialization of the data structure used in protection of
+ * parts of code that may not become interrupted.
+ *------------------------------------------------------------*/
 
 void pci_init_critical_section_handling( Board *board )
 {
@@ -281,12 +281,11 @@ void pci_init_critical_section_handling( Board *board )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function to protect parts of code that may not be interrupted. */
-/* The inverse function must be called as many times as this      */
-/* function has been to give up the spinlock and re-enable        */
-/* interrupts.                                                    */
-/*----------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function to protect parts of code that must not be interrupted.
+ * The inverse function must be called as many times as this
+ * function has been to give up the spinlock and re-enable interrupts.
+ *---------------------------------------------.-----------------------*/
 
 inline void pci_start_critical_section( Board *board )
 {
@@ -296,10 +295,10 @@ inline void pci_start_critical_section( Board *board )
 }
 
 
-/*----------------------------------------------------------*/
-/* Function to be called at the end of a parts of code that */
-/* may not become interrupted.                              */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function to be called at the end of a parts of code that
+ * must not be interrupted.
+ *----------------------------------------------------------*/
 
 inline void pci_end_critical_section( Board *board )
 {
