@@ -95,7 +95,7 @@ Var *f_layout( Var *v )
 
 		pos = buffer = T_malloc( len );
 
-		memcpy( pos, &Lc, sizeof( long ) );     /* current line number */
+		memcpy( pos, &Lc, sizeof( long ) );       /* current line number */
 		pos += sizeof( long );
 
 		* ( ( long * ) pos ) = ( long ) layout;   /* type of layout */
@@ -103,7 +103,7 @@ Var *f_layout( Var *v )
 
 		if ( Fname )
 		{
-			strcpy( ( char * ) pos, Fname );    /* current file name */
+			strcpy( ( char * ) pos, Fname );      /* current file name */
 			pos += strlen( Fname ) + 1;
 		}
 		else
@@ -121,8 +121,8 @@ Var *f_layout( Var *v )
 
 	Tool_Box = T_malloc( sizeof( TOOL_BOX ) );
 	Tool_Box->layout = layout;
-	Tool_Box->Tools = NULL;               /* no form created yet */
-	Tool_Box->objs = NULL;                /* and also no objects */
+	Tool_Box->Tools = NULL;                       /* no form created yet */
+	Tool_Box->objs = NULL;                        /* and also no objects */
 
 	return vars_push( INT_VAR, ( long ) layout );
 }

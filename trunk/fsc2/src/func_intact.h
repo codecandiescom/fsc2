@@ -29,15 +29,15 @@ typedef struct _IOBJ_ {
 
 	volatile int state;     /* state (on/off) of press count (buttons) */
 
-	FL_OBJECT *group;       /* group (RADIO) button belongs to */
+	FL_OBJECT *group;       /* group a radio button belongs to */
 	long partner;
 
 	volatile double value;  /* current value of slider */
 	double start_val,       /* maximum and minimum value */
 		   end_val,
-		   step;
+		   step;            /* step width of slider (0.0 means not set) */
 
-	union {
+	union {                 /* value of INT or FLOAT in/output objects */
 		long lval;
 		double dval;
 	} val;
