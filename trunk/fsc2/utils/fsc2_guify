@@ -24,9 +24,9 @@
 #
 #
 #  This script tries to GUI-fy a suitably adapted EDL script, i.e. it takes
-#  a slightly modified EDL script and creates a Perl script which, in turn,
-#  allows the user to set parameters via a GUI and then creates an EDL sript
-#  from the parameters and sends it to fsc2 for execution.
+#  an "enhanced" EDL script and creates from it a Perl script which, in turn,
+#  allows the user to set parameters via a GUI, creates an EDL sript from
+#  these parameters and sends it to fsc2 for execution.
 
 
 use strict;
@@ -160,7 +160,6 @@ for ( @vars ) {
 	} else {
 		$$_{ value } = $$_{ def_value } = "";
 		$entry_width = 15;
-		$unit_width  = 10;
 	}
 }
 
@@ -457,6 +456,7 @@ my %fp = ( -side => "top",
 my %wp = ( -side => "left",
 		   -fill => "x",
 		   -expand => 1 );
+my %up = ( -side => "left" );
 
 my $fsc2_how_to_run = "Test program";
 my @fsc2_how_to_run = ( "Start experiment",
@@ -468,12 +468,12 @@ my $fsc2_main_frame = $fsc2_main_window->Frame( -relief => "ridge",
 my $fsc2_balloon = $fsc2_main_frame->Balloon( );
 my $fsc2_apply_frame = $fsc2_main_window->Frame( );
 my $fsc2_apply_button = $fsc2_apply_frame->Button( -text => "Apply",
-                                                   -command => \\&write_out );
-$fsc2_apply_button->bind( "all", "<Control-a>" => \\&write_out );
+                                                   -command => \&write_out );
+$fsc2_apply_button->bind( "all", "<Alt-a>" => \&write_out );
 my $fsc2_quit_button = $fsc2_apply_frame->Button( -text => "Quit",
                  -command => sub { &store_defs; $fsc2_main_window->destroy } );
 $fsc2_quit_button->bind( "all",
-                         "<Control-q>" =>
+                         "<Alt-q>" =>
                          sub { &store_defs; $fsc2_main_window->destroy } );
 $fsc2_apply_frame->pack( -side => "bottom",
                          -fill => "x",
@@ -481,14 +481,13 @@ $fsc2_apply_frame->pack( -side => "bottom",
 
 EOT
 
-	# Now write the code for editing the variables
+	# Now write the code for creating the editing fields for the variables
 
 	for ( @vars ) {
 		print <<"EOT";
 my \%$$_{ name };
 \$$$_{ name }\{ tk_frame \} = \$fsc2_main_frame->Frame( );
-\$$$_{ name }\{ tk_label \} = \$$$_{ name }\{ tk_frame \}->Label(
--text => $$_{ label },
+\$$$_{ name }\{ tk_label \} = \$$$_{ name }\{ tk_frame \}->Label( -text => $$_{ label },
 -width => $label_width,
 -anchor => 'w' );
 EOT
@@ -520,7 +519,7 @@ my \@$$_{ name } = ( \"$$_{ menu_entries }[ 0 ]\"";
 -width => $entry_width,
 -textvariable => \\\$$$_{ name } );
 ";
-		} else {
+		} elsif( $$_{ type } =~ /^file$/o ) {
 			print "my \$$$_{ name } = \"$$_{ value }\";
 \$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Entry( -textvariable => \\\$$$_{ name },
 -width => $entry_width,
@@ -533,9 +532,9 @@ my \@$$_{ name } = ( \"$$_{ menu_entries }[ 0 ]\"";
 \$$$_{ name }\{ tk_unit \} = \$$$_{ name }\{ tk_frame \}->Label( -text => $$_{ unit },
 -width => $unit_width );
 EOT
-		} else {
+		} elsif ( $$_{ type } =~ /^file$/o ) {
 			print <<"EOT";
-\$$$_{ name }\{ tk_unit \} = \$$$_{ name }\{ tk_frame \}->Button( -text => \"Browse\",
+\$$$_{ name }\{ tk_unit \} = \$$$_{ name }\{ tk_frame \}->Button( -text => \"...\",
 -command => sub { my \$fn = \&fsc2_filesel::show( \$fsc2_main_window, \$$$_{ name } );
 				  \$$$_{ name } = \$fn if defined \$fn;
  				  \$$$_{ name }\{ tk_entry \}->xview( length( \$$$_{ name } ) - $entry_width ) }
@@ -547,7 +546,7 @@ EOT
 \$$$_{ name }\{ tk_frame \}->pack( \%fp );
 \$$$_{ name }\{ tk_label \}->pack( \%wp );
 \$$$_{ name }\{ tk_entry \}->pack( \%wp );
-\$$$_{ name }\{ tk_unit \}->pack( \%wp );
+\$$$_{ name }\{ tk_unit \}->pack( \%up );
 
 EOT
 	}
@@ -567,6 +566,14 @@ EOT
 \$fsc2_quit_button->pack( \%wp, padx => '5m', -pady => '3m' );
 
 load_defs( );
+EOT
+
+	for ( @vars ) {
+	print "\$$$_{ name }\{ tk_entry \}->xview( length( \$$$_{ name } ) - $entry_width );
+" if $$_{ type } =~ /^file$/o;
+	}
+
+	print <<"EOT";
 MainLoop;
 
 
@@ -677,7 +684,7 @@ print \$fh \"";
 		for ( @vars ) {
 			if ( $$_{ type } =~ /^int|float|menu$/o ) {
 				$line =~ s/\b$$_{ name }\b/\$$$_{ name }/g;
-			} else {
+			} elsif ( $$_{ type } =~ /^file$/o ) {
 				$line =~ s/\b$$_{ name }\b/\\\"\$$$_{ name }\\\"/g;
 			}
 		}
@@ -850,6 +857,8 @@ EOT
 };
 
 
+################################################################
+
 package fsc2_filesel;
 
 use Tk;
@@ -865,13 +874,19 @@ BEGIN {
 }
 
 sub show {
-
-	my $top = shift;
+	my ( $top, $file ) = @_;
 
 	my $selected = undef;
 
-	$cur_file = "";
+	if ( defined $file and $file =~ m|^((.*?)/)?([^/]+)$|o ) {
+		$cur_file = $3;
+		$cur_dir = $2 ne "" ? $2 : $1 if defined $1;
+	} else {
+		$cur_file = "";
+	}
+
 	my %fs;
+
 	$fs{ top } = $top->Toplevel( '-title' => 'File Select' );
 	$fs{ top }->grab;
 	$fs{ dir } = $fs{ top }->Entry( -textvariable => \$cur_dir,
@@ -905,7 +920,7 @@ sub show {
 								 -pady => '1m'
 							   );
 	$fs{ frame }->Button( -text => 'Rescan',
-						  -command => [ \&populate_fs, $fs{ list }, 
+						  -command => [ \&populate_fs, $fs{ list },
 										$cur_dir ]
 						)->pack( -side => 'left',
 								 -padx => '2m',
