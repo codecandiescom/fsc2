@@ -259,6 +259,9 @@ typedef struct {
 	FILE *show_file;
 	FILE *dump_file;
 
+	bool do_show_pulses;
+	bool do_dump_pulses;
+
 	bool auto_shape_pulses;
 	long left_shape_warning;
 
@@ -419,6 +422,8 @@ PULSE *rs690_get_pulse( long pnum );
 const char *rs690_ptime( double p_time );
 const char *rs690_pticks( Ticks ticks );
 int rs690_pulse_compare( const void *A, const void *B );
+void rs690_show_pulses( void );
+void rs690_dump_pulses( void );
 void rs690_dump_channels( FILE *fp );
 void rs690_duty_check( void );
 Ticks rs690_calc_max_length( FUNCTION *f );

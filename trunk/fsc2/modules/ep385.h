@@ -246,6 +246,9 @@ typedef struct {
 	FILE *show_file;
 	FILE *dump_file;
 
+	bool do_show_pulses;
+	bool do_dump_pulses;
+
 	bool auto_shape_pulses;
 	long left_shape_warning;
 	long right_shape_warning;
@@ -256,9 +259,6 @@ typedef struct {
 
 	Ticks minimum_twt_pulse_distance;
 	long twt_distance_warning;
-
-	bool do_show_pulses;
-	bool do_dump_pulses;
 
 } EP385;
 

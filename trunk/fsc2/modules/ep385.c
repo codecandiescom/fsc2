@@ -122,6 +122,9 @@ int ep385_init_hook( void )
 	ep385.dump_file = NULL;
 	ep385.show_file = NULL;
 
+	ep385.do_show_pulses = UNSET;
+	ep385.do_dump_pulses = UNSET;
+
 	ep385.is_shape_2_defense = UNSET;
 	ep385.is_defense_2_shape = UNSET;
 	ep385.shape_2_defense_too_near = 0;
@@ -133,9 +136,6 @@ int ep385_init_hook( void )
 
 	ep385.auto_twt_pulses = UNSET;
 	ep385.left_twt_warning = ep385.right_twt_warning = 0;
-
-	ep385.do_show_pulses = UNSET;
-	ep385.do_dump_pulses = UNSET;
 
 	for ( i = 0; i < MAX_CHANNELS; i++ )
 	{

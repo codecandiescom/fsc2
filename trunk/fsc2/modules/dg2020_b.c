@@ -117,6 +117,9 @@ int dg2020_b_init_hook( void )
 	dg2020.dump_file = NULL;
 	dg2020.show_file = NULL;
 
+	dg2020.do_show_pulses = UNSET;
+	dg2020.do_dump_pulses = UNSET;
+
 	dg2020.is_shape_2_defense = UNSET;
 	dg2020.is_defense_2_shape = UNSET;
 	dg2020.shape_2_defense_too_near = 0;
@@ -135,9 +138,6 @@ int dg2020_b_init_hook( void )
 
 	dg2020.dummy_phase_setup = NULL;
 	dg2020.num_dummy_phase_setups = 0;
-
-	dg2020.do_show_pulses = UNSET;
-	dg2020.do_dump_pulses = UNSET;
 
 	for ( i = 0; i < MAX_PODS; i++ )
 	{
