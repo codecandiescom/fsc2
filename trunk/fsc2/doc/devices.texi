@@ -344,7 +344,7 @@ case a 1-dimensional array with two elements is returned, containing the
 measured values of the corresponding channels.
 
 @item SR810
-@item SR830
+@itemx SR830
 If no argument is specified the measured value at channel 1 is returned.
 If one parameter is passed to the function the value at the
 corresponding channel is returned. Possible channel numbers and their

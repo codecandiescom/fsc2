@@ -911,7 +911,6 @@ exists at all. To do so call @code{func_exists()}
 with the name of
 the function as the argument. It will return @code{0} if the function
 does not exist and can not be used, otherwise a non-zero value.
-
 @item
 Call @code{func_get()}
 @findex func_get()
@@ -923,12 +922,10 @@ function which you have to store. If the returned pointer is @code{NULL}
 the function does not exist or isn't loaded.  The variable pointed to by
 the second argument will be set to either @code{ALL}, @code{PREP} or
 @code{EXP}.
-
 @item
 Now call @code{vars_push()} for each of the arguments of the function -
 see the description of @code{vars_push()} in the section about
 @acronym{fsc2}'s built in variable types.
-
 @item
 Finally, call @code{func_call()} with the pointer returned by the call
 to @code{func_get()}
