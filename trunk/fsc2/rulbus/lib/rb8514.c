@@ -485,7 +485,7 @@ int rulbus_rb8514_software_start( int handle )
 
 	if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
 								  bytes, cnt ) ) != ( int ) cnt )
-		return rulbus_errno = retval;
+		return rulbus_errno = retval < 0 ? retval : RULBUS_WRITE_ERROR;
 
 	return rulbus_errno = RULBUS_OK;
 }
