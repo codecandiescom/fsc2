@@ -266,15 +266,16 @@ static void fonts_init( void )
 	if ( * ( ( char * ) xresources[ AXISFONT ].var ) != '\0' )
 		G.font = XLoadQueryFont( G.d, ( char * ) xresources[ AXISFONT ].var );
 
+	if ( ! G.font )
+		G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_1 );
+	if ( ! G.font )
+		G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_2 );
+	if ( ! G.font )
+		G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_3 );
+
 	if ( G.font )
 		XTextExtents( G.font, "Xp", 2, &dummy, &G.font_asc, &G.font_desc,
 					  &font_prop );
-	else
-	{
-		G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_1 );
-		G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_2 );
-		G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_3 );
-	}
 }
 
 
