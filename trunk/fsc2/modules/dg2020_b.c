@@ -108,7 +108,7 @@ int dg2020_b_init_hook( void )
 
 	pulser_struct.keep_all_pulses = dg2020_keep_all;
 
-	pulser_struct.ch_to_num = dg2002_ch_to_num;
+	pulser_struct.ch_to_num = dg2020_ch_to_num;
 
 	/* Finally, we initialize variables that store the state of the pulser */
 

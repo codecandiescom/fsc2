@@ -734,7 +734,7 @@ void dg2020_dump_channels( FILE *fp )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-long dg2002_ch_to_num( long channel )
+long dg2020_ch_to_num( long channel )
 {
 	switch ( channel )
 	{
