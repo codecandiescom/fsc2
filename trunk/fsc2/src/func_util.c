@@ -723,7 +723,6 @@ Var *f_cscale( Var *v )
 
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
-		T_free( dp );
 		eprint( FATAL, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
@@ -739,19 +738,19 @@ Var *f_cscale( Var *v )
 	memcpy( ptr, &type, sizeof( int ) );               /* type indicator  */
 	ptr += sizeof( int );
 
-	memcpy( ptr, is_set, sizeof( int ) );              /* flags */
+	memcpy( ptr, &is_set, sizeof( int ) );             /* flags */
 	ptr += sizeof( int );
 
-	memcpy( ptr, x_0, sizeof( int ) );                 /* new x-offset */
+	memcpy( ptr, &x_0, sizeof( double ) );             /* new x-offset */
 	ptr += sizeof( double );
 
-	memcpy( ptr, dx, sizeof( int ) );                  /* new x-increment */
+	memcpy( ptr, &dx, sizeof( double ) );              /* new x-increment */
 	ptr += sizeof( double );
 
-	memcpy( ptr, y_0, sizeof( int ) );                 /* new y-offset */
+	memcpy( ptr, &y_0, sizeof( double ) );             /* new y-offset */
 	ptr += sizeof( double );
 
-	memcpy( ptr, dy, sizeof( int ) );                  /* new y-increment */
+	memcpy( ptr, &dy, sizeof( double ) );              /* new y-increment */
 	ptr += sizeof( double );
 
 	/* Detach from the segment with the data segment */
