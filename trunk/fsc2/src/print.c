@@ -711,7 +711,6 @@ static void print_header( FILE *fp, char *name )
 	fprintf( fp, "%%%%BeginProlog\n"
 			 	 "%%%%BeginResource: procset fsc2Dict\n"
 			     "/fsc2Dict 23 dict dup begin\n"
-			     "fsc2Dict begin\n"
 			     "/b { bind def } bind def\n"
 			     "/s { stroke } b\n"
 			     "/f { fill } b\n"
@@ -760,7 +759,7 @@ static void print_header( FILE *fp, char *name )
 	   of file !) */
 
 	fprintf( fp, "end readonly def %% fsc2Dict\n"
-			 	 "%%%%EndResource
+			 	 "%%%%EndResource\n"
 			     "%%%%EndProlog\n"
 			 	 "%%%%BeginSetup\n"
 			     "fsc2Dict begin\n"
