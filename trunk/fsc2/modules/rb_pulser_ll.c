@@ -29,8 +29,14 @@ static void rb_pulser_failure( bool rb_flag, const char *mess );
 static void rb_pulser_synthesizer_init( void );
 
 
-/*-----------------------------------------------------------*
- *-----------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function called at the very start of the experiment to bring
+ * the pulser into the state it's supposed to be in. This mainly
+ * includes "opening" the Rulbus cards it's made of and setting
+ * them up and also initializing the pulse modulation system of
+ * the RF synthesizer that takes care of the single possibke RF
+ * pulse
+ *---------------------------------------------------------------*/
 
 void rb_pulser_init( void )
 {
@@ -180,6 +186,9 @@ static void rb_pulser_synthesizer_init( void )
 
 
 /*-----------------------------------------------------------*
+ * Function called at the end of the experiment to bring the
+ * pulser back into a quite state and "close" the Rulbus
+ * cards the pulser is mode of
  *-----------------------------------------------------------*/
 
 void rb_pulser_exit( void )
@@ -210,8 +219,9 @@ void rb_pulser_exit( void )
 }
 
 
-/*-----------------------------------------------------------*
- *-----------------------------------------------------------*/
+/*------------------------------------------*
+ * Function to "start" or "stop" the pulser
+ *------------------------------------------*/
 
 void rb_pulser_run( bool state )
 {
@@ -289,8 +299,12 @@ void rb_pulser_run( bool state )
 }
 
 
-/*-----------------------------------------------------------*
- *-----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function for making a card either "active" or "inactive"
+ * which just means that it get set up to create end pulses
+ * or creation of end pulses is switched off (and the delay
+ * is set to 0 to keep it from creating GATE pulses)
+ *----------------------------------------------------------*/
 
 void rb_pulser_delay_card_state( int handle, bool state )
 {
@@ -307,8 +321,9 @@ void rb_pulser_delay_card_state( int handle, bool state )
 }
 
 
-/*-----------------------------------------------------------*
- *-----------------------------------------------------------*/
+/*--------------------------------------------*
+ * Function to set the delay for a delay card
+ *--------------------------------------------*/
 
 void rb_pulser_delay_card_delay( int handle, unsigned long delay )
 {
