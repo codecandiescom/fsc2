@@ -32,7 +32,7 @@ export headers
 
 
 all:
-	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
+	if [ `hostname -f` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
 		$(MAKE) pion; \
 	fi
 	$(MAKE) fsc2 fsc2_clean modules

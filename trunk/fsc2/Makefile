@@ -10,18 +10,14 @@ libdir         = $(prefix)/lib/fsc2
 auxdir         = $(libdir)/aux
 docdir         = $(libdir)/doc
 
-#prefix        = $(shell pwd)
-#bindir        = $(prefix)
-#libdir        = $(prefix)
-#auxdir        = $(prefix)/aux
-#docdir        = $(prefix)/doc
+#prefix         = $(shell pwd)
+#bindir         = $(prefix)
+#libdir         = $(prefix)
+#auxdir         = $(prefix)/aux
+#docdir         = $(prefix)/doc
 
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log
-
-# The name of the awk tool is passed to the programs via a macro
-
-AWK            = /usr/bin/awk
 
 
 ##############################################################################
@@ -47,6 +43,7 @@ FLEX           = flex
 FLEXFLAGS      = -B -P
 RM             = -rm
 RMFLAGS        = -f
+AWK            = /usr/bin/awk
 
 
 ############################################################################
