@@ -775,11 +775,11 @@ argument can't be used).
 @section Multi-Device functions
 @cindex Multi-Device functions
 
-There are a few convenience functions that work with two or more
-devices. They use the single-device functions (and thus will print error
-messages if the modules for the required devices aren't loaded or don't
-if the modules don't support the needed functions). The module they are
-defined in is automatically loaded, so it needs no special entry in the
+There are a few convenience functions that use two or more devices. They
+use the single-device functions (and thus will print error messages if
+the modules for the required devices aren't loaded or don't if the
+modules don't support the needed functions). The module they are defined
+in is automatically loaded, so it needs no special entry in the
 @code{DEVICES} section.
 
 
