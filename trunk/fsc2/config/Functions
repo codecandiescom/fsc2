@@ -112,6 +112,7 @@ pulser_shape_to_defense_minimum_distance, 1, PREP;
 pulser_defense_to_shape_minimum_distance, 1, PREP;
 pulser_dump_pulses, 0, PREP;
 pulser_automatic_shape_pulses, -1, PREP;
+pulser_automatic_twt_pulses, -1, PREP;
 
 /* Functions exported by the lock-in amplifier drivers
    (Stanford Research 510, 530, 810, 830, and Bruker ER023M signal channel) */
