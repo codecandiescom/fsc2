@@ -478,7 +478,7 @@ void print( int severity, const char *fmt, ... )
 /* This routine takes the input file and feeds it to 'fsc2_clean' which is */
 /* running as a child process. The output of fsc2_clean gets written to a  */
 /* pipe for which an immediately readable stream is returned by the        */
-/* function (or NULL instead on most errors).                              */
+/* function (or NULL instead on errors within the parent process).         */
 /*-------------------------------------------------------------------------*/
 
 FILE *filter_edl( const char *name, FILE *fp )
