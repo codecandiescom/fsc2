@@ -1,0 +1,109 @@
+/*-----------------------------------------------------------------------
+	This script is for testing all built-in mathematical functions of
+	fsc2 when applied to both single numbers and array slices (as far
+	as applicable). No warnings or errors should occur or something
+	is seriously broken.
+
+	$Id$
+-------------------------------------------------------------------------*/ 
+
+VARIABLES:
+
+I, K = 100;
+A1, a1 = 4;
+A2[ K ], a2[ K ];
+A3[ 2, * ], a3[ 3, * ];
+
+
+EXPERIMENT:
+
+FOR I = 1 : K {
+	a2[ I ] = sqrt( 3.0 ) * I;
+}
+
+A1 = int( a1 );
+A2 = int( a2 );
+A3[ 1 ] = int( a2 );
+
+a1 = float( A1 );
+a2 = float( A2 );
+a3[ 2 ] = sqrt( 2.0 ) * float( A2 );
+a3[ 3 ] = -sqrt( abs( a3[ 2 ] ) );
+
+A3[ 2 ] = -A2;
+
+a3[ 2 ] = sqrt( 2.0 ) * float( A2 );
+a3[ 3 ] = -sqrt( abs( a3[ 2 ] ) );
+
+A1 = round( a1 );
+A2 = round( a2 );
+A3[ 1 ] = round( a3[ 1 ] );
+
+A1 = floor( a1 );
+A2 = floor( a2 );
+A3[ 1 ] = floor( a3[ 2 ] );
+
+A1 = ceil( a1 );
+A2 = ceil( a2 );
+A3[ 1 ] = ceil( a3[ 3 ] );
+
+A1 = abs( A1 );
+A2 = abs( A2 );
+A3[ 1 ] = abs( A3[ 2 ] );
+
+a1 = abs( a1 );
+a2 = abs( a2 );
+a3[ 1 ] = abs( a3[ 3 ] );
+
+a1 = mean( a2 );
+a1 = mean( a2, 5 );
+a1 = mean( a2, 2, 8 );
+
+a1 = mean( a3[ 1 ] );
+a1 = mean( a3[ 1 ], 7 );
+a1 = mean( a3[ 1 ], 2, 9 );
+
+a1 = rms( a2 );
+a1 = rms( a2, 5 );
+a1 = rms( a2, 2, 8 );
+
+a1 = rms( a3[ 1 ] );
+a1 = rms( a3[ 1 ], 7 );
+a1 = rms( a3[ 1 ], 2, 9 );
+
+a1 = sqrt( a1 );
+a2 = sqrt( a2 );
+
+set_seed( 243419 );
+
+a1 = random( );
+a2 = random( size( a2 ) );
+a3[ 1 ] = random( size( a3, 2 ) );
+
+a1 = grandom( );
+a2 = grandom( size( a2 ) );
+a3[ 1 ] = grandom( size( a3, 2 ) );
+
+a1 = asin( sin( a1 ) );
+a1 = acos( cos( a1 ) );
+a1 = atan( tan( a1 ) );
+
+a2 = asin( sin( a2 ) );
+a2 = acos( cos( a2 ) );
+a2 = atan( tan( a2 ) );
+
+a3[ 1 ]	= asin( sin( a3[ 1 ] ) );
+a3[ 1 ]	= acos( cos( a3[ 1 ] ) );
+a3[ 1 ]	= atan( tan( a3[ 1 ] ) );
+
+a1 = asinh( sinh( a1 ) );
+a1 = acosh( cosh( a1 ) );
+a1 = atanh( tanh( a1 ) );
+
+a2 = asinh( sinh( a2 ) );
+a2 = acosh( cosh( a2 ) );
+a2 = atanh( tanh( a2 ) );
+
+a3[ 1 ]	= asinh( sinh( a3[ 1 ] ) );
+a3[ 1 ]	= acosh( cosh( a3[ 1 ] ) );
+a3[ 1 ]	= atanh( tanh( a3[ 1 ] ) );

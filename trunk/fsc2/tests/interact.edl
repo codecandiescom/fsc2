@@ -1,0 +1,100 @@
+/*-----------------------------------------------------------------------
+	This script for testing all built-in functions of fsc2 dealing with
+	with graphical elements the user can define, set, query and delete.
+	No warnings or errors should occur or something is seriously broken.
+
+	$Id$
+-------------------------------------------------------------------------*/ 
+
+VARIABLES:
+
+B1, B2, B3, B4;
+S1, S2;
+I1, I2;
+O1, O2;
+M;
+I;
+
+EXPERIMENT:
+
+hide_toolbox( 1 );
+B1 = button_create( "NORMAL_BUTTON", "Normal button",
+					"This is a\nnormal button" );
+B2 = button_create( "PUSH_BUTTON", "Push\nbutton", "This is a\npush button" );
+B3 = button_create( "RADIO_BUTTON", "Radio button 1",
+					"This is a\nradio button" );
+B4 = button_create( "RADIO_BUTTON", B3, "Radio button 2",
+					"This is another\nradio button" );
+S1 = slider_create( "NORMAL_SLIDER", 0, 10, 0.5, "Normal slider",
+					"This is a\nnormal slider" );
+S2 = slider_create( "VALUE_SLIDER", -10, 10, 1, "Value slider",
+					"This is a\nvalue slider" );
+I1 = input_create( "INT_INPUT", 1685, "Integer input object",
+				   "This is an input\nobject for integers" );
+I2 = input_create( "FLOAT_INPUT", -2.7182818, "Float input object",
+				   "This is an input\nobject for floats", "%14.7e" );
+O1 = output_create( "INT_OUTPUT", 1750, "Integer output object",
+					"This is an output\nobject for integers" );
+O2 = output_create( "FLOAT_OUTPUT", 3.1415927, "Float output object",
+					"This is an output\nobject for floats", "%14.7f" );
+M = menu_create( "Menu", "Item1", "Item2", "Item3" );
+hide_toolbox( 0 );
+
+FOR I = 1 : 10 {
+	button_state( B2, ( button_state( B2 ) + 1 ) % 2 );
+	IF button_state( B3 ) {
+		button_state( B4, 1 );
+	} ELSE {
+		button_state( B3, 1 );
+	}
+	slider_value( S1, slider_value( S1 ) + 0.5 );
+	slider_value( S2, slider_value( S2 ) - 1 );
+	input_value( I1, input_value( I1 ) + 10 );
+	input_value( I2, input_value( I2 ) * 2 );
+	output_value( O1, output_value( O1 ) - 10 );
+	output_value( O2, output_value( O2 ) / 2 );
+	menu_choice( M, menu_choice( M ) % 3 + 1 );
+}
+
+button_delete( B1, B2 );
+button_delete( B3 );
+button_delete( B4 );
+slider_delete( S1, S2 );
+input_delete( I1, I2 );
+output_delete( O1, O2 );
+menu_delete( M );
+
+B1 = button_create( 0, "Normal button", "This is a\nnormal button" );
+B2 = button_create( 1, "Push\nbutton", "This is a\npush button" );
+B3 = button_create( 2, "Radio button 1", "This is a\nradio button" );
+B4 = button_create( 2, B3, "Radio button 2", "This is another\nradio button" );
+S1 = slider_create( 3, 0, 10, 0.5, "Normal slider",
+					"This is a\nnormal slider" );
+S2 = slider_create( 4, -10, 10, 1, "Value slider", "This is a\nvalue slider" );
+I1 = input_create( 5, 1685, "Integer input object",
+				   "This is an input\nobject for integers" );
+I2 = input_create( 6, -2.7182818, "Float input object",
+				   "This is an input\nobject for floats", "%14.7e" );
+O1 = output_create( 7, 1750, "Integer output object",
+					"This is an output\nobject for integers" );
+O2 = output_create( 8, 3.1415927, "Float output object",
+					"This is an output\nobject for floats", "%14.7f" );
+M = menu_create( "Menu", "Item1", "Item2", "Item3" );
+
+FOR I = 1 : 10 {
+	button_state( B2, ( button_state( B2 ) + 1 ) % 2 );
+	IF button_state( B3 ) {
+		button_state( B4, 1 );
+	} ELSE {
+		button_state( B3, 1 );
+	}
+	slider_value( S1, slider_value( S1 ) - 0.5 );
+	slider_value( S2, slider_value( S2 ) + 1 );
+	input_value( I1, input_value( I1 ) - 10 );
+	input_value( I2, input_value( I2 ) / 2 );
+	output_value( O1, output_value( O1 ) + 10 );
+	output_value( O2, output_value( O2 ) * 2 );
+	menu_choice( M, menu_choice( M ) % 3 + 1 );
+}
+
+object_delete( M, O2, O1, I2, I1, S2, S1, B4, B3, B2, B1 );
