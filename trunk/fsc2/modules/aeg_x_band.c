@@ -393,7 +393,14 @@ Var *magnet_fast_init( Var *v )
 
 Var *set_field( Var *v )
 {
+	double field;
+
+
 	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == INT_VAR )
+		eprint( WARN, "%s:%ld: %s: Integer value used for magnetic field.\n",
+				Fname, Lc, DEVICE_NAME );
+	field = VALUE( v );
 
 	if ( exist_device( "er035m" ) )
 	{
@@ -437,18 +444,23 @@ Var *set_field( Var *v )
 		}
 	}
 
-	if ( TEST_RUN )
-		return vars_push( FLOAT_VAR, VALUE( v ) );
-
-	if ( ! magnet_goto_field( VALUE( v ) ) )
+	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		eprint( FATAL, "%s: Can't reach requested field of %lf G.\n",
-				DEVICE_NAME, VALUE( v ) );
-		THROW( EXCEPTION );
+		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of "
+				"function `set_field'.\n", Fname, Lc, DEVICE_NAME );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
 	}
 
-	while ( ( v = vars_pop( v ) ) )
-		;
+	if ( TEST_RUN )
+		return vars_push( FLOAT_VAR, field );
+
+	if ( ! magnet_goto_field( field ) )
+	{
+		eprint( FATAL, "%s: Can't reach requested field of %lf G.\n",
+				DEVICE_NAME, field );
+		THROW( EXCEPTION );
+	}
 
 	return vars_push( FLOAT_VAR, magnet.act_field );
 }
