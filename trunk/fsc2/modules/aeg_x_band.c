@@ -37,7 +37,6 @@
 /* Exported functions */
 
 int aeg_x_band_init_hook( void );
-int aeg_x_band_test_hook( void );
 int aeg_x_band_exp_hook( void );
 int aeg_x_band_end_of_exp_hook( void );
 void aeg_x_band_exit_hook( void );
@@ -222,15 +221,6 @@ int aeg_x_band_init_hook( void )
 	magnet.is_opened = UNSET;
 	magnet.fast_init = UNSET;
 
-	return 1;
-}
-
-
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
-
-int aeg_x_band_test_hook( void )
-{
 	return 1;
 }
 
