@@ -427,21 +427,23 @@ value or a string variable with the string @code{"ON"} (it is
 case-insensitive, so @code{"on"}, @code{"On"} or even @code{"oN"} will
 also do). False (i.e.@: @code{0} is returned when it receives an integer
 variable with a value of @code{0} or a string with the text @code{"OFF"}
-(again this checked ion a case-insensitive manner). If the variable
-passed to the function is a floating point variable normally an error
-message like
+(again this is checked in a case-insensitive manner).
+
+If the variable passed to the function is a floating point variable
+normally an error message like
 @example
 foo.edl:17: XYZ: Floating point number found where boolean
                  value was expected in abc().
 @end example
 @noindent
-Only when @acronym{fsc2} is running the experiment only a similar
-warning message is printed but instead the floating point value is
-copnverted to the next integer value and the truth value of this number
-is returned to avoid stopping the experiment.
+is printed and an exception is thrown. Only when @acronym{fsc2} is
+running the experiment only a similar warning message is printed but
+instead the floating point value is converted to the nearest integer
+value and the truth value of this number is returned to avoid stopping
+the experiment.
 
 Finally, if the function receives a string variable that is neither
-@code{"ON"} nor @code{"OFF"} (including variations of the case the
+@code{"ON"} nor @code{"OFF"} (including variations of the case of the
 characters) an error message is printed:
 @example
 foo.edl:17: XYZ: Invalid boolean argument ("bla") in abc().
