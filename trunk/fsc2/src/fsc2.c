@@ -464,7 +464,7 @@ static void test_machine_type( void )
 		 ! strcasecmp( utsbuf.sysname, "linux" ) )
 		Internals.is_linux_i386 = SET;
 	else
-		Internals.is_linux_i386 = SET;
+		Internals.is_linux_i386 = UNSET;
 }
 
 
