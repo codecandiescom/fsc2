@@ -122,8 +122,16 @@ void load_all_drivers( void )
 			if ( need_GPIB == UNSET && saved_need_GPIB == SET )
 				need_GPIB = SET;
 
+#if defined WITH_RULBUS
 			if ( need_RULBUS == UNSET && saved_need_RULBUS == SET )
 				need_RULBUS = SET;
+#else
+			if ( need_RULBUS )
+			{
+				eprint( FATAL, UNSET, "Module '%s' requires RULBUS but fsc2 "
+						"hasn't been built with RULBUS support.\n", cd->name );
+				THROW( EXCEPTION );
+#endif
 		}
 
 		TRY_SUCCESS;

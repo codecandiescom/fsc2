@@ -47,6 +47,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#if defined WITH_RULBUS
+#include <rulbus.h>
+#endif
+
 
 /* inclusion of programs own header files as far as necessary */
 

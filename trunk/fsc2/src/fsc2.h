@@ -55,6 +55,10 @@
 #include <fcntl.h>
 #include <forms.h>
 
+#if defined WITH_RULBUS
+#include <rulbus.h>
+#endif
+
 /* inclusion of programs own header files */
 
 #include "fsc2_config.h"

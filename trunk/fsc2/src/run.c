@@ -35,7 +35,7 @@ extern FL_resource xresources[ ];             /* from xinit.c */
 
 /* Routines of the main process exclusively used in this file */
 
-static bool start_gpib( void );
+static bool start_gpib_and_rulbus( void );
 static bool no_prog_to_run( void );
 static bool init_devs_and_graphics( void );
 static void stop_while_exp_hook( FL_OBJECT *a, long b );
@@ -106,7 +106,7 @@ bool run( void )
 
 	Internals.state = STATE_RUNNING;
 
-	if ( ! start_gpib( ) )
+	if ( ! start_gpib_and_rulbus( ) )
 		return FAIL;
 
 	/* If there are no commands but an EXPERIMENT section label we just run
@@ -176,7 +176,7 @@ bool run( void )
 /* starts the GPIB bus if at least one of the devices needs it.      */
 /*-------------------------------------------------------------------*/
 
-static bool start_gpib( void )
+static bool start_gpib_and_rulbus( void )
 {
 	/* Disable some buttons and show a watch cusor */
 
@@ -196,6 +196,25 @@ static bool start_gpib( void )
 		XFlush( fl_get_display( ) );
 		return FAIL;
 	}
+
+#if defined WITH_RULBUS
+	/* If there are devices that are controlled via the RULBUS initialize it */
+
+	if ( need_RULBUS && ( retval = rulbus_open( ) ) < 0 )
+	{
+		eprint( FATAL, UNSET, "Failed to initialize RULBUS: %s.\n",
+				rulbus_strerror( ) );
+
+		if ( need_GPIB )
+			gpib_shutdown( );
+
+		set_buttons_for_run( 0 );
+		Internals.state = STATE_IDLE;
+		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+		XFlush( fl_get_display( ) );
+		return FAIL;
+	}
+#endif
 
 	return OK;
 }
@@ -240,6 +259,11 @@ static bool no_prog_to_run( void )
 	EDL.do_quit = EDL.react_to_do_quit = UNSET;
 
 	run_end_of_exp_hooks( );
+
+#if defined WITH_RULBUS
+	if ( need_RULBUS
+		 rulbus_close( );
+#endif
 
 	if ( need_GPIB )
 		gpib_shutdown( );
@@ -325,8 +349,14 @@ static bool init_devs_and_graphics( void )
 		run_end_of_exp_hooks( );
 		vars_del_stack( );
 
+#if defined WITH_RULBUS
+		if ( need_RULBUS
+			 rulbus_close( );
+#endif
+
 		if ( need_GPIB )
 			gpib_shutdown( );
+
 		fsc2_serial_cleanup( );
 
 		Internals.mode = PREPARATION;
@@ -432,8 +462,14 @@ static void fork_failure( int stored_errno )
 
 	run_end_of_exp_hooks( );
 
+#if defined WITH_RULBUS
+	if ( need_RULBUS
+		 rulbus_close( );
+#endif
+
 	if ( need_GPIB )
 		gpib_shutdown( );
+
 	fsc2_serial_cleanup( );
 
 	Internals.mode = PREPARATION;
@@ -696,8 +732,14 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 
 	run_end_of_exp_hooks( );
 
+#if defined WITH_RULBUS
+	if ( need_RULBUS
+		 rulbus_close( );
+#endif
+
 	if ( need_GPIB )
 		gpib_shutdown( );
+
 	fsc2_serial_cleanup( );
 
 	/* Print out for how long the experiment has been running */
