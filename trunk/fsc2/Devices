@@ -20,8 +20,8 @@ TDS520A       // Tektronix digitizing oscilloscope
 SR510         // Stanford Research lock-in amplifier
 SR810         // Stanford Research lock-in amplifier
 
-S_BAND        // S-band magnet power supply
-AEG_X_BAND    // X-band AEG magnet power supply
+S_BAND        // S-band AEG magnet power supply (Frankfurt)
+AEG_X_BAND    // X-band AEG magnet power supply (Berlin)
 
 ER035M        // Bruker NMR gaussmeter
 
