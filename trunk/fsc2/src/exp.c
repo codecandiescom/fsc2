@@ -68,6 +68,7 @@ static void loop_setup( void );
 static void setup_while_or_repeat( int type, long *pos );
 static void setup_if_else( long *pos, Prg_Token *cur_wr );
 static void exp_syntax_check( void );
+static void deal_with_token_in_test( void );
 static void save_restore_variables( bool flag );
 static const char *get_construct_name( int type );
 
@@ -614,7 +615,7 @@ static void setup_while_or_repeat( int type, long *pos )
 		}
 	}
 
-	eprint( FATAL, UNSET, "Missing '}' for %s loop starting at %s:%ld.\n",
+	eprint( FATAL, UNSET, "Missing '}' for %s starting at %s:%ld.\n",
 			get_construct_name( type ), cur->Fname, cur->Lc );
 	THROW( EXCEPTION );
 }
@@ -833,7 +834,6 @@ int exp_testlex( void )
 
 void exp_test_run( void )
 {
-	Prg_Token *cur;
 	long old_FLL = EDL.File_List_Len;
 
 
@@ -890,112 +890,10 @@ void exp_test_run( void )
 				EDL.do_quit = UNSET;
 			}
 
-			switch ( EDL.cur_prg_token->token )
-			{
-				case '}' :
-					EDL.cur_prg_token = EDL.cur_prg_token->end;
-					break;
+			/* Now deal with the token at hand - the function only returns
+			   when contro[ structure tokens are found */
 
-				case WHILE_TOK :
-					cur = EDL.cur_prg_token;
-					if ( test_condition( cur ) )
-					{
-						cur->counter = 1;
-						EDL.cur_prg_token = cur->start;
-					}
-					else
-					{
-						cur->counter = 0;
-						EDL.cur_prg_token = cur->end;
-					}
-					break;
-
-				case UNTIL_TOK :
-					cur = EDL.cur_prg_token;
-					if ( ! test_condition( cur ) )
-					{
-						cur->counter = 1;
-						EDL.cur_prg_token = cur->start;
-					}
-					else
-					{
-						cur->counter = 0;
-						EDL.cur_prg_token = cur->end;
-					}
-					break;
-
-				case REPEAT_TOK :
-					cur = EDL.cur_prg_token;
-					if ( cur->counter == 0 )
-						get_max_repeat_count( cur );
-					if ( ++cur->count.repl.act <= cur->count.repl.max )
-					{
-						cur->counter++;
-						EDL.cur_prg_token = cur->start;
-					}
-					else
-					{
-						cur->counter = 0;
-						EDL.cur_prg_token = cur->end;
-					}
-					break;
-
-				case FOR_TOK :
-					cur = EDL.cur_prg_token;
-					if ( cur->counter == 0 )
-						get_for_cond( cur );
-					if ( test_for_cond( cur ) )
-					{
-						cur->counter = 1;
-						EDL.cur_prg_token = cur->start;
-					}
-					else
-					{
-						cur->counter = 0;
-						EDL.cur_prg_token = cur->end;
-					}
-					break;
-
-				case FOREVER_TOK :
-					cur = EDL.cur_prg_token;          /* just test once ! */
-					if ( cur->counter )
-					{
-						cur->counter = 0;
-						EDL.cur_prg_token = cur->start;
-					}
-					else
-					{
-						cur->counter = 0;
-						EDL.cur_prg_token = cur->end;
-					}
-					break;
-
-				case BREAK_TOK :
-					EDL.cur_prg_token->start->counter = 0;
-					EDL.cur_prg_token = EDL.cur_prg_token->start->end;
-					break;
-
-				case NEXT_TOK :
-					EDL.cur_prg_token = EDL.cur_prg_token->start;
-					break;
-
-				case IF_TOK : case UNLESS_TOK :
-					cur = EDL.cur_prg_token;
-					EDL.cur_prg_token
-						       = test_condition( cur ) ? cur->start : cur->end;
-					break;
-
-				case ELSE_TOK :
-					if ( ( EDL.cur_prg_token + 1 )->token == '{' )
-						EDL.cur_prg_token += 2;
-					else
-						EDL.cur_prg_token++;
-					break;
-
-				default :
-					exp_runparse( );               /* (re)start the parser */
-					break;
-			}
+			deal_with_token_in_test( );
 		}
 
 		tools_clear( );
@@ -1020,6 +918,122 @@ void exp_test_run( void )
 	save_restore_variables( UNSET );
 	EDL.File_List_Len = old_FLL;
 	Internals.mode = PREPARATION;
+}
+
+
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+
+static void deal_with_token_in_test( void )
+{
+	Prg_Token *cur;
+
+
+	switch ( EDL.cur_prg_token->token )
+	{
+		case '}' :
+			EDL.cur_prg_token = EDL.cur_prg_token->end;
+			break;
+
+		case WHILE_TOK :
+			cur = EDL.cur_prg_token;
+			if ( test_condition( cur ) )
+			{
+				cur->counter = 1;
+				EDL.cur_prg_token = cur->start;
+			}
+			else
+			{
+				cur->counter = 0;
+				EDL.cur_prg_token = cur->end;
+			}
+			break;
+
+		case UNTIL_TOK :
+			cur = EDL.cur_prg_token;
+			if ( ! test_condition( cur ) )
+			{
+				cur->counter = 1;
+				EDL.cur_prg_token = cur->start;
+			}
+			else
+			{
+				cur->counter = 0;
+				EDL.cur_prg_token = cur->end;
+			}
+			break;
+
+		case REPEAT_TOK :
+			cur = EDL.cur_prg_token;
+			if ( cur->counter == 0 )
+				get_max_repeat_count( cur );
+			if ( ++cur->count.repl.act <= cur->count.repl.max )
+			{
+				cur->counter++;
+				EDL.cur_prg_token = cur->start;
+			}
+			else
+			{
+				cur->counter = 0;
+				EDL.cur_prg_token = cur->end;
+			}
+			break;
+
+		case FOR_TOK :
+			cur = EDL.cur_prg_token;
+			if ( cur->counter == 0 )
+				get_for_cond( cur );
+			if ( test_for_cond( cur ) )
+			{
+				cur->counter = 1;
+				EDL.cur_prg_token = cur->start;
+			}
+			else
+			{
+				cur->counter = 0;
+				EDL.cur_prg_token = cur->end;
+			}
+			break;
+
+		case FOREVER_TOK :
+			cur = EDL.cur_prg_token;          /* just test once ! */
+			if ( cur->counter )
+			{
+				cur->counter = 0;
+				EDL.cur_prg_token = cur->start;
+			}
+			else
+			{
+				cur->counter = 0;
+				EDL.cur_prg_token = cur->end;
+			}
+			break;
+
+		case BREAK_TOK :
+			EDL.cur_prg_token->start->counter = 0;
+			EDL.cur_prg_token = EDL.cur_prg_token->start->end;
+			break;
+
+		case NEXT_TOK :
+			EDL.cur_prg_token = EDL.cur_prg_token->start;
+			break;
+
+		case IF_TOK : case UNLESS_TOK :
+			cur = EDL.cur_prg_token;
+			EDL.cur_prg_token = test_condition( cur ) ? cur->start : cur->end;
+			break;
+			
+		case ELSE_TOK :
+			if ( ( EDL.cur_prg_token + 1 )->token == '{' )
+				EDL.cur_prg_token += 2;
+			else
+				EDL.cur_prg_token++;
+			break;
+
+		default :
+			exp_runparse( );               /* (re)start the parser */
+			break;
+	}
 }
 
 
