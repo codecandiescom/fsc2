@@ -105,8 +105,8 @@ FUV      {FLOAT}{UV}
 FMV      {FLOAT}{MV}
 FV       {FLOAT}{V}
 
-FMG      {INT}{MG}
-FG       {INT}{G}
+FMG      {FLOAT}{MG}
+FG       {FLOAT}{G}
 
 FMHZ     {FLOAT}{MHZ}
 FKHZ     {FLOAT}{KHZ}
@@ -328,12 +328,12 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 {IMV}       unit_spec( yytext, yyleng, "\x04mvolt" );
 {IV}/(;|,)  unit_spec( yytext, yyleng, "\x04volt" );
 {IV}        unit_spec( yytext, yyleng, "\x04volt" );
-{FNV}/(;|,) unit_spec( yytext, yyleng, "\x04volt" );
-{FNV}       unit_spec( yytext, yyleng, "\x04volt" );
-{FUV}/(;|,) unit_spec( yytext, yyleng, "\x04volt" );
-{FUV}       unit_spec( yytext, yyleng, "\x04volt" );
-{FMV}/(;|,) unit_spec( yytext, yyleng, "\x04volt" );
-{FMV}       unit_spec( yytext, yyleng, "\x04volt" );
+{FNV}/(;|,) unit_spec( yytext, yyleng, "\x04nvolt" );
+{FNV}       unit_spec( yytext, yyleng, "\x04nvolt" );
+{FUV}/(;|,) unit_spec( yytext, yyleng, "\x04uvolt" );
+{FUV}       unit_spec( yytext, yyleng, "\x04uvolt" );
+{FMV}/(;|,) unit_spec( yytext, yyleng, "\x04mvolt" );
+{FMV}       unit_spec( yytext, yyleng, "\x04mvolt" );
 {FV}/(;|,)  unit_spec( yytext, yyleng, "\x04volt" );
 {FV}        unit_spec( yytext, yyleng, "\x04volt" );
 
