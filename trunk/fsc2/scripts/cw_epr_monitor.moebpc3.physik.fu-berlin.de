@@ -284,9 +284,7 @@ FOREVER {
 
 	IF button_state( Save ) {
 		File = get_file( );
-		IF is_file( File ) {
-			save( File, slice( data, 1, I ) );
-		}
+		save( File, slice( data, 1, I ) );
 	}
 
 	Old_Pause_State = Pause_State;
