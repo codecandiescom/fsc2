@@ -513,9 +513,6 @@ void exp_test_run( void )
 		T_free( Fname );
 	Fname = NULL;
 
-	if ( prg_length == 0 )                       /* no program no test... */
-		return;
-
 	TRY
 	{
 		/* 1. Run the test run hook functions of the modules.
