@@ -1674,6 +1674,9 @@ void vars_clean_up( void )
 
 Var *vars_push_copy( Var *v )
 {
+	Var *nv = NULL;
+
+
 	if ( v->flags & ON_STACK )
 		return v;
 
@@ -1683,23 +1686,30 @@ Var *vars_push_copy( Var *v )
 	switch ( v->type )
 	{
 		case INT_VAR :
-			return vars_push( v->type, v->val.lval );
+			nv = vars_push( v->type, v->val.lval );
+			break;
 
 		case FLOAT_VAR :
-			return vars_push( v->type, v->val.dval );
+			nv = vars_push( v->type, v->val.dval );
+			break;
 
 		case INT_ARR :
-			return vars_push( v->type, v->val.lpnt, v->len );
+			nv = vars_push( v->type, v->val.lpnt, v->len );
+			break;
 
 		case FLOAT_ARR :
-			return vars_push( v->type, v->val.dpnt, v->len );
+			nv = vars_push( v->type, v->val.dpnt, v->len );
+			break;
 
 		case INT_REF : case FLOAT_REF :
-			return vars_push( v->type, v );
+			nv = vars_push( v->type, v );
+			break;
+
+		default:
+			fsc2_assert( 1 == 0 );
 	}
 
-	fsc2_assert( 1 == 0 );
-	return NULL;
+	return nv;
 }
 
 
