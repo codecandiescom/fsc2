@@ -102,7 +102,7 @@ static void exp_runerror( const char *s );
 
 %token E_NT_TOKEN E_UT_TOKEN E_MT_TOKEN E_T_TOKEN E_KT_TOKEN E_MGT_TOKEN
 %token E_NU_TOKEN E_UU_TOKEN E_MU_TOKEN E_KU_TOKEN E_MEG_TOKEN
-%type <vptr> expr unit line list1
+%type <vptr> expr unit line list1 list2
 
 
 
@@ -141,7 +141,7 @@ line:    E_VAR_TOKEN '=' expr      { vars_assign( $3, $1 ); }
        | E_VAR_TOKEN '['           { vars_arr_start( $1 ); }
          list1 ']'                 { vars_arr_lhs( $4 ) }
          ass                       { fsc2_assert( EDL.Var_Stack == NULL ); }
-       | E_FUNC_TOKEN '(' list2 ')'{ vars_pop( func_call( $1 ) ); }
+       | E_FUNC_TOKEN '(' list3 ')'{ vars_pop( func_call( $1 ) ); }
        | E_FUNC_TOKEN '['          { print( FATAL, "'%s' is a predefined "
 											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
@@ -228,7 +228,7 @@ expr:    E_INT_TOKEN unit          { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | E_VAR_TOKEN '['           { vars_arr_start( $1 ); }
          list1 ']'                 { $$ = vars_arr_rhs( $4 ); }
          unit                      { $$ = apply_unit( $<vptr>6, $7 ); }
-       | E_FUNC_TOKEN '(' list2
+       | E_FUNC_TOKEN '(' list3
          ')'                       { $$ = func_call( $1 ); }
          unit                      { $$ = apply_unit( $<vptr>5, $6 ); }
        | E_VAR_REF
@@ -283,18 +283,20 @@ unit:    /* empty */               { $$ = NULL; }
 /* list of indices for access of an array element */
 
 list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
-	   | expr
-       | list1 ',' expr            { $$ = $3; }
+	   | expr list2
 ;
+
+list2:   /* empty */               { }
+       | list2 ',' expr            { $$ = $3; }
 
 /* list of function arguments */
 
-list2:   /* empty */
-       | exprs list3
+list3:   /* empty */
+       | exprs list4
 ;
 
-list3:   /* empty */
-       | list3 ',' exprs
+list4:   /* empty */
+       | list4 ',' exprs
 ;
 
 exprs:   expr                     { }
