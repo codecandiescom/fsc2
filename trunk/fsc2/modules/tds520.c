@@ -150,13 +150,6 @@ int tds520_exp_hook( void )
 int tds520_end_of_exp_hook( void )
 {
 	tds520_finished( );
-
-	/* Reset the digitizer structure to the state it was set to in the
-	   preparations section - we need this when starting the same experiment
-	   again... */
-
-	tds520_store_state( &tds520, &tds520_stored );
-
 	return 1;
 }
 

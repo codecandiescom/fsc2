@@ -329,7 +329,7 @@ void er023m_set_ct( int ct_mult )
 
 /*------------------------------------------------*/
 /* Asks the device for the current phase setting, */
-/* a value between 0 and 259 will be returned.    */
+/* a value between 0 and 359 will be returned.    */
 /*------------------------------------------------*/
 
 int er023m_get_ph( void )

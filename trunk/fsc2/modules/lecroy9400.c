@@ -132,11 +132,6 @@ int lecroy9400_exp_hook( void )
 int lecroy9400_end_of_exp_hook( void )
 {
 	lecroy9400_finished( );
-
-	/* Reset structure describing the state of the digitizer to the one
-	   it had before the test run was started */
-
-	lecroy9400_store_state( &lecroy9400, &lecroy9400_stored );
 	return 1;
 }
 

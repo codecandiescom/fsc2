@@ -244,7 +244,6 @@ int sr830_end_of_exp_hook( void )
 	if ( sr830.device >= 0 )
 		gpib_local( sr830.device );
 
-	memcpy( &sr830, &sr830_stored, sizeof( SR830 ) );
 	sr830.device = -1;
 
 	return 1;

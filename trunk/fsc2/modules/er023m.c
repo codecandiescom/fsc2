@@ -175,11 +175,10 @@ Var *lockin_get_data( Var *v )
 	if ( FSC2_MODE == TEST )               /* return dummy value in test run */
 		return vars_push( FLOAT_VAR, ER023M_TEST_DATA );
 
-	val = ( double ) er023m_get_data( );
-/*
+/*	val = ( double ) er023m_get_data( );*/
 	val = ( ( double ) ( er023m_get_data( ) - er023m.min )
 			* er023m.scale_factor - 1.0 ) / rg_list[ er023m.rg_index ];
-*/
+
 	return vars_push( FLOAT_VAR, val );
 }
 

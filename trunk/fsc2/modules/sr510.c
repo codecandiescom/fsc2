@@ -206,7 +206,6 @@ int sr510_end_of_exp_hook( void )
 		gpib_local( sr510.device );
 	}
 
-	memcpy( &sr510, &sr510_stored, sizeof( SR510 ) );
 	sr510.device = -1;
 
 	return 1;

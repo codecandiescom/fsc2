@@ -135,6 +135,8 @@ bool run( void )
 		fl_set_object_callback( main_form->run, stop_while_exp_hook, 0 );
 
 		fl_set_object_label( main_form->run, "Stop" );
+
+		FSC2_MODE = EXPERIMENT;
 		run_exp_hooks( );
 
 		fl_set_object_callback( main_form->run, run_file, 0 );
@@ -161,6 +163,8 @@ bool run( void )
 		if ( need_GPIB )
 			gpib_shutdown( );
 		fsc2_serial_cleanup( );
+
+		FSC2_MODE = PREPARATION;
 
 		set_buttons_for_run( 1 );
 		stop_graphics( );
@@ -206,6 +210,7 @@ bool run( void )
 
 	if ( child_pid != -1 )           /* if fork() succeeded */
 	{
+		FSC2_MODE = PREPARATION;
 		sema_post( semaphore );      /* we're ready to read data */
 		need_post = UNSET;
 		return OK;
@@ -251,6 +256,7 @@ bool run( void )
 	if ( need_GPIB )
 		gpib_shutdown( );
 	fsc2_serial_cleanup( );
+	FSC2_MODE = PREPARATION;
 
 	stop_measurement( NULL, 1 );
 	return FAIL;
@@ -672,7 +678,6 @@ static void run_child( void )
 
 
 	I_am = CHILD;
-	FSC2_MODE = EXPERIMENT;
 
     /* Set up pipes for communication with parent process */
 
