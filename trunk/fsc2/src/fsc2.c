@@ -481,7 +481,6 @@ void test_file( FL_OBJECT *a, long b )
 
 
 	a->u_ldata = 0;
-	b = b;
 
 	/* While program is being tested the test can be aborted by pressing the
 	   test button again - in this case we simply throw an exception */
@@ -560,6 +559,12 @@ void test_file( FL_OBJECT *a, long b )
 		a->u_ldata = 1;
 		user_break = UNSET;
 	}
+
+
+	/* Delete buttons etc f this was really just a test and not the */
+
+	if ( b == 0 || a->u_ldata || ! state )
+		tools_clear( );
 
 	fl_set_object_label( main_form->test_file, "Test" );
 	fl_activate_object( main_form->Load );
@@ -657,7 +662,10 @@ void run_file( FL_OBJECT *a, long b )
 
 		if ( 1 == fl_show_choice( str1, str2, "Continue to run the program?",
 								  2, "No", "Yes", "", 1 ) )
+		{
+			tools_clear( );
 			return;
+		}
 	}		
 
 	/* Finally start the experiment */
