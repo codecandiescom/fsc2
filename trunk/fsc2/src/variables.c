@@ -6,7 +6,7 @@
 #include "fsc2.h"
 
 
-/* some typedefs needed due to the limitations of va_arg() (also see the
+/* Some typedefs needed due to the limitations of va_arg() (also see the
    C-FAQ 15.11 on this point): FnctPtr is a pointer to a Var pointer returning
    function with a Var pointer as argument. */
 
@@ -935,18 +935,11 @@ void vars_check( Var *v, int type )
 
 	if ( v->type == UNDEF_VAR )
 	{
-		if ( v->name != NULL )
-		{
-			eprint( FATAL, "%s:%ld: The accessed variable `%s' has not been "
-					"assigned a value.\n", Fname, Lc, v->name );
-			THROW( EXCEPTION );
-		}
-		else
-		{
-			eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			exit( EXIT_FAILURE );
-		}
+		assert( v->name != NULL );              /* just a bit paranoid ? */
+
+		eprint( FATAL, "%s:%ld: The accessed variable `%s' has not been "
+				"assigned a value.\n", Fname, Lc, v->name );
+		THROW( EXCEPTION );
 	}
 	
 	/* Check that the variable has the correct type */
@@ -975,19 +968,10 @@ void vars_warn_new( Var *v )
 {
  	if ( v->flags & NEW_VARIABLE )
 	{
-		if ( v->name != NULL )
-			eprint( WARN, "%s:%ld: WARNING: Variable `%s' has not been "
-					"assigned a value.\n", Fname, Lc, v->name );
-		else
-		{
-			/* ERROR: transient variables shouldn't have a name (with the
-			   only exception for functions, but then we shouldn't end
-			   up here anyway...) */ 
+		assert( v->name != NULL );            /* just a bit paranoid ? */
 
-			eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s.\n",
-					__FILE__, __LINE__ );
-			exit( EXIT_FAILURE );
-		}
+		eprint( WARN, "%s:%ld: WARNING: Variable `%s' has not been assigned "
+				"a value.\n", Fname, Lc, v->name );
 	}
 }
 
@@ -1009,6 +993,8 @@ bool vars_exist( Var *v )
 	for ( lp = Var_Stack; lp != NULL; lp = lp->next )
 		if ( lp == v )
 			return OK;
+
+	/* This should never happen and this function might finally vanish... */
 
 	eprint( FATAL, "fsc2: INTERNAL ERROR: Use of non-existing "
 			"variable detected at %s:%d.\n", __FILE__, __LINE__ );
@@ -1034,7 +1020,7 @@ Var *vars_arr_start( Var *v )
 
 	/* Check if the array is completely new (type is still UNDEF_VAR). In this
 	   case set its type and zero the pointer to the data so we know no memory
-	   has been allocated yet. Otherwise check if its really an array. */
+	   has been allocated yet. Otherwise check if it's really an array. */
 
 	if ( v->type == UNDEF_VAR )
 	{
@@ -1064,30 +1050,27 @@ Var *vars_arr_start( Var *v )
 
 Var *vars_arr_lhs( Var *v )
 {
-	int dim;
-	Var *a,
-		*cv;
+	int n;
+	Var *cv;
 
 
 	while ( v->type != ARR_PTR )
 		v = v->prev;
 
-	a = v->from;
-
 	/* Count the variable below v on the stack */
 
-	for ( dim = 0, cv = v->next; cv != 0; cv = cv->next )
+	for ( n = 0, cv = v->next; cv != 0; cv = cv->next )
 		if ( cv->type != UNDEF_VAR )
-			dim++;
+			n++;
 
 	/* If the array is new we need to set it up */
 
-	if ( a->flags & NEW_VARIABLE )
-		return vars_setup_new_array( a, dim, v );
+	if ( v->from->flags & NEW_VARIABLE )
+		return vars_setup_new_array( v, n );
 
 	/* Push a pointer to the indexed element onto the stack */
 
-	return vars_get_lhs_pointer( a, v, dim );
+	return vars_get_lhs_pointer( v, n );
 }
 
 
@@ -1097,11 +1080,17 @@ Var *vars_arr_lhs( Var *v )
 /* evaluates the index list and returns an ARR_PTR variable pointing to */
 /* the indexed array element (or slice, if there is one index less than */
 /* the array has dimensions).                                           */
+/* ->                                                                   */
+/*    1. The 'from'-field in 'v' is a pointer to to the array and the   */
+/*       following variables on the stack are the indices of the        */
+/*       element (or slice) to be accessed                              */
+/*    2. Number of indices on the stack                                 */
 /*----------------------------------------------------------------------*/
 
-Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
+Var *vars_get_lhs_pointer( Var *v, int n )
 {
 	Var  *ret;
+	Var *a = v->from;
 	long index;
 
 
@@ -1109,7 +1098,7 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
        arrays allow assignment of array slices there needs to be only one
        index less than the dimension of the array) */
 
-	if ( dim < a->dim - 1 )
+	if ( n < a->dim - 1 )
 	{
 		eprint( FATAL, "%s:%ld: Not enough indices found for array `%s'.\n",
 				Fname, Lc, a->name );
@@ -1118,10 +1107,11 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
 
 	/* Check that there are not too many indices */
 
-	if ( dim > a->dim )
+	if ( n > a->dim )
 	{
-		eprint( FATAL, "%s:%ld: Too many indices found for %d-dimensional "
-				"array `%s'.\n", Fname, Lc, a->dim, a->name );
+		eprint( FATAL, "%s:%ld: Too many indices (%d) found for "
+				"%d-dimensional array `%s'.\n",
+				Fname, Lc, n, a->dim, a->name );
 		THROW( EXCEPTION );
 	}
 
@@ -1129,7 +1119,7 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
        complete slice in order to determine the missing size of the last
        dimension */
 
-	if ( a->flags & NEED_ALLOC && dim != a->dim - 1 )
+	if ( a->flags & NEED_ALLOC && n != a->dim - 1 )
 	{
 		if ( a->dim != 1 )
 			eprint( FATAL, "%s:%ld: Size of array `%s' is still unknown, "
@@ -1142,18 +1132,19 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
 		THROW( EXCEPTION );
 	}
 
-	/* calculate the pointer to the indexed array element (or slice) */
+	/* Calculate the pointer to the indexed array element (or slice) and,
+       while doing so, pop all the indices from the stack */
 
 	index = vars_calc_index( a, v->next );
 
-	/* pop the variable with the array pointer */
+	/* Pop the variable with the array pointer */
 
 	vars_pop( v );
 
 	/* If the array is still variable sized and thus needs memory allocated we
-	 push a pointer to the array onto the stack and store the indexed slice in
-	 the variables structure `len' element. Otherwise we push a variable onto
-	 the stack with a pointer to the indexed element or slice.*/
+	   push a pointer to the array onto the stack and store the indexed slice
+	   in the variables structure `len' element. Otherwise we push a variable
+	   onto the stack with a pointer to the indexed element or slice.*/
 
 	if ( a->flags & NEED_ALLOC )
 	{
@@ -1163,14 +1154,14 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
 	else
 	{
 		if ( a->type == INT_ARR )
-			ret = vars_push( ARR_PTR, a->val.lpnt + index , a );
+			ret = vars_push( ARR_PTR, a->val.lpnt + index, a );
 		else
-			ret = vars_push( ARR_PTR, a->val.dpnt + index , a );
+			ret = vars_push( ARR_PTR, a->val.dpnt + index, a );
 	}
 
 	/* Set a flag if a slice is indexed */
 
-	if ( dim == a->dim - 1 )
+	if ( n == a->dim - 1 )
 		ret->flags |= NEED_SLICE;
 
 	return ret;
@@ -1193,7 +1184,7 @@ long vars_calc_index( Var *a, Var *v )
 
 	for ( i = 0, index = 0; v != NULL; i++, v = vn )
 	{
-		/* We can't use still undefined variables as index...*/
+		/* We can't use an undefined variable as an index...*/
 
 		if ( v->type == UNDEF_VAR )
 		{
@@ -1256,7 +1247,7 @@ long vars_calc_index( Var *a, Var *v )
 		vars_pop( v );
 	}
 
-	if ( vn != NULL )
+	if ( vn != NULL )                      /* i.e. UNDEF_VAR as an index */
 	{
 		eprint( FATAL, "%s:%ld: Missing array index for array `%s'.\n",
 				Fname, Lc, a->name );
@@ -1273,18 +1264,20 @@ long vars_calc_index( Var *a, Var *v )
 
 
 /*-------------------------------------------------------------------------*/
-/* The function creates a new array 'a' od dimension 'd' with the sizes of */
-/* the dimensions specified by a list of indices on the stack, starting    */
-/* at 'v'. If the list conatains only one index less than the dimension, a */
-/* variable sized array is created.                                        */
+/* The function sets up a new array, pointed to by the 'from'-filed in 'v' */
+/* dimension 'dim' with the sizes of the dimensions specified by a list of */
+/* indices on the stack, starting directly after 'v'. If the list contains */
+/* only one index less than the dimension, a variable sized array is       */
+/* created.                                                                */
 /*-------------------------------------------------------------------------*/
 
-Var *vars_setup_new_array( Var *a, int dim, Var *v )
+Var *vars_setup_new_array( Var *v, int dim )
 {
 	int i,
 		cur;
 	Var *vn,
-		*ret;
+		*ret,
+		*a = v->from;
 
 
 	if ( v->next->type == UNDEF_VAR )
@@ -1375,10 +1368,9 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 	/* Allocate memory */
 
 	if ( a->type == INT_ARR )
-		a->val.lpnt = ( long * ) T_calloc( ( size_t ) a->len, sizeof( long ) );
+		a->val.lpnt = ( long * ) T_calloc( a->len, sizeof( long ) );
 	else
-		a->val.dpnt = ( double * ) T_calloc( ( size_t ) a->len,
-											 sizeof( double ) );
+		a->val.dpnt = ( double * ) T_calloc( a->len, sizeof( double ) );
 
 	a->flags &= ~NEW_VARIABLE;
 	ret = vars_push( ARR_PTR, NULL, a );
@@ -1405,10 +1397,15 @@ Var *vars_arr_rhs( Var *v )
 	/* The variable pointer this function gets passed is a pointer to the very
        last index on the variable stack. Now we've got to work our way up in
        the stack until we find the first non-index variable which has to be a
-       pointer to an array. */
+       pointer to an array. While doing so we also count the number 'dim' of
+       indices on the stack */
 
+	dim = 0;
 	while ( v->type != ARR_PTR )
+	{
 		v = v->prev;
+		dim++;
+	}
 
 	a = v->from;                      /* Get array the pointer refers to */
 
@@ -1421,11 +1418,6 @@ Var *vars_arr_rhs( Var *v )
 				"not been assigned data yet.\n", Fname, Lc, a->name );
 		THROW( EXCEPTION );
 	}
-
-	/* Count the indices on the stack */
-
-	for ( dim = 0, cv = v->next; cv != 0; dim++, cv = cv->next )
-		;
 
 	/* Check that the number of indices is not less than the dimension of the
        array minus one - we allow slice access for the very last dimension */
@@ -1473,7 +1465,7 @@ Var *vars_arr_rhs( Var *v )
 			return vars_push( ARR_PTR, a->val.dpnt + index, a );
 	}
 
-	assert( 1 == 0 );       /* we never should end here... */
+	assert( 1 == 0 );       /* we never should end up here... */
 }
 
 
@@ -1503,7 +1495,7 @@ void vars_assign( Var *src, Var *dest )
 			break;
 
 		default :
-			assert( 1 == 0 );           /* we never should end here... */
+			assert( 1 == 0 );           /* we never should end up here... */
 	}
 
 	vars_pop( dest );
@@ -1524,7 +1516,7 @@ void vars_ass_from_var( Var *src, Var *dest )
 
 	if ( src->flags & NEW_VARIABLE )
 	{
-		eprint( FATAL, "%s:%ld: On right hand side of assignment a "
+		eprint( FATAL, "%s:%ld: On the right hand side of the assignment a "
 				"variable is used that has not been assigned a value.\n",
 				Fname, Lc );
 		THROW( EXCEPTION );
@@ -1599,7 +1591,7 @@ void vars_ass_from_var( Var *src, Var *dest )
 			}
 			break;
 
-		default :                    /* we never should end here... */
+		default :                    /* we never should end up here... */
 			assert ( 1 == 0 );
 	}
 }
@@ -1840,10 +1832,15 @@ void vars_arr_init( Var *v )
 	/* The variable pointer this function gets passed is a pointer to the very
        last initialization data on the variable stack. Now we've got to work
        our way doen the variable stack until we find the first non-data
-       variable which must be of ARR_PTR type. */
+       variable which must be of ARR_PTR type. While doing so, we also count
+       the number of initializers, 'ni', on the stack. */
 
+	ni = 0;
 	while ( v->type != ARR_PTR )
+	{
 		v = v->prev;
+		ni++;
+	}
 	a = v->from;
 	vars_check( a, INT_ARR | FLOAT_ARR );
 
@@ -1868,11 +1865,8 @@ void vars_arr_init( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* Count number of initializers and check that it fits the number of
-       elements the array */
-
-	for ( p1 = v->next, ni = 0; p1 != NULL; ni++, p1 = p1->next )
-		;
+	/* Check that the number of initializers fits the number of elements of
+       the array */
 
 	if ( ni < a->len )
 		eprint( WARN, "%s:%ld: Less initializers for array `%s' than it has "
@@ -1941,10 +1935,14 @@ Var *apply_unit( Var *var, Var *unit )
 			return vars_mult( var, vars_push( INT_VAR, 1 ) );
 		if ( var->type & ( INT_ARR | FLOAT_ARR ) )
 			return vars_push( ARR_REF, var );
-		if ( var->type & ( INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_PTR ) )
+		if ( var->type & ( INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_PTR |
+			               STR_VAR | FUNC ) )
 			 return var;
 
-		assert( 1 == 0 );           /* This better never happens... */
+		/* Here starts the paranoia section... */
+
+		vars_check( var , ~UNDEF_VAR );
+		assert( 1 == 0 );
 	}
 	else
 	{
