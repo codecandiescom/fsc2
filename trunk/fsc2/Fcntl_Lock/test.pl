@@ -33,7 +33,7 @@ ok( $fs = $fs->new( 'l_type'   => F_RDLCK,
 					'l_pid'    => $$ ) );
 
 ##############################################
-# 4. Check that properties of created objects are what they ae supposed to be
+# 4. Check that properties of created objects are what they are supposed to be
 
 ok( $fs->l_type == F_RDLCK and $fs->l_whence == SEEK_CUR and
 	$fs->l_start == 123 and $fs->l_len == 234 and $fs->l_pid == $$ );
@@ -106,11 +106,11 @@ ok( defined $fs->fcntl_lock( $fh, F_SETLK ) );
 close $fh;
 
 ##############################################
-# 16. Now comes a real test: the child process grabs a write lock on a test
-#     file for 2 secs while the parent repeatedly tries to get the lock.
-#     After the child finally releases the lock should be able to obtain the
-#     lock (this test isn't real clean because under extremely high system
-#     load it might not work properly...)
+# 16. Now a real test: the child process grabs a write lock on a test file
+#     for 2 secs while the parent repeatedly tries to get the lock. After
+#     the child finally releases the lock the parent should be able to
+#     obtain the lock (this test isn't real clean because under extremely
+#     high system load it might not work as expected...)
 
 $fs = $fs->new( 'l_type'   => F_WRLCK,
 				'l_whence' => SEEK_SET,
