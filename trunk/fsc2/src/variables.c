@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.12  1999/07/17 15:58:23  jens
+   Bug fix.
+
    Revision 1.11  1999/07/17 15:45:01  jens
    Changed vars_push to reflect new treatment of start of print statements.
 
@@ -870,10 +873,12 @@ Var *vars_push( int type, void *data )
 
 	/* if the type is undefine and data non-zero this comes from the start of
 	   a print statement and data is a pointer to the format string which is
-	   copied in the new stack variables name */
+	   copied in the new stack variables name. Otherwise set name to NULL. */
 
 	if ( type == UNDEF_VAR && data != NULL )
 		new_stack_var->name = get_string_copy( ( char * ) data );
+	else
+		new_stack_var->name = NULL;
 
 	/* set its type and clear the `new_flag' */
 
@@ -887,7 +892,6 @@ Var *vars_push( int type, void *data )
 	if ( type == FLOAT_VAR )
 		new_stack_var->val.dval = *( ( double * ) data );
 
-	new_stack_var->name = NULL;
 	new_stack_var->next = NULL;
 
 	/* and finally append it to the end of the stack */
