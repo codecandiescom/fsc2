@@ -716,6 +716,7 @@ bool display_file( char *name, FILE *fp )
 void sigchld_handler( int sig_type, void *data )
 {
 	int status;
+	int pid;
 
 
 	data = data;
