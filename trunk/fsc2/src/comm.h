@@ -23,7 +23,7 @@
    queue has always to be larger than the maximum number of shared segments,
    so make sure SHMMNI is correct ! */
 
-# define QUEUE_SIZE ( SHMMNI + 1 ) 
+# define QUEUE_SIZE ( SHMMNI + 8 ) 
 
 
 
