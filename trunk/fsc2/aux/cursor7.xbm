@@ -25,7 +25,7 @@
 #define cursor7_height 21
 #define cursor7_x_hot 19
 #define cursor7_y_hot 10
-static const char cursor7_bits[] = {
+static unsigned char cursor7_bits[] = {
   0x00, 0x00, 0x00,
   0x00, 0x00, 0x00,
   0x00, 0x00, 0x00,
