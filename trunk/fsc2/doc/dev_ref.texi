@@ -878,7 +878,8 @@ Fixed length of TRIGGER_OUT pulse: @w{20 ns}
 
 @paragraphindent 0
 @strong{Options to be set in configuration file}:
-@table @samp NUM_CHANNEL_CARDS
+@table @samp
+@item NUM_CHANNEL_CARDS
 Number of cards with 4 channels each build into the device
 @end table
 

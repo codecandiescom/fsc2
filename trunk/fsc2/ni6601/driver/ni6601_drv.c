@@ -165,9 +165,9 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 
 	writel( ( board->addr_phys & 0xFFFFFF00L ) | 0x80,
 		board->mite + 0xC0 );
-
-	/* Request the interrupt used by the board */
 #if 0
+	/* Request the interrupt used by the board */
+
 	if ( request_irq( dev->irq, ni6601_irq_handler, SA_SHIRQ,
 			  NI6601_NAME, board ) ) {
 		PDEBUG( "Can't obtain IRQ %d\n", dev->irq );
