@@ -1081,7 +1081,6 @@ sub num_steps {
 sub add_pulse_list {
 
 	my ( $self, $step, $key ) = ( shift, shift, shift );
-
 	my $ch = $self->find_by_key( $key );
 
 	fail( "Invalid input at line $..\n" ) unless defined $ch;
@@ -1191,14 +1190,21 @@ sub inv {
 #---------------------------------------------------------
 # Adds a new set of pulses for a new step of the experiment - to reduce
 # memory usage a new pulse list is only created if the previous pulse list
-# isn't identical to the new one, otherwise a reference to the previous one
-# is used instead.
+# isn't identical to the new one, otherwise a reference to the last
+# previously defined one is used instead.
 
 sub add_pulse_list {
 
 	my ( $self, $step ) = ( shift, shift );
-	$self->{ 'plist' }[ $step ] = $self->{ 'plist' }[ $step - 1 ]->comp( @_ )
-		if $step > 0;
+
+	my $pstep;
+
+	for ( $pstep = $step - 1; $pstep > 0; $pstep-- ) {
+		last if defined $self->{ 'plist' }[ $pstep ];
+	}
+
+	$self->{ 'plist' }[ $step ] = $self->{ 'plist' }[ $pstep ]->comp( @_ )
+		if $pstep > 0;
 	$self->{ 'plist' }[ $step ] = Pulse_List->new( @_ )
 		unless defined $self->{ 'plist' }[ $step ];
 }
@@ -1213,7 +1219,8 @@ sub get_pulse_list {
 	fail( "Invalid pulse list index\n" ) if $step < 0;
 
 	return $self->{ 'plist' }[ $step ]->{ 'list' }
-		if exists $self->{ 'plist' }[ $step ]->{ 'list' };
+		if defined $self->{ 'plist' }[ $step ] and
+		   exists $self->{ 'plist' }[ $step ]->{ 'list' };
 	return undef;
 }
 
@@ -1226,6 +1233,7 @@ sub longest_sequence {
 	my @duration = ( 0, 0 );
 
 	for ( @{ $self->{ 'plist' } } ) {
+		next unless defined $_;
 		my $len = $_->len;
 		$duration[ 0 ] = $len if $duration[ 0 ] < $len;
 		$duration[ 1 ] = $len - $self->{ 'delay' } + $Delay
@@ -1244,6 +1252,7 @@ sub first_pulse {
     my $first;
 
     for ( @{ $self->{ 'plist' } } ) {
+		next unless defined $_;
         my $e = $_->start;
 		next unless defined $e;
 		$e -= $self->{ 'delay' };
