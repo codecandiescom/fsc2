@@ -1067,6 +1067,7 @@ Var *f_init_1d( Var *v )
 	G.nx = DEFAULT_X_POINTS;
 	G.rwc_start[ X ] = ( double ) ARRAY_OFFSET;
 	G.rwc_delta[ X ] = 1.0;
+	G.label[ X ] = G.label[ Z ] = G.label[ Z ] = NULL;
 
 
 	if ( v == NULL )
@@ -1177,6 +1178,7 @@ Var *f_init_2d( Var *v )
 	G.ny = DEFAULT_Y_POINTS;
 	G.rwc_start[ X ] = G.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
 	G.rwc_delta[ X ] = G.rwc_delta[ Y ] = 1.0; 
+	G.label[ X ] = G.label[ Z ] = G.label[ Z ] = NULL;
 
 
 	if ( v == NULL )
@@ -1309,19 +1311,19 @@ Var *f_init_2d( Var *v )
 labels_2d:
 
 	vars_check( v, STR_VAR );
-	G.label[ X ] = v->val.sptr;
+	G.label[ X ] = get_string_copy( v->val.sptr );
 
 	if ( ( v = v->next ) == NULL )
 		return vars_push( INT_VAR, 1 );
 
 	vars_check( v, STR_VAR );
-	G.label[ Y ] = v->val.sptr;
+	G.label[ Y ] = get_string_copy( v->val.sptr );
 
-	if ( ( v = v->next ) == NULL )
-		return vars_push( INT_VAR, 1 );
-
-	vars_check( v, STR_VAR );
-	G.label[ Z ] = v->val.sptr;
+	if ( ( v = v->next ) != NULL )
+	{
+		vars_check( v, STR_VAR );
+		G.label[ Z ] = get_string_copy( v->val.sptr );
+	}
 
 	return vars_push( INT_VAR, 1 );
 }

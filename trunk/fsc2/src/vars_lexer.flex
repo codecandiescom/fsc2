@@ -250,6 +250,10 @@ WS          [\n \t]+
 "/"         return '/';       /* division operator */
 "%"         return '%';       /* modulo operator */
 "^"         return '^';       /* exponentiation operator */
+"!"         return NOT;       /* logical negation operator */
+"&"         return AND;       /* logical and operator */
+"|"         return OR;        /* logical or operator */
+"~"         return XOR;       /* logical exclusive or (xor) operator */
 
 			/* handling of end of statement character */
 ";"			return ';';
@@ -329,15 +333,18 @@ int variables_parser( FILE *in )
 
 	varsparse( );
 
-/*
+
 #ifdef DEBUG
+/*
 	print_all_vars( );
-#endif
 */
+#endif
+
 	return Vars_Next_Section;
 }
 
 
+#ifdef DEBUG
 void print_all_vars( void )
 {
 	Var *v = var_list;
@@ -379,3 +386,4 @@ void print_all_vars( void )
 		v = v->next;
 	}
 }
+#endif
