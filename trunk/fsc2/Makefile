@@ -82,7 +82,7 @@ ifdef libdir
 endif
 
 ifdef auxdir
-	CFLAGS += -Dauxdir=\"$(auxdir:/=)/\" -I$(auxdir)
+	CFLAGS += -Dauxdir=\"$(auxdir:/=)/\" -I../aux
 endif
 
 
