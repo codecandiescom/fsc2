@@ -595,7 +595,7 @@ Var *pulser_phase_reset( Var *v )
 		f->next_phase = 0;
 
 		if ( ! TEST_RUN )
-			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X + 1; j++ )
+			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
 				if ( f->phase_setup->is_set[ j ] && 
 					 ! dg2020_channel_assign(
 						 f->pcm[ j * f->pc_len + 0 ]->self,
