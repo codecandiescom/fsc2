@@ -28,7 +28,7 @@ prefix         = /usr/local
 bindir         = $(prefix)/bin
 libdir         = $(prefix)/lib/fsc2
 auxdir         = $(libdir)/aux
-docdir         = $(prefix)/share/doc
+docdir         = $(prefix)/share/doc/fsc2
 mandir         = $(prefix)/man
 infodir        = $(prefix)/info
 
