@@ -145,6 +145,7 @@ Var *monochromator_wavelength( Var *v )
 
 
 	CLOBBER_PROTECT( buf );
+	CLOBBER_PROTECT( wl );
 
 	if ( v == NULL )
 	{
@@ -182,7 +183,7 @@ Var *monochromator_wavelength( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		print( SEVER, "Wavelength of %.3f nm is too large, using maximum "
+		print( SEVERE, "Wavelength of %.3f nm is too large, using maximum "
 			   "wavelength of %.3f nm instead.\n",
 			   wl * 1e9, MAX_WAVELENGTH * 1e9 );
 		wl = MAX_WAVELENGTH;
