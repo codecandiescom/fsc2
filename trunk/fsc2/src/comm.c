@@ -29,13 +29,13 @@
    is too busy to accept the data immediately. To avoid (or at least to reduce
    the impact of the problem) pointers to the data as well as the data are
    stored in shared memory buffers that can be written to by the child also
-   when the parent is busy and that the parent reads out when it has time.
+   when the parent is busy and that the parent reads out when it's got time.
 
    The buffer with pointers, the message queue, is a basically a ring buffer
    with slots into which the type of the data and a pointer to a shared memory
-   segment, containing the data, are written by the child process. Beside,
+   segment, containing the data, are written by the child process. Besides,
    there are two pointers to the slots of the message queue, one pointer,
-   updated by the child only, which indicats the last slot written into by the
+   updated by the child only, which indicates the last slot written to by the
    child, and a second which points to the next slot that the parent process
    has to remove from the message queue and which is updated by the parent
    process. When both pointers are identical the message queue is empty.
@@ -45,8 +45,8 @@
    initialized to the number of slots in the message queue. Before the child
    may write into the next slot it must wait on the semaphore. In turn, the
    parent always posts the semaphore when a slot has become free. The removal
-   of the data from the message queue by the parent is done in an idle
-   handler, i.e. when it's not busy doing something else.
+   of the data from the message queue by the parent is done in an idle handler,
+   i.e. when it's not busy doing something else.
 
    There are two types of messages to be exchanged between the child and the
    parent. The first one is mainly data to be displayed by the parent. These
@@ -133,6 +133,10 @@ void setup_comm( void )
 		THROW( EXCEPTION );
 	}
 
+	/* Then we need a circular buffer plus a a low and a high mark pointer
+	   in shared memory where the child deposits the keys for further shared
+	   memory buffers with the data the parent is supposed to display. */
+
 	if ( ( Comm.MQ = ( MESSAGE_QUEUE * ) get_shm( &Comm.MQ_ID,
                                                   sizeof *Comm.MQ ) )
 		 == ( MESSAGE_QUEUE * ) -1 )
@@ -150,10 +154,11 @@ void setup_comm( void )
 	for ( i = 0; i < QUEUE_SIZE; i++ )
 		Comm.MQ->slot[ i ].shm_id = -1;
 
-	/* Beside the pipes we need a semaphore which allows the parent to control
-	   when the child is allowed to send data and messages. Its size has to be
-	   at least by one element smaller than the message queue size to avoid
-	   having the child send more messages than message queue can hold. */
+	/* Beside the pipes and the key buffer we need a semaphore which allows
+	   the parent to control when the child is allowed to send data and
+	   messages. Its size has to be at least by one element smaller than the
+	   message queue size to avoid having the child send more messages than
+	   message queue can hold. */
 
 	if ( ( Comm.data_semaphore = sema_create( QUEUE_SIZE - 1 ) ) < 0 )
 	{
@@ -165,6 +170,9 @@ void setup_comm( void )
 				"channels.\n" );
 		THROW( EXCEPTION );
 	}
+
+	/* Finally we need another semaphore which is used by the parent to
+	   keep the child from sending more than one REQUEST type message. */
 
 	if ( ( Comm.request_semaphore = sema_create( 0 ) ) < 0 )
 	{
@@ -1077,284 +1085,274 @@ bool writer( int type, ... )
 	header.type = type;
 	va_start( ap, type );
 
-	switch ( type )
-	{
-		case C_EPRINT :
-			fsc2_assert( Internals.I_am == CHILD );
-
-			str[ 0 ] = va_arg( ap, char * );
-			va_end( ap );
-			if ( str[ 0 ] == NULL )
-				header.data.str_len[ 0 ] = -1;
-			else if ( *str[0 ] == '\0' )
-				header.data.str_len[ 0 ] = 0;
-			else
-				header.data.str_len[ 0 ] = strlen( str[ 0 ] );
-
-			if ( ! pipe_write( ( char * ) &header, sizeof header ) )
-				return FAIL;
-
-			if ( header.data.str_len[ 0 ] > 0 &&
-				 ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
-				return FAIL;
-			break;
-
-		case C_SHOW_MESSAGE :
-			fsc2_assert( Internals.I_am == CHILD );
-
-			str[ 0 ] = va_arg( ap, char * );
-			va_end( ap );
-			if ( str[ 0 ] == NULL )
-				header.data.str_len[ 0 ] = -1;
-			else if ( *str[ 0 ] == '\0' )
-				header.data.str_len[ 0 ] = 0;
-			else
-				header.data.str_len[ 0 ] = strlen( str[ 0 ] );
-
-			if ( ! pipe_write( ( char * ) &header, sizeof header ) )
-				return FAIL;
-			if ( header.data.str_len[ 0 ] > 0 &&
-				 ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
-				return FAIL;
-			break;
-
-		case C_SHOW_ALERT :
-			fsc2_assert( Internals.I_am == CHILD );
-
-			str[ 0 ] = va_arg( ap, char * );
-			va_end( ap );
-			if ( str[ 0 ] == NULL )
-				header.data.str_len[ 0 ] = -1;
-			else if ( *str[ 0 ] == '\0' )
-				header.data.str_len[ 0 ] = 0;
-			else
-				header.data.str_len[ 0 ] = strlen( str[ 0 ] );
-
-			if ( ! pipe_write( ( char * ) &header, sizeof header ) )
-				return FAIL;
-				 
-			if ( header.data.str_len[ 0 ] > 0 &&
-				 ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
-				return FAIL;
-			break;
-
-		case C_SHOW_CHOICES :
-			fsc2_assert( Internals.I_am == CHILD );
-
-			str[ 0 ] = va_arg( ap, char * );
-			va_end( ap );
-			if ( str[ 0 ] == NULL )
-				header.data.str_len[ 0 ] = -1;
-			else if ( *str[ 0 ] == '\0' )
-				header.data.str_len[ 0 ] = 0;
-			else
-				header.data.str_len[ 0 ] = strlen( str[ 0 ] );
-
-			n1 = va_arg( ap, int );
-
-			for ( i = 1; i < 4; i++ )
-			{
-				str[ i ] = va_arg( ap, char * );
-				if ( str[ i ] == NULL )
-					header.data.str_len[ i ] = -1;
-				else if ( *str[ i ] == '\0' )
-					header.data.str_len[ i ] = 0;
-				else
-					header.data.str_len[ i ] = strlen( str[ i ] );
-			}
-
-			n2 = va_arg( ap, int );
-			va_end( ap );
-
-			if ( ! pipe_write( ( char * ) &header, sizeof header ) ||
-				 ! pipe_write( ( char * ) &n1, sizeof( int ) ) ||
-				 ! pipe_write( ( char * ) &n2, sizeof( int ) ) )
-				return FAIL;
-
-			for ( i = 0; i < 4; i++ )
-				if ( header.data.str_len[ i ] > 0 )
-					if ( ! pipe_write( str[ i ],
-									   ( size_t ) header.data.str_len[ i ] ) )
-						return FAIL;
-			break;
-
-		case C_SHOW_FSELECTOR :
-			fsc2_assert( Internals.I_am == CHILD );
-
-			/* Set up header and write it */
-
-			for ( i = 0; i < 4; i++ )
-			{
-				str[ i ] = va_arg( ap, char * );
+	if ( Internals.I_am == CHILD )
+		switch ( type )
+		{
+			case C_EPRINT :
+				str[ 0 ] = va_arg( ap, char * );
 				va_end( ap );
-				if ( str[ i ] == NULL )
-					header.data.str_len[ i ] = -1;
-				else if ( *str[ i ] == '\0' )
-					header.data.str_len[ i ] = 0;
+				if ( str[ 0 ] == NULL )
+					header.data.str_len[ 0 ] = -1;
+				else if ( *str[0 ] == '\0' )
+					header.data.str_len[ 0 ] = 0;
 				else
-					header.data.str_len[ i ] = strlen( str[ i ] );
-			}
+					header.data.str_len[ 0 ] = strlen( str[ 0 ] );
 
-			if ( ! pipe_write( ( char * ) &header, sizeof header ) )
-				return FAIL;
-
-			/* Write out all four strings */
-
-			for ( i = 0; i < 4; i++ )
-			{
-				if ( header.data.str_len[ i ] > 0 )
-					if ( ! pipe_write( str[ i ],
-									   ( size_t ) header.data.str_len[ i ] ) )
-						return FAIL;
-			}
-
-			break;
-
-		case C_PROG : case C_OUTPUT :
-			fsc2_assert( Internals.I_am == CHILD );
-			va_end( ap );
-			return pipe_write( ( char * ) &header, sizeof header );
-
-		case C_INPUT :
-			fsc2_assert( Internals.I_am == CHILD );
-
-			/* Set up the two argument strings */
-
-			for ( i = 0; i < 2; i++ )
-			{
-				str[ i ] = va_arg( ap, char * );
-				if ( str[ i ] == NULL )
-					header.data.str_len[ i ] = -1;
-				else if ( *str[ i ] == '\0' )
-					header.data.str_len[ i ] = 0;
-				else
-					header.data.str_len[ i ] = strlen( str[ i ] );
-			}
-			va_end( ap );
-
-			/* Send header and the two strings */
-
-			if ( ! pipe_write( ( char * ) &header, sizeof header ) )
-				return FAIL;
-			for ( i = 0; i < 2; i++ )
-				if ( header.data.str_len[ i ] > 0 &&
-					 ! pipe_write( str[ i ],
-								   ( size_t ) header.data.str_len[ i ] ) )
+				if ( ! pipe_write( ( char * ) &header, sizeof header ) )
 					return FAIL;
-			break;
 
-		case C_LAYOUT    :
-		case C_BCREATE   : case C_BDELETE : case C_BSTATE  : case C_BCHANGED :
-		case C_SCREATE   : case C_SDELETE : case C_SSTATE  : case C_SCHANGED :
-		case C_ICREATE   : case C_IDELETE : case C_ISTATE  : case C_ICHANGED :
-		case C_MCREATE   : case C_MDELETE : case C_MCHOICE : case C_MCHANGED :
-		case C_TBCHANGED : case C_TBWAIT  : case C_ODELETE : case C_CLABEL   :
-		case C_XABLE     :
-			fsc2_assert( Internals.I_am == CHILD );
+				if ( header.data.str_len[ 0 ] > 0 &&
+					 ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
+					return FAIL;
+				break;
 
-			header.data.len = va_arg( ap, ptrdiff_t );
-			if ( ! pipe_write( ( char * ) &header, sizeof header ) )
-			{
+			case C_SHOW_MESSAGE :
+				str[ 0 ] = va_arg( ap, char * );
 				va_end( ap );
-				return FAIL;
-			}
-			data = va_arg( ap, void * );
-			va_end( ap );
-			return pipe_write( ( char * ) data, ( size_t ) header.data.len );
+				if ( str[ 0 ] == NULL )
+					header.data.str_len[ 0 ] = -1;
+				else if ( *str[ 0 ] == '\0' )
+					header.data.str_len[ 0 ] = 0;
+				else
+					header.data.str_len[ 0 ] = strlen( str[ 0 ] );
 
-		case C_FREEZE :
-			fsc2_assert( Internals.I_am == CHILD );
-			header.data.int_data = va_arg( ap, int );
-			va_end( ap );
-			return pipe_write( ( char * ) &header, sizeof header );
+				if ( ! pipe_write( ( char * ) &header, sizeof header ) )
+					return FAIL;
+				if ( header.data.str_len[ 0 ] > 0 &&
+					 ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
+					return FAIL;
+				break;
 
-		case C_ACK :
-			fsc2_assert( Internals.I_am == PARENT );
-			va_end( ap );
-			return pipe_write( ( char * ) &header, sizeof header );
-
-		case C_BCREATE_REPLY   : case C_BSTATE_REPLY  : case C_BCHANGED_REPLY :
-		case C_SCREATE_REPLY   : case C_SSTATE_REPLY  : case C_SCHANGED_REPLY :
-		case C_ICREATE_REPLY   : case C_ISTATE_REPLY  : case C_ICHANGED_REPLY :
-		case C_MCREATE_REPLY   : case C_MCHOICE_REPLY : case C_MCHANGED_REPLY :
-		case C_TBCHANGED_REPLY : case C_TBWAIT_REPLY  :
-			fsc2_assert( Internals.I_am == PARENT );
-
-			header.data.len = va_arg( ap, ptrdiff_t );
-
-			/* Don't try to continue writing on EPIPE (SIGPIPE is ignored) */
-
-			if ( ! pipe_write( ( char * ) &header, sizeof header ) &&
-				 errno == EPIPE )
-			{
+			case C_SHOW_ALERT :
+				str[ 0 ] = va_arg( ap, char * );
 				va_end( ap );
-				return FAIL;
-			}
+				if ( str[ 0 ] == NULL )
+					header.data.str_len[ 0 ] = -1;
+				else if ( *str[ 0 ] == '\0' )
+					header.data.str_len[ 0 ] = 0;
+				else
+					header.data.str_len[ 0 ] = strlen( str[ 0 ] );
 
-			data = va_arg( ap, void * );
-			va_end( ap );
-			return pipe_write( ( char * ) data, ( size_t ) header.data.len );
+				if ( ! pipe_write( ( char * ) &header, sizeof header ) )
+					return FAIL;
+				 
+				if ( header.data.str_len[ 0 ] > 0 &&
+					 ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
+					return FAIL;
+				break;
 
-		case C_LAYOUT_REPLY  : case C_BDELETE_REPLY : case C_SDELETE_REPLY :
-		case C_IDELETE_REPLY : case C_MDELETE_REPLY : case C_ODELETE_REPLY :
-		case C_CLABEL_REPLY  : case C_XABLE_REPLY   :
-			fsc2_assert( Internals.I_am == PARENT );
+			case C_SHOW_CHOICES :
+				str[ 0 ] = va_arg( ap, char * );
+				va_end( ap );
+				if ( str[ 0 ] == NULL )
+					header.data.str_len[ 0 ] = -1;
+				else if ( *str[ 0 ] == '\0' )
+					header.data.str_len[ 0 ] = 0;
+				else
+					header.data.str_len[ 0 ] = strlen( str[ 0 ] );
 
-			header.data.long_data = va_arg( ap, long );
-			va_end( ap );
-			return pipe_write( ( char * ) &header, sizeof header );
+				n1 = va_arg( ap, int );
 
-		case C_STR :
-			fsc2_assert( Internals.I_am == PARENT );
+				for ( i = 1; i < 4; i++ )
+				{
+					str[ i ] = va_arg( ap, char * );
+					if ( str[ i ] == NULL )
+						header.data.str_len[ i ] = -1;
+					else if ( *str[ i ] == '\0' )
+						header.data.str_len[ i ] = 0;
+					else
+						header.data.str_len[ i ] = strlen( str[ i ] );
+				}
 
-			str[ 0 ] = va_arg( ap, char * );
-			va_end( ap );
-			if ( str[ 0 ] == NULL )
-				header.data.len = -1;
-			else if ( *str[ 0 ] == '\0' )
-				header.data.len = 0;
-			else
-				header.data.len = ( ptrdiff_t ) strlen( str[ 0 ] );
-			va_end( ap );
+				n2 = va_arg( ap, int );
+				va_end( ap );
 
-			/* Don't try to continue writing on EPIPE (SIGPIPE is ignored) */
+				if ( ! pipe_write( ( char * ) &header, sizeof header ) ||
+					 ! pipe_write( ( char * ) &n1, sizeof( int ) ) ||
+					 ! pipe_write( ( char * ) &n2, sizeof( int ) ) )
+					return FAIL;
 
-			if ( ! pipe_write( ( char * ) &header, sizeof header ) &&
-				 errno == EPIPE )
-				return FAIL;
+				for ( i = 0; i < 4; i++ )
+					if ( header.data.str_len[ i ] > 0 )
+						if ( ! pipe_write( str[ i ],
+									   ( size_t ) header.data.str_len[ i ] ) )
+							return FAIL;
+				break;
 
-			if ( header.data.len > 0 &&
-				 ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
-				return FAIL;
-			break;
+			case C_SHOW_FSELECTOR :
+				/* Set up header and write it */
 
-		case C_INT :
-			fsc2_assert( Internals.I_am == PARENT );
-			header.data.int_data = va_arg( ap, int );
-			va_end( ap );
-			return pipe_write( ( char * ) &header, sizeof header );
+				for ( i = 0; i < 4; i++ )
+				{
+					str[ i ] = va_arg( ap, char * );
+					va_end( ap );
+					if ( str[ i ] == NULL )
+						header.data.str_len[ i ] = -1;
+					else if ( *str[ i ] == '\0' )
+						header.data.str_len[ i ] = 0;
+					else
+						header.data.str_len[ i ] = strlen( str[ i ] );
+				}
 
-		case C_LONG :
-			fsc2_assert( Internals.I_am == PARENT );
-			header.data.long_data = va_arg( ap, long );
-			va_end( ap );
-			return pipe_write( ( char * ) &header, sizeof header );
+				if ( ! pipe_write( ( char * ) &header, sizeof header ) )
+					return FAIL;
 
-		case C_FLOAT :
-			fsc2_assert( Internals.I_am == PARENT );
-			header.data.float_data = va_arg( ap, float );
-			va_end( ap );
-			return pipe_write( ( char * ) &header, sizeof header );
+				/* Write out all four strings */
 
-		case C_DOUBLE :
-			fsc2_assert( Internals.I_am == PARENT );
-			header.data.double_data = va_arg( ap, double );
-			va_end( ap );
-			return pipe_write( ( char * ) &header, sizeof header );
+				for ( i = 0; i < 4; i++ )
+				{
+					if ( header.data.str_len[ i ] > 0 )
+						if ( ! pipe_write( str[ i ],
+									   ( size_t ) header.data.str_len[ i ] ) )
+							return FAIL;
+				}
 
-		default :                     /* this should never be reached... */
-			fsc2_assert( 1 == 0 );
-	}
+				break;
+
+			case C_PROG : case C_OUTPUT :
+				va_end( ap );
+				return pipe_write( ( char * ) &header, sizeof header );
+
+			case C_INPUT :
+				/* Set up the two argument strings */
+
+				for ( i = 0; i < 2; i++ )
+				{
+					str[ i ] = va_arg( ap, char * );
+					if ( str[ i ] == NULL )
+						header.data.str_len[ i ] = -1;
+					else if ( *str[ i ] == '\0' )
+						header.data.str_len[ i ] = 0;
+					else
+						header.data.str_len[ i ] = strlen( str[ i ] );
+				}
+				va_end( ap );
+
+				/* Send header and the two strings */
+
+				if ( ! pipe_write( ( char * ) &header, sizeof header ) )
+					return FAIL;
+				for ( i = 0; i < 2; i++ )
+					if ( header.data.str_len[ i ] > 0 &&
+						 ! pipe_write( str[ i ],
+									   ( size_t ) header.data.str_len[ i ] ) )
+						return FAIL;
+				break;
+
+			case C_LAYOUT   :
+			case C_BCREATE  : case C_BDELETE   : case C_BSTATE   :
+			case C_BCHANGED : case C_SCREATE   : case C_SDELETE  :
+			case C_SSTATE   : case C_SCHANGED  : case C_ICREATE  :
+			case C_IDELETE  : case C_ISTATE    : case C_ICHANGED :
+			case C_MCREATE  : case C_MDELETE   : case C_MCHOICE  :
+			case C_MCHANGED : case C_TBCHANGED : case C_TBWAIT   :
+			case C_ODELETE  : case C_CLABEL    : case C_XABLE    :
+				header.data.len = va_arg( ap, ptrdiff_t );
+				if ( ! pipe_write( ( char * ) &header, sizeof header ) )
+				{
+					va_end( ap );
+					return FAIL;
+				}
+				data = va_arg( ap, void * );
+				va_end( ap );
+				return pipe_write( ( char * ) data,
+								   ( size_t ) header.data.len );
+
+			case C_FREEZE :
+				header.data.int_data = va_arg( ap, int );
+				va_end( ap );
+				return pipe_write( ( char * ) &header, sizeof header );
+
+			default :                     /* this should never be reached... */
+				va_end( ap );
+				fsc2_assert( 1 == 0 );
+		}
+	else                   /* if this is the parent process */
+		switch ( type )
+		{		
+			case C_ACK :
+				va_end( ap );
+				return pipe_write( ( char * ) &header, sizeof header );
+
+			case C_BCREATE_REPLY   : case C_BSTATE_REPLY   :
+			case C_BCHANGED_REPLY  : case C_SCREATE_REPLY  :
+			case C_SSTATE_REPLY    : case C_SCHANGED_REPLY :
+			case C_ICREATE_REPLY   : case C_ISTATE_REPLY   :
+			case C_ICHANGED_REPLY  : case C_MCREATE_REPLY  :
+			case C_MCHOICE_REPLY   : case C_MCHANGED_REPLY :
+			case C_TBCHANGED_REPLY : case C_TBWAIT_REPLY   :
+				header.data.len = va_arg( ap, ptrdiff_t );
+
+				/* Don't try to continue writing on EPIPE (SIGPIPE is
+				   ignored) */
+
+				if ( ! pipe_write( ( char * ) &header, sizeof header ) &&
+					 errno == EPIPE )
+				{
+					va_end( ap );
+					return FAIL;
+				}
+
+				data = va_arg( ap, void * );
+				va_end( ap );
+				return pipe_write( ( char * ) data,
+								   ( size_t ) header.data.len );
+
+			case C_LAYOUT_REPLY  : case C_BDELETE_REPLY :
+			case C_SDELETE_REPLY : case C_IDELETE_REPLY :
+			case C_MDELETE_REPLY : case C_ODELETE_REPLY :
+			case C_CLABEL_REPLY  : case C_XABLE_REPLY   :
+				header.data.long_data = va_arg( ap, long );
+				va_end( ap );
+				return pipe_write( ( char * ) &header, sizeof header );
+
+			case C_STR :
+				str[ 0 ] = va_arg( ap, char * );
+				va_end( ap );
+				if ( str[ 0 ] == NULL )
+					header.data.len = -1;
+				else if ( *str[ 0 ] == '\0' )
+					header.data.len = 0;
+				else
+					header.data.len = ( ptrdiff_t ) strlen( str[ 0 ] );
+				va_end( ap );
+
+				/* Don't try to continue writing on EPIPE (SIGPIPE is
+				   ignored) */
+
+				if ( ! pipe_write( ( char * ) &header, sizeof header ) &&
+					 errno == EPIPE )
+					return FAIL;
+
+				if ( header.data.len > 0 &&
+					 ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
+					return FAIL;
+				break;
+
+			case C_INT :
+				header.data.int_data = va_arg( ap, int );
+				va_end( ap );
+				return pipe_write( ( char * ) &header, sizeof header );
+
+			case C_LONG :
+				header.data.long_data = va_arg( ap, long );
+				va_end( ap );
+				return pipe_write( ( char * ) &header, sizeof header );
+
+			case C_FLOAT :
+				header.data.float_data = va_arg( ap, float );
+				va_end( ap );
+				return pipe_write( ( char * ) &header, sizeof header );
+
+			case C_DOUBLE :
+				header.data.double_data = va_arg( ap, double );
+				va_end( ap );
+				return pipe_write( ( char * ) &header, sizeof header );
+
+			default :                     /* this should never be reached... */
+				va_end( ap );
+				fsc2_assert( 1 == 0 );
+		}
 
 	return OK;
 }
