@@ -91,7 +91,6 @@
 
 
 #include "fsc2.h"
-#include <sys/shm.h>
 
 
 /* locally used routines */
@@ -1239,14 +1238,14 @@ bool writer( int type, ... )
 						return FAIL;
 				break;
 
-			case C_LAYOUT   :
-			case C_BCREATE  : case C_BDELETE   : case C_BSTATE   :
-			case C_BCHANGED : case C_SCREATE   : case C_SDELETE  :
-			case C_SSTATE   : case C_SCHANGED  : case C_ICREATE  :
-			case C_IDELETE  : case C_ISTATE    : case C_ICHANGED :
-			case C_MCREATE  : case C_MDELETE   : case C_MCHOICE  :
-			case C_MCHANGED : case C_TBCHANGED : case C_TBWAIT   :
-			case C_ODELETE  : case C_CLABEL    : case C_XABLE    :
+			case C_LAYOUT   : case C_BCREATE  : case C_BDELETE   :
+			case C_BSTATE   : case C_BCHANGED : case C_SCREATE   :
+			case C_SDELETE  : case C_SSTATE   : case C_SCHANGED  :
+			case C_ICREATE  : case C_IDELETE  : case C_ISTATE    :
+			case C_ICHANGED : case C_MCREATE  : case C_MDELETE   :
+			case C_MCHOICE  : case C_MCHANGED : case C_TBCHANGED :
+			case C_TBWAIT   : case C_ODELETE  : case C_CLABEL    :
+			case C_XABLE    :
 				header.data.len = va_arg( ap, ptrdiff_t );
 				if ( ! pipe_write( ( char * ) &header, sizeof header ) )
 				{
