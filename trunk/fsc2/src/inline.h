@@ -139,7 +139,7 @@ static inline long lrnd( double x )
 
 static inline unsigned long ulrnd( double x )
 {
-	fsc2_assert( x >= 0.0 )
+	fsc2_assert( x >= 0.0 );
 
 	if ( x > ULONG_MAX )
 		return ULONG_MAX;
