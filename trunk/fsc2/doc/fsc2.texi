@@ -20,7 +20,7 @@
 @sp 4
 @center @titlefont{fsc2}
 @sp 4
-@center A program for remote control of EPR spectrometers
+@center A program for the remote control of EPR spectrometers
 @sp 2
 @center August 2000
 @sp 10
@@ -34,7 +34,7 @@
 
 @ifinfo
 @direntry
-* fsc2: (fsc2). A program for remote control of EPR spetrometers.
+* fsc2: (fsc2). A program for the remote control of EPR spetrometers.
 @end direntry
 @end ifinfo
 

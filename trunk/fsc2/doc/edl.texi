@@ -195,11 +195,18 @@ variables start with a lower case character, i.e.@: a-z.
 @cindex Arithmetic
 
 There are the usual arithmetic operations built into @b{fsc2}, i.e.@:
-addition, subtraction, multiplication and division. They can be applied
-to simple integer and floating point values and variables only. If one
-of the values is a floating point value the result is also a floating
-point number - only if both values are integer the result also has
-integer type.
+addition, subtraction, multiplication and division, not too surprisingly
+represented by the characters `@code{+}', `@code{-}', `@code{*}' and
+`@code{/}'.
+@cindex + (addition operator)
+@cindex - (subtraction operator)
+@cindex * (multiplication operator)
+@cindex / (division operator)
+They can be applied to simple integer and floating point values (see
+below how they may be used with 1-dimensional arrays). If one of the
+values is a floating point value the result is also a floating point
+number - only if both values are integer the result also has integer
+type.
 
 Some care has to be taken in arithmetic with integers.
 @cindex integer overflow
@@ -243,6 +250,7 @@ digits following the decimal point. Thus, typical results are
 @example
 7 / 2 = 3     8 / 3 = 2     -7 / 2 = -3
 @end example
+@cindex / (division operator)
 @cindex integer division
 @noindent
 To avoid this truncation convert (see the function @code{float()} below)
@@ -257,8 +265,8 @@ float( 7 ) / 2 = 3.5    8 / float( 3 ) = 2.666666667
 Beside the normal arithmetic operations there are two more operations,
 the modulo function and the exponentiation. For the modulo operation the
 percent sign @code{%}
-@findex % @r{(modulo function)}
-@cindex modulo function
+@findex % (modulo operator)
+@cindex modulo operator
 is used and the result is the remainder of the division, e.g.@:
 
 @example
@@ -276,11 +284,125 @@ For the exponentiation the caret character @code{^} is to be used, e.g.@:
 @noindent
 As usual, non-integer exponents can only be used with non-negative bases!
 
-@b{We still need to talk about operator precedence...}
+
+@subsection Assignment operators
+@cindex assignment operators
+@cindex =
+@cindex +=
+@cindex -=
+@cindex *=
+@cindex /=
+@cindex %=
+@cindex ^=
+
+When assigning to a variable usually the `@code{=}' operator is
+used. But there are many cases where e.g.@: just a number is added to a
+variable and one would have to write
+@example
+I = I + 1;
+@end example
+This assignment can be shortened (and sometimes made more readable) by
+using the `add and assign' operator `@code{+=}':
+@example
+I += 1;
+@end example
+Assignment operators mixed with arithmetic can also be used with all
+other arithmetic operators, i.e.@: you may use all of the following
+assignment operators
+@example
++=     -=     *=     /=     %=     ^=
+@end example
 
 
-@node Arithmetic with arrays, Arithmetic, Control structures,EDL
-@section Arithmetic with arrays
+@subsection Operator precedence
+@cindex operator precedence
+
+
+Usually one doesn't think about the precedence of operators. We already
+learned in primary school that multiplication and division has a higher
+precedence than addition or subtraction. Of course, a programming
+language should follow this rules. But sometimes there are cases where
+it is necessary to know exactly the precedence and also in which
+sequence an expression is evaluated.
+
+the unary `@code{+}' and '@code{-}' operators have the highest
+precedence, i.e.@: the operators defining the sign of a number. There is
+a further operator, to be discussed later, having the same precedence,
+the logical negation operator, `@code{!}'. The evaluation of an
+expression with more than one of these operators is from the right to
+the left, i.e.@:
+@example
+ ! - x    @r{will be treated as if written as}    ! ( - x )
+@end example
+(This is not a very useful example but just here for sake of
+completeness.)
+
+The exponentiation operator, `@code{^}', has the next highest
+precedence, i.e.@: it `binds' more thightly than any other binary
+operator. If there is more than one of these operators in a row the
+expression will evaluated from the right to the left:
+@example
+ 2^3^4    @r{will be treated as if written as}    2^(3^4)
+@end example
+
+The operator with the next lower precedence is the modulo operator,
+`@code{%}'. Expressions with more than one `@code{%}' in a row will be
+evaluated left to right, i.e.
+@example
+ 31 % 6 % 2    @r{will be treated as if written as}    ( 31 % 6 ) % 2
+@end example
+
+
+Now the multiplication and division operators, `@code{*}' and `@code{/},
+follow. Both have exactly the same precedence and expressions involving
+more than one of these operators are evaluated left to right, i.e.
+@example
+ 3 * 22 / 7    @r{will be treated as if written as}    ( 3 * 22 ) / 7
+@end example
+(Take care: This can make a lot of a difference when e.g.@: integer
+multiplication is involved.)
+
+The next lower precedence operators are the addition and subtraction
+operators, `@code{+}' and `@code{-}'. Also for these operators
+expressions are evaluated left to right:
+@example
+ 13 + 4 - 5    @r{will be treated as if written as}    ( 13 + 4 ) - 5
+@end example
+Usually, this won't matter a lot, but if you're dealing with very large
+numbers and there's danger of an overflow to occur knowing the rules of
+evaluation can become important.
+
+The next lower precedence operators are the logical operators to be
+discussed in more detail below, i.e.@: the logical @i{and} operator,
+`@code{&}, the logical @i{or} operator, `@code{|}' and the logical
+@i{exclusive or} (xor) operator, `@code{~}'. Expressions containing more
+than one of these operators are always evaluated from the left to the
+right of the expression:
+@example
+ a | b & c    @r{will be treated as if written as}    ( a | b ) & c
+@end example
+
+Finally, the lowest precedence operators are the comparision operators
+(also the be discussed below in more detail), the test for equality,
+`@code{==}' (not to be confused with the assignement operator
+`@code{=}'), the test for inequality, `@code{!=}', and the remaining
+four comparison operators `@code{<}', `@code{<=}', `@code{>}' and
+`@code{>=}', i.e.@: @i{less than}, @i{less or equal}, @i{larger} and
+@i{larger or equal}. If more than one of these operators appears in an
+expression evaluation is done left to right.
+
+Actually, there are also the assignement operators. But these are only
+used after all of the other operators have been evaluated, so there is
+never a necessity to enclose the right hand of an equation with
+parenthesis. And since only one assignement operator is allowed in a
+statement you don't have to worry about the order of evaluation.
+
+Of course, the precedence of operators and the sequence they are
+evaluated in can always be changed by using parenthesis. So, if in doubt,
+use parenthesis -- this won't slow down the program significantly.
+
+
+@subsection Arithmetic with arrays
 @cindex Arithmetic with arrays
 
 
@@ -356,8 +478,14 @@ function results in:
       sqrt( a )  ->   @{ 0.7071068, 1.0, 1.1414215 @}
 @end example
 
+Finally, for obvious reasons, when computed assignements are used
+(i.e.@: `@code{+=}', `@code{-=}', `@code{*=}', `@code{/=}', `@code{%=}'
+or `@code{^=}') the left hand side variable of an equation has to be an
+array when arithmetic with arrays is used.
 
-@node Control structures, , Arithmetic with arrays, EDL
+
+
+@node Control structures, , Arithmetic, EDL
 @section Control structures
 @cindex Control structures
 @cindex Flow control
