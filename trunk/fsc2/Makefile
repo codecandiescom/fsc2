@@ -181,7 +181,6 @@ DEFAULT_HTTP_PORT := 8080
 
 MAIL_ADDRESS      := Jens.Toerring@physik.fu-berlin.de
 
-
 ##############################################################################
 #
 # Here follow settings determining the make process - which compiler and
@@ -501,16 +500,10 @@ ifdef SERIAL_LOCK_DIR
 endif
 
 
-# Define variables with the full paths of the 'mail' and 'addr2line' programs
-# and make sure the mail program and addr2line got found by 'which',
-# otherwise don't set the variables. If NO_MAIL has been defined never
-# send crash mails (which require ADDR2LINE to be set).
-
-MAIL_PROGRAM  := $(shell which mail)
-ifneq ($(word 1,$(MAIL_PROGRAM)),which:)
-	CONFFLAGS += -DMAIL_PROGRAM=\"$(MAIL_PROGRAM)\"
-endif
-
+# Define variables with the full paths of the 'addr2line' program and make
+# sure addr2line gets found by 'which', otherwise don't set the variable.
+# If NO_MAIL has been defined never send crash mails (which requir
+#  ADDR2LINE to be set).
 
 ifndef NO_MAIL
 	ADDR2LINE     := $(shell which addr2line)
