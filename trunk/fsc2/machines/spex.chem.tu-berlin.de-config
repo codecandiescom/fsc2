@@ -3,25 +3,25 @@
 # $Id$
 
 grep -E '^[ \t]*#define[ \t]+CCD_PIXEL_WIDTH[ \t]+1340[[:space:]]*$' \
-	 $cdir/rs_spec10.conf > /dev/null;
-if [ $! ]; then
+	 $cdir/rs_spec10.conf > /dev/null
+if [ $? -ne 0 ]; then
 	sed 's/^\s*\(#define CCD_PIXEL_WIDTH\).*$/\1  1340/' $cdir/rs_spec10.conf \
-		> $cdir/rs_spec10.conf.new;
-	mv $cdir/rs_spec10.conf.new $cdir/rs_spec10.conf;
+		> $cdir/rs_spec10.conf.new
+	mv $cdir/rs_spec10.conf.new $cdir/rs_spec10.conf
 fi
 
 grep -E '^[ \t]*#define[ \t]+CCD_PIXEL_HEIGHT[ \t]+400[[:space:]]*$' \
-	 $cdir/rs_spec10.conf > /dev/null;
-if [ $! ]; then
+	 $cdir/rs_spec10.conf > /dev/null
+if [ $? -ne 0 ]; then
 	sed 's/^\s*\(#define CCD_PIXEL_HEIGHT\).*$/\1 400/' $cdir/rs_spec10.conf \
-		> $cdir/rs_spec10.conf.new;
-	mv $cdir/rs_spec10.conf.new $cdir/rs_spec10.conf;
+		> $cdir/rs_spec10.conf.new
+	mv $cdir/rs_spec10.conf.new $cdir/rs_spec10.conf
 fi
 
 grep -E '^[ \t]*[0-9]+[ \t]+[0-9]+[ \t]+1339+[ \t]+399[[:space:]]*$' \
-	 $cdir/rs_spec10.state > /dev/null;
-if [ $! ]; then
+	 $cdir/rs_spec10.state > /dev/null
+if [ $? -ne 0 ]; then
 	sed 's/\s*([0-9]+[ \t]+[0-9]+[ \t]+).$/\1 1399 399/' \
-		$cdir/rs_spec10.state > $cdir/rs_spec10.state.new;
-	mv $cdir/rs_spec10.state.new $cdir/rs_spec10.state;
+		$cdir/rs_spec10.state > $cdir/rs_spec10.state.new
+	mv $cdir/rs_spec10.state.new $cdir/rs_spec10.state
 fi

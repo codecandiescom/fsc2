@@ -410,14 +410,14 @@ endif
 # machines subdirectory are still for the old name but a symbolic link has
 # been set from the new machine name to the old one)
 
-machine_name     := $(shell                                \
-					   mn=`hostname -f 2>/dev/null`;       \
-					   if [    -n $$mn                     \
-						    -a -L $(mchdir)/$$mn ]; then   \
-						   ls -l $(mchdir)/$$mn |          \
-						   sed 's/^.*->[ \t]+\(.*\)/\1/';  \
-					   else                                \
-						   echo $$mn;                      \
+machine_name     := $(shell                                 \
+					   mn=`hostname -f 2>/dev/null`;        \
+					   if [    -n $$mn                      \
+						    -a -L $(mchdir)/$$mn ]; then    \
+						   ls -l $(mchdir)/$$mn |           \
+						   sed 's/^.*->[ \t]\+\(.*\)/\1/';  \
+					   else                                 \
+						   echo $$mn;                       \
 					   fi; )
 
 # Try to include a configuration file for machines that are listed in the
