@@ -664,13 +664,11 @@ static void incr_x( long x_index, long len )
 		cv->xpoints_s = T_realloc( cv->xpoints_s,
 								   new_Gnx * G.ny * sizeof( XPoint ) );
 
-		if ( G.is_fs )
-			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
+		cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
 			                                        ( double ) ( new_Gnx - 1 );
 	}
 
-	if ( G.is_fs )
-		G.scale_changed = SET;
+	G.scale_changed = SET;
 }
 
 
@@ -700,12 +698,10 @@ static void incr_y( long y_index )
 			for ( k = 0; k < G.nx; sp++, k++ )
 				sp->exist = UNSET;
 
-		if ( G.is_fs )
-			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
+		cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
 	}
 
-	if ( G.is_fs )
-		G.scale_changed = SET;
+	G.scale_changed = SET;
 }
 
 
@@ -752,15 +748,10 @@ static void incr_x_and_y( long x_index, long len, long y_index )
 		/* Reorganise the old elements to fit into the new array and clear
 		   the the new elements in the already existing rows */
 
-
-		if ( G.is_fs )
-		{
-			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
+		cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
 			                                        ( double ) ( new_Gnx - 1 );
-			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
-		}
+		cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
 	}
 
-	if ( G.is_fs )
-		G.scale_changed = SET;
+	G.scale_changed = SET;
 }
