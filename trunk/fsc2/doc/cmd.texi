@@ -60,6 +60,14 @@ isn't needed anymore, so better be @strong{real careful}.
 @item @option{-h, --help}
 Displays a very short help text and exits.
 
+@item @option{-size size}
+This option specifies the sizes of the window to be used etc. Use either
+@code{Small} for low resolution displays or @code{Large} for high resolution
+displays. If not specified size will default to @code{Small} for
+displays with a resolution of less than 1152x870, for all other to
+@code{Large}. @code{Small} and @code{Large} can be abbreviated to
+@code{S} or @code{s} and @code{L} and @code{l}.
+
 @item @option{-geometry geometry_string}
 This option specifies the preferred size and position of the main
 window, see man page for X for a description of the correct format for
