@@ -57,6 +57,16 @@
 #endif
 
 
+#ifndef EXCEPTIONS_SOURCE_COMPILE
+
+extern jmp_buf exception_env_stack[ ];
+extern unsigned int exception_env_stack_pos;
+extern unsigned int exception_id;
+extern void longjmperror( void );
+
+#endif  /* ! EXCEPTIONS_SOURCE_COMPILE */
+
+
 enum {
 	NO_EXCEPTION                = 0,               /* must be 0 ! */
 	EXCEPTION                   = ( 1 <<  0 ),
@@ -104,15 +114,5 @@ enum {
 		    longjmperror( ); \
         longjmp( exception_env_stack[ --exception_env_stack_pos ], e ); \
     }
-
-#ifndef EXCEPTIONS_SOURCE_COMPILE
-
-extern jmp_buf exception_env_stack[ ];
-extern unsigned int exception_env_stack_pos;
-extern unsigned int exception_id;
-extern void longjmperror( void );
-
-#endif  /* EXCEPTIONS_SOURCE_COMPILE */
-
 
 #endif  /* EXCEPTIONS_HEADER */
