@@ -25,9 +25,9 @@
 #include "fsc2.h"
 
 
-#define INCH         25.4         /* mm in an inch conversion factor */
-#define S2P          1            /* send to printer */
-#define P2F          2            /* print to file */
+#define INCH         25.4         /* inch to mm conversion factor */
+#define S2P          1            /* send to printer mode */
+#define P2F          2            /* print to file mode */
 
 #define A6_PAPER     0
 #define A5_PAPER     1
@@ -72,6 +72,7 @@ static void eps_draw_contour( FILE *fp, int cn );
 static void print_comm( FILE *fp );
 static char **split_into_lines( int *num_lines );
 static char *paren_replace( const char *str );
+static void print_markers( FILE *fp );
 
 
 /*-------------------------------------------------------------------------*/
@@ -96,7 +97,7 @@ void print_1d( FL_OBJECT *obj, long data )
 
 	fl_deactivate_object( obj );
 
-	/* Find out about the way to print and get a file */
+	/* Find out about the way to print and get a file if needed */
 
 	if ( get_print_file( &fp, &name ) )
 	{
@@ -120,7 +121,7 @@ void print_1d( FL_OBJECT *obj, long data )
 
 void print_2d( FL_OBJECT *obj, long data )
 {
-	FILE *fp;
+	FILE *fp = NULL;
 	char *name = NULL;
 
 
@@ -135,7 +136,7 @@ void print_2d( FL_OBJECT *obj, long data )
 		return;
 	}
 
-	/* Find out about the way to print and get a file */
+	/* Find out about the way to print and get a file if needed */
 
 	if ( get_print_file( &fp, &name ) )
 	{
@@ -312,12 +313,18 @@ static bool get_print_file( FILE **fp, char **name )
 	/* In print-to-file mode ask for confirmation if the file already exists
 	   and try to open it for writing */
 
-	if  ( ( 0 == stat( *name, &stat_buf ) &&
-			1 != show_choices( "The selected file does already exist:\n"
-							   " You're sure you want to overwrite it?",
-							   2, "Yes", "No", NULL, 2 ) ) ||
-		  ( *fp = fopen( *name, "w" ) ) == NULL )
+	if  ( 0 == stat( *name, &stat_buf ) &&
+		  1 != show_choices( "The selected file does already exist:\n"
+							 "Are you sure you want to overwrite it?",
+							 2, "Yes", "No", NULL, 2 ) )
 	{
+		*name = T_free( *name );
+		return FAIL;
+	}
+
+	if ( ( *fp = fopen( *name, "w" ) ) == NULL )
+	{
+		fl_show_alert( "Error", "Sorry, can't open file:", *name, 1 );
 		*name = T_free( *name );
 		return FAIL;
 	}
@@ -344,85 +351,65 @@ void print_callback( FL_OBJECT *obj, long data )
 		fl_set_object_lcol( print_form->s2p_input, FL_BLACK );
 		fl_activate_object( print_form->s2p_input );
 		fl_deactivate_object( print_form->p2f_group );
-		return;
 	}
-
-	if ( obj == print_form->p2f_button )
+	else if ( obj == print_form->p2f_button )
 	{
 		fl_set_object_lcol( print_form->p2f_input, FL_BLACK );
 		fl_set_object_lcol( print_form->p2f_browse, FL_BLACK );
 		fl_set_object_lcol( print_form->s2p_input, FL_INACTIVE_COL );
 		fl_deactivate_object( print_form->s2p_input );
 		fl_activate_object( print_form->p2f_group );
-		return;
 	}
-
-	if ( obj == print_form->p2f_browse )
+	else if ( obj == print_form->p2f_browse )
 	{
 		fn = fl_show_fselector( "Select output EPS file:", NULL,
 								"*.eps", NULL );
 		if ( fn != NULL )
 			fl_set_input( print_form->p2f_input, fn );
-		return;
 	}
-
-	if ( obj == print_form->A6 )
+	else if ( obj == print_form->A6 )
 	{
 		paper_width = 210.0;
 		paper_height = 297.0;
 		paper_type = A6_PAPER;
-		return;
 	}
-
-	if ( obj == print_form->A5 )
+	else if ( obj == print_form->A5 )
 	{
 		paper_width = 210.0;
 		paper_height = 297.0;
 		paper_type = A4_PAPER;
-		return;
 	}
-
-	if ( obj == print_form->A4 )
+	else if ( obj == print_form->A4 )
 	{
 		paper_width = 210.0;
 		paper_height = 297.0;
 		paper_type = A4_PAPER;
-		return;
 	}
-
-	if ( obj == print_form->A3 )
+	else if ( obj == print_form->A3 )
 	{
 		paper_width = 297.0;
 		paper_height = 420.2;
 		paper_type = A3_PAPER;
-		return;
 	}
-
-	if ( obj == print_form->Letter )
+	else if ( obj == print_form->Letter )
 	{
 		paper_width = 215.9;
 		paper_height = 279.4;
 		paper_type = Letter_PAPER;
-		return;
 	}
-
-	if ( obj == print_form->Legal )
+	else if ( obj == print_form->Legal )
 	{
 		paper_width = 215.9;
 		paper_height = 355.6;
 		paper_type = Legal_PAPER;
-		return;
 	}
-
-	if ( obj == print_form->bw_button )
+	else if ( obj == print_form->bw_button )
 		print_with_color = UNSET;
-
-	if ( obj == print_form->col_button )
+	else if ( obj == print_form->col_button )
 		print_with_color = SET;
-
-	if ( obj == print_form->add_comment )
+	else if ( obj == print_form->add_comment )
 		print_with_comment =
-						fl_get_button( print_form->add_comment ) ? SET : UNSET;
+			fl_get_button( print_form->add_comment ) ? SET : UNSET;
 }
 
 
@@ -464,7 +451,7 @@ static void get_print_comm( void )
 
 
 /*--------------------------------------------------------------*/
-/* Function forks of a child for doing the actually printing    */
+/* Function forks of a child for doing the actually printing,   */
 /* while the main program can continue taking care of new data. */
 /*--------------------------------------------------------------*/
 
@@ -482,12 +469,13 @@ static void start_printing( FILE *fp, char *name, int dim, long what )
 
 	if ( ( pid = fork( ) ) == -1 )
 	{
-		fl_show_alert( "Error", "Sorry, can't print.", NULL, 1 );
+		fl_show_alert( "Error", "Sorry, can't print.",
+					   "Running out of system resources.", 1 );
 		return;
 	}
 
 	/* fsc2's main process can now continue, the spawned child process
-	   takes care of printing */
+	   takes care of all the rest */
 
 	if ( pid != 0 )
 		return;
@@ -525,7 +513,7 @@ static FILE *spawn_print_prog( const char *command )
 
 	/* Create a temporary file for the data because some programs don't work
 	   well with a non-seekable stream (but unlink the file immediately so
-	   that it won't survive in case of any future problems) */
+	   it won't survive in case of any future problems) */
 
 	if ( ( tmp_fd = mkstemp( filename ) ) < 0 ||
 		 ( tmp_fp = fdopen( tmp_fd, "w" ) ) == NULL )
@@ -612,14 +600,17 @@ static void start_printing_1d( FILE *fp, char *name, long what )
 		eps_make_scale( fp, ( void * ) &G.cut_curve, Y, what );
 	}
 
-	/* Restrict futher drawings to the frame of the scales */
+	/* Restrict further drawings to the frame of the scales */
 
 	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp clip np\n",
 			 x_0 - 0.1, y_0 - 0.1, h + 0.2, w + 0.2, - ( h + 0.2 ) );
 
 	if ( what == 1 )
+	{
 		for ( i = G.nc - 1; i >= 0; i-- )
 			eps_draw_curve_1d( fp, G.curve[ i ], i, 1 );
+		print_markers( fp );
+	}
 	else
 		eps_draw_curve_1d( fp, &G.cut_curve, 0, what );
 
@@ -634,6 +625,16 @@ static void start_printing_1d( FILE *fp, char *name, long what )
 static void start_printing_2d( FILE *fp, char *name )
 {
 	print_header( fp, name );
+
+	/* If the active curve has been switched off in the mean time nothing
+	   remains to be printed... */
+
+	if ( G.active_curve == -1 )
+	{
+		fprintf( fp, "showpage\n"
+					 "%%%%EOF\n" );
+		return;
+	}
 
 	/* Set the area for the graph, leave a margin on all sides and,
        additionally, 20 mm (x-axis) / 25 (y-axis) for labels and tick marks */
@@ -1479,7 +1480,7 @@ static void print_comm( FILE *fp )
 /*-------------------------------------------------------------------*/
 /* The comment text to be printed is a single string with embedded   */
 /* newline characters. This routine splits this string into an array */
-/* of strings, each of them being one line of the text. The function */
+/* of strings, each of them holding one line of text. The function   */
 /* returns an array of strings (the calling routine must T_free()    */
 /* both all the strings as well as the array of string pointers) and */
 /* the number of lines to be printed (through the pointer argument). */
@@ -1593,11 +1594,11 @@ static char **split_into_lines( int *num_lines )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Routine returns an string that is basically the copy of the input */
-/* string but with a backslash prepended to all parenthesis (which   */
-/* the PostScript interpreter might choke on).                       */
-/*-------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Routine returns a string that is basically the copy of the input */
+/* string but with a backslash prepended to all parenthesis (which  */
+/* the PostScript interpreter might otherwise choke on).            */
+/*------------------------------------------------------------------*/
 
 static char *paren_replace( const char *str )
 {
@@ -1627,6 +1628,75 @@ static char *paren_replace( const char *str )
 		}
 
 	return sp;
+}
+
+
+/*-----------------------------------------------------*/
+/* Function for drawing the markers in 1D graphic mode */
+/*-----------------------------------------------------*/
+
+static void print_markers( FILE *fp )
+{
+	long i;
+	Curve_1d *cv = NULL;
+	Marker *m;
+	double s2d;
+
+
+	/* Find out the currently active curve (needed for scaling), return
+	   immediately if there isn't one */
+
+	for ( i = 0; i < G.nc; i++ )
+		if ( G.curve[ i ]->active )
+		{
+			cv = G.curve[ i ];
+			break;
+		}
+
+	if ( cv == NULL )
+		return;
+
+	/* Calculate x scale factor and then draw all markers */
+
+	s2d = w * cv->s2d[ X ] / G.canvas.w;
+
+	for ( m = G.marker; m != NULL; m = m->next )
+	{
+		if ( print_with_color )
+			switch ( m->color )
+			{
+				case 0 :
+					fprintf( fp, "0.8 0.8 0.8 srgb\n" );    /* "white" */
+					break;
+
+				case 1 :
+					fprintf( fp, "1 0 0 srgb\n" );          /* red */
+					break;
+
+				case 2 :
+					fprintf( fp, "0 1 0 srgb\n" );          /* green */
+					break;
+
+				case 3 :
+					fprintf( fp, "1 0.75 0 srgb\n" );       /* dark yellow */
+					break;
+
+				case 4 :
+					fprintf( fp, "0 0 1 srgb\n" );          /* blue */
+					break;
+
+				default :
+					fprintf( fp, "0 0 0 srgb\n" );          /* black */
+				break;
+			}
+		else
+			fprintf( fp, "0 sgr\n" );
+
+		fprintf( fp, "[ 1 1 ] 0 sd\n" );
+		
+		fprintf( fp, "%f %f m 0 %f rl s\n",
+				 x_0 + s2d * ( m->position + cv->shift[ X ] ), y_0, h );
+	}
 }
 
 
