@@ -26,6 +26,8 @@
 #  an "enhanced" EDL script and creates from it a Perl script which, in turn,
 #  when run allows the user to set parameters via a GUI and then creates an
 #  EDL script from these parameters and sends it to fsc2 for execution.
+#  Unfortunately, neither this script nor the scripts created by it are
+#  very easy to read or understand...
 
 
 use strict;
@@ -46,9 +48,9 @@ my $need_file_sel = 0;
 
 # By changing the following variables the layout of the form can be changed!
 
-my $label_width = 20;
-my $entry_width = 10;
-my $unit_width  = 5;
+my $label_width = 20;         # width of labels at the left of the input field
+my $entry_width = 10;         # width of the input fields
+my $unit_width  = 5;          # width for e.g. unit to right of the input field
 
 my $if = *STDIN;
 my $of = *STDOUT;
@@ -71,7 +73,7 @@ while ( <$if> ) {
     }
 
     # If the line ends in a backslash append the next line to it (which
-	# then also must be a line starting with the 'guify' signature)
+	# then also must be a line starting with the 'guify' marker)
 
     my $cur_line = $_;
     $lino = $.;
@@ -239,6 +241,8 @@ sub analyze_var_options {
 
 
 ################################################################
+# Function for determining the limits for floating point variables
+# as specified in the "enhanced" EDL script
 
 sub get_float_limits {
     my ( $hr, $str ) = @_;
@@ -280,6 +284,8 @@ sub get_float_limits {
 
 
 ################################################################
+# Function for determining the limits for initeger variables
+# as specified in the "enhanced" EDL script
 
 sub get_int_limits {
     my ( $hr, $str ) = @_;
