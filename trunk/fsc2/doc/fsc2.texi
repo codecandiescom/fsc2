@@ -89,7 +89,7 @@ devices to be used in the experiment.
 
 
 @menu
-* Overview::                Basic concepts of @code{fsc2}
+* Introduction::            Basic concepts of @code{fsc2}
 * GUI::                     The graphical user interface
 * Web Server::              Monitoring the experiment via the net
 * EDL::                     Description of @code{EDL} the language
@@ -98,7 +98,7 @@ devices to be used in the experiment.
 * Using Pulsers::           How to work with the pulsers
 * Example EDL Scripts::     A set of example scripts
 * Command Line Options::    How to invoke @code{fsc2}
-* GUI-fying::               How to add a GUI to an @code{EDL} programs
+* GUI-fying::               How to add a GUI to an @code{EDL} script
 * Cloning Devices::         Creating modules for identical devices
 * Internals::               How @code{fsc2} works internally
 * Modules::                 How to create new modules

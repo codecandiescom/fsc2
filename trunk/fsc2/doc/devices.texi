@@ -25,7 +25,7 @@
 
 @ifinfo
 @menu
-* Introduction::            
+* Overview::            
 * Magnet Functions::
 * Gaussmeter Functions::
 * Lock-In Functions::
@@ -44,8 +44,8 @@
 @end ifinfo
 
 
-@node Introduction, Magnet Functions, Device Functions, Device Functions
-@section Introduction
+@node Overview, Magnet Functions, Device Functions, Device Functions
+@section Overview
 
 
 The simplest approach to dealing with device-specific functions would
@@ -134,7 +134,7 @@ of an already exsiting device, please see one of the following chapters
 (@pxref{Cloning Devices}) on how this is done.
 
 
-@node Magnet Functions, Gaussmeter Functions, Introduction, Device Functions
+@node Magnet Functions, Gaussmeter Functions, Overview, Device Functions
 @section Magnet Functions
 @cindex Magnet Functions
 
