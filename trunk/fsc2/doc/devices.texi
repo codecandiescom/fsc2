@@ -763,9 +763,9 @@ Usually, during an experiment the digitizer starts to do the
 acquisitions following a call of @code{digitizer_start_acquisition()}
 and stops when it's done. To have the digitizer running constantly
 following an acquisition (at least up to the next
-@code{digitizer_start_acquisition()} command) you may use this
-function. It accepts no arguments and can only be used in the
-@code{EXPERIMENT} section.
+@code{digitizer_start_acquisition()} command) use this function. It
+accepts no arguments and can only be used in the @code{EXPERIMENT}
+section.
 
 
 @item digitizer_lock_keyboard()
