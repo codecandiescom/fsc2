@@ -724,7 +724,7 @@ IF J == 1 {
 	FOR I = 1 : Num_Points - 1 {
 		fsave( File, \"#\", field + ( I - 1 ) * step_size );
 		FOR K = 1 : J {
-			fsave( File, \",#\", data[ J, I ] );
+			fsave( File, \",#\", data[ K, I ] );
 		}
 		fsave( File, \"\\n\" );
 	}
@@ -737,6 +737,7 @@ IF J == 1 {
 
 fsave( File, \"\\n\"
        \"% Date:                    # #\\n\"
+	   \"% Script:                  cw_epr\\n\"
        \"% Magnet:\\n\"
        \"%   Start field:           # G\\n\"
        \"%   End field:             # G\\n\"
@@ -881,7 +882,7 @@ print F
 
 	avg += data[ J ];
 	clear_curve( 1, 3 );
-	display( 1, data, 3 );
+	display( 1, data[ J ], 3 );
 
 	set_field( start_field + ( Num_Points - 1 ) * step_size );
 ";
