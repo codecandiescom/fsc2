@@ -48,12 +48,13 @@ struct SPECTRAPRO_300I {
 		long grooves;       /* number of grooves per m */
 		double blaze;       /* blaze wavelength (negative if not appicable) */
 		bool is_calib;      /* is calibration information valid ? */
-		double n0;              /* pixel offset of center frequency */
+		double init_offset;
+		double init_adjust;
 		double inclusion_angle;
 		double focal_length;
 		double detector_angle;
-		double init_offset;
-		double init_gadjust;
+		bool used_in_test;
+		bool installed_in_test;
 	} grating[ MAX_GRATINGS ];
 };
 
@@ -121,6 +122,8 @@ FILE *spectrapro_300i_open_calib( char *name );
 double spectrapro_300i_min( double *x, void *par );
 void spectrapro_300i_open( void );
 void spectrapro_300i_close( void );
+double spectrapro_300i_get_wavelength( void );
+void spectrapro_300i_set_wavelength( double wavelength );
 long spectrapro_300i_get_turret( void );
 void spectrapro_300i_set_turret( long turret );
 long spectrapro_300i_get_grating( void );
@@ -132,8 +135,6 @@ long spectrapro_300i_get_adjust( long grating );
 void spectrapro_300i_set_adjust( long grating, long adjust );
 void spectrapro_300i_install_grating( char *part_no, long grating );
 void spectrapro_300i_uninstall_grating( long grating );
-void spectrapro_300i_send( const char *buf );
-char *spectrapro_300i_talk( const char *buf, size_t len, long wait_cycles );
 
 
 void spectrapro_300i_read_calib( FILE *fp, const char *calib_file );

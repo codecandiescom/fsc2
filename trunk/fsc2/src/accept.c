@@ -767,7 +767,10 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	x_len = get_number_of_new_points( &ptr, type );
 
 	if ( type & ( INT_REF | FLOAT_REF ) )
+	{
 		memcpy( &y_len, ptr, sizeof y_len );
+		y_len--;
+	}
 
 	cv = G2.curve_2d[ curve ];
 
@@ -778,7 +781,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	{
 		xy_scale_changed = SET;
 		if ( y_index + y_len >= G2.ny )
-			need_cut_redraw |= incr_x_and_y( x_index, x_len, y_index + y_len );
+			need_cut_redraw |= incr_x_and_y( x_index, x_len, y_index + y_len);
 		else
 			need_cut_redraw |= incr_x( x_index, x_len );
 	}
@@ -894,7 +897,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	else
 	{
 		ptr += sizeof y_len;
-		for ( cur_ptr = ptr, i = y_index; i < y_index + y_len; i++ )
+		for ( cur_ptr = ptr, i = y_index; i <= y_index + y_len; i++ )
 		{
 			sp = cv->points + i * G2.nx + x_index;
 			memcpy( &x_len, cur_ptr, sizeof x_len );

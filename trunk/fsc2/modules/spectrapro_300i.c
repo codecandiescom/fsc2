@@ -52,9 +52,9 @@ int spectrapro_300i_init_hook( void )
 		spectrapro_300i.grating[ i ].grooves = 1200000;
 		spectrapro_300i.grating[ i ].blaze = 7.5e-7;
 		spectrapro_300i.grating[ i ].init_offset = 0.0;
-		spectrapro_300i.grating[ i ].init_gadjust = 0.0;
+		spectrapro_300i.grating[ i ].init_adjust = 0.0;
 		spectrapro_300i.grating[ i ].used_in_test = UNSET;
-		spectrapro_300i.grating[ grating ].installed_in_test = UNSET;
+		spectrapro_300i.grating[ i ].installed_in_test = UNSET;
 	}
 
 	spectrapro_300i.turret = 0;
@@ -77,20 +77,27 @@ int spectrapro_300i_exp_hook( void )
 	if ( ! spectrapro_300i.is_needed )
 		return 1;
 
+	/* We don't know yet which gratings are installed */
+
 	for ( i = 0; i < MAX_GRATINGS; i++ )
 		spectrapro_300i.grating[ i ].is_installed = SET;
 
 	spectrapro_300i_open( );
 
+	/* Check that gratings used in the test run where installed (or at least
+	   the function for installing the grating was called) */
+
 	for ( i = 0; i < MAX_GRATINGS; i++ )
-		if ( spectrapro_300i.grating[ grating ].used_in_test &&
-			 ! spectrapro_300i.grating[ grating ].is_installed  &&
-			 ! spectrapro_300i.grating[ grating ].installed_in_test )
+		if ( spectrapro_300i.grating[ i ].used_in_test &&
+			 ! spectrapro_300i.grating[ i ].is_installed  &&
+			 ! spectrapro_300i.grating[ i ].installed_in_test )
 		{
 			print( FATAL, "Found during test run that non installed "
 				   "grating #%ld is used.\n", i + 1 );
 			THROW( EXCEPTION );
 		}
+
+	/* No calibration file has been read yet */
 
 	spectrapro_300i.use_calib = 0;
 
@@ -123,8 +130,9 @@ void spectrapro_300i_exit_hook( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*----------------------------------------------*/
+/* Returns a string with the name of the device */
+/*----------------------------------------------*/
 
 Var *monochromator_name( Var *v )
 {
@@ -133,9 +141,9 @@ Var *monochromator_name( Var *v )
 }
 
 
-/*-----------------------------------------------------*/
-/* Function for setting or quering the current grating */
-/*-----------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Function for setting or quering the currently used  grating */
+/*-------------------------------------------------------------*/
 
 Var *monochromator_grating( Var *v )
 {
@@ -281,23 +289,15 @@ Var *monochromator_turret( Var *v )
 
 Var *monochromator_wavelength( Var *v )
 {
-	const char *reply;
 	double wl;
-	char *buf;
 
 
-	CLOBBER_PROTECT( buf );
 	CLOBBER_PROTECT( wl );
 
 	if ( v == NULL )
 	{
 		if ( FSC2_MODE == EXPERIMENT )
-		{
-			reply = spectrapro_300i_talk( "?NM", 100, 1 );
-			spectrapro_300i.wavelength = T_atod( reply ) * 1.0e-9;
-			T_free( ( void * ) reply );
-		}
-
+			spectrapro_300i.wavelength = spectrapro_300i_get_wavelength( );
 		return vars_push( FLOAT_VAR, spectrapro_300i.wavelength );
 	}
 
@@ -314,6 +314,9 @@ Var *monochromator_wavelength( Var *v )
 		print( SEVERE, "Invalid negative wavelength, using 0 nm instead.\n" );
 		wl = 0.0;
 	}
+
+	/* Check that the wavelength isn't too large (also dealing with rounding
+	   errors) */
 
 	if ( wl > MAX_WAVELENGTH + 1.0e-12 )
 	{
@@ -336,21 +339,7 @@ Var *monochromator_wavelength( Var *v )
 	too_many_arguments( v );
 
 	if ( FSC2_MODE == EXPERIMENT )
-	{
-		buf = get_string( "%.3f GOTO", 1.0e9 * wl );
-
-		TRY
-		{
-			spectrapro_300i_send( buf );
-			T_free( buf );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			T_free( buf );
-			RETHROW( );
-		}
-	}
+		spectrapro_300i_set_wavelength( wl );
 
 	spectrapro_300i.wavelength = wl;
 
@@ -367,8 +356,9 @@ Var *monochromator_wavelength( Var *v )
 /* like "1-120-750". A part number consists of a single digit, a      */
 /* hyphen, a three-digit number for the grooves density, another      */
 /* hyphen and either a number for the blaze wavelength or a string    */
-/* consisting of letters. Of course, to install a grating the grating */
-/* may not already used for a grating.                                */
+/* consisting of letters. The string may have not conssist of more    */
+/* than 10 characters. Of course, to install a grating there can't be */
+/* already a grating installed at the same position.                  */
 /*--------------------------------------------------------------------*/
 
 Var *monochromator_install_grating( Var *v )
@@ -582,7 +572,6 @@ Var *monochromator_wavelength_axis( Var * v )
 	double pixel_width;
 	long num_pixels;
 	size_t g;
-	double offset;
 	double inclusion_angle_2;
 	double focal_length;
 	double detector_angle;
@@ -674,7 +663,6 @@ Var *monochromator_wavelength_axis( Var * v )
 	}
 
 	wl = spectrapro_300i.wavelength;
-	offset = spectrapro_300i.grating[ g ].n0;
 	inclusion_angle_2 = 0.5 * spectrapro_300i.grating[ g ].inclusion_angle;
 	focal_length = spectrapro_300i.grating[ g ].focal_length;
 	detector_angle = spectrapro_300i.grating[ g ].detector_angle;
@@ -682,14 +670,14 @@ Var *monochromator_wavelength_axis( Var * v )
 	grating_angle = asin( 0.5 * wl * spectrapro_300i.grating[ g ].grooves
 						  / cos( inclusion_angle_2 ) );
 
-	x = - pixel_width * ( 0.5 * ( double ) ( num_pixels - 1 ) + offset );
+	x = - pixel_width * ( 0.5 * ( double ) ( num_pixels - 1 ) );
 	theta = atan(   x * cos( detector_angle )
 				  / ( focal_length + x * sin( detector_angle ) ) );
 	wl_low = (   sin( grating_angle - inclusion_angle_2 )
 			   + sin( grating_angle + inclusion_angle_2 + theta ) )
 		     / spectrapro_300i.grating[ g ].grooves;
 
-	x = pixel_width * ( 0.5 * ( double ) ( num_pixels - 1 ) - offset );
+	x = pixel_width * ( 0.5 * ( double ) ( num_pixels - 1 ) );
 	theta = atan(   x * cos( detector_angle )
 				  / ( focal_length + x * sin( detector_angle ) ) );
 	wl_hi = (   sin( grating_angle - inclusion_angle_2 )
@@ -708,16 +696,18 @@ Var *monochromator_wavelength_axis( Var * v )
 /* manually, i.e. instead of reading them from a file. It expects   */
 /* five arguments:                                                  */
 /* 1. grating number (grating must be installed)                    */
-/* 2. pixel offset (in pixels)                                      */
-/* 3. inclusion angle (in degree)                                   */
-/* 4. focal length (in meters)                                      */
-/* 5. detector angle (in degree)                                    */
+/* 2. init offset value (zero position of grating, within [-1,1])   */
+/* 3. init adjust value (rotation speed of grating, within [-1,1])  */
+/* 4. inclusion angle (in degree)                                   */
+/* 5. focal length (in meters)                                      */
+/* 6. detector angle (in degree)                                    */
 /*------------------------------------------------------------------*/
 
 Var *monochromator_set_calibration( Var *v )
 {
+	double init_offset;
+	double init_adjust;
 	long grating;
-	double offset;
 	double inclusion_angle;
 	double focal_length;
 	double detector_angle;
@@ -774,7 +764,25 @@ Var *monochromator_set_calibration( Var *v )
 		return vars_push( INT_VAR, 1 );
 	}
 
-	offset = get_double( v, "pixel offset" );
+	init_offset = get_double( v, "init offset value" );
+	if ( fabs( init_offset ) > 1.0 )
+	{
+		print( FATAL, "Init offset value not within interval [-1,1].\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	init_adjust = get_double( v, "init adjust value" );
+	if ( fabs( init_offset ) > 1.0 )
+	{
+		print( FATAL, "Init adjust value not within interval [-1,1].\n" );
+		THROW( EXCEPTION );
+	}
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
@@ -785,7 +793,7 @@ Var *monochromator_set_calibration( Var *v )
 	inclusion_angle = get_double( v, "inclusion angle" );
 	if ( inclusion_angle <= 0.0 )
 	{
-		print( FATAL, "Invalid inclusion angle.\n" );
+		print( FATAL, "Invalid zero or negative inclusion angle.\n" );
 		THROW( EXCEPTION );
 	}
 	inclusion_angle *= atan( 1.0 ) / 45.0;
@@ -814,7 +822,8 @@ Var *monochromator_set_calibration( Var *v )
 
 	too_many_arguments( v );
 
-	spectrapro_300i.grating[ grating - 1 ].n0 = offset;
+	spectrapro_300i.grating[ grating - 1 ].init_offset = init_offset;
+	spectrapro_300i.grating[ grating - 1 ].init_adjust = init_adjust;
 	spectrapro_300i.grating[ grating - 1 ].inclusion_angle = inclusion_angle;
 	spectrapro_300i.grating[ grating - 1 ].focal_length = focal_length;
 	spectrapro_300i.grating[ grating - 1 ].detector_angle = detector_angle;
@@ -891,7 +900,7 @@ Var *monochromator_init_offset( Var *v )
 		spectrapro_300i_set_offset( grating,
 								lrnd( offset * INIT_OFFSET_RANGE /
 									 spectrapro_300i.grating[ grating ].grooves
-									 + ( grating % 3 ) * INIT_OFFSET ) );
+								   + ( ( grating - 1 ) % 3 ) * INIT_OFFSET ) );
 
 	spectrapro_300i.grating[ grating - 1 ].init_offset = offset;
 
@@ -945,7 +954,7 @@ Var *monochromator_init_adjust( Var *v )
 	{
 		if ( FSC2_MODE == TEST )
 			return vars_push( FLOAT_VAR,
-						 spectrapro_300i.grating[ grating - 1 ].init_gadjust );
+						  spectrapro_300i.grating[ grating - 1 ].init_adjust );
 		return vars_push( FLOAT_VAR,
 						  spectrapro_300i_get_adjust( grating )
 						  / INIT_ADJUST_RANGE );
@@ -967,7 +976,7 @@ Var *monochromator_init_adjust( Var *v )
 									lrnd( gadjust * INIT_ADJUST_RANGE
 										  + INIT_ADJUST ) );
 
-	spectrapro_300i.grating[ grating - 1 ].init_gadjust = gadjust;
+	spectrapro_300i.grating[ grating - 1 ].init_adjust = gadjust;
 
 	return vars_push( FLOAT_VAR, gadjust );
 }
