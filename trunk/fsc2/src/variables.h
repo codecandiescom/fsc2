@@ -131,4 +131,10 @@ Var * apply_unit( Var *var, Var *unit );
 Var *vars_val( Var *v );
 
 
+Var *vars_add_to_int_var( Var *v1, Var *v2 );
+Var *vars_add_to_float_var( Var *v1, Var *v2 );
+Var *vars_add_to_int_arr( Var *v1, Var *v2 );
+Var *vars_add_to_float_arr( Var *v1, Var *v2 );
+
+
 #endif  /* ! VARIABLES_HEADER */
