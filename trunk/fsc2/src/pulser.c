@@ -6,8 +6,10 @@
 #include "fsc2.h"
 
 
-/* Function clears the complete pulser structure, that has to be set up
-   by the init_hook( ) function of the pulser driver */
+/*---------------------------------------------------------------*/
+/* Function clears the complete pulser structure, that has to be */
+/* set up by the init_hook( ) function of the pulser driver      */
+/*---------------------------------------------------------------*/
 
 void pulser_struct_init( void )
 {
@@ -38,10 +40,11 @@ void pulser_struct_init( void )
 }
 
 
-/* 
-   This function is going to be called at the start of each pulser specific
-   function to avoid using a pulser function if there's no pulser driver
-*/
+/*--------------------------------------------------------------------------*/
+/* This function is going to be called at the start of each pulser specific */
+/* function to avoid using a pulser function if there's no pulser driver    */
+/*--------------------------------------------------------------------------*/
+
 
 void is_pulser_driver( void )
 {
@@ -54,16 +57,16 @@ void is_pulser_driver( void )
 }
 
 
-/*
-   This function is called to determine if a certain pulser function needed by
-   the experiment is suppled by the pulser driver. The first argument is the
-   functions address, the second a snippet of text to be inserted in the error
-   message (for convenience it is also tested if there's a driver at all so
-   tha not each function has to test for this even when the name of the pulser
-   isn't explicitely needed).
-*/
+/*-----------------------------------------------------------------------*/
+/* This function is called to determine if a certain pulser function     */
+/* needed by the experiment is supplied by the pulser driver. The first  */
+/* argument is the functions address, the second a snippet of text to be */
+/* inserted in the error message (for convenience it is also tested if   */
+/* there's a driver at all so tha not each function has to test for this */
+/* even when the name of the pulser isn't explicitely needed).           */
+/*-----------------------------------------------------------------------*/
 
-is_pulser_func( void *func, const char *text )
+void is_pulser_func( void *func, const char *text )
 {
 	is_pulser_driver( );
 
@@ -76,12 +79,12 @@ is_pulser_func( void *func, const char *text )
 }
 
 
-/*
-   Function tests if the time (in seconds) it gets passed is a reasonable
-   integer multiple of 1 ns and tries to reduce rounding errors. If the time
-   more than 10 ps off from a ns an error message is output, using the text
-   snippet passed to the function as the second argument.
-*/
+/*---------------------------------------------------------------------------*/
+/* Function tests if the time (in seconds) it gets passed is a reasonable    */
+/* integer multiple of 1 ns and tries to reduce rounding errors. If the time */
+/* more than 10 ps off from a ns an error message is output, using the text  */
+/* snippet passed to the function as the second argument.                    */
+/*---------------------------------------------------------------------------*/
 
 double is_mult_ns( double val, const char * text )
 {
@@ -97,10 +100,11 @@ double is_mult_ns( double val, const char * text )
 }
 
 
-/* 
-   This function is called for the assignment of a function for a pod - it
-   can't be called when there are no pods, in this case the assignment has to
-   be done via the p_assign_channel() function */
+/*-------------------------------------------------------------------------*/ 
+/* This function is called for the assignment of a function for a pod - it */
+/* can't be called when there are no pods, in this case the assignment has */
+/* to be done via the p_assign_channel() function                          */
+/*-------------------------------------------------------------------------*/ 
 
 void p_assign_pod( long func, Var *v )
 {
@@ -108,8 +112,6 @@ void p_assign_pod( long func, Var *v )
 
 
 	is_pulser_driver( );
-
-	/* <PARANOIA=on> */
 
 	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
 			func <= PULSER_CHANNEL_FUNC_MAX );
@@ -147,12 +149,13 @@ void p_assign_pod( long func, Var *v )
 }
 
 
-/*
-   This function has a double purpose: For pulsers that have pods and
-   channels, the pod to channel assignment is done via this function. For
-   pulsers, that have just channels, the assignment of a function to a channel
-   is done here (instead of p_assign_pod() as for the other type of pulsers)
-*/
+/*------------------------------------------------------------------------*/
+/* This function has a double purpose: For pulsers that have pods and     */
+/* channels, the pod to channel assignment is done via this function. For */
+/* pulsers, that have just channels, the assignment of a function to a    */
+/* channel is done here (instead of p_assign_pod() as for the other type  */
+/* of pulsers)                                                            */
+/*------------------------------------------------------------------------*/
 
 void p_assign_channel( long func, Var *v )
 {
@@ -194,9 +197,9 @@ void p_assign_channel( long func, Var *v )
 }
 
 
-/*
-   Function for setting a delay (in seconds) for a certain connector
-*/
+/*-------------------------------------------------------------------*/
+/* Function for setting a delay (in seconds) for an output connector */
+/*-------------------------------------------------------------------*/
 
 void p_set_delay( long func, Var *v )
 {
@@ -209,12 +212,7 @@ void p_set_delay( long func, Var *v )
 	/* check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		delay = ( double ) v->val.lval;
-	else
-		delay = v->val.dval;
-
+	delay = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
 	vars_pop( v );
 
 	/* check that the delay value is reasonable */
@@ -234,9 +232,9 @@ void p_set_delay( long func, Var *v )
 }
 
 
-/*
-   Function for inverting the polarity for a certain connector
-*/
+/*-------------------------------------------------------------*/
+/* Function for inverting the polarity for an output connector */
+/*-------------------------------------------------------------*/
 
 void p_inv( long func )
 {
@@ -248,9 +246,10 @@ void p_inv( long func )
 }
 
 
-/*
-   Function for setting the high voltage trigger level for a certain connector
-*/
+/*-----------------------------------------------------*/
+/* Function for setting the high voltage trigger level */
+/* for one of the output connector                     */
+/*-----------------------------------------------------*/
 
 void p_set_v_high( long func, Var *v )
 {
@@ -263,12 +262,7 @@ void p_set_v_high( long func, Var *v )
 	/* check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		voltage = ( double ) v->val.lval;
-	else
-		voltage = v->val.dval;
-
+	voltage = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
 	vars_pop( v );
 
 	/* finally call the function (if it exists...) */
@@ -279,9 +273,10 @@ void p_set_v_high( long func, Var *v )
 }
 
 
-/*
-   Function for setting the high voltage trigger level for a certain connector
-*/
+/*----------------------------------------------------*/
+/* Function for setting the low voltage trigger level */
+/* for one of the output connectors                   */
+/*----------------------------------------------------*/
 
 void p_set_v_low( long func, Var *v )
 {
@@ -294,12 +289,7 @@ void p_set_v_low( long func, Var *v )
 	/* check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		voltage = ( double ) v->val.lval;
-	else
-		voltage = v->val.dval;
-
+	voltage = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
 	vars_pop( v );
 
 	/* finally call the function (if it exists...) */
@@ -310,9 +300,9 @@ void p_set_v_low( long func, Var *v )
 }
 
 
-/*
-   Function for setting the timebase of the pulser
-*/
+/*-------------------------------------------------*/
+/* Function for setting the timebase of the pulser */
+/*-------------------------------------------------*/
 
 void p_set_timebase( Var *v )
 {
@@ -321,17 +311,12 @@ void p_set_timebase( Var *v )
 	/* check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-	    timebase = ( double ) v->val.lval;
-	else
-		timebase = v->val.dval;
-
+	timebase = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
 	vars_pop( v );
 
 	/* check that the timebase has a reasonable value */
 
-	if ( timebase < 0.99e-9 )
+	if ( timebase < 9.9e-10 )
 	{
 		eprint( FATAL, "%s:%ld: Invalid timebase: %f\n", Fname, Lc, timebase );
 		THROW( EXCEPTION );
@@ -346,11 +331,11 @@ void p_set_timebase( Var *v )
 }
 
 
-/*
-   Function for setting the trigger in mode (EXTERNAL or INTERNAL)
-*/
+/*-----------------------------------------------------------------*/
+/* Function for setting the trigger in mode (EXTERNAL or INTERNAL) */
+/*-----------------------------------------------------------------*/
 
-void p_set_trigger_mode( Var *v)
+void p_set_trigger_mode( Var *v )
 {
 	int mode;
 
@@ -383,9 +368,9 @@ void p_set_trigger_mode( Var *v)
 	( *pulser_struct.set_trigger_mode )( mode );
 }
 
-/*
-   Function for setting the trigger in slope (POSITIVE or NEGATIVE)
-*/
+/*------------------------------------------------------------------*/
+/* Function for setting the trigger in slope (POSITIVE or NEGATIVE) */
+/*------------------------------------------------------------------*/
 
 void p_set_trigger_slope( Var *v )
 {
@@ -421,9 +406,9 @@ void p_set_trigger_slope( Var *v )
 }
 
 
-/*
-   Function for setting the trigger in level voltage
-*/
+/*---------------------------------------------------*/
+/* Function for setting the trigger in level voltage */
+/*---------------------------------------------------*/
 
 void p_set_trigger_level( Var *v )
 {
@@ -433,12 +418,7 @@ void p_set_trigger_level( Var *v )
 	/* check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-	    level = ( double ) v->val.lval;
-	else
-		level = v->val.dval;
-
+	level = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
 	vars_pop( v );
 
 	/* finally call the function (if it exists...) */
@@ -449,9 +429,9 @@ void p_set_trigger_level( Var *v )
 }
 
 
-/*
-   Function for setting the (minimum) repeat time for the experiment
-*/
+/*-------------------------------------------------------------------*/
+/* Function for setting the (minimum) repeat time for the experiment */
+/*-------------------------------------------------------------------*/
 
 void p_set_rep_time( Var *v )
 {
@@ -461,15 +441,10 @@ void p_set_rep_time( Var *v )
 	/* check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-	    time = ( double ) v->val.lval;
-	else
-		time = v->val.dval;
-
+	time = ( v->type == INT_VAR ) ? ( double ) v->val.lval :  v->val.dval;
 	vars_pop( v );
 
-	if ( time < 0.99e-9 )
+	if ( time < 9.9e-10 )
 	{
 		eprint( FATAL, "%s:%ld: Invalid repeat time: %f s\n",
 				Fname, Lc, time );
@@ -485,9 +460,9 @@ void p_set_rep_time( Var *v )
 }
 
 
-/*
-   Function for setting the (maximum) repeat frequency for the experiment
-*/
+/*------------------------------------------------------------------------*/
+/* Function for setting the (maximum) repeat frequency for the experiment */
+/*------------------------------------------------------------------------*/
 
 void p_set_rep_freq( Var *v )
 {
@@ -497,12 +472,7 @@ void p_set_rep_freq( Var *v )
 	/* check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-	    freq = ( double ) v->val.lval;
-	else
-		freq = v->val.dval;
-
+	freq = ( v->type == INT_VAR ) ? ( double ) v->val.lval :  v->val.dval;
 	vars_pop( v );
 
 	if ( freq > 1.01e9 || freq <= 0.0 )
@@ -523,5 +493,3 @@ void p_set_rep_freq( Var *v )
 					"setting a repeat frequency" );
 	( *pulser_struct.set_repeat_time )( time );
 }
-
-
