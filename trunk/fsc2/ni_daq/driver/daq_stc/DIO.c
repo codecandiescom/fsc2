@@ -1,28 +1,28 @@
 /*
-  $Id$
- 
-  Driver for National Instruments PCI E Series DAQ boards
-
-  Copyright (C) 2003-2004 Jens Thoms Toerring
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-
-  To contact the author send email to
-  Jens.Toerring@physik.fu-berlin.de
-*/
+ *  $Id$
+ * 
+ *  Driver for National Instruments PCI E Series DAQ boards
+ * 
+ *  Copyright (C) 2003-2004 Jens Thoms Toerring
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ * 
+ *  To contact the author send email to
+ *  Jens.Toerring@physik.fu-berlin.de
+ */
 
 
 #include "ni_daq_board.h"
@@ -34,10 +34,10 @@
 #endif
 
 
-/*--------------------------------------------------------------*/
-/* Function resets the DIO subsystem back into a known state by */
-/* disabling serial output and switching all pins to input.     */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function resets the DIO subsystem back into a known state by
+ * disabling serial output and switching all pins to input.
+ *--------------------------------------------------------------*/
 
 void DIO_reset_all( Board *board )
 {
@@ -48,8 +48,9 @@ void DIO_reset_all( Board *board )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*-------------------------------------------------*
+ * Handler for ioctl() calls for the DIO subsystem
+ *-------------------------------------------------*/
 
 int DIO_ioctl_handler( Board *board, NI_DAQ_DIO_ARG *arg )
 {
@@ -85,12 +86,12 @@ int DIO_ioctl_handler( Board *board, NI_DAQ_DIO_ARG *arg )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function reads an 8-bit value from the DIO pins but only from */
-/* pins for which bits are set in the mask (this allows having   */
-/* some of the pins used for input while the others are used for */
-/* output at the same time).                                     */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function reads an 8-bit value from the DIO pins but only from
+ * pins for which bits are set in the mask (this allows having
+ * some of the pins used for input while the others are used for
+ * output at the same time).
+ *---------------------------------------------------------------*/
 
 int DIO_in( Board *board, unsigned char *value, unsigned char mask )
 {
@@ -111,12 +112,12 @@ int DIO_in( Board *board, unsigned char *value, unsigned char mask )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function outputs an 8-bit value at the DIO pins but only at the  */
-/* pins for which bits are set in the mask (this allows having some */
-/* of the pins being used for output while the others are used for  */
-/* input at the same time).                                         */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function outputs an 8-bit value at the DIO pins but only at the
+ * pins for which bits are set in the mask (this allows having some
+ * of the pins being used for output while the others are used for
+ * input at the same time).
+ *------------------------------------------------------------------*/
 
 int DIO_out( Board *board, unsigned char value, unsigned char mask )
 {

@@ -1,28 +1,28 @@
 /*
-  $Id$
- 
-  Driver for National Instruments DAQ boards based on a DAQ-STC
-
-  Copyright (C) 2003-2004 Jens Thoms Toerring
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-
-  To contact the author send email to
-  Jens.Toerring@physik.fu-berlin.de
-*/
+ *  $Id$
+ * 
+ *  Driver for National Instruments DAQ boards based on a DAQ-STC
+ * 
+ *  Copyright (C) 2003-2004 Jens Thoms Toerring
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ * 
+ *  To contact the author send email to
+ *  Jens.Toerring@physik.fu-berlin.de
+ */
 
 
 #include "ni_daq_board.h"
@@ -39,9 +39,9 @@ static int AO_direct_output( Board *board, unsigned int channel, int value );
 #endif
 
 
-/*----------------------------------------------------------*/
-/* Function resets the AO subsystem back into a known state */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function resets the AO subsystem back into a known state
+ *----------------------------------------------------------*/
 
 void AO_reset_all( Board *board )
 {
@@ -144,8 +144,9 @@ void AO_reset_all( Board *board )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*------------------------------------------------*
+ * Handler for ioctl() calls for the AO subsystem
+ *------------------------------------------------*/
 
 int AO_ioctl_handler( Board *board, NI_DAQ_AO_ARG *arg )
 {
@@ -176,9 +177,9 @@ int AO_ioctl_handler( Board *board, NI_DAQ_AO_ARG *arg )
 }
 
 
-/*-----------------------------------*/
-/* Function for setting up a channel */
-/*-----------------------------------*/
+/*-----------------------------------*
+ * Function for setting up a channel
+ *-----------------------------------*/
 
 static int AO_channel_setup( Board *board, unsigned int channel,
 			     NI_DAQ_AO_CHANNEL_ARGS *channel_args )
@@ -222,10 +223,10 @@ static int AO_channel_setup( Board *board, unsigned int channel,
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function for immediate direct output (i.e. without use of the */
-/* ADC FIFO etc.). The channel must have been set up before.     */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for immediate direct output (i.e. without use of the
+ * ADC FIFO etc.). The channel must have been set up before.
+ *---------------------------------------------------------------*/
 
 static int AO_direct_output( Board *board, unsigned int channel, int value )
 {

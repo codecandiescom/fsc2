@@ -1,28 +1,28 @@
 /*
-  $Id$
- 
-  Driver for National Instruments DAQ boards based on a DAQ-STC
-
-  Copyright (C) 2003-2004 Jens Thoms Toerring
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-
-  To contact the author send email to
-  Jens.Toerring@physik.fu-berlin.de
-*/
+ *  $Id$
+ * 
+ *  Driver for National Instruments DAQ boards based on a DAQ-STC
+ * 
+ *  Copyright (C) 2003-2004 Jens Thoms Toerring
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ * 
+ *  To contact the author send email to
+ *  Jens.Toerring@physik.fu-berlin.de
+ */
 
 
 #include "ni_daq_board.h"
@@ -51,9 +51,9 @@ static PFI_States PFI_state[ 10 ];
 
 
 
-/*-----------------------------------------------------------*/
-/* Function resets the MSC subsystem back into a known state */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function resets the MSC subsystem back into a known state
+ *-----------------------------------------------------------*/
 
 void MSC_reset_all( Board *board )
 {
@@ -131,9 +131,9 @@ void MSC_reset_all( Board *board )
 }
 
 
-/*------------------------------------------------------------*/
-/* Function for enabling one of the interrupts of the DAQ-STC */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function for enabling one of the interrupts of the DAQ-STC
+ *------------------------------------------------------------*/
 
 void daq_irq_enable( Board *board, int irq, void ( * handler )( Board * ) )
 {
@@ -216,9 +216,9 @@ void daq_irq_enable( Board *board, int irq, void ( * handler )( Board * ) )
 	}
 }
 
-/*-------------------------------------------------------------*/
-/* Function for disabling one of the interrupts of the DAQ-STC */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function for disabling one of the interrupts of the DAQ-STC
+ *-------------------------------------------------------------*/
 
 void daq_irq_disable( Board *board, int irq )
 {
@@ -290,19 +290,19 @@ void daq_irq_disable( Board *board, int irq )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function for switching the PFIi lines to output or input. Each  */
-/* subsystem (i.e. AI, AO, GPCT0 and GPCT1) is supposed to call    */
-/* this function and will be allowed setting a direction of a PFI  */
-/* line only if hasn't been already claimed by a different sub-    */
-/* system. Thus each subsystem also has to "release" the PFI lines */
-/* it "allocated" when it's not using them anymore. This is done   */
-/* by calling the function with the state argument being           */
-/* "NI_DAQ_UNUSED". A subsystem can also "release" all of its PFI  */
-/* lines by calling the function with the channel argument being   */
-/* set to "NI_DAQ_ALL".                                            */
-/* The function returns 0 on success and 1 on errors.              */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function for switching the PFIi lines to output or input. Each
+ * subsystem (i.e. AI, AO, GPCT0 and GPCT1) is supposed to call
+ * this function and will be allowed setting a direction of a PFI
+ * line only if hasn't been already claimed by a different sub-
+ * system. Thus each subsystem also has to "release" the PFI lines
+ * it "allocated" when it's not using them anymore. This is done
+ * by calling the function with the state argument being
+ * "NI_DAQ_UNUSED". A subsystem can also "release" all of its PFI
+ * lines by calling the function with the channel argument being
+ * set to "NI_DAQ_ALL".
+ * The function returns 0 on success and 1 on errors.
+ *-----------------------------------------------------------------*/
 
 int MSC_PFI_setup( Board *board, NI_DAQ_SUBSYSTEM sub_system,
 		   NI_DAQ_INPUT channel, NI_DAQ_PFI_STATE state )
@@ -374,9 +374,9 @@ int MSC_PFI_setup( Board *board, NI_DAQ_SUBSYSTEM sub_system,
 }
 
 
-/*-----------------------------------------------------------*/
-/* Function for handling ioctl() calls for the MSC subsystem */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function for handling ioctl() calls for the MSC subsystem
+ *-----------------------------------------------------------*/
 
 int MSC_ioctl_handler( Board *board, NI_DAQ_MSC_ARG *arg )
 {
@@ -426,9 +426,9 @@ int MSC_ioctl_handler( Board *board, NI_DAQ_MSC_ARG *arg )
 }
 
 
-/*------------------------------------------------------*/
-/* Sets the clock speeds (both the fast and slow clock) */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Sets the clock speeds (both the fast and slow clock)
+ *------------------------------------------------------*/
 
 static int MSC_set_speed( Board *board, unsigned int divider,
 			  NI_DAQ_CLOCK_SPEED_VALUE speed )
@@ -485,10 +485,10 @@ static int MSC_set_speed( Board *board, unsigned int divider,
 }
 
 
-/*---------------------------------------------------*/
-/* Selects which clock to output at the FREQ_OUT pin */
-/* and enables or disables output.                   */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Selects which clock to output at the FREQ_OUT pin
+ * and enables or disables output.
+ *---------------------------------------------------*/
 
 static int MSC_clock_output( Board *board, NI_DAQ_CLOCK_TYPE clock,
 			     NI_DAQ_STATE output_state )
@@ -514,10 +514,10 @@ static int MSC_clock_output( Board *board, NI_DAQ_CLOCK_TYPE clock,
 }
 
 
-/*--------------------------------------------------------*/
-/* Selects the trigger mode (either TTL digital or analog */
-/* with the required level(s)).                           */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Selects the trigger mode (either TTL digital or analog
+ * with the required level(s)).
+ *--------------------------------------------------------*/
 
 static int MSC_trigger_setup( Board *board, NI_DAQ_TRIG_TYPE trigger_type,
 			      int trigger_high, int trigger_low )
@@ -580,10 +580,10 @@ static int MSC_trigger_setup( Board *board, NI_DAQ_TRIG_TYPE trigger_type,
 }
 
 
-/*---------------------------------------------------*/
-/* Function fills in a structure with the properties */
-/* of a board and returns it to the caller.          */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function fills in a structure with the properties
+ * of a board and returns it to the caller.
+ *---------------------------------------------------*/
 
 int MSC_board_properties( Board *board, NI_DAQ_BOARD_PROPERTIES *arg )
 {

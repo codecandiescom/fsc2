@@ -1,28 +1,28 @@
 /*
-  $Id$
- 
-  Library for National Instruments DAQ boards based on a DAQ-STC
-
-  Copyright (C) 2003-2004 Jens Thoms Toerring
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-
-  To contact the author send email to
-  Jens.Toerring@physik.fu-berlin.de
-*/
+ *  $Id$
+ * 
+ *  Library for National Instruments DAQ boards based on a DAQ-STC
+ * 
+ *  Copyright (C) 2003-2004 Jens Thoms Toerring
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ * 
+ *  To contact the author send email to
+ *  Jens.Toerring@physik.fu-berlin.de
+ */
 
 
 #include "ni_daq_lib.h"
@@ -37,10 +37,10 @@ static int ni_daq_gpct_time_to_ticks( int board, int counter,
 
 
 
-/*-------------------------------------------------*/
-/* Function for switching the G_IN_TIMEBASE1 (i.e. */
-/* the fast time base) between 20 MHz and 10 MHz   */
-/*-------------------------------------------------*/
+/*-------------------------------------------------*
+ * Function for switching the G_IN_TIMEBASE1 (i.e.
+ * the fast time base) between 20 MHz and 10 MHz
+ *-------------------------------------------------*/
 
 int ni_daq_gpct_set_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed )
 {
@@ -69,10 +69,10 @@ int ni_daq_gpct_set_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed )
 }
 
 
-/*---------------------------------------------------*/
-/* Function to determine if G_IN_TIMEBASE1 (i.e. the */
-/* fast time base) is running at 20 MHz or at 10 MHz */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function to determine if G_IN_TIMEBASE1 (i.e. the
+ * fast time base) is running at 20 MHz or at 10 MHz
+ *---------------------------------------------------*/
 
 int ni_daq_gpct_get_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE *speed )
 {
@@ -91,10 +91,10 @@ int ni_daq_gpct_get_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE *speed )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function starts a counter that will run until it is explicitely */
-/* stopped by a call of ni_daq_gpct_stop_counter().                */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function starts a counter that will run until it is explicitely
+ * stopped by a call of ni_daq_gpct_stop_counter().
+ *-----------------------------------------------------------------*/
 
 int ni_daq_gpct_start_counter( int board, int counter, NI_DAQ_INPUT source )
 {
@@ -134,10 +134,10 @@ int ni_daq_gpct_start_counter( int board, int counter, NI_DAQ_INPUT source )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function starts a counter that will be gated by its adjacent counter */
-/* for 'gate_length'. It stops automatically at the end of the gate.    */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function starts a counter that will be gated by its adjacent counter
+ * for 'gate_length'. It stops automatically at the end of the gate.
+ *----------------------------------------------------------------------*/
 
 int ni_daq_gpct_start_gated_counter( int board, int counter,
 									 double gate_length, NI_DAQ_INPUT source )
@@ -224,8 +224,8 @@ int ni_daq_gpct_start_gated_counter( int board, int counter,
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int ni_daq_gpct_stop_counter( int board, int counter )
 {
@@ -309,8 +309,8 @@ int ni_daq_gpct_stop_counter( int board, int counter )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int ni_daq_gpct_start_pulses( int board, int counter )
 {
@@ -354,8 +354,8 @@ int ni_daq_gpct_start_pulses( int board, int counter )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int ni_daq_gpct_get_count( int board, int counter, int wait_for_end,
 						   unsigned long *count, int *state )
@@ -406,8 +406,8 @@ int ni_daq_gpct_get_count( int board, int counter, int wait_for_end,
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int ni_daq_gpct_single_pulse( int board, int counter, double duration,
 							  double *delay, int dont_start )
@@ -489,8 +489,8 @@ int ni_daq_gpct_single_pulse( int board, int counter, double duration,
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int ni_daq_gpct_continuous_pulses( int board, int counter,
 								   double high_phase, double low_phase,
@@ -614,8 +614,8 @@ int ni_daq_gpct_continuous_pulses( int board, int counter,
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int ni_daq_gpct_stop_pulses( int board, int counter )
 {
@@ -629,8 +629,8 @@ int ni_daq_gpct_stop_pulses( int board, int counter )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int ni_daq_gpct_state( int board, int counter, int *state )
 {
@@ -659,9 +659,9 @@ int ni_daq_gpct_state( int board, int counter, int *state )
 }
 
 
-/*------------------------------------------------------*/
-/* Function checks if a counter source value is correct */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function checks if a counter source value is correct
+ *------------------------------------------------------*/
 
 static int ni_daq_gpct_check_source( NI_DAQ_INPUT source )
 {
@@ -674,8 +674,8 @@ static int ni_daq_gpct_check_source( NI_DAQ_INPUT source )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 static int ni_daq_gpct_is_armed( int board, int counter, int *state )
 {
@@ -697,10 +697,10 @@ static int ni_daq_gpct_is_armed( int board, int counter, int *state )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function is used only internally: when the board is opened it gets */
-/* called to find out the current GPCT settings of the board          */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function is used only internally: when the board is opened it gets
+ * called to find out the current GPCT settings of the board
+ *--------------------------------------------------------------------*/
 
 int ni_daq_gpct_init( int board )
 {
@@ -724,12 +724,12 @@ int ni_daq_gpct_init( int board )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* This function tries to figure out the timing (in units of ticks of */
-/* the GPCT clock) for a given time (in seconds). If necessary (and   */
-/* possible) the GPCT clock setting is changed to make it possible to */
-/* achieve to requested timing.                                       */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * This function tries to figure out the timing (in units of ticks of
+ * the GPCT clock) for a given time (in seconds). If necessary (and
+ * possible) the GPCT clock setting is changed to make it possible to
+ * achieve to requested timing.
+ *--------------------------------------------------------------------*/
 
 static int ni_daq_gpct_time_to_ticks( int board, int counter,
 									  double duration, unsigned long *ticks,

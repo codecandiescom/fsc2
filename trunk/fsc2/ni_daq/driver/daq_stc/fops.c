@@ -1,28 +1,28 @@
 /*
-  $Id$
- 
-  Driver for National Instruments DAQ boards based on a DAQ-STC
-
-  Copyright (C) 2003-2004 Jens Thoms Toerring
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-
-  To contact the author send email to
-  Jens.Toerring@physik.fu-berlin.de
-*/
+ *  $Id$
+ * 
+ *  Driver for National Instruments DAQ boards based on a DAQ-STC
+ * 
+ *  Copyright (C) 2003-2004 Jens Thoms Toerring
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ * 
+ *  To contact the author send email to
+ *  Jens.Toerring@physik.fu-berlin.de
+ */
 
 
 #include "ni_daq_board.h"
@@ -51,9 +51,9 @@ struct file_operations ni_daq_file_ops = {
 };
 
 
-/*---------------------------------------------------------------------*/
-/* Function gets executed when the device file for a board gets opened */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function gets executed when the device file for a board gets opened
+ *---------------------------------------------------------------------*/
 
 static int ni_daq_open( struct inode *inode_p, struct file *file_p )
 {
@@ -94,9 +94,9 @@ static int ni_daq_open( struct inode *inode_p, struct file *file_p )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function gets executed when the device file for a board gets closed */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function gets executed when the device file for a board gets closed
+ *---------------------------------------------------------------------*/
 
 static int ni_daq_release( struct inode *inode_p, struct file *file_p )
 {
@@ -139,9 +139,9 @@ static int ni_daq_release( struct inode *inode_p, struct file *file_p )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function for dealing with poll() and select() calls for the driver */ 
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for dealing with poll() and select() calls for the driver
+ *--------------------------------------------------------------------*/
 
 static unsigned int ni_daq_poll( struct file *filep,
 				 struct poll_table_struct * pt )
@@ -194,20 +194,20 @@ static unsigned int ni_daq_poll( struct file *filep,
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function for reading from the device file associated with the board. */
-/* Reading the device file only works for data from the AI subsystem.   */
-/* 1. If no valid acquisition set up has been done return -EINVAL       */
-/* 2. If there's an acquisition set up but the acquisition hasn't been  */
-/*    started, trying to read from the file automatically starts it     */
-/* 3. If the file wasn't opened in non-blocking mode wait until data    */
-/*    are available                                                     */
-/* 4. Return as many data as are available (or as many as requested)    */
-/* 5. If the acquisition is finished and all data to be expected are    */
-/*    getting passed on to the user a reset of the AI subsystem is      */
-/*    done, i.e. DMA is automatically disabled, buffers are deallocated */
-/*    and trigger input lines are released back into the pool           */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function for reading from the device file associated with the board.
+ * Reading the device file only works for data from the AI subsystem.
+ * 1. If no valid acquisition set up has been done return -EINVAL
+ * 2. If there's an acquisition set up but the acquisition hasn't been
+ *    started, trying to read from the file automatically starts it
+ * 3. If the file wasn't opened in non-blocking mode wait until data
+ *    are available
+ * 4. Return as many data as are available (or as many as requested)
+ * 5. If the acquisition is finished and all data to be expected are
+ *    getting passed on to the user a reset of the AI subsystem is
+ *    done, i.e. DMA is automatically disabled, buffers are deallocated
+ *    and trigger input lines are released back into the pool
+ *----------------------------------------------------------------------*/
 
 static ssize_t ni_daq_read( struct file *filep, char *buff, size_t count,
 			    loff_t *offp )
@@ -299,9 +299,9 @@ static ssize_t ni_daq_read( struct file *filep, char *buff, size_t count,
 }
 
 
-/*--------------------------------------------------------*/
-/* Not implemented yet (to be used with the AO subsystem) */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Not implemented yet (to be used with the AO subsystem)
+ *--------------------------------------------------------*/
 
 static ssize_t ni_daq_write( struct file *filep, const char *buff,
 			     size_t count, loff_t *offp )
@@ -310,9 +310,9 @@ static ssize_t ni_daq_write( struct file *filep, const char *buff,
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function for handling of ioctl() calls for one of the boards */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function for handling of ioctl() calls for one of the boards
+ *--------------------------------------------------------------*/
 
 static int ni_daq_ioctl( struct inode *inode_p, struct file *file_p,
 			 unsigned int cmd, unsigned long arg )

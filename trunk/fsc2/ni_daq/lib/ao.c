@@ -1,41 +1,41 @@
 /*
-  $Id$
- 
-  Library for National Instruments DAQ boards based on a DAQ-STC
-
-  Copyright (C) 2003-2004 Jens Thoms Toerring
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-
-  To contact the author send email to
-  Jens.Toerring@physik.fu-berlin.de
-*/
+ *  $Id$
+ * 
+ *  Library for National Instruments DAQ boards based on a DAQ-STC
+ * 
+ *  Copyright (C) 2003-2004 Jens Thoms Toerring
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ * 
+ *  To contact the author send email to
+ *  Jens.Toerring@physik.fu-berlin.de
+ */
 
 
 #include "ni_daq_lib.h"
 
 
-/*---------------------------------------------------------------*/
-/* Function for configuration of the AO channels - it can be set */
-/* individually for each channel if an external or the internal  */
-/* reference is to be used and if the channels is to be used in  */
-/* unipolar or bipolar mode. If this function doesn't get called */
-/* all channels are per default set to use of the internal       */
-/* reference and bipolar mode.                                   */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for configuration of the AO channels - it can be set
+ * individually for each channel if an external or the internal
+ * reference is to be used and if the channels is to be used in
+ * unipolar or bipolar mode. If this function doesn't get called
+ * all channels are per default set to use of the internal
+ * reference and bipolar mode.
+ *---------------------------------------------------------------*/
 
 int ni_daq_ao_channel_configuration( int board, int num_channels,
 									 int *channels,
@@ -118,8 +118,8 @@ int ni_daq_ao_channel_configuration( int board, int num_channels,
 	return ni_daq_errno = NI_DAQ_OK;
 }
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int ni_daq_ao( int board, int num_channels, int *channels, double *values )
 {
@@ -191,9 +191,9 @@ int ni_daq_ao( int board, int num_channels, int *channels, double *values )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function for initializing the AO channels to the default state */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for initializing the AO channels to the default state
+ *----------------------------------------------------------------*/
 
 int ni_daq_ao_init( int board )
 {

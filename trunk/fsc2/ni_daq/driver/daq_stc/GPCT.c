@@ -1,28 +1,28 @@
 /*
-  $Id$
- 
-  Driver for National Instruments DAQ boards based on a DAQ-STC
-
-  Copyright (C) 2003-2004 Jens Thoms Toerring
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-
-  To contact the author send email to
-  Jens.Toerring@physik.fu-berlin.de
-*/
+ *  $Id$
+ * 
+ *  Driver for National Instruments DAQ boards based on a DAQ-STC
+ * 
+ *  Copyright (C) 2003-2004 Jens Thoms Toerring
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ * 
+ *  To contact the author send email to
+ *  Jens.Toerring@physik.fu-berlin.de
+ */
 
 
 #include "ni_daq_board.h"
@@ -63,9 +63,9 @@ static int GPCT_input_source( int source, u16 *bits );
 #endif
 
 
-/*------------------------------------------------------------------*/
-/* Function resets the whole GCPT subsystem back into a known state */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function resets the whole GCPT subsystem back into a known state
+ *------------------------------------------------------------------*/
 
 void GPCT_reset_all( Board *board )
 {
@@ -159,8 +159,9 @@ void GPCT_reset_all( Board *board )
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*--------------------------------------------------*
+ * Handler for ioctl() calls for the GPCT subsystem
+ *--------------------------------------------------*/
 
 int GPCT_ioctl_handler( Board *board, NI_DAQ_GPCT_ARG *arg )
 {
@@ -234,11 +235,11 @@ int GPCT_ioctl_handler( Board *board, NI_DAQ_GPCT_ARG *arg )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function for setting the G_IN_TIMEBASE1 - it can be switched between */
-/* 20 MHz and 10 MHz (please note that the time base for IN_TIMEBASE2   */
-/* is controlled by the general setting of the MSC subsystem!).         */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function for setting the G_IN_TIMEBASE1 - it can be switched between
+ * 20 MHz and 10 MHz (please note that the time base for IN_TIMEBASE2
+ * is controlled by the general setting of the MSC subsystem!).
+ *----------------------------------------------------------------------*/
 
 static int GPCT_clock_speed( Board *board, NI_DAQ_CLOCK_SPEED_VALUE speed )
 {
@@ -257,9 +258,9 @@ static int GPCT_clock_speed( Board *board, NI_DAQ_CLOCK_SPEED_VALUE speed )
 }
 
 
-/*------------------------------------------------------------*/
-/* Function for enabling or disabling the output of a counter */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function for enabling or disabling the output of a counter
+ *------------------------------------------------------------*/
 
 static int GPCT_counter_output_state( Board *board, unsigned int counter,
 				      NI_DAQ_STATE output_state )
@@ -283,9 +284,9 @@ static int GPCT_counter_output_state( Board *board, unsigned int counter,
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function for stopping the counter(s) of a board, i.e. disarming it. */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function for stopping the counter(s) of a board, i.e. disarming it.
+ *---------------------------------------------------------------------*/
 
 static int GPCT_counter_disarm( Board *board, unsigned counter )
 {
@@ -313,15 +314,15 @@ static int GPCT_counter_disarm( Board *board, unsigned counter )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Function for reading the value of a counter (via the save registers).    */
-/* When called with the 'wait_on_end' member of the NI_DAQ_COUNTER_VAL      */
-/* structure passed to the function being set it's assumed that the counter */
-/* is doing a gated measurement with the neighboring counter as the source  */
-/* of the (single) gate pulse. The function will then wait for the neigh-   */
-/* boring counter to stop counting before disarming the counter and reading */
-/* the counter value.                                                       */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Function for reading the value of a counter (via the save registers).
+ * When called with the 'wait_on_end' member of the NI_DAQ_COUNTER_VAL
+ * structure passed to the function being set it's assumed that the counter
+ * is doing a gated measurement with the neighboring counter as the source
+ * of the (single) gate pulse. The function will then wait for the neigh-
+ * boring counter to stop counting before disarming the counter and reading
+ * the counters value.
+ *--------------------------------------------------------------------------*/
 
 static int GPCT_get_count( Board *board, unsigned int counter,
 			   int wait_for_end, unsigned long *count )
@@ -394,8 +395,8 @@ static int GPCT_get_count( Board *board, unsigned int counter,
 	return 0;
 }
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 static void G0_TC_handler( Board *board )
 {
@@ -403,8 +404,8 @@ static void G0_TC_handler( Board *board )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 static void G1_TC_handler( Board *board )
 {
@@ -412,9 +413,9 @@ static void G1_TC_handler( Board *board )
 }
 
 
-/*---------------------------------------------------*/
-/* Function to start output of pulses from a counter */
-/*---------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function to start output of pulses from a counter
+ *---------------------------------------------------*/
 
 static int GPCT_start_pulses( Board *board, unsigned int counter,
 			      NI_DAQ_INPUT source, NI_DAQ_INPUT gate,
@@ -547,11 +548,11 @@ static int GPCT_start_pulses( Board *board, unsigned int counter,
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function to start output of pulses from one or both counter */
-/* (it or they must have been set up by an ioctl() call with   */
-/* NI_DAQ_GPCT_START_PULSER in delayed start mode)             */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function to start output of pulses from one or both counter
+ * (it or they must have been set up by an ioctl() call with
+ * NI_DAQ_GPCT_START_PULSER in delayed start mode)
+ *-------------------------------------------------------------*/
 
 static int GPCT_arm( Board *board, unsigned int counter )
 {
@@ -584,9 +585,9 @@ static int GPCT_arm( Board *board, unsigned int counter )
 
 
 
-/*--------------------------------------*/
-/* Function for starting event counting */
-/*--------------------------------------*/
+/*----------------------------------*
+ * Function to start event counting
+ *----------------------------------*/
 
 static int GPCT_start_counting( Board *board, unsigned int counter,
 				NI_DAQ_INPUT source, NI_DAQ_INPUT gate,
@@ -658,10 +659,10 @@ static int GPCT_start_counting( Board *board, unsigned int counter,
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function checks if a counter of a board is currently counting */
-/* (i.e. if it's armed).                                         */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function checks if a counter of a board is currently counting
+ * (i.e. if it's armed).
+ *---------------------------------------------------------------*/
 
 static int GPCT_is_busy( Board *board, unsigned counter, int *is_armed )
 {
@@ -679,8 +680,8 @@ static int GPCT_is_busy( Board *board, unsigned counter, int *is_armed )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ *---------------------------------------------------------------------*/
 
 static int GPCT_input_gate( int gate, u16 *bits )
 {
@@ -698,8 +699,8 @@ static int GPCT_input_gate( int gate, u16 *bits )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ *---------------------------------------------------------------------*/
 
 static int GPCT_input_source( int source, u16 *bits )
 {
@@ -718,7 +719,6 @@ static int GPCT_input_source( int source, u16 *bits )
 
 	return 1;
 }
-
 
 
 /*
