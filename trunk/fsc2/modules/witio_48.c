@@ -613,7 +613,7 @@ static void check_ret( int ret_val )
 	if ( ret_val == WITIO_48_OK )
 		return;
 
-	print( FATAL, "%s.\n", witio_48_error_message( ) );
+	print( FATAL, "%s.\n", witio_48_strerror( ) );
 	witio_48_close( );
 	THROW( EXCEPTION );
 }
