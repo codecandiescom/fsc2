@@ -44,7 +44,7 @@ static volatile int quitting;
 bool run( void )
 {
 	const char *line;
-	int i, pr;
+	int i;
     char *gpib_log = ( char * ) GPIB_LOG_FILE;
 
 
@@ -98,15 +98,9 @@ bool run( void )
 	 two pipes, one for the parent process to write to the child process and
 	 another one for the other way round.*/
 
-    if ( ( pr = pipe( pd ) ) < 0 || pipe( pd + 2 ) < 0 )      /* open pipes */
+	if ( ! setup_comm( ) )
 	{
-		if ( pr == 0 )
-		{
-			close( pd[ 0 ] );
-			close( pd[ 1 ] );
-		}
-
-		eprint( FATAL, "Not enough file handles to run experiment." );
+		eprint( FATAL, "Can't set up internal communication channels.\n" );
 		run_exit_hooks( );
 		if ( need_GPIB )
 			gpib_shutdown( );
@@ -164,8 +158,11 @@ bool run( void )
 			break;
 	}
 
-	for ( i = 0; i < 4; i++ )
-		close( pd[ i ] );
+
+	close( pd[ 0 ] );
+	close( pd[ 3 ] );
+	pd[ 0 ] = pd[ 2 ];
+	end_comm( );
 
 	fl_remove_signal_callback( SIGCHLD );
 	fl_add_signal_callback( SIGCHLD, sigchld_handler, NULL );
@@ -205,7 +202,15 @@ void new_data_handler( int sig_type, void *data )
 		kill( child_pid, DO_SEND );
 	}
 	else
+	{
+		Message_Queue[ message_queue_high ].shm_id = Key->shm_id;
+		Message_Queue[ message_queue_high++ ].type = Key->type;
+		message_queue_high %= QUEUE_SIZE;
 		fl_trigger_object( run_form->redraw_dummy);
+
+		if ( Key->type == DATA )
+			kill( child_pid, DO_SEND );
+	}
 }
 
 
@@ -312,8 +317,7 @@ void stop_measurement( FL_OBJECT *a, long b )
 		return;
 	}
 
-	close( pd[ READ ] );               /* close also end of pipe */
-	close( pd[ WRITE ] );              /* close also write end of pipe */
+	end_comm( );
 	fl_remove_signal_callback( NEW_DATA );
 	fl_remove_signal_callback( QUITTING );
 

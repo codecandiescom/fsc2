@@ -3,73 +3,271 @@
 */
 
 
-/*-----------------------------------------------------------------------------
-   This part of the program is necessary for exchanging data between the main
-   process (called the parent process in the following) and the forked process
-   that does the measurement (the child process). There are several reasons
-   why both processes have to exchange data. The first one is that the child
-   process can't (and shouldn't) take care of displaying the measured data.
-   Thus a mechanism is needed for passing the measured data to be displayed to
-   the parent process. The other reason is that the child process also can't
-   use the functions from the XForms library for displaying message or alert
-   boxes etc. For this we need the parent process to display them and then to
-   return the result to the child process.
+/* 
+   There are two types of messages to be exchanged between the child and the
+   parent. The first on are data to be displayed by the parent. These should
+   be accepted as fast as possible so that the child can continue with the
+   measurement immediately. The other type of messages are requests by the
+   child for the parent to do some things for it, i.e. display an alert box
+   etc. and possibly return the user selection. The protocoll for requests is
+   quite simple - the child sends the request and waits for the answer by the
+   parent, knowing exactly what kind of data to expect.
 
-   The communication between both processes works via a pair of pipes (it also
-   could be done using a socket pair - I don't know if this would be faster so
-   I opted for the more conservative approach.
+   The first problem to be addressed is how to make the parent aware of data
+   send by the child. This is handled by two signals, DO_SEND and NEW_DATA.
+   The DO_SEND signal is raised by the parent when it is prepared to accept
+   data. The child always has to wait for this signal before it may send any
+   data. Then it posts its message and raises the NEW_DATA signal. Nopw the
+   parent has to accept the data and when it is done again raises the DO_SEND
+   signal. The DO_SEND signal is necessary to avoid flooding the parent with
+   requests and data.
 
-   An important point is that the child process is supposed not to flood the
-   parent process with data - thus there is the following mechanism to avoid
-   it: The parent pocess always has to send a DO_SEND signal (that's SIGUSR1)
-   to the child process before it tries to send further data.
+   The request type of messages is easy to implement - a simple pair of pipes
+   will do. All needed beside is a protocoll for the differerent types of
+   requests. Since requests are not real time critical the parent does not
+   have to reply immediately and the child waits until the parent honors the
+   request. Thus the way requests are handled by the parent is simple: The
+   parent catches the signal and triggers an invisible button which in turn is
+   leads to the buttons handler function being called by the main loop of the
+   program as every other event. Then the parent reads the pipe and replys by
+   sending the answer to the request via another pipe. No synchronization is
+   needed since the child will be blocked reading the reply pipe until the
+   parent writes its answer to the pipe.
 
-   Since the parent process will usually be busy displaying data and shouln't
-   be forced to constantly check for new data, the child process always has to
-   send a SIGNAL, NEW_DATA (that's SIGUSR2), before it actually sends the
-   data. Thus the parent process is interrupted to read the data. If it has
-   done so it again sends the DO_SEND signal to the child process.
+   The implementation for the exchange of data is a bit more complicated. Here
+   the child should not be forced to wait for the parent process to finally
+   react to the (self-created) event since this may take quite some time while
+   the parent is busy updating the display or is even waiting while the user
+   resizes one of the windows. On the other hand, the parent can't store the
+   data already in the handler for the NEW_DATA signal, because it would have
+   to call malloc() which is, unfortunately, not reentrant. Thus, the
+   alternative is to use shared memory segments.
 
-   This way of controlling the communication between parent and child process
-   has the advantage that we don't have to make the signal handlers reentrant
-   - the child process will only send more data (and thus raise te NEW_DATA
-   signal) when the parent process is finished reading previously sent data.
-   But there is also a disadvantage: If the parent process takes a long time
-   to accept new data, the child will not be able to continue with the
-   experiment in between. Thus the code in the parent process should be
-   written in a way that new data are read with no more delay than necessary.
+   When the child process needs to send data to the parent it gets a new
+   shared mory segment, copies the data into the segment and then sends the
+   parent the identifier of the memory segment. Within the signal handler all
+   the parent does is to store this identifier then it raises the DO_SEND
+   immediately. This way the child can continue with the measurement the
+   parent has time to handle the new data whenever it is ready to do so.
 
-   There is an asymmetry in the communication between the parent and the child
-   process. The child process rarely needs data from the parent.  These cases
-   are when the child needs the parent process to display a message or alert
-   box etc. and than has to wait for the result. That means that the
-   communication is always synchronous, i.e. the child don't has to expect
-   data at random moments but only as the result of its own previous write
-   operation.  Thus, for these functions we don't have to set up a scheme using
-   signals (the child process even knows what kind of data to expect as reply).
+   How does the child send memory segment identifiers to the parent? This also
+   done via another shared memory segment created before the child is started
+   and not be removed until the child exits. All to be stored in this memory
+   segment is the memory segment identifier for the segment with the data and
+   the the type of the message, i.e. DATA or REQUEST. The latter has also to
+   be send because the parent wouldn't know otherwise what kind of message it
+   is going to receive.
 
-   Because of this asymmetry there are several types of messages which can
-   only be send by the child process and read only by the parent process.
-   These are:
-        C_EPRINT
-		C_SHOW_MESSAGE
-		C_SHOW_ALERT
-		C_SHOW_CHOICES
-		C_SHOW_FSELECTOR
-		C_INIT_GRAPHICS
-		C_DATA
------------------------------------------------------------------------------*/
+   Thus, in the NEW_DATA signal handler the parent just copies the segment
+   identifier and the type flag and, for DATA messages, raises the DO_SEND
+   signal. Finaly, it creates a synthetic event for the invisible button.
+   Where do the segment identifieres get stored? Together with the segment for
+   storing the identifiers a queue is created for storing the the identifiers
+   and message type flags. The size of the queue can be rather limited since
+   there is only a limited amount of shared memory segments. Thus this queue
+   to has have only one plus the maximum number of shared memory segments
+   entries (the extra entry is for REQUEST messages - there can always only be
+   one). Beside the message queue also two pointers are needed, on pointing to
+   the oldest unhandled entry and one just above the newest one.
+
+   In the handler for the synthetically triggered, invisible button the parent
+   handles all the entries in the message queue starting with the oldest ones.
+   For REQUEST type messages he reads the pipe and sends its reply. For DATA
+   messages it copies the data to the appropriate places and then removes the
+   shared memory segment for euse by the child. Finally, it displays the new
+   data.
+
+   This scheme will work as long as the parent doesn't get to much behind with
+   handling DATA messages. But if the parent is very busy and the child very
+   fast creating (and sending) new data we will finally run out of shared
+   memory segments. Thus, if getting a new shared memory segment fails for the
+   child it will sleep a short while and then retry, hoping that the parent
+   removed one of the previously used segments in the mean time.
+
+   The only problem still unaddressed by this scheme is data sets exceeding
+   the maximum size of a shared memory segment. But this limit seems to be
+   rather high (ipcs says 32768 kB), so I hope this never going to happen...
+   If it should ever hapen this will result in the measurement getting stopped
+   with an `internal communication error'.
+
+*/
 
 
 
 #include "fsc2.h"
 
+#include <sys/ipc.h>
+#include <sys/shm.h>
+
 /* locally used routines */
 
-static void pipe_read( int fd, void *buf, size_t bytes_to_read );
-static Data_Buffer *get_new_data_buffer( void );
+static bool pipe_read( int fd, void *buf, size_t bytes_to_read );
+
+static int Key_Area;
 
 
+/*----------------------------------------------------------------*/
+/* This routine sets up the resources needed for the interprocess */
+/* communication. It is called before the child is forked.        */
+/*----------------------------------------------------------------*/
+
+bool setup_comm( void )
+{
+	int pr;
+	int i;
+	struct shmid_ds shm_buf;
+
+
+	/* Open pipes for passing data between child and parent process - we need
+	   two pipes, one for the parent process to write to the child process and
+	   another one for the other way round.*/
+
+    if ( ( pr = pipe( pd ) ) < 0 || pipe( pd + 2 ) < 0 )      /* open pipes */
+	{
+		if ( pr == 0 )
+		{
+			close( pd[ 0 ] );
+			close( pd[ 1 ] );
+		}
+
+		return FAIL;
+	}
+
+	/* Beside the pipes we need a shared memory segment to pass the key to
+	   further shared memory segments used to send data from the child to the
+	   parent */
+
+	Key_Area = shmget( IPC_PRIVATE, 2 * sizeof( int ), IPC_CREAT | 0600 );
+
+	if ( Key_Area < 0 )
+	{
+		for ( i = 0; i < 4; i++ )
+			close( pd[ i ] );
+		return FAIL;
+	}
+
+	if ( ( Key = ( KEY * ) shmat( Key_Area, NULL, 0 ) ) == ( KEY * ) - 1 )
+	{
+		for ( i = 0; i < 4; i++ )
+			close( pd[ i ] );
+
+		shmctl( Key_Area, IPC_RMID, &shm_buf );
+		return FAIL;
+	}
+
+	/* Finally we need a message queue where the parent stores the keys and
+	   message types it got from the child for later inspection */
+
+	TRY
+    {
+		Message_Queue = T_malloc( QUEUE_SIZE * sizeof( KEY ) );
+		TRY_SUCCESS;
+	}
+	CATCH( EXCEPTION )
+	{
+		for ( i = 0; i < 4; i++ )
+			close( pd[ i ] );
+
+		shmdt( Key );
+		shmctl( Key_Area, IPC_RMID, &shm_buf );
+		return FAIL;
+	}
+
+	message_queue_low = message_queue_high = 0;
+
+	return OK;
+}
+
+
+/*--------------------------------------------------------------*/
+/* This routine is called after the child process died to clean */
+/* up the resources used in the interprocess communication.     */
+/*--------------------------------------------------------------*/
+
+void end_comm( void )
+{
+	struct shmid_ds shm_buf;
+
+
+	/* Handle remaining messages */
+
+	if ( message_queue_low != message_queue_high )
+		new_data_callback( NULL, 0 );
+
+	/* Deallocate the message queue */
+
+	T_free( Message_Queue );
+
+	/* Detach from and remove the shared memory segment */
+
+	shmdt( Key );
+	shmctl( Key_Area, IPC_RMID, &shm_buf );
+
+	/* Close parents side of read and write pipe */
+
+	close( pd[ READ ] );
+	close( pd[ WRITE ] );
+}
+
+
+/*-----------------------------------------------------------*/
+/* new_data_callback() is responsible for either honoring a  */
+/* a REQUEST or storing and displaying DATA from the child.  */
+/* Actually, this routine is just a callback function for an */
+/* invisible button in the form shown while the experiment   */
+/* is running and that is synthetically triggered from the   */
+/* parents NEW_DATA signal handler.                          */ 
+/* The message queue is read as long as the low marker has   */
+/* not reached the high marker, both being incremented in a  */
+/* wrap-around fashion.                                      */
+/*-----------------------------------------------------------*/
+
+void new_data_callback( FL_OBJECT *a, long b )
+{
+	struct shmid_ds shm_buf;
+
+	a = a;
+	b = b;
+
+	while ( message_queue_low != message_queue_high )
+	{
+		if ( Message_Queue[ message_queue_low ].type == REQUEST )
+			reader( NULL );
+		else
+		{
+			/* Lots of other stuff still to come... */
+
+			/* Finally remove the shared memory segment, we're done with it */
+
+			shmctl( Message_Queue[ message_queue_low ].shm_id,
+					IPC_RMID, &shm_buf );
+		}
+
+		message_queue_low++;
+		message_queue_low %= QUEUE_SIZE;
+
+	}
+}
+
+
+/*----------------------------------------------------------------------*/
+/* This function handles the reading from the pipe for both the parent  */
+/* and the child process. In each case a message is started by a header */
+/* that contains at least information about the type of message. Many   */
+/* of the messages can only be read by the parent. These are:           */
+/* C_EPRINT, C_SHOW_MESSAGE, C_SHOW_ALERT, C_SHOW_CHOICES,              */
+/* C_SHOW_FSELECTOR and C_INIT_GRAPHICS                                 */
+/* These are the implemented requests.                                  */
+/* The remaining types are used for passing the replies to the request  */
+/* back to the child process. THese are also the ones where a return    */
+/* value is be needed. Since the child child itself triggered the reply */
+/* by its request it also knows what type of return it has to expect    */
+/* and thus has to pass a pointer to a variable of the appropriate type */
+/* (cast to void *) in which the return value will be stored. For       */
+/* strings the calling routine has to pass a pointer to a character     */
+/* pointer, in this pointer a pointer to the return string is stored    */
+/* and the string remains usuable until the next call of reader().      */
+/*----------------------------------------------------------------------*/
 
 long reader( void *ret )
 {
@@ -80,11 +278,13 @@ long reader( void *ret )
 	int n1, n2;
 	long nx, ny;
 	long retval;
-	char *retstr = NULL;
-	Data_Buffer *dbuf;
+	static char *retstr = NULL;
 
 
-	pipe_read( pd[ READ ], &header, sizeof( CS ) );
+	/* Get the header - failure indicates that the child is dead */
+
+	if ( ! pipe_read( pd[ READ ], &header, sizeof( CS ) ) )
+		return 0;
 
 	switch ( header.type )
 	{
@@ -239,6 +439,8 @@ long reader( void *ret )
 			break;
 
 		case C_STR :
+			assert( I_am == CHILD );         /* only to be read by the child */
+
 			if ( header.data.len == 0 )
 			{
 				ret = NULL;
@@ -255,24 +457,31 @@ long reader( void *ret )
 			break;
 
 		case C_INT :
+			assert( I_am == CHILD );         /* only to be read by the child */
+
 			if ( ret != NULL )
 				*( ( int * ) ret ) = header.data.int_data;
 			retval = 1;
 			break;
 
 		case C_LONG :
+			assert( I_am == CHILD );         /* only to be read by the child */
+
 			if ( ret != NULL )
 				*( ( long * ) ret ) = header.data.long_data;
 			retval = 1;
 			break;
 
 		case C_FLOAT :
+			assert( I_am == CHILD );         /* only to be read by the child */
+
 			if ( ret != NULL )
 				*( ( float * ) ret ) = header.data.float_data;
 			retval = 1;
 			break;
 
 		case C_DOUBLE :
+			assert( I_am == CHILD );         /* only to be read by the child */
 			if ( ret != NULL )
 				*( ( double * ) ret ) = header.data.double_data;
 			retval = 1;
@@ -301,7 +510,7 @@ long reader( void *ret )
 /*    3. Number of bytes to read                                */
 /*--------------------------------------------------------------*/
 
-void pipe_read( int fd, void *buf, size_t bytes_to_read )
+bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 {
 	size_t bytes_read;
 	size_t already_read = 0;
@@ -309,40 +518,43 @@ void pipe_read( int fd, void *buf, size_t bytes_to_read )
 	while ( bytes_to_read > 0 )
 	{
 		bytes_read = read( fd, buf + already_read, bytes_to_read );
+		if ( bytes_read == 0 )
+			return FAIL;
 		bytes_to_read -= bytes_read;
 		already_read += bytes_read;
 	}
+
+	return OK;
 }
 
 
-
-/*----------------------------------------------------------------------------
-    This function is the other side of reader() (see above) - it writes the
-	stuff to the pipe. The kind of data to be written for te different `types'
-	are given hear:
-
-	C_EPRINT         : string (char *) to be output
-	C_SHOW_MESSAGE   : message string (char *) to be shown (parameter as in
-	                   fl_show_messages())
-	C_SHOW_ALERT     : alert string (char *) to be shown
-	C_SHOW_CHOICES   : question string (char *), number of buttons (1-3) (int),
-                       3 strings with texts for buttons (char *), number of
-                       default button (int) (parameter as in fl_show_choices())
-	C_INIT_GRAPHICS  : dimensionality of plot (2 or 3) (long), number of points
-	                   in x- and y-direction (long) and the x- and y-label
-                       strings (char *)
-	C_SHOW_FSELECTOR : 4 strings (char *) with identical meaning as the para-
-	                   meter for fl_show_fselector()
-	C_STR            : string (char *)
-	C_INT            : integer data (int)
-	C_LONG,          : long integer data (long)
-	C_FLOAT          : float data (float)
-	C_DOUBLE         : double data (double)
-
-	The types C_EPRINT, C_SHOW_MESSAGE, C_SHOW_ALERT, C_SHOW_CHOICES,
-	C_SHOW_FSELECTOR, C_INIT_GRAPHICS and C_DATA are only to be used by the
-	child process!
-----------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* This function is the opposite of reader() (see above) - it writes the   */
+/* stuff to the pipe. The kind of data to be written for the different     */
+/* `types' are given hear:                                                 */
+/* C_EPRINT         : string (char *) to be output                         */
+/* C_SHOW_MESSAGE   : message string (char *) to be shown (parameter as in */
+/*                    fl_show_messages())                                  */
+/* C_SHOW_ALERT     : alert string (char *) to be shown                    */
+/* C_SHOW_CHOICES   : question string (char *), number of buttons (1-3)    */
+/*                    (3 int), 3 strings with texts for buttons (char *),  */
+/*                    number of default button (int) (parameter as in      */
+/*                    fl_show_choices())                                   */
+/* C_INIT_GRAPHICS  : dimensionality of experiment (1 or 2) (long), number */
+/*                    of points in x- and y-direction (long) and the x-    */
+/*                    and y-label strings (char *)                         */
+/* C_SHOW_FSELECTOR : 4 strings (4 char *) with identical meaning as the   */
+/*                    parameter for fl_show_fselector()                    */
+/* C_STR            : string (char *)                                      */
+/* C_INT            : integer data (int)                                   */
+/* C_LONG,          : long integer data (long)                             */
+/* C_FLOAT          : float data (float)                                   */
+/* C_DOUBLE         : double data (double)                                 */
+/*                                                                         */
+/* The types C_EPRINT, C_SHOW_MESSAGE, C_SHOW_ALERT, C_SHOW_CHOICES,       */
+/* C_SHOW_FSELECTOR, C_INIT_GRAPHICS are only to be used by the child      */
+/* process, the other only by the parent!                                  */
+/*-------------------------------------------------------------------------*/
 
 
 void writer( int type, ... )
@@ -353,15 +565,12 @@ void writer( int type, ... )
 	long dim;
 	int n1, n2;
 	long nx, ny;
-	int data_type;
 	int i;
 	char ack;
-	long *lpnt;
-	double *dpnt;
 
 
 	/* The child process has to wait for the parent process to become ready to
-	   accept data and than to tell it that it's now going to send new data.
+	   accept data and then to tell it that it's now going to send new data.
 	   The other way round this isn't necessary since the child process is
 	   only reading when it actually waits for data. */
 
@@ -371,6 +580,7 @@ void writer( int type, ... )
 			pause( );
 		do_send = UNSET;
 
+		Key->type = REQUEST;
 		kill( getppid( ), NEW_DATA );   /* tell parent to read new data */
 	}
 
@@ -489,6 +699,8 @@ void writer( int type, ... )
 			break;
 
 		case C_STR :
+			assert( I_am == PARENT );    /* only to be written by the parent */
+
 			str[ 0 ] = va_arg( ap, char * );
 			if ( str[ 0 ] != NULL )
 				header.data.len = strlen( str[ 0 ] );
@@ -500,21 +712,29 @@ void writer( int type, ... )
 			break;
 
 		case C_INT :
+			assert( I_am == PARENT );    /* only to be written by the parent */
+
 			header.data.int_data = va_arg( ap, int );
 			write( pd[ WRITE ], &header, sizeof( CS ) );
 			break;
 
 		case C_LONG :
+			assert( I_am == PARENT );    /* only to be written by the parent */
+
 			header.data.long_data = va_arg( ap, long );
 			write( pd[ WRITE ], &header, sizeof( CS ) );
 			break;
 
 		case C_FLOAT :
+			assert( I_am == PARENT );    /* only to be written by the parent */
+
 			header.data.float_data = va_arg( ap, float );
 			write( pd[ WRITE ], &header, sizeof( CS ) );
 			break;
 
 		case C_DOUBLE :
+			assert( I_am == PARENT );    /* only to be written by the parent */
+
 			header.data.double_data = va_arg( ap, double );
 			write( pd[ WRITE ], &header, sizeof( CS ) );
 			break;
@@ -525,63 +745,4 @@ void writer( int type, ... )
 
 
 	va_end( ap );
-}
-
-
-
-Data_Buffer *get_new_data_buffer( void )
-{
-	Data_Buffer *ndbuf;
-
-	if ( DBuf == NULL )
-		return T_malloc( sizeof( Data_Buffer ) );
-
-	ndbuf = DBuf;
-
-	while ( ndbuf != NULL )
-		ndbuf = ndbuf->next;
-
-	ndbuf->next = T_malloc( sizeof( Data_Buffer ) );
-	return ndbuf->next;
-}
-
-
-void delete_data_buffer( Data_Buffer *buf )
-{
-	Data_Buffer *prev_buf;
-
-
-	if ( buf == NULL )
-		return;
-
-	/* Free memory allocated for arrays */
-
-	if ( buf->type == INT_TRANS_ARR && buf->data.lpnt != NULL )
-		T_free( buf->data.lpnt );
-
-	if ( buf->type == FLOAT_TRANS_ARR && buf->data.dpnt != NULL )
-		T_free( buf->data.dpnt );
-
-	/* Unlink the buffer from the list of data buffers */
-
-	if ( buf == DBuf )                   /* buffer is at start of list */
-	{
-		DBuf = buf->next;
-		T_free( buf );
-		return;
-	}
-
-	prev_buf = DBuf;
-	while ( prev_buf->next != buf )
-		prev_buf = prev_buf->next;
-
-	prev_buf->next = buf->next;
-	T_free( buf );
-}
-
-
-void delete_all_data_buffers( void )
-{
-	while ( DBuf != NULL )
-		delete_data_buffer( DBuf );
 }

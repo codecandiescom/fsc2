@@ -37,28 +37,25 @@ typedef struct {
 } CS;
 
 
-typedef struct Data_Buffer_ {
+
+typedef struct {
+	int shm_id;
 	int type;
-	long nx;
-	long ny;
-	union {
-		long lval;
-		double dval;
-		long *lpnt;
-		double *dpnt;
-	} data;
-	size_t len;
-	int overdraw_flag;
+} KEY;
 
-	struct Data_Buffer_ *next;
-} Data_Buffer;
+enum {
+	DATA,
+	REQUEST
+};
 
 
+# define QUEUE_SIZE 129     /* max number of shared memory segments + 1 */
+                            /* (as determined by 'ipcs -ul') */
 
+bool setup_comm( void );
+void end_comm( void );
 long reader( void *ret );
 void writer( int type, ... );
-void delete_data_buffer( Data_Buffer *buf );
-void delete_all_data_buffers( void );
 
 
 

@@ -88,8 +88,8 @@ FD_run *create_form_run(void)
     fl_set_object_boxtype(obj,FL_NO_BOX);
     fl_set_object_callback(obj,run_sigchld_callback,0);
   obj = fl_add_frame(FL_UP_FRAME,180,10,840,780,"");
-  fdui->yaxis = obj = fl_add_canvas(FL_NORMAL_CANVAS,185,15,90,690,"");
-  fdui->xaxis = obj = fl_add_canvas(FL_NORMAL_CANVAS,275,705,740,80,"");
+  fdui->y_axis = obj = fl_add_canvas(FL_NORMAL_CANVAS,185,15,90,690,"");
+  fdui->x_axis = obj = fl_add_canvas(FL_NORMAL_CANVAS,275,705,740,80,"");
   fdui->canvas = obj = fl_add_canvas(FL_NORMAL_CANVAS,275,15,740,690,"");
   fl_end_form();
 

@@ -7,6 +7,18 @@
 
 
 typedef struct {
+	FL_OBJECT *obj;
+	Window id;
+	Pixmap pm;
+	GC gc;                  /* gc for pixmap */
+	int x,
+		y;
+	unsigned int w,         /* width and height of canvas */
+		         h;
+} Canvas;	
+
+
+typedef struct {
 	bool is_init;
 	bool is_drawn;
 	bool is_warn;
@@ -15,14 +27,11 @@ typedef struct {
 	long ny;                /* points in y-direction */
 	char *x_label;          /* label for x-axis */
 	char *y_label;          /* label for y-axis */
-	Window id;              /* window id */
+
 	Display *d;             /* pointer to display structure */
-	Pixmap pm;              /* pixmap for double buffering */
-	GC gc;                  /* gc for pixmap */
-	int x,                  /* x- and y- position of canvas */
-		y;
-	unsigned int w,         /* width and height of canvas */
-		         h;
+	Canvas x_axis;
+	Canvas y_axis;
+	Canvas canvas;
 } Graphics;
 
 

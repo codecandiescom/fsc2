@@ -5,6 +5,8 @@
 
 
 #include "fsc2.h"
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 
 
@@ -1028,17 +1030,22 @@ Var *f_init_display( Var *v )
 }
 
 
-/*-----------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
 /* f_display() is used to send new data to the display system. */
-/*-----------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
 
 Var *f_display( Var *v )
 {
 	int nx, ny;
 	int overdraw_flag = 1;
+	int shm_id;
+	struct shmid_ds shm_buf;
+	long len = 0;                    /* total length of message to send */
+	void *buf;
+	void *ptr;
 
 
-	/* We can't display daa without a previous initialization */
+	/* We can't display data without a previous initialization */
 
 	if ( ! G.is_init )
 	{
@@ -1051,6 +1058,10 @@ Var *f_display( Var *v )
 
 		return vars_push( INT_VAR, 0 );
 	}
+
+	/* We begin with checking the arguments */
+
+	len += sizeof( long );                  /* for the length itself */
 
 	/* Get the x-index for the data */
 
@@ -1067,10 +1078,11 @@ Var *f_display( Var *v )
 		nx = v->val.lval;
 	else
 		nx = rnd( v->val.dval );
+	len += sizeof( long );
 
 	v = v->next;
 
-	if ( G.dim == 3 )                          /* get y-index for 3D data */
+	if ( G.dim == 2 )                          /* for 3D display get y-index */
 	{
 		if ( v == NULL )
 		{
@@ -1085,6 +1097,8 @@ Var *f_display( Var *v )
 			ny = v->val.lval;
 		else
 			ny = rnd( v->val.dval );
+
+		len += sizeof( long );
 
 		v = v->next;
 	}
@@ -1102,32 +1116,133 @@ Var *f_display( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
+	/* Check the overdraw flag */
+
 	if ( v->next != NULL )
 		overdraw_flag = 0;
+	len += 2 * sizeof( int );                      /* for flag and data type */
 
-	if ( I_am == PARENT )
+	if ( I_am == PARENT )      /* i.e. as long as this is only a test run... */
 		return vars_push( INT_VAR, 1 );
+
+	/* We need to determine the amount of shared memory needed */
 
 	switch( v->type )
 	{
 		case INT_VAR :
-			writer( C_DATA, nx, ny, INT_VAR, v->val.lval, overdraw_flag );
+			len += sizeof( long );
 			break;
 
 		case FLOAT_VAR :
-			writer( C_DATA, nx, ny, FLOAT_VAR, v->val.dval, overdraw_flag );
+			len += sizeof( double );
 			break;
 
 		case INT_TRANS_ARR :
-			writer( C_DATA, nx, ny, INT_TRANS_ARR, v->len, v->val.lpnt,
-					overdraw_flag );
+			len += v->len * sizeof( long );
 			break;
 
 		case FLOAT_TRANS_ARR :
-			writer( C_DATA, nx, ny, FLOAT_TRANS_ARR, v->len, v->val.dpnt,
-					overdraw_flag );
+			len += v->len * sizeof( double );
 			break;
 	}
+
+	while ( ! do_send )             /* wait for parent to become ready */
+		pause( );
+	do_send = UNSET;
+
+	/* Now try to get a shared memory segment - if it fails and the reason is
+	   that no segments or no memory for segments is left wait for some time
+	   and hope for the parent process to remove other segments in between. */
+
+	do
+	{
+		shm_id = shmget( IPC_PRIVATE, len, IPC_CREAT | 0600 );
+
+		if ( shm_id < 0 )
+		{
+			if ( errno == ENOSPC )
+				usleep( 10000 );
+			else                             /* non-recoverable failure... */
+			{
+				eprint( FATAL, "Internal communication problem at %s%d.\n",
+						__FILE__, __LINE__ );
+				THROW( EXCEPTION );
+			}
+		}
+	} while ( shm_id < 0 );
+
+	/* Attach to the shared memory segment - if this should fail (improbable)
+	   delete the segment, print an error message and stop the measurement */
+
+	if ( ( buf = shmat( shm_id, NULL, 0 ) ) == ( void * ) - 1 )
+	{
+		shmctl( shm_id, IPC_RMID, &shm_buf );       /* delete the segment */
+		eprint( FATAL, "Internal communication error at %s%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	/* Copy the data to the segment */
+
+	ptr = buf;
+
+	memcpy( ptr, &len, sizeof( long ) );          /* length */
+	ptr += sizeof( long );
+
+	memcpy( ptr, &nx, sizeof( long ) );           /* x-index */
+	ptr += sizeof( long );
+
+	memcpy( ptr, &ny, sizeof( long ) );           /* y-index */
+	ptr += sizeof( long );
+
+	memcpy( ptr, &overdraw_flag, sizeof( int ) ); /* overdraw flag */
+	ptr += sizeof( int );
+
+	memcpy( ptr, &v->type, sizeof( int ) );       /* type of data... */
+	ptr += sizeof( int );
+	
+	switch( v->type )                             /* ...and now the data  */
+	{
+		case INT_VAR :
+			memcpy( ptr, &v->val.lval, sizeof( long ) );
+			ptr += sizeof( long );
+			break;
+
+		case FLOAT_VAR :
+			memcpy( ptr, &v->val.dval, sizeof( double ) );
+			ptr += sizeof( double );
+			break;
+
+		case INT_TRANS_ARR :
+			memcpy( ptr, v->val.lpnt, v->len * sizeof( long ) );
+			ptr += v->len * sizeof( long );
+			break;
+
+		case FLOAT_TRANS_ARR :
+			memcpy( ptr, v->val.dpnt, v->len * sizeof( double ) );
+			ptr += v->len * sizeof( double );
+			break;
+
+		default :                   /* this better never happens... */
+			shmdt( ( void * ) buf );
+			shmctl( shm_id, IPC_RMID, &shm_buf );       /* delete segment */
+			eprint( FATAL, "Internal communication error at %s%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION );
+	}
+
+	/* Detach the the segment with the data segment */
+
+	shmdt( ( void * ) buf );
+
+	/* Finally tell parent about the identifier etc. */
+
+	Key->shm_id = shm_id;
+	Key->type = DATA;
+
+	kill( getppid( ), NEW_DATA );           /* signal parent the new data */
+
+	/* That's all, folks... */
 
 	return vars_push( INT_VAR, 1 );
 }

@@ -6,14 +6,14 @@
 #include "fsc2.h"
 
 
-void create_pixmap( void );
-void delete_pixmap( void );
+void setup_canvas( Canvas *c, FL_OBJECT *obj );
+void create_pixmap( Canvas *c );
+void delete_pixmap( Canvas *c );
 int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 					void *udata );
-void reconfigure_window( unsigned int w, unsigned int h );
-void redraw( void );
-void repaint( void );
-
+void reconfigure_window( Canvas *c, int w, int h );
+void redraw_canvas( Canvas *c );
+void repaint_canvas( Canvas *c );
 
 
 void graphics_init( long dim, long nx, long ny, char *x_label, char *y_label )
@@ -60,22 +60,17 @@ void start_graphics( void )
 				  "fsc: Run" );
 
 	G.is_drawn = SET;
-	G.id = fl_get_canvas_id( run_form->canvas );
 	G.d = fl_get_display( );
 
-	G.x = run_form->canvas->x;
-	G.y = run_form->canvas->y;
-	G.w = run_form->canvas->w;
-	G.h = run_form->canvas->h;
+	setup_canvas( &G.x_axis, run_form->x_axis );
+	setup_canvas( &G.y_axis, run_form->y_axis );
+	setup_canvas( &G.canvas, run_form->canvas );
 
-	fl_add_canvas_handler( run_form->canvas, Expose, canvas_handler, NULL );
-    fl_add_canvas_handler( run_form->canvas, ConfigureNotify, canvas_handler,
-                           NULL );
+//	fl_set_cursor( G.canvas.id, XC_left_ptr );
 
-	create_pixmap( );
-	redraw( );
-
-	fl_set_cursor( G.id, XC_left_ptr );
+	redraw_canvas( &G.x_axis );
+	redraw_canvas( &G.y_axis );
+	redraw_canvas( &G.canvas );
 }
 
 
@@ -85,21 +80,47 @@ void start_graphics( void )
 
 void stop_graphics( void )
 {
+   fl_remove_canvas_handler( run_form->x_axis, Expose, canvas_handler);
+   fl_remove_canvas_handler( run_form->x_axis, ConfigureNotify,
+							 canvas_handler);
+   fl_remove_canvas_handler( run_form->y_axis, Expose, canvas_handler);
+   fl_remove_canvas_handler( run_form->y_axis, ConfigureNotify,
+							 canvas_handler);
    fl_remove_canvas_handler( run_form->canvas, Expose, canvas_handler);
    fl_remove_canvas_handler( run_form->canvas, ConfigureNotify,
 							 canvas_handler);
-	delete_pixmap( );
+
+	delete_pixmap( &G.x_axis );
+	delete_pixmap( &G.y_axis );
+	delete_pixmap( &G.canvas );
 
    if ( fl_form_is_visible( run_form->run ) )
 	   fl_hide_form( run_form->run );
 }
 
 
-/*----------------------------------------*/
-/* Creates a pixmap for double buffering. */
-/*----------------------------------------*/
+void setup_canvas( Canvas *c, FL_OBJECT *obj )
+{
+	c->id = fl_get_canvas_id( obj );
+	c->obj = obj;
+	c->obj->u_vdata = ( void * ) c;
 
-void create_pixmap( void )
+	c->x = obj->x;
+	c->y = obj->y;
+	c->w = obj->w;
+	c->h = obj->h;
+	create_pixmap( c );
+
+	fl_add_canvas_handler( c->obj, Expose, canvas_handler, NULL );
+    fl_add_canvas_handler( c->obj, ConfigureNotify, canvas_handler, NULL );
+}
+
+
+/*---------------------------------*/
+/* Creates a pixmap for buffering. */
+/*---------------------------------*/
+
+void create_pixmap( Canvas *c )
 {
     Window root;
     int x, y;               /* x- and y-position */
@@ -108,25 +129,30 @@ void create_pixmap( void )
 		         bw,        /* border width */
 		         d;         /* depth */
 
-    XGetGeometry( G.d, G.id, &root, &x, &y, &w, &h, &bw, &d );
-    G.pm = XCreatePixmap( G.d, G.id, G.w, G.h, d );
-    G.gc = XCreateGC( G.d, G.id, 0, 0);
+    XGetGeometry( G.d, c->id, &root, &x, &y, &w, &h, &bw, &d );
+    c->pm = XCreatePixmap( G.d, c->id, c->w, c->h, d );
+    c->gc = XCreateGC( G.d, c->id, 0, 0);
 
-	if ( G.is_init )
-		XSetForeground( G.d, G.gc, fl_get_flcolor( FL_WHITE ) );
+	if ( c->obj == run_form->canvas )
+	{
+		if ( G.is_init )
+			XSetForeground( G.d, c->gc, fl_get_pixel( FL_WHITE ) );
+		else
+			XSetForeground( G.d, c->gc, fl_get_pixel( FL_INACTIVE ) );
+	}
 	else
-		XSetForeground( G.d, G.gc, fl_get_flcolor( FL_INACTIVE ) );
+		XSetForeground( G.d, c->gc, fl_get_pixel( c->obj->col1 ) );
 }
 
 
-/*------------------------------------------*/
-/* Deletes the pixmap for double buffering. */
-/*------------------------------------------*/
+/*-----------------------------------*/
+/* Deletes the pixmap for buffering. */
+/*-----------------------------------*/
 
-void delete_pixmap( void )
+void delete_pixmap( Canvas *c )
 {
-    XFreeGC( G.d, G.gc );
-    XFreePixmap( G.d, G.pm );
+    XFreeGC( G.d, c->gc );
+    XFreePixmap( G.d, c->pm );
 }
 
 
@@ -137,23 +163,22 @@ void delete_pixmap( void )
 int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 					void *udata )
 {
-	obj = obj;
+	Canvas *c = ( Canvas * ) obj->u_vdata;
+
 	window = window;
 	udata = udata;
 
 	switch ( ev->type )
     {
         case Expose :
-            if ( ev->xexpose.window != G.id )
-                break;
             if ( ev->xexpose.count == 0 )     /* only react to last in queue */
-                repaint( );
+                repaint_canvas( c );
             break;
 
 		case ConfigureNotify :                /* window was reconfigure  */
-            if ( ( int ) G.w == w && ( int ) G.h == h )
+            if ( ( int ) c->w == w && ( int ) c->h == h )
 				break;
-            reconfigure_window( ( unsigned int ) w, ( unsigned int ) h );
+            reconfigure_window( c, w, h );
             break;
 
 	}
@@ -166,24 +191,27 @@ int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 /* Handles changes of the window size. */
 /*-------------------------------------*/
 
-void reconfigure_window( unsigned int w, unsigned int h )
+void reconfigure_window( Canvas *c, int w, int h )
 {
-	G.w = w;
-	G.h = h;
-	delete_pixmap( );
-	create_pixmap( );
-	redraw( );
+
+	c->w = ( unsigned int ) w;
+	c->h = ( unsigned int ) h;
+
+	delete_pixmap( c );
+	create_pixmap( c );
+
+	redraw_canvas( c );
 }
 
 
-/*---------------------------------------*/
-/* Does a complete redraw of the canvas. */
-/*---------------------------------------*/
+/*-------------------------------------*/
+/* Does a complete redraw of a canvas. */
+/*-------------------------------------*/
 
-void redraw( void )
+void redraw_canvas( Canvas *c )
 {
-	XFillRectangle( G.d, G.pm, G.gc, 0, 0, G.w, G.h );
-	repaint( );
+	XFillRectangle( G.d, c->pm, c->gc, 0, 0, c->w, c->h );
+	repaint_canvas( c );
 }
 
 
@@ -191,7 +219,7 @@ void redraw( void )
 /* Copies the background pixmap onto the canvas. */
 /*-----------------------------------------------*/
 
-void repaint( void )
+void repaint_canvas( Canvas *c )
 {
-    XCopyArea( G.d, G.pm, G.id, G.gc, 0, 0, G.w, G.h, 0, 0 );
+	XCopyArea( G.d, c->pm, c->id, c->gc, 0, 0, c->w, c->h, 0, 0 );
 }
