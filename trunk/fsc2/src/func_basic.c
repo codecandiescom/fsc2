@@ -1437,14 +1437,14 @@ Var *f_mean( Var *v )
 	size_t len;
 	long *ilp = NULL;
 	double *idp = NULL;
-	double val = 0.0;
+	double val;
 	long a_index;
 	size_t slice_len;
 
 
 	if ( v == NULL )
 	{
-		print( FATAL, "No arguments.\n" );
+		print( FATAL, "Missing argument(s).\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1501,7 +1501,7 @@ Var *f_mean( Var *v )
 			slice_len = len - a_index;
 	}
 
-	for ( i = 0; i < slice_len; i++ )
+	for ( val = 0.0, i = 0; i < slice_len; i++ )
 		if ( ilp != NULL )
 			val += ( double ) *ilp++;
 		else
@@ -1518,17 +1518,73 @@ Var *f_rms( Var *v )
 {
 	size_t i;
 	size_t len;
+	size_t slice_len;
 	long *ilp;
 	double *idp;
-	double val = 0.0;
+	double val;
+	long a_index;
 
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing argument(s).\n" );
+		THROW( EXCEPTION );
+	}
 
 	vars_check( v, INT_CONT_ARR | FLOAT_CONT_ARR | ARR_REF | ARR_PTR |
 				   INT_ARR | FLOAT_ARR );
 
 	get_array_params( v, &len, &ilp, &idp );
+	slice_len = len;
 
-	for ( i = 0; i < len; i++ )
+	/* The following optional parameter are the start index into to the array
+	   and the length of the subarray to be used for the calculation */
+
+	if ( v->next != NULL )
+	{
+		a_index = get_long( v->next, "array index" ) - ARRAY_OFFSET;
+
+		if ( a_index < 0 )
+		{
+			print( FATAL, "Invalid array index (%ld).\n",
+				   a_index + ARRAY_OFFSET );
+			THROW( EXCEPTION );
+		}
+
+		if ( ilp != NULL )
+			ilp += a_index;
+		else
+			idp += a_index;
+
+		if ( v->next->next != NULL )
+		{
+			slice_len = get_long( v->next->next, "length of slice" );
+
+			if ( slice_len < 1 )
+			{
+				print( FATAL, "Zero or negative slice length (%ld).\n",
+					   slice_len );
+				THROW( EXCEPTION );
+			}
+
+			/* Test that the slice is within the arrays range */
+
+			if ( slice_len != 1 && a_index + slice_len > len ) {
+				if ( Internals.mode == TEST && ( v->flags & IS_DYNAMIC ) )
+					slice_len = len - a_index;
+				else
+				{
+					print( FATAL, "Sum of index and slice length parameter "
+						   "exceeds length of array.\n" );
+					THROW( EXCEPTION );
+				}
+			}
+		}
+		else
+			slice_len = len - a_index;
+	}
+
+	for ( val = 0.0, i = 0; i < slice_len; i++ )
 		if ( ilp != NULL )
 		{
 			val += ( double ) *ilp * ( double ) *ilp;

@@ -115,7 +115,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "size",          f_size,     	   -2, ACCESS_ALL,  NULL, UNSET },
 	{ "sizes",         f_sizes,    	    1, ACCESS_ALL,  NULL, UNSET },
 	{ "mean",          f_mean,     	   -3, ACCESS_ALL,  NULL, UNSET },
-	{ "rms",           f_rms,      	    1, ACCESS_ALL,  NULL, UNSET },
+	{ "rms",           f_rms,      	   -3, ACCESS_ALL,  NULL, UNSET },
 	{ "slice",         f_slice,    	   -3, ACCESS_ALL,  NULL, UNSET },
 	{ "square",        f_square,   	    1, ACCESS_ALL,  NULL, UNSET },
 	{ "int_slice",     f_islice,   	    1, ACCESS_ALL,  NULL, UNSET },
@@ -507,7 +507,7 @@ Var *func_call( Var *f )
 CALL_STACK *call_push( Func *f, const char *device_name )
 {
 	const char *t;
-	CALL_STACK *cs;
+	static CALL_STACK *cs;
 
 
 	TRY
