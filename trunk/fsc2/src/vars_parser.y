@@ -42,9 +42,8 @@ static Var *CV;
 
 
 %token NS_TOKEN US_TOKEN MS_TOKEN S_TOKEN
-%token NV_TOKEN UV_TOKEN MV_TOKEN V_TOKEN
-%token MG_TOKEN G_TOKEN
-%token MHZ_TOKEN KHZ_TOKEN HZ_TOKEN
+%token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN
+%token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
 %type <vptr> expr line arrass list1 list2 list3 unit
 
 %left EQ LT LE GT GE

@@ -7,7 +7,7 @@
 		/*     DEFINITIONS     */
 		/*---------------------*/
 
-%option noyywrap case-insensitive stack
+%option noyywrap stack
 
 %{
 
@@ -35,7 +35,7 @@ int yylex( void );
 void include_handler( char *file );
 void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 			 FILE *primary_fp, FILE **fp, int *incl_depth );
-void unit_spec( char *text, long len, const char *unit );
+void unit_spec( char *text, int type, int power );
 
 
 long Lc,
@@ -60,57 +60,42 @@ INT      [+-]?[0-9]+
 EXPO     [EDed][+-]?{INT}
 FLOAT    ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
-NS       N(ANO)?S(ECOND(S)?)?
-US       (MICRO?S(ECOND(S)?)?)|(US)
-MS       M(ILLI)?S(SECOND(S)?)?
-S        S(ECOND(S)?)?
+UNIT     ("G"|"T"|"Oe"|"V"|"A"|"Hz")
 
-NV       N(ANO)?V(OLT(S)?)?
-UV       (MICRO?V(OLT(S)?)?)|(UV)
-MV       M(ILLI)?V(OLT(S)?)?
-V        V(OLT(S)?)?
+INS      {INT}[\t \r]*"ns"
+IUS      {INT}[\t \r]*"us"
+IMS      {INT}[\t \r]*"ms"
+IS       {INT}[\t \r]*"s"
 
-MG       M(ILLI)?G(AUSS)?
-G        G(AUSS)?
+FNS      {FLOAT}[\t \r]*"ns"
+FUS      {FLOAT}[\t \r]*"us"
+FMS      {FLOAT}[\t \r]*"ms"
+FS       {FLOAT}[\t \r]*"s"
 
-HZ       H(ERT)?Z
-KHZ      K(ILO)?H(ERT)?Z
-MHZ      M(EGA)?H(ERT)?Z
+INANO    {INT}[\t \r]*"n"{UNIT}
+IMICRO   {INT}[\t \r]*"u"{UNIT}
+IMILLI   {INT}[\t \r]*"m"{UNIT}
+INONE    {INT}[\t \r]*{UNIT}
+IKILO    {INT}[\t \r]*"k"{UNIT}
+IMEGA    {INT}[\t \r]*"M"LUNIT}
 
+FNANO    {FLOAT}[\t \r]*"n"{UNIT}
+FMICRO   {FLOAT}[\t \r]*"u"{UNIT}
+FMILLI   {FLOAT}[\t \r]*"m"{UNIT}
+FNONE    {FLOAT}[\t \r]*{UNIT}
+FKILO    {FLOAT}[\t \r]*"k"{UNIT}
+FMEGA    {FLOAT}[\t \r]*"M"LUNIT}
 
-INS      {INT}{NS}
-IUS      {INT}{US}
-IMS      {INT}{MS}
-IS       {INT}{S}
+INTs     {INT}[\t \r]*"nT"
+IUT      {INT}[\t \r]*"uT"
+IMT      {INT}[\t \r]*"mT"
+IT       {INT}[\t \r]*"T"
 
-INV      {INT}{NV}
-IUV      {INT}{UV}
-IMV      {INT}{MV}
-IV       {INT}{V}
+FNT      {FLOAT}[\t \r]*"nT"
+FUT      {FLOAT}[\t \r]*"uT"
+FMT      {FLOAT}[\t \r]*"mT"
+FT       {FLOAT}[\t \r]*"T"
 
-IMG      {INT}{MG}
-IG       {INT}{G}
-
-IMHZ     {INT}{MHZ}
-IKHZ     {INT}{KHZ}
-IHZ      {INT}{HZ}
-
-FNS      {FLOAT}{NS}
-FUS      {FLOAT}{US}
-FMS      {FLOAT}{MS}
-FS       {FLOAT}{S}
-
-FNV      {FLOAT}{NV}
-FUV      {FLOAT}{UV}
-FMV      {FLOAT}{MV}
-FV       {FLOAT}{V}
-
-FMG      {FLOAT}{MG}
-FG       {FLOAT}{G}
-
-FMHZ     {FLOAT}{MHZ}
-FKHZ     {FLOAT}{KHZ}
-FHZ      {FLOAT}{HZ}
 
 WLWS     ^[\t ]*\n
 LWS      ^[\t ]+
@@ -286,88 +271,94 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 			}
 } /* end of <incl> */
 
-            /* here some special handling of time specifications */
-{NS}/(,|;)  printf( "\x04nsec" );
-{NS}        printf( "\x04nsec" );
-{US}/(;|,)  printf( "\x04usec" );
-{US}        printf( "\x04usec" );
-{MS}/(;|,)  printf( "\x04msec" );
-{MS}        printf( "\x04msec" );
-{S}/(;|,)   printf( "\x04sec" );
-{S}         printf( "\x04sec" );
-{INS}/(;|,) unit_spec( yytext, yyleng, "\x04nsec" );
-{INS}       unit_spec( yytext, yyleng, "\x04nsec" );
-{IUS}/(;|,) unit_spec( yytext, yyleng, "\x04usec" );
-{IUS}       unit_spec( yytext, yyleng, "\x04usec" );
-{IMS}/(;|,) unit_spec( yytext, yyleng, "\x04msec" );
-{IMS}       unit_spec( yytext, yyleng, "\x04msec" );
-{IS}/(;|,)  unit_spec( yytext, yyleng, "\x04sec" );
-{IS}        unit_spec( yytext, yyleng, "\x04sec" );
-{FNS}/(;|,) unit_spec( yytext, yyleng, "\x04nsec" );
-{FNS}       unit_spec( yytext, yyleng, "\x04nsec" );
-{FUS}/(;|,) unit_spec( yytext, yyleng, "\x04usec" );
-{FUS}       unit_spec( yytext, yyleng, "\x04usec" );
-{FMS}/(;|,) unit_spec( yytext, yyleng, "\x04msec" );
-{FMS}       unit_spec( yytext, yyleng, "\x04msec" );
-{FS}/(;|,)  unit_spec( yytext, yyleng, "\x04sec" );
-{FS}        unit_spec( yytext, yyleng, "\x04sec" );
+            /* here some special handling of numbers with units */
 
-{NV}/(,|;)  printf( "\x04nvolt" );
-{NV}        printf( "\x04nvolt" );
-{UV}/(;|,)  printf( "\x04uvolt" );
-{UV}        printf( "\x04uvolt" );
-{MV}/(;|,)  printf( "\x04mvolt" );
-{MV}        printf( "\x04mvolt" );
-{V}/(;|,)   printf( "\x04volt" );
-{V}         printf( "\x04volt" );
-{INV}/(;|,) unit_spec( yytext, yyleng, "\x04nvolt" );
-{INV}       unit_spec( yytext, yyleng, "\x04nvolt" );
-{IUV}/(;|,) unit_spec( yytext, yyleng, "\x04uvolt" );
-{IUV}       unit_spec( yytext, yyleng, "\x04uvolt" );
-{IMV}/(;|,) unit_spec( yytext, yyleng, "\x04mvolt" );
-{IMV}       unit_spec( yytext, yyleng, "\x04mvolt" );
-{IV}/(;|,)  unit_spec( yytext, yyleng, "\x04volt" );
-{IV}        unit_spec( yytext, yyleng, "\x04volt" );
-{FNV}/(;|,) unit_spec( yytext, yyleng, "\x04nvolt" );
-{FNV}       unit_spec( yytext, yyleng, "\x04nvolt" );
-{FUV}/(;|,) unit_spec( yytext, yyleng, "\x04uvolt" );
-{FUV}       unit_spec( yytext, yyleng, "\x04uvolt" );
-{FMV}/(;|,) unit_spec( yytext, yyleng, "\x04mvolt" );
-{FMV}       unit_spec( yytext, yyleng, "\x04mvolt" );
-{FV}/(;|,)  unit_spec( yytext, yyleng, "\x04volt" );
-{FV}        unit_spec( yytext, yyleng, "\x04volt" );
+{INS}/(;|,) unit_spec( yytext, 0, 0 );
+{INS}       unit_spec( yytext, 0, 0 );
+{IUS}/(;|,) unit_spec( yytext, 0, 3 );
+{IUS}       unit_spec( yytext, 0, 3 );
+{IMS}/(;|,) unit_spec( yytext, 0, 6 );
+{IMS}       unit_spec( yytext, 0, 6 );
+{IS}/(;|,)  unit_spec( yytext, 0, 9 );
+{IS}        unit_spec( yytext, 0, 9 );
+{FNS}/(;|,) unit_spec( yytext, 1, 0 );
+{FNS}       unit_spec( yytext, 1, 0 );
+{FUS}/(;|,) unit_spec( yytext, 1, 3 );
+{FUS}       unit_spec( yytext, 1, 3 );
+{FMS}/(;|,) unit_spec( yytext, 1, 6 );
+{FMS}       unit_spec( yytext, 1, 6 );
+{FS}/(;|,)  unit_spec( yytext, 1, 9 );
+{FS}        unit_spec( yytext, 1, 9 );
 
-{MG}/(;|,)  printf( "\x04mgauss" );
-{MG}        printf( "\x04mgauss" );
-{G}/(;|,)   printf( "\x04gauss" );
-{G}         printf( "\x04gauss" );
-{IMG}/(;|,) unit_spec( yytext, yyleng, "\x04mgauss" );
-{IMG}       unit_spec( yytext, yyleng, "\x04mgauss" );
-{IG}/(;|,)  unit_spec( yytext, yyleng, "\x04gauss" );
-{IG}        unit_spec( yytext, yyleng, "\x04gauss" );
-{FMG}/(;|,) unit_spec( yytext, yyleng, "\x04mgauss" );
-{FMG}       unit_spec( yytext, yyleng, "\x04mgauss" );
-{FG}/(;|,)  unit_spec( yytext, yyleng, "\x04gauss" );
-{FG}        unit_spec( yytext, yyleng, "\x04gauss" );
+{INANO}/(;|,)  unit_spec( yytext, 0, -9 );
+{INANO}        unit_spec( yytext, 0, -9 );
+{IMICRO}/(;|,) unit_spec( yytext, 0, -6 );
+{IMICRO}       unit_spec( yytext, 0, -6 );
+{IMILLI}/(;|,) unit_spec( yytext, 0, -3 );
+{IMILLI}       unit_spec( yytext, 0, -3 );
+{INONE}/(;|,)  unit_spec( yytext, 0, 0 );
+{INONE}        unit_spec( yytext, 0, 0 );
+{IKILO}/(;|,)  unit_spec( yytext, 0, 3 );
+{IKILO}        unit_spec( yytext, 0, 3 );
 
-{MHZ}/(;|,) printf( "\x04mhertz" );
-{MHZ}       printf( "\x04mhertz" );
-{KHZ}/(;|,) printf( "\x04khertz" );
-{KHZ}       printf( "\x04khertz" );
-{HZ}/(;|,)  printf( "\x04hertz" );
-{HZ}        printf( "\x04hertz" );
-{IMHZ}/(;|,) unit_spec( yytext, yyleng, "\x04mhertz" );
-{IMHZ}       unit_spec( yytext, yyleng, "\x04mhertz" );
-{IKHZ}/(;|,) unit_spec( yytext, yyleng, "\x04khertz" );
-{IKHZ}       unit_spec( yytext, yyleng, "\x04khertz" );
-{IHZ}/(;|,)  unit_spec( yytext, yyleng, "\x04hertz" );
-{IHZ}        unit_spec( yytext, yyleng, "\x04hertz" );
-{FMHZ}/(;|,) unit_spec( yytext, yyleng, "\x04mhertz" );
-{FMHZ}       unit_spec( yytext, yyleng, "\x04mhertz" );
-{FKHZ}/(;|,) unit_spec( yytext, yyleng, "\x04khertz" );
-{FKHZ}       unit_spec( yytext, yyleng, "\x04khertz" );
-{FHZ}/(;|,)  unit_spec( yytext, yyleng, "\x04hertz" );
-{FHZ}        unit_spec( yytext, yyleng, "\x04hertz" );
+{FNANO}/(;|,)  unit_spec( yytext, 1, -9 );
+{FNANO}        unit_spec( yytext, 1, -9 );
+{FMICRO}/(;|,) unit_spec( yytext, 1, -6 );
+{FMICRO}       unit_spec( yytext, 1, -6 );
+{FMILLI}/(;|,) unit_spec( yytext, 1, -3 );
+{FMILLI}       unit_spec( yytext, 1, -3 );
+{FNONE}/(;|,)  unit_spec( yytext, 1, 0 );
+{FNONE}        unit_spec( yytext, 1, 0 );
+{FKILO}/(;|,)  unit_spec( yytext, 1, 3 );
+{FKILO}        unit_spec( yytext, 1, 3 );
+
+{INTs}/(;|,) unit_spec( yytext, 0, -5 );
+{INTs}       unit_spec( yytext, 0, -5 );
+{IUT}/(;|,) unit_spec( yytext, 0, -2 );
+{IUT}       unit_spec( yytext, 0, -2 );
+{IMT}/(;|,) unit_spec( yytext, 0, 1 );
+{IMT}       unit_spec( yytext, 0, 1 );
+{IT}/(;|,)  unit_spec( yytext, 0, 4 );
+{IT}        unit_spec( yytext, 0, 4 );
+{FNT}/(;|,) unit_spec( yytext, 1, -5 );
+{FNT}       unit_spec( yytext, 1, -5 );
+{FUT}/(;|,) unit_spec( yytext, 1, -2 );
+{FUT}       unit_spec( yytext, 1, -2 );
+{FMT}/(;|,) unit_spec( yytext, 1, 1 );
+{FMT}       unit_spec( yytext, 1, 1 );
+{FT}/(;|,)  unit_spec( yytext, 1, 4 );
+{FT}        unit_spec( yytext, 1, 4 );
+
+"ns"/(,|;)  printf( "\x4nsec" );
+"ns"        printf( "\x4nsec" );
+"us"/(;|,)  printf( "\x4usec" );
+"us"        printf( "\x4usec" );
+"ms"/(;|,)  printf( "\x4msec" );
+"ms"        printf( "\x4msec" );
+"s"/(;|,)   printf( "\x4sec" );
+"s"         printf( "\x4sec" );
+
+"nT"/(,|;)  printf( "\x4ntesla" );
+"nT"        printf( "\x4ntesla" );
+"uT"/(;|,)  printf( "\x4utesla" );
+"uT"        printf( "\x4utesla" );
+"mT"/(;|,)  printf( "\x4mtesla" );
+"mT"        printf( "\x4mtesla" );
+"T"/(;|,)
+"T"
+
+"n"{UNIT}(,|;) printf( "\x4nunit" );
+"n"{UNIT}      printf( "\x4nunit" );
+"u"{UNIT}(,|;) printf( "\x4uunit" );
+"u"{UNIT}      printf( "\x4uunit" );
+"m"{UNIT}(,|;) printf( "\x4munit" );
+"m"{UNIT}      printf( "\x4munit" );
+{UNIT}(,|;)
+{UNIT}
+"k"{UNIT}(,|;) printf( "\x4kunit" );
+"k"{UNIT}      printf( "\x4kunit" );
+"M"{UNIT}(,|;) printf( "\x4megunit" );
+"M"{UNIT}      printf( "\x4megunit" );
 
 			/* all the rest is simply copied to the output */
 
@@ -590,13 +581,158 @@ void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 
 /* Takes combinations like "100ns" apart and writes them out as "100 nsec" */
 
-void unit_spec( char *text, long len, const char *unit )
+void unit_spec( char *text, int type, int power )
 {
-	register char *q = text + len - 1;
+	double dval;
+	long lval;
 
-	while ( isalpha( *q ) || *q == '_' )
-		q--;
-	*++q = '\0';
-	printf( "%s", text );
-	printf( " %s", unit );
+
+	if ( type == 0 )
+	{
+		lval = strtol( text, NULL, 10 );
+		if ( ( lval == LONG_MAX || dval == LONG_MIN ) && errno == ERANGE )
+		    goto try_double;
+
+		switch ( power )
+		{
+			case -9 :
+				if ( lval % 1000000000L )
+				    printf( "%.9f", ( double ) lval * 1.0e-9 );
+				else
+				 	printf( "%ld", lval / 1000000000L );
+				return;
+
+			case -6 :
+				if ( lval % 1000000 )
+					printf( "%.6f", ( double ) lval * 1.0e-6 );
+				else
+				 	printf( "%ld", lval / 100000 );
+				return;
+
+			case -5 :
+				if ( lval % 100000 )
+					printf( "%.6f", ( double ) lval * 1.0e-5 );
+				else
+				 	printf( "%ld", lval / 10000 );
+				return;
+
+			case -3 :
+				if ( lval % 1000 )
+					printf( "%.3f", ( double ) lval * 1.0e-3 );
+				else
+				 	printf( "%ld", lval / 1000 );
+				return;
+
+			case -2 :
+				if ( lval % 100 )
+					printf( "%.3f", ( double ) lval * 1.0e-2 );
+				else
+				 	printf( "%ld", lval / 100 );
+				return;
+
+			case 0 :
+				printf( "%ld", lval );
+				return;
+
+			case 1 :
+				if ( labs( lval ) > LONG_MAX / 10 )
+				    printf( "%f", ( double ) lval * 10.0 );
+				else
+					printf( "%ld", lval * 10 );
+				return;
+
+			case 3 :
+				if ( labs( lval ) > LONG_MAX / 1000 )
+				    printf( "%f", ( double ) lval * 1000.0 );
+				else
+					printf( "%ld", lval * 1000 );
+				return;
+
+			case 4 :
+				if ( labs( lval ) > LONG_MAX / 10000 )
+				    printf( "%f", ( double ) lval * 10000.0 );
+				else
+					printf( "%ld", lval * 10000 );
+				return;
+
+			case 6 :
+				if ( labs( lval ) > LONG_MAX / 1000000L )
+				    printf( "%f", ( double ) lval * 1.0e6 );
+				else
+					printf( "%ld", lval * 1000000L );
+				return;
+
+			case 9 :
+				if ( labs( lval ) > LONG_MAX / 1000000000L )
+				    printf( "%f", ( double ) lval * 1.0e9 );
+				else
+					printf( "%ld", lval * 1000000000L );
+				return;
+
+			default :
+				 printf( "\x03\n%s:%ld: INTERNAL ERROR.\n", Fname, Lc );
+				 exit( EXIT_FAILURE );
+		}
+	}
+
+try_double:
+
+	dval = strtod( text, NULL );
+	if ( ( dval == HUGE_VAL || dval == 0.0 ) && errno == ERANGE )
+	{
+		printf( "\x03\n%s:%ld: Overflow or underflow occurred while "
+				"reading a number.\n", Fname, Lc );
+		exit( EXIT_FAILURE );
+	}
+
+	switch ( power )
+	{
+		case -9 :
+			 printf( "%.12f", dval * 1.0e-9 );
+			 break;
+
+		case -6 :
+			 printf( "%.12f", dval * 1.0e-6 );
+			 break;
+
+		case -5 :
+			 printf( "%.12f", dval * 1.0e-5 );
+			 break;
+
+		case -3 :
+			 printf( "%.12f", dval * 1.0e-3 );
+			 break;
+
+		case -2 :
+			 printf( "%.12f", dval * 1.0e-2 );
+			 break;
+
+		case 0 :
+			 printf( "%.12f", dval );
+			 break;
+
+		case 1 :
+			 printf( "%.12f", dval * 10.0 );
+			 break;
+
+		case 3 :
+			 printf( "%.12f", dval * 1.0e3 );
+			 break;
+
+		case 4 :
+			 printf( "%.12f", dval * 1.0e4 );
+			 break;
+
+		case 6 :
+			 printf( "%.12f", dval * 1.0e6 );
+			 break;
+
+		case 9 :
+			 printf( "%f", dval * 1.0e9 );
+			 break;
+
+		default :
+			 printf( "\x03\n%s:%ld: INTERNAL ERROR.\n", Fname, Lc );
+			 exit( EXIT_FAILURE );
+	}
 }
