@@ -35,6 +35,10 @@ ifeq ($(shell hostname -f),pion.chemie.uni-frankfurt.de)
 	CFLAGS    += -DIS_STILL_LIBC1
 endif
 
+ifeq ($(shell hostname -f),pion.chemie.uni-frankfurt.de)
+	c_source  += gpib_lexer.c gpib_parser.c
+endif
+
 
 export headers
 
