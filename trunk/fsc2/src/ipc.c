@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 1999-2003 Jens Thoms Toerring
+  Copyright (C) 1999-2004 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -271,8 +271,7 @@ int sema_create( int size )
 
 	raise_permissions( );
 
-	if ( ( sema_id = semget( IPC_PRIVATE, 1,
-							 IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR ) ) < 0 )
+	if ( ( sema_id = semget( IPC_PRIVATE, 1, S_IRUSR | S_IWUSR ) ) < 0 )
 	{
 		lower_permissions( );
 		return -1;

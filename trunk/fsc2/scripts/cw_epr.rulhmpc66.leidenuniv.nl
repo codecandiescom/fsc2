@@ -571,7 +571,7 @@ sub evaluate {
 		}
 	}
 
-	my $sweep_rate = $cs / $kdt;
+	$sweep_rate = $cs / $kdt;
 	$sweep_rate = 1.39 * 1428.8 / 60 if $sweep_rate > 1.39 * 1428.8 / 60;
 	$sweep_rate = 0.01 * 1428.8 / 60 if $sweep_rate < 0.01 * 1428.8 / 60;
 

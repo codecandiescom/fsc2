@@ -1,7 +1,7 @@
 /*
   $Id$
  
-  Driver for National Instruments DAQ boards
+  Library for National Instruments DAQ boards based on a DAQ-STC
 
   Copyright (C) 2003-2004 Jens Thoms Toerring
 

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 1999-2003 Jens Thoms Toerring
+  Copyright (C) 1999-2004 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -216,10 +216,16 @@ void rb_pulser_exit( void )
 	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
 		if ( delay_card[ i ].handle >= 0 )
 		{
+			/* Commented out according to Huibs wishes, he want's the pulses
+			   to stay where they were at the end of the experiement.
+
 			rulbus_delay_set_output_pulse( delay_card[ i ].handle,
 										   RULBUS_DELAY_OUTPUT_BOTH,
 										   RULBUS_DELAY_PULSE_NONE );
 			rulbus_delay_set_delay( delay_card[ i ].handle, 0, 1 );
+
+			*/
+
 			rulbus_card_close( delay_card[ i ].handle );
 			delay_card[ i ].handle = -1;
 		}
