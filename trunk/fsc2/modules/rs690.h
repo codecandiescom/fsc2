@@ -81,7 +81,7 @@ Var *pulser_lock_keyboard( Var *v );
 
 #define TS_MAX_WORDS           1024   /* maximum number of words in TS mode */
 
-#define MAX_LOOP_REPETITION    4095
+#define MAX_LOOP_REPETITIONS   4095
 
 #define MAX_PULSES             500
 
@@ -184,7 +184,7 @@ typedef struct _PHS_ {
 
 
 typedef struct _FS_ {
-	int fields[ 4 * NUM_HSM_CARDS ];   /* data for all channels */
+	unsigned short fields[ 4 * NUM_HSM_CARDS ];   /* data for all channels */
 	Ticks pos;                         /* position of the slice */
 	Ticks len;                         /* length of the slice */
 	struct _FS_ *next;
@@ -324,7 +324,7 @@ bool rs690_IN_SETUP = UNSET;
 PHASE_SETUP rs690_phs[ 2 ];
 double rs690_fixed_timebases[ NUM_FIXED_TIMEBASES ] =
 													{ 4.0e-9, 8.0e-9, 1.6e-8 };
-int rs690_default_fields[ 4 * NUM_HSM_CARDS ];
+unsigned short rs690_default_fields[ 4 * NUM_HSM_CARDS ];
 
 #else
 
@@ -334,7 +334,7 @@ extern PULSE *rs690_Pulses;
 extern bool rs690_IN_SETUP;
 extern PHASE_SETUP rs690_phs[ 2 ];
 extern double rs690_fixed_timebases[ NUM_FIXED_TIMEBASES ];
-extern int rs690_default_fields[ 4 * NUM_HSM_CARDS ];
+extern unsigned short rs690_default_fields[ 4 * NUM_HSM_CARDS ];
 
 #endif
 

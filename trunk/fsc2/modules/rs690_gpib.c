@@ -126,7 +126,7 @@ bool rs690_init( const char *name )
 static bool rs690_field_channel_setup( void )
 {
 	int i, j;
-	int fields[ 4 * NUM_HSM_CARDS ][ 16 ];
+	int field_list[ 4 * NUM_HSM_CARDS ][ 16 ];
 	char buf[ 72 * 4 * NUM_HSM_CARDS + 6 ];
 	int free_channel = 0;
 	CHANNEL *ch;
@@ -134,7 +134,7 @@ static bool rs690_field_channel_setup( void )
 
 	for ( i = 0; i < 4 * NUM_HSM_CARDS; i++ )
 		for ( j = 0; j < 16; j++ )
-			fields[ i ][ j ] = -1;
+			field_list[ i ][ j ] = -1;
 
 	for ( i = 0; i < MAX_CHANNELS; i++ )
 	{
@@ -143,7 +143,7 @@ static bool rs690_field_channel_setup( void )
 		if ( ch->function == NULL )
 			continue;
 
-		fields[ ch->field ][ ch->bit ] = i;
+		field_list[ ch->field ][ ch->bit ] = i;
 
 		if ( i == free_channel )
 		{
@@ -160,14 +160,13 @@ static bool rs690_field_channel_setup( void )
 		sprintf( buf + strlen( buf ), ",FL%d,HEX", i );
 
 		for ( j = ( 4 << rs690.timebase_type ) - 1; j >= 0; j-- )
-			if ( fields[ i ][ j ] != -1 )
+			if ( field_list[ i ][ j ] != -1 )
 				sprintf( buf + strlen( buf ), ",%c%d",
-						 ( char ) ( 'A' + fields[ i ][ j ] / 16 ),
-						 fields[ i ][ j ] & 0x0f );
+						 ( char ) ( 'A' + field_list[ i ][ j ] / 16 ),
+						 field_list[ i ][ j ] );
 			else
 				sprintf( buf + strlen( buf ), ",%c%d",
-						 ( char ) ( 'A' + free_channel / 16 ),
-						 free_channel & 0x0f );
+						 ( char ) ( 'A' + free_channel / 16 ), free_channel );
 	}
 
 
@@ -258,13 +257,58 @@ static bool rs690_init_channels_16ns( void )
 	int i;
 	FS *n;
 	char buf[ 10000 ];
+	int table_count;
+	Ticks count;
+
+
+	/* First we need to set how many tables we need */
+
+	count = rs690.last_new_fs->len;
+	if ( count <= MAX_TICKS_PER_ENTRY )
+		table_count = 1;
+	else if ( count / MAX_TICKS_PER_ENTRY <= MAX_LOOP_REPETITIONS )
+		table_count = 2;
+	else
+		table_count = 3;
+
+	if ( table_count == 1 )
+	{
+		sprintf( buf, "LTD0,T0,%d!", rs690.new_fs_count );
+		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+			rs690_gpib_failure( );
+		
+		sprintf( buf, "LOS0,%s,M1,1,T0,1!",
+				 rs690.trig_in_mode == EXTERNAL ? "1" : "CONT" );
+		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+			rs690_gpib_failure( );
+	}
+	else if ( table_count == 2 )
+	{
+		if ( count / MAX_TICKS_PER_ENTRY != 0 )
+			sprintf( buf, "LTD0,T0,%d,T1,1!", rs690.new_fs_count );
+		else
+			sprintf( buf, "LTD0,T0,%d,T1,1!", rs690.new_fs_count - 1 );
+		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+			rs690_gpib_failure( );
+
+		sprintf( buf, "LOS0,%s,M1,1,T0,1,T1,1!",
+				 rs690.trig_in_mode == EXTERNAL ? "1" : "CONT" );
+		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+			rs690_gpib_failure( );
+	}
+	else
+	{
+	}
+
 
 
 	for ( i = 0; i < 4 * NUM_HSM_CARDS; i++ )
 	{
 		sprintf( buf, "LDT,T0,FL%d,0,%d", i, rs690.new_fs_count );
-		for ( n = rs690.new_fs; n != NULL; n = n->next )
-			sprintf( buf, ",%X,%ldns", n->fields[ i ], n->len * 16 );
+		for ( n = rs690.new_fs; n != NULL && n->len % MAX_TICKS_PER_ENTRY != 0;
+			  n = n->next )
+			sprintf( buf, ",%X,%ldns", n->fields[ i ],
+					 ( n->len % MAX_TICKS_PER_ENTRY ) * 16 );
 		strcat( buf, "!" );
 		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 			rs690_gpib_failure( );
