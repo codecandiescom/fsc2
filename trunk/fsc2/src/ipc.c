@@ -63,13 +63,13 @@ void *get_shm( int *shm_id, long len )
 			fsc2_usleep( 10000, SET );
 		else                                      /* non-recoverable failure */
 		{
+			lower_permissions( );
 #ifndef NDEBUG
 			eprint( FATAL, UNSET, "Internal error at %s:%d, shmget() failed "
 					"with error number %d.\n*** PLEASE SEND A BUG REPORT "
 					"CITING THESE LINES *** Thank you.\n",
 					__FILE__, __LINE__, errno );
 #endif
-			lower_permissions( );
 			return NULL;
 		}
 	}
