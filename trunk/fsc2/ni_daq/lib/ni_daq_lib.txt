@@ -223,7 +223,7 @@ int ni_daq_msc_set_clock_output( int board, NI_DAQ_CLOCK_TYPE daq_clock,
                                  NI_DAQ_STATE on_off )
 
 This function is for selecting one of the two clocks and enabling (or
-disabling) of the freuqency output at the FREQ_OUT pin. The first
+disabling) of the frequency output at the FREQ_OUT pin. The first
 argument is as usual the board handle. The second is the clock to
 output, use
 
