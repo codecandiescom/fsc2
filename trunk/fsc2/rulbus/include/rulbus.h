@@ -67,7 +67,7 @@ int rulbus_dac12_properties( int handle, double *Vmax, double *Vmin,
 
 /* Functions and definitions for the delay card module (RB8514) */
 
-int rulbus_delay_set_delay( int handle, unsigned long delay );
+int rulbus_delay_set_delay( int handle, unsigned long delay, int force );
 int rulbus_delay_set_trigger( int handle, int edge );
 int rulbus_delay_set_output_pulse( int handle, int output, int type );
 int rulbus_delay_set_output_pulse_polarity( int handle, int type, int pol );
