@@ -91,6 +91,7 @@ PX			"+"?[xX]:?
 PY			"+"?[yY]:?
 PMX			"-"[yX]:?
 PMY			"-"[yY]:?
+CW          [cC][wW]
 POD1        P(OD)?_?1
 POD2        P(OD)?_?2
 ON          ON
@@ -213,10 +214,26 @@ WS          [\n=: ]+
 			}
 
 
-{PX}		return PX_TOK;
-{PY}		return PY_TOK;
-{PMX}		return PMX_TOK;
-{PMY}		return PMY_TOK;
+{PX}		{
+				assignlval.lval = PHASE_PLUS_X;
+				return PXY_TOK;
+			}
+{PY}		{
+				assignlval.lval = PHASE_PLUS_Y;
+				return PXY_TOK;
+			}
+{PMX}		{
+				assignlval.lval = PHASE_MINUS_X;
+				return PXY_TOK;
+			}
+{PMY}		{
+				assignlval.lval = PHASE_MINUS_Y;
+				return PXY_TOK;
+			}
+{CW}        {
+				assignlval.lval = PHASE_CW;
+				return PXY_TOK;
+			}
 
 {POD1}		return POD1_TOK;
 {POD2}		return POD2_TOK;

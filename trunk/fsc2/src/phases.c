@@ -114,7 +114,7 @@ Phase_Sequence *phase_seq_start( long phase_seq_num )
 /* ->                                                               */
 /*    * number of the phase sequence, 1 or 2                        */
 /*    * either PHASE_PLUS_X, PHASE_MINUS_X, PHASE_PLUS_Y,           */
-	    PHASE_MINUS_Y or PHASE_CW                                   */
+/*	    PHASE_MINUS_Y or PHASE_CW                                   */
 /*------------------------------------------------------------------*/
 
 void phases_add_phase( Phase_Sequence *p, int phase_type )
