@@ -116,7 +116,7 @@ typedef struct
 	bool mod_type_is_set;
 	int mod_source[ NUM_MOD_TYPES ];
 	bool mod_source_is_set[ NUM_MOD_TYPES ];
-	int mod_ampl[ NUM_MOD_TYPES ];
+	double mod_ampl[ NUM_MOD_TYPES ];
 	bool mod_ampl_is_set[ NUM_MOD_TYPES ];
 
 } HP8647A;
