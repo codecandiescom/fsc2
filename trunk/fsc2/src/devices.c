@@ -107,7 +107,6 @@ void delete_devices( void )
 
 	for ( ; cd != NULL; cd = cdp )
 	{
-		
 		unload_device( cd );     /* run the exit hooks and unload the module */
 		if ( cd->name != NULL )
 			T_free( cd->name );
