@@ -28,7 +28,7 @@
 Unfortunately, all devices listed in the @code{DEVICES} section must be
 different. This is due to limitations of to the way shared libraries are
 handled and, as far as devices are concerned that are controlled via the
-GPIB bus, to certain ideosyncrasies of the GPIB libraries . Thus, if two
+GPIB bus, to certain ideosyncrasies of the GPIB libraries. Thus, if two
 or more exactly identical devices are to be used simultaneously extra
 shared libraries for these devices have to be created.
 
@@ -36,14 +36,14 @@ Fortunately, this is such a simple process that it can be done via a
 script. There are basically three or four steps:
 @enumerate
 @item @code{cd} into the @file{utils} subdirectory of @acronym{fsc2}s main
-directory
-@item run the script @file{clone_device}
-@item remake fsc2 and reinstall
-@item update the GPIB configuration file if necessary
+directory.
+@item Run the script @file{clone_device}.
+@item Remake fsc2 and reinstall.
+@item Update the GPIB configuration file if necessary.
 @end enumerate
 
-The script @file{clone_device} is a Perl script (thus you need Perl
-installed to be able to run it). The script resides in the @code{utils}
+The script @file{clone_device} is a Perl script thus you'll need Perl
+installed to be able to run it. The script resides in the @code{utils}
 subdirectory of @acronym{fsc2}s main directory and can only be run from
 within this directory. It asks for the name of the device to be cloned
 (i.e.@: the name of the device of which two or more are to be used
@@ -53,8 +53,8 @@ applicable, in the GPIB configuration file.
 
 Lets assume you have use two lock-in amplifiers of type @code{sr510} and
 need a second device module that will be invoked by the name
-@code{sr510_b}. Here is a complete example of what one will see when
-running the script (together with the answers):
+@code{sr510_b}. Here is a complete example of what you'll have to expect
+when running the script (together with the answers):
 @example
 jens@@crowley:~/fsc2/utils > clone_device 
 
@@ -90,16 +90,18 @@ replace the device name by `SR510_B' and change the GPIB
 address to the one of the new device.
 @end example
 
-When you have run the script you will have to @code{cd} back to
-@acronym{fsc2}s main directory and recompile by typing @code{make}.
-After a successful run of make to compile the new device module you
-will have to install it. To do so you must become @code{root} and,
-from @acronym{fsc2}s main directory, run @w{@code{make install}}.
+When you have run the script you will have to @code{cd} back from the
+@file{utils} subdirectory to @acronym{fsc2}s main directory (just type
+@code{cd ..} and recompile, using the @code{make} command. After a
+successful run of make to compile the new device module you also have to
+install it. To do so you must become @code{root} and, still from
+@acronym{fsc2}s main directory, run @w{@code{make install}}.
 
-If the device isn't controlled via the GPIB bus everything is already
-done. Otherwise you will have also to edit (still as @code{root} the
-GPIB configuration file (which usually is @file{/etc/gpib.conf}) and
-first copy the entry of the cloned device. Then you only have to
-change the name of the device given there (i.e.@: in or example
-@code{SR510}) to the new device name (@code{SR510_B} in the example) and
-finally change the entry for the new devices GPIB address.
+If the device isn't controlled via the GPIB bus you're already
+done. Otherwise you will have also to edit (still with @code{root}
+privileges) the GPIB configuration file (which usually is
+@file{/etc/gpib.conf}) and copy the entry for the cloned device. Then
+you only have to change in the copy the device name to the one you have
+entered while runing the script (i.e.@: in the example @code{SR510}) to
+the new device name @code{SR510_B} and finally correct the entry for the
+new devices GPIB address.
