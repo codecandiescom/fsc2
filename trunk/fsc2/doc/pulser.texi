@@ -43,7 +43,8 @@ of implemented:
 @item Sony/Tektronix DG2020 (X-band spectrometer, Berlin)
 @item Tektronix HFS9003 (W-band spectrometer, Berlin)
 @item Bruker EP385 Pulse Programmer (X-band spectrometer, Berlin)
-@item Interface Technology RS690 Word Generator (360 GHz spectrometer, Berlin)
+@item Interface Technology RS690 Word Generator (360 GHz and X-band
+spectrometer, Berlin)
 @end itemize
 The @strong{Interface Technology RS690} can also be used for the Berlin
 X-band spectrometer without any changes, and, of course, all pulsers can
