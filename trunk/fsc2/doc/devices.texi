@@ -2144,6 +2144,8 @@ The function uses the @code{fsc2_pulses} program to display the pulse
 settings. @code{fsc2_pulses} only works if both Perl and Perl/Tk (in not
 too ancient a version) is installed on the system.
 
+When running in batch mode this function does nothing.
+
 This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} script.
 
@@ -2154,6 +2156,8 @@ of an @code{EDL} script.
 This function requests the user to select a file name and then writes
 all pulse settings during the test run into the file in a format
 suitable to be used as input for the @code{fsc2_pulses} utility.
+
+When running in batch mode this function does nothing.
 
 This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} script.

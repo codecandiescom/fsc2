@@ -189,7 +189,7 @@ Starts @code{fsc2} in graphics mode and immediately does a syntax
 check on FILE. If the syntax check does not fail the experiment is
 started without the need for further user input.
 
-@item @option{-S}
+@item @option{-B}
 Starts @code{fsc2} in batch mode, see discussion above.
 
 @item @option{--delete}
