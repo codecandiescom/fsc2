@@ -8,7 +8,7 @@
 use strict;
 
 
-my ( %h, $a, @f, $key );
+my ( $h, %h1, %h2, $a, @f, $key );
 
 if ( $#ARGV == -1 ) {
 	open( F, "<mem" ) or die "Can' open file `mem'";
@@ -19,42 +19,42 @@ if ( $#ARGV == -1 ) {
 while ( <F> ) {
 	@f = split /\s+/;
 
-	if ( $f[ 1 ] eq /malloc:/ ) {
-		$h{ $f[ 1 ] } = "malloc $f[ 2 ].";
-	}
+	$h = $f[ 0 ] eq "(0)" ? \%h1 : \%h2;
 
-	if ( $f[ 1 ] eq /calloc:/ ) {
-		$h{ $f[ 1 ] } = "calloc $f[ 2 ].";
-	}
+	$$h{ $f[ 2 ] } = "malloc $f[ 2 ] at line $." if $f[ 1 ] eq "malloc:";
+	$$h{ $f[ 2 ] } = "calloc $f[ 2 ] at line $." if $f[ 1 ] eq "calloc:";
+	$$h{ $f[ 2 ] } = "strdup $f[ 2 ] at line $." if $f[ 1 ] eq "strdup:";
 
-	if ( $f[ 1 ] eq /strdup:/ ) {
-		$h{ $f[ 1 ] } = "strdup $f[ 2 ].";
-	}
-
-	if ( $f[ 1 ] eq /realloc:/ ) {
-		if ( $f[ 1 ] eq "(nil)" ) {
-			$h{ $f[ 3 ] } = "realloc from (nil) $f[ 4 ].";
+	if ( $f[ 1 ] eq "realloc:" ) {
+		if ( $f[ 2 ] eq "(nil)" ) {
+			$$h{ $f[ 4 ] } = "$f[ 0 ]: realloc from (nil) $f[ 4 ]";
 		} else {
-			if ( not defined $h{ $f[ 1 ] } ) {
-				print "realloc error for $f[ 1 ] at $.\n";
+			if ( not defined $$h{ $f[ 2 ] } ) {
+				print "$f[ 0 ]: realloc error for $f[ 2 ] at $.\n";
 			} else {
-				delete $h{ $f[ 1 ] };
+				delete $$h{ $f[ 2 ] };
 			}
-			$h{ $f[ 3 ] } = "realloc $f[ 4 ]";
 		}
+		$$h{ $f[ 4 ] } = "realloc $f[ 4 ]";
 	}
 
-	if ( $f[ 1 ] eq /free:/ ) {
-		if ( not defined $h{ $f[ 1 ] } ) {
-			print "free error for $f[ 1 ] at line $.\n";
+	if ( $f[ 1 ] eq "free:" ) {
+		if ( not defined $$h{ $f[ 2 ] } ) {
+			print "$f[ 0 ]: free error for $f[ 2 ] at line $.\n";
 		} else {
-			delete $h{ $f[ 1 ] };
+			delete $$h{ $f[ 2 ] };
 		}
 	}
 }
 
 close( F );
 
-foreach $key ( keys %h ) {
-	print "$key $h{ $key }\n";
+print "Remaing memory from parent:\n";
+foreach $key ( keys %h1 ) {
+	print "$h1{ $key }\n";
+}
+
+print "\nRemaing memory from child:\n";
+foreach $key ( keys %h2 ) {
+	print "$h2{ $key }\n";
 }

@@ -19,6 +19,7 @@ static bool is_tested = UNSET;       /* set when EDL file has been tested */
 static bool state = UNSET;           /* set when EDL passed the tests */
 static char *in_file = NULL;         /* name of input file */
 static time_t in_file_mod = 0;
+static char *title = NULL;
 static bool delete_file = UNSET;
 static bool delete_old_file = UNSET;
 
@@ -260,6 +261,8 @@ int main( int argc, char *argv[ ] )
 	else
 		fprintf( stderr, "fsc2: Internal failure on startup.\n" );
 
+	T_free( in_file );
+	T_free( title );
 	clean_up( );
 	xforms_close( );
 
@@ -313,7 +316,6 @@ void load_file( FL_OBJECT *a, long reload )
 	char *old_in_file = NULL;
 	FILE *fp;
 	struct stat file_stat;
-	static char *title = NULL;
 
 
 	notify_conn( BUSY_SIGNAL );
