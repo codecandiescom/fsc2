@@ -1089,7 +1089,8 @@ void recalc_XPoints_of_curve_2d( Curve_2d *cv )
 {
 	long i, j;
 	Scaled_Point *sp;
-	XPoint *xp, *xps;
+	XPoint *xp  = cv->xpoints,
+		   *xps = cv->xpoints_s;
 	short dw, dh;
 
 
@@ -1100,8 +1101,7 @@ void recalc_XPoints_of_curve_2d( Curve_2d *cv )
 	dw = cv->w / 2;
 	dh = cv->h / 2;
 
-	for ( sp = cv->points, xp = cv->xpoints, xps = cv->xpoints_s, i = 0;
-		  i < G.ny; i++ )
+	for ( sp = cv->points, i = 0; i < G.ny; i++ )
 		for ( j = 0; j < G.nx; sp++, xp++, xps++, j++ )
 		{
 			xp->x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );

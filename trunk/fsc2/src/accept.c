@@ -294,7 +294,7 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 			cv->points = T_realloc( cv->points,
 								  ( x_index + len ) * sizeof( Scaled_Point ) );
 			cv->xpoints = T_realloc( cv->xpoints,
-										( x_index + len ) * sizeof( XPoint ) );
+									 ( x_index + len ) * sizeof( XPoint ) );
 
 			for ( j = G.nx, sp = cv->points + j; j < x_index + len; sp++, j++ )
 				sp->exist = UNSET;
