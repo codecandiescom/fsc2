@@ -518,7 +518,8 @@ GRACE_PERIOD: 20ns;
 Without this statement a default grace period of @w{10 ns} will be
 used.
 
-Here's a diagram that shows the phase switch delay and the grace period:
+Here's a diagram that shows the phase switch delay and the grace period
+(again assuming that the microwave pulses are to be phase-cycled):
 @example
                    ____________________________
                   |                            |
