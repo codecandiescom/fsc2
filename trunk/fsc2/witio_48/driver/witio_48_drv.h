@@ -115,6 +115,11 @@ typedef struct {
 #include <asm/uaccess.h>
 #include <asm/io.h>
 
+#ifdef CONFIG_DEVFS_FS
+#include <linux/devfs_fs_kernel.h>
+#endif
+
+
 #define PORT unsigned int
 
 

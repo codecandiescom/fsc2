@@ -88,8 +88,12 @@
 #include <linux/spinlock.h>
 #else
 #include <linux/malloc.h>
+
 #endif
 
+#ifdef CONFIG_DEVFS_FS
+#include <linux/devfs_fs_kernel.h>
+#endif
 
 /* Compatibility file for kernels from 2.0 up to 2.4 */
 

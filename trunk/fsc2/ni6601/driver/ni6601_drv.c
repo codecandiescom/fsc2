@@ -118,6 +118,30 @@ static int __init ni6601_init( void )
 }
 
 
+/*-----------------------------------------------------*/
+/* Function gets executed when the module gets removed */
+/*-----------------------------------------------------*/
+
+static void __exit ni6601_cleanup( void )
+{
+	ni6601_release_resources( boards, board_count );
+
+	/* Unregister the character device (but only when we aren't using
+	   devfs exclussively as indicated by major being 0 */
+
+#ifdef CONFIG_DEVFS_FS
+	if ( major != 0 && devfs_unregister_chrdev( major, NI6601_NAME ) < 0 )
+#else
+	if ( unregister_chrdev( major, NI6601_NAME ) < 0 )
+#endif
+		printk( KERN_ERR NI6601_NAME ": Unable to unregister "
+			"module.\n" );
+	else
+		printk( KERN_INFO NI6601_NAME ": Module successfully "
+			"removed\n" );
+}
+
+
 /*----------------------------------*/
 /* Initialization of a single board */
 /*----------------------------------*/
@@ -192,30 +216,6 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
  init_failure:
 	ni6601_release_resources( boards, board_count );
 	return -1;
-}
-
-
-/*-----------------------------------------------------*/
-/* Function gets executed when the module gets removed */
-/*-----------------------------------------------------*/
-
-static void __exit ni6601_cleanup( void )
-{
-	ni6601_release_resources( boards, board_count );
-
-	/* Unregister the character device (but only when we aren't using
-	   devfs exclussively as indicated by major being 0 */
-
-#ifdef CONFIG_DEVFS_FS
-	if ( major != 0 && devfs_unregister_chrdev( major, NI6601_NAME ) < 0 )
-#else
-	if ( unregister_chrdev( major, NI6601_NAME ) < 0 )
-#endif
-		printk( KERN_ERR NI6601_NAME ": Unable to unregister "
-			"module.\n" );
-	else
-		printk( KERN_INFO NI6601_NAME ": Module successfully "
-			"removed\n" );
 }
 
 
