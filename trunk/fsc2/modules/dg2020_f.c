@@ -7,6 +7,7 @@
 
 
 #include "dg2020.h"
+#include "gpib.h"
 
 
 
@@ -249,7 +250,7 @@ int dg2020_end_of_exp_hook( void )
 		return 1;
 
 #ifndef MAX_DEBUG
-  gpib_local( dg2020.device );
+    gpib_local( dg2020.device );
 #endif
 
 	return 1;
