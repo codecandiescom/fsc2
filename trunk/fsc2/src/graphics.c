@@ -992,21 +992,21 @@ void make_label_string( char *lstr, double num, int res )
 	n = i_max( 1, mag - res );
 
 	if ( mag > 5 )                              /* num > 10^5 */
-		sprintf( lstr, "%1.*E", n - 1, num );
+		snprintf( lstr, MAX_LABEL_LEN, "%1.*E", n - 1, num );
 	else if ( mag > 0 )                         /* num >= 1 */
 	{
 		if ( res >= 0 )
-			sprintf( lstr, "%*g", mag, num );
+			snprintf( lstr, MAX_LABEL_LEN, "%*g", mag, num );
 		else
-			sprintf( lstr, "%*.*f", n, abs( res ), num );
+			snprintf( lstr, MAX_LABEL_LEN, "%*.*f", n, abs( res ), num );
 	}
 	else if ( mag > -4 && res >= - 4 )          /* num > 10^-4 */
-		sprintf( lstr, "%1.*f", abs( res ), num );
+		snprintf( lstr, MAX_LABEL_LEN, "%1.*f", abs( res ), num );
 	else                                        /* num < 10^-4 */
 		if ( mag < res )
-			sprintf( lstr, "0" );
+			snprintf( lstr, MAX_LABEL_LEN, "0" );
 		else
-			sprintf(  lstr, "%1.*E", n, num );
+			snprintf(  lstr, MAX_LABEL_LEN, "%1.*E", n, num );
 }
 
 

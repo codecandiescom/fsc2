@@ -1270,7 +1270,7 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 		   rwc_start_coarse;   /* rwc value of first large tick */
 	double rwc_coarse;
 	short x, y;
-	char lstr[ 128 ];
+	char lstr[ MAX_LABEL_LEN + 1 ];
 	int width;
 	short last = -1000;
 

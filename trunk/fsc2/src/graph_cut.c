@@ -1219,7 +1219,7 @@ static void cut_make_scale( Canvas *c, int coord )
 	if ( coord != Z )
 		rwc_start = cv->rwc_start[ r_coord ]
 			        - cv->shift[ r_coord ] * cv->rwc_delta[ r_coord ];
-	else
+	else                           /* z-axis always shows the complete range */
 		rwc_start = cv->rwc_start[ r_coord ];
 
 	if ( cv->rwc_delta[ r_coord ] < 0 )
@@ -1382,6 +1382,8 @@ static void cut_make_scale( Canvas *c, int coord )
 						   x - SHORT_TICK_LEN, y );
 		}
 
+		/* Finally draw the triangle indicating the position of the cut */
+
 		triangle[ 0 ].x = x - LONG_TICK_LEN - 3;
 		if ( CG.cut_dir == X )
 			triangle[ 0 ].y = G.cut_z_axis.h - 1
@@ -1395,7 +1397,7 @@ static void cut_make_scale( Canvas *c, int coord )
 		triangle[ 1 ].y = - LONG_TICK_LEN / 3;
 		triangle[ 2 ].x = 0;
 		triangle[ 2 ].y = 2 * ( LONG_TICK_LEN / 3 );
-		XFillPolygon( G.d, c->pm, c->font_gc, triangle, 3,
+		XFillPolygon( G.d, c->pm, G.curve_2d[ 0 ]->gc, triangle, 3,
 					  Convex, CoordModePrevious );
 	}
 }

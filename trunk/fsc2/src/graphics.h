@@ -18,6 +18,8 @@
 #define CUT_SELECT_Y      2
 #define CUT_SELECT_BREAK -1
 
+#define MAX_LABEL_LEN     128   /* maximum length of tick label string */
+
 
 #if ( SIZE == HI_RES )
 #define SCALE_TICK_DIST   6     /* mean minimum distance between ticks */
