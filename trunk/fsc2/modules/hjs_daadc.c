@@ -72,6 +72,7 @@ struct HJS_DAADC {
     struct termios *tio;    /* serial port terminal interface structure */
 	double max_volts;
 	double volts_out;
+	bool is_volts_out;
 	int out_val;
 	bool has_dac_been_set;;
 };
@@ -149,8 +150,9 @@ void hjs_daadc_exit_hook( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Function returns a string variable with the name of the device */
+/*----------------------------------------------------------------*/
 
 Var *daq_name( Var *v )
 {
@@ -159,8 +161,19 @@ Var *daq_name( Var *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Function can be used to inform the module about the current settinng */
+/* of the potentiometer at the front panel. It takes a floating point   */
+/* input argument between 0 and 10 (that should be identical to the     */
+/* scale of the potentiometer). In later calls of daq_set_voltage() it  */
+/* will be then assumed that this is the correct potentiometer setting  */
+/* and the output voltage is adjusted accordingly. If, for example, the */
+/* function is called with an argument of 2.5 and later the function    */
+/* daq_set_voltage() is called with an argument of 1.25 V the value     */
+/* send to the DAC is halve of the maximum value instead of an eigth of */
+/* it, thus the real output voltage is 1.25 V (at least if the value    */
+/* passed to the function about the potentiometer setting was correct.  */
+/*----------------------------------------------------------------------*/
 
 Var *daq_maximum_output_voltage( Var *v )
 {
@@ -210,7 +223,16 @@ Var *daq_set_voltage( Var *v )
 
 
 	if ( v == NULL )
+	{
+		if ( ! hjs_daadc.has_dac_been_set )
+		{
+			print( FATAL, "DAC hasn't been set before, can't determine the "
+				   "current output voltage.\n" );
+			THROW( EXCEPTION );
+		}
+
 		return vars_push( FLOAT_VAR, hjs_daadc.volts_out );
+	}
 
 	volts = get_double( v, "DAC output voltage" );
 
