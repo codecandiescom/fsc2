@@ -28,6 +28,11 @@
 #endif
 
 
+#if ! defined auxdir
+#define auxdir "./"
+#endif
+
+
 /* inclusion system header files */
 
 #include <stdio.h>
