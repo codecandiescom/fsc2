@@ -106,7 +106,7 @@ expr:    E_INT_TOKEN unit         { if ( $2 == NULL )
        | E_VAR_TOKEN unit         { $$ = apply_unit( $1, $2 ); }
        | E_VAR_TOKEN '['          { vars_arr_start( $1 ); }
          list1 ']'                { CV = vars_arr_rhs( $4 ); }
-         unit                     { $$ = apply_unit( $7, CV ); }
+         unit                     { $$ = apply_unit( CV, $7); }
        | E_FUNC_TOKEN '(' list2
          ')'                      { CV = func_call( $1 ); }
          unit                     { $$ = apply_unit( CV, $6 ); }
