@@ -604,7 +604,7 @@ EOT
 \$$$_{ name }\{ tk_frame \}->pack( \%fp );
 \$$$_{ name }\{ tk_label \}->pack( \%wp );
 \$$$_{ name }\{ tk_entry \}->pack( \%wp );
-\$$$_{ name }\{ tk_unit \}->pack( \%up );
+\$$$_{ name }\{ tk_unit  \}->pack( \%up );
 
 EOT
     }
@@ -620,7 +620,7 @@ EOT
                                        -pady => '3m' );
 
 \$fsc2_apply_button->pack( \%wp, padx => '5m', -pady => '3m' );
-\$fsc2_quit_button->pack( \%wp, padx => '5m', -pady => '3m' );
+\$fsc2_quit_button->pack(  \%wp, padx => '5m', -pady => '3m' );
 
 load_defs( );
 \$fsc2_main_window->geometry( \$geom ) if defined \$geom;
@@ -707,16 +707,16 @@ EOT
 
     # Here the body of the EDL script that the script we are just writing is
     # going to send to fsc2 is written. For normal lines we just have to
-    # double all backslashes, escape double quotes and $'s and prepend an
-    # (escaped) $ to the variable names.
+    # double all backslashes, escape double quotes and '$'s and prepend an
+    # (escaped) '$' to the variable names.
     # For the possibly embedded if, else, elsif and endif commands we
     # have to built in some Perl code to allow the written script to
     # decide which parts need to be written to the EDL script depending
     # on what values or menu entries the user selected. Here the eval
     # function comes quite handy because we can simply treat the conditions
-    # as some Perl code after prepending a $ to the variable name...
+    # as some Perl code after prepending a '$' to the variable name...
     # This way the user can use even rather complicated expressions as
-    # conditions (actually, even complete Perl scripts ;-)
+    # conditions (actually complete Perl scripts ;-)
 
     print "\n    print \$fh \"";
 
