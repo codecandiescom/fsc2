@@ -293,9 +293,9 @@ static int dg2020_calc_channels_needed( FUNCTION *f )
 
 	num_channels = 0;
 	for ( i = 0; i < f->pc_len; i++ )
-		for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
+		for ( j = PHASE_PLUS_X; j <= PHASE_CW - PHASE_PLUS_X; j++ )
 		{
-			if ( f->pm[ j * f->pc_len + i ] )
+			if ( f->pm[ ( j - PHASE_PLUS_X ) * f->pc_len + i ] )
 				num_channels++;
 			else
 				is_all = UNSET;
