@@ -1061,9 +1061,9 @@ Var *f_cscale( Var *v )
 }
 
 
-/*----------------------------------------------------*/
-/* Function to change the scale during the experiment */
-/*----------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Function to change the scale of a 1D display during the experiment */
+/*--------------------------------------------------------------------*/
 
 Var *f_cscale_1d( Var *v )
 {
@@ -1170,9 +1170,9 @@ Var *f_cscale_1d( Var *v )
 }
 
 
-/*----------------------------------------------------*/
-/* Function to change the scale during the experiment */
-/*----------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Function to change the scale of a 2D display during the experiment */
+/*--------------------------------------------------------------------*/
 
 Var *f_cscale_2d( Var *v )
 {
@@ -1327,9 +1327,10 @@ Var *f_clabel( Var *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function to change one or more axis labels during the experiment */
-/*------------------------------------------------------------------*/
+/*---------------------------------------------*/
+/* Function to change one or more axis labels */
+/* of a 1D display during the experiment      */
+/*--------------------------------------------*/
 
 Var *f_clabel_1d( Var *v )
 {
@@ -1442,9 +1443,10 @@ Var *f_clabel_1d( Var *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function to change one or more axis labels during the experiment */
-/*------------------------------------------------------------------*/
+/*--------------------------------------------*/
+/* Function to change one or more axis labels */
+/* of a 2D display during the experiment      */
+/*--------------------------------------------*/
 
 Var *f_clabel_2d( Var *v )
 {
@@ -1597,7 +1599,7 @@ Var *f_rescale( Var *v )
 
 /*---------------------------------------------------------*/
 /* Function to change the number of points to be displayed */
-/* during the experiment.                                  */
+/* in a 1D display during the experiment.                  */
 /*---------------------------------------------------------*/
 
 Var *f_rescale_1d( Var *v )
@@ -1692,7 +1694,7 @@ Var *f_rescale_1d( Var *v )
 
 /*---------------------------------------------------------*/
 /* Function to change the number of points to be displayed */
-/* during the experiment.                                  */
+/* in a 2D display during the experiment.                  */
 /*---------------------------------------------------------*/
 
 Var *f_rescale_2d( Var *v )
@@ -1831,9 +1833,9 @@ Var *f_display( Var *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/* f_display() is used to send new data to the display system. */
-/*-------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* f_display() is used to send new 1D data to the display system. */
+/*----------------------------------------------------------------*/
 
 Var *f_display_1d( Var *v )
 {
@@ -2116,7 +2118,14 @@ Var *f_display_2d( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* Copy the data to the segment */
+	/* Copy the data to the segment. First comes the total length of the
+	   segment, then the number of data sets. For each data set follows the
+	   x- and y-index, the curve number and the type of the data. Then, for
+	   single data points just the value, for 1D-arrays the length of the
+	   array and the data of the array, and for 2D-arrays first the total
+	   number of bytes that make up the wole information about the 2D-array,
+	   the number of 1D-arrays the 2D-array is made of and then for each of
+	   the 1D-arrays its length and data. */
 
 	ptr = CHAR_P buf;
 
@@ -2210,7 +2219,7 @@ Var *f_display_2d( Var *v )
 					x_len = dp[ i ].vptr->val.vptr[ j ]->len;
 					memcpy( ptr, &x_len, sizeof x_len );
 					ptr += sizeof x_len;
-					memcpy( ptr, dp[ i ].vptr->val.vptr[ j ]->val.lpnt,
+					memcpy( ptr, dp[ i ].vptr->val.vptr[ j ]->val.dpnt,
 							x_len * sizeof( double ) );
 					ptr += x_len * sizeof( double );
 				}
