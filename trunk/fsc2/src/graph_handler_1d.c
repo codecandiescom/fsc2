@@ -1099,8 +1099,8 @@ void repaint_canvas_1d( Canvas *c )
 	if ( c == &G.canvas )
 	{
 		if ( G.button_state == 3 &&
-			 c->ppos[ X ] >= 0 && c->ppos[ X ] < c->w &&
-			 c->ppos[ Y ] >= 0 && c->ppos[ Y ] < c->h )
+			 c->ppos[ X ] >= 0 && c->ppos[ X ] < ( int ) c->w &&
+			 c->ppos[ Y ] >= 0 && c->ppos[ Y ] < ( int ) c->h )
 			for ( i = 0; i < G.nc; i++ )
 			{
 				cv = G.curve[ i ];
@@ -1129,8 +1129,8 @@ void repaint_canvas_1d( Canvas *c )
 
 		if ( G.button_state == 5 )
 		{
-			if ( c->ppos[ X ] >= 0 && c->ppos[ X ] < c->w &&
-				 c->ppos[ Y ] >= 0 && c->ppos[ Y ] < c->h )
+			if ( c->ppos[ X ] >= 0 && c->ppos[ X ] < ( int ) c->w &&
+				 c->ppos[ Y ] >= 0 && c->ppos[ Y ] < ( int ) c->h )
 				for ( i = 0; i < G.nc; i++ )
 				{
 					cv = G.curve[ i ];

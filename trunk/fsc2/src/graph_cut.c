@@ -1779,7 +1779,9 @@ static void repaint_cut_canvas( Canvas *c )
 
 	if ( c == &G.cut_canvas )
 	{
-		if ( G.button_state == 3 )
+		if ( G.button_state == 3 &&
+			 c->ppos[ X ] >= 0 && c->ppos[ X ] < ( int ) c->w &&
+			 c->ppos[ Y ] >= 0 && c->ppos[ Y ] < ( int ) c->h )
 		{
 			r_coord = CG.cut_dir == X ? Y : X;
 
@@ -1791,33 +1793,36 @@ static void repaint_cut_canvas( Canvas *c )
 
 			strcpy( buf, " " );
 			make_label_string( buf + 1, x_pos, ( int ) floor( log10( fabs(
-				scv->rwc_delta[ r_coord ] ) / cv->s2d[ X ] ) ) - 2 );
+				          scv->rwc_delta[ r_coord ] ) / cv->s2d[ X ] ) ) - 2 );
 			strcat( buf, "   " ); 
 			make_label_string( buf + strlen( buf ), y_pos,
-							   ( int ) floor( log10( fabs(
-								scv->rwc_delta[ Z ] ) / cv->s2d[ Y ] ) ) - 2 );
+							    ( int ) floor( log10( fabs(
+							    scv->rwc_delta[ Z ] ) / cv->s2d[ Y ] ) ) - 2 );
 			strcat( buf, " " );
 
 			if ( G.font != NULL )
 				XDrawImageString( G.d, pm, cv->font_gc, 5,
-								  G.font_asc + 5,
-								  buf, strlen( buf ) );
+								  G.font_asc + 5, buf, strlen( buf ) );
 		}
 
 		if ( G.button_state == 5 )
 		{
 			r_coord = CG.cut_dir == X ? Y : X;
 
-			x_pos = scv->rwc_delta[ r_coord ] * ( c->ppos[ X ] - G.start[ X ] )
-				    / cv->s2d[ X ];
-			y_pos = scv->rwc_delta[ r_coord ] * ( G.start[ Y ] - c->ppos[ Y ] )
-				    / cv->s2d[ Y ];
+			if ( c->ppos[ X ] >= 0 && c->ppos[ X ] < ( int ) c->w &&
+				 c->ppos[ Y ] >= 0 && c->ppos[ Y ] < ( int ) c->h )
+			{
+				x_pos = scv->rwc_delta[ r_coord ]
+					    * ( c->ppos[ X ] - G.start[ X ] ) / cv->s2d[ X ];
+				y_pos = scv->rwc_delta[ r_coord ]
+					    * ( G.start[ Y ] - c->ppos[ Y ] ) / cv->s2d[ Y ];
 
-			sprintf( buf, " %#g   %#g ", x_pos, y_pos );
-			if ( G.font != NULL )
-				XDrawImageString( G.d, pm, cv->font_gc, 5,
-								  G.font_asc + 5,
-								  buf, strlen( buf ) );
+				sprintf( buf, " %#g   %#g ", x_pos, y_pos );
+				if ( G.font != NULL )
+					XDrawImageString( G.d, pm, cv->font_gc, 5,
+									  G.font_asc + 5,
+									  buf, strlen( buf ) );
+			}
 
 			XSetForeground( G.d, G.cut_curve.gc, fl_get_pixel( FL_RED ) );
 			XDrawArc( G.d, pm, G.cut_curve.gc,

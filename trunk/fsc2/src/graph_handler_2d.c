@@ -382,6 +382,9 @@ static void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 	obj = obj;
 
+	if ( G.active_curve == -1 )
+		return;
+
 	/* We need to do event compression to avoid being flooded with motion
 	   events - instead of handling them all individually we only react to
 	   the latest in the series of motion events for the current window */
@@ -399,9 +402,6 @@ static void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 		fl_XNextEvent( ev );                  /* get the next event */
 	}
-
-	if ( G.active_curve == -1 )
-		return;
 
 	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &keymask );
 
@@ -1309,68 +1309,68 @@ void repaint_canvas_2d( Canvas *c )
 
 	if ( c == &G.canvas )
 	{
-		if ( G.button_state == 3 )
+		if ( G.button_state == 3 &&
+			 G.active_curve != -1 &&
+			 G.curve_2d[ G.active_curve ]->is_scale_set &&
+			 c->ppos[ X ] >= 0 && c->ppos[ X ] < ( int ) c->w &&
+			 c->ppos[ Y ] >= 0 && c->ppos[ Y ] < ( int ) c->h )
 		{
-			if ( G.active_curve != -1 &&
-				 G.curve_2d[ G.active_curve ]->is_scale_set )
+			cv = G.curve_2d[ G.active_curve ];
+
+			x_pos = ( c->ppos[ X ] + cv->w / 2 ) / cv->s2d[ X ]
+				    - cv->shift[ X ];
+			y_pos = ( ( double ) G.canvas.h - 1.0 - c->ppos[ Y ]
+					  + cv->h / 2 ) / cv->s2d[ Y ] - cv->shift[ Y ];
+
+			if ( x_pos < 0 || floor( x_pos ) >= G.nx ||
+				 y_pos < 0 || floor( y_pos ) >= G.ny ||
+				 ! cv->is_scale_set )
+				index = -1;
+			else
 			{
-				cv = G.curve_2d[ G.active_curve ];
+				index = G.nx * ( long ) floor( y_pos )
+					    + ( long ) floor( x_pos );
 
-				x_pos = ( c->ppos[ X ] + cv->w / 2 ) / cv->s2d[ X ]
-					    - cv->shift[ X ];
-				y_pos = ( ( double ) G.canvas.h - 1.0 - c->ppos[ Y ]
-						  + cv->h / 2 ) / cv->s2d[ Y ] - cv->shift[ Y ];
-
-				if ( x_pos < 0 || floor( x_pos ) >= G.nx ||
-					 y_pos < 0 || floor( y_pos ) >= G.ny ||
-					 ! cv->is_scale_set )
-					index = -1;
+				if ( cv->points[ index ].exist )
+					z_pos = cv->rwc_start[ Z ] + cv->rwc_delta[ Z ]
+						    * cv->points[ index ].v;
 				else
-				{
-					index = G.nx * ( long ) floor( y_pos )
-						    + ( long ) floor( x_pos );
-
-					if ( cv->points[ index ].exist )
-						z_pos = cv->rwc_start[ Z ] + cv->rwc_delta[ Z ]
-					            * cv->points[ index ].v;
-					else
-						index = -1;
-				}
-
-				x_pos = cv->rwc_start[ X ] + cv->rwc_delta[ X ]
-					        * ( c->ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ] );
-				y_pos = cv->rwc_start[ Y ] + cv->rwc_delta[ Y ]
-					       * ( ( ( double ) G.canvas.h - 1.0 - c->ppos[ Y ] ) /
-									           cv->s2d[ Y ] - cv->shift[ Y ] );
-
-				strcpy( buf, " " );
-				make_label_string( buf + 1, x_pos, ( int ) floor( log10( fabs(
-					cv->rwc_delta[ X ] ) / cv->s2d[ X ] ) ) - 2 );
-				strcat( buf, "   " ); 
-				make_label_string( buf + strlen( buf ), y_pos,
-								   ( int ) floor( log10( fabs(
-									 cv->rwc_delta[ Y ] ) /
-														cv->s2d[ Y ] ) ) - 2 );
-				if ( index != -1 )
-				{
-					strcat( buf, "   " ); 
-					make_label_string( buf + strlen( buf ), z_pos,
-									   ( int ) floor( log10( fabs(
-										                cv->rwc_delta[ Z ] ) /
-														cv->s2d[ Z ] ) ) - 2 );
-				}
-				strcat( buf, " " );
-
-				if ( G.font != NULL )
-					XDrawImageString( G.d, pm, cv->font_gc, 5,
-									  G.font_asc + 5, buf, strlen( buf ) );
+					index = -1;
 			}
+
+			x_pos = cv->rwc_start[ X ] + cv->rwc_delta[ X ]
+				    * ( c->ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ] );
+			y_pos = cv->rwc_start[ Y ] + cv->rwc_delta[ Y ]
+				    * ( ( ( double ) G.canvas.h - 1.0 - c->ppos[ Y ] )
+						/ cv->s2d[ Y ] - cv->shift[ Y ] );
+
+			strcpy( buf, " " );
+			make_label_string( buf + 1, x_pos, ( int ) floor( log10( fabs(
+				cv->rwc_delta[ X ] ) / cv->s2d[ X ] ) ) - 2 );
+			strcat( buf, "   " ); 
+			make_label_string( buf + strlen( buf ), y_pos,
+							   ( int ) floor( log10( fabs( cv->rwc_delta[ Y ] )
+													 / cv->s2d[ Y ] ) ) - 2 );
+			if ( index != -1 )
+			{
+				strcat( buf, "   " ); 
+				make_label_string( buf + strlen( buf ), z_pos,
+						       ( int ) floor( log10( fabs( cv->rwc_delta[ Z ] )
+													 / cv->s2d[ Z ] ) ) - 2 );
+			}
+			strcat( buf, " " );
+
+			if ( G.font != NULL )
+				XDrawImageString( G.d, pm, cv->font_gc, 5,
+								  G.font_asc + 5, buf, strlen( buf ) );
 		}
 
 		if ( G.button_state == 5 )
 		{
 			if ( G.active_curve != -1 &&
-				 G.curve_2d[ G.active_curve ]->is_scale_set )
+				 G.curve_2d[ G.active_curve ]->is_scale_set &&
+				 c->ppos[ X ] >= 0 && c->ppos[ X ] < ( int ) c->w &&
+				 c->ppos[ Y ] >= 0 && c->ppos[ Y ] < ( int ) c->h )
 			{
 				cv = G.curve_2d[ G.active_curve ];
 
