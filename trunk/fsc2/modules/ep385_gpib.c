@@ -41,15 +41,12 @@ static void ep385_gpib_failure( void );
 /*----------------------------------------------------------------*/
 /*----------------------------------------------------------------*/
 
+#ifndef EP385_GPIB_DEBUG
 bool ep385_init( const char *name )
 {
 	char cmd[ 100 ];
 	int i;
 
-
-#ifdef EP385_GPIB_DEBUG
-	UNUSED_ARGUMENT( name );
-#endif
 
 	if ( gpib_init_device( name, &ep385.device ) == FAILURE )
 		return FAIL;
@@ -107,6 +104,12 @@ bool ep385_init( const char *name )
 
 	return OK;
 }
+#else
+bool ep385_init( UNUSED_ARG const char *name )
+{
+	return OK;
+}
+#endif
 
 
 /*--------------------------------------------------------------*/

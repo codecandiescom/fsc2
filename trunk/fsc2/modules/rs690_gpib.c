@@ -530,6 +530,7 @@ static int rs690_write( int device_no, const char *s, long len )
 static int rs690_write( UNUSED_ARG int device_no, UNUSED_ARG const char *s,
 						UNUSED_ARG long len )
 {
+	return SUCCESS;
 }
 #endif
 
