@@ -67,6 +67,7 @@ int tds_tmpl_init_hook( void )
 	tds_tmpl.is_rec_len  = UNSET;
 	tds_tmpl.is_trig_pos = UNSET;
 	tds_tmpl.data_source = TDS_TMPL_UNDEF;
+	tds_tmpl.windows_are_checked = UNSET;
 #ifndef NO_GATED_MEASUREMENTS
 	tds_tmpl.meas_source = TDS_TMPL_UNDEF;
 #endif
@@ -79,6 +80,8 @@ int tds_tmpl_init_hook( void )
 		tds_tmpl.channels_in_use[ i ] = UNSET;
 
 	tds_tmpl_stored.w = NULL;
+
+	tds_tmpl_stored.w    = NULL;
 
 	return 1;
 }
@@ -145,6 +148,7 @@ int tds_tmpl_exp_hook( void )
 	   be undone... */
 
 	tds_tmpl_store_state( &tds_tmpl, &tds_tmpl_stored );
+	tds_tmpl.windows_are_checked = UNSET;
 
 	if ( ! tds_tmpl_init( DEVICE_NAME ) )
 	{

@@ -137,6 +137,8 @@ void tds_tmpl_do_pre_exp_checks( void )
 	for ( w = tds_tmpl.w; w != NULL; w = w->next )
 		tds_tmpl_window_checks( w );
 
+	tds_tmpl.windows_are_checked = SET;
+
 	/* Now that all windows are properly set we switch on gated measurements */
 
 #ifndef NO_GATED_MEASUREMENTS
@@ -705,13 +707,9 @@ void tds_tmpl_state_check( double timebase, long rec_len, double trig_pos )
 
 	if ( FSC2_MODE == EXPERIMENT )
 	{
-		timebase = tds_tmpl_get_timebase( );
-		rec_len = tds_tmpl_get_record_length( );
-		trig_pos = tds_tmpl_get_trigger_pos( );
-
-		if ( timebase == tds_tmpl.timebase &&
-			 rec_len  == tds_tmpl.rec_len  &&
-			 trig_pos == tds_tmpl.trig_pos )
+		if ( ( timebase = tds_tmpl_get_timebase( ) ) == tds_tmpl.timebase &&
+			 ( rec_len = tds_tmpl_get_record_length( ) ) == tds_tmpl.rec_len &&
+			 ( trig_pos = tds_tmpl_get_trigger_pos( ) ) == tds_tmpl.trig_pos )
 			return;
 	}
 	else
@@ -723,83 +721,89 @@ void tds_tmpl_state_check( double timebase, long rec_len, double trig_pos )
 
 	/* In principle, the windows should simply stay at their positions (as
 	   the cursors do) but if the record length got smaller we have to do
-	   also some checking and, if necessary, readjustments.*/
+	   also some checking and, if necessary, readjustments.
+	   But there's a small amount of time where we may *not* do this and
+	   this is during the inititialisation of the device when we just have
+	   set a new time base but haven't checked and set up the windows yet -
+	   in this case the values stored in the windows structures are still
+	   bogus and the following would lead to wrong error messages. */
 
     window = timebase * rec_len / TDS_TMPL_POINTS_PER_DIV;
 
-	for ( w = tds_tmpl.w; w != NULL; w = w->next )
-	{
-		if ( rec_len < tds_tmpl.rec_len )
+	if ( tds_tmpl.windows_are_checked )
+		for ( w = tds_tmpl.w; w != NULL; w = w->next )
 		{
-			/* If the start of window is still within the valid range but the
-			   end is too late reduce the length. */
-
-			if ( w->start_num < rec_len && w->end_num > rec_len )
+			if ( rec_len < tds_tmpl.rec_len )
 			{
-				w->end_num = rec_len;
-				width = ( rec_len - w->start_num + 1 )
-					    * timebase / TDS_TMPL_POINTS_PER_DIV;
+				/* If the start of window is still within the valid range but
+				   the end is too late reduce the length. */
 
-				buf1 = T_strdup( tds_tmpl_ptime( w->width ) );
-				print( SEVERE, "Width of %ld. window had to be readjusted "
-					   "from %s to %s.\n", w->num - WINDOW_START_NUMBER,
-					   buf1, tds_tmpl_ptime( width ) );
-				T_free( buf1 );
-
-				w->width = width;
-			}
-			else if ( w->start_num > rec_len )
-			{
-				/* If the window width isn't larger than the record length
-				   shift the window start position to the latest possible
-				   point, otherwise use the whole record length */
-
-				if ( w->end_num - w->start_num + 1 <= rec_len )
+				if ( w->start_num < rec_len && w->end_num > rec_len )
 				{
-					w->start_num = rec_len - ( w->end_num - w->start_num );
-					start = ( w->start_num - 1 )
-							* timebase / TDS_TMPL_POINTS_PER_DIV
-							- trig_pos * window;
 					w->end_num = rec_len;
+					width = ( rec_len - w->start_num + 1 )
+					    	* timebase / TDS_TMPL_POINTS_PER_DIV;
 
-					buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
-					print( SEVERE, "Position of %ld. window had to be shifted "
-						   "from %s to %s.\n",
-						   w->num - WINDOW_START_NUMBER, buf1,
-						   tds_tmpl_ptime( start ) );
+					buf1 = T_strdup( tds_tmpl_ptime( w->width ) );
+					print( SEVERE, "Width of %ld. window had to be readjusted "
+						   "from %s to %s.\n", w->num - WINDOW_START_NUMBER,
+						   buf1, tds_tmpl_ptime( width ) );
 					T_free( buf1 );
+
+					w->width = width;
 				}
-				else
+				else if ( w->start_num > rec_len )
 				{
-					w->start_num = 1;
-					start = - trig_pos * window;
-					w->end_num = rec_len;
-					width = rec_len * timebase / TDS_TMPL_POINTS_PER_DIV;
+					/* If the window width isn't larger than the record length
+					   shift the window start position to the latest possible
+					   point, otherwise use the whole record length */
 
-					buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
-					buf2 = T_strdup( tds_tmpl_ptime( w->width ) );
-					buf3 = T_strdup( tds_tmpl_ptime( start ) );
+					if ( w->end_num - w->start_num + 1 <= rec_len )
+					{
+						w->start_num = rec_len - ( w->end_num - w->start_num );
+						start = ( w->start_num - 1 )
+								* timebase / TDS_TMPL_POINTS_PER_DIV
+								- trig_pos * window;
+						w->end_num = rec_len;
 
-					print( SEVERE, "Position and width of %ld. window had to "
-						   "be readjusted from %s and %s to %s and %s.\n",
-						   w->num - WINDOW_START_NUMBER, buf1, buf2, buf3,
-						   tds_tmpl_ptime( width ) );
+						buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
+						print( SEVERE, "Position of %ld. window had to be "
+							   "shifted from %s to %s.\n",
+							   w->num - WINDOW_START_NUMBER, buf1,
+							   tds_tmpl_ptime( start ) );
+						T_free( buf1 );
+					}
+					else
+					{
+						w->start_num = 1;
+						start = - trig_pos * window;
+						w->end_num = rec_len;
+						width = rec_len * timebase / TDS_TMPL_POINTS_PER_DIV;
 
-					T_free( buf3 );
-					T_free( buf2 );
-					T_free( buf1 );
+						buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
+						buf2 = T_strdup( tds_tmpl_ptime( w->width ) );
+						buf3 = T_strdup( tds_tmpl_ptime( start ) );
+
+						print( SEVERE, "Position and width of %ld. window had "
+							   "to be readjusted from %s and %s to %s and "
+							   "%s.\n", w->num - WINDOW_START_NUMBER, buf1,
+							   buf2, buf3, tds_tmpl_ptime( width ) );
+
+						T_free( buf3 );
+						T_free( buf2 );
+						T_free( buf1 );
+					}
 				}
 			}
+
+			/* Recalculate the windows start time and width (we assume it just
+			   stays in exacty the same position) */
+
+			w->start = ( w->start_num - 1 ) * timebase
+					   / TDS_TMPL_POINTS_PER_DIV - trig_pos * window;
+			w->width = ( w->end_num - 1 ) * timebase / TDS_TMPL_POINTS_PER_DIV
+				   	   - trig_pos * window - w->start;
 		}
-
-		/* Recalculate the windows start time and width (we assume it just
-		   stays in exacty the same position) */
-
-		w->start = ( w->start_num - 1 ) * timebase / TDS_TMPL_POINTS_PER_DIV
-				   - trig_pos * window;
-		w->width = ( w->end_num - 1 ) * timebase / TDS_TMPL_POINTS_PER_DIV
-				   - trig_pos * window - w->start;
-	}
 
 	tds_tmpl.timebase = timebase;
 	tds_tmpl.rec_len  = rec_len;
