@@ -383,7 +383,7 @@ void print_all_vars( void )
 }
 #endif
 
-static int preps_get_channel_name( void )
+static int varss_get_channel_name( void )
 {
 	Var *func, *v;
 	int access;
