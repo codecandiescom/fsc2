@@ -1193,6 +1193,6 @@ void notify_conn( int signo )
 	   replied (as indicated by the variable) */
 
 	while ( ! conn_child_replied )
-		pause( );
+		usleep( 50000 );
 	conn_child_replied = UNSET;
 }

@@ -72,7 +72,7 @@ pid_t spawn_conn( bool start_state )
 	{
 		close( conn_pd[ WRITE ] );
 		while ( ! conn_child_replied )
-			pause( );
+			usleep( 50000 );
 		conn_child_replied = UNSET;
 	}
 
