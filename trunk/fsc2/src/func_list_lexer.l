@@ -176,7 +176,7 @@ int func_list_parse( Func **fncts, int num_func )
 	else
 		 is_restart = SET;
 
-	/* count the number of functions defined in the file */
+	/* Count the number of functions defined in the file */
 
 	TRY
 	{
@@ -206,6 +206,8 @@ int func_list_parse( Func **fncts, int num_func )
 		( *fncts )[ cur ].nargs = 0;
 		( *fncts )[ cur ].access_flag = ACCESS_EXP;
 		( *fncts )[ cur ].to_be_loaded = SET;
+		( *fcnts )[ cur ].handle = NULL;
+		( *fcnts )[ cur ].count = 0;
 	}
 
 	( *fncts )[ num_func ].to_be_loaded = UNSET;
