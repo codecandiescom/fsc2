@@ -32,8 +32,8 @@ static void rs690_commit( bool flag );
 static void rs690_make_fs( FS *start_fs );
 static void rs690_populate_fs( FS *start_fs );
 static void rs690_check_fs( void );
-static void rs690_correct_fs_for_8ns( void );
-static void rs690_correct_fs_for_4ns( void );
+static void	rs690_correct_fs_for_8ns( void );
+static void	rs690_correct_fs_for_4ns( void );
 static FS *rs690_append_fs( Ticks pos );
 static FS *rs690_insert_fs( FS *at, Ticks pos );
 static void rs690_delete_fs_successor( FS *n );
@@ -1030,12 +1030,12 @@ void rs690_channel_setup( bool flag )
 	{
 		rs690.new_fs = rs690_append_fs( - START_OFFSET );
 		rs690.new_fs->len = 1;
-		memset( rs690.new_fs->fields, 0, sizeof rs690.new_fs->fields );
 
 		rs690_append_fs( 0 );
 
 		rs690_make_fs( rs690.new_fs->next );
 		rs690_populate_fs( rs690.new_fs->next );
+
 		rs690_check_fs( );
 		TRY_SUCCESS;
 	}
@@ -1211,30 +1211,21 @@ void rs690_check_fs( void )
 		{
 			TRY
 			{
-				s = T_strdup( rs690_pticks( n->pos + 1 ) );
+				s = T_strdup( rs690_pticks( n->pos + START_OFFSET ) );
 				print( FATAL, "Pulse sequence is longer (%s) than the "
 					   "repetition time of %s.\n",
 					   s, rs690_pticks( rs690.repeat_time ) );
-				T_free( s );
-				TRY_SUCCESS;
+				s = CHAR_P T_free( s );
+				THROW( EXCEPTION );
 			}
 			OTHERWISE
 			{
-				T_free( s );
+				s = CHAR_P T_free( s );
 				RETHROW( );
 			}
-
-			THROW( EXCEPTION );
-		}
-		else if ( n->pos + START_OFFSET == rs690.repeat_time )
-		{
-			print( SEVERE, "Pulse sequence is exactly as long as the "
-				   "repetition time of %s, it needs to be lengthened a "
-				   "bit.\n", rs690_pticks( rs690.repeat_time ) );
-			n->len = 1;
 		}
 		else
-			n->len = rs690.repeat_time - n->pos;
+			n->len = Ticks_max( 1, rs690.repeat_time - n->pos );
 	}
 	else      /* no repetition time has been set */
 		n->len = 1;
@@ -1281,7 +1272,7 @@ void rs690_check_fs( void )
 	   maximum number of words we have for storing table entries would be
 	   needed we have to bail out. */
 
-	if ( rs690.new_fs_count > TS_MAX_WORDS - 3 )
+	if ( rs690.new_fs_count > TS_MAX_WORDS - 2 )
 	{
 		print( FATAL, "Pulse sequence is too complicated to create with "
 			   "this device.\n" );
@@ -1305,32 +1296,24 @@ void rs690_check_fs( void )
 
 static void rs690_correct_fs_for_8ns( void )
 {
-	FS *n,
-	   *p = NULL;
-	int fr;
+	FS *n, *p;
 	int i;
 
 
-	/* 'fr' is 1 when the previous FS structure (pointed to by 'p') was only
-	   semi-filled and we have to fill it up with the first Tick of the FS
-	   structure we're currently dealing with. */
-
-	for ( fr = 0, n = rs690.new_fs; n != NULL; n = n->next )
+	for ( p = rs690.new_fs, n = p->next; n != NULL; n = n->next )
 	{
 		/* If there was still room in the previous FS move the first slice
 		   of the current FS into it */
 
-		if ( fr != 0 )
+		if ( p->len < 2 )
 		{
 			for ( i = 0; i <= rs690.last_used_field; i++ )
-				p->fields[ i ] = ( p->fields[ i ] << 8 ) | n->fields[ i ];
-
-			/* The current FS is now a Tick shorter and starts one Tick
-			   later and the semi-filled FS is now complete */
-
+				p->fields[ i ] = ( p->fields[ i ] << 8 ) | 
+								 ( n->fields[ i ] & 0xff );
+			p->len++;
+			p->is_composite = SET;
 			n->pos++;
 			n->len--;
-			fr = 0;
 		}
 
 		/* If the current FS was just one Tick long and this Tick got shifted
@@ -1343,18 +1326,16 @@ static void rs690_correct_fs_for_8ns( void )
 			rs690_delete_fs_successor( p );
 			rs690.new_fs_count--;
 			n = p;
+			continue;
 		}
 
-		/* If the current FS is now only one Tick long we will have to shift
-		   a Tick of the next FS into it. */
+		p = n;
+	}
 
-		if ( n->len == 1 )
-		{
-			fr = 1;
-			p = n;
-			n->len = 2;              /* FS lengths must always be even */
-		}
-	}			
+	/* Make sure the last FS has an even length */
+
+	if ( p->len & 1 )
+		p->len++;
 }
 
 
@@ -1371,34 +1352,31 @@ static void rs690_correct_fs_for_8ns( void )
 /* fill it with Ticks from the following structure.                 */
 /*------------------------------------------------------------------*/
 
-static void rs690_correct_fs_for_4ns( void )
+static void	rs690_correct_fs_for_4ns( void )
 {
-	FS *n,
-	   *p = NULL;
-	int fr;
+	FS *n, *p;
 	int i, j;
 
 
-	/* 'fr' tells how many Ticks are still free in the previous FS structure
-	   pointed to by 'p' */
-
-	for ( fr = 0, n = rs690.new_fs; n != NULL; n = n->next )
+	for ( p = rs690.new_fs, n = p->next; n != NULL; n = n->next )
 	{
 		/* If there is still room in the previous FS move as many Ticks
-		   of the current FS into it as there is room (and while there
+		   of the current FS into it as possible (but only while there
 		   are still Ticks left in the current FS). */
 
-		while ( fr > 0 && n->len > 0 )
+		while ( p->len < 4 && n->len > 0 )
 		{
 			for ( i = 0; i <= rs690.last_used_field; i++ )
-				p->fields[ i ] = ( p->fields[ i ] << 4 ) | n->fields[ i ];
+				p->fields[ i ] = ( p->fields[ i ] << 4 ) |
+								 ( n->fields[ i ] & 0xf );
+			p->len++;
+			p->is_composite = SET;
 			n->pos++;
 			n->len--;
-			fr--;
 		}
 
-		/* If the Ticks of the current FS have been moved completely into
-		   the previous FS it's now empty, so delete it and continue with
+		/* If all the Ticks of the current FS have been moved into the
+		   previous FS it's now empty, so delete it and continue with
 		   the next FS in the list. */
 
 		if ( n->len == 0 )
@@ -1410,21 +1388,37 @@ static void rs690_correct_fs_for_4ns( void )
 		}
 
 		/* If the current FS is now shorter than 4 Ticks we have to prepare
-		   it to become the next successor into which we're going to shift
+		   it to become the next predecessor into which we're going to shift
 		   Ticks from the next FS. */
 
 		if ( n->len < 4 )
-		{
 			for ( i = 0; i <= rs690.last_used_field; i++ )
 				for ( j = 0; j < n->len - 1; j++ )
 					n->fields[ i ] = ( n->fields[ i ] << 4 ) |
 									 ( n->fields[ i ] & 0xF );
 
-			fr = 4 - n->len;   /* calculate how many Ticks are still free */
-			n->len = 4;        /* length must be 4 */
-			p = n;
-		}
-	}			
+		p = n;
+	}
+
+	/* If very the last FS wasn't completely filled (i.e. hadn't at least 4
+	   Ticks) fill it up with time slices with data for no pulses - this
+	   might lead to a lengthening of the repetition time of up to three
+	   clock cycles. */
+
+	if ( p->len == 1 )             /* no pulses in this one anyway */
+		p->len = 4;
+
+	while ( p->len < 4 )
+	{
+		for ( i = 0; i <= rs690.last_used_field; i++ )
+			p->fields[ i ] = ( p->fields[ i ] << 4 ) |
+							 ( rs690_default_fields[ i ] & 0xf );	
+		p->len++;
+		p->is_composite = SET;
+	}
+
+	if ( p->len % 4 )
+		p->len = ( p->len / 4 + 1 ) * 4;
 }
 
 
@@ -1454,6 +1448,7 @@ static FS *rs690_insert_fs( FS *at, Ticks pos )
 
 	n->len = 0;
 	n->pos = pos;
+	n->is_composite = UNSET;
 	memcpy( n->fields, rs690_default_fields, sizeof n->fields );
 
 	return n;
@@ -1487,6 +1482,7 @@ static FS *rs690_append_fs( Ticks pos )
 	n->next = NULL;
 	n->len = 0;
 	n->pos = pos;
+	n->is_composite = UNSET;
 	memcpy( n->fields, rs690_default_fields, sizeof n->fields );
 
 	return n;
