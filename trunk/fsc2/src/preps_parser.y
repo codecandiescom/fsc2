@@ -136,7 +136,7 @@ sep2:    /* empty */
 
 expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, $1 ); }
        | FLOAT_TOKEN               { $$ = vars_push( FLOAT_VAR, $1 ); }
-       | VAR_TOKEN                 { $$ = vars_push_simple( $1 ); }
+       | VAR_TOKEN                 { $$ = vars_push_copy( $1 ); }
        | VAR_REF                   { $$ = $1; }
        | VAR_TOKEN '['             { vars_push_astack( $1 ); }
          list3 ']'                 { $$ = vars_pop_astack( ); }

@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.18  1999/07/21 07:32:24  jens
+   *** empty log message ***
+
    Revision 1.17  1999/07/20 23:30:32  jens
    Quite some changes: vars_push() has now a variable arguments list, thus we
    don't have to pass it a void pointer to the data but, depending on the type,
@@ -789,11 +792,11 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 
 
 /*--------------------------------------------------------------------------*/
-/* vars_push_simple() creates a new entry on the variable stack for an      */
-/* already existing variable (this is checked) and sets its type and value. */
+/* vars_push_simple() creates a new entry on the variable stack as a copy   */
+/* of an already existing variable (this is checked).                       */
 /*--------------------------------------------------------------------------*/
 
-Var *vars_push_simple( Var *v )
+Var *vars_push_copy( Var *v )
 {
 	/* Make sure it's really a simple variable */
 
@@ -852,11 +855,7 @@ Var *vars_push( int type, ... )
 	switch ( type )
 	{
 		case UNDEF_VAR :
-			/* if the type is undefine and data non-zero this comes from
-			   the start of a print statement and data is a pointer to the
-			   format string which is copied in the new stack variables name.
-			   Otherwise set name to NULL. */
-			new_stack_var->name = get_string_copy( va_arg( ap, char * ) );
+			assert( 1 == 0 );
 			break;
 
 		case INT_VAR :
@@ -1516,8 +1515,7 @@ void vars_check( Var *v )
 		else
 		{
 			/* ERROR: undefined transient variables shouldn't have a name
-			   (with the only exception for functions, but then we should
-			   never end up here...) */ 
+			   and also never should have type UNDEF_VAR... */ 
 
 			eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s.\n",
 					__FILE__, __LINE__);
