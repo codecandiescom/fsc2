@@ -14,18 +14,18 @@ er035m_sas;                  // gauss meter
 
 VARIABLES:
 
-start_freq  =  8 MHz;
-end_freq    = 22 MHz;
-step_freq   = 25 kHz;          
+start_freq  =   8 MHz;
+end_freq    =  22 MHz;
+step_freq   = 100 kHz;          
 
-attenuation = -5 db;
+attenuation =  -5 dB;
 
 N_runs      = 20;            // how many times to repeat the whole experiment
-N_averages  = 16;            // number of averages per frequency
+N_averages  = 16;            // number of averages per frequency point
 
 N_max_base_curves = 10;      // how many curve to use for baseline correction
 
-channel = CH1;               // input channel of the digitizer
+Channel = CH1;               // input channel of the digitizer
 
 
 /***********************************************/
@@ -101,25 +101,25 @@ max_time   = min_time + Rec_len * time_res;
 Pretrigger = int( 0.9 * trig_pos * Rec_len );
 change_scale( min_time * 1.0e-3, time_res * 1.0e-3);
 
-mean_curve[ 1 ] = float_slice( Rec_len );
-base_curve = float_slice( Rec_len );
-
 /* Get a file for storing all data and write experiments parameter */
 
 F1 = get_file( "File for storing complete data sets:" );
 F2 = get_file( "File for storing averaged data sets:" );
-fsave( F2, "% Start frequency  = # MHz\n", start_freq * 1.0e-6 );
-fsave( F2, "% End frequency    = # MHz\n", end_freq * 1.0e-6 );
-fsave( F2, "% Step frequency   = # kHz\n", step_freq * 1.0e-3 );
-fsave( F2, "% Attenuation      = # dB\n", attenuation );
-fsave( F2, "% Record length    = #\n", Rec_len );
-fsave( F2, "% Trigger position = #\n", int( trig_pos * Rec_len ) );
-fsave( F2, "% Time base        = # ns\n", time_base * 1.0e-9 );
-fsave( F2, "%Sensitivity       = # mV\n",
-	   1.0e3 * digitizer_sensitivity( channel ) );
-fsave( F2, "% Field            = # G\n", measure_field( ) );
-save_comment( F2, "% ", "Sample: \nMicrowave frequency: \n"
-			  "Microwave power: \nTemperature: \n" );
+
+IF is_file( F2 ) {
+	fsave( F2, "% Start frequency  = # MHz\n", start_freq * 1.0e-6 );
+	fsave( F2, "% End frequency    = # MHz\n", end_freq * 1.0e-6 );
+	fsave( F2, "% Step frequency   = # kHz\n", step_freq * 1.0e-3 );
+	fsave( F2, "% Attenuation      = # dB\n", attenuation );
+	fsave( F2, "% Record length    = #\n", Rec_len );
+	fsave( F2, "% Trigger position = #\n", int( trig_pos * Rec_len ) );
+	fsave( F2, "% Time base        = # ns\n", time_base * 1.0e-9 );
+	fsave( F2, "%Sensitivity       = # mV\n",
+		   1.0e3 * digitizer_sensitivity( Channel ) );
+	fsave( F2, "% Field            = # G\n", measure_field( ) );
+	save_comment( F2, "% ", "Sample: \nMicrowave frequency: \n"
+				  "Microwave power: \nTemperature: \n" );
+}
 
 /* Create the sliders for setting the integration window limits */
 
@@ -153,14 +153,13 @@ FOR J = 1 : N_runs
 
 		/* Get next curve from the digitizer */
 
-		curve = digitizer_get_curve_fast( channel );
+		curve = digitizer_get_curve_fast( Channel );
 
 		/* If this wasn't the very last curve of the run set the new frequency
 		   and already start the next masurement, so we're not loosing time 
 		   doing all the graphics */
 
-		IF I != N_steps
-		{
+		IF I != N_steps {
 	        freq += step_freq;
 			synthesizer_frequency( freq );
 			digitizer_start_acquisition( );
@@ -168,33 +167,39 @@ FOR J = 1 : N_runs
 
 		/* Save the new date to file */
 
-		IF F1 >= 0
-		{
+		IF is_file( F1 ) {
 			fsave( F1, "% #.run, frequency = # MHz\n\n", J, freq * 1.0e-6 );
 			save( F1, curve );
 		}
 
 		/* Add the new curve to the results from previous runs */
 
-		mean_curve[ I ] = ( ( J - 1 ) * mean_curve[ I ] + curve ) / J;
+		IF J != 1 {
+			mean_curve[ I ] = ( ( J - 1 ) * mean_curve[ I ] + curve ) / J;
+		} ELSE {
+			mean_curve[ I ] = curve;
+		}
 		Is_stored = 1;
 
 		/* Calculate the mean of the data before the trigger used to get rid
 		   of changes of the 'zero level' */
 
-		IF Pretrigger != 0
-		{
+		IF Pretrigger != 0 {
 	    	ground = mean( curve, 1, Pretrigger );
 			mean_ground[ I ] = ( ( J - 1 ) * mean_ground[ I ] + ground ) / J;
 		}
 
-		/* At the start of a run add up curves to be used as baseline */
+		/* At the start of run add up curves used for baseline correction */
 
-		IF I <= N_max_base_curves
-		{
-			N_base_curves = ( J - 1 ) * N_max_base_curves + I;
-	    	base_curve = ( 1.0 - 1.0 / N_base_curves ) * base_curve
-	    	             + ( curve - ground ) / N_base_curves;
+		IF I <= N_max_base_curves {
+			IF I == 1 & J == 1 {
+				N_base_curves = 1;
+				base_curve = curve - ground;
+			} ELSE {
+				N_base_curves += 1;
+		    	base_curve = ( 1.0 - 1.0 / N_base_curves ) * base_curve
+	    		             + ( curve - ground ) / N_base_curves;
+			}
 		}
 
 		/* Calculate the values of the integration window (now using 'curve'
@@ -237,8 +242,7 @@ FOR J = 1 : N_runs
 			}
 
 			base_int = 1.0e3 * mean( base_curve, Start_pos, Width );
-			FOR K = 1 : End_index
-			{
+			FOR K = 1 : End_index {
 				integral[ 1 ] = 1.0e3 * mean( mean_curve[ K ],
 											  Start_pos, Width );
 				integral[ 2 ] = integral[ 1 ] - base_int
@@ -252,6 +256,7 @@ FOR J = 1 : N_runs
 	print( "I = #, N_steps = #\n", I, N_steps );
 }
 
+
 ON_STOP:
 
 synthesizer_state( "OFF" );
@@ -263,7 +268,8 @@ IF ! Is_stored {           // Check if data of last trace were stored
 	freq = start_freq + I * step_freq;
 }
 
-IF F2 >= 0 {
+IF is_file( F2 )
+{
 	IF J < N_runs {
 		fsave( F2, "% Number of runs: #\n", J );
 	} ELSE {
@@ -297,16 +303,14 @@ B2 = button_create( "NORMAL_BUTTON", "Done" );
 
 FOREVER
 {
-	IF button_state( B2 )           // check Done button
-	{
+	IF button_state( B2 ) {          // check Done button
 		BREAK;
 	}
 
 	IF button_state( B1 )           // check Save button
 	{
 		F3 = get_file( "File for storing integrated region:" );		
-		IF F3 >= 0
-		{
+		IF is_file( F3 ) {
 			IF start_time < end_time {
 				fsave( F3, "% Integration window from # ns to # ns\n"
 						   "% (times relative to trigger)\n\n"
@@ -344,8 +348,7 @@ FOREVER
 
 	new_start_time = slider_value( S1 );
 	new_end_time   = slider_value( S2 );
-	IF start_time == new_start_time & end_time == new_end_time
-	{
+	IF start_time == new_start_time & end_time == new_end_time {
 		wait( 0.2 s );
 		NEXT;
 	}
@@ -374,8 +377,7 @@ FOREVER
 	}
 
 	base_int = 1.0e3 * mean( base_curve, Start_pos, Width );
-	FOR K = 1 : End_index
-	{
+	FOR K = 1 : End_index {
 		integral[ 1 ] = 1.0e3 * mean( mean_curve[ K ], Start_pos, Width );
 		integral[ 2 ] = integral[ 1 ] - base_int - 1.0e3 * mean_ground[ K ];
 		display( 1, K, integral[ 1 ], 3,

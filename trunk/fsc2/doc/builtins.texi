@@ -424,6 +424,13 @@ defaults to "Please enter a comment:".
 @end table
 
 
+@item is_file()
+@anchor{is_file}
+@findex is_file()
+This function expects a file handle as returned by @code{get_file()} and
+checks if it is valid and if the associated file is open for writing.
+
+
 @node Interaction functions, Mathematical functions, Output functions, Built-in Functions
 @section Interaction functions
 @cindex interaction functions
