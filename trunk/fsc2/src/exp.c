@@ -70,6 +70,12 @@ static bool pop_curly_brace( void );
 static void loop_setup( void );
 static void setup_while_or_repeat( int type, long *pos );
 static void setup_if_else( long *pos, Prg_Token_T *cur_wr );
+static void setup_else( Prg_Token_T *cur, long i, bool in_if,
+						bool *dont_need_close_parens );
+static void setup_open_brace_in_if_else( Prg_Token_T *cur, long i,
+										 bool in_if );
+static bool setup_close_brace_in_if_else( long *pos, Prg_Token_T *cur, long i,
+										  bool *in_if );
 static void exp_syntax_check( void );
 static void deal_with_token_in_test( void );
 static const char *get_construct_name( int type );
@@ -161,14 +167,16 @@ void store_exp( FILE *in )
 			continue;
 		}
 
-		/* Get or extend memory for storing the tokens if necessary */
+		/* Get or extend memory for storing the tokens if necessary, then
+		   store the token */
 
 		if ( EDL.prg_length % PRG_CHUNK_SIZE == 0 )
-			EDL.prg_token = PRG_TOKEN_P T_realloc( EDL.prg_token,
+			EDL.prg_token = 
+					 PRG_TOKEN_P T_realloc( EDL.prg_token,
 											( EDL.prg_length + PRG_CHUNK_SIZE )
 									        * sizeof *EDL.prg_token );
 
-		EDL.prg_token[ EDL.prg_length ].token = ret;   /* store token */
+		EDL.prg_token[ EDL.prg_length ].token = ret;
 
 		/* If the file name changed get a copy of the new file name. Then set
 		   the pointer in the program token structure to the file name and
@@ -650,7 +658,6 @@ static void setup_if_else( long *pos, Prg_Token_T *cur_wr )
 	bool dont_need_close_parens = UNSET;           /* set for IF-ELSE and
 													  UNLESS-ELSE constructs */
 
-
 	/* Start with some sanity checks */
 
 	if ( i == EDL.prg_length )
@@ -670,11 +677,10 @@ static void setup_if_else( long *pos, Prg_Token_T *cur_wr )
 	/* Now let's get things done... */
 
 	for ( ; i < EDL.prg_length; i++ )
-	{
 		switch( EDL.prg_token[ i ].token )
 		{
 			case WHILE_TOK : case REPEAT_TOK :
-			case FOR_TOK : case FOREVER_TOK :
+			case FOR_TOK :   case FOREVER_TOK :
 			case UNTIL_TOK :
 				setup_while_or_repeat( EDL.prg_token[ i ].token, &i );
 				break;
@@ -706,77 +712,107 @@ static void setup_if_else( long *pos, Prg_Token_T *cur_wr )
 				break;
 
 			case ELSE_TOK :
-				if ( i + 1 == EDL.prg_length )
-				{
-					eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in "
-							"EXPERIMENT section.\n",
-							EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
-					THROW( EXCEPTION );
-				}
-
-				if ( EDL.prg_token[ i + 1 ].token != '{' &&
-					 EDL.prg_token[ i + 1 ].token != IF_TOK &&
-					 EDL.prg_token[ i + 1 ].token != UNLESS_TOK )
-				{
-					eprint( FATAL, UNSET, "%s:%ld: Missing '{' after ELSE.\n",
-							EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
-					THROW( EXCEPTION );
-				}
-
-				if ( in_if )
-				{
-					eprint( FATAL, UNSET, "Missing '}' for ELSE block "
-							"belonging to IF-ELSE construct starting at "
-							"%s:%ld.\n", cur->Fname, cur->Lc );
-					THROW( EXCEPTION );
-				}
-
-				if (  EDL.prg_token[ i + 1 ].token == IF_TOK ||
-					  EDL.prg_token[ i + 1 ].token == UNLESS_TOK )
-				{
-					cur->end = EDL.prg_token + i;
-					dont_need_close_parens = SET;
-				}
-
+				setup_else( cur, i, in_if, &dont_need_close_parens );
 				break;
 
 			case '{' :
-				if ( i + 1 == EDL.prg_length )
-				{
-					eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in "
-							"EXPERIMENT section.\n",
-							EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
-					THROW( EXCEPTION );
-				}
-
-				if ( in_if )
-					cur->start = EDL.prg_token + i + 1;
-				else
-					cur->end = EDL.prg_token + i - 1;
+				setup_open_brace_in_if_else( cur, i, in_if );
 				break;
 
 			case '}' :
-				if ( in_if )
-				{
-					in_if = UNSET;
-					if ( i + 1 < EDL.prg_length &&
-						 EDL.prg_token[ i + 1 ].token == ELSE_TOK )
-						break;
-				}
-
-				if ( cur->end != NULL )
-					( cur->end - 1 )->end = EDL.prg_token + i + 1;
-				else
-					cur->end = EDL.prg_token + i + 1;
-				EDL.prg_token[ i ].end = EDL.prg_token + i + 1;
-				*pos = i;
-				return;
+				if ( setup_close_brace_in_if_else( pos, cur, i, &in_if ) )
+					return;
 		}
-	}
 
 	eprint( FATAL, UNSET, "Missing '}' for %s starting at %s:%ld.\n",
 			in_if ? "IF/UNLESS" : "ELSE", cur->Fname, cur->Lc );
 	THROW( EXCEPTION );
+}
+
+
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+static void setup_else( Prg_Token_T *cur, long i, bool in_if,
+						bool *dont_need_close_parens )
+{
+	if ( i + 1 == EDL.prg_length )
+	{
+		eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in "
+				"EXPERIMENT section.\n",
+				EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
+		THROW( EXCEPTION );
+	}
+
+	if ( EDL.prg_token[ i + 1 ].token != '{' &&
+		 EDL.prg_token[ i + 1 ].token != IF_TOK &&
+		 EDL.prg_token[ i + 1 ].token != UNLESS_TOK )
+	{
+		eprint( FATAL, UNSET, "%s:%ld: Missing '{' after ELSE.\n",
+				EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
+		THROW( EXCEPTION );
+	}
+
+	if ( in_if )
+	{
+		eprint( FATAL, UNSET, "Missing '}' for ELSE block "
+				"belonging to IF-ELSE construct starting at "
+				"%s:%ld.\n", cur->Fname, cur->Lc );
+		THROW( EXCEPTION );
+	}
+
+	if (  EDL.prg_token[ i + 1 ].token == IF_TOK ||
+		  EDL.prg_token[ i + 1 ].token == UNLESS_TOK )
+	{
+		cur->end = EDL.prg_token + i;
+		*dont_need_close_parens = SET;
+	}
+}
+
+
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+static void setup_open_brace_in_if_else( Prg_Token_T *cur, long i, bool in_if )
+{
+	if ( i + 1 == EDL.prg_length )
+	{
+		eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in "
+				"EXPERIMENT section.\n",
+				EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
+		THROW( EXCEPTION );
+	}
+
+	if ( in_if )
+		cur->start = EDL.prg_token + i + 1;
+	else
+		cur->end = EDL.prg_token + i - 1;
+}
+
+
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+static bool setup_close_brace_in_if_else( long *pos, Prg_Token_T *cur, long i,
+										  bool *in_if )
+{
+	if ( *in_if )
+	{
+		*in_if = UNSET;
+		if ( i + 1 < EDL.prg_length &&
+			 EDL.prg_token[ i + 1 ].token == ELSE_TOK )
+			return FALSE;
+	}
+
+	if ( cur->end != NULL )
+		( cur->end - 1 )->end = EDL.prg_token + i + 1;
+	else
+		cur->end = EDL.prg_token + i + 1;
+
+	EDL.prg_token[ i ].end = EDL.prg_token + i + 1;
+	*pos = i;
+
+	return TRUE;
 }
 
 
@@ -863,7 +899,7 @@ void exp_test_run( void )
 		   4. Do the test run.
 		*/
 
-		Internals.mode = TEST;
+		Fsc2_Internals.mode = TEST;
 		vars_save_restore( SET );
 
 		experiment_time( );
@@ -884,7 +920,7 @@ void exp_test_run( void )
 
 			/* Give the 'Stop Test' button a chance to get tested... */
 
-			if ( ! ( Internals.cmdline_flags & TEST_ONLY ) &&
+			if ( ! ( Fsc2_Internals.cmdline_flags & TEST_ONLY ) &&
 				 token_count >= CHECK_FORMS_AFTER )
 			{
 				fl_check_only_forms( );
@@ -929,11 +965,11 @@ void exp_test_run( void )
 		EDL.File_List_Len = old_FLL;
 		close_all_files( );
 
-		Internals.mode = PREPARATION;
+		Fsc2_Internals.mode = PREPARATION;
 		RETHROW( );
 	}
 
-	Internals.mode = PREPARATION;
+	Fsc2_Internals.mode = PREPARATION;
 	EDL.Fname = NULL;
 	vars_save_restore( UNSET );
 	EDL.File_List_Len = old_FLL;

@@ -203,7 +203,7 @@ Var_T *f_print( Var_T *v )
 	{
 		if ( cv != NULL )      /* skip printing if there are not enough data */
 		{
-			if ( Internals.mode != TEST || print_anyway )
+			if ( Fsc2_Internals.mode != TEST || print_anyway )
 				switch ( cv->type )
 				{
 					case INT_VAR :
@@ -231,7 +231,7 @@ Var_T *f_print( Var_T *v )
 		cp = ep + 4;
 	}
 
-	if ( Internals.mode != TEST || print_anyway )
+	if ( Fsc2_Internals.mode != TEST || print_anyway )
 		eprint( NO_ERROR, UNSET, cp );
 
 	/* Finally free the copy of the format string and return number of
@@ -458,7 +458,7 @@ Var_T *f_showm( Var_T *v )
 	char *mp;
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -500,7 +500,7 @@ Var_T *f_showm( Var_T *v )
 		memmove( mp + 1, mp + 2, strlen( mp ) - 1 );
 	}
 
-	if ( Internals.mode == EXPERIMENT )
+	if ( Fsc2_Internals.mode == EXPERIMENT )
 		show_message( mess );
 
 	T_free( mess );
@@ -530,7 +530,7 @@ Var_T *f_wait( Var_T *v )
 	if ( how_long < 0.0 )
 	{
 		print( WARN, "Negative time value.\n" );
-		if ( Internals.mode == TEST )
+		if ( Fsc2_Internals.mode == TEST )
 			return vars_push( INT_VAR, 1L );
 		return vars_push( INT_VAR, EDL.do_quit ? 0L : 1L );
 	}
@@ -551,7 +551,7 @@ Var_T *f_wait( Var_T *v )
 	   waiting time to the global variable that is used to give the modules
 	   a very rough time estimate about the used time. */
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 	{
 		EDL.experiment_time += how_long;
 		return vars_push( INT_VAR, 1L );
@@ -637,7 +637,7 @@ Var_T *f_init_1d( Var_T *v )
 	int i;
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -649,12 +649,12 @@ Var_T *f_init_1d( Var_T *v )
 	G.is_init = SET;
 	G.mode = NORMAL_DISPLAY;
 
-	G1.nc = 1;
-	G1.nx = DEFAULT_1D_X_POINTS;
-	G1.rwc_start[ X ] = ( double ) ARRAY_OFFSET;
-	G1.rwc_delta[ X ] = 1.0;
+	G_1d.nc = 1;
+	G_1d.nx = DEFAULT_1D_X_POINTS;
+	G_1d.rwc_start[ X ] = ( double ) ARRAY_OFFSET;
+	G_1d.rwc_delta[ X ] = 1.0;
 	for ( i = X; i <= Y; i++ )
-		G1.label[ i ] = G1.label_orig[ i ] = NULL;
+		G_1d.label[ i ] = G_1d.label_orig[ i ] = NULL;
 
 	/* Now evaluate the arguments */
 
@@ -664,11 +664,11 @@ Var_T *f_init_1d( Var_T *v )
 	if ( v->type == STR_VAR )
 		goto labels_1d;
 
-	G1.nc = get_long( v, "number of curves" );
+	G_1d.nc = get_long( v, "number of curves" );
 
-	if ( G1.nc < 1 || G1.nc > MAX_CURVES )
+	if ( G_1d.nc < 1 || G_1d.nc > MAX_CURVES )
 	{
-		print( FATAL, "Invalid number of curves (%ld).\n", G1.nc );
+		print( FATAL, "Invalid number of curves (%ld).\n", G_1d.nc );
 		THROW( EXCEPTION );
 	}
 
@@ -678,10 +678,10 @@ Var_T *f_init_1d( Var_T *v )
 	if ( v->type == STR_VAR )
 		goto labels_1d;
 
-	G1.nx = get_long( v, "number of points" );
+	G_1d.nx = get_long( v, "number of points" );
 
-	if ( G1.nx <= 0 )
-		G1.nx = DEFAULT_1D_X_POINTS;
+	if ( G_1d.nx <= 0 )
+		G_1d.nx = DEFAULT_1D_X_POINTS;
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 		goto init_1d_done;
@@ -701,18 +701,18 @@ Var_T *f_init_1d( Var_T *v )
 			THROW( EXCEPTION );
 		}
 
-		G1.rwc_start[ X ] = VALUE( v );
+		G_1d.rwc_start[ X ] = VALUE( v );
 		v = v->next;
-		G1.rwc_delta[ X ] = VALUE( v );
+		G_1d.rwc_delta[ X ] = VALUE( v );
 
-		if ( G1.rwc_delta[ X ] == 0.0 )
+		if ( G_1d.rwc_delta[ X ] == 0.0 )
 		{
-			G1.rwc_start[ X ] = ARRAY_OFFSET;
-			G1.rwc_delta[ X ] = 1.0;
+			G_1d.rwc_start[ X ] = ARRAY_OFFSET;
+			G_1d.rwc_delta[ X ] = 1.0;
 		}
 
-		if ( G1.rwc_delta[ X ] == 0.0 )
-			G1.rwc_delta[ X ] = 1.0;
+		if ( G_1d.rwc_delta[ X ] == 0.0 )
+			G_1d.rwc_delta[ X ] = 1.0;
 	}
 
 	if ( ( v = vars_pop( v ) ) == NULL )
@@ -721,24 +721,24 @@ Var_T *f_init_1d( Var_T *v )
  labels_1d:
 
 	vars_check ( v, STR_VAR );
-	G1.label[ X ] = T_strdup( v->val.sptr );
+	G_1d.label[ X ] = T_strdup( v->val.sptr );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check ( v, STR_VAR );
-		G1.label[ Y ] = T_strdup( v->val.sptr );
+		G_1d.label[ Y ] = T_strdup( v->val.sptr );
 	}
 
  init_1d_done:
 
-	G1.nx_orig = G1.nx;
-	G1.rwc_start_orig[ X ] = G1.rwc_start[ X ];
-	G1.rwc_delta_orig[ X ] = G1.rwc_delta[ X ];
+	G_1d.nx_orig = G_1d.nx;
+	G_1d.rwc_start_orig[ X ] = G_1d.rwc_start[ X ];
+	G_1d.rwc_delta_orig[ X ] = G_1d.rwc_delta[ X ];
 
 	for ( i = X; i <= Y; i++ )
 	{
-		G1.label_orig[ i ] = G1.label[ i ];
-		G1.label[ i ] = NULL;
+		G_1d.label_orig[ i ] = G_1d.label[ i ];
+		G_1d.label[ i ] = NULL;
 	}
 
 	return vars_push( INT_VAR, 1L );
@@ -755,7 +755,7 @@ Var_T *f_init_2d( Var_T *v )
 	int i;
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -765,13 +765,13 @@ Var_T *f_init_2d( Var_T *v )
 
 	G.dim |= 2;
 	G.is_init = SET;
-	G2.nc = 1;
-	G2.nx = DEFAULT_2D_X_POINTS;
-	G2.ny = DEFAULT_2D_Y_POINTS;
-	G2.rwc_start[ X ] = G2.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
-	G2.rwc_delta[ X ] = G2.rwc_delta[ Y ] = 1.0;
+	G_2d.nc = 1;
+	G_2d.nx = DEFAULT_2D_X_POINTS;
+	G_2d.ny = DEFAULT_2D_Y_POINTS;
+	G_2d.rwc_start[ X ] = G_2d.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
+	G_2d.rwc_delta[ X ] = G_2d.rwc_delta[ Y ] = 1.0;
 	for ( i = X; i <= Z; i++ )
-		G2.label[ i ] = G2.label_orig[ i ] = NULL;
+		G_2d.label[ i ] = G_2d.label_orig[ i ] = NULL;
 
 	/* Now evaluate the arguments */
 
@@ -781,11 +781,11 @@ Var_T *f_init_2d( Var_T *v )
 	if ( v->type == STR_VAR )
 		goto labels_2d;
 
-	G2.nc = get_long( v, "number of curves" );
+	G_2d.nc = get_long( v, "number of curves" );
 
-	if ( G2.nc < 1 || G2.nc > MAX_CURVES )
+	if ( G_2d.nc < 1 || G_2d.nc > MAX_CURVES )
 	{
-		print( FATAL, "Invalid number of curves (%ld).\n", G2.nc );
+		print( FATAL, "Invalid number of curves (%ld).\n", G_2d.nc );
 		THROW( EXCEPTION );
 	}
 
@@ -795,10 +795,10 @@ Var_T *f_init_2d( Var_T *v )
 	if ( v->type == STR_VAR )
 		goto labels_2d;
 
-	G2.nx = get_long( v, "number of points in x-direction" );
+	G_2d.nx = get_long( v, "number of points in x-direction" );
 
-	if ( G2.nx <= 0 )
-		G2.nx = DEFAULT_2D_X_POINTS;
+	if ( G_2d.nx <= 0 )
+		G_2d.nx = DEFAULT_2D_X_POINTS;
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 		goto init_2d_done;
@@ -806,10 +806,10 @@ Var_T *f_init_2d( Var_T *v )
 	if ( v->type == STR_VAR )
 		goto labels_2d;
 
-	G2.ny = get_long( v, "number of points in y-direction" );
+	G_2d.ny = get_long( v, "number of points in y-direction" );
 
-	if ( G2.ny <= 0 )
-		G2.ny = DEFAULT_2D_Y_POINTS;
+	if ( G_2d.ny <= 0 )
+		G_2d.ny = DEFAULT_2D_Y_POINTS;
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 		goto init_2d_done;
@@ -829,14 +829,14 @@ Var_T *f_init_2d( Var_T *v )
 			THROW( EXCEPTION );
 		}
 
-		G2.rwc_start[ X ] = VALUE( v );
+		G_2d.rwc_start[ X ] = VALUE( v );
 		v = v->next;
-		G2.rwc_delta[ X ] = VALUE( v );
+		G_2d.rwc_delta[ X ] = VALUE( v );
 
-		if ( G2.rwc_delta[ X ] == 0.0 )
+		if ( G_2d.rwc_delta[ X ] == 0.0 )
 		{
-			G2.rwc_start[ X ] = ( double ) ARRAY_OFFSET;
-			G2.rwc_delta[ X ] = 1.0;
+			G_2d.rwc_start[ X ] = ( double ) ARRAY_OFFSET;
+			G_2d.rwc_delta[ X ] = 1.0;
 		}
 	}
 
@@ -858,14 +858,14 @@ Var_T *f_init_2d( Var_T *v )
 			THROW( EXCEPTION );
 		}
 
-		G2.rwc_start[ Y ] = VALUE( v );
+		G_2d.rwc_start[ Y ] = VALUE( v );
 		v = v->next;
-		G2.rwc_delta[ Y ] = VALUE( v );
+		G_2d.rwc_delta[ Y ] = VALUE( v );
 
-		if ( G2.rwc_delta[ Y ] == 0.0 )
+		if ( G_2d.rwc_delta[ Y ] == 0.0 )
 		{
-			G2.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
-			G2.rwc_delta[ Y ] = 1.0;
+			G_2d.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
+			G_2d.rwc_delta[ Y ] = 1.0;
 		}
 	}
 
@@ -875,34 +875,34 @@ Var_T *f_init_2d( Var_T *v )
  labels_2d:
 
 	vars_check( v, STR_VAR );
-	G2.label[ X ] = T_strdup( v->val.sptr );
+	G_2d.label[ X ] = T_strdup( v->val.sptr );
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 		return vars_push( INT_VAR, 1L );
 
 	vars_check( v, STR_VAR );
-	G2.label[ Y ] = T_strdup( v->val.sptr );
+	G_2d.label[ Y ] = T_strdup( v->val.sptr );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check( v, STR_VAR );
-		G2.label[ Z ] = T_strdup( v->val.sptr );
+		G_2d.label[ Z ] = T_strdup( v->val.sptr );
 	}
 
  init_2d_done:
 
-	G2.nx_orig = G2.nx;
-	G2.ny_orig = G2.ny;
+	G_2d.nx_orig = G_2d.nx;
+	G_2d.ny_orig = G_2d.ny;
 	for ( i = X; i <= Y; i++ )
 	{
-		G2.rwc_start_orig[ i ] = G2.rwc_start[ i ];
-		G2.rwc_delta_orig[ i ] = G2.rwc_delta[ i ];
+		G_2d.rwc_start_orig[ i ] = G_2d.rwc_start[ i ];
+		G_2d.rwc_delta_orig[ i ] = G_2d.rwc_delta[ i ];
 	}
 
 	for ( i = X; i <= Z; i++ )
 	{
-		G2.label_orig[ i ] = G2.label[ i ];
-		G2.label[ i ] = NULL;
+		G_2d.label_orig[ i ] = G_2d.label[ i ];
+		G_2d.label[ i ] = NULL;
 	}
 
 	return vars_push( INT_VAR, 1L );
@@ -924,7 +924,7 @@ Var_T *f_dmode( Var_T *v )
 	int type = D_CHANGE_MODE;
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -987,22 +987,22 @@ Var_T *f_dmode( Var_T *v )
 	}
 
 	if ( width == 0 )
-		width = G1.nx;
+		width = G_1d.nx;
 
 	too_many_arguments( v );
 
 	/* In a test run we're already done */
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 	{
-		G1.nx = width;
+		G_1d.nx = width;
 		return vars_push( INT_VAR, 1L );
 	}
 
 	/* If we get here as the parent we're still in the PREPARATIONS phase
 	   and we just store the values in the graphics main structure. */
 
-	if ( Internals.I_am == PARENT )
+	if ( Fsc2_Internals.I_am == PARENT )
 	{
 		if ( G.mode == mode )
 			print( WARN, "Display is already in \"%s\" mode.\n",
@@ -1010,7 +1010,7 @@ Var_T *f_dmode( Var_T *v )
 		else
 		{
 			G.mode = mode;
-			G1.nx_orig = G1.nx = width;
+			G_1d.nx_orig = G_1d.nx = width;
 		}
 
 		return vars_push( INT_VAR, 1L );
@@ -1065,7 +1065,7 @@ Var_T *f_dmode( Var_T *v )
 
 Var_T *f_cscale( Var_T *v )
 {
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -1114,7 +1114,7 @@ Var_T *f_cscale_1d( Var_T *v )
 	int type = D_CHANGE_SCALE;
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -1168,12 +1168,12 @@ Var_T *f_cscale_1d( Var_T *v )
 
 	/* In a test run we're already done */
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 		return vars_push( INT_VAR, 1L );
 
 	/* Function can only be used in experiment section */
 
-	fsc2_assert( Internals.I_am == CHILD );
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
 
 	len =   sizeof len + sizeof type + sizeof is_set
 		  + sizeof x_0 + sizeof dx;
@@ -1234,7 +1234,7 @@ Var_T *f_cscale_2d( Var_T *v )
 	int type = D_CHANGE_SCALE;
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -1301,12 +1301,12 @@ Var_T *f_cscale_2d( Var_T *v )
 
 	/* In a test run we're already done */
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 		return vars_push( INT_VAR, 1L );
 
 	/* Function can only be used in experiment section */
 
-	fsc2_assert( Internals.I_am == CHILD );
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
 
 	len =   sizeof len + sizeof type + sizeof is_set
 		  + sizeof x_0 + sizeof dx + sizeof y_0 + sizeof dy;
@@ -1364,7 +1364,7 @@ Var_T *f_cscale_2d( Var_T *v )
 
 Var_T *f_clabel( Var_T *v )
 {
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -1415,7 +1415,7 @@ Var_T *f_clabel_1d( Var_T *v )
 	int type = D_CHANGE_LABEL;
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -1466,12 +1466,12 @@ Var_T *f_clabel_1d( Var_T *v )
 
 	/* In a test run we're already done */
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 		return vars_push( INT_VAR, 1L );
 
 	/* Function can only be used in experiment section */
 
-	fsc2_assert( Internals.I_am == CHILD );
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
 
 	len = sizeof len + sizeof type;
 	for ( i = X; i <= Y; i++ )
@@ -1542,7 +1542,7 @@ Var_T *f_clabel_2d( Var_T *v )
 	int type = D_CHANGE_LABEL;
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -1600,12 +1600,12 @@ Var_T *f_clabel_2d( Var_T *v )
 
 	/* In a test run we're already done */
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 		return vars_push( INT_VAR, 1L );
 
 	/* Function can only be used in experiment section */
 
-	fsc2_assert( Internals.I_am == CHILD );
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
 
 	len = sizeof len + sizeof type;
 	for ( i = X; i <= Z; i++ )
@@ -1667,7 +1667,7 @@ Var_T *f_clabel_2d( Var_T *v )
 
 Var_T *f_rescale( Var_T *v )
 {
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -1716,7 +1716,7 @@ Var_T *f_rescale_1d( Var_T *v )
 	int type = D_CHANGE_POINTS;
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -1760,12 +1760,12 @@ Var_T *f_rescale_1d( Var_T *v )
 
 	/* In a test run we're already done */
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 		return vars_push( INT_VAR, 1L );
 
 	/* Function can only be used in experiment section */
 
-	fsc2_assert( Internals.I_am == CHILD );
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
 
 	len = sizeof len + sizeof type + sizeof new_nx;
 
@@ -1819,7 +1819,7 @@ Var_T *f_rescale_2d( Var_T *v )
 	int type = D_CHANGE_POINTS;
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -1870,12 +1870,12 @@ Var_T *f_rescale_2d( Var_T *v )
 
 	/* In a test run we're already done */
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 		return vars_push( INT_VAR, 1L );
 
 	/* Function can only be used in experiment section */
 
-	fsc2_assert( Internals.I_am == CHILD );
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
 
 	len = sizeof len + sizeof type + sizeof new_nx + sizeof new_ny;
 
@@ -1922,7 +1922,7 @@ Var_T *f_rescale_2d( Var_T *v )
 
 Var_T *f_display( Var_T *v )
 {
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -1970,7 +1970,7 @@ Var_T *f_display_1d( Var_T *v )
 	int i;
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -2006,13 +2006,13 @@ Var_T *f_display_1d( Var_T *v )
 		return vars_push( INT_VAR, 0L );
 	}
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 	{
 		T_free( dp );
 		return vars_push( INT_VAR, 1L );
 	}
 
-	fsc2_assert( Internals.I_am == CHILD );
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
 
 	/* Determine the required amount of shared memory */
 
@@ -2150,7 +2150,7 @@ Var_T *f_display_2d( Var_T *v )
 	long x_len, y_len;
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -2186,13 +2186,13 @@ Var_T *f_display_2d( Var_T *v )
 		return vars_push( INT_VAR, 0L );
 	}
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 	{
 		T_free( dp );
 		return vars_push( INT_VAR, 1L );
 	}
 
-	fsc2_assert( Internals.I_am == CHILD );
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
 
 	/* Determine the required amount of shared memory, we need to pass on
 	   the total length of the of the data segment, the number of sets and
@@ -2600,7 +2600,7 @@ static dpoint_T *eval_display_args( Var_T *v, int dim, int *nsets )
 		v = v->next;
 
 		if ( dp[ *nsets ].nc < 0 ||
-			 dp[ *nsets ].nc >= ( dim == 1 ? G1.nc : G2.nc ) )
+			 dp[ *nsets ].nc >= ( dim == 1 ? G_1d.nc : G_2d.nc ) )
 		{
 			print( FATAL, "Invalid curve number (%ld).\n",
 				   dp[ *nsets ].nc + 1 );
@@ -2622,7 +2622,7 @@ static dpoint_T *eval_display_args( Var_T *v, int dim, int *nsets )
 
 Var_T *f_clearcv( Var_T *v )
 {
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -2673,7 +2673,7 @@ Var_T *f_clearcv_1d( Var_T *v )
 	int type = D_CLEAR_CURVE;
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -2705,7 +2705,7 @@ Var_T *f_clearcv_1d( Var_T *v )
 
 	if ( v == NULL )
 	{
-		if ( Internals.mode == TEST )
+		if ( Fsc2_Internals.mode == TEST )
 			return vars_push( INT_VAR, 1L );
 
 		ca = LONG_P T_malloc( sizeof *ca );
@@ -2723,9 +2723,9 @@ Var_T *f_clearcv_1d( Var_T *v )
 
 			curve = get_long( v, "curve number" );
 
-			if ( curve < 1 || curve > G1.nc )
+			if ( curve < 1 || curve > G_1d.nc )
 			{
-				if ( Internals.mode == TEST )
+				if ( Fsc2_Internals.mode == TEST )
 					print( SEVERE, "Can't clear 1D curve %ld, curve "
 						   "does not exist.\n", curve );
 				continue;
@@ -2747,7 +2747,7 @@ Var_T *f_clearcv_1d( Var_T *v )
 
 	/* In a test run this already everything to be done */
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 	{
 		T_free( ca );
 		return vars_push( INT_VAR, 1L );
@@ -2756,7 +2756,7 @@ Var_T *f_clearcv_1d( Var_T *v )
 	/* Now starts the code only to be executed by the child, i.e. while the
 	   measurement is running. */
 
-	fsc2_assert( Internals.I_am == CHILD );
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
 
 	/* Now try to get a shared memory segment */
 
@@ -2821,7 +2821,7 @@ Var_T *f_clearcv_2d( Var_T *v )
 	int type = D_CLEAR_CURVE;
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -2853,7 +2853,7 @@ Var_T *f_clearcv_2d( Var_T *v )
 
 	if ( v == NULL )
 	{
-		if ( Internals.mode == TEST )
+		if ( Fsc2_Internals.mode == TEST )
 			return vars_push( INT_VAR, 1L );
 
 		ca = LONG_P T_malloc( sizeof *ca );
@@ -2871,9 +2871,9 @@ Var_T *f_clearcv_2d( Var_T *v )
 
 			curve = get_long( v, "curve number" );
 
-			if ( curve < 1 || curve > G2.nc )
+			if ( curve < 1 || curve > G_2d.nc )
 			{
-				if ( Internals.mode == TEST )
+				if ( Fsc2_Internals.mode == TEST )
 					print( SEVERE, "Can't clear 2D curve %ld, curve "
 						   "does not exist.\n", curve );
 				continue;
@@ -2895,7 +2895,7 @@ Var_T *f_clearcv_2d( Var_T *v )
 
 	/* In a test run this already everything to be done */
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 	{
 		T_free( ca );
 		return vars_push( INT_VAR, 1L );
@@ -2904,7 +2904,7 @@ Var_T *f_clearcv_2d( Var_T *v )
 	/* Now starts the code only to be executed by the child, i.e. while the
 	   measurement is running. */
 
-	fsc2_assert( Internals.I_am == CHILD );
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
 
 	/* Now try to get a shared memory segment */
 
@@ -2959,7 +2959,7 @@ Var_T *f_clearcv_2d( Var_T *v )
 
 Var_T *f_setmark( Var_T *v )
 {
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -3006,10 +3006,10 @@ Var_T *f_setmark_1d( Var_T *v )
 	int shm_id;
 	const char *colors[ ] = { "WHITE", "RED", "GREEN", "YELLOW",
 							  "BLUE", "BLACK", "DELETE" };
-	long num_colors = sizeof colors / sizeof *colors;
+	long num_colors = ( long ) NUM_ELEMS( colors );
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -3078,13 +3078,13 @@ Var_T *f_setmark_1d( Var_T *v )
 
 	/* In a test run this all there is to be done */
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 		return vars_push( INT_VAR, 1L );
 	
 	/* Now starts the code only to be executed by the child, i.e. while the
 	   measurement is running. */
 
-	fsc2_assert( Internals.I_am == CHILD );
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
 
 	/* Now try to get a shared memory segment */
 
@@ -3144,10 +3144,10 @@ Var_T *f_setmark_2d( Var_T *v )
 	int shm_id;
 	const char *colors[ ] = { "WHITE", "RED", "GREEN", "YELLOW",
 							  "BLUE", "BLACK", "DELETE" };
-	long num_colors = sizeof colors / sizeof *colors;
+	long num_colors = ( long ) NUM_ELEMS( colors );
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -3206,7 +3206,7 @@ Var_T *f_setmark_2d( Var_T *v )
 	{
 		curve = get_long( v, "curve number" ) - 1;
 
-		if ( curve < 0 || curve >= G2.nc )
+		if ( curve < 0 || curve >= G_2d.nc )
 		{
 			print( SEVERE, "Can't clear marker on 2D curve %ld, curve does "
 				   "not exist.\n", curve + 1 );
@@ -3242,13 +3242,13 @@ Var_T *f_setmark_2d( Var_T *v )
 
 	/* In a test run this all there is to be done */
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 		return vars_push( INT_VAR, 1L );
 	
 	/* Now starts the code only to be executed by the child, i.e. while the
 	   measurement is running. */
 
-	fsc2_assert( Internals.I_am == CHILD );
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
 
 	/* Now try to get a shared memory segment */
 
@@ -3304,7 +3304,7 @@ Var_T *f_setmark_2d( Var_T *v )
 
 Var_T *f_clearmark( Var_T *v )
 {
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -3349,7 +3349,7 @@ Var_T *f_clearmark_1d( Var_T *v )
 	int shm_id;
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -3383,13 +3383,13 @@ Var_T *f_clearmark_1d( Var_T *v )
 
 	/* In a test run this all there is to be done */
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 		return vars_push( INT_VAR, 1L );
 	
 	/* Now starts the code only to be executed by the child, i.e. while the
 	   measurement is running. */
 
-	fsc2_assert( Internals.I_am == CHILD );
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
 
 	/* Now try to get a shared memory segment */
 
@@ -3441,7 +3441,7 @@ Var_T *f_clearmark_2d( UNUSED_ARG Var_T *v )
 	long curves[ MAX_CURVES ] = { -1L, -1L, -1L, -1L };
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -3471,11 +3471,11 @@ Var_T *f_clearmark_2d( UNUSED_ARG Var_T *v )
 
 	/* Check for a list of curve numbers */
 
-	for ( i = 0; v != NULL && i < G2.nc; i++, v = vars_pop( v ) )
+	for ( i = 0; v != NULL && i < G_2d.nc; i++, v = vars_pop( v ) )
 	{
 		curves[ i ] = get_strict_long( v, "curve number" ) - 1;
 
-		if ( curves[ i ] < 0 || curves[ i ] >= G2.nc )
+		if ( curves[ i ] < 0 || curves[ i ] >= G_2d.nc )
 		{
 			print( FATAL, "There is no curve numbered %ld\n",
 				   curves[ i ] + 1 );
@@ -3487,13 +3487,13 @@ Var_T *f_clearmark_2d( UNUSED_ARG Var_T *v )
 
 	/* In a test run this all there is to be done */
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 		return vars_push( INT_VAR, 1L );
 	
 	/* Now starts the code only to be executed by the child, i.e. while the
 	   measurement is running. */
 
-	fsc2_assert( Internals.I_am == CHILD );
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
 
 	/* Now try to get a shared memory segment */
 
@@ -3546,7 +3546,7 @@ Var_T *f_get_pos( UNUSED_ARG Var_T *v )
 	double *result;
 
 
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
@@ -3571,13 +3571,13 @@ Var_T *f_get_pos( UNUSED_ARG Var_T *v )
 
 	/* In a test run this all there is to be done */
 
-	if ( Internals.mode == TEST )
+	if ( Fsc2_Internals.mode == TEST )
 		return nv;
 
 	/* Now starts the code only to be executed by the child, i.e. while the
 	   measurement is running. */
 
-	fsc2_assert( Internals.I_am == CHILD );
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
 
 	len = sizeof EDL.Lc;
 
@@ -3696,7 +3696,7 @@ Var_T *f_find_peak( Var_T *v )
 	if ( i == len )
 	{
 		T_free( arr );
-		if ( Internals.mode != TEST )
+		if ( Fsc2_Internals.mode != TEST )
 			return vars_push( FLOAT_VAR, -1.0 );
 		else
 			return vars_push( FLOAT_VAR, 0.5 * len + 1.0 + ARRAY_OFFSET );

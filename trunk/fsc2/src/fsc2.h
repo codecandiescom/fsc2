@@ -343,7 +343,7 @@ struct GUI_Stuff {
 
 /* Global variables */
 
-extern Internals_T FSC2_Internals;
+extern Internals_T Fsc2_Internals;
 extern EDL_Stuff_T EDL;
 extern Communication_T Comm;
 extern GUI_Stuff_T GUI;
