@@ -243,6 +243,7 @@ int s_band_exp_hook( void )
 	magnet.is_opened = SET;
 
 	/* When same EDL file is run again always use fast initialization mode */
+	/* Is this really a good idea ????*/
 
 	magnet.fast_init = SET;
 
