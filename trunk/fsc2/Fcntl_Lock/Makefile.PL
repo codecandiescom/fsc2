@@ -23,7 +23,7 @@ WriteMakefile(
     'PREREQ_PM'		=> {},
     ( $] >= 5.005 ?
       ( ABSTRACT_FROM => 'Fcntl_Lock.pm', # retrieve abstract from module
-        AUTHOR     => 'J. T. Toerring <Jens.Toerring@physik.fu-berlin.de>' ) :
+        AUTHOR     => 'Jens Thoms Toerring <Jens.Toerring@physik.fu-berlin.de>' ) :
 	  ( ) ),
     'LIBS'		=> [''],
     'DEFINE'	=> '',

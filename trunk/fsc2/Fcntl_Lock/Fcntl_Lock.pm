@@ -45,17 +45,15 @@ sub new {
 				 'l_len'    => 0,
 				 'l_pid'    => 0,
 			   };
-    bless $self, $pkg;
-
-	no strict 'refs';
 
 	while ( @_ ) {
+		no strict 'refs';
 		my $key = shift;
 		croak "Flock structure has no \'$key\' member" unless defined &$key;
 		&$key( $self, shift );
 	}
 
-	return $self;
+    bless $self, $pkg;
 }
 
 
