@@ -163,7 +163,7 @@ enum {
 
 
 #if defined ( FSC2_MAIN )
-const char *phase_types[ ] = { "X", "-X", "Y", "-Y" };
+const char *Phase_Types[ ] = { "X", "-X", "Y", "-Y" };
 #else
 extern const char *Phase_Types[ ];
 #endif

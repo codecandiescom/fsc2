@@ -759,7 +759,7 @@ void p_phs_setup( int func, int type, int pod, long val )
 {
 	assert ( Cur_PHS != - 1 ? ( Cur_PHS == func ) : 1 );
 	assert( func == 0 || func == 1 );      /* phase funcion correct ? */
-	assert( type >= PHASES_PLUS_X && type <= PHASES_MINUS_Y );
+	assert( type >= PHASE_PLUS_X && type <= PHASE_MINUS_Y );
 
 	Cur_PHS = func;
 
