@@ -3241,10 +3241,11 @@ be used as long as it is possible to use the DAQ board as the contolling
 clock of the experiment. At a well-defined time before or after (or
 exactly at) the start of the acquisition a trigger is output at the
 @code{GPCTR1_OUT} pin of the board. This mode can be used e.g.@: to
-start an acqisition and only afterwards trigger e.g.@: a laser. The
-length of the trigger being output is an compile time option and can
-be changed in the configuration file for the device, the default is
-@w{100 ns}.
+start an acqisition and only afterward trigger e.g.@: a laser, or the
+other way round, first trigger the laser and only after a well-defined
+time delay start the acquisition. The length of the trigger being output
+is an compile time option and can be changed in the configuration file
+for the device, the default is @w{100 ns}.
 
 According to the above discussion here's a list of all required and
 optional arguments to the function when used with the different trigger
