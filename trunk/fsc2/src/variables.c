@@ -1796,7 +1796,7 @@ static Var *vars_setup_new_array( Var *v, int dim )
 
 	a->dim = dim;
 	a->sizes = NULL;
-	a->sizes = T_malloc( dim * sizeof( unsigned int ) );
+	a->sizes = T_malloc( dim * sizeof *a->sizes );
 	a->len = 1;
 
 	a->flags &= ~NEW_VARIABLE;
@@ -1862,9 +1862,9 @@ static Var *vars_setup_new_array( Var *v, int dim )
 	/* Allocate memory */
 
 	if ( a->type == INT_CONT_ARR )
-		a->val.lpnt = ( long * ) T_calloc( a->len, sizeof( long ) );
+		a->val.lpnt = T_calloc( a->len, sizeof( long ) );
 	else
-		a->val.dpnt = ( double * ) T_calloc( a->len, sizeof( double ) );
+		a->val.dpnt = T_calloc( a->len, sizeof( double ) );
 
 	return vars_push( ARR_PTR, NULL, a );
 }
@@ -2365,7 +2365,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 
 		if ( d->type == INT_CONT_ARR )
 		{
-			d->val.lpnt = T_calloc( d->len,  sizeof( long ) );
+			d->val.lpnt = T_calloc( d->len, sizeof( long ) );
 			dest->val.lpnt = d->val.lpnt + dest->len * d->sizes[ d->dim - 1 ];
 		}
 		else
