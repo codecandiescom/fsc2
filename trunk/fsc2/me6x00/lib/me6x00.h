@@ -37,7 +37,7 @@ unsigned int me6x00_frequency_to_timer( double freq );
 int me6x00_board_type( int board, unsigned int *type );
 int me6x00_num_dacs( int board, unsigned int *num_dacs );
 int me6x00_serial_number( int board, unsigned int *serial_no );
-const me6x00_dev_info *me6x00_board_info( int board );
+int me6x00_board_info( int board, me6x00_dev_info **info );
 const char *me6x00_error_message( void );
 int me6x00_close( int board );
 int me6x00_voltage( int board, int dac, double volts );
@@ -60,6 +60,8 @@ int me6x00_wraparound( int board, int dac, int size, unsigned short *buf );
 #define ME6X00_TRIGGER_EXT_LOW   0x10
 #define ME6X00_TRIGGER_EXT_HIGH  0x30
 
+
+#define ME6X00_OK        0
 
 #define ME6X00_ERR_IBN  -1
 #define ME6X00_ERR_IFR  -2

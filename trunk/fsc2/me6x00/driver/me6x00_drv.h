@@ -433,8 +433,6 @@ typedef  struct {
 
 /* IOCTL's */
 
-#define ME6X00_IOCTL_MINNR  32
-#define ME6X00_IOCTL_MAXNR  43
 #define ME6X00_MAGIC 'r'
 #define ME6X00_SET_MODE           _IOW  ( ME6X00_MAGIC, 32, me6x00_mode_st   )
 #define ME6X00_START_STOP_CONV    _IOW  ( ME6X00_MAGIC, 33, me6x00_stasto_st )
@@ -448,6 +446,9 @@ typedef  struct {
 #define ME6X00_RESET_BOARD        _IO   ( ME6X00_MAGIC, 41                   )
 #define ME6X00_BOARD_INFO         _IOR  ( ME6X00_MAGIC, 42, me6x00_dev_info  )
 #define ME6X00_KEEP_VOLTAGE       _IOW  ( ME6X00_MAGIC, 43, me6x00_keep_st   )
+
+#define ME6X00_IOCTL_MINNR        _IOC_NR( ME6X00_SET_MODE )
+#define ME6X00_IOCTL_MAXNR        _IOC_NR( ME6X00_KEEP_VOLTAGE )
 
 
 /*

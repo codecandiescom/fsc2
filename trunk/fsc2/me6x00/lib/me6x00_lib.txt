@@ -1,0 +1,302 @@
+#
+# $Id$
+#
+
+
+ ME6X00 Library Manual
+ =====================
+
+
+The library expects device files for the board(s) to exist in the '/dev'
+subdirectory. The device file for the first board has to be '/dev/me6x00_0',
+for the second board '/dev/me6x00_1' etc. They are sorted according to the
+sequence the boards are found on the PCI bus.
+
+
+The maximum number of boards that can be used is controlled via
+'ME6X00_MAX_BOARDS', which is currently set to 4. This isn't defined by
+the library but by the kernel module - if you want to use more boards
+you must change the define in the header file for the kernel module
+'me6x00_drv.h' and recompile and re-install both the kernel module and
+the library.
+
+
+To use the library you will have to include the header file 'me6x00.h'.
+
+
+Not all of the functions you will find in the sources of the libary are
+already working. These are especially the functions that could be used
+with ME-6100 boards only. Since I don't have such a board I have no chance
+to test such functions. Most of these functuins are marked as 'INCOMPLETE'
+in the source and require additional code.
+
+The library currently supplies the following functions:
+
+    me6x00_board_type()
+	me6x00_num_dacs()
+	me6x00_serial_number()
+	me6x00_board_info()
+	me6x00_error_message()
+	me6x00_close()
+	me6x00_keep_voltage()
+	me6x00_voltage()
+	me6x00_reset()
+	me6x00_reset_all()
+	me6x00_single()
+
+
+All functions (except me6x00_error_message()) return an integer, indicating
+success or failure. On success, 'ME6X00_OK' (which is just 0) is returned.
+On failure a negative number, is returned, indicating the type of failure.
+The following values can be expected:
+
+    ME6X00_ERR_IBN    Invalid board number
+    ME6X00_ERR_IFR    Invalid frequency
+    ME6X00_ERR_BSY    Board is busy
+    ME6X00_ERR_NDF    No device file
+    ME6X00_ERR_ACS    No permission to open device file
+    ME6X00_ERR_NAP    Command can't be used with ME6X00 boards
+    ME6X00_ERR_DAC    Invalid DAC channel number
+    ME6X00_ERR_TDC    Invalid DAC channel for requested operation
+    ME6X00_ERR_TCK    Ticks too low (frequency too high)
+    ME6X00_ERR_TRG    Invalid trigger mode parameter
+    ME6X00_ERR_VLT    Invalid voltage
+    ME6X00_ERR_IBA    Invalid buffer address
+    ME6X00_ERR_IBS    Invalid buffer size
+    ME6X00_ERR_BNO    Board not open
+    ME6X00_ERR_ABS    Operation aborted due to signal
+    ME6X00_ERR_DFP    Unspecified error when opening device file
+    ME6X00_ERR_NDV    No driver loaded for board
+    ME6X00_ERR_INT    Internal library error
+
+All functions except (me6x00_close(), me6x00_frequency_to_timer() and
+me6x00_error_message())  may return at least one of the following error
+codes:
+
+    ME6X00_ERR_IBN    ME6X00_ERR_BSY    ME6X00_ERR_NDF
+    ME6X00_ERR_ACS    ME6X00_ERR_DFP    ME6X00_ERR_NDV
+    ME6X00_ERR_INT
+
+These error codes will not be mentioned explicitely in the description
+of the functions anymore.
+
+
+Nearly all functions require the number of the board as the first argument.
+This argument is an integer number between 0 and (ME6X00_MAX_BOARDS - 1)
+or the number of installed boards minus 1, whatever is smaller.
+
+
+A large number of the function also expect the number of a DAC on the
+board as the second argument. Depending on the type of the board this
+must be an ineteger between 0 and 4, 0 and 8 or 0 and 15. Instead of
+a number also a symbolic name of the foem ME6X00_DACxx can be given,
+where xx has to be replaced by the DAC number (always two digits, so
+use ME6X00_DAC01 etc.).
+
+
+There is no need to "open" a board before using it - the first call
+to one of the functions will automatically open the board and make it
+exclusively accessable by the process that opened the board this way.
+
+
+Processes that get started by a call to the exec-family of functions
+won't be able to access the board, i.e. the close-on-exec flag is
+set for the file handle used for accessing the board.
+
+
+======================================================================
+
+int me6x00_board_type( int board, unsigned int *type )
+
+This function returns an (unsigned) integer describing the type of the
+board. Possible board types are:
+
+ME6000 standard version:
+
+    PCI_DEVICE_ID_MEILHAUS_ME6004   (0x6004)     4 DACs
+    PCI_DEVICE_ID_MEILHAUS_ME6008   (0x6008)     8 DACs
+    PCI_DEVICE_ID_MEILHAUS_ME600F   (0x600F)    16 DACs
+
+ME6000 isolated version:
+
+   	PCI_DEVICE_ID_MEILHAUS_ME6014   (0x6014)     4 DACs
+   	PCI_DEVICE_ID_MEILHAUS_ME6018   (0x6018)     8 DACs
+   	PCI_DEVICE_ID_MEILHAUS_ME601F   (0x601F)    16 DACs
+
+ME6000 isle version:
+
+   	PCI_DEVICE_ID_MEILHAUS_ME6034   (0x6034)     4 DACs
+   	PCI_DEVICE_ID_MEILHAUS_ME6038   (0x6038)     8 DACs
+   	PCI_DEVICE_ID_MEILHAUS_ME603F   (0x603F)    16 DACs
+
+ME6100 standard version:
+
+   	PCI_DEVICE_ID_MEILHAUS_ME6104   (0x6104)     4 DACs
+   	PCI_DEVICE_ID_MEILHAUS_ME6108   (0x6108)     8 DACs
+   	PCI_DEVICE_ID_MEILHAUS_ME610F   (0x610F)    16 DACs
+
+ME6100 isolated version:
+
+   	PCI_DEVICE_ID_MEILHAUS_ME6114   (0x6114)     4 DACs
+   	PCI_DEVICE_ID_MEILHAUS_ME6118   (0x6118)     8 DACs
+   	PCI_DEVICE_ID_MEILHAUS_ME611F   (0x611F)    16 DACs
+
+ME6100 isle version:
+
+   	PCI_DEVICE_ID_MEILHAUS_ME6134   (0x6134)     4 DACs
+   	PCI_DEVICE_ID_MEILHAUS_ME6138   (0x6138)     8 DACs
+   	PCI_DEVICE_ID_MEILHAUS_ME613F   (0x613F)    16 DACs
+
+
+   int board             Board number
+   unsigned int *type    Pointer to variable for returning the board type
+
+
+======================================================================
+
+int me6x00_num_dacs( int board, unsigned int *num_dacs )
+
+Function returns an (unsigned) integer with the number of DACs on the board.
+Possible return values are either 4, 8 or 16.
+
+   int board               Board number
+   unsigned int *num_dacs  Pointer to variable for returning the number of DACs
+
+
+======================================================================
+
+int me6x00_serial_number( int board, unsigned int *serial_no )
+
+Function returns an (unsigned) integer with the serial number of the board.
+
+   int board                Board number
+   unsigned int *serial_no  Pointer to variable for returning the serial
+							number of DACs
+
+
+======================================================================
+
+int me6x00_board_info( int board, me6x00_dev_info **info )
+
+Function returns a pointer to a structure (of type me6x00_dev_info)
+with information about the addressed board. This structure is
+typedef'ed as
+
+    typedef struct {
+    	unsigned int vendor_ID;    /* always 1402 (for Meilhaus Electronic) */
+    	unsigned int device_ID;    /* board type                            */
+    	unsigned int serial_no;    /* serial number of board                */
+    	unsigned int hw_revision;  /* hard ware revicsion number of board   */
+    	int bus_no;                /* PCI bus number board is connected to  */
+    	int dev_no;                /* number of the board on this bus       */
+    	int func_no;               /* always 0 (board has only 1 function)  */
+    } me6x00_dev_info;
+
+In 'info' each time the function is called the same address gets returned
+and the memory it points to is overwritten with the data for the addressed
+board. Thus if you want to keep the information about a board you will
+have to copy the data to a new location.
+
+   int board                Board number
+   me6x00_dev_info **info   Pointer for returning the address with a structure
+							with informations about the board
+
+
+======================================================================
+
+const char *me6x00_error_message( void )
+
+Whenever a call to one of the other functions failed an error number is
+returned. To get a very short textual description about the error this
+function can be called, returning a string with the error description.
+If the previous call to one of the other functions did not return an
+error number but ME6X00_OK the function returns an empty string.
+
+
+======================================================================
+
+int me6x00_close( int board )
+
+The function can be used to close the boards device file and thus make
+the board accessible by other processes.
+
+   int board             Board number
+
+The function may return the follwoing error codes:
+
+    ME6X00_ERR_IBN    ME6X00_ERR_BNO
+
+
+======================================================================
+
+int me6x00_keep_voltage( int board, int dac, int state )
+
+Normally, when you are finished dealing with the DACs of a board, i.e.
+when either the program ends or the board is closed explicitely using
+me6x00_close(), the voltage at all the DACs of the board are set back
+to output 0 V. But sometimes it's necessary to keep the last set voltage
+even after the program finished. This can be achieved by using this
+function. Using the function you can determine which of the DACs of
+a board will keep their voltage and which will go back to 0 V.
+
+   int board             Board number
+   int dac               DAC number
+   int state             if non-zero the voltage of the DAC will kept
+                         after closing the board, otherwise it will be set
+                         to 0 V. Alternatively, teh symbolic names
+						 ME6X00_KEEP and ME6X00_DONT_KEEP can be used.
+
+
+======================================================================
+
+int me6x00_voltage( int board, int dac, double volts )
+
+With this function the outpur voltage of a DAC on the board can be set.
+The voltage must be between -10 V and +10 V. If this is a ME-6100 board
+and was outputting in continuous mode this will be stopped before setting
+the new voltage.
+
+   int board             Board number
+   int dac               DAC number
+   double voltage        Voltage to be set
+
+Beside the error codes mentioned above the function may return:
+
+    ME6X00_ERR_VLT
+
+
+======================================================================
+
+int me6x00_reset( int board, int dac )
+
+This function resets the voltage of a DAC of the board to 0 V. If the
+board is a ME-6100 it will also stop all continuous output going on.
+
+   int board             Board number
+   int dac               DAC number
+
+
+======================================================================
+
+int me6x00_reset_all( int board )
+
+This function resets the voltage of all DACs of the board to 0 V. If the
+board is a ME-6100 it will also stop all continuous output going on for
+the first 4 DACs of the board.
+
+   int board             Board number
+   int dac               DAC number
+
+
+======================================================================
+
+int me6x00_single( int board, int dac, unsigned short val )
+
+This function is basically the same as me6x00_voltage() but takes an
+integer between 0 and (hexadicimal) 0xFFFF as input instead of a
+volatge. For 0 a voltage of -10 V is output, while for 0xFFFF it's
++10 V
+
+   int board             Board number
+   int dac               DAC number
+   unsigned short val    Voltage to be output as a 16 bit value

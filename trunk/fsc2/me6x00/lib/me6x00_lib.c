@@ -66,6 +66,7 @@ static int check_dac( int board, int dac, int is_me6100_special );
 
 static const char *error_message = "";
 static ME6X00_Device_Info dev_info[ ME6X00_MAX_BOARDS ];
+static me6x00_dev_info ret_info;
 
 
 /*----------------------------------------------------------------*/
@@ -109,7 +110,7 @@ int me6x00_board_type( int board, unsigned int *type )
 		return ret;
 
 	*type = dev_info[ board ].info.device_ID;
-	return 0;
+	return ME6X00_OK;
 }
 
 
@@ -128,7 +129,7 @@ int me6x00_num_dacs( int board, unsigned int *num_dacs )
 		return ret;
 
 	*num_dacs = dev_info[ board ].num_dacs;
-	return 0;
+	return ME6X00_OK;
 }
 
 
@@ -148,21 +149,30 @@ int me6x00_serial_number( int board, unsigned int *serial_no )
 		return ret;
 
 	*serial_no = dev_info[ board ].info.serial_no;
-	return 0;
+	return ME6X00_OK;
 }
 		
 
 /*--------------------------------------------------------------------*/
 /*--------------------------------------------------------------------*/
 
-const me6x00_dev_info *me6x00_board_info( int board )
+int me6x00_board_info( int board, me6x00_dev_info **info )
 {
+	int ret;
+
+
 	error_message = "";
 
-	if ( check_board( board ) < 0 )
-		return NULL;
+	if ( ( ret = check_board( board ) ) < 0 )
+		return ret;
 
-	return &dev_info[ board ].info;
+	/* Pass back to the user a copy of the requested info so (s)he can't
+	   mess around with the original */
+
+	ret_info = dev_info[ board ].info;
+	*info = &ret_info;
+
+	return ME6X00_OK;
 }
 
 
@@ -202,7 +212,7 @@ int me6x00_close( int board )
 
 	dev_info[ board ].is_init = 0;
 
-	return 0;
+	return ME6X00_OK;
 }
 
 
@@ -246,7 +256,7 @@ int me6x00_keep_voltage( int board, int dac, int state )
 		return ME6X00_ERR_INT;
 	}
 
-	return 0;
+	return ME6X00_OK;
 }
 
 
@@ -304,7 +314,7 @@ int me6x00_continuous( int board, int dac, int size, unsigned short *buf )
 
 	/*******/
 
-	return 0;
+	return ME6X00_OK;
 }
 
 
@@ -339,7 +349,7 @@ int me6x00_continuous_ex( int board, int dac, int size, unsigned short *buf )
 
 	/*******/
 
-	return 0;
+	return ME6X00_OK;
 }
 
 
@@ -416,7 +426,7 @@ int me6x00_reset_all( int board )
 		return ME6X00_ERR_INT;
 	}
 
-	return 0;
+	return ME6X00_OK;
 }
 
 
@@ -454,7 +464,7 @@ int me6x00_set_timer( int board, int dac, unsigned int ticks )
 		return ME6X00_ERR_INT;
 	}
 
-	return 0;
+	return ME6X00_OK;
 }
 
 
@@ -485,7 +495,7 @@ int me6x00_set_trigger( int board, int dac, int mode )
 
 	/*******/
 
-	return 0;
+	return ME6X00_OK;
 }
 
 
@@ -542,7 +552,7 @@ int me6x00_single( int board, int dac, unsigned short val )
 		return ME6X00_ERR_INT;
 	}
 
-	return 0;
+	return ME6X00_OK;
 }
 
 
@@ -575,7 +585,7 @@ int me6x00_start( int board, int dac )
 		return ME6X00_ERR_INT;
 	}
 
-	return 0;
+	return ME6X00_OK;
 }
 
 
@@ -598,7 +608,7 @@ int me6x00_stop( int board, int dac )
 
 	/*******/
 
-	return 0;
+	return ME6X00_OK;
 }
 
 
@@ -621,7 +631,7 @@ int me6x00_stop_ex( int board, int dac )
 
 	/*******/
 
-	return 0;
+	return ME6X00_OK;
 }
 
 
@@ -656,7 +666,7 @@ int me6x00_wraparound( int board, int dac, int size, unsigned short *buf )
 
 	/*******/
 
-	return 0;
+	return ME6X00_OK;
 }
 
 
@@ -784,7 +794,7 @@ static int check_board( int board )
 		dev_info[ board ].is_init = 1;
 	}
 
-	return 0;
+	return ME6X00_OK;
 }
 
 
@@ -858,5 +868,5 @@ static int check_dac( int board, int dac, int is_me6100_specific )
 			return ME6X00_ERR_INT;
 	}
 
-	return 0;
+	return ME6X00_OK;
 }
