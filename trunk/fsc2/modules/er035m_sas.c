@@ -40,6 +40,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 /* exported functions and symbols */
 
 int er035m_sas_init_hook( void );
+int er035m_sas_test_hook( void );
 int er035m_sas_exp_hook( void );
 int er035m_sas_end_of_exp_hook( void );
 void er035m_sas_end_hook( void );
@@ -63,7 +64,7 @@ static void er035m_sas_comm_fail( void );
 
 
 
-static struct
+typedef struct
 {
 	bool is_needed;         /* is the gaussmter needed at all? */
 	int state;              /* current state of the gaussmeter */
@@ -72,8 +73,9 @@ static struct
 							   RES_LOW = 0.01 G or RES_HIGH = 0.001 G */
 	struct termios *tio;    /* serial port terminal interface structure */
 	char prompt;            /* prompt character send on each reply */
-} nmr;
+} NMR;
 
+static NMR nmr, nmr_stored;
 
 static const char *er035m_sas_eol = "\r\n";
 
@@ -139,14 +141,6 @@ enum {
 
 int er035m_sas_init_hook( void )
 {
-	if ( exists_device( "er035m_s" ) || exists_device( "er035m" ) ||
-		 exists_device( "er035m_sa" ) )
-	{
-		print( FATAL, "A driver for the ER035 gaussmeter is already "
-			   "loaded.\n" );
-		THROW( EXCEPTION );
-	}
-
 	/* Claim the serial port (throws exception on failure) */
 
 	fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
@@ -156,6 +150,15 @@ int er035m_sas_init_hook( void )
 	nmr.resolution = UNDEF_RES;
 	nmr.prompt = '\0';
 
+	return 1;
+}
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
+int er035m_sas_test_hook( void )
+{
+	memcpy( &nmr_stored, &nmr, sizeof( NMR ) );
 	return 1;
 }
 
@@ -172,6 +175,8 @@ int er035m_sas_exp_hook( void )
 	long retries;
 	int cur_res;
 
+
+	memcpy( &nmr, &nmr_stored, sizeof( NMR ) );
 
 	if ( ! nmr.is_needed )
 		return 1;
@@ -930,3 +935,4 @@ static void er035m_sas_comm_fail( void )
  * tags-file-name: "../TAGS"
  * End:
  */
+

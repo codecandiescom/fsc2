@@ -142,7 +142,7 @@ int er035m_init_hook( void )
 	if ( exists_device( "er035m_s" ) )
 	{
 		print( FATAL, "Driver for ER035M gaussmeter (serial port version) is "
-			   "already loaded - only one field controllibg gaussmeter can be "
+			   "already loaded - only one field controlling gaussmeter can be "
 			   "used.\n" );
 		THROW( EXCEPTION );
 	}

@@ -37,6 +37,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 
 int  pt2025_init_hook( void );
+int  pt2025_test_hook( void );
 int  pt2025_exp_hook( void );
 int  pt2025_end_of_exp_hook( void );
 
@@ -65,7 +66,7 @@ typedef struct
 	int resolution;
 } PT2025;
 
-static PT2025 pt2025;
+static PT2025 pt2025, pt2025_stored;
 
 
 
@@ -94,8 +95,20 @@ int pt2025_init_hook( void )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
+int pt2025_test_hook( void )
+{
+	memcpy( &pt2025_stored, &pt2025, sizeof( PT2025 ) );
+	return 1;
+}
+
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
 int pt2025_exp_hook( void )
 {
+	memcpy( &pt2025, &pt2025_stored, sizeof( PT2025 ) );
+
 	if ( ! pt2025_init( DEVICE_NAME ) )
 	{
 		print( FATAL, "Failed to initialize device.\n" );

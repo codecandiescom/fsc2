@@ -47,6 +47,7 @@ static int res_list[ 3 ] = { 0.1, 0.01, 0.001 };
 /* exported functions and symbols */
 
 int er035m_s_init_hook( void );
+int er035m_s_test_hook( void );
 int er035m_s_exp_hook( void );
 int er035m_s_end_of_exp_hook( void );
 void er035m_s_end_hook( void );
@@ -73,7 +74,7 @@ static void er035m_s_comm_fail( void );
 
 
 
-static struct
+typedef struct
 {
 	bool is_needed;         /* is the gaussmter needed at all? */
 	int state;              /* current state of the gaussmeter */
@@ -81,7 +82,9 @@ static struct
 	int resolution;         /* LOW = 0.01 G, HIGH = 0.001 G */
     struct termios *tio;    /* serial port terminal interface structure */
 	char prompt;            /* prompt character send on each reply */
-} nmr;
+} NMR;
+
+static NMR nmr, nmr_stored;
 
 static const char *er035m_s_eol = "\r\n";
 
@@ -146,25 +149,29 @@ int er035m_s_init_hook( void )
 
 	if ( exists_device( "bh15" ) )
 	{
-		print( FATAL, "Driver for Bruker BH15 field controller is already "
-			   "loaded - there can only be one gaussmeter.\n" );
+		print( FATAL, "Driver for BH15 field controller is already loaded - "
+			   "only one field control gaussmeter can be used.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( exists_device( "er035m" ) )
 	{
-		print( FATAL, "Driver for ER035 gaussmeter (connected to IEEE bus) is "
-			   "already loaded - there can only be one gaussmeter.\n" );
+		print( FATAL, "Driver for ER035M gaussmeter (IEEE version) is "
+			   "already loaded - only one field controlling gaussmeter can be "
+			   "used.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( exists_device( "er035m_sa" ) || exists_device( "er035m_sas" ) )
+	{
+		print( FATAL, "Driver for ER035M field controlling gaussmeter must "
+			   "be first gaussmeter in DEVICES list.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( ! exists_device( "aeg_s_band" ) && ! exists_device( "aeg_x_band" ) )
-	{	
 		print( WARN, "Driver for NMR gaussmeter is loaded but no appropriate "
 			   "magnet power supply driver.\n" );
-		nmr.is_needed = UNSET;
-		return 0;
-	}
 
 	/* Claim the serial port (throws exception on failure) */
 
@@ -182,6 +189,16 @@ int er035m_s_init_hook( void )
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 
+int er035m_s_test_hook( void )
+{
+	memcpy( &nmr_stored, &nmr, sizeof( NMR ) );
+	return 1;
+}
+
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
 int er035m_s_exp_hook( void )
 {
 	char buffer[ 21 ], *bp;
@@ -191,6 +208,8 @@ int er035m_s_exp_hook( void )
 	long retries;
 	int cur_res;
 
+
+	memcpy( &nmr, &nmr_stored, sizeof( NMR ) );
 
 	if ( ! nmr.is_needed )
 		return 1;
