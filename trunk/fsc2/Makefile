@@ -622,7 +622,7 @@ ifndef NO_MAIL
 endif
 
 
-# IF USE_FSC2_MTA has not been define also create a variable with the full
+# IF USE_FSC2_MTA has not been defined also create a variable with the full
 # name of the 'mail' program. Otherwise we need the libresolv.so library
 # for the built-in mail transport agent.
 
