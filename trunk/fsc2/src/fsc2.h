@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <math.h>
 #include <ctype.h>
+#include <limits.h>
 
 
 
@@ -45,9 +46,14 @@ int primary_experiment_parser( FILE *in );
 
 #if defined ( FSC2_MAIN )
 
+/* used in compiling the user supplied program */
+
 long Lc = 0;
 char *Fname = NULL;
 Compilation compilation;
+
+
+long Default_Time_Base = DEFAULT_TIME_BASE;
 
 Var *var_list = NULL;
 Var *Var_Stack = NULL;
@@ -67,6 +73,8 @@ Pulse *Cur_Pulse = NULL;
 extern long Lc;
 extern char *Fname;
 extern Compilation compilation;
+
+extern long Default_Time_Base;
 
 extern Var *var_list;
 extern Var *Var_Stack;

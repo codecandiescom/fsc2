@@ -31,6 +31,11 @@ typedef struct Pulse_ {
 Pulse *pulse_new( int num );
 Pulse *pulse_find( int num );
 void pulse_set_func( Pulse *p, long func );
+void pulse_set_start( Pulse *p, Var *v );
+void pulse_set_len( Pulse *p, Var *v );
+void pulse_set_dpos( Pulse *p, Var *v );
+void pulse_set_dlen( Pulse *p, Var *v );
+void pulse_set_maxlen( Pulse *p, Var *v );
 
 
 #endif  /* ! PULSE_HEADER */
