@@ -361,9 +361,9 @@ int rulbus_adc12_conversion_done( int handle )
 }
 
 
-/*----------------------------------------------------*
- * 
- *----------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Function for getting a converted voltage from the card.
+ *--------------------------------------------------------*/
 
 int rulbus_adc12_convert( int handle, double *volts )
 {
