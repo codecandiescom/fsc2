@@ -1534,12 +1534,34 @@ from @file{comm.c}. Since the communication between the processes is
 quite important I would like to spend some time on this topic.
 
 
-The first channel of communication is a set of pipes by which the
-processes can send each other messages and read back the replies. The
-way @code{fsc2} is written this always involves the process doing the
-experiment (called the "child" in the following) sending a request and
-the parent process answering. This is used whenever the child process
-can only continue after it has received the answer to its query.
+All communication between parent and child is controlled via a shared
+memory segment. It is a structure of type @code{MESSAGE_QUEUE}, declared
+in @file{comm.h}. This structure consists of an array of structures of
+type @code{SLOT} and two marker variables, @code{low} and @code{high}.
+When the child needs to send data to the parent (there's no sending of
+data from the parent to the child that isn't initialized by the child)
+it creates a new shared memory segment for the data and then puts the
+key of this shared memory segment into the slot indexed by the
+@code{high} marker (which it increments afterwards). To keep the child
+process from sending more messages than there are free slots in the
+array of @code{SLOT} structures there's also a semaphore that starts off
+with the number of slots available and that the child process has to
+wait for (thereby decrementing it) before using a new slot. The parent,
+on the other hand, will post the semaphore each time it removes a key
+from the slot indexed by the @code{low} marker (which increments at the
+same time). The parent recognizes that there are no more messages to
+remove from the array of slots when the @code{low} marker is equal to
+the @code{high} marker.
+
+
+Beside data the child also may need to send what's called "requests" in
+the following. These requests always require an answer by the parent.
+In this case instead of shared memory segments a simple set of pipes is
+used to send the data of the "request" from the child to the parent and
+also for the answer. In this case the type field of the @code{SLOT}
+structure is set by the child to indicate that this is a request,
+inducing the parent to listen on the pipe.
+
 
 
 That's how far I got yet, the sequel is coming soon, stay tuned ;-)
