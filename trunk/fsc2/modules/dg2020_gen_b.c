@@ -25,7 +25,7 @@
 #include "dg2020_b.h"
 
 
-static int Cur_PHS = -1;
+static int Cur_PHS = -1;                 /* used for internal sanity checks */
 
 
 /*------------------------------------------------------------------*/
@@ -176,7 +176,6 @@ bool dg2020_set_function_delay( int function, double delay )
 {
 	Ticks Delay = dg2020_double2ticks( delay );
 	int i;
-	FUNCTION *f;
 
 
 	if ( dg2020.function[ function ].is_delay )
@@ -541,7 +540,6 @@ bool dg2020_set_phase_reference( int phs, int function )
 
 
 	fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
-
 	Cur_PHS = phs;
 
 	/* Phase function can't be used with this driver... */
@@ -644,6 +642,7 @@ bool dg2020_phase_setup( int phs )
 
 
 	fsc2_assert( Cur_PHS != -1 && Cur_PHS == phs );
+	Cur_PHS = -1;
 
 	if ( dg2020_phs[ phs ].function == NULL )
 	{

@@ -26,7 +26,7 @@
 #include "dg2020_f.h"
 
 
-static int Cur_PHS = -1;
+static int Cur_PHS = -1;                 /* used for internal sanity checks */
 
 
 /*----------------------------------------------------*/
@@ -663,6 +663,7 @@ bool dg2020_phase_setup( int func )
 
 
 	fsc2_assert( Cur_PHS != -1 && Cur_PHS == func );
+	Cur_PHS = -1;
 
 	/* Check that for all phase types data are set */
 
@@ -705,8 +706,6 @@ bool dg2020_phase_setup( int func )
 	else
 		ret = dg2020_phase_setup_finalize( PULSER_CHANNEL_PHASE_2,
 											phs[ func ] );
-
-	Cur_PHS = -1;
 
 	return ret;
 }

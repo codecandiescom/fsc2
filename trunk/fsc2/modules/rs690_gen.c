@@ -24,7 +24,7 @@
 #include "rs690.h"
 
 
-static int Cur_PHS = -1;
+static int Cur_PHS = -1;                 /* used for internal sanity checks */
 
 
 /*------------------------------------------------------------------*/
@@ -402,7 +402,6 @@ bool rs690_set_phase_reference( int phs, int function )
 
 
 	fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
-
 	Cur_PHS = phs;
 
 	/* Phase function can't be used with this driver... */
@@ -463,9 +462,7 @@ bool rs690_phase_setup_prep( int phs, int type, int dummy, long channel )
 	fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
 	fsc2_assert ( phs == 0 || phs == 1 );
 
-
 	dummy = dummy;
-
 	Cur_PHS = phs;
 
 	/* Make sure the phase type is supported */
@@ -563,6 +560,7 @@ bool rs690_phase_setup( int phs )
 
 
 	fsc2_assert( Cur_PHS != -1 && Cur_PHS == phs );
+	Cur_PHS = -1;
 
 	if ( rs690_phs[ phs ].function == NULL )
 	{
