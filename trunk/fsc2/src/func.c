@@ -11,9 +11,10 @@
 
 
 static void f_wait_alarm_handler( int sig_type );
-static void formated_save( Var *v, int fid );
-static void unformated_save( Var *v, int fid );
-void print_array( Var *v, long cur_dim, long *start, int fid );
+static int get_save_file( Var **v, const char *calling_function );
+static void print_array( Var *v, long cur_dim, long *start, int fid );
+static void print_slice( Var *v, int fid );
+static void print_browser( int browser, int fid, const char* comment );
 
 
 static bool No_File_Number;
@@ -73,13 +74,17 @@ Var *f_log( Var *v  );
 Var *f_sqrt( Var *v  );
 Var *f_print( Var *v  );
 Var *f_wait( Var *v  );
-Var *f_init_display( Var *v );
+Var *f_init_1d( Var *v );
+Var *f_init_2d( Var *v );
 Var *f_display( Var *v );
 Var *f_dim( Var *v );
 Var *f_size( Var *v );
 Var *f_sizes( Var *v );
 Var *f_getf( Var *v );
 Var *f_save( Var *v );
+Var *f_fsave( Var *v );
+Var *f_save_p( Var *v );
+Var *f_save_o( Var *v );
 
 
 /* The following variables are shared with loader.c which adds further 
@@ -114,13 +119,17 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "sqrt",         f_sqrt,          1, ACCESS_ALL, 0 },
 	{ "print",        f_print,        -1, ACCESS_ALL, 0 },
 	{ "wait",         f_wait,          1, ACCESS_ALL, 0 },
-	{ "init_display", f_init_display, -1, ACCESS_ALL, 0 },
+	{ "init_1d",      f_init_1d,      -1, ACCESS_ALL, 0 },
+	{ "init_2d",      f_init_2d,      -1, ACCESS_ALL, 0 },
 	{ "display",      f_display,      -1, ACCESS_EXP, 0 },
 	{ "dim",          f_dim,           1, ACCESS_ALL, 0 },
 	{ "size",         f_size,          2, ACCESS_ALL, 0 },
 	{ "sizes",        f_sizes,         1, ACCESS_ALL, 0 },
 	{ "get_file",     f_getf,         -1, ACCESS_ALL, 0 },
 	{ "save",         f_save,         -1, ACCESS_ALL, 0 },
+	{ "fsave",        f_fsave,        -1, ACCESS_ALL, 0 },
+	{ "save_program", f_save_p,       -1, ACCESS_ALL, 0 },
+	{ "save_output",  f_save_o,       -1, ACCESS_ALL, 0 },
 	{ NULL,           NULL,            0, 0,          0 }
 	                                     /* marks last entry, don't remove ! */
 };
@@ -729,14 +738,14 @@ Var *f_print( Var *v )
 	   as there specifiers in the format string */
 
 	if ( on_stack < in_format )
-		eprint( SEVERE, "%s:%ld: Less data than format descriptors in print() "
-				"format string.\n", Fname, Lc );
+		eprint( SEVERE, "%s:%ld: Less data than format descriptors in "
+				"`print()' format string.\n", Fname, Lc );
 
 	/* utter a warning if there are more data than format descriptors */
 
 	if ( on_stack > in_format )
-		eprint( SEVERE, "%s:%ld: More data than format descriptors in print() "
-				"format string.\n", Fname, Lc );
+		eprint( SEVERE, "%s:%ld: More data than format descriptors in "
+				"`print()' format string.\n", Fname, Lc );
 
 	/* count number of `#' */
 
@@ -799,7 +808,7 @@ Var *f_print( Var *v )
 
 			default :
 				eprint( WARN, "%s:%ld: Unknown escape sequence \\%c in "
-						"print() format string.\n", Fname, Lc, *( cp + 1 ) );
+						"`print()' format string.\n", Fname, Lc, *( cp + 1 ) );
 				*cp = *( cp + 1 );
 				break;
 		}
@@ -836,8 +845,7 @@ Var *f_print( Var *v )
 						break;
 
 					default :
-						eprint( FATAL, "XXXXXX\n" );
-						THROW( EXCEPTION );
+						assert( 1 == 0 );
 				}
 
 			cv = cv->next;
@@ -895,10 +903,11 @@ Var *f_wait( Var *v )
 	sleepy.it_value.tv_usec =
 		( how_long - sleepy.it_value.tv_sec * 1000000000L ) / 1000;
 
+
 	signal( SIGALRM, f_wait_alarm_handler );
 	setitimer( ITIMER_REAL, &sleepy, NULL );
 
-	/* wake up only after sleeping time or if DO_QUIT signal was received */
+	/* wake up only after sleeping time or if DO_QUIT signal is received */
 
 	do
 	{
@@ -907,10 +916,10 @@ Var *f_wait( Var *v )
 	} while ( ! do_quit &&
 			  ( sleepy.it_value.tv_sec > 0 || sleepy.it_value.tv_usec > 0 ) );
 
-	/* Return 1 if end of sleping time was reached, 0 if do_quit was set */
-	/* Don't reset the alarm signal handler, because after receipt of a
+	/* Return 1 if end of sleping time was reached, 0 if do_quit was set.
+	   Do not reset the alarm signal handler, because after receipt of a
 	   'do_quit' signal the timer may still be running and send a signal
-	   that kills the child ! */
+	   that could kill the child prematurely ! */
 
 	return vars_push( INT_VAR, do_quit ? 0 : 1 );
 }
@@ -931,6 +940,72 @@ void f_wait_alarm_handler( int sig_type )
 }
 
 
+
+Var *f_init_1d( Var *v )
+{
+	long n = -1;
+	double rwc_start = 0.0, rwc_delta = 0.0;
+	char *label;
+
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing number of points in `init_1d()'.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR );  /* get # of points in x-direction */
+
+	if ( v->type == INT_VAR )
+		n = v->val.lval;
+	else
+	{
+		eprint( WARN, "%s:%ld: Floating point value used as number of "
+				"points.\n", Fname, Lc );
+		n = rnd( v->val.dval );
+	}
+
+	v = v->next;
+
+	/* If next value is an integer or a float this is the real world coordinate
+	   and its increment */
+
+	if ( v != NULL )
+	{
+
+		/* If next value is an integer or a float this is the real world
+		   coordinate foolowed by the increment */
+
+		if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+		{
+			if ( v->next == NULL || 
+				 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
+			{
+				eprint( FATAL, "%s:%ld: Real word coordinate given but no "
+						"increment.\n" );
+				THROW( EXCEPTION );
+			}
+
+			rwc_start = VALUE( v );
+			rwc_delta = VALUE( v->next );
+			v = v->next->next;
+		}
+
+		if ( v != NULL )
+		{
+			vars_check ( v, STR_VAR );
+			label = get_string_copy( v->val.sptr );
+		}
+		else
+			label = NULL;
+	}
+	
+	graphics_init( 1, n, 0, rwc_start, rwc_delta, 0.0, 0.0, label, NULL );
+	return vars_push( INT_VAR, 1 );
+}
+
+
 /*-------------------------------------------------------------------------*/
 /* f_init_display() has to be called to initialize the display system. It  */
 /* expects a variable number of arguments but at least two. The first arg- */
@@ -941,7 +1016,7 @@ void f_wait_alarm_handler( int sig_type )
 /* and y-axis.                                                             */
 /*-------------------------------------------------------------------------*/
 
-Var *f_init_display( Var *v )
+Var *f_init_2d( Var *v )
 {
 	long dim;
 	long nx, ny;
@@ -1040,7 +1115,7 @@ Var *f_init_display( Var *v )
 	else
 		l2 = NULL;
 
-	graphics_init( dim, nx, ny, l1, l2 );
+	graphics_init( dim, nx, ny, 0.0, 0.0, 0.0, 0.0, l1, l2 );
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -1383,7 +1458,7 @@ Var *f_getf( Var *var )
 	/* Second string is the is the file name pattern */
 
 	if ( s[ 1 ] == NULL || s[ 1 ] == "" )
-		s[ 1 ] = get_string_copy( "*.*" );
+		s[ 1 ] = get_string_copy( "*.dat" );
 	else
 		s[ 1 ] = get_string_copy( s[ 1 ] );
 
@@ -1419,7 +1494,7 @@ getfile_retry:
 
 	if ( ( r == NULL || *r == '\0' ) &&
 		 1 != show_choices( "Do you really want to cancel selecting\n"
-							"the file name ? Data might get lost!",
+							"the file name ? Data will not be saved!",
 							2, "Yes", "No", NULL, 2 ) )
 		 goto getfile_retry;
 
@@ -1477,6 +1552,82 @@ getfile_retry:
 }
 
 
+int get_save_file( Var **v, const char *calling_function )
+{
+	Var *get_file_ptr;
+	Var *file;
+	int file_num;
+	int access;
+
+
+	/* If no file has been selected yet get a file and use it exclusively
+	   (i.e. also expect that no file identifier is given in later calls),
+	   otherwise the first variable has to be the file identifier */
+
+	if ( File_List_Len == 0 )
+	{
+		No_File_Number = UNSET;
+
+		get_file_ptr = func_get( "get_file", &access );
+		file = func_call( get_file_ptr );         /* get the file name */
+
+		No_File_Number = SET;
+
+		if ( file->val.lval < 0 )
+		{
+			vars_pop( file );
+			return -1;
+		}
+		vars_pop( file );
+		file_num = 0;
+	}
+	else if ( ! No_File_Number )                 /* file numbers are given */
+	{
+		if ( *v != NULL )
+		{
+			if ( ( *v )->type != INT_VAR )
+			{
+				eprint( FATAL, "%s:%ld: First argument in `%s' isn't a "
+						"file identifier.\n", Fname, Lc, calling_function );
+				THROW( EXCEPTION );
+			}
+			file_num = ( int ) file->val.lval;
+		}
+		else
+		{
+			eprint( WARN, "%s:%ld: Call of `%s' without any arguments.\n",
+					Fname, Lc, calling_function );
+			return -1;
+		}
+		*v = ( *v )->next;
+	}
+	else
+		file_num = 0;
+
+	/* Check that the file identifier is reasonable */
+
+	if ( file_num < 0 )
+	{
+		eprint( WARN, "%s:%ld: File never has been opened, skipping "
+				"`%s' command.\n", Fname, Lc, calling_function );
+		return -1;
+	}
+
+	if ( file_num >= File_List_Len )
+	{
+		eprint( FATAL, "%s:%ld: Invalid file identifier in `%s'.\n",
+				Fname, Lc, calling_function );
+		THROW( EXCEPTION );
+	}
+
+	return file_num;
+}
+
+
+/*--------------------------------*/
+/* Closes all opened output files */
+/*--------------------------------*/
+
 void close_all_files( void )
 {
 	int i;
@@ -1495,68 +1646,26 @@ void close_all_files( void )
 }
 
 
+/*--------------------------------------------------------------------------*/
+/* Saves data to a file. If `get_file()' hasn't been called yet it will be  */
+/* called now - in this case the file opened this way is the only file to   */
+/* be used and no file identifier is allowed as first argument to `save()'. */
+/* This version of save writes the data in an unformated way, i.e. each     */
+/* on its own line wih the only exception of arrays of more than one        */
+/* dimension where a edmpty line is put between the slices.                 */
+/*--------------------------------------------------------------------------*/
+
 Var *f_save( Var *v )
 {
-	Var *get_file_ptr;
-	Var *file;
+	long i;
+	long start;
 	int file_num;
-	int access;
 
 
-	/* If no file has been selected yet get a file and use it exclusively
-	   (i.e. also expect in later calls that no file identifier is given),
-	   otherwise the first variable has to be the file identifier */
+	/* Determine the file identifier */
 
-	if ( File_List_Len == 0 )
-	{
-		No_File_Number = UNSET;
-
-		get_file_ptr = func_get( "get_file", &access );
-		assert( get_file_ptr != NULL );           /* again being paranoid... */
-		file = func_call( get_file_ptr );         /* get the file name */
-
-		No_File_Number = SET;
-
-		if ( file->val.lval < 0 )
-		{
-			vars_pop( file );
-			return vars_push( INT_VAR, 0 );
-		}
-		vars_pop( file );
-		file_num = 0;
-	}
-	else if ( ! No_File_Number )                 /* file numbers are given */
-	{
-		if ( v != NULL )
-		{
-			vars_check( v, INT_VAR );
-			file_num = file->val.lval;
-		}
-		else
-		{
-			eprint( WARN, "%s:%ld: Call of `save()' without any arguments.\n",
-					Fname, Lc );
-			return vars_push( INT_VAR, 0 );
-		}
-		v = v->next;
-	}
-	else
-		file_num = 0;
-
-	/* Check that the file identifier is reasonable */
-
-	if ( file_num < 0 )
-	{
-		eprint( WARN, "%s:%ld: File never has been opened, skipping "
-				"`save()' command.\n", Fname, Lc );
+	if ( ( file_num = get_save_file( &v, "save()" ) ) == -1 )
 		return vars_push( INT_VAR, 0 );
-	}
-
-	if ( file_num >= File_List_Len )
-	{
-		eprint( FATAL, "%s:%ld: Invalid file identifier.\n", Fname, Lc );
-		THROW( EXCEPTION );
-	}
 
 	if ( v == NULL )
 	{
@@ -1568,53 +1677,48 @@ Var *f_save( Var *v )
 	if ( TEST_RUN )
 		return vars_push( INT_VAR, 1 );
 
-	if ( v->type == STR_VAR )
-		formated_save( v, file_num );
-	else
-		unformated_save( v, file_num );
-
-	return vars_push( INT_VAR, 1 );
-}
-
-
-void formated_save( Var *v, int fid )
-{
-}
-
-void unformated_save( Var *v, int fid )
-{
-	long i;
-	long start;
-
 	do
 	{
 		switch( v->type )
 		{
 			case INT_VAR :
-				fprintf( File_List[ fid ], "%ld\n", v->val.lval );
+				fprintf( File_List[ file_num ], "%ld\n", v->val.lval );
 				break;
 
 			case FLOAT_VAR :
-				fprintf( File_List[ fid ], "%#g\n", v->val.dval );
+				fprintf( File_List[ file_num ], "%#g\n", v->val.dval );
 				break;
 
 			case STR_VAR :
-				fprintf( File_List[ fid ], "%s\n", v->val.sptr );
+				fprintf( File_List[ file_num ], "%s\n", v->val.sptr );
 				break;
 
 			case INT_TRANS_ARR :
 				for ( i = 0; i < v->len; i++ )
-					fprintf( File_List[ fid ], "%ld\n", v->val.lpnt[ i ] );
+					fprintf( File_List[ file_num ], "%ld\n",
+							 v->val.lpnt[ i ] );
 				break;
 				
 			case FLOAT_TRANS_ARR :
 				for ( i = 0; i < v->len; i++ )
-					fprintf( File_List[ fid ], "%#g\n", v->val.dpnt[ i ] );
+					fprintf( File_List[ file_num ], "%#g\n", 
+							 v->val.dpnt[ i ] );
+				break;
+
+			case ARR_PTR :
+				print_slice( v, file_num );
 				break;
 
 			case ARR_REF :
+				if ( v->from->flags && NEED_ALLOC )
+				{
+					eprint( WARN, "%s:%ld: Variable sized array `%s' is still "
+							"undefined - skipping `save()'.\n", 
+							Fname, Lc, v->from->name );
+					break;
+				}
 				start = 0;
-				print_array( v->from, 0, &start, fid );
+				print_array( v->from, 0, &start, file_num );
 				break;
 
 			default :
@@ -1624,7 +1728,9 @@ void unformated_save( Var *v, int fid )
 		v = v->next;
 	} while ( v );
 
-	fflush( File_List[ fid ] );
+	fflush( File_List[ file_num ] );
+
+	return vars_push( INT_VAR, 1 );
 }
 
 
@@ -1637,14 +1743,299 @@ void print_array( Var *v, long cur_dim, long *start, int fid )
 			print_array( v, cur_dim + 1, start, fid );
 	else
 	{
-		for ( i = 0; i < v->sizes[ cur_dim ]; i++ )
+		for ( i = 0; i < v->sizes[ cur_dim ]; (*start)++, i++ )
 		{
 			if ( v->type == INT_ARR )
 				fprintf( File_List[ fid ], "%ld\n", v->val.lpnt[ *start ] );
 			else
 				fprintf( File_List[ fid ], "%f\n", v->val.dpnt[ *start ] );
-			*start += 1;
 		}
+
 		fprintf( File_List[ fid ], "\n" );
 	}
+}
+
+
+void print_slice( Var *v, int fid )
+{
+	long i;
+
+	for ( i = 0; i < v->from->sizes[ v->from->dim - 1 ]; i++ )
+	{
+		if ( v->from->type == INT_ARR )
+			fprintf( File_List[ fid ], "%ld\n", 
+					 * ( ( long * ) v->val.gptr + i ) );
+		else
+			fprintf( File_List[ fid ], "%f\n", 
+					 * ( ( double * ) v->val.gptr + i ) );
+	}
+}
+
+
+/*--------------------------------------------------------------------------*/
+/* Saves data to a file. If `get_file()' hasn't been called yet it will be  */
+/* called now - in this case the file opened this way is the only file to   */
+/* be used and no file identifier is allowed as first argument to `save()'. */
+/* This function is the formated save with the same meaning of the format   */
+/* string as in `print()'.                                                  */
+/*--------------------------------------------------------------------------*/
+
+Var *f_fsave( Var *v )
+{
+	int file_num;
+	char *fmt;
+	char *cp;
+	char *ep;
+	Var *cv;
+	char *sptr;
+	int in_format,
+		on_stack,
+		s;
+
+
+	/* Determine the file identifier */
+
+	if ( ( file_num = get_save_file( &v, "fsave()" ) ) == -1 )
+		return vars_push( INT_VAR, 0 );
+
+	if ( v == NULL )
+	{
+		eprint( WARN, "%s:%ld: Call of `fsave()' without format sting and "
+				"data.\n", Fname, Lc );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( v->type != STR_VAR )
+	{
+		eprint( FATAL, "%s:%ld: Missing format string in call of `fsave()'\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	if ( TEST_RUN )
+		return vars_push( INT_VAR, 1 );
+
+	sptr = cp = v->val.sptr;
+
+	/* Count the number of specifiers `#' in the format string but don't count
+	   escaped `#' (i.e "\#") */
+
+	for ( in_format = 0, sptr; ( cp = strchr( cp, '#' ) ) != NULL;
+		  ++cp )
+		if ( cp == fmt || *( cp - 1 ) != '\\' )
+			in_format++;
+
+	/* Check and count number of variables on the stack following the format
+	   string */
+
+	for  ( cv = v->next, on_stack = 0; cv != NULL; ++on_stack, cv = cv->next )
+		vars_check( cv, INT_VAR | FLOAT_VAR | STR_VAR );
+
+	/* Check that there are at least as many variables are on the stack 
+	   as there specifiers in the format string */
+
+	if ( on_stack < in_format )
+		eprint( SEVERE, "%s:%ld: Less data than format descriptors in "
+				"`save()' format string.\n", Fname, Lc );
+
+	/* Warn if there are more data than format descriptors */
+
+	if ( on_stack > in_format )
+		eprint( SEVERE, "%s:%ld: More data than format descriptors in "
+				"`save()' format string.\n", Fname, Lc );
+
+	/* Count number of `#' */
+
+	for ( cp = sptr, s = 0; *cp != '\0' ; ++cp )
+		if ( *cp == '#' )
+			s++;
+
+	/* Get string long enough to replace each `#' by a 4-char sequence 
+	   plus a '\0' */
+
+	fmt = get_string( strlen( sptr ) + 4 * s + 2 );
+	strcpy( fmt, sptr );
+
+	for ( cp = fmt; *cp != '\0'; ++cp )
+	{
+		/* Skip normal characters */
+
+		if ( *cp != '\\' && *cp != '#' )
+			continue;
+
+		/* Convert format descriptor (unescaped `#') to 5 \x01 */
+
+		if ( *cp == '#' )
+		{
+			for ( ep = fmt + strlen( fmt ) + 1; ep != cp; --ep )
+				*( ep + 4 ) = *ep;
+			*cp++ = '\x01';
+			*cp++ = '\x01';
+			*cp++ = '\x01';
+			*cp++ = '\x01';
+			*cp = '\x01';
+			continue;
+		}
+
+		/* Replace escape sequences */
+
+		switch ( *( cp + 1 ) )
+		{
+			case '#' :
+				*cp = '#';
+				break;
+
+				break;
+
+			case 'n' :
+				*cp = '\n';
+				break;
+
+			case 't' :
+				*cp = '\t';
+				break;
+
+			case '\\' :
+				*cp = '\\';
+				break;
+
+			case '\"' :
+				*cp = '"';
+				break;
+
+			default :
+				eprint( WARN, "%s:%ld: Unknown escape sequence \\%c in "
+						"`save()' format string.\n", Fname, Lc, *( cp + 1 ) );
+				*cp = *( cp + 1 );
+				break;
+		}
+		
+		for ( ep = cp + 1; *ep != '\0'; ep++ )
+			*ep = *( ep + 1 );
+	}
+
+	/* Now lets start printing... */
+
+	cp = fmt;
+	cv = v->next;
+	while ( ( ep = strstr( cp, "\x01\x01\x01\x01\x01" ) ) != NULL )
+	{
+		if ( cv != NULL )      /* skip printing if there are not enough data */
+		{
+			switch ( cv->type )
+			{
+				case INT_VAR :
+					strcpy( ep, "%ld" );
+					fprintf( File_List[ file_num ], cp, cv->val.lval );
+					break;
+
+				case FLOAT_VAR :
+					strcpy( ep, "%#g" );
+					fprintf( File_List[ file_num ], cp, cv->val.dval );
+					break;
+
+				case STR_VAR :
+					strcpy( ep, "%s" );
+					fprintf( File_List[ file_num ], cp, cv->val.sptr );
+					break;
+
+				default :
+					assert( 1 == 0 );
+			}
+
+			cv = cv->next;
+		}
+
+		cp = ep + 5;
+	}
+
+	fprintf( File_List[ file_num ], cp );
+	fflush( File_List[ file_num ] );
+
+	/* Finally free the copy of the format string and return */
+
+	T_free( fmt );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*-------------------------------------------------------------------------*/
+/* Saves the EDL program to a file. If `get_file()' hasn't been called yet */
+/* it will be called now - in this case the file opened this way is the    */
+/* only file to be used and no file identifier is allowed as first argu-   */
+/* ment to `save()'.                                                       */
+/* Beside the file identifier the other (optional) parameter is a string   */
+/* that gets prepended to each line of the EDL program (i.e. a comment     */
+/* character).                                                             */
+/*-------------------------------------------------------------------------*/
+
+Var *f_save_p( Var *v )
+{
+	int file_num;
+
+
+	/* Determine the file identifier */
+
+	if ( ( file_num = get_save_file( &v, "save_program()" ) ) == -1 )
+		return vars_push( INT_VAR, 0 );
+
+	if ( v != NULL )
+		vars_check( v, STR_VAR );
+
+	if ( TEST_RUN )
+		return vars_push( INT_VAR, 1 );
+
+	print_browser( 0, file_num, v != NULL ? v->val.sptr : "" );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*--------------------------------------------------------------------------*/
+/* Saves the content of the output window to a file. If `get_file()' hasn't */
+/* been called yet it will be called now - in this case the file opened     */
+/* this way is the only file to be used and no file identifier is allowed   */
+/* as first argument to `save()'.                                           */
+/* Beside the file identifier the other (optional) parameter is a string    */
+/* that gets prepended to each line of the output (i.e. a comment char).    */
+/*--------------------------------------------------------------------------*/
+
+Var *f_save_o( Var *v )
+{
+	int file_num;
+
+
+	/* Determine the file identifier */
+
+	if ( ( file_num = get_save_file( &v, "save_output()" ) ) == -1 )
+		return vars_push( INT_VAR, 0 );
+
+	if ( v != NULL )
+		vars_check( v, STR_VAR );
+
+	if ( TEST_RUN )
+		return vars_push( INT_VAR, 1 );
+
+	print_browser( 1, file_num, v != NULL ? v->val.sptr : "" );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+void print_browser( int browser, int fid, const char* comment )
+{
+	char *line;
+
+
+	writer( browser ==  0 ? C_PROG : C_OUTPUT );
+	while ( 1 )
+	{
+		reader( &line );
+		if ( line != NULL )
+			fprintf( File_List[ fid ], "%s%s\n", comment, line );
+		else
+			break;
+	}
+	fflush( File_List[ fid ] );
 }

@@ -150,9 +150,9 @@ void xforms_init( int *argc, char *argv[] )
 
 	/* fdesign is unable to set the box type attributes for canvases... */
 
-	fl_set_object_boxtype( run_form->x_axis, FL_NO_BOX );
-	fl_set_object_boxtype( run_form->y_axis, FL_NO_BOX );
-	fl_set_object_boxtype( run_form->canvas, FL_FRAME_BOX );
+	fl_set_canvas_decoration( run_form->x_axis, FL_FRAME_BOX );
+	fl_set_canvas_decoration( run_form->y_axis, FL_FRAME_BOX );
+	fl_set_canvas_decoration( run_form->canvas, FL_NO_FRAME );
 
 	/* Set some properties of goodies */
 

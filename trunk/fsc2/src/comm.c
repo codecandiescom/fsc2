@@ -104,6 +104,7 @@
 /* locally used routines */
 
 static bool pipe_read( int fd, void *buf, size_t bytes_to_read );
+static void send_browser( FL_OBJECT *browser );
 
 static int Key_Area;
 
@@ -258,7 +259,7 @@ void new_data_callback( FL_OBJECT *a, long b )
 /* that contains at least information about the type of message. Many   */
 /* of the messages can only be read by the parent. These are:           */
 /* C_EPRINT, C_SHOW_MESSAGE, C_SHOW_ALERT, C_SHOW_CHOICES,              */
-/* C_SHOW_FSELECTOR and C_INIT_GRAPHICS                                 */
+/* C_SHOW_FSELECTOR, C_INIT_GRAPHICS, C_PROG and C_OUTPUT.              */
 /* These are the implemented requests.                                  */
 /* The remaining types are used for passing the replies to the request  */
 /* back to the child process. THese are also the ones where a return    */
@@ -269,6 +270,10 @@ void new_data_callback( FL_OBJECT *a, long b )
 /* strings the calling routine has to pass a pointer to a character     */
 /* pointer, in this pointer a pointer to the return string is stored    */
 /* and the string remains usuable until the next call of reader().      */
+/*                                                                      */
+/* On C_PROG and C_OUTPUT the parent sends the child all lines (as      */
+/* C_STR) from the main browser or the error browser, respectively,     */
+/* followed by a NULL string as end marker.                             */
 /*----------------------------------------------------------------------*/
 
 long reader( void *ret )
@@ -281,6 +286,7 @@ long reader( void *ret )
 	long nx, ny;
 	long retval;
 	static char *retstr = NULL;
+	double rwc_x_start, rwc_x_delta, rwc_y_start, rwc_y_delta;
 
 
 	/* Get the header - failure indicates that the child is dead */
@@ -449,11 +455,16 @@ long reader( void *ret )
 		case C_INIT_GRAPHICS :
 			assert( I_am == PARENT );       /* only to be read by the parent */
 
-			/* read the dimension and the numbers of points */
+			/* read the dimension, numbers of points and the real word
+			   coordinate stuff */
 
 			pipe_read( pd[ READ ], &dim, sizeof( long ) );
 			pipe_read( pd[ READ ], &nx, sizeof( long ) );
 			pipe_read( pd[ READ ], &ny, sizeof( long ) );
+			pipe_read( pd[ READ ], &rwc_x_start, sizeof( double ) );
+			pipe_read( pd[ READ ], &rwc_x_delta, sizeof( double ) );
+			pipe_read( pd[ READ ], &rwc_y_start, sizeof( double ) );
+			pipe_read( pd[ READ ], &rwc_y_delta, sizeof( double ) );
 
 			/* get length of both label strings from header and read them */
 
@@ -472,13 +483,22 @@ long reader( void *ret )
 
 			/* call the function with the parameters just read */
 
-			graphics_init( dim, nx, ny, str[ 0 ], str[ 1 ] );
+			graphics_init( dim, nx, ny, rwc_x_start, rwc_x_delta,
+						   rwc_y_start, rwc_y_delta, str[ 0 ], str[ 1 ] );
 
 			/* get rid of the label strings and return */
 
 			for ( i = 0; i < 2 ; i++ )
 				if ( str[ i ] != NULL )
 					T_free( str[ i ] );
+			retval = 0;
+			break;
+
+		case C_PROG : case C_OUTPUT :
+			assert( I_am == PARENT );       /* only to be read by the parent */
+
+			send_browser( header.type == C_PROG ?
+						  main_form->browser : main_form->error_browser );
 			retval = 0;
 			break;
 
@@ -600,6 +620,7 @@ bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 /*                    and y-label strings (char *)                         */
 /* C_SHOW_FSELECTOR : 4 strings (4 char *) with identical meaning as the   */
 /*                    parameter for fl_show_fselector()                    */
+/* C_PROG, C_OUTPUT : None at all                                          */
 /* C_STR            : string (char *)                                      */
 /* C_INT            : integer data (int)                                   */
 /* C_LONG,          : long integer data (long)                             */
@@ -622,6 +643,7 @@ void writer( int type, ... )
 	long nx, ny;
 	int i;
 	char ack;
+	double rwc_x_start, rwc_x_delta, rwc_y_start, rwc_y_delta;
 
 
 	/* The child process has to wait for the parent process to become ready to
@@ -752,12 +774,17 @@ void writer( int type, ... )
 					header.data.str_len[ i ] = strlen( str[ i ] );
 			}
 
-			/* Send header, dimension, numbers of points and label strings */
+			/* Send header, dimension, numbers of points, real world
+               coordinate stuff and the label strings */
 
 			write( pd[ WRITE ], &header, sizeof( CS ) );
 			write( pd[ WRITE ], &dim, sizeof( long ) );
 			write( pd[ WRITE ], &nx, sizeof( long ) );
 			write( pd[ WRITE ], &ny, sizeof( long ) );
+			write( pd[ WRITE ], &rwc_x_start, sizeof( double ) );
+			write( pd[ WRITE ], &rwc_x_delta, sizeof( double ) );
+			write( pd[ WRITE ], &rwc_y_start, sizeof( double ) );
+			write( pd[ WRITE ], &rwc_y_delta, sizeof( double ) );
 
 			for ( i = 0; i < 2; i++ )
 				if ( header.data.str_len[ i ] > 0 )
@@ -790,6 +817,11 @@ void writer( int type, ... )
 					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
 			}
 
+			break;
+
+		case C_PROG : case C_OUTPUT :
+			assert( I_am == CHILD );      /* only to be written by the child */
+			write( pd[ WRITE ], &header, sizeof( CS ) );
 			break;
 
 		case C_STR :
@@ -842,4 +874,17 @@ void writer( int type, ... )
 	}
 
 	va_end( ap );
+}
+
+
+void send_browser( FL_OBJECT *browser )
+{
+	const char *line;
+	int i = 0;
+
+
+	while ( ( line = fl_get_browser_line( browser, ++i ) ) != NULL )
+		writer( C_STR, line );
+
+	writer( C_STR, NULL );
 }

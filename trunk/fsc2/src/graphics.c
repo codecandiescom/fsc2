@@ -16,19 +16,38 @@ void redraw_canvas( Canvas *c );
 void repaint_canvas( Canvas *c );
 
 
-void graphics_init( long dim, long nx, long ny, char *x_label, char *y_label )
+void graphics_init( long dim, long nx, long ny,
+					double rwc_x_start, double rwc_x_delta,
+					double rwc_y_start, double rwc_y_delta,
+					char *x_label, char *y_label )
 {
 	/* The parent process does all the graphics stuff... */
 
 	if ( I_am == CHILD )
 	{
-		writer( C_INIT_GRAPHICS, dim, nx, ny, x_label, y_label );
+		writer( C_INIT_GRAPHICS, dim, nx, ny, rwc_x_start, rwc_x_delta,
+				rwc_y_start, rwc_y_delta, x_label, y_label );
 		return;
 	}
 
 	G.dim = dim;
+
 	G.nx = nx;
 	G.ny = ny;
+
+	G.rwc_x_start = rwc_x_start;
+	G.rwc_x_delta = rwc_x_delta;
+	if ( rwc_x_start == 0.0 && rwc_x_delta == 0.0 )
+		G.is_rwc_x = UNSET;
+	else
+		G.is_rwc_x = SET;
+
+	G.rwc_y_start = rwc_y_start;
+	G.rwc_y_delta = rwc_y_delta;
+	if ( rwc_y_start == 0.0 && rwc_y_delta == 0.0 )
+		G.is_rwc_y = UNSET;
+	else
+		G.is_rwc_y = SET;
 
 	if ( x_label != NULL )
 	{
@@ -55,7 +74,7 @@ void graphics_init( long dim, long nx, long ny, char *x_label, char *y_label )
 void start_graphics( void )
 {
 	fl_show_form( run_form->run, FL_PLACE_MOUSE | FL_FREE_SIZE, FL_FULLBORDER,
-				  "fsc: Run" );
+				  "fsc: Display" );
 
 	G.is_drawn = SET;
 	G.d = fl_get_display( );
@@ -66,6 +85,9 @@ void start_graphics( void )
 
 	redraw_canvas( &G.x_axis );
 	redraw_canvas( &G.y_axis );
+	redraw_canvas( &G.canvas );
+
+	fl_raise_form( run_form->run );
 }
 
 
@@ -99,7 +121,6 @@ void setup_canvas( Canvas *c, FL_OBJECT *obj )
 {
 	c->id = fl_get_canvas_id( obj );
 	c->obj = obj;
-	c->obj->u_vdata = ( void * ) c;
 
 	c->x = obj->x;
 	c->y = obj->y;
@@ -107,8 +128,9 @@ void setup_canvas( Canvas *c, FL_OBJECT *obj )
 	c->h = obj->h;
 	create_pixmap( c );
 
-	fl_add_canvas_handler( c->obj, Expose, canvas_handler, NULL );
-    fl_add_canvas_handler( c->obj, ConfigureNotify, canvas_handler, NULL );
+	fl_add_canvas_handler( c->obj, Expose, canvas_handler, ( void * ) c );
+    fl_add_canvas_handler( c->obj, ConfigureNotify, canvas_handler,
+						   ( void * ) c );
 }
 
 
@@ -132,7 +154,7 @@ void create_pixmap( Canvas *c )
 	if ( c->obj == run_form->canvas )
 	{
 		if ( G.is_init )
-			XSetForeground( G.d, c->gc, fl_get_pixel( FL_WHITE ) );
+			XSetForeground( G.d, c->gc, fl_get_pixel( FL_BLACK ) );
 		else
 			XSetForeground( G.d, c->gc, fl_get_pixel( FL_INACTIVE ) );
 	}
@@ -159,16 +181,17 @@ void delete_pixmap( Canvas *c )
 int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 					void *udata )
 {
-	Canvas *c = ( Canvas * ) obj->u_vdata;
+	Canvas *c = ( Canvas * ) udata;
 
+
+	obj = obj;
 	window = window;
 	udata = udata;
 
 	switch ( ev->type )
     {
         case Expose :
-            if ( ev->xexpose.count == 0 )     /* only react to last in queue */
-                repaint_canvas( c );
+			repaint_canvas( c );
             break;
 
 		case ConfigureNotify :                /* window was reconfigure  */
@@ -176,7 +199,6 @@ int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 				break;
             reconfigure_window( c, w, h );
             break;
-
 	}
 
 	return 1;
@@ -193,10 +215,13 @@ void reconfigure_window( Canvas *c, int w, int h )
 	c->w = ( unsigned int ) w;
 	c->h = ( unsigned int ) h;
 
-	delete_pixmap( c );
-	create_pixmap( c );
+	if ( c->w > 0 && c->h > 0 )
+	{
+		delete_pixmap( c );
+		create_pixmap( c );
 
-	redraw_canvas( c );
+		redraw_canvas( c );
+	}
 }
 
 
@@ -218,4 +243,11 @@ void redraw_canvas( Canvas *c )
 void repaint_canvas( Canvas *c )
 {
 	XCopyArea( G.d, c->pm, c->id, c->gc, 0, 0, c->w, c->h, 0, 0 );
+}
+
+
+void fs_button_callback( FL_OBJECT *a, long b )
+{
+	a = a;
+	b = b;
 }

@@ -131,8 +131,9 @@ typedef VarretFnct *FnctPtr;
   to INT_ARR or FLOAT_ARR (depending on the result of the macro IF_FUNC(), see
   above). Finally, it pushes a transient variable onto the stack of type
   ARR_PTR with the `from' element in the variable structure pointing to the
-  original array. This transient variable serves as a kind of marker since
-  next the parser is going to read all indices and push them onto the stack.
+  original array. This transient variable serves as a kind of marker since the
+  next thing the parser is going to do is to read all indices and push them
+  onto the stack.
 
   The next tokens have to be numbers - either simple numbers or computed
   numbers (i.e. results of function calls or elements of arrays). These are
