@@ -772,7 +772,7 @@ static PULSE *ep385_delete_pulse( PULSE *p )
 
 	if ( p->tp )
 	{
-		if ( p->sp->function->self == PULSER_CHANNEL_TWT )
+		if ( p->tp->function->self == PULSER_CHANNEL_TWT )
 			ep385_delete_pulse( p->tp );
 		else
 			p->tp->tp = NULL;
