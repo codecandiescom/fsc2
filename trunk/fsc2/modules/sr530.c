@@ -131,7 +131,7 @@ int sr530_end_of_exp_hook( void )
 
 	if ( sr530.device >= 0 )
 	{
-		gpib_write( sr530.device, "I0\n", 3 );
+		gpib_write( sr530.device, "I0", 2 );
 		gpib_local( sr530.device );
 	}
 
@@ -509,13 +509,13 @@ bool lockin_init( const char *name )
 
 	/* Ask lock-in to send status byte and test if it does */
 
-	if ( gpib_write( sr530.device, "Y\n", 2 ) == FAILURE ||
+	if ( gpib_write( sr530.device, "Y", 1 ) == FAILURE ||
 		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
 		return FAIL;
 
 	/* Lock the keyboard */
 
-	if ( gpib_write( sr530.device, "I1\n", 3 ) == FAILURE )
+	if ( gpib_write( sr530.device, "I1", 2 ) == FAILURE )
 		return FAIL;
 
 	/* If sensitivity, time constant or phase were set in one of the
@@ -543,7 +543,7 @@ double sr530_get_data( void )
 	long length = 20;
 
 
-	if ( gpib_write( sr530.device, "Q1\n", 3 ) == FAILURE ||
+	if ( gpib_write( sr530.device, "Q1", 2 ) == FAILURE ||
 		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
@@ -564,13 +564,13 @@ double sr530_get_data( void )
 
 double sr530_get_adc_data( long channel )
 {
-	char buffer[ 16 ] = "X*\n";
+	char buffer[ 16 ] = "X*";
 	long length = 16;
 
 
 	buffer[ 1 ] = ( char ) channel + '0';
 
-	if ( gpib_write( sr530.device, buffer, 3 ) == FAILURE ||
+	if ( gpib_write( sr530.device, buffer, 2 ) == FAILURE ||
 		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
@@ -595,7 +595,7 @@ double sr530_get_sens( void )
 
 	/* Ask lock-in for the sensitivity setting */
 
-	if ( gpib_write( sr530.device, "G\n", 2 ) == FAILURE ||
+	if ( gpib_write( sr530.device, "G", 1 ) == FAILURE ||
 		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
@@ -610,7 +610,7 @@ double sr530_get_sens( void )
 	   by a factor of 10 */
 
 	length = 10;
-	if ( gpib_write( sr530.device, "E1\n", 3 ) == FAILURE ||
+	if ( gpib_write( sr530.device, "E1", 2 ) == FAILURE ||
 		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
@@ -649,7 +649,7 @@ void sr530_set_sens( int Sens )
 
 	if ( Sens <= 3 )
 	{
-		if ( gpib_write( sr530.device, "E1,1\n", 5 ) == FAILURE )
+		if ( gpib_write( sr530.device, "E1,1", 4 ) == FAILURE )
 		{
 			eprint( FATAL, "%s: Can't access the lock-in amplifier.",
 					DEVICE_NAME );
@@ -659,7 +659,7 @@ void sr530_set_sens( int Sens )
 	}
 	else
 	{
-		if ( gpib_write( sr530.device, "E1,0\n", 5 ) == FAILURE )
+		if ( gpib_write( sr530.device, "E1,0", 4 ) == FAILURE )
 		{
 			eprint( FATAL, "%s: Can't access the lock-in amplifier.",
 					DEVICE_NAME );
@@ -669,7 +669,7 @@ void sr530_set_sens( int Sens )
 
 	/* Now set the sensitivity */
 
-	sprintf( buffer, "G%d\n", Sens );
+	sprintf( buffer, "G%d", Sens );
 
 	if ( gpib_write( sr530.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
@@ -692,7 +692,7 @@ double sr530_get_tc( void )
 	long length = 10;
 
 
-	if ( gpib_write( sr530.device, "T1\n", 3 ) == FAILURE ||
+	if ( gpib_write( sr530.device, "T1", 2 ) == FAILURE ||
 		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
@@ -717,7 +717,7 @@ void sr530_set_tc( int TC )
 	char buffer[10];
 
 
-	sprintf( buffer, "T1,%d\n", TC );
+	sprintf( buffer, "T1,%d", TC );
 	if ( gpib_write( sr530.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
@@ -730,7 +730,7 @@ void sr530_set_tc( int TC )
 
 	/* Recheck this in the manual !!!!!!!!!! */
 
-	if ( TC <= 4 && gpib_write( sr530.device, "T2,0\n", 5 ) == FAILURE )
+	if ( TC <= 4 && gpib_write( sr530.device, "T2,0", 4 ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
 				DEVICE_NAME );
@@ -738,14 +738,14 @@ void sr530_set_tc( int TC )
 	}
 
 	if ( TC > 4 && TC <= 6 &&
-		 gpib_write( sr530.device, "T2,1\n", 5 ) == FAILURE )
+		 gpib_write( sr530.device, "T2,1", 4 ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
-	if ( TC > 6 && gpib_write( sr530.device, "T2,2\n", 5 ) == FAILURE )
+	if ( TC > 6 && gpib_write( sr530.device, "T2,2", 4 ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
 				DEVICE_NAME );
@@ -766,7 +766,7 @@ double sr530_get_phase( void )
 	double phase;
 
 
-	if ( gpib_write( sr530.device, "P\n", 2L ) == FAILURE ||
+	if ( gpib_write( sr530.device, "P", 1 ) == FAILURE ||
 		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
@@ -796,7 +796,7 @@ double sr530_set_phase( double phase )
 	char buffer[20];
 
 
-	sprintf( buffer, "P%.2f\n", phase );
+	sprintf( buffer, "P%.2f", phase );
 	if ( gpib_write( sr530.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
