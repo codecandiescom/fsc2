@@ -181,8 +181,8 @@ double hp8647a_get_attenuation( void )
 
 bool hp8647a_set_mod_state( int type, bool state )
 {
-	const char *types[ ] = { "FM", "AM", "PM" };
 	char cmd[ 100 ];
+	const char *types[ ] = { "FM", "AM", "PM" };
 	int i;
 
 
@@ -235,7 +235,7 @@ int hp8647a_get_mod_state( void )
 			return i;
 	}
 
-	return -1;
+	return UNDEFINED;
 }
 
 

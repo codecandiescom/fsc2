@@ -91,8 +91,11 @@ typedef struct
 	double real_attenuation;        // might differ from attenuation due to use
 									// of table
 	int mod_type;
+	bool mod_type_is_set;
 	int mod_source[ NUM_MOD_TYPES ];
+	bool mod_source_is_set[ NUM_MOD_TYPES ];
 	int mod_ampl[ NUM_MOD_TYPES ];
+	bool mod_ampl_is_set[ NUM_MOD_TYPES ];
 
 } HP8647A;
 
@@ -101,10 +104,14 @@ typedef struct
 #if defined( HP8647A_MAIN )
 
 HP8647A hp8647a;
+const char *mod_types[ ] =   { "FM", "AM", "PHASE" };
+const char *mod_sources[ ] = { "EXT AC", "EXT DC", "INT 1kHz", "INT 400 Hz" };
 
 #else
 
 extern HP8647A hp8647a;
+extern const char **mod_types;
+extern const char **mod_sources;
 
 #endif
 

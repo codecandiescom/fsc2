@@ -22,6 +22,9 @@ static HP8647A hp8647a_backup;
 
 int hp8647a_init_hook( void )
 {
+	int i;
+
+
 	/* Set global variable to indicate that GPIB bus is needed */
 
 	need_GPIB = SET;
@@ -42,6 +45,14 @@ int hp8647a_init_hook( void )
 	hp8647a.real_attenuation = MAX_ATTEN - 100.0;  // invalid value !
 
 	hp8647a.att_ref_freq = DEF_ATT_REF_FREQ;
+
+	hp8647a.mod_type = UNDEFINED;
+	hp8647a.mod_type_is_set = UNSET;
+	for ( i = 0; i < NUM_MOD_TYPES; i++ )
+	{
+		hp8647a.mod_source_is_set[ i ] = UNSET;
+		hp8647a.mod_ampl_is_set[ i ] = UNSET;
+	}
 
 	return 1;
 }
@@ -786,8 +797,50 @@ Var *synthesizer_mod_ampl( Var *v )
 
 Var *synthesizer_mod_type( Var *v )
 {
-	vars_pop( v );
-	return vars_push( STR_VAR, "AM" );
+	int res;
+
+
+	if ( v == 0 )
+	{
+		if ( ! hp8647a.mod_type_is_set && I_am == PARENT && ! TEST_RUN )
+		{
+			eprint( FATAL, "%s:%ld: %s: Modulation type hasn't been set and "
+					"can't determined before the experiment is started.\n",
+					Fname, Lc, DEVICE_NAME );
+			THROW( EXCEPTION );
+		}
+
+		if ( I_am == PARENT )
+		{
+			if ( ! hp8647a.mod_type_is_set )
+				return vars_push( STR_VAR, "FM" );
+			else return vars_push( STR_VAR, mod_types[ hp8647a.mod_type ] );
+		}
+
+		if ( ( res = hp8647a_get_mod_state( ) ) != UNDEFINED )
+			return vars_push( STR_VAR, mod_types[ res ] );
+		else
+			return vars_push( STR_VAR, "NONE" );
+	}
+
+	vars_check( v, STR_VAR );
+	if ( ( res = is_in( v->val.sptr, mod_types, 3 ) ) == UNDEFINED )
+	{
+		eprint( FATAL, "%s:%ld: %s: Invalid modulation type `%s'.\n",
+				Fname, Lc, DEVICE_NAME, v->val.sptr );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
+				"`synthesizer_mod_type'.\n", Fname, Lc, DEVICE_NAME );
+
+	hp8647a_set_mod_state( res, SET );
+
+	hp8647a.mod_type = res;
+	hp8647a.mod_type_is_set = SET;
+
+	return vars_push( STR_VAR, mod_types[ res ] );
 }
 
 
