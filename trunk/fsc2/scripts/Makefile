@@ -1,21 +1,16 @@
 # $Id$
 
-all:
-	$(MAKE) install-$(shell hostname -f)
+# list of all scripts for the current machine (i.e. all scripts with name
+# extension equal to the machines FQDN)
+
+scripts = $(wildcard *.$(shell hostname -f))
 
 
-install-pion.anorg.chemie.uni-frankfurt.de: ;
+# install the these scripts in the bindir (but without the FQDN extension)
 
-install-moebi.physik.fu-berlin.de:
-	$(RM) $(RMFLAGS) $(bindir)/cw_epr
-	install -m 755 -o fsc2 -g fsc2 cw_epr.moebi.physik.fu-berlin.de \
-			$(bindir)/cw_epr
-
-
-install-crowley.physik.fu-berlin.de:
-	$(RM) $(RMFLAGS) $(bindir)/cw_endor
-	install -m 755 -o fsc2 -g fsc2 cw_endor.crowley.physik.fu-berlin.de \
-			$(bindir)/cw_endor
-
-
-install-crowley.none: ;
+install: $(scripts)
+	for file in $(scripts); \
+	do \
+		install -m 755 -o fsc2 -g fsc2 \
+			$$file $(bindir)/$${file%.$(shell hostname -f)}; \
+	done
