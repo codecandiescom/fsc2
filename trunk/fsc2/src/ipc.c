@@ -24,6 +24,7 @@
 #include "fsc2.h"
 #include <sys/ipc.h>
 #include <sys/sem.h>
+#include <sys/shm.h>
 
 
 #if defined ( _SEM_SEMUN_UNDEFINED ) && ( _SEM_SEMUN_UNDEFINED == 1 )

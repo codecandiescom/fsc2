@@ -26,8 +26,6 @@
 #define IPC_HEADER
 
 #include "fsc2.h"
-#include <sys/ipc.h>
-#include <sys/shm.h>
 
 
 #if ! defined ( SEM_R )
