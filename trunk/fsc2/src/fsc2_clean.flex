@@ -199,7 +199,7 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 
 			/* end of comment and end of line */
 {EREM2}     {
-				/* on end of comment in #include-statement don't dunp '\n' */
+				/* on end of comment in #include-statement don't dump '\n' */
 
 				if ( yy_top_state( ) == incl )
 				   unput( '\n' );
