@@ -68,6 +68,7 @@ FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 CHT         ((CH1)|(CH2)|(CH3)|(CH4)|(AUX)|(MATH1)|(MATH2)|(MATH3)|(REF1)|(REF2)|(REF3)|(REF4)|(LIN))
 
 IDENT       [A-Za-z]+[A-Za-z0-9_]*
+FUNC        {IDENT}"#"[0-9]+
 
 P           P(ULSE)?_?{INT}
 
@@ -206,6 +207,35 @@ WS          [\n \t]+
 			}
 
 			/* Handling of function, variable and array identifiers */
+{FUNC}      {
+				int acc;
+
+                if ( ! strcmp( strchr( varstext, '#' ), "#1" ) )
+                    *strchr( varstext, '#' ) = '\0';
+
+				varslval.vptr = func_get( varstext, &acc );
+				if ( varslval.vptr != NULL )
+				{
+					/* If it's a function check that the function can be used
+					   in the current context */
+
+					if ( acc == ACCESS_EXP )
+					{
+						eprint( FATAL, "%s:%ld: Function `%s' can only be "
+								"used in the EXPERIMENT section.\n",
+								 Fname, Lc, varstext );
+						THROW( EXCEPTION );
+					}
+					return FUNC_TOKEN;
+				}
+                else
+                {
+                    eprint( FATAL, "%s:%ld: Function `%s' is not loaded.\n",
+							Fname, Lc, varstext );
+					THROW( EXCEPTION );
+                }
+            }
+
 {IDENT}     {
 				int acc;
 
@@ -340,6 +370,9 @@ int variables_parser( FILE *in )
 	return Vars_Next_Section;
 }
 
+
+/*-------------------------------------------*/
+/*-------------------------------------------*/
 
 static Var *vars_get_channel_name( void )
 {

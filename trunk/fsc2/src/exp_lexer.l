@@ -36,7 +36,7 @@ static Var *exp_get_channel_name( void );
 extern Token_Val exp_val;
 
 
-/* locally used global variables */
+/* Locally used global variables */
 
 int Exp_Next_Section;
 
@@ -87,20 +87,20 @@ FUNC        {IDENT}"#"[0-9]+
 		/*---------------*/
 
 
-			/* handling of file name lines */
+			/* Handling of file name lines */
 {FILE}      {
 				*( exptext + expleng - 1 ) = '\0';
 				T_free( Fname );
 				Fname = T_strdup( exptext + 2 );
 			}
 
-			/* handling of line number lines */
+			/* Handling of line number lines */
 {LNUM}		{
 				*( exptext + expleng - 1 ) = '\0';
 				Lc = atol( exptext + 2 );
 			}
 
-			/* handling of error messages from the cleaner */
+			/* Handling of error messages from the cleaner */
 {ERR}		{
 				eprint( FATAL, "%s\n", exptext + 2 );
 				THROW( EXCEPTION );
@@ -112,37 +112,37 @@ FUNC        {IDENT}"#"[0-9]+
 				THROW( EXCEPTION );
 			}
 
-			/* handling of DEVICES: labels */
+			/* Handling of DEVICES: labels */
 {DEV}		{
 				Exp_Next_Section = DEVICES_SECTION;
 				return 0;
 			}
 
-			/* handling of ASSIGNMENTS: labels */
+			/* Handling of ASSIGNMENTS: labels */
 {ASS}		{
 				Exp_Next_Section = ASSIGNMENTS_SECTION;
 				return 0;
 			}
 
-			/* handling of VARIABLES: labels */
+			/* Handling of VARIABLES: labels */
 {VAR}		{
 				Exp_Next_Section = VARIABLES_SECTION;
 				return 0;
 			}
 
-			/* handling of PHASES: labels */
+			/* Handling of PHASES: labels */
 {PHAS}		{
 				Exp_Next_Section = PHASES_SECTION;
 				return 0;
 			}
 
-			/* handling of PREPARATIONS: labels */
+			/* Handling of PREPARATIONS: labels */
 {PREP}		{
 				Exp_Next_Section = PREPARATIONS_SECTION;
 				return 0;
 			}
 
-			/* handling of EXPERIMENT: labels */
+			/* Handling of EXPERIMENT: labels */
 {EXP}		{
 				Exp_Next_Section = EXPERIMENT_SECTION;
 				return 0;
@@ -183,7 +183,7 @@ FUNC        {IDENT}"#"[0-9]+
 				return E_INT_TOKEN;
 			}
 
-			/* combinations of pulse and property, e.g. `P3.LEN' */
+			/* Combinations of pulse and property, e.g. `P3.LEN' */
 
 {P}"."{F}   {
 				exp_val.vptr = p_get( exptext, P_FUNC );
@@ -300,10 +300,10 @@ FUNC        {IDENT}"#"[0-9]+
 "^="        return E_EXPA;
 
 
-			/* handling of end of statement character */
+			/* Handling of end of statement character */
 ";"			return ';';
 
-{WS}        /* skip white space */
+{WS}        /* Skip white space */
 
 "\x4ntesla" return E_NT_TOKEN;
 "\x4utesla" return E_UT_TOKEN;
@@ -318,7 +318,7 @@ FUNC        {IDENT}"#"[0-9]+
 "\x4kunit"  return E_KU_TOKEN;
 "\x4megunit" return E_MEG_TOKEN;
 
-			/* handling of invalid input */
+			/* Handling of invalid input */
 .           {
 				eprint( FATAL, "%s:%ld: Invalid input in EXPERIMENT section: "
 						"`%s'.\n", Fname, Lc, exptext );
@@ -335,6 +335,9 @@ FUNC        {IDENT}"#"[0-9]+
 %%		/*     End of Rules     */
 		/*----------------------*/
 
+
+/*-------------------------------------------*/
+/*-------------------------------------------*/
 
 int experiment_parser( FILE *in )
 {
@@ -359,6 +362,9 @@ int experiment_parser( FILE *in )
 	return Exp_Next_Section;
 }
 
+
+/*-------------------------------------------*/
+/*-------------------------------------------*/
 
 static Var *exp_get_channel_name( void )
 {

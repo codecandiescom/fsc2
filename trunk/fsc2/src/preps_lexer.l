@@ -38,7 +38,7 @@ static Var *preps_get_channel_name( void );
 
 extern void prepsparse( void );
 
-/* locally used global variables */
+/* Locally used global variables */
 
 int Preps_Next_Section;
 
@@ -105,20 +105,20 @@ FUNC        {IDENT}"#"[0-9]+
 		/*---------------*/
 
 
-			/* handling of file name lines */
+			/* Handling of file name lines */
 {FILE}      {
 				*( prepstext + prepsleng - 1 ) = '\0';
 				T_free( Fname );
 				Fname = T_strdup( prepstext + 2 );
 			}
 
-			/* handling of line number lines */
+			/* Handling of line number lines */
 {LNUM}		{
 				*( prepstext + prepsleng - 1 ) = '\0';
 				Lc = atol( prepstext + 2 );
 			}
 
-			/* handling of error messages from the cleaner */
+			/* Handling of error messages from the cleaner */
 {ERR}		{
 				eprint( FATAL, "%s\n", prepstext + 2 );
 				THROW( EXCEPTION );
@@ -130,31 +130,31 @@ FUNC        {IDENT}"#"[0-9]+
 				THROW( EXCEPTION );
 			}
 
-			/* handling of DEVICES: labels */
+			/* Handling of DEVICES: labels */
 {DEV}		{
 				Preps_Next_Section = DEVICES_SECTION;
 				return SECTION_LABEL;
 			}
 
-			/* handling of ASSIGNMENTS: labels */
+			/* Handling of ASSIGNMENTS: labels */
 {ASS}		{
 				Preps_Next_Section = ASSIGNMENTS_SECTION;
 				return SECTION_LABEL;
 			}
 
-			/* handling of VARIABLES: labels */
+			/* Handling of VARIABLES: labels */
 {VAR}		{
 				Preps_Next_Section = VARIABLES_SECTION;
 				return SECTION_LABEL;
 			}
 
-			/* handling of PHASES: labels */
+			/* Handling of PHASES: labels */
 {PHAS}		{
 				Preps_Next_Section = PHASES_SECTION;
 				return SECTION_LABEL;
 			}
 
-			/* handling of EXPERIMENT: labels */
+			/* Handling of EXPERIMENT: labels */
 {EXP}		{
 				Preps_Next_Section = EXPERIMENT_SECTION;
 				return SECTION_LABEL;
@@ -170,7 +170,7 @@ FUNC        {IDENT}"#"[0-9]+
                 return FLOAT_TOKEN;
             }
 
-            /* handling of string constants (to be used as format strings in
+            /* Handling of string constants (to be used as format strings in
 			   the print() function */
 {STR}       {
 				prepstext[ prepsleng - 1 ] = '\0';
@@ -187,7 +187,7 @@ FUNC        {IDENT}"#"[0-9]+
 {DL}        return DL_TOK;
 {PC}        return PC_TOK;
 
-			/* combinations of pulse and property, e.g. `P3.LEN' */
+			/* Combinations of pulse and property, e.g. `P3.LEN' */
 
 {P}"."{F}   {
 				prepslval.vptr = p_get( prepstext, P_FUNC );
@@ -312,7 +312,7 @@ FUNC        {IDENT}"#"[0-9]+
 				THROW( EXCEPTION );
 			}
 
-			/* handling of function, variable and array identifiers */
+			/* Handling of function, variable and array identifiers */
 {FUNC}      {
 				int acc;
 
@@ -322,9 +322,6 @@ FUNC        {IDENT}"#"[0-9]+
 				prepslval.vptr = func_get( prepstext, &acc );
 				if ( prepslval.vptr != NULL )
 				{
-					/* If it's a function check that the function can be used
-					   in the current context */
-
 					if ( acc == ACCESS_EXP )
 					{
 						eprint( FATAL, "%s:%ld: Function `%s' can only be "
@@ -345,7 +342,7 @@ FUNC        {IDENT}"#"[0-9]+
 {IDENT}     {
 				int acc;
 
-				/* first check if the identifier is a function name */
+				/* First check if the identifier is a function name */
 
 				prepslval.vptr = func_get( prepstext, &acc );
 				if ( prepslval.vptr != NULL )
@@ -360,7 +357,7 @@ FUNC        {IDENT}"#"[0-9]+
 					return FUNC_TOKEN;
 				}
 
-				/* if it's not a function it should be a variable */
+				/* If it's not a function it should be a variable */
 
 				if ( ( prepslval.vptr = vars_get( prepstext ) ) == NULL )
 				{
@@ -372,7 +369,7 @@ FUNC        {IDENT}"#"[0-9]+
 				return VAR_TOKEN;
 			}
 
-			/* stuff used with functions, arrays and math */
+			/* Stuff used with functions, arrays and math */
 
 "=="        return EQ;        /* equal */
 "!="        return NE;        /* unequal */
@@ -403,14 +400,14 @@ FUNC        {IDENT}"#"[0-9]+
 "%="        return MODA;
 "^="        return EXPA;
 
-            /* quasi-assignment operator for pulse properties */
+            /* Quasi-assignment operator for pulse properties */
 
 ":"         return ':';
 
-			/* handling of end of statement character */
+			/* Handling of end of statement character */
 ";"			return ';';
 
-{WS}        /* skip white space */
+{WS}        /* Skip white space */
 
 "\x4ntesla" return NT_TOKEN;
 "\x4utesla" return UT_TOKEN;
@@ -425,7 +422,7 @@ FUNC        {IDENT}"#"[0-9]+
 "\x4kunit"  return KU_TOKEN;
 "\x4megunit" return MEG_TOKEN;
 
-			/* handling of invalid input */
+			/* Handling of invalid input */
 .           {
 				eprint( FATAL, "%s:%ld: Invalid input in PREPARATIONS "
 						"section: `%s'.\n", Fname, Lc, prepstext );
@@ -442,6 +439,9 @@ FUNC        {IDENT}"#"[0-9]+
 %%		/*     End of Rules     */
 		/*----------------------*/
 
+
+/*-------------------------------------------*/
+/*-------------------------------------------*/
 
 int preparations_parser( FILE *in )
 {
@@ -471,6 +471,9 @@ int preparations_parser( FILE *in )
 	return Preps_Next_Section;
 }
 
+
+/*-------------------------------------------*/
+/*-------------------------------------------*/
 
 static Var *preps_get_channel_name( void )
 {
