@@ -612,7 +612,7 @@ static double hp8647a_set_frequency( double freq )
 
 	assert( freq >= MIN_FREQ && freq <= MAX_FREQ );
 
-	sprintf( cmd, "FREQ:CW %.2f KHZ", 1.0e-3 * freq );
+	sprintf( cmd, "FREQ:CW %f", freq );
 	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
 		hp8647_comm_failure( );
 
@@ -627,34 +627,13 @@ static double hp8647a_get_frequency( void )
 {
 	char buffer[ 100 ];
 	long length = 100;
-	double freq;
-	char *cp;
 
 
 	if ( gpib_write( hp8647a.device, "FREQ:CW?", 8 ) == FAILURE ||
 		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
 		hp8647_comm_failure( );
 
-	if ( ( cp = strchr( buffer, ' ' ) ) != NULL )
-	{
-		*cp++ = '\0';
-		freq = T_atof( buffer );
-		switch ( *cp )
-		{
-			case 'M' :
-				return freq * 1.0e6;
-
-			case 'K' :
-				return freq * 1.0e3;
-
-			case 'H' :
-				return freq;
-		}
-	}
-
-	eprint( FATAL, "%s: Unexpected data received from synthesizer.",
-			DEVICE_NAME );
-	THROW( EXCEPTION );
+	return T_atof( buffer );
 }
 
 
@@ -668,7 +647,7 @@ static double hp8647a_set_attenuation( double att )
 
 	assert( att >= MAX_ATTEN && att <= MIN_ATTEN );
 
-	sprintf( cmd, "POW:AMPL %6.1f DB", att );
+	sprintf( cmd, "POW:AMPL %6.1f", att );
 	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
 		hp8647_comm_failure( );
 
