@@ -135,6 +135,56 @@ ifneq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
 endif
 
 
+# Here's some stuff that makes it more convenient to make and install on
+# machines that are known well enough - for these machines one doesn't has
+# to edit the Makefile all the time...
+
+INSTALL_MACHINE   := install-unknown
+UNINSTALL_MACHINE := uninstall-unknown
+
+ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
+	GPIB_LIBRARY       := JTT
+	INSTALL_MACHINE    := install-$(machine_name)
+	UNINSTALL_MACHINE  := uninstall-$(machine_name)
+endif
+
+ifeq ($(machine_name),moebi.physik.fu-berlin.de)
+	GPIB_LIBRARY       := JTT
+	INSTALL_MACHINE    := install-$(machine_name)
+	UNINSTALL_MACHINE  := uninstall-$(machine_name)
+endif
+
+ifeq ($(machine_name),crowley.physik.fu-berlin.de)
+	GPIB_LIBRARY       := JTT
+	INSTALL_MACHINE    := install-$(machine_name)
+	UNINSTALL_MACHINE  := uninstall-$(machine_name)
+endif
+
+ifeq ($(machine_name),door.physik.fu-berlin.de)
+	GPIB_LIBRARY       := JTT
+	INSTALL_MACHINE    := install-$(machine_name)
+	UNINSTALL_MACHINE  := uninstall-$(machine_name)
+endif
+
+ifeq ($(machine_name),isaak.physik.fu-berlin.de)
+	GPIB_LIBRARY       := JTT
+	INSTALL_MACHINE    := install-$(machine_name)
+	UNINSTALL_MACHINE  := uninstall-$(machine_name)
+endif
+
+ifeq ($(machine_name),sunone.chemie.unibas.ch)
+	 GPIB_LIBRARY       := NI
+	 INSTALL_MACHINE    := install-$(machine_name)
+	 UNINSTALL_MACHINE  := uninstall-$(machine_name)
+endif
+
+ifeq ($(machine_name),crowley.none)
+	 GPIB_LIBRARY       := JTT
+	 INSTALL_MACHINE    := install-$(machine_name)
+	 UNINSTALL_MACHINE  := uninstall-$(machine_name)
+endif
+
+
 # Pass lots of variables to the source files...
 # For directories make sure they end with a `/'.
 
@@ -214,56 +264,6 @@ endif
 
 ifneq ($(word 1,$(ADDR2LINE)),which:)
 	CFLAGS += -DADDR2LINE=\"$(ADDR2LINE)\"
-endif
-
-
-# Here's some stuff that makes it more convenient to make and install on
-# machines that I know well enough - for these machines I don't have
-# to edit the Makefile all the time...
-
-INSTALL_MACHINE   := install-unknown
-UNINSTALL_MACHINE := uninstall-unknown
-
-ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
-	GPIB_LIBRARY       := JTT
-	INSTALL_MACHINE    := install-$(machine_name)
-	UNINSTALL_MACHINE  := uninstall-$(machine_name)
-endif
-
-ifeq ($(machine_name),moebi.physik.fu-berlin.de)
-	GPIB_LIBRARY       := JTT
-	INSTALL_MACHINE    := install-$(machine_name)
-	UNINSTALL_MACHINE  := uninstall-$(machine_name)
-endif
-
-ifeq ($(machine_name),crowley.physik.fu-berlin.de)
-	GPIB_LIBRARY       := JTT
-	INSTALL_MACHINE    := install-$(machine_name)
-	UNINSTALL_MACHINE  := uninstall-$(machine_name)
-endif
-
-ifeq ($(machine_name),door.physik.fu-berlin.de)
-	GPIB_LIBRARY       := JTT
-	INSTALL_MACHINE    := install-$(machine_name)
-	UNINSTALL_MACHINE  := uninstall-$(machine_name)
-endif
-
-ifeq ($(machine_name),isaak.physik.fu-berlin.de)
-	GPIB_LIBRARY       := JTT
-	INSTALL_MACHINE    := install-$(machine_name)
-	UNINSTALL_MACHINE  := uninstall-$(machine_name)
-endif
-
-ifeq ($(machine_name),sunone.chemie.unibas.ch)
-	 GPIB_LIBRARY       := NI
-	 INSTALL_MACHINE    := install-$(machine_name)
-	 UNINSTALL_MACHINE  := uninstall-$(machine_name)
-endif
-
-ifeq ($(machine_name),crowley.none)
-	 GPIB_LIBRARY       := JTT
-	 INSTALL_MACHINE    := install-$(machine_name)
-	 UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
 
