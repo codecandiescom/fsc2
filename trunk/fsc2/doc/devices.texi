@@ -3202,7 +3202,7 @@ This function is only available for the PCI-MIO-16E-1 card. It allows to
 configure individulaly the analog outputs (AO) of the card. Both output
 channels can be used to do biplor or unipolar output. While in bipolar
 mode voltages between @w{-10 V} and @w{+10 V} with a resolution of ca.@:
-@{5 mV} can be produced, in unipolar mode voltages between only @w{0 V}
+@w{5 mV} can be produced, in unipolar mode voltages between only @w{0 V}
 and @w{+10 V} but with an increased resolution of about @w{2.5 mV} can
 be produced.
 
