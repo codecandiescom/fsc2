@@ -210,7 +210,6 @@ int conditionerror( const char *s )
 {
 	s = s;                    /* stupid but avoids compiler warning */
 
-	eprint( FATAL, SET, "Syntax error in loop or IF condition near token "
-			"%s.\n", conditiontext );
+	eprint( FATAL, SET, "Syntax error in loop or IF condition.\n" );
 	THROW( EXCEPTION );
 }
