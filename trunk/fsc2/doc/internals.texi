@@ -47,7 +47,7 @@ checks on what can be expected to happen during the real experiment and
 detect possible problems.
 
 
-Only if all these tests succeeded the third step, the execution of the
+Only if all these tests succeed the third step, the execution of the
 @code{EXPERIMENT} section of the @code{EDL} script, is started, i.e.@:
 the experiment is run. When an experiment is restarted (without
 reloading the @code{EDL} file) only this third step is repeated.
@@ -535,15 +535,15 @@ This point out of the way I'll now want to start the @i{tour de force}
 through the sources. When @code{fsc2} is invoked it starts with the
 @code{main()} function in the file @file{fsc2.c}. After setting up lots
 of global variables and checking the command line options it tries to
-connect to a kind of daemon process or starts it if it's not already
-running.  This daemon is taking care of situations where @code{fsc2} is
-running in non-exclusive mode, i.e.@: more than instance of @code{fsc2}
-is to be run at the same time, and it will tell new instances about what
-they are allowed to do and what not to avoid more than one instance
-trying to access the same devices at the same time. It also is supposed
-to remove things like lock files, shared memory segments etc.@: should
-it ever happen that @code{fsc2} crashes that badly that it isn't able to
-do it itself.
+connect to a kind of daemon process (or starts it if it's not already
+running).  This daemon is taking care of situations where @code{fsc2} is
+running in non-exclusive mode, i.e.@: when more than instance of
+@code{fsc2} is to be run at the same time, and it will tell new
+instances about what they are allowed to do and what not to avoid more
+than one instance trying to access the same devices at the same time. It
+also is supposed to remove things like lock files, shared memory
+segments etc.@: should it ever happen that @code{fsc2} crashes so badly
+that it isn't able to do it itself.
 
 
 When this hurdle has been taken the initialization of the graphics is
@@ -551,7 +551,7 @@ done. All the code for doing so is in the file @file{xinit.c}. You will
 have to read a bit about the @code{Xforms} library to understand what's
 going on there. Mostly it's loading a shared library for creating the
 forms used by the program (there are two shared libraries,
-@file{fsc2_rsc_lr.so} and @file{fsc2_rsc_hr.so}, which on is loaded
+@file{fsc2_rsc_lr.so} and @file{fsc2_rsc_hr.so}, which one is loaded
 depends on the screen resolution and the comand line option
 @code{-size}), evaluating the settings in the @file{.Xdefaults} and
 @file{.Xresources} files, again setting up lots of global variables and
