@@ -882,13 +882,6 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 
 void unload_device( Device *dev )
 {
-	/* We might get here when from within an EDL function called from within
-	   a module an exception got thrown. In this case the call stack isn't
-	   empty and we need to clean it up. */
-
-	while ( call_pop( ) )
-		/* empty */ ;
-
 	if ( dev->driver.handle &&
 		 ! Internals.exit_hooks_are_run && dev->driver.is_exit_hook )
 	{
