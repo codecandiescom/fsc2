@@ -64,6 +64,7 @@ PY          PH(ASE)?_?Y:?
 DEL         ((D)|(DEL)|(DELAY)):?
 POD         P(OD)?
 CH          C(H(ANNEL)?)?
+INV         I(NV(ERT(ED)?)?)?
 UNREC       [^\n=,;:. ]+
 
 
@@ -158,6 +159,8 @@ UNREC       [^\n=,;:. ]+
             	assignlval.dval = atof( assigntext );
                 return( FLOAT_TOKEN );
             }
+
+{INV}       return( INV_TOKEN );
 
 "\x4nsec"   return( NS_TOKEN );
 "\x4usec"   return( US_TOKEN );

@@ -41,6 +41,7 @@ int Channel_Type;
 %token POD_TOKEN             /* POD */
 %token CH_TOKEN              /* CHANNEL */
 %token DEL_TOKEN             /* DELAY */
+%token INV_TOKEN             /* INVERTED */
 %token NS_TOKEN              /* nsec */
 %token US_TOKEN              /* usec */
 %token MS_TOKEN              /* msec */
@@ -48,7 +49,7 @@ int Channel_Type;
 %token <lval> INT_TOKEN
 %token <dval> FLOAT_TOKEN
 
-%type <dval> delay cd time unit
+%type <dval> time unit
 
 
 %%
@@ -65,7 +66,6 @@ input:   /* empty */
 /* A (non-empty) line has to start with one of the channel keywords */
 
 line:    keywd pcd ';'
-       | keywd SECTION_LABEL          { THROW ( SYNTAX_ERROR_EXCEPTION ); }
        | keywd pcd SECTION_LABEL      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | keywd pcd keywd error ';'    { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | error ';'                    { THROW ( SYNTAX_ERROR_EXCEPTION ); }
@@ -91,27 +91,19 @@ keywd:   MW_TOKEN                     { Channel_Type = PULSER_CHANNEL_MW; }
 
 /* Pod and channel asignments consists of the POD and CHANNEL keyword,
    followed by the pod or channel number(s), and, optionally, a DELAY keyword
-   followed by the delay time. The sequence of the keywords is arbitrary. */
+   followed by the delay time and the INVERTED keyword. The sequence of the
+   keywords is arbitrary. */
 
 
-pcd:    pod cd
-      | ch pd
-      | DEL_TOKEN time pc            { set_pod_delay( Channel_Type, $2 ); } 
+pcd:    /* empty */
+      | pcd pod
+      | pcd ch
+      | pcd del
+      | pcd INV_TOKEN                { assign_inv_channel( Channel_Type ); }
 ;
+
 
 pod:    POD_TOKEN INT_TOKEN          { assign_pod( Channel_Type, $2 ); }
-;
-
-cd:     ch delay                     { set_pod_delay( Channel_Type, $2 ); }
-      | DEL_TOKEN time ch            { set_pod_delay( Channel_Type, $2 ); }
-;
-
-pd:     pod delay                    { set_pod_delay( Channel_Type, $2 ); }
-      | DEL_TOKEN time pod           { set_pod_delay( Channel_Type, $2 ); } 
-;
-
-pc:     pod ch
-      | ch pod
 ;
 
 ch:     CH_TOKEN INT_TOKEN           { assign_channel( Channel_Type, $2 ); }
@@ -122,8 +114,7 @@ ch1:    /* empty */
       | ch1 INT_TOKEN                { assign_channel( Channel_Type, $2 ); }
 ;
 
-delay:  /* empty */                  { $$ = 0.0; }
-      | DEL_TOKEN time               { $$ = $2; }
+del:    DEL_TOKEN time               { set_pod_delay( Channel_Type, $2 ); }
 ;
 
 time:   INT_TOKEN unit               { $$ = ( double ) $1 * $2; }
