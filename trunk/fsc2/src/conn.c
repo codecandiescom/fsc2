@@ -273,7 +273,7 @@ static void connect_handler( int listen_fd )
 		close( conn_fd );
 	}
 
-	_exit( 0 );                          /* we'll never end here */ 
+	_exit( 0 );
 }
 
 
