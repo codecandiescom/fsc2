@@ -609,6 +609,7 @@ psd:      PSD_TOKEN expr           { p_set_psd( $1, $2 ); }
 /* Handling of GRACE_PERIOD commands (pulsers with phase switch only) */
 
 gp:       GP_TOKEN expr            { p_set_gp( $2 ); }
+;
 
 %%
 

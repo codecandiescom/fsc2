@@ -63,7 +63,7 @@ input:   /* empty */
 sep:     ';'
 	   | DEV_TOKEN                    { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 	   | SECTION_LABEL                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-
+;
 
 %%
 

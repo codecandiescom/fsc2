@@ -161,7 +161,7 @@ ls:      '{'
 et:      ls
        | IF_TOK                  { in_cond = SET; }
          expr ls                 { in_cond = UNSET; }
-
+;
 
 line:    E_VAR_TOKEN ass                              { }
        | E_VAR_TOKEN '[' list1 ']' ass                { }
