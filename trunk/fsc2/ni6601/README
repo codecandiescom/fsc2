@@ -35,16 +35,16 @@ Without this file the module can not be compiled. The file gets created
 automatically if autoconf.h exists and you have at least run 'make dep'
 in the kernel source directory.
 
-Finally, if you want to create the module for a kernel you are *not*
-currently running you should set the environment variable
-NI6601_KERNEL_SOURCE to the source directory  of the kernel you want to
-make the module for. It's still required that both 'autoconf.h' and
-'version.h' exist for this kernel. If NI6601_KERNEL_SOURCE is set the
-module will always be created for the kernel the variable is pointing
-to but you will have to copy the module to the correct place in
-'/lib/modules' and run 'makedep -a' by hand (but the user library gets
-installed automatically). So, this probably is only for those that are
-quite sure they know what they are doing...
+If you want to create the module for a kernel you are *not* currently
+running you must set the environment variable NI6601_KERNEL_SOURCE to
+the source directory  of the kernel you want to make the module for.
+It's still required that both 'autoconf.h' and 'version.h' exist for
+this kernel. If NI6601_KERNEL_SOURCE is set the module will be created
+for the kernel the variable is pointing to but you will have to copy
+the module to the correct place in '/lib/modules', run 'makedep -a' 
+and create the device files yourself (but the user library gets
+installed automatically). So, this probably is only for those that
+are quite sure they know what they are doing...
 
 
 III. Compiling and installing via the 'INSTALL' script
