@@ -875,17 +875,18 @@ program is checked extensively and as far as possible everything is done
 as it will be done later in the real experiment. But this leads the
 problem that the functions in the module must return data even though
 they can't talk to the devices yet. If the program asks for the measured
-value from a device reasonable, valid value most be returned.  This can
+value from a device reasonable, valid values most be returned.  This can
 be quite tricky, because, while writing the module it is less than clear
-what will be reasonable, valid value in all imaginable situations.
+what will be reasonable, valid values in all imaginable situations.
 
 I don't have a failsafe method to select values to return during the
 test run and I also fear that there isn't one. But after some
 experimenting the values now used in the modules didn't lead to too many
-problems. If necessary the users must be made aware of possible
-problems, i.e.@: if they test values returned from the @acronym{EDL} file
-they must be prepared to write the @acronym{EDL} program to accept some
-unexpected values.
+problems. To make them stand out they are always defined as macros at
+some prominent place at the start of the module. If necessary the users
+must be made aware of possible problems, i.e.@: if they test values
+returned from the @acronym{EDL} file they must be prepared to write the
+@acronym{EDL} program to accept some unexpected values.
 
 
 @subsection How to compile a module
