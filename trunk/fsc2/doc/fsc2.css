@@ -1,0 +1,13 @@
+samp { font-family:monospace;
+	   font-weight:bold;
+	   color:#AA0000;
+	 }
+
+td.example { background-color:#FFFFE0;
+             padding-top:1.5mm;
+             padding-bottom:1.5mm;
+             padding-left:4mm;
+             padding-right:4mm;
+             border-width:thin;
+			 border-style:solid;}
+
