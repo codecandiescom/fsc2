@@ -959,7 +959,7 @@ void clean_up( void )
 
 	/* Get rid of the last remains of graphics */
 
-	for ( i = X; i <= Z; i++ )
+	for ( i = X; i <= ( G.dim == 1 ? Y : Z ); i++ )
 		if ( G.label[ i ] != NULL )
 			G.label[ i ] = T_free( G.label[ i ] );
 
