@@ -55,7 +55,7 @@ void *get_shm( int *shm_id, long len )
 	while ( ( *shm_id = shmget( IPC_PRIVATE, len + 4,
 								IPC_CREAT | SHM_R | SHM_A ) ) < 0 )
 	{
-		if ( errno == ENOSPC || errno == ENOMEM)  /* wait for 10 ms */
+		if ( errno == ENOSPC || errno == ENOMEM ) /* wait for 10 ms */
 			usleep( 10000 );
 		else                                      /* non-recoverable failure */
 		{
