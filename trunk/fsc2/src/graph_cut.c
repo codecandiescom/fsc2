@@ -1013,14 +1013,14 @@ bool cut_new_points( long curve, long x_index, long y_index, long len )
 		sp = G.curve_2d[ curve ]->points + y_index * G.nx + CG.index;
 
 #ifndef NDEBUG
-		/* There was a crash, probably from the sp->v in the following
+		/* There were two crashes, probably from the sp->v in the following
 		   cut_integrate_point() call, which I didn't find the reason for
 		   yet. Here I just try to avoid the problem in order to keep
 		   experiments from crashing. */
 
 		if ( sp == NULL )
 		{
-			eprint( SEVERE, UNSET, "Internal error detected at %s:%d, %ld. "
+			eprint( SEVERE, UNSET, "Internal error detected at %s:%d, %ld.\n"
 					"Please send a bug report immediately, including this "
 					"error message!\n", __FILE__, __LINE__, CG.index );
 			return FAIL;
@@ -1058,19 +1058,19 @@ static void cut_integrate_point( long p_index, double val )
 	long i, j;
 
 
-	/* If this is a completely new point it as to be integrated into the
-	   array of XPoints (which have to be sorted in ascending order of the
+	/* If this is a completely new point integrate it into the array of
+	   XPoints (which have to be sorted in ascending order of the
 	   x-coordinate), otherwise the XPoint just needs to be updated */
 
 	if ( ! cv->points[ p_index ].exist )
 	{
 		/* Find next existing point to the left */
 
-		for ( i = p_index - 1, cvp = cv->points + i;
-			  i >= 0 && ! cvp->exist; cvp--, i-- )
+		for ( i = p_index - 1, cvp = cv->points + i; i >= 0 && ! cvp->exist;
+			  cvp--, i-- )
 			;
 
-		if ( i == -1 )                     /* new points to be drawn is first*/
+		if ( i == -1 )                    /* new points to be drawn is first */
 		{
 			xp_index = cv->points[ p_index ].xp_ref = 0;
 			memmove( cv->xpoints + 1, cv->xpoints,
