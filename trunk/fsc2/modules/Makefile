@@ -114,30 +114,30 @@ export        # export all symbols to the sub-makefiles
 
 all:
 	$(MAKE) $(simp_modules:.c=.so)
-	for n in $(tds_list); do                                     \
-		o=`echo $$n | tr "a-z" "A-Z"`;                           \
-		for m in "" _util _gpib; do                              \
-			if [ ! -e $$n$$m.c -o tds$$m.c.tmpl -nt $$n$$m.c     \
-				 -o $$n.h -nt $$n$$m.c ]; then                   \
-				sed "s/tds_tmpl/$$n/g;s/TDS_TMPL/$$o/g"          \
-					tds$$m.c.tmpl > $$n$$m.c;                    \
-			fi;                                                  \
-		done;                                                    \
+	for n in $(tds_list); do                                       \
+		o=`echo $$n | tr "a-z" "A-Z"`;                             \
+		for m in "" _util _gpib; do                                \
+			if [ ! -e $$n$$m.c -o tds$$m.c.tmpl -nt $$n$$m.c       \
+				 -o $$n.h -nt $$n$$m.c ]; then                     \
+				sed "s/tds_tmpl/$$n/g;s/TDS_TMPL/$$o/g"            \
+					tds$$m.c.tmpl > $$n$$m.c;                      \
+			fi;                                                    \
+		done;                                                      \
 	done;
-	for n in $(hp864_list); do                                   \
-		o=`echo $$n | tr "a-z" "A-Z"`;                           \
-		for m in .c _util.c _gpib.c _lexer.l; do                 \
-			if [ ! -e $$n$$m -o hp864$$m.tmpl -nt $$n$$m         \
-				 -o $$n.h -nt $$n$$m ]; then                     \
-				sed "s/hp864_tmpl/$$n/g;s/HP864_TMPL/$$o/g"      \
-					hp864$$m.tmpl > $$n$$m;                      \
-			fi;                                                  \
-		done;                                                    \
+	@for n in $(hp864_list); do                                    \
+		o=`echo $$n | tr "a-z" "A-Z"`;                             \
+		for m in .c _util.c _gpib.c _lexer.l; do                   \
+			if [ ! -e $$n$$m -o hp864$$m.tmpl -nt $$n$$m           \
+				 -o $$n.h -nt $$n$$m ]; then                       \
+				sed "s/hp864_tmpl/$$n/g;s/HP864_TMPL/$$o/g"        \
+					hp864$$m.tmpl > $$n$$m;                        \
+			fi;                                                    \
+		done;                                                      \
 	done;
-	for m in $(shell echo $(comp_modules) | cut -f1- -d' '); do  \
-		sed -e "s/##/$$m/g" Makefile.tmpl > $$m.make &&          \
-		$(MAKE) -f $$m.make;                                     \
-		$(RM) $(RMFLAGS) $$m.make;                               \
+	@for m in $(shell echo $(comp_modules) | cut -f1- -d' '); do   \
+		sed -e "s/##/$$m/g" Makefile.tmpl > $$m.make &&            \
+		$(MAKE) -f $$m.make;                                       \
+		$(RM) $(RMFLAGS) $$m.make;                                 \
 	done;
 
 # The following rule looks a bit complicated because we have to check if
@@ -153,24 +153,28 @@ all:
 # exist by an extra call of gcc - if it fails the module isn't created.
 
 $(simp_modules:.c=.so): %.so: %.o	
-	if [ -z "$($(patsubst %.so,%_libs,$@))" ]; then              \
-		$(CC) $(LFLAGS) $^ -o $@;                                \
-		chmod 644 $@;                                            \
-	else                                                         \
-		for l in "$($(patsubst %.so,%_libs,$@))"; do             \
-			if [ "$(notdir $$l)" == "$$l" ]; then                \
-				l=$${l%.so};                                     \
-				libs="$$libs -l$${l#lib}";                       \
-			else                                                 \
-				libs="$$libs $$l";                               \
-			fi;                                                  \
-		done;                                                    \
-		$(CC) $$libs -shared -o $@.lib_test 2>/dev/null;         \
-		if [ -e $@.lib_test ]; then                              \
-			$(RM) $(RMFLAGS) $@.lib_test;                        \
-			$(CC) $(LFLAGS) $^ $$libs -o $@;                     \
-			chmod 644 $@;                                        \
-		fi;                                                      \
+	@if [ -z "$($(patsubst %.so,%_libs,$@))" ]; then               \
+		echo "$(CC) $(LFLAGS) $^ -o $@";                           \
+		$(CC) $(LFLAGS) $^ -o $@;                                  \
+		chmod 644 $@;                                              \
+	else                                                           \
+		for l in "$($(patsubst %.so,%_libs,$@))"; do               \
+			if [ "$(notdir $$l)" == "$$l" ]; then                  \
+				l=$${l%.so};                                       \
+				libs="$$libs -l$${l#lib}";                         \
+			else                                                   \
+				libs="$$libs $$l";                                 \
+			fi;                                                    \
+		done;                                                      \
+		echo "$(CC) $(LFLAGS) $^ $$libs -o $@";                    \
+		$(CC) $$libs -shared -o $@.lib_test 2>/dev/null;           \
+		if [ -e $@.lib_test ]; then                                \
+			$(RM) $(RMFLAGS) $@.lib_test;                          \
+			$(CC) $(LFLAGS) $^ $$libs -o $@;                       \
+			chmod 644 $@;                                          \
+		else                                                       \
+			echo "warning: $@ not created, libraries not found.";  \
+		fi;                                                        \
 	fi
 
 
@@ -179,7 +183,8 @@ $(simp_modules:.c=.so): %.so: %.o
 # followed by the string "_incl" with "-I" and pass this to the compiler.
 
 $(simp_modules:.c=.o): %.o: %.c $(cdir)/%.conf $(src_headers)
-	incl="$(foreach i,$($(patsubst %.o,%_incl,$@)),-I$(i))";     \
+	@incl="$(foreach i,$($(patsubst %.o,%_incl,$@)),-I$(i))";      \
+	echo "$(CC) $$incl $(CFLAGS) -c $(LFLAGS) $< -o $@";           \
 	$(CC) $$incl $(CFLAGS) -c $(LFLAGS) $< -o $@
 
 
@@ -187,8 +192,8 @@ $(simp_modules:.c=.o): %.o: %.c $(cdir)/%.conf $(src_headers)
 # from a template file
 
 $(addsuffix .c,$(s_band_list)): %.c: s_band_magnet.c.tmpl
-	n=$(subst .c,,$(subst s_band_magnet_,,$@)); \
-	o=`echo $$n | tr "a-z" "A-Z"`; \
+	n=$(subst .c,,$(subst s_band_magnet_,,$@));                    \
+	o=`echo $$n | tr "a-z" "A-Z"`;                                 \
 	sed "s/s_band_magnet_tmpl/s_band_magnet_$$n/g;s/S_BAND_MAGNET_TMPL/S_BAND_MAGNET_$$o/g" $^ > $@
 
 
@@ -197,8 +202,8 @@ $(addsuffix .c,$(s_band_list)): %.c: s_band_magnet.c.tmpl
 install:
 	$(INSTALL) -d $(libdir)
 	$(EXEC_INSTALL) -m  644 -o $(OWNER) -g $(GROUP) *.so $(libdir)
-	if [ "$(INSTALL_MACHINE)" != "install-unknown" ]; then  \
-		$(MAKE) $(INSTALL_MACHINE);                         \
+	if [ "$(INSTALL_MACHINE)" != "install-unknown" ]; then         \
+		$(MAKE) $(INSTALL_MACHINE);                                \
 	fi
 
 # Here links to module libraries for often used devices for the different
