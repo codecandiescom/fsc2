@@ -378,12 +378,19 @@ Var *vars_sub( Var *v1, Var *v2 )
 			new_var = vars_sub_from_float_arr( v1, v2 );
 			break;
 
-		case ARR_REF : case ARR_PTR :
+		case ARR_REF :
 			v1 = vars_array_check( v1, v2 );
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_sub_from_int_arr( v1->from, v2 );
 			else
 				new_var = vars_sub_from_float_arr( v1->from, v2 );
+			break;
+
+		case ARR_PTR :
+			if ( v1->from->type == INT_ARR )
+				new_var = vars_sub_from_int_arr( v1, v2 );
+			else
+				new_var = vars_sub_from_float_arr( v1, v2 );
 			break;
 
 		default :
@@ -444,12 +451,19 @@ Var *vars_mult( Var *v1, Var *v2 )
 			new_var = vars_mult_by_float_arr( v1, v2 );
 			break;
 
-		case ARR_REF : case ARR_PTR :
+		case ARR_REF :
 			v1 = vars_array_check( v1, v2 );
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_mult_by_int_arr( v1->from, v2 );
 			else
 				new_var = vars_mult_by_float_arr( v1->from, v2 );
+			break;
+
+		case ARR_PTR :
+			if ( v1->from->type == INT_ARR )
+				new_var = vars_mult_by_int_arr( v1, v2 );
+			else
+				new_var = vars_mult_by_float_arr( v1, v2 );
 			break;
 
 		default :
@@ -510,12 +524,19 @@ Var *vars_div( Var *v1, Var *v2 )
 			new_var = vars_div_of_float_arr( v1, v2 );
 			break;
 
-		case ARR_REF : case ARR_PTR :
+		case ARR_REF :
 			v1 = vars_array_check( v1, v2 );
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_div_of_int_arr( v1->from, v2 );
 			else
 				new_var = vars_div_of_float_arr( v1->from, v2 );
+			break;
+
+		case ARR_PTR :
+			if ( v1->from->type == INT_ARR )
+				new_var = vars_div_of_int_arr( v1, v2 );
+			else
+				new_var = vars_div_of_float_arr( v1, v2 );
 			break;
 
 		default :
@@ -576,12 +597,19 @@ Var *vars_mod( Var *v1, Var *v2 )
 			new_var = vars_mod_of_float_arr( v1, v2 );
 			break;
 
-		case ARR_REF : case ARR_PTR :
+		case ARR_REF :
 			v1 = vars_array_check( v1, v2 );
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_mod_of_int_arr( v1->from, v2 );
 			else
 				new_var = vars_mod_of_float_arr( v1->from, v2 );
+			break;
+
+		case ARR_PTR :
+			if ( v1->from->type == INT_ARR )
+				new_var = vars_mod_of_int_arr( v1, v2 );
+			else
+				new_var = vars_mod_of_float_arr( v1, v2 );
 			break;
 
 		default :
@@ -642,12 +670,19 @@ Var *vars_pow( Var *v1, Var *v2 )
 			new_var = vars_pow_of_float_arr( v1, v2 );
 			break;
 
-		case ARR_REF : case ARR_PTR :
+		case ARR_REF :
 			v1 = vars_array_check( v1, v2 );
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_pow_of_int_arr( v1->from, v2 );
 			else
 				new_var = vars_pow_of_float_arr( v1->from, v2 );
+			break;
+
+		case ARR_PTR :
+			if ( v1->from->type == INT_ARR )
+				new_var = vars_pow_of_int_arr( v1, v2 );
+			else
+				new_var = vars_pow_of_float_arr( v1, v2 );
 			break;
 
 		default :

@@ -184,7 +184,7 @@ Var *vars_add_to_int_arr( Var *v1, Var *v2 )
 	if ( v1->type == ARR_PTR )
 	{
 		v1_lpnt = ( long * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->dim -1 ];
+		v1_len = v1->from->sizes[ v1->from->dim -1 ];
 	}
 	else
 	{
@@ -416,7 +416,7 @@ Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
 	if ( v1->type == ARR_PTR )
 	{
 		v1_lpnt = ( long * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->dim -1 ];
+		v1_len = v1->from->sizes[ v1->from->dim -1 ];
 	}
 	else
 	{
@@ -504,7 +504,7 @@ Var *vars_sub_from_float_arr( Var *v1, Var *v2 )
 	if ( v1->type == ARR_PTR )
 	{
 		v1_dpnt = ( double * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->dim -1 ];
+		v1_len = v1->from->sizes[ v1->from->dim -1 ];
 	}
 	else
 	{
@@ -648,7 +648,7 @@ Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
 	if ( v1->type == ARR_PTR )
 	{
 		v1_lpnt = ( long * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->dim -1 ];
+		v1_len = v1->from->sizes[ v1->from->dim -1 ];
 	}
 	else
 	{
@@ -736,7 +736,7 @@ Var *vars_mult_by_float_arr( Var *v1, Var *v2 )
 	if ( v1->type == ARR_PTR )
 	{
 		v1_dpnt = ( double * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->dim -1 ];
+		v1_len = v1->from->sizes[ v1->from->dim -1 ];
 	}
 	else
 	{
@@ -913,7 +913,7 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 	if ( v1->type == ARR_PTR )
 	{
 		v1_lpnt = ( long * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->dim -1 ];
+		v1_len = v1->from->sizes[ v1->from->dim -1 ];
 	}
 	else
 	{
@@ -1009,7 +1009,7 @@ Var *vars_div_of_float_arr( Var *v1, Var *v2 )
 	if ( v1->type == ARR_PTR )
 	{
 		v1_dpnt = ( double * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->dim -1 ];
+		v1_len = v1->from->sizes[ v1->from->dim -1 ];
 	}
 	else
 	{
@@ -1204,7 +1204,7 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 	if ( v1->type == ARR_PTR )
 	{
 		v1_lpnt = ( long * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->dim -1 ];
+		v1_len = v1->from->sizes[ v1->from->dim -1 ];
 	}
 	else
 	{
@@ -1300,7 +1300,7 @@ Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
 	if ( v1->type == ARR_PTR )
 	{
 		v1_dpnt = ( double * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->dim -1 ];
+		v1_len = v1->from->sizes[ v1->from->dim -1 ];
 	}
 	else
 	{
@@ -1529,7 +1529,7 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 	if ( v1->type == ARR_PTR )
 	{
 		v1_lpnt = ( long * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->dim -1 ];
+		v1_len = v1->from->sizes[ v1->from->dim -1 ];
 	}
 	else
 	{
@@ -1683,7 +1683,7 @@ Var *vars_pow_of_float_arr( Var *v1, Var *v2 )
 	if ( v1->type == ARR_PTR )
 	{
 		v1_dpnt = ( double * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->dim -1 ];
+		v1_len = v1->from->sizes[ v1->from->dim -1 ];
 	}
 	else
 	{
