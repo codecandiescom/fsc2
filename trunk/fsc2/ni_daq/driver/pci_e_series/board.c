@@ -269,7 +269,7 @@ void pci_board_irq_handling_setup( Board *board )
 
 void pci_board_reset_all( Board *board )
 {
-	/* Set uo the DACs of the board with teh values stored in the EEPROM */
+	/* Set uo the DACs of the board with the values stored in the EEPROM */
 
 	caldac_calibrate( board );
 

@@ -375,6 +375,7 @@ int MSC_PFI_setup( Board *board, NI_DAQ_SUBSYSTEM sub_system,
 
 
 /*-----------------------------------------------------------*/
+/* Function for handling ioctl() calls for the MSC subsystem */
 /*-----------------------------------------------------------*/
 
 int MSC_ioctl_handler( Board *board, NI_DAQ_MSC_ARG *arg )

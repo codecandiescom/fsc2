@@ -1119,9 +1119,10 @@ void AI_irq_handler( Board *board )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Handler for the SC TC event that gets raised on end of the acquisition */
-/*------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Handler for the SC TC event that gets raised on end of acquisition */
+/* Processes sleeping on the associated wait queue are woken.         */
+/*--------------------------------------------------------------------*/
 
 void AI_SC_irq_handler( Board *board )
 {
