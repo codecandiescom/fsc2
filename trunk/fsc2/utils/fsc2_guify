@@ -35,7 +35,7 @@ use warnings;
 
 my @lines;
 my @vars;
-my $guify_entry = '^\s*==\s+';
+my $guify_entry = '^\s*===\s+';
 my $var_entry = $guify_entry .
 	'([A-Za-z0-9_]+)\s+(int|float|menu)(\s+(.*))?';
 my $if_entry = $guify_entry . 'if\\s+';
