@@ -1,0 +1,506 @@
+@c $Id$
+
+@node Functions, Modules, EDL, Top
+@chapter Built-in Functions
+
+
+@section Built-in functions
+@cindex built-in functions
+
+@subsection Output functions
+@cindex output functions
+
+@table @samp
+@item print()
+@findex print()
+Function prints text into the output browser in the main form of
+@b{fsc2}.  It needs a @i{format string}
+@cindex format string
+as its very first argument. Ths @i{format string} can contain any text
+as well as a special character, @code{#},
+@findex # @r{(in @code{print()} function)}
+that is used as a placeholder for data to be printed in its place.
+Here's a first simple example: You want to print the value of a variable
+called @code{I}, that just has a value of 3. Now,
+
+@example
+print( "The value of I is #.", I );
+@end example
+@noindent
+will print, when the program is interpreted,
+
+@example
+The value of I is 3.
+@end example
+@noindent
+But you can have not only one but as many placeholder characters in the
+@i{format string} as you need. Of course, the number of placeholder
+characters has to match the number of variables (or data) following the
+@i{format string}.
+
+You may use @code{print()} to print integer or floating point values
+(that includes the return values of functions) and variables and strings
+(i.e.@: text enclosed in double quotes, @code{"}).  Here's a longer,
+somewhat contrived example:
+
+@example
+print( "The # of # is: #", "sine", x, sin( x ) );
+@end example
+@noindent
+This will print (if x equals 0.5):
+
+@example
+The sine of 0.500000 is: 0.479426
+@end example
+
+There are special sequences allowed in the @i{format string}. They all
+start with an @i{escape character}, the backslash @code{\}. Here's a
+list of all the recognized special sequences:
+
+@table @samp
+@cindex escape characters (in @code{print()} function)
+@item \n
+Does a linefeed. Thus several lines can be printed at once by one call of
+@code{print()}.
+@item \t
+Embed a tabulator character, tab stops are set at every eighth character.
+@item \\
+Prints a backslash, @code{\}, thus switching off the special meaning of the
+backslash as an escape character.
+@item \"
+Prints a quote - use it to be able to embed quotes into the @i{format
+string}.
+@item \#
+Prints a @code{#}, thus switching off the special meaning of the
+@code{#} character as a placeholder for variables to be printed.
+@item \T
+While normally nothing is printed while a test of the experiment section
+of an @b{EDL} file is run, if the @i{format string} starts with this
+escape sequence the @code{print()} function will produce output even in
+the test run.
+@end table
+
+@item init_1d()
+@findex init_1d()
+Initializes the display for one-dimensional experiments - without a call to
+this function no data will be displayed. The function takes up to six
+arguments but all of them are optional. They are:
+
+@enumerate
+@item
+Number of curves to be displayed, maximum is currently set to 4. If not given
+it defaults to 1.
+@item
+Number of points, if missing or zero will be treated as unknown. Negative
+values will also be treated as unknown. If the given value is too small to
+fit the data it is adjusted automatically so that all data fit into the
+display.
+@item
+Start value of x-axis. If missing (or undefined, see next point) point
+numbers are printed, starting with 1 (if FORTRAN style array offsets are
+used, for C style arrays the starting value is 0).
+@item
+Increment for data along the x-axis (thus restricting the display to equally
+spaced data). Setting it to zero implies that the start value and the
+increment are undefined and point numbers are shown instead. Negative
+increments are handled correctly.
+@item
+String variable with label to be shown at the x-axis.
+@item
+String variable with label to be shown at the y-axis.
+@end enumerate
+
+Formally, the function with its arguments can be written as
+
+@example
+init_1d( [ n_curves [ , n_points [ , start, increment ] ], ]
+         [ x_label [ , y_label ] ] )
+@end example
+@noindent
+This means that the function can be called in all of the follwing ways:
+
+@example
+init_1d( n_curves, n_points, start, increment, x_label, y_label )
+init_1d( n_curves, n_points, start, increment, x_label )
+init_1d( n_curves, n_points, x_label, y_label )
+init_1d( n_curves, n_points, x_label )
+init_1d( n_curves, n_points )
+init_1d( n_curves, x_label, y_label )
+init_1d( n_curves, x_label )
+init_1d( n_curves )
+init_1d( x_label, y_label )
+init_1d( x_label )
+init_1d( )
+@end example
+
+In error messages the start value and the increment of the data displayed at
+the x-axis are (in contrast to the point numbers) refered to as `real world
+coordinates'.
+
+@item init_2d()
+@findex init_2d()
+Initializes the display for two-dimensional experiments - without a call to
+this function no data will be displayed. The function takes up to nine
+arguments but all of them are optional. They are:
+
+@enumerate
+@item
+Number of data sets to be displayed, maximum is currently set to 4. If not
+given it defaults to 1.
+@item
+Number of points in x-direction, if missing will be treated as unknown. Also a
+zero value indicates that the value is unknown. If you enter a negative value
+this will be treated as a guess.
+@item
+Number of points in y-direction, if missing will be treated as unknown. A
+non-positive value means the value is unknown.
+@item
+Start value of x-axis. If missing point (or undefined, see next point) numbers
+are printed, starting with 1 (or 0, depending on the setting for array
+start-offsets).
+@item
+Increment for data along the x-axis (thus restricting the display to equally
+spaced data). Setting it to zero implies that the start value and the
+increment are undefined and point numbers are shown instead.
+@item
+Start value of y-axis.
+@item
+Increment for data along the y-axis.
+@item
+String variable with label to be shown at the x-axis.
+@item                
+String variable with label to be shown at the y-axis.
+@item
+String variable with label to be shown at the z-axis.
+@end enumerate
+
+Formally, the function with its arguments can be written as
+
+@example
+init_2d( [ n_data_sets [ , n_x_points [ , n_y_points, 
+         [ , x-start, x-increment, y-start, y-increment ] ,
+         ]  ]  ] [ x-label [ , y-label [ , z-label ] ] ] )
+@end example
+
+
+@item display( )
+@findex display()
+This function has to be called to display data in 1-dimensional as well as
+2-dimensional experiments. It takes the following arguments:
+
+@enumerate
+@item
+The (x) point number of the data point or the point number of the first data
+point in the data array.
+@item
+Only in 2D-experiments: The y-point number of the data point or the point
+number of the first data point in the data array.
+@item
+The data point or an (one-dimensional) array of data.
+@item
+Number of the curve or data set the data are to be displayed in. If missing it
+defaults to the first curve, 1. If there is more than one data set given
+in the @code{display()} command the curve number @strong{can't} be left out.
+@end enumerate
+These arguments can be repeated as many times as there are data to be
+displayed simultaneously (but in this case none of the arguments may be left
+out!).
+
+Formally, the function with its arguments can be written for 1D-experiments as
+
+@example
+display( n_x_point, data [ , n_curve ] [ , ... ] )
+@end example
+@noindent
+while for 2D-experiments it is
+
+@example
+display( n_x_point, n_y_point, data [ , n_curve ] [ , ... ] )
+@end example
+
+@item clear_curve( )
+@findex clear_curve( )
+Removes one or more curves from the display. Use a list of curve numbers
+as arguments, no argument defaults to the first curve.
+
+@item get_file( )
+@findex get_file()
+Opens a new file and returns a unique identifier for the file that can
+be stored in an integer variable ans is to be used in calls to functions
+of the @code{save_xxx()}-family. If no argument is given a file selector
+is shown and to let the user choose a file. If an argment s given (that
+has to be a string!) the file with this name is opened.  If opening the
+file fails the user is asked to select a different file name.  If the
+user cancels the selection of a file she is asked for confirmation since
+data may get lost.
+
+If @code{get_file()} is never called, on the first call to a function
+from the @code{save_xxx()}-family the user is asked to select a file and
+this file is used exclusively in further @code{save_xxx()}-calls.
+I.e.@: either @code{get_file()} is called before any save-operation or
+never at all!
+
+@item save()
+@findex save()
+Saves one or more data or one-dimensional arrays. The first argument is a
+file identifier as returned by @code{get_file()}. If
+@code{get_file()} never has been called before the user is asked to
+select a file, but use of more than this file then becomes impossible!
+
+All arguments following the (optional) file identifier are data. The types of
+these data may be
+
+@itemize @bullet
+@item
+Integer data
+@item
+Floating point data
+@item
+Strings (with no interpretation of escape sequences, see also
+@code{fsave()})
+@item
+One-dimensional arrays (or slices of arrays) of integer or floationg point
+type
+@item
+Complete more-dimensional arrays
+@end itemize
+
+This form of the function saves data in an unformated fashion, i.e.@:
+each data value is written onto a new line. The only exception is
+more-dimensional arrays - here a empty line is printed between the
+individual slices of the array. Here's an example: The array
+
+@example
+X[ 3, 2 ] = @{ 1, 2, 3, 4, 5, 6 @}
+@end example
+@noindent
+will be printed as
+
+@example
+1
+2
+
+3
+4
+
+5
+6
+@end example
+
+@item fsave()
+@findex fsave()
+This function may be used to write data in a formated way into a
+file. As in the case of the @code{save()} function the first argument
+may be a file identifier. The next argument must be a @i{format string}
+with exactly he same syntax as in the @code{print()} function,
+i.e.@: there must be one @code{#} character for each data item. In
+contrast to the @code{save()} function this function can not be used to
+print array slices or complete arrays, but only simple data types. On
+the other hand, printing of complete arrays can be done using loops,
+i.e.@: as in the following example:
+
+@example
+VARIABLES:
+
+FILE_ID;
+I; J;
+X[ 3, 2 ] = @{ 1, 2, 3, 4, 5, 6 @};
+
+EXPERIMENT:
+
+FILE_ID = get_file( );
+
+for I = 1 : 3 @{
+    for J = 1 : 2 @{
+        fsave( FILLE_ID, "X[ #, # ] = #\n", I, J, X[ I, J ] );
+    @}
+@}
+@end example
+@noindent
+This will print:
+
+@example
+X[ 1, 1 ] = 1
+X[ 1, 2 ] = 2
+X[ 2, 1 ] = 3
+X[ 2, 2 ] = 4
+X[ 3, 1 ] = 5
+X[ 3, 2 ] = 6
+@end example
+
+
+@item save_program()
+@findex save_program()
+This functions writes the @b{EDL} program into a file. As usual, the
+first arguiment may be a file identifier - the same rules apply as for
+@code{save()} and @code{fsave()}. The second argument may be a string
+that is prepended to each line of the program, i.e.@: a comment character
+to make other programs like @code{MATHLAB} or @code{octave} skip these
+lines.
+
+
+@item save_output()
+@findex save_output()
+This function has the same arguments as @code{save_program()} but prints
+the content of the output window into the file.
+
+
+@item save_comment()
+@findex save_comment()
+This function is used to print comments into the file. When it is called a
+small editor is shown and the user may write her comments. These will be then
+written into the file.
+
+The first argument may as usual be a file identifier. The second
+argument is again a string to be prepended to each line of the
+comment. The third argument is a string that wil appear in the comment
+editor when it is opened - use "@code{\n}" to seperate the lines of a
+multi-line text. The last argument is the label string to be shown on
+top of the editor - it defaults to "Please enter a comment:".
+@end table
+
+@subsection Auxillary functions
+
+@table @samp
+@item wait()
+@findex wait()
+Waits for the specified time. Times are always to be given in
+nanoseconds or alternatively with a unit, e.g.@: @w{100
+ms}. Unfortunately, the time resolution of @code{wait()} is in the @w{10
+ms} range and may even be less exact.
+
+@item dim()
+@findex dim()
+The function returns the dimension of the array passed to it as
+argument. I.e.@: for the array
+
+@example
+X[ 4, 2, 5 ]
+@end example
+@noindent
+it will return 3.
+
+@item size()
+@findex size()
+The function takes two arguments, an array and one of the dimensions of the
+aray, and returns the size of this dimension. I.e.@: for an array defined as
+@code{X[ 4, 2, 5 ]} @code{size( X, 3 )} will return 5.
+
+@item sizes()
+@findex sizes()
+Ths function is similar to @code{size()} but only takes an array as
+argument an returns a new one-dimensional array with the sizes of the
+different dimensions. I.e.@:, use it the follwing way:
+
+@example
+X[ 4, 2, 5 ]
+Dim_X[ * ];
+
+Dim_X = size( X );
+@end example
+@end table
+
+
+
+@subsection Mathematical functions
+@cindex mathematical functions
+
+@table @samp
+@item int()
+@findex int()
+Converts a number to integer type by truncating all digits following the
+decimal point.
+
+@item float()
+@findex float()
+Converts a number to floating point type.
+
+@item round()
+@findex round()
+Converts a floating point number to the nearest integer, i.e.@:
+
+@example
+round( 8.5 ) = 9    round( 8.49 ) = 8    round( -1.75 ) = -2
+@end example
+
+@item floor()
+@findex floor()
+Converts a floating point number to the largest integer that is not larger
+than the argument, i.e.@:
+
+@example
+floor( 8.6 ) = 8    floor( -8.6 ) = -9
+@end example
+
+@item ceil()
+@findex ceil()
+Converts a floating point number to the smallest integer that is not less than
+the argument, i.e.@:
+
+@example
+round( 8.6 ) = 9     round( -8.6 ) = -8
+@end example
+
+@item abs()
+@findex abs()
+Returns the absolut value of an integer or floating point number.
+
+@item sqrt()
+@findex sqrt()
+Returns the square root of an integer or floating point number. The
+argument must be a positive number.
+
+@item random()
+@findex random()
+Returns a pseudo-random number in the interval @w{[0, 1]}.
+
+@item set_seed()
+@findex set_seed()
+Sets a seed for the random number generator used in the function
+@code{random()} function. The argument has to be a positve integer.
+
+@item sin()
+@findex sin()
+Returns the sine of the argument, with the argument interpreted as the angle
+in radian.
+
+@item cos()
+@findex cos()
+Returns the cosine of the argument, with the argument interpreted as the angle
+in radian.
+
+@item tan()
+@findex tan()
+Returns the tangent of the argument, with the argument interpreted as the angle
+in radian.
+
+@item asin()
+@findex asin()
+Returns the inverse of the sine function of the argument as an angle in
+radian. The argument must be in the interval @w{[-1, 1]}, the
+result an element of the interval @w{[-pi/2, pi/2]}.
+
+@item acos()
+@findex acos()
+Returns the inverse of the cosine function of the argument as an angle
+in radian. The argument must be in the interval @w{[-1, 1]}, the result
+an element of the interval @w{[0, pi]}.
+
+@item atan()
+@findex atan()
+Returns the inverse of the tangent function of the argument as an angle in
+radian, the result an element of the interval @w{[-pi, pi]}.
+
+@item sinh()
+@findex sinh()
+Returns the hyperbolic sine of the argument.
+
+@item cosh()
+@findex cosh()
+Returns the hyperbolic cosine of the argument.
+
+@item tanh()
+@findex tanh()
+Returns the hyperbolic tangent of the argument.
+
+@end table

@@ -1,0 +1,70 @@
+@c $Id$
+
+\input texinfo   @c -*-texinfo-*-
+@c %**start of header
+@setfilename fsc2.info
+@settitle fsc2
+@set lastupdate November 6, 1999
+@iftex
+@afourpaper
+@end iftex
+@c %**end of header
+
+
+@syncodeindex fn cp
+
+
+@titlepage
+@sp 6
+@center @titlefont{fsc2}
+@sp 4
+@center A program for remote control of EPR spetrometers
+@sp 2
+@center May 2000
+@sp 10
+@center Jens Thoms T@"orring
+@end titlepage
+
+
+@direntry
+* fsc2: (fsc2). A program for remote control of EPR spetrometers.
+@end direntry
+
+
+
+@ifinfo
+@node Top, , (dir), (dir)
+@top Top
+
+This text describes fsc2, a program to control cw- and pulsed EPR
+spectrometer. Basically, fsc2 is an interpreter to run a program that
+describes how the experiment is to be done. After an overview the syntax
+to be used is explained. This is followed by a section about the
+built-in functions that may be used in the program. Finally, it is
+explained who one can write modules for new devices to be used in the
+experiment.
+
+
+@menu
+* Overview::                Basic concepts of fsc2.
+* EDL::                     Description of EDL the language.
+* Functions::               Built-in functions.
+* Modules::                 How to create new modules.
+* Index::                   List of all indexed words.
+@end menu
+
+@end ifinfo
+
+
+@include overview.texi
+@include edl.texi
+@include builtins.texi
+@include modules.texi
+
+@node Index, , , Top
+@unnumbered Index
+@printindex cp
+
+@contents
+
+@bye

@@ -1,0 +1,402 @@
+@c $Id$
+
+@node EDL, Functions, Overview, Top
+@chapter EDL
+@cindex EDL
+
+This chapter describes the @b{EDL}language (@b{E}xperiment
+@b{D}escription @b{L}anguage)).
+
+@ifinfo
+@menu
+* Basics::                  Basic principles.
+* Sections::                The sections of an EDL program.
+* Variables::               Using variables and arrays.
+* Control structures::      Flow control in an EDL program
+@end menu
+@end ifinfo
+
+
+@node Basics, Sections, EDL, EDL
+@section Basics
+@cindex basic EDL structure 
+
+
+
+EDL is in many respects quite similar to other computer languages like
+C, FORTRAN or BASIC etc. You can use variables to do computations, you
+have flow control structures like if-else-constructs and for- and
+while-loops and there is a set of built-in functions. On the other hand,
+since the purpose of EDL is to describe an EPR experiment, there are
+also some differences. The most noticeable is the overall structure
+of an EDL program.
+
+Each EDL program is divided into a set of sections that are somewhat
+related to the way a real-life experiment is done. In such an experiment
+you will first decide which devices you need. This is reflected in the
+DEVICES section of an EDL file where you simply list all the devices to
+be used in the experiment (at least the ones to be controlled by the
+computer). The next section, the VARIABLES section, unfortunately
+doesn't have a real-world equivalent -- here you have to declare all
+variables and arrays you will use in the rest of the program and,
+optionally, initialise them. Next, in a pulsed experiment, you will
+probably set the pulser. This is partly done in the ASSIGNMENTS
+section. For a pulsed experiment you may also want to decide about the
+kind of phase-cycling to use in the experiment -- this goes into the
+PHASES section. Now follows the PREPARATIONS section: here all the
+devices are set up. For example, here you define all pulses, i.e.@:
+their positions and lengths as well as the way they should be changed in
+the experiment. Or you tell the program the start value of the magnetic
+field and the amount the field has to be increased (or decreased)
+between data points. And when you're done with setting up the devices
+you will finally start the experiment: this coincides with the start of
+the EXPERIMENT section.
+
+Due to the different purposes of the sections there are differences in
+the syntax to be used in the various sections.
+
+
+
+@node Sections, Variables, Basics, EDL
+@section Sections
+@cindex section
+
+
+Each @b{EDL} file consists of at least one of 6 different types of
+sections.
+
+
+@node Variables, Control structures, Sections, EDL
+
+@section Devices
+@cindex devices
+
+
+The DEVICES section has a very simple syntax, after a line with just
+@example
+DEVICES:
+@end example
+@noindent
+to announce the start of this section, a semicolon separated list of the
+devices to be used in the experiment follows. It doesn't matter if you
+write the device names with lower or upper case letters, they will
+automatically be converted to all lower case.
+
+
+@section Variables
+@cindex variables
+@cindex arrays
+
+
+Within the VARAIBLES, ASSIGNMENTS, PREPARATIONS and EXPERIMENT section
+variables may be used. Each variable to be used has to be declared,
+i.e.@: it has to be listed in the VARIABLES section before it may be
+used. The start of te VARIABLES section is declared by a line stating
+@example
+VARIABLES:
+@end example
+
+
+
+@subsection Variable names
+
+Names of variables always must start with a character, i.e.@: A-Z and
+a-z. The remaining part of the variable name can consist of characters,
+numbers and the underscore character, '_' (or in short, if you prefer
+regular expressions: @code{[A-Za-z][A-Za-z_0-9]*}). Thus, 'AbC_12x' and
+'aBc_12X' are legal variable names, while '12xy' or '_Yx2'
+aren't. Please take note that the variable names are case sensitive,
+i.e.@: 'XY', 'Xy', 'xY' and 'xy' are four different variable names!
+
+
+There are a few exceptions to the valid variable names because a few
+characters or character combinations are already used for physical units
+as well as combinations of these with the characters @code{n} (nano),
+@code{u} (micro), @code{m} (milli), @code{k} (kilo) and @code{M} (mega).
+These are
+@table @samp
+@item s
+Seconds (and @code{ns, us, ms, ks} and @code{Ms})
+@item G
+Gauss (and @code{nG, uG, mG, kG} and @code{MG})
+@item T
+Tesla (and @code{nT, uT} and @code{mT})
+@item V
+Volt (and @code{nV, uV, mV, kV} and @code{MV})
+@item A
+Ampere (and @code{nA, uA, mA, kA} and @code{MA})
+@item Hz
+Hertz (and @code{nHz, uHz, mHz, kHz} and @code{MHz})
+@end table
+
+Of course, also the reserved words can't be used as variable names. But
+they are easy to avoid, because all reserved words are spelt in capital
+letters only.
+
+
+@subsection Variable types
+
+
+Variables cam be divided into two classes, variables to hold integer
+values and variables for storing floating point values.
+
+
+Integer variables can hold data from the interval @w{[-2^31, 2^31 - 1]},
+i.e. they run from -2147483648 all the way up to +2147483647. In
+contrast, floating point variables can have much larger values (up to ca.@:
+10^300), the exact limits depending on the machine fsc2 is running on.
+
+
+To distinguish between integer and floating point variables the
+following convention is used:
+@cite{The names of all integer variables start with a upper case letter,
+i.e.@: A-Z, while the names of floating point variables start with a
+lower case character, i.e.@: a-z.}
+
+
+
+@subsection Arithmetic
+@cindex arithmetic
+
+There are the usual arithmetic operations built into fsc2, i.e.@:
+addition, subtraction, multiplication and division. They can be applied
+to simple integer and floating point values and variables only. If one
+of the values is a floating point value the result is also a floating
+point number - only if both values are integer the result also has
+integer type.
+
+Some care has to be taken in arithmetic with integers.
+@cindex integer overflow
+@cindex integer underflow
+@cindex overflow, integers
+@cindex underflow, integers
+@cindex range of integers
+@cindex integers, range of
+The range of values an integer variable can have is restricted to the
+interval @w{[-2147483648, +2147483647]}, i.e.@: @w{[-2^31, 2^31 - 1]}
+(at least on a 32-bit processor). Thus, it isn't to difficult to create
+numbers with greater values, e.g.@: by multiplication, that can't be
+represented by an integer! In this case the result of the operation will
+be completely bogus, e.g.@:
+
+@example
+1000000 * 3000 = -1294967296
+@end example
+@noindent
+(There is actually some logic behind this result but that doesn't help
+much.)  So, if you suspect the result of an integer operation to exceed
+the range of representable values, convert the values to floating point
+type (see the function @code{float()} below) before you do the
+potentially problematic arithmetic operation.
+
+Of course, there are also limits to the range of numbers representable by a
+floating point number. Fortunately, these limits are much larger - typically
+the size of the maximum numbers is in the range of 10^300.
+@cindex floating point numbers, range of
+@cindex range of floating point numbers
+@cindex floating point overflow
+@cindex floating point underflow
+@cindex overflow, floating point numbers
+@cindex underflow, floating point numbers
+
+Another important point about calculations involving integers concerns the
+division. The result of the division of two integer values is again an integer
+value. For non-integer results this is achieved by simply truncating the
+digits following the decimal point. Thus, typical results are
+
+@example
+7 / 2 = 3     8 / 3 = 2     -7 / 2 = -3
+@end example
+@cindex integer division
+@noindent
+To avoid this truncation convert (see the function @code{float()} below)
+at least one of the values used in the division to floating point type,
+i.e
+
+@example
+float( 7 ) / 2 = 3.5    8 / float( 3 ) = 2.666666667
+@end example
+
+
+Beside the normal arithmetic operations there are two more operations, the
+modulo and the exponentiation. For the modulo operation the percent sign
+@code{%}
+@findex % @r{(modulo function)}
+@cindex modulo function
+is used and the result is the remainder of the division, e.g.@:
+
+@example
+7 % 3 = 2         6.5 % 2.5 = 1.5 
+@end example
+
+
+For the exponentiation the caret character @code{^} is to be used, e.g.@:
+@findex ^ @r{(exponentation)}
+@cindex exponentation
+
+@example
+3^2 = 9           6.5 ^ 1.5 = 16.5718134219...
+@end example
+@noindent
+As usual, non-integer exponents can only be used with non-negative bases!
+
+
+
+@node Control structures, , Variables, EDL
+@section Control structures
+@cindex control structures
+@cindex flow control
+
+
+
+
+
+Within the EXPERIMENT section flow control structures can be used. These
+are FOR, WHILE and REPEAT loops and IF-ELSE constructs. (Please note:
+all of these keywords have to be spelt in capital letters!).
+
+
+Most flow control construct keywords are followed by a condition and all
+are then followed by a block of statements. Such a block of statements
+has to be enclosed in curly braces and may contain as many statements as
+needed (or still fit into the memory).
+
+
+The most simple construct is the REPEAT loop. What is needed following
+the keyword REPEAT is a number and a block with commands. The number
+should be an integer number (or an expression resulting in an integer).
+The following block of statements will now be repeated as many times as
+specified by the number (or expression). Here's an example:
+
+@example
+    I = 0;
+    SUM = 0;
+
+    REPEAT 100 @{
+        I = I + 1;
+        SUM = SUM + I;
+    @}
+@end example
+
+This snippet will calculate the sum of all integers between 1 and 100
+(of course, there are more elegant ways to do this, but it's just an
+example). After the initialization of the two variables `I' and `SUM'
+the REPEAT loop starts with 100 as the number of repetitions. Now, in
+curly braces, i.e.@: between `@{' and `@}', follow the statements to be
+executed in the loop.
+
+Nearly as simple a construct is the WHILE loop: following the keyword a
+condition is needed first. Usually, this will be a comparison between two
+numbers, but also a simple number will suffice -- if its value is non-zero
+it will be interpreted as TRUE. Of course, the keyword and the condition
+have to be followed by a block of statements.
+
+Again, an example:
+
+@example
+    I = 1;
+    Fact = 1;
+
+    WHILE I <= 6 @{
+        I = I + 1;
+        Fact = Fact * I;
+    @}
+@end example
+
+This program snippet (that could also have been written using a REPEAT
+loop) calculates the factorial of 6. After initializing `I' and `Fact'
+it is tested in the loop condition if `I' is still not larger that 6. If
+this is true, the following block of statements is executed.
+
+Here is a complete list of the comparison operators between to numbers:
+
+@multitable{==} {compare for equality (don't confuse with the single `=' that is used in assignments)}
+@item @code{==} @tab compare for equality (don't confuse with the single `=' that is used in assignments)
+@item @code{!=} @tab TRUE if the numbers are unequal
+@item @code{<} @tab TRUE if the left side number is smaller than the
+right side number
+@item @code{>} @tab TRUE if the left side number is smaller or equal to the
+right side number
+@item @code{<} @tab TRUE if the left side number is larger than the
+right side number
+@item @code{>=} @tab TRUE if the left side number is larger or equal to the
+right side number
+@end multitable
+
+And here is also an example for using simple numbers in a condition,
+using that a non-zero value is always interpreted as TRUE:
+
+@example
+    I = 6;
+    Fact = 1;
+
+    WHILE I  @{
+        Fact = Fact * I;
+        I = I - 1;
+    @}
+@end example
+
+This example does exactly the same as the previous one, i.e.@: it
+calculates the factorial of 6. But the difference is that we start with
+`I' set to 6 and than decrement it succesively. Thus we can use `I' in
+the loops condition by simply checking if it still is non-zero and thus
+the condition still TRUE and repeating the loop as long as it is.
+
+Sometimes, you may want to check not for the truth but for the falsehood
+of an expression. In this case you have to prepend the expression with a
+exclamation mark, `!', to reverse the meaning of a test.
+
+If you want to check for combinations of expressions you can use the
+logical AND, OR or XOR (exclusive or) operators. Here is a list of these
+operators and their meaning:
+
+@multitable{~} {TRUE if left or right hand side expressions are TRUE but not both}
+@item @code{!} @tab Negate truth of an expression
+@item @code{&} @tab TRUE if left and right hand side expressions are TRUE
+@item @code{|} @tab TRUE if left or right hand side expressions are TRUE
+@item @code{~} @tab TRUE if left or right hand side expressions are TRUE but not both
+@end multitable
+
+
+Before the WIHLE loop on often has to initialize the loop variables and
+within the statement block the loop variable has to been updated. In
+many cases (for example in both the preceeding examples) it is simpler
+to use a FOR loop instead, because setting the loop variable as well as
+updating it is auomatically done in the condition part. Here's an
+example that does exactly the same as the first of the two preceeding
+examples:
+
+@example
+    Fact = 1;
+    FOR I = 1:6 @{
+        Fact = Fact * I;
+    @}
+@end example
+
+At the very start of the FOR loop the loop variable `I' is set to 1 and
+the block is run using this value. When it is done, `I' is automatically
+incremented by 1 and tested if it is still not larger than 6. If this is
+TRUE the loop is repeated with the new value of `I'. Take care: You can
+change `I' also within the loop, but you only should do this if you
+really mean it and know what you're doing!
+
+But we also can reproduce the second version of the factorial
+calculation using a FOR loop. Here it is:
+
+@example
+    Fact = 1;
+    FOR I = 6:1:-1 @{
+        Fact = Fact * I;
+    @}
+@end example
+
+Now `I' starts of with the value 6 and the third value in the FOR loop
+condition part is the value to be used for incrementing `I'. In our case
+it is -1, so `I' actually will be decremented until it is smaller than 1
+(the second value in the FOR loop condition). As you see, FOR loop
+variables can not only be incremented by 1 but by any value (integer
+or floating point ones). And, of course, the loop variable don't have to
+be an integer variable!
+
+
+Finally there's the IF-ELSE construct.
