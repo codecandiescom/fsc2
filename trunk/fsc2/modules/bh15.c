@@ -168,7 +168,7 @@ int bh15_exp_hook( void )
 int bh15_end_of_exp_hook( void )
 {
 	if ( ! bh15.is_needed )
-		return;
+		return 1;
 
 	if ( bh15.device >= 0 )
 	{

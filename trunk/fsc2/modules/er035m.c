@@ -329,7 +329,7 @@ try_again:
 int er035m_end_of_exp_hook( void )
 {
 	if ( ! nmr.is_needed )
-		return;
+		return 1;
 
 	if ( nmr.device >= 0 )
 		gpib_local( nmr.device );

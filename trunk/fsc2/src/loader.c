@@ -277,7 +277,7 @@ void run_end_of_exp_hooks( void )
 
 
 	/* Each of the end-of-experiment hooks must be run to get all instruments
-	   back in a usable state, eventhough the function failed for one */
+	   back in a usable state, even if the function fails for one of them */
 
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 	{
