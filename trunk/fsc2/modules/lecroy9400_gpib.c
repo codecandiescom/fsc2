@@ -37,6 +37,7 @@ bool lecroy9400_init( const char *name )
 	char buffer[ 100 ];
 	long len = 100;
 	int i;
+	unsigned int j;
 
 
 	is_acquiring = UNSET;
@@ -102,11 +103,26 @@ bool lecroy9400_init( const char *name )
 	/* Set up averaging for function channels */
 
 	for ( i = LECROY9400_FUNC_E; i <= LECROY9400_FUNC_F; i++ )
+	{
+		/* If the record length hasn't been set use one that is as least as
+		   long as the number of points we can fetch for an averaged curve
+		   (i.e. the number of points displayed on the screen which in turn
+		   is 10 times the number of points per division) */
+
+		if ( lecroy9400.rec_len[ i ] == UNDEFINED_REC_LEN )
+		{
+			for ( j = 0; j < CL_ENTRIES; j++ )
+				if ( cl[ j ] >= 10 * ppd[ lecroy9400.tb_index ] )
+					break;
+			lecroy9400.rec_len[ i ] = cl[ j ];
+		}
+
 		if ( lecroy9400.is_num_avg[ i ] )
 			lecroy9400_set_up_averaging( i, lecroy9400.source_ch[ i ],
 										 lecroy9400.num_avg[ i ],
-										 lecroy9400.rec_len[ i ],
-										 lecroy9400.is_reject[ i ] );
+										 lecroy9400.is_reject[ i ],
+										 lecroy9400.rec_len[ i ] );
+	}
 
 	return OK;
 }
@@ -494,11 +510,17 @@ bool lecroy9400_get_desc( int channel )
 }
 
 
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
 double lecroy9400_get_trigger_pos( void )
 {
 	return 0;
 }
 
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
 
 bool lecroy9400_set_trigger_pos( double position )
 {
@@ -507,8 +529,11 @@ bool lecroy9400_set_trigger_pos( double position )
 }
 
 
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
 void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
-								  long rec_len, bool reject )
+								  bool reject, long rec_len )
 {
 	char cmd[ 100 ];
 
@@ -541,10 +566,16 @@ void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
 
 
 
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
 void lecroy9400_finished( void )
 {
 }
 
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
 
 void lecroy9400_start_acquisition( void )
 {
@@ -561,6 +592,9 @@ void lecroy9400_start_acquisition( void )
 	is_acquiring = SET;
 }
 
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
 
 void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 						   bool use_cursor )
@@ -603,7 +637,7 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 	while ( 1 )
 	{
 		long cur_avg;
-		long i;
+		long j;
 
 		if ( DO_STOP )
 			THROW( USER_BREAK_EXCEPTION )
@@ -611,9 +645,9 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 		usleep( 20000 );
 
 		lecroy9400_get_desc( ch );
-		for ( cur_avg = 0, i = 0; i < 4; i++ )
+		for ( cur_avg = 0, j = 0; j < 4; j++ )
 			cur_avg = cur_avg * 256 +
-				( long ) lecroy9400.wv_desc[ ch ][ 102 + i ];
+				( long ) lecroy9400.wv_desc[ ch ][ 102 + j ];
 
 		if ( cur_avg >= lecroy9400.num_avg[ ch ] )
 			break;
@@ -662,6 +696,8 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 }
 
 
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
 
 void lecroy9400_free_running( void )
 {

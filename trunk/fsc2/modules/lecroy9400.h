@@ -40,7 +40,7 @@
 #define LECROY9400_TEST_NUM_AVG      10
 #define LECROY9400_TEST_TRIG_POS     0.1
 #define LECROY9400_TEST_TRIG_CHANNEL 0
-#define LECROY9400_TEST_REC_LEN      2000
+#define LECROY9400_TEST_REC_LEN      1250
 
 
 #define MAX_CHANNELS       9         /* number of channel names */

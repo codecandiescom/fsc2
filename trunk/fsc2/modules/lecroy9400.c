@@ -78,7 +78,7 @@ int lecroy9400_init_hook( void )
 	{
 		lecroy9400.source_ch[ i ]  = LECROY9400_CH1 + i - LECROY9400_FUNC_E;
 		lecroy9400.is_num_avg[ i ] = UNSET;
-		lecroy9400.rec_len[ i ]    = DEFAULT_REC_LEN;
+		lecroy9400.rec_len[ i ]    = UNDEFINED_REC_LEN;
 		lecroy9400.is_reject[ i ]  = UNSET;
 	}
 
@@ -427,6 +427,16 @@ Var *digitizer_timebase( Var *v )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
+Var *digitizer_time_per_point( Var *v )
+{
+	v = v;
+	return vars_push( FLOAT_VAR, tpp[ lecroy9400.tb_index ] );
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
 Var *digitizer_sensitivity( Var *v )
 {
 	long channel;
@@ -541,8 +551,18 @@ Var *digitizer_sensitivity( Var *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* Function for setting up averaging: 1. argument is one of the function  */
+/* channel doing the averaging, 2. argument is the source channel, either */
+/* channel 1 or 2, 3. argument is the number of averages to be done, 4.   */
+/* optional argument is either a number (as a truth value) or one of the  */
+/* strings "ON" or "OFF" to indicate if overflow rejection should be used */
+/* (defaults to off) and the 5. optional argument is the number of points */
+/* to average (defaults to a number at least as large as the maximum      */
+/* number of points that can be returned according to the time resolution */
+/* setting, if set only that many data points will be returned in acqui-  */
+/* sitions).                                                              */
+/*------------------------------------------------------------------------*/
 
 Var *digitizer_averaging( Var *v )
 {
@@ -603,7 +623,8 @@ Var *digitizer_averaging( Var *v )
 	
 	v = vars_pop( v );
 
-	/* Get the number of averages to use */
+	/* Get the number of averages to use - adjust value if necessary to one
+	   of the possible number of averages as given by the array 'na' */
 
 	if ( v == NULL )
 	{
@@ -657,73 +678,74 @@ Var *digitizer_averaging( Var *v )
 
 	v = vars_pop( v );
 
-	/* If there is a further argument this has to be the record length */
+	/* If there is a further argument this has to be the overflow rejection
+	   setting */
 
-	rec_len = lecroy9400.rec_len[ channel ];
-	reject = lecroy9400.is_reject[ channel ];
+	reject = UNSET;
+	rec_len = UNDEFINED_REC_LEN;
 
 	if ( v != NULL )
 	{
-		vars_check( v, INT_VAR );
+		vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
-		rec_len = v->val.lval;
-
-		if ( rec_len <= 0 )
+		if ( v->type == INT_VAR )
+			reject = v->val.lval != 0;
+		else if ( v->type == FLOAT_VAR )
+			reject = v->val.dval != 0.0;
+		else
 		{
-			eprint( FATAL, SET, "%s: Invalid zero or negative record length "
-					"in function %s().\n", DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
-
-		i = 0;
-		while ( 1 )
-		{
-			if ( i >= ( int ) NA_ENTRIES )
+			if ( ! strcasecmp( v->val.sptr, "OFF" ) )
+				reject = UNSET;
+			else if ( ! strcasecmp( v->val.sptr, "ON" ) )
+				reject = SET;
+			else
 			{
-				eprint( FATAL, SET, "%s: Record length %ld too long in "
-						"%s().\n", DEVICE_NAME, rec_len, Cur_Func );
+				eprint( FATAL, SET, "%s: Invalid argument in call of "
+						"function %s().\n", DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
 			}
-
-			if ( rec_len == cl[ i ] )
-				break;
-
-			if ( rec_len < cl[ i ] )
-			{
-				eprint( SEVERE, SET, "%s: Can't set record length to %ld, "
-						"using next larger allowed value of %ld instead.\n",
-						DEVICE_NAME, rec_len, cl[ i ] );
-				rec_len = cl[ i ];
-				break;
-			}
-
-			i++;
 		}
 
 		v = vars_pop( v );
 
-		/* Finally, there can be a boolean argument for setting rejection */
+		/* Last (optional) value is the number of points to use in averaging */
 
 		if ( v != NULL )
 		{
-			vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+			vars_check( v, INT_VAR );
 
-			if ( v->type == INT_VAR )
-				reject = v->val.lval != 0;
-			else if ( v->type == FLOAT_VAR )
-				reject = v->val.dval != 0.0;
-			else
+			rec_len = v->val.lval;
+
+			if ( rec_len <= 0 )
 			{
-				if ( ! strcasecmp( v->val.sptr, "OFF" ) )
-					reject = UNSET;
-				else if ( ! strcasecmp( v->val.sptr, "ON" ) )
-					reject = SET;
-				else
+				eprint( FATAL, SET, "%s: Invalid zero or negative record "
+						"length in function %s().\n", DEVICE_NAME, Cur_Func );
+				THROW( EXCEPTION )
+			}
+
+			i = 0;
+			while ( 1 )
+			{
+				if ( i >= ( int ) NA_ENTRIES )
 				{
-					eprint( FATAL, SET, "%s: Invalid argument in call of "
-							"function %s().\n", DEVICE_NAME, Cur_Func );
+					eprint( FATAL, SET, "%s: Record length %ld too long in "
+							"%s().\n", DEVICE_NAME, rec_len, Cur_Func );
 					THROW( EXCEPTION )
 				}
+
+				if ( rec_len == cl[ i ] )
+					break;
+
+				if ( rec_len < cl[ i ] )
+				{
+					eprint( SEVERE, SET, "%s: Can't set record length to %ld, "
+							"using next larger allowed value of %ld "
+							"instead.\n", DEVICE_NAME, rec_len, cl[ i ] );
+					rec_len = cl[ i ];
+					break;
+				}
+
+				i++;
 			}
 
 			v = vars_pop( v );
@@ -739,8 +761,8 @@ Var *digitizer_averaging( Var *v )
 		}
 	}
 
-	lecroy9400_set_up_averaging( channel, source_ch, num_avg, rec_len,
-								 reject );
+	lecroy9400_set_up_averaging( channel, source_ch, num_avg,
+								 reject, rec_len );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -782,7 +804,8 @@ Var *digitizer_num_averages( Var *v )
 
 	if ( TEST_RUN )
 	{
-		if ( lecroy9400.is_num_avg[ channel ] )
+		if ( lecroy9400.is_num_avg[ channel ] &&
+			 lecroy9400.rec_len[ channel ] != UNDEFINED_REC_LEN )
 			return vars_push( INT_VAR, lecroy9400.num_avg[ channel ] );
 		else
 			return vars_push( INT_VAR, LECROY9400_TEST_NUM_AVG );
@@ -1117,7 +1140,10 @@ static Var *get_curve( Var *v, bool use_cursor )
 		return nv;
 	}
 
-	length = lecroy9400.rec_len[ ch ];
+	if ( lecroy9400.rec_len[ ch ] == UNDEFINED_REC_LEN )
+		length = LECROY9400_TEST_REC_LEN;
+	else
+		length = lecroy9400.rec_len[ ch ];
 	array = T_malloc( length * sizeof( double ) );
 	for ( i = 0; i < length; i++ )
 		array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
