@@ -361,9 +361,7 @@ const char *rulbus_strerror( void )
 The function returns a pointer to a (read-only) string with a short
 descriptive text of the error encountered in the last invocation of
 one of the Rulbus functions (or "Success" if the last function call
-was successful). A NULL pointer gets returned if the RULBUS isn't
-open (i.e. rulbus_open() has never been called or rulbus_close() has
-been called before this function).
+was successful).
 
 
 ----------------------------------------------------------------------
