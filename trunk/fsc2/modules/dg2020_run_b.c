@@ -122,7 +122,6 @@ void dg2020_do_checks( FUNCTION *f )
   to the function passed as argument.
 ----------------------------------------------------------------------------*/
 
-
 void dg2020_set_pulses( FUNCTION *f )
 {
 	PULSE *p;
@@ -274,7 +273,7 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 /*----------------------------------------------------------------------------
   Changes the pulse pattern in the channels belonging to function 'f' so that
   the data in the pulser get in sync with the its internal representation.
-  Care has taken to minimize the number of commands and their length.
+  Some care has taken to minimize the number of commands and their length.
 ----------------------------------------------------------------------------*/
 
 void dg2020_commit( FUNCTION * f, bool flag )

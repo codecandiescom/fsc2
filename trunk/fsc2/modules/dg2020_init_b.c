@@ -520,13 +520,28 @@ static void dg2020_setup_phase_matrix( FUNCTION *f )
 
 	for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
 		for ( j = 0; j < f->pc_len; j++ )
-			if ( ! f->pm[ i * f->pc_len + j ] )
-				f->pcm[ i * f->pc_len + j ] = f->channel[ cur_channel ];
+			if ( f->pm[ i * f->pc_len + j ] )
+				f->pcm[ i * f->pc_len + j ] = f->channel[ cur_channel++ ];
 			else
 				f->pcm[ i * f->pc_len + j ] = f->channel[ 0 ];
 
 	T_free( f->pm );
 	f->pm = NULL;
+
+/*!!!*/
+	if ( f->pcm )
+	{
+		int i1, j1;
+		printf( "pcm for function `%s'\n", Function_Names[ f->self ] );
+		for ( i1 = 0; i1 < 5; i1++ )
+		{
+			printf( "%s ", Phase_Types[ i1 ] );
+			for ( j1 = 0; j1 < f->pc_len; j1++ )
+				printf( " %2d", f->pcm[ i1 * f->pc_len + j1 ]->self );
+			printf( "\n" );
+		}
+	}
+/*!!!*/
 }
 
 
@@ -565,23 +580,15 @@ static void dg2020_pulse_start_setup( void )
 
 		for ( j = 0; j < f->num_pulses; j++ )
 		{
-			if ( f->num_pods == 1 )
-			{
-				f->pulses[ j ]->channel = T_malloc( sizeof( CHANNEL * ) );
-				f->pulses[ j ]->channel[ 0 ] = f->channel[ 0 ];
-			}
-			else
-			{
-				f->pulses[ j ]->channel = T_malloc( f->pc_len *
-													sizeof( CHANNEL * ) );
-				for ( k = 0; k < f->pc_len; k++ )
-					f->pulses[ j ]->channel[ k ] = NULL;
+			f->pulses[ j ]->channel = T_malloc( f->pc_len *
+												sizeof( CHANNEL * ) );
+			for ( k = 0; k < f->pc_len; k++ )
+				f->pulses[ j ]->channel[ k ] = NULL;
 
-				for ( k = 0; k < f->pc_len; k++ )
-					f->pulses[ j ]->channel[ k ] =
-						f->pcm[ ( f->pulses[ j ]->pc->sequence[ k ]
-								  - PHASE_PLUS_X ) * f->pc_len + k ];
-			}
+			for ( k = 0; k < f->pc_len; k++ )
+				f->pulses[ j ]->channel[ k ] =
+					f->pcm[ ( f->pulses[ j ]->pc->sequence[ k ]
+							  - PHASE_PLUS_X ) * f->pc_len + k ];
 		}
 	}
 }
