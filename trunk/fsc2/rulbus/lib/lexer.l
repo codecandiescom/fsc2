@@ -42,7 +42,7 @@ static void count( void );
 
 %}
 
-STRING   ["'][^"']+["']
+STRING   [\"\'][^\"\']*[\"\']
 
 		/*---------------*/
 %%		/*     RULES     */
@@ -56,6 +56,7 @@ STRING   ["'][^"']+["']
 "name"     { count(); return NAME_TOKEN; }
 "type"     { count(); return TYPE_TOKEN; }
 "addr"     { count(); return ADDR_TOKEN; }
+"nchan"    { count(); return NCHAN_TOKEN; }
 "range"    { count(); return RANGE_TOKEN; }
 "polar"    { count(); return POLAR_TOKEN; }
 
@@ -90,7 +91,7 @@ STRING   ["'][^"']+["']
 
 			   count( );
                rulbus_lval.sval = p = rulbus_text + 1;
-			   while ( *p != '"' )
+			   while ( *p && *p != *rulbus_text )
                    p++;
                *p = '\0';
                return STR_TOKEN;

@@ -32,15 +32,12 @@ typedef struct RULBUS_ADC12_CARD RULBUS_ADC12_CARD;
 
 struct RULBUS_ADC12_CARD {
 	int handle;
+	int nchan;
 	double gain;
 	int trig_mode;
-	bool is_data;
 	int data;
 	unsigned char ctrl;
 };
-
-
-#define ADC12_MAX_CHANNELS   7          /* could als be 15 ! */
 
 
 #define DATA_LOW             0          /* read only */
@@ -136,6 +133,10 @@ int rulbus_adc12_card_init( int handle )
 	tmp += rulbus_num_adc12_cards++;
 
 	tmp->handle = handle;
+	if ( rulbus_card[ handle ].nchan >= 0 )
+		tmp->nchan = rulbus_card[ handle ].nchan;
+	else
+		tmp->nchan = ADC12_MAX_CHANNELS;
 	tmp->gain = 1.0;
 	tmp->trig_mode = RULBUS_ADC12_INT_TRIG;
 	tmp->ctrl = 0;
@@ -201,7 +202,7 @@ int rulbus_adc12_set_channel( int handle, int channel )
 	if ( ( card = rulbus_adc12_card_find( handle ) ) == NULL )
 		return RULBUS_INV_HND;
 
-	if ( channel < 0 || channel > ADC12_MAX_CHANNELS )
+	if ( channel < 0 || channel >= card->nchan )
 		return RULBUS_INV_ARG;
 
 	ctrl = ( card->ctrl & ~ CTRL_CHANNEL_MASK ) | channel;
@@ -210,7 +211,6 @@ int rulbus_adc12_set_channel( int handle, int channel )
 		return RULBUS_OK;
 
 	card->ctrl = ctrl;
-	card->is_data = UNSET;
 	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 ) )
 		 																  < 0 )
 		return retval;
@@ -253,7 +253,6 @@ int rulbus_adc12_set_gain( int handle, int gain )
 		return RULBUS_OK;
 
 	card->ctrl = ctrl;
-	card->is_data = UNSET;
 	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 ) )
 																		  < 0 )
 		return retval;
@@ -296,7 +295,6 @@ int rulbus_adc12_set_trigger_mode( int handle, int mode )
 
 	card->ctrl = ctrl;
 	card->trig_mode = mode;
-	card->is_data = UNSET;
 
 	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 ) )
 																		  < 0 )
@@ -308,19 +306,23 @@ int rulbus_adc12_set_trigger_mode( int handle, int mode )
 }
 
 
-/*-----------------------------------------------------------------------*
+/*----------------------------------------------------------------------*
  * Function for testing if a conversion is already finished. It returns
- * 1 if a conversion has already happened, otherwise 0. Since it doesn't
- * make sense calling the function when in internal trigger mode in this
- * case always 0 is returned.
- *-----------------------------------------------------------------------*/
+ * 1 and stores the voltage in what 'volts' points to if a conversion
+ * has already happened, otherwise 0. Since it doesn't make sense to
+ * call the function when in internal trigger mode, in this case always
+ * 0 is returned.
+ *----------------------------------------------------------------------*/
 
-int rulbus_adc12_conversion_done( int handle )
+int rulbus_adc12_check_convert( int handle, double *volts )
 {
 	RULBUS_ADC12_CARD *card;
 	unsigned char hi, low;
 	int retval;
 
+
+	if ( volts == NULL )
+		return RULBUS_INV_ARG;
 
 	if ( ( card = rulbus_adc12_card_find( handle ) ) == NULL )
 		return RULBUS_INV_HND;
@@ -329,11 +331,6 @@ int rulbus_adc12_conversion_done( int handle )
 
 	if ( card->trig_mode == RULBUS_ADC12_INT_TRIG )
 		return 0;
-
-	/* If we already detected a trigger and fetched the data also return */
-
-	if ( card->is_data )
-		return 1;
 
 	/* Check if a conversion has already happened which also means that an
 	   external trigger was received */
@@ -344,10 +341,8 @@ int rulbus_adc12_conversion_done( int handle )
 	if ( ! ( hi & STATUS_EOC ) )
 		return 0;
 
-	/* If the conversion is already done get also the low data byte and
-	   calculate the data value - that's what the user will get when she
-	   later calls rulbus_adc12_convert( ), By reading the low data byte
-	   also the EOC condition is cleared. */
+	/* If the conversion is already done also get the low data byte and
+	   return the value to the user */
 
 	if ( ( retval = rulbus_read( handle, DATA_LOW, &low, 1 ) ) < 0 )
 		return retval;
@@ -358,7 +353,7 @@ int rulbus_adc12_conversion_done( int handle )
 	if ( card->data & ADC12_BIT_OFFSET )
 		card->data = ADC12_BIT_OFFSET - card->data - 1;
 
-	card->is_data = SET;
+	*volts = ( VOLTAGE_SPAN / ADC12_RANGE ) * card->gain * card->data;
 	return 1;
 }
 
@@ -375,6 +370,9 @@ int rulbus_adc12_convert( int handle, double *volts )
 	unsigned char hi, low;
 
 
+	if ( volts == NULL )
+		return RULBUS_INV_ARG;
+
 	if ( ( card = rulbus_adc12_card_find( handle ) ) == NULL )
 		return RULBUS_INV_HND;
 
@@ -384,35 +382,25 @@ int rulbus_adc12_convert( int handle, double *volts )
 		 ( retval = rulbus_write( handle, TRIGGER_ADDR, &trig, 1 ) ) < 0 )
 		return retval;
 
-	/* Check the EOC (end of conversion) bit. Unless we're in external trigger
-	   mode and we already have fetched data repeat until it becomes set. */
+	/* Check the EOC (end of conversion) bit */
 
-	do {
+	do
+	{
 		if ( ( retval = rulbus_read( handle, STATUS_ADDR, &hi, 1 ) ) < 0 )
 			return retval;
-	} while ( ! ( hi & STATUS_EOC ) &&
-			  ! ( card->trig_mode == RULBUS_ADC12_INT_TRIG &&
-				  ! card->is_data ) );
-
-	/* If the EOC bit is set get the new data from the card, even though if
-	   this means throwing away data we already fetched in external trigger
-	   mode. */
-
-	if ( hi & STATUS_EOC )
-	{
-		/* Get the low data byte */
-
-		if ( ( retval = rulbus_read( handle, DATA_LOW, &low, 1 ) ) < 0 )
-			return retval;
-
-		/* Calculate the voltage from the dat we just received */
-
-		card->data = ( ( hi & STATUS_DATA_MASK ) << 8 ) | low;
-		if ( card->data & ADC12_BIT_OFFSET )
-			card->data = ADC12_BIT_OFFSET - card->data - 1;
 	}
+	while ( ! ( hi & STATUS_EOC ) );
 
-	card->is_data = UNSET;
+	/* Get the low data byte */
+
+	if ( ( retval = rulbus_read( handle, DATA_LOW, &low, 1 ) ) < 0 )
+		return retval;
+
+	/* Calculate the voltage from the dat we just received */
+
+	card->data = ( ( hi & STATUS_DATA_MASK ) << 8 ) | low;
+	if ( card->data & ADC12_BIT_OFFSET )
+		card->data = ADC12_BIT_OFFSET - card->data - 1;
 
 	*volts = ( VOLTAGE_SPAN / ADC12_RANGE ) * card->gain * card->data;
 	return RULBUS_OK;

@@ -73,8 +73,6 @@ typedef enum
 #define RULBUS_INVALID_ADDR     0xff
 
 
-
-
 #define RB8509   8509       /* 12-bit ADC card */
 #define RB8510   8510       /* 12-bit DAC card */
 #define RB8514   8514       /* Delay card */
@@ -84,6 +82,9 @@ typedef enum
 #define RB8510_WIDTH 2
 #define RB8514_WIDTH 4
 #define RB8515_WIDTH 1
+
+
+#define ADC12_MAX_CHANNELS   16          /* there are also some with only 8 */
 
 
 typedef struct RULBUS_CARD_LIST RULBUS_CARD_LIST;
@@ -96,6 +97,7 @@ struct RULBUS_CARD_LIST {
 	unsigned char width;
 	struct RULBUS_CARD_HANDLER *handler;
 	bool in_use;
+	int nchan;
 	int range;
 	int polar;
 };
