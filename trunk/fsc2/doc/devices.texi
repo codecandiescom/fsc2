@@ -1753,8 +1753,8 @@ of an @code{EDL} program.
 @anchor{pulser_show_pulses}
 @item pulser_show_pulses()
 @findex pulser_show_pulses()
-This function exists for the Berlin X-band pulser modules
-@code{dg2020_b} and @code{ep385} only. It allows to view the pulses as
+This function exists for the pulser modules @code{dg2020_b},
+@code{ep385} and @code{hfs9000} only. It allows to view the pulses as
 they become set during the test run. If this function is called an
 additional window pops up after the end of the test run which shows the
 position of all pulses at the start of the experiment. By using the
@@ -1775,8 +1775,8 @@ of an @code{EDL} program.
 @anchor{pulser_dump_pulses}
 @item pulser_dump_pulses()
 @findex pulser_dump_pulses()
-This function exists for the Berlin X-band pulser modules
-@code{dg2020_b} and @code{ep385} only. It requests the user to select a
+This function exists for the pulser modules @code{dg2020_b},
+@code{ep385} and @code{hfs9000} only. It requests the user to select a
 file name and then writes all pulse settings during the test run into
 the file in a format suitable to be used as input for the
 @code{fsc2_pulses} utility.

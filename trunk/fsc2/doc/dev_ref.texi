@@ -554,6 +554,8 @@ can range from @w{-4.7 V} to @w{4.7 V}.
 @item @code{pulser_pulse_reset()}     @tab @ref{pulser_pulse_reset}
 @item @code{pulser_lock_keyboard()}   @tab @ref{pulser_lock_keyboard}
 @item @code{pulser_stop_on_update()}  @tab @ref{pulser_stop_on_update}
+@item @code{pulser_show_pulses()}     @tab @ref{pulser_show_pulses}
+@item @code{pulser_dump_pulses()}     @tab @ref{pulser_dump_pulses}
 @end multitable
 
 

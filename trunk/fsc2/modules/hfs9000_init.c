@@ -25,6 +25,7 @@
 #include "hfs9000.h"
 
 
+static void hfs9000_init_print( FILE *fp );
 static void hfs9000_basic_pulse_check( void );
 static void hfs9000_basic_functions_check( void );
 static void hfs9000_pulse_start_setup( void );
@@ -40,6 +41,44 @@ void hfs9000_init_setup( void )
 	hfs9000_basic_pulse_check( );
 	hfs9000_basic_functions_check( );
 	hfs9000_pulse_start_setup( );
+
+	if ( hfs9000.dump_file != NULL )
+	{
+		hfs9000_init_print( hfs9000.dump_file );
+		hfs9000_dump_channels( hfs9000.dump_file );
+	}
+	if ( hfs9000.show_file != NULL )
+	{
+		hfs9000_init_print( hfs9000.show_file );
+		hfs9000_dump_channels( hfs9000.show_file );
+	}
+}
+
+
+/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+
+static void hfs9000_init_print( FILE *fp )
+{
+	FUNCTION *f;
+	int i;
+
+
+	if ( fp == NULL )
+		return;
+
+	fprintf( fp, "TB: %g\nD: %ld\n===\n", hfs9000.timebase,
+			 hfs9000.neg_delay );
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = hfs9000.function + i;
+
+		if ( ! f->is_needed )
+			continue;
+
+		fprintf( fp, "%s:%d %ld\n",
+				 f->name, f->channel->self, f->delay );
+	}
 }
 
 

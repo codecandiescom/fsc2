@@ -149,7 +149,7 @@ void dg2020_basic_pulse_check( void )
 		{
 			if ( p->function->num_pods == 1 )
 			{
-				print( FATAL, "Phase %ld needs phase cycling but its "
+				print( FATAL, "Pulse %ld needs phase cycling but its "
 					   "function '%s' has only one pod assigned to it.\n",
 					   p->num, p->function->name );
 				THROW( EXCEPTION );
@@ -280,8 +280,8 @@ static void dg2020_basic_functions_check( void )
 				continue;
 
 			f->num_pulses++;
-			f->pulses = PULSE_PP T_realloc( f->pulses,
-										   f->num_pulses * sizeof *f->pulses );
+			f->pulses = PULSE_PP T_realloc( f->pulses, f->num_pulses
+													   * sizeof *f->pulses );
 			f->pulses[ f->num_pulses - 1 ] = cp;
 
 			if ( cp->is_active )
@@ -584,8 +584,8 @@ static void dg2020_pulse_start_setup( void )
 
 		for ( j = 0; j < f->num_pulses; j++ )
 		{
-			f->pulses[ j ]->channel = CHANNEL_PP T_malloc( f->pc_len *
-														 sizeof( CHANNEL * ) );
+			f->pulses[ j ]->channel =
+						CHANNEL_PP T_malloc( f->pc_len * sizeof( CHANNEL * ) );
 			for ( k = 0; k < f->pc_len; k++ )
 				f->pulses[ j ]->channel[ k ] = NULL;
 
@@ -804,6 +804,8 @@ static void dg2020_create_shape_pulses( void )
 		np->is_old_pos = rp->is_old_pos;
 		np->is_old_len = rp->is_old_len;
 
+		np->channel = NULL;
+
 		np->needs_update = rp->needs_update;
 	}
 
@@ -933,6 +935,8 @@ static void dg2020_create_twt_pulses( void )
 
 		np->is_old_pos = rp->is_old_pos;
 		np->is_old_len = rp->is_old_len;
+
+		np->channel = NULL;
 
 		np->needs_update = rp->needs_update;
 	}
