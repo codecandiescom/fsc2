@@ -199,7 +199,7 @@ sub serve {
 
 	unsupported_request( $req, $maj, $min ) unless $req =~ /^(GET)|(HEAD)$/o;
 
-	# Send not too a rude reply if the client didn't send a Host field while
+	# Send not too rude a reply if the client didn't send a Host field while
 	# claiming to be HTTP/1.1 compliant
 
 	missing_host_field( $req, $maj, $min )

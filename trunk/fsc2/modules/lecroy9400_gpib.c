@@ -518,7 +518,7 @@ void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
 	if ( FSC2_MODE != EXPERIMENT )
 		return;
 
-	/* If the record length hasn't been set use the numbr of points on the
+	/* If the record length hasn't been set use the number of points on the
 	   screen (which depends on the time base). Otherwise check that the
 	   number we got isn't larger than the number of points on the screen
 	   and, if necessary reduce it. */

@@ -51,11 +51,12 @@ bool lecroy9400_init( void )
 
     /* Set digitizer to short form of replies, make it only send a line feed
 	   at the end of replies, switch off debugging, transmit data in one block
-	   without an END block marker (#I) and set the data format to binary with
-	   2 byte length. Then ask it for the status byte 1 to test if the device
+	   without an END block marker (#I) and set the data format to ASCII (we
+	   can't set it to binary when talking to the device over RS232) with
+	   16-bit data. Then ask it for the status byte 1 to test if the device
 	   reacts. */
 
-    if ( lecroy9400_write( "CHDR,OFF;CTRL,LF;CHLP,OFF;CBLS,-1;CFMT,A,WORD\n",
+    if ( lecroy9400_write( "CHDR,OFF;CTRL,LF;CHLP,OFF;CBLS,-1;CFMT,L,WORD\n",
 						   46 ) == FAIL ||
 		 lecroy9400_write( "STB,1\n", 6 ) == FAIL ||
 		 lecroy9400_read( buffer, &len ) == FAIL )
@@ -525,7 +526,7 @@ void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
 	if ( FSC2_MODE != EXPERIMENT )
 		return;
 
-	/* If the record length hasn't been set use the numbr of points on the
+	/* If the record length hasn't been set use the number of points on the
 	   screen (which depends on the time base). Otherwise check that the
 	   number we got isn't larger than the number of points on the screen
 	   and, if necessary reduce it. */
