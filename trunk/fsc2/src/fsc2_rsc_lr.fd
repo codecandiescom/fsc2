@@ -268,6 +268,24 @@ name: conn_button
 callback: conn_callback
 argument: 0
 
+--------------------
+class: FL_BUTTON
+type: HIDDEN_BUTTON
+box: 125 10 1 1
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NorthWest FL_East
+name: tb_wait_button
+callback: tb_wait_callback
+argument: 0
+
 =============== FORM ===============
 Name: run
 Width: 620
