@@ -9,6 +9,8 @@
    urgently need access to a real device for testing if this is the way to do
    it - the manual is no help at all at trying to figure out what to do...
 
+   Is this still valid?  2000/7/9
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
 
