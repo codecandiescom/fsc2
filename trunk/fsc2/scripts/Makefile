@@ -29,16 +29,23 @@ scripts = $(wildcard *.$(machine_name))
 # Some care has to be taken for the case that there are no scripts...
 
 install:
-	if [ -n "$(scripts)" ]; then                             \
-		for file in $(scripts); do                           \
-			install -m 755 -o $(OWNER) -g $(GROUP)           \
-				$$file $(bindir)/$${file%.$(machine_name)};  \
-		done;                                                \
+	if [ -n "$(scripts)" ]; then  \
+		$(MAKE) install_it;       \
 	fi
 
+install_it:
+	for file in $(scripts); do                           \
+		install -m 755 -o $(OWNER) -g $(GROUP)           \
+			$$file $(bindir)/$${file%.$(machine_name)};  \
+	done
+
+
 uninstall:
-	if [ -n "$(scripts)" ]; then                                    \
-		for file in $(scripts); do                                  \
-			-$(RM) $(RMFLAGS) $(bindir)/$${file%.$(machine_name)};  \
-		done;                                                       \
+	if [ -n "$(scripts)" ]; then  \
+		$(MAKE) uninstall_it;       \
 	fi
+
+uninstall_it:
+	for file in $(scripts); do                                  \
+		-$(RM) $(RMFLAGS) $(bindir)/$${file%.$(machine_name)};  \
+	done

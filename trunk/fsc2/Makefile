@@ -342,11 +342,12 @@ install:
 	$(MAKE) -C scripts install
 	$(MAKE) -C doc install
 
+
 uninstall:
 	-$(RM) $(RMFLAGS) $(libdir)/Functions
 	-$(RM) $(RMFLAGS) $(libdir)/Devices
-	-for f in `basename $(adir)/*.xpm`; do  \
-		$(RM) $(RMFLAGS) $(auxdir)/$$f;    \
+	-for file in `basename $(adir)/*.xpm`; do  \
+		$(RM) $(RMFLAGS) $(auxdir)/$$file;     \
 	done
 	$(MAKE) -C src uninstall
 	$(MAKE) -C modules uninstall
