@@ -61,6 +61,14 @@ enum {
 };
 
 
+enum {
+	   RED = 0,
+	   GREEN,
+	   BLUE
+};
+
+
+
 /* Define the different section types */
 
 enum {

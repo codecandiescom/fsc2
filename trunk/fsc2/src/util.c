@@ -298,10 +298,6 @@ void i2rgb( double h, int *rgb )
 /* red (1.0) are returned.                                                  */
 /*--------------------------------------------------------------------------*/
 
-#define RED   0
-#define GREEN 1
-#define BLUE  2
-
 void i22rgb( double h, int *rgb )
 {
 	if ( h < 0.0 )
