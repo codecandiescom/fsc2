@@ -784,9 +784,6 @@ int gpib_read( int device, char *buffer, long *length )
 static void gpib_read_end( const char *dev_name, char *buffer, long received,
 						   long expected )
 {
-    long i;
-
-
     if ( ll > LL_ERR || ( gpib_status & GPIB_ERR ) )
         gpib_log_function_end( "gpib_read", dev_name );
 
