@@ -234,8 +234,6 @@ void delete_stale_shms( void )
 
 			if ( ! strncmp( ( char * ) buf, "fsc2", 4 ) )
 			{
-				shmdt( buf );
-
 				/* Take care: the shm_nattch field in the shmid_ds structure
 				   has different types in different Linux versions, in older
 				   ones it is an unsigned short, nowadays an unsigned long.
@@ -250,8 +248,12 @@ void delete_stale_shms( void )
 				else
 					shmctl( shm_id, IPC_RMID, NULL );
 			}
-			else                                        /* wrong magic */
-				shmdt( buf );
+
+			/* Detach from the memory segment - if we called shmctl() with
+			   IPC_RMID on it it will no be deleted (as long as no other
+			   process is still attached to it). */
+
+			shmdt( buf );
 		}
 	}
 }
