@@ -2,7 +2,18 @@
    e.g. printing to gv) and *not* closing the exec()ed program results
    in a failure to initialize the GPIB bus when trying to start a new
    experiment in combination with using either the LLP or the National
-   Instrument GPIB driver and library is used. If this happens we need a
-   patch for setting the close-on-exec flag for the device file of the
-   GPIB board! Only tested to work correcty for my own GPIB driver/library
+   Instrument GPIB driver and library. If this happens we need a patch
+   for setting the close-on-exec flag for the device file of the GPIB
+   board! Only tested to work correcty for my own GPIB driver/library
    (thanks to Martin Fuchs for pointing out the problem).
+
+2. The Internet Explorer seems to have problems getting served corectly 
+   by the web server, as far as I heard sometimes the graphics don't get
+   delivered (again, Martin Fuchs found this problem).
+
+3. When increasing the magnification of the display of the measured data
+   more and more there is a point above which rubish will get displayed
+   (but the program does not crash). Since it is probably a lot of work
+   to get this cleaned up and, on the other hand, it only shows up under
+   unreasonable situations (i.e. when doing stress testing) solving the
+   problem has a rather low position on my priority list...
