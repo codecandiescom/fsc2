@@ -449,7 +449,23 @@ set_field( field );
    output the parameter to it */
 
 File = get_file( );
-save_comment( File, \"%\" );
+I = 1;
+pulser_state( \"ON\" );
+
+FOREVER {
+	wait( 1.1 * repeat_time * N_Avg );
+	data = - daq_get_voltage( CH0 );
+	display( I, data );
+	fsave( File, \"#,#\\n\", p2_to_p3_dist * ( I - 1 ) * 1.0e9, data );
+	pulser_shift( );
+	pulser_update( );
+	I += 1;
+}
+
+
+ON_STOP:
+
+pulser_state( \"OFF\" );
 
 fsave( File,
 	   \"% Date:                   # #\\n\"
@@ -466,23 +482,7 @@ fsave( File,
 	   P2.LENGTH * 1.0e9, P3.LENGTH * 1.0e9, p1_to_p2_dist * 1.0e9,
 	   p2_to_p3_dist * 1.0e9, p2_to_p3_incr * 1.0e9 );
 
-I = 1;
-pulser_state( \"ON\" );
-
-FOREVER {
-	wait( 1.1 * repeat_time * N_Avg );
-	data = - daq_get_voltage( CH0 );
-	display( I, data );
-	fsave( File, \"#,#\\n\", p2_to_p3_dist * ( I - 1 ) * 1.0e9, data );
-	pulser_shift( );
-	pulser_update( );	
-	I += 1;
-}
-
-
-ON_STOP:
-
-pulser_state( \"OFF\" );
+save_comment( File, \"%\" );
 ";
     close $fh;
 
