@@ -34,6 +34,7 @@ static struct {
 	char *lock_file;
 	bool have_lock;
 	bool is_open;
+	bool is_blocking;
 	int fd;
 	struct termios old_tio,
 		           new_tio;
@@ -125,13 +126,14 @@ void fsc2_serial_init( void )
 
 	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
 	{
-		Serial_Port[ i ].dev_file  = NULL;
-		Serial_Port[ i ].devname   = NULL;
-		Serial_Port[ i ].lock_file = UNSET;
-		Serial_Port[ i ].in_use    = UNSET;
-		Serial_Port[ i ].have_lock = UNSET;
-		Serial_Port[ i ].is_open   = UNSET;
-		Serial_Port[ i ].fd        = -1;
+		Serial_Port[ i ].dev_file    = NULL;
+		Serial_Port[ i ].devname     = NULL;
+		Serial_Port[ i ].lock_file   = UNSET;
+		Serial_Port[ i ].in_use      = UNSET;
+		Serial_Port[ i ].have_lock   = UNSET;
+		Serial_Port[ i ].is_open     = UNSET;
+		Serial_Port[ i ].is_blocking = UNSET;
+		Serial_Port[ i ].fd          = -1;
 	}
 #endif
 }
@@ -265,6 +267,7 @@ struct termios *fsc2_serial_open( int sn, const char *devname, int flags )
 
 	Serial_Port[ sn ].fd = fd;
 	Serial_Port[ sn ].is_open = SET;
+	Serial_Port[ sn ].is_blocking = ! ( flags & O_NONBLOCK );
 
 	return &Serial_Port[ sn ].new_tio;
 #else
@@ -331,13 +334,27 @@ ssize_t fsc2_serial_write( int sn, const void *buf, size_t count )
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Function for reading data from one of the serial ports. It expects  */
+/* 5 arguments, first the number of the serial port, then a buffer and */
+/* its length for returning the read in data, a timeout in us we are   */
+/* supposed to wait for data to readable on the serial port and        */
+/* finally a flag that tells if the function is to return immediately  */
+/* if as signal is received before any data could be read.             */
+/* if the timeout value in 'us_wait' is zero the function won't wait   */
+/* for data to appear on the serial port, when it is negative the      */
+/* function waits indefinitely long for data.                          */
+/* The function returns the number of read in data or -1 when an error */
+/* happened.                                                           */
+/*---------------------------------------------------------------------*/
 
-ssize_t fsc2_serial_read( int sn, void *buf, size_t count )
+ssize_t fsc2_serial_read( int sn, void *buf, size_t count,
+						  long us_wait, bool quit_on_signal )
 {
 	ssize_t read_count;
-
+	fd_set rfds;
+	struct timeval timeout;
+	struct timeval before, after;
 
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
 	{
@@ -346,7 +363,50 @@ ssize_t fsc2_serial_read( int sn, void *buf, size_t count )
 	}
 
 	raise_permissions( );
-	read_count = read( Serial_Port[ sn ].fd, buf, count );
+
+	/* If there is a non-negative timeout period and the serial port is
+	   opened in non-blocking mode wait for data for the specified
+	   timeout. A zero timeout means wait forever. */
+
+	if ( us_wait != 0 && ! Serial_Port[ sn ].is_blocking )
+	{
+		FD_ZERO( &rfds );
+		FD_SET( Serial_Port[ sn ].fd, &rfds );
+
+	read_retry:
+
+		timeout.tv_sec  = us_wait / 1000000;
+		timeout.tv_usec = us_wait % 1000000;
+
+		gettimeofday( &before, NULL );
+
+		switch ( select( Serial_Port[ sn ].fd + 1, &rfds, NULL, NULL,
+						 us_wait > 0 ? &timeout : NULL ) )
+		{
+			case -1 :
+				if ( errno == ENOMEM )
+					print( FATAL, "Not enough memory while reading on serial "
+						   "port.\n" );
+
+				if ( errno == EINTR && ! quit_on_signal )
+				{
+					gettimeofday( &after, NULL );
+					us_wait -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
+							   - ( before.tv_sec * 1000000 - before.tv_usec );
+					goto read_retry;
+				}
+				/* fall through */
+
+			case 0 :
+				lower_permissions( );
+				return -1;
+		}
+	}
+
+	while ( ( read_count = read( Serial_Port[ sn ].fd, buf, count ) ) == -1 
+			&& errno == EINTR && ! quit_on_signal )
+		/* empty */ ;
+		
 	lower_permissions( );
 
 	return read_count;

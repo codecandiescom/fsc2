@@ -292,7 +292,7 @@ void spectrapro_300i_open( void )
 	spectrapro_300i.is_open = SET;
 
 	/* Now a quick check that we can talk to the monochromator, it should be
-	   able to send us its model string wihin one second or something is
+	   able to send us its model string within one second or something is
 	   definitely hosed... */
 
 	if ( ! spectrapro_300i_comm( SERIAL_WRITE, "MODEL\r" ) )
@@ -308,7 +308,6 @@ void spectrapro_300i_open( void )
 				 ! strncmp( reply + already_read - 5, " ok\r\n", 5 ) )
 				break;
 		}
-		fsc2_usleep( SPECTRAPRO_300I_WAIT, UNSET );
 		stop_on_user_request( );
 	}
 
@@ -1066,7 +1065,7 @@ static bool spectrapro_300i_read( char *buf, size_t *len )
 		   hit by the user. */
 
 	read_retry:
-		fsc2_usleep( SPECTRAPRO_300I_WAIT, SET );
+
 		TRY
 		{		
 			stop_on_user_request( );
@@ -1214,13 +1213,10 @@ static bool spectrapro_300i_comm( int type, ... )
 			lptr = va_arg( ap, size_t * );
 			va_end( ap );
 
-			len = fsc2_serial_read( SERIAL_PORT, buf, *lptr );
+			len = fsc2_serial_read( SERIAL_PORT, buf, *lptr,
+									SPECTRAPRO_300I_WAIT, UNSET );
 			if ( len < 0 )
-			{
-				if ( errno != EAGAIN && errno != EINTR )
-					return FAIL;
-				*lptr = 0;
-			}
+				return FAIL;
 			else
 				*lptr = len;
 			break;
