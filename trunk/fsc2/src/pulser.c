@@ -542,7 +542,7 @@ void p_set_max_seq_len( Var *v )
 	seq_len = VALUE( v );          /* sequence length is given in time units */
 	vars_pop( v );
 
-	seq_len = is_mult_ns( seq_len, "Maximum pattern length" )
+	seq_len = is_mult_ns( seq_len, "Maximum pattern length" );
 
 	/* Call the appropriate function (if it exists) */
 

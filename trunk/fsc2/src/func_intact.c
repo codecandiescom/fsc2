@@ -267,7 +267,7 @@ Var *f_bcreate( Var *v )
 	if ( v != NULL )
 	{
 		eprint( WARN, SET, "Superfluous arguments in call of %s().\n",
-				"Cur_Func );
+				Cur_Func );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
