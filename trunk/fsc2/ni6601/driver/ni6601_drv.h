@@ -142,21 +142,7 @@ typedef struct {
 
 #undef NI6601_DEBUG
 
-#include <linux/module.h>
-
-#include <linux/version.h>
-
 #include <linux/autoconf.h>
-
-
-#if ! defined ( CONFIG_PCI )
-#error "PCI support in kernel is missing."
-#endif
-
-
-#if ! defined( KERNEL_VERSION )
-#define KERNEL_VERSION( a, b, c ) ( ( ( a ) << 16 ) | ( ( b ) << 8 ) | ( c ) )
-#endif
 
 #if defined( CONFIG_MODVERSIONS ) && ! defined( MODVERSIONS )
 #define MODVERSIONS
@@ -164,6 +150,18 @@ typedef struct {
 
 #if defined( MODVERSIONS )
 #include <linux/modversions.h>
+#endif
+
+#include <linux/module.h>
+
+#include <linux/version.h>
+
+#if ! defined ( CONFIG_PCI )
+#error "PCI support in kernel is missing."
+#endif
+
+#if ! defined( KERNEL_VERSION )
+#define KERNEL_VERSION( a, b, c ) ( ( ( a ) << 16 ) | ( ( b ) << 8 ) | ( c ) )
 #endif
 
 #if defined( CONFIG_SMP ) && ! defined( __SMP__ )

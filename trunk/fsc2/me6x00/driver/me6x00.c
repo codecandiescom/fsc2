@@ -45,10 +45,6 @@
  */
 
 
-#include <linux/module.h>
-
-#include <linux/version.h>
-
 #include <linux/autoconf.h>
 
 #if defined( CONFIG_MODVERSIONS ) && ! defined( MODVERSIONS )
@@ -58,6 +54,9 @@
 #ifdef MODVERSIONS
 #include <linux/modversions.h>
 #endif
+
+#include <linux/module.h>
+#include <linux/version.h>
 
 #if defined( CONFIG_SMP ) && ! defined( __SMP__ )
 #define __SMP__
@@ -81,7 +80,6 @@
 #include <linux/unistd.h>
 #include <linux/poll.h>
 #include <linux/vmalloc.h>
-#include <asm/pgtable.h>
 #include <linux/mm.h>
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 2, 0 )
