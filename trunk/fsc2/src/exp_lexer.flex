@@ -247,6 +247,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "/"         return '/';       /* division operator */      
 "%"         return '%';       /* modulo operator */        
 "^"         return '^';       /* exponentiation operator */
+":"         return ':';       /* condition separator in for loops */
 
 			/* handling of end of statement character */
 ";"			return ';';
