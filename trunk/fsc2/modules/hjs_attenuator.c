@@ -25,12 +25,21 @@
 #include "hjs_attenuator.h"
 
 
+/* Global variables */
+
+
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
+HJS_ATTENUATOR hjs_attenuator;
 
-HJS_ATTENUATOR hjs_attenuator, hjs_attenuator_stored;
 
+/* Local variables */
+
+static HJS_ATTENUATOR hjs_attenuator_stored;
+
+
+/* Local functions */
 
 static bool hjs_attenuator_serial_init( void );
 static void hjs_attenuator_set_attenuation( long new_step );
@@ -135,8 +144,16 @@ Var *mw_attenuator_name( Var *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+/* Function allows to load a new list of attenuations versus */
+/* stepper motor positions from a file. When called without  */
+/* an argument the default calibration file is loaded, which */
+/* is defined in the configuration file for the module.      */
+/* The default calibration file is loaded immediately when   */
+/* the module got loaded, so it's not necessary to call the  */
+/* function unless a different calibration file is to be     */
+/* used.                                                     */
+/*-----------------------------------------------------------*/
 
 Var *mw_attenuator_use_table( Var *v )
 {
@@ -235,8 +252,12 @@ Var *mw_attenuator_initial_attenuation( Var *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* EDL function for querying or setting the attenuation. Calling  */
+/* the function requires that mw_attenuator_initial_attenuation() */
+/* has been called before to tell the module about the initial    */
+/* attenuation set at the device.                                 */
+/*----------------------------------------------------------------*/
 
 Var *mw_attenuator_attenuation( Var *v )
 {
@@ -300,6 +321,7 @@ static bool hjs_attenuator_serial_init( void )
 
 
 /*-----------------------------------------------------------------------*/
+/* Function for setting the new attenuation by moving the stepper motor. */
 /*-----------------------------------------------------------------------*/
 
 static void hjs_attenuator_set_attenuation( long new_step )
@@ -316,6 +338,8 @@ static void hjs_attenuator_set_attenuation( long new_step )
 	if ( steps == 0 )
 		return;
 
+	/* Assemble the command ans send it to the device */
+
 	cmd = get_string( "@01\n@0A %+ld,300\n", steps );
 	len = ( ssize_t ) strlen( cmd );
 
@@ -326,11 +350,16 @@ static void hjs_attenuator_set_attenuation( long new_step )
 	}
 
 	T_free( cmd );
+
+	/* Wait a bit for the motor to move */
+
 	fsc2_usleep( labs( steps ) * HJS_ATTENTUATOR_WAIT_PER_STEP, SET );
 	stop_on_user_request( );
 
 	/* To always reach the end point from the same side we go a bit further
-	   up when we come from below and then back down again. */
+	   up when we come from below and then back down again (obviously, the
+	   device allows to go a bit (50 steps) over the upper limit of steps
+	   given in the calibration file). */
 
     if ( steps < 0 )
 		return;
@@ -449,8 +478,15 @@ static FILE *hjs_attenuator_open_table( char *name )
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Function for determining the stepper motor position for a certain  */
+/* attenuation. The attenuation can't be negative and must be between */
+/* the minimum and maximum attenuation in the array of attenuation/   */
+/* motor position settings in the array read in from the calibration  */
+/* file. For attenutaions where there is no entry in the list linear  */
+/* interpolation (and rounded to the next integer position) between   */
+/* the neighboring entries is used.                                   */
+/*--------------------------------------------------------------------*/
 
 static long hjs_attenuator_att_to_step( double att )
 {
@@ -466,6 +502,9 @@ static long hjs_attenuator_att_to_step( double att )
 		print( FATAL, "Invalid negative attenuation of %.1f dB.\n", att );
 		THROW( EXCEPTION );
 	}
+
+	/* Check that the attenuation value is covered by the list, give it
+	   a bit of slack (0.1%) for rounding errors */
 
 	if ( att > hjs_attenuator.max_table_att * 1.001 )
 	{
@@ -487,6 +526,9 @@ static long hjs_attenuator_att_to_step( double att )
 
 	if ( att <= hjs_attenuator.min_table_att )
 		return hjs_attenuator.att_table[ 0 ].step;
+
+	/* Do a binary search of the list for the attenuation, interpolate if
+	   necesaary */
 
 	ind = hjs_attenuator.att_table_len / 2;
 	max_index = hjs_attenuator.att_table_len - 1;
