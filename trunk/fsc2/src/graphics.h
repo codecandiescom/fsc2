@@ -247,7 +247,7 @@ void create_pixmap( Canvas *c );
 void delete_pixmap( Canvas *c );
 void redraw_axis( int coord );
 void change_scale( int is_set, double *vals );
-void change_label( char *label );
+void change_label( char **label );
 void rescale( long new_nx, long new_ny );
 
 

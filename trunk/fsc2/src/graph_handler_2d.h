@@ -18,6 +18,7 @@ void repaint_canvas_2d( Canvas *c );
 void fs_rescale_2d( Curve_2d *cv );
 void make_scale_2d( Curve_2d *cv, Canvas *c, int coord );
 void save_scale_state_2d( Curve_2d *cv );
+void redraw_canvas_2d( Canvas *c );
 
 
 #endif   /* ! GRAPH_HANDLER_2D_HEADER */

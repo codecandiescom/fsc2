@@ -1140,7 +1140,7 @@ void redraw_all_2d( void )
 /* Does a complete redraw of a canvas. */
 /*-------------------------------------*/
 
-static void redraw_canvas_2d( Canvas *c )
+void redraw_canvas_2d( Canvas *c )
 {
 	long i, count;
 	Curve_2d *cv;
