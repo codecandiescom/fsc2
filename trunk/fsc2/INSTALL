@@ -1,7 +1,7 @@
 A) Requirements
 ===============
 
-The following tools and libraries are needed to create fsc2:
+The following tools and libraries are needed to compile and install fsc2:
 
  1) gmake
  2) gcc
