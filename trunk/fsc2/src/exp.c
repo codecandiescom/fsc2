@@ -16,7 +16,7 @@
    while setting it to too large a value will make it difficult for the user
    to stop the interpreter! */
 
-#define CHECK_FORMS_AFTER   65536
+#define CHECK_FORMS_AFTER   8192
 
 
 static bool in_for_lex = UNSET;   // set while handling for loop condition part

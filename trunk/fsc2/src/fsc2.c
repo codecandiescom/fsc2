@@ -34,7 +34,7 @@ static bool display_file( char *name, FILE *fp );
 static void start_editor( void );
 static void start_help_browser( void );
 static void set_main_signals( void );
-
+static void usage( void );
 
 
 /**************************/
@@ -88,6 +88,13 @@ int main( int argc, char *argv[ ] )
 		cur_arg = 1;
 		while ( cur_arg < argc )
 		{
+			if ( ! strcmp( argv[ cur_arg ], "-h" ) ||
+				 ! strcmp( argv[ cur_arg ], "--help" ) )
+			{
+				usage( );
+				return EXIT_SUCCESS;
+			}
+
 			if ( ! strcmp( argv[ cur_arg ], "-s" ) )
 			{
 				do_signal = SET;
@@ -231,6 +238,7 @@ int main( int argc, char *argv[ ] )
 
 		if ( do_signal )
 			kill( getppid( ), SIGUSR1 );
+
 		while ( fl_do_forms( ) != main_form->quit )
 			;
 	}
@@ -669,6 +677,7 @@ void test_file( FL_OBJECT *a, long b )
 	static bool running_test = UNSET;
 	static bool user_break = UNSET;
 	struct stat file_stat;
+	static bool in_test = UNSET;
 
 
 	a->u_ldata = 0;
@@ -686,8 +695,14 @@ void test_file( FL_OBJECT *a, long b )
 		delete_devices( );                       /* run the exit hooks ! */
 		eprint( FATAL, "Test of program aborted, received user break.\n" );
 		notify_conn( UNBUSY_SIGNAL );
+		in_test = UNSET;
 		THROW( EXCEPTION );
 	}
+
+	if ( in_test )
+		return;
+	else
+		in_test = SET;
 
 	/* Here starts the real action... */
 
@@ -695,6 +710,7 @@ void test_file( FL_OBJECT *a, long b )
 	{
 		fl_show_alert( "Error", "Sorry, but no file is loaded.", NULL, 1 );
 		notify_conn( UNBUSY_SIGNAL );
+		in_test = UNSET;
 		return;
 	}
 		
@@ -702,6 +718,7 @@ void test_file( FL_OBJECT *a, long b )
 	{
 		fl_show_alert( "Warning", "File has already been tested.", NULL, 1 );
 		notify_conn( UNBUSY_SIGNAL );
+		in_test = UNSET;
 		return;
 	}
 
@@ -717,12 +734,16 @@ void test_file( FL_OBJECT *a, long b )
 								  2, "No", "Yes", "", 1 ) )
 		{
 			notify_conn( UNBUSY_SIGNAL );
+			in_test = UNSET;
 			return;
 		}
 
 		load_file( main_form->browser, 1 );
 		if ( ! is_loaded )
+		{
+			in_test = UNSET;
 			return;
+		}
 		notify_conn( BUSY_SIGNAL );
 	}
 
@@ -775,6 +796,7 @@ void test_file( FL_OBJECT *a, long b )
 	fl_set_object_lcol( main_form->quit, FL_BLACK );
 
 	notify_conn( UNBUSY_SIGNAL );
+	in_test = UNSET;
 }
 
 
@@ -1259,4 +1281,30 @@ void notify_conn( int signo )
 	while ( ! conn_child_replied )
 		usleep( 50000 );
 	conn_child_replied = UNSET;
+}
+
+
+/*------------------------------------------------------------*/  
+/*------------------------------------------------------------*/  
+
+void usage( void )
+{
+	char *dd;
+
+	dd = get_string_copy( docdir );
+	if ( dd[ strlen( dd ) - 1 ] == '/' )
+		dd[ strlen( dd ) - 1 ] = '\0';
+	fprintf( stderr, "Usage: fsc2 [OPTIONS]... [FILE]\n"
+			 "A program for remote control of EPR spectrometers\n\n"
+			 "OPTIONS:\n"
+			 "  -t FILE      run syntax check on FILE and exit (no graphics)\n"
+			 "  -T FILE      run syntax check on FILE\n"
+			 "  -S FILE      start interpreting FILE (i.e. start the "
+			 "experiment)\n"
+			 "  -d FILE      delete input file FILE when fsc2 is done with "
+			 "it.\n\n"
+			 "For a complete documentation see either %s/fsc2.ps,\n"
+			 "%s/fsc2.pdf or %s/fsc2_frame.html\n"
+			 "or type \"info fsc2\".\n", dd, dd, dd );
+	T_free( dd );
 }
