@@ -1,0 +1,43 @@
+DEVICES:
+
+dg2020_b;
+sr530;
+er035m_s;
+aeg_x_band;
+
+
+VARIABLES:
+
+start_field = 3300.0 G;
+end_field   = 3450.0 G;
+field_step  =    0.5 G;
+
+field = start_field;
+I = 1;
+data;
+
+
+ASSIGNMENTS:
+
+TIMEBASE: 5 ns;
+MICROWAVE:    POD = 1, 5, V_HIGH = 5 V, V_LOW = 0 V, INV;
+PHASE_SETUP:  MICROWAVE,
+	          CW: 5;
+
+
+PREPARATIONS:
+
+P0: FUNCTION = MW,
+	START    = 10 ns;
+pulser_cw_mode( );
+magnet_setup( start_field, field_step );
+init_1d( );
+
+
+EXPERIMENT:
+
+WHILE field <= end_field {
+	data = lockin_get_data( );
+	display( 1, data );
+	field = sweep_up( );
+}

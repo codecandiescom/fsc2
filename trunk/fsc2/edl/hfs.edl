@@ -1,0 +1,45 @@
+DEVICES:
+
+hfs9000;
+
+
+VARIABLES:
+
+I;
+
+
+ASSIGNMENTS:
+
+TIMEBASE:     5 ns;
+TRIGGER_MODE: INTERNAL;
+MW:           CH = 1, DELAY = 0 ns;
+DETECTION:    CH = TRIGGER_OUT;//, DELAY = -20 ns;
+//TRIGGER_MODE: EXTERNAL, SLOPE = POS, LEVEL = 1.2 V;
+
+
+PREPARATIONS:
+
+P0: FUNC   = DETECTION,
+	START  = 0 ns,
+	DSTART = 40 ns;
+
+P1: FUNC   = MW,
+	START  = 100 ns,
+	LENGTH = 10 ns,
+	DSTART = 50 ns;
+
+P2: FUNC   = MW,
+	START  = 200 ns,
+	LENGTH = 20 ns,
+	DSTART = 50ns,
+	DLEN   = 20 ns;
+
+EXPERIMENT:
+
+FOR I = 1 : 10 {
+
+//	wait( 1 );
+	pulser_shift( );
+	pulser_increment( );
+	pulser_update( );
+}

@@ -1,0 +1,13 @@
+DEVICES:
+
+sr510;
+w_band;
+
+PREPARATIONS:
+
+magnet_setup( 4.2 A, 0.1 A );
+magnet_use_dac_port( 3 );
+
+EXPERIMENT:
+
+set_current( 9.0 );
