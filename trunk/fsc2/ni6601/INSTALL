@@ -331,10 +331,12 @@ else              # dynamically assigned major device number
 
 	# Test if the system is LSB 1.1.0 compliant
 
-	if [ ! \(    -d /etc/init.d                   	 \
-		      -a -e /lib/lsb/init-functions       	 \
-              -a -e /lib/lsb/install_initd           \
-              -a -e /lib/lsb/remove_initd \) ]; then
+	if [ ! \(    -d /etc/init.d                   	              \
+		      -a -e /lib/lsb/init-functions       	              \
+              -a \(    -e /lib/lsb/install_initd                  \
+					-o -e /usr/lib/lsb/install_initd \)           \
+              -a \(    -e /lib/lsb/remove_initd                   \
+					-o -e /usr/lib/lsb/remove_initd \) \) ]; then
 	dialog --msgbox "\
 Sorry, your system does not seem to be LSB 1.1.0 compliant.\n\
 To have the NI6601 module loaded at boot time and device files\n\
@@ -353,12 +355,19 @@ loaded at boot time and the device files are created\n\
 
 		if [ $? -eq 0 ]; then
 			if [ -e /etc/init.d/ni6601 ]; then
-				/lib/lsb/remove_initd /etc/init.d/ni6601 >/dev/null 2>&1
+				if [ -e /lib/lsb/remove_initd ]; then
+					/lib/lsb/remove_initd /etc/init.d/ni6601 >/dev/null 2>&1
+				else
+					/usr/lib/lsb/remove_initd /etc/init.d/ni6601 >/dev/null 2>&1
+				fi
 				rm -f /etc/init.d/ni6601
 			fi
 			install -m 744 utils/ni6601 /etc/init.d/ni6601
-			/lib/lsb/install_initd /etc/init.d/ni6601
-
+			if [ -e /lib/lsb/install_initd ]; then
+				/lib/lsb/install_initd /etc/init.d/ni6601
+			else
+				/usr/lib/lsb/install_initd /etc/init.d/ni6601
+			fi
 			dialog --msgbox "\
 Unless you reboot the system (which is *not* required)\n\
 please run the command\n\

@@ -56,7 +56,7 @@ bool ep385_init( const char *name )
 
 	/* Stop and reset pulser */
 
-	ep385_command( "TIM;STQ\r" );
+	ep385_command( "TIM;SET;STQ\r" );
 
 	strcpy( cmd, "TIM;" );
 
@@ -114,7 +114,7 @@ bool ep385_init( const char *name )
 
 bool ep385_run( bool state )
 {
-	ep385_command( state ? "TIM;SET;TRY;SFT\r" : "TIM;STP\r" );
+	ep385_command( state ? "TIM;SET;TRY;SFT\r" : "TIM;SET;STP\r" );
 	ep385.is_running = state;
 
 	return OK;
