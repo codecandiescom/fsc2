@@ -769,10 +769,10 @@ One of the most annoying things in programming is error handling. In
 order to make a program failsafe in every place where there is even the
 remotest chance that something may go wrong one has to include error
 handling code.  This is especially tedious within deeply nested function
-calls where it is often not clear on which level the error andling is
+calls where it is often not clear on which level the error handling is
 done best.
 
-In ordr to alleviate ths problem in @acronym{fsc2} there is a mechanism
+In order to alleviate ths problem in @acronym{fsc2} there is a mechanism
 called exceptions. An exception can be seens as a kind of flag that can
 be raised at any instance in the program and leads to the flow of
 control being changed to a place were the error can be handled.
@@ -835,7 +835,7 @@ which are used to implement exceptions.
 
 
 The idea and most of the code used for exceptions in @acronym{fsc2} is taken
-from an article by Peter Simons in the the iX magzine
+from an article by Peter Simons in the the iX magazine
 (@uref{http://www.heise.de/ix/}), No. 5, 1998, pp. 160-162.
 
 
