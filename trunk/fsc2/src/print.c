@@ -163,7 +163,10 @@ void print_2d( FL_OBJECT *obj, long data )
 
 	x_0 = margin + 25.0;
 	y_0 = margin + 20.0;
-	w = paper_height - margin - x_0 - 35.0;
+	if ( print_with_color )
+		w = paper_height - margin - x_0 - 35.0;
+	else
+		w = paper_height - margin - x_0;
 	h = paper_width - margin - y_0;
 
 	/* Draw the frame and the scales */
@@ -500,7 +503,18 @@ static void print_header( FILE *fp, char *name )
                  "      exch pop 3 -1 roll pop exch pop gr } b\n"
 				 "/cw { gs np 0 0 m\n"
 	             "      false charpath flattenpath pathbbox\n"
-	             "      pop exch pop exch pop gr } b\n"
+			     "      pop exch pop exch pop gr } b\n" );
+	if ( print_with_color )
+		fprintf( fp, 
+			     "/fsc2 { gs /Times-Roman 6 sf\n"
+			     "        (fsc2) ch sub 6 sub exch\n"
+			     "        (fsc2) cw sub 4 sub exch m\n"
+			     "        1 -0.025 0 { dup dup srgb gs (fsc2) show gr\n"
+			     "        -0.025 0.025 rm } for\n"
+			     "        1 1 1 srgb (fsc2) show gr } b\n"
+			     "%%%%EndProlog\n" );
+	else
+		fprintf( fp, 
 			     "/fsc2 { gs /Times-Roman 6 sf\n"
 			     "        (fsc2) ch sub 6 sub exch\n"
 			     "        (fsc2) cw sub 4 sub exch m\n"
@@ -508,6 +522,7 @@ static void print_header( FILE *fp, char *name )
 			     "        -0.025 0.025 rm } for\n"
 			     "        1 setgray (fsc2) show gr } b\n"
 			     "%%%%EndProlog\n" );
+
 
 	/* Rotate and shift for landscape format, scale to mm units, set font
 	   and draw logo, date and user name */
@@ -937,12 +952,14 @@ static void eps_draw_surface( FILE *fp, int cn )
 
 	/* Print areas gray for which there are no data */
 
-	fprintf( fp, "0.5 sgr\n"
+	
+	fprintf( fp, "%s\n"
 			 "%f %f m\n"
 			 "0 %f rl\n"
 			 "%f 0 rl\n"
 			 "0 %f rl\n"
 			 "cp f\n",
+			 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
 			 x_0 - 0.1, y_0 - 0.1, h + 0.2, w + 0.2, - ( h + 0.2 ) );
 
 	/* Now draw the data */
@@ -997,42 +1014,46 @@ static void eps_draw_contour( FILE *fp, int cn )
 
 	curp = s2d[ X ] * cv->shift[ X ];
 	if ( curp - dw > 0 )
-		fprintf( fp, "0.5 sgr\n"
+		fprintf( fp, "%s\n"
 				 "%f %f m\n"
 				 "%f 0 rl\n"
 				 "0 %f rl\n"
 				 "%f 0 rl\n"
 				 "cp fill\n",
+				 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
 				 x_0, y_0, curp - dw, h, - ( curp - dw ) );
 
 	curp = s2d[ X ] * ( G.nx - 1 + cv->shift[ X ] );
 	if ( w > curp + dw )
-		fprintf( fp, "0.5 sgr\n"
+		fprintf( fp, "%s\n"
 				 "%f %f m\n"
 				 "0 %f rl\n"
 				 "%f 0 rl\n"
 				 "0 %f rl\n"
 				 "cp fill\n",
+				 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
 				 x_0 + curp + dw , y_0, h, w - ( curp + dw ), - h );
 
 	curp = s2d[ Y ] * cv->shift[ Y ];
 	if ( curp - dh > 0 )
-		fprintf( fp, "0.5 sgr\n"
+		fprintf( fp, "%s\n"
 				 "%f %f m\n"
 				 "%f 0 rl\n"
 				 "0 %f rl\n"
 				 "%f 0 rl cp\n"
 				 "fill\n",
+				 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
 				 x_0, y_0, w, curp - dh, - w );
 
 	curp = s2d[ Y ] * ( G.ny - 1 + cv->shift[ Y ] );
 	if ( h > curp + dh )
-		fprintf( fp, "0.5 sgr\n"
+		fprintf( fp, "%s\n"
 				 "%f %f m\n"
 				 "%f 0 rl\n"
 				 "0 %f rl\n"
 				 "%f 0 rl\n"
 				 "cp fill\n",
+				 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
 				 x_0, y_0 + curp + dh , w, h - ( curp + dh ), - w );
 
 	/* Now draw the data */
@@ -1043,11 +1064,12 @@ static void eps_draw_contour( FILE *fp, int cn )
 			{
 				if ( ! cv->points[ k ].exist )
 				{
-					fprintf( fp, "0.5 sgr\n"
+					fprintf( fp, "%s\n"
 							 "%f %f m\n"
 							 "0 %f 2 copy rl\n"
 							 "%f 0 rl\n"
 							 "neg rl cp fill\n",
+							 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
 							 x_0 + s2d[ X ] * ( i + cv->shift[ X ] ) - dw,
 							 y_0 + s2d[ Y ] * ( j + cv->shift[ Y ] ) - dh,
 							 2.0 * dh, 2.0 * dw );
