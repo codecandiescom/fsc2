@@ -529,10 +529,10 @@ void stop_measurement( FL_OBJECT *a, long b )
 
 static void set_buttons_for_run( int active )
 {
+	fl_freeze_form( fsc2_main_form );
+
 	if ( active == 0 )
 	{
-		fl_freeze_form( main_form->fsc2 );
-
 		fl_deactivate_object( main_form->Load );
 		fl_set_object_lcol( main_form->Load, FL_INACTIVE_COL );
 
@@ -547,12 +547,10 @@ static void set_buttons_for_run( int active )
 
 		fl_deactivate_object( main_form->bug_report );
 		fl_set_object_lcol( main_form->bug_report, FL_INACTIVE_COL );
-
-		fl_unfreeze_form( main_form->fsc2 );
 	}
 	else
 	{
-		fl_freeze_form( main_form->fsc2 );
+		fl_freeze_form( fsc2_main_form );
 
 		fl_activate_object( main_form->Load );
 		fl_set_object_lcol( main_form->Load, FL_BLACK );
@@ -569,10 +567,10 @@ static void set_buttons_for_run( int active )
 		fl_activate_object( main_form->bug_report );
 		fl_set_object_lcol( main_form->bug_report, FL_BLACK );
 
-		fl_unfreeze_form( main_form->fsc2 );
-
 		notify_conn( UNBUSY_SIGNAL );
 	}
+
+	fl_unfreeze_form( fsc2_main_form );
 }
 
 
