@@ -724,7 +724,7 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 	/* Calculate how long the curve (with header) is going to be and allocate
        enough memory (data are 2-byte integers) */
 
-	num_points =   ( w != NULL ? w->end_num : tds744a.rec_len )
+	num_points =   ( w != NULL ? w->end_num : tds754a.rec_len )
 		         - ( w != NULL ? w->start_num : 1 );
 	*length = 2 * num_points;
 	len2 = 1 + ( long ) floor( log10( *length ) );

@@ -655,7 +655,7 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 	/* Now get all the data bytes... */
 
 	if ( gpib_write( tds520.device, "CURV?\n" ) == FAILURE ||
-		 gpib_read_w( tds520.device, buffer, length ) == FAILURE )
+		 gpib_read( tds520.device, buffer, length ) == FAILURE )
 	{
 		T_free( buffer );
 		T_free( *data );
