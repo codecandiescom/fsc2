@@ -321,14 +321,14 @@ int sema_destroy( int sema_id )
 
 /*-------------------------------------------------------------------------*/
 /* Function waits until the value of the semapore with ID number 'sema_id' */
-/* becomes greater than 0 (and then decrement the semaphore by 1 ). It     */
+/* becomes greater than 0 (and then decrement the semaphore by 1). It      */
 /* returns 0 or -1 on error. The function will not return but continue to  */
 /* wait when signals are received.                                         */
 /*-------------------------------------------------------------------------*/
 
 int sema_wait( int sema_id )
 {
-	struct sembuf sema_buf = { 0, -1, 0 };
+	struct sembuf wait = { 0, -1, 0 };
 	bool must_reset = UNSET;
 
 
@@ -338,7 +338,7 @@ int sema_wait( int sema_id )
 		must_reset = SET;
 	}
 
-	while ( semop( sema_id, &sema_buf, 1 ) < 0 )
+	while ( semop( sema_id, &wait, 1 ) < 0 )
 		if ( errno != EINTR )
 		{
 			if ( must_reset )
@@ -360,7 +360,7 @@ int sema_wait( int sema_id )
 
 int sema_post( int sema_id )
 {
-	struct sembuf sema_buf = { 0, 1, 0 };
+	struct sembuf post = { 0, 1, 0 };
 	bool must_reset = UNSET;
 
 
@@ -370,7 +370,7 @@ int sema_post( int sema_id )
 		must_reset = SET;
 	}
 
-	while ( semop( sema_id, &sema_buf, 1 ) < 0 )
+	while ( semop( sema_id, &post, 1 ) < 0 )
 		if ( errno != EINTR )
 		{
 			if ( must_reset )
