@@ -502,7 +502,7 @@ successfully called.
 The most basic element of an analog input sequence is a single conversion,
 i.e. the conversion of an input voltage into a corresponding data value by
 the ADC. When more than a single channel is to be measured a set of
-conversions makes up a so called scan. During a scan the voltages at
+conversions makes what is called a scan. During a scan the voltages at
 several analog input channels are converted, one after each other (there's
 only a single AD converter on the board). Finally, a set of scans constitutes
 a complete acquisition.
