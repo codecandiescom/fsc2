@@ -803,6 +803,7 @@ void child_sig_handler( int signo )
 				sema_destroy( semaphore );
 			}
 
+			do_quit = SET;
 			_exit( -1 );
 	}
 }
