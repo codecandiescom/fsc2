@@ -138,12 +138,12 @@ unit:    /* empty */               { $$ = vars_push( INT_VAR, 1L ); }
        | NV_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
        | UV_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
        | MV_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | V_TOKEN                   { $$ = vars_push( FLOAT_VAR, 1.0 ); }
+       | V_TOKEN                   { $$ = vars_push( INT_VAR, 1 ); }
        | MG_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | G_TOKEN                   { $$ = vars_push( FLOAT_VAR, 1.0 ); }
+       | G_TOKEN                   { $$ = vars_push( INT_VAR, 1 ); }
        | MHZ_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
        | KHZ_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
-       | HZ_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0 ); }
+       | HZ_TOKEN                  { $$ = vars_push( INT_VAR, 1 ); }
 ;
 
 arhs:    /* empty */               { vars_arr_init( vars_push( UNDEF_VAR ) ); }

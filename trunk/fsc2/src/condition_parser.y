@@ -144,12 +144,12 @@ unit:    /* empty */              { $$ = vars_push( INT_VAR, 1L ); }
        | E_NV_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
        | E_UV_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
        | E_MV_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | E_V_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0 ); }
+       | E_V_TOKEN                { $$ = vars_push( INT_VAR, 1 ); }
        | E_MG_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | E_G_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0 ); }
+       | E_G_TOKEN                { $$ = vars_push( INT_VAR, 1 ); }
        | E_MHZ_TOKEN              { $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
        | E_KHZ_TOKEN              { $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
-       | E_HZ_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0 ); }
+       | E_HZ_TOKEN               { $$ = vars_push( INT_VAR, 1 ); }
 ;
 
 
