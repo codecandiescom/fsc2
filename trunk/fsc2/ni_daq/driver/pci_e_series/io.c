@@ -296,10 +296,10 @@ inline void pci_start_critical_section( Board *board )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Function to be called at the end of a part of code that may not become */
-/* interrupted by IRQs.                                                   */
-/*------------------------------------------------------------------------*/
+/*----------------------------------------------------------*/
+/* Function to be called at the end of a parts of code that */
+/* may not become interrupted.                              */
+/*----------------------------------------------------------*/
 
 inline void pci_end_critical_section( Board *board )
 {
