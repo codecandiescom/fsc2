@@ -219,8 +219,7 @@ void p_assign_pod( long func, Var *v )
 
 	is_pulser_driver( );
 
-	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
-				 func <= PULSER_CHANNEL_FUNC_MAX );
+	fsc2_assert( func >= 0 && func < PULSER_CHANNEL_NUM_FUNC );
 
 	/* Test if there's a function for assigning channels to pods - otherwise
 	   the pulser doesn't have pods and we have to quit */
@@ -282,8 +281,7 @@ void p_assign_channel( long func, Var *v )
 
 	is_pulser_driver( );
 
-	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
-				 func <= PULSER_CHANNEL_FUNC_MAX );
+	fsc2_assert( func >= 0 && func < PULSER_CHANNEL_NUM_FUNC );
 
 	/* Check the variable and get its value */
 
@@ -341,8 +339,7 @@ void p_set_delay( long func, Var *v )
 
 	is_pulser_driver( );
 
-	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
-				 func <= PULSER_CHANNEL_FUNC_MAX );
+	fsc2_assert( func >= 0 && func < PULSER_CHANNEL_NUM_FUNC );
 
 	/* Check the variable and get its value */
 
@@ -381,8 +378,7 @@ void p_inv( long func )
 {
 	is_pulser_driver( );
 
-	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
-				 func <= PULSER_CHANNEL_FUNC_MAX );
+	fsc2_assert( func >= 0 && func < PULSER_CHANNEL_NUM_FUNC );
 
 	is_pulser_func( pulser_struct[ Cur_Pulser ].invert_function,
 					"inverting a channel" );
@@ -415,8 +411,7 @@ void p_set_v_high( long func, Var *v )
 
 	is_pulser_driver( );
 
-	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
-				 func <= PULSER_CHANNEL_FUNC_MAX );
+	fsc2_assert( func >= 0 && func < PULSER_CHANNEL_NUM_FUNC );
 
 	/* Check the variable and get its value */
 
@@ -457,8 +452,7 @@ void p_set_v_low( long func, Var *v )
 
 	is_pulser_driver( );
 
-	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
-				 func <= PULSER_CHANNEL_FUNC_MAX );
+	fsc2_assert( func >= 0 && func < PULSER_CHANNEL_NUM_FUNC );
 
 	/* Check the variable and get its value */
 
@@ -862,8 +856,7 @@ void p_phase_ref( int func, int ref )
 	{
 		if ( pulser_struct[ Cur_Pulser ].needs_phase_pulses )
 		{
-			if ( func < PULSER_CHANNEL_FUNC_MIN ||
-				 func > PULSER_CHANNEL_FUNC_MAX )
+			if ( func < 0 || func >= PULSER_CHANNEL_NUM_FUNC )
 			{
 				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 						__FILE__, __LINE__ );
@@ -888,8 +881,7 @@ void p_phase_ref( int func, int ref )
 		else
 		{
 			if ( ( func != 0 && func != 1 )    ||
-				 ref < PULSER_CHANNEL_FUNC_MIN ||
-				 ref > PULSER_CHANNEL_FUNC_MAX )
+				 ref < 0 || ref >= PULSER_CHANNEL_NUM_FUNC )
 			{
 				eprint( FATAL, UNSET, "Internal error detected at s:%d.\n",
 						__FILE__, __LINE__ );
@@ -985,8 +977,8 @@ void p_set( long pnum, int type, Var *v )
 		{
 			case P_FUNC :
 				if ( v->type != INT_VAR ||
-					 v->val.lval < PULSER_CHANNEL_FUNC_MIN ||
-					 v->val.lval > PULSER_CHANNEL_FUNC_MAX )
+					 v->val.lval < 0    ||
+					 v->val.lval >= PULSER_CHANNEL_NUM_FUNC )
 				{
 					eprint( FATAL, SET, "Invalid function.\n" );
 					THROW( EXCEPTION );
@@ -1190,7 +1182,7 @@ void p_phs_setup( int func, int type, int pod, long val )
 
 	/* A few sanity checks before we call the pulsers handler function */
 
-	fsc2_assert( type >= PHASE_TYPES_MIN && type <= PHASE_TYPES_MAX );
+	fsc2_assert( type >= 0 && type < PHASE_TYPES_MAX );
 	fsc2_assert( func == 0 || func == 1 );       /* phase function correct ? */
 
 	/* Let's check if the pulser supports the function needed */
@@ -1341,8 +1333,7 @@ void p_exists_function( int function )
 {
 	is_pulser_driver( );
 
-	fsc2_assert( function >= PULSER_CHANNEL_FUNC_MIN &&
-				 function <= PULSER_CHANNEL_FUNC_MAX );
+	fsc2_assert( function >= 0 && function < PULSER_CHANNEL_NUM_FUNC );
 
 	if ( ( function == PULSER_CHANNEL_PHASE_1 ||
 		   function == PULSER_CHANNEL_PHASE_2 ) &&

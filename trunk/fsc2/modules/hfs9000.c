@@ -122,7 +122,7 @@ int hfs9000_init_hook( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		hfs9000.function[ i ].self = PULSER_CHANNEL_FUNC_MIN + i;
+		hfs9000.function[ i ].self = i;
 		hfs9000.function[ i ].is_used = UNSET;
 		hfs9000.function[ i ].is_needed = UNSET;
 		hfs9000.function[ i ].channel = NULL;

@@ -171,9 +171,9 @@ int I_am = PARENT;
 int FSC2_MODE = PREPARATION;
 bool IN_HOOK = UNSET;
 
-int pd[ 4 ];                    /* pipe descriptors */
-int conn_pd[ 2 ];
-pid_t child_pid = 0;            /* pid of child */
+int pd[ 4 ];                    /* pipe descriptors for measurement child */
+int conn_pd[ 2 ];               /* pipe for communication child */
+pid_t child_pid = 0;            /* pid of measurement child */
 pid_t conn_pid = -1;            /* pid of communication child */
 int data_semaphore = -1;
 int request_semaphore = -1;
@@ -227,7 +227,7 @@ extern long Num_Pulsers;
 extern Pulser_Struct *pulser_struct;
 
 extern Phase_Sequence *PSeq;
-extern Acquisition_Sequence ASeq[ ];
+extern Acquisition_Sequence ASeq[ 2 ];
 
 extern long Cur_Pulse;
 
@@ -248,10 +248,10 @@ extern int I_am;
 extern int FSC2_MODE;
 extern bool IN_HOOK;
 
-extern int pd[ ];                  /* pipe descriptors */
-extern int conn_pd[ ];
-extern pid_t child_pid;            /* pid of child */
-extern pid_t conn_pid;
+extern int pd[ 4 ];                /* pipe descriptors for measurement child */
+extern int conn_pd[ 2 ];           /* pipe for connection child */
+extern pid_t child_pid;            /* pid of measurement child */
+extern pid_t conn_pid;             /* pid of connection child */
 extern int data_semaphore;
 extern int request_semaphore;
 extern volatile bool do_quit;

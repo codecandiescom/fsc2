@@ -1350,8 +1350,14 @@ void main_sig_handler( int signo )
 
 		/* Ignored signals : */
 
-		case SIGHUP  : case SIGINT  : case SIGALRM : case SIGCONT :
-		case SIGTTIN : case SIGTTOU : case SIGVTALRM : case SIGPIPE :
+		case SIGHUP :
+		case SIGINT :
+		case SIGALRM :
+		case SIGCONT :
+		case SIGTTIN :
+		case SIGTTOU :
+		case SIGVTALRM :
+		case SIGPIPE :
 			return;
 
 		/* All the remaining signals are deadly... We set fsc2_death to the

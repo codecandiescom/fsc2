@@ -29,6 +29,7 @@
 
 
 Var *f_print(   Var *v );
+Var *f_showm(   Var *v );
 Var *f_wait(    Var *v );
 Var *f_init_1d( Var *v );
 Var *f_init_2d( Var *v );

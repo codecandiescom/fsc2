@@ -13,7 +13,7 @@ t;
 
 PREP:
 
-init_2d( 4, N, M, -100, 5, 3325, 2.0, "Time after laser flash [ns]",
+init_2d( 4, N, M, -0.1, 5e-3, 3325, 2.0, "Time after laser flash [µs]",
 		 "Magnetic field [G]", "Signal intensity [V]" );
 
 EXP:

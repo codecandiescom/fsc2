@@ -25,19 +25,19 @@
 #include "fsc2.h"
 
 
-/*-------------------------------------------------------------------*/
-/* Function expects a format string as in printf and arguments which */
-/* must correspond to the given format string and returns a string   */
-/* of the right length into which the arguments are written. The     */
-/* caller of the function is responsible for free-ing the string.    */
-/* -> 1. printf()-type format string                                 */
-/*    2. As many arguments as there are conversion specifiers etc.   */
-/*       in the format string                                        */
-/* <- Pointer to character array of exactly the right length into    */
-/*    which the string characterized by the format string has been   */
-/*    written. On failure, i.e. if there is not enough space, the    */
-/*    function throws an OUT_OF_MEMORY exception.                    */
-/*-------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Function expects a format string as printf() and arguments which */
+/* must correspond to the given format string and returns a string  */
+/* of the right length into which the arguments are written. The    */
+/* caller of the function is responsible for free-ing the string.   */
+/* -> 1. printf()-type format string                                */
+/*    2. As many arguments as there are conversion specifiers etc.  */
+/*       in the format string                                       */
+/* <- Pointer to character array of exactly the right length into   */
+/*    which the string characterized by the format string has been  */
+/*    written. On failure, i.e. if there is not enough space, the   */
+/*    function throws an OUT_OF_MEMORY exception.                   */
+/*------------------------------------------------------------------*/
 
 #define GET_STRING_TRY_LENGTH 128
 
@@ -157,10 +157,10 @@ const char *strip_path( const char *path )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function returns the string "/" if the string passed to it did not */
-/* end with a slash, otherwise it returns the empty string, "".       */
-/*--------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Function returns the string "/" if the string passed to it does */
+/* not end with a slash, otherwise it returns the empty string "". */
+/*-----------------------------------------------------------------*/
 
 
 const char *slash( const char *path )
@@ -329,13 +329,13 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* This a somewhat simplified version of the previous function, eprint(), */
-/* mainly for writers of moduls. The only argument beside the usual ones  */
-/* one would pass to printf() and friends is the severity of the error.   */
-/* Everything else (i.e. the decision if to prepend a file name, a line   */
-/* number or a function name) is dealt with automatically.                */
-/*------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* This a somewhat simplified version of the previous function, eprint() */
+/* mainly for writers of moduls. The only argument beside the usual ones */
+/* one would pass to printf() and friends is the severity of the error.  */
+/* Everything else (i.e. the decision if to prepend a file name, a line  */
+/* number or a function name) is dealt with automatically.               */
+/*-----------------------------------------------------------------------*/
 
 void print( int severity, const char *fmt, ... )
 {
@@ -473,13 +473,8 @@ void print( int severity, const char *fmt, ... )
 /* and tell the user about it. The lock automatically expires when fsc2   */
 /* exits (on normal termination it will also delete the lock file).       */
 /* To make this work correctly for more then one user the lock file must  */
-/* belong to a special user (e.g. a user named `fsc2' belonging to a      */
-/* group also named `fsc2') and the program belong to this user and have  */
-/* the setuid and the setgid bit set, i.e. install it with                */
-/*                                                                        */
-/*            chown fsc2.fsc2 fsc2                                        */
-/*            chmod 6755 fsc2                                             */
-/*                                                                        */
+/* belong to a special user (e.g. a user named `fsc2') as well as the     */
+/* program belong to this user and have the setuid bit set.               */
 /* Another purpose of this scheme is to get rid of shared memory segments */
 /* that remain after fsc2 crashed or was killed. Therefore, all shared    */
 /* memory segment have to be created with the EUID of fsc2 so that even   */
@@ -654,8 +649,8 @@ void i2rgb( double h, int *rgb )
 
 		scale = ( h - p[ i ] ) / ( p[ i + 1 ] - p[ i ] );
 		for ( j = RED; j <= BLUE; j++ )
-			rgb[ j ] = ( int ) ( v[ j ][ i ]
-								 + ( v[ j ][ i + 1 ] - v[ j ][ i ] ) * scale );
+			rgb[ j ] = irnd( v[ j ][ i ]
+							 + ( v[ j ][ i + 1 ] - v[ j ][ i ] ) * scale );
 		return;
 	}
 
@@ -708,6 +703,9 @@ Var *get_digitizer_channel_number( const char *channel_name )
 	for ( channel = 0; channel < NUM_DIGITIZER_CHANNEL_NAMES; channel++ )
 		if ( ! strcmp( channel_name, Digitizer_Channel_Names[ channel ] ) )
 			break;
+
+	/* If the name was not recognized the reason might by that the
+	   abbreviation "LIN" may have been used for "LINE"...*/
 
 	if ( channel == NUM_DIGITIZER_CHANNEL_NAMES &&
 		 ! strcmp( channel_name, "LIN" ) )

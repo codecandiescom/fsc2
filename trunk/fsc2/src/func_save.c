@@ -666,7 +666,7 @@ Var *f_fsave( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* Rewrite the format string and check thar arguments are ok, then print */
+	/* Rewrite the format string and check that arguments are ok, then print */
 
 	f_format_check( v );
 
@@ -1030,7 +1030,7 @@ static void ff_format_check( Var *v )
 /* This function is called by f_fsave() and f_ffsave() to do the actual  */
 /* printing. It loops over the format string and prints it argument by   */
 /* argument (unfortunately, there's portable no way to create a variable */
-/* argument list, so it must be done this way). The fuinction returns    */
+/* argument list, so it must be done this way). The function returns     */
 /* the number of character written.                                      */
 /*-----------------------------------------------------------------------*/
 

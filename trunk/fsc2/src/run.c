@@ -358,6 +358,7 @@ static void fork_failure( int stored_errno )
 						"when trying to start experiment.\n", errno );
 			fl_show_alert( "FATAL Error", "System error on start of "
 						   "experiment.", "", 1 );			
+			break;
 	}
 
 	child_pid = 0;
@@ -792,8 +793,14 @@ static void child_sig_handler( int signo )
 
 		/* Ignored signals : */
 
-		case SIGHUP :  case SIGINT :  case SIGUSR1 : case SIGCHLD :
-		case SIGCONT : case SIGTTIN : case SIGTTOU : case SIGVTALRM :
+		case SIGHUP :
+		case SIGINT :
+		case SIGUSR1 :
+		case SIGCHLD :
+		case SIGCONT :
+		case SIGTTIN :
+		case SIGTTOU :
+		case SIGVTALRM :
 			break;
 			
 		/* All remaining signals are deadly... */

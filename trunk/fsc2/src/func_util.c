@@ -240,6 +240,59 @@ Var *f_print( Var *v )
 
 
 /*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+Var *f_showm( Var *v )
+{
+	char *mess;
+	char *mp;
+
+
+	vars_check( v, STR_VAR );
+	mess = T_strdup( v->val.sptr );
+
+	for ( mp = mess; *mp; mp++ )
+	{
+		if ( *mp != '\\' )
+			continue;
+
+		switch ( *( mp + 1 ) )
+		{
+			case 'n' :
+				*mp = '\n';
+				break;
+
+			case 't' :
+				*mp = '\t';
+				break;
+
+			case '\\' :
+				*mp = '\\';
+				break;
+
+			case '\"' :
+				*mp = '"';
+				break;
+
+			default :
+				print( WARN, "Unknown escape sequence \\%c in message "
+					   "string.\n", *( mp + 1 ) );
+				*mp = *( mp + 1 );
+				break;
+		}
+
+		memmove( mp + 1, mp + 2, strlen( mp ) - 1 );
+	}
+
+	if ( FSC2_MODE == EXPERIMENT )
+		show_message( mess );
+
+	T_free( mess );
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*-------------------------------------------------------------------*/
 /* f_wait() is kind of a version of usleep() that isn't disturbed by */
 /* signals - only exception: If a DO_QUIT signal is delivered to the */
 /* caller of f_wait() (i.e. the child) it returns immediately.       */

@@ -24,7 +24,7 @@ button_state( BID3, 1 );
 BID4 = button_create( "RADIO_BUTTON", BID3, "Bla4", "Help4" );
 SID1 = slider_create( "NORMAL_SLIDER", 0, 1, 0.2, "Blub1", "Hilfe1" );
 BID5 = button_create( "RADIO_BUTTON", "Sweep RF up" );
-BID6 = button_create( "RADIO_BUTTON", BID5, "Stop RF sweep" );
+BID6 = button_create( "RADIO_BUTTON", BID5, "Stop RF\nsweep" );
 button_state( BID6, 1 );
 BID7 = button_create( "RADIO_BUTTON", BID5, "Sweep RF down" );
 SID2 = slider_create( "VALUE_SLIDER", -100.0, -3.0, "Attenuation",
@@ -69,6 +69,8 @@ FOREVER {
 }
 
 ON_STOP:
+
+show_message( "This\nis\nthe\nend,\nmy\nfriend!" );
 
 hide_toolbox( 1 );
 wait( 2 );

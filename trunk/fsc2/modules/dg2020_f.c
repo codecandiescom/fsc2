@@ -122,7 +122,7 @@ int dg2020_f_init_hook( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		dg2020.function[ i ].self = PULSER_CHANNEL_FUNC_MIN + i;
+		dg2020.function[ i ].self = i;
 		dg2020.function[ i ].is_used = UNSET;
 		dg2020.function[ i ].is_needed = UNSET;
 		dg2020.function[ i ].pod = NULL;

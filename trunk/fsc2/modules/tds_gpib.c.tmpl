@@ -1,0 +1,1261 @@
+/*
+  $Id$
+
+  Copyright (C) 2001 Jens Thoms Toerring
+
+  This file is part of fsc2.
+
+  Fsc2 is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2, or (at your option)
+  any later version.
+
+  Fsc2 is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with fsc2; see the file COPYING.  If not, write to
+  the Free Software Foundation, 59 Temple Place - Suite 330,
+  Boston, MA 02111-1307, USA.
+*/
+
+
+
+#include "tds_tmpl.h"
+
+
+static double tds_tmpl_get_area_wo_cursor( int channel, WINDOW *w );
+static double tds_tmpl_get_amplitude_wo_cursor( int channel, WINDOW *w );
+
+static bool in_init = UNSET;
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+bool tds_tmpl_init( const char *name )
+{
+	int ch;
+	double cp1, cp2;
+	char buffer[ 100 ];
+	long len = 100;
+	bool lock_state;
+	int on_count, needed_count, needed_on_count;
+
+
+#ifndef NO_GATED_MEASUREMENTS
+	tds_tmpl.meas_source = -1;
+#endif
+	if ( gpib_init_device( name, &tds_tmpl.device ) == FAILURE )
+        return FAIL;
+
+	in_init = SET;
+	TRY
+	{
+		/* Store the lock state the user asked for and for the initialization
+		   set it to locked. */
+
+		if ( gpib_write( tds_tmpl.device, "LOC ALL\n", 8 ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+
+		lock_state = tds_tmpl.lock_state;
+		tds_tmpl.lock_state = SET;
+
+		/* Set digitizer to short form of replies */
+
+		if ( gpib_write( tds_tmpl.device, "*CLS;:VERB OFF;:HEAD OFF\n", 25 )
+			 == FAILURE ||
+			 gpib_write( tds_tmpl.device, "*STB?\n", 6 ) == FAILURE ||
+			 gpib_read( tds_tmpl.device, buffer, &len ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+
+		tds_tmpl.is_reacting = SET;
+
+		/* Check if the the time base, record length and trigger position
+		   have been set during preparation, if so send them to the device,
+		   otherwise fetch them */
+
+		if ( tds_tmpl.is_timebase )
+			tds_tmpl_set_timebase( tds_tmpl.timebase );
+		else
+			tds_tmpl.timebase = tds_tmpl_get_timebase( );
+
+		if ( tds_tmpl.is_rec_len )
+			tds_tmpl_set_record_length( tds_tmpl.rec_len );
+		else
+			tds_tmpl.rec_len = tds_tmpl_get_record_length( );
+
+		if ( tds_tmpl.is_trig_pos )
+			tds_tmpl_set_trigger_pos( tds_tmpl.trig_pos );
+		else
+			tds_tmpl.trig_pos = tds_tmpl_get_trigger_pos( );
+
+		if ( tds_tmpl.is_trigger_channel )
+			tds_tmpl_set_trigger_channel( tds_tmpl.trigger_channel );
+		else
+			tds_tmpl.trigger_channel = tds_tmpl_get_trigger_channel( );
+			
+		/* Set format of data transfer (binary, INTEL format) */
+
+		if ( gpib_write( tds_tmpl.device, "DAT:ENC SRI;WID 2\n", 18 )
+			 == FAILURE )
+			tds_tmpl_gpib_failure( );
+		
+		/* Set unit for cursor setting commands to seconds and cursor types
+		   to VBAR (vertical bars)*/
+
+		if ( gpib_write( tds_tmpl.device, 
+						 "CURS:FUNC VBA;VBA:UNITS SECO\n", 29 ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+
+		/* Make sure cursor 1 is the left one */
+		
+		cp1 = tds_tmpl_get_cursor_position( 1 );
+		cp2 = tds_tmpl_get_cursor_position( 2 );
+
+		if ( cp1 > cp2 )
+		{
+			tds_tmpl_set_cursor( 1, cp2 );
+			tds_tmpl_set_cursor( 2, cp1 );
+			tds_tmpl.cursor_pos = cp2;
+		}
+		else
+			tds_tmpl.cursor_pos = cp1;
+
+		/* Switch off repetitive acquisition mode */
+
+		if ( gpib_write( tds_tmpl.device, "ACQ:REPE OFF\n", 13 ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+
+		/* If a sensitivity has been set in the PREPARATION section set them
+           now */
+
+		for ( ch = TDS_TMPL_CH1; ch < NUM_NORMAL_CHANNELS; ch++ )
+			if ( tds_tmpl.is_sens[ ch ] )
+				tds_tmpl_set_sens( ch, tds_tmpl.sens[ ch ] );
+			else
+				tds_tmpl.sens[ ch ] = tds_tmpl_get_sens( ch );
+
+		/* If the number of averages has been set in the PREPARATIONS section
+		   send it to the digitizer now */
+
+		if ( tds_tmpl.is_num_avg == SET )
+			tds_tmpl_set_num_avg( tds_tmpl.num_avg );
+		else
+			tds_tmpl.num_avg = tds_tmpl_get_num_avg( );
+
+		/* Count how many channels are switched on, how many are needed and
+		   how many of the needed ones are on */
+
+		for ( needed_count = needed_on_count = on_count = 0, ch = 0;
+			  ch < NUM_DISPLAYABLE_CHANNELS; ch++ )
+		{
+			if ( ( tds_tmpl.channel_is_on[ ch ]
+									 = tds_tmpl_display_channel_state( ch ) ) )
+				on_count++;
+
+			if ( tds_tmpl.channels_in_use[ ch ] )
+			{
+				needed_count++;
+
+				if ( tds_tmpl.channel_is_on[ ch ] )
+					needed_on_count++;
+			}
+		}
+
+		fsc2_assert( needed_count <= MAX_SIMULTANEOUS_CHANNELS );
+
+		/* If not all needed channels are on, but switching them all on
+		   would take more than MAX_SIMULTANEOUS_CHANNELS first switch off
+		   channels that aren't needed (beginning with the high numbered
+		   channels, i.e. first REF channels, then MATH channels and finally
+		   real measurement channels) until all the needed channels can
+		   be switched on. */
+
+		if ( needed_count > needed_on_count )
+		{
+			while ( needed_count - needed_on_count >
+					MAX_SIMULTANEOUS_CHANNELS - on_count )
+				for ( ch = NUM_DISPLAYABLE_CHANNELS - 1; ch >= 0; ch-- )
+					if ( ! tds_tmpl.channels_in_use[ ch ] &&
+						 tds_tmpl.channel_is_on[ ch ] )
+					{
+						tds_tmpl_display_channel( ch, UNSET );
+						on_count--;
+						break;
+					}
+
+			for ( ch = 0; ch < NUM_DISPLAYABLE_CHANNELS; ch++ )
+				if ( tds_tmpl.channels_in_use[ ch ] &&
+					 ! tds_tmpl.channel_is_on[ ch ] )
+					tds_tmpl_display_channel( ch, SET );
+		}
+
+		/* Switch to running until run/stop button is pressed and start
+           running */
+
+		tds_tmpl_free_running( );
+
+		/* Unlock the keyboard if the user told us so */
+
+		tds_tmpl.lock_state = lock_state;
+
+		if ( ! tds_tmpl.lock_state &&
+			 gpib_write( tds_tmpl.device, "LOC NON\n", 8 ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+	}
+	OTHERWISE
+	{
+		gpib_local( tds_tmpl.device );
+		tds_tmpl.lock_state = lock_state;
+		in_init = UNSET;
+		return FAIL;
+	}
+
+	in_init = UNSET;
+	return OK;
+}
+
+
+/*---------------------------------*/
+/* Returns the digitizers timebase */
+/*---------------------------------*/
+
+double tds_tmpl_get_timebase( void )
+{
+	char reply[ 30 ];
+	long length = 30;
+
+
+	if ( gpib_write( tds_tmpl.device, "HOR:MAI:SCA?\n", 13 ) == FAILURE ||
+		 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+
+	reply[ length - 1 ] = '\0';
+	return T_atod( reply );
+}
+
+
+/*-------------------------------------*/
+/* Sets the timebase of the digitizer */
+/*-------------------------------------*/
+
+void tds_tmpl_set_timebase( double timebase )
+{
+	char cmd[ 40 ];
+
+
+	sprintf( cmd, "HOR:MAI:SCA %8.3E\n", timebase );
+	if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+
+	tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+}
+
+
+/*-----------------------------------------------------*/
+/* tds_tmpl_set_record_length() sets the record length. */
+/*-----------------------------------------------------*/
+
+void tds_tmpl_set_record_length( long num_points )
+{
+    char cmd[ 100 ];
+
+
+	sprintf( cmd, "HOR:RECO %ld\n", num_points );
+    if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+
+	tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+}
+
+
+/*-----------------------------------------------------------------*/
+/* tds_tmpl_get_record_length() returns the current record length. */
+/*-----------------------------------------------------------------*/
+
+long tds_tmpl_get_record_length( void )
+{
+    char reply[ 30 ];
+    long length = 30;
+	char *r = reply;
+
+
+    if ( gpib_write( tds_tmpl.device, "HOR:RECO?\n", 10 ) == FAILURE ||
+         gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+
+    reply[ length - 1 ] = '\0';
+	while ( ! isdigit( *r ) && *r++ )
+		;
+
+    return T_atol( r );
+}
+
+
+/*--------------------------------------------------------------*/
+/* Sets the trigger position, range of paramters is [0,1] where */
+/* 0 means no pretrigger while 1 indicates maximum pretrigger   */
+/*--------------------------------------------------------------*/
+
+void tds_tmpl_set_trigger_pos( double pos )
+{
+    char cmd[ 50 ];
+
+
+	sprintf( cmd, "HOR:TRIG:POS %f\n", 100.0 * pos );
+    if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+
+	tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+}
+
+
+/*-------------------------------------------------------------------*/
+/* Returns the current trigger position in the intervall [0,1] where */
+/* 0 means no pretrigger while 1 indicates maximum pretrigger        */
+/*-------------------------------------------------------------------*/
+
+double tds_tmpl_get_trigger_pos( void )
+{
+    char reply[ 30 ];
+    long length = 30;
+
+
+    if ( gpib_write( tds_tmpl.device, "HOR:TRIG:POS?\n", 14 ) == FAILURE ||
+         gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+
+    reply[ length - 1 ] = '\0';
+    return 0.01 * T_atod( reply );
+}
+
+
+/*-----------------------------------------*/
+/* Function returns the number of averages */
+/*-----------------------------------------*/
+
+long tds_tmpl_get_num_avg( void )
+{
+	char reply[ 30 ];
+	long length = 30;
+
+
+	if ( tds_tmpl_get_acq_mode( ) == AVERAGE )
+	{
+		if ( gpib_write( tds_tmpl.device,"ACQ:NUMAV?\n", 11 ) == FAILURE ||
+			 gpib_read( tds_tmpl.device, reply, &length) == FAILURE )
+			tds_tmpl_gpib_failure( );
+
+		reply[ length - 1 ] = '\0';
+		return T_atol( reply );
+	}
+	else                            	/* digitizer is in sample mode */
+		return 1;
+}
+
+
+/*--------------------------------------*/
+/* Function sets the number of averages */
+/*--------------------------------------*/
+
+void tds_tmpl_set_num_avg( long num_avg )
+{
+	char cmd[ 30 ];
+
+
+	/* With number of acquisitions set to zero simply stop the digitizer */
+
+	if ( num_avg == 0 )
+	{
+		if ( gpib_write( tds_tmpl.device, "ACQ:STATE STOP\n", 15 ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+		return;
+	}
+
+	/* With number of acquisitions switch to sample mode, for all other numbers
+	   set the number of acquisitions and switch to average mode */
+
+	if ( num_avg == 1 )
+	{
+		if ( gpib_write( tds_tmpl.device, "ACQ:MOD SAM\n", 12 ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+	}
+	else
+	{
+		sprintf( cmd, "ACQ:NUMAV %ld\n", num_avg );
+		if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE ||
+			 gpib_write( tds_tmpl.device, "ACQ:MOD AVE\n", 12 ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+	}
+
+	/* Finally restart the digitizer */
+
+	if ( gpib_write( tds_tmpl.device, "ACQ:STATE RUN\n", 14 ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+}
+
+/*-------------------------------------------------------------------------*/
+/* Function returns the data acquisition mode. If the digitizer is neither */
+/* in average nor in sample mode, it is switched to sample mode.           */ 
+/*-------------------------------------------------------------------------*/
+
+int tds_tmpl_get_acq_mode( void )
+{
+	char reply[ 30 ];
+	long length = 30;
+
+
+	if ( gpib_write( tds_tmpl.device, "ACQ:MOD?\n", 9 ) == FAILURE ||
+		 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+
+	if ( *reply == 'A' )		/* digitizer is in average mode */
+		return AVERAGE;
+
+	if ( *reply != 'S' )		/* if not in sample mode set it */
+	{
+		if ( gpib_write( tds_tmpl.device, "ACQ:MOD SAM\n", 12 ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+	}
+
+	return SAMPLE;
+}
+
+
+/*---------------------------------------------------------------*/
+/* Returns the position of the first or second cursor, depending */
+/* on the value of the argument passed to the function (1 or 2 ) */
+/*---------------------------------------------------------------*/
+
+double tds_tmpl_get_cursor_position( int cur_no )
+{
+	char cmd[ 40 ] = "CURS:VBA:POSITION";
+    char reply[ 30 ];
+    long length = 30;
+
+	fsc2_assert( cur_no == 1 || cur_no == 2 );
+
+	strcat( cmd, cur_no == 1 ? "1?\n" : "2?\n" );
+    if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE ||
+         gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+
+    reply[ length - 1 ] = '\0';
+    return T_atod( reply );
+}
+
+
+/*----------------------------------------------*/
+/* Returns the distance between the two cursors */
+/*----------------------------------------------*/
+
+double tds_tmpl_get_cursor_distance( void )
+{
+	return   tds_tmpl_get_cursor_position( 1 )
+		   - tds_tmpl_get_cursor_position( 2 );
+}
+
+
+/*---------------------------------------------------------------------*/
+/* Sets the trigger channel according to the number passed as argument */
+/*---------------------------------------------------------------------*/
+
+void tds_tmpl_set_trigger_channel( int ch )
+{
+	char cmd[ 50 ];
+
+
+#if defined TDS_TMPL_AUX
+	fsc2_assert( ( ch >= TDS_TMPL_CH1 && ch < NUM_NORMAL_CHANNELS ) ||
+				 ch == TDS_TMPL_AUX || ch == TDS_TMPL_LIN );
+#endif
+#if defined TDS_TMPL_AUX1 && defined TDS_TMPL_AUX2
+	fsc2_assert( ( ch >= TDS_TMPL_CH1 && ch < NUM_NORMAL_CHANNELS ) ||
+				 ch == TDS_TMPL_AUX1 || ch == TDS_TMPL_AUX2 ||
+				 ch == TDS_TMPL_LIN );
+#endif			 
+
+
+	switch( ch )
+	{
+#if defined TDS_TMPL_AUX1
+		case TDS_TMPL_AUX1 :
+			strcpy( cmd, "TRIG:MAI:EDGE:SOU CH3\n" );
+			break;
+#endif
+#if defined TDS_TMPL_AUX2
+		case TDS_TMPL_AUX2 :
+			strcpy( cmd, "TRIG:MAI:EDGE:SOU CH4\n" );
+			break;
+#endif
+		default :
+			sprintf( cmd, "TRIG:MAI:EDGE:SOU %s\n", Channel_Names[ ch ] );
+			break;
+	}
+
+	if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+}
+
+
+/*-----------------------------------------------*/
+/* Returns number of the current trigger channel */
+/*-----------------------------------------------*/
+
+int tds_tmpl_get_trigger_channel( void )
+{
+    char reply[ 30 ];
+    long length = 30;
+
+
+    if ( gpib_write( tds_tmpl.device, "TRIG:MAI:EDGE:SOU?\n", 19 ) == FAILURE
+		 || gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+
+	/* Possible replies are "CH1", "CH2", "CH3", "CH4", "AUX", or "LIN",
+	   depending on the model (some models that only have 2 normal channels
+	   but 2 AUX channels return "CH3" and "CH4" for AUX1 and AUX2) */
+
+#ifdef TDS_TMPL_AUX
+    if ( ! strncmp( reply, "AUX", 3 ) )
+        return TDS_TMPL_AUX;
+#endif
+#ifdef TDS_TMPL_AUX1
+    if ( ! strncmp( reply, "CH3", 3 ) )
+        return TDS_TMPL_AUX1;
+#endif
+#ifdef TDS_TMPL_AUX2
+    if ( ! strncmp( reply, "CH4", 3 ) )
+        return TDS_TMPL_AUX2;
+#endif
+    if ( ! strncmp( reply, "LIN", 3 ) )
+        return TDS_TMPL_LIN;
+
+	switch ( reply[ 2 ] )
+	{
+		case '1' :
+			return TDS_TMPL_CH1;
+
+		case '2' :
+			return TDS_TMPL_CH2;
+#ifdef TDS_TMPL_CH3
+		case '3' :
+			return TDS_TMPL_CH3;
+#endif
+#ifdef TDS_TMPL_CH4
+		case '4' :
+			return TDS_TMPL_CH4;
+#endif
+		default :
+			print( FATAL, "Received invalid data from device.\n" );
+			THROW( EXCEPTION );
+	}
+}
+
+
+/*-----------------------------------*/
+/* Called on communication problems */
+/*-----------------------------------*/
+
+void tds_tmpl_gpib_failure( void )
+{
+	if ( ! in_init )
+		print( FATAL, "Communication with device failed.\n" );
+	THROW( EXCEPTION );
+}
+
+
+/*--------------------------------------------------------------------*/
+/* tds_tmpl_clear_SESR() reads the the standard event status register */
+/* and thereby clears it - if this isn't done no SRQs are flagged !   */
+/*--------------------------------------------------------------------*/
+
+void tds_tmpl_clear_SESR( void )
+{
+    char reply[ 30 ];
+    long length = 30;
+
+
+    if ( gpib_write( tds_tmpl.device, "*ESR?\n", 6 ) == FAILURE ||
+		 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+}
+
+
+/*--------------------------------------------------------------*/
+/* Does all the necessary work after an experiment is finished. */
+/*--------------------------------------------------------------*/
+
+void tds_tmpl_finished( void )
+{
+	if ( ! tds_tmpl.is_reacting )
+		return;
+
+    gpib_write( tds_tmpl.device, "ACQ:STATE STOP\n", 15 );
+    tds_tmpl_clear_SESR( );
+    gpib_write( tds_tmpl.device,
+				"*SRE 0;:ACQ:STOPA RUNST;STATE RUN;:LOC NON\n", 43 );
+	gpib_local( tds_tmpl.device );
+	tds_tmpl.is_reacting = UNSET;
+}
+
+
+/*--------------------------------------*/
+/* Positions the first or second cursor */
+/*--------------------------------------*/
+
+void tds_tmpl_set_cursor( int cur_num, double pos )
+{
+    char cmd[ 60 ];
+
+
+	fsc2_assert( cur_num == 1 || cur_num == 2 );
+
+    /* set cursors to specified positions */
+
+	sprintf( cmd, "CURS:VBA:POSITION %d %11.5E\n", cur_num, pos );
+    if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+}
+
+
+/*--------------------------------------------*/
+/* Function tests if a channel is switched on */
+/*--------------------------------------------*/
+
+bool tds_tmpl_display_channel_state( int channel )
+{
+	char cmd[ 30 ];
+    char reply[ 10 ];
+    long length = 10;
+
+
+	fsc2_assert( channel >= TDS_TMPL_CH1 &&
+				 channel < NUM_DISPLAYABLE_CHANNELS );
+
+	sprintf( cmd, "SEL:%s?\n", Channel_Names[ channel ] );
+    if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE ||
+         gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+
+	return reply[ 0 ] != 0;
+}
+
+
+/*--------------------------------------------------------*/
+/* Function switches a channel of the digitizer on or off */
+/*--------------------------------------------------------*/
+
+void tds_tmpl_display_channel( int channel, bool on_flag )
+{
+	char cmd[ 30 ];
+
+
+	fsc2_assert( channel >= TDS_TMPL_CH1 &&
+				 channel < NUM_DISPLAYABLE_CHANNELS );
+
+	/* Get the channels sensitivity */
+
+	if ( on_flag && channel >= 0 && channel < NUM_NORMAL_CHANNELS )
+	{
+		tds_tmpl_get_sens( channel );
+		tds_tmpl.is_sens[ channel ] = SET;
+	}
+
+    /* If it's not in the state we need switch it on or off */
+
+    if ( tds_tmpl_display_channel_state( channel ) != on_flag )
+    {
+        sprintf( cmd, "SEL:%s %s\n", Channel_Names[ channel ],
+				 on_flag ? "ON" : "OFF" );
+        if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+    }
+}
+
+
+/*-----------------------------------------------------------*/
+/* Returns the sensitivity of the channel passed as argument */
+/*-----------------------------------------------------------*/
+
+double tds_tmpl_get_sens( int channel )
+{
+    char cmd[ 30 ];
+    char reply[ 30 ];
+    long length = 30;
+
+
+	fsc2_assert( channel >= TDS_TMPL_CH1 && channel < NUM_NORMAL_CHANNELS );
+
+	sprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
+	if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+
+    reply[ length - 1 ] = '\0';
+	tds_tmpl.sens[ channel ] = T_atod( reply );
+
+	return tds_tmpl.sens[ channel ];
+}
+
+
+/*--------------------------------------------------------*/
+/* Sets the sensitivity of one of the digitizers channels */
+/*--------------------------------------------------------*/
+
+void tds_tmpl_set_sens( int channel, double sens )
+{
+    char cmd[ 40 ];
+#ifdef CHECK_SENS_IMPEDANCE
+	char reply[ 40 ];
+	long length = 40;
+#endif
+
+
+	fsc2_assert( channel >= TDS_TMPL_CH1 && channel < NUM_NORMAL_CHANNELS );
+
+#ifdef CHECK_SENS_IMPEDANCE
+	/* Some digitizers allow high sensitivities only for 1 MOhm input
+	   impedance, not for 50 Ohm */
+
+	if ( sens > min_sens_50 )
+	{
+		sprintf( cmd, "CH%1d:IMP?\n", channel );
+		if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE ||
+			 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+
+		if ( strncmp( reply, "MEG", 3 ) )
+		{
+			if ( in_init )
+			{
+				print( FATAL, "Sensitivity of %f V for channel %s too low "
+					   "with input impedance set to  50 Ohm.\n",
+					   Channel_Names[ channel ], sens );
+				THROW( EXCEPTION );
+			}
+
+			print( SEVERE, "Sensitivity of %f V for channel %s too low "
+				   "with input impedance set to 50 Ohm.\n",
+				   Channel_Names[ channel ], sens );
+			return;
+		}
+	}
+#endif
+
+	sprintf( cmd, "%s:SCA %8.3E\n", Channel_Names[ channel ], sens );
+	if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+void tds_tmpl_start_acquisition( void )
+{
+    /* Start an acquisition:
+       1. clear the SESR register to allow SRQs
+       2. set state to run
+	   3. set stop after sequence */
+
+
+	tds_tmpl_clear_SESR( );
+    if ( gpib_write( tds_tmpl.device, "ACQ:STATE RUN;STOPA SEQ\n", 24 )
+		 == FAILURE )
+		tds_tmpl_gpib_failure( );
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+double tds_tmpl_get_area( int channel, WINDOW *w, bool use_cursor )
+{
+#ifdef NO_GATED_MEASUREMENTS
+	/* Some older devices (TDS520) can't do gated measuements at all, so
+	   we've got to get the curve 'by hand'. If the user asked to mark the
+	   window position using cursors (as would be done with the newer
+	   oszilloscopes and gated measurements) set the cursors to the start
+	   and end position of the window. */
+
+	if ( use_cursor )
+	{
+		double window = tds_tmpl.timebase * tds_tmpl.rec_len /
+						TDS_TMPL_POINTS_PER_DIV;
+
+		tds_tmpl_set_cursor( 1, w != NULL ?
+							 w->start : ( - tds_tmpl.trig_pos * window ) );
+		tds_tmpl_set_cursor( 2, w != NULL ?
+							 w->start + w->width :
+							 ( ( 1.0 - tds_tmpl.trig_pos ) * window ));
+	}
+
+	return tds_tmpl_get_area_wo_cursor( channel, w );
+
+#else
+
+	char cmd[ 50 ];
+	char reply[ 40 ];
+	long length = 40;
+
+
+
+	if ( ! use_cursor )
+		return tds_tmpl_get_area_wo_cursor( channel, w );
+
+	/* Set measurement type to area */
+
+    if ( gpib_write( tds_tmpl.device, "MEASU:IMM:TYP ARE\n", 18 ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+
+	fsc2_assert( channel >= TDS_TMPL_CH1 &&
+				 channel < NUM_DISPLAYABLE_CHANNELS );
+
+	/* Set channel (if the channel is not already set) */
+
+	if ( channel != tds_tmpl.meas_source )
+	{
+		sprintf( cmd, "MEASU:IMM:SOURCE %s\n", Channel_Names[ channel ] );
+		if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+		tds_tmpl.meas_source = channel;
+	}
+
+	/* Set the cursors */
+
+	tds_tmpl_set_meas_window( w );
+
+	/* Wait for measurement to finish (use polling) */
+
+	do
+	{
+		stop_on_user_request( );
+
+		length = 40;
+		usleep( 100000 );
+		if ( gpib_write( tds_tmpl.device, "BUSY?\n", 6 ) == FAILURE ||
+			 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+	} while ( reply[ 0 ] == '1' ); 
+
+	/* Get the the area */
+
+	length = 40;
+	if ( gpib_write( tds_tmpl.device, "*WAI;:MEASU:IMM:VAL?\n", 21 )
+		 == FAILURE ||
+		 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+
+	reply[ length - 1 ] = '\0';
+	return T_atod( reply );
+
+#endif
+}
+
+
+/*---------------------------------------------------------------------*/
+/* Measures the area without using the built-in measurement method but */
+/* by fetching the curve in the window and integrating it 'by hand'.   */
+/*---------------------------------------------------------------------*/
+
+static double tds_tmpl_get_area_wo_cursor( int channel, WINDOW *w )
+{
+	double *data, area;
+	long length, i;
+	double pos = 0.0;
+	char buf[ 100 ];
+	long len = 100;
+
+
+	tds_tmpl_get_curve( channel, w, &data, &length, UNSET );
+
+	for ( area = 0.0, i = 0; i < length; i++ )
+		area += data[ i ];
+
+	T_free( data );
+
+	/* To be able to get comparable results to the built-in measurement
+	   method we have to subtract the position setting */
+
+	if ( channel >= TDS_TMPL_CH1 && channel < NUM_NORMAL_CHANNELS )
+	{
+		sprintf( buf, "CH%1d:POS?\n", channel + 1 );
+		if ( gpib_write( tds_tmpl.device, buf, strlen( buf ) ) == FAILURE ||
+			 gpib_read( tds_tmpl.device, buf, &len ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+
+		pos = T_atod( buf );
+	}
+
+	/* Return the integrated area, multiplied by the the time per point */
+
+	return ( area - length * pos )
+		   * tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
+						bool use_cursor )
+{
+	char cmd[ 50 ];
+	char reply[ 10 ];
+	long len = 10;
+	char *buffer;
+	char *b;
+	long i;
+	double sens;
+	double scale;
+	long len1, len2;
+
+
+	fsc2_assert( channel >= TDS_TMPL_CH1 &&
+				 channel < NUM_DISPLAYABLE_CHANNELS );
+
+#ifdef NO_GATED_MEASUREMENTS
+	/* Some older devices (TDS520) can't do gated measuements at all, so
+	   we've got to get the curve 'by hand'. If the user asked to mark the
+	   window position using cursors (as would be done with the newer
+	   oszilloscopes and gated measurements) set the cursors to the start
+	   and end position of the window. */
+
+	if ( use_cursor )
+	{
+		double window = tds_tmpl.timebase * tds_tmpl.rec_len /
+						TDS_TMPL_POINTS_PER_DIV;
+		tds_tmpl_set_cursor( 1, w != NULL ?
+							 w->start : ( - tds_tmpl.trig_pos * window ) );
+		tds_tmpl_set_cursor( 2, w != NULL ?
+							 w->start + w->width :
+							 ( ( 1.0 - tds_tmpl.trig_pos ) * window ));
+	}
+#endif
+
+	/* Calculate the scale factor for converting the data returned by the
+	   digitizer (2-byte integers) into real voltage levels */
+
+	if ( channel >= TDS_TMPL_CH1 && channel < NUM_NORMAL_CHANNELS )
+	{
+		if ( ! tds_tmpl.is_sens[ channel ] || ! tds_tmpl.lock_state )
+		{
+			sens = tds_tmpl_get_sens( channel );
+			tds_tmpl.is_sens[ channel ] = SET;
+		}
+
+		sens = tds_tmpl.sens[ channel ];
+	}
+	else
+		sens = 1.0;
+
+	scale = 10.24 * sens / ( double ) 0xFFFF;
+
+	/* Set the data source channel (if it's not already set correctly) */ 
+
+	if ( channel != tds_tmpl.data_source )
+	{
+		sprintf( cmd, "DATA:SOURCE %s\n", Channel_Names[ channel ] );
+		if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+		tds_tmpl.data_source = channel;
+	}
+
+	/* Set the cursors or set start and end point of interval */
+
+#ifdef NO_GATED_MEASUREMENTS
+	sprintf( cmd, "DAT:START %ld;STOP %ld\n", 
+			 w != NULL ? w->start_num : 1,
+			 w != NULL ? w->end_num : tds_tmpl.rec_len );
+	if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+#else
+	if ( use_cursor )
+		tds_tmpl_set_curve_window( w );
+	else
+	{
+		sprintf( cmd, "DAT:START %ld;STOP %ld\n", 
+				 w != NULL ? w->start_num : 1,
+				 w != NULL ? w->end_num : tds_tmpl.rec_len );
+		if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+	}
+#endif
+
+	/* Wait for measurement to finish (use polling) */
+
+	do
+	{
+		stop_on_user_request( );
+
+		len = 10;
+		usleep( 100000 );
+		if ( gpib_write( tds_tmpl.device, "BUSY?\n", 6 ) == FAILURE ||
+			 gpib_read( tds_tmpl.device, reply, &len ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+	} while ( reply[ 0 ] == '1' ); 
+
+	/* Calculate how long the curve (with header) is going to be and allocate
+       enough memory (data are 2-byte integers) */
+
+	*length = w != NULL ? w->end_num - w->start_num + 1 : tds_tmpl.rec_len;
+	len = 2 * *length;
+	len2 = 1 + lrnd( floor( log10( len ) ) );
+	len1 = 1 + lrnd( floor( log10( len2 ) ) );
+	len += len1 + len2 + 2;
+
+	*data = T_malloc( *length * sizeof( double ) );
+	buffer = T_malloc( len );
+
+	/* Now get all the data bytes... */
+
+	if ( gpib_write( tds_tmpl.device, "CURV?\n", 6 ) == FAILURE ||
+		 gpib_read( tds_tmpl.device, buffer, &len ) == FAILURE )
+	{
+		T_free( buffer );
+		T_free( *data );
+		tds_tmpl_gpib_failure( );
+	}
+
+	/* ....and copy them to the final destination (the data are INTEL format
+	   2-byte integers, so the following requires sizeof( short ) == 2 and
+	   only works on a machine with INTEL format - there got to be better ways
+	   to do it...) Also scale data so that we get the real measured
+	   voltage. */
+
+	fsc2_assert( sizeof( short ) == 2 );
+
+	b = buffer + len1 + len2 + 1;
+
+	for ( i = 0; i < *length; i++ )
+		*( *data + i ) = scale * ( double ) *( ( short * ) b + i );
+
+	T_free( buffer );
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+double tds_tmpl_get_amplitude( int channel, WINDOW *w, bool use_cursor )
+{
+#ifdef NO_GATED_MEASUREMENTS
+	/* Some older devices (TDS520) can't do gated measuements at all, so
+	   we've got to calculate the area 'by hand'. If the user asked to
+	   simulate using cursors (as would be done with the newer oszilloscopes
+	   and gated measurements) set the cursors to the start and end position
+	   of the window. */
+
+	if ( use_cursor )
+	{
+		double window = tds_tmpl.timebase * tds_tmpl.rec_len /
+						TDS_TMPL_POINTS_PER_DIV;
+
+		tds_tmpl_set_cursor( 1, w != NULL ?
+							 w->start : ( - tds_tmpl.trig_pos * window ) );
+		tds_tmpl_set_cursor( 2, w != NULL ?
+							 w->start + w->width :
+							 ( ( 1.0 - tds_tmpl.trig_pos ) * window ));
+	}
+
+	return tds_tmpl_get_amplitude_wo_cursor( channel, w );
+
+#else
+
+	char cmd[ 50 ];
+	char reply[ 40 ];
+	long length = 40;
+
+
+	if ( ! use_cursor )
+		return tds_tmpl_get_amplitude_wo_cursor( channel, w );
+
+	/* Set measurement type to area */
+
+    if ( gpib_write( tds_tmpl.device, "MEASU:IMM:TYP AMP\n", 18 ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+
+	fsc2_assert( channel >= TDS_TMPL_CH1 &&
+				 channel < NUM_DISPLAYABLE_CHANNELS );
+
+	/* Set channel (if the channel is not already set) */
+
+	if ( channel != tds_tmpl.meas_source )
+	{
+		sprintf( cmd, "MEASU:IMM:SOURCE %s\n", Channel_Names[ channel ] );
+		if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+		tds_tmpl.meas_source = channel;
+	}
+
+	/* Set the cursors */
+
+	tds_tmpl_set_meas_window( w );
+
+	/* Wait for measurement to finish (use polling) */
+
+	do
+	{
+		stop_on_user_request( );
+
+		length = 40;
+		usleep( 100000 );
+		if ( gpib_write( tds_tmpl.device, "BUSY?\n", 6 ) == FAILURE ||
+			 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+	} while ( reply[ 0 ] == '1' ); 
+
+
+	/* Get the the amplitude */
+
+	length = 40;
+	if ( gpib_write( tds_tmpl.device, "*WAI\n", 5 ) == FAILURE ||
+		 gpib_write( tds_tmpl.device, "MEASU:IMM:VAL?\n", 15 ) == FAILURE ||
+		 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+
+	reply[ length - 1 ] = '\0';
+	return T_atod( reply );
+
+#endif
+}
+
+
+/*-------------------------------------------------------------------*/
+/* Gets the amplitude without the built-in measurement method but by */
+/* fetching the curve in the window and integrating it 'by hand'.    */
+/*-------------------------------------------------------------------*/
+
+static double tds_tmpl_get_amplitude_wo_cursor( int channel, WINDOW *w )
+{
+	double *data, min, max;
+	long length, i;
+
+
+	tds_tmpl_get_curve( channel, w, &data, &length, UNSET );
+
+	min = HUGE_VAL;
+	max = - HUGE_VAL;
+	for ( i = 0; i < length; i++ )
+	{
+		max = d_max( data[ i ], max );
+		min = d_min( data[ i ], min );
+	}
+
+	T_free( data );
+
+	/* Return the difference between highest and lowest value */
+
+	return max - min;
+}
+
+
+/*----------------------------------------*/
+/* Sets the digitizer to run continuously */
+/*----------------------------------------*/
+
+void tds_tmpl_free_running( void )
+{
+	if ( gpib_write( tds_tmpl.device, "ACQ:STOPA RUNST;STATE RUN\n", 26 )
+		 == FAILURE )
+		tds_tmpl_gpib_failure( );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+void tds_tmpl_lock_state( bool lock )
+{
+	char cmd[ 100 ];
+	int channel;
+
+
+	/* If we switch from unlocked to locked state we need to find out the
+	   current timebase, record length, trigger position and sensitivity
+	   settings */
+
+	if ( ! tds_tmpl.lock_state && lock )
+	{
+		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+
+		for ( channel = TDS_TMPL_CH1; channel < NUM_NORMAL_CHANNELS;
+			  channel++ )
+		{
+			tds_tmpl_get_sens( channel );
+			tds_tmpl.is_sens[ channel ] = SET;
+		}
+	}
+
+	sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
+	if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+	tds_tmpl.lock_state = lock;
+}
+
+
+/* The next functions are useless when the device (i.e. TDS520) can't do
+   gated measurements or has no tracking cursors */
+
+#ifndef NO_GATED_MEASUREMENTS
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+void tds_tmpl_set_track_cursors( bool flag )
+{
+	char cmd[ 20 ];
+
+
+	sprintf( cmd, "CURS:MODE %s\n", flag ? "TRAC" : "IND" );
+    if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+void tds_tmpl_set_gated_meas( bool flag )
+{
+	char cmd[ 20 ];
+
+
+	sprintf( cmd, "MEASU:GAT %s\n", flag ? "ON" : "OFF" );
+    if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+void tds_tmpl_set_snap( bool flag )
+{
+	char cmd[ 50 ];
+
+
+	if ( flag )
+	{
+		if ( gpib_write( tds_tmpl.device, "DAT SNA\n", 8 ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+	}
+	else
+	{
+		sprintf( cmd, "DAT:STAR 1;STOP %ld\n", tds_tmpl.rec_len );
+		if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+			tds_tmpl_gpib_failure( );
+	}		
+}
+
+#endif
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

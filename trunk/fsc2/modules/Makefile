@@ -46,6 +46,8 @@ lecroy9400    := lecroy9400.c  lecroy9400_gpib.c  lecroy9400_util.c
 
 src_headers   := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h 
 
+tds_list      := tds754a tds744a tds540 tds520c tds520a tds520
+
 CFLAGS        += -I$(sdir) -I$(cdir)
 
 
@@ -76,9 +78,20 @@ export        # export all symbols to the sub-makefiles
 
 # Making the modules consisting of just one file is simple, to make the
 # more complicated modules we need to create temporary makefiles from a
-# template and then invoke them
+# template and then invoke them. For the Tektronix digitizers even the
+# sources are created from templates.
 
 all: $(simp_modules:.c=.so)
+	for n in $(tds_list); do \
+		o=`echo $$n | tr "a-z" "A-Z"`; \
+		for m in "" _util _gpib; do \
+			if [ ! -e $$n$$m.c -o tds$$m.c.tmpl -nt $$n$$m.c \
+				 -o $$n.h -nt $$n$$m.c ]; then \
+				sed "s/tds_tmpl/$$n/g;s/TDS_TMPL/$$o/g" \
+					tds$$m.c.tmpl > $$n$$m.c; \
+			fi; \
+		done; \
+	done;
 	for m in $(shell echo $(comp_modules) | cut -f1- -d' '); do \
 		sed -e "s/##/$$m/g" Makefile.tmpl > $$m.make; \
 		$(MAKE) -f $$m.make; \
@@ -224,6 +237,11 @@ clean:
 
 distclean:
 	$(MAKE) clean
+	-for n in $(tds_list); do \
+		for m in "" _util _gpib; do \
+			$(RM) $(RMFLAGS) $$n$$m.c; \
+		done; \
+	done;
 	-$(RM) $(RMFLAGS) *.so
 
 # don't automatically delete intermediate files created by flex

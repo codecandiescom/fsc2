@@ -31,6 +31,31 @@
 #include "tds754a.conf"
 
 
+#define TDS754A_UNDEF  -1
+#define TDS754A_CH1     0
+#define TDS754A_CH2     1
+#define TDS754A_CH3     2
+#define TDS754A_CH4     3
+#define TDS754A_MATH1   4
+#define TDS754A_MATH2   5
+#define TDS754A_MATH3   6
+#define TDS754A_REF1    7
+#define TDS754A_REF2    8
+#define TDS754A_REF3    9
+#define TDS754A_REF4   10
+#define TDS754A_AUX    11         /* Auxiliary (for trigger only) */
+#define TDS754A_LIN    12         /* Line In (for triggger only) */
+#define MAX_CHANNELS   13
+
+#define NUM_NORMAL_CHANNELS       ( TDS754A_CH4 + 1 )
+#define NUM_DISPLAYABLE_CHANNELS  ( TDS754A_REF4 + 1 )
+#define MAX_SIMULTANEOUS_CHANNELS 4
+
+#define TDS754A_POINTS_PER_DIV    50
+
+#define CHECK_SENS_IMPEDANCE   /* Not all sensitivites are allowed for all
+								  input impedances, needs additonal checks */
+
 /* Here values are defined that get returned by the driver in the test run
    when the digitizer can't be accessed - these values must really be
    reasonable ! */
@@ -40,33 +65,7 @@
 #define TDS754A_TEST_SENSITIVITY  0.01
 #define TDS754A_TEST_NUM_AVG      16
 #define TDS754A_TEST_TRIG_POS     0.1
-#define TDS754A_TEST_TRIG_CHANNEL 0
-
-
-
-#define TDS754A_POINTS_PER_DIV   50
-#define MAX_DISPLAYABLE_CHANNELS  4
-
-#define MAX_CHANNELS  13         /* number of channel names */
-
-#define TDS754A_UNDEF -1
-#define TDS754A_CH1    0
-#define TDS754A_CH2    1
-#define TDS754A_CH3    2
-#define TDS754A_CH4    3
-#define TDS754A_MATH1  4
-#define TDS754A_MATH2  5
-#define TDS754A_MATH3  6
-#define TDS754A_REF1   7
-#define TDS754A_REF2   8
-#define TDS754A_REF3   9
-#define TDS754A_REF4  10
-#define TDS754A_AUX   11         /* Auxiliary (for trigger only) */
-#define TDS754A_LIN   12         /* Line In (for triggger only) */
-
-
-#define GENERAL_TO_TDS754A 0
-#define TDS754A_TO_GENERAL 1
+#define TDS754A_TEST_TRIG_CHANNEL TDS754A_CH1
 
 
 /* Structure for description of a `window' on the digitizer, made up from the
@@ -95,14 +94,13 @@ typedef struct
 	double timebase;
 	bool is_timebase;
 
-	double sens[ MAX_CHANNELS ];
-	double is_sens[ MAX_CHANNELS ];
+	double sens[ NUM_NORMAL_CHANNELS ];
+	double is_sens[ NUM_NORMAL_CHANNELS ];
 
 	long num_avg;
 	bool is_num_avg;
 
 	WINDOW *w;                // start element of list of windows
-	int num_windows;
 	bool is_equal_width;      // all windows have equal width -> tracking
 	                          // cursors can be used without further checking
 	bool gated_state;         // Gated measurements ?
@@ -119,18 +117,79 @@ typedef struct
 
 	double cursor_pos;        // current position of cursor 1
 
-	int meas_source;          // currently selected measurements source channel
-	int data_source;          // currently selected data source channel
+	int meas_source;          // channel selected as measurement source
+	int data_source;          // channel selected as data source
 
-	bool channel_is_on[ MAX_CHANNELS ];
-	bool channels_in_use[ MAX_CHANNELS ];
+	bool channel_is_on[ NUM_DISPLAYABLE_CHANNELS ];
+	bool channels_in_use[ NUM_DISPLAYABLE_CHANNELS ];
 
 	bool lock_state;          // set if keyboard is locked
 } TDS754A;
 
 
+enum {
+	SAMPLE,
+	AVERAGE
+};
 
-/* declaration of exported functions */
+enum {
+	GENERAL_TO_TDS754A,
+	TDS754A_TO_GENERAL
+};
+
+
+#ifdef TDS754A_MAIN
+
+	TDS754A tds754a;
+
+	/* This array must be set to the available record lengths of the digitizer
+	   and must always end with a 0 */
+
+	static long record_lengths[ ] = { 500, 1000, 2500, 5000, 15000, 50000, 0 };
+
+	/* List of all possible time base values (in seconds) */
+
+	static double tb[ ] = {                     500.0e-12,
+							  1.0e-9,   2.0e-9,   5.0e-9,
+							 12.5e-9,  25.0e-9,  50.0e-9,
+							100.0e-9, 200.0e-9, 500.0e-9,
+							  1.0e-6,   2.0e-6,   5.0e-6,
+							 10.0e-6,  20.0e-6,  50.0e-6,
+							100.0e-6, 200.0e-6, 500.0e-6,
+							  1.0e-3,   2.0e-3,   5.0e-3,
+							 10.0e-3,  20.0e-3,  50.0e-3,
+							100.0e-3, 200.0e-3, 500.0e-3,
+							  1.0,      2.0,      5.0,
+							 10.0 };
+
+	#define TB_ENTRIES ( sizeof tb / sizeof tb[ 0 ] )
+
+	/* Maximum and minimum sensitivity settings (in V) for the measurement
+	   channels.
+	   Take care: The minimum sensitivity of 10 V only works with 1 M Ohm input
+	   impedance, while for 50 Ohm the minimum sensitivity is only 1V.
+	   Unfortunately, this can only be tested after the digitizer is online. */
+
+	double max_sens = 1e-3,
+		   min_sens_50 = 1.0,
+		   min_sens = 10.0;
+
+
+	const char *Channel_Names[ MAX_CHANNELS ] =
+										  { "CH1", "CH2", "CH3", "CH4",
+											"MATH1", "MATH2", "MATH3", "REF1",
+  											"REF2", "REF3", "REF4",
+								 			"AUX", "LINE" };
+#else
+
+	extern TDS754A tds754a;
+	extern const char *Channel_Names[ MAX_CHANNELS ];
+	extern double max_sens, min_sens_50, min_sens;
+
+#endif
+
+
+/* Declaration of exported functions */
 
 int tds754a_init_hook( void );
 int tds754a_test_hook( void );
@@ -165,7 +224,7 @@ Var *digitizer_run( Var *v );
 Var *digitizer_lock_keyboard( Var *v );
 
 
-/* declaration of internally used functions */
+/* Declaration of internally used functions */
 
 const char *tds754a_ptime( double p_time );
 void tds754a_delete_windows( TDS754A *s );
@@ -213,30 +272,12 @@ void tds754a_free_running( void );
 void tds754a_lock_state( bool lock );
 
 
-#define NUM_CH_NAMES 13
+/* Unfortunately, the digitizer sometimes seems to have problems returning
+   data when there's not a short delay between the write and read command
+   I found empirically that waiting 2 ms seems to get rid of the problem. */
 
-#ifdef TDS754A_MAIN
-
-TDS754A tds754a;
-const char *Channel_Names[ NUM_CH_NAMES ] =
-										  { "CH1", "CH2", "CH3", "CH4",
-											"MATH1", "MATH2", "MATH3", "REF1",
-  											"REF2", "REF3", "REF4",
-								 			"AUX", "LINE" };
-#else
-
-extern TDS754A tds754a;
-extern const char *Channel_Names[ NUM_CH_NAMES ];
-
-#endif
-
-
-
-enum {
-	SAMPLE,
-	AVERAGE
-};
-
+#define gpib_read( a, b, c ) \
+		( usleep( 2000 ), gpib_read( ( a ), ( b ), ( c ) ) )
 
 /*
  * Local variables:

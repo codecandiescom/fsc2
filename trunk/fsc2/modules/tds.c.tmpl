@@ -23,45 +23,13 @@
 
 
 
-#define TDS754A_MAIN
+#define TDS_TMPL_MAIN
 
-#include "tds754a.h"
-
-const char device_name[ ]  = DEVICE_NAME;
-const char generic_type[ ] = DEVICE_TYPE;
+#include "tds_tmpl.h"
 
 
-/* This array must be set to the available record lengths of the digitizer
-   and must always end with a 0 */
-
-static long record_lengths[ ] = { 500, 1000, 2500, 5000, 15000, 50000, 0 };
-
-/* List of all possible time base values (in seconds) */
-
-static double tb[ ] = {                     500.0e-12,
-						  1.0e-9,   2.0e-9,   5.0e-9,
-						 12.5e-9,  25.0e-9,  50.0e-9,
-						100.0e-9, 200.0e-9, 500.0e-9,
-						  1.0e-6,   2.0e-6,   5.0e-6,
-						 10.0e-6,  20.0e-6,  50.0e-6,
-						100.0e-6, 200.0e-6, 500.0e-6,
-						  1.0e-3,   2.0e-3,   5.0e-3,
-						 10.0e-3,  20.0e-3,  50.0e-3,
-						100.0e-3, 200.0e-3, 500.0e-3,
-						  1.0,      2.0,      5.0,
-						 10.0 };
-
-#define TB_ENTRIES ( sizeof tb / sizeof tb[ 0 ] )
-
-
-/* Maximum and minimum sensitivity settings (in V) for the measurement
-   channels.
-   Take care: The minimum sensitivity of 10 V only works with 1 M Ohm input
-   impedance, while for 50 Ohm the minimum sensitivity is only 1V.
-   Unfortunately, this can only be tested after the digitizer is online. */
-
-static double max_sens = 1e-3,
-              min_sens = 10.0;
+static const char device_name[ ]  = DEVICE_NAME;
+static const char generic_type[ ] = DEVICE_TYPE;
 
 
 static Var *get_area( Var *v, bool use_cursor );
@@ -69,7 +37,7 @@ static Var *get_curve( Var *v, bool use_cursor );
 static Var *get_amplitude( Var *v, bool use_cursor );
 
 
-static TDS754A tds754a_stored;
+static TDS_TMPL tds_tmpl_stored;
 
 
 
@@ -81,7 +49,7 @@ static TDS754A tds754a_stored;
 /* Init hook function for the module. */
 /*------------------------------------*/
 
-int tds754a_init_hook( void )
+int tds_tmpl_init_hook( void )
 {
 	int i;
 
@@ -92,29 +60,25 @@ int tds754a_init_hook( void )
 
 	/* Initialize some variables in the digitizers structure */
 
-	tds754a.is_reacting = UNSET;
-	tds754a.w           = NULL;
-	tds754a.is_timebase = UNSET;
-	tds754a.is_num_avg  = UNSET;
-	tds754a.is_rec_len  = UNSET;
-	tds754a.is_trig_pos = UNSET;
-	tds754a.num_windows = 0;
-	tds754a.data_source = TDS754A_UNDEF;
-	tds754a.meas_source = TDS754A_UNDEF;
-	tds754a.lock_state  = SET;
+	tds_tmpl.is_reacting = UNSET;
+	tds_tmpl.w           = NULL;
+	tds_tmpl.is_timebase = UNSET;
+	tds_tmpl.is_num_avg  = UNSET;
+	tds_tmpl.is_rec_len  = UNSET;
+	tds_tmpl.is_trig_pos = UNSET;
+	tds_tmpl.data_source = TDS_TMPL_UNDEF;
+#ifndef NO_GATED_MEASUREMENTS
+	tds_tmpl.meas_source = TDS_TMPL_UNDEF;
+#endif
+	tds_tmpl.lock_state  = SET;
 
-	for ( i = TDS754A_CH1; i <= TDS754A_CH4; i++ )
-		tds754a.is_sens[ i ] = UNSET;
-	for ( i = TDS754A_MATH1; i <= TDS754A_REF4; i++ )
-	{
-		tds754a.is_sens[ i ] = SET;
-		tds754a.sens[ i ] = 1.0;
-	}
+	for ( i = TDS_TMPL_CH1; i < NUM_NORMAL_CHANNELS; i++ )
+		tds_tmpl.is_sens[ i ] = UNSET;
 
-	for ( i = 0; i < MAX_CHANNELS; i++ )
-		tds754a.channels_in_use[ i ] = UNSET;
+	for ( i = 0; i < NUM_DISPLAYABLE_CHANNELS; i++ )
+		tds_tmpl.channels_in_use[ i ] = UNSET;
 
-	tds754a_stored.w = NULL;
+	tds_tmpl_stored.w = NULL;
 
 	return 1;
 }
@@ -124,12 +88,12 @@ int tds754a_init_hook( void )
 /* Test hook function for the module */
 /*-----------------------------------*/
 
-int tds754a_test_hook( void )
+int tds_tmpl_test_hook( void )
 {
 	/* Store the state of the digitizer structure it was set to in the
 	   PREPARATIONS section */
 
-	tds754a_store_state( &tds754a_stored, &tds754a );
+	tds_tmpl_store_state( &tds_tmpl_stored, &tds_tmpl );
 	return 1;
 }
 
@@ -138,7 +102,7 @@ int tds754a_test_hook( void )
 /* End of test hook function for the module */
 /*------------------------------------------*/
 
-int tds754a_end_of_test_hook( void )
+int tds_tmpl_end_of_test_hook( void )
 {
 	int ch; 
 	int count;
@@ -148,18 +112,19 @@ int tds754a_end_of_test_hook( void )
 	   during the test run, they got to be switched on at the start of the
 	   experiment. */
 
-	for ( count = 0, ch = 0; ch < MAX_CHANNELS; ch++ )
+	for ( count = 0, ch = 0; ch < NUM_DISPLAYABLE_CHANNELS; ch++ )
 	{
-		tds754a_stored.channels_in_use[ ch ] = tds754a.channels_in_use[ ch ];
+		tds_tmpl_stored.channels_in_use[ ch ] = tds_tmpl.channels_in_use[ ch ];
 		count++;
 	}
 
-	/* If more than MAX_DISPLAYABLE_CHANNELS are needed we're in trouble */
+	/* If more than MAX_SIMULTANEOUS_CHANNELS are needed we're in trouble */
 
-	if ( count > MAX_DISPLAYABLE_CHANNELS )
+	if ( count > MAX_SIMULTANEOUS_CHANNELS )
 	{
-		print( FATAL, "More than %d channels would be needed for the "
-			   "experiment.\n", MAX_DISPLAYABLE_CHANNELS );
+		print( FATAL, "%d channels are needed for the experiment but only "
+			   "%d can be displayed simulataneously.\n", count,
+			   MAX_SIMULTANEOUS_CHANNELS );
 		THROW( EXCEPTION );
 	}
 
@@ -171,22 +136,22 @@ int tds754a_end_of_test_hook( void )
 /* Start of experiment hook function for the module */
 /*--------------------------------------------------*/
 
-int tds754a_exp_hook( void )
+int tds_tmpl_exp_hook( void )
 {
 	/* Reset the digitizer structure to the state it was set to in the
 	   preparations section - changes done to it in the test run are to
 	   be undone... */
 
-	tds754a_store_state( &tds754a, &tds754a_stored );
+	tds_tmpl_store_state( &tds_tmpl, &tds_tmpl_stored );
 
-	if ( ! tds754a_init( DEVICE_NAME ) )
+	if ( ! tds_tmpl_init( DEVICE_NAME ) )
 	{
 		print( FATAL, "Initialization of device failed: %s\n",
 			   gpib_error_msg );
 		THROW( EXCEPTION );
 	}
 
-	tds754a_do_pre_exp_checks( );
+	tds_tmpl_do_pre_exp_checks( );
 
 	return 1;
 }
@@ -196,9 +161,9 @@ int tds754a_exp_hook( void )
 /* End of experiment hook function for the module */
 /*------------------------------------------------*/
 
-int tds754a_end_of_exp_hook( void )
+int tds_tmpl_end_of_exp_hook( void )
 {
-	tds754a_finished( );
+	tds_tmpl_finished( );
 	return 1;
 }
 
@@ -208,10 +173,10 @@ int tds754a_end_of_exp_hook( void )
 /*------------------------------------------*/
 
 
-void tds754a_exit_hook( void )
+void tds_tmpl_exit_hook( void )
 {
-	tds754a_delete_windows( &tds754a );
-	tds754a_delete_windows( &tds754a_stored );
+	tds_tmpl_delete_windows( &tds_tmpl );
+	tds_tmpl_delete_windows( &tds_tmpl_stored );
 }
 
 
@@ -234,22 +199,17 @@ Var *digitizer_define_window( Var *v )
 		   win_width = 0;
 	bool is_win_start = UNSET;
 	bool is_win_width = UNSET;
+	long num_windows = 1;
+	double w1, w2;
 	WINDOW *w;
 
-
-	if ( tds754a.num_windows >= MAX_NUM_OF_WINDOWS )
-	{
-		print( FATAL, "Maximum number of digitizer windows (%ld) "
-			   "exceeded.\n", MAX_NUM_OF_WINDOWS );
-		THROW( EXCEPTION );
-	}
 
 	/* During the experiment if the digitizer's keyboard isn't locked we
 	   need to reread the timebase, record length and trigger position and
 	   update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
-		tds754a_state_check( 0.0, 0.0, 0.0 );
+	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
 
 	if ( v != NULL )
 	{
@@ -278,32 +238,56 @@ Var *digitizer_define_window( Var *v )
 		}
 	}
 
-	if ( FSC2_MODE == EXPERIMENT && ( ! is_win_start || ! is_win_width ) )
+	/* During the experiment take the current cursor positions as the
+	   windows borders if they haven't been specified - but we have to
+	   be careful: if the cursors ae exacty on top of each other we take
+	   the smallest possible non-zero cursor distance as the width. */
+
+	if ( FSC2_MODE == EXPERIMENT )
 	{
-		print( FATAL, "During the experiment the position and width of a "
-			   "new window must be specified.\n" );
-		THROW( EXCEPTION );
+		if ( ! is_win_start )
+		{
+			w1 = tds_tmpl_get_cursor_position( 1 );
+			w2 = tds_tmpl_get_cursor_position( 2 );
+			win_start = d_min( w1, w2 );
+			is_win_start = SET;
+		}
+
+		if ( ! is_win_width )
+		{
+			win_width = fabs( tds_tmpl_get_cursor_distance( ) );
+			if ( 1 > lrnd( win_width / tds_tmpl.timebase
+						   * TDS_TMPL_POINTS_PER_DIV ) )
+				win_width = tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
+			is_win_width = SET;
+		}
 	}
 
 	/* Create a new window structure and append it to the list of windows */
 
-	if ( tds754a.w == NULL )
+	if ( tds_tmpl.w == NULL )
 	{
-		tds754a.w = w = T_malloc( sizeof( WINDOW ) );
+		tds_tmpl.w = w = T_malloc( sizeof( WINDOW ) );
 		w->prev = NULL;
 	}
 	else
 	{
-		w = tds754a.w;
+		w = tds_tmpl.w;
 		while ( w->next != NULL )
+		{		
+			num_windows++;
 			w = w->next;
+		}
 		w->next = T_malloc( sizeof( WINDOW ) );
 		w->next->prev = w;
 		w = w->next;
+		w->is_start = UNSET;
+		w->is_width = UNSET;
+		num_windows++;
 	}
 
 	w->next = NULL;
-	w->num = tds754a.num_windows++ + WINDOW_START_NUMBER;
+	w->num = num_windows + WINDOW_START_NUMBER;
 
 	if ( is_win_start )
 		w->start = win_start;
@@ -316,18 +300,22 @@ Var *digitizer_define_window( Var *v )
 	/* Do all possible checks and, if necessary, readjust window position and
 	   width */
 
-	tds754a_window_checks( w );
+	tds_tmpl_window_checks( w );
 
+
+#ifndef NO_GATED_MEASUREMENTS
 	/* If we're already running the experiment and only just now the very 
-	   first window gets defined we have to switch on gated measurements */
+	   first window gets defined we have to switch on gated measurements
+	   (unless the device can't do gated measurements). */
 
-	if ( FSC2_MODE == EXPERIMENT && w == tds754a.w )
+	if ( FSC2_MODE == EXPERIMENT && w == tds_tmpl.w )
 	{
-		tds754a_set_gated_meas( SET );
-		tds754a.gated_state = SET;
+		tds_tmpl_set_gated_meas( SET );
+		tds_tmpl.gated_state = SET;
 	}
 
-	tds754a_set_tracking( w );
+	tds_tmpl_set_tracking( w );
+#endif
 
 	return vars_push( INT_VAR, w->num );
 }
@@ -340,17 +328,18 @@ Var *digitizer_change_window( Var *v )
 {
 	WINDOW *w;
 	long win_num;
+	double w1, w2;
 
 
-	if ( tds754a.w == NULL )
+	if ( tds_tmpl.w == NULL )
 	{
 		print( FATAL, "No windows have been defined.\n" );
 		THROW( EXCEPTION );
 	}
 
-	if ( v == NULL || v->next == NULL )
+	if ( v == NULL )
 	{
-		print( FATAL, "Missing arguments.\n" );
+		print( FATAL, "Missing window ID.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -358,15 +347,16 @@ Var *digitizer_change_window( Var *v )
 	   need to reread the timebase, record length and trigger position and
 	   update and recheck the windws */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
-		tds754a_state_check( 0.0, 0.0, 0.0 );
+	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
 
 	/* Figure out the window number and test if a window with this number
 	   exists at all */
 
 	win_num = get_strict_long( v, "window ID" );
+	v = vars_pop( v );
 
-	for ( w = tds754a.w; w->num != win_num && w != NULL; w = w->next )
+	for ( w = tds_tmpl.w; w->num != win_num && w != NULL; w = w->next )
 		;
 
 	if ( w == NULL )
@@ -375,25 +365,58 @@ Var *digitizer_change_window( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* Let a more specialized function deal with it if there's only a
-	   position argument */
+	/* During the experiment we also accept that there are no arguments for
+	   the position or the width and use the cursor positions instead */
 
-	if ( v->next->next == NULL )
+	if ( FSC2_MODE != PREPARATION && v == NULL )
 	{
-		vars_pop( digitizer_window_position( v ) );
-		return vars_push( INT_VAR, win_num );
+		if ( FSC2_MODE == EXPERIMENT )
+		{
+			w1 = tds_tmpl_get_cursor_position( 1 );
+			w2 = tds_tmpl_get_cursor_position( 2 );
+			w->start = d_min( w1, w2 );
+		}
+	}
+	else
+	{
+		if ( v == NULL )
+		{
+			print( FATAL, "Missing window start position argument.\n" );
+			THROW( EXCEPTION );
+		}
+		w->start = get_double( v, "window start position" );
+		v = vars_pop( v );
 	}
 
-	w->start = get_double( v = vars_pop( v ), "window start position" );
-	w->width = get_double( v = vars_pop( v ), "window with" );
+	if ( FSC2_MODE != PREPARATION && v == NULL )
+	{
+		if ( FSC2_MODE == EXPERIMENT )
+		{
+			w->width = fabs( tds_tmpl_get_cursor_distance( ) );
+			if ( 1 > lrnd( w->width / tds_tmpl.timebase
+						   * TDS_TMPL_POINTS_PER_DIV ) )
+				w->width = tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
+		}
+	}
+	else
+	{
+		if ( v == NULL )
+		{
+			print( FATAL, "Missing window width argument.\n" );
+			THROW( EXCEPTION );
+		}
+		w->width = get_double(  v, "window with" );
+	}
 
 	too_many_arguments( v );
 	
 	/* Do all possible checks and, if necessary, readjust window position and
 	   width */
 
-	tds754a_window_checks( w );
-	tds754a_set_tracking( w );
+	tds_tmpl_window_checks( w );
+#ifndef NO_GATED_MEASUREMENTS
+	tds_tmpl_set_tracking( w );
+#endif
 
 	return vars_push( INT_VAR, win_num );
 }
@@ -407,7 +430,7 @@ Var *digitizer_window_position( Var *v )
 	long win_num;
 
 
-	if ( tds754a.w == NULL )
+	if ( tds_tmpl.w == NULL )
 	{
 		print( FATAL, "No windows have been defined.\n" );
 		THROW( EXCEPTION );
@@ -415,7 +438,7 @@ Var *digitizer_window_position( Var *v )
 
 	if ( v == NULL )
 	{
-		print( FATAL, "Missing argument.\n" );
+		print( FATAL, "Missing window ID.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -423,15 +446,15 @@ Var *digitizer_window_position( Var *v )
 	   need to reread the timebase, record length and trigger position and
 	   update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
-		tds754a_state_check( 0.0, 0.0, 0.0 );
+	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
 
 	/* Figure out the window number and test if a window with this number
 	   exists at all */
 
 	win_num = get_strict_long( v, "window ID" );
 
-	for ( w = tds754a.w; w->num != win_num && w != NULL; w = w->next )
+	for ( w = tds_tmpl.w; w->num != win_num && w != NULL; w = w->next )
 		;
 
 	if ( w == NULL )
@@ -450,8 +473,10 @@ Var *digitizer_window_position( Var *v )
 	/* Do all possible checks and, if necessary, readjust window position and
 	   width */
 
-	tds754a_window_checks( w );
-	tds754a_set_tracking( w );
+	tds_tmpl_window_checks( w );
+#ifndef NO_GATED_MEASUREMENTS
+	tds_tmpl_set_tracking( w );
+#endif
 
 	return vars_push( FLOAT_VAR, w->start );
 }
@@ -466,7 +491,7 @@ Var *digitizer_window_width( Var *v )
 	long win_num;
 
 
-	if ( tds754a.w == NULL )
+	if ( tds_tmpl.w == NULL )
 	{
 		print( FATAL, "No windows have been defined.\n" );
 		THROW( EXCEPTION );
@@ -482,15 +507,15 @@ Var *digitizer_window_width( Var *v )
 	   need to reread the timebase, record length and trigger position and
 	   update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
-		tds754a_state_check( 0.0, 0.0, 0.0 );
+	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
 
 	/* Figure out the window number and test if a window with this number
 	   exists at all */
 
 	win_num = get_strict_long( v, "window ID" );
 
-	for ( w = tds754a.w; w->num != win_num && w != NULL; w = w->next )
+	for ( w = tds_tmpl.w; w->num != win_num && w != NULL; w = w->next )
 		;
 
 	if ( w == NULL )
@@ -509,8 +534,10 @@ Var *digitizer_window_width( Var *v )
 	/* Do all possible checks and, if necessary, readjust window position and
 	   width */
 
-	tds754a_window_checks( w );
-	tds754a_set_tracking( w );
+	tds_tmpl_window_checks( w );
+#ifndef NO_GATED_MEASUREMENTS
+	tds_tmpl_set_tracking( w );
+#endif
 
 	return vars_push( FLOAT_VAR, w->width );
 }
@@ -527,17 +554,24 @@ Var *digitizer_display_channel( Var *v )
 	long channel;
 
 
-	channel = tds754a_translate_channel( GENERAL_TO_TDS754A,
+	channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
 									  get_strict_long( v, "channel number" ) );
 
-	if ( channel > MAX_CHANNELS )
+	if( channel >= NUM_DISPLAYABLE_CHANNELS && channel < MAX_CHANNELS )
 	{
-		print( FATAL, "Invalid channel number: %ld.\n",
-			   tds754a_translate_channel( TDS754A_TO_GENERAL, channel ) );
+		print( FATAL, "Channel \"%s\" can't be displayed.\n",
+			   Channel_Names[ channel ] );
 		THROW( EXCEPTION );
 	}
 
-	tds754a.channels_in_use[ channel ] = SET;
+	if ( channel >= MAX_CHANNELS )
+	{
+		print( FATAL, "Invalid channel number: %ld.\n",
+			   tds_tmpl_translate_channel( TDS_TMPL_TO_GENERAL, channel ) );
+		THROW( EXCEPTION );
+	}
+
+	tds_tmpl.channels_in_use[ channel ] = SET;
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -557,24 +591,24 @@ Var *digitizer_timebase( Var *v )
 	   need to reread the timebase, record length and trigger position and
 	   update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
-		tds754a_state_check( 0.0, 0.0, 0.0 );
+	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
 
 	if ( v == NULL )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				if ( ! tds754a.is_timebase )
+				if ( ! tds_tmpl.is_timebase )
 					no_query_possible( );
-				return vars_push( FLOAT_VAR, tds754a.timebase );
+				return vars_push( FLOAT_VAR, tds_tmpl.timebase );
 				
 
 			case TEST :
-				return vars_push( FLOAT_VAR, tds754a.is_timebase ?
-								  tds754a.timebase : TDS754A_TEST_TIME_BASE );
+				return vars_push( FLOAT_VAR, tds_tmpl.is_timebase ?
+								  tds_tmpl.timebase : TDS_TMPL_TEST_TIME_BASE );
 
 			case EXPERIMENT :
-				return vars_push( FLOAT_VAR, tds754a.timebase );
+				return vars_push( FLOAT_VAR, tds_tmpl.timebase );
 		}
 
 	timebase = get_double( v, "time base" );
@@ -582,14 +616,7 @@ Var *digitizer_timebase( Var *v )
 	if ( timebase <= 0 )
 	{
 		print( FATAL, "Invalid zero or negative time base: %s.\n",
-			   tds754a_ptime( timebase ) );
-		THROW( EXCEPTION );
-	}
-
-	if ( timebase <= 0 )
-	{
-		print( FATAL, "Invalid zero or negative time base: %s.\n",
-			   tds754a_ptime( timebase ) );
+			   tds_tmpl_ptime( timebase ) );
 		THROW( EXCEPTION );
 	}
 
@@ -606,27 +633,27 @@ Var *digitizer_timebase( Var *v )
 	if ( TB >= 0 &&                                         /* value found ? */
 		 fabs( timebase - tb[ TB ] ) > timebase * 1.0e-2 )  /* error > 1% ?  */
 	{
-		t = T_strdup( tds754a_ptime( timebase ) );
+		t = T_strdup( tds_tmpl_ptime( timebase ) );
 		print( WARN, "Can't set timebase to %s, using %s instead.\n",
-			   t, tds754a_ptime( tb[ TB ] ) );
+			   t, tds_tmpl_ptime( tb[ TB ] ) );
 		T_free( t );
 	}
 
 	if ( TB < 0 )                                   /* not found yet ? */
 	{
-		t = T_strdup( tds754a_ptime( timebase ) );
+		t = T_strdup( tds_tmpl_ptime( timebase ) );
 
 		if ( timebase < tb[ 0 ] )
 		{
 			TB = 0;
 			print( WARN, "Timebase of %s is too low, using %s instead.\n",
-				   t, tds754a_ptime( tb[ TB ] ) );
+				   t, tds_tmpl_ptime( tb[ TB ] ) );
 		}
 		else
 		{
 		    TB = TB_ENTRIES - 1;
 			print( WARN, "Timebase of %s is too large, using %s instead.\n",
-				   t, tds754a_ptime( tb[ TB ] ) );
+				   t, tds_tmpl_ptime( tb[ TB ] ) );
 		}
 
 		T_free( t );
@@ -634,14 +661,14 @@ Var *digitizer_timebase( Var *v )
 
 	too_many_arguments( v );
 
-	tds754a.is_timebase = SET;
+	tds_tmpl.is_timebase = SET;
 
 	if ( FSC2_MODE == EXPERIMENT )
-		tds754a_set_timebase( tb[ TB ] );
+		tds_tmpl_set_timebase( tb[ TB ] );
 
-	tds754a_state_check( tb[ TB ], tds754a.rec_len, tds754a.trig_pos );
+	tds_tmpl_state_check( tb[ TB ], tds_tmpl.rec_len, tds_tmpl.trig_pos );
 
-	return vars_push( FLOAT_VAR, tds754a.timebase );
+	return vars_push( FLOAT_VAR, tds_tmpl.timebase );
 }
 
 
@@ -656,10 +683,10 @@ Var *digitizer_time_per_point( Var *v )
 	   need to reread the timebase, record length and trigger position and
 	   update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
-		tds754a_state_check( 0.0, 0.0, 0.0 );
+	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
 
-	return vars_push( FLOAT_VAR, tds754a.timebase / TDS754A_POINTS_PER_DIV );
+	return vars_push( FLOAT_VAR, tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV );
 }
 
 
@@ -678,10 +705,10 @@ Var *digitizer_sensitivity( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	channel = tds754a_translate_channel( GENERAL_TO_TDS754A,
+	channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
 									  get_strict_long( v, "channel number" ) );
 
-	if ( channel > TDS754A_CH4 )
+	if ( channel >= NUM_NORMAL_CHANNELS )
 	{
 		print( FATAL, "Can't set or obtain sensitivity for channel %s.\n",
 			   Channel_Names[ channel ] );
@@ -692,18 +719,19 @@ Var *digitizer_sensitivity( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				if ( ! tds754a.is_sens[ channel ] )
+				if ( ! tds_tmpl.is_sens[ channel ] )
 					no_query_possible( );
-				return vars_push( FLOAT_VAR, tds754a.sens[ channel ] );
+				return vars_push( FLOAT_VAR, tds_tmpl.sens[ channel ] );
 
 			case TEST :
-				return vars_push( FLOAT_VAR, tds754a.is_sens[ channel ] ?
-						  tds754a.sens[ channel ] : TDS754A_TEST_SENSITIVITY );
+				return vars_push( FLOAT_VAR, tds_tmpl.is_sens[ channel ] ?
+								  tds_tmpl.sens[ channel ] :
+								  TDS_TMPL_TEST_SENSITIVITY );
 
 			case EXPERIMENT :
-				tds754a.sens[ channel ] = tds754a_get_sens( channel );
-				tds754a.is_sens[ channel ] = SET;
-				return vars_push( FLOAT_VAR, tds754a.sens[ channel ] );
+				tds_tmpl.sens[ channel ] = tds_tmpl_get_sens( channel );
+				tds_tmpl.is_sens[ channel ] = SET;
+				return vars_push( FLOAT_VAR, tds_tmpl.sens[ channel ] );
 		}
 
 	sens = get_double( v, "sensitivity" );
@@ -717,12 +745,12 @@ Var *digitizer_sensitivity( Var *v )
 	too_many_arguments( v );
 
 	if ( FSC2_MODE == EXPERIMENT )
-		tds754a_set_sens( channel, sens );
+		tds_tmpl_set_sens( channel, sens );
 
-	tds754a.sens[ channel ] = sens;
-	tds754a.is_sens[ channel ] = SET;
+	tds_tmpl.sens[ channel ] = sens;
+	tds_tmpl.is_sens[ channel ] = SET;
 
-	return vars_push( FLOAT_VAR, tds754a.sens[ channel ] );
+	return vars_push( FLOAT_VAR, tds_tmpl.sens[ channel ] );
 }
 
 
@@ -738,54 +766,65 @@ Var *digitizer_num_averages( Var *v )
 	   need to reread the timebase, record length and trigger position and
 	   update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
-		tds754a_state_check( 0.0, 0.0, 0.0 );
+	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
 
 	if ( v == NULL )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				if ( ! tds754a.is_num_avg )
+				if ( ! tds_tmpl.is_num_avg )
 					no_query_possible( );
-				return vars_push( INT_VAR, tds754a.num_avg );
+				return vars_push( INT_VAR, tds_tmpl.num_avg );
 
 			case TEST :
-				return vars_push( INT_VAR, tds754a.is_num_avg ?
-								  tds754a.num_avg : TDS754A_TEST_NUM_AVG );
+				return vars_push( INT_VAR, tds_tmpl.is_num_avg ?
+								  tds_tmpl.num_avg : TDS_TMPL_TEST_NUM_AVG );
 
 			case EXPERIMENT :
-				tds754a.num_avg = tds754a_get_num_avg( );
-				tds754a.is_num_avg = SET;
-				return vars_push( INT_VAR, tds754a.num_avg );
+				tds_tmpl.num_avg = tds_tmpl_get_num_avg( );
+				return vars_push( INT_VAR, tds_tmpl.num_avg );
 		}
 
 	num_avg = get_long( v, "number of averages" );
 
 	if ( num_avg == 0 )
 	{
-		print( FATAL, "Can't do zero averages. If you want to set sample "
-			   "mode specify 1 as number of averages.\n" );
+		if ( FSC2_MODE != EXPERIMENT )
+		{
+			print( FATAL, "Can't do zero averages. If you want to set sample "
+				   "mode specify 1 as number of averages.\n" );
+			THROW( EXCEPTION );
+		}
 
-		if ( FSC2_MODE == EXPERIMENT )
-			return vars_push( INT_VAR, tds754a.num_avg );
+		print( SEVERE, "Can't do zero averages. Switching off averaging.\n" );
+		num_avg = 1;
 
-		THROW( EXCEPTION );
 	}
 	else if ( num_avg < 0 )
 	{
-		print( FATAL, "Invalid negative number of averages: %ld.\n", num_avg );
-		THROW( EXCEPTION );
+		if ( FSC2_MODE != EXPERIMENT )
+		{
+			print( FATAL, "Invalid negative number of averages: %ld.\n",
+				   num_avg );
+			THROW( EXCEPTION );
+		}
+
+		print( SEVERE, "Invalid negative number of averages: %ld.\n",
+			   num_avg );
+		tds_tmpl.num_avg = tds_tmpl_get_num_avg( );
+		return vars_push( INT_VAR, tds_tmpl.num_avg );
 	}
 
 	too_many_arguments( v );
 
 	if ( FSC2_MODE == EXPERIMENT )
-		tds754a_set_num_avg( num_avg );
+		tds_tmpl_set_num_avg( num_avg );
 
-	tds754a.num_avg = num_avg;
-	tds754a.is_num_avg = SET;
+	tds_tmpl.num_avg = num_avg;
+	tds_tmpl.is_num_avg = SET;
 
-	return vars_push( INT_VAR, tds754a.num_avg );
+	return vars_push( INT_VAR, tds_tmpl.num_avg );
 }
 
 
@@ -805,8 +844,8 @@ Var *digitizer_record_length( Var *v )
 	   need to reread the timebase, record length and trigger position and
 	   update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
-		tds754a_state_check( 0.0, 0.0, 0.0 );
+	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
 
 	if ( v == NULL )
 	{
@@ -814,16 +853,16 @@ Var *digitizer_record_length( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				if ( ! tds754a.is_rec_len )
+				if ( ! tds_tmpl.is_rec_len )
 					no_query_possible( );
-				return vars_push( INT_VAR, tds754a.rec_len );
+				return vars_push( INT_VAR, tds_tmpl.rec_len );
 
 			case TEST :
-				return vars_push( INT_VAR, tds754a.is_rec_len ?
-								  tds754a.rec_len : TDS754A_TEST_REC_LEN );
+				return vars_push( INT_VAR, tds_tmpl.is_rec_len ?
+								  tds_tmpl.rec_len : TDS_TMPL_TEST_REC_LEN );
 
 			case EXPERIMENT :
-				return vars_push( INT_VAR, tds754a.rec_len );
+				return vars_push( INT_VAR, tds_tmpl.rec_len );
 		}
 	}
 
@@ -859,15 +898,15 @@ Var *digitizer_record_length( Var *v )
 		i++;
 	}
 
-	tds754a.is_rec_len = SET;
+	tds_tmpl.is_rec_len = SET;
 
 	if ( FSC2_MODE == EXPERIMENT )
-		tds754a_set_record_length( record_lengths[ i ] );
+		tds_tmpl_set_record_length( record_lengths[ i ] );
 
-	tds754a_state_check( tds754a.timebase, record_lengths[ i ],
-						 tds754a.trig_pos );
+	tds_tmpl_state_check( tds_tmpl.timebase, record_lengths[ i ],
+						 tds_tmpl.trig_pos );
 
-	return vars_push( INT_VAR, tds754a.rec_len );
+	return vars_push( INT_VAR, tds_tmpl.rec_len );
 }
 
 
@@ -886,23 +925,23 @@ Var *digitizer_trigger_position( Var *v )
 	   need to reread the timebase, record length and trigger position and
 	   update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
-		tds754a_state_check( 0.0, 0.0, 0.0 );
+	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
 
 	if ( v == NULL )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				if ( ! tds754a.is_trig_pos )
+				if ( ! tds_tmpl.is_trig_pos )
 					no_query_possible( );
-				return vars_push( FLOAT_VAR, tds754a.trig_pos );
+				return vars_push( FLOAT_VAR, tds_tmpl.trig_pos );
 
 			case TEST :
-				return vars_push( FLOAT_VAR, tds754a.is_trig_pos ?
-								  tds754a.trig_pos : TDS754A_TEST_TRIG_POS );
+				return vars_push( FLOAT_VAR, tds_tmpl.is_trig_pos ?
+								  tds_tmpl.trig_pos : TDS_TMPL_TEST_TRIG_POS );
 
 			case EXPERIMENT :
-				return vars_push( FLOAT_VAR, tds754a.trig_pos );
+				return vars_push( FLOAT_VAR, tds_tmpl.trig_pos );
 		}
 
 	trig_pos = get_double( v, "trigger position" );
@@ -923,14 +962,14 @@ Var *digitizer_trigger_position( Var *v )
 
 	too_many_arguments( v );
 
-	tds754a.is_trig_pos = SET;
+	tds_tmpl.is_trig_pos = SET;
 
 	if ( FSC2_MODE  == EXPERIMENT )
-		tds754a_set_trigger_pos( trig_pos );
+		tds_tmpl_set_trigger_pos( trig_pos );
 
-	tds754a_state_check( tds754a.timebase, tds754a.rec_len, trig_pos );
+	tds_tmpl_state_check( tds_tmpl.timebase, tds_tmpl.rec_len, trig_pos );
 
-	return vars_push( FLOAT_VAR, tds754a.trig_pos );
+	return vars_push( FLOAT_VAR, tds_tmpl.trig_pos );
 }
 
 
@@ -945,10 +984,10 @@ Var *digitizer_meas_channel_ok( Var *v )
 	long channel;
 
 
-	channel = tds754a_translate_channel( GENERAL_TO_TDS754A,
+	channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
 									  get_strict_long( v, "channel number" ) );
 
-	if ( channel > TDS754A_REF4 )
+	if ( channel >= NUM_DISPLAYABLE_CHANNELS )
 		return vars_push( INT_VAR, 0 );
 	else
 		return vars_push( INT_VAR, 1 );
@@ -970,39 +1009,55 @@ Var *digitizer_trigger_channel( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				if ( ! tds754a.is_trigger_channel )
+				if ( ! tds_tmpl.is_trigger_channel )
 					no_query_possible( );
-				return vars_push( INT_VAR, tds754a_translate_channel(
-							   TDS754A_TO_GENERAL, tds754a.trigger_channel ) );
+				return vars_push( INT_VAR, tds_tmpl_translate_channel(
+							   TDS_TMPL_TO_GENERAL, tds_tmpl.trigger_channel ) );
 
 			case TEST :
-				return vars_push( INT_VAR, tds754a_translate_channel(
-							   TDS754A_TO_GENERAL, tds754a.is_trigger_channel ?
-							   tds754a.trigger_channel :
-							   TDS754A_TEST_TRIG_CHANNEL ) );
+				return vars_push( INT_VAR, tds_tmpl_translate_channel(
+							   TDS_TMPL_TO_GENERAL, tds_tmpl.is_trigger_channel ?
+							   tds_tmpl.trigger_channel :
+							   TDS_TMPL_TEST_TRIG_CHANNEL ) );
 
 			case EXPERIMENT :
-				return vars_push( INT_VAR, tds754a_translate_channel(
-						TDS754A_TO_GENERAL, tds754a_get_trigger_channel( ) ) );
+				return vars_push( INT_VAR, tds_tmpl_translate_channel(
+						TDS_TMPL_TO_GENERAL, tds_tmpl_get_trigger_channel( ) ) );
 		}
 
 	in_channel = get_strict_long( v, "channel number" );
-	channel = tds754a_translate_channel( GENERAL_TO_TDS754A, in_channel );
+	channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL, in_channel );
 
     switch ( channel )
     {
-        case TDS754A_CH1 : case TDS754A_CH2 : case TDS754A_CH3 :
-		case TDS754A_CH4 : case TDS754A_AUX : case TDS754A_LIN :
+        case TDS_TMPL_CH1 :
+		case TDS_TMPL_CH2 :
+#if defined TDS_TMPL_CH3
+		case TDS_TMPL_CH3 :
+#endif
+#if defined TDS_TMPL_CH4
+		case TDS_TMPL_CH4 :
+#endif
+#if defined TDS_TMPL_AUX
+		case TDS_TMPL_AUX :
+#endif
+#if defined TDS_TMPL_AUX1
+		case TDS_TMPL_AUX1 :
+#endif
+#if defined TDS_TMPL_AUX2
+		case TDS_TMPL_AUX2 :
+#endif
+		case TDS_TMPL_LIN :
 			if ( FSC2_MODE == EXPERIMENT )
-				tds754a_set_trigger_channel( channel );
-			tds754a.trigger_channel = channel;
-			tds754a.is_trigger_channel = SET;
+				tds_tmpl_set_trigger_channel( channel );
+			tds_tmpl.trigger_channel = channel;
+			tds_tmpl.is_trigger_channel = SET;
             break;
 
 		default :
-			if ( channel >= 0 && channel < NUM_CH_NAMES )
-				print( FATAL, "Channel %s can't be used as trigger channel.\n",
-					   Channel_Names[ channel ] );
+			if ( channel >= 0 && channel < MAX_CHANNELS )
+				print( FATAL, "Channel \"%s\" can't be used as trigger "
+					   "channel.\n", Channel_Names[ channel ] );
 			else
 				print( FATAL, "Invalid channel number %ld.\n", in_channel );
 			THROW( EXCEPTION );
@@ -1021,8 +1076,9 @@ Var *digitizer_start_acquisition( Var *v )
 {
 	v = v;
 
+
 	if ( FSC2_MODE == EXPERIMENT )
-		tds754a_start_acquisition( );
+		tds_tmpl_start_acquisition( );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -1033,7 +1089,7 @@ Var *digitizer_start_acquisition( Var *v )
 
 Var *digitizer_get_area( Var *v )
 {
-	return get_area( v, tds754a.w != NULL ? SET : UNSET );
+	return get_area( v, tds_tmpl.w != NULL ? SET : UNSET );
 }
 
 
@@ -1063,16 +1119,16 @@ static Var *get_area( Var *v, bool use_cursor )
 		THROW( EXCEPTION );
 	}
 
-	ch = ( int ) tds754a_translate_channel( GENERAL_TO_TDS754A,
+	ch = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
 									  get_strict_long( v, "channel number" ) );
 
-	if ( ch > TDS754A_REF4 )
+	if ( ch >= NUM_DISPLAYABLE_CHANNELS )
 	{
 		print( FATAL, "Invalid channel %s.\n", Channel_Names[ ch ] );
 		THROW( EXCEPTION );
 	}
 
-	tds754a.channels_in_use[ ch ] = SET;
+	tds_tmpl.channels_in_use[ ch ] = SET;
 
 	/* Now check if there's a variable with a window number and check it */
 
@@ -1080,7 +1136,7 @@ static Var *get_area( Var *v, bool use_cursor )
 	{
 		long win_num;
 
-		if ( tds754a.w == NULL )
+		if ( tds_tmpl.w == NULL )
 		{
 			print( FATAL, "No measurement windows have been defined.\n" );
 			THROW( EXCEPTION );
@@ -1088,12 +1144,12 @@ static Var *get_area( Var *v, bool use_cursor )
 
 		win_num = get_strict_long( v, "window number" );
 
-		for ( w = tds754a.w; w != NULL && w->num != win_num; w = w->next )
+		for ( w = tds_tmpl.w; w != NULL && w->num != win_num; w = w->next )
 			;
 
 		if ( w == NULL )
 		{
-			print( FATAL, "No measurement windows have been defined.\n" );
+			print( FATAL, "Second argument is not a valid window ID.\n" );
 			THROW( EXCEPTION );
 		}
 	}
@@ -1106,16 +1162,16 @@ static Var *get_area( Var *v, bool use_cursor )
 	   need to reread the timebase, record length and trigger position and
 	   update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
-		tds754a_state_check( 0.0, 0.0, 0.0 );
+	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
 
-	/* Talk to digitizer only in the real experiment, otherwise return a dummy
+	/* Talk to digitizer only during the experiment, otherwise return a dummy
 	   value */
 
 	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( FLOAT_VAR, 1.234e-8 );
 
-	return vars_push( FLOAT_VAR, tds754a_get_area( ch, w, use_cursor ) );
+	return vars_push( FLOAT_VAR, tds_tmpl_get_area( ch, w, use_cursor ) );
 }
 
 
@@ -1124,7 +1180,7 @@ static Var *get_area( Var *v, bool use_cursor )
 
 Var *digitizer_get_curve( Var *v )
 {
-	return get_curve( v, tds754a.w != NULL ? SET : UNSET );
+	return get_curve( v, tds_tmpl.w != NULL ? SET : UNSET );
 }
 
 
@@ -1157,16 +1213,16 @@ static Var *get_curve( Var *v, bool use_cursor )
 		THROW( EXCEPTION );
 	}
 
-	ch = ( int ) tds754a_translate_channel( GENERAL_TO_TDS754A,
+	ch = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
 									  get_strict_long( v, "channel number" ) );
 
-	if ( ch > TDS754A_REF4 )
+	if ( ch >= NUM_DISPLAYABLE_CHANNELS )
 	{
 		print( FATAL, "Invalid channel %s.\n", Channel_Names[ ch ] );
 		THROW( EXCEPTION );
 	}
 
-	tds754a.channels_in_use[ ch ] = SET;
+	tds_tmpl.channels_in_use[ ch ] = SET;
 
 	/* Now check if there's a variable with a window number and check it */
 
@@ -1174,7 +1230,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	{
 		long win_num;
 
-		if ( tds754a.w == NULL )
+		if ( tds_tmpl.w == NULL )
 		{
 			print( FATAL, "No measurement windows have been defined.\n" );
 			THROW( EXCEPTION );
@@ -1182,12 +1238,12 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 		win_num = get_strict_long( v, "window number" );
 
-		for ( w = tds754a.w; w != NULL && w->num != win_num; w = w->next )
+		for ( w = tds_tmpl.w; w != NULL && w->num != win_num; w = w->next )
 			;
 
 		if ( w == NULL )
 		{
-			print( FATAL, "No measurement windows have been defined.\n" );
+			print( FATAL, "Second argument is not a valid window ID.\n" );
 			THROW( EXCEPTION );
 		}
 	}
@@ -1200,23 +1256,23 @@ static Var *get_curve( Var *v, bool use_cursor )
 	   need to reread the timebase, record length and trigger position and
 	   update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
-		tds754a_state_check( 0.0, 0.0, 0.0 );
+	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   array */
 
 	if ( FSC2_MODE == EXPERIMENT )
 	{
-		tds754a_get_curve( ch, w, &array, &length, use_cursor );
+		tds_tmpl_get_curve( ch, w, &array, &length, use_cursor );
 		nv = vars_push( FLOAT_ARR, array, length );
 	}
 	else
 	{
-		if ( tds754a.is_rec_len  )
-			length = tds754a.rec_len;
+		if ( tds_tmpl.is_rec_len  )
+			length = tds_tmpl.rec_len;
 		else
-			length = TDS754A_TEST_REC_LEN;
+			length = TDS_TMPL_TEST_REC_LEN;
 		array = T_malloc( length * sizeof( double ) );
 		for ( i = 0; i < length; i++ )
 			array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
@@ -1264,16 +1320,16 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 		THROW( EXCEPTION );
 	}
 
-	ch = ( int ) tds754a_translate_channel( GENERAL_TO_TDS754A,
+	ch = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
 									  get_strict_long( v, "channel number" ) );
 
-	if ( ch > TDS754A_REF4 )
+	if ( ch >= NUM_DISPLAYABLE_CHANNELS )
 	{
 		print( FATAL, "Invalid channel %s.\n", Channel_Names[ ch ] );
 		THROW( EXCEPTION );
 	}
 
-	tds754a.channels_in_use[ ch ] = SET;
+	tds_tmpl.channels_in_use[ ch ] = SET;
 
 	/* Now check if there's a variable with a window number and check it */
 
@@ -1281,7 +1337,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	{
 		long win_num;
 
-		if ( tds754a.w == NULL )
+		if ( tds_tmpl.w == NULL )
 		{
 			print( FATAL, "No measurement windows have been defined.\n" );
 			THROW( EXCEPTION );
@@ -1289,12 +1345,12 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 
 		win_num = get_strict_long( v, "window number" );
 
-		for ( w = tds754a.w; w != NULL && w->num != win_num; w = w->next )
+		for ( w = tds_tmpl.w; w != NULL && w->num != win_num; w = w->next )
 			;
 
 		if ( w == NULL )
 		{
-			print( FATAL, "No measurement windows have been defined.\n" );
+			print( FATAL, "Second argument is not a valid window ID.\n" );
 			THROW( EXCEPTION );
 		}
 	}
@@ -1307,8 +1363,8 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	   need to reread the timebase, record length and trigger position and
 	   update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
-		tds754a_state_check( 0.0, 0.0, 0.0 );
+	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   value */
@@ -1316,7 +1372,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( FLOAT_VAR, 1.23e-7 );
 
-	return vars_push( FLOAT_VAR, tds754a_get_amplitude( ch, w, use_cursor ) );
+	return vars_push( FLOAT_VAR, tds_tmpl_get_amplitude( ch, w, use_cursor ) );
 }
 
 
@@ -1328,7 +1384,7 @@ Var *digitizer_run( Var *v )
 	v = v;
 
 	if ( FSC2_MODE == EXPERIMENT )
-		tds754a_free_running( );
+		tds_tmpl_free_running( );
 
 	return vars_push( INT_VAR,1 );
 }
@@ -1351,9 +1407,9 @@ Var *digitizer_lock_keyboard( Var *v )
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )
-		tds754a_lock_state( lock );
+		tds_tmpl_lock_state( lock );
 
-	tds754a.lock_state = lock;
+	tds_tmpl.lock_state = lock;
 	return vars_push( INT_VAR, lock ? 1 : 0 );
 }
 

@@ -167,7 +167,9 @@ enum {
 };
 
 
-/* Define names for often used digitizer channels */
+/* Define names for often used digitizer channels - if more get added put
+   them before the very last element and don't forget also to update the
+   array with the channel names. */
 
 enum {
 	DIGITIZER_CHANNEL_INVALID = -1,
@@ -191,18 +193,17 @@ enum {
 	DIGITIZER_CHANNEL_FUNC_E,
 	DIGITIZER_CHANNEL_FUNC_F,
 	DIGITIZER_CHANNEL_EXT,
-	DIGITIZER_CHANNEL_EXT10
+	DIGITIZER_CHANNEL_EXT10,
+	NUM_DIGITIZER_CHANNEL_NAMES
 };
 
-
-#define NUM_DIGITIZER_CHANNEL_NAMES 21
 
 #if defined ( FSC2_MAIN )
 
 const char *Digitizer_Channel_Names[ NUM_DIGITIZER_CHANNEL_NAMES ] =
-	{ "CH1", "CH2", "CH3", "CH4", "MATH1", "MATH2", "MATH3",
-	  "REF1", "REF2", "REF3", "REF4", "AUX", "AUX1", "AUX2", "LINE",
-	  "MEM_C", "MEM_D", "FUNC_E", "FUNC_F", "EXT", "EXT10" };
+			{ "CH1", "CH2", "CH3", "CH4", "MATH1", "MATH2", "MATH3",
+			  "REF1", "REF2", "REF3", "REF4", "AUX", "AUX1", "AUX2", "LINE",
+			  "MEM_C", "MEM_D", "FUNC_E", "FUNC_F", "EXT", "EXT10" };
 #else
 
 extern const char *Digitizer_Channel_Names[ NUM_DIGITIZER_CHANNEL_NAMES ];
@@ -215,8 +216,9 @@ extern const char *Digitizer_Channel_Names[ NUM_DIGITIZER_CHANNEL_NAMES ];
 #define PULSER_GENERIC_TYPE "pulser"
 
 
-/* Define the different functions pulses may have (it's not dangerous here to
-   add further ones as long as the first two and the last remain unchanged) */
+/* Define the different functions pulses may have - if more get added put them
+   before the very last entry and don't forget to also update the array of
+   function names (plus the lexers dealing with channel names). */
 
 enum {
 	PULSER_CHANNEL_NO_TYPE = -1,
@@ -234,23 +236,24 @@ enum {
 	PULSER_CHANNEL_OTHER_1,
 	PULSER_CHANNEL_OTHER_2,
 	PULSER_CHANNEL_OTHER_3,
-	PULSER_CHANNEL_OTHER_4
+	PULSER_CHANNEL_OTHER_4,
+	PULSER_CHANNEL_NUM_FUNC
 };
 
 
 #if defined ( FSC2_MAIN )
-const char *Function_Names[ ] = { "MW", "TWT", "TWT_GATE", "DETECTION",
-								  "DETECTION_GATE", "DEFENSE", "RF", "RF_GATE",
-								  "PULSE_SHAPE", "PHASE_1", "PHASE_2",
-								  "OTHER_1", "OTHER_2", "OTHER_3", "OTHER_4" };
-#else
-extern const char *Function_Names[ ];
-#endif
 
-#define PULSER_CHANNEL_FUNC_MIN PULSER_CHANNEL_MW
-#define PULSER_CHANNEL_FUNC_MAX PULSER_CHANNEL_OTHER_4
-#define PULSER_CHANNEL_NUM_FUNC \
-                      ( PULSER_CHANNEL_FUNC_MAX - PULSER_CHANNEL_FUNC_MIN + 1)
+const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ] = 
+			{ "MW", "TWT", "TWT_GATE", "DETECTION",
+			  "DETECTION_GATE", "DEFENSE", "RF", "RF_GATE",
+			  "PULSE_SHAPE", "PHASE_1", "PHASE_2",
+			  "OTHER_1", "OTHER_2", "OTHER_3", "OTHER_4" };
+
+#else
+
+extern const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ];
+
+#endif
 
 
 /* Define access types for functions in certain sections */
@@ -263,31 +266,34 @@ enum {
 
 
 /* Defines the types of phases used in phase cycling - don't ever change the
-   ordering, just add more to the end ! */
+   ordering, if necessary add more just before the last entry (and don't
+   forget to also extend the array of of phase type names). */
 
 enum {
-	PHASE_PLUS_X,
+	PHASE_PLUS_X = 0,
 	PHASE_MINUS_X,
 	PHASE_PLUS_Y,
 	PHASE_MINUS_Y,
-	PHASE_CW
+	PHASE_CW,
+	PHASE_TYPES_MAX
 };
 
 
-#define PHASE_TYPES_MIN  PHASE_PLUS_X
-#define PHASE_TYPES_MAX  PHASE_CW
-
 #if defined ( FSC2_MAIN )
-const char *Phase_Types[ ] = { "+X", "-X", "+Y", "-Y", "CW" };
+
+const char *Phase_Types[ PHASE_TYPES_MAX ] = { "+X", "-X", "+Y", "-Y", "CW" };
+
 #else
-extern const char *Phase_Types[ ];
+
+extern const char *Phase_Types[ PHASE_TYPES_MAX ];
+
 #endif
 
 
 /* Define the acquisition types used in phase cycling */
 
 enum {
-	ACQ_PLUS_U,
+	ACQ_PLUS_U = 0,
 	ACQ_MINUS_U,
 	ACQ_PLUS_A,
 	ACQ_MINUS_A,
@@ -300,7 +306,7 @@ enum {
 
 typedef struct
 {
-	/* Global compilation error states (FATAL, SEVERE and WARN) */
+	/* Number of errors detected during compilation (FATAL, SEVERE and WARN) */
 
 	int error[ 3 ];
 
@@ -356,14 +362,11 @@ enum {
 
 
 /* The following number is the start number for numbers designating digitizer
-   windows. It should be large enough to make it easy in functions to decide
-   if a number can be only a window number. The second number is the maximum
-   number of windows. Thus any number in the right context in the range
-   between WINDOW_START_NUMBER and WINDOW_START_NUMBER + MAX_NUM_OF_WINDOWS
-   has a high chance of being a window number - not a very nice hack, but... */
+   windows. It should be large enough to give functions at least a fighting
+   chance to decide if a number is possibly a window number. (Actual window
+   numbers start from WINDOW_START_NUMBER + 1.) */
 
-#define WINDOW_START_NUMBER  1024
-#define MAX_NUM_OF_WINDOWS   128
+#define WINDOW_START_NUMBER  172438
 
 
 #endif /* ! FSC2_GLOBAL */
