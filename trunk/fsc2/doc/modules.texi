@@ -410,7 +410,7 @@ For arrays of 2 or more dimensions (i.e.@: variables of type
 @code{INT_REF} and @code{FLOAT_REF}) the dimension of the array is
 stored in the @code{dim} field of the variables structure. For the data
 of such arrays the @code{vptr} field in the @code{val} union of the
-variable structure is relevent, @code{vptr} is an array of variable
+variable structure is relevant, @code{vptr} is an array of variable
 pointers, pointing to the next lower-dimension sub-arrays. How many of
 such sub-arrays exist can be determined from the @code{len} field of the
 variable structure. As already for the one-dimensional arrays care has
