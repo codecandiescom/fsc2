@@ -103,7 +103,7 @@ Var *digitizer_define_window( Var *v )
 	if ( v == NULL || v->next == NULL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Missing parameter in call of function "
-				"`digitizer_define_window', need at least one.\n",
+				"`digitizer_define_window', need at least start position.\n",
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
