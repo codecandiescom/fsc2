@@ -106,6 +106,11 @@ ifdef WITH_PCI_MIO_16E_1
 comp_modules    += pci_mio_16e_1
 endif
 
+ifdef WITH_RULBUS
+simp_modules    += rulbus_adc12
+comp_modules    += rulbus_pulser
+endif
+
 src_headers     := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h
 
 INCLUDES        += -I$(sdir) -I$(cdir)

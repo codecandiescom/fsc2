@@ -195,6 +195,18 @@ SERIAL_LOCK_DIR    := /var/lock
 # pci_mio_16e_1_libs := libni_daq.so
 
 
+# The next two lines must be uncommented if you want support for the RULBUS
+# (Rijksuniversiteit Leiden BUS) and the devices connected to it. If the
+# library for the card isn't in a place where the linker will find it
+# automatically (e.g. '/usr/lib' and '/usr/local/lib') you need to specify
+# the full absolut path for the library (e.g. '/usr/xxx/yyy/librulbus.so').
+# You must make sure that the library for the card is already properly
+# installed if you want to build fsc2 with support for the card.
+
+# WITH_RULBUS        := yes
+# rulbus_libs        := librulbus.so
+
+
 # Comment out the next two lines if you don't want the ability to run a HTTP
 # server that allows to monitor fsc2s current state via the Internet. The
 # default port number the HTTP server will listen on can be set by the second
