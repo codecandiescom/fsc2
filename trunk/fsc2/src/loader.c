@@ -55,6 +55,7 @@ void load_all_drivers( void )
 {
 	Device *cd;
 	bool saved_need_GPIB;
+	CALL_STACK *cs = NULL;
 
 
 	/* Treat "User_Functions" also as a kind of device driver and append
@@ -70,10 +71,14 @@ void load_all_drivers( void )
 	EDL.Num_Pulsers = 0;
 
 	num_func = Num_Func;
-	for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
-		load_functions( cd );
+	TRY
+	{
+		for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
+			load_functions( cd );
+		TRY_SUCCESS;
+	}
 
-	/* Because some multiply defined functions may have been added resort
+	/* Because some multiple defined functions may have been added resort
 	   the function list to make searching via bsearch() possible */
 
 	qsort( Fncts, Num_Func, sizeof *Fncts, func_cmp );
@@ -104,7 +109,9 @@ void load_all_drivers( void )
 					 ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
 					Cur_Pulser++;
 
-				call_push( NULL, cd->device_name );
+				if ( ( cs = call_push( NULL, cd->device_name ) ) == NULL )
+					THROW( OUT_OF_MEMORY_EXCEPTION );
+
 				if ( ! cd->driver.init_hook( ) )
 					eprint( WARN, UNSET, "Initialisation of module '%s.so' "
 							"failed.\n", cd->name );
@@ -119,7 +126,8 @@ void load_all_drivers( void )
 	}
 	OTHERWISE
 	{
-		call_pop( );
+		if ( cs != NULL )
+			call_pop( );
 		Internals.in_hook = UNSET;
 		RETHROW( );
 	}
@@ -468,6 +476,7 @@ static void resolve_generic_type( Device *dev )
 void run_test_hooks( void )
 {
 	Device *cd;
+	CALL_STACK *cs = NULL;
 
 
 	Cur_Pulser = -1;
@@ -482,7 +491,9 @@ void run_test_hooks( void )
 					 ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
 					Cur_Pulser++;
 
-				call_push( NULL, cd->device_name );
+				if ( ( cs = call_push( NULL, cd->device_name ) ) == NULL )
+					THROW( OUT_OF_MEMORY_EXCEPTION );
+
 				if ( ! cd->driver.test_hook( ) )
 					eprint( SEVERE, UNSET, "Initialisation of test run failed "
 							"for module '%s'.\n", cd->name );
@@ -493,7 +504,8 @@ void run_test_hooks( void )
 	}
 	OTHERWISE
 	{
-		call_pop( );
+		if ( cs != NULL )
+			call_pop( );
 		Internals.in_hook = UNSET;
 		RETHROW( );
 	}
@@ -509,6 +521,7 @@ void run_test_hooks( void )
 void run_end_of_test_hooks( void )
 {
 	Device *cd;
+	CALL_STACK *cs = NULL;
 
 
 	Cur_Pulser = -1;
@@ -523,7 +536,9 @@ void run_end_of_test_hooks( void )
 					 ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
 					Cur_Pulser++;
 
-				call_push( NULL, cd->device_name );
+				if ( ( cs = call_push( NULL, cd->device_name ) ) == NULL )
+					THROW( OUT_OF_MEMORY_EXCEPTION );
+
 				if ( ! cd->driver.end_of_test_hook( ) )
 					eprint( SEVERE, UNSET, "Final checks after test run "
 							"failed for module '%s'.\n", cd->name );
@@ -534,7 +549,8 @@ void run_end_of_test_hooks( void )
 	}
 	OTHERWISE
 	{
-		call_pop( );
+		if ( cs != NULL )
+			call_pop( );
 		Internals.in_hook = UNSET;
 		RETHROW( );
 	}
@@ -550,6 +566,7 @@ void run_end_of_test_hooks( void )
 void run_exp_hooks( void )
 {
 	Device *cd;
+	CALL_STACK *cs = NULL;
 
 
 	Cur_Pulser = -1;
@@ -565,7 +582,9 @@ void run_exp_hooks( void )
 					 ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
 					Cur_Pulser++;
 
-				call_push( NULL, cd->device_name );
+				if ( ( cs = call_push( NULL, cd->device_name ) ) == NULL )
+					THROW( OUT_OF_MEMORY_EXCEPTION );
+
 				if ( ! cd->driver.exp_hook( ) )
 					eprint( SEVERE, UNSET, "Initialisation of experiment "
 							"failed for module '%s'.\n", cd->name );
@@ -588,7 +607,8 @@ void run_exp_hooks( void )
 	}
 	OTHERWISE
 	{
-		call_pop( );
+		if ( cs != NULL )
+			call_pop( );
 		Internals.in_hook = UNSET;
 		RETHROW( );
 	}
@@ -629,26 +649,19 @@ void run_end_of_exp_hooks( void )
 		if ( ! cd->is_loaded || ! cd->driver.is_end_of_exp_hook )
 			continue;
 
+		if ( call_push( NULL, cd->device_name ) == NULL )
+			continue;
+
 		TRY
 		{
-			call_push( NULL, cd->device_name );
-
-			TRY
-			{
-				if( ! cd->driver.end_of_exp_hook( ) )
-					eprint( SEVERE, UNSET, "Resetting module '%s' after "
-							"experiment failed.\n", cd->name );
-				TRY_SUCCESS;
-			}
-
+			if( ! cd->driver.end_of_exp_hook( ) )
+				eprint( SEVERE, UNSET, "Resetting module '%s' after "
+						"experiment failed.\n", cd->name );
 			call_pop( );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
-		{
-			Internals.in_hook = UNSET;
-			RETHROW( );
-		}
+			call_pop( );
 	}
 
 	Internals.in_hook = UNSET;
@@ -668,8 +681,8 @@ void run_exit_hooks( void )
 		return;
 
 	/* Run all exit hooks starting with the last device and ending with the
-	   very first one in the list. Also make sure that all exit hooks are run
-	   even if some of them fail with an exception. */
+	   very first in the list. Also make sure that all exit hooks are run even
+	   if some of them fail with an exception. */
 
 	for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
 		/* empty */ ;
@@ -686,25 +699,17 @@ void run_exit_hooks( void )
 		if ( ! cd->is_loaded || ! cd->driver.is_exit_hook )
 			continue;
 
+		if ( call_push( NULL, cd->device_name ) == NULL )
+			continue;
+
 		TRY
 		{
-			call_push( NULL, cd->device_name );
-
-			TRY
-			{
-				cd->driver.exit_hook( );
-				TRY_SUCCESS;
-			}
-
+			cd->driver.exit_hook( );
 			call_pop( );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
-		{
-			Internals.in_hook = UNSET;
-			Internals.exit_hooks_are_run = SET;
-			RETHROW( );
-		}
+			call_pop( );
 	}
 
 	Internals.in_hook = UNSET;
