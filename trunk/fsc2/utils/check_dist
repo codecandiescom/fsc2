@@ -30,7 +30,7 @@ my $missing = 0;
 
 chdir( ".." );
 
-open( $fh, "<MANIFEST" ) or "Can't open file MANIFEST for reading: $!\n";
+open( $fh, "<MANIFEST" ) or die "Can't open file MANIFEST for reading: $!\n";
 while ( <$fh> ) {
 	next if /^\s*(#.*)?$/;
 	chomp;
