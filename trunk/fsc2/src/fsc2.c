@@ -1039,7 +1039,8 @@ void test_file( FL_OBJECT *a, long b )
 	}
 
 	/* Before scanning the file reload it if the file on disk has changed in
-	   between - quit if file can't be read again. */
+	   between and the user wants the new version - quit if file can't be read
+	   again. */
 
 	stat( in_file, &file_stat );
 	if ( in_file_mod != file_stat.st_mtime &&
@@ -1080,11 +1081,15 @@ void test_file( FL_OBJECT *a, long b )
 	user_break = UNSET;
 
 	/* Parse the input file and, when we're done with it, close it, everything
-	   relevant is now stored in memory... */
+	   relevant is now stored in memory (unless the parsing was interrupted
+	   by the user) */
 
 	state = scan_main( in_file, in_file_fp );
-	fclose( in_file_fp );
-	in_file_fp = NULL;
+	if ( ! user_break )
+	{
+		fclose( in_file_fp );
+		in_file_fp = NULL;
+	}
 
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 	running_test = UNSET;
