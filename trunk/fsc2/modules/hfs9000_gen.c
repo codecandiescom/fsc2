@@ -219,7 +219,7 @@ bool hfs9000_set_function_high_level( int function, double voltage )
 
 	v = lrnd( voltage / VOLTAGE_RESOLUTION );
 
-	if ( v < lrnf( MIN_POD_HIGH_VOLTAGE / VOLTAGE_RESOLUTION ) ||
+	if ( v < lrnd( MIN_POD_HIGH_VOLTAGE / VOLTAGE_RESOLUTION ) ||
 		 v > lrnd( MAX_POD_HIGH_VOLTAGE / VOLTAGE_RESOLUTION ) )
 	{
 		print( FATAL, "Invalid high level of %g V for function '%s', valid "
