@@ -931,7 +931,7 @@ monochromator_wavenumber( wn );
 ccd_camera_roi( "ALL" );
 ccd_camera_binning( "NONE" );
 
-Spec = ccd_camera_get_spectrum( );
+Spec = spike_remove( ccd_camera_get_spectrum( ) );
 display( 1, Spec );
 
 FOREVER {
@@ -948,12 +948,12 @@ FOREVER {
        	}
        	exposure_time = new;
 		ccd_camera_exposure_time( exposure_time );
-		Spec = ccd_camera_get_spectrum( );
+		Spec = spike_remove( ccd_camera_get_spectrum( ) );
 		display_1d( 1, Spec );
    	}
 
     IF button_state( B_gs ) {
-		Spec = reverse( ccd_camera_get_spectrum( ) );
+		Spec = spike_remove( ccd_camera_get_spectrum( ) );
 		display_1d( 1, Spec );
     }
 
@@ -997,7 +997,7 @@ FOREVER {
 	        object_enable( B_gs, "OFF" );
 			monochromator_wavenumber( new_wn );
 			clear_marker( );
-			Spec = ccd_camera_get_spectrum( );
+			Spec = spike_remove( ccd_camera_get_spectrum( ) );
 			display_1d( 1, Spec );
 			old_lpos = lpos;
 			lpos = 0.0;
@@ -1023,7 +1023,7 @@ FOREVER {
 			monochromator_wavenumber( new_wn );
 			old_lpos = lpos;
 			clear_marker( );
-			Spec = ccd_camera_get_spectrum( );
+			Spec = spike_remove( ccd_camera_get_spectrum( ) );
 			display_1d( 1, Spec );
 	        object_enable( B_gs, "ON" );
 			BREAK;
@@ -1051,12 +1051,12 @@ FOREVER {
 
        	exposure_time = new;
 		ccd_camera_exposure_time( exposure_time );
-		Spec = ccd_camera_get_spectrum( );
+		Spec = spike_remove( ccd_camera_get_spectrum( ) );
 		display_1d( 1, Spec );
    	}
 
     IF button_state( B_gs ) {
-		Spec = ccd_camera_get_spectrum( );
+		Spec = spike_remove( ccd_camera_get_spectrum( ) );
 		display_1d( 1, Spec );
     }
 
@@ -1109,7 +1109,7 @@ FOREVER {
 		monochromator_wavenumber( new_wn );
 		old_lpos = lpos;
 		clear_marker( );
-		Spec = ccd_camera_get_spectrum( );
+		Spec = spike_remove( ccd_camera_get_spectrum( ) );
 		display_1d( 1, Spec );
         object_enable( B_gs, "ON" );
 	}
@@ -1371,7 +1371,7 @@ monochromator_wavenumber( wn );
 ccd_camera_roi( "ALL" );
 ccd_camera_binning( "NONE" );
 
-Spec = ccd_camera_get_spectrum( );
+Spec = spike_remove( ccd_camera_get_spectrum( ) );
 display( 1, Spec );
 
 IF ll >= 1.0e-3 cm^-1 {
@@ -1410,12 +1410,12 @@ FOREVER {
 
        	exposure_time = new;
 		ccd_camera_exposure_time( exposure_time );
-		Spec = ccd_camera_get_spectrum( );
+		Spec = spike_remove( ccd_camera_get_spectrum( ) );
 		display_1d( 1, Spec );
    	}
 
     IF button_state( B_gs ) {
-		Spec = ccd_camera_get_spectrum( );
+		Spec = spike_remove( ccd_camera_get_spectrum( ) );
 		display_1d( 1, Spec );
     }
 
@@ -1458,7 +1458,7 @@ FOREVER {
 		object_enable( B_gs, "OFF" );
 		clear_marker_1d( );
 		monochromator_wavenumber( wn );
-		Spec = ccd_camera_get_spectrum( );
+		Spec = spike_remove( ccd_camera_get_spectrum( ) );
 		display_1d( 1, Spec );
 		object_enable( B_conf, "OFF" );
 		object_enable( B_gs, "ON" );
@@ -1870,7 +1870,7 @@ I_scan = output_create( "INT_OUTPUT", 0,
 IF laser_line != 0.0 {
 	monochromator_wavenumber( cwn + cwn_offset );
 	start_wn = cwn - 0.5 * ( N_Points - 1 ) * step_wn;
-	change_label_1d( "Wavenumbers [rel. cm^-1]", "Counts [1/s]" );
+	change_label_1d( "Wavenumbers [rel. cm^-1]", "Counts" );
 	change_scale( start_wn, step_wn );
 	FOR J = 1 : N_Points {
 		wn[ J ] = start_wn + ( J - 1 ) * step_wn;
@@ -1882,7 +1882,7 @@ IF laser_line != 0.0 {
 } ELSE {
 	monochromator_wavenumber( cwn - cwn_offset );
 	start_wn = cwn + 0.5 * ( N_Points - 1 ) * step_wn;
-	change_label_1d( "Wavenumbers [abs. cm^-1]", "Counts [1/s]" );
+	change_label_1d( "Wavenumbers [abs. cm^-1]", "Counts" );
 	change_scale( start_wn, - step_wn );
 	FOR J = 1 : N_Points {
 		wn[ J ] = start_wn - ( J - 1 ) * step_wn;
@@ -1901,19 +1901,20 @@ F_all = get_file( "", "*.dat", "", "", "dat" );
 FOR I = 1 : N_scans {
 	output_value( I_scan, I );
 	spec = ccd_camera_get_spectrum( );
-	IF ( I == 1 ) {
-		avg_spec = spec;
-	} ELSE {
-		avg_spec += spec;
-	}
 
 	F_cur = clone_file( F_all, "dat", sprint( "scan_#.dat", I ) );
 	FOR J = 1 : N_Points {
 		fsave( F_cur, "# #\n", wn[ J ], spec[ J ] );
 	}
 
-	display_1d( 1, spec / exposure_time, 1,
-				1, avg_spec / ( I * exposure_time ), 2 );
+	spec = spike_remove( spec );
+	IF ( I == 1 ) {
+		avg_spec = spec;
+	} ELSE {
+		avg_spec += spec;
+	}
+
+	display_1d( 1, spec, 1, 1, avg_spec / I, 2 );
 
 	IF toolbox_changed( ) {
 		IF button_state( B_eas ) {
@@ -2402,7 +2403,7 @@ IF laser_line != 0.0 {
 	N_Points = round( width / step_wn ) + 1;
 	monochromator_wavenumber( cwn + cwn_offset );
 
-	change_label_1d( "Wavenumbers [rel. cm^-1]", "Counts [1/s]" );
+	change_label_1d( "Wavenumbers [rel. cm^-1]", "Counts" );
 	change_scale( start_wn, step_wn );
 	wn = lin_space( start_wn, start_wn + ( N_Points - 1 ) * step_wn,
                     N_Points );
@@ -2418,7 +2419,7 @@ IF laser_line != 0.0 {
 	N_Points = round( width / step_wn ) + 1;
 	monochromator_wavenumber( cwn - cwn_offset );
 
-	change_label_1d( "Wavenumbers [abs. cm^-1]", "Counts [1/s]" );
+	change_label_1d( "Wavenumbers [abs. cm^-1]", "Counts" );
 	change_scale( start_wn, - step_wn );
 	wn = lin_space( start_wn, start_wn - ( N_Points - 1 ) * step_wn,
                     N_Points );
@@ -2436,11 +2437,6 @@ F_all = get_file( "", "*.dat", "", "", "dat" );
 FOR I = 1 : N_scans {
 	output_value( I_scan, I );
 	spec = slice( ccd_camera_get_spectrum( ), Start_Point, N_Points );
-	IF ( I == 1 ) {
-		avg_spec = spec;
-	} ELSE {
-		avg_spec += spec;
-	}
 
 	F_cur = clone_file( F_all, "dat", sprint( "scan_#.dat", I ) );
 	fsave( F_cur, "\\#. scan\\n\\n", I );
@@ -2448,8 +2444,15 @@ FOR I = 1 : N_scans {
 		fsave( F_cur, "# #\\n", wn[ J ], spec[ J ] );
 	}
 
-	display_1d( 1, spec / exposure_time, 1,
-				1, avg_spec / ( I * exposure_time ), 2 );
+	spec = spike_remove( spec );
+
+	IF ( I == 1 ) {
+		avg_spec = spec;
+	} ELSE {
+		avg_spec += spec;
+	}
+
+	display_1d( 1, spec, 1, 1, avg_spec / I, 2 );
 
 	IF ! toolbox_changed( ) {
 		NEXT;
@@ -2659,14 +2662,14 @@ hide_toolbox( 1 );
 I_scan = output_create( "INT_OUTPUT", 0,
                         sprint( "Current scan (of #)", N_scans ) );
 IF laser_line != 0.0 {
-	change_label_1d( "Wavenumbers [rel. cm^-1]", "Counts [1/s]" );
+	change_label_1d( "Wavenumbers [rel. cm^-1]", "Counts" );
 	change_scale( start_wn, step_wn );
 	B_rel = button_create( "RADIO_BUTTON", "Relative wavenumbers" );
 	B_abs = button_create( "RADIO_BUTTON", B_rel, "Absolute wavenumbers" );
 	B_wl  = button_create( "RADIO_BUTTON", B_rel, "Wavelengths" );
 
 } ELSE {
-	change_label_1d( "Wavenumbers [abs. cm^-1]", "Counts [1/s]" );
+	change_label_1d( "Wavenumbers [abs. cm^-1]", "Counts" );
 	change_scale( start_wn, - step_wn );
 	B_abs = button_create( "RADIO_BUTTON", "Absolute wavenumbers" );
 	B_wl  = button_create( "RADIO_BUTTON", B_abs, "Wavelengths" );
@@ -2711,6 +2714,8 @@ FOR I = 1 : N_scans {
 		fsave( F_cur, "\\n" );
 
 		// Draw the new data (after gluing the spectra together at the overlap)
+
+		spec = spike_remove( spec );
 
 		IF J == 1 {
 			scan = spec;
