@@ -743,6 +743,9 @@ static bool incr_x_and_y( long x_index, long len, long y_index )
 		cv->points = T_malloc( new_Gnx * ( y_index + 1 )
 							   * sizeof( Scaled_Point ) );
 
+		/* Reorganise the old elements to fit into the new array and clear
+		   the the new elements in the already existing rows */
+
 		for ( sp = cv->points, j = 0; j < G.ny; j++ )
 		{
 			memcpy( sp, old_points + j * G.nx, G.nx * sizeof( Scaled_Point ) );
@@ -760,9 +763,6 @@ static bool incr_x_and_y( long x_index, long len, long y_index )
 								              * sizeof( XPoint ) );
 		cv->xpoints_s = T_realloc( cv->xpoints_s, new_Gnx * ( y_index + 1 )
 								                  * sizeof( XPoint ) );
-
-		/* Reorganise the old elements to fit into the new array and clear
-		   the the new elements in the already existing rows */
 
 		if ( cv->is_fs )
 		{
