@@ -39,6 +39,15 @@ die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
 
 my $Dead_Points = 5;
 
+
+# This variable is the minimum distance a wavenumber may have from the
+# laser line. In most cases the user is getting asked if he want's to
+# really continue if he tries to use one that's nearer (the script for
+# setting up the ROI and binning does not accept them at all).
+
+my $Min_Dist = 200.0;
+
+
 ########################################################################
 
 my @f;
@@ -240,7 +249,6 @@ sub show_message {
 #############################################
 # Package for displaying the temperature of the CCD camera
 #############################################
-
 
 package Temperature;
 
@@ -555,7 +563,7 @@ rs_spec10;
 
 VARIABLES:
 
-wn = 0.0;
+wn = 0.0 cm^-1;
 exposure_time = 0.1 s;
 laser_line;
 CCD_size[ 2 ] = ccd_camera_pixel_area( );
@@ -628,7 +636,8 @@ FOREVER {
        	new = input_value( B_wnr );
        	IF new == wn OR
 		   laser_line - new > 44000.0 OR
-		   laser_line - new < 46000.0 / 3.0 {
+		   laser_line - new < 46000.0 / 3.0 OR
+		   abs( new ) < $Min_Dist {
            	input_value( B_wnr, laser_line - wn );
            	NEXT;
        	}
@@ -647,7 +656,8 @@ FOREVER {
 
    	IF toolbox_changed( B_wna ) {
        	new = input_value( B_wna );
-       	IF new == wn OR new > 44000.0 OR new < 46000.0 / 3.0 {
+       	IF new == wn OR new > 44000.0 OR new < 46000.0 / 3.0 OR 
+		   ( laser_line != 0.0 AND abs( laser_line - new ) < $Min_Dist ) {
            	input_value( B_wna, wn );
            	NEXT;
        	}
@@ -1026,6 +1036,8 @@ sub cam_line_valid {
 sub cam_calib {
 	my $line = shift;
     my $fh;
+
+	return unless Laser_Check::ask_if_safe( Laser_Line::get_line( ), $line );
 
 	no warnings "exec";
     unless ( open $fh, "|fsc2_start" ) {
@@ -1516,13 +1528,15 @@ sub mono_calib {
 	my ( $line, $laser_line ) = @_;
     my $fh;
 
+	$line = $laser_line - $line if $laser_line != 0.0;
+
+	return unless Laser_Check::ask_if_safe( $laser_line, $line );
+
 	no warnings "exec";
     unless ( open $fh, "|fsc2_start" ) {
 		main::show_message( "Can't start fsc2" );
 		return;
 	}
-
-	$line = $laser_line - $line if $laser_line != 0.0;
 
     print $fh <<EOF;
 /*
@@ -2086,19 +2100,33 @@ sub check_all_parms {
 # Runs the actual experiment
 
 sub realtime_run {
+
     my ( $fh, $lcwn );
 
-	no warnings "exec";
-    unless ( open $fh, "|fsc2_start" ) {
-		main::show_message( "Can't start fsc2" );
-		return;
+	if ( $units[ 0 ] == 1 ) {
+		return unless Laser_Check::ask_if_safe( $laser_line,
+												$$cwn + 0.5 * $wn_width,
+												$$cwn - 0.5 * $wn_width );
+	} else {
+		return unless Laser_Check::ask_if_safe( $laser_line,
+												$laser_line
+												- $$cwn + 0.5 * $wn_width,
+												$laser_line
+												- $$cwn - 0.5 * $wn_width );
 	}
 
 	if ( $laser_line != 0.0 and $units[ 0 ] == 1 ) {
 		$lcwn = $laser_line - $$cwn;
 	} else {
-		$lcwn = $cwn;
+		$lcwn = $$cwn;
 	}
+
+	no warnings "exec";
+    unless ( open $fh, "|fsc2_load" ) {
+		main::show_message( "Can't start fsc2" );
+		return;
+	}
+
 
     print $fh <<EOF;
 DEVICES:
@@ -2108,7 +2136,7 @@ rs_spec10;
 
 VARIABLES:
 
-cwn = $$lcwn cm^-1;
+cwn = $lcwn cm^-1;
 exposure_time = $$exp_time s;
 start_wn;
 step_wn;
@@ -2568,16 +2596,28 @@ sub check_all_parms {
 sub single_run {
     my ( $fh, $lcwn );
 
-	no warnings "exec";
-    unless ( open $fh, "|fsc2_start" ) {
-		main::show_message( "Can't start fsc2" );
-		return;
+	if ( $units[ 0 ] == 1 ) {
+		return unless Laser_Check::ask_if_safe( $laser_line,
+												$$cwn + 0.5 * $wn_width,
+												$$cwn - 0.5 * $wn_width );
+	} else {
+		return unless Laser_Check::ask_if_safe( $laser_line,
+												$laser_line
+												- $$cwn + 0.5 * $wn_width,
+												$laser_line
+												- $$cwn - 0.5 * $wn_width );
 	}
 
 	if ( $laser_line != 0.0 and $units[ 0 ] == 1 ) {
 		$lcwn = $laser_line - $$cwn;
 	} else {
 		$lcwn = $cwn;
+	}
+
+	no warnings "exec";
+    unless ( open $fh, "|fsc2_start" ) {
+		main::show_message( "Can't start fsc2" );
+		return;
 	}
 
     print $fh <<EOF;
@@ -3208,10 +3248,13 @@ sub multi_window_run {
 sub multi_single_run {
     my ( $fh, $swn, $ewn );
 
-	no warnings "exec";
-    unless ( open $fh, "|fsc2_start" ) {
-		main::show_message( "Can't start fsc2" );
-		return;
+	if ( $units[ 0 ] == 1 ) {
+		return unless Laser_Check::ask_if_safe( $laser_line, $$start_wn,
+												$$end_wn );
+	} else {
+		return unless Laser_Check::ask_if_safe( $laser_line,
+												$laser_line - $$start_wn,
+												$laser_line - $$end_wn );
 	}
 
 	if ( $laser_line != 0.0 and $units[ 0 ] == 1 ) {
@@ -3220,6 +3263,12 @@ sub multi_single_run {
 	} else {
 		$swn = $$start_wn;
 		$ewn = $$end_wn;
+	}
+
+	no warnings "exec";
+    unless ( open $fh, "|fsc2_start" ) {
+		main::show_message( "Can't start fsc2" );
+		return;
 	}
 
     print $fh <<EOF;
@@ -3462,10 +3511,13 @@ EOF
 sub multi_run {
     my ( $fh, $swn, $ewn );
 
-	no warnings "exec";
-    unless ( open $fh, "|fsc2_start" ) {
-		main::show_message( "Can't start fsc2" );
-		return;
+	if ( $units[ 0 ] == 1 ) {
+		return unless Laser_Check::ask_if_safe( $laser_line, $$start_wn,
+												$$end_wn );
+	} else {
+		return unless Laser_Check::ask_if_safe( $laser_line,
+												$laser_line - $$start_wn,
+												$laser_line - $$end_wn );
 	}
 
 	if ( $laser_line != 0.0 and $units[ 0 ] == 1 ) {
@@ -3474,6 +3526,12 @@ sub multi_run {
 	} else {
 		$swn = $$start_wn;
 		$ewn = $$end_wn;
+	}
+
+	no warnings "exec";
+    unless ( open $fh, "|fsc2_start" ) {
+		main::show_message( "Can't start fsc2" );
+		return;
 	}
 
     print $fh <<EOF;
@@ -3954,6 +4012,91 @@ EOF
 	}
 
 	return @res;
+}
+
+
+1;
+
+
+#############################################
+# Package to check if the wavenumber range used in
+# an experiment is far enough from the laser line
+#############################################
+
+package Laser_Check;
+
+use strict;
+use warnings;
+use Tk;
+
+
+sub ask_if_safe {
+
+	my ( $laser_line, $swn, $ewn ) = @_;
+
+	return 1 if $laser_line == 0.0;
+
+	if ( $swn >= $laser_line and defined $ewn and $ewn <= $laser_line ) {
+		if ( $mw->Dialog( '-text' =>
+						  "The spectral range includes\n" .
+						  "the the laser line.\n ".
+						  "Do you really want to continue?",
+						  '-buttons' => [ "Yes", "No" ],
+						  '-default_button' => "No" )->Show( ) eq "No" ) {
+			return 0;
+		}
+		return 1;
+	}
+
+	if ( abs( $swn - $laser_line ) < $Min_Dist ) {
+
+		if ( defined $ewn and abs( $ewn - $laser_line ) < $Min_Dist and
+			 $mw->Dialog( '-text' =>
+						  "Both the start and end\n" .
+						  "wavenumber are less than\n" .
+						  "$Min_Dist cm^-1 away from the\n" .
+						  "laser line.\n" .
+						  "Do you really want to continue?",
+						  '-buttons' => [ "Yes", "No" ],
+						  '-default_button' => "No" )->Show( ) eq "No" ) {
+			return 0;
+		}
+
+		if ( defined $ewn and abs( $ewn - $laser_line ) >= $Min_Dist and
+			 $mw->Dialog( '-text' =>
+						  "The start wavenumber is\n" .
+						  "less than $Min_Dist cm^-1 away\n" .
+						  "from the laser line.\n" .
+						  "Do you really want to continue?",
+						  '-buttons' => [ "Yes", "No" ],
+						  '-default_button' => "No" )->Show( ) eq "No" ) {
+			return 0;
+		}
+
+		if ( ! defined $ewn and
+			 $mw->Dialog( '-text' =>
+						  "The selected wavenumber is\n" .
+						  "less than$ Min_Dist cm^-1 away\n" .
+						  "from the laser line.\n" .
+						  "Do you really want to continue?",
+						  '-buttons' => [ "Yes", "No" ],
+						  '-default_button' => "No" )->Show( ) eq "No" ) {
+			return 0;
+		}
+	}
+
+	if ( defined $ewn and abs( $ewn - $laser_line ) < $Min_Dist and
+		 $mw->Dialog( '-text' =>
+					  "The end wavenumber is\n" .
+					  "less than $Min_Dist cm^-1 away\n" .
+					  "from the laser line.\n" .
+					  "Do you really want to continue?",
+					  '-buttons' => [ "Yes", "No" ],
+					  '-default_button' => "No" )->Show( ) eq "No" ) {
+		return 0;
+	}
+
+	return 1;
 }
 
 
