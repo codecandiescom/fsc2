@@ -87,6 +87,7 @@ static double sr530_set_phase( double phase );
 static double sr530_get_ref_freq( void );
 static double sr530_set_dac_voltage( long channel, double voltage );
 static void sr530_lock_state( bool lock );
+static void sr530_failure( void );
 
 
 
@@ -136,11 +137,7 @@ int sr530_exp_hook( void )
 	/* Initialize the lock-in */
 
 	if ( ! sr530_init( DEVICE_NAME ) )
-	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
-				DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		sr530_failure( );
 
 	return 1;
 }
@@ -778,11 +775,7 @@ double sr530_get_data( int channel )
 	
 	if ( gpib_write( sr530.device, cmd, strlen( cmd ) ) == FAILURE ||
 		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
-				DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		sr530_failure( );
 
 	buffer[ length - 2 ] = '\0';
 	return T_atof( buffer );
@@ -805,11 +798,7 @@ double sr530_get_adc_data( long channel )
 
 	if ( gpib_write( sr530.device, buffer, strlen( buffer ) ) == FAILURE ||
 		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
-				DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		sr530_failure( );
 
 	buffer[ length - 2 ] = '\0';
 	return T_atof( buffer );
@@ -830,11 +819,7 @@ double sr530_get_sens( void )
 
 	if ( gpib_write( sr530.device, "G\n", 2 ) == FAILURE ||
 		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
-				DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		sr530_failure( );
 
 	buffer[ length - 2 ] = '\0';
 	sens = slist[ 24 - T_atol( buffer ) ];
@@ -845,11 +830,7 @@ double sr530_get_sens( void )
 	length = 10;
 	if ( gpib_write( sr530.device, "E1\n", 3 ) == FAILURE ||
 		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
-				DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		sr530_failure( );
 
 	if ( buffer[ 0 ] == '1' )
 		sens *= 0.1;
@@ -884,22 +865,14 @@ void sr530_set_sens( int Sens )
 	{
 		if ( gpib_write( sr530.device, "E1,1\n", 5 ) == FAILURE ||
 			 gpib_write( sr530.device, "E2,1\n", 5 ) == FAILURE)
-		{
-			eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
-					DEVICE_NAME );
-			THROW( EXCEPTION );
-		}
+			sr530_failure( );
 		Sens += 3;
 	}
 	else
 	{
 		if ( gpib_write( sr530.device, "E1,0\n", 5 ) == FAILURE ||
 			 gpib_write( sr530.device, "E2,0\n", 5 ) == FAILURE )
-		{
-			eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
-					DEVICE_NAME );
-			THROW( EXCEPTION );
-		}
+			sr530_failure( );
 	}
 
 	/* Now set the sensitivity */
@@ -907,11 +880,7 @@ void sr530_set_sens( int Sens )
 	sprintf( buffer, "G%d\n", Sens );
 
 	if ( gpib_write( sr530.device, buffer, strlen( buffer ) ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
-				DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		sr530_failure( );
 }
 
 
@@ -929,11 +898,7 @@ double sr530_get_tc( void )
 
 	if ( gpib_write( sr530.device, "T1\n", 3 ) == FAILURE ||
 		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
-				DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		sr530_failure( );
 
 	buffer[ length - 2 ] = '\0';
 	return tcs[ T_atol( buffer ) - 1 ];
@@ -954,36 +919,20 @@ void sr530_set_tc( int TC )
 
 	sprintf( buffer, "T1,%d\n", TC );
 	if ( gpib_write( sr530.device, buffer, strlen( buffer ) ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
-				DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		sr530_failure( );
 
 	/* Also set the POST time constant where 'T2,0' switches it off, 'T2,1'
 	   sets it to 100ms and 'T1,2' to 1s */
 
 	if ( TC <= 4 && gpib_write( sr530.device, "T2,0\n", 5 ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
-				DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		sr530_failure( );
 
 	if ( TC > 4 && TC <= 6 &&
 		 gpib_write( sr530.device, "T2,1\n", 5 ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
-				DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		sr530_failure( );
 
 	if ( TC > 6 && gpib_write( sr530.device, "T2,2\n", 5 ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
-				DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		sr530_failure( );
 }
 
 
@@ -1001,11 +950,7 @@ double sr530_get_phase( void )
 
 	if ( gpib_write( sr530.device, "P\n", 2 ) == FAILURE ||
 		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
-				DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		sr530_failure( );
 
 	buffer[ length - 2 ] = '\0';
 	phase = T_atof( buffer );
@@ -1031,11 +976,7 @@ double sr530_set_phase( double phase )
 
 	sprintf( buffer, "P%.2f\n", phase );
 	if ( gpib_write( sr530.device, buffer, strlen( buffer ) ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
-				DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		sr530_failure( );
 
 	return phase;
 }
@@ -1052,11 +993,7 @@ static double sr530_get_ref_freq( void )
 
 	if ( gpib_write( sr530.device, "F\n", 2 ) == FAILURE ||
 		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
-				DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		sr530_failure( );
 
 	buffer[ length - 2 ] = '\0';
 	return T_atof( buffer );
@@ -1086,11 +1023,7 @@ static double sr530_set_dac_voltage( long channel, double voltage )
 
 	sprintf( buffer, "X%1ld,%f\n", channel, voltage );
 	if ( gpib_write( sr530.device, buffer, strlen( buffer ) ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
-				DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		sr530_failure( );
 	
 	return voltage;
 }
@@ -1106,9 +1039,15 @@ static void sr530_lock_state( bool lock )
 
 	sprintf( cmd, "I%c\n", lock ? '2' : '0' );
 	if ( gpib_write( sr530.device, cmd, strlen( cmd ) ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
-				DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		sr530_failure( );
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static void sr530_failure( void )
+{
+	eprint( FATAL, "%s: Can't access the lock-in amplifier.\n", DEVICE_NAME );
+	THROW( EXCEPTION );
 }

@@ -154,7 +154,7 @@ void start_graphics( void )
 
 	if ( G.dim == 1 )
 		fl_delete_object( run_form->z_axis );
-	else
+	else if ( G.dim == 2 )
 	{
 		fl_set_canvas_decoration( run_form->z_axis, FL_FRAME_BOX );
 		fl_set_canvas_decoration( cut_form->cut_x_axis, FL_FRAME_BOX );

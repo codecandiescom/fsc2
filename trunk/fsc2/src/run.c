@@ -524,7 +524,11 @@ static void run_child( void )
 	while ( h );
 }*/
 
-	do_measurement( );                     /* run the experiment */
+	TRY {
+		do_measurement( );                     /* run the experiment */
+		TRY_SUCCESS;
+	}
+	OTHERWISE { };                             /* catch all exceptions */
 
 	/* Experiment ended prematurely if the end of EDL file wasn't reached */
 
@@ -776,5 +780,7 @@ static void do_measurement( void )
 			if ( ! react_to_do_quit )
 				THROW( EXCEPTION );
 		}
+		OTHERWISE
+			PASSTHROU( );
 	}
 }
