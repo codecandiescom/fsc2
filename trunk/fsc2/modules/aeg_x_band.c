@@ -700,7 +700,8 @@ try_again:
 
 	for ( i = 0; i < test_steps; ++i )
 	{
-		fl_check_only_forms( );
+		if ( I_am == PARENT )
+			fl_check_only_forms( );
 
 		if ( DO_STOP )
 			THROW( USER_BREAK_EXCEPTION );
@@ -729,7 +730,8 @@ try_again:
 
 	for ( i = 0; i < test_steps; ++i )
 	{
-		fl_check_only_forms( );
+		if ( I_am == PARENT )
+			fl_check_only_forms( );
 
 		if ( DO_STOP )
 			THROW( USER_BREAK_EXCEPTION );

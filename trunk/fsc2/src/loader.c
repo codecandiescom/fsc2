@@ -499,7 +499,7 @@ void run_exp_hooks( void )
 		else
 			cd->driver.exp_hook_is_run = SET;
 
-		/* Give user a chance to break while running the experiment hooks */
+		/* Give user a chance to stop while running the experiment hooks */
 
 		fl_check_only_forms( );
 		if ( DO_STOP )
