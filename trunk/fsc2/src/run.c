@@ -287,6 +287,8 @@ static void quitting_handler( int signo )
 	child_is_quitting = SET;
 	kill( child_pid, DO_QUIT );
 	errno = errno_saved;
+
+	printf( "In quitting_handler()\n" );
 }
 
 
@@ -344,6 +346,9 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 {
 	b = b;
 
+	printf( "In run_sigchld_callback() with child_is_quitting = %d.\n",
+			child_is_quitting ? 1 : 0 );
+
 	if ( ! child_is_quitting )   /* missing notification by the child ? */
 		fl_show_alert( "FATAL Error", "Experiment stopped prematurely.",
 					   NULL, 1 );
@@ -356,12 +361,12 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 
 
 /*---------------------------------------------------------------------*/
-/* stop_measurement() has two functions - if called with a parameter   */
-/* b == 0 it serves as the callback for the stop button and just sends */
-/* a DO_QUIT signal to the child telling it to exit. This in turn will */
-/* cause another call of the function, this time with b == 1 by        */
-/* run_sigchld_handler(), catching the SIGCHLD from the child in order */
-/* to get the post-measurement clean-up done.                          */
+/* stop_measurement() has two functions - if called with the parameter */
+/* b set to 0 it serves as the callback for the stop button and just   */
+/* sends a DO_QUIT signal to the child telling it to exit. This in     */
+/* turn will cause another call of the function, this time with b set  */
+/* to 1 by run_sigchld_handler(), catching the SIGCHLD from the child  */
+/* in order to get the post-measurement clean-up done.                 */
 /*---------------------------------------------------------------------*/
 
 void stop_measurement( FL_OBJECT *a, long b )
@@ -381,6 +386,8 @@ void stop_measurement( FL_OBJECT *a, long b )
 		return;
 	}
 
+	printf( "In stop_measurement() with b set to 1.\n" );
+
 	end_comm( );
 
 	/* Remove the signal handlers */
@@ -390,7 +397,7 @@ void stop_measurement( FL_OBJECT *a, long b )
 	sigaction( NEW_DATA, &new_data_oact, NULL );
 	sigaction( QUITTING, &quitting_oact, NULL );
 
-	/* reset all the devices and finally the GPIB bus */
+	/* Reset all the devices and finally the GPIB bus */
 
 	tools_clear( );
 	run_end_of_exp_hooks( );
