@@ -123,7 +123,7 @@ int keithley228a_init_hook( void )
 	keithley228a.lockin_dac_port = -1;
 	keithley228a.lockin_name = NULL;
 	for ( i = 0; lockins[ i ] != NULL; i++ )
-		if ( exist_device( lockins[ i ] ) )
+		if ( exists_device( lockins[ i ] ) )
 		{
 			keithley228a.lockin_name = lockins[ i ];
 			keithley228a.lockin_dac_port = dac_ports[ i ];
