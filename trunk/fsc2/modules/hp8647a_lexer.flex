@@ -7,7 +7,7 @@
 		/*     DEFINITIONS     */
 		/*---------------------*/
 
-%option noyywrap stack
+%option noyywrap stack nounput
 
 %{
 
