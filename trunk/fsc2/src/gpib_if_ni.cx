@@ -343,10 +343,10 @@ int gpib_init_device( const char *device_name, int *dev )
 
 	devices[ i ].number = ibdev( 0, devices[ i ].pad, devices[ i ].sad,
 								 devices[ i ].timo,
-								 ( ( devices[ i ].eosmode &
-									 ( REOS | XEOS | BIN ) ) << 8 ) |
-								 ( devices[ i ].eos & 0xff ),
-								 devices[ i ].eosmode & EOT ? 1 : 0 );
+								 devices[ i ].eosmode & EOT ? 1 : 0,
+								 ( devices[ i ].eosmode &
+								   ( REOS | XEOS | BIN ) ) |
+								 ( devices[ i ].eos & 0xff ) );
 
 	if ( first_time )
 	{
@@ -812,7 +812,7 @@ int gpib_read( int device, char *buffer, long *length )
     }
 
 	raise_permissions( );
-    ibrd( device, buffer, expected );
+	ibrd( device, buffer, expected );
 	lower_permissions( );
     *length = ibcnt;
 
@@ -1204,8 +1204,8 @@ static void close_on_exec_hack( int *fd_list )
 {
 	int *new_fd_list;
 	int i, j;
-	bool found;
 	int flags;
+	bool found;
 
 
 	if ( fd_list == NULL )
@@ -1224,11 +1224,16 @@ static void close_on_exec_hack( int *fd_list )
 
 	for ( i = 0; new_fd_list[ i ] != -1; i++ )
 	{
-		for ( found = UNSET, j = 0; fd_list[ j ] != -1 && ! found; j++ )
-			found = new_fd_list[ i ] == fd_list[ j ];
+		found = UNSET;
+		for ( j = 0; fd_list[ j ] != -1; j++ )
+			if ( new_fd_list[ i ] == fd_list[ j ] )
+			{
+				found = SET;
+				break;
+			}
 
 		if ( ! found &&
-			 ( flags = fcntl( new_fd_list [ i ], F_GETFD, 0 ) ) != -1 )
+			 ( flags = fcntl( new_fd_list [ i ], F_GETFD, 0 ) ) >= 0 )
 			fcntl( new_fd_list [ i ], F_SETFD, flags | FD_CLOEXEC );
 	}
 

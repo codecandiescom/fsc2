@@ -28,7 +28,7 @@
 
 /* Include configuration information for the device */
 
-#include "rb8510.conf"
+#include "rb8510_0.conf"
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
@@ -47,10 +47,10 @@ static struct {
 } rb8510, rb8510_stored;
 
 
-int rb8510_init_hook( void );
-int rb8510_test_hook( void );
-int rb8510_exp_hook( void );
-int rb8510_end_of_exp_hook( void );
+int rb8510_0_init_hook( void );
+int rb8510_0_test_hook( void );
+int rb8510_0_exp_hook( void );
+int rb8510_0_end_of_exp_hook( void );
 
 Var *daq_name( Var *v );
 Var *daq_set_voltage( Var *v );
@@ -60,7 +60,7 @@ Var *daq_set_voltage( Var *v );
  * Function called immediately after the module has been loaded
  *--------------------------------------------------------------*/
 
-int rb8510_init_hook( void )
+int rb8510_0_init_hook( void )
 {
 	need_RULBUS = SET;
 
@@ -75,7 +75,7 @@ int rb8510_init_hook( void )
  * Function called at the start of the test run
  *----------------------------------------------*/
 
-int rb8510_test_hook( void )
+int rb8510_0_test_hook( void )
 {
 	rb8510_stored = rb8510;
 
@@ -94,14 +94,13 @@ int rb8510_test_hook( void )
  * Function called at the start of the experiment
  *------------------------------------------------*/
 
-int rb8510_exp_hook( void )
+int rb8510_0_exp_hook( void )
 {
 	rb8510 = rb8510_stored;
 
 	/* Open the card */
 
-	if ( ( rb8510.handle = rulbus_card_open( RULBUS_CARD_NAME ) )
-		 														 != RULBUS_OK )
+	if ( ( rb8510.handle = rulbus_card_open( RULBUS_CARD_NAME ) ) < 0 )
 	{
 		print( FATAL, "Initialization of card failed: %s.\n",
 			   rulbus_strerror( ) );
@@ -120,14 +119,14 @@ int rb8510_exp_hook( void )
 
 	/* Check if during the test run an invalid voltage was requested */
 
-	if ( rb8510.Vmax >= rb8510_stored.Vmax + 0.5 * rb8510.dV )
+	if ( rb8510_stored.Vmax >= rb8510.Vmax + 0.5 * rb8510.dV )
 	{
 		print( FATAL, "Voltage requested in preparation or test run was "
 			   "higher than maximum output voltage of card.\n" );
 		THROW( EXCEPTION );
 	}
 
-	if ( rb8510.Vmin <= rb8510_stored.Vmin - 0.5 * rb8510.dV )
+	if ( rb8510_stored.Vmin <= rb8510.Vmin - 0.5 * rb8510.dV )
 	{
 		print( FATAL, "Voltage requested in preparation or test run was lower "
 			   "than minimum output voltage of card.\n" );
@@ -150,7 +149,7 @@ int rb8510_exp_hook( void )
  * Function called at the end of the experiment
  *----------------------------------------------*/
 
-int rb8510_end_of_exp_hook( void )
+int rb8510_0_end_of_exp_hook( void )
 {
 	if ( rb8510.handle >= 0 )
 	{

@@ -107,8 +107,7 @@ int rb8509_exp_hook( void )
 
 	/* Open the card */
 
-	if ( ( rb8509.handle = rulbus_card_open( RULBUS_CARD_NAME ) )
-		 														 != RULBUS_OK )
+	if ( ( rb8509.handle = rulbus_card_open( RULBUS_CARD_NAME ) ) < 0 )
 	{
 		print( FATAL, "Initialization of card failed: %s.\n",
 			   rulbus_strerror( ) );
@@ -167,7 +166,7 @@ int rb8509_exp_hook( void )
 
 	if ( rb8509.trig_mode_is_set &&
 		 rb8509.trig_mode != RULBUS_ADC12_INT_TRIG &&
-		 rulbus_adc12_set_gain( rb8509.handle, rb8509.trig_mode ) 
+		 rulbus_adc12_set_trigger_mode( rb8509.handle, rb8509.trig_mode ) 
 		 														 != RULBUS_OK )
 	{
 		print( FATAL, "Initialization of card failed: %s.\n",
@@ -316,7 +315,8 @@ Var *daq_trigger_mode( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	rb8509.ext_trig_used = SET;
+	if ( rb8509.trig_mode == RULBUS_ADC12_EXT_TRIG )
+		rb8509.ext_trig_used = SET;
 
 	return vars_push( INT_VAR, rb8509.trig_mode );
 }

@@ -85,8 +85,8 @@ static const char *rulbus_errlist[ ] = {
 	"Invalid card handle",                             /* RULBUS_INV_HND */
 	"Card has not been opened",                        /* RULBUS_CRD_NOP */
 	"Invalid card address offset",                     /* RULBUS_INV_OFF */
-	"Write error"                                      /* RULBUS_WRT_ERR */
-	"Read error"                                       /* RULBUS_RD_ERR  */
+	"Write error",                                     /* RULBUS_WRT_ERR */
+	"Read error",                                      /* RULBUS_RD_ERR  */
 	"Card is busy",                                    /* RULBUS_CRD_BSY */
 	"Voltage out of range",                            /* RULBUS_INV_VLT */
 	"Card can't be triggered externally",              /* RULBUS_NO_EXT  */
@@ -258,10 +258,8 @@ int rulbus_open( void )
 
     /* Set the close-on-exec flag for the device file descriptor */
 
-    if ( ( fd_flags = fcntl( fd, F_GETFD, 0 ) ) < 0 )
-        fd_flags = 0;
-
-    fcntl( fd, F_SETFD, fd_flags | FD_CLOEXEC );
+    if ( ( fd_flags = fcntl( fd, F_GETFD, 0 ) ) >= 0 )
+		fcntl( fd, F_SETFD, fd_flags | FD_CLOEXEC );
 
 	rulbus_in_use = SET;
 
@@ -269,7 +267,7 @@ int rulbus_open( void )
 
 	for ( i = 0; i < rulbus_num_card_handlers; i++ )
 		if ( rulbus_card_handler[ i ].init &&
-			 ( retval = rulbus_card_handler[ i ].init( ) ) < 0 )
+			 ( retval = rulbus_card_handler[ i ].init( ) ) != RULBUS_OK )
 		{
 			for ( --i; i >= 0; i-- )
 				if ( rulbus_card_handler[ i ].exit )
@@ -381,10 +379,13 @@ int rulbus_card_open( const char *name )
 
 	if ( ! rulbus_card[ i ].in_use )
 	{
+		rulbus_card[ i ].in_use = SET;
 		if ( rulbus_card[ i ].handler->card_init &&
 			 ( retval = rulbus_card[ i ].handler->card_init( i ) ) < 0 )
-			return retval;
-		rulbus_card[ i ].in_use = SET;
+		{
+			rulbus_card[ i ].in_use = UNSET;
+			return rulbus_errno = retval;
+		}
 	}
 
 	return i;
@@ -448,7 +449,7 @@ int rulbus_write( int handle, unsigned char offset, unsigned char *data,
 								data, len );
 
 	if ( retval <= 0 )
-		return rulbus_errno = RULBUS_WRT_ERR;
+		return rulbus_errno = retval;
 
 	rulbus_errno = RULBUS_OK;
 	return retval;               /* return number of bytes written */
@@ -490,7 +491,7 @@ int rulbus_read( int handle, unsigned char offset, unsigned char *data,
 							   data, len );
 
 	if ( retval <= 0 )
-		return rulbus_errno = RULBUS_RD_ERR;
+		return rulbus_errno = retval;
 
 	rulbus_errno = RULBUS_OK;
 	return retval;                    /* return number of bytes read */
@@ -599,7 +600,6 @@ static void rulbus_cleanup( void )
 {
 	int i;
 
-
 	if ( rulbus_card )
 	{
 		for ( i = 0; i < rulbus_num_cards; i++ )
@@ -637,7 +637,7 @@ static int rulbus_write_rack( unsigned char rack, unsigned char addr,
 			case ENOMEM :
 				return RULBUS_NO_MEM;
 
-			case -EIO :
+			case EIO :
 				return RULBUS_TIM_OUT;
 
 			default :                   /* catch all for "impossible" errors */
@@ -650,8 +650,7 @@ static int rulbus_write_rack( unsigned char rack, unsigned char addr,
 
 /*------------------------------------------------------------------*
  * Function for reading a number of bytes from a certain address at
- * one of the racks (with special handling for the case of a single
- * byte to be read).
+ * one of the racks.
  *------------------------------------------------------------------*/
 
 static int rulbus_read_rack( unsigned char rack, unsigned char addr,
@@ -661,21 +660,18 @@ static int rulbus_read_rack( unsigned char rack, unsigned char addr,
 	int retval;
 
 
-	if ( ( retval = ioctl( fd, RULBUS_EPP_IOC_WRITE, &args ) ) <= 0 )
+	if ( ( retval = ioctl( fd, RULBUS_EPP_IOC_READ, &args ) ) <= 0 )
 		switch ( errno )
 		{
 			case ENOMEM :
 				return RULBUS_NO_MEM;
 
-			case -EIO :
+			case EIO :
 				return RULBUS_TIM_OUT;
 
 			default :                   /* catch all for "impossible" errors */
 				return RULBUS_RD_ERR;
 		}
-
-	if ( len == 1 )
-		*data = args.byte;
 
 	return retval;
 }

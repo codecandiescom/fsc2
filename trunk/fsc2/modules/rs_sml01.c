@@ -798,7 +798,7 @@ Var *synthesizer_modulation( Var *v )
 	unsigned int set = 0;
 	int res;
 	const char *str[ ] = { "amplitude", "type", "source" };
-	const char mod_source[ ] = { "EXT AC", "EXT DC", "INT" };
+	const char *mod_source[ ] = { "EXT AC", "EXT DC", "INT" };
 	double val;
 	double ampl = 0.0;
 	double freq = 0.0;

@@ -879,8 +879,8 @@ int is_in( const char *supplied_in, const char **alternatives, int max )
 	/* Now check if the cleaned up input string is identical to one of the
 	   alternatives */
 
-	for ( cpy = in, a = *alternatives, count = 0; a && count < max;
-		  count++, a += strlen( a ) + 1 )
+	for ( cpy = in, a = alternatives[ 0 ], count = 0; a && count < max;
+		   a = alternatives[ ++count ] )
 		if ( ! strcasecmp( in, a ) )
 			break;
 

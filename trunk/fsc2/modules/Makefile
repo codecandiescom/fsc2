@@ -111,7 +111,8 @@ endif
 
 ifdef WITH_RULBUS
 simp_modules    += rb8509
-simp_modules    += rb8510
+simp_modules    += rb8510_0
+simp_modules    += rb8510_1
 comp_modules    += rb_pulser
 endif
 

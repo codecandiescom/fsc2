@@ -111,7 +111,7 @@ int rulbus_dac12_card_init( int handle )
 
 	for ( i = 0; i < sizeof ranges / sizeof *ranges; i++ )
 		if ( ranges[ i ] ==
-			 		( int ) floor( rulbus_card[ handle ].range * 1e2 + 0.5 ) )
+			 	   ( int ) floor( rulbus_card[ handle ].range * 1.0e2 + 0.5 ) )
 			break;
 	
 	switch ( i )
@@ -274,14 +274,17 @@ int rulbus_dac12_set_voltage( int handle, double volts )
 	if ( card->v == val )
 		return RULBUS_OK;
 
-	rulbus_dac12_card[ handle ].v = val;
+	card->v = val;
 
 	byte = ( val >> 8 ) & 0xFF;
-	if ( ( retval = rulbus_write( handle, DAC12_MSB, &byte, 1 ) ) < 0 )
+	if ( ( retval = rulbus_write( handle, DAC12_MSB, &byte, 1 ) ) != 1 )
 		return retval;
 
 	byte = val & 0xFF;
-	return rulbus_write( handle, DAC12_LSB, &byte, 1 );
+	if ( ( retval = rulbus_write( handle, DAC12_LSB, &byte, 1 ) ) != 1 )
+		return retval;
+
+	return RULBUS_OK;
 }
 
 

@@ -106,6 +106,8 @@ FLOAT    ((({INT}"."[0-9]*)|([0-9]*"."{INT})){EXPO}?)|({INT}{EXPO})
                rulbus_lval.sval = p = rulbus_text + 1;
 			   while ( *p && *p != *rulbus_text )
                    p++;
+			   if ( ! *p )
+				   return ERR_TOKEN;
                *p = '\0';
                return STR_TOKEN;
            }

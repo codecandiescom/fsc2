@@ -33,7 +33,6 @@ static double rs_sml01_get_pulse_width( void );
 static double rs_sml01_get_pulse_delay( void );
 #endif
 static void rs_sml01_comm_failure( void );
-static void rs_sml01_check_complete( void );
 static bool rs_sml01_talk( const char *cmd, char *reply, long *length );
 
 
@@ -62,14 +61,16 @@ bool rs_sml01_init( const char *name )
 	rs_sml01_command( "POW:ALC ON" );
 	rs_sml01_command( "OUTP:AMOD AUTO" );
 #if defined WITH_PULSE_MODULATION
-	rs_sml01_command( ":SOUR:PULM:SOUR EXT" );
-	rs_sml01_command( ":SOUR:PULS:DOUB OFF" );
+	rs_sml01_command( "PULM:SOUR EXT" );
+	rs_sml01_command( "PULS:DOUB:STAT OFF" );
 #endif
 
 	/* Figure out the current frequency if it's not going to be set */
 
 	if ( ! rs_sml01.freq_is_set )
 		rs_sml01.freq = rs_sml01_get_frequency( );
+	else
+		rs_sml01_set_frequency( rs_sml01.freq );
 
 	/* Set or get the current attenuation */
 
@@ -135,8 +136,6 @@ bool rs_sml01_init( const char *name )
 			rs_sml01.mod_ampl_is_set[ i ] = SET;
 		}
 	}
-
-	rs_sml01_set_frequency( rs_sml01.freq );
 
 #if defined WITH_PULSE_MODULATION
 	if ( rs_sml01.pulse_trig_slope_is_set )
@@ -259,7 +258,6 @@ bool rs_sml01_set_output_state( bool state )
 
 	sprintf( cmd, "OUTP %s", state ? "ON" : "OFF" );
 	rs_sml01_command( cmd );
-	rs_sml01_check_complete( );
 
 	return state;
 }
@@ -291,7 +289,6 @@ double rs_sml01_set_frequency( double freq )
 
 	sprintf( cmd, "FREQ:CW %.0f", freq );
 	rs_sml01_command( cmd );
-	rs_sml01_check_complete( );
 
 	return freq;
 }
@@ -324,7 +321,6 @@ double rs_sml01_set_attenuation( double att )
 
 	sprintf( cmd, "POW %6.1f", att );
 	rs_sml01_command( cmd );
-	rs_sml01_check_complete( );
 
 	return att;
 }
@@ -435,7 +431,6 @@ int rs_sml01_set_mod_source( int type, int source, double freq )
 	}
 
 	rs_sml01_command( cmd );
-	rs_sml01_check_complete( );
 
 	return source;
 }
@@ -513,7 +508,6 @@ double rs_sml01_set_mod_ampl( int type, double ampl )
 	}
 
 	rs_sml01_command( cmd );
-	rs_sml01_check_complete( );
 
 	return ampl;
 }
@@ -552,7 +546,6 @@ void rs_sml01_set_pulse_state( bool state )
 		strcat( cmd, "OFF" );
 
 	rs_sml01_command( cmd );
-	rs_sml01_check_complete( );
 }
 
 
@@ -584,7 +577,6 @@ void rs_sml01_set_pulse_trig_slope( bool state )
 		strcat( cmd, "NEG" );
 
 	rs_sml01_command( cmd );
-	rs_sml01_check_complete( );
 }
 
 
@@ -612,7 +604,6 @@ void rs_sml01_set_pulse_width( double width )
 
 	sprintf( cmd, "PULS:WIDT %s", rs_sml01_pretty_print( width ) );
 	rs_sml01_command( cmd );
-	rs_sml01_check_complete( );
 }
 
 
@@ -641,7 +632,6 @@ void rs_sml01_set_pulse_delay( double delay )
 
 	sprintf( cmd, "PULS:DEL %s", rs_sml01_pretty_print( delay ) );
 	rs_sml01_command( cmd );
-	rs_sml01_check_complete( );
 }
 
 
@@ -669,21 +659,6 @@ static void rs_sml01_comm_failure( void )
 {
 	print( FATAL, "Communication with device failed.\n" );
 	THROW( EXCEPTION );
-}
-
-
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
-
-static void rs_sml01_check_complete( void )
-{
-	char buffer[ 10 ];
-	long length = 10;
-
-
-	do {
-		rs_sml01_talk( "*OPC?", buffer, &length );
-	} while ( buffer[ 1 ] != '1' );
 }
 
 

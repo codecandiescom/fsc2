@@ -68,6 +68,7 @@ aeg_x_band    // X-band AEG magnet power supply (Berlin)
 keithley228a  // W-band magnet power supply (Berlin)
 er032m        // Bruker ER 032 M field controller
 ips20_4       // Oxford sweep power supply
+ips120_10     // Oxford sweep power supply
 s_band_magnet_broad;    // special module for "broken" Frankfurt S-band
 s_band_magnet_narrow;   // special module for "broken" Frankfurt S-band
 hjs_sfc;      // simple field control for Steinhoff group
@@ -120,7 +121,8 @@ me6000        // ME-6000 DAC card
 hjs_daadc     // DA/AD converter from the group of H.-J. Steinhoff (Osnabrueck)
 pci_mio_16e_1 // PCI-MIO-16E-1 DAQ card by National Instruments
 rb8509        // Rulbus 12-bit ADC card
-rb8510        // Rulbus 12-bit DAC card
+rb8510_0      // Rulbus 12-bit DAC card
+rb8510_1      // Rulbus 12-bit DAC card
 
 
 // Event counter (NI6601 board)

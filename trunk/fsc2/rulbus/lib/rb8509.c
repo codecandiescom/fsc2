@@ -53,7 +53,7 @@ struct RULBUS_ADC12_CARD {
 /* Bits in the control byte */
 
 #define CTRL_CHANNEL_MASK              ( 7 << 0 )
-#define CTRL_MULTIPLEXER_MASK          ( 1 << 3 )       /* keep always low ! */
+#define CTRL_MULTIPLEXER               ( 1 << 3 )       /* active low ! */
 #define CTRL_GAIN_MASK                 ( 3 << 4 )
 #define CTRL_EXT_TRIGGER_ENABLE        ( 1 << 6 )
 #define CTRL_INTERRUPT_ENABLE          ( 1 << 7 )
@@ -123,7 +123,6 @@ int rulbus_adc12_card_init( int handle )
 	RULBUS_ADC12_CARD *tmp;
 	int retval = RULBUS_OK;
 	unsigned char dummy;
-	unsigned int i;
 	double Vmin;
 	double dV;
 
@@ -184,7 +183,8 @@ int rulbus_adc12_card_init( int handle )
 	/* Set a few defaults: selected channel is 0, gain is 1, use internal
 	   trigger and no interrupts */
 
-	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &tmp->ctrl, 1 ) ) < 0 )
+	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &tmp->ctrl, 1 ) )
+		 																 != 1 )
 	{
 		tmp = realloc( rulbus_adc12_card,
 					   --rulbus_num_adc12_cards * sizeof *tmp );
@@ -194,11 +194,11 @@ int rulbus_adc12_card_init( int handle )
 		return retval;
 	}
 
-	usleep( ADC12_DELAY );      /* allow for settling time of gain switching */
+	usleep( ADC12_DELAY );      /* allow for settling time after gain switch */
 
 	/* Read the low data byte to make sure the EOC bit is cleared */
 
-	if ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &dummy, 1 ) ) < 0 )
+	if ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &dummy, 1 ) ) != 1 )
 	{
 		tmp = realloc( rulbus_adc12_card,
 					   --rulbus_num_adc12_cards * sizeof *tmp );
@@ -300,12 +300,15 @@ int rulbus_adc12_set_channel( int handle, int channel )
 
 	card->ctrl = ctrl;
 	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 ) )
-		 																  < 0 )
+		 																 != 1 )
 		return retval;
 
 	/* Read the low data byte to make sure the EOC bit is cleared */
 
-	return rulbus_read( handle, DATA_LOW_ADDR, &ctrl, 1 );
+	if ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &ctrl, 1 ) ) != 1 )
+		return retval;
+
+	return RULBUS_OK;
 }
 
 
@@ -342,7 +345,7 @@ int rulbus_adc12_set_gain( int handle, int gain )
 
 	card->ctrl = ctrl;
 	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 ) )
-																		  < 0 )
+																		 != 1 )
 		return retval;
 
 	/* The card needs a settling time of about 18 us after gain switching */
@@ -351,7 +354,10 @@ int rulbus_adc12_set_gain( int handle, int gain )
 
 	/* Read the low data byte to make sure the EOC bit is cleared */
 
-	return rulbus_read( handle, DATA_LOW_ADDR, &ctrl, 1 );
+	if ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &ctrl, 1 ) ) != 1 )
+		 return retval;
+
+	return RULBUS_OK;
 }
 
 
@@ -390,12 +396,15 @@ int rulbus_adc12_set_trigger_mode( int handle, int mode )
 	card->trig_mode = mode;
 
 	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 ) )
-																		  < 0 )
+																		 != 1 )
 		return retval;
 
 	/* Read the low data byte to make sure the EOC bit is cleared */
 
-	return rulbus_read( handle, DATA_LOW_ADDR, &ctrl, 1 );
+	if ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &ctrl, 1 ) ) != 1 )
+		return retval;
+
+	return RULBUS_OK;
 }
 
 
@@ -457,7 +466,7 @@ int rulbus_adc12_check_convert( int handle, double *volts )
 	/* Check if a conversion has already happened which also means that an
 	   external trigger was received */
 
-	if ( ( retval = rulbus_read( handle, STATUS_ADDR, &hi, 1 ) ) < 0 )
+	if ( ( retval = rulbus_read( handle, STATUS_ADDR, &hi, 1 ) ) != 1 )
 		return retval;
 
 	if ( ! ( hi & STATUS_EOC ) )
@@ -466,13 +475,13 @@ int rulbus_adc12_check_convert( int handle, double *volts )
 	/* If the conversion is already done also get the low data byte and
 	   return the value to the user */
 
-	if ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &low, 1 ) ) < 0 )
+	if ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &low, 1 ) ) != 1 )
 		return retval;
 
 	/* Calculate the voltage from the data we just received */
 
 	card->data = ( ( hi & STATUS_DATA_MASK ) << 8 ) | low;
-	*volts = ( card->dV * card->data - card->Vmin ) / card->gain;
+	*volts = ( card->dV * card->data + card->Vmin ) / card->gain;
 	return 1;
 }
 
@@ -500,27 +509,27 @@ int rulbus_adc12_convert( int handle, double *volts )
 	   no importance, the mere act of writing to the register triggers. */
 
 	if ( card->trig_mode == RULBUS_ADC12_INT_TRIG &&
-		 ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &trig, 1 ) ) <  0 ||
-		   ( retval = rulbus_write( handle, TRIGGER_ADDR, &trig, 1 ) ) < 0 ) )
+		 ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &trig, 1 ) ) != 1 ||
+		   ( retval = rulbus_write( handle, TRIGGER_ADDR, &trig, 1 ) ) != 1 ) )
 		return retval;
 
 	/* Check the EOC (end of conversion) bit */
 
 	do
 	{
-		if ( ( retval = rulbus_read( handle, STATUS_ADDR, &hi, 1 ) ) < 0 )
+		if ( ( retval = rulbus_read( handle, STATUS_ADDR, &hi, 1 ) ) != 1 )
 			return retval;
 	} while ( ! ( hi & STATUS_EOC ) );
 
-	/* Get the low data byte */
+	/* Get the low data byte (thereby also resetting the EOC bit) */
 
-	if ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &low, 1 ) ) < 0 )
+	if ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &low, 1 ) ) != 1 )
 		return retval;
 
 	/* Calculate the voltage from the data we just received */
 
 	card->data = ( ( hi & STATUS_DATA_MASK ) << 8 ) | low;
-	*volts = ( card->dV * card->data - card->Vmin ) / card->gain;
+	*volts = ( card->dV * card->data + card->Vmin ) / card->gain;
 	return RULBUS_OK;
 }
 

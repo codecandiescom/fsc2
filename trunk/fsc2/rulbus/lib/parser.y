@@ -185,8 +185,8 @@ static int new_card( void )
 
 	/* Set up a new structure for the card */
 
-	if ( ( tmp = realloc( rulbus_card, ( rulbus_num_cards + 1 )
-						  			   * sizeof *tmp ) ) == NULL )
+	if ( ( tmp = realloc( rulbus_card,
+						  ( rulbus_num_cards + 1 ) * sizeof *tmp ) ) == NULL )
 		return RULBUS_NO_MEM;
 
 	rulbus_card = tmp;
@@ -228,7 +228,6 @@ static int set_name( const char *name )
 		 															  == NULL )
 		return RULBUS_NO_MEM;
 
-	strcpy( rulbus_card[ rulbus_num_cards - 1 ].name, name );
 	return RULBUS_OK;
 }
 
@@ -319,9 +318,9 @@ static int set_polar( const char *polar )
 	/* Check the string */
 
 	if ( ! strcasecmp( polar, "unipolar" ) )
-		rulbus_card[ rulbus_num_cards - 1 ].range = RULBUS_UNIPOLAR;
+		rulbus_card[ rulbus_num_cards - 1 ].polar = RULBUS_UNIPOLAR;
 	else if ( ! strcasecmp( polar, "bipolar" ) )
-		rulbus_card[ rulbus_num_cards - 1 ].range = RULBUS_BIPOLAR;
+		rulbus_card[ rulbus_num_cards - 1 ].polar = RULBUS_BIPOLAR;
 	else
 		return RULBUS_INV_POL;
 
