@@ -104,6 +104,7 @@ devices to be used in the experiment.
 * Modules::                 How to create new modules
 * Device Reference::        List of devices and their functions
 * Reserved Words::          List of all reserved words
+* EDL mode for emacs::      Support for editing with emacs
 * Acknowledgments::         The title says it all...
 * Copying::                 The GNU General Public License
 * Index::                   List of all indexed words
