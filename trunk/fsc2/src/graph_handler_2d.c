@@ -370,7 +370,7 @@ void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 	int keymask;
 	bool scale_changed = UNSET;
 
-	
+
 	obj = obj;
 
 	/* We need to do event compression to avoid being flooded with motion
