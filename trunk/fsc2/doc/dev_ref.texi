@@ -46,8 +46,8 @@
 * hp8672a::         HP RF Synthesizer HP8672A
 * hjs_attenuator::  Home-built microwave attenuator
 * hjs_daadc::       Home-built AD and DA converter
-* hjs_sfc::         Simple Field Control (Steinhoff group, Osnabrueck)
-* hjs_fc::          Field Control (Steinhoff group, Osnabrueck)
+* hjs_sfc::         Simple Field Control (HJS_SFC, Steinhoff group, Osnabrueck)
+* hjs_fc::          Field Control (HJS_FC, Steinhoff group, Osnabrueck)
 * ips20_4::         Oxford Magnet Sweep Power Supply IPS20-4
 * keithley228a::    Magnet Power Supply Keithley 228A (Berlin W-Band)
 * kontron4060::     Kontron 4060 Voltmeter
@@ -982,10 +982,10 @@ voltage can be reduced via a potentiometer at the front panel.
 
 @node hjs_sfc, hjs_fc, hjs_daadc, Device Reference
 @iftex
-@subheading Simple Field Control (Steinhoff group, Osnabrueck)
+@subheading Simple Field Control (HJS_SFC, Steinhoff group, Osnabrueck)
 @end iftex
 @ifnottex
-@section Simple Field Control (Steinhoff group, Osnabrueck)
+@section Simple Field Control (HJS_SFC, Steinhoff group, Osnabrueck)
 @end ifnottex
 
 @paragraphindent 0
@@ -996,9 +996,9 @@ voltage can be reduced via a potentiometer at the front panel.
 
 @paragraphindent 0
 @strong{Description}: Pseudo-device module used for controlling magnets
-in the group of H.-J.@: Steinhoff at the University of
-Osnabrueck. There's no device that gets controlled directly by this
-module but instead the magnetic field is controlled via the output
+in the group of H.-J.@: Steinhoff at the University of Osnabrueck. It's
+not for a device that gets controlled directly by this module but
+instead the magnetic field is controlled indirectly via the output
 voltage of a home-built DA and AD converter, using the module
 @code{hjs_daadc}. The module requires a previous calibration of the
 relation of the DAC output voltage and the resulting field, with these
@@ -1027,10 +1027,10 @@ can't be used, it gets reserved automatically for this module.
 
 @node hjs_fc, ips20_4, hjs_sfc, Device Reference
 @iftex
-@subheading Field Control (Steinhoff group, Osnabrueck)
+@subheading Field Control (HJS_FC, Steinhoff group, Osnabrueck)
 @end iftex
 @ifnottex
-@section Field Control (Steinhoff group, Osnabrueck)
+@section Field Control (HJS_FC, Steinhoff group, Osnabrueck)
 @end ifnottex
 
 @paragraphindent 0
@@ -1043,10 +1043,10 @@ and @code{bnm12}
 @paragraphindent 0
 @strong{Description}: Pseudo-device module used for controlling magnets
 in the group of H.-J.@: Steinhoff at the University of
-Osnabrueck. There's no device that gets controlled directly by this
-module but instead the magnetic field is controlled via the output
+Osnabrueck. There's not just one device that gets controlled directly by
+this module but instead the magnetic field is controlled via the output
 voltage of a home-built DA and AD converter, using the module
-@code{hjs_daadc} and the field is measured by the Bruker BNM12
+@code{hjs_daadc}, and the field is measured by the Bruker BNM12
 gaussmeter (which in turn requires the @code{witio_48} module for the
 WITIO-48 DIO card for reading in the measured field). When this module
 is used neither the DAC of the DA and AD converter nor the first DIO
