@@ -67,7 +67,7 @@ int dg2020_f_init_hook( void )
 	dg2020.is_running   = SET;
 	dg2020.keep_all     = UNSET;
 
-	pulser_struct.has_phase_switch = SET;
+	pulser_struct.needs_phase_pulses = SET;
 
 	pulser_struct.set_timebase = dg2020_store_timebase;
 

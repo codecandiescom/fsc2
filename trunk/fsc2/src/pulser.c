@@ -39,7 +39,7 @@
 
 void pulser_struct_init( void )
 {
-	pulser_struct.has_phase_switch           = UNSET;
+	pulser_struct.needs_phase_pulses         = UNSET;
 
 	pulser_struct.name                       = NULL;
 
@@ -584,7 +584,7 @@ void p_phase_ref( int func, int ref )
     is_pulser_func( pulser_struct.set_phase_reference,
                     "setting a function for phase cycling" );
 
-	if ( pulser_struct.has_phase_switch )
+	if ( pulser_struct.needs_phase_pulses )
 	{
 		if ( func < PULSER_CHANNEL_FUNC_MIN ||
 			 func > PULSER_CHANNEL_FUNC_MAX )
@@ -897,7 +897,7 @@ void p_exists_function( int function )
 
 	if ( ( function == PULSER_CHANNEL_PHASE_1 ||
 		   function == PULSER_CHANNEL_PHASE_2 ) &&
-		 ! pulser_struct.has_phase_switch )
+		 ! pulser_struct.needs_phase_pulses )
 	{
 		eprint( FATAL, SET, "%s: Pulse setup has no phase switches, so "
 				"PHASE functions can't be used.\n" );

@@ -546,7 +546,7 @@ static void ass_func( int function )
 
 	if ( Channel_Type != PULSER_CHANNEL_NO_TYPE )
 	{
-		if ( pulser_struct.has_phase_switch )
+		if ( pulser_struct.needs_phase_pulse )
 			p_phase_ref( Channel_Type, function );
 		else
 		{
@@ -561,7 +561,7 @@ static void ass_func( int function )
 	   phase switches. In this cas Cur_PHS most be set to the number of
 	   the PHASE_SETUP (i.e. 0 or 1 for the first or second PHASE_SETUP) */
 
-	if ( ! pulser_struct.has_phase_switch && Cur_PHS != -1 )
+	if ( ! pulser_struct.needs_phase_pulses && Cur_PHS != -1 )
 		p_phase_ref( Cur_PHS, function );
 	else
 	{

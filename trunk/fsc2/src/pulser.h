@@ -32,7 +32,7 @@ typedef struct {
 
 	const char *name;
 
-	bool has_phase_switch;
+	bool needs_phase_pulses;
 
 	bool ( *assign_function )( int function, long connector );
 	bool ( *assign_channel_to_function )( int function, long channel );
