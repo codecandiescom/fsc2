@@ -77,17 +77,17 @@ static volatile sig_atomic_t Child_return_status;
 static bool Graphics_have_been_started = UNSET;
 
 
-/*------------------------------------------------------------------*/
-/* run() starts an experiment. To do so it initializes all needed   */
-/* devices and opens a new window for displaying the measured data. */
-/* Then everything needed for the communication between parent and  */
-/* the child to be created is set up, i.e. pipes, a semaphore and a */
-/* shared memory segment for storing the type of the data and a key */
-/* for a further shared memory segment that will contain the data.  */
-/* Finally, after initializing some global variables and setting up */
-/* signal handlers used for synchronization of the processes the    */
-/* child process is started and thus the experiments begins.        */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * run() starts an experiment. To do so it initializes all needed
+ * devices and opens a new window for displaying the measured data.
+ * Then everything needed for the communication between parent and
+ * the child to be created is set up, i.e. pipes, a semaphore and a
+ * shared memory segment for storing the type of the data and a key
+ * for a further shared memory segment that will contain the data.
+ * Finally, after initializing some global variables and setting up
+ * signal handlers used for synchronization of the processes the
+ * child process is started and thus the experiments begins.
+ *------------------------------------------------------------------*/
 
 bool run( void )
 {
@@ -201,11 +201,11 @@ bool run( void )
 }
 
 
-/*----------------------------------------------------------*/
-/* Called when the program was started with the main window */
-/* being iconified and an error happened, in which case the */
-/* the main window must be de-iconified.                    */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Called when the program was started with the main window
+ * being iconified and an error happened, in which case the
+ * the main window must be de-iconified.
+ *----------------------------------------------------------*/
 
 static void error_while_iconified( void )
 {
@@ -215,11 +215,11 @@ static void error_while_iconified( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* This function first does some smaller changes to the GUI and then */
-/* starts the GPIB bus, the RULBUS and does some initialization for  */
-/* serial port subsystem.                                            */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * This function first does some smaller changes to the GUI and then
+ * starts the GPIB bus, the RULBUS and does some initialization for
+ * serial port subsystem.
+ *-------------------------------------------------------------------*/
 
 static bool start_gpib_and_rulbus( void )
 {
@@ -278,11 +278,11 @@ static bool start_gpib_and_rulbus( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* This all to be done when the experiment section does not contain any */
-/* commands: devices get initialized, again de-initialized, and then we */
-/* already return.                                                      */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * This all to be done when the experiment section does not contain any
+ * commands: devices get initialized, again de-initialized, and then we
+ * already return.
+ *----------------------------------------------------------------------*/
 
 static bool no_prog_to_run( void )
 {
@@ -349,12 +349,12 @@ static bool no_prog_to_run( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Function sets a zero point for the dtime() function, runs the experiment */
-/* hooks (while still allowing the user to break in between), initializes   */
-/* the graphics and creates two pipes for two-way communication between the */
-/* parent and child process.                                                */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Function sets a zero point for the dtime() function, runs the experiment
+ * hooks (while still allowing the user to break in between), initializes
+ * the graphics and creates two pipes for two-way communication between the
+ * parent and child process.
+ *--------------------------------------------------------------------------*/
 
 static bool init_devs_and_graphics( void )
 {
@@ -462,12 +462,12 @@ static bool init_devs_and_graphics( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Sets the signal handlers for all signals used for communication */
-/* between the parent and the child process. Finally, it activates */
-/* an idle callback routine which the parent uses for accepting    */
-/* displaying of new data.                                         */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Sets the signal handlers for all signals used for communication
+ * between the parent and the child process. Finally, it activates
+ * an idle callback routine which the parent uses for accepting
+ * displaying of new data.
+ *-----------------------------------------------------------------*/
 
 static void setup_signal_handlers( void )
 {
@@ -486,11 +486,11 @@ static void setup_signal_handlers( void )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Callback handler for the main "Stop" button during device */
-/* initialization (to allow stopping the experiment already  */
-/* at this early stage).                                     */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Callback handler for the main "Stop" button during device
+ * initialization (to allow stopping the experiment already
+ * at this early stage).
+ *-----------------------------------------------------------*/
 
 static void stop_while_exp_hook( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
@@ -498,9 +498,9 @@ static void stop_while_exp_hook( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Things that remain to be done when forking the child process failed... */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Things that remain to be done when forking the child process failed...
+ *------------------------------------------------------------------------*/
 
 static void fork_failure( int stored_errno )
 {
@@ -568,11 +568,11 @@ static void fork_failure( int stored_errno )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Checks if new errors etc. were found while running the exp_hooks. */
-/* In this case ask the user if she wants to continue - unless an    */
-/* exception was thrown.                                             */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Checks if new errors etc. were found while running the exp_hooks.
+ * In this case ask the user if she wants to continue - unless an
+ * exception was thrown.
+ *-------------------------------------------------------------------*/
 
 static void check_for_further_errors( Compilation_T *c_old,
 									  Compilation_T *c_all )
@@ -621,11 +621,11 @@ static void check_for_further_errors( Compilation_T *c_old,
 }
 
 
-/*---------------------------------------------------------------------*/
-/* quitting_handler() is the parents handler for the QUITTING signal   */
-/* sent by the child when it exits normally: the handler sets a global */
-/* variable and reacts by sending the child a DO_QUIT signal.          */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * quitting_handler() is the parents handler for the QUITTING signal
+ * sent by the child when it exits normally: the handler sets a global
+ * variable and reacts by sending the child a DO_QUIT signal.
+ *---------------------------------------------------------------------*/
 
 static void quitting_handler( UNUSED_ARG int signo )
 {
@@ -638,11 +638,11 @@ static void quitting_handler( UNUSED_ARG int signo )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Callback function for the 'Stop' button - used to kill the child  */
-/* process. After the child is dead a different callback function is */
-/* used for this button, see run_close_button_callback().            */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Callback function for the 'Stop' button - used to kill the child
+ * process. After the child is dead a different callback function is
+ * used for this button, see run_close_button_callback().
+ *-------------------------------------------------------------------*/
 
 void run_stop_button_callback( FL_OBJECT *a, UNUSED_ARG long b )
 {
@@ -687,14 +687,14 @@ void run_stop_button_callback( FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* run_sigchld_handler() is the handler for SIGCHLD signals received */
-/* while a measurement is running. Only the most basic things (i.e   */
-/* waiting for the return status and resetting of signal handlers)   */
-/* are done here since it's a signal handler. To get the remaining   */
-/* stuff done an invisible button is triggered which leads to a call */
-/* of its callback function, run_sigchld_callback().                 */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * run_sigchld_handler() is the handler for SIGCHLD signals received
+ * while a measurement is running. Only the most basic things (i.e
+ * waiting for the return status and resetting of signal handlers)
+ * are done here since it's a signal handler. To get the remaining
+ * stuff done an invisible button is triggered which leads to a call
+ * of its callback function, run_sigchld_callback().
+ *-------------------------------------------------------------------*/
 
 static void run_sigchld_handler( int signo )
 {
@@ -747,18 +747,18 @@ static void run_sigchld_handler( int signo )
 }
 
 
-/*----------------------------------------------------------------*/
-/* run_sigchld_callback() is the callback for an invisible button */
-/* that is triggered on the death of the child. If the child died */
-/* prematurely, i.e. without notifying the parent by a QUITTING   */
-/* signal or it signals an error via its return status an error   */
-/* message is output. Then the post-measurement clean-up is done, */
-/* i.e. the now defunct communication channels to the child are   */
-/* closed, the devices are reset and the graphic is set up to     */
-/* reflect the new state. The display window isn't yet closed,    */
-/* this is only done when the 'Stop' button, now labeled 'Close', */
-/* gets pressed.                                                  */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * run_sigchld_callback() is the callback for an invisible button
+ * that is triggered on the death of the child. If the child died
+ * prematurely, i.e. without notifying the parent by a QUITTING
+ * signal or it signals an error via its return status an error
+ * message is output. Then the post-measurement clean-up is done,
+ * i.e. the now defunct communication channels to the child are
+ * closed, the devices are reset and the graphic is set up to
+ * reflect the new state. The display window isn't yet closed,
+ * this is only done when the 'Stop' button, now labeled 'Close',
+ * gets pressed.
+ *----------------------------------------------------------------*/
 
 void run_sigchld_callback( FL_OBJECT *a, long b )
 {
@@ -903,10 +903,10 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 }
 
 
-/*-------------------------------------------------------*/
-/* This function gets called whenever the 'Close' button */
-/* in (one of) the display window(s) gets pressed.       */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * This function gets called whenever the 'Close' button
+ * in (one of) the display window(s) gets pressed.
+ *-------------------------------------------------------*/
 
 void run_close_button_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
@@ -937,12 +937,12 @@ void run_close_button_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*----------------------------------------------------------*/
-/* set_buttons_for_run() makes the buttons in the main form */
-/* for running another experiment and quitting inaccessible */
-/* while a measurement is running and makes them accessible */
-/* again when the experiment is finished.                   */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * set_buttons_for_run() makes the buttons in the main form
+ * for running another experiment and quitting inaccessible
+ * while a measurement is running and makes them accessible
+ * again when the experiment is finished.
+ *----------------------------------------------------------*/
 
 static void set_buttons_for_run( int run_state )
 {
@@ -1000,18 +1000,18 @@ static void set_buttons_for_run( int run_state )
 /**************************************************************/
 
 
-/*-------------------------------------------------------------------*/
-/* run_child() is the child process' code for doing the measurement. */
-/* It does some initialization (e.g. setting up signal handlers) and */
-/* then runs the experiment by calling do_measurement(). The         */
-/* experiment stops either when all lines of the program have been   */
-/* dealt with, an unrecoverable error happened or the user told it   */
-/* to stop (by pressing the "Stop" button). When returning from the  */
-/* do_measurement() routine it signals the parent process that it's  */
-/* going to die and waits for the arrival of an acknowledging        */
-/* signal. When the child gets an signal it can't deal with it does  */
-/* not return from do_measurement() but dies in the signal handler.  */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * run_child() is the child process' code for doing the measurement.
+ * It does some initialization (e.g. setting up signal handlers) and
+ * then runs the experiment by calling do_measurement(). The
+ * experiment stops either when all lines of the program have been
+ * dealt with, an unrecoverable error happened or the user told it
+ * to stop (by pressing the "Stop" button). When returning from the
+ * do_measurement() routine it signals the parent process that it's
+ * going to die and waits for the arrival of an acknowledging
+ * signal. When the child gets an signal it can't deal with it does
+ * not return from do_measurement() but dies in the signal handler.
+ *-------------------------------------------------------------------*/
 
 static void run_child( void )
 {
@@ -1080,14 +1080,14 @@ static void run_child( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Set up the signal handlers for all kinds of signals the child may */
-/* receive. This probably looks a bit like overkill, but I just want */
-/* to make sure the child doesn't get killed by meaningless signals  */
-/* and, on the other hand, that on deadly signals it gets a chance   */
-/* to try to get rid of shared memory that the parent didn't destroy */
-/* (in case it was killed by a signal it couldn't catch).            */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Set up the signal handlers for all kinds of signals the child may
+ * receive. This probably looks a bit like overkill, but I just want
+ * to make sure the child doesn't get killed by meaningless signals
+ * and, on the other hand, that on deadly signals it gets a chance
+ * to try to get rid of shared memory that the parent didn't destroy
+ * (in case it was killed by a signal it couldn't catch).
+ *-------------------------------------------------------------------*/
 
 static void setup_child_signals( void )
 {
@@ -1122,23 +1122,23 @@ static void setup_child_signals( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/* This is the signal handler for the signals the child receives. */
-/* There are two signals that have a real meaning, SIGUSR2 (aka   */
-/* DO_QUIT) and SIGALRM. The others are either ignored or kill    */
-/* the child (but in a, hopefully, controlled way to allow        */
-/* deletion of shared memory if the parent didn't do it itself).  */
-/* There's a twist: The SIGALRM signal can only come from the     */
-/* f_wait() function (see func_util.c). Here we wait in a pause() */
-/* for SIGALRM to get a reliable timer. On the other hand, the    */
-/* pause() also has to be interruptible by the DO_QUIT signal, so */
-/* by falling through from the switch for this signal it is       */
-/* guaranteed that also this signal will end the pause() - it     */
-/* works even when the handler, while handling a SIGALRM signal,  */
-/* is interrupted by a DO_QUIT signal. In all other cases (i.e.   */
-/* when we're not waiting in the pause() in	f_wait()) nothing     */
-/* unexpected happens.                                            */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * This is the signal handler for the signals the child receives.
+ * There are two signals that have a real meaning, SIGUSR2 (aka
+ * DO_QUIT) and SIGALRM. The others are either ignored or kill
+ * the child (but in a, hopefully, controlled way to allow
+ * deletion of shared memory if the parent didn't do it itself).
+ * There's a twist: The SIGALRM signal can only come from the
+ * f_wait() function (see func_util.c). Here we wait in a pause()
+ * for SIGALRM to get a reliable timer. On the other hand, the
+ * pause() also has to be interruptible by the DO_QUIT signal, so
+ * by falling through from the switch for this signal it is
+ * guaranteed that also this signal will end the pause() - it
+ * works even when the handler, while handling a SIGALRM signal,
+ * is interrupted by a DO_QUIT signal. In all other cases (i.e.
+ * when we're not waiting in the pause() in	f_wait()) nothing
+ * unexpected happens.
+ *----------------------------------------------------------------*/
 
 static void child_sig_handler( int signo )
 {
@@ -1207,14 +1207,14 @@ static void child_sig_handler( int signo )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* The child got to wait for the parent to tell it that it now expects */
-/* the child to die (if the child dies unexpectedly the parent assumes */
-/* that something went wrong during the experiment). This functions    */
-/* sets everything up so that the parents DO_QUIT signal will be       */
-/* handled by the correct function, sends a QUITTING signal to the     */
-/* parent and then waits for the parent to allow it to exit.           */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * The child got to wait for the parent to tell it that it now expects
+ * the child to die (if the child dies unexpectedly the parent assumes
+ * that something went wrong during the experiment). This functions
+ * sets everything up so that the parents DO_QUIT signal will be
+ * handled by the correct function, sends a QUITTING signal to the
+ * parent and then waits for the parent to allow it to exit.
+ *---------------------------------------------------------------------*/
 
 static void wait_for_confirmation( void )
 {
@@ -1247,9 +1247,9 @@ static void wait_for_confirmation( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Child's handler for the DO_QUIT signal while its waiting to die */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Child's handler for the DO_QUIT signal while its waiting to die
+ *-----------------------------------------------------------------*/
 
 static void child_confirmation_handler( int signo )
 {
@@ -1258,10 +1258,10 @@ static void child_confirmation_handler( int signo )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* do_measurement() runs through and executes all commands. Since it */
-/* is executed by the child it has got to honor the 'do_quit' flag.  */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * do_measurement() runs through and executes all commands. Since it
+ * is executed by the child it has got to honor the 'do_quit' flag.
+ *-------------------------------------------------------------------*/
 
 static void do_measurement( void )
 {
@@ -1320,13 +1320,13 @@ static void do_measurement( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* The following is just a lengthy switch to deal with tokens that can't */
-/* be handled by the parser directly, the tokens for flow control.       */
-/* Control is transfered back to this function whenever the parser finds */
-/* the end-of-line delimiter (a colon), a closing curly brace or one of  */
-/* the flow control tokens.                                              */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * The following is just a lengthy switch to deal with tokens that can't
+ * be handled by the parser directly, the tokens for flow control.
+ * Control is transfered back to this function whenever the parser finds
+ * the end-of-line delimiter (a colon), a closing curly brace or one of
+ * the flow control tokens.
+ *-----------------------------------------------------------------------*/
 
 static void deal_with_program_tokens( void )
 {
