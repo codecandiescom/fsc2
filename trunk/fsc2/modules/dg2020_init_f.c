@@ -550,9 +550,6 @@ PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth, int pos,
 	if ( np->is_active )
 		dg2020_set_phase_pulse_pos_and_len( f, np, p, nth );
 
-	np->is_dpos = p->is_dpos == UNSET;
-	np->is_dlen = p->is_dlen == UNSET;
-
 	/* it doesn't needs updates yet */
 
 	np->is_old_pos = np->is_old_len = UNSET;
@@ -673,6 +670,11 @@ void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 				( p->pos + p->len + pn->pos ) / 2 - np->pos;
 		}
 	}
+
+	/* If the new pulse has either no position or no length reset both flags */
+
+	if ( ! np->is_pos || ! np->is_len )
+		np->is_pos = np->is_len = UNSET;
 
 	for_pulse = p;
 }
