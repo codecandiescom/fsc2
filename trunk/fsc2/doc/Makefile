@@ -21,7 +21,7 @@
 
 
 docs     := $(wildcard *.texi)
-pngs     := $(wildcard fsc2fig*.png) interfacing.png
+pngs     := $(wildcard fsc2fig*.png) $(wildcard simplecw*.png)
 xbms     := $(wildcard $(adir)/cursor*.xbm)
 figures  := $(pngs) $(notdir $(patsubst %.xbm,%.png,$(xbms)))
 eps_pics := $(patsubst %.png,%.eps,$(figures))

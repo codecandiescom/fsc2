@@ -32,12 +32,12 @@
 @end menu
 @end ifinfo
 
-In this chapter all functions built into @acronym{fsc2} are discussed in
+In this chapter all functions built into @code{fsc2} are discussed in
 detail. These functions are available even when no device modules have
 been specified in the @code{DEVICES} section (or this section is
 missing). Many functions can be used in the @code{VARIABLES},
 @code{PREPARATIONS} as well as the @code{EXPERIMENT} section of an
-@acronym{EDL} program, but there are some that can be used only either
+@code{EDL} program, but there are some that can be used only either
 before the @code{EXPERIMENT} section starts or within the
 @code{EXPERIMENT} section.
 
@@ -163,7 +163,7 @@ displayed at the @i{x}-axis are (in contrast to the point numbers)
 referred to as `real world coordinates'.
 
 This function can only be used in the @code{PREPARATIONS} section of an
-@acronym{EDL} program.
+@code{EDL} program.
 
 
 @anchor{init_2d}
@@ -213,7 +213,7 @@ init_2d( [ n_data_sets [ , n_x_points [ , n_y_points,
 @end example
 
 This function can only be used in the @code{PREPARATIONS} section of an
-@acronym{EDL} program.
+@code{EDL} program.
 
 
 @anchor{display}
@@ -255,7 +255,7 @@ display( n_x_point, n_y_point, data [ , n_curve [ , ... ] ] )
 @end example
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} program.
+@code{EDL} program.
 
 
 @anchor{change_scale}
@@ -272,7 +272,7 @@ instead of a value a string (e.g.@ @code{"keep"}) can be passed as the
 argument.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} program.
+@code{EDL} program.
 
 
 @anchor{change_label}
@@ -280,7 +280,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @findex change_label()
 Using this function the labels at the axis of the display window (and, if
 shown, of the cross section window) can be changed from within as
-@acronym{EDL} program. For 1D-display it accepts up to two strings for
+@code{EDL} program. For 1D-display it accepts up to two strings for
 the @i{x}- and @i{y}-axis labels, for 2D-display up to three, the third
 for the @i{z}-axis label. To leave a label unchanged pass the function
 an empty string, i.e.@ @code{""}. If no label should be drawn pass it
@@ -288,7 +288,7 @@ a string that just contains one (or more) space characters, i.e.@:
 @code{" "}.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} program.
+@code{EDL} program.
 
 @anchor{rescale}
 @item rescale()
@@ -298,7 +298,7 @@ in @i{x}- (and @i{y}-) direction can be set. If, during the experiment
 more points are displayed then set in the initialization, the scaling of
 the axis (or axis in the 2D-case) will be changed automatically. Using
 the function @code{rescale()} one can change the number of points from
-within the @acronym{EDL} program. In the 1D-case the function accepts
+within the @code{EDL} program. In the 1D-case the function accepts
 one argument, the new number of points in @i{x}-direction. If this value
 is @code{0} the number of points is adjusted to the number of points
 currently displayed. Exceptions are when either the new number of
@@ -315,7 +315,7 @@ do any changes to the axis and @code{0} sets the number of points to the
 number of points currently displayed along this axis.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} program.
+@code{EDL} program.
 
 @anchor{clear_curve}
 @item clear_curve()
@@ -325,7 +325,7 @@ there are curves can be used. No arguments at all implies the first
 curve. Invalid arguments are discarded and an error message is printed.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} program.
+@code{EDL} program.
 
 
 @anchor{draw_marker}
@@ -363,7 +363,7 @@ previously set markers. It accepts no arguments.
 @item print()
 @findex print()
 This function prints text into the output browser in the main form of
-@acronym{fsc2}.  It needs a @i{format string}
+@code{fsc2}.  It needs a @i{format string}
 @cindex format string
 as its very first argument. The @i{format string} can contain any text
 as well as a special character, @code{#},
@@ -426,7 +426,7 @@ Prints a @code{#}, thus switching off the special meaning of the
 @code{#} character as a placeholder for variables to be printed.
 @item \T
 While normally nothing is printed during the test run of the
-@code{EXPERIMENT} section of an @acronym{EDL} program, if the @i{format
+@code{EXPERIMENT} section of an @code{EDL} program, if the @i{format
 string} starts with this escape sequence the @code{print()} function
 will produce output already in the test run (the @code{T} is never
 printed).
@@ -477,7 +477,7 @@ after the default file has already been opened is not allowed, call it
 either before the first save-operation or never at all!
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} program.
+@code{EDL} program.
 
 
 @anchor{clone_file}
@@ -517,7 +517,7 @@ select different file. The program enforces that the extension of the
 new file is identical to the one passed to it as the third argument.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} program.
+@code{EDL} program.
 
 
 @anchor{save}
@@ -526,7 +526,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 Writes one or more data or complete arrays to a file. But some care has
 to be used: If @w{@code{get_file()}} has been called before the first
 argument has to be the file number returned by the call to tell
-@acronym{fsc2} which file to use. If, on the other hand,
+@code{fsc2} which file to use. If, on the other hand,
 @code{get_file()} hasn't been called before, the user is asked to select
 a file now and all further calls of functions of the
 @w{@code{save_xxx()}} type will use this one file and the first argument
@@ -573,7 +573,7 @@ will be printed as
 
 The function returns the total number of characters that have been
 written to the file and can only be used in the @code{EXPERIMENT}
-section of an @acronym{EDL} program.
+section of an @code{EDL} program.
 
 
 @anchor{fsave}
@@ -663,7 +663,7 @@ The function returns the total number of characters that have been written to
 the file.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} program.
+@code{EDL} program.
 
 @anchor{ffsave}
 @item ffsave()
@@ -720,7 +720,7 @@ the value is computed by converting the next arguments(s), which must be
 an integer values.
 
 In contrast to the @code{printf()} format string no length modifier can
-be used - @acronym{fsc2} has no different short, long or long long
+be used - @code{fsc2} has no different short, long or long long
 variable types.
 
 The following table lists all conversion characters. If the character
@@ -761,12 +761,12 @@ The function returns the total number of characters that have been written to
 the file.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} program.
+@code{EDL} program.
 
 @anchor{save_program}
 @item save_program()
 @findex save_program()
-This functions writes the currently run @acronym{EDL} program into a
+This functions writes the currently run @code{EDL} program into a
 file. As usual, the first argument may be a file identifier - the same
 rules apply as for @code{save()} and @code{fsave()}. The second argument
 can be a string that is prepended to each line of the program, i.e.@: a
@@ -774,7 +774,7 @@ comment character to make other programs like @acronym{MATHLAB} or
 @acronym{octave} skip these lines.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} program.
+@code{EDL} program.
 
 
 @anchor{save_output}
@@ -785,7 +785,7 @@ the content of the output window (i.e.@: the bottom browser window in
 the main form) into the file.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} program.
+@code{EDL} program.
 
 
 @anchor{save_comment}
@@ -804,7 +804,7 @@ last argument is the label string to be shown on top of the editor - it
 defaults to "Please enter a comment:".
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} program.
+@code{EDL} program.
 
 
 @anchor{is_file}
@@ -934,7 +934,7 @@ pixels smaller than the default size use the label string
 @subsection List of Interaction Functions
 
 All the following functions can only be used in the @code{EXPERIMENT}
-section of an @acronym{EDL} program.
+section of an @code{EDL} program.
 
 @table @samp
 @anchor{layout}
@@ -1265,7 +1265,7 @@ boolean argument (either @code{1} or @code{"ON"} to hide the toolbox or
 @cindex mathematical functions
 
 The following mathematical function can be used in all section of an
-@acronym{EDL} program that allow the use of functions.
+@code{EDL} program that allow the use of functions.
 
 @table @samp
 @anchor{int}
@@ -1532,7 +1532,7 @@ error message and return immediately. The maximum time the function
 accepts is more than 2.1 billion seconds (or about 68 years).
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} program.
+@code{EDL} program.
 
 @anchor{slice}
 @item slice()

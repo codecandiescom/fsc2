@@ -24,16 +24,16 @@
 @chapter Internals
 
 
-In this chapter I will try to explain in some detail how @acronym{fsc2}
+In this chapter I will try to explain in some detail how @code{fsc2}
 does work internally. I hope that this will help especially if you try
 to write a new module for a device (or if you get upset about things
-@acronym{fsc2} does differently from the way you would like it to).
+@code{fsc2} does differently from the way you would like it to).
 
-As you will already have understood @acronym{fsc2} is basically an
-interpreter for @acronym{EDL} programs. But in contrast to other
+As you will already have understood @code{fsc2} is basically an
+interpreter for @code{EDL} programs. But in contrast to other
 interpreters it does not interpret each line of input individually,
 i.e.@: analyzing a line, and, if the line is syntactically correct,
-executing it. Instead, the interpretation of an @acronym{EDL} file is a
+executing it. Instead, the interpretation of an @code{EDL} file is a
 three-stage process. In the first step the program as a whole is
 analyzed and checked for syntactic correctness and, everything up to the
 start of the @code{EXPERIMENT} section, is executed. Only the
@@ -41,9 +41,9 @@ start of the @code{EXPERIMENT} section, is executed. Only the
 checks are done. In the second step, a complete test run of
 @code{EXPERIMENT} section of the program is done to avoid that the
 experiment will have to be stopped due to syntactic or logical errors in
-the @acronym{EDL} program. Only if this test run succeeds the third
+the @code{EDL} program. Only if this test run succeeds the third
 stage, the execution of the @code{EXPERIMENT} section of the
-@acronym{EDL} program, is started, i.e.@: the experiment is run.
+@code{EDL} program, is started, i.e.@: the experiment is run.
 
 @ifinfo
 @menu
@@ -63,7 +63,7 @@ token by token fashion, where tokens are e.g.@: variable or function
 names, numbers, braces, semicolons, section labels etc. This is mainly
 done by the code within the files which you'll find in the @file{src}
 directory, having an extension of @code{.l}. As you will see there's
-such a file for each of the different sections an @acronym{EDL} program
+such a file for each of the different sections an @code{EDL} program
 may contain. Actually, there are some extra ones, @file{split_lexer.l}
 is a central switch for the first stage that calls the individual
 tokenizers in turn on finding the section labels and deals with errors
@@ -75,28 +75,28 @@ analyzing the files with the list of device modules,
 tokens).
 
 
-Finally, there is @file{fsc2_clean.l}. @acronym{EDL} expects its input
+Finally, there is @file{fsc2_clean.l}. @code{EDL} expects its input
 to be a single file in a certain format. Thus it does not deal directly
 with the input files (there can be more than one when there are
-@code{#INCLUDE} statements in an @acronym{EDL} program) but there is an
-extra program, @file{fsc2_clean} that translates the input @acronym{EDL}
+@code{#INCLUDE} statements in an @code{EDL} program) but there is an
+extra program, @file{fsc2_clean} that translates the input @code{EDL}
 file into a form that the main program understands. @code{fsc2_clean}
 for example removes all comments, includes files for @code{#INCLUDE}
 statements, adds information about line numbers and file names etc., and
 then passes this cleaned-up input to the @code{fsc2} program. If you are
-interested what @code{fsc2} really sees of an @acronym{EDL} file you can
-run @code{fsc2_clean} with the @acronym{EDL} file as its input (please
+interested what @code{fsc2} really sees of an @code{EDL} file you can
+run @code{fsc2_clean} with the @code{EDL} file as its input (please
 note that the output of @code{fsc2_clean} program contains some
 non-printable characters).
 
 
 In the sections preceeding the @code{EXPERIMENT} section the lines of
-the @acronym{EDL} program are also already executed. E.g.@: during the
+the @code{EDL} program are also already executed. E.g.@: during the
 handling of the @code{DEVICES} section the modules for the listed
 devices are loaded and the functions defined in the modules are included
-into @acronym{fsc2}s internal list of functions that can be used from
-within the @acronym{EDL} program. While reading the @code{VARIABLES}
-section the newly defined variables are added to @acronym{fsc2}s list of
+into @code{fsc2}s internal list of functions that can be used from
+within the @code{EDL} program. While reading the @code{VARIABLES}
+section the newly defined variables are added to @code{fsc2}s list of
 variables, and, if necessary, are also initialized.
 
 
@@ -112,7 +112,7 @@ what is not.
 
 
 To give you an example, here's a very simple statement from an
-@acronym{EDL} program:
+@code{EDL} program:
 @example
 A = B + 3;
 @end example
@@ -178,7 +178,7 @@ functions accessing the device because neither the GPIB bus nor the
 serials ports are configured at this moment.
 
 
-While handling the part of the @acronym{EDL} program up to the start of
+While handling the part of the @code{EDL} program up to the start of
 the @code{EXPERIMENT} section, functions from the modules may be called
 (unless they have been explicitely declared to be used only during the
 experiment). Usually, such function calls will be used to define the
@@ -188,11 +188,11 @@ state of the device at the start of the experiment. For example, the
 lockin_sensitivity( 100 uV );
 @end example
 @noindent
-When @acronym{fsc2} interprets this line it will call the appropriate
+When @code{fsc2} interprets this line it will call the appropriate
 function in the module for the lock-in amplifier with a floating point
 number of @code{0.0001} as the argument (the module does not have to
 take care of dealing with units, they are already translated by
-@acronym{fsc2}).  The module function for setting the lock-in amplifiers
+@code{fsc2}).  The module function for setting the lock-in amplifiers
 sensitivity should now check the argument it got passed (there my or may
 not be a sensitivity setting of @code{0.0001} and only the module knows
 about this). If the argument is reasonable the module should store the
@@ -202,11 +202,11 @@ of the experiment.
 How to deal with completely wrong arguments or arguments that don't fit
 (e.g.@: if the argument is @code{40 uV} but the lock-in amplifier has
 only discreet sensitivity settings of @code{30 uV} and @code{100 uV}) is
-completely up to the writer of the module, @acronym{fsc2} will accept
+completely up to the writer of the module, @code{fsc2} will accept
 whatever the module returns. For example, the module may accept the
 argument after converting it to something more correct and printing out
-a warning or it may bail out and tell @acronym{fsc2} to stop with
-interpreting the @acronym{EDL} file.
+a warning or it may bail out and tell @code{fsc2} to stop with
+interpreting the @code{EDL} file.
 
 
 Another thing module writers should keep in mind is that this first (and
@@ -222,7 +222,7 @@ changed during the experiment.
 @node Second stage of interpretation, Third stage of interpretation, First stage of interpretation, Internals
 @section Second stage of interpretation
 
-The second stage of the interpretation of an @acronym{EDL} program is
+The second stage of the interpretation of an @code{EDL} program is
 the test run of the @code{EXPERIMENT} section. A test run is necessary
 for two reasons. First, only a very rudimentary syntax check has been
 done for the @code{EXPERIMENT} section until now. Second, and much more
@@ -235,7 +235,7 @@ requested to be set to a value that the magnet can't produce. In this
 case there usually are only few alternatives, if any, to aborting the
 experiment. Foreseeing and taking the appropriate measures for such
 possibly fatal situation would complicate both the writing of modules
-and @acronym{EDL} programs enormously and probably would still not catch
+and @code{EDL} programs enormously and probably would still not catch
 all of them.
 
 
@@ -271,9 +271,9 @@ digitizers, defining the parts of the complete measured curve that get
 returned or that are integrated over etc. Because during the test run
 neither the time base nor the amount of pre-trigger the digitizer is set
 to are known (unless both have been set explicitely from the
-@acronym{EDL} program) it can't be tested if the windows start and end
+@code{EDL} program) it can't be tested if the windows start and end
 positions are within the time slice the digitizer measures. Thus the
-module can just store these settings and tell @acronym{fsc2} that they
+module can just store these settings and tell @code{fsc2} that they
 seem to be reasonable. Only when the experiment starts and the module
 has it's first chance to find out the real time base and pre-trigger
 setting it can do the necessary checks on the window settings and should
@@ -290,10 +290,10 @@ the test run and after the test run finished successfully.
 @section Third stage of interpretation
 
 
-The third and final stage of the interpretation of an @acronym{EDL}
+The third and final stage of the interpretation of an @code{EDL}
 program is running the real experiment. This third stage may be repeated
 several times if the user restarts an experiment without reloading the
-@acronym{EDL} file.
+@code{EDL} file.
 
 
 At the start of the third stage first the GPIB bus and the serial ports
@@ -301,16 +301,16 @@ are initialized (at least if one of the devices needs them). Next hook
 functions in the modules are called that allow the modules to initialize
 the devices and do all checks they find necessary. If this was
 successful the graphics for the experiment is initialized, opening up
-the display window. When all this has been done @acronym{fsc2} is ready
+the display window. When all this has been done @code{fsc2} is ready
 to do the experiment, i.e.@: to interpret the @code{EXPERIMENT} section.
 
 
 But there is a twist. Just before starting to interpret the
-@code{EXPERIMENT} section @acronym{fsc2} splits itself into two
+@code{EXPERIMENT} section @code{fsc2} splits itself into two
 independent processes by doing a @code{fork()}. If you use the @code{ps}
 command to list all your running processes suddenly a new instance of
 @code{fsc2} will be listed@footnote{Please note that already before the
-experiment gets started you will find two instances of @acronym{fsc2}
+experiment gets started you will find two instances of @code{fsc2}
 running, during the experiment there are three.}. One of these two
 processes is doing the interpretation of the @code{EXPERIMENT} section
 while the other process is responsible for the graphics and all
@@ -323,7 +323,7 @@ as concerned with acquiring data from the devices etc.@: should be
 unimpeded (at least as far as possible) from the task of dealing with
 user requests to allow maximum execution speed and to make the timing of
 the experiment less dependent on user interruptions. Take for example
-the case that the user starts to move one of @acronym{fsc2}s windows
+the case that the user starts to move one of @code{fsc2}s windows
 around on the screen. As long as she is moving the window no other
 instructions of the program can be executed, which effectively would
 stop the experiment for this time even though nothing really relevant

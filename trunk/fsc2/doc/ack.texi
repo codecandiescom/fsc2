@@ -4,7 +4,7 @@
 @appendix Acknowledgments
 
 
-@acronym{fsc2} has been written mostly while I was working in the groups
+@code{fsc2} has been written mostly while I was working in the groups
 of Prof.@: Th.@: Prisner (J.-W.-Goethe-University, Frankfurt/Main) and
 Prof.@: K.@: M@"obius (Free University Berlin). Both where so kind to
 allow me to spend quite large amounts of time on getting it to the state

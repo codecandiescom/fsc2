@@ -20,17 +20,17 @@
 @c Boston, MA 02111-1307, USA.
 
 
-@node Command Line Options, Cloning Devices, Using Pulsers, Top
+@node Command Line Options, GUI-fying, Using Pulsers, Top
 @chapter Command Line Options
 @cindex command ine options
 
-@acronym{fsc2} can be invoked from the command line with the following
+@code{fsc2} can be invoked from the command line with the following
 syntax:
 
 @strong{@code{              fsc2 [OPTION] [FILE]}}
 
 The square brackets indicate that the options as well as the file name
-are optional. @code{FILE} is expected to be an @acronym{EDL} file. The
+are optional. @code{FILE} is expected to be an @code{EDL} file. The
 available options are:
 
 @table @samp
@@ -39,20 +39,20 @@ Runs a syntax check on FILE and quits. No graphic is used and all output is
 written to the controlling terminal.
 
 @item @option{-T}
-Starts @acronym{fsc2} in graphics mode and immediately does a syntax
-check on FILE.  When @acronym{fsc2} is done with the check it waits for
+Starts @code{fsc2} in graphics mode and immediately does a syntax
+check on FILE.  When @code{fsc2} is done with the check it waits for
 further commands.
 
 @item @option{-S}
-Starts @acronym{fsc2} in graphics mode and immediately does a syntax
+Starts @code{fsc2} in graphics mode and immediately does a syntax
 check on FILE. If the syntax check does not fail the experiment is
 started without the need for further user input.
 
 @item @option{--delete}
-Starts @acronym{fsc2} in graphics mode and loads FILE (or also tests
+Starts @code{fsc2} in graphics mode and loads FILE (or also tests
 and/or starts the program when used in conjunction with the @code{-T} or
 @code{-S} flags). The input file will be @strong{automatically deleted}
-when @acronym{fsc2} is done with it, i.e.@ when either @acronym{fsc2}
+when @code{fsc2} is done with it, i.e.@ when either @code{fsc2}
 exits or a new file is loaded. This flag is only useful for cases where
 the input file is a temporary file that needs to be deleted when it
 isn't needed anymore, so better be @strong{really careful}.
@@ -125,10 +125,10 @@ for the middle and @code{right} or @code{3} for the right mouse
 button. Per default each of the three mouse buttons can be used.
 
 @item @option{-noCrashMail}
-Usually, @acronym{fsc2} sends an email to the author whenever it
+Usually, @code{fsc2} sends an email to the author whenever it
 crashes. This email contains informations about the reasons for the
-crash as well as the currently loaded @acronym{EDL} program. If you
-would prefer @acronym{fsc2} @b{not} to send such a mail use this
+crash as well as the currently loaded @code{EDL} program. If you
+would prefer @code{fsc2} @b{not} to send such a mail use this
 option.
 
 @item @option{-noBalloons}
@@ -138,7 +138,7 @@ do. If you get annoyed with this you can switch off the display of the
 help balloons.
 
 @item @option{-httpPort}
-This option tells @acronym{fsc2}s webserver on which port to listen for
+This option tells @code{fsc2}'s webserver on which port to listen for
 incoming connections. Per default it is 8080 but using this option a
 different port (in the range between 1024 and 65535) can be set.
 

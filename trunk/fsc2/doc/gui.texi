@@ -40,50 +40,50 @@
 
 @ifnotinfo
 
-Whenever you start @acronym{fsc2} the first thing you will see is the
+Whenever you start @code{fsc2} the first thing you will see is the
 following window:
 
 @image{fsc2fig1,11cm,}
 
 The large white area at the top is a browser for displaying the text of
-the current @acronym{EDL} program. Below this main browser is another
-browser for error messages as well as output from the @acronym{EDL}
+the current @code{EDL} program. Below this main browser is another
+browser for error messages as well as output from the @code{EDL}
 program. On the right side of the browsers is a slider that lets you
 shift the border between both browsers.
 
 On the left side you have a set of buttons:
 @itemize @bullet
 @item The @code{Load} button opens a file selector, allowing you to
-load a different @acronym{EDL} program.
-@item The @code{Reload} button lets you reload the current @acronym{EDL}
+load a different @code{EDL} program.
+@item The @code{Reload} button lets you reload the current @code{EDL}
 program which is needed when you have edited it. 
 @item The @code{Edit} button opens an editor with the currently loaded
-@acronym{EDL} program. Which editor will be used depends on the
+@code{EDL} program. Which editor will be used depends on the
 environment variable @code{EDITOR}, if it isn't set @code{vi} is used as
 the default.
-@item The @code{Test} button lets you check an @acronym{EDL} program 
+@item The @code{Test} button lets you check an @code{EDL} program 
 after it has been loaded. While the test is running the buttons label is
 changed to @code{Stop Test} and can be used to abort the test. After the
 test finished successfully the label is set back to @code{Test} and the
 button becomes inactive until a new program is loaded (or the current
 program is reloaded).
 @item Using the @code{Start} button you start the execution of the
-@acronym{EDL} program. During a short time after the start of the
+@code{EDL} program. During a short time after the start of the
 program (while device initialization is done) the button label is
 changed to @code{Stop} to let you abort the experiment. When the
 initialization is finished the label reverts back to @code{Start} and
 the button remains inactive during the experiment.
-@item The @code{Quit} button is used to end @acronym{fsc2}. It can't be
+@item The @code{Quit} button is used to end @code{fsc2}. It can't be
 used while an experiment is running.
 @item The @code{WWW Server} button lets you start (and stop) a little web
 server that allows you to monitor the current state of the experiment
 via a browser from a different computer over the net. Per default, the
 web server listens for incoming connections on port 8080, so the URL you
 have to enter in the browser is @code{http://HOST:8080}, where
-@code{HOST} is the name of the computer @acronym{fsc2} is running on. A
+@code{HOST} is the name of the computer @code{fsc2} is running on. A
 different port instead of 8080 can be selected via a command line option.
 @item Pressing the @code{Help} button will try to start a browser with
-the HTML documentation for @acronym{fsc2}. You can select the browser to
+the HTML documentation for @code{fsc2}. You can select the browser to
 be used by setting the environment variable @code{BROWSER} to the name
 of your favorite browser (@code{netscape}, @code{mozilla}, @code{opera},
 @code{konqueror}, @code{lynx} and @code{w3m} should work without
@@ -92,7 +92,7 @@ problems). The default browser is @code{Netscape}.
 where you can compose a mail with a bug report. The editor that will be
 used for writing the mail depends on the environment variable
 @code{EDITOR}, if it isn't set @code{vi} is used as the default. When
-you're finished writing the mail @acronym{fsc2} will let you decide if
+you're finished writing the mail @code{fsc2} will let you decide if
 you really want to send the bug report.
 @end itemize
 
@@ -101,31 +101,31 @@ you really want to send the bug report.
 @ifinfo
 @ifnothtml
 
-The first window you see when you start @acronym{fsc2} contains the
+The first window you see when you start @code{fsc2} contains the
 following elements:
 @itemize @bullet
-@item At the top the browser for displaying the @acronym{EDL} file to be run
+@item At the top the browser for displaying the @code{EDL} file to be run
 @item Below this another browser where error messages as well as output
-from the @acronym{EDL} program will be displayed.
+from the @code{EDL} program will be displayed.
 @item On the right side of the browsers is a slider that lets you move
 the border between both browsers.
 @item The @code{Load} button - when you click onto it a file selector
-is shown, allowing you to load a different @acronym{EDL} program.
+is shown, allowing you to load a different @code{EDL} program.
 @item The @code{Reload} button - when you have edited the currently
-loaded @acronym{EDL} program you have to click onto this button to
-make @acronym{fsc2} load the changed file.
+loaded @code{EDL} program you have to click onto this button to
+make @code{fsc2} load the changed file.
 @item The @code{Edit} button - when you click onto it an editor will
-open up with the currently loaded @acronym{EDL} program. Which
+open up with the currently loaded @code{EDL} program. Which
 editor will be used depends on the environment variable @code{EDITOR},
 if it isn't set @code{vi} is used as the default editor.
-@item The @code{Test} button lets you check an @acronym{EDL} program 
+@item The @code{Test} button lets you check an @code{EDL} program 
 after it has been loaded. While the test is running the buttons label is
 changed to @code{Stop Test} and can be used to abort the test. After the
 test finished successfully the button becomes inactive until a new
 program is loaded (or the current program is reloaded).
 @item Using the @code{Start} button you start execution of the
-@acronym{EDL} program, i.e.@: you start the measurement.
-@item The @code{Quit} button is for leaving @acronym{fsc2}.
+@code{EDL} program, i.e.@: you start the measurement.
+@item The @code{Quit} button is for leaving @code{fsc2}.
 @item The @code{WWW Server} button lets you start (and stop) a little web
 server that allows you to monitor the current state of the experiment
 via a browser from a different computer over the net. Per default, the
@@ -134,13 +134,13 @@ you have to enter in the browser is
 @uref{http://name.of.experiment.computer:8080}. A different port can
 be selected via a command line option.
 @item Pressing the @code{Help} button will start try to start a browser
-with the HTML documentation for @acronym{fsc2}. You can select the
+with the HTML documentation for @code{fsc2}. You can select the
 browser to use by setting the environment variable @code{BROWSER} to the
 name of your favorite browser (netscape, mozilla, opera, konqueror, lynx
 and w3m should work without problems). The default browser is Netscape.
 @item Finally, the @code{Bug report} button will open an editor window
 where you can compose a bug report. When you're finished writing the
-mail @acronym{fsc2} will let you decide if you really want to mail the
+mail @code{fsc2} will let you decide if you really want to mail the
 bug report. The editor that will be used for writing the mail depends on
 the environment variable @code{EDITOR}, if it isn't set @code{vi} is
 used as the default.
@@ -154,8 +154,8 @@ pressing the key for this letter each button can be triggered via the
 keyboard - but note that, if the underlined letter is an uppercase
 character, you have to enter the uppercase character from the keyboard!
 
-During the test @acronym{fsc2} may detect problems with the
-@acronym{EDL} program or even errors. It then will print messages in the
+During the test @code{fsc2} may detect problems with the
+@code{EDL} program or even errors. It then will print messages in the
 lower browser. There are four categories of messages: normal messages,
 warnings, warnings for severe problems and fatal error messages. Normal
 messages, not indicating a problem, are printed in black. Warnings are
@@ -173,8 +173,8 @@ in the next section, opens up for displaying the measured data.
 
 
 @ifnotinfo
-The next figure shows you the main window of @acronym{fsc2} with an
-@acronym{EDL} program loaded (the name of the loaded program is shown in
+The next figure shows you the main window of @code{fsc2} with an
+@code{EDL} program loaded (the name of the loaded program is shown in
 the widow title) and the test already been done. The program has written
 out some text already during the test, thus some lines are shown in the
 output browser.
@@ -188,7 +188,7 @@ output browser.
 @section Experiment Window
 
 When an experiment is started another window will pop up. It is up to
-the writer of the @acronym{EDL} program to choose if the window will be
+the writer of the @code{EDL} program to choose if the window will be
 used for displaying just curves or color-coded surfaces, see the
 functions @code{init_1d()} and @code{init_2d()} in one of the later
 chapters. The first type of display is well suited for showing the
@@ -545,11 +545,11 @@ an @code{EDL} program that creates several different kinds of objects
 allowing user input during the experiment. All these elements appear in
 a separate window, the tool box.
 
-Please note, that @acronym{fsc2} usually will not be able to do a real
+Please note, that @code{fsc2} usually will not be able to do a real
 thorough test before the experiment is started when the tool box is
 used. In this case the flow of control is often controlled by user input
-which can not be predicted. Therefore, @acronym{fsc2} has no possibility
-to determine which parts of the @acronym{EDL} will be run at what time
+which can not be predicted. Therefore, @code{fsc2} has no possibility
+to determine which parts of the @code{EDL} will be run at what time
 and if data to be send to devices will be correct. For these reasons
 it is probably better not to use a tool box when running important
 experiments, or only a tool box to display (but not change) relevant
@@ -568,7 +568,7 @@ A tool box may contain the following types of objects:
 @end ifinfo
 
 First there are the normal buttons. A normal button can be clicked on to
-and the @acronym{EDL} program can determine how often the button has
+and the @code{EDL} program can determine how often the button has
 been pressed. The second type of objects are push buttons, i.e.@:
 buttons that can be in two states, either pressed or released.  The
 third type of objects, radio buttons, always come in groups and only
@@ -595,11 +595,11 @@ alternatives.
 @node Customization, , Tool Box Window, GUI
 @section Customization
 
-Several aspects of the way @acronym{fsc2}s GUI looks like can be
-customized. On the one hand, this can be done by starting @acronym{fsc2}
+Several aspects of the way @code{fsc2}s GUI looks like can be
+customized. On the one hand, this can be done by starting @code{fsc2}
 with the appropriate command line flags (@pxref{Command Line Options}).
 In order not to have to list a long line of command line options each
-time @acronym{fsc2} is started the required settings can also be made
+time @code{fsc2} is started the required settings can also be made
 permanent by adding them to the file @file{.Xdefaults} in the users
 home directory (please note that the name of the file starts with a dot,
 the dot keeps it from being listed with the normal @code{ls} command,
@@ -624,7 +624,7 @@ Now follows a list of all options that can be set via the
 @file{.Xdefaults} file:
 @table @samp
 @item geometry
-Sets the size and position of the main window of @acronym{fsc2}. The
+Sets the size and position of the main window of @code{fsc2}. The
 size and position have to be specified in the form
 @i{width}@code{x}@i{height}@code{+}@i{x}@code{+}@i{y}. Both the size
 (i.e.@: @i{width}@code{x}@i{height}) or the position (i.e.@:
@@ -690,7 +690,7 @@ the mouse is hovering over a button for some time. If you're fed up with
 this texts popping up simply set it to @code{True}.
 
 @item httpPort
-This option tells @acronym{fsc2}s webserver on which port to listen for
+This option tells @code{fsc2}s webserver on which port to listen for
 incoming connections. Per default it is 8080 but using this option a
 different port (in the range between 1024 and 65535) can be set.
 

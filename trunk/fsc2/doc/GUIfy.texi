@@ -1,0 +1,568 @@
+@c $Id$
+@c
+@c Copyright (C) 1999-2002 Jens Thoms Toerring
+@c
+@c This file is part of fsc2.
+@c
+@c Fsc2 is free software; you can redistribute it and/or modify
+@c it under the terms of the GNU General Public License as published by
+@c the Free Software Foundation; either version 2, or (at your option)
+@c any later version.
+@c
+@c Fsc2 is distributed in the hope that it will be useful,
+@c but WITHOUT ANY WARRANTY; without even the implied warranty of
+@c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+@c GNU General Public License for more details.
+@c
+@c You should have received a copy of the GNU General Public License
+@c along with fsc2; see the file COPYING.  If not, write to
+@c the Free Software Foundation, 59 Temple Place - Suite 330,
+@c Boston, MA 02111-1307, USA.
+
+
+@node GUI-fying, Cloning Devices, Command Line Options, Top
+@chapter GUI-fying EDL programs
+
+@ifinfo
+@menu
+* fsc2_guify::            Creating a GUI for an @code{EDL} program
+* Interfacing::           Sending EDL programs to fsc2
+@end menu
+@end ifinfo
+
+@node fsc2_guify, Interfacing, , GUI-fying
+@section @code{fsc2_guify}
+@findex fsc2_guify
+
+
+@b{Please note: The following will only work if you have Perl and
+Perl/Tk (in a not too ancient versions) installed on your machine...}
+
+Often there is a small set of standard experiments, each with a few
+parameters that need to be changed all of the time. For example in a cw
+EPR experiment the start and end field and the sweep speed typically are
+such parameters. After some time it can become rather tedious to always
+having to edit the corresponding @code{EDL} file to set the
+parameters. Beside, for someone not used to @code{fsc2} and its syntax
+and who just wants to do a simple experiment it may be too daunting a
+task to safely apply the necessary changes to an existing @code{EDL}
+program.
+
+Fortunately, once you have written an @code{EDL} program it usually is
+rather simple to create a script from this @code{EDL} program that
+allows to set the relevant parameters using a graphical user interface
+and which then automatically creates the modified @code{EDL} program and
+sends it to @code{fsc2} for execution. That's what the @code{fsc2_guify}
+conversion tool is good for that comes with @code{fsc2}.
+
+Let's go back to the relatively simple @code{EDL} script for a cw EPR
+experiment from the start of the chapter about the the @code{EDL}
+language:
+@example
+DEVICES:
+  er035m_s;              // gaussmeter module
+  aeg_x_band;            // magnet module
+  sr530;                 // lock-in amplifier module
+
+VARIABLES:
+  start_field = 3360.0 G;
+  end_field   = 3450.0 G;
+  field_step  =    0.5 G;
+
+  field = start_field;
+  I = 1;
+  data;
+
+PREPARATIONS:
+  magnet_setup( start_field, field_step );
+  init_1d( );
+
+EXPERIMENT:
+  WHILE field <= end_field
+  @{
+      data = lockin_get_data( );
+      display( I, data );
+      save( data );
+      I = I + 1;
+      field = sweep_up( );
+      wait( lockin_time_constant( ) );
+  @}
+@end example
+
+Obviously, there are just three variables that often will have to be
+changed, @code{start_field}, @code{end_field} and @code{field_step}.
+Now, to make the @code{fsc2_guify} tool aware of this we need to add
+three lines to define variables and change three lines to replace the
+hard-coded values by these variables:
+@example
+DEVICES:
+  er035m_s;              // gaussmeter module
+  aeg_x_band;            // magnet module
+  sr530;                 // lock-in amplifier module
+
+VARIABLES:
+=== START_FIELD float [ 2000 : 5000 ] [ 3360 ] "Start field:" "G"
+  start_field = START_FIELD G;
+=== END_FIELD float [ 2000 : 5000 ] [ 3450 ] "End field:" "G"
+  end_field   = END_FIELD G;
+=== FIELD_STEP float [ 0.002 : 100 ] [ 0.5 ] "Field step:" "G"
+  field_step  = FIELD_STEP G;
+
+  field = start_field;
+  I = 1;
+  data;
+
+PREPARATIONS:
+  magnet_setup( start_field, field_step );
+  init_1d( );
+
+EXPERIMENT:
+  WHILE field <= end_field
+  @{
+      data = lockin_get_data( );
+      display( I, data );
+      save( data );
+      I = I + 1;
+      field = sweep_up( );
+      wait( lockin_time_constant( ) );
+  @}
+@end example
+
+Before explaining the exact meaning of the extra lines let's see what
+the conversion tool will make from this. To invoke the conversion tool
+on the "enhanced" @code{EDL} program (which for now is assumed to be
+named @file{simple_cw.Edl}) just type
+
+@kbd{fsc2_guify simple_cw.Edl simple_cw}
+
+This should create an executable script called @file{simple_cw}.
+
+@ifnotinfo
+If you now execute this script the following graphical user interface
+will show up:
+
+@image{simplecw1,7cm,}
+
+
+As you see there are three fields for editing the parameters according
+to the three lines we added to the @code{EDL} program. On the left
+side at the bottom there's another button labeled @code{Apply}. This
+button is usable only when the values you enter into the three fields
+are reasonable, i.e.@: they are numbers and are in the correct range
+(see below for how the allowed ranges get set). If you let the mouse
+hover over the field where you can edit a parameter the allowed range
+for the parameter will be shown.
+
+@end ifnotinfo
+
+If, after adjusting the parameters, you click onto the @code{Apply}
+button the script will automatically generate the @code{EDL}
+program. Then it will, all by itself, start @code{fsc2} (if it isn't
+already running) and send it the @code{EDL} program. If
+@code{fsc2} will now immediately start the experiment, just test the
+program or only load it depends on what you selected with the popup-menu
+button just above the @code{Apply} and @code{Quit} button (which in this
+example is set to @code{Test program}, so @code{fsc2} will load and
+test the @code{EDL} program but not yet try to start the experiment).
+
+Now that you have seen what you will get let's have a closer look at the
+first of the new lines in the "enhanced" @code{EDL} program:
+@example
+=== START_FIELD float [ 2000 : 5000 ] [ 3360 ] "Start field:" "G"
+@end example
+@noindent
+The special lines needed by the @code{fsc2_guify} conversion tool start
+with three equal signs, at least one space character and followed by a
+list of items, separated by spaces. The first item on such a line is the
+name of a variable, which may consist of all normal characters, digits
+and the underscore character. But you must make sure that its name does
+not coincide with the name of a variable already used in the
+@code{EDL} program. The next required item is the type of the
+variable, which can be either @code{int}, @code{float} or @code{menu}.
+
+For variables of type @code{int} and @code{float} all the following
+items are optional. The first thing you can tell the conversion program
+is an allowed range for the value of a variable. Ranges have to be given
+in square braces and the start and end value of the range must be
+separated by a colon. Thus @w{@code{[ 2000 : 5000 ]}} tells the
+conversion program to let the resulting script accept only values
+between 2000 and 5000 for the variable @code{START_FIELD} to be entered
+by the user. You don't have to give both a start and end value, if
+e.g.@: the end value is missing the conversion program will only make
+sure that the value of @code{START_FIELD} is always at least 2000 but
+won't care about the end value.
+
+The next item, a single number in square braces, is the default value
+for the variable, i.e.@: the value to be shown when the script is
+invoked for the first time. The second from last item is a string with
+the text to be shown to the left of the field for editing the start
+field. And, finally, the last item is string with e.g.@: a unit to be
+shown on the right hand side of the editable field.
+
+Please note: when the user exits the created script the current values
+will be stored in a file with the same name as the script in a (if
+necessary newly created) subdirectory in her home directory, named
+@file{.fsc2}. On the next invocation the script will read in the stored
+values but will use the default values for values that didn't made sense
+(e.g.@: because they didn't fit into the range).
+
+Of course, beside this extra line we also must tell the script in which
+places the user supplied value has to be used. In this example it's only
+one location, just below the special line, where the original value of
+@code{3360.0} has been replaced with the name of the variable
+@code{START_FIELD}.
+
+The only difference between a @code{float} and an @code{int} variable
+is that, obviously, for @code{int} variables you may only use integer
+numbers for the range values and the initial value.
+
+But there's a third type of variables, @code{menu}. These are for cases
+where you want to have one value selected from a list of values. To
+demonstrate this let's improve the @code{EDL} program a bit. For
+examples sake we assume that you have to switch between different
+lock-in amplifiers quite often because some colleague of yours tends to
+borrow your favorite one. In this case it would be rather useful to be
+able to also select the type of the lock-in amplifier from within the
+script. Therefore, we need to replace the line where the lock-in
+amplifier is specified in the @code{DEVICES} section
+@example
+  sr530;                 // lock-in amplifier module
+@end example
+@noindent
+by a lines defining a @code{menu} variable like this:
+@example
+=== LI menu [ "SR510", "SR530", "SR810" ] [ 2 ] "Lock-in amplifier:"
+  LI;                    // lock-in amplifier module
+@end example
+
+In contrast to the @code{int} and @code{float} variables, where the type
+of the variable was followed by an (optional) range, for @code{menu}
+variables a list of strings with the menu entries is required. This list
+must be enclosed in square braces and the strings with the entries
+separated by commas. (If you need a double quote character within one of
+the strings you must escape it with a backslash.) After the list of the
+menu entries an optional field (again in square braces) can be given
+that specifies the default entry to be shown, in our case it is the
+second, i.e.@: the menu entry with @code{"SR530"}. Again, as already in
+the case for @code{float} and @code{int} variables you can specify the
+strings to be shown to the left and right of the popup-menu.
+
+@ifnotinfo
+
+If we now again convert our improved and enhanced @code{EDL} program
+and start the resulting script, we will get the following graphical
+interface:
+
+@image{simplecw2,7cm,}
+
+The new popup-menu will allow you to pick the model of the lock-in
+amplifier to be used in the experiment.
+
+@end ifnotinfo
+
+
+But that's not all you can do.Sometimes it's necessary to change the
+@code{EDL} code depending on what the user selected. For an useful
+example let's further improve the @code{EDL} program to include
+setting the lock-in's time constant. To do so, you normally would
+include a line for defining the time constant in the @code{VARIABLES}
+section and a line, somewhere at the start of the @code{EXPERIMENT}
+section to set the lock-in's time constant. The "enhamced" @code{EDL}
+program now would look like this:
+@example
+DEVICES:
+  er035m_s;              // gaussmeter module
+  aeg_x_band;            // magnet module
+=== LI menu [ "SR510", "SR530", "SR810" ] [ 2 ] "Lock-in amplifier:"
+  LI;                    // lock-in amplifier module
+
+VARIABLES:
+=== START_FIELD float [ 2000 : 5000 ] [ 3360 ] "Start field:" "G"
+  start_field = START_FIELD G;
+=== END_FIELD float [ 2000 : 5000 ] [ 3450 ] "End field:" "G"
+  end_field   = END_FIELD G;
+=== FIELD_STEP float [ 0.002 : 100 ] [ 0.5 ] "Field step:" "G"
+  field_step  = FIELD_STEP G;
+
+  tc          =   300 ms;
+
+  field = start_field;
+  I = 1;
+  data;
+
+PREPARATIONS:
+  magnet_setup( start_field, field_step );
+  init_1d( );
+
+EXPERIMENT:
+
+  lockin_time_constant( tc );
+
+  WHILE field <= end_field
+  @{
+      data = lockin_get_data( );
+      display( I, data );
+      save( data );
+      I = I + 1;
+      field = sweep_up( );
+      wait( tc );
+  @}
+@end example
+@noindent
+(Please note that now also the length of time to wait in the loop for
+the experiment uses the new variable, which is more effective anyway
+because we now don't have to query the lock-in all of the time.)
+
+Now let's make the time constant adjustable by the user. And to further
+improve things we also would like to make it possible @b{not} to set a
+time constant but to simply use the one which is already set at the
+lock-in's front panel. To do so we could create a menu (a menu is
+appropriate here, because the lock-in only allows discreet settings for
+the time constant):
+@example
+=== TC menu [ "Don't set", 3 s", "  1 s", "300 ms", "100 ms", \
+===           " 30 ms", " 10 ms", "  3 ms" ] [ 4 ] "Time constant"
+@end example
+@noindent
+There is something new here: Because it would look rather ugly to have
+an extremely long line for specifying all the different time constant
+settings the lock-in allows, we put a backslash at the end of the first
+line, thus indicating to the conversion script that the next line is a
+continuation of the current line (but then we also have to start the new
+line with three equal signs (and a space) or it wouldn't know what to do
+with it).
+
+But the more important point is how to deal with the first menu entry,
+where we promise that the program won't set the time constant but
+instead will use the one already set at the lock-in. The first
+occurrence is at the line
+@example
+  tc          =   300 ms;
+@end example
+@noindent
+If the user selected the @code{"Don't set} menu entry we would get a
+line like
+@example
+  tc          =   Don't set;
+@end example
+@noindent
+and you can be quite sure that @code{fsc2} would complain loudly
+about a syntax errors. Thus we'll need to make this line depend on
+which menu entry the user selected. To do so you will have to use
+(including the commands for creating the menu):
+@example
+=== TC menu [ "Don't set", "  3 s", "  1 s", "300 ms", "100 ms", \
+===           " 30 ms", " 10 ms", "  3 ms" ] [ 4 ] "Time constant"
+=== if TC eq "Don't set"
+tc;
+=== else
+tc = TC;
+=== endif
+@end example
+So, beside defining and using special variables you may also use if-else
+constructs. The condition here is if the selected menu entry, @code{TC},
+is set to @code{Don't set} or to something else. In the first case, we
+would just declare the new @code{EDL} variable @code{tc}, but in the
+second case we also have to initialize it to the user selected
+value. Thus we use the condition @w{@code{TC eq "Don't set"}} to find
+out what to do. The meaning is hopefully rather obvious: @code{eq}
+stands for equality (of two strings). If @code{TC} is set to the menu
+entry @w{@code{"Don't set"}} the strings will match and the first
+alternative, i.e.@: just declaring but not setting @code{tc}, will be
+chosen. Otherwise the other branch of the if-else-construct will be used
+and @code{tc} will be initialized with the value the user selected.
+
+(If you are real careful, you will have noted some difference between
+the behavior of the variable @code{TC} in the line starting with the
+three equal signs, where it still to be treated as a string, and the
+place where it appears in the "enhanced" @code{EDL} code and where
+its content is simply pasted in, without any double quotes. If you
+really should need an @code{EDL} string you would have to include the
+double quotes when declaring the menu entries, e.g.@: by using
+@w{@code{"\"Don't set\""}}, but then also make sure you use this form
+also in the three-equal-signs part, or, alternatively, put the variable
+in the @code{EDL} part in double quotes.)
+
+Instead of the comparison for equality, @code{eq}, we could also have
+used the opposite operator, @code{ne}, which evaluates to true if the
+strings differ.
+
+Of course, there is a second place, where we have to apply a
+change. That's in the line where we really set the lock-in's time
+constant at the start of the @code{EXPERIMENT} section. Here we have to
+replace
+@example
+  lockin_time_constant( tc );
+@end example
+@noindent
+by
+@example
+=== if TC ne "Don't set"
+  lockin_time_constant( tc );
+=== else
+  tc = lockin_time_constant( );
+=== endif
+@end example
+@noindent
+i.e.@: if the user selected a time constant we have to set the lock-in
+accordingly, otherwise we just query the time constant but do not change
+it.
+
+If you aren't satisfied with just @code{if}, @code{else} and @code{endif}
+you may also try your luck with @code{elsif}, which stands for "else if".
+This means you can also use constructs like
+@example
+=== if TC eq "Don't set"
+  tc = lockin_time_constant( );
+=== elsif TC eq "  3s"
+  print( "Few, that's going to be a real long experiment...\n" );
+  lockin_time_constant( tc );
+=== else
+  lockin_time_constant( tc );
+=== endif
+@end example
+@noindent
+in which case the program would output a sentence grumbling about the
+time the experiment will take when the user selected a time constant of
+three seconds. Please note that it's important not to omit any spaces
+from the string when comparing it against a menu entry - for a human
+it's obvious that @code{" 3s"} and @code{"3s"} is supposed to mean the
+same, but a computer isn't that good at getting the meaning but rather
+cares about formalities...
+
+Of course, you can also compare numbers in if-elsif-else-endif
+constructs (or whatever you care to call them). The reason that we were
+talking only about the @code{eq} and @code{ne} operator until now is
+just because @code{menu} variables are strings, so they got to be
+compared as strings. On the other hand, the start and end field as well
+as the field step to be used are all (floating point) numbers, so if you
+need to compare them you will have to use the proper operators. These
+are: @code{==} for equality, @code{!=} for inequality, and, finally,
+@code{<}, @code{<=}, @code{>} and @code{>=} to check for less then, less
+or equal then, larger then and larger or equal then.
+
+One example, where this would come handy, is to check if the start field
+is lower than the end field (otherwise the above program wouldn't do
+anything useful) and, if necessary, to reverse them. To make sure the
+lower field value is always the start field you could write in the
+@code{VARIABLES} section
+@example
+=== if START_FIELD < END_FIELD
+start_field = START_FIELD G;
+end_field   = END_FIELD G;
+=== else
+start_field = END_FIELD G;
+end_field   = START_FIELD G;
+=== endif
+@end example
+@noindent
+Of course, this still leaves a possible hole in our @code{EDL}
+program in case the start and end field the user entered are equal.
+So we could improve the code by checking also for this case and force
+the end field to be at least one field step larger than the start field:
+@example
+=== if START_FIELD < END_FIELD
+start_field = START_FIELD G;
+end_field   = END_FIELD G;
+=== elsif START_FIELD == END_FIELD
+start_field = START_FIELD G;
+end_field   = END_FIELD G + FIELD_STEP G;
+=== else
+start_field = END_FIELD G;
+end_field   = START_FIELD G;
+=== endif
+@end example
+
+One thing you might take from this (admittedly somewhat contrived)
+example is that you can use the field step variable @code{FIELD_STEP}
+even before it appears in the code. The place where a variable for the
+conversion tool gets declared is completely irrelevant, you also could
+move all of them to the very end of the "enhanced" @code{EDL}
+program. The only thing of importance is the sequence in which they are
+declared, because this determines the sequence they are shown in the
+graphical user interface.
+
+Actually, you can even do a lot more in the comparisons, you may e.g.@:
+use arithmetics within the comparison. The secret behind this is that
+the comparison is done via a call of the Perl @code{eval()} function
+after a @code{$} has been prepended to the variables (to make them
+proper variables of the script generating the @code{EDL} program).
+I.e.@: a comparison like @w{@code{START_FIELD < END_FIELD}} is evaluated
+by the Perl machinery as
+@example
+eval@{ START_FIELD < END_FIELD @}
+@end example
+@noindent
+Thus, in the comparisons you have the whole power of Perl at your finger
+tips, including all of its regular expression evaluation machinery. If
+you know Perl you'll be able to do really weird things with @w{this ;-)}
+
+
+@node Interfacing, , fsc2_guify, GUI-fying
+@section Sending @code{EDL} programs to @code{fsc2}
+
+
+The @code{fsc2_guify} conversion tool (or, to be exact, the scripts
+created by this tool) relies on an inbuilt property of @code{fsc2},
+i.e.@: that @code{fsc2} is prepared to listen to external programs
+that might want to send it @code{EDL} programs. These external
+programs are
+@example
+fsc2_load
+fsc2_test
+fsc2_start
+@end example
+If these programs get passed an @code{EDL} program they will contact
+(or even start) @code{fsc2} and pass it the program. From the names
+of the programs their functions should be obvious: the first one tells
+@code{fsc2} to just load the @code{EDL} program, the second one
+tells it to also test the program, and the third asks @code{fsc2}
+to even start the @code{EDL} program after a successful test.
+
+You could e.g.@: invoke these programs from the command line, type in an
+@code{EDL} program and when you're finished, you would see the program
+launch @code{fsc2} with your newly typed in program. Of course,
+that's not what these programs really are meant for. Instead they should
+allow scripts etc.@: that create @code{EDL} programs to send their
+results to @code{fsc2} without having to deal with any of the details
+about how this is done. So, they just start one of the above programs,
+pass it the @code{EDL} program and then might care to inspect the
+return value.
+
+In @code{C} code you probably would do this using the @code{popen()}
+function, requesting a stream for writing (for sending the @code{EDL}
+program), while in e.g.@: Perl you would open a new pipe to write to as
+in
+@example
+open( F, "|fsc2_test" ) or die "Can't run fsc2_test: $!\n";
+@end example
+@noindent
+
+The success (or reason of failure if you're unlucky) can be determined
+from the return value:
+@table @samp
+@item 0
+Everything ok, program finished successfully
+@item -1
+An internal error as been detected in the program handling the
+connection to @code{fsc2}, please send a bug report
+@item 1
+A different user is already running fsc2
+@item 2
+@code{fsc2} is busy, i.e. it's already running an experiment
+(or a test run)
+@item 3
+Internal error in @code{fsc2} detected, please send a bug report
+@item 4
+@code{fsc2} could not be started (probably because the
+executable was not found)
+@end table
+
+Using these programs you are able to send @code{EDL} programs, created
+with whichever method or programming language you prefer, to
+@code{fsc2}.  A few example scripts (written in Perl) can be found the
+@code{scripts} subdirectory of the main directory of the package. (You
+could also examine on of the scripts created by @code{fsc2_guify} but be
+warned that these scripts may not look too nice because they were
+written by a program that doesn't care much about proper indentation
+etc.)

@@ -20,12 +20,12 @@
 @c Boston, MA 02111-1307, USA.
 
 
-@node Modules, Interfacing, Internals, Top
+@node Modules, Device Reference, Internals, Top
 @chapter Modules
 @cindex modules
 
 This chapter tries to describe how to write new modules for use with
-@acronym{fsc2}.
+@code{fsc2}.
 
 @ifinfo
 @menu
@@ -42,13 +42,13 @@ This chapter tries to describe how to write new modules for use with
 
 
 Modules allow extending the set of commands to be used in an
-@acronym{EDL} file. This is especially important if a new device needs
-to be integrated into @acronym{fsc2}. You don't have to change
-@acronym{fsc2} itself but write a new module for the new devices without
-having to understand completely how the @acronym{fsc2} works. It's only
+@code{EDL} file. This is especially important if a new device needs
+to be integrated into @code{fsc2}. You don't have to change
+@code{fsc2} itself but write a new module for the new devices without
+having to understand completely how the @code{fsc2} works. It's only
 necessary to be able to write functions in C for the communication with
 the new device. The only exception is some basic knowledge about
-@acronym{fsc2}'s variables. They are explained in one of the following
+@code{fsc2}'s variables. They are explained in one of the following
 sections. But modules may also be used for other purposes beside handling
 new devices - one might also write modules that supply new mathematical
 functions or other useful functionalities. But the following the
@@ -62,7 +62,7 @@ device via an hardware interface, e.g.@: the GPIB bus or a serial port
 lock-in amplifier will be used. Probably the most basic operation is to
 get data from the amplifier. So one will have to create a function
 called for example @code{lockin_get_data()}. This name will be used in
-the module written in C as well as in the @acronym{EDL} file.
+the module written in C as well as in the @code{EDL} file.
 
 Before starting to write a new module you have to decide about the name
 for the device, which will also be the name of the module. E.g.@: for the
@@ -78,7 +78,7 @@ the source tree and usually gets installed in
 @file{/usr/local/lib/fsc2}. The entries in this file are
 case-insensitive, so you might add `SR510', `sr510' or `Sr510'
 etc. Within the file C and C++ style comments can be used. By adding
-the device name to this file you tell @acronym{fsc2} that there is now a
+the device name to this file you tell @code{fsc2} that there is now a
 module called `sr510' (take care - all modules are spelled with
 @strong{lower} case characters!). Actually, the file compiled from the C
 file defining the functions has to be @file{sr510.so} - that means it is
@@ -94,7 +94,7 @@ er023m        // Bruker Signal Channel, model ER 023 M
 @end example
 
 The next thing is to append the function(s) exported (in the sense that
-they can be used from @acronym{EDL} programs) by the module to the
+they can be used from @code{EDL} programs) by the module to the
 function data base file called @file{Functions}
 @cindex @code{Functions} file
 . Also this file is located in the @file{config} subdirectory of the
@@ -116,10 +116,10 @@ a @code{#} character.
       or @code{PREP},
 @cindex @code{PREP} (in @code{Functions} file)
       where @code{ALL} means that the function can be used in all parts of the
-      @acronym{EDL} file, while @code{EXP} tells @acronym{fsc2} to use this
+      @code{EDL} file, while @code{EXP} tells @code{fsc2} to use this
       functions only during an experiment and, finally, @code{PREP} restricts
       the use of the function to the @code{PREPARATION} section of the
-      @acronym{EDL} file.
+      @code{EDL} file.
 @end enumerate
 As in the device data base, C and C++ style comments can be used. Here
 are a few lines from a valid @file{Functions} file with the entries for
@@ -149,7 +149,7 @@ variable number of arguments with an upper limit of 1 argument (if
 called without an argument it returns the sensitivity setting of the
 lock-in, if called with an argument the function treats this as the new
 sensitivity to be set). This function can be used in all parts of the
-@acronym{EDL} program - but because querying the lock-in for its
+@code{EDL} program - but because querying the lock-in for its
 sensitivity won't work as long as the program can't talk with the
 lock-in, i.e.@: while not in the @code{EXPERIMENT} section the function
 must test for this case and emit an appropriate error message all by
@@ -159,10 +159,10 @@ itself.
 Writing the C file(s) with these functions, compiling it to create a
 shareable library file from it and extending the device and function
 data base is all there is to be done. If in the devices sections of the
-@acronym{EDL} file the new device is found (and it's also listed in the
+@code{EDL} file the new device is found (and it's also listed in the
 devices data base file @file{Devices}) the new module will be loaded by
-@acronym{fsc2} and the functions defined in the module can be used in
-the @acronym{EDL} file.
+@code{fsc2} and the functions defined in the module can be used in
+the @code{EDL} file.
 
 
 
@@ -171,12 +171,12 @@ the @acronym{EDL} file.
 
 
 Of course, the first question is: Why do I have to know about this at
-all?  The answer is that all functions to be used in an @acronym{EDL}
+all?  The answer is that all functions to be used in an @code{EDL}
 file get their input parameters in form of this kind of variables and
-@acronym{fsc2} expects that you return values also in the form of
-@acronym{fsc2}'s variables.
+@code{fsc2} expects that you return values also in the form of
+@code{fsc2}'s variables.
 
-Now let's have a look at the way @acronym{fsc2} internally stores
+Now let's have a look at the way @code{fsc2} internally stores
 variables. Here is the (actually somewhat simplified) @code{typedef} of the
 structure for variables:
 
@@ -231,7 +231,7 @@ array of data?
 
 Actually, it's not too complicated. The pointer to the variable
 structure @code{var} points to the first of the two parameters. And if
-you look back at the typedef for @acronym{fsc2}'s variables, there is a
+you look back at the typedef for @code{fsc2}'s variables, there is a
 @code{next} pointer. This is the key to access the next parameter --
 @code{var->next} points to next of the input parameters. If the function
 expects even more arguments, @code{var->next->next} etc.@: let's you get
@@ -257,7 +257,7 @@ If you declared your function in the function data base file
 @file{Functions} to accept exactly two input parameters the function will
 always get exactly two. The @code{next}-pointer of the very last
 parameter will always be @code{NULL}. If the function gets called in the
-@acronym{EDL} file with more variables than you declared it to have a
+@code{EDL} file with more variables than you declared it to have a
 warning will be printed, the superfluous variables discarded
 automatically and not passed to the function. If, on the other hand,
 there are not enough parameters the program will just print an error
@@ -275,7 +275,7 @@ get passed to your functions in any way, especially the
 @code{next}-pointer!}
 
 
-What @acronym{fsc2} won't do is check if the arguments it passes to your
+What @code{fsc2} won't do is check if the arguments it passes to your
 function have the type you expect. Let's assume that you expect two
 integer values. What you should do first is to check if the parameters
 you got are really integers. There is a function that can do this for you,
@@ -339,7 +339,7 @@ see the typedef for variables above the value is stored in the union
     @code{var->INT}@ @ @ @ (which is a macro standing for @code{var->val.lval})
 @end quotation
 @noindent
-and what you get is a value of type @code{long int} -- @acronym{fsc2}
+and what you get is a value of type @code{long int} -- @code{fsc2}
 is using long integers internally. On the other hand, if the type of the
 variable is @code{FLOAT_VAR} you get at the data with
 @quotation
@@ -368,10 +368,10 @@ long get_long( Var *var, const char *snippet )
 The first argument is a pointer to the variable you want to
 evaluate. The second parameter is used to setup a warning message when
 the variable isn't an integer variable but a float value. This message
-always starts with the name of the currently interpreted @acronym{EDL}
+always starts with the name of the currently interpreted @code{EDL}
 file, followed by the line number and the device name. The second
 parameter is a string that gets embedded into the message. For example
-if the currently interpreted @acronym{EDL} file is @file{foo.edl}, the
+if the currently interpreted @code{EDL} file is @file{foo.edl}, the
 line where your function is called is line 17 and the device name is
 @code{XYZ}, your function (that expects an integer but got a floating
 point number) is @code{abc()} and the string you pass to the function
@@ -410,7 +410,7 @@ long get_strict_long( Var *var, const char *snippet )
 @noindent
 This function has the same arguments as the two other functions but it
 will throw an exception when getting passed a floating point number,
-stopping the interpretation of the @acronym{EDL} program (see below)
+stopping the interpretation of the @code{EDL} program (see below)
 except while doing the experiment, in which case only a warning message
 is printed and the floating point number is converted to the nearest
 integer, which is then returned (thus avoiding the termination of the
@@ -439,7 +439,7 @@ foo.edl:17: XYZ: Floating point number found where boolean
                  value was expected in abc().
 @end example
 @noindent
-is printed and an exception is thrown. Only when @acronym{fsc2} is
+is printed and an exception is thrown. Only when @code{fsc2} is
 running the experiment only a similar warning message is printed but
 instead the floating point value is converted to the nearest integer
 value and the truth value of this number is returned to avoid stopping
@@ -518,7 +518,7 @@ Var *square( Var *var )
 @noindent
 As you see it is checked first that the variable passed to the function
 has the correct type - both integer and floating point values are ok
-(otherwise the interpretation of the @acronym{EDL} program woul be stopped).
+(otherwise the interpretation of the @code{EDL} program woul be stopped).
 Next we distinguish between the possibilities that the value is
 an integer or a floating point number by testing the @code{type}
 field of the variable. Then we create either a new integer variable by
@@ -570,7 +570,7 @@ return ret_var;
 @noindent
 Actually, at some point of your function you may have allocated memory
 for storing the data. It is your responsibility to free this memory
-before you return from your function, @acronym{fsc2} just uses a copy of
+before you return from your function, @code{fsc2} just uses a copy of
 the data you pass to it using @code{vars_push()}. As you probably already
 guessed, if you want to return a float array, you will have to use
 @code{FLOAT_ARR} instead of @code{INT_ARR} in the call to
@@ -610,7 +610,7 @@ An alternative (e.g.@: if the type of the variables you need to return
 differs) is two write two functions where the first one does the
 calculations needed and stores the second value in a global
 variable. All the second function has to do is just to return the value
-of the global variable. This way, the @acronym{EDL} file might look like
+of the global variable. This way, the @code{EDL} file might look like
 @example
 V1 = my_function_1( );
 v2 = my_function_2( );
@@ -679,8 +679,8 @@ correct sequence, so it's not completely foolproof.
 
 First of all, each module has to include the header file
 @file{fsc2_module.h} -- otherwise it will not be able to use
-@acronym{fsc2}'s variables. It should @strong{not} include
-@file{fsc2.h}, this header file is for @acronym{fsc2} itself.
+@code{fsc2}'s variables. It should @strong{not} include
+@file{fsc2.h}, this header file is for @code{fsc2} itself.
 @file{fsc2_module.h} already includes all definitions and declarations
 of macros, variables and functions for GPIB functions.
 
@@ -718,12 +718,12 @@ the device type, e.g.
 #define DEVICE_TYPE     "digitizer"
 @end example
 @noindent
-The device type string is used by @acronym{fsc2} to figure out if more
+The device type string is used by @code{fsc2} to figure out if more
 than one device with the same functionality is being used by an
-@acronym{EDL} program. You probably already have read that when you have
+@code{EDL} program. You probably already have read that when you have
 two such devices you can access the second device by appending a
-'@code{#2}' when calling an @acronym{EDL}-function. But, obviously, for
-this to work @acronym{fsc2} must know which devices have similar
+'@code{#2}' when calling an @code{EDL}-function. But, obviously, for
+this to work @code{fsc2} must know which devices have similar
 capabilities and which don't. This it finds out from the device type
 string. Thus if you decide which device type string you're going to use
 please first check the device types of other devices as defined in their
@@ -751,11 +751,11 @@ or
 const char *device_name  = DEVICE_NAME;
 const char *generic_type = DEVICE_TYPE;
 @end example
-@acronym{fsc2} will use the first variable with the name for printing of
+@code{fsc2} will use the first variable with the name for printing of
 @noindent
 warnings and error messages. The second string is needed to find out
 about the type of the device. If this variable does not exist
-@acronym{fsc2} won't have any information about the device type and
+@code{fsc2} won't have any information about the device type and
 having another device of the same type recognized automatically will fail.
 
 
@@ -764,7 +764,7 @@ Another important point is that if in two modules with different
 this modules can be used at the same time. If the user tries to list
 both modules simultaneously in the @code{DEVICES} section an error
 message will be printed and interpretation of the program will be
-stopped. Thus it must be avoided to use identical @acronym{EDL} function
+stopped. Thus it must be avoided to use identical @code{EDL} function
 names in modules for devices of different types.
 
 
@@ -780,7 +780,7 @@ program interpreting the @code{VARIABLES} or @code{PREPARATIONS} section
 and, on the other hand, when interpreting the @code{EXPERIMENT}
 section. During the handling of the @code{VARIABLES} or
 @code{PREPARATIONS} section the devices are not initialized and can't be
-accessed and the @acronym{EDL} program interpretation @code{FSC2_MODE}
+accessed and the @code{EDL} program interpretation @code{FSC2_MODE}
 is set to the predefined value @code{PREPARATION}.
 
 But before the real experiment is started a test run of the
@@ -838,7 +838,7 @@ GPIB bus.
 To make dealing with the GPIB bus simpler there are several routines
 that can be used when writing a module, which then call the needed
 functions from the GPIB library you choose when installing
-@acronym{fsc2}.
+@code{fsc2}.
 
 As already pointed out above, to be able to use the GPIB bus our module
 must set the boolean variable @code{need_GPIB}.
@@ -930,7 +930,7 @@ with the number of the serial port (0 stands for the device file
 for @file{/dev/ttyS1} or for @code{COM2} etc.@:) as the first and the
 device name as the second argument. If the requested serial port has
 already been claimed by a different device the function will print an
-error message and stop the @acronym{EDL} program, so you don't have to
+error message and stop the @code{EDL} program, so you don't have to
 deal with error handling.
 
 For all functions that deal directly with file descriptors for the
@@ -1014,7 +1014,7 @@ descriptor. If the function gets passed an invalid serial port number
 @findex exit_hook()
 
 
-As you will already know the interpretation of an @acronym{EDL} file
+As you will already know the interpretation of an @code{EDL} file
 consists of several steps. When the file is tested and a @code{DEVICES}
 section is found all modules for the devices listed are loaded. When in
 the test the @code{EXPERIMENT} section is found the test run is started
@@ -1060,9 +1060,9 @@ warning message will be printed. If the initialization fails in a
 non-recoverable way, the function should throw an exception.
 
 The second function, @code{sr510_test_hook()}, is called at the start
-of the test run of the @code{EXPERIMENT} section of the @acronym{EDL}
+of the test run of the @code{EXPERIMENT} section of the @code{EDL}
 input file. Again, it can be used for initializations. But it should be
-noted that changes to the variables defined in the @acronym{EDL} file
+noted that changes to the variables defined in the @code{EDL} file
 will remain only visible for the test run, after the test is completed
 they will revert to their former values, i.e.@: the ones they had before
 the test run started! The return code of the function is the same as for
@@ -1113,15 +1113,15 @@ experimenting the values now used in the modules didn't lead to too many
 problems. To make them stand out they are always defined as macros at
 some prominent place at the start of the module. If necessary the users
 must be made aware of possible problems, i.e.@: if they test values
-returned from the @acronym{EDL} file they must be prepared to write the
-@acronym{EDL} program to accept some unexpected values.
+returned from the @code{EDL} file they must be prepared to write the
+@code{EDL} program to accept some unexpected values.
 
 
 @subsection How to compile a module
 
-A module is a shareable library that gets loaded while @acronym{fsc2} is
+A module is a shareable library that gets loaded while @code{fsc2} is
 running if the name of the module is listed in the @code{DEVICES}
-section of an @acronym{EDL} file. Probably the simplest way to make such
+section of an @code{EDL} file. Probably the simplest way to make such
 a shareable library from the source files you have written is to include
 it in the existing @file{Makefile} in the @file{modules} subdirectory
 of the packages. But, of course, it's also possible to use other methods.
@@ -1163,7 +1163,7 @@ simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c \
 @noindent
 If you now re-compile it will also be compiled, a shareable library will
 be created from it and when you do @code{make install} it will be copied
-to the appropriate place where @acronym{fsc2} will find it (but don't
+to the appropriate place where @code{fsc2} will find it (but don't
 forget that you also have to declare it in the devices data base file
 @file{config/Devices} and the functions it exports in the functions data
 base file @file{config/Functions}).
@@ -1191,7 +1191,7 @@ The module @code{tds754a} consists of the four @code{C} source files
 listed here. You have to create a similar entry for your own
 module. That's all that's need done and you can now re-compile to
 create the new module and re-install to make it available to
-@acronym{fsc2}.
+@code{fsc2}.
 
 If you should want to compile a module 'by hand' you'll have to make sure
 that the @file{src} and the @file{config} directory are in the include
@@ -1210,14 +1210,14 @@ To create a shareable library from it you need
 @noindent
 (assuming you're using GNU's @code{gcc} and @code{ld}). If this succeeds
 you will still have to copy the library to the place where
-@acronym{fsc2} expects it, i.e.@: usually @file{/usr/local/lib/fsc2},
+@code{fsc2} expects it, i.e.@: usually @file{/usr/local/lib/fsc2},
 or need to set the environment variable @code{LD_LIBRARY_PATH} to
 point to the place where the library can be found.
 
 
 @subsection Calling EDL functions from a modules
 
-Calling an @acronym{EDL} function (built-in as well as @acronym{EDL}
+Calling an @code{EDL} function (built-in as well as @code{EDL}
 functions defined in other modules) consists of three to four steps:
 
 @enumerate
@@ -1242,7 +1242,7 @@ the second argument will be set to either @code{ALL}, @code{PREP} or
 @item
 Now call @code{vars_push()} for each of the arguments of the function -
 see the description of @code{vars_push()} in the section about
-@acronym{fsc2}'s built in variable types.
+@code{fsc2}'s built in variable types.
 @item
 Finally, call @code{func_call()} with the pointer returned by the call
 to @code{func_get()}
@@ -1251,7 +1251,7 @@ as the argument. This will return a pointer to the
 variable with the result.
 @end enumerate
 
-As an example let's assume there is an @acronym{EDL} function named
+As an example let's assume there is an @code{EDL} function named
 @code{foo()} you want to call from your module, that takes two
 arguments, an integer and a floating point value. Then a typical piece
 of C code to call the function would be
@@ -1318,7 +1318,7 @@ for your modules.
 
 Finally, a boolean type is something that was missing until the new C99
 standard (and which only a few compilers already support), so there's
-already a @code{typedef} for this type included in @acronym{fsc2} that
+already a @code{typedef} for this type included in @code{fsc2} that
 you can use. It's also documented here in order to avoid confusion
 should you accidentally try to redefine it.
 
@@ -1329,8 +1329,8 @@ should you accidentally try to redefine it.
 
 When writing a module one often has to print out messages to inform the
 user e.g.@: about invalid arguments etc.  For this purpose there's the
-@code{print()} function in @acronym{fsc2} (not to be mistaken for the
-built-in @acronym{EDL} function with the same name) that helps to deal
+@code{print()} function in @code{fsc2} (not to be mistaken for the
+built-in @code{EDL} function with the same name) that helps to deal
 with this and prints messages to the lower browser in the main
 form. Except for the first argument the function is identical to the
 @code{printf()} function in @code{C}, i.e.@: the second parameter is a
@@ -1350,7 +1350,7 @@ There are four levels:
       now throw an exception (see next subsection) to make the program stop.
 @end itemize
 
-To the output the @acronym{EDL} file name and line number (if
+To the output the @code{EDL} file name and line number (if
 appropriate) as well as the device and function name is prepended.
 
 The full @code{C} declaration of this function is:
@@ -1419,7 +1419,7 @@ handling code.  This is especially tedious within deeply nested function
 calls where it is often not clear on which level the error handling is
 done best.
 
-In order to alleviate this problem in @acronym{fsc2} there is a mechanism
+In order to alleviate this problem in @code{fsc2} there is a mechanism
 called exceptions. An exception can be seen as a kind of flag that can
 be raised at any instance in the program and leads to the flow of
 control being changed to a place were the error can be handled.
@@ -1434,7 +1434,7 @@ if ( non_recoverable_error )
 @findex THROW()
 @findex EXCEPTION
 @noindent
-and @acronym{fsc2} will take care of all error handling and will stop a
+and @code{fsc2} will take care of all error handling and will stop a
 running experiment. That's all you need to know about exceptions for
 nearly all cases that have to be dealt with in modules.
 
@@ -1521,7 +1521,7 @@ USER_BREAK_EXCEPTION
 @noindent
 @code{EXCEPTION} stands for all kinds of exceptions not covered by one
 of the following two types. @code{OUT_OF_MEMORY_EXCEPTION} will only be
-thrown by @acronym{fsc2}s special functions for memory allocation (see
+thrown by @code{fsc2}s special functions for memory allocation (see
 next section), so don't throw it yourself without a very good reason. A
 @code{USER_BREAK_EXCEPTION} should be thrown from within a module when
 the module is doing something rather time consuming (e.g.@: waiting for
@@ -1575,7 +1575,7 @@ criticism by Chris Torek (@email{nospam@@elf.eng.bsdi.com}) on
 @findex T_free()
 @findex T_strdup()
 
-There are special function for @acronym{fsc2} for allocating memory.
+There are special function for @code{fsc2} for allocating memory.
 These functions not only allocate memory but also check that the
 allocation really returned as much memory as you asked for (on failure
 the program is stopped and an appropriate error message is
@@ -1622,7 +1622,7 @@ CATCH( OUT_OF_MEMORY_EXCEPTION )
 @subsection The @code{bool} type
 @cindex bool type
 
-@acronym{fsc2} already has a @code{typedef} for the @code{bool} type,
+@code{fsc2} already has a @code{typedef} for the @code{bool} type,
 i.e.@: for variables that can have only two values, either @code{1} or
 @code{0}. It is declared as
 @example
@@ -1664,12 +1664,12 @@ with pulsers in exactly the same way as normal devices, i.e.@: to define
 just a set of functions for setting different pulse properties etc.@:
 but this would make the programs much harder to write and understand.
 Instead many aspects of dealing with pulses and pulsers are integrated
-directly into the @acronym{EDL} language. While this makes it easier for
-the user writing @acronym{EDL} programs it requires more work by the
+directly into the @code{EDL} language. While this makes it easier for
+the user writing @code{EDL} programs it requires more work by the
 writer of the module for a pulsers.
 
 If, for example, the user defines a new pulse in the @code{PREPARATIONS}
-section the relevant part of the @acronym{EDL} file will similar look to
+section the relevant part of the @code{EDL} file will similar look to
 this:
 @example
 P3: FUNCTION = MW,
@@ -1685,17 +1685,17 @@ new pulse 3 is associated with is the function for microwave pulses.
 Next it detects that the start position of the new pulse is defined in
 terms of the values that (hopefully) have been already set for the pulse
 1 and must ask the module for the start position of pulse 1. Using the
-returned value @acronym{fsc2} now can calculate the start position of
+returned value @code{fsc2} now can calculate the start position of
 the new pulse 3 and must then call another function in the module to
 tell the module about this position. Finally, another function in the
-module must exist so that @acronym{fsc2} can inform it about the length
+module must exist so that @code{fsc2} can inform it about the length
 of the new pulse. Using these (and a lot more) functions the module will
 be able to set up an internal representation of the pulser state and to
 bring the pulser into this state at the start of the experiment.
 
 To make it possible to integrate handling of pulsers in this way
-directly into @acronym{EDL} the module for a pulser must obviously
-define quite a lot of non-@acronym{EDL} functions and some additional
+directly into @code{EDL} the module for a pulser must obviously
+define quite a lot of non-@code{EDL} functions and some additional
 variables. Pointers to all of these needed functions are collected in one
 structure, @code{pulser_struct}:
 @example
@@ -1748,12 +1748,12 @@ struct @{
 @end example
 @noindent
 At the start all the pointers in this structure are set to @code{NULL}
-(@acronym{fsc2} has still no idea which functions it actually has to
+(@code{fsc2} has still no idea which functions it actually has to
 call), @code{name} is also a @code{NULL} pointer and the boolean
 variable @code{needs_phase_pulses} is set to false. Now, when the
 @code{init_hook} of the pulser module gets run it has to fill in values
 for all the function pointers it supplies functions for - only this will
-allow @acronym{fsc2} to figure out where the relevant functions to call
+allow @code{fsc2} to figure out where the relevant functions to call
 are. When the module does not define a function it must leave the
 corresponding entry in the structure unchanged, i.e.@: leave it a
 @code{NULL} pointer. Most of the following text will try to explain in
@@ -1780,11 +1780,11 @@ case for the Frankfurt S-band spectrometer.
 
 
 Now follows a list of all functions that can be defined within a pulser
-module and advertised to @acronym{fsc2} by assigning a pointer to the
+module and advertised to @code{fsc2} by assigning a pointer to the
 function in the pulsers structure. All functions are supposed to return
 a boolean value. Please remember that not all functions must exist, if
 they don't exist and you don't supply a pointer for some of the
-functions in the pulser structure @acronym{fsc2} will tell the user
+functions in the pulser structure @code{fsc2} will tell the user
 automatically that the ability associated with the function is not
 available with the driver. You can be sure that all time values that
 these function receive are integer multiples of one nanosecond.
@@ -2018,9 +2018,9 @@ ASSIGNMENTS:
 @noindent
 If you determine the maximum length of the pulser pattern in your module
 during the test run the value you get can be plain wrong if the
-@acronym{EDL} program contains e.g.@: @code{FOREVER} loops,
+@code{EDL} program contains e.g.@: @code{FOREVER} loops,
 @code{IF}/@code{ELSE} constructs etc.@: because it is not possible to
-determine during the test run which branches of the @acronym{EDL}
+determine during the test run which branches of the @code{EDL}
 program will be run in the real experiment. The
 @code{MAXIMUM_SEQUENCE_LENGTH} command should allow the user to correct
 the possible wrong value when necessary.
@@ -2056,7 +2056,7 @@ If you are writing a module that has to create phase pulses
 automatically (and thus you have set the variable
 @code{needs_phase_pulses} in the pulser structure), this function will
 be called when in the definition of a phase function the function, the
-phase pulses will be used with, is set. That means if the @acronym{EDL}
+phase pulses will be used with, is set. That means if the @code{EDL}
 program contains a line like
 @example
 ASSIGNMENTS:
@@ -2085,7 +2085,7 @@ ASSIGNMENTS:
 In this case @code{MICROWAVE} is again the function that has to be phase
 cycled and is passed to the function as the second argument. The first
 argument is either @code{0} or @code{1}, depending on if the this for the
-first phase cycled function (i.e.@: when the command in @acronym{EDL}
+first phase cycled function (i.e.@: when the command in @code{EDL}
 program starts with either @code{PHASE_SETUP} or @code{PASE_SETUP_1}) or
 for the second phase cycled function (i.e.@: for @code{PHASE_SETUP_2}).
 
@@ -2140,7 +2140,7 @@ PHASE_SETUP_1:  +X: POD_1 = ON, POD2 = OFF,
                 -Y: 1, 1;
 @end example
 @noindent
-is expected in the @acronym{EDL} program. The first line indicates that
+is expected in the @code{EDL} program. The first line indicates that
 the phase function 1 is to be used to control phase pulses for microwave
 pulses and the output pods to be used are the pods 2 and 3. The
 following lines are supposed to tell the module that in order to create
@@ -2174,10 +2174,10 @@ one one the two pods has been set.
 
 The fourth and final argument is the state of the output for the put
 when the pulse is output. In our example this means that it will be
-@code{1} when a @code{1} or @code{ON} is found in the @acronym{EDL}
+@code{1} when a @code{1} or @code{ON} is found in the @code{EDL}
 program and @code{0} for @code{OFF} or @code{0}.
 
-Accordingly, the @acronym{EDL} code for the phase setup given above will
+Accordingly, the @code{EDL} code for the phase setup given above will
 lead to the following sequence of calls of the function
 @code{phase_setup_prep()}:
 @example
@@ -2214,7 +2214,7 @@ PHASE_SETUP_1:  MICROWAVE,
               CW: 3;
 @end example
 @noindent
-For these @acronym{EDL} code the function @code{phase_setup_prep()} gets
+For these @code{EDL} code the function @code{phase_setup_prep()} gets
 called five times in a row. Again the first and second parameter the
 function will receive is the phase setup number (i.e.@: either @code{0}
 or @code{1}, for our example it would be @code{0} because we're dealing
@@ -2306,7 +2306,7 @@ integer multiple of the pulsers time base).
 
 @item bool set_pulse_length( long pulse_number, double ptime )
 The function gets called when the length of a pulse is set in the
-@acronym{EDL} file. As usual, the first argument is the pulse number,
+@code{EDL} file. As usual, the first argument is the pulse number,
 the second is the initial length of the pulse in seconds. You will have
 to check yourself within the module that the pulse length hasn't an
 invalid value. If the length of the pulse is zero you should treat the
@@ -2340,7 +2340,7 @@ like
   PULSE_13: PHASE_CYCLE = PHASE_SEQUENCE_1, ...
 @end example
 @noindent
-are found in the @code{EXPERIMENT} section of the @acronym{EDL} file.
+are found in the @code{EXPERIMENT} section of the @code{EDL} file.
 The second argument is either the number @code{1} or @code{2},
 indicating one of the currently allowed two phase sequences. But to
 avoid the necessity of changes of the module it is probably a good idea
@@ -2348,7 +2348,7 @@ to test this value within the function.
 
 
 @item bool get_pulse_function( long pulse_number, int *function )
-This function is called by @acronym{fsc2} to find out about the function
+This function is called by @code{fsc2} to find out about the function
 of a pulse from the module. If a pulse with the number passed to the
 function exists (otherwise the module should print out an error message
 and throw an exception), it should set the variable pointed to by the
@@ -2358,7 +2358,7 @@ be printed out and an exception has to be thrown.
 
 
 @item bool get_pulse_position( long pulse_number, double *ptime )
-This function is called by @acronym{fsc2} to find out about the current
+This function is called by @code{fsc2} to find out about the current
 position of a pulse from the module. If a pulse with the number passed
 to the function exists (otherwise the module should print out an error
 message and throw an exception), it should set the variable pointed to

@@ -25,13 +25,13 @@
 @cindex Overview
 
 
-@acronym{fsc2} is a program for the remote control of cw- and pulsed EPR
-spectrometers. (Actually, the design of @acronym{fsc2} should make it
+@code{fsc2} is a program for the remote control of cw- and pulsed EPR
+spectrometers. (Actually, the design of @code{fsc2} should make it
 also easy to use it to a broad range of experiments not releated to
 EPR.) It is basically an interpreter that executes a program to describe
 the experiment in a language which in the following will be called
-@acronym{EDL}
-@cindex @acronym{EDL}
+@code{EDL}
+@cindex @code{EDL}
 (@b{E}xperiment @b{D}escription @b{L}anguage). Making the execution of
 the experiment completely controllable in this way is quite different
 from the approach usually taken in programs for remote spectrometer
@@ -51,13 +51,13 @@ has not written in a way that allows it to be adapted to the new
 requirements, in which case the old program becomes useless and has to
 be rewritten from scratch.
 
-@acronym{fsc2} is different in this respect because it wasn't developed
+@code{fsc2} is different in this respect because it wasn't developed
 with a certain set of experiments in mind but is intended to make it as
 easy as possible to do all kinds of experiments. Of course, this comes
 with a small price: one has to specify clearly how the experiment is to
-be done by writing a (usually rather short) program. @acronym{fsc2} will
+be done by writing a (usually rather short) program. @code{fsc2} will
 interpret this program and do the experiment accordingly. Writing a
-program may sound difficult, but the @acronym{EDL} language that is used
+program may sound difficult, but the @code{EDL} language that is used
 to define an experiment isn't very hard to learn. And when this hurdle
 has been taken you will have complete control over the way the
 experiment is done. Just to give a few trivial examples: sometimes
@@ -66,7 +66,7 @@ interest in between, so it would be rather useful to skip these
 regions. Most normal programs won't allow this and one has to either
 record also the uninteresting field regions (thus loosing lots of time)
 or to manually restart the experiments for each of the regions of
-interest. In contrast, with @acronym{fsc2} it shouldn't take more than a
+interest. In contrast, with @code{fsc2} it shouldn't take more than a
 few minutes to write an @code{EDL} program consisting of just a few
 lines of code that can not only skip these regions but also repeat the
 experiment as often as needed, and if necessary do different numbers of
@@ -81,35 +81,35 @@ been written, only the relevant parameters have to be changed. And
 because one can use variables in the program it's easy to have a block
 for defining the parameters somewhere at the start of the program and
 change only these if necessary. If this is still too much hassle it is
-even possible to write a script (not an @acronym{EDL} program but, for
+even possible to write a script (not an @code{EDL} program but, for
 example, a Perl script or whatever your preferred scripting language is)
 which allows to set the parameters via a graphical user interface and
-then have the script generate the @acronym{EDL} program which in turn is
-passed directly to @acronym{fsc2} without any further user
+then have the script generate the @code{EDL} program which in turn is
+passed directly to @code{fsc2} without any further user
 interaction. If such a utility already exists one doesn't even have to
-learn how to write @acronym{EDL} programs and you have all the
+learn how to write @code{EDL} programs and you have all the
 convenience of the traditional type of programs without having to
-sacrifice the flexibility of @acronym{fsc2}.
+sacrifice the flexibility of @code{fsc2}.
 
 Another common problem with the traditional type of programs is the use
 of different devices or the integration of new ones. Usually, the
 devices are hard-coded into the program and changing just one device
-requires a major rewrite. In contrast, @acronym{fsc2} has a strictly
+requires a major rewrite. In contrast, @code{fsc2} has a strictly
 modular approach to the handling of devices. For each device a separate
 module exists that only gets used if it is listed explicitely in the
-@acronym{EDL} program. Thus changing the experiment to work with e.g.@:
+@code{EDL} program. Thus changing the experiment to work with e.g.@:
 a different lock-in amplifier or digitizer usually does not require more
-than changing one line of the @acronym{EDL} program (at least as long as
+than changing one line of the @code{EDL} program (at least as long as
 the devices aren't too different in their capabilities). Moreover, this
 is also a major advantage when a new device has to be
 integrated. Instead of changing the whole program that controls the
 experiment only a module for the new device has to be written. Writing
 such a module does not even require a thorough understanding of the way
-@acronym{fsc2} works but only some knowledge about a few conventions
+@code{fsc2} works but only some knowledge about a few conventions
 (which are explained in detail in one of the later parts of this
 manual). This also allows the module to be tested independently of the
 main program and there is no danger of introducing new bugs into
-@acronym{fsc2} itself.
+@code{fsc2} itself.
 
 The advantages of the approach taken in @code{fsc2} have made it
 possible to use it successfully to control spectrometers in S-, X- and
@@ -120,16 +120,16 @@ cycling.
 
 The manual is organized along the following lines: the next chapter
 (@pxref{GUI}) explains in detail the graphical user interface used for
-starting an @acronym{EDL} program and displaying the measured data. The
-following chapter (@pxref{EDL}) explains how to monitor @acronym{fsc2}'s
+starting an @code{EDL} program and displaying the measured data. The
+following chapter (@pxref{EDL}) explains how to monitor @code{fsc2}'s
 progress via the internet, using a browser. Then follows a chapter
-(@pxref{EDL}) that explains all about the @acronym{EDL} language. To
-give you an expression how easy writing an @acronym{EDL} program is you
+(@pxref{EDL}) that explains all about the @code{EDL} language. To
+give you an expression how easy writing an @code{EDL} program is you
 may have a look at the first example (@pxref{Basics}) which discusses a
 program for doing a simple cw-detected EPR-experiment.
 
 The next chapter (@pxref{Built-in Functions}) lists all functions that
-are already built into @acronym{fsc2}. These include functions for
+are already built into @code{fsc2}. These include functions for
 displaying data, storing the measured data in one or more files,
 functions to extend the graphical user interface used during the
 experiment and, finally, mathematical and other useful utility
@@ -139,17 +139,14 @@ modules are already exist (at the time of writing this there are 29
 different modules to choose from).
 
 Experiments with pulsed microwave or RF excitation play an ever
-increasing role in modern EPR and @acronym{fsc2} has an extensive set
+increasing role in modern EPR and @code{fsc2} has an extensive set
 of commands and functions for dealing with pulses and pulse generators.
 These are explained in the chapter following the functions for other
 devices (@pxref{Using Pulsers}).
 
 The next chapter (@pxref{Command Line Options}) lists all the command
-line options that can be passed to @acronym{fsc2}, the following
+line options that can be passed to @code{fsc2}, the following
 chapters (@pxref{Cloning Devices}, @pxref{Modules}) explain in detail
 everything there is to know about writing new modules. Another chapter
-(@pxref{Internals}) give a short overview about how @acronym{fsc2} works
-internally, which may also be helpful when writing a new module. The
-final chapter (@pxref{Interfacing}) explains how to write programs that
-interface with @acronym{fsc2}, i.e.@: that can send @acronym{EDL}
-programs to @acronym{fsc2} that in turn will execute them.
+(@pxref{Internals}) give a short overview about how @code{fsc2} works
+internally, which may also be helpful when writing a new module.

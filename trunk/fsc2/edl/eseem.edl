@@ -1,6 +1,6 @@
 DEVICES:
 
-dg2020;
+dg2020_f;
 tds754a;
 
 
@@ -29,7 +29,7 @@ DETECTION:           POD = 0,    V_HIGH = 5 V, V_LOW = 0 V;
 DETECTION_GATE:      POD = 7,    V_HIGH = 5 V, V_LOW = 0 V;
 PHASE_1:         MW, POD = 1, 2, V_HIGH = 5 V, V_LOW = 0 V;
 
-PHASE_1_SETUP:	X: POD_1 = OFF, POD2 = OFF,
+PHASE_SETUP_1:	X: POD_1 = OFF, POD2 = OFF,
 			   +Y: 0, 1,
 			   -X: 1, 0,
 			   -Y: 1, 1;
@@ -41,7 +41,7 @@ GRACE_PERIOD: 10ns;
 PHASES:
 
 PHASE_SEQUENCE_1     = +x, +x, -x, -x;
-PHASE_SEQUENCE_1     = +x, -x, +x, -x;
+PHASE_SEQUENCE_2     = +x, -x, +x, -x;
 ACQUISITION_SEQUENCE = +, -, -, +;
 
 
@@ -56,7 +56,7 @@ P1: FUNC     	= MW,
 	START    	= P0.START + tau,
 	LENGTH   	= 30 ns,
 	DSTART   	= dtau,
-	PHASE_CYCLE = PHS1;
+	PHASE_CYCLE = PHS2;
 
 P2: FUNC        = TWT_GATE,
 	START       = 0 ns,
@@ -85,10 +85,6 @@ init_1d( 1, 512, tau * 1e9, dtau * 1e9, "tau [ ns ]",
 
 EXPERIMENT:
 
-
-pulser_update( );
-
-
 save_program( "% " );
 
 
@@ -102,17 +98,17 @@ FOR I = 1 : 512 {
 		data[ 1 ] = digitizer_get_area( CH1, WID1 );
 		data[ 2 ] = digitizer_get_area( CH1, WID2 );
 
-		if ( J == 1 | J == 4 ) {
+		IF J == 1 | J == 4 {
 			res = res + ( data[ 1 ] - data[ 2 ] );
-		} else {
+		} ELSE {
 			res = res - ( data[ 1 ] - data[ 2 ] );
 		}
 
 		pulser_next_phase( );
-		pulser_update;
+		pulser_update( );
 	}
 
-	  display( I, res )
+	display( I, res );
 
 	fsave( "#\n", res );
 

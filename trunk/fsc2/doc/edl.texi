@@ -21,8 +21,8 @@
 
 
 @node EDL, Built-in Functions, Web Server, Top
-@chapter @acronym{EDL}
-@cindex @acronym{EDL}
+@chapter @code{EDL}
+@cindex @code{EDL}
 
 @ifinfo
 @menu
@@ -36,30 +36,30 @@
 @end menu
 @end ifinfo
 
-To do an experiment using @acronym{fsc2} you have to write a program
+To do an experiment using @code{fsc2} you have to write a program
 describing the experiment. While this may look like a daunting task if
 you have no programming experience at all it has the advantage that you
 have complete control over the way the experiment is done. You don't
 have to rely on some programmer (who probably isn't around when you need
 him or her most) to have got everything right before you even started
-planning the experiment. And writing @acronym{EDL} programs really isn't
+planning the experiment. And writing @code{EDL} programs really isn't
 that difficult.
 
 
 @node Basics, Sections, EDL, EDL
 @section Basics
 
-An @acronym{EDL} program is roughly structured along the way an
+An @code{EDL} program is roughly structured along the way an
 experiment is done. Before you start an experiment you first have to
 select the devices to be used and set them up. So the first part of an
-@acronym{EDL} program simply consists of a few lines specifying the
+@code{EDL} program simply consists of a few lines specifying the
 devices to be controlled by the program and setting their parameter,
 i.e.@: the time base of the digitizer, the sensitivity of the lock-in
 amplifier or which pulses are to be created by the pulse generator. And
 as you would now start the experiment the second part of the
-@acronym{EDL} program describes how the experiment is to be done.
+@code{EDL} program describes how the experiment is to be done.
 
-To give you an impression how an @acronym{EDL} program may look like
+To give you an impression how an @code{EDL} program may look like
 here's the program for a cw-EPR experiment:
 @example
 DEVICES:
@@ -147,8 +147,8 @@ wait for the time constant of the lock-in amplifier to give it enough
 time to measure a new data point.
 
 When you have written such a program (using, for example, a simple ASCII
-editor) you load it into @acronym{fsc2} and press the test or the start
-button.  @acronym{fsc2} will now analyze the program very thoroughly. It
+editor) you load it into @code{fsc2} and press the test or the start
+button.  @code{fsc2} will now analyze the program very thoroughly. It
 will not only check for misspelt keywords, undefined variables,
 non-existent functions, syntax errors etc.@: but will also repeat the
 loop in the experiment section as often as in the real experiment to
@@ -157,10 +157,10 @@ for example, checking that the field will not be sweeped into regions
 the magnet or the gauss-meter can not handle (e.g.@: by incidentally
 setting an end field value of @w{34500.0 G} the magnet can't produce
 instead of @w{3450.00 G}). So you can be reasonable sure that the
-experiment will not abort due to a faulty @acronym{EDL} program after it
+experiment will not abort due to a faulty @code{EDL} program after it
 has run for 2 hours and you have to start all over again.
 
-As you can already see form the example most of an @acronym{EDL} program
+As you can already see form the example most of an @code{EDL} program
 consists of function calls. Functions can be divided into two
 categories, built-in functions and device functions. Built-in functions
 (like @code{init_1d()}, @code{display()}, @code{save()} and
@@ -174,7 +174,7 @@ amplifier and are only available when a lock-in amplifier module is
 specified. Most of these functions are available for all types of
 lock-in amplifiers (possibly with minor variations) so that using a
 different lock-in amplifier usually doesn't require a major rewrite of
-the @acronym{EDL} program but just changing the lock-ins name in the
+the @code{EDL} program but just changing the lock-ins name in the
 @code{DEVICES} section.
 
 To find out about all built-in and device functions, their arguments and
@@ -186,7 +186,7 @@ when they may be used have a look at the later parts of this manual.
 @cindex section
 
 
-As you already have seen in the example above, an @acronym{EDL} program
+As you already have seen in the example above, an @code{EDL} program
 consists of several section. There are up to 6 different sections. These
 are:
 @example
@@ -212,7 +212,7 @@ has also already been discussed in the example.
 
 Because pulses play such an important role in modern EPR experiments
 lots of elements for handling pulses and the pulser, that creates them,
-are built into @acronym{fsc2}. There are even two sections,
+are built into @code{fsc2}. There are even two sections,
 @code{ASSIGNMENTS} and @code{PHASES} exclusively devoted to the pulser
 setup. The basic setup of the pulser (e.g.@: setting the time base and
 trigger mode as well as setting up the pulser channels) is done in the
@@ -233,7 +233,7 @@ Finally, there is the @code{EXPERIMENT} section. As you already have
 seen this section usually consists of one or more loops, possibly nested.
 
 
-While the sections of an @acronym{EDL} file don't have to appear in the
+While the sections of an @code{EDL} file don't have to appear in the
 sequence they are listed above it is probably best not to experiment too
 much with this. In any case, if it exists the @code{EXPERIMENT} section
 must always be the last one.
@@ -266,14 +266,14 @@ label. It can only be used within the @code{EXPERIMENT} section. The
 program is going to be executed even after the user hit the @code{Stop}
 button. This part of the @code{EXPERIMENT} section will probably contain
 code that stores previously unsaved data and does other things that are
-necessary before the experiment really stops.  When @acronym{fsc2}
+necessary before the experiment really stops.  When @code{fsc2}
 executes the code following the @code{ON_STOP} label it can't be stopped
 via the the @code{Stop} button.
 
 @node Syntax, Variables, Sections, EDL
 @section Syntax
 
-There are a few basic rules about the syntax of @acronym{EDL} programs.
+There are a few basic rules about the syntax of @code{EDL} programs.
 Each program consists of one or more sections that always start with one
 of the section keywords listed in the previous section. Each keyword has
 to be followed immediately (i.e.@: without any spaces, tabulator or
@@ -285,7 +285,7 @@ section all valid statements are just names of devices while in
 other sections a valid statement may be a complicated equation), but in
 all cases a statement must always end in a semicolon, `@code{;}'.
 There is nothing special about continuing a statement on a new line
-(i.e.@: a statement can span several lines), @acronym{fsc2} recognizes
+(i.e.@: a statement can span several lines), @code{fsc2} recognizes
 where a statement ends by the semicolon.
 
 Within a statement all characters like spaces, tabulator characters and
@@ -298,7 +298,7 @@ start_field       =               3360.0G;
         3360.0 G;
 @end example
 
-@acronym{EDL} programs use lots of function calls. There are no obvious
+@code{EDL} programs use lots of function calls. There are no obvious
 differences between variable names and function names (all start with a
 character, followed by more characters, numbers or underscore
 characters). To make clear that a word is a function it has to
@@ -317,7 +317,7 @@ arguments have to be separated by commas.
 
 Within the @code{VARIABLES}, @code{ASSIGNMENTS}, @code{PREPARATIONS} and
 @code{EXPERIMENT} section variables may be used. Each variable that is
-used in an @acronym{EDL} program must be declared, i.e.@: it has to be
+used in an @code{EDL} program must be declared, i.e.@: it has to be
 listed in the @code{VARIABLES} section before it may be used. The start
 of the @code{VARIABLES} section is indicated by a line stating
 @example
@@ -362,7 +362,7 @@ the characters @code{n} (nano), @code{u} (micro), @code{m} (milli),
 @end multitable
 @end quotation
 
-Finally, the keywords used by @acronym{EDL} also may not be used as
+Finally, the keywords used by @code{EDL} also may not be used as
 variable names (to make it easier to avoid these, they are all spelled
 with capitals only). In the appendix you'll find a list of (hopefully) all
 reserved words.
@@ -377,7 +377,7 @@ Integer variables (on machines with 32-bit processors) can hold data in
 the interval @w{[-2^31, 2^31 - 1]}, i.e.@: they run from @w{-2147483648}
 all the way up to @w{+2147483647}. In contrast, floating point variables
 can have much larger values (up to ca.@: 10^300), the exact limits
-depending on the machine @acronym{fsc2} is running on.
+depending on the machine @code{fsc2} is running on.
 
 To distinguish between integer and floating point variables the case of
 the first character of the variables name is important: if the name
@@ -406,7 +406,7 @@ defines a 1-dimensional array @code{F} of 100 integers and a
 
 
 All elements of an arrays are automatically initialized to zero. On the
-other hand, arrays can also be initialized within the @acronym{EDL} file
+other hand, arrays can also be initialized within the @code{EDL} file
 by equating the array to a list of values, enclosed in curly braces:
 @example
 C[ 3 ] = @{ 2, 1, -1 @};
@@ -478,7 +478,7 @@ anymore). More-dimensional variable sized arrays can not be initialized.
 @section Arithmetic
 @cindex Arithmetic
 
-Of course, @acronym{fsc2} understands the usual arithmetic operations,
+Of course, @code{fsc2} understands the usual arithmetic operations,
 i.e.@: addition, subtraction, multiplication and division, represented
 by the characters `@code{+}', `@code{-}', `@code{*}' and `@code{/}'.
 @cindex + (addition operator)
@@ -676,7 +676,7 @@ right of the expression:
 @end example
 @noindent
 To make your intentions more clear to human readers of your
-@acronym{EDL} programs it's probably a good idea to use parenthesis in
+@code{EDL} programs it's probably a good idea to use parenthesis in
 these cases even if they are not strictly required.
 
 Finally, the lowest precedence operators are the comparison operators
@@ -1120,7 +1120,7 @@ starts directly after the @code{FOREVER} keyword.
 @quotation
 @cartouche
 There is a disadvantage of using a @code{FOREVER} loop: Because
-@acronym{fsc2} can't determine in advance when the @code{FOREVER} loop
+@code{fsc2} can't determine in advance when the @code{FOREVER} loop
 is going to be terminated it is not possible to test these loops
 thoroughly in the test run, i.e.@ before the experiment is
 started. Instead, in the test run a @code{FOREVER} loop is just run once
@@ -1232,7 +1232,7 @@ much sense).
 @cartouche
 As already mentioned for @code{FOREVER} loops also @code{IF-ELSE} and
 @code{UNLESS-ELSE} constructs introduce some problems for testing an
-@acronym{EDL} program before the real experiment is done. This happens
+@code{EDL} program before the real experiment is done. This happens
 when the condition to be tested depends either on user input (e.g.@:
 tests if the user pressed a button etc.) or on the results of a
 measurement itself. In these cases the flow of control of the program
@@ -1254,10 +1254,10 @@ that didn't fit into any of the previous sections.
 @subsection @code{#INCLUDE} statement
 @cindex #INCLUDE statement
 
-Everywhere within an @acronym{EDL} program one can include another
-@acronym{EDL} file. This is done using the @code{#INCLUDE} keyword,
+Everywhere within an @code{EDL} program one can include another
+@code{EDL} file. This is done using the @code{#INCLUDE} keyword,
 followed by the name of the file to be included, and has the same effect
-as if the included file had been pasted into the current @acronym{EDL}
+as if the included file had been pasted into the current @code{EDL}
 program. Included files may also contain @code{#INCLUDE} statements, up
 to 16 levels deep.
 
@@ -1266,12 +1266,12 @@ to 16 levels deep.
 @subsection @code{#EXIT} statement
 @cindex #EXIT statement
 
-When the @code{#EXIT} statement is found in an @acronym{EDL} program
+When the @code{#EXIT} statement is found in an @code{EDL} program
 this is equivalent to the end of the file - everything following the
-statement is discarded. In the main file of an @acronym{EDL} program
-this means that this is the end of the @acronym{EDL} program. If instead
+statement is discarded. In the main file of an @code{EDL} program
+this means that this is the end of the @code{EDL} program. If instead
 the current file is an included file (see the @code{#INCLUDE} statement)
-@acronym{fsc2} will immediately return to reading the file the current
+@code{fsc2} will immediately return to reading the file the current
 file was included from.
 
 
@@ -1279,11 +1279,11 @@ file was included from.
 @subsection @code{#QUIT} statement
 @cindex #QUIT statement
 
-When the @code{#QUIT} statement is encountered in a file @acronym{fsc2}
-immediately treats this as the complete end of the @acronym{EDL} program
-and won't read any further lines. In the main file of an @acronym{EDL}
+When the @code{#QUIT} statement is encountered in a file @code{fsc2}
+immediately treats this as the complete end of the @code{EDL} program
+and won't read any further lines. In the main file of an @code{EDL}
 this is equivalent to the @code{#EXIT} statement. But while in an
-included @acronym{EDL} file @code{#EXIT} will induce @acronym{fsc2} to
-return to the including file, @code{#QUIT} makes @acronym{fsc2} stop
-completely, i.e.@: it will not even return to higher level @acronym{EDL}
+included @code{EDL} file @code{#EXIT} will induce @code{fsc2} to
+return to the including file, @code{#QUIT} makes @code{fsc2} stop
+completely, i.e.@: it will not even return to higher level @code{EDL}
 files.

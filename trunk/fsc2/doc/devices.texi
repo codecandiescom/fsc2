@@ -48,7 +48,7 @@ The most simple approach would be to have a set of functions for each
 individual device, i.e.@: to have a different function for e.g.@:
 fetching data from each of a series of different digitizing
 oscilloscopes.  But this would be a nuisance for someone writing
-@acronym{EDL} programs because whenever for example the oscilloscope has
+@code{EDL} programs because whenever for example the oscilloscope has
 to be changed also all the programs would have to be adjusted to reflect
 the names of the functions for the new digitizer.
 
@@ -65,7 +65,7 @@ new_data = tds754a_get_curve( 1 );        // get curve from channel 1
 @end example
 @noindent
 but one doesn't has to change dozens of references to the TDS754A
-oscilloscope in each and every @acronym{EDL} program when someone else
+oscilloscope in each and every @code{EDL} program when someone else
 needs just this oscilloscope for a few days and one has to do with the
 TDS520 oscilloscope in between.
 
@@ -77,7 +77,7 @@ all device functions can be completely identical for all devices of the
 same type. Thus, while the names of the functions remain identical, the
 arguments the functions are called with may differ sometimes for
 different devices. But while this can be annoyingly enough it at least
-reduces the amount of changes to be done to the @acronym{EDL} program
+reduces the amount of changes to be done to the @code{EDL} program
 considerably.
 
 But what if you need to use for example two lock-in amplifiers
@@ -120,7 +120,7 @@ a short message is printed.
 
 The only situation that still is a bit more problematical are cases
 where two identical devices are to be used simultaneously. Due to
-limitations not only of @acronym{fsc2} but also to the way the libraries
+limitations not only of @code{fsc2} but also to the way the libraries
 used for accessing the GPIB bus works you can't simply list the same
 device twice in the @code{DEVICES} section and then use these as
 outlines above. Instead, two device modules with different names have to
@@ -156,7 +156,7 @@ name instead after a proper installation of the program.
 
 Since it is not possible for the @strong{AEG} magnets to measure the
 field using just the magnet power supply it is necessary also to specify
-a gaussmeter to enable @acronym{fsc2} to control the magnet. The module
+a gaussmeter to enable @code{fsc2} to control the magnet. The module
 name of the gaussmeter has to appear @b{before} the magnet module entry
 in the @code{DEVICES} section. See the next section for the implemented
 gaussmeter and the related functions.
@@ -239,7 +239,7 @@ Calling this functions in the @code{PREPARATIONS} section will shorten
 the time used for the calibration of the field sweep at the start of the
 experiment for the @strong{AEG} magnet power supplies. Unfortunately,
 this also reduces the precision of the field sweep. Whenever an
-experiment is restarted (i.e.@: if no new @acronym{EDL} file has been
+experiment is restarted (i.e.@: if no new @code{EDL} file has been
 loaded in between) this shortened calibration is done anyways to check
 that the parameters didn't change significantly since the last run.
 
@@ -669,7 +669,7 @@ Additionally, you also may specify a value of @code{0}, indicating that
 the function to be displayed should not be changed, i.e.@: the data type
 already set manually should be used.
 
-This function can be used in all sections of an @acronym{EDL}
+This function can be used in all sections of an @code{EDL}
 program. If the auto-acquisition setup is changed during an already
 running auto-acquisition all data stored in the lock-in's internal
 buffer are discarded before the measurement continues using the new
@@ -1275,7 +1275,7 @@ This function starts an acquisition sequence of the
 oscilloscope. Previously measured curves are discarded and new data
 are sampled until the requested number of averages has been reached.
 The function can only be used in the @code{EXPERIMENT} section of the
-@acronym{EDL} file.
+@code{EDL} file.
 
 
 @anchor{digitizer_get_area}
@@ -1323,7 +1323,7 @@ The function will automatically wait until a still running acquisition
 sequence is finished before measuring the area. 
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} file.
+@code{EDL} file.
 
 
 @anchor{digitizer_get_area_fast}
@@ -1338,7 +1338,7 @@ bit faster because it doesn't set the cursors (which also means that
 there is no visual feedback).
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} file.
+@code{EDL} file.
 
 
 @anchor{digitizer_get_curve}
@@ -1378,7 +1378,7 @@ to supply an array for storing the data. Usually, this will be an array
 defined with an unspecified number of elements.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} file.
+@code{EDL} file.
 
 
 @anchor{digitizer_get_curve_fast}
@@ -1428,7 +1428,7 @@ The function will automatically wait until a still running acquisition
 sequence is finished before measuring the amplitude.
 
 This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} file.
+@code{EDL} file.
 
 
 @anchor{digitizer_get_amplitude_fast}
@@ -1484,7 +1484,7 @@ dg2020_b;
 hfs9003;
 @end example
 
-Pulsers are rather special and even the @acronym{EDL} syntax for dealing
+Pulsers are rather special and even the @code{EDL} syntax for dealing
 with the pulsers differs slightly. Thus there is a whole chapter dealing
 with pulsers and how to define and use pulses, see @ref{Using
 Pulsers}. Several of the aspects of the following short descriptions of
@@ -1887,7 +1887,7 @@ lakeshore330
 @noindent
 in the @code{DEVICES} section. All functions for the temperature
 controller can only be used in the @code{EXPERIMENT} section of
-the @acronym{EDL} program.
+the @code{EDL} program.
 
 
 @table @samp
@@ -1991,7 +1991,7 @@ egg4402
 @end example
 @noindent
 in the @code{DEVICES} section. All functions for the boxcar integrator
-can only be used in the @code{EXPERIMENT} section of the @acronym{EDL}
+can only be used in the @code{EXPERIMENT} section of the @code{EDL}
 program.
 
 @table @samp

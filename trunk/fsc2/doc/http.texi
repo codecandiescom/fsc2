@@ -27,14 +27,14 @@
 It often can be quite useful to be able to find out about the current
 state of an experiment without having to sit around in the lab all the
 time or constantly coming back just to check that everything is still
-working fine. @acronym{fsc2} allows this when you start its built-in web
+working fine. @code{fsc2} allows this when you start its built-in web
 server by simply clicking on the @code{WWW server} button. The button
 stays green instead of grey while the web server is running.
 
 Normal web servers listen for incoming requests from the outside world
 on a predefined port, numbered 80. Thus you usually don't have to tell
 your browser to which port of the server to connect, it will use port 80
-by default. This is a bit different with @acronym{fsc2}. Because it does
+by default. This is a bit different with @code{fsc2}. Because it does
 not run with very high privileges it can't use port 80 (ports in the
 range between 0 and 1023 can only be used by programs running with the
 rights of the root user). Instead per default it uses the alternate HTTP
@@ -48,18 +48,18 @@ http://name.of.computer:8080
 @noindent
 where @code{name.of.computer} is the Internet name of the computer the
 experiment is running on (@strong{don't} prepend a @code{www.}). You
-also may tell @acronym{fsc2} to use a different port instead of 8080
+also may tell @code{fsc2} to use a different port instead of 8080
 through the @code{-httpPort} command line option.
 
-When @acronym{fsc2}'s web server is running your browser will display a
-page telling you @acronym{fsc2}'s current state, i.e. whether it is idle,
+When @code{fsc2}'s web server is running your browser will display a
+page telling you @code{fsc2}'s current state, i.e. whether it is idle,
 running and experiment, waiting for user input (when e.g. a file
 selector is shown) or has finished the experiment. Furthermore, it
-displays a copy of the display window and, if @acronym{fsc2} is showing
+displays a copy of the display window and, if @code{fsc2} is showing
 it, of the cross section window. Both are shown in exactly the same way
 as they are displayed on the screen. Finally, it shows the last 30 lines
 of the browser for error messages and other output from the running
-@acronym{EDL} program.
+@code{EDL} program.
 
 Currently, graphics will only be sent in either PNG or JPEG format, thus
 your browser must support on of these formats. While there is no
@@ -69,7 +69,7 @@ the GIF format is patented by Unisys and I am not going to buy a license).
 Perhaps this will change in 2003 when the patent expires.
 
 Please note that serving web pages is a rather low priority task. When
-the @acronym{fsc2} is very busy acquiring and displaying data the reaction
+the @code{fsc2} is very busy acquiring and displaying data the reaction
 time to a request for a new page might be rather long.
 
 Under certain conditions you may get a "Not available" message instead
@@ -80,7 +80,7 @@ closed the corresponding window.
 
 Interacting directly with requests from the Internet always raises some
 concerns about security. First of all, the very rudimentary web server
-built into @acronym{fsc2} is that simple (and is running with the
+built into @code{fsc2} is that simple (and is running with the
 privileges of the user only) that I am quite convinced that there are no
 bugs that could be exploited to gain access to data an outsider
 shouldn't be able to obtain. And because the server is written in Perl
@@ -88,12 +88,12 @@ shouldn't be able to obtain. And because the server is written in Perl
 issue. All you have to worry about is that, in principle, everybody on
 the world can have a look at your measurement while the web server is
 up and running. If you are deeply concerned about this you can also build
-@acronym{fsc2} without support for the web server.
+@code{fsc2} without support for the web server.
 
 The only other conceivable problem would be that someone really
 malicious would constantly send requests to the server which, in turn,
-must bother @acronym{fsc2} to tell it about its current status and to
-create graphics with the window contents. In cases when @acronym{fsc2} is
+must bother @code{fsc2} to tell it about its current status and to
+create graphics with the window contents. In cases when @code{fsc2} is
 already having problems acquiring and displaying the measured data this
 could further increase its workload and, in extreme cases, might slow
 down the experiment a bit. If you have reasons to suspect something like

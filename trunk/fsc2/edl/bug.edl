@@ -1,7 +1,7 @@
 DEVICES:
 
-dg2020;
-//tds754a;
+dg2020_f;
+tds754a;
 
 
 VARIABLES:
@@ -28,7 +28,7 @@ DETECTION:           POD = 0,    V_HIGH = 5 V, V_LOW = 0 V;
 DETECTION_GATE:      POD = 7,    V_HIGH = 5 V, V_LOW = 0 V;
 PHASE_1:         MW, POD = 1, 2, V_HIGH = 5 V, V_LOW = 0 V;
 
-PHASE_1_SETUP:  X: POD_1 = OFF, POD2 = OFF,
+PHASE_SETUP_1:  X: POD_1 = OFF, POD2 = OFF,
                +Y: 1, 0,
                -X: 0, 1,
                -Y: 1, 1;
@@ -73,10 +73,10 @@ P4: FUNC        = DETECTION_GATE,
     DSTART      = 2 * dtau;
 
 
-//WID1 = digitizer_define_window( 316 ns, 104 ns );
-//WID2 = digitizer_define_window( 606 ns, 104 ns );
-//digitizer_num_averages( 100 );
-//digitizer_trigger_channel( CH4 );
+WID1 = digitizer_define_window( 316 ns, 104 ns );
+WID2 = digitizer_define_window( 606 ns, 104 ns );
+digitizer_num_averages( 100 );
+digitizer_trigger_channel( CH4 );
 
 init_1d( 2, 512, tau * 1e9, dtau * 1e9, "tau [ ns ]",
          "Echo intensity [ Vs ]" );
@@ -88,7 +88,7 @@ EXPERIMENT:
 pulser_update( );
 
 
-//save_program( "% " );
+save_program( "% " );
 
 
 

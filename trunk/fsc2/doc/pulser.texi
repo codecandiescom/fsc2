@@ -43,7 +43,7 @@ pulsers/spectrometer combinations of implemented:
 @item Tektronix HFS9003 with W-band spectrometer in Berlin
 @end itemize
 Because of the importance of the pulser for time-resolved experiments
-there are even two additional types of sections in the @acronym{EDL}
+there are even two additional types of sections in the @code{EDL}
 program in order to set up the pulser. These
 are@footnote{@code{ASSIGNMENTS:} can be abbreviated to
 @code{ASSIGNMENT:} or @code{ASS:} and @code{PHASES:} to @code{PHA}.}
@@ -312,7 +312,7 @@ The names of the functions do not enforce what the channels that will
 become associated with them are really going to be used for, but it is
 probably a good idea not to use e.g.@: the @code{MICROWAVE} channel for
 something completely different (other people will have major problems
-understanding what your @acronym{EDL} program is supposed to do and
+understanding what your @code{EDL} program is supposed to do and
 there's no Obfuscated EDL Contest yet;-).
 
 The functions @code{OTHER_1} to @code{OTHER_4} should be used in cases
@@ -686,7 +686,7 @@ In one of the following sections it is explained how the phase sequences
 become associated with certain pulses.
 
 Beside the phase sequences also acquisition sequences can be defined.
-These are used by some @acronym{EDL} functions to determine how the
+These are used by some @code{EDL} functions to determine how the
 results of the experiments with different phases have to be added up in
 order to give the final result for a complete phase cycling sequence. In
 the example of a phase cycled stimulated echo experiment the area of the
@@ -1107,7 +1107,7 @@ FOR I = 1: Curve_length @{
 The inner loop in the previous example runs through the 4 different
 phase settings, adding up the areas with the correct sign. Instead of
 writing out this loop one could also define an acquisition sequence and
-use the @acronym{EDL} function @code{get_phase_cycled_area()}. This
+use the @code{EDL} function @code{get_phase_cycled_area()}. This
 function does everything automatically that had to be spelled out
 explicitely in the loop in the previous example and thus makes the
 program much simpler. The only changes needed are in the @code{PHASES}
@@ -1165,7 +1165,7 @@ windows as you need. For each of the windows the phase cycled area is
 measured.  Of course, in these cases not just one data value will be
 returned but an array of data values with as many elements as there are
 digitizer windows passed to the function. It is the responsibility of
-the writer of the @acronym{EDL} program to supply an array long enough
+the writer of the @code{EDL} program to supply an array long enough
 to hold exactly as many data as returned by the function. Here's an
 example:
 @example

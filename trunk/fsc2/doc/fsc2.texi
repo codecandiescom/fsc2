@@ -79,8 +79,8 @@ translation approved by the Free Software Foundation.
 @node Top, , (dir), (dir)
 @top Top
 
-This text describes @acronym{fsc2}, a program to control cw- and pulsed
-EPR spectrometer. Basically, @acronym{fsc2} is an interpreter to run a
+This text describes @code{fsc2}, a program to control cw- and pulsed
+EPR spectrometer. Basically, @code{fsc2} is an interpreter to run a
 program that describes how the experiment is to be done. After an
 overview the syntax to be used is explained. This is followed by a
 section about the built-in functions that may be used in the
@@ -89,23 +89,23 @@ devices to be used in the experiment.
 
 
 @menu
-* Overview::                Basic concepts of fsc2.
+* Overview::                Basic concepts of @code{fsc2}
 * GUI::                     The graphical user interface
 * Web Server::              Monitoring the experiment via the net
-* EDL::                     Description of EDL the language.
-* Built-in Functions::      Built-in functions.
-* Device Functions::        Functions for accessing devices.
+* EDL::                     Description of @code{EDL} the language
+* Built-in Functions::      Description of all built-in functions
+* Device Functions::        Description of functions for accessing devices
 * Using Pulsers::           How to work with the pulsers
-* Command Line Options::    How to invoke @acronym{fsc2}
+* Command Line Options::    How to invoke @code{fsc2}
+* GUI-fying::               How to add a GUI to an @code{EDL} programs
 * Cloning Devices::         Creating modules for identical devices
-* Internals::               How fsc2 works internally
-* Modules::                 How to create new modules.
-* Interfacing::             Accessing fsc2 from other programs
+* Internals::               How @code{fsc2} works internally
+* Modules::                 How to create new modules
 * Device Reference::        List of devices and their functions
-* Reserved Words::          List of all reserved words.
+* Reserved Words::          List of all reserved words
 * Acknowledgments::         The title says it all...
 * Copying::                 The GNU General Public License
-* Index::                   List of all indexed words.
+* Index::                   List of all indexed words
 @end menu
 
 
@@ -135,6 +135,8 @@ translation approved by the Free Software Foundation.
 
 @end ifinfo
 
+@kbdinputstyle distinct
+
 @contents
 
 @include overview.texi
@@ -145,10 +147,10 @@ translation approved by the Free Software Foundation.
 @include devices.texi
 @include pulser.texi
 @include cmd.texi
+@include GUIfy.texi
 @include cloning.texi
 @include internals.texi
 @include modules.texi
-@include interfacing.texi
 @include dev_ref.texi
 @include reserved.texi
 @include ack.texi

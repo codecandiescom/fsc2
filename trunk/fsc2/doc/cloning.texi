@@ -20,7 +20,7 @@
 @c Boston, MA 02111-1307, USA.
 
 
-@node Cloning Devices, Internals, Command Line Options, Top
+@node Cloning Devices, Internals, GUI-fying, Top
 @chapter Cloning Devices
 @cindex cloning devices
 
@@ -37,7 +37,7 @@ script (at least as long as the modules are written following the
 conventions discussed in the next chapter). There are basically
 three or four steps:
 @enumerate
-@item @code{cd} into the @file{utils} subdirectory of @acronym{fsc2}s main
+@item @code{cd} into the @file{utils} subdirectory of @code{fsc2}s main
 directory.
 @item Run the script @file{clone_device}.
 @item Remake fsc2 and reinstall.
@@ -46,7 +46,7 @@ directory.
 
 The script @file{clone_device} is a Perl script thus you'll need Perl
 installed to be able to run it. The script resides in the @code{utils}
-subdirectory of @acronym{fsc2}s main directory and can only be run from
+subdirectory of @code{fsc2}s main directory and can only be run from
 within this directory. It asks for the name of the device to be cloned
 (i.e.@: the name of the device of which two or more are to be used
 simultaneously), a new name for the device and finally for another name
@@ -93,11 +93,11 @@ address to the one of the new device.
 @end example
 
 When you have run the script you will have to @code{cd} back from the
-@file{utils} subdirectory to @acronym{fsc2}s main directory (just type
+@file{utils} subdirectory to @code{fsc2}s main directory (just type
 @code{cd ..}) and recompile, using the @code{make} command. After a
 successful run of make to compile the new device module you also have to
 install it. To do so you must become @code{root} and, still from
-@acronym{fsc2}s main directory, run @w{@code{make install}}.
+@code{fsc2}s main directory, run @w{@code{make install}}.
 
 If the device isn't controlled via the GPIB bus you're already
 done. Otherwise you will have also to edit (still with @code{root}

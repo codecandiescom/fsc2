@@ -32,7 +32,6 @@
 use strict;
 use warnings;
 
-
 my @lines;
 my @vars;
 my $guify_entry = '^\s*===\s+';
@@ -43,6 +42,7 @@ my $elsif_entry = $guify_entry . "elsif\\s+";
 my $else_entry = $guify_entry . "else\\s*\$";
 my $endif_entry = $guify_entry . "endif\\s*\$";
 my $if_level = 0;
+my $lino;
 
 # By changing the following variables the layout of the form can be changed!
 
@@ -61,19 +61,12 @@ if ( $ARGV[ 0 ] ) {
 		or die "Can't open input file " . $ARGV[ 0 ] . ": $!\n";
 }
 
-if ( $ARGV[ 1 ] ) {
-	open( $of, ">" . $ARGV[ 1 ] )
-		or die "Can't open ouput file " . $ARGV[ 0 ] . ": $!\n";
-}
-
-select $of;
-
 while ( <$if> ) {
 
 	# Just store lines with normal EDL code
 
 	unless ( /$guify_entry/o ) {
-		push @lines, $_;
+		push @lines, { line => $_, lino => $. };
 		next;
 	}
 
@@ -81,41 +74,42 @@ while ( <$if> ) {
 	# must be a line starting with the 'guify' signature)
 
 	my $cur_line = $_;
+	$lino = $.;
 	while ( $cur_line =~ /\\\s*$/ ) {
 		$cur_line =~ s/(.*)\\\s*$/$1 /;
 		die "Unexpected end of input file\n" unless defined( $_ = <$if> );
 		die "Missing continuation at line $.\n" unless /$guify_entry/o;
-		$_ =~ s/$guify_entry(.*)/$1/o;
+		s/$guify_entry(.*)/$1/o;
 		$cur_line .= $_;
 	}
 
-	# if/else/elsifendif lines stay in the program for later evaluation
+	# if/else/elsif/endif lines stay in the program for later handling
 
 	if ( $cur_line =~ /$if_entry/o ) {
 		$if_level++;
-		push @lines, $_;
+		push @lines, { line => $cur_line, lino => $lino };
 		next;
 	}
 
 	if ( $cur_line =~ /$else_entry/o ) {
-		die "'else' found without previous 'if' at line $.\n"
+		die "'else' found without previous 'if' at line $lino\n"
 			if $if_level <= 0;
-		push @lines, $_;
+		push @lines, { line => $cur_line, lino => $lino };
 		next;
 	}
 
 	if ( $cur_line =~ /$elsif_entry/o ) {
-		die "'elsif' found without previous 'if' at line $.\n"
+		die "'elsif' found without previous 'if' at line $lino\n"
 			if $if_level <= 0;
-		push @lines, $_;
+		push @lines, { line => $cur_line, lino => $lino };
 		next;
 	}
 
 	if ( $cur_line =~ /$endif_entry/o ) {
-		die "'endif' found without previous 'if' at line $.\n"
+		die "'endif' found without previous 'if' at line $lino\n"
 			if $if_level <= 0;
 		$if_level--;
-		push @lines, $_;
+		push @lines, { line => $cur_line, lino => $lino };
 		next;
 	}
 
@@ -123,12 +117,17 @@ while ( <$if> ) {
 
 	if ( $cur_line =~ /$var_entry/o ) {
 		my $var_options = { name => $1, type => $2, value => undef };
-		analyze_var_options( $var_options, $4 ) if defined $4;
+		if ( defined $4 ) {
+			my $option = $4;
+			die "Syntax error at line $lino, garbage after variable type\n"
+				unless $option =~ /^\s*[\"\[]/;
+			analyze_var_options( $var_options, $option );
+		}
 		push @vars, $var_options;
 		next;
 	}
 
-	die "Invalid syntax on line $.\n";
+	die "Invalid syntax at line $lino\n";
 }
 
 close $if;
@@ -161,7 +160,18 @@ for ( @vars ) {
 	}
 }
 
+# Check the if and elsif lines for Perl syntax errors
+
+cond_check( );
+
 # Write out the script
+
+if ( $ARGV[ 1 ] ) {
+	open( $of, ">" . $ARGV[ 1 ] )
+		or die "Can't open ouput file " . $ARGV[ 0 ] . ": $!\n";
+}
+
+select $of;
 
 write_script( );
 
@@ -201,6 +211,8 @@ sub analyze_var_options {
 
 	( $res, $str ) = get_string( $str );
 	$hr->{ unit } = defined $res ? $res : '""';
+
+	die "Syntax error at line $lino\n" if defined $str and $str !~ /^\s*$/;
 }
 
 
@@ -212,16 +224,21 @@ sub get_float_limits {
 	my $float_rep = '[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?';
 
 
+	if ($str !~ /^\s*\[/o ) {
+		$hr->{ max } = $hr->{ min } = undef;
+		return $str;
+	}
+
 	if ( $str =~ /^\s*(\[\s*([^:\s]+)?\s*:\s*([^:\s]+)?\s*\])(\s+(.*))?$/o ) {
 		$str = $5;
 
 		$min = $2 if defined $2;
 		$max = $3 if defined $3;
 
-		die "Not a floating point number ($min) at line $.\n"
+		die "Not a floating point number ($min) at line $lino\n"
 			if defined $min and $min !~ /^$float_rep$/o;
 
-		die "Not a floating point number ($max) at line $.\n"
+		die "Not a floating point number ($max) at line $lino\n"
 			if defined $max and $max !~ /^$float_rep$/o;
 
 		if ( defined $min and defined $max and $min > $max ) {
@@ -248,16 +265,21 @@ sub get_int_limits {
 	my $int_rep = '[+-]?\d+';
 
 
+	if ($str !~ /^\s*\[/o ) {
+		$hr->{ max } = $hr->{ min } = undef;
+		return $str;
+	}
+
 	if ( $str =~ /^(\[\s*([^:\s]+)?\s*:\s*([^:\s]+)?\s*\])(\s+(.*))?$/o ) {
 		$str = $5;
 
 		$min = $2 if defined $2;
 		$max = $3 if defined $3;
 
-		die "Not an integer number ($min) at line $.\n"
+		die "Not an integer number ($min) at line $lino\n"
 			if defined $min and $min !~ /^$int_rep$/o;
 
-		die "Not a integer number ($max) at line $.\n"
+		die "Not a integer number ($max) at line $lino\n"
 			if defined $max and $max !~ /^$int_rep$/o;
 
 		if ( defined( $min ) and defined( $max ) and $min > $max ) {
@@ -290,10 +312,13 @@ sub get_menu_entries {
 		$mstr =~ /^"((\\"|[^"])*)"/og;
 		push @menu_entries, $1;
 		push @menu_entries, $1 while $mstr =~ /\G\s*,\s*"((\\\"|[^\"])*)"/go;
-		die "Less then 2 menu entries at line $.\n" if @menu_entries < 2;
+		die "Less than 2 entries in menu descriptor starting at line $lino\n"
+			if @menu_entries < 2;
+		die "Syntax error in menu descriptor starting at line $lino\n"
+			unless $' =~ /^\s*$/;
 		$hr->{ menu_entries } = \@menu_entries;
 	} else {
-		die "Missing entries for menu at line $.\n";
+		die "Missing entries in menu descriptor starting at line $lino\n";
 	}
 
 	return $str;
@@ -311,7 +336,7 @@ sub get_default_value {
 	return ( undef, undef ) unless defined $str;
 
 	return ( undef, $str ) unless
-		$str =~ /\s*\[\s*([^\]\s]+)\s*\](\s+(.*)?)?$/o;
+		$str =~ /^\s*\[\s*([^\]\s]+)\s*\](\s+(.*)?)?$/o;
 
 	$val = $1;
 	$str = $3;
@@ -319,35 +344,35 @@ sub get_default_value {
 	if ( $hr->{ type } =~ /^int$/ ) {
 		if ( $val =~ /^[+-]?\d+$/ ) {
 			die "Default value for $hr->{ name } does not fit into range at " .
-				"line $.\n"
+				"line $lino\n"
 					if ( defined $hr->{ max } and $hr->{ max } < $val ) or
 					   ( defined $hr->{ min } and $hr->{ min } > $val );
 			return ( $val, $str );
 		} else {
-			die "Default value ($val) isn't an integer number at line $.\n";
+			die "Default value ($val) isn't an integer number at line $lino\n";
 		}
 	} elsif ( $hr->{ type } =~ /^float$/ ) {
 		if ( $val =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?/o ) {
 			die "Initil value for $hr->{ name } does not fit into range at " .
-				"line $.\n"
+				"line $lino\n"
 					if ( defined $hr->{ max } and $hr->{ max } < $val ) or
 					   ( defined $hr->{ min } and $hr->{ min } > $val );
 			return ( $val, $str );
 		} else {
 			die "Default value ($val) isn't a floating point number at " .
-				"line $.\n";
+				"line $lino\n";
 		}
 	} else {
 		if ( $val =~ /^\d+/o ) {
 			die "Default value ($val) for $hr->{ name } is larger than the " .
-				"number of menu entries at line $.\n"
+				"number of menu entries at line $lino\n"
 				if $val > @{ $hr->{ menu_entries } };
-			die "Invalid default value of 0 for $hr->{ name } at line $., " .
-				"must be at least 1.\n" if $val == 0;
+			die "Invalid default value of 0 for $hr->{ name } at " .
+				"line $lino, must be at least 1.\n" if $val == 0;
 			return ( $hr->{ menu_entries }->[ $val - 1 ], $str );
 		} else {
 			die "Default value ($val) isn't a positive integer number at " .
-				"line $.\n";
+				"line $lino\n";
 		}
 	}
 }
@@ -360,9 +385,40 @@ sub get_string {
 
 	return ( undef, undef ) unless defined $str;
 
-	$str =~ /^s*(\"([^\"]|\\\")*\")(\s+(.*)?)?$/o;
+	die "Syntax error at line $lino\n" unless $str =~ /^\s*\"/o;
+
+	$str =~ /^\s*(\"([^\"]|\\\")*\")(\s+(.*)?)?$/o;
 	return ( $1, $4 ) if defined $1;
-	return ( undef, $4 );
+	return ( undef, $str );
+}
+
+
+################################################################
+# Routine checks all conditions found in the input file by calling eval()
+# on them (after prepending some code to create and initialize possibly
+# needed variables and putting a $ in front of the variable names.
+# If the eval() fails we know that there must be some syntax error...
+
+sub cond_check {
+
+	my $defs = "";
+	$defs .= "my \$$$_{ name } = \"$$_{ value }\"\n;" for ( @vars );
+
+	for ( @lines ) {
+		next unless $$_{ line } =~ /$guify_entry/o;
+		$$_{ line } =~ /$guify_entry(if|else|elsif|endif)\s*(.*?)\s*$/;
+		my ( $type, $rcmd ) = ( $1, $2 );
+		next unless $type =~ /^if|elsif$/o;
+		my $cmd = $rcmd;
+		$cmd =~ s/\b$$_{ name }\b/\$$$_{ name }/g for ( @vars );
+
+		# Disable warnings for the test call of eval
+
+		local $SIG{ __WARN__ }= sub{ };
+		eval $defs . $cmd;
+		die "Syntax error in $type condition at line $$_{ lino }: \"$rcmd\"\n"
+			if $@;
+	}
 }
 
 
@@ -473,6 +529,7 @@ EOT
 	# and the Apply- and Quit-button
 
 	print <<"EOT";
+
 \$fsc2_main_frame->pack( \%fp, -pady => '1m' );
 \$fsc2_main_window->Optionmenu( -options => \\\@fsc2_how_to_run,
 				                -textvariable => \\\$fsc2_how_to_run,
@@ -543,7 +600,7 @@ sub float_check {
 sub write_out {
     my \$fh;
     open( \$fh, \"|fsc2_\" . lc \$fsc2_how_to_run )
-        or die \"Can't find utility fsc2_\" . lc \$fsc2_how_to_run . \".\\n\";
+        or die \"Can't find utility fsc2_\" . lc \$fsc2_how_to_run . \".\\n\\n\";
 EOT
 
 	# Here the body of the EDL script that the script we are just writing is
@@ -559,8 +616,9 @@ EOT
 	# This way the user can use even rather complicated expressions as
 	# the conditions...
 
-	print "print \$fh \"";
-	for my $line ( @lines ) {
+	print "	print \$fh \"";
+	for ( @lines ) {
+		my $line = $$_{ line };
 		if ( $line =~ /$guify_entry/o ) {
 			$line =~ /$guify_entry(if|else|elsif|endif)\s*(.*?)\s*$/;
 			my ( $type, $cmd ) = ( $1, $2 );
