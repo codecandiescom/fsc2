@@ -726,6 +726,7 @@ endif
 	$(MAKE) -C me6x00 distclean
 	$(MAKE) -C ni6601 distclean
 	$(MAKE) -C witio_48 distclean
+	$(MAKE) -C ni_daq distclean
 
 mostlyclean:
 	$(MAKE) -C $(sdir) distclean
