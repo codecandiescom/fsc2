@@ -621,6 +621,33 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 
 		pp->pulse->needs_update = SET;
 	}
+
+	/* Finally check if the pulses are far enough apart - for automatically
+	   created pulses lengthen them if necessary, for user created pulses
+	   print a warning */
+
+	pp = f->pulse_params;
+
+	for ( i = 1; i < f->num_active_pulses; i++ )
+	{
+		ppp = pp;
+		pp = pp + 1;
+
+		if ( pp->pos - ( ppp->pos + ppp->len )
+			 < dg2020.minimum_twt_pulse_distance )
+		{
+			if ( pp->pulse->tp != NULL || ppp->pulse->tp != NULL )
+				ppp->len = pp->pos - ppp->pos;
+			else
+			{
+				if ( dg2020.twt_distance_warning++ != 0 )
+					print( SEVERE, "Distance between TWT pulses #%ld and #%ld "
+						   "is smaller than %s.\n", ppp->pulse->num,
+						   pp->pulse->num, dg2020_pticks(
+							   dg2020.minimum_twt_pulse_distance ) );
+			}
+		}
+	}
 }
 
 

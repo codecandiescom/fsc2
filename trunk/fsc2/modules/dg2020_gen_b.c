@@ -51,6 +51,9 @@ bool dg2020_store_timebase( double timebase )
 	dg2020.is_timebase = SET;
 	dg2020.timebase = timebase;
 
+	dg2020.minimum_twt_pulse_distance =
+						 lrnd( ceil( MINIMUM_TWT_PULSE_DISTANCE / timebase ) );
+
 	return OK;
 }
 

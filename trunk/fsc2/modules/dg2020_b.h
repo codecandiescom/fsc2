@@ -288,6 +288,9 @@ typedef struct {
 	long left_twt_warning;
 	long right_twt_warning;
 
+	Ticks minimum_twt_pulse_distance;
+	long twt_distance_warning;
+
 } DG2020;
 
 

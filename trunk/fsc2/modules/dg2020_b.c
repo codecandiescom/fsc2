@@ -130,6 +130,8 @@ int dg2020_b_init_hook( void )
 
 	dg2020.block[ 0 ].is_used = dg2020.block[ 1 ].is_used = UNSET;
 
+	dg2020.twt_distance_warning = 0;
+
 	for ( i = 0; i < MAX_PODS; i++ )
 	{
 		dg2020.pod[ i ].self = i;
@@ -288,6 +290,11 @@ int dg2020_b_end_of_test_hook( void )
 	if ( dg2020.shape_2_defense_too_near != 0 ||
 		 dg2020.defense_2_shape_too_near != 0 )
 		THROW( EXCEPTION );
+
+	if ( dg2020.twt_distance_warning )
+		print( SEVERE, "Distance between TWT pulses was %ld times shorter "
+			   "than %s.\n", dg2020.twt_distance_warning,
+			   dg2020_pticks( dg2020.minimum_twt_pulse_distance ) );
 
 	/* Now we have to reset the internal representation back to its initial
 	   state */
