@@ -58,18 +58,15 @@ bool tds_tmpl_init( const char *name )
 		/* Store the lock state the user asked for and for the initialization
 		   set it to locked. */
 
-		if ( gpib_write( tds_tmpl.device, "LOC ALL\n", 8 ) == FAILURE )
-			tds_tmpl_gpib_failure( );
-
+		tds_tmpl_command( "LOC ALL\n" );
 		lock_state = tds_tmpl.lock_state;
 		tds_tmpl.lock_state = SET;
 
 		/* Set digitizer to short form of replies */
 
-		if ( gpib_write( tds_tmpl.device, "*CLS;:VERB OFF;:HEAD OFF\n", 25 )
-			 == FAILURE ||
-			 gpib_write( tds_tmpl.device, "*STB?\n", 6 ) == FAILURE ||
-			 gpib_read( tds_tmpl.device, buffer, &len ) == FAILURE )
+		tds_tmpl_command( "*CLS;:VERB OFF;:HEAD OFF\n" );
+		tds_tmpl_command( "*STB?\n" );
+		if ( gpib_read( tds_tmpl.device, buffer, &len ) == FAILURE )
 			tds_tmpl_gpib_failure( );
 
 		tds_tmpl.is_reacting = SET;
@@ -100,16 +97,12 @@ bool tds_tmpl_init( const char *name )
 
 		/* Set format of data transfer (binary, INTEL format) */
 
-		if ( gpib_write( tds_tmpl.device, "DAT:ENC SRI;WID 2\n", 18 )
-			 == FAILURE )
-			tds_tmpl_gpib_failure( );
+		tds_tmpl_command( "DAT:ENC SRI;WID 2\n" );
 
 		/* Set unit for cursor setting commands to seconds and cursor types
 		   to VBAR (vertical bars)*/
 
-		if ( gpib_write( tds_tmpl.device,
-						 "CURS:FUNC VBA;VBA:UNITS SECO\n", 29 ) == FAILURE )
-			tds_tmpl_gpib_failure( );
+		tds_tmpl_command( "CURS:FUNC VBA;VBA:UNITS SECO\n" );
 
 		/* Make sure cursor 1 is the left one */
 
@@ -127,8 +120,7 @@ bool tds_tmpl_init( const char *name )
 
 		/* Switch off repetitive acquisition mode */
 
-		if ( gpib_write( tds_tmpl.device, "ACQ:REPE OFF\n", 13 ) == FAILURE )
-			tds_tmpl_gpib_failure( );
+		tds_tmpl_command( "ACQ:REPE OFF\n" );
 
 		/* If a sensitivity has been set in the PREPARATION section set them
            now */
@@ -207,9 +199,8 @@ bool tds_tmpl_init( const char *name )
 
 		tds_tmpl.lock_state = lock_state;
 
-		if ( ! tds_tmpl.lock_state &&
-			 gpib_write( tds_tmpl.device, "LOC NON\n", 8 ) == FAILURE )
-			tds_tmpl_gpib_failure( );
+		if ( ! tds_tmpl.lock_state )
+			tds_tmpl_command( "LOC NON\n" );
 
 		TRY_SUCCESS;
 	}
@@ -236,8 +227,8 @@ double tds_tmpl_get_timebase( void )
 	long length = 30;
 
 
-	if ( gpib_write( tds_tmpl.device, "HOR:MAI:SCA?\n", 13 ) == FAILURE ||
-		 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+	tds_tmpl_command( "HOR:MAI:SCA?\n" );
+	if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
 		tds_tmpl_gpib_failure( );
 
 	reply[ length - 1 ] = '\0';
@@ -255,8 +246,7 @@ void tds_tmpl_set_timebase( double timebase )
 
 
 	sprintf( cmd, "HOR:MAI:SCA %8.3E\n", timebase );
-	if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_command( cmd );
 
 	tds_tmpl_state_check( 0.0, 0, 0.0 );
 }
@@ -272,8 +262,7 @@ void tds_tmpl_set_record_length( long num_points )
 
 
 	sprintf( cmd, "HOR:RECO %ld\n", num_points );
-    if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_command( cmd );
 
 	tds_tmpl_state_check( 0.0, 0, 0.0 );
 }
@@ -290,8 +279,8 @@ long tds_tmpl_get_record_length( void )
 	char *r = reply;
 
 
-    if ( gpib_write( tds_tmpl.device, "HOR:RECO?\n", 10 ) == FAILURE ||
-         gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+	tds_tmpl_command( "HOR:RECO?\n" );
+	if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
 		tds_tmpl_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
@@ -313,8 +302,7 @@ void tds_tmpl_set_trigger_pos( double pos )
 
 
 	sprintf( cmd, "HOR:TRIG:POS %f\n", 100.0 * pos );
-    if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_command( cmd );
 
 	tds_tmpl_state_check( 0.0, 0, 0.0 );
 }
@@ -331,8 +319,8 @@ double tds_tmpl_get_trigger_pos( void )
     long length = 30;
 
 
-    if ( gpib_write( tds_tmpl.device, "HOR:TRIG:POS?\n", 14 ) == FAILURE ||
-         gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+	tds_tmpl_command( "HOR:TRIG:POS?\n" );
+	if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
 		tds_tmpl_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
@@ -352,8 +340,8 @@ long tds_tmpl_get_num_avg( void )
 
 	if ( tds_tmpl_get_acq_mode( ) == AVERAGE )
 	{
-		if ( gpib_write( tds_tmpl.device,"ACQ:NUMAV?\n", 11 ) == FAILURE ||
-			 gpib_read( tds_tmpl.device, reply, &length) == FAILURE )
+		tds_tmpl_command( "ACQ:NUMAV?\n" );
+		if ( gpib_read( tds_tmpl.device, reply, &length) == FAILURE )
 			tds_tmpl_gpib_failure( );
 
 		reply[ length - 1 ] = '\0';
@@ -376,32 +364,23 @@ void tds_tmpl_set_num_avg( long num_avg )
 	/* With number of acquisitions set to zero simply stop the digitizer */
 
 	if ( num_avg == 0 )
-	{
-		if ( gpib_write( tds_tmpl.device, "ACQ:STATE STOP\n", 15 ) == FAILURE )
-			tds_tmpl_gpib_failure( );
-		return;
-	}
+		tds_tmpl_command( "ACQ:STATE STOP\n" );
 
 	/* With number of acquisitions switch to sample mode, for all other numbers
 	   set the number of acquisitions and switch to average mode */
 
 	if ( num_avg == 1 )
-	{
-		if ( gpib_write( tds_tmpl.device, "ACQ:MOD SAM\n", 12 ) == FAILURE )
-			tds_tmpl_gpib_failure( );
-	}
+		tds_tmpl_command( "ACQ:MOD SAM\n" );
 	else
 	{
 		sprintf( cmd, "ACQ:NUMAV %ld\n", num_avg );
-		if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE ||
-			 gpib_write( tds_tmpl.device, "ACQ:MOD AVE\n", 12 ) == FAILURE )
-			tds_tmpl_gpib_failure( );
+		tds_tmpl_command( cmd );
+		tds_tmpl_command( "ACQ:MOD AVE\n" );
 	}
 
 	/* Finally restart the digitizer */
 
-	if ( gpib_write( tds_tmpl.device, "ACQ:STATE RUN\n", 14 ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_command( "ACQ:STATE RUN\n" );
 }
 
 /*-------------------------------------------------------------------------*/
@@ -415,18 +394,15 @@ int tds_tmpl_get_acq_mode( void )
 	long length = 30;
 
 
-	if ( gpib_write( tds_tmpl.device, "ACQ:MOD?\n", 9 ) == FAILURE ||
-		 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+	tds_tmpl_command( "ACQ:MOD?\n" );
+	if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
 		tds_tmpl_gpib_failure( );
 
 	if ( *reply == 'A' )		/* digitizer is in average mode */
 		return AVERAGE;
 
 	if ( *reply != 'S' )		/* if not in sample mode set it */
-	{
-		if ( gpib_write( tds_tmpl.device, "ACQ:MOD SAM\n", 12 ) == FAILURE )
-			tds_tmpl_gpib_failure( );
-	}
+		tds_tmpl_command( "ACQ:MOD SAM\n" );
 
 	return SAMPLE;
 }
@@ -446,8 +422,8 @@ double tds_tmpl_get_cursor_position( int cur_no )
 	fsc2_assert( cur_no == 1 || cur_no == 2 );
 
 	strcat( cmd, cur_no == 1 ? "1?\n" : "2?\n" );
-    if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE ||
-         gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+	tds_tmpl_command( cmd );
+    if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
 		tds_tmpl_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
@@ -485,9 +461,7 @@ void tds_tmpl_set_trigger_channel( int ch )
 #endif
 
 	sprintf( cmd, "TRIG:MAI:EDGE:SOU %s\n", Channel_Names[ ch ] );
-
-	if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_command( cmd );
 }
 
 
@@ -501,8 +475,8 @@ int tds_tmpl_get_trigger_channel( void )
     long length = 30;
 
 
-    if ( gpib_write( tds_tmpl.device, "TRIG:MAI:EDGE:SOU?\n", 19 ) == FAILURE
-		 || gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+	tds_tmpl_command( "TRIG:MAI:EDGE:SOU?\n" );
+	if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
 		tds_tmpl_gpib_failure( );
 
 	/* Possible replies are "CH1", "CH2", "CH3", "CH4", "AUX", or "LIN",
@@ -569,8 +543,8 @@ void tds_tmpl_clear_SESR( void )
     long length = 30;
 
 
-    if ( gpib_write( tds_tmpl.device, "*ESR?\n", 6 ) == FAILURE ||
-		 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+	tds_tmpl_command( "*ESR?\n" );
+	if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
 		tds_tmpl_gpib_failure( );
 }
 
@@ -607,8 +581,7 @@ void tds_tmpl_set_cursor( int cur_num, double pos )
     /* set cursors to specified positions */
 
 	sprintf( cmd, "CURS:VBA:POSITION %d %11.5E\n", cur_num, pos );
-    if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_command( cmd );
 }
 
 
@@ -627,8 +600,8 @@ bool tds_tmpl_display_channel_state( int channel )
 				 channel < NUM_DISPLAYABLE_CHANNELS );
 
 	sprintf( cmd, "SEL:%s?\n", Channel_Names[ channel ] );
-    if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE ||
-         gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+	tds_tmpl_command( cmd );
+    if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
 		tds_tmpl_gpib_failure( );
 
 	return reply[ 0 ] != '0';
@@ -661,8 +634,7 @@ void tds_tmpl_display_channel( int channel, bool on_flag )
     {
         sprintf( cmd, "SEL:%s %s\n", Channel_Names[ channel ],
 				 on_flag ? "ON" : "OFF" );
-        if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
-			tds_tmpl_gpib_failure( );
+		tds_tmpl_command( cmd );
     }
 }
 
@@ -681,8 +653,8 @@ double tds_tmpl_get_sens( int channel )
 	fsc2_assert( channel >= TDS_TMPL_CH1 && channel < NUM_NORMAL_CHANNELS );
 
 	sprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
-	if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+	tds_tmpl_command( cmd );
+	if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
 		tds_tmpl_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
@@ -714,8 +686,8 @@ void tds_tmpl_set_sens( int channel, double sens )
 	if ( sens > min_sens_50 )
 	{
 		sprintf( cmd, "CH%1d:IMP?\n", channel );
-		if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE ||
-			 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+		tds_tmpl_command( cmd );
+		if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
 			tds_tmpl_gpib_failure( );
 
 		if ( strncmp( reply, "MEG", 3 ) )
@@ -737,8 +709,7 @@ void tds_tmpl_set_sens( int channel, double sens )
 #endif
 
 	sprintf( cmd, "%s:SCA %8.3E\n", Channel_Names[ channel ], sens );
-	if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_command( cmd );
 }
 
 
@@ -754,9 +725,7 @@ void tds_tmpl_start_acquisition( void )
 
 
 	tds_tmpl_clear_SESR( );
-    if ( gpib_write( tds_tmpl.device, "ACQ:STATE RUN;STOPA SEQ\n", 24 )
-		 == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_command( "ACQ:STATE RUN;STOPA SEQ\n" );
 }
 
 
@@ -799,8 +768,7 @@ double tds_tmpl_get_area( int channel, WINDOW *w, bool use_cursor )
 
 	/* Set measurement type to area */
 
-    if ( gpib_write( tds_tmpl.device, "MEASU:IMM:TYP ARE\n", 18 ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_command( "MEASU:IMM:TYP ARE\n" );
 
 	fsc2_assert( channel >= TDS_TMPL_CH1 &&
 				 channel < NUM_DISPLAYABLE_CHANNELS );
@@ -810,8 +778,7 @@ double tds_tmpl_get_area( int channel, WINDOW *w, bool use_cursor )
 	if ( channel != tds_tmpl.meas_source )
 	{
 		sprintf( cmd, "MEASU:IMM:SOURCE %s\n", Channel_Names[ channel ] );
-		if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
-			tds_tmpl_gpib_failure( );
+		tds_tmpl_command( cmd );
 		tds_tmpl.meas_source = channel;
 	}
 
@@ -827,17 +794,16 @@ double tds_tmpl_get_area( int channel, WINDOW *w, bool use_cursor )
 
 		length = 40;
 		usleep( 100000 );
-		if ( gpib_write( tds_tmpl.device, "BUSY?\n", 6 ) == FAILURE ||
-			 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+		tds_tmpl_command( "BUSY?\n" );
+		if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
 			tds_tmpl_gpib_failure( );
 	} while ( reply[ 0 ] == '1' );
 
 	/* Get the the area */
 
 	length = 40;
-	if ( gpib_write( tds_tmpl.device, "*WAI;:MEASU:IMM:VAL?\n", 21 )
-		 == FAILURE ||
-		 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+	tds_tmpl_command( "*WAI;:MEASU:IMM:VAL?\n" );
+	if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
 		tds_tmpl_gpib_failure( );
 
 	reply[ length - 1 ] = '\0';
@@ -874,8 +840,8 @@ static double tds_tmpl_get_area_wo_cursor( int channel, WINDOW *w )
 	if ( channel >= TDS_TMPL_CH1 && channel < NUM_NORMAL_CHANNELS )
 	{
 		sprintf( buf, "CH%1d:POS?\n", channel + 1 );
-		if ( gpib_write( tds_tmpl.device, buf, strlen( buf ) ) == FAILURE ||
-			 gpib_read( tds_tmpl.device, buf, &len ) == FAILURE )
+		tds_tmpl_command( buf );
+		if ( gpib_read( tds_tmpl.device, buf, &len ) == FAILURE )
 			tds_tmpl_gpib_failure( );
 
 		pos = T_atod( buf );
@@ -950,8 +916,7 @@ void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 	if ( channel != tds_tmpl.data_source )
 	{
 		sprintf( cmd, "DAT:SOU %s\n", Channel_Names[ channel ] );
-		if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
-			tds_tmpl_gpib_failure( );
+		tds_tmpl_command( cmd );
 		tds_tmpl.data_source = channel;
 	}
 
@@ -961,8 +926,7 @@ void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 	sprintf( cmd, "DAT:START %ld;STOP %ld\n",
 			 w != NULL ? w->start_num : 1,
 			 w != NULL ? w->end_num : tds_tmpl.rec_len );
-	if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_command( cmd );
 #else
 	if ( use_cursor )
 		tds_tmpl_set_curve_window( w );
@@ -971,8 +935,7 @@ void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 		sprintf( cmd, "DAT:START %ld;STOP %ld\n",
 				 w != NULL ? w->start_num : 1,
 				 w != NULL ? w->end_num : tds_tmpl.rec_len );
-		if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
-			tds_tmpl_gpib_failure( );
+		tds_tmpl_command( cmd );
 	}
 #endif
 
@@ -984,8 +947,8 @@ void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 		len = 10;
 		usleep( 100000 );
-		if ( gpib_write( tds_tmpl.device, "BUSY?\n", 6 ) == FAILURE ||
-			 gpib_read( tds_tmpl.device, reply, &len ) == FAILURE )
+		tds_tmpl_command( "BUSY?\n" );
+		if ( gpib_read( tds_tmpl.device, reply, &len ) == FAILURE )
 			tds_tmpl_gpib_failure( );
 	} while ( reply[ 0 ] == '1' );
 
@@ -1066,8 +1029,7 @@ double tds_tmpl_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 
 	/* Set measurement type to area */
 
-    if ( gpib_write( tds_tmpl.device, "MEASU:IMM:TYP AMP\n", 18 ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_command( "MEASU:IMM:TYP AMP\n" );
 
 	fsc2_assert( channel >= TDS_TMPL_CH1 &&
 				 channel < NUM_DISPLAYABLE_CHANNELS );
@@ -1077,8 +1039,7 @@ double tds_tmpl_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 	if ( channel != tds_tmpl.meas_source )
 	{
 		sprintf( cmd, "MEASU:IMM:SOURCE %s\n", Channel_Names[ channel ] );
-		if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
-			tds_tmpl_gpib_failure( );
+		tds_tmpl_command( cmd );
 		tds_tmpl.meas_source = channel;
 	}
 
@@ -1094,8 +1055,8 @@ double tds_tmpl_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 
 		length = 40;
 		usleep( 100000 );
-		if ( gpib_write( tds_tmpl.device, "BUSY?\n", 6 ) == FAILURE ||
-			 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+		tds_tmpl_command( "BUSY?\n" );
+		if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
 			tds_tmpl_gpib_failure( );
 	} while ( reply[ 0 ] == '1' );
 
@@ -1103,9 +1064,9 @@ double tds_tmpl_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 	/* Get the the amplitude */
 
 	length = 40;
-	if ( gpib_write( tds_tmpl.device, "*WAI\n", 5 ) == FAILURE ||
-		 gpib_write( tds_tmpl.device, "MEASU:IMM:VAL?\n", 15 ) == FAILURE ||
-		 gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
+	tds_tmpl_command( "*WAI\n" );
+	tds_tmpl_command( "MEASU:IMM:VAL?\n" );
+	if ( gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
 		tds_tmpl_gpib_failure( );
 
 	reply[ length - 1 ] = '\0';
@@ -1150,9 +1111,7 @@ static double tds_tmpl_get_amplitude_wo_cursor( int channel, WINDOW *w )
 
 void tds_tmpl_free_running( void )
 {
-	if ( gpib_write( tds_tmpl.device, "ACQ:STOPA RUNST;STATE RUN\n", 26 )
-		 == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_command( "ACQ:STOPA RUNST;STATE RUN\n" );
 }
 
 
@@ -1182,8 +1141,7 @@ void tds_tmpl_lock_state( bool lock )
 	}
 
 	sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
-	if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_command( cmd );
 	tds_tmpl.lock_state = lock;
 }
 
@@ -1212,8 +1170,7 @@ void tds_tmpl_set_track_cursors( bool flag )
 
 
 	sprintf( cmd, "CURS:MODE %s\n", flag ? "TRAC" : "IND" );
-    if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_command( cmd );
 }
 
 
@@ -1226,8 +1183,7 @@ void tds_tmpl_set_gated_meas( bool flag )
 
 
 	sprintf( cmd, "MEASU:GAT %s\n", flag ? "ON" : "OFF" );
-    if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
-		tds_tmpl_gpib_failure( );
+	tds_tmpl_command( cmd );
 }
 
 
@@ -1240,15 +1196,11 @@ void tds_tmpl_set_snap( bool flag )
 
 
 	if ( flag )
-	{
-		if ( gpib_write( tds_tmpl.device, "DAT SNA\n", 8 ) == FAILURE )
-			tds_tmpl_gpib_failure( );
-	}
+		tds_tmpl_command( "DAT SNA\n" );
 	else
 	{
 		sprintf( cmd, "DAT:STAR 1;STOP %ld\n", tds_tmpl.rec_len );
-		if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
-			tds_tmpl_gpib_failure( );
+		tds_tmpl_command( cmd );
 	}
 }
 
