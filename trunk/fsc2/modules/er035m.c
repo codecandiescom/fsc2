@@ -52,6 +52,19 @@ static NMR nmr;
 #define E2_US       100000    /* 100 ms, used in calls of usleep() */
 #define ER035M_WAIT 200000    /* this means 200 ms for usleep() */
 
+/* If the field is unstable the gausmeter might never get to the state where
+   the field value is valid with the requested resolution eventhough the look
+   state is achieved. `ER035M_S_MAX_RETRIES' tells how many times we retry in
+   this case. With a value of 100 and the current setting of `ER035M_S_WAIT'
+   of 200 ms it will take at least 20 s before this will happen.
+
+   Take care: This does not mean that we stop trying to get the field while
+   the gaussmeter is still actively searching but only in the case that a
+   lock is already achieved but the field value is too unstable! */
+
+#define ER035M_MAX_RETRIES 100
+
+
 enum {
 	   ER035M_UNKNOWN = -1,
 	   ER035M_LOCKED = 0,
@@ -498,8 +511,11 @@ Var *field_meter_wait( Var *v )
 /*-----------------------------------------------------------------------*/
 /* er035m_get_field() returns the field value from the gaussmeter - it   */
 /* will return the settled value but will report a failure if gaussmeter */
-/* isn't in lock state. Thus, if the gaussmeter isn't already in locked  */
-/* state call find_field() instead.                                      */
+/* isn't in lock state. Another reason for a failure is a field that is  */
+/* too unstable to achieve the requested resolution eventhough the       */
+/* gaussmetere is already in lock state.                                 */
+/* Take care: If the gaussmeter isn't already in the lock state call     */
+/*            the function find_field() instead.                         */
 /*-----------------------------------------------------------------------*/
 
 double er035m_get_field( void )
@@ -507,9 +523,12 @@ double er035m_get_field( void )
 	char buffer[ 21 ];
 	char *state_flag;
 	long length;
+	long tries = ER035M_MAX_RETRIES;
 
 
-	/* Repeat asking for field value until it's correct up to LSD */
+	/* Repeat asking for field value until it's correct up to LSD -
+	   it will give up after `ER035M_S_MAX_RETRIES' retries to avoid
+	   getting into an infinite loop when the field is too unstable */
 
 	do
 	{
@@ -542,7 +561,17 @@ double er035m_get_field( void )
 			THROW( EXCEPTION );
 		}
 
-	} while ( *state_flag != '0' );
+	} while ( *state_flag != '0' && tries-- > 0 );
+
+	/* If the maximum number of retries was exceeded we've got to give up */
+
+	if ( tries < 0 )
+	{
+		eprint( FATAL, "%s: Field is too unstable to be measured with the "
+				"requested resolution of %s G.", nmr.name,
+				nmr.resolution == LOW ? "0.01" : "0.001" );
+		THROW( EXCEPTION );
+	}
 
 	/* Finally interpret the field value string */
 
