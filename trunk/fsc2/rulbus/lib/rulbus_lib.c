@@ -378,7 +378,7 @@ int rulbus_perror( const char *s )
 {
 	extern int rulbus_lineno;
 	extern int rulbus_column;
-	char *p
+	char *p;
 	int count = 0;
 
 	if ( ! rulbus_in_use )
