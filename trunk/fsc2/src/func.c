@@ -1007,10 +1007,10 @@ Var *f_wait( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == INT_VAR )
-		how_long = ( double ) v->val.lval;
-	else
-		how_long = v->val.dval;
+	how_long = VALUE( v->val.lval );
+
+	while ( ( v = vars_pop( v ) ) )
+		;
 
 	if ( how_long < 0.0 || how_long > LONG_MAX )
 	{

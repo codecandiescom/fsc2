@@ -359,6 +359,9 @@ Var *magnet_setup( Var *v )
 	magnet.field_step = VALUE( v->next );
 	magnet.is_field = magnet.is_field_step = SET;
 
+	while ( ( v = vars_pop( v ) ) )
+		;
+
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -370,7 +373,9 @@ Var *magnet_setup( Var *v )
 
 Var *magnet_fast_init( Var *v )
 {
-	v = v;
+	while ( ( v = vars_pop( v ) ) )
+		;
+
 	magnet.fast_init = SET;
 	return vars_push( INT_VAR, 1 );
 }
@@ -435,6 +440,9 @@ Var *set_field( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	while ( ( v = vars_pop( v ) ) )
+		;
+
 	return vars_push( FLOAT_VAR, magnet.act_field );
 }
 
@@ -444,7 +452,8 @@ Var *set_field( Var *v )
 
 Var *sweep_up( Var *v )
 {
-	v = v;
+	while ( ( v = vars_pop( v ) ) )
+		;
 
 	if ( ! magnet.is_field_step )
 	{
@@ -469,8 +478,8 @@ Var *sweep_up( Var *v )
 
 Var *sweep_down( Var *v )
 {
-	v = v;
-
+	while ( ( v = vars_pop( v ) ) )
+		;
 
 	if ( ! magnet.is_field_step )
 	{
@@ -495,7 +504,8 @@ Var *sweep_down( Var *v )
 
 Var *reset_field( Var *v )
 {
-	v = v;
+	while ( ( v = vars_pop( v ) ) )
+		;
 
 	if ( ! magnet.is_field )
 	{
