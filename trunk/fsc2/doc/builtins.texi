@@ -513,22 +513,23 @@ checks if it is valid and if the associated file is open for writing.
 @section Interaction functions
 @cindex interaction functions
 
-These functions are for creating and handling of buttons, sliders and
-input fields that allow the user to influence the experiment when it is
-already running. If they are used it is not possible anymore to check
-the complete experiment before it is run because it is impossible to
-forsee which buttons, sliders or input fields are used at what
-moment. Therefore, these functions should only be used where it is
-really necessary, i.e.@: when trying to find the optimum parameters for
-an experiment but not in the final experiment.
+These functions are for creating, handling and deleting of buttons,
+sliders and input fields. When such an object is created for the first
+time a new window with the title "Toolbox" opens up. The objects (i.e.@:
+buttons, sliders and input and output fields) displayed in the toolbox
+allow the user to influence the experiment when it is already
+running. The toolbox window will vanish automatically when all objects
+have been deleted. The toolbox with its objects can only be used while
+the experiment, i.e.@: the functions for creating, handling and deleting
+of objects can only be used within the @code{EXPERIMENT} section of the
+program.
 
-To display the buttons, sliders and input fields a new window is created
-on the first call of either the @code{button_create()},
-@code{slider_create()}, @code{input_create()} or @code{output_create()}
-function. It will be automatically deleted when either all buttons,
-sliders and input or output fields are deleted again or at the end of an
-experiment. These functions can only be used within the @code{EXPERIMENT}
-section of the program.
+Please note that if the objects in the toolbox are used it is
+not possible anymore to check the complete experiment before it is run
+because it is impossible to forsee which buttons, sliders or input
+fields are used at what moment. Therefore, these functions should only
+be used where it is really necessary, i.e.@: when trying to find the
+optimum parameters for an experiment but not in the final experiment.
 
 When the program is tested before the experiment is started it is
 assumed that all buttons are not pressed and switched off (unless they
@@ -783,6 +784,16 @@ returned by the function @code{output_create()}. If this is the only
 argument the value the output field is set to is returned. If there's a
 second value the output field is set to this value. Obviously, the value
 must be number.
+
+
+@anchor{object_delete}
+@item object_delete()
+@findex object_delete()
+The function deletes on or more objects from the toolbox. It expects one
+or a comma separated list of object identifiers as returned by the
+functions @code{button_create()}, @code{slider_create()} and
+@code{input_create()}.
+
 
 @end table
 

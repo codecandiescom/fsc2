@@ -2668,3 +2668,129 @@ static void convert_escapes( char *str )
 		ptr++;
 	}
 }
+
+
+/*------------------------------------------*/
+/* Deletes one or more objects of any kind. */
+/* Parameter are one or more object IDs     */
+/*------------------------------------------*/
+
+Var *f_objdel( Var *v )
+{
+	IOBJECT *io;
+
+
+	/* We need the ID of the button to delete */
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing parameter in call of %s().\n",
+				Fname, Lc, Cur_Func );
+		THROW( EXCEPTION );
+	}
+
+	/* Loop over all object numbers */
+
+	while ( v != NULL )
+	{
+		/* Since the object 'belong' to the parent, the child needs to ask
+		   the parent to delete the object. The ID of each object to be deleted
+		   gets passed to te parent in a buffer and the parent is asked to
+		   delete the object */
+
+		if ( I_am == CHILD )
+		{
+			void *buffer, *pos;
+			size_t len;
+
+			/* Do all possible checking of the parameter */
+
+			if ( v->type != INT_VAR || v->val.lval < 0 )
+			{
+				eprint( FATAL, "%s:%ld: Invalid object identifier in %s().\n",
+						Fname, Lc, Cur_Func );
+				THROW( EXCEPTION );
+			}
+
+			/* Get a bufer long enough and write data */
+
+			len = 2 * sizeof( long );
+			if ( Fname )
+				len += strlen( Fname ) + 1;
+			else
+				len++;
+
+			pos = buffer = T_malloc( len );
+
+			memcpy( pos, &Lc, sizeof( long ) );       /* current line number */
+			pos += sizeof( long );
+			memcpy( pos, &v->val.lval, sizeof( long ) );  /* object ID */
+			pos += sizeof( long );
+			if ( Fname )
+			{
+				strcpy( ( char * ) pos, Fname );    /* current file name */
+				pos += strlen( Fname ) + 1;
+			}
+			else
+				* ( char * ) pos++ = '\0';
+
+			v = vars_pop( v );
+
+			/* Ask parent to delete the object, bomb out on failure */
+
+			if ( ! exp_objdel( buffer, len ) )
+				THROW( EXCEPTION );
+
+			continue;
+		}
+
+		/* No tool box -> no objects -> no objects to delete... */
+
+		if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+		{
+			eprint( FATAL, "%s:%ld: No objects have been defined yet.\n",
+					Fname, Lc );
+			THROW( EXCEPTION );
+		}
+
+		/* Do checks on parameters */
+
+		if ( v->type != INT_VAR || v->val.lval < 0 ||
+			 ( io = find_object_from_ID( v->val.lval ) ) == NULL )
+		{
+			eprint( FATAL, "%s:%ld: Invalid object identifier in %s().\n",
+					Fname, Lc, Cur_Func );
+			THROW( EXCEPTION );
+		}
+
+		switch ( io->type )
+		{
+			case NORMAL_BUTTON :
+			case PUSH_BUTTON :
+			case RADIO_BUTTON :
+				vars_pop( f_bdelete( vars_push( INT_VAR, v->val.lval ) ) );
+				break;
+
+			case NORMAL_SLIDER :
+			case VALUE_SLIDER :
+				vars_pop( f_sdelete( vars_push( INT_VAR, v->val.lval ) ) );
+				break;
+
+			case INT_INPUT :
+			case FLOAT_INPUT :
+			case INT_OUTPUT :
+			case FLOAT_OUTPUT :
+				vars_pop( f_idelete( vars_push( INT_VAR, v->val.lval ) ) );
+				break;
+
+			default :
+				eprint( FATAL, "Internal error at %s:%d.\n",
+						__FILE__, __LINE__ );
+				THROW( EXCEPTION );
+		}
+
+		v = vars_pop( v );
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
