@@ -46,14 +46,15 @@ static Var *CV;
 %token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
 %type <vptr> expr arrass list1 list2 list3 unit
 
-%left AND OR XOR
-%left NOT
+
+
 %left EQ NE LT LE GT GE
+%left AND OR XOR
 %left '+' '-'
 %left '*' '/'
 %left '%'
-%left NEG
 %right '^'
+%left NEG NOT
 
 
 %%
