@@ -108,7 +108,7 @@ Currently suported devices
 fsc2 works with three different GPIB driver/library combinations, the
 Linux Lab Project driver (http://www.llp.fu-berlin.de), the National
 Instruments driver (http://www.natinst.com) and a driver for NI PCII
-and AT-GPIB/TNT (ISA) cards I wrote an which can be downloaded from
+and AT-GPIB/TNT (ISA) cards I wrote and which can be downloaded from
 the same URL as fsc2, see above.
 
 Limitations
