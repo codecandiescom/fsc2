@@ -208,6 +208,7 @@ extern int cmdline_flags;
 extern long Lc;
 extern char *Fname;
 extern const char *Cur_Func;
+extern const Device *Cur_Dev;
 extern Compilation compilation;
 extern Prg_Token *prg_token;
 extern long prg_length;
