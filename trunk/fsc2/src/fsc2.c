@@ -695,11 +695,14 @@ void test_file( FL_OBJECT *a, long b )
 		delete_devices( );                       /* run the exit hooks ! */
 		eprint( FATAL, "Test of program aborted, received user break.\n" );
 		notify_conn( UNBUSY_SIGNAL );
-		in_test = UNSET;
+		running_test = UNSET;
 		THROW( EXCEPTION );
 	}
 
-	/* Avoid executing the  handler while it's already running... */
+	/* If fsc2 is too busy to react to clicks on the "Stop Test" button and
+	   the user presses it several times strange things happen, especially
+	   th "Quit" button becoming unusable. The following helps avoiding to
+	   execute the handler again while it's already running... */
 
 	if ( in_test )
 		return;
