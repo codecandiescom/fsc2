@@ -164,6 +164,11 @@ install-isaak.physik.fu-berlin.de:
 	-$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
 	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
 
+install-moebpc3.physik.fu-berlin.de:
+	$(MAKE) $(UNINSTALL_MACHINE)
+	-$(LN) $(LNFLAGS) $(libdir)/ips20_4.so $(libdir)/magnet.so
+	-chown $(OWNER).$(GROUP) $(libdir)/magnet.so
+
 install-tresr.physik.fu-berlin.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
 	-$(LN) $(LNFLAGS) $(libdir)/er032m.so $(libdir)/magnet.so
@@ -216,6 +221,9 @@ uninstall-isaak.physik.fu-berlin.de:
 	-$(RM) $(RMFLAGS) $(libdir)/pulser.so
 	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
 	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
+
+uninstall-moebpc3.physik.fu-berlin.de:
+	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
 
 uninstall-tresr.physik.fu-berlin.de:
 	-$(RM) $(RMFLAGS) $(libdir)/magnet.so

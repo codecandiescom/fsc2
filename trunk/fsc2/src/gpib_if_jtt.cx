@@ -186,6 +186,7 @@ static int gpib_init_controller( void )
 
 
 	raise_permissions( );
+
     if ( gpib_init_device( CONTROLLER, &controller ) != SUCCESS )
 	{
 		lower_permissions( );

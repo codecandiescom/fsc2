@@ -294,7 +294,8 @@ Var *synthesizer_frequency( Var *v )
 			   the test run we only do this to check that we stay within all
 			   the limits */
 
-			hp8647a.real_attenuation = hp8647a_get_att( freq );
+			if ( hp8647a.use_table )
+				hp8647a.real_attenuation = hp8647a_get_att( freq );
 			break;
 
 		case EXPERIMENT :
@@ -305,14 +306,17 @@ Var *synthesizer_frequency( Var *v )
 			}
 
 			/* Take care of setting the correct attenuation to level out the
-			   non- flatness of the RF field in the resonator if a table has
+			   non-flatness of the RF field in the resonator if a table has
 			   been set */
 
-			att = hp8647a_get_att( freq );
-			if ( att != hp8647a.real_attenuation )
+			if ( hp8647a.use_table )
 			{
-				hp8647a_set_attenuation( att );
-				hp8647a.real_attenuation = att;
+				att = hp8647a_get_att( freq );
+				if ( att != hp8647a.real_attenuation )
+				{
+					hp8647a_set_attenuation( att );
+					hp8647a.real_attenuation = att;
+				}
 			}
 
 			/* Finally set the frequency */

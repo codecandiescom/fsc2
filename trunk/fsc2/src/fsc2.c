@@ -89,6 +89,8 @@ int main( int argc, char *argv[ ] )
 	Internals.EUID = geteuid( );
 	Internals.EGID = getegid( );
 
+	lower_permissions( );
+
     Internals.child_pid = 0;
 
 	Internals.mode = PREPARATION;
@@ -118,8 +120,6 @@ int main( int argc, char *argv[ ] )
 	Comm.request_semaphore = -1;
 	Comm.MQ = NULL;
 	Comm.MQ_ID = -1;
-
-	lower_permissions( );
 
 	/* Figure out if the machine has an INTEL type processor */
 

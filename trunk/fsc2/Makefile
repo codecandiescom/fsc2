@@ -224,6 +224,14 @@ ifeq ($(machine_name),isaak.physik.fu-berlin.de)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
+ifeq ($(machine_name),moebpc3.physik.fu-berlin.de)
+	OWNER              := fsc2
+	GROUP              := uucp
+	GPIB_LIBRARY       := JTT
+	INSTALL_MACHINE    := install-$(machine_name)
+	UNINSTALL_MACHINE  := uninstall-$(machine_name)
+endif
+
 ifeq ($(machine_name),sunone.chemie.unibas.ch)
 	OWNER              := exp
 	GROUP              := exp
@@ -518,6 +526,8 @@ specific-crowley.physik.fu-berlin.de:
 specific-door.physik.fu-berlin.de:
 
 specific-isaak.physik.fu-berlin.de:
+
+specific-moebpc3.physik.fu-berlin.de:
 
 specific-tresr.physik.fu-berlin.de:
 	sed -e 's/\"ER032M\"/\"Field\"/' \
