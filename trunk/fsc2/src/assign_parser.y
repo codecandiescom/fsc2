@@ -107,14 +107,16 @@ static bool Func_is_set = UNSET;
 %type <lval> phsv
 %type <vptr> expr list1 unit sl_val
 
+
+
+%left EQ NE LT LE GT GE
 %left AND OR XOR
 %left NOT
-%left EQ NE LT LE GT GE
 %left '+' '-'
 %left '*' '/'
 %left '%'
-%left NEG
 %right '^'
+%left NEG
 
 
 %%

@@ -61,14 +61,14 @@ static Var *CV;
 %type <vptr> expr unit list1
 
 
+%left EQ NE LT LE GT GE
 %left AND OR XOR
 %left NOT
-%left EQ NE LT LE GT GE
 %left '+' '-'
 %left '*' '/'
 %left '%'
-%left NEG
 %right '^'
+%left NEG
 
 
 %%

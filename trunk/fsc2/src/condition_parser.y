@@ -83,13 +83,12 @@ static Var *CV;
 
 
 %left E_AND E_OR E_XOR
-%left E_NOT
 %left E_EQ E_NE E_LT E_LE E_GT E_GE
 %left '+' '-'
 %left '*' '/'
 %left '%'
-%left E_NEG
 %right '^'
+%left E_NEG E_NOT
 
 
 %%
