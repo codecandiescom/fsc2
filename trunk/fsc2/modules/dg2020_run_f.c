@@ -329,7 +329,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 			phase_p->is_old_pos = SET;
 		}
 
-		/* So, obviously we have to reset the pulse position: Try to start the
+		/* So, obviously, we have to reset the pulse position: Try to start the
 		   phase pulse as late as possible, i.e. just the phase switch delay
 		   plus a grace period before the associated pulse, because the
 		   probablity is high that the preceeding pulse is going to be shifted
