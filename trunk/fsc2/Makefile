@@ -10,7 +10,7 @@
 
 prefix         = .
 bindir         = $(prefix)/.
-libdir         = $(prefix)/
+libdir         = $(prefix)/.
 
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log
@@ -78,7 +78,7 @@ endif
 .SUFFIXES: .c .o .h
 .PHONY: all clean
 
-all: tags fsc2 mods fsc2_clean
+all: fsc2 mods fsc2_clean
 
 fsc2: $(objects) $(header)
 	$(CC) -o $@ $(objects) $(LIBS) $(LDFLAGS)
@@ -106,6 +106,18 @@ fsc2_clean: fsc2_clean.o exceptions.o
 fsc2_clean.c: fsc2_clean.flex $(header)
 	$(FLEX) -B -o$@ $<
 
+
+install:
+	cp fsc2 $(bindir)/fsc2
+	chown fsc2.fsc2 $(bindir)/fsc2
+	chmod 6755 $(bindir)/fsc2
+	strip $(bindir)/fsc2
+	cp *.so $(libdir)
+	cp fsc2_clean $(libdir)
+	cp undo.xbm $(libdir)
+	chown fsc2.fsc2 $(libdir)/*.so $(libdir)/undo.xbm $(libdir)/fsc2_clean
+	chmod 644 $(libdir)/*.so $(libdir)/undo.xbm
+	chmod 755 $(libdir)/fsc2_clean
 
 tags:
 	etags -T ${c_sources} *.flex *.y ${c_sources:.c=.h} $(header)

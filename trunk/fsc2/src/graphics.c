@@ -33,6 +33,7 @@ void start_graphics( void )
 {
 	XCharStruct font_prop;
 	int dummy;
+	char *bitmap_file;
 
 
 	/* Create the form for running experiments */
@@ -40,6 +41,13 @@ void start_graphics( void )
 	run_form = create_form_run( );
 
 	/* It still need some modifications... */
+
+	bitmap_file = get_string( strlen( libdir ) + strlen( "/undo.xbm" ) );
+	strcpy( bitmap_file, libdir );
+	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
+		strcat( bitmap_file, "/" );
+	strcat( bitmap_file, "undo.xbm" );
+    fl_set_bitmapbutton_file( run_form->undo_button, bitmap_file );
 
 	fl_set_object_helper( run_form->stop, "Stop the running program" );
 	fl_set_object_helper( run_form->undo_button,
