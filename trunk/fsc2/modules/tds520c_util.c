@@ -431,7 +431,7 @@ void tds520c_set_window( WINDOW *w )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-long tds520_translate_channel( int dir, long channel )
+long tds520c_translate_channel( int dir, long channel )
 {
 	if ( dir == GENERAL_TO_TDS520C )
 	{
