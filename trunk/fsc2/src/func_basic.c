@@ -8,6 +8,8 @@
 
 static void get_array_params( Var *v, long *len, long **ilp, double **idp );
 
+static bool grand_is_old = UNSET;
+
 
 
 /*----------------------------------------------------------------*/
@@ -1136,21 +1138,22 @@ Var *f_random( Var *v )
 }
 
 
-/*---------------------------------------------------*/
-/* Returns random numbers with gaussian distribution */
-/* and with zero mean value and a variance of 1.     */
-/*---------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Returns random numbers with Gaussian distribution, zero mean value   */
+/* and variance of 1. See W. H. Press, S. A. Teukolsky, W, T. Vettering */
+/* and B. P. Flannery, "Numerical Recipes in C", 2nd ed., Cambridge     */
+/* University Press 1992, pp. 288-290, for all the gory details.        */
+/*----------------------------------------------------------------------*/
 
 Var *f_grand( Var *v )
 {
-	static bool is_old = UNSET;
 	static double next_val;
 	double factor, radius, val_1, val_2;
 
 
 	v = v;
 
-	if ( ! is_old )
+	if ( ! grand_is_old )
 	{
 		do {
 			val_1 = 2.0 * ( double ) random( ) / ( double ) RAND_MAX - 1.0;
@@ -1160,11 +1163,11 @@ Var *f_grand( Var *v )
 
 		factor = sqrt( - 2.0 * log( radius ) / radius );
 		next_val = val_1 * factor;
-		is_old = SET;
+		grand_is_old = SET;
 		return vars_push( FLOAT_VAR, val_2 * factor );
 	}
 
-	is_old = UNSET;
+	grand_is_old = UNSET;
 	return vars_push( FLOAT_VAR, next_val );
 }
 
@@ -1219,6 +1222,7 @@ Var *f_setseed( Var *v )
 			arg >>= 1;
 	}
 
+	grand_is_old = UNSET;
 	srandom( arg );
 	return vars_push( INT_VAR, 1 );
 }

@@ -7,6 +7,8 @@
 #include "gpib_if.h"
 
 
+volatile bool need_post;
+
 extern int exp_runparse( void );              /* from exp_run_parser.y */
 
 /* Routines of the main process exclusively used in this file */
@@ -159,6 +161,7 @@ bool run( void )
 
 	if ( child_pid != -1 )           /* if fork() succeeded */
 	{
+		need_post = UNSET;
 		sema_post( semaphore );      /* we're ready to read data */
 		return OK;
 	}
@@ -297,6 +300,7 @@ static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
 static void new_data_handler( int signo )
 {
 	int errno_saved;
+	int new_high;
 
 
 	signo = signo;
@@ -304,10 +308,24 @@ static void new_data_handler( int signo )
 
 	Message_Queue[ message_queue_high ].shm_id = Key->shm_id;
 	Message_Queue[ message_queue_high ].type = Key->type;
-	message_queue_high = ( message_queue_high + 1 ) % QUEUE_SIZE;
+	new_high = ( message_queue_high + 1 ) % QUEUE_SIZE;
+
+	/* If this were data tell child that it can send new data (as long as the
+	   message queue isn't full) */
 
 	if ( Key->type == DATA )
-		sema_post( semaphore );
+	{
+		if ( new_high != message_queue_low )
+		{
+			message_queue_high = new_high;
+			sema_post( semaphore );
+		}
+		else
+			need_post = SET;
+	}
+	else
+		if ( new_high != message_queue_low )
+			message_queue_high = new_high;
 
 	errno = errno_saved;
 }
@@ -751,7 +769,21 @@ static void do_measurement( void )
 					cur = cur_prg_token;
 					if ( test_condition( cur ) )
 					{
-						cur->counter++;
+						cur->counter = 1;
+						cur_prg_token = cur->start;
+					}
+					else
+					{
+						cur->counter = 0;
+						cur_prg_token = cur->end;
+					}
+					break;
+
+				case UNTIL_TOK :
+					cur = cur_prg_token;
+					if ( ! test_condition( cur ) )
+					{
+						cur->counter = 1;
 						cur_prg_token = cur->start;
 					}
 					else
@@ -784,7 +816,7 @@ static void do_measurement( void )
 
 					if ( test_for_cond( cur ) )
 					{
-						cur->counter++;
+						cur->counter = 1;
 						cur_prg_token = cur->start;
 					}
 					else

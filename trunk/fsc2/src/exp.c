@@ -591,7 +591,7 @@ void exp_test_run( void )
 					cur = cur_prg_token;
 					if ( test_condition( cur ) )
 					{
-						cur->counter++;
+						cur->counter = 1;
 						cur_prg_token = cur->start;
 					}
 					else
@@ -605,7 +605,7 @@ void exp_test_run( void )
 					cur = cur_prg_token;
 					if ( ! test_condition( cur ) )
 					{
-						cur->counter++;
+						cur->counter = 1;
 						cur_prg_token = cur->start;
 					}
 					else
@@ -635,10 +635,9 @@ void exp_test_run( void )
 					cur = cur_prg_token;
 					if ( cur->counter == 0 )
 						get_for_cond( cur );
-
 					if ( test_for_cond( cur ) )
 					{
-						cur->counter++;
+						cur->counter = 1;
 						cur_prg_token = cur->start;
 					}
 					else
@@ -652,7 +651,7 @@ void exp_test_run( void )
 					cur = cur_prg_token;          /* just test once ! */
 					if ( cur->counter )
 					{
-						cur->counter--;
+						cur->counter = 0;
 						cur_prg_token = cur->start;
 					}
 					else
@@ -1201,8 +1200,8 @@ bool test_for_cond( Prg_Token *cur )
 				cur->count.forl.act->val.lval += cur->count.forl.incr.lval;
 		else
 			cur->count.forl.act->val.dval += 
-				( cur->count.forl.incr.type == INT_VAR ?
-				       cur->count.forl.incr.lval : cur->count.forl.incr.dval );
+				cur->count.forl.incr.type == INT_VAR ?
+					cur->count.forl.incr.lval : cur->count.forl.incr.dval;
 	}
 
 	/* Get sign of increment */
@@ -1212,7 +1211,6 @@ bool test_for_cond( Prg_Token *cur )
 		 ( cur->count.forl.incr.type == FLOAT_VAR &&
 		   cur->count.forl.incr.dval < 0 ) )
 		sign = SET;
-
 
 	/* If the increment is positive test if loop variable is less or equal to
 	   the end value, if increment is negative if loop variable is larger or
