@@ -369,6 +369,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "*="        return MULA;
 "/="        return DIVA;
 "%="        return MODA;
+"^="        return EXPA;
 
             /* quasi-assignment operator for pulse properties */
 

@@ -67,6 +67,7 @@ static Var *CV;
 %token E_MULA         290
 %token E_DIVA         291
 %token E_MODA         292
+%token E_EXPA         293
 
 %token <vptr> E_VAR_TOKEN         /* variable name */
 %token <vptr> E_VAR_REF

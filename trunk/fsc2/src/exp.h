@@ -52,6 +52,7 @@ typedef union {
 #define	E_MULA          290
 #define	E_DIVA          291
 #define	E_MODA          292
+#define E_EXPA          293
 
 #define IF_TOK         2049
 #define ELSE_TOK       2050

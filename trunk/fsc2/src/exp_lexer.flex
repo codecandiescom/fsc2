@@ -268,6 +268,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "*="        return E_MULA;
 "/="        return E_DIVA;
 "%="        return E_MODA;
+"^="        return E_EXPA;
 
 
 			/* handling of end of statement character */

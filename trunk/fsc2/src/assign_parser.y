@@ -111,12 +111,11 @@ static bool Func_is_set = UNSET;
 
 %left EQ NE LT LE GT GE
 %left AND OR XOR
-%left NOT
 %left '+' '-'
 %left '*' '/'
 %left '%'
 %right '^'
-%left NEG
+%left NEG NOT
 
 
 %%

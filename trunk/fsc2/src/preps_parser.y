@@ -54,7 +54,7 @@ static Var *CV;
 %token <sptr> STR_TOKEN
 %token EQ NE LT LE GT GE
 %token AND OR XOR NOT
-%token PLSA MINA MULA DIVA MODA
+%token PLSA MINA MULA DIVA MODA EXPA
 
 %token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN
 %token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
@@ -117,6 +117,9 @@ ass:     '=' expr                  { vars_assign( $2, $2->prev ); }
 															$2 ), C ); }
        | MODA expr                 { Var *C = $2->prev;
 	                                 vars_assign( vars_div( vars_val( C ),
+															$2 ), C ); }
+       | EXPA expr                 { Var *C = $2->prev;
+	                                 vars_assign( vars_pow( vars_val( C ),
 															$2 ), C ); }
 ;                                     
 
