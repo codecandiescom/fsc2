@@ -3942,8 +3942,8 @@ valid:
 10.7 db786
 @end example
 @noindent
-As you see also blank lines don't matter. Finally, all lines starting
-with a hash character, `@code{#}', are treated as comments.
+Blank lines don't matter. Finally, all lines starting with a hash
+character, `@code{#}', are treated as comments.
 
 If an attenuation is used that isn't in the table the stepper motor
 setting to be used is linearly interpolated from the next neighboring
