@@ -1178,7 +1178,7 @@ declared.
 In the @code{PREPARATIONS} section the graphics get initialized, we will
 display the averaged traces at each field point, so we need a 2D
 display. We're going to display 2 curves, one with the raw data and one
-where we try to do some background subtraction by taking the some points
+where we try to do some background subtraction by taking some points
 before the laser flash and subtracting their mean value from the
 curve. This should take care of slow drifts of the base line.
 
