@@ -28,9 +28,11 @@
 
 int fsc2_serial_open( const char *dev_name, int flags );
 ssize_t int fsc2_serial_write( int fd, const void *buf, size_t count );
+ssize_t fsc2_serial_read( int fd, void *buf, size_t count );
 int fsc2_serial_close( int fd );
 int fsc2_tcgetattr( int fd, struct termios *termios_p );
 int fsc2_cfsetospeed( struct termios *termios_p, speed_t speed );
+int fsc2_cfsetispeed( struct termios *termios_p, speed_t speed );
 int fsc2_tcflush( int fd, int queue_selector );
 int fsc2_tcsetattr( int fd, int optional_actions, struct termios *termios_p );
 int fsc2_tcflush( int fd, int queue_selector );

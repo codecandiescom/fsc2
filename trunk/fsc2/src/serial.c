@@ -62,6 +62,23 @@ ssize_t int fsc2_serial_write( int fd, const void *buf, size_t count )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
+ssize_t fsc2_serial_read( int fd, void *buf, size_t count )
+{
+	ssize_t ret_count;
+	bool must_reset = UNSET;
+
+
+	must_reset = raise_permissions( );
+	ret_count = read( fd, buf, count );
+	lower_permissions( must_reset );
+
+	return ret_count;
+}
+	
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
 int fsc2_serial_close( int fd )
 {
 	int ret;
@@ -103,6 +120,22 @@ int fsc2_cfsetospeed( struct termios *termios_p, speed_t speed )
 
 	must_reset = raise_permissions( );
 	ret = cfsetospeed( termios_p, spped );
+	lower_permissions( must_reset );
+
+	return ret;
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+int fsc2_cfsetispeed( struct termios *termios_p, speed_t speed )
+{
+	int ret;
+	bool must_reset = UNSET;
+
+	must_reset = raise_permissions( );
+	ret = cfsetispeed( termios_p, speed );
 	lower_permissions( must_reset );
 
 	return ret;

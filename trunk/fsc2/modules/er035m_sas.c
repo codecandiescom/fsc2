@@ -760,11 +760,11 @@ static bool er035m_sas_comm( int type, ... )
 			   should not become the controlling terminal, otherwise line
 			   noise read as a CTRL-C might kill the program. */
 
-			if ( ( nmr.fd = open( serial_port,
+			if ( ( nmr.fd = fsc2_serial_open( serial_port,
 							  O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) < 0 )
 				return FAIL;
 
-			tcgetattr( nmr.fd, &nmr.old_tio );
+			fsc2_tcgetattr( nmr.fd, &nmr.old_tio );
 			memcpy( &nmr.new_tio, &nmr.old_tio,
 					sizeof( struct termios ) );
 
@@ -776,21 +776,21 @@ static bool er035m_sas_comm( int type, ... )
 			nmr.new_tio.c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
 
 			nmr.new_tio.c_cflag |= CS8 | CLOCAL | CREAD;
-			cfsetospeed( &nmr.new_tio, SERIAL_BAUDRATE );
-			cfsetispeed( &nmr.new_tio, 0 );
+			fsc2_cfsetospeed( &nmr.new_tio, SERIAL_BAUDRATE );
+			fsc2_cfsetispeed( &nmr.new_tio, 0 );
 
 			nmr.new_tio.c_iflag = IGNBRK;
 			nmr.new_tio.c_oflag = 0;
 			nmr.new_tio.c_lflag = 0;
-			tcflush( nmr.fd, TCIOFLUSH );
-			tcsetattr( nmr.fd, TCSANOW, &nmr.new_tio );
+			fsc2_tcflush( nmr.fd, TCIOFLUSH );
+			fsc2_tcsetattr( nmr.fd, TCSANOW, &nmr.new_tio );
 			break;
 
 		case SERIAL_EXIT :
 			er035m_sas_write( "LOC" );
-			tcflush( nmr.fd, TCIOFLUSH );
-			tcsetattr( nmr.fd, TCSANOW, &nmr.old_tio );
-			close( nmr.fd );
+			fsc2_tcflush( nmr.fd, TCIOFLUSH );
+			fsc2_tcsetattr( nmr.fd, TCSANOW, &nmr.old_tio );
+			fsc2_serial_close( nmr.fd );
 			break;
 
 		case SERIAL_WRITE :
@@ -799,7 +799,7 @@ static bool er035m_sas_comm( int type, ... )
 			va_end( ap );
 
 			len = strlen( buf );
-			if ( write( nmr.fd, buf, len ) != len )
+			if ( fsc2_serial_write( nmr.fd, buf, len ) != len )
 				return FAIL;
 			break;
 
@@ -817,7 +817,7 @@ static bool er035m_sas_comm( int type, ... )
 			{
 				if ( len < 0 )
 					usleep( ER035M_SAS_WAIT );
-				len = read( nmr.fd, buf, *lptr );
+				len = fsc2_serial_read( nmr.fd, buf, *lptr );
 			}
 			while ( len < 0 && errno == EAGAIN && read_retries-- > 0 );
 				
