@@ -498,10 +498,10 @@ Var *func_call( Var *f )
 /* Before a function gets called a few data items have to be stored for   */
 /* utility functions like print() and for handling pulsers. print() needs */
 /* the name of the function and, for functions from modules, the name of  */
-/* the device. For pulser functions the pulser numbers that supplies the  */
-/* function must be stored as well the global variable 'Cur_Pulser' must  */
-/* be set and on return from the called function reset to to the previous */
-/* be reset to the previous value.                                        */
+/* the device. For pulser functions the pulsers number that supplies the  */
+/* function must be stored as well as the global variable 'Cur_Pulser'    */
+/* must be set, and on return from the called function reset to the       */
+/* previous value.                                                        */
 /* A return value of NULL means we're running out of memory.              */
 /*------------------------------------------------------------------------*/
 
