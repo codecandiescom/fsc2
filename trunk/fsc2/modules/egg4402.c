@@ -155,7 +155,7 @@ Var *boxcar_curve_length( Var *v )
 		return vars_push( INT_VAR, T_atol( buffer ) );
 	}
 
-	num_points = get_int( v, "number of points", DEVICE_NAME );
+	num_points = get_long( v, "number of points", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 

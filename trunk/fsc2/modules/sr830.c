@@ -297,7 +297,7 @@ Var *lockin_get_data( Var *v )
 
 	for ( num_channels = i = 0; i < 6 && v != NULL; i++, v = vars_pop( v ) )
 	{
-		channel[ i ] = get_long( v, "channel number", DEVICE_NAME );
+		channels[ i ] = get_long( v, "channel number", DEVICE_NAME );
 
 		if ( channels[ i ] < 1 || channels[ i ] > NUM_CHANNELS )
 		{
@@ -422,7 +422,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	/* Get and check the voltage */
 
-	volatge = get_double( v, "DAC voltage", DEVICE_NAME );
+	voltage = get_double( v, "DAC voltage", DEVICE_NAME );
 
 	if ( voltage < DAC_MIN_VOLTAGE || voltage > DAC_MIN_VOLTAGE )
 	{

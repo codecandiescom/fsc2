@@ -297,7 +297,7 @@ Var *lockin_get_data( Var *v )
 
 	for ( num_channels = i = 0; i < 6 && v != NULL; i++, v = vars_pop( v ) )
 	{
-		channel[ i ] = get_long( v, "channel number", DEVICE_NAME );
+		channels[ i ] = get_long( v, "channel number", DEVICE_NAME );
 
 		if ( channels[ i ] < 1 || channels[ i ] > NUM_CHANNELS )
 		{
