@@ -175,23 +175,23 @@ void eprint( int severity, const char *fmt, ... )
 	{
 		if ( severity == FATAL )
 		{
-			strcpy( buffer, "@C1" );
-			cp += 3;
-			space_left -= 3;
+			strcpy( buffer, "@C1@f" );
+			cp += 5;
+			space_left -= 5;
 		}
 
 		if ( severity == SEVERE )
 		{
-			strcpy( buffer, "@C2" );
-			cp += 3;
-			space_left -= 3;
+			strcpy( buffer, "@C2@f" );
+			cp += 5;
+			space_left -= 5;
 		}
 
 		if ( severity == WARN )
 		{
-			strcpy( buffer, "@C4" );
-			cp += 3;
-			space_left -= 3;
+			strcpy( buffer, "@C4@f" );
+			cp += 5;
+			space_left -= 5;
 		}
 
 		va_start( ap, fmt );
