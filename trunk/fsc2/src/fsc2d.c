@@ -242,7 +242,7 @@ static int start_fsc2d( bool exclusive, FILE *in_file_fp )
 
 	/* Create UNIX domain socket */
 
-	if ( ( listen_fd = socket( AF_UNIX, SOCK_STREAM, 0 ) ) == 1 )
+	if ( ( listen_fd = socket( AF_UNIX, SOCK_STREAM, 0 ) ) == -1 )
 		return -1;
 
 	unlink( FSC2_SOCKET );
@@ -265,7 +265,7 @@ static int start_fsc2d( bool exclusive, FILE *in_file_fp )
 
     umask( old_mask );
 
-	if ( listen( listen_fd, SOMAXCONN ) < 0 )
+	if ( listen( listen_fd, SOMAXCONN ) == -1 )
 	{
 		close( listen_fd );
 		unlink( FSC2D_SOCKET );
@@ -279,7 +279,7 @@ static int start_fsc2d( bool exclusive, FILE *in_file_fp )
 	sact.sa_handler = fsc2d_sig_handler;
 	sigemptyset( &sact.sa_mask );
 	sact.sa_flags = 0;
-	if ( sigaction( SIGUSR2, &sact, NULL ) < 0 )
+	if ( sigaction( SIGUSR2, &sact, NULL ) == -1 )
 	{
 		unlink( FSC2D_SOCKET );
 		lower_permissions( );

@@ -110,7 +110,10 @@ int main( int argc, char *argv[ ] )
 			   	( pid_t ) check_spawn_fsc2d( ! ( Fsc2_Internals.cmdline_flags &
 												 NON_EXCLUSIVE ),
 											 In_file_fp ) ) == -1 )
+	{
+		fprintf( stderr, "Failed to setup daemon process for fsc2.\n" );
 		return EXIT_FAILURE;
+	}
 
 	/* Initialize xforms stuff, quit on error */
 
@@ -119,6 +122,7 @@ int main( int argc, char *argv[ ] )
 	{
 		raise_permissions( );
 		lower_permissions( );
+		fprintf( stderr, "Graphic setup failed.\n" );
 		return EXIT_FAILURE;
 	}
 	
@@ -142,7 +146,10 @@ int main( int argc, char *argv[ ] )
 	if ( Fsc2_Internals.cmdline_flags & DO_LOAD )
 	{
 		if ( ! get_edl_file( fname ) )
+		{
+			fprintf( stderr, "Failed to set up full name of EDL file.\n" );
 			return EXIT_FAILURE;
+		}
 
 		conn_pid = Fsc2_Internals.conn_pid;
 		Fsc2_Internals.conn_pid = 0;
@@ -167,7 +174,10 @@ int main( int argc, char *argv[ ] )
 		fname = argv[ 1 ];
 
 		if ( ! get_edl_file( fname ) )
+		{
+			fprintf( stderr, "Failed to set up full name of EDL file.\n" );
 			return EXIT_FAILURE;
+		}
 
 		conn_pid = Fsc2_Internals.conn_pid;
 		Fsc2_Internals.conn_pid = 0;
