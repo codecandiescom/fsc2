@@ -260,9 +260,14 @@ pack:
 # Write zipped tarball to ZIP drive (with mount and unmount of ZIP drive)
 
 ZIP:
-	if ! `grep ZIP /etc/mtab > /dev/null`; then \
-	    sleep 1; \
-		mount /ZIP; \
+	$(MAKE) pack
+	if [ `hostname -f` = "crowley.none" ]; then \
+		if ! `grep ZIP /etc/mtab > /dev/null`; then \
+			sleep 1; \
+			mount /ZIP; \
+		fi; \
+		cp ../fsc2.tgz /ZIP; \
+		umount /ZIP; \
+	else \
+		scp ../fsc2.tgz moebi:/ZIP; \
 	fi
-	cp ../fsc2.tgz /ZIP
-	umount /ZIP
