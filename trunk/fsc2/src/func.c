@@ -1058,6 +1058,7 @@ void f_wait_alarm_handler( int sig_type )
 /* 2. Number of points (optional, 0 if unknown, negative if a guess) */
 /* 3. Real world coordinate and increment (optional)                 */
 /* 4. x-axis label (optional)                                        */
+/* 5. y-axis label (optional)                                        */
 /*-------------------------------------------------------------------*/
 
 Var *f_init_1d( Var *v )
@@ -1152,7 +1153,7 @@ label_1d:
 		{
 			vars_check ( v, STR_VAR );
 			G.label[ X ] = get_string_copy( v->val.sptr );
-			v = v->next->next;
+			v = v->next;
 		}
 
 		if ( v != NULL )
