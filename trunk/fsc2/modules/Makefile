@@ -139,8 +139,10 @@ install-pion.anorg.chemie.uni-frankfurt.de:
 	-chown $(OWNER).$(GROUP) $(libdir)/pulser.so
 	-$(LN) $(LNFLAGS) $(libdir)/aeg_s_band.so $(libdir)/s_band.so
 	-chown $(OWNER).$(GROUP) $(libdir)/s_band.so
-	-$(LN) $(LNFLAGS) $(libdir)/aeg_s_band.so $(libdir)/magnet.so
-	-chown $(OWNER).$(GROUP) $(libdir)/magnet.so
+	-$(LN) $(LNFLAGS) $(libdir)/s_band_magnet_broad.so $(libdir)/magnet_b.so
+	-chown $(OWNER).$(GROUP) $(libdir)/magnet_b.so
+	-$(LN) $(LNFLAGS) $(libdir)/s_band_magnet_narrow.so $(libdir)/magnet_n.so
+	-chown $(OWNER).$(GROUP) $(libdir)/magnet_n.so
 	-$(LN) $(LNFLAGS) $(libdir)/bh15.so $(libdir)/gaussmeter.so
 	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
 	-$(LN) $(LNFLAGS) $(libdir)/sr530.so $(libdir)/lockin.so

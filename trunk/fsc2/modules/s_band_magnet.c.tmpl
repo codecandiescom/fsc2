@@ -449,7 +449,7 @@ static double s_band_magnet_tmpl_field_check( double field, bool *err_flag )
 	{
 		new_field = DAC_value * magnet.resolution +
 					S_BAND_MAGNET_TMPL_MIN_FIELD;
-		print( WARN, "Field of exactly %f G can't be reached, using %f G "
+		print( SEVERE, "Field of exactly %f G can't be reached, using %f G "
 			   "instead.\n", field, new_field );
 		field = new_field;
 	}
