@@ -18,9 +18,10 @@ typedef struct {
 static void f_wait_alarm_handler( int sig_type );
 static DPoint *eval_display_args( Var *v, int *npoints );
 static int get_save_file( Var **v, const char *calling_function );
-static void print_array( Var *v, long cur_dim, long *start, int fid );
-static void print_slice( Var *v, int fid );
-static void print_browser( int browser, int fid, const char* comment );
+static bool print_array( Var *v, long cur_dim, long *start, int fid );
+static bool print_slice( Var *v, int fid );
+static bool print_browser( int browser, int fid, const char* comment );
+static bool T_fprintf( int file_num, const char *fmt, ... );
 
 
 static bool No_File_Numbers;
@@ -1930,8 +1931,12 @@ Var *f_getf( Var *var )
 	FILE *fp;
 	long len;
 	struct stat stat_buf;
-	char *r = NULL;
+	static char *r;
+	static FILE_LIST *old_File_List;
 
+
+	r = NULL;
+	old_File_List = NULL;
 
 	/* If there was a call of `f_save()' without a previous call to `f_getf()'
 	   `f_save()' did call already call `f_getf()' by itself and now don't
@@ -1984,12 +1989,14 @@ Var *f_getf( Var *var )
 	{
 		s[ 2 ] = NULL;
 		len = 0;
+
 		do
 		{
 			len += PATH_MAX;
 			s[ 2 ] = T_realloc( s[ 2 ], len );
 			getcwd( s[ 2 ], len );
 		} while ( s[ 2 ] == NULL && errno == ERANGE );
+
 		if ( s[ 2 ] == NULL )
 			s[ 2 ] = get_string_copy( "" );
 	}
@@ -2001,7 +2008,6 @@ Var *f_getf( Var *var )
 	else
 		s[ 3 ] = get_string_copy( s[ 3 ] );
 		   
-
 getfile_retry:
 
 	/* Try to get a filename - on 'Cancel' request confirmation (unless a
@@ -2075,13 +2081,36 @@ getfile_retry:
 		goto getfile_retry;
 	}
 
-	File_List = T_realloc( File_List, 
-						   ( File_List_Len + 1 ) * sizeof( FILE * ) );
-	File_List[ File_List_Len ] = fp;
-
-	T_free( r );
 	for ( i = 0; i < 4; i++ )
 		T_free( s[ i ] );
+
+	/* The reallocation for the File_List may file but we still need to close
+	   all files and get rid of memory for the file names, thus we save the
+	   current File_List before we try to reallocate */
+
+	if ( File_List )
+	{
+		old_File_List = T_malloc( File_List_Len * sizeof( FILE_LIST ) );
+		memcpy( old_File_List, File_List,
+				File_List_Len * sizeof( FILE_LIST ) );
+	}
+
+	TRY
+	{
+		File_List = T_realloc( File_List, 
+							   ( File_List_Len + 1 ) * sizeof( FILE_LIST ) );
+		if ( old_File_List != NULL )
+			T_free( old_File_List );
+		TRY_SUCCESS;
+	}
+	CATCH( OUT_OF_MEMORY_EXCEPTION )
+	{
+		File_List = old_File_List;
+		THROW( EXCEPTION );
+	}
+
+	File_List[ File_List_Len ].fp = fp;
+	File_List[ File_List_Len ].name = r;
 
 	return vars_push( INT_VAR, File_List_Len++ );
 }
@@ -2188,7 +2217,11 @@ void close_all_files( void )
 	}
 
 	for ( i = 0; i < File_List_Len; i++ )
-		fclose( File_List[ i ] );
+	{
+		T_free( File_List[ i ].name );
+		fclose( File_List[ i ].fp );
+	}
+
 	T_free( File_List );
 	File_List = NULL;
 	File_List_Len = 0;
@@ -2231,31 +2264,35 @@ Var *f_save( Var *v )
 		switch( v->type )
 		{
 			case INT_VAR :
-				fprintf( File_List[ file_num ], "%ld\n", v->val.lval );
+				if ( ! T_fprintf( file_num, "%ld\n", v->val.lval ) )
+					THROW( EXCEPTION );
 				break;
 
 			case FLOAT_VAR :
-				fprintf( File_List[ file_num ], "%#g\n", v->val.dval );
+				if ( ! T_fprintf( file_num, "%#g\n", v->val.dval ) )
+					THROW( EXCEPTION );
 				break;
 
 			case STR_VAR :
-				fprintf( File_List[ file_num ], "%s\n", v->val.sptr );
+				if ( ! T_fprintf( file_num, "%s\n", v->val.sptr ) )
+					THROW( EXCEPTION );
 				break;
 
 			case INT_TRANS_ARR :
 				for ( i = 0; i < v->len; i++ )
-					fprintf( File_List[ file_num ], "%ld\n",
-							 v->val.lpnt[ i ] );
+					if ( ! T_fprintf( file_num, "%ld\n", v->val.lpnt[ i ] ) )
+						THROW( EXCEPTION );
 				break;
 				
 			case FLOAT_TRANS_ARR :
 				for ( i = 0; i < v->len; i++ )
-					fprintf( File_List[ file_num ], "%#g\n", 
-							 v->val.dpnt[ i ] );
+					if ( ! T_fprintf( file_num, "%#g\n", v->val.dpnt[ i ] ) )
+						THROW( EXCEPTION );
 				break;
 
 			case ARR_PTR :
-				print_slice( v, file_num );
+				if ( ! print_slice( v, file_num ) )
+					THROW( EXCEPTION );
 				break;
 
 			case ARR_REF :
@@ -2267,7 +2304,8 @@ Var *f_save( Var *v )
 					break;
 				}
 				start = 0;
-				print_array( v->from, 0, &start, file_num );
+				if ( ! print_array( v->from, 0, &start, file_num ) )
+					THROW( EXCEPTION );
 				break;
 
 			default :
@@ -2277,47 +2315,71 @@ Var *f_save( Var *v )
 		v = v->next;
 	} while ( v );
 
-	fflush( File_List[ file_num ] );
-
 	return vars_push( INT_VAR, 1 );
 }
 
 
-static void print_array( Var *v, long cur_dim, long *start, int fid )
+/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+
+static bool print_array( Var *v, long cur_dim, long *start, int fid )
 {
 	long i;
 
 	if ( cur_dim < v->dim - 1 )
+	{
 		for ( i = 0; i < v->sizes[ cur_dim ]; i++ )
-			print_array( v, cur_dim + 1, start, fid );
+			if ( ! print_array( v, cur_dim + 1, start, fid ) )
+				return FAIL;
+	}
 	else
 	{
 		for ( i = 0; i < v->sizes[ cur_dim ]; (*start)++, i++ )
 		{
 			if ( v->type == INT_ARR )
-				fprintf( File_List[ fid ], "%ld\n", v->val.lpnt[ *start ] );
+			{
+				if ( ! T_fprintf( fid, "%ld\n", v->val.lpnt[ *start ] ) )
+					return FAIL;
+			}
 			else
-				fprintf( File_List[ fid ], "%f\n", v->val.dpnt[ *start ] );
+			{
+				if ( ! T_fprintf( fid, "%f\n", v->val.dpnt[ *start ] ) )
+					return FAIL;
+			}
 		}
 
-		fprintf( File_List[ fid ], "\n" );
+		if ( ! T_fprintf( fid, "\n" ) )
+			return FAIL;
 	}
+
+	return OK;
 }
 
 
-static void print_slice( Var *v, int fid )
+/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+
+static bool print_slice( Var *v, int fid )
 {
 	long i;
 
 	for ( i = 0; i < v->from->sizes[ v->from->dim - 1 ]; i++ )
 	{
 		if ( v->from->type == INT_ARR )
-			fprintf( File_List[ fid ], "%ld\n", 
-					 * ( ( long * ) v->val.gptr + i ) );
+		{
+			if ( ! T_fprintf( fid, "%ld\n", * 
+							  ( ( long * ) v->val.gptr + i ) ) )
+				return FAIL;
+		}
 		else
-			fprintf( File_List[ fid ], "%f\n", 
-					 * ( ( double * ) v->val.gptr + i ) );
+		{
+			if ( ! T_fprintf( fid, "%f\n",
+							  * ( ( double * ) v->val.gptr + i ) ) )
+				return FAIL;
+		}
 	}
+
+	return OK;
 }
 
 
@@ -2482,17 +2544,17 @@ Var *f_fsave( Var *v )
 			{
 				case INT_VAR :
 					strcpy( ep, "%ld" );
-					fprintf( File_List[ file_num ], cp, cv->val.lval );
+					T_fprintf( file_num, cp, cv->val.lval );
 					break;
 
 				case FLOAT_VAR :
 					strcpy( ep, "%#g" );
-					fprintf( File_List[ file_num ], cp, cv->val.dval );
+					T_fprintf( file_num, cp, cv->val.dval );
 					break;
 
 				case STR_VAR :
 					strcpy( ep, "%s" );
-					fprintf( File_List[ file_num ], cp, cv->val.sptr );
+					T_fprintf( file_num, cp, cv->val.sptr );
 					break;
 
 				default :
@@ -2505,8 +2567,7 @@ Var *f_fsave( Var *v )
 		cp = ep + 4;
 	}
 
-	fprintf( File_List[ file_num ], cp );
-	fflush( File_List[ file_num ] );
+	T_fprintf( file_num, cp );
 
 	/* Finally free the copy of the format string and return */
 
@@ -2542,7 +2603,8 @@ Var *f_save_p( Var *v )
 	if ( TEST_RUN )
 		return vars_push( INT_VAR, 1 );
 
-	print_browser( 0, file_num, v != NULL ? v->val.sptr : "" );
+	if ( ! print_browser( 0, file_num, v != NULL ? v->val.sptr : "" ) )
+		THROW( EXCEPTION );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -2573,7 +2635,8 @@ Var *f_save_o( Var *v )
 	if ( TEST_RUN )
 		return vars_push( INT_VAR, 1 );
 
-	print_browser( 1, file_num, v != NULL ? v->val.sptr : "" );
+	if ( ! print_browser( 1, file_num, v != NULL ? v->val.sptr : "" ) )
+		THROW( EXCEPTION );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -2587,25 +2650,30 @@ Var *f_save_o( Var *v )
 /* 3. Comment string to prepend to each line                           */
 /*---------------------------------------------------------------------*/
 
-static void print_browser( int browser, int fid, const char* comment )
+static bool print_browser( int browser, int fid, const char* comment )
 {
 	char *line;
+	bool state;
 
 
 	writer( browser ==  0 ? C_PROG : C_OUTPUT );
 	if ( comment == NULL )
 		comment = "";
-	fprintf( File_List[ fid ], "%s\n", comment );
+	state = T_fprintf( fid, "%s\n", comment );
+
 	while ( 1 )
 	{
 		reader( &line );
-		if ( line != NULL )
-			fprintf( File_List[ fid ], "%s%s\n", comment, line );
+		if ( line != NULL && state )
+			state = T_fprintf( fid, "%s%s\n", comment, line );
 		else
 			break;
 	}
-	fprintf( File_List[ fid ], "%s\n", comment );
-	fflush( File_List[ fid ] );
+
+	if ( state )
+		state = T_fprintf( fid, "%s\n", comment );
+
+	return state;
 }
 
 
@@ -2631,7 +2699,6 @@ Var *f_save_c( Var *v )
 
 	if ( ( file_num = get_save_file( &v, "save_comment()" ) ) == -1 )
 		return vars_push( INT_VAR, 0 );
-
 
 	if ( TEST_RUN )
 		return vars_push( INT_VAR, 1 );
@@ -2674,20 +2741,103 @@ Var *f_save_c( Var *v )
 	cl = r;
 	if ( cc == NULL )
 		cc = "";
-	fprintf( File_List[ file_num ], "%s\n", cc );
+	T_fprintf( file_num, "%s\n", cc );
+
 	while ( cl != NULL )
 	{
 		nl = strchr( cl, '\n' );
 		if ( nl != NULL )
 			*nl++ = '\0';
-		fprintf( File_List[ file_num ], "%s%s\n", cc, cl );
+		T_fprintf( file_num, "%s%s\n", cc, cl );
 		cl = nl;
 	}
+
 	if ( cc != NULL )
-		fprintf( File_List[ file_num ], "%s\n", cc );
-	fflush( File_List[ file_num ] );
+		T_fprintf( file_num, "%s\n", cc );
 
 	T_free( r );
 
 	return vars_push( INT_VAR, 1 );
+}
+
+
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
+static bool T_fprintf( int file_num, const char *fmt, ... )
+{
+	int n;                      /* number of bytes we need to write */
+	static int size;            /* guess for number of characters needed */
+	char *p;
+	va_list ap;
+
+
+	size = 1024;
+
+	/* First we've got to find out how many characters we need to write out */
+
+	TRY
+	{
+		p = T_malloc( size * sizeof( char ) );
+		TRY_SUCCESS;
+	}
+	CATCH( OUT_OF_MEMORY_EXCEPTION )
+		return FAIL;
+
+	while ( 1 ) {
+
+		/* Try to print in the allocated space */
+
+		va_start( ap, fmt );
+		n = vsnprintf( p, size, fmt, ap );
+		va_end( ap );
+
+		/* If that worked, try to write out the string */
+
+		if ( n > -1 && n < size )
+			break;
+
+		/* Else try again with more space */
+
+		if ( n > -1 )            /* glibc 2.1 */
+			size = n + 1;        /* precisely what is needed */
+		else                     /* glibc 2.0 */
+		{
+			if ( size < INT_MAX / 2 )
+				size *= 2;           /* twice the old size */
+			else
+			{
+				T_free( p );
+				return FAIL;
+			}
+		}
+
+		TRY
+		{
+			p = T_realloc( p, size * sizeof( char ) );
+			TRY_SUCCESS;
+		}
+		CATCH( OUT_OF_MEMORY_EXCEPTION )
+			return FAIL;
+	}
+
+	/* Now we try to write the string to a file */
+
+	if ( fprintf( File_List[ file_num ].fp, "%s", p ) == n )
+	{
+		fflush( File_List[ file_num ].fp );
+		T_free( p );
+		return OK;
+	}
+
+	/* Couldn't write as many bytes as needed - disk seems to be full */
+
+	fl_show_alert( "Disk is full while writing to file", 
+				   File_List[ file_num ].name, "Please choose a new file.",
+				   1 );
+
+	/* !!!!!!!!!!!!!!!!! THIS STILL NEEDS A LOT OF WORK !!!!!!!!!!!!!!!!!! */
+
+	T_free( p );
+	return FAIL;
 }
