@@ -831,7 +831,7 @@ static Var *get_area( Var *v, bool use_cursor )
 
 Var *digitizer_get_curve( Var *v )
 {
-	return get_curve( v, SET );
+	return get_curve( v, tds520a.w != NULL ? SET : UNSET );
 }
 
 Var *digitizer_get_curve_fast( Var *v )

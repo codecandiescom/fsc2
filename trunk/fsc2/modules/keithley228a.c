@@ -606,6 +606,7 @@ static double keithley228a_goto_current( double new_current )
 	char reply[ 100 ];
 	long length = 100;
 	double dummy;
+	int max_tries = 100;
 
 	
 	assert( fabs( new_current <= KEITHLEY228A_MAXMAX_CURRENT ) );
@@ -635,19 +636,27 @@ static double keithley228a_goto_current( double new_current )
 	keithley228a.current = keithley228a_set_current( new_current );
 	usleep( 100000 );
 
-	/* Wait for the current to stabilize to the required value (checking
+	/* Wait for the current to stabilize at the requested value (checking
 	   also the voltage to go down to zero won't do because there is some
 	   resistance due to the leads which forces the power supply to maintain
 	   a small voltage, depending on the current) */
 
 	do
 	{
+		usleep( 100000 );
 		length = 100;
 		if ( gpib_read( keithley228a.device, reply, &length ) == FAILURE )
 			keithley228a_gpib_failure( );
 		sscanf( reply, "%lf,%lf", &dummy, &act_amps );
-	} while ( fabs( act_amps - keithley228a.current ) > 0.05 );
+	} while ( fabs( act_amps - keithley228a.current ) > 0.05 &&
+			  max_tries-- > 0 );
 	
+	if ( max_tries < 0 )
+	{
+		eprint( FATAL, "%s: Can't set requested current.\n", DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+
 	return keithley228a.current;
 }
 
@@ -684,7 +693,7 @@ static double keithley228a_set_current( double new_current )
 	{
 		if ( fabs( new_current ) >= 0.04 )
 		{
-			power_supply_current = 1.0e-2 * lround( 1.e-2 * new_current );
+			power_supply_current = 1.0e-2 * lround( 1.e2 * new_current );
 			dac_volts = V_TO_A_FACTOR
 				        * fabs( power_supply_current - new_current );
 		}

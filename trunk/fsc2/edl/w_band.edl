@@ -3,11 +3,44 @@ DEVICES:
 sr510;
 w_band;
 
+VARIABLES:
+
+start_current = 0 A;
+step_current = 0.01 A;
+
+I;
+cur;
+data;
+
 PREPARATIONS:
 
-magnet_setup( 4.2 A, 0.1 A );
-magnet_use_dac_port( 3 );
+magnet_setup( start_current, step_current );
+magnet_use_dac_port( 6 );
+init_1d( 2, -1, 0, 0.01, "Was ist das wohl?", "Na, einfach Bloedsinn..." );
 
 EXPERIMENT:
 
-set_current( 9.0 );
+save_program( "% " );
+save_comment( "% ", "Sample: \nTemperatur: \n" );
+fsave( "% Sensitivity = # \n", lockin_sensitivity() );
+fsave( "% tc          = # \n", lockin_time_constant() );
+
+
+FOR I =  1 : 80 {
+	cur = sweep_up( );
+	data = lockin_get_data( );
+	display( I, cur, 1, 81 - I, data, 2 );
+	save( cur );
+ 	wait( 0.1 s );
+}
+
+set_current( start_current );
+save( start_current );
+
+FOR I =  81 : 160 {
+	cur = sweep_down( );
+	data = lockin_get_data( );
+	display( I, cur, 1, I, data, 2 );
+	fsave( "I = #, cur = #, data = #\n", I, cur, data );
+	wait( 0.1 s );
+}
