@@ -46,6 +46,9 @@
 # Right button:  previous pulse settings
 # Scroll up:     next pulse settings
 # Scroll down:   previous pulse settings
+#
+# Please note that this script may use lots of memory and also may take
+# quite some time before it starts displaying the pulses.
 
 
 use warnings;
@@ -1259,26 +1262,23 @@ sub new {
 }
 
 #---------------------------------------------------------
-#
+# Compares an existing pulse pattern to the settings for a new one to be
+# created. If both the patterns are identical a reference to the already
+# existing pulse pattern is returned, otherwise 'undef' gets returned.
 
 sub comp {
 	my $self = shift;
-	my $i = 0;
 
 	shift;
-	return undef if @{ $self->{ 'list' } } != @_ / 3;
-	return $self if @_ == 0 and @{ $self->{ 'list' } } == 0;
-	while ( @_ ) {
-		my ( $num, $start, $len ) = ( shift, shift, shift );
-		return undef
-			if $num . "," . $start . "," . $len 
-				ne ${ $self->{ 'list' }->[ $i++ ] };
+	return undef unless @{ $self->{ 'list' } } == @_ / 3;
+	for ( @{ $self->{ 'list' } } ) {
+		return undef unless shift( ) . "," . shift( ) . "," . shift( ) eq $$_;
 	}
 	return $self;
 }
 
 #---------------------------------------------------------
-# Returns total length of the pulse list (i.e. start postition plus
+# Returns the total length of the pulse list (i.e. start postition plus
 # length of the last pulse) or 0 if there's no pulse in the pulse list
 
 sub len {
