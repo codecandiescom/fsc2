@@ -29,7 +29,6 @@ static void ep385_basic_pulse_check( void );
 static void ep385_basic_functions_check( void );
 static void ep385_create_phase_matrix( FUNCTION *f );
 static void ep385_setup_channels( void );
-static void ep385_pulse_start_setup( void );
 static void ep385_channel_start_check( CHANNEL *ch );
 
 
@@ -45,7 +44,6 @@ void ep385_init_setup( void )
 	int i, j;
 
 
-
 	TRY
 	{
 		ep385_basic_pulse_check( );
@@ -56,26 +54,28 @@ void ep385_init_setup( void )
 	}
 	OTHERWISE
 	{
+		/* Free memory already allocated when the error happend */
+
 		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 		{
 			f = &ep385.function[ i ];
 
 			if ( f->pulses != NULL )
-				f->pulses = T_free( f->pulses );
+				f->pulses = PULSE_PP T_free( f->pulses );
 
 			if ( f->pm != NULL )
 			{
 				for ( j = 0; j < f->pc_len * f->num_channels; j++ )
 					if ( f->pm[ j ] != NULL )
 						T_free( f->pm[ j ] );
-				f->pm = T_free( f->pm );
+				f->pm = PULSE_PPP T_free( f->pm );
 			}
-
-			for ( i = 0; i < MAX_CHANNELS; i++ )
-				if ( ep385.channel[ i ].pulse_params != NULL )
-					ep385.channel[ i ].pulse_params =
-						T_free( ep385.channel[ i ].pulse_params );
 		}
+
+		for ( i = 0; i < MAX_CHANNELS; i++ )
+			if ( ep385.channel[ i ].pulse_params != NULL )
+				ep385.channel[ i ].pulse_params =
+					PULSE_PARAMS_P T_free( ep385.channel[ i ].pulse_params );
 
 		RETHROW( );
 	}
@@ -425,8 +425,11 @@ static void ep385_setup_channels( void )
 		ch->old_pulse_params = ch->pulse_params + ch->num_pulses;
 
 		for ( j = 0; j < ch->num_pulses; j++ )
+		{
 			ch->pulse_params->pos = ch->pulse_params->len =
 				ch->old_pulse_params->pos = ch->old_pulse_params->len = 0;
+			ch->pulse_params->pulse = ch->old_pulse_params->pulse = NULL;
+		}
 	}
 }
 
@@ -434,7 +437,7 @@ static void ep385_setup_channels( void )
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
 
-static void ep385_pulse_start_setup( void )
+void ep385_pulse_start_setup( void )
 {
 	FUNCTION *f;
 	CHANNEL *ch;
@@ -456,6 +459,10 @@ static void ep385_pulse_start_setup( void )
 			 i == PULSER_CHANNEL_PHASE_2 )
 			continue;
 
+		/* Run over all channels associated with the current function and
+		   set the pulse pointers, positions and lengths for the current
+		   phase */
+
 		for ( j = 0; j < f->num_channels; j++ )
 		{
 			ch = f->channel[ j ];
@@ -466,10 +473,15 @@ static void ep385_pulse_start_setup( void )
 				if ( p->is_active )
 				{
 					ch->pulse_params[ ch->num_active_pulses ].pos =
+					ch->old_pulse_params[ ch->num_active_pulses ].pos =
 															 p->pos + f->delay;
-					ch->pulse_params[ ch->num_active_pulses ].len = p->len;
-					ch->pulse_params[ ch->num_active_pulses++ ].pulse = p;
-				}			
+					ch->pulse_params[ ch->num_active_pulses ].len =
+					ch->old_pulse_params[ ch->num_active_pulses ].len = p->len;
+					ch->pulse_params[ ch->num_active_pulses++ ].pulse =
+					ch->old_pulse_params[ ch->num_active_pulses++ ].pulse = p;
+				}
+
+			ch->old_num_active_pulses = ch->num_active_pulses;
 
 			ep385_channel_start_check( ch );
 		}
@@ -485,6 +497,9 @@ static void ep385_channel_start_check( CHANNEL *ch )
 	PULSE_PARAMS *pp;
 	int i;
 
+
+	/* Check that there aren't more pulses per channel than the pulser can
+	   deal with */
 
 	if ( ch->num_active_pulses > MAX_PULSES_PER_CHANNEL )
 	{
@@ -503,7 +518,7 @@ static void ep385_channel_start_check( CHANNEL *ch )
 		pp = ch->pulse_params + i;
 		if ( pp->pos + pp->len > MAX_PULSER_BITS )
 		{
-			print( FATAL, "Pulse %ld of function '%s' foes not fit into the "
+			print( FATAL, "Pulse %ld of function '%s' does not fit into the "
 				   "pulsers memory.\n",
 				   pp->pulse->num, Function_Names[ ch->function->self ] );
 			THROW( EXCEPTION );
@@ -514,7 +529,7 @@ static void ep385_channel_start_check( CHANNEL *ch )
 
 		if ( pp->pos + pp->len == ch->pulse_params[ i + 1 ].pos )
 		{
-			print( FATAL, "Pulses %ld and %ld of fucntion '%s' are not "
+			print( FATAL, "Pulses %ld and %ld of function '%s' are not "
 				   "separated.\n", pp->pulse->num,
 				   ch->pulse_params[ i + 1 ].pulse->num,
 				   Function_Names[ ch->function->self ] );
@@ -523,7 +538,7 @@ static void ep385_channel_start_check( CHANNEL *ch )
 
 		if ( pp->pos + pp->len > ch->pulse_params[ i + 1 ].pos )
 		{
-			print( FATAL, "Pulses %ld and %ld of fucntion '%s' overlap.\n",
+			print( FATAL, "Pulses %ld and %ld of function '%s' overlap.\n",
 				   pp->pulse->num, ch->pulse_params[ i + 1 ].pulse->num,
 				   Function_Names[ ch->function->self ] );
 			THROW( EXCEPTION );

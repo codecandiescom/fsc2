@@ -25,7 +25,6 @@
 #include "ep385.h"
 
 
-
 /*-----------------------------------------------------------------*/
 /* Converts a time into the internal type of a time specification, */
 /* i.e. an integer multiple of the time base                       */
@@ -146,114 +145,6 @@ int ep385_pulse_compare( const void *A, const void *B )
 		         *b = *( PULSE_PARAMS ** ) B;
 
 	return a->pos <= b->pos ? -1 : 1;
-}
-
-
-/*---------------------------------------------------------
-  Determines the longest sequence of all pulse functions.
------------------------------------------------------------*/
-
-Ticks ep385_get_max_seq_len( void )
-{
-	int i;
-	Ticks max = 0;
-	FUNCTION *f;
-
-
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = &ep385.function[ i ];
-
-		/* Nothing to be done for unused functions and the phase functions */
-
-		if ( ! f->is_used ||
-			 f->self == PULSER_CHANNEL_PHASE_1 ||
-			 f->self == PULSER_CHANNEL_PHASE_2 )
-			continue;
-
-		max = Ticks_max( max, f->max_seq_len + f->delay );
-	}
-
-	if ( ep385.is_max_seq_len )
-		max = Ticks_max( max, ep385.max_seq_len );
-
-	return max;
-}
-
-
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
-
-void ep385_set( char *arena, Ticks start, Ticks len, Ticks offset )
-{
-	fsc2_assert( start + len + offset <= ep385.max_seq_len );
-
-	memset( arena + offset + start, SET, len );
-}
-
-
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
-
-int ep385_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
-{
-	static Ticks where = 0;
-	int ret;
-	char *a = old_p + where,
-		 *b = new_p + where;
-	char cur_state;
-
-
-	/* If we reached the end of the arena in the last call return 0 */
-
-	if ( where == -1 )
-	{
-		where = 0;
-		return 0;
-	}
-
-	/* Search for next difference in the arena */
-
-	while ( where < ep385.max_seq_len && *a == *b )
-	{
-		where++;
-		a++;
-		b++;
-	}
-
-	/* If none was found anymore */
-
-	if ( where == ep385.max_seq_len )
-	{
-		where = 0;
-		return 0;
-	}
-
-	/* Store the start position (including the offset and the necessary one
-	   due to the pulsers firmware bug) and store if we wave to reset (-1)
-	   or to set (1) */
-
-	*start = where;
-	ret = *a == SET ? -1 : 1;
-	cur_state = *a;
-
-	/* Now figure out the length of the area we have to set or reset */
-
-	*length = 0;
-	while ( where < ep385.max_seq_len && *a != *b && *a == cur_state )
-	{
-		where++;
-		a++;
-		b++;
-		( *length )++;
-	}
-
-	/* Set a marker that we reached the end of the arena */
-
-	if ( where == ep385.max_seq_len )
-		where = -1;
-
-	return ret;
 }
 
 

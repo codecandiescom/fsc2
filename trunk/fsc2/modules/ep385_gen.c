@@ -49,12 +49,22 @@ bool ep385_store_timebase( double timebase )
 
 	if ( timebase < FIXED_TIMEBASE )
 	{
-		char *min = T_strdup( ep385_ptime( ( double ) FIXED_TIMEBASE ) );
+		static char *min = NULL;
 
-		print( FATAL, "Invalid time base of %s, must be at least  %s.\n",
-			   ep385_ptime( timebase ), min );
-		T_free( min );
-		THROW( EXCEPTION );
+		TRY
+		{
+			min = T_strdup( ep385_ptime( ( double ) FIXED_TIMEBASE ) );
+			print( FATAL, "Invalid time base of %s, must be at least  %s.\n",
+				   ep385_ptime( timebase ), min );
+			THROW( EXCEPTION );
+		}
+		OTHERWISE
+		{
+			if ( min )
+				T_free( min );
+			RETHROW( );
+		}
+					
 	}
 
 	ep385.is_timebase = SET;
@@ -198,14 +208,34 @@ bool ep385_set_trigger_mode( int mode )
 
 bool ep385_set_repeat_time( double rep_time )
 {
+	static double new_rep_time;
+	static double min_repeat_time;
+	static double max_repeat_time;
+
+
+	/* For the following we need the pulsers time base. If it hasn't been
+	   set yet we default to the built-in clock running at 125 MHz. */
+
+	if ( ! ep385.is_timebase )
+	{
+		ep385.timebase = FIXED_TIMEBASE;
+		ep385.timebase_mode = INTERNAL;
+		ep385.is_timebase = SET;
+	}
+
+	/* Complain if a different time base already has been set */
+
 	if ( ep385.is_repeat_time &&
-		 ep385.repeat_time != ep385_double2ticks( rep_time ) )
+		 rep_time != ( new_rep_time = ( 12800 * ep385.repeat_time + 2048 * 16 )
+					   * ep385.timebase ) )
 	{
 		print( FATAL, "A different repeat time/frequency of %s/%g Hz has "
-			   "already been set.\n", ep385_pticks( ep385.repeat_time ),
-			   1.0 / ep385_ticks2double( ep385.repeat_time ) );
+			   "already been set.\n", ep385_ptime( new_rep_time ),
+			   1.0 / new_rep_time );
 		THROW( EXCEPTION );
 	}
+
+	/* We can't set a repetition time with external trigger */
 
 	if ( ep385.is_trig_in_mode && ep385.trig_in_mode == EXTERNAL )
 	{
@@ -214,6 +244,8 @@ bool ep385_set_repeat_time( double rep_time )
 		THROW( EXCEPTION );
 	}
 
+	/* Check that the repetition time is within the allowed limits */
+
 	if ( rep_time <= 0 )
 	{
 		print( FATAL, "Invalid zero or negative repeat time: %s.\n",
@@ -221,39 +253,46 @@ bool ep385_set_repeat_time( double rep_time )
 		THROW( EXCEPTION );
 	}
 
+	min_repeat_time	= ( 2048 * 16 + 10 * 12800 ) * ep385.timebase;
+	max_repeat_time	= ( 2048 * 16 + 65535 * 12800 ) * ep385.timebase;
 
-	ep385.repeat_time = ep385_double2ticks( rep_time );
+	if ( rep_time < min_repeat_time * 0.99 ||
+		 rep_time > max_repeat_time * 1.01 )
+	{
+		static char *tmin = NULL, *tmax = NULL;
+
+		TRY
+		{
+			tmin = T_strdup( ep385_ptime( min_repeat_time ) );
+			tmin = T_strdup( ep385_ptime( max_repeat_time ) );
+
+			print( FATAL, "Repeat time/frequency of %s/%g Hz is not within "
+				   "range of %s/%g Hz to %s/%g Hz.\n", ep385_ptime( rep_time ),
+				   tmin, 1.0 / min_repeat_time, tmax, 1.0 / max_repeat_time );
+			THROW( EXCEPTION );
+		}
+		OTHERWISE
+		{
+			if ( tmin )
+				T_free( tmin );
+			if ( tmax )
+				T_free( tmax );
+			RETHROW( );
+		}
+	}
+
+	ep385.repeat_time = lrnd( ( ep385_double2ticks( rep_time ) - 2048 * 16 )
+							  / 12800 );
+	new_rep_time = ( ep385.repeat_time * 12800 + 2048 * 16 ) * ep385.timebase;
+
+	/* If the adjusted repetition time doesn't fir within 1% with the
+	   requested time print a warning */
+
+	if ( fabs( new_rep_time - rep_time ) > 0.01 * rep_time )
+		print( WARN, "Adjusting repeat time/frequency to %s/%g.\n",
+			   ep385_ptime( new_rep_time ), 1.0 / new_rep_time );
+
 	ep385.is_repeat_time = SET;
-
-	return OK;
-}
-
-
-/*----------------------------------------------------------------------*/
-/* Function allows to enforce a certain maximum sequence length in case */
-/* the correct sequence length can't be determined during the test run  */
-/*----------------------------------------------------------------------*/
-
-bool ep385_set_max_seq_len( double seq_len )
-{
-	if ( ep385.is_max_seq_len &&
-		 ep385.max_seq_len != ep385_double2ticks( seq_len ) )
-	{
-		print( FATAL, "A differrent minimum pattern length of %s has already "
-			   "been set.\n", ep385_pticks( ep385.max_seq_len ) );
-		THROW( EXCEPTION );
-	}
-
-	/* Check that the value is reasonable */
-
-	if ( seq_len <= 0 )
-	{
-		print( FATAL, "Zero or negative minimum pattern length.\n" );
-		THROW( EXCEPTION );
-	}
-
-	ep385.max_seq_len = ep385_double2ticks( seq_len );
-	ep385.is_max_seq_len = SET;
 
 	return OK;
 }

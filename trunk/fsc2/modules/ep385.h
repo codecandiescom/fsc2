@@ -154,6 +154,7 @@ typedef struct _C_ {
 
 	int num_pulses;
 	int num_active_pulses;
+	int old_num_active_pulses;
 	PULSE_PARAMS *pulse_params;
 	PULSE_PARAMS *old_pulse_params;
 } CHANNEL;
@@ -312,7 +313,7 @@ bool ep385_change_pulse_length_change( long pnum, double p_time );
 /* Functions from ep385_init.c */
 
 void ep385_init_setup( void );
-void ep385_set_pulses( FUNCTION *f );
+void ep385_pulse_start_setup( void );
 
 
 /* Functions from ep385_util.c */
@@ -323,9 +324,6 @@ PULSE *ep385_get_pulse( long pnum );
 const char *ep385_ptime( double p_time );
 const char *ep385_pticks( Ticks ticks );
 int ep385_pulse_compare( const void *A, const void *B );
-Ticks ep385_get_max_seq_len( void );
-void ep385_set( char *arena, Ticks start, Ticks len, Ticks offset );
-int ep385_diff( char *old_p, char *new_p, Ticks *start, Ticks *length );
 
 
 /* Functions fron ep385_run.c */
@@ -340,10 +338,7 @@ void ep385_cw_setup( void );
 /* Functions from ep385_gpib.c */
 
 bool ep385_init( const char *name );
-bool ep385_set_constant( int channel, Ticks start, Ticks length, int state );
-bool ep385_set_trig_out_pulse( void );
-bool ep385_run( bool flag );
-bool ep385_get_channel_state( int channel );
+bool ep385_set_channels( void );
 bool ep385_set_channel_state( int channel, bool flag );
 
 

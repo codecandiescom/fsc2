@@ -58,7 +58,6 @@ int ep385_init_hook( void )
 	ep385.is_cw_mode   = UNSET;
 
 	pulser_struct.set_timebase = ep385_store_timebase;
-
 	pulser_struct.assign_function = NULL;
 	pulser_struct.assign_channel_to_function =
 											  ep385_assign_channel_to_function;
@@ -147,7 +146,7 @@ int ep385_init_hook( void )
 
 int ep385_test_hook( void )
 {
-	/* Make real sure that a timebase is set (shouldn't be needed) */
+	/* Make sure that a timebase is set (shouldn't really be needed) */
 
 	if ( ! ep385.is_timebase )
 	{
@@ -191,14 +190,9 @@ int ep385_end_of_test_hook( void )
 	if ( ! ep385_is_needed || ep385.is_cw_mode )
 		return 1;
 
-	/* First we have to reset the internal representation back to its initial
-	   state */
+	/* Reset the internal representation back to its initial state */
 
 	ep385_full_reset( );
-
-	/* Now we've got to find out about the maximum sequence length */
-
-	ep385.max_seq_len = ep385_get_max_seq_len( );
 
 	return 1;
 }
@@ -284,13 +278,14 @@ int ep385_end_of_exp_hook( void )
 void ep385_exit_hook( void )
 {
 	PULSE *p, *np;
-	int i;
+	FUNCTION *f;
+	int i, j;
 
 
 	if ( ! ep385_is_needed )
 		return;
 
-	/* Free all the memory allocated within the module */
+	/* Free all memory that may have been allocated for the module */
 
 	for ( p = ep385_Pulses; p != NULL; p = np )
 	{
@@ -301,9 +296,25 @@ void ep385_exit_hook( void )
 	ep385_Pulses = NULL;
 
 	for ( i = 0; i < MAX_CHANNELS; i++ )
-		if ( ep385.channel[ i ].function != NULL &&
-			 ep385.channel[ i ].function->pulses != NULL )
-			T_free( ep385.channel[ i ].function->pulses );
+		if ( ep385.channel[ i ].pulse_params != NULL )
+			ep385.channel[ i ].pulse_params =
+				T_free( ep385.channel[ i ].pulse_params );
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = &ep385.function[ i ];
+
+		if ( f->pulses != NULL )
+			f->pulses = T_free( f->pulses );
+
+		if ( f->pm != NULL )
+		{
+			for ( j = 0; j < f->pc_len * f->num_channels; j++ )
+				if ( f->pm[ j ] != NULL )
+					T_free( f->pm[ j ] );
+			f->pm = T_free( f->pm );
+		}
+	}
 }
 
 
