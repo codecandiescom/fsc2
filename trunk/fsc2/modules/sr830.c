@@ -70,7 +70,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 /* Declaration of exported functions */
 
 int sr830_init_hook( void );
-int sr830_test_hook( void )
+int sr830_test_hook( void );
 int sr830_exp_hook( void );
 int sr830_end_of_exp_hook( void );
 void sr830_exit_hook( void );
@@ -1050,7 +1050,7 @@ Var *lockin_lock_keyboard( Var *v )
 			;
 	}
 
-	if ( FSC2_MODE == EPERIMENT )
+	if ( FSC2_MODE == EXPERIMENT )
 		sr830_lock_state( lock );
 
 	return vars_push( INT_VAR, lock ? 1 : 0 );

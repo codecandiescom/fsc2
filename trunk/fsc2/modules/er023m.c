@@ -71,15 +71,17 @@ int er023m_init_hook( void )
 	for ( i = 1; i <= MAX_MF_INDEX; i++ )
 		mf_list[ i ] = 0.5 * mf_list[ i - 1 ];
 
+	/* Set up the (uncalibrated) modulation amplitude list */
+
+	for ( i = 0; i <= MAX_MA_INDEX; i++ )
+		ma_list[ i ] = 100.0 * pow( 10.0, ( double ) -i / 20.0 );
+
 	/* Clear the calibration list */
 
 	for ( i = 0; i <= MAX_MF_INDEX; i++ )
 		er023m.calib[ i ].is_ph[ 0 ] = 
 			er023m.calib[ i ].is_ph[ 1 ] = 
 				er023m.calib[ i ].is_ma = UNSET;
-
-	for ( i = 0; i <= MAX_MA_INDEX; i++ )
-		ma_list[ i ] = 100.0 * pow( 10.0, ( double ) -i / 20.0 );
 
 	/* Set several more variables in the structure describing the device */
 

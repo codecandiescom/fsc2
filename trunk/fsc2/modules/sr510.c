@@ -47,6 +47,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 /* Declaration of exported functions */
 
 int sr510_init_hook( void );
+int sr510_test_hook( void );
 int sr510_exp_hook( void );
 int sr510_end_of_exp_hook( void );
 void sr510_exit_hook( void );
@@ -83,6 +84,10 @@ typedef struct
 
 static SR510 sr510;
 static SR510 sr510_stored;
+
+
+#define UNDEF_SENS_INDEX -1
+#define UNDEF_TC_INDEX   -1
 
 
 /* Lists of valid sensitivity and time constant settings (the last three
@@ -140,14 +145,11 @@ int sr510_init_hook( void )
 
 	sr510.device = -1;
 
-	sr510.sens_index = -1;       /* no sensitivity has to be set at start of */
-	sr510.sens_warn = UNSET;     /* experiment and no warning concerning the */
-                                 /* sensitivity setting has been printed yet */
-	sr510.is_phase = UNSET;      /* no phase has to be set at start of the */
-	                             /* experiment */
-	sr510.tc_index = -1;         /* no time constant has to be set at the */
-	sr510.tc_warn = UNSET;       /* start of the experiment and no warning */
-	                             /* concerning it has been printed yet */
+	sr510.sens_index = UNDEF_SENS_INDEX;
+	sr510.sens_warn = UNSET;
+	sr510.is_phase = UNSET;
+	sr510.tc_index = UNDEF_TC_INDEX;
+	sr510.tc_warn = UNSET;
 
 	for ( i = 0; i < 2; i++ )
 		sr510.dac_voltage[ i ] = 0.0;
@@ -163,6 +165,7 @@ int sr510_init_hook( void )
 int sr510_test_hook( void )
 {
 	memcpy( &sr510_stored, &sr510, sizeof( SR510 ) );
+	return 1;
 }
 
 
@@ -294,7 +297,7 @@ Var *lockin_get_adc_data( Var *v )
 Var *lockin_sensitivity( Var *v )
 {
 	double sens;
-	int sens_index = -1;
+	int sens_index = UNDEF_SENS_INDEX;
 	unsigned int i;
 
 
@@ -307,8 +310,11 @@ Var *lockin_sensitivity( Var *v )
 						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
 
-			case TEST :                    /* return dummy value in test run */
-				return vars_push( FLOAT_VAR, SR510_TEST_SENSITIVITY );
+			case TEST :
+				return vars_push( FLOAT_VAR,
+								  sr510.sens_index == UNDEF_SENS_INDEX ?
+								  SR510_TEST_SENSITIVITY :
+								  sens_list[ sr510.sens_index ] );
 
 			case EXPERIMENT :
 				return vars_push( FLOAT_VAR, sr510_get_sens( ) );
@@ -352,7 +358,8 @@ Var *lockin_sensitivity( Var *v )
 			break;
 		}
 
-	if ( sens_index < 0 && sens < sens_list[ SENS_ENTRIES - 1 ] * 1.01 )
+	if ( sens_index == UNDEF_SENS_INDEX &&
+		 sens < sens_list[ SENS_ENTRIES - 1 ] * 1.01 )
 		sens_index = SENS_ENTRIES - 1;
 
 	if ( sens_index > 0 &&                                  /* value found ? */
@@ -375,7 +382,7 @@ Var *lockin_sensitivity( Var *v )
 		sr510.sens_warn = SET;
 	}
 
-	if ( sens_index < 0 )                                 /* not found yet ? */
+	if ( sens_index == UNDEF_SENS_INDEX )                 /* not found yet ? */
 	{
 		if ( sens > sens_list[ 0 ] )
 			sens_index = 0;
@@ -413,7 +420,7 @@ Var *lockin_sensitivity( Var *v )
 Var *lockin_time_constant( Var *v )
 {
 	double tc;
-	int tc_index = -1;
+	int tc_index = UNDEF_TC_INDEX;
 	unsigned int i;
 
 
@@ -427,7 +434,9 @@ Var *lockin_time_constant( Var *v )
 				THROW( EXCEPTION )
 
 			case TEST :
-				return vars_push( FLOAT_VAR, SR510_TEST_TIME_CONSTANT );
+				return vars_push( FLOAT_VAR, sr510.tc_index == UNDEF_TC_INDEX ?
+								  SR510_TEST_TIME_CONSTANT :
+								  tc_list[ sr510.tc_index ] );
 
 			case EXPERIMENT :
 				return vars_push( FLOAT_VAR, sr510_get_tc( ) );
@@ -486,7 +495,7 @@ Var *lockin_time_constant( Var *v )
 		sr510.tc_warn = SET;
 	}
 	
-	if ( tc_index < 0 )                                  /* not found yet ? */
+	if ( tc_index == UNDEF_TC_INDEX )                     /* not found yet ? */
 	{
 		if ( tc < tc_list[ 0 ] )
 			tc_index = 0;
@@ -541,7 +550,8 @@ Var *lockin_phase( Var *v )
 				THROW( EXCEPTION )
 
 			case TEST :
-				return vars_push( FLOAT_VAR, SR510_TEST_PHASE );
+				return vars_push( FLOAT_VAR, sr510.is_phase ?
+								  sr510.phase : SR510_TEST_PHASE );
 
 			case EXPERIMENT :
 				return vars_push( FLOAT_VAR, sr510_get_phase( ) );
@@ -657,8 +667,19 @@ Var *lockin_dac_voltage( Var *v )
 	/* If no second argument is specified return the current DAC setting */
 
 	if ( v == NULL )
+	{
+		if ( FSC2_MODE == PREPARATION )
+		{
+			eprint( FATAL, SET, "%s: Function %s() with only one argument can "
+					"only be used in the EXPERIMENT section.\n",
+					DEVICE_NAME, Cur_Func );
+			THROW( EXCEPTION )
+		}
+
+
 		return vars_push( FLOAT_VAR,
 						  sr510.dac_voltage[ channel - first_DAC_port ] );
+	}
 
 	/* Second argument must be a voltage between -10.24 V and +10.24 V */
 
@@ -782,11 +803,11 @@ bool sr510_init( const char *name )
 	   actual setting now because the lock-in could not be accessed before.
 	   Finally set the DAC output voltages to a defined value (default 0 V).*/
 
-	if ( sr510.sens_index != -1 )
+	if ( sr510.sens_index != UNDEF_SENS_INDEX )
 		sr510_set_sens( sr510.sens_index );
 	if ( sr510.is_phase == SET )
 		sr510_set_phase( sr510.phase );
-	if ( sr510.tc_index != -1 )
+	if ( sr510.tc_index != UNDEF_TC_INDEX )
 		sr510_set_tc( sr510.tc_index );
 	for ( i = 0; i < 2; i++ )
 		sr510_set_dac_voltage( i + first_DAC_port, sr510.dac_voltage[ i ] );

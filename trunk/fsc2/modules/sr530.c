@@ -52,6 +52,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 /* Declaration of exported functions */
 
 int sr530_init_hook( void );
+int sr530_test_hook( void );
 int sr530_exp_hook( void );
 int sr530_end_of_exp_hook( void );
 void sr530_exit_hook( void );
@@ -88,7 +89,11 @@ typedef struct
 
 
 static SR530 sr530;
-static SR530 sr530_store;
+static SR530 sr530_stored;
+
+
+#define UNDEF_SENS_INDEX -1
+#define UNDEF_TC_INDEX   -1
 
 /* Lists of valid sensitivity and time constant settings (the last three
    entries in the sensitivity list are only usable when the EXPAND button
@@ -145,17 +150,25 @@ int sr530_init_hook( void )
 
 	sr530.device = -1;
 
-	sr530.sens_index = -1;       /* no sensitivity has to be set at start of */
-	sr530.sens_warn = UNSET;     /* experiment and no warning concerning the */
-                                 /* sensitivity setting has been printed yet */
-	sr530.is_phase = UNSET;      /* no phase has to be set at start of the */
-	                             /* experiment */
-	sr530.tc_index = -1;         /* no time constant has to be set at the */
-	                             /* start of the experiment and no warning */
-	                             /* concerning it has been printed yet */
+	sr530.sens_index = UNDEF_SENS_INDEX;
+	sr530.sens_warn = UNSET;
+	sr530.is_phase = UNSET;
+	sr530.tc_index = UNDEF_TC_INDEX;
+
 	for ( i = 0; i < 2; i++ )
 		sr530.dac_voltage[ i ]  = 0.0;
 
+	return 1;
+}
+
+
+/*-----------------------------------*/
+/* Test hook function for the module */
+/*-----------------------------------*/
+
+int sr530_test_hook( void )
+{
+	memcpy( &sr530_stored, &sr530, sizeof( SR530 ) );
 	return 1;
 }
 
@@ -168,7 +181,7 @@ int sr530_exp_hook( void )
 {
 	/* Store the current state */
 
-	memcpy( &sr530_store, &sr530, sizeof( SR530 ) );
+	memcpy( &sr530_stored, &sr530, sizeof( SR530 ) );
 
 	/* Initialize the lock-in */
 
@@ -197,7 +210,7 @@ int sr530_end_of_exp_hook( void )
         gpib_local( sr530.device );
     }
 
-	memcpy( &sr530, &sr530_store, sizeof( SR530 ) );
+	memcpy( &sr530, &sr530_stored, sizeof( SR530 ) );
 	sr530.device = -1;
 	return 1;
 }
@@ -293,10 +306,10 @@ static double get_single_channel_data( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( TEST_RUN )                  /* return dummy value in test run */
+	if ( FSC2_MODE == TEST )               /* return dummy value in test run */
 		return 0.0;
-	else
-		return sr530_get_data( ( int ) channel );
+
+	return sr530_get_data( ( int ) channel );
 }
 
 
@@ -328,7 +341,7 @@ Var *lockin_get_adc_data( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( TEST_RUN )                  /* return dummy value in test run */
+	if ( FSC2_MODE == TEST )               /* return dummy value in test run */
 		return vars_push( FLOAT_VAR, SR530_TEST_ADC_VOLTAGE );
 
 	return vars_push( FLOAT_VAR, sr530_get_adc_data( port ) );
@@ -345,26 +358,28 @@ Var *lockin_get_adc_data( Var *v )
 Var *lockin_sensitivity( Var *v )
 {
 	double sens;
-	int sens_index = -1;
+	int sens_index = UNDEF_SENS_INDEX;
 	unsigned int i;
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )                  /* return dummy value in test run */
-			return vars_push( FLOAT_VAR, SR530_TEST_SENSITIVITY );
-		else
+		switch ( FSC2_MODE )
 		{
-			if ( I_am == PARENT )
-			{
+			case PREPARATION :
 				eprint( FATAL, SET, "%s: Function %s() with no argument can "
 						"only be used in the EXPERIMENT section.\n",
 						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
-			}
-			return vars_push( FLOAT_VAR, sr530_get_sens( ) );
+
+			case TEST :
+				return vars_push( FLOAT_VAR,
+								  sr530.sens_index == UNDEF_SENS_INDEX ?
+								  SR530_TEST_SENSITIVITY :
+								  sens_list[ sr530.sens_index ] );
+
+			case EXPERIMENT :
+				return vars_push( FLOAT_VAR, sr530_get_sens( ) );
 		}
-	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
@@ -404,7 +419,8 @@ Var *lockin_sensitivity( Var *v )
 			break;
 		}
 
-	if ( sens_index < 0 && sens < sens_list[ SENS_ENTRIES - 1 ] * 1.01 )
+	if ( sens_index == UNDEF_SENS_INDEX &&
+		 sens < sens_list[ SENS_ENTRIES - 1 ] * 1.01 )
 		sens_index = SENS_ENTRIES - 1;
 
 	if ( sens_index > 0 &&                             /* value found ? */
@@ -427,7 +443,7 @@ Var *lockin_sensitivity( Var *v )
 		sr530.sens_warn = SET;
 	}
 
-	if ( sens_index < 0 )                                /* not found yet ? */
+	if ( sens_index == UNDEF_SENS_INDEX )                 /* not found yet ? */
 	{
 		if ( sens > sens_list[ 0 ] )
 			sens_index = 0;
@@ -448,13 +464,10 @@ Var *lockin_sensitivity( Var *v )
 		}
 	}
 
-	if ( ! TEST_RUN )
-	{
-		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			sr530_set_sens( sens_index );
-		else                         /* if called in a preparation sections */ 
-			sr530.sens_index = sens_index;
-	}
+	sr530.sens_index = sens_index;
+
+	if ( FSC2_MODE == EXPERIMENT )
+		sr530_set_sens( sens_index );
 	
 	return vars_push( FLOAT_VAR, sens_list[ sens_index ] );
 }
@@ -469,26 +482,27 @@ Var *lockin_sensitivity( Var *v )
 Var *lockin_time_constant( Var *v )
 {
 	double tc;
-	int tc_index = -1;
+	int tc_index = UNDEF_TC_INDEX;
 	unsigned int i;
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
-			return vars_push( FLOAT_VAR, SR530_TEST_TIME_CONSTANT );
-		else
+		switch ( FSC2_MODE )
 		{
-			if ( I_am == PARENT )
-			{
+			case PREPARATION :
 				eprint( FATAL, SET, "%s: Function %s() with no argument can "
 						"only be used in the EXPERIMENT section.\n",
 						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
-			}
-			return vars_push( FLOAT_VAR, sr530_get_tc( ) );
+
+			case TEST :
+				return vars_push( FLOAT_VAR, sr530.tc_index == UNDEF_TC_INDEX ?
+								  SR530_TEST_TIME_CONSTANT :
+								  tc_list[ sr530.tc_index ] );
+
+			case EXPERIMENT :
+				return vars_push( FLOAT_VAR, sr530_get_tc( ) );
 		}
-	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -542,7 +556,7 @@ Var *lockin_time_constant( Var *v )
 					tc, tc_list[ tc_index ] * 1.0e3 );
 	}
 	
-	if ( tc_index < 0 )                                  /* not found yet ? */
+	if ( tc_index == UNDEF_SENS_INDEX )                   /* not found yet ? */
 	{
 		if ( tc < tc_list[ 0 ] )
 			tc_index = 0;
@@ -559,13 +573,10 @@ Var *lockin_time_constant( Var *v )
 					tc_list[ tc_index ] * 1.0e3 );
 	}
 
-	if ( ! TEST_RUN )
-	{
-		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			sr530_set_tc( tc_index );
-		else                         /* if called in a preparation sections */ 
-			sr530.tc_index = tc_index;
-	}
+	sr530.tc_index = tc_index;
+
+	if ( FSC2_MODE == EXPERIMENT )
+		sr530_set_tc( tc_index );
 	
 	return vars_push( FLOAT_VAR, tc_list[ tc_index ] );
 }
@@ -587,21 +598,21 @@ Var *lockin_phase( Var *v )
 	/* Without an argument just return current phase settting */
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
-			return vars_push( FLOAT_VAR, SR530_TEST_PHASE );
-		else
+		switch ( FSC2_MODE )
 		{
-			if ( I_am == PARENT )
-			{
+			case PREPARATION :
 				eprint( FATAL, SET, "%s: Function %s() with no argument can "
 						"only be used in the EXPERIMENT section.\n",
 						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
-			}
-			return vars_push( FLOAT_VAR, sr530_get_phase( ) );
+
+			case TEST :
+				return vars_push( FLOAT_VAR, sr530.is_phase ?
+								  sr530.phase : SR530_TEST_PHASE );
+
+			case EXPERIMENT :
+				return vars_push( FLOAT_VAR, sr530_get_phase( ) );
 		}
-	}
 
 	/* Otherwise set phase to value passed to the function */
 
@@ -631,19 +642,13 @@ Var *lockin_phase( Var *v )
 		phase = 360.0 - phase;
 	}
 
-	if ( TEST_RUN )
+	sr530.phase    = phase;
+	sr530.is_phase = SET;
+
+	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( FLOAT_VAR, phase );
-	else
-	{
-		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			return vars_push( FLOAT_VAR, sr530_set_phase( phase ) );
-		else                         /* if called in a preparation sections */ 
-		{
-			sr530.phase    = phase;
-			sr530.is_phase = SET;
-			return vars_push( FLOAT_VAR, phase );
-		}
-	}
+
+	return vars_push( FLOAT_VAR, sr530_set_phase( phase ) );
 }
 
 
@@ -661,18 +666,18 @@ Var *lockin_ref_freq( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( TEST_RUN )
-		return vars_push( FLOAT_VAR, SR530_TEST_REF_FREQUENCY );
-	else
+	switch ( FSC2_MODE )
 	{
-		if ( I_am == PARENT )
-		{
+		case PREPARATION :
 			eprint( FATAL, SET, "%s: Function %s() can only be used in the "
 					"EXPERIMENT section.\n", DEVICE_NAME, Cur_Func );
 			THROW( EXCEPTION )
-		}
-		return vars_push( FLOAT_VAR, sr530_get_ref_freq( ) );
+
+		case TEST :
+			return vars_push( FLOAT_VAR, SR530_TEST_REF_FREQUENCY );
 	}
+
+	return vars_push( FLOAT_VAR, sr530_get_ref_freq( ) );
 }
 
 
@@ -719,8 +724,18 @@ Var *lockin_dac_voltage( Var *v )
 	/* If no second argument is specified return the current DAC setting */
 
 	if ( v == NULL )
+	{
+		if ( FSC2_MODE == PREPARATION )
+		{
+			eprint( FATAL, SET, "%s: Function %s() with only one argument can "
+					"only be used in the EXPERIMENT section.\n",
+					DEVICE_NAME, Cur_Func );
+			THROW( EXCEPTION )
+		}
+
 		return vars_push( FLOAT_VAR,
 						  sr530.dac_voltage[ channel - first_DAC_port ] );
+	}
 
 	/* Second argument must be a voltage between -10.24 V and +10.24 V */
 
@@ -748,7 +763,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	sr530.dac_voltage[ channel - first_DAC_port ] = voltage;
 
-	if ( TEST_RUN || I_am == PARENT)
+	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( FLOAT_VAR, voltage );
 
 	return vars_push( FLOAT_VAR, sr530_set_dac_voltage( channel, voltage ) );
@@ -797,7 +812,7 @@ Var *lockin_lock_keyboard( Var *v )
 			;
 	}
 
-	if ( ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 		sr530_lock_state( lock );
 
 	return vars_push( INT_VAR, lock ? 1 : 0);
@@ -844,11 +859,11 @@ bool sr530_init( const char *name )
 	   actual setting now because the lock-in could not be accessed before
 	   Finally set the DAC output voltages to a defined value (default 0 V).*/
 
-	if ( sr530.sens_index != -1 )
+	if ( sr530.sens_index != UNDEF_SENS_INDEX )
 		sr530_set_sens( sr530.sens_index );
 	if ( sr530.is_phase == SET )
 		sr530_set_phase( sr530.phase );
-	if ( sr530.tc_index != -1 )
+	if ( sr530.tc_index != UNDEF_TC_INDEX )
 		sr530_set_tc( sr530.tc_index );
 	for ( i = 0; i < 2; i++ )
 		sr530_set_dac_voltage( i + first_DAC_port, sr530.dac_voltage[ i ] );

@@ -884,7 +884,7 @@ Var *lockin_ref_freq( Var *v )
 	/* Without an argument just return current frequency settting */
 
 	if ( v == NULL )
-		switch (FSC2_MODE )
+		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
 				eprint( FATAL, SET, "%s: Function %s() with no argument can "
@@ -940,6 +940,9 @@ Var *lockin_ref_freq( Var *v )
 					MIN_MOD_FREQ, 1.0e-3 * MAX_MOD_FREQ / ( double ) harm );
 		THROW( EXCEPTION )
 	}
+
+	sr810.mod_freq    = freq;
+	sr810.is_mod_freq = SET;
 
 	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( FLOAT_VAR, freq );
@@ -1051,7 +1054,7 @@ Var *lockin_lock_keyboard( Var *v )
 	if ( FSC2_MODE == EXPERIMENT )
 		sr810_lock_state( lock );
 
-	return vars_push( INT_VAR, lock ? 1 : 0);
+	return vars_push( INT_VAR, lock ? 1 : 0 );
 }
 
 
