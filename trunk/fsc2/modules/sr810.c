@@ -708,17 +708,7 @@ Var *lockin_ref_freq( Var *v )
 		if ( TEST_RUN )
 			return vars_push( FLOAT_VAR, 1.0e5 );
 		else
-		{
-			if ( I_am == PARENT )
-			{
-				eprint( FATAL, "%s:%ld: %s: Function `lockin_ref_freq' "
-						"with no argument can only be used in the EXPERIMENT "
-						"section.\n", Fname, Lc, DEVICE_NAME );
-				THROW( EXCEPTION );
-			}
-
 			return vars_push( FLOAT_VAR, sr810_get_ref_freq( ) );
-		}
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -757,14 +747,7 @@ Var *lockin_ref_freq( Var *v )
 	if ( TEST_RUN )
 		return vars_push( FLOAT_VAR, freq );
 
-	if ( I_am == CHILD )                /* if called in EXPERIMENT section */
-		return vars_push( FLOAT_VAR, sr810_set_ref_freq( freq ) );
-	else                                /* if called in preparation sections */
-	{
-		sr810.ref_freq = freq;
-		sr810.RF = SET;
-		return vars_push( FLOAT_VAR, freq );
-	}
+	return vars_push( FLOAT_VAR, sr810_set_ref_freq( freq ) );
 }
 
 
