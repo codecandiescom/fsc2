@@ -547,37 +547,21 @@ long tds_tmpl_translate_channel( int dir, long channel, bool flag )
 #endif
 			case CHANNEL_LINE :
 				return TDS_TMPL_LIN;
-
-			case CHANNEL_MEM_C  :
-			case CHANNEL_MEM_D  :
-			case CHANNEL_FUNC_E :
-			case CHANNEL_FUNC_F :
-			case CHANNEL_EXT    :
-			case CHANNEL_EXT10  :
-			case CHANNEL_CH0    :
-			case CHANNEL_CH5    :
-			case CHANNEL_CH6    :
-			case CHANNEL_CH7    :
-			case CHANNEL_CH8    :
-			case CHANNEL_CH9    :
-			case CHANNEL_CH10   :
-			case CHANNEL_CH11   :
-			case CHANNEL_CH12   :
-			case CHANNEL_CH13   :
-			case CHANNEL_CH14   :
-			case CHANNEL_CH15   :
-				if ( flag )
-					return -1;
-				print( FATAL, "Digitizer has no channel %s.\n",
-					   Channel_Names[ channel ] );
-				THROW( EXCEPTION );
-
-			default :
-				if ( flag )
-					return -1;
-				print( FATAL, "Invalid channel number %ld.\n", channel );
-				THROW( EXCEPTION );
 		}
+
+		if ( channel > CHANNEL_INVALID && channel < NUM_CHANNEL_NAMES )
+		{
+			if ( flag )
+				return -1;
+			print( FATAL, "Digitizer has no channel %s.\n",
+				   Channel_Names[ channel ] );
+			THROW( EXCEPTION );
+		}
+
+		if ( flag )
+			return -1;
+		print( FATAL, "Invalid channel number %ld.\n", channel );
+		THROW( EXCEPTION );
 	}
 	else
 	{

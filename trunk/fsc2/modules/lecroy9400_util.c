@@ -366,43 +366,21 @@ long lecroy9400_translate_channel( int dir, long channel, bool flag )
 
 			case CHANNEL_EXT10 :
 				return LECROY9400_EXT10;
-
-			case CHANNEL_CH3   :
-			case CHANNEL_CH4   :
-			case CHANNEL_MATH1 :
-			case CHANNEL_MATH2 :
-			case CHANNEL_MATH3 :
-			case CHANNEL_REF1  :
-			case CHANNEL_REF2  :
-			case CHANNEL_REF3  :
-			case CHANNEL_REF4  :
-			case CHANNEL_AUX   :
-			case CHANNEL_AUX1  :
-			case CHANNEL_AUX2  :
-			case CHANNEL_CH0   :
-			case CHANNEL_CH5   :
-			case CHANNEL_CH6   :
-			case CHANNEL_CH7   :
-			case CHANNEL_CH8   :
-			case CHANNEL_CH9   :
-			case CHANNEL_CH10  :
-			case CHANNEL_CH11  :
-			case CHANNEL_CH12  :
-			case CHANNEL_CH13  :
-			case CHANNEL_CH14  :
-			case CHANNEL_CH15  :
-				if ( flag )
-					return -1;
-				print( FATAL, "Digitizer has no channel %s.\n",
-					   Channel_Names[ channel ] );
-				THROW( EXCEPTION );
-
-			default :
-				if ( flag )
-					return -1;
-				print( FATAL, "Invalid channel number %ld.\n", channel );
-				THROW( EXCEPTION );
 		}
+
+		if ( channel > CHANNEL_INVALID && channel < NUM_CHANNEL_NAMES )
+		{
+			if ( flag )
+				return -1;
+			print( FATAL, "Digitizer has no channel %s.\n",
+				   Channel_Names[ channel ] );
+			THROW( EXCEPTION );
+		}
+
+		if ( flag )
+			return -1;
+		print( FATAL, "Invalid channel number %ld.\n", channel );
+		THROW( EXCEPTION );
 	}
 	else
 	{

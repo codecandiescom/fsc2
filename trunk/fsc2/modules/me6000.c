@@ -101,6 +101,7 @@ int me6000_test_hook( void )
 	return 1;
 }
 
+
 /*---------------------------------------------------------*/
 /*---------------------------------------------------------*/
 
@@ -126,7 +127,7 @@ int me6000_exp_hook( void )
 			print( FATAL, "Invalid board number.\n" );
 			THROW( EXCEPTION );
 
-		case ME6X00_ERR_NSB:
+		case ME6X00_ERR_NSB :
 			print( FATAL, "Driver for board not loaded.\n" );
 			THROW( EXCEPTION );
 
@@ -342,32 +343,18 @@ static int me6000_channel_number( long ch )
 
 		case CHANNEL_CH15 :
 			return ME6X00_DAC15;
-
-		case CHANNEL_MATH1  :
-		case CHANNEL_MATH2  :
-		case CHANNEL_MATH3  :
-		case CHANNEL_REF1   :
-		case CHANNEL_REF2   :
-		case CHANNEL_REF3   :
-		case CHANNEL_REF4   :
-		case CHANNEL_AUX    :
-		case CHANNEL_AUX1   :
-		case CHANNEL_AUX2   :
-		case CHANNEL_LINE   :
-		case CHANNEL_MEM_C  :
-		case CHANNEL_MEM_D  :
-		case CHANNEL_FUNC_E :
-		case CHANNEL_FUNC_F :
-		case CHANNEL_EXT    :
-		case CHANNEL_EXT10  :
-				print( FATAL, "There's no DAC channel named %s.\n",
-					   Channel_Names[ ch ] );
-				THROW( EXCEPTION );
-
-		default :
-			print( FATAL, "Invalid channel number %ld.\n", ch );
-			THROW( EXCEPTION );
 	}
+
+
+	if ( ch > CHANNEL_INVALID && ch < NUM_CHANNEL_NAMES )
+	{
+		print( FATAL, "There's no DAC channel named %s.\n",
+			   Channel_Names[ ch ] );
+		THROW( EXCEPTION );
+	}
+
+	print( FATAL, "Invalid channel number %ld.\n", ch );
+	THROW( EXCEPTION );
 
 	return -1;
 }
