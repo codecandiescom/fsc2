@@ -33,6 +33,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io );
 static void tools_callback( FL_OBJECT *ob, long data );
 static bool check_format_string( const char *buf );
 static void convert_escapes( char *str );
+static void store_geometry( void );
 
 
 extern FL_resource xresources[ ];
@@ -185,8 +186,7 @@ void parent_freeze( int freeze )
 	{
 		if ( fl_form_is_visible( Tool_Box->Tools ) )
 		{
-			tool_x = Tool_Box->Tools->x;
-			tool_y = Tool_Box->Tools->y;
+			store_geometry( );
 			fl_hide_form( Tool_Box->Tools );
 		}
 
@@ -718,8 +718,7 @@ Var *f_bdelete( Var *v )
 				{
 					if ( fl_form_is_visible( Tool_Box->Tools ) )
 					{
-						tool_x = Tool_Box->Tools->x;
-						tool_y = Tool_Box->Tools->y;
+						store_geometry( );
 						fl_hide_form( Tool_Box->Tools );
 					}
 					fl_free_form( Tool_Box->Tools );
@@ -1381,8 +1380,7 @@ Var *f_sdelete( Var *v )
 				{
 					if ( fl_form_is_visible( Tool_Box->Tools ) )
 					{
-						tool_x = Tool_Box->Tools->x;
-						tool_y = Tool_Box->Tools->y;
+						store_geometry( );
 						fl_hide_form( Tool_Box->Tools );
 					}
 					fl_free_form( Tool_Box->Tools );
@@ -2030,8 +2028,7 @@ Var *f_idelete( Var *v )
 				{
 					if ( fl_form_is_visible( Tool_Box->Tools ) )
 					{
-						tool_x = Tool_Box->Tools->x;
-						tool_y = Tool_Box->Tools->y;
+						store_geometry( );
 						fl_hide_form( Tool_Box->Tools );
 					}
 					fl_free_form( Tool_Box->Tools );
@@ -2323,8 +2320,7 @@ void tools_clear( void )
 	{
 		if ( fl_form_is_visible( Tool_Box->Tools ) )
 		{
-			tool_x = Tool_Box->Tools->x;
-			tool_y = Tool_Box->Tools->y;
+			store_geometry( );
 			fl_hide_form( Tool_Box->Tools );
 		}
 	}
@@ -2373,8 +2369,7 @@ static void recreate_Tool_Box( void )
 	{
 		if ( fl_form_is_visible( Tool_Box->Tools ) )
 		{
-			tool_x = Tool_Box->Tools->x;
-			tool_y = Tool_Box->Tools->y;
+			store_geometry( );
 			fl_hide_form( Tool_Box->Tools );
 		}
 
@@ -2972,6 +2967,26 @@ Var *f_objdel( Var *v )
 	}
 
 	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/* Another function for dealing with an XForms bug... */
+/*----------------------------------------------------*/
+
+static void store_geometry( void )
+{
+	if ( tool_x != Tool_Box->Tools->x - 1 && 
+		 tool_y != Tool_Box->Tools->y - 1 )
+	{
+		tool_x = Tool_Box->Tools->x;
+		tool_y = Tool_Box->Tools->y;
+	}
+	else
+	{
+		tool_x = Tool_Box->Tools->x - 1;
+		tool_y = Tool_Box->Tools->y - 1;
+	}
 }
 
 
