@@ -9,8 +9,8 @@
 /*                                                                         */
 /*  In order to avoid exception stack overflows (e.g. after 256 successful */
 /*  calls with TRY) I found it is necessary to decrement the stack pointer */
-/*  `exception_env_stack_pos' after each successful TRY, as defined with   */
-/*  the macro `TRY_SUCCESS'. A typical sequence is thus:                   */
+/*  `exception_env_stack_pos' after each successful TRY, as defined by the */
+/*  macro `TRY_SUCCESS'. A typical sequence is thus:                       */
 /*                                                                         */
 /*  TRY {                                                                  */
 /*      statement;                                                         */

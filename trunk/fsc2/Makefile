@@ -173,7 +173,7 @@ ${tds520a:.c=.lo}: tds520a.h $(headers)
 	$(CC) $(CFLAGS) -c -fPIC $< -o $*.lo
 
 
-# install the program in $bindir and all the other stuff in $libdir
+# install the program in $bindir and all the other stuff in $libdir and $auxdir
 
 install:
 	install -d $(bindir)
