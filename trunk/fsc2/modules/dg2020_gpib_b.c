@@ -152,6 +152,18 @@ static bool dg2020_set_trigger_in_impedance( int state );
 static void dg2020_gpib_failure( void );
 
 
+#ifdef DG2020_B_GPIB_DEBUG
+#warning "*************************************"
+#warning "dg2020_b.so made for DEBUG mode only!"
+#warning "*************************************"
+
+#define gpib_write( a, b, c ) ( fprintf( stderr, "%s\n", ( b ) ), SUCCESS )
+#define gpib_read( a, b, c ) ( SUCCESS )
+#define gpib_init_device( a, b ) 1
+#endif
+
+
+
 /*------------------------------------------------------*/
 /* dg2020_init() initializes the Sony/Tektronix DG2020. */
 /* ->                                                   */
@@ -164,8 +176,12 @@ bool dg2020_init( const char *name )
 {
 	int i, j;
 	FUNCTION *f;
+#ifndef DG2020_B_GPIB_DEBUG
 	char reply[ 100 ];
 	long len = 100;
+#else
+	name = name;
+#endif
 
 
 	if ( gpib_init_device( name, &dg2020.device ) == FAILURE )

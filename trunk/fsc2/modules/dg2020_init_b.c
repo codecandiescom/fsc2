@@ -199,9 +199,10 @@ void dg2020_basic_pulse_check( void )
 		{
 			if ( p->function->pm == NULL )      /* if it doesn't exist yet */
 			{
-				p->function->pm = BOOL_P T_malloc( p->pc->len *
-											 sizeof( *p->function->pm ) *
-											 ( PHASE_CW - PHASE_PLUS_X + 1 ) );
+				p->function->pm =
+					BOOL_P T_malloc( p->pc->len * sizeof( *p->function->pm )
+									 * ( PHASE_CW - PHASE_PLUS_X + 1 ) );
+
 				for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
 					for ( j = 0; j < p->pc->len; j++ )
 						p->function->pm[ i * p->pc->len + j ] = UNSET;
@@ -225,7 +226,7 @@ void dg2020_basic_pulse_check( void )
 static void dg2020_basic_functions_check( void )
 {
 	FUNCTION *f;
-	int i, j;
+	int i;
 	PULSE *cp;
 
 
@@ -245,22 +246,14 @@ static void dg2020_basic_functions_check( void )
 		if ( ! f->is_used )
 			continue;
 
-		/* Check if the function has pulses assigned to it */
+		/* Check if the function has pulses assigned to it, otherwise print
+		   a warning and reduce the number of channels it gets to 1 */
 
 		if ( ! f->is_needed )
 		{
 			print( WARN, "No pulses have been assigned to function '%s'.\n",
-				   Function_Names[ i ] );
-			f->is_used = UNSET;
-
-			for ( j = 0; j < f->num_channels; j++ )
-			{
-				f->channel[ j ]->function = NULL;
-				f->channel[ j ] = NULL;
-			}
-			f->num_channels = 0;
-
-			continue;
+				   f->name );
+			f->is_needed = SET;
 		}
 
 		/* Make sure there's at least one pod assigned to the function */
@@ -296,8 +289,9 @@ static void dg2020_basic_functions_check( void )
 
 		if ( f->num_pods > 1 && f->phase_setup == NULL )
 		{
-			print( FATAL, "Missing phase setup for function '%s'.\n",
-				   Function_Names[ i ] );
+			print( FATAL, "Function '%s' has more than one pod but "
+				   "association between pods and phases is missing.\n",
+				   f->name );
 			THROW( EXCEPTION );
 		}
 
@@ -331,6 +325,15 @@ static int dg2020_calc_channels_needed( FUNCTION *f )
 
 	if ( f->num_pods < 2 )
 		return 1;
+
+	/* For channels with more than one pod but no pulses... */
+
+	if ( f->num_pulses == 0 )
+	{
+		f->pc_len = 1;
+		f->need_constant = SET;
+		return 1;
+	}
 
 	fsc2_assert( f->pm != NULL );
 
@@ -376,7 +379,7 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 
 		if ( j == f->num_pods )                 /* not found ? */
 		{
-			print( FATAL, "According to the the phase setup pod %d is needed "
+			print( FATAL, "According to the phase setup pod %d is needed "
 				   "for function '%s' but it's not assigned to it.\n",
 				   f->phase_setup->pod[ i ]->self, f->name );
 			THROW( EXCEPTION );
@@ -391,8 +394,8 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 	{
 		if ( f->phase_setup->is_needed[ i ] && ! f->phase_setup->is_set[ i ] )
 		{
-			print( FATAL, "Phase type '%s' is needed for function '%s' but it "
-				   "hasn't been not defined in a PHASE_SETUP command.\n",
+			print( FATAL, "Phase type '%s' is needed for function '%s' but "
+				   "has not been not defined in a PHASE_SETUP command.\n",
 				   Phase_Types[ i + PHASE_PLUS_X ], f->name );
 			THROW( EXCEPTION );
 		}
@@ -530,7 +533,7 @@ static void dg2020_setup_phase_matrix( FUNCTION *f )
 	int cur_channel;
 
 
-	fsc2_assert( f->pm != NULL && f->pcm == NULL );
+	fsc2_assert( f->num_pulses == 0 || ( f->pm != NULL && f->pcm == NULL ) );
 
 	/* If the function needs constant voltage channel we keep the channel with
 	   the lowest number for it */
@@ -542,13 +545,13 @@ static void dg2020_setup_phase_matrix( FUNCTION *f )
 
 	for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
 		for ( j = 0; j < f->pc_len; j++ )
-			if ( f->pm[ i * f->pc_len + j ] )
+			if ( f->pm && f->pm[ i * f->pc_len + j ] )
 				f->pcm[ i * f->pc_len + j ] = f->channel[ cur_channel++ ];
 			else
 				f->pcm[ i * f->pc_len + j ] = f->channel[ 0 ];
 
-	T_free( f->pm );
-	f->pm = NULL;
+	if ( f->pm != NULL )
+		f->pm = BOOL_P T_free( f->pm );
 }
 
 

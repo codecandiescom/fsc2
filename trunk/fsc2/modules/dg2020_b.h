@@ -30,6 +30,9 @@
 #include "dg2020_b.conf"
 
 
+#define DG2020_B_GPIB_DEBUG 1
+
+
 /* Here are all the directly exported functions (i.e. exported either implicit
    as a hook functions or via the Functions data base) */
 
