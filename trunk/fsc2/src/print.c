@@ -531,7 +531,7 @@ static void print_header( FILE *fp, char *name )
 	time_t d;
 
 
-	/* Start writing the EPS header plus some routines into the file */
+	/* Writes EPS header plus some routines into the file */
 
 	d = time( NULL );
 
@@ -543,6 +543,7 @@ static void print_header( FILE *fp, char *name )
 
 	fprintf( fp, "%%%%Title: %s\n"
 			     "%%%%BoundingBox: 0 0 %d %d\n"
+			     "%%%%Orientation: Landscape\n"
 			     "%%%%End Comments\n",
 			     name,
 			     ( int ) ( 72.0 * paper_width / INCH ),
@@ -600,7 +601,7 @@ static void print_header( FILE *fp, char *name )
 
 	/* Done with the header, tell the Postscript interpreter */
 
-	frintf( fp, "%%%%EndProlog\n" );
+	fprintf( fp, "%%%%EndProlog\n" );
 
 	/* Rotate and shift for landscape format, scale to mm units, set font
 	   and draw logo, date and user name */
