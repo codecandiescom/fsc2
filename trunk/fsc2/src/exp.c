@@ -47,19 +47,19 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr );
    the parser. This is necessary for two reasons: First, the experiment
    section may contain loops. Without an intermediate it would be rather
    difficult to run through the loops since we would have to re-read and
-   re-tokenize the input file again and again, which not only would be slow
+   re-tokenise the input file again and again, which not only would be slow
    but also difficult since what we read as input file is actually a pipe from
    the `cleaner'. Second, we will have to run through the experiment section
    at least two times, first for syntax and sanity checks and then again for
    really doing the experiment. Again, without an intermediate for storing the
-   tokenized form of the experiment section this would necessitate reading the
+   tokenised form of the experiment section this would necessitate reading the
    input files at least two times.
 
    By having an intermediate between the lexer and the parser we avoid several
-   problems. We don't have to re-read and re-tokenize the input file. We also
+   problems. We don't have to re-read and re-tokenise the input file. We also
    can find out about loops and handle them later by simply feeding the parser
    the loop again and again. Of course, beside storing the experiment section
-   in tokenized form as done by this function, we also need a routine that
+   in tokenised form as done by this function, we also need a routine that
    later feeds the stored tokens to the parser(s).
 */
 
@@ -149,7 +149,7 @@ void store_exp( FILE *in )
 		prg_token[ prg_length ].Fname = cur_Fname;
 		prg_token[ prg_length ].Lc = Lc;
 
-		/* Initialize pointers needed for flow control and the data entries
+		/* Initialise pointers needed for flow control and the data entries
 		   used in repeat loops */
 
 		prg_token[ prg_length ].start = prg_token[ prg_length ].end = NULL;
@@ -157,7 +157,7 @@ void store_exp( FILE *in )
 		prg_length++;
 	}
 
-	/* Check and initialize if's and loops */
+	/* Check and initialise if's and loops */
 
 	loop_setup( );
 }
@@ -519,7 +519,7 @@ void exp_test_run( void )
 	TRY
 	{
 		/* 1. Run the test run hook functions of the modules.
-		   2. Save the variables so we can reset them to their intial values
+		   2. Save the variables so we can reset them to their initial values
 		      when the test run is completed.
 		   3. Save the relevant values from the pulse structures.
 		   3. Set up a signal handler so that it's possible to stop the test
@@ -656,7 +656,7 @@ void exp_test_run( void )
 /* Routine works as a kind of virtual lexer by simply passing the    */
 /* parser the tokens we stored while running store_exp(). The only   */
 /* exception are tokens dealing with flow control - for most of them */
-/* the parser gets signaled an end of file, only the `}' is handled  */
+/* the parser gets signalled an end of file, only the `}' is handled */
 /* by the parser itself (but also as an EOF).                        */
 /*-------------------------------------------------------------------*/
 
@@ -727,10 +727,10 @@ int exp_runlex( void )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* This routines returnes the tokens to the parser while the condition of */
-/* a while, repeat or for or if is parsed.                                */
-/*------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* This routines returns the tokens to the parser while the condition of */
+/* a while, repeat or for or if is parsed.                               */
+/*-----------------------------------------------------------------------*/
 
 int conditionlex( void )
 {
@@ -790,7 +790,7 @@ int conditionlex( void )
 				return E_VAR_REF;
 
 			case '=' :
-				eprint( FATAL, "%s:%ld: For comparisions `==' must be used "
+				eprint( FATAL, "%s:%ld: For comparisons `==' must be used "
 						"(`=' is for assignments only).\n", Fname, Lc );
 				THROW( EXCEPTION );
 
@@ -842,7 +842,7 @@ bool test_condition( Prg_Token *cur )
 		THROW( EXCEPTION );
 	}
 			 
-	/* Test the result - erverything nonzero returns OK */
+	/* Test the result - everything nonzero returns OK */
 
 	if ( Var_Stack->type == INT_VAR )
 		condition = Var_Stack->val.lval ? OK : FAIL;
@@ -947,7 +947,7 @@ void get_for_cond( Prg_Token *cur )
 	conditionparse( );                    /* get start value */
 	assert( Var_Stack->next == NULL );    /* Paranoia as usual... */
 
-	/* Make sure there is at least one more token, i.e. the loop's end value */
+	/* Make sure there is at least one more token, i.e. the loops end value */
 
 	if ( cur_prg_token->token != ':' )
 	{

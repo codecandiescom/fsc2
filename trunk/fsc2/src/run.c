@@ -33,7 +33,7 @@ static volatile bool child_is_quitting;
 
 
 /*-------------------------------------------------------------------*/
-/* run() starts an experiment. To do so it initializes all needed    */
+/* run() starts an experiment. To do so it initialises all needed    */
 /* devices and opens a new window for displaying the measured data.  */
 /* Then a pipe is opened for passing measured data from the child    */
 /* process (to be created for acquiring the data) and the main       */
@@ -63,11 +63,11 @@ bool run( void )
 	set_buttons_for_run( 0 );
 	fl_set_cursor( FL_ObjWin( main_form->run ), XC_watch );
 
-	/* If the devices need the GPIB bus initialize it now */
+	/* If the devices need the GPIB bus initialise it now */
 
 	if ( need_GPIB && gpib_init( &gpib_log, LL_ERR ) == FAILURE )
 	{
-		eprint( FATAL, "Can't initialize GPIB bus.\n" );
+		eprint( FATAL, "Can't initialise GPIB bus.\n" );
 		set_buttons_for_run( 1 );
 		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 		return FAIL;
@@ -114,7 +114,7 @@ bool run( void )
 	signal handlers because they become blocked by when the display is busy
 	and no SEND_DATA is send back to the child, effectively stopping it
 	completely, so we have to use the traditional approach for this type of
-	signal. Also with SIGCHLD there was a problem - the XForms signal andler
+	signal. Also with SIGCHLD there was a problem - the XForms signal handler
 	wasn't reliable enough, so... */
 
 	signal( NEW_DATA, new_data_handler );
@@ -333,8 +333,8 @@ void stop_measurement( FL_OBJECT *a, long b )
 
 /*----------------------------------------------------------*/
 /* set_buttons_for_run() makes the buttons in the main form */
-/* for running another experient and quitting inaccesible   */
-/* while a measurement is running and makes them accesible  */
+/* for running another experiment and quitting inaccessible */
+/* while a measurement is running and makes them accessible */
 /* again when the experiment is finished.                   */
 /*----------------------------------------------------------*/
 

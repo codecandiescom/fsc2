@@ -26,12 +26,12 @@
    a simple pair of pipes will do. All needed beside is a protocol for the
    different types of requests. Since requests are not really time critical
    the parent does not have to reply immediately and the child waits until the
-   parent honors the request. Thus the way requests are handled by the parent
+   parent honours the request. Thus the way requests are handled by the parent
    is as follows: The parent catches the NEW_DATA signal and triggers an
    invisible button which in turn leads to the button handler function being
    called by the main loop of the program as for every other event. Then the
    parent reads the pipe and replies by sending the answer to the request via
-   another pipe. No synchronization is needed since the child will be blocked
+   another pipe. No synchronisation is needed since the child will be blocked
    while reading the reply pipe until the parent finishes writing its answer
    to the pipe. The parent will also have to send a DO_SEND signal to allow
    the child to send further data or requests.
@@ -100,7 +100,7 @@
    these memory segments will remain intact since the system won't remove
    them. To make it simpler to find and then remove orphaned shared memory
    segments, i.e. segments that no process is interested in anymore, each
-   memory segment allocated by fsc2 is labeled by the four byte magic number
+   memory segment allocated by fsc2 is labelled by the four byte magic number
    'fsc2' at its very start. Using this label at the next start of fsc2 all
    orphaned segments can be identified and released.
 
@@ -277,7 +277,7 @@ void *get_shm( int *shm_id, long len )
 
 
 /*------------------------------------------------------------*/
-/* new_data_callback() is responsible for either honoring a   */
+/* new_data_callback() is responsible for either honouring a  */
 /* a REQUEST or storing and displaying DATA from the child.   */
 /* Actually, this routine is the handler for an idle call-    */
 /* back.                                                      */
@@ -762,7 +762,7 @@ void writer( int type, ... )
 			if ( header.data.str_len[ 0 ] > 0 )
 				write( pd[ WRITE ], str[ 0 ], header.data.len );
 
-			/* wait for a random character to be sent back as acknowledgment */
+			/* wait for a random character to be sent back as acknowledgement */
 
 			read( pd[ READ ], &ack, sizeof( char ) );
 			break;
