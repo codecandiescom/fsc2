@@ -105,7 +105,8 @@ typedef struct
 	double attenuation;
 	bool attenuation_is_set;
 
-	bool state;
+	bool state;                     /* RF is on or off */
+	bool is_10db;                   /* 10 db extra output option */
 
 	char *table_file;               /* name of attenuation table file */
 	bool use_table;
