@@ -26,6 +26,7 @@
 
 
 #include "fsc2_module.h"
+#include <float.h>
 
 
 /* Include configuration information for the device */
