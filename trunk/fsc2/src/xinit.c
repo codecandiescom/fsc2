@@ -37,31 +37,14 @@ static int fsc2_xio_error_handler( Display *d );
 #endif
 
 
-#if ( SIZE == HI_RES )
-#define WIN_MIN_WIDTH    220
-#define WIN_MIN_HEIGHT   570
-#define NORMAL_FONT_SIZE FL_MEDIUM_SIZE
-#define SMALL_FONT_SIZE  FL_SMALL_SIZE
-#define TOOLS_FONT_SIZE  FL_MEDIUM_FONT
-#define SLIDER_SIZE      0.075
-#else
-#define WIN_MIN_WIDTH    200
-#define WIN_MIN_HEIGHT   320
-#define NORMAL_FONT_SIZE FL_SMALL_SIZE
-#define SMALL_FONT_SIZE  FL_TINY_SIZE
-#define TOOLS_FONT_SIZE  FL_SMALL_FONT
-#define SLIDER_SIZE      0.1
-#endif
-
-
 /* Some variables needed for the X resources */
 
-#define N_APP_OPT 15
+#define N_APP_OPT 16
 FL_IOPT xcntl;
 
 char xGeoStr[ 64 ], xdisplayGeoStr[ 64 ],
 	 xcutGeoStr[ 64 ], xtoolGeoStr[ 64 ],
-	 xaxisFont[ 256 ], xsmb[ 64 ];
+	 xaxisFont[ 256 ], xsmb[ 64 ], xsizeStr[ 64 ];
 
 int xbrowserfs, xbuttonfs, xinputfs, xlabelfs, xchoicefs, xsliderfs,
 	xfileselectorfs, xhelpfs, xnocm;
@@ -90,7 +73,18 @@ FL_resource xresources[ N_APP_OPT ] = {
 	{ "helpFontSize", "*.helpFontSize", FL_INT, &xhelpfs, "0", sizeof( int ) },
 	{ "stopMouseButton", "*.stopMouseButton", FL_STRING, &xsmb, "", 64 },
 	{ "noCrashMail", "*.noCrashMail", FL_BOOL, &xnocm, "0", sizeof( int ) },
+	{ "size", "*.size", FL_STRING, xsizeStr, "", 64 },
 };
+
+
+static struct {
+	int WIN_MIN_WIDTH;
+	int WIN_MIN_HEIGHT;
+	int NORMAL_FONT_SIZE;
+	int SMALL_FONT_SIZE;
+	int TOOLS_FONT_SIZE;
+	double SLIDER_SIZE;
+} XI_sizes;
 
 
 
@@ -142,22 +136,58 @@ bool xforms_init( int *argc, char *argv[ ] )
 	XSetIOErrorHandler( fsc2_xio_error_handler );
 #endif
 
+	/* Find out the resolution we're going to run in */
+
+	if ( fl_scrh >= 870 && fl_scrw >= 1152 )
+		G_Funcs.size = HIGH;
+	else
+		G_Funcs.size = LOW;
+
+	if ( * ( ( char * ) xresources[ RESOLUTION ].var ) != '\0' )
+	{
+		if ( ! strcasecmp( ( char * ) xresources[ RESOLUTION ].var, "s" ) ||
+			 ! strcasecmp( ( char * ) xresources[ RESOLUTION ].var, "small" ) )
+			G_Funcs.size = LOW;
+		if ( ! strcasecmp( ( char * ) xresources[ RESOLUTION ].var, "l" ) ||
+			 ! strcasecmp( ( char * ) xresources[ RESOLUTION ].var, "large" ) )
+			G_Funcs.size = HIGH;
+	}
+
+	if ( G_Funcs.size == LOW )
+	{
+		XI_sizes.WIN_MIN_WIDTH    = 200;
+		XI_sizes.WIN_MIN_HEIGHT   = 320;
+		XI_sizes.NORMAL_FONT_SIZE = FL_SMALL_SIZE;
+		XI_sizes.SMALL_FONT_SIZE  = FL_TINY_SIZE;
+		XI_sizes.TOOLS_FONT_SIZE  = FL_SMALL_FONT;
+		XI_sizes.SLIDER_SIZE      = 0.1;
+	}
+	else
+	{
+		XI_sizes.WIN_MIN_WIDTH    = 220;
+		XI_sizes.WIN_MIN_HEIGHT   = 570;
+		XI_sizes.NORMAL_FONT_SIZE = FL_MEDIUM_SIZE;
+		XI_sizes.SMALL_FONT_SIZE  = FL_SMALL_SIZE;
+		XI_sizes.TOOLS_FONT_SIZE  = FL_MEDIUM_FONT;
+		XI_sizes.SLIDER_SIZE      = 0.075;
+	}
+
 	/* Set some properties of goodies */
 
-	fl_set_goodies_font( FL_NORMAL_STYLE, NORMAL_FONT_SIZE );
-	fl_set_oneliner_font( FL_NORMAL_STYLE, NORMAL_FONT_SIZE );
+	fl_set_goodies_font( FL_NORMAL_STYLE, XI_sizes.NORMAL_FONT_SIZE );
+	fl_set_oneliner_font( FL_NORMAL_STYLE, XI_sizes.NORMAL_FONT_SIZE );
 
 	if ( * ( ( int * ) xresources[ HELPFONTSIZE ].var ) != 0 )
 		fl_set_tooltip_font( FL_NORMAL_STYLE, 
 							 * ( ( int * ) xresources[ HELPFONTSIZE ].var ) );
 	else
-		fl_set_tooltip_font( FL_NORMAL_STYLE, SMALL_FONT_SIZE );
+		fl_set_tooltip_font( FL_NORMAL_STYLE, XI_sizes.SMALL_FONT_SIZE );
 
 	if ( * ( ( int * ) xresources[ FILESELFONTSIZE ].var ) != 0 )
 		fl_set_fselector_fontsize( * ( ( int * )
 									   xresources[ FILESELFONTSIZE ].var )  );
 	else
-		fl_set_fselector_fontsize( NORMAL_FONT_SIZE );
+		fl_set_fselector_fontsize( XI_sizes.NORMAL_FONT_SIZE );
 	fl_set_tooltip_color( FL_BLACK, FL_YELLOW );
 
 	fl_disable_fselector_cache( 1 );
@@ -165,12 +195,12 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	/* Set default font sizes */
 
-	xcntl.browserFontSize = NORMAL_FONT_SIZE;
-	xcntl.buttonFontSize  = TOOLS_FONT_SIZE;
-	xcntl.inputFontSize   = TOOLS_FONT_SIZE;
-	xcntl.labelFontSize   = TOOLS_FONT_SIZE;
-	xcntl.choiceFontSize  = TOOLS_FONT_SIZE;
-	xcntl.sliderFontSize  = TOOLS_FONT_SIZE;
+	xcntl.browserFontSize = XI_sizes.NORMAL_FONT_SIZE;
+	xcntl.buttonFontSize  = XI_sizes.TOOLS_FONT_SIZE;
+	xcntl.inputFontSize   = XI_sizes.TOOLS_FONT_SIZE;
+	xcntl.labelFontSize   = XI_sizes.TOOLS_FONT_SIZE;
+	xcntl.choiceFontSize  = XI_sizes.TOOLS_FONT_SIZE;
+	xcntl.sliderFontSize  = XI_sizes.TOOLS_FONT_SIZE;
 
 	/* Set the stop mouse button */
 
@@ -227,12 +257,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 			* ( ( int * ) xresources[ SLIDERFONTSIZE ].var );
 	fl_set_defaults( FL_PDSliderFontSize, &xcntl );
 
-
-#if ( SIZE == HI_RES )
-	if ( ! dl_fsc2_rsc( HIGH ) )
-#else
-	if ( ! dl_fsc2_rsc( LOW ) )
-#endif
+	if ( ! dl_fsc2_rsc( G_Funcs.size ) )
 		 return FAIL;
 
 	/* Create and display the main form */
@@ -258,10 +283,11 @@ bool xforms_init( int *argc, char *argv[ ] )
 	h = y2 - y1 - h1;
 	H = h1 + h2 + h;
 
-	fl_set_slider_size( main_form->win_slider, SLIDER_SIZE );
+	fl_set_slider_size( main_form->win_slider, XI_sizes.SLIDER_SIZE );
 	fl_set_slider_value( main_form->win_slider,
-						 ( double ) ( h1 + h / 2 - 0.5 * H * SLIDER_SIZE )
-						 / ( ( 1.0 - SLIDER_SIZE ) * H ) );
+						 ( double ) ( h1 + h / 2
+									  - 0.5 * H * XI_sizes.SLIDER_SIZE )
+						 / ( ( 1.0 - XI_sizes.SLIDER_SIZE ) * H ) );
 
 	/* There's no use for the bug report button if either no mail address
 	   or no mail program has been set */
@@ -278,10 +304,10 @@ bool xforms_init( int *argc, char *argv[ ] )
 								&wx, &wy, &ww, &wh );
 		if ( WidthValue & flags && HeightValue & flags )
 		{
-			if ( ww < WIN_MIN_WIDTH )
-				ww = WIN_MIN_WIDTH;
-			if ( wh < WIN_MIN_HEIGHT )
-				wh = WIN_MIN_HEIGHT;
+			if ( ww < XI_sizes.WIN_MIN_WIDTH )
+				ww = XI_sizes.WIN_MIN_WIDTH;
+			if ( wh < XI_sizes.WIN_MIN_HEIGHT )
+				wh = XI_sizes.WIN_MIN_HEIGHT;
 
 			fl_set_form_size( main_form->fsc2, ww, wh );
 		}
@@ -309,7 +335,8 @@ bool xforms_init( int *argc, char *argv[ ] )
 	border_offset_x = main_form->fsc2->x - attr.x;
 	border_offset_y = main_form->fsc2->y - attr.y;
 
-	fl_winminsize( main_form->fsc2->window, WIN_MIN_WIDTH, WIN_MIN_HEIGHT );
+	fl_winminsize( main_form->fsc2->window,
+				   XI_sizes.WIN_MIN_WIDTH, XI_sizes.WIN_MIN_HEIGHT );
 
 	/* Check if axis font exists (if the user set a font) */
 
@@ -422,6 +449,11 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 	app_opt[ NOCRASHMAIL ].specifier      = T_strdup( "*.noCrashMail" );
 	app_opt[ NOCRASHMAIL ].argKind        = XrmoptionNoArg;
 	app_opt[ NOCRASHMAIL ].value          = ( caddr_t ) "0";
+
+	app_opt[ RESOLUTION	].option          = T_strdup( "-size" );
+	app_opt[ RESOLUTION	].specifier       = T_strdup( "*.size" );
+	app_opt[ RESOLUTION	].argKind         = XrmoptionSepArg;
+	app_opt[ RESOLUTION	].value           = ( caddr_t ) NULL;
 }
 
 
@@ -441,8 +473,8 @@ bool dl_fsc2_rsc( bool size )
 	strcpy( lib_name, libdir );
 	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
 		strcat( lib_name, "/" );
-	if ( size == HIGH )
-		strcat( lib_name, "fsc2_rsc_hr.so" );
+	if ( size == LOW )
+		strcat( lib_name, "fsc2_rsc_lr.so" );
 	else
 		strcat( lib_name, "fsc2_rsc_hr.so" );
 
@@ -567,9 +599,9 @@ void win_slider_callback( FL_OBJECT *a, long b )
 	h = y2 - y1 - h1;
 	H = y2 - y1 + h2;
 
-	new_h1 = ( FL_Coord ) ( ( 1.0 - SLIDER_SIZE ) * H 
+	new_h1 = ( FL_Coord ) ( ( 1.0 - XI_sizes.SLIDER_SIZE ) * H 
 							* fl_get_slider_value( a )
-							+ 0.5 * H * SLIDER_SIZE - h / 2 );
+							+ 0.5 * H * XI_sizes.SLIDER_SIZE - h / 2 );
 
 	fl_set_object_size( main_form->browser, w1, new_h1 );
 	fl_set_object_geometry( main_form->error_browser, x2, y1 + new_h1 + h,

@@ -26,6 +26,7 @@
 
 
 
+static void func_intact_init( void );
 static IOBJECT *find_object_from_ID( long ID );
 static void recreate_Tool_Box( void );
 static FL_OBJECT *append_object_to_form( IOBJECT *io );
@@ -41,13 +42,93 @@ static int tool_x, tool_y, tool_w, tool_h;
 static bool tool_has_been_shown = UNSET;
 
 
-#if ( SIZE == HI_RES )
-#define WIN_MIN_WIDTH  50
-#define WIN_MIN_HEIGHT 50
-#else
-#define WIN_MIN_WIDTH  30
-#define WIN_MIN_HEIGHT 30
-#endif
+static struct {
+	bool is_init;
+
+	int	WIN_MIN_WIDTH;
+	int	WIN_MIN_HEIGHT;
+
+	int	OBJ_HEIGHT;
+	int	OBJ_WIDTH;
+
+	int	BUTTON_HEIGHT;
+	int	BUTTON_WIDTH;
+	int	NORMAL_BUTTON_DELTA;
+
+	int	SLIDER_HEIGHT;
+	int	SLIDER_WIDTH;
+
+	int INPUT_HEIGHT;
+	int INPUT_WIDTH;
+
+	int	LABEL_VERT_OFFSET;
+	int	VERT_OFFSET;
+	int	HORI_OFFSET;
+
+	int	OFFSET_X0;
+	int	OFFSET_Y0;
+} FI_sizes = { UNSET, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	
+
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+static void func_intact_init( void )
+{
+	if ( G_Funcs.size == LOW )
+	{
+		FI_sizes.WIN_MIN_WIDTH       = 30;
+		FI_sizes.WIN_MIN_HEIGHT      = 30;
+
+		FI_sizes.OBJ_HEIGHT          = 35;
+		FI_sizes.OBJ_WIDTH           = 140;
+
+		FI_sizes.BUTTON_HEIGHT       = 35;
+		FI_sizes.BUTTON_WIDTH        = 150;
+		FI_sizes.NORMAL_BUTTON_DELTA = 5;
+
+		FI_sizes.SLIDER_HEIGHT       = 25;
+		FI_sizes.SLIDER_WIDTH        = 150;
+
+		FI_sizes.INPUT_HEIGHT        = 25;
+		FI_sizes.INPUT_WIDTH         = 150;
+
+		FI_sizes.LABEL_VERT_OFFSET   = 15;
+		FI_sizes.VERT_OFFSET         = 10;
+		FI_sizes.HORI_OFFSET         = 10;
+
+		FI_sizes.OFFSET_X0           = 20;
+		FI_sizes.OFFSET_Y0           = 20;
+	}
+	else
+	{
+		FI_sizes.WIN_MIN_WIDTH       = 50;
+		FI_sizes.WIN_MIN_HEIGHT      = 50;
+
+		FI_sizes.OBJ_HEIGHT          = 50;
+		FI_sizes.OBJ_WIDTH           = 210;
+
+		FI_sizes.BUTTON_HEIGHT       = 50;
+		FI_sizes.BUTTON_WIDTH        = 210;
+		FI_sizes.NORMAL_BUTTON_DELTA = 10;
+
+		FI_sizes.SLIDER_HEIGHT       = 35;
+		FI_sizes.SLIDER_WIDTH        = 210;
+
+		FI_sizes.INPUT_HEIGHT        = 35;
+		FI_sizes.INPUT_WIDTH         = 210;
+
+		FI_sizes.LABEL_VERT_OFFSET   = 15;
+		FI_sizes.VERT_OFFSET         = 15;
+		FI_sizes.HORI_OFFSET         = 20;
+
+		FI_sizes.OFFSET_X0           = 20;
+		FI_sizes.OFFSET_Y0           = 20;
+	}
+
+	FI_sizes.is_init = SET;
+}
 
 
 /*------------------------------------------------------------*/
@@ -63,6 +144,9 @@ Var *f_layout( Var *v )
 	int layout;
 	const char *str[ ] = { "VERT", "VERTICAL", "HORI", "HORIZONTAL" };
 
+
+	if ( ! FI_sizes.is_init )
+		func_intact_init( );
 
 	if ( I_am == PARENT && Tool_Box != NULL )
 	{
@@ -163,6 +247,9 @@ Var *f_bcreate( Var *v )
 	IOBJECT *new_io, *ioi;
 	long ID = 0;
 
+
+	if ( ! FI_sizes.is_init )
+		func_intact_init( );
 
 	/* At least the type of the button must be specified */
 
@@ -434,6 +521,9 @@ Var *f_bdelete( Var *v )
 	long new_anchor;
 
 
+	if ( ! FI_sizes.is_init )
+		func_intact_init( );
+
 	/* We need the ID of the button to delete */
 
 	if ( v == NULL )
@@ -616,6 +706,8 @@ Var *f_bstate( Var *v )
 	const char *on_off_str[ ] = { "OFF", "ON" };
 
 
+	if ( ! FI_sizes.is_init )
+		func_intact_init( );
 
 	/* We need at least the ID of the button */
 
@@ -845,6 +937,9 @@ Var *f_screate( Var *v )
 	char *help_text = NULL;
 	long ID = 0;
 
+
+	if ( ! FI_sizes.is_init )
+		func_intact_init( );
 
 	/* We need at least the type of the slider and the minimum and maximum
 	   value */
@@ -1114,6 +1209,9 @@ Var *f_sdelete( Var *v )
 	IOBJECT *io;
 
 
+	if ( ! FI_sizes.is_init )
+		func_intact_init( );
+
 	/* At least one slider ID is needed... */
 
 	if ( v == NULL )
@@ -1270,6 +1368,9 @@ Var *f_svalue( Var *v )
 {
 	IOBJECT *io;
 
+
+	if ( ! FI_sizes.is_init )
+		func_intact_init( );
 
 	/* We need at least the sliders ID */
 
@@ -1448,6 +1549,9 @@ Var *f_icreate( Var *v )
 	long lval = 0;
 	double dval = 0.0;
 
+
+	if ( ! FI_sizes.is_init )
+		func_intact_init( );
 
 	/* At least the type of the input or output object must be specified */
 
@@ -1760,6 +1864,9 @@ Var *f_idelete( Var *v )
 	IOBJECT *io;
 
 
+	if ( ! FI_sizes.is_init )
+		func_intact_init( );
+
 	/* We need the ID of the button to delete */
 
 	if ( v == NULL )
@@ -1919,6 +2026,9 @@ Var *f_ivalue( Var *v )
 	IOBJECT *io;
 	char buf[ MAX_INPUT_CHARS + 1 ];
 
+
+	if ( ! FI_sizes.is_init )
+		func_intact_init( );
 
 	/* We need at least the objects ID */
 
@@ -2266,8 +2376,8 @@ static void recreate_Tool_Box( void )
 
 	fl_end_form( );
 
-	Tool_Box->w = last_io->x + OBJ_WIDTH + OFFSET_X0;
-	Tool_Box->h = last_io->y + OBJ_HEIGHT + OFFSET_Y0;
+	Tool_Box->w = last_io->x + FI_sizes.OBJ_WIDTH + FI_sizes.OFFSET_X0;
+	Tool_Box->h = last_io->y + FI_sizes.OBJ_HEIGHT + FI_sizes.OFFSET_Y0;
 
 	fl_set_form_size( Tool_Box->Tools, Tool_Box->w, Tool_Box->h );
 	fl_adjust_form_size( Tool_Box->Tools );
@@ -2298,7 +2408,7 @@ static void recreate_Tool_Box( void )
 
 	tool_has_been_shown = SET;
 	fl_winminsize( Tool_Box->Tools->window,
-				   WIN_MIN_WIDTH, WIN_MIN_HEIGHT );
+				   FI_sizes.WIN_MIN_WIDTH, FI_sizes.WIN_MIN_HEIGHT );
 }
 
 
@@ -2316,48 +2426,49 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 
 	if ( io->prev == NULL )
 	{
-		io->x = OFFSET_X0 + ( io->type == NORMAL_BUTTON ?
-							  NORMAL_BUTTON_DELTA : 0 );
-		io->y = OFFSET_Y0;
+		io->x = FI_sizes.OFFSET_X0 + ( io->type == NORMAL_BUTTON ?
+									   FI_sizes.NORMAL_BUTTON_DELTA : 0 );
+		io->y = FI_sizes.OFFSET_Y0;
 	}
 	else
 	{
 		if ( Tool_Box->layout == VERT )
 		{
-			io->x = OFFSET_X0 + ( io->type == NORMAL_BUTTON ?
-								  NORMAL_BUTTON_DELTA : 0 );
-			io->y = io->prev->y + io->prev->h + VERT_OFFSET +
+			io->x = FI_sizes.OFFSET_X0 + ( io->type == NORMAL_BUTTON ?
+										   FI_sizes.NORMAL_BUTTON_DELTA : 0 );
+			io->y = io->prev->y + io->prev->h + FI_sizes.VERT_OFFSET +
 				( io->prev->type == NORMAL_SLIDER ||
 				  io->prev->type == VALUE_SLIDER  ||
 				  io->prev->type == INT_INPUT     ||
 				  io->prev->type == FLOAT_INPUT   ||
 				  io->prev->type == INT_OUTPUT    ||
 				  io->prev->type == FLOAT_OUTPUT ?
-				  LABEL_VERT_OFFSET : 0 );
+				  FI_sizes.LABEL_VERT_OFFSET : 0 );
 		}
 		else
 		{
-			io->x = io->prev->x + io->prev->w + HORI_OFFSET
-				- ( io->type == NORMAL_BUTTON ? NORMAL_BUTTON_DELTA : 0 )
+			io->x = io->prev->x + io->prev->w + FI_sizes.HORI_OFFSET
+				- ( io->type == NORMAL_BUTTON ?
+					FI_sizes.NORMAL_BUTTON_DELTA : 0 )
 				- ( io->prev->type == NORMAL_BUTTON ?
-					NORMAL_BUTTON_DELTA : 0 );
-			io->y = OFFSET_Y0;
+					FI_sizes.NORMAL_BUTTON_DELTA : 0 );
+			io->y = FI_sizes.OFFSET_Y0;
 		}
 	}
 
 	switch ( io->type )
 	{
 		case NORMAL_BUTTON :
-			io->w = BUTTON_WIDTH - 2 * NORMAL_BUTTON_DELTA;
-			io->h = BUTTON_HEIGHT;
+			io->w = FI_sizes.BUTTON_WIDTH - 2 * FI_sizes.NORMAL_BUTTON_DELTA;
+			io->h = FI_sizes.BUTTON_HEIGHT;
 			io->self = fl_add_button( FL_NORMAL_BUTTON, io->x, io->y,
 									  io->w, io->h, io->label );
 			fl_set_object_color( io->self, FL_MCOL, FL_GREEN );
 			break;
 
 		case PUSH_BUTTON :
-			io->w = BUTTON_WIDTH;
-			io->h = BUTTON_HEIGHT;
+			io->w = FI_sizes.BUTTON_WIDTH;
+			io->h = FI_sizes.BUTTON_HEIGHT;
 			io->self = fl_add_checkbutton( FL_PUSH_BUTTON, io->x, io->y,
 										   io->w, io->h, io->label );
 			fl_set_object_color( io->self, FL_MCOL, FL_YELLOW );
@@ -2365,8 +2476,8 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			break;
 
 		case RADIO_BUTTON :
-			io->w = BUTTON_WIDTH;
-			io->h = BUTTON_HEIGHT;
+			io->w = FI_sizes.BUTTON_WIDTH;
+			io->h = FI_sizes.BUTTON_HEIGHT;
 
 			if ( io->group != NULL )
 				fl_addto_group( io->group );
@@ -2387,8 +2498,8 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			break;
 
 		case NORMAL_SLIDER :
-			io->w = SLIDER_WIDTH;
-			io->h = SLIDER_HEIGHT;
+			io->w = FI_sizes.SLIDER_WIDTH;
+			io->h = FI_sizes.SLIDER_HEIGHT;
 			io->self = fl_add_slider( FL_HOR_BROWSER_SLIDER, io->x, io->y,
 									  io->w, io->h, io->label );
 			fl_set_slider_bounds( io->self, io->start_val, io->end_val );
@@ -2403,8 +2514,8 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			break;
 
 		case VALUE_SLIDER :
-			io->w = SLIDER_WIDTH;
-			io->h = SLIDER_HEIGHT;
+			io->w = FI_sizes.SLIDER_WIDTH;
+			io->h = FI_sizes.SLIDER_HEIGHT;
 			io->self = fl_add_valslider( FL_HOR_BROWSER_SLIDER, io->x, io->y,
 										 io->w, io->h, io->label );
 			fl_set_slider_bounds( io->self, io->start_val, io->end_val );
@@ -2423,8 +2534,8 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			break;
 
 		case INT_INPUT :
-			io->w = INPUT_WIDTH;
-			io->h = INPUT_HEIGHT;
+			io->w = FI_sizes.INPUT_WIDTH;
+			io->h = FI_sizes.INPUT_HEIGHT;
 			io->self = fl_add_input( FL_INT_INPUT, io->x, io->y, io->w, io->h,
 									 NULL );
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
@@ -2435,8 +2546,8 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			break;
 
 		case FLOAT_INPUT :
-			io->w = INPUT_WIDTH;
-			io->h = INPUT_HEIGHT;
+			io->w = FI_sizes.INPUT_WIDTH;
+			io->h = FI_sizes.INPUT_HEIGHT;
 			io->self = fl_add_input( FL_FLOAT_INPUT, io->x, io->y,
 									 io->w, io->h, NULL );
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
@@ -2447,8 +2558,8 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			break;
 
 		case INT_OUTPUT :
-			io->w = INPUT_WIDTH;
-			io->h = INPUT_HEIGHT;
+			io->w = FI_sizes.INPUT_WIDTH;
+			io->h = FI_sizes.INPUT_HEIGHT;
 			io->self = fl_add_input( FL_INT_INPUT, io->x, io->y, io->w, io->h,
 									 NULL );
 			fl_set_object_boxtype( io->self, FL_EMBOSSED_BOX );
@@ -2462,8 +2573,8 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			break;
 
 		case FLOAT_OUTPUT :
-			io->w = INPUT_WIDTH;
-			io->h = INPUT_HEIGHT;
+			io->w = FI_sizes.INPUT_WIDTH;
+			io->h = FI_sizes.INPUT_HEIGHT;
 			io->self = fl_add_input( FL_FLOAT_INPUT, io->x, io->y,
 									 io->w, io->h, NULL );
 			fl_set_object_boxtype( io->self, FL_EMBOSSED_BOX );
@@ -2687,6 +2798,9 @@ Var *f_objdel( Var *v )
 {
 	IOBJECT *io;
 
+
+	if ( ! FI_sizes.is_init )
+		func_intact_init( );
 
 	/* We need the ID of the button to delete */
 
