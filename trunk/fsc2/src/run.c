@@ -37,7 +37,7 @@ extern FL_resource xresources[ ];             /* from xinit.c */
 /* Routines of the main process exclusively used in this file */
 
 static bool start_gpib_and_rulbus( void );
-static void startup_error_while_iconified( void );
+static void error_while_iconified( void );
 static bool no_prog_to_run( void );
 static bool init_devs_and_graphics( void );
 static void stop_while_exp_hook( FL_OBJECT *a, long b );
@@ -103,7 +103,7 @@ bool run( void )
 			fl_trigger_object( GUI.main_form->quit );
 
 		if ( Internals.cmdline_flags & ICONIFIED_RUN )
-			startup_error_while_iconified( );
+			error_while_iconified( );
 
 		return FAIL;
 	}
@@ -115,7 +115,8 @@ bool run( void )
 	if ( ! start_gpib_and_rulbus( ) )
 	{
 		if ( Internals.cmdline_flags & ICONIFIED_RUN )
-			startup_error_while_iconified( );
+			error_while_iconified( );
+
 		return FAIL;
 	}
 
@@ -125,7 +126,8 @@ bool run( void )
 	if ( EDL.prg_token == NULL )
 	{
 		if ( Internals.cmdline_flags & ICONIFIED_RUN )
-			startup_error_while_iconified( );
+			error_while_iconified( );
+
 		return no_prog_to_run( );
 	}
 
@@ -134,7 +136,8 @@ bool run( void )
 	if ( ! init_devs_and_graphics( ) )
 	{
 		if ( Internals.cmdline_flags & ICONIFIED_RUN )
-			startup_error_while_iconified( );
+			error_while_iconified( );
+
 		return FAIL;
 	}
 
@@ -191,10 +194,13 @@ bool run( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*----------------------------------------------------------*/
+/* Called when the program was started with the main window */
+/* being iconified and an error happens, in which case the  */
+/* message of the main window must become visible.          */
+/*----------------------------------------------------------*/
 
-static void startup_error_while_iconified( void )
+static void error_while_iconified( void )
 {
 	Internals.cmdline_flags &= ~ ICONIFIED_RUN;
 	fl_raise_form( GUI.main_form->fsc2 );
@@ -492,7 +498,7 @@ static void fork_failure( int stored_errno )
 	sigaction( QUITTING, &quitting_old_act, NULL );
 
 	if ( Internals.cmdline_flags & ICONIFIED_RUN )
-		startup_error_while_iconified( );
+		error_while_iconified( );
 
 	switch ( stored_errno )
 	{
@@ -912,9 +918,7 @@ void run_close_button_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 				break;
 
 			case -1 :
-				Internals.cmdline_flags &= ~ ICONIFIED_RUN;
-				fl_raise_form( GUI.main_form->fsc2 );
-				XMapWindow( fl_get_display( ), GUI.main_form->fsc2->window );
+				error_while_iconified( );
 				break;
 		}
 }
