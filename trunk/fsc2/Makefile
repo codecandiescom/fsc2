@@ -90,8 +90,8 @@ SERIAL_LOCK_DIR   := /var/lock
 
 
 # Comment out the next two lines if you don't want a HTTP server that allows
-# to monitor fsc2's current state via the Internet. The default port number
-# must be between 1024 and 65535.
+# to monitor fsc2's current state via the Internet. The default port number,
+# set by the sec ond variable, must be between 1024 and 65535.
 
 WITH_HTTP_SERVER  := yes
 DEFAULT_HTTP_PORT := 8080
@@ -101,6 +101,8 @@ DEFAULT_HTTP_PORT := 8080
 # will be send - if not set no "Bug report" button will be shown. Please
 # change this only if you change the program yourself (in which case sending
 # bug reports or mails about crashes to me wouldn't make too much sense).
+# If you want to keep fsc2 from sending out crash reports at all to me
+# commenting out this variable is one way to do it.
 
 MAIL_ADDRESS      := Jens.Toerring@physik.fu-berlin.de
 
