@@ -1905,7 +1905,7 @@ Var *f_ivalue( Var *v )
 			return vars_push( FLOAT_VAR, dval );
 	}
 
-	/* No tool box -> no sliders... */
+	/* No tool box -> no input or output objects... */
 
 	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 	{
@@ -1914,7 +1914,7 @@ Var *f_ivalue( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* Check that ID is ID of a slider */
+	/* Check that ID is ID of an input or output object */
 
 	if ( v->type != INT_VAR || v->val.lval < 0 ||
 		 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
@@ -1926,7 +1926,7 @@ Var *f_ivalue( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* If there are no more arguments just return the sliders value */
+	/* If there are no more arguments just return the objects value */
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
