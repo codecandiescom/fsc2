@@ -83,7 +83,7 @@ modules:
 # Make the primary lexer that's utilized by the main program
 
 fsc2_clean: fsc2_clean.o exceptions.o
-	$(CC) -o $@ $^ -lfl -lm
+	$(CC) -o $@ $^ -lm
 
 fsc2_clean.c: fsc2_clean.l $(headers)
 	$(FLEX) -B -o$@ $<

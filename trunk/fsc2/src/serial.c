@@ -140,7 +140,6 @@ void fsc2_serial_init( void )
 void fsc2_serial_cleanup( void )
 {
 #if defined( NUM_SERIAL_PORTS ) && NUM_SERIAL_PORTS > 0
-#if NUM_SERIAL_PORTS > 0
 	int i;
 
 
@@ -182,7 +181,7 @@ int fsc2_serial_open( int sn, const char *devname, int flags )
 	fd = open( Serial_Port[ sn ].dev_file, flags );
 
 	return fd;
-else
+#else
 	sn = sn;
 	devname = devname;
 	flags = flags;
