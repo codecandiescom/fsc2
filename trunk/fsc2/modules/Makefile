@@ -183,7 +183,7 @@ $(addsuffix .so,$(simp_modules)): %.so: %.o
 				libs="$$libs $$l";                                 \
 			fi;                                                    \
 		done;                                                      \
-		echo "$(CC) $(LFLAGS) $^ $$libs -o $@;                     \
+		echo "$(CC) $(LFLAGS) $^ $$libs -o $@";                    \
 		$(CC) $$libs -shared -o $@.lib_test 2>/dev/null;           \
 		if [ -e $@.lib_test ]; then                                \
 			$(RM) $(RMFLAGS) $@.lib_test;                          \
