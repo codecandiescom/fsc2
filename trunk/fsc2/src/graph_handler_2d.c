@@ -1477,7 +1477,7 @@ static void draw_2d_points( Canvas *c, Curve_2d *cv )
 			/* Skip points that are not within the shown part of the canvas */
 
 			if ( xp->x >= ( short int ) c->w || xp->y >= ( short int ) c->h ||
-				 xp->x + cv->w - 1 < 0 || xp->y + cv->h - 1 < 0 )
+				 xp->x + cv->w < 1 || xp->y + cv->h < 1 )
 				continue;
 
 			p[ 0 ].x = xp->x;
@@ -1501,7 +1501,7 @@ static void draw_2d_points( Canvas *c, Curve_2d *cv )
 			/* Skip points that are not within the shown part of the canvas */
 
 			if ( xp->x >= ( short int ) c->w || xp->y >= ( short int ) c->h ||
-				 xp->x + cv->w - 1 < 0 || xp->y + cv->h - 1 < 0 )
+				 xp->x + cv->w < 1 || xp->y + cv->h < 1 )
 				continue;
 
 			XFillRectangle( G.d, c->pm,
