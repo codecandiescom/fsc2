@@ -1722,6 +1722,8 @@ Var *f_fslice( Var *v )
 		else
 			eprint( FATAL, SET, "Negative value (%f) used as array size in "
 					"function %s().\n", v->val.dval, Cur_Func );
+		THROW( EXCEPTION )
+	}
 
 	array = T_malloc( size * sizeof( double ) );
 	for( i = 0; i < size; i++ )
