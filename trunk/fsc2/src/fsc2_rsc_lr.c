@@ -204,8 +204,8 @@ FD_print *create_form_print(void)
   FL_OBJECT *obj;
   FD_print *fdui = (FD_print *) fl_calloc(1, sizeof(*fdui));
 
-  fdui->print = fl_bgn_form(FL_NO_BOX, 440, 330);
-  obj = fl_add_box(FL_UP_BOX,0,0,440,330,"");
+  fdui->print = fl_bgn_form(FL_NO_BOX, 440, 340);
+  obj = fl_add_box(FL_UP_BOX,0,0,440,340,"");
   obj = fl_add_frame(FL_ENGRAVED_FRAME,10,110,420,90,"");
   obj = fl_add_frame(FL_ENGRAVED_FRAME,10,10,420,95,"");
   fdui->s2p_input = obj = fl_add_input(FL_NORMAL_INPUT,125,55,215,35,"Print command: ");
@@ -216,37 +216,12 @@ FD_print *create_form_print(void)
     fl_set_object_lsize(obj,FL_NORMAL_SIZE);
     fl_set_object_lalign(obj,FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
     fl_set_object_resize(obj, FL_RESIZE_NONE);
-  fdui->cancel_button = obj = fl_add_button(FL_NORMAL_BUTTON,95,290,85,30,"Cancel");
+  fdui->cancel_button = obj = fl_add_button(FL_NORMAL_BUTTON,95,295,85,30,"Cancel");
     fl_set_object_lsize(obj,FL_NORMAL_SIZE);
     fl_set_object_resize(obj, FL_RESIZE_NONE);
-  fdui->print_button = obj = fl_add_button(FL_NORMAL_BUTTON,245,290,80,30,"Print");
+  fdui->print_button = obj = fl_add_button(FL_NORMAL_BUTTON,245,295,80,30,"Print");
     fl_set_object_lsize(obj,FL_NORMAL_SIZE);
     fl_set_object_resize(obj, FL_RESIZE_NONE);
-
-  fdui->paper_types = fl_bgn_group();
-  fdui->A3 = obj = fl_add_checkbutton(FL_RADIO_BUTTON,190,210,35,35,"A3");
-    fl_set_object_color(obj,FL_COL1,FL_GREEN);
-    fl_set_object_lsize(obj,FL_NORMAL_SIZE);
-    fl_set_object_resize(obj, FL_RESIZE_NONE);
-    fl_set_object_callback(obj,print_callback,0);
-  fdui->Letter = obj = fl_add_checkbutton(FL_RADIO_BUTTON,260,210,35,35,"Letter");
-    fl_set_object_color(obj,FL_COL1,FL_GREEN);
-    fl_set_object_lsize(obj,FL_NORMAL_SIZE);
-    fl_set_object_resize(obj, FL_RESIZE_NONE);
-    fl_set_object_callback(obj,print_callback,0);
-  fdui->Legal = obj = fl_add_checkbutton(FL_RADIO_BUTTON,340,210,35,35,"Legal");
-    fl_set_object_color(obj,FL_COL1,FL_GREEN);
-    fl_set_object_lsize(obj,FL_NORMAL_SIZE);
-    fl_set_object_resize(obj, FL_RESIZE_NONE);
-    fl_set_object_callback(obj,print_callback,0);
-  fdui->A4 = obj = fl_add_checkbutton(FL_RADIO_BUTTON,125,210,35,35,"A4");
-    fl_set_object_color(obj,FL_COL1,FL_GREEN);
-    fl_set_object_lsize(obj,FL_NORMAL_SIZE);
-    fl_set_object_resize(obj, FL_RESIZE_NONE);
-    fl_set_object_callback(obj,print_callback,0);
-    fl_set_button(obj, 1);
-  fl_end_group();
-
 
   fdui->modes = fl_bgn_group();
   fdui->s2p_button = obj = fl_add_checkbutton(FL_RADIO_BUTTON,25,15,35,35," Send to printer");
@@ -274,23 +249,58 @@ FD_print *create_form_print(void)
     fl_set_object_callback(obj,print_callback,0);
   fl_end_group();
 
-  obj = fl_add_text(FL_NORMAL_TEXT,15,245,85,30,"Printer type:");
+  obj = fl_add_text(FL_NORMAL_TEXT,15,260,85,30,"Printer type:");
     fl_set_object_lsize(obj,FL_NORMAL_SIZE);
     fl_set_object_lalign(obj,FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
     fl_set_object_resize(obj, FL_RESIZE_NONE);
 
   fdui->color_group = fl_bgn_group();
-  fdui->bw_button = obj = fl_add_checkbutton(FL_RADIO_BUTTON,125,245,35,35,"Black & White");
+  fdui->bw_button = obj = fl_add_checkbutton(FL_RADIO_BUTTON,125,260,35,35,"Black & White");
     fl_set_object_color(obj,FL_COL1,FL_GREEN);
     fl_set_object_lsize(obj,FL_NORMAL_SIZE);
     fl_set_object_resize(obj, FL_RESIZE_NONE);
     fl_set_object_callback(obj,print_callback,0);
-  fdui->col_button = obj = fl_add_checkbutton(FL_RADIO_BUTTON,260,245,35,35,"Color");
+  fdui->col_button = obj = fl_add_checkbutton(FL_RADIO_BUTTON,260,260,35,35,"Color");
     fl_set_object_color(obj,FL_COL1,FL_GREEN);
     fl_set_object_lsize(obj,FL_NORMAL_SIZE);
     fl_set_object_resize(obj, FL_RESIZE_NONE);
     fl_set_object_callback(obj,print_callback,0);
     fl_set_button(obj, 1);
+  fl_end_group();
+
+
+  fdui->paper_types = fl_bgn_group();
+  fdui->A3 = obj = fl_add_checkbutton(FL_RADIO_BUTTON,190,210,35,35,"A3");
+    fl_set_object_color(obj,FL_COL1,FL_GREEN);
+    fl_set_object_lsize(obj,FL_NORMAL_SIZE);
+    fl_set_object_resize(obj, FL_RESIZE_NONE);
+    fl_set_object_callback(obj,print_callback,0);
+  fdui->Letter = obj = fl_add_checkbutton(FL_RADIO_BUTTON,190,235,35,35,"Letter");
+    fl_set_object_color(obj,FL_COL1,FL_GREEN);
+    fl_set_object_lsize(obj,FL_NORMAL_SIZE);
+    fl_set_object_resize(obj, FL_RESIZE_NONE);
+    fl_set_object_callback(obj,print_callback,0);
+  fdui->Legal = obj = fl_add_checkbutton(FL_RADIO_BUTTON,260,235,35,35,"Legal");
+    fl_set_object_color(obj,FL_COL1,FL_GREEN);
+    fl_set_object_lsize(obj,FL_NORMAL_SIZE);
+    fl_set_object_resize(obj, FL_RESIZE_NONE);
+    fl_set_object_callback(obj,print_callback,0);
+  fdui->A4 = obj = fl_add_checkbutton(FL_RADIO_BUTTON,125,210,35,35,"A4");
+    fl_set_object_color(obj,FL_COL1,FL_GREEN);
+    fl_set_object_lsize(obj,FL_NORMAL_SIZE);
+    fl_set_object_resize(obj, FL_RESIZE_NONE);
+    fl_set_object_callback(obj,print_callback,0);
+    fl_set_button(obj, 1);
+  fdui->A5 = obj = fl_add_checkbutton(FL_RADIO_BUTTON,260,210,35,35,"A5");
+    fl_set_object_color(obj,FL_COL1,FL_GREEN);
+    fl_set_object_lsize(obj,FL_NORMAL_SIZE);
+    fl_set_object_resize(obj, FL_RESIZE_NONE);
+    fl_set_object_callback(obj,print_callback,0);
+  fdui->A6 = obj = fl_add_checkbutton(FL_RADIO_BUTTON,125,235,35,35,"A6");
+    fl_set_object_color(obj,FL_COL1,FL_GREEN);
+    fl_set_object_lsize(obj,FL_NORMAL_SIZE);
+    fl_set_object_resize(obj, FL_RESIZE_NONE);
+    fl_set_object_callback(obj,print_callback,0);
   fl_end_group();
 
   fl_end_form();

@@ -1,4 +1,4 @@
-/** Header file generated with fdesign on Fri Nov 24 18:20:10 2000.**/
+/** Header file generated with fdesign on Mon Dec  4 17:53:50 2000.**/
 
 #ifndef FD_fsc2_h_
 #define FD_fsc2_h_
@@ -87,11 +87,6 @@ typedef struct {
 	FL_OBJECT *s2p_input;
 	FL_OBJECT *cancel_button;
 	FL_OBJECT *print_button;
-	FL_OBJECT *paper_types;
-	FL_OBJECT *A3;
-	FL_OBJECT *Letter;
-	FL_OBJECT *Legal;
-	FL_OBJECT *A4;
 	FL_OBJECT *modes;
 	FL_OBJECT *s2p_button;
 	FL_OBJECT *p2f_button;
@@ -101,6 +96,13 @@ typedef struct {
 	FL_OBJECT *color_group;
 	FL_OBJECT *bw_button;
 	FL_OBJECT *col_button;
+	FL_OBJECT *paper_types;
+	FL_OBJECT *A3;
+	FL_OBJECT *Letter;
+	FL_OBJECT *Legal;
+	FL_OBJECT *A4;
+	FL_OBJECT *A5;
+	FL_OBJECT *A6;
 } FD_print;
 
 extern FD_print * create_form_print(void);

@@ -89,7 +89,7 @@ lockin_lock_keyboard, -1, EXP;  // Lock or unlock the keyboard
 // Functions exported by the digitizer (TDS520, TDS520A, TDS744A, TDS754A)
 
 digitizer_define_window, -1, PREP;      // defines a cursor window
-digitizer_timebase, -1, PREP;           // set or get the time base
+digitizer_timebase, -1, ALL;            // set or get the time base
 digitizer_num_averages, -1, ALL;        // set or get number of averages
 digitizer_trigger_channel, 1, PREP;     // set or get trigger channel
 digitizer_record_length, -1, ALL;       // set or get record_length

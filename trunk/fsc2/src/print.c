@@ -10,10 +10,12 @@
 #define S2P          1            /* send to printer */
 #define P2F          2            /* print to file */
 
-#define A4_PAPER     0
-#define A3_PAPER     1
-#define Letter_PAPER 2
-#define Legal_PAPER  3
+#define A6_PAPER     0
+#define A5_PAPER     1
+#define A4_PAPER     2
+#define A3_PAPER     3
+#define Letter_PAPER 4
+#define Legal_PAPER  5
 
 
 FD_print *print_form;
@@ -232,6 +234,18 @@ static int get_print_file( FILE **fp, char **name )
 
 	switch ( paper_type )
 	{
+		case A6_PAPER :
+			fl_set_button( print_form->A6, 1 );
+			paper_width = 210.0;
+			paper_height = 297.0;
+			break;
+
+		case A5_PAPER :
+			fl_set_button( print_form->A5, 1 );
+			paper_width = 210.0;
+			paper_height = 297.0;
+			break;
+
 		case A4_PAPER :
 			fl_set_button( print_form->A4, 1 );
 			paper_width = 210.0;
@@ -310,6 +324,10 @@ static int get_print_file( FILE **fp, char **name )
 	CATCH ( EXCEPTION )
 		obj = print_form->cancel_button;
 
+	if ( 1 == fl_get_button( print_form->A6 ) )
+		 paper_type = A6_PAPER;
+	if ( 1 == fl_get_button( print_form->A5 ) )
+		 paper_type = A5_PAPER;
 	if ( 1 == fl_get_button( print_form->A4 ) )
 		 paper_type = A4_PAPER;
 	if ( 1 == fl_get_button( print_form->A3 ) )
@@ -405,6 +423,22 @@ void print_callback( FL_OBJECT *obj, long data )
 								"*.eps", NULL );
 		if ( fn != NULL )
 			fl_set_input( print_form->p2f_input, fn );
+		return;
+	}
+
+	if ( obj == print_form->A6 )
+	{
+		paper_width = 210.0;
+		paper_height = 297.0;
+		paper_type = A6_PAPER;
+		return;
+	}
+
+	if ( obj == print_form->A5 )
+	{
+		paper_width = 210.0;
+		paper_height = 297.0;
+		paper_type = A4_PAPER;
 		return;
 	}
 
@@ -528,6 +562,10 @@ static void print_header( FILE *fp, char *name )
 	   and draw logo, date and user name */
 
 	fprintf( fp, "%f dup scale 90 r 0 %f t\n", 72.0 / INCH, - paper_width );
+	if ( paper_type == A5_PAPER )
+		fprintf( fp, "10 10 t\n1 2 sqrt div dup scale\n" );
+	if ( paper_type == A6_PAPER )
+		fprintf( fp, "10 10 t\n0.5 dup scale\n" );
 	fprintf( fp, "%f %f fsc2\n", paper_height, paper_width );
 	fprintf( fp, "/Times-Roman 4 sf\n" );
 	fprintf( fp, "5 5 m (%s %s) show\n", ctime( &d ),

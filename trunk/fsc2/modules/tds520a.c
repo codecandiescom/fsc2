@@ -17,7 +17,7 @@ static Var *get_amplitude( Var *v, bool use_cursor );
 /* This array must be set to the possible record lengths of the digitizer
    and must always end with a 0 */
 
-static long record_lengths[ ] = { 500, 1000, 2000, 5000, 15000, 0 };
+static long record_lengths[ ] = { 500, 1000, 2500, 5000, 15000, 50000, 0 };
 
 
 /*******************************************/

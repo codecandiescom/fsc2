@@ -559,7 +559,7 @@ argument:
 Name: print
 Width: 570
 Height: 545
-Number of Objects: 26
+Number of Objects: 28
 
 --------------------
 class: FL_BOX
@@ -684,115 +684,6 @@ shortcut:
 resize: FL_RESIZE_NONE
 gravity: FL_NoGravity FL_NoGravity
 name: print_button
-callback: 
-argument: 
-
---------------------
-class: FL_BEGIN_GROUP
-type: 0
-box: 0 10 10 0
-boxtype: FL_NO_BOX
-colors: FL_COL1 FL_MCOL
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_DEFAULT_SIZE
-lcol: FL_BLACK
-label: 
-shortcut: 
-resize: FL_RESIZE_ALL
-gravity: FL_NoGravity FL_NoGravity
-name: paper_types
-callback: 
-argument: 
-
---------------------
-class: FL_CHECKBUTTON
-type: RADIO_BUTTON
-box: 255 350 45 45
-boxtype: FL_NO_BOX
-colors: FL_COL1 FL_GREEN
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
-lcol: FL_BLACK
-label: A3
-shortcut: 
-resize: FL_RESIZE_NONE
-gravity: FL_NoGravity FL_NoGravity
-name: A3
-callback: print_callback
-argument: 0
-
---------------------
-class: FL_CHECKBUTTON
-type: RADIO_BUTTON
-box: 340 350 45 45
-boxtype: FL_NO_BOX
-colors: FL_COL1 FL_GREEN
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
-lcol: FL_BLACK
-label: Letter
-shortcut: 
-resize: FL_RESIZE_NONE
-gravity: FL_NoGravity FL_NoGravity
-name: Letter
-callback: print_callback
-argument: 0
-
---------------------
-class: FL_CHECKBUTTON
-type: RADIO_BUTTON
-box: 450 350 45 45
-boxtype: FL_NO_BOX
-colors: FL_COL1 FL_GREEN
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
-lcol: FL_BLACK
-label: Legal
-shortcut: 
-resize: FL_RESIZE_NONE
-gravity: FL_NoGravity FL_NoGravity
-name: Legal
-callback: print_callback
-argument: 0
-
---------------------
-class: FL_CHECKBUTTON
-type: RADIO_BUTTON
-box: 170 350 45 45
-boxtype: FL_NO_BOX
-colors: FL_COL1 FL_GREEN
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_LARGE_SIZE
-lcol: FL_BLACK
-label: A4
-shortcut: 
-resize: FL_RESIZE_NONE
-gravity: FL_NoGravity FL_NoGravity
-name: A4
-callback: print_callback
-argument: 0
-	value: 1
-
---------------------
-class: FL_END_GROUP
-type: 0
-box: 0 0 0 0
-boxtype: FL_NO_BOX
-colors: FL_COL1 FL_MCOL
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_DEFAULT_SIZE
-lcol: FL_BLACK
-label: 
-shortcut: 
-resize: FL_RESIZE_ALL
-gravity: FL_NoGravity FL_NoGravity
-name: 
 callback: 
 argument: 
 
@@ -944,7 +835,7 @@ argument:
 --------------------
 class: FL_TEXT
 type: NORMAL_TEXT
-box: 25 405 110 30
+box: 25 430 110 30
 boxtype: FL_FLAT_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_LEFT|FL_ALIGN_INSIDE
@@ -980,7 +871,7 @@ argument:
 --------------------
 class: FL_CHECKBUTTON
 type: RADIO_BUTTON
-box: 170 395 45 45
+box: 170 420 45 45
 boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -998,7 +889,7 @@ argument: 0
 --------------------
 class: FL_CHECKBUTTON
 type: RADIO_BUTTON
-box: 340 395 45 45
+box: 350 420 45 45
 boxtype: FL_NO_BOX
 colors: FL_COL1 FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -1013,6 +904,151 @@ name: col_button
 callback: print_callback
 argument: 0
 	value: 1
+
+--------------------
+class: FL_END_GROUP
+type: 0
+box: 0 0 0 0
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
+callback: 
+argument: 
+
+--------------------
+class: FL_BEGIN_GROUP
+type: 0
+box: 0 10 10 0
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: paper_types
+callback: 
+argument: 
+
+--------------------
+class: FL_CHECKBUTTON
+type: RADIO_BUTTON
+box: 255 350 45 45
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_GREEN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_LARGE_SIZE
+lcol: FL_BLACK
+label: A3
+shortcut: 
+resize: FL_RESIZE_NONE
+gravity: FL_NoGravity FL_NoGravity
+name: A3
+callback: print_callback
+argument: 0
+
+--------------------
+class: FL_CHECKBUTTON
+type: RADIO_BUTTON
+box: 255 385 45 45
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_GREEN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_LARGE_SIZE
+lcol: FL_BLACK
+label: Letter
+shortcut: 
+resize: FL_RESIZE_NONE
+gravity: FL_NoGravity FL_NoGravity
+name: Letter
+callback: print_callback
+argument: 0
+
+--------------------
+class: FL_CHECKBUTTON
+type: RADIO_BUTTON
+box: 350 385 45 45
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_GREEN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_LARGE_SIZE
+lcol: FL_BLACK
+label: Legal
+shortcut: 
+resize: FL_RESIZE_NONE
+gravity: FL_NoGravity FL_NoGravity
+name: Legal
+callback: print_callback
+argument: 0
+
+--------------------
+class: FL_CHECKBUTTON
+type: RADIO_BUTTON
+box: 170 350 45 45
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_GREEN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_LARGE_SIZE
+lcol: FL_BLACK
+label: A4
+shortcut: 
+resize: FL_RESIZE_NONE
+gravity: FL_NoGravity FL_NoGravity
+name: A4
+callback: print_callback
+argument: 0
+	value: 1
+
+--------------------
+class: FL_CHECKBUTTON
+type: RADIO_BUTTON
+box: 350 350 45 45
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_GREEN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_LARGE_SIZE
+lcol: FL_BLACK
+label: A5
+shortcut: 
+resize: FL_RESIZE_NONE
+gravity: FL_NoGravity FL_NoGravity
+name: A5
+callback: print_callback
+argument: 0
+
+--------------------
+class: FL_CHECKBUTTON
+type: RADIO_BUTTON
+box: 170 385 45 45
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_GREEN
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_LARGE_SIZE
+lcol: FL_BLACK
+label: A6
+shortcut: 
+resize: FL_RESIZE_NONE
+gravity: FL_NoGravity FL_NoGravity
+name: A6
+callback: print_callback
+argument: 0
 
 --------------------
 class: FL_END_GROUP
