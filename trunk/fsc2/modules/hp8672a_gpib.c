@@ -226,6 +226,8 @@ double hp8672a_set_attenuation( double att )
 
 	fsc2_assert( att >= MAX_ATTEN && att <= hp8672a.min_attenuation );
 
+	/* Above 3 db we have to switch on the additional 10 db output option */
+
 	if ( att > 3 )
 	{
 		hp8672a.is_10db = SET;
