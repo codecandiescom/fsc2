@@ -103,6 +103,11 @@ is used no email is send.
 .TP
 \fB\-noBalloons\fR
 Switches off display of help message balloons.
+.TP
+\fBhttpPort\fR
+Tells \fBfsc2\fR's web server on which port to listen for incoming
+connections. Valid port numbers are in the range between 1024
+and 65535, otherwise the default port (8080) will be used.
 .SH RESOURCES
 The program understands the following X resource names:
 .TP
@@ -157,8 +162,8 @@ whenever it crashes.
 Switches off display of help message balloons.
 .TP
 \fBhttpPort\fR
-This option tells \fBfsc2\fR's web server on which port to listen for
-incoming connections. Valid port numbers are in the range between 1024
+Tells \fBfsc2\fR's web server on which port to listen for incoming
+connections. Valid port numbers are in the range between 1024
 and 65535, otherwise the default port (8080) will be used.
 .SH SEE ALSO
 The complete documentation for \fPfsc2\fR in PostScript, PDF and HTML
