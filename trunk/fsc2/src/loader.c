@@ -143,10 +143,10 @@ static int func_cmp( const void *a, const void *b )
 }
 
 
-/*--------------------------------------------*/
-/* Function tests if the device driver passed */
-/* to the function by name is loaded.         */
-/*--------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Function tests if the device driver passed to the function by */
+/* name is loaded.                                               */
+/*---------------------------------------------------------------*/
 
 bool exists_device( const char *name )
 {
@@ -180,7 +180,7 @@ bool exists_function( const char *name )
 
 
 /*-------------------------------------------------------------------*/
-/* Function links a library file with the name passed to it (after   */
+/* Function dlopens a library file with the name passed to it (after */
 /* adding the extension '.so') and then tries to find all references */
 /* to functions listed in the function data base 'Functions'.        */
 /*-------------------------------------------------------------------*/
@@ -219,7 +219,7 @@ static void load_functions( Device *dev )
 
 	/* If this didn't work try it the normal way using the compiled in library
 	   path or, if the device name starts with an absolute path, using this
-	   path (this my happen when the device is specified using an alternative
+	   path (this may happen when the device is specified using an alternative
 	   name and thus we have to follow a symbolic link). The exception is when
 	   the DO_CHECK flag is defined, where the compiled in path (or everything
 	   except what is defined in LD_LIBRARY_PATH) is *not* what we want... */
