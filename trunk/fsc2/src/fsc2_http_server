@@ -60,8 +60,8 @@ $| = 1;
 $SIG{ PIPE } = sub { close $client; exit 0 };
 
 
-# The main process should expect lots of dead child processes, so it better
-# deals with them (or we'ld eat up the whole process table sooner or later)
+# The main process must expect lots of dead child processes, so it better
+# deals with them
 
 $SIG{ CHLD } = sub { 1 until waitpid( -1, WNOHANG ) == -1 };
 
@@ -86,8 +86,8 @@ $SIG{ TERM } = sub { shutdown( $server, 2 ) if $$ == $ppid; exit 0; };
 # requests can get served simultaneously. This requires the child processes
 # to look out for locks on STDOUT, i.e. the write-connection to fsc2. To be
 # more precise, each single server has to get an lock on STDOUT by calling
-# stdout_lock() before writing to it and must release this lock (by calling
-# stdout_unlock()) only after reading the complete reply from fsc2.
+# stdout_lock() before writing to it and must release the lock only after
+# reading the complete reply from fsc2.
 
 while ( $client = $server->accept( ) ) {
 	if ( my $pid = fork ) {         # parent on success
@@ -104,7 +104,7 @@ while ( $client = $server->accept( ) ) {
 
 
 #########################################################
-# This function deals with a new connection fromt he outside world
+# This function handles a single new connection from the outside world
 
 sub serve {
 
@@ -117,7 +117,7 @@ sub serve {
 	select $client;
 	$| = 1;
 
-	# Skip leading blank lines from the client, give up when the client
+	# Skip leading blank lines from the client, give up if the client
 	# closes the connection
 
 	1 while defined( $txt = <$client> ) and $txt =~ /^\r*$/o;
@@ -182,10 +182,10 @@ sub serve_main {
 	# Ask the parent for its current state - and don't forget to set a lock
 	# on STDOUT while doing it or other processes might interfere
 
-	stdout_lock( ) or exit 1;
+	stdout_lock( 1 ) or exit 1;
 	print STDOUT 'S';
 	1 while defined ( $state = <STDIN> ) and $state =~ /^$/o;
-	stdout_unlock( );
+	stdout_lock( 0 );
 
 	return unless defined $state;
 
@@ -237,29 +237,29 @@ sub serve_main {
 	# this version, it usually seems to be compressed better and the
 	# problem with transparency isn't an issue here).
 
-	if ( $state =~ /^[1-3]$/ and ( $has_png or $has_gif ) ) {
-		stdout_lock( ) or exit 1;
+	if ( $state =~ /^[1-3]$/o and ( $has_png or $has_gif ) ) {
+		stdout_lock( 1 ) or exit 1;
 		print STDOUT 'W';
 		1 while defined ( $state = <STDIN> ) and $state =~ /^$/o;
-		stdout_unlock( );
+		stdout_lock( 0 );
 
 		return unless defined $state;
 
 		print "<H2>Display window:</H2>\r\n" .
 			  "<P><CENTER><IMG SRC=\"fsc2_a." . ( $has_png ? "png" : "gif" ) .
 			  "\" ALT=\"Display window\"></CENTER></P>\r\n"
-				  if $state =~ /^[1-3]$/;
+				  if $state =~ /^[1-3]$/o;
 		print "<H2>Cross section window:</H2>\r\n" .
 			  "<P><CENTER><IMG SRC=\"fsc2_b." . ( $has_png ? "png" : "gif" ) .
 			  "\" ALT=\"Cross section window\"></CENTER></P>\r\n"
-				  if $state =~ /^3$/;
+				  if $state =~ /^3$/o;
 	}
 
 	# Finally, ask fsc2 for the contents of the error browser and, when we
 	# got it (and if there's any content), pass it on to the client after
 	# some changes.
 
-	stdout_lock( ) or exit 1;
+	stdout_lock( 1 ) or exit 1;
 	print STDOUT 'E';
 	while ( <STDIN> ) {
 		last if /^$/o;
@@ -272,7 +272,7 @@ sub serve_main {
 				    ">$_</FONT>\r\n";
 		}
 	}
-	stdout_unlock( );
+	stdout_lock( 0 );
 
 	print "<H2>Output browser:</H2>\r\n" .
 		  "<P><PRE>$txt</PRE></P>\r\n" if defined $txt;
@@ -283,7 +283,7 @@ sub serve_main {
 
 #########################################################
 # Passes the fsc2 logo file on to the client if it can be found where we
-# expect it (also telling the client via th expiry date that the logo
+# expect it (also telling the client via the expiry date that the logo
 # won't change anytime in the near future, so it may happily cache it)
 
 sub serve_logo {
@@ -312,7 +312,10 @@ sub serve_logo {
 
 
 #########################################################
-#
+# Sends a graphic to the client. fsc2 has to create it for us as a temporary
+# file and then send us the file name. If the window to be shown does not
+# exist anymore (or the file can't be created) we get send a '0' character
+# instead in which case we have to send the "Not available" picture.
 
 sub serve_pics {
 	my ( $which, $ext ) = @_;
@@ -333,18 +336,18 @@ sub serve_pics {
 						  exit 0
 					   };
 
-	stdout_lock( ) or exit 1;
+	stdout_lock( 1 ) or exit 1;
 	print STDOUT ( $ext eq 'png' ? uc( $which ) : $which );
 	1 while defined ( $state = <STDIN> ) and $state =~ /^$/o;
-	return stdout_unlock( ) unless defined $state;
+	return stdout_lock( 0 ) unless defined $state;
 
-	if ( $state !~ /^0$/ ) {
+	if ( $state !~ /^0$/o ) {
 		$file = <STDIN>;
 		chomp $file;
 	} else {
 		$file = $auxdir . "na.$ext";
 	}
-	stdout_unlock( );
+	stdout_lock( 0 );
 
 	open( $fh, $file ) or return not_found( "$which.$ext" );
 	print "HTTP/1.0 200 OK\r\n" .
@@ -423,32 +426,19 @@ sub illegal_request {
 # as the 'infinite' expiry date, according to RFC 2616)
 
 sub rfc_1123_date {
-	if ( @_ == 0 ) {
-		return strftime( "%a", gmtime ) . ", "  .
-			strftime( "%d %b %G %T", gmtime ) . " GMT";
-	} else {
-		return strftime( "%a", gmtime( time + 3600 ) ) . ", "  .
-			strftime( "%d %b %G %T", gmtime( time + 31557600 ) ) .
-				" GMT";
-	}
+	my @gm_time = gmtime( time( ) + ( @_ == 0 ? 0 : 31557600 ) );
+
+	return strftime( "%a", @gm_time ) . ", "  .
+		   strftime( "%d %b %G %T", @gm_time ) . " GMT";
 }
 
 
 #########################################################
-# Creates an advisory lock on STDOUT. Uses fcntl() instead of flock() in a
-# rather cryptic way (about which I am not too happy) because flock() does
-# not seem to work at all...
+# Creates (or releases) an advisory lock on STDOUT. Uses fcntl() instead of
+# flock() in a rather cryptic way (about which I am not too happy) because
+# flock() does not seem to work at all...
 
 sub stdout_lock {
 	return defined fcntl STDOUT, F_SETLKW,
-						 pack( "sslll", F_WRLCK, SEEK_SET, 0, 0, 0 );
-}
-
-
-#########################################################
-# Releases the advisory lock on STDOUT created by a call of stdout_lock().
-
-sub stdout_unlock {
-	return defined fcntl STDOUT, F_SETLK,
-						 pack( "sslll", F_UNLCK, SEEK_SET, 0, 0, 0 );
+		pack( "sslll", shift( ) ? F_WRLCK : F_UNLCK, SEEK_SET, 0, 0, 0 );
 }
