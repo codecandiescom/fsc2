@@ -151,7 +151,7 @@ bool dg2020_set_pulse_length( long pnum, double time )
 
 	if ( time != 0.0 )
 	{
-		p->len dg2020_double2ticks( time );
+		p->len = dg2020_double2ticks( time );
 		p->is_len SET;
 	}
 
