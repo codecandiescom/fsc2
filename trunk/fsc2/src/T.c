@@ -218,11 +218,12 @@ char *T_strdup( const char *str )
 	if ( str == NULL )
 		return NULL;
 
-	if ( ( new_str = strdup( str ) ) == NULL )
+	if ( ( new_str = malloc( strlen( str ) + 1 ) ) == NULL )
 	{
 		print( FATAL, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
+	strcpy( new_mem, string );
 
 #if defined MDEBUG && ! defined __STRICT_ANSI__
 	if ( Internals.is_i386 )

@@ -1624,7 +1624,7 @@ void main_sig_handler( int signo )
 {
 	int errno_saved;
 	pid_t pid;
-#if ! defined( NDEBUG ) && defined( ADDR2LINE )
+#if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 #endif
 
