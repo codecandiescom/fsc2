@@ -1894,6 +1894,13 @@ void vars_ass_from_var( Var *src, Var *dest )
 		THROW( EXCEPTION );
 	}
 
+	if ( dest->flags & NEED_ALLOC )
+	{
+		eprint( FATAL, "%s:%ld: Assignment to dynamic array `%s' that has a "
+				"still undefined size.\n", Fname, Lc, dest->name );
+		THROW( EXCEPTION );
+	}
+
 	/* If the destination variable is still completely new set its type */
 
 	if ( dest->type == UNDEF_VAR )
