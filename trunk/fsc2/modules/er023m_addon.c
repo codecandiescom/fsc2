@@ -54,9 +54,8 @@ Var *lockin_rg( Var *v )
 
 	if ( rg_index < 0 || rg_index > RG_MAX_INDEX )
 	{
-		eprint( FATAL, SET, "%s: Invalid receiver gain index %ld in %s(), "
-				"valid range is 0-%d.\n",
-				DEVICE_NAME, rg_index, RG_MAX_INDEX );
+		print( FATAL, "Invalid receiver gain index %ld, valid range is "
+			   "0-%d.\n", rg_index, RG_MAX_INDEX );
 		THROW( EXCEPTION );
 	}
 
@@ -94,17 +93,15 @@ Var *lockin_tc( Var *v )
 
 	if ( tc_index > 0 && tc_index < TC_MIN_INDEX )
 	{
-		eprint( SEVERE, SET, "%s: Minimum usuable time constant index is %d, "
-				"using this value instead of %ld.\n", DEVICE_NAME,
-				TC_MIN_INDEX, tc_index );
+		print( SEVERE, "Minimum usuable time constant index is %d, using this "
+			   "value instead of %ld.\n", TC_MIN_INDEX, tc_index );
 		tc_index = TC_MIN_INDEX;
 	}
 
 	if ( tc_index < 0 || tc_index > TC_MAX_INDEX )
 	{
-		eprint( FATAL, SET, "%s: Invalid time constant index %ld in %s(), "
-				"valid range is %d-%d.\n",
-				DEVICE_NAME, tc_index, TC_MIN_INDEX, TC_MAX_INDEX );
+		print( FATAL, "Invalid time constant index %ld, valid range is "
+			   "%d-%d.\n", tc_index, TC_MIN_INDEX, TC_MAX_INDEX );
 		THROW( EXCEPTION );
 	}
 
@@ -132,7 +129,7 @@ Var *lockin_ma( Var *v )
 	if ( er023m.mf_index == UNDEF_MF_INDEX ||
 		 ! er023m.calib[ er023m.mf_index ].is_ma )
 	{
-		eprint( WARN, SET, "%s: MA is not calibrated.\n", DEVICE_NAME );
+		print( WARN, "MA is not calibrated.\n" );
 		compilation.error[ WARN ] -= 1;
 	}
 
@@ -155,10 +152,9 @@ Var *lockin_ma( Var *v )
 
 	if ( ma > MAX_MA_INDEX || ma < MIN_MA_INDEX )
 	{
-		eprint( FATAL, SET, "%s: Modulation attenuation index %ld is too "
-				"%s, must be in range %d-%d.\n",
-				DEVICE_NAME, ma, ma > MAX_MA_INDEX ? "large" : "low",
-				MIN_MA_INDEX, MAX_MA_INDEX );
+		print( FATAL, "Modulation attenuation index %ld is too %s, must be in "
+			   "range %d-%d.\n", ma, ma > MAX_MA_INDEX ? "large" : "low",
+			   MIN_MA_INDEX, MAX_MA_INDEX );
 		THROW( EXCEPTION );
 	}
 
@@ -198,24 +194,21 @@ Var *lockin_ct( Var *v )
 	ct_mult = get_long( v, "conversion time multiplicator" );
 	if ( ct_mult < 0 )
 	{
-		eprint( FATAL, SET, "%s: Invalid negative conversion time multiplier "
-				"in %s().\n", DEVICE_NAME, Cur_Func );
+		print( FATAL, "Invalid negative conversion time multiplier.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( ct_mult < MIN_CT_MULT )
 	{
-		eprint( SEVERE, SET, "%s: Conversion time multiplier of %ld is too "
-				"low, using %ld instead in %s().\n", DEVICE_NAME,
-				ct_mult, MIN_CT_MULT, Cur_Func );
+		print( SEVERE, "Conversion time multiplier of %ld is too low, using "
+			   "%ld instead.\n", ct_mult, MIN_CT_MULT );
 		ct_mult = MIN_CT_MULT;
 	}
 
 	if ( ct_mult > MAX_CT_MULT )
 	{
-		eprint( SEVERE, SET, "%s: Conversion time multiplier of %ld is too "
-				"large, using %ld instead in %s().\n", DEVICE_NAME,
-				ct_mult, MAX_CT_MULT, Cur_Func );
+		print( SEVERE, "Conversion time multiplier of %ld is too large, using "
+			   "%ld instead.\n", ct_mult, MAX_CT_MULT );
 		ct_mult = MAX_CT_MULT;
 	}
 
@@ -234,9 +227,8 @@ Var *lockin_ct( Var *v )
 		else
 			new_ct_mult = BAD_HIGH_CT_MULT + 1;
 
-		eprint( SEVERE, SET, "%s: Conversion time multiplier of %ld might "
-				"result in garbled data, using %ld instead.\n", DEVICE_NAME,
-				ct_mult, new_ct_mult );
+		print( SEVERE, "Conversion time multiplier of %ld might result in "
+			   "garbled data, using %ld instead.\n", ct_mult, new_ct_mult );
 
 		ct_mult = new_ct_mult;
 	}
@@ -281,16 +273,15 @@ Var *lockin_mf( Var *v )
 
 	if ( mf_index < 0 )
 	{
-		eprint( FATAL, SET, "%s: Invalid negative modulation frequency index "
-				"%ld in %s().\n", DEVICE_NAME, mf_index, Cur_Func );
+		print( FATAL, "Invalid negative modulation frequency index %ld.\n",
+			   mf_index );
 		THROW( EXCEPTION );
 	}
 
 	if ( mf_index > MAX_MF_INDEX )
 	{
-		eprint( FATAL, SET, "%s: Invalid modulation frequency index %ld in "
-				"%s(), valid range is 0-%ld.\n", DEVICE_NAME, mf_index,
-				Cur_Func, MAX_MF_INDEX );
+		print( FATAL, "Invalid modulation frequency index %ld, valid range is "
+			   "0-%ld.\n", mf_index, MAX_MF_INDEX );
 		THROW( EXCEPTION );
 	}
 
@@ -309,12 +300,12 @@ Var *lockin_mf( Var *v )
 		if ( er023m.ha != UNDEF_HARMONIC &&
 			 er023m.calib[ old_mf_index ].is_ph[ er023m.ha ] &&
 			 ! er023m.calib[ mf_index ].is_ph[ er023m.ha ] )
-			eprint( SEVERE, SET, "%s: Setting new modulation frequency makes "
-					"phase uncalibrated.\n", DEVICE_NAME );
+			print( SEVERE, "Setting new modulation frequency makes phase "
+				   "uncalibrated.\n" );
 		if ( er023m.calib[ old_mf_index ].is_ma &&
 			 ! er023m.calib[ mf_index ].is_ma )
-			eprint( SEVERE, SET, "%s: Setting new modulation frequency makes "
-					"modulation amplitude uncalibrated.\n", DEVICE_NAME );
+			print( SEVERE, "Setting new modulation frequency makes modulation "
+				   "amplitude uncalibrated.\n" );
 	}
 
 	return vars_push( INT_VAR, mf_index );

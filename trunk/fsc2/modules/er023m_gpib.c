@@ -105,11 +105,10 @@ bool er023m_init( const char *name )
 				else
 					new_ct_mult = BAD_HIGH_CT_MULT + 1;
 
-				eprint( SEVERE, UNSET, "%s: Conversion time had to be changed "
-						"from %.2f ms (CT = %ld) to %.2f ms (CT = %ld).\n",
-						DEVICE_NAME, 1.0e3 * BASE_CT * er023m.ct_mult,
-						er023m.ct_mult, 1.0e3 * BASE_CT * new_ct_mult,
-						new_ct_mult );
+				print( SEVERE, "Conversion time had to be changed from "
+					   "%.2f ms (CT = %ld) to %.2f ms (CT = %ld).\n",
+					   1.0e3 * BASE_CT * er023m.ct_mult, er023m.ct_mult,
+					   1.0e3 * BASE_CT * new_ct_mult, new_ct_mult );
 
 				er023m.ct_mult = new_ct_mult;
 			}
@@ -646,8 +645,7 @@ unsigned char er023m_st( void )
 void er023m_failure( void )
 {
 	if ( ! dont_print_on_error )
-		eprint( FATAL, UNSET, "%s: Can't access the signal channel.\n",
-				DEVICE_NAME );
+		print( FATAL, "Can't access the signal channel.\n" );
 	THROW( EXCEPTION );
 }
 

@@ -244,9 +244,7 @@ int keithley228a_init_hook( void )
 
 int keithley228a_exp_hook( void )
 {
-	Cur_Func = "keithley228a_exp_hook";
 	keithley228a_init( DEVICE_NAME );
-	Cur_Func = NULL;
 	return 1;
 }
 
@@ -256,9 +254,7 @@ int keithley228a_exp_hook( void )
 
 int keithley228a_end_of_exp_hook( void )
 {
-	Cur_Func = "keithley228a_end_of_exp_hook";
 	keithley228a_to_local( );
-	Cur_Func = NULL;
 	return 1;
 }
 

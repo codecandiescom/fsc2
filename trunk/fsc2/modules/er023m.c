@@ -124,8 +124,8 @@ int er023m_exp_hook( void )
 
 	if ( ! er023m_init( DEVICE_NAME ) )
 	{
-		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
-				DEVICE_NAME, gpib_error_msg );
+		print( FATAL, "Initialization of device failed: %s\n",
+			   gpib_error_msg );
 		THROW( EXCEPTION );
 	}
 
@@ -171,8 +171,7 @@ Var *lockin_get_data( Var *v )
 
 
 	if ( v != NULL )
-		eprint( WARN, SET, "%s: Useless parameter%s in call of %s().\n",
-				DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+		print( WARN, "Useless parameter%s.\n", v->next != NULL ? "s" : "" );
 
 	if ( FSC2_MODE == TEST )               /* return dummy value in test run */
 		return vars_push( FLOAT_VAR, ER023M_TEST_DATA );
@@ -223,8 +222,7 @@ Var *lockin_sensitivity( Var *v )
 
 	if ( rg <= 0.0 )
 	{
-		eprint( FATAL, SET, "%s: Negative or zero receiver gain in %s().\n",
-				DEVICE_NAME, Cur_Func );
+		print( FATAL, "%s: Negative or zero receiver gain.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -255,14 +253,14 @@ Var *lockin_sensitivity( Var *v )
 			else
 				rg_index = RG_MAX_INDEX;
 
-			eprint( WARN, SET, "%s: Receiver gain of %.2e is too %s, using "
-					"%.2e instead.\n", DEVICE_NAME, rg,
-					rg_index == 0 ? "low" : "high", rg_list[ rg_index ] );
+			print( WARN, "Receiver gain of %.2e is too %s, using %.2e "
+				   "instead.\n", rg,
+				   rg_index == 0 ? "low" : "high", rg_list[ rg_index ] );
 		}
 	}
 	else if ( fabs( rg - rg_list[ rg_index ] ) > rg * 6.0e-2 )
-		eprint( WARN, SET, "%s: Can't set receiver gain to %.2e, using %.2e "
-				"instead.\n", DEVICE_NAME, rg, rg_list[ rg_index ] );
+		print( WARN, "Can't set receiver gain to %.2e, using %.2e instead.\n",
+			   rg, rg_list[ rg_index ] );
 
 	er023m.rg_index = rg_index;
 	if ( FSC2_MODE == EXPERIMENT )
@@ -307,8 +305,7 @@ Var *lockin_time_constant( Var *v )
 
 	if ( tc <= 0.0 )
 	{
-		eprint( FATAL, SET, "%s: Negative or zero time constant in %s().\n",
-				DEVICE_NAME, Cur_Func );
+		print( FATAL, "Negative or zero time constant.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -338,21 +335,20 @@ Var *lockin_time_constant( Var *v )
 	{
 		if ( tc_index < TC_MIN_INDEX )
 		{
-			eprint( SEVERE, SET, "%s: Time constants below %.2f ms can't be "
-					"used, increasing time constant to this value.\n",
-					DEVICE_NAME, 1.0e3 * tc_list[ TC_MIN_INDEX ] );
+			print( SEVERE, "Time constants below %.2f ms can't be used, "
+				   "increasing time constant to this value.\n",
+				   1.0e3 * tc_list[ TC_MIN_INDEX ] );
 			tc_index = TC_MIN_INDEX;
 		}
 		else if ( fabs( tc - tc_list[ tc_index ] ) > tc * 6.0e-2 )
 		{                                                   /* error > 6% ? */
 			if ( tc > 1.0 )
-				eprint( WARN, SET, "%s: Can't set time constant to %.2f s, "
-						"using %.2f s instead.\n", DEVICE_NAME, tc,
-						tc_list[ tc_index ] );
+				print( WARN, "Can't set time constant to %.2f s, using %.2f s "
+					   "instead.\n", tc, tc_list[ tc_index ] );
 			else
-				eprint( WARN, SET, "%s: Can't set time constant to %.2f ms,"
-						" using %.2f ms instead.\n", DEVICE_NAME,
-						tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
+				print( WARN, "Can't set time constant to %.2f ms, using "
+					   "%.2f ms instead.\n",
+					   tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
 		}
 	}
 	
@@ -363,9 +359,9 @@ Var *lockin_time_constant( Var *v )
 		else
 			tc_index = TC_MAX_INDEX;
 
-		eprint( WARN, SET, "%s: Time constant of %.2f s is too %s, using %.2f "
-				"s instead.\n",	DEVICE_NAME, tc,
-				tc_index == 0 ? "short" : "long", tc_list[ tc_index ] );
+		print( WARN, "Time constant of %.2f s is too %s, using %.2f s "
+			   "instead.\n",
+			   tc, tc_index == 0 ? "short" : "long", tc_list[ tc_index ] );
 	}
 
 	er023m.tc_index = tc_index;
@@ -391,7 +387,7 @@ Var *lockin_phase( Var *v )
 	if ( er023m.mf_index == UNDEF_MF_INDEX ||
 		 ! er023m.calib[ er023m.mf_index ].is_ph )
 	{
-		eprint( WARN, SET, "%s: Phase is not calibrated.\n", DEVICE_NAME );
+		print( WARN, "Phase is not calibrated.\n" );
 		compilation.error[ WARN ] -= 1;
 	}
 
@@ -464,8 +460,8 @@ Var *lockin_offset( Var *v )
 
 	if ( of < MIN_OF || of > MAX_OF )
 	{
-		eprint( FATAL, SET, "%s: Invalid offset value %d in %s(), must be in "
-				"range %d-%d.\n", DEVICE_NAME, of, Cur_Func, MIN_OF, MAX_OF );
+		print( FATAL, "Invalid offset value %d, must be in range "
+			   "%d-%d.\n", of, MIN_OF, MAX_OF );
 		THROW( EXCEPTION );
 	}
 
@@ -511,8 +507,7 @@ Var *lockin_conversion_time( Var *v )
 
 	if ( ct <= 0.0 )
 	{
-		eprint( FATAL, SET, "%s: Negative or zero conversion time in %s().\n",
-				DEVICE_NAME, Cur_Func );
+		print( FATAL, "Negative or zero conversion time.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -520,15 +515,15 @@ Var *lockin_conversion_time( Var *v )
 
 	if ( ct_mult < MIN_CT_MULT )
 	{
-		eprint( SEVERE, SET, "%s: Conversion time too short, using %.2f ms.\n",
-				DEVICE_NAME, 1.0e3 * MIN_CT_MULT * BASE_CT );
+		print( SEVERE, "Conversion time too short, using %.2f ms.\n",
+			   1.0e3 * MIN_CT_MULT * BASE_CT );
 		ct_mult = MIN_CT_MULT;
 	}
 
 	if ( ct_mult > MAX_CT_MULT )
 	{
-		eprint( SEVERE, SET, "%s: Conversion time too long, using %.2f s.\n",
-				DEVICE_NAME, MAX_CT_MULT * BASE_CT );
+		print( SEVERE, "Conversion time too long, using %.2f s.\n",
+			   MAX_CT_MULT * BASE_CT );
 		ct_mult = MAX_CT_MULT;
 	}
 
@@ -547,9 +542,9 @@ Var *lockin_conversion_time( Var *v )
 		else
 			new_ct_mult = BAD_HIGH_CT_MULT + 1;
 
-		eprint( SEVERE, SET, "%s: Conversion time of %.2f ms might result in "
-				"garbled data, using %.2f ms instead.\n", DEVICE_NAME,
-				1.0e3 * BASE_CT * ct_mult, 1.0e3 * BASE_CT * new_ct_mult );
+		print( SEVERE, "Conversion time of %.2f ms might result in garbled "
+			   "data, using %.2f ms instead.\n",
+			   1.0e3 * BASE_CT * ct_mult, 1.0e3 * BASE_CT * new_ct_mult );
 
 		ct_mult = new_ct_mult;
 	}
@@ -599,8 +594,7 @@ Var *lockin_ref_freq( Var *v )
 
 	if ( mf <= 0.0 )
 	{
-		eprint( FATAL, SET, "%s: Negative or zero modulation frequency in "
-				"%s().\n", DEVICE_NAME, Cur_Func );
+		print( FATAL, "Negative or zero modulation frequency.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -621,15 +615,15 @@ Var *lockin_ref_freq( Var *v )
 		else
 			mf_index = MAX_MF_INDEX;
 
-		eprint( WARN, SET, "%s: Modulation frequency of %.2f kHz is too "
-				"%s, using %.2f kHz instead.\n",
-				DEVICE_NAME, mf * 1.0e-3, mf_index == 0 ? "high" : "low",
-				mf_list[ mf_index ] * 1.0e-3 );
+		print( WARN, "Modulation frequency of %.2f kHz is too %s, using "
+			   "%.2f kHz instead.\n",
+			   mf * 1.0e-3, mf_index == 0 ? "high" : "low",
+			   mf_list[ mf_index ] * 1.0e-3 );
 	}
 	else if ( fabs( mf - mf_list[ mf_index ] ) > mf * 6.0e-2 )
-		eprint( WARN, SET, "%s: Can't set modulation frequency to %.2f kHz, "
-				"using %.2f kHz instead.\n", DEVICE_NAME, mf * 1.0e-3,
-				mf_list[ mf_index ] * 1.0e-3 );
+		print( WARN, "Can't set modulation frequency to %.2f kHz, using "
+			   "%.2f kHz instead.\n",
+			   mf * 1.0e-3, mf_list[ mf_index ] * 1.0e-3 );
 
 	er023m.mf_index = mf_index;
 	if ( FSC2_MODE == EXPERIMENT )
@@ -644,12 +638,12 @@ Var *lockin_ref_freq( Var *v )
 		if ( er023m.ha != UNDEF_HARMONIC &&
 			 er023m.calib[ old_mf_index ].is_ph[ er023m.ha ] &&
 			 ! er023m.calib[ mf_index ].is_ph[ er023m.ha ] )
-			eprint( SEVERE, SET, "%s: Setting new modulation frequency makes "
-					"phase uncalibrated.\n", DEVICE_NAME );
+			print( SEVERE, "Setting new modulation frequency makes phase "
+				   "uncalibrated.\n" );
 		if ( er023m.calib[ old_mf_index ].is_ma &&
 			 ! er023m.calib[ mf_index ].is_ma )
-			eprint( SEVERE, SET, "%s: Setting new modulation frequency makes "
-					"modulation amplitude uncalibrated.\n", DEVICE_NAME );
+			print( SEVERE, "Setting new modulation frequency makes modulation "
+				   "amplitude uncalibrated.\n" );
 	}
 
 	return vars_push( FLOAT_VAR, mf_list[ mf_index ] );
@@ -693,8 +687,7 @@ Var *lockin_ref_level( Var *v )
 
 	if ( ma < 0.0 )
 	{
-		eprint( FATAL, SET, "%s: Negative modulation amplitude in %s().\n",
-				DEVICE_NAME, Cur_Func );
+		print( FATAL, "Negative modulation amplitude.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -715,14 +708,13 @@ Var *lockin_ref_level( Var *v )
 		else
 			ma_index = MAX_MA_INDEX;
 
-		eprint( WARN, SET, "%s: Modulation amplitude of %.2f G is too "
-				"%s, using %.2 G instead.\n", DEVICE_NAME,
-				ma, ma_index == 0 ? "high" : "low", ma_list[ ma_index ] );
+		print( WARN, "Modulation amplitude of %.2f G is too %s, using %.2 G "
+			   "instead.\n",
+			   ma, ma_index == 0 ? "high" : "low", ma_list[ ma_index ] );
 	}
 	else if ( fabs( ma - ma_list[ ma_index ] ) > ma * 5.0e-2 )
-		eprint( WARN, SET, "%s: Can't set modulation amplitude to %.2f G, "
-				"using %.2f G instead.\n",
-				DEVICE_NAME, ma, ma_list[ ma_index ] );
+		print( WARN, "Can't set modulation amplitude to %.2f G, using %.2f G "
+			   "instead.\n", ma, ma_list[ ma_index ] );
 
 	er023m.ma_index = ma_index;
 	if ( FSC2_MODE == EXPERIMENT )
@@ -764,9 +756,8 @@ Var *lockin_harmonic( Var *v )
 
 	if ( ha < MIN_HARMONIC || ha > MAX_HARMONIC )
 	{
-		eprint( FATAL, SET, "%s: Invalid value %d used for harmonic, valid "
-				"values are %d and %d.\n", DEVICE_NAME, ha + 1,
-				MIN_HARMONIC + 1, MAX_HARMONIC + 1 );
+		print( FATAL, "Invalid value %d used for harmonic, valid values are "
+			   "%d and %d.\n", ha + 1, MIN_HARMONIC + 1, MAX_HARMONIC + 1 );
 		THROW( EXCEPTION );
 	}
 
@@ -810,9 +801,9 @@ Var *lockin_resonator( Var *v )
 
 	if ( re < MIN_RESONATOR || re > MAX_RESONATOR )
 	{
-		eprint( FATAL, SET, "%s: Invalid value %d used as resonator number, "
-				"valid values are %d and %d.\n", DEVICE_NAME, re + 1,
-				MIN_RESONATOR + 1, MAX_RESONATOR + 1 );
+		print( FATAL, SET, "Invalid value %d used as resonator number, valid "
+			   "values are %d and %d.\n",
+			   re + 1, MIN_RESONATOR + 1, MAX_RESONATOR + 1 );
 		THROW( EXCEPTION );
 	}
 
