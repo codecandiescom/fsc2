@@ -31,10 +31,10 @@ browsers.
 On the left side you have a set of buttons:
 @itemize @bullet
 @item The @code{Load} button - when you click onto it a file selector
-is shown that allows you to select a new @acronym{EDL} program
+is shown that allows you to select a new @acronym{EDL} program.
 @item The @code{Reload} button - when you have edited the currently
 loaded @acronym{EDL} program you have to click onto this button to
-make @acronym{fsc2} load the changed file
+make @acronym{fsc2} load the changed file.
 @item The @code{Edit} button - when you click onto it an editor will
 open up with the curently loaded @acronym{EDL} program. Which
 editor to use depends on the environment variable @code{EDITOR},
@@ -48,7 +48,7 @@ after it has been loaded.
 documentation for @acronym{fsc2}.
 @item Finally, the @code{Bug report} button will open an editor window
 where you can compose a bug report. When you're finished the program
-will allow you to mail me the bug report.
+will let you mail me the bug report.
 @end itemize
 
 @end ifnotinfo
@@ -61,14 +61,14 @@ following elements:
 @itemize @bullet
 @item At the top the browser for displaying the @acronym{EDL} file to be run
 @item Below this another browser where error messages as well as output
-from the @acronym{EDL} program will be displayed
+from the @acronym{EDL} program will be displayed.
 @item On the right side of the browsers is a slider that lets you move
 the border between both browsers.
 @item The @code{Load} button - when you click onto it a file selector
-is shown that allows you to select a new @acronym{EDL} program
+is shown that allows you to select a new @acronym{EDL} program.
 @item The @code{Reload} button - when you have edited the currently
 loaded @acronym{EDL} program you have to click onto this button to
-make @acronym{fsc2} load the changed file
+make @acronym{fsc2} load the changed file.
 @item The @code{Edit} button - when you click onto it an editor will
 open up with the curently loaded @acronym{EDL} program. Which
 editor to use depends on the environment variable @code{EDITOR},
@@ -82,8 +82,25 @@ after it has been loaded.
 documentation for @acronym{fsc2}.
 @item Finally, the @code{Bug report} button will open an editor window
 where you can compose a bug report. When you're finished the program
-will allow you to mail me the bug report.
+will let you mail me the bug report.
 @end itemize
 
 @end ifnothtml
 @end ifinfo
+
+In each button one of the characters of the label is underlined. By
+pressing the key for this letter each button can be triggered via the
+keyboard - but note that, if the underlined letter is an uppercase
+character, you have to enter the uppercase character from the keyboard!
+
+When you start testing the program most of the buttons can not be used
+anymore (as indicated by the text becoming grayed). And the label of the
+@code{Test} button will become @code{Stop Test} - so if you want to stop
+the test press the @code{Test} button again.
+
+During the test @acronym{fsc2} may detect problems with @acronym{EDL}
+program or even errors. It then will print messages in the lower
+browser. There are three categories of messages: Warnings, messages for
+severe problems and fatal error messages. Warnings are printed in green,
+messages for severe problems in blue and messages for fatal errors in
+red (in the latter case the test is also aborted immediately).
