@@ -33,8 +33,11 @@ static Pixmap get_cut_window( unsigned int *width, unsigned int *height );
 static void dump_as_ppm( FILE *dp, XImage *image );
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Writes a graphic with the display (if type equals 1) or cross section */
+/* (for type == 2 ) window to the file descriptor passed to the function */
+/* - function may trow an exception (instead of returning an error code) */
+/*-----------------------------------------------------------------------*/
 
 void dump_window( int type, int fd )
 {
@@ -50,13 +53,13 @@ void dump_window( int type, int fd )
 	if ( ! G.is_init || ! G.is_fully_drawn || G.color_hash == NULL )
 		THROW( EXCEPTION );
 
-	/* We need a stream because write(2) is horribly slow because it does
-	   not use buffering */
+	/* We need a stream because write(2) is horribly slow due to it not being
+	   buffered */
 
 	if ( ( fp = fdopen( fd, "w" ) ) == NULL )
 		THROW( EXCEPTION );
 
-	/* Get a pixmap with the garphic we are supposed to send and convert it
+	/* Get a pixmap with the graphic we are supposed to send and convert it
 	   to an XImage */
 
 	if ( type == 1 )
@@ -82,7 +85,7 @@ void dump_window( int type, int fd )
 		THROW( EXCEPTION );
 	}
 
-	/* Write out the image in PPM format - the webserver will have to take
+	/* Write out the image in PPM format - the web server will have to take
 	   care of converting it to a more appropriate format. */
 
 	dump_as_ppm( fp, image );
