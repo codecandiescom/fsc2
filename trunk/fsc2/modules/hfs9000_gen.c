@@ -148,7 +148,6 @@ bool hfs9000_set_function_delay( int function, double delay )
 {
 	Ticks Delay = hfs9000_double2ticks( delay );
 	int i;
-	FUNCTION *f;
 
 
 	if ( hfs9000.function[ function ].is_delay )

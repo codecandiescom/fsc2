@@ -174,7 +174,6 @@ bool dg2020_set_function_delay( int function, double delay )
 {
 	Ticks Delay = dg2020_double2ticks( delay );
 	int i;
-	FUNCTION *f;
 
 
 	if ( dg2020.function[ function ].is_delay )
