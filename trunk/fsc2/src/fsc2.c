@@ -1345,6 +1345,8 @@ void usage( void )
 			 "             Mouse button to be used to stop an experiment\n"
 			 "             1 = \"left\", 2 = \"middle\", 3 = \"right\" "
 			 "button\n"
+			 "  -size size\n"
+			 "             specify the size to use, either L[ow] or H[igh]\n"
 			 "  -geometry geometry\n"
 			 "             specify preferred size and position of main "
 			 "window\n"

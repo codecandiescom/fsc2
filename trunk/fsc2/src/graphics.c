@@ -71,9 +71,9 @@ static struct {
 	int	WIN_MIN_2D_WIDTH;
 	int	WIN_MIN_HEIGHT;
 	int	SMALL_FONT_SIZE;
-	char *DEFAULT_AXISFONT_1;
-	char *DEFAULT_AXISFONT_2;
-	char *DEFAULT_AXISFONT_3;
+	const char *DEFAULT_AXISFONT_1;
+	const char *DEFAULT_AXISFONT_2;
+	const char *DEFAULT_AXISFONT_3;
 } GI_sizes;
 
 
@@ -132,6 +132,8 @@ void start_graphics( void )
 
 		for ( i = X; i <= Z; i++ )
 			G.label[ i ] = T_strdup( G.label_orig[ i ] );
+
+		cut_init( );
 	}
 
 	/* Create the forms for running experiments */

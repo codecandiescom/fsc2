@@ -89,52 +89,6 @@ typedef struct {
 
 #define MAX_INPUT_CHARS 32
 
-#if ( SIZE == HI_RES )
-
-#define OBJ_HEIGHT                50
-#define OBJ_WIDTH                 210
-
-#define BUTTON_HEIGHT             50
-#define BUTTON_WIDTH              210
-#define NORMAL_BUTTON_DELTA       10
-
-#define SLIDER_HEIGHT             35
-#define SLIDER_WIDTH              210
-
-#define INPUT_HEIGHT              35
-#define INPUT_WIDTH               210
-
-#define LABEL_VERT_OFFSET         15
-#define VERT_OFFSET               15
-#define HORI_OFFSET               20
-
-#define OFFSET_X0                 20
-#define OFFSET_Y0                 20
-
-#else
-
-#define OBJ_HEIGHT                35
-#define OBJ_WIDTH                 140
-
-#define BUTTON_HEIGHT             35
-#define BUTTON_WIDTH              150
-#define NORMAL_BUTTON_DELTA       5
-
-#define SLIDER_HEIGHT             25
-#define SLIDER_WIDTH              150
-
-#define INPUT_HEIGHT              25
-#define INPUT_WIDTH               150
-
-#define LABEL_VERT_OFFSET         15
-#define VERT_OFFSET               10
-#define HORI_OFFSET               10
-
-#define OFFSET_X0                 20
-#define OFFSET_Y0                 20
-
-#endif
-
 
 /* exported functions */
 

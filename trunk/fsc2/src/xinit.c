@@ -29,7 +29,7 @@
 
 static int main_form_close_handler( FL_FORM *a, void *b );
 static void setup_app_options( FL_CMD_OPT app_opt[ ] );
-static bool dl_fsc2_rsc( bool size );
+static bool dl_fsc2_rsc( void );
 
 #if 0
 static int fsc2_x_error_handler( Display *d, XErrorEvent *err );
@@ -257,7 +257,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 			* ( ( int * ) xresources[ SLIDERFONTSIZE ].var );
 	fl_set_defaults( FL_PDSliderFontSize, &xcntl );
 
-	if ( ! dl_fsc2_rsc( G_Funcs.size ) )
+	if ( ! dl_fsc2_rsc( ) )
 		 return FAIL;
 
 	/* Create and display the main form */
