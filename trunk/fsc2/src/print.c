@@ -308,7 +308,7 @@ static int get_print_file( FILE **fp, char **name )
 		fl_set_button( print_form->s2p_button, 1 );
 		fl_set_button( print_form->p2f_button, 0 );
 		fl_set_object_lcol( print_form->s2p_input, FL_BLACK );
-		fl_set_object_lcol( print_form->p2f_browse, FL_INACTIVE_COL );
+		fl_set_object_lcol( print_form->p2f_input, FL_INACTIVE_COL );
 		fl_set_object_lcol( print_form->p2f_browse, FL_INACTIVE_COL );
 		fl_deactivate_object( print_form->p2f_group );
 	}
@@ -317,7 +317,7 @@ static int get_print_file( FILE **fp, char **name )
 		fl_set_button( print_form->s2p_button, 0 );
 		fl_set_button( print_form->p2f_button, 1 );
 		fl_set_object_lcol( print_form->s2p_input, FL_INACTIVE_COL );
-		fl_set_object_lcol( print_form->p2f_browse, FL_BLACK );
+		fl_set_object_lcol( print_form->p2f_input, FL_BLACK );
 		fl_set_object_lcol( print_form->p2f_browse, FL_BLACK );
 		fl_deactivate_object( print_form->s2p_input );
 	}
