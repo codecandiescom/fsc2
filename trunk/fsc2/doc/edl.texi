@@ -477,7 +477,7 @@ right of the expression:
 @end example
 
 Finally, the lowest precedence operators are the comparison operators
-(also the be discussed below in more detail), the test for equality,
+(also the be discussed below in more detail), i.e.@: the test for equality,
 `@code{==}' (not to be confused with the assignment operator
 `@code{=}'), the test for inequality, `@code{!=}', and the remaining
 four comparison operators `@code{<}', `@code{<=}', `@code{>}' and
@@ -666,8 +666,8 @@ Here is a complete list of the comparison operators between two
 expressions (e.g.@: numbers):
 
 @quotation
-@cindex == (comparison operator)
-@cindex comparison operator
+@cindex == (equal)
+@cindex equal `=='
 @cindex != (unequal)
 @cindex unequal `!='
 @cindex < (less than)
