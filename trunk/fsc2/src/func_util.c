@@ -1701,6 +1701,8 @@ Var *f_getf( Var *var )
 		   
 	if ( s[ 4 ] == NULL || s[ 4 ][ 0 ] == '\0' )
 		s[ 4 ] = NULL;
+	else
+		s[ 4 ] = T_strdup( s[ 4 ] );
 
 getfile_retry:
 
