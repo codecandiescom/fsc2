@@ -68,22 +68,6 @@ void tds754a_do_pre_exp_checks( void )
 		if ( tds754a.channels_in_use[ i ] )
 			tds754a_display_channel( i );
 
-	/* That's all if no windows have been defined we switch off gated
-	   measurement mode, i.e. all measurement operations are done on the
-	   whole curve */
-
-	if ( tds754a.w == NULL )
-	{
-		tds754a_set_gated_meas( UNSET );
-		tds754a.gated_state = UNSET;
-		return;
-	}
-	else
-	{
-		tds754a_set_gated_meas( SET );
-		tds754a.gated_state = SET;
-	}
-
 	/* Remove all unused windows and test if for all other windows the width
 	   is set */
 
@@ -105,6 +89,22 @@ void tds754a_do_pre_exp_checks( void )
 		if ( ! w->is_width )
 			is_width = UNSET;
 		w = w->next;
+	}
+
+	/* That's all if no windows have been defined we switch off gated
+	   measurement mode, i.e. all measurement operations are done on the
+	   whole curve */
+
+	if ( tds754a.w == NULL )
+	{
+		tds754a_set_gated_meas( UNSET );
+		tds754a.gated_state = UNSET;
+		return;
+	}
+	else
+	{
+		tds754a_set_gated_meas( SET );
+		tds754a.gated_state = SET;
 	}
 
 	/* If not get the distance of the cursors on the digitizers screen and

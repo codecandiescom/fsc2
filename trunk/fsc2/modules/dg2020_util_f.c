@@ -449,6 +449,7 @@ int dg2020_diff( bool *old, bool *new, Ticks *start, Ticks *length )
 	int ret;
 	bool *a = old + where,
 		 *b = new + where;
+	bool cur_state;
 
 
 	/* If we reached the end of the arena in the last call return 0 */
@@ -482,11 +483,12 @@ int dg2020_diff( bool *old, bool *new, Ticks *start, Ticks *length )
 
 	*start = where;
 	ret = *a == SET ? -1 : 1;
+	cur_state = *a;
 
 	/* Now figure out the length of the area we have to set or reset */
 
 	*length = 0;
-	while ( where < dg2020.max_seq_len && *a != *b )
+	while ( where < dg2020.max_seq_len && *a != *b && *a == cur_state )
 	{
 		where++;
 		a++;

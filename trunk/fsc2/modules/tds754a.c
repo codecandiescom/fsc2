@@ -474,6 +474,7 @@ Var *digitizer_get_area( Var *v )
 	if ( v != NULL )
 	{
 		vars_check( v, INT_VAR );
+
 		if ( ( w = tds754a.w ) == NULL )
 		{
 			eprint( FATAL, "%s:%ld: TDS754A: No measurement windows have been "
