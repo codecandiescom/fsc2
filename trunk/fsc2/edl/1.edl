@@ -17,7 +17,7 @@ EXPERIMENT:
 
 
 //lockin_sensitivity( 3nV );
-lockin_time_constant( 1s );
+lockin_time_constant( 100 ms );
 
 FOR I = 1:1001 {
 	data = lockin_get_data( 1, 2 );
