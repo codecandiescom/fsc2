@@ -130,32 +130,51 @@ sep2:    /* empty */
 ;
 
 
-expr:    INT_TOKEN unit           { $$ = vars_mult( vars_push( INT_VAR, $1 ), 
-													$2 ); }
-       | FLOAT_TOKEN unit         { $$ = vars_mult( vars_push( FLOAT_VAR, $1 ),
-													$2 ); }
-       | VAR_TOKEN unit           { $$ = vars_mult( $1, $2 ); }
+expr:    INT_TOKEN unit           { if ( $2 == NULL )
+                                      $$ = vars_push( INT_VAR, $1 );
+                                    else
+	                                  $$ = vars_mult( vars_push( INT_VAR, $1 ),
+													  $2 ); }
+       | FLOAT_TOKEN unit         { if ( $2 == NULL )
+                                      $$ = vars_push( FLOAT_VAR, $1 );
+                                    else
+	                                  $$ = vars_mult(
+										    vars_push( FLOAT_VAR, $1 ), $2 ); }
+       | VAR_TOKEN unit           { if ( $2 == NULL )
+                                      $$ = $1;
+                                    else
+	                                  $$ = vars_mult( $1, $2 ); }
        | VAR_TOKEN '['            { vars_arr_start( $1 ); }
          list1 ']'                { CV = vars_arr_rhs( $4 ); }
-         unit                     { if ( CV->type & ( INT_VAR | FLOAT_VAR ) )
-			                            $$ = vars_mult( CV, $7 );
+         unit                     { if ( $7 == NULL )
+			                          $$ = CV;
 		                            else
 									{
+									  if ( CV->type & ( INT_VAR | FLOAT_VAR ) )
+			                            $$ = vars_mult( CV, $7 );
+									  else
+									  {
 										eprint( FATAL, "%s:%ld: Can't apply "
 												 "a unit to a non-number.\n",
 												Fname, Lc );
 										THROW( EXCEPTION );
+									  }
 									}
                                   }
        | FUNC_TOKEN '(' list2 ')' { CV = func_call( $1 ); }
-         unit                     { if ( CV->type & ( INT_VAR | FLOAT_VAR ) )
-			                            $$ = vars_mult( CV, $6 );
+         unit                     { if ( $6 == NULL )
+			                          $$ = CV;
 		                            else
 									{
+									  if ( CV->type & ( INT_VAR | FLOAT_VAR ) )
+			                            $$ = vars_mult( CV, $6 );
+									  else
+									  {
 										eprint( FATAL, "%s:%ld: Can't apply "
 												 "a unit to a non-number.\n",
 												Fname, Lc );
 										THROW( EXCEPTION );
+									  }
 									}
                                   }
        | VAR_REF
@@ -181,7 +200,10 @@ expr:    INT_TOKEN unit           { $$ = vars_mult( vars_push( INT_VAR, $1 ),
        | expr '%' expr            { $$ = vars_mod( $1, $3 ); }
        | expr '^' expr            { $$ = vars_pow( $1, $3 ); }
        | '-' expr %prec NEG       { $$ = vars_negate( $2 ); }
-       | '(' expr ')' unit        { $$ = vars_mult( $2, $4 ); }
+       | '(' expr ')' unit        { if ( $4 == NULL )
+			                          $$ = $2;
+		                            else
+									  $$ = vars_mult( $2, $4 ); }
 ;
 
 unit:    /* empty */               { $$ = vars_push( INT_VAR, 1L ); }
