@@ -340,6 +340,7 @@ install:
 # How to get rid of everything that got installed
 
 uninstall:
+	-$(RM) $(RMFLAGS) $(libdir)/hp8647a.table
 	-$(RM) $(RMFLAGS) $(libdir)/version.ugz
 	-$(RM) $(RMFLAGS) $(libdir)/Functions
 	-$(RM) $(RMFLAGS) $(libdir)/Devices
