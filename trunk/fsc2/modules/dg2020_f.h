@@ -20,9 +20,14 @@ Var *pulser_start( Var *v );
 
 
 
-/* Definitions needed for the pulser*/
+/* Definitions needed for the pulser */
 
 #define Ticks long              // for times in units of the pulsers time base
+
+
+/* name of device as given in GPIB configuration file /etc/gpib.conf */
+
+#define DEVICE_NAME "DG2020"
 
 
 #define MIN_TIMEBASE            5.0e-9     // minimum pulser time base: 5 ns
@@ -195,80 +200,97 @@ typedef struct _p_ {
 } PULSE;
 
 
-/* All the remaining declarations are internal to the module */
-
-/* The following functions are indirectly exported via the pulser structure
-   as defined in pulser.h */
-
-static bool set_timebase( double timebase );
-static bool assign_function( int function, long pod );
-static bool assign_channel_to_function( int function, long channel );
-static bool invert_function( int function );
-static bool set_delay_function( int function, double delay );
-static bool set_function_high_level( int function, double voltage );
-static bool set_function_low_level( int function, double voltage );
-static bool set_trigger_mode( int mode );
-static bool set_trig_in_level( double voltage );
-static bool set_trig_in_slope( int slope );
-static bool set_repeat_time( double time );
-
-static bool set_phase_reference( int phase, int function );
-
-static bool new_pulse( long pnum );
-static bool set_pulse_function( long pnum, int function );
-static bool set_pulse_position( long pnum, double time );
-static bool set_pulse_length( long pnum, double time );
-static bool set_pulse_position_change( long pnum, double time );
-static bool set_pulse_length_change( long pnum, double time );
-static bool set_pulse_phase_cycle( long pnum, int cycle );
-static bool set_pulse_maxlen( long pnum, double time );
-static bool set_pulse_replacements( long pnum, long num_repl, 
-									long *repl_list );
-
-static bool get_pulse_function( long pnum, int *function );
-static bool get_pulse_position( long pnum, double *time );
-static bool get_pulse_length( long pnum, double *time );
-static bool get_pulse_position_change( long pnum, double *time );
-static bool get_pulse_length_change( long pnum, double *time );
-static bool get_pulse_phase_cycle( long pnum, int *cycle );
-static bool get_pulse_maxlen( long pnum, double *time );
-
-static bool setup_phase( int func, PHS phs );
+/* Here the global variables of the module are declared */
 
 
-/* All the remaining functions are exclusively used internally */
+#if defined (DG2020_MAIN )
 
-static Ticks double2ticks( double time );
-static double ticks2double( Ticks ticks );
-static void check_pod_level_diff( double high, double low );
-static PULSE *get_pulse( long pnum );
-static const char *ptime( double time );
-static const char *pticks( Ticks ticks );
-static void check_consistency( void );
+bool dg2020_is_needed = UNSET;
+DG2020 dg2020;
+PULSE *Pulses = NULL;
 
-static void basic_pulse_check( void );
-static void basic_functions_check( void );
-static void distribute_channels( void );
-static CHANNEL *get_next_free_channel( void );
-static void pulse_start_setup( void );
-static int start_compare( const void *A, const void *B );
+#else
+
+extern bool dg2020_is_needed;
+extern DG2020 dg2020;
+extern PULSE *Pulses;
+
+#endif
+
+
+
+/* Here follow the functions from dg2020_gen.c */
+
+bool set_timebase( double timebase );
+bool assign_function( int function, long pod );
+bool assign_channel_to_function( int function, long channel );
+bool invert_function( int function );
+bool set_delay_function( int function, double delay );
+bool set_function_high_level( int function, double voltage );
+bool set_function_low_level( int function, double voltage );
+bool set_trigger_mode( int mode );
+bool set_trig_in_level( double voltage );
+bool set_trig_in_slope( int slope );
+bool set_repeat_time( double time );
+
+bool set_phase_reference( int phase, int function );
+bool setup_phase( int func, PHS phs );
+
+
+/* These are the functions from dg2020_pulse.c */
+
+bool new_pulse( long pnum );
+bool set_pulse_function( long pnum, int function );
+bool set_pulse_position( long pnum, double time );
+bool set_pulse_length( long pnum, double time );
+bool set_pulse_position_change( long pnum, double time );
+bool set_pulse_length_change( long pnum, double time );
+bool set_pulse_phase_cycle( long pnum, int cycle );
+bool set_pulse_maxlen( long pnum, double time );
+bool set_pulse_replacements( long pnum, long num_repl, long *repl_list );
+
+bool get_pulse_function( long pnum, int *function );
+bool get_pulse_position( long pnum, double *time );
+bool get_pulse_length( long pnum, double *time );
+bool get_pulse_position_change( long pnum, double *time );
+bool get_pulse_length_change( long pnum, double *time );
+bool get_pulse_phase_cycle( long pnum, int *cycle );
+bool get_pulse_maxlen( long pnum, double *time );
+
+bool change_pulse_position( long pnum, double time );
+bool change_pulse_length( long pnum, double time );
+bool change_pulse_position_change( long pnum, double time );
+bool change_pulse_length_change( long pnum, double time );
+
+
+/* Here come the functions from dg2020_util.c */
+
+Ticks double2ticks( double time );
+double ticks2double( Ticks ticks );
+void check_pod_level_diff( double high, double low );
+PULSE *get_pulse( long pnum );
+const char *ptime( double time );
+const char *pticks( Ticks ticks );
+CHANNEL *get_next_free_channel( void );
+int init_compare( const void *A, const void *B );
+
+
+/* The functions from dg2020_init.c */
+
+void init_setup( void );
+void basic_pulse_check( void );
+void basic_functions_check( void );
+void distribute_channels( void );
+void pulse_start_setup( void );
 void create_phase_pulses( int func );
 PULSE *new_phase_pulse( FUNCTION *f, PULSE *p, int pos, int pod );
-
-static bool change_pulse_position( long pnum, double time );
-static bool change_pulse_length( long pnum, double time );
-static bool change_pulse_position_change( long pnum, double time );
-static bool change_pulse_length_change( long pnum, double time );
-
-static void do_checks( void );
-static void do_update( void );
+void do_checks( void );
+void do_update( void );
 
 
-/* All the functions starting with dg2020 are functions that really access the
-   pulser, i.e. they can only be used after the GPIB bus has been initialized
-*/
+/* Finally the functions from dg2020_gpib.c */
 
-static bool dg2020_init( const char *name );
-static bool dg2020_run( bool flag );
-static bool dg2020_set_timebase( void );
-static bool dg2020_update_data( void );
+bool dg2020_init( const char *name );
+bool dg2020_run( bool flag );
+bool dg2020_set_timebase( void );
+bool dg2020_update_data( void );
