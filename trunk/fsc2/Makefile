@@ -2,6 +2,7 @@
 
 # The following variables determine where the program files will be copied to
 # by 'make install' as well as the name of the GPIB configuration and log file
+# (set 'prefix' to './' for a local install)
 
 prefix         = /usr/local
 bindir         = $(prefix)/bin
@@ -12,6 +13,10 @@ infodir        = /usr/local/info
 
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log
+
+# To whom bug reports and crash messages will get send
+
+MAIL_ADDRESS   = Jens.Toerring@physik.fu-berlin.de
 
 
 ##############################################################################
@@ -47,10 +52,8 @@ EXEC_INSTALL   = install             # command for installing executables
 ########### (unless you really know what you're doing ...) #################
 ############################################################################
 
-# Set up variables with maintainer email address and the full paths for
-# the mail program 'mail' and the GNU utility 'addr2line'
+# Define variables with full paths for the 'mail' and 'addr2line' programs
 
-MAIL_ADDRESS   = Jens.Toerring@physik.fu-berlin.de
 MAIL_PROGRAM   = $(shell which mail)
 ADDR2LINE      = $(shell which addr2line)
 
@@ -64,8 +67,7 @@ ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
 	CFLAGS    += -DIS_STILL_LIBC1
 endif
 
-# Pass GPIB_LOG and GPIB_CONF via macros to the source files
-# Don't forget to escape all double quotes (`"') with backslashes.
+# Pass GPIB_LOG and GPIB_CONF and other stuff via macros to the source files
 # For directories make sure they end with a `/'.
 
 ifdef GPIB_LOG
@@ -107,6 +109,9 @@ endif
 ifdef MAIL_ADDRESS
 	CFLAGS += -DMAIL_ADDRESS=\"$(MAIL_ADDRESS)\"
 endif
+
+# Make sure the mailprogram and addr2line got found by which,
+# otherwise don't set the variables
 
 ifneq ($(word 1,$(MAIL_PROGRAM)),which:)
 	CFLAGS += -DMAIL_PROGRAM=\"$(MAIL_PROGRAM)\"
