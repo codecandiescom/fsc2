@@ -45,17 +45,19 @@
 @section Introduction
 
 
-The most simple approach would be to have a set of functions for each
-individual device, i.e.@: to have a different function for e.g.@:
-fetching data from each of a series of different digitizing
-oscilloscopes.  But this would be a nuisance for someone writing
-@code{EDL} programs because whenever for example the oscilloscope has
-to be changed also all the programs would have to be adjusted to reflect
-the names of the functions for the new digitizer.
+The simplest approach to dealing with device-specific functions would
+have been to have a set of functions for each individual device, all
+with different names. Then one would have a different function for
+e.g.@: fetching data from each of a series of different digitizing
+oscilloscopes. But this would become a nuisance for whenever for example
+the oscilloscope had to be changed in the experimental setup, because
+then one would have to carefully check all function calls in the
+@code{EDL} scripts and adjust the names of the functions to fit the new
+digitizer.
 
-Thus it's reasonable to have generic functions for similar devices
-that usually have a lot in common. It's not only much more convenient
-to write
+Thus it's more reasonable to have generic functions for similar devices
+that usually have a lot in common. It's not only much more convenient to
+write
 @example
 new_data = digitizer_get_curve( CH1 );    // get curve from channel 1
 @end example
@@ -70,16 +72,16 @@ oscilloscope in each and every @code{EDL} program when someone else
 needs just this oscilloscope for a few days and one has to do with the
 TDS520 oscilloscope in between.
 
-Of course, using generic functions has its limitations - if e.g.@: the
-new lock-in amplifier has only one channel while the previously used one
-had two no abstraction will make the new lock-in it have two
-channels. This means that, while a lot of abstraction is possible, not
-all device functions can be completely identical for all devices of the
-same type. Thus, while the names of the functions remain identical, the
-arguments the functions are called with may differ sometimes for
-different devices. But while this can be annoyingly enough it at least
-reduces the amount of changes to be done to the @code{EDL} program
-considerably.
+Of course, using generic functions is not the silver bullet for all and
+each situations - if e.g.@: the new lock-in amplifier has only one
+channel while the one used previously had two no abstraction will make
+the new lock-in it have two channels. This means that, while a lot of
+abstraction is possible, not all device functions can be completely
+identical for all devices of the same type. Thus, while the names of the
+functions remain identical, the arguments the functions are called with
+may differ sometimes for different devices. But while this can be
+annoyingly enough it at least reduces the amount of changes to be done
+to the @code{EDL} program considerably.
 
 But what if you need to use for example two lock-in amplifiers
 simultaneously? When the names of the functions for accessing both the
@@ -111,7 +113,6 @@ the third one would have to append @code{"#3"} to the function name
 etc. (One could also append the string @code{"#1"} to the name of the
 function for the first lock-in amplifier, but that's optional.)
 
-
 In situations where only the module of the second of two similar devices
 defines a function (e.g.@: because the first device doesn't has the
 necessary capabilities) the function can be used without and with
@@ -121,10 +122,10 @@ a short message is printed.
 
 The only situation that still is a bit more problematical are cases
 where two identical devices are to be used simultaneously. Due to
-limitations not only of @code{fsc2} but also to the way the libraries
+limitations not only of @code{fsc2} but already to the way the libraries
 used for accessing the GPIB bus works you can't simply list the same
 device twice in the @code{DEVICES} section and then use these as
-outlines above. Instead, two device modules with different names have to
+outlined above. Instead, two device modules with different names have to
 be created for the identical devices and made known to the program.
 Fortunately, there's a Perl script that will automatically deal with
 this problem, please see one of the later chapters (@pxref{Cloning
