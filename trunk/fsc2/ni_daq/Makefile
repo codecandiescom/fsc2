@@ -35,6 +35,8 @@ prefix  = $(shell if [ -e driver/include/autoconf.h ]; then \
 					  echo "/usr/local"; \
 				  fi)
 
+incl_dir  = $(prefix)/include
+
 export 
 
 
@@ -48,11 +50,26 @@ all:
 
 
 driver:
+	@if [ ! -e driver/include/autoconf.h ]; then \
+		echo "**************************************************"; \
+		echo "* The file driver/include/autoconf.h is missing. *"; \
+		echo "*      Please run './INSTALL' to create it.      *"; \
+		echo "**************************************************"; \
+		exit 2; \
+	fi
 	$(MAKE) -C driver
 
 
 lib:
 	$(MAKE) -C lib
+
+
+install:
+	$(INSTALL) -d $(incl_dir)
+	$(INSTALL) -m 644 include/ni_daq.h $(incl_dir)
+	$(INSTALL) -m 644 include/ni_daq_drv.h $(incl_dir)
+	$(MAKE) -C driver install
+	$(MAKE) -C lib install
 
 
 clean:
@@ -63,3 +80,4 @@ clean:
 
 distclean:
 	$(MAKE) clean
+	$(RM) $(RMFLAGS) makelog
