@@ -32,7 +32,7 @@
 static void dg2020_shape_padding_check_1( FUNCTION *f );
 static void dg2020_shape_padding_check_2( void );
 static void dg2020_twt_padding_check( FUNCTION *f );
-static int dg2020_pulse_params_compare( const void *A, const void *B );
+static int dg2020_twt_pulse_compare( const void *A, const void *B );
 static void dg2020_defense_shape_check( FUNCTION *shape );
 
 
@@ -491,8 +491,18 @@ static void dg2020_shape_padding_check_2( void )
 }
 
 
-/*------------------------------------------------*/
-/*------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+/* Does all kinds of checks for TWT pulses. For TWT pulses created directly */
+/* by the user we only check if the distance between them is large enough   */
+/* (as requested by MINIMUM_TWT_PULSE_DISTANCE in the configuration file    */
+/* for the pulser). For automatically created TWT pulses we also check that */
+/* they don't have to start too early (which might happen of the pulse the  */
+/* TWT pulse was created for starts very early and the left padding thus    */
+/* can't be set), that they don't overlap (pulses may get shortened or even */
+/* disappear in this case) and that the last TWT pulse isn't too long (i.e. */
+/* would last longer than the repetition time or the maximum pulse sequence */
+/* duration).                                                               */
+/*--------------------------------------------------------------------------*/
 
 static void dg2020_twt_padding_check( FUNCTION *f )
 {
@@ -506,7 +516,7 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 		return;
 
 	qsort( f->pulse_params, f->num_params, sizeof *f->pulse_params,
-		   dg2020_pulse_params_compare );
+		   dg2020_twt_pulse_compare );
 
 	/* Check that first TWT pulse doesn't start too early (this only can
 	   happen for automatically created pulses) */
@@ -544,7 +554,7 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 		pp = pp + 1;
 
 		/* Don't complain about manually generated pulses - the user has to
-		   take care of this */
+		   take care of them */
 
 		if ( ppp->pulse->tp == NULL && pp->pulse->tp == NULL )
 			continue;
@@ -720,11 +730,11 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 /*------------------------------------------------------------------*/
 /* Comparison function for two pulses: returns 0 if both pulses are */
 /* inactive, -1 if only the second pulse is inactive or starts at a */
-/* later time and 1 if only the first pulse is inactive pulse or    */
-/* the second pulse starts earlier.                                 */
+/* later time and 1 if only the first pulse is an inactive pulse or */
+/* the second pulse starts earlier than the first.                  */
 /*------------------------------------------------------------------*/
 
-static int dg2020_pulse_params_compare( const void *A, const void *B )
+static int dg2020_twt_pulse_compare( const void *A, const void *B )
 {
 	PULSE_PARAMS *a = ( PULSE_PARAMS * ) A,
 				 *b = ( PULSE_PARAMS * ) B;
@@ -735,18 +745,18 @@ static int dg2020_pulse_params_compare( const void *A, const void *B )
 	return 1;
 }
 
-/*------------------------------------------------------------------------*/
-/* Function checks if the distance between pulse shape pulses and defense */
-/* pulses is large enough. The minimum lengths the shape_2_defense and    */
-/* defense_2_shape members of the dg2020 structure. Both are set to       */
-/* rather large values at first but can be customized by calling the EDL  */
-/* functions pulser_shape_to_defense_minimum_distance() and               */
-/* pulser_defense_to_shape_minimum_distance() (names are intentionally    */
-/* that long).                                                            */
-/* The function is called only if pulse shape and defense pulses are used */
-/* and either also TWT or TWT_GATE pulses or at least one of both the     */
-/* mentioned EDL functions have been called.                              */
-/*------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* Function checks if the distances between pulse shape pulses and defense */
+/* pulses are large enough. The minimum lengths the shape_2_defense and    */
+/* defense_2_shape members of the dg2020 structure. Both are set to        */
+/* rather large values at first but can be customized by calling the EDL   */
+/* functions pulser_shape_to_defense_minimum_distance() and                */
+/* pulser_defense_to_shape_minimum_distance() (names are intentionally     */
+/* that long).                                                             */
+/* The function is called only if pulse shape and defense pulses are used  */
+/* and either also TWT or TWT_GATE pulses or at least one of both the      */
+/* mentioned EDL functions have been called.                               */
+/*-------------------------------------------------------------------------*/
 
 static void dg2020_defense_shape_check( FUNCTION *shape )
 {
@@ -975,6 +985,7 @@ void dg2020_full_reset( void )
 PULSE *dg2020_delete_pulse( PULSE *p, bool warn )
 {
 	PULSE *pp;
+	FUNCTION *f;
 	int i;
 
 
@@ -1010,35 +1021,34 @@ PULSE *dg2020_delete_pulse( PULSE *p, bool warn )
 	if ( p->is_function && p->function->num_pulses > 0 &&
 		 p->function->pulses != NULL )
 	{
-		for ( i = 0; i < p->function->num_pulses; i++ )
-			if ( p->function->pulses[ i ] == p )
+		f = p->function;
+
+		for ( i = 0; i < f->num_pulses; i++ )
+			if ( f->pulses[ i ] == p )
 				break;
 
-		fsc2_assert( i < p->function->num_pulses );  /* Paranoia */
+		fsc2_assert( i < f->num_pulses );                 /* Paranoia */
 
 		/* Put the last of the functions pulses into the slot for the pulse to
 		   be deleted and shorten the list by one element */
 
-		if ( i != p->function->num_pulses - 1 )
-			p->function->pulses[ i ] =
-				p->function->pulses[ p->function->num_pulses - 1 ];
+		if ( i != f->num_pulses - 1 )
+			f->pulses[ i ] = f->pulses[ f->num_pulses - 1 ];
 
 		/* Now delete the pulse - if the deleted pulse was the last pulse of
 		   its function send a warning and mark the function as useless */
 
-		if ( p->function->num_pulses-- > 1 )
-			p->function->pulses = PULSE_PP
-									T_realloc( p->function->pulses,
-											   p->function->num_pulses
-											   * sizeof *p->function->pulses );
+		if ( f->num_pulses-- > 1 )
+			f->pulses = PULSE_PP T_realloc( f->pulses,
+										   f->num_pulses * sizeof *f->pulses );
 		else
 		{
-			p->function->pulses = PULSE_PP T_free( p->function->pulses );
+			f->pulses = PULSE_PP T_free( f->pulses );
 
 			if ( warn )
 				print( SEVERE, "Function '%s' isn't used at all because all "
-					   "its pulses are unused.\n", p->function->name );
-			p->function->is_used = UNSET;
+					   "its pulses are unused.\n", f->name );
+			f->is_used = UNSET;
 		}
 	}
 
@@ -1093,14 +1103,14 @@ void dg2020_commit( FUNCTION *f, bool flag )
 		return;
 	}
 
-	/* In a real run we now have to change the pulses. The only way to keep
-	   the number and length of commands to be sent to the pulser at a minimum
-	   while getting it right in every imaginable case is to create two images
-	   of the pulser channel states, one of the current state and a second one
-	   of the state after the changes. These images are compared and only that
-	   parts where differences are found are changed. Of course, that needs
-	   quite some computer time but probable is faster, or at least easier to
-	   understand and to debug, than any alternative I came up with...
+	/* In a real run we now have to change the pulses. To keep the number and
+	   length of commands to be sent to the pulser at a minimum while getting
+	   it right in every imaginable case is to create two images of the pulser
+	   channel states, one of the current state and a second one of the state
+	   after the changes. These images are compared and only that parts where
+	   differences are found are changed. Of course, that needs quite some
+	   computer time but probable is faster, or at least easier to understand
+	   and to debug, than any alternative I came up with...
 
 	   First allocate memory for the old and the new states of the channels
 	   used by the function */

@@ -74,7 +74,7 @@ static bool ep385_update_pulses( bool flag )
 	static FUNCTION *f;
 	PULSE *p;
 	static CHANNEL *ch;
-	PULSE **pm_entry;
+	PULSE **pm_elem;
 	PULSE_PARAMS *pp;
 
 
@@ -113,10 +113,10 @@ static bool ep385_update_pulses( bool flag )
 
 			/* Now we set up a new list of pulse parameters and sort it */
 
-			pm_entry = f->pm[ f->next_phase * f->num_channels + j ];
+			pm_elem = f->pm[ f->next_phase * f->num_channels + j ];
 
 			for ( ch->num_active_pulses = 0, m = 0;
-				  ( p = pm_entry[ m ] ) != NULL; m++ )
+				  ( p = pm_elem[ m ] ) != NULL; m++ )
 			{
 				if ( ! p->is_active )
 					continue;
@@ -900,8 +900,8 @@ PULSE *ep385_delete_pulse( PULSE *p, bool warn )
 {
 	PULSE *pp;
 	FUNCTION *f;
-	PULSE **pm_entry;
-	int i, j, k, l;
+	PULSE **pm_elem;
+	int i, j, k;
 
 
 	/* If the pulse has an associated shape pulse delete it */
@@ -944,17 +944,22 @@ PULSE *ep385_delete_pulse( PULSE *p, bool warn )
 		if ( i != f->num_pulses - 1 )
 			f->pulses[ i ] = f->pulses[ f->num_pulses - 1 ];
 
-		/* Remove the pulse from all of the functions phase lists */
+		/* Remove the pulse from all of the functions phase lists (to which
+		   pointers are stored in a matrix with num_channels columns and
+		   pc_len rows and which consists of up to num_pulses pulse pointers
+		   plus a NULL pointer as the last entry) */
 
-		for ( j = 0; j < f->pc_len; j++ )
-			for ( k = 0; k < f->num_channels; k++ )
-			{
-				pm_entry = f->pm[ j * k ];
-				for ( l = 0; l < f->num_pulses; l++ )
-					if ( pm_entry[ l ] == p )
-						memcpy( pm_entry + l, pm_entry + l + 1,
-								( f->num_pulses - l ) * sizeof *pm_entry );
-			}
+		for ( j = 0; j < f->pc_len * f->num_channels; j++ )
+		{
+			pm_elem = f->pm[ j ];
+			for ( k = 0; k < f->num_pulses && pm_elem[ k ] != NULL; k++ )
+				if ( pm_elem[ k ] == p )
+				{
+					memcpy( pm_elem + k, pm_elem + k + 1,
+							( f->num_pulses - k ) * sizeof *pm_elem );
+					break;
+				}
+		}
 
 		/* Now delete the pulse - if the deleted pulse was the last pulse of
 		   its function send a warning and mark the function as useless */
