@@ -1,4 +1,7 @@
 #include "fsc2.h"
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/param.h>
 #include "gpib.h"
 
 
