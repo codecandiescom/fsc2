@@ -352,9 +352,9 @@ static void rs_spec10_temperature_init( void )
 		{
 			print( FATAL, "Configuration file for camera has invalid CCD "
 				   "temperature range, valid range is %.2f K (%.2fC) to "
-				   "%.2f K (%.2f C).\n", CCD_MIN_TEMPERATURE,
-				   rs_spec10_k2c( CCD_MIN_TEMPERATURE ), CCD_MAX_TEMPERATURE,
-				   rs_spec10_k2c( CCD_MAX_TEMPERATURE ) );
+				   "%.2f K (%.2f C).\n", rs_spec10_c2k( CCD_MIN_TEMPERATURE ),
+				   CCD_MIN_TEMPERATURE, rs_spec10_c2k( CCD_MAX_TEMPERATURE ),
+				   CCD_MAX_TEMPERATURE );
 			THROW( EXCEPTION );
 		}
 	}
@@ -370,10 +370,12 @@ static void rs_spec10_temperature_init( void )
 	}
 
 	/* Set a target temperature if this was requested in the PREPARATIONS
-	   section */
+	   section, otherwise set the temperature to the lowest possible one. */
 
 	if ( rs_spec10->temp.is_setpoint )
 		rs_spec10_set_temperature( rs_spec10->temp.setpoint );
+	else
+		rs_spec10_set_temperature( rs_spec10_c2k( CCD_MIN_TEMPERATURE ) );
 
 	/* Check if we can read the current temperature and if yes get it */
 

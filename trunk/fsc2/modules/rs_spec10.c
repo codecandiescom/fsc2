@@ -817,6 +817,9 @@ Var *ccd_camera_temperature( Var *v )
 
 	too_many_arguments( v );
 
+	if ( FSC2_MODE == EXPERIMENT )
+		rs_spec10_set_temperature( temp );
+
 	rs_spec10->temp.setpoint = temp;
 	rs_spec10->temp.is_setpoint = SET;
 

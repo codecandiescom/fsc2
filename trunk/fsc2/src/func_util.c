@@ -1639,10 +1639,7 @@ Var *f_rescale_1d( Var *v )
 	new_nx = get_long( v, "number of points" );
 
 	if ( new_nx < -1 )
-	{
-		print( FATAL, "Invalid negative number of points.\n" );
-		THROW( EXCEPTION );
-	}
+		return vars_push( INT_VAR, 0L );
 
 	too_many_arguments( v );
 
@@ -1734,21 +1731,14 @@ Var *f_rescale_2d( Var *v )
 	new_nx = get_long( v, "number of points in x-direction" );
 
 	if ( new_nx < -1 )
-	{
-		print( FATAL, "Invalid negative number of points in x-direction.\n" );
-		THROW( EXCEPTION );
-	}
+		new_nx = -1;
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		new_ny = get_long( v, "number of points in y-direction" );
 
-		if ( new_ny < -1 )
-		{
-			print( FATAL, "Invalid negative number of points (%ld) in "
-				   "y-direction.\n", new_ny );
-			THROW( EXCEPTION );
-		}
+		if ( new_nx == -1 && new_ny < -1 )
+			return vars_push( INT_VAR, 0L );
 	} else
 		new_ny = -1;
 

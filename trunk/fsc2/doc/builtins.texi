@@ -538,20 +538,10 @@ This function can only be used in the @code{EXPERIMENT} section of an
 This function can be called instead of @code{rescale_1d()} or
 @code{rescale_2d()} when only either a 1D- or a 2D-display is used (but
 not both at once). In the 1D-case the function accepts one argument, the
-new number of points in @i{x}-direction. If this value is @code{0} the
-number of points is adjusted to the number of points currently
-displayed. Exceptions are when either the new number of points is
-smaller than the default number, in which case the default number is
-used, or the number is smaller than the number of points currently
-displayed which is then used as the new number of points. Passing the
-function a value of @code{-1} means that the number of points should
-remain unchanged.
-
-In the 2D-case the function accepts two arguments, one for the number of
-points to be displayed in @i{x}-direction and the second for the number
-of points in @i{y}-direction. As in the 1D-case a @code{-1} means not to
-do any changes to the axis and @code{0} sets the number of points to the
-number of points currently displayed along this axis.
+new number of points in @i{x}-direction. In the 2D-case the function
+accepts two arguments, one for the number of points to be displayed in
+@i{x}-direction and the second for the number of points in
+@i{y}-direction.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.

@@ -1091,7 +1091,6 @@ static void G_init_curves_2d( void )
 
 		cv->points = NULL;
 		cv->xpoints = NULL;
-		cv->xpoints_s = NULL;
 
 		cv->marker_2d  = NULL;
 		cv->cut_marker = NULL;
@@ -1185,8 +1184,6 @@ static void G_init_curves_2d( void )
 			sp->exist = UNSET;
 
 		cv->xpoints = XPOINT_P T_malloc( G2.nx * G2.ny * sizeof *cv->xpoints );
-		cv->xpoints_s = XPOINT_P T_malloc( G2.nx * G2.ny
-										   * sizeof *cv->xpoints_s );
 	}
 }
 
@@ -1482,7 +1479,6 @@ void graphics_free( void )
 
 			T_free( cv2->points );
 			T_free( cv2->xpoints );
-			T_free( cv2->xpoints_s );
 			cv2 = CURVE_2D_P T_free( cv2 );
 		}
 	}
@@ -2597,9 +2593,6 @@ void rescale_2d( long *new_dims )
 		G2.curve_2d[ k ]->xpoints = XPOINT_P
 			 T_realloc( G2.curve_2d[ k ]->xpoints,
 						new_nx * new_ny * sizeof *G2.curve_2d[ k ]->xpoints );
-		G2.curve_2d[ k ]->xpoints_s = XPOINT_P
-			 T_realloc( G2.curve_2d[ k ]->xpoints_s,
-					   new_nx * new_ny * sizeof *G2.curve_2d[ k ]->xpoints_s );
 
 		if ( G2.curve_2d[ k ]->is_fs )
 		{
