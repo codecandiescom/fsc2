@@ -274,8 +274,8 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "\x4nunit"  return E_NU_TOKEN;
 "\x4uunit"  return E_UU_TOKEN;
 "\x4mvolt"  return E_MU_TOKEN;
-"\x4kunit"  return E_KU_TOKEN
-"\x4megunit" return E_MEG_TOKEN
+"\x4kunit"  return E_KU_TOKEN;
+"\x4megunit" return E_MEG_TOKEN;
 
 			/* handling of invalid input */
 .           {
