@@ -3811,7 +3811,7 @@ This function is only available for the home-built AD and DA converter.
 This device has a potentiometer at the front side that can be used to
 reduce the output voltage level from the maximum level of @w{+10 V}. By
 calling this function you can tell the program about the new value of
-the maximum outout voltage, so that you afterwards may use the real
+the maximum output voltage, so that you afterwards may use the real
 required output voltages instead of values that have to be too large by
 the reduction factor of the potentiometer. So, if the potentiometer is
 set to 5 (of its maximum range of 10) and you call this function with an
