@@ -998,12 +998,13 @@ Var *f_print( Var *v )
 		if ( *cp == '#' )
 			s++;
 
-	/* get string long enough to replace each `#' by a 4-char sequence */
+	/* get string long enough to replace each `#' by a 4-char sequence 
+	   plus a '\0' */
 
 	fmt = get_string( strlen( sptr ) + 4 * s + 2 );
 	strcpy( fmt, sptr );
 
-	for ( cp = fmt; *cp != '\0' ; ++cp )
+	for ( cp = fmt; *cp != '\0'; ++cp )
 	{
 		/* skip normal characters */
 
@@ -1103,7 +1104,7 @@ Var *f_print( Var *v )
 
 					case STR_VAR :
 						strcpy( ep, "%s\x7F" );
-						eprint( NO_ERROR, cp, sptr );
+						eprint( NO_ERROR, cp, cv->val.sptr );
 						break;
 				}
 

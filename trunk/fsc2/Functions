@@ -19,6 +19,7 @@
 square, 1, ALL;               // returns the square of a value
 int_slice, 1, ALL;            // creates an integer array slice
 float_slice, 1, ALL;          // creates an float array slice
+filename, -1, ALL;            // asks user for a file name
 
 
 // Functions exported by the magnet power supply drivers
