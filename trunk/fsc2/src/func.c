@@ -152,8 +152,8 @@ void functions_exit( void )
 
 	for ( i = num_def_func; i < num_func; i++ )
 		if ( fncts[ i ].name != NULL )
-			free( ( char * ) fncts[ i ].name );
-	free( fncts );
+			T_free( ( char * ) fncts[ i ].name );
+	T_free( fncts );
 	fncts = NULL;
 }
 
@@ -217,7 +217,7 @@ void load_functions( Device *dev )
 	   dynamically loaded library */
 
 	dev->driver.handle = dlopen( lib_name, RTLD_LAZY );
-	free( lib_name );
+	T_free( lib_name );
 	if ( dev->driver.handle == NULL )
 	{
 		if ( strcmp( dev->name, "User_Functions" ) )
@@ -244,7 +244,7 @@ void load_functions( Device *dev )
 	dev->driver.init_hook = dlsym( dev->driver.handle, hook_func );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_init_hook = SET;
-	free( hook_func );
+	T_free( hook_func );
 
 	/* Get test hook function if available */
 	
@@ -255,7 +255,7 @@ void load_functions( Device *dev )
 	dev->driver.test_hook = dlsym( dev->driver.handle, hook_func );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_test_hook = SET;
-	free( hook_func );
+	T_free( hook_func );
 
 	/* Get pre-experiment hook function if available */
 	
@@ -266,7 +266,7 @@ void load_functions( Device *dev )
 	dev->driver.exp_hook = dlsym( dev->driver.handle, hook_func );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_exp_hook = SET;
-	free( hook_func );
+	T_free( hook_func );
 
 	/* Finally check if there's also an exit hook function */
 
@@ -277,7 +277,7 @@ void load_functions( Device *dev )
 	dev->driver.exit_hook = dlsym( dev->driver.handle, hook_func );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_exit_hook = SET;
-	free( hook_func );
+	T_free( hook_func );
 
 	/* Run through all the functions in the function list and if they need
 	   to be resolved try to find them in the device driver functions - check
@@ -993,6 +993,6 @@ Var *f_print( Var *v )
 	/* finally free the copy of the format string and return number of
 	   printed varaibles */
 
-	free( fmt );
+	T_free( fmt );
 	return vars_push( INT_VAR, in_format );
 }
