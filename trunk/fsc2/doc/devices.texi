@@ -3024,8 +3024,8 @@ When no ROI has been specified per default the whole area of the CCD
 chip is used as the ROI.
 
 
-@anchor ccd_camera_binning
-@item {ccd_camera_binning()}
+@anchor{ccd_camera_binning}
+@item ccd_camera_binning()
 @findex ccd_camera_binning()
 The function allows to set or query the binning (i.e.@: the combining of
 several pixels) done by the camera. If called with no arguments the
@@ -3068,8 +3068,8 @@ or the number @code{1} or one of the strings @code{"SOFTWARE"} or
 @code{"SOFT"} for software binning.
 
 
-@anchor ccd_camera_binning_method
-@item {ccd_camera_binning_method()}
+@anchor{ccd_camera_binning_method}
+@item ccd_camera_binning_method()
 @findex ccd_camera_binning_method()
 This function lets you query or set the binning method to be used.
 You can use either hardware binning, i.e.@: binning is done by the
@@ -3091,8 +3091,8 @@ or the number @code{1} or one of the strings @code{"SOFTWARE"} or
 @code{"SOFT"} for software binning.
 
 
-@anchor ccd_camera_exposure_time
-@item {ccd_camera_exposure_time()}
+@anchor {ccd_camera_exposure_time}
+@item ccd_camera_exposure_time()
 @findex ccd_camera_exposure_time()
 The function can be used to determine or set the exposure time used by
 the camera. If called without an argument the function returns the
@@ -3106,8 +3106,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor ccd_camera_clear_cycles
-@item {ccd_camera_clear_cycles()}
+@anchor {ccd_camera_clear_cycles}
+@item ccd_camera_clear_cycles()
 @findex ccd_camera_clear_cycles()
 The function allows to determine or set the number of clear cycles of
 the CCD chip to be done before an exposure is started. If called without
@@ -3120,8 +3120,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor ccd_camera_get_image
-@item {ccd_camera_get_image()}
+@anchor {ccd_camera_get_image}
+@item ccd_camera_get_image()
 @findex ccd_camera_get_image()
 The function starts an exposure, fetches the resulting image from the
 camera and returns it to the @code{EDL} script as a 2-dimensional
@@ -3133,8 +3133,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor ccd_camera_get_spectrum
-@item {ccd_camera_get_spectrum()}
+@anchor {ccd_camera_get_spectrum}
+@item ccd_camera_get_spectrum()
 @findex ccd_camera_get_spectrum()
 The function starts an exposure, fetches the result from the camera and
 returns it as an 1-dimensionl array to the @code{EDL} script. The length
@@ -3146,8 +3146,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor ccd_camera_temperature
-@item {ccd_camera_temperature()}
+@anchor {ccd_camera_temperature}
+@item ccd_camera_temperature()
 @findex ccd_camera_temperature()
 The function can be used to determine the current temperature of the CCD
 chip or to set a target temperature for the chip. If called without an
@@ -3161,15 +3161,15 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor ccd_camera_pixel_size
-@item {ccd_camera_pixel_size()}
+@anchor {ccd_camera_pixel_size}
+@item ccd_camera_pixel_size()}
 @findex ccd_camera_pixel_size()
 The function takes no arguments and returns the width of a pixel of the
 CCD chip.
 
 
-@anchor ccd_camera_pixel_area
-@item {ccd_camera_pixel_area()}
+@anchor {ccd_camera_pixel_area}
+@item ccd_camera_pixel_area()
 @findex ccd_camera_pixel_area()
 The function accepts no aguments and returns an 1-dimensional array with
 two elements, where the first argument is the number of pixels of the

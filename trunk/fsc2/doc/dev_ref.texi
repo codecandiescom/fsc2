@@ -1018,17 +1018,17 @@ library are part of the @code{fsc2} package)
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{counter_name()}                   @tab @ref{counter_name}
-@item @code{counter_start_continuous_counter} @tab @ref{counter_start_continuous_counter}
-@item @code{counter_start_timed_counter}      @tab @ref{counter_start_timed_counter}
-@item @code{counter_timed_count}              @tab @ref{counter_timed_count}
-@item @code{counter_intermediate_count}       @tab @ref{counter_intermediate_count}
-@item @code{counter_final_count}              @tab @ref{counter_final_count}
-@item @code{counter_stop_counter}             @tab @ref{counter_stop_counter}
-@item @code{counter_single_pulse}             @tab @ref{counter_single_pulse}
-@item @code{counter_continuous_pulses}        @tab @ref{counter_continuous_pulses}
-@item @code{counter_dio_read}                 @tab @ref{counter_dio_read}
-@item @code{counter_dio_write}                @tab @ref{counter_dio_write}
+@item @code{counter_name()}                     @tab @ref{counter_name}
+@item @code{counter_start_continuous_counter()} @tab @ref{counter_start_continuous_counter}
+@item @code{counter_start_timed_counter()}      @tab @ref{counter_start_timed_counter}
+@item @code{counter_timed_count()}              @tab @ref{counter_timed_count}
+@item @code{counter_intermediate_count()}       @tab @ref{counter_intermediate_count}
+@item @code{counter_final_count()}              @tab @ref{counter_final_count}
+@item @code{counter_stop_counter()}             @tab @ref{counter_stop_counter}
+@item @code{counter_single_pulse()}             @tab @ref{counter_single_pulse}
+@item @code{counter_continuous_pulses()}        @tab @ref{counter_continuous_pulses}
+@item @code{counter_dio_read()}                 @tab @ref{counter_dio_read}
+@item @code{counter_dio_write()}                @tab @ref{counter_dio_write}
 @end multitable
 
 
