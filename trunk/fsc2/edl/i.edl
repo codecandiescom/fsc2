@@ -25,9 +25,9 @@ BID7 = button_create( "RADIO_BUTTON", BID5, "Sweep RF down" );
 SID2 = slider_create( "VALUE_SLIDER", -100.0, -3.0, "Attenuation",
 					  "Adjusts RF attenuation" );
 I1   = input_create( "INT_INPUT", 17, "Na, was wohl?", "Weiss auch nicht..." );
-I2   = input_create( "FLOAT_INPUT", -13, "Noch eins", "Foobar" );
-I3   = output_create( "INT_OUTPUT", 17, "Dies ist nur fuer output", "Weiss auch nicht..." );
-I4   = output_create( "FLOAT_OUTPUT", -13, "Noch eins", "Foobar" );
+I2   = input_create( "FLOAT_INPUT", -13, "Noch eins", "Foobar", "%.2f" );
+I3   = output_create( "INT_OUTPUT", 17, "", "Weiss auch nicht..." );
+I4   = output_create( "FLOAT_OUTPUT", -13, "Noch eins", "Foobar", "%.5f A" );
 
 FOREVER {
 

@@ -2121,7 +2121,8 @@ static void recreate_Tool_Box( void )
 		{
 			Tool_Box->h += OBJ_HEIGHT + VERT_OFFSET;
 			if ( io->next != NULL && 
-				 ( io->type == INT_INPUT || io->type == FLOAT_INPUT ) )
+				 ( io->type == INT_INPUT || io->type == FLOAT_INPUT ||
+				   io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT ) )
 				Tool_Box->h += LABEL_VERT_OFFSET;
 		}
 		else
