@@ -497,7 +497,7 @@ all: config.h
 	$(MAKE) -C $(sdir) gpib_setup
 	$(MAKE) built
 	$(MAKE) tags
-	$(MAKE) -C $(src) all
+	$(MAKE) -C $(sdir) all
 ifdef WITH_HTTP_SERVER
 	@if [ ! -e $(ldir)/Makefile                                \
 		  -o $(ldir)/Makefile.PL -nt $(ldir)/Makefile ]; then  \
