@@ -35,7 +35,7 @@ use warnings;
 
 my $label_width = 20;         # width of labels at the left of the input field
 my $entry_width = 10;         # width of the input fields
-my $unit_width  = 5;          # width for e.g. unit to right of the input field
+my $unit_width  =  5;         # width for e.g. unit to right of the input field
 
 my @lines;
 my @vars;
