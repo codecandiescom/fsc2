@@ -669,41 +669,35 @@ Var *f_cscale( Var *v )
 		is_set = 1;
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
+	if ( ( v = vars_pop( v ) ) != NULL && v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
-		is_set <<= 1;
-		if ( v->type & ( INT_VAR | FLOAT_VAR ) )
-		{
-			dx = VALUE( v );
-			is_set++;
-		}
+		dx = VALUE( v );
+		if ( dx != 0.0 )
+			is_set |= 2;
 	}
 
 	if ( v != NULL && ( v = vars_pop( v ) ) != NULL )
 	{
 		if ( G.dim == 1 )
 		{
-			eprint( FATAL, "%s:%ld: With 1D graphics only the x-sclae can be "
-					"changed.\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: With 1D graphics only the x-scaling can "
+					"be changed.\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
 
-		is_set <<= 1;
 		if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 		{
 			y_0 = VALUE( v );
-			is_set++;
+			is_set |= 4;
 		}
 	}
 
-	if ( v != NULL && ( v = vars_pop( v ) ) != NULL )
+	if ( v != NULL && ( v = vars_pop( v ) ) != NULL &&
+		 v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
-		is_set <<= 1;
-		if ( v->type & ( INT_VAR | FLOAT_VAR ) )
-		{
-			dy = VALUE( v );
-			is_set++;
-		}
+		dy = VALUE( v );
+		if ( dy != 0.0 )
+			is_set |= 8;
 	}
 
 	/* In a test run we're already done */

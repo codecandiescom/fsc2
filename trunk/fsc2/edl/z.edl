@@ -45,7 +45,6 @@ FOR K = 1 : M
 //	}
 
 	IF K == 20 {
-		print( "K = #\n", K );
 		change_scale( -13.4, 0.2, -521, 27 );
 	}
 
@@ -56,7 +55,7 @@ FOR K = 1 : M
 	wait( 500ms );
 }
 
-change_scale( 0, 1, 0, 1 );
+change_scale( 1, 1, 1, 1 );
 
 #EXIT
 
