@@ -26,9 +26,6 @@
 #include "ni6601_drv.h"
 
 
-
-EXPORT_NO_SYMBOLS;
-
 static int ni6601_init_board( struct pci_dev *dev, Board *board );
 static int ni6601_open( struct inode *inode_p, struct file *file_p );
 static int ni6601_release( struct inode *inode_p, struct file *file_p );
@@ -90,9 +87,9 @@ struct file_operations ni6601_file_ops = {
 };
 
 
-/*--------------------------------------------------------*/
-/* Fuinction that gets executed when the module is loaded */
-/*--------------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* Function that gets executed when the module is loaded */
+/*-------------------------------------------------------*/
 
 static int __init ni6601_init( void )
 {
@@ -751,6 +748,9 @@ static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
 	PDEBUG( "Got interrupt\n" );
 }
 
+
+
+EXPORT_NO_SYMBOLS;
 
 
 module_init( ni6601_init );
