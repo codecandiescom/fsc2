@@ -123,7 +123,7 @@ typedef struct {
 	XFontStruct *font;
 
 	int button_state,       /* usuable button states */
-		real_button_state;  /* the real button state */
+		raw_button_state;   /* the real button state */
 
 	int x_start,
 		y_start;
