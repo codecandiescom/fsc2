@@ -27,7 +27,7 @@
 
 /* Globals declared in func_intact.c */
 
-extern TOOL_BOX *Tool_Box;
+extern TOOL_BOX *Toolbox;
 
 
 static Var *f_mcreate_child( Var *v, size_t len, long num_strs );
@@ -80,29 +80,29 @@ Var *f_mcreate( Var *var )
 		return f_mcreate_child( v, len, num_strs );
 
 	/* Now that we're done with checking the parameters we can create the new
-       button - if the Tool_Box doesn't exist yet we've got to create it now */
+       button - if the Toolbox doesn't exist yet we've got to create it now */
 
-	if ( Tool_Box == NULL )
+	if ( Toolbox == NULL )
 		tool_box_create( VERT );
 
 	TRY
 	{
 		new_io = IOBJECT_P T_malloc( sizeof *new_io );
-		if ( Tool_Box->objs == NULL )
+		if ( Toolbox->objs == NULL )
 		{
-			Tool_Box->objs = new_io;
+			Toolbox->objs = new_io;
 			new_io->next = new_io->prev = NULL;
 		}
 		else
 		{
-			for ( ioi = Tool_Box->objs; ioi->next != NULL; ioi = ioi->next )
+			for ( ioi = Toolbox->objs; ioi->next != NULL; ioi = ioi->next )
 				/* empty */ ;
 			ioi->next = new_io;
 			new_io->prev = ioi;
 			new_io->next = NULL;
 		}
 
-		new_io->ID = Tool_Box->next_ID++;
+		new_io->ID = Toolbox->next_ID++;
 		new_io->type = MENU;
 		new_io->self = NULL;
 		new_io->state = 1;
@@ -144,8 +144,8 @@ Var *f_mcreate( Var *var )
 				T_free( new_io->menu_items );
 			}
 
-			if( Tool_Box->objs == new_io )
-				Tool_Box->objs = NULL;
+			if( Toolbox->objs == new_io )
+				Toolbox->objs = NULL;
 			else
 				ioi->next = NULL;
 
@@ -157,7 +157,7 @@ Var *f_mcreate( Var *var )
 
 	/* Draw the new menu */
 
-	recreate_Tool_Box( );
+	recreate_Toolbox( );
 
 	return vars_push( INT_VAR, new_io->ID );
 }
@@ -249,12 +249,12 @@ Var *f_mdelete( Var *v )
 			f_mdelete_parent( v );
 	} while ( ( v = vars_pop( v ) ) != NULL );
 
-	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Tool_Box )
+	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Toolbox )
 		return vars_push( INT_VAR, 1L );
 
 	/* Redraw the tool box without the menu */
 
-	recreate_Tool_Box( );
+	recreate_Toolbox( );
 
 	return vars_push( INT_VAR, 1L );
 }
@@ -321,7 +321,7 @@ static void f_mdelete_parent( Var *v )
 
 	/* No tool box -> no menu to delete */
 
-	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	if ( Toolbox == NULL || Toolbox->objs == NULL )
 	{
 		print( FATAL, "No menus have been defined yet.\n" );
 		THROW( EXCEPTION );
@@ -344,7 +344,7 @@ static void f_mdelete_parent( Var *v )
 	if ( io->prev != NULL )
 		io->prev->next = io->next;
 	else
-		Tool_Box->objs = io->next;
+		Toolbox->objs = io->next;
 
 	/* Delete the menu object if its drawn */
 
@@ -362,7 +362,7 @@ static void f_mdelete_parent( Var *v )
 
 	/* If this was the very last object delete also the form */
 
-	if ( Tool_Box->objs == NULL )
+	if ( Toolbox->objs == NULL )
 	{
 		tool_box_delete( );
 
@@ -401,7 +401,7 @@ Var *f_mchoice( Var *v )
 
 	/* No tool box -> no menus -> no menu item to set or get... */
 
-	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	if ( Toolbox == NULL || Toolbox->objs == NULL )
 	{
 		print( FATAL, "No menus have been defined yet.\n" );
 		THROW( EXCEPTION );
@@ -583,7 +583,7 @@ Var *f_mchanged( Var *v )
 
 	/* No tool box -> no menus -> no menu item to set or get... */
 
-	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	if ( Toolbox == NULL || Toolbox->objs == NULL )
 	{
 		print( FATAL, "No menus have been defined yet.\n" );
 		THROW( EXCEPTION );

@@ -27,7 +27,7 @@
 
 /* Globals declared in func_intact.c */
 
-extern TOOL_BOX *Tool_Box;
+extern TOOL_BOX *Toolbox;
 
 
 static Var *f_bcreate_child( Var *v, long type, long coll );
@@ -192,11 +192,11 @@ Var *f_bcreate( Var *var )
 	too_many_arguments( v );
 
 	/* Now that we're done with checking the parameters we can create the new
-       button - if the Tool_Box doesn't exist yet we've got to create it now */
+       button - if the Toolbox doesn't exist yet we've got to create it now */
 
 	TRY
 	{
-		if ( Tool_Box == NULL )
+		if ( Toolbox == NULL )
 			tool_box_create( VERT );
 
 		new_io = IOBJECT_P T_malloc( sizeof *new_io );
@@ -211,21 +211,21 @@ Var *f_bcreate( Var *var )
 		RETHROW( );
 	}
 		
-	if ( Tool_Box->objs == NULL )
+	if ( Toolbox->objs == NULL )
 	{
-		Tool_Box->objs = new_io;
+		Toolbox->objs = new_io;
 		new_io->next = new_io->prev = NULL;
 	}
 	else
 	{
-		for ( ioi = Tool_Box->objs; ioi->next != NULL; ioi = ioi->next )
+		for ( ioi = Toolbox->objs; ioi->next != NULL; ioi = ioi->next )
 			/* empty */ ;
 		ioi->next = new_io;
 		new_io->prev = ioi;
 		new_io->next = NULL;
 	}
 
-	new_io->ID = Tool_Box->next_ID++;
+	new_io->ID = Toolbox->next_ID++;
 	new_io->type = ( int ) type;
 	if ( type == RADIO_BUTTON && coll == -1 )
 		new_io->state = 1;
@@ -241,7 +241,7 @@ Var *f_bcreate( Var *var )
 
 	/* Draw the new button */
 
-	recreate_Tool_Box( );
+	recreate_Toolbox( );
 
 	return vars_push( INT_VAR, new_io->ID );
 }
@@ -384,12 +384,12 @@ Var *f_bdelete( Var *v )
 	/* The child process is already done here and also a test run (or when the
 	   tool box is already deleted) */
 
-	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Tool_Box )
+	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Toolbox )
 		return vars_push( INT_VAR, 1L );
 
 	/* Redraw the form without the deleted buttons */
 
-	recreate_Tool_Box( );
+	recreate_Toolbox( );
 
 	return vars_push( INT_VAR, 1L );
 }
@@ -458,7 +458,7 @@ static void f_bdelete_parent( Var *v )
 
 	/* No tool box -> no buttons -> no buttons to delete... */
 
-	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	if ( Toolbox == NULL || Toolbox->objs == NULL )
 	{
 		print( FATAL, "No buttons have been defined yet.\n" );
 		THROW( EXCEPTION );
@@ -481,7 +481,7 @@ static void f_bdelete_parent( Var *v )
 	if ( io->prev != NULL )
 		io->prev->next = io->next;
 	else
-		Tool_Box->objs = io->next;
+		Toolbox->objs = io->next;
 
 	/* Delete the button (it's not drawn in a test run!) */
 
@@ -519,7 +519,7 @@ static void f_bdelete_parent( Var *v )
 
 	/* If this was the last object also delete the form */
 
-	if ( Tool_Box->objs == NULL )
+	if ( Toolbox->objs == NULL )
 	{
 		tool_box_delete( );
 
@@ -558,7 +558,7 @@ Var *f_bstate( Var *v )
 
 	/* No tool box -> no buttons -> no button state to set or get... */
 
-	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	if ( Toolbox == NULL || Toolbox->objs == NULL )
 	{
 		print( FATAL, "No buttons have been defined yet.\n" );
 		THROW( EXCEPTION );
@@ -622,7 +622,7 @@ Var *f_bstate( Var *v )
 
 	if ( io->type == RADIO_BUTTON && io->state == 1 )
 	{
-		for ( oio = Tool_Box->objs; oio != NULL; oio = oio->next )
+		for ( oio = Toolbox->objs; oio != NULL; oio = oio->next )
 		{
 			if ( oio == io || oio->type != RADIO_BUTTON ||
 				 oio->group != io->group )
@@ -744,7 +744,7 @@ Var *f_bchanged( Var *v )
 
 	/* No tool box -> no buttons -> no button state change possible... */
 
-	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	if ( Toolbox == NULL || Toolbox->objs == NULL )
 	{
 		print( FATAL, "No buttons have been defined yet.\n" );
 		THROW( EXCEPTION );

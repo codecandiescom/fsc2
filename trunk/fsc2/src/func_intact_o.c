@@ -27,7 +27,7 @@
 
 /* Globals declared in func_intact.c */
 
-extern TOOL_BOX *Tool_Box;
+extern TOOLBOX *Toolbox;
 
 
 static Var *f_ocreate_child( Var *v, long type, long lval, double dval );
@@ -214,11 +214,11 @@ Var *f_ocreate( Var *var )
 	too_many_arguments( v );
 
 	/* Now that we're done with checking the parameters we can create the new
-       button - if the Tool_Box doesn't exist yet we've got to create it now */
+       button - if the Toolbox doesn't exist yet we've got to create it now */
 
 	TRY
 	{
-		if ( Tool_Box == NULL )
+		if ( Toolbox == NULL )
 			tool_box_create( VERT );
 
 		new_io = IOBJECT_P T_malloc( sizeof *new_io );
@@ -248,21 +248,21 @@ Var *f_ocreate( Var *var )
 		RETHROW( );
 	}
 		
-	if ( Tool_Box->objs == NULL )
+	if ( Toolbox->objs == NULL )
 	{
-		Tool_Box->objs = new_io;
+		Toolbox->objs = new_io;
 		new_io->next = new_io->prev = NULL;
 	}
 	else
 	{
-		for ( ioi = Tool_Box->objs; ioi->next != NULL; ioi = ioi->next )
+		for ( ioi = Toolbox->objs; ioi->next != NULL; ioi = ioi->next )
 			/* empty */ ;
 		ioi->next = new_io;
 		new_io->prev = ioi;
 		new_io->next = NULL;
 	}
 
-	new_io->ID = Tool_Box->next_ID++;
+	new_io->ID = Toolbox->next_ID++;
 	new_io->type = ( int ) type;
 	if ( type == INT_INPUT || type == INT_OUTPUT )
 		new_io->val.lval = lval;
@@ -277,7 +277,7 @@ Var *f_ocreate( Var *var )
 
 	/* Draw the new object */
 
-	recreate_Tool_Box( );
+	recreate_Toolbox( );
 
 	return vars_push( INT_VAR, new_io->ID );
 }
@@ -464,12 +464,12 @@ Var *f_odelete( Var *v )
 
 	/* The child process is already done here, and in a test run we're also */
 
-	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Tool_Box )
+	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Toolbox )
 		return vars_push( INT_VAR, 1L );
 
 	/* Redraw the form without the deleted objects */
 
-	recreate_Tool_Box( );
+	recreate_Toolbox( );
 
 	return vars_push( INT_VAR, 1L );
 }
@@ -537,7 +537,7 @@ static void f_odelete_parent( Var *v )
 
 	/* No tool box -> no objects -> no objects to delete... */
 
-	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	if ( Toolbox == NULL || Toolbox->objs == NULL )
 	{
 		print( FATAL, "No input or output objects have been defined yet.\n" );
 		THROW( EXCEPTION );
@@ -563,7 +563,7 @@ static void f_odelete_parent( Var *v )
 	if ( io->prev != NULL )
 		io->prev->next = io->next;
 	else
-		Tool_Box->objs = io->next;
+		Toolbox->objs = io->next;
 
 	/* Delete the object (its not drawn in a test run!) */
 
@@ -579,7 +579,7 @@ static void f_odelete_parent( Var *v )
 		T_free( io->form_str );
 	T_free( io );
 
-	if ( Tool_Box->objs == NULL )
+	if ( Toolbox->objs == NULL )
 	{
 		tool_box_delete( );
 
@@ -619,7 +619,7 @@ Var *f_ovalue( Var *v )
 
 	/* No tool box -> no input or output objects... */
 
-	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	if ( Toolbox == NULL || Toolbox->objs == NULL )
 	{
 		print( FATAL, "No input or output objects have been defined yet.\n" );
 		THROW( EXCEPTION );
@@ -828,7 +828,7 @@ Var *f_ochanged( Var *v )
 
 	/* No tool box -> no input or output objects... */
 
-	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	if ( Toolbox == NULL || Toolbox->objs == NULL )
 	{
 		print( FATAL, "No input or output objects have been defined yet.\n" );
 		THROW( EXCEPTION );

@@ -1678,13 +1678,6 @@ second value the output field is set to this value. Obviously, the value
 must be number.
 
 
-@anchor{output_change_label}
-@item output_change_label()
-@findex output_change_label()
-The function allows to change the label of an output field. It takes two
-arguments, the ID of the output field and a string with the new label.
-
-
 @anchor{menu_create}
 @item menu_create()
 @findex menu_create()

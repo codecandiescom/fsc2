@@ -67,16 +67,16 @@ static Var *f_obj_clabel_child( long ID, char *label );
 static Var *f_obj_xable_child( long ID, long state );
 static int tool_box_close_handler( FL_FORM *a, void *b );
 static FL_OBJECT *append_object_to_form( IOBJECT *io, int *w, int *h );
-static void normal_button_init( IOBJECT *io );
-static void push_button_init( IOBJECT *io );
-static void radio_button_init( IOBJECT *io );
-static void slider_init( IOBJECT *io );
-static void var_slider_init( IOBJECT *io );
-static void int_input_init( IOBJECT *io );
-static void float_input_init( IOBJECT *io );
-static void int_output_init( IOBJECT *io );
-static void float_output_init( IOBJECT *io );
-static void menue_init( IOBJECT *io );
+static void normal_button_setup( IOBJECT *io );
+static void push_button_setup( IOBJECT *io );
+static void radio_button_setup( IOBJECT *io );
+static void slider_setup( IOBJECT *io );
+static void val_slider_setup( IOBJECT *io );
+static void int_input_setup( IOBJECT *io );
+static void float_input_setup( IOBJECT *io );
+static void int_output_setup( IOBJECT *io );
+static void float_output_setup( IOBJECT *io );
+static void menue_setup( IOBJECT *io );
 static void tools_callback( FL_OBJECT *ob, long data );
 static Var *f_tb_changed_child( Var *v );
 static Var *f_tb_wait_child( Var *v );
@@ -999,43 +999,43 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io, int *w, int *h )
 	switch ( io->type )
 	{
 		case NORMAL_BUTTON :
-			normal_button_init( io );
+			normal_button_setup( io );
 			break;
 
 		case PUSH_BUTTON :
-			push_button_init( io );
+			push_button_setup( io );
 			break;
 
 		case RADIO_BUTTON :
-			radio_button_init( io );
+			radio_button_setup( io );
 			break;
 
 		case NORMAL_SLIDER : case SLOW_NORMAL_SLIDER :
-			slider_init( io );
+			slider_setup( io );
 			break;
 
 		case VALUE_SLIDER : case SLOW_VALUE_SLIDER :
-			var_slider_init( io );
+			val_slider_setup( io );
 			break;
 
 		case INT_INPUT :
-			int_input_init( io );
+			int_input_setup( io );
 			break;
 
 		case FLOAT_INPUT :
-			float_input_init( io );
+			float_input_setup( io );
 			break;
 
 		case INT_OUTPUT :
-			int_output_init( io );
+			int_output_setup( io );
 			break;
 
 		case FLOAT_OUTPUT :
-			float_output_init( io );
+			float_output_setup( io );
 			break;
 
 		case MENU :
-			menue_init( io );
+			menue_setup( io );
 			break;
 
 		default :
@@ -1059,10 +1059,11 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io, int *w, int *h )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Creates a normal button, determines its size and sets some properties */
+/*-----------------------------------------------------------------------*/
 
-static void normal_button_init( IOBJECT *io )
+static void normal_button_setup( IOBJECT *io )
 {
 	if ( io->label != NULL )
 	{
@@ -1100,10 +1101,11 @@ static void normal_button_init( IOBJECT *io )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Creates a push button, determines its size and sets some properties */
+/*---------------------------------------------------------------------*/
 
-static void push_button_init( IOBJECT *io )
+static void push_button_setup( IOBJECT *io )
 {
 	io->w = io->h = FI_sizes.PUSH_BUTTON_SIZE;
 	io->self = fl_add_checkbutton( FL_PUSH_BUTTON, io->x, io->y,
@@ -1141,10 +1143,11 @@ static void push_button_init( IOBJECT *io )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Creates a radio button, determines its size and sets some properties */
+/*----------------------------------------------------------------------*/
 
-static void radio_button_init( IOBJECT *io )
+static void radio_button_setup( IOBJECT *io )
 {
 	IOBJECT *nio;
 
@@ -1218,10 +1221,11 @@ static void radio_button_init( IOBJECT *io )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Creates a normal slider, determines its size and sets some properties */
+/*-----------------------------------------------------------------------*/
 
-static void slider_init( IOBJECT *io )
+static void slider_setup( IOBJECT *io )
 {
 	io->w = FI_sizes.SLIDER_WIDTH;
 	io->h = FI_sizes.SLIDER_HEIGHT;
@@ -1263,10 +1267,11 @@ static void slider_init( IOBJECT *io )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Creates a value slider, determines its size and sets some properties */
+/*----------------------------------------------------------------------*/
 
-static void var_slider_init( IOBJECT *io )
+static void val_slider_setup( IOBJECT *io )
 {
 	double prec;
 
@@ -1315,10 +1320,12 @@ static void var_slider_init( IOBJECT *io )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*------------------------------------------------------*/
+/* Creates an integer input object, determines its size */
+/* and sets some properties                             */
+/*------------------------------------------------------*/
 
-static  void int_input_init( IOBJECT *io )
+static  void int_input_setup( IOBJECT *io )
 {
 	char buf[ MAX_INPUT_CHARS + 1 ];
 
@@ -1357,10 +1364,12 @@ static  void int_input_init( IOBJECT *io )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* Creates a floating point input object, determines its */
+/* size and sets some properties                         */
+/*-------------------------------------------------------*/
 
-static  void float_input_init( IOBJECT *io )
+static  void float_input_setup( IOBJECT *io )
 {
 	char buf[ MAX_INPUT_CHARS + 1 ];
 
@@ -1399,10 +1408,12 @@ static  void float_input_init( IOBJECT *io )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* Creates an integer output object, determines its size */
+/* and sets some properties                              */
+/*-------------------------------------------------------*/
 
-static  void int_output_init( IOBJECT *io )
+static  void int_output_setup( IOBJECT *io )
 {
 	char buf[ MAX_INPUT_CHARS + 1 ];
 
@@ -1445,10 +1456,12 @@ static  void int_output_init( IOBJECT *io )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*--------------------------------------------------------*/
+/* Creates a floating point output object, determines its */
+/* size and sets some properties                          */
+/*--------------------------------------------------------*/
 
-static  void float_output_init( IOBJECT *io )
+static  void float_output_setup( IOBJECT *io )
 {
 	char buf[ MAX_INPUT_CHARS + 1 ];
 
@@ -1491,10 +1504,11 @@ static  void float_output_init( IOBJECT *io )
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Creates a menue, determines its size and sets some properties */
+/*---------------------------------------------------------------*/
 
-static void menue_init( IOBJECT *io )
+static void menue_setup( IOBJECT *io )
 {
 	long i;
 	int wt, ht;
