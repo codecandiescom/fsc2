@@ -133,17 +133,14 @@ gpib:
 	fi;                                                         \
 	if [ "$(GPIB_LIBRARY)" = "ni" ]; then                       \
 		if [ ! -e gpib_lexer.l                                  \
-	          -o gpib_lexer.ll -nt gpib_lexer.l ]; then         \
-			$(RM) $(RMFLAGS) gpib_lexer.l;                      \
-			$(LN) $(LNFLAGS) gpib_lexer.ll gpib_lexer.l;        \
-		fi;                                                     \
-		if [ ! -e gpib_lexer.l                                  \
-	    	  -o gpib_lexer.ll -nt gpib_lexer.l ]; then         \
+	    	  -o gpib_lexer.ll -nt gpib_lexer.l                 \
+			  -o ! gpib_lexer.ll -ef gpib_lexer.l ]; then       \
 			$(RM) $(RMFLAGS) gpib_lexer.l;                      \
 			$(LN) $(LNFLAGS) gpib_lexer.ll gpib_lexer.l;        \
 		fi;                                                     \
 		if [ ! -e gpib_parser.y                                 \
-	    	  -o gpip_parser.yy -nt gpib_parser.y ]; then       \
+	    	  -o gpip_parser.yy -nt gpib_parser.y               \
+			  -o ! gpib_parser.yy -ef gpib_parser.y ]; then     \
 			$(RM) $(RMFLAGS) gpib_parser.y;                     \
 			$(LN) $(LNFLAGS) gpib_parser.yy gpib_parser.y;      \
 		fi;                                                     \

@@ -57,7 +57,7 @@ GROUP            := fsc2
 # Finally, set the verbosity level of the GPIB logs, use HIGH, MEDIUM, LOW
 # or OFF. If not set it defaults to LOW, i.e. only errors will be logged.
 
-GPIB_LIBRARY     := JTT
+GPIB_LIBRARY     := NI
 GPIB_CONF_FILE   := /etc/gpib.conf
 GPIB_LOG_FILE    := /tmp/gpib.log
 GPIB_LOG_LEVEL   := HIGH
@@ -254,11 +254,11 @@ ifeq ($(machine_name),isaak.physik.fu-berlin.de)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
-ifeq ($(machine_name),crowley.none)
-	GPIB_LIBRARY       := JTT
-	INSTALL_MACHINE    := install-$(machine_name)
-	UNINSTALL_MACHINE  := uninstall-$(machine_name)
-endif
+#ifeq ($(machine_name),crowley.none)
+#	 GPIB_LIBRARY       := JTT
+#	 INSTALL_MACHINE    := install-$(machine_name)
+#	 UNINSTALL_MACHINE  := uninstall-$(machine_name)
+#endif
 
 
 # Finally the definition of further needed variables

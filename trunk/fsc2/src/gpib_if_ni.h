@@ -97,6 +97,8 @@ GPIB_VARIABLE int gpib_write( int device, const char *buffer, long length );
 GPIB_VARIABLE int gpib_read( int device, char *buffer, long *length );
 GPIB_VARIABLE int gpib_serial_poll( int device, unsigned char *stb );
 GPIB_VARIABLE void gpib_log_message( const char *fmt, ... );
+GPIB_VARIABLE int gpib_dev_setup( GPIB_Device *temp_dev );
+GPIB_VARIABLE void gpib_error_setup( char *buffer, size_t buffer_length );
 
 
 GPIB_VARIABLE char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */

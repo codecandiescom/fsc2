@@ -22,7 +22,7 @@
 */
 
 
-%option noyywrap nocase-sensitive nounput never-interactive pointer
+%option noyywrap nocase-sensitive nounput never-interactive pointer yylineno
 
 %{
 

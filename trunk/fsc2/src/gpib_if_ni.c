@@ -31,6 +31,7 @@
 
 
 extern int gpibparse( void );
+extern int gpiblineno;
 
 
 /*----------------------------------------------------------------*/
@@ -78,11 +79,13 @@ static GPIB_Device devices[ GPIB_MAX_DEV ];
 /*------------------------------------------------------------------------*/
 
 
-int ll;                         /* log level                              */
-int gpib_is_active = 0;         /* flag, set after initialization of bus  */
-FILE *gpib_log;                 /* file pointer of GPIB log file          */
-int num_devices = 0;
-int num_init_devices = 0;
+static int ll;                      /* log level                             */
+static int gpib_is_active = 0;      /* flag, set after initialization of bus */
+static FILE *gpib_log;              /* file pointer of GPIB log file         */
+static int num_devices = 0;
+static int num_init_devices = 0;
+static char *gpib_error_buffer = NULL;
+static size_t gpib_error_buffer_length = 0;
 
 
 /*-------------------------------------------------------------------------*/
@@ -992,4 +995,107 @@ void gpib_log_message( const char *fmt, ... )
 	vfprintf( gpib_log, fmt, ap );
 	va_end( ap );
 	lower_permissions( );
+}
+
+
+/*---------------------------------------------------------------------*/
+/* Function is called from the parser to check a few device parameters */
+/* and to copy them to the appropriate device structure.               */
+/*---------------------------------------------------------------------*/
+
+int gpib_dev_setup( GPIB_Device *temp_dev )
+{
+    int i;
+
+
+    /* Take care that there aren't too many devices */
+
+    if ( num_devices >= GPIB_MAX_DEV )
+        return -1;
+
+    /* Check validity of name, addresses and timeout flag */
+
+    if ( *temp_dev->name == '\0' ) {
+        fprintf( stderr, "Name of device missing near line %d in "
+				 "\"%s\".\n", gpiblineno, GPIB_CONF_FILE );
+        if ( gpib_error_buffer != NULL &&
+             gpib_error_buffer_length > 0 )
+            snprintf( gpib_error_buffer, gpib_error_buffer_length,
+					  "Name of device missing near line %d in "
+					  "\"%s\".", gpiblineno, GPIB_CONF_FILE );
+        return -1;
+    }
+
+    if ( temp_dev->pad < 0 || temp_dev->pad > 0x1e ) {
+        fprintf( stderr, "Invalid primary GPIB address %d for device "
+				 "\"%s\".\n", temp_dev->pad, temp_dev->name );
+        if ( gpib_error_buffer != NULL &&
+             gpib_error_buffer_length > 0 )
+            snprintf( gpib_error_buffer, gpib_error_buffer_length,
+					  "Invalid primary GPIB address %d for device "
+					  "\"%s\".", temp_dev->pad, temp_dev->name );
+        return -1;
+    }
+
+    if ( temp_dev->sad != 0 &&
+         ( temp_dev->sad < 0x60 || temp_dev->sad > 0x7e ) ) {
+        fprintf( stderr, "Invalid secondary GPIB address %d for "
+				 "device \"%s\".\n", temp_dev->sad, temp_dev->name );
+        if ( gpib_error_buffer != NULL &&
+             gpib_error_buffer_length > 0 )
+            snprintf( gpib_error_buffer, gpib_error_buffer_length,
+					  "Invalid secondary GPIB address %d for "
+					  "device \"%s\".",
+					  temp_dev->sad, temp_dev->name );
+        return -1;
+    }
+
+    if ( temp_dev->timo < TNONE || temp_dev->timo > T1000s ) {
+        fprintf( stderr, "Invalid timeout setting for device "
+				 "\"%s\".\n", temp_dev->name );
+        if ( gpib_error_buffer != NULL &&
+             gpib_error_buffer_length > 0 )
+            snprintf( gpib_error_buffer, gpib_error_buffer_length,
+					  "Invalid timeout setting for device \"%s\".",
+					  temp_dev->name );
+        return -1;
+    }
+
+    /* Check that the device name is unique */
+
+    for ( i = 0; i < num_devices; i++ )
+        if ( ! strcmp( devices[ i ].name, temp_dev->name ) )
+        {
+            fprintf( stderr, "Device \"%s\" found more than once "
+					 "in configuration file \"%s\".\n",
+					 temp_dev->name, GPIB_CONF_FILE );
+            if ( gpib_error_buffer != NULL &&
+                 gpib_error_buffer_length > 0 )
+                snprintf( gpib_error_buffer,
+						  gpib_error_buffer_length,
+						  "Device \"%s\" found more than once "
+						  "in configuration file \"%s\".",
+						  temp_dev->name,
+						  GPIB_CONF_FILE );
+            return -1;
+        }
+
+    /* Copy to real device structure and increment device count */
+
+    memcpy( devices + num_devices++, temp_dev, sizeof( Device ) );
+
+    return 0;
+}
+
+
+/*------------------------------------------------------------------*/
+/* This function allows the calling program to define a buffer to   */
+/* which error messages are written. The maximum length of an error */
+/* message is set by the second parameter.                          */
+/*------------------------------------------------------------------*/
+
+void gpib_error_setup( char *buffer, size_t buffer_length )
+{
+    gpib_error_buffer = buffer;
+    gpib_error_buffer_length = buffer_length;
 }

@@ -30,7 +30,9 @@
 
 
 extern int gpiblex( void );
-void gpiberror( const char *s );
+extern int gpiblineno;
+
+static void gpiberror( const char *s );
 
 static GPIB_Device dev;
 
@@ -111,11 +113,11 @@ sep2:   /* empty */
 %%
 
 
-void gpiberror( const char *s )
+static void gpiberror( const char *s )
 {
 	extern char *gpibtext;
 
 
-	printf( "%s at token '%s'\n", s, gpibtext );
+	printf( "%s at token '%s' on line %d.\n", s, gpibtext, gpiblineno );
 	ibsta |= IBERR;
 }
