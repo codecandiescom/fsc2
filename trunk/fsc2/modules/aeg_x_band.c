@@ -779,7 +779,7 @@ try_again:
 
 bool magnet_goto_field( double field, double error )
 {
-	if ( ! magnet_goto_field_rec( field, doube error, 0 ) )
+	if ( ! magnet_goto_field_rec( field, error, 0 ) )
 		return FAIL;
 
 	magnet.act_field = magnet.target_field = magnet.meas_field;
@@ -795,6 +795,7 @@ bool magnet_goto_field_rec( double field, double error, int rec )
 	double mini_steps;
 	int steps;
 	double remainder;
+	double max_dev;
 	int i;
 	static double last_diff;  /* field difference in last step */
 	static int try;           /* number of steps without conversion */
