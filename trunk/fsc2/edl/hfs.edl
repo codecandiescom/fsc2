@@ -2,7 +2,6 @@ DEVICES:
 
 hfs9003;    // pulser
 tds540;     // digitizer
-hp8647a;    // rf synthesizer
 
 
 VARIABLES:
@@ -32,15 +31,15 @@ P0: FUNC   = MW,
 P1: FUNC   = MW,
 	START  = P0.START + P0.LEN + 10 ns,
 	LENGTH = 10 ns,
-	DSTART = 10 ns,
-	DLEN   = 5 ns;
+;//	DSTART = 10 ns,
+//	DLEN   = 5 ns;
 	
 
 P2: FUNC   = MW,
-	START  = 80 ns,
+	START  = 380 ns,
 	LENGTH = 20 ns,
-	DSTART = 20 ns,
-	DLEN   = 10 ns;
+	DSTART = -20 ns,
+;//	DLEN   = 10 ns;
 
 P21: FUNC  = MW;
 P22: FUNC  = MW;
@@ -71,11 +70,11 @@ FOR J = 1 : 100 {
 		pulser_shift( );
 //		pulser_increment( );
 
-		IF I % 2 {
-			P2.LEN = P2.LEN + 20 ns;
-		} ELSE {
-			P2.LEN -= 20 ns;
-		}
+//		  IF I % 2 {
+//			  P2.LEN = P2.LEN + 20 ns;
+//		  } ELSE {
+//			  P2.LEN -= 20 ns;
+//		  }
 
 //		  IF P2.LEN >= 100 ns {      // split PULSE_2 if too long
 //				P21.S   = P2.S;

@@ -115,6 +115,8 @@ void hfs9000_do_checks( FUNCTION *f )
 	{
 		p = f->pulses[ i ];
 
+		/* Check that pulse still fits into the pulser s memory */
+
 		if ( p->is_active )
 		{
 			f->max_seq_len = Ticks_max( f->max_seq_len, p->pos + p->len );
@@ -130,17 +132,35 @@ void hfs9000_do_checks( FUNCTION *f )
 			f->num_active_pulses = i + 1;
 		}
 
-		if ( i + 1 < f->num_pulses && f->pulses[ i + 1 ]->is_active &&
-			 p->pos + p->len > f->pulses[ i + 1 ]->pos )
+		/* Check that pulse doesn't overlap with the next one - if their
+		   distance becomes zero print out a warning in the test run */
+
+		if ( i + 1 < f->num_pulses && f->pulses[ i + 1 ]->is_active )
 		{
-			if ( hfs9000_IN_SETUP )
-				eprint( FATAL, "%s: Pulses %ld and %ld overlap.\n",
-						pulser_struct.name, p->num, f->pulses[ i + 1 ]->num );
-			else
-				eprint( FATAL, "%s:%ld: %s: Pulses %ld and %ld begin to "
-						"overlap.\n", Fname, Lc, pulser_struct.name, p->num,
-						f->pulses[ i + 1 ]->num );
-			THROW( EXCEPTION );
+			if ( p->pos + p->len > f->pulses[ i + 1 ]->pos )
+			{
+				if ( hfs9000_IN_SETUP )
+					eprint( FATAL, "%s: Pulses %ld and %ld overlap.\n",
+							pulser_struct.name, p->num,
+							f->pulses[ i + 1 ]->num );
+				else
+					eprint( FATAL, "%s:%ld: %s: Pulses %ld and %ld begin to "
+							"overlap.\n", Fname, Lc, pulser_struct.name,
+							p->num, f->pulses[ i + 1 ]->num );
+				THROW( EXCEPTION );
+			}
+			else if ( p->pos + p->len == f->pulses[ i + 1 ]->pos )
+			{
+				if ( hfs9000_IN_SETUP )
+					eprint( SEVERE, "%s: Distance between pulses %ld and %ld "
+							"is zero.\n", Fname, Lc, pulser_struct.name,
+							p->num, f->pulses[ i + 1 ]->num );
+				else
+					eprint( SEVERE, "%s:%ld: %s: Distance between pulses %ld "
+							"and %ld becomes zero.\n", Fname, Lc,
+							pulser_struct.name, p->num,
+							f->pulses[ i + 1 ]->num );
+			}
 		}
 	}
 }

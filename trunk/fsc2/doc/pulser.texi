@@ -199,7 +199,8 @@ defined:
 @item @code{PHASE_1} (or @code{PH_1}, @code{PH1}, @code{PHASE1} or
       @code{PHASE} or @code{PH})
 @item @code{PHASE_2} (or @code{PH_2}, @code{PH2}, @code{PHASE2})
-@item @code{OTHER_1} (or @code{OTHER}, @code{O_1}, @code{O1}, @code{O})
+@item @code{OTHER_1} (or @code{OTHER1}, @code{O_1}, @code{O1},
+      @code{OTHER}, @code{O})
 @item @code{OTHER_2} (or @code{OTHER2}, @code{O_2}, @code{O2})
 @item @code{OTHER_3} (or @code{OTHER3}, @code{O_3}, @code{O3})
 @item @code{OTHER_4} (or @code{OTHER4}, @code{O_4}, @code{O4})
@@ -225,6 +226,7 @@ RF:        CHANNEL = 2;
 RF_GATE:   CH = 3;
 DETECTION: CHANNEL = TRIGGER_OUT;
 @end example
+
 Please note, that usually the output channels are numbered as printed on
 the device, the only exception for the Tektronix HFS9003 is the trigger
 out channel, that is called @code{TRIGGER_OUT}, and has some special
@@ -238,15 +240,17 @@ RF:        POD = 6;
 RF_GATE:   POD = 7;
 DETECTION: POD = 11;
 @end example
+
 Optionally, for the Sony/Tektronix DG2020 you can also set which of the
-internal channels are going to be used. If you don't, the program will
+internal channels are going to be used. If you don't the program will
 automatically grab as many as it needs (using always the ones with the
-lowest numbers). You do this by
+lowest numbers first). You tell the program which of the internal
+channels to use via a statement like this:
 @example
 MICROWAVE: POD = 1, 2, 3, 4  CHANNEL = 31, 32, 33, 34;
 RF:        POD = 6           CHANNEL = 35;
 RF_GATE:   POD = 7           CHANNEL = 17;
-DETECTION: POD = 11;    // leave it to program to select a channel
+DETECTION: POD = 11;    // leave it to program to select the channel
 @end example
 
 
@@ -256,7 +260,7 @@ the hardware allows you may set the high and the low voltage for pulses
 using the keywords @code{V_HIGH} and @code{V_LOW}:
 @example
 MICROWAVE: POD = 1, 2, 3, 4  V_HIGH = 4.3 V, V_LOW = -0.5 V;
-RF:        POD = 6           V_HIGH = 2.6 Vv V_LOW = 0 V;
+RF:        POD = 6           V_HIGH = 2.6 V, V_LOW = 0 V;
 RF_GATE:   POD = 7           V_HIGH = 5 V,   V_LOW = 0 V;
 @end example
 

@@ -5,7 +5,6 @@
 use strict;
 use Tk;
 
-my $lockin     = 'SR810';
 my $start_freq = 8;
 my $end_freq   = 22;
 my $step_freq  = 25;
@@ -15,6 +14,7 @@ my $mod_ampl   = 80;
 my $N_runs     = 20;
 my $tc         = "Don't set";
 my $sens       = "Don't set";
+my $current    = 0;
 my $how        = 'Start program';
 
 
@@ -169,20 +169,6 @@ $f7_v->pack( %wp );
 $f7_l2->pack( %wp );
 
 
-my $f8 = $mw->Frame( );
-my $f8_l = $f8->Label( '-text' => 'Lock-in amplifier:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f8_m = $f8->Optionmenu( '-options' =>
-							[ ( 'SR510', 'SR530', 'SR810', 'SR830' ) ],
-							'-width' => 9,
-							'-variable' => \$lockin,
-							'-command' => [ \&li_conf, $lockin ] );
-$f8->pack( %fp );
-$f8_l->pack( %wp );
-$f8_m->pack( %wp );
-
-
 my $f9 = $mw->Frame( );
 my $f9_l = $f9->Label( '-text' => 'Time constant:',
 					   '-width' => '20',
@@ -217,6 +203,24 @@ $f10_l->pack( %wp );
 $f10_m->pack( %wp );
 
 
+my $f11 = $mw->Frame( );
+my $f11_l1 = $f11->Label( '-text' => 'Field current:',
+						'-width' => '20',
+						'anchor' => 'w' );
+my $f11_v = $f11->Entry( '-textvariable' => \$current,
+					   '-width' => '6',
+					   '-validate' => 'key',
+					   '-validatecommand' => \&is_numeric,
+					   '-relief' => 'sunken' );
+my $f11_l2 = $f11->Label( '-text' => 'A',
+						  '-width' => 1 );
+
+$f11->pack( %fp );
+$f11_l1->pack( %wp );
+$f11_v->pack( %wp );
+$f11_l2->pack( %wp );
+$f11->{ is_shown } = 1;
+
 
 $mw->Optionmenu( '-options' => [ ( 'Start program', 'Test program',
 								   'Load into fsc2' ) ],
@@ -243,13 +247,8 @@ my $ne;
 if ( $ARGV[ 0 ] ) {
 	open( F, "<$ARGV[ 0 ]" ) or return;
 } else {
-	open( F, "<$ENV{ HOME }/.fsc2/.endor" ) or return;
+	open( F, "<$ENV{ HOME }/.fsc2/.cw_endor" ) or return;
 }
-
-goto done_reading unless defined( $ne = <F> )
-	and $ne =~ /^SR(5|8)(1|3)0$/;
-chomp $ne;
-$lockin = $ne;
 
 goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
 chomp $ne;
@@ -289,6 +288,10 @@ goto done_reading unless defined( $ne = <F> )
 chomp $ne;
 $sens = $ne;
 
+goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+chomp $ne;
+$current = $ne;
+
 done_reading:
 close F;
 }
@@ -300,7 +303,7 @@ sub store_defs {
 	local *F;
 
 	mkdir "$ENV{ HOME }/.fsc2", 0777 unless -e "$ENV{ HOME }/.fsc2";
-	open( F, ">$ENV{ HOME }/.fsc2/.endor" ) or return;
+	open( F, ">$ENV{ HOME }/.fsc2/.cw_endor" ) or return;
 
 	$start_freq = 0 if $start_freq eq ".";
 	$end_freq = 0 if $end_freq eq ".";
@@ -309,7 +312,7 @@ sub store_defs {
 	$mod_freq = 0 if $mod_freq eq ".";
 	$mod_ampl = 0 if $mod_ampl eq ".";
 
-	print F "$lockin\n$start_freq\n$end_freq\n$step_freq\n$atten\n" .
+	print F "$start_freq\n$end_freq\n$step_freq\n$atten\n" .
 	    "$mod_freq\n$mod_ampl\nN_runs\n$tc\n$sens\n";
 
 	close F;
@@ -374,40 +377,35 @@ $how2 = "start" if $how =~ /^Start/;
 $how2 = "test"  if $how =~ /^Test/;
 $how2 = "load"  if $how =~ /^Load/;
 
-open( F, "|fsc2_$how2" ) or die "Can't find utility.\n";
+open( F, "|fsc2_$how2" ) or die "Can't find utility fsc2_$how2.\n";
 
 print F
 "DEVICES:
 
-hp8647a;\n";
+hp8647a;
+sr510;
+keithley228a;
 
-print F lc( $lockin ), ";\n";
-print F
-"
 
 VARIABLES:
 
 start_freq  = $start_freq MHz;
 end_freq    = $end_freq MHz;
 step_freq   = $step_freq kHz;
-attenuation = $atten dB;\n";
+attenuation = $atten dB;
+mod_ampl    = $mod_ampl kHz;
+N_runs      = $N_runs;
+current     = $current;\n";
 
-if ( $lockin =~ /^SR8/ ) {
-	print F "mod_freq    = $mod_freq kHz;\n";
-} else {
-	print F "mod_freq;\n";
-}
+print F "mod_freq;\n";
 
 if ( $tc eq "Don't set" ) {
 	print F "tc;\n";
 } else {
-	print F "tc = $tc;\n";
+	print F "tc          = $tc;\n";
 }
 
-print F
-"mod_ampl    = $mod_ampl kHz;
-N_runs      = $N_runs;
-
+print F "
 I = 0;
 J;
 K = 1;
@@ -420,7 +418,7 @@ File_1, File_2;
 
 PREPARATIONS:
 
-synthesizer_use_table( );
+// synthesizer_use_table( );
 synthesizer_attenuation( attenuation );
 synthesizer_att_ref_freq( 14 MHz );
 synthesizer_frequency( start_freq );
@@ -432,20 +430,9 @@ print F "lockin_time_constant( tc );\n" if $tc ne "Don't set";
 print F "lockin_sensitivity( $sens );\n" if $sens ne "Don't set";
 print F "\n\nEXPERIMENT:
 
-synthesizer_state( \"ON\" );\n";
-
-# Neither the SR510 nor the SR530 can set the reference frequency nor
-# its level...
-
-if ( $lockin =~ /^SR8/ ) {
-	print F "lockin_ref_freq( mod_freq );
-lockin_ref_level( 1 V );\n";
-} else {
-	print F "mod_freq = lockin_ref_freq( );\n";
-}
-print F "tc = lockin_time_constant( );\n" if $tc eq "Don't set";
-
-print F "
+synthesizer_state( \"ON\" );
+tc = lockin_time_constant( );
+mod_freq = lockin_ref_freq( );
 
 File_1 = get_file( \"File for storing all runs:\" );
 File_2 = get_file( \"File for storing final result:\" );
@@ -456,15 +443,15 @@ fsave( File_2, \"% Start frequency = # MHz\\n\"
                \"% Time constant   = # s\\n\"
                \"% Phase           = #\\n\"
                \"% Mod. frequency  = # kHz\\n\"
-               \"% Mod. amplitude  = # kHz\\n%\\n\",
+               \"% Mod. amplitude  = # kHz\\n\"
+               \"% Field current   = # A\\n%\\n\",
        start_freq * 1.0e-6, end_freq * 1.0e-6, step_freq * 1.0e-3,
        lockin_sensitivity( ), tc, lockin_phase( ), mod_freq * 1.0e-3,
-       mod_ampl * 1.0e-3 );
+       mod_ampl * 1.0e-3, current );
 save_comment( File_2, \"% \" );
 save_program( File_2, \"% \" );\n\n";
 
 print F "
-
 FOR I = 1 : N_runs
 {
 	print( \"Starting #. run out of #\\n\", I, N_runs );
@@ -604,26 +591,6 @@ sub do_checks {
 		return -1;
 	}
 
-	if ( $lockin =~ /^SR8/ ) {
-		if ( $mod_freq =~ /^\.?$/ ) {
-			$text = "Modulation frequency hasn't been set.";
-			&show_message( $text );
-			return -1;
-		}
-
-		if ( $mod_freq <= 0 ) {
-			$text = "Modulation frequency is too low.";
-			&show_message( $text );
-			return -1;
-		}
-
-		if ( $mod_freq > 100 ) {
-			$text = "Modulation frequency is too high.";
-			&show_message( $text );
-			return -1;
-		}
-	}
-
 	if ( $mod_ampl =~ /^\.?$/ ) {
 		$text = "Modulation amplitude hasn't been set.";
 		&show_message( $text );
@@ -650,6 +617,24 @@ sub do_checks {
 
 	if ( $N_runs < 1 ) {
 		$text = "Number of runs is too small.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $current =~ /^$/ ) {
+		$text = "Field current hasn't been set.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $current < -10.0 ) {
+		$text = "Field current is too low.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $current > 10.0 ) {
+		$text = "Field current is too high.";
 		&show_message( $text );
 		return -1;
 	}

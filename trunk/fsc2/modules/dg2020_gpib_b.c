@@ -672,7 +672,7 @@ static void dg2020_gpib_failure( void )
 
 bool dg2020_lock_state( bool lock )
 {
-	char cmd[ 100 ];
+	char cmd[ 10 ];
 
 	sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
 	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )

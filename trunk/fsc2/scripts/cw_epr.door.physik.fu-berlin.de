@@ -1,0 +1,480 @@
+#!/usr/bin/perl -w
+
+# $Id$
+
+use strict;
+use Tk;
+
+my $start_cur          = 0;
+my $end_cur 	       = 0;
+my $cur_step	       = 1;
+my $num_runs	       = 1;
+my $tc_fact  	       = 1;
+my $tc			       = "Don't set";
+my $sens		       = "Don't set";
+my $how			       = 'Start experiment';
+my $bridge		       = 'cw';
+
+
+my %fp = ( '-side' => 'top',
+		   '-fill' => 'x',
+		   '-padx' => '2m',
+		   '-pady' => '2m' );
+
+my %wp = ( '-side' => 'left',
+		   '-fill' => 'x',
+		   '-padx' => '3m',
+		   '-expand' => 1 );
+
+# Get defaults
+
+&get_defs;
+
+# Create all the graphic stuff
+
+my $mw = MainWindow->new( );
+$mw->title( "cw_epr" );
+
+my $f1 = $mw->Frame( );
+my $f1_l1 = $f1->Label( '-text' => 'Start current:',
+						'-width' => '20',
+						'anchor' => 'w' );
+my $f1_v = $f1->Entry( '-textvariable' => \$start_cur,
+					   '-width' => '8',
+					   '-validate' => 'key',
+					   '-validatecommand' => \&is_numeric,
+					   '-relief' => 'sunken' );
+my $f1_l2 = $f1->Label( '-text' => 'A',
+						'-width' => 1 );
+
+$f1->pack( %fp );
+$f1_l1->pack( %wp );
+$f1_v->pack( %wp );
+$f1_l2->pack( %wp );
+
+
+my $f2 = $mw->Frame( );
+my $f2_l1 = $f2->Label( '-text' => 'End current:',
+						'-width' => '20',
+						'anchor' => 'w' );
+my $f2_v = $f2->Entry( '-textvariable' => \$end_cur,
+					   '-width' => '8',
+					   '-validate' => 'key',
+					   '-validatecommand' => \&is_numeric,
+					   '-relief' => 'sunken' );
+my $f2_l2 = $f2->Label( '-text' => 'A',
+						'-width' => 1 );
+
+$f2->pack( %fp );
+$f2_l1->pack( %wp );
+$f2_v->pack( %wp );
+$f2_l2->pack( %wp );
+
+
+my $f3 = $mw->Frame( );
+my $f3_l1 = $f3->Label( '-text' => 'Current step size:',
+						'-width' => '20',
+						'anchor' => 'w' );
+my $f3_v = $f3->Entry( '-textvariable' => \$cur_step,
+					   '-width' => '8',
+					   '-validate' => 'key',
+					   '-validatecommand' => \&is_numeric,
+					   '-relief' => 'sunken' );
+my $f3_l2 = $f3->Label( '-text' => 'A',
+						'-width' => 1 );
+
+$f3->pack( %fp );
+$f3_l1->pack( %wp );
+$f3_v->pack( %wp );
+$f3_l2->pack( %wp );
+
+
+my $f4 = $mw->Frame( );
+my $f4_l1 = $f4->Label( '-text' => 'Number of runs:',
+						'-width' => '20',
+						'anchor' => 'w' );
+my $f4_v = $f4->Entry( '-textvariable' => \$num_runs,
+					   '-width' => '8',
+					   '-validate' => 'key',
+					   '-validatecommand' => sub { $_[ 0 ] =~ /^\s*\d*\s*$/ },
+					   '-relief' => 'sunken' );
+my $f4_l2 = $f4->Label( '-text' => ' ',
+						'-width' => 1 );
+
+$f4->pack( %fp );
+$f4_l1->pack( %wp );
+$f4_v->pack( %wp );
+$f4_l2->pack( %wp );
+
+
+my $f5 = $mw->Frame( '-width' => '29' );
+my $f5_l1 = $f5->Label( '-text' => 'Waiting time:',
+						'-width' => '20',
+						'anchor' => 'w' );
+my $f5_v = $f5->Entry( '-textvariable' => \$tc_fact,
+					   '-width' => '7',
+					   '-validate' => 'key',
+					   '-validatecommand' => \&is_numeric,
+					   '-relief' => 'sunken' );
+my $f5_l2 = $f5->Label( '-text' => '* tc',
+						'-width' => 2 );
+
+$f5->pack( %fp );
+$f5_l1->pack( %wp );
+$f5_v->pack( %wp );
+$f5_l2->pack( %wp );
+
+
+
+my $f6 = $mw->Frame( );
+my $f6_l = $f6->Label( '-text' => 'Time constant (tc):',
+					   '-width' => '20',
+					   'anchor' => 'w' );
+my $f6_m = $f6->Optionmenu( '-options' =>
+                            [ ( "Don't set", '100 s', ' 30 s', ' 10 s',
+                                '  3 s', '  1 s', '300 ms', '100 ms', ' 30 ms',
+                                ' 10 ms', '  3 ms', '  1 ms' ) ],
+							'-width' => 9,
+							'-variable' => \$tc );
+$f6->pack( %fp );
+$f6_l->pack( %wp );
+$f6_m->pack( %wp );
+
+
+my $f7 = $mw->Frame( );
+my $f7_l = $f7->Label( '-text' => 'Sensitivity:',
+					   '-width' => '20',
+					   'anchor' => 'w' );
+my $f7_m = $f7->Optionmenu( '-options' =>
+							[ ( "Don't set", '500 mV', '200 mV', '100 mV',
+								' 50 mV', ' 20 mV', ' 10 mV', '  5 mv',
+								'  2 mV', '  1 mV', '500 uV', '200 uV',
+								'100 uV', ' 50 uV', ' 20 uV', ' 10 uV',
+								'  5 uV', '  2 uV', '  1 uV',
+								'500 nV', '200 nV', '100 nV', ' 50 nV',
+								' 10 nV', '  5 nV', '  2 nV', '  1 nV' ) ],
+							'-width' => 9,
+							'-variable' => \$sens );
+$f7->pack( %fp );
+$f7_l->pack( %wp );
+$f7_m->pack( %wp );
+
+
+$mw->Optionmenu( '-options' => [ ( 'Start experiment', 'Test program',
+								   'Load into fsc2' ) ],
+				 '-variable' => \$how,
+				 '-command' => \&write_out
+			   )->pack( '-padx' => '3m',
+						'-pady' => '3m' );
+
+$mw->Button( '-text' => 'Quit',
+			 '-command' => sub { &store_defs; $mw->destroy }
+		   )->pack( '-padx' => '3m',
+					'-pady' => '3m' );
+
+MainLoop;
+
+
+#############################################
+
+sub get_defs {
+
+local *F;
+my $ne;
+
+if ( $ARGV[ 0 ] ) {
+	open( F, "<$ARGV[ 0 ]" ) or return;
+} else {
+	open( F, "<$ENV{ HOME }/.fsc2/.cw_epr" ) or return;
+}
+
+goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+chomp $ne;
+$start_cur = $ne;
+
+goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+chomp $ne;
+$end_cur = $ne;
+
+goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+chomp $ne;
+$cur_step = $ne;
+
+goto done_reading unless defined( $ne = <F> ) and $ne =~ /^\d+$/;
+chomp $ne;
+$num_runs = $ne;
+
+goto done_reading unless defined( $ne = <F> )
+	and $ne =~ /(^Don't set)|([13]0{0,2} m?s)$/;
+chomp $ne;
+$tc = $ne;
+
+goto done_reading unless defined( $ne = <F> )
+	and $ne =~ /(^Don't set)|([125]0{0,2} [mun]V)$/;
+chomp $ne;
+$sens = $ne;
+
+done_reading:
+close F;
+}
+
+
+#############################################
+
+sub store_defs {
+	local *F;
+
+	mkdir "$ENV{ HOME }/.fsc2", 0777 unless -e "$ENV{ HOME }/.fsc2";
+	open( F, ">$ENV{ HOME }/.fsc2/.cw_epr" ) or return;
+
+	$start_cur = 0 if $start_cur eq ".";
+	$end_cur = 0 if $end_cur eq ".";
+	$cur_step = 0 if $cur_step eq ".";
+
+	print F "$start_cur\n$end_cur\n$cur_step\n$num_runs\n$tc\n$sens\n";
+
+	close F;
+}
+
+
+#############################################
+
+sub is_numeric {
+
+	my $new_val = shift;
+	$new_val =~ /^((\d+\.?(\d+)?)|(\.(\d+)?))?$/;
+}
+
+
+#############################################
+
+sub write_out {
+
+return if &do_checks( ) != 0;
+
+local *F;
+my $text;
+my $how2;
+
+$how2 = "start" if $how =~ /^Start/;
+$how2 = "test"	if $how =~ /^Test/;
+$how2 = "load"	if $how =~ /^Load/;
+
+open( F, "|fsc2_$how2" ) or die "Can't find utility fsc2_$how2.\n";
+
+print F
+"DEVICES:\n\n";
+print F "sr510;\nkeithley228a;\n\n\n";
+
+print F
+"VARIABLES:\n\nI";
+print F ", J" if $num_runs != 1;
+print F ";
+start_cur = $start_cur G;
+end_cur = $end_cur G;
+cur_step = ";
+print F $end_cur > $start_cur ? $cur_step : - $cur_step;
+print F " G;\n";
+print F
+"N_points = ceil( abs( end_cur - start_cur ) / abs( cur_step ) ) + 1;
+data[ N_points ];
+N_runs = $num_runs;\n";
+
+if ( $num_runs != 1 ) {
+	print F "new_data[ N_points ];\n";
+}
+
+if ( $tc eq "Don't set" ) {
+	print F "tc;\n";
+} else {
+	print F "tc = $tc;\n";
+}
+
+print F "\n\nPREPARATIONS:\n\n";
+print F "magnet_setup( start_cur, cur_step );\n";
+print F "lockin_time_constant( tc );\n" if $tc ne "Don't set";
+print F "lockin_sensitivity( $sens );\n" if $sens ne "Don't set";
+print F "init_1d( ";
+print F $num_runs == 1 ? "1" : "3";
+print F ", N_points, start_cur, cur_step, \"Magnet current / A\",
+		 \"Signal / V\" );\n\n\n";
+
+print F
+"EXPERIMENT:\n
+fsave( \"% Field:\\n\"
+	   \"%	 Start current:     # A\\n\"
+	   \"%	 current field:     # A\\n\"
+	   \"%	 Current step size: # A\\n\"
+	   \"% Lock-In:\\n\"
+	   \"%	 Sensitivity:     # V\\n\"
+	   \"%	 Time constant:   # s\\n\"
+	   \"%	 Phase:			  # degree\\n\"
+	   \"% Number of runs:	  #\\n\",
+	   start_cur, start_cur + ( N_points - 1 ) * cur_step, cur_step,
+	   lockin_sensitivity( ), lockin_time_constant( ), lockin_phase( ),
+	   N_runs );
+save_comment( \"% \" );
+save_program( \"% \", \"Sample:  \\nMicrowave frequency:  \\n\"
+              \"Microwave power:  \\nTemperature:  \\n\" );\n\n";
+
+print F "tc = lockin_time_constant( );\n\n" if $tc eq "Don't set";
+if ( $num_runs != 1 ) {
+	print F
+"FOR J = 1 : N_runs \{
+
+	print( \"Starting #. run out of #\\n\", J, N_runs );
+
+	FOR I = 1 : N_points \{
+
+		new_data[ I ] = lockin_get_data( );\n\n\t\t";
+
+print F "fsave( \"# #\\n\", start_cur + ( I - 1 ) * cur_step, " .
+	    "new_data[ I ] );";
+
+print F "
+		display( I, ( data[ I ] + new_data[ I ] ) / float( J ), 1,
+		         I, new_data[ I ], 3 );
+
+		IF ( I < N_points ) \{\n\t\t\t";
+	print F "sweep_up( );";
+print F "
+			wait( ";
+print F "$tc_fact * " if $tc_fact != 1;
+print F "tc );
+		\}
+	\}
+
+	data += new_data;
+	clear_curve( 1, 3 );
+	display( 1, data / float( J ), 2 );
+
+	fsave( \"\\n\" );
+	IF ( J < N_runs ) \{\n\t\t";
+	print F	"reset_field( );";
+print F "
+		wait( ";
+print F "$tc_fact * " if $tc_fact != 1;
+print F "tc );
+	\}
+\}
+
+
+ON_STOP:
+
+fsave( \"\\n\" );
+FOR I = 1 : N_points \{
+	fsave( \"# #\\n\", start_field + ( I - 1 ) * field_step, data[ I ] );
+\}
+";
+} else {
+	print F
+"FOR I = 1 : N_points \{
+	data[ I ] = lockin_get_data( );\n\t";
+print F "fsave( \"# #\\n\", " .
+		"start_cur + ( I - 1 ) * cur_step, data[ I ] );";
+print F "
+	display( I, data[ I ] );
+	IF ( I < N_points ) \{\n\t\t";
+	print F "sweep_up( );";
+print F "
+		wait( ";
+print F "$tc_fact * " if $tc_fact != 1;
+print F "tc );
+	\}
+\}";
+}
+
+close F;
+
+# Notify the user if sending the program to fsc2 failed for some reasons
+
+if ( $? != 0 ) {
+    if ( $? >> 8 == -1 ) {
+        $text = "Internal error.";
+    } elsif ( $? >> 8 == 1 ) {
+        $text = "Someone else is running fsc2.";
+    } elsif ( $? >> 8 == 2 ) {
+        $text = "fsc2 is currently busy.";
+    } elsif ( $? >> 8 == 3 ) {
+        $text = "Internal error of fsc2.";
+    } elsif ( $? >> 8 == 4 ) {
+        $text = "Could not start fsc2.";
+    } else {
+        $text = "Something strange is going on here.";
+    }
+
+    &show_message( $text ) if $? >> 8 != 0;
+}
+}
+
+
+#############################################
+
+sub do_checks {
+
+	if ( $start_cur =~ /^\.?$/ ) {
+		&show_message( "Start current hasn't been set." );
+		return -1;
+	}
+
+	if ( $start_cur < -10.0 ) {
+		&show_message( "Start current is too low." );
+		return -1;
+	}
+
+	if ( $start_cur > 10.0 ) {
+		&show_message( "Start current is too high." );
+	}
+
+	if ( $end_cur =~ /^\.?$/ ) {
+		&show_message( "End current hasn't been set." );
+		return -1;
+	}
+
+	if ( $end_cur < -10.0 ) {
+		&show_message( "End current is too low." );
+		return -1;
+	}
+
+	if ( $end_cur > 10.0 ) {
+		&show_message( "End current is too high." );
+		return -1;
+	}
+
+	if ( $cur_step =~ /^\.?$/ ) {
+		&show_message( "Current step size hasn't been set." );
+		return -1;
+	}
+
+	if ( abs( $cur_step ) > abs( $end_cur - $start_cur ) ) {
+		&show_message( "Current step size larger than\n" .
+					   "difference between start and\n" .
+					   "end current." );
+		return -1;
+	}
+
+	if ( $num_runs =~ /^$/ ) {
+		&show_message( "Number of runs hasn't been\n" .
+					   "set, defaulting to 1." );
+		$num_runs = 1;
+	}
+
+	if ( $num_runs < 1 ) {
+		&show_message( "Invalid number of runs." );
+		return -1;
+	}
+
+	return 0;
+}
+
+
+#############################################
+
+sub show_message {
+	my $text = shift;
+
+	$mw->messageBox( '-icon' => 'error',
+					 '-type' => 'Ok',
+					 '-title' => 'Error',
+					 '-message' => $text );
+}

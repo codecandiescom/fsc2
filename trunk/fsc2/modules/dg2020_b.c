@@ -347,6 +347,18 @@ Var *pulser_state( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
+Var *pulser_channel_state( Var *v )
+{
+	v = v;
+	eprint( SEVERE, "%s:%ld: %s: Individual pod channels can't be switched "
+			"on or off with this device.\n", Fname, Lc, DEVICE_NAME );
+	return vars_push( INT_VAR, 0 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 Var *pulser_update( Var *v )
 {
 	v = v;

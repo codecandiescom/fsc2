@@ -100,7 +100,7 @@ int hfs9000_init_hook( void )
 	{
 		hfs9000.channel[ i ].self = i;
 		hfs9000.channel[ i ].function = NULL;
-		hfs9000.channel[ i ].state = UNSET;
+		hfs9000.channel[ i ].state = SET;
 	}
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -203,7 +203,8 @@ int hfs9000_exp_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	/* Now we have to tell the pulser about all the pulses */
+	/* Now we have to tell the pulser about all the pulses and switch on
+	   all needed channels */
 
 	for ( i = 0; i <= MAX_CHANNEL; i++ )
 		if ( hfs9000.channel[ i ].function != NULL &&
@@ -211,7 +212,13 @@ int hfs9000_exp_hook( void )
 		{
 			hfs9000_set_pulses( hfs9000.channel[ i ].function );
 			if ( i != HFS9000_TRIG_OUT )
-				hfs9000_set_channel_state( i, START );
+				hfs9000_set_channel_state( i, hfs9000.channel[ i ].state );
+		}
+		else
+		{
+			hfs9000.channel[ i ].state = UNSET;
+			if ( i != HFS9000_TRIG_OUT )
+				hfs9000_set_channel_state( i, hfs9000.channel[ i ].state );
 		}
 
 
@@ -270,8 +277,9 @@ void hfs9000_exit_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*---------------------------------------------*/
+/* Switches the output of the pulser on or off */
+/*---------------------------------------------*/
 
 Var *pulser_state( Var *v )
 {
@@ -309,6 +317,68 @@ Var *pulser_state( Var *v )
 }
 
 
+/*------------------------------------------------------------*/
+/* Switches an individual channel of the puleser on or of or, */
+/* if called with just one argument, returns the state.       */
+/*------------------------------------------------------------*/
+
+Var *pulser_channel_state( Var *v )
+{
+	int channel;
+	bool state;
+
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: %s: Missing parameter in function "
+				"`pulser_channel_state'.\n", Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_VAR );
+
+	channel = v->val.lval;
+
+	if ( channel < MIN_CHANNEL || channel > MAX_CHANNEL )
+	{
+		eprint( FATAL, "%s:%ld: %s: Invalid channel parameter in function "
+				"`pulser_channel_state'.\n", Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+
+	v = vars_pop( v );
+	if ( v == NULL )
+		return vars_push( INT_VAR,
+						  ( long ) ( hfs9000.channel[ channel ].state ?
+									 1 : 0 ) );
+
+	if ( v->type == INT_VAR )
+		state = v->val.lval != 0 ? SET : UNSET;
+	else if ( v->type == FLOAT_VAR )
+		state = v->val.dval != 0.0 ? SET : UNSET;
+	else
+	{
+		if ( ! strcasecmp( v->val.sptr, "OFF" ) )
+			 state = UNSET;
+		else if ( ! strcasecmp( v->val.sptr, "ON" ) )
+			state = SET;
+		else
+		{
+			eprint( FATAL, "%s:%d: %s: Invalid argument in call of "
+					"`pulser_channel_state'.\n", Fname, Lc, DEVICE_NAME );
+			THROW( EXCEPTION );
+		}
+	}
+	
+	hfs9000.channel[ channel].state = state;
+
+	if ( I_am != PARENT && ! TEST_RUN )
+		hfs9000_set_channel_state( channel, state );
+
+	return vars_push( INT_VAR, ( long ) state );
+}
+
+	
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
@@ -558,42 +628,14 @@ Var *pulser_pulse_reset( Var *v )
 }
 
 
-// /*----------------------------------------------------*/
-// /*----------------------------------------------------*/
-// 
-// Var *pulser_lock_keyboard( Var *v )
-// {
-// 	   bool lock;
-// 
-// 
-// 	   if ( v == NULL )
-// 		   lock = SET;
-// 	   else
-// 	   {
-// 		   vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-// 
-// 		   if ( v->type == INT_VAR )
-// 			   lock = v->val.lval == 0 ? UNSET : UNSET;
-// 		   else if ( v->type == FLOAT_VAR )
-// 			   lock = v->val.dval == 0.0 ? UNSET : UNSET;
-// 		   else
-// 		   {
-// 			   if ( ! strcasecmp( v->val.sptr, "OFF" ) )
-// 				   lock = UNSET;
-// 			   else if ( ! strcasecmp( v->val.sptr, "ON" ) )
-// 				   lock = SET;
-// 			   else
-// 			   {
-// 				   eprint( FATAL, "%s:%d: %s: Invalid argument in call of "
-// 						   "`pulser_lock_keyboard'.\n",
-// 						   Fname, Lc, DEVICE_NAME );
-// 				   THROW( EXCEPTION );
-// 			   }
-// 		   }
-// 	   }
-// 
-// 	   if ( ! TEST_RUN )
-// 		   hfs9000_lock_state( lock );
-// 
-// 	   return vars_push( INT_VAR, lock ? 1 : 0 );
-// }
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_lock_keyboard( Var *v )
+{
+	v = v;
+
+	eprint( SEVERE, "%s:%ld: %s: Function `pulser_lock_keyboard' can't be "
+			"used for this device.\n", Fname, Lc, DEVICE_NAME );
+	return vars_push( INT_VAR, 1 );
+}
