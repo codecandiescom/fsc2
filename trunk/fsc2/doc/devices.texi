@@ -4612,13 +4612,13 @@ Another important point is that for SPEX type monochromators an offset
 "real" wavelength or -number is automatically taken into account. Thus
 the position reported by the program and at the console of the CD2A unit
 may differ because the program tries to take care of the offset (see the
-description of the function @code{monochromator_offset()} below for more
-information). Furthermore, for wavenumber-driven SPEX monochromators
-also the position of the laser line gets remembered between
-experiments. These informations are stored in a file in the same
+description of the function @code{monochromator_calibrate()} below for
+more information). Furthermore, for wavenumber-driven SPEX
+monochromators also the position of the laser line gets remembered
+between experiments. These informations are stored in a file in the same
 directory where the module for the device resides (under the name
 @file{spex_cd2a.calib} unless specified differently in the configuration
-file for the device). This file gets automatically read in when the
+file for the device). This file automatically gets read in when the
 module is loaded and at the start of each experiment and rewritten at
 the end of the experiment.
 
@@ -4690,53 +4690,6 @@ after installing a new laser with a different line position).
 
 Please note: for monochromators doing a scan calling this function
 automatically aborts the currently running scan.
-
-The function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} script.
-
-
-@anchor{monochromator_offset}
-@item monochromator_offset()
-@findex monochromator_offset()
-The function is only supported for SPEX monochromators. It can be used
-to tell the module about an offset between the wavelength or -number
-displayed by the CD2A console and the "real", i.e.@: experimentally
-well-known wavelength or (absolute) wavenumber. Once it has been set,
-all functions will take this offset into account when talking with the
-device.
-
-The offset is taken to be the difference between the "real" position of
-a line and the position where it appears when measured with @code{fsc2}.
-Thus the usual procedure to set the offset is to measure the position of
-a well-known line using @code{fsc2} and then to call the function with
-the difference between the "real" position and the observed position.
-Afterwards @code{fsc2} will automatically take the offset into account
-and in a new measurement the line should seem to appear at the expected
-position.
-
-Please note that the offset can @strong{only} be set for wavenumber
-driven monochromators while using absolute wavenumbers, i.e.@: while no
-laser line position is set! If you want to determine and set a new
-offset first store the current laser line position, switch off use of a
-laser line position by calling @code{monochromator_laser_line()} with a
-zero argument and only after measuring and setting a new offset set the
-laser line position again.
-
-The function can also be used to determine the current value of the
-offset when called without an argument. Please don't be too surprised
-if this value differs from the one you have just set: since an offset
-may already have been used while you did the measurement off the new
-offset, the newly set offset may only have been added to the old value
-and by quering the new value you get the sum of the old and the new
-offset.
-
-The value of the offset is read in at the start of an experiment from a
-file and again written to the file at the end of the experiment, so it
-does not need to be set every time an experiment is started.
-
-Within the configuration file for the monochromator an upper limit
-for the offset can be set. If it has been set no offsets larger than
-the one specified in the configuration file get accepted.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -4866,19 +4819,18 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_wavelength_axis}
 @item monochromator_wavelength_axis()
 @findex monochromator_wavelength_axis()
-The function is only supported for SpectraPro-300i monochromators. It
-requires that the module for a CCD camera is available that returns
-information about the number of pixels of the CCD chip and the distance
-between pixels. It then returns an array with two elements, with the
-first element being the wavelength at the leftmost pixel of the chip and
-the second element being the wavelength difference between neighboring
-pixels. The function can also be called with up to two arguments, an
-integer for the grating number and the wavelength at the center of the
-chip. If these arguments aren't given, the currently used grating and
-wavelength of the monochromator are used.
+The function requires that the module for a CCD camera is available that
+returns information about the number of pixels of the CCD chip and the
+distance between pixels. It then returns an array with two elements,
+with the first element being the wavelength at the leftmost pixel of the
+chip and the second element being the wavelength difference between
+neighboring pixels. The function can also be called with up to two
+arguments, an integer for the grating number and the wavelength at the
+center of the chip. If these arguments aren't given, the currently used
+grating and wavelength of the monochromator are used.
 
-To be able to work the function also requires that a calibration for the
-grating has been loaded, either by calling
+For @code{SpectraPro-300i} monochromators it is required thata
+calibration for the grating has been loaded, either by calling
 @code{monochromator_set_calibration()} or
 @code{monochromator_read_calibration()} (see below). If no calibration
 has been loaded for the grating a warning is printed and the returned
@@ -4912,6 +4864,18 @@ for gratings with lower groove densities the deviation gets even larger,
 proportional to the inverse of the groove density. To obtain the exact
 wavelength for a certain pixel on the chip use the function
 @code{monochromator_calc_wavelength()} discussed below.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{monochromator_number_axis}
+@item monochromator_number_axis()
+@findex monochromator_wavenumber_axis()
+This function is similar to the function
+@code{monochromator_wavelength_axis()} but instead of returning values
+to be used for setting a wavelength axis the values are suitable for
+setting up a wavenumber axis.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -5095,14 +5059,17 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_calibrate}
 @item monochromator_calibrate()
 @findex monochromator_calibrate()
-The function is only supported for SpectraPro-300i monochromators. It is
-for use in the dispersion calibration of a grating, i.e.@: the procedure
-where from a set of at least 4 measured positions of known lines (at at
-least two different center wavelengths) the optimum values for the
-inclusion angle, the focal length and the detector angle are determined.
-This function requires that the module for a CCD camera is available
-that returns information about the number of pixels of the CCD chip and
-the distance between pixels.
+The function is takes different arguments for the @code{SpectraPro-300i} and
+the @code{SPEX} monochromator.
+
+For the @code{SpectraPro-300i} it is for use in the dispersion
+calibration of a grating, i.e.@: the procedure where from a set of at
+least 4 measured positions of known lines (at at least two different
+center wavelengths) the optimum values for the inclusion angle, the
+focal length and the detector angle are determined.  This function
+requires that the module for a CCD camera is available that returns
+information about the number of pixels of the CCD chip and the distance
+between pixels.
 
 The function expects a minimum of 5 arguments. The first is the grating
 number (an integer between 1 and the maximum number of installed
@@ -5133,6 +5100,51 @@ After the function found what it guesses to be the optimum paramters it
 returns an (1-dimensional) array with three elements, where the first
 element is the inclusion angle (in degrees), the second element is the
 focal length (in m) and the third is the detector angle (in degrees).
+
+When called without an argument for @code{SpectraPro-300i}
+monochromators the function returns an array with three elements, which
+are the current calibration settings for the inclusion angle (in
+degree), the focal length (in @code{m}) and the detector angle (in degree).
+
+For the @code{SPEX} monochromators it can be used to set an offset
+between the wavelength or -number displayed by the CD2A console and the
+"real", i.e.@: experimentally well-known wavelength or (absolute)
+wavenumber. Once it has been set, all functions will take this offset
+into account when talking with the device.
+
+The second calibration value (the optional second argumumen) to be set
+by the function for @code{SPEX} monochromators is the wavelength or
+-number difference between two pixels of an attached CCD camera.
+
+The offset is taken to be the difference between the "real" position of
+a line and the position where it appears when measured with @code{fsc2}.
+Thus the usual procedure to set the offset is to measure the position of
+a well-known line using @code{fsc2} and then to call the function with
+the difference between the "real" position and the observed position.
+Afterwards @code{fsc2} will automatically take the offset into account
+and in a new measurement the line should seem to appear at the expected
+position.
+
+Please note that the offset can @strong{only} be set for wavenumber
+driven monochromators while using absolute wavenumbers, i.e.@: while no
+laser line position is set! If you want to determine and set a new
+offset first store the current laser line position, switch off use of a
+laser line position by calling @code{monochromator_laser_line()} with a
+zero argument and only after measuring and setting a new offset set the
+laser line position again.
+
+If called without an argument for @code{SPEX} monochromators the
+function returns an array with two elements, representing the cuurent
+calibration setting of the offset (in @code{m} for wavelength driven and
+in @code{cm^-1} for wavenumber driven monochromators) and the wavelength
+or -number difference between two adjacent CCD camera pixels (or
+@code{0} if the value isn't known).
+
+Please note: To set the offset of a @code{SPEX} monochromator to
+@code{0} @strong{don't} pass a zero argument for the offset to the
+function. Instead determine the current offset setting by a call without
+arguments and then call the function again with that offset as the first
+argument!.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.

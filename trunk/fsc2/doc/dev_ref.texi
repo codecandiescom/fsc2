@@ -1899,6 +1899,7 @@ nm}.
 @item @code{monochromator_wavenumber()}       @tab @ref{monochromator_wavenumber}
 @item @code{monochromator_groove_density()}   @tab @ref{monochromator_groove_density}
 @item @code{monochromator_wavelength_axis()}  @tab @ref{monochromator_wavelength_axis}
+@item @code{monochromator_wavenumber_axis()}  @tab @ref{monochromator_wavenumber_axis}
 @item @code{monochromator_calc_wavelength()}  @tab @ref{monochromator_calc_wavelength}
 @item @code{monochromator_set_calibration()}  @tab @ref{monochromator_set_calibration}
 @item @code{monochromator_load_calibration()} @tab @ref{monochromator_load_calibration}
@@ -1939,10 +1940,12 @@ via the CD2A Compudrive (i.e.@: 1249, 1403, 1404, 1680B, 1681B, 1701,
 @item @code{monochromator_wavelength()}       @tab @ref{monochromator_wavelength}
 @item @code{monochromator_wavenumber()}       @tab @ref{monochromator_wavenumber}
 @item @code{monochromator_laser_line()}       @tab @ref{monochromator_laser_line}
-@item @code{monochromator_offset()}           @tab @ref{monochromator_offset}
 @item @code{monochromator_scan_setup()}       @tab @ref{monochromator_scan_setup}
 @item @code{monochromator_start_scan()}       @tab @ref{monochromator_start_scan}
 @item @code{monochromator_scan_step()}        @tab @ref{monochromator_scan_step}
+@item @code{monochromator_wavelength_axis()}  @tab @ref{monochromator_wavelength_axis}
+@item @code{monochromator_wavenumber_axis()}  @tab @ref{monochromator_wavenumber_axis}
+@item @code{monochromator_calibrate()}        @tab @ref{monochromator_calibrate}
 @item @code{monochromator_shutter_limits()}   @tab @ref{monochromator_shutter_limits}
 @item @code{monochromator_groove_density()}   @tab @ref{monochromator_groove_density}
 @end multitable

@@ -28,8 +28,8 @@
 #include "fsc2_module.h"
 
 
-/* Define the following for test runs where no real communication with the
-   monochromator happens */
+/* Define the following for test purposes only where no real communication
+   with the monochromator is supposed to happen */
 
 /*
 #define SPEX_CD2A_TEST
@@ -178,6 +178,7 @@ Var *monochromator_scan_step( Var *v );
 Var *monochromator_laser_line( Var *v );
 Var *monochromator_groove_density( Var *v );
 Var *monochromator_shutter_limits( Var *v );
+Var *monochromator_calibrate( Var *v );
 Var *monochromator_wavelength_axis( Var * v );
 Var *monochromator_wavenumber_axis( Var * v );
 
