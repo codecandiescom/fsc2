@@ -92,8 +92,8 @@ void tds520_do_pre_exp_checks( void )
 		w = w->next;
 	}
 
-	/* If no width is set fro all get the distance of the cursors on the
-	   digitizers screen and use it as the default width. */
+	/* If no width is set for all windows get the distance of the cursors on
+	   the digitizers screen and use it as the default width. */
 
 	if ( tds520.w != NULL && ! is_width )
 	{
