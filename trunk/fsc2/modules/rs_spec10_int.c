@@ -40,11 +40,11 @@ static void rs_spec10_ccd_init( void );
 static void rs_spec10_temperature_init( void );
 
 
-/*----------------------------------------------------------------------*/
-/* Function for initializing everything related to the camera. It first */
-/* tries to find the camera, then opens the device file and finally     */
-/* initializes it and temperature control system.                       */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function for initializing everything related to the camera. It first
+ * tries to find the camera, then opens the device file and finally
+ * initializes it and temperature control system.
+ *----------------------------------------------------------------------*/
 
 void rs_spec10_init_camera( void )
 {
@@ -104,12 +104,12 @@ void rs_spec10_init_camera( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function for initializing the camera. Several properties are compared */
-/* to the values from the configuration file for the module (deviations  */
-/* resulting in an exception) and then several default settings are made */
-/* and capabilities of the camera determined.                            */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for initializing the camera. Several properties are compared
+ * to the values from the configuration file for the module (deviations
+ * resulting in an exception) and then several default settings are made
+ * and capabilities of the camera determined.
+ *-----------------------------------------------------------------------*/
 
 static void rs_spec10_ccd_init( void )
 {
@@ -339,9 +339,9 @@ static void rs_spec10_ccd_init( void )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Function for initializing the temperature control system of the camera */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function for initializing the temperature control system of the camera
+ *------------------------------------------------------------------------*/
 
 static void rs_spec10_temperature_init( void )
 {
@@ -420,10 +420,10 @@ static void rs_spec10_temperature_init( void )
 }
 
 
-/*-------------------------------------------------*/
-/* Function sets the number of clear cycles to be  */
-/* done before a picture is taken with the camera. */
-/*-------------------------------------------------*/
+/*-------------------------------------------------*
+ * Function sets the number of clear cycles to be
+ * done before a picture is taken with the camera.
+ *-------------------------------------------------*/
 
 void rs_spec10_clear_cycles( uns16 cycles )
 {
@@ -444,14 +444,14 @@ void rs_spec10_clear_cycles( uns16 cycles )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function fetches a single picture from the camera. Fetching more */
-/* than a single picture hasn't been implemented because the camera */
-/* has no shutter and only supports CLEAR_PRE_SEQUENCE mode. This   */
-/* means that the CCD can't be cleared between the exposures, so    */
-/* fetching more than one picture would basically be identical to   */
-/* just using a longer exposure time.                               */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function fetches a single picture from the camera. Fetching more
+ * than a single picture hasn't been implemented because the camera
+ * has no shutter and only supports CLEAR_PRE_SEQUENCE mode. This
+ * means that the CCD can't be cleared between the exposures, so
+ * fetching more than one picture would basically be identical to
+ * just using a longer exposure time.
+ *------------------------------------------------------------------*/
 
 uns16 *rs_spec10_get_pic( uns32 *size )
 {
@@ -666,9 +666,9 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 }
 
 
-/*-----------------------------------------------*/
-/* Returns the current temperature of the camera */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Returns the current temperature of the camera
+ *-----------------------------------------------*/
 
 double rs_spec10_get_temperature( void )
 {
@@ -695,9 +695,9 @@ double rs_spec10_get_temperature( void )
 }
 
 
-/*-------------------------------------------*/
-/* Sets a target temperature for the camera. */
-/*-------------------------------------------*/
+/*-------------------------------------------*
+ * Sets a target temperature for the camera.
+ *-------------------------------------------*/
 
 double rs_spec10_set_temperature( double temp )
 {
@@ -725,8 +725,8 @@ double rs_spec10_set_temperature( double temp )
 }
 
 
-/*-----------------------------------------*/
-/*-----------------------------------------*/
+/*-----------------------------------------*
+ *-----------------------------------------*/
 
 void rs_spec10_error_handling( void )
 {

@@ -44,8 +44,8 @@ static double spectrapro_300i_conv( long gn, double cwl, long num_pixels,
 									double pixel_width, double px );
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
 
 int spectrapro_300i_init_hook( void )
 {
@@ -80,8 +80,8 @@ int spectrapro_300i_init_hook( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
 
 int spectrapro_300i_exp_hook( void )
 {
@@ -124,8 +124,8 @@ int spectrapro_300i_exp_hook( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
 
 int spectrapro_300i_end_of_exp_hook( void )
 {
@@ -138,9 +138,9 @@ int spectrapro_300i_end_of_exp_hook( void )
 }
 
 
-/*----------------------------------------------*/
-/* Returns a string with the name of the device */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Returns a string with the name of the device
+ *----------------------------------------------*/
 
 Var_T *monochromator_name( UNUSED_ARG Var_T *v )
 {
@@ -148,9 +148,9 @@ Var_T *monochromator_name( UNUSED_ARG Var_T *v )
 }
 
 
-/*------------------------------------------------------------*/
-/* Function for setting or quering the currently used grating */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function for setting or quering the currently used grating
+ *------------------------------------------------------------*/
 
 Var_T *monochromator_grating( Var_T *v )
 {
@@ -211,13 +211,13 @@ Var_T *monochromator_grating( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function for setting or quering the current turret. If the turret is */
-/* changed also the grating is set to the one at the same position on   */
-/* the new turret (if this is installed) or to one of the gratings      */
-/* installed on the new turret. If there is no grating installed for    */
-/* the new turret the function will return an error.                    */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function for setting or quering the current turret. If the turret is
+ * changed also the grating is set to the one at the same position on
+ * the new turret (if this is installed) or to one of the gratings
+ * installed on the new turret. If there is no grating installed for
+ * the new turret the function will return an error.
+ *----------------------------------------------------------------------*/
 
 Var_T *monochromator_turret( Var_T *v )
 {
@@ -291,11 +291,11 @@ Var_T *monochromator_turret( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function either returns the currently set wavelength (if called */
-/* with no arguments) or moves the grating to a new center wave-   */
-/* length as specified (in meters) by the only argument.           */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function either returns the currently set wavelength (if called
+ * with no arguments) or moves the grating to a new center wave-
+ * length as specified (in meters) by the only argument.
+ *-----------------------------------------------------------------*/
 
 Var_T *monochromator_wavelength( Var_T *v )
 {
@@ -359,11 +359,11 @@ Var_T *monochromator_wavelength( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function either returns the currently set wavenumber (if called */
-/* with no arguments) or moves the grating to a new center wave-   */
-/* number as specified (in cm^-1) by the only argument.            */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function either returns the currently set wavenumber (if called
+ * with no arguments) or moves the grating to a new center wave-
+ * number as specified (in cm^-1) by the only argument.
+ *-----------------------------------------------------------------*/
 
 Var_T *monochromator_wavenumber( Var_T *v )
 {
@@ -410,19 +410,19 @@ Var_T *monochromator_wavenumber( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function for installing or de-installing a grating. First argument */
-/* must be a valid grating number. The second argument is either the  */
-/* string "UNINSTALL" to de-install a grating (in which case the      */
-/* grating number must be the number of an already installed grating) */
-/* or a string with the part number of the grating, i.e. something    */
-/* like "1-120-750". A part number consists of a single digit, a      */
-/* hyphen, a three-digit number for the grooves density, another      */
-/* hyphen and either a number for the blaze wavelength or a string    */
-/* consisting of letters. The string may have not conssist of more    */
-/* than 10 characters. Of course, to install a grating there can't be */
-/* already a grating installed at the same position.                  */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for installing or de-installing a grating. First argument
+ * must be a valid grating number. The second argument is either the
+ * string "UNINSTALL" to de-install a grating (in which case the
+ * grating number must be the number of an already installed grating)
+ * or a string with the part number of the grating, i.e. something
+ * like "1-120-750". A part number consists of a single digit, a
+ * hyphen, a three-digit number for the grooves density, another
+ * hyphen and either a number for the blaze wavelength or a string
+ * consisting of letters. The string may have not conssist of more
+ * than 10 characters. Of course, to install a grating there can't be
+ * already a grating installed at the same position.
+ *--------------------------------------------------------------------*/
 
 Var_T *monochromator_install_grating( Var_T *v )
 {
@@ -500,10 +500,10 @@ Var_T *monochromator_install_grating( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function returns the number of grooves per meter of a grating. */
-/* The only argument must be the number of an installed grating.  */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function returns the number of grooves per meter of a grating.
+ * The only argument must be the number of an installed grating.
+ *----------------------------------------------------------------*/
 
 Var_T *monochromator_groove_density( Var_T *v )
 {
@@ -540,21 +540,21 @@ Var_T *monochromator_groove_density( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* The function loads a calibration for the monochromator from a file.  */
-/* If no argument is passed to the function the tries to open a default */
-/* calibration file with a name that can be set via the definition of   */
-/* "DEFAULT_CALIB_FILE" in the configuration file for the device. If    */
-/* this file name is not an absolute path (i.e. starts with a slash)    */
-/* name of the directory where also the library for the monochromator   */
-/* resides is prepended.                                                */
-/* If there is an argument this must be a string with the name of the   */
-/* calibration file.                                                    */
-/* A calibration file may contain entries for one or more gratings. For */
-/* each grating the offset, inclusion angle, focal length and detector  */
-/* angle must be defined. Take a luck at the default calibration file   */
-/* for the details of the syntax.                                       */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * The function loads a calibration for the monochromator from a file.
+ * If no argument is passed to the function the tries to open a default
+ * calibration file with a name that can be set via the definition of
+ * "DEFAULT_CALIB_FILE" in the configuration file for the device. If
+ * this file name is not an absolute path (i.e. starts with a slash)
+ * name of the directory where also the library for the monochromator
+ * resides is prepended.
+ * If there is an argument this must be a string with the name of the
+ * calibration file.
+ * A calibration file may contain entries for one or more gratings. For
+ * each grating the offset, inclusion angle, focal length and detector
+ * angle must be defined. Take a luck at the default calibration file
+ * for the details of the syntax.
+ *----------------------------------------------------------------------*/
 
 Var_T *monochromator_load_calibration( Var_T * v )
 {
@@ -625,15 +625,15 @@ Var_T *monochromator_load_calibration( Var_T * v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function returns an array of two wavelength values that are suitable */
-/* for use as axis description parameters (start of axis and increment) */
-/* required by by the change_scale() function (if the camera uses       */
-/* binning the second element may have to be multiplied by the          */
-/* x-binning width). Please note: since the axis is not really          */
-/* completely linear, the axis that gets displyed when using these      */
-/* values is not 100% correct!                                          */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function returns an array of two wavelength values that are suitable
+ * for use as axis description parameters (start of axis and increment)
+ * required by by the change_scale() function (if the camera uses
+ * binning the second element may have to be multiplied by the
+ * x-binning width). Please note: since the axis is not really
+ * completely linear, the axis that gets displyed when using these
+ * values is not 100% correct!
+ *----------------------------------------------------------------------*/
 
 Var_T *monochromator_wavelength_axis( Var_T *v )
 {
@@ -759,15 +759,15 @@ Var_T *monochromator_wavelength_axis( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function returns an array of two wavenumber values that are suitable */
-/* for use as axis description parameters (start of axis and increment) */
-/* required by by the change_scale() function (if the camera uses       */
-/* binning the second element may have to be multiplied by the          */
-/* x-binning width). Please note: since the axis is not really          */
-/* completely linear, the axis that gets displyed when using these      */
-/* values is not 100% correct!                                          */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function returns an array of two wavenumber values that are suitable
+ * for use as axis description parameters (start of axis and increment)
+ * required by by the change_scale() function (if the camera uses
+ * binning the second element may have to be multiplied by the
+ * x-binning width). Please note: since the axis is not really
+ * completely linear, the axis that gets displyed when using these
+ * values is not 100% correct!
+ *----------------------------------------------------------------------*/
 
 Var_T *monochromator_wavenumber_axis( Var_T * v )
 {
@@ -809,15 +809,15 @@ Var_T *monochromator_wavenumber_axis( Var_T * v )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Function allows to calculate the exact wavelength for a pixel position */
-/* on the CCD cameras chip. It takes up to three arguments. The first     */
-/* argument is either a single value or an array of pixel positions for   */
-/* which the corresponding wavelength is to be calculated. The second,    */
-/* optional argument is the grating used and the third, optional argument */
-/* is the center wavelength. If the center wavelength or both optional    */
-/* arguments are not specified the currently set values are used.         */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function allows to calculate the exact wavelength for a pixel position
+ * on the CCD cameras chip. It takes up to three arguments. The first
+ * argument is either a single value or an array of pixel positions for
+ * which the corresponding wavelength is to be calculated. The second,
+ * optional argument is the grating used and the third, optional argument
+ * is the center wavelength. If the center wavelength or both optional
+ * arguments are not specified the currently set values are used.
+ *------------------------------------------------------------------------*/
 
 Var_T *monochromator_calc_wavelength( Var_T *v )
 {
@@ -960,12 +960,12 @@ Var_T *monochromator_calc_wavelength( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function converts the indices (relative to the left hand edge */
-/* of the CCD chip, where the index starts of with 1)  stored in */
-/* array 'src' to the wavelength at that positions, writing them */
-/* into array 'dest'.                                            */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function converts the indices (relative to the left hand edge
+ * of the CCD chip, where the index starts of with 1)  stored in
+ * array 'src' to the wavelength at that positions, writing them
+ * into array 'dest'.
+ *---------------------------------------------------------------*/
 
 static void spectrapro_300i_arr_conv( long gn, double cwl, long num_pixels,
 									  double pixel_width, Var_T *src,
@@ -1002,10 +1002,10 @@ static void spectrapro_300i_arr_conv( long gn, double cwl, long num_pixels,
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function takes an index (relative to the left edge of the CCD chip */
-/* and starting there with 1) into the wavelength at that position.   */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function takes an index (relative to the left edge of the CCD chip
+ * and starting there with 1) into the wavelength at that position.
+ *--------------------------------------------------------------------*/
 
 static double spectrapro_300i_conv( long gn, double cwl, long num_pixels,
 									double pixel_width, double px )
@@ -1047,17 +1047,17 @@ static double spectrapro_300i_conv( long gn, double cwl, long num_pixels,
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function allows to set a new calibration for one of the gratings */
-/* manually, i.e. instead of reading them from a file. It expects   */
-/* five arguments:                                                  */
-/* 1. grating number (grating must be installed)                    */
-/* 2. init offset value (zero position of grating, within [-1,1])   */
-/* 3. init adjust value (rotation speed of grating, within [-1,1])  */
-/* 4. inclusion angle (in degree)                                   */
-/* 5. focal length (in meters)                                      */
-/* 6. detector angle (in degree)                                    */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function allows to set a new calibration for one of the gratings
+ * manually, i.e. instead of reading them from a file. It expects
+ * five arguments:
+ * 1. grating number (grating must be installed)
+ * 2. init offset value (zero position of grating, within [-1,1])
+ * 3. init adjust value (rotation speed of grating, within [-1,1])
+ * 4. inclusion angle (in degree)
+ * 5. focal length (in meters)
+ * 6. detector angle (in degree)
+ *------------------------------------------------------------------*/
 
 Var_T *monochromator_set_calibration( Var_T *v )
 {
@@ -1163,14 +1163,14 @@ Var_T *monochromator_set_calibration( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* The function either returns or sets the value of the zero angle offset */
-/* for one of the gratings. The actual value is in the interval [-1,1],   */
-/* representing the range of of deviations that can be set (there is no   */
-/* obvious relation between this value and the offset angle).             */
-/* This function should only be used during the calibration of the        */
-/* monochromator.                                                         */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * The function either returns or sets the value of the zero angle offset
+ * for one of the gratings. The actual value is in the interval [-1,1],
+ * representing the range of of deviations that can be set (there is no
+ * obvious relation between this value and the offset angle).
+ * This function should only be used during the calibration of the
+ * monochromator.
+ *------------------------------------------------------------------------*/
 
 Var_T *monochromator_zero_offset( Var_T *v )
 {
@@ -1240,17 +1240,17 @@ Var_T *monochromator_zero_offset( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* The function either returns or sets the value that determines the */
-/* wavelength the monochromator moves to when it gets send a new     */
-/* wavelength. There is a default value, but to be able to do a      */
-/* calibration this default value is adjustable in a certain range.  */
-/* Using this function this deviation can be determined or set. The  */
-/* deviation is a value in the interval [-1,1] (0 stands for the     */
-/* default value).                                                   */
-/* This function should only be used during the calibration of the   */
-/* monochromator.                                                    */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * The function either returns or sets the value that determines the
+ * wavelength the monochromator moves to when it gets send a new
+ * wavelength. There is a default value, but to be able to do a
+ * calibration this default value is adjustable in a certain range.
+ * Using this function this deviation can be determined or set. The
+ * deviation is a value in the interval [-1,1] (0 stands for the
+ * default value).
+ * This function should only be used during the calibration of the
+ * monochromator.
+ *-------------------------------------------------------------------*/
 
 Var_T *monochromator_grating_adjust( Var_T *v )
 {
@@ -1317,35 +1317,35 @@ Var_T *monochromator_grating_adjust( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function for calculating the calibration values of a grating of the  */
-/* monochromator. It takes the results of at least four measurements    */
-/* of pixel offsets for known lines from the center of the detector (at */
-/* possibly different center wavelengths) and tries to to find the      */
-/* values for the inclusion angle, focal length and detector angle that */
-/* reproduce these experimental values with the lowest deviation by     */
-/* doing a simplex minimization. Unfortunately, when trying to minimize */
-/* all three parameters data at once with only slightly noisy one runs  */
-/* into the simplex normally ends up with completely unrealistic values.*/
-/* Thus we have to minimze the three parameters individually, keeping   */
-/* both other fixed and starting with the inclusion angle, followed by  */
-/* the focal length and ending with the detector angle.                 */
-/* Input parameters:                                                    */
-/*  1. number of the grating that has been used                         */
-/*  2. array of wavelengths of the measured lines                       */
-/*  3. array of center wavelengths for the measured value               */
-/*  4. array of diffraction order for the measured values               */
-/*  5. array of measured pixel offsets (if necessary already corrected  */
-/*     for center wavelegth offsets)                                    */
-/* The following arguments are optional:                                */
-/*  6. end of fit criterion value                                       */
-/*  7. start value for fit of inclusion angle                           */
-/*  8. start value for fit of focal length                              */
-/*  9. start value for fit of detector angle                            */
-/* 10. start deviation for inclusion angle                              */
-/* 11. start deviation for focal length                                 */
-/* 12. start deviation for detector angle                               */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function for calculating the calibration values of a grating of the
+ * monochromator. It takes the results of at least four measurements
+ * of pixel offsets for known lines from the center of the detector (at
+ * possibly different center wavelengths) and tries to to find the
+ * values for the inclusion angle, focal length and detector angle that
+ * reproduce these experimental values with the lowest deviation by
+ * doing a simplex minimization. Unfortunately, when trying to minimize
+ * all three parameters data at once with only slightly noisy one runs
+ * into the simplex normally ends up with completely unrealistic values.
+ * Thus we have to minimze the three parameters individually, keeping
+ * both other fixed and starting with the inclusion angle, followed by
+ * the focal length and ending with the detector angle.
+ * Input parameters:
+ *  1. number of the grating that has been used
+ *  2. array of wavelengths of the measured lines
+ *  3. array of center wavelengths for the measured value
+ *  4. array of diffraction order for the measured values
+ *  5. array of measured pixel offsets (if necessary already corrected
+ *     for center wavelegth offsets)
+ * The following arguments are optional:
+ *  6. end of fit criterion value
+ *  7. start value for fit of inclusion angle
+ *  8. start value for fit of focal length
+ *  9. start value for fit of detector angle
+ * 10. start deviation for inclusion angle
+ * 11. start deviation for focal length
+ * 12. start deviation for detector angle
+ *----------------------------------------------------------------------*/
 
 Var_T *monochromator_calibrate( Var_T *v )
 {
@@ -1672,4 +1672,3 @@ Var_T *monochromator_calibrate( Var_T *v )
  * tags-file-name: "../TAGS"
  * End:
  */
-

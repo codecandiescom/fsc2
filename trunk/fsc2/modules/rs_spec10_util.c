@@ -29,9 +29,9 @@
 #define C2K_OFFSET   273.16         /* offset between Celsius and Kelvin */
 
 
-/*------------------------------------------------------------------*/
-/* Function for reading in the last stored state of the CCD camera. */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for reading in the last stored state of the CCD camera.
+ *------------------------------------------------------------------*/
 
 bool rs_spec10_read_state( void )
 {
@@ -226,9 +226,9 @@ bool rs_spec10_read_state( void )
 }
 
 
-/*------------------------------------------------------------*/
-/* Function for writing the state of the CCD camera to a file */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function for writing the state of the CCD camera to a file
+ *------------------------------------------------------------*/
 
 bool rs_spec10_store_state( void )
 {
@@ -301,9 +301,9 @@ bool rs_spec10_store_state( void )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function for converting a temperature from Kelvin to degree Celsius */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function for converting a temperature from Kelvin to degree Celsius
+ *---------------------------------------------------------------------*/
 
 double rs_spec10_k2c( double tk )
 {
@@ -311,9 +311,9 @@ double rs_spec10_k2c( double tk )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function for converting a temperature from degree Celsius to Kelvin */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function for converting a temperature from degree Celsius to Kelvi
+ *---------------------------------------------------------------------*/
 
 double rs_spec10_c2k( double tc )
 {
@@ -321,10 +321,10 @@ double rs_spec10_c2k( double tc )
 }
 
 
-/*-------------------------------------------------*/
-/* Function for converting a temperature in Kelvin */
-/* to a value that can be send to the device.      */
-/*-------------------------------------------------*/
+/*-------------------------------------------------*
+ * Function for converting a temperature in Kelvin
+ * to a value that can be send to the device.
+ *-------------------------------------------------*/
 
 int16 rs_spec10_k2ic( double tk )
 {
@@ -332,10 +332,10 @@ int16 rs_spec10_k2ic( double tk )
 }
 
 
-/*-------------------------------------------------------*/
-/* Function for converting a temperature from the value  */
-/* returned from the device into a temperature in Kelvin */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function for converting a temperature from the value
+ * returned from the device into a temperature in Kelvin
+ *-------------------------------------------------------*/
 
 double rs_spec10_ic2k( int16 tci )
 {
@@ -343,13 +343,13 @@ double rs_spec10_ic2k( int16 tci )
 }
 
 
-/*----------------------------------------------------------*/
-/* Function for testing if a certain attribute is available */
-/* and if it can be only read, only written or both. It     */
-/* returns FAIL if the attribute isn't available, otherwise */
-/* OK and the 'acc' pointer is set to either ACC_READ_ONLY, */
-/* ACC_WRITE_ONLY or ACC_READ_WRITE.                        */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function for testing if a certain attribute is available
+ * and if it can be only read, only written or both. It
+ * returns FAIL if the attribute isn't available, otherwise
+ * OK and the 'acc' pointer is set to either ACC_READ_ONLY,
+ * ACC_WRITE_ONLY or ACC_READ_WRITE.
+ *----------------------------------------------------------*/
 
 bool rs_spec10_param_access( uns32 param, uns16 *acc )
 {
@@ -370,11 +370,11 @@ bool rs_spec10_param_access( uns32 param, uns16 *acc )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function for writing a time value into a string in a pretty form. */
-/* Please note that the buffer for that string is static, i.e. the   */
-/* string is overwritten on each invokation of the function.         */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for writing a time value into a string in a pretty form.
+ * Please note that the buffer for that string is static, i.e. the
+ * string is overwritten on each invokation of the function.
+ *-------------------------------------------------------------------*/
 
 const char *rs_spec10_ptime( double p_time )
 {
@@ -391,19 +391,19 @@ const char *rs_spec10_ptime( double p_time )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* The following functions are part of a dirty hack to get around the */
-/* problem that the PVCAM library does not set the close-on-exec flag */
-/* for the device file. The first function builds a list of all open  */
-/* file descriptor from the entries in the /proc/self/fd directory of */
-/* the current process. Then the function for initialisation of the   */
-/* board gets called, opening the device file. Afterwards, the second */
-/* function is invoked that compares the fd's in the list with the    */
-/* entries in the /proc/self/fd directory and sets the close-on-exec  */
-/* flag for the new fd (i.e. the fd that wasn't already in the old    */
-/* list). Of course this will only work on Linux but fails (hopefully */
-/* benignly) on other systems.                                        */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * The following functions are part of a dirty hack to get around the
+ * problem that the PVCAM library does not set the close-on-exec flag
+ * for the device file. The first function builds a list of all open
+ * file descriptor from the entries in the /proc/self/fd directory of
+ * the current process. Then the function for initialisation of the
+ * board gets called, opening the device file. Afterwards, the second
+ * function is invoked that compares the fd's in the list with the
+ * entries in the /proc/self/fd directory and sets the close-on-exec
+ * flag for the new fd (i.e. the fd that wasn't already in the old
+ * list). Of course this will only work on Linux but fails (hopefully
+ * benignly) on other systems.
+ *--------------------------------------------------------------------*/
 
 int *rs_spec10_get_fd_list( void )
 {
@@ -460,8 +460,8 @@ int *rs_spec10_get_fd_list( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
 void rs_spec10_close_on_exec_hack( int *fd_list )
 {

@@ -130,9 +130,9 @@ static void sr530_failure( void );
 
 
 
-/*------------------------------------*/
-/* Init hook function for the module. */
-/*------------------------------------*/
+/*------------------------------------*
+ * Init hook function for the module.
+ *------------------------------------*/
 
 int sr530_init_hook( void )
 {
@@ -159,9 +159,9 @@ int sr530_init_hook( void )
 }
 
 
-/*-----------------------------------*/
-/* Test hook function for the module */
-/*-----------------------------------*/
+/*-----------------------------------*
+ * Test hook function for the module
+ *-----------------------------------*/
 
 int sr530_test_hook( void )
 {
@@ -170,9 +170,9 @@ int sr530_test_hook( void )
 }
 
 
-/*--------------------------------------------------*/
-/* Start of experiment hook function for the module */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Start of experiment hook function for the module
+ *--------------------------------------------------*/
 
 int sr530_exp_hook( void )
 {
@@ -193,9 +193,9 @@ int sr530_exp_hook( void )
 }
 
 
-/*------------------------------------------------*/
-/* End of experiment hook function for the module */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * End of experiment hook function for the module
+ *------------------------------------------------*/
 
 int sr530_end_of_exp_hook( void )
 {
@@ -212,8 +212,8 @@ int sr530_end_of_exp_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *lockin_name( UNUSED_ARG Var_T *v )
 {
@@ -221,14 +221,14 @@ Var_T *lockin_name( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function returns the lock-in voltage(s) in V, with the range depending  */
-/* on the current sensitivity setting. It may be called with no parameter, */
-/* in which case the voltage at channel 1 is returned, with one parameter, */
-/* which designates the channel number (1 or 2), which returns the voltage */
-/* at the selected channel, or two parameters, both designating channels,  */
-/* which will return an array of the voltages at both the channels.        */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function returns the lock-in voltage(s) in V, with the range depending
+ * on the current sensitivity setting. It may be called with no parameter,
+ * in which case the voltage at channel 1 is returned, with one parameter,
+ * which designates the channel number (1 or 2), which returns the voltage
+ * at the selected channel, or two parameters, both designating channels,
+ * which will return an array of the voltages at both the channels.
+ *-------------------------------------------------------------------------*/
 
 Var_T *lockin_get_data( Var_T *v )
 {
@@ -250,8 +250,8 @@ Var_T *lockin_get_data( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ *---------------------------------------------------------------------*/
 
 static double get_single_channel_data( Var_T *v )
 {
@@ -278,12 +278,12 @@ static double get_single_channel_data( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function returns the voltage at one or more of the 4 ADC ports  */
-/* on the backside of the lock-in amplifier. The argument(s) must  */
-/* be integers between 1 and 4.                                    */
-/* Returned values are in the interval [ -10.24V, +10.24V ].       */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function returns the voltage at one or more of the 4 ADC ports
+ * on the backside of the lock-in amplifier. The argument(s) must
+ * be integers between 1 and 4.
+ * Returned values are in the interval [ -10.24V, +10.24V ].
+ *-----------------------------------------------------------------*/
 
 Var_T *lockin_get_adc_data( Var_T *v )
 {
@@ -306,12 +306,12 @@ Var_T *lockin_get_adc_data( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Returns or sets sensitivity of the lock-in amplifier. If called with no */
-/* argument the current sensitivity is returned, otherwise the sensitivity */
-/* is set to the argument. By using the EXPAND button the sensitivity can  */
-/* be increased by a factor of 10.                                         */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Returns or sets sensitivity of the lock-in amplifier. If called with no
+ * argument the current sensitivity is returned, otherwise the sensitivity
+ * is set to the argument. By using the EXPAND button the sensitivity can
+ * be increased by a factor of 10.
+ *-------------------------------------------------------------------------*/
 
 Var_T *lockin_sensitivity( Var_T *v )
 {
@@ -417,11 +417,11 @@ Var_T *lockin_sensitivity( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Returns or sets the time constant of the lock-in amplifier. If called  */
-/* without an argument the time constant is returned (in secs). If called */
-/* with an argumet the time constant is set to this value.                */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Returns or sets the time constant of the lock-in amplifier. If called
+ * without an argument the time constant is returned (in secs). If called
+ * with an argumet the time constant is set to this value.
+ *------------------------------------------------------------------------*/
 
 Var_T *lockin_time_constant( Var_T *v )
 {
@@ -511,13 +511,13 @@ Var_T *lockin_time_constant( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Returns or sets the phase of the lock-in amplifier. If called   */
-/* without an argument the current phase setting is returned (in   */
-/* degree between 0 and 359). Otherwise the phase is set to value  */
-/* passed to the function (after conversion to 0-359 degree range) */
-/* and the value the phase is set to is returned.                  */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Returns or sets the phase of the lock-in amplifier. If called
+ * without an argument the current phase setting is returned (in
+ * degree between 0 and 359). Otherwise the phase is set to value
+ * passed to the function (after conversion to 0-359 degree range)
+ * and the value the phase is set to is returned.
+ *-----------------------------------------------------------------*/
 
 Var_T *lockin_phase( Var_T *v )
 {
@@ -567,10 +567,10 @@ Var_T *lockin_phase( Var_T *v )
 }
 
 
-/*------------------------------------------------------------*/
-/* Function returns the reference frequency, can only be used */
-/* for queries.                                               */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function returns the reference frequency, can only be used
+ * for queries.
+ *------------------------------------------------------------*/
 
 Var_T *lockin_ref_freq( Var_T *v )
 {
@@ -593,14 +593,14 @@ Var_T *lockin_ref_freq( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Function sets or returns the voltage at one of the 2 DAC  */
-/* ports on the backside of the lock-in amplifier. The first */
-/* argument must be the channel number, either 5 or 6, the   */
-/* second the voltage in the range between -10.24 V and      */
-/* +10.24 V. If there isn't a second argument the set DAC    */
-/* voltage is returned (which is initially set to 0 V).      */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function sets or returns the voltage at one of the 2 DAC
+ * ports on the backside of the lock-in amplifier. The first
+ * argument must be the channel number, either 5 or 6, the
+ * second the voltage in the range between -10.24 V and
+ * +10.24 V. If there isn't a second argument the set DAC
+ * voltage is returned (which is initially set to 0 V).
+ *-----------------------------------------------------------*/
 
 Var_T *lockin_dac_voltage( Var_T *v )
 {
@@ -659,8 +659,8 @@ Var_T *lockin_dac_voltage( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 Var_T *lockin_lock_keyboard( Var_T *v )
 {
@@ -682,8 +682,8 @@ Var_T *lockin_lock_keyboard( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *lockin_command( Var_T *v )
 {
@@ -720,10 +720,10 @@ Var_T *lockin_command( Var_T *v )
 /******************************************************/
 
 
-/*------------------------------------------------------------------*/
-/* Function initialises the Stanford lock-in amplifier and tests if */
-/* it can be accessed by asking it to send its status byte.         */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function initialises the Stanford lock-in amplifier and tests if
+ * it can be accessed by asking it to send its status byte.
+ *------------------------------------------------------------------*/
 
 bool sr530_init( const char *name )
 {
@@ -775,9 +775,9 @@ bool sr530_init( const char *name )
 }
 
 
-/*------------------------------------------------------------*/
-/* lockin_data() returns the measured voltage of the lock-in. */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * lockin_data() returns the measured voltage of the lock-in.
+ *------------------------------------------------------------*/
 
 double sr530_get_data( int channel )
 {
@@ -795,11 +795,11 @@ double sr530_get_data( int channel )
 }
 
 
-/*----------------------------------------------------------*/
-/* lockin_get_adc() returns the value of the voltage at one */
-/* of the 4 ADC ports.                                      */
-/* -> Number of the ADC channel (1-4)                       */
-/*-------------------------- -------------------------------*/
+/*----------------------------------------------------------*
+ * lockin_get_adc() returns the value of the voltage at one
+ * of the 4 ADC ports.
+ * -> Number of the ADC channel (1-4)
+ *----------------------------------------------------------*/
 
 double sr530_get_adc_data( long channel )
 {
@@ -814,9 +814,9 @@ double sr530_get_adc_data( long channel )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function determines the sensitivity setting of the lock-in amplifier. */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function determines the sensitivity setting of the lock-in amplifier.
+ *-----------------------------------------------------------------------*/
 
 double sr530_get_sens( void )
 {
@@ -842,13 +842,13 @@ double sr530_get_sens( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function sets the sensitivity of the lock-in amplifier to one of the */
-/* valid values. The parameter can be in the range from 0 to 23,  where */
-/* 0 is 0.5 V and 23 is 10 nV - these and the other values in between   */
-/* are listed in the global array 'sens_list' at the start of the file. */
-/* To achieve sensitivities below 100 nV EXPAND has to switched on.     */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function sets the sensitivity of the lock-in amplifier to one of the
+ * valid values. The parameter can be in the range from 0 to 23,  where
+ * 0 is 0.5 V and 23 is 10 nV - these and the other values in between
+ * are listed in the global array 'sens_list' at the start of the file.
+ * To achieve sensitivities below 100 nV EXPAND has to switched on.
+ *----------------------------------------------------------------------*/
 
 void sr530_set_sens( int sens_index )
 {
@@ -883,11 +883,11 @@ void sr530_set_sens( int sens_index )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function returns the current time constant of the lock-in amplifier. */
-/* See also the global array 'tc_list' with the possible time constants */
-/* at the start of the file.                                            */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function returns the current time constant of the lock-in amplifier.
+ * See also the global array 'tc_list' with the possible time constants
+ * at the start of the file.
+ *----------------------------------------------------------------------*/
 
 double sr530_get_tc( void )
 {
@@ -901,12 +901,12 @@ double sr530_get_tc( void )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function sets the time constant (plus the post time constant) to one    */
-/* of the valid values. The parameter can be in the range from 0 to 10,    */
-/* where 0 is 1 ms and 10 is 100 s - these and the other values in between */
-/* are listed in the global array 'tc_list' (cf. start of file)            */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function sets the time constant (plus the post time constant) to one
+ * of the valid values. The parameter can be in the range from 0 to 10,
+ * where 0 is 1 ms and 10 is 100 s - these and the other values in between
+ * are listed in the global array 'tc_list' (cf. start of file)
+ *-------------------------------------------------------------------------*/
 
 void sr530_set_tc( int tc_index )
 {
@@ -928,10 +928,10 @@ void sr530_set_tc( int tc_index )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Function returns the current phase setting of the lock-in */
-/* amplifier (in degree between 0 and 359).                  */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function returns the current phase setting of the lock-in
+ * amplifier (in degree between 0 and 359).
+ *-----------------------------------------------------------*/
 
 double sr530_get_phase( void )
 {
@@ -954,9 +954,9 @@ double sr530_get_phase( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Functions sets the phase to a value between 0 and 360 degree. */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Functions sets the phase to a value between 0 and 360 degree.
+ *---------------------------------------------------------------*/
 
 double sr530_set_phase( double phase )
 {
@@ -969,9 +969,9 @@ double sr530_set_phase( double phase )
 }
 
 
-/*------------------------------------------*/
-/* Function returns the reference frequency */
-/*------------------------------------------*/
+/*------------------------------------------*
+ * Function returns the reference frequency
+ *------------------------------------------*/
 
 static double sr530_get_ref_freq( void )
 {
@@ -985,9 +985,9 @@ static double sr530_get_ref_freq( void )
 }
 
 
-/*----------------------------------------*/
-/* Functions sets the DAC output voltage. */
-/*----------------------------------------*/
+/*----------------------------------------*
+ * Functions sets the DAC output voltage.
+ *----------------------------------------*/
 
 static double sr530_set_dac_voltage( long channel, double voltage )
 {
@@ -1010,8 +1010,8 @@ static double sr530_set_dac_voltage( long channel, double voltage )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 static void sr530_lock_state( bool lock )
 {
@@ -1023,8 +1023,8 @@ static void sr530_lock_state( bool lock )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static bool sr530_command( const char *cmd )
 {
@@ -1034,8 +1034,8 @@ static bool sr530_command( const char *cmd )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static bool sr530_talk( const char *cmd, char *reply, long *length )
 {
@@ -1046,8 +1046,8 @@ static bool sr530_talk( const char *cmd, char *reply, long *length )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 static void sr530_failure( void )
 {

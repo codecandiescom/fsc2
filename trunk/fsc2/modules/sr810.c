@@ -229,9 +229,9 @@ static void sr810_failure( void );
 
 
 
-/*-----------------------------------*/
-/* Init hook function for the module */
-/*-----------------------------------*/
+/*-----------------------------------*
+ * Init hook function for the module
+ *-----------------------------------*/
 
 int sr810_init_hook( void )
 {
@@ -278,9 +278,9 @@ int sr810_init_hook( void )
 }
 
 
-/*-----------------------------------*/
-/* Test hook function for the module */
-/*-----------------------------------*/
+/*-----------------------------------*
+ * Test hook function for the module
+ *-----------------------------------*/
 
 int sr810_test_hook( void )
 {
@@ -289,9 +289,9 @@ int sr810_test_hook( void )
 }
 
 
-/*--------------------------------------------------*/
-/* Start of experiment hook function for the module */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Start of experiment hook function for the module
+ *--------------------------------------------------*/
 
 int sr810_exp_hook( void )
 {
@@ -310,9 +310,9 @@ int sr810_exp_hook( void )
 }
 
 
-/*------------------------------------------------*/
-/* End of experiment hook function for the module */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * End of experiment hook function for the module
+ *------------------------------------------------*/
 
 int sr810_end_of_exp_hook( void )
 {
@@ -334,8 +334,8 @@ int sr810_end_of_exp_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *lockin_name( UNUSED_ARG Var_T *v )
 {
@@ -445,12 +445,12 @@ Var_T *lockin_get_data( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function returns the voltage at one of the 4 ADC ports on the */
-/* backside of the lock-in amplifier. The argument must be an    */
-/* integer between 1 and 4.                                      */
-/* Returned values are in the range between -10.5 V and +10.5 V. */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function returns the voltage at one of the 4 ADC ports on the
+ * backside of the lock-in amplifier. The argument must be an
+ * integer between 1 and 4.
+ * Returned values are in the range between -10.5 V and +10.5 V.
+ *---------------------------------------------------------------*/
 
 Var_T *lockin_get_adc_data( Var_T *v )
 {
@@ -473,14 +473,14 @@ Var_T *lockin_get_adc_data( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Function sets or returns the voltage at one of the 4 DAC  */
-/* ports on the backside of the lock-in amplifier. The first */
-/* argument must be an integer between 1 and 4, the second   */
-/* the voltage in the range between -10.5 V and +10.5 V. If  */
-/* there isn't a second argument the set DAC voltage is      */
-/* returned (which is initially set to 0 V).                 */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function sets or returns the voltage at one of the 4 DAC
+ * ports on the backside of the lock-in amplifier. The first
+ * argument must be an integer between 1 and 4, the second
+ * the voltage in the range between -10.5 V and +10.5 V. If
+ * there isn't a second argument the set DAC voltage is
+ * returned (which is initially set to 0 V).
+ *-----------------------------------------------------------*/
 
 Var_T *lockin_dac_voltage( Var_T *v )
 {
@@ -536,11 +536,11 @@ Var_T *lockin_dac_voltage( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Returns or sets sensitivity of the lock-in amplifier. If called with no */
-/* argument the current sensitivity is returned, otherwise the sensitivity */
-/* is set to the argument.                                                 */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Returns or sets sensitivity of the lock-in amplifier. If called with no
+ * argument the current sensitivity is returned, otherwise the sensitivity
+ * is set to the argument.
+ *-------------------------------------------------------------------------*/
 
 Var_T *lockin_sensitivity( Var_T *v )
 {
@@ -649,11 +649,11 @@ Var_T *lockin_sensitivity( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Returns or sets the time constant of the lock-in amplifier. If called  */
-/* without an argument the time constant is returned (in secs). If called */
-/* with an argumet the time constant is set to this value.                */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Returns or sets the time constant of the lock-in amplifier. If called
+ * without an argument the time constant is returned (in secs). If called
+ * with an argumet the time constant is set to this value.
+ *------------------------------------------------------------------------*/
 
 Var_T *lockin_time_constant( Var_T *v )
 {
@@ -758,13 +758,13 @@ Var_T *lockin_time_constant( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Returns or sets the phase of the lock-in amplifier. If called   */
-/* without an argument the current phase setting is returned (in   */
-/* degree between 0 and 359). Otherwise the phase is set to value  */
-/* passed to the function (after conversion to 0-359 degree range) */
-/* and the value the phase is set to is returned.                  */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Returns or sets the phase of the lock-in amplifier. If called
+ * without an argument the current phase setting is returned (in
+ * degree between 0 and 359). Otherwise the phase is set to value
+ * passed to the function (after conversion to 0-359 degree range)
+ * and the value the phase is set to is returned.
+ *-----------------------------------------------------------------*/
 
 Var_T *lockin_phase( Var_T *v )
 {
@@ -817,9 +817,9 @@ Var_T *lockin_phase( Var_T *v )
 }
 
 
-/*-----------------------------------------*/
-/* Sets or returns the harmonic to be used */
-/*-----------------------------------------*/
+/*-----------------------------------------*
+ * Sets or returns the harmonic to be used
+ *-----------------------------------------*/
 
 Var_T *lockin_harmonic( Var_T *v )
 {
@@ -872,8 +872,8 @@ Var_T *lockin_harmonic( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ *------------------------------------------------------------------*/
 
 Var_T *lockin_ref_mode( UNUSED_ARG Var_T *v )
 {
@@ -883,9 +883,9 @@ Var_T *lockin_ref_mode( UNUSED_ARG Var_T *v )
 }
 
 
-/*--------------------------------------------------*/
-/* Sets or returns the lock-in modulation frequency */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Sets or returns the lock-in modulation frequency
+ *--------------------------------------------------*/
 
 Var_T *lockin_ref_freq( Var_T *v )
 {
@@ -952,8 +952,8 @@ Var_T *lockin_ref_freq( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ *------------------------------------------------------------------*/
 
 Var_T *lockin_ref_level( Var_T *v )
 {
@@ -998,8 +998,8 @@ Var_T *lockin_ref_level( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 Var_T *lockin_auto_setup( Var_T *v )
 {
@@ -1166,8 +1166,8 @@ Var_T *lockin_auto_setup( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 Var_T *lockin_get_sample_time( UNUSED_ARG Var_T *v )
 {
@@ -1201,8 +1201,8 @@ Var_T *lockin_get_sample_time( UNUSED_ARG Var_T *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 Var_T *lockin_auto_acquisition( Var_T *v )
 {
@@ -1231,8 +1231,8 @@ Var_T *lockin_auto_acquisition( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 Var_T *lockin_lock_keyboard( Var_T *v )
 {
@@ -1254,8 +1254,8 @@ Var_T *lockin_lock_keyboard( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *lockin_command( Var_T *v )
 {
@@ -1292,9 +1292,9 @@ Var_T *lockin_command( Var_T *v )
 /******************************************************/
 
 
-/*--------------------------------------------------------------------------*/
-/* Function initialises the lock-in amplifier at the start of the experiment */
-/*---------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Function initialises the lock-in amplifier at the start of the experiment
+ *---------------------------------------------------------------------------*/
 
 static bool sr810_init( const char *name )
 {
@@ -1388,9 +1388,9 @@ static bool sr810_init( const char *name )
 }
 
 
-/*----------------------------------------------------------------*/
-/* lockin_get_data() returns the measured voltage of the lock-in. */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * lockin_get_data() returns the measured voltage of the lock-in.
+ *----------------------------------------------------------------*/
 
 static double sr810_get_data( void )
 {
@@ -1412,9 +1412,9 @@ static double sr810_get_data( void )
 }
 
 
-/*------------------------------------------------------------*/
-/* lockin_data() returns the measured voltage of the lock-in. */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * lockin_data() returns the measured voltage of the lock-in.
+ *------------------------------------------------------------*/
 
 static void sr810_get_xy_data( double *data, long *channels, int num_channels )
 {
@@ -1473,8 +1473,8 @@ static void sr810_get_xy_data( double *data, long *channels, int num_channels )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
 
 static void sr810_get_xy_auto_data( double *data, long *channels,
 									int num_channels )
@@ -1536,11 +1536,11 @@ static void sr810_get_xy_auto_data( double *data, long *channels,
 }
 
 
-/*----------------------------------------------------------*/
-/* lockin_get_adc() returns the value of the voltage at one */
-/* of the 4 ADC ports.                                      */
-/* -> Number of the ADC channel (1-4)                       */
-/*-------------------------- -------------------------------*/
+/*----------------------------------------------------------*
+ * lockin_get_adc() returns the value of the voltage at one
+ * of the 4 ADC ports.
+ * -> Number of the ADC channel (1-4)
+ *----------------------------------------------------------*/
 
 static double sr810_get_adc_data( long channel )
 {
@@ -1557,11 +1557,11 @@ static double sr810_get_adc_data( long channel )
 }
 
 
-/*------------------------------------------------------*/
-/* Function sets the voltage at one of the 4 DAC ports. */
-/* -> Number of the DAC channel (1-4)                   */
-/* -> Voltage to be set (-10.5 V - +10.5 V)             */
-/*-------------------------- ---------------------------*/
+/*------------------------------------------------------*
+ * Function sets the voltage at one of the 4 DAC ports.
+ * -> Number of the DAC channel (1-4)
+ * -> Voltage to be set (-10.5 V - +10.5 V)
+ *------------------------------------------------------*/
 
 static double sr810_set_dac_data( long port, double voltage )
 {
@@ -1577,10 +1577,10 @@ static double sr810_set_dac_data( long port, double voltage )
 }
 
 
-/*---------------------------------------------------------*/
-/* Function returns the voltage at one of the 4 DAC ports. */
-/* -> Number of the DAC channel (1-4)                      */
-/*-------------------------- ------------------------------*/
+/*---------------------------------------------------------*
+ * Function returns the voltage at one of the 4 DAC ports.
+ * -> Number of the DAC channel (1-4)
+ *---------------------------------------------------------*/
 
 static double sr810_get_dac_data( long port )
 {
@@ -1597,9 +1597,9 @@ static double sr810_get_dac_data( long port )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function determines the sensitivity setting of the lock-in amplifier. */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function determines the sensitivity setting of the lock-in amplifier.
+ *-----------------------------------------------------------------------*/
 
 static double sr810_get_sens( void )
 {
@@ -1617,12 +1617,12 @@ static double sr810_get_sens( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function sets the sensitivity of the lock-in amplifier to one of the */
-/* valid values. The parameter can be in the range from 0 to 26,  where */
-/* 0 is 2 nV and 26 is 1 V - these and the other values in between are  */
-/* listed in the global array 'sens_list' at the start of the file.     */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function sets the sensitivity of the lock-in amplifier to one of the
+ * valid values. The parameter can be in the range from 0 to 26,  where
+ * 0 is 2 nV and 26 is 1 V - these and the other values in between are
+ * listed in the global array 'sens_list' at the start of the file.
+ *----------------------------------------------------------------------*/
 
 static void sr810_set_sens( int sens_index )
 {
@@ -1634,11 +1634,11 @@ static void sr810_set_sens( int sens_index )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function returns the current time constant of the lock-in amplifier. */
-/* See also the global array 'tc_list' with the possible time constants */
-/* at the start of the file.                                            */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function returns the current time constant of the lock-in amplifier.
+ * See also the global array 'tc_list' with the possible time constants
+ * at the start of the file.
+ *----------------------------------------------------------------------*/
 
 static double sr810_get_tc( void )
 {
@@ -1652,12 +1652,12 @@ static double sr810_get_tc( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Fuunction sets the time constant to one of the valid values. The  */
-/* parameter can be in the range from 0 to 19, where 0 is 10 us and  */
-/* 19 is 30 ks - these and the other values in between are listed in */
-/* the global array 'tc_list' (cf. start of file).                   */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Fuunction sets the time constant to one of the valid values. The
+ * parameter can be in the range from 0 to 19, where 0 is 10 us and
+ * 19 is 30 ks - these and the other values in between are listed in
+ * the global array 'tc_list' (cf. start of file).
+ *-------------------------------------------------------------------*/
 
 static void sr810_set_tc( int tc_index )
 {
@@ -1669,10 +1669,10 @@ static void sr810_set_tc( int tc_index )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Function returns the current phase setting of the lock-in */
-/* amplifier (in degree between 0 and 359).                  */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function returns the current phase setting of the lock-in
+ * amplifier (in degree between 0 and 359).
+ *-----------------------------------------------------------*/
 
 static double sr810_get_phase( void )
 {
@@ -1700,9 +1700,9 @@ static double sr810_get_phase( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Functions sets the phase to a value between 0 and 360 degree. */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Functions sets the phase to a value between 0 and 360 degree.
+ *---------------------------------------------------------------*/
 
 static double sr810_set_phase( double phase )
 {
@@ -1715,8 +1715,8 @@ static double sr810_set_phase( double phase )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 static double sr810_get_mod_freq( void )
 {
@@ -1730,8 +1730,8 @@ static double sr810_get_mod_freq( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 static double sr810_set_mod_freq( double freq )
 {
@@ -1758,8 +1758,8 @@ static double sr810_set_mod_freq( double freq )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 static long sr810_get_mod_mode( void )
 {
@@ -1773,8 +1773,8 @@ static long sr810_get_mod_mode( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 static long sr810_get_harmonic( void )
 {
@@ -1788,8 +1788,8 @@ static long sr810_get_harmonic( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 static long sr810_set_harmonic( long harmonic )
 {
@@ -1816,8 +1816,8 @@ static long sr810_set_harmonic( long harmonic )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 static double sr810_get_mod_level( void )
 {
@@ -1831,8 +1831,8 @@ static double sr810_get_mod_level( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 static double sr810_set_mod_level( double level )
 {
@@ -1847,8 +1847,8 @@ static double sr810_set_mod_level( double level )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 static long sr810_set_sample_time( long st_index )
 {
@@ -1869,8 +1869,8 @@ static long sr810_set_sample_time( long st_index )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ ---------------------------------------------------------------*/
 
 static long sr810_get_sample_time( void )
 {
@@ -1892,8 +1892,8 @@ static long sr810_get_sample_time( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 static void sr810_set_display_channel( long type )
 {
@@ -1926,8 +1926,8 @@ static void sr810_set_display_channel( long type )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 static long sr810_get_display_channel( void )
 {
@@ -1966,19 +1966,19 @@ static long sr810_get_display_channel( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Starts and stops auto-acquisition mode (i.e. storing of data at */
-/* constant time intervals). We only use "Shot" mode which has the */
-/* drawback that the number of data points sampled is limited to a */
-/* maximum of 16383 points for each of the two channels but avoids */
-/* problems with having to pause acquisition while reading data    */
-/* (which would make timing less exact). Hopefully, 16383 points   */
-/* will be enough in all cases.                                    */
-/* When stopped the buffer holding the data is automatically       */
-/* cleared. When an external trigger instead of the internal clock */
-/* is used the trigger start mode is automatically activated or    */
-/* deactivated.                                                    */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Starts and stops auto-acquisition mode (i.e. storing of data at
+ * constant time intervals). We only use "Shot" mode which has the
+ * drawback that the number of data points sampled is limited to a
+ * maximum of 16383 points for each of the two channels but avoids
+ * problems with having to pause acquisition while reading data
+ * (which would make timing less exact). Hopefully, 16383 points
+ * will be enough in all cases.
+ * When stopped the buffer holding the data is automatically
+ * cleared. When an external trigger instead of the internal clock
+ * is used the trigger start mode is automatically activated or
+ * deactivated.
+ *-----------------------------------------------------------------*/
 
 static void sr810_auto( int flag )
 {
@@ -2004,8 +2004,8 @@ static void sr810_auto( int flag )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 static double sr810_get_auto_data( int type )
 {
@@ -2095,8 +2095,8 @@ static double sr810_get_auto_data( int type )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 static void sr810_lock_state( bool lock )
 {
@@ -2108,8 +2108,8 @@ static void sr810_lock_state( bool lock )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static bool sr810_command( const char *cmd )
 {
@@ -2119,8 +2119,8 @@ static bool sr810_command( const char *cmd )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static bool sr810_talk( const char *cmd, char *reply, long *length )
 {
@@ -2131,8 +2131,8 @@ static bool sr810_talk( const char *cmd, char *reply, long *length )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 static void sr810_failure( void )
 {

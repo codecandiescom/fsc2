@@ -34,11 +34,11 @@ struct RS_SPEC10 *rs_spec10 = NULL,
 				  rs_spec10_exp;
 
 
-/*----------------------------------------------------------------*/
-/* This function is called directly after all modules are loaded. */
-/* Its main function is to initialize all global variables that   */
-/* are needed in the module.                                      */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * This function is called directly after all modules are loaded
+ * Its main function is to initialize all global variables tha
+ * are needed in the module
+ *----------------------------------------------------------------*/
 
 int rs_spec10_init_hook( void )
 {
@@ -72,9 +72,9 @@ int rs_spec10_init_hook( void )
 }
 
 
-/*-------------------------------------------*/
-/* Start of test hook function of the module */
-/*-------------------------------------------*/
+/*-------------------------------------------*
+ * Start of test hook function of the module
+ *-------------------------------------------*/
 
 int rs_spec10_test_hook( void )
 {
@@ -91,9 +91,9 @@ int rs_spec10_test_hook( void )
 }
 
 
-/*-------------------------------------------------*/
-/* Start of experiment hook function of the module */
-/*-------------------------------------------------*/
+/*-------------------------------------------------*
+ * Start of experiment hook function of the module
+ *-------------------------------------------------*/
 
 int rs_spec10_exp_hook( void )
 {
@@ -110,10 +110,10 @@ int rs_spec10_exp_hook( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function gets called just before the child process doing the */
-/* experiment exits.                                            */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function gets called just before the child process doing the
+ * experiment exits.
+ *--------------------------------------------------------------*/
 
 void rs_spec10_child_exit_hook( void )
 {
@@ -121,9 +121,9 @@ void rs_spec10_child_exit_hook( void )
 }
 
 
-/*-----------------------------------------------*/
-/* End of experiment hook function of the module */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * End of experiment hook function of the module
+ *-----------------------------------------------*/
 
 int rs_spec10_end_of_exp_hook( void )
 {
@@ -137,9 +137,9 @@ int rs_spec10_end_of_exp_hook( void )
 }
 
 
-/*-----------------------------------------*/
-/* Called before device driver is unloaded */
-/*-----------------------------------------*/
+/*-----------------------------------------*
+ * Called before device driver is unloaded
+ *-----------------------------------------*/
 
 void rs_spec10_exit_hook( void )
 {
@@ -163,9 +163,9 @@ void rs_spec10_exit_hook( void )
 }
 
 
-/*-----------------------------------------*/
-/* Function returns the name of the device */
-/*-----------------------------------------*/
+/*-----------------------------------------*
+ * Function returns the name of the device
+ *-----------------------------------------*/
 
 Var_T *ccd_camera_name( UNUSED_ARG Var_T *v )
 {
@@ -173,13 +173,13 @@ Var_T *ccd_camera_name( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function for setting the region of interest (ROI) for the next */
-/* image or spectrum to be fetched. The function expects an array */
-/* with 4 elements with the coordinates of the lower left hand    */
-/* and the upper right hand corner. If one of the elements is 0   */
-/* the corresponding ROI value remains unchanged.                 */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for setting the region of interest (ROI) for the nex
+ * image or spectrum to be fetched. The function expects an arra
+ * with 4 elements with the coordinates of the lower left han
+ * and the upper right hand corner. If one of the elements is 
+ * the corresponding ROI value remains unchanged.
+ *----------------------------------------------------------------*/
 
 Var_T *ccd_camera_roi( Var_T *v )
 {
@@ -277,15 +277,15 @@ Var_T *ccd_camera_roi( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function for setting the binning used with the next image or spectrum */
-/* to be returned by the camera. The function expects to get an array of */
-/* 2 elements, the vertical and horizontal binning factors. A value of 0 */
-/* indicates that the current binning value should remain unchanged.     */
-/* Optionally, the function can get passed a second argument, a number   */
-/* or string for the type of binning (i.e. in hardware or software) to   */
-/* be used.                                                              */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for setting the binning used with the next image or spectru
+ * to be returned by the camera. The function expects to get an array o
+ * 2 elements, the vertical and horizontal binning factors. A value of 
+ * indicates that the current binning value should remain unchanged
+ * Optionally, the function can get passed a second argument, a numbe
+ * or string for the type of binning (i.e. in hardware or software) t
+ * be used
+ *-----------------------------------------------------------------------*/
 
 Var_T *ccd_camera_binning( Var_T *v )
 {
@@ -358,13 +358,13 @@ Var_T *ccd_camera_binning( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function for setting the binning method (i.e. either via hardware or  */
-/* software) for the next pictures fetched from the camera. The function */
-/* expects either a number (where 0 stands for hardware binning while    */
-/* any other number for software binning) or a string, either "SOFT" or  */
-/* "SOFTWARE" or "HARD" or "HARDWARE".                                   */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for setting the binning method (i.e. either via hardware o
+ * software) for the next pictures fetched from the camera. The functio
+ * expects either a number (where 0 stands for hardware binning whil
+ * any other number for software binning) or a string, either "SOFT" o
+ * "SOFTWARE" or "HARD" or "HARDWARE".
+ *-----------------------------------------------------------------------*/
 
 Var_T *ccd_camera_binning_method( Var_T *v )
 {
@@ -416,9 +416,9 @@ Var_T *ccd_camera_binning_method( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/* Function for query or setting if the exposure time */
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ * Function for query or setting if the exposure time
+ *----------------------------------------------------*/
 
 Var_T *ccd_camera_exposure_time( Var_T *v )
 {
@@ -466,10 +466,10 @@ Var_T *ccd_camera_exposure_time( Var_T *v )
 }
 
 
-/*-----------------------------------------------------*/
-/* Function to query or set the number of clear cycles */
-/* to be done before an exposure.                      */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function to query or set the number of clear cycle
+ * to be done before an exposure
+ *-----------------------------------------------------*/
 
 Var_T *ccd_camera_clear_cycles( Var_T *v )
 {
@@ -500,9 +500,9 @@ Var_T *ccd_camera_clear_cycles( Var_T *v )
 }
 
 
-/*-----------------------------------------------*/
-/* Function for getting an image from the camera */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Function for getting an image from the camera
+ *-----------------------------------------------*/
 
 Var_T *ccd_camera_get_image( UNUSED_ARG Var_T *v )
 {
@@ -700,9 +700,9 @@ Var_T *ccd_camera_get_image( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------------*/
-/* Function for getting a spectrum from the camera */
-/*-------------------------------------------------*/
+/*-------------------------------------------------*
+ * Function for getting a spectrum from the camera
+ *-------------------------------------------------*/
 
 Var_T *ccd_camera_get_spectrum( UNUSED_ARG Var_T *v )
 {
@@ -859,10 +859,10 @@ Var_T *ccd_camera_get_spectrum( UNUSED_ARG Var_T *v )
 }
 
 
-/*------------------------------------------------------*/
-/* Function for determining the current CCD temperature */
-/* or to set a target temperature (setpoint).           */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function for determining the current CCD temperatur
+ * or to set a target temperature (setpoint)
+ *------------------------------------------------------*/
 
 Var_T *ccd_camera_temperature( Var_T *v )
 {
@@ -938,9 +938,9 @@ Var_T *ccd_camera_temperature( Var_T *v )
 }
 
 
-/*--------------------------------------------------*/
-/* Function returns the size of a pixel (in meters) */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Function returns the size of a pixel (in meters)
+ *--------------------------------------------------*/
 
 Var_T *ccd_camera_pixel_size( UNUSED_ARG Var_T *v )
 {
@@ -948,10 +948,10 @@ Var_T *ccd_camera_pixel_size( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------*/
-/* Function returns an array with the width and */
-/* height of the CCD chip as its elements       */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Function returns an array with the width an
+ * height of the CCD chip as its element
+ *----------------------------------------------*/
 
 Var_T *ccd_camera_pixel_area( UNUSED_ARG Var_T *v )
 {

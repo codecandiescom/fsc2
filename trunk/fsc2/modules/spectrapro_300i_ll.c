@@ -43,10 +43,10 @@ static bool spectrapro_300i_comm( int type, ... );
 static void spectrapro_300i_comm_fail( void );
 
 
-/*-----------------------------------------------------------*/
-/* If the function succeeds it returns a file pointer to the */
-/* calibration file. Otherwise an exception is thrown.       */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * If the function succeeds it returns a file pointer to the
+ * calibration file. Otherwise an exception is thrown.
+ *-----------------------------------------------------------*/
 
 FILE *spectrapro_300i_find_calib( char *name )
 {
@@ -119,12 +119,12 @@ FILE *spectrapro_300i_find_calib( char *name )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Tries to open the file with the given name and returns the file  */
-/* pointer or NULL if file does not exist returns, or throws an     */
-/* exception if the file can't be read (either because of problems  */
-/*  with the permissions or other, unknown reasons).                */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Tries to open the file with the given name and returns the file
+ * pointer or NULL if file does not exist returns, or throws an
+ * exception if the file can't be read (either because of problems
+ *  with the permissions or other, unknown reasons).
+ *------------------------------------------------------------------*/
 
 FILE *spectrapro_300i_open_calib( char *name )
 {
@@ -153,28 +153,28 @@ FILE *spectrapro_300i_open_calib( char *name )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function for calculation of the sum of the squares of the differences */
-/* between the measured offsets of the lines from he center (in pixels)  */
-/* and the calculated offsets. The formulas used are (in TeX notation):  */
-/* $n$: deviation in numbers of pixels                                   */
-/* $x$: width of a single pixel                                          */
-/* $m$: diffraction order                                                */
-/* $\psi$: grating angle, rotation angle of the grating                  */
-/* $\gamma$: inclusion angle, angle between incoming and outgoing beam   */
-/* $f$: focal length of monochromator                                    */
-/* $\delta$: detector angle, deviation of angle between center beam and  */ 
-/* perpendicular on the CCD plane                                        */
-/* $\theta$: incident angle of beam on detector                          */ 
-/* $\lambda$: wavelength of measured line                                */
-/* $\lambda_C$: wavelength at the center of the detector                 */ 
-/* \begin{eqnarray*}                                                     */
-/* \tan \theta & = & \frac{ nx \, \cos \delta}{f + nx \, \sin \delta} \\ */
-/* \sin \psi & = & \frac{m \lambda_C}{2 d \, \cos \gamma / 2}         \\ */
-/* \lambda & = & \frac{d}{m} \, \{ \sin ( \psi - \frac{\gamma}{2} )      */	
-/*               + \sin ( \psi - \frac{\gamma}{2} + \theta ) \}          */
-/* \end{eqnarray*}                                                       */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for calculation of the sum of the squares of the differences
+ * between the measured offsets of the lines from he center (in pixels)
+ * and the calculated offsets. The formulas used are (in TeX notation):
+ * $n$: deviation in numbers of pixels
+ * $x$: width of a single pixel
+ * $m$: diffraction order
+ * $\psi$: grating angle, rotation angle of the grating
+ * $\gamma$: inclusion angle, angle between incoming and outgoing beam
+ * $f$: focal length of monochromator
+ * $\delta$: detector angle, deviation of angle between center beam and
+ * perpendicular on the CCD plane
+ * $\theta$: incident angle of beam on detector
+ * $\lambda$: wavelength of measured line
+ * $\lambda_C$: wavelength at the center of the detector
+ * \begin{eqnarray*}
+ * \tan \theta & = & \frac{ nx \, \cos \delta}{f + nx \, \sin \delta} \\
+ * \sin \psi & = & \frac{m \lambda_C}{2 d \, \cos \gamma / 2}         \\
+ * \lambda & = & \frac{d}{m} \, \{ \sin ( \psi - \frac{\gamma}{2} )
+ *               + \sin ( \psi - \frac{\gamma}{2} + \theta ) \}
+ * \end{eqnarray*}
+ *-----------------------------------------------------------------------*/
 
 double spectrapro_300i_min( double *x, void *par )
 {
@@ -264,13 +264,13 @@ double spectrapro_300i_min( double *x, void *par )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function tries to open the device file for the serial port the */
-/* monochromator is attached to, checks if it replies to commands */
-/* and then fetches some basic informations about the state of    */
-/* the monochromator like which gratings are installed and the    */
-/* current grating and turret.                                    */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function tries to open the device file for the serial port the
+ * monochromator is attached to, checks if it replies to commands
+ * and then fetches some basic informations about the state of
+ * the monochromator like which gratings are installed and the
+ * current grating and turret.
+ *----------------------------------------------------------------*/
 
 void spectrapro_300i_open( void )
 {
@@ -317,10 +317,10 @@ void spectrapro_300i_open( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function just closes the device file for the serial port the */
-/* monochromator is attached to.                                */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function just closes the device file for the serial port the
+ * monochromator is attached to.
+ *--------------------------------------------------------------*/
 
 void spectrapro_300i_close( void )
 {
@@ -330,10 +330,10 @@ void spectrapro_300i_close( void )
 }
 
 
-/*-------------------------------------------------------*/
-/* Function asks the monochromator for the wavelength it */
-/* is currently set to.                                  */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function asks the monochromator for the wavelength it
+ * is currently set to.
+ *-------------------------------------------------------*/
 
 double spectrapro_300i_get_wavelength( void )
 {
@@ -345,9 +345,9 @@ double spectrapro_300i_get_wavelength( void )
 }
 
 
-/*------------------------------------------------------*/
-/* Function sets the monochromator to a new wavelength. */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function sets the monochromator to a new wavelength.
+ *------------------------------------------------------*/
 
 void spectrapro_300i_set_wavelength( double wavelength )
 {
@@ -373,9 +373,9 @@ void spectrapro_300i_set_wavelength( double wavelength )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function asks the monochromator for the turret currently used. */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function asks the monochromator for the turret currently used.
+ *----------------------------------------------------------------*/
 
 long spectrapro_300i_get_turret( void )
 {
@@ -390,9 +390,9 @@ long spectrapro_300i_get_turret( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function tells the monochromator to switch to a different turret. */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function tells the monochromator to switch to a different turret.
+ *-------------------------------------------------------------------*/
 
 void spectrapro_300i_set_turret( long tn )
 {
@@ -423,9 +423,9 @@ void spectrapro_300i_set_turret( long tn )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function asks the monochromator for the currently used grating. */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function asks the monochromator for the currently used grating.
+ *-----------------------------------------------------------------*/
 
 long spectrapro_300i_get_grating( void )
 {
@@ -440,9 +440,9 @@ long spectrapro_300i_get_grating( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function tells to monochromator to switch to a different grating. */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function tells to monochromator to switch to a different grating.
+ *-------------------------------------------------------------------*/
 
 void spectrapro_300i_set_grating( long gn )
 {
@@ -475,11 +475,11 @@ void spectrapro_300i_set_grating( long gn )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function queries the monochromator about informations about all */
-/* installed gratings and stores the data (groove density, blaze   */
-/* information) in the internal structure for the monochromator.   */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function queries the monochromator about informations about all
+ * installed gratings and stores the data (groove density, blaze
+ * information) in the internal structure for the monochromator.
+ *-----------------------------------------------------------------*/
 
 void spectrapro_300i_get_gratings( void )
 {
@@ -627,10 +627,10 @@ void spectrapro_300i_get_gratings( void )
 }
 	
 
-/*-----------------------------------------------------*/
-/* Function asks the monochromator for the zero offset */
-/* setting for one of the gratings.                    */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function asks the monochromator for the zero offset
+ * setting for one of the gratings.
+ *-----------------------------------------------------*/
 
 long spectrapro_300i_get_offset( long gn )
 {
@@ -670,12 +670,12 @@ long spectrapro_300i_get_offset( long gn )
 }
 	
 
-/*----------------------------------------------------------*/
-/* Function sets a new zero offset for one of the gratings, */
-/* then executes a reset and finally switches back to the   */
-/* original wavelength. The function needs quite a lot of   */
-/* time, mainly because of the required reset.              */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function sets a new zero offset for one of the gratings,
+ * then executes a reset and finally switches back to the
+ * original wavelength. The function needs quite a lot of
+ * time, mainly because of the required reset.
+ *----------------------------------------------------------*/
 
 void spectrapro_300i_set_offset( long gn, long offset )
 {
@@ -739,10 +739,10 @@ void spectrapro_300i_set_offset( long gn, long offset )
 }
 
 
-/*--------------------------------------------------------*/
-/* Function asks the monochromator for the grating adjust */
-/* setting for one of the gratings.                       */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Function asks the monochromator for the grating adjust
+ * setting for one of the gratings.
+ *--------------------------------------------------------*/
 
 long spectrapro_300i_get_adjust( long gn )
 {
@@ -782,12 +782,12 @@ long spectrapro_300i_get_adjust( long gn )
 }
 	
 
-/*-------------------------------------------------------------------*/
-/* Function sets a new grating adjust value for one of the gratings, */
-/* then executes a reset and finally switches back to the original   */
-/* wavelength. The function needs quite a lot of time, mainly        */
-/* because of the required reset.                                    */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function sets a new grating adjust value for one of the gratings,
+ * then executes a reset and finally switches back to the original
+ * wavelength. The function needs quite a lot of time, mainly
+ * because of the required reset.
+ *-------------------------------------------------------------------*/
 
 void spectrapro_300i_set_adjust( long gn, long adjust )
 {
@@ -849,10 +849,10 @@ void spectrapro_300i_set_adjust( long gn, long adjust )
 }
 
 
-/*-------------------------------------------------------*/
-/* Function installs a new grating into the non-volatile */
-/* memory of the monochromator.                          */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function installs a new grating into the non-volatile
+ * memory of the monochromator.
+ *-------------------------------------------------------*/
 
 void spectrapro_300i_install_grating( long gn, const char *part_no )
 {
@@ -877,10 +877,10 @@ void spectrapro_300i_install_grating( long gn, const char *part_no )
 }
 
 
-/*--------------------------------------------------------*/
-/* Function removes an already installed grating from the */
-/* non-volatile memory of the monochromator.              */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Function removes an already installed grating from the
+ * non-volatile memory of the monochromator.
+ *--------------------------------------------------------*/
 
 void spectrapro_300i_uninstall_grating( long gn )
 {
@@ -905,10 +905,10 @@ void spectrapro_300i_uninstall_grating( long gn )
 }
 
 
-/*--------------------------------------------------------*/
-/* Function for commands that just get send to the device */
-/* and don't expect any replies.                          */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Function for commands that just get send to the device
+ * and don't expect any replies.
+ *--------------------------------------------------------*/
 
 void spectrapro_300i_send( const char *buf )
 {
@@ -951,38 +951,38 @@ void spectrapro_300i_send( const char *buf )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function tries to read up to '*len' bytes of data into 'buf' from the */
-/* monochromator. It recognizes the end of the data (if there are less   */
-/* than '*len' going to be send by the device) by the string " ok\r\n"   */
-/* (or, in one case "ok\r\n") when the command initializing the read     */
-/* was successful, or "?\r\n" when the command failed (probably due to   */
-/* an invalid command.                                                   */
-/* There are four cases to be considered:                                */
-/* 1. The returned string ended in "ok\r\n" or " ok\r\n". In this case   */
-/*    this part is cut of (i.e. replaced by a '\0') and the length of    */
-/*    the string ready in is returned in len (could actually be 0 when   */
-/*    the "ok\r\n" part was everything we got) and the function returns  */
-/*    a status indicating success.                                       */
-/* 2. The returned string ended ended neither in " ok\r\n", "ok\r\n" or  */
-/*    "?\r\n", indicating that there are more data coming. In 'len' the  */
-/*    length of what we got is returned and the function returns a       */
-/*    status indicating failure. No '\0' is appended to the returned     */
-/*    string.                                                            */
-/* 3. The string we got ended in "?\r\n", in which case the function     */
-/*    throws an exception.                                               */
-/* 4. Reading from the device failed, in which case an exception is      */
-/*    thrown.                                                            */
-/* Some care has to be taken: when the input buffer 'buf' isn't large    */
-/* enough to hold the complete string the device is trying to send it    */
-/* may happen that the transmission ends within the marker indicating    */
-/* success or failure, in which case this function won't be able to      */
-/* determine if the end of a transmission has been reached. In this      */
-/* case the calling function must do the checking!                       */
-/*                                                                       */
-/* There's also another way this function can be ended: if the user hit  */
-/* the "Stop" button a USER_BREAK_EXCEPTION is thrown.                   */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function tries to read up to '*len' bytes of data into 'buf' from the
+ * monochromator. It recognizes the end of the data (if there are less
+ * than '*len' going to be send by the device) by the string " ok\r\n"
+ * (or, in one case "ok\r\n") when the command initializing the read
+ * was successful, or "?\r\n" when the command failed (probably due to
+ * an invalid command.
+ * There are four cases to be considered:
+ * 1. The returned string ended in "ok\r\n" or " ok\r\n". In this case
+ *    this part is cut of (i.e. replaced by a '\0') and the length of
+ *    the string ready in is returned in len (could actually be 0 when
+ *    the "ok\r\n" part was everything we got) and the function returns
+ *    a status indicating success.
+ * 2. The returned string ended ended neither in " ok\r\n", "ok\r\n" or
+ *    "?\r\n", indicating that there are more data coming. In 'len' the
+ *    length of what we got is returned and the function returns a
+ *    status indicating failure. No '\0' is appended to the returned
+ *    string.
+ * 3. The string we got ended in "?\r\n", in which case the function
+ *    throws an exception.
+ * 4. Reading from the device failed, in which case an exception is
+ *    thrown.
+ * Some care has to be taken: when the input buffer 'buf' isn't large
+ * enough to hold the complete string the device is trying to send it
+ * may happen that the transmission ends within the marker indicating
+ * success or failure, in which case this function won't be able to
+ * determine if the end of a transmission has been reached. In this
+ * case the calling function must do the checking!
+ *
+ * There's also another way this function can be ended: if the user hit
+ * the "Stop" button a USER_BREAK_EXCEPTION is thrown.
+ *-----------------------------------------------------------------------*/
 
 static bool spectrapro_300i_read( char *buf, size_t *len )
 {
@@ -1079,12 +1079,12 @@ static bool spectrapro_300i_read( char *buf, size_t *len )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function sends a command and returns a buffer (with a default */
-/* size of *len bytes) with the reply of the device. If the      */
-/* reply by the device is longer that *len bytes, a larger       */
-/* buffer gets returned. The buffer always ends in a '\0'.       */  
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function sends a command and returns a buffer (with a default
+ * size of *len bytes) with the reply of the device. If the
+ * reply by the device is longer that *len bytes, a larger
+ * buffer gets returned. The buffer always ends in a '\0'.
+ *---------------------------------------------------------------*/
 
 char *spectrapro_300i_talk( const char *buf, size_t len )
 {
@@ -1147,10 +1147,10 @@ char *spectrapro_300i_talk( const char *buf, size_t len )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Low level function for the communication with the monochromator */
-/* via the serial port.                                            */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Low level function for the communication with the monochromator
+ * via the serial port.
+ *-----------------------------------------------------------------*/
 
 static bool spectrapro_300i_comm( int type, ... )
 {
@@ -1227,9 +1227,9 @@ static bool spectrapro_300i_comm( int type, ... )
 }
 
 
-/*-----------------------------------------*/
-/* Converts a wavelength into a wavenumber */
-/*-----------------------------------------*/
+/*-----------------------------------------*
+ * Converts a wavelength into a wavenumber
+ *-----------------------------------------*/
 
 double spectrapro_300i_wl2wn( double wl )
 {
@@ -1238,9 +1238,9 @@ double spectrapro_300i_wl2wn( double wl )
 }
 
 
-/*-----------------------------------------*/
-/* Converts a wavenumber into a wavelength */
-/*-----------------------------------------*/
+/*-----------------------------------------*
+ * Converts a wavenumber into a wavelength
+ *-----------------------------------------*/
 
 double spectrapro_300i_wn2wl( double wn )
 {
@@ -1249,9 +1249,9 @@ double spectrapro_300i_wn2wl( double wn )
 }
 
 
-/*----------------------------------------------------------*/
-/* Function called on communication failure with the device */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function called on communication failure with the device
+ *----------------------------------------------------------*/
 
 static void spectrapro_300i_comm_fail( void )
 {

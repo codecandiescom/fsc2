@@ -26,12 +26,12 @@
 
 
 
-/*----------------------------------------------------------------------*/
-/* If the function succeeds it returns a file pointer to the table file */
-/* and sets the table_file entry in the device structure to the name of */
-/* the table file. Otherwise an exception is thrown. In any case the    */
-/* memory used for the file name passed to the function is deallocated. */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * If the function succeeds it returns a file pointer to the table file
+ * and sets the table_file entry in the device structure to the name of
+ * the table file. Otherwise an exception is thrown. In any case the
+ * memory used for the file name passed to the function is deallocated.
+ *----------------------------------------------------------------------*/
 
 FILE *rs_sml01_find_table( char **name )
 {
@@ -83,14 +83,14 @@ FILE *rs_sml01_find_table( char **name )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Tries to open the file with the given name and returns the file  */
-/* pointer, returns NULL if file does not exist returns, or throws  */
-/* an exception if the file can't be read (either because of prob-  */
-/* lems with the permissions or other, unknoen reasons). If opening */
-/* the file fails with an exception memory used for its name is     */
-/* deallocated.                                                     */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Tries to open the file with the given name and returns the file
+ * pointer, returns NULL if file does not exist returns, or throws
+ * an exception if the file can't be read (either because of prob-
+ * lems with the permissions or other, unknoen reasons). If opening
+ * the file fails with an exception memory used for its name is
+ * deallocated.
+ *------------------------------------------------------------------*/
 
 FILE *rs_sml01_open_table( char *name )
 {
@@ -118,10 +118,10 @@ FILE *rs_sml01_open_table( char *name )
 }
 
 
-/*-----------------------------------------------*/
-/* Calculates from the table the attenuation for */
-/* a given frequency by interpolation            */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Calculates from the table the attenuation for
+ * a given frequency by interpolation.
+ *-----------------------------------------------*/
 
 double rs_sml01_get_att_from_table( double freq )
 {
@@ -200,8 +200,8 @@ double rs_sml01_get_att_from_table( double freq )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ *----------------------------------------------------------------------*/
 
 double rs_sml01_get_att( double freq )
 {
@@ -232,8 +232,8 @@ double rs_sml01_get_att( double freq )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ *----------------------------------------------------------------------*/
 
 unsigned int rs_sml01_get_mod_param( Var_T **v, double *dres, int *ires )
 {
@@ -309,12 +309,12 @@ unsigned int rs_sml01_get_mod_param( Var_T **v, double *dres, int *ires )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function for checking that the modulation amplitude is still within */
-/* the allowed range for a certain frequency. If the modulation ampli- */
-/* tude is too large it is reduced to the maximum possible value and a */
-/* warning is printed out.                                             */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function for checking that the modulation amplitude is still within
+ * the allowed range for a certain frequency. If the modulation ampli-
+ * tude is too large it is reduced to the maximum possible value and a
+ * warning is printed out.
+ *---------------------------------------------------------------------*/
 
 void rs_sml01_check_mod_ampl( double freq )
 {
@@ -380,8 +380,8 @@ void rs_sml01_check_mod_ampl( double freq )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ *---------------------------------------------------------------------*/
 
 #if defined WITH_PULSE_MODULATION
 
