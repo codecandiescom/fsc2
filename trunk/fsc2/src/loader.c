@@ -114,12 +114,28 @@ void load_all_drivers( void )
 
 				call_push( NULL, cd, cd->device_name, cd->count );
 
-				if ( ! cd->driver.init_hook( ) )
-					eprint( WARN, UNSET, "Initialisation of module "
-							"'%s.fsc2_so' failed.\n", cd->name );
+				TRY
+				{
+					if ( ! cd->driver.init_hook( ) )
+						eprint( WARN, UNSET, "Initialisation of module "
+								"'%s.fsc2_so' did not return successfully.\n",
+								cd->name );
+					TRY_SUCCESS;
+				}
+				OTHERWISE
+				{
+					eprint( FATAL, UNSET, "Failed to initialize module "
+							"'%s'.\n", cd->name );
+					call_pop( );
+					vars_del_stack( );
+					dlclose( cd->driver.handle );
+					RETHROW( );
+				}
 
 				call_pop( );
 				vars_del_stack( );
+
+				cd->driver.init_hook_is_run = SET;
 			}
 
 			if ( need_GPIB == UNSET && saved_need_GPIB == SET )
@@ -142,16 +158,8 @@ void load_all_drivers( void )
 	}
 	OTHERWISE
 	{
-		call_pop( );
-		vars_del_stack( );
 		Internals.in_hook = UNSET;
-
-		/* On failure to run an init hook we have to unload all modules that
-		   already have their init hooks run */
-
-		for ( cd = cd->prev; cd != NULL; cd = cd->prev )
-			unload_device( cd );
-
+		delete_devices( );
 		RETHROW( );
 	}
 
@@ -926,7 +934,9 @@ void unload_device( Device *dev )
 	fsc2_assert( EDL.Call_Stack == NULL );
 
 	if ( dev->driver.handle &&
-		 ! Internals.exit_hooks_are_run && dev->driver.is_exit_hook )
+		 ! Internals.exit_hooks_are_run && 
+		 dev->driver.init_hook_is_run &&
+		 dev->driver.is_exit_hook )
 	{
 		if ( dev->generic_type != NULL &&
 			 ! strcasecmp( dev->generic_type, PULSER_GENERIC_TYPE ) )

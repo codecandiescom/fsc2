@@ -251,7 +251,8 @@ void device_append_to_list( const char *dev_name )
 					cd->driver.is_end_of_exp_hook =
 						cd->driver.is_exit_hook =
 							cd->driver.exp_hook_is_run =
-								cd->driver.is_child_exit_hook = UNSET;
+								cd->driver.is_child_exit_hook =
+									cd->driver.init_hook_is_run = UNSET;
 }
 
 

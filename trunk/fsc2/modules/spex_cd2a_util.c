@@ -233,7 +233,7 @@ bool spex_cd2a_store_state( void )
 double spex_cd2a_wl2Awn( double wl )
 {
 	if ( wl <= 0.0 )
-		THROW( INVALID_INPUT_EXCEPTION );
+		SPEX_CD2A_THROW( INVALID_INPUT_EXCEPTION );
 	return 0.01 / wl;
 }
 
@@ -244,8 +244,8 @@ double spex_cd2a_wl2Awn( double wl )
 
 double spex_cd2a_Awn2wl( double wn )
 {
-	if ( wn <= 0.0 );
-		THROW( INVALID_INPUT_EXCEPTION );
+	if ( wn <= 0.0 )
+		SPEX_CD2A_THROW( INVALID_INPUT_EXCEPTION );
 	return 0.01 / wn;
 }
 
@@ -284,7 +284,7 @@ double spex_cd2a_Mwn2Awn( double wn )
 double spex_cd2a_wl2Mwn( double wl )
 {
 	if ( wl <= 0.0 )
-		THROW( INVALID_INPUT_EXCEPTION );
+		SPEX_CD2A_THROW( INVALID_INPUT_EXCEPTION );
 	return spex_cd2a_Awn2Mwn( 0.01 / wl );
 }
 
@@ -298,7 +298,7 @@ double spex_cd2a_Mwn2wl( double wn )
 {
 	wn = spex_cd2a_Mwn2Awn( wn );
 	if ( wn <= 0.0 )
-		THROW( INVALID_INPUT_EXCEPTION );
+		SPEX_CD2A_THROW( INVALID_INPUT_EXCEPTION );
 	return 0.01 / wn;
 }
 
@@ -459,9 +459,9 @@ double spex_cd2a_UMwn2S2wl( double wn )
 }
 
 
-/*---------------------------------------------------------*/
- * Converts a wavelength as seen by the monochromator into */
- * an absolute wavenumber as seen by the monochromator     */
+/*---------------------------------------------------------*
+ * Converts a wavelength as seen by the monochromator into
+ * an absolute wavenumber as seen by the monochromator
  *---------------------------------------------------------*/
 
 double spex_cd2a_Swl2UAwn( double wl )
@@ -471,9 +471,9 @@ double spex_cd2a_Swl2UAwn( double wl )
 
 
 /*-----------------------------------------------------*
-/* Converts an absolute wavenumber as seen by the user
-/* into a wavelength as seen by the monochromator.
-/*-----------------------------------------------------*/
+ * Converts an absolute wavenumber as seen by the user
+ * into a wavelength as seen by the monochromator.
+ *-----------------------------------------------------*/
 
 double spex_cd2a_UAwn2Swl( double wn )
 {

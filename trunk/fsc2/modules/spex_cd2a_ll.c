@@ -975,7 +975,7 @@ static ssize_t spex_cd2a_calc_pos_mess_len( void )
 
 /*------------------------------------------------------------------------*
  * Reads in data send from the device with information about its position
- *------------------------------------------------------------------------*
+ *------------------------------------------------------------------------*/
 
 static void spex_cd2a_pos_mess_check( const char *bp )
 {

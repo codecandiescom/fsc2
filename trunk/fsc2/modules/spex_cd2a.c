@@ -132,14 +132,26 @@ int spex_cd2a_init_hook( void )
 		SPEX_CD2A_THROW( EXCEPTION );
 	}			
 
-	/* Find out which is the highest wavelength that can be set */
-
 	if ( spex_cd2a.mode & WN_MODES )
-		spex_cd2a.lower_limit = spex_cd2a_Awn2wl( LOWER_LIMIT );
+	{
+		TRY
+		{
+			spex_cd2a.lower_limit = spex_cd2a_Awn2wl( LOWER_LIMIT );
+			TRY_SUCCESS;
+		}
+		CATCH( INVALID_INPUT_EXCEPTION )
+		{
+			print( FATAL, "Invalid setting for upper wavenumber limit in "
+				   "configuration file for the device.\n" );
+			SPEX_CD2A_THROW( EXCEPTION );
+	   }
+	}
 	else if ( UNITS == NANOMETER )
 		spex_cd2a.lower_limit = 1.0e-9 * LOWER_LIMIT;
 	else
 		spex_cd2a.lower_limit = 1.0e-10 * LOWER_LIMIT;
+
+	/* Find out which is the highest wavelength that can be set */
 
 	if ( UPPER_LIMIT < 0 ||
 		 ( spex_cd2a.mode & WN_MODES && UPPER_LIMIT <= 0.0 ) )
@@ -154,7 +166,19 @@ int spex_cd2a_init_hook( void )
 	}
 
 	if ( spex_cd2a.mode & WN_MODES )
-		spex_cd2a.upper_limit = spex_cd2a_Awn2wl( UPPER_LIMIT );
+	{
+		TRY
+		{
+			spex_cd2a.upper_limit = spex_cd2a_Awn2wl( UPPER_LIMIT );
+			TRY_SUCCESS;
+		}
+		CATCH( INVALID_INPUT_EXCEPTION )
+		{
+			print( FATAL, "Invalid setting for lower wavenumber limit in "
+				   "configuration file for the device.\n" );
+			SPEX_CD2A_THROW( EXCEPTION );
+		}
+	}
 	else if ( UNITS == NANOMETER )
 		spex_cd2a.upper_limit = 1.0e-9 * UPPER_LIMIT;
 	else
@@ -221,7 +245,7 @@ int spex_cd2a_init_hook( void )
 
 	/* Also the lower and upper limit must be corrected if the grating isn't
 	   the standard grating. In this case it also seems not to be possible
-	   to go to the limits, we should stay at least to steps away from them */
+	   to go to the limits, we should stay at least two steps away from them */
 
 	if ( GROOVE_DENSITY != STANDARD_GROOVE_DENSITY )
 	{
@@ -266,9 +290,7 @@ int spex_cd2a_init_hook( void )
 	spex_cd2a.sends_lf = SENDS_LINEFEED != NO_LINEFEED;
 
 	spex_cd2a.is_wavelength = UNSET;
-
 	spex_cd2a.scan_is_init = UNSET;
-
 	spex_cd2a.shutter_limits_are_set = UNSET;
 
 	return 1;
@@ -282,7 +304,6 @@ int spex_cd2a_init_hook( void )
 int spex_cd2a_test_hook( void )
 {
 	spex_cd2a_stored = spex_cd2a;
-
 	return 1;
 }
 
@@ -372,10 +393,14 @@ Var *monochromator_name( UNUSED_ARG Var *v )
 
 Var *monochromator_scan_setup( Var *v )
 {
-	double start, step;
+	double start = 0.0;
+	double step;
 	long num_steps;
 	double vals[ 2 ];
 
+
+	CLOBBER_PROTECT( v );
+	CLOBBER_PROTECT( start );
 
 	if ( v == NULL )
 	{
@@ -389,6 +414,7 @@ Var *monochromator_scan_setup( Var *v )
 			vals[ 0 ] = spex_cd2a_SAwn2UMwn( spex_cd2a.scan_start );
 		else
 			vals[ 0 ] = spex_cd2a_Swl2Uwl( spex_cd2a.scan_start );
+
 		vals[ 1 ] = spex_cd2a.scan_step;
 
 		return vars_push( FLOAT_ARR, vals, 2 );
@@ -400,21 +426,32 @@ Var *monochromator_scan_setup( Var *v )
 		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
-	if ( spex_cd2a.mode & WN_MODES )
-		start = spex_cd2a_UMwn2Swl( get_double( v, "start wavenumber" ) );
-	else
-		start = spex_cd2a_Uwl2Swl( get_double( v, "start wavelength" ) );
-
-	if ( start <= 0.0 )
+	TRY
 	{
 		if ( spex_cd2a.mode & WN_MODES )
-			print( FATAL, "Invalid start wavenumber of %.4f cm^-1.\n",
-				   spex_cd2a_Swl2UMwn( start ) );
+		{
+			start = get_double( v, "start wavenumber" );
+			start = spex_cd2a_UMwn2Swl( start );
+		}
+		else
+		{
+			start = get_double( v, "start wavelength" );
+			start = spex_cd2a_Uwl2Swl( start );
+		}
+
+		TRY_SUCCESS;
+	}
+	CATCH( INVALID_INPUT_EXCEPTION )
+	{
+		if ( spex_cd2a.mode & WN_MODES )
+			print( FATAL, "Invalid start wavenumber of %.4f cm^-1.\n", start );
 		else
 			print( FATAL, "Invalid start wavelength of %.5f nm.\n",
-				   1.0e9 * spex_cd2a_Swl2Uwl( start ) );
+				   1.0e9 * start );
 		SPEX_CD2A_THROW( EXCEPTION );
 	}
+	OTHERWISE
+		SPEX_CD2A_RETHROW( );
 
 	if ( start < spex_cd2a.lower_limit )
 	{
@@ -429,6 +466,7 @@ Var *monochromator_scan_setup( Var *v )
 				   "limit of the device of %.5f nm.\n",
 				   1.0e9 * spex_cd2a_Swl2Uwl( start ),
 				   1.0e9 * spex_cd2a_Swl2Uwl( spex_cd2a.lower_limit ) );
+
 		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
@@ -444,6 +482,7 @@ Var *monochromator_scan_setup( Var *v )
 				   "upper limit of the device of %.5f nm.\n",
 				   1.0e9 * spex_cd2a_Swl2Uwl( start ),
 				   1.0e9 * spex_cd2a_Swl2Uwl( spex_cd2a.upper_limit ) );
+
 		SPEX_CD2A_THROW( EXCEPTION );
 	}
 
@@ -529,6 +568,7 @@ Var *monochromator_scan_setup( Var *v )
 	   and step size */
 
 	spex_cd2a_halt( );
+
 	if ( FSC2_MODE == EXPERIMENT )
 	{
 		spex_cd2a_scan_start( );
@@ -558,6 +598,8 @@ Var *monochromator_wavelength( Var *v )
 	double wl;
 
 
+	CLOBBER_PROTECT( wl );
+
 	if ( v == NULL )
 	{
 		if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.scan_is_init )
@@ -570,14 +612,20 @@ Var *monochromator_wavelength( Var *v )
 						  spex_cd2a_Swl2Uwl( spex_cd2a.wavelength ) );
 	}
 
-	wl = spex_cd2a_Uwl2Swl( get_double( v, "wavelength" ) );
+	wl = get_double( v, "wavelength" );
 
-	if ( wl < 0.0 )
+	TRY
 	{
-		print( FATAL, "Invalid wavelength of %.5f nm.\n",
-			   1.0e9 * spex_cd2a_Swl2Uwl( wl ) );
+		wl = spex_cd2a_Uwl2Swl( wl );
+		TRY_SUCCESS;
+	}
+	CATCH( INVALID_INPUT_EXCEPTION )
+	{
+		print( FATAL, "Invalid wavelength of %.5f nm.\n", 1.0e9 * wl );
 		SPEX_CD2A_THROW( EXCEPTION );
 	}
+	OTHERWISE
+		SPEX_CD2A_RETHROW( );
 
 	if ( wl < spex_cd2a.lower_limit )
 	{
@@ -623,53 +671,62 @@ Var *monochromator_wavenumber( Var *v )
 	double wl;
 
 
-	if ( v != NULL )
-	{
-		wl = spex_cd2a_UMwn2Swl( get_double( v, "wavenumber" ) );
+	CLOBBER_PROTECT( wl );
 
-		if ( wl <= 0.0 )
-		{
-			print( FATAL, "Invalid (absolute) wavenumber of %.4f cm^-1.\n",
-				   spex_cd2a_Swl2UAwn( wl ) );
-			SPEX_CD2A_THROW( EXCEPTION );
-		}
-
-		if ( wl < spex_cd2a.lower_limit )
-		{
-			print( FATAL, "Requested (absolute) wavenumber of %.4f cm^-1 is "
-				   "larger than the upper wavenumber limit of %.4f cm^-1.\n",
-				   spex_cd2a_Swl2UAwn( wl ),
-				   spex_cd2a_Swl2UAwn( spex_cd2a.lower_limit ) );
-			SPEX_CD2A_THROW( EXCEPTION );
-		}
-
-		if ( wl > spex_cd2a.upper_limit )
-		{
-			print( FATAL, "Requested (absolute) wavenumber of %.4f cm^-1 is "
-				   "lower than the lower wavenumber limit of %.4f cm^-1.\n",
-				   spex_cd2a_Swl2UAwn( wl ),
-				   spex_cd2a_Swl2UAwn( spex_cd2a.upper_limit ) );
-			SPEX_CD2A_THROW( EXCEPTION );
-		}
-
-		too_many_arguments( v );
-
-		spex_cd2a.wavelength = wl;
-		spex_cd2a.is_wavelength = SET;
-
-		if ( spex_cd2a.in_scan )
-			spex_cd2a_halt( );
-
-		spex_cd2a_set_wavelength( );
-	}
-	else
+	if ( v == NULL )
 	{
 		if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.scan_is_init )
 		{
-			print( FATAL, "Wavenumber hasn't been set yet,\n ");
+			print( FATAL, "Wavenumber hasn't been set yet.\n ");
 			SPEX_CD2A_THROW( EXCEPTION );
 		}
+
+		return vars_push( FLOAT_VAR,
+						  spex_cd2a_Swl2UMwn( spex_cd2a.wavelength ) );
 	}
+
+	wl = get_double( v, "wavenumber" );
+
+	TRY
+	{
+		wl = spex_cd2a_UMwn2Swl( wl );
+		TRY_SUCCESS;
+	}
+	CATCH( INVALID_INPUT_EXCEPTION )
+	{
+		print( FATAL, "Invalid wavenumber of %.4f cm^-1.\n", wl );
+		SPEX_CD2A_THROW( EXCEPTION );
+	}
+	OTHERWISE
+		SPEX_CD2A_RETHROW( );
+
+	if ( wl < spex_cd2a.lower_limit )
+	{
+		print( FATAL, "Requested (absolute) wavenumber of %.4f cm^-1 is "
+			   "larger than the upper wavenumber limit of %.4f cm^-1.\n",
+			   spex_cd2a_Swl2UAwn( wl ),
+			   spex_cd2a_Swl2UAwn( spex_cd2a.lower_limit ) );
+		SPEX_CD2A_THROW( EXCEPTION );
+	}
+
+	if ( wl > spex_cd2a.upper_limit )
+	{
+		print( FATAL, "Requested (absolute) wavenumber of %.4f cm^-1 is "
+			   "lower than the lower wavenumber limit of %.4f cm^-1.\n",
+			   spex_cd2a_Swl2UAwn( wl ),
+			   spex_cd2a_Swl2UAwn( spex_cd2a.upper_limit ) );
+		SPEX_CD2A_THROW( EXCEPTION );
+	}
+
+	too_many_arguments( v );
+
+	spex_cd2a.wavelength = wl;
+	spex_cd2a.is_wavelength = SET;
+
+	if ( spex_cd2a.in_scan )
+		spex_cd2a_halt( );
+
+	spex_cd2a_set_wavelength( );
 
 	return vars_push( FLOAT_VAR, spex_cd2a_Swl2UMwn( spex_cd2a.wavelength ) );
 }
@@ -813,7 +870,19 @@ Var *monochromator_laser_line( Var *v )
 	else
 	{
 		spex_cd2a.mode = WND;
-		wl = spex_cd2a_UAwn2Swl( wn );
+		
+		TRY
+		{
+			wl = spex_cd2a_UAwn2Swl( wn );
+			TRY_SUCCESS;
+		}
+		CATCH( INVALID_INPUT_EXCEPTION )
+		{
+			print( FATAL, "Invalid laser line of %.4f cm^-1.\n", wn );
+			SPEX_CD2A_THROW( EXCEPTION );
+		}
+		OTHERWISE
+			SPEX_CD2A_RETHROW( );
 
 		/* Abort if the monochromator has a shutter, the laser line is within
 		   it's range but the laser line is outside of the shutter range. */
@@ -900,16 +969,29 @@ Var *monochromator_shutter_limits( Var *v )
 			SPEX_CD2A_THROW( EXCEPTION );
 		}
 
-		if ( spex_cd2a.mode & WN_MODES )
+		TRY
 		{
-			tl[ 0 ] = spex_cd2a_UMwn2Swl( l[ 1 ] );
-			tl[ 1 ] = spex_cd2a_UMwn2Swl( l[ 0 ] );
+			if ( spex_cd2a.mode & WN_MODES )
+			{
+				tl[ 0 ] = spex_cd2a_UMwn2Swl( l[ 1 ] );
+				tl[ 1 ] = spex_cd2a_UMwn2Swl( l[ 0 ] );
+			}
+			else
+			{
+				tl[ 0 ]	= spex_cd2a_Uwl2Swl( l[ 0 ] );
+				tl[ 1 ]	= spex_cd2a_Uwl2Swl( l[ 1 ] );
+			}
+
+			TRY_SUCCESS;
 		}
-		else
+		CATCH( INVALID_INPUT_EXCEPTION )
 		{
-			tl[ 0 ]	= spex_cd2a_Uwl2Swl( l[ 0 ] );
-			tl[ 1 ]	= spex_cd2a_Uwl2Swl( l[ 1 ] );
+			print( FATAL, "Invalid shutter linits (%.4f cm^-1, %.4f cm^-1).\n",
+				   l[ 0 ], l[ 1 ] );
+			SPEX_CD2A_THROW( EXCEPTION );
 		}
+		OTHERWISE
+			SPEX_CD2A_RETHROW( );
 
 		if ( tl[ 0 ] < spex_cd2a.lower_limit )
 		{
@@ -944,8 +1026,8 @@ Var *monochromator_shutter_limits( Var *v )
 			lwl = spex_cd2a_Awn2wl( spex_cd2a.laser_wavenumber );
 			if ( lwl < tl[ 0 ] || lwl > tl[ 1 ] )
 			{
-				print( FATAL, "New shutter limits do not cover the laser "
-					   "line position.\n" );
+				print( FATAL, "Shutter limits don't cover the laser line "
+					   "position.\n" );
 				SPEX_CD2A_THROW( EXCEPTION );
 			}
 		}
@@ -1097,23 +1179,31 @@ Var *monochromator_calibrate( Var *v )
 
 Var *monochromator_wavelength_axis( Var *v )
 {
+	double wl = spex_cd2a.wavelength;
 	Var *cv;
 	long num_pixels;
-	double wl;
 	int acc;
 
 
-	wl = spex_cd2a.wavelength;
+	CLOBBER_PROTECT( wl );
 
 	if ( v != NULL )
 	{
-		wl = spex_cd2a_Uwl2Swl( get_double( v, "wavelength" ) );
+		wl = get_double( v, "wavelength" );
 
-		if ( wl < 0.0 )
+		TRY
 		{
-			print( FATAL, "Invalid negative center wavelength.\n" );
+			wl = spex_cd2a_Uwl2Swl( wl );
+			TRY_SUCCESS;
+		}
+		CATCH( INVALID_INPUT_EXCEPTION )
+		{
+			print( FATAL, "Invalid center wavelength of %.5f nm.\n",
+				   1.0e9 * wl );
 			SPEX_CD2A_THROW( EXCEPTION );
 		}
+		OTHERWISE
+			SPEX_CD2A_RETHROW( );
 	}
 	else if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.scan_is_init )
 	{
@@ -1188,23 +1278,30 @@ Var *monochromator_wavelength_axis( Var *v )
 
 Var *monochromator_wavenumber_axis( Var *v )
 {
-	double wl;
+	double wl = spex_cd2a.wavelength;
 	Var *cv;
 	long num_pixels;
 	int acc;
 
 
-	wl = spex_cd2a.wavelength;
+	CLOBBER_PROTECT( wl );
 
 	if ( v != NULL )
 	{
-		wl = spex_cd2a_UMwn2Swl( get_double( v, "wavenumber" ) );
+		wl = get_double( v, "wavenumber" );
 
-		if ( wl <= 0.0 )
+		TRY
 		{
-			print( FATAL, "Invalid center wavenumber.\n" );
+			wl = spex_cd2a_UMwn2Swl( wl );
+			TRY_SUCCESS;
+		}
+		CATCH( INVALID_INPUT_EXCEPTION )
+		{
+			print( FATAL, "Invalid wavenumber of %.4f cm^-1.\n", wl );
 			SPEX_CD2A_THROW( EXCEPTION );
 		}
+		OTHERWISE
+			SPEX_CD2A_RETHROW( );
 	}
 	else if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.scan_is_init )
 	{
