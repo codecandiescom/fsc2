@@ -641,10 +641,6 @@ static void cut_integrate_point( long index, double val )
 					cvp->xp_ref++;
 		}
 
-		cv->points[ index ].v = val;
-		cv->points[ index ].exist = SET;
-		cv->count++;
-
 		/* Calculate the x-coordinate of the new point and figure out if it
 		   exceeds the borders of the canvas */
 
@@ -654,9 +650,18 @@ static void cut_integrate_point( long index, double val )
 			cv->left = SET;
 		if ( cv->xpoints[ xp_index ].x >= ( int ) G.cut_canvas.w )
 			cv->right = SET;
+
+		/* Increment the number of points belonging to the cut */
+
+		cv->count++;
+		cv->points[ index ].exist = SET;
 	}
 	else
 		xp_index = cv->points[ index ].xp_ref;
+
+	/* Store the (new) points value */
+
+	cv->points[ index ].v = val;
 
 	/* Calculate the y-coordinate of the (new) point and figure out if it
 	   exceeds the borders of the canvas */
@@ -1261,9 +1266,6 @@ static void cut_make_scale( Canvas *c, int coord )
 	XPoint triangle[ 3 ];
 
 
-	/* The distance between the smallest ticks should be ca. `SCALE_TICK_DIST'
-	   points - calculate the corresponding delta in real word units */
-
 	if ( coord == X )
 	{
 		r_coord = CG.cut_dir == X ? Y : X;
@@ -1287,6 +1289,9 @@ static void cut_make_scale( Canvas *c, int coord )
 			r_scale = ( double ) c->h / ( double ) ( G.ny - 1 );
 		}
 	}
+
+	/* The distance between the smallest ticks should be ca. `SCALE_TICK_DIST'
+	   points - calculate the corresponding delta in real word units */
 
 	rwc_delta = ( double ) SCALE_TICK_DIST
 		        * fabs( cv2->rwc_delta[ r_coord ] ) / r_scale;
