@@ -68,8 +68,10 @@ c_sources      = fsc2.c pulser.c util.c exceptions.c variables.c \
 
 ifeq ($(SIZE),HI_RES)
 	c_sources += fsc2_rsc_hr.c
+	CFLAGS    += -DSIZE=1
 else
 	c_sources += fsc2_rsc_lr.c
+	CFLAGS    += -DSIZE=0
 endif
 
 bison_sources  = $(notdir $(wildcard src/*_parser.y))
@@ -113,8 +115,6 @@ endif
 ifdef auxdir
 	CFLAGS += -Dauxdir=\"$(auxdir:/=)/\"
 endif
-
-CFLAGS     += -DSIZE=$(SIZE)
 
 
 # Switch off all implicit rules and set suffices of file to be made by make

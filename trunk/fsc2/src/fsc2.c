@@ -153,10 +153,17 @@ static bool xforms_init( int *argc, char *argv[] )
 
 	/* Set some properties of goodies */
 
+#if ( SIZE == HI_RES )
 	fl_set_tooltip_font( FL_NORMAL_STYLE, FL_MEDIUM_SIZE );
 	fl_set_fselector_fontsize( FL_LARGE_SIZE );
 	fl_set_goodies_font( FL_NORMAL_STYLE, FL_LARGE_SIZE );
 	fl_set_oneliner_font( FL_NORMAL_STYLE, FL_LARGE_SIZE );
+#else
+	fl_set_tooltip_font( FL_NORMAL_STYLE, FL_TINY_SIZE );
+	fl_set_fselector_fontsize( FL_SMALL_SIZE );
+	fl_set_goodies_font( FL_NORMAL_STYLE, FL_SMALL_SIZE );
+	fl_set_oneliner_font( FL_NORMAL_STYLE, FL_SMALL_SIZE );
+#endif	
 
 	/* Create and display the main form */
 
@@ -171,10 +178,18 @@ static bool xforms_init( int *argc, char *argv[] )
 	fl_set_object_helper( main_form->quit, "Quit fsc2" );
 	fl_set_object_helper( main_form->bug_report, "Mail a bug report" );
 
+#if ( SIZE == HI_RES )
 	fl_set_browser_fontsize( main_form->browser, FL_LARGE_SIZE );
+#else
+	fl_set_browser_fontsize( main_form->browser, FL_SMALL_SIZE );
+#endif
 	fl_set_browser_fontstyle( main_form->browser, FL_FIXED_STYLE );
 
+#if ( SIZE == HI_RES )
 	fl_set_browser_fontsize( main_form->error_browser, FL_LARGE_SIZE );
+#else
+	fl_set_browser_fontsize( main_form->error_browser, FL_SMALL_SIZE );
+#endif
 	fl_set_browser_fontstyle( main_form->error_browser, FL_FIXED_STYLE );
 
 	fl_get_object_geometry( main_form->browser, &x1, &y1, &w1, &h1 );
