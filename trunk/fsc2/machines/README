@@ -1,15 +1,13 @@
 The files in these directories are used to simpify the compilation
 and installation of fsc2 on well known machines. Normally, one would
 have to edit the makefile in the main directory of the package (and
-possibly also in the 'modules' sub-directorty) and apply the necessary
+possibly also in the 'modules' subdirectorty) and apply the necessary
 changes to adapt it for the machine whenever one installs a new version.
-
 
 To avoid this, in the make and install processes the makefiles
 involved will look for files with names starting with the fully
 qualified hostname of the machine in this directory and include
 them if they exist.
-
 
 Up to three files will get included. As an example in the following
 it is assumed that the fully qualified hostname of the machine fsc2
@@ -19,7 +17,6 @@ the files in the 'machines' directory will be searched for:
 hex.unseen.edu
 hex.unseen.edu-config
 hex.unseen.edu-install
-
 
 The first file 'hex.unseen.edu' must contain just definitions as
 you will find them in a makefile. It is for setting the variables
@@ -56,12 +53,10 @@ MAIL_ADDRESS
 What they mean is explained in some detail at the top of the
 makefile in the main directory.
 
-
 The file 'hex.unseen.edu-config' is a file with commands that
 get executed before the compilation starts. It can e.g. be used
 to automatically change configuration files for devices etc.
 (or with whatever ideas you come up with).
-
 
 The third file, 'hex.unseen.edu-install', again is a makefile that
 gets included during installation of fsc2. It should contain two

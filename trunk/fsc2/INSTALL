@@ -128,14 +128,24 @@ C) Preparing for Installation
 =============================
 
 After installing the required tools and libraries and extracting the
-archive go into the newly created directory fsc2. Open the Makefile in
-this directory with your favorite editor.
+archive go into the newly created directory fsc2. You can use two methods
+of doing so. Either you can edit the Makefile directly and change some
+variables at its top. Alternatvely, go into the 'machines' subdirectory
+and copy the file 'template.nowhere' to a file with the fully qualified
+hostname of your machine (i.e. its full name, including the domain name)
+as its name. Now you can edit this file and it will automatically get
+evaluated during the make process. This is probably more convenient. When
+you edit the Makefile you will have to do it again and again whenever you
+install a new version. In contrast the file in the 'machines' subdirectory
+can just be copied from an old installation to a new version and everything
+should stay the same.
 
 
 Normally, fsc2 and all auxiliary files needed will be installed below
 /usr/local (in /usr/local/bin, /usr/local/lib/fsc2, /usr/local/info
 and /usr/local/share/doc). To change this location edit the lines
-defining the variable 'prefix' in the Makefile.
+defining the variable 'prefix' in the Makefile or the file you're setting
+up for your machine.
 
 
 The next two variables, OWNER and GROUP, will be used when setting the
@@ -210,7 +220,8 @@ card or the Roper Scientific Spec-10 CCD camera is required. In this case
 the lines where these variables are defined must be uncommented and the
 additional variables for the include paths and the exact locations for
 the required libraries may have to be changed. Please see the comments
-in the Makefile for details.
+in the Makefile or the template file in the 'machines' directory for
+details.
 
 
 Moreover, support for the National Instruments 6601 GPCT, the Meilhaus
@@ -363,7 +374,7 @@ Just start by typing 'fsc2 edl/qq.edl' or 'fsc2 edl/z.edl' (assuming you're
 still in fsc2's main directory) and click on the "Start" button to get an
 idea about how fsc2 displays 1- and 2-dimensional data sets.
 
-                  April 15, 2003             Much luck, Jens
+                      May 7, 2003             Much luck, Jens
 --
        _  _____  _____
       | ||_   _||_   _|         Jens.Toerring@physik.fu-berlin.de

@@ -54,7 +54,7 @@ GROUP             := uucp
 # after the '#INCLUDE' directive a file name enclosed in '<' and '>' is
 # found. This is for the case a system wide EDL files etc. has been set up
 # and from which users may use include files without going to the hassle
-# always to write out the full path. If no such repository exists its save
+# always to write out the full path. If no such repository exists its saver
 # to leave this variable undefined.
 
 # DEF_INCL_DIR      := /scratch/EDL/includes
@@ -122,10 +122,11 @@ SERIAL_LOCK_DIR   := /var/lock
 
 # The next two lines must be uncommented if you want support for the National
 # Instruments 6601 GPCT card. If the library for the card isn't in a place
-# where the linker will find it automatically you need to specify the full
-# absolut path for the library (e.g. '/usr/xxx/yyy/libni6601.so'). You must
-# make sure that the library for the card is already installed if you want
-# to build fsc2 with support for the card.
+# where the linker will find it automatically (e.g. '/usr/lib' and
+# '/usr/local/lib') you need to specify the full absolut path for the
+# library (e.g. '/usr/xxx/yyy/libni6601.so'). You must make sure that the
+# library for the card is already installed if you want to build fsc2 with
+# support for the card.
 
 # WITH_NI6601       := yes
 # ni6601_libs       := libni6601.so
@@ -133,10 +134,11 @@ SERIAL_LOCK_DIR   := /var/lock
 
 # Uncommented the next two lines if you want support for the Meilhaus
 # Electronics 6000 or 6100 DAC card. If the library for the card isn't in a
-# place where the linker will find it automatically you need to specify the
-# full absolut path for the library  (e.g. '/opt/zzz/ttt/libme6x00.so').
-# You must make sure that the library for the card is already installed if
-# you want to build fsc2 with support for the card.
+# place where the linker will find it automatically (e.g. '/usr/lib' and
+# '/usr/local/lib') you need to specify the full absolut path for the
+# library  (e.g. '/opt/zzz/ttt/libme6x00.so'). You must make sure that the
+# library for the card is already installed if you want to build fsc2 with
+# support for the card.
 
 # WITH_ME6000       := yes
 # me6000_libs       := libme6x00.so
@@ -144,25 +146,27 @@ SERIAL_LOCK_DIR   := /var/lock
 
 # The next two lines must be uncommented if you want support for the Wasco
 # WITIO-48 DIO card. If the library for the card isn't in a place where the
-# linker will find it automatically you need to specify the full absolut path
-# for the library (e.g. '/usr/xxx/yyy/libwitio_48.so'). You must make sure
-# that the library for the card is already installed if you want to build
-# fsc2 with support for the card.
+# linker will find it automatically (e.g. '/usr/lib' and '/usr/local/lib')
+# you need to specify the full absolut path for the library (e.g.
+# '/usr/xxx/yyy/libwitio_48.so'). You must make sure that the library for
+# the card is already installed if you want to build fsc2 with support for
+# the card.
 
 # WITH_WITIO_48     := yes
 # witio_48_libs     := libwitio_48.so
 
 
-# The follwoing three lines must be uncommented when you want support for the
+# The following three lines must be uncommented when you want support for the
 # Roper Scientific Spec-10 CCD camera. Depending on where you installed the
 # header files required by the PVCAM library (which is need to access the
 # camera) you may have to change the 'rs_spec10_incl' variable to the name
 # of the installation directory. The third variable, 'rs_spec10_libs', must
 # be changed if the library isn't in a place where the linker will find it
-# automatically, in this case it must be the full absolute path to of the
-# library (e.g. '/usr/lib/pvcam/libpvcam.so'). You must make sure that the
-# library for the camera is already installed if you want to build fsc2 with
-# support for the camera.
+# automatically(e.g. '/usr/lib' and '/usr/local/lib'). In this case it must
+# be the full absolute path to of the library (for example
+#  '/usr/lib/pvcam/libpvcam.so'). You must make sure that the library for the
+# camera is already installed if you want to build fsc2 with support for the
+# camera.
 
 # WITH_SPEC10       := yes
 # rs_spec10_incl    := /usr/local/include/pvcam
