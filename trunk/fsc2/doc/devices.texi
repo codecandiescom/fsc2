@@ -447,12 +447,15 @@ only if either it has been already called with an argument or in the
 @findex digitizer_define_window()
 The function can be used to define a time window to be used in later
 calls of the functions to measure an area, an amplitude or to fetch a
-curve from the oscilloscope. It needs at least two arguments, a
-non-negative window number that must not be used before and the
+curve from the oscilloscope. It needs at least one arguments, the
 starting point of the interval (in seconds). Optionally, there can be a
-third argument with the width of the window (also in seconds). If no
+second argument with the width of the window (also in seconds). If no
 width argument is passed to the function the distance between the cursor
 pair shown on the oscilloscopes screen is going to be used.
+
+The function returns an integer number that can be used in later calls
+to address the window. Thus, you need to store this number in a variable
+to be able to use this window in further calls of digitizer functions.
 
 The allowed range of arguments for the start point and width of the
 window depends on the time base setting of the oscilloscope as well as
