@@ -62,7 +62,6 @@
 #include "phases.h"
 #include "pulser.h"
 #include "pulse.h"
-#include "ppcheck.h"
 #include "exp.h"
 #include "run.h"
 #include "chld_func.h"

@@ -181,32 +181,32 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			/* combinations of pulse and property, e.g. `P3.LEN' */
 
 {P}"."{F}   {
-				exp_val.vptr = pulse_get_prop( exptext, P_FUNC );
+				exp_val.vptr = p_get( exptext, P_FUNC );
 				return E_VAR_REF;
             }
 
 {P}"."{S}   {
-				exp_val.vptr = pulse_get_prop( exptext, P_POS );
+				exp_val.vptr = p_get( exptext, P_POS );
 				return E_VAR_REF;
             }
 
 {P}"."{L}   {
-				exp_val.vptr = pulse_get_prop( exptext, P_LEN );
+				exp_val.vptr = p_get( exptext, P_LEN );
 				return E_VAR_REF;
             }
 
 {P}"."{DS}  {
-				exp_val.vptr = pulse_get_prop( exptext, P_DPOS );
+				exp_val.vptr = p_get( exptext, P_DPOS );
 				return E_VAR_REF;
             }
 
 {P}"."{DL}  {
-				exp_val.vptr = pulse_get_prop( exptext, P_DLEN );
+				exp_val.vptr = p_get( exptext, P_DLEN );
 				return E_VAR_REF;
             }
 
 {P}"."{ML}  {
-				exp_val.vptr = pulse_get_prop( exptext, P_MAXLEN );
+				exp_val.vptr = p_get( exptext, P_MAXLEN );
 				return E_VAR_REF;
             }
 
