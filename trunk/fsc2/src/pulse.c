@@ -192,7 +192,7 @@ void pulse_set( Pulse *p, int type, Var *v )
 
 Var *get_pulse_by_addr_prop( Pulse *p, int prop )
 {
-	const char *type_strings[ ] = { "Function", "Start", "Length",
+	const char *prop_strings[ ] = { "Function", "Start", "Length",
 									"Position change", "Length change",
 									"Maximum Length" };
 	int i, j;
@@ -208,12 +208,12 @@ Var *get_pulse_by_addr_prop( Pulse *p, int prop )
 
 	/* Make sure the accessed property of the pulse has been set */
 
-	if ( ! ( p->set_flags & type ) )
+	if ( ! ( p->set_flags & prop ) )
 	{
-		for ( j = 0, i = type; ! ( i & 1 ) && i != 0; i >>=  1 )
+		for ( j = 0, i = prop; ! ( i & 1 ) && i != 0; i >>=  1 )
 			j++;
 
-		/* Check for unreasonable value of type variable */
+		/* Check for unreasonable value of property variable */
 
 		if ( i != 1 )
 		{
@@ -225,13 +225,13 @@ Var *get_pulse_by_addr_prop( Pulse *p, int prop )
 		/* </PARANOIA> */
 
 		eprint( FATAL, "%s:%ld: %s of pulse %d has not been set.\n", 
-				Fname, Lc, type_strings[ j ], p->num );
+				Fname, Lc, prop_strings[ j ], p->num );
 		THROW( EXCEPTION );
 	}
 
 	/* Now return the appropriate data */
 
-	switch ( type )
+	switch ( prop )
 	{
 		case P_FUNC :
 			return vars_push( INT_VAR, p->func );
