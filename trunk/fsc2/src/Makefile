@@ -27,7 +27,7 @@ c_sources     = fsc2.c xinit.c pulser.c util.c exceptions.c variables.c    \
 				exp.c run.c comm.c accept.c gpib_if.c loader.c conn.c      \
 				ipc.c print.c serial.c graphics.c graph_handler_1d.c       \
 				graph_handler_2d.c graph_cut.c bugs.c fsc2_assert.c        \
-				dump.c module_util.c
+				dump.c inline.c module_util.c
 ifdef WITH_HTTP_SERVER
 c_sources    += http.c dump_graphic.c
 endif
@@ -36,7 +36,7 @@ flex_sources  = $(wildcard *_lexer.l)
 sources       = $(bison_sources:.y=.c) $(flex_sources:.l=.c) $(c_sources)
 objects       = $(sources:.c=.o)
 resources     = $(wildcard fsc2_rsc_*r.fd)
-headers       = ${c_sources:.c=.h} global.h fsc2_types.h inline.h
+headers       = ${c_sources:.c=.h} global.h fsc2_types.h
 all_headers   = $(headers) $(bison_sources:.y=.h) $(resources:.fd=.h)
 
 export headers        # export list of header files to the modules Makefile

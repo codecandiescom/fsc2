@@ -34,7 +34,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 
 /* Here is a list of the supported lock-in amplifiers plus the default DAC
-   ports used with each off them. The default DAC port list will only be
+   ports used with each of them. The default DAC port list will only be
    used when LOCKIN_DAC isn't defined in 'keithley228a.conf'. */
 
 static const char *lockins[ ] = { "sr510", "sr530", "sr810", "sr830", NULL };
