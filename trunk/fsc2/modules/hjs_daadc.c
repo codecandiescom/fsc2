@@ -485,7 +485,7 @@ Var *daq_set_voltage( Var *v )
 
 	/* Check the new output voltage */
 
-	if ( volts < MIN_OUT_VOLTS || volts >= hjs_daadc.max_volts * 1.001 )
+	if ( volts < MIN_OUT_VOLTS || volts >= hjs_daadc.max_volts * 1.0001 )
 	{
 		if ( FSC2_MODE == EXPERIMENT )
 		{
@@ -617,7 +617,7 @@ Var *daq_dac_parameter( Var *v )
 static int hjs_daadc_da_volts_to_val( double volts )
 {
 	fsc2_assert( volts >= MIN_OUT_VOLTS &&
-				 volts < hjs_daadc.max_volts * 1.001 );
+				 volts < hjs_daadc.max_volts * 1.0001 );
 
 	return irnd( volts / hjs_daadc.max_volts * 4095.0 );
 }
@@ -668,7 +668,7 @@ static bool hjs_daadc_serial_init( void )
 
 static void hjs_daadc_out( int out )
 {
-    fsc2_assert( out >= 0 && out <= 4095 );
+	fsc2_assert( out >= 0 && out <= 4095 );
 	hjs_daadc_in_out( out );
 	hjs_daadc.out_val = out;
 }

@@ -268,12 +268,16 @@ scripts/Makefile
 scripts/cw_endor.crowley.physik.fu-berlin.de
 scripts/cw_endor.door.physik.fu-berlin.de
 scripts/cw_epr.door.physik.fu-berlin.de
+scripts/cw_epr.dyson.physik.uni-osnabrueck.de
 scripts/cw_epr.freed.physik.uni-osnabrueck.de
 scripts/cw_epr.isaak.physik.fu-berlin.de
 scripts/cw_epr.moebpc3.physik.fu-berlin.de
+scripts/cw_epr.pake.physik.uni-osnabrueck.de
 scripts/cw_epr.tresr.physik.fu-berlin.de
 scripts/cw_epr_monitor.moebpc3.physik.fu-berlin.de
+scripts/cw_epr_saturation.dyson.physik.uni-osnabrueck.de
 scripts/cw_epr_saturation.freed.physik.uni-osnabrueck.de
+scripts/cw_epr_saturation.pake.physik.uni-osnabrueck.de
 scripts/endor_monitor.crowley.physik.fu-berlin.de
 scripts/trepr.isaak.fu-berlin.de
 scripts/tresr.sunone.chemie.unibas.ch

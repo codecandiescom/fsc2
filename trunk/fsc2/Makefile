@@ -513,8 +513,8 @@ all:
 config: fsc2_config.h
 	@if [ -n $(machine_name) ]; then                        \
 		echo "Configuring for machine $(machine_name)...";  \
-		if [ -x $(mchdir)/$(machine_name)-config ]; then    \
-			. $(mchdir)/$(machine_name)-config;             \
+		if [ -r $(mchdir)/$(machine_name)-config ]; then    \
+			$(SHELL) $(mchdir)/$(machine_name)-config;      \
 		fi                                                  \
 	fi
 	$(MAKE) -C $(sdir) gpib_setup

@@ -1,0 +1,7 @@
+# -*-sh-*-
+#
+# $Id$
+
+sed 's/^#define SERIAL_PORT[ \t].*$/#define SERIAL_PORT     2/'  \
+	$cdir/hjs_attenuator.conf > $cdir/hjs_attenuator.conf.new
+mv $cdir/hjs_attenuator.conf.new $cdir/hjs_attenuator.conf

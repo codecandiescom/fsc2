@@ -2,6 +2,6 @@
 #
 # $Id$
 
-sed 's/^#define SERIAL_PORT[ \t].*$$/#define SERIAL_PORT     1/'  \
-	$(cdir)/er035m_sas.conf > $(cdir)/er035m_sas.conf.new
-mv $(cdir)/er035m_sas.conf.new $(cdir)/er035m_sas.conf
+sed 's/^#define SERIAL_PORT[ \t].*$/#define SERIAL_PORT     1/'  \
+	$cdir/er035m_sas.conf > $cdir/er035m_sas.conf.new
+mv $cdir/er035m_sas.conf.new $cdir/er035m_sas.conf
