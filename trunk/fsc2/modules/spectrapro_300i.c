@@ -451,26 +451,33 @@ Var *monochromator_groove_density( Var *v )
 	long grating;
 
 
-	grating = get_strict_long( v, "grating number" );
-
-	if ( grating < 1 && grating > MAX_GRATINGS )
+	if ( v == NULL )
+		grating = spectrapro_300i.current_grating;
+	else
 	{
-		print( FATAL, "Invalid grating number, must be in range between "
-			   "1 and %d.\n", MAX_GRATINGS );
-		THROW( EXCEPTION );
+		grating = get_strict_long( v, "grating number" ) - 1;
+
+		if ( grating < 0 && grating >= MAX_GRATINGS )
+		{
+			print( FATAL, "Invalid grating number, must be in range between "
+				   "1 and %d.\n", MAX_GRATINGS );
+			THROW( EXCEPTION );
+		}
+
+		too_many_arguments( v );
 	}
 	
-	if ( ! spectrapro_300i.grating[ grating - 1 ].is_installed )
+	if ( ! spectrapro_300i.grating[ grating ].is_installed )
 	{
-		print( FATAL, "Grating #%ld isn't installed.\n", grating );
+		print( FATAL, "Grating #%ld isn't installed.\n", grating + 1 );
 		THROW( EXCEPTION );
 	}
 
 	if ( FSC2_MODE == TEST )
-		spectrapro_300i.grating[ grating - 1 ].used_in_test = SET;
+		spectrapro_300i.grating[ grating ].used_in_test = SET;
 
 	return vars_push( FLOAT_VAR,
-				   ( double ) spectrapro_300i.grating[ grating - 1 ].grooves );
+					  ( double ) spectrapro_300i.grating[ grating ].grooves );
 }
 
 
@@ -984,7 +991,7 @@ Var *monochromator_set_calibration( Var *v )
 
 	if ( v->type == STR_VAR )
 	{
-		if ( strcasecmp( v->val.sptr, "OFF" ) )
+		if ( strcasecmp( v->val.sptr, "DELETE_CALIBRATION" ) )
 		{
 			print( FATAL, "Invalid second argument.\n" );
 			THROW( EXCEPTION );

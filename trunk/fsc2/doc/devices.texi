@@ -50,18 +50,17 @@
 @section Overview
 
 
-The simplest approach to dealing with device-specific functions would
-have been to have a set of functions for each individual device, all
-with different names. Then one would have a different function for
-e.g.@: fetching data from each of a series of different digitizing
-oscilloscopes. But this would become a nuisance whenever the
-oscilloscope had to be changed in the experimental setup. One then would
-have to carefully check all function calls in the @code{EDL} scripts and
-adjust the names of the functions to fit the new digitizer.
+The simple-minded approach to dealing with device-specific functions
+would be to have a set of functions for each individual device, all with
+different names. Then one would have a different function for e.g.@:
+fetching data from each of a series of different digitizing
+oscilloscopes. But this would become a nuisance whenever a oscilloscope
+has to be changed in the experimental setup - one would have to
+carefully check all function calls in the @code{EDL} scripts and adjust
+the names of the functions to fit the new digitizer.
 
-Thus it's more reasonable to have generic functions for similar devices
-that usually have a lot in common. It's much more convenient just to
-write
+So it's more reasonable to have generic functions for similar devices
+which have a lot in common. It's much more convenient just to write
 @example
 new_data = digitizer_get_curve( CH1 );    // get curve from channel 1
 @end example
@@ -71,9 +70,9 @@ instead of
 new_data = tds754a_get_curve( 1 );        // get curve from channel 1
 @end example
 @noindent
-and changing dozens of references to the TDS754A oscilloscope in each
-and every @code{EDL} script when someone else needs just this
-oscilloscope for a few days and one has to do with the TDS520
+and then changing dozens of references to the TDS754A oscilloscope in
+each and every @code{EDL} script when someone else needs your
+oscilloscope for just a few days and you have to do with the TDS520
 oscilloscope in between.
 
 Of course, using generic functions is not the silver bullet for all
@@ -971,6 +970,7 @@ case @code{0} is returned.
 SR8[13]0: 1-19999
 ER023M:   1-2
 
+
 @anchor{lockin_lock_keyboard}
 @item lockin_lock_keyboard()
 @findex lockin_lock_keyboard()
@@ -1106,6 +1106,7 @@ External amplified trigger input (LeCroy 9400)
 
 
 @table @samp
+
 @anchor{digitizer_name}
 @item digitizer_name()
 @findex digitizer_name()
@@ -1674,6 +1675,7 @@ of the pulse sequence has to be committed explicitely by calling
 
 
 @table @samp
+
 @anchor{pulser_name}
 @item pulser_name()
 @findex pulser_name()
@@ -1798,6 +1800,7 @@ of the function associated with either @code{PULSE_SETUP_1} or
 
 This function also immediately updates the pulse sequence, as it is done
 by calling @code{pulser_update()}.
+
 
 @anchor{pulser_reset}
 @item pulser_reset()
@@ -2166,6 +2169,7 @@ in the @code{DEVICES} section.
 
 
 @table @samp
+
 @anchor{synthesizer_name}
 @item synthesizer_name()
 @findex synthesizer_name()
@@ -2274,6 +2278,7 @@ If there has been set both a frequency and a step frequency the function
 will decrement the synthesizers frequency. It returns the newly set
 frequency. The function can only be called in the @code{EXPERIMENT}
 section.
+
 
 @anchor{synthesizer_reset_frequency}
 @item synthesizer_reset_frequency()
@@ -2478,6 +2483,7 @@ the @code{EDL} script.
 
 
 @table @samp
+
 @anchor{temp_contr_name}
 @item temp_contr_name()
 @findex temp_contr_name()
@@ -2489,6 +2495,7 @@ Returns a string with the name of the temperature controller being used.
 @findex temp_contr_temperature()
 This function accepts no arguments and returns the temperature at the
 currently active sample channel.
+
 
 @anchor{temp_contr_sample_channel}
 @item temp_contr_sample_channel()
@@ -2548,6 +2555,7 @@ in the @code{DEVICES} section.
 @findex voltmeter_name()
 Returns a string with the name of the voltmeter being used.
 
+
 @anchor{voltmeter_get_data}
 @item voltmeter_get_data()
 @findex voltmeter_get_data()
@@ -2590,6 +2598,7 @@ script.
 @findex boxcar_name()
 Returns a string with the name of the boxcar integrator being used.
 
+
 @anchor{boxcar_curve_length}
 @item boxcar_curve_length()
 @findex boxcar_curve_length()
@@ -2622,6 +2631,7 @@ Function starts a new acquisition.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
+
 
 @anchor{boxcar_stop_acquisition}
 @item boxcar_stop_acquisition()
@@ -2671,6 +2681,7 @@ in the @code{DEVICES} section.
 @findex freq_counter_name()
 Returns a string with the name of the frequency counter being used.
 
+
 @anchor{freq_counter_measure}
 @item freq_counter_measure()
 @findex freq_counter_measure()
@@ -2703,6 +2714,7 @@ library (both coming with @code{fsc2}) have been successfully installed.
 @item dac_name()
 @findex dac_name()
 Returns a string with the name of the DAC being used.
+
 
 @anchor{dac_voltage}
 @item dac_voltage()
@@ -2751,6 +2763,7 @@ library (both coming with @code{fsc2}) have been successfully installed.
 @findex counter_name()
 Returns a string with the name of the event counter being used.
 
+
 @anchor{counter_start_continuous_counter}
 @item counter_start_continuous_counter()
 @findex counter_start_continuous_counter()
@@ -2776,6 +2789,7 @@ channel @code{0} is channel @code{1} and vice versa, and channels
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
+
 
 @anchor{counter_start_timed_counter}
 @item counter_start_timed_counter()
@@ -2810,6 +2824,7 @@ channel @code{0} is channel @code{1} and vice versa, and channels
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
+
 @anchor{counter_timed_count}
 @item counter_timed_count()
 @findex counter_timed_count()
@@ -2822,6 +2837,7 @@ previous function.
 
 The largest value that can be returned is @w{2147483647}, i.e.@: @w{2^31
 - 1}.
+
 
 @anchor{counter_intermediate_count}
 @item counter_intermediate_count()
@@ -2840,6 +2856,7 @@ i.e.@: @w{2^31 - 1}.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
+
 
 @anchor{counter_final_count}
 @item counter_final_count()
@@ -2862,6 +2879,7 @@ i.e.@: @w{2^31 - 1}.
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
+
 @anchor{counter_stop_counter}
 @item counter_stop_counter()
 @findex counter_stop_counter()
@@ -2874,6 +2892,7 @@ between the symbolic values and channel numbers is non-trivial).
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
+
 
 @anchor{counter_single_pulse}
 @item counter_single_pulse()
@@ -2889,6 +2908,7 @@ be an integer multiple of @w{50 ns}.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
+
 
 @anchor{counter_continuous_pulses}
 @item counter_continuous_pulses()
@@ -2911,6 +2931,7 @@ function @code{counter_stop_counter()} must be called.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
+
 
 @anchor{counter_dio_read}
 @item counter_dio_read()
@@ -2940,6 +2961,7 @@ set to @code{0}.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
+
 
 @anchor{counter_dio_write}
 @item counter_dio_write()
@@ -2981,11 +3003,11 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @section CCD Camera Functions
 @cindex CCD Camera Functions
 
-The only currentyl supplied CCD camera is the Roper Scientific Spec-10
+The only currently supplied CCD camera is the Roper Scientific Spec-10
 camera (without a shutter and with LN cooling). Its module is loaded by
 specifying
 @example
-rs_spec10;
+rs_spec10
 @end example
 in the @code{DEVICES} section. 
 
@@ -3190,7 +3212,7 @@ Currently only the SpectraPro-300i series of monochromator is supported
 Research Corporation. The module for the monochromator gets loaded by
 specifying
 @example
-spectrapro_300i;
+spectrapro_300i
 @end example
 in the @code{DEVICES} section. 
 
@@ -3451,6 +3473,7 @@ in the @code{DEVICES} section.
 @findex powersuppy_name()
 Returns a string with the name of the power supply being used.
 
+
 @anchor{powersupply_channel_state}
 @item powersupply_channel_state()
 @findex powersupply_channel_state()
@@ -3494,6 +3517,7 @@ limit does not allow it.
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
+
 @anchor{powersupply_voltage_limit}
 @item powersupply_voltage_limit()
 @findex powersupply_voltage_limit()
@@ -3508,6 +3532,7 @@ effect can be achieved by calling the function
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
+
 
 @anchor{powersupply_current}
 @item powersupply_current()
@@ -3525,6 +3550,7 @@ limit does not allow it.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
+
 
 @anchor{powersupply_current_limit}
 @item powersupply_current_limit()
@@ -3569,7 +3595,7 @@ according to the setting of the @code{ACQUISITION_SEQUENCE}.
 The function needs both a pulser and a digitizer. It is not possible to
 use the function with more than one pulser or digitizer -- if more than
 one pulser or digitizer is listed in the @code{DEVICES} section it will
-always try to use the first pulser and digitizer listed.
+always use the first pulser and digitizer listed only.
 
 The function can be used both for 1-dimensional and 2-dimensional
 measurements. In the first case there is just one signal channel, in the

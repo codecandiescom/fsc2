@@ -603,18 +603,20 @@ specify either an integer number or a string:
 @item @code{3} @tab @code{"YELLOW"} @tab yellow
 @item @code{4} @tab @code{"BLUE"} @tab blue
 @item @code{5} @tab @code{"BLACK"} @tab black
-@item @code{6} @tab @code{"DELETE"} @tab black
+@item @code{6} @tab @code{"DELETE"} @tab
 @end multitable
 @noindent
-The last color, @code{"DELETE"}, is invisible obviously not a color but
-can be used to delete a marker at the specified position (if more than
-one marker has been set for that position only the first, older one will
-be deleted).
+The last color, @code{"DELETE"}, is bviously not a color but can be used
+to delete a marker at the specified position (if more than one marker
+has been set for that position only the first, older one will be
+deleted).
 
 Please note: in "sliding window" display mode, the coordinate for the
 marker is not used at all (but must be given and must be larger than
 @code{0}), the marker will always be drawn at the newest point for the
-first displayed curve. Thus also can't delete markers in this mode.
+first displayed curve (the curve numbered 1). Thus also can't delete
+a single marker in this mode but only all of them using the functin
+@code{clear_marker_1d()}.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
