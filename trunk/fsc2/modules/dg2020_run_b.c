@@ -125,6 +125,11 @@ void dg2020_do_checks( FUNCTION *f )
 }
 
 
+/*----------------------------------------------------------------------*/
+/* If there are both TWT_GATE pulses and DEFENSE pulses check that they */
+/* won't get to near to each other to avoid burning the diode or mixer. */
+/*----------------------------------------------------------------------*/
+
 static void dg2020_defense_twt_check( void )
 {
 	FUNCTION *twt = &dg2020.function[ PULSER_CHANNEL_TWT_GATE ],
@@ -328,7 +333,7 @@ PULSE *dg2020_delete_pulse( PULSE *p )
   Some care has taken to minimize the number of commands and their length.
 ----------------------------------------------------------------------------*/
 
-void dg2020_commit( FUNCTION * f, bool flag )
+void dg2020_commit( FUNCTION *f, bool flag )
 {
 	PULSE *p;
 	int i, j;

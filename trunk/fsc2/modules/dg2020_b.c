@@ -661,7 +661,7 @@ Var *pulser_pulse_reset( Var *v )
 		p->pos = p->initial_pos;
 		p->is_pos = p->initial_is_pos;
 
-		if ( p->is_len )
+		if ( p->is_len || p->is_len )
 		{
 			p->old_len = p->len;
 			p->is_old_len = SET;
