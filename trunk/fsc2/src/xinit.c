@@ -460,7 +460,7 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-bool dl_fsc2_rsc( bool size )
+bool dl_fsc2_rsc( void )
 {
 	char *lib_name;
 	void *handle;
@@ -473,7 +473,7 @@ bool dl_fsc2_rsc( bool size )
 	strcpy( lib_name, libdir );
 	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
 		strcat( lib_name, "/" );
-	if ( size == LOW )
+	if ( G_Funcs.size == LOW )
 		strcat( lib_name, "fsc2_rsc_lr.so" );
 	else
 		strcat( lib_name, "fsc2_rsc_hr.so" );
