@@ -342,8 +342,7 @@ Var *digitizer_sensitivity( Var *v )
 	if ( v->val.lval < TDS520_CH1 || v->val.lval > TDS520_CH2 )
 	{
 		eprint( FATAL, "%s:%ld: %s: Can't set or obtain sensitivity for "
-				"channel %s.\n", Fname, Lc, DEVICE_NAME,
-				Channel_Names[ v->val.lval ] );
+				"specified channel.\n", Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
