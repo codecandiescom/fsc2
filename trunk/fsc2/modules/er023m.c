@@ -149,14 +149,20 @@ Var *lockin_name( Var *v )
 
 Var *lockin_get_data( Var *v )
 {
+	double val;
+
+
 	if ( v != NULL )
 		eprint( WARN, SET, "%s: Useless parameter%s in call of %s().\n",
 				DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
 
 	if ( TEST_RUN )                  /* return dummy value in test run */
 		return vars_push( FLOAT_VAR, ER023M_TEST_DATA );
-	else
-		return vars_push( FLOAT_VAR, ( double ) er023m_get_data( ) );
+
+	val = rg_list[ er023m.rg_index ]
+		  * ( ( double ) ( er023m_get_data( ) - er023m.min )
+			  * er023m.scale_factor - 1.0 );
+	return vars_push( FLOAT_VAR, val );
 }
 
 

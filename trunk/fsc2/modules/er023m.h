@@ -179,7 +179,7 @@ typedef struct {
 	int nb;               /* number of bytes send from ADC */
 	                      /* recheck whenever CT changes */
 	double scale_factor;
-	int scale_offset;
+	long min;
 
 	unsigned char st;     /* status byte */
 	bool st_is_valid;     /* when set use the stored value of the status byte,

@@ -77,20 +77,17 @@ bool er023m_init( const char *name )
 		}
 
 		/* Set the conversion time - if it hasn't been specified by the user
-		   get its value and set it to a value of at least MIN_CT_MULT */
+		   get its value and set it to a value of at least MIN_CT_MULT (it
+		   must be set anyway to set up some inportant values needed in the
+		   data conversion). */
 
-		if ( er023m.ct_mult != UNDEF_CT_MULT )
-			er023m_set_ct( er023m.ct_mult );
-		else
+		if ( er023m.ct_mult == UNDEF_CT_MULT )
 		{
 			er023m.ct_mult = er023m_get_ct( );
 			if ( er023m.ct_mult < MIN_CT_MULT )
-				er023m_set_ct( er023m.ct_mult = MIN_CT_MULT );
+				er023m.ct_mult = MIN_CT_MULT;
 		}
-
-		/* Get the number of bytes to be expected for ADC data */
-
-		er023m.nb = er023m_nb( );
+		er023m_set_ct( er023m.ct_mult );
 
 		/* Set or fetch the modulation frequency */
 
@@ -292,13 +289,18 @@ int er023m_get_ct( void )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Sets the conversion time, input must be between 10 and 9999 */
-/* (values below 10, i.e. 3.2 ms would make it impossible to   */
-/* fetch data in single mode (SM)). Because the CT setting has */
-/* an influence on the number of bytes returned as ADC data we */
-/* als have to (re)read this number of bytes.                  */
-/*-------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Sets the conversion time, input must be between 10 and 9999  */
+/* (values below 10, i.e. 3.2 ms would make it impossible to    */
+/* fetch data in single mode (SM)). Because the conversion time */
+/* determines the number of bytes returned as ADC data as well  */
+/* as how many of the bits in the returned bytes are valid we   */
+/* also have to (re)read this number of bytes and recalculate   */
+/* the scaling factor and offset according to the algorithm     */
+/* that Robert Bittl (FU Berlin) has figured out and was kind   */
+/* enough to tell me (as usual, the manual is tells nothing     */
+/* about how to do it...).                                      */
+/*--------------------------------------------------------------*/
 
 void er023m_set_ct( int ct_mult )
 {
@@ -312,11 +314,14 @@ void er023m_set_ct( int ct_mult )
 		er023m_failure( );
 
 	er023m.nb = er023m_nb( );
+
+	er023m.min = 128 * ct_mult;
+	er023m.scale_factor = 2.0 / ( double ) ( 512 * ct_mult - 1 - er023m.min )
 }
 
 
 /*------------------------------------------------*/
-/* Asks the device fro the current phase setting, */
+/* Asks the device for the current phase setting, */
 /* a value between 0 and 259 will be returned.    */
 /*------------------------------------------------*/
 
@@ -537,12 +542,12 @@ void er023m_set_re( int re )
 }
 
 
-/*----------------------------------------------------------*/
-/* Returns the number of bytes to be expected when fetching */
-/* ADC data in single mode (SM) - again the manual is lying */
-/* by teling that the maximum number is 3 while in reality  */
-/* it seems to be 4.                                        */
-/*----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+/* Returns the number of bytes to be expected when fetching  */
+/* ADC data in single mode (SM) - again the manual is lying  */
+/* by claiming that the maximum number is 3 while in reality */
+/* it seems to be 4.                                         */
+/*-----------------------------------------------------------*/
 
 int er023m_nb( void )
 {
@@ -560,14 +565,7 @@ int er023m_nb( void )
 	buf[ len - 1 ] = '\0';
 	nb = T_atoi( buf + 2 );
 
-	fsc2_assert( nb > 0 && nb <= MAX_NB &&
-				 nb <= ( int ) sizeof( unsigned int ) );
-
-	for ( fac = 255, i = 1; i < nb; i++ )
-		fac = fac * 256 + 255;
-
-	er023m.scale_factor = 0.5 / ( double ) fac;
-	er023m.scale_offset = 1 << ( 4 * nb );
+	fsc2_assert( nb == 2 || nb == 4 );
 
 	return nb;
 }
