@@ -2,11 +2,7 @@
   $Id$
 */
 
-
-
 #include "fsc2.h"
-
-
 
 
 /* exported functions */
@@ -16,17 +12,24 @@ int s_band_test_hook( void );
 int s_band_exp_hook( void );
 void s_band_exit_hook( void );
 
+Var *magnet_setup( Var *v );
+Var *goto_field( Var *v )
+Var *sweep_up( void );
+Var *sweep_down( void );
+
+
+
+/* locally used functions */
+
+static bool magnet_init( void )
+static bool magnet_goto_field( void );
+static bool magnet_goto_field_rec( int rec );
+static bool magnet_sweep( int dir );
+static bool magnet_do( int command );
+
 
 
 #define sign( x ) ( ( ( x ) >= 0.0 ) ? 1.0 : -1.0 )
-
-
-enum {
-	   SERIAL_INIT,
-	   SERIAL_TRIGGER,
-	   SERIAL_VOLTAGE,
-	   SERIAL_EXIT,
-};
 
 /* MAGNET_ZERO_STEP is the data to be send to the magnet to achieve a sweep
    speed of exactly zero - which is 0x800 minus `half a bit' :-)
@@ -48,13 +51,11 @@ enum {
 #define SERIAL_PORT     "/dev/ttyS1" /* serial port device file */
 #define SERIAL_TIME     50000        /* 50 ms */
 
-#define E2_US           100000       /* 100 ms, used in calls of usleep() */
-
 
 #define S_BAND_MIN_FIELD_STEP              1.5e-3
 #define S_BAND_WITH_ER035M_MIN_FIELD       460
 #define S_BAND_WITH_ER035M_MAX_FIELD       2390
-#define S_BAND_WITH_ER035M_MIN_FIELD       0
+#define S_BAND_WITH_XXXXXX_MIN_FIELD       0
 #define S_BAND_WITH_XXXXXX_MAX_FIELD       9000
 
 
@@ -84,8 +85,14 @@ typedef struct
 
 
 
-static Magnet magnet = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-						 0, 0, -1, NULL, NULL };
+static Magnet magnet = { 0.0, 0.0, 0, 0, 0.0, 0.0, 0.0,
+						 0.0, 0.0, 0, 0, -1, NULL, NULL };
+enum {
+	   SERIAL_INIT,
+	   SERIAL_TRIGGER,
+	   SERIAL_VOLTAGE,
+	   SERIAL_EXIT,
+};
 
 
 
@@ -109,26 +116,24 @@ int s_band_exp_hook( void )
 	Var *func;
 
 
-	/* Check that the fuctions exported by the field meter driver can be
-	   accessed */
+	/* Check that the functions exported by the field meter driver(s) can be
+	   accessed (so w don't have to do it later on again and again) */
 
 	if ( ( func = func_get( "find_field" ) ) == NULL )
 	{
-		eprint( FATAL, "Magnet driver: Can't find functions for field "
-				"measurements.\n" );
+		eprint( FATAL, "Can't find functions for field measurements.\n" );
 		THROW( EXCEPTION );
 	}
 	vars_pop( func );
 
 	if ( ( func = func_get( "field_meter_wait" ) ) == NULL )
 	{
-		eprint( FATAL, "Magnet driver: Can't find functions for field "
-				"measurements.\n" );
+		eprint( FATAL, "Can't find functions for field measurements.\n" );
 		THROW( EXCEPTION );
 	}
 	vars_pop( func );
 
-	/* Try to initialize the magnet poser supply controller */
+	/* Try to initialize the magnet power supply controller */
 
 	if ( ! magnet_init( ) )
 	{
@@ -149,9 +154,11 @@ void s_band_exit_hook( void )
 }
 
 
+/-----------------------------------------------------*/
+/-----------------------------------------------------*/
 
 
-void magnet_setup( Var *v )
+Var *magnet_setup( Var *v )
 {
 	/* check that both variables are reasonable */
 
@@ -162,33 +169,99 @@ void magnet_setup( Var *v )
 	{
 		if ( VAL( v ) < S_BAND_WITH_ER035M_MIN_FIELD )
 		{
-			eprint( FATAL, "Start field too low for Bruker ER035M gaussmeter, "
-					"minimum is %d G.\n",
+			eprint( FATAL, "%s:%ld: Start field (%lf G) too low for Bruker "
+					"ER035M gaussmeter, minimum is %d G.\n", Fname, Lc,
+					( double ) VAL( v ),
 					( int ) S_BAND_WITH_ER035M_MIN_FIELD );
 			THROW( EXCEPTION );
 		}
         
 		if ( magnet.field > S_BAND_WITH_ER035M_MAX_FIELD )
 		{
-			eprint( FATAL, "Start field too high for Bruker ER035M "
-					"gaussmeter, maximum is %d G.\n",
+			eprint( FATAL, "%s:%ld: Start field (%lf G) too high for Bruker "
+					"ER035M gaussmeter, maximum is %d G.\n", Fname, Lc,
+					( double ) VAL( v ),
 					( int ) S_BAND_WITH_ER035M_MAX_FIELD );
 			THROW( EXCEPTION );
 		}
 	}
 
+	/* What about the other field measurement device ? */
+
+	magnet.field = VAL( v );
+
+	if ( VAL( v->next ) < S_BAND_MIN_FIELD_STEP )
+	{
+		eprint( FATAL, "%s:%ld: Field sweep step size (%lg G) too small, "
+				"minimum is %f G.\n", Fname, Lc, ( double ) VAL( v->next ),
+				( int ) S_BAND_MIN_FIELD_STEP );
+		THROW( EXCEPTION );
+	}
+		
+	magnet.is_field_step = VAL( v->next );
+
+	magnet.is_field = magnet.is_field_step = SET;
+	return vars_push( INT_VAR, 1 );
+}
+
+/-----------------------------------------------------*/
+/-----------------------------------------------------*/
+
+Var *goto_field( Var *v )
+{
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( exist_device( "er035m" ) )
+	{
+		if ( VAL( v ) < S_BAND_WITH_ER035M_MIN_FIELD )
+		{
+			eprint( FATAL, "%s:%ld: Field (%lf G) too low for Bruker ER035M "
+					"gaussmeter, minimum is %d G.\n", Fname, Lc,
+					( double ) VAL( v ),
+					( int ) S_BAND_WITH_ER035M_MIN_FIELD );
+			THROW( EXCEPTION );
+		}
+        
+		if ( magnet.field > S_BAND_WITH_ER035M_MAX_FIELD )
+		{
+			eprint( FATAL, "%s:%ld: Field (%lf G) too high for Bruker ER035M "
+					"gaussmeter, maximum is %d G.\n", Fname, Lc,
+					( double ) VAL( v ),
+					( int ) S_BAND_WITH_ER035M_MAX_FIELD );
+			THROW( EXCEPTION );
+		}
+	}
+
+	/* What about the other field measurement device ? */
+
+	if ( TEST_RUN )
+		return vars_push( FLOAT_VAR, VAL( v ) );
+}
 
 
+/-----------------------------------------------------*/
+/-----------------------------------------------------*/
+
+Var *sweep_up( void )
+{
+	return vars_push( INT_VAR, 1 );
+}
 
 
+/-----------------------------------------------------*/
+/-----------------------------------------------------*/
 
+Var *sweep_down( void )
+{
+	if ( ! magnet.is_field_step )
+	{
+		eprint( FATAL, "
 
+	if ( ! TEST_RUN )
+		
 
-
-
-static bool magnet_goto_field( void );
-static bool magnet_goto_field_rec( int rec );
-
+	return vars_push( INT_VAR, 1 );
+}
 
 
 /* The sweep of the magnet is done by setting a voltage for a certain time
@@ -242,7 +315,7 @@ static bool magnet_goto_field_rec( int rec );
 /* to the start field.                                                      */
 /*--------------------------------------------------------------------------*/
 
-bool magnet_init( void )
+static bool magnet_init( void )
 {
 	double start_field;
 	int i;
@@ -336,7 +409,7 @@ try_again:
 /* This just a wrapper to hide the recursiveness of magnet_goto_field_rec() */
 /*--------------------------------------------------------------------------*/
 
-bool magnet_goto_field( void )
+static bool magnet_goto_field( void )
 {
 	if ( ! magnet_goto_field_rec( 0 ) )
 		return( FAIL );
@@ -346,7 +419,7 @@ bool magnet_goto_field( void )
 }
 
 
-bool magnet_goto_field_rec( Magnet int rec )
+static bool magnet_goto_field_rec( int rec )
 {
 	double mini_steps;
 	int steps;
@@ -436,7 +509,7 @@ bool magnet_goto_field_rec( Magnet int rec )
 
 
 
-bool magnet_sweep( int dir )
+static bool magnet_sweep( int dir )
 {
 	int steps, i;
 	double mini_steps;
@@ -524,7 +597,7 @@ bool magnet_sweep( int dir )
 /* face.                                                                     */
 /*---------------------------------------------------------------------------*/
 
-bool magnet_do( int command )
+static bool magnet_do( int command )
 {
 	unsigned char data[ 2 ];
 	int volt;

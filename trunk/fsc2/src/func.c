@@ -193,6 +193,23 @@ void load_all_drivers( void )
 }
 
 
+/*--------------------------------------------------------------------*/
+/* Function tests if a device driver, passed to the function by name, */
+/* is loaded.                                                         */
+/*--------------------------------------------------------------------*/
+
+bool exist_device( const char *name )
+{
+	Device *cd;
+
+	for ( cd = Device_List; cd != NULL; cd = cd->next )
+		if ( cd->is_loaded && ! strcmp( cd->name, name ) )
+			return OK;
+
+	return FAIL;
+}
+
+
 /*----------------------------------------------------------------------*/
 /* Function links a library file with the name passed to it (after      */
 /* adding the extension `so') and then tries to find still unresolved   */
@@ -331,7 +348,9 @@ void load_functions( Device *dev )
 }
 
 
+/*-------------------------------------------------------*/
 /* Functions runs the test hook functions of all modules */
+/*-------------------------------------------------------*/
 
 void run_test_hooks( void )
 {
@@ -345,7 +364,9 @@ void run_test_hooks( void )
 }
 
 
+/*-------------------------------------------------------------*/
 /* Functions runs the experiment hook functions of all modules */
+/*-------------------------------------------------------------*/
 
 void run_exp_hooks( void )
 {
@@ -386,7 +407,7 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 	/* Try to find the library fitting the name */
 
 	for ( cd = Device_List; cd != 0; cd = cd->next )
-		if ( ! strcmp( cd->name, from ) )
+		if ( cd->is_loaded && ! strcmp( cd->name, from ) )
 			break;
 
 	if ( cd == NULL )                    /* library not found ? */
