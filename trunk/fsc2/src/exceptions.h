@@ -71,10 +71,10 @@ typedef enum {
 } Exception_Types;
 
 
-jmp_buf *push_exception_frame( const char *file, unsigned int line );
-void pop_exception_frame( const char *file, unsigned int line );
+jmp_buf *push_exception_frame( const char *file, int line );
+void pop_exception_frame( const char *file, int line );
 jmp_buf *throw_exception( Exception_Types exception_type );
-Exception_Types get_exception_type( const char *file, int unsigned line );
+Exception_Types get_exception_type( const char *file, int line );
 
 
 #define TRY         \

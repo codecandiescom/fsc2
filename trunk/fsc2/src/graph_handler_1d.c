@@ -216,7 +216,7 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 			repaint_canvas_1d( &G.canvas );
 			break;
 
-		case 8 : case 16 :                               /* middle button */
+		case 8 : case 16 :                               /* button 4/5/wheel */
 			if ( G.drag_canvas != 1 && G.drag_canvas != 2 )
 				break;
 
@@ -322,7 +322,7 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 			}
 			break;
 
-		case 8 :
+		case 8 :                               /* button 4/wheel up */
 			if ( G.drag_canvas == 1 )
 			{
 				G.x_axis.ppos[ X ] = G.start[ X ] - G.x_axis.w / 10;
@@ -390,7 +390,7 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 			}
 			break;
 
-		case 16 :
+		case 16 :                              /* button 5/wheel down */
 			if ( G.drag_canvas == 1 )
 			{
 				G.x_axis.ppos[ X ] = G.start[ X ] + G.x_axis.w / 10;

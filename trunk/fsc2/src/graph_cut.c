@@ -1428,7 +1428,7 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 			repaint_cut_canvas( &G.cut_canvas );
 			break;
 
-		case 8 : case 16 :
+		case 8 : case 16 :                     /* button 4/5/wheel */
 			if ( G.drag_canvas != 1 && G.drag_canvas != 2 )
 				break;
 
@@ -1539,7 +1539,7 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 			}
 			break;
 
-		case 8 :
+		case 8 :                               /* button 4/wheel up */
 			if ( G.drag_canvas == 1 )
 			{
 				G.cut_x_axis.ppos[ X ] = G.start[ X ] - G.cut_x_axis.w / 10;
@@ -1572,7 +1572,7 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 				cut_next_index( NULL, 0 );
 			break;
 
-		case 16 :
+		case 16 :                              /* button 5/wheel down */
 			if ( G.drag_canvas == 1 )
 			{
 				G.cut_x_axis.ppos[ X ] = G.start[ X ] + G.cut_x_axis.w / 10;

@@ -121,10 +121,12 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	setlocale( LC_NUMERIC, "C" );
 
-	/* We also must keep the main window always becoming the topmost window
-	   at the most inconvenient moments... */
+	/* We also must keep the main window from always becoming the topmost
+	   window at the most inconvenient moments... */
 
 	fl_set_app_nomainform( 1 );
+
+	/* All command line flags shold have been dealt with now. */
 
 	if ( *argc > 1 && argv[ 1 ][ 0 ] == '-' )
 	{
@@ -140,10 +142,10 @@ bool xforms_init( int *argc, char *argv[ ] )
 		T_free( app_opt[ i ].specifier );
 	}
 
+#if 0
 	/* Maybe we'll use homegrown X error handlers sometime, but currently
 	   there's no reason to do so... */
 
-#if 0
 	XSetErrorHandler( fsc2_x_error_handler );
 	XSetIOErrorHandler( fsc2_xio_error_handler );
 #endif
@@ -214,7 +216,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 	xcntl.choiceFontSize  = XI_sizes.TOOLS_FONT_SIZE;
 	xcntl.sliderFontSize  = XI_sizes.TOOLS_FONT_SIZE;
 
-	/* Set the stop mouse button */
+	/* Set the stop mouse button (only used in the 'Display' window) */
 
 	GUI.stop_button_mask = 0;
 	if ( * ( char * ) xresources[ STOPMOUSEBUTTON ].var != '\0' )
