@@ -11,7 +11,7 @@
 		/*     DEFINITIONS     */
 		/*---------------------*/
 
-%option noyywrap case-insensitive nounput
+%option noyywrap case-sensitive nounput
 
 %{
 
@@ -54,6 +54,11 @@ EXP         ^[ \t]*EXP(ERIMENT)?:
 
 PS          ^[ \t]*P(HASE)?_?S(EQ(UENCE)?)?_?[0-9]{0,2}
 AS          ^[ \t]*A(CQ(UISITION)?)?_?S(EQ(UENCE)?)?_?[XY]?
+
+PX          "+"?[xX]
+MX          "-"[xX]
+PY          "+"?[yY]
+MY          "-"[yY]
 
 WS          [\n=,:. ]+
 
@@ -156,27 +161,19 @@ WS          [\n=,:. ]+
 			}
 
 			/* handling of phase cycle identifiers */
-"x"         {
+{PX}        {
 				phaseslval.lval = PHASE_PLUS_X;
 				return P_TOKEN;
 			}
-"+x"        {
-				phaseslval.lval = PHASE_PLUS_X;
-				return P_TOKEN;
-			}
-"-x"        {
+{MX}        {
 				phaseslval.lval = PHASE_MINUS_X;
 				return P_TOKEN;
 			}
-"y"         {
+{PY}        {
 				phaseslval.lval = PHASE_PLUS_Y;
 				return P_TOKEN;
 			}
-"+y"        {
-				phaseslval.lval = PHASE_PLUS_Y;
-				return P_TOKEN;
-			}
-"-y"        {
+{MY}        {
 				phaseslval.lval = PHASE_MINUS_Y;
 				return P_TOKEN;
 			}

@@ -7,7 +7,7 @@
 		/*     DEFINITIONS     */
 		/*---------------------*/
 
-%option noyywrap case-insensitive stack nounput noyy_top_state
+%option noyywrap case-sensitive stack nounput noyy_top_state
 
 %{
 

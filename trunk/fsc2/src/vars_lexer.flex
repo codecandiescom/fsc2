@@ -12,7 +12,7 @@
 		/*     DEFINITIONS     */
 		/*---------------------*/
 
-%option noyywrap case-insensitive nounput
+%option noyywrap case-sensitive nounput
 
 %{
 
