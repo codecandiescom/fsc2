@@ -586,7 +586,7 @@ not found).
 @end table
 
 Using these programs you are able to send @code{EDL} programs to
-code{fsc2}, created with whichever method or programming language you
+@code{fsc2}, created with whichever method or programming language you
 prefer. A few example scripts written in Perl can be found in the
 @code{scripts} subdirectory of the main directory of the package. You
 could also examine one of the scripts created by @code{fsc2_guify} but

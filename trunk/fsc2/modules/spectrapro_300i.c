@@ -660,7 +660,7 @@ static void spectrapro_300i_install_grating( char *part_no, long grating )
 	TRY
 	{
 		spectrapro_300i_send( buf );
-		T_free( bif );
+		T_free( buf );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
