@@ -1497,17 +1497,14 @@ void fs_button_callback( FL_OBJECT *a, long b )
 void curve_button_callback( FL_OBJECT *obj, long data )
 {
 	char hstr[ 128 ];
+	int bstate;
 
-
-	obj = obj;
 
 	if ( G.dim == 1 )
 	{
-		G.curve[ data - 1 ]->active ^= SET;
-
 		/* Change the help string for the button */
 
-		if ( fl_get_button( obj ) )
+		if ( ( G.curve[ data - 1 ]->active = fl_get_button( obj ) ) )
 			sprintf( hstr, "Exempt curve %ld from\nrescaling operations",
 					 data );
 		else
@@ -1541,32 +1538,44 @@ void curve_button_callback( FL_OBJECT *obj, long data )
 			switch( data )
 			{
 				case 1:
-					fl_set_button( GUI.run_form->curve_1_button,
-								   G.active_curve == 0 ? 0 : 1 );
+					obj = GUI.run_form->curve_1_button;
+					fl_set_button( obj, G.active_curve == 0 ? 0 : 1 );
 					break;
 
 				case 2:
-					fl_set_button( GUI.run_form->curve_2_button,
-								   G.active_curve == 1 ? 0 : 1 );
+					obj = GUI.run_form->curve_2_button;
+					fl_set_button( obj, G.active_curve == 1 ? 0 : 1 );
 					break;
 
 				case 3:
-					fl_set_button( GUI.run_form->curve_3_button,
-								   G.active_curve == 2 ? 0 : 1 );
+					obj = GUI.run_form->curve_3_button;
+					fl_set_button( obj, G.active_curve == 2 ? 0 : 1 );
 					break;
 
 				case 4:
-					fl_set_button( GUI.run_form->curve_4_button,
-								   G.active_curve == 3 ? 0 : 1 );
+					obj = GUI.run_form->curve_4_button;
+					fl_set_button( obj, G.active_curve == 3 ? 0 : 1 );
 					break;
 			}
+		}
+		else
+		{
+			bstate = fl_get_button( obj );
+			if ( ( bstate && data - 1 == G.active_curve ) ||
+				 ( ! bstate && G.active_curve == -1 ) )
+				return;
 		}
 
 		/* Make buttons work like radio buttons but also allow switching off
 		   all of them */
 
 		if ( data - 1 == G.active_curve )     /* shown curve is switched off */
+		{
 			G.active_curve = -1;
+			sprintf( hstr, "Show curve %ld", data );
+			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( obj, hstr );
+		}
 		else
 		{
 			switch ( G.active_curve )
