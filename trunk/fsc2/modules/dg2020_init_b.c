@@ -70,27 +70,10 @@ void dg2020_basic_pulse_check( void )
 			THROW( EXCEPTION );
 		}
 
-		/* Check the start position */
+		/* Check start position and pulse length */
 
-		if ( ! p->is_pos )
+		if ( ! p->is_pos || ! p->is_len )
 			p->is_active = UNSET;
-
-		/* Check the pulse length */
-
-		if ( ! p->is_len )
-		{
-			if ( p->is_pos &&
-				 p->function == &dg2020.function[ PULSER_CHANNEL_DET ] )
-			{
-				eprint( WARN, "%s: Length of detection pulse %ld is being set "
-						"to %s", pulser_struct.name, p->num,
-						dg2020_ptime( 1 ) );
-				p->len = 1;
-				p->is_len = SET;
-			}
-			else
-				p->is_active = UNSET;
-		}
 
 		/* Check that the pulse fits into the pulsers memory
 		   (If you check the following line real carefully, you will find that
@@ -274,17 +257,32 @@ static void dg2020_basic_functions_check( void )
 			dg2020_phase_setup_check( f );
 		
 		f->num_needed_channels = dg2020_calc_channels_needed( f );
+
+/*!!!*/
+		if ( f->pm )
+		{
+			int i1, j1;
+			printf( "pm for function `%s'\n", Function_Names[ i ] );
+			for ( i1 = 0; i1 < 5; i1++ )
+			{
+				printf( "%s ", Phase_Types[ i1 ] );
+				for ( j1 = 0; j1 < f->pc_len; j1++ )
+					printf( " %1c", '0' + f->pm[ i1 * f->pc_len + j1 ] );
+				printf( "\n" );
+			}
+		}
+/*!!!*/
 	}
 }
 
 
 /*--------------------------------------------------------------------------
   This function tries to figure out how many channels are going to be needed.
-  It's very simple for functions that only have one pod - here also one
-  channel will do. On the other hand, for functions with phase cycling we have
-  to consult the phase matrix (set up in dg2020_basic_pulse_check()). We need
-  one channel for each used phase type for each stage of the phase cycle and
-  (if not all phase types are used in all stages) one extra channel for the
+  It's very simple for functions that only have one pod - here one channel
+  will do. On the other hand, for functions with phase cycling we have to
+  consult the phase matrix (set up in dg2020_basic_pulse_check()). We need one
+  channel for each used phase type for each stage of the phase cycle and (if
+  not all phase types are used in all stages) one extra channel for the
   constant voltage.
 --------------------------------------------------------------------------*/
 
@@ -315,6 +313,10 @@ static int dg2020_calc_channels_needed( FUNCTION *f )
 			
 	if ( ! is_all )            /* if we needed a constant voltage */
 		num_channels++;
+
+/*!!!*/
+	printf( "Number of needed channels: %d\n", num_channels );
+/*!!!*/
 
 	return num_channels;
 }
@@ -384,13 +386,14 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 			free_pod_list[ free_pods++ ] = f->pod[ i ];
 	}
 
-	for ( i = j = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
-		if ( ! f->phase_setup->is_set[ i ] )
-		{
-			f->phase_setup->is_set[ i ]= SET;
-			f->phase_setup->pod[ i ] = free_pod_list[ j ];
-			j = ( j + 1 ) % free_pods;
-		}
+	if ( free_pods != 0 )
+		for ( i = j = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
+			if ( ! f->phase_setup->is_set[ i ] )
+			{
+				f->phase_setup->is_set[ i ]= SET;
+				f->phase_setup->pod[ i ] = free_pod_list[ j ];
+				j = ( j + 1 ) % free_pods;
+			}
 
 	/* We also have to test that different phase types are not associated with
        the same pod (exception: the different phase types are never actually

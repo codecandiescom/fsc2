@@ -180,6 +180,11 @@ int dg2020_b_test_hook( void )
 		dg2020_change_pulse_position_change;
 	pulser_struct.set_pulse_length_change = dg2020_change_pulse_length_change;
 
+
+/*!!!*/
+	THROW( EXCEPTION );
+/*!!!*/
+
 	return 1;
 }
 
