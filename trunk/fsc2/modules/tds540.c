@@ -230,9 +230,7 @@ Var *digitizer_define_window( Var *v )
 			}
 			is_win_width = SET;
 
-			if ( ( v = vars_pop( v ) ) != NULL )
-				eprint( WARN, SET, "%s: Superfluous arguments in call of "
-						"function %s().\n", DEVICE_NAME, Cur_Func );
+			too_many_arguments( v, DEVICE_NAME );
 		}
 	}
 
@@ -360,9 +358,7 @@ Var *digitizer_timebase( Var *v )
 		T_free( t );
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous arguments in call of "
-				"function %s().\n", DEVICE_NAME, Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	tds540.timebase = tb[ TB ];
 	tds540.is_timebase = SET;
@@ -443,9 +439,7 @@ Var *digitizer_sensitivity( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	tds540.sens[ channel ] = sens;
 	tds540.is_sens[ channel ] = SET;
@@ -511,9 +505,7 @@ Var *digitizer_num_averages( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	tds540.num_avg = num_avg;
 	tds540.is_num_avg = SET;
@@ -654,9 +646,7 @@ Var *digitizer_trigger_position( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	tds540.trig_pos = trig_pos;
 	tds540.is_trig_pos = SET;
@@ -744,9 +734,7 @@ Var *digitizer_trigger_channel( Var *v )
 			THROW( EXCEPTION )
     }
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -847,9 +835,7 @@ static Var *get_area( Var *v, bool use_cursor )
 	else
 		w = NULL;
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous arguments in call of "
-				"function %s().\n", DEVICE_NAME, Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   value */
@@ -945,9 +931,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	else
 		w = NULL;
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous arguments in call of "
-				"function %s().\n", DEVICE_NAME, Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   array */
@@ -1055,9 +1039,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	else
 		w = NULL;
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous arguments in call of "
-				"function %s().\n", DEVICE_NAME, Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   array */
@@ -1115,9 +1097,7 @@ Var *digitizer_lock_keyboard( Var *v )
 			}
 		}
 
-		if ( ( v = vars_pop( v ) ) != NULL )
-			eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
-					DEVICE_NAME, Cur_Func );
+		too_many_arguments( v, DEVICE_NAME );
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )

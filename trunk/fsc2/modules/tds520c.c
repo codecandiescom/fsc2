@@ -67,29 +67,7 @@ static Var *get_curve( Var *v, bool use_cursor );
 static Var *get_amplitude( Var *v, bool use_cursor );
 
 
-static struct {
-	bool is_equal_width;
-
-	bool is_timebase;
-	double timebase;
-
-	bool is_num_avg;
-	long num_avg;
-
-	bool is_rec_len;
-	long rec_len;
-
-	bool is_trig_pos;
-	double trig_pos;
-
-	int data_source;
-	int meas_source;
-
-	bool lock_state;
-
-	bool is_sens[ MAX_CHANNELS ];
-	double sens[ MAX_CHANNELS ];
-} tds520c_store;
+static TDS520C tds520c_stored;
 
 
 /*******************************************/
@@ -130,6 +108,22 @@ int tds520c_init_hook( void )
 		tds520c.sens[ i ] = 1.0;
 	}
 
+	tds520c_stored.w = NULL;
+
+	return 1;
+}
+
+
+/*-----------------------------------*/
+/* Test hook function for the module */
+/*-----------------------------------*/
+
+int tds520c_test_hook( void )
+{
+	/* Store the state of the digitizer structure it was set to in the
+	   PREPARATIONS section */
+
+	tds520c_store_state( &tds520c_stored, &tds520c );
 	return 1;
 }
 
@@ -140,46 +134,24 @@ int tds520c_init_hook( void )
 
 int tds520c_exp_hook( void )
 {
-	int i;
+	/* Reset the digitizer structure to the state it was set to in the
+	   preparations section - changes done to it in the test run are to
+	   be undone... */
 
+	tds520c_store_state( &tds520c, &tds520c_stored );
 
-	/* Store the state the digitizer was set to in the preparations section -
-	   we need this when starting the same experiment again... */
-
-	tds520c_store.is_equal_width = tds520c.is_equal_width;
-
-	tds520c_store.is_timebase    = tds520c.is_timebase;
-	tds520c_store.timebase       = tds520c.timebase;
-
-	tds520c_store.is_num_avg     = tds520c.is_num_avg;
-	tds520c_store.num_avg        = tds520c.num_avg;
-
-	tds520c_store.is_rec_len     = tds520c.is_rec_len;
-	tds520c_store.rec_len        = tds520c.rec_len;
-
-	tds520c_store.is_trig_pos    = tds520c.is_trig_pos;
-	tds520c_store.trig_pos       = tds520c.trig_pos;
-
-	tds520c_store.data_source    = tds520c.data_source;
-	tds520c_store.meas_source    = tds520c.meas_source;
-
-	tds520c_store.lock_state     = tds520c.lock_state;
-
-	for ( i = TDS520C_CH1; i <= TDS520C_CH2; i++ )
-	{
-		tds520c_store.is_sens[ i ] = tds520c.is_sens[ i ];
-		tds520c_store.sens[ i ]    = tds520c.sens[ i ];
-	}
-
+	TDS520C_INIT = SET;
 	if ( ! tds520c_init( DEVICE_NAME ) )
 	{
 		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
 				DEVICE_NAME, gpib_error_msg );
+		TDS520C_INIT = UNSET;
 		THROW( EXCEPTION )
 	}
 
 	tds520c_do_pre_exp_checks( );
 
+	TDS520C_INIT = UNSET;
 	return 1;
 }
 
@@ -190,41 +162,7 @@ int tds520c_exp_hook( void )
 
 int tds520c_end_of_exp_hook( void )
 {
-	int i;
-
-
 	tds520c_finished( );
-
-	/* Reset the digitizer to the state it was set to in the preparations
-	   section - we need this when starting the same experiment again... */
-
-	tds520c.is_reacting          = UNSET;
-
-	tds520c_store.is_equal_width = tds520c.is_equal_width;
-
-	tds520c.is_timebase          = tds520c_store.is_timebase;
-	tds520c.timebase             = tds520c_store.timebase;
-
-	tds520c_store.is_num_avg     = tds520c.is_num_avg;
-	tds520c.num_avg              = tds520c_store.num_avg;
-
-	tds520c.is_rec_len           = tds520c_store.is_rec_len;
-	tds520c.rec_len              = tds520c_store.rec_len;
-
-	tds520c.is_trig_pos          = tds520c_store.is_trig_pos;
-	tds520c.trig_pos             = tds520c_store.trig_pos;
-
-	tds520c.data_source          = tds520c_store.data_source;
-	tds520c.meas_source          = tds520c_store.meas_source;
-
-	tds520c.lock_state = tds520c_store.lock_state;
-
-	for ( i = TDS520C_CH1; i <= TDS520C_CH2; i++ )
-	{
-		tds520c.is_sens[ i ] = tds520c_store.is_sens[ i ];
-		tds520c.sens[ i ]    = tds520c_store.sens[ i ];
-	}
-
 	return 1;
 }
 
@@ -236,7 +174,8 @@ int tds520c_end_of_exp_hook( void )
 
 void tds520c_exit_hook( void )
 {
-	tds520c_delete_windows( );
+	tds520c_delete_windows( &tds520c );
+	tds520c_delete_windows( &tds520c_stored );
 }
 
 
@@ -296,9 +235,7 @@ Var *digitizer_define_window( Var *v )
 			}
 			is_win_width = SET;
 
-			if ( ( v = vars_pop( v ) ) != NULL )
-				eprint( WARN, SET, "%s: Superfluous arguments in call of "
-						"function %s().\n", DEVICE_NAME, Cur_Func );
+			too_many_arguments( v, DEVICE_NAME );
 		}
 	}
 
@@ -426,15 +363,13 @@ Var *digitizer_timebase( Var *v )
 		T_free( t );
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	tds520c.timebase = tb[ TB ];
 	tds520c.is_timebase = SET;
 
 	if ( FSC2_MODE == EXPERIMENT )
-		tds520_set_timebase( tds520c.timebase );
+		tds520c_set_timebase( tds520c.timebase );
 
 	return vars_push( FLOAT_VAR, tds520c.timebase );
 }
@@ -510,9 +445,7 @@ Var *digitizer_sensitivity( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	tds520c.sens[ channel ] = sens;
 	tds520c.is_sens[ channel ] = SET;
@@ -578,9 +511,7 @@ Var *digitizer_num_averages( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	tds520c.num_avg = num_avg;
 	tds520c.is_num_avg = SET;
@@ -664,9 +595,7 @@ Var *digitizer_record_length( Var *v )
 		i++;
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	tds520c.rec_len = record_lengths[ i ];
 	tds520c.is_rec_len = SET;
@@ -725,9 +654,7 @@ Var *digitizer_trigger_position( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	tds520c.trig_pos = trig_pos;
 	tds520c.is_trig_pos = SET;
@@ -814,9 +741,7 @@ Var *digitizer_trigger_channel( Var *v )
 			THROW( EXCEPTION )
     }
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -917,9 +842,7 @@ static Var *get_area( Var *v, bool use_cursor )
 	else
 		w = NULL;
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   value */
@@ -1014,9 +937,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	else
 		w = NULL;
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   array */
@@ -1124,9 +1045,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	else
 		w = NULL;
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
+	too_many_arguments( v, DEVICE_NAME );
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   value */
@@ -1184,9 +1103,7 @@ Var *digitizer_lock_keyboard( Var *v )
 			}
 		}
 
-		if ( ( v = vars_pop( v ) ) != NULL )
-			eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
-					DEVICE_NAME, Cur_Func );
+		too_many_arguments( v, DEVICE_NAME );
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )

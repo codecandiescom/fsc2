@@ -258,7 +258,7 @@ Var *lockin_get_data( Var *v )
 
 	val[ 1 ] = get_single_channel_data( v );
 
-	too_many_arguments( v );
+	too_many_arguments( v, DEVICE_NAME );
 
 	return vars_push( FLOAT_ARR, val, 2 );
 }
@@ -377,7 +377,7 @@ Var *lockin_sensitivity( Var *v )
 				DEVICE_NAME, Cur_Func );
 	sens = VALUE( v );
 
-	too_many_arguments( v );
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( sens < 0.0 )
 	{
@@ -494,7 +494,7 @@ Var *lockin_time_constant( Var *v )
 				DEVICE_NAME, Cur_Func );
 	tc = VALUE( v );
 
-	too_many_arguments( v );
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( tc < 0.0 )
 	{
@@ -598,7 +598,7 @@ Var *lockin_phase( Var *v )
 				DEVICE_NAME, Cur_Func );
 	phase = VALUE( v );
 
-	too_many_arguments( v );
+	too_many_arguments( v, DEVICE_NAME );
 
 	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
 		phase -= 360.0;
@@ -714,7 +714,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	voltage = VALUE( v );
 
-	too_many_arguments( v );
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( fabs( voltage ) > 10.24 )
 	{
@@ -765,7 +765,7 @@ Var *lockin_lock_keyboard( Var *v )
 		}
 	}
 
-	too_many_arguments( v );
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( FSC2_MODE == EXPERIMENT )
 		sr530_lock_state( lock );

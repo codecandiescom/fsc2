@@ -22,6 +22,8 @@
 */
 
 
+#if ! defined FSC2_MODULE_HEADER
+
 #if ! defined FSC2_HEADER
 #define FSC2_HEADER
 
@@ -85,6 +87,7 @@
 #include "print.h"
 #include "func_intact.h"
 #include "conn.h"
+#include "module_util.h"
 
 
 #if defined MAPATROL
@@ -164,6 +167,7 @@ FL_FORM *cut_main_form;
 
 int I_am = PARENT;
 int FSC2_MODE = PREPARATION;
+
 int pd[ 4 ];                    /* pipe descriptors */
 int conn_pd[ 2 ];
 pid_t child_pid = 0;            /* pid of child */
@@ -236,6 +240,7 @@ extern FD_cut *cut_form;
 
 extern int I_am;
 extern int FSC2_MODE;
+
 extern int pd[ ];                  /* pipe descriptors */
 extern int conn_pd[ ];
 extern pid_t child_pid;            /* pid of child */
@@ -267,6 +272,8 @@ extern TOOL_BOX *Tool_Box;
 
 
 #endif  /* ! FSC2_HEADER */
+
+#endif  /* ! FSC2_MODULE_HEADER */
 
 
 /*

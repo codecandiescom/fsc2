@@ -22,9 +22,7 @@
 */
 
 
-
-#include "fsc2.h"
-#include "gpib_if.h"
+#include "fsc2_module.h"
 
 
 /* Include configuration information for the device */
@@ -167,13 +165,7 @@ Var *boxcar_curve_length( Var *v )
 		num_points = lrnd( v->val.dval );
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "Superfluous parameter in call of function %s().\n",
-				DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( num_points < 32 || num_points > 4096 )
 	{
@@ -386,13 +378,7 @@ Var *boxcar_get_curve( Var *v )
 		}
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous parameter in call of"
-				"function %s().\n", DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	num_points = last - first + 1;
 

@@ -22,8 +22,7 @@
 */
 
 
-#include "fsc2.h"
-#include "gpib_if.h"
+#include "fsc2_module.h"
 
 
 /* Include configuration information for the device */
@@ -256,13 +255,7 @@ Var *magnet_setup( Var *v )
 		
 	magnet.field_step = fabs( VALUE( v ) );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( FATAL, SET, "%s: Superfluous paramter%s in call of %s().\n",
-				DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	magnet.is_init = SET;
 	return vars_push( INT_VAR, 1 );
@@ -435,13 +428,7 @@ Var *set_field( Var *v )
 		eprint( SEVERE, SET, "%s: Can't use a maximum field error in %s().\n",
 				DEVICE_NAME, Cur_Func );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous parameter in call of "
-				"function %s().\n", DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	er032m_field_check( field );
 

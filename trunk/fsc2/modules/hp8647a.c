@@ -25,7 +25,6 @@
 #define HP8647A_MAIN
 
 #include "hp8647a.h"
-#include "gpib_if.h"
 
 
 const char generic_type[ ] = DEVICE_TYPE;
@@ -233,13 +232,7 @@ Var *synthesizer_state( Var *v )
 		state = res ? UNSET : SET;
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous arguments in call of "
-				"function `synthesizer_state'.\n", DEVICE_NAME );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	hp8647a.state = state;
 
@@ -302,13 +295,7 @@ Var *synthesizer_frequency( Var *v )
 			THROW( EXCEPTION )
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous arguments in call of "
-				"function `synthesizer_frequency'.\n", DEVICE_NAME );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	/* In test run stop program if value is out of range while in real run
 	   just keep the current value on errors */
@@ -417,13 +404,7 @@ Var *synthesizer_attenuation( Var *v )
 
 	att = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous arguments in call of "
-				"function `synthesizer_attenuation'.\n", DEVICE_NAME );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	/* Check that attenuation is within valid range, if not throw exception
 	   in test run, but in real run just don't change the attenuation */
@@ -490,14 +471,7 @@ Var *synthesizer_minimum_attenuation( Var *v )
 
 	min_atten = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous arguments in call of "
-				"function `synthesizer_minimum_attenuation'.\n", DEVICE_NAME );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
-
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( min_atten > MIN_MIN_ATTEN )
 	{
@@ -537,8 +511,6 @@ Var *synthesizer_step_frequency( Var *v )
 			eprint( SEVERE, SET, "%s: RF step frequency has already been "
 					"set in the PREPARATIONS section to %f MHz, keeping old "
 					"value.\n", DEVICE_NAME, 1.0e-6 * hp8647a.step_freq );
-			while ( ( v = vars_pop( v ) ) != NULL )
-				;
 			return vars_push( FLOAT_VAR, hp8647a.step_freq );
 		}
 
@@ -548,13 +520,7 @@ Var *synthesizer_step_frequency( Var *v )
 
 		hp8647a.step_freq = VALUE( v );
 
-		if ( ( v = vars_pop( v ) ) != NULL )
-		{
-			eprint( WARN, SET, "%s: Superfluous arguments in call of "
-					"function `synthesizer_step_frequency'.\n", DEVICE_NAME );
-			while ( ( v = vars_pop( v ) ) != NULL )
-				;
-		}
+		too_many_arguments( v, DEVICE_NAME );
 
 		hp8647a.step_freq_is_set = SET;
 	}
@@ -705,13 +671,7 @@ Var *synthesizer_use_table( Var *v )
 
 		tfname = T_strdup( v->val.sptr );
 
-		if ( ( v = vars_pop( v ) ) != NULL )
-		{
-			eprint( WARN, SET, "%s: Superfluous arguments in call of "
-					"function `synthesizer_use_table'.\n", DEVICE_NAME );
-			while ( ( v = vars_pop( v ) ) != NULL )
-				;
-		}
+		too_many_arguments( v, DEVICE_NAME );
 
 		TRY
 		{
@@ -772,13 +732,7 @@ Var *synthesizer_att_ref_freq( Var *v )
 
 	/* Get rid of the variables */
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous arguments in call of "
-				"function `synthesizer_use_table'.\n", DEVICE_NAME );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	/* Check that the frequency is within the synthesizers range */
 
@@ -886,13 +840,16 @@ Var *synthesizer_modulation( Var *v )
 			hp8647a.mod_source[ hp8647a.mod_type ] =
 							hp8647a_set_mod_source( hp8647a.mod_type, source );
 			hp8647a.mod_source_is_set[ hp8647a.mod_type ] = SET;
+
 		}
 
 		if ( ampl >= 0.0 )
 		{
-			hp8647a.mod_ampl[ hp8647a.mod_type ] =
-								hp8647a_set_mod_ampl( hp8647a.mod_type, ampl );
+			hp8647a.mod_ampl[ hp8647a.mod_type ] = ampl;
 			hp8647a.mod_ampl_is_set[ hp8647a.mod_type ] = SET;
+
+			if ( FSC2_MODE == EXPERIMENT )
+				hp8647a_set_mod_ampl( hp8647a.mod_type, ampl );
 		}
 	}
 	else
@@ -967,16 +924,13 @@ Var *synthesizer_mod_type( Var *v )
 		}
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous arguments in call of "
-				"`synthesizer_mod_type'.\n", DEVICE_NAME );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
-	hp8647a.mod_type = hp8647a_set_mod_type( res );
+	hp8647a.mod_type = res;
 	hp8647a.mod_type_is_set = SET;
+
+	if ( FSC2_MODE == EXPERIMENT )
+		hp8647a_set_mod_type( res );
 
 	return vars_push( INT_VAR, res );
 }
@@ -1027,13 +981,7 @@ Var *synthesizer_mod_source( Var *v )
 
 	vars_check( v, STR_VAR | INT_VAR );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous arguments in call of "
-				"`synthesizer_mod_source'.\n", DEVICE_NAME );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( v->type == INT_VAR )
 	{
@@ -1080,7 +1028,7 @@ Var *synthesizer_mod_source( Var *v )
 	}
 
 	hp8647a.mod_source[ hp8647a.mod_type ] =
-		                    hp8647a_set_mod_source( hp8647a.mod_type, source );
+							hp8647a_set_mod_source( hp8647a.mod_type, source );
 	hp8647a.mod_source_is_set[ hp8647a.mod_type ] = SET;
 
 	return vars_push( INT_VAR, hp8647a.mod_source );
@@ -1134,13 +1082,7 @@ Var *synthesizer_mod_ampl( Var *v )
 
 	ampl = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous arguments in call of "
-				"function `synthesizer_mod_ampl'.\n", DEVICE_NAME );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( hp8647a.mod_type == MOD_TYPE_OFF )
 	{

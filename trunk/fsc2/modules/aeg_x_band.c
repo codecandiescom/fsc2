@@ -282,6 +282,8 @@ Var *magnet_name( Var *v )
 Var *magnet_setup( Var *v )
 {
 	bool err_flag = UNSET;
+	double start_field;
+	double field_step;
 
 
 	/* check that both variables are reasonable */
@@ -297,40 +299,41 @@ Var *magnet_setup( Var *v )
 	if ( v->type == INT_VAR )
 		eprint( WARN, SET, "%s: Integer value used for magnetic field in "
 				"%s().\n", DEVICE_NAME, Cur_Func );
+	start_field = VALUE( v )
 
-	if ( v->next == NULL )
+	if ( ( v = vars_pop( v ) ) == NULL )
 	{
 		eprint( FATAL, SET, "%s: Missing field step size in call of "
 				"%s().\n", DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v->next, INT_VAR | FLOAT_VAR );
-	if ( v->next->type == INT_VAR )
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == INT_VAR )
 		eprint( WARN, SET, "%s: Integer value used for field step width "
 				"in %s().\n", DEVICE_NAME, Cur_Func );
+	field_step = VALUE( v );
+
+	too_many_arguments( v, DEVICE_NAME );
 
 	/* Check that new field value is still within bounds */
 
-	aeg_x_band_field_check( VALUE( v ), &err_flag );
+	aeg_x_band_field_check( start_field, &err_flag );
 	if ( err_flag )
 		THROW( EXCEPTION )
 
-	if ( fabs( VALUE( v->next ) ) < AEG_X_BAND_MIN_FIELD_STEP )
+	if ( fabs( field_step ) < AEG_X_BAND_MIN_FIELD_STEP )
 	{
 		eprint( FATAL, SET, "%s: Field sweep step size (%lf G) too small in "
 				"%s(), minimum is %f G.\n",
-				DEVICE_NAME, VALUE( v->next ), Cur_Func,
+				DEVICE_NAME, field_step, Cur_Func,
 				( double ) AEG_X_BAND_MIN_FIELD_STEP );
 		THROW( EXCEPTION )
 	}
-		
-	magnet.field = VALUE( v );
-	magnet.field_step = VALUE( v->next );
-	magnet.is_field = magnet.is_field_step = SET;
 
-	while ( ( v = vars_pop( v ) ) )
-		;
+	magnet.field = start_field;
+	magnet.field_step = field_step;
+	magnet.is_field = magnet.is_field_step = SET;
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -343,9 +346,6 @@ Var *magnet_setup( Var *v )
 
 Var *magnet_fast_init( Var *v )
 {
-	while ( ( v = vars_pop( v ) ) )
-		;
-
 	magnet.fast_init = SET;
 	return vars_push( INT_VAR, 1 );
 }
@@ -393,13 +393,7 @@ Var *set_field( Var *v )
 					"of field value in %s().\n", DEVICE_NAME, Cur_Func );
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous parameter in call of "
-				"function %s().\n", DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, field );

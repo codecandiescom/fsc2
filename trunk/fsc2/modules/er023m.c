@@ -224,14 +224,7 @@ Var *lockin_sensitivity( Var *v )
 				DEVICE_NAME );
 	rg = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( rg <= 0.0 )
 	{
@@ -322,14 +315,7 @@ Var *lockin_time_constant( Var *v )
 				DEVICE_NAME );
 	tc = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( tc <= 0.0 )
 	{
@@ -446,14 +432,7 @@ Var *lockin_phase( Var *v )
 	else
 		phase = irnd( v->val.dval );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	while ( phase < 0 )
 		phase += 360;
@@ -507,14 +486,7 @@ Var *lockin_offset( Var *v )
 	else
 		of = ( int ) v->val.lval;
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( of < MIN_OF || of > MAX_OF )
 	{
@@ -568,14 +540,7 @@ Var *lockin_conversion_time( Var *v )
 				DEVICE_NAME );
 	ct = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( ct <= 0.0 )
 	{
@@ -648,14 +613,7 @@ Var *lockin_ref_freq( Var *v )
 				DEVICE_NAME );
 	mf = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( mf <= 0.0 )
 	{
@@ -756,14 +714,7 @@ Var *lockin_ref_level( Var *v )
 				DEVICE_NAME );
 	ma = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( ma < 0.0 )
 	{
@@ -845,14 +796,7 @@ Var *lockin_harmonic( Var *v )
 	else
 		ha = ( int ) v->val.lval - 1;
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( ha < MIN_HARMONIC || ha > MAX_HARMONIC )
 	{
@@ -909,14 +853,7 @@ Var *lockin_resonator( Var *v )
 	else
 		re = ( int ) v->val.lval - 1;
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( re < MIN_RESONATOR || re > MAX_RESONATOR )
 	{

@@ -371,7 +371,7 @@ Var *set_field( Var *v )
 
 	field = aeg_s_band_field_check( VALUE( v ), &err_flag );
 
-	/* The second argument an be the maximum error */
+	/* The second argument be the maximum error */
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
@@ -386,7 +386,7 @@ Var *set_field( Var *v )
 					"field value in %s().\n", DEVICE_NAME, Cur_Func );
 	}
 
-	too_many_arguments( v; DEVICE_NAME );
+	too_many_arguments( v, DEVICE_NAME );
 
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, field );

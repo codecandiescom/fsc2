@@ -188,11 +188,10 @@ Var *digitizer_define_window( Var *v )
 		vars_check( v, INT_VAR | FLOAT_VAR );
 		win_start = VALUE( v );
 		is_win_start = SET;
-		v = vars_pop( v );
 
 		/* If there's a second parameter take it to be the window width */
 
-		if ( v != NULL )
+		if ( ( v = vars_pop( v ) ) != NULL )
 		{
 			vars_check( v, INT_VAR | FLOAT_VAR );
 			win_width = VALUE( v );
@@ -208,14 +207,7 @@ Var *digitizer_define_window( Var *v )
 			}
 			is_win_width = SET;
 
-			if ( ( v = vars_pop( v ) ) != NULL )
-			{
-				eprint( WARN, SET, "%s: Superfluous arguments in call of "
-						"function %s().\n", DEVICE_NAME, Cur_Func );
-
-				while ( ( v = vars_pop( v ) ) != NULL )
-					;
-			}
+			too_many_arguments( v, DEVICE_NAME );
 		}
 	}
 
@@ -306,7 +298,6 @@ Var *digitizer_timebase( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	timebase = VALUE( v );
-	vars_pop( v );
 
 	if ( timebase <= 0 )
 	{
@@ -430,13 +421,7 @@ Var *digitizer_sensitivity( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	sens = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous parameter%s in call of %s().\n",
-				DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	/* Check that the sensitivity setting isn't out of range */
 
@@ -535,11 +520,9 @@ Var *digitizer_averaging( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	v = vars_pop( v );
-
 	/* Get the source channel */
 
-	if ( v == NULL )
+	if ( ( v = vars_pop( v ) ) == NULL )
 	{
 		eprint( FATAL, SET, "%s: Missing source channel argument in call of "
 				"function %s().\n", DEVICE_NAME, Cur_Func );
@@ -560,12 +543,10 @@ Var *digitizer_averaging( Var *v )
 		THROW( EXCEPTION )
 	}
 	
-	v = vars_pop( v );
-
 	/* Get the number of averages to use - adjust value if necessary to one
 	   of the possible number of averages as given by the array 'na' */
 
-	if ( v == NULL )
+	if ( ( v = vars_pop( v ) ) == NULL )
 	{
 		eprint( FATAL, SET, "%s: Missing number of averages in call of "
 				"function %s().\n", DEVICE_NAME, Cur_Func );
@@ -615,15 +596,13 @@ Var *digitizer_averaging( Var *v )
 		i++;
 	}
 
-	v = vars_pop( v );
-
 	/* If there is a further argument this has to be the overflow rejection
 	   setting */
 
 	reject = UNSET;
 	rec_len = UNDEFINED_REC_LEN;
 
-	if ( v != NULL )
+	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
@@ -690,14 +669,7 @@ Var *digitizer_averaging( Var *v )
 			v = vars_pop( v );
 		}
 
-		if ( v != NULL )
-		{
-			eprint( WARN, SET, "%s: Superfluous parameter%s in call of "
-					"function %s().\n",
-					DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-			while ( ( v = vars_pop( v ) ) != NULL )
-				;
-		}
+		too_many_arguments( v, DEVICE_NAME );
 	}
 
 	lecroy9400_set_up_averaging( channel, source_ch, num_avg,
@@ -844,14 +816,15 @@ Var *digitizer_trigger_position( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	trig_pos = VALUE( v );
-	vars_pop( v );
 
 	if ( trig_pos < 0.0 || trig_pos > 1.0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid trigger position: %f, must be in "
-				"interval [0,1].\n", Fname, Lc, DEVICE_NAME, trig_pos );
+				"interval [0,1].\n", DEVICE_NAME, trig_pos );
 		THROW( EXCEPTION )
 	}
+
+	too_many_arguments( v, DEVICE_NAME );
 
 	lecroy9400.trig_pos = trig_pos;
 	lecroy9400.is_trig_pos = SET;
@@ -927,7 +900,6 @@ Var *digitizer_trigger_channel( Var *v )
 	vars_check( v, INT_VAR );
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
 											v->val.lval );
-	vars_pop( v );
 
 	if ( channel >= MAX_CHANNELS )
 	{
@@ -952,6 +924,8 @@ Var *digitizer_trigger_channel( Var *v )
 					Channel_Names[ channel ] );
 			THROW( EXCEPTION )
     }
+
+	too_many_arguments( v, DEVICE_NAME );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -1013,7 +987,6 @@ static Var *get_curve( Var *v, bool use_cursor )
 	vars_check( v, INT_VAR );
 	ch = ( int ) lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
 											   v->val.lval );
-	v = vars_pop( v );
 
 	if ( ch < LECROY9400_CH1 ||
 		 ( ch > LECROY9400_CH2 && ch < LECROY9400_FUNC_E ) ||
@@ -1029,7 +1002,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 #if 0
 	/* Now check if there's a variable with a window number and check it */
 
-	if ( v != NULL )
+	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check( v, INT_VAR );
 		if ( ( w = lecroy9400.w ) == NULL )
@@ -1044,7 +1017,6 @@ static Var *get_curve( Var *v, bool use_cursor )
 			if ( w->num == v->val.lval )
 			{
 				w->is_used = SET;
-				v = vars_pop( v );
 				break;
 			}
 			w = w->next;
@@ -1061,13 +1033,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 #endif
 		w = NULL;
 
-	if ( v != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous arguments in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v, DEVICE_NAME );
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   array */
@@ -1076,19 +1042,20 @@ static Var *get_curve( Var *v, bool use_cursor )
 	{
 		lecroy9400_get_curve( ch, w, &array, &length, use_cursor );
 		nv = vars_push( FLOAT_ARR, array, length );
-		T_free( array );
-		return nv;
+	}
+	else
+	{
+		if ( lecroy9400.rec_len[ ch ] == UNDEFINED_REC_LEN )
+			length = LECROY9400_TEST_REC_LEN;
+		else
+			length = lecroy9400.rec_len[ ch ];
+		array = T_malloc( length * sizeof( double ) );
+		for ( i = 0; i < length; i++ )
+			array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
+		nv = vars_push( FLOAT_ARR, array, length );
+		nv->flags |= IS_DYNAMIC;
 	}
 
-	if ( lecroy9400.rec_len[ ch ] == UNDEFINED_REC_LEN )
-		length = LECROY9400_TEST_REC_LEN;
-	else
-		length = lecroy9400.rec_len[ ch ];
-	array = T_malloc( length * sizeof( double ) );
-	for ( i = 0; i < length; i++ )
-		array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
-	nv = vars_push( FLOAT_ARR, array, length );
-	nv->flags |= IS_DYNAMIC;
 	T_free( array );
 	return nv;
 }
