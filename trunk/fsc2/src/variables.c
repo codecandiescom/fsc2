@@ -540,7 +540,7 @@ Var *vars_pow( Var *v1, Var *v2 )
 		   ( v1->type == FLOAT_VAR && v1->val.dval < 0.0 ) )
 		 && v2->type != INT_VAR )
 	{
-		eprint( FATAL, "%s:%ld: Negative base while exponent not an integral "
+		eprint( FATAL, "%s:%ld: Negative base while exponent not an integer "
 				"value.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -732,11 +732,11 @@ Var *vars_push( int type, ... )
 				get_memcpy( new_stack_var->val.dpnt,
 							new_stack_var->len * sizeof( double ) );
 			break;
-/* ????????????????????????????????????????????
-		case INT_ARR: case FLOAT_ARR :
+
+		case ARR_REF :
 			new_stack_var->from = va_arg( ap, Var * );
 			break;
-   ???????????????????????????????????????????? */
+
 		default :
 			assert( 1 == 0 );
 	}
@@ -910,7 +910,8 @@ void vars_check( Var *v, int type )
 	int t = v->type;
 	const char *types[ ] = { "INTEGER", "FLOAT", "STRING", "INTEGER ARRAY",
 							 "FLOAT ARRAY", "FUNCTION", "ARRAY POINTER",
-							 "INTEGER ARRAY SLICE", "FLOAT ARRAY SLICE" };
+							 "INTEGER ARRAY SLICE", "FLOAT ARRAY SLICE",
+	                         "ARRAY REFERENCE" };
 	
 	/* being paranoid we first check that the variable exists at all -
 	   probably this can be left out later. */
@@ -1168,10 +1169,12 @@ long vars_calc_index( Var *a, Var *v )
 
 
 
-	/* run through all the indices on the variable stack */
+	/* Run through all the indices on the variable stack */
 
 	for ( i = 0, index = 0; v != NULL; i++, v = vn )
 	{
+		/* We can't use still undefined variables as index...*/
+
 		if ( v->type == UNDEF_VAR )
 		{
 			vn = v->next;
@@ -1179,11 +1182,11 @@ long vars_calc_index( Var *a, Var *v )
 			break;
 		}
 
-		/* check the variable with the size */
+		/* Check the variable with the size */
 
 		vars_check( v, INT_VAR | FLOAT_VAR );
 
-		/* get current index and warn if it's a float variable */
+		/* Get current index and warn if it's a float variable */
 
 		if ( v->type == INT_VAR )
 			cur = v->val.lval - ARRAY_OFFSET;
@@ -1194,17 +1197,17 @@ long vars_calc_index( Var *a, Var *v )
 			cur = ( int ) v->val.dval - ARRAY_OFFSET;
 		}
 
-		/* check that the index is not too small or too large */
+		/* Check that the index a number not a `*' */
 
 		if ( cur == - ARRAY_OFFSET && v->flags & VARIABLE_SIZED )
 		{
-			eprint( FATAL, "%s:%ld: A `*' as index is only allowed in "
-					"declaration of an array, but not in assignment.\n",
+			eprint( FATAL, "%s:%ld: A `*' as index is only allowed in the "
+					"declaration of an array, not in an assignment.\n",
 					Fname, Lc );
 			THROW( EXCEPTION );
 		}
 
-		/* check that the index is not too small or too large */
+		/* Check that the index is not too small or too large */
 
 		if ( cur < 0 )
 		{
@@ -1223,11 +1226,11 @@ long vars_calc_index( Var *a, Var *v )
 			THROW( EXCEPTION );
 		}
 
-		/* update the index */
+		/* Update the index */
 
 		index = index * a->sizes[ i ] + cur;
 
-		/* pop the variable with the index */
+		/* Pop the variable with the index */
 
 		vn = v->next;
 		vars_pop( v );
@@ -1240,7 +1243,7 @@ long vars_calc_index( Var *a, Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* for slices we need another update of the index */
+	/* For slices we need another update of the index */
 
 	if ( i != a->dim )
 		index = index * a->sizes[ i ];
@@ -1267,7 +1270,7 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* set array's dimension and allocate memory for their sizes */
+	/* Set array's dimension and allocate memory for their sizes */
 
 	a->dim = dim;
 	a->sizes = NULL;
@@ -1275,7 +1278,7 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 	a->flags &= ~NEW_VARIABLE;
 	a->len = 1;
 
-	/* run through the variables with the sizes after popping the variable
+	/* Run through the variables with the sizes after popping the variable
        with the array pointer */
 
 	vn = v->next;
@@ -1284,16 +1287,16 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 
 	for ( i = 0; v != NULL; i++ )
 	{
-		/* check the variable with the size */
+		/* Check the variable with the size */
 
 		vars_check( v, INT_VAR | FLOAT_VAR );
 
-		/* check the value of variable with the size and set the corresponding
+		/* Check the value of variable with the size and set the corresponding
 		   entry in the array's field for sizes */
 
 		if ( v->type == INT_VAR )
 		{
-			/* if the the very last variable with the sizes has the flag
+			/* If the the very last variable with the sizes has the flag
 			   VARIABLE_SIZED set this is going to be a dynamically sized
 			   array - set the corresponding flag in the array variable,
 			   don't reset its NEW_VARIABLE flag and don't allocate memory
@@ -1338,14 +1341,14 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 		a->sizes[ i ] = cur;
 		a->len *= cur;
 
-		/* pop the variable with the size */
+		/* Pop the variable with the size */
 
 		vn = v->next;
 		vars_pop( v );
 		v = vn;
 	}
 
-	/* allocate memory */
+	/* Allocate memory */
 
 	if ( a->type == INT_ARR )
 		a->val.lpnt = ( long * ) T_calloc( ( size_t ) a->len, sizeof( long ) );
@@ -1377,13 +1380,13 @@ Var *vars_arr_rhs( Var *v )
 
 	/* The variable pointer this function gets passed is a pointer to the very
        last index on the variable stack. Now we've got to work our way up in
-       the variable stack until we find the first non-index variable which
-       should be a pointer to an array. */
+       the stack until we find the first non-index variable which has to be a
+       pointer to an array. */
 
 	while ( v->type != ARR_PTR )
 		v = v->prev;
 
-	a = v->from;                      /* get array the pointer points to */
+	a = v->from;                      /* Get array the pointer refers to */
 
 	/* If the right hand side array is still variable sizes it never has been
        assigned values to it and it makes no sense to use its elements */
@@ -1395,12 +1398,12 @@ Var *vars_arr_rhs( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* count the indices on the stack */
+	/* Count the indices on the stack */
 
 	for ( dim = 0, cv = v->next; cv != 0; dim++, cv = cv->next )
 		;
 
-	/* check that the number of indices is not less than the dimension of the
+	/* Check that the number of indices is not less than the dimension of the
        array minus one - we allow slice access for the very last dimension */
 
 	if ( dim < a->dim - 1 )
@@ -1410,7 +1413,7 @@ Var *vars_arr_rhs( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* check that there are not too many indices */
+	/* Check that there are not too many indices */
 
 	if ( dim > a->dim )
 	{
@@ -1419,11 +1422,11 @@ Var *vars_arr_rhs( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* calculate the position of the indexed array element (or slice) */
+	/* Calculate the position of the indexed array element (or slice) */
 
 	index = vars_calc_index( a, v->next );
 
-	/* pop the array pointer variable */
+	/* Pop the array pointer variable */
 
 	vars_pop( v );
 
@@ -1474,7 +1477,13 @@ void vars_assign( Var *src, Var *dest )
 		case INT_TRANS_ARR : case FLOAT_TRANS_ARR :  /* transient array */
 			vars_ass_from_trans_ptr( src, dest );
 			break;
-
+/*
+		case INT_ARR : case FLOAT_ARR :
+			eprint( FATAL, "%s:%ld: A complete array can't be used in an "
+					"assignment (try `%s[]' instead).\n",
+					Fname, Lc, src->name );
+			THROW( EXCEPTION );
+*/
 		default :
 			assert( 1 == 0 );           /* we never should end here... */
 	}
@@ -1900,9 +1909,11 @@ Var *apply_unit( Var *var, Var *unit )
 	if ( unit == NULL )
 	{
 		if ( var->type & ( INT_VAR | FLOAT_VAR ) )
-			return var;
-		eprint( FATAL, "%s:%ld: The shit hits the fan...\n", Fname, Lc );
-		THROW( EXCEPTION );
+			return vars_mult( var, vars_push( INT_VAR, 1 ) );
+		if ( var->type & ( INT_ARR | FLOAT_ARR ) )
+			return vars_push( ARR_REF, var );
+
+		assert( 1 == 0 );
 	}
 	else
 	{
