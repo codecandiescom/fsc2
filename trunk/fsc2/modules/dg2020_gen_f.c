@@ -516,8 +516,21 @@ bool dg2020_set_phase_reference( int phase, int function )
 {
 	FUNCTION *p, *f;
 
-	p = &dg2020.function[ phase ];
+
+	/* The phase function can't be phase cycled... */
+
+	if ( function == PULSER_CHANNEL_PHASE_1 ||
+		 function == PULSER_CHANNEL_PHASE_2 )
+	{
+		eprint( FATAL, "%s:%ld: A PHASE function can't be phase cycled.",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
 	f = &dg2020.function[ function ];
+
+	p = &dg2020.function[ phase == 0 ? PULSER_CHANNEL_PHASE_1 :
+						               PULSER_CHANNEL_PHASE_2 ];
 
 	if ( p->phase_func != NULL )
 	{
@@ -551,7 +564,7 @@ bool dg2020_set_phase_reference( int phase, int function )
 /* different combination (i.e. both off, both on or one off and the      */
 /* other on).                                                            */
 /* 'function' is the phase function the data are to be used for (i.e. 0  */
-/*   means PHASE_1, 1 means PHASE_2, 2 means both)                       */
+/*   means PHASE_1, 1 means PHASE_2)                                     */
 /* 'type' means the type of phase, see global.h (PHASE_PLUS/MINUX_X/Y)   */
 /* 'pod' tells if the value is for the first or the second pod channel   */
 /*   (0: first pod channel, 1: second pod channel, -1: pick the one not  */
@@ -604,32 +617,22 @@ bool dg2020_phase_setup_prep( int func, int type, int pod, long val,
 
 		if ( phs[ func ].is_var[ type ][ pod ] )
 		{
-			if ( func == 2 )
-				eprint( FATAL, "%s:%ld: Both output states for phase %s of "
-						"phase functions already have been defined.", Fname, 
-						Lc, Phase_Types[ type ] );
-			else
-				eprint( FATAL, "%s:%ld: Both output states for phase %s of "
-						"function `%s' already have been defined.", Fname,
-						Lc, Phase_Types[ type ], func == 0 ?
-						Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
-						Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
+			eprint( FATAL, "%s:%ld: Both output states for phase %s of "
+					"function `%s' already have been defined.", Fname,
+					Lc, Phase_Types[ type ], func == 0 ?
+					Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
+					Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
 			THROW( EXCEPTION );
 		}
 	}
 
 	if ( phs[ func ].is_var[ type ][ pod ] )
 	{
-		if ( func == 2 )
-			eprint( FATAL, "%s:%ld: %s: Output state of %d. pod for phase %s "
-					"of phase functions already has been defined.", Fname, Lc,
-					pulser_struct.name, pod + 1, Phase_Types[ type ] );
-		else
-			eprint( FATAL, "%s:%ld: %s: Output state of %d. pod for phase %s "
-					"of function `%s' already has been defined.", Fname, Lc,
-					pulser_struct.name, pod + 1, Phase_Types[ type ],
-					func == 0 ? Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
-					Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
+		eprint( FATAL, "%s:%ld: %s: Output state of %d. pod for phase %s "
+				"of function `%s' already has been defined.", Fname, Lc,
+				pulser_struct.name, pod + 1, Phase_Types[ type ],
+				func == 0 ? Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
+				Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
 		THROW( EXCEPTION );
 	}
 
@@ -649,7 +652,7 @@ bool dg2020_phase_setup( int func )
 {
 	int i, j;
 	bool cons[ 4 ] = { UNSET, UNSET, UNSET, UNSET };
-	bool ret1, ret2;
+	bool ret;
 
 
 	assert( Cur_PHS != -1 && Cur_PHS == func );
@@ -682,31 +685,25 @@ bool dg2020_phase_setup( int func )
 	   been assigned the same data */
 
 	for ( i = 0; i < 4; i++ )
-	{
 		if ( ! cons[ i ] )
 		{
-			if ( func == 2 )
-				eprint( FATAL, "%s:%ld: %s: Inconsistent data for phase setup "
-						"of phase functions.", Fname, Lc, pulser_struct.name );
-			else
-				eprint( FATAL, "%s:%ld: %s: Inconsistent data for phase setup "
-						"of function `%s'.", Fname, Lc, pulser_struct.name,
-						func == 0 ? Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
-						Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
+			eprint( FATAL, "%s:%ld: %s: Inconsistent data for phase setup "
+					"of function `%s'.", Fname, Lc, pulser_struct.name,
+					func == 0 ? Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
+					Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
 			THROW( EXCEPTION );
 		}
-	}
 
-	if ( func == 0 || func == 2 )
-		ret1 = dg2020_phase_setup_finalize( PULSER_CHANNEL_PHASE_1,
+	if ( func == 0 )
+		ret = dg2020_phase_setup_finalize( PULSER_CHANNEL_PHASE_1,
 											phs[ func ] );
-	if ( func == 1 || func == 2 )
-		ret2 = dg2020_phase_setup_finalize( PULSER_CHANNEL_PHASE_2,
+	else
+		ret = dg2020_phase_setup_finalize( PULSER_CHANNEL_PHASE_2,
 											phs[ func ] );
 
 	Cur_PHS = -1;
 
-	return ret1 == OK && ret2 == OK ? OK : FAIL;
+	return ret;
 }
 
 

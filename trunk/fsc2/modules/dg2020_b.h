@@ -111,9 +111,6 @@ typedef struct _F_ {
 
 	int next_phase;
 
-	Ticks psd;                   // delay due to phase switches (only needed
-	bool is_psd;                 // for the phase functions)
-
 	long max_seq_len;            // maximum length of the pulse sequence
 
 	bool is_inverted;            // if set polarity is inverted

@@ -381,7 +381,7 @@ int tds754a_get_trigger_channel( void )
 
 void tds754a_gpib_failure( void )
 {
-	eprint( FATAL, "TDS754A: Communication with device failed." );
+	eprint( FATAL, "%s: Communication with device failed.", DEVICE_NAME );
 	THROW( EXCEPTION );
 }
 
@@ -711,8 +711,8 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length )
 
 	/* ....and copy them to the final destination (the data are INTEL format
 	   2-byte integers, so the following requires sizeof( short ) == 2 and
-	   only work on a machine with INTEL format - there got to be better ways
-	   to do it..) Also scale data so that we get the real measured
+	   only works on a machine with INTEL format - there got to be better ways
+	   to do it...) Also scale data so that we get the real measured
 	   voltage. */
 
 	assert( sizeof( short ) == 2 );

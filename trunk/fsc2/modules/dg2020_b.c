@@ -94,7 +94,6 @@ int dg2020_b_init_hook( void )
 	dg2020.is_repeat_time = UNSET;
 	dg2020.is_neg_delay = UNSET;
 	dg2020.neg_delay = 0;
-	dg2020.is_grace_period = UNSET;
 
 	dg2020.block[ 0 ].is_used = dg2020.block[ 1 ].is_used = UNSET;
 
@@ -112,7 +111,6 @@ int dg2020_b_init_hook( void )
 		for ( j = 0; j < MAX_PODS_PER_FUNC; j++ )
 			dg2020.function[ i ].pod[ j ] = NULL;
 		dg2020.function[ i ].num_pods = 0;
-		dg2020.function[ i ].is_psd = UNSET;
 		dg2020.function[ i ].num_channels = 0;
 		dg2020.function[ i ].num_pulses = 0;
 		dg2020.function[ i ].pulses = NULL;
