@@ -264,34 +264,32 @@ if [ `id -u` != "0" ]; then
 	exit 1;
 fi
 
-# Do the basic installation (covered by makefile)
-
-test -z "$ME6X00_KERNEL_SOURCE" || dialog --msgbox \
-"Please note:\n\
-  Because ME6X00_KERNEL_SOURCE is set the new module\n\
-  `pwd`/driver/me6x00.o will *not* be copied to the\n\
-    appropriate module directory (which probably\n\
-  is /lib/modules/${ME6X00_KERNEL_SOURCE##/}) and\n\
-      also 'makedep -a' will not be run.\n\n\
-  Only the user library will be installed." 12 58
-
-make install
-
-if [ $? -ne 0 ]; then
-	dialog --msgbox "Sorry, installation failed.\n" 5 30
-	exit 1
-fi
-
-# Find out if user wants to update the modules dependency file
+# Do the basic installation (covered by the makefile) and
+# find out if user wants to update the modules dependency file
 
 if [ -z "$ME6X00_KERNEL_SOURCE" ]; then
+	make install
+
+	if [ $? -ne 0 ]; then
+		dialog --msgbox "Sorry, installation failed.\n" 5 30
+		exit 1
+	fi
+
 	dialog --yesno \
 "Do you want to update the modules dependency\n\
 file /lib/modules/`uname -r`/modules.dep using\n\
         the command 'depmod -a'?" 8 55
 	test $? || depmod -a
+else
+    dialog --msgbox \
+"Please note:\n\
+  Because ME6X00_KERNEL_SOURCE is set the new module\n\
+  `pwd`/driver/me6x00.o was *not* copied to the\n\
+    appropriate module directory (which probably\n\
+  is /lib/modules/${ME6X00_KERNEL_SOURCE##/}) and\n\
+        also 'makedep -a' was not run.\n\n\
+Only the user library and header files got installed." 12 58
 fi
-
 
 # Find out if user wants to create the device file for the board, but only if
 # the major device number isn't set to 0.
@@ -312,6 +310,7 @@ if [ $MAJOR -ne 0 ]; then
 "A device file /dev/me6x00_$i already exists.\n\
 Delete existing file and replace with a new one?" 7 54;
 				if [ $? -eq 0 ]; then
+					rm -f /dev/me6x00_$i
 					mknod /dev/me6x00_$i c $MAJOR $i
 					chmod 666 /dev/me6x00_$i
 				fi
@@ -413,6 +412,7 @@ fi
 
 echo "alias char-major-$MAJOR me6x00" >> $MODULECONF
 }
+
 
 ################################################################
 #
