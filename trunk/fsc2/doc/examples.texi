@@ -215,7 +215,7 @@ a valid one by calling the function @code{is_file()}
 file. In this case we use the function @code{fsave()} (@pxref{fsave}) to
 write both the current field (as stored in the variable @code{field})
 and the new data into the (first) file. According to the format string
-both values will appear on one line by itself.
+both values will appear on one line.
 
 All now still needed in the inner loop is to sweep to a new magnetic
 field (which, according to the our call of @code{magnet_setup()}
