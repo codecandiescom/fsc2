@@ -654,7 +654,7 @@ static int witio_48_dio_in( WITIO_48_DATA *data )
 	/* Check if the channel number isn't too large for the mode of
 	   the selected DIO */
 
-	if ( ( board.states[ dio ].mode == WITIO_48_MODE_1x24 &&
+	if ( ( board.states[ dio ].mode == WITIO_48_MODE_3x8 &&
 	       ch > WITIO_48_CHANNEL_0 ) ||
 	     ( ( board.states[ dio ].mode == WITIO_48_MODE_2x12 ||
 		 board.states[ dio ].mode == WITIO_48_MODE_16_8 ) &&

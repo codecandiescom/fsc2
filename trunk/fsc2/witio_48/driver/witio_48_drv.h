@@ -156,7 +156,7 @@ struct Board {
 
 #if defined WITIO_48_DEBUG
 #define PDEBUG( fmt, args... ) \
-	{ printk( KERN_DEBUG "witio_48: " fmt, ## args ); }
+	{ printk( KERN_DEBUG __FUNCTION__ "(): " fmt, ## args ); }
 #else
 #define PDEBUG( ftm, args... )
 #endif
