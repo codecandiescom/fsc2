@@ -169,7 +169,6 @@ int er035m_sa_exp_hook( void )
 {
 	char buffer[ 21 ], *bp;
 	long length = 20;
-	int try_count = 0;
 	Var *v;
 	int cur_res;
 
