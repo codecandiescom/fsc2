@@ -166,6 +166,7 @@ void phases_clear( void )
 		ASeq[ i ].defined = UNSET;
 		if ( ASeq[ i ].sequence != NULL )
 			T_free( ASeq[ i ].sequence );
+		ASeq[ i ].sequence = NULL;
 	}
 
 	for ( p = PSeq; p != NULL; p = pn )
