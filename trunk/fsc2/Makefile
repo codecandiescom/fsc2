@@ -113,6 +113,7 @@ CFLAGS           := -ggdb $(OPT) -I/usr/X11R6/include/X11 \
 					-Waggregate-return \
 					-Wnested-externs \
 					-Wcast-align \
+				    # -DMDEBUG            # for malloc debugging
 				    # -Wconversion
 				    # -Wsign-compare      # missing in older gcc versions
 				    # -Wbad-function-cast # too many false positives
@@ -121,7 +122,6 @@ CFLAGS           := -ggdb $(OPT) -I/usr/X11R6/include/X11 \
 				    # -ansi               # fails due to inline/asm
 				    # -pedantic
 				    # -DNDEBUG            # switch off build-in debugging code 
-				    # -DMDEBUG            # for malloc debugging
 LFLAGS			 := $(OPT) -shared -fpic  # needed for libraries
 
 ifeq ($(MPATROL),YES)
