@@ -3321,7 +3321,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 This function starts on of the counters of the card. The counter will
 count for a specified time and then stops automatically. It requires at
 least two arguments, the counter to be used, specified by a symbolic
-name between @code{CH0} and @code{3}. If the requested counter is
+name between @code{CH0} and @code{CH3}. If the requested counter is
 already running the function will fail. The second required argument is
 the length of time the counter is supposed to count. This time must be
 between @w{100 ns} and about @w{214.748 s} and must be an integer
