@@ -683,7 +683,10 @@ static void do_measurement( void )
 			   reached */
 
 			if ( cur_prg_token == prg_token + On_Stop_Pos )
-				react_to_quit = UNSET;
+			{
+				react_to_do_quit = UNSET;
+				do_quit = UNSET;
+			}
 
 			switch ( cur_prg_token->token )
 			{
