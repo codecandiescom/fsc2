@@ -236,7 +236,7 @@ static void load_functions( Device *dev )
 		else
 		{
 			lib_name = get_string( "%s.so", dev->name );
-			dev->driver.handle = dlopen( dev->name, RTLD_NOW );
+			dev->driver.handle = dlopen( lib_name, RTLD_NOW );
 			T_free( lib_name );
 		}
 	}
