@@ -1,12 +1,17 @@
 # $Id$
 
 
-docs           = $(wildcard fsc2_*.texi)
+docs  = $(wildcard fsc2_*.texi)
+
+
+all:
+	$(MAKE) html
+	$(MAKE) ps
+	$(MAKE) pdf
 
 
 html: $(docs)
 	texi2html -split_node -menu -number -expandinfo -glossary -acc fsc2.texi
-
 
 ps: $(docs)
 	texi2dvi -c fsc2.texi
