@@ -136,7 +136,7 @@ void eprint( int severity, const char *fmt, ... )
 
 			if ( severity == SEVERE )
 			{
-				strcpy( cp, "@C3" );
+				strcpy( cp, "@C2" );
 				cp += 3;
 				space_left -= 3;
 			}
