@@ -21,24 +21,27 @@
   Boston, MA 02111-1307, USA.
 --!>
 
+body {}
 
-samp { font-family:monospace;
-	   font-weight:bold;
-	   color:#AA0000;
-	 }
+code { color : #0000FF; }
 
-td.example { background-color:#FFFF44;
-             padding-top:1.5mm;
-             padding-bottom:1.5mm;
-             padding-left:4mm;
-             padding-right:4mm;
-             border-width:thin;
-			 border-style:solid;
-		   }
+samp { color       : #AA0000;
+       font-family : monospace;
+       font-weight : bold;
+     }
 
-table.navi { background-color:#CCCCCC;
-	         cellpadding:4;
-		     cellspacing:0;
-		     border:0;
-			 width:100%;
-	       }
+td.example { background-color : #FFFF44;
+             padding-top      : 1.5mm;
+             padding-bottom   : 1.5mm;
+             padding-left     : 4mm;
+             padding-right    : 4mm;
+             border-width     : thin;
+             border-style     : solid;
+           }
+
+table.navi { background-color : #CCCCCC;
+             cellpadding      : 4;
+             cellspacing      : 0;
+             border           : 0;
+             width            : 100%;
+           }
