@@ -926,14 +926,10 @@ void recalc_XPoints_of_curve_1d( Curve_1d *cv )
 		xp->y = ( short ) G.canvas.h - 1 - 
 			   d2shrt( cv->s2d[ Y ] * ( cv->points[ j ].v + cv->shift[ Y ] ) );
 
-		if ( xp->x < 0 )
-			cv->left = SET;
-		if ( xp->x >= ( int ) G.canvas.w )
-			cv->right = SET;
-		if ( xp->y < 0 )
-			cv->up = SET;
-		if ( xp->y >= ( int ) G.canvas.h )
-			cv->down = SET;
+		cv->left  |= ( xp->x < 0 );
+		cv->right |= ( xp->x >= ( int ) G.canvas.w );
+		cv->up    |= ( xp->y < 0 );
+		cv->down  |= ( xp->y >= ( int ) G.canvas.h );
 
 		xp++;
 	}

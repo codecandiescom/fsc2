@@ -1104,13 +1104,13 @@ void recalc_XPoints_of_curve_2d( Curve_2d *cv )
 			xps->x = xp->x - dw;
 			xps->y = xp->y - dh;
 
-			if ( sp->exist )
-			{
-				cv->left &= ( xps->x + cv->w <= 0 );
-				cv->right &= ( xps->x >= ( int ) G.canvas.w );
-				cv->up &= ( xps->y + cv->h <= 0 );
-				cv->down &= ( xps->y >= ( int ) G.canvas.h );
-			}
+			if ( ! sp->exist )
+				continue;
+
+			cv->left  &= ( xps->x + cv->w <= 0 );
+			cv->right &= ( xps->x >= ( int ) G.canvas.w );
+			cv->up    &= ( xps->y + cv->h <= 0 );
+			cv->down  &= ( xps->y >= ( int ) G.canvas.h );
 		}
 }
 

@@ -336,10 +336,10 @@ static void cut_recalc_XPoints( void )
 			   d2shrt( cv->s2d[ Y ] * ( cv->points[ j ].v + cv->shift[ Y ] ) );
 		sp->xp_ref = k;
 
-		cv->left  = ( xp->x < 0 );
-		cv->right = ( xp->x >= ( int ) G.cut_canvas.w );
-		cv->up    = ( xp->y < 0 );
-		cv->down  = ( xp->y >= ( int ) G.cut_canvas.h );
+		cv->left  |= ( xp->x < 0 );
+		cv->right |= ( xp->x >= ( int ) G.cut_canvas.w );
+		cv->up    |= ( xp->y < 0 );
+		cv->down  |= ( xp->y >= ( int ) G.cut_canvas.h );
 
 		xp++;
 		k++;
