@@ -107,6 +107,8 @@ long get_file_length( char *name, int *len )
 	char *pc;
 	FILE *pp;
 	long lc, i;
+	struct sigaction sact;
+	struct sigaction oact;
 
 
 	/* Get some memory for the pipe command */
@@ -124,8 +126,6 @@ long get_file_length( char *name, int *len )
 	strcpy( pc, AWK_PROG" 'END{print NR}' " );
 	strcat( pc, name );
 
-	signal( SIGCHLD, SIG_IGN );
-
 	if ( ( pp = popen( pc, "r" ) ) == NULL )
 	{
 		T_free( pc );
@@ -133,9 +133,14 @@ long get_file_length( char *name, int *len )
 	}
 
 	fscanf( pp, "%ld", &lc );
-	pclose( pp );
 
-	signal( SIGCHLD, main_sig_handler );
+	/* Since popen() / pclose() does a wait4() but we get the still get the
+	   SIGCHLD signal we have to ignore it just here... */
+
+	sact.sa_handler = SIG_IGN;
+	sigaction( SIGCHLD, &sact, &oact );
+	pclose( pp );
+	sigaction( SIGCHLD, &oact, NULL );
 
 	T_free( pc );
 
