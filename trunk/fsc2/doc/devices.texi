@@ -460,26 +460,28 @@ will be used.
 @cindex Gaussmeter Functions
 
 
-Currently, three types of gaussmeters are implemented, the Bruker ER035M
-NMR gaussmeter, the Bruker BH15 hall probe field controller and the
-Metrolab PT2025 NMR gaussmeter. The range of fields that can be measured
-with the Bruker ER035M NMR gaussmeter depends on the probe being
-used. With the F0 probe (S-band) the range is @w{460 G} to @w{2390 G}
-while with the F1 probe (X-band) a range between @w{1460 G} and @w{19900
-G} can be measured.  With the BH15 field controller a range between
-@w{-50 G} and @w{2300 G} can be used. Finally, for the Metrolab PT2025
-it is currently assumed that a probe for the field range between @w{1.5
-T} and @w{3.4 T} (W-band) is used.
+Currently, four types of gaussmeters are implemented, the Bruker ER035M
+NMR gaussmeter, the Bruker BH15 hall probe field controller, the
+Metrolab PT2025 NMR gaussmeter and, finally, the Bruker BNM12 NMR
+gaussmeter. The range of fields that can be measured with the Bruker
+ER035M NMR gaussmeter depends on the probe being used. With the F0 probe
+(S-band) the range is @w{460 G} to @w{2390 G} while with the F1 probe
+(X-band) a range between @w{1460 G} and @w{19900 G} can be measured.
+With the BH15 field controller a range between @w{-50 G} and @w{2300 G}
+can be used. Finally, for the Metrolab PT2025 it is currently assumed
+that a probe for the field range between @w{1.5 T} and @w{3.4 T}
+(W-band) is used.
 
 The modules defining the gaussmeter functions (to be listed in the
 @code{DEVICES} section) are:
 @example
 er035m
 er035m_s
-bh15
 er035m_sa
 er035m_sas
+bh15
 pt2025
+bnm12
 @end example
 @noindent
 The modules with names starting with @code{er035m} are for the Bruker
@@ -490,10 +492,12 @@ the computer. (If you're wondering why there are versions for both the
 GPIB bus and the serial port, the simple explanation is that some of the
 ER035M gaussmeters simple don't work with the GPIB bus even though they
 should.) The @code{bh15} module is for the Hall controller used in some
-setups. The last module, @code{pt2025}, is for the Metrolab NMR
-gaussmeter from the Berlin W-Band spectrometer.
+setups, the @code{pt2025} module is for the Metrolab NMR gaussmeter from
+the Berlin W-Band spectrometer. The last module, @code{bnm12}, is for
+the Bruker BNM12 gaussmeter.
 
-The first three gaussmeter modules, @code{er035m}, @code{er035m_s} and
+
+The three gaussmeter modules, @code{er035m}, @code{er035m_s} and
 @code{bh15}, are only to be used for controlling the sweep of a magnet
 power supply. Thus only one of these gaussmeter drivers can be loaded at
 the same time. If other gaussmeters are also to be used the
@@ -501,9 +505,13 @@ the same time. If other gaussmeters are also to be used the
 first in the @code{DEVICES} section and specified @b{before} the magnet
 module (see above) which relies on its existence,
 
-In contrast, the three other modules, @code{er035m_sa},
-@code{er035m_sas} and @code{pt2025}, are only to be used for field
-measurements but not for direct field control.
+In contrast, the four other modules, @code{er035m_sa},
+@code{er035m_sas}, @code{pt2025} and @code{bnm12}, are only to be used
+for field measurements but not for direct field control.
+
+The Bruker BNM12 NMR gaussmeter can only be read out when the WITIO-48
+DIO card is present and its module @code{witio_48} has already been
+loaded.
 
 
 @table @samp
@@ -518,6 +526,11 @@ Returns a string with the name of the gaussmeter being used.
 @findex gaussmeter_field()
 The function returns the current field in Gauss. It takes no arguments
 and can only be used in the @code{EXPERIMENT} section.
+
+@strong{Please note}: for the Bruker NMR gaussmeter BNM12 with a field
+resolution setting of @code{0.01 G} the kG part of the field value gets
+cut off, i.e.@: with this resolution setting a field of @code{3125.63 G}
+will be reported as being @code{123.63 G}.
 
 
 @anchor{find_field}
@@ -545,20 +558,31 @@ returns the value in Gauss. The function can only be called in the
 @findex gaussmeter_resolution()
 This function is defined in the device drivers for the Bruker NMR
 gaussmeters (@code{er035m}, @code{er035m_s}, @code{er035m_sa} and
-@code{er035m_sas}) and for the Metrolab NMR gaussmeter, @code{pt2025}.
-It can be used to set or query the resolution in Gauss used in
-measurements of the magnetic field.
+@code{er035m_sas}), the Metrolab NMR gaussmeter, @code{pt2025} and for
+the @code{bnm12} Bruker BNM12 NMR gaussmeter.  It can be used to set or
+query the resolution in Gauss used in measurements of the magnetic
+field.
 
 To set a resolution the values @code{0.1 G}, @code{0.01 G} and
-@code{0.001 G} can be used for the Bruker NMR gaussmeter, while for the
+@code{0.001 G} can be used for the Bruker NMR gaussmeter. For the
 Metrolab Gaussmeter only @code{0.01 G} and @code{0.001 G} are usable.
+Finally, for the Bruker BNM12 NMR gaussmeter the values @code{1.0 G},
+@code{0.1 G} and @code{0.01 G} can be used.
 
-Please note that for the modules @code{er035m} and @code{er035m_s},
+@strong{Please note}: for the modules @code{er035m} and @code{er035m_s},
 i.e.@: the modules for direct field control, the resolution will be
 increased automatically from @code{0.1 G} to @code{0.01 G} at the
 initialization (i.e.@: at the very start of the experiment) unless 
 the low resolution has been set explicitely during the
 @code{PREPARATIONS} section.
+
+@strong{Also note}: for the Bruker BNM12 gaussmeter changing the
+resolution won't effect the device directly, it can only be read
+out. The device has a switch at its front panel where the resolution can
+be set and calling this function is for making the module aware of the
+setting of the switch (its position can't be determined from within the
+program). This @strong{necessary} to be able to interpret the data
+received from the device correctly.
 
 
 @anchor{gaussmeter_probe_orientation}
