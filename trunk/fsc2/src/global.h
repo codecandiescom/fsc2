@@ -176,6 +176,7 @@ enum {
 	PHASE_MINUS_X,
 	PHASE_PLUS_Y,
 	PHASE_MINUS_Y,
+	PHASE_CW
 };
 
 
