@@ -547,12 +547,12 @@ used.
 Third, each module should but its basic configuration information into a
 special file which should be well enough commented to allow even people
 without much programming experience to adapt the behaviour of the module
-to his/her needs. A good example are modules for devices that are accessed
-via the serial port. Because you probably won't know which serial port
-the user is going to use you shouldn't hide this information somewhere
-deep in the innard of your module but put it in a prominent place where
-it's easy to find. Thus this is one of the items that should go into the
-configuration file.
+to his/her needs. A good example are modules for devices that are
+accessed via the serial port. Because you probably won't know which
+serial port the user is going to use you shouldn't hide this information
+somewhere deep down in the innards of your module but put it in a
+prominent place where it's easy to find. Thus this is one of the items
+that should go into the configuration file.
 
 All configuration files are in the @file{config} directory. For obvious
 reasons the names of the configuration files should make it clear for
@@ -580,12 +580,31 @@ than one device with the same functionality is being used by an
 two such devices you can access the second device by appending a
 '@code{#2}' when calling an @acronym{EDL}-function. But, obviously, for
 this to work @acronym{fsc2} must know which devices have similar
-capabilities and which don't. This it interferes from the device type
+capabilities and which don't. This it finds out from the device type
 string. Thus if you decide which device type string you're going to use
 please first check the device types of other devices as defined in their
 configuration files.  If your device is similar enough to one of the
 exiting devices pick the same device type string, otherwise pick a
 new and descriptive name. Please also see the next section.
+
+
+@subsection Variables a module should define
+
+In the previous section the meaning of the device type string has
+already been discussed. While the definition of the string should go
+into the configuration file for the device, no memory has been allocated
+for this string yet. This should be done as one of the first things after
+the include files having been included. Each and every device module
+should define a constant character array called @code{generic_type},
+that contaings the device type string, i.e. one of the first lines
+should always be
+@example
+const char generic_type[ ] = DEVICE_TYPE;
+@end example
+@acronym{fsc2} will try to find a variable with this name in the module
+to find out about the type of the device. If this variable does not
+exist it won't have any information about the device type and having
+another device of the same type recognized automatically will not work.
 
 
 
@@ -598,11 +617,12 @@ new and descriptive name. Please also see the next section.
 @findex end_of_exp_hook
 @findex exit_hook()
 
-Each module may contain four pre-defined functions that don't have to be
-declared in the function data base file, *Functions'. They all start
-with the name of the module (always in lower case letters - the only
-exception is `User_Functions' to make it stand out), followed by the
-words @code{_init_hook}, @code{_test_hook}, @code{_end_of_test_hook},
+
+
+Each module may contain up to six pre-defined functions that don't have
+to be declared in the function data base file, *Functions'. They all
+start with the name of the module followed by 
+@code{_init_hook}, @code{_test_hook}, @code{_end_of_test_hook},
 @code{_exp_hook}, @code{_end_of_exp_hook} and @code{_exit_hook}. Thus,
 if the new device is named `ABC123' and thus the module is `abc123'
 these functions are (together with the parameters):
@@ -641,37 +661,47 @@ they will revert to their former values, i.e.@: the ones they had before
 the test run started! The return code of the function is the same as for
 the init hook function (i.e.@: always return a non-zero value on success).
 
-The third function, @code{abc123_exp_hook()}, is run when the actual
-experiment is done. Initialization of devices should be done
-here. Return codes are again identical to the ones of the former two
+The third function, @code{abc123_end_of_test_hook()} is called when the
+test hook functions of the modules have been run. This hook function
+might be used to reset variables internal to the module that have been
+changed during the test run. The return code of the function is the same
+as for the init hook and test hook function (i.e.@: always return a
+non-zero value on success).
+
+
+The fourth function, @code{abc123_exp_hook()}, is run when the actual
+experiment is started. Initialization of devices should be done
+here. Return codes are again identical to the ones of the former
 functions.
 
-Finally, the fourth function, @code{abc123_exit_hook()}, is run after
-the experiment has been completed.  Actually, the function is called
-always at the end of the interpretation of the @acronym{EDL} input file,
-even if exceptions made the interpreter stop reading in the input
-file. That means, that @w{@code{abc123_exit_hook()}} will be executed
-even if none of the other hook functions have been run!  The most
-important thing to be done in this function is probably resetting the
-devices. But since the function is even called even if
-@code{abc_init_hook()} has not been executed at all (because another
-module further to the top of the list of modules threw an exception) one
-probably should use an initialized static global variable indicating if
-the device has been initialized at all.
+The fifth function, @code{abc123_end_of_exp_hook()} is run after the
+experiment has been stopped. This hook function should be used to get
+the device back into a usable state wth local control.
+
+Finally, the sixth and final function, @code{abc123_exit_hook()}, is run
+just before the module is unloaded.
+
+Please note that the first three functions, i.e.@:
+@code{abc123__init_hook}, @code{abc123_test_hook} and
+@code{abc123_end_of_test_hook} as well as the last function,
+@code{abc123_exit_hook()}, will be run only once, while both the
+remaining functions, @code{abc123_exp_hook()} and
+@code{abc123_end_of_exp_hook()} will be run each time the experiment is
+started.
 
 
 @subsection Global variables
 
 There are a few important global variables for modules. The first on is
 a flag, called @code{TEST_RUN}. If it is set, the function in the module
-is called during a test run, thus no devices should be really used. Only
+is called during a test run, thus can devices  be used yet. Only
 if @code{TEST_RUN} is unset the hardware interfaces to the devices are
 initialized and devices may be used. During a test run, the module
 should try to return reasonable dummy data.  That means that the module
 functions should at least return data of the same type as it will do in
 the actual experiment. E.g., if a function will return an array during
 the experiment it should do the same during the a test run, even though
-the data in the array probably will be bogus.
+the data in the array probably are going to be completely bogus.
 
 Another important global variable, @code{need_GPIB}, has to be set by the
 init hook function if the hardware interface for the device controlled
@@ -681,9 +711,9 @@ a line in the init hook function similar to
 need_GPIB = SET;
 @end example
 
-For serial ports things handled a bit differently. In the init_hook you
-should try to request the serial port you need by calling the function
-@code{fsc2_request_serial_port()}
+For serial ports things handled a bit differently. In the init hook
+function you should try to request the serial port you need by calling
+the function @code{fsc2_request_serial_port()}
 @example
 fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 @end example
