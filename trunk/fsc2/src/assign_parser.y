@@ -44,6 +44,7 @@ static long Cur_PROT = PHASE_UNKNOWN_PROT;
 %token TWT_GATE_TOKEN        /* TRAVELING_WAVE_TUBE_GATE */
 %token DET_TOKEN             /* DETECTION */
 %token DET_GATE_TOKEN        /* DETECTION_GATE */
+%token DEF_TOKEN             /* DEFENCE */
 %token RF_TOKEN              /* RADIO_FREQUENCY */
 %token RF_GATE_TOKEN         /* RADIO_FREQUENCY_GATE */
 %token PSH_TOKEN             /* PULSE_SHAPE */
@@ -204,6 +205,11 @@ func:    MW_TOKEN                  { if ( Cur_PHS == -1 )
                                      else
 										 p_phase_ref( Cur_PHS,
 												   PULSER_CHANNEL_DET_GATE ); }
+       | DEF_TOKEN                 { if ( Cur_PHS == -1 )
+	                                     Channel_Type = PULSER_CHANNEL_DEFENCE;
+                                     else
+										 p_phase_ref( Cur_PHS,
+													PULSER_CHANNEL_DEFENCE ); }
        | RF_TOKEN                  { if ( Cur_PHS == -1 )
 	                                     Channel_Type = PULSER_CHANNEL_RF;
                                      else

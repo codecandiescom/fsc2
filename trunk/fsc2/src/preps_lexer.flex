@@ -65,6 +65,7 @@ TWT         T(RAVELING)?_?W(AVE)?_?T(UBE)?
 TWT_GATE    T(RAVELING)?_?W(AVE)?_?T(UBE)?_?G(ATE)?
 DET         DET(ECTION)?
 DET_GATE    DET(ECTION)?_?G(ATE)?
+DEF         DEF(ENCE)?
 RF          R(ADIO)?_?F(REQ(UENCY)?)?
 RF_GATE     R(ADIO)?_?F(REQ(UENCY)?)?_?G(ATE)?
 PSH         P(ULSE)?_?SH(APE)?
@@ -258,6 +259,10 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			}
 {DET_GATE}  {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DET_GATE );
+				return VAR_REF;
+			}
+{DEF}       {
+				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DEFENCE );
 				return VAR_REF;
 			}
 {RF}        {

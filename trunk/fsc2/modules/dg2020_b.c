@@ -12,9 +12,8 @@
 
 
 /*---------------------------------------------------------------------------
-  This function is called directly after all modules are loaded. Its main
-  function is to initialize all global variables that are needed in the
-  module.
+  This function is called directly after all modules are loaded. Its function
+  is to initialize all global variables that are needed in the module.
 ---------------------------------------------------------------------------*/
 
 int dg2020_b_init_hook( void )

@@ -124,8 +124,7 @@ enum {
 
 
 /* Define the different functions pulses may have (it's not too dangerous here
-   to add further ones as long as the immediately following defined remains
-   intact)
+   to add further ones as long as the first two and the last remain unchanged)
 */
 
 enum {
@@ -135,6 +134,7 @@ enum {
 	PULSER_CHANNEL_TWT_GATE,
 	PULSER_CHANNEL_DET,
 	PULSER_CHANNEL_DET_GATE,
+	PULSER_CHANNEL_DEFENCE,
 	PULSER_CHANNEL_RF,
 	PULSER_CHANNEL_RF_GATE,
 	PULSER_CHANNEL_PULSE_SHAPE,
@@ -148,10 +148,10 @@ enum {
 
 
 #if defined ( FSC2_MAIN )
-const char *Function_Names[ ] = { "MW", "TWT", "TWT_GATE", "DET", "DET_GATE",
-								  "RF", "RF_GATE", "PULSE_SHAPE", "PHASE_1",
-								  "PHASE_2", "OTHER_1", "OTHER_2", "OTHER_3",
-								  "OTHER_4" };
+const char *Function_Names[ ] = { "MW", "TWT", "TWT_GATE", "DETECTION",
+								  "DETECTION_GATE", "DEFENCE", "RF", "RF_GATE",
+								  "PULSE_SHAPE", "PHASE_1", "PHASE_2",
+								  "OTHER_1", "OTHER_2", "OTHER_3", "OTHER_4" };
 #else
 extern const char *Function_Names[ ];
 #endif
