@@ -1747,7 +1747,7 @@ static void set_main_signals( void )
 	size_t i;
 
 
-	for ( i = 0; i < sizeof sig_list / sizeof sig_list[ 0 ]; i++ )
+	for ( i = 0; i < sizeof sig_list / sizeof *sig_list; i++ )
 	{
 		sact.sa_handler = main_sig_handler;
 		sigemptyset( &sact.sa_mask );
