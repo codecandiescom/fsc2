@@ -35,9 +35,9 @@ double margin = 25.0;             /* margin (in mm) to leave on all sides */
 
 static int get_print_file( FILE **fp, char **name );
 static void print_header( FILE *fp, char *name );
-static void eps_make_scale( FILE *fp, void *cv, int coord, int dim );
+static void eps_make_scale( FILE *fp, void *cv, int coord, long dim );
 static void eps_color_scale( FILE *fp );
-static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, int dir );
+static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, long dir );
 static void eps_draw_surface( FILE *fp, int cn );
 static void eps_draw_contour( FILE *fp, int cn );
 static void do_print( char *name, const char *command );
@@ -57,7 +57,7 @@ static int start_printing( char **argv, char *name );
 /* or color output.                                                        */
 /* For drawing the curves from the main 1D display window the parameter    */
 /* 'data' is expected to be 1, while for cross section curves 'data' must  */
-/* be 0 fro cross sections through the x-axis and -1 for the y-axis!       */
+/* be 0 for cross sections through the x-axis and -1 for the y-axis!       */
 /*-------------------------------------------------------------------------*/
 
 void print_1d( FL_OBJECT *obj, long data )
@@ -67,8 +67,6 @@ void print_1d( FL_OBJECT *obj, long data )
 	char *name = NULL;
 	int i;
 
-
-	data = data;
 
 	fl_deactivate_object( obj );
 
@@ -97,7 +95,7 @@ void print_1d( FL_OBJECT *obj, long data )
 	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp s\n",
 			 x_0 - 0.5, y_0 - 0.5, h + 1.0, w + 1.0, - ( h + 1.0 ) );
 
-	if ( obj == run_form->print_button )
+	if ( data == 1 )
 	{
 		for ( i = 0; i < G.nc; i++ )
 		{
@@ -113,8 +111,8 @@ void print_1d( FL_OBJECT *obj, long data )
 	}
 	else
 	{
-		eps_make_scale( fp, ( void * ) &G.cut_curve, X, ( int ) data );
-		eps_make_scale( fp, ( void * ) &G.cut_curve, Y, ( int ) data );
+		eps_make_scale( fp, ( void * ) &G.cut_curve, X, data );
+		eps_make_scale( fp, ( void * ) &G.cut_curve, Y, data );
 	}
 
 	/* Restrict drawings to the frame */
@@ -122,13 +120,11 @@ void print_1d( FL_OBJECT *obj, long data )
 	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp clip np\n",
 			 x_0 - 0.1, y_0 - 0.1, h + 0.2, w + 0.2, - ( h + 0.2 ) );
 
-	if ( obj == run_form->print_button )
-	{
+	if ( data == 1 )
 		for ( i = G.nc - 1; i >= 0; i-- )
 			eps_draw_curve_1d( fp, G.curve[ i ], i, 1 );
-	}
 	else
-		eps_draw_curve_1d( fp, &G.cut_curve, 0, ( int ) data );
+		eps_draw_curve_1d( fp, &G.cut_curve, 0, data );
 
 	fprintf( fp, "showpage\n" );
 	fclose( fp );
@@ -179,10 +175,12 @@ void print_2d( FL_OBJECT *obj, long data )
 
 	x_0 = margin + 25.0;
 	y_0 = margin + 20.0;
+
 	if ( print_with_color )
 		w = paper_height - margin - x_0 - 35.0;
 	else
 		w = paper_height - margin - x_0;
+
 	h = paper_width - margin - y_0;
 
 	/* Draw the frame and the scales */
@@ -193,6 +191,7 @@ void print_2d( FL_OBJECT *obj, long data )
 
 	eps_make_scale( fp, G.curve_2d[ G.active_curve ], X, 2 );
 	eps_make_scale( fp, G.curve_2d[ G.active_curve ], Y, 2 );
+
 	if ( print_with_color )
 		eps_make_scale( fp, G.curve_2d[ G.active_curve ], Z, 2 );
 
@@ -579,10 +578,13 @@ static void print_header( FILE *fp, char *name )
 	   and draw logo, date and user name */
 
 	fprintf( fp, "%f dup scale 90 r 0 %f t\n", 72.0 / INCH, - paper_width );
+
 	if ( paper_type == A5_PAPER )
 		fprintf( fp, "10 10 t\n1 2 sqrt div dup scale\n" );
+
 	if ( paper_type == A6_PAPER )
 		fprintf( fp, "10 10 t\n0.5 dup scale\n" );
+
 	fprintf( fp, "%f %f fsc2\n", paper_height, paper_width );
 	fprintf( fp, "/Times-Roman 4 sf\n" );
 	fprintf( fp, "5 5 m (%s %s) show\n", ctime( &d ),
@@ -594,7 +596,7 @@ static void print_header( FILE *fp, char *name )
 /* Draws the scales for both 1D and 2D graphics */
 /*----------------------------------------------*/
 
-static void eps_make_scale( FILE *fp, void *cv, int coord, int dim )
+static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 {
 	double rwc_delta,          /* distance between small ticks (in rwc) */
 		   order,              /* and its order of magnitude */
@@ -914,7 +916,7 @@ static void eps_color_scale( FILE *fp )
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
-static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, int dir )
+static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, long dir )
 {
 	double s2d[ 2 ];
 	long k;
@@ -967,9 +969,8 @@ static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, int dir )
 
 	/* Find the very first point and move to it */
 
-	k = 0;
-	while ( ! cv->points[ k ].exist && k < max_points )
-		k++;
+	for ( k = 0; ! cv->points[ k ].exist && k < max_points; k++ )
+		;
 
 	if ( k >= max_points )                  /* is there only just one ? */
 		return;
@@ -981,11 +982,9 @@ static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, int dir )
 	/* Draw all other points */
 
 	for ( ; k < max_points; k++ )
-	{
 		if (  cv->points[ k ].exist )
 			fprintf( fp, "%f %f l\n", x_0 + s2d[ X ] * ( k + cv->shift[ X ] ),
 					 y_0 + s2d[ Y ] * ( cv->points[ k ].v + cv->shift[ Y ] ) );
-	}
 
 	fprintf( fp, "s gr\n" );
 }
@@ -1058,7 +1057,7 @@ static void eps_draw_contour( FILE *fp, int cn )
 						h * cv->s2d[ Y ] / G.canvas.h };
 	double dw = s2d[ X ] / 2,
 		   dh = s2d[ Y ] / 2;
-	double curp;
+	double cur_p;
 	double z;
 	long i, j, k;
 	double z1, z2, g;
@@ -1069,8 +1068,8 @@ static void eps_draw_contour( FILE *fp, int cn )
 
 	/* Print areas gray for which there are no data */
 
-	curp = s2d[ X ] * cv->shift[ X ];
-	if ( curp - dw > 0 )
+	cur_p = s2d[ X ] * cv->shift[ X ];
+	if ( cur_p - dw > 0 )
 		fprintf( fp, "%s\n"
 				 "%f %f m\n"
 				 "%f 0 rl\n"
@@ -1078,10 +1077,10 @@ static void eps_draw_contour( FILE *fp, int cn )
 				 "%f 0 rl\n"
 				 "cp fill\n",
 				 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
-				 x_0, y_0, curp - dw, h, - ( curp - dw ) );
+				 x_0, y_0, cur_p - dw, h, - ( cur_p - dw ) );
 
-	curp = s2d[ X ] * ( G.nx - 1 + cv->shift[ X ] );
-	if ( w > curp + dw )
+	cur_p = s2d[ X ] * ( G.nx - 1 + cv->shift[ X ] );
+	if ( w > cur_p + dw )
 		fprintf( fp, "%s\n"
 				 "%f %f m\n"
 				 "0 %f rl\n"
@@ -1089,10 +1088,10 @@ static void eps_draw_contour( FILE *fp, int cn )
 				 "0 %f rl\n"
 				 "cp fill\n",
 				 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
-				 x_0 + curp + dw , y_0, h, w - ( curp + dw ), - h );
+				 x_0 + cur_p + dw , y_0, h, w - ( cur_p + dw ), - h );
 
-	curp = s2d[ Y ] * cv->shift[ Y ];
-	if ( curp - dh > 0 )
+	cur_p = s2d[ Y ] * cv->shift[ Y ];
+	if ( cur_p - dh > 0 )
 		fprintf( fp, "%s\n"
 				 "%f %f m\n"
 				 "%f 0 rl\n"
@@ -1100,10 +1099,10 @@ static void eps_draw_contour( FILE *fp, int cn )
 				 "%f 0 rl cp\n"
 				 "fill\n",
 				 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
-				 x_0, y_0, w, curp - dh, - w );
+				 x_0, y_0, w, cur_p - dh, - w );
 
-	curp = s2d[ Y ] * ( G.ny - 1 + cv->shift[ Y ] );
-	if ( h > curp + dh )
+	cur_p = s2d[ Y ] * ( G.ny - 1 + cv->shift[ Y ] );
+	if ( h > cur_p + dh )
 		fprintf( fp, "%s\n"
 				 "%f %f m\n"
 				 "%f 0 rl\n"
@@ -1111,7 +1110,7 @@ static void eps_draw_contour( FILE *fp, int cn )
 				 "%f 0 rl\n"
 				 "cp fill\n",
 				 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
-				 x_0, y_0 + curp + dh , w, h - ( curp + dh ), - w );
+				 x_0, y_0 + cur_p + dh , w, h - ( cur_p + dh ), - w );
 
 	/* Now draw the data */
 
