@@ -395,6 +395,8 @@ void change_label_1d( char **label );
 void change_label_2d( char **label );
 void rescale_1d( long new_nx );
 void rescale_2d( long *new_dims );
+void fs_vert_rescale_1d( void );
+void fs_vert_rescale_2d( void );
 void redraw_canvas_2d( Canvas_T *c );
 void change_mode( long mode, long width );
 

@@ -109,7 +109,8 @@ enum {
 	D_CHANGE_POINTS = -4,
 	D_SET_MARKER    = -5,
 	D_CLEAR_MARKERS = -6,
-	D_CHANGE_MODE   = -7
+	D_CHANGE_MODE   = -7,
+	D_VERT_RESCALE  = -8
 };
 
 

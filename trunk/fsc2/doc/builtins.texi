@@ -432,13 +432,48 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @findex change_scale()
 This function allows to change the scale settings (originally set in the
 call of @w{@code{init_1d()}} or @w{@code{init_2d()}}) when your using
-either a 1D-display or a 2D.display (bot not both) after the experiment
+either a 1D-display or a 2D-display (but not both) after the experiment
 has been started. With a one-dimensional display the function can be
 passed a maximum of two arguments, the new start value of the @i{x}-axis
 and the new @i{x}-increment. For two-dimensional display the function
 also accepts a new start value for the @i{y}-axis as well as the
 @i{y}-increment. If one of these values should remain unchanged a string
 (e.g.@ @code{"keep"}) instead of a value can be passed as the argument.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{vert_rescale_1d}
+@item vert_rescale_1d()
+@findex vert_rescale_1d()
+The function allows to resize the @i{y}-scaling of the display so that
+all curves will again fit vertically into the display area (the horizintal
+scaling is left unchanged). The function takes no arguments.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{vert_rescale_2d}
+@item vert_rescale_2d()
+@findex vert_rescale_2d()
+The function allows to resize the @i{z}-scaling of the display so that
+currently displayed curve will use the full range of @i{z}-values again.
+The function takes no arguments.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{vert_rescale}
+@item vert_rescale()
+@findex vert_rescale()
+The function allows to change the vertical scaling for 1D-display or the
+@i{z}-scaling for 2D-display when only either 1D or 2D display is activated.
+If both are active use the function @code{vert_rescale_1d()} to change
+the vertical scaling of the 1D display and @code{vert_rescale_2d()} to
+change the @i{z}-scaling of the 2D display.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.

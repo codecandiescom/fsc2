@@ -1346,6 +1346,208 @@ Var_T *f_cscale_2d( Var_T *v )
 	return vars_push( INT_VAR, 1L );
 }
 
+/*------------------------------------------------------------------*
+ *------------------------------------------------------------------*/
+
+Var_T *f_vrescale( Var_T *v )
+{
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* No rescale without graphics... */
+
+	if ( ! G.is_init )
+	{
+		if ( ! G.is_warn )                         /* warn only once */
+		{
+			print( SEVERE, "Can't do vertical rescale, missing graphics "
+				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
+		return vars_push( INT_VAR, 0L );
+	}
+
+	if ( G.dim == 3 )
+	{
+		print( FATAL, "Both 1D- and 2D-display are in use, use either "
+			   "function vert_rescale_1d() or vert_rescale_2d().\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( G.dim == 1 )
+		return f_vrescale_1d( v );
+	else
+		return f_vrescale_2d( v );
+}
+
+
+/*------------------------------------------------------------------*
+ *------------------------------------------------------------------*/
+
+Var_T *f_vrescale_1d( UNUSED_ARG Var_T *v )
+{
+	int shm_id;
+	long len = 0;                    /* total length of message to send */
+	void *buf;
+	char *ptr;
+	int type = D_VERT_RESCALE;
+
+
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* No rescale without graphics... */
+
+	if ( ! G.is_init )
+	{
+		if ( ! G.is_warn )                         /* warn only once */
+		{
+			print( SEVERE, "Can't do vertical rescale, missing graphics "
+				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
+		return vars_push( INT_VAR, 0L );
+	}
+
+	if ( ! ( G.dim & 1 ) )
+	{
+		print( FATAL, "No 1D display has been initialized, use function "
+			   "vert_rescale_2d() instead.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* In a test run we're already done */
+
+	if ( Fsc2_Internals.mode == TEST )
+		return vars_push( INT_VAR, 1L );
+
+	/* Function can only be used in experiment section */
+
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
+
+	len = sizeof len + sizeof type;
+
+	/* Now try to get a shared memory segment */
+
+	if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
+	{
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	/* Copy the data to the segment */
+
+	ptr = CHAR_P buf;
+
+	memcpy( ptr, &len, sizeof len );                   /* total length */
+	ptr += sizeof len;
+
+	memcpy( ptr, &type, sizeof type );                 /* type indicator  */
+	ptr += sizeof type;
+
+	/* Detach from the segment with the data segment */
+
+	detach_shm( buf, NULL );
+
+	/* Wait for parent to become ready to accept new data, then store
+	   identifier and send signal to tell parent about the data */
+
+	send_data( DATA_1D, shm_id );
+
+	return vars_push( INT_VAR, 1L );
+}
+
+
+/*------------------------------------------------------------------*
+ *------------------------------------------------------------------*/
+
+Var_T *f_vrescale_2d( UNUSED_ARG Var_T *v )
+{
+	int shm_id;
+	long len = 0;                    /* total length of message to send */
+	void *buf;
+	char *ptr;
+	int type = D_VERT_RESCALE;
+
+
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* No rescale without graphics... */
+
+	if ( ! G.is_init )
+	{
+		if ( ! G.is_warn )                         /* warn only once */
+		{
+			print( SEVERE, "Can't do vertical rescale, missing graphics "
+				   "initialization.\n" );
+			G.is_warn = SET;
+		}
+
+		return vars_push( INT_VAR, 0L );
+	}
+
+	if ( ! ( G.dim & 2 ) )
+	{
+		print( FATAL, "No 2D display has been initialized, use function "
+			   "vert_rescale_1d() instead.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* In a test run we're already done */
+
+	if ( Fsc2_Internals.mode == TEST )
+		return vars_push( INT_VAR, 1L );
+
+	/* Function can only be used in experiment section */
+
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
+
+	len = sizeof len + sizeof type;
+
+	/* Now try to get a shared memory segment */
+
+	if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
+	{
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	/* Copy the data to the segment */
+
+	ptr = CHAR_P buf;
+
+	memcpy( ptr, &len, sizeof len );                   /* total length */
+	ptr += sizeof len;
+
+	memcpy( ptr, &type, sizeof type );                 /* type indicator  */
+	ptr += sizeof type;
+
+	/* Detach from the segment with the data segment */
+
+	detach_shm( buf, NULL );
+
+	/* Wait for parent to become ready to accept new data, then store
+	   identifier and send signal to tell parent about the data */
+
+	send_data( DATA_2D, shm_id );
+
+	return vars_push( INT_VAR, 1L );
+}
+
 
 /*------------------------------------------------------------------*
  * Function to change one or more axis labels during the experiment

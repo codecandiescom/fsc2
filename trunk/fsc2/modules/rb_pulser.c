@@ -657,12 +657,13 @@ Var_T *pulser_pulse_minimum_specs( Var_T *v )
 	{
 		if ( p == p->function->pulses[ 0 ] )
 		{
-			t =   rb_pulser.delay_card[ INIT_DELAY ].intr_delay
+			t =   rb_pulser.delay_card[ ERT_DELAY ].intr_delay
+				+ rb_pulser.delay_card[ INIT_DELAY ].intr_delay
 				+ rb_pulser.delay_card[ MW_DELAY_0 ].intr_delay;
 
-#ifndef EXT_TRIGGER_GOES_TO_INIT_DELAY
+#if defined EXT_TRIGGER_GOES_TO_INIT_DELAY
 			if ( rb_pulser.trig_in_mode == EXTERNAL )
-				t += rb_pulser.delay_card[ ERT_DELAY ].intr_delay;
+				t -= rb_pulser.delay_card[ ERT_DELAY ].intr_delay;
 #endif
 		}
 		else if ( p == p->function->pulses[ 1 ] )
@@ -676,26 +677,30 @@ Var_T *pulser_pulse_minimum_specs( Var_T *v )
 	}
 	else if ( p->function == rb_pulser.function + PULSER_CHANNEL_RF )
 	{
-		t =   rb_pulser.delay_card[ INIT_DELAY ].intr_delay
+		t =   rb_pulser.delay_card[ ERT_DELAY ].intr_delay
+			+ rb_pulser.delay_card[ INIT_DELAY ].intr_delay
 			+ rb_pulser.delay_card[ INIT_DELAY ].delay
+			* rb_pulser.timebase
 			+ rb_pulser.delay_card[ RF_DELAY ].intr_delay
 			+ SYNTHESIZER_INTRINSIC_DELAY;
 
-#ifndef EXT_TRIGGER_GOES_TO_INIT_DELAY
+#if defined EXT_TRIGGER_GOES_TO_INIT_DELAY
 		if ( rb_pulser.trig_in_mode == EXTERNAL )
-			t += rb_pulser.delay_card[ ERT_DELAY ].intr_delay;
+			t -= rb_pulser.delay_card[ ERT_DELAY ].intr_delay;
 #endif
 	}
 	else if ( p->function == rb_pulser.function + PULSER_CHANNEL_DET )
 	{
-		t =   rb_pulser.delay_card[ INIT_DELAY ].intr_delay
+		t =   rb_pulser.delay_card[ ERT_DELAY ].intr_delay
+			+ rb_pulser.delay_card[ INIT_DELAY ].intr_delay
 			+ rb_pulser.delay_card[ INIT_DELAY ].delay
+			* rb_pulser.timebase
 			+ rb_pulser.delay_card[ DET_DELAY_0 ].intr_delay
 			+ rb_pulser.delay_card[ DET_DELAY_1 ].intr_delay;
 
-#ifndef EXT_TRIGGER_GOES_TO_INIT_DELAY
+#if defined EXT_TRIGGER_GOES_TO_INIT_DELAY
 		if ( rb_pulser.trig_in_mode == EXTERNAL )
-			t += rb_pulser.delay_card[ ERT_DELAY ].intr_delay;
+			t -= rb_pulser.delay_card[ ERT_DELAY ].intr_delay;
 #endif
 	}
 	else

@@ -157,7 +157,6 @@ void rb_pulser_init_delay( void )
 			pos += rb_pulser.delay_card[ ERT_DELAY ].intr_delay;
 #endif
 
-
 	if ( pos < - PRECISION * rb_pulser.timebase )
 	{
 		print( FATAL, "First MW pulse starts too early.\n" );
@@ -214,9 +213,15 @@ void rb_pulser_delay_card_setup( void )
 		/* Loop over all active pulses of the function (which are already
 		   ordered by start position */
 
-		start =   rb_pulser.delay_card[ INIT_DELAY ].delay
-				* rb_pulser.timebase
-			    + rb_pulser.delay_card[ INIT_DELAY ].intr_delay;
+		start =   rb_pulser.delay_card[ ERT_DELAY  ].intr_delay
+			    + rb_pulser.delay_card[ INIT_DELAY ].intr_delay
+			    + rb_pulser.delay_card[ INIT_DELAY ].delay
+			    * rb_pulser.timebase;
+
+#if defined EXT_TRIGGER_GOES_TO_INIT_DELAY
+		if ( rb_pulser.trig_in_mode == EXTERNAL )
+			start -= rb_pulser.delay_card[ ERT_DELAY ].intr_delay;
+#endif
 
 		for ( card = f->delay_card, j = 0; j < f->num_active_pulses; j++ )
 		{
@@ -236,7 +241,7 @@ void rb_pulser_delay_card_setup( void )
 			   set to get the pulse to start at the correct moment */
 
 			if ( f->self != PULSER_CHANNEL_MW ||
-				 ( f->self == PULSER_CHANNEL_MW && j != 0 ) )
+				 ( f->self == PULSER_CHANNEL_MW && j!= 0 ) )
 			{
 				/* Find out the first possible moment the following pulse
 				   could start at - if there's no following delay card

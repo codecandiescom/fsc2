@@ -347,6 +347,13 @@ static void other_data_request( int dim, int type, char *ptr )
 			}
 			break;
 
+		case D_VERT_RESCALE :                       /* change vertical scale */
+			if ( dim == DATA_1D )
+				fs_vert_rescale_1d( );
+			else
+				fs_vert_rescale_2d( );
+			break;
+
 		case D_CHANGE_LABEL :                 /* change label command */
 			for ( i = X; i <= ( dim == DATA_1D ? Y : Z ); i++ )
 			{

@@ -122,7 +122,6 @@ config/tds754a.conf
 config/thurlby330.conf
 config/User_Functions.conf
 config/witio_48.conf
-config/xx
 
 doc/ack.texi
 doc/background.gif

@@ -1963,6 +1963,40 @@ void undo_button_callback_2d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
  * Rescales the 1D display so that the canvas is completely used.
  *----------------------------------------------------------------*/
 
+void fs_vert_rescale_1d( void )
+{
+	long i;
+
+
+	for ( i = 0; i < G_1d.nc; i++ )
+		save_scale_state_1d( G_1d.curve[ i ] );
+
+	/* ... and rescale to full scale */
+
+	fs_rescale_1d( );
+	redraw_all_1d( );
+}
+
+
+/*----------------------------------------------------------------*
+ * Rescales the 2D display so that the canvas is completely used.
+ *----------------------------------------------------------------*/
+
+void fs_vert_rescale_2d( void )
+{
+	if ( G_2d.active_curve != -1 )
+	{
+		save_scale_state_2d( G_2d.curve_2d[ G_2d.active_curve ] );
+		fs_rescale_2d( G_2d.curve_2d[ G_2d.active_curve ] );
+		redraw_all_2d( );
+	}
+}
+
+
+/*-------------------------------------------*
+ * Callback for the FS button for 1D display
+ *-------------------------------------------*/
+
 void fs_button_callback_1d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
 	int state;
@@ -2006,9 +2040,9 @@ void fs_button_callback_1d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*----------------------------------------------------------------*
- * Rescales the 2D display so that the canvas is completely used.
- *----------------------------------------------------------------*/
+/*-------------------------------------------*
+ * Callback for the FS button for 2D display
+ *-------------------------------------------*/
 
 void fs_button_callback_2d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
@@ -2197,7 +2231,6 @@ void curve_button_callback_2d( FL_OBJECT *obj, long data )
 /*--------------------------------------------------------------*
  * Function does the work for the clear_curve_1d() EDL function
  *--------------------------------------------------------------*/
-
 void clear_curve_1d( long curve )
 {
 	long i;
