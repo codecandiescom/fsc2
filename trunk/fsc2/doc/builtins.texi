@@ -493,7 +493,7 @@ elements of an array).
 @table @samp
 @item time()
 @findex time()
-Returns a string with the current time the form @code{hh:mm:ss}.
+Returns a string with the current time in the form @code{hh:mm:ss}.
 
 @item date()
 @findex date()
