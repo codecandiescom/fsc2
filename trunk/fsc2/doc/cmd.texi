@@ -84,7 +84,7 @@ complete list of all differences that might be expected:
   from the list starts automatically.
 
 @item
-  In batch mode @code{EDL} does not query the user for names of output
+  In batch mode @code{fsc2} does not query the user for names of output
   file names.  Instead, a file name is constructed from the name of the
   currently executed @code{EDL} script and an extension of
   "@code{.batch_output.}", followed by a unique integer nuber. See the
