@@ -700,9 +700,6 @@ static void set_child_signals( void )
 
 void child_sig_handler( int signo )
 {
-	extern int cmdline_flags;                /* defined in fsc2.c */
-
-
 	switch ( signo )
 	{
 		case DO_QUIT :                /* aka SIGUSR2 */
