@@ -343,7 +343,7 @@ sub set_sweep_method {
 
 
 #############################################
-# Reads default settings from 
+# Reads default settings
 
 sub get_defs {
 
