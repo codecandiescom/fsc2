@@ -239,9 +239,8 @@ Var *daq_ao_channel_setup( Var *v )
 	{
 		double tmp_volts = 0.0;
 
-
-		/* If switching between uni- and bipolar mode or external and internal
-		   reference set output voltage to zero */
+		/* When switching between uni- and bipolar mode or external and
+		   internal reference set output voltage to zero */
 
 		if ( ( pol != ( int ) pci_mio_16e_1.ao_state.polarity[ dac ] ||
 			   er !=
@@ -256,32 +255,28 @@ Var *daq_ao_channel_setup( Var *v )
 		
 	if ( FSC2_MODE == EXPERIMENT )
 	{
-		NI_DAQ_STATE l_er;
-		NI_DAQ_BU_POLARITY l_pol;
+		NI_DAQ_STATE l_er = er;
+		NI_DAQ_BU_POLARITY l_pol = pol;
 
-		if ( ( ret = ni_daq_ao_channel_configuration( pci_mio_16e_1.board, 1,
-												  &dac, &l_er, &l_pol ) ) < 0 )
+		switch ( ni_daq_ao_channel_configuration( pci_mio_16e_1.board, 1,
+												  &dac, &l_er, &l_pol ) )
 		{
-			switch ( ret )
-			{
-				case NI_DAQ_ERR_NER :
-					print( FATAL, "Board does not allow use of external "
-						   "reference for AO.\n" );
-					break;
+			case NI_DAQ_OK :
+				break;
 
-				case NI_DAQ_ERR_UAO :
-					print( FATAL, "Board allows only bipolar AO.\n" );
-					break;
+			case NI_DAQ_ERR_NER :
+				print( FATAL, "Board does not allow use of external "
+					   "reference for AO.\n" );
+				THROW( EXCEPTION );
 
-				default :
-					print( FATAL, "AO channel setup failed.\n" );
-			}
+			case NI_DAQ_ERR_UAO :
+				print( FATAL, "Board allows only bipolar AO.\n" );
+				THROW( EXCEPTION );
 
-			THROW( EXCEPTION );
+			default :
+				print( FATAL, "AO channel setup failed.\n" );
+				THROW( EXCEPTION );
 		}
-
-		er = l_er;
-		pol = l_pol;
 	}
 
 	if ( pci_mio_16e_1.ao_state.is_used[ dac ] )
