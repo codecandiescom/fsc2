@@ -443,9 +443,10 @@ V RB8514 (Delay Card) Functions
 
 On intitialization (when rulbus_card_open() is called) a delay it may
 be currently creating is stopped, the delay is set to 0 and the creation
-of start or end pulses is switched off. When the card is closed (either
-directly by a call of rulbus_card_close() or indirectly on a call of
-rulbus_close()) the card is left in the state it is at that moment.
+of start or end pulses is switched off and the polarity of start end end
+pulses is set to positive. When the card is closed (either directly by a
+call of rulbus_card_close() or indirectly on a call of rulbus_close())
+the card is left in the state it is at that moment.
 
 
 ----------------------------------------------------------------------
@@ -455,7 +456,7 @@ int rulbus_delay_set_delay( int handle, unsigned long delay, int force )
 The function is for setting the number of ticks of an external clock
 during which the card will output a pulse. It must be a number between
 0 and 16777215 (2^24 - 1). Setting a delay of 0 will create no output
-at the gate outputs, just a start or end pulse (if they are enabled).
+at the gate outputs, just a start or end pulse if they are enabled.
 
 Usually when the card is just in the process of creating a delay the
 function will return the error RULBUS_CRD_BSY and not set a new delay.

@@ -106,6 +106,8 @@ void rulbus_delay_exit( void )
 int rulbus_delay_card_init( int handle )
 {
 	RULBUS_DELAY_CARD *tmp;
+	int i;
+	unsigned char byte;
 
 
 	tmp = realloc( rulbus_delay_card,
@@ -118,13 +120,22 @@ int rulbus_delay_card_init( int handle )
 	tmp += rulbus_num_delay_cards++;
 
 	tmp->handle = handle;
-	tmp->delay = INVALID_DELAY;
-	tmp->ctrl = END_PULSE_OUT_1_ENABLE | END_PULSE_POSITIVE;
+	tmp->delay = 0;
+	tmp->ctrl = START_PULSE_POSITIVE | END_PULSE_POSITIVE;
 
-	/* Set a few defaults: output a (positive) end pulse, start pulse on a
-	   raising trigger edge and disable interrupts */
+	/* Set a few defaults: output neither start nor end pulses, dsiable
+	   interrupts, triggger of rasing edge and output polarity of start
+	   and end pulses is positive, the set the delay to 0. */
 
-	return rulbus_write( handle, CONTROL_ADDR, &tmp->ctrl, 1 );
+	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &tmp->ctrl, 1 ) )
+																 != RULBUS_OK )
+		return retval;
+
+	for ( byte = 0, i = 0; i < 3, i++ )
+		if ( ( retval = rulbus_write( handle, 2 - i, &byte, 1 ) ) < 0 )
+			 return retval;
+
+	return RULBUS_OK;
 }
 	
 
@@ -164,7 +175,7 @@ void rulbus_delay_card_exit( int handle )
  * Function for setting the delay duration
  *-----------------------------------------*/
 
-int rulbus_delay_set_delay( int handle, unsigned long delay )
+int rulbus_delay_set_delay( int handle, unsigned long delay, int force )
 {
 	RULBUS_DELAY_CARD *card;
 	unsigned char byte;
@@ -181,11 +192,18 @@ int rulbus_delay_set_delay( int handle, unsigned long delay )
 	if ( delay == card->delay )
 		return RULBUS_OK;
 
+	/* Check that the card isn't currently creating a delay - if it is tell
+	   the user it's busy unless the 'force' flag is set (which allows the
+	   user to set a new delay even though a delay is already is created,
+	   which then ends prematurely) */
+
 	if ( ( retval = rulbus_read( handle, STATUS_ADDR, &byte, 1 ) ) < 0 )
 		 return retval;
 
-	if ( byte & DELAY_BUSY )
+	if ( byte & DELAY_BUSY && ! force )
 		return RULBUS_CRD_BSY;
+
+	card->delay = delay;
 
 	for ( i = 0; i < 3; delay >>= 8, i++ )
 	{
@@ -194,7 +212,6 @@ int rulbus_delay_set_delay( int handle, unsigned long delay )
 			 return retval;
 	}
 
-	card->delay = delay;
 	return RULBUS_OK;
 }
 
@@ -251,7 +268,8 @@ int rulbus_delay_set_output_pulse( int handle, int output, int type )
 		   output != RULBUS_DELAY_OUTPUT_BOTH ) ||
 		 ( type != RULBUS_DELAY_START_PULSE &&
 		   type != RULBUS_DELAY_END_PULSE &&
-		   type != RULBUS_DELAY_PULSE_BOTH ) )
+		    type != RULBUS_DELAY_PULSE_BOTH &&
+		   type != RULBUS_DELAY_PULSE_NONE ) )
 		return RULBUS_INV_ARG;
 
 	ctrl = card->ctrl & 0xF0;
