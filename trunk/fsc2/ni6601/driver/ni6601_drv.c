@@ -585,10 +585,10 @@ static int ni6601_start_pulses( Board *board, NI6601_PULSES *arg )
 		ni6601_disable_out( board, NI6601_OUT( p.counter ) );
 
 	/* Set the count for the duration of the high and the low voltage
-	   phase of the pulse */
+	   phase of the pulse (after suntracting 1) */
 
-	writel( p.high_ticks, board->regs.load_a[ p.counter ] );
-	writel( p.low_ticks,  board->regs.load_b[ p.counter ] );
+	writel( p.high_ticks - 1, board->regs.load_a[ p.counter ] );
+	writel( p.low_ticks - 1,  board->regs.load_b[ p.counter ] );
 
 	/* Assemble value to be written into the mode register */
 
