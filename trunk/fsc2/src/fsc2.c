@@ -61,7 +61,7 @@ int main( int argc, char *argv[ ] )
 			return( 1 );
 		}
 
-		just_testing = SET;  /* signal "just_testing"-mode to print_errors() */
+		just_testing = SET;        /* signal "just_testing"-mode to eprint() */
 		return( scan_main( argv[ 2 ] ) ? EXIT_SUCCESS : EXIT_FAILURE );
 	}
 	else
@@ -411,6 +411,7 @@ void test_file( FL_OBJECT *a, long b )
 
 	if ( running_test )
 	{
+		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 		user_break = SET;
 		delete_devices( );                       /* run the exit hooks ! */
 		eprint( FATAL, "Program test aborted, received user break at "
@@ -432,7 +433,7 @@ void test_file( FL_OBJECT *a, long b )
 		return;
 	}
 
-	/* Before scanning the file reload if the file on disk has changed in
+	/* Before scanning the file reload it if the file on disk has changed in
 	   between - quit if file can't be read again. */
 
 	stat( in_file, &file_stat );
@@ -468,7 +469,9 @@ void test_file( FL_OBJECT *a, long b )
 
 	user_break = UNSET;
 	running_test = SET;
+	fl_set_cursor( FL_ObjWin( main_form->run ), XC_watch );
 	state = scan_main( in_file );
+	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 	running_test = UNSET;
 
 	if ( ! user_break )

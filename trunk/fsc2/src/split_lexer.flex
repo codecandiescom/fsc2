@@ -137,7 +137,7 @@ bool scan_main( char *file )
 	bool split_error;
 
 
-	/* forget everything about previous tests */
+	/* Forget everything about previous tests */
 
 	clean_up( );
 
@@ -146,7 +146,7 @@ bool scan_main( char *file )
 	if ( ! functions_init( ) || ! device_list_parse( ) )
 		return FAIL;
 
-	/* check that the file name is reasonable */
+	/* Check that the file name is reasonable */
 
 	if ( file == NULL || *file == '\0' )
 	{
@@ -154,10 +154,12 @@ bool scan_main( char *file )
 		return FAIL;
 	}
 
-	/* filter file through "fsc2_clean" */
+	/* Filter input through "fsc2_clean" (must be located in `libdir') */
 
-	cmd = get_string( strlen( "fsc2_clean " ) + strlen( file ) );
-	strcpy( cmd, "fsc2_clean " );
+	cmd = get_string( strlen( libdir ) + 1 + strlen( "fsc2_clean " )
+	                  + strlen( file ) );
+	strcpy( cmd, libdir );
+	strcat( cmd, "/fsc2_clean " );
 	strcat( cmd, file );
 
 	splitin = popen( cmd, "r" );
