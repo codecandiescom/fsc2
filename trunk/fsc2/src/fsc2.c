@@ -90,9 +90,15 @@ int main( int argc, char *argv[ ] )
 	}
 #endif
 
-	/* Figure out the machine type from the value returned by uname() */
+	/* Figure out the machine type from the value returned by uname(),
+	   currently i[3-6]86 will be treated as having an Intel compatible
+	   processor. */
 
-	if ( uname( &utsbuf ) == 0 && ! strncmp( utsbuf.machine, "i386", 4 ) )
+	if ( uname( &utsbuf ) == 0 &&
+		 utsbuf.machine[ 0 ] == 'i' &&
+		 utsbuf.machine[ 1 ] >= '3' && utsbuf.machine[ 1 ] <= '6'
+		 utsbuf.machine[ 2 ] == '8' &&
+		 utsbuf.machine[ 3 ] == '6' )
 		is_i386 = SET;
 
 	/* First we have to test for command line arguments */
