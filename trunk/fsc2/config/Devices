@@ -148,3 +148,8 @@ witio_48
 
 hjs_attenuator           // stepper motor controlled attenuator from the
 						 // group of H.-J. Steinhoff (Osnabrueck)
+
+
+// Choppers
+
+gg_chopper

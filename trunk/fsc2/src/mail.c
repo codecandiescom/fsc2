@@ -41,6 +41,28 @@
 #include <resolv.h>
 
 
+/* On very old systems NS_MAXDNAME does not seem to be defined in
+   <arpa/nameser.h> but instead MAXDNAME. Also the 'ns_class' and
+   'ns_type' enumerations aren't declared, so they also need to be
+   defined to the required values. */
+
+#if ! defined NS_MAXDNAME
+#define NS_MAXDNAME MAXDNAME
+#endif
+
+#if ! defined ns_c_in
+#define ns_c_in C_IN
+#endif
+
+#if ! defined ns_t_mx
+#define ns_t_mx T_MX
+#endif
+
+#if ! defined ns_t_name
+#define ns_t_cname T_CNAME
+#endif
+
+
 /* Define the maximum length of data we're prepared to get on a DNS query
    for the MX RRs */
 
