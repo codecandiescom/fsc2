@@ -20,7 +20,7 @@ Pulse *pulse_new( int num )
 	/* allocate memory for the new pulse, set its number and link it
 	   to the top of the pulse list */
 
-	p = ( Pulse * ) T_malloc( sizeof( Pulse ) );
+	p = T_malloc( sizeof( Pulse ) );
 
 	p->prev = NULL;
 	p->next = Plist;

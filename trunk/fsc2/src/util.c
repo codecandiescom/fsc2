@@ -5,7 +5,7 @@ char *get_string_copy( char *str )
 {
 	char *new;
 
-	new = ( char * ) T_malloc( ( strlen( str ) + 1 ) * sizeof( char ) );
+	new = T_malloc( ( strlen( str ) + 1 ) * sizeof( char ) );
 	strcpy( new, str );
 	return( new );
 }
@@ -13,7 +13,7 @@ char *get_string_copy( char *str )
 
 char *get_string( size_t len )
 {
-	return( ( char * ) T_malloc( ( len + 1 ) * sizeof( char ) ) );
+	return( T_malloc( ( len + 1 ) * sizeof( char ) ) );
 }
 
 
