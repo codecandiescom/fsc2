@@ -22,6 +22,7 @@
 */
 
 
+#include <dlfcn.h>
 #include "fsc2.h"
 #include "serial.h"
 #include "gpib_if.h"
