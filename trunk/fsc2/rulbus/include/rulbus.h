@@ -115,22 +115,22 @@ int rulbus_rb8514_delay_software_start( int handle );
 double rulbus_rb8514_delay_get_intrinsic_delay( int handle );
 
 
-#define RULBUS_RB8514_DELAY_FALLING_EDGE      1
-#define RULBUS_RB8514_DELAY_RAISING_EDGE      0
+#define RULBUS_RB8514_DELAY_FALLING_EDGE        1
+#define RULBUS_RB8514_DELAY_RAISING_EDGE        0
 
-#define RULBUS_RB8514_DELAY_CARD_MAX          ( ( 1 << 24 ) - 1 )
+#define RULBUS_RB8514_DELAY_CARD_MAX            ( ( 1 << 24 ) - 1 )
 
-#define RULBUS_RB8514_DELAY_OUTPUT_1          1
-#define RULBUS_RB8514_DELAY_OUTPUT_2          2
-#define RULBUS_RB8514_DELAY_OUTPUT_BOTH       3
+#define RULBUS_RB8514_DELAY_OUTPUT_1            1
+#define RULBUS_RB8514_DELAY_OUTPUT_2            2
+#define RULBUS_RB8514_DELAY_OUTPUT_BOTH         3
 
-#define RULBUS_RB8514_DELAY_PULSE_NONE        0
-#define RULBUS_RB8514_DELAY_START_PULSE       1
-#define RULBUS_RB8514_DELAY_END_PULSE         2
-#define RULBUS_RB8514_DELAY_PULSE_BOTH        3
+#define RULBUS_RB8514_DELAY_PULSE_NONE          0
+#define RULBUS_RB8514_DELAY_START_PULSE         1
+#define RULBUS_RB8514_DELAY_END_PULSE           2
+#define RULBUS_RB8514_DELAY_PULSE_BOTH          3
 
-#define RULBUS_RB8514_DELAY_POLARITY_NEGATIVE 0
-#define RULBUS_RB8514_DELAY_POLARITY_POSITIVE 1
+#define RULBUS_RB8514_DELAY_POLARITY_NEGATIVE   0
+#define RULBUS_RB8514_DELAY_POLARITY_POSITIVE   1
 
 
 /* Functions and definitions for the clock card module (RB8515) */
@@ -213,3 +213,19 @@ int rulbus_generic_read( int handle, unsigned char address,
 
 
 #endif /* ! RULBUS_HEADER */
+
+
+/*
+ * Local variables:
+ * c-basic-offset: 8
+ * c-indent-level: 8
+ * c-brace-imaginary-offset: 0
+ * c-brace-offset: 0
+ * c-argdecl-indent: 4
+ * c-label-ofset: -4
+ * c-continued-statement-offset: 4
+ * c-continued-brace-offset: 0
+ * indent-tabs-mode: t
+ * tab-width: 8
+ * End:
+ */

@@ -175,3 +175,19 @@ void rulbus_generic_card_exit( int handle );
 
 
 #endif /* ! RULBUS_LIB_HEADER */
+
+
+/*
+ * Local variables:
+ * c-basic-offset: 8
+ * c-indent-level: 8
+ * c-brace-imaginary-offset: 0
+ * c-brace-offset: 0
+ * c-argdecl-indent: 4
+ * c-label-ofset: -4
+ * c-continued-statement-offset: 4
+ * c-continued-brace-offset: 0
+ * indent-tabs-mode: t
+ * tab-width: 8
+ * End:
+ */
