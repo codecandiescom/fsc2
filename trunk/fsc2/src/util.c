@@ -242,7 +242,7 @@ long get_file_length( const char *name, int *len )
 /* functions like printf(). Then an unspecified number of arguments   */
 /* may follow (which should correspond to the conversion specifiers   */
 /* in the format string).                                             */
-/* When the program is running with graphics te output goes to the    */
+/* When the program is running with graphics the output goes to the   */
 /* error browser, otherwise to stderr. The maximum line length to be  */
 /* output is FL_BROWSER_LINELENGTH, which was defined to 2048 (at     */
 /* least the last time I checked) in /usr/include/forms.h. Usually,   */
