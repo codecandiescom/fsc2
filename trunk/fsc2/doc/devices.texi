@@ -1788,10 +1788,11 @@ of an @code{EDL} program.
 @node Synthesizer Functions, Temperature Controller Functions, Pulser Functions, Device Functions
 @section Synthesizer Functions
 @cindex Synthesizer Functions
-The only implemented synthesizer so far is the HP8647A. Its module is
-loaded by specifying
+The only implemented synthesizers so far are the HP8647A and
+HP8672A. Its modules are loaded by specifying
 @example
 hp8647a
+hp8672a
 @end example
 @noindent
 in the @code{DEVICES} section.
@@ -1824,27 +1825,34 @@ RF output.
 @item synthesizer_frequency()
 @findex synthesizer_frequency()
 The function queries or sets the RF output frequency. If called to set
-the frequency it accepts one argument, the frequency in the range
-between @w{250 kHz} and @w{1000 MHz}. The frequency set by the very
-first call of this function is also the function that is set
-automatically by a call of the function
+the frequency it accepts a frequency as the only argument. For the
+@code{HP8647A} the frequency must be in the range between @w{250 kHz}
+and @w{1000 MHz}, for the @code{HP8672A} between @w{xxx MHz} and @w{18
+GHz}. The frequency set by the very first call of this function is also
+the function that is set automatically by a call of the function
 @code{synthesizer_reset_frequency()} (see below).
 
 Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e.@: without an argument (unless the frequency has already
-been set by calling the function with an argument).
+been set by calling the function with an argument). For the
+@code{HP8672A} the fucntion can be called in query mode only when the
+frequency has been set previously.
 
 
 @anchor{synthesizer_attenuation}
 @item synthesizer_attenuation()
 @findex synthesizer_attenuation()
 The function queries or sets the output attenuation. If called to set
-the attenuation it accepts one argument, the attenuation in the range
-between @w{+10 db} and @w{-136 db} with a resolution of @w{0.1 db}.
+the attenuation it accepts one argument, the attenuation. For the
+@code{HP8647A} the attenuation must be in the range between @w{+10 db}
+and @w{-136 db} with a resolution of @w{0.1 db}, for the @code{HP8672A}
+between @w{+3 db} and @w{-120 db} wiith a resolution of @w{1 db}.
 
 Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e.@: without an argument (unless the attenuation has already
-been set by calling the function with an argument).
+been set by calling the function with an argument). For the
+@code{HP8672A} the fucntion can be called in query mode only when the
+attenuation has been set previously.
 
 
 @anchor{synthesizer_minimum_attenuation}
@@ -1853,11 +1861,11 @@ been set by calling the function with an argument).
 The function can be used to restrict the minimum output attenuation to
 avoid to inadvertently set too high output power levels. It can be
 called to both query and sets the minimum output attenuation. If called
-to set the attenuation it accepts one argument, the attenuation in the
-range between @w{+10 db} and @w{-136 db}. Calling the function disables
-setting the attenuation by further calls of
-@code{synthesizer_attenuation()} to ranges below the value set by
-this function.
+to set the attenuation it accepts one argument, the attenuation within
+the allowed range of attenuations of the device. Calling the function
+disables setting the attenuation by further calls of
+@code{synthesizer_attenuation()} to ranges below the value set by this
+function.
 
 
 @anchor{synthesizer_step_frequency}
@@ -1874,6 +1882,7 @@ Before the step frequency has been set by calling the function with an
 argument the query form of the function (i.e.@: calling it without an
 argument can't be used).
 
+
 @anchor{synthesizer_sweep_up}
 @item synthesizer_sweep_up()
 @findex synthesizer_sweep_up()
@@ -1881,6 +1890,7 @@ If there has been set both a frequency and a step frequency the function
 will increment the synthesizers frequency. It returns the newly set
 frequency. The function can only be called in the @code{EXPERIMENT}
 section.
+
 
 @anchor{synthesizer_sweep_down}
 @item synthesizer_sweep_down()
@@ -1897,6 +1907,7 @@ If a frequency has been set at all the function will reset the
 synthesizers frequency to the frequency that has been set at first. The
 function can only be called in the @code{EXPERIMENT} section.
 
+
 @anchor{synthesizer_use_table}
 @item synthesizer_use_table()
 @findex synthesizer_use_table()
@@ -1905,8 +1916,9 @@ new frequency is set. To find out which attenuation has to be set for a
 new frequency a table file is used. The name of this table file can be
 passed to the function as a (string) argument. If no argument is given a
 default table file is used (typically this is
-@file{/usr/local/lib/fsc2/hp8647a.table}, but it may depend on the
-installation).
+@file{/usr/local/lib/fsc2/hp8647a.table} for the @code{HP8647A} and
+@file{/usr/local/lib/fsc2/hp8672a.table} for the @code{HP8672A}, but it
+may depend on the installation).
 
 The table file must consist of pairs of entries, a frequency and a
 corresponding attenuation in db. The attenuation is being added to the
@@ -1947,56 +1959,69 @@ When a table file is used there remains the question for which frequency
 to use the attenuation has been set e.g.@: by
 @code{synthesizer_attenuation()}. To set this reference frequency the
 function @code{synthesizer_att_ref_freq()} can be used. If the function
-isn't called a frequency of @w{14 MHz} is used.
+isn't called a frequency of @w{14 MHz} is used for the @code{HP8647A}
+and @w{2 GHz} for the @code{HP8672A}.
 
 
 @anchor{synthesizer_modulation}
 @item synthesizer_modulation()
 @findex synthesizer_modulation()
-This function is used to set the type, source and amplitude of the
-modulation. It can set all of these parameters at once or only parts.
+Using this function for the @code{HP8647A} the type, source and
+amplitude of the modulation can be set, for the @code{HP8672A} both type
+and amplitude. It can set all of these parameters at once or only parts
+of them.
 
-There are three possible types of modulation FM, AM and phase
-modulation. The modulation type is specified by a string, either
-@code{"FM"}, @code{"AM"}, @code{"PHASE"} or, finally, @code{"OFF"}.
+For the @code{HP8647A} there are four possible types of modulation: FM,
+AM and phase modulation. The modulation type is specified by a string,
+either @code{"FM"}, @code{"AM"}, @code{"PHASE"} or, finally,
+@code{"OFF"}. For the @code{HP8672A} @code{"FM"}, @code{"AM"} and
+@code{"OFF"} can be used.
 
 Please note that setting a modulation source or amplitude while the
 modulation is off (i.e.@: when @code{"OFF"} has been specified as the
 modulation type) is not possible and trying to do so will make the
 program abort.
 
-The possible modulation sources are either external AC coupled, external
-DC coupled, internal @w{1 kHz} or internal @w{400 Hz}. For external AC
-or DC coupled modulation specify one the strings @code{"EXT AC"},
-@code{"AC"}, @code{"EXT DC"} or @code{"DC"}. For internally generated
-modulation with @w{1 kHz} or @w{400 Hz} use a string argument from the
-following list: @code{"INT 1kHz"}, @code{"INT 1 kHz"}, @code{"INT 1"},
-@code{"1kHz"}, @code{"1 kHz"}, @code{"1"}, @code{"INT 400Hz"},
-@code{"INT 400 Hz"}, @code{"INT 400"}, @code{"400Hz"}, @code{"400 Hz"}
-or @code{"400"}. But please note: external DC coupled modulation source
-does not work with amplitude and phase modulation@!
+For the @code{HP8647A} the possible modulation sources are either
+external AC coupled, external DC coupled, internal @w{1 kHz} or internal
+@w{400 Hz}. For external AC or DC coupled modulation specify one the
+strings @code{"EXT AC"}, @code{"AC"}, @code{"EXT DC"} or
+@code{"DC"}. For internally generated modulation with @w{1 kHz} or
+@w{400 Hz} use a string argument from the following list: @code{"INT
+1kHz"}, @code{"INT 1 kHz"}, @code{"INT 1"}, @code{"1kHz"}, @code{"1
+kHz"}, @code{"1"}, @code{"INT 400Hz"}, @code{"INT 400 Hz"}, @code{"INT
+400"}, @code{"400Hz"}, @code{"400 Hz"} or @code{"400"}. But please note:
+external DC coupled modulation source does not work with amplitude and
+phase modulation@!
+
+For the @code{HP8672A} no modulation source can be specified.
 
 Finally you may specify the modulation amplitude, which has to be a
-number (preferably a floating point number). FM modulation amplitudes
-have to be in the range between @w{0 Hz} and @w{100 kHz}, AM modulation
-amplitudes between @w{0 %} and @w{100 %} and phase modulation amplitudes
-between @w{0 degree} and @w{10 degree}.
+number (preferably a floating point number). For the @code{HP8647A} FM
+modulation amplitudes have to be in the range between @w{0 Hz} and
+@w{100 kHz}, AM modulation amplitudes between @w{0 %} and @w{100 %} and
+phase modulation amplitudes between @w{0 degree} and @w{10 degree}.
 
-Only in the first call of the function all three arguments, i.e.@: the
-modulation type, source and amplitude, should be passed to the
-function. In further calls not all of the arguments have to be given
-again. Instead, in further calls it is sufficient to specify only for
-example a new amplitude. The same, of course, holds for the modulation
-source.
+For the @code{HP8672A} FM modulation can be set to either @w{30 kHz},
+@w{100 kHz}, @w{300 kHz}, @w{1 MHz}, @w{3 MHz} or @w{10 MHz}. AM
+modulation can only be set to either @w{30 %} or @w{100 %}.
+
+
+Only in the first call of the function all two or three arguments,
+i.e.@: the modulation type, amplitude and source (if applicable) should
+be passed to the function. In further calls not all of the arguments
+need to be given again. Instead, in further calls it is sufficient to
+specify only for example a new amplitude. The same, of course, holds for
+the modulation source.
 
 If the modulation type becomes changed, the source and amplitude reverts
 to the settings that were specified in previous calls of the function
-when this modulation type was still active. I.e.@: if at first AM
-modulation using an external AC coupled source and an amplitude of
-@w{50 %} was set and then the modulation was changed to FM with
-different settings for source and amplitude, another call switching back
-to AM modulation will also restore the settings of external AC coupled
-source and @w{50 %} amplitude.
+when this modulation type was still active. I.e.@: if for the
+@code{HP8647A} at first AM modulation using an external AC coupled
+source and an amplitude of @w{50 %} was set and then the modulation was
+changed to FM with different settings for source and amplitude, another
+call switching back to AM modulation will also restore the settings of
+external AC coupled source and @w{50 %} amplitude.
 
 
 @anchor{synthesizer_mod_type}
@@ -2004,10 +2029,13 @@ source and @w{50 %} amplitude.
 @findex synthesizer_mod_type()
 As an alternative the function @code{synthesizer_modulation()} the
 modulation type can be also set via the function
-@code{synthesizer_mod_type()}. It accepts on of the three string
-arguments @code{"FM"}, @code{"AM"}, @code{"PHASE"} or, finally,
-@code{"OFF"} (or the numbers @code{0} for FM, @code{1} for AM, @code{2}
-for phase modulation or @code{3} for switching modulation off).
+@code{synthesizer_mod_type()}. It accepts on of three (for the
+@code{HP8672A}) or four ( for the @code{HP8647} string arguments
+@code{"FM"}, @code{"AM"}, @code{"PHASE"} (@code{HP8647A} only) or,
+finally, @code{"OFF"}. (or the numbers @code{0} for FM, @code{1} for AM,
+for the @code{HP8647A} @code{2} for phase modulation or @code{3} for
+switching modulation off, and @code{2} for modulation off for the
+@code{HP8672A})).
 
 If called with no argument it will return the currently active modulation
 type as an integer number.
@@ -2016,8 +2044,9 @@ type as an integer number.
 @anchor{synthesizer_mod_source}
 @item synthesizer_mod_source()
 @findex synthesizer_mod_source()
-If the modulation type has been set before the modulation source can be
-set directly via this function. It accepts one of the following strings:
+This function is only available for the @code{HP8647A}.  If the
+modulation type has been set before the modulation source can be set
+directly via this function. It accepts one of the following strings:
 @code{"INT 1kHz"}, @code{"INT 1 kHz"}, @code{"INT 1"}, @code{"1kHz"},
 @code{"1 kHz"}, @code{"1"}, @code{"INT 400Hz"}, @code{"INT 400 Hz"},
 @code{"INT 400"}, @code{"400Hz"}, @code{"400 Hz"} or
@@ -2038,10 +2067,14 @@ program.
 @findex synthesizer_mod_ampl()
 
 If the modulation type has been set this function can be used to set the
-modulation amplitude. For FM the allowed range of frequencies is from
-@w{0 Hz} to @w{100 kHz}, for AM amplitudes between @w{0 %} and @w{100 %}
-are acceptable and for phase modulation values between @w{0 degree} and
-@w{10 degree} are valid.
+modulation amplitude. For the @code{HP8647A} the allowed range of FM
+frequencies is from @w{0 Hz} to @w{100 kHz}, for AM amplitudes between
+@w{0 %} and @w{100 %} are acceptable and for phase modulation values
+between @w{0 degree} and @w{10 degree} are valid. 
+
+For the @code{HP8672A} FM modulation can be set to either @w{30 kHz},
+@w{100 kHz}, @w{300 kHz}, @w{1 MHz}, @w{3 MHz} or @w{10 MHz}. AM
+modulation can only be set to either @w{30 %} or @w{100 %}.
 
 If called with no argument, the function will return the amplitude
 setting for the currently active modulation type. You can neither set

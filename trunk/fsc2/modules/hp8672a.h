@@ -41,12 +41,6 @@
 #define MOD_TYPE_AM     1
 #define MOD_TYPE_OFF    2
 
-#define NUM_MOD_SOURCES 4
-#define MOD_SOURCE_AC   0
-#define MOD_SOURCE_DC   1
-#define MOD_SOURCE_1k   2
-#define MOD_SOURCE_400  3
-
 #define MAX_FM_AMPL     1.0e7             /* 10 MHz */
 #define MAX_AM_AMPL     1.0e2             /* 100 % */
 

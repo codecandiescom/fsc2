@@ -262,7 +262,7 @@ int hp8672a_set_mod_param( Var *v, double *dres, int *ires )
 			*ires = MOD_TYPE_AM;
 			return 2;
 
-		case 2 :
+		case 3 :
 			*ires = MOD_TYPE_OFF;
 			return 2;
 	}
