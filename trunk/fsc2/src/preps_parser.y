@@ -47,9 +47,9 @@ Var *P_Var;
 %token ML_TOK                   /* maximum pulse length */
 %token RP_TOK                   /* replacement pulses */
 
-%token <vptr> VAR_REF
 
-%token <vptr>  VAR_TOKEN        /* variable */
+%token <vptr> VAR_TOKEN         /* variable */
+%token <vptr> VAR_REF
 %token <vptr> FUNC_TOKEN        /* function */
 %token <lval> INT_TOKEN
 %token <dval> FLOAT_TOKEN
