@@ -355,9 +355,14 @@ bool dg2020_set_timebase( double timebase );
 bool dg2020_set_memory_size( long mem_size );
 bool dg2020_channel_assign(  int channel, int pod );
 bool dg2020_update_data( void );
-bool dg2020_make_blocks( int num_blks, BLOCK *block );
-bool dg2020_make_seq( int num_blks, BLOCK *block );
+bool dg2020_make_blocks( int num_blocks, BLOCK *block );
+bool dg2020_make_seq( int num_blocks, BLOCK *block );
 bool pulser_set_channel( int channel, Ticks address,
 						 Ticks length, char *pattern );
 bool dg2020_set_constant( int channel, Ticks address,
 						  Ticks length, int state );
+bool dg2020_set_pod_high_level( int pod, double voltage );
+bool dg2020_set_pod_low_level( int pod, double voltage );
+bool dg2020_set_trigger_in_level( double voltage );
+bool dg2020_set_trigger_in_slope( int slope );
+void dg2020_gpib_failure( void );

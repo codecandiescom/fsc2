@@ -256,6 +256,8 @@ Ticks dg2020_get_max_seq_len( void )
 /*---------------------------------------------------------------------------
   Function calculates the amount of memory needed for padding to achieve the
   requested repetition time. It then sets up the blocks if they are needed.
+  The additional bit in the memory size is needed because, due to a bug
+  in the pulsers firmware, the first bit can't be used
 ---------------------------------------------------------------------------*/
 
 void dg2020_calc_padding( void )
@@ -264,16 +266,33 @@ void dg2020_calc_padding( void )
 	long block_repeat;
 
 
-	/* Calculate the grace period and append it to the maximum sequence
-	   length */
+	/* Make sure sequence length has at least the minimum possible size */
 
-	dg2020.max_seq_len = Ticks_min( dg2020.max_seq_len,	MAX_PULSER_BITS - 1 );
+	dg2020.max_seq_len = Ticks_max( dg2020.max_seq_len,	MIN_BLOCK_SIZE );
 
-	/* If no repeat time or frequency has been set nothing is to be done */
+	/* Make sure the sequences fit into the pulser memory */
+
+	if ( dg2020.max_seq_len >= MAX_PULSER_BITS )
+	{
+		eprint( FATAL, "DG2020: The requested pulse sequences don't fit into "
+				"the pulsers memory. Maybe, you could try a longer pulser "
+				"time base.\n." );
+		THROW( EXCEPTION );
+	}
+
+	/* If no repeat time or frequency has been set we're done */
 
 	if ( ! dg2020.is_repeat_time )
 	{
-		dg2020.mem_size = dg2020.max_seq_len;
+		if ( dg2020.trig_in_mode == EXTERNAL )
+		{
+			strcpy( dg2020.block[ 0 ].blk_name, "B0" );
+			dg2020.block[ 0 ].start = 0;
+			dg2020.block[ 0 ].repeat = 1;
+			dg2020.block[ 0 ].is_used = SET;
+		}
+
+		dg2020.mem_size = dg2020.max_seq_len + 1;
 		return;
 	}
 
@@ -289,7 +308,7 @@ void dg2020_calc_padding( void )
 					"than the repeat time of %s.\n",
 					dg2020_pticks( dg2020.max_seq_len ),
 					dg2020_pticks( dg2020.repeat_time ) );
-		dg2020.mem_size = dg2020.max_seq_len;
+		dg2020.mem_size = dg2020.max_seq_len + 1;
 		return;
 	}
 
@@ -325,19 +344,63 @@ void dg2020_calc_padding( void )
 
 	if ( block_repeat < 2 )
 	{
-		dg2020.mem_size = dg2020.max_seq_len;
+		dg2020.mem_size = dg2020.max_seq_len + 1;
 		return;
 	}
 
-	dg2020.mem_size = dg2020.max_seq_len + block_length;
+	dg2020.mem_size = dg2020.max_seq_len + block_length + 1;
 
-	strcpy( dg2020.block[ 0 ].blk_name, "B1" );
+	strcpy( dg2020.block[ 0 ].blk_name, "B0" );
 	dg2020.block[ 0 ].start = 0;
 	dg2020.block[ 0 ].repeat = 1;
 	dg2020.block[ 0 ].is_used = SET;
 
-	strcpy( dg2020.block[ 1 ].blk_name, "B2" );
-	dg2020.block[ 1 ].start = dg2020.max_seq_len;
+	strcpy( dg2020.block[ 1 ].blk_name, "B1" );
+	dg2020.block[ 1 ].start = dg2020.max_seq_len + 1;
 	dg2020.block[ 1 ].repeat = block_repeat;
 	dg2020.block[ 1 ].is_used = SET;
+}
+
+
+/*----------------------------------------------------------*/
+/* dg2020_prep_cmd() does some preparations in assembling   */
+/* a command string for setting a pulse pattern. It first   */
+/* checks the supplied parameters, allocates memory for the */
+/* command string and finally assembles the start of the    */
+/* command string. If the function returns succesfully one  */
+/* should not forget to free the memory allocated for the   */
+/* command string later on!                                 */
+/* ->                                                       */
+/*  * pointer to pointer to the command string              */
+/*  * number of the pulser channel                          */
+/*  * address of the start of the pulse pattern to be set   */
+/*  * length of the pulse pattern to be set                 */
+/* <-                                                       */
+/*  * 1: ok, 0: error                                       */
+/*----------------------------------------------------------*/
+
+bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length )
+{
+	char dummy[ 10 ];
+
+
+	/* Check the parameters */
+
+	if ( channel < 0 || channel > MAX_CHANNELS ||
+		 address < 0 || address + length > MAX_PULSER_BITS ||
+		 length <= 0 || length > MAX_PULSER_BITS )
+		return FAIL;
+
+	/* Get enough memory for the command string */
+
+	*cmd = T_malloc( ( ( long ) length + 50 ) *  sizeof( char ) );
+
+	/* Set up the command string */
+
+	sprintf( dummy, "%ld", length );
+	sprintf( *cmd, ";DATA:PATT:BIT %d,%ld,%ld,#%ld%s", channel,
+			 ( long ) address, ( long ) length, ( long ) strlen( dummy ),
+			 dummy );
+
+	return OK;
 }
