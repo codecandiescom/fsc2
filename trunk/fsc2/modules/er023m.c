@@ -61,6 +61,8 @@ static double rg_list[ RG_MAX_INDEX + 1 ];
 static double tc_list[ TC_MAX_INDEX + 1 ];
 
 
+#define UNDEF_PHASE           -1
+
 #define MAX_MF_INDEX          6
 #define MAX_MOD_FREQ          100000.0
 #define MIN_MOD_FREQ          0.001
@@ -146,6 +148,7 @@ static ER023M er023m_store;
 int er023m_init_hook( void )
 {
 	int i;
+	double fac;
 
 
 	/* Set global variable to indicate that GPIB bus is needed */
@@ -160,7 +163,7 @@ int er023m_init_hook( void )
 
 	rg_list[ 0 ]  = MIN_RG;
 	rg_list[ RG_MAX_INDEX ] = MAX_RG;
-	fac = pow( MAX_RG / MIN_RG, 1.0 / ( double ) ( RC_SETTINGS - 1 ) );
+	fac = pow( MAX_RG / MIN_RG, 1.0 / ( double ) ( RG_MAX_INDEX ) );
 	for ( i = 1; i < RG_MAX_INDEX; i++ )
 		rg_list[ i ] = fac * rg_list[ i - 1 ];
 
@@ -172,7 +175,7 @@ int er023m_init_hook( void )
 
 	er023m.rg_index = UNDEF_RG_INDEX;
 	er023m.tc_index = UNDEF_TC_INDEX;
-	er023m.is_phase = UNDEF_PHASE;
+	er023m.phase    = UNDEF_PHASE;
 	er023m.mf_index = UNDEF_MF_INDEX;
 	er023m.ma       = UNDEF_MOD_ATT;
 	er023m.harmonic = UNDEF_HARMONIC;
@@ -189,7 +192,7 @@ int er023m_init_hook( void )
 /* otherwise the receiver gain is set to the argument. Possible receiver */
 /* gain settings are in the range between 2.0e1 and 1.0e7 in steps of    */
 /* about 1, 1.25, 1.5, 2, 2.5, 3.0, 4.0, 5.0, 6.0 and 8.0 (multiplied by */
-/* a power of 10). 
+/* a power of 10).                                                       */
 /*-----------------------------------------------------------------------*/
 
 Var *lockin_sensitivity( Var *v )
@@ -271,7 +274,7 @@ Var *lockin_sensitivity( Var *v )
 
 		eprint( WARN, SET, "%s: Receiver gain of %.2e is too %s, using "
 				"%.2e instead.\n", DEVICE_NAME, rg,
-				rg_index == 0 ? "low" : "high"rg_list[ rg_index ] );
+				rg_index == 0 ? "low" : "high", rg_list[ rg_index ] );
 	}
 
 	if ( ! TEST_RUN )
@@ -304,7 +307,7 @@ Var *lockin_rg( Var *v )
 			{
 				eprint( FATAL, SET, "%s: Function %s() with no argument can "
 						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Function );
+						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
 			}
 			return vars_push( INT_VAR, er023m_get_rg( ) );
@@ -550,7 +553,7 @@ Var *lockin_phase( Var *v )
 						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
 			}
-			return vars_push( FLOAT_VAR, er023m_get_phase( ) );
+			return vars_push( FLOAT_VAR, er023m_get_ph( ) );
 		}
 	}
 
@@ -578,7 +581,7 @@ Var *lockin_phase( Var *v )
 	{
 		er023m.phase = phase;
 		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			er023m_set_phase( phase );
+			er023m_set_ph( phase );
 	}
 	
 	return vars_push( FLOAT_VAR, phase );
@@ -634,7 +637,7 @@ Var *lockin_ref_level( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Value %d for modulation attenuation is too "
 				"%s, must be in range %d-%d.\n", DEVICE_NAME, ma,
-				ma > MOD_OFF : "large" : "low", MIN_MOD_ATT, MOD_OFF );
+				ma > MOD_OFF ? "large" : "low", MIN_MOD_ATT, MOD_OFF );
 		THROW( EXCEPTION )
 	}
 
@@ -655,7 +658,7 @@ Var *lockin_ref_level( Var *v )
 
 static int er023m_get_rg( void )
 {
-	char *buf[ 30 ];
+	char buf[ 30 ];
 	long len = 30;
 
 	if ( gpib_write( er023m.device, "RG\r", 3 ) == FAILURE ||
@@ -677,7 +680,7 @@ static void er023m_set_rg( int rg_index )
 
 	fsc2_assert( rg_index >=0 && rg_index <= RG_MAX_INDEX );
 
-	sprintf( buf, "RG%d\r" rg_index );
+	sprintf( buf, "RG%d\r", rg_index );
 	if ( gpib_write( er023m.device, buf, strlen( buf ) ) == FAILURE )
 		er023m_failure( );
 }
@@ -688,7 +691,7 @@ static void er023m_set_rg( int rg_index )
 
 static int er023m_get_tc( void )
 {
-	char *buf[ 30 ];
+	char buf[ 30 ];
 	long len = 30;
 
 	if ( gpib_write( er023m.device, "TC\r", 3 ) == FAILURE ||
@@ -710,7 +713,7 @@ static void er023m_set_tc( int tc_index )
 
 	fsc2_assert( tc_index >=0 && tc_index <= RG_MAX_INDEX );
 
-	sprintf( buf, "TC%d\r" tc_index );
+	sprintf( buf, "TC%d\r", tc_index );
 	if ( gpib_write( er023m.device, buf, strlen( buf ) ) == FAILURE )
 		er023m_failure( );
 }
@@ -721,7 +724,7 @@ static void er023m_set_tc( int tc_index )
 
 static int er023m_get_ph( void )
 {
-	char *buf[ 30 ];
+	char buf[ 30 ];
 	long len = 30;
 
 	if ( gpib_write( er023m.device, "PH\r", 3 ) == FAILURE ||
@@ -741,9 +744,9 @@ static void er023m_set_ph( int ph_index )
 	char buf[ 30 ];
 
 
-	fsc2_assert( ph_index >= 0 && ph_index <= PH_MAX_INDEX );
+	fsc2_assert( ph_index >= 0 && ph_index <= 359 );
 
-	sprintf( buf, "PH%d\r" tc_index );
+	sprintf( buf, "PH%d\r", ph_index );
 	if ( gpib_write( er023m.device, buf, strlen( buf ) ) == FAILURE )
 		er023m_failure( );
 }
@@ -754,7 +757,7 @@ static void er023m_set_ph( int ph_index )
 
 static int er023m_get_ma( void )
 {
-	char *buf[ 30 ];
+	char buf[ 30 ];
 	long len = 30;
 
 	if ( gpib_write( er023m.device, "MA\r", 3 ) == FAILURE ||
@@ -776,7 +779,7 @@ static void er023m_set_ma( int ma )
 
 	fsc2_assert( ma >= MIN_MOD_ATT && ma <= MOD_OFF );
 
-	sprintf( buf, "MA%d\r" tc_index );
+	sprintf( buf, "MA%d\r", ma );
 	if ( gpib_write( er023m.device, buf, strlen( buf ) ) == FAILURE )
 		er023m_failure( );
 }
