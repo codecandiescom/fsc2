@@ -42,8 +42,7 @@ field_meter_wait, 0, EXP;       // wait a bit for field to stabilize
 
 // Functions exported by the pulser drivers
 
-pulser_set_timebase, 1, PREP;   // sets timebase for pulser
-
+pulser_start, 0, EXP;           // switches the pulser into run mode
 
 // Functions exported by the lock-in amplifier drivers
 
@@ -52,3 +51,5 @@ lockin_get_adc_data, -1, EXP;   // returns the ADC voltage(s)
 lockin_sensitivity, -1, ALL;    // gets or sets the sensitivity
 lockin_time_constant, -1, ALL;  // gets or sets the time constant
 lockin_phase, -1, ALL;          // gets or sets the phase
+
+
