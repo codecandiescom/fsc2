@@ -35,7 +35,7 @@
 
 #include "sr530.conf"
 
-const char *generic_type = DEVICE_TYPE;
+const char generic_type[ ] = DEVICE_TYPE;
 
 
 /* Here values are defined that get returned by the driver in the test run
