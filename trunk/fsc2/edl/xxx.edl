@@ -8,11 +8,25 @@ B[ 2, 3 ] = { 2, 3, 4, 5, 6, 7 };
 
 EXPERIMENT:
 
+I = 0;
+
 FOR I = 1 : 100000 {
 	Arr[ 2, 1 ] -= B[ 2 ]; //int_slice( 10 );
+
+	UNLESS I % 17 == 0 {
+		print( "\Tgutschi gutschi #\n", I );
+	} ELSE {
+		print( "\Tblub blib #\n", I );
+	}
 }
 
+UNLESS I % 17 == 0 {
+	print( "\Tgutschi gutschi #\n", I );
+} 
+
 print( "jklfsjfjsdjl\n" );
+
+
 
 ON_STOP:
 

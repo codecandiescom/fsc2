@@ -30,13 +30,12 @@
 
 #include "fsc2.h"
 
+extern int exp_testlex( void );           /* defined in exp.c */
 
-extern int exp_testlex( void );
-
-/* locally used functions */
+/* locally defined functions */
 
 int exp_testparse( void );
-int exp_testerror( const char *s );
+static int exp_testerror( const char *s );
 
 %}
 
@@ -102,9 +101,9 @@ int exp_testerror( const char *s );
 %token FOREVER_TOK    2058
 
 
-%token <vptr> E_VAR_TOKEN         /* variable name */
+%token <vptr> E_VAR_TOKEN
 %token <vptr> E_VAR_REF
-%token <vptr> E_FUNC_TOKEN        /* function name */
+%token <vptr> E_FUNC_TOKEN
 %token E_INT_TOKEN
 %token E_FLOAT_TOKEN
 %token E_STR_TOKEN
@@ -126,32 +125,40 @@ int exp_testerror( const char *s );
 %%
 
 
-input:   eol                 { YYACCEPT; }
-       | cond                { YYACCEPT; }
-       | line eol            { YYACCEPT; }
-       | line line           { eprint( FATAL, SET, "Missing semicolon"
-									   " before (or on) this line.\n" );
-	                           THROW( EXCEPTION ); }
-       | line ','            { eprint( FATAL, SET, "Missing semicolon"
-									   " before (or on) this line.\n" );
-	                           THROW( EXCEPTION ); }
+input:   /* empty */ 
+       | input eol
+       | input fc
+       | input line eol
+       | input line line
+       { eprint( FATAL, SET, "Missing semicolon before (or on) this line.\n" );
+	             THROW( EXCEPTION ); }
+       | input line ','
+       { eprint( FATAL, SET, "Missing semicolon before (or on) this line.\n" );
+	             THROW( EXCEPTION ); }
 ;
 
 eol:     ';'
        | '}'
 ;
 
-cond:    FOR_TOK E_VAR_TOKEN '=' expr ':' expr fi '{'
+fc :     FOR_TOK E_VAR_TOKEN '=' expr ':' expr fi '{'
        | FOREVER_TOK '{'
        | REPEAT_TOK expr '{'
        | WHILE_TOK expr '{'
        | UNTIL_TOK expr '{'
        | IF_TOK expr '{'
        | UNLESS_TOK expr '{'
-       | ELSE_TOK '{'
-       | ELSE_TOK IF_TOK expr '{'
+       | ELSE_TOK et
        | BREAK_TOK eol
        | CONT_TOK eol
+;
+
+fi:      /* empty */
+	   | ':' expr
+;
+
+et:      '{'
+       | IF_TOK expr '{'
 ;
 
 line:    E_VAR_TOKEN '=' expr                         { }
@@ -163,9 +170,9 @@ line:    E_VAR_TOKEN '=' expr                         { }
        | E_VAR_TOKEN E_EXPA expr                      { }
        | E_VAR_TOKEN '[' list1 ']' ass                { }
        | E_FUNC_TOKEN '(' list2 ')'                   { }
-       | E_FUNC_TOKEN '['          { eprint( FATAL, SET, "`%s' is a predefined"
-											 " function.\n", $1->name );
-	                                 THROW( EXCEPTION ); }
+       | E_FUNC_TOKEN '['
+          { eprint( FATAL, SET, "`%s' is a predefined function.\n", $1->name );
+	        THROW( EXCEPTION ); }
        | E_PPOS '=' expr                              { }
        | E_PPOS E_PLSA expr   						  { }
        | E_PPOS E_MINA expr   						  { }
@@ -196,10 +203,6 @@ line:    E_VAR_TOKEN '=' expr                         { }
        | E_PDLEN E_EXPA expr  						  { }
 ;
 
-fi:      /* empty */
-	   | ':' 
-;
-
 ass:     '=' expr
        | E_PLSA expr
        | E_MINA expr
@@ -215,12 +218,12 @@ expr:    E_INT_TOKEN unit                             { }
        | E_VAR_TOKEN '[' list1 ']' unit               { }
        | E_FUNC_TOKEN '(' list2 ')' unit              { }
        | E_VAR_REF                                    { }
-       | E_VAR_TOKEN '('           { eprint( FATAL, SET, "`%s' isn't a "
-											 "function.\n", $1->name );
-	                                 THROW( EXCEPTION ); }
-       | E_FUNC_TOKEN '['          { eprint( FATAL, SET, "`%s' is a predefined"
-											 " function.\n", $1->name );
-	                                 THROW( EXCEPTION ); }
+       | E_VAR_TOKEN '('
+          { eprint( FATAL, SET, "`%s' isn't a function.\n", $1->name );
+	        THROW( EXCEPTION ); }
+       | E_FUNC_TOKEN '['
+          { eprint( FATAL, SET, "`%s' is a predefined function.\n", $1->name );
+	        THROW( EXCEPTION ); }
        | E_PPOS                                       { }
        | E_PLEN                                       { }
        | E_PDPOS                                      { }
@@ -288,7 +291,7 @@ strs:    /* empty */
 %%
 
 
-int exp_testerror ( const char *s )
+static int exp_testerror ( const char *s )
 {
 	s = s;                    /* stupid but avoids compiler warning */
 
