@@ -551,8 +551,8 @@ FILE *filter_edl( const char *name, FILE *fp )
 		/* On failure to exec fsc2_clean we send an error message back that
 		   the lexer has to deal with. */
 
-		printf( "\x03\nStarting the test procedure failed, utility '%s' not "
-				"correctly installed.\n", cmd );
+		printf( "\x03\nStarting the test procedure failed, utility '%s' "
+				"probably not correctly installed.\n", cmd );
 
 	filter_failure:
 
