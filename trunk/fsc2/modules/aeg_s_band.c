@@ -109,7 +109,7 @@ enum {
 
 int aeg_s_band_init_hook( void )
 {
-	bool *is_gaussmeter;
+	void *is_gaussmeter;
 	int ret;
 
 
@@ -130,14 +130,11 @@ int aeg_s_band_init_hook( void )
 	   that's not as simple as it might look... */
 
 	if ( exists_device( "er035m" ) )
-		ret = get_lib_symbol( "er035m", "is_gaussmeter",
-							  ( void ** ) &is_gaussmeter );
+		ret = get_lib_symbol( "er035m", "is_gaussmeter", &is_gaussmeter );
 	else if ( exists_device( "er035m_s" ) )
-		ret = get_lib_symbol( "er035m_s", "is_gaussmeter",
-							  ( void ** ) &is_gaussmeter );
+		ret = get_lib_symbol( "er035m_s", "is_gaussmeter", &is_gaussmeter );
 	else
-		ret = get_lib_symbol( "bh15", "is_gaussmeter",
-							  ( void ** ) &is_gaussmeter );
+		ret = get_lib_symbol( "bh15", "is_gaussmeter", &is_gaussmeter );
 
 	fsc2_assert( ret != LIB_ERR_NO_LIB );      /* this can't happen....*/
 
@@ -148,7 +145,7 @@ int aeg_s_band_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	if ( ! *is_gaussmeter )
+	if ( ! * ( bool * ) is_gaussmeter )
 	{
 		print( FATAL, "Problem in DEVICES section: driver for "
 			   "gaussmeter must be listed before magnet driver.\n" );

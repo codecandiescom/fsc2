@@ -119,8 +119,8 @@ int keithley228a_init_hook( void )
 	Var *func_ptr;
 	int acc;
 	int i;
-	int *first_DAC_port;
-	int *last_DAC_port;
+	void *first_DAC_port;
+	void *last_DAC_port;
 	int dev_num;
 
 
@@ -190,21 +190,22 @@ int keithley228a_init_hook( void )
 #endif
 
 	if ( get_lib_symbol( keithley228a.lockin_name, "first_DAC_port",
-						 ( void ** ) &first_DAC_port ) != LIB_OK ||
+						 &first_DAC_port ) != LIB_OK ||
 		 get_lib_symbol( keithley228a.lockin_name, "last_DAC_port",
-						 ( void ** ) &last_DAC_port ) != LIB_OK )
+						 &last_DAC_port ) != LIB_OK )
 	{
 		print( FATAL, "Can't find necessary symbols in library for lock-in "
 			   "amplifier '%s'.\n", keithley228a.lockin_name );
 		THROW( EXCEPTION );
 	}
 
-	if ( keithley228a.lockin_dac_port < *first_DAC_port ||
-		 keithley228a.lockin_dac_port > *last_DAC_port )
+	if ( keithley228a.lockin_dac_port < * ( int * ) first_DAC_port ||
+		 keithley228a.lockin_dac_port > * ( int * ) last_DAC_port )
 	{
 		print( FATAL, "Invalid DAC port number %d, valid range for lock-in "
 			   "'%s' is %d to %d\n", keithley228a.lockin_dac_port,
-				keithley228a.lockin_name, *first_DAC_port, *last_DAC_port );
+				keithley228a.lockin_name, * ( int * ) first_DAC_port,
+			   * ( int * ) last_DAC_port );
 		THROW( EXCEPTION );
 	}
 
@@ -361,27 +362,28 @@ Var *magnet_use_correction( Var *v )
 Var *magnet_use_dac_port( Var *v )
 {
 	int port;
-	int *first_DAC_port;
-	int *last_DAC_port;
+	void *first_DAC_port;
+	void *last_DAC_port;
 
 
 	port = ( int ) get_long( v, "DAC port" );
 
 	if ( get_lib_symbol( keithley228a.lockin_name, "first_DAC_port",
-						 ( void ** ) &first_DAC_port ) != LIB_OK ||
+						 &first_DAC_port ) != LIB_OK ||
 		 get_lib_symbol( keithley228a.lockin_name, "last_DAC_port",
-						 ( void ** ) &last_DAC_port ) != LIB_OK )
+						 &last_DAC_port ) != LIB_OK )
 	{
 		print( FATAL, "Can't find necessary symbols in library for lock-in "
 			   "amplifier '%s'.\n", keithley228a.lockin_name );
 		THROW( EXCEPTION );
 	}
 
-	if ( port < *first_DAC_port || port > *last_DAC_port )
+	if ( port < * ( int * ) first_DAC_port ||
+		 port > * ( int * ) last_DAC_port )
 	{
 		print( FATAL, "Invalid DAC port number %d, valid range for lock-in "
 			   "'%s' is %d to %d\n", port, keithley228a.lockin_name,
-			   *first_DAC_port, *last_DAC_port );
+			   * ( int * ) first_DAC_port, * ( int * ) last_DAC_port );
 		THROW( EXCEPTION );
 	}
 
