@@ -194,11 +194,6 @@ WS          [\n=: ]+
 
 {INV}       return INV_TOKEN;
 
-"\x4nsec"   return NS_TOKEN;
-"\x4usec"   return US_TOKEN;
-"\x4msec"   return MS_TOKEN;
-"\x4sec"    return S_TOKEN;
-
 			/* all needed pulse related keywords... */
 
 			/* combinations of pulse and property, e.g. `P3.LEN' */
