@@ -34,12 +34,43 @@ extern bool Dont_Save;
 static int get_save_file( Var **v );
 static int print_array( Var *v, long cur_dim, long *start, int fid );
 static int print_slice( Var *v, int fid );
-static void format_check( Var *v );
+static void f_format_check( Var *v );
+static void ff_format_check( Var *v );
 static long do_printf( int file_num, Var *v );
 static int print_browser( int browser, int fid, const char* comment );
 static int T_fprintf( int file_num, const char *fmt, ... );
-static char *handle_string( char *str );
-static void handle_escape( char *fmt_end );
+static char *handle_escape( char *fmt_end );
+
+
+/*--------------------------------------------------------------------*/
+/* Function to check if a number passed to it is a valid file handle. */
+/* This requires that the number is an integer variable. It returns 1 */
+/* if there's an already opened file associated with this number and  */
+/* 0 if there isn't.                                                  */
+/*--------------------------------------------------------------------*/
+
+Var *f_is_file( Var *v )
+{
+	if ( v == NULL )
+	{
+		eprint( FATAL, SET, "Missing argument in call of function %s().\n",
+				Cur_Func );
+		THROW( EXCEPTION )
+	}
+
+	if ( v->type != INT_VAR )
+	{
+		eprint( FATAL, SET, "Parameter of function %s() isn't a file "
+				"handle.\n", Cur_Func );
+		THROW( EXCEPTION )
+	}
+
+    if ( v->val.lval < 0 || v->val.lval >= File_List_Len ||
+		 ( ! TEST_RUN && File_List[ v->val.lval ].fp == NULL ) )
+		return vars_push( INT_VAR, 0 );
+
+	return vars_push( INT_VAR, 1 );
+}
 
 
 /*---------------------------------------------------------------------------*/
@@ -505,7 +536,8 @@ Var *f_save( Var *v )
 				break;
 
 			case STR_VAR :
-				count += T_fprintf( file_num, "%s\n", v->val.sptr );
+				count += T_fprintf( file_num, "%s\n",
+									handle_escape( v->val.sptr ) );
 				break;
 
 			case INT_ARR :
@@ -623,10 +655,6 @@ static int print_slice( Var *v, int fid )
 Var *f_fsave( Var *v )
 {
 	int file_num;
-	char *cp;
-	char *sptr;
-	Var *cv;
-	ptrdiff_t s2c;
 
 
 	/* Determine the file identifier */
@@ -648,13 +676,37 @@ Var *f_fsave( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	for ( cp = sptr = v->val.sptr, cv = v->next; *cp != '\0'; cp++ )
+	/* Rewrite the format string and check thar arguments are ok, then print */
+
+	f_format_check( v );
+
+	return vars_push( INT_VAR, ( long ) do_printf( file_num, v ) );
+}
+
+
+/*-------------------------------------------------------------------------*/
+/* This function gets called from f_fsave() to make from its format string */
+/* a format string that can be passed to fprintf()'s format string.        */
+/*-------------------------------------------------------------------------*/
+
+static void f_format_check( Var *v )
+{
+	char *cp;
+	Var *cv;
+	ptrdiff_t s2c;
+
+
+	/* Replace the '#' characters with the appropriate conversion specifiers */
+
+	for ( cp = v->val.sptr, cv = v->next; *cp != '\0'; cp++ )
 	{
+		/* '%' must be replaced by "%%" */
+
 		if ( *cp == '%' )
 		{
-			s2c = cp - sptr;
-			sptr = T_realloc( sptr, strlen( sptr ) + 2 );
-			cp = sptr + s2c;
+			s2c = cp - v->val.sptr;
+			v->val.sptr = T_realloc( v->val.sptr, strlen( v->val.sptr ) + 2 );
+			cp = v->val.sptr + s2c;
 			memmove( cp + 1, cp, strlen( cp ) );
 			cp++;
 			continue;
@@ -663,7 +715,9 @@ Var *f_fsave( Var *v )
 		if ( *cp != '#' )
 			continue;
 
-		if ( *cp == '#' && cp != sptr && *( cp - 1 ) == '\\' )
+		/* "\#" is replaced by '#' */
+
+		if ( cp != v->val.sptr && *( cp - 1 ) == '\\' )
 		{
 			*( cp - 1 ) = '#';
 			memmove( cp - 1, cp, strlen( cp - 1 ) );
@@ -673,38 +727,41 @@ Var *f_fsave( Var *v )
 
 		if ( cv == NULL )
 		{
-			eprint( FATAL, SET, "Less data than format descriptors in "
-					"%s() format string.\n", Cur_Func );
+			eprint( FATAL, SET, "Less data than format descriptors in %s() "
+					"format string.\n", Cur_Func );
 			THROW( EXCEPTION )
 		}
 
 		switch ( cv->type )
 		{
 			case INT_VAR :
-				s2c = cp - sptr;
-				sptr = T_realloc( sptr, strlen( sptr ) + 2 );
-				cp = sptr + s2c;
+				s2c = cp - v->val.sptr;
+				v->val.sptr = T_realloc( v->val.sptr,
+										 strlen( v->val.sptr ) + 2 );
+				cp = v->val.sptr + s2c;
 			    memmove( cp + 2, cp + 1, strlen( cp ) );
 				memcpy( cp, "%d", 2 );
 				cp++;
 				break;
 
 			case FLOAT_VAR :
-				s2c = cp - sptr;
-				sptr = T_realloc( sptr, strlen( sptr ) + 5 );
-				cp = sptr + s2c;
+				s2c = cp - v->val.sptr;
+				v->val.sptr = T_realloc( v->val.sptr,
+										 strlen( v->val.sptr ) + 5 );
+				cp = v->val.sptr + s2c;
 			    memmove( cp + 5, cp + 1, strlen( cp ) );
 				memcpy( cp, "%#.9g", 5 );
 				cp += 4;
 				break;
 
 			case STR_VAR :
-				s2c = cp - sptr;
-				sptr = T_realloc( sptr, strlen( sptr ) + 2 );
-				cp = sptr + s2c;
+				s2c = cp - v->val.sptr;
+				v->val.sptr = T_realloc( v->val.sptr,
+										 strlen( v->val.sptr ) + 2 );
+				cp = v->val.sptr + s2c;
 			    memmove( cp + 2, cp + 1, strlen( cp ) );
 				memcpy( cp, "%s", 2 );
-				handle_string( cv->val.sptr );
+				handle_escape( cv->val.sptr );
 				cp++;
 				break;
 
@@ -725,9 +782,9 @@ Var *f_fsave( Var *v )
 			;
 	}
 
-	v->val.sptr = sptr;
-	handle_string( v->val.sptr );
-	return vars_push( INT_VAR, ( long ) do_printf( file_num, v ) );
+	/* Finally replace the escpe sequences in the format string */
+
+	handle_escape( v->val.sptr );
 }
 
 
@@ -768,20 +825,20 @@ Var *f_ffsave( Var *v )
 
 	/* Check that format string and arguments are ok, then print */
 
-	format_check( v );
+	ff_format_check( v );
 
 	return vars_push( INT_VAR, do_printf( file_num, v ) );
 }
 
 
 /*--------------------------------------------------------------------------*/
-/* Function is used by f_printf( ) to check that the format string is well- */
+/* Function is used by ff_save( ) to check that the format string is well-  */
 /* formed and to find out if there are at least as many arguments as needed */
 /* by the format string (if there are more a warning is printed and the     */
 /* superfluous arguments are discarded).                                    */
 /*--------------------------------------------------------------------------*/
 
-static void format_check( Var *v )
+static void ff_format_check( Var *v )
 {
 	const char *sptr = v->val.sptr;
 	Var *vptr = v->next;
@@ -789,7 +846,7 @@ static void format_check( Var *v )
 
 	/* Replace escape characters in the format string */
 
-	handle_string( v->val.sptr );
+	handle_escape( v->val.sptr );
 
 	/* Loop over the format string to figure out if there are enough arguments
 	   for the format string and that the argument types are the ones expected
@@ -913,7 +970,7 @@ static void format_check( Var *v )
 				THROW( EXCEPTION )
 			}
 				
-			handle_string( vptr->val.sptr );
+			handle_escape( vptr->val.sptr );
 			sptr++;
 			vptr = vptr->next;
 			continue;
@@ -1741,176 +1798,140 @@ get_repl_retry:
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function to check if a number passed to it is a valid file handle. */
-/* This requires that the number is an integer variable. It returns 1 */
-/* if there's an already opened file associated with this number and  */
-/* 0 if there isn't.                                                  */
-/*--------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Function replaces escape sequences in a string by the character */
+/* the stand for - all C type escape sequences are supported.      */         
+/*-----------------------------------------------------------------*/
 
-Var *f_is_file( Var *v )
-{
-	if ( v == NULL )
-	{
-		eprint( FATAL, SET, "Missing argument in call of function %s().\n",
-				Cur_Func );
-		THROW( EXCEPTION )
-	}
-
-	if ( v->type != INT_VAR )
-	{
-		eprint( FATAL, SET, "Parameter of function %s() isn't a file "
-				"handle.\n", Cur_Func );
-		THROW( EXCEPTION )
-	}
-
-    if ( v->val.lval < 0 || v->val.lval >= File_List_Len ||
-		 ( ! TEST_RUN && File_List[ v->val.lval ].fp == NULL ) )
-		return vars_push( INT_VAR, 0 );
-
-	return vars_push( INT_VAR, 1 );
-}
-
-
-/*-------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------*/
-
-static char *handle_string(char *str )
+static char *handle_escape( char *str )
 {
 	char *cp;
-
-
-	for ( cp = str; *cp != '\0'; cp++ )
-		if ( *cp == '\\' )
-			handle_escape( cp );
-
-	return str;
-}
-
-
-/*-------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------*/
-
-static void handle_escape( char *cp )
-{
 	int esc_len;
 
 
-	switch ( *( cp + 1 ) )
+	for ( cp = str; *cp != '\0'; cp++)
 	{
-		case '\0' :
-			eprint( FATAL, SET, "End of string directly following escape "
-					"character '\\'.\n" );
-			THROW( EXCEPTION )
-			break;
+		if ( *cp != '\\' )
+			continue;
 
-		case 'a' :
-			*cp = '\a';
-			memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
-			break;
-
-		case 'b' :
-			*cp = '\b';
-			memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
-			break;
-
-		case 'f' :
-			*cp = '\f';
-			memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
-			break;
-
-		case 'n' :
-			*cp = '\n';
-			memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
-			break;
-
-		case 'r' :
-			*cp = '\r';
-			memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
-			break;
-
-		case 't' :
-			*cp = '\t';
-			memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
-			break;
-
-		case 'v' :
-			*cp = '\v';
-			memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
-			break;
-
-		case '\\' :
-			*cp = '\\';
-			memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
-			break;
-
-		case '\?' :
-			*cp = '\?';
-			memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
-			break;
-
-		case '\'' :
-			*cp = '\'';
-			memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
-			break;
-
-		case '\"' :
-			*cp = '\"';
-			memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
-			break;
-
-		case 'x' :
-			if ( ! isdigit( *( cp + 2 ) ) &&
-				 ( toupper( *( cp + 2 ) ) < 'A' ||
-				   toupper( *( cp + 2 ) ) > 'F' ) )
-			{
-				eprint( FATAL, SET, "'\\x' with no following hex digits in "
-						"string.\n" );
+		switch ( *( cp + 1 ) )
+		{
+			case '\0' :
+				eprint( FATAL, SET, "End of string directly following escape "
+						"character '\\'.\n" );
 				THROW( EXCEPTION )
-			}
-			esc_len = 1;
-			*cp = *( cp + 2 )
-				  - ( isdigit( *( cp + 2 ) ) ? '0' : ( 'A' + 10 ) );
+				break;
 
-			if ( isdigit( *( cp + 3 ) ) ||
-				 ( toupper( *( cp + 3 ) ) >= 'A' &&
-				   toupper( *( cp + 3 ) ) <= 'F' ) )
-			{
-				esc_len++;
-				*cp = *cp * 16
-					  + ( *( cp + 3 )
-						  - ( isdigit( *( cp + 3 ) ) ? '0' : ( 'A' + 10 ) ) );
-			}
+			case 'a' :
+				*cp = '\a';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
 
-			memmove( cp + 1, cp + 2 + esc_len, strlen( cp + 1 + esc_len ) );
-			break;
+			case 'b' :
+				*cp = '\b';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
 
-		default :
-			if ( *( cp + 1 ) < '0' || *( cp + 1 ) > '7' )
-			{
-				eprint( FATAL, SET, "Unknown escape sequence '\\%c' in "
-						"string.\n", *( cp + 1 ) );
-				THROW( EXCEPTION )
-			}
+			case 'f' :
+				*cp = '\f';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
 
-			*cp = *( cp + 1 ) - '0';
-			esc_len = 1;
+			case 'n' :
+				*cp = '\n';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
 
-			if ( *( cp + 2 ) >= '0' && *( cp + 2 ) <= '7' )
-			{
-				*cp = *cp * 8 + *( cp + 2 ) - '0';
-				esc_len++;
+			case 'r' :
+				*cp = '\r';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
 
-				if ( *( cp + 3 ) >= '0' && *( cp + 3 ) <= '7' && *cp < 0x1F )
+			case 't' :
+				*cp = '\t';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
+
+			case 'v' :
+				*cp = '\v';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
+
+			case '\\' :
+				*cp = '\\';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
+
+			case '\?' :
+				*cp = '\?';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
+
+			case '\'' :
+				*cp = '\'';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
+
+			case '\"' :
+				*cp = '\"';
+				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				break;
+
+			case 'x' :
+				if ( ! isdigit( *( cp + 2 ) ) &&
+					 ( toupper( *( cp + 2 ) ) < 'A' ||
+					   toupper( *( cp + 2 ) ) > 'F' ) )
 				{
-					*cp = *cp * 8 + *( cp + 3 ) - '0';
-					esc_len++;
+					eprint( FATAL, SET, "'\\x' with no following hex digits "
+							"in string.\n" );
+					THROW( EXCEPTION )
 				}
-			}
+				esc_len = 1;
+				*cp = *( cp + 2 )
+					  - ( isdigit( *( cp + 2 ) ) ? '0' : ( 'A' + 10 ) );
 
-			memmove( cp + 1, cp + 1 + esc_len, strlen( cp + esc_len ) );
-			break;
+				if ( isdigit( *( cp + 3 ) ) ||
+					 ( toupper( *( cp + 3 ) ) >= 'A' &&
+					   toupper( *( cp + 3 ) ) <= 'F' ) )
+				{
+					esc_len++;
+					*cp = *cp * 16
+					      + ( *( cp + 3 )
+						  - ( isdigit( *( cp + 3 ) ) ? '0' : ( 'A' + 10 ) ) );
+				}
+
+				memmove( cp + 1, cp + 2 + esc_len,
+						 strlen( cp + 1 + esc_len ) );
+				break;
+
+			default :
+				if ( *( cp + 1 ) < '0' || *( cp + 1 ) > '7' )
+				{
+					eprint( FATAL, SET, "Unknown escape sequence '\\%c' in "
+							"string.\n", *( cp + 1 ) );
+					THROW( EXCEPTION )
+				}
+
+				*cp = *( cp + 1 ) - '0';
+				esc_len = 1;
+
+				if ( *( cp + 2 ) >= '0' && *( cp + 2 ) <= '7' )
+				{
+					*cp = *cp * 8 + *( cp + 2 ) - '0';
+					esc_len++;
+
+					if ( *( cp + 3 ) >= '0' && *( cp + 3 ) <= '7' &&
+						 *cp < 0x1F )
+					{
+						*cp = *cp * 8 + *( cp + 3 ) - '0';
+						esc_len++;
+					}
+				}
+
+				memmove( cp + 1, cp + 1 + esc_len, strlen( cp + esc_len ) );
+				break;
+		}
 	}
+
+	return str;
 }
-
-
