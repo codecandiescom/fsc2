@@ -16,6 +16,7 @@ void User_Functions_exit_hook( void );
 Var *square( Var *var );
 Var *int_slice( Var *var );
 Var *float_slice( Var *var );
+Var *get_phase_cycled_area_1d( Var *v );
 
 
 
@@ -127,13 +128,13 @@ Var *get_phase_cycled_area_1d( Var *v )
 	long num_windows;
 	long *win_list;
 	long seq_len;
-	long i;
+	long i, j;
 
 
 	/* At the very start lets figure out if there are functions for phase
        cycling and for obtaining an area */
 
-	if ( ( funct_ptr = func_get( "pulser_next_phase" ) ) == NULL )
+	if ( ( func_ptr = func_get( "pulser_next_phase" ) ) == NULL )
 	{
 		eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): No pulser module "
 				"loaded supplying a function to do phase cycling.\n",
@@ -273,7 +274,7 @@ Var *get_phase_cycled_area_1d( Var *v )
 		{
 			eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): Acquisition "
 					"sequence A would need access to B channel.\n",
-					Fname, LC );
+					Fname, Lc );
 			THROW( EXCEPTION );
 		}
 		if ( acq_seq == 1 && 
@@ -282,7 +283,7 @@ Var *get_phase_cycled_area_1d( Var *v )
 		{
 			eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): Acquisition "
 					"sequence B would need access to A channel.\n",
-					Fname, LC );
+					Fname, Lc );
 			THROW( EXCEPTION );
 		}
 	}
@@ -333,7 +334,7 @@ Var *get_phase_cycled_area_1d( Var *v )
 
 	win_list = T_malloc( num_windows * sizeof( long ) );
 
-	if ( v !== NULL )
+	if ( v != NULL )
 	{
 		for ( i = 0; i < num_windows; i++ )
 		{
@@ -379,42 +380,52 @@ Var *get_phase_cycled_area_1d( Var *v )
 	for ( i = 0; i < seq_len; i++ )
 	{
 		vars_pop( vars_call( func_get( "digitizer_start_acquisition" ) ) );
-		for ( j = 0; j < num_windows; j++ )
+
+		if ( win_list[ 0 ] == -1 )
 		{
 			if ( is_get_area_fast )
+				vn = digitizer_get_area_fast( vars_push( INT_VAR, channel ) );
+			else
+				vn = digitizer_get_area_( vars_push( INT_VAR, channel ) );
+
+			if ( ASeq[ acq_seq ].sequence[ i ] = ACQ_PLUS_A ||
+				 ASeq[ acq_seq ].sequence[ i ] = ACQ_PLUS_B )
+				data[ 0 ] += vn->val.dval;
+			else
+				data[ 0 ] -= vn->val.dval;
+			vars_pop( vn );
+		}
+		else
+		{
+			for ( j = 0; j < num_windows; j++ )
 			{
-				if ( win_list[ i ] >= 0 )
+				if ( is_get_area_fast )
 					vn = digitizer_get_area_fast(
 						vars_push( INT_VAR, channel ),
 						vars_push( INT_VAR, win_list[ j ] ) );
 				else
-					vn = digitizer_get_area_fast(
-						vars_push( INT_VAR, channel ) );
-			}
-			else
-			{
-				if ( win_list[ i ] >= 0 )
 					vn = digitizer_get_area(
 						vars_push( INT_VAR, channel ),
 						vars_push( INT_VAR, win_list[ j ] ) );
+
+				if ( ASeq[ acq_seq ].sequence[ i ] = ACQ_PLUS_A ||
+					 ASeq[ acq_seq ].sequence[ i ] = ACQ_PLUS_B )
+					data[ j ] += vn->val.dval;
 				else
-					vn = digitizer_get_area_( vars_push( INT_VAR, channel ) );
+					data[ j ] -= vn->val.dval;
+				vars_pop( vn );
 			}
 		}
-
-		if ( ASeq[ acq_seq ].sequence[ i ] = ACQ_PLUS_A ||
-			 ASeq[ acq_seq ].sequence[ i ] = ACQ_PLUS_B )
-			data[ i ] += vn->val.dval;
-		else
-			data[ i ] -= vn->val.dval;
-
-		vars_pop( vn );
 
 		vars_pop( vars_call( func_get( "pulser_next_phase" ) ) );
 		vars_pop( vars_call( func_get( "pulser_update" ) ) );
 	}
 
-	vn = vars_push( FLOAT_TRANS_ARR, data, seq_len );
+	if ( win_list[ 0 ] == -1 )
+		vn = vars_push( FLOAT_VAR, data[ 0 ] );
+	else
+		vn = vars_push( FLOAT_TRANS_ARR, data, seq_len );
+
 	T_free( data );
 	T_free( win_list );
 
