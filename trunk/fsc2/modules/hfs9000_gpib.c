@@ -23,16 +23,16 @@ bool hfs9000_init( const char *name )
 	if ( gpib_init_device( name, &hfs9000.device ) == FAILURE )
 		return FAIL;
 
-	if ( gpib_write( hfs9000.device, "HEADER OFF", 10 ) == FAILURE )
+	if ( gpib_write( hfs9000.device, "HEADER OFF\n", 11 ) == FAILURE )
 		hfs9000_gpib_failure( );
 
-	strcpy( cmd, "FPAN:MESS \"  ***   REMOTE  -  Keyboard disabled !   ***\"");
+	strcpy( cmd, "FPAN:MESS \"***  REMOTE  -  Keyboard disabled !  ***\"\n");
 	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 		hfs9000_gpib_failure( );
 
 	/* Stop the pulser */
 
-	if ( gpib_write( hfs9000.device, "TBAS:RUN OFF", 12 ) == FAILURE )
+	if ( gpib_write( hfs9000.device, "TBAS:RUN OFF\n", 13 ) == FAILURE )
 		hfs9000_gpib_failure( );
 
 	/* Set timebase for pulser */
@@ -41,6 +41,7 @@ bool hfs9000_init( const char *name )
 	{
 		strcpy( cmd, "TBAS:PER " );
 		gcvt( hfs9000.timebase, 9, cmd + strlen( cmd) );
+		strcat( cmd, "\n" );
 		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 			hfs9000_gpib_failure( );
 	}
@@ -53,10 +54,11 @@ bool hfs9000_init( const char *name )
 
 	/* Set lead delay to zero for all used channels */
 
-	strcpy( cmd, "PGENA:CH*:LDEL MIN" );
+	strcpy( cmd, "PGENA:CH*:LDEL MIN\n" );
 	for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
 	{
-		if ( ! hfs9000.channel[ i ].function->is_used )
+		if ( hfs9000.channel[ i ].function == NULL ||
+			 ! hfs9000.channel[ i ].function->is_used )
 			continue;
 		cmd[ 8 ] = ( char ) i + '0';
 		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -65,10 +67,11 @@ bool hfs9000_init( const char *name )
 
 	/* Set duty cycle to 100% for all used channels */
 
-	strcpy( cmd, "PGENA:CH*:DCYC 100" );
+	strcpy( cmd, "PGENA:CH*:DCYC 100\n" );
 	for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
 	{
-		if ( ! hfs9000.channel[ i ].function->is_used )
+		if ( hfs9000.channel[ i ].function == NULL ||
+			 ! hfs9000.channel[ i ].function->is_used )
 			continue;
 		cmd[ 8 ] = ( char ) i + '0';
 		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -79,9 +82,10 @@ bool hfs9000_init( const char *name )
 
 	for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
 	{
-		if ( ! hfs9000.channel[ i ].function->is_used )
+		if ( hfs9000.channel[ i ].function == NULL ||
+			 ! hfs9000.channel[ i ].function->is_used )
 			continue;
-		sprintf( cmd, "PGENA:CH%1d:POL %s", i,
+		sprintf( cmd, "PGENA:CH%1d:POL %s\n", i,
 				 hfs9000.channel[ i ].function->is_inverted ?
 				 "COMP" : "NORM" );
 		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -89,25 +93,24 @@ bool hfs9000_init( const char *name )
 	}
 
 	/* Set raise/fall times for pulses to maximum speed for all channels */
-	/* !!!!!!!!!! This needs some checking, the manual doesn't make clear
-	   if the transition time or the transition rate is ment when we set
-	   this to MIN Or MAX !!!!!!!!! */
 
 	for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
 	{
-		if ( ! hfs9000.channel[ i ].function->is_used )
+		if ( hfs9000.channel[ i ].function == NULL ||
+			 ! hfs9000.channel[ i ].function->is_used )
 			continue;
-		sprintf( cmd, "PGENA:CH%1d:TRANS MIN", i );
+		sprintf( cmd, "PGENA:CH%1d:TRANS MIN\n", i );
 		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 			hfs9000_gpib_failure( );
 	}
 
 	/* Set pulse type to RZ (Return to Zero) for all used channels */
 
-	strcpy( cmd, "PGENA:CH*:TYPE RZ");
+	strcpy( cmd, "PGENA:CH*:TYPE RZ\n");
 	for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
 	{
-		if ( ! hfs9000.channel[ i ].function->is_used )
+		if ( hfs9000.channel[ i ].function == NULL ||
+			 ! hfs9000.channel[ i ].function->is_used )
 			continue;
 		cmd[ 8 ] = ( char ) i + '0';
 		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -118,31 +121,34 @@ bool hfs9000_init( const char *name )
 
 	for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
 	{
-		if ( ! hfs9000.channel[ i ].function->is_used )
+		if ( hfs9000.channel[ i ].function == NULL ||
+			 ! hfs9000.channel[ i ].function->is_used )
 			continue;
 
 		if ( hfs9000.channel[ i ].function->is_high_level )
 		{
-			sprintf( cmd, "PGENA:CH%1d:HLIM MAX", i );
+			sprintf( cmd, "PGENA:CH%1d:HLIM MAX\n", i );
 			if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 				hfs9000_gpib_failure( );
 
 			sprintf( cmd, "PGENA:CH%1d:HIGH ", i );
 			gcvt( hfs9000.channel[ i ].function->high_level,
 				  5, cmd + strlen( cmd ) );
+			strcat( cmd, "\n" );
 			if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 				hfs9000_gpib_failure( );
 		}
 
 		if ( hfs9000.channel[ i ].function->is_low_level )
 		{
-			sprintf( cmd, "PGENA:CH%1d:LLIM MIN", i );
+			sprintf( cmd, "PGENA:CH%1d:LLIM MIN\n", i );
 			if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 				hfs9000_gpib_failure( );
 
 			sprintf( cmd, "PGENA:CH%1d:LOW ", i );
 			gcvt( hfs9000.channel[ i ].function->low_level,
 				  5, cmd + strlen( cmd ) );
+			strcat( cmd, "\n" );
 			if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 				hfs9000_gpib_failure( );
 		}
@@ -152,10 +158,11 @@ bool hfs9000_init( const char *name )
 
 	for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
 	{
-		if ( ! hfs9000.channel[ i ].function->is_used )
+		if ( hfs9000.channel[ i ].function == NULL ||
+			 ! hfs9000.channel[ i ].function->is_used )
 			continue;
 
-		sprintf( cmd, "PGENA:CH%1d:SIGN %s\n", i,
+		sprintf( cmd, "PGENA:CH%1d:SIGN \"%s\"\n", i,
 				 hfs9000_fnames[ hfs9000.channel[ i ].function->self ] );
 		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 			hfs9000_gpib_failure( );
@@ -165,10 +172,11 @@ bool hfs9000_init( const char *name )
 
 	for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
 	{
-		if ( ! hfs9000.channel[ i ].function->is_used )
+		if ( hfs9000.channel[ i ].function == NULL ||
+			 ! hfs9000.channel[ i ].function->is_used )
 			continue;
 
-		sprintf( cmd, "PGENA:CH%1d:OUTP %s", i,
+		sprintf( cmd, "PGENA:CH%1d:OUTP %s\n", i,
 				 hfs9000.channel[ i ].function->is_used ? "ON" : "OFF" );
 		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 			hfs9000_gpib_failure( );
@@ -176,6 +184,11 @@ bool hfs9000_init( const char *name )
 
 	hfs9000_setup_trig_in( );
 
+	if ( gpib_write( hfs9000.device, "VECT:STAR 0\n", 12 ) == FAILURE ||
+		 gpib_write( hfs9000.device, "VECT:END 65535\n", 15 ) == FAILURE ||
+		 gpib_write( hfs9000.device, "VECT:LOOP 65535\n", 16 ) == FAILURE )
+		hfs9000_gpib_failure( );
+	
 	return OK;
 }
 
@@ -201,27 +214,27 @@ static void hfs9000_setup_trig_in( void )
 
 	if ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL )
 	{
-		strcpy( cmd, "TBAS:TIN:INP OFF" );
+		strcpy( cmd, "TBAS:TIN:INP OFF\n" );
 		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 			hfs9000_gpib_failure( );
 
-		strcpy( cmd, "TBAS:MODE ABUR" );
+		strcpy( cmd, "TBAS:MODE ABUR\n" );
 		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 			hfs9000_gpib_failure( );
 	}
 	else
 	{
-		strcpy( cmd, "TBAS:TIN:INP ON" );
+		strcpy( cmd, "TBAS:TIN:INP ON\n" );
 		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 			hfs9000_gpib_failure( );
 
-		strcpy( cmd, "TBAS:MODE BURS" );
+		strcpy( cmd, "TBAS:MODE BURS\n" );
 		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 			hfs9000_gpib_failure( );
 
 		if ( hfs9000.is_trig_in_slope )
 		{
-			sprintf( cmd, "TBAS:TIN:SLOP %s",
+			sprintf( cmd, "TBAS:TIN:SLOP %s\n",
 					 hfs9000.trig_in_slope == POSITIVE ? "POS" : "NEG" );
 			if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 				hfs9000_gpib_failure( );
@@ -231,6 +244,7 @@ static void hfs9000_setup_trig_in( void )
 		{
 			strcpy( cmd, "TBAS:TIN:LEV " );
 			gcvt( hfs9000.trig_in_level, 8, cmd + strlen( cmd ) );
+			strcat( cmd, "\n" );
 			if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 				hfs9000_gpib_failure( );
 		}
@@ -239,17 +253,19 @@ static void hfs9000_setup_trig_in( void )
 
 		for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
 		{
-			if ( ! hfs9000.channel[ i ].function->is_used )
+			if ( hfs9000.channel[ i ].function == NULL ||
+			 ! hfs9000.channel[ i ].function->is_used )
 				continue;
 
-			sprintf( cmd, "PGENA:CH%1d:CDEL MIN", i );
+			sprintf( cmd, "PGENA:CH%1d:CDEL MIN\n", i );
 			if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 				hfs9000_gpib_failure( );
 		}
 
-		if ( hfs9000.channel[ HFS9000_TRIG_OUT ].function->is_used )
+		if ( hfs9000.channel[ HFS9000_TRIG_OUT ].function == NULL ||
+			 hfs9000.channel[ HFS9000_TRIG_OUT ].function->is_used )
 		{
-			strcpy( cmd, "TBAS:TOUT:PRET 60E-9" );
+			strcpy( cmd, "TBAS:TOUT:PRET 60E-9\n" );
 			if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 				hfs9000_gpib_failure( );
 		}
@@ -265,7 +281,7 @@ bool hfs9000_set_constant( int channel, Ticks start, Ticks length, int state )
 	char cmd[ 100 ];
 
 
-	sprintf( cmd, "PGENA:CH%1d:BDATA:FILL %ld,%ld,%s\n",
+	sprintf( cmd, "*WAI;:PGENA:CH%1d:BDATA:FILL %ld,%ld,%s\n",
 			 channel, start, length, state ? "#HFF" : "0" );
 	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 		hfs9000_gpib_failure( );
@@ -285,7 +301,7 @@ bool hfs9000_set_trig_out_pulse( void )
 	char cmd[ 100 ];
 
 
-	sprintf( cmd, "TBAS:TOUT:PER %ld", p->pos + f->delay );
+	sprintf( cmd, "TBAS:TOUT:PER %ld\n", p->pos + f->delay );
 	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 		hfs9000_gpib_failure( );
 
@@ -308,7 +324,7 @@ bool hfs9000_run( bool flag )
 	char cmd[ 100 ];
 
 
-	sprintf( cmd, "*WAI;:TBAS:RUN %s", flag ? "ON" : "OFF" );
+	sprintf( cmd, "*WAI;:TBAS:RUN %s\n", flag ? "ON" : "OFF" );
 
 	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 		hfs9000_gpib_failure( );
@@ -330,7 +346,7 @@ bool hfs9000_get_channel_state( int channel )
 
 	assert ( channel >= MIN_CHANNEL && channel <= MAX_CHANNEL );
 
-	sprintf( cmd, "PGENA:CH%1d:OUT?", channel );
+	sprintf( cmd, "PGENA:CH%1d:OUT?\n", channel );
 	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE ||
 		 gpib_read( hfs9000.device, reply, &len ) == FAILURE )
 		hfs9000_gpib_failure( );
@@ -349,7 +365,8 @@ bool hfs9000_set_channel_state( int channel, bool flag )
 
 	assert ( channel >= MIN_CHANNEL && channel <= MAX_CHANNEL );
 
-	sprintf( cmd, "*WAI;:PGENA:CH%1d:OUTP %s", channel, flag ? "ON" : "OFF" );
+	sprintf( cmd, "*WAI;:PGENA:CH%1d:OUTP %s\n", channel,
+			 flag ? "ON" : "OFF" );
 	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 		hfs9000_gpib_failure( );
 

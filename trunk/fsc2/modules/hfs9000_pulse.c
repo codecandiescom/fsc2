@@ -115,10 +115,13 @@ bool hfs9000_set_pulse_function( long pnum, int function )
 		{
 			p->is_len = SET;
 			p->len = 1;
+			p->initial_is_len = SET;
+			p->initial_len = p->len;
 		}
 		else
 		{
 			p->len = 1;
+			p->initial_len = p->len;
 			eprint( WARN, "%s:%ld: %s: Length of Trigger Out pulse has been "
 					"set to fixed length of %s.\n", Fname, Lc,
 					pulser_struct.name,

@@ -94,6 +94,7 @@ int hfs9000_init_hook( void )
 	hfs9000.is_trig_in_level = UNSET;
 	hfs9000.is_neg_delay = UNSET;
 	hfs9000.neg_delay = 0;
+	hfs9000.max_seq_len = 0;
 
 	for ( i = 0; i <= MAX_CHANNEL; i++ )
 	{
@@ -141,6 +142,8 @@ int hfs9000_test_hook( void )
 	/* Check consistency of pulse settings and do everything to setup the
 	   pulser for the test run */
 
+
+	hfs9000.has_been_running = hfs9000.is_running;
 	hfs9000_IN_SETUP = SET;
 	hfs9000_init_setup( );
 	hfs9000_IN_SETUP = UNSET;
@@ -202,8 +205,14 @@ int hfs9000_exp_hook( void )
 	/* Now we have to tell the pulser about all the pulses */
 
 	for ( i = 0; i <= MAX_CHANNEL; i++ )
-		if ( hfs9000.channel[ i ].function->is_used )
+		if ( hfs9000.channel[ i ].function != NULL &&
+			 hfs9000.channel[ i ].function->is_used )
+		{
 			hfs9000_set_pulses( hfs9000.channel[ i ].function );
+			if ( i != HFS9000_TRIG_OUT )
+				hfs9000_set_channel_state( i, START );
+		}
+
 
 	hfs9000_run( hfs9000.is_running );
 
@@ -216,7 +225,7 @@ int hfs9000_exp_hook( void )
 
 int hfs9000_end_of_exp_hook( void )
 {
-	const char *cmd = "FPAN:MESS \"\"";
+	const char *cmd = "FPAN:MESS \"\"\n";
 
 
 	if ( ! hfs9000_is_needed )
@@ -225,6 +234,7 @@ int hfs9000_end_of_exp_hook( void )
 	hfs9000_run( STOP );
 	gpib_write( hfs9000.device, cmd, strlen( cmd ) );
 	gpib_local( hfs9000.device );
+	hfs9000.has_been_running = hfs9000.is_running;
 
 	return 1;
 }
@@ -300,11 +310,6 @@ Var *pulser_update( Var *v )
 
 	if ( hfs9000.needs_update )
 		hfs9000_do_update( );
-
-	/* If we're doing a real experiment also tell the pulser to start */
-
-	if ( ! TEST_RUN )
-		hfs9000_run( START );
 
 	return vars_push( INT_VAR, 1 );
 }

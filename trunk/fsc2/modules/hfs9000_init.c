@@ -30,6 +30,8 @@ void hfs9000_init_setup( void )
 static void hfs9000_basic_pulse_check( void )
 {
 	PULSE *p;
+	FUNCTION *f;
+
 
 
 	if ( hfs9000_Pulses == NULL )
@@ -61,6 +63,8 @@ static void hfs9000_basic_pulse_check( void )
 			THROW( EXCEPTION );
 		}
 
+		f = p->function;
+
 		if ( p->function->channel == NULL )
 		{
 			eprint( FATAL, "%s: No channel has been set for function `%s' "
@@ -87,6 +91,10 @@ static void hfs9000_basic_pulse_check( void )
 
 		if ( p->is_active )
 			p->was_active = p->has_been_active = SET;
+
+		f->pulses = T_realloc( f->pulses,
+							   ( f->num_pulses + 1 ) * sizeof( PULSE * ) );
+		f->pulses[ f->num_pulses++ ] = p;
 	}
 }
 
@@ -169,8 +177,6 @@ static void hfs9000_pulse_start_setup( void )
 
 		qsort( f->pulses, f->num_pulses, sizeof( PULSE * ),
 			   hfs9000_start_compare );
-
-		/* Check that they don't overlap and fit into the pulsers memory */
 
 		hfs9000_do_checks( f );
 	}

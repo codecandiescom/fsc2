@@ -157,6 +157,7 @@ typedef struct {
 	bool needs_update;       // set if pulse properties have been changed in
                              // test run or experiment
 	bool is_running;         // set if the pulser is in run mode
+	bool has_been_running;
 
 	Ticks mem_size;          // size of the complete sequence, i.e. including
 	                         // the memory needed for padding
@@ -216,9 +217,10 @@ bool hfs9000_is_needed = UNSET;
 HFS9000 hfs9000;
 PULSE *hfs9000_Pulses = NULL;
 bool hfs9000_IN_SETUP = UNSET;
-const char *hfs9000_fnames[ ] = { "MW", "TWT", "TWTG", "DET", "DETG", "DFNS",
-								  "RF", "RFG", "PSHP", "PHS1", "PHS2",
-								  "O1", "O2", "O3", "O4" };
+const char *hfs9000_fnames[ ] = { "MW", "TWT", "TWTGAT", "DET", "DETGAT",
+								  "DFNS", "RF", "RFGATE", "PSHAPE", "PHASE1",
+								  "PHASE2", "OTHER1", "OTHER2", "OTHER3",
+								  "OTHER4" };
 
 #else
 
@@ -226,7 +228,7 @@ extern bool hfs9000_is_needed;
 extern HFS9000 hfs9000;
 extern PULSE *hfs9000_Pulses;
 extern bool hfs9000_IN_SETUP;
-extern const char **hfs9000_fnames;
+extern const char *hfs9000_fnames[ PULSER_CHANNEL_NUM_FUNC ];
 
 #endif
 

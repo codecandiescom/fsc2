@@ -31,11 +31,13 @@ void hfs9000_do_update( void )
 	if ( hfs9000.is_running )
 	{
 		restart = SET;
-		hfs9000_run( STOP );
+		if ( ! TEST_RUN )
+			hfs9000_run( STOP );
 	}
+
 	hfs9000_update_pulses( TEST_RUN );
 	hfs9000.needs_update = UNSET;
-	if ( restart )
+	if ( restart && ! TEST_RUN )
 		hfs9000_run( START );
 }
 
@@ -171,24 +173,25 @@ void hfs9000_set_pulses( FUNCTION *f )
 
 	/* Set the channels to zero. */
 
-	hfs9000_set_constant( f->channel->self, 0, hfs9000.mem_size, 0 );
+	hfs9000_set_constant( f->channel->self, 0, MAX_PULSER_BITS, 0 );
 
 	/* Now simply run through all active pulses of the channel */
 
-	for ( p = f->pulses[ 0 ], i = 0; i < f->num_pulses && p->is_active;
-		  p = f->pulses[ ++i ] )
+	for ( i = 0; i < f->num_pulses; i++ )
 	{
 		/* Set the area of the pulse itself */
 
+		p = f->pulses[ i ];
+		if ( ! p->is_active )
+			continue;
 		start = p->pos + f->delay;
 		end = p->pos + p->len + f->delay;
 
 		if ( start != end )
 			hfs9000_set_constant( p->channel->self, start, end - start, 1 );
-	}
 
-	for ( p = f->pulses[ 0 ], i = 0; i < f->num_pulses; p = f->pulses[ ++i ] )
 		p->was_active = p->is_active;
+	}
 }
 
 
@@ -234,6 +237,8 @@ void hfs9000_full_reset( void )
 
 		p = p->next;
 	}
+
+	hfs9000.is_running = hfs9000.has_been_running;
 }
 
 
@@ -349,12 +354,15 @@ static void hfs9000_commit( FUNCTION *f, bool flag )
 			continue;
 		}
 
-		if ( p->is_old_pos || ( p->is_old_len && p->old_len != 0 ) )
-			hfs9000_set( p->channel->old,
-						 p->is_old_pos ? p->old_pos : p->pos,
-						 p->is_old_len ? p->old_len : p->len, f->delay );
-		if ( p->is_pos && p->is_len && p->len != 0 )
-			hfs9000_set( p->channel->new, p->pos, p->len, f->delay );
+		if ( f->channel->self != HFS9000_TRIG_OUT )
+		{
+			if ( p->is_old_pos || ( p->is_old_len && p->old_len != 0 ) )
+				hfs9000_set( p->channel->old,
+							 p->is_old_pos ? p->old_pos : p->pos,
+							 p->is_old_len ? p->old_len : p->len, f->delay );
+			if ( p->is_pos && p->is_len && p->len != 0 )
+				hfs9000_set( p->channel->new, p->pos, p->len, f->delay );
+		}
 
 		p->channel->needs_update = SET;
 
@@ -373,10 +381,13 @@ static void hfs9000_commit( FUNCTION *f, bool flag )
 
 	if ( f->channel->needs_update )
 	{
-		while ( ( what = hfs9000_diff( f->channel->old, f->channel->new, 
-									   &start, &len ) ) != 0 )
-			hfs9000_set_constant( f->channel->self, start, len,
-								  what == -1 ? 0 : 1 );
+		if ( f->channel->self == HFS9000_TRIG_OUT )
+			hfs9000_set_trig_out_pulse( );
+		else
+			while ( ( what = hfs9000_diff( f->channel->old, f->channel->new, 
+										   &start, &len ) ) != 0 )
+				hfs9000_set_constant( f->channel->self, start, len,
+									  what == -1 ? 0 : 1 );
 	}
 
 	f->channel->needs_update = UNSET;
