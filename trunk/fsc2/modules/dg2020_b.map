@@ -21,7 +21,7 @@
 #  Boston, MA 02111-1307, USA.
 
 
-DG2020_B_1.0 {
+DG2020_B {
 
 	global:
 				generic_type;

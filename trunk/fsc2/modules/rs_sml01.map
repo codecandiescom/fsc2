@@ -21,7 +21,7 @@
 #  Boston, MA 02111-1307, USA.
 
 
-RS_SML01_1.0 {
+RS_SML01 {
 
 	global:
 				generic_type;

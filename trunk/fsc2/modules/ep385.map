@@ -21,7 +21,7 @@
 #  Boston, MA 02111-1307, USA.
 
 
-EP385_1.0 {
+EP385 {
 
 	global:
 				generic_type;

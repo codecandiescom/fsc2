@@ -21,7 +21,7 @@
 #  Boston, MA 02111-1307, USA.
 
 
-HP8672A_1.0 {
+HP8672A {
 
 	global:
 				generic_type;
