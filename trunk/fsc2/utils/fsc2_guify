@@ -266,7 +266,7 @@ sub get_float_limits {
 
         $hr->{ max } = $max;
         $hr->{ min } = $min;
-    }  else {
+    } else {
         $hr->{ max } = $hr->{ min } = undef;
     }
 
@@ -593,7 +593,7 @@ EOT
     }
 
     # Ok, everything needed for the graphical interface done. After the
-    # MainLoop() call follow all the funcions that needed by the script
+    # MainLoop() call follow all the funcions needed by the script
 
     print <<"EOT";
 MainLoop;
