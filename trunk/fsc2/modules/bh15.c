@@ -25,7 +25,9 @@
 #include "gpib_if.h"
 
 
-#define DEVICE_NAME "BH15"
+/* Include configuration information for the device */
+
+#include "bh15.conf"
 
 
 int bh15_init_hook( void );

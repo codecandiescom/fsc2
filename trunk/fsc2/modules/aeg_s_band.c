@@ -30,12 +30,9 @@
 #include <fcntl.h>
 
 
-/* Definitions for serial port access - apply changes here */
+/* Include configuration information for the device */
 
-#define SERIAL_PORT     1            /* serial port number (i.e. COM2) */
-#define SERIAL_BAUDRATE B1200        /* baud rate of field controller */
-#define SERIAL_TIME     50000        /* time in us set at magnet front panel */
-                                     /* set to 50 ms and not to be changed ! */
+#include "aeg_s_band.conf"
 
 
 /* Exported functions */
@@ -54,7 +51,6 @@ Var *sweep_down( Var *v );
 Var *reset_field( Var *v );
 
 
-
 /* Locally used functions */
 
 static double aeg_s_band_field_check( double field, bool *err_flag );
@@ -65,21 +61,6 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 static void magnet_sweep( int dir );
 static bool magnet_do( int command );
 
-
-
-/* Maximum and minimum field settings (also depending on field meter)
-   In principle it would be better if this could be asked from the gaussmeter
-   but some of them (at least the ER035M) know about it only after the
-   the exp_hook function has been run... */
-
-#define AEG_S_BAND_MIN_FIELD_STEP              1.5e-3
-#define AEG_S_BAND_WITH_ER035M_MIN_FIELD       460
-#define AEG_S_BAND_WITH_ER035M_MAX_FIELD       2390
-#define AEG_S_BAND_WITH_BH15_MIN_FIELD         -50
-#define AEG_S_BAND_WITH_BH15_MAX_FIELD         23000
-
-
-#define DEVICE_NAME "AEG_S_BAND"         /* name of device */
 
 typedef struct
 {
