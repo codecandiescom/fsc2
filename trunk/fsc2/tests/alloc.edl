@@ -33,9 +33,4 @@ m += M;
 
 mean( h[ 1 ] );
 
-//h +=3;
-//H = int( h + 3 );
-
-print( "\T# #\n", size( H, 2 ), size( h, 2 ) );
-
 k = sizes( h );
