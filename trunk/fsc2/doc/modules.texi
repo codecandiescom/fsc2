@@ -673,8 +673,7 @@ from a device I always use either @code{set} or @code{get} in the
 function name. E.g.@: its not possible to send data values to a
 lockin-amplifier, thus I use the name @code{lockin_get_data()} (and not
 e.g.@: @code{lockin_data()}). In names for functions that can be used
-for setting as well as getting data of device I try to avoid these
-words.
+for setting as well as getting data I try to avoid these words.
 
 
 All functions to be invoked via an @code{EDL} script take their arguments
