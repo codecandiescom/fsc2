@@ -75,6 +75,13 @@ initialization is finished the label reverts back to @code{Start} and
 the button remains inactive during the experiment.
 @item The @code{Quit} button is used to end @acronym{fsc2}. It can't be
 used while an experiment is running.
+@item The @code{WWW Server} button lets you start (and stop) a little web
+server that allows you to monitor the current state of the experiment
+via a browser from a different computer over the net. Per default, the
+web server listens for incoming connections on port 8080, so the URL
+you have to enter in the browser is
+@uref{http://name.of.experiment.computer:8080}. A different port can
+be selected via a command line option.
 @item Pressing the @code{Help} button will try to start a browser with
 the HTML documentation for @acronym{fsc2}. You can select the browser to
 be used by setting the environment variable @code{BROWSER} to the name
@@ -119,6 +126,13 @@ program is loaded (or the current program is reloaded).
 @item Using the @code{Start} button you start execution of the
 @acronym{EDL} program, i.e.@: you start the measurement.
 @item The @code{Quit} button is for leaving @acronym{fsc2}.
+@item The @code{WWW Server} button lets you start (and stop) a little web
+server that allows you to monitor the current state of the experiment
+via a browser from a different computer over the net. Per default, the
+web server listens for incoming connections on port 8080, so the URL
+you have to enter in the browser is
+@uref{http://name.of.experiment.computer:8080}. A different port can
+be selected via a command line option.
 @item Pressing the @code{Help} button will start try to start a browser
 with the HTML documentation for @acronym{fsc2}. You can select the
 browser to use by setting the environment variable @code{BROWSER} to the
