@@ -82,6 +82,7 @@ enum {
 	C_ISTATE_REPLY,
 	C_ODELETE,
 	C_ODELETE_REPLY,
+	C_FREEZE
 };
 
 

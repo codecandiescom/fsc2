@@ -106,7 +106,9 @@ Var *f_ivalue(  Var *v );
 Var *f_idelete( Var *v );
 Var *f_ivalue(  Var *v );
 Var *f_objdel(  Var *v );
+Var *f_freeze(  Var *v );
 
+void parent_freeze( int freeze );
 void tools_clear( void );
 
 

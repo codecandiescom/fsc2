@@ -1087,6 +1087,18 @@ functions @code{button_create()}, @code{slider_create()} and
 @code{input_create()}.
 
 
+@anchor{hide_toolbox}
+@item hide_toolbox()
+@findex hide_toolbox()
+This function can be used to hide and later redraw the toolbox. This
+can, for example, be used to avoid multiple redraws when creating or
+deleting several objects. The function can even be used before the
+toolbox has been drawn for the first time. It expects exactly one
+boolean argument (either @code{1} or @code{"ON"} to hide the toolbox or
+@code{0} or @code{"OFF"} to redisplay it).
+
+
+
 @end table
 
 

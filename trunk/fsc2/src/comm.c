@@ -523,7 +523,6 @@ long reader( void *ret )
 			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			sema_post( semaphore );
-
 			send_browser( header.type == C_PROG ?
 						  main_form->browser : main_form->error_browser );
 			retval = 0;
@@ -693,6 +692,13 @@ long reader( void *ret )
 			exp_objdel( data, header.data.len );
 			T_free( data );
 			retval = 0;
+			break;
+
+		case C_FREEZE :
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
+
+			sema_post( semaphore );
+			parent_freeze( header.data.int_data );
 			break;
 
 		case C_STR :
@@ -1043,6 +1049,13 @@ void writer( int type, ... )
 			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			data = va_arg( ap, void * );
 			write( pd[ WRITE ], data, ( size_t ) header.data.len );
+			break;
+
+		case C_FREEZE :
+			fsc2_assert( I_am == CHILD );
+
+			header.data.int_data = va_arg( ap, int );
+			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		case C_BCREATE_REPLY :

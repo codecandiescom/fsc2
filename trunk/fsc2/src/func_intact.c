@@ -38,7 +38,10 @@ static void convert_escapes( char *str );
 extern FL_resource xresources[ ];
 extern FL_IOPT xcntl;
 static int tool_x, tool_y;
+static int tool_x_place, tool_y_place;
 static bool tool_has_been_shown = UNSET;
+static bool is_frozen = UNSET;
+static bool needs_pos = SET;
 
 
 static struct {
@@ -127,6 +130,67 @@ static void func_intact_init( void )
 	}
 
 	FI_sizes.is_init = SET;
+}
+
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+Var *f_freeze( Var *v )
+{
+	bool is_now_frozen;
+
+
+	is_now_frozen = get_boolean( v );
+
+	if ( I_am == CHILD )
+		writer( C_FREEZE, ( int ) is_now_frozen );
+
+	return vars_push( INT_VAR, ( long ) is_now_frozen );
+}
+
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+void parent_freeze( int freeze )
+{
+	if ( Tool_Box == NULL ||  Tool_Box->Tools == NULL )
+	{
+		is_frozen = freeze ? SET : UNSET;
+		return;
+	}
+
+
+	if ( is_frozen && ! freeze )
+	{
+		if ( needs_pos )
+		{
+			fl_set_form_position( Tool_Box->Tools,
+								  tool_x_place, tool_y_place );
+			fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
+						  FL_FULLBORDER, "fsc2: Tools" );
+		}
+		else
+			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
+						  FL_FULLBORDER, "fsc2: Tools" );
+
+		tool_has_been_shown = SET;
+		fl_winminsize( Tool_Box->Tools->window,
+					   FI_sizes.WIN_MIN_WIDTH, FI_sizes.WIN_MIN_HEIGHT );
+	}
+	else if ( ! is_frozen && freeze )
+	{
+		tool_x_place = Tool_Box->Tools->x;
+		tool_y_place = Tool_Box->Tools->y;
+
+		if ( fl_form_is_visible( Tool_Box->Tools ) )
+			fl_hide_form( Tool_Box->Tools );
+
+		needs_pos = SET;
+	}
+
+	is_frozen = freeze ? SET : UNSET;
 }
 
 
@@ -2238,6 +2302,11 @@ void tools_clear( void )
 	IOBJECT *io, *next;
 
 
+	is_frozen = UNSET;
+	needs_pos = SET;
+	tool_has_been_shown = UNSET;
+
+
 	if ( Tool_Box == NULL )
 		return;
 
@@ -2279,7 +2348,6 @@ void tools_clear( void )
 static void recreate_Tool_Box( void )
 {
 	IOBJECT *io, *last_io = NULL;
-	bool needs_pos = SET;
 	int flags;
 	unsigned int tool_w, tool_h;
 
@@ -2312,7 +2380,7 @@ static void recreate_Tool_Box( void )
 
 		fl_free_form( Tool_Box->Tools );
 
-		needs_pos = SET;
+		needs_pos = SET && ! is_frozen;
 		Tool_Box->Tools = fl_bgn_form( FL_UP_BOX, 1, 1 );
 	}
 	else
@@ -2328,19 +2396,15 @@ static void recreate_Tool_Box( void )
 
 			if ( XValue & flags && YValue & flags )
 			{
-				tool_x += border_offset_x - 1;
-				tool_y += border_offset_y - 1;
+				tool_x += border_offset_x;
+				tool_y += border_offset_y;
 				needs_pos = SET;
 			}
 		}
 	}
 
 	if ( tool_has_been_shown )
-	{
 		needs_pos = SET;
-		tool_x -= 1;
-		tool_y -= 1;
-	}
 
 	for ( io = Tool_Box->objs; io != NULL; io = io->next )
 	{
@@ -2370,19 +2434,27 @@ static void recreate_Tool_Box( void )
 			fl_set_object_label( io->self, io->label );
 	}
 
-	if ( needs_pos )
+	if ( ! is_frozen )
 	{
-		fl_set_form_position( Tool_Box->Tools, tool_x, tool_y );
-		fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-					  FL_FULLBORDER, "fsc2: Tools" );
+		if ( needs_pos )
+		{
+			fl_set_form_position( Tool_Box->Tools, tool_x, tool_y );
+			fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
+						  FL_FULLBORDER, "fsc2: Tools" );
+		}
+		else
+			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
+						  FL_FULLBORDER, "fsc2: Tools" );
+
+		tool_has_been_shown = SET;
+		fl_winminsize( Tool_Box->Tools->window,
+					   FI_sizes.WIN_MIN_WIDTH, FI_sizes.WIN_MIN_HEIGHT );
 	}
 	else
-		fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-				  FL_FULLBORDER, "fsc2: Tools" );
-
-	tool_has_been_shown = SET;
-	fl_winminsize( Tool_Box->Tools->window,
-				   FI_sizes.WIN_MIN_WIDTH, FI_sizes.WIN_MIN_HEIGHT );
+	{
+		tool_x_place = tool_x;
+		tool_y_place = tool_y;
+	}
 }
 
 
