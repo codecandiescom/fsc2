@@ -82,6 +82,7 @@ void *get_shm( int *shm_id, long len );
 int new_data_callback( XEvent *a, void *b );
 long reader( void *ret );
 void writer( int type, ... );
+long *exp_bcreate( void *buffer, long len );
 
 
 #endif  /* ! COMM_HEADER */
