@@ -720,7 +720,8 @@ void child_sig_handler( int signo )
 		/* All the remaining signals are deadly... */
 
 		default :
-			if ( ! ( flags & 32 ) )                  /* 32 means NO_MAIL */
+			if ( * ( ( int * ) xresources[ NOCRASHMAIL ].var ) == 0 &&
+				 ! ( flags & 32 ) )                  /* 32 means NO_MAIL */
 			{
 				DumpStack( );
 				death_mail( signo );

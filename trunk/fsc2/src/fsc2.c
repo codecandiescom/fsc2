@@ -347,10 +347,16 @@ static void final_exit_handler( void )
 	if ( fsc2_death != 0 && fsc2_death != SIGTERM )
 	{
 		if ( * ( ( int * ) xresources[ NOCRASHMAIL ].var ) == 0 &&
-			 ! ( flags & NO_MAIL ) )
+			  ! ( flags & NO_MAIL ) )
 			death_mail( fsc2_death );
-		fprintf( stderr, "fsc2 (%d, %s) killed by %s signal.\n", getpid( ),
-				 I_am == CHILD ? "CHILD" : "PARENT", strsignal( fsc2_death ) );
+
+		fprintf( stderr, "fsc2 (%d) killed by %s signal.\n", getpid( ),
+				 strsignal( fsc2_death ) );
+
+		if ( * ( ( int * ) xresources[ NOCRASHMAIL ].var ) == 0 &&
+			  ! ( flags & NO_MAIL ) )
+			fprintf( stderr, "A crash report has been sent to %s\n",
+					 MAIL_ADDRESS );
 	}
 }
 
