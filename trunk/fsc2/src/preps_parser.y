@@ -131,10 +131,8 @@ sep2:    /* empty */
 ;
 
 
-expr:    INT_TOKEN unit           { $$ = vars_mult( vars_push( INT_VAR, $1 ),
-													  $2 ); }
-       | FLOAT_TOKEN unit         { $$ = vars_mult(
-										    vars_push( FLOAT_VAR, $1 ), $2 ); }
+expr:    INT_TOKEN unit           { $$ = apply_unit( $1, $2 ); }
+       | FLOAT_TOKEN unit         { $$ = apply_unit( $1, $2 ); }
        | VAR_TOKEN unit           { $$ = apply_unit( $1, $2 ); }
        | VAR_TOKEN '['            { vars_arr_start( $1 ); }
          list1 ']'                { CV = vars_arr_rhs( $4 ); }
@@ -168,10 +166,10 @@ expr:    INT_TOKEN unit           { $$ = vars_mult( vars_push( INT_VAR, $1 ),
        | expr '%' expr            { $$ = vars_mod( $1, $3 ); }
        | expr '^' expr            { $$ = vars_pow( $1, $3 ); }
        | '-' expr %prec NEG       { $$ = vars_negate( $2 ); }
-       | '(' expr ')' unit        { $$ = vars_mult( $2, $4 ); }
+       | '(' expr ')' unit        { $$ = apply_unit( $2, $4 ); }
 ;
 
-unit:    /* empty */               { $$ = vars_push( INT_VAR, 1 ); }
+unit:    /* empty */               { $$ = NULL; }
        | NT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
        | UT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
        | MT_TOKEN                  { $$ = vars_push( INT_VAR, 10 ); }

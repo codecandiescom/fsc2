@@ -87,16 +87,10 @@ linet:   VAR_TOKEN                { } /* no assignment to be done */
 	                                THROW( EXCEPTION ); }
 ;
 
-expr:    INT_TOKEN unit           { if ( $2 == NULL )
-                                      $$ = vars_push( INT_VAR, $1 );
-                                    else
-	                                  $$ = vars_mult( vars_push( INT_VAR, $1 ),
-													  $2 ); }
-       | FLOAT_TOKEN unit         { if ( $2 == NULL )
-                                      $$ = vars_push( FLOAT_VAR, $1 );
-                                    else
-	                                  $$ = vars_mult(
-										    vars_push( FLOAT_VAR, $1 ), $2 ); }
+expr:    INT_TOKEN unit           { $$ = apply_unit( vars_push( INT_VAR, $1 ),
+													 $2 ); }
+       | FLOAT_TOKEN unit         { $$ = apply_unit( vars_push( FLOAT_VAR, $1),
+													 $2 ); }
        | VAR_TOKEN unit           { $$ = apply_unit( $1, $2 ); }
        | VAR_TOKEN '['            { vars_arr_start( $1 ); }
          list3 ']'                { CV = vars_arr_rhs( $4 ); }
@@ -130,11 +124,11 @@ expr:    INT_TOKEN unit           { if ( $2 == NULL )
        | expr '%' expr            { $$ = vars_mod( $1, $3 ); }
        | expr '^' expr            { $$ = vars_pow( $1, $3 ); }
        | '-' expr %prec NEG       { $$ = vars_negate( $2 ); }
-       | '(' expr ')' unit        { $$ = vars_mult( $2, $4 ); }
+       | '(' expr ')' unit        { $$ = apply_unit( $2, $4 ); }
 ;
 
 
-unit:    /* empty */               { $$ = vars_push( INT_VAR, 1L ); }
+unit:    /* empty */               { $$ = NULL; }
        | NT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
        | UT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
        | MT_TOKEN                  { $$ = vars_push( INT_VAR, 10 ); }
