@@ -1,0 +1,345 @@
+#!/usr/bin/perl -w    -*- cperl -*-
+#
+# $Id$
+#
+# Copyright (C) 2001 Jens Thoms Toerring
+#
+# This file is part of fsc2.
+#
+# Fsc2 is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# Fsc2 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with fsc2; see the file COPYING.  If not, write to
+# the Free Software Foundation, 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
+
+
+use strict;
+
+
+my ( $dev, $dev_name, $new_dev, $new_dev_name, $line );
+my $kind = -1;
+local *F;
+local *Fin;
+local *Fout;
+
+#
+# Primary checks
+#
+
+die "\nThis program must be started from within the utils subdirectory\n" .
+	"of fsc2's main directory and must have the necessary permissions\n" .
+	"to write files in the modules and config subdirectory.\n\n"
+	unless -d "../modules" and -W "../modules" and
+	       -d "../config"  and -w "../config"  and
+		   `pwd` =~ /.\/utils/;
+
+
+#
+# First part: Ask the user which device (s)he wants to duplicate
+#
+
+print "\nThis program allows you to automatically create a new device\n" .
+      "module from an already existing device. This is necessary only\n" .
+      "in cases where two identical devices must be used simultaneously.\n\n" .
+	  "You will have to enter the name of the device you want to clone\n" .
+	  "in exactly the same way as it would appear in the DEVICES section\n" .
+	  "of an EDL program.\n\n" .
+      "Do you want to continue [y/n]? ";
+
+while ( <> ) {
+	exit if $_ =~ /^[nN][oO]?$/;
+	last if $_ =~ /^[yY]((es)|(ES))?$/;
+	print "Sorry, I didn't understand your reply.\n" .
+		  "Do you want to continue [y/n]? ";
+}
+
+print "\nName of the device module you want to clone :  ";
+$dev = <>;
+chomp $dev;
+
+die "Sorry, no module with this name seems to exist.\n"
+	unless -e "../config/$dev.conf" and
+	       -e "../modules/$dev.c";
+
+open( F, "< ../config/$dev.conf" ) or die
+		"Can't open configration file $dev.conf.\n";
+while ( defined( $line = <F> ) ) {
+	if ( $line =~ /#define\s+DEVICE_NAME\s+"([A-Za-z0-9_]+)"/ ) {
+		$dev_name = $1;
+		last;
+	}
+}
+close F;
+
+die "Sorry, can't find DEVICE_NAME in configuration file " .
+	"../config/$dev.conf.\n" unless defined $dev_name;
+print "\nPlease now enter the name for the new module :  ";
+$new_dev = <>;
+chomp $new_dev;
+die "Sorry, invalid module name.\n" unless $new_dev =~ /^[A-Za-z0-9_]+$/;
+die "Sorry, old and new module name are identical.\n" if $dev eq $new_dev;
+die "Sorry, a module with the name $new_dev already seems to exist.\n"
+	if -e "../config/$new_dev.conf" or
+	   -e "../config/$new_dev.c";
+
+
+print "\nAlso a device name (to be used in error messages and\n" .
+	  "possibly also in the GPIB configuration file) is needed.\n\n" .
+	  "Please enter a new device name (the old name is $dev_name) : ";
+$new_dev_name = <>;
+chomp $new_dev_name;
+die "Sorry, invalid device name.\n" unless $new_dev =~ /^[A-Za-z0-9_]+$/;
+die "Sorry, the old and the new device name are identical.\n"
+	if $dev_name eq $new_dev_name;
+
+print "\nThanks, that's all the needed information...\n\n";
+
+
+#
+# Second part: Figure out if this is a simple module, i.e. consisting of just
+#              one C file, or a more complicated module that must be made
+#              from a set of C files plus a header file. This is done by
+#              looking into the module makefile.
+#
+
+open ( F, "< ../modules/Makefile" ) or
+	die "Sorry, can't open the module makefile ../modules/Makefile.\n";
+
+while ( defined( $line = <F> ) ) {
+	next unless $line =~ /^\s*(simp)|(comp)_modules\s*:*=/;
+	$kind = check_type( *F, $line, $dev );
+	last if $kind != -1;
+}
+close F;
+
+die "Sorry, can't find module in module makefile ../modules/Makefile.\n"
+	unless $kind != -1;
+
+#
+# Now create the files for the new device and update the modules Makefile
+#
+
+if ( $kind == 0 ) {
+	make_simple_clone( $dev, $dev_name, $new_dev, $new_dev_name );
+} else {
+	make_comp_clone( $dev, $dev_name, $new_dev, $new_dev_name );
+}
+
+#
+# Finally append the new device to the device data base
+#
+
+rename "../config/Devices", "../config/Devices.old" or die
+	"Can't create new files in ../config, please check permissions.\n";
+open( Fin, "< ../config/Devices.old" );
+open( Fout, "> ../config/Devices" );
+
+while ( defined( $line = <Fin> ) ) {
+	print Fout $line;
+}
+print Fout "$new_dev     // added automatically be clone_device\n";
+
+close Fin;
+close Fout;
+
+#
+# Say good bye to the user
+#
+
+print "Everything worked out well. Now you simply have to re-make fsc2\n" .
+      "(just cd to the main directory and type 'make' and, when this\n" .
+	  "succeeds, become root and type 'make install').\n\n" .
+	  "If the device is controlled via the GPIB bus you still have to\n" .
+	  "update the GPIB configuration file manually (usually, it's\n" .
+	  "/etc/gpib.conf). Just copy the section for the old device,\n" .
+	  "replace the device name by \`$new_dev\'_name and change the GPIB\n" .
+	  "address to the one of the new device.\n\n";
+
+#
+# That's it
+#
+
+
+sub check_type {
+	my ( $F, $line, $dev ) = @_;
+
+	my $kind = ( $line =~ /^\s*simp_modules/ ) ? 0 : 1;
+
+	return 0 if $line =~ /\b$dev.c\b/ and $kind == 0;
+	return 1 if $line =~ /\b$dev\b/ and $kind == 1;
+
+	while ( $line =~ /\\$/ and defined( $line = <$F> ) ) {
+		return 0 if $line =~ /\b$dev.c\b/ and $kind == 0;
+		return 1 if $line =~ /\b$dev\b/ and $kind == 1;
+	}
+
+	return -1;
+}
+
+
+sub make_simple_clone{
+	my ( $d, $dn, $nd, $ndn ) = @_;
+	local *Fin;
+	local *Fout;
+	my $line;
+
+	replace_txt( "../modules/$d.c", "../modules/$nd.c",
+				 "\"$d.conf\"", "\"$nd.conf\"" );
+	replace_txt( "../config/$d.conf", " ../config/$nd.conf",
+				 "\"$dn\"", "\"$ndn\"" );
+
+	rename "../modules/Makefile", "../modules/Makefile.old" or die
+		"Can't create new files in ../module, please check permissions.\n";
+	open( Fin, "< ../modules/Makefile.old" );
+	open( Fout, "> ../modules/Makefile" ) or
+		die "Can't open modules makefile ../modules/Makefile.\n";
+
+	while ( defined( $line = <Fin> ) ) {
+		if ( $line =~ /^\s*simp_modules\s*:*=/ ) {
+			print Fout $line if $line =~ /\\$/;
+			while ( $line =~ /\\$/ and defined( $line = <Fin> ) ) {
+				print Fout $line if $line =~ /\\$/;
+			}
+
+			chomp $line;
+			print Fout "$line $nd.c\n";
+			next;
+		}
+
+		print Fout $line;
+	}
+
+	close Fin;
+	close Fout;
+}
+
+
+sub make_comp_clone{
+	my ( $d, $dn, $nd, $ndn ) = @_;
+	local *Fin;
+	local *Fout;
+	my ( $line, $nn );
+
+
+	die "Sorry, file ../modules/$nd.h already exists.\n"
+		if -e "../modules/$nd.h";
+
+	my @fl = get_mod_list( $d );
+
+	replace_txt( "../config/$d.conf", " ../config/$nd.conf",
+				 "\"$dn\"", "\"$ndn\"" );
+	replace_txt( "../modules/$d.h", "../modules/$nd.h",
+				 "\"$d.conf\"", "\"$nd.conf\"" );
+
+	my $j = 0;
+	for my $fn ( @fl ) {
+		if ( $fn eq "$d.c" ) {
+			$nn = "$nd.c"
+		} else {
+			for my $i ( 1..100000 ) {
+				$nn = $fn;
+				$nn =~ s/\.c$//;
+				$nn .= "_" . $i . ".c";
+				last unless -e "../modules/$nn";
+			}
+		}
+
+		replace_txt( "../modules/$fn", "../modules/$nn",
+					 "\"$d.h\"", "\"$nd.h\"" );
+
+		$fl[ $j++ ] = $nn;
+	}
+
+	rename "../modules/Makefile", "../modules/Makefile.old" or die
+		"Can't create new files in ../module, please check permissions.\n";
+	open( Fin, "< ../modules/Makefile.old" );
+	open( Fout, "> ../modules/Makefile" ) or
+		die "Can't open modules makefile ../modules/Makefile.\n";
+
+	while ( defined( $line = <Fin> ) ) {
+
+		if ( $line =~ /^\s*$d\s*:*=/ ) {
+			print Fout $line;
+			while ( $line =~ /\\$/ and defined( $line = <Fin> ) ) {
+				print Fout $line;
+			}
+
+			print Fout "$nd :=";
+			for ( @fl ) {
+				print Fout " $_";
+			}
+
+			print Fout "\n";
+			next;
+		}
+
+		if ( $line =~ /^\s*comp_modules\s*:*=/ ) {
+			print Fout $line if $line =~ /\\$/;
+			while ( $line =~ /\\$/ and defined( $line = <Fin> ) ) {
+				print Fout $line if $line =~ /\\$/;
+			}
+
+			chomp $line;
+			print Fout "$line $nd\n";
+			next;
+		}
+
+		print Fout $line;
+	}
+
+	close Fin;
+	close Fout;
+}
+
+
+sub replace_txt {
+	my ( $ofn, $nfn, $os, $ns ) =  @_;
+	local ( *Fin, *Fout );
+
+
+	open( Fin, "< $ofn" ) or die "Can't open file $ofn for reading.\n";
+	open( Fout, "> $nfn" ) or die "Can't open file $nfn for writing.\n";
+
+	while ( defined( $line = <Fin> ) ) {
+		$line =~ s/$os/$ns/; 
+		print Fout $line;
+	}
+
+	close Fin;
+	close Fout;
+}
+
+
+sub get_mod_list {
+	my $d = shift;
+	local *F;
+	my ( $line, $new_line, @list );
+
+	open( F, "< ../modules/Makefile" ) or
+		die "Can't open modules makefile ../modules/Makefile.\n";
+
+	while ( defined( $line = <F> ) ) {
+		last if $line =~ /^\s*$d\s*:*=/;
+	}
+
+	while ( $line =~ /\\$/ and defined( $new_line = <F> ) ) {
+		$line =~ s/\\$/ /;
+		$line .= $new_line;
+	}
+	close F;
+
+	@list = split /=/, $line;
+	@list = split /\s+/, $list[ 1 ];
+	splice( @list, 0, 1 ) if $list[ 0 ] =~ /^\s*$/;
+
+	return @list;
+}
