@@ -634,8 +634,8 @@ labels_2d:
 
 Var *f_cscale( Var *v )
 {
-	double x_0, y_0, dx, dy;
-	int is_set = 0;
+	double x_0, y_0, dx, dy;         /* new scale settings */
+	int is_set = 0;                  /* flags, indicating what to change */
 	int shm_id;
 	long len = 0;                    /* total length of message to send */
 	void *buf;
