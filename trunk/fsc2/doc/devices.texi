@@ -416,11 +416,12 @@ non-zero argument or no argument at all.
 @cindex Digitizer functions
 
 The digitizing oscilloscopes currently implemented are the Tektronix
-TDS520, TDS520A, TDS744A and TDS754A. The corresponding module names to
-be used in the @code{DEVICES} section are
+TDS520, TDS520A, TDS540, TDS744A and TDS754A. The corresponding module
+names to be used in the @code{DEVICES} section are
 @example
 tds520
 tds520a
+tds540
 tds744a
 tds754a
 @end example
@@ -435,7 +436,45 @@ base of the oscilloscope can be only set once before the start of the
 on the model, please check the manual.
 
 The function can be called in query mode (i.e.@: without an argument)
-only if either it has been already called with an argument or in the
+only if either it has already been called with an argument or in the
+@code{EXPERIMENT} section.
+
+
+@table @samp
+@item digitizer_sensitivity()
+@findex digitizer_sensitivity()
+The function queries (if called with no argument) or sets (if called
+with an argument) the sensitivity setting of on of the channels of the
+oscilloscope. It needs at least on argument, the channel, either
+symbolically  or numerically. The channels that can be specified, depend
+on the model of the oscilloscope:
+@table @samp
+@item TDS520
+@item TDS520A
+@itemize @bullet
+@item @code{CH1} or @code{CH2} or, alternatively @code{0} or @code{1}
+@end itemize
+@item TDS540
+@item TDS744A
+@item TDS754A
+@itemize @bullet
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4} or, alternatively
+@code{0}, @code{1}, @code{2} or @code{3}
+@end itemize
+@end table
+
+If a second argument is given it is taken to be the new sensitivity
+setting in Volts per scale unit. Please note that for some of the
+oscilloscopes the range of admissible sensitivity settings also depends
+on the input impedance setting. If the sensitivity value passed to the
+function is not one of the possible values the next allowed value is
+used instead.
+
+If no second argument is given the current sensitivity setting for the
+channel isr eturned.
+
+The function can be called in query mode (i.e.@: without a second
+argument) only if either the sensitivity has already been set or in the
 @code{EXPERIMENT} section.
 
 
@@ -450,7 +489,7 @@ argument is larger than the maximum number of averages the maximum
 number is used instead.
 
 The function can be called in query mode (i.e.@: without an argument)
-only if either it has been already called with an argument or in the
+only if either it has already been called with an argument or in the
 @code{EXPERIMENT} section.
 
 
@@ -468,6 +507,7 @@ numeric!):
 @item @code{AUX1}, @code{AUX2} or @code{LIN} or, alternatively @code{9},
 @code{10} or @code{11}
 @end itemize
+@item TDS540
 @item TDS744A
 @item TDS754A
 @itemize @bullet
@@ -477,7 +517,7 @@ numeric!):
 @end itemize
 @end table
 The function can be called in query mode (i.e.@: without an argument)
-only if either it has been already called with an argument or in the
+only if either it has already been called with an argument or in the
 @code{EXPERIMENT} section.
 
 
@@ -490,7 +530,7 @@ a value passed to the function will be rounded up to the next
 allowed value if necessary.
 
 The function can be called in query mode (i.e.@: without an argument)
-only if either it has been already called with an argument or in the
+only if either it has already been called with an argument or in the
 @code{EXPERIMENT} section.
 
 
@@ -504,7 +544,7 @@ that the trigger is at the very first point of the trace and 1 that it's
 at the last point).
 
 The function can be called in query mode (i.e.@: without an argument)
-only if either it has been already called with an argument or in the
+only if either it has already been called with an argument or in the
 @code{EXPERIMENT} section.
 
 
@@ -571,6 +611,7 @@ the digitizer:
 @item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,
 alternatively, @code{5}, @code{6}, @code{7} or @code{8}
 @end itemize
+@item TDS540
 @item TDS744A
 @item TDS754A
 @itemize @bullet
@@ -629,12 +670,12 @@ of the digitizer:
 @item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,
 alternatively, @code{5}, @code{6}, @code{7} or @code{8}
 @end itemize
+@item TDS540
 @item TDS744A
 @item TDS754A
 @itemize @bullet
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4} or, alternatively
 @code{0}, @code{1}, @code{2} or @code{3}
-
 @item @code{MATH1}, @code{MATH2} or @code{MATH3} or, alternatively,
 @code{4}, @code{5} or @code{6} 
 @item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,
@@ -680,6 +721,7 @@ of the digitizer:
 @item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,
 alternatively, @code{5}, @code{6}, @code{7} or @code{8}
 @end itemize
+@item TDS540
 @item TDS744A
 @item TDS754A
 @itemize @bullet
