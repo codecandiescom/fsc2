@@ -216,6 +216,12 @@ char *T_strdup( const char *str )
 
 
 	if ( str == NULL )
+	{
+		eprint( FATAL, UNSET,
+				"Internal error detected at %s:%d (strdup with NULL).\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
 		return NULL;
 
 	if ( ( new_str = malloc( strlen( str ) + 1 ) ) == NULL )
@@ -223,7 +229,7 @@ char *T_strdup( const char *str )
 		print( FATAL, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
-	strcpy( new_mem, str );
+	strcpy( new_str, str );
 
 #if defined MDEBUG && ! defined __STRICT_ANSI__
 	if ( Internals.is_i386 )

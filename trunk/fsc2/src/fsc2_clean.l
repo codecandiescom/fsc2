@@ -82,6 +82,7 @@ char *prog_name;
 extern int seteuid( uid_t euid );
 extern int setegid( gid_t egid );
 extern int vsnprintf( char *str, size_t size, const char *format, va_list ap );
+extern int fileno( FILE *stream );
 #endif
 
 #define MAX_INCLUDE_DEPTH  16
