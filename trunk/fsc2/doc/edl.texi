@@ -286,7 +286,7 @@ arguments have to be separated by commas.
 
 Within the @code{VARIABLES}, @code{ASSIGNMENTS}, @code{PREPARATIONS} and
 @code{EXPERIMENT} section variables may be used. Each variable that is
-used in an @acronym{EDL program must be declared, i.e.@: it has to be
+used in an @acronym{EDL} program must be declared, i.e.@: it has to be
 listed in the @code{VARIABLES} section before it may be used. The start
 of the @code{VARIABLES} section is indicated by a line stating
 @example

@@ -40,7 +40,8 @@ int hfs9000_init_hook( void )
 	   pointers for the functions that will get called from pulser.c */
 
 	hfs9000.needs_update = UNSET;
-	hfs9000.is_running = SET;
+	hfs9000.is_running   = SET;
+	hfs9000.keep_all     = UNSET;
 
 	pulser_struct.set_timebase = hfs9000_store_timebase;
 
