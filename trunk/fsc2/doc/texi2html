@@ -2777,48 +2777,50 @@ sub l2h_InitCache
 
 sub l2h_StoreCache
 {
-  return unless $l2h_latex_count;
+	return unless $l2h_latex_count;
 
-  my ($key, $value);
-  open(FH, ">$l2h_cache_file") || return warn"$ERROR l2h Error: could not open $docu_rdir$l2h_cache_file for writing: $!\n";
+	my ($key, $value);
+	open(FH, ">$l2h_cache_file") ||
+		return warn "$ERROR l2h Error: could not open " .
+			"$docu_rdir$l2h_cache_file for writing: $!\n";
 
+	while (($key, $value) = each %l2h_cache)
+	{
+		# escape stuff
 
-  while (($key, $value) = each %l2h_cache)
-  {
-    # escape stuff
-    $key =~ s|/|\\/|g;
-    $key =~ s|\\\\/|\\/|g;
-    # weird, a \ at the end of the key results in an error
-    # maybe this also broke the dbm database stuff
-    $key =~ s|\\$|\\\\|;
-    $value =~ s/\|/\\\|/g;
-    $value =~ s/\\\\\|/\\\|/g;
-    $value =~ s|\\\\|\\\\\\\\|g;
-    print FH "\n\$l2h_cache_key = q/$key/;\n";
-    print FH "\$l2h_cache{\$l2h_cache_key} = q|$value|;\n";
-  }
-  print FH "1;";
-  close(FH);
+		$key =~ s|/|\\/|g;
+		$key =~ s|\\\\/|\\/|g;
+
+		# weird, a \ at the end of the key results in an error
+		# maybe this also broke the dbm database stuff
+
+		$key =~ s|\\$|\\\\|;
+		$value =~ s/\|/\\\|/g;
+		$value =~ s/\\\\\|/\\\|/g;
+		$value =~ s|\\\\|\\\\\\\\|g;
+		print FH "\n\$l2h_cache_key = q/$key/;\n";
+		print FH "\$l2h_cache{\$l2h_cache_key} = q|$value|;\n";
+	}
+	print FH "1;";
+	close(FH);
 }
 
 # return cached html, if it exists for text, and if all pictures
 # are there, as well
 sub l2h_FromCache
 {
-  my $text = shift;
-  my $cached = $l2h_cache{$text};
-  if ($cached)
-  {
-    while ($cached =~ m/SRC="(.*?)"/g)
-    {
-      unless (-e "$docu_rdir$1")
-      {
+	my $text = shift;
+	my $cached = $l2h_cache{$text};
+	if ($cached)
+	{
+		while ($cached =~ m/SRC="(.*?)"/g) {
+			unless (-e "$docu_rdir$1") {
+				return undef;
+			}
+		}
+		return $cached;
+	}
 	return undef;
-      }
-    }
-    return $cached;
-  }
-  return undef;
 }
 
 # insert generated html into cache, move away images,
@@ -2828,36 +2830,33 @@ $maximage = 1;
 
 sub l2h_ToCache
 {
-  my $count = shift;
-  my $content = shift;
-  my @images = ($content =~ /SRC="(.*?)"/g);
-  my ($src, $dest);
+	my $count = shift;
+	my $content = shift;
+	my @images = ($content =~ /SRC="(.*?)"/g);
+	my ($src, $dest);
 
-  for $src (@images)
-  {
-    $dest = $l2h_img{$src};
-    unless ($dest)
-    {
-      my $ext;
-      if ($src =~ /.*\.(.*)$/ && $1 ne $docu_ext)
-      {
-	$ext = $1;
-      }
-      else
-      {
-	warn "$ERROR: L2h image $src has invalid extension\n";
-	next;
-      }
-      while (-e "$docu_rdir${docu_name}_$maximage.$ext") { $maximage++;}
-      $dest = "${docu_name}_$maximage.$ext";
-      system("cp -f $docu_rdir$src $docu_rdir$dest");
-      $l2h_img{$src} = $dest;
-      unlink "$docu_rdir$src" unless ($DEBUG & DEBUG_L2H);
-    }
-    $content =~ s/$src/$dest/g;
-  }
-  $l2h_cache{$l2h_to_latex[$count]} = $content;
-  return $content;
+	for $src (@images)
+	{
+		$dest = $l2h_img{$src};
+		unless ($dest)
+		{
+			my $ext;
+			if ($src =~ /.*\.(.*)$/ && $1 ne $docu_ext) {
+				$ext = $1;
+			} else {
+				warn "$ERROR: L2h image $src has invalid extension\n";
+				next;
+			}
+			while (-e "$docu_rdir${docu_name}_$maximage.$ext") { $maximage++;}
+			$dest = "${docu_name}_$maximage.$ext";
+			system("cp -f $docu_rdir$src $docu_rdir$dest");
+			$l2h_img{$src} = $dest;
+			unlink "$docu_rdir$src" unless ($DEBUG & DEBUG_L2H);
+		}
+		$content =~ s/$src/$dest/g;
+	}
+	$l2h_cache{$l2h_to_latex[$count]} = $content;
+	return $content;
 }
 
 
@@ -2913,135 +2912,137 @@ foreach (keys(%things_map)) {
 if ($use_acc) {
     # accentuated characters
     foreach (keys(%accent_map)) {
-	if ($_ eq "`") {
-	    $subst_code .= "s/$;3";
-	} elsif ($_ eq "'") {
-	    $subst_code .= "s/$;4";
-	} else {
-	    $subst_code .= "s/\\\@\\$_";
-	}
-	$subst_code .= "([a-z])/&\${1}$accent_map{$_};/gi;\n";
+		if ($_ eq "`") {
+			$subst_code .= "s/$;3";
+		} elsif ($_ eq "'") {
+			$subst_code .= "s/$;4";
+		} else {
+			$subst_code .= "s/\\\@\\$_";
+		}
+		$subst_code .= "([a-z])/&\${1}$accent_map{$_};/gi;\n";
     }
 }
 eval("sub simple_substitutions { $subst_code }");
 
 &init_input;
-INPUT_LINE: while ($_ = &next_line) {
-    #
-    # remove \input on the first lines only
-    #
-    if ($first_line) {
-	next if /^\\input/;
-	$first_line = 0;
-    }
-    # non-@ substitutions cf. texinfmt.el
-    #
-    # parse texinfo tags
-    #
-    $tag = '';
-    $end_tag = '';
-    if (/^\s*\@end\s+(\w+)\b/) {
-	$end_tag = $1;
-    } elsif (/^\s*\@(\w+)\b/) {
-	$tag = $1;
-    }
-    #
-    # handle @html / @end html
-    #
-    if ($in_html) {
-	if ($end_tag eq 'html') {
-	    $in_html = 0;
-	} else {
-	    $tag2pro{$in_html} .= $_;
-	}
-	next;
-    } elsif ($tag eq 'html') {
-	$in_html = $PROTECTTAG . ++$html_num;
-	push(@lines, $in_html);
-	next;
-    }
+ INPUT_LINE: while ($_ = &next_line) {
+	 #
+	 # remove \input on the first lines only
+	 #
+	 if ($first_line) {
+		 next if /^\\input/;
+		 $first_line = 0;
+	 }
+	 # non-@ substitutions cf. texinfmt.el
+	 #
+	 # parse texinfo tags
+	 #
+	 $tag = '';
+	 $end_tag = '';
+	 if (/^\s*\@end\s+(\w+)\b/) {
+		 $end_tag = $1;
+	 } elsif (/^\s*\@(\w+)\b/) {
+		 $tag = $1;
+	 }
+	 #
+	 # handle @html / @end html
+	 #
+	 if ($in_html) {
+		 if ($end_tag eq 'html') {
+			 $in_html = 0;
+		 } else {
+			 $tag2pro{$in_html} .= $_;
+		 }
+		 next;
+	 } elsif ($tag eq 'html') {
+		 $in_html = $PROTECTTAG . ++$html_num;
+		 push(@lines, $in_html);
+		 next;
+	 }
 
-    #
-    # try to remove inlined comments
-    # syntax from tex-mode.el comment-start-skip
-    #
-    s/((^|[^\@])(\@\@)*)\@c(omment | |\{|$).*/$1/;
+	 #
+	 # try to remove inlined comments
+	 # syntax from tex-mode.el comment-start-skip
+	 #
 
-# Sometimes I use @c right at the end of  a line ( to suppress the line feed )
-#    s/((^|[^\@])(\@\@)*)\@c(omment)?$/$1/;
-#     s/((^|[^\@])(\@\@)*)\@c(omment)? .*/$1/;
-#     s/(.*)\@c{.*?}(.*)/$1$2/;
-#     s/(.*)\@comment{.*?}(.*)/$1$2/;
-#     s/^(.*)\@c /$1/;
-#     s/^(.*)\@comment /$1/;
+	 s/((^|[^\@])(\@\@)*)\@c(omment | |\{|$).*/$1/;
+
+	# Sometimes I use @c right at the end of  a line (to suppress line feed )
+	#    s/((^|[^\@])(\@\@)*)\@c(omment)?$/$1/;
+	#     s/((^|[^\@])(\@\@)*)\@c(omment)? .*/$1/;
+	#     s/(.*)\@c{.*?}(.*)/$1$2/;
+	#     s/(.*)\@comment{.*?}(.*)/$1$2/;
+	#     s/^(.*)\@c /$1/;
+	#     s/^(.*)\@comment /$1/;
 
     #############################################################
     # value substitution before macro expansion, so that
     # it works in macro arguments 
+
     s/\@value{($VARRE)}/$value{$1}/eg;
 
     #############################################################
     # macro substitution
-    while (/\@(\w+)/g)
-    {
-      if (exists($macros->{$1}))
-      {
-	my $before = $`;
-	my $name = $1;
-	my $after = $';
-	my @args;
-	my $args;
-	if ($after =~ /^\s*{(.*?[^\\])}(.*)/)  
-	{
-	  $args = $1;
-	  $after = $2;
-	}
-	elsif (@{$macros->{$name}->{Args}} == 1)
-	{
-	  $args = $after;
-	  $args =~ s/^\s*//;
-	  $args =~ s/\s*$//;
-	  $after = '';
-	}
-	$args =~ s|\\\\|\\|g;
-	$args =~ s|\\{|{|g;
-        $args =~ s|\\}|}|g;
-	if (@{$macros->{$name}->{Args}} > 1)
-	{
-	  $args =~ s/(^|[^\\]),/$1$;/g ;
-	  $args =~ s|\\,|,|g;
-	  @args = split(/$;\s*/, $args) if (@{$macros->{$name}->{Args}} > 1);
-	}
-	else
-	{
-	  $args =~ s|\\,|,|g;
-	  @args = ($args);
-	}
-	my $macrobody = $macros->{$name}->{Body};
-	for ($i=0; $i<=$#args; $i++)
-	{
-	  $macrobody =~ s|\\$macros->{$name}->{Args}->[$i]\\|$args[$i]|g;
-	}
-	$macrobody =~ s|\\\\|\\|g;
-	$_ = $before . $macrobody . $after;
-	unshift @input_spool, map {$_ = $_."\n"} split(/\n/, $_);
-	next INPUT_LINE;
-      }
-    }				#
+
+    while (/\@(\w+)/g) {
+		if (exists($macros->{$1}))
+		{
+			my $before = $`;
+			my $name = $1;
+			my $after = $';
+			my @args;
+			my $args;
+			if ($after =~ /^\s*{(.*?[^\\])}(.*)/)  
+			{
+				$args = $1;
+				$after = $2;
+			}
+			elsif (@{$macros->{$name}->{Args}} == 1)
+			{
+				$args = $after;
+				$args =~ s/^\s*//;
+				$args =~ s/\s*$//;
+				$after = '';
+			}
+			$args =~ s|\\\\|\\|g;
+			$args =~ s|\\{|{|g;
+							$args =~ s|\\}|}|g;
+			if (@{$macros->{$name}->{Args}} > 1)
+			{
+				$args =~ s/(^|[^\\]),/$1$;/g ;
+				$args =~ s|\\,|,|g;
+				@args = split(/$;\s*/, $args) if (@{$macros->{$name}->{Args}} > 1);
+			}
+			else
+			{
+				$args =~ s|\\,|,|g;
+				@args = ($args);
+			}
+			my $macrobody = $macros->{$name}->{Body};
+			for ($i=0; $i<=$#args; $i++)
+			{
+				$macrobody =~ s|\\$macros->{$name}->{Args}->[$i]\\|$args[$i]|g;
+			}
+			$macrobody =~ s|\\\\|\\|g;
+			$_ = $before . $macrobody . $after;
+			unshift @input_spool, map {$_ = $_."\n"} split(/\n/, $_);
+			next INPUT_LINE;
+		}
+	}				#
 
 
     #
     # try to skip the line
-    #
-    if ($end_tag) {
+	#
+	if ($end_tag) {
         $in_titlepage = 0 if $end_tag eq 'titlepage';
-	next if $to_skip{"end $end_tag"};
+		next if $to_skip{"end $end_tag"};
     } elsif ($tag) {
-      $in_titlepage = 1 if $tag eq 'titlepage';
-      next if $to_skip{$tag};
-      last if $tag eq 'bye';
+		$in_titlepage = 1 if $tag eq 'titlepage';
+		next if $to_skip{$tag};
+		last if $tag eq 'bye';
     }
-    if ($in_top) {
+	if ($in_top) {
 	# parsing the top node
 	if ($tag eq 'node' ||
 	    ($sec2level{$tag} && $tag !~ /unnumbered/ && $tag !~ /heading/))
@@ -3434,8 +3435,10 @@ INPUT_LINE: while ($_ = &next_line) {
 		push(@lines, "</TR></TABLE>\n");
 		&html_pop_if('TR');
 	    } else {
-		push(@lines, "</DL>\n");
-		&html_pop_if('DD');
+			push(@lines, "</DD>\n") if $html_element eq 'DD';
+			&html_pop_if( 'DD' );
+			push(@lines, "</DL>\n");
+			&html_pop_if('DD');
 	    }
 	    &html_pop_if();
 	    if (@tables) {
@@ -3646,9 +3649,9 @@ INPUT_LINE: while ($_ = &next_line) {
 		if ($html_element eq 'DL' || $html_element eq 'DD') {
 		    if ($things_map{$in_table} && !$what) {
 			# special case to allow @table @bullet for instance
-			push(@lines, &debug("<DT>$things_map{$in_table}\n", __LINE__));
+			push(@lines, &debug("<DT>$things_map{$in_table}</DT>\n", __LINE__));# JTT 15-4-2003
 		    } else {
-			push(@lines, &debug("<DT>\@$in_table\{$what\}\n", __LINE__));
+			push(@lines, &debug("<DT>\@$in_table\{$what\}</DT>\n", __LINE__));# JTT 15-4-2003
 		    }
 		    push(@lines, "<DD>");
 		    &html_push('DD') unless $html_element eq 'DD';
@@ -3678,22 +3681,19 @@ INPUT_LINE: while ($_ = &next_line) {
 	}
     }
     # paragraph separator
+
     if ($_ eq "\n" && ! $in_pre) {
-	next if $#lines >= 0 && $lines[$#lines] eq "\n";
-	if ($html_element eq 'P') {
-	    push (@lines, &debug("</P><P>\n", __LINE__));
+		next if $#lines >= 0 && $lines[$#lines] eq "\n";
+		if ($html_element eq 'P') {
+			push (@lines, &debug("</P><P>\n", __LINE__));
+		}
+		elsif ($html_element eq 'body' || $html_element eq 'BLOCKQUOTE' ||
+			   $html_element eq 'DD' || $html_element eq 'LI') 
+		{
+			&html_push('P');
+			push(@lines, &debug("<P>\n", __LINE__));
+		}
 	}
-# 	else
-# 	{
-# 	  push(@lines, "<P></P>\n");
-# 	  $_ = &debug("<P></P>\n", __LINE__);
-# 	}
-        elsif ($html_element eq 'body' || $html_element eq 'BLOCKQUOTE' || $html_element eq 'DD' || $html_element eq 'LI') 
-	{
-	  &html_push('P');
-	  push(@lines, &debug("<P>\n", __LINE__));
-	}
-      }
     # otherwise
     push(@lines, $_) unless $in_titlepage;
     push(@lines, &debug("</center>\n", __LINE__))  if ($tag eq 'center');
