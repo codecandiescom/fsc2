@@ -110,6 +110,7 @@ Pulse *Cur_Pulse = NULL;
 
 bool TEST_RUN = UNSET;       /* flag, set while EXPERIMENT section is tested */
 bool need_GPIB = UNSET;      /* flag, set if GPIB bus is needed */
+bool need_Serial_Port[ 4 ] = { UNSET, UNSET, UNSET, UNSET };
 
 
 bool just_testing;
@@ -152,7 +153,7 @@ extern Pulse *Cur_Pulse;
 
 extern bool TEST_RUN;
 extern bool need_GPIB;
-
+extern bool need_Serial_Port[ 4 ];
 
 extern bool just_testing;
 extern FD_fsc2 *main_form;
