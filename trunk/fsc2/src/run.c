@@ -628,7 +628,8 @@ static void run_child( void )
 	}
 #endif
 
-	TRY {
+	TRY
+	{
 		do_measurement( );               /* run the experiment */
 		return_status = OK;
 		TRY_SUCCESS;

@@ -544,7 +544,7 @@ void load_file( FL_OBJECT *a, long reload )
 	state = FAIL;
 	is_tested = UNSET;
 
-	/* Run all the exit hooks and zero number of compilation errors */
+	/* Run all the exit hooks and reset number of compilation errors */
 
 	if ( ! exit_hooks_are_run )
 		run_exit_hooks( );

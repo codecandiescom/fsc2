@@ -15,7 +15,7 @@ init_1d( );
 EXPERIMENT:
 
 FOREVER {
-	wait( 0.5 s );
+	wait( 0.2 s );
 	display( I, voltmeter_get_data( ) );
 	I += 1;
 }

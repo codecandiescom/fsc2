@@ -554,12 +554,14 @@ void run_exit_hooks( void )
 		;
 
 	for ( ; cd != NULL; cd = cd->prev )
+	{
 		TRY
 		{
 			if ( cd->is_loaded && cd->driver.is_exit_hook )
 				cd->driver.exit_hook( );
 			TRY_SUCCESS;
 		}
+	}
 
 	/* Set global variable to show that exit hooks already have been run */
 
