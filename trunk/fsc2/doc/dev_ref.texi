@@ -61,6 +61,7 @@
 * s_band_magnet_broad::   S-band Magnet Power Supply (broad range)
 * s_band_magnet_narrow::  S-band Magnet Power Supply (narrow range)
 * spectrapro_300i::  Acton Research SpectraPro-300i Monochromator
+* spex_cd2a::       SPEX Monochromators with CD2A Compudrive
 * sr510::           Stanford Research Lock-In Amplifier SR510
 * sr530::           Stanford Research Lock-In Amplifier SR530
 * sr810::           Stanford Research Lock-In Amplifier SR810
@@ -1544,7 +1545,7 @@ Prisner at the J.-W.-Goethe University in Frankfurt/Main. Field range is
 @c #############################################################
 
 
-@node spectrapro_300i, sr510, s_band_magnet_narrow, Device Reference
+@node spectrapro_300i, spex_cd2a, s_band_magnet_narrow, Device Reference
 @iftex
 @subheading Acton Research SpectraPro-300i Monochromator
 @end iftex
@@ -1557,7 +1558,8 @@ Prisner at the J.-W.-Goethe University in Frankfurt/Main. Field range is
 
 @paragraphindent 0
 @strong{Description}: Acton Research SpectraPro-300i monochromator, up
-to 3 gratings on up to 3 turrets.
+to 3 gratings on up to 3 turrets, wavelength range @w{0 nm} to @w{1400
+nm}.
 
 @paragraphindent 0
 @strong{Controlled via}:  Serial port
@@ -1568,6 +1570,7 @@ to 3 gratings on up to 3 turrets.
 @item @code{monochromator_name()}             @tab @ref{monochromator_name}
 @item @code{monochromator_grating()}          @tab @ref{monochromator_grating}
 @item @code{monochromator_wavelength()}       @tab @ref{monochromator_wavelength}
+@item @code{monochromator_wavenumber()}       @tab @ref{monochromator_wavenumber}
 @item @code{monochromator_groove_density()}   @tab @ref{monochromator_groove_density}
 @item @code{monochromator_wavelength_axis()}  @tab @ref{monochromator_wavelength_axis}
 @item @code{monochromator_calc_wavelength()}  @tab @ref{monochromator_calc_wavelength}
@@ -1584,7 +1587,44 @@ to 3 gratings on up to 3 turrets.
 @c #############################################################
 
 
-@node sr510, sr530, spectrapro_300i, Device Reference
+@node spex_cd2a, sr510, spectrapro_300i, Device Reference
+@iftex
+@subheading SPEX Monochromators with CD2A Compudrive
+@end iftex
+@ifnottex
+@section SPEX Monochromators with CD2A Compudrive
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{spex_cd2a}
+
+@paragraphindent 0
+@strong{Description}: Monochromators by SPEX controlled by the computer
+via the CD2A Compudrive (i.e.@: 1249, 1403, 1404, 1680B, 1681B, 1701,
+1702, 1703, 1704m 1870B, 1870C).
+
+@paragraphindent 0
+@strong{Controlled via}:  Serial port
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{monochromator_name()}             @tab @ref{monochromator_name}
+@item @code{monochromator_wavelength()}       @tab @ref{monochromator_wavelength}
+@item @code{monochromator_wavenumber()}       @tab @ref{monochromator_wavenumber}
+@item @code{monochromator_laser_line()}       @tab @ref{monochromator_laser_line}
+@item @codemonochromator_scan_setup()}        @tab @ref{monochromator_scan_setup}
+@item @code{monochromator_start_scan()}       @tab @ref{monochromator_start_scan}
+@item @code{monochromator_scan_step()}        @tab @ref{monochromator_scan_step}
+@item @code{monochromator_shutter_limits()}   @tab @ref{monochromator_shutter_limits}
+@item @code{monochromator_groove_density()}   @tab @ref{monochromator_groove_density}
+@end multitable
+
+
+@c #############################################################
+
+
+@node sr510, sr530, spex_cd2a, Device Reference
 @iftex
 @subheading Stanford Research Lock-In Amplifier SR510
 @end iftex

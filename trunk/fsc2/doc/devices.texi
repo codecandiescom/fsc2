@@ -3729,18 +3729,34 @@ the number of pixels in the (vertical) @i{y}-direction.
 @section Monochromator Functions
 @cindex Monochromator Functions
 
-Currently only the SpectraPro-300i series of monochromator is supported
-(actually, the module has only been tested with the 308i) by the Acton
-Research Corporation. The module for the monochromator gets loaded by
-specifying
+Currently only the SpectraPro-300i series of monochromator (actually,
+the module has only been tested with the 308i) by the Acton Research
+Corporation and monochromators by SPEX controlled via the CD2A
+Compudrive interface are supported. The modules for the monochromators
+get loaded by specifying
 @example
 spectrapro_300i
+spex_cd2a
 @end example
 in the @code{DEVICES} section. 
 
-Some of the functions listed below will only work when the monochromator
+There are two different types of monochromators by SPEX. They are either
+wavelength or wavenumber driven. In case of wavelength driven
+monochromators functions accepting or returning spectral positions
+etc.@: expect or return them in units of wavelengths, i.e.@: in
+@code{m}. In contrast, for wavenumber driven monochromators the
+functions expect or return values in wavenumber units, i.e.@: in
+@code{cm^-1}. To make things even more interesting, for wavenumber
+driven monochromators a laser line position can be set. If such a laser
+line position is set, values are expected or returned in relative
+wavenumber units, i.e.@: as differences between the wavenumber of the
+laser line and the absolute wavenumber.
+
+Some of the functions listed below will only work when a monochromator
 is used in conjunction with a CCD camera (and have been tested only with
-the Spec-10 CCD camera by Roper Scientific).
+the Spec-10 CCD camera by Roper Scientific in conjunction with the
+SpectraPro-300i).
+
 
 @table @samp
 
@@ -3750,30 +3766,134 @@ the Spec-10 CCD camera by Roper Scientific).
 Returns a string with the name of the monochromator being used.
 
 
-@anchor{monochromator_grating}
-@item monochromator_grating()
-@findex monochromator_grating()
-The function queries or sets a new grating. If called with no argument
-the function returns the number of the currently used grating (an
-integer between 1 and the maximum number of installed gratings). If
-called with an integer argument the monochromator switches to the
-grating indexed by the number if it is available. The center wavelength
-the new grating is set to remains the same as for the previous grating.
-
-The function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} script.
-
-
 @anchor{monochromator_wavelength}
 @item monochromator_wavelength()
 @findex monochromator_wavelength()
 If called with no argument the function returns the current center
 wavelength (in m) of the grating. If called with an argument the grating
-is moved to the specified center wavelength (which must be between @w{0
-nm} and @w{1400 nm}.
+is moved to the specified center wavelength (which must be in the range
+covered by the monochromator and the current grating).
+
+Please note: for SPEX monochromators doing a scan calling this function
+automatically aborts the currently running scan.
+
+
+@anchor{monochromator_wavenumber}
+@item monochromator_wavenumber()
+@findex monochromator_wavenumber()
+If called with no argument this function returns the current center
+wavenumber in @code{cm^-1} of the grating, either in absolute units or,
+if a laser line position has been set, in relative units, i.e.@: as the
+difference between the laser line position and the gratings center
+wavenumber. If called with an argument the grating is moved to the
+specified center wavenumber, which must be given in absolute units if no
+laser line position has been set, otherwise in relative units. The
+possible range depends on the grating being used.
+
+Please note: for SPEX monochromators doing a scan calling this function
+automatically aborts the currently running scan.
+
+
+@anchor{monochromator_laser_line}
+@item monochromator_laser_line()
+@findex monochromator_laser_line()
+The function is only supported for wavenumber driven SPEX
+monochromators. It allows to set (or query if the function is called
+without an argument) to set a laser line position. If such a laser line
+has been set the device automatically switches to using relative
+wavenumbers, i.e.@: differences between the laser line position and
+absolute wavenumbers. All @code{EDL} functions accepting or returning
+spectral positions will then also switch to such relative wavenumbers.
+
+To set a laser line position the function expects a single argument, the
+position in absolute wavenumbers (even when a different laser line
+position has already been set and other functions expect spectral
+positions in relative wavenumbers!). To switch use of a laser line
+position off (and thus revert to spectral positions in absolute a zero
+or negative value must be passed to the function.
+
+Please note: for monochromators doing a scan calling this function
+automatically aborts the currently running scan.
+
+
+@anchor{monochromator_scan_setup}
+@item monochromator_scan_setup()
+@findex monochromator_scan_setup()
+The function is only supported for SPEX monochromators. These have a
+special scan mode, where scans can be done going from low to high
+wavelengths or from high to low wavenumbers (during a scan the
+monochromator doesn't have to do backslash removal, making the slew to a
+new position faster). For doing a scan the start position and the step
+width for the scan must be defined, which can be done using this
+function. To set the scan parameter the function expects to arguments,
+first the start position of the scan, given in wavelength units for
+wavelength driven monochromators and in wavenumbers (absolute, if no
+laser line position has been set, otherwise in relative units). The
+second argument is the step width, which must be a positive wavelength
+step size for wavelength driven monochromators and a @strong{negative}
+wavenumber step size for wavenumber driven ones.
+
+If called without an argument, the function returns a two-dinemsional
+array, with the first argument being the start position and the second
+the scan step size.
+
+Please note: for monochromators doing a scan calling this function
+automatically aborts the currently running scan.
+
+
+@anchor{monochromator_start_scan}
+@item monochromator_start_scan()
+@findex monochromator_start_scan()
+The function is only supported for SPEX monochromators and requires that
+the function @code{monochromator_scan_setup()} has been called
+previously to define the scan parameters. It slews the monochromator to
+the start position of the scan, switches to scan mode and returns the
+spectral position of the monochromator, either in wavelength units for
+wavelength driven monochromators or wavenumbers for wavenumber driven
+ones (in absolute units, if no laser line position has been set,
+otherwise in relative units).
+
+Please note: if the monochromators is already doing a scan calling this
+function automatically aborts the running scan.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
+
+
+@anchor{monochromator_scan_step}
+@item monochromator_scan_step()
+@findex monochromator_scan_step()
+The function is only supported for SPEX monochromators and requires that
+both the function @code{monochromator_scan_setup()} has been called
+previously to define the scan parameters and that the monochromator has
+been switched to scan mode by calling @code{monochromator_start_scan()}.
+The function slews the monochromator to the next spectral position by
+the scan step size and returns the new position, either in wavelength
+units for wavelength driven monochromators or wavenumbers for wavenumber
+driven ones (in absolute units, if no laser line position has been set,
+otherwise in relative units).
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{monochromator_shutter_limits}
+@item monochromator_shutter_limits()
+@findex monochromator_shutter_limits()
+The function is only supported for SPEX monochromators that have
+shutters to protect the PMT or APD etc.@: from excitation light in a
+certain frequency range. The function can be used to query or set these
+shutter limits. To set the shutter limits the function expects two
+arguments, the lower and the upper shutter limit. If a laser line
+position has been set the function won't allow to set the shutter limits
+to values that don't cover the laser line. When called without an
+argument the function returns a two-dimensional array, with the first
+element being the lower shutter limit and the second the upper shutter
+limit.
+
+
+Please note: for monochromators doing a scan calling this function
+automatically aborts the currently running scan.
 
 
 @anchor{monochromator_groove_density}
@@ -3789,13 +3909,29 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
+@anchor{monochromator_grating}
+@item monochromator_grating()
+@findex monochromator_grating()
+The function is only supported for SpectraPro-300i monochromators. It
+queries or sets a new grating. If called with no argument the function
+returns the number of the currently used grating (an integer between 1
+and the maximum number of installed gratings). If called with an integer
+argument the monochromator switches to the grating indexed by the number
+if it is available. The center wavelength the new grating is set to
+remains the same as for the previous grating.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
 @anchor{monochromator_turret}
 @item monochromator_turret()
 @findex monochromator_turret()
-If called with no argument the function returns the number of the
-currently used turret of the monochromator (an integer number starting
-at 1). If called with an integer argument it switches the monochromator
-to the indexed turret.
+The function is only supported for SpectraPro-300i monochromators. If
+called with no argument the function returns the number of the currently
+used turret of the monochromator (an integer number starting at 1). If
+called with an integer argument it switches the monochromator to the
+indexed turret.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -3804,15 +3940,16 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_wavelength_axis}
 @item monochromator_wavelength_axis()
 @findex monochromator_wavelength_axis()
-This function requires that the module for a CCD camera is available
-that returns information about the number of pixels of the CCD chip and
-the distance between pixels. It then returns an array with two elements,
-with the first element being the wavelength at the leftmost pixel of the
-chip and the second element being the wavelength difference between
-neighboring pixels. The function can also be called with up to two
-arguments, an integer for the grating number and the wavelength at the
-center of the chip. If these arguments aren't given, the currently used
-grating and wavelength of the monochromator are used.
+The function is only supported for SpectraPro-300i monochromators. It
+requires that the module for a CCD camera is available that returns
+information about the number of pixels of the CCD chip and the distance
+between pixels. It then returns an array with two elements, with the
+first element being the wavelength at the leftmost pixel of the chip and
+the second element being the wavelength difference between neighboring
+pixels. The function can also be called with up to two arguments, an
+integer for the grating number and the wavelength at the center of the
+chip. If these arguments aren't given, the currently used grating and
+wavelength of the monochromator are used.
 
 To be able to work the function also requires that a calibration for the
 grating has been loaded, either by calling
@@ -3857,11 +3994,12 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_calc_wavelength}
 @item monochromator_calc_wavelength()
 @findex monochromator_calc_wavelength()
-This function requires that the module for a CCD camera is available
-that returns information about the number of pixels of the CCD chip and
-the distance between pixels. It accepts a pixel position or an array of
-pixel positions on the CCD chip (relative to the left edge of the chip
-and starting with 1) and returns, depending on the type of the argument,
+The function is only supported for SpectraPro-300i monochromators. It
+requires that the module for a CCD camera is available that returns
+information about the number of pixels of the CCD chip and the distance
+between pixels. It accepts a pixel position or an array of pixel
+positions on the CCD chip (relative to the left edge of the chip and
+starting with 1) and returns, depending on the type of the argument,
 either a number or an array with the exact wavelengths for the pixel
 position(s). The function also accepts up to two arguments, an integer
 for the grating number and the wavelength at the center of the chip. If
@@ -3882,9 +4020,10 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_load_calibration}
 @item monochromator_load_calibration()
 @findex monochromator_load_calibration()
-The function tries to load a file with calibration data for one or more
-of the gratings. For each grating three values are required for a
-complete calibration.
+The function is only supported for SpectraPro-300i monochromators. It
+tries to load a file with calibration data for one or more of the
+gratings. For each grating three values are required for a complete
+calibration.
 
 The first value is the inclusion angle (i.e.@: the angle between the
 incident and the reflected beam for the center wavelength of the
@@ -3922,9 +4061,10 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_set_calibration}
 @item monochromator_set_calibration()
 @findex monochromator_set_calibration()
-This function allows to set calibration data for a grating directly
-instead of reading them from a file. It can also used to reset the
-calibration for a grating.
+The function is only supported for SpectraPro-300i monochromators. It
+allows to set calibration data for a grating directly instead of reading
+them from a file. It can also used to reset the calibration for a
+grating.
 
 The function expects 4 arguments, the grating number (an integer between
 1 and the maximum number of installed gratings), the inclusion angle (in
@@ -3941,14 +4081,15 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_install_grating}
 @item monochromator_install_grating()
 @findex monochromator_install_grating()
-This function can be used to tell the monochromator about a new grating.
-It expects two arguments, the grating number (an integer between 1 and
-the maximum number of installable gratings) and a string with the part
-number of the newly installed grating. All part numbers are expected to
-start with a single digit, followed by a dash, a three-digit number with
-the number grooves per thenth of a mm (if necessary left-filled with
-zeros), another dash and an identifier for the blaze wavelength or type
-of the grating. Thus a valid part number string would be e.g.@:
+The function is only supported for SpectraPro-300i monochromators. It
+can be used to tell the monochromator about a new grating.  It expects
+two arguments, the grating number (an integer between 1 and the maximum
+number of installable gratings) and a string with the part number of the
+newly installed grating. All part numbers are expected to start with a
+single digit, followed by a dash, a three-digit number with the number
+grooves per thenth of a mm (if necessary left-filled with zeros),
+another dash and an identifier for the blaze wavelength or type of the
+grating. Thus a valid part number string would be e.g.@:
 @code{"1-120-750"} for a grating with 1200 grooves per mm and a blazing
 wavelength of @w{750 nm}. Another possible part number string is
 @code{"2-030-HVIS"}. The total length of the string may not excceed 10
@@ -3965,13 +4106,14 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_zero_offset}
 @item monochromator_zero_offset()
 @findex monochromator_zero_offset()
-This function allows to either query or set the zero offset of a
-grating. The zero offset is basically an angle that results from
-misalignments of the grating (and the CCD chip) and leads to the zero
-order peak not appearing exactly at the center of the CCD chip. By
-setting the zero offset value correctly this misalignments can be
-compensated for. It is expressed as a number in the interval
-@code{[-1,+1]} and the correct value can only be found experimentally.
+The function is only supported for SpectraPro-300i monochromators. It
+allows to either query or set the zero offset of a grating. The zero
+offset is basically an angle that results from misalignments of the
+grating (and the CCD chip) and leads to the zero order peak not
+appearing exactly at the center of the CCD chip. By setting the zero
+offset value correctly this misalignments can be compensated for. It is
+expressed as a number in the interval @code{[-1,+1]} and the correct
+value can only be found experimentally.
 
 The function expects at least one argument, an integer number
 designating the grating (an integer between 1 and the maximum number of
@@ -3994,8 +4136,9 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_grating_adjust}
 @item monochromator_grating_adjust()
 @findex monochromator_grating_adjust()
-The value that can be queried or set by this function is used to adjust
-the angle by which the grating is rotated when moving it to a certain
+The function is only supported for SpectraPro-300i monochromators. The
+value that can be queried or set by this function is used to adjust the
+angle by which the grating is rotated when moving it to a certain
 wavelength. The monochromator has a built-in default value for the ratio
 between the angle and the wavelength which can be changed by the grating
 adjust value. If this value (and also the zero offset, see above) is set
@@ -4026,13 +4169,14 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_calibrate}
 @item monochromator_calibrate()
 @findex monochromator_calibrate()
-This function is for use in the dispersion calibration of a grating,
-i.e.@: the procedure where from a set of at least 4 measured positions
-of known lines (at at least two different center wavelengths) the
-optimum values for the inclusion angle, the focal length and the
-detector angle are determined.  This function requires that the module
-for a CCD camera is available that returns information about the number
-of pixels of the CCD chip and the distance between pixels.
+The function is only supported for SpectraPro-300i monochromators. It is
+for use in the dispersion calibration of a grating, i.e.@: the procedure
+where from a set of at least 4 measured positions of known lines (at at
+least two different center wavelengths) the optimum values for the
+inclusion angle, the focal length and the detector angle are determined.
+This function requires that the module for a CCD camera is available
+that returns information about the number of pixels of the CCD chip and
+the distance between pixels.
 
 The function expects a minimum of 5 arguments. The first is the grating
 number (an integer between 1 and the maximum number of installed
