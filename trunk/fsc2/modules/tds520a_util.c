@@ -198,7 +198,8 @@ void tds520a_do_pre_exp_checks( void )
 			tds520a.is_equal_width = UNSET;
 	}
 
-	/* Next check: Test if the windows fit into the measurement window */
+	/* Test if the windows fit into the measurement window and calculate start
+	   and end point of window */
 
     window = tds520a.timebase * tds520a.rec_len / TDS_POINTS_PER_DIV;
 
@@ -213,9 +214,17 @@ void tds520a_do_pre_exp_checks( void )
 					"time range.\n", DEVICE_NAME, w->num );
 			THROW( EXCEPTION );
 		}
+
+		/* Take care: Numbers start from 1 ! */
+
+		w->start_num = lround( ( w->start + tds520a.trig_pos * window )
+							   * TDS_POINTS_PER_DIV / tds520a.timebase ) + 1;
+		w->end_num = lround( ( w->start + w->width
+							   + tds520a.trig_pos * window )
+							 * TDS_POINTS_PER_DIV / tds520a.timebase ) + 1;
     }
 
-	/* Now that al windows are properly set we switch on gated measurements */
+	/* Now that all windows are properly set we switch on gated measurements */
 
 	tds520a_set_gated_meas( SET );
 	tds520a.gated_state = SET;

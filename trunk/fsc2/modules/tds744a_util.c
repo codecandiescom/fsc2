@@ -224,7 +224,7 @@ void tds744a_do_pre_exp_checks( void )
 							 * TDS_POINTS_PER_DIV / tds744a.timebase ) + 1;
     }
 
-	/* Now that al windows are properly set we switch on gated measurements */
+	/* Now that all windows are properly set we switch on gated measurements */
 
 	tds744a_set_gated_meas( SET );
 	tds744a.gated_state = SET;
