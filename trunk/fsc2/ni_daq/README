@@ -166,7 +166,7 @@ While National Instruments has made quite an amount of information about
 register level programming of the card available, some very important bits,
 especially concerning the MITE chip, are missing, making figuring out how
 to program it an unnecessary PITA. Thanks go to Tim Ously of National
-Instruments by supplying list as much of the missing informations on the
-Comedi mailing as he was able to get permission for
+Instruments by supplying in the comedi mailing list as much of the missing
+informations on the Comedi mailing as he was able to get permission for.
 
     13.3.2004   Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>
