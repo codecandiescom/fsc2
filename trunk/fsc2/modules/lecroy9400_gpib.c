@@ -499,6 +499,8 @@ bool lecroy9400_get_desc( int channel )
 
 double lecroy9400_get_trigger_pos( void )
 {
+	/***** Still needs to be implemented *****/
+
 	return 0;
 }
 
@@ -509,6 +511,9 @@ double lecroy9400_get_trigger_pos( void )
 bool lecroy9400_set_trigger_pos( double position )
 {
 	position = position;
+
+	/***** Still needs to be implemented *****/
+
 	return OK;
 }
 
@@ -535,6 +540,9 @@ void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
 	lecroy9400.rec_len[ channel ] = rec_len;
 	lecroy9400.is_reject[ channel ] = reject;
 
+	if ( FSC2_MODE != EXPERIMENT )
+		return;
+
 	/* If the record length hasn't been set use one that is as least as
 	   long as the number of points we can fetch for an averaged curve
 	   (which is just the number of points displayed on the screen) */
@@ -546,9 +554,6 @@ void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
 				break;
 		rec_len = lecroy9400.rec_len[ channel ] = cl[ i ];
 	}
-
-	if ( FSC2_MODE != EXPERIMENT )
-		return;
 
 	snprintf( cmd, 100, "SEL,%s;RDF,AVG,SUMMED,%ld,%s,%ld,%s,0",
 			  channel == LECROY9400_FUNC_E ? "FE" : "FF", rec_len,

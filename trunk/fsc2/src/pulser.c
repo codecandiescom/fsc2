@@ -44,6 +44,9 @@ void pulser_struct_init( void )
 	long i;
 
 
+	if ( Num_Pulsers == 0 )
+		return;
+
 	pulser_struct = T_malloc( Num_Pulsers * sizeof( Pulser_Struct ) );
 
 	for ( i = 0; i < Num_Pulsers; i++ )

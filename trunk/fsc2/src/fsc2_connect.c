@@ -21,40 +21,40 @@
   Boston, MA 02111-1307, USA.
 
 
-   This program expects an EDL program on standard input. It will then read it
-   in, write it to a temporary file and try to connect to fsc2 via a socket on
-   which fsc2 is supposed to listen. If this succeeds it sends fsc2 the
-   invoking users UID, followed by a letter that depends on the name the
-   program was invocated with - if it was started as 'fsc2_start' it sends an
-   'S', if as 'fsc2_test' it sends 'T' and if invocated as either 'fsc2_load'
-   or 'fsc2_connect' it sends an 'L', thus indicating what fsc2 is supposed to
-   do, i.e. either start the EDL program immediately, to test it or only to
-   load it. It also sends a second letter, 'd' to tell fsc2 to delete the
-   temporary file when it's done with it. Finally it sends the file name.
-   fsc2 can react in different ways: It can indicate that it is either run by
-   a user with a different UID, that it is busy, or that it couldn't read the
-   messages, which in turn is returned by this program via its return value
-   (see list below).
+  This program expects an EDL program on standard input. It will then read it
+  in, write it to a temporary file and try to connect to fsc2 via a socket on
+  which fsc2 is supposed to listen. If this succeeds it sends fsc2 the
+  invoking users UID, followed by a letter that depends on the name the
+  program was invocated with - if it was started as 'fsc2_start' it sends an
+  'S', if as 'fsc2_test' it sends 'T' and if invocated as either 'fsc2_load'
+  or 'fsc2_connect' it sends an 'L', thus indicating what fsc2 is supposed to
+  do, i.e. either start the EDL program immediately, to test it or only to
+  load it. It also sends a second letter, 'd' to tell fsc2 to delete the
+  temporary file when it's done with it. Finally it sends the file name.
+  fsc2 can react in different ways: It can indicate that it is either run by
+  a user with a different UID, that it is busy, or that it couldn't read the
+  messages, which in turn is returned by this program via its return value
+  (see list below).
 
-   If, on the other hand, the program finds that fsc2 isn't running (because
-   it can't connect to fsc2) it will try to start fsc2 with the '--delete'
-   flag (to make fsc2 delete its input file when done with it) and, depending
-   on the name this program was invocated with, with the '-S' or '-T' flag or
-   no flag and the name of the temporary file. If fsc2 can't be started
-   properly this program will return a return value to indicate it.
+  If, on the other hand, the program finds that fsc2 isn't running (because
+  it can't connect to fsc2) it will try to start fsc2 with the '--delete'
+  flag (to make fsc2 delete its input file when done with it) and, depending
+  on the name this program was invocated with, with the '-S' or '-T' flag or
+  no flag and the name of the temporary file. If fsc2 can't be started
+  properly this program will return a return value to indicate it.
 
-   The best way to use this program is to create the EDL program to send to
-   fsc2 and send it to this program using a popen() call. The success can be
-   obtained by examining the return status of the following call of pclose().
+  The best way to use this program is to create the EDL program to send to
+  fsc2 and send it to this program using a popen() call. The success can be
+  obtained by examining the return status of the following call of pclose().
 
-   Return codes:
+  Return codes:
 
-    0: Everything ok
-   -1: Internal error
-    1: Different user is running fsc2
-	2: fsc2 is busy
-	3: Internal error in fsc2
-	4: fsc2 could not be started
+   0: Everything ok
+  -1: Internal error
+   1: Different user is running fsc2
+   2: fsc2 is busy
+   3: Internal error in fsc2
+   4: fsc2 could not be started
 */
 
 
