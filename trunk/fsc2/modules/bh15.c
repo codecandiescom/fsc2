@@ -102,6 +102,8 @@ int bh15_exp_hook( void )
 	if ( ! bh15.is_needed )
 		return 1;
 
+	assert( bh15.device < 0 );
+
 	if ( gpib_init_device( bh15.name, &bh15.device ) == FAILURE )
 	{
 		bh15.device = -1;
@@ -173,6 +175,8 @@ int bh15_end_of_exp_hook( void )
 		bh15_get_field( );
 		gpib_local( bh15.device );
 	}
+
+	bh15.device = -1;
 
 	return 1;
 }

@@ -128,6 +128,8 @@ int er035m_exp_hook( void )
 	if ( ! nmr.is_needed )
 		return 1;
 
+	assert( nmr.device < 0 );
+
 	if ( gpib_init_device( nmr.name, &nmr.device ) == FAILURE )
 	{
 		nmr.device = -1;
