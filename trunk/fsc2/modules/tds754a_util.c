@@ -52,6 +52,7 @@ void tds754a_do_pre_exp_checks( void )
     double width, window, dcd, dtb, fac;
     long tb, cd;
 	double test_width;
+	int i;
 
 
 	/* If a trigger channel has been set in the PREPARATIONS section send
@@ -61,6 +62,12 @@ void tds754a_do_pre_exp_checks( void )
 		tds754a_set_trigger_channel( 
 			Channel_Names[ tds754a.trigger_channel ] );
 
+	/* Switch all channels on that get used in the measurements */
+
+	for ( i = 0; i <= TDS754A_REF4; i++)
+		if ( tds754a.channels_in_use[ i ] )
+			tds754a_display_channel( i );
+
 	/* That's all if no windows have been defined we switch off gated
 	   measurement mode, i.e. all measurement operations are done on the
 	   whole curve */
@@ -68,10 +75,14 @@ void tds754a_do_pre_exp_checks( void )
 	if ( tds754a.w == NULL )
 	{
 		tds754a_set_gated_meas( UNSET );
+		tds754a.gated_state = UNSET;
 		return;
 	}
 	else
+	{
 		tds754a_set_gated_meas( SET );
+		tds754a.gated_state = SET;
+	}
 
 	/* Remove all unused windows and test if for all other windows the width
 	   is set */
@@ -162,6 +173,8 @@ void tds754a_do_pre_exp_checks( void )
 			w->width = dcd;
 		}
 
+		/* Check if the windows have all the same length */
+
 		if ( w == tds754a.w )
 			test_width = w->width;
 		else if ( w->width != test_width )
@@ -193,7 +206,66 @@ void tds754a_do_pre_exp_checks( void )
 		tds754a_set_cursor( 1, tds754a.w->start );
 		tds754a_set_cursor( 2, tds754a.w->start + tds754a.w->width );
 		tds754a_set_track_cursors( SET );
+		tds754a.cursor_pos = tds754a.w->start;
 	}
 	else
 		tds754a_set_track_cursors( UNSET );
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+void tds754a_set_meas_window( WINDOW *w )
+{
+	tds754a_set_window( w );
+
+	if ( w != NULL )
+	{
+		/* If not already in gated measurement state set it now */
+
+		if ( ! tds754a.gated_state )
+		{
+			tds754a_set_gated_meas( SET );
+			tds754a.gated_state = SET;
+		}
+	}
+	else
+	{
+		/* If in gated measurement state switch it off */
+
+		if ( tds754a.gated_state )
+		{
+			tds754a_set_gated_meas( UNSET );
+			tds754a.gated_state = UNSET;
+		}
+	}
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+void tds754a_set_window( WINDOW *w )
+{
+	if ( w == NULL )
+		return;
+
+		/* If all windows have the same width we only have to set the first
+		   cursor (and only if its not already at the correct position),
+		   otherwise we have to set both cursors */
+
+	if ( tds754a.is_equal_width )
+	{
+		if ( tds754a.cursor_pos == w->start )
+		{
+			tds754a_set_cursor( 1, w->start );
+			tds754a.cursor_pos = w->start;
+		}
+	}
+	else
+	{
+		tds754a_set_cursor( 1, w->start );
+		tds754a_set_cursor( 2, w->start + w->width );
+	}
 }

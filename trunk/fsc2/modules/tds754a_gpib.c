@@ -19,6 +19,11 @@ bool tds754a_init( const char *name )
 	/* Set digitzer into local lockout state */
 
 	gpib_lock( tds754a.device );
+    if ( gpib_write( tds754a.device, "LOC ALL", 7 ) == FAILURE )
+	{
+		gpib_local( tds754a.device );
+        return FAIL;
+	}
 
     /* Set digitizer to short form of replies */
 
@@ -101,7 +106,7 @@ bool tds754a_init( const char *name )
     if ( gpib_write( tds754a.device, "ACQ:STOPA SEQ", 13 ) == FAILURE ||
          gpib_write( tds754a.device, "DESE 1", 6 )         == FAILURE ||
          gpib_write( tds754a.device, "*ESE 1", 6 )         == FAILURE ||
-         gpib_write( tds754a.device, "*SRE 32", 7 )        == FAILURE ||
+         gpib_write( tds754a.device, "*SRE 32", 7 )        == FAILURE )
     {
         gpib_local( tds754a.device );
         return FAIL;
@@ -309,7 +314,6 @@ bool tds754a_get_cursor_distance( double *cd )
 }
 
 
-
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
@@ -403,6 +407,9 @@ void tds754a_finished( void )
 }
 
 
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
 bool tds754a_set_cursor( int cur_num, double pos )
 {
     char cmd[ 60 ] = "CURS:VBA:POSITION";
@@ -421,6 +428,9 @@ bool tds754a_set_cursor( int cur_num, double pos )
 }
 
 
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
 bool tds754a_set_track_cursors( bool flag )
 {
 	char cmd[ 20 ] = "CURS:MODE  ";
@@ -432,6 +442,11 @@ bool tds754a_set_track_cursors( bool flag )
 	return OK;
 }
 
+
+/*----------------------------------------------------*/
+/* Function switches gated measurement mode on or off */
+/*----------------------------------------------------*/
+
 bool tds754a_set_gated_meas( bool flag )
 {
 	char cmd[ 20 ] = "MEASU:GAT ";
@@ -439,6 +454,144 @@ bool tds754a_set_gated_meas( bool flag )
 	strcat( cmd, flag ? "ON" : "OFF" );
     if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds754a_gpib_failure( );
+
+	return OK;
+}
+
+
+/*-------------------------------------------------*/
+/* Function switches on a channel of the digitizer */
+/*-------------------------------------------------*/
+
+bool tds754a_display_channel( int channel )
+{
+	char cmd[ 30 ] = "SEL:";
+    char reply[ 10 ];
+    long length = 10;
+
+
+	assert( channel >= 0 && channel < TDS754A_AUX );
+
+	/* check if channel is already displayed */
+
+    strcat( cmd, Channel_Names[ channel ] );
+    strcat( cmd, "?" );
+    if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE ||
+         gpib_read( tds754a.device, reply, &length ) == FAILURE )
+		tds754a_gpib_failure( );
+
+    /* if not switch it on */
+
+    if ( reply[ 0 ] == '0' )
+    {
+        strcpy( cmd, "SEL:" );
+        strcat( cmd, Channel_Names[ channel ] );
+        strcat( cmd, " ON" );
+        if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
+			tds754a_gpib_failure( );
+		sleep( 2 );                  // do we really need this ?
+    }
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+bool tds754a_start_aquisition( void )
+{
+	int status;
+
+
+    /* Start an acquisition:
+       1. clear the SESR register to allow SRQs
+       2. set state to run
+       3. tell digitizer to set the operation complete bit in the SESR when
+	      the measurement is finished, this, in turn will set the ESB-bit in
+          the status byte register which leads to a SRQ */
+
+    if ( ! tds754a_clear_SESR( ) ||
+         gpib_write( tds754a.device, "ACQ:STATE RUN", 13 ) == FAILURE ||
+         gpib_write( tds754a.device, "*OPC", 4 ) == FAILURE )
+		tds754a_gpib_failure( );
+
+    /* Now all left to do is to wait for a SRQ (don't test return status
+       for RQS bit set - it obviously never is (?)) */
+
+    if ( gpib_wait( tds754a.device, RQS, &status ) == FAILURE )
+		tds754a_gpib_failure( );
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+double tds754a_get_area( int channel, WINDOW *w )
+{
+	char cmd[ 50 ] = "MEASU:IMM:SOURCE ";
+	char reply[ 40 ];
+	long length = 40;
+
+
+    /* Now we can measure the data:
+       1. set measurement type to area
+	   2. set the cursors if necessary
+       2. measure all the areas:
+          a. set channel (if the channel is not already set) 
+          b. get the value of the area */
+
+    if ( gpib_write( tds754a.device, "MEASU:IMM:TYP AREA", 18 ) == FAILURE )
+		tds754a_gpib_failure( );
+
+	assert( channel >= 0 && channel < TDS754A_AUX );
+
+	if ( channel != tds754a.meas_source )
+	{
+		strcat( cmd, Channel_Names[ channel ] );
+		if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
+			tds754a_gpib_failure( );
+		tds754a.meas_source = channel;
+	}
+
+	tds754a_set_meas_window( w );
+
+	if ( gpib_write( tds754a.device, "MEASU:IMM:VAL?", 14 ) == FAILURE ||
+		 gpib_read( tds754a.device, reply, &length ) == FAILURE )
+		tds754a_gpib_failure( );
+
+	reply[ length - 1 ] = '\0';
+	return T_atof( reply );
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length )
+{
+	char cmd[ 40 ];
+
+
+	assert( channel >= 0 && channel < TDS754A_AUX );
+
+	if ( channel != tds754a.data_source )
+	{
+		strcpy( cmd, "DATA:SOURCE " );
+		strcat( cmd, Channel_Names[ channel ] );
+		if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
+			tds754a_gpib_failure( );
+		tds754a.data_source = channel;
+	}
+
+	tds754a_set_window( w );
+
+	if ( gpib_write( tds754a.device, "CURV?", 5 ) == FAILURE )
+		tds754a_gpib_failure( );
+
+	/* !!!!!!!!!! Still some stuff to do */
 
 	return OK;
 }
