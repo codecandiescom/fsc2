@@ -245,7 +245,7 @@ must change the "rs_spec10_incl" variable in the same Makefile to the path
 of the header files.
 
 Now go into the main directory of the package and type 'make'. This may
-take some time to finish. Usually no warnings should show up during the
+take some time to finish. In principle no warnings should show up during the
 compilation (at least on systems with a newer libc and if my GPIB library
 is used), but warnings may occur when the documentation is created and some
 of the required tools are not available. It may even happen that the make
@@ -253,8 +253,9 @@ process stops with an error message during this stage (i.e. while making
 the documentation). This does *not* mean that the program didn't compile
 succesfully!
 
-Please don't start 'make' from one of the subdirectories, this is bound to
-fail in most cases and will not create everything you'll need.
+If you start 'make' from one of the subdirectories only the things in this
+subdirectory get made, so if you want to build everything always start
+make from the main directory!
 
 If you get more than a few warnings (about problems with fsc2, not header
 files included by fsc2) during the compilation stage of the program or if
