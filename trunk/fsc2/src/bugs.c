@@ -9,15 +9,6 @@
 extern Fsc2_Assert Assert_struct;      /* defined fsc2_assert.c */
 
 
-#if ! defined MAIL_ADDRESS
-#define MAIL_ADDRESS "Jens.Toerring@physik.fu-berlin.de"
-#endif
-
-#if ! defined MAIL_PROGRAM
-#define MAIL_PROGRAM "/usr/bin/mail"
-#endif
-
-
 /*------------------------------------------------------------------------*/
 /* Callback function for the bug report button. Creates a bug report with */
 /* some information about the input and output of the program etc and     */
@@ -26,6 +17,8 @@ extern Fsc2_Assert Assert_struct;      /* defined fsc2_assert.c */
 
 void bug_report_callback( FL_OBJECT *a, long b )
 {
+#if defined ( MAIL_ADDRESS ) && defined ( MAIL_PROGRAM )
+
 	FILE *tmp;
 	int tmp_fd;
 	char filename[ ] = P_tmpdir "/fsc2XXXXXX";
@@ -280,6 +273,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	unlink( filename );                /* delete the temporary file */
 	sigaction( SIGCHLD, &oact, NULL );
 	notify_conn( UNBUSY_SIGNAL );
+#endif
 }
 
 
@@ -289,6 +283,8 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 void death_mail( int signo )
 {
+#if defined ( MAIL_ADDRESS ) && defined ( MAIL_PROGRAM )
+
 	FILE *mail;
 	char cur_line[ FL_BROWSER_LINELENGTH ];
 	char *clp;
@@ -349,4 +345,5 @@ void death_mail( int signo )
 	}
 
 	pclose( mail );
+#endif
 }
