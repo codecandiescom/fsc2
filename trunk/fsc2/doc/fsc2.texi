@@ -1,31 +1,32 @@
 \input texinfo   @c -*-texinfo-*-
 
-@c $Id$
+@c  $Id$
 @c
-@c Copyright (C) 1999-2004 Jens Thoms Toerring
+@c  Copyright (C) 1999-2004 Jens Thoms Toerring
 @c
-@c This file is part of fsc2.
+@c  This file is part of fsc2.
 @c
-@c Fsc2 is free software; you can redistribute it and/or modify
-@c it under the terms of the GNU General Public License as published by
-@c the Free Software Foundation; either version 2, or (at your option)
-@c any later version.
+@c  Fsc2 is free software; you can redistribute it and/or modify
+@c  it under the terms of the GNU General Public License as published by
+@c  the Free Software Foundation; either version 2, or (at your option)
+@c  any later version.
 @c
-@c Fsc2 is distributed in the hope that it will be useful,
-@c but WITHOUT ANY WARRANTY; without even the implied warranty of
-@c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-@c GNU General Public License for more details.
+@c  Fsc2 is distributed in the hope that it will be useful,
+@c  but WITHOUT ANY WARRANTY; without even the implied warranty of
+@c  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+@c  GNU General Public License for more details.
 @c
-@c You should have received a copy of the GNU General Public License
-@c along with fsc2; see the file COPYING.  If not, write to
-@c the Free Software Foundation, 59 Temple Place - Suite 330,
-@c Boston, MA 02111-1307, USA.
+@c  You should have received a copy of the GNU General Public License
+@c  along with fsc2; see the file COPYING.  If not, write to
+@c  the Free Software Foundation, 59 Temple Place - Suite 330,
+@c  Boston, MA 02111-1307, USA.
 
-@c %**start of header
+@c  %**start of header
+
 
 @setfilename fsc2.info
 @settitle fsc2
-@set lastupdate June 20, 2004
+@set lastupdate July 26, 2004
 @iftex
 @afourpaper
 @end iftex
@@ -42,7 +43,7 @@
 @sp 4
 @center A Program for the Remote Control of Spectrometers
 @sp 2
-@center June 2004
+@center July 2004
 @sp 10
 @center Jens Thoms T@"orring
 @sp 1
@@ -90,7 +91,7 @@ modules and lots of further topics.
 * Introduction::            Basic concepts of @code{fsc2}
 * GUI::                     The graphical user interface
 * Web Server::              Monitoring the experiment via the net
-* EDL::                     Description of @code{EDL} the language
+* EDL::                     Description of the @code{EDL} language
 * Built-in Functions::      Description of all built-in functions
 * Device Functions::        Description of functions for accessing devices
 * Using Pulsers::           How to work with the pulsers
