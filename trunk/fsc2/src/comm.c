@@ -288,7 +288,6 @@ long reader( void *ret )
 {
 	CS header;
 	char *str[ 4 ];
-	long dim;
 	int i;
 	int n1, n2;
 	long retval;
@@ -659,7 +658,6 @@ void writer( int type, ... )
 	CS header;
 	va_list ap;
 	char *str[ 4 ];
-	long dim;
 	int n1, n2;
 	int i;
 	char ack;

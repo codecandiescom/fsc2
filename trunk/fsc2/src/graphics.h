@@ -134,14 +134,10 @@ typedef struct {
 
 #include "fsc2.h"
 
-void graphics_init( long dim, long nc, long nx, long ny,
-					double rwc_x_start, double rwc_x_delta,
-					double rwc_y_start, double rwc_y_delta,
-					char *x_label, char *y_label );
-void graphics_free( void );
-void free_graphics( void );
 void start_graphics( void );
 void stop_graphics( void );
+void graphics_free( void );
+void free_graphics( void );
 void reconfigure_window( Canvas *c, int w, int h );
 void recalc_XPoints( void );
 void recalc_XPoints_of_curve( Curve_1d *cv );
