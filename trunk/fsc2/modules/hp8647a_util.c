@@ -236,6 +236,8 @@ double hp8647a_get_att( double freq )
 }
 
 
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
 
 int hp8647a_set_mod_param( Var *v, double *dres, int *ires )
 {
@@ -246,8 +248,8 @@ int hp8647a_set_mod_param( Var *v, double *dres, int *ires )
 							  "INT 400", "400Hz", "400 Hz", "400" };
 
 
-	/* If the variable is an integer of floating value this means a amplitude
-	   setting */
+	/* If the variable is an integer of floating value this means an
+	   amplitude setting */
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -258,7 +260,7 @@ int hp8647a_set_mod_param( Var *v, double *dres, int *ires )
 		return 1;
 	}
 
-	/* Otherwise its got to be a string */
+	/* Otherwise it got to be a string */
 
 	vars_check( v, STR_VAR );
 

@@ -801,7 +801,7 @@ Var *synthesizer_modulation( Var *v )
 		v = vars_pop( v );
 	}
 
-	if ( type != UNDEFINED || hp8647a.mod_type_is_set ==  SET )
+	if ( type != UNDEFINED || hp8647a.mod_type_is_set == SET )
 	{
 		if ( type != UNDEFINED )
 		{
