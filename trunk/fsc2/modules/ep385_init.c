@@ -232,6 +232,8 @@ static void ep385_create_shape_pulses( void )
 		rp->sp = np;
 		np->sp = rp;
 
+		np->tp = NULL;
+
 		/* The remaining properties are just exact copies of the
 		   pulse the shape pulse has to be used with */
 
@@ -359,6 +361,8 @@ static void ep385_create_twt_pulses( void )
 
 		rp->tp = np;
 		np->tp = rp;
+
+		np->sp = NULL;
 
 		/* The remaining properties are just exact copies of the
 		   pulse the shape pulse has to be used with */

@@ -28,7 +28,6 @@
 static bool ep385_update_pulses( bool flag );
 static void ep385_pulse_check( FUNCTION *f );
 static void ep385_defense_shape_check( FUNCTION *shape );
-static PULSE *ep385_delete_pulse( PULSE *p );
 static void ep385_commit( bool flag );
 
 
