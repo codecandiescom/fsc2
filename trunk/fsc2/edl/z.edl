@@ -1,9 +1,10 @@
 DEVICES:
 
 VARS:
+
 I, J, K;
-N = 10,
-M = 10;
+N = 20,
+M = 20;
 j[ 4, N ];
 k[ N ];
 a, b;
