@@ -930,8 +930,8 @@ inline void lower_permissions( void )
 /* to half the size of a short int.                                        */
 /*-------------------------------------------------------------------------*/
 
-#define SHRT_MAX_HALF ( SHRT_MAX / 2 )
-#define SHRT_MIN_HALF ( SHRT_MIN / 2 )
+#define SHRT_MAX_HALF ( SHRT_MAX >> 1 )
+#define SHRT_MIN_HALF ( SHRT_MIN >> 1 )
 
 
 inline short d2shrt( double a )
