@@ -151,7 +151,8 @@ install:
 
 
 tags:
-	etags -T ${c_sources} *.flex *.y ${c_sources:.c=.h} $(header)
+	etags -T ${c_sources} *.flex *.y ${c_sources:.c=.h} $(header) \
+		  ${modules} ${dg2020} ${dg2020:.c=.h}} ${tds754a} ${tds754a:.c=.h}}
 
 
 clean: 
