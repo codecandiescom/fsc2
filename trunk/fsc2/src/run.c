@@ -929,8 +929,7 @@ static void run_child( void )
 	   process if the parent process is being debugged and a breakpoint has
 	   been set in a part of code that is shared between parent and child. */
 
-	if ( ( fcd = getenv( "FSC2_CHILD_DEBUG" ) ) != NULL &&
-		 fcd[ 0 ] != '\0' )
+	if ( ( fcd = getenv( "FSC2_CHILD_DEBUG" ) ) != NULL && *fcd != '\0' )
 	{
 		fprintf( stderr, "Child process pid = %d\n", getpid( ) );
 		fflush( stderr );
