@@ -843,7 +843,7 @@ static ssize_t output( const char *fmt, ... )
 
 	while ( 1 )
 	{
-		c = T_realloc( c, len );
+		c = CHAR_P T_realloc( c, len );
 		va_start( ap, fmt );
 		wr = vsnprintf( c, len, fmt, ap );
 		va_end( ap );
