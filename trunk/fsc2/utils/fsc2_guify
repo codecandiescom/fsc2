@@ -446,8 +446,8 @@ sub cond_check {
 
 
 ################################################################
-# All the rest is the routine that writes the new script. That's the
-# real tricky part and it unfortunately also looks like this...
+# All the rest is the routine that writes the script. That's the
+# real tricky part and unfortunately also looks that way...
 
 sub write_script {
 
@@ -909,6 +909,7 @@ EOT
 
 
 ################################################################
+# Package for showing a file selector
 
 package fsc2_filesel;
 
@@ -1017,6 +1018,8 @@ sub show {
 }
 
 
+################################################################
+
 sub new_selection {
     my ( $d, $l, $y ) = @_;
     my $sel = $l->get( $l->nearest( $y ) );
@@ -1043,6 +1046,8 @@ sub new_selection {
     }
 }
 
+
+################################################################
 
 sub populate_fs {
     my ( $list, $dir ) = @_;
