@@ -6,8 +6,6 @@
 #include "fsc2.h"
 
 
-void tools_clear( void );
-
 
 static IOBJECT *find_object_from_ID( long ID );
 static void recreate_Tool_Box( void );
@@ -22,9 +20,8 @@ static void tools_callback( FL_OBJECT *ob, long data );
 Var *f_bcreate( Var *v )
 {
 	long type;
-	long coll;
+	long coll = -1;
 	IOBJECT *cio;
-	FL_OBJECT *group = NULL;
 	char *label = NULL;
 	char *help_text = NULL;
 	IOBJECT *new_io, *ioi;
@@ -74,8 +71,6 @@ Var *f_bcreate( Var *v )
 
 	if ( type == RADIO_BUTTON )
 	{
-	    coll = -1;
-
 		if ( v != NULL && v->type & ( INT_VAR | FLOAT_VAR ) )
 		{
 			vars_check( v, INT_VAR | FLOAT_VAR );
@@ -89,23 +84,26 @@ Var *f_bcreate( Var *v )
 			else
 				coll = v->val.lval;
 
-			/* Check that other group member exists at all */
-
-			if ( ( cio = find_object_from_ID( coll ) ) == NULL )
+			if ( I_am == PARENT )
 			{
-				eprint( FATAL, "%s:%ld: Button with ID %ld doesn't exist in "
-						"`button_create'.\n", Fname, Lc, coll );
-				THROW( EXCEPTION );
-			}
+				/* Check that other group member exists at all */
 
-			/* The other group members must also be radio buttons */
+				if ( ( cio = find_object_from_ID( coll ) ) == NULL )
+				{
+					eprint( FATAL, "%s:%ld: Button with ID %ld doesn't exist "
+							"in `button_create'.\n", Fname, Lc, coll );
+					THROW( EXCEPTION );
+				}
 
-			if ( cio->type != RADIO_BUTTON )
-			{
-				eprint( FATAL, "%s:%ld: Button with ID %ld isn't a "
-						"RADIO_BUTTON in `button_create'.\n",
-						Fname, Lc, coll );
-				THROW( EXCEPTION );
+				/* The other group members must also be radio buttons */
+
+				if ( cio->type != RADIO_BUTTON )
+				{
+					eprint( FATAL, "%s:%ld: Button with ID %ld isn't a "
+							"RADIO_BUTTON in `button_create'.\n",
+							Fname, Lc, coll );
+					THROW( EXCEPTION );
+				}
 			}
 
 			v = vars_pop( v );
@@ -134,6 +132,61 @@ Var *f_bcreate( Var *v )
 			;
 	}
 
+	if ( I_am == CHILD )
+	{
+		void *buffer, *pos;
+		long new_ID;
+		long *result;
+
+
+		buffer = T_malloc( 3 * sizeof( long ) + strlen( Fname )
+						   + strlen( label ) + strlen( help_text ) );
+		pos = buffer;
+
+		memcpy( pos, &Lc, sizeof( long ) );     /* store current line number */
+		pos += sizeof( long );
+
+		memcpy( pos, &type, sizeof( long ) );   /* store button type */
+		pos += sizeof( long );
+
+		memcpy( pos, &coll, sizeof( long ) );   /* store colleague button */
+		pos += sizeof( long );
+
+		strcpy( ( char * ) pos, Fname );        /* store current file name */
+		pos += strlen( Fname ) + 1;
+
+		if ( label )                            /* store label string */
+		{
+			strcpy( ( char * ) pos, label );
+			pos += strlen( label ) + 1;
+		}
+		else
+			*( ( char * ) pos++ ) = '\0';
+
+		if ( help_text )                        /* store help text string */
+		{
+			strcpy( ( char * ) pos, help_text );
+			pos += strlen( help_text ) + 1;
+		}
+		else
+			*( ( char * ) pos++ ) = '\0';
+
+		result = exp_bcreate( buffer, ( long ) ( pos - buffer ) );
+
+		T_free( label );
+		T_free( help_text );
+
+		if ( result[ 0 ] == 0 )
+		{
+			T_free( result );
+			THROW( EXCEPTION );
+		}
+
+		new_ID = result[ 1 ];
+		T_free( result );
+		return vars_push( INT_VAR, new_ID );
+	}
+
 	/* Now that we're done with checking the parameters we can create the new
        button - if the Tool_Box doesn't exist yet we've got to create it now */
 
@@ -141,6 +194,7 @@ Var *f_bcreate( Var *v )
 	{
 		Tool_Box = T_malloc( sizeof( TOOL_BOX ) );
 		Tool_Box->layout = VERT;
+		Tool_Box->x = Tool_Box->y = 0;
 		Tool_Box->Tools = NULL;
 		new_io = Tool_Box->objs = T_malloc( sizeof( IOBJECT ) );
 		new_io->next = new_io->prev = NULL;
@@ -158,24 +212,28 @@ Var *f_bcreate( Var *v )
 	new_io->ID = ID;
 	new_io->type = ( int ) type;
 	new_io->state = 0;
-	new_io->group = group;
+	new_io->group = NULL;
 	new_io->label = label;
 	new_io->help_text = help_text;
 	new_io->partner = coll;
 	new_io->is_created = UNSET;
+	new_io->delete_after_test = TEST_RUN ? SET : UNSET;
 
-	recreate_Tool_Box( );
-
-	if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
-		fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-					  FL_FULLBORDER, "fsc2: Tool box" );
-	else
+	if ( ! TEST_RUN )
 	{
-		fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
-		fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-					  FL_FULLBORDER, "fsc2: Tool box" );
+		recreate_Tool_Box( );
+
+		if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
+			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
+						  FL_FULLBORDER, "fsc2: Tool box" );
+		else
+		{
+			fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
+			fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
+						  FL_FULLBORDER, "fsc2: Tool box" );
+		}
+		XFlush( fl_get_display( ) );
 	}
-	XFlush( fl_get_display( ) );
 
 	return vars_push( INT_VAR, new_io->ID );
 }
@@ -198,15 +256,45 @@ Var *f_bdelete( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( Tool_Box == NULL )
-	{
-		eprint( FATAL, "%s:%ld: No buttons have been defined yet.\n",
-				Fname, Lc );
-		THROW( EXCEPTION );
-	}
-
 	while ( v != NULL )
 	{
+		if ( I_am == CHILD )
+		{
+			void *buffer, *pos;
+
+
+			if ( v->type != INT_VAR )
+			{
+				eprint( FATAL, "%s:%ld: Invalid button identifier in "
+						"`button_delete'.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+
+			buffer = T_malloc( 2 * sizeof( long ) + strlen( Fname ) + 1 );
+
+			pos = buffer;
+			memcpy( pos, &Lc, sizeof( long ) );
+			pos += sizeof( long );
+			memcpy( pos, &v->val.lval, sizeof( long ) );
+			pos += sizeof( long );
+			strcpy( pos, Fname );
+			pos += strlen( ( char * ) pos ) + 1;
+
+			v = vars_pop( v );
+
+			if ( ! exp_bdelete( buffer, ( long ) ( buffer - pos ) ) )
+				THROW( EXCEPTION );
+
+			continue;
+		}
+
+		if ( Tool_Box == NULL )
+		{
+			eprint( FATAL, "%s:%ld: No buttons have been defined yet.\n",
+					Fname, Lc );
+			THROW( EXCEPTION );
+		}
+
 		if ( v->type != INT_VAR ||
 			 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
 			 ( io->type != NORMAL_BUTTON &&
@@ -220,22 +308,29 @@ Var *f_bdelete( Var *v )
 
 		/* Remove button from the linked list */
 
-		if ( io->next != NULL )
-			io->next->prev = io->prev;
-		if ( io->prev != NULL )
-			io->prev->next = io->next;
-		else
-			Tool_Box->objs = io->next;
+		if ( ! TEST_RUN || io->delete_after_test )
+		{
+			if ( io->next != NULL )
+				io->next->prev = io->prev;
+			if ( io->prev != NULL )
+				io->prev->next = io->next;
+			else
+				Tool_Box->objs = io->next;
+		}
 
 		/* Delete the button */
 
-		fl_delete_object( io->self );
-		fl_free_object( io->self );
+		if ( ! TEST_RUN )
+		{
+			fl_delete_object( io->self );
+			fl_free_object( io->self );
+		}
 
-		/* Special care has to be taken for radio buttons if the first is
-		   deleted */
+		/* Special care has to be taken for radio buttons if the first one
+		   (i.e. the other refer to) is deleted */
 
-		if ( io->type == RADIO_BUTTON && io->partner == -1 )
+		if ( ( ! TEST_RUN || io->delete_after_test ) &&
+			 io->type == RADIO_BUTTON && io->partner == -1 )
 		{
 			for ( nio = io->next; nio != NULL; nio = nio->next )
 				if ( nio->type == RADIO_BUTTON && nio->partner == io->ID )
@@ -251,16 +346,25 @@ Var *f_bdelete( Var *v )
 						nio->partner = new_anchor;
 		}
 
-		T_free( io );
+		if ( ! TEST_RUN || io->delete_after_test )
+		{
+			T_free( io->label );
+			T_free( io->help_text );
+			T_free( io );
+		}
 
 		if ( Tool_Box->objs == NULL )
 		{
-			fl_hide_form( Tool_Box->Tools );
+			if ( ! TEST_RUN )
+			{
+				fl_hide_form( Tool_Box->Tools );
 
-			fl_delete_object( Tool_Box->background_box );
-			fl_free_object( Tool_Box->background_box );
+				fl_delete_object( Tool_Box->background_box );
+				fl_free_object( Tool_Box->background_box );
 
-			fl_free_form( Tool_Box->Tools );
+				fl_free_form( Tool_Box->Tools );
+			}
+
 			Tool_Box = T_free( Tool_Box );
 
 			if ( ( v = vars_pop( v ) ) != NULL )
@@ -273,22 +377,27 @@ Var *f_bdelete( Var *v )
 			return vars_push( INT_VAR, 1 );
 		}
 
-
 		v = vars_pop( v );
 	}
 
-	recreate_Tool_Box( );
+	if ( I_am == CHILD )
+		return vars_push( INT_VAR, 1 );
 
-	if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
-		fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-					  FL_FULLBORDER, "fsc2: Tool box" );
-	else
+	if ( ! TEST_RUN )
 	{
-		fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
-		fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-					  FL_FULLBORDER, "fsc2: Tool box" );
+		recreate_Tool_Box( );
+
+		if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
+			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
+						  FL_FULLBORDER, "fsc2: Tool box" );
+		else
+		{
+			fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
+			fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
+						  FL_FULLBORDER, "fsc2: Tool box" );
+		}
+		XFlush( fl_get_display( ) );
 	}
-	XFlush( fl_get_display( ) );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -309,6 +418,13 @@ Var *f_bstate( Var *v )
 		eprint( FATAL, "%s:%ld: Missing parameters in call of "
 				"`button_state'.\n", Fname, Lc );
 		THROW( EXCEPTION );
+	}
+
+	if ( I_am == CHILD )
+	{
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+		return vars_push( INT_VAR, 0 );
 	}
 
 	if ( Tool_Box == NULL )
@@ -355,7 +471,8 @@ Var *f_bstate( Var *v )
 	else
 		io->state = v->val.dval != 0.0 ? 1 : 0;
 
-	fl_set_button( io->self, io->state );
+	if ( ! TEST_RUN )
+		fl_set_button( io->self, io->state );
 
 	if ( io->type == RADIO_BUTTON )
 	{
@@ -475,6 +592,13 @@ Var *f_screate( Var *v )
 			;
 	}
 	
+	if ( I_am == CHILD )
+	{
+		T_free( label );
+		T_free( help_text );
+		return vars_push( INT_VAR, 0 );
+	}
+
 	/* Now that we're done with checking the parameters we can create the new
        button - if the Tool_Box doesn't exist yet we've got to create it now */
 
@@ -504,19 +628,23 @@ Var *f_screate( Var *v )
 	new_io->label = label;
 	new_io->help_text = help_text;
 	new_io->is_created = UNSET;
+	new_io->delete_after_test = TEST_RUN ? 1 : 0;
 	
-	recreate_Tool_Box( );
-
-	if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
-		fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-					  FL_FULLBORDER, "fsc2: Tool box" );
-	else
+	if ( ! TEST_RUN )
 	{
-		fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
-		fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-					  FL_FULLBORDER, "fsc2: Tool box" );
+		recreate_Tool_Box( );
+
+		if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
+			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
+						  FL_FULLBORDER, "fsc2: Tool box" );
+		else
+		{
+			fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
+			fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
+						  FL_FULLBORDER, "fsc2: Tool box" );
+		}
+		XFlush( fl_get_display( ) );
 	}
-	XFlush( fl_get_display( ) );
 
 	return vars_push( INT_VAR, new_io->ID );
 }
@@ -538,15 +666,22 @@ Var *f_sdelete( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( Tool_Box == NULL )
-	{
-		eprint( FATAL, "%s:%ld: No sliders have been defined yet.\n",
-				Fname, Lc );
-		THROW( EXCEPTION );
-	}
-
 	while ( v != NULL )
 	{
+		if ( I_am == CHILD )
+		{
+			while ( ( v = vars_pop( v ) ) != NULL )
+				;
+			return vars_push( INT_VAR, 0 );
+		}
+
+		if ( Tool_Box == NULL )
+		{
+			eprint( FATAL, "%s:%ld: No sliders have been defined yet.\n",
+					Fname, Lc );
+			THROW( EXCEPTION );
+		}
+
 		if ( v->type != INT_VAR ||
 			 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
 			 ( io->type != NORMAL_BUTTON &&
@@ -560,28 +695,43 @@ Var *f_sdelete( Var *v )
 
 		/* Remove button from the linked list */
 
-		if ( io->next != NULL )
-			io->next->prev = io->prev;
-		if ( io->prev != NULL )
-			io->prev->next = io->next;
-		else
-			Tool_Box->objs = io->next;
+		if ( ! TEST_RUN || io->delete_after_test )
+		{
+			if ( io->next != NULL )
+				io->next->prev = io->prev;
+			if ( io->prev != NULL )
+				io->prev->next = io->next;
+			else
+				Tool_Box->objs = io->next;
+		}
 
 		/* Delete the button */
 
-		fl_delete_object( io->self );
-		fl_free_object( io->self );
+		if ( ! TEST_RUN )
+		{
+			fl_delete_object( io->self );
+			fl_free_object( io->self );
+		}
 
-		T_free( io );
+		if ( ! TEST_RUN || io->delete_after_test )
+		{
+			T_free( io->label );
+			T_free( io->help_text );
+			T_free( io );
+		}
 
 		if ( Tool_Box->objs == NULL )
 		{
-			fl_hide_form( Tool_Box->Tools );
+			if ( ! TEST_RUN )
+			{
+				fl_hide_form( Tool_Box->Tools );
 
-			fl_delete_object( Tool_Box->background_box );
-			fl_free_object( Tool_Box->background_box );
+				fl_delete_object( Tool_Box->background_box );
+				fl_free_object( Tool_Box->background_box );
 
-			fl_free_form( Tool_Box->Tools );
+				fl_free_form( Tool_Box->Tools );
+			}
+
 			Tool_Box = T_free( Tool_Box );
 
 			if ( ( v = vars_pop( v ) ) != NULL )
@@ -598,18 +748,21 @@ Var *f_sdelete( Var *v )
 		v = vars_pop( v );
 	}
 
-	recreate_Tool_Box( );
-
-	if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
-		fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-					  FL_FULLBORDER, "fsc2: Tool box" );
-	else
+	if ( ! TEST_RUN )
 	{
-		fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
-		fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-					  FL_FULLBORDER, "fsc2: Tool box" );
+		recreate_Tool_Box( );
+
+		if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
+			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
+						  FL_FULLBORDER, "fsc2: Tool box" );
+		else
+		{
+			fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
+			fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
+						  FL_FULLBORDER, "fsc2: Tool box" );
+		}
+		XFlush( fl_get_display( ) );
 	}
-	XFlush( fl_get_display( ) );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -630,6 +783,13 @@ Var *f_svalue( Var *v )
 		eprint( FATAL, "%s:%ld: Missing parameters in call of "
 				"`slider_value'.\n", Fname, Lc );
 		THROW( EXCEPTION );
+	}
+
+	if ( I_am == CHILD )
+	{
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+		return vars_push( FLOAT_VAR, 1.23 );
 	}
 
 	if ( Tool_Box == NULL )
@@ -671,7 +831,8 @@ Var *f_svalue( Var *v )
 		io->value = io->start_val;
 	}
 	
-	fl_set_slider_value( io->self, io->value );
+	if ( ! TEST_RUN )
+		fl_set_slider_value( io->self, io->value );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
@@ -741,6 +902,59 @@ void tools_clear( void )
 }
 
 
+/*-----------------------------------------------------*/
+/* Removes all objects that were created in a test run */
+/*-----------------------------------------------------*/
+
+void clear_tools_after_test( void )
+{
+	IOBJECT *io, *nio, *next;
+	long new_anchor;
+
+
+	if ( Tool_Box == NULL )
+		return;
+
+	for ( io = Tool_Box->objs; io != NULL; io = next )
+	{
+		next = io->next;
+
+		if ( ! io->delete_after_test )
+			continue;
+
+		if ( io->next != NULL )
+			io->next->prev = io->prev;
+		if ( io->prev != NULL )
+			io->prev->next = io->next;
+		else
+			Tool_Box->objs = io->next;
+
+		if ( io->type == RADIO_BUTTON && io->partner == -1 )
+		{
+			for ( nio = next; nio != NULL; nio = nio->next )
+				if ( nio->type == RADIO_BUTTON && nio->partner == io->ID )
+				{
+					new_anchor = nio->ID;
+					nio->partner = -1;
+					break;
+				}
+
+			if ( nio != NULL )
+				for ( nio = nio->next; nio != NULL; nio = nio->next )
+					if ( nio->type == RADIO_BUTTON && nio->partner == io->ID )
+						nio->partner = new_anchor;
+		}
+
+		T_free( io->label );
+		T_free( io->help_text );
+		T_free( io );
+	}		
+
+	if ( Tool_Box->objs == NULL )
+		Tool_Box = T_free( Tool_Box );
+}
+
+
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
@@ -784,11 +998,6 @@ static void recreate_Tool_Box( void )
 
 		fl_free_form( Tool_Box->Tools );
 		T_free( Tool_Box->Tools );
-	}
-	else
-	{
-		Tool_Box->x = 0;
-		Tool_Box->y = 0;
 	}
 
 	/* Now we've got to calculate its new size and create it */
@@ -895,6 +1104,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 					if ( nio->partner == io->ID )
 						nio->group = io->group;
 			}
+
 			io->self = fl_add_round3dbutton( FL_RADIO_BUTTON, io->x, io->y,
 											 io->w, io->h, io->label );
 			fl_end_group( );
