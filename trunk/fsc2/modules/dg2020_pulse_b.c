@@ -140,15 +140,22 @@ bool dg2020_set_pulse_length( long pnum, double time )
 		THROW( EXCEPTION );
 	}
 
-	if ( time <= 0 )
+	if ( time < 0.0 )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid length for pulse %ld: %s.\n",
+		eprint( FATAL, "%s:%ld: %s: Invalid negative length set for "
+				"pulse %ld: %s.\n",
 				Fname, Lc, pulser_struct.name, pnum, dg2020_ptime( time ) );
 		THROW( EXCEPTION );
 	}
 
-	p->len = p->initial_len = dg2020_double2ticks( time );
-	p->is_len = p->initial_is_len = SET;
+	if ( time != 0.0 )
+	{
+		p->len = dg2020_double2ticks( time );
+		p->is_len = SET;
+	}
+
+	p->initial_len = dg2020_double2ticks( time );
+	p->initial_is_len = SET;
 
 	return OK;
 }
