@@ -156,7 +156,7 @@ arhs:    /* empty */               { vars_arr_init( vars_push( UNDEF_VAR ) ); }
 list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
        | expr                      { $$ = $1; }
        | '*'                       { ( $$ = vars_push( INT_VAR, 0 ) )->flags
-										 |= VARIABLE_SIZED; }
+										                   |= VARIABLE_SIZED; }
        | list1 ',' expr            { $$ = $1; }
        | list1 ',' '*'             { ( $$ = vars_push( INT_VAR, 0 ) )->flags
 										 |= VARIABLE_SIZED; }

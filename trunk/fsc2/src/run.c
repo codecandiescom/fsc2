@@ -85,19 +85,21 @@ bool run( void )
 
 	memcpy( &compile_test, &compilation, sizeof( Compilation ) );
 
-	/* Run all the experiment hooks - on failure reset GPIB bus */
+	/* Run all the experiment hooks and initialize the graphics */
 
 	TRY
 	{
 		vars_pop( f_dtime( NULL ) );
 		run_exp_hooks( );
 		check_for_further_errors( &compile_test, &compilation );
+		start_graphics( );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
 		run_end_of_exp_hooks( );
-		gpib_shutdown( );
+		if ( need_GPIB )
+			gpib_shutdown( );
 		set_buttons_for_run( 1 );
 		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 		return FAIL;
@@ -116,10 +118,6 @@ bool run( void )
 		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 		return FAIL;
 	}
-
-	/* Open window for displaying measured data */
-
-	start_graphics( );
 
 	child_is_quitting = UNSET;
 

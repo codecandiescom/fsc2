@@ -497,14 +497,15 @@ static void G_init_curves_2d( void )
 		cv = G.curve_2d[ i ] = T_malloc( sizeof( Curve_2d ) );
 
 		cv->points = NULL;
+		cv->xpoints = NULL;
+		cv->xpoints_s = NULL;
+
 		cv->points = T_malloc( G.nx * G.ny * sizeof( Scaled_Point ) );
 
 		for ( sp = cv->points, j = 0; j < G.nx * G.ny; sp++, j++ )
 			sp->exist = UNSET;
 
-		cv->xpoints = NULL;
 		cv->xpoints = T_malloc( G.nx * G.ny * sizeof( XPoint ) );
-		cv->xpoints_s = NULL;
 		cv->xpoints_s = T_malloc( G.nx * G.ny * sizeof( XPoint ) );
 
 		/* Create a GC for drawing the curve and set its colour */

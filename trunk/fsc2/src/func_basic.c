@@ -1213,3 +1213,104 @@ Var *f_sizes( Var *v )
 	vars_check( v, ARR_REF );
 	return vars_push( INT_TRANS_ARR, v->from->sizes, ( long ) v->from->dim );
 }
+
+
+/*------------------------------------------------------------------*/
+/* Calculates the mean of the elements of an one dimensional array. */
+/*------------------------------------------------------------------*/
+
+Var *f_mean( Var *v )
+{
+	long i;
+	long len;
+	long *ilp;
+	double *idp;
+	double val = 0.0;
+
+
+	vars_check( v, INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR |
+				   INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
+	get_array_params( v, "mean", &len, &ilp, &idp );
+
+	for ( i = 0; i < len; i++ )
+		if ( ilp != NULL )
+			val += ( double ) *ilp++;
+		else
+			val += *idp++;
+
+	return vars_push( FLOAT_VAR, val / ( double ) len );
+}
+
+
+/*------------------------------------------------------------------*/
+/* Calculates the mean of the elements of an one dimensional array. */
+/*------------------------------------------------------------------*/
+
+Var *f_slice( Var *v )
+{
+	long len;
+	long *ilp;
+	double *idp;
+	long index;
+	long slice_len;
+
+
+	vars_check( v, INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR |
+				   INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
+	get_array_params( v, "mean", &len, &ilp, &idp );
+
+	vars_check( v->next, INT_VAR | FLOAT_VAR );
+
+	if ( v->next->type == FLOAT_VAR )
+	{
+		eprint( WARN, "%s:%ld: Float value used as array index in function "
+				"`slice'.\n", Fname, Lc );
+		index = lround( v->next->val.dval ) - ARRAY_OFFSET;
+	}
+	else
+		index = v->next->val.lval - ARRAY_OFFSET;
+
+	if ( index < 0 )
+	{
+		eprint( FATAL, "%s:%ld: Negative array index used in function "
+				"`slice'.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v->next->next, INT_VAR | FLOAT_VAR );
+
+	if ( v->next->type == FLOAT_VAR )
+	{
+		eprint( WARN, "%s:%ld: Float value used as slice length parameter in "
+				"function `slice'.\n", Fname, Lc );
+		slice_len = lround( v->next->next->val.dval );
+	}
+	else
+		slice_len = v->next->next->val.lval;
+
+	if ( slice_len < 1 )
+	{
+		eprint( FATAL, "%s:%ld; Zero or negative slice length used in "
+				"function `slice'.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+
+	/* !!!!!
+	   This test needs still some thinking about because of problems in the
+	   test run with dynamically assigned arrays */
+
+	if ( index + slice_len >= len && ! TEST_RUN )
+	{
+		eprint( FATAL, "%s:%ld: Sum of index and slice length parameter "
+				"exceeds length of array in function slice.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	if ( ilp != NULL )
+		return vars_push( INT_TRANS_ARR, ilp + index, slice_len );
+	else
+		return vars_push( FLOAT_TRANS_ARR, idp + index, slice_len );
+}

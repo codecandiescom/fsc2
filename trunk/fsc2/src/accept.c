@@ -692,12 +692,12 @@ static bool incr_y( long y_index )
 	{
 		cv = G.curve_2d[ i ];
 			
-		cv->points = T_realloc( cv->points, G.nx * ( y_index + 1 )
-								            * sizeof( Scaled_Point ) );
-		cv->xpoints = T_realloc( cv->xpoints, G.nx * ( y_index + 1 )
-								              * sizeof( XPoint ) );
+		cv->points    = T_realloc( cv->points, G.nx * ( y_index + 1 )
+								   * sizeof( Scaled_Point ) );
+		cv->xpoints   = T_realloc( cv->xpoints, G.nx * ( y_index + 1 )
+								   * sizeof( XPoint ) );
 		cv->xpoints_s = T_realloc( cv->xpoints_s, G.nx * ( y_index + 1 )
-								                   * sizeof( XPoint ) );
+								   * sizeof( XPoint ) );
 
 		for ( sp = &cv->points[ G.ny * G.nx ], j = G.ny; j <= y_index; j++ )
 			for ( k = 0; k < G.nx; sp++, k++ )

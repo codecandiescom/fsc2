@@ -84,6 +84,8 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "dim",           f_dim,      1, ACCESS_ALL,  UNSET	},
 	{ "size",          f_size,     2, ACCESS_ALL,  UNSET	},
 	{ "sizes",         f_sizes,    1, ACCESS_ALL,  UNSET	},
+	{ "mean",          f_mean,     1, ACCESS_ALL,  UNSET    },
+	{ "slice",         f_slice,    3, ACCESS_ALL,  UNSET    },
 	{ "get_file",      f_getf,    -1, ACCESS_EXP,  UNSET	},
 	{ "save",          f_save,    -1, ACCESS_EXP,  UNSET	},
 	{ "fsave",         f_fsave,   -1, ACCESS_EXP,  UNSET	},

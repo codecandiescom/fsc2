@@ -817,6 +817,7 @@ Var *vars_negate( Var *v )
 		for ( i = 0; i < len; ilp++, i++ )
 			rlp[ i ] = - *ilp;
 		new_var = vars_push( INT_TRANS_ARR, rlp, len );
+		new_var->flags |= v->flags & IS_DYNAMIC;
 		T_free( rlp );
 	}
 	else
@@ -825,6 +826,7 @@ Var *vars_negate( Var *v )
 		for ( i = 0; i < len; idp++, i++ )
 			rdp[ i ] = - *idp;
 		new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+		new_var->flags |= v->flags & IS_DYNAMIC;
 		T_free( rdp );
 	}
 
@@ -1512,6 +1514,8 @@ Var *vars_get_lhs_pointer( Var *v, int n )
 	if ( n == a->dim - 1 )
 		ret->flags |= NEED_SLICE;
 
+	ret->flags |= a->flags & IS_DYNAMIC;
+
 	return ret;
 }
 
@@ -1571,13 +1575,26 @@ long vars_calc_index( Var *a, Var *v )
 			THROW( EXCEPTION );
 		}
 
+		/* Here we must be careful: If the array is dynamically sized and
+		   we're still in the test phase, the array slice size might be a
+		   dummy value that get's corrected in the real measurement. In this
+		   case (i.e. test phase and array is dynamically sized and its the
+		   last index into the array) we accept the index and readjust it to
+		   the currenty possible maximum value. */
+
 		if ( cur >= a->sizes[ i ] )
 		{
-			eprint( FATAL, "%s:%ld: Invalid array index #%d (value=%d) for "
-					"array `%s', maximum is %d.\n",
-					Fname, Lc, i + 1, cur + ARRAY_OFFSET, a->name,
-					a->sizes[ i ] - 1 + ARRAY_OFFSET );
-			THROW( EXCEPTION );
+			if ( ! ( ( a->flags & IS_DYNAMIC ) && TEST_RUN )
+				 || v->next != NULL || i != a->dim - 1 )
+			{
+				eprint( FATAL, "%s:%ld: Invalid array index #%d (value=%d) "
+						"for array `%s', maximum is %d.\n", Fname, Lc, i + 1,
+						cur + ARRAY_OFFSET, a->name,
+						a->sizes[ i ] - 1 + ARRAY_OFFSET );
+				THROW( EXCEPTION );
+			}
+			else
+				cur = a->sizes[ i ] - 1;
 		}
 
 		/* Update the index */
@@ -1608,10 +1625,10 @@ long vars_calc_index( Var *a, Var *v )
 
 /*-------------------------------------------------------------------------*/
 /* The function sets up a new array, pointed to by the 'from'-field in 'v' */
-/* dimension 'dim' with the sizes of the dimensions specified by a list of */
-/* indices on the stack, starting directly after 'v'. If the list contains */
-/* only one index less than the dimension, a variable sized array is       */
-/* created.                                                                */
+/* and dimension 'dim' with the sizes of the dimensions specified by a     */
+/* list of indices on the stack, starting directly after 'v'. If the list  */
+/* contains only one index less than the dimension, a variable sized array */
+/* is created.                                                             */
 /*-------------------------------------------------------------------------*/
 
 Var *vars_setup_new_array( Var *v, int dim )
@@ -1634,8 +1651,9 @@ Var *vars_setup_new_array( Var *v, int dim )
 	a->dim = dim;
 	a->sizes = NULL;
 	a->sizes = T_malloc( dim * sizeof( int ) );
-	a->flags &= ~NEW_VARIABLE;
 	a->len = 1;
+
+	a->flags &= ~NEW_VARIABLE;
 
 	/* Run through the variables with the sizes after popping the variable
        with the array pointer */
@@ -1668,10 +1686,11 @@ Var *vars_setup_new_array( Var *v, int dim )
 
 				vars_pop( v );
 
-				a->flags &= ~NEW_VARIABLE;
+				a->flags |= IS_DYNAMIC;
 				a->sizes[ i ] = 0;
 				a->flags |= NEED_ALLOC;
 				ret = vars_push( ARR_PTR, NULL, a );
+				ret->flags |= IS_DYNAMIC;
 				return ret;
 			}
 
@@ -1721,6 +1740,7 @@ Var *vars_setup_new_array( Var *v, int dim )
 
 Var *vars_arr_rhs( Var *v )
 {
+	Var *ret;
 	int  dim;
 	Var  *a;
 	long index;
@@ -1795,15 +1815,15 @@ Var *vars_arr_rhs( Var *v )
 		else
 			return vars_push( FLOAT_VAR, *( a->val.dpnt + index ) );
 	}
-	else
-	{
-		if ( a->type == INT_ARR )
-			return vars_push( ARR_PTR, a->val.lpnt + index, a );
-		else
-			return vars_push( ARR_PTR, a->val.dpnt + index, a );
-	}
 
-	assert( 1 == 0 );       /* we never should end up here... */
+	if ( a->type == INT_ARR )
+		ret = vars_push( ARR_PTR, a->val.lpnt + index, a );
+	else
+		ret = vars_push( ARR_PTR, a->val.dpnt + index, a );
+
+	ret->flags |= a->flags & IS_DYNAMIC;
+
+	return ret;
 }
 
 
@@ -1851,6 +1871,13 @@ void vars_assign( Var *src, Var *dest )
 
 void vars_ass_from_var( Var *src, Var *dest )
 {
+	long i;
+	long lval;
+	double dval;
+	long *lp;
+	double *dp;
+
+
 	/* Don't do an assignment if right hand side has no value */
 
 	if ( src->flags & NEW_VARIABLE )
@@ -1928,6 +1955,40 @@ void vars_ass_from_var( Var *src, Var *dest )
 				else
 					*( ( double * ) dest->val.gptr ) = src->val.dval;
 			}
+			break;
+
+		case INT_ARR :
+			if ( dest->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Can't assign value to array with "
+						"more than one dimension.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+
+			if ( src->type == FLOAT_VAR )
+			{
+				eprint( WARN, "%s:%ld: Assigning float value to integer "
+						"array.\n", Fname, Lc );
+				lval = ( long ) src->val.dval;
+			}
+			else
+				lval = src->val.lval;
+
+			for ( i = 0, lp = dest->val.lpnt; i < dest->len; i++ )
+				*lp++ = lval;
+			break;
+
+		case FLOAT_ARR :
+			if ( dest->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Can't assign value to array with "
+						"more than one dimension.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+
+			dval = VALUE( src );
+			for ( i = 0, dp = dest->val.dpnt; i < dest->len; i++ )
+				*dp++ = dval;
 			break;
 
 		default :                    /* we never should end up here... */
@@ -2097,11 +2158,11 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 
 void vars_ass_from_trans_ptr( Var *src, Var *dest )
 {
-	Var    *d;
-	int    i;
+	Var *d;
+	int i;
 	double *sdptr = NULL;
-	long   *slptr = NULL;
-	bool   dest_needs_pop = UNSET;
+	long *slptr = NULL;
+	bool dest_needs_pop = UNSET;
 
 
 	/* We can't assign from a transient array to a variable */
@@ -2113,7 +2174,7 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 		THROW( EXCEPTION );
 	}
 
-	assert( dest->type & ( ARR_PTR | INT_ARR | FLOAT_ARR ) ); /* paranoia */
+	vars_check( dest, ARR_PTR | INT_ARR | FLOAT_ARR );
 
 	/* This is for assignments to one-dimensional arrays that are specified
 	   on the LHS just with their names and without any brackets */
@@ -2216,6 +2277,8 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 				*dest->val.dpnt++ = ( double ) *slptr++;
 		}
 	}
+
+	dest->flags |= dest->flags & src->flags & IS_DYNAMIC;
 
 	if ( dest_needs_pop )
 		vars_pop( dest );
@@ -2347,6 +2410,9 @@ void vars_arr_init( Var *v )
 
 Var *apply_unit( Var *var, Var *unit ) 
 {
+	Var *ret;
+
+
 	if ( var->type == UNDEF_VAR )
 	{
 		assert( var->name != NULL );              /* just a bit paranoid ? */
@@ -2361,7 +2427,11 @@ Var *apply_unit( Var *var, Var *unit )
 		if ( var->type & ( INT_VAR | FLOAT_VAR ) )
 			return vars_mult( var, vars_push( INT_VAR, 1 ) );
 		if ( var->type & ( INT_ARR | FLOAT_ARR ) )
-			return vars_push( ARR_REF, var );
+		{
+			ret = vars_push( ARR_REF, var );
+			ret->flags |= var->flags & IS_DYNAMIC;
+			return ret;
+		}
 		return var;
 	}
 

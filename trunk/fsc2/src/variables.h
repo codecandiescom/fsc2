@@ -83,6 +83,7 @@ enum {
 	NEED_SLICE         = ( 1 << 2 ),
 	NEED_INIT          = ( 1 << 3 ),
 	NEED_ALLOC         = ( 1 << 4 ),
+	IS_DYNAMIC         = ( 1 << 5 ),
 };
 
 
