@@ -24,6 +24,10 @@
 use strict;
 use Tk;
 
+my @version = split /\./, $Tk::VERSION;
+die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
+	if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
+
 my $lockin     = 'SR810';
 my $start_freq = 8;
 my $end_freq   = 22;
@@ -42,9 +46,9 @@ my %fp = ( '-side' => 'top',
 		   '-padx' => '2m',
 		   '-pady' => '2m' );
 
-my %wp = ( '-side' => 'left',
-		   '-fill' => 'x',
-		   '-padx' => '3m',
+my %wp = ( '-side'   => 'left',
+		   '-fill'   => 'x',
+		   '-padx'   => '3m',
 		   '-expand' => 1 );
 
 # Get defaults
@@ -63,16 +67,16 @@ my $f0 = $mw->Frame( )->pack( '-side' => 'top',
 
 
 my $f1 = $mw->Frame( );
-my $f1_l1 = $f1->Label( '-text' => 'Start frequency:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f1_v = $f1->Entry( '-textvariable' => \$start_freq,
-					   '-width' => '6',
-					   '-validate' => 'key',
+my $f1_l1 = $f1->Label( '-text'           => 'Start frequency:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f1_v = $f1->Entry( '-textvariable'    => \$start_freq,
+					   '-width'           => '6',
+					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_numeric,
-					   '-relief' => 'sunken' );
-my $f1_l2 = $f1->Label( '-text' => 'MHz',
-						'-width' => 3 );
+					   '-relief'          => 'sunken' );
+my $f1_l2 = $f1->Label( '-text'           => 'MHz',
+						'-width'          => 3 );
 
 $f1->pack( %fp );
 $f1_l1->pack( %wp );
@@ -81,16 +85,16 @@ $f1_l2->pack( %wp );
 
 
 my $f2 = $mw->Frame( );
-my $f2_l1 = $f2->Label( '-text' => 'End frequency:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f2_v = $f2->Entry( '-textvariable' => \$end_freq,
-					   '-width' => '6',
-					   '-validate' => 'key',
+my $f2_l1 = $f2->Label( '-text'           => 'End frequency:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f2_v = $f2->Entry( '-textvariable'    => \$end_freq,
+					   '-width'           => '6',
+					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_numeric,
-					   '-relief' => 'sunken' );
-my $f2_l2 = $f2->Label( '-text' => 'MHz',
-						'-width' => 3 );
+					   '-relief'          => 'sunken' );
+my $f2_l2 = $f2->Label( '-text'           => 'MHz',
+						'-width'          => 3 );
 
 $f2->pack( %fp );
 $f2_l1->pack( %wp );
@@ -99,16 +103,16 @@ $f2_l2->pack( %wp );
 
 
 my $f3 = $mw->Frame( );
-my $f3_l1 = $f3->Label( '-text' => 'Step frequency:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f3_v = $f3->Entry( '-textvariable' => \$step_freq,
-					   '-width' => '6',
-					   '-validate' => 'key',
+my $f3_l1 = $f3->Label( '-text'           => 'Step frequency:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f3_v = $f3->Entry( '-textvariable'    => \$step_freq,
+					   '-width'           => '6',
+					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_numeric,
-					   '-relief' => 'sunken' );
-my $f3_l2 = $f3->Label( '-text' => 'kHz',
-						'-width' => 3 );
+					   '-relief'          => 'sunken' );
+my $f3_l2 = $f3->Label( '-text'           => 'kHz',
+						'-width'          => 3 );
 
 $f3->pack( %fp );
 $f3_l1->pack( %wp );
@@ -117,16 +121,16 @@ $f3_l2->pack( %wp );
 
 
 my $f4 = $mw->Frame( );
-my $f4_l1 = $f4->Label( '-text' => 'Attenuation:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f4_v = $f4->Entry( '-textvariable' => \$atten,
-					   '-width' => '6',
-					   '-validate' => 'key',
+my $f4_l1 = $f4->Label( '-text'           => 'Attenuation:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f4_v = $f4->Entry( '-textvariable'    => \$atten,
+					   '-width'           => '6',
+					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_signed_numeric,
-					   '-relief' => 'sunken' );
-my $f4_l2 = $f4->Label( '-text' => 'dB',
-						'-width' => 3 );
+					   '-relief'          => 'sunken' );
+my $f4_l2 = $f4->Label( '-text'           => 'dB',
+						'-width'          => 3 );
 
 $f4->pack( %fp );
 $f4_l1->pack( %wp );
@@ -135,16 +139,16 @@ $f4_l2->pack( %wp );
 
 
 my $f5 = $mw->Frame( );
-my $f5_l1 = $f5->Label( '-text' => 'Modulation frequency:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f5_v = $f5->Entry( '-textvariable' => \$mod_freq,
-					   '-width' => '6',
-					   '-validate' => 'key',
+my $f5_l1 = $f5->Label( '-text'           => 'Modulation frequency:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f5_v = $f5->Entry( '-textvariable'    => \$mod_freq,
+					   '-width'           => '6',
+					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_numeric,
-					   '-relief' => 'sunken' );
-my $f5_l2 = $f5->Label( '-text' => 'kHz',
-						'-width' => 3 );
+					   '-relief'          => 'sunken' );
+my $f5_l2 = $f5->Label( '-text'           => 'kHz',
+						'-width'          => 3 );
 
 $f5->pack( %fp );
 $f5_l1->pack( %wp );
@@ -153,16 +157,16 @@ $f5_l2->pack( %wp );
 $f5->{ is_shown } = 1;
 
 my $f6 = $mw->Frame( );
-my $f6_l1 = $f6->Label( '-text' => 'Modulation amplitude:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f6_v = $f6->Entry( '-textvariable' => \$mod_ampl,
-					   '-width' => '6',
-					   '-validate' => 'key',
+my $f6_l1 = $f6->Label( '-text'           => 'Modulation amplitude:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f6_v = $f6->Entry( '-textvariable'    => \$mod_ampl,
+					   '-width'           => '6',
+					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_numeric,
-					   '-relief' => 'sunken' );
-my $f6_l2 = $f6->Label( '-text' => 'kHz',
-						'-width' => 3 );
+					   '-relief'          => 'sunken' );
+my $f6_l2 = $f6->Label( '-text'           => 'kHz',
+						'-width'          => 3 );
 
 $f6->pack( %fp );
 $f6_l1->pack( %wp );
@@ -171,16 +175,16 @@ $f6_l2->pack( %wp );
 
 
 my $f7 = $mw->Frame( );
-my $f7_l1 = $f7->Label( '-text' => 'Number of runs:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f7_v = $f7->Entry( '-textvariable' => \$N_runs,
-					   '-width' => '6',
-					   '-validate' => 'key',
+my $f7_l1 = $f7->Label( '-text'           => 'Number of runs:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f7_v = $f7->Entry( '-textvariable'    => \$N_runs,
+					   '-width'           => '6',
+					   '-validate'        => 'key',
 					   '-validatecommand' => sub { $_[ 0 ] =~ /^s*\d*\s*$/ },
-					   '-relief' => 'sunken' );
-my $f7_l2 = $f7->Label( '-text' => '    ',
-						'-width' => 3 );
+					   '-relief'          => 'sunken' );
+my $f7_l2 = $f7->Label( '-text'           => '    ',
+						'-width'          => 3 );
 
 $f7->pack( %fp );
 $f7_l1->pack( %wp );
@@ -189,28 +193,28 @@ $f7_l2->pack( %wp );
 
 
 my $f8 = $mw->Frame( );
-my $f8_l = $f8->Label( '-text' => 'Lock-in amplifier:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f8_m = $f8->Optionmenu( '-options' =>
+my $f8_l = $f8->Label( '-text'          => 'Lock-in amplifier:',
+					   '-width'         => '20',
+					   'anchor'         => 'w' );
+my $f8_m = $f8->Optionmenu( '-options'  =>
 							[ ( 'SR510', 'SR530', 'SR810', 'SR830' ) ],
-							'-width' => 9,
+							'-width'    => 9,
 							'-variable' => \$lockin,
-							'-command' => [ \&li_conf, $lockin ] );
+							'-command'  => [ \&li_conf, $lockin ] );
 $f8->pack( %fp );
 $f8_l->pack( %wp );
 $f8_m->pack( %wp );
 
 
 my $f9 = $mw->Frame( );
-my $f9_l = $f9->Label( '-text' => 'Time constant:',
-					   '-width' => '20',
-					   'anchor' => 'w' );
-my $f9_m = $f9->Optionmenu( '-options' =>
+my $f9_l = $f9->Label( '-text'          => 'Time constant:',
+					   '-width'         => '20',
+					   'anchor'         => 'w' );
+my $f9_m = $f9->Optionmenu( '-options'  =>
                             [ ( "Don't set", '100 s', ' 30 s', ' 10 s',
                                 '  3 s', '  1 s', '300 ms', '100 ms', ' 30 ms',
                                 ' 10 ms', '  3 ms', '  1 ms' ) ],
-							'-width' => 9,
+							'-width'    => 9,
 							'-variable' => \$tc );
 $f9->pack( %fp );
 $f9_l->pack( %wp );
@@ -218,9 +222,9 @@ $f9_m->pack( %wp );
 
 
 my $f10 = $mw->Frame( );
-my $f10_l = $f10->Label( '-text' => 'Sensitivity:',
-						'-width' => '20',
-						'anchor' => 'w' );
+my $f10_l = $f10->Label( '-text'         => 'Sensitivity:',
+						 '-width'        => '20',
+						 'anchor'        => 'w' );
 my $f10_m = $f10->Optionmenu( '-options' =>
                             [ ( "Don't set", '500 mV', '200 mV', '100 mV',
                                 ' 50 mV', ' 20 mV', ' 10 mV', '  5 mv',
@@ -229,23 +233,23 @@ my $f10_m = $f10->Optionmenu( '-options' =>
                                 '  5 uV', '  2 uV', '  1 uV',
                                 '500 nV', '200 nV', '100 nV', ' 50 nV',
                                 ' 10 nV', '  5 nV', '  2 nV', '  1 nV' ) ],
-							'-width' => 9,
-							'-variable' => \$sens );
+							'-width'     => 9,
+							'-variable'  => \$sens );
 $f10->pack( %fp );
 $f10_l->pack( %wp );
 $f10_m->pack( %wp );
 
 
 
-$mw->Optionmenu( '-options' => [ ( 'Start program', 'Test program',
-								   'Load into fsc2' ) ],
-				 '-variable' => \$how,
-				 '-command' => \&write_out
+$mw->Optionmenu( '-options'     => [ ( 'Start program', 'Test program',
+									   'Load into fsc2' ) ],
+				 '-variable'    => \$how,
+				 '-command'     => \&write_out
 			   )->pack( '-padx' => '3m',
 					    '-pady' => '3m' );
 
-$mw->Button( '-text' => 'Quit',
-			 '-command' => sub { &store_defs; $mw->destroy }
+$mw->Button( '-text'        => 'Quit',
+			 '-command'     => sub { &store_defs; $mw->destroy }
 		   )->pack( '-padx' => '3m',
 					'-pady' => '3m' );
 
@@ -266,9 +270,8 @@ if ( $ARGV[ 0 ] ) {
 }
 
 goto done_reading unless defined( $ne = <F> ) and $ne =~ /^#/;
+goto done_reading unless defined( $ne = <F> ) and $ne =~ /^SR(5|8)(1|3)0$/;
 
-goto done_reading unless defined( $ne = <F> )
-	and $ne =~ /^SR(5|8)(1|3)0$/;
 chomp $ne;
 $lockin = $ne;
 
