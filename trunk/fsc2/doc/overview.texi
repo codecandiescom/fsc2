@@ -26,9 +26,11 @@
 
 
 @acronym{fsc2} is a program for the remote control of cw- and pulsed EPR
-spectrometers. It is basically an interpreter that executes a program to
-describe the experiment in a language which in the following will be
-called @acronym{EDL}
+spectrometers. (Actually, the design of @acronym{fsc2} should make it
+also easy to use it to a broad range of experiments not releated to
+EPR.) It is basically an interpreter that executes a program to describe
+the experiment in a language which in the following will be called
+@acronym{EDL}
 @cindex @acronym{EDL}
 (@b{E}xperiment @b{D}escription @b{L}anguage). Making the execution of
 the experiment completely controllable in this way is quite different
