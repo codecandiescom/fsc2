@@ -1674,17 +1674,6 @@ updates. If called with an argument of @code{1} you may switch back to
 the default behavior.
 
 
-@anchor{pulser_cw_mode}
-@item pulser_cw_mode()
-@findex pulser_cw_mode()
-This function exists for the Berlin X-band pulser modules
-@code{dg2020_b}, @code{ep385} and @code{rs690} only. It tells the pulser
-to create an output suitable for cw EPR measurements.
-
-This function can only be called during the @code{PREPARATIONS} section
-of an @code{EDL} program.
-
-
 @anchor{pulser_shape_to_defense_minimum_distance}
 @item pulser_shape_to_defense_minimum_distance()
 @findex pulser_shape_to_defense_minimum_distance()

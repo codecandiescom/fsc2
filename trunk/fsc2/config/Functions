@@ -106,7 +106,6 @@ pulser_pulse_reset, -1, EXP;    // set back pulses to initial state
 pulser_next_phase, -1, EXP;     // switch to next phase in phase cycling
 pulser_phase_reset, -1, EXP;    // switch back to first phase
 pulser_lock_keyboard, -1, EXP;  // lock or unlock the keyboard
-pulser_cw_mode, 0, PREP;        // CW mode experiment (DG2020/Berlin only)
 pulser_stop_on_update, 1, ALL;  // sets stop during updates (HFS9000 only)
 
 pulser_shape_to_defense_minimum_distance, 1, PREP;

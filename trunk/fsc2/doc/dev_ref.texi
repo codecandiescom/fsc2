@@ -212,7 +212,6 @@ for function/output channels declared as @code{INVERTED}).
 @item @code{pulser_name()}           @tab @ref{pulser_name}
 @item @code{pulser_state()}          @tab @ref{pulser_state}
 @item @code{pulser_update()}         @tab @ref{pulser_update}
-@item @code{pulser_cw_mode()}        @tab @ref{pulser_cw_mode}
 @item @code{pulser_shift()}          @tab @ref{pulser_shift}
 @item @code{pulser_increment()}      @tab @ref{pulser_increment}
 @item @code{pulser_reset()}          @tab @ref{pulser_reset}
@@ -272,7 +271,6 @@ for function/output channels declared as @code{INVERTED}).
 @item @code{pulser_name()}           @tab @ref{pulser_name}
 @item @code{pulser_state()}          @tab @ref{pulser_state}
 @item @code{pulser_update()}         @tab @ref{pulser_update}
-@item @code{pulser_cw_mode()}        @tab @ref{pulser_cw_mode}
 @item @code{pulser_shift()}          @tab @ref{pulser_shift}
 @item @code{pulser_increment()}      @tab @ref{pulser_increment}
 @item @code{pulser_reset()}          @tab @ref{pulser_reset}
@@ -345,7 +343,6 @@ Output channels: 8
 @item @code{pulser_name()}           @tab @ref{pulser_name}
 @item @code{pulser_state()}          @tab @ref{pulser_state}
 @item @code{pulser_update()}         @tab @ref{pulser_update}
-@item @code{pulser_cw_mode()}        @tab @ref{pulser_cw_mode}
 @item @code{pulser_shift()}          @tab @ref{pulser_shift}
 @item @code{pulser_increment()}      @tab @ref{pulser_increment}
 @item @code{pulser_reset()}          @tab @ref{pulser_reset}

@@ -565,11 +565,10 @@ phase cycling is to be used.
 
 The Berlin bridge setup is rather simple in that it expects pulses with
 different phases to appear on different input connectors of the
-microwave bridge. The bridge has 5 different inputs (one for each phase
-@code{+X}, @code{-X}, @code{+Y} and @code{-Y} and one to be used for
-@i{cw} experiments) and the phase of the pulse coming from the bridge
-and going to the TWT amplifier depends on which input connector was used
-for the pulse.
+microwave bridge. The bridge has 4 different inputs, one for each phase
+@code{+X}, @code{-X}, @code{+Y} and @code{-Y}, and the phase of the
+pulse coming from the bridge and going to the TWT amplifier depends on
+which input connector was used for the pulse.
 
 Now all you have to do is to tell the program once which pulser pod
 channel is connected to which phase input of the bridge (and, to allow
@@ -580,8 +579,7 @@ PHASE_SETUP:  MICROWAVE,
                X: POD = 1,
               +Y: POD = 2,
               -X: POD = 4,
-              -Y: 5,
-              CW: 3;
+              -Y: 5;
 @end example
 @noindent
 or
@@ -1185,8 +1183,7 @@ PHASE_SETUP:   MW,           // cycle microwave channel
                +X: POD = 1,  // POD 1 on for +X
                -X: POD = 2,  // POD 2 on for -X
                +Y: POD = 3,  // POD 3 on for +Y
-               -Y: POD = 4,  // POD 4 on for -Y
-               CW: POD = 5;  // POD 5 on for CW
+               -Y: POD = 4;  // POD 4 on for -Y
 
 PHASES:
 
