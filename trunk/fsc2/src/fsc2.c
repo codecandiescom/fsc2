@@ -110,8 +110,7 @@ int main( int argc, char *argv[ ] )
 
 	EUID = geteuid( );
 	EGID = getegid( );
-	seteuid( getuid( ) );
-	setegid( getgid( ) );
+	lower_permissions( );
 
 	/* Initialize xforms stuff, quit on error */
 

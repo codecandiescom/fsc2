@@ -24,13 +24,6 @@
 #include "fsc2.h"
 
 
-static struct {
-	bool has_raise_been_run;
-	uid_t old_euid;
-	gid_t old_egid;
-} fsc2_perms = { UNSET, 0, 0 };
-
-
 /*-----------------------------------------------------------------*/
 /* Function allocates memory for a string with one extra character */
 /* for the end-of-string null-byte.                                */
@@ -362,15 +355,8 @@ bool fsc2_locking( void )
 
 inline void raise_permissions( void )
 {
-	fsc2_perms.old_euid = geteuid( );
-	fsc2_perms.old_egid = getegid( );
-
-	if ( fsc2_perms.old_euid != EUID )
-		seteuid( EUID );
-	if ( fsc2_perms.old_egid != EGID )
-		setegid( EGID );
-
-	fsc2_perms.has_raise_been_run = SET;
+	seteuid( EUID );
+	setegid( EGID );
 }
 
 
@@ -379,12 +365,8 @@ inline void raise_permissions( void )
 
 inline void lower_permissions( void )
 {
-	if ( ! fsc2_perms.has_raise_been_run )
-		return;
-
-	seteuid( fsc2_perms.old_euid );
-	setegid( fsc2_perms.old_egid );
-	fsc2_perms.has_raise_been_run = UNSET;
+	seteuid( getuid( ) );
+	setegid( getgid( ) );
 }
 
 

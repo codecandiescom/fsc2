@@ -243,7 +243,6 @@ INSTALL_MACHINE   = install-unknown
 UNINSTALL_MACHINE = uninstall-unknown
 
 ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
-	LIBS              += -Lfl
 	GPIB_LIBRARY       = LLP
 	INSTALL_MACHINE    = install-$(machine_name)
 	UNINSTALL_MACHINE  = uninstall-$(machine_name)
@@ -283,23 +282,24 @@ endif
 # Finally the definition of further needed variables
 
 ifeq ($(GPIB_LIBRARY),LLP)
-	GPIB_LIBRARY = old
-	LIBS += -lgpib
+	GPIB_LIBRARY          = old
+	CFLAGS               += -I/usr/local/include/gpib
+	LIBS                 += -lgpib -lfl
 else
 	ifeq ($(GPIB_LIBRARY),NI)
-		GPIB_LIBRARY = ni
-		LIBS += -lgpib
+		GPIB_LIBRARY      = ni
+		LIBS             += -lgpib
 		ifdef GPIB_CONF_FILE
-			CFLAGS += -DGPIB_CONF_FILE=\"$(GPIB_CONF_FILE)\"
+			CFLAGS       += -DGPIB_CONF_FILE=\"$(GPIB_CONF_FILE)\"
 		else
-			CFLAGS += -DGPIB_CONF_FILE=\"/etc/gpib.conf\"
+			CFLAGS       += -DGPIB_CONF_FILE=\"/etc/gpib.conf\"
 		endif
 	else
 		ifeq ($(GPIB_LIBRARY),JTT)
-			GPIB_LIBRARY = jtt
-			LIBS += -lgpib
+			GPIB_LIBRARY  = jtt
+			LIBS         += -lgpib
 		else
-			GPIB_LIBRARY = none
+			GPIB_LIBRARY  = none
 		endif
 	endif
 endif
