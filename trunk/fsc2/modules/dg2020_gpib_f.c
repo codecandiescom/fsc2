@@ -173,69 +173,56 @@ bool dg2020_init( const char *name )
 
 	/* Try to get the status byte to make sure the pulser reacts */
 
-	if ( gpib_write( dg2020.device, "*STB?\n", 6 ) == FAILURE ||
-		 gpib_read( dg2020.device, reply, &len ) == FAILURE )
+	dg2020_command( "*STB?\n" );
+	if ( gpib_read( dg2020.device, reply, &len ) == FAILURE )
 		dg2020_gpib_failure( );
 
     /* Set pulser to short form of replies */
 
-    if ( gpib_write( dg2020.device, "VERB OFF\n", 9 ) == FAILURE ||
-         gpib_write( dg2020.device, "HEAD OFF\n", 9 ) == FAILURE )
-		dg2020_gpib_failure( );
+	dg2020_command( "VERB OFF\n" );
+	dg2020_command( "HEAD OFF\n" );
 
 	/* Make sure the pulser is stopped */
 
-	if ( gpib_write( dg2020.device, "STOP\n", 5 ) == FAILURE )
-		dg2020_gpib_failure( );
+	dg2020_command( "STOP\n" );
 
 	/* Switch off remote command debugging function */
 
-	if ( gpib_write( dg2020.device, "DEB:SNO:STAT OFF\n", 17 ) == FAILURE )
-		dg2020_gpib_failure( );
+	dg2020_command( "DEB:SNO:STAT OFF\n" );
 
 	/* Switch on phase lock for internal oscillator */
 
-	if ( gpib_write( dg2020.device, "SOUR:OSC:INT:PLL ON\n", 20 ) == FAILURE )
-		dg2020_gpib_failure( );
+	dg2020_command( "SOUR:OSC:INT:PLL ON\n" );
 
 	/* Delete all blocks */
 
-	if ( gpib_write( dg2020.device, "DATA:BLOC:DEL:ALL\n", 18 ) == FAILURE )
-		dg2020_gpib_failure( );
+	dg2020_command( "DATA:BLOC:DEL:ALL\n" );
 
 	/* Remove all sequence definitions */
 
-	if ( gpib_write( dg2020.device, "DATA:SEQ:DEL:ALL\n", 17 ) == FAILURE )
-		dg2020_gpib_failure( );
+	dg2020_command( "DATA:SEQ:DEL:ALL\n" );
 
 	/* Switch to manual update mode */
 
-	if ( gpib_write( dg2020.device, "MODE:UPD MAN\n", 13 ) == FAILURE )
-		dg2020_gpib_failure( );
+	dg2020_command( "MODE:UPD MAN\n" );
 
 	/* Set the time base */
 
-	if ( ! dg2020_set_timebase( dg2020.timebase ) )
-		dg2020_gpib_failure( );
+	dg2020_set_timebase( dg2020.timebase );
 
 	/* Set the memory size needed */
 
-	if ( ! dg2020_set_memory_size( ( long ) dg2020.mem_size ) )
-		dg2020_gpib_failure( );
+	dg2020_set_memory_size( ( long ) dg2020.mem_size );
 
 	/* Switch on repeat mode for INTERNAL trigger mode and enhanced mode for
 	   EXTERNAL trigger mode - in the later case also set trigger level and
 	   slope */
 
 	if ( dg2020.trig_in_mode == INTERNAL )
-	{
-		if ( gpib_write( dg2020.device, "MODE:STAT REP\n", 14 ) == FAILURE )
-			dg2020_gpib_failure( );
-	}
+		dg2020_command( "MODE:STAT REP\n" );
 	else
 	{
-		if ( gpib_write( dg2020.device, "MODE:STAT ENH\n", 14 ) == FAILURE )
-			dg2020_gpib_failure( );
+		dg2020_command( "MODE:STAT ENH\n" );
 		if ( dg2020.is_trig_in_level )
 			dg2020_set_trigger_in_level( dg2020.trig_in_level );
 		if ( dg2020.is_trig_in_slope )
@@ -306,10 +293,7 @@ bool dg2020_init( const char *name )
 
 bool dg2020_run( bool flag )
 {
-	if ( gpib_write( dg2020.device, flag ? "*WAI;STAR\n": "*WAI;STOP\n", 10 )
-		 == FAILURE )
-		dg2020_gpib_failure( );
-
+	dg2020_command( flag ? "*WAI;STAR\n": "*WAI;STOP\n" );
 	dg2020.is_running = flag;
 	return OK;
 }
@@ -336,8 +320,7 @@ bool dg2020_set_timebase( double timebase )
 
 	gcvt( 1.0 / timebase, 4, cmd + strlen( cmd ) );
 	strcat( cmd, "\n" );
-	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
-		dg2020_gpib_failure( );
+	dg2020_command( cmd );
 
 	return OK;
 }
@@ -362,8 +345,7 @@ bool dg2020_set_memory_size( long mem_size )
 		return FAIL;
 
 	sprintf( cmd + strlen( cmd ), "%ld\n", mem_size );
-	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
-		dg2020_gpib_failure( );
+	dg2020_command( cmd );
 
 	return OK;
 }
@@ -390,9 +372,7 @@ bool dg2020_channel_assign( int channel, int pod )
 
 	sprintf( cmd + strlen( cmd ), "%d:ASSIGN ", pod );
 	sprintf( cmd + strlen( cmd ), "%d\n", channel );
-
-	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
-		dg2020_gpib_failure( );
+	dg2020_command( cmd );
 
 	return OK;
 }
@@ -409,9 +389,7 @@ bool dg2020_channel_assign( int channel, int pod )
 
 bool dg2020_update_data( void )
 {
-	if ( gpib_write( dg2020.device, "DATA:UPD\n", 9 ) == FAILURE )
-		dg2020_gpib_failure( );
-
+	dg2020_command( "DATA:UPD\n" );
 	return dg2020_gpib_check( );
 }
 
@@ -451,17 +429,15 @@ bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 	}
 	cmd[ strlen( cmd ) - 1 ] = '\0';
 
-	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
-		dg2020_gpib_failure( );
+	dg2020_command( cmd );
+	dg2020_command( "*ESR?\n" );
 
-	if ( gpib_write( dg2020.device, "*ESR?\n", 6 ) == FAILUE )
-		dg2020_gpib_failure( );
 	l = 100;
 	if ( gpib_read( dg2020.device, dummy, &l ) == FAILURE )
 		dg2020_gpib_failure( );
 	if ( dummy[ 0 ] != '0' || l != 2 )
 	{
-		gpib_write( dg2020.device, "ALLE?\n", 6 );
+		dg2020_command( "ALLE?\n" );
 		l = 1000;
 		if ( gpib_read( dg2020.device, dummy, &l ) == FAILURE )
 			dg2020_gpib_failure( );
@@ -479,16 +455,13 @@ bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 	l = strlen( dummy );
 	sprintf( cmd, "DATA:BLOC:DEF #%ld%s%ld,%s\n", l, dummy,
 			 block[ 0 ].start, block[ 0 ].blk_name );
-
-	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
-		dg2020_gpib_failure( );
+	dg2020_command( cmd );
 
 	for ( i = 1; i < num_blocks; ++i )
 	{
 		sprintf( cmd, "DATA:BLOC:ADD %ld,\"%s\"\n",
 				 block[ i ].start, block[ i ].blk_name );
-		if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
-			dg2020_gpib_failure( );
+		dg2020_command( cmd );
 	}
 
 	return OK;
@@ -520,26 +493,22 @@ bool dg2020_make_seq( int num_blocks, BLOCK *block )
 	l = strlen( dummy );
 	sprintf( cmd, ":DATA:SEQ:DEF #%ld%s%s,1,0,0,0,0\n",
 			 l, dummy, block[ 0 ].blk_name );
-
-	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
-		dg2020_gpib_failure( );
+	dg2020_command( cmd );
 
 	for ( i = 1; i < num_blocks; i++ )
 	{
 		sprintf( cmd, ":DATA:SEQ:ADD %d,\"%s\",%ld,0,0,0,0\n",
 				 i, block[ i ].blk_name, block[ i ].repeat );
-
-		if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
-			dg2020_gpib_failure( );
+		dg2020_command( cmd );
 	}
 
 	/* For external trigger mode set trigger wait for first (and only) block */
 
-	if ( dg2020.trig_in_mode == EXTERNAL &&
-		 ( gpib_write( dg2020.device, "DATA:SEQ:REP 0,1\n", 17 ) == FAILURE ||
-		   gpib_write( dg2020.device, "DATA:SEQ:TWAIT 0,1\n", 19 ) == FAILURE )
-		)
-		dg2020_gpib_failure( );
+	if ( dg2020.trig_in_mode == EXTERNAL )
+	{
+		dg2020_command( "DATA:SEQ:REP 0,1\n" );
+		dg2020_command( "DATA:SEQ:TWAIT 0,1\n" );
+	}
 
 	return OK;
 }
@@ -606,10 +575,18 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 
 	/* Send the command string to the pulser */
 
-	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
-		dg2020_gpib_failure( );
+	TRY
+	{
+		dg2020_command( cmd );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( cmd );
+		RETHROW( );
+	}
 
-	T_free( cmd );       /* free memory used for command string */
+	T_free( cmd );
 
 	return OK;
 }
@@ -625,9 +602,7 @@ bool dg2020_set_pod_high_level( int pod, double voltage )
 	sprintf( cmd, "OUTP:PODA:CH%d:HIGH %f %s\n", pod,
 			 fabs( voltage ) >= 1 ? voltage : 1000.0 * voltage,
 			 fabs( voltage ) >= 1 ? "V" : "mV" );
-
-	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
-		dg2020_gpib_failure( );
+	dg2020_command( cmd );
 
 	return OK;
 }
@@ -643,9 +618,7 @@ bool dg2020_set_pod_low_level( int pod, double voltage )
 	sprintf( cmd, "OUTP:PODA:CH%d:LOW %f %s\n", pod,
 			 fabs( voltage ) >= 1 ? voltage : 1000.0 * voltage,
 			 fabs( voltage ) >= 1 ? "V" : "mV" );
-
-	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
-		dg2020_gpib_failure( );
+	dg2020_command( cmd );
 
 	return OK;
 }
@@ -661,9 +634,7 @@ bool dg2020_set_trigger_in_level( double voltage )
 	sprintf( cmd, "TRIG:LEV %f %s\n",
 			 fabs( voltage ) >= 1 ? voltage : 1000.0 * voltage,
 			 fabs( voltage ) >= 1 ? "V" : "mV" );
-
-	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
-		dg2020_gpib_failure( );
+	dg2020_command( cmd );
 
 	return OK;
 }
@@ -678,9 +649,7 @@ bool dg2020_set_trigger_in_slope( int slope )
 
 	sprintf( cmd, "TRIG:SLO %s\n",
 			 slope == POSITIVE ? "POS" : "NEG" );
-
-	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
-		dg2020_gpib_failure( );
+	dg2020_command( cmd );
 
 	return OK;
 }
@@ -695,9 +664,7 @@ bool dg2020_set_trigger_in_impedance( int state )
 
 	sprintf( cmd, "TRIG:IMP %s\n",
 			 state == LOW ? "LOW" : "HIGH" );
-
-	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
-		dg2020_gpib_failure( );
+	dg2020_command( cmd );
 
 	return OK;
 }
@@ -998,9 +965,19 @@ bool dg2020_lock_state( bool lock )
 	char cmd[ 10 ];
 
 	sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
+	dg2020_command( cmd );
+
+	return OK;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+bool dg2020_command( const char *cmd )
+{
 	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
-
 	return OK;
 }
 
