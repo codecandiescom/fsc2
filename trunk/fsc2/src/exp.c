@@ -5,6 +5,9 @@
 
 #include "fsc2.h"
 
+extern int prim_exp_runparse( void );
+extern int conditionparse( void );
+
 
 Token_Val prim_exp_val;
 
@@ -327,6 +330,37 @@ void setup_if_else( int type, long *pos, Prg_Token *cur_wr )
 	THROW( BLOCK_ERROR_EXCEPTION );
 }
 
+
+void prim_exp_run( void )
+{
+	cur_prg_token = prg_token;
+
+	while ( cur_prg_token != prg_token + prg_length )
+	{
+		switch ( cur_prg_token->token )
+		{
+			case WHILE_TOK :
+				cur_prg_token++;
+				conditionparse( );
+				break;
+
+			case BREAK_TOK :
+				break;
+
+			default :
+				prim_exp_runparse( );
+				break;
+		}
+	}
+}
+
+
+int prim_exp_runlex( void )
+{
+	
+
+	return( 0 );
+}
 
 int conditionlex( void )
 {

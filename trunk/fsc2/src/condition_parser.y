@@ -13,6 +13,7 @@
 
 /* locally used functions */
 
+int conditionparse( void );
 int conditionerror( const char *s );
 
 

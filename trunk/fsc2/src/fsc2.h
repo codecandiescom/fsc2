@@ -61,6 +61,7 @@ char *Fname = NULL;
 Compilation compilation;
 Prg_Token *prg_token = NULL;
 long prg_length = 0;
+Prg_Token *cur_prg_token;
 
 long Time_Unit = DEFAULT_TIME_UNIT;
 long Time_Base = DEFAULT_TIME_UNIT;
@@ -86,6 +87,7 @@ extern char *Fname;
 extern Compilation compilation;
 extern Prg_Token *prg_token;
 extern long prg_length;
+extern Prg_Token *cur_prg_token;
 
 extern long Time_Unit;
 extern long Time_Base;

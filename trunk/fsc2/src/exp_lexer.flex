@@ -279,7 +279,10 @@ int primary_experiment_parser( FILE *in )
 	Prim_Exp_Next_Section = OK;
 
 	TRY
+	{
 		store_exp( in );
+		prim_exp_run( );
+	}
 	CATCH( INVALID_INPUT_EXCEPTION )
 	{
 		eprint( FATAL, "%s:%ld: Invalid input in EXPERIMENT section: `%s'\n",

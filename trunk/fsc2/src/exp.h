@@ -75,6 +75,8 @@ void forget_prg( void );
 void prim_loop_setup( void );
 void setup_while_or_repeat( int type, long *pos );
 void setup_if_else( int type, long *pos, Prg_Token *cur_wr );
+void prim_exp_run( void );
+int prim_exp_runlex( void );
 int conditionlex( void );
 
 #endif   /* ! PRIM_EXP_HEADER */

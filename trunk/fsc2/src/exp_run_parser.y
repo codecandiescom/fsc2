@@ -15,6 +15,7 @@ extern int prim_exp_runlex( void );
 
 /* locally used functions */
 
+int prim_exp_runparse( void );
 int prim_exp_runerror( const char *s );
 
 
@@ -22,7 +23,7 @@ int prim_exp_runerror( const char *s );
 
 
 /* the following union and the token definitions MUST be identical to the ones
-   in `condition_parser.y', `prim_exp.h' ! */
+   in `prim_exp.h' and `condition_parser.y' ! */
 
 %union {
 	long   lval;
@@ -58,9 +59,10 @@ int prim_exp_runerror( const char *s );
 %token E_EQ E_LT E_LE E_GT E_GE
 
 %token E_NS_TOKEN E_US_TOKEN E_MS_TOKEN E_S_TOKEN
-%type <vptr> expr line
+%type <vptr> expr line list1
 
 
+%left E_EQ E_LT E_LE E_GT E_GE
 %left '+' '-'
 %left '*' '/'
 %left '%'
@@ -72,11 +74,12 @@ int prim_exp_runerror( const char *s );
 
 
 input:   /* empty */
-       | input ';'
-       | input line ';'            { assert( Var_Stack == NULL ); }
-       | input error ';'           { THROW( SYNTAX_ERROR_EXCEPTION ); }
-       | input line line           { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | input eol
+       | input line eol            { assert( Var_Stack == NULL ); }
 ;
+
+eol:     ';'
+       | '}'                       { YYACCEPT; }
 
 /* currently only the variables related stuff */
 
@@ -104,12 +107,22 @@ expr:    E_INT_TOKEN               { $$ = vars_push( INT_VAR, &$1 ); }
        | '(' expr ')'              { $$ = $2 }
 ;
 
-list1:   expr                      { }
-       | list1 ',' expr            { }
+/* list of indices for access of an array element */
+
+list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
+	   | expr                      { $$ = $1; }
+       | list1 ',' expr            { $$ = $3; }
 ;
 
-list2:   expr                      { }
-       | list2 ',' expr            { }
+/* list of function arguments */
+
+list2:   /* empty */
+       | exprs
+	   | list2 ',' exprs
+;
+
+exprs:   expr                      { }
+       | E_STR_TOKEN                 { vars_push( STR_VAR, $1 ); }
 ;
 
 
@@ -118,11 +131,7 @@ list2:   expr                      { }
 
 int prim_exp_runerror ( const char *s )
 {
-	if ( *prim_exptext == '\0' )
-		eprint( FATAL, "%s:%ld: Unexpected end of file in EXPERIMENT "
-				"section.\n", Fname, Lc );
-	else
-		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.\n",
-				Fname, Lc, prim_exptext );
+	eprint( FATAL, "%s:%ld: Syntax error in EXPERIMENT section.\n",
+				Fname, Lc );
 	THROW( EXPERIMENT_EXCEPTION );
 }
