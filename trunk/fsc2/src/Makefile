@@ -88,8 +88,8 @@ fsc2: $(objects)
 
 %.c: %.l $(headers)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %_lexer.l,%,$<) -o$@ $<
-	sed -e 's/\bECHO\b/FLEX_ECHO/g' $@ > $@.x
-	sed -e 's/register char \*yy_cp, \*yy_bp;/\
+	sed 's/\bECHO\b/FLEX_ECHO/g' $@ > $@.x
+	sed 's/register char \*yy_cp, \*yy_bp;/\
 		register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@.x > $@
 	-$(RM) $(RMFLAGS) $@.x
 

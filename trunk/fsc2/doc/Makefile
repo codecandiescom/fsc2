@@ -63,33 +63,33 @@ fsc2.html: $(docs) $(figures)
 		if [ -z "`grep -h '^<TITLE>fsc2: Index:' $$i`" ]; then \
 			echo -n '  <a href="'$$i'">' >> TOC; \
 			grep -h '^<TITLE>fsc2: [^<]*</TITLE>$$' $$i | \
-			sed -e 's/^<TITLE>fsc2: \([^<]*\)<\/TITLE>$$/\1<\/a><br>/' >> TOC; \
+			sed 's/^<TITLE>fsc2: \([^<]*\)<\/TITLE>$$/\1<\/a><br>/' >> TOC; \
 		fi; \
 	done
 	@for i in fsc2_[1-9][0-9].html; do \
 		if [ -z "`grep -h '^<TITLE>fsc2: Index:' $$i`" ]; then \
 			echo -n '  <a href="'$$i'">' >> TOC; \
 			grep -h '^<TITLE>fsc2: [^<]*</TITLE>$$' $$i | \
-			sed -e 's/^<TITLE>fsc2: \([^<]*\)<\/TITLE>$$/\1<\/a><br>/' >> TOC; \
+			sed 's/^<TITLE>fsc2: \([^<]*\)<\/TITLE>$$/\1<\/a><br>/' >> TOC; \
 		fi; \
 	done
 	@echo -n '  <a href="fsc2_toc.html">' >> TOC;
 	@grep -h '^<TITLE>fsc2: [^<]*</TITLE>$$' fsc2_toc.html | \
-	sed -e 's/^<TITLE>fsc2: \([^<]*\)<\/TITLE>$$/\1<\/a><br><br>/' >> TOC;
+	sed 's/^<TITLE>fsc2: \([^<]*\)<\/TITLE>$$/\1<\/a><br><br>/' >> TOC;
 	@echo '  <a href="http://www.physik.fu-berlin.de/~toerring/fsc2.html">Download</a><br>' >> TOC
 	@echo '  <a href="mailto:Jens.Toerring@physik.fu-berlin.de">Contact</a>' >> TOC
 	@echo -e '  </div>\n  <div id="level1">\n    <div id="main">' >> TOC
 	@for i in *.html; do \
-		sed -e '1,/BODY/!d' $$i > $$i.x; \
+		sed '1,/BODY/!d' $$i > $$i.x; \
 		cat TOC >> $$i.x; \
-		sed -e '1,/<BODY>/d;/<\/BODY/,$$d' $$i >> $$i.x; \
+		sed '1,/<BODY>/d;/<\/BODY/,$$d' $$i >> $$i.x; \
 		echo -e '    </div>\n  </div>\n</div>\n</BODY>\n</HTML>' >> $$i.x; \
 		mv $$i.x $$i; \
 	done
 	-@$(RM) TOC
 
 %.png: $(adir)/%.xbm
-	convert -page `identify $< 2>/dev/null | sed -e 's/^.*[ 	]\([0-9]\{1,\}x[0-9]\{1,\}\)[ 	].*$$/\1/'` $< $@ 2>/dev/null
+	convert -page `identify $< 2>/dev/null | sed 's/^.*[ 	]\([0-9]\{1,\}x[0-9]\{1,\}\)[ 	].*$$/\1/'` $< $@ 2>/dev/null
 
 ps: fsc2.ps
 
@@ -128,10 +128,10 @@ fsc2.pdf: $(docs) $(pdf_pics)
 ifneq ($(word 1,$(shell which convert)),which:)
 %.pdf: $(adir)/%.xbm
 	convert -compress Zip \
-		-page `identify $< 2>/dev/null | sed -e 's/^.*[ 	]\([0-9]\{1,\}x[0-9]\{1,\}\)[ 	].*$$/\1/'` $< $@ 2>/dev/null
+		-page `identify $< 2>/dev/null | sed 's/^.*[ 	]\([0-9]\{1,\}x[0-9]\{1,\}\)[ 	].*$$/\1/'` $< $@ 2>/dev/null
 %.pdf: %.png
 	convert -compress Zip \
-		-page `identify $< 2>/dev/null | sed -e 's/^.*[ 	]\([0-9]\{1,\}x[0-9]\{1,\}\)[ 	].*$$/\1/'` $< $@ 2>/dev/null
+		-page `identify $< 2>/dev/null | sed 's/^.*[ 	]\([0-9]\{1,\}x[0-9]\{1,\}\)[ 	].*$$/\1/'` $< $@ 2>/dev/null
 else
 %.pdf: $(figures)
 	@echo "Can't make PDF documentation, program 'convert' not found."; \

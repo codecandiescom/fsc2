@@ -238,7 +238,7 @@ function do_install() {
 
 # Ask user if he wants to install the library, driver and include files etc.
 
-PREFIX=`grep ME6X00_PREFIX driver/autoconf.h | sed -e 's/[^\"]*//' | tr -d \"`
+PREFIX=`grep ME6X00_PREFIX driver/autoconf.h | sed 's/[^\"]*//' | tr -d \"`
 MAJOR=`grep ME6X00_MAJOR driver/autoconf.h | awk '{print $3}'`;
 
 dialog --yesno \

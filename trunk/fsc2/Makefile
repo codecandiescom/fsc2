@@ -641,7 +641,7 @@ built:
 					 $(mdir)/Makefile $(mdir)/*.[chl]                       \
 					 $(cdir)/Functions $(cdir)/Devices $(cdir)/*.conf |     \
 	grep -v 'sed\|grep' |                                               \
-	sed -e 's/^.*$$Id\: \(.*,v [0-9]\{1,\}\.[0-9]\{1,\} [0-9]\{4\}\/[0-9]\{2\}\/[0-9]\{2\} [\0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}\).*/\1/g' >> version
+	sed 's/^.*$$Id\: \(.*,v [0-9]\{1,\}\.[0-9]\{1,\} [0-9]\{4\}\/[0-9]\{2\}\/[0-9]\{2\} [\0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}\).*/\1/g' >> version
 	-@gzip -c -9 version | uuencode - > version.ugz
 	-@$(RM) $(RMFLAGS) version
 
@@ -813,29 +813,29 @@ MANIFEST:
 pion.anorg.chemie.uni-frankfurt.de:
 
 crowley.physik.fu-berlin.de:
-	sed -e 's/^#define SERIAL_PORT.*$$/#define SERIAL_PORT     0/'  \
+	sed 's/^#define SERIAL_PORT[ \t].*$$/#define SERIAL_PORT     0/'  \
 		$(cdir)/er035m_sas.conf > $(cdir)/er035m_sas.conf.new
 	mv $(cdir)/er035m_sas.conf.new $(cdir)/er035m_sas.conf
 
 door.physik.fu-berlin.de:
 
 isaak.physik.fu-berlin.de:
-	sed -e 's/^#define SERIAL_PORT.*$$/#define SERIAL_PORT     1/'  \
+	sed 's/^#define SERIAL_PORT[ \t].*$$/#define SERIAL_PORT     1/'  \
 		$(cdir)/er035m_sas.conf > $(cdir)/er035m_sas.conf.new
 	mv $(cdir)/er035m_sas.conf.new $(cdir)/er035m_sas.conf
 
 moebpc3.physik.fu-berlin.de:
 
 single.physik.fu-berlin.de:
-	sed -e 's|^#define DEFAULT_CALIB_FILE.*$$|#define DEFAULT_CALIB_FILE "/home/studier/edl/calib/spectrapro_300i.calib"|' \
+	sed 's|^#define DEFAULT_CALIB_FILE[ \t].*$$|#define DEFAULT_CALIB_FILE "/home/studier/edl/calib/spectrapro_300i.calib"|' \
 		$(cdir)/spectrapro_300i.conf > $(cdir)/spectrapro_300i.conf.new
 	mv $(cdir)/spectrapro_300i.conf.new $(cdir)/spectrapro_300i.conf
 
 tresr.physik.fu-berlin.de:
-	sed -e 's/\"ER032M\"/\"Field\"/'                           \
+	sed 's/\"ER032M\"/\"Field\"/'                           \
 		$(cdir)/er032m.conf > $(cdir)/er032m.conf.new
 	mv $(cdir)/er032m.conf.new $(cdir)/er032m.conf
-	sed -e 's/\"LECROY9400\"/\"LeCroy9450\"/'                  \
+	sed 's/\"LECROY9400\"/\"LeCroy9450\"/'                  \
 		$(cdir)/lecroy9400.conf > $(cdir)/lecroy9400.conf.new
 	mv $(cdir)/lecroy9400.conf.new $(cdir)/lecroy9400.conf
 

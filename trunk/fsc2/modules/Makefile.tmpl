@@ -67,7 +67,7 @@ $(##:.c=.o): %.o: %.c ##.h $(cdir)/##.conf $(src_headers)
 
 %_lexer.c: %_lexer.l $(src_header)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %lexer.l,%,$<) -o$@ $<
-	sed -e 's/\bECHO\b/FLEX_ECHO/g' $@ > $@.x
-	sed -e 's/register char \*yy_cp, \*yy_bp;/\
+	sed 's/\bECHO\b/FLEX_ECHO/g' $@ > $@.x
+	sed 's/register char \*yy_cp, \*yy_bp;/\
 			register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@.x > $@
 	-$(RM) $(RMFLAGS) $@.x

@@ -133,7 +133,7 @@ modules:
 		done;                                                      \
 	done;
 	@for m in $(shell echo $(comp_modules) | cut -f1- -d' '); do   \
-		sed -e "s/##/$$m/g" Makefile.tmpl > $$m.make &&            \
+		sed "s/##/$$m/g" Makefile.tmpl > $$m.make &&               \
 		$(MAKE) -f $$m.make;                                       \
 		$(RM) $(RMFLAGS) $$m.make;                                 \
 	done;
