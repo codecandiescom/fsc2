@@ -144,6 +144,7 @@ void start_graphics( void )
 		fl_hide_object( run_form->curve_3_button );
 		fl_hide_object( run_form->curve_4_button );
 
+		fl_hide_object( run_form->print_button );
 		fl_hide_object( run_form->full_scale_button );
 		fl_hide_object( run_form->undo_button );
 	}
@@ -185,9 +186,8 @@ void start_graphics( void )
 	setup_canvas( &G.x_axis, run_form->x_axis );
 	setup_canvas( &G.y_axis, run_form->y_axis );
 	if ( G.dim == 2 )
-	{
 		setup_canvas( &G.z_axis, run_form->z_axis );
-	}
+
 	setup_canvas( &G.canvas, run_form->canvas );
 
 	if ( G.is_init )
