@@ -1,0 +1,129 @@
+I. Introduction
+===============
+
+This package is a driver (module) and a library for the Wasco WITIO-48
+DIO card. It was mainly written to allow support for this type of cards
+for a program for spectrometer control, fsc2, I have written. It currently
+only allows to use the board for simple DIO, the timer/counter chips
+also on the board are not supported.
+
+
+II. Preparation for installation
+================================
+
+Before you start compiling and installing the package please note: The
+way the module is build depends strongly on the configuration of the
+kernel the modules is supposed to work with and the directories with
+the kernels include (header) files are needed. Some distributions allow
+you to install just the kernel headers, this could be enough. Otherwise,
+you will have to install the complete kernel sources and may need to do
+some further work.
+
+In the 'include/linux' subdirectory of the kernel sources a file called
+'autoconf.h' is of special importance. It contains information on how the
+kernel was build. Make sure that it is in sync with the kernel (it could
+be out of sync if you have run 'make menuconfig' or 'make xconfig' etc.,
+changed some settings and saved the results, but didn't built the kernel
+with these new settings). Especially important is that the macro
+CONFIG_MODVERSIONS is defined correctly. If you compile the module but
+get error messages about undefined symbols when you try to run depmode or
+insmode on the new module chances are high that CONFIG_MODVERSIONS was
+defined in autoconf.h but the kernel has not been compiled with this option.
+
+Another essential file is 'version.h' in the kernel include directory.
+Without this file the module can not be compiled. The file gets created
+automatically if autoconf.h exists and you have at least run 'make dep'
+in the kernel source directory.
+
+If you want to create the module for a kernel you are *not* currently
+running you must set the environment variable NI6601_KERNEL_SOURCE to
+the source directory  of the kernel you want to make the module for.
+It's still required that both 'autoconf.h' and 'version.h' exist for
+this kernel. If NI6601_KERNEL_SOURCE is set the module will be created
+for the kernel the variable is pointing to but you will have to copy
+the module to the correct place in '/lib/modules', run 'makedep -a' 
+and create the device files yourself (but the user library gets
+installed automatically). So, this probably is only for those that
+are quite sure they know what they are doing...
+
+
+III. Compiling and installing via the 'INSTALL' script
+======================================================
+
+The simplest way to compile and install everything needed is to use the
+installation script, INSTALL, that you should find in the same directory
+as this README file. It not only lets you choose the device settings etc.
+but will also check that all needed files for compiling the module
+successfully are available. The only requirement for running the
+installation script is that you have the 'dialog' utility installed on
+your system.
+
+Here are some comments concerning the questions you'll get asked by the
+script:
+
+1. Base address of the board: the board occupies a certain range of
+   memory addresses in the I/O memory. To find out which addresses are
+   already used up for other devices please see the file '/proc/ioports'
+   (addresses are in hex). You will have to check the manual of the board
+   to find out how to set the addresses via jumpers if necessary.
+
+2. Major device number: Each and every device has a major device number
+   (which gets associated with the device driver name via an entry in
+   '/etc/modules.conf'). Actually, two devices may share a device number
+   if one of them is a character device (like the WITIO-48 board) and
+   the other one is a block device (e.g. a hard disk). The major device
+   number can't be choosen at random or conflicts with other devices may
+   result!
+
+   Major device numbers must be in the range between 1 and 254. The file
+   '/proc/devices' is a list of all devices currently used and their
+   major number, so never pick one of these. It's best to choose a
+   number that's completely unused yet - a list of the numbers already
+   assigned to certain devices can be found in the kernel documentation 
+   in '/usr/src/linux/Documentation/devices.txt'. I'd recommend to use a
+   number from the ranges that are either unassigned or marked for local
+   and experimental use (e.g. 60 to 63, 120 to 127 and 240 to 254).
+
+   As a (perhaps better) alternative to specifying a fixed major device
+   number you can also use a dynamically assigned major device number.
+   This happens when you specify a major device number of 0. The only
+   disadvantage is that device files cannot be created in advance
+   because the major device number may not always be the same. But,
+   fortunately, the creation (and deletion) of the device files can be
+   done automatically, e.g. by an init script that loads the module for
+   the WITIO-48 card and creates device files when the computer is booted
+   and deletes the device files at shutdown. (The init script supplied
+   with the driver expects your system to conform to the Linux Standard
+   Base Specifications version 1.1.0 (LSB) or higher, if it doesn't you
+   may have to apply a few changes to the script and install it as well
+   as the links in the runlevel directories manually.)
+
+2. Debugging code: When debugging code is included into the driver internal
+   function calls as well as some additional information will be added to
+   the kernel messages (e.g. '/var/log/messages' or '/var/log/debug' on some
+   systems). That can be a lot of data, so please use it only when you want
+   to debug the module and check regularly that your root file system isn't
+   running out of space!
+
+3. Installation directory: Include files will be installed in the 'include'
+   subdirectory of the install directory, the library in the 'lib'
+   subdirectory. Please choose something reasonable or use the default
+   '/usr/local'.
+
+It is possible that after installing the libraries the linker still has
+problems finding them. In this case you may have to run 'ldconfig' to
+rebuild the linkers database of libraries.
+
+
+IV. Documentation
+=================
+
+In the 'driver' subdirectory you will find a file named 'witio_48_drv.txt',
+describing in detail which ioctl() calls that can used to deal with the
+card.
+
+In the 'lib' a file named 'witio_48_lib.c' describes the functionality
+supplied by the library.
+
+
+    28.3.2003   Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>
