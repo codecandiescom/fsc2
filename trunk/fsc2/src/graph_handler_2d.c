@@ -1315,25 +1315,27 @@ void redraw_canvas_2d( Canvas *c )
 
 			for ( sp = cv->points, xps = cv->xpoints_s, count = cv->count,
 				  i = 0; i < G2.nx * G2.ny && count != 0; sp++, xps++, i++ )
-				if ( sp->exist )
-				{
-					count--;
+			{
+				if ( ! sp->exist )
+					continue;
 
-					/* Don't draw if the rectangle isn't at least partially
-					   within the canvas (this seems to be faster than X
-					   setting the color and only then doing the clipping). */
+				count--;
 
-					if ( xps->x > ( short int ) c->w ||
-						 xps->y > ( short int ) c->h ||
-						 - xps->x - 1 > cv->w || - xps->y - 1 > cv->h )
-						continue;
+				/* Don't draw if the rectangle isn't at least partially within
+				   the canvas (this seems to be faster than X setting the
+				   color and only then doing the clipping). */
 
-					XSetForeground( G.d, cv->gc,
-									d2color( cv->z_factor
-											 * ( sp->v + cv->shift[ Z ] ) ) );
-					XFillRectangle( G.d, c->pm, cv->gc,
-									xps->x, xps->y, cv->w, cv->h );
-				}
+				if ( xps->x > ( short int ) c->w ||
+					 xps->y > ( short int ) c->h ||
+					 - xps->x - 1 > cv->w || - xps->y - 1 > cv->h )
+					continue;
+
+				XSetForeground( G.d, cv->gc,
+								d2color( cv->z_factor
+										 * ( sp->v + cv->shift[ Z ] ) ) );
+				XFillRectangle( G.d, c->pm, cv->gc,
+								xps->x, xps->y, cv->w, cv->h );
+			}
 
 			/* Draw markers of the current curve */
 
@@ -1363,10 +1365,18 @@ void redraw_canvas_2d( Canvas *c )
 					points[ 0 ].x =   d2shrt( cv->s2d[ X ] 
 											  * ( m->x_pos + cv->shift[ X ] ) )
 									- dw;
+					if ( points[ 0 ].x + 2 * dw < 0 ||
+						 points[ 0 ].x > ( short int ) c->w )
+						 continue;
+
 					points[ 0 ].y =   i2shrt( G2.canvas.h ) - 1
 									- d2shrt( cv->s2d[ Y ] 
 											  * ( m->y_pos + cv->shift[ Y ] ) )
 									- dh;
+					if ( points[ 1 ].y + 2 * dh < 0 ||
+						 points[ 0 ].y > ( short int ) c->h )
+						continue;
+
 					XDrawLines( G.d, c->pm, m->gc, points, 5,
 								CoordModePrevious );
 				}
