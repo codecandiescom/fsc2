@@ -223,7 +223,7 @@ trigger mode as well as setting up the pulser channels) is done in the
 phase-cycling -- here you will have to define the phase sequences to be
 used in the experiment as well as the way the resulting echos will be
 added up. Because this is a rather extensive subject (and because of the
-different ways pulsers are used in the supported spectrometers, an
+different ways pulsers are used in the supported spectrometers) an
 in-depth discussion of both these sections is part of a whole chapter
 (@pxref{Using Pulsers}).
 
