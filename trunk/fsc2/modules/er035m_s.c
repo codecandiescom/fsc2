@@ -32,13 +32,10 @@
 #include <fcntl.h>
 
 
-/* definitions for serial port access */
+/* Include configuration information for the device */
 
-#define SERIAL_PORT     1            /* serial port number (i.e. COM2) */
-#define SERIAL_BAUDRATE B9600        /* baud rate of field controller */
+#include "er035m_s.conf"
 
-
-#define DEVICE_NAME "ER035M_S"       /* name of device */
 
 #define TEST_FIELD 2000.0        /* returned as current fireld in test run */
 
@@ -84,7 +81,7 @@ typedef struct
 
 
 static NMR nmr;
-static char serial_port[ ] = "/dev/ttyS*";
+static char serial_port[ ] = "/dev/ttyS**";
 static char er035m_s_eol[ ] = "\r\n";
 
 
@@ -188,7 +185,15 @@ int er035m_s_init_hook( void )
 	}
 
 	need_Serial_Port[ SERIAL_PORT ] = SET;
-	*strrchr( serial_port, '*' ) = ( char ) ( SERIAL_PORT + '0' );
+	if ( SERIAL_PORT < 100 )
+		snprintf( strchr( serial_port, '*' ), 3, "%d", SERIAL_PORT );
+	else
+	{
+		eprint( FATAL, UNSET, "%s: Serial port numbers %d (i.e /dev/ttyS%d or "
+				"COM%d) is too large, 99 is maximum.\n", DEVICE_NAME,
+				SERIAL_PORT, SERIAL_PORT, SERIAL_PORT + 1 );
+		THROW( EXCEPTION );
+	}
 
 	nmr.is_needed = SET;
 	nmr.state = ER035M_S_UNKNOWN;

@@ -32,13 +32,10 @@
 #include <fcntl.h>
 
 
-/* definitions for serial port access */
+/* Include configuration information for the device */
 
-#define SERIAL_PORT     0           /* serial port number (i.e. COM1) */
-#define SERIAL_BAUDRATE B9600       /* baud rate of field controller */
+#include "er035m_sas.conf"
 
-
-#define DEVICE_NAME "ER035M_SAS"    /* name of device */
 
 #define TEST_FIELD 2000.0           /* returned as current field in test run */
 
