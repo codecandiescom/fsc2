@@ -196,7 +196,7 @@ typedef struct {
 	CHANNEL channel[ MAX_CHANNELS ];
 
 	int needed_channels;     // number of channels that are going to be needed
-	                         // for the experiment
+	                         // in the experiment
 
 	bool needs_update;       // set if pulse properties have been changed in
                              // test run or experiment
