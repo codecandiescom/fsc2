@@ -19,6 +19,9 @@ int conditionerror( const char *s );
 %}
 
 
+/* the following union and the token definitions MUST be identical to the ones
+   in `prim_exp.h' and `prim_exp_run_parser.y' ! */
+
 %union {
 	long   lval;
     double dval;

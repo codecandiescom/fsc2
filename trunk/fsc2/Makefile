@@ -44,8 +44,8 @@ preps_parser.c preps_parser.h: preps_parser.y fsc2.h
 preps_lexer.c: preps_lexer.flex fsc2.h
 	flex -Ppreps -opreps_lexer.c preps_lexer.flex
 
-prim_exp_parser.c: prim_exp_parser.y fsc2.h
-	bison -v -t -p prim_exp -o prim_exp_parser.c prim_exp_parser.y
+prim_exp_run_parser.c: prim_exp_run_parser.y fsc2.h
+	bison -v -t -p prim_exp_run -o prim_exp_parser_run.c prim_exp_run_parser.y
 
 prim_exp_lexer.c: prim_exp_lexer.flex fsc2.h
 	flex -Pprim_exp -oprim_exp_lexer.c prim_exp_lexer.flex
