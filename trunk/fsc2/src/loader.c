@@ -77,7 +77,6 @@ bool exist_function( const char *name )
 	int i;
 
 
-
 	for ( i = 0; i < num_func; i++ )
 		if ( fncts[ i ].name != NULL &&
 			 ! strcmp( fncts[ i ].name, name ) &&
@@ -90,7 +89,7 @@ bool exist_function( const char *name )
 
 /*-----------------------------------------------------------------------*/
 /* Function links a library file with the name passed to it (after       */
-/* adding the extension `so') and then tries to find still unresolved    */
+/* adding the extension `.so') and then tries to find still unresolved   */
 /* references to functions listed in the function data base `Functions'. */
 /*-----------------------------------------------------------------------*/
 
@@ -98,7 +97,7 @@ void load_functions( Device *dev )
 {
 	int num;
 	char *lib_name;
-	char *hook_func;
+	char *hook_func_name;
 	void *cur;
 
 
@@ -124,55 +123,47 @@ void load_functions( Device *dev )
 	}
 
 	dev->is_loaded = SET;
-	dev->driver.is_init_hook = UNSET;
-	dev->driver.is_test_hook = UNSET;
-	dev->driver.is_exp_hook = UNSET;
-	dev->driver.is_exit_hook = UNSET;
+	dev->driver.is_init_hook = dev->driver.is_test_hook =
+		dev->driver.is_exp_hook = dev->driver.is_exit_hook = UNSET;
 
 	/* If there is function with the name of the library file and the
 	   appended string "_init_hook" store it and set corresponding flag */
 
-	hook_func = T_malloc( strlen( dev->name ) + 11 );
-	strcpy( hook_func, dev->name );
-	strcat( hook_func, "_init_hook" );	
+	hook_func_name = get_string( strlen( dev->name ) + 10 );
+	strcpy( hook_func_name, dev->name );
+	strcat( hook_func_name, "_init_hook" );	
 
-	dev->driver.init_hook = dlsym( dev->driver.handle, hook_func );
+	dev->driver.init_hook = dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_init_hook = SET;
-	T_free( hook_func );
 
 	/* Get test hook function if available */
 	
-	hook_func = T_malloc( strlen( dev->name ) + 11 );
-	strcpy( hook_func, dev->name );
-	strcat( hook_func, "_test_hook" );	
+	strcpy( hook_func_name, dev->name );
+	strcat( hook_func_name, "_test_hook" );	
 
-	dev->driver.test_hook = dlsym( dev->driver.handle, hook_func );
+	dev->driver.test_hook = dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_test_hook = SET;
-	T_free( hook_func );
 
 	/* Get pre-experiment hook function if available */
 	
-	hook_func = T_malloc( strlen( dev->name ) + 10 );
-	strcpy( hook_func, dev->name );
-	strcat( hook_func, "_exp_hook" );	
+	strcpy( hook_func_name, dev->name );
+	strcat( hook_func_name, "_exp_hook" );	
 
-	dev->driver.exp_hook = dlsym( dev->driver.handle, hook_func );
+	dev->driver.exp_hook = dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_exp_hook = SET;
-	T_free( hook_func );
 
 	/* Finally check if there's also an exit hook function */
 
-	hook_func = T_malloc( strlen( dev->name ) + 11 );
-	strcpy( hook_func, dev->name );
-	strcat( hook_func, "_exit_hook" );	
+	strcpy( hook_func_name, dev->name );
+	strcat( hook_func_name, "_exit_hook" );	
 
-	dev->driver.exit_hook = dlsym( dev->driver.handle, hook_func );
+	dev->driver.exit_hook = dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_exit_hook = SET;
-	T_free( hook_func );
+	T_free( hook_func_name );
 
 	/* Run through all the functions in the function list and if they need
 	   to be resolved try to find them in the device driver functions - check
