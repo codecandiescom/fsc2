@@ -81,7 +81,7 @@ static void save_restore_variables( bool flag );
   experiment. Third, handling of loops becomes rather simple because we only
   have to feed them to the parser again and again. Of course, beside storing
   the experiment section in tokenised form as done by this function, we also
-  need routines that later passes the stored tokens to the parsers,
+  need routines that later pass the stored tokens to the parsers,
   exp_testlex() and exp_runlex().
 
   The function does the following:
