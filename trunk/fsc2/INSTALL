@@ -75,6 +75,15 @@ something appropriate for you (or even /dev/null). You can also set the
 verbosity of the logs by changing the variable GPIB_LOG_LEVEL to either
 HIGH, MEDIUM, LOW or OFF.
 
+Following the setting of variables concerned with the GPIB stuff a line
+follows with the definition of the variable 'IS_I386'. Please comment
+out this line (or simply delete it) if you want to compile the program
+for a machine that does not use an i386 type of processor (i.e. on a PPC).
+Some routines used only in debugging need a bit of assembler, so they wont
+work on a processor with a completely different architecture. If the line
+defining the variable 'IS_I386' is removed these parts are left out of the
+program, but in every other respect it should work as on a i386 machine.
+
 If you are still using the old libc (version 1) please search for the line
 
   ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)

@@ -45,6 +45,13 @@ GPIB_CONF_FILE = /etc/gpib.conf
 GPIB_LOG_FILE  = /tmp/gpib.log
 GPIB_LOG_LEVEL = HIGH
 
+# Comment out the next line if your machine does *not* have a i386 processor
+# (some stuff that helps me in debugging the program only works on Intel
+# processors, so removing the following line doesn't influence the basic
+# functionality, it just makes it a little bit harder to trace bugs...)
+
+IS_I386        = 1
+
 # To whom bug reports and crash messages will get send
 
 MAIL_ADDRESS   = Jens.Toerring@physik.fu-berlin.de
@@ -144,6 +151,10 @@ endif
 
 ifeq ($(GPIB_LOG_LEVEL),OFF)
 	CFLAGS += -DGPIB_LOG_LEVEL=LL_NONE
+endif
+
+ifdef IS_I386
+	CFLAGS += -DIS_I386
 endif
 
 ifdef MAIL_ADDRESS
