@@ -26,7 +26,7 @@ static int get_save_file( Var **v, const char *calling_function );
 static bool print_array( Var *v, long cur_dim, long *start, int fid );
 static bool print_slice( Var *v, int fid );
 static bool print_browser( int browser, int fid, const char* comment );
-static void T_fprintf( int file_num, const char *fmt, ... );
+static void T_fprintf( int file_num, const char *func, const char *fmt, ... );
 
 extern void child_sig_handler( int signo );
 
@@ -1641,25 +1641,25 @@ Var *f_save( Var *v )
 		switch( v->type )
 		{
 			case INT_VAR :
-				T_fprintf( file_num, "%ld\n", v->val.lval );
+				T_fprintf( file_num, "save", "%ld\n", v->val.lval );
 				break;
 
 			case FLOAT_VAR :
-				T_fprintf( file_num, "%#.9g\n", v->val.dval );
+				T_fprintf( file_num, "save", "%#.9g\n", v->val.dval );
 				break;
 
 			case STR_VAR :
-				T_fprintf( file_num, "%s\n", v->val.sptr );
+				T_fprintf( file_num, "save", "%s\n", v->val.sptr );
 				break;
 
 			case INT_TRANS_ARR :
 				for ( i = 0; i < v->len; i++ )
-					T_fprintf( file_num, "%ld\n", v->val.lpnt[ i ] );
+					T_fprintf( file_num, "save", "%ld\n", v->val.lpnt[ i ] );
 				break;
 				
 			case FLOAT_TRANS_ARR :
 				for ( i = 0; i < v->len; i++ )
-					T_fprintf( file_num, "%#.9g\n", v->val.dpnt[ i ] );
+					T_fprintf( file_num, "save", "%#.9g\n", v->val.dpnt[ i ] );
 				break;
 
 			case ARR_PTR :
@@ -1709,12 +1709,12 @@ static bool print_array( Var *v, long cur_dim, long *start, int fid )
 		for ( i = 0; i < v->sizes[ cur_dim ]; (*start)++, i++ )
 		{
 			if ( v->type == INT_ARR )
-				T_fprintf( fid, "%ld\n", v->val.lpnt[ *start ] );
+				T_fprintf( fid, "save", "%ld\n", v->val.lpnt[ *start ] );
 			else
-				T_fprintf( fid, "%#.9g\n", v->val.dpnt[ *start ] );
+				T_fprintf( fid, "save", "%#.9g\n", v->val.dpnt[ *start ] );
 		}
 
-		T_fprintf( fid, "\n" );
+		T_fprintf( fid, "save", "\n" );
 	}
 
 	return OK;
@@ -1730,9 +1730,11 @@ static bool print_slice( Var *v, int fid )
 
 	for ( i = 0; i < v->from->sizes[ v->from->dim - 1 ]; i++ )
 		if ( v->from->type == INT_ARR )
-			T_fprintf( fid, "%ld\n", * ( ( long * ) v->val.gptr + i ) );
+			T_fprintf( fid, "save", "%ld\n",
+					   * ( ( long * ) v->val.gptr + i ) );
 		else
-			T_fprintf( fid, "%#.9g\n", * ( ( double * ) v->val.gptr + i ) );
+			T_fprintf( fid, "save", "%#.9g\n",
+					   * ( ( double * ) v->val.gptr + i ) );
 
 	return OK;
 }
@@ -1899,17 +1901,17 @@ Var *f_fsave( Var *v )
 			{
 				case INT_VAR :
 					strcpy( ep, "%ld" );
-					T_fprintf( file_num, cp, cv->val.lval );
+					T_fprintf( file_num, "fsave", cp, cv->val.lval );
 					break;
 
 				case FLOAT_VAR :
 					strcpy( ep, "%#.9g" );
-					T_fprintf( file_num, cp, cv->val.dval );
+					T_fprintf( file_num, "fsave", cp, cv->val.dval );
 					break;
 
 				case STR_VAR :
 					strcpy( ep, "%s" );
-					T_fprintf( file_num, cp, cv->val.sptr );
+					T_fprintf( file_num, "fsave", cp, cv->val.sptr );
 					break;
 
 				default :
@@ -1921,13 +1923,13 @@ Var *f_fsave( Var *v )
 		else
 		{
 			strcpy( ep, "#" );
-			T_fprintf( file_num, cp );
+			T_fprintf( file_num, "fsave", cp );
 		}
 
 		cp = ep + 6;
 	}
 
-	T_fprintf( file_num, cp );
+	T_fprintf( file_num, "fsave", cp );
 
 	/* Finally free the copy of the format string and return */
 
@@ -2019,7 +2021,8 @@ static bool print_browser( int browser, int fid, const char* comment )
 	writer( browser ==  0 ? C_PROG : C_OUTPUT );
 	if ( comment == NULL )
 		comment = "";
-	T_fprintf( fid, "%s\n", comment );
+	T_fprintf( fid, browser == 0 ? "save_program" : "save_output",
+			   "%s\n", comment );
 
 	while ( 1 )
 	{
@@ -2037,13 +2040,15 @@ static bool print_browser( int browser, int fid, const char* comment )
 					;
 			}
 
-			T_fprintf( fid, "%s%s\n", comment, lp );
+			T_fprintf( fid, browser == 0 ? "save_program" : "save_output",
+					   "%s%s\n", comment, lp );
 		}
 		else
 			break;
 	}
 
-	T_fprintf( fid, "%s\n", comment );
+	T_fprintf( fid, browser == 0 ? "save_program" : "save_output",
+			   "%s\n", comment );
 
 	return OK;
 }
@@ -2119,19 +2124,19 @@ Var *f_save_c( Var *v )
 	cl = r;
 	if ( cc == NULL )
 		cc = "";
-	T_fprintf( file_num, "%s\n", cc );
+	T_fprintf( file_num, "save_comment", "%s\n", cc );
 
 	while ( cl != NULL )
 	{
 		nl = strchr( cl, '\n' );
 		if ( nl != NULL )
 			*nl++ = '\0';
-		T_fprintf( file_num, "%s%s\n", cc, cl );
+		T_fprintf( file_num, "save_comment", "%s%s\n", cc, cl );
 		cl = nl;
 	}
 
 	if ( cc != NULL )
-		T_fprintf( file_num, "%s\n", cc );
+		T_fprintf( file_num, "save_comment", "%s\n", cc );
 
 	T_free( r );
 
@@ -2142,7 +2147,7 @@ Var *f_save_c( Var *v )
 /*---------------------------------------------------------------------*/
 /*---------------------------------------------------------------------*/
 
-static void T_fprintf( int file_num, const char *fmt, ... )
+static void T_fprintf( int file_num, const char *func, const char *fmt, ... )
 {
 	int n;                      /* number of bytes we need to write */
 	static int size;            /* guess for number of characters needed */
@@ -2158,6 +2163,13 @@ static void T_fprintf( int file_num, const char *fmt, ... )
 
 	/* If the file has been closed because of insufficient place and no
        replacement file has been given just don't print */
+
+	if ( file_num >= File_List_len )
+	{
+		eprint( FATAL, "%s:%ld: Invalid file handler used in call of function "
+				"%s().\n", Fname, Lc, func );
+		THROW( EXCEPTION );
+	}
 
 	if ( File_List[ file_num ].fp == NULL )
 		return;
