@@ -10,11 +10,11 @@ libdir         = $(prefix)/lib/fsc2
 auxdir         = $(libdir)/aux
 docdir         = $(libdir)/doc
 
-#prefix         = $(shell pwd)
-#bindir         = $(prefix)
-#libdir         = $(prefix)
-#auxdir         = $(prefix)/aux
-#docdir         = $(prefix)/doc
+#prefix        = $(shell pwd)
+#bindir        = $(prefix)
+#libdir        = $(prefix)
+#auxdir        = $(prefix)/aux
+#docdir        = $(prefix)/doc
 
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log
@@ -199,7 +199,7 @@ distclean:
 
 pack:
 	$(MAKE) distclean
-	cd ..; tar -c fsc2a | gzip -c -9 > fsc2a.tgz
+	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
 
 # Write zipped tarball to ZIP drive (with mount and unmount of ZIP drive)
 
