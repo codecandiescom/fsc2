@@ -387,7 +387,7 @@ int return_status;
 /* by a zero return of the function 'do_measurement) or it received */
 /* a DO_QUIT signal in the  meantime (as indicated by the global    */
 /* variable 'do_quit') it exits. After switching back to the "real" */
-/* DO_QUIT" handler as the next and final step of the loop it waits */
+/* DO_QUIT handler as the next and final step of the loop it waits  */
 /* for the global variable indicating a DO_SEND signal to become    */
 /* true - this is necessary in order to avoid loosing data by       */
 /* flooding the parent with data and signals it might not be able   */
@@ -415,7 +415,7 @@ static void run_child( void )
 
 /*
 {
-	int h = 1;
+	bool h = SET;
 	while ( h );
 }
 */
@@ -476,10 +476,10 @@ static void do_quit_handler( int sig_type )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* do_measurement() runs through and executes all commands. Since it is */
-/* executed by the child it's got to honour the `do_quit' flag.         */
-/*----------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* do_measurement() runs through and executes all commands. Since it */
+/* is executed by the child it's got to honor the `do_quit' flag.    */
+/*-------------------------------------------------------------------*/
 
 static void do_measurement( void )
 {
