@@ -30,10 +30,9 @@
 #define PRG_CHUNK_SIZE 16384
 
 /* Number of tokens to be parsed before forms are rechecked for user input -
-   too low a number slows down the program quite a lot (and even moderately
-   short EDL files with loops may produce an appreciable number of tokens),
-   while setting it to too large a value will make it difficult for the user
-   to stop the interpreter! */
+   too small a number slows down the program quite a lot (and even moderately
+   short EDL files may produce an appreciable number of tokens), while making
+   it too large makes it difficult for the user to stop the interpreter. */
 
 #define CHECK_FORMS_AFTER   8192
 
