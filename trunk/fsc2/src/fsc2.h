@@ -40,6 +40,7 @@
 #include <string.h>
 #include <locale.h>
 #include <math.h>
+#include <float.h>
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
