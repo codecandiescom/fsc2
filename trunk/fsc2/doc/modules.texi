@@ -573,22 +573,17 @@ correct sequence, so it's not completely foolproof.
 
 @subsection Files to be included
 
-First of all, each module has to include the header file @file{fsc2.h}
--- otherwise it will not be able to use @acronym{fsc2}'s variables.
+First of all, each module has to include the header file
+@file{fsc2_module.h} -- otherwise it will not be able to use
+@acronym{fsc2}'s variables. It should @strong{not} include
+@file{fsc2.h}, this header file is for @acronym{fsc2} itself.
+@file{fsc2_module.h} already includes all definitions and declarations
+of macros, variables and functions for GPIB functions.
 
-Second, all modules that use the GPIB bus should include
-@file{gpib_if.h}, this contains all the definitions and declarations of
-macros, variables and functions for GPIB functions. Actually, it will in
-turn include further header files and knows (hopefully) which are the
-correct ones -- @acronym{fsc2} is supposed to work with different
-implementations of the GPIB functionality and by including
-@code{gpib_if.h} you don't have to care about which one is going to be
-used.
-
-Third, each module should but its basic configuration information into a
-special file which should be well enough commented to allow even people
-without much programming experience to adapt the behavior of the module
-to his/her needs. A good example are modules for devices that are
+Second, each module should put its basic configuration information into
+a special file which should be commented well enough to allow even
+people without much programming experience to adapt the behavior of the
+module to his/her needs. A good example are modules for devices that are
 accessed via the serial port. Because you probably won't know which
 serial port the user is going to use you shouldn't hide this information
 somewhere deep down in the innards of your module but put it in a
@@ -666,15 +661,18 @@ for unrelated devices.
 
 @subsection Global variables
 
-First there is a global variable, called @code{FSC2_MODE}, which tells
-you in which context your module function is called. There are three
-different contexts: First you have to distinguish between the program
-interpreting the @code{VARIABLES} or @code{PREPARATIONS} section and, on
-the other hand, when interpreting the @code{EXPERIMENT} section. During
-the handling of the @code{VARIABLES} or @code{PREPARATIONS} section the
-devices are not initialized and can't be accessed and the @acronym{EDL}
-program interpretation @code{FSC2_MODE} is set to the value
-@code{PREPARATION}.
+First there is a global variable@footnote{Actually, @code{FSC2_MODE}
+isn't a real variable. While you can obtain its value you can't assign
+values to it, and if your try the compiler will complain about an error
+like '@code{invalid lvalue in assignment}'.}, called @code{FSC2_MODE},
+which tells you in which context your module function is called. There
+are three different contexts: First you have to distinguish between the
+program interpreting the @code{VARIABLES} or @code{PREPARATIONS} section
+and, on the other hand, when interpreting the @code{EXPERIMENT}
+section. During the handling of the @code{VARIABLES} or
+@code{PREPARATIONS} section the devices are not initialized and can't be
+accessed and the @acronym{EDL} program interpretation @code{FSC2_MODE}
+is set to the predefined value @code{PREPARATION}.
 
 But before the real experiment is started a test run of the
 @code{EXPERIMENT} section must be done. While in this context your
@@ -688,7 +686,8 @@ the test run the variable @code{FSC2_MODE} is set to @code{TEST}.
 
 Finally the experiment gets started. Now your module can talk to the
 devices and can return 'real' values. To indicate this @code{FSC2_MODE}
-is set to the value @code{EXPERIMENT}.
+is set to the value @code{EXPERIMENT} (it's already set to this value
+when the @code{exp_hook} functions (see below) are run).
 
 Thus you will probably often have constructs like the following in your
 module functions:
@@ -712,13 +711,16 @@ switch ( FSC2_MODE )
 @end example
 
 
-Another important global variable, @code{need_GPIB}, being also of type
-@code{bool}, has to be set by the init hook function if the device is
+The second improtant global variable, @code{need_GPIB}, is of type
+@code{bool} and has to be set in the init hook function if the device is
 controlled via the GPIB bus. Thus, if the GPIB bus is needed, include a
 line in the init hook function similar to
 @example
 need_GPIB = SET;
 @end example
+If you forget to set this variable chances are high that the program
+will stop with an error message, complaining that it can't access the
+GPIB bus.
 
 
 @subsection Handling GPIB devices
@@ -726,22 +728,24 @@ need_GPIB = SET;
 To make dealing with the GPIB bus simpler there are several routines
 that can be used when writing a module, which then call the needed
 functions from the GPIB library you choose when installing
-@acronym{fsc2}. The declaration of all of these functions can be found
-in @file{gpib_if.h}.
+@acronym{fsc2}.
 
-The first thing that must be done is to announce the device to the set
-of functions dealing with the GPIB bus. This should be done in the
-@code{exp_hook} function (see below) and is done via the function
+As already pointed out above, to be able to use the GPIB bus our module
+must set the boolean variable @code{need_GPIB}.
+
+The first other thing to do is to announce the device to the set of
+functions dealing with the GPIB bus. This should be done in the
+@code{exp_hook} function (see below) via a call of the function
 @example
 int gpib_init_device( const char *name, int *device );
 @end example
-The function expects the name of the function (which will be used to
-look it up in the GPIB configuration file) and the address of an
-integer, which, on successful return, will contain a number now
-associated with the device and to be used in all further calls of
-GPIB functions for this device. The function returns one of to value,
-either @code{SUCCESS} or @code{FAILURE} with obvious meaning. All of the
-functions described in rest of this section return these values.
+This function expects the name of the device (which will be used to look
+it up in the GPIB configuration file) and the address of an integer,
+which, on successful return, will contain a number now associated with
+the device and to be used in all further calls of GPIB functions for
+this device. The function returns either either @code{SUCCESS} or
+@code{FAILURE} (with obvious meaning). All of the functions described in
+rest of this section return these values.
 
 The next two most important functions are
 @example
@@ -753,9 +757,9 @@ to the device designated by @code{device} (which you got from a call of
 @code{gpib_init_device()}). The second function reads a maximum of
 @code{length} byte from the device @code{device} and stores them in
 @code{buffer}. Before @code{gpib_read()} is called @code{length} must
-have been set to the maximum number of data that should be read, after a
-successful call @code{length} contains the number of bytes that have
-been read.
+have been set to the maximum number of data that should be read and
+after a successful call @code{length} contains the number of bytes that
+really have been read.
 
 When you're done dealing with a device you should call
 @example
@@ -797,7 +801,7 @@ the format string.
 
 @subsection Serial port handling
 
-For serial ports things are handled a quite bit differently from GPIB
+For serial ports things are handled a bit differently from GPIB
 devices. In the init hook function you must try to request the serial
 port you need by calling the function @code{fsc2_request_serial_port()}
 @example
@@ -813,11 +817,11 @@ error message and stop the @acronym{EDL} program, so you don't have to
 deal with error handling.
 
 For all functions that deal directly with file descriptors for the
-serial port device files there are replacements. The following table
-lists all functions that are used with respect to serial ports with
-their replacements:
+serial port device files there are replacements functions. The following
+table lists all functions that are used with respect to serial ports
+with their replacements:
 @table @samp
-@item open() 
+@item open()
 @code{fsc2_serial_open()}
 @findex fsc2_serial_open()
 @item close()
@@ -826,7 +830,7 @@ their replacements:
 @item write()
 @code{fsc2_serial_write()}
 @findex fsc2_serial_write()
-@item read
+@item read()
 @code{fsc2_serial_read()}
 @findex fsc2_serial_read()
 @item tcgetattr()

@@ -27,8 +27,7 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 
-#include "fsc2.h"
-#include "gpib_if.h"
+#include "fsc2_module.h"
 
 
 /* Include configuration information for the device */
@@ -253,21 +252,15 @@ Var *lockin_get_data( Var *v )
 		return vars_push( FLOAT_VAR, get_single_channel_data( v ) );
 
 	val[ 0 ] = get_single_channel_data( v );
-	v = vars_pop( v );
 
-	if ( v == NULL )
-		return vars_push( FLOAT_VAR, val[ 1 ] );
+	if ( ( v = vars_pop( v ) ) == NULL )
+		return vars_push( FLOAT_VAR, val[ 0 ] );
 
 	val[ 1 ] = get_single_channel_data( v );
-	v = vars_pop( v );
 
-	if ( v != NULL )
-	{
+	if ( ( v = vars_pop( v ) ) != NULL )
 		eprint( WARN, SET, "%s: Superfluous paramter%s in call of %s().\n",
 				DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
 
 	return vars_push( FLOAT_ARR, val, 2 );
 }
@@ -387,13 +380,8 @@ Var *lockin_sensitivity( Var *v )
 	sens = VALUE( v );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
-	{
 		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
 				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
 
 	if ( sens < 0.0 )
 	{
@@ -511,13 +499,8 @@ Var *lockin_time_constant( Var *v )
 	tc = VALUE( v );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
-	{
 		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
 				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
 
 	if ( tc < 0.0 )
 	{
@@ -622,13 +605,8 @@ Var *lockin_phase( Var *v )
 	phase = VALUE( v );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
-	{
 		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
 				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
 
 	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
 		phase -= 360.0;
@@ -710,7 +688,6 @@ Var *lockin_dac_voltage( Var *v )
 				"number in %s().\n", DEVICE_NAME, Cur_Func );
 
 	channel = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
-	v = vars_pop( v );
 
 	if ( channel < first_DAC_port || channel > last_DAC_port )
 	{
@@ -722,7 +699,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	/* If no second argument is specified return the current DAC setting */
 
-	if ( v == NULL )
+	if ( ( v = vars_pop( v ) ) == NULL )
 	{
 		if ( FSC2_MODE == PREPARATION )
 		{
@@ -746,12 +723,8 @@ Var *lockin_dac_voltage( Var *v )
 	voltage = VALUE( v );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
-	{
 		eprint( WARN, SET, "%s: Superfluous arguments in call of function "
 				"%s().\n", DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL ) 
-				;
-	}
 
 	if ( fabs( voltage ) > 10.24 )
 	{
@@ -803,13 +776,8 @@ Var *lockin_lock_keyboard( Var *v )
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
-	{
 		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
 				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
 
 	if ( FSC2_MODE == EXPERIMENT )
 		sr530_lock_state( lock );
