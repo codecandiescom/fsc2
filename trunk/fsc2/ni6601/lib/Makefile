@@ -30,7 +30,7 @@ incl_dir  = $(prefix)/include
 
 CFLAGS    = -ggdb -O2 -Wall -Wwrite-strings -Wstrict-prototypes \
 			-Wmissing-prototypes -Wmissing-declarations -W
-LDFLAGS   = --version-script=ni6601_lib.map
+LDFLAGS   = -Wl,--version-script=ni6601_lib.map
 INCLUDES  = -I../driver -I.
 
 sources   = ni6601_lib.c
