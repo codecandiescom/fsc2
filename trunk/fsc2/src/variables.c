@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.22  1999/07/22 16:37:00  jens
+   *** empty log message ***
+
    Revision 1.21  1999/07/22 07:47:47  jens
    *** empty log message ***
 
@@ -65,6 +68,11 @@
 
 
 #include "fsc2.h"
+
+
+typedef Var *VarretFnct( Var * );
+typedef VarretFnct *FnctPtr;
+
 
 
 
@@ -292,7 +300,7 @@ Var *vars_new( char *name )
 
 	/* Get memory for a new structure and for storing the name */
 
-	vp = ( Var * ) T_malloc( sizeof( Var ) );
+	vp = T_malloc( sizeof( Var ) );
 	vp->name = get_string_copy( name );
 
 	/* Set relevant entries in the new structure and make it the very first
@@ -855,7 +863,7 @@ Var *vars_push( int type, ... )
 	/* get memory for the new variable to be apppended to the stack
 	   and setits type */
 
-	new_stack_var = ( Var * ) T_malloc( sizeof( Var ) );
+	new_stack_var = T_malloc( sizeof( Var ) );
 	new_stack_var->type = type;
 
 	/* get the data for the new variable */
@@ -881,9 +889,11 @@ Var *vars_push( int type, ... )
 			break;
 
 		case FUNC :
-			/* passing the function pointer to assign it here proved to be
-			   too difficult for my limited understanding of C or the type
-			   analyser in va_arg( ) is broken... */
+			/* getting the function pointer seems to be to complicated for
+			   va_arg when written directly thus `FnctPtr' is a typedef
+			   (see start of file) */
+
+			new_stack_var->val.fnct = va_arg( ap, FnctPtr );
 			break;
 
 		case ARR_PTR :
@@ -1058,10 +1068,10 @@ void qvars_arr_extend( Var *a, Var *s )
 	/* extend the `sizes' entry and store the size for this dimension */
 
 	if ( a->sizes == NULL )
-		a->sizes = ( int * ) T_malloc( sizeof( int ) );
+		a->sizes = T_malloc( sizeof( int ) );
 	else
-		a->sizes = ( int * ) T_realloc( ( void * ) a->sizes,
-										( a->dim + 1 )* sizeof( int ) );
+		a->sizes = T_realloc( ( void * ) a->sizes,
+							  ( a->dim + 1 )* sizeof( int ) );
 	a->sizes[ a->dim++ ] = size;
 
 	if ( s )                 /* only for non-variable-size arrays */
@@ -1206,7 +1216,7 @@ void vars_push_astack( Var *v )
 
 	/* get memory on the array stack */
 
-	tmp = ( AStack * ) T_malloc( sizeof( AStack ) );
+	tmp = T_malloc( sizeof( AStack ) );
 
 	/* put `tmp' on top of stack */
 
@@ -1225,7 +1235,7 @@ void vars_push_astack( Var *v )
 
 	Arr_Stack->var = v;
 	Arr_Stack->act_entry = 0;
-	Arr_Stack->entries = ( long * ) T_malloc( v->dim * sizeof( long ) );
+	Arr_Stack->entries = T_malloc( v->dim * sizeof( long ) );
 
 	vars_pop( v );    /* this isn't be needed ? */
 }
@@ -1308,11 +1318,9 @@ void vars_arr_assign( Var *a, Var *v )
 			len *= Arr_Stack->var->sizes[ i ];
 
 		if ( Arr_Stack->var->type == INT_ARR )
-			Arr_Stack->var->val.lpnt =
-				( long * ) T_malloc( len * sizeof( long ) );
+			Arr_Stack->var->val.lpnt = T_malloc( len * sizeof( long ) );
 		else
-			Arr_Stack->var->val.dpnt =
-				( double * ) T_malloc( len * sizeof( double ) );
+			Arr_Stack->var->val.dpnt = T_malloc( len * sizeof( double ) );
 		Arr_Stack->var->len = len;
 		Arr_Stack->var->flags &= ~NEW_VARIABLE;
 	}
@@ -1710,6 +1718,25 @@ Var *vars_arr_start( Var *v )
 /* All the variables below this variable are indices for the array     */
 /* element. The only exception is the case that the array is still new */
 /* - then these variables indicate the sizes of the dimensions.        */
+/*
+   So, what's returned?
+
+   1. when called in VARIABLES section for a new array
+     a. for a non-variable array a pointer to the first element of the
+	    array is returned
+     b. for a variable sized array a ARR_PTR variable pointing to NULL
+	    is returned (thus making initialisation of this kind of arrays
+		impossible
+
+   2. normally
+     a. for new, variable sized arrays a generic pointer to the array is
+	    returned (actually the variable passed to the function) and the
+		stack remains untouched
+     b. normally a pointer to the element top be set - for variable sized
+	    arrays when less indices than the dimensions of the array were
+		on the stack the NEED_ARRAY_SLICE is set.
+
+*/
 /*---------------------------------------------------------------------*/
 
 Var *vars_arr_set( Var *v )
@@ -1729,7 +1756,7 @@ Var *vars_arr_set( Var *v )
 	for ( dim = 0, cv = v->next; cv != 0; ++dim, cv = cv->next )
 		;
 
-	if ( dim == 0 )
+	if ( dim == 0 && ! ( a->flags & VARIABLE_SIZED ) )
 	{
 		eprint( FATAL, "%s:%ld: Missing array dimensions.\n", Fname, Lc );
 		THROW( VARIABLES_EXCEPTION );
@@ -1746,17 +1773,18 @@ Var *vars_arr_set( Var *v )
 	   the array which can be used in the following to initialize the new
 	   array. If, on the other hand, vars_setup_new_array() just returns a
 	   NULL generic array pointer which means it's an dynamically sized array
-	   and makes sure we can't assign data to it. We no pop the array pointer
+	   and makes sure we can't assign data to it. We now pop the array pointer
 	   and return the variable pointer we got from vars_setup_new_array().
 
 	   `New' dynamically sized arrays have already been set up as far as
-	   possible by an earlier call to vars_setup_new_array(). We now expect an
-	   assignment of an array slice which will finally determine the still
-	   missing size. The function doing this assignment will have to do all
-	   normally done here, i.e. determining the size of the last dimension,
-	   allocating memory and calculating the location for storing its data all
-	   by itself. Thus we simply leave the pointer to the array on the stack
-	   untouched and return.
+	   possible by an earlier call to vars_setup_new_array() (otherwise the
+	   VARIABLE_SIZED flag couldn't be set). We now expect an assignment of
+	   an array slice which will finally determine the still missing
+	   size. The function doing this assignment will have to do all things
+	   normally done here, i.e. after determining the size of the last
+	   dimension the allocation memory and calculation of the location for
+	   storing the data all by itself. Thus we simply leave the pointer to
+	   the array on the stack untouched and return.
 	*/
 
 	if ( a->flags & NEW_VARIABLE )
@@ -1801,7 +1829,7 @@ Var *vars_arr_set( Var *v )
 
 	vars_pop( v );
 
-	/* push a pointer the accessed element onto the stack */
+	/* push a pointer to the accessed element onto the stack */
 
 	if ( a->type == INT_ARR )
 		ret = vars_push( INT_PTR, a->val.lpnt + index, a );
@@ -1867,10 +1895,6 @@ long vars_calc_index( Var *a, Var *v )
 		vn = v->next;
 		vars_pop( v );
 	}
-
-	/* make sure we didn't botched the indexing arithmetic */
-
-	assert( index < a->len );
 
 	return( index );
 }
@@ -1965,3 +1989,102 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 	else
 		return( vars_push( FLOAT_PTR, a->val.dpnt, a ) );
 }
+
+
+Var *vars_arr_get( Var *v )
+{
+	int dim, i;
+	Var *a, *cv, *ret;
+	long index;
+
+
+	/* check that variable is an array pointer */
+
+	vars_check2( v, ARR_PTR );
+	a = v->val.vptr;
+
+	/* check that array already has data assigned to it */
+
+	if ( a->flags & NEW_VARIABLE )
+	{
+		assert( a->flags & VARIABLE_SIZED );
+
+		eprint( FATAL, "%s:%ld: The array `%s' is dynamically siezd and has "
+				"not been assigned data yet.\n", Fname, Lc, a->name );
+		THROW( VARIABLES_EXCEPTION );
+	}
+
+	/* count the variable below v on the stack */
+
+	for ( dim = 0, cv = v->next; cv != 0; ++dim, cv = cv->next )
+		;
+
+	if ( dim == 0 & ! ( a->flags & VARIABLE_SIZED ) )
+	{
+		eprint( FATAL, "%s:%ld: Missing array dimensions.\n", Fname, Lc );
+		THROW( VARIABLES_EXCEPTION );
+	}
+
+	
+	/* check that for fixed size arrays there are as many indices on the
+	   stack as the array has dimensions, for dynamically sized arrays we
+	   also allow acess to array slices */
+
+	if ( ( ! ( a->flags & VARIABLE_SIZED ) && dim < a->dim ) ||
+		 ( a->flags & VARIABLE_SIZED && dim < a->dim - 1 ) )
+	{
+		eprint( FATAL, "%s:%ld: Array `%s' is %d-dimensional but only "
+				"indices are given.\n", Fname, Lc, a->name, a->dim, dim );
+		THROW( VARIABLES_EXCEPTION );
+	}
+
+	/* check that there are not too many indices */
+
+	if ( dim > a->dim )
+	{
+		eprint( FATAL, "%s:%ld: Array `%s' is %d-dimensional but more "
+				"indices are given.\n", Fname, Lc, a->name, a->dim );
+		THROW( VARIABLES_EXCEPTION );
+	}
+
+	/* calculate the pointer to the indexed array element and push it onto
+	   the stack */
+
+	index = vars_calc_index( a, v->next );
+
+	/* pop the array pointer variable and return a variable with the value
+	   from the accessed element */
+
+	vars_pop( v );
+
+	if ( a->flags & VARIABLE_SIZED && dim == a->dim - 1 )
+	{
+		if ( a->type == INT_ARR )
+			ret = vars_push( INT_PTR, a->val.lpnt + index, a );
+		else
+			ret = vars_push( FLOAT_PTR, a->val.dpnt + index, a );
+	
+		ret->flags = IS_ARRAY_SLICE;
+		return( ret );
+	}
+	
+	if ( a->type == INT_ARR )
+		return( vars_push( INT_VAR, *( a->val.lpnt + index ) ) );
+	else
+		return( vars_push( FLOAT_VAR, *( a->val.dpnt + index ) ) );
+
+	assert( 1 == 0 );
+}
+
+
+Var *vars_assign( Var *src, Var *dest )
+{
+	/* <PARANOID> check that both variables really exist </PARANOID> */
+
+	assert( vars_exist( src ) && vars_exist( dest ) );
+
+	if ( src->type & ( INT_PTR | FLOAT_PTR ) && src->flags & IS_ARRAY_SLICE )
+	{
+		switch ( dest->type )
+		{
+			case INT_PTR : case 

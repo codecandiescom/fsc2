@@ -4,6 +4,9 @@
    $Id$
 
    $Log$
+   Revision 1.8  1999/07/22 16:37:26  jens
+   *** empty log message ***
+
    Revision 1.7  1999/07/21 23:01:56  jens
    *** empty log message ***
 
@@ -120,7 +123,7 @@ Var *func_get( char *name, int *access )
 		if ( ! strcmp( fncts[ i ].name, name ) )
 		{
 			ret = vars_push( FUNC, fncts[ i ].fnct );
-			ret->val.fnct = fncts[ i ].fnct;
+/*			ret->val.fnct = fncts[ i ].fnct; */
 			ret->name = get_string_copy( name );
 			ret->dim = fncts[ i ].nargs;
 			*access = fncts[ i ].access_flag;

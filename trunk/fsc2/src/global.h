@@ -122,7 +122,8 @@ enum {
 	NEW_VARIABLE       = ( 1 << 0 ),
 	TRANSIENT_VARIABLE = ( 1 << 1 ),
 	VARIABLE_SIZED     = ( 1 << 2 ),
-	NEED_ARRAY_SLICE   = ( 1 << 3 )
+	NEED_ARRAY_SLICE   = ( 1 << 3 ),
+	IS_ARRAY_SLICE     = ( 1 << 4 ),
 };
 
 
