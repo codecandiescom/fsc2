@@ -345,7 +345,7 @@ pack:
 ZIP:
 	$(MAKE) pack
 	if [ `hostname -f` = "crowley.none" \
-		 -o `hostname -f` = "moebi.physik.fu-berlin.de"]; then \
+		 -o `hostname -f` = "moebi.physik.fu-berlin.de" ]; then \
 		if ! `grep ZIP /etc/mtab > /dev/null`; then \
 			sleep 1; \
 			mount /ZIP; \
