@@ -190,6 +190,7 @@ int hfs9000_exp_hook( void )
 	int i;
 
 
+
 	if ( ! hfs9000_is_needed )
 		return 1;
 
@@ -214,7 +215,7 @@ int hfs9000_exp_hook( void )
 		}
 
 
-	hfs9000_run( hfs9000.is_running );
+	hfs9000_run( hfs9000.has_been_running );
 
 	return 1;
 }
