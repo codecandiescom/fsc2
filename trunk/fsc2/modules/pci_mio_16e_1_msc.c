@@ -25,11 +25,11 @@
 #include "pci_mio_16e_1.h"
 
 
-/*---------------------------------------------------------------------*/
-/* Functions allows to reserve (or un-reserve) the FREQ_OUT so that in */
-/* the following changes to the FREQ_OUT require a pass-phrase (i.e.   */
-/* when calling the function daq_freq_out() withb an argument.         */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Functions allows to reserve (or un-reserve) the FREQ_OUT so that in
+ * the following changes to the FREQ_OUT require a pass-phrase (i.e.
+ * when calling the function daq_freq_out() withb an argument.
+ *---------------------------------------------------------------------*/
 
 Var_T *daq_reserve_freq_out( Var_T *v )
 {
@@ -82,13 +82,13 @@ Var_T *daq_reserve_freq_out( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function for setting the output at the FREQ_OUT pin. It can be queried, */
-/* returning the currently output frequency or 0 if switched off, or can   */
-/* set to the frequency passed to the function (within the limits of the   */
-/* range of possible frequencies) or switched off when the requested       */
-/* frequency is 0.                                                         */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function for setting the output at the FREQ_OUT pin. It can be queried,
+ * returning the currently output frequency or 0 if switched off, or can
+ * set to the frequency passed to the function (within the limits of the
+ * range of possible frequencies) or switched off when the requested
+ * frequency is 0.
+ *-------------------------------------------------------------------------*/
 
 Var_T *daq_freq_out( Var_T *v )
 {
@@ -288,8 +288,8 @@ Var_T *daq_freq_out( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ *-------------------------------------------------------------------------*/
 
 Var_T *daq_trigger_setup( Var_T *v )
 {

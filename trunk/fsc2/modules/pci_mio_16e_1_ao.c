@@ -327,7 +327,7 @@ Var_T *daq_ao_channel_setup( Var_T *v )
 
 
 /*-----------------------------------------------------*
- * Function for outputting an volatge at an AO channel
+ * Function for outputting an voltage at an AO channel
  *-----------------------------------------------------*/
 
 Var_T *daq_set_voltage( Var_T *v )

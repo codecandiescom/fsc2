@@ -25,10 +25,10 @@
 #include "pci_mio_16e_1.h"
 
 
-/*---------------------------------------------------------------*/
-/* Converts a channel number as we get it passed from the parser */
-/* into a real channel number.                                   */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Converts a channel number as we get it passed from the parser
+ * into a real channel number.
+ *---------------------------------------------------------------*/
 
 int pci_mio_16e_1_channel_number( long ch, const char *snippet )
 {

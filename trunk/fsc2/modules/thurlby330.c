@@ -81,9 +81,9 @@ static struct {
 
 
 
-/*------------------------------------*/
-/* Init hook function for the module. */
-/*------------------------------------*/
+/*------------------------------------*
+ * Init hook function for the module.
+ *------------------------------------*/
 
 int thurlby330_init_hook( void )
 {
@@ -99,9 +99,9 @@ int thurlby330_init_hook( void )
 }
 
 
-/*--------------------------------------------------*/
-/* Start of experiment hook function for the module */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Start of experiment hook function for the module
+ *--------------------------------------------------*/
 
 int thurlby330_exp_hook( void )
 {
@@ -118,9 +118,9 @@ int thurlby330_exp_hook( void )
 }
 
 
-/*------------------------------------------------*/
-/* End of experiment hook function for the module */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * End of experiment hook function for the module
+ *------------------------------------------------*/
 
 int thurlby330_end_of_exp_hook( void )
 {
@@ -135,8 +135,8 @@ int thurlby330_end_of_exp_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *powersupply_name( UNUSED_ARG Var_T *v )
 {
@@ -144,9 +144,9 @@ Var_T *powersupply_name( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------------*/
-/* Switch on/off damping of a power supply channel */
-/*-------------------------------------------------*/
+/*-------------------------------------------------*
+ * Switch on/off damping of a power supply channel
+ *-------------------------------------------------*/
 
 Var_T *powersupply_damping( Var_T *v )
 {   
@@ -179,9 +179,9 @@ Var_T *powersupply_damping( Var_T *v )
 }
 
 
-/*--------------------------------------*/
-/* Switch on/off a power supply channel */
-/*--------------------------------------*/
+/*--------------------------------------*
+ * Switch on/off a power supply channel
+ *--------------------------------------*/
 
 Var_T *powersupply_channel_state( Var_T *v )
 {   
@@ -214,14 +214,14 @@ Var_T *powersupply_channel_state( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function sets or returns the voltage at one of the 2 outputs. */
-/* The first argument must be the output number, either 1 or 2,  */
-/* the second the voltage in the range between 0 V and 32 V (in  */
-/* 10 mV steps). If there isn't a second argument the voltage at */
-/* the outputs is returned (which may be smaller than the        */
-/* voltage that had been set due to the current limit).          */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function sets or returns the voltage at one of the 2 outputs.
+ * The first argument must be the output number, either 1 or 2,
+ * the second the voltage in the range between 0 V and 32 V (in
+ * 10 mV steps). If there isn't a second argument the voltage at
+ * the outputs is returned (which may be smaller than the
+ * voltage that had been set due to the current limit).
+ *---------------------------------------------------------------*/
 
 Var_T *powersupply_voltage( Var_T *v )
 {
@@ -269,13 +269,13 @@ Var_T *powersupply_voltage( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function sets the voltage limit (which is identical to setting */
-/* voltage using power-supply_voltage()) when called with two     */
-/* arguments. If called with only one argument the voltage limit  */
-/* setting is returned. The initial voltage limit (i.e. when the  */
-/* module is started is 0 V.                                      */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function sets the voltage limit (which is identical to setting
+ * voltage using power-supply_voltage()) when called with two
+ * arguments. If called with only one argument the voltage limit
+ * setting is returned. The initial voltage limit (i.e. when the
+ * module is started is 0 V.
+ *----------------------------------------------------------------*/
 
 Var_T *powersupply_voltage_limit( Var_T *v )
 {
@@ -325,14 +325,14 @@ Var_T *powersupply_voltage_limit( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function sets or returns the current at one of the 2 outputs. */
-/* The first argument must be the output number, either 1 or 2,  */
-/* the second the current in the range between 0 A and 3 A (in   */
-/* 1 mA steps). If there isn't a second argument the current at  */
-/* the outputs is returned (which may be smaller than the        */
-/* current that had been set due to the voltage limit).          */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function sets or returns the current at one of the 2 outputs.
+ * The first argument must be the output number, either 1 or 2,
+ * the second the current in the range between 0 A and 3 A (in
+ * 1 mA steps). If there isn't a second argument the current at
+ * the outputs is returned (which may be smaller than the
+ * current that had been set due to the voltage limit).
+ *---------------------------------------------------------------*/
 
 Var_T *powersupply_current( Var_T *v )
 {
@@ -381,13 +381,13 @@ Var_T *powersupply_current( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function sets the current limit (which is identical to setting */
-/* current using power-supply_current()) when called with two     */
-/* arguments. If called with only one argument the current limit  */
-/* setting is returned. The initial current limit (i.e. when the  */
-/* module is started is 0 A.                                      */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function sets the current limit (which is identical to setting
+ * current using power-supply_current()) when called with two
+ * arguments. If called with only one argument the current limit
+ * setting is returned. The initial current limit (i.e. when the
+ * module is started is 0 A.
+ *----------------------------------------------------------------*/
 
 Var_T *powersupply_current_limit( Var_T *v )
 {
@@ -436,9 +436,9 @@ Var_T *powersupply_current_limit( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function for sending a GPIB command directly to power supply */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function for sending a GPIB command directly to power supply
+ *--------------------------------------------------------------*/
 
 Var_T *powersupply_command( Var_T *v )
 {
@@ -469,9 +469,9 @@ Var_T *powersupply_command( Var_T *v )
 }
 
 
-/*-------------------------------------------------------*/
-/* Internal functions for initialization of power-supply */ 
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Internal functions for initialization of power-supply
+ *-------------------------------------------------------*/
 
 static bool thurlby330_init( const char *name )
 {
@@ -482,8 +482,8 @@ static bool thurlby330_init( const char *name )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static double thurlby330_set_voltage( long channel, double voltage )
 {
@@ -500,8 +500,8 @@ static double thurlby330_set_voltage( long channel, double voltage )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static double thurlby330_get_voltage( long channel )
 {
@@ -519,8 +519,8 @@ static double thurlby330_get_voltage( long channel )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static double thurlby330_get_voltage_limit( long channel )
 {
@@ -538,8 +538,8 @@ static double thurlby330_get_voltage_limit( long channel )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static double thurlby330_set_current( long channel, double current )
 {
@@ -557,8 +557,8 @@ static double thurlby330_set_current( long channel, double current )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static double thurlby330_get_current( long channel )
 {
@@ -576,8 +576,8 @@ static double thurlby330_get_current( long channel )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static double thurlby330_get_current_limit( long channel )
 {
@@ -595,8 +595,8 @@ static double thurlby330_get_current_limit( long channel )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static bool thurlby330_command( const char *cmd )
 {
@@ -609,8 +609,8 @@ static bool thurlby330_command( const char *cmd )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static bool thurlby330_talk( const char *cmd, char *reply, long *length )
 {
@@ -628,8 +628,8 @@ static bool thurlby330_talk( const char *cmd, char *reply, long *length )
 }
 
 
-/*--------------------------------------------------*/
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ *--------------------------------------------------*/
 
 static void thurlby330_failure( void )
 {
@@ -638,8 +638,8 @@ static void thurlby330_failure( void )
 }
 
 
-/*--------------------------------------------------*/
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ *--------------------------------------------------*/
 
 static long thurlby330_get_channel( Var_T *v )
 {
@@ -657,6 +657,7 @@ static long thurlby330_get_channel( Var_T *v )
 
 	return channel + 1;
 }
+
 
 /*
  * Local variables:

@@ -53,7 +53,7 @@ const char *tds_tmpl_ptime( double p_time )
 
 /*---------------------------------------------------------------------*
  * Deletes all window by removing them from the linked list of windows
- *---------------------------------------------------------------------*
+ *---------------------------------------------------------------------*/
 
 void tds_tmpl_delete_windows( TDS_TMPL_T *s )
 {
@@ -826,7 +826,7 @@ void tds_tmpl_state_check( double timebase, long rec_len, double trig_pos )
  * length if a NULL pointer was passed to the function. Finally, it
  * switches tracking cursors on or off, depending if the widths of
  * all windows are equal or not.
- *-------------------------------------------------------------------
+ *-------------------------------------------------------------------*/
 
 void tds_tmpl_set_tracking( Window_T *w )
 {
