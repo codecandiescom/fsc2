@@ -343,14 +343,14 @@ struct GUI_Stuff {
 
 /* Global variables */
 
-extern Internals_T Internals;
+extern Internals_T FSC2_Internals;
 extern EDL_Stuff_T EDL;
 extern Communication_T Comm;
 extern GUI_Stuff_T GUI;
 extern Graphics_T G;
-extern Graphics_1d_T G1;
-extern Graphics_2d_T G2;
-extern Cut_Graphics_T CG;
+extern Graphics_1d_T G_1d;
+extern Graphics_2d_T G_2d;
+extern Cut_Graphics_T G_cut;
 
 extern bool Need_GPIB;
 #if defined WITH_RULBUS
