@@ -133,7 +133,7 @@ volatile bool do_quit = UNSET;
 bool exit_hooks_are_run = UNSET;
 
 Graphics G;
-Data_Buffer *dbuf;
+Data_Buffer *dbuf = NULL;
 
 
 #else   /*  ! FSC2_MAIN */
