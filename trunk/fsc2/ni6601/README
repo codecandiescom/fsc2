@@ -119,7 +119,7 @@ IV. Documentation
 =================
 
 In the 'driver' subdirectory you will find a file named 'ni6601_drv.txt',
-describing in detail which ioctl() calls that can used to deal with the
+describing in detail the ioctl() calls that can used to deal with the
 card.
 
 In the 'lib' subdirectory a file named 'ni6601_lib.txt' describes the
