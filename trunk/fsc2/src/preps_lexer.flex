@@ -196,33 +196,32 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			/* combinations of pulse and property, e.g. `P3.LEN' */
 
 {P}?"."{F}  {
-				prepslval.vptr = pulse_get_by_addr( n2p( prepstext ), P_FUNC );
+				prepslval.vptr = pulse_get_prop( prepstext, P_FUNC );
 				return VAR_REF;
             }
 
 {P}?"."{S}  {
-				prepslval.vptr = pulse_get_by_addr( n2p( prepstext ), P_POS );
+				prepslval.vptr = pulse_get_prop( prepstext, P_POS );
 				return VAR_REF;
             }
 
 {P}?"."{L}  {
-				prepslval.vptr = pulse_get_by_addr( n2p( prepstext ), P_LEN );
+				prepslval.vptr = pulse_get_prop( prepstext, P_LEN );
 				return VAR_REF;
             }
 
 {P}?"."{DS} {
-				prepslval.vptr = pulse_get_by_addr( n2p( prepstext ), P_DPOS );
+				prepslval.vptr = pulse_get_prop( prepstext, P_DPOS );
 				return VAR_REF;
             }
 
 {P}?"."{DL} {
-				prepslval.vptr = pulse_get_by_addr( n2p( prepstext ), P_DLEN );
+				prepslval.vptr = pulse_get_prop( prepstext, P_DLEN );
 				return VAR_REF;
             }
 
 {P}?"."{ML} {
-				prepslval.vptr = pulse_get_by_addr( n2p( prepstext ),
-													P_MAXLEN );
+				prepslval.vptr = pulse_get_prop( prepstext, P_MAXLEN );
 				return VAR_REF;
             }
 

@@ -150,32 +150,32 @@ WS          [\n \t]+
 			/* all needed pulse related keywords... */
 
 {P}?"."{F}  {
-				varslval.vptr = pulse_get_by_addr( n2p( varstext ), P_FUNC );
+				varslval.vptr = pulse_get_prop( varstext, P_FUNC );
 				return VAR_REF;
             }
 
 {P}?"."{S}  {
-				varslval.vptr = pulse_get_by_addr( n2p( varstext ), P_POS );
+				varslval.vptr = pulse_get_prop( varstext, P_POS );
 				return VAR_REF;
             }
 
 {P}?"."{L}  {
-				varslval.vptr = pulse_get_by_addr( n2p( varstext ), P_LEN );
+				varslval.vptr = pulse_get_prop( varstext, P_LEN );
 				return VAR_REF;
             }
 
 {P}?"."{DS} {
-				varslval.vptr = pulse_get_by_addr( n2p( varstext ), P_DPOS );
+				varslval.vptr = pulse_get_prop( varstext, P_DPOS );
 				return VAR_REF;
             }
 
 {P}?"."{DL} {
-				varslval.vptr = pulse_get_by_addr( n2p( varstext ), P_DLEN );
+				varslval.vptr = pulse_get_prop( varstext, P_DLEN );
 				return VAR_REF;
             }
 
 {P}?"."{ML} {
-				varslval.vptr = pulse_get_by_addr( n2p( varstext ), P_MAXLEN );
+				varslval.vptr = pulse_get_prop( varstext, P_MAXLEN );
 				return VAR_REF;
             }
 
