@@ -2356,9 +2356,9 @@ This function is available only for the @code{rb_pulser} module, i.e.@:
 the pulser used with the 275 GHz spectrometer in Leiden. It expects a
 single argument, a pulse, e.g. @code{P1}. If it is the first pulse of
 a function (i.e.@: @code{MICROWAVE}, @code{RF} or @code{DETECTION}), the
-function returns the earliest possible position of the pulse. For all
-other pulses, the minimum distance to the end of the previous pulse is
-returned.
+function returns the earliest possible absolute position of the pulse.
+For all later pulses, the minimum distance to the end of the previous
+pulse is returned.
 
 This function can only be called during the @code{EXPERIMENT} section
 of an @code{EDL} script.
