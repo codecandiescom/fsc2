@@ -95,4 +95,10 @@ number @code{1} for the left mouse button, @code{middle} or @code{2} for
 the middle and @code{right} or @code{3} for the right mouse button. Per
 default each of the three mouse buttons can be used.
 
+@item @option{-noCrashMail}
+Usually, @acronym{fsc2} sends an email to the author whenever it
+crashes. This email contains information about the reason for the crash and.
+the currently loaded @acronym{EDL} program. If you would prefer
+@acronym{fsc2} @b{not} to send such an email use this option.
+
 @end table

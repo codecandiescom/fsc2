@@ -1310,7 +1310,7 @@ void usage( void )
 			 "  -axisFont font\n"
 			 "             set the font to be used in the axis in the "
 			 "display window\n"
-			 "  -noCrashMail
+			 "  -noCrashMail\n"
 			 "             don't send mail when fsc2 crashes\n"
 			 "  -h, --help\n"
 			 "             display this help text and exit\n\n"
