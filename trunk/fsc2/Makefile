@@ -218,8 +218,8 @@ CFLAGS           := $(OPTIMIZATION) \
 					-Waggregate-return \
 					-Wnested-externs \
 					-Wcast-align \
-				    # -DNDEBUG            # switch off built-in debugging code
 				    # -DMDEBUG            # for built-in malloc debugging
+				    # -DNDEBUG            # switch off built-in debugging code
 				    # -Wconversion
 				    # -Wsign-compare      # missing in older gcc versions
 				    # -Wbad-function-cast # too many false positives
