@@ -14,16 +14,16 @@ er035m_sas;                  // gauss meter
 
 VARIABLES:
 
-start_freq  = 12 MHz;
-end_freq    =  14 MHz;
-step_freq   = 40 kHz;          
+start_freq  = 10.5 MHz;
+end_freq    =  23 MHz;
+step_freq   = 50 kHz;          
 
-attenuation =  -4 dB;
+attenuation =  -5.5 dB;
 
-N_runs      = 2;             // how many times to repeat the whole experiment
+N_runs      = 20;             // how many times to repeat the whole experiment
 N_averages  = 50;            // number of averages per frequency point
 
-N_max_base_curves = 4;       // how many curve to use for baseline correction
+N_max_base_curves = 10;       // how many curve to use for baseline correction
 
 window_start = 3 us;         // start of integration window (after trigger)
 window_width = 5 us;         // width of integration window
@@ -63,7 +63,6 @@ time_res;                        // digitizer time resolution (in ns)
 
 min_time, max_time;              // first / last point (in ns)
 start_time, end_time;            // intergation window start / end pos. (in ns)
-new_start_time, new_end_time;    // new values od sliders (in ns)
 Start_pos_1, Start_pos_2, Width;
 N_base_curves;
 integ, base_int;
@@ -72,8 +71,6 @@ integral;
 I, J, K, M;                      // counters
 
 F1, F2, F3;                      // file handlers
-S1, S2;                          // slider handlers
-B1, B2;                          // button handlers
 
 End_index;
 Is_stored = 0;
@@ -144,7 +141,7 @@ IF Start_pos_1 > Rec_len {
 	abort( );
 }
 
-Width = int( 0.02 * window_width / time_base );
+Width = int( 50 * window_width / time_base );
 IF Width < 1 {
 	Width = 1;
 }
@@ -172,6 +169,12 @@ IF window_start_2 == 0.0 {
 	}
 }
 
+print( "\Twindow_start = #, window_width = #, time_base = #\n",
+		window_start, window_width, time_base );
+print( "\TStart_pos_1 = #, Start_pos_2 = #, Width = #\n",
+       Start_pos_1, Start_pos_2, Width );
+
+
 /* Now, finally, we can start the experiment */
 
 FOR J = 1 : N_runs
@@ -186,12 +189,13 @@ FOR J = 1 : N_runs
 
 	IF J % 2 {
 	    freq = start_freq;
-    	synthesizer_frequency( freq );
+	    synthesizer_frequency( freq );
+	    step_freq = abs( step_freq );
 		M = 0;
 	} ELSE {
-		M = N_steps + 1;
+	    step_freq = - abs( step_freq );
+	    M = N_steps + 1;
 	}
-	step_freq *= ( -1.0 )^( J % 2 + 1 );
 
     digitizer_start_acquisition( );
 
@@ -228,24 +232,27 @@ FOR J = 1 : N_runs
 
         /* Add the new curve to the results from previous runs */
 
-        IF J != 1 {
-            mean_curve[ M ] = ( ( J - 1 ) * mean_curve[ M ] + curve ) / J;
-        } ELSE {
-            mean_curve[ M ] = curve;
-        }
+		IF J == 1 {
+		    mean_curve[ M ] = curve;
+		} ELSE {
+	        mean_curve[ M ] = ( ( J - 1 ) * mean_curve[ M ] + curve ) / J;
+		}
         Is_stored = 1;
 
-        /* Calculate the mean of the data before the trigger used to get rid
-           of changes of the 'zero level' */
+        /* Calculate the mean of the data before the trigger which is used
+		   later to get rid of changes of the 'zero level' */
 
         IF Pretrigger != 0 {
             ground = mean( curve, 1, Pretrigger );
             mean_ground[ M ] = ( ( J - 1 ) * mean_ground[ M ] + ground ) / J;
-        }
+        } ELSE {
+			ground = mean_ground[ M ] = 0;
+		}
 
-        /* At the start of run add up curves used for baseline correction */
+        /* At the start of run with the frequency swept up add curves used
+		   for baseline correction */
 
-        IF I <= N_max_base_curves | I > N_steps - N_max_base_curves {
+        IF I <= N_max_base_curves & J % 2 == 1 {
             IF I == 1 & J == 1 {
                 N_base_curves = 1;
                 base_curve = curve - ground;
@@ -256,12 +263,12 @@ FOR J = 1 : N_runs
             }
         }
 
-        /* Calculate the values of the integration window (now using 'curve'
-           as temporary storage for the baseline corrected curve) */
+        /* Calculate the integration window and the cleaned up curve (now
+		   using 'curve' for temporary storage) */
 
+        integral = 1.0e3 * (   mean( mean_curve[ M ], Start_pos_1, Width )
+		                     - mean( mean_curve[ M ], Start_pos_2, Width ) );
         curve = 1.0e3 * ( mean_curve[ M ] - base_curve - mean_ground[ M ] );
-        integral = 1.0e3 * (   mean( curve, Start_pos_1, Width )
-							 - mean( curve, Start_pos_2, Width ) );
 
         /* Display the new data */
 
