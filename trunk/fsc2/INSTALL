@@ -63,13 +63,13 @@ archive go into the newly created directory fsc2. Edit the Makefile in
 this directory.
 
 Normally, the fsc2 and all auxiliary files needed will be installed below
-/usr/local (i.e. in /usr/local/bin, /usr/local/lib/fsc2, /sr/local/info
-and /usr/local/share/doc). To change this edit the first lines of the
-Makefile.
+/usr/local (i.e. in /usr/local/bin, /usr/local/lib/fsc2, /usr/local/info
+and /usr/local/share/doc). To change this location edit the first lines
+of the Makefile.
 
 The next make file variable, RESOLUTION, tells fsc2 if the program is going
 to be run on a machine with a high or a low resolution display. Monitors
-with less the 17" inch can be considered low resolution. Set the variable
+with less than 17" inch can be considered low resolution. Set the variable
 either to LOW or HIGH accordingly.
 
 The next lines are for setting the GPIB library that you are going to use.
@@ -80,26 +80,25 @@ GPIB support you also may set this variable to NONE. In this case fsc2
 won't run experiments which need devices that are connected via the GPIB
 bus (but you still can test such EDL programs). Use this option only if
 you either want to built a test version or if all your devices are
-controlled via to the serial ports.
+controlled via the serial ports.
 
 If you use the National Instruments GPIB driver you can set the place
-where fsc2 expects the configuration file. But usually this does not need
-to be changed.
+where fsc2 expects the GPIB configuration file, gpib.conf. But usually
+there is no reason to change the default value.
 
 While running fsc2 may write out information about the activity on the
 GPIB bus into a log file. You may change the default, /tmp/gpib.log, to
-something appropriate for you (or even /dev/null). You can also set the
-verbosity of the logs by changing the variable GPIB_LOG_LEVEL to either
-HIGH, MEDIUM, LOW or OFF.
-
+something appropriate for you (or even to /dev/null). You can also set
+the verbosity of the logs by changing the variable GPIB_LOG_LEVEL to
+either HIGH, MEDIUM, LOW or OFF.
 
 The next two variables must be set to the owner of the all files that will
 be installed as well as its group. I would strongly recommend to create a
 special account and a special group for fsc2. fsc2 needs to be setuid'ed,
-so for security reasons this special user should have as low priveleges as
+so for security reasons this special user should have as low privileges as
 possible and should not be able to log in to the system (set it's shell in
-/etc/passwd to /bin/false). Most of the time fsc2 runs with the real user
-ID and group ID but at a few places (e.g. when writing to shared log files,
+/etc/passwd to /bin/false). Most of the time fsc2 runs with the real users
+ID and group but at a few places (e.g. when writing to shared log files,
 creates lock files, or accesses shared memory) it switches back to the EUID
 and EGID of fsc2.
 
@@ -115,18 +114,19 @@ other respect fsc2 should work as on an i386 machine.
 C) Compiling and Installing
 ===========================
 
-Go back into the main directory of the package and type 'make'. This may
-take some time to finish. A few warnings may show up during the compilation,
-especially when the documentation is created and some of the required tools
-are not available. It can even happen that make stops with an error message
-in this case (i.e. during making the documenntation). This does *not* mean
-that the program didn't compile succesfully!
+Go into the main directory of the package and type 'make'. This may take
+some time to finish. Usually no warnings should show up during the
+compilation (at least on systems with a newer libc and if my GPIB library
+is used), but errors can happen when the documentation is created and some
+of the required tools are not available. It can even happen that make stops
+with an error message in this case (i.e. during making the documenntation).
+This does *not* mean that the program didn't compile succesfully!
 
 Please don't start 'make' from one of the subdirectories, this is bound to
 fail in most cases.
 
 If you get more than a few warnings during the compilation stage of the
-program or the make process even fails there you should send me an email
+program or the make process fails completely you should send me an email
 with the output of make.
 
 When the compilation of the program succeded (even though making the
@@ -140,11 +140,11 @@ worry about...
 D) Simple Tests
 ===============
 
-The subdirectory 'edl' contains several several EDL programs that you can use
-to test fsc2 and get aquinted with the syntax. Please note that some of the
-files will not work - I didn't had time to systematically weed out the ones
-that are outdated. There are a few programs that will even work without any
-devices, these are
+The subdirectory 'edl' contains several several EDL programs that you can
+use to test fsc2 and get acquainted with the syntax. Unfortunately, some
+of the files will not work - I didn't had time to systematically weed out
+the ones that are outdated. There are a few programs that will even work
+without any devices, these are
 
   a.edl
   gr.edl
