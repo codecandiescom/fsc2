@@ -643,8 +643,7 @@ of the array elements.
 @anchor{rms}
 @findex rms()
 Expects an one-dimensional array as input and returns the square root of
-the sum of the squares of the array elements, divided by the number of
-elements.
+the sum of the squared array elements, divided by the number of elements.
 
 
 @item sqrt()
@@ -817,7 +816,7 @@ array, and returns the size of this dimension. I.e.@: for an array defined as
 @findex sizes()
 This function is similar to @code{size()} but only takes an array as
 argument an returns a new one-dimensional array with the sizes of the
-different dimensions. I.e.@:, use it the following way:
+different dimensions. I.e.@: use it the following way:
 
 @example
 X[ 4, 2, 5 ]

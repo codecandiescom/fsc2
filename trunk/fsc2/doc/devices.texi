@@ -342,7 +342,7 @@ maximum sensitivity can be specified, in which case the @code{EXPAND}
 button is automatically switched on.
 
 Before the @code{EXPERIMENT} section this function can't be called
-without an argument, i.e. as a query.
+without an argument, i.e.@: as a query.
 
 @item lockin_time_constant()
 @findex lockin_time_constant()
@@ -368,7 +368,7 @@ interval between 0 and 360 degrees. If called with an argument the phase
 is set accordingly.
 
 Before the @code{EXPERIMENT} section this function can't be called
-without an argument, i.e. as a query.
+without an argument, i.e.@: as a query.
 
 @item lockin_ref_freq()
 @findex lockin_ref_freq()
@@ -382,7 +382,7 @@ printed and the experiment is stopped) - the admissible range depends on
 the harmonics setting, see the manual for more details.
 
 Before the @code{EXPERIMENT} section this function can't be called in
-query mode, i.e. without an argument.
+query mode, i.e.@: without an argument.
 
 @item lockin_ref_level()
 @findex lockin_ref_level()
@@ -393,7 +393,7 @@ between @w{4 mV} and @w{5 V}, if the argument is not within this range
 an error message is printed and the experiment is stopped.
 
 Before the @code{EXPERIMENT} section this function can't be called in
-query mode, i.e. without an argument.
+query mode, i.e.@: without an argument.
 
 
 @item lockin_lock_keyboard()
@@ -494,9 +494,11 @@ only if either it has been already called with an argument or in the
 @item digitizer_trigger_position()
 @findex digitizer_trigger_position()
 The function queries (if called with no argument) or sets (if called
-with an argument) the amount of pre-trigger, i.e.@ the portion of the
+with an argument) the amount of pre-trigger, i.e.@: the portion of the
 trace shown with data before the trigger was detected. The function
-accepts or returns values from the interval @w{[0, 1]}.
+accepts or returns values from the interval @w{[0, 1]} (where 0 means
+that the trigger is at the very first point of the trace and 1 that it's
+at the last point).
 
 The function can be called in query mode (i.e.@: without an argument)
 only if either it has been already called with an argument or in the
@@ -782,7 +784,7 @@ to switch output on, or zero or the string @code{"OFF"} to switch it
 off. The synthesizer output is never switched on automatically!
 
 Before the @code{EXPERIMENT} section this function can't be called in
-query mode, i.e. without an argument (unless the state has already been
+query mode, i.e.@: without an argument (unless the state has already been
 set by calling the function with an argument). In query mode it either
 returns either @code{1} or @code{0} to indicate the on/off state of the
 RF output.
@@ -798,7 +800,7 @@ automatically by a call of the function
 @code{synthesizer_reset_frequency()} (see below).
 
 Before the @code{EXPERIMENT} section this function can't be called in
-query mode, i.e. without an argument (unless the frequency has already
+query mode, i.e.@: without an argument (unless the frequency has already
 been set by calling the function with an argument).
 
 
@@ -809,7 +811,7 @@ the attenuation it accepts one argument, the attenuation in the range
 between @w{+10 db} and @w{-136 db}.
 
 Before the @code{EXPERIMENT} section this function can't be called in
-query mode, i.e. without an argument (unless the attenuation has already
+query mode, i.e.@: without an argument (unless the attenuation has already
 been set by calling the function with an argument).
 
 @item synthesizer_step_frequency()
