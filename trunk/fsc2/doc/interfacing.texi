@@ -34,47 +34,151 @@ measurements it may be too complicated to learn the @acronym{EDL}
 syntax. But it is possible to write some rather simple programs that
 interface to @acronym{fsc2} and handle this automatically.
 
+
 What such a program has to do is to create a @acronym{EDL} file and send
 it to @acronym{fsc2}. Usually, the program will have a graphical
-frontend that allows the user to set the parameter and will then create
+front-end that allows the user to set the parameter and will then create
 the @acronym{EDL} file using these parameter. To write such a program an
 interpreted language like Tcl/Tk or Perl/Tk (or even a simple shell
-script using e.g.@ the @code{dialog} utility) will be sufficient. When it
-has obtained the necessary parameter all it has to do is to call one of
-the three programs
+script using e.g.@ the @code{dialog} utility) will be sufficient.
+
+@ifnotinfo
+Here's an example for a typical ENDOR-experiment:
+
+@image{interfacing,7cm,}
+
+As you see all the relevant parameters can be set in the form. After
+clicking onto the @code{Apply} button all the script
+@end ifnotinfo
+@ifinfo
+@ifnothtml
+When it has obtained the necessary parameter all it 
+@end ifnothtml
+@end ifinfo
+has to do is to call one of the three programs
 @example
   fsc2_load
   fsc2_test
   fsc2_start
 @end example
 @noindent
-with the @acronym{EDL} program text supplie at its standard input. Each
-of the three programs will either start @acronym{fsc2} or, if
-@acronym{fsc2} is already running, connect to it, and will ask
-@acronym{fsc2} to use the program text as its new input file. The
-difference between the three programs is that @code{fsc2_load} will only
-make @acronym{fsc2} load the program, @code{fsc2_test} will also tell
-@acronym{fsc2} to run a test on the input program, and @code{fsc2_start}
-will make @acronym{fsc2} start the experiment immediately (at least if
-the test of the @acronym{EDL} file was successful).
+with the text of an @acronym{EDL} program (created according to the
+parameters) supplied to its standard input.
+@ifnotinfo
+With the settings of the above example this could be
+@example
+DEVICES:
+  hp8647a;
+  sr810;
+
+VARIABLES:
+  start_freq  = 8 MHz;
+  end_freq    = 22 MHz;
+  step_freq   = 25 kHz;
+  attenuation = -8 dB;
+  mod_freq    = 19 kHz;
+  tc          = 300 ms;
+  mod_ampl    = 80 kHz;
+  N_runs      = 20;
+
+  I = 0;
+  J;
+  K = 1;
+
+  N_points = ceil( abs( ( end_freq - start_freq ) / step_freq ) ) + 1;
+  data[ N_points ];
+  mean_data[ N_points ];
+  File_1, File_2;
+
+PREPARATIONS:
+  synthesizer_use_table( );
+  synthesizer_attenuation( attenuation );
+  synthesizer_att_ref_freq( 14 MHz );
+  synthesizer_frequency( start_freq );
+  synthesizer_modulation( "FM", "EXT DC", mod_ampl );
+
+  init_1d( 2, N_points, start_freq * 1e-6, step_freq * 1e-6,
+           "Frequency / MHz", "Signal / V" );
+  lockin_time_constant( tc );
+
+EXPERIMENT:
+  lockin_ref_freq( mod_freq );
+  lockin_ref_level( 1 V );
+  synthesizer_state( "ON" );
+
+  File_1 = get_file( "File for storing all runs:" );
+  File_2 = get_file( "File for storing final result:" );
+  fsave( File_2, "% Start frequency = # MHz\n"
+                 "% End frequency   = # MHz\n"
+                 "% Step frequency  = # kHz\n"
+                 "% Lock-in sens.   = # V\n"
+                 "% Time constant   = # s\n"
+                 "% Phase           = #\n"
+                 "% Mod. frequency  = # kHz\n"
+                 "% Mod. amplitude  = # kHz\n%\n",
+         start_freq * 1.0e-6, end_freq * 1.0e-6, step_freq * 1.0e-3,
+         lockin_sensitivity( ), tc, lockin_phase( ), mod_freq * 1.0e-3,
+         mod_ampl * 1.0e-3 );
+  save_comment( File_2, "% " );
+  save_program( File_2, "% " );
+
+  FOR I = 1 : N_runs @{
+      print( "Starting #. run out of #\n", I, N_runs );
+
+      FOR J = 1 : N_points @{
+          data[ J ] = lockin_get_data( );
+          display( J, data[ J ], 1, J,
+                   ( mean_data[ J ] + data[ J ] ) / I, 2 );
+          synthesizer_frequency( start_freq + J * step_freq );
+          wait( tc );
+      @}
+
+      save( File_1, data );
+      mean_data += data;
+      K = I;
+      synthesizer_frequency( start_freq );
+  @}
+
+ON_STOP:
+  synthesizer_state( "OFF" );
+
+  IF I > 0 @{
+      save( File_2, mean_data / K );
+  @}
+@end example
+@end ifnotinfo
+Each of the three programs
+@ifnotinfo
+mentioned above
+@end ifnotinfo
+will either start @acronym{fsc2} or, if @acronym{fsc2} is already
+running, connect to it, and will ask @acronym{fsc2} to use the program
+text as its new input file. The difference between the three programs is
+that @code{fsc2_load} will only make @acronym{fsc2} load the program,
+@code{fsc2_test} will also tell @acronym{fsc2} to run a test on the
+input program, and @code{fsc2_start} will make @acronym{fsc2} start the
+experiment immediately (at least if the test of the @acronym{EDL} file
+was successful).
 
 When @acronym{fsc2} has accepted the new @acronym{EDL} file the programs
 return immediately. Using their return values you can find out if they
 were successful. The return values have the following meaning:
 @table @samp
-@item 0 
+@item 0
 Everything ok, program finished succesfully
 @item -1
-An internal error as been detected, please send a bug report
+An internal error as been detected in the program handling the
+connection to @acronym{fsc2}, please send a bug report
 @item 1
 A different user is already running fsc2
 @item 2
-@acronym{fsc2} is busy, i.e. is already running an experiment (or a test run)
+@acronym{fsc2} is busy, i.e. is already running an experiment
+(or a test run)
 @item 3
 Internal error in @acronym{fsc2} detected, please send a bug report
 @item 4
-@acronym{fsc2} could not be started (probably because the executable was
-not found)
+@acronym{fsc2} could not be started (probably because the
+executable was not found)
 @end table
 
 Please have a look at the @code{scripts} subdirectory in the main

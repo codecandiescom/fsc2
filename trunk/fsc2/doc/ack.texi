@@ -10,18 +10,17 @@ Prof.@: K.@: M@"obius (Free University Berlin). Both where so kind to
 allow me to spend quite large amounts of time on getting it to the state
 it is in now.
 
-All the people using the program sofar have been mis-used as
-alpha-testers. The first one accepting this r@^ole has been Axel Weber
-in Frankfurt, who already dealt with the ideosyncracies of the very
-first version (yes, there was a @acronym{FSC}, then without a @code{1}).
-Later, in Berlin, Stefan Weber, Chris W.@: M.@: Kay, Gerriet Eilers,
-Andreas Kuppig, Heike M@"ogling, Michael Fuhs, Anton Savitsky, Alexander
-Schnegg and Radko took over. Finally, also Iwo Gatlik and Tomasz
-Motylewski (Basel University) had some share of the fun. I would like to
-thank them not only for the constant stream of bug reports and proposals
-for improvements or new features (and I sometimes needed quite a lot of
-convincing) but, especially, for their enduring patience with me. Much
-too often when they wanted to do important experiments things didn't
-work and they had to wait until I got it fixed -- and I know I am too
-often not too easy to deal with in this kind of situation. So, many
-thanks to all of you.
+All the people using the program sofar have from time to time been
+mis-used as alpha-testers. The first one accepting this unpleasant
+r@^ole has been Axel Weber in Frankfurt, who already dealt with the bugs
+and shortcomings of the very first version (yes, there was a
+@acronym{FSC}, then without a @code{1}).  Later in Berlin Stefan Weber,
+Chris W.@: M.@: Kay, Gerriet Eilers, Andreas Kuppig, Heike M@"ogling,
+Michael Fuhs, Anton Savitsky, Alexander Schnegg and Radko took
+over. Finally, also Iwo Gatlik and Tomasz Motylewski (Basel University)
+had some share of the fun. I would like to thank them not only for the
+constant stream of bug reports and proposals for improvements or new
+features (and I sometimes needed quite a lot of convincing) but,
+especially, for their enduring patience. Much too often when they wanted
+to do an important experiment things didn't work and they had to wait
+until I got it fixed. So, again, many thanks to all of you.

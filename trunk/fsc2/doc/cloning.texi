@@ -28,12 +28,14 @@
 Unfortunately, all devices listed in the @code{DEVICES} section must be
 different. This is due to limitations of to the way shared libraries are
 handled and, as far as devices are concerned that are controlled via the
-GPIB bus, to certain ideosyncrasies of the GPIB libraries. Thus, if two
-or more exactly identical devices are to be used simultaneously extra
-shared libraries for these devices have to be created.
+GPIB bus, to certain requirements of the GPIB libraries. Thus, if two or
+more exactly identical devices are to be used simultaneously additional
+shared libraries with unique names for these devices have to be created.
 
 Fortunately, this is such a simple process that it can be done via a
-script. There are basically three or four steps:
+script (at least as long as the modules are written following the
+conventions discussed in the preceeding chapter). There are basically
+three or four steps:
 @enumerate
 @item @code{cd} into the @file{utils} subdirectory of @acronym{fsc2}s main
 directory.
