@@ -1187,11 +1187,11 @@ tds754a       := tds754a.c tds754a_gpib.c tds754a_util.c
 @noindent
 The module @code{tds754a} consists of the four @code{C} source files
 listed here. You have to create a similar entry for your own
-module. After you've down so you're done and can now re-compile to
+module. That's all that's need done and you can now re-compile to
 create the new module and re-install to make it available to
 @acronym{fsc2}.
 
-When you want to compile a module 'by hand' you'll have to make sure
+If you shoud want to compile a module 'by hand' you'll have to make sure
 that the @file{src} and the @file{config} directory are in the include
 paths and that both the flags @code{-shared} and @code{-fpic} are set
 both for compiling as well as linking. If you have a @code{C} source
@@ -1208,7 +1208,9 @@ To create a shareable library from it you need
 @noindent
 (assuming you're using GNU's @code{gcc} and @code{ld}). If this succeeds
 you will still have to copy the library to the place where
-@acronym{fsc2} expects it, i.e.@: usually @file{/usr/local/lib/fsc2}.
+@acronym{fsc2} expects it, i.e.@: usually @file{/usr/local/lib/fsc2},
+or need to set the environment variable @code{LD_LIBRARY_PATH} to
+point to the place where the library can be found.
 
 
 @subsection Calling EDL functions from a modules
@@ -1221,9 +1223,9 @@ functions defined in other modules) consists of three to four steps:
 You may first want to check if the function you're planning to call
 exists at all. To do so call @code{func_exists()}
 @findex func_exists()
-with the name of
-the function as the argument. It will return @code{0} if the function
-does not exist and can not be used, otherwise a non-zero value.
+with the name of the function as the argument. It will return @code{0}
+if the function does not exist and can not be used, otherwise a non-zero
+value.
 @item
 Call @code{func_get()}
 @findex func_get()
@@ -1275,19 +1277,19 @@ Var *my_function( Var *var )
 @end example
 
 
-There is one point that need attention: After the call to
-@code{func_call()} the variable with the pointer to the function
-returned by @code{func_get()}
+There is one point that needs attention: After the call to
+@code{func_call()} the variable @code{func_ptr} with the pointer to the
+function returned by @code{func_get()}
 @findex func_get()
-, @code{func_ptr}, will disappear automatically. Thus, when you need to
-call the function again you will have to go through this procedure,
-since the value stored in @code{func_ptr} after the call to
-@code{func_call()} is completely useless and even dangerous to use for
-any purpose whatsoever!  So, don't assume that the value of
-@code{func_prtr} you got from @code{func_get()}
+will disappear automatically. Thus, when you need to call the function
+again  you will have to go through this procedure, since the value
+stored in @code{func_ptr} after the call to @code{func_call()} is
+completely useless and even dangerous to use for any purpose whatsoever!
+So, don't assume that the value of @code{func_prtr} you got from
+@code{func_get()}
 @findex func_get()
 will have any meaning later on. Not only will the value be invalid but,
-even worse, there is an high probability that hard to trace bugs will
+even worse, there is a high probability that hard to trace bugs will
 result if you try to use it.
 
 
@@ -1307,15 +1309,15 @@ very similar also in @code{C} using a few macros.
 When writing the program I had to deal a lot with memory leaks,
 segmentation faults etc.@: and hacked together a few routines for
 allocation and deallocation of memory that have some build in code and
-which help me with debugging (and throw an exception when an allocation
-fails). You might find it useful to also use these routines for your
-modules.
+which help me with debugging (and that throw an exception when an
+allocation fails). You might find it useful to also use these routines
+for your modules.
 
 Finally, a boolean type is something that was missing until the new C99
-standard (and which only a few compilers already support, if any at
-all), so there's already a @code{typedef} for this type included in
-@acronym{fsc2} that you can use. It's also documented here in order to
-avoid confusion should you accidentally try to redefine it.
+standard (and which only a few compilers already support), so there's
+already a @code{typedef} for this type included in @acronym{fsc2} that
+you can use. It's also documented here in order to avoid confusion
+should you accidentally try to redefine it.
 
 
 @subsection Printing out messages
@@ -1362,8 +1364,8 @@ void print( int severity, const char *fmt, ... )
 To find out how much time has been spent since the start of the
 experiment the function @code{experiment_time()} may be used. It returns
 the time in seconds since the start of the experiment (to be precise
-since the start of the exp_hook functions). The time resolution should
-not be taken to be better than about @w{10 ms}.
+since the start of the first exp_hook function). The time resolution
+should not be taken to be better than about @w{10 ms}.
 
 The function also can be used during the test run but in this case only
 a very rough estimate will be returned that easily could be off by more
@@ -1401,9 +1403,9 @@ if ( non_recoverable_error )
 @findex THROW()
 @findex EXCEPTION
 @noindent
-and @acronym{fsc2} will take care of all error handling. That's all you
-need to know about exceptions for nearly all cases that have to be
-dealt with in modules.
+and @acronym{fsc2} will take care of all error handling and will stop a
+running experiment. That's all you need to know about exceptions for
+nearly all cases that have to be dealt with in modules.
 
 
 @subsubsection More on programming with exceptions
@@ -1458,7 +1460,7 @@ TRY
 @}
 OTHERWISE
 @{
-    do_cleanup();       /* e.g. deallocate memory */
+    do_local_cleanup();       /* e.g. deallocate memory */
     RETHROW();
 @}
 @end example
@@ -1473,8 +1475,7 @@ need to find out more about this problem, have a look at the code in
 @file{exceptions.h} and @file{exceptions.c} and read the documentation
 for the standard C functions @code{setjmp()}
 @findex setjmp()
-and
-@code{longjmp()}
+and @code{longjmp()}
 @findex longjmp()
 which are used to implement exceptions.
 
@@ -1500,7 +1501,11 @@ void stop_on_user_request( void )
 @end example
 that should be called. It will automatically determine if the user has
 pressed the @code{STOP} button and, if she did, will throw an
-@code{USER_BREAK_EXCEPTION}.
+@code{USER_BREAK_EXCEPTION}. This will work from all parts of the module
+except when running the @code{end_of_exp_hook} and @code{exit_hook}
+functions because these need to run without the user intervening.
+Thus you must make sure that these clean-up functions don't call other
+functions that may rely on user intervention.
 
 
 Here's some code taken from the module for a digitizer. It waits
@@ -1612,7 +1617,7 @@ if ( ! flag )
     flag = UNSET;
 @}
 ...
-if ( flag )
+if ( flag == SET )
     do_something_else( );
 @end example
 
