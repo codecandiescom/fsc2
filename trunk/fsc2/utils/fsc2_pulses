@@ -853,7 +853,7 @@ sub add_pulse_list {
 
 	my $ch = $self->find_by_key( $key );
 
-	die "Invalid imput at line $..\n" unless defined $ch;
+	die "Invalid input at line $..\n" unless defined $ch;
 
 	$ch->add_pulse_list( $step, @_ );
 	$self->{ 'num_steps' } = $step if $step > $self->{ 'num_steps' };
