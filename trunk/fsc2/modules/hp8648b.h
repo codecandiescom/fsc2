@@ -27,11 +27,11 @@
 
 /* Include configuration information for the device */
 
-#include "hp8647a.conf"
+#include "hp8648b.conf"
 
 
-#define MIN_FREQ        2.5e5            /* 250 kHz  */
-#define MAX_FREQ        1.0e9            /* 1000 MHz */
+#define MIN_FREQ        1.0e4            /* 10 kHz  */
+#define MAX_FREQ        2.0e9            /* 2000 MHz */
 #define MIN_MIN_ATTEN   3.0              /* really the minimum attenuation */
 #define MAX_ATTEN      -136.0            /* -136 db  */
 #define ATT_RESOLUTION  0.1
@@ -55,11 +55,11 @@
 
 /* declaration of exported functions */
 
-int hp8647a_init_hook( void );
-int hp8647a_test_hook( void );
-int hp8647a_exp_hook( void );
-int hp8647a_end_of_exp_hook( void );
-void hp8647a_exit_hook( void );
+int hp8648b_init_hook( void );
+int hp8648b_test_hook( void );
+int hp8648b_exp_hook( void );
+int hp8648b_end_of_exp_hook( void );
+void hp8648b_exit_hook( void );
 
 
 Var *synthesizer_name( Var *v );
@@ -120,19 +120,19 @@ typedef struct
 	double mod_ampl[ NUM_MOD_TYPES ];
 	bool mod_ampl_is_set[ NUM_MOD_TYPES ];
 
-} HP8647A;
+} HP8648B;
 
 
 
-#if defined( HP8647A_MAIN )
+#if defined( HP8648B_MAIN )
 
-HP8647A hp8647a;
+HP8648B hp8648b;
 const char *mod_types[ ] =   { "FM", "AM", "PHASE", "OFF" };
 const char *mod_sources[ ] = { "EXT AC", "EXT DC", "INT 1kHz", "INT 400 Hz" };
 
 #else
 
-extern HP8647A hp8647a;
+extern HP8648B hp8648b;
 extern const char *mod_types[ ];
 extern const char *mod_sources[ ];
 
@@ -140,38 +140,38 @@ extern const char *mod_sources[ ];
 
 
 
-/* functions defined in "hp8647a_util.c" */
+/* functions defined in "hp8648b_util.c" */
 
-void hp8647a_read_table( FILE *fp );
-FILE *hp8647a_find_table( char **name );
-FILE *hp8647a_open_table( char *name );
-double hp8647a_get_att_from_table( double freq );
-double hp8647a_get_att( double freq );
-int hp8647a_set_mod_param( Var *v, double *dres, int *ires );
-
-
-/* functions defined in "hp8647a_lexer.l" */
-
-void hp8647a_read_table( FILE *fp );
+void hp8648b_read_table( FILE *fp );
+FILE *hp8648b_find_table( char **name );
+FILE *hp8648b_open_table( char *name );
+double hp8648b_get_att_from_table( double freq );
+double hp8648b_get_att( double freq );
+int hp8648b_set_mod_param( Var *v, double *dres, int *ires );
 
 
-/* functions defined in "hp8647a_gpib.c" */
+/* functions defined in "hp8648b_lexer.l" */
 
-bool hp8647a_init( const char *name );
-void hp8647a_finished( void );
-bool hp8647a_set_output_state( bool state );
-bool hp8647a_get_output_state( void );
-double hp8647a_set_frequency( double freq );
-double hp8647a_get_frequency( void );
-double hp8647a_set_attenuation( double att );
-double hp8647a_get_attenuation( void );
-int hp8647a_set_mod_type( int type );
-int hp8647a_get_mod_type( void );
-int hp8647a_set_mod_source( int type, int source );
-int hp8647a_get_mod_source( int type );
-double hp8647a_set_mod_ampl( int type, double ampl );
-double hp8647a_get_mod_ampl( int type );
-bool hp8647a_command( const char *cmd );
+void hp8648b_read_table( FILE *fp );
+
+
+/* functions defined in "hp8648b_gpib.c" */
+
+bool hp8648b_init( const char *name );
+void hp8648b_finished( void );
+bool hp8648b_set_output_state( bool state );
+bool hp8648b_get_output_state( void );
+double hp8648b_set_frequency( double freq );
+double hp8648b_get_frequency( void );
+double hp8648b_set_attenuation( double att );
+double hp8648b_get_attenuation( void );
+int hp8648b_set_mod_type( int type );
+int hp8648b_get_mod_type( void );
+int hp8648b_set_mod_source( int type, int source );
+int hp8648b_get_mod_source( int type );
+double hp8648b_set_mod_ampl( int type, double ampl );
+double hp8648b_get_mod_ampl( int type );
+bool hp8648b_command( const char *cmd );
 
 
 /*

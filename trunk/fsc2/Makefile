@@ -641,6 +641,7 @@ install:
 	$(MAKE) -C $(mdir) install
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) version.ugz $(libdir)
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/hp8647a.table $(libdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/hp8648b.table $(libdir)
 ifdef WITH_HTTP_SERVER
 	$(MAKE) -C Fcntl_Lock install
 endif
@@ -654,6 +655,7 @@ endif
 
 uninstall:
 	-$(RM) $(RMFLAGS) $(libdir)/hp8647a.table
+	-$(RM) $(RMFLAGS) $(libdir)/hp8648b.table
 	-$(RM) $(RMFLAGS) $(libdir)/version.ugz
 	-$(RM) $(RMFLAGS) $(libdir)/Functions
 	-$(RM) $(RMFLAGS) $(libdir)/Devices
