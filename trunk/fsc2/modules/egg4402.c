@@ -515,7 +515,7 @@ static void egg4402_query( char *buffer, long *length )
 	do
 	{
 		usleep( 100000 );
-		if ( do_quit )
+		if ( DO_QUIT )
 			THROW( USER_BREAK_EXCEPTION );
 		if ( gpib_serial_poll( egg4402.device, &stb ) == FAILURE )
 			egg4402_failure( );

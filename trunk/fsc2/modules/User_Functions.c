@@ -72,11 +72,13 @@ void User_Functions_exit_hook( void )
 Var *bla( Var *v )
 {
 	v = v;
-	while ( 1 )
-	{
-		if ( do_quit )
-			THROW( USER_BREAK_EXCEPTION );
-	}
+
+	if ( ! TEST_RUN )
+		while ( 1 )
+		{
+			if ( DO_QUIT )
+				THROW( USER_BREAK_EXCEPTION );
+		}
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -115,6 +117,11 @@ Var *int_slice( Var *v )
 	array = T_calloc( size, sizeof( long ) );
 	ret = vars_push( INT_TRANS_ARR, array, size );
 	T_free( array );
+
+	if ( ! TEST_RUN )
+		usleep( 10000 );
+	if ( DO_QUIT )
+		THROW( USER_BREAK_EXCEPTION );
 
 	return ret;
 }

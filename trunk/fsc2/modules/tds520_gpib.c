@@ -628,7 +628,7 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	do
 	{
-		if ( do_quit )
+		if ( DO_QUIT )
 			THROW( USER_BREAK_EXCEPTION );
 
 		len = 10;
