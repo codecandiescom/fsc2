@@ -46,8 +46,8 @@ typedef struct
 
 
 static NMR nmr;
-static enum {
-	RES_VERY_LOW,
+enum {
+	RES_VERY_LOW = 0,
 	RES_LOW,
 	RES_HIGH
 };
@@ -474,7 +474,7 @@ double er035m_sa_get_field( void )
 	char *state_flag;
 	long length;
 	long tries = ER035M_SA_MAX_RETRIES;
-	char *res[ ] = { "0.1", "0.01", "0.001" };
+	const char *res[ ] = { "0.1", "0.01", "0.001" };
 
 
 	/* Repeat asking for field value until it's correct up to LSD -

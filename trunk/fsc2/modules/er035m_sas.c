@@ -63,8 +63,8 @@ typedef struct
 static NMR nmr;
 static char serial_port[ ] = "/dev/ttyS*";
 static char er035m_sas_eol[ ] = "\r\n";
-static enum {
-	RES_VERY_LOW,
+enum {
+	RES_VERY_LOW = 0,
 	RES_LOW,
 	RES_HIGH
 };
@@ -536,7 +536,7 @@ static double er035m_sas_get_field( void )
 	long length;
 	long tries = ER035M_SAS_MAX_RETRIES;
 	long retries;
-	char *res[ ] = { "0.1", "0.01", "0.001" };
+	const char *res[ ] = { "0.1", "0.01", "0.001" };
 
 
 	/* Repeat asking for field value until it's correct up to the LSD -
