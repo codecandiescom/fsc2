@@ -318,6 +318,11 @@ static void http_send_picture( int pd, int type )
 		if ( ( tmp_fd = mkstemp( filename ) ) < 0 )
 			THROW( EXCEPTION );
 
+		/* Older versions of libc (2.0.6 and earlier) don't set the file
+		   permissions correctly to 0600 but 0666... */
+
+		chmod( filename, S_IRUSR | S_IWUSR );
+
 		dump_window( type, tmp_fd );
 
 		reply[ 0 ] = '1';
