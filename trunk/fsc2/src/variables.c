@@ -258,13 +258,14 @@ Var *vars_new( char *name )
 }
 
 
-/*------------------------------------------------------------------*/
-/* vars_add() adds two variables and pushes the result on the stack */
-/* ->                                                               */
-/*    * pointers to two variable structures                         */
-/* <-                                                               */
-/*    * pointer to a new transient variable on the variables stack  */
-/*------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* vars_add() adds two variables or array slices and pushes the result */
+/* on the stack                                                        */
+/* ->                                                                  */
+/*    * pointers to two variable structures                            */
+/* <-                                                                  */
+/*    * pointer to a new transient variable on the variables stack     */
+/*---------------------------------------------------------------------*/
 
 Var *vars_add( Var *v1, Var *v2 )
 {
@@ -326,13 +327,14 @@ Var *vars_add( Var *v1, Var *v2 )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* vars_sub() subtracts two variables and pushes the result on the stack */
-/* ->                                                                    */
-/*    * pointers to two variable structures                              */
-/* <-                                                                    */
-/*    * pointer to a new transient variable on the variables stack       */
-/*-----------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* vars_sub() subtracts two variables or array slices and pushes the */
+/* result on the stack                                               */
+/* ->                                                                */
+/*    * pointers to two variable structures                          */
+/* <-                                                                */
+/*    * pointer to a new transient variable on the variables stack   */
+/*-------------------------------------------------------------------*/
 
 Var *vars_sub( Var *v1, Var *v2 )
 {
@@ -394,13 +396,14 @@ Var *vars_sub( Var *v1, Var *v2 )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* vars_mult() multiplies two variables and pushes the result on the stack */
-/* ->                                                                      */
-/*    * pointers to two variable structures                                */
-/* <-                                                                      */
-/*    * pointer to a new transient variable on the variables stack         */
-/*-------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* vars_mult() multiplies two variables or array slices and pushes */
+/* the result on the stack                                         */
+/* ->                                                              */
+/*    * pointers to two variable structures                        */
+/* <-                                                              */
+/*    * pointer to a new transient variable on the variables stack */
+/*-----------------------------------------------------------------*/
 
 Var *vars_mult( Var *v1, Var *v2 )
 {
@@ -462,13 +465,14 @@ Var *vars_mult( Var *v1, Var *v2 )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* vars_div() divides two variables and pushes the result on the stack */
-/* ->                                                                  */
-/*    * pointers to two variable structures                            */
-/* <-                                                                  */
-/*    * pointer to a new transient variable on the variables stack     */
-/*---------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* vars_div() divides two variables or array slices and pushes the */
+/* result on the stack                                             */
+/* ->                                                              */
+/*    * pointers to two variable structures                        */
+/* <-                                                              */
+/*    * pointer to a new transient variable on the variables stack */
+/*-----------------------------------------------------------------*/
 
 Var *vars_div( Var *v1, Var *v2 )
 {
@@ -530,13 +534,14 @@ Var *vars_div( Var *v1, Var *v2 )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* vars_mod() pushes the modulo of the two variables on the stack  */
-/* ->                                                              */
-/*    * pointers to two variable structures                        */
-/* <-                                                              */
-/*    * pointer to a new transient variable on the variables stack */
-/*-----------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* vars_mod() pushes the modulo of the two variables or array slices */
+/* on the stack                                                      */
+/* ->                                                                */
+/*    * pointers to two variable structures                          */
+/* <-                                                                */
+/*    * pointer to a new transient variable on the variables stack   */
+/*-------------------------------------------------------------------*/
 
 Var *vars_mod( Var *v1, Var *v2 )
 {
@@ -674,14 +679,14 @@ Var *vars_pow( Var *v1, Var *v2 )
 }
 
 
-/*-----------------------------------------------*/
-/* vars_negate() negates the value of a variable */
-/* ->                                            */
-/*    * pointer a variable                       */
-/* <-                                            */
-/*    * pointer to the same variable but with    */
-/*      its value negated                        */
-/*-----------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* vars_negate() negates the value of a variable or an array slice */
+/* ->                                                              */
+/*    * pointer a variable                                         */
+/* <-                                                              */
+/*    * pointer to the same variable but with its value negated    */
+/*      (for array slices its a new transient array!)              */
+/*-----------------------------------------------------------------*/
 
 Var *vars_negate( Var *v )
 {
