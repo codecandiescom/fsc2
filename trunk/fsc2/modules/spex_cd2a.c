@@ -1127,12 +1127,12 @@ Var *monochromator_wavelength_axis( Var *v )
 
 	too_many_arguments( v );
 
-	/* Check that we can talk with the camera */
+	/* Check if there's a CCD camera module loaded */
 
-	if ( ! exists_device( "rs_spec10" ) )
+	if ( ! exists_device_type( "ccd_camera" ) )
 	{
-		print( FATAL, "Function can only be used when the module for the "
-			   "Roper Scientific Spec-10 CCD camera is loaded.\n" );
+		print( FATAL, "Function can only be used when the module for a "
+			   "CCD camera is loaded.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1220,10 +1220,10 @@ Var *monochromator_wavenumber_axis( Var *v )
 
 	/* Check that we can talk with the camera */
 
-	if ( ! exists_device( "rs_spec10" ) )
+	if ( ! exists_device_type( "ccd_camera" ) )
 	{
-		print( FATAL, "Function can only be used when the module for the "
-			   "Roper Scientific Spec-10 CCD camera is loaded.\n" );
+		print( FATAL, "Function can only be used when the module for a "
+			   "CCD camera is loaded.\n" );
 		THROW( EXCEPTION );
 	}
 

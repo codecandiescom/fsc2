@@ -171,6 +171,7 @@ int exists_device( const char *name )
 {
 	Device *cd;
 
+
 	for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded &&
 			 ! strcasecmp( strip_path( cd->name ), name ) )
@@ -179,6 +180,24 @@ int exists_device( const char *name )
 	return 0;
 }
 
+
+/*---------------------------------------------------------------*/
+/* Function tests if a device driver for a device of the generic */
+/* type passed to the function by 'type' is loaded.              */
+/*---------------------------------------------------------------*/
+
+bool exists_device_type( const char *type )
+{
+	Device *cd;
+
+
+	for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
+		if ( cd->is_loaded &&
+			 ! strcasecmp( strip_path( cd->generic_type ), name ) )
+			return OK;
+
+	return FAIL;
+}
 
 /*-------------------------------------------------------------------*/
 /* Routine tests if a function passed to the routine by name exists. */

@@ -4624,7 +4624,7 @@ the end of the experiment.
 Some of the functions listed below will only work when a monochromator
 is used in conjunction with a CCD camera (and have been tested only with
 the Spec-10 CCD camera by Roper Scientific in conjunction with the
-SpectraPro-300i).
+supported monochromatore).
 
 
 @table @samp

@@ -30,6 +30,7 @@
 
 void load_all_drivers( void );
 int exists_device( const char *name );
+bool exists_device_type( const char *type );
 bool exists_function( const char *name );
 void run_test_hooks( void );
 void run_end_of_test_hooks( void );
