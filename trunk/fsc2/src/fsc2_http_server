@@ -53,7 +53,7 @@ $auxdir = $ARGV[ 1 ] if defined $ARGV[ 1 ];
 
 
 # Un-buffer the (write) connection to fsc2 (i.e. STDOUT) or it may never
-# react to what we're sending its way
+# get to react to what we're sending its way
 
 $| = 1;
 
@@ -156,14 +156,15 @@ sub serve {
 
 	$file =~ s|^(http://$hostname)?/||io;
 
-	# Stop on unsupported types of requests (anything except GET and HEAD)
+	# Stop on unsupported requests (i.e. everything except GET and HEAD)
 
 	unsupported_request( $req, $maj, $min ) unless $req =~ /^(GET)|(HEAD)$/io;
 
-	# Check if client accepts PNG, GIF or JPEG files and skip the rest of
-	# the noise, we're done listening when we get an empty line
+	# Check if client accepts PNG, GIF or JPEG files and if it sends a
+	# Host field, don't care for anything else. The client is done when it
+	# sends an empty line
 
-	while ( defined( $txt = <$client> ) and $txt !~ /^$crlf$/o ) {
+	while ( defined( $txt = <$client> ) and $txt !~ /^\r*$/o ) {
 		next unless $txt =~ /^\s*(Accept)|(Host):/io;
 		if ( $txt =~ /^\s*Accept:/io ) {
 			for ( keys %f ) {
