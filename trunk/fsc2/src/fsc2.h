@@ -57,6 +57,7 @@
 #include "prim_exp.h"
 #include "run.h"
 #include "chld_func.h"
+#include "graphics.h"
 
 
 /* The diverse lexers */
