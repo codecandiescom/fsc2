@@ -109,7 +109,7 @@ WS          [\n \t]+
 			/* Handling of file name lines */
 {FILE}      {
 				*( varstext + varsleng - 1 ) = '\0';
-				T_free( EDL.Fname );
+				EDL.Fname = T_free( EDL.Fname );
 				EDL.Fname = T_strdup( varstext + 2 );
 			}
 

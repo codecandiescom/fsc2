@@ -144,7 +144,7 @@ bool device_list_parse( void )
 	Device_Name *new_device_name;
 
 
-	T_free( EDL.Fname );
+	EDL.Fname = T_free( EDL.Fname );
 	EDL.Fname = get_string( "%s%sDevices", libdir, slash( libdir ) );
 
 	if ( ( devices_listin = fopen( EDL.Fname, "r" ) ) == NULL )

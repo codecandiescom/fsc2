@@ -167,7 +167,7 @@ WS          [\n=: ]+
 			/* handling of file name lines */
 {FILE}      {
 				*( assigntext + assignleng - 1 ) = '\0';
-				T_free( EDL.Fname );
+				EDL.Fname = T_free( EDL.Fname );
 				EDL.Fname = T_strdup( assigntext + 2 );
 			}
 

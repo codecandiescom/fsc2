@@ -163,7 +163,7 @@ size_t func_list_parse( Func **fncts, size_t num_func )
 
 
 	nf = num_func;
-	T_free( EDL.Fname );
+	EDL.Fname = T_free( EDL.Fname );
 	EDL.Fname = get_string( "%s%sFunctions", libdir, slash( libdir ) );
 
 	if ( ( func_listin = fopen( EDL.Fname, "r" ) ) == NULL )

@@ -98,7 +98,7 @@ WS          [\n=,:. ]+
 			/* handling of file name lines */
 {FILE}      {
 				*( phasestext + phasesleng - 1 ) = '\0';
-				T_free( EDL.Fname );
+				EDL.Fname = T_free( EDL.Fname );
 				EDL.Fname = T_strdup( phasestext + 2 );
 			}
 
