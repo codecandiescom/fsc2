@@ -62,6 +62,23 @@ void ep385_init_setup( void )
 
 		ep385_setup_channels( );
 		ep385_pulse_start_setup( );
+
+		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+		{
+			f = ep385.function + i;
+			if ( ( ! f->is_used && f->num_channels == 0 ) ||
+				 i == PULSER_CHANNEL_PHASE_1 ||
+				 i == PULSER_CHANNEL_PHASE_2 )
+				continue;
+
+			if ( f->max_seq_len > MAX_PULSER_BITS )
+			{
+				print( FATAL, "Pulse sequence for function '%s' is too "
+					   "long.\n", f->name );
+				THROW( EXCEPTION );
+			}
+		}
+
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -816,6 +833,87 @@ static void ep385_pulse_start_setup( void )
 	}
 
 	ep385_shape_padding_check_2( );
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = ep385.function + i;
+		if ( ( ! f->is_used && f->num_channels == 0 ) ||
+			 i == PULSER_CHANNEL_PHASE_1 ||
+			 i == PULSER_CHANNEL_PHASE_2 )
+			continue;
+
+		for ( j = 0; j < f->num_channels; j++ )
+		{
+			ch = f->channel[ j ];
+			if ( ch->num_active_pulses == 0 )
+				continue;
+
+			f->max_seq_len = Ticks_max( f->max_seq_len,
+						   ch->pulse_params[ ch->num_active_pulses - 1 ].pos +
+						   ch->pulse_params[ ch->num_active_pulses - 1 ].len );
+		}
+	}
+
+	/* Now we still need a final check that the distance between the last
+	   defense pulse and the first shape pulse isn't too short - this is
+	   only relevant for very fast repetitions of the pulse sequence but
+	   needs to be tested - thanks to Celine Elsaesser for pointing this
+	   out. */
+
+	if ( ep385.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
+		 ep385.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
+	{
+		Ticks add;
+		CHANNEL *cs =
+					 ep385.function[ PULSER_CHANNEL_PULSE_SHAPE ].channel[ 0 ],
+				*cd = ep385.function[ PULSER_CHANNEL_DEFENSE ].channel[ 0 ];
+		PULSE_PARAMS *shape_p, *defense_p;
+
+		if ( cd->num_active_pulses != 0 && cs->num_active_pulses != 0 )
+		{
+			shape_p = cs->pulse_params;
+			defense_p = cd->pulse_params + cd->num_active_pulses - 1;
+			add = Ticks_min( ep385.defense_2_shape, shape_p->pos
+							 + Ticks_max( cd->function->max_seq_len,
+										  cs->function->max_seq_len )
+							 - defense_p->pos - defense_p->len );
+
+			if ( add < ep385.defense_2_shape )
+				cd->function->max_seq_len = cs->function->max_seq_len =
+									Ticks_max( cd->function->max_seq_len,
+											   cs->function->max_seq_len )
+									+ ep385.defense_2_shape - add;
+	
+			shape_p = cs->pulse_params + cs->num_active_pulses - 1;
+			defense_p = cd->pulse_params;
+			add = Ticks_min( ep385.shape_2_defense, defense_p->pos
+							 + Ticks_max( cd->function->max_seq_len,
+										  cs->function->max_seq_len )
+							 - shape_p->pos - shape_p->len );
+
+			if ( add < ep385.shape_2_defense )
+				cd->function->max_seq_len = cs->function->max_seq_len = 
+									Ticks_max( cd->function->max_seq_len,
+											   cs->function->max_seq_len )
+									+ ep385.shape_2_defense - add;
+		}
+	}
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = ep385.function + i;
+		if ( ( ! f->is_used && f->num_channels == 0 ) ||
+			 i == PULSER_CHANNEL_PHASE_1 ||
+			 i == PULSER_CHANNEL_PHASE_2 )
+			continue;
+
+		if ( f->max_seq_len > MAX_PULSER_BITS )
+		{
+			print( FATAL, "Pulse sequence for function '%s' is too long.\n",
+				   f->name );
+			THROW( EXCEPTION );
+		}
+	}
 }
 
 

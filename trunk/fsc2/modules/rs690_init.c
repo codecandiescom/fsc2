@@ -852,6 +852,8 @@ static void rs690_pulse_start_setup( void )
 	}
 
 	rs690_shape_padding_check_2( );
+
+	rs690_seq_length_check( );
 }
 
 

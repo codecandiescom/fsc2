@@ -304,7 +304,7 @@ void dg2020_calc_padding( void )
 		{
 			char *t = T_strdup( dg2020_pticks( dg2020.max_seq_len ) );
 			print( SEVERE, "Pulse pattern is %s long and thus longer than the "
-				   "repeat time of %s.\n",
+				   "requested repeat time of %s.\n",
 				   t, dg2020_pticks( dg2020.repeat_time ) );
 			T_free( t );
 		}

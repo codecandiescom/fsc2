@@ -146,12 +146,32 @@ bool dg2020_reorganize_pulses( bool flag )
 		Ticks add;
 		FUNCTION *fs = dg2020.function + PULSER_CHANNEL_PULSE_SHAPE,
 				 *fd = dg2020.function + PULSER_CHANNEL_DEFENSE;
-		PULSE_PARAMS *shape_p = fs->pulse_params,
-					 *defense_p = fd->pulse_params + fd->num_params - 1;
+		PULSE_PARAMS *shape_p, *defense_p;
 
-		add = shape_p->pos + fd->max_seq_len - defense_p->pos - defense_p->len;
-		if ( add < dg2020.defense_2_shape )
-			fd->max_seq_len += dg2020.defense_2_shape - add;
+		if ( fd->num_params != 0 && fs->num_params != 0 )
+		{
+			shape_p = fs->pulse_params;
+			defense_p = fd->pulse_params + fd->num_params - 1;
+			add = Ticks_min( dg2020.defense_2_shape, shape_p->pos
+							 + Ticks_max( fd->max_seq_len, fs->max_seq_len )
+							 - defense_p->pos - defense_p->len );
+
+			if ( add < dg2020.defense_2_shape )
+				fs->max_seq_len = fd->max_seq_len =
+								Ticks_max( fd->max_seq_len, fs->max_seq_len )
+								+ dg2020.defense_2_shape - add;
+
+			shape_p = fs->pulse_params  + fs->num_params - 1;
+			defense_p = fd->pulse_params;
+			add = Ticks_max( dg2020.shape_2_defense, defense_p->pos
+							 + Ticks_max( fd->max_seq_len, fs->max_seq_len )
+							 - shape_p->pos - shape_p->len );
+
+			if ( add < dg2020.shape_2_defense )
+				fs->max_seq_len = fd->max_seq_len =
+								Ticks_max( fd->max_seq_len, fs->max_seq_len )
+								+ dg2020.shape_2_defense - add;
+		}
 
 		if ( fd->max_seq_len >
 			 ( FSC2_MODE == TEST ? MAX_PULSER_BITS : dg2020.max_seq_len ) )

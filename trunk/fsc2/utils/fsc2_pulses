@@ -668,8 +668,8 @@ sub init {
 
 	my $self = shift;
 
-	$self->{ 'w' }->title( "Pulse parameters:" .
-						   ( $ARGV[ 0 ] ? "  $ARGV[ 0 ]" : "" ) );
+	$self->{ 'w' }->title( "Pulse parameters" .
+						   ( $ARGV[ 0 ] ? ":  $ARGV[ 0 ]" : "" ) );
 
 	my $F = $self->{ 'w' }->Frame( '-relief'     => 'ridge',
 								   'borderwidth' => '1m' );

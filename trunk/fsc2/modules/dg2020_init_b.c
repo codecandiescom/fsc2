@@ -79,7 +79,7 @@ static void dg2020_init_print( FILE *fp )
 		return;
 
 	fprintf( fp, "TB: %g\nD: %ld\n===\n", dg2020.timebase,
-			 dg2020.neg_delay );
+			 dg2020.neg_delay);
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
@@ -587,6 +587,54 @@ static void dg2020_pulse_start_setup( void )
 					f->pulses[ j ]->channel[ k ] =
 									  f->pcm[ f->pulses[ j ]->pc->sequence[ k ]
 									  * f->pc_len + k ];
+		}
+	}
+
+	/* Now we still need a final check that the distance between the last
+	   defense pulse and the first shape pulse isn't too short - this is
+	   only relevant for very fast repetitions of the pulse sequence but
+	   needs to be tested - thanks to Celine Elsaesser for pointing this
+	   out. */
+
+	if ( dg2020.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
+		 dg2020.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
+	{
+		Ticks add;
+		FUNCTION *fs = dg2020.function + PULSER_CHANNEL_PULSE_SHAPE,
+				 *fd = dg2020.function + PULSER_CHANNEL_DEFENSE;
+		PULSE_PARAMS *shape_p, *defense_p;
+
+		if ( fd->num_params != 0 && fs->num_params != 0 )
+		{
+			shape_p = fs->pulse_params;
+			defense_p = fd->pulse_params + fd->num_params - 1;
+			add = Ticks_min( dg2020.defense_2_shape, shape_p->pos 
+							 + Ticks_max( fd->max_seq_len, fs->max_seq_len )
+							 - defense_p->pos - defense_p->len );
+
+			if ( add < dg2020.defense_2_shape )
+				fs->max_seq_len = fd->max_seq_len =
+								Ticks_max( fd->max_seq_len, fs->max_seq_len )
+								+ dg2020.defense_2_shape - add;
+
+			shape_p = fs->pulse_params  + fs->num_params - 1;
+			defense_p = fd->pulse_params;
+			add = Ticks_min( dg2020.shape_2_defense, defense_p->pos
+							 + Ticks_max( fd->max_seq_len, fs->max_seq_len )
+							 - shape_p->pos - shape_p->len );
+
+			if ( add < dg2020.shape_2_defense )
+				fs->max_seq_len = fd->max_seq_len =
+								Ticks_max( fd->max_seq_len, fs->max_seq_len )
+								+ dg2020.shape_2_defense - add;
+		}
+
+		if ( fd->max_seq_len > MAX_PULSER_BITS )
+		{
+			print( FATAL, "Pulse sequence for function '%s' is too long. "
+				   "Perhaps you should try to use the "
+				   "pulser_maximum_pattern_length() function.\n", fd->name );
+			THROW( EXCEPTION );
 		}
 	}
 }

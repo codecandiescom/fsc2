@@ -273,13 +273,37 @@ static bool ep385_update_pulses( bool flag )
 		CHANNEL *cs =
 					 ep385.function[ PULSER_CHANNEL_PULSE_SHAPE ].channel[ 0 ],
 				*cd = ep385.function[ PULSER_CHANNEL_DEFENSE ].channel[ 0 ];
-		PULSE_PARAMS *shape_p = cs->pulse_params,
-					 *defense_p = cd->pulse_params + cd->num_active_pulses - 1;
+		PULSE_PARAMS *shape_p, *defense_p;
 
-		add = shape_p->pos + cd->function->max_seq_len
-			  - defense_p->pos - defense_p->len;
-		if ( add < ep385.defense_2_shape )
-			cd->function->max_seq_len += ep385.defense_2_shape - add;
+
+		if ( cd->num_active_pulses != 0 && cs->num_active_pulses != 0 )
+		{
+			shape_p = cs->pulse_params;
+			defense_p = cd->pulse_params + cd->num_active_pulses - 1;
+			add = Ticks_min( ep385.defense_2_shape, shape_p->pos
+							 + Ticks_max( cd->function->max_seq_len,
+										  cs->function->max_seq_len )
+							 - defense_p->pos - defense_p->len );
+
+			if ( add < ep385.defense_2_shape )
+				cd->function->max_seq_len = cs->function->max_seq_len =
+									Ticks_max( cd->function->max_seq_len,
+											   cs->function->max_seq_len )
+									+ ep385.defense_2_shape - add;
+
+			shape_p = cs->pulse_params + cs->num_active_pulses - 1;
+			defense_p = cd->pulse_params;
+			add = Ticks_min( ep385.shape_2_defense, defense_p->pos
+							 + Ticks_max( cd->function->max_seq_len,
+										  cs->function->max_seq_len )
+							 - shape_p->pos - shape_p->len );
+
+			if ( add < ep385.shape_2_defense )
+				cd->function->max_seq_len = cs->function->max_seq_len =
+									Ticks_max( cd->function->max_seq_len,
+											   cs->function->max_seq_len )
+									+ ep385.shape_2_defense - add;
+		}
 	}
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )

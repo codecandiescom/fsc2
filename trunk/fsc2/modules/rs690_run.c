@@ -80,9 +80,9 @@ static bool rs690_update_pulses( bool flag )
 {
 	static int i, j;
 	int l, m;
-	FUNCTION *f;
+	static FUNCTION *f;
 	PULSE *p;
-	CHANNEL *ch;
+	static CHANNEL *ch;
 	PULSE **pm_entry;
 	PULSE_PARAMS *pp;
 
@@ -235,6 +235,10 @@ static bool rs690_update_pulses( bool flag )
 	}
 
 	rs690_shape_padding_check_2( );
+
+	/* Now figure out the pulse sequence length */
+
+	rs690_seq_length_check( );
 
 	if ( rs690.needs_update )
 		rs690_commit( flag );
@@ -815,6 +819,105 @@ void rs690_twt_padding_check( CHANNEL *ch )
 
 
 /*------------------------------------------------*/
+/*------------------------------------------------*/
+
+void rs690_seq_length_check( void )
+{
+	int i, j;
+	FUNCTION *f;
+	CHANNEL *ch;
+
+
+	/* Determine length of sequence lengths of individual functions */
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = rs690.function + i;
+
+		/* Nothing to be done for unused functions and the phase functions */
+
+		if ( ( ! f->is_used && f->num_channels == 0 ) ||
+			 i == PULSER_CHANNEL_PHASE_1 ||
+			 i == PULSER_CHANNEL_PHASE_2 )
+			continue;
+
+		for ( j = 0; j < f->num_channels; j++ )
+		{
+			ch = f->channel[ j ];
+			if ( ch->num_active_pulses == 0 )
+				continue;
+
+			f->max_seq_len = Ticks_max( f->max_seq_len,
+						   ch->pulse_params[ ch->num_active_pulses - 1 ].pos +
+						   ch->pulse_params[ ch->num_active_pulses - 1 ].len );
+		}
+	}
+
+	/* We still need a final check that the distance between the last
+	   defense pulse and the first shape pulse isn't too short, otherwise
+	   the time we wait after the last pulse must be lengthened - this is
+	   only relevant for very fast repetitions of the pulse sequence but
+	   needs to be tested - thanks to Celine Elsaesser for pointing this
+	   out. */
+
+	if ( rs690.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
+		 rs690.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
+	{
+		Ticks add;
+		CHANNEL *cs =
+					 rs690.function[ PULSER_CHANNEL_PULSE_SHAPE ].channel[ 0 ],
+				*cd = rs690.function[ PULSER_CHANNEL_DEFENSE ].channel[ 0 ];
+		PULSE_PARAMS *shape_p, *defense_p;
+
+		if ( cd->num_active_pulses != 0 && cs->num_active_pulses != 0 )
+		{
+			shape_p = cs->pulse_params;
+			defense_p = cd->pulse_params + cd->num_active_pulses - 1;
+			add = Ticks_min( rs690.defense_2_shape, shape_p->pos
+							 + Ticks_max( cd->function->max_seq_len,
+										  cs->function->max_seq_len )
+							 - defense_p->pos - defense_p->len );
+
+			if ( add < rs690.defense_2_shape )
+				cd->function->max_seq_len = cs->function->max_seq_len =
+									Ticks_max( cd->function->max_seq_len,
+											   cs->function->max_seq_len )
+									+ rs690.defense_2_shape - add;
+
+			shape_p = cs->pulse_params- cs->num_active_pulses - 1;
+			defense_p = cd->pulse_params;
+			add = Ticks_min( rs690.shape_2_defense, defense_p->pos
+							 + Ticks_max( cd->function->max_seq_len,
+										  cs->function->max_seq_len )
+							 - shape_p->pos - shape_p->len );
+
+			if ( add < rs690.shape_2_defense )
+				cd->function->max_seq_len = cs->function->max_seq_len =
+									Ticks_max( cd->function->max_seq_len,
+											   cs->function->max_seq_len )
+									+ rs690.shape_2_defense - add;
+		}
+	}
+
+	/* Finally determine the total length of the pulse sequence */
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = rs690.function + i;
+
+		/* Nothing to be done for unused functions and the phase functions */
+
+		if ( ( ! f->is_used && f->num_channels == 0 ) ||
+			 i == PULSER_CHANNEL_PHASE_1 ||
+			 i == PULSER_CHANNEL_PHASE_2 )
+			continue;
+
+		rs690.max_seq_len = Ticks_max( rs690.max_seq_len, f->max_seq_len );
+	}
+}
+
+
+/*------------------------------------------------*/
 /* Function deletes a pulse and returns a pointer */
 /* to the next pulse in the pulse list.           */
 /*------------------------------------------------*/
@@ -1180,21 +1283,25 @@ void rs690_check_fs( void )
 
 
 	/* The very last FS, standing for the time following the pulses hasn't
-	   got a length yet. If a repetition time has been given we set it to
-	   its number of ticks, otherwise to 1 tick. While we're at it we
-	   also need to check if the pulse sequence hasn't gotten longer than
-	   the repetition time. */
+	   got a length yet. If a repetition time has been given we try to set
+	   it to its number of ticks. Otherwise we use the maximum sequence
+	   length (which might be longer than the time of the end point of the
+	   last pulse if we had to add some padding to guarantee that a shape
+	   pulse doesn't come too early after a defense pulse). While we're at
+	   it we also need to check that the pulse sequence hasn't gotten longer
+	   than the repetition time. */
 
 	for ( n = rs690.new_fs; n->next != NULL; n = n->next )
 		/* empty */ ;
 
 	if ( rs690.is_repeat_time )
 	{
-		if ( n->pos + START_OFFSET > rs690.repeat_time )
+		if ( rs690.max_seq_len + START_OFFSET > rs690.repeat_time )
 		{
 			TRY
 			{
-				s = T_strdup( rs690_pticks( n->pos + START_OFFSET ) );
+				s = T_strdup(
+							rs690_pticks( rs690.max_seq_len + START_OFFSET ) );
 				print( FATAL, "Pulse sequence is longer (%s) than the "
 					   "repetition time of %s.\n",
 					   s, rs690_pticks( rs690.repeat_time ) );
@@ -1211,7 +1318,7 @@ void rs690_check_fs( void )
 			n->len = Ticks_max( 1, rs690.repeat_time - n->pos );
 	}
 	else      /* no repetition time has been set */
-		n->len = 1;
+		n->len = Ticks_max( 1, rs690.max_seq_len - n->pos );
 
 	/* If the fields of two adjacent FS structures have the same bit pattern
 	   combine them (this can happen if e.g. the distance between two pulses

@@ -405,8 +405,6 @@ bool dg2020_channel_assign( int channel, int pod )
 
 bool dg2020_update_data( void )
 {
-	char reply[ 10 ];
-	long len;
 
 
 	dg2020_command( "DATA:UPD\n" );
@@ -415,6 +413,9 @@ bool dg2020_update_data( void )
 /*
 	while( 1 )
 	{
+		char reply[ 10 ];
+		long len;
+
 		dg2020_command( "*ESE\n" );
 		len = 10;
 		if ( gpib_read( dg2020.device, reply, &len ) == FAILURE )

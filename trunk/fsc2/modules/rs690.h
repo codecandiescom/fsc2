@@ -139,6 +139,8 @@ typedef struct _F_ {
 
 	bool is_inverted;          /* if set polarity is inverted */
 
+	Ticks max_seq_len;
+
 	bool uses_auto_shape_pulses;
 	Ticks left_shape_padding;
 	Ticks right_shape_padding;
@@ -241,6 +243,8 @@ typedef struct {
 							    test run or experiment */
 	bool is_running;         /* set if the pulser is in run mode */
 	bool has_been_running;
+
+	Ticks max_seq_len;
 
 	Ticks shape_2_defense;
 	bool is_shape_2_defense;
@@ -431,6 +435,7 @@ PULSE *rs690_delete_pulse( PULSE *p, bool warn );
 void rs690_shape_padding_check_1( CHANNEL *ch );
 void rs690_shape_padding_check_2( void );
 void rs690_twt_padding_check( CHANNEL *ch );
+void rs690_seq_length_check( void );
 void rs690_channel_setup( bool flag );
 void rs690_cleanup_fs( void );
 

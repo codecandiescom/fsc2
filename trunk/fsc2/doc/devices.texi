@@ -1722,11 +1722,16 @@ This function exists for the Berlin X-band pulser modules
 @code{dg2020_b}, @code{ep385} and @code{rs690} only. It sets the minimum
 allowed distance between the end of a defense pulse and the start of a
 pulse shaper pulse to avoid destroying the detector by excessive
-microwave power. The default minimum value for this distance is
-intentionally set to an unreasonably long value and this function allows
-to reduce (but also enlarge) the value. As another security measure the
-function requires the user to explicitely confirm the new value before
-an experiment is started.
+microwave power. The function also makes sure that the time between the
+last defense pulse in a sequence and the first shape pulse of the next
+pulse sequence does not get too short when a very high repetition rate
+is used.
+
+The default minimum value for this distance is intentionally set to an
+unreasonably long value and this function allows to reduce (but also
+enlarge) the value. As another security measure the function requires
+the user to explicitely confirm the new value before an experiment is
+started.
 
 This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} program.
