@@ -28,14 +28,15 @@ scripts = $(wildcard *.$(machine_name))
 # Install these scripts in the bindir (but without the FQDN extension)
 # Some care has to be taken for the case that there are no scripts...
 
-install: $(scripts)
-	if [ -n "$(scripts)" ]; then \
-		make install_them;       \
+install:
+	if [ -n "$(scripts)" ]; then                             \
+		for file in $(scripts); do                           \
+			install -m 755 -o $(OWNER) -g $(GROUP)           \
+				$$file $(bindir)/$${file%.$(machine_name)};  \
+		done
 	fi
 
-
-install_them:
-	for file in $(scripts); do \
-		install -m 755 -o $(OWNER) -g $(GROUP) \
-			$$file $(bindir)/$${file%.$(machine_name)}; \
+uninstall:
+	for file in $(scripts); do                                  \
+		-$(RM) $(RMFLAGS) $(bindir)/$${file%.$(machine_name)};  \
 	done

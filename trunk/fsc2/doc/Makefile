@@ -116,6 +116,20 @@ install:
 	install-info $(infodir)/fsc2.info $(infodir)/dir
 
 
+uninstall:
+	-$(RM) $(RMFLAGS) $(mandir)/man1/fsc2.1.gz
+	-for f in *.html; do                 \
+		$(RM) $(RMFLAGS) $(docdir)/$$f;  \
+	done
+	-for f in *.png; do                  \
+		$(RM) $(RMFLAGS) $(docdir)/$$f;  \
+	done
+	-$(RM) $(RMFLAGS) $(docdir)/fsc2.css
+	-$(RM) $(RMFLAGS) $(docdir)/fsc2.ps
+	-$(RM) $(RMFLAGS) $(docdir)/fsc2.pdf
+	-install-info --delete fsc2 $(infodir)/dir
+	-$(RM) $(RMFLAGS) $(infodir)/fsc2.info*.gz
+
 # How to clean up the mess we created
 
 clean:
