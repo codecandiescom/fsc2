@@ -68,9 +68,8 @@ fsc2_connect.o: fsc2_connect.c
 
 clean:
 	$(RM) $(RMFLAGS) *.o *.output *_parser.[ch] *_lexer.c fsc2_clean.c fsc2 \
-					 fsc2_clean fsc2_connect gpib_if.[ch] fsc2_rsc.[ch] mem \
-					 gpib_parser.y gpib_lexer.l *~
-
+					 fsc2_clean fsc2_connect gpib_if.[ch] fsc2_rsc.[ch]     \
+					 fsc2_rsc_[hl]r.[ch] gpib_parser.y gpib_lexer.l mem *~
 
 # Machine specific stuff: different GPIB interfaces and resource files
 # for the graphical interface are needed...
@@ -100,25 +99,27 @@ crowley.none:
 # fsc2_rsc.[ch] doesn't exist or the files they're made from are newer
 
 hi_res:
-	if [ ! -e fsc2_rsc.c -o ! -e fsc2_rsc.h        \
-		 -o -nt fsc2_rsc_hr.c fsc2_rsc.c           \
-		 -o -nt fsc2_rsc_hr.h fsc2_rsc.h ]; then   \
-		$(RM) $(RMFLAGS) fsc2_rsc.[ch];            \
-		fdesign -convert fsc2_rsc_hr.fd;           \
-		cp fsc2_rsc_hr.c fsc2_rsc.c;               \
-		cp fsc2_rsc_hr.h fsc2_rsc.h;               \
-		echo "#define SIZE HI_RES" >> fsc2_rsc.h;  \
+	if [ ! -e fsc2_rsc.c -o ! -e fsc2_rsc.h          \
+		 -o ! -e fsc2_rsc_hr.c -o ! -e fsc2_rsc_hr.h \
+		 -o fsc2_rsc_hr.c -nt fsc2_rsc.c             \
+		 -o fsc2_rsc_hr.h -nt fsc2_rsc.h ]; then     \
+		rm -f fsc2_rsc.[ch];                         \
+		fdesign -convert fsc2_rsc_hr.fd;             \
+		cp fsc2_rsc_hr.c fsc2_rsc.c;                 \
+		cp fsc2_rsc_hr.h fsc2_rsc.h;                 \
+		echo "#define SIZE HI_RES" >> fsc2_rsc.h;    \
 	fi
 
 low_res:
-	if [ ! -e fsc2_rsc.c -o ! -e fsc2_rsc.h        \
-		 -o -nt fsc2_rsc_lr.c fsc2_rsc.c           \
-		 -o -nt fsc2_rsc_lr.h fsc2_rsc.h ]; then   \
-		$(RM) $(RMFLAGS) fsc2_rsc.[ch];            \
-		fdesign -convert fsc2_rsc_lr.fd;           \
-		cp fsc2_rsc_lr.c fsc2_rsc.c;               \
-		cp fsc2_rsc_lr.h fsc2_rsc.h;               \
-		echo "#define SIZE LOW_RES" >> fsc2_rsc.h; \
+	if [ ! -e fsc2_rsc.c -o ! -e fsc2_rsc.h          \
+		 -o ! -e fsc2_rsc_lr.c -o ! -e fsc2_rsc_lr.h \
+		 -o fsc2_rsc_lr.c -nt fsc2_rsc.c             \
+		 -o fsc2_rsc_lr.h -nt fsc2_rsc.h ]; then     \
+		rm -f fsc2_rsc.[ch];                         \
+		fdesign -convert fsc2_rsc_lr.fd;             \
+		cp fsc2_rsc_lr.c fsc2_rsc.c;                 \
+		cp fsc2_rsc_lr.h fsc2_rsc.h;                 \
+		echo "#define SIZE LOW_RES" >> fsc2_rsc.h;   \
 	fi
 
 
@@ -129,36 +130,36 @@ low_res:
 
 gpib_old:
 	if [ ! -e gpib_if.c -o ! -e gpib_if.h            \
-		 -o -nt gpib_if_old.c gpib_if.c              \
-		 -o -nt gpib_if_old.h gpib_if.h ]; then      \
-		$(RM) $(RMFLAGS) gpib_if.[ch];               \
+		 -o gpib_if_old.c -nt gpib_if.c              \
+		 -o gpib_if_old.h -nt gpib_if.h ]; then      \
+		rm -f gpib_if.[ch];                          \
 		cp gpib_if_old.c gpib_if.c;                  \
 		cp gpib_if_old.h gpib_if.h;                  \
 	fi
 
 gpib_jtt:
 	if [ ! -e gpib_if.c -o ! -e gpib_if.h            \
-		 -o -nt gpib_if_jtt.c gpib_if.c              \
-		 -o -nt gpib_if_jtt.h gpib_if.h ]; then      \
-		$(RM) $(RMFLAGS) gpib_if.[ch];               \
+		 -o gpib_if_jtt.c -nt gpib_if.c              \
+		 -o gpib_if_jtt.h -nt gpib_if.h ]; then      \
+		rm -f gpib_if.[ch];                          \
 		cp gpib_if_jtt.c gpib_if.c;                  \
 		cp gpib_if_jtt.h gpib_if.h;                  \
 	fi
 
 gpib_ni:
 	if [ ! -e gpib_if.c -o ! -e gpib_if.h            \
-		 -o -nt gpib_if_ni.c gpib_if.c               \
-		 -o -nt gpib_if_ni.h gpib_if.h ]; then       \
-		$(RM) $(RMFLAGS) gpib_if.[ch];               \
+		 -o gpib_if_ni.c -nt gpib_if.c               \
+		 -o gpib_if_ni.h -nt gpib_if.h ]; then       \
+		rm -f gpib_if.[ch];                          \
 		cp gpib_if_ni.c gpib_if.c;                   \
 		cp gpib_if_ni.h gpib_if.h;                   \
 	fi
 	if [ ! -e gpib_parser.y                          \
-		 -o -nt gpib_parser.yy gpib_parser.y ]; then \
+		 -o gpib_parser.yy -nt gpib_parser.y ]; then \
 		cp gpib_parser.yy gpib_parser.y;             \
 	fi
 	if [ ! -e gpib_lexer.l                           \
-	     -o -nt gpib_lexer.ll gpib_lexer.l ]; then   \
+	     -o gpib_lexer.ll -nt gpib_lexer.l ]; then   \
 		cp gpib_lexer.ll gpib_lexer.l;               \
 	fi
 
