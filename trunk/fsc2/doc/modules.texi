@@ -415,7 +415,6 @@ parameter should already have been found during the test run, thus
 forcing the user to correct her/his program.
 
 
-
 @subsection Returning data from EDL functions
 
 If your function just wants to return an integer or a float, things are
