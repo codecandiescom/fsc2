@@ -88,7 +88,7 @@ bool tds744a_init( const char *name )
 		tds744a.timebase = tds744a_get_timebase( );
 
 	/* If the number of averages has been set in the PREPARATIONS section send
-       to the digitizer now */
+       it to the digitizer now */
 
 	if ( tds744a.is_num_avg == SET )
 		tds744a_set_num_avg( tds744a.num_avg );
@@ -96,7 +96,7 @@ bool tds744a_init( const char *name )
 		tds744a.num_avg = tds744a_get_num_avg( );
 
 	/* Switch on all channels that have been used in the experiment section
-	   and that aren't already switched on */
+	   if they aren't already switched on */
 
 	for ( ch = 0; ch < MAX_CHANNELS; ch++ )
 		if ( tds744a.channels_in_use[ ch ] )
