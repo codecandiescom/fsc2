@@ -890,6 +890,8 @@ void tds_tmpl_set_meas_window( WINDOW *w )
 {
 	if ( w != NULL )
 	{
+		/* Set the cursor positions */
+
 		tds_tmpl_set_window( w );
 
 		/* If not already in gated measurement state set it now */
