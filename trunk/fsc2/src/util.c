@@ -522,11 +522,11 @@ FILE *filter_edl( const char *name, FILE *fp )
 			 dup2( pd[ 1 ], STDOUT_FILENO ) == -1 )
 		{
 			if ( errno == EMFILE )
-				 write( pd[ 1 ], "\x03\nStart the test procedure failed, "
-						"running out of system resources.\n", 68 );
+				 write( pd[ 1 ], "\x03\nStarting the test procedure failed, "
+						"running out of system resources.\n", 71 );
 			else
-				 write( pd[ 1 ], "\x03\nStart the test procedure failed, "
-						"internal error detected.\n", 60 );
+				 write( pd[ 1 ], "\x03\nStarting the test procedure failed, "
+						"internal error detected.\n", 63 );
 			close( pd[ 1 ] );
 			goto filter_failure;
 		}
@@ -565,7 +565,7 @@ FILE *filter_edl( const char *name, FILE *fp )
 	close( pd[ 1 ] );
 
 	/* Wait until the child process had a chance to write to the pipe, if the
-	   parent is too fast in trying to read it it only will see an EOF. */
+	   parent is too fast in trying to read on it it only sees an EOF. */
 
 	FD_ZERO( &rfds );
 	FD_SET( pd[ 0 ], &rfds );
