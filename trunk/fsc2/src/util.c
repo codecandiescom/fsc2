@@ -667,6 +667,16 @@ inline unsigned short i2ushrt( int a )
 	return ( unsigned short ) a;
 }
 
+inline long d2long( double a )
+{
+	if ( a > LONG_MAX )
+		return LONG_MAX;
+	if ( a < LONG_MIN )
+		return LONG_MIN;
+	return lround( a );
+}
+
+
 inline int    i_max( int    a, int    b ) { return a > b ? a : b; }
 inline int    i_min( int    a, int    b ) { return a < b ? a : b; }
 inline long   l_max( long   a, long   b ) { return a > b ? a : b; }

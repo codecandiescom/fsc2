@@ -690,7 +690,7 @@ Var *f_cscale( Var *v )
 	int shm_id;
 	long len = 0;                    /* total length of message to send */
 	void *buf;
-	void *ptr;
+	char *ptr;
 	int type = D_CHANGE_SCALE;
 
 
@@ -824,7 +824,7 @@ Var *f_clabel( Var *v )
 	int shm_id;
 	long len = 0;                    /* total length of message to send */
 	void *buf;
-	void *ptr;
+	char *ptr;
 	int i;
 	int type = D_CHANGE_LABEL;
 
@@ -951,7 +951,7 @@ Var *f_rescale( Var *v )
 	int shm_id;
 	long len = 0;                    /* total length of message to send */
 	void *buf;
-	void *ptr;
+	char *ptr;
 	int type = D_CHANGE_POINTS;
 
 
@@ -1083,7 +1083,7 @@ Var *f_display( Var *v )
 	int shm_id;
 	long len = 0;                    /* total length of message to send */
 	void *buf;
-	void *ptr;
+	char *ptr;
 	int nsets;
 	int i;
 
@@ -1459,7 +1459,7 @@ Var *f_clearcv( Var *v )
 	int shm_id;
 	long len = 0;                    /* total length of message to send */
 	void *buf;
-	void *ptr;
+	char *ptr;
 	int type = D_CLEAR_CURVE;
 
 

@@ -1392,7 +1392,7 @@ Var *f_mean( Var *v )
 	long *ilp = NULL;
 	double *idp = NULL;
 	double val = 0.0;
-	long index;
+	long a_index;
 	long slice_len;
 
 
@@ -1420,22 +1420,22 @@ Var *f_mean( Var *v )
 		{
 			eprint( WARN, SET, "Float value used as array index in "
 					"function %s().\n", Cur_Func );
-			index = lround( v->next->val.dval ) - ARRAY_OFFSET;
+			a_index = lround( v->next->val.dval ) - ARRAY_OFFSET;
 		}
 		else
-			index = v->next->val.lval - ARRAY_OFFSET;
+			a_index = v->next->val.lval - ARRAY_OFFSET;
 
-		if ( index < 0 )
+		if ( a_index < 0 )
 		{
 			eprint( FATAL, SET, "Invalid array index (%ld) in function "
-					"%s().\n", index + ARRAY_OFFSET, Cur_Func );
+					"%s().\n", a_index + ARRAY_OFFSET, Cur_Func );
 			THROW( EXCEPTION )
 		}
 
 		if ( ilp != NULL )
-			ilp += index;
+			ilp += a_index;
 		else
-			idp += index;
+			idp += a_index;
 
 		if ( v->next->next != NULL )
 		{
@@ -1459,9 +1459,9 @@ Var *f_mean( Var *v )
 
 			/* Test that the slice is within the arrays range */
 
-			if ( slice_len != 1 && index + slice_len > len ) {
+			if ( slice_len != 1 && a_index + slice_len > len ) {
 				if ( TEST_RUN && ( v->flags & IS_DYNAMIC ) )
-					slice_len = len - index;
+					slice_len = len - a_index;
 				else
 				{
 					eprint( FATAL, SET, "Sum of index and slice length "
@@ -1472,7 +1472,7 @@ Var *f_mean( Var *v )
 			}
 		}
 		else
-			slice_len = len - index;
+			slice_len = len - a_index;
 	}
 
 	for ( i = 0; i < slice_len; i++ )
@@ -1526,7 +1526,7 @@ Var *f_slice( Var *v )
 	long len;
 	long *ilp;
 	double *idp;
-	long index;
+	long a_index;
 	long slice_len;
 
 
@@ -1548,12 +1548,12 @@ Var *f_slice( Var *v )
 	{
 		eprint( WARN, SET, "Float value used as array index in function "
 				"%s().\n", Cur_Func );
-		index = lround( v->next->val.dval ) - ARRAY_OFFSET;
+		a_index = lround( v->next->val.dval ) - ARRAY_OFFSET;
 	}
 	else
-		index = v->next->val.lval - ARRAY_OFFSET;
+		a_index = v->next->val.lval - ARRAY_OFFSET;
 
-	if ( index < 0 )
+	if ( a_index < 0 )
 	{
 		eprint( FATAL, SET, "Negative array index used in function "
 				"%s().\n", Cur_Func );
@@ -1581,14 +1581,14 @@ Var *f_slice( Var *v )
 		}
 	}
 	else
-		slice_len = len - index;
+		slice_len = len - a_index;
 
 	/* Test that the slice is within the arrays range */
 
-	if ( index + slice_len > len )
+	if ( a_index + slice_len > len )
 	{
 		if ( TEST_RUN && ( v->flags & IS_DYNAMIC ) )
-			slice_len = len - index;
+			slice_len = len - a_index;
 		else
 		{
 			eprint( FATAL, SET, "Sum of index and slice length parameter "
@@ -1598,9 +1598,9 @@ Var *f_slice( Var *v )
 	}
 
 	if ( ilp != NULL )
-		return vars_push( INT_ARR, ilp + index, slice_len );
+		return vars_push( INT_ARR, ilp + a_index, slice_len );
 	else
-		return vars_push( FLOAT_ARR, idp + index, slice_len );
+		return vars_push( FLOAT_ARR, idp + a_index, slice_len );
 }
 
 
