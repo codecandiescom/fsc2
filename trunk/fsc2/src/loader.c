@@ -427,7 +427,10 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 	/* Try to find the library fitting the name */
 
 	for ( cd = Device_List; cd != 0; cd = cd->next )
-		if ( cd->is_loaded && ! strcmp( cd->name, from ) )
+		if ( cd->is_loaded &&
+			 ( ! strcmp( cd->name, from ) || 
+			   ( strchr( cd->name, '/' ) != NULL &&
+				 ! strcmp( strrchr( cd->name, '/' ) + 1, from ) ) ) )
 			break;
 
 	if ( cd == NULL )                    /* library not found ? */
