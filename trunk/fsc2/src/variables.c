@@ -180,7 +180,7 @@ typedef VarretFnct *FnctPtr;
   with the NEED_INIT flag in the `flags' element of the variables structure
   (of the transient variable) is set, a list of data (in curly brackets,
   i.e. `{' and `}' following as an assignment will be interpreted as data
-  for initialising the array.
+  for initializing the array.
 
   But beside these fixed sized arrays there are also variable sized arrays.
   These are needed e.g. for storing data sets received from the transient
@@ -188,7 +188,7 @@ typedef VarretFnct *FnctPtr;
   in advance. Only the very last dimension of an array may be variable sized
   and making it variable sized is indicated by writing a star (`*') as the
   size of this dimension. In contrast to fixed sized arrays, variable sized
-  arrays cannot be initialised and the very first assignment to such an array
+  arrays cannot be initialized and the very first assignment to such an array
   must be an array slice, i.e. an one-dimensional array. This is done by
   either assigning an existing array or by assigning the data from an
   array-returning function.
@@ -2286,10 +2286,10 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 
 
 /*--------------------------------------------------------------------------*/
-/* Function initialises a new array. When called the stack at 'v' contains  */
-/* all the data for the initialisation (the last data on top of the stack)  */
-/* and, directly below the data, an ARR_PTR to the array to be initialised. */
-/* If 'v' is an UNDEF_VAR no initialisation has to be done.                 */
+/* Function initializes a new array. When called the stack at 'v' contains  */
+/* all the data for the initialization (the last data on top of the stack)  */
+/* and, directly below the data, an ARR_PTR to the array to be initialized. */
+/* If 'v' is an UNDEF_VAR no initialization has to be done.                 */
 /*--------------------------------------------------------------------------*/
 
 void vars_arr_init( Var *v )
@@ -2300,7 +2300,7 @@ void vars_arr_init( Var *v )
 		 *a;
 
 
-	/* If there are no initialisation data this is indicated by a variable
+	/* If there are no initialization data this is indicated by a variable
 	   of type UNDEF_VAR - just pop it as well as the array pointer */
 
 	if ( v->type == UNDEF_VAR )
@@ -2312,10 +2312,10 @@ void vars_arr_init( Var *v )
 	}
 
 	/* The variable pointer this function gets passed is a pointer to the very
-       last initialisation data on the variable stack. Now we've got to work
+       last initialization data on the variable stack. Now we've got to work
        our way down the variable stack until we find the first non-data
        variable which must be of ARR_PTR type. While doing so, we also count
-       the number of initialisers, 'ni', on the stack. */
+       the number of initializers, 'ni', on the stack. */
 
 	ni = 0;
 	while ( v->type != ARR_PTR )
@@ -2327,14 +2327,14 @@ void vars_arr_init( Var *v )
 	vars_check( a, INT_ARR | FLOAT_ARR );
 
 
-	/* Variable sized arrays can't be initialised, they need the assignment of
+	/* Variable sized arrays can't be initialized, they need the assignment of
 	   an array slice to determine the still unknown size of their very last
 	   dimension */
 
 	if ( a->flags & NEED_ALLOC )
 	{
 		eprint( FATAL, "%s:%ld: Variable sized array `%s' can not be "
-				"initialised.\n", Fname, Lc, a->name );
+				"initialized.\n", Fname, Lc, a->name );
 		THROW( EXCEPTION );
 	}
 
@@ -2342,21 +2342,21 @@ void vars_arr_init( Var *v )
 
 	if ( ! ( a->flags & NEED_INIT ) )
 	{
-		eprint( FATAL, "%s:%ld: Initialisation of array `%s' only allowed "
+		eprint( FATAL, "%s:%ld: Initialization of array `%s' only allowed "
 				"immediately after declaration.\n", Fname, Lc, a->name );
 		THROW( EXCEPTION );
 	}
 
-	/* Check that the number of initialisers fits the number of elements of
+	/* Check that the number of initializers fits the number of elements of
        the array */
 
 	if ( ni < a->len )
-		eprint( WARN, "%s:%ld: Less initialisers for array `%s' than it has "
+		eprint( WARN, "%s:%ld: Less initializers for array `%s' than it has "
 				"elements.\n", Fname, Lc, a->name );
 
 	if ( ni > a->len )
 	{
-		eprint( FATAL, "%s:%ld: Too many initialisers for array `%s'.\n",
+		eprint( FATAL, "%s:%ld: Too many initializers for array `%s'.\n",
 				Fname, Lc, a->name );
 		THROW( EXCEPTION );
 	}
@@ -2379,7 +2379,7 @@ void vars_arr_init( Var *v )
 				*v->val.lpnt++ = p1->val.lval;
 			else
 			{
-				eprint( WARN, "%s:%ld: Float value used in initialisation of "
+				eprint( WARN, "%s:%ld: Float value used in initialization of "
 						"integer array `%s'.\n", Fname, Lc, a->name );
 				*v->val.lpnt++ = ( long ) p1->val.dval;
 			}
