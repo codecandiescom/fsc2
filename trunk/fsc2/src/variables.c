@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.9  1999/07/17 13:32:18  jens
+   *** empty log message ***
+
    Revision 1.8  1999/07/17 12:49:21  jens
    Diverse corrections to make lint more happy...
 
@@ -681,7 +684,7 @@ Var *vars_pow( Var *v1, Var *v2 )
 
 	if ( v1->type == INT_VAR )
 	{
-		if ( v1->type == 0 )   /* powers of zero are always 1 */
+		if ( v1->val.lval == 0 )   /* powers of zero are always 1 */
 		{
 			ires = 1;
 			new_var = vars_push( INT_VAR, ( void * ) &ires );
