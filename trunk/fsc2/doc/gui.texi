@@ -511,13 +511,14 @@ direction. Now hit the @code{Space} bar and the cross section in the
 other direction is drawn.
 
 
-@subsection Creating additional tools
+@subsection Creating a tool box
 
-Sometimes it is necessary to adjust certain values during an experiment
+Sometimes it is necessary to adjust certain values while a measurement
 is running, especially if one is trying to determine the optimum
-parameters for an experiment. To facilitate this it is possible to create
-several different kinds of objects that allow user input during the
-experiment. All of the user created elements appear in a seperate window.
+parameters for an experiment. Therefor it is possible to create several
+different kinds of objects that allow user input during the
+experiment. All of the user created elements appear in a seperate
+window, the tool box.
 @ifnotinfo
 The next figure shows all types of objects that can be created.
 
@@ -525,15 +526,13 @@ The next figure shows all types of objects that can be created.
 
 @end ifnotinfo
 
-First there are the normal buttons. A normal button can be depressed and
-from the @acronym{EDL} program it is possible to determine how often the
-button has been pressed since the last time the function was called.
-
-The second type of objects are push buttons, i.e.@: buttons, that can be
-in two states, either pressed or released.
-
-The third type of objects, radio buttons always come in groups and only
-exactly one of a group can be in the activated state at any moment.
+First there are the normal buttons. A normal button can be clicked on
+and the @acronym{EDL} program can determine how often the button has
+been pressed. The second type of objects are push buttons, i.e.@:
+buttons, that can be in two states, either pressed or released.
+The third type of objects, radio buttons, always come in groups and only
+exactly one of a group of radio buttons can be in the active state at
+any moment.
 
 The next objects are sliders to adjust numerical values. There are two
 types of sliders, normal sliders and value sliders. The only difference
