@@ -699,12 +699,12 @@ void test_file( FL_OBJECT *a, long b )
 		THROW( EXCEPTION );
 	}
 
-	/* If fsc2 is too busy testing a program (this seems to happen when what
-	   the program does is mostly output to the error browser) to react to
-	   clicks on the "Stop Test" button and the user presses it several times
-	   strange things happen, especially the "Quit" button becoming unusable.
-	   The following helps avoiding to execute the handler again while it's
-	   already running... */
+	/* If fsc2 is too busy testing a program to react to clicks on the "Stop
+	   Test" button (this seems to happen when what the program does is mostly
+	   output to the error browser) and the user presses the button several
+	   times strange things happen, especially the "Quit" button becoming
+	   unusable.  The following helps avoiding to execute the handler again
+	   while it's already running... */
 
 	if ( in_test )
 		return;
