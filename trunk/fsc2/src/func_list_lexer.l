@@ -57,7 +57,7 @@ REM5     "*"+[^*/\n]*
 EREM1    "*"+"/"
 EREM2    "*"+"/"[\t ]*\n
 
-INT      [+-]?[0-9]+
+INT      ([+-]?[0-9]+)|"-"
 
 WLWS     ^[\t ]*\n
 LWS      ^[\t ]+
@@ -387,7 +387,10 @@ static void fll_get_functions( Func *fncts, int num_predef_func )
 					THROW( EXCEPTION );
 				}
 
-				fncts[ act ].nargs = atol( func_listtext );
+				if ( func_listtext[ 0 ] == '-' && func_listtext[ 1 ] == '\0' )
+					fncts[ act ].nargs = LONG_MIN;
+				else
+					fncts[ act ].nargs = atol( func_listtext );
 				state = 2;
 				break;
 
