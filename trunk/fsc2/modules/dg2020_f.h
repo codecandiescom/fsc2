@@ -3,6 +3,11 @@
 */
 
 
+#if defined MAX_DEBUG
+#define dg2020_set_constant x_define_set_constant
+#endif
+
+
 #include "fsc2.h"
 
 

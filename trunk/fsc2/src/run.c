@@ -65,8 +65,7 @@ bool run( void )
 
 	/* If the devices need the GPIB bus initialise it now */
 
-/*!%!%!%!%*/
-/*
+#ifndef MAX_DEBUG
 	if ( need_GPIB && gpib_init( &gpib_log, LL_ERR ) == FAILURE )
 	{
 		eprint( FATAL, "Can't initialise GPIB bus.\n" );
@@ -74,8 +73,7 @@ bool run( void )
 		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 		return FAIL;
 	}
-*/
-/*!%!%!%!%*/
+#endif
 
 	/* Run all the experiment hooks - on failure reset GPIB bus */
 
