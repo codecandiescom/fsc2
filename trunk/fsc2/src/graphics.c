@@ -57,6 +57,7 @@ static Graphics_2d *G_2d_stored = NULL;
 
 extern FL_resource xresources[ ];
 
+static bool display_has_been_shown = UNSET;
 
 static struct {
 	unsigned int WIN_MIN_1D_WIDTH;
@@ -68,8 +69,6 @@ static struct {
 	const char *DEFAULT_AXISFONT_1;
 	const char *DEFAULT_AXISFONT_2;
 	const char *DEFAULT_AXISFONT_3;
-
-	bool display_has_been_shown;
 
 	int display_x,
 		display_y;
@@ -107,7 +106,14 @@ void start_graphics( void )
 	int i;
 
 
-	set_defaults( );
+	if ( ! display_has_been_shown )
+		set_defaults( );
+
+	G.font = NULL;
+
+	CG.is_shown = UNSET;
+	CG.curve = -1;
+	CG.index = 0;
 
 	if ( G.dim & 1 )
 	{
@@ -179,7 +185,7 @@ void start_graphics( void )
 		G.d = FL_FormDisplay( GUI.run_form_1d->run_1d );
 	}
 
-	GI.display_has_been_shown = SET;
+	display_has_been_shown = SET;
 
 	/* Set minimum size for display window and switch on full scale button */
 
@@ -270,7 +276,10 @@ static void set_default_sizes( void )
 	int flags;
 
 
-	if ( ! GI.display_has_been_shown )
+	/* If the display windows have never been shown before evaluate the
+	   positions and sizes specified on the command line */
+
+	if ( ! display_has_been_shown )
 	{
 		if ( * ( ( char * ) xresources[ DISPLAYGEOMETRY ].var ) != '\0' )
 		{
@@ -451,19 +460,12 @@ static void set_defaults( void )
 		G.enlarge_box_width =   5;
 	}
 
-	GI.display_has_been_shown = UNSET;
 	GI.is_pos = UNSET;
 	GI.is_size = UNSET;
 	GI.is_1d_pos = UNSET;
 	GI.is_1d_size = UNSET;
 	GI.is_2d_pos = UNSET;
 	GI.is_2d_size = UNSET;
-
-	G.font = NULL;
-
-	CG.is_shown = UNSET;
-	CG.curve = -1;
-	CG.index = 0;
 }
 
 
