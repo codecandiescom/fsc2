@@ -570,7 +570,7 @@ M = H;
 elements of @code{H}.
 
 Some care has to be taken: it is also possible to shrink the length of a
-variable sized array by assigning a another array to it. If @code{M}
+variable sized array by assigning another array to it. If @code{M}
 had already been given a length by e.g.@: assigning a value to its 25th
 element then assigning it the shorter array @code{H} will automatically
 shorten it to 10 elements and the values stored in the 11th to the 25th
@@ -692,7 +692,7 @@ at once by just writing
 z2 = z1;
 @end example
 @noindent
-It's basically just a abbreviation for the longer form
+It's basically just an abbreviation for the longer form
 @example
 z2[ 1 ] = z1;
 z2[ 2 ] = z1;
@@ -1009,7 +1009,7 @@ number):
 @end example
 
 Multiplication and division are also possible with whole arrays. Again,
-these operations are implemented in a element-by-element way, i.e.@:
+these operations are implemented in an element-by-element way, i.e.@:
 multiplying two arrays is not a dot product but results again in an
 array of the same size as both the original arrays. The same holds for
 the division. With the arrays @code{a} and @code{b} defined above the
