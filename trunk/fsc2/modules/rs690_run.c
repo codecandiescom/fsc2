@@ -571,11 +571,11 @@ void rs690_shape_padding_check_1( CHANNEL *ch )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* In the shape padding checks fo single channels it could not be tested */
-/* if pulses with automatic shape padding in different channels would    */
-/* overlap, which needs to be done here.                                 */
-/*-----------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* In the shape padding checks for single channels it could not be tested */
+/* if pulses with automatic shape padding in different channels would     */
+/* overlap, which needs to be done here.                                  */
+/*------------------------------------------------------------------------*/
 
 void rs690_shape_padding_check_2( void )
 {

@@ -495,13 +495,13 @@ static void dg2020_shape_padding_check_2( void )
 /* Does all kinds of checks for TWT pulses. For TWT pulses created directly */
 /* by the user we only check if the distance between them is large enough   */
 /* (as requested by MINIMUM_TWT_PULSE_DISTANCE in the configuration file    */
-/* for the pulser). For automatically created TWT pulses we also check that */
-/* they don't have to start too early (which might happen of the pulse the  */
-/* TWT pulse was created for starts very early and the left padding thus    */
-/* can't be set), that they don't overlap (pulses may get shortened or even */
-/* disappear in this case) and that the last TWT pulse isn't too long (i.e. */
-/* would last longer than the repetition time or the maximum pulse sequence */
-/* duration).                                                               */
+/* for the pulser). For automatically created TWT pulses we lengthen the    */
+/* pulses in this case and also check that they don't have to start too     */
+/* early (which might happen of the pulse the TWT pulse was created for     */
+/* starts very early and the left padding thus can't be set), that they     */
+/* don't overlap (pulses may get shortened or even disappear in this case)  */
+/* and that the last TWT pulse isn't too long (i.e. that it would last      */
+/* longer than the repetition time or the maximum pulse sequence duration). */
 /*--------------------------------------------------------------------------*/
 
 static void dg2020_twt_padding_check( FUNCTION *f )
