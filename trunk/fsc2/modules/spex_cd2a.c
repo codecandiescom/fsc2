@@ -864,15 +864,20 @@ Var *monochromator_offset( Var *v )
 	if ( v == NULL )
 		return vars_push( FLOAT_VAR, spex_cd2a.offset );
 
+	if ( spex_cd2a.mode == WND )
+	{
+		print( FATAL, "Monochromator offset can't be set while in relative "
+			   "wavenumber mode. Set the laser line position to 0 before "
+			   "attempting to change the offset.\n" );
+		THROW( EXCEPTION );
+	}
+
 	if ( spex_cd2a.mode & WN_MODES )
 		new_offset = get_double( v, "wavenumber offset" );
 	else
 		new_offset = get_double( v, "wavelength offset" );
 
-	if ( spex_cd2a.mode == WND )
-		offset = spex_cd2a.offset - new_offset;
-	else
-		offset = spex_cd2a.offset + new_offset;
+	offset = spex_cd2a.offset - new_offset;
 
 #if defined SPEX_CD2A_MAX_OFFSET
 	if ( spex_cd2a.mode & WN_MODES && offset > SPEX_CD2A_MAX_OFFSET )
@@ -1039,9 +1044,8 @@ Var *monochromator_shutter_limits( Var *v )
 /* for use as axis description parameters (start of axis and increment) */
 /* required by by the change_scale() function (if the camera uses       */
 /* binning the second element may have to be multiplied by the          */
-/* x-binning width). Please note: since the axis is not really          */
-/* completely linear, the axis that gets displyed when using these      */
-/* values is not 100% correct!                                          */
+/* x-binning width). Please note: since the axis is not really linear   */
+/* the axis displayed when using these values isn't absolutely correct! */
 /*----------------------------------------------------------------------*/
 
 Var *monochromator_wavelength_axis( Var *v )
@@ -1051,6 +1055,8 @@ Var *monochromator_wavelength_axis( Var *v )
 	double wl;
 	int acc;
 
+
+	wl = spex_cd2a.wavelength;
 
 	if ( v != NULL )
 	{
@@ -1068,7 +1074,7 @@ Var *monochromator_wavelength_axis( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	too_many_arguments;
+	too_many_arguments( v );
 
 	/* Check that we can talk with the camera */
 
@@ -1103,10 +1109,27 @@ Var *monochromator_wavelength_axis( Var *v )
 
 	cv = vars_push( FLOAT_ARR, NULL, 2 );
 
-	cv->val.dpnt[ 0 ] =
-		spex_cd2a_Swl2Uwl( spex_cd2a.wavelength -
-						   0.5 * ( num_pixels - 1 ) * spex_cd2a.pixel_diff );
-	cv->val.dpnt[ 1 ] = spex_cd2a.pixel_diff;
+	if ( spex_cd2a.mode == WL )
+	{
+		cv->val.dpnt[ 0 ] =
+			spex_cd2a_Swl2Uwl( wl - 0.5 * ( num_pixels - 1 )
+							   * spex_cd2a.pixel_diff );
+		cv->val.dpnt[ 1 ] = spex_cd2a.pixel_diff;
+	}
+	else
+	{
+		print( WARN, "Requesting wavelength axis for monochromator running "
+			   "in wavenumber mode.\n" );
+		cv->val.dpnt[ 0 ] =
+			spex_cd2a_SAwn2Uwl( spex_cd2a_wl2Awn( wl )
+								+ 0.5 * ( num_pixels - 1 )
+								* spex_cd2a.pixel_diff );
+		cv->val.dpnt[ 1 ] = 
+			( spex_cd2a_SAwn2Uwl( spex_cd2a_wl2Awn( wl )
+								- 0.5 * ( num_pixels - 1 )
+								* spex_cd2a.pixel_diff )
+			  - cv->val.dpnt[ 0 ] ) / ( num_pixels - 1 );
+	}
 
 	return cv;
 }
@@ -1117,40 +1140,96 @@ Var *monochromator_wavelength_axis( Var *v )
 /* for use as axis description parameters (start of axis and increment) */
 /* required by by the change_scale() function (if the camera uses       */
 /* binning the second element may have to be multiplied by the          */
-/* x-binning width). Please note: since the axis is not really          */
-/* completely linear, the axis that gets displyed when using these      */
-/* values is not 100% correct!                                          */
+/* x-binning width). Please note: since the axis is not really linear   */
+/* the axis displayed when using these values isn't absolutely correct! */
 /*----------------------------------------------------------------------*/
 
 Var *monochromator_wavenumber_axis( Var *v )
 {
-	double wn, wl;
+	double wl;
 	Var *cv;
+	long num_pixels;
+	int acc;
 
+
+	wl = spex_cd2a.wavelength;
 
 	if ( v != NULL )
 	{
-		wn = spex_cd2a_UMwn2SAwn( get_double( v, "wavenumber" ) );
+		wl = spex_cd2a_UMwn2Swl( get_double( v, "wavenumber" ) );
 
-		if ( wn <= 0.0 )
+		if ( wl <= 0.0 )
 		{
 			print( FATAL, "Invalid center wavenumber.\n" );
 			THROW( EXCEPTION );
 		}
-
-		wl = spex_cd2a_Awn2wl( wn );
 	}
 	else if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.scan_is_init )
 	{
 		print( FATAL, "Wavenumber hasn't been set yet.\n ");
 		THROW( EXCEPTION );
 	}
-/*
-	cv = monochromator_wavelength_axis( v );
 
-	cv->val.dpnt[ 0 ] = spex_cd2a_wl2mwn( cv->val.dpnt[ 0 ] );
-	cv->val.dpnt[ 1 ] = - spex_cd2a_s2r_wn( cv->val.dpnt[ 1 ] );
-*/
+	too_many_arguments( v );
+
+	/* Check that we can talk with the camera */
+
+	if ( ! exists_device( "rs_spec10" ) )
+	{
+		print( FATAL, "Function can only be used when the module for the "
+			   "Roper Scientific Spec-10 CCD camera is loaded.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Get the width (in pixels) of the chip of the camera */
+
+	if ( ! func_exists( "ccd_camera_pixel_area" ) )
+	{
+		print( FATAL, "CCD camera has no function for determining the "
+			   "size of the chip.\n" );
+		THROW( EXCEPTION );
+	}
+
+	cv = func_call( func_get( "ccd_camera_pixel_area", &acc ) );
+
+	if ( cv->type != INT_ARR ||
+		 cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
+	{
+		print( FATAL, "Function of CCD for determining the size of the chip "
+			   "does not return a useful value.\n" );
+		THROW( EXCEPTION );
+	}
+
+	num_pixels = cv->val.lpnt[ 0 ];
+	vars_pop( cv );
+
+	cv = vars_push( FLOAT_ARR, NULL, 2 );
+
+	if ( spex_cd2a.mode == WL )
+	{
+		print( WARN, "Requesting wavenumber axis for monochromator running "
+			   "in wavelength mode!\n" );
+		cv->val.dpnt[ 0 ] = 
+			spex_cd2a_SAwn2Uwl( spex_cd2a_wl2Awn( wl )
+								+ 0.5 * ( num_pixels - 1 )
+								* spex_cd2a.pixel_diff );
+		cv->val.dpnt[ 1 ] =
+			( spex_cd2a_SAwn2Uwl( spex_cd2a_wl2Awn( wl )
+								  - 0.5 * ( num_pixels - 1 )
+								  * spex_cd2a.pixel_diff )
+			  - cv->val.dpnt[ 0 ] ) / ( num_pixels - 1 );
+	}
+	else
+	{
+		cv->val.dpnt[ 0 ] =
+			spex_cd2a_SAwn2UMwn( spex_cd2a_wl2Awn( wl )
+								 - 0.5 * ( num_pixels - 1 )
+								 * spex_cd2a.pixel_diff );
+		cv->val.dpnt[ 1 ] = spex_cd2a.pixel_diff;
+		if ( spex_cd2a.mode == WN )
+			cv->val.dpnt[ 1 ] *= -1.0;
+	}
+
 	return cv;
 }
 
