@@ -3135,7 +3135,7 @@ If, in contrast, there are two acquisition sequences an array of twice
 the number of windows is returned. The first value in the array is the
 result for the first acquistion sequence for the first window, the
 second the result for the second acquistion sequence and the first
-window, then follow the the results of both acquisition sequences for
+window, then follow the results of both acquisition sequences for
 the second window, etc.
 
 As an example here parts of an @code{EDL} script for a 1-dimensional

@@ -56,9 +56,48 @@ fsc2.info: $(docs)
 html: fsc2.html
 
 fsc2.html: $(docs) $(figures)
-	./texi2html -frames -split chapter -menu -number -sec_nav -iso fsc2.texi
-	sed -e 's/fsc2_[0-9]\{1,\}/fsc2/' fsc2_frame.html > fsc2_frame.x
-	mv fsc2_frame.x fsc2_frame.html
+	./texi2html -split chapter -menu -number -sec_nav -iso fsc2.texi
+	@echo '<div id="lftBar">' > TOC
+	@echo '  <img src="fsc2.gif" alt="fsc2 logo">' >> TOC
+	@echo '  <br>' >> TOC
+	@echo '  <br>' >> TOC
+	@for i in fsc2.html fsc2_[1-9].html; do \
+		if [ -z "`grep -h '^<TITLE>fsc2: Index:' $$i`" ]; then \
+			echo -n '  <a href="' >> TOC; \
+			echo -n "$$i" >> TOC; \
+		 	echo -n '">' >> TOC; \
+			grep -h '^<TITLE>fsc2: [^<]*</TITLE>$$' $$i | \
+			sed -e 's/^<TITLE>fsc2: \([^<]*\)<\/TITLE>$$/\1/' >> TOC; \
+			echo '  </a><br>' >> TOC; \
+		fi; \
+	done
+	@for i in fsc2_[1-9][0-9].html; do \
+		if [ -z "`grep -h '^<TITLE>fsc2: Index:' $$i`" ]; then \
+			echo -n '  <a href="' >> TOC; \
+			echo -n "$$i" >> TOC; \
+			echo -n '">' >> TOC; \
+			grep -h '^<TITLE>fsc2: [^<]*</TITLE>$$' $$i | \
+			sed -e 's/^<TITLE>fsc2: \([^<]*\)<\/TITLE>$$/\1/' >> TOC; \
+			echo '</a><br>' >> TOC; \
+		fi; \
+	done
+	@echo '	 <br>' >> TOC
+	@echo '  <a href="http://www.physik.fu-berlin.de/~toerring/fsc2.html">Download</a>' >> TOC
+	@echo '	 </div>' >> TOC
+	@echo '	 <div id="level0">' >> TOC
+	@echo '	   <div id="level1">' >> TOC
+	@echo '		 <div id="main">' >> TOC
+	@for i in fsc2.html fsc2_[0-9]*.html; do \
+		sed -e '1,/BODY/!d' $$i > $$i.x; \
+		cat TOC >> $$i.x; \
+		sed -e '1,/<BODY>/d;/<\/BODY/,$$d' $$i >> $$i.x; \
+		echo "      </div>" >> $$i.x; \
+		echo "    </div>" >> $$i.x; \
+		echo "  </div>" >> $$i.x; \
+		sed -e '1,/<\/BODY>/d' $$i >> $ii.x; \
+		mv $$i.x $$i; \
+	done
+	-@$(RM) TOC
 
 %.png: $(adir)/%.xbm
 	convert -page `identify $< 2>/dev/null | sed -e 's/^.*[ 	]\([0-9]\{1,\}x[0-9]\{1,\}\)[ 	].*$$/\1/'` $< $@ 2>/dev/null

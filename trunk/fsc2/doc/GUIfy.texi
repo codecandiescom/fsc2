@@ -38,17 +38,18 @@
 @b{Please note: The following will only work if you have Perl and
 Perl/Tk (in a not too ancient versions) installed on your machine...}
 
-Often there is a small set of standard experiments, each with a few
-parameters that need to be changed all of the time. For example in a cw
-EPR experiment the start and end field and the sweep speed typically are
-such parameters. After some time it can become rather tedious to always
-edit the corresponding @code{EDL} file to set the parameters. Besides,
-for someone not familiar with @code{fsc2}'s syntax who just wants to do
-a simple experiment it may be too daunting a task to safely apply the
-necessary changes to an existing @code{EDL} script.
+There is often a small set of standard experiments, each with a few
+parameters that need to be changed all of the time. For example in a
+cw-EPR experiment the start and end field and the sweep speed typically
+are such parameters. After some time it can become rather tedious having
+to edit the corresponding @code{EDL} script every time just to set these
+parameters. Besides, for someone not familiar with @code{fsc2}'s syntax
+who just wants to do a simple experiment it may appera to be too
+daunting a task to safely apply the necessary changes to an existing
+@code{EDL} script.
 
-Fortunately, once you have written an @code{EDL} script it usually is
-rather simple to create a script from this @code{EDL} script that
+Fortunately, once you have written an @code{EDL} script it is rather
+simple to create a @code{Perl} script from the @code{EDL} script that
 allows to set the relevant parameters using a graphical user interface
 and which then automatically creates the modified @code{EDL} script and
 sends it to @code{fsc2} for execution. That's what the @code{fsc2_guify}
@@ -130,9 +131,9 @@ EXPERIMENT:
 Before explaining the exact meaning of the extra lines let's see what
 the conversion tool will make from this. To invoke the conversion tool
 on the "enhanced" @code{EDL} script (which for now is assumed to be
-named @file{simple_cw.Edl}) just type
+named @file{simple_cw.EDL}) just type
 
-@kbd{fsc2_guify simple_cw.Edl simple_cw}
+@kbd{fsc2_guify simple_cw.EDL simple_cw}
 
 @noindent
 This should create an executable script called @file{simple_cw}.
