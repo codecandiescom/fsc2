@@ -1,41 +1,41 @@
 /*
-  $Id$
- 
-  Library for National Instruments DAQ boards based on a DAQ-STC
-
-  Copyright (C) 2003-2004 Jens Thoms Toerring
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-
-  To contact the author send email to
-  Jens.Toerring@physik.fu-berlin.de
-*/
+ *  $Id$
+ * 
+ *  Library for National Instruments DAQ boards based on a DAQ-STC
+ * 
+ *  Copyright (C) 2003-2004 Jens Thoms Toerring
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ * 
+ *  To contact the author send email to
+ *  Jens.Toerring@physik.fu-berlin.de
+ */
 
 
 #include "ni_daq_lib.h"
 
 
-/*----------------------------------------------------------------*/
-/* Function for setting the clock speeds - the 'speed' argument   */
-/* tells if the frequency output of both clocks is to be reduced  */
-/* by a factor of 2 (as seen on the FREQ_OUT pin and by the sub-  */
-/* systems of the boards for IN_TIMEBASE2), the divider (between  */
-/* 1 and 16) gets set for both clocks and applies to what appears */
-/* on the FREQ_OUT pin only.                                      */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for setting the clock speeds - the 'speed' argument
+ * tells if the frequency output of both clocks is to be reduced
+ * by a factor of 2 (as seen on the FREQ_OUT pin and by the sub-
+ * systems of the boards for IN_TIMEBASE2), the divider (between
+ * 1 and 16) gets set for both clocks and applies to what appears
+ * on the FREQ_OUT pin only.
+ *----------------------------------------------------------------*/
 
 int ni_daq_msc_set_clock_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed,
 								int divider )
@@ -65,10 +65,10 @@ int ni_daq_msc_set_clock_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed,
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function for setting the clock to be output at the FREQ_OUT pin */
-/* and for enabling and disabling the frequency output             */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function for setting the clock to be output at the FREQ_OUT pin
+ * and for enabling and disabling the frequency output
+ *-----------------------------------------------------------------*/
 
 int ni_daq_msc_set_clock_output( int board, NI_DAQ_CLOCK_TYPE daq_clock,
 								 NI_DAQ_STATE on_off )
@@ -99,9 +99,9 @@ int ni_daq_msc_set_clock_output( int board, NI_DAQ_CLOCK_TYPE daq_clock,
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function for determining all current clock settings of the board */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for determining all current clock settings of the board
+ *------------------------------------------------------------------*/
 
 int ni_daq_msc_get_clock_state( int board, NI_DAQ_CLOCK_TYPE *daq_clock,
 								NI_DAQ_STATE *on_off,
@@ -127,8 +127,8 @@ int ni_daq_msc_get_clock_state( int board, NI_DAQ_CLOCK_TYPE *daq_clock,
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
 
 int ni_daq_msc_set_trigger( int board, NI_DAQ_TRIG_TYPE trigger_type,
 							double trigger_high, double trigger_low )
@@ -175,10 +175,10 @@ int ni_daq_msc_set_trigger( int board, NI_DAQ_TRIG_TYPE trigger_type,
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function is used only internally: when the board is opened it gets */
-/* called to find out the current clock settings of the board         */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function is used only internally: when the board is opened it gets
+ * called to find out the current clock settings of the board
+ *--------------------------------------------------------------------*/
 
 int ni_daq_msc_init( int board )
 {
@@ -195,7 +195,6 @@ int ni_daq_msc_init( int board )
 
 	if ( ( ret == ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_MSC, &msc ) ) < 0 )
 		return 1;
-
 
 	ni_daq_dev[ board ].msc_state.clock = msc.clock;
 	ni_daq_dev[ board ].msc_state.output_state = msc.output_state;

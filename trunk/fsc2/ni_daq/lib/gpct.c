@@ -36,7 +36,6 @@ static int ni_daq_gpct_time_to_ticks( int board, int counter,
 									  NI_DAQ_INPUT *source );
 
 
-
 /*-------------------------------------------------*
  * Function for switching the G_IN_TIMEBASE1 (i.e.
  * the fast time base) between 20 MHz and 10 MHz

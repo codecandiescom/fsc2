@@ -1,28 +1,28 @@
 /*
-  $Id$
- 
-  Library for National Instruments DAQ boards based on a DAQ-STC
-
-  Copyright (C) 2003-2004 Jens Thoms Toerring
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-
-  To contact the author send email to
-  Jens.Toerring@physik.fu-berlin.de
-*/
+ *  $Id$
+ * 
+ *  Library for National Instruments DAQ boards based on a DAQ-STC
+ * 
+ *  Copyright (C) 2003-2004 Jens Thoms Toerring
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ * 
+ *  To contact the author send email to
+ *  Jens.Toerring@physik.fu-berlin.de
+ */
 
 
 #include <stdio.h>
@@ -78,14 +78,14 @@ const int ni_daq_nerr =
 static int ni_daq_first_call_handler( void );
 
 
-/*------------------------------------------------------------------*/
-/* Function for initializing the board - it expects the name of the */
-/* device file associated with the board as its argument. It then   */
-/* tries to open the device file, applies some default settings and */
-/* asks the driver for the boards capabilities. On success a non-   */
-/* negative integer handle for the board is returned, on failure a  */
-/* negative number indicating the reason of the failure.            */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for initializing the board - it expects the name of the
+ * device file associated with the board as its argument. It then
+ * tries to open the device file, applies some default settings and
+ * asks the driver for the boards capabilities. On success a non-
+ * negative integer handle for the board is returned, on failure a
+ * negative number indicating the reason of the failure.
+ *------------------------------------------------------------------*/
 
 int ni_daq_open( const char *name )
 {
@@ -167,8 +167,8 @@ int ni_daq_open( const char *name )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ *----------------------------------------------------------------------*/
 
 int ni_daq_close( int board )
 {
@@ -188,14 +188,14 @@ int ni_daq_close( int board )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Prints out a string to stderr, consisting of a user supplied  */
-/* string (the argument of the function), a colon, a blank and   */
-/* a short descriptive text of the error encountered in the last */
-/* invocation of one of the ni_daq_xxx() functions, followed by  */
-/* a new-line. If the argument is NULL or an empty string only   */
-/* the error message is printed.                                 */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Prints out a string to stderr, consisting of a user supplied
+ * string (the argument of the function), a colon, a blank and
+ * a short descriptive text of the error encountered in the last
+ * invocation of one of the ni_daq_xxx() functions, followed by
+ * a new-line. If the argument is NULL or an empty string only
+ * the error message is printed.
+ *---------------------------------------------------------------*/
 
 int ni_daq_perror( const char *s )
 {
@@ -207,11 +207,11 @@ int ni_daq_perror( const char *s )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Returns a string with a short descriptive text of the error   */
-/* encountered in the last invocation of one of the ni_daq_xxx() */
-/* functions.                                                    */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Returns a string with a short descriptive text of the error
+ * encountered in the last invocation of one of the ni_daq_xxx()
+ * functions.
+ *---------------------------------------------------------------*/
 
 const char *ni_daq_strerror( void )
 {
@@ -219,8 +219,8 @@ const char *ni_daq_strerror( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ *----------------------------------------------------------------------*/
 
 int ni_daq_basic_check( int board )
 {
@@ -236,8 +236,8 @@ int ni_daq_basic_check( int board )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ *----------------------------------------------------------------------*/
 
 static int ni_daq_first_call_handler( void )
 {
