@@ -39,7 +39,7 @@ static int fsc2_xio_error_handler( Display *d );
 
 /* Some variables needed for the X resources */
 
-FL_IOPT xcntl;
+static FL_IOPT xcntl;
 
 static struct {
 	unsigned int WIN_MIN_WIDTH;

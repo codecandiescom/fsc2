@@ -25,8 +25,8 @@
 #include "fsc2.h"
 
 /* This file only exists to hold the definitions of several global variables
-   in a single, easy to find place */
-
+   in a single, easy to find place (but not all are defined here, others
+   are defined in the files they mostly belong to!) */
 
 const char *prog_name;           /* Name the program was started with */
 
