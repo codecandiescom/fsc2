@@ -36,7 +36,7 @@ static void hfs9000_basic_pulse_check( void )
 
 	if ( hfs9000_Pulses == NULL )
 	{
-		eprint( SEVERE, "%s: No pulses have been defined.\n",
+		eprint( SEVERE, UNSET, "%s: No pulses have been defined.\n",
 				pulser_struct.name );
 		return;
 	}
@@ -49,15 +49,15 @@ static void hfs9000_basic_pulse_check( void )
 
 		if ( ! p->is_function )
 		{
-			eprint( FATAL, "%s: Pulse %ld is not associated with a "
+			eprint( FATAL, UNSET, "%s: Pulse %ld is not associated with a "
 					"function.\n", pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 
 		if ( ! p->function->is_used )
 		{
-			eprint( FATAL, "%s: The function `%s' of pulse %ld hasn't been "
-					"declared in the ASSIGNMENTS section.\n",
+			eprint( FATAL, UNSET, "%s: The function `%s' of pulse %ld hasn't "
+					"been declared in the ASSIGNMENTS section.\n",
 					pulser_struct.name, Function_Names[ p->function->self ],
 					p->num );
 			THROW( EXCEPTION );
@@ -67,8 +67,8 @@ static void hfs9000_basic_pulse_check( void )
 
 		if ( p->function->channel == NULL )
 		{
-			eprint( FATAL, "%s: No channel has been set for function `%s' "
-					"used for pulse %ld.\n", pulser_struct.name,
+			eprint( FATAL, UNSET, "%s: No channel has been set for function "
+					"`%s' used for pulse %ld.\n", pulser_struct.name,
 					Function_Names[ p->function->self ], p->num );
 			THROW( EXCEPTION );
 		}
@@ -83,9 +83,9 @@ static void hfs9000_basic_pulse_check( void )
 		if ( p->is_pos && p->is_len && p->len != 0 &&
 			 p->pos + p->len + p->function->delay > MAX_PULSER_BITS )
 		{
-			eprint( FATAL, "%s: Pulse %ld does not fit into the pulsers "
-					"memory. You could try a longer pulser time base.\n",
-					pulser_struct.name, p->num );
+			eprint( FATAL, UNSET, "%s: Pulse %ld does not fit into the "
+					"pulsers memory. You could try a longer pulser time "
+					"base.\n", pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -126,8 +126,9 @@ static void hfs9000_basic_functions_check( void )
 
 		if ( ! f->is_needed )
 		{
-			eprint( WARN, "%s: No pulses have been assigned to function "
-					"`%s'.\n", pulser_struct.name, Function_Names[ i ] );
+			eprint( WARN, UNSET, "%s: No pulses have been assigned to "
+					"function `%s'.\n", pulser_struct.name,
+					Function_Names[ i ] );
 			f->is_used = UNSET;
 
 			if ( f->channel != NULL )
@@ -142,9 +143,9 @@ static void hfs9000_basic_functions_check( void )
 		if ( f->delay < 0 &&
 			 ( hfs9000.is_trig_in_mode || hfs9000.trig_in_mode == EXTERNAL ) )
 		{
-			eprint( FATAL, "%s: Negative delay for function `%s' can't be "
-					"used with external triggert mode.\n", pulser_struct.name,
-					Function_Names[ f->self ] );
+			eprint( FATAL, UNSET, "%s: Negative delay for function `%s' can't "
+					"be used with external triggert mode.\n",
+					pulser_struct.name, Function_Names[ f->self ] );
 			THROW( EXCEPTION );
 		}
 	}

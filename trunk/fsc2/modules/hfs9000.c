@@ -24,9 +24,9 @@ int hfs9000_init_hook( void )
 
 	if ( pulser_struct.name != NULL )
 	{
-		eprint( FATAL, "%s:%ld: While loading driver HFS9000 found that a"
+		eprint( FATAL, SET, "While loading driver HFS9000 found that a"
 				"driver for pulser %s is already installed.\n",
-				Fname, Lc, pulser_struct.name );
+				pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
@@ -136,7 +136,7 @@ int hfs9000_test_hook( void )
 	if ( hfs9000_Pulses == NULL )
 	{
 		hfs9000_is_needed = UNSET;
-		eprint( WARN, "%s loaded but no pulses are defined.\n",
+		eprint( WARN, UNSET, "%s loaded but no pulses are defined.\n",
 				pulser_struct.name );
 		return 1;
 	}
@@ -200,7 +200,7 @@ int hfs9000_exp_hook( void )
 	
 	if ( ! hfs9000_init( DEVICE_NAME ) )
 	{
-		eprint( FATAL, "%s: Failure to initialize the pulser: %s\n",
+		eprint( FATAL, UNSET, "%s: Failure to initialize the pulser: %s\n",
 				pulser_struct.name, gpib_error_msg );
 		THROW( EXCEPTION );
 	}
@@ -315,8 +315,8 @@ Var *pulser_state( Var *v )
 			state = SET;
 		else
 		{
-			eprint( FATAL, "%s:%d: %s: Invalid argument in call of "
-					"`pulser_state'.\n", Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, SET, "%s: Invalid argument in call of "
+					"`pulser_state'.\n", DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 	}
@@ -342,8 +342,8 @@ Var *pulser_channel_state( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: %s: Missing parameter in function "
-				"`pulser_channel_state'.\n", Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, SET, "%s: Missing parameter in function "
+				"`pulser_channel_state'.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -353,8 +353,8 @@ Var *pulser_channel_state( Var *v )
 
 	if ( channel < MIN_CHANNEL || channel > MAX_CHANNEL )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid channel parameter in function "
-				"`pulser_channel_state'.\n", Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, SET, "%s: Invalid channel parameter in function "
+				"`pulser_channel_state'.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -376,8 +376,8 @@ Var *pulser_channel_state( Var *v )
 			state = SET;
 		else
 		{
-			eprint( FATAL, "%s:%d: %s: Invalid argument in call of "
-					"`pulser_channel_state'.\n", Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, SET, "%s: Invalid argument in call of "
+					"`pulser_channel_state'.\n", DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 	}
@@ -444,17 +444,17 @@ Var *pulser_shift( Var *v )
 
 		if ( ! p->is_pos )
 		{
-			eprint( FATAL, "%s:ld: %s: Pulse %ld has no position set, so "
+			eprint( FATAL, SET, "%s: Pulse %ld has no position set, so "
 					"shifting it is impossible.\n",
-					Fname, Lc, pulser_struct.name, p->num );
+					pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 
 		if ( ! p->is_dpos )
 		{
-			eprint( FATAL, "%s:%ld: %s: Amount of position change hasn't "
+			eprint( FATAL, SET, "%s: Amount of position change hasn't "
 					"been defined for pulse %ld.\n",
-					Fname, Lc, pulser_struct.name, p->num );
+					pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -466,10 +466,9 @@ Var *pulser_shift( Var *v )
 
 		if ( ( p->pos += p->dpos ) < 0 )
 		{
-			eprint( FATAL, "%s:%ld: %s: Shifting the position of pulse "
+			eprint( FATAL, SET, "%s: Shifting the position of pulse "
 					"%ld leads to an invalid  negative position of %s.\n",
-					Fname, Lc, pulser_struct.name,
-					p->num, hfs9000_pticks( p->pos ) );
+					pulser_struct.name, p->num, hfs9000_pticks( p->pos ) );
 			THROW( EXCEPTION );
 		}
 
@@ -520,25 +519,25 @@ Var *pulser_increment( Var *v )
 
 		if ( ! p->is_len )
 		{
-			eprint( FATAL, "%s:%ld: %s: Pulse %ld has no length set, so "
+			eprint( FATAL, SET, "%s: Pulse %ld has no length set, so "
 					"incrementing it length is impossibe.\n",
-					Fname, Lc, pulser_struct.name, p->num );
+					pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 
 		if ( p->channel->self == HFS9000_TRIG_OUT )
 		{
-			eprint( FATAL, "%s:%ld: %s: Length of Trigger Out pulse %ld "
-					"can't be changed.\n", Fname, Lc, pulser_struct.name,
+			eprint( FATAL, SET, "%s: Length of Trigger Out pulse %ld "
+					"can't be changed.\n", pulser_struct.name,
 					p->num );
 			THROW( EXCEPTION );
 		}
 
 		if ( ! p->is_dlen )
 		{
-			eprint( FATAL, "%s:%ld: %s: Length change time hasn't been "
+			eprint( FATAL, SET, "%s: Length change time hasn't been "
 					"defined for pulse %ld.\n",
-					Fname, Lc, pulser_struct.name, p->num );
+					pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 	
@@ -550,10 +549,9 @@ Var *pulser_increment( Var *v )
 
 		if ( ( p->len += p->dlen ) < 0 )
 		{
-			eprint( FATAL, "%s:%ld: %s: Incrementing the length of pulse "
+			eprint( FATAL, SET, "%s: Incrementing the length of pulse "
 					"%ld leads to an invalid negative pulse length of %s.\n",
-					Fname, Lc, pulser_struct.name,
-					p->num, hfs9000_pticks( p->len ) );
+					pulser_struct.name, p->num, hfs9000_pticks( p->len ) );
 			THROW( EXCEPTION );
 		}
 
@@ -647,7 +645,7 @@ Var *pulser_lock_keyboard( Var *v )
 {
 	v = v;
 
-	eprint( SEVERE, "%s:%ld: %s: Function `pulser_lock_keyboard' can't be "
-			"used for this device.\n", Fname, Lc, DEVICE_NAME );
+	eprint( SEVERE, SET, "%s: Function `pulser_lock_keyboard' can't be "
+			"used for this device.\n", DEVICE_NAME );
 	return vars_push( INT_VAR, 1 );
 }

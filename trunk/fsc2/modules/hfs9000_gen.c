@@ -20,8 +20,8 @@ bool hfs9000_store_timebase( double timebase )
 		char *max =
 			T_strdup( hfs9000_ptime( ( double ) MAX_TIMEBASE ) );
 
-		eprint( FATAL, "%s:%ld: %s: Invalid time base of %s, valid range is "
-				"%s to %s.\n", Fname, Lc, pulser_struct.name,
+		eprint( FATAL, SET, "%s: Invalid time base of %s, valid range is "
+				"%s to %s.\n", pulser_struct.name,
 				hfs9000_ptime( timebase ), min, max );
 		T_free( min );
 		T_free( max );
@@ -47,8 +47,8 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 	if ( channel != HFS9000_TRIG_OUT && 
 		 ( channel < MIN_CHANNEL || channel > MAX_CHANNEL ) )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid channel, valid are CH[%d-%d] and "
-				"TRIGGER_OUT.\n", Fname, Lc, pulser_struct.name,
+		eprint( FATAL, SET, "%s: Invalid channel, valid are CH[%d-%d] and "
+				"TRIGGER_OUT.\n", pulser_struct.name,
 				( int ) MIN_CHANNEL, ( int ) MAX_CHANNEL );
 		THROW( EXCEPTION );
 	}
@@ -57,17 +57,17 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 	{
 		if ( f->is_inverted )
 		{
-			eprint( FATAL, "%s:%ld: %s: Function `%s' has been set to use "
+			eprint( FATAL, SET, "%s: Function `%s' has been set to use "
 					"inverted logic. This can't be done with TRIGER_OUT "
-					"channel.\n", Fname, Lc, pulser_struct.name,
+					"channel.\n", pulser_struct.name,
 					Function_Names[ function ] );
 			THROW( EXCEPTION );
 		}
 
 		if ( f->is_high_level || f->is_low_level )
 		{
-			eprint( FATAL, "%s:%d: %s: For function `%s', associated with "
-					"Trigger Out, no voltage levels can be set.\n", Fname, Lc,
+			eprint( FATAL, SET, "%s: For function `%s', associated with "
+					"Trigger Out, no voltage levels can be set.\n",
 					pulser_struct.name, Function_Names[ function ] );
 			THROW( EXCEPTION );
 		}
@@ -78,25 +78,25 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 		if ( c->function->self == function )
 		{
 			if ( channel == HFS9000_TRIG_OUT )
-				eprint( SEVERE, "%s:%ld: %s: TRIGGER_OUT channel is assigned "
-						"more than once to function `%s'.\n", Fname, Lc,
+				eprint( SEVERE, SET, "%s: TRIGGER_OUT channel is assigned "
+						"more than once to function `%s'.\n",
 						pulser_struct.name,
 						Function_Names[ c->function->self ] );
 			else
-				eprint( SEVERE, "%s:%ld: %s: Channel %ld is assignedmore than "
-						"once to function `%s'.\n", Fname, Lc,
+				eprint( SEVERE, SET, "%s: Channel %ld is assignedmore than "
+						"once to function `%s'.\n",
 						pulser_struct.name,
 						channel, Function_Names[ c->function->self ] );
 			return FAIL;
 		}
 
 		if ( channel == HFS9000_TRIG_OUT )
-			eprint( FATAL, "%s:%ld: %s: TRIGGER_OUT channel is already used "
-					"for function `%s'.\n", Fname, Lc, pulser_struct.name,
+			eprint( FATAL, SET, "%s: TRIGGER_OUT channel is already used "
+					"for function `%s'.\n", pulser_struct.name,
 					Function_Names[ c->function->self ] );
 		else
-			eprint( FATAL, "%s:%ld: %s: Channel %ld is already used for "
-					"function `%s'.\n", Fname, Lc, pulser_struct.name, channel,
+			eprint( FATAL, SET, "%s: Channel %ld is already used for "
+					"function `%s'.\n", pulser_struct.name, channel,
 					Function_Names[ c->function->self ] );
 		THROW( EXCEPTION );
 	}
@@ -118,9 +118,9 @@ bool hfs9000_invert_function( int function )
 	if ( hfs9000.function[ function ].channel != NULL &&
 		 hfs9000.function[ function ].channel->self == HFS9000_TRIG_OUT )
 	{
-		eprint( FATAL, "%s:%ld: %s: Polarity of function `%s' associated with "
-				"Trigger Out can't be inverted.\n", Fname,
-				Lc, pulser_struct.name, Function_Names[ function ] );
+		eprint( FATAL, SET, "%s: Polarity of function `%s' associated with "
+				"Trigger Out can't be inverted.\n",
+				pulser_struct.name, Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
 
@@ -142,9 +142,8 @@ bool hfs9000_set_function_delay( int function, double delay )
 
 	if ( hfs9000.function[ function ].is_delay )
 	{
-		eprint( FATAL, "%s:%ld: %s: Delay for function `%s' has already been "
-				"set.\n", Fname, Lc, pulser_struct.name,
-				Function_Names[ function ] );
+		eprint( FATAL, SET, "%s: Delay for function `%s' has already been "
+				"set.\n", pulser_struct.name, Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
 
@@ -156,8 +155,8 @@ bool hfs9000_set_function_delay( int function, double delay )
 			   hfs9000.trig_in_mode == EXTERNAL ) ||
 			 hfs9000.is_trig_in_slope || hfs9000.is_trig_in_level )
 		{
-			eprint( FATAL, "%s:%ld: Negative delays are invalid in EXTERNAL "
-					"trigger mode.\n", Fname, Lc );
+			eprint( FATAL, SET, "Negative delays are invalid in EXTERNAL "
+					"trigger mode.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -195,16 +194,16 @@ bool hfs9000_set_function_high_level( int function, double voltage )
 
 	if ( f->is_high_level )
 	{
-		eprint( FATAL, "%s:%ld: %s: High level for function `%s' has already "
-				"been set.\n", Fname, Lc, pulser_struct.name,
+		eprint( FATAL, SET, "%s: High level for function `%s' has already "
+				"been set.\n", pulser_struct.name,
 				Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
 
 	if ( f->channel != NULL && f->channel->self == HFS9000_TRIG_OUT )
 	{
-		eprint( FATAL, "%s:%ld: %s: Function `%s' is associated with Trigger"
-				"Out that doesn't allow setting of levels.\n", Fname, Lc,
+		eprint( FATAL, SET, "%s: Function `%s' is associated with Trigger"
+				"Out that doesn't allow setting of levels.\n",
 				pulser_struct.name, Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
@@ -213,8 +212,8 @@ bool hfs9000_set_function_high_level( int function, double voltage )
 
 	if ( voltage < MIN_POD_HIGH_VOLTAGE || voltage > MAX_POD_HIGH_VOLTAGE )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid high level of %g V for function "
-				"`%s', valid range is %g V to %g V.\n", Fname, Lc,
+		eprint( FATAL, SET, "%s: Invalid high level of %g V for function "
+				"`%s', valid range is %g V to %g V.\n",
 				pulser_struct.name, voltage, Function_Names[ function ],
 				MIN_POD_HIGH_VOLTAGE, MAX_POD_HIGH_VOLTAGE );
 		THROW( EXCEPTION );
@@ -241,17 +240,17 @@ bool hfs9000_set_function_low_level( int function, double voltage )
 
 	if ( f->is_low_level )
 	{
-		eprint( FATAL, "%s:%ld: %s: Low level for function `%s' has already "
-				"been set.\n", Fname, Lc, pulser_struct.name,
+		eprint( FATAL, SET, "%s: Low level for function `%s' has already "
+				"been set.\n", pulser_struct.name,
 				Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
 
 	if ( f->channel != NULL && f->channel->self == HFS9000_TRIG_OUT )
 	{
-		eprint( FATAL, "%s:%ld: %s: Function `%s' is associated with "
+		eprint( FATAL, SET, "%s: Function `%s' is associated with "
 				"TRIGGER_OUT channel that doesn't allow setting of levels.\n",
-				Fname, Lc, pulser_struct.name, Function_Names[ function ] );
+				pulser_struct.name, Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
 
@@ -259,8 +258,8 @@ bool hfs9000_set_function_low_level( int function, double voltage )
 
 	if ( voltage < MIN_POD_LOW_VOLTAGE || voltage > MAX_POD_LOW_VOLTAGE )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid low level of %g V for function "
-				"`%s', valid range is %g V to %g V.\n", Fname, Lc,
+		eprint( FATAL, SET, "%s: Invalid low level of %g V for function "
+				"`%s', valid range is %g V to %g V.\n",
 				pulser_struct.name, voltage, Function_Names[ function ],
 				MIN_POD_LOW_VOLTAGE, MAX_POD_LOW_VOLTAGE );
 		THROW( EXCEPTION );
@@ -287,8 +286,8 @@ bool hfs9000_set_trigger_mode( int mode )
 
 	if ( hfs9000.is_trig_in_mode )
 	{
-		eprint( FATAL, "%s:%ld: %s: Trigger mode has already been set.\n",
-				Fname, Lc, pulser_struct.name );
+		eprint( FATAL, SET, "%s: Trigger mode has already been set.\n",
+				pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
@@ -296,17 +295,15 @@ bool hfs9000_set_trigger_mode( int mode )
 	{
 		if ( hfs9000.is_trig_in_slope )
 		{
-			eprint( FATAL, "%s:%ld: %s: INTERNAL trigger mode and setting a "
-					"trigger slope isn't possible.\n", Fname, Lc,
-					pulser_struct.name );
+			eprint( FATAL, SET, "%s: INTERNAL trigger mode and setting a "
+					"trigger slope isn't possible.\n", pulser_struct.name );
 			THROW( EXCEPTION );
 		}
 
 		if ( hfs9000.is_trig_in_level )
 		{
-			eprint( FATAL, "%s:%ld: %s: INTERNAL trigger mode and setting a "
-					"trigger level isn't possible.\n", Fname, Lc,
-					pulser_struct.name );
+			eprint( FATAL, SET, "%s: INTERNAL trigger mode and setting a "
+					"trigger level isn't possible.\n", pulser_struct.name );
 			THROW( EXCEPTION );
 		}
 	}
@@ -314,9 +311,9 @@ bool hfs9000_set_trigger_mode( int mode )
 	{
 		if ( hfs9000.is_neg_delay )
 		{
-			eprint( FATAL, "%s:%ld: %s: EXTERNAL trigger mode and using "
+			eprint( FATAL, SET, "%s: EXTERNAL trigger mode and using "
 					"negative delays for functions isn't possible.\n",
-					Fname, Lc, pulser_struct.name );
+					pulser_struct.name );
 			THROW( EXCEPTION );
 		}
 	}
@@ -337,33 +334,32 @@ bool hfs9000_set_trig_in_level( double voltage )
 
 	if ( hfs9000.is_trig_in_level && hfs9000.trig_in_level != voltage )
 	{
-		eprint( FATAL, "%s:%ld: %s: A different level of %g V for the trigger "
-				"has already been set.\n", Fname, Lc, pulser_struct.name,
+		eprint( FATAL, SET, "%s: A different level of %g V for the trigger "
+				"has already been set.\n", pulser_struct.name,
 				hfs9000.trig_in_level );
 		THROW( EXCEPTION );
 	}
 
 	if ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL )
 	{
-		eprint( SEVERE, "%s:%ld: %s: Setting a trigger level is useless in "
-				"INTERNAL trigger mode.\n", Fname, Lc, pulser_struct.name );
+		eprint( SEVERE, SET, "%s: Setting a trigger level is useless in "
+				"INTERNAL trigger mode.\n", pulser_struct.name );
 		return FAIL;
 	}
 
 	if ( hfs9000.is_neg_delay &&
 		 ! ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL ) )
 	{
-		eprint( FATAL, "%s:%ld: %s: Setting a trigger level (thus implicitly "
+		eprint( FATAL, SET, "%s: Setting a trigger level (thus implicitly "
 				"selecting EXTERNAL trigger mode) while using negative delays "
-				"for functions is incompatible.\n", Fname, Lc,
-				pulser_struct.name );
+				"for functions is incompatible.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
 	if ( voltage > MAX_TRIG_IN_LEVEL || voltage < MIN_TRIG_IN_LEVEL )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid level for trigger of %g V, valid "
-				"range is %g V to %g V.\n", Fname, Lc, pulser_struct.name,
+		eprint( FATAL, SET, "%s: Invalid level for trigger of %g V, valid "
+				"range is %g V to %g V.\n", pulser_struct.name,
 				MIN_TRIG_IN_LEVEL, MAX_TRIG_IN_LEVEL );
 		THROW( EXCEPTION );
 	}
@@ -384,26 +380,25 @@ bool hfs9000_set_trig_in_slope( int slope )
 
 	if ( hfs9000.is_trig_in_slope && hfs9000.trig_in_slope != slope )
 	{
-		eprint( FATAL, "%s:%ld: %s: A different trigger slope (%s) has "
-				"already been set.\n", Fname, Lc, pulser_struct.name,
+		eprint( FATAL, SET, "%s: A different trigger slope (%s) has "
+				"already been set.\n", pulser_struct.name,
 				slope == POSITIVE ? "NEGATIVE" : "POSITIVE" );
 		THROW( EXCEPTION );
 	}
 
 	if ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL )
 	{
-		eprint( SEVERE, "%s:%ld: %s: Setting a trigger slope is useless in "
-				"INTERNAL trigger mode.\n", Fname, Lc, pulser_struct.name );
+		eprint( SEVERE, SET, "%s: Setting a trigger slope is useless in "
+				"INTERNAL trigger mode.\n", pulser_struct.name );
 		return FAIL;
 	}
 
 	if ( hfs9000.is_neg_delay &&
 		 ! ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL ) )
 	{
-		eprint( FATAL, "%s:%ld: %s: Setting a trigger slope (implicitly "
+		eprint( FATAL, SET, "%s: Setting a trigger slope (implicitly "
 				"selecting EXTERNAL trigger mode) while using negative delays "
-				"for functions is incompatible.\n", Fname, Lc,
-				pulser_struct.name );
+				"for functions is incompatible.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
@@ -422,8 +417,8 @@ bool hfs9000_set_max_seq_len( double seq_len )
 	if ( hfs9000.is_max_seq_len &&
 		 hfs9000.max_seq_len != hfs9000_double2ticks( seq_len ) )
 	{
-		eprint( FATAL, "%s:%ld: %s: A differrent minimum pattern length of %s "
-				"has already been set.\n", Fname, Lc, pulser_struct.name,
+		eprint( FATAL, SET, "%s: A differrent minimum pattern length of %s "
+				"has already been set.\n", pulser_struct.name,
 				hfs9000_pticks( hfs9000.max_seq_len ) );
 		THROW( EXCEPTION );
 	}
@@ -432,8 +427,8 @@ bool hfs9000_set_max_seq_len( double seq_len )
 
 	if ( seq_len <= 0 )
 	{
-		eprint( FATAL, "%s:%ls: %s: Zero or negative minimum pattern "
-				"length.\n", Fname, Lc, pulser_struct.name );
+		eprint( FATAL, SET, "%s: Zero or negative minimum pattern "
+				"length.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 

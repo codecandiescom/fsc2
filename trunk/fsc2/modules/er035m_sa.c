@@ -102,8 +102,8 @@ int er035m_sa_init_hook( void )
 	if ( exists_device( "er035m_s" ) || exists_device( "er035m" ) ||
 		 exists_device( "er035m_sas" ) )
 	{
-		eprint( FATAL, "ER035M: A driver for the ER035 gaussmeter is already "
-				"loaded.\n" );
+		eprint( FATAL, UNSET, "ER035M: A driver for the ER035 gaussmeter is "
+				"already loaded.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -187,45 +187,45 @@ try_again:
 			case '0' :      /* Probe F0 is connected -> OK for S-band */
 				if ( exists_device( "aeg_s_band" ) )
 					break;
-				eprint( FATAL, "%s: Wrong field probe (F0) connected to the "
-						"NMR gaussmeter.\n", nmr.name );
+				eprint( FATAL, UNSET, "%s: Wrong field probe (F0) connected "
+						"to the NMR gaussmeter.\n", nmr.name );
 				THROW( EXCEPTION );
 				
 
 			case '1' :      /* Probe F1 is connected -> OK for X-band*/
 				if ( exists_device( "aeg_x_band" ) )
 					break;
-				eprint( FATAL, "%s: Wrong field probe (F1) connected to the "
-						"NMR gaussmeter.\n", nmr.name );
+				eprint( FATAL, UNSET, "%s: Wrong field probe (F1) connected "
+						"to the NMR gaussmeter.\n", nmr.name );
 				THROW( EXCEPTION );
 
 			case '2' :      /* No probe connected -> error */
-				eprint( FATAL, "%s: No field probe connected to the NMR "
-						"gaussmeter.\n", nmr.name );
+				eprint( FATAL, UNSET, "%s: No field probe connected to the "
+						"NMR gaussmeter.\n", nmr.name );
 				THROW( EXCEPTION );
 
 			case '3' :      /* Error temperature -> error */
-				eprint( FATAL, "%s: Temperature error from NMR gaussmeter.\n",
-						nmr.name );
+				eprint( FATAL, UNSET, "%s: Temperature error from NMR "
+						"gaussmeter.\n", nmr.name );
 				THROW( EXCEPTION );
 
 			case '4' :      /* TRANS L-H -> test again */
 				if ( try_count++ < 10 )
 					goto try_again;
-				eprint( FATAL, "%s: NMR gaussmeter can't find the actual "
-						"field.\n", nmr.name );
+				eprint( FATAL, UNSET, "%s: NMR gaussmeter can't find the "
+						"actual field.\n", nmr.name );
 				THROW( EXCEPTION );
 
 			case '5' :      /* TRANS L-H -> test again */
 				if ( try_count++ < 10 )
 					goto try_again;
-				eprint( FATAL, "%s: NMR gaussmeter can't find the actual "
-						"field.\n", nmr.name );
+				eprint( FATAL, UNSET, "%s: NMR gaussmeter can't find the "
+						"actual field.\n", nmr.name );
 				THROW( EXCEPTION );
 
 			case '6' :      /* MOD OFF -> error (should never happen */
-				eprint( FATAL, "%s: Modulation of NMR gaussmeter is switched "
-						"off.\n", nmr.name );
+				eprint( FATAL, UNSET, "%s: Modulation of NMR gaussmeter is "
+						"switched off.\n", nmr.name );
 				THROW( EXCEPTION );
 
 			case '7' :      /* MOD POS -> OK (default state) */
@@ -239,8 +239,8 @@ try_again:
 				break;
 
 			case 'A' :      /* FIELD ? -> error (doesn't seem to work) */
-				eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
-						"problem.\n", nmr.name );
+				eprint( FATAL, UNSET, "%s: NMR gaussmeter has an "
+						"unidentifiable problem.\n", nmr.name );
 				THROW( EXCEPTION );
 
 			case 'B' :      /* SU active -> OK */
@@ -299,8 +299,8 @@ try_again:
 
 		default :                     /* should never happen... */
 		{
-			eprint( FATAL, "%s: Undocumented data received from the NMR "
-					"gaussmeter.\n", nmr.name );
+			eprint( FATAL, UNSET, "%s: Undocumented data received from the "
+					"NMR gaussmeter.\n", nmr.name );
 			THROW( EXCEPTION );
 		}
 	}
@@ -425,8 +425,8 @@ Var *measure_field( Var *v )
 					break;
 
 				case 'A' :      /* FIELD ? -> error */
-					eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
-							"problem.\n", nmr.name );
+					eprint( FATAL, UNSET, "%s: NMR gaussmeter has an "
+							"unidentifiable problem.\n", nmr.name );
 					THROW( EXCEPTION );
 
 				case 'B' :      /* SU active -> OK */
@@ -439,14 +439,14 @@ Var *measure_field( Var *v )
 
 				case 'D' :      /* OU active -> error (should never happen) */
 					nmr.state = ER035M_SA_OU_ACTIVE;
-					eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
-							"problem.\n", nmr.name );
+					eprint( FATAL, UNSET, "%s: NMR gaussmeter has an "
+							"unidentifiable problem.\n", nmr.name );
 					THROW( EXCEPTION );
 
 				case 'E' :      /* OD active -> error (should never happen) */
 					nmr.state = ER035M_SA_OD_ACTIVE;
-					eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
-							"problem.\n", nmr.name );
+					eprint( FATAL, UNSET, "%s: NMR gaussmeter has an "
+							"unidentifiable problem.\n", nmr.name );
 					THROW( EXCEPTION );
 
 				case 'F' :      /* Search active but at a search limit -> OK*/
@@ -516,8 +516,8 @@ double er035m_sa_get_field( void )
 
 		if ( *state_flag >= '3' )
 		{
-			eprint( FATAL, "%s: NMR gaussmeter can't lock on the current "
-					"field.\n", nmr.name );
+			eprint( FATAL, UNSET, "%s: NMR gaussmeter can't lock on the "
+					"current field.\n", nmr.name );
 			THROW( EXCEPTION );
 		}
 
@@ -527,8 +527,8 @@ double er035m_sa_get_field( void )
 
 	if ( tries < 0 )
 	{
-		eprint( FATAL, "%s: Field is too unstable to be measured with the "
-				"requested resolution of %s G.\n", nmr.name,
+		eprint( FATAL, UNSET, "%s: Field is too unstable to be measured with "
+				"the requested resolution of %s G.\n", nmr.name,
 				res[ nmr.resolution ] );
 		THROW( EXCEPTION );
 	}
@@ -547,6 +547,6 @@ double er035m_sa_get_field( void )
 
 static void er035m_sa_failure( void )
 {
-	eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", nmr.name );
+	eprint( FATAL, UNSET, "%s: Can't access the NMR gaussmeter.\n", nmr.name );
 	THROW( EXCEPTION );
 }

@@ -122,10 +122,10 @@ void hfs9000_do_checks( FUNCTION *f )
 			f->max_seq_len = Ticks_max( f->max_seq_len, p->pos + p->len );
 			if ( f->delay + f->max_seq_len > MAX_PULSER_BITS )
 			{
-				eprint( FATAL, "%s:%ld: %s: Pulse sequence for function "
-						"`%s' does not fit into the pulsers memory. Maybe, "
-						"you could try a longer pulser time base.\n", Fname,
-						Lc, pulser_struct.name, Function_Names[ f->self ] );
+				eprint( FATAL, SET, "%s: Pulse sequence for function `%s' "
+						"does not fit into the pulsers memory. You could try "
+						"a longer pulser time base.\n",
+						pulser_struct.name, Function_Names[ f->self ] );
 				THROW( EXCEPTION );
 			}
 
@@ -140,26 +140,25 @@ void hfs9000_do_checks( FUNCTION *f )
 			if ( p->pos + p->len > f->pulses[ i + 1 ]->pos )
 			{
 				if ( hfs9000_IN_SETUP )
-					eprint( FATAL, "%s: Pulses %ld and %ld overlap.\n",
+					eprint( FATAL, UNSET, "%s: Pulses %ld and %ld overlap.\n",
 							pulser_struct.name, p->num,
 							f->pulses[ i + 1 ]->num );
 				else
-					eprint( FATAL, "%s:%ld: %s: Pulses %ld and %ld begin to "
-							"overlap.\n", Fname, Lc, pulser_struct.name,
+					eprint( FATAL, SET, "%s: Pulses %ld and %ld begin to "
+							"overlap.\n", pulser_struct.name,
 							p->num, f->pulses[ i + 1 ]->num );
 				THROW( EXCEPTION );
 			}
 			else if ( p->pos + p->len == f->pulses[ i + 1 ]->pos )
 			{
 				if ( hfs9000_IN_SETUP )
-					eprint( SEVERE, "%s: Distance between pulses %ld and %ld "
-							"is zero.\n", Fname, Lc, pulser_struct.name,
+					eprint( SEVERE, UNSET, "%s: Distance between pulses %ld "
+							"and %ld is zero.\n", pulser_struct.name,
 							p->num, f->pulses[ i + 1 ]->num );
 				else
-					eprint( SEVERE, "%s:%ld: %s: Distance between pulses %ld "
-							"and %ld becomes zero.\n", Fname, Lc,
-							pulser_struct.name, p->num,
-							f->pulses[ i + 1 ]->num );
+					eprint( SEVERE, SET, "%s: Distance between pulses %ld "
+							"and %ld becomes zero.\n", pulser_struct.name,
+							p->num, f->pulses[ i + 1 ]->num );
 			}
 		}
 	}
@@ -232,7 +231,7 @@ void hfs9000_full_reset( void )
 
 		if ( ! p->has_been_active )
 		{
-			eprint( WARN, "%s: Pulse %ld is never used.\n",
+			eprint( WARN, UNSET, "%s: Pulse %ld is never used.\n",
 					pulser_struct.name, p->num );
 			p = hfs9000_delete_pulse( p );
 			continue;
@@ -296,8 +295,8 @@ static PULSE *hfs9000_delete_pulse( PULSE *p )
 
 	if ( p->function->num_pulses == 0 )
 	{
-		eprint( SEVERE, "%s: Function `%s' isn't used at all because all its "
-				"pulses are never used.\n", pulser_struct.name,
+		eprint( SEVERE, UNSET, "%s: Function `%s' isn't used at all because "
+				"all its pulses are never used.\n", pulser_struct.name,
 				Function_Names[ p->function->self ] );
 		p->function->is_used = UNSET;
 	}
