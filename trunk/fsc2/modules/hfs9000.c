@@ -53,7 +53,7 @@ int hfs9000_init_hook( void )
 	pulser_struct.set_function_low_level = hfs9000_set_function_low_level;
 
 	pulser_struct.set_trigger_mode = hfs9000_set_trigger_mode;
-	pulser_struct.set_repeat_time = hfs9000_set_repeat_time;
+	pulser_struct.set_repeat_time = NULL;
 	pulser_struct.set_trig_in_level = hfs9000_set_trig_in_level;
 	pulser_struct.set_trig_in_slope = hfs9000_set_trig_in_slope;
 	pulser_struct.set_trig_in_impedance = NULL;

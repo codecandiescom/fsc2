@@ -126,14 +126,10 @@ typedef struct {
 	int trig_in_mode;        //	EXTERNAL or INTERNAL
 	int trig_in_slope;       //	only in EXTERNAL mode
 	double trig_in_level;    //	only in EXTERNAL mode
-	Ticks repeat_time;       //	only in INTERNAL mode
-
-	bool is_cw_mode;         // set for cw mode
 
 	bool is_trig_in_mode;
 	bool is_trig_in_slope;
 	bool is_trig_in_level;
-	bool is_repeat_time;
 
 	Ticks neg_delay;
 	bool is_neg_delay;       // if any of the functions has a negative delay
@@ -231,7 +227,6 @@ bool hfs9000_set_function_low_level( int function, double voltage );
 bool hfs9000_set_trigger_mode( int mode );
 bool hfs9000_set_trig_in_level( double voltage );
 bool hfs9000_set_trig_in_slope( int slope );
-bool hfs9000_set_repeat_time( double time );
 
 
 /* These are the functions from hfs9000_pulse.c */

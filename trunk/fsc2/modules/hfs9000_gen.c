@@ -293,14 +293,6 @@ bool hfs9000_set_trigger_mode( int mode )
 	}
 	else
 	{
-		if ( hfs9000.is_repeat_time )
-		{
-			eprint( FATAL, "%s:%ld: %s: EXTERNAL trigger mode and setting a "
-					"repeat time or frequency isn't possible.\n", Fname, Lc,
-					pulser_struct.name );
-			THROW( EXCEPTION );
-		}
-
 		if ( hfs9000.is_neg_delay )
 		{
 			eprint( FATAL, "%s:%ld: %s: EXTERNAL trigger mode and using "
@@ -332,8 +324,7 @@ bool hfs9000_set_trig_in_level( double voltage )
 		THROW( EXCEPTION );
 	}
 
-	if ( ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL ) ||
-		 hfs9000.is_repeat_time )
+	if ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL )
 	{
 		eprint( SEVERE, "%s:%ld: %s: Setting a trigger level is useless in "
 				"INTERNAL trigger mode.\n", Fname, Lc, pulser_struct.name );
@@ -341,8 +332,7 @@ bool hfs9000_set_trig_in_level( double voltage )
 	}
 
 	if ( hfs9000.is_neg_delay &&
-		 ! ( ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL ) ||
-			 hfs9000.is_repeat_time ) )
+		 ! ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL ) )
 	{
 		eprint( FATAL, "%s:%ld: %s: Setting a trigger level (thus implicitly "
 				"selecting EXTERNAL trigger mode) while using negative delays "
@@ -381,8 +371,7 @@ bool hfs9000_set_trig_in_slope( int slope )
 		THROW( EXCEPTION );
 	}
 
-	if ( ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL ) ||
-		 hfs9000.is_repeat_time)
+	if ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL )
 	{
 		eprint( SEVERE, "%s:%ld: %s: Setting a trigger slope is useless in "
 				"INTERNAL trigger mode.\n", Fname, Lc, pulser_struct.name );
@@ -390,8 +379,7 @@ bool hfs9000_set_trig_in_slope( int slope )
 	}
 
 	if ( hfs9000.is_neg_delay &&
-		 ! ( ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL ) ||
-			 hfs9000.is_repeat_time ) )
+		 ! ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL ) )
 	{
 		eprint( FATAL, "%s:%ld: %s: Setting a trigger slope (implicitly "
 				"selecting EXTERNAL trigger mode) while using negative delays "
@@ -402,52 +390,6 @@ bool hfs9000_set_trig_in_slope( int slope )
 
 	hfs9000.trig_in_slope = slope;
 	hfs9000.is_trig_in_slope = SET;
-
-	return OK;
-}
-
-
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
-
-bool hfs9000_set_repeat_time( double time )
-{
-	if ( hfs9000.is_repeat_time &&
-		 hfs9000.repeat_time != hfs9000_double2ticks( time ) )
-	{
-		eprint( FATAL, "%s:%ld: %s: A different repeat time/frequency of %s/"
-				"%g Hz has already been set.\n", Fname, Lc, pulser_struct.name,
-				hfs9000_pticks( hfs9000.repeat_time ),
-				1.0 / hfs9000_ticks2double( hfs9000.repeat_time ) );
-		THROW( EXCEPTION );
-	}
-
-	if ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == EXTERNAL )
-	{
-		eprint( FATAL, "%s:%ld: %s: Setting a repeat time/frequency and "
-				"trigger mode to EXTERNAL isn't possible.\n", Fname, Lc,
-				pulser_struct.name );
-		THROW( EXCEPTION );
-	}
-
-	if ( hfs9000.is_trig_in_slope || hfs9000.is_trig_in_level )
-	{
-		eprint( FATAL, "%s:%ld: %s: Setting a repeat time/frequency and a "
-				"trigger slope or level isn't possible.\n", Fname, Lc,
-				pulser_struct.name );
-		THROW( EXCEPTION );
-	}
-
-	if ( time <= 0 )
-	{
-		eprint( FATAL, "%s:%ld: %s: Invalid zero or negative repeat time: "
-				"%s.\n", Fname, Lc, pulser_struct.name,
-				hfs9000_ptime( time ) );
-		THROW( EXCEPTION );
-	}
-
-	hfs9000.repeat_time = hfs9000_double2ticks( time );
-	hfs9000.is_repeat_time = SET;
 
 	return OK;
 }
