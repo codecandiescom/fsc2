@@ -445,7 +445,6 @@ static void set_buttons_for_run( int active )
 }
 
 
-
 /**************************************************************/
 /*                                                            */
 /*         Here's the code for the child process...           */
