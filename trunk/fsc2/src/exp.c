@@ -640,13 +640,13 @@ void exp_test_run( void )
 			}
 		}
 
-		clear_tools_after_test( );
+		tools_clear( );
 		run_end_of_test_hooks( );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
-		clear_tools_after_test( );
+		tools_clear( );
 
 		Fname = NULL;
 		save_restore_variables( UNSET );

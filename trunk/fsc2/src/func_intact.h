@@ -34,9 +34,6 @@ typedef struct _IOBJ_ {
 	double start_val,       /* start and end value */
 		   end_val;
 
-	bool is_created;
-	bool delete_after_test;
-
 } IOBJECT;
 
 
@@ -118,7 +115,6 @@ Var *f_sdelete( Var *v );
 Var *f_svalue( Var *v );
 
 void tools_clear( void );
-void clear_tools_after_test( void );
 
 
 #endif   /* ! INTERACTIVE_HEADER */
