@@ -35,11 +35,12 @@ att;
 new_att;
 
 
-PS[ 5 ];
-PL[ 5 ];
-PSV[ 5 ];
-PLV[ 5 ];
-PMS[ 5 ];
+PS[ 5 ];            /* pulse start position input fields */
+PL[ 5 ];            /* pulse length input fields */
+PSV[ 5 ];           /* start positions of pulses (in units of 10 ns) */
+PLV[ 5 ];           /* pulse lengths (in units of 10 ns) */
+PMS[ 5 ];           /* minimum values for pulse positions (in 10 ns units) */
+
 Freq, Current_Field, New_Field, RF_ON_OFF, Att, Sweep_Rate, Sweep_Up,
 Sweep_Stop, Sweep_Down, Pause, Clear;
 Acq_Rate, New_Acq_Rate;
@@ -50,7 +51,7 @@ DOWN = -1;
 I = 0;
 NP, NL;
 np, nl;
-MAX_LEN = 16777215;
+MAX_LEN = 16777215;     /* max. delay (in ticks) */
 
 
 PREPARATIONS:
@@ -80,14 +81,24 @@ init_1d( );
 
 EXPERIMENT:
 
+/* Stop the magnet if it's sweeping */
+
 IF magnet_sweep( ) != STOPPED {
     magnet_sweep( STOPPED );
 }
+
+/* Make sure the pulser is running */
+
+pulser_state( "ON" );
+
+/* Get the current field value and the synthesizer settings */
 
 current_field = get_field( );
 new_field = current_field;
 att = synthesizer_attenuation( );
 freq = synthesizer_frequency( );
+
+/* Create the toolbox */
 
 hide_toolbox( "ON" );
 PSV[ 1 ] = round( P1.START / 10 ns );
@@ -147,9 +158,9 @@ FOREVER {
     IF toolbox_changed( ) {
 
         /* The first part of the loop is dealing with the pulse settings. It
-           gets a bit complicated because we have to check the new settings for
-           each pulse so it won't make the pulser kill the experiment just
-           because a pulse can't be set... */
+           gets a bit complicated because we have to check the new settings
+	       for each pulse so it won't make the pulser kill the experiment
+	       because a pulse can't be set to the requested value... */
 
         /* Checks for first MW pulse */
 
@@ -274,7 +285,7 @@ FOREVER {
             }
         }
 
-        /* Checks for the RF Pulse */
+        /* Checks for the RF pulse */
 
         IF input_changed( PS[ 4 ] ) {
             NP = input_value( PS[ 4 ] );
@@ -309,7 +320,7 @@ FOREVER {
             }
         }
 
-        /* Checks for the detection Pulse */
+        /* Checks for the detection pulse */
 
         IF input_changed( PS[ 5 ] ) {
             NP = input_value( PS[ 5 ] );
@@ -374,11 +385,8 @@ FOREVER {
             synthesizer_state( button_state( RF_ON_OFF ) );
         }
 
-        /* The second section of the loop deals with the buttons and entry
-           fields for field control.... */
-
-        /* Check if the sweep up button has been pressed and start sweeping up
-           (unless we're already sweeping up) */
+        /* Check if the sweep up button has been pressed and start sweeping
+           up (unless we're already sweeping up) */
 
         IF  Sweep_State != UP AND button_state( Sweep_Up ) {
             IF Sweep_State == STOPPED {
@@ -423,8 +431,8 @@ FOREVER {
         }
 
         /* Check if a new field has been set - if yes go to the new field
-           (which automatically stops a sweep) after checking that it's within
-           the allowed limits */
+           (which automatically stops a sweep) after checking that it's
+	       within the allowed limits */
 
         new_set_field = input_value( New_Field );
         IF abs( new_set_field - new_field ) > 0.149 G {
@@ -466,9 +474,10 @@ FOREVER {
         Pause_Display = button_state( Pause );
     }
 
-    /* The fourth and final part of the loop are the things that need to be
-       done each time through the loop and mostly deals with getting data from
-       the ADC (that gets its input from the boxcar integrator) */
+    /* The final part of the loop are the things that need to be done each
+	   time through the loop and deals with getting data from the ADC (that
+	   gets its input from the boxcar integrator) and updating the field
+	   value display */
 
     /* Update the output field with the current field if necessary */
 
@@ -480,7 +489,7 @@ FOREVER {
     IF ! Pause_Display {
         I += 1;
         wait( 0.2 s );
-        display( I, daq_get_voltage( CH0 ) );
+        display( I, - daq_get_voltage( CH0 ) );
     } ELSE {
         wait( 0.2 s );
     }
