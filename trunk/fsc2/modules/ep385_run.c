@@ -27,7 +27,7 @@
 
 static bool ep385_update_pulses( bool flag );
 static void ep385_channel_check( CHANNEL *ch );
-static void ep385_defense_twt_check( void );
+static void ep385_defense_shape_check( FUNCTION *shape );
 static PULSE *ep385_delete_pulse( PULSE *p );
 static void ep385_commit( bool flag );
 
@@ -187,13 +187,16 @@ static bool ep385_update_pulses( bool flag )
 			}
 		}
 
-		/* Do an additional check for the TWT gate channel to avoid it gets
-		   to near to a defense pulse */
+		/* Check that defense and shape pulses don't get to near to each
+		   other (this checks are done when either one of the minimum
+		   distances has been set or TWT or TWT_GATE pulses are used) */
 
-		if ( f->self == PULSER_CHANNEL_TWT_GATE &&
-			 ep385.function[ PULSER_CHANNEL_TWT_GATE ].is_used &&
-			 ep385.function[ PULSER_CHANNEL_DEFENSE ].is_used )
-			ep385_defense_twt_check( );
+		if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
+			 ep385.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
+			 ( ep385.is_shape_2_defense || ep385.is_defense_2_shape ||
+			   ep385.function[ PULSER_CHANNEL_TWT ].is_used ||
+			   ep385.function[ PULSER_CHANNEL_TWT_GATE ].is_used ) )
+			ep385_defense_shape_check( f );
 	}
 
 	ep385_commit( flag );
@@ -258,48 +261,80 @@ static void ep385_channel_check( CHANNEL *ch )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* If there are both TWT_GATE pulses and DEFENSE pulses check that */
-/* they won't get to near to each other to avoid destroying the    */
-/* diode or the mixer inadvertently.                               */
-/*-----------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* Function checks if the distance between pulse shape pulses and defense */
+/* pulses is large enough. The minimum lengths the shape_2_defense and    */
+/* defense_2_shape members of the ep395 structure. Both are set to rather */
+/* large values at first but can be customized by calling the EDL         */
+/* functions pulser_shape_to_defense_minimum_distance() and               */
+/* pulser_defense_to_shape_minimum_distance() (names are intentionally    */
+/* that long).                                                            */
+/* The function is called only if pulse shape and defense pulses are used */
+/* and either also TWT or TWT_GATE pulses or at least one of both the     */
+/* mentioned EDL functions have been called.                              */
+/*------------------------------------------------------------------------*/
 
-static void ep385_defense_twt_check( void )
+static void ep385_defense_shape_check( FUNCTION *shape )
 {
-	FUNCTION *twt = &ep385.function[ PULSER_CHANNEL_TWT_GATE ],
-		     *defense = &ep385.function[ PULSER_CHANNEL_DEFENSE ];
-	PULSE *twt_p, *defense_p;
-	Ticks defense_2_twt, twt_2_defense;
+	FUNCTION *defense = ep385.function + PULSER_CHANNEL_DEFENSE;
+	PULSE *shape_p, *defense_p;
 	long i, j;
 
 
-	defense_2_twt = ( Ticks ) lrnd( ceil( DEFENSE_2_TWT_MIN_DISTANCE /
-										  ep385.timebase ) );
-	twt_2_defense = ( Ticks ) lrnd( ceil( TWT_2_DEFENSE_MIN_DISTANCE /
-										  ep385.timebase ) );
-
-	for ( i = 0; i < defense->num_pulses; i++ )
+	for ( i = 0; i < shape->num_pulses; i++ )
 	{
-		defense_p = defense->pulses[ i ];
+		shape_p = shape->pulses[ i ];
 
-		if ( ! defense_p->is_active )
+		if ( ! shape_p->is_active )
 			continue;
 
-		for ( j = 0; j < twt->num_pulses; j++ )
+		for ( j = 0; j < defense->num_pulses; j++ )
 		{
-			twt_p = twt->pulses[ j ];
-			if ( ! twt_p->is_active )
+			defense_p = defense->pulses[ j ];
+
+			if ( ! defense_p->is_active )
 				continue;
 
-			if ( twt_p->pos < defense_p->pos &&
-				 twt_p->len + twt_p->pos + twt_2_defense > defense_p->pos )
-				print( SEVERE, "TWT_GATE pulse %ld gets dangerously near to "
-					   "DEFENSE pulse %ld.\n", twt_p->num, defense_p->num );
+			if ( shape_p->pos < defense_p->pos &&
+				 shape_p->pos + shape_p->len + ep385.shape_2_defense >
+				 defense_p->pos )
+			{
+				if ( FSC2_MODE == EXPERIMENT )
+				{
+					print( FATAL, "Distance between PULSE_SHAPE pulse %ld "
+						   "and DEFENSE pulse %ld got shorter than %s.\n",
+						   shape_p->num, defense_p->num, ep385_ptime(
+							   ep385_ticks2double( ep385.shape_2_defense ) ) );
+					THROW( EXCEPTION );
+				}
 
-			if ( twt_p->pos > defense_p->pos &&
-				 defense_p->pos + defense_p->len + defense_2_twt > twt_p->pos )
-				print( SEVERE, "DEFENSE pulse %ld gets dangerously near to "
-					   "TWT_GATE pulse %ld.\n", defense_p->num, twt_p->num );
+				print( SEVERE, "Distance between PULSE_SHAPE pulse %ld "
+					   "and DEFENSE pulse %ld got shorter than %s.\n",
+					   shape_p->num, defense_p->num, ep385_ptime(
+						   ep385_ticks2double( ep385.shape_2_defense ) ) );
+				ep385.shape_2_defense_too_near = SET;
+
+			}
+
+			if ( defense_p->pos < shape_p->pos &&
+				 defense_p->pos + defense_p->len + ep385.defense_2_shape >
+				 shape_p->pos )
+			{
+				if ( FSC2_MODE == EXPERIMENT )
+				{
+					print( FATAL, "Distance between DEFENSE pulse %ld and "
+						   "PULSE_SHAPE pulse %ld got shorter than %s.\n",
+						   defense_p->num, shape_p->num, ep385_ptime(
+							   ep385_ticks2double( ep385.defense_2_shape ) ) );
+					THROW( EXCEPTION );
+				}
+
+				print( FATAL, "Distance between DEFENSE pulse %ld and "
+					   "PULSE_SHAPE pulse %ld got shorter than %s.\n",
+					   defense_p->num, shape_p->num, ep385_ptime(
+						   ep385_ticks2double( ep385.defense_2_shape ) ) );
+				ep385.defense_2_shape_too_near = SET;
+			}
 		}
 	}
 }

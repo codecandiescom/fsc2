@@ -31,6 +31,7 @@ static void ep385_create_phase_matrix( FUNCTION *f );
 static void ep385_setup_channels( void );
 static void ep385_pulse_start_setup( void );
 static void ep385_channel_start_check( CHANNEL *ch );
+static void ep385_defense_shape_init_check( FUNCTION *shape );
 
 
 /*-----------------------------------------------------------------*/
@@ -489,6 +490,13 @@ static void ep385_pulse_start_setup( void )
 
 			ep385_channel_start_check( ch );
 		}
+
+		if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
+			 ep385.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
+			 ( ep385.is_shape_2_defense || ep385.is_defense_2_shape ||
+			   ep385.function[ PULSER_CHANNEL_TWT ].is_used ||
+			   ep385.function[ PULSER_CHANNEL_TWT_GATE ].is_used ) )
+			ep385_defense_shape_init_check( f );
 	}
 }
 
@@ -546,6 +554,67 @@ static void ep385_channel_start_check( CHANNEL *ch )
 				   pp->pulse->num, ch->pulse_params[ i + 1 ].pulse->num,
 				   Function_Names[ ch->function->self ] );
 			THROW( EXCEPTION );
+		}
+	}
+}
+
+
+/*------------------------------------------------------------------------*/
+/* Function checks if the distance between pulse shape pulses and defense */
+/* pulses is large enough. The minimum lengths the shape_2_defense and    */
+/* defense_2_shape members of the ep395 structure. Both are set to rather */
+/* large values at first but can be customized by calling the EDL         */
+/* functions pulser_shape_to_defense_minimum_distance() and               */
+/* pulser_defense_to_shape_minimum_distance() (names are intentionally    */
+/* that long).                                                            */
+/* The function is called only if pulse shape and defense pulses are used */
+/* and either also TWT or TWT_GATE pulses or at least one of both the     */
+/* mentioned EDL functions have been called.                              */
+/*------------------------------------------------------------------------*/
+
+static void ep385_defense_shape_init_check( FUNCTION *shape )
+{
+	FUNCTION *defense = ep385.function + PULSER_CHANNEL_DEFENSE;
+	PULSE *shape_p, *defense_p;
+	long i, j;
+
+
+	for ( i = 0; i < shape->num_pulses; i++ )
+	{
+		shape_p = shape->pulses[ i ];
+
+		if ( ! shape_p->is_active )
+			continue;
+
+		for ( j = 0; j < defense->num_pulses; j++ )
+		{
+			defense_p = defense->pulses[ j ];
+
+			if ( ! defense_p->is_active )
+				continue;
+
+			if ( shape_p->pos < defense_p->pos &&
+				 shape_p->pos + shape_p->len + ep385.shape_2_defense >
+				 defense_p->pos )
+			{
+				print( SEVERE, "Distance between PULSE_SHAPE pulse %ld "
+					   "and DEFENSE pulse %ld is shorter than %s.\n",
+					   shape_p->num, defense_p->num, ep385_ptime(
+						   ep385_ticks2double( ep385.shape_2_defense ) ) );
+				ep385.shape_2_defense_too_near = SET;
+
+			}
+
+			if ( defense_p->pos < shape_p->pos &&
+				 defense_p->pos + defense_p->len + ep385.defense_2_shape >
+				 shape_p->pos )
+			{
+				print( FATAL, "Distance between DEFENSE pulse %ld and "
+					   "PULSE_SHAPE pulse %ld is shorter than %s.\n",
+					   defense_p->num, shape_p->num, ep385_ptime(
+						   ep385_ticks2double( ep385.defense_2_shape ) ) );
+				ep385.defense_2_shape_too_near = SET;
+			}
 		}
 	}
 }
