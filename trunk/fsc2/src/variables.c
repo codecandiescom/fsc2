@@ -1742,31 +1742,37 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 		eprint( WARN, "%s:%ld: Assignment of float array (slice) `%s' to "
 				"integer array `%s'.", Fname, Lc, s->name, d->name );
 
-	/* Get also the correct type of pointer for the data source - the pointer
-	   to the start of the slice is always stored as a void pointer */
+	/* Now do the actual copying - if both types are identical a fast memcpy()
+	   will do the job, otherwise we need to do it 'by hand' */
 
-	if ( s->type == INT_ARR )
-		src->val.lpnt = ( long * ) src->val.gptr;
-	else
-		src->val.dpnt = ( double * ) src->val.gptr;
-
-	/* Finally copy the array slice */
-
-	for ( i = 0; i < d->sizes[ d->dim - 1 ]; i++ )
+	if ( s->type == d->type )
 	{
-		if ( d->type == INT_ARR )
-		{
-			if ( s->type == INT_ARR )
-				*dest->val.lpnt++ = *src->val.lpnt++;
-			else
-				*dest->val.lpnt++ = ( long ) *src->val.dpnt++;
-		}
+		if ( s->type == INT_ARR )
+			memcpy( dest->val.lpnt, src->val.gptr,
+					d->sizes[ d->dim - 1 ] * sizeof( long ) );
 		else
+			memcpy( dest->val.dpnt, src->val.gptr,
+					d->sizes[ d->dim - 1 ] * sizeof( double ) );
+	}
+	else
+	{
+		/* Get also the correct type of pointer for the data source - the
+		   pointer to the start of the slice is always stored as a void
+		   pointer */
+
+		if ( s->type == INT_ARR )
+			src->val.lpnt = ( long * ) src->val.gptr;
+		else
+			src->val.dpnt = ( double * ) src->val.gptr;
+
+		/* Finally copy the array slice element by element */
+
+		for ( i = 0; i < d->sizes[ d->dim - 1 ]; i++ )
 		{
-			if ( s->type == INT_ARR )
-				*dest->val.dpnt++ = ( double ) *src->val.lpnt++;
+			if ( d->type == INT_ARR )
+				*dest->val.lpnt++ = ( long ) *src->val.dpnt++;
 			else
-				*dest->val.dpnt++ = *src->val.dpnt++;
+				*dest->val.dpnt++ = ( double ) *src->val.lpnt++;
 		}
 	}
 }
@@ -1869,7 +1875,9 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 		eprint( WARN, "%s:%ld: Assignment of float array (or slice) to "
 				"integer array `%s'.", Fname, Lc, d->name );
 
-	/* Now copy the transient array as slice to the destination */
+	/* Now copy the transient array as slice to the destination - if both
+	   variable types fit a fast memcpy() will do the job while in the other
+	   case the copying has to be done 'by hand' */
 
 	if ( ( src->type == INT_TRANS_ARR && d->type == INT_ARR ) ||
 		 ( src->type == FLOAT_TRANS_ARR && d->type == FLOAT_ARR ) )
@@ -2048,7 +2056,7 @@ Var *apply_unit( Var *var, Var *unit )
 		    return vars_mult( var, unit );
 		else
 		{
-			eprint( FATAL, "%s:%ld: Syntax error: A unit is applied to a "
+			eprint( FATAL, "%s:%ld: Syntax error: Unit is applied to a "
 					"non-number.", Fname, Lc );
 			THROW( EXCEPTION );
 		}
