@@ -1059,11 +1059,11 @@ bool spex_cd2a_read_state( void )
 
 
 	dn = fsc2_config_dir( );
-	fn = get_string( "%s%s%s", dn, slash( dn ), SPEX_CD2A_CALIB_FILE );
+	fn = get_string( "%s%s%s", dn, slash( dn ), SPEX_CD2A_STATE_FILE );
 
 	if ( ( fp = fsc2_fopen( fn, "r" ) ) == NULL )
 	{
-		print( FATAL, "Can't open calibration file '%s'.\n", fn );
+		print( FATAL, "Can't open state file '%s'.\n", fn );
 		T_free( fn );
 		THROW( EXCEPTION );
 	}
@@ -1095,7 +1095,7 @@ bool spex_cd2a_read_state( void )
 				if ( ( i > 0 && spex_cd2a.mode & WL ) || i > 1 ||
 					 fsc2_fscanf( fp, "%lf", val + i++ ) != 1 )
 				{
-					print( FATAL, "Invalid calibration file '%s'.\n", fn );
+					print( FATAL, "Invalid state file '%s'.\n", fn );
 					T_free( fn );
 					fsc2_fclose( fp );
 					THROW( EXCEPTION );
@@ -1107,7 +1107,7 @@ bool spex_cd2a_read_state( void )
 				if ( c == EOF || ( spex_cd2a.mode & WN_MODES && c != 'c' ) ||
 					 ( spex_cd2a.mode & WL && c != 'n' ) )
 				{
-					print( FATAL, "Invalid calibration file '%s'.\n", fn );
+					print( FATAL, "Invalid state file '%s'.\n", fn );
 					T_free( fn );
 					fsc2_fclose( fp );
 					THROW( EXCEPTION );
@@ -1119,7 +1119,7 @@ bool spex_cd2a_read_state( void )
 						 fsc2_fgetc( fp ) != '-' ||
 						 fsc2_fgetc( fp ) != '1' ) ) )
 				{
-					print( FATAL, "Invalid calibration file '%s'.\n", fn );
+					print( FATAL, "Invalid state file '%s'.\n", fn );
 					T_free( fn );
 					fsc2_fclose( fp );
 					THROW( EXCEPTION );
@@ -1156,18 +1156,18 @@ bool spex_cd2a_store_state( void )
 
 
 	dn = fsc2_config_dir( );
-	fn = get_string( "%s%s%s", dn, slash( dn ), SPEX_CD2A_CALIB_FILE );
+	fn = get_string( "%s%s%s", dn, slash( dn ), SPEX_CD2A_STATE_FILE );
 
 	if ( ( fp = fsc2_fopen( fn, "w" ) ) == NULL )
 	{
-		print( SEVERE, "Can't store calibration data in '%s'.\n", fn );
+		print( SEVERE, "Can't store state data in '%s'.\n", fn );
 		return FAIL;
 	}
 
 	fsc2_fprintf( fp, "# --- Do *not* edit this file, it gets created "
 				  "automatically ---\n\n"
-				  "# In this file calibration items for the spex_cd2a "
-				  "driver are stored:\n"
+				  "# In this file state information for the spex_cd2a "
+				  "driver is stored:\n"
 				  "# 1. An offset of the monochromator, i.e. a number that "
 				  "always has to be\n"
 				  "#    added to wavenumbers -or lengths reported by the "

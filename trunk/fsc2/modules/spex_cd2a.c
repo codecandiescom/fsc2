@@ -83,7 +83,7 @@ int spex_cd2a_init_hook( void )
 #if defined SPEX_CD2A_MAX_OFFSET
 	if ( fabs( spex_cd2a.offset ) > SPEX_CD2A_MAX_OFFSET )
 	{
-		print( FATAL, "Offset setting in calibration file '%s' is "
+		print( FATAL, "Offset setting in state file '%s' is "
 			   "unrealistically high.\n" );
 		THROW( EXCEPTION );
 	}
@@ -263,8 +263,6 @@ int spex_cd2a_init_hook( void )
 
 	spex_cd2a.scan_is_init = UNSET;
 
-	spex_cd2a.use_calib = 0;
-
 	spex_cd2a.shutter_limits_are_set = UNSET;
 
 	return 1;
@@ -298,7 +296,7 @@ int spex_cd2a_exp_hook( void )
 #if defined SPEX_CD2A_MAX_OFFSET
 	if ( fabs( spex_cd2a.offset ) > SPEX_CD2A_MAX_OFFSET )
 	{
-		print( FATAL, "Offset setting in calibration file '%s' is "
+		print( FATAL, "Offset setting in state file '%s' is "
 			   "unrealistically high.\n" );
 		THROW( EXCEPTION );
 	}

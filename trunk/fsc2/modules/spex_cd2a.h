@@ -117,8 +117,6 @@ typedef struct {
 	double grooves;                  /* in grooves per m */
 	double standard_grooves;         /* in grooves per m */
 
-	bool use_calib;
-
 	double shutter_low_limit;        /* wavelength in m */
 	double shutter_high_limit;       /* wavelength in m */
 	bool shutter_limits_are_set;

@@ -1,6 +1,6 @@
 # --- Do *not* edit this file, it gets created automatically ---
 
-# In this file calibration items for the spex_cd2a driver are stored:
+# In this file state information for the spex_cd2a driver is stored:
 # 1. An offset of the monochromator, i.e. a number that always has to be
 #    added to wavenumbers -or lengths reported by the monochromator and
 #    subtracted from wavenumbers or -lengths send to the device.
