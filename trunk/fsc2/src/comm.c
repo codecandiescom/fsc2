@@ -1449,7 +1449,6 @@ static void pipe_read( char *buf, size_t bytes_to_read )
 
 /*--------------------------------------------------------------*
  * Functions writes to the pipe in chunks of the maximum size.
- *
  * ->
  *    1. Pointer to buffer for storing the data
  *    2. Number of bytes to be written
