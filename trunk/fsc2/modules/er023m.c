@@ -159,9 +159,8 @@ Var *lockin_get_data( Var *v )
 	if ( TEST_RUN )                  /* return dummy value in test run */
 		return vars_push( FLOAT_VAR, ER023M_TEST_DATA );
 
-	val = rg_list[ er023m.rg_index ]
-		  * ( ( double ) ( er023m_get_data( ) - er023m.min )
-			  * er023m.scale_factor - 1.0 );
+	val = ( ( double ) ( er023m_get_data( ) - er023m.min )
+			* er023m.scale_factor - 1.0 ) / rg_list[ er023m.rg_index ];
 	return vars_push( FLOAT_VAR, val );
 }
 
