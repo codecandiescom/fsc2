@@ -39,7 +39,9 @@ struct RULBUS_DAC12_CARD {
 };
 
 
-static double dV[ ] = { 1.25e-3, 2.5e-3, 5.0e-3, 2.5e-3, 5.0e-3 };
+/* Voltage resolutions and minimum voltages of DAC12 cards */
+
+static double dV[ ] =   { 1.25e-3, 2.5e-3, 5.0e-3, 2.5e-3, 5.0e-3 };
 static double Vmin[ ] = { 0.0, 0.0, 0.0, -5.12, -10.24 };
 
 #define DAC12_MAX_VALUE      0x0FFF
