@@ -821,8 +821,8 @@ Var *synthesizer_modulation( Var *v )
 	const char *str[ ] = { "amplitude", "type", "source" };
 	double ampl = -1.0;
 	int what;
-	int type = UNDEFINED, source = UNDEFINED;
-	
+	int type = UNDEFINED,
+		source = UNDEFINED;
 
 
 	if ( v == NULL )
