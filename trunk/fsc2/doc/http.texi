@@ -43,7 +43,7 @@ explicitely to connect to this port instead of port 80. This is done by
 specifying also the port number in the URL, just add a colon and the
 port number to the machine name like this:
 @example
-     http://name.of.computer:8080
+http://name.of.computer:8080
 @end example
 @noindent
 where @code{name.of.computer} is the Internet name of the computer the
@@ -65,7 +65,7 @@ Currently, graphics will only be sent in either PNG or JPEG format, thus
 your browser must support on of these formats. While there is no
 technical problem to also support GIF some legal issues which keep me
 from doing so (as far as I know the LWZ compression method used with
-the GIF format is patented by Unisys I am not going to by a license).
+the GIF format is patented by Unisys and I am not going to buy a license).
 Perhaps this will change in 2003 when the patent expires.
 
 Please note that serving web pages is a rather low priority task. When
