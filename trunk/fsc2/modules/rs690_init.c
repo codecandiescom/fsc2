@@ -526,7 +526,19 @@ static void rs690_basic_functions_check( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 		if ( rs690.function[ i ].is_needed )
+		{
 			rs690_create_phase_matrix( rs690.function + i );
+
+			/* Warn the user if there is more than one channel assigned to the
+			   function but there's no PHASE_SETUP that we're going to use
+			   only the very first channel for creating pulses */
+
+			if ( rs690.function[ i ].phase_setup == NULL &&
+				 rs690.function[ i ].num_channels > 1 )
+				print( NO_ERROR, "Using only channel %d for %s pulses.\n",
+					   rs690.function[ i ].channel[ 0 ]->self,
+					   rs690.function[ i ].name );
+		}
 }
 
 

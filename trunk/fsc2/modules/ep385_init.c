@@ -538,7 +538,7 @@ static void ep385_basic_functions_check( void )
 
 			if ( ep385.function[ i ].phase_setup == NULL &&
 				 ep385.function[ i ].num_channels > 1 )
-				print( WARN, "Using only channel %d for %s pulses.\n",
+				print( NO_ERROR, "Using only channel %d for %s pulses.\n",
 					   ep385.function[ i ].channel[ 0 ]->self,
 					   ep385.function[ i ].name );
 		}

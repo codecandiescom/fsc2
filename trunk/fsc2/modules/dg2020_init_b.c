@@ -181,7 +181,7 @@ void dg2020_basic_pulse_check( void )
 				p->function->phase_setup =
 								dg2020_create_dummy_phase_setup( p->function );
 
-				print( WARN, "Using only POD %d for %s pulses.\n",
+				print( NO_ERROR, "Using only POD %d for %s pulses.\n",
 					   p->function->pod[ 0 ]->self,
 					   p->function->name );
 			}
