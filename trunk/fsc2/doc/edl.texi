@@ -582,9 +582,12 @@ sub-arrays it will start to exist, e.g.@: by having
 j[ 3, 2 ] = 2.7182818;
 @end example
 @noindent
-Now the 3rd and the 7th sub-array of @code{j} exist - but no others.
-And both these sub-arrays have different lengths, the 3rd sub-array has
-a length of only 2, while the 9th sub-array has a length of 9.
+Now the 3rd and the 7th sub-array of @code{j} exist - but no others
+(i.e.@: the 1st, 2nd, 4th, 5th and 6th sub-array do not exist yet and
+trying to use a value in one of these sub-arrays will result in an error
+message). And both these sub-arrays have different lengths, the 3rd
+sub-array has a length of only 2, while the 7th sub-array has a length
+of 9.
 
 Of course, the sub-arrays can also be created by assigning another
 array. E.g.
