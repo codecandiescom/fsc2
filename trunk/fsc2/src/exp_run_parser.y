@@ -36,7 +36,7 @@ extern char *exptext;
 /* locally used functions */
 
 int exp_runparse( void );
-void exp_runerror( const char *s );
+static void exp_runerror( const char *s );
 
 %}
 
@@ -308,7 +308,7 @@ strs:    /* empty */
 %%
 
 
-void exp_runerror ( const char *s )
+static void exp_runerror ( const char *s )
 {
 	s = s;                    /* avoid compiler warning */
 

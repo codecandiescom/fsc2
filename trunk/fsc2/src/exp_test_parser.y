@@ -36,7 +36,7 @@ extern int exp_testlex( void );
 /* locally used functions */
 
 int exp_testparse( void );
-void exp_testerror( const char *s );
+static void exp_testerror( const char *s );
 
 static bool dont_print_error = UNSET;
 static bool in_cond = UNSET;
@@ -280,7 +280,7 @@ strs:    /* empty */
 %%
 
 
-void exp_testerror( const char *s )
+static void exp_testerror( const char *s )
 {
 	s = s;                    /* avoid compiler warning */
 

@@ -35,9 +35,9 @@ extern char *assigntext;
 
 /* locally used functions */
 
-void assignerror( const char *s );
-void ass_func( int function );
-void set_protocol( long prot );
+static void assignerror( const char *s );
+static void ass_func( int function );
+static void set_protocol( long prot );
 
 /* locally used global variables */
 
@@ -509,7 +509,7 @@ gp:       GP_TOKEN expr            { set_protocol( PHASE_FFM_PROT );
 %%
 
 
-void assignerror ( const char *s )
+static void assignerror ( const char *s )
 {
 	s = s;                                 /* avoid compiler warning */
 
@@ -536,7 +536,7 @@ void assignerror ( const char *s )
 /* `Func_is_set' has to be unset at the start of each line!           */
 /*--------------------------------------------------------------------*/
 
-void ass_func( int function )
+static void ass_func( int function )
 {
 	if ( ! Func_is_set )
 	{
@@ -570,7 +570,7 @@ void ass_func( int function )
 /* at the start and after the end of the ASSIGNMENTS section.      */
 /*-----------------------------------------------------------------*/
 
-void set_protocol( long prot )
+static void set_protocol( long prot )
 {
 	if ( Cur_PROT != PHASE_UNKNOWN_PROT && Cur_PROT != prot )
 	{

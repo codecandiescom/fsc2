@@ -69,7 +69,7 @@ sep:     ';'
 %%
 
 
-void deviceserror ( const char *s )
+static void deviceserror ( const char *s )
 {
 	s = s;                    /* stupid but avoids compiler warning */
 

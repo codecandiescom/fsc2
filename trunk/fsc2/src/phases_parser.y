@@ -34,7 +34,7 @@ extern int phaseslex( void );
 
 /* locally used functions */
 
-void phaseserror( const char *s );
+static void phaseserror( const char *s );
 
 
 extern char *phasestext;
@@ -100,9 +100,9 @@ p_list:  /* empty */
 %%
 
 
-void phaseserror ( const char *s )
+static void phaseserror ( const char *s )
 {
-	s = s;                    /* stupid but avoids compiler warning */
+	s = s;                    /* avoid compiler warning */
 
 	if ( *phasestext == '\0' )
 		eprint( FATAL, SET, "Unexpected end of file in PHASES section.\n" );

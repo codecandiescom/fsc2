@@ -37,7 +37,7 @@ extern char *prepstext;
 
 /* locally used functions */
 
-void prepserror( const char *s );
+static void prepserror( const char *s );
 
 %}
 
@@ -117,24 +117,24 @@ line:    P_TOK prop
 ;
 
 ass:     '=' expr                  { vars_assign( $2, $2->prev ); }
-       | PLSA expr                 { Var *C = $2->prev;
-	                                 vars_assign( vars_add( vars_val( C ),
-															$2 ), C ); }
-       | MINA expr                 { Var *C = $2->prev;
-	                                 vars_assign( vars_sub( vars_val( C ),
-															$2 ), C ); }
-       | MULA expr                 { Var *C = $2->prev;
-	                                 vars_assign( vars_mult( vars_val( C ),
-															 $2 ), C ); }
-       | DIVA expr                 { Var *C = $2->prev;
-	                                 vars_assign( vars_div( vars_val( C ),
-															$2 ), C ); }
-       | MODA expr                 { Var *C = $2->prev;
-	                                 vars_assign( vars_div( vars_val( C ),
-															$2 ), C ); }
-       | EXPA expr                 { Var *C = $2->prev;
-	                                 vars_assign( vars_pow( vars_val( C ),
-															$2 ), C ); }
+       | PLSA expr                 { vars_assign( vars_add(
+		                                                  vars_val( $2->prev ),
+															$2 ), $2->prev ); }
+       | MINA expr                 { vars_assign( vars_sub(
+										                  vars_val( $2->prev ),
+															$2 ), $2->prev ); }
+       | MULA expr                 { vars_assign( vars_mult(
+										                  vars_val( $2->prev ),
+														    $2 ), $2->prev ); }
+       | DIVA expr                 { vars_assign( vars_div(
+										                  vars_val( $2->prev ),
+															$2 ), $2->prev ); }
+       | MODA expr                 { vars_assign( vars_div(
+										                  vars_val( $2->prev ),
+															$2 ), $2->prev ); }
+       | EXPA expr                 { vars_assign( vars_pow(
+										                  vars_val( $2->prev ),
+															$2 ), $2->prev ); }
 ;                                     
 
 prop:   /* empty */
@@ -234,8 +234,7 @@ exprs:   expr                     { }
 ;
 
 strs:    /* empty */
-       | strs STR_TOKEN           { Var *v;
-		                            v = vars_push( STR_VAR, $2 );
+       | strs STR_TOKEN           { Var *v = vars_push( STR_VAR, $2 );
 	                                vars_add( v->prev, v ); }
 ;
 
@@ -243,7 +242,7 @@ strs:    /* empty */
 %%
 
 
-void prepserror ( const char *s )
+static void prepserror ( const char *s )
 {
 	s = s;                    /* stupid but avoids compiler warning */
 

@@ -33,7 +33,7 @@
 /* locally used functions */
 
 int conditionparse( void );
-void conditionerror( const char *s );
+static void conditionerror( const char *s );
 
 %}
 
@@ -206,7 +206,7 @@ strs:    /* empty */
 %%
 
 
-void conditionerror( const char *s )
+static void conditionerror( const char *s )
 {
 	s = s;                    /* avoid compiler warning */
 
