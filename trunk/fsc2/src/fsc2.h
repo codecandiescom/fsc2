@@ -157,7 +157,7 @@ bool just_testing = UNSET;
 FD_fsc2 *main_form;
 FD_run *run_form;
 FD_input_form *input_form;
-FD_run *cut_form;
+FD_cut *cut_form;
 
 int I_am = PARENT;
 int pd[ 4 ];                    /* pipe descriptors */
@@ -216,7 +216,7 @@ extern bool just_testing;
 extern FD_fsc2 *main_form;
 extern FD_run *run_form;
 extern FD_input_form *input_form;
-extern FD_run *cut_form;
+extern FD_cut *cut_form;
 
 
 extern int I_am;
