@@ -2164,10 +2164,10 @@ static void T_fprintf( int file_num, const char *func, const char *fmt, ... )
 	/* If the file has been closed because of insufficient place and no
        replacement file has been given just don't print */
 
-	if ( file_num >= File_List_len )
+	if ( file_num < 0 || file_num >= File_List_Len )
 	{
-		eprint( FATAL, "%s:%ld: Invalid file handler used in call of function "
-				"%s().\n", Fname, Lc, func );
+		eprint( FATAL, "%s:%ld: Invalid file handler used in call of "
+				"function %s().\n", Fname, Lc, func );
 		THROW( EXCEPTION );
 	}
 
