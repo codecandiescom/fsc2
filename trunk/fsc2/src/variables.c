@@ -269,9 +269,6 @@ Var *vars_new( char *name )
 Var *vars_add( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long i;
-	long *lp;
-	double *dp;
 
 
 	/* Make sure that `v1' and `v2' exist, are integers or float values 
@@ -291,21 +288,24 @@ Var *vars_add( Var *v1, Var *v2 )
 	switch ( v1->type )
 	{
 		case INT_VAR :
-			new_var = vars_add_to_iv( v1, v2 );
+			new_var = vars_add_to_int_var( v1, v2 );
 			break;
 
 		case FLOAT_VAR :
-			new_var = vars_add_to_fv( v1, v2 );
+			new_var = vars_add_to_float_var( v1, v2 );
 			break;
 			
-		case INT_ARR :
-			new_var = vars_add_to_ia( v1, v2 );
+		case INT_ARR : case INT_TRANS_ARR :
+			new_var = vars_add_to_int_arr( v1, v2 );
 			break;
 
-		case FLOAT_ARR :
-			new_var = vars_add_to_ia( v1, v2 );
+		case FLOAT_ARR : case FLOAT_TRANS_ARR :
+			new_var = vars_add_to_float_arr( v1, v2 );
 			break;
 
+		default :
+			assert( 1 == 0 );
+	}
 /*
 
 
@@ -2097,12 +2097,12 @@ Var *vars_val( Var *v )
 	if ( v->flags & NEED_SLICE )
 	{
 		vars_check( v->from, INT_ARR | FLOAT_ARR );
-		if ( v-from->type == INT_ARR )
+		if ( v->from->type == INT_ARR )
 			return vars_push( INT_TRANS_ARR, v->val.vptr,
-							  v2->from->sizes[ v2->from->dim - 1 ] );
+							  v->from->sizes[ v->from->dim - 1 ] );
 		else
 			return vars_push( FLOAT_TRANS_ARR, v->val.vptr,
-							  v2->from->sizes[ v2->from->dim - 1 ] );
+							  v->from->sizes[ v->from->dim - 1 ] );
 	}
 
 /*
