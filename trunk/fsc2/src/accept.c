@@ -908,10 +908,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	if ( x_index + x_len > G2.nx )
 		G2.nx = x_index + x_len;
 	if ( y_index + y_len >= G2.ny )
-	{
 		G2.ny = y_index + y_len + 1;
-		need_cut_redraw = SET;
-	}
 
 	/* Include the new data into the scaled data */
 

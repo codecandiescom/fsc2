@@ -1075,7 +1075,9 @@ static void G_init_curves_2d( void )
 	for ( i = 0; i < NUM_COLORS + 2; i++ )
 	{
 		G2.gcs[ i ] = XCreateGC( G.d, G2.canvas.pm, 0, 0 );
-		 XSetForeground( G.d, G2.gcs[ i ], fl_get_pixel( FL_FREE_COL1 + i ) );
+		XSetForeground( G.d, G2.gcs[ i ], fl_get_pixel( FL_FREE_COL1 + i ) );
+		XSetLineAttributes( G.d, G2.gcs[ i ], 0, LineSolid, CapButt,
+							JoinBevel );
 	}
 
 	for ( i = 0; i < 7; i++ )
