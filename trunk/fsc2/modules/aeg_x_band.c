@@ -104,12 +104,8 @@ enum {
 
 /*----------------------------------------------------------------*/
 /* Here we check if also a driver for a field meter is loaded and */
-/* test if this driver will be loaded before the X-band driver.   */
+/* test if this driver will be loaded before the magnet driver.   */
 /*----------------------------------------------------------------*/
-
-
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
 
 int aeg_x_band_init_hook( void )
 {
@@ -127,11 +123,11 @@ int aeg_x_band_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	/* We need the field meter driver called *before* the X-band driver since
+	/* We need the field meter driver called *before* the magnet driver since
 	   the field meter is needed in the initialization of the magnet.
-	   Probably we should implement a solution that brings the devices into
-	   the correct sequence instead of this hack, but that's not as simple as
-	   it might look... */
+	   Probably we should implement a solution that brings the devices
+	   automatically into the correct sequence instead of this hack, but
+	   that's not as simple as it might look... */
 
 	if ( exist_device( "er035m" ) )
 		ret = get_lib_symbol( "er035m", "is_gaussmeter",
