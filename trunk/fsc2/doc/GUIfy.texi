@@ -578,7 +578,7 @@ or a test run.
 @item 3
 Internal error in @code{fsc2} detected (please send a bug report).
 @item 4
-@code{fsc2} could not be started (probably because its executable could
+@code{fsc2} could not be started (probably because its executable was
 not found).
 @end table
 
