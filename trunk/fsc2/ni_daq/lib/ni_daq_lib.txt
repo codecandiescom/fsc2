@@ -105,25 +105,25 @@ is ni_daq_nerr - 1.
 
 
 The timings possible with the board take a bit of getting used to.
-Basically, the board has two clocks, a fast one running at 20 MHz and a
-slow clock, running at 200 kHz.
+Basically, the board has two clocks, a fast one running at 20 MHz
+and a slow clock, running at 200 kHz.
 
 The fast clock can be used by all subsystems (i.e. AI, AO and GPCT)
-and each subsystem can individually slow down the clock rate it sees
-by a factor of 2. Thus, e.g. the AI system can use the 20 MHz clock
-while the GPCT subsystem at the same time can use the fast clock at
-half its normal rate, i.e. 10 MHz.
+and each subsystem can individually slow down the fast clock rate it
+sees by a factor of 2. Thus, e.g. the AI system can use the 20 MHz
+clock while the GPCT subsystem at the same time can use the fast clock
+at half its normal rate, i.e. 10 MHz.
 
 Also the slow clock can be slowed down by a factor of 2. But in contrast
 to the fast clock, the speed of slow clock is common to all subsystems.
-Therefore it's important to take into consideration which speed it's
+Therefore it's important to take into consideration which speed it is
 currently running at when programming a subsystem, and when a subsystem
-needs to change the clock rate the programmer must be aware, that the
-change also applies to all the other subsystems.
+needs to change the clock rate the programmer must be aware that this
+change also applies to the slow clock rate for all the other subsystems.
 
 Beside the clocks seen by the subsystem there's also a FREQ_OUT pin
 of the board that can output one of the clocks. The speed of both
-clocks, when appearing on the FREQ_OUT pin can be reduced by an
+clocks, when output at the FREQ_OUT pin, can be reduced by an
 integer factor between 1 and 16 (without influencing the speed seen
 by the subsystems). Furthermore the frequencies can be further
 divided by a factor of 2 (but only both of them at once). When this
@@ -153,7 +153,7 @@ at all, the driver for the board could be not loaded, the device file (i.e.
 the file name passed to the function) may not exist, the user may have
 no permission to open the board, the board could already be opened by
 a different process, or an unspecified error may occur when opening the
-file, or, finally, an internal error in the driver migth get triggered.
+file, or, finally, an internal error in the driver might get triggered.
 In these cases a negative number is returned, with the following
 error codes:
 
@@ -165,7 +165,9 @@ error codes:
 
 int ni_daq_close( int board )
 
-This function should be called when the coard isn't used anymore.
+This function should be called when the coard isn't used anymore (but
+also gets called automatically when the program exits and the device
+file is still open).
 
 The function can only fail for two reasons, either the board handle
 passed to the function is invalid or the board isn't open, in which
@@ -194,6 +196,8 @@ const char *ni_daq_strerror( void )
 The function returns a string with a short descriptive text of the
 error encountered in the last invocation of one of the functions for
 the board (or "Success" if the last function call was successful).
+The returned pointer points to some memory belonging to the library
+and the string gets overwritten on each invocation of the function.
 
 
 ======================================================================
@@ -208,7 +212,7 @@ full and half speed. Thus the second argument must be either
 
     NI_DAQ_FULL_SPEED   or   NI_DAQ_HALF_SPEED
 
-Please note that a change is also immediately visible for all subsystems
+Please note that a change is also immediately applies to all subsystems
 using the slow clock!
 
 The third argument is a further divider to apply to the clock rate (only
