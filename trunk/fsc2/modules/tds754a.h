@@ -211,13 +211,10 @@ const char *Channel_Names[ ] = { "CH1", "CH2", "CH3", "CH4",
 								 "MATH1", "MATH2", "MATH3", "REF1",
 								 "REF2", "REF3", "REF4",
 								 "AUX", "LINE" };
-bool TDS754A_INIT = UNSET;
-
 #else
 
 extern TDS754A tds754a;
 extern const char *Channel_Names[ ];
-extern const bool TDS754A_INIT;
 
 #endif
 

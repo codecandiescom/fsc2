@@ -143,18 +143,15 @@ int tds754a_exp_hook( void )
 
 	tds754a_store_state( &tds754a, &tds754a_stored );
 
-	TDS754A_INIT = SET;
 	if ( ! tds754a_init( DEVICE_NAME ) )
 	{
 		print( FATAL, "Initialization of device failed: %s\n",
 			   gpib_error_msg );
-		TDS754A_INIT = UNSET;
 		THROW( EXCEPTION );
 	}
 
 	tds754a_do_pre_exp_checks( );
 
-	TDS754A_INIT = UNSET;
 	return 1;
 }
 

@@ -141,18 +141,15 @@ int tds520c_exp_hook( void )
 
 	tds520c_store_state( &tds520c, &tds520c_stored );
 
-	TDS520C_INIT = SET;
 	if ( ! tds520c_init( DEVICE_NAME ) )
 	{
 		print( FATAL, "Initialization of device failed: %s\n",
 			   gpib_error_msg );
-		TDS520C_INIT = UNSET;
 		THROW( EXCEPTION );
 	}
 
 	tds520c_do_pre_exp_checks( );
 
-	TDS520C_INIT = UNSET;
 	return 1;
 }
 

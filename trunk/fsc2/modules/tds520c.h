@@ -206,13 +206,10 @@ TDS520C tds520c;
 const char *Channel_Names[ ] = { "CH1", "CH2", "MATH1", "MATH2", "MATH3",
 								 "REF1", "REF2", "REF3", "REF4",
 								 "AUX1", "AUX2", "LINE" };
-bool TDS520C_INIT = UNSET;
-
 #else
 
 extern TDS520C tds520c;
 extern const char *Channel_Names[ ];
-extern const bool TDS520C_INIT;
 
 #endif
 
