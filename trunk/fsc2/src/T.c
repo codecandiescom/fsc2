@@ -35,6 +35,9 @@
 void *T_malloc( size_t size )
 {
 	void *mem;
+#if defined MDEBUG
+	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
+#endif
 
 	mem = malloc( size );
 
@@ -45,8 +48,9 @@ void *T_malloc( size_t size )
 	}
 
 #if defined MDEBUG
-	fprintf( stderr, "(%d) malloc:  %p (%u)\n",
-			 I_am == CHILD, mem, size );
+	asm( "mov %%ebp, %0" : "=g" ( EBP ) );
+	fprintf( stderr, "(%d) malloc:  %p (%u) from %p\n",
+			 I_am == CHILD, mem, size, ( int * ) * ( EBP + 1 ) );
 	fflush( stderr );
 #endif
 
@@ -60,6 +64,10 @@ void *T_malloc( size_t size )
 void *T_calloc( size_t nmemb, size_t size )
 {
 	void *mem;
+#if defined MDEBUG
+	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
+#endif
+
 
 	mem = calloc( nmemb, size );
 
@@ -70,8 +78,9 @@ void *T_calloc( size_t nmemb, size_t size )
 	}
 
 #if defined MDEBUG
-	fprintf( stderr, "(%d) calloc:  %p (%u)\n",
-			 I_am == CHILD, mem, nmemb * size );
+	asm( "mov %%ebp, %0" : "=g" ( EBP ) );
+	fprintf( stderr, "(%d) calloc:  %p (%u) from %p\n",
+			 I_am == CHILD, mem, nmemb * size, ( int * ) * ( EBP + 1 ) );
 	fflush( stderr );
 #endif
 	return mem;
@@ -84,6 +93,9 @@ void *T_calloc( size_t nmemb, size_t size )
 void *T_realloc( void *ptr, size_t size )
 {
 	void *new_ptr;
+#if defined MDEBUG
+	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
+#endif
 
 	new_ptr = realloc( ptr, size );
 
@@ -94,8 +106,9 @@ void *T_realloc( void *ptr, size_t size )
 	}
 
 #if defined MDEBUG
-	fprintf( stderr, "(%d) realloc: %p -> %p (%u)\n",
-			 I_am == CHILD, ptr, new_ptr, size );
+	asm( "mov %%ebp, %0" : "=g" ( EBP ) );
+	fprintf( stderr, "(%d) realloc: %p -> %p (%u) from %p\n",
+			 I_am == CHILD, ptr, new_ptr, size, ( int * ) * ( EBP + 1 ) );
 	fflush( stderr );
 #endif
 
@@ -108,11 +121,17 @@ void *T_realloc( void *ptr, size_t size )
 
 void *T_free( void *ptr )
 {
+#if defined MDEBUG
+	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
+#endif
+
 	if ( ptr == NULL )
 		return NULL;
 
 #if defined MDEBUG
-	fprintf( stderr, "(%d) free:    %p\n", I_am == CHILD, ptr );
+	asm( "mov %%ebp, %0" : "=g" ( EBP ) );
+	fprintf( stderr, "(%d) free:    %p from %p\n",
+		     I_am == CHILD, ptr, ( int * ) * ( EBP + 1 ) );
 	fflush( stderr );
 	fsc2_assert( mprobe( ptr ) == MCHECK_OK );
 #endif
@@ -128,6 +147,9 @@ void *T_free( void *ptr )
 char *T_strdup( const char *str )
 {
 	char *new_str;
+#if defined MDEBUG
+	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
+#endif
 
 
 	if ( str == NULL )
@@ -140,8 +162,10 @@ char *T_strdup( const char *str )
 	}
 
 #if defined MDEBUG
-	fprintf( stderr, "(%d) strdup:  %p (%u)\n",
-			 I_am == CHILD, new_str, strlen( str ) + 1 );
+	asm( "mov %%ebp, %0" : "=g" ( EBP ) );
+	fprintf( stderr, "(%d) strdup:  %p (%u) from %p\n",
+			 I_am == CHILD, new_str, strlen( str ) + 1,
+			 ( int * ) * ( EBP + 1 ) );
 	fflush( stderr );
 #endif
 
