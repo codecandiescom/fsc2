@@ -956,7 +956,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 			length = LECROY9400_TEST_REC_LEN;
 		else
 			length = lecroy9400.rec_len[ ch ];
-		array = T_malloc( length * sizeof( double ) );
+		array = DOUBLE_P T_malloc( length * sizeof *array );
 		for ( i = 0; i < length; i++ )
 			array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
 		nv = vars_push( FLOAT_ARR, array, length );

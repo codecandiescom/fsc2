@@ -211,7 +211,7 @@ Var *digitizer_define_window( Var *v )
 	   update and recheck the windows */
 
 	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+		tds_tmpl_state_check( 0.0, 0, 0.0 );
 
 	if ( v != NULL )
 	{
@@ -269,7 +269,7 @@ Var *digitizer_define_window( Var *v )
 
 	if ( tds_tmpl.w == NULL )
 	{
-		tds_tmpl.w = w = T_malloc( sizeof( WINDOW ) );
+		tds_tmpl.w = w = WINDOW_P T_malloc( sizeof *w );
 		w->prev = NULL;
 	}
 	else
@@ -280,7 +280,7 @@ Var *digitizer_define_window( Var *v )
 			num_windows++;
 			w = w->next;
 		}
-		w->next = T_malloc( sizeof( WINDOW ) );
+		w->next = WINDOW_P T_malloc( sizeof *w->next );
 		w->next->prev = w;
 		w = w->next;
 		w->is_start = UNSET;
@@ -350,7 +350,7 @@ Var *digitizer_change_window( Var *v )
 	   update and recheck the windws */
 
 	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+		tds_tmpl_state_check( 0.0, 0, 0.0 );
 
 	/* Figure out the window number and test if a window with this number
 	   exists at all */
@@ -449,7 +449,7 @@ Var *digitizer_window_position( Var *v )
 	   update and recheck the windows */
 
 	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+		tds_tmpl_state_check( 0.0, 0, 0.0 );
 
 	/* Figure out the window number and test if a window with this number
 	   exists at all */
@@ -510,7 +510,7 @@ Var *digitizer_window_width( Var *v )
 	   update and recheck the windows */
 
 	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+		tds_tmpl_state_check( 0.0, 0, 0.0 );
 
 	/* Figure out the window number and test if a window with this number
 	   exists at all */
@@ -605,7 +605,7 @@ Var *digitizer_timebase( Var *v )
 	   update and recheck the windows */
 
 	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+		tds_tmpl_state_check( 0.0, 0, 0.0 );
 
 	if ( v == NULL )
 		switch ( FSC2_MODE )
@@ -696,7 +696,7 @@ Var *digitizer_time_per_point( Var *v )
 	   update and recheck the windows */
 
 	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+		tds_tmpl_state_check( 0.0, 0, 0.0 );
 
 	return vars_push( FLOAT_VAR, tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV );
 }
@@ -779,7 +779,7 @@ Var *digitizer_num_averages( Var *v )
 	   update and recheck the windows */
 
 	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+		tds_tmpl_state_check( 0.0, 0, 0.0 );
 
 	if ( v == NULL )
 		switch ( FSC2_MODE )
@@ -857,7 +857,7 @@ Var *digitizer_record_length( Var *v )
 	   update and recheck the windows */
 
 	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+		tds_tmpl_state_check( 0.0, 0, 0.0 );
 
 	if ( v == NULL )
 	{
@@ -940,7 +940,7 @@ Var *digitizer_trigger_position( Var *v )
 	   update and recheck the windows */
 
 	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+		tds_tmpl_state_check( 0.0, 0, 0.0 );
 
 	if ( v == NULL )
 		switch ( FSC2_MODE )
@@ -1177,7 +1177,7 @@ static Var *get_area( Var *v, bool use_cursor )
 	   update and recheck the windows */
 
 	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+		tds_tmpl_state_check( 0.0, 0, 0.0 );
 
 	/* Talk to digitizer only during the experiment, otherwise return a dummy
 	   value */
@@ -1271,7 +1271,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	   update and recheck the windows */
 
 	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+		tds_tmpl_state_check( 0.0, 0, 0.0 );
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   array */
@@ -1287,7 +1287,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 			length = tds_tmpl.rec_len;
 		else
 			length = TDS_TMPL_TEST_REC_LEN;
-		array = T_malloc( length * sizeof( double ) );
+		array = DOUBLE_P T_malloc( length * sizeof *array );
 		for ( i = 0; i < length; i++ )
 			array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
 		nv = vars_push( FLOAT_ARR, array, length );
@@ -1378,7 +1378,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	   update and recheck the windows */
 
 	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+		tds_tmpl_state_check( 0.0, 0, 0.0 );
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   value */

@@ -198,7 +198,7 @@ unsigned int er023m_get_data( void )
 	   point automatically (when in SINGLE mode) */
 
 	if ( gpib_write( er023m.device, "SM\r", 3 ) == FAILURE ||
-		 gpib_read( er023m.device, buf, &len ) == FAILURE )
+		 gpib_read( er023m.device, ( char * ) buf, &len ) == FAILURE )
 		er023m_failure( );
 
 	/* The device should send as many bytes for a data point as it told us
@@ -343,7 +343,7 @@ void er023m_set_ct( int ct_mult )
 	   determined experimentally (and don't work for CT settings in the
 	   region between 125 and 200, i.e. 40 ms and 64 ms) */
 
-	er023m.min = 102.4 * ct_mult;
+	er023m.min = lrnd( 102.4 * ct_mult );
 	er023m.scale_factor = 2.0 / ( double ) ( 529.28 * ct_mult - er023m.min );
 }
 

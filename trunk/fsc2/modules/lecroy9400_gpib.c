@@ -486,7 +486,8 @@ bool lecroy9400_get_desc( int channel )
 	fsc2_assert( channel >= LECROY9400_CH1 && channel <= LECROY9400_FUNC_F );
 
 	if ( gpib_write( lecroy9400.device, cmds[ channel ], 8 ) == FAILURE ||
-		 gpib_read( lecroy9400.device, lecroy9400.wv_desc[ channel ], &len )
+		 gpib_read( lecroy9400.device,
+					( char * ) lecroy9400.wv_desc[ channel ], &len )
 		 == FAILURE )
 		lecroy9400_gpib_failure( );
 
@@ -657,19 +658,19 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 	*length = lecroy9400.rec_len[ ch ];
 
 	len = 2 * *length + 10;
-	data = T_malloc( 2 * len );
+	data = UCHAR_P T_malloc( 2 * len );
 
 	snprintf( cmd, 100, "RD,%s.DA,1,%ld,0,0",
 			  ch == LECROY9400_FUNC_E ? "FE" : "FF", *length );
 	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( lecroy9400.device, data, &len ) == FAILURE )
+		 gpib_read( lecroy9400.device, ( char * ) data, &len ) == FAILURE )
 		lecroy9400_gpib_failure( );
 
 	*length = ( ( long ) data[ 2 ] * 256 + ( long ) data[ 3 ] ) / 2;
 
 	TRY
 	{
-		*array = T_malloc( *length * sizeof( double ) );
+		*array = DOUBLE_P T_malloc( *length * sizeof *array );
 		TRY_SUCCESS;
 	}
 	CATCH( OUT_OF_MEMORY_EXCEPTION )

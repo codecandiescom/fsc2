@@ -447,7 +447,7 @@ void lecroy9400_store_state( LECROY9400 *dest, LECROY9400 *src )
 		return;
 	}
 
-	dest->w = T_malloc( src->num_windows * sizeof( WINDOW ) );
+	dest->w = WINDOW_P T_malloc( src->num_windows * sizeof *dest->w );
 	for ( i = 0, w = src->w; w != NULL; i++, w = w->next )
 	{
 		*( dest->w + i ) = *w;

@@ -42,6 +42,7 @@
 #define UCHAR_P          ( unsigned char * )
 #define CHAR_PP          ( char ** )
 #define UCHAR_PP         ( unsigned char ** )
+#define BOOL_P           ( bool * )
 #define DEVICE_NAME_P    ( Device_Name * )
 #define FUNC_P           ( Func * )
 #define PULSER_STRUCT_P  ( Pulser_Struct * )
@@ -67,6 +68,8 @@
 #define PULSE_P          ( PULSE * )
 #define PULSE_PP         ( PULSE ** )
 #define DG2020_STORE_P   ( DG2020_STORE * )
+#define CHANNEL_PP       ( CHANNEL ** )
+#define WINDOW_P         ( WINDOW * )
 
 #else
 
@@ -78,6 +81,7 @@
 #define UCHAR_P
 #define CHAR_PP
 #define UCHAR_PP
+#define BOOL_P
 #define DEVICE_NAME_P
 #define FUNC_P
 #define PULSER_STRUCT_P
@@ -103,6 +107,8 @@
 #define PULSE_P
 #define PULSE_PP
 #define DG2020_STORE_P
+#define CHANNEL_PP
+#define WINDOW_P
 
 #endif
 

@@ -258,7 +258,7 @@ void tds_tmpl_set_timebase( double timebase )
 	if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds_tmpl_gpib_failure( );
 
-	tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+	tds_tmpl_state_check( 0.0, 0, 0.0 );
 }
 
 
@@ -275,7 +275,7 @@ void tds_tmpl_set_record_length( long num_points )
     if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds_tmpl_gpib_failure( );
 
-	tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+	tds_tmpl_state_check( 0.0, 0, 0.0 );
 }
 
 
@@ -316,7 +316,7 @@ void tds_tmpl_set_trigger_pos( double pos )
     if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds_tmpl_gpib_failure( );
 
-	tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+	tds_tmpl_state_check( 0.0, 0, 0.0 );
 }
 
 
@@ -892,7 +892,7 @@ static double tds_tmpl_get_area_wo_cursor( int channel, WINDOW *w )
 /*-----------------------------------------------------------------*/
 
 void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
-						bool use_cursor )
+						 bool use_cursor )
 {
 	char cmd[ 50 ];
 	char reply[ 10 ];
@@ -998,8 +998,8 @@ void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 	len1 = 1 + lrnd( floor( log10( len2 ) ) );
 	len += len1 + len2 + 2;
 
-	*data = T_malloc( *length * sizeof( double ) );
-	buffer = T_malloc( len );
+	*data = DOUBLE_P T_malloc( *length * sizeof **data );
+	buffer = CHAR_P T_malloc( len );
 
 	/* Now get all the data bytes... */
 
@@ -1171,7 +1171,7 @@ void tds_tmpl_lock_state( bool lock )
 
 	if ( ! tds_tmpl.lock_state && lock )
 	{
-		tds_tmpl_state_check( 0.0, 0.0, 0.0 );
+		tds_tmpl_state_check( 0.0, 0, 0.0 );
 
 		for ( channel = TDS_TMPL_CH1; channel < NUM_NORMAL_CHANNELS;
 			  channel++ )
