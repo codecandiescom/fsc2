@@ -386,6 +386,52 @@ bool rs690_set_repeat_time( double rep_time )
 	}
 
 	rs690.repeat_time = rs690_double2ticks( rep_time );
+
+	if ( rs690.timebase_type == TIMEBASE_4_NS && rs690.repeat_time % 4 )
+	{
+		static char *o;
+
+		TRY
+		{
+			o = T_strdup( rs690_pticks( rs690.repeat_time ) );
+			rs690.repeat_time = ( rs690.repeat_time / 4 + 1 ) * 4;
+			print( WARN, "Adjusting repeat time/frequency from %s/%g Hz to "
+				   "%s/%g Hz.\n", o, 1.0 / rep_time,
+				   rs690_pticks( rs690.repeat_time ),
+				   1.0 / rs690_ticks2double( rs690.repeat_time ) );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			o = CHAR_P T_free( o );
+			RETHROW( );
+		}
+
+		o = CHAR_P T_free( o );
+	}
+	else if ( rs690.timebase_type == TIMEBASE_4_NS && rs690.repeat_time % 2 )
+	{
+		static char *o;
+
+		TRY
+		{
+			o = T_strdup( rs690_pticks( rs690.repeat_time ) );
+			rs690.repeat_time = ( rs690.repeat_time / 2 + 1 ) * 2;
+			print( WARN, "Adjusting repeat time/frequency from %s/%g Hz to "
+				   "%s/%g Hz.\n", o, 1.0 / rep_time,
+				   rs690_pticks( rs690.repeat_time ),
+				   1.0 / rs690_ticks2double( rs690.repeat_time ) );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			o = CHAR_P T_free( o );
+			RETHROW( );
+		}
+
+		o = CHAR_P T_free( o );
+	}
+			   
 	rs690.is_repeat_time = SET;
 
 	return OK;

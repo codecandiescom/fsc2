@@ -1168,32 +1168,45 @@ void rs690_check_fs( void )
 			TRY
 			{
 				s = T_strdup( rs690_pticks( n->pos ) );
-				print( SEVERE, "Pulse sequence is longer (%s) than the "
+				print( FATAL, "Pulse sequence is longer (%s) than the "
 					   "repetition time of %s.\n",
 					   s, rs690_pticks( rs690.repeat_time ) );
 				T_free( s );
+				TRY_SUCCESS;
 			}
 			OTHERWISE
 			{
 				T_free( s );
 				RETHROW( );
 			}
+
+			THROW( EXCEPTION );
 		}
 		else if ( n->pos == rs690.repeat_time )
+		{
 			print( SEVERE, "Pulse sequence is exactly as long as the "
 				   "repetition time of %s.\n",
 				   rs690_pticks( rs690.repeat_time ) );
 
-		if ( n->pos >= rs690.repeat_time )
-		{
 			rs690_delete_fs_successor( p );
 			rs690.new_fs_count--;
+			n = p;
 		}
 		else
 			n->len = rs690.repeat_time - n->pos;
 	}
 	else
-		n->len = 1;
+	{
+		/* Make sure the total length of the sequence is a multiple of 4 for
+		   a 4 ns time base and a multiple of 2 for a 8 ns time base */
+
+		if ( rs690.timebase_type == TIMEBASE_16_NS )
+			n->len = 1;
+		else if ( rs690.timebase_type == TIMEBASE_8_NS )
+			n->len = ( n->pos % 2 ) ? 1 : 2;
+		else if ( rs690.timebase_type == TIMEBASE_4_NS )
+			n->len = ( n->pos % 4 ) ? 4 - n->pos % 4 : 4;
+	}
 
 	/* If two adjacent slice have the same data combine them (this can happen
 	   if the distance between two pulses is zero) */
