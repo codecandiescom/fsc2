@@ -240,16 +240,7 @@ void p_assign_pod( long func, Var *v )
 
 	/* Check the variable and get its value */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		pod = v->val.lval;
-	else
-	{
-		print( WARN, "Float variable used as pod number.\n" );
-		pod = ( long ) v->val.dval;
-	}
-
+	pod = get_double( v, "pod number" );
 	vars_pop( v );
 
 	/* Finally call the function (if it exists...) */
@@ -298,16 +289,7 @@ void p_assign_channel( long func, Var *v )
 
 	/* Check the variable and get its value */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		channel = v->val.lval;
-	else
-	{
-		print( WARN, "Float variable used as channel number.\n" );
-		channel = ( long ) v->val.dval;
-	}
-
+	channel = get_long( v, "channel number" );
 	vars_pop( v );
 
 	/* Finally call the function (if it exists...) */
@@ -362,8 +344,7 @@ void p_set_delay( long func, Var *v )
 
 	/* Check the variable and get its value */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	delay = ( ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval );
+	delay = get_double( v, "delay" );
 	vars_pop( v );
 
 	delay = is_mult_ns( delay, "Delay" );
@@ -446,8 +427,7 @@ void p_set_v_high( long func, Var *v )
 
 	/* Check the variable and get its value */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	voltage = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
+	voltage = get_double( v, "high voltage level" );
 	vars_pop( v );
 
 	/* Finally call the function (if it exists...) */
@@ -493,8 +473,7 @@ void p_set_v_low( long func, Var *v )
 
 	/* Check the variable and get its value */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	voltage = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
+	voltage = get_double( v, "low voltage level" );
 	vars_pop( v );
 
 	/* Finally call the function (if it exists...) */
@@ -537,11 +516,9 @@ void p_set_timebase( Var *v )
 
 	/* Check the variable and get its value */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	timebase = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
-	vars_pop( v );
-
+	timebase = get_double( v, "time base" );
 	timebase = is_mult_ns( timebase, "Time base"  );
+	vars_pop( v );
 
 	/* Finally call the function (if it exists...) */
 
@@ -583,16 +560,7 @@ void p_set_trigger_mode( Var *v )
 
 	/* Check the variable and get its value */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-	    mode = ( int ) v->val.lval;
-	else
-	{
-		print( WARN, "Float variable used as trigger mode.\n" );
-		mode = ( int ) v->val.dval;
-	}
-
+	mode = ( int ) get_long( v, "trigger mode" );
 	vars_pop( v );
 
 	if ( mode != INTERNAL && mode != EXTERNAL )
@@ -640,16 +608,7 @@ void p_set_trigger_slope( Var *v )
 
 	/* Check the variable and get its value */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-	    slope = ( int ) v->val.lval;
-	else
-	{
-		print( WARN, "Float variable used as trigger slope.\n" );
-		slope = ( int ) v->val.dval;
-	}
-
+	slope = ( int ) get_long( v, "trigger slope" );
 	vars_pop( v );
 
 	if ( slope != POSITIVE && slope != NEGATIVE )
@@ -698,8 +657,7 @@ void p_set_trigger_level( Var *v )
 
 	/* Check the variable and get its value */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	level = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
+	level = get_double( v, "trigger level" );
 	vars_pop( v );
 
 	/* Finally call the function (if it exists...) */
@@ -742,8 +700,7 @@ void p_set_trigger_impedance( Var *v )
 
 	/* Check the variable and get its value */
 
-	vars_check( v, INT_VAR );
-	state = ( int ) v->val.lval;
+	state = ( int ) get_strict_long( v, "trigger impedance" );
 	vars_pop( v );
 
 	/* Finally call the function (if it exists...) */
@@ -786,8 +743,7 @@ void p_set_rep_time( Var *v )
 
 	/* Check the variable and get its value */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	rep_time = ( v->type == INT_VAR ) ? ( double ) v->val.lval :  v->val.dval;
+	rep_time = get_double( v, "repetition time" );
 	vars_pop( v );
 
 	if ( rep_time < 9.9e-10 )
@@ -838,8 +794,7 @@ void p_set_rep_freq( Var *v )
 
 	/* Check the variable and get its value */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	freq = VALUE( v );
+	freq = get_double( v, "repetition frequency" );
 	vars_pop( v );
 
 	if ( freq > 1.01e9 || freq <= 0.0 )
@@ -895,8 +850,7 @@ void p_set_max_seq_len( Var *v )
 
 	/* Check the variable and get its value */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	seq_len = VALUE( v );          /* sequence length is given in time units */
+	seq_len = get_double( v, "maximum pattern length" );
 	vars_pop( v );
 
 	seq_len = is_mult_ns( seq_len, "Maximum pattern length" );
@@ -1066,6 +1020,10 @@ long p_new( long pnum )
 
 void p_set( long pnum, int type, Var *v )
 {
+	long func, phase;
+	double pos, len, dpos, dlen;
+
+
 	is_pulser_driver( );
 
 	/* Now the correct driver function is called. All switches just check that
@@ -1083,66 +1041,63 @@ void p_set( long pnum, int type, Var *v )
 		switch ( type )
 		{
 			case P_FUNC :
-				if ( v->type != INT_VAR ||
-					 v->val.lval < 0    ||
-					 v->val.lval >= PULSER_CHANNEL_NUM_FUNC )
+				func = get_strict_long( v, "pulse channel function" );
+				vars_pop( v );
+				if ( func < 0 || func >= PULSER_CHANNEL_NUM_FUNC )
 				{
 					print( FATAL, "Invalid pulse channel function.\n" );
 					THROW( EXCEPTION );
 				}
+
 				is_pulser_func( pulser_struct[ Cur_Pulser ].set_pulse_function,
 								"setting a pulse function" );
-				pulser_struct[ Cur_Pulser ].set_pulse_function( pnum,
-														 ( int ) v->val.lval );
-				vars_pop( v );
+				pulser_struct[ Cur_Pulser ].set_pulse_function( pnum, func );
 				break;
 
 			case P_POS :
-				vars_check( v, INT_VAR | FLOAT_VAR );
+				pos = get_double( v, "pulse position" );
+				vars_pop( v );
 				is_pulser_func( pulser_struct[ Cur_Pulser ].set_pulse_position,
 								"setting a pulse position" );
-				pulser_struct[ Cur_Pulser ].set_pulse_position( pnum,
-																VALUE( v ) );
-				vars_pop( v );
+				pulser_struct[ Cur_Pulser ].set_pulse_position( pnum, pos );
 				break;
 
 			case P_LEN :
-				vars_check( v, INT_VAR | FLOAT_VAR );
+				len = get_double( v, "pulse length" );
+				vars_pop( v );
 				is_pulser_func( pulser_struct[ Cur_Pulser ].set_pulse_length,
 								"setting a pulse length" );
-				pulser_struct[ Cur_Pulser ].set_pulse_length( pnum,
-															  VALUE( v ) );
-				vars_pop( v );
+				pulser_struct[ Cur_Pulser ].set_pulse_length( pnum, len );
 				break;
 
 			case P_DPOS :
-				vars_check( v, INT_VAR | FLOAT_VAR );
+				dpos = get_double( v, "pulse position change" );
+				vars_pop( v );
 				is_pulser_func(
 					pulser_struct[ Cur_Pulser ].set_pulse_position_change,
 					"setting a pulse position change" );
 				pulser_struct[ Cur_Pulser ].set_pulse_position_change( pnum,
-																  VALUE( v ) );
-				vars_pop( v );
+																	   dpos );
 				break;
 
 			case P_DLEN :
-				vars_check( v, INT_VAR | FLOAT_VAR );
+				dlen = get_double( v, "pulse length change" );
+				vars_pop( v );
 				is_pulser_func(
 					pulser_struct[ Cur_Pulser ].set_pulse_length_change,
 					"setting a pulse length change" );
 				pulser_struct[ Cur_Pulser ].set_pulse_length_change( pnum,
-																  VALUE( v ) );
-				vars_pop( v );
+																	 dlen );
 				break;
 
 			case P_PHASE :
-				vars_check( v, INT_VAR );
+				phase = get_strict_long( v, "pulse phase cycle" );
+				vars_pop( v );
 				is_pulser_func(
 					pulser_struct[ Cur_Pulser ].set_pulse_phase_cycle,
 					"setting a pulse phase cycle" );
 				pulser_struct[ Cur_Pulser ].set_pulse_phase_cycle( pnum,
-																 v->val.lval );
-				vars_pop( v );
+																   phase );
 				break;
 
 			default:
@@ -1377,12 +1332,15 @@ void p_phs_end( int func )
 
 void p_set_psd( int func, Var *v )
 {
+	double psd;
+
+
 	fsc2_assert( func == 0 || func == 1 );
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	psd = get_double( v, "phase switch delay" );
+	vars_pop( v );
 	is_pulser_func( pulser_struct[ Cur_Pulser ].set_phase_switch_delay,
 					"setting a phase switch delay" );
-
 
 	TRY
 	{
@@ -1394,7 +1352,7 @@ void p_set_psd( int func, Var *v )
 	TRY
 	{
 		pulser_struct[ Cur_Pulser ].set_phase_switch_delay( func == 0 ?
-				 PULSER_CHANNEL_PHASE_1 : PULSER_CHANNEL_PHASE_2, VALUE( v ) );
+				 PULSER_CHANNEL_PHASE_1 : PULSER_CHANNEL_PHASE_2, psd );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1404,7 +1362,6 @@ void p_set_psd( int func, Var *v )
 	}
 
 	call_pop( );
-	vars_pop( v );
 }
 
 
@@ -1414,9 +1371,14 @@ void p_set_psd( int func, Var *v )
 
 void p_set_gp( Var *v )
 {
+	double gp;
+
+
 	is_pulser_driver( );
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	gp = get_double( v, "grace period" );
+	vars_pop( v );
 	is_pulser_func( pulser_struct[ Cur_Pulser ].set_grace_period,
 					"setting a grace period" );
 
@@ -1429,7 +1391,7 @@ void p_set_gp( Var *v )
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].set_grace_period( VALUE( v ) );
+		pulser_struct[ Cur_Pulser ].set_grace_period( gp );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1439,7 +1401,6 @@ void p_set_gp( Var *v )
 	}
 
 	call_pop( );
-	vars_pop( v );
 }
 
 
