@@ -1130,12 +1130,12 @@ bool spex_cd2a_read_state( void )
 
 	} while ( ! found_end );
 
-	T_free( fn );
 	fsc2_fclose( fp );
 
 	if ( val[ 1 ] <= 0.0 )
 	{
 		print( FATAL, "Invalid state file '%s'.\n", fn );
+		T_free( fn );
 		THROW( EXCEPTION );
 	}	
 
@@ -1147,6 +1147,7 @@ bool spex_cd2a_read_state( void )
 		if ( val[ 2 ] <= 0.0 )
 		{
 			print( FATAL, "Invalid state file '%s'.\n", fn );
+			T_free( fn );
 			THROW( EXCEPTION );
 		}	
 		spex_cd2a.laser_wavenumber = val[ 2 ];
@@ -1157,6 +1158,7 @@ bool spex_cd2a_read_state( void )
 		spex_cd2a.pixel_diff = val[ 1 ];
 	}
 
+	T_free( fn );
 	return OK;
 }
 
