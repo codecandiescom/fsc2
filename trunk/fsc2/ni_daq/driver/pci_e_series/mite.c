@@ -122,11 +122,12 @@ int pci_dma_buf_setup( Board *board, NI_DAQ_SUBSYSTEM sys,
 	int i;
 
 
-	/* If there's already memory allocated for the subsystem release it */
+	/* Make sure memory already allocated for the subsystem is released
+	   before we continue */
 
 	pci_dma_buf_release( board, sys );
 
-	/* Make sure the buffer size fits the page size */
+	/* Make the buffers size fit the page size */
 
 	while ( buf_size < DMA_BUFFER_SIZE )
 	{
@@ -282,7 +283,7 @@ int pci_dma_buf_setup( Board *board, NI_DAQ_SUBSYSTEM sys,
 /* When the function returns 'size' points to the number of    */
 /* transfered bytes. A negative return value indicates an      */
 /* error, a return value of 0 means that everything went well  */
-/* and there are still more data to be expected and a value    */
+/* and there are still more data to be expected, while a value */
 /* of 1 also means success but that all data to be expected    */
 /* now have been fetched and the DMA system has been shut down */
 /* (and a further call would fail unless a new acquisition has */
@@ -405,8 +406,8 @@ size_t pci_dma_get_available( Board *board, NI_DAQ_SUBSYSTEM sys )
 	   last data point read later on was garbage when during the reading
 	   the data there was heavy disk I/O (also using DMA) going on. That's
 	   also why the the next two lines aren't written as a single line,
-	   because then the compiler rearranged the reads to read the FCR first
-	   and the DAR only afterwards. */
+	   when doing so the compiler rearranged the code to read the FCR
+	   first and the DAR only afterwards. */
 
 	u32 avail = le32_to_cpu( readl( mite_DAR( sys ) ) );
 
