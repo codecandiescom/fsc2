@@ -65,7 +65,7 @@ static void f_objdel_child( Var *v );
 static void f_objdel_parent( Var *v );
 static Var *f_obj_clabel_child( long ID, char *label );
 static Var *f_obj_xable_child( long ID, long state );
-static int tool_box_close_handler( FL_FORM *a, void *b );
+static int toolbox_close_handler( FL_FORM *a, void *b );
 static FL_OBJECT *append_object_to_form( IOBJECT *io, int *w, int *h );
 static void normal_button_setup( IOBJECT *io );
 static void push_button_setup( IOBJECT *io );
@@ -86,7 +86,7 @@ static Var *f_tb_wait_child( Var *v );
 /* Function for initializing the toolbox */
 /*---------------------------------------*/
 
-void tool_box_create( long layout )
+void toolbox_create( long layout )
 {
 	if ( Toolbox != NULL )
 		return;
@@ -155,7 +155,7 @@ void tool_box_create( long layout )
 /* Function for finally deleting the toolbox */
 /*-------------------------------------------*/
 
-void tool_box_delete( void )
+void toolbox_delete( void )
 {
 	if ( Internals.mode != TEST && Toolbox->Tools )
 	{
@@ -223,7 +223,7 @@ void parent_freeze( int freeze )
 		/* Set a close handler that avoids that the tool box window can be
 		   closed */
 
-		fl_set_form_atclose( Toolbox->Tools, tool_box_close_handler, NULL );
+		fl_set_form_atclose( Toolbox->Tools, toolbox_close_handler, NULL );
 
 		Toolbox->has_been_shown = SET;
 	}
@@ -309,7 +309,7 @@ Var *f_layout( Var *v )
 
 	/* Set up structure for tool box */
 
-	tool_box_create( layout );
+	toolbox_create( layout );
 
 	return vars_push( INT_VAR, layout );
 }
@@ -932,7 +932,7 @@ void recreate_Toolbox( void )
 		/* Set a close handler that avoids that the tool box window can be
 		   closed */
 
-		fl_set_form_atclose( Toolbox->Tools, tool_box_close_handler, NULL );
+		fl_set_form_atclose( Toolbox->Tools, toolbox_close_handler, NULL );
 
 		Toolbox->has_been_shown = SET;
 	}
@@ -946,7 +946,7 @@ void recreate_Toolbox( void )
 /* the event.                                                         */
 /*--------------------------------------------------------------------*/
 
-static int tool_box_close_handler( FL_FORM *a, void *b )
+static int toolbox_close_handler( FL_FORM *a, void *b )
 {
 	UNUSED_ARGUMENT( a );
 	UNUSED_ARGUMENT( b );
