@@ -311,6 +311,7 @@ extern Graphics_2d G2;
 extern Cut_Graphics CG;
 
 extern bool need_GPIB;
+extern bool need_RULBUS;
 
 extern Phase_Sequence *PSeq;
 extern Acquisition_Sequence ASeq[ 2 ];

@@ -1675,6 +1675,7 @@ void clean_up( void )
 
 	delete_devices( );
 	need_GPIB = UNSET;
+	need_RULBUS = UNSET;
 	fsc2_final_serial_cleanup( );
 
 	/* Delete function list */

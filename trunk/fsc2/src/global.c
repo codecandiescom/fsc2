@@ -36,6 +36,7 @@ COMMUNICATION Comm;
 GUI_Stuff GUI;
 
 bool need_GPIB = UNSET;          /* Flag, set if GPIB bus is needed */
+bool need_RULBUS = UNSET;        /* Flag, set if RULBUS is needed */
 
 const char *Channel_Names[ NUM_CHANNEL_NAMES ] =
 	{

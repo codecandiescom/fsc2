@@ -37,7 +37,7 @@
 
 %}
 
-STRING   \"[^"]+\"
+STRING   ["'][^"']+["']
 
 		/*---------------*/
 %%		/*     RULES     */
@@ -51,6 +51,8 @@ STRING   \"[^"]+\"
 "name"     return NAME_TOKEN;
 "type"     return TYPE_TOKEN;
 "addr"     return ADDR_TOKEN;
+"range"    return RANGE_TOKEN;
+"polar"    return POLAR_TOKEN;
 
 0[0-3][0-7]{0,2} {   /* octal number between 0 and 0377 */
                sscanf( yytext, "%o", &yylval.ival ); 

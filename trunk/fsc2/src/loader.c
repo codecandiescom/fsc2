@@ -55,6 +55,7 @@ void load_all_drivers( void )
 {
 	Device *cd;
 	bool saved_need_GPIB;
+	bool saved_need RULBUS;
 
 
 	/* Treat "User_Functions" also as a kind of device driver and append
@@ -101,6 +102,7 @@ void load_all_drivers( void )
 		for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
 		{
 			saved_need_GPIB = need_GPIB;
+			saved_need_RULBUS = need_RULBUS;
 
 			if ( cd->is_loaded && cd->driver.is_init_hook )
 			{
@@ -119,6 +121,9 @@ void load_all_drivers( void )
 
 			if ( need_GPIB == UNSET && saved_need_GPIB == SET )
 				need_GPIB = SET;
+
+			if ( need_RULBUS == UNSET && saved_need_RULBUS == SET )
+				need_RULBUS = SET;
 		}
 
 		TRY_SUCCESS;

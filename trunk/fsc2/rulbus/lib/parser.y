@@ -332,7 +332,5 @@ static int set_rack( void )
 
 static void yyerror( const char *s )
 {
-	extern char *yytext;
 	s = s;
-	fprintf( stderr, "%s %s\n", s, yytext );
 }

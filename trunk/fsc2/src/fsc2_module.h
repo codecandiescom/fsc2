@@ -97,6 +97,7 @@ extern Acquisition_Sequence ASeq[ ];
 extern long Cur_Pulser;
 
 extern bool need_GPIB;
+extern bool need_RULBUS;
 
 
 extern const char *Channel_Names[ NUM_CHANNEL_NAMES ];
