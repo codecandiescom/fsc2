@@ -465,7 +465,7 @@ Var *lockin_phase( Var *v )
 	if ( v == 0 )
 	{
 		if ( TEST_RUN )
-			return vars_push( FLOAT_VAR, 0 );
+			return vars_push( FLOAT_VAR, 0.0 );
 		else
 		{
 			if ( I_am == PARENT )
