@@ -1,3 +1,13 @@
+/*
+  $Id$
+
+  $Log$
+  Revision 1.10  1999/07/21 07:09:39  jens
+  *** empty log message ***
+
+*/
+
+
 /*****************************************************************/
 /* This is the lexer for the PREPARATIONS section of an EDL file */
 /*****************************************************************/
@@ -54,7 +64,7 @@ PREP        ^[ \t]*PREP(ARATION)?S?:
 EXP         ^[ \t]*EXP(ERIMENT)?:
 
 ESTR        \x5.*\x3\n.*\n
-STR         \x5.*\x6
+STR         \x5[^\x6]*\x6
 
 MW          M(ICRO)?_?W(AVE)?:?
 TWT         T(RAVELING)?_?W(AVE)?_?T(UBE)?:?
