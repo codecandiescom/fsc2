@@ -22,14 +22,13 @@
 */
 
 
-#define RS_SPEC10_MAIN
-
 #include "rs_spec10.h"
 
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
+RS_SPEC10 *rs_spec10, rs_spec10_prep, rs_spec10_test, rs_spec10_exp;
 
 
 /*----------------------------------------------------------------*/

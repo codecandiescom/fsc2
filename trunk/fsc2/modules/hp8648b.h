@@ -125,21 +125,9 @@ struct HP8648B {
 };
 
 
-
-#if defined( HP8648B_MAIN )
-
-HP8648B hp8648b;
-const char *mod_types[ ] =   { "FM", "AM", "PHASE", "OFF" };
-const char *mod_sources[ ] = { "EXT AC", "EXT DC", "INT 1kHz", "INT 400 Hz" };
-
-#else
-
 extern HP8648B hp8648b;
 extern const char *mod_types[ ];
 extern const char *mod_sources[ ];
-
-#endif
-
 
 
 /* functions defined in "hp8648b_util.c" */

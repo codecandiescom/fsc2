@@ -76,16 +76,7 @@ struct RS_SPEC10 {
 };
 
 
-
-#if defined RS_SPEC10_MAIN
-
-RS_SPEC10 *rs_spec10, rs_spec10_prep, rs_spec10_test, rs_spec10_exp;
-
-#else
-
 extern RS_SPEC10 *rs_spec10, rs_spec10_prep, rs_spec10_test, rs_spec10_exp;
-
-#endif
 
 
 #define RS_SPEC10_TEST_TEMP      180.0    /* in Kelvin */
