@@ -57,7 +57,7 @@ int ep385_init_hook( void )
 	ep385.keep_all     = UNSET;
 	ep385.is_cw_mode   = UNSET;
 
-	pulser_struct.set_timebase = NULL;
+	pulser_struct.set_timebase = ep385_store_timebase;
 
 	pulser_struct.assign_function = NULL;
 	pulser_struct.assign_channel_to_function =
@@ -101,8 +101,8 @@ int ep385_init_hook( void )
 
 	/* Finally, we initialize variables that store the state of the pulser */
 
-	ep385.timebase = FIXED_TIMEBASE;
-	ep385.is_timebase = SET;
+	ep385.is_timebase = UNSET;
+	ep385.timebase_mode = EXTERNAL;
 	ep385.is_trig_in_mode = UNSET;
 	ep385.is_repeat_time = UNSET;
 	ep385.is_neg_delay = UNSET;
@@ -147,6 +147,15 @@ int ep385_init_hook( void )
 
 int ep385_test_hook( void )
 {
+	/* Make real sure that a timebase is set (shouldn't be needed) */
+
+	if ( ! ep385.is_timebase )
+	{
+		ep385.is_timebase = SET;
+		ep385.timebase_mode = INTERNAL;
+		ep385.timebase = FIXED_TIMEBASE;
+	}
+
 	if ( ep385_Pulses == NULL && ! ep385.is_cw_mode )
 	{
 		ep385_is_needed = UNSET;
@@ -479,7 +488,7 @@ Var *pulser_shift( Var *v )
 
 	if ( ep385.is_cw_mode )
 	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
+		print( FATAL, "Pulses can't be shifted in CW mode.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -557,7 +566,7 @@ Var *pulser_increment( Var *v )
 
 	if ( ep385.is_cw_mode )
 	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
+		print( FATAL, "Pulses can't be changed in CW mode.\n" );
 		THROW( EXCEPTION );
 	}
 

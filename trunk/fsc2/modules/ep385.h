@@ -173,6 +173,7 @@ typedef struct {
 
 	double timebase;         /* time base of the digitizer */
 	bool is_timebase;
+	bool timebase_mode;      /* INTERNAL (default) or external */
 
 	int trig_in_mode;        /* EXTERNAL or INTERNAL */
 	bool is_trig_in_mode;
@@ -273,6 +274,7 @@ extern PHASE_SETUP ep385_phs[ 2 ];
 
 /* Here follow the functions from ep385_gen.c */
 
+bool ep385_store_timebase( double timebase );
 bool ep385_assign_channel_to_function( int function, long channel );
 bool ep385_set_function_delay( int function, double delay );
 bool ep385_set_trigger_mode( int mode );

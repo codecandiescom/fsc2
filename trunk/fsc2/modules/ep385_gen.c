@@ -37,7 +37,7 @@ bool ep385_store_timebase( double timebase )
 {
 	if ( ep385.is_timebase )
 	{
-		if ( ep385.timebase_mode = EXTERNAL )
+		if ( ep385.timebase_mode == EXTERNAL )
 			print( FATAL, "Time base (external) has already been set to %s.\n",
 				   ep385_ptime( ep385.timebase ) );
 		else
@@ -49,11 +49,10 @@ bool ep385_store_timebase( double timebase )
 
 	if ( timebase < FIXED_TIMEBASE )
 	{
-		char *min =
-			T_strdup( ep385_ptime( ( double ) FIXED_TIMEBASE ) );
+		char *min = T_strdup( ep385_ptime( ( double ) FIXED_TIMEBASE ) );
 
 		print( FATAL, "Invalid time base of %s, must be at least  %s.\n",
-			   ep385_ptime( timebase ), min, max );
+			   ep385_ptime( timebase ), min );
 		T_free( min );
 		THROW( EXCEPTION );
 	}
