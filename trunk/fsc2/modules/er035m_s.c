@@ -739,7 +739,8 @@ static bool er035m_s_read( char *buf, long *len )
 	if ( ! nmr.prompt )
 		nmr.prompt = buf[ 0 ];
 
-	/* Make buffer end with zero and remove leading prompt characters */
+	/* Make buffer end with zero and remove leading prompt characters if
+	   there are any */
 
 	*( strchr( buf, '\r' ) ) = '\0';
 	*len = strlen( buf );
@@ -761,7 +762,7 @@ static bool er035m_s_comm( int type, ... )
 	char *buf;
 	long len;
 	long *lptr;
-	long read_retries = 10;
+	long read_retries = 10;            /* number of times we try to read */
 
 
 	va_start( ap, type );
@@ -793,7 +794,6 @@ static bool er035m_s_comm( int type, ... )
 			len = va_arg( ap, long );
 			if ( write( nmr.fd, buf, len ) != len )
 			{
-				perror( "Shit happend in WRITE" );
 				va_end( ap );
 				return FAIL;
 			}
@@ -813,8 +813,6 @@ static bool er035m_s_comm( int type, ... )
 				
 			if ( len < 0 )
 			{
-				printf( "%ld, errno = %d\n", read_retries, errno );
-				perror( "Shit happend in READ" );
 				*lptr = 0;
 				va_end( ap );
 				return FAIL;
