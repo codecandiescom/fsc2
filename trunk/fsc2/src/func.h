@@ -61,7 +61,7 @@ typedef struct
 
 bool functions_init( void );
 void functions_exit( void );
-int function_exist( const char *name );
+int func_exist( const char *name );
 Var *func_get( const char *name, int *access );
 Var *func_get_long( const char *name, int *access, bool flag );
 Var *func_call( Var *f );

@@ -238,7 +238,7 @@ void functions_exit( void )
 /* fnction exists.                                                   */
 /*-------------------------------------------------------------------*/
 
-int function_exist( const char *name )
+int func_exist( const char *name )
 {
 	return NULL != bsearch( name, Fncts, Num_Func, sizeof( Func ), func_cmp2 );
 }
