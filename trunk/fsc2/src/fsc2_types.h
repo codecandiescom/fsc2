@@ -71,6 +71,7 @@
 #define DG2020_STORE_P   ( DG2020_STORE * )
 #define CHANNEL_PP       ( CHANNEL ** )
 #define WINDOW_P         ( WINDOW * )
+#define PULSE_PARAMS_P   ( PULSE_PARAMS * )
 
 #else
 
@@ -111,6 +112,7 @@
 #define DG2020_STORE_P
 #define CHANNEL_PP
 #define WINDOW_P
+#define PULSE_PARAMS_P
 
 #endif
 
