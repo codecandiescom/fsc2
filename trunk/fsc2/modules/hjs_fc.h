@@ -72,6 +72,8 @@ Var *get_field( Var *v );
 Var *sweep_up( Var *v );
 Var *sweep_down( Var *v );
 Var *reset_field( Var *v );
+Var *magnet_B0( Var *v );
+Var *magnet_slope( Var *v );
 
 void hjs_fc_read_calibration( void );
 

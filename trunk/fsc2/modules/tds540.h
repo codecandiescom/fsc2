@@ -65,6 +65,7 @@
 
 
 #define NUM_NORMAL_CHANNELS       ( TDS540_CH4 + 1 )
+#define NUM_MEAS_CHANNELS         ( TDS540_MATH3 + 1 )
 #define NUM_DISPLAYABLE_CHANNELS  ( TDS540_REF4 + 1 )
 #define MAX_SIMULTANEOUS_CHANNELS 4
 
@@ -228,6 +229,7 @@ Var *digitizer_get_amplitude( Var *v );
 Var *digitizer_get_amplitude_fast( Var *v );
 Var *digitizer_run( Var *v );
 Var *digitizer_lock_keyboard( Var *v );
+Var *digitizer_copy_curve( Var *v );
 Var *digitizer_command( Var *v );
 
 
@@ -278,6 +280,7 @@ void tds540_get_curve( int channel, WINDOW *w, double **data, long *length,
 double tds540_get_amplitude( int channel, WINDOW *w, bool use_cursor );
 void tds540_free_running( void );
 void tds540_lock_state( bool lock );
+void tds540_copy_curve( int src, int dest );
 bool tds540_command( const char *cmd );
 
 

@@ -590,6 +590,52 @@ Var *reset_field( Var *v )
 }
 
 
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+Var *magnet_B0( Var *v )
+{
+	if ( v != NULL )
+	{
+		print( FATAL, "Field for DAC output of 0 V can't be set for this "
+			   "driver, only query is possible.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( FSC2_MODE == PREPARATION )
+	{
+		print( FATAL, "Field for DAC output of 0 V can only be queried during "
+			   "the EXPERIMENT section.\n" );
+		THROW( EXCEPTION );
+	}
+
+	return vars_push( FLOAT_VAR, hjs_fc.B0V );
+}
+
+
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+Var *magnet_slope( Var *v )
+{
+	if ( v != NULL )
+	{
+		print( FATAL, "Field change for 1 V DAC voltage increment can't be "
+			   "set for this driver, only query is possible.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( FSC2_MODE == PREPARATION )
+	{
+		print( FATAL, "Field change for 1 V DAC voltage increment can only be "
+			   "queried during the EXPERIMENT section.\n" );
+		THROW( EXCEPTION );
+	}
+
+	return vars_push( FLOAT_VAR, hjs_fc.slope );
+}
+
+
 /*-------------------------------------------*/
 /*                                           */
 /*           Low level functions             */

@@ -51,6 +51,7 @@
 
 
 #define NUM_NORMAL_CHANNELS       ( TDS520C_CH2 + 1 )
+#define NUM_MEAS_CHANNELS         ( TDS520C_MATH3 + 1 )
 #define NUM_DISPLAYABLE_CHANNELS  ( TDS520C_AUX2 + 1 )
 #define MAX_SIMULTANEOUS_CHANNELS 2
 
@@ -237,6 +238,7 @@ Var *digitizer_get_amplitude( Var *v );
 Var *digitizer_get_amplitude_fast( Var *v );
 Var *digitizer_run( Var *v );
 Var *digitizer_lock_keyboard( Var *v );
+Var *digitizer_copy_curve( Var *v );
 Var *digitizer_command( Var *v );
 
 
@@ -287,6 +289,7 @@ void tds520c_get_curve( int channel, WINDOW *w, double **data, long *length,
 double tds520c_get_amplitude( int channel, WINDOW *w, bool use_cursor );
 void tds520c_free_running( void );
 void tds520c_lock_state( bool lock );
+void tds520c_copy_curve( int src, int dest );
 bool tds520c_command( const char *cmd );
 
 

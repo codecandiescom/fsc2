@@ -52,6 +52,7 @@
 
 
 #define NUM_NORMAL_CHANNELS       ( TDS744A_CH4 + 1 )
+#define NUM_MEAS_CHANNELS         ( TDS744A_MATH3 + 1 )
 #define NUM_DISPLAYABLE_CHANNELS  ( TDS744A_REF4 + 1 )
 #define MAX_SIMULTANEOUS_CHANNELS 4
 
@@ -234,6 +235,7 @@ Var *digitizer_get_amplitude( Var *v );
 Var *digitizer_get_amplitude_fast( Var *v );
 Var *digitizer_run( Var *v );
 Var *digitizer_lock_keyboard( Var *v );
+Var *digitizer_copy_curve( Var *v );
 Var *digitizer_command( Var *v );
 
 
@@ -284,6 +286,7 @@ void tds744a_get_curve( int channel, WINDOW *w, double **data, long *length,
 double tds744a_get_amplitude( int channel, WINDOW *w, bool use_cursors );
 void tds744a_free_running( void );
 void tds744a_lock_state( bool lock );
+void tds744a_copy_curve( int src, int dest );
 bool tds744a_command( const char *cmd );
 
 

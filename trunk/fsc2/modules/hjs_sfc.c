@@ -410,6 +410,13 @@ Var *magnet_B0( Var *v )
 	if ( v == NULL )
 		return vars_push( FLOAT_VAR, hjs_sfc.B0V );
 
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		print( FATAL, "Field for DAC output of 0 V can only be set during the "
+			   "PREPARATIONS section.\n" );
+		THROW( EXCEPTION );
+	}
+
 	if ( hjs_sfc.B0V_has_been_used )
 	{
 		print( FATAL, "Field for DAC output of 0 V has already been used, "
@@ -443,6 +450,13 @@ Var *magnet_slope( Var *v )
 
 	if ( v == NULL )
 		return vars_push( FLOAT_VAR, hjs_sfc.slope );
+
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		print( FATAL, "Field change for 1 V DAC voltage increment can only "
+			   "be set during the PREPARATIONS section.\n" );
+		THROW( EXCEPTION );
+	}
 
 	if ( hjs_sfc.slope_has_been_used )
 	{

@@ -1318,6 +1318,15 @@ call of @code{digitizer_averaging()}. It needs exactly one argument, the
 the channel used to do the averaging, i.e.@: either @code{FUNC_E} or
 @code{FUNC_F}.
 
+@strong{Please note}: Anton Savitzky noticed that there seems to be
+firmware bug in the @code{Tektronix} digitzers from the 500 series
+(i.e. @code{TDS520}, @code{TDS520A}, @code{TDS520C} and @code{TDS540}).
+For numbers of averages above about 16 only half of the number of
+averages seem to be taken by the device it has been instructed to do.
+It's hard to say which is the exact number of averages this bug starts
+at because it only shows up in the signal-to-noise ratio being worse
+by a factor of the square root of 2 than is to be expected.
+
 
 @anchor{digitizer_averaging}
 @item digitizer_averaging()
@@ -1736,6 +1745,36 @@ following an acquisition (at least up to the next
 @code{digitizer_start_acquisition()} command) use this function. It
 accepts no arguments and can only be used in the @code{EXPERIMENT}
 section.
+
+
+@anchor{digitizer_copy_curve}
+@item digitizer_copy_curve()
+@findex digitizer_copy_curve()
+This function is only available for the @code{Tektronix} digitizers and
+allows to save a curve from on of the normal or @code{MATH} channels to
+one of the @code{REF} channels. It takes two arguments, first the source
+channel, i.e.@: the channel to copy the data from, which must be
+(depending on the model of the digitizer)
+@table @samp
+@item TDS520
+@itemx TDS520A
+@itemize @bullet
+@item @code{CH1} or @code{CH2}
+@item @code{MATH1}, @code{MATH2} or @code{MATH3}
+@end itemize
+@item TDS540
+@itemx TDS744A
+@itemx TDS754A
+@itemize @bullet
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
+@item @code{MATH1}, @code{MATH2} or @code{MATH3}
+@end itemize
+@end table
+The second argument is the reference channel the data are to be copied
+to, i.e.@: on from
+@itemize @bullet
+@item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
+@end itemize
 
 
 @anchor{digitizer_lock_keyboard}
