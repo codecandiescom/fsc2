@@ -7,12 +7,12 @@
 #prefix         = /usr/local
 #bindir         = $(prefix)/bin
 #libdir         = $(prefix)/lib/fsc2
-#auxdir         = $(prefix)/lib/fsc2/aux
+#auxdir         = $(libdir)/aux
 
 prefix         = .
 bindir         = $(prefix)
 libdir         = $(prefix)
-auxdir         = $(prefix)/aux
+auxdir         = $(libdir)/aux
 
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log
@@ -28,8 +28,9 @@ AWK            = /usr/bin/awk
 
 SHELL          = /bin/sh
 CC             = gcc
-CFLAGS        += -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
-			     -Wmissing-prototypes -Wmissing-declarations -W \
+CFLAGS        += -I. -I./src -I./modules -I./aux -ggdb -Wall -Wwrite-strings \
+				 -Wstrict-prototypes -Wmissing-prototypes \
+				 -Wmissing-declarations -W \
 				 # -DDEBUG \
 				 # -DMDEBUG # for malloc debugging
 				 # -DMAX_DEBUG # for debugging of digitizer
@@ -50,16 +51,19 @@ RMFLAGS        = -f
 ############################################################################
 
 
-bison_sources  = $(wildcard *_parser.y)
-flex_sources   = $(wildcard *_lexer.flex)
+VPATH          = src:modules
+
+
 c_sources      = fsc2.c fsc2_rsc.c pulser.c util.c exceptions.c variables.c \
 				 func.c T.c phases.c exp.c devices.c gpib.c run.c comm.c \
 				 chld_func.c graphics.c accept.c graph_handler_1d.c \
 				 graph_handler_2d.c loader.c bugs.c print.c
+bison_sources  = $(notdir $(wildcard src/*_parser.y))
+flex_sources   = $(notdir $(wildcard src/*_lexer.flex))
 sources        = $(bison_sources:.y=.c) $(flex_sources:.flex=.c) \
 				 ${c_sources}
 objects        = $(sources:.c=.o)
-header         = ${c_sources:.c=.h} global.h
+headers        = ${c_sources:.c=.h} global.h
 modules        = User_Functions.c sr510.c sr810.c s_band.c aeg_x_band.c \
 				 er035m.c bh15.c hp8647a.c
 dg2020_f       = dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
@@ -94,34 +98,32 @@ ifdef auxdir
 	CFLAGS += -Dauxdir=\"$(auxdir:/=)/\"
 endif
 
-VPATH       = .:./modules
 
 
 # Switch off all implicit rules and set suffices of file to be made by make
 
 .SUFFIXES:
 .SUFFIXES: .c .o .h
-.PHONY: all clean .FORCE
+.PHONY: all clean distclean
 
 
 # default rule: make the main program, the modules and the primary lexer
 
 all: fsc2 fsc2_clean mods
 
-
 # make the main program from the c, flex and bison source files
 
-fsc2: $(objects) $(header)
+fsc2: $(objects) $(headers)
 	$(CC) -o $@ $(objects) $(LIBS) $(LDFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-%.c: %.y $(header)
-	$(BISON) $(BISONFLAGS) $(patsubst %_parser.y,%,$<) -o $@ $<
+%.c: %.y $(headers)
+	$(BISON) $(BISONFLAGS) $(notdir $(patsubst %_parser.y,%,$<)) -o $@ $<
 
-%.c: %.flex $(header)
-	$(FLEX) $(FLEXFLAGS)$(patsubst %_lexer.flex,%,$<) -o$@ $<
+%.c: %.flex $(headers)
+	$(FLEX) $(FLEXFLAGS)$(notdir $(patsubst %_lexer.flex,%,$<)) -o$@ $<
 	sed -e 's/register char \*yy_cp, \*yy_bp;/register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
 	mv -f $@.x $@
 
@@ -130,7 +132,7 @@ fsc2: $(objects) $(header)
 fsc2_clean: fsc2_clean.o exceptions.o
 	$(CC) -o $@ $^ -lfl -lm
 
-fsc2_clean.c: fsc2_clean.flex $(header)
+fsc2_clean.c: fsc2_clean.flex $(headers)
 	$(FLEX) -B -o$@ $<
 
 # make the modules - the pulser and digitizer modules have to be handled
@@ -164,7 +166,7 @@ ${dg2020_b:.c=.lo}: dg2020_b.h
 ${tds754a:.c=.lo}: tds754a.h
 ${tds520a:.c=.lo}: tds520a.h
 
-%.lo: %.c $(header)
+%.lo: %.c $(headers)
 	$(CC) $(CFLAGS) -c -fPIC $< -o $*.lo
 
 
@@ -174,19 +176,24 @@ install:
 	install -d $(bindir)
 	install -m 6755 -o fsc2 -g fsc2 -s fsc2 $(bindir)
 	install -d $(libdir)
+	install -d $(auxdir)
 	install -m 755 -o fsc2 -g fsc2 -s fsc2_clean $(libdir)
 	install -m 644 -o fsc2 -g fsc2 -s *.so $(libdir)
-	install -m 644 -o fsc2 -g fsc2 -s *.xpm $(libdir)
+	install -m 644 -o fsc2 -g fsc2 -s *.xpm $(auxdir)
 
 
 tags:
-	etags -T ${c_sources} *.flex *.y ${c_sources:.c=.h} $(header)  \
+	etags -T ${c_sources} *.flex *.y ${c_sources:.c=.h} $(headers)  \
 		  ${modules} ${dg2020_f} dg2020_f.h ${dg2020_b} dg2020_b.h \
 		  ${tds754a} tds754a.h ${tds520a} tds520a.h
 
 
 clean: 
-	$(RM) $(RMFLAGS) *.o fsc2_clean fsc2 *.output *_parser.c *_parser.h \
+	$(RM) $(RMFLAGS) *.o *.output *_parser.c *_parser.h \
+		*_lexer.c fsc2_clean.c *.lo *.so TAGS mem
+
+distclean: 
+	$(RM) $(RMFLAGS) fsc2 fsc2_clean *.o *.output *_parser.c *_parser.h \
 		*_lexer.c fsc2_clean.c *.lo *.so TAGS mem
 
 # don't delete intermediate files created by bison and flex
