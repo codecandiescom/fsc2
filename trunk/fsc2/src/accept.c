@@ -599,21 +599,21 @@ static void accept_1d_data( long x_index, long curve, Var_Type_T type,
 		}
 	}
 
-	/* Calculate new points for display */
+	/* Calculate new points for display (unless no scale is set yet) */
 
-	if ( ! G_1d.is_scale_set )
-		return;
+	if ( G_1d.is_scale_set )
+	{
+		G_1d.rwc_start[ Y ] = G_1d.rw_min;
 
-	G_1d.rwc_start[ Y ] = G_1d.rw_min;
+		/* If the scale did not change redraw only the current curve,
+		   otherwise all curves */
 
-	/* If the scale did not change redraw only the current curve, otherwise all
-	   curves */
-
-	if ( ! ( Scale_1d_changed[ X ] || Scale_1d_changed[ Y ] ) )
-		recalc_XPoints_of_curve_1d( G_1d.curve[ curve ] );
-	else
-		for ( i = 0; i < G_1d.nc; i++ )
-			recalc_XPoints_of_curve_1d( G_1d.curve[ i ] );
+		if ( ! ( Scale_1d_changed[ X ] || Scale_1d_changed[ Y ] ) )
+			recalc_XPoints_of_curve_1d( G_1d.curve[ curve ] );
+		else
+			for ( i = 0; i < G_1d.nc; i++ )
+				recalc_XPoints_of_curve_1d( G_1d.curve[ i ] );
+	}
 }
 
 
@@ -789,21 +789,21 @@ static void accept_1d_data_sliding( long curve, Var_Type_T type, char *ptr )
 
 	cv->count += len;
 
-	/* Calculate new points for display */
+	/* Calculate new points for display (unless no scale is set yet) */
 
-	if ( ! G_1d.is_scale_set )
-		return;
+	if ( G_1d.is_scale_set )
+	{
+		G_1d.rwc_start[ Y ] = G_1d.rw_min;
 
-	G_1d.rwc_start[ Y ] = G_1d.rw_min;
+		/* If the scale did not change recalculate the points of the current
+		   curve only, otherwise the points of all curves */
 
-	/* If the scale did not change recalculate the points of the current curve
-	   only, otherwise the points of all curves */
-
-	if ( ! ( Scale_1d_changed[ X ] || Scale_1d_changed[ Y ] ) )
-		recalc_XPoints_of_curve_1d( G_1d.curve[ curve ] );
-	else
-		for ( i = 0; i < G_1d.nc; i++ )
-			recalc_XPoints_of_curve_1d( G_1d.curve[ i ] );
+		if ( ! ( Scale_1d_changed[ X ] || Scale_1d_changed[ Y ] ) )
+			recalc_XPoints_of_curve_1d( G_1d.curve[ curve ] );
+		else
+			for ( i = 0; i < G_1d.nc; i++ )
+				recalc_XPoints_of_curve_1d( G_1d.curve[ i ] );
+	}
 }
 
 
@@ -1039,7 +1039,7 @@ static void accept_2d_data( long x_index, long y_index, long curve,
 	}
 
 	/* We're done when nothing is to be drawn because no scaling for the curve
-	   is set */
+	   is set yet */
 
 	if ( ! cv->is_scale_set )
 		return;
