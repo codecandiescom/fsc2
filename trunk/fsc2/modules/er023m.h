@@ -104,7 +104,7 @@ extern double mf_list[ MAX_MF_INDEX + 1 ];
 #define MIN_CT_MULT           10       /* 3.2 ms */
 #define MAX_CT_MULT           9999     /* ~ 3.2 s */
 #define UNDEF_CT_MULT         -1
-#define BASE_CT               3.2e-3   /* minimum conversion time */
+#define BASE_CT               3.2e-4   /* minimum conversion time */
 
 
 /* Constants for dealing with the modulation attenuation */
