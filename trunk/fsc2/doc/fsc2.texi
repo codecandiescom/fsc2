@@ -80,6 +80,7 @@ devices to be used in the experiment.
 * Device Functions::        Functions for accessing devices.
 * Using Pulsers::           How to work with the pulsers
 * Command Line Options::    How to invoke @acronym{fsc2}
+* Cloning Devices::         Creating modules for identical devices
 * Modules::                 How to create new modules.
 * Interfacing::             Accessing fsc2 from other programs
 * Reserved Words::          List of all reserved words.
@@ -98,6 +99,7 @@ devices to be used in the experiment.
 @include devices.texi
 @include pulser.texi
 @include cmd.texi
+@include cloning.texi
 @include modules.texi
 @include interfacing.texi
 @include reserved.texi

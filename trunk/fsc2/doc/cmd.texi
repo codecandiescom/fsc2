@@ -20,8 +20,8 @@
 @c Boston, MA 02111-1307, USA.
 
 
-@node Command Line Options, Modules, Using Pulsers, Top
-@chapter Command line options
+@node Command Line Options, Cloning Devices, Using Pulsers, Top
+@chapter Command Line Options
 @cindex command line options
 
 @acronym{fsc2} can be invoked from the command line with the following
