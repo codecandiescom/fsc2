@@ -294,6 +294,8 @@ void death_mail( int signo )
 	char *clp;
 	int lines;
 	int i;
+	char buffer[ 512 ];
+	int count;
 
 
 	if ( ( mail = popen( MAIL_PROGRAM " -s 'fsc2 crash' " MAIL_ADDRESS, "w" ) )
@@ -310,7 +312,15 @@ void death_mail( int signo )
 				 Assert_struct.expression );
 #endif
 
-	fprintf( mail, "Fname = %s, Lc = %ld\n\n", Fname, Lc );
+	if ( signo != SIGABRT && fail_mess_fd >= 0 )
+	{
+		while ( ( count = read( fail_mess_fd, buffer, 512 ) ) > 0 )
+			fwrite( buffer, count, 1, mail );
+		fprintf( mail, "\n" );
+		close( fail_mess_fd );
+	}
+
+	fprintf( mail, "In EDL program Fname = %s at Lc = %ld\n\n", Fname, Lc );
 
 	fputs( "Content of program browser:\n\n"
 		   "--------------------------------------------------\n\n", mail );

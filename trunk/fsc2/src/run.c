@@ -634,11 +634,11 @@ static void run_child( void )
 
 /*--------------------------------------------------------------------*/
 /* Sets up the signal handlers for all kinds of signals the child may */
-/* receive. This probably looks a bit like overkill, but I just wan't */
+/* receive. This probably looks a bit like overkill, but I just want  */
 /* to sure the child doesn't get killed by some meaningless signals   */
 /* and, on the other hand, that on deadly signals it still gets a     */
 /* chance to try to get rid of shared memory that the parent didn't   */
-/* destroyed (in case it was killed by an signal it couldn't catch).  */
+/* destroy (in case it was killed by an signal it couldn't catch).    */
 /*--------------------------------------------------------------------*/
 
 static void set_child_signals( void )
@@ -681,19 +681,22 @@ static void set_child_signals( void )
 /* (but in a controlled way to allow deletion of shared memory if */
 /* the parent didn't do it as expected.                           */
 /* There's a twist: The SIGALRM signal can only come from the     */
-/* f_wait() function (see func_util.c). Here we we wait in a	  */
-/* pause() for SIGALRM to get a reliable timer. On the other	  */
-/* hand, the pause() also has to be interruptible by the		  */
-/* DO_QUIT signal, so by falling through from the switch for	  */
-/* this signal it is guaranteed that also this signal will end	  */
-/* the pause() - it works even when the handler, while handling	  */
-/* a SIGALRM signal, is interrupted by a DO_QUIT signal. In all	  */
-/* other cases (i.e. when we're not waiting in the pause() in	  */
-/* f_wait()) nothing unexpected happens.                          */
+/* f_wait() function (see func_util.c). Here we wait in a pause() */
+/* for SIGALRM to get a reliable timer. On the other hand, the    */
+/* pause() also has to be interruptible by the DO_QUIT signal, so */
+/* by falling through from the switch for this signal it is       */
+/* guaranteed that also this signal will end the pause() - it     */
+/* works even when the handler, while handling a SIGALRM signal,  */
+/* is interrupted by a DO_QUIT signal. In all other cases (i.e.   */
+/* when we're not waiting in the pause() in	f_wait()) nothing     */
+/* unexpected happens.                                            */
 /*----------------------------------------------------------------*/
 
 void child_sig_handler( int signo )
 {
+	extern int flags;
+
+
 	switch ( signo )
 	{
 		case DO_QUIT :                /* aka SIGUSR2 */
@@ -717,6 +720,11 @@ void child_sig_handler( int signo )
 		/* All the remaining signals are deadly... */
 
 		default :
+			if ( signo != SIGABRT  )
+				DumpStack( );
+			if ( ! ( flags & 32 ) )                  /* 32 means NO_MAIL */
+				death_mail( signo );
+
 			/* Test if parent still exists and if not (i.e. the parent died
 			   without sending the child a SGTERM signal) destroy the
 			   semaphore and shared memory (as far as the child knows about

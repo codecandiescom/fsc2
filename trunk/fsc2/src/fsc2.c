@@ -46,7 +46,7 @@ static void start_editor( void );
 static void start_help_browser( void );
 static void set_main_signals( void );
 
-static int flags;
+int flags;
 
 
 
@@ -314,7 +314,7 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 
 static void final_exit_handler( void )
 {
-	/* Stop the process that's waiting for external connections as well
+	/* Stop the process that is waiting for external connections as well
 	   as the child process */
 
 	if ( conn_pid > 0 )
@@ -347,7 +347,7 @@ static void final_exit_handler( void )
 	if ( fsc2_death != 0 && fsc2_death != SIGTERM )
 	{
 		if ( * ( ( int * ) xresources[ NOCRASHMAIL ].var ) == 0 &&
-			 !( flags & NO_MAIL ) )
+			 ! ( flags & NO_MAIL ) )
 			death_mail( fsc2_death );
 		fprintf( stderr, "fsc2 (%d, %s) killed by %s signal.\n", getpid( ),
 				 I_am == CHILD ? "CHILD" : "PARENT", strsignal( fsc2_death ) );
@@ -1179,7 +1179,7 @@ static void set_main_signals( void )
 		if ( sigaction( sig_list[ i ], &sact, NULL ) < 0 )
 		{
 			fprintf( stderr, "Failed to initialize fsc2.\n" );
-			exit( -1 );
+			exit( EXIT_FAILURE );
 		}
 	}
 }
@@ -1228,11 +1228,15 @@ void main_sig_handler( int signo )
 			return;
 
 		/* All the remaining signals are deadly... We set fsc2_death to the
-		   signal so final_exit_handler can do appropriate things. */
+		   signal number so final_exit_handler can do appropriate things. */
 
 		default :
 			fsc2_death = signo;
-			exit( -1 );
+
+			if ( signo != SIGABRT && ! ( flags & NO_MAIL ) )
+				DumpStack( );
+
+			exit( EXIT_FAILURE );
 	}
 }
 
