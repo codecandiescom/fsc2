@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2004 Anton Savitsky
+ *  Copyright (C) 1999-2004 Anton Savitsky / Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -35,15 +35,15 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 /* Some constants needed for the device */
 
-#define TEST_VOLTAGE		20.0    /* in V */
-#define TEST_CURRENT		0.001	/* in A */
+#define TEST_VOLTAGE		20.0        /* in V */
+#define TEST_CURRENT		0.001	    /* in A */
 
-#define MAX_VOLTAGE			2000.0	/* in V */
-#define MIN_VOLTAGE			0.0		/* in V */
-#define VOLTAGE_RESOLUTION	1.0		/* in V */
-#define MAX_CURRENT			0.300	/* in A */
-#define MIN_CURRENT			0.000	/* in A */
-#define CURRENT_RESOLUTION	1.0e-3	/* in A */
+#define MAX_VOLTAGE			2000.0	    /* in V */
+#define MIN_VOLTAGE			0.0		    /* in V */
+#define VOLTAGE_RESOLUTION	1.0		    /* in V */
+#define MAX_CURRENT			0.300	    /* in A */
+#define MIN_CURRENT			0.000	    /* in A */
+#define CURRENT_RESOLUTION	1.0e-3	    /* in A */
 
 
 /* Declaration of exported functions */
@@ -191,7 +191,8 @@ Var_T *powersupply_voltage( Var_T *v )
 		return vars_push( FLOAT_VAR, mcn700_2000.test_volts );
 	}
 
-	return vars_push( FLOAT_VAR, mcn700_2000_set_voltage( voltage ) );
+	mcn700_2000_set_voltage( voltage );
+	return vars_push( FLOAT_VAR, mcn700_2000_get_voltage( ) );
 }
 
 
@@ -238,13 +239,14 @@ Var_T *powersupply_current( Var_T *v )
 		return vars_push( FLOAT_VAR, mcn700_2000.test_amps );
 	}
 
-	return vars_push( FLOAT_VAR, mcn700_2000_set_current( current ) );
+	mcn700_2000_set_current( current );
+	return vars_push( FLOAT_VAR, mcn700_2000_get_current( ) );
 }
 
 
-/*---------------------------------------------------------------*
- * Function for sending a GPIB command directly to power supply.
- *---------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function for sending a GPIB command directly to power supply
+ *--------------------------------------------------------------*/
 
 Var_T *powersupply_command( Var_T *v )
 {
@@ -305,7 +307,6 @@ static double mcn700_2000_set_voltage( double voltage )
 	fsc2_assert( voltage >= MIN_VOLTAGE &&
 				 voltage <= MAX_VOLTAGE );
 
-	voltage = lrnd( voltage / VOLTAGE_RESOLUTION ) * VOLTAGE_RESOLUTION;
 	sprintf( buffer, "U%.2f\n", voltage );
 	mcn700_2000_command( buffer );
 	mcn700_2000_set_voltage_completed( );
@@ -342,7 +343,6 @@ static double mcn700_2000_set_current( double current )
 
 	fsc2_assert( current >= MIN_CURRENT &&
 				 current <= MAX_CURRENT);
-	current = lrnd( current / CURRENT_RESOLUTION ) * CURRENT_RESOLUTION;
 	sprintf( buffer, "I%.3f\n", current );
 	mcn700_2000_command( buffer );
 
@@ -369,7 +369,7 @@ static double mcn700_2000_get_current( void )
 
 
 /*-----------------------------------------------------*
- * Function returns when the voltage control is active
+ * Function returns once the voltage control is active
  *-----------------------------------------------------*/
 
 void mcn700_2000_set_voltage_completed( void )
@@ -380,11 +380,10 @@ void mcn700_2000_set_voltage_completed( void )
 	while ( ! ( stb & 0x04 ) )
 	{
 		fsc2_usleep( 10000, UNSET );
+		stop_on_user_request( );
 
 		if ( gpib_serial_poll( mcn700_2000.device, &stb ) == FAILURE )
 			mcn700_2000_failure( );
-
-		stop_on_user_request( );
 	}
 }
 
