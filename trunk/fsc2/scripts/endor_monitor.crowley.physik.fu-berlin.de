@@ -75,7 +75,7 @@ FOREVER {
 
 	old_freq = freq;
 	freq = input_value( I1 ) * 1.0e6;
-	IF freq < min_freq | freq > max_freq {
+	IF freq < min_freq OR freq > max_freq {
 		freq = old_freq;
 		input_value( I1, freq * 1.0e-6 );
 	} ELSE IF freq != old_freq {
@@ -85,7 +85,7 @@ FOREVER {
 	/* Check value of step frequency */
 
 	new_step_freq = input_value( I2 ) * 1.0e3;
-	IF new_step_freq < min_step_freq | new_step_freq > max_step_freq {
+	IF new_step_freq < min_step_freq OR new_step_freq > max_step_freq {
 		input_value( I2, step_freq * 1.0e-3 );
 	} ELSE {
 		step_freq = new_step_freq;
@@ -101,7 +101,7 @@ FOREVER {
 	/* Check if attenuation has been changed */
 
 	new_atten = input_value( I3 );
-	IF new_atten < min_atten | new_atten > max_atten {
+	IF new_atten < min_atten OR new_atten > max_atten {
 		input_value( I3, atten );
 	} ELSE IF atten != new_atten {
 		atten = new_atten;
@@ -111,7 +111,7 @@ FOREVER {
 	/* If pause is on or frequency has been changed go back to start
 	   after short sleeping period */
 
-	IF button_state( B5 ) | old_freq != freq {
+	IF button_state( B5 ) OR old_freq != freq {
 		wait( 0.5 s );
 		NEXT;
 	}

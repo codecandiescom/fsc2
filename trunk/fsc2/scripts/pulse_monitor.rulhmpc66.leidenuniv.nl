@@ -151,7 +151,7 @@ FOREVER {
 				input_value( PS[ 1 ], PSV[ 1 ] * 10 );
 			} ELSE {
 				NP /= 10;
-				IF NP < PMS[ 1 ] | NP + PLV[ 1 ] + PMS[ 2 ] >= PSV[ 2 ] {
+				IF NP < PMS[ 1 ] OR NP + PLV[ 1 ] + PMS[ 2 ] >= PSV[ 2 ] {
 					input_value( PS[ 1 ], PSV[ 1 ] * 10 );
 				} ELSE {
 					PSV[ 1 ] = NP;
@@ -167,7 +167,7 @@ FOREVER {
 				input_value( PL[ 1 ], PLV[ 1 ] * 10 );
 			} ELSE {
 				NL /= 10;
-				IF NL < 0 | PSV[ 1 ] + NL + PMS[ 2 ] >= PSV[ 2 ] {
+				IF NL < 0 OR PSV[ 1 ] + NL + PMS[ 2 ] >= PSV[ 2 ] {
 					input_value( PL[ 1 ], PLV[ 1 ] * 10 );
 				} ELSE {
 					PLV[ 1 ] = NL;
@@ -185,7 +185,7 @@ FOREVER {
 				input_value( PS[ 2 ], PSV[ 2 ] * 10 );
 			} ELSE {
 				NP /= 10;
-				IF NP <= PSV[ 1 ] + PLV[ 1 ] + PMS[ 2 ] |
+				IF NP <= PSV[ 1 ] + PLV[ 1 ] + PMS[ 2 ] OR
 				   NP + PLV[ 2 ] + PMS[ 3 ] >= PSV[ 3 ] {
 					input_value( PS[ 2 ], PSV[ 2 ] * 10 );
 				} ELSE {
@@ -202,7 +202,7 @@ FOREVER {
 				input_value( PL[ 2 ], PLV[ 2 ] * 10 );
 			} ELSE {
 				NL /= 10;
-				IF NL < 0 | PSV[ 2 ] + NL + PMS[ 3 ] >= PSV[ 3 ] {
+				IF NL < 0 OR PSV[ 2 ] + NL + PMS[ 3 ] >= PSV[ 3 ] {
 					input_value( PL[ 2 ], PLV[ 2 ] * 10 );
 				} ELSE {
 					PLV[ 2 ] = NL;
@@ -220,7 +220,7 @@ FOREVER {
 				input_value( PS[ 3 ], PSV[ 3 ] * 10 );
 			} ELSE {
 				NP /= 10;
-				IF NP <= PSV[ 2 ] + PLV[ 2 ] + PMS[ 3 ] |
+				IF NP <= PSV[ 2 ] + PLV[ 2 ] + PMS[ 3 ] OR
 				   NP + PLV[ 3 ] > MAX_LEN {
 					input_value( PS[ 3 ], PSV[ 3 ] * 10 );
 				} ELSE {
@@ -237,7 +237,7 @@ FOREVER {
 				input_value( PL[ 3 ], PLV[ 3 ] * 10 );
 			} ELSE {
 				NL /= 10;
-				IF NL < 0 | PSV[ 3 ] + NL > MAX_LEN {
+				IF NL < 0 OR PSV[ 3 ] + NL > MAX_LEN {
 					input_value( PL[ 3 ], PLV[ 3 ] * 10 );
 				} ELSE {
 					PLV[ 3 ] = NL;
@@ -255,7 +255,7 @@ FOREVER {
 				input_value( PS[ 4 ], PSV[ 4 ] * 10 );
 			} ELSE {
 				NP /= 10;
-				IF NP <= PMS[ 4 ] | NP > MAX_LEN {
+				IF NP <= PMS[ 4 ] OR NP > MAX_LEN {
 					input_value( PS[ 4 ], PSV[ 4 ] * 10 );
 				} ELSE {
 					PSV[ 4 ] = NP;
@@ -271,7 +271,7 @@ FOREVER {
 				input_value( PL[ 4 ], PLV[ 4 ] * 10 );
 			} ELSE {
 				NL /= 10;
-				IF NL < 0 | NL > MAX_LEN {
+				IF NL < 0 OR NL > MAX_LEN {
 					input_value( PL[ 4 ], PLV[ 4 ] * 10 );
 				} ELSE {
 					PLV[ 4 ] = NL;
@@ -289,7 +289,7 @@ FOREVER {
 				input_value( PS[ 5 ], PSV[ 5 ] * 10 );
 			} ELSE {
 				NP /= 10;
-				IF NP <= PMS[ 5 ] | NP + PLV[ 5 ] > MAX_LEN {
+				IF NP <= PMS[ 5 ] OR NP + PLV[ 5 ] > MAX_LEN {
 					input_value( PS[ 5 ], PSV[ 5 ] * 10 );
 				} ELSE {
 					PSV[ 5 ] = NP;
@@ -305,7 +305,7 @@ FOREVER {
 				input_value( PL[ 5 ], PLV[ 5 ] * 10 );
 			} ELSE {
 				NL /= 10;
-				IF NL < 0 | PSV[ 5 ] + NL > MAX_LEN {
+				IF NL < 0 OR PSV[ 5 ] + NL > MAX_LEN {
 					input_value( PL[ 5 ], PLV[ 5 ] * 10 );
 				} ELSE {
 					PLV[ 5 ] = NL;
@@ -321,7 +321,7 @@ FOREVER {
 		/* Check if the sweep up button has been pressed and start sweeping up
 		   (unless we're already sweeping up) */
 
-		IF  Sweep_State != UP & button_state( Sweep_Up ) {
+		IF  Sweep_State != UP AND button_state( Sweep_Up ) {
 			IF Sweep_State == STOPPED {
 				magnet_sweep( UP );
 				Sweep_State = UP;
@@ -339,7 +339,7 @@ FOREVER {
 		/* Check if the sweep down button has been pressed and start sweeping
 		   down (unless we're already sweeping down) */
 
-		IF Sweep_State != DOWN & button_state( Sweep_Down ) {
+		IF Sweep_State != DOWN AND button_state( Sweep_Down ) {
 			IF Sweep_State == STOPPED {
 				magnet_sweep( DOWN );
 				Sweep_State = DOWN;
@@ -357,7 +357,7 @@ FOREVER {
 		/* Check if the sweep stop button has been pressed while we're
 		   sweeping */
 
-		IF Sweep_State != STOPPED & button_state( Sweep_Stop ) {
+		IF Sweep_State != STOPPED AND button_state( Sweep_Stop ) {
 			magnet_sweep( STOPPED );
 			Sweep_State = STOPPED;
 			draw_marker( I + 1, "RED" );
@@ -369,7 +369,7 @@ FOREVER {
 
 		new_set_field = input_value( New_Field );
 		IF abs( new_set_field - new_field ) > 0.149 G {
-			IF new_set_field > 114304 G | new_set_field < 0 G {
+			IF new_set_field > 114304 G OR new_set_field < 0 G {
 				input_value( New_Field, new_field );
 			} ELSE {
 				Sweep_State = STOPPED;
@@ -386,7 +386,7 @@ FOREVER {
 
 		new_sweep_rate = abs( input_value( Sweep_Rate ) );
 		IF abs( sweep_rate - new_sweep_rate ) > 0.01 {
-			IF new_sweep_rate <= 33.1 & new_sweep_rate >= 0.23814 {
+			IF new_sweep_rate <= 33.1 AND new_sweep_rate >= 0.23814 {
 				sweep_rate = magnet_sweep_rate( new_sweep_rate );
 				IF Sweep_State != STOPPED {
 					draw_marker( I + 1, "GREEN" )

@@ -652,7 +652,7 @@ FOR I = 1 : N {
 		 } else {
 			 $text = "Something strange is going on here.";
 		 }
-	
+
 		 &show_message( $text ) if $? >> 8 != 0;
 	 }
 }

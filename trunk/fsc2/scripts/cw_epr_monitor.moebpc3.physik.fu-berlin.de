@@ -169,7 +169,7 @@ FOREVER {
 	   of the sweep direction, in the later case also stop and restart the
 	   lock-in's auto-acquisition to empty its internal data buffer. */
 
-	IF  Sweep_State != UP & button_state( Sweep_Up ) & I < MAX_POINTS {
+	IF  Sweep_State != UP AND button_state( Sweep_Up ) AND I < MAX_POINTS {
 		IF Sweep_State == STOPPED {
 			magnet_sweep( UP );
 			Sweep_State = UP;
@@ -192,7 +192,7 @@ FOREVER {
 	   reversal of the sweep direction, in the later case also stop and restart
 	   the lock-in's auto-acquisition to empty its internal data buffer. */
 
-	IF Sweep_State != DOWN & button_state( Sweep_Down ) & I < MAX_POINTS {
+	IF Sweep_State != DOWN AND button_state( Sweep_Down ) AND I < MAX_POINTS {
 		IF Sweep_State == STOPPED {
 			magnet_sweep( DOWN );
 			Sweep_State = DOWN;
@@ -212,7 +212,7 @@ FOREVER {
 
 	/* Check if the sweep stop button has been pressed while we're sweeping */
 
-	IF Sweep_State != STOPPED & button_state( Sweep_Stop ) {
+	IF Sweep_State != STOPPED AND button_state( Sweep_Stop ) {
 		lockin_auto_acquisition( \"OFF\" );
 		magnet_sweep( STOPPED );
 		Sweep_State = STOPPED;
@@ -232,7 +232,7 @@ FOREVER {
 
 	new_current = input_value( Current );
 	IF abs( current - new_current ) > 0.01 mA {
-		IF new_current > 7.0 A | new_current < -7.0 A {
+		IF new_current > 7.0 A OR new_current < -7.0 A {
 			current = get_field( );
 		} ELSE {
 			lockin_auto_acquisition( \"OFF\" );
@@ -253,7 +253,7 @@ FOREVER {
 
 	new_sweep_rate = abs( input_value( Sweep_Rate ) );
 	IF abs( sweep_rate * 60.0 - new_sweep_rate ) > 0.0001 {
-		IF new_sweep_rate <= 1.0 & new_sweep_rate >= 0.01 {
+		IF new_sweep_rate <= 1.0 AND new_sweep_rate >= 0.01 {
 			sweep_rate = magnet_sweep_rate( new_sweep_rate / 60.0 );
 			IF Sweep_State != STOPPED {
 				lockin_auto_acquisition( \"OFF\" );
@@ -319,7 +319,7 @@ FOREVER {
 		data[ I ] = lockin_get_data( 1 );
 		display( I, data[ I ] * 1.0e3 );
 
-		IF ( Sweep_State != STOPPED & magnet_sweep( ) == STOPPED ) |
+		IF ( Sweep_State != STOPPED AND magnet_sweep( ) == STOPPED ) OR
 			 I >= MAX_POINTS {
 			lockin_auto_acquisition( \"OFF\" );
 			magnet_sweep( STOPPED );

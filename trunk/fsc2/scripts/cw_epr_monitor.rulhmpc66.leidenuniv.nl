@@ -144,12 +144,12 @@ FOREVER {
 	/* Check if the magnet reached the upper or lower limit in which case
 	   a running sweep must be stopped */
 
-	IF Sweep_State != STOPPED & magnet_sweep( ) == STOPPED {
+	IF Sweep_State != STOPPED AND magnet_sweep( ) == STOPPED {
 		Sweep_State = STOPPED;
 		button_state( Sweep_Stop, "ON" );
 		draw_marker( I, "RED" );
 
-		IF ! Pause_State & ! Draw_While_Stopped {	
+		IF ! Pause_State AND ! Draw_While_Stopped {	
 			lockin_auto_acquisition( "OFF" );
 		}
 	}
@@ -159,8 +159,9 @@ FOREVER {
 	/* If the display is stopped and no user interaction was detected wait a
 	   short time and restart the main loop */
 
-	IF ( Pause_State | ( Sweep_State == STOPPED & ! Draw_While_Stopped ) )
-	   & ! TB_Changed {
+	IF ( ( Pause_State OR
+		   ( Sweep_State == STOPPED AND ! Draw_While_Stopped ) ) ) AND
+		 ! TB_Changed {
 		wait( 0.1 s );
 		NEXT;
 	}
@@ -168,7 +169,7 @@ FOREVER {
 	/* If displaying data isn't stopped get as many points as there are in
 	   the lock-ins buffer and display them. */
 
-	IF ! Pause_State & ( Sweep_State != STOPPED | Draw_While_Stopped ) {
+	IF ! Pause_State AND ( Sweep_State != STOPPED OR Draw_While_Stopped ) {
 
     	st += delta_time( );
 
@@ -187,10 +188,10 @@ FOREVER {
 
 	/* Check if "Sweep up" button has been pressed */
 
-	IF button_state( Sweep_Up ) & Sweep_State != UP {
+	IF button_state( Sweep_Up ) AND Sweep_State != UP {
 
 		IF ! Pause_State {
-			IF ( Sweep_State == STOPPED & Draw_While_Stopped ) |
+			IF ( Sweep_State == STOPPED AND Draw_While_Stopped ) OR
 			   Sweep_State == DOWN {
 				lockin_auto_acquisition( "OFF" );
 			}
@@ -207,10 +208,10 @@ FOREVER {
 
 	/* Check if "Sweep Down" button has been pressed */
 
-	IF button_state( Sweep_Down ) & Sweep_State != DOWN {
+	IF button_state( Sweep_Down ) AND Sweep_State != DOWN {
 
 		IF ! Pause_State {
-			IF ( Sweep_State == STOPPED & Draw_While_Stopped ) |
+			IF ( Sweep_State == STOPPED AND Draw_While_Stopped ) OR
 			   Sweep_State == UP {
 				lockin_auto_acquisition( "OFF" );
 			}
@@ -227,7 +228,7 @@ FOREVER {
 
 	/* Check if "Stop Sweep" button has been pressed */
 
-	IF button_state( Sweep_Stop ) & Sweep_State != STOPPED {
+	IF button_state( Sweep_Stop ) AND Sweep_State != STOPPED {
 
 		IF ! Pause_State {
 			lockin_auto_acquisition( "OFF" );
@@ -251,7 +252,7 @@ FOREVER {
 
 		new_set_field = input_value( New_Field );
 
-		IF new_set_field <= 114304 G & new_set_field >= 0 G &
+		IF new_set_field <= 114304 G AND new_set_field >= 0 G AND
 		   abs( new_set_field - new_field ) >= 0.14288 G {
 
 			new_field = set_field( new_set_field );
@@ -283,7 +284,7 @@ FOREVER {
 
 		new_sweep_rate = abs( input_value( Sweep_Rate ) );
 
-		IF  new_sweep_rate <= 33.1 & new_sweep_rate >= 0.23814 &
+		IF  new_sweep_rate <= 33.1 AND new_sweep_rate >= 0.23814 AND
 		    abs( sweep_rate - new_sweep_rate ) >= 0.01 {
 
 			sweep_rate = magnet_sweep_rate( new_sweep_rate );
@@ -347,7 +348,7 @@ FOREVER {
 		clear_marker( );
 		rescale( 64 );
 		I = 0;
-		IF ! Pause_State & ( Sweep_State != STOPPED | Draw_While_Stopped ) {
+		IF ! Pause_State AND ( Sweep_State != STOPPED OR Draw_While_Stopped ) {
 			lockin_auto_acquisition( "OFF" );
 			lockin_auto_acquisition( "ON" );
 			delta_time( );
@@ -359,10 +360,10 @@ FOREVER {
 
 	IF button_changed( Pause ) {
 		IF ! Pause_State {
-			IF Sweep_State != STOPPED | Draw_While_Stopped {
+			IF Sweep_State != STOPPED OR Draw_While_Stopped {
 				lockin_auto_acquisition( "OFF" );
 			}
-		} ELSE IF Sweep_State != STOPPED | Draw_While_Stopped {
+		} ELSE IF Sweep_State != STOPPED OR Draw_While_Stopped {
 			lockin_auto_acquisition( "ON" );
 			delta_time( );
 			st = 0.0 s;

@@ -64,7 +64,7 @@ $f3 = $f0->Button( '-text' => "Calibration",
 				   '-command' => \&calib );
 $f4 = $mw->Frame(  );
 $f5 = $mw->Button( '-text' => "Quit",
-				   '-command' => sub { $mw->geometry( ) =~ /^\d+x\d+(.*)$/;
+				   '-command' => sub { $mw->geometry=~ /^\d+x\d+(.*)$/;
 									   $defs{ 'main_geometry' } = $1;
 									   store_defs( );
 									   $mw->destroy } );
@@ -161,7 +161,7 @@ laser_line = monochromator_laser_line( );
 nll = laser_line;
 monochromator_laser_line( 0.0 );
 
-IF laser_line - monochromator_offset( ) >= 46000.0 / 3.0 + 2 &
+IF laser_line - monochromator_offset( ) >= 46000.0 / 3.0 + 2 AND
    laser_line - monochromator_offset( ) <= 43998.0 {
 	start_wn = laser_line + 2 cm^-1;
 	end_wn   = laser_line - 2 cm^-1;
@@ -207,7 +207,7 @@ FOREVER {
 
 		nll = new;
 
-		IF nll > 0.0 & nll - lpos <= 10.0 {
+		IF nll > 0.0 AND nll - lpos <= 10.0 {
 			object_enable( B_acc, "ON" );
 		} ELSE {
 			object_enable( B_acc, "OFF" );
@@ -222,7 +222,7 @@ FOREVER {
 			NEXT;
 		}
 
-		IF new - monochromator_offset( ) > 44000.0 |
+		IF new - monochromator_offset( ) > 44000.0 OR
 		   new - monochromator_offset( ) < 46000.0 / 3.0 {
 			input_value( B_swn, start_wn );
 			NEXT;
@@ -244,7 +244,7 @@ FOREVER {
 			NEXT;
 		}
 
-		IF new - monochromator_offset( ) > 44000.0 |
+		IF new - monochromator_offset( ) > 44000.0 OR
 		   new - monochromator_offset( ) < 46000.0 / 3.0 {
 			input_value( B_ewn, end_wn );
 			NEXT;
@@ -266,7 +266,7 @@ FOREVER {
 			NEXT;
 		}
 
-		IF new <= 0.0 | new > 10.0 {
+		IF new <= 0.0 OR new > 10.0 {
 			input_value( B_stsz, step_size );
 			NEXT;
 		}
@@ -282,7 +282,7 @@ FOREVER {
 			NEXT;
 		}
 
-		IF new < 0.001 | new > 100.0 {
+		IF new < 0.001 OR new > 100.0 {
 			input_value( B_mt, mtime );
 			NEXT;
 		}
@@ -337,7 +337,7 @@ FOREVER {
 			NEXT;
 		}
 
-		IF new > start_wn | new < end_wn {
+		IF new > start_wn OR new < end_wn {
 			input_value( B_lpos, lpos );
 			NEXT;
 		}
@@ -346,7 +346,7 @@ FOREVER {
 		clear_marker( );
 		draw_marker( round( ( start_wn - lpos ) / step_size + 1 ) );
 
-		IF nll > 0.0 & nll - lpos <= 10.0 {
+		IF nll > 0.0 AND nll - lpos <= 10.0 {
 			object_enable( B_acc, "ON" );
 		} ELSE {
 			object_enable( B_acc, "OFF" );
@@ -357,7 +357,7 @@ FOREVER {
 
 		new = find_peak( slice( data, 1, N_points ) );
 
-		IF new < 1.0 | new > size( data ) {
+		IF new < 1.0 OR new > size( data ) {
 			NEXT;
 		}
 
@@ -522,17 +522,17 @@ FOREVER {
 		IF input_changed( B_swn ) {
 			new = input_value( B_swn );
 
-			IF ( Mode == RELATIVE &
-				 ( ll - new > 44000.0 | ll - new < 46000.0 / 3.0 ) ) |
-			   ( Mode == ABSOLUTE &
-				 ( new > 44000.0 | new < 46000.0 / 3.0 ) ) {
+			IF ( Mode == RELATIVE AND
+				 ( ll - new > 44000.0 OR ll - new < 46000.0 / 3.0 ) ) OR
+			   ( Mode == ABSOLUTE AND
+				 ( new > 44000.0 OR new < 46000.0 / 3.0 ) ) {
 				input_value( B_swn,
 							 Mode == RELATIVE ? start_wn : ll - start_wn);
 				NEXT;
 			}
 
 			start_wn = Mode == RELATIVE ? new : ll - new;
-			IF ! ( Doing_Scan | Doing_Sampling ) {
+			IF ! ( Doing_Scan OR Doing_Sampling ) {
 				object_enable( B_scan, "ON" );
 			}
 			IF Mode == RELATIVE {
@@ -545,8 +545,8 @@ FOREVER {
 
 		IF button_changed( B_goto ) {
 			button_state( B_goto );
-			IF ( Mode == RELATIVE & cwn != start_wn ) |
-			   ( Mode == ABSOLUTE & cwn != ll - start_wn ) {
+			IF ( Mode == RELATIVE AND cwn != start_wn ) OR
+			   ( Mode == ABSOLUTE AND cwn != ll - start_wn ) {
 				cwn = Mode == RELATIVE ? start_wn : ll - start_wn ;
 				output_value( B_cwn, cwn );
 				monochromator_wavenumber( start_wn );
@@ -556,7 +556,7 @@ FOREVER {
 		IF input_changed( B_stsz ) {
 			new = input_value( B_stsz );
 
-			IF new <= 0.0 | new > 10.0 {
+			IF new <= 0.0 OR new > 10.0 {
 				input_value( B_stsz, step_size );
 				NEXT;
 			}
@@ -567,7 +567,7 @@ FOREVER {
 		IF input_changed( B_mt ) {
 			new = input_value( B_mt );
 
-			IF new < 0.001 | new > 100.0 {
+			IF new < 0.001 OR new > 100.0 {
 				input_value( B_mt, mtime );
 				NEXT;
 			}
@@ -1097,7 +1097,10 @@ FOR I = 1 : N_scans {
 
 	FOR J = 1 : N_points {
 
-		IF button_state( B_abs ) & Display_Mode == 0 {
+		output_value( B_cwn, Display_Mode == 0 ?
+					  cwn[ J ] : laser_line - cwn[ J ] );
+
+		IF button_state( B_abs ) AND Display_Mode == 0 {
 			change_scale( laser_line - start_wn, -step_size );
 			change_label( "Wavenumber [cm^-1 abs.]" );
 			object_change_label( B_cwn, "Current position [cm^-1 abs.]" );
@@ -1105,7 +1108,7 @@ FOR I = 1 : N_scans {
 			Display_Mode = 1;
 		}
 
-		IF button_state( B_rel ) & Display_Mode == 1 {
+		IF button_state( B_rel ) AND Display_Mode == 1 {
 			change_scale( start_wn, step_size );
 			change_label( "Wavenumber [cm^-1 rel.]" );
 			object_change_label( B_cwn, "Current position [cm^-1 rel.]" );
@@ -1121,8 +1124,6 @@ FOR I = 1 : N_scans {
 
 		IF J < N_points {
 			cwn[ J + 1 ] = monochromator_scan_step( );
-			output_value( B_cwn, Display_Mode == 0 ?
-						  cwn[ J + 1 ] : laser_line - cwn[ J + 1 ] );
 		}
 	}
 
