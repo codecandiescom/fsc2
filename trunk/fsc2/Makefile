@@ -33,12 +33,17 @@ mandir         = $(prefix)/man
 infodir        = $(prefix)/info
 
 # Set the location of the GPIB configuration file (only needed with the
-# National Instruments GPIB library) and the file for writing logs about
-# the activity on the GPIB bus. These settings are compiled into the program.
+# National Instruments GPIB library). If not set GPIB_CONF_FILE defaults
+# to /etc/gpib.conf.
+# Also set the file for writing logs about the activity on the GPIB bus.
+# If not given logs will be written to stderr.
+# Finally, set the verbosity level of the GPIB logs, use HIGH, MEDIUM, LOW
+# or OFF. If not set it defaults to OFF.
+# All of these settings are compiled into the program.
 
-GPIB_CONF_FILE = /etc/gpib.conf      # defaults to /etc/gpib.conf
+GPIB_CONF_FILE = /etc/gpib.conf
 GPIB_LOG_FILE  = /tmp/gpib.log
-GPIB_LOG_LVEL  = HIGH                # set to HIGH, MEDIUM, LOW or OFF
+GPIB_LOG_LEVEL = HIGH
 
 # To whom bug reports and crash messages will get send
 
@@ -126,19 +131,19 @@ ifdef GPIB_LOG_FILE
 endif
 
 ifeq ($(GPIB_LOG_LEVEL),HIGH)
-	CFLAGS += -DGPIB_LOG_LEVEL=LL_ALL
+	CFLAGS += -DGPIB_LOG_LEVEL=\"LL_ALL\"
 endif
 
 ifeq ($(GPIB_LOG_LEVEL),MEDIUM)
-	CFLAGS += -DGPIB_LOG_LEVEL=LL_CE
+	CFLAGS += -DGPIB_LOG_LEVEL=\"LL_CE\"
 endif
 
 ifeq ($(GPIB_LOG_LEVEL),LOW)
-	CFLAGS += -DGPIB_LOG_LEVEL=LL_ERR
+	CFLAGS += -DGPIB_LOG_LEVEL=\"LL_ERR\"
 endif
 
 ifeq ($(GPIB_LOG_LEVEL),OFF)
-	CFLAGS += -DGPIB_LOG_LEVEL=LL_NONE
+	CFLAGS += -DGPIB_LOG_LEVEL=\"LL_NONE\"
 endif
 
 ifdef MAIL_ADDRESS
