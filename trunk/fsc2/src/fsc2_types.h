@@ -73,6 +73,7 @@
 #define WINDOW_P          ( WINDOW * )
 #define PULSE_PARAMS_P    ( PULSE_PARAMS * )
 #define ATT_TABLE_ENTRY_P ( ATT_TABLE_ENTRY * )
+#define FS_P              ( FS * )
 
 #else
 
@@ -115,6 +116,7 @@
 #define WINDOW_P
 #define PULSE_PARAMS_P
 #define ATT_TABLE_ENTRY_P
+#define FS_P
 
 #endif
 

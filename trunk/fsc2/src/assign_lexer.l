@@ -133,6 +133,8 @@ CH          CH(ANNEL)?
 INV         INV(ERT(ED)?)?
 VH          V_?H(IGH)?
 VL          V_?L(OW)?
+CHN         [A-H][0-9]|(1[0-5])
+
 
 TB          T(IME)?_?B(ASE)?(#{INT})?:?
 TM          T(RIG(GER)?)?_?M(ODE)?(#{INT})?:?
@@ -344,6 +346,12 @@ WS          [\n=: ]+
 				set_cur_pulser( );
 				return OIV_TOKEN;
 			}
+
+{CHN}       {
+				assignlval.lval =   ( assigntext[ 0 ] - 'A' ) * 16
+								  + T_atol( assigntext + 1 );
+				return CHN_TOKEN;
+            }
 
 {POD}       return POD_TOKEN;
 
