@@ -53,15 +53,13 @@ Var *f_is_file( Var *v )
 {
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "Missing argument in call of function %s().\n",
-				Cur_Func );
+		print( FATAL, "Missing argument.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( v->type != INT_VAR )
 	{
-		eprint( FATAL, SET, "Parameter of function %s() isn't a file "
-				"handle.\n", Cur_Func );
+		print( FATAL, "Arguments isn't a file handle.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -119,8 +117,8 @@ Var *f_getf( Var *var )
 
 	if ( No_File_Numbers )
 	{
-		eprint( FATAL, SET, "Call of %s() after call of save()-type function "
-				"without previous call of %s().\n", Cur_Func, Cur_Func );
+		print( FATAL, "Call of get_file() after call of save()-type function "
+			   "without previous call of get_file().\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -328,16 +326,14 @@ Var *f_clonef( Var *v )
 	if ( v->type != INT_VAR ||
 		 v->val.lval < 0 || v->val.lval >= File_List_Len )
 	{
-		 eprint( FATAL, SET, "First argument in call of %s() isn't a vaild "
-				 "file identifier.\n", Cur_Func );
+		 print( FATAL, "First argument isn't a vaild file handle.\n" );
 		 THROW( EXCEPTION );
 	}
 
 	if ( v->next->type != STR_VAR || v->next->next->type != STR_VAR ||
 		 *v->next->next->val.sptr == '\0' )
 	{
-		eprint( FATAL, SET, "Invalid second and third argument in call of "
-				"%s().\n", Cur_Func );
+		print( FATAL, "Invalid second and third argument.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -428,16 +424,14 @@ static int get_save_file( Var **v )
 
 			if ( ( *v )->type != INT_VAR )
 			{
-				eprint( FATAL, SET, "First argument in %s() isn't a "
-						"file identifier.\n", Cur_Func );
+				print( FATAL, "First argument isn't a file handle.\n" );
 				THROW( EXCEPTION );
 			}
 			file_num = ( int ) ( *v )->val.lval;
 		}
 		else
 		{
-			eprint( WARN, SET, "Call of %s() without any arguments.\n",
-					Cur_Func );
+			print( WARN, "Missing arguments.\n" );
 			return -1;
 		}
 		*v = ( *v )->next;
@@ -450,14 +444,13 @@ static int get_save_file( Var **v )
 	if ( file_num < 0 )
 	{
 		if ( ! Dont_Save )
-			eprint( WARN, SET, "File has never been opened, skipping "
-					"%s() command.\n", Cur_Func );
+			print( WARN, "File has never been opened, skipping command.\n" );
 		return -1;
 	}
 
 	if ( file_num >= File_List_Len )
 	{
-		eprint( FATAL, SET, "Invalid file identifier in %s().\n", Cur_Func );
+		print( FATAL, "Invalid file handle.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -519,7 +512,7 @@ Var *f_save( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( WARN, SET, "Call of %s() without data.\n", Cur_Func );
+		print( WARN, "Missing arguments.\n" );
 		return vars_push( INT_VAR, 0 );
 	}
 
@@ -561,9 +554,8 @@ Var *f_save( Var *v )
 			case ARR_REF :
 				if ( v->from->flags & NEED_ALLOC )
 				{
-					eprint( WARN, SET, "Variable sized array `%s' is still "
-							"undefined in %s() - skipping'.\n",
-							v->from->name, Cur_Func );
+					print( WARN, "Variable sized array `%s' is still "
+						   "undefined - skipping'.\n", v->from->name );
 					break;
 				}
 				start = 0;
@@ -664,15 +656,13 @@ Var *f_fsave( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( WARN, SET, "Call of %s() without format string and data.\n",
-				Cur_Func );
+		print( WARN, "Missing arguments.\n" );
 		return vars_push( INT_VAR, 0 );
 	}
 
 	if ( v->type != STR_VAR )
 	{
-		eprint( FATAL, SET, "Missing format string in call of %s()\n",
-				Cur_Func );
+		print( FATAL, "Missing format string.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -731,8 +721,8 @@ static void f_format_check( Var *v )
 
 		if ( cv == NULL )
 		{
-			eprint( FATAL, SET, "Less data than format descriptors in %s() "
-					"format string.\n", Cur_Func );
+			print( FATAL, "Less data than format descriptors in format "
+				   "string.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -770,8 +760,8 @@ static void f_format_check( Var *v )
 				break;
 
 			default :
-				eprint( FATAL, SET, "Function %s() can only write numbers and "
-						"strings to a file.\n", Cur_Func );
+				print( FATAL, "Function can only write numbers and strings "
+					   "to a file.\n" );
 				THROW( EXCEPTION );
 		}
 
@@ -780,8 +770,8 @@ static void f_format_check( Var *v )
 
 	if ( cv != NULL )
 	{
-		eprint( SEVERE, SET, "More data than format descriptors in "
-				"%s() format string.\n", Cur_Func );
+		print( SEVERE, "More data than format descriptors in format "
+			   "string.\n" );
 		while ( ( cv = vars_pop( cv ) ) != NULL )
 			;
 	}
@@ -816,14 +806,13 @@ Var *f_ffsave( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( WARN, SET, "Call of %s() without data.\n", Cur_Func );
+		print( WARN, "Missing arguments.\n" );
 		return vars_push( INT_VAR, 0 );
 	}
 
 	if ( v->type != STR_VAR )
 	{
-		eprint( FATAL, SET, "Missing format string in call of %s()\n",
-				Cur_Func );
+		print( FATAL, "Missing format string.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -868,8 +857,7 @@ static void ff_format_check( Var *v )
 
 		if ( *sptr == '\0' )
 		{
-			eprint( FATAL, SET, "'%%' found at end of format string in call "
-					"of %s().\n", Cur_Func );
+			print( FATAL, "'%%' found at end of format string.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -884,8 +872,8 @@ static void ff_format_check( Var *v )
 			sptr++;
 			if ( *sptr == '\0' )
 			{
-				eprint( FATAL, SET, "End of format string within conversion "
-						"specifier in call of %s().\n", Cur_Func );
+				print( FATAL, "End of format string within conversion "
+					   "specifier.\n" );
 				THROW( EXCEPTION );
 			}
 		}
@@ -898,8 +886,8 @@ static void ff_format_check( Var *v )
 		{
 			if ( vptr->type != INT_VAR )
 			{
-				eprint( FATAL, SET, "Non-integer variable used as field "
-						"length in format string in %s().\n", Cur_Func );
+				print( FATAL, "Non-integer variable used as field length in "
+					   "format string.\n" );
 				THROW( EXCEPTION );
 			}
 
@@ -912,8 +900,8 @@ static void ff_format_check( Var *v )
 
 		if ( *sptr == '\0' )
 		{
-			eprint( FATAL, SET, "End of format string within conversion "
-					"specifier in call of %s().\n", Cur_Func );
+			print( FATAL, "End of format string within conversion "
+				   "specifier.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -925,15 +913,15 @@ static void ff_format_check( Var *v )
 			{
 				if ( vptr == NULL )
 				{
-					eprint( FATAL, SET, "Not enough arguments for format "
-							"string in %s().\n", Cur_Func );
+					print( FATAL, "Not enough arguments for format "
+						   "string.\n" );
 					THROW( EXCEPTION );
 				}
 
 				if ( vptr->type != INT_VAR )
 				{
-					eprint( FATAL, SET, "Non-integer variable used as field "
-							"length in format string in %s().\n", Cur_Func );
+					print( FATAL, "Non-integer variable used as field "
+						   "length in format string.\n" );
 					THROW( EXCEPTION );
 				}
 
@@ -946,8 +934,8 @@ static void ff_format_check( Var *v )
 
 			if ( *sptr == '\0' )
 			{
-				eprint( FATAL, SET, "End of format string within conversion "
-						"specifier in call of %s().\n", Cur_Func );
+				print( FATAL, "End of format string within conversion "
+					   "specifier.\n" );
 				THROW( EXCEPTION );
 			}
 		}
@@ -961,16 +949,15 @@ static void ff_format_check( Var *v )
 		{
 			if ( vptr == NULL )
 			{
-				eprint( FATAL, SET, "Not enough arguments for format "
-						"string in %s().\n", Cur_Func );
+				print( FATAL, "Not enough arguments for format "
+					   "string.\n" );
 				THROW( EXCEPTION );
 			}
 
 			if ( vptr->type != STR_VAR )
 			{
-				eprint( FATAL, SET, "Non-string variable found for string "
-						"type conversion specifier in format string in "
-						"%s().\n", Cur_Func );
+				print( FATAL, "Non-string variable found for string type "
+					   "conversion specifier in format string.\n" );
 				THROW( EXCEPTION );
 			}
 				
@@ -984,16 +971,14 @@ static void ff_format_check( Var *v )
 		{
 			if ( vptr == NULL )
 			{
-				eprint( FATAL, SET, "Not enough arguments for format "
-						"string in %s().\n", Cur_Func );
+				print( FATAL, "Not enough arguments for format string.\n" );
 				THROW( EXCEPTION );
 			}
 
 			if ( vptr->type != INT_VAR )
 			{
-				eprint( WARN, SET, "Non-integer variable found for integer "
-						"type conversion specifier in format string in "
-						"%s().\n", Cur_Func );
+				print( WARN, "Non-integer variable found for integer type "
+					   "conversion specifier in format string.\n" );
 				THROW( EXCEPTION );
 			}
 				
@@ -1007,16 +992,14 @@ static void ff_format_check( Var *v )
 		{
 			if ( vptr == NULL )
 			{
-				eprint( FATAL, SET, "Not enough arguments for format "
-						"string in %s().\n", Cur_Func );
+				print( FATAL, "Not enough arguments for format string.\n" );
 				THROW( EXCEPTION );
 			}
 
 			if ( vptr->type != FLOAT_VAR )
 			{
-				eprint( WARN, SET, "Non-floating point variable found for "
-						"float type conversion specifier in format string "
-						"in %s().\n", Cur_Func );
+				print( WARN, "Non-floating point variable found for float "
+					   "type conversion specifier in format string.\n" );
 				THROW( EXCEPTION );
 			}
 				
@@ -1025,8 +1008,8 @@ static void ff_format_check( Var *v )
 			continue;
 		}
 
-		eprint( FATAL, SET, "Unknown conversion specifier '%c' found in "
-				"format string in %s().\n", *sptr, Cur_Func );
+		print( FATAL, "Unknown conversion specifier '%c' found in format "
+			   "string.\n", *sptr );
 		THROW( EXCEPTION );
 	}
 
@@ -1035,8 +1018,8 @@ static void ff_format_check( Var *v )
 
 	if ( vptr != NULL )
 	{
-		eprint( SEVERE, SET, "More arguments than conversion specifiers found "
-				"in format string in %&s().\n", Cur_Func );
+		print( SEVERE, "More arguments than conversion specifiers found in "
+			   "format.\n" );
 		while ( ( vptr = vars_pop( vptr ) ) != NULL )
 			;
 	}
@@ -1580,8 +1563,7 @@ static int T_fprintf( int file_num, const char *fmt, ... )
 	{
 		if ( file_num < 0 || file_num >= File_List_Len )
 		{
-			eprint( FATAL, SET, "Invalid file handle used in call of "
-					"function %s().\n", Cur_Func );
+			print( FATAL, "Invalid file handle.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -1821,8 +1803,8 @@ static char *handle_escape( char *str )
 		switch ( *( cp + 1 ) )
 		{
 			case '\0' :
-				eprint( FATAL, SET, "End of string directly following escape "
-						"character '\\'.\n" );
+				print( FATAL, "End of string directly following escape "
+					   "character '\\'.\n" );
 				THROW( EXCEPTION );
 				break;
 
@@ -1886,8 +1868,8 @@ static char *handle_escape( char *str )
 					 ( toupper( *( cp + 2 ) ) < 'A' ||
 					   toupper( *( cp + 2 ) ) > 'F' ) )
 				{
-					eprint( FATAL, SET, "'\\x' with no following hex digits "
-							"in string.\n" );
+					print( FATAL, "'\\x' with no following hex digits "
+						   "in string.\n" );
 					THROW( EXCEPTION );
 				}
 				esc_len = 1;
@@ -1911,8 +1893,8 @@ static char *handle_escape( char *str )
 			default :
 				if ( *( cp + 1 ) < '0' || *( cp + 1 ) > '7' )
 				{
-					eprint( FATAL, SET, "Unknown escape sequence '\\%c' in "
-							"string.\n", *( cp + 1 ) );
+					print( FATAL, "Unknown escape sequence '\\%c' in "
+						   "string.\n", *( cp + 1 ) );
 					THROW( EXCEPTION );
 				}
 
