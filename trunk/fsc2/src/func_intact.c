@@ -300,6 +300,10 @@ Var *f_bcreate( Var *v )
 		Tool_Box->layout = VERT;
 		Tool_Box->x = Tool_Box->y = 0;
 		Tool_Box->Tools = NULL;
+	}
+
+	if ( Tool_Box->objs == NULL )
+	{
 		new_io = Tool_Box->objs = T_malloc( sizeof( IOBJECT ) );
 		new_io->next = new_io->prev = NULL;
 	}

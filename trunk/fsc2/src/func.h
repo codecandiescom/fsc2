@@ -14,7 +14,7 @@ typedef struct
     Var * ( * fnct )( Var * );        /* pointer to the function */
 	long nargs;                       /* number of arguments */
     int access_flag;                  /* asscessibility flag */
-	bool to_be_loaded;                /* if set function has to be loaded */
+	bool to_be_loaded;                /* set if function has to be loaded */
 } Func;
 
 
