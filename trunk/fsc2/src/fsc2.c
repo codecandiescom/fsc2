@@ -128,6 +128,15 @@ void xforms_init( int *argc, char *argv[] )
 
 	main_form = create_form_fsc2( );
 
+	fl_set_object_helper( main_form->Load, "Loads a new EDL program" );
+	fl_set_object_helper( main_form->Edit, "Edit the loaded EDL program" );
+	fl_set_object_helper( main_form->reload, "Reload current EDL program" );
+	fl_set_object_helper( main_form->test_file, "Does a syntax check of the "
+						  "loaded EDL program" );
+	fl_set_object_helper( main_form->run, "Start the loaded EDL program" );
+	fl_set_object_helper( main_form->quit, "Quit fsc2" );
+	fl_set_object_helper( main_form->bug_report, "Mail a bug report" );
+
 	fl_set_browser_fontsize( main_form->browser, FL_MEDIUM_SIZE );
 	fl_set_browser_fontstyle( main_form->browser, FL_FIXED_STYLE );
 
