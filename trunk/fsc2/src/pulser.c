@@ -6,12 +6,6 @@
 #include "fsc2.h"
 
 
-static void is_driver( void );
-static void is_func( void *func, const char *text );
-static double is_mult_ns( double val, const char * text );
-
-
-
 /* Function clears the complete pulser structure, that has to be set up
    by the init_hook( ) function of the pulser driver */
 
@@ -49,7 +43,7 @@ void pulser_struct_init( void )
    function to avoid using a pulser function if there's no pulser driver
 */
 
-static void is_driver( void )
+void is_pulser_driver( void )
 {
 	if ( pulser_struct.name == NULL )
 	{
@@ -69,9 +63,9 @@ static void is_driver( void )
    isn't explicitely needed).
 */
 
-static void is_func( void *func, const char *text )
+is_pulser_func( void *func, const char *text )
 {
-	is_driver( );
+	is_pulser_driver( );
 
 	if ( func == NULL )
 	{
@@ -81,7 +75,15 @@ static void is_func( void *func, const char *text )
 	}
 }
 
-static double is_mult_ns( double val, const char * text )
+
+/*
+   Function tests if the time (in seconds) it gets passed is a reasonable
+   integer multiple of 1 ns and tries to reduce rounding errors. If the time
+   more than 10 ps off from a ns an error message is output, using the text
+   snippet passed to the function as the second argument.
+*/
+
+double is_mult_ns( double val, const char * text )
 {
 	val *= 1.e9;
 	if ( fabs( val - lround( val ) ) > 1.e-2 )
@@ -98,15 +100,14 @@ static double is_mult_ns( double val, const char * text )
 /* 
    This function is called for the assignment of a function for a pod - it
    can't be called when there are no pods, in this case the assignment has to
-   be done via the p_assign_channel() function
-*/
+   be done via the p_assign_channel() function */
 
 void p_assign_pod( long func, Var *v )
 {
 	long pod;
 
 
-	is_driver( );
+	is_pulser_driver( );
 
 	/* <PARANOIA=on> */
 
@@ -140,7 +141,8 @@ void p_assign_pod( long func, Var *v )
 
 	/* finally call the function (if it exists...) */
 
-	is_func( pulser_struct.assign_function, "assigning function to pod" );
+	is_pulser_func( pulser_struct.assign_function,
+					"assigning function to pod" );
 	( *pulser_struct.assign_function )( func, pod );
 }
 
@@ -179,13 +181,14 @@ void p_assign_channel( long func, Var *v )
 
 	if ( pulser_struct.assign_channel_to_function == NULL )
 	{
-		is_func( pulser_struct.assign_function, "assigning function to pod" );
+		is_pulser_func( pulser_struct.assign_function,
+						"assigning function to pod" );
 		( *pulser_struct.assign_function )( func, channel );
 	}
 	else
 	{
-		is_func( pulser_struct.assign_channel_to_function,
-				 "assigning function to channel" );
+		is_pulser_func( pulser_struct.assign_channel_to_function,
+						"assigning function to channel" );
 		( *pulser_struct.assign_channel_to_function )( func, channel );
 	}
 }
@@ -226,7 +229,7 @@ void p_set_delay( long func, Var *v )
 
 	/* finally call the function (if it exists...) */
 
-	is_func( pulser_struct.set_delay_function, "setting a delay" );
+	is_pulser_func( pulser_struct.set_delay_function, "setting a delay" );
 	( *pulser_struct.set_delay_function )( func, delay );
 }
 
@@ -240,7 +243,7 @@ void p_inv( long func )
 	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
 			func <= PULSER_CHANNEL_FUNC_MAX );
 
-	is_func( pulser_struct.invert_function, "inverting a channel" );
+	is_pulser_func( pulser_struct.invert_function, "inverting a channel" );
 	( *pulser_struct.invert_function )( func );
 }
 
@@ -270,8 +273,8 @@ void p_set_v_high( long func, Var *v )
 
 	/* finally call the function (if it exists...) */
 
-	is_func( pulser_struct.set_function_high_level,
-			 "setting high voltage level" );
+	is_pulser_func( pulser_struct.set_function_high_level,
+					"setting high voltage level" );
 	( *pulser_struct.set_function_high_level )( func, voltage );
 }
 
@@ -301,8 +304,8 @@ void p_set_v_low( long func, Var *v )
 
 	/* finally call the function (if it exists...) */
 
-	is_func( pulser_struct.set_function_low_level,
-			 "setting low voltage level" );
+	is_pulser_func( pulser_struct.set_function_low_level,
+					"setting low voltage level" );
 	( *pulser_struct.set_function_low_level )( func, voltage );
 }
 
@@ -338,7 +341,7 @@ void p_set_timebase( Var *v )
 
 	/* finally call the function (if it exists...) */
 
-	is_func( pulser_struct.set_timebase,"setting the timebase" );
+	is_pulser_func( pulser_struct.set_timebase,"setting the timebase" );
 	( *pulser_struct.set_timebase )( timebase );
 }
 
@@ -375,7 +378,8 @@ void p_set_trigger_mode( Var *v)
 
 	/* finally call the function (if it exists...) */
 
-	is_func( pulser_struct.set_trigger_mode, "setting the trigger mode" );
+	is_pulser_func( pulser_struct.set_trigger_mode,
+					"setting the trigger mode" );
 	( *pulser_struct.set_trigger_mode )( mode );
 }
 
@@ -411,7 +415,8 @@ void p_set_trigger_slope( Var *v )
 
 	/* finally call the function (if it exists...) */
 
-	is_func( pulser_struct.set_trig_in_slope, "setting the trigger slope" );
+	is_pulser_func( pulser_struct.set_trig_in_slope,
+					"setting the trigger slope" );
 	( *pulser_struct.set_trig_in_slope )( slope );
 }
 
@@ -438,7 +443,8 @@ void p_set_trigger_level( Var *v )
 
 	/* finally call the function (if it exists...) */
 
-	is_func( pulser_struct.set_trig_in_level, "setting the trigger level" );
+	is_pulser_func( pulser_struct.set_trig_in_level,
+					"setting the trigger level" );
 	( *pulser_struct.set_trig_in_level )( level );
 }
 
@@ -474,7 +480,7 @@ void p_set_rep_time( Var *v )
 
 	/* finally call the function (if it exists...) */
 
-	is_func( pulser_struct.set_repeat_time, "setting a repeat time" );
+	is_pulser_func( pulser_struct.set_repeat_time, "setting a repeat time" );
 	( *pulser_struct.set_repeat_time )( time );
 }
 
@@ -513,7 +519,8 @@ void p_set_rep_freq( Var *v )
 
 	/* finally call the function (if it exists...) */
 
-	is_func( pulser_struct.set_repeat_time, "setting a repeat frequency" );
+	is_pulser_func( pulser_struct.set_repeat_time,
+					"setting a repeat frequency" );
 	( *pulser_struct.set_repeat_time )( time );
 }
 

@@ -54,5 +54,9 @@ void p_set_trigger_level( Var *v );
 void p_set_rep_time( Var *v );
 void p_set_rep_freq( Var *v );
 
+void is_pulser_driver( void );
+void is_pulser_func( void *func, const char *text );
+double is_mult_ns( double val, const char * text );
+
 
 #endif  /* ! PULSER_HEADER */
