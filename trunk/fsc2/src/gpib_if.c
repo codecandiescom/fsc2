@@ -956,19 +956,19 @@ char *gpib_get_conf_file( char *file )
 		{
 			case ENOENT :
 				eprint( FATAL, "gpib: GPIB configuration file `%s' does not "
-						"exist.\n", file );
+						"exist.", file );
 				strcpy( file, "" );
 				break;
 
 			case EACCES :
 				eprint( FATAL, "gpib: No permission to access GPIB "
-						"configuration file `%s'.\n", file );
+						"configuration file `%s'.", file );
 				strcpy( file, "" );
 				break;
 
 			default :
 				eprint( FATAL, "gpib: Can't read GPIB configuration file "
-						"`%s'.\n", file );
+						"`%s'.", file );
 				strcpy( file, "" );
 				break;
 		}

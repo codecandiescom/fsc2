@@ -13,7 +13,7 @@
 #include "fsc2.h"
 
 static PHS phs[ 3 ];
-static Cur_PHS = -1;
+static int Cur_PHS = -1;
 
 
 /*---------------------------------------------------------------*/
