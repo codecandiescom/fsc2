@@ -603,6 +603,9 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length )
 
 	do
 	{
+		if ( do_quit )
+			THROW( EXCEPTION );
+
 		len = 10;
 		usleep( 100000 );
 		if ( gpib_write( tds520.device, "BUSY?\n" ) == FAILURE ||

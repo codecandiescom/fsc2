@@ -617,6 +617,9 @@ double tds754a_get_area( int channel, WINDOW *w )
 
 	do
 	{
+		if ( do_quit )
+			THROW( EXCEPTION );
+
 		length = 40;
 		usleep( 100000 );
 		if ( gpib_write( tds754a.device, "BUSY?\n" ) == FAILURE ||
@@ -674,6 +677,9 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length )
 
 	do
 	{
+		if ( do_quit )
+			THROW( EXCEPTION );
+
 		len = 10;
 		usleep( 100000 );
 		if ( gpib_write( tds754a.device, "BUSY?\n" ) == FAILURE ||
