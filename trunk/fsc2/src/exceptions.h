@@ -28,11 +28,11 @@
 
 #include <setjmp.h>
 
-enum {
+typedef enum {
 	NO_EXCEPTION                = 0,               /* must be 0 ! */
 	EXCEPTION                   = ( 1 << 0 ),
-	OUT_OF_MEMORY_EXCEPTION     = ( 2 << 1 ),
-	TOO_DEEPLY_NESTED_EXCEPTION = ( 3 << 2 ),
+	OUT_OF_MEMORY_EXCEPTION     = ( 1 << 1 ),
+	TOO_DEEPLY_NESTED_EXCEPTION = ( 1 << 2 ),
 	EOF_IN_COMMENT_EXCEPTION    = ( 1 << 3 ),
 	EOF_IN_STRING_EXCEPTION     = ( 1 << 4 ),
 	DANGLING_END_OF_COMMENT     = ( 1 << 5 ),
@@ -40,7 +40,7 @@ enum {
 	MISSING_SEMICOLON_EXCEPTION = ( 1 << 7 ),
 	INVALID_INPUT_EXCEPTION     = ( 1 << 8 ),
 	USER_BREAK_EXCEPTION        = ( 1 << 9 ),
-};
+} Exception_Type;
 
 
 #define TRY \
