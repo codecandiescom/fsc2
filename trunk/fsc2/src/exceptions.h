@@ -31,6 +31,11 @@
 #include <syslog.h>
 
 
+#ifndef MAX_NESTED_EXCEPTION
+#define MAX_NESTED_EXCEPTION 256
+#endif
+
+
 enum {
 	NO_EXCEPTION                = 0,               /* must be 0 ! */
 	EXCEPTION                   = ( 1 <<  0 ),
@@ -46,11 +51,6 @@ enum {
 	USER_BREAK_EXCEPTION        = ( 1 << 10 ),
 	ABORT_EXCEPTION             = ( 1 << 11 ),
 };
-
-
-#ifndef MAX_NESTED_EXCEPTION
-#define MAX_NESTED_EXCEPTION 256
-#endif
 
 
 #define TRY \
