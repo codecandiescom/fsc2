@@ -240,8 +240,26 @@ int new_data_callback( XEvent *a, void *b )
 	a = a;
 	b = b;
 
+
+	/* Check if the child raised a signal to tell us it's done. If it did
+	   send it a DO_QUIT signal (but only if it's still alive) and remove
+	   the callback for the 'STOP' button */
+
+	if ( Internals.child_is_quitting == QUITTING_RAISED )
+	{
+		if ( Internals.child_pid > 0 && ! kill( Internals.child_pid, 0 ) )
+			kill( Internals.child_pid, DO_QUIT );
+		Internals.child_is_quitting = QUITTING_ACCEPTED;
+		fl_set_object_callback( GUI.run_form->stop, NULL, 0 );
+	}
+
+	/* Check if the child is waiting for an answer in a call of the
+	   toolbox_wait() function and the timer expired. */
+
 	if ( Internals.tb_wait == TB_WAIT_TIMER_EXPIRED )
 		tb_wait_handler( 0 );
+
+	/* Now handle new data send by the child */
 
 	while ( Comm.MQ->low != Comm.MQ->high )
 		TRY
@@ -275,9 +293,17 @@ int new_data_callback( XEvent *a, void *b )
 			Comm.MQ->low = Comm.MQ->high;
 		}
 
+		/* Finally check for requests from the HTTP server and handle death
+		   of the HTTP server. */
+
 #if defined WITH_HTTP_SERVER
 	if ( Internals.http_pid > 0 )
 		http_check( );
+	else if ( Internals.http_server_died )
+	{
+		Internals.http_server_died = UNSET;
+		fl_call_object_callback( GUI.main_form->server );
+	}
 #endif
 
 	return 0;

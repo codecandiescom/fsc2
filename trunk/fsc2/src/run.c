@@ -58,7 +58,6 @@ static void deal_with_program_tokens( void );
 
 /* Locally used global variables used in parent, child and signal handlers */
 
-static volatile sig_atomic_t child_is_quitting;
 sigjmp_buf alrm_env;
 volatile sig_atomic_t can_jmp_alrm = 0;
 static struct sigaction sigchld_old_act,
@@ -118,10 +117,7 @@ bool run( void )
 	   new data. */
 
 	setup_signal_handlers( );
-
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
-
-	fl_set_idle_callback( 0, NULL );
 
 	/* We have to be careful: When the child process gets forked it may
 	   already be finished running *before* the fork() call returns in the
@@ -334,7 +330,7 @@ static bool init_devs_and_graphics( void )
 	}
 
 	fl_set_object_callback( GUI.main_form->run, run_file, 0 );
-	child_is_quitting = UNSET;
+	Internals.child_is_quitting = QUITTING_UNSET;
 
 	return OK;
 }
@@ -429,7 +425,6 @@ static void fork_failure( int stored_errno )
 
 	Internals.mode = PREPARATION;
 
-	fl_set_idle_callback( idle_handler, NULL );
 	run_close_button_callback( NULL, 0 );
 	fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
 	fl_activate_object( GUI.main_form->run );
@@ -497,10 +492,7 @@ static void quitting_handler( int signo )
 
 	signo = signo;
 	errno_saved = errno;
-	child_is_quitting = SET;
-	if ( Internals.child_pid > 0 && ! kill( Internals.child_pid, 0 ) )
-		kill( Internals.child_pid, DO_QUIT );
-	fl_set_object_callback( GUI.run_form->stop, NULL, 0 );
+	Internals.child_is_quitting = QUITTING_RAISED;
 	errno = errno_saved;
 }
 
@@ -581,7 +573,7 @@ static void run_sigchld_handler( int signo )
 		if ( pid == Internals.http_pid )
 		{
 			Internals.http_pid = -1;
-			fl_trigger_object( GUI.main_form->server );
+			Internals.http_server_died = SET;
 			continue;
 		}
 
@@ -634,7 +626,8 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 
 	b = b;
 
-	if ( ! child_is_quitting )   /* missing notification by the child ? */
+	if ( Internals.child_is_quitting == QUITTING_UNSET )
+									/* missing notification by the child ? */
 	{
 		if ( ! ( Internals.cmdline_flags & DO_CHECK ) )
 		{

@@ -177,9 +177,20 @@ typedef struct {
 	bool exit_hooks_are_run;     /* Set if modules exit hooks have all already
 									been run */
 
+	/* The following are flags that get set in signal handlers and when set
+	   indicate that certain actions have to be taken the idle callbacks */
+
+	volatile sig_atomic_t child_is_quitting; /* Set when the child is done */
+
 	volatile sig_atomic_t tb_wait; /* set if the child is waiting for the
 									  change of the state of an object in the
 									  toolbox */
+
+	volatile sig_atomic_t http_server_died; /* set when the http server dies */
+
+	volatile sig_atomic_t conn_request; /* set on request from the child
+										   process dealing with external
+										   connections */
 } INTERNALS;
 
 

@@ -62,6 +62,7 @@ static bool display_file( char *name, FILE *fp );
 static void start_editor( void );
 static void start_help_browser( void );
 static void set_main_signals( void );
+static void conn_request_handler( void );
 
 
 
@@ -103,6 +104,9 @@ int main( int argc, char *argv[ ] )
 	Internals.I_am = PARENT;
 	Internals.just_testing = UNSET;
 	Internals.exit_hooks_are_run = UNSET;
+	Internals.tb_wait = TB_WAIT_NOT_RUNNING;
+	Internals.http_server_died = UNSET;
+	Internals.conn_request = UNSET;
 
 	prog_name = argv[ 0 ];
 
@@ -1559,19 +1563,16 @@ static void start_help_browser( void )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Callback function for an invisible button that is triggered */
-/* when the connection child sends a new file name.            */
-/*-------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Function that deals with requests by the child process that is */
+/* listening for external connections (to send a new EDL program) */
+/*----------------------------------------------------------------*/
 
-void conn_callback( FL_OBJECT *a, long b )
+static void conn_request_handler( void )
 {
 	char line[ MAXLINE ];
 	int count;
 
-
-	a = a;
-	b = b;
 
 	while ( ( count = read( Comm.conn_pd[ READ ], line, MAXLINE ) ) == -1 &&
 			errno == EINTR )
@@ -1638,13 +1639,13 @@ void main_sig_handler( int signo )
 				if ( pid == Internals.http_pid )
 				{
 					Internals.http_pid = -1;
-					fl_trigger_object( GUI.main_form->server );
+					Internals.http_server_died = SET;
 				}
 			errno = errno_saved;
 			return;
 
 		case SIGUSR1 :
-			fl_trigger_object( GUI.main_form->conn_button );
+			Internals.conn_request = SET;
 			return;
 
 		case SIGUSR2 :
@@ -1787,14 +1788,36 @@ void usage( int return_status )
 }
 
 
+/*---------------------------------------------------------*/
+/* Idle handler that's running while no experiment is done */
+/* and which deals with periodic tasks.                    */
+/*---------------------------------------------------------*/
+
 int idle_handler( XEvent *a, void *b )
 {
 	a = a;
 	b = b;
 
+
+	/* Check if a request from the child for external conections has
+	   come in */
+
+	if ( Internals.conn_request )
+	{
+		Internals.conn_request = UNSET;
+		conn_request_handler( );
+	}
+
+	/* Check for request by the HTTP server and its death */
+
 #if defined WITH_HTTP_SERVER
 	if ( Internals.http_pid > 0 )
 		http_check( );
+	else if ( Internals.http_server_died )
+	{
+		Internals.http_server_died = UNSET;
+		fl_call_object_callback( GUI.main_form->server );
+	}
 #endif
 
 	return 0;
