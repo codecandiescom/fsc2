@@ -104,7 +104,7 @@ my $f4_l1 = $f4->Label( '-text' => 'Attenuation:',
 my $f4_v = $f4->Entry( '-textvariable' => \$atten,
 					   '-width' => '6',
 					   '-validate' => 'key',
-					   '-validatecommand' => \&is_numeric,
+					   '-validatecommand' => \&is_signed_numeric,
 					   '-relief' => 'sunken' );
 my $f4_l2 = $f4->Label( '-text' => 'dB',
 						'-width' => 3 );
@@ -265,7 +265,7 @@ goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
 chomp $ne;
 $step_freq = $ne;
 
-goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+goto done_reading unless defined( $ne = <F> ) and is_signed_numeric( $ne );
 chomp $ne;
 $atten = $ne;
 
@@ -322,6 +322,15 @@ sub store_defs {
 #############################################
 
 sub is_numeric {
+
+	my $new_val = shift;
+	return $new_val =~ /^((\d+\.?(\d+)?)|(\.(\d+)?))?$/;
+}
+
+
+#############################################
+
+sub is_signed_numeric {
 
 	my $new_val = shift;
 	return $new_val =~ /^[+-]?((\d+\.?(\d+)?)|(\.(\d+)?))?$/;
