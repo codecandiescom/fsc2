@@ -693,7 +693,11 @@ print \$fh \"";
 			if ( $$_{ type } =~ /^int|float|menu$/o ) {
 				$line =~ s/\b$$_{ name }\b/\$$$_{ name }/g;
 			} elsif ( $$_{ type } =~ /^file$/o ) {
-				$line =~ s/\b$$_{ name }\b/\\\"\$$$_{ name }\\\"/g;
+				if ( $line =~ /get_file\s*\(\s*$$_{ name }/ ) {
+					$line =~ s/\b$$_{ name }\b/\\\"\\\\\$$$_{ name }\\\"/g;
+				} else {
+					$line =~ s/\b$$_{ name }\b/\\\"\$$$_{ name }\\\"/g;
+				}
 			}
 		}
 		print $line;
