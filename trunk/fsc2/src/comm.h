@@ -97,6 +97,7 @@ void writer( int type, ... );
 long *exp_bcreate( void *buffer, long len );
 bool exp_bdelete( void *buffer, long len );
 long exp_bstate( void *buffer, long len );
+long *exp_screate( void *buffer, long len );
 
 
 #endif  /* ! COMM_HEADER */
