@@ -221,6 +221,7 @@ Var *digitizer_get_amplitude( Var *v );
 Var *digitizer_get_amplitude_fast( Var *v );
 Var *digitizer_run( Var *v );
 Var *digitizer_lock_keyboard( Var *v );
+Var *digitizer_command( Var *v );
 
 
 /* Declaration of internally used functions */
@@ -269,6 +270,7 @@ void tds540_get_curve( int channel, WINDOW *w, double **data, long *length,
 double tds540_get_amplitude( int channel, WINDOW *w, bool use_cursor );
 void tds540_free_running( void );
 void tds540_lock_state( bool lock );
+void tds540_command( const char *cmd );
 
 
 /*
