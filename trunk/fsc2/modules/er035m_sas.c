@@ -25,11 +25,6 @@
 #include "fsc2.h"
 
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
-
 /* Include configuration information for the device */
 
 #include "er035m_sas.conf"
