@@ -25,8 +25,9 @@
 # also a free(). To use it define MDEBUG when compiling fsc2, run fsc2 with
 # stderr redirected to a file and then feed the resulting file to this script.
 # To figure out the exact file name and line number that triggered the error
-# that the executable was either the version of fsc2 in the current directory
-# or, if none exists there, /usr/local/bin/fsc2.
+# the addr2line utility is used on the executable, asuming that it was either
+# the version of fsc2 in the current directory or, if none exists there,
+# /usr/local/bin/fsc2.
 
 use strict;
 
