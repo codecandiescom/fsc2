@@ -806,14 +806,13 @@ Var *f_print( Var *v )
 	char *ep;
 	Var *cv;
 	char *sptr;
-	int in_format,
-		on_stack,
-		s;
+	int in_format,               // number of wild cards characters
+		on_stack,                // number of arguments (beside format string )
+		percs;                   // number of `%' characters
 	bool print_anyway = UNSET;
-	int percs;
 
 	
-	/* a call to print() without any argument just prints a newline */
+	/* A call to print() without any argument just prints a newline */
 
 	if ( v == NULL )
 	{
@@ -824,7 +823,7 @@ Var *f_print( Var *v )
 		return vars_push( INT_VAR, 0 );
 	}
 
-	/* make sure the first argument is a string */
+	/* Make sure the first argument is a string */
 
 	vars_check( v, STR_VAR );
 	sptr = cp = v->val.sptr;
@@ -834,69 +833,64 @@ Var *f_print( Var *v )
 		print_anyway = SET;
 	}
 
-	/* count the number of specifiers `#' in the format string but don't count
-	   escaped `#' (i.e "\#") */
+	/* Count the number of specifiers `#' in the format string but don't count
+	   escaped `#' (i.e "\#"). Also count number of `%' - since this is a
+	   format string we need to replace each `%' by a `%%' since printf() and
+	   friends use it in the conversion specification. */
 
-	for ( percs = in_format = 0, sptr; ( cp = strchr( cp, '#' ) ) != NULL;
-		  ++cp )
+	percs = *sptr == '%' ? 1 : 0;
+	in_format = *sptr == '#' ? 1 : 0;
+
+	for ( cp = sptr + 1; *cp != '\0'; cp++ )
 	{
-		if ( *( cp - 1 ) != '\\' )
+		if ( *cp == '#' && *( cp - 1 ) != '\\' )
 			in_format++;
 		if ( *cp == '%' )
 			percs++;
 	}
 
-	/* check and count number of variables on the stack following the format
+	/* Check and count number of variables on the stack following the format
 	   string */
 
 	for  ( cv = v->next, on_stack = 0; cv != NULL; ++on_stack, cv = cv->next )
 		vars_check( cv, INT_VAR | FLOAT_VAR | STR_VAR );
 
-	/* check that there are at least as many variables are on the stack 
+	/* Check that there are at least as many variables are on the stack 
 	   as there specifiers in the format string */
 
 	if ( on_stack < in_format )
 		eprint( SEVERE, "%s:%ld: Less data than format descriptors in "
 				"`print()' format string.", Fname, Lc );
 
-	/* utter a warning if there are more data than format descriptors */
+	/* Utter a warning if there are more data than format descriptors */
 
 	if ( on_stack > in_format )
 		eprint( SEVERE, "%s:%ld: More data than format descriptors in "
 				"`print()' format string.", Fname, Lc );
 
-	/* count number of `#' */
+	/* Get string long enough to replace each `#' by a 5 char sequence */
 
-	for ( cp = sptr, s = 0; *cp != '\0' ; ++cp )
-		if ( *cp == '#' )
-			s++;
-
-	/* get string long enough to replace each `#' by a 4-char sequence 
-	   plus a '\0' */
-
-	fmt = get_string( strlen( sptr ) + 4 * s + percs + 2 );
+	fmt = get_string( strlen( sptr ) + 4 * in_format + percs + 2 );
 	strcpy( fmt, sptr );
 
-	for ( cp = fmt; *cp != '\0'; ++cp )
+	for ( cp = fmt; *cp != '\0'; cp++ )
 	{
-		/* skip normal characters */
+		/* Skip normal characters */
 
 		if ( *cp != '\\' && *cp != '#' && *cp != '%' )
 			continue;
 
-		/* convert format descriptor (un-escaped `#') to 5 \x01 */
+		/* Convert format descriptor (un-escaped `#') to 5 \x01 */
 
 		if ( *cp == '#' )
 		{
-			for ( ep = fmt + strlen( fmt ) + 1; ep != cp; --ep )
-				*( ep + 4 ) = *ep;
-			*cp++ = '\x01';
-			*cp++ = '\x01';
-			*cp++ = '\x01';
-			*cp++ = '\x01';
-			*cp = '\x01';
+			memmove( cp + 4, cp, strlen( cp ) + 1 );
+			memset( cp, '\x01', 5 );
+			cp += 4;
 			continue;
 		}
+
+		/* Double all `%'s */
 
 		if ( *cp == '%' )
 		{
@@ -905,14 +899,12 @@ Var *f_print( Var *v )
 			continue;
 		}
 
-		/* replace escape sequences */
+		/* Replace escape sequences */
 
 		switch ( *( cp + 1 ) )
 		{
 			case '#' :
 				*cp = '#';
-				break;
-
 				break;
 
 			case 'n' :
@@ -938,11 +930,10 @@ Var *f_print( Var *v )
 				break;
 		}
 		
-		for ( ep = cp + 1; *ep != '\0'; ep++ )
-			*ep = *( ep + 1 );
+		memmove( cp + 1, cp + 2, strlen( cp ) - 1 );
 	}
 
-	/* now lets start printing... */
+	/* Now lets start printing... */
 
 	cp = fmt;
 	if ( ! just_testing )
@@ -995,7 +986,7 @@ Var *f_print( Var *v )
 	if ( ! TEST_RUN || print_anyway ) 
 		eprint( NO_ERROR, cp );
 
-	/* finally free the copy of the format string and return number of
+	/* Finally free the copy of the format string and return number of
 	   printed variables */
 
 	T_free( fmt );
@@ -2358,8 +2349,7 @@ Var *f_fsave( Var *v )
 	char *sptr;
 	int in_format,
 		on_stack,
-		s;
-	int percs;
+		percs;
 
 
 	/* Determine the file identifier */
@@ -2389,10 +2379,12 @@ Var *f_fsave( Var *v )
 	/* Count the number of specifiers `#' in the format string but don't count
 	   escaped `#' (i.e "\#") */
 
-	for ( percs = in_format = 0, sptr; ( cp = strchr( cp, '#' ) ) != NULL;
-		  ++cp )
+	percs = *sptr == '%' ? 1 : 0;
+	in_format = *sptr == '#' ? 1 : 0;
+
+	for ( cp = sptr + 1; *cp != '\0'; ++cp )
 	{
-		if ( *( cp - 1 ) != '\\' )
+		if ( *cp == '#' && *( cp - 1 ) != '\\' )
 			in_format++;
 		if ( *cp == '%' )
 			percs++;
@@ -2417,16 +2409,10 @@ Var *f_fsave( Var *v )
 		eprint( SEVERE, "%s:%ld: More data than format descriptors in "
 				"`save()' format string.", Fname, Lc );
 
-	/* Count number of `#' */
-
-	for ( cp = sptr, s = 0; *cp != '\0' ; ++cp )
-		if ( *cp == '#' )
-			s++;
-
 	/* Get string long enough to replace each `#' by a 4-char sequence 
 	   plus a '\0' */
 
-	fmt = get_string( strlen( sptr ) + 4 * s + percs + 2 );
+	fmt = get_string( strlen( sptr ) + 4 * in_format + percs + 2 );
 	strcpy( fmt, sptr );
 
 	for ( cp = fmt; *cp != '\0'; ++cp )
@@ -2440,15 +2426,13 @@ Var *f_fsave( Var *v )
 
 		if ( *cp == '#' )
 		{
-			for ( ep = fmt + strlen( fmt ) + 1; ep != cp; --ep )
-				*( ep + 4 ) = *ep;
-			*cp++ = '\x01';
-			*cp++ = '\x01';
-			*cp++ = '\x01';
-			*cp++ = '\x01';
-			*cp = '\x01';
+			memmove( cp + 4, cp, strlen( cp ) + 1 );
+			memset( cp, '\x01', 5 );
+			cp += 4;
 			continue;
 		}
+
+		/* Double each `%' */
 
 		if ( *cp == '%' )
 		{
@@ -2463,8 +2447,6 @@ Var *f_fsave( Var *v )
 		{
 			case '#' :
 				*cp = '#';
-				break;
-
 				break;
 
 			case 'n' :
@@ -2490,8 +2472,7 @@ Var *f_fsave( Var *v )
 				break;
 		}
 		
-		for ( ep = cp + 1; *ep != '\0'; ep++ )
-			*ep = *( ep + 1 );
+		memmove( cp + 1, cp + 2, strlen( cp ) - 1 );
 	}
 
 	/* Now lets start printing... */
