@@ -22,13 +22,7 @@ bool tds520a_init( const char *name )
 	if ( gpib_init_device( name, &tds520a.device ) == FAILURE )
         return FAIL;
 
-	/* Set digitzer into local lockout state */
-
-    if ( gpib_write( tds520a.device, "LOC ALL\n" ) == FAILURE )
-	{
-		gpib_local( tds520a.device );
-        return FAIL;
-	}
+	gpib_clr( tds520a.device );
 
     /* Set digitizer to short form of replies */
 
@@ -419,7 +413,6 @@ void tds520a_finished( void )
     gpib_write( tds520a.device, "*SRE 0\n" );
     gpib_write( tds520a.device, "ACQ:STOPA RUNST\n" );
     gpib_write( tds520a.device, "ACQ:STATE RUN\n" );
-    gpib_write( tds520a.device, "LOC NON\n" ); 
 
 	gpib_local( tds520a.device );
 }
@@ -666,8 +659,7 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length )
 
 	/* Ask digitizer to send the curve */
 
-	if ( gpib_write( tds520a.device, "*WAI\n" ) == FAILURE ||
-		 gpib_write( tds520a.device, "CURV?\n" ) == FAILURE )
+	if ( gpib_write( tds520a.device, "*WAI;:CURV?\n" ) == FAILURE )
 		tds520a_gpib_failure( );
 
 	/* Read just the first two bytes, these are a '#' character plus the
