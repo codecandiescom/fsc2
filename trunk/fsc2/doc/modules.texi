@@ -41,19 +41,19 @@ This chapter tries to describe how to write new modules for use with
 @section What modules are good for
 
 
-Modules allow extending the set of commands to be used in an
-@code{EDL} file. This is especially important if a new device needs
-to be integrated into @code{fsc2}. You don't have to change
-@code{fsc2} itself but write a new module for the new devices without
-having to understand completely how the @code{fsc2} works. It's only
-necessary to be able to write functions in C for the communication with
-the new device. The only exception is some basic knowledge about
-@code{fsc2}'s variables. They are explained in one of the following
-sections. But modules may also be used for other purposes beside handling
-new devices - one might also write modules that supply new mathematical
-functions or other useful functionalities. But the following the
-discussion will mainly concentrate on modules for new devices, writing
-other modules is even simpler.
+Modules allow extending the set of commands to be used in an @code{EDL}
+file. This is especially important if a new device needs to be
+integrated into @code{fsc2}. You don't have to change @code{fsc2} itself
+but write a new module for the new devices without having to understand
+completely how the @code{fsc2} works. It's only necessary to be able to
+write functions in C for the communication with the new device. The only
+exception is some basic knowledge about @code{fsc2}'s variables. They
+are explained in one of the following sections. But modules may also be
+used for other purposes beside handling devices - one might also write
+modules that supply new mathematical functions or other useful
+functionalities. But the following the discussion will mainly
+concentrate on modules for new devices, writing other modules is even
+simpler.
 
 Let's start with a short summary of the things a module for a device has
 to do. Usually, a module contains just a few functions that talk to the
@@ -77,14 +77,14 @@ supported devices. It can be found in the @file{config} subdirectory of
 the source tree and usually gets installed in
 @file{/usr/local/lib/fsc2}. The entries in this file are
 case-insensitive, so you might add `SR510', `sr510' or `Sr510'
-etc. Within the file C and C++ style comments can be used. By adding
-the device name to this file you tell @code{fsc2} that there is now a
-module called `sr510' (take care - all modules are spelled with
-@strong{lower} case characters!). Actually, the file compiled from the C
-file defining the functions has to be @file{sr510.so} - that means it is
-a shareable library, how to create it from the C file is described
-later. Here is a short snippet from the @file{Devices} file with the
-entries for the lock-in amplifiers:
+etc. Within the file C and C++ style comments can be used. By adding the
+device name to this file you tell @code{fsc2} that there is now a module
+called `sr510' (take care - all modules are spelled with @strong{lower}
+case characters!). Actually, the file compiled from the C file defining
+the functions has to be @file{sr510.so} - that means it is a shared
+library (how to create one from the C file is described later). Here is
+a short snippet from the @file{Devices} file with the entries for the
+lock-in amplifiers:
 @example
 sr510         // Stanford Research lock-in amplifier, model 510
 sr530         // Stanford Research lock-in amplifier, model 530
@@ -101,8 +101,8 @@ function data base file called @file{Functions}
 source tree and will usually be installed in
 @file{/usr/local/lib/fsc2}. Here one would add lines consisting of two
 or three entries, separated by commas and ending with a
-semicolon. Please note that you can't use function names that contain
-a @code{#} character.
+semicolon. Please note that you can't use function names that contain a
+@code{#} character.
 @enumerate
 @item Each line must start with the names of the exported function, i.e.@:
       @code{lockin_get_data}.
@@ -157,12 +157,12 @@ itself.
 
 
 Writing the C file(s) with these functions, compiling it to create a
-shareable library file from it and extending the device and function
-data base is all there is to be done. If in the devices sections of the
+shared library file from it and extending the device and function data
+base is all there is to be done. If in the devices sections of the
 @code{EDL} file the new device is found (and it's also listed in the
 devices data base file @file{Devices}) the new module will be loaded by
-@code{fsc2} and the functions defined in the module can be used in
-the @code{EDL} file.
+@code{fsc2} and the functions defined in the module can be used in the
+@code{EDL} file.
 
 
 
@@ -358,7 +358,7 @@ to get the address of the start of a string variable.
 
 There are some functions that make it even easier for you to evaluate
 the parameters your function receives. The first one is for the case
-that you expect an integer variable but would be prepared also to deal
+that you expect an integer variable but would also be prepared to deal
 with a floating number after it has been rounded to the nearest
 integer. This is the function @code{get_long()}, defined as
 @example
@@ -385,8 +385,8 @@ the following warning message will be printed:
 foo.edl:17: XYZ: Floating point number used as baz in abc().
 @end example
 
-If, on the other hand, you expect a floating point number but are
-prepared to also accept an integer, you can use the function
+If, on the other hand, you expect a floating point number but also would
+accept an integer, you can use the function
 @example
 long get_double( Var *var, const char *snippet )
 @end example
