@@ -596,7 +596,7 @@ stimulated echo experiment the first microwave pulse usually is set
 first to a @code{+X} phase, then to @code{-X}, again to @code{+X} and
 finally to @code{-X}. The second pulse will run at the same time through
 the sequence @code{+X}, @code{+X}, @code{-X} and @code{-X}. The third
-pulse has alway the same @code{+X} phase.  Because a constant phase of
+pulse has alway the same @code{+X} phase. Because a constant phase of
 @code{+X} is the default, only two phase sequences have to be defined:
 @example
 PHASE_SEQUENCE_1: +x, -x, +x, -x;  // for 1st pulse
