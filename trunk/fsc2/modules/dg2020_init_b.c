@@ -26,8 +26,8 @@ void dg2020_init_setup( void )
 
 /*--------------------------------------------------------------------------
   Function runs through all pulses and checks that at least:
-  1. the function is set and the function itself has been declared in the
-     ASSIGNMENTS section
+  1. a pulse function is set and the function itself has been declared in
+     the ASSIGNMENTS section
   2. the start position is set
   3. the length is set (only exception: if pulse function is DETECTION
      and no length is set it's more or less silently set to one tick)
@@ -241,19 +241,61 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 	}
 
 	/* In the basic pulse check we created made a list of all phase types
-	   needed for all functions. Now we can check if these phase types are
-	   also defined in the phase setup. */
+	   needed for the current function. Now we can check if these phase types
+	   are also defined in the phase setup. */
 
 	for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
 	{
 		if ( f->phase_setup->is_needed[ i ] && ! f->phase_setup->is_set[ i ] )
 		{
 			eprint( FATAL, "%s: Phase type `%s' is needed for function `%s' "
-					"but it hasn't been not defined in the PHASE_SETUP "
-					"commmand.", pulser_struct.name,
+					"but it hasn't been not defined in a PHASE_SETUP "
+					"command.", pulser_struct.name,
 					Phase_Types[ i + PHASE_PLUS_X ],
 					Function_Names[ f->self ] );
 			THROW( EXCEPTION );
 		}
 	}
+
+	/* Now we distribute pods of the function that aren't used for pulse types
+	   set in the PHASE_SETUP command to phase types that aren't needed for
+	   real pulses (this way the unused pod is automatically set to a constant
+	   voltages as needed by the Berlin pulse bridge) */
+
+	/* We also have to test that different phase types are not associated with
+       the same pod (exception: the different phase types are never actually
+       used for a pulse - that's ok). */
+
+	for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
+		for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
+		{
+			if ( i == j )
+				continue;
+
+			if ( f->phase_setup->is_needed[ i ] &&
+				 f->phase_setup->is_set[ j ] &&
+				 f->phase_setup->pod[ i ] == f->phase_setup->pod[ j ] )
+			{
+
+				/* Distinguish between the cases that either both phase types
+				   are really needed by pulses or that one is needed by a
+				   pulse and the other is defined but not actually needed for
+				   a pulse but to just to create a constant voltage. */
+
+				if ( f->phase_setup->is_needed[ j ] )
+					eprint( FATAL, "%s: Pod %ld can't be used for phase type "
+							"`%s' and `%s' at the same time.",
+							pulser_struct.name,
+							f->phase_setup->pod[ i ]->self,
+							Phase_Types[ i + PHASE_PLUS_X ],
+							Phase_Types[ j + PHASE_PLUS_X ] );
+				else
+					eprint( FATAL, "%s: Pod %ld is needed for phase type `%s' "
+							"and can't be also used for other phase types.",
+							pulser_struct.name,
+							f->phase_setup->pod[ i ]->self,
+							Phase_Types[ i + PHASE_PLUS_X ] );
+				THROW( EXCEPTION );
+			}
+		}
 }
