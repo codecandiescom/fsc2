@@ -27,7 +27,6 @@ static int cut_form_close_handler( FL_FORM *a, void *b );
 static void cut_setup_canvas( Canvas *c, FL_OBJECT *obj );
 static int cut_canvas_handler( FL_OBJECT *obj, Window window, int w, int h,
 							   XEvent *ev, void *udata );
-static void cut_repaint_canvas( Canvas *c );
 static void cut_reconfigure_window( Canvas *c, int w, int h );
 static void cut_press_handler( FL_OBJECT *obj, Window window,
 							   XEvent *ev, Canvas *c );
@@ -794,7 +793,7 @@ static int cut_canvas_handler( FL_OBJECT *obj, Window window, int w, int h,
     {
         case Expose :
             if ( ev->xexpose.count == 0 )     /* only react to last in queue */
-				cut_repaint_canvas( c );
+				redraw_all_cut_canvases( );
             break;
 
 		case ConfigureNotify :
@@ -817,15 +816,6 @@ static int cut_canvas_handler( FL_OBJECT *obj, Window window, int w, int h,
 	}
 
 	return 1;
-}
-
-
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
-
-static void cut_repaint_canvas( Canvas *c )
-{
-	redraw_all_cut_canvases( );
 }
 
 
