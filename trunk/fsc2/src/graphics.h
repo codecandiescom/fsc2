@@ -6,10 +6,40 @@
 #if ! defined GRAPHICS_HEADER
 #define GRAPHICS_HEADER
 
+
 #define MAX_CURVES  4
+
 
 #define DEFAULT_X_POINTS  64
 #define DEFAULT_Y_POINTS  32
+
+
+#if ( SIZE == HI_RES )
+#define SCALE_TICK_DIST   6     /* mean minimum distance between ticks */
+#define SHORT_TICK_LEN    5     /* length of short ticks */
+#define MEDIUM_TICK_LEN  10     /* length of medium ticks */
+#define LONG_TICK_LEN    14     /* length of long ticks */
+#define LABEL_DIST        7     /* distance between label and scale line */
+#define X_SCALE_OFFSET   20     /* x distance between scale line and window */
+#define Y_SCALE_OFFSET   21     /* y distance between scale line and window */
+#define Z_SCALE_OFFSET   46     /* z distance between scale line and window */
+#define Z_LINE_OFFSET    10     /* distance bewteen colour scale and window */
+#define Z_LINE_WIDTH     14     /* width of colour scale */
+#define ENLARGE_BOX_WIDTH 5     /* width of enlarge box */
+#else
+#define SCALE_TICK_DIST   4
+#define SHORT_TICK_LEN    3
+#define MEDIUM_TICK_LEN   6
+#define LONG_TICK_LEN     8
+#define LABEL_DIST        5
+#define X_SCALE_OFFSET   12
+#define Y_SCALE_OFFSET   12
+#define Z_SCALE_OFFSET   25
+#define Z_SCALE_WIDTH     8
+#define Z_LINE_OFFSET     5
+#define Z_LINE_WIDTH      8
+#define ENLARGE_BOX_WIDTH 3
+#endif
 
 
 typedef	struct {

@@ -129,23 +129,24 @@ void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 				case 1 :                       /* in x-axis window */
 					c->box_x = c->ppos[ X ];
 					c->box_w = 0;
-					c->box_y = 21;
-					c->box_h = 5;
+					c->box_y = X_SCALE_OFFSET + 1;
+					c->box_h = ENLARGE_BOX_WIDTH;
 					c->is_box = SET;
 					break;
 
 				case 2 :                       /* in y-axis window */
-					c->box_x = c->w - 27;
+					c->box_x = c->w
+						       - ( Y_SCALE_OFFSET + ENLARGE_BOX_WIDTH + 1 );
 					c->box_y = c->ppos[ Y ];
-					c->box_w = 5;
+					c->box_w = ENLARGE_BOX_WIDTH;
 					c->box_h = 0;
 					c->is_box = SET;
 					break;
 
 				case 4 :                       /* in z-axis window */
-					c->box_x = 47;
+					c->box_x = Z_SCALE_OFFSET + 1;
 					c->box_y = c->ppos[ Y ];
-					c->box_w = 5;
+					c->box_w = ENLARGE_BOX_WIDTH;
 					c->box_h = 0;
 					c->is_box = SET;
 					break;
@@ -1489,10 +1490,11 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 	if ( coord == Z )
 		make_color_scale( c, cv );
 
-	/* The distance between the smallest ticks should be about 6 points -
-	   calculate the corresponding delta in real word units */
+	/* The distance between the smallest ticks should be ca. `SCALE_TICK_DIST'
+	   points - calculate the corresponding delta in real word units */
 
-	rwc_delta = 6.0 * fabs( cv->rwc_delta[ coord ] ) / cv->s2d[ coord ];
+	rwc_delta = ( double ) SCALE_TICK_DIST * fabs( cv->rwc_delta[ coord ] ) /
+		                                                      cv->s2d[ coord ];
 
 	/* Now scale this distance to the interval [ 1, 10 [ */
 
@@ -1500,8 +1502,8 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 	order = pow( 10.0, mag );
 	modf( rwc_delta / order, &rwc_delta );
 
-	/* Now get a `smooth' value for the ticks distance, i.e. either 2, 2.5,
-	   5 or 10 and convert it to real world coordinates */
+	/* Get a `smooth' value for the ticks distance, i.e. either 2, 2.5, 5 or
+	   10 and convert it to real world coordinates */
 
 	if ( rwc_delta <= 2.0 )       /* in [ 1, 2 ] -> units of 2 */
 	{
@@ -1586,7 +1588,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 	{
 		/* Draw coloured line of scale */
 
-		y = 20;
+		y = X_SCALE_OFFSET;
 		XSetForeground( G.d, cv->gc,
 						fl_get_pixel( G.colors[ G.active_curve ] ) );
 		XFillRectangle( G.d, c->pm, cv->gc, 0, y - 2, c->w, 3 );
@@ -1600,7 +1602,8 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 
 			if ( coarse % coarse_factor == 0 )         /* long line */
 			{
-				XDrawLine( G.d, c->pm, c->font_gc, x, y + 3, x, y - 14 );
+				XDrawLine( G.d, c->pm, c->font_gc, x, y + 3,
+						   x, y - LONG_TICK_LEN );
 				rwc_coarse += coarse_factor * rwc_delta;
 				if ( G.font == NULL )
 					continue;
@@ -1610,21 +1613,24 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 				if ( x - width / 2 - 10 > last )
 				{
 					XDrawString( G.d, c->pm, c->font_gc, x - width / 2,
-								 y + 7 + G.font_asc, lstr, strlen( lstr ) );
+								 y + LABEL_DIST + G.font_asc, lstr,
+								 strlen( lstr ) );
 					last = x + width / 2;
 				}
 			}
 			else if ( medium % medium_factor == 0 )    /* medium line */
-				XDrawLine( G.d, c->pm, c->font_gc, x, y, x, y - 10 );
+				XDrawLine( G.d, c->pm, c->font_gc, x, y,
+						   x, y - MEDIUM_TICK_LEN );
 			else                                       /* short line */
-				XDrawLine( G.d, c->pm, c->font_gc, x, y, x, y - 5 );
+				XDrawLine( G.d, c->pm, c->font_gc, x, y,
+						   x, y - SHORT_TICK_LEN );
 		}
 	}
 	else if ( coord == Y )
 	{
 		/* Draw coloured line of scale */
 
-		x = c->w - 21;
+		x = c->w - Y_SCALE_OFFSET;
 		XSetForeground( G.d, cv->gc,
 						fl_get_pixel( G.colors[ G.active_curve ] ) );
 		XFillRectangle( G.d, c->pm, cv->gc, x, 0, 3, c->h );
@@ -1638,7 +1644,8 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 
 			if ( coarse % coarse_factor == 0 )         /* long line */
 			{
-				XDrawLine( G.d, c->pm, c->font_gc, x - 3, y, x + 14, y );
+				XDrawLine( G.d, c->pm, c->font_gc, x - 3, y,
+						   x + LONG_TICK_LEN, y );
 				rwc_coarse += coarse_factor * rwc_delta;
 
 				if ( G.font == NULL )
@@ -1646,20 +1653,22 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 
 				make_label_string( lstr, rwc_coarse, ( int ) mag );
 				width = XTextWidth( G.font, lstr, strlen( lstr ) );
-				XDrawString( G.d, c->pm, c->font_gc, x - 7 - width,
+				XDrawString( G.d, c->pm, c->font_gc, x - LABEL_DIST - width,
 							 y + G.font_asc / 2, lstr, strlen( lstr ) );
 			}
 			else if ( medium % medium_factor == 0 )    /* medium line */
-				XDrawLine( G.d, c->pm, c->font_gc, x, y, x + 10, y );
+				XDrawLine( G.d, c->pm, c->font_gc, x, y,
+						   x + MEDIUM_TICK_LEN, y );
 			else                                      /* short line */
-				XDrawLine( G.d, c->pm, c->font_gc, x, y, x + 5, y );
+				XDrawLine( G.d, c->pm, c->font_gc, x, y,
+						   x + SHORT_TICK_LEN, y );
 		}
 	}
 	else
 	{
 		/* Draw coloured line of scale */
 
-		x = 46;
+		x = Z_SCALE_OFFSET;
 		XSetForeground( G.d, cv->gc,
 						fl_get_pixel( G.colors[ G.active_curve ] ) );
 		XFillRectangle( G.d, c->pm, cv->gc, x - 2, 0, 3, c->h );
@@ -1673,7 +1682,8 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 
 			if ( coarse % coarse_factor == 0 )         /* long line */
 			{
-				XDrawLine( G.d, c->pm, c->font_gc, x + 3, y, x - 14, y );
+				XDrawLine( G.d, c->pm, c->font_gc, x + 3, y,
+						   x - LONG_TICK_LEN, y );
 				rwc_coarse += coarse_factor * rwc_delta;
 
 				if ( G.font == NULL )
@@ -1681,13 +1691,15 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 
 				make_label_string( lstr, rwc_coarse, ( int ) mag );
 				width = XTextWidth( G.font, lstr, strlen( lstr ) );
-				XDrawString( G.d, c->pm, c->font_gc, x + 7,
+				XDrawString( G.d, c->pm, c->font_gc, x + LABEL_DIST,
 							 y + G.font_asc / 2, lstr, strlen( lstr ) );
 			}
 			else if ( medium % medium_factor == 0 )    /* medium line */
-				XDrawLine( G.d, c->pm, c->font_gc, x, y, x - 10, y );
+				XDrawLine( G.d, c->pm, c->font_gc, x, y,
+						   x - MEDIUM_TICK_LEN, y );
 			else                                      /* short line */
-				XDrawLine( G.d, c->pm, c->font_gc, x, y, x - 5, y );
+				XDrawLine( G.d, c->pm, c->font_gc, x, y,
+						   x - SHORT_TICK_LEN, y );
 		}
 	}
 }
@@ -1707,15 +1719,17 @@ void make_color_scale( Canvas *c, Curve_2d *cv )
 	h = ( unsigned int ) ceil( ( double ) c->h / ( double ) NUM_COLORS );
 	h_inc = ( double ) c->h / ( double ) NUM_COLORS;
 
-	XDrawLine( G.d, c->pm, c->font_gc, 10, 0, 10, c->h - 1 );
-	XDrawLine( G.d, c->pm, c->font_gc, 25, 0, 25, c->h - 1 );
+	XDrawLine( G.d, c->pm, c->font_gc, Z_LINE_OFFSET, 0,
+			   Z_LINE_OFFSET, c->h - 1 );
+	XDrawLine( G.d, c->pm, c->font_gc, Z_LINE_OFFSET + Z_LINE_WIDTH + 1,
+			   0, Z_LINE_OFFSET + Z_LINE_WIDTH + 1, c->h - 1 );
 
 	col_inc = 1.0 / ( double ) ( NUM_COLORS - 1 );
 
 	for ( i = 0; i < NUM_COLORS; i++ )
 	{
 		XSetForeground( G.d, cv->gc, d2color( i * col_inc ) );
-		XFillRectangle( G.d, c->pm, cv->gc, 11,
-						d2shrt( c->h - ( i + 1 ) * h_inc ), 14, h );
+		XFillRectangle( G.d, c->pm, cv->gc, Z_LINE_OFFSET + 1,
+						d2shrt( c->h - ( i + 1 ) * h_inc ), Z_LINE_WIDTH, h );
 	}
 }
