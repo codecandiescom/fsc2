@@ -31,7 +31,7 @@ void *get_memcpy( const void *array, size_t size );
 char *correct_line_breaks( char *str );
 const char *strip_path( const char *path );
 const char *slash( const char *path );
-long get_file_length( char *name, int *len );
+long get_file_length( const char *name, int *len );
 void eprint( int severity, bool print_fl, const char *fmt, ... );
 bool fsc2_locking( void );
 int is_in( const char *supplied_in, const char **altern, int max );
