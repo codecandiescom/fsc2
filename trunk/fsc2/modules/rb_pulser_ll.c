@@ -264,19 +264,19 @@ void rb_pulser_run( bool state )
 												RULBUS_DELAY_END_PULSE )
 				 												 != RULBUS_OK )
 				rb_pulser_failure( SET, "Failure to start pulser" );
-		}
 
-		/* Finally get the ERT card to run by first setting the trigger slope
-		   to falling, then to raising edge, afterwards it feeds itself it's
-		   own end pulse as trigger input */
+			/* now get the ERT card to run by first setting the trigger slope
+			   to falling, then to raising edge, afterwards it feeds itself
+			   it's own end pulse as trigger input */
 
-		if ( rulbus_delay_set_trigger( delay_card[ ERT_DELAY ].handle,
-									   RULBUS_DELAY_FALLING_EDGE )
+			if ( rulbus_delay_set_trigger( delay_card[ ERT_DELAY ].handle,
+										   RULBUS_DELAY_FALLING_EDGE )
 			 												    != RULBUS_OK ||
-			 rulbus_delay_set_trigger( delay_card[ ERT_DELAY ].handle,
-									   RULBUS_DELAY_RAISING_EDGE )
+				 rulbus_delay_set_trigger( delay_card[ ERT_DELAY ].handle,
+										   RULBUS_DELAY_RAISING_EDGE )
 			 													 != RULBUS_OK )
-			rb_pulser_failure( SET, "Failure to start pulser" );
+				rb_pulser_failure( SET, "Failure to start pulser" );
+		}
 	}
 	else                        /* stop the pulser */
 	{
