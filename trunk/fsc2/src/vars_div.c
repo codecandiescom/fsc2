@@ -39,11 +39,31 @@ static void vars_div_check( double val );
 
 Var *vars_div( Var *v1, Var *v2 )
 {
-	vars_check( v1, RHS_TYPES );
+	vars_check( v1, RHS_TYPES | REF_PTR | INT_PTR | FLOAT_PTR );
 	vars_check( v2, RHS_TYPES );
 
-	if ( v1->type == REF_PTR )
-		v1 = v1->from;
+	switch ( v1->type )
+	{
+		case INT_VAR :
+			new_var = vars_int_var_mult( v1, v2 );
+			break;
+
+		case FLOAT_VAR :
+			new_var = vars_float_var_mult( v1, v2 );
+			break;
+	
+		case INT_ARR :
+			new_var = vars_int_arr_mult( v1, v2 );
+			break;
+
+		case FLOAT_ARR :
+			new_var = vars_float_arr_mult( v1, v2 );
+			break;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_ref_mult( v1, v2 );
+			break;
+	}
 
 	return vars_div_i( v1, v2, UNSET );
 }

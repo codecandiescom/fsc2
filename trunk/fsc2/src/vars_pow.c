@@ -39,11 +39,23 @@ static void vars_pow_check( double v1, double v2 );
 
 Var *vars_pow( Var *v1, Var *v2 )
 {
-	vars_check( v1, RHS_TYPES );
+	vars_check( v1, RHS_TYPES | REF_PTR | INT_PTR | FLOAT_PTR );
 	vars_check( v2, RHS_TYPES );
 
-	if ( v1->type == REF_PTR )
-		v1 = v1->from;
+	switch ( v1->type )
+	{
+		case REF_PTR :
+			v1 = v1->from;
+			break;
+
+		case INT_PTR :
+			v1 = vars_push( INT_VAR, *v1->val.lpnt );
+			break;
+
+		case FLOAT_PTR :
+			v1 = vars_push( FLOAT_VAR, *v1->val.dpnt );
+			break;
+	}
 
 	return vars_pow_i( v1, v2, UNSET );
 }
