@@ -131,7 +131,7 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 		/*----------------------*/
 
 
-bool split( char *file )
+bool scan_main( char *file )
 {
 	char *cmd;
 	bool split_error;

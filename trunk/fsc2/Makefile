@@ -18,7 +18,7 @@ header         = ${c_sources:.c=.h} global.h
 all: tags fsc2 mods
 
 fsc2: $(objects) fsc2_clean $(header)
-	gcc -o $@ $(objects) -Wl,-E -lm -ldl -lgpib -lfl
+	gcc -o $@ $(objects) -Wl,-E -lm -ldl -forms -lX11 -lgpib -lfl
 
 %.o: %.c
 	gcc $(CFLAGS) -c -o $@ $<
