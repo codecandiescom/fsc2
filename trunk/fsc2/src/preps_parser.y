@@ -44,7 +44,9 @@ static Var *CV;
 %token DL_TOK                   /* pulse length change */
 %token PH_TOK                   /* phase sequence */
 %token ML_TOK                   /* maximum pulse length */
-%token RP_TOK                   /* replacement pulses */
+%token <vptr> PFUNC             /* variable with pulse function
+%token <vptr> RP_TOK            /* replacement pulse list */
+%token RPP_TOK
 
 
 %token <vptr> VAR_TOKEN         /* variable */
@@ -53,7 +55,6 @@ static Var *CV;
 %token <lval> INT_TOKEN
 %token <dval> FLOAT_TOKEN
 %token <sptr> STR_TOKEN
-%token <vptr> RPP_TOK
 %token EQ LT LE GT GE
 %token AND OR XOR NOT
 
@@ -76,13 +77,13 @@ static Var *CV;
 
 
 input:   /* empty */
-       | input ';'                 { Cur_Pulse = NULL; }
-       | input line ';'            { Cur_Pulse = NULL;
+       | input ';'                 { Cur_Pulse = -1; }
+       | input line ';'            { Cur_Pulse = -1;
 	                                 assert( Var_Stack == NULL ); }
        | input error ';'           { THROW( SYNTAX_ERROR_EXCEPTION ); }
        | input line line           { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | input SECTION_LABEL       { Cur_Pulse = NULL;
+       | input SECTION_LABEL       { Cur_Pulse = -1;
 	                                 assert( Var_Stack == NULL );
 	                                 YYACCEPT; }
 ;
@@ -101,19 +102,20 @@ line:    P_TOK prop
 ;
 
 prop:   /* empty */
-       | prop F_TOK sep1 expr sep2  { pulse_set( Cur_Pulse, P_FUNC, $4 ); }
-       | prop S_TOK sep1 expr sep2  { pulse_set( Cur_Pulse, P_POS, $4 ); }
-       | prop L_TOK sep1 expr sep2  { pulse_set( Cur_Pulse, P_LEN,$4 ); }
-       | prop DS_TOK sep1 expr sep2 { pulse_set( Cur_Pulse, P_DPOS, $4 ); }
-       | prop DL_TOK sep1 expr sep2 { pulse_set( Cur_Pulse, P_DLEN, $4 ); }
-       | prop ML_TOK sep1 expr sep2 { pulse_set( Cur_Pulse, P_MAXLEN, $4 ); }
-       | prop RP_TOK sep1 rps sep2
+       | prop F_TOK sep1 PFUNC sep2 { p_set( Cur_Pulse, P_FUNC, $4 ); }
+       | prop S_TOK sep1 expr sep2  { p_set( Cur_Pulse, P_POS, $4 ); }
+       | prop L_TOK sep1 expr sep2  { p_set( Cur_Pulse, P_LEN,$4 ); }
+       | prop DS_TOK sep1 expr sep2 { p_set( Cur_Pulse, P_DPOS, $4 ); }
+       | prop DL_TOK sep1 expr sep2 { p_set( Cur_Pulse, P_DLEN, $4 ); }
+       | prop ML_TOK sep1 expr sep2 { p_set( Cur_Pulse, P_MAXLEN, $4 ); }
+       | prop RP_TOK sep1 rps sep2  { p_set( Cur_Pulse, P_REPL, $2->next );
+	   	                              vars_pop( $2 ); }
 ;
 
 /* replacement pulse settings */
 
-rps:     RPP_TOK                    { pulse_set( Cur_Pulse, P_REPL, $1 ); }
-       | rps sep2 RPP_TOK           { pulse_set( Cur_Pulse, P_REPL, $3 ); }
+rps:     RPP_TOK
+       | rps sep2 RPP_TOK
 ;
 
 
