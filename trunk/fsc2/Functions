@@ -54,7 +54,8 @@ pulser_next_phase, -1, EXP;     // switch to next phase in phase cycling
 pulser_phase_reset, -1, EXP;    // switch back to first phase
 
 
-// Functions exported by the lock-in amplifier drivers (SR510, SR530, SR810)
+// Functions exported by the lock-in amplifier drivers
+// (SR510, SR530, SR810, SR830)
 
 lockin_get_data, -1, EXP;       // returns the lock-in voltage 
 lockin_get_adc_data, 1, EXP;    // returns a ADC voltage
@@ -62,9 +63,9 @@ lockin_dac_voltage, -1, ALL;    // gets or sets DAC voltage
 lockin_sensitivity, -1, ALL;    // gets or sets the sensitivity
 lockin_time_constant, -1, ALL;  // gets or sets the time constant
 lockin_phase, -1, ALL;          // gets or sets the phase
-lockin_ref_freq, -1, ALL;       // Get or set reference frequency (SR810 only)
-lockin_ref_mode, 0, EXP;        // Get reference mode (SR810 only)
-lockin_ref_level, -1, ALL;      // Get or set reference level (SR810 only)
+lockin_ref_freq, -1, ALL;       // Get or set reference frequency (SR8x0 only)
+lockin_ref_mode, 0, EXP;        // Get reference mode (SR8x0 only)
+lockin_ref_level, -1, ALL;      // Get or set reference level (SR8x0 only)
 
 
 // functions exported by the digitizer (TDS754A)
