@@ -3,6 +3,9 @@
 */
 
 
+#include "fsc2.h"
+
+
 /*------------------------------------------------------------------------*/
 /* Callback function for the bug report button. Creates a bug report with */
 /* some information about the input and output of the program etc and     */
