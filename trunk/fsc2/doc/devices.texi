@@ -506,14 +506,22 @@ without an argument, i.e.@: as a query.
 @item lockin_ref_freq()
 @findex lockin_ref_freq()
 The function can be used to query the modulation frequency and, for the
-models @strong{SR810} and @strong{SR830}, to set the modulation
-frequency (both the other models need an external modulation
+@strong{SR810}, @strong{SR830} and @strong{ER023M}, to set the
+modulation frequency (both the other models need an external modulation
 frequency). If called with no argument the current modulation frequency
-is returned. If called with an argument (models @strong{SR810} and
-@strong{SR830} only) the modulation frequency is set. If the frequency
-is not within the admissible range an error message is printed and the
-experiment is stopped) - the admissible range depends on the harmonics
-setting, see the manual for more details.
+is returned. If called with an argument (@strong{SR810}, @strong{SR830}
+and @strong{ER023M} only) the modulation frequency is set.
+
+If for the @strong{SR810} and @strong{SR830} the frequency is not within
+the admissible range an error message is printed and the experiment is
+stopped).  The admissible range depends on the harmonics setting, see
+the manual for more details.
+
+For the @strong{ER023M} only certain modulation frequencies can be set,
+these are @code{100 kHz}, @code{50 kHz}, @code{25 kHz}, @code{12.5 kHz},
+@code{100 kHz}, @code{6.25 kHz} and @code{3.125 kHz}. If a modulation
+frequency is specified that does not fit one of the valid ones the next
+usable frequency is used.
 
 Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e.@: without an argument.
