@@ -290,10 +290,12 @@ Var *vars_add( Var *v1, Var *v2 )
 
 	switch ( v1->type )
 	{
+		/* Concatenate two strings with the '+ operator */
+
 		case STR_VAR :
 			if ( v2->type != STR_VAR )
 			{
-				eprint( FATAL, "%s:%ld: Can't add string to a number.\n",
+				eprint( FATAL, "%s:%ld: Can't add a string and a number.\n",
 						Fname, Lc );
 				THROW( EXCEPTION );
 			}
@@ -1018,7 +1020,13 @@ Var *vars_push( int type, ... )
 	new_stack_var = T_malloc( sizeof( Var ) );
 	new_stack_var->type = type;
 
-	/* get the data for the new variable */
+	/* Clear its `flag' and set the `name' and `next' entry to NULL... */
+
+	new_stack_var->name = NULL;
+	new_stack_var->next = NULL;
+	new_stack_var->flags = 0;
+
+	/* Get the data for the new variable */
 
 	va_start( ap, type );
 
@@ -1051,6 +1059,7 @@ Var *vars_push( int type, ... )
 		case ARR_PTR :
 			new_stack_var->val.gptr = va_arg( ap, void * );
 			new_stack_var->from = va_arg( ap, Var * );
+			new_stack_var->flags |= new_stack_var->from->flags & IS_DYNAMIC;
 			break;
 
 		case INT_TRANS_ARR :
@@ -1058,8 +1067,8 @@ Var *vars_push( int type, ... )
 			new_stack_var->len = va_arg( ap, long );
 			if ( new_stack_var->val.lpnt != NULL )
 				new_stack_var->val.lpnt =
-					get_memcpy( new_stack_var->val.lpnt,
-								new_stack_var->len * sizeof( long ) );
+					         get_memcpy( new_stack_var->val.lpnt,
+										 new_stack_var->len * sizeof( long ) );
 			else
 				new_stack_var->val.lpnt = T_calloc( new_stack_var->len,
 													sizeof( long ) );
@@ -1087,13 +1096,7 @@ Var *vars_push( int type, ... )
 
 	va_end( ap );
 	
-	/* Clear its `flag' and set the `name' and `next' entry to NULL... */
-
-	new_stack_var->name = NULL;
-	new_stack_var->next = NULL;
-	new_stack_var->flags = 0;
-
-	/* ...and finally append it to the stack */
+	/* Finally append the new variable to the stack */
 
 	if ( ( stack = Var_Stack ) == NULL )
 	{
@@ -1439,7 +1442,7 @@ Var *vars_arr_lhs( Var *v )
 
 Var *vars_get_lhs_pointer( Var *v, int n )
 {
-	Var  *ret;
+	Var *ret;
 	Var *a = v->from;
 	long index;
 
@@ -1509,12 +1512,10 @@ Var *vars_get_lhs_pointer( Var *v, int n )
 			ret = vars_push( ARR_PTR, a->val.dpnt + index, a );
 	}
 
-	/* Set a flag if a slice is indexed */
+	/* Set necessary flags if a slice is indexed */
 
 	if ( n == a->dim - 1 )
 		ret->flags |= NEED_SLICE;
-
-	ret->flags |= a->flags & IS_DYNAMIC;
 
 	return ret;
 }
@@ -1690,7 +1691,6 @@ Var *vars_setup_new_array( Var *v, int dim )
 				a->sizes[ i ] = 0;
 				a->flags |= NEED_ALLOC;
 				ret = vars_push( ARR_PTR, NULL, a );
-				ret->flags |= IS_DYNAMIC;
 				return ret;
 			}
 
@@ -1725,7 +1725,6 @@ Var *vars_setup_new_array( Var *v, int dim )
 
 	a->flags &= ~NEW_VARIABLE;
 	ret = vars_push( ARR_PTR, NULL, a );
-	ret->flags |= NEED_INIT;
 
 	return ret;
 }
@@ -1740,7 +1739,6 @@ Var *vars_setup_new_array( Var *v, int dim )
 
 Var *vars_arr_rhs( Var *v )
 {
-	Var *ret;
 	int  dim;
 	Var  *a;
 	long index;
@@ -1817,13 +1815,9 @@ Var *vars_arr_rhs( Var *v )
 	}
 
 	if ( a->type == INT_ARR )
-		ret = vars_push( ARR_PTR, a->val.lpnt + index, a );
+		return vars_push( ARR_PTR, a->val.lpnt + index, a );
 	else
-		ret = vars_push( ARR_PTR, a->val.dpnt + index, a );
-
-	ret->flags |= a->flags & IS_DYNAMIC;
-
-	return ret;
+		return vars_push( ARR_PTR, a->val.dpnt + index, a );
 }
 
 
@@ -2199,6 +2193,12 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 
 	d = dest->from;
 
+	/* If the source array has a fixed size the size of the destination array
+	   becomes now alo fixed by the assignment, reflect this in its flags */
+
+	if ( ! ( src->flags & IS_DYNAMIC ) )
+		 dest->flags &= ~IS_DYNAMIC;
+
 	/* Again being paranoid... */
 
 	assert( dest->flags & NEED_SLICE || d->flags & NEED_ALLOC );
@@ -2277,8 +2277,6 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 				*dest->val.dpnt++ = ( double ) *slptr++;
 		}
 	}
-
-	dest->flags |= dest->flags & src->flags & IS_DYNAMIC;
 
 	if ( dest_needs_pop )
 		vars_pop( dest );
@@ -2410,9 +2408,6 @@ void vars_arr_init( Var *v )
 
 Var *apply_unit( Var *var, Var *unit ) 
 {
-	Var *ret;
-
-
 	if ( var->type == UNDEF_VAR )
 	{
 		assert( var->name != NULL );              /* just a bit paranoid ? */
@@ -2427,11 +2422,7 @@ Var *apply_unit( Var *var, Var *unit )
 		if ( var->type & ( INT_VAR | FLOAT_VAR ) )
 			return vars_mult( var, vars_push( INT_VAR, 1 ) );
 		if ( var->type & ( INT_ARR | FLOAT_ARR ) )
-		{
-			ret = vars_push( ARR_REF, var );
-			ret->flags |= var->flags & IS_DYNAMIC;
-			return ret;
-		}
+			return vars_push( ARR_REF, var );
 		return var;
 	}
 
@@ -2462,11 +2453,11 @@ Var *vars_val( Var *v )
 		if ( ! ( v->from->flags & NEED_ALLOC ) )
 		{
 			if ( v->from->type == INT_ARR )
-				return vars_push( INT_TRANS_ARR, v->val.vptr,
-								  v->from->sizes[ v->from->dim - 1 ] );
+				vn = vars_push( INT_TRANS_ARR, v->val.vptr,
+								v->from->sizes[ v->from->dim - 1 ] );
 			else
-				return vars_push( FLOAT_TRANS_ARR, v->val.vptr,
-								  v->from->sizes[ v->from->dim - 1 ] );
+				vn = vars_push( FLOAT_TRANS_ARR, v->val.vptr,
+								v->from->sizes[ v->from->dim - 1 ] );
 		}
 		else
 		{
@@ -2475,8 +2466,10 @@ Var *vars_val( Var *v )
 			else
 				vn = vars_push( FLOAT_TRANS_ARR, NULL, 0 );
 			vn->flags |= NEED_ALLOC;
-			return vn;
 		}
+
+		vn->flags |= v->from->flags & IS_DYNAMIC;
+		return vn;
 	}
 
 	if ( v->from->type == INT_ARR )
