@@ -1463,9 +1463,6 @@ otherwise the program will be stopped immediately. This function can be
 used in the @code{EXPERIMENT} section only and not after the
 @code{ON_STOP} label.
 
-This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} program.
-
 
 @anchor{abort}
 @item abort()
@@ -1475,8 +1472,6 @@ is a kind of an emergency exit when nothing else will do. When called it
 displays a message box on the screen to inform the user. This function
 can only be used in the @code{EXPERIMENT} section
 
-This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} program.
 
 @anchor{date}
 @item date()
@@ -1499,9 +1494,6 @@ functions as a floating point value. When called for the very first time
 it returns the time since the start of the experiment (i.e.@: the time
 the start of the @code{EXPERIMENT} section was processed). The time
 returned by the function has micro-second resolution.
-
-This function can only be used in the @code{EXPERIMENT} section of an
-@acronym{EDL} program.
 
 
 @anchor{wait}
