@@ -40,7 +40,7 @@ LNUM        \x2\n[0-9]+\n
 ERR         \x3\n.+\n
 
 DEV         ^[\t ]*DEV(ICE)?S?:
-ASS         ^[\t ]*ASS(IGNMENT)?S?:
+ASS         ^[\t ]*((ASS(IGNMENT)?)|(ASSIGNMENTS)):
 VAR         ^[\t ]*VAR(IABLE)?S?:
 PHAS        ^[\t ]*PHA(SES)?:
 PREP        ^[\t ]*PREP(ARATION)?S?:

@@ -1,6 +1,8 @@
-@c %$Id$
-
 \input texinfo   @c -*-texinfo-*-
+
+@c $Id$
+
+
 @c %**start of header
 @setfilename fsc2.info
 @settitle fsc2
