@@ -644,7 +644,7 @@ Var *pulser_pulse_reset( Var *v )
  * This is a special funtion for the Rulbus pulser only which returns
  * some minimum values for a pulse: for each first pulse of a function
  * the earliest possible position for the pulse, for all others the
- * minimum delay between the pulse and its predecessor.
+ * minimum delay between the end of its predecessor and its start.
  *---------------------------------------------------------------------*/
 
 Var *pulser_pulse_minimum_specs( Var *v )
