@@ -874,8 +874,7 @@ Var *pulser_lock_keyboard( Var *v )
 			else
 			{
 				eprint( FATAL, "%s:%d: %s: Invalid argument in call of "
-						"`pulser_lock_keyboard'.\n",
-						Fname, Lc, DEVICE_NAME );
+						"`pulser_lock_keyboard'.\n", name, Lc, DEVICE_NAME );
 				THROW( EXCEPTION );
 			}
 		}
