@@ -6,8 +6,9 @@
 
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+/* Returns a string with a time value with a resonable unit. */
+/*-----------------------------------------------------------*/
 
 const char *tds520_ptime( double time )
 {
@@ -49,8 +50,8 @@ void tds520_do_pre_exp_checks( void )
 {
 	WINDOW *w, *wn;
 	bool is_width = SET;
-    double width, window, dcd, dtb, fac;
-    long tb, cd;
+    double width, window, dcs, dcd, dtb, fac;
+    long tb, cs, cd;
 	int i;
 
 
@@ -61,7 +62,7 @@ void tds520_do_pre_exp_checks( void )
 		tds520_set_trigger_channel( 
 			Channel_Names[ tds520.trigger_channel ] );
 
-	/* Switch all channels on that get used in the measurements */
+	/* Switch on all channels that are used in the measurements */
 
 	for ( i = 0; i <= TDS520_REF4; i++)
 		if ( tds520.channels_in_use[ i ] )
@@ -90,8 +91,8 @@ void tds520_do_pre_exp_checks( void )
 		w = w->next;
 	}
 
-	/* If not get the distance of the cursors on the digitizers screen and
-	   use it as the default width. */
+	/* If no width is set fro all get the distance of the cursors on the
+	   digitizers screen and use it as the default width. */
 
 	if ( tds520.w != NULL && ! is_width )
 	{
@@ -111,17 +112,36 @@ void tds520_do_pre_exp_checks( void )
 				w->width = width;
 	}
 
-	/* It's not possible to set arbitrary cursor distances - they've got to be
-	   multiples of the smallest time resolution of the digitizer, which is
-	   1 / TDS_POINTS_PER_DIV of the time base. In the following it is tested
-	   if the requested cursor distance fit this requirement and if not the
-	   values are readjusted. While we're at it we also try to find out if
-	   all window widths are equal - than we can use tracking cursors */
-
-	tds520.is_equal_width = SET;
+	/* It's not possible to set arbitrary cursor positions and distances -
+	   they've got to be multiples of the smallest time resolution of the
+	   digitizer, which is the time base divided by TDS_POINTS_PER_DIV. In the
+	   following it is tested if the requested cursor position and distance
+	   fit this requirement and if not the values are readjusted. */
 
 	for ( w = tds520.w; w != NULL; w = w->next )
 	{
+		dcs = w->start;
+		dtb = tds520.timebase;
+		fac = 1.0;
+
+		while ( fabs( dcs ) < 1.0 || fabs( dtb ) < 1.0 )
+		{
+			dcs *= 1000.0;
+			dtb *= 1000.0;
+			fac *= 0.001;
+		}
+		cs = lround( TDS_POINTS_PER_DIV * dcs );
+		tb = lround( dtb );
+
+		if ( cs % tb )        /* window start not multiple of a point ? */
+		{
+			cs = ( cs / tb ) * tb;
+			dcs = cs * fac / TDS_POINTS_PER_DIV;
+			eprint( SEVERE, "%s: Start point of window %ld has been readjusted"
+					" to %s.\n", DEVICE_NAME, w->num, tds520_ptime( dcs ) );
+			w->start = dcs;
+		}
+
 		dcd = w->width;
 		dtb = tds520.timebase;
 		fac = 1.0;
@@ -135,13 +155,13 @@ void tds520_do_pre_exp_checks( void )
 		cd = lround( TDS_POINTS_PER_DIV * dcd );
 		tb = lround( dtb );
 
-		if ( labs( cd ) < tb )
+		if ( labs( cd ) < tb )     /* window smaller than one point ? */
 		{
 			w->width = tds520.timebase / TDS_POINTS_PER_DIV;
 			eprint( SEVERE, "%s: Width of window %ld has been readjusted to "
 					"%s.\n", DEVICE_NAME, w->num, tds520_ptime( w->width  ) );
 		}
-		else if ( cd % tb )
+		else if ( cd % tb )        /* window width not multiple of a point ? */
 		{
 			cd = ( cd / tb ) * tb;
 			dcd = cd * fac / TDS_POINTS_PER_DIV;
@@ -149,14 +169,10 @@ void tds520_do_pre_exp_checks( void )
 					"%s.\n", DEVICE_NAME, w->num, tds520_ptime( dcd ) );
 			w->width = dcd;
 		}
-
-		/* Check if the windows have all the same length */
-
-		if ( w != tds520.w && w->width != tds520.w->width )
-			tds520.is_equal_width = UNSET;
 	}
 
-	/* Next check: Test if the windows fit into the measurement window */
+	/* Test if the windows fit into the measurement window and calculate start
+	   and end point of window */
 
     window = tds520.timebase * tds520.rec_len / TDS_POINTS_PER_DIV;
 
@@ -171,59 +187,12 @@ void tds520_do_pre_exp_checks( void )
 					"time range.\n", DEVICE_NAME, w->num );
 			THROW( EXCEPTION );
 		}
+
+		/* Take care: Numbers start from 1 ! */
+
+		w->start_num = lround( ( w->start + tds520.trig_pos * window )
+							   * TDS_POINTS_PER_DIV / tds520.timebase ) + 1;
+		w->end_num = lround( ( w->start + w->width + tds520.trig_pos * window )
+							   * TDS_POINTS_PER_DIV / tds520.timebase ) + 1;
     }
-}
-
-
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
-
-void tds520_set_curve_window( WINDOW *w )
-{
-	tds520_set_window( w );
-
-	if ( w != NULL )
-	{
-		if ( ! tds520.snap_state )
-		{
-			tds520_set_snap( SET );
-			tds520.snap_state = SET;
-		}
-	}
-	else
-	{
-		if ( tds520.snap_state )
-		{
-			tds520_set_snap( UNSET );
-			tds520.snap_state = UNSET;
-		}
-	}
-}
-
-
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
-
-void tds520_set_window( WINDOW *w )
-{
-	if ( w == NULL )
-		return;
-
-		/* If all windows have the same width we only have to set the first
-		   cursor (and only if its not already at the correct position),
-		   otherwise we have to set both cursors */
-
-	if ( tds520.is_equal_width )
-	{
-		if ( tds520.cursor_pos != w->start )
-		{
-			tds520_set_cursor( 1, w->start );
-			tds520.cursor_pos = w->start;
-		}
-	}
-	else
-	{
-		tds520_set_cursor( 1, w->start );
-		tds520_set_cursor( 2, w->start + w->width );
-	}
 }

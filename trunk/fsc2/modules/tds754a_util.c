@@ -122,17 +122,40 @@ void tds754a_do_pre_exp_checks( void )
 				w->width = width;
 	}
 
-	/* It's not possible to set arbitrary cursor distances - they've got to be
-	   multiples of the smallest time resolution of the digitizer, which is
-	   1 / TDS_POINTS_PER_DIV of the time base. In the following it is tested
-	   if the requested cursor distance fit this requirement and if not the
-	   values are readjusted. While we're at it we also try to find out if
-	   all window widths are equal - than we can use tracking cursors */
+	/* It's not possible to set arbitrary cursor positions and distances -
+	   they've got to be multiples of the smallest time resolution of the
+	   digitizer, which is the time base divided by TDS_POINTS_PER_DIV. In the
+	   following it is tested if the requested cursor position and distance
+	   fit this requirement and if not the values are readjusted. While we're
+	   at it we also try to find out if all window widths are equal - than we
+	   can use tracking cursors */
 
 	tds754a.is_equal_width = SET;
 
 	for ( w = tds754a.w; w != NULL; w = w->next )
 	{
+		dcs = w->start;
+		dtb = tds520.timebase;
+		fac = 1.0;
+
+		while ( fabs( dcs ) < 1.0 || fabs( dtb ) < 1.0 )
+		{
+			dcs *= 1000.0;
+			dtb *= 1000.0;
+			fac *= 0.001;
+		}
+		cs = lround( TDS_POINTS_PER_DIV * dcs );
+		tb = lround( dtb );
+
+		if ( cs % tb )        /* window start not multiple of a point ? */
+		{
+			cs = ( cs / tb ) * tb;
+			dcs = cs * fac / TDS_POINTS_PER_DIV;
+			eprint( SEVERE, "%s: Start point of window %ld has been readjusted"
+					" to %s.\n", DEVICE_NAME, w->num, tds520_ptime( dcs ) );
+			w->start = dcs;
+		}
+
 		dcd = w->width;
 		dtb = tds754a.timebase;
 		fac = 1.0;
@@ -146,13 +169,13 @@ void tds754a_do_pre_exp_checks( void )
 		cd = lround( TDS_POINTS_PER_DIV * dcd );
 		tb = lround( dtb );
 
-		if ( labs( cd ) < tb )
+		if ( labs( cd ) < tb )     /* window smaller than one point ? */
 		{
 			w->width = tds754a.timebase / TDS_POINTS_PER_DIV;
 			eprint( SEVERE, "%s: Width of window %ld has been readjusted to "
 					"%s.\n", DEVICE_NAME, w->num, tds754a_ptime( w->width  ) );
 		}
-		else if ( cd % tb )
+		else if ( cd % tb )        /* window width not multiple of a point ? */
 		{
 			cd = ( cd / tb ) * tb;
 			dcd = cd * fac / TDS_POINTS_PER_DIV;
