@@ -819,7 +819,7 @@ Var *f_cscale( Var *v )
 Var *f_clabel( Var *v )
 {
 	char *l[ 3 ] = { NULL, NULL, NULL };
-	long lengths[ 3 ] = { 1, 1, 1 };
+	size_t lengths[ 3 ] = { 1, 1, 1 };
 	int shm_id;
 	long len = 0;                    /* total length of message to send */
 	void *buf;
@@ -1080,7 +1080,7 @@ Var *f_display( Var *v )
 {
 	DPoint *dp;
 	int shm_id;
-	size_t len = 0;                    /* total length of message to send */
+	long len = 0;                     /* total length of message to send */
 	void *buf;
 	char *ptr;
 	int nsets;
