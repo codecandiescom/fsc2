@@ -494,37 +494,37 @@ Within the format string and the argument strings escape sequences, all
 starting with a backslash character @code{\}, can be used to print
 otherwise unprintable characters. These are
 @table @samp
-@item @code{\a}
+@item \a
 prints an alert (bell) character (0x07)
-@item @code{\b}
+@item \b
 prints a backspace character (0x08)
-@item @code{\f}
+@item \f
 prints a formfeed character (0x0C)
-@item @code{\n}
+@item \n
 prints a newline character (0x0A)
-@item @code{\r}
+@item \r
 prints a carriage return character (0x0D)
-@item @code{\t}
+@item \t
 prints a horizontal tab character (0x09)
-@item @code{\v}
+@item \v
 prints a vertical tab character (0x0B)
-@item @code{\\}
+@item \\
 prints a backslash @code{\}
-@item @code{\?}
+@item \?
 prints a question mark @code{?}
-@item @code{\'}
+@item \'
 prints a single quote @code{\'}
-@item @code{\"}
+@item \"
 prints a double quote @code{"}
-@item @code{\}@i{ooo}
+@item \@i{ooo}
 replaces the octal number @i{ooo} by the corresponding character (as
 many octal digits are used as long as the resulting number is less
 then 255)
-@item @code{\x}@i{hh}
+@item \x@i{hh}
 replaces the hexadecimal number @i{hh} by the corresponding character
 (there must be one or two hexadecimal digits)
 
-@item @code{\#}
+@item \#
 prints a @code{#} (this is a special escape sequence to be used with
 @code{fsave()} only)
 @end table
@@ -1227,13 +1227,12 @@ will return an array with 4 elements containing the data
 @item dim()
 @findex dim()
 The function returns the dimension of the array passed to it as
-argument. I.e.@: for the array
-
+argument. I.e.@: if applied to the array
 @example
 X[ 4, 2, 5 ]
 @end example
 @noindent
-it will return 3.
+it will return @code{3}.
 
 
 @anchor{size}
@@ -1245,7 +1244,7 @@ array, and returns the size of this dimension. I.e.@: for an array defined as
 @code{X[ 4, 2, 5 ]}
 @end example
 @noindent
-@code{size( X, 3 )} will return 5.
+@code{size( X, 3 )} will return @code{5}.
 
 
 @anchor{sizes}
