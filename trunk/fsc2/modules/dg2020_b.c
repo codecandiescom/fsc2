@@ -533,20 +533,8 @@ int dg2020_b_exp_hook( void )
 
 int dg2020_b_end_of_exp_hook( void )
 {
-	FUNCTION *f;
-	int i;
-
-
 	dg2020_run( STOP );
 	gpib_local( dg2020.device );
-
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = dg2020.function + i;
-		if ( f->pulse_params )
-			f->pulse_params = PULSE_PARAMS_P T_free( f->pulse_params );
-		f->old_pulse_params = NULL;
-	}
 
 	/* Finally reset the internal representation back to its initial state
 	   in case another experiment is started */
@@ -579,6 +567,9 @@ void dg2020_b_exit_hook( void )
 		f->pcm = CHANNEL_PP T_free( f->pcm );
 		f->pm = BOOL_P T_free( f->pm );
 		f->pulses = PULSE_PP T_free( f->pulses );
+		if ( f->pulse_params )
+			f->pulse_params = PULSE_PARAMS_P T_free( f->pulse_params );
+		f->old_pulse_params = NULL;
 	}
 
 	if ( dg2020.dummy_phase_setup )
@@ -1116,11 +1107,8 @@ Var *pulser_shift( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		if ( ! p->is_old_pos )
-		{
-			p->old_pos = p->pos;
-			p->is_old_pos = SET;
-		}
+		p->old_pos = p->pos;
+		p->is_old_pos = SET;
 
 		if ( ( p->pos += p->dpos ) < 0 )
 		{
@@ -1216,11 +1204,8 @@ Var *pulser_increment( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		if ( ! p->is_old_len )
-		{
-			p->old_len = p->len;
-			p->is_old_len = SET;
-		}
+		p->old_len = p->len;
+		p->is_old_len = SET;
 
 		if ( ( p->len += p->dlen ) < 0 )
 		{

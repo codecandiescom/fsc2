@@ -892,15 +892,10 @@ void dg2020_set_pulses( FUNCTION *f )
 								pp->pos, pp->len );
 					dg2020_clear( pp->pulse->channel[ j ]->old_d,
 								  pp->pos, pp->len );
-
-					pp->pulse->is_old_len = pp->pulse->is_old_pos = SET;
-					pp->pulse->old_pos = pp->pulse->pos;
-					pp->pulse->old_len = pp->pulse->len;
 				}
 
 				pp->pulse->channel[ j ]->needs_update = SET;
 			}
-
 		}
 
 	for ( i = 0; i < f->num_needed_channels; i++ )
