@@ -108,9 +108,11 @@ int variables_parser( FILE *in );
 int phases_parser( FILE *in );
 int preparations_parser( FILE *in );
 int experiment_parser( FILE *in );
+void sigusr1_handler( int signo );
 
 
-#define TAB_LENGTH          4
+#define TAB_LENGTH        4
+#define MAXLINE        4096
 
 
 /* Global variables */
@@ -155,6 +157,7 @@ FD_input_form *input_form;
 
 int I_am = PARENT;
 int pd[ 4 ];                    /* pipe descriptors */
+int conn_pd[ 2 ];
 pid_t child_pid = 0;            /* pid of child */
 pid_t conn_pid = -1;            /* pid of communication child */
 volatile bool do_send = UNSET;  /* globals used with the signal handlers */
@@ -210,6 +213,7 @@ extern FD_input_form *input_form;
 
 extern int I_am;
 extern int pd[ ];                  /* pipe descriptors */
+extern int conn_pd[ ];
 extern pid_t child_pid;            /* pid of child */
 extern pid_t conn_pid;
 extern volatile bool do_send;      /* globals used with the signal handlers */

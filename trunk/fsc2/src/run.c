@@ -168,6 +168,7 @@ bool run( void )
 	end_comm( );
 
 	signal( SIGCHLD, SIG_IGN );
+	signal( SIGUSR1, sigusr1_handler );
 	run_end_of_exp_hooks( );
 	if ( need_GPIB )
 		gpib_shutdown( );

@@ -207,6 +207,8 @@ int main( int argc, char *argv[ ] )
 	if ( do_delete )
 		delete_file = SET;
 
+	signal( SIGUSR1, sigusr1_handler );
+
 	if ( ( conn_pid = spawn_conn( ( do_test || do_start ) && is_loaded ) )
 		 != -1 )
 	{
@@ -360,7 +362,7 @@ void load_file( FL_OBJECT *a, long reload )
 	a = a;
 
 	if ( conn_pid >= 0 )
-		kill( BUSY_SIGNAL, conn_pid );
+		kill( conn_pid, BUSY_SIGNAL );
 
 	/* If new file is to be loaded get its name, otherwise use previous name */
 
@@ -370,7 +372,7 @@ void load_file( FL_OBJECT *a, long reload )
 		if ( fn == NULL )
 		{
 			if ( conn_pid )
-				kill( UNBUSY_SIGNAL, conn_pid );
+				kill( conn_pid, UNBUSY_SIGNAL );
 			return;
 		}
 	}
@@ -392,7 +394,7 @@ void load_file( FL_OBJECT *a, long reload )
 		{
 			in_file = old_in_file;
 			if ( conn_pid >= 0 )
-				kill( UNBUSY_SIGNAL, conn_pid );
+				kill( conn_pid, UNBUSY_SIGNAL );
 			return;
 		}
 
@@ -405,7 +407,7 @@ void load_file( FL_OBJECT *a, long reload )
 	{
 		fl_show_alert( "Error", "Sorry, no file is loaded yet.", NULL, 1 );
 		if ( conn_pid >= 0 )
-			kill( UNBUSY_SIGNAL, conn_pid );
+			kill( conn_pid, UNBUSY_SIGNAL );
 		return;
 	}
 
@@ -419,7 +421,7 @@ void load_file( FL_OBJECT *a, long reload )
 			fl_show_alert( "Error", "Sorry, no permission to read file:",
 						   fn, 1 );
 		if ( conn_pid >= 0 )
-			kill( UNBUSY_SIGNAL, conn_pid );
+			kill( conn_pid, UNBUSY_SIGNAL );
 		return;
 	}
 
@@ -427,7 +429,7 @@ void load_file( FL_OBJECT *a, long reload )
 	{
 		fl_show_alert( "Error", "Sorry, can't open file:", fn, 1 );
 		if ( conn_pid >= 0 )
-			kill( UNBUSY_SIGNAL, conn_pid );
+			kill( conn_pid, UNBUSY_SIGNAL );
 		return;
 	}
 
@@ -461,7 +463,7 @@ void load_file( FL_OBJECT *a, long reload )
 
 	fclose( fp );
 	if ( conn_pid >= 0 )
-		kill( UNBUSY_SIGNAL, conn_pid );
+		kill( conn_pid, UNBUSY_SIGNAL );
 }
 
 
@@ -600,7 +602,7 @@ void test_file( FL_OBJECT *a, long b )
 	a->u_ldata = 0;
 	b = b;
 
-	kill( BUSY_SIGNAL, conn_pid );
+	kill( conn_pid, BUSY_SIGNAL );
 
 	/* While program is being tested the test can be aborted by pressing the
 	   test button again - in this case we simply throw an exception */
@@ -619,14 +621,14 @@ void test_file( FL_OBJECT *a, long b )
 	if ( ! is_loaded )
 	{
 		fl_show_alert( "Error", "Sorry, but no file is loaded.", NULL, 1 );
-		kill( UNBUSY_SIGNAL, conn_pid );
+		kill( conn_pid, UNBUSY_SIGNAL );
 		return;
 	}
 		
     if ( is_tested )
 	{
 		fl_show_alert( "Warning", "File has already been tested.", NULL, 1 );
-		kill( UNBUSY_SIGNAL, conn_pid );
+		kill( conn_pid, UNBUSY_SIGNAL );
 		return;
 	}
 
@@ -641,14 +643,14 @@ void test_file( FL_OBJECT *a, long b )
 								  "",
 								  2, "No", "Yes", "", 1 ) )
 		{
-			kill( UNBUSY_SIGNAL, conn_pid );
+			kill( conn_pid, UNBUSY_SIGNAL );
 			return;
 		}
 
 		load_file( main_form->browser, 1 );
 		if ( ! is_loaded )
 			return;
-		kill( BUSY_SIGNAL, conn_pid );
+		kill( conn_pid, BUSY_SIGNAL );
 	}
 
 	/* While the test is run the only accessible button is the test button
@@ -699,7 +701,7 @@ void test_file( FL_OBJECT *a, long b )
 	fl_activate_object( main_form->quit );
 	fl_set_object_lcol( main_form->quit, FL_BLACK );
 
-	kill( UNBUSY_SIGNAL, conn_pid );
+	kill( conn_pid, UNBUSY_SIGNAL );
 }
 
 
@@ -718,12 +720,12 @@ void run_file( FL_OBJECT *a, long b )
 	a = a;
 	b = b;
 
-	kill( BUSY_SIGNAL, conn_pid );
+	kill( conn_pid, BUSY_SIGNAL );
 
 	if ( ! is_loaded )              /* check that there is a file loaded */
 	{
 		fl_show_alert( "Error", "Sorry, but no file is loaded.", NULL, 1 );
-		kill( UNBUSY_SIGNAL, conn_pid );
+		kill( conn_pid, UNBUSY_SIGNAL );
 		return;
 	}
 
@@ -732,7 +734,7 @@ void run_file( FL_OBJECT *a, long b )
 		test_file( main_form->test_file, 1 );
 		if ( main_form->test_file->u_ldata == 1 )  /* user break ? */
 			return;
-		kill( BUSY_SIGNAL, conn_pid );
+		kill( conn_pid, BUSY_SIGNAL );
 	}
 	else
 	{
@@ -751,7 +753,7 @@ void run_file( FL_OBJECT *a, long b )
 				test_file( main_form->test_file, 1 );
 				if ( main_form->test_file->u_ldata == 1 )  /* user break ? */
 					return;
-				kill( BUSY_SIGNAL, conn_pid );
+				kill( conn_pid, BUSY_SIGNAL );
 			}
 		}
 	}
@@ -759,7 +761,7 @@ void run_file( FL_OBJECT *a, long b )
 	if ( ! state )               /* return if program failed the test */
 	{
 		fl_show_alert( "Error", "Sorry, but test of file failed.", NULL, 1 );
-		kill( UNBUSY_SIGNAL, conn_pid );
+		kill( conn_pid, UNBUSY_SIGNAL );
 		return;
 	}
 
@@ -792,7 +794,7 @@ void run_file( FL_OBJECT *a, long b )
 		if ( 1 == fl_show_choice( str1, str2, "Continue to run the program?",
 								  2, "No", "Yes", "", 1 ) )
 		{
-			kill( UNBUSY_SIGNAL, conn_pid );
+			kill( conn_pid, UNBUSY_SIGNAL );
 			return;
 		}
 	}		
@@ -810,7 +812,7 @@ void run_file( FL_OBJECT *a, long b )
 					   "See browser for more information.", 1 );
 	}
 
-	kill( UNBUSY_SIGNAL, conn_pid );
+	kill( conn_pid, UNBUSY_SIGNAL );
 }
 
 
@@ -1043,4 +1045,26 @@ static void start_help_browser( void )
 	}
 
 	execvp( av[ 0 ], av );
+}
+
+
+/*------------------------------------------------------------*/  
+/*------------------------------------------------------------*/  
+
+void sigusr1_handler( int signo )
+{
+	char line[ MAXLINE ];
+	int count;
+
+
+	assert( signo == SIGUSR1 );
+
+
+	while ( ( count = read( conn_pd[ READ ], line, MAXLINE ) ) == -1 &&
+			errno == EINTR )
+		;
+
+	if ( count > 0 )
+		line[ count - 1 ] = '\0';
+	printf( "%s\n", line );
 }
