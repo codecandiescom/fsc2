@@ -213,7 +213,7 @@ extern KEY *Key;
 extern KEY *Message_Queue;
 extern volatile int message_queue_low, message_queue_high;
 
-extern FILE **File_List;
+extern FILE_LIST *File_List;
 extern int File_List_Len;
 
 
