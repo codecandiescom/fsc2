@@ -464,14 +464,20 @@ static void quitting_handler( int signo )
 static void run_sigchld_handler( int signo )
 {
 	int return_status;
+#if defined ( DEBUG )
 	int pid;
+#endif
 	int errno_saved;
 
 
 	signo = signo;
 	errno_saved = errno;
 
+#if ! defined ( DEBUG )
+	if ( wait( &return_status ) != child_pid )
+#else
 	if ( ( pid = wait( &return_status ) ) != child_pid )
+#endif
 	{
 		errno_saved = errno;
 		return;                       /* if some other child process died... */

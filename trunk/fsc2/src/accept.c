@@ -230,7 +230,7 @@ static void other_data_request( int type, char *ptr )
 	long *ca;
 	int is_set;
 	char *label[ 3 ];
-	char lengths[ 3 ];
+	long lengths[ 3 ];
 
 
 	switch( type )

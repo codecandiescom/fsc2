@@ -1571,7 +1571,7 @@ bool test_for_cond( Prg_Token *cur )
 		}
 	}
 
-	/* We better never end here... */
+	/* We can't end up here... */
 
 	eprint( FATAL, UNSET, "Internal error at %s:%d.\n", __FILE__, __LINE__ );
 	THROW( EXCEPTION )
