@@ -121,7 +121,6 @@ int gpib_init( char *log_file_name, int log_level )
 
 			while ( 1 )
 			{
-				gpib_local( cur_dev->number );
 				T_free( cur_dev->name );
 				if ( cur_dev->prev != NULL )
 				{
@@ -153,17 +152,15 @@ int gpib_init( char *log_file_name, int log_level )
 
 static int gpib_init_controller( void )
 {
+	int state;
+
     if ( gpib_init_device( CONTROLLER, &controller ) != SUCCESS )
         return FAILURE;
 
-    if( ! ibIsMaster( controller ) )
+    if( gpib_ask( controller, GPIB_IS_MASTER, &state ) != SUCCESS )
         return FAILURE;
 
-    if  ( ( ibonl( controller, ON ) | ibsic( controller ) |
-            ibsre( controller, ON ) ) & IBERR )
-          return FAILURE;
-
-    return SUCCESS;
+	return state ? SUCCESS : FAILURE;
 }
 
 
@@ -202,8 +199,7 @@ int gpib_shutdown( void )
 	T_free( cur_dev );
 	gpib_dev_list = NULL;
 
-    ibsre( controller, OFF );       /* pull down the REN line */
-    ibonl( controller, OFF );       /* "switch off" the controller */
+    gpib_onl( controller, OFF );       /* "switch off" the controller */
 
     if ( ll > LL_NONE )
     {
@@ -322,9 +318,9 @@ int gpib_init_device( const char *device_name, int *dev )
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_init_device", device_name );
 
-    cur_dev->number = ibfind( ( char * ) device_name );
+    cur_dev->number = gpib_find( ( char * ) device_name );
 
-    if ( ibsta & IBERR )
+    if ( gpib_status & GPIB_ERR )
 	{
 		T_free( cur_dev->name );
 		if ( cur_dev->prev != NULL )
@@ -332,8 +328,8 @@ int gpib_init_device( const char *device_name, int *dev )
 		else
 			gpib_dev_list = NULL;
 		T_free( cur_dev );
-        sprintf( gpib_error_msg, "Can't initialise device %s, ibsta = 0x%x",
-				 device_name, ibsta );
+        sprintf( gpib_error_msg, "Can't initialise device %s, status = 0x%x",
+				 device_name, gpib_status );
 		return FAILURE;
 	}
 
@@ -387,12 +383,12 @@ int gpib_timeout( int device, int period )
 		seteuid( getuid( ) );
     }
 
-    ibtmo( device, period );
+    gpib_tmo( device, period );
 
-    if ( ibsta & IBERR )
+    if ( gpib_status & GPIB_ERR )
     {
         sprintf( gpib_error_msg, "Can't set timeout period for device %s, "
-				 "ibsta = 0x%x.", dev_name, ibsta );
+				 "gpib_status = 0x%x.", dev_name, gpib_status );
         return FAILURE;
     }
 
@@ -438,15 +434,15 @@ int gpib_clear_device( int device )
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_clear_device", dev_name );
 
-    ibclr( device );
+    gpib_clr( device );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_clear_device", dev_name );
 
-    if ( ibsta & IBERR )
+    if ( gpib_status & GPIB_ERR )
     {
-        sprintf( gpib_error_msg, "Can't clear device %s, ibsta = 0x%x",
-				 dev_name, ibsta );
+        sprintf( gpib_error_msg, "Can't clear device %s, gpib_status = 0x%x",
+				 dev_name, gpib_status );
         return FAILURE;
     }
 
@@ -480,15 +476,15 @@ int gpib_local( int device )
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_local", dev_name );
 
-    ibloc( device );
+    gpib_loc( device );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_local", dev_name );
 
-    if ( ibsta & IBERR )
+    if ( gpib_status & GPIB_ERR )
     {
         sprintf( gpib_error_msg, "Can't send 'GOTO LOCAL' message to device "
-				 "%s, ibsta = 0x%x", dev_name, ibsta );
+				 "%s, gpib_status = 0x%x", dev_name, gpib_status );
         return FAILURE;
     }
 
@@ -522,15 +518,15 @@ int gpib_trigger( int device )
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_trigger", dev_name );
 
-    ibtrg( device );
+    gpib_trg( device );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_trigger", dev_name );
 
-    if ( ibsta & IBERR )
+    if ( gpib_status & GPIB_ERR )
     {
-        sprintf( gpib_error_msg, "Can't trigger device %s, ibsta = 0x%x",
-				 dev_name, ibsta );
+        sprintf( gpib_error_msg, "Can't trigger device %s, gpib_status = 0x%x",
+				 dev_name, gpib_status );
         return FAILURE;
     }
 
@@ -589,15 +585,15 @@ int gpib_wait( int device, int mask, int *status )
     if ( ! ( mask & TIMO ) && timeout != TNONE )
         gpib_timeout( device, TNONE );
 
-    ibwait( device, mask );
+    gpib_wait( device, mask );
 
     if ( status != NULL )
-        *status = ibsta;
+        *status = gpib_status;
 
 	if ( ll > LL_ERR )
 	{
 		seteuid( EUID );
-        fprintf( gpib_log, "wait return status = 0x0%X\n", ibsta );
+        fprintf( gpib_log, "wait return status = 0x0%X\n", gpib_status );
 		seteuid( getuid( ) );
 	}
 
@@ -607,10 +603,10 @@ int gpib_wait( int device, int mask, int *status )
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_wait", dev_name );
 
-    if ( ibsta & IBERR )
+    if ( gpib_status & GPIB_ERR )
     {
-        sprintf( gpib_error_msg, "Can't wait for device %s, ibsta = 0x%x",
-				 dev_name, ibsta );
+        sprintf( gpib_error_msg, "Can't wait for device %s, status = 0x%x",
+				 dev_name, gpib_status );
         return FAILURE;
     }
 
@@ -631,6 +627,8 @@ int gpib_wait( int device, int mask, int *status )
 int gpib_write( int device, const char *buffer, long length )
 {
 	char *dev_name;
+	char *b;
+	int eos;
 
 
     TEST_BUS_STATE;              /* bus not initialised yet ? */
@@ -657,18 +655,28 @@ int gpib_write( int device, const char *buffer, long length )
         return FAILURE;
     }
 
+	/* Append the eos byte to the output string */
+
+	b = malloc( length + 1 );
+	gpib_ask( device, GPIB_ASK_EOS, &eos );
+	memcpy( b, buffer, length );
+	b[ length ] = ( char ) ( eos && 0xff );
+
     if ( ll > LL_ERR )
         gpib_write_start( dev_name, buffer, length );
 
-	ibwrt( device, ( char * ) buffer, length );
+	gpib_wrt( device, b, length + 1 );
+	free( b );
+    if ( ! ( gpib_status & GPIB_ERR ) )
+		gpib_count--;
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_write", dev_name );
 
-    if ( ibsta & IBERR )
+    if ( gpib_status & GPIB_ERR )
     {
-        sprintf( gpib_error_msg, "Can't send data to device %s, ibsta = 0x%x",
-				 dev_name, ibsta );
+        sprintf( gpib_error_msg, "Can't send data to device %s, status = 0x%x",
+				 dev_name, gpib_status );
         return FAILURE;
     }
 
@@ -756,16 +764,16 @@ int gpib_read( int device, char *buffer, long *length )
 		seteuid( getuid( ) );
     }
 
-    ibrd( device, buffer, expected );
-    *length = ibcnt;
+    gpib_rd( device, buffer, expected );
+    *length = gpib_count;
 
     if ( ll > LL_NONE )
         gpib_read_end( dev_name, buffer, *length, expected );
 
-    if ( ibsta & IBERR )
+    if ( gpib_status & GPIB_ERR )
     {
-        sprintf( gpib_error_msg, "Can't read data from device %s, ibsta = "
-				 "0x%x.", dev_name, ibsta );
+        sprintf( gpib_error_msg, "Can't read data from device %s, status = "
+				 "0x%x.", dev_name, gpib_status );
         return FAILURE;
     }
 
@@ -788,7 +796,7 @@ static void gpib_read_end( const char *dev_name, char *buffer, long received,
     long i;
 
 
-    if ( ll > LL_ERR || ( ibsta & IBERR ) )
+    if ( ll > LL_ERR || ( gpib_status & GPIB_ERR ) )
         gpib_log_function_end( "gpib_read", dev_name );
 
     if ( ll < LL_CE )
@@ -863,7 +871,7 @@ static void gpib_log_error( const char *type )
                               0x0800, 0x0400, 0x0200, 0x0100,
                               0x0080, 0x0040, 0x0020, 0x0010,
                               0x0008, 0x0004, 0x0002, 0x0001 };
-    static char is[ 16 ][ 6 ] = {  "IBERR", "TIMO", "END",  "SRQI",
+    static char is[ 16 ][ 6 ] = {  "ERR", "TIMO", "END",  "SRQI",
                                    "RQS",   "\b",   "\b",   "CMPL",
                                    "LOK",   "REM",  "CIC",  "ATN",
                                    "TACS",  "LACS", "DTAS", "DCAS" };
@@ -881,10 +889,10 @@ static void gpib_log_error( const char *type )
     fprintf( gpib_log, "ERROR in function %s: <", type );
     for ( i = 15; i >= 0; i-- )
     {
-        if ( ibsta & stat[ 15 - i ] )
+        if ( gpib_status & stat[ 15 - i ] )
             fprintf( gpib_log, " %s", is[ 15 - i ] );
     }
-    fprintf( gpib_log, " > -> %s\n", ie[ iberr ] );
+    fprintf( gpib_log, " > -> %s\n", ie[ gpib_error ] );
     fflush( gpib_log );
 	seteuid( getuid( ) );
 }
@@ -920,7 +928,7 @@ static void gpib_log_function_start( const char *function,
 static void gpib_log_function_end( const char *function,
 								   const char *dev_name )
 {
-    if ( ibsta & IBERR )
+    if ( gpib_status & GPIB_ERR )
         gpib_log_error( function );
     else
     {
