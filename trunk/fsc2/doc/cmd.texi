@@ -24,6 +24,53 @@
 @chapter Command Line Options
 @cindex command ine options
 
+
+Normally it is not possible to start @code{fsc2} more than once, if you
+try a short error message is printed out and the program aborts. It was
+written this way to avoid the problem that only one program should be
+able to control the devices at a time. Otherwise it can't be guaranteed
+that the devices react as expected (just imagine how happy you would be
+when you're doing a pulsed experiment where you set the field manually
+to a certain value and someone else starts to change the field via a
+different instance of @code{fsc2}).
+
+But there can be some cases where it might be desirable to be able to
+run more than one instance of @code{fsc2} at the same time. In this case
+you have to start @code{fsc2} with the @code{-non-exclusive} option (the
+option name was intentionally made hard to type so you won't use it
+accidentally). In this case another instance of @code{fsc2} can be
+started if it is also started with the @code{-non-exclusive} option (but
+not without it).
+
+If you start more than one instance of @code{fsc2} you will have to
+consider some possible problems:
+@itemize @bullet
+@item
+  Only one of the instances will be able to control devices via the GPIB
+  bus. If you try to start a second experiment which also needs devices
+  controlled via the GPIB the second experiment will abort immediately.
+  The same also holds for devices controlled using the serial ports or via
+  other channels like built-in PCI or ISA cards - each serial port and card
+  can only be accessed from a single instance of @code{fsc2} at the same
+  time. What works is for example having one instance of @code{fsc2}
+  control devices via the GPIB bus and the first serial port and another
+  instance that controls devices via the second serial port and e.g.@: a
+  built-in PCI or ISA card.
+@item
+  Only the first instance of @code{fsc2} is going to be able to
+  communicate with external programs (i.e.@: scripts that automatically
+  generate @code{EDL} scripts and send them to @code{fsc2}). And if this
+  instance exits, none of the others will take over -- you need to start a
+  new instance which then is going to deal with external programs.
+@item
+  You also won't be able to run the built-in web-server for more that
+  one of the instances of @code{fsc2}, at least on port 8080 the web
+  server per default is listening on. If you want the web server to run for
+  each (or at least for more than one) instance of @code{fsc2} you need to
+  specify different HTTP ports for the different instances via the
+  @code{-httpPort} option.
+@end itemize
+
 @code{fsc2} can be invoked from the command line with the following
 syntax:
 
@@ -56,6 +103,11 @@ when @code{fsc2} is done with it, i.e.@ when either @code{fsc2}
 exits or a new file is loaded. This flag is only useful for cases where
 the input file is a temporary file that needs to be deleted when it
 isn't needed anymore, so better be @strong{really careful}.
+
+@item @option{-non-exclusive}
+When started with this option you are able to run several instances
+of @code{fsc2} at the same time (at least if all the other instances
+where also started with this option).
 
 @item @option{-h, --help}
 Displays a very short help text and exits.

@@ -101,3 +101,9 @@ could further increase its workload and, in extreme cases, might slow
 down the experiment a bit. If you have reasons to suspect something like
 this to happen simply switching off the web server (or not switching it
 on in the first place) is probably the best solution.
+
+Please note: If multiple instances of @code{fsc2} are running only one
+of them can run the web server on the default port 8080. So if you want
+more than one of the instances to run a web server you must assign a
+different port the web server is going to listen on to the different
+instances using the @code{-httpPort} option.
