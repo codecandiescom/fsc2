@@ -748,8 +748,7 @@ Var *p_get( char *txt, int type )
 /*
   'function' is the phase function the data are to be used for (i.e. 0 means
   PHASE_1, 1 means PHASE_2)
-  'type' means the type of phase, i.e. X, Y, -X or -Y (0 = X, 1 = Y, 2 = -X
-  and 3 = -Y)
+  'type' means the type of phase, see global.h (PHASE_PLUS/MINUX_X/Y
   'pod' means if the value is for the first or the second pod channel
   (0: first pod channel, 1: second pod channel, -1: pick the one not set yet)
   'val' means high or low to be set on the pod channel to set the requested
@@ -758,12 +757,9 @@ Var *p_get( char *txt, int type )
 
 void p_phs_setup( int func, int type, int pod, long val )
 {
-	const char *types[ ] = { "X", "Y", "-X", "-Y" };
-
-
 	assert ( Cur_PHS != - 1 ? ( Cur_PHS == func ) : 1 );
 	assert( func == 0 || func == 1 );      /* phase funcion correct ? */
-	assert( type >= 0 && type <= 3 );      /* type (X, Y, -X, -Y) correct */
+	assert( type >= PHASES_PLUS_X && type <= PHASES_MINUS_Y );
 
 	Cur_PHS = func;
 
@@ -778,7 +774,7 @@ void p_phs_setup( int func, int type, int pod, long val )
 		{
 			eprint( FATAL, "%s:%ld: Both output states for phase %s of "
 					"function already have been defined.\n", Fname, Lc,
-					types[ type ], func == 0 ?
+					Phase_Types[ type ], func == 0 ?
 					Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
 					Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
 			THROW( EXCEPTION );
@@ -789,7 +785,7 @@ void p_phs_setup( int func, int type, int pod, long val )
 	{
 		eprint( FATAL, "%s:%ld: Output state of %d. pod for phase %s of "
 				"function already has been defined.\n", Fname, Lc, pod + 1,
-				types[ type ], func == 0 ?
+				Phase_Types[ type ], func == 0 ?
 				Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
 				Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
 		THROW( EXCEPTION );

@@ -410,13 +410,13 @@ phs:      PHS_TOK                  { Cur_PHS = $1;
 ;
 
 phsl:     /* empty */
-        | phsl PX_TOK              { Cur_PHST = 0; }
+        | phsl PX_TOK              { Cur_PHST = PHASE_PLUS_X; }
 		  sep1 phsvl
-        | phsl PY_TOK              { Cur_PHST = 1; }
+        | phsl PY_TOK              { Cur_PHST = PHASE_PLUS_Y; }
           sep1 phsvl
-        | phsl PMX_TOK             { Cur_PHST = 2; }
+        | phsl PMX_TOK             { Cur_PHST = PHASE_MINUS_X; }
           sep1 phsvl
-        | phsl PMY_TOK             { Cur_PHST = 3; }
+        | phsl PMY_TOK             { Cur_PHST = PHASE_MINUS_Y; }
           sep1 phsvl
 ;
 
