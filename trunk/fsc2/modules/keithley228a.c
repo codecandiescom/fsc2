@@ -270,7 +270,7 @@ Var *magnet_use_dac_port( Var *v )
 						 ( void ** ) &last_DAC_port ) != LIB_OK )
 	{
 		eprint( FATAL, "%s:%ld: %s: Can't find necessary symbols in library "
-				"for lock-in amplifier %s\n", Fname, Lc, DEVICE_NAME,
+				"for lock-in amplifier '%s'\n", Fname, Lc, DEVICE_NAME,
 				keithley228a.lockin_name );
 		THROW( EXCEPTION );
 	}
@@ -278,7 +278,7 @@ Var *magnet_use_dac_port( Var *v )
 	if ( port < *first_DAC_port || port > *last_DAC_port )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid DAC port number %d, valid range "
-				"for lock-in %s is %d to %d\n", Fname, Lc, DEVICE_NAME, port,
+				"for lock-in '%s' is %d to %d\n", Fname, Lc, DEVICE_NAME, port,
 				keithley228a.lockin_name, *first_DAC_port, *last_DAC_port );
 		THROW( EXCEPTION );
 	}
