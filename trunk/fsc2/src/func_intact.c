@@ -1974,6 +1974,13 @@ Var *f_tb_changed( Var *v )
 		for ( ; v != NULL; v = vars_pop( v ) )
 		{
 			io = find_object_from_ID( get_strict_long( v, "object ID" ) );
+
+			if ( io == NULL )
+			{
+				print( FATAL, "Invalid object identifier.\n" );
+				THROW( EXCEPTION );
+			}
+
 			if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
 				continue;
 			if ( io->is_changed )
@@ -2128,6 +2135,13 @@ Var *f_tb_wait( Var *v )
 		for ( ; v != NULL; v = v->next )
 		{
 			io = find_object_from_ID( get_strict_long( v, "object ID" ) );
+
+			if ( io == NULL )
+			{
+				print( FATAL, "Invalid object identifier.\n" );
+				THROW( EXCEPTION );
+			}
+
 			if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
 				continue;
 			if ( io->is_changed )
@@ -2159,6 +2173,13 @@ Var *f_tb_wait( Var *v )
 		for ( ; v != NULL; v = vars_pop( v ) )
 		{
 			io = find_object_from_ID( get_strict_long( v, "object ID" ) );
+
+			if ( io == NULL )
+			{
+				print( FATAL, "Invalid object identifier.\n" );
+				THROW( EXCEPTION );
+			}
+
 			if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
 				continue;
 			io->report_change = SET;
