@@ -547,6 +547,9 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 }
 
 
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
 static bool dg2020_set_pod_high_level( int pod, double voltage )
 {
 	char cmd[ 100 ];
@@ -561,6 +564,9 @@ static bool dg2020_set_pod_high_level( int pod, double voltage )
 	return OK;
 }
 
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
 
 static bool dg2020_set_pod_low_level( int pod, double voltage )
 {
@@ -577,6 +583,9 @@ static bool dg2020_set_pod_low_level( int pod, double voltage )
 }
 
 
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
 static bool dg2020_set_trigger_in_level( double voltage )
 {
 	char cmd[ 100 ];
@@ -592,6 +601,9 @@ static bool dg2020_set_trigger_in_level( double voltage )
 }
 
 
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
 static bool dg2020_set_trigger_in_slope( int slope )
 {
 	char cmd[ 100 ];
@@ -605,6 +617,9 @@ static bool dg2020_set_trigger_in_slope( int slope )
 	return OK;
 }
 
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
 
 static bool dg2020_set_trigger_in_impedance( int state )
 {
@@ -620,9 +635,27 @@ static bool dg2020_set_trigger_in_impedance( int state )
 }
 
 
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
 static void dg2020_gpib_failure( void )
 {
 	eprint( FATAL, "%s: Communication with device failed.\n",
 			pulser_struct.name );
 	THROW( EXCEPTION );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+bool dg2020_lock_state( bool lock )
+{
+	char cmd[ 100 ];
+
+	sprintf( cmd, "LOC %s\n", lock ? "ALL" | "NON" );
+	if ( gpib_write( dg2020.device, cmd ) == FAILURE )
+		dg2020_gpib_failure( );
+
+	return OK;
 }
