@@ -22,8 +22,7 @@ bool hfs9000_store_timebase( double timebase )
 
 		eprint( FATAL, "%s:%ld: %s: Invalid time base of %s, valid range is "
 				"%s to %s.\n", Fname, Lc, pulser_struct.name,
-				hfs9000_ptime( timebase ),
-				min, max );
+				hfs9000_ptime( timebase ), min, max );
 		T_free( min );
 		T_free( max );
 		THROW( EXCEPTION );
@@ -43,6 +42,7 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 {
 	FUNCTION *f = &hfs9000.function[ function ];
 	CHANNEL *c = &hfs9000.channel[ channel - 1 ];
+
 
 	channel -= 1;
 	if ( channel < 0 || channel >= MAX_CHANNELS )
@@ -83,7 +83,6 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 
 bool hfs9000_invert_function( int function )
 {
-	hfs9000.function[ function ].is_used = SET;
 	hfs9000.function[ function ].is_inverted = SET;
 	return OK;
 }
@@ -150,6 +149,7 @@ bool hfs9000_set_function_high_level( int function, double voltage )
 {
 	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
 
+
 	if ( voltage < MIN_POD_HIGH_VOLTAGE || voltage > MAX_POD_HIGH_VOLTAGE )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid high level of %g V for function "
@@ -178,6 +178,7 @@ bool hfs9000_set_function_low_level( int function, double voltage )
 {
 	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
 
+
 	if ( voltage < MIN_POD_LOW_VOLTAGE || voltage > MAX_POD_LOW_VOLTAGE )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid low level of %g V for function "
@@ -205,6 +206,7 @@ bool hfs9000_set_function_low_level( int function, double voltage )
 bool hfs9000_set_trigger_mode( int mode )
 {
 	assert( mode == INTERNAL || mode == EXTERNAL );
+
 
 	if ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode != mode )
 	{
@@ -264,6 +266,7 @@ bool hfs9000_set_trigger_mode( int mode )
 bool hfs9000_set_trig_in_level( double voltage )
 {
 	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
+
 
 	if ( hfs9000.is_trig_in_level && hfs9000.trig_in_level != voltage )
 	{

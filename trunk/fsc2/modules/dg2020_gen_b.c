@@ -103,6 +103,7 @@ bool dg2020_assign_channel_to_function( int function, long channel )
 	FUNCTION *f = &dg2020.function[ function ];
 	CHANNEL *c = &dg2020.channel[ channel ];
 
+
 	if ( channel < 0 || channel >= MAX_CHANNELS )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid channel number: %ld, valid range "
@@ -141,7 +142,6 @@ bool dg2020_assign_channel_to_function( int function, long channel )
 
 bool dg2020_invert_function( int function )
 {
-	dg2020.function[ function ].is_used = SET;
 	dg2020.function[ function ].is_inverted = SET;
 	return OK;
 }
@@ -209,6 +209,7 @@ bool dg2020_set_function_high_level( int function, double voltage )
 {
 	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
 
+
 	if ( voltage < MIN_POD_HIGH_VOLTAGE || voltage > MAX_POD_HIGH_VOLTAGE )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid high level of %g V for function "
@@ -236,6 +237,7 @@ bool dg2020_set_function_high_level( int function, double voltage )
 bool dg2020_set_function_low_level( int function, double voltage )
 {
 	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
+
 
 	if ( voltage < MIN_POD_LOW_VOLTAGE || voltage > MAX_POD_LOW_VOLTAGE )
 	{
@@ -331,6 +333,7 @@ bool dg2020_set_trigger_mode( int mode )
 bool dg2020_set_trig_in_level( double voltage )
 {
 	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
+
 
 	if ( dg2020.is_trig_in_level && dg2020.trig_in_level != voltage )
 	{
