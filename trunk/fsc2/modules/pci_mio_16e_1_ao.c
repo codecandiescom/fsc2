@@ -50,6 +50,8 @@ Var *daq_reserve_dac( Var *v )
 														 "AO channel number" ),
 										"AO channel" );
 
+	v = vars_pop( v );
+
 	if ( v == NULL )
 		return vars_push( INT_VAR,
 						 pci_mio_16e_1.ao_state.reserved_by[ dac ] ? 1L : 0L );
