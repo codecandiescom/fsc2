@@ -802,7 +802,7 @@ void delete_pixmap( Canvas *c )
 void redraw_axis( int coord )
 {
 	Canvas *c;
-	Curve_1d *cv;
+	Curve_1d *cv = NULL;
 	int width;
 	int i;
 

@@ -559,7 +559,7 @@ void unit_spec( char *text, int type, int power )
 	if ( type == 0 )
 	{
 		lval = strtol( text, NULL, 10 );
-		if ( ( lval == LONG_MAX || dval == LONG_MIN ) && errno == ERANGE )
+		if ( ( lval == LONG_MAX || lval == LONG_MIN ) && errno == ERANGE )
 		    goto try_double;
 
 		switch ( power )

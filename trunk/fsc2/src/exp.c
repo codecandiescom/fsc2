@@ -279,7 +279,7 @@ static void setup_while_or_repeat( int type, long *pos )
 {
 	Prg_Token *cur = prg_token + *pos;
 	long i = *pos + 1;
-	const char *t;
+	const char *t = "??";
 
 
 	/* Start of with some sanity checks */

@@ -337,7 +337,7 @@ long reader( void *ret )
 	char *str[ 4 ];
 	int i;
 	int n1, n2;
-	long retval;
+	long retval = 0;
 	static char *retstr = NULL;
 
 
