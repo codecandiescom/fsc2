@@ -161,6 +161,7 @@ void eprint( int severity, const char *fmt, ... )
 	int space_left = FL_BROWSER_LINELENGTH;
 	va_list ap;
 
+
 	if ( severity != NO_ERROR )
 		compilation.error[ severity ] += 1;
 
