@@ -173,8 +173,8 @@ inline bool get_boolean( Var *v, const char *device )
 
 		else if ( device != NULL )
 		{
-			eprint( FATAL, SET, "%s: Invalid argument (%s) in call of "
-					"function %s().\n", device, v->val.sptr, Cur_Func );
+			eprint( FATAL, SET, "%s: Invalid boolean argument (\"%s\") in "
+					"%s().\n", device, v->val.sptr, Cur_Func );
 			THROW( EXCEPTION )
 		}
 	}
