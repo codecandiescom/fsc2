@@ -20,17 +20,30 @@ step_freq   = 40 kHz;
 
 attenuation =  -4 dB;
 
-N_runs      = 2;            // how many times to repeat the whole experiment
+N_runs      = 2;             // how many times to repeat the whole experiment
 N_averages  = 50;            // number of averages per frequency point
 
-N_max_base_curves =4;      // how many curve to use for baseline correction
+N_max_base_curves = 4;       // how many curve to use for baseline correction
+
+window_start = 3 us;         // start of integration window (after trigger)
+window_width = 5 us;         // width of integration window
+
+
+
+/***********************************************/
+/* Values that usually don't need changes      */
+/***********************************************/
 
 Channel = CH1;               // input channel of the digitizer
 
+window_start_2 = 0;           // start of second integration window, if zero
+                              // window starts window_width seconds before
+                              // end of trace 
 
 /***********************************************/
 /* Nothing needs to be changed below this line */
 /***********************************************/
+
 
 freq = start_freq;
 
@@ -51,12 +64,12 @@ time_res;                        // digitizer time resolution (in ns)
 min_time, max_time;              // first / last point (in ns)
 start_time, end_time;            // intergation window start / end pos. (in ns)
 new_start_time, new_end_time;    // new values od sliders (in ns)
-Start_pos, End_pos, Width;
+Start_pos_1, Start_pos_2, Width;
 N_base_curves;
 integ, base_int;
-integral[ 2 ];
+integral;
 
-I, J, K;                         // counters
+I, J, K, M;                      // counters
 
 F1, F2, F3;                      // file handlers
 S1, S2;                          // slider handlers
@@ -68,7 +81,7 @@ Is_stored = 0;
 
 PREPARATIONS:
 
-synthesizer_use_table( "table_big.dat" );
+synthesizer_use_table( );//"table_big.dat" );
 synthesizer_attenuation( attenuation );
 synthesizer_frequency( start_freq );
 synthesizer_att_ref_freq( 14 MHz );
@@ -78,7 +91,6 @@ digitizer_num_averages( N_averages );
 
 init_2d( 3, 0, N_steps, 0, 0, start_freq * 1.0e-6, step_freq * 1.0e-6,
          "Time / us", "Radio frequency / MHz", "Signal / mV" );
-
 
 EXPERIMENT:
 
@@ -98,7 +110,7 @@ min_time = - trig_pos * Rec_len * time_res;
 max_time   = min_time + Rec_len * time_res;
 
 Pretrigger = int( 0.9 * trig_pos * Rec_len );
-change_scale( min_time * 1.0e-3, time_res * 1.0e-3);
+change_scale( min_time * 1.0e-3, time_res * 1.0e-3 );
 
 /* Get a file for storing all data */
 
@@ -120,34 +132,77 @@ IF is_file( F2 ) {
                   "Microwave power: \nTemperature: \n" );
 }
 
-/* Create the sliders for setting the integration window limits */
+/* Set the integration window limits */
 
-start_time = 0.0;
-S1 = slider_create( "VALUE_SLIDER", min_time, max_time,
-                    "Integration window border 1 (ns)" );
-slider_value( S1, start_time );
-Start_pos = int( Rec_len * trig_pos );
+Start_pos_1 = int( trig_pos * Rec_len + 0.02 * window_start / time_base ) + 1;
+IF Start_pos_1 < 1 {
+	print( "Integration window starts too early.\n" );
+	abort( );
+}
+IF Start_pos_1 > Rec_len {
+	print( "Integration window starts too late.\n" );
+	abort( );
+}
 
-S2 = slider_create( "VALUE_SLIDER", min_time, max_time,
-                    "Integration window border 2 (ns)" );
-end_time = 50.0 * time_res;
-slider_value( S2, end_time );
-Width = 51;
+Width = int( 0.02 * window_width / time_base );
+IF Width < 1 {
+	Width = 1;
+}
+IF Start_pos_1 + Width > Rec_len {
+	print( "Integration window is too long.\n" );
+	abort( );
+}
 
+IF window_start_2 == 0.0 {
+	Start_pos_2 = Rec_len - Width + 1;
+} ELSE {
+	Start_pos_2 = int(   trig_pos * Rec_len
+					   + 0.02 * window_start_2 / time_base ) + 1;
+	IF Start_pos_2 < 1 {
+		print( "Second integration window starts too early.\n" );
+		abort( );
+	}
+	IF ( Start_pos_2 > Rec_len {
+		print( "Second integration window starts too late.\n" );
+		abort( );
+	}
+	IF Start_pos_2 + Width > Rec_len {
+		print( "Second integration window is too long.\n" );
+		abort( );
+	}
+}
+
+/* Now, finally, we can start the experiment */
 
 FOR J = 1 : N_runs
 {
-    print( "Starting #. run of #\n", J, N_runs );
+	IF J % 2 {
+	    print( "Starting #. run of #, sweeping up.\n", J, N_runs );
+	} ELSE {
+	    print( "Starting #. run of #, sweeping down.\n", J, N_runs );
+	}
 
     /* Set the synthesizer to the start frequency and start an acquisition */
 
-    freq = start_freq;
-    synthesizer_frequency( freq );
+	IF J % 2 {
+	    freq = start_freq;
+    	synthesizer_frequency( freq );
+		M = 0;
+	} ELSE {
+		M = N_steps + 1;
+	}
+	step_freq *= ( -1.0 )^( J % 2 + 1 );
 
     digitizer_start_acquisition( );
 
     FOR I = 1 : N_steps
     {
+		IF J % 2 {
+			M += 1;
+		} ELSE {
+			M -= 1
+		}
+
         Is_stored = 0;
 
         /* Get next curve from the digitizer */
@@ -174,9 +229,9 @@ FOR J = 1 : N_runs
         /* Add the new curve to the results from previous runs */
 
         IF J != 1 {
-            mean_curve[ I ] = ( ( J - 1 ) * mean_curve[ I ] + curve ) / J;
+            mean_curve[ M ] = ( ( J - 1 ) * mean_curve[ M ] + curve ) / J;
         } ELSE {
-            mean_curve[ I ] = curve;
+            mean_curve[ M ] = curve;
         }
         Is_stored = 1;
 
@@ -185,12 +240,12 @@ FOR J = 1 : N_runs
 
         IF Pretrigger != 0 {
             ground = mean( curve, 1, Pretrigger );
-            mean_ground[ I ] = ( ( J - 1 ) * mean_ground[ I ] + ground ) / J;
+            mean_ground[ M ] = ( ( J - 1 ) * mean_ground[ M ] + ground ) / J;
         }
 
         /* At the start of run add up curves used for baseline correction */
 
-        IF I <= N_max_base_curves {
+        IF I <= N_max_base_curves | I > N_steps - N_max_base_curves {
             IF I == 1 & J == 1 {
                 N_base_curves = 1;
                 base_curve = curve - ground;
@@ -204,52 +259,15 @@ FOR J = 1 : N_runs
         /* Calculate the values of the integration window (now using 'curve'
            as temporary storage for the baseline corrected curve) */
 
-        curve = 1.0e3 * ( mean_curve[ I ] - base_curve - mean_ground[ I ] );
-        integral[ 1 ] = 1.0e3 * mean( mean_curve[ I ], Start_pos, Width );
-        integral[ 2 ] = mean( curve, Start_pos, Width );
+        curve = 1.0e3 * ( mean_curve[ M ] - base_curve - mean_ground[ M ] );
+        integral = 1.0e3 * (   mean( curve, Start_pos_1, Width )
+							 - mean( curve, Start_pos_2, Width ) );
 
         /* Display the new data */
 
-        display( 1, I, 1.0e3 * mean_curve[ I ], 1,
-                 1, I, curve, 2,
-                 1, I, integral[ 1 ], 3,
-                 2, I, integral[ 2 ], 3 );
-
-        /* Finally check for new positions of the integration window sliders */
-
-        new_start_time = slider_value( S1 );
-        new_end_time   = slider_value( S2 );
-        IF start_time != new_start_time | end_time != new_end_time
-        {
-            start_time = new_start_time;
-            end_time   = new_end_time;
-
-            Start_pos = round( ( start_time - min_time ) / time_res ) + 1;
-            End_pos   = round( ( end_time - min_time ) / time_res ) + 1;
-            Width = abs( End_pos - Start_pos ) + 1;
-            IF Width > Rec_len - Start_pos + 1 {
-                Width = Rec_len - Start_pos + 1 ;
-            }
-            IF Start_pos > End_pos {
-                Start_pos = End_pos;
-            }
-
-            IF ( J == 1 ) {
-                End_index = I;
-            } ELSE {
-                End_index = N_steps;
-            }
-
-            base_int = 1.0e3 * mean( base_curve, Start_pos, Width );
-            FOR K = 1 : End_index {
-                integral[ 1 ] = 1.0e3 * mean( mean_curve[ K ],
-                                              Start_pos, Width );
-                integral[ 2 ] = integral[ 1 ] - base_int
-                                - 1.0e3 * mean_ground[ K ];
-                display( 1, K, integral[ 1 ], 3,
-                         2, K, integral[ 2 ], 3 );
-            }
-        }
+        display( 1, M, 1.0e3 * mean_curve[ M ], 1,
+                 1, M, curve, 2,
+                 1, M, integral, 3 );
     }
 }
 
@@ -292,94 +310,5 @@ IF is_file( F2 )
         fsave( F2, "\n% Frequency: # MHz\n\n", freq * 1.0e-6 );
         freq += step_freq;
         save( F2, mean_curve[ I ] );
-    }
-}
-
-/* Create two buttons for saving integrals and finally stopping */
-
-B1 = button_create( "NORMAL_BUTTON", "Save" );
-B2 = button_create( "NORMAL_BUTTON", "Done" );
-
-FOREVER
-{
-    IF button_state( B2 ) {          // check Done button
-        BREAK;
-    }
-
-    IF button_state( B1 )            // check Save button
-    {
-        F3 = get_file( "File for storing integrated region:" );     
-        IF is_file( F3 ) {
-            IF start_time < end_time {
-                fsave( F3, "% Integration window from # ns to # ns\n"
-                           "% (times relative to trigger)\n\n"
-                           "% Integral over raw data\n\n",
-                       start_time, end_time );
-            } ELSE {
-                fsave( F3, "% Integration window from # ns to # ns\n"
-                           "% (times relative to trigger)\n"
-                           "% Integrals over raw data:\n\n",
-                       end_time, start_time );
-            }
-
-            IF J == 1 & I < N_steps {
-                End_index = I;
-            } ELSE {
-                End_index = N_steps;
-            }
-
-            base_int = mean( base_curve, Start_pos, Width );
-            FOR K = 1 : End_index {
-                fsave( F3, "#\n", mean( mean_curve[ K ], Start_pos, Width ) );
-            }
-            fsave( F3, "\n% Integrals over preprocessed data:\n\n" );
-            FOR K = 1 : End_index {
-                fsave( F3, "#\n", mean( mean_curve[ K ], Start_pos, Width )
-                                  - base_int - mean_ground[ K ] );
-            }
-        }
-
-        NEXT;
-    }
-
-    /* Get new positions of sliders - if nothing changed wait for a moment
-       and go back to start of loop */
-
-    new_start_time = slider_value( S1 );
-    new_end_time   = slider_value( S2 );
-    IF start_time == new_start_time & end_time == new_end_time {
-        wait( 0.3 s );
-        NEXT;
-    }
-
-    start_time = new_start_time;
-    end_time   = new_end_time;
-
-    /* Calculate new indices of integration windows and calculate and display
-       the integrals */
-
-    Start_pos = round( ( start_time - min_time ) / time_res ) + 1;
-    End_pos   = round( ( end_time - min_time ) / time_res ) + 1;
-    Width = abs( End_pos - Start_pos ) + 1;
-
-    IF Width > Rec_len - Start_pos + 1 {
-        Width = Rec_len - Start_pos + 1;
-    }
-    IF Start_pos > End_pos {
-        Start_pos = End_pos;
-    }
-
-    IF ( J == 1 ) {
-        End_index = I;
-    } ELSE {
-        End_index = N_steps;
-    }
-
-    base_int = 1.0e3 * mean( base_curve, Start_pos, Width );
-    FOR K = 1 : End_index {
-        integral[ 1 ] = 1.0e3 * mean( mean_curve[ K ], Start_pos, Width );
-        integral[ 2 ] = integral[ 1 ] - base_int - 1.0e3 * mean_ground[ K ];
-        display( 1, K, integral[ 1 ], 3,
-                 2, K, integral[ 2 ], 3 );
     }
 }

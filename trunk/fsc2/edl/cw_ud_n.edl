@@ -1,0 +1,104 @@
+DEVICES:
+
+er035m_s;
+aeg_x_band;
+sr810;
+//sr830;
+//sr530;
+
+
+VARIABLES:
+
+I, J;
+
+start_field = 3375 G;
+field_step =  0.25 G;
+N_points = 601;
+N_runs = 20;
+
+b0;
+tc;
+data[ N_points ];
+new_data[ N_points ];
+FILE1, FILE2;
+
+
+PREPARATIONS:
+
+magnet_setup( start_field, field_step );
+
+init_1d( 2, N_points, start_field, field_step,
+		 "Magnetic Field / G", "Signal / V" );
+
+
+EXPERIMENT:
+
+tc = lockin_time_constant( );
+
+FILE1 = get_file( "File for raw data:" );
+FILE2 = get_file( "FILE for averaged data:" );
+
+IF is_file( FILE2 ) {
+	fsave( FILE2, "% Start field   = # G\n", start_field );
+	fsave( FILE2, "% End field     = # G\n",
+		   start_field + N_points * field_step );
+	fsave( FILE2, "% Field step    = # G\n", field_step );
+	fsave( FILE2, "% Sensitivity   = # V\n", lockin_sensitivity( ) );
+	fsave( FILE2, "% Time constant = # s\n", tc );
+	save_comment( FILE2, "% ", "Sample: \nMicrowave frequency: \n"
+			     "Microwave power: \nTemperature: \n" );
+	save_program( FILE2, "% " );
+}
+
+
+FOR J = 1 : 2 * N_runs {
+
+	print( "Starting #. run of #\n", ( J + 1 ) / 2, N_runs );
+
+	FOR I = 1 : N_points {
+
+		new_data[ I ] = lockin_get_data( );
+        fsave( FILE1, "# #\n",
+			   start_field + ( I - 1 ) * field_step, new_data[ I ] );
+		display( I, ( 1.0 - 1.0 / J ) * data[ I ] + new_data[ I ] / J, 1,
+				 I, new_data[ I ], 2 );
+		IF I != N_points {
+			sweep_up( );
+		}
+		wait( tc );
+	}
+
+    fsave( FILE1, "\n" );
+	data = ( 1.0 - 1.0 / J ) * data + new_data / J;
+	clear_curve( 2 );
+
+	J += 1;
+	print( "Sweeping down in #. run\n", J / 2 );
+
+	FOR I = N_points : 1 : -1 {
+
+		new_data[ I ] = lockin_get_data( );
+        fsave( FILE1, "# #\n",
+			   start_field + ( I - 1 ) * field_step, new_data[ I ] );
+		display( I, ( 1.0 - 1.0 / J ) * data[ I ] + new_data[ I ] / J, 1,
+				 I, new_data[ I ], 2 );
+		IF ( I != 1 ) {
+			sweep_down( );
+			wait( tc );
+		}
+	}
+
+    fsave( FILE1, "\n" );
+	data = ( 1.0 - 1.0 / J ) * data + new_data / J;
+	clear_curve( 2 );
+	reset_field( );
+	wait( tc );
+}
+
+ON_STOP:
+
+clear_curve( 2 );
+FOR I = 1 : N_points {
+     fsave( FILE2, "# #\n", start_field + ( I - 1 ) * field_step, data[ I ] );
+}
+

@@ -106,6 +106,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
     { "slider_create", f_screate, -1, ACCESS_EXP,  UNSET },
     { "slider_delete", f_sdelete, -1, ACCESS_EXP,  UNSET },
     { "slider_value",  f_svalue,  -1, ACCESS_EXP,  UNSET },
+    { "abort",         f_abort,    0, ACCESS_ALL,  UNSET },
 	{ NULL,            NULL,       0, 0,           UNSET}
 	                   /* last set marks the very last entry, don't remove ! */
 };

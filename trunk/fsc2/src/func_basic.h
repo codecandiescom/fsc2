@@ -10,6 +10,7 @@
 #include "fsc2.h"
 
 
+Var *f_abort(   Var *v );
 Var *f_int(     Var *v );
 Var *f_float(   Var *v );
 Var *f_round(   Var *v );

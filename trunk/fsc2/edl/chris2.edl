@@ -1,0 +1,95 @@
+#!/usr/local/bin/fsc2
+
+DEVICES:
+
+tds520;
+er035m_sas;
+
+VARIABLES:
+
+window_start = 10 us;
+window_width = 20 us;
+N_averages = 16;
+NUM_BASE_CURVES = 10;
+
+
+curve[ * ];
+base_curve[ * ];
+Pretrigger;
+ground;
+
+Rec_len;
+trig_pos;
+time_base;
+
+
+I = 0;
+WS, WW;
+
+
+PREPARATIONS:
+
+digitizer_num_averages( N_averages );
+
+init_2d( 3, 0, 0, 0, 0, 0, 1, "Time / ms",
+		 "Magnetic Field (arbitrary units)", "Signal / mV" );
+
+EXPERIMENT:
+
+Rec_len = digitizer_record_length( );
+trig_pos = digitizer_trigger_position( );
+time_base = digitizer_timebase( );
+
+Pretrigger = int( 0.9 * trig_pos * Rec_len );
+WS = Pretrigger + int( 50 * window_start * 1.0e6 / time_base );
+WW = int( 50 * window_width * 1.0e6 / time_base );
+
+IF WS > Rec_len | WS + WW > Rec_len {
+	WS = Pretrigger;
+	WW = Rec_len - Pretrigger;
+	print( "Integration window does not fit, using everything "
+		   "after trigger!\n" );
+}
+
+
+
+change_scale( - trig_pos * Rec_len / 50.0 * time_base * 1.e3,
+	      	  time_base / 50.0 * 1e3 );
+
+save_program( "% " );
+fsave( "% Sensitivity        = # mV/div\n",
+	   digitizer_sensitivity( CH1 ) * 1.0e3 );
+fsave( "% Number of averages = #\n", N_averages );
+fsave( "% Time base          = # us/div\n", time_base * 1.0e6 );
+fsave( "% Number of points   = #\n", Rec_len );
+fsave( "% Trigger position   = #\n", int( Rec_len * trig_pos ) );
+fsave( "% Slice length       = # ms\n", Rec_len * time_base / 50 * 1.0e3 );
+save_comment( "% " );
+
+fsave( "\n% Field = # G\n\n", measure_field( ) );
+
+FOREVER {
+
+	I += 1;
+	digitizer_start_acquisition( );
+	curve = 1000.0 * digitizer_get_curve_fast( CH1 );
+
+	IF Pretrigger != 0 {
+	    ground = mean( curve, 1, Pretrigger );
+	} ELSE {
+	    ground = 0;
+	}
+
+	IF I <= NUM_BASE_CURVES {
+	    IF I != 1 {
+    		base_curve *= ( float( I ) - 1.0 ) / float(  I );
+    	}
+	    base_curve += ( curve - ground ) / I;
+	}
+
+	display( 1, I, ( curve - ground ) , 1,
+			 1, I, curve, 2,
+			 1, I, ( curve - ground - base_curve ) , 3 );
+	save( curve );
+	fsave( "\n% Field = # G\n\n", measure_field( ) );
+}
