@@ -812,28 +812,40 @@ static void reconfigure_window_1d( Canvas *c, int w, int h )
 
 	/* Calculate the new scale factors */
 
-	if ( c == &G.canvas && G.is_scale_set )
+	if ( c == &G.canvas )
 	{
-		for ( i = 0; i < G.nc; i++ )
+		if ( G.is_scale_set )
 		{
-			cv = G.curve[ i ];
-
-			cv->s2d[ X ] *= ( double ) ( w - 1 ) / ( double ) ( old_w - 1 );
-			cv->s2d[ Y ] *= ( double ) ( h - 1 ) / ( double ) ( old_h - 1 );
-
-			if ( cv->can_undo )
+			for ( i = 0; i < G.nc; i++ )
 			{
-				cv->old_s2d[ X ] *= ( double ) ( w - 1 )
-									/ ( double ) ( old_w - 1 );
-				cv->old_s2d[ Y ] *= ( double ) ( h - 1 )
-									/ ( double ) ( old_h - 1 );
+				cv = G.curve[ i ];
+
+				cv->s2d[ X ] *= ( double ) ( w - 1 )
+								/ ( double ) ( old_w - 1 );
+				cv->s2d[ Y ] *= ( double ) ( h - 1 )
+								/ ( double ) ( old_h - 1 );
+
+				if ( cv->can_undo )
+				{
+					cv->old_s2d[ X ] *= ( double ) ( w - 1 )
+										/ ( double ) ( old_w - 1 );
+					cv->old_s2d[ Y ] *= ( double ) ( h - 1 )
+										/ ( double ) ( old_h - 1 );
+				}
 			}
+
+			/* Recalculate data for drawing (has to be done after setting of
+			   canvas sizes since they are needed in the recalculation) */
+
+			recalc_XPoints_1d( );
 		}
-
-		/* Recalculate data for drawing (has to be done after setting of canvas
-		   sizes since they are needed in the recalculation) */
-
-		recalc_XPoints_1d( );
+		else
+			for ( i = 0; i < G.nc; i++ )
+			{
+				G.curve[ i ]->s2d[ X ] *= ( double ) ( w - 1 )
+										  / ( double ) ( old_w - 1 );
+				G.curve[ i ]->s2d[ Y ] = ( double ) ( h - 1 );
+			}
 	}
 
 	/* We can't know the sequence the different canvases are reconfigured
