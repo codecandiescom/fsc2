@@ -301,7 +301,7 @@ defined within a module that get called automatically at the start of
 the test run and after the test run finished successfully.
 
 
-@node Third stage of interpretation, , Second stage of interpretation, Internals
+@node Third stage of interpretation, Reading the sources, Second stage of interpretation, Internals
 @section Third stage of interpretation
 
 
@@ -407,3 +407,214 @@ objects in the toolbox. Here the task running the experiment always has
 to wait for a reaction by the user interaction task (which in turn may
 have to wait for user input). This communication channel is realized by
 a pair of pipes between the processes.
+
+
+
+@node Reading the sources, , Third stage of interpretation, Internals
+@section Reading the sources
+
+
+The following is supposed to give you an introduction on where to
+look when you are search for something in the source code of
+@code{fsc2}. This is yet far from complete but work in progress.
+
+
+Lets start with what to do when you want to debug @code{fsc2}. It's
+probably obvious that when you want to run the main (parent) process of
+@code{fsc2} under a debugger you just start it in the debugger. To keep
+the debugger from getting stopped each time an internally used signal is
+received you probably should start with telling the debugger to ignore
+the two signals @code{SIGUSR1} and @code{SIGUSR2}. Under @code{gdb} you
+do this by entering
+@example
+(gdb) handle SIGUSR1 nostop noprint
+(gdb) handle SIGUSR2 nostop noprint
+@end example
+
+Debugging the child process, running the experiment requires the
+debugger to attach to the newly created child process. To be able to do
+so easily without the child process already starting to execute while
+you're still trying to attach it you should set the environment variable
+@code{FSC2_CHILD_DEBUG}, e.g.@:
+@example
+> export FSC2_CHILD_DEBUG=1
+@end example
+When this environment variable is defined the child process will sleep
+for about ten hour before it starts, which should be more than enough
+for you to attach to it. Moreover, when this environment variable is set
+a line telling you the PID of the child process is printed out when the
+child process gets started. All you have to do is to start the debugger
+with the PID to attach to. Here's an example of a typical session
+when I start try to debug the child process using @code{gdb}:
+@example
+jens@@crowley:~/Lab/fsc2 > export FSC2_CHILD_DEBUG=1
+jens@@crowley:~/Lab/fsc2 > src/fsc2 &
+[2] 28801
+jens@@crowley:~/Lab/fsc2 > Child process pid = 28805
+jens@@crowley:~/Lab/fsc2 > gdb src/fsc2 28805
+GNU gdb 5.0
+Copyright 2000 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "i386-suse-linux"...
+/home/jens/Lab/fsc2/28805: No such file or directory.
+Attaching to program: /home/jens/Lab/fsc2/src/fsc2, Pid 28805
+Reading symbols from /usr/X11R6/lib/libforms.so.1...done.
+Loaded symbols for /usr/X11R6/lib/libforms.so.1
+Reading symbols from /usr/X11R6/lib/libX11.so.6...done.
+Loaded symbols for /usr/X11R6/lib/libX11.so.6
+Reading symbols from /lib/libm.so.6...done.
+Loaded symbols for /lib/libm.so.6
+Reading symbols from /lib/libdl.so.2...done.
+Loaded symbols for /lib/libdl.so.2
+Reading symbols from /usr/local/lib/libgpib.so...done.
+Loaded symbols for /usr/local/lib/libgpib.so
+Reading symbols from /lib/libc.so.6...done.
+Loaded symbols for /lib/libc.so.6
+Reading symbols from /usr/X11R6/lib/libXext.so.6...done.
+Loaded symbols for /usr/X11R6/lib/libXext.so.6
+Reading symbols from /usr/X11R6/lib/libXpm.so.4...done.
+Loaded symbols for /usr/X11R6/lib/libXpm.so.4
+Reading symbols from /lib/ld-linux.so.2...done.
+Loaded symbols for /lib/ld-linux.so.2
+Reading symbols from /lib/libnss_compat.so.2...done.
+Loaded symbols for /lib/libnss_compat.so.2
+Reading symbols from /lib/libnsl.so.1...done.
+Loaded symbols for /lib/libnsl.so.1
+Reading symbols from /usr/lib/gconv/ISO8859-1.so...done.
+Loaded symbols for /usr/lib/gconv/ISO8859-1.so
+Reading symbols from /usr/local/lib/fsc2/fsc2_rsc_lr.so...done.
+Loaded symbols for /usr/local/lib/fsc2/fsc2_rsc_lr.so
+Reading symbols from /usr/local/lib/fsc2/User_Functions.so...done.
+Loaded symbols for /usr/local/lib/fsc2/User_Functions.so
+0x40698951 in __libc_nanosleep () from /lib/libc.so.6
+(gdb)
+@end example
+@noindent
+Now the child process will be waiting at the very start of its code
+in the function @code{run_child()} in the file @file{run.c}.
+
+Please note that because @code{fsc2} is normally running as a setuid-ed
+process you must not try to debug the already installed and setuid-ed
+version (that's not allowed for security reason) but only a version for
+which belongs to you and for which you have unlimited execution
+permissions. This might require that you temporarily change the
+permissions to allow access by all users for all device files (for the
+GPIB board, the serial ports and, possibly, cards installed in the
+computer and used by @code{fsc2}) for devices that are controlled by the
+@code{EDL} script you use during debugging. Don't forget to reset the
+permissions when you're done.
+
+
+This point out of the way I'll start a tour de force through the
+sources. When @code{fsc2} is invoked it starts at the code in
+@code{main()} in the file @file{fsc2.c}. After setting up lots of global
+variables and checking the command line options it tries to connect to a
+kind of daemon process or start it if it's not already running.  This
+daemon is taking care of situation where @code{fsc2} is running in
+non-exclusive mode, i.e.@: more than instance of @code{fsc2} is to
+be run at the same time, and it will tell new instances about what they
+are allowed to do and what not to avoid more than one instance trying to
+access the same devices at the same time.
+
+
+When this hurdle has been taken the initialization of the graphics is
+done. All the code for doing so is in the file @file{xinit.c}. You will
+have to read a bit about the @code{Xforms} library to understand what's
+going on there. Mostly it's loading a shared library for creating the
+forms used by the program (there are two shared libraries,
+@file{fsc2_rsc_lr.so} and @file{fsc2_rsc_hr.so}, which on is loaded
+depends on the screen resolution and the comand line option
+@code{-size}), evaluating the settings in the @file{.Xdefaults} and
+@file{.Xresources} files, again setting up lots of global variables and
+doing further checks on the command line arguments.
+
+
+When this part was successful some further checks of the remaining
+command line options are done and, if specified on the command line,
+an @code{EDL} script is loaded. Now we're already near to start the
+main loop of the program. But before this loop is entered another new
+process is spawned that opens a socket (of type @code{AF_UNIX}) to
+listen on incoming connections from external programs that want to send
+@code{EDL} scripts to @code{fsc2} for execution. The code for spawning
+this child process and the code for the child process itself is to be
+found in the @file{conn.c}.
+
+
+After this stage the main loop of the program is entered. It consists of
+just these two lines:
+@example
+while ( fl_do_forms( ) != GUI.main_form->quit )
+    /* empty */ ;
+@end example
+Everything else is hidden behind these two lines. What they do is to
+wait for new events until the @code{Quit} button gets pressed. Possible
+events are clicking on the buttons in the different form, but they don't
+need to be mentioned in this loop because all buttons trigger callback
+functions when clicked on. The remaining stuff in the @code{main()}
+function is just cleaning up when the program quits and a few things for
+dealing with certain circumstances.
+
+
+When you want to understand what's really going on you will have to
+start with figuring out what happens in the callback functions for the
+different buttons. The simplest way to find out which callback functions
+are associated with which functions is probably to use the
+@code{fdesign} program coming with the @code{Xforms} library and
+starting it on one of the files @file{fsc2_rsc_lr.fd} or
+@code{fsc2_rsc_hr.fd}. From within it you can display all of the forms
+used by the program and find out the names of the callback functions
+associated with each element of the forms.
+
+
+The callback functions for the buttons of the main form are mostly in
+@file{fsc2.c}. I will restrict myself to the most important ones: The
+@code{Load} button invokes the function @code{load_file()}, which is
+quite forward -- it asks the user to select a new file, checks if it
+exists and can be read and, if this tests succeed, loads the file and
+displays it in the main browser.
+
+
+Once a file has been read in the @code{Test} button gets activated.
+When it gets clicked on the function @code{test_file()} gets invoked and
+that's were things get interesting. As you will find over and over again
+in the program is starts with lots of testing and adjustments of the
+buttons of the main form. (If you should worry about lines like
+@example
+notify_conn( BUSY_SIGNAL );
+@end example
+@noindent
+@example
+notify_conn( UNBUSY_SIGNAL );
+@end example
+@noindent
+are about: these tell the child process listening for external
+connections that @code{fsc2} is at the moment too busy accepting a new
+@code{EDL} script and then that it's again prepared to load sucg a
+script.)
+
+The real fun starts at the line
+@example
+state = scan_main( EDL.in_file, in_file_fp );
+@end example
+@noindent
+which calls the central subroutine to parse and test the @code{EDL}
+script. A good deal of the following is going to be concerned what's
+happening here.
+
+
+The function @code{scan_main()} is located in the file
+@file{split_lexer.l}. This obviously isn't a normall @code{C} file but a
+file from which the @code{flex} utility creates a @code{C}
+file. @code{flex} is a tool that generates programs that perfom
+pattern-matching on input text. That means that a program created by
+@code{flex} will dissect an input text into the tokens according to the
+rules of how these tokens are supposed to look like defined in the
+@code{.l} file. And that's exactly what needs to be done with an
+@code{EDL} script before it can later be digested by @code{fsc2} (with
+the help of another tool, @code{bison}).
+
+
+That's it for the moment, the sequel is coming soon, please stay tuned ;-)
