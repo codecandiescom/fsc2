@@ -1167,7 +1167,7 @@ Var *vars_push( int type, ... )
 			break;
 
 		case FUNC :
-			new_stack_var->val.fnct = va_arg( ap, Func * );
+			new_stack_var->val.fnct = va_arg( ap, struct Func_ * );
 			break;
 
 		case ARR_PTR :
