@@ -1118,6 +1118,9 @@ void undo_button_callback( FL_OBJECT *a, long b )
 		{
 			G.is_fs = UNSET;
 			fl_set_button( run_form->full_scale_button, 0 );
+			fl_set_object_helper( run_form->full_scale_button,
+								  "Rescale curves to fit into the window\n"
+								  "and switch on automatic rescaling" );
 		}
 
 		if ( is_undo )
@@ -1153,6 +1156,9 @@ void undo_button_callback( FL_OBJECT *a, long b )
 		{
 			cv2->is_fs = UNSET;
 			fl_set_button( run_form->full_scale_button, 0 );
+			fl_set_object_helper( run_form->full_scale_button,
+								  "Rescale curves to fit into the window\n"
+								  "and switch on automatic rescaling" );
 		}
 
 		redraw_all_2d( );
