@@ -9,7 +9,7 @@ d1[ N ], d2[ N ];
 
 PREPARATIONS:
 
-init_1d( 2, N, sf, df, "Field [ G ]", "Signal [uV]" );
+init_1d( 2, N, sf * 0.1, df * 0.1, "Field [mT]", "Signal [uV]" );
 
 EXPERIMENT:
 

@@ -59,7 +59,7 @@ Some key features:
   fsc2 package.
 
 * fsc2 has been extensively tested and is currently used to control seven
-  EPR spectrometers, using a broad range of different devices and	
+  EPR spectrometers, using a broad range of different devices and   
   experimental techniques.
 
 * The complete sources for the program and all device modules are available
