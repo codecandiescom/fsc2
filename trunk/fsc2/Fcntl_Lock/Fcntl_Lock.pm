@@ -88,7 +88,7 @@ BEGIN {
 	}
 	if ( $err = eval { &Errno::EBADF } ) {
 		$fcntl_error_texts{ $err } = "Not an open file handle or descriptor " .
-			                         "or not open or writing (with F_WRLCK) "
+			                         "or not open or writing (with F_WRLCK) " .
 									 "or reading (with F_RDLCK)";
 	}
 	if ( $err = eval { &Errno::EDEADLK } ) {
