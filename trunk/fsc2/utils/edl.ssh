@@ -34,7 +34,7 @@ written by "Jens Thoms Toerring <Jens.Toerring@physik.fu-berlin.de>"
 version is 1.1
 documentation is
    "a2ps style sheet for EDL files."
-   "It's jsut a quick hack and is directly derived from the C style"
+   "It's just a quick hack and is directly derived from the C style"
    "sheet by Miguel Santana and Akim Demaille (as distributed with a2ps)."
 end documentation
 

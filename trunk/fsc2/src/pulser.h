@@ -43,6 +43,7 @@ typedef struct {
 	bool ( *set_function_low_level )( int function, double low_voltage );
 
 	bool ( *set_timebase )( double timebase );
+	bool ( *set_timebase_level ) ( int level_type );
 	bool ( *set_trigger_mode )( int mode );
 	bool ( *set_repeat_time )( double rep_time );
 	bool ( *set_trig_in_level )( double voltage );
@@ -102,6 +103,7 @@ void p_inv( long func );
 void p_set_v_high( long func, Var *v );
 void p_set_v_low( long func, Var *v );
 void p_set_timebase( Var *v );
+void p_set_timebase_level( int level_type );
 void p_set_trigger_mode( Var *v);
 void p_set_trigger_slope( Var *v );
 void p_set_trigger_level( Var *v );

@@ -68,33 +68,37 @@ bool rs690_store_timebase( double timebase )
 
 	/* Figure out if we can use the internal clock (with time bases of
 	   4 ns, 8 ns or 16 ns) or if we have to expect an external clock
-	   input */
+	   input. The same holds if an input level type for an external clock
+	   aleady has been set. */
 
-	for ( i = 0; i < NUM_FIXED_TIMEBASES; i++ )
-	{
-		if ( timebase >= rs690_fixed_timebases[ i ] * 0.999 &&
-			 timebase <= rs690_fixed_timebases[ i ] * 1.001 )
+	if ( ! rs690.is_timebase_level )
+		for ( i = 0; i < NUM_FIXED_TIMEBASES; i++ )
 		{
-			rs690.timebase_type = i;
-			rs690.timebase = rs690_fixed_timebases[ i ];
-			rs690.timebase_mode = INTERNAL;
+			if ( timebase >= rs690_fixed_timebases[ i ] * 0.999 &&
+				 timebase <= rs690_fixed_timebases[ i ] * 1.001 )
+			{
+				rs690.timebase_type = i;
+				rs690.timebase = rs690_fixed_timebases[ i ];
+				rs690.timebase_mode = INTERNAL;
+				rs690.is_timebase = SET;
+				break;
+			}
+
+			if ( timebase > rs690_fixed_timebases[ i ] )
+				continue;
+
+			rs690.timebase_type = i - 1;
+			rs690.timebase = timebase;
+			rs690.timebase_mode = EXTERNAL;
 			rs690.is_timebase = SET;
 			break;
 		}
 
-		if ( timebase > rs690_fixed_timebases[ i ] )
-			continue;
-
-		rs690.timebase_type = i - 1;
-		rs690.timebase = timebase;
-		rs690.timebase_mode = EXTERNAL;
-		rs690.is_timebase = SET;
-		break;
-	}
+	/* External time bases are handled like an internal time base of 4 ns */
 
 	if ( ! rs690.is_timebase )
 	{
-		rs690.timebase_type = TIMEBASE_16_NS;
+		rs690.timebase_type = TIMEBASE_4_NS;
 		rs690.timebase = timebase;
 		rs690.timebase_mode = EXTERNAL;
 		rs690.is_timebase = SET;
@@ -103,9 +107,36 @@ bool rs690_store_timebase( double timebase )
 	/* Remind the user that with the choosen time base an external clock
 	   might be needed */
 
-	if ( rs690.timebase_mode == EXTERNAL )
+	if ( rs690.timebase_mode == EXTERNAL && ! rs690.is_timebase_level )
 		print( NO_ERROR, "Time base of %s requires external clock.\n",
 			   rs690_ptime( timebase ) );
+
+	return OK;
+}
+
+
+/*------------------------------------------------*/
+/*------------------------------------------------*/
+
+bool rs690_store_timebase_level( int level_type )
+{
+	fsc2_assert( level_type == TTL_LEVEL || level_type == ECL_LEVEL );
+
+	if ( rs690.is_timebase_level )
+	{
+		print( FATAL, "External input for clock already has been set to "
+			   "%s.\n", rs690.timebase_level == TTL_LEVEL ? "TTL" : "ECL" );
+		THROW( EXCEPTION );
+	}
+
+	rs690.timebase_level = level_type;
+	rs690.is_timebase_level = SET;
+
+	if ( rs690.is_timebase && rs690.timebase_mode == INTERNAL )
+	{
+		rs690.timebase_mode = EXTERNAL;
+		rs690.timebase_type = TIMEBASE_4_NS;
+	}
 
 	return OK;
 }
@@ -339,12 +370,65 @@ bool rs690_set_trig_in_slope( int slope )
 	{
 		print( FATAL, "Setting a trigger slope (implicitly selecting EXTERNAL "
 			   "trigger mode) and using negative delays for functions is "
-			   "incompatible.\n" );
+			   "impossible.\n" );
 		THROW( EXCEPTION );
 	}
 
+	rs690.trig_in_mode = EXTERNAL;
 	rs690.trig_in_slope = slope;
 	rs690.is_trig_in_slope = SET;
+
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+bool rs690_set_trig_in_level_type( double type )
+{
+	int level_type;
+
+
+	level_type = ( int ) type;
+
+	if ( level_type != TTL_LEVEL && level_type != ECL_LEVEL )
+	{
+		print( FATAL, "Trigger input levels can only be set via the "
+			   "'TTL' or 'ECL' keywords for this device.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( rs690.is_trig_in_level_type &&
+		 rs690.trig_in_level_type != level_type )
+	{
+		print( FATAL, "A different trigger level type of '%s' has already "
+			   "been set.\n",
+			   rs690.trig_in_level_type == TTL_LEVEL ? "TTL" : "ECL" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( rs690.is_trig_in_mode && rs690.trig_in_mode == INTERNAL ) ||
+		 rs690.is_repeat_time )
+	{
+		print( SEVERE, "Setting a trigger level is useless in INTERNAL "
+			   "trigger mode.\n" );
+		return FAIL;
+	}
+
+	if ( rs690.is_neg_delay &&
+		 ! ( ( rs690.is_trig_in_mode && rs690.trig_in_mode == INTERNAL ) ||
+			 rs690.is_repeat_time ) )
+	{
+		print( FATAL, "Setting a trigger level type (thus implicitly "
+			   "selecting EXTERNAL trigger mode) and using negative delays "
+			   "for functions is incompatible.\n" );
+		THROW( EXCEPTION );
+	}
+
+	rs690.trig_in_mode = EXTERNAL;
+	rs690.trig_in_level_type = level_type;
+	rs690.is_trig_in_level_type = SET;
 
 	return OK;
 }

@@ -81,9 +81,10 @@ bool rs690_init( const char *name )
 		rs690_gpib_failure( );
 
 	/* Set the clock source mode - currently we only support either internal
-	   or external TTL oscillator */
+	   or external ECL and TTL oscillator (defaulting to TTL) */
 
-	sprintf( cmd, "LCK,%c!", rs690.timebase_mode == INTERNAL ? '0' : '2' );
+	sprintf( cmd, "LCK,%c!", rs690.timebase_mode == INTERNAL ? '0' :
+			 ( rs690.timebase_level == ECL_LEVEL ? '1' : '2' ) );
 	if ( gpib_write( rs690.device, cmd, strlen( cmd ) ) == FAILURE )
 		rs690_gpib_failure( );
 
@@ -91,7 +92,9 @@ bool rs690_init( const char *name )
 
 	if ( rs690.is_trig_in_mode && rs690.trig_in_mode == EXTERNAL )
 	{
-		if ( gpib_write( rs690.device, "LET,2!", 6 ) == FAILURE )
+		sprintf( cmd, "LET,%c!",
+				 rs690.trig_in_level_type == ECL_LEVEL ? '1' : '2' );
+		if ( gpib_write( rs690.device, cmd, 6 ) == FAILURE )
 			rs690_gpib_failure( );
 
 		if( rs690.is_trig_in_slope )

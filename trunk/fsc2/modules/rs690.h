@@ -204,12 +204,17 @@ typedef struct {
 	bool is_timebase;
 	int timebase_type;
 	bool timebase_mode;      /* INTERNAL (default) or EXTERNAL */
+	int timebase_level;
+	bool is_timebase_level;
 
 	int trig_in_mode;        /* EXTERNAL or INTERNAL */
 	bool is_trig_in_mode;
 
 	int trig_in_slope;
 	bool is_trig_in_slope;
+
+	int trig_in_level_type;
+	bool is_trig_in_level_type;
 
 	Ticks repeat_time;       /* only in INTERNAL mode */
 	bool is_repeat_time;
@@ -354,10 +359,12 @@ extern unsigned short rs690_default_fields[ 4 * NUM_HSM_CARDS ];
 /* Here follow the functions from rs690_gen.c */
 
 bool rs690_store_timebase( double timebase );
+bool rs690_store_timebase_level( int level_type );
 bool rs690_assign_channel_to_function( int function, long channel );
 bool rs690_set_function_delay( int function, double delay );
 bool rs690_set_trigger_mode( int mode );
 bool rs690_set_trig_in_slope( int slope );
+bool rs690_set_trig_in_level_type( double type );
 bool rs690_set_repeat_time( double rep_time );
 bool rs690_invert_function( int function );
 bool rs690_set_phase_reference( int phase, int function );

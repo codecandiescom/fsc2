@@ -62,20 +62,16 @@ int rs690_init_hook( void )
 	rs690.is_cw_mode   = UNSET;
 
 	pulser_struct.set_timebase = rs690_store_timebase;
-	pulser_struct.assign_function = NULL;
+	pulser_struct.set_timebase_level = rs690_store_timebase_level;
 	pulser_struct.assign_channel_to_function =
 											  rs690_assign_channel_to_function;
 	pulser_struct.invert_function = rs690_invert_function;
 	pulser_struct.set_function_delay = rs690_set_function_delay;
-	pulser_struct.set_function_high_level = NULL;
-	pulser_struct.set_function_low_level = NULL;
 
 	pulser_struct.set_trigger_mode = rs690_set_trigger_mode;
 	pulser_struct.set_repeat_time = rs690_set_repeat_time;
-	pulser_struct.set_trig_in_level = NULL;
 	pulser_struct.set_trig_in_slope = rs690_set_trig_in_slope;
-	pulser_struct.set_trig_in_impedance = NULL;
-	pulser_struct.set_max_seq_len = NULL;
+	pulser_struct.set_trig_in_level = rs690_set_trig_in_level_type;
 
 	pulser_struct.set_phase_reference = rs690_set_phase_reference;
 
@@ -86,7 +82,6 @@ int rs690_init_hook( void )
 	pulser_struct.set_pulse_position_change = rs690_set_pulse_position_change;
 	pulser_struct.set_pulse_length_change = rs690_set_pulse_length_change;
 	pulser_struct.set_pulse_phase_cycle = rs690_set_pulse_phase_cycle;
-	pulser_struct.set_grace_period = NULL;
 
 	pulser_struct.get_pulse_function = rs690_get_pulse_function;
 	pulser_struct.get_pulse_position = rs690_get_pulse_position;
@@ -97,8 +92,6 @@ int rs690_init_hook( void )
 
 	pulser_struct.phase_setup_prep = rs690_phase_setup_prep;
 	pulser_struct.phase_setup = rs690_phase_setup;
-
-	pulser_struct.set_phase_switch_delay = NULL;
 
 	pulser_struct.keep_all_pulses = rs690_keep_all;
 
@@ -113,8 +106,12 @@ int rs690_init_hook( void )
 	rs690.has_been_running = SET;
 	rs690.is_timebase = UNSET;
 	rs690.timebase_mode = EXTERNAL;
+	rs690.timebase_level = TTL_LEVEL;
+	rs690.is_timebase_level = UNSET;
 
 	rs690.trig_in_mode = INTERNAL;
+	rs690.is_trig_in_level_type = UNSET;
+	rs690.trig_in_level_type = TTL_LEVEL;
 
 	rs690.num_pulses = 0;
 

@@ -161,6 +161,12 @@ enum {
 	EXTERNAL
 };
 
+/* Definition for level types */
+
+enum {
+	TTL_LEVEL,
+	ECL_LEVEL
+};
 
 /* Some definitions used in graphic */
 
