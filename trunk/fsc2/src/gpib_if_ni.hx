@@ -53,9 +53,9 @@
 #define ADDRESS( pad, sad ) \
                            ( ( ( pad ) & 0xff ) | ( ( ( sad ) & 0xff ) << 8 ) )
 
-typedef struct GPIB_Device GPIB_Device;
+typedef struct GPIB_Dev GPIB_Dev_T;
 
-struct GPIB_Device {
+struct GPIB_Dev {
 	int is_online;
 	int number;
     char name[ GPIB_NAME_MAX + 1 ];
@@ -98,7 +98,7 @@ int gpib_write( int device, const char *buffer, long length );
 int gpib_read( int device, char *buffer, long *length );
 int gpib_serial_poll( int device, unsigned char *stb );
 void gpib_log_message( const char *fmt, ... );
-int gpib_dev_setup( GPIB_Device *temp_dev );
+int gpib_dev_setup( GPIB_Dev_T *temp_dev );
 
 
 extern char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */

@@ -35,7 +35,7 @@ extern char *gpibtext;
 
 static void gpiberror( const char *s );
 
-static GPIB_Device dev;
+static GPIB_Dev_T dev;
 
 #define GPIB_DEF_TIMO T1s
 
