@@ -74,12 +74,12 @@ devices to be used in the experiment.
 
 @menu
 * Overview::                Basic concepts of fsc2.
-* Command Line Options::    How to invoke @acronym{fsc2}
 * GUI::                     The grahical user interface
 * EDL::                     Description of EDL the language.
 * Built-in Functions::      Built-in functions.
 * Device Functions::        Functions for accessing devices.
 * Using Pulsers::           How to work with the pulsers
+* Command Line Options::    How to invoke @acronym{fsc2}
 * Modules::                 How to create new modules.
 * Interfacing::             Accessing fsc2 from other programs
 * Reserved Words::          List of all reserved words.
@@ -91,14 +91,14 @@ devices to be used in the experiment.
 @contents
 
 @include overview.texi
-@include cmd.texi
 @include gui.texi
 @include edl.texi
 @include builtins.texi
 @include devices.texi
 @include pulser.texi
-@include interfacing.texi
+@include cmd.texi
 @include modules.texi
+@include interfacing.texi
 @include reserved.texi
 
 @node Index, , , Top
