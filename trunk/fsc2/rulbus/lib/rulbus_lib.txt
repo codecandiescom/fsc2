@@ -276,6 +276,15 @@ mode.
 
 ----------------------------------------------------------------------
 
+int rulbus_adc12:num_channels( int handle )
+
+This function returns the number of channels of the card. This function can
+fail only due to an invalid 'handle' argument, in which case RULBUS_INV_HND
+is returned.
+
+
+----------------------------------------------------------------------
+
 int rulbus_adc12_set_channel( int handle, int channel )
 
 This function can be called to set the the channel for which conversions

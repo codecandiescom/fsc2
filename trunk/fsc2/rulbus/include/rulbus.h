@@ -39,6 +39,7 @@ extern int rulbus_errno;
 
 /* Functions and definitions for the 12-bit ADC card module (RB8509) */
 
+int rulbus_adc12_num_channels( int handle );
 int rulbus_adc12_set_channel( int handle, int channel );
 int rulbus_adc12_set_gain( int handle, int gain );
 int rulbus_adc12_set_trigger_mode( int handle, int mode );

@@ -187,6 +187,22 @@ void rulbus_adc12_card_exit( int handle )
 }
 
 
+/*-----------------------------------------------------*
+ * Function returns the number of channels of the card
+ *-----------------------------------------------------*/
+
+int rulbus_adc12_num_channels( int handle )
+{
+	RULBUS_ADC12_CARD *card;
+
+
+	if ( ( card = rulbus_adc12_card_find( handle ) ) == NULL )
+		return RULBUS_INV_HND;
+
+	return card->nchan;
+}
+
+
 /*---------------------------------------------------*
  * Function for selecting which channnel of the card
  * is to be used in conversions
