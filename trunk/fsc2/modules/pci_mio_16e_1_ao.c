@@ -110,7 +110,6 @@ Var *daq_ao_channel_setup( Var *v )
 	int er;
 	int pol;
 	int other_count;
-	int ret;
 	char *pass = NULL;
 
 
