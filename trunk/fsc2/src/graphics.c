@@ -5,6 +5,8 @@
 
 #include "fsc2.h"
 
+#define NUM_COLORS 128
+
 #include "c1.xbm"             /* bitmaps for cursors */
 #include "c2.xbm"
 #include "c3.xbm"
@@ -20,6 +22,8 @@
 static void G_struct_init( void );
 static void create_label_pixmap( int coord );
 static void setup_canvas( Canvas *c, FL_OBJECT *obj );
+static void create_colors( void );
+static void free_colors( void );
 static void canvas_off( Canvas *c, FL_OBJECT *obj );
 static void fs_rescale_2d( void );
 
@@ -150,7 +154,10 @@ void start_graphics( void )
 	setup_canvas( &G.x_axis, run_form->x_axis );
 	setup_canvas( &G.y_axis, run_form->y_axis );
 	if ( G.dim == 2 )
+	{
+		create_colors( );
 		setup_canvas( &G.canvas, run_form->z_axis );
+	}
 	setup_canvas( &G.canvas, run_form->canvas );
 
 	if ( G.is_init )
@@ -338,7 +345,7 @@ void create_label_pixmap( int coord )
 	height = G.font_asc + G.font_desc + 5;
 
 	/* Create the intermediate pixmap, fill with color of the axis canvas and
-	   draw  the text */
+	   draw the text */
 
     pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), width, height,
 						fl_get_canvas_depth( c->obj ) );
@@ -380,6 +387,9 @@ void stop_graphics( void )
 		canvas_off( &G.x_axis, run_form->x_axis );
 		canvas_off( &G.y_axis, run_form->y_axis );
 		canvas_off( &G.canvas, run_form->canvas );
+
+		if ( G.dim == 2 )
+			free_colors( );
 	}
 
 	if ( fl_form_is_visible( run_form->run ) )
@@ -442,11 +452,17 @@ void graphics_free( void )
 
 void free_graphics( void )
 {
+	int i;
+
+
 	G.is_init = UNSET;
-	if ( G.label[ X ] != NULL )
-		T_free( G.label[ X ] );
-	if ( G.label[ Y ] != NULL )
-		T_free( G.label[ Y ] );
+
+	for ( i = X; i <=Z; i++ )
+		if ( G.label[ i ] != NULL )
+		{
+			T_free( G.label[ i ] );
+			G.label[ i ] = NULL;
+		}
 }
 
 
@@ -591,6 +607,38 @@ void delete_pixmap( Canvas *c )
 		if ( c == &G.canvas )
 			XFreePixmap( G.d, G.pm );
 	}
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+void create_colors( void )
+{
+	int i;
+	int rgb[ 3 ];
+
+
+	for ( i = 0; i < NUM_COLORS + 2; i++ )
+	{
+		i22rgb( ( double ) ( i - 1 ) / ( double ) NUM_COLORS, rgb );
+		fl_mapcolor( i + FL_FREE_COL1, rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ]);
+	}
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+void free_colors( void )
+{
+	int i;
+	FL_COLOR colors[ NUM_COLORS + 2 ];
+
+	for ( i = 0; i < NUM_COLORS + 2; i++ )
+		colors[ i ] = i + FL_FREE_COL1;
+
+	fl_free_colors( colors, NUM_COLORS + 2 );
 }
 
 
