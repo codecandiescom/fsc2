@@ -80,6 +80,7 @@ modules:
 	sed -e 's/\bECHO\b/FLEX_ECHO/g' $@ > $@.x
 	sed -e 's/register char \*yy_cp, \*yy_bp;/\
 		register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@.x > $@
+	-$(RM) $(RMFLAGS) $@.x
 
 
 # Make the primary lexer (which does the cleanup of the input EDL files)
