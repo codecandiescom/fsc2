@@ -674,7 +674,7 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 	char *b;
 	long i;
 	double scale;
-	long num_points, len1, len2;
+	long len1, len2;
 
 
 	assert( channel >= 0 && channel < TDS754A_AUX );

@@ -360,8 +360,7 @@ Var *digitizer_meas_channel_ok( Var *v )
 
 	if ( v->val.lval < TDS754A_CH1 || v->val.lval > TDS754A_REF4 )
 		vars_push( INT_VAR, 0 );
-	else
-		vars_push( INT_VAR, 1 );
+	vars_push( INT_VAR, 1 );
 }
 
 

@@ -119,8 +119,7 @@ Var *float_slice( Var *var )
 Var *get_phase_cycled_area_1d( Var *v )
 {
 	Var *func_ptr;
-	Var *ret_v;
-	Var *vn;
+	Var *vn;                         /* all purpose variable */
 	bool is_get_area;
 	bool is_get_area_fast;
 	long acq_seq;
@@ -220,15 +219,29 @@ Var *get_phase_cycled_area_1d( Var *v )
 
 	/* First parameter is the acqusition sequence number */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
 	if ( v->type == INT_VAR )
 		acq_seq = v->val.lval;
-	else
+	else if ( v->type == INT_VAR )
 	{
 		eprint( WARN, "%s:%ld: get_phase_cycled_area_1d(): Floating point "
 				"value used as acquisition sequence number.\n", Fname, Lc );
 		acq_seq = lround( v->val.dval );
+	}
+	else
+	{
+		if ( ! strcmp( v->val.sptr, "A" ) || ! strcmp( v->val.sptr, "a" ) )
+			acq_seq = 1;
+		else if ( ! strcmp( v->val.sptr, "B" ) || 
+				  ! strcmp( v->val.sptr, "b" ) )
+			acq_seq = 2;
+		else
+		{
+			eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): Invalid "
+					"acqusisition type string: %s\n", Fname, Lc, v->val.sptr );
+			THROW( EXCEPTION );
+		}
 	}
 
 	if ( acq_seq != 1 && acq_seq != 2 )
@@ -245,6 +258,33 @@ Var *get_phase_cycled_area_1d( Var *v )
 		eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): Missing second"
 				"argument (i.e. chnnel number).\n", Fname, Lc );
 		THROW( EXCEPTION );
+	}
+
+	/* Check that the acquisition sequence contains only references to the
+	   channel associated with the acquisition sequence, i.e. if the
+	   acquisition sequence is B only the B channel may be used (and vice
+	   versa) */
+
+	for ( i = 0; i < ASeq[ acq_seq ].len; i++ )
+	{
+		if ( acq_seq == 0 && 
+			 ( ASeq[ acq_seq ].sequence[ i ] == ACQ_PLUS_B ||
+			   ASeq[ acq_seq ].sequence[ i ] == ACQ_MINUS_B ) )
+		{
+			eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): Acquisition "
+					"sequence A would need access to B channel.\n",
+					Fname, LC );
+			THROW( EXCEPTION );
+		}
+		if ( acq_seq == 1 && 
+			 ( ASeq[ acq_seq ].sequence[ i ] == ACQ_PLUS_A ||
+			   ASeq[ acq_seq ].sequence[ i ] == ACQ_MINUS_A ) )
+		{
+			eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): Acquisition "
+					"sequence B would need access to A channel.\n",
+					Fname, LC );
+			THROW( EXCEPTION );
+		}
 	}
 
 	/* The next parameter is the channel number - hopefully, it was specified
@@ -270,17 +310,17 @@ Var *get_phase_cycled_area_1d( Var *v )
 	}
 
 	vars_push( INT_VAR, channel );
-	ret_v = vars_call( func_ptr );
+	vn = vars_call( func_ptr );
 
-	if ( ret_v->val.lval == 0 )
+	if ( vn->val.lval == 0 )
 	{
-		vars_pop( ret_v );
+		vars_pop( vn );
 		eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): Invalid channel "
 				"number: %ld.\n", Fname, Lc, channel );
 		THROW( EXCEPTION );
 	}
 
-	vars_pop( ret_v );
+	vars_pop( vn );
 
 	/* Now we got to count the remaining arguments on the stack to find out
 	   how many windows there are and build up the window list */
@@ -324,13 +364,14 @@ Var *get_phase_cycled_area_1d( Var *v )
 		win_list[ 0 ] = -1;              /* No window to be used ! */
 
 
-	/* also get memory for the data */
+	/* Also get memory for the data */
 
 	data = T_malloc( num_windows * sizeof( double ) );
 	for ( i = 0; i < num_windows; i++ )
 		data[ i ] = 0.0;
 
-	/* Now we can really start. First we reset the phase sequence */
+	/* Now we can really start. First we reset the phase sequence, then we
+	   run through the complete phase cycle */
 
 	vars_pop( vars_call( func_get( "pulser_phase_reset" ) ) );
 	vars_pop( vars_call( func_get( "pulser_update" ) ) );
@@ -361,8 +402,21 @@ Var *get_phase_cycled_area_1d( Var *v )
 			}
 		}
 
-		if ( ASeq[ acq_seq ].sequence[ i ] = 
-		data[ i ] = 
+		if ( ASeq[ acq_seq ].sequence[ i ] = ACQ_PLUS_A ||
+			 ASeq[ acq_seq ].sequence[ i ] = ACQ_PLUS_B )
+			data[ i ] += vn->val.dval;
+		else
+			data[ i ] -= vn->val.dval;
+
+		vars_pop( vn );
+
+		vars_pop( vars_call( func_get( "pulser_next_phase" ) ) );
+		vars_pop( vars_call( func_get( "pulser_update" ) ) );
 	}
 
+	vn = vars_push( FLOAT_TRANS_ARR, data, seq_len );
+	T_free( data );
+	T_free( win_list );
+
+	return vn;
 }

@@ -580,7 +580,7 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 	char *b;
 	long i;
 	double scale, window;
-	long num_points, len1, len2;
+	long len1, len2;
 
 
 	assert( channel >= 0 && channel < TDS520_AUX1 );
