@@ -356,7 +356,7 @@ to get the address of the start of a string variable.
 But there are some functions that make it even easier for you to
 evaluate the parameters your function receives. The first one is for the
 case that you expect an integer variable but would be prepared also to
-deal with a floating number (after it has been rounded to the next
+deal with a floating number (after it has been rounded to the nearest
 integer. This is the function @code{get_long()}, defined as
 @example
 long get_long( Var *var, const char *snippet, const char *device )
@@ -407,11 +407,12 @@ long get_strict_long( Var *var, const char *snippet, const char *device )
 @end example
 This function has the same arguments as the two other functions but it
 will usually throw an exception to stop the interpretation of the
-@acronym{EDL} program (see below) except when the experiment is really
-done, in which case it will print a warning message but will convert the
-number to next integer to avoid to abort a running experiment. But
-usually, the wrong parameter should already have been found during the
-test run, thus forcing the user to correct her/his program.
+@acronym{EDL} program (see below) except while doing the experiment, in
+which case a warning message is printed and the floating point number is
+converted to the nearest integer, which is then returned (thus avoiding
+the termination of the running experiment). But usually the wrong
+parameter should already have been found during the test run, thus
+forcing the user to correct her/his program.
 
 
 
