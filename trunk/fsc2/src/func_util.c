@@ -358,7 +358,7 @@ Var *f_wait( Var *v )
 	       pause( );
 
 	   Unfortunately, there is a nasty race condition: If one of the signal
-	   handlers get executed between the check for its flag and the pause()
+	   handlers gets executed between the check for its flag and the pause()
 	   the pause() gets started even though it shouldn't. And this actually
 	   happens sometimes, freezing the child process.
 
