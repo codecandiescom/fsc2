@@ -101,7 +101,7 @@ line:    P_TOK prop
 ;
 
 prop:   /* empty */
-       | prop F_TOK sep1 expr sep2 { p_set( Cur_Pulse, P_FUNC, $4 ); }
+       | prop F_TOK sep1 expr sep2  { p_set( Cur_Pulse, P_FUNC, $4 ); }
        | prop S_TOK sep1 expr sep2  { p_set( Cur_Pulse, P_POS, $4 ); }
        | prop L_TOK sep1 expr sep2  { p_set( Cur_Pulse, P_LEN,$4 ); }
        | prop DS_TOK sep1 expr sep2 { p_set( Cur_Pulse, P_DPOS, $4 ); }
