@@ -2087,6 +2087,35 @@ static void repaint_cut_canvas( Canvas *c )
 	XFlush( G.d );
 }
 
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+int get_mouse_pos_cut( double *pa )
+{
+	Curve_1d *cv = &G2.cut_curve;
+	int r_coord;
+
+
+	if ( ! G2.is_cut || G2.active_curve == -1 ||
+		 ! G2.curve_2d[ G2.active_curve ]->is_scale_set )
+		return 0;
+
+	fl_get_win_mouse( FL_ObjWin( G2.cut_canvas.obj ),
+					  ppos + X, ppos + Y, &keymask );
+
+	r_coord = CG.cut_dir == X ? Y : X;
+
+	pa[ X ] = scv->rwc_start[ r_coord ] + scv->rwc_delta[ r_coord ]
+			  * ( ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ] );
+	pa[ Y ] = scv->rwc_start[ Z ] + scv->rwc_delta[ Z ]
+			  * ( ( G2.cut_canvas.h - 1.0 - ppos[ Y ] ) / cv->s2d[ Y ]
+				  - cv->shift[ Y ] );
+
+	return 4;
+}
+
+
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 

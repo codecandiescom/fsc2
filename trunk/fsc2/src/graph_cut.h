@@ -87,6 +87,7 @@ void cut_clear_curve( long curve );
 void set_cut_marker( long x_pos, long color );
 void delete_cut_marker( long x_pos );
 void delete_all_cut_markers( bool redraw_flag );
+int get_mouse_pos_cut( double *pa );
 
 
 #endif   /* ! GRAPH_CUT_HEADER */

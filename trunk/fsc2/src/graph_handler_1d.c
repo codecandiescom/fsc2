@@ -1412,9 +1412,9 @@ int get_mouse_pos_1d( double *pa )
 	{
 		cv = G1.curve[ i ];
 
-		pa[ 2 * i ] = G1.rwc_start[ X ] + G1.rwc_delta[ X ]
-					  * ( ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ] );
-		pa[ 2 * i + 1 ] = G1.rwc_start[ Y ] + G1.rwc_delta[ Y ]
+		pa[ 2 * i + X ] = G1.rwc_start[ X ] + G1.rwc_delta[ X ]
+						  * ( ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ] );
+		pa[ 2 * i + Y ] = G1.rwc_start[ Y ] + G1.rwc_delta[ Y ]
 						  * ( ( G1.canvas.h - 1.0 - ppos[ Y ] ) /
 							  cv->s2d[ Y ] - cv->shift[ Y ] );
 	}
