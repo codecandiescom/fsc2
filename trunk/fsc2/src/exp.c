@@ -880,7 +880,7 @@ bool test_condition( Prg_Token *cur )
 	bool condition;
 
 
-	cur_prg_token++;                     /* skip the WHILE or IF */
+	cur_prg_token++;                     /* skip the WHILE or IF etc. */
 	conditionparse( );                   /* get the value */
 	assert( Var_Stack->next == NULL );   /* Paranoia as usual... */
 	assert( cur_prg_token->token == '{' );
