@@ -37,20 +37,20 @@ RS_SML01_T rs_sml01;
 static const char *mod_types[ ] =   { "FM", "AM", "PHASE", "OFF" };
 
 
-static struct MOD_RANGES fm_mod_ranges[ ] = { { 7.600000e6, 1.00e6 },
-											{ 1.513125e8, 1.25e5 },
-											{ 3.026250e8, 2.50e6 },
-											{ 6.052500e8, 5.00e6 },
-											{ 1.100000e9, 1.00e6 } };
+struct MOD_RANGES fm_mod_ranges[ ] = { { 7.600000e6, 1.00e6 },
+									   { 1.513125e8, 1.25e5 },
+									   { 3.026250e8, 2.50e6 },
+									   { 6.052500e8, 5.00e6 },
+									   { 1.100000e9, 1.00e6 } };
 
-static struct MOD_RANGES pm_mod_ranges[ ] = { { 7.600000e6, 10.0 },
-											{ 1.513125e8, 1.25 },
-											{ 3.026250e8, 2.50 },
-											{ 6.052500e8, 5.00 },
-											{ 1.100000e9, 10.0 } };
+struct MOD_RANGES pm_mod_ranges[ ] = { { 7.600000e6, 10.0 },
+									   { 1.513125e8, 1.25 },
+									   { 3.026250e8, 2.50 },
+									   { 6.052500e8, 5.00 },
+									   { 1.100000e9, 10.0 } };
 
-static size_t num_fm_mod_ranges = NUM_ELEMS( fm_mod_ranges );
-static size_t num_pm_mod_ranges = NUM_ELEMS( pm_mod_ranges );
+size_t num_fm_mod_ranges = NUM_ELEMS( fm_mod_ranges );
+size_t num_pm_mod_ranges = NUM_ELEMS( pm_mod_ranges );
 
 static RS_SML01_T rs_sml01_backup;
 
