@@ -748,6 +748,7 @@ void xforms_close( void )
 	if ( fl_form_is_visible( GUI.main_form->fsc2 ) )
 		fl_hide_form( GUI.main_form->fsc2 );
 	fl_free_form( GUI.main_form->fsc2 );
+	fl_finish( );
 
 	/* Close the library for the graphics resources */
 
