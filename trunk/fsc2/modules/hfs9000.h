@@ -316,7 +316,7 @@ int hfs9000_diff( char *old, char *new, Ticks *start, Ticks *length );
 
 /* Functions fron hfs9000_run.c */
 
-void hfs9000_do_update( void );
+bool hfs9000_do_update( void );
 void hfs9000_do_checks( FUNCTION *f );
 void hfs9000_set_pulses( FUNCTION *f );
 void hfs9000_full_reset( void );

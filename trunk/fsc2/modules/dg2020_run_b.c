@@ -40,18 +40,22 @@ static void dg2020_defense_twt_check( void );
 /* reset to their original positions.                                      */
 /*-------------------------------------------------------------------------*/
 
-void dg2020_do_update( void )
+bool dg2020_do_update( void )
 {
+	bool state;
+
+
 	if ( ! dg2020_is_needed )
-		return;
+		return OK;
 
 	/* Resort the pulses and check that the new pulse settings are
 	   reasonable and finally commit all changes */
 
-	if ( dg2020_reorganize_pulses( TEST_RUN ) && ! TEST_RUN )
+	if ( ( state = dg2020_reorganize_pulses( TEST_RUN ) ) && ! TEST_RUN )
 		dg2020_update_data( );
 
 	dg2020.needs_update = UNSET;
+	return state;
 }
 
 
@@ -125,6 +129,7 @@ void dg2020_do_checks( FUNCTION *f )
 {
 	PULSE *p;
 	int i;
+
 
 	for ( i = 0; i < f->num_pulses; i++ )
 	{

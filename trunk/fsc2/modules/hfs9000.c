@@ -107,6 +107,8 @@ int hfs9000_init_hook( void )
 
 	pulser_struct.set_phase_switch_delay = NULL;
 
+	pulser_struct.keep_all_pulses = hfs9000_keep_all;
+
 	/* Finally, we initialize variables that store the state of the pulser */
 
 	hfs9000.trig_in_mode = EXTERNAL;
@@ -428,7 +430,7 @@ Var *pulser_update( Var *v )
 	/* Send all changes to the pulser */
 
 	if ( hfs9000.needs_update )
-		hfs9000_do_update( );
+		return vars_push( INT_VAR, hfs9000_do_update( ) ? 1 : 0 );
 
 	return vars_push( INT_VAR, 1 );
 }

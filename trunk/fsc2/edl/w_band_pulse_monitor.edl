@@ -1,0 +1,400 @@
+DEVICES:
+
+sr510;
+keithley228a;
+tds540;
+hfs9003;
+
+
+VARIABLES:
+
+waiting_time = 0.5 s;      // how often the form gets checked
+
+timebase = 5 ns;           // the pulsers time base
+
+p1_start = 0ns;            // start and length of 1. pulse
+p1_len   = 80 ns;
+
+p2_start = 300 ns;;        // start and length of 2. pulse
+p2_len   = 160 ns;
+
+p3_start = 500 ns;         // start and length of 3. pulse
+p3_len   = 0 ns;
+
+
+// Detection pulse starts off at the position where the Hahn-echo should be
+pd_start = 2 * p2_start + p2_len - p1_start - 0.5 * p1_len;
+
+detection_delay = 90 ns;   // to adjust for pulse amplifier delays
+
+current =          0 A;    // current as in input field
+current_step  = 0.01 A;    // current step as in input field
+act_current = current;     // the 'real' current
+new_current = current;
+new_current_step = current_step;
+
+min_current  = -10 A;
+max_current  =  10 A;
+
+
+CDF,          			   // current display field
+CIF,          			   // current input field
+CSIF,         			   // current step input field
+UB,           			   // sweep up button
+SB,           			   // stop sweep_button
+DB,           			   // sweep down button
+P1SF,         			   // Pulse 1 start field
+P1LF,         			   // Pulse 1 length field
+P2SF,         			   // Pulse 2 start field
+P2LF,         			   // Pulse 2 length field
+P3SF,         			   // Pulse 3 start field
+P3LF,         			   // Pulse 3 length field
+PDSF;         			   // Detection pulse start
+
+TB = int( 1e9 * timebase );
+max_len = timebase * 65536;  // maximum pulser pattern length
+
+
+ASSIGNMENTS:
+
+TIME_BASE: timebase;
+TRIGGER_MODE: EXTERNAL;
+
+MICROWAVE:   CHANNEL = 1;
+DETECTION:   CHANNEL = TRIGGER_OUT, DELAY = detection_delay;
+
+KEEP_ALL_PULSES;                       // 3. pulse is usually off per default
+MAXIMUM_PATTERN_LENGTH = max_len;      // fsc2 can't figure this out...
+
+
+PREPARATIONS:
+
+P1:  FUNCTION    = MICROWAVE,
+     START       = p1_start,
+     LENGTH      = p1_len;
+
+P2:  FUNCTION    = P1.FUNC,
+     START       = p2_start,
+     LENGTH      = p2_len;
+
+P3:  FUNCTION    = P1.FUNC,
+     START       = p3_start,
+     LENGTH      = p3_len;
+
+P9:  FUNCTION    = DETECTION,
+     START       = pd_start;
+
+
+
+init_1d( );
+
+
+EXPERIMENT:
+
+set_field( act_current );
+digitizer_lock_keyboard( 0 );
+
+layout( "VERT" );
+
+CDF = output_create( "FLOAT_OUTPUT", act_current, "Current [A]", "", "%.5f" );
+CIF = input_create( "FLOAT_INPUT", current, "Set current [A]" );
+CSIF = input_create( "FLOAT_INPUT", current_step, "Set current step [A]" );
+
+UB = button_create( "RADIO_BUTTON", "Sweep up" );
+SB = button_create( "RADIO_BUTTON", UB, "Stop sweep" );
+button_state( SB, 1 );
+DB = button_create( "RADIO_BUTTON", UB, "Sweep down" );
+
+P1SF = input_create( "FLOAT_INPUT", P1.START * 1e9, "Start of 1. pulse [ns]" );
+P1LF = input_create( "FLOAT_INPUT", P1.LENGTH * 1e9,
+					 "Length of 1. pulse [ns]" );
+P2SF = input_create( "FLOAT_INPUT", P2.START * 1e9, "Start of 2. pulse [ns]" );
+P2LF = input_create( "FLOAT_INPUT", P2.LENGTH * 1e9,
+					 "Length of 2. pulse [ns]" );
+P3SF = input_create( "FLOAT_INPUT", P3.START * 1e9, "Start of 3. pulse [ns]" );
+P3LF = input_create( "FLOAT_INPUT", P3.LENGTH * 1e9,
+					 "Length of 3. pulse [ns]" );
+PDSF = input_create( "FLOAT_INPUT", P9.START * 1e9,
+					 "Start of detection pulse [ns]" );
+
+
+FOREVER
+{
+
+	/* Check for a newly entered current - take care that the values don't
+	   exceed the allowed range */
+
+	new_current = input_value( CIF );
+	IF new_current != current
+	{
+		IF new_current > max_current | new_current < min_current
+		{
+			input_value( CIF, current );
+		}
+		ELSE
+		{
+			set_field( new_current );
+			current = new_current;
+			act_current = new_current;
+			output_value( CDF, act_current );
+		}
+
+		NEXT;
+	}
+
+	/* Check for a newly entered current step - don't do steps of more than
+	   0.5 A */
+
+	new_current_step = input_value( CSIF );
+	IF new_current_step != current_step
+	{
+		IF new_current_step > 0.5 A | new_current_step < 0 A
+		{
+			input_value( CSIF, current_step );
+			NEXT;
+		}
+
+		current_step = new_current_step;
+	}
+
+	/* Sweep up if sweep up button is pressed - check that we don't try to
+	   run over the 10 A limit (if reached switch the stop button on) */
+
+	IF button_state( UB )
+	{
+		IF act_current + current_step > max_current
+		{
+			button_state( SB, 1 );
+			NEXT;
+		}
+
+		act_current = set_field( act_current + current_step );
+		output_value( CDF, act_current );
+	}
+
+	/* Sweep down if sweep down button is pressed - check that we don't
+	   excced the lower limit of -10 A */
+
+	IF button_state( DB )
+	{
+		IF act_current - current_step < min_current
+		{
+			button_state( SB, 1 );
+			NEXT;
+		}
+
+		act_current = set_field( act_current - current_step );
+		output_value( CDF, act_current );
+	}
+
+	/* Check if position of pulse 1 got changed - take care that pulse start
+	   is an integer multiple of the timebase and check that the pulse neither
+	   starts before zero or collides with the next pulse. */
+
+	p1_start = 1e-9 * input_value( P1SF );
+	IF P1.START != p1_start
+	{
+		/* Round to timebase, if still different from current pulse setting
+		   really start changing the pulse */
+
+		p1_start = 1e-9 * TB * round( ( 1e9 * p1_start ) / TB );
+		input_value( P1SF, p1_start * 1e9 );
+
+		IF P1.START != p1_start
+		{
+			/* Check that pulse start is not less than zero and that pulse does
+			   not coincide with one of the following pulses (take care: if one
+			   of the next pulses is switched off by having its length set to
+			   zero we actually can walk all over it... */
+
+			IF p1_start < 0 |
+			   ( p2_len != 0 & p1_start + p1_len >= p2_start ) |
+			   ( p3_len != 0 & p1_start + p1_len >= p3_start ) |
+			   p1_start + p1_len >= max_len
+			{
+				p1_start = P1.START;
+				input_value( P1SF, p1_start * 1e9 );
+				NEXT;
+			}
+
+			/* Everything seems to be ok so set the new pulse position. But
+			   to be real sure check the return value of pulser_update(). If
+			   this should have failed we need to reset the displayed value
+			   in order not to get the user confused... */
+
+			P1.START = p1_start;
+			IF ! pulser_update( )
+			{
+				p1_start = P1.START;
+				input_value( P1SF, p1_start * 1e9 );
+			}
+		}
+	}
+
+	/* Check if length of pulse 1 got changed */
+
+	p1_len = 1e-9 * input_value( P1LF );
+	IF P1.LENGTH != p1_len
+	{
+		p1_len = 1e-9 * TB * round( ( 1e9 * p1_len ) / TB );
+		input_value( P1LF, p1_len * 1e9 );
+
+		IF P1.LENGTH != p1_len
+		{
+			IF p1_len < 0 |
+			   ( p2_len != 0 & p1_start + p1_len >= p2_start ) |
+			   ( p3_len != 0 & p1_start + p1_len >= p3_start ) |
+			   p1_start + p1_len >= max_len
+			{
+				p1_len = P1.LENGTH;
+				input_value( P1LF, p1_len * 1e9 );
+				NEXT;
+			}
+
+			P1.LENGTH = p1_len;
+			IF ! pulser_update( )
+			{
+				p1_len = P1.LENGTH;
+				input_value( P1LF, p1_len * 1e9 );
+			}
+		}
+	}
+
+	/* Check if position of pulse 2 got changed */
+
+	p2_start = 1e-9 * input_value( P2SF );
+	IF P2.START != p2_start
+	{
+		p2_start = 1e-9 * TB * round( ( 1e9 * p2_start ) / TB );
+		input_value( P2SF, p2_start * 1e9 );
+
+		IF P2.START != p2_start
+		{
+			IF ( p1_len > 0 & p2_start <= p1_start + p1_len ) |
+			   ( p3_len != 0 & p2_start + p2_len >= p3_start ) |
+			   p2_start + p2_len >= max_len
+			{
+				p2_start = P2.START;
+				input_value( P2SF, p2_start * 1e9 );
+				NEXT;
+			}
+
+			P2.START = p2_start;
+			IF ! pulser_update( )
+			{
+				p2_start = P2.START;
+				input_value( P2SF, p2_start * 1e9 );
+			}
+		}
+	}
+
+	/* Check if length of pulse 2 got changed */
+
+	p2_len = 1e-9 * input_value( P2LF );
+	IF P2.LENGTH != p2_len
+	{
+		p2_len = 1e-9 * TB * round( ( 1e9 * p2_len ) / TB );
+		input_value( P2LF, p2_len * 1e9 );
+
+		IF P2.LENGTH != p2_len
+		{
+			IF p2_len < 0 |
+			   ( p3_len != 0 & p2_start + p2_len >= p3_start ) |
+			   p2_start + p2_len >= max_len
+			{
+				p2_len = P2.LENGTH;
+				input_value( P2LF, p2_len * 1e9 );
+				NEXT;
+			}
+
+			P2.LENGTH = p2_len;
+			IF ! pulser_update( )
+			{
+				p2_len = P2.LENGTH;
+				input_value( P2LF, p2_len * 1e9 );
+			}				
+		}
+	}
+
+	/* Check if position of pulse 3 got changed */
+
+	p3_start = 1e-9 * input_value( P3SF );
+	IF P3.START != p3_start
+	{
+		p3_start = 1e-9 * TB * round( ( 1e9 * p3_start ) / TB );
+		input_value( P3SF, p3_start * 1e9 );
+
+		IF P3.START != p3_start
+		{
+			IF ( p2_len > 0 & p3_start <= p2_start + p2_len ) |
+			   ( p1_len > 0 & p3_start <= p1_start + p1_len ) |
+			   p3_start + p3_len >= max_len
+			{
+				p3_start = P3.START;
+				input_value( P3SF, p3_start * 1e9 );
+				NEXT;
+			}
+
+			P3.START = p3_start;
+			IF ! pulser_update( )
+			{
+				p3_start = P3.START;
+				input_value( P3SF, p3_start * 1e9 );
+			}				
+		}
+	}
+
+	/* Check if length of pulse 3 got changed */
+
+	p3_len = 1e-9 * input_value( P3LF );
+	IF P3.LENGTH != p3_len
+	{
+		p3_len = 1e-9 * TB * round( ( 1e9 * p3_len ) / TB );
+		input_value( P3LF, p3_len * 1e9 );
+
+		IF P3.LENGTH != p3_len
+		{
+			IF p3_len < 0 |
+			   p3_start + p3_len >= max_len
+			{
+				p3_len = P3.LENGTH;
+				input_value( P3LF, p3_len * 1e9 );
+			}
+
+			P3.LENGTH = p3_len;
+			IF ! pulser_update( )
+			{
+				p3_len = P3.LENGTH;
+				input_value( P3LF, p3_len * 1e9 );
+			}				
+		}
+	}
+
+	/* Check if position of detection pulse got changed */
+
+	pd_start = 1e-9 * input_value( PDSF );
+	IF P9.START != pd_start
+	{
+		pd_start = 1e-9 * TB * round( ( 1e9 * pd_start ) / TB );
+		input_value( PDSF, pd_start * 1e9 );
+
+		IF P9.START != pd_start
+		{
+			IF pd_start < 0 | pd_start + timebase >= max_len
+			{
+				pd_start = P9.START;
+				input_value( PDSF, pd_start * 1e9 );
+				NEXT;
+			}
+
+			P9.START = pd_start;
+			IF ! pulser_update( )
+			{
+				pd_start = P9.START;
+				input_value( PDSF, pd_start * 1e9 );
+			}
+		}
+	}
+
+	wait( waiting_time );
+}

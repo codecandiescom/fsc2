@@ -229,6 +229,13 @@ Ticks hfs9000_get_max_seq_len( void )
 
 void hfs9000_set( char *arena, Ticks start, Ticks len, Ticks offset )
 {
+	if ( start + len + offset > hfs9000.max_seq_len )
+	{
+		eprint( FATAL, SET, "Pulses use more memory than expected. Perhaps "
+				"you should use the MAXIMUM_PATTERN_LENGTH command.\n" );
+		THROW( EXCEPTION );
+	}
+
 	memset( ( void * ) ( arena + offset + start ),
 			( int ) SET, len * sizeof( bool ) );
 }

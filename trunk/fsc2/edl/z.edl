@@ -13,8 +13,8 @@ FILE;
 
 PREP:
 
-init_2d( 4, N, M, 350, 20, 3325, 2.0, "Pulse separation [ns]",
-		 "Magnetic field [G]", "Echo intensity (arbitrary units)" );
+init_2d( 4, N, M, -100, 5, 3325, 2.0, "Time after laser flash [ns]",
+		 "Magnetic field [G]", "Signal intensity [V]" );
 
 EXP:
 
@@ -28,18 +28,17 @@ FOR K = 1 : M
 			a = 0.0;
 			b = 0.0;
 		} ELSE {
-			a = 0.001 * exp( - ( ( K - 0.8 * M ) / ( 0.1 * M ) )^2 )
+			a = 0.1 * exp( - ( ( K - 0.8 * M ) / ( 0.1 * M ) )^2 )
 				* exp( - 3.0 * ( I - 20 ) / N );
-	    	b = 0.0007 * exp( - ( ( K - 0.3 * M ) / ( 0.1 * M ) )^2 )
+	    	b = 0.07 * exp( - ( ( K - 0.3 * M ) / ( 0.1 * M ) )^2 )
 				* exp( - 1.5 * ( I - 20 ) / N );
 		}
 
 		j[ 1, I ] = float( K + I - 2 ) / float( M + N - 2 );
 		j[ 2, I ] = a + b;
 		j[ 3, I ] = a * ( 0.9 + 0.1 * cos( 0.2 * ( I - 20 ) ) ) - b;
-		j[ 4, I ] = j[ 2, I ] + 0.00005 * grandom( );
+		j[ 4, I ] = j[ 2, I ] + 0.005 * grandom( );
 	}
-
 
 	display( 1, K, j[ 1 ], 1, 
 			 1, K, j[ 2 ], 2,

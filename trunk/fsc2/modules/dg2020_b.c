@@ -398,6 +398,9 @@ Var *pulser_channel_state( Var *v )
 
 Var *pulser_update( Var *v )
 {
+	bool state = OK;
+
+
 	v = v;
 
 
@@ -414,14 +417,14 @@ Var *pulser_update( Var *v )
 	/* Send all changes to the pulser */
 
 	if ( dg2020.needs_update )
-		dg2020_do_update( );
+		state = dg2020_do_update( );
 
 	/* If we're doing a real experiment also tell the pulser to start */
 
 	if ( ! TEST_RUN )
 		dg2020_run( START );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, state ? 1 : 0 );
 }
 
 

@@ -36,16 +36,17 @@ static void hfs9000_commit( FUNCTION *f, bool flag );
   test run.
 ----------------------------------------------------------------------------*/
 
-void hfs9000_do_update( void )
+bool hfs9000_do_update( void )
 {
 	bool restart = UNSET;
+	bool state;
 
 
 	if ( ! hfs9000_is_needed )
-		return;
+		return OK;
 
-	/* Resort the pulses and check that the new pulse settings are
-	   reasonable and finally commit all changes */
+	/* Resort the pulses,check that the new pulse settings are reasonable
+	   and finally commit all changes */
 
 	if ( hfs9000.is_running )
 	{
@@ -54,10 +55,13 @@ void hfs9000_do_update( void )
 			hfs9000_run( STOP );
 	}
 
-	hfs9000_update_pulses( TEST_RUN );
+	state = hfs9000_update_pulses( TEST_RUN );
+
 	hfs9000.needs_update = UNSET;
 	if ( restart && ! TEST_RUN )
 		hfs9000_run( START );
+
+	return state;
 }
 
 
@@ -139,12 +143,18 @@ void hfs9000_do_checks( FUNCTION *f )
 		if ( p->is_active )
 		{
 			f->max_seq_len = Ticks_max( f->max_seq_len, p->pos + p->len );
-			if ( f->delay + f->max_seq_len > MAX_PULSER_BITS )
+			if ( f->delay + f->max_seq_len > 
+				         ( TEST_RUN ? MAX_PULSER_BITS : hfs9000.max_seq_len ) )
 			{
-				eprint( FATAL, SET, "%s: Pulse sequence for function `%s' "
-						"does not fit into the pulsers memory. You could try "
-						"a longer pulser time base.\n",
-						pulser_struct.name, Function_Names[ f->self ] );
+				if ( TEST_RUN )
+					eprint( FATAL, SET, "%s: Pulse sequence for function "
+							"`%s' does not fit into the pulsers memory.\n",
+							pulser_struct.name, Function_Names[ f->self ] );
+				else
+					eprint( FATAL, ! hfs9000_IN_SETUP, "%s: Pulse sequence "
+							"for function `%s' is too long. Possibly "
+							"MAXIMUM_PATTERN_LENGTH needs to be higher.\n",
+							pulser_struct.name, Function_Names[ f->self ] );
 				THROW( EXCEPTION );
 			}
 

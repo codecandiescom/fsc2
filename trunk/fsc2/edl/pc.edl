@@ -1,10 +1,10 @@
 DEVICES:
 
-pulser;
-gaussmeter;
-magnet;
-//dg2020_b;
-//tds754a;
+//pulser;
+//gaussmeter;
+//magnet;
+dg2020_b;
+tds754a;
 
 
 VARIABLES:
@@ -33,7 +33,7 @@ MICROWAVE:           POD = 1, 2, 3    V_HIGH = 5 V, V_LOW = 0 V, INV,
 					 DELAY = 5 ns;
 
 
-PHASE_1_SETUP:	MW,
+PHASE_SETUP_1:	MW,
 				 X: POD = 1,
 				-X: POD = 2;
 

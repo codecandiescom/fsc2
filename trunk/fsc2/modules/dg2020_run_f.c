@@ -40,10 +40,10 @@
 /* reset to their original positions.                                      */
 /*-------------------------------------------------------------------------*/
 
-void dg2020_do_update( void )
+bool dg2020_do_update( void )
 {
 	if ( ! dg2020_is_needed )
-		return;
+		return OK;
 
 	/* Resort the pulses and, while in a test run, we also have to check that
 	   the new pulse settings are reasonable */
@@ -51,7 +51,7 @@ void dg2020_do_update( void )
 	if ( ! dg2020_reorganize_pulses( TEST_RUN ) )
 	{
 		dg2020.needs_update = UNSET;
-		return;
+		return FAIL;
 	}
 
 	/* Finally commit all changes */
@@ -64,6 +64,7 @@ void dg2020_do_update( void )
 	}
 
 	dg2020.needs_update = UNSET;
+	return OK;
 }
 
 
