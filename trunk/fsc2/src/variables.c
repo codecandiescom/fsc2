@@ -1390,7 +1390,7 @@ Var *vars_setup_new_array( Var *v, int dim )
 Var *vars_arr_rhs( Var *v )
 {
 	int  dim;
-	Var  *a, *cv;
+	Var  *a;
 	long index;
 
 
@@ -1476,7 +1476,7 @@ Var *vars_arr_rhs( Var *v )
 
 void vars_assign( Var *src, Var *dest )
 {
-	/* <PARANOID> check that both variables really exist </PARANOID> */
+	/* <PARANOID> check that both variables exist </PARANOID> */
 
 	assert( vars_exist( src ) && vars_exist( dest ) );
 
@@ -1808,7 +1808,7 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 /* Function initializes a new array. When called the stack at 'v' contains  */
 /* all the data for the initialization (the last data on top of the stack)  */
 /* and, directly below the data, an ARR_PTR to the array to be initialized. */
-/* If 'v' is NULL no inititialisation has to be done.                       */
+/* If 'v' is an UNDEF_VAR no inititialisation has to be done.               */
 /*--------------------------------------------------------------------------*/
 
 void vars_arr_init( Var *v )

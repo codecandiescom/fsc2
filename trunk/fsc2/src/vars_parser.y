@@ -159,9 +159,10 @@ list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
 										 |= VARIABLE_SIZED; }
 ;
 
-/* list of data for assignment to newly declared array */
+/* list of data for initialization of a newly declared array */
 
-arrass:  '{' list2 '}'             { $$ = $2; }
+arrass:   '{' '}'                  { $$ = vars_push( UNDEF_VAR ); }
+        | '{' list2 '}'            { $$ = $2; }
 ;
 
 list2:   expr                      { $$ = $1; }
