@@ -65,6 +65,8 @@ FOR J = 1 : N_runs {
 	
 	IF Pretrigger != 0 {
 	    ground = mean( slice( curve, 1, Pretrigger ) );
+	} ELSE {
+		ground = 0;
 	}
 
 	IF I <= NUM_BASE_CURVES {
