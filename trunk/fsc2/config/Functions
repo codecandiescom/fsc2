@@ -21,32 +21,37 @@
   Boston, MA 02111-1307, USA.
 */
 
+
 /********************************************************************/
 /* List of all non-builtin functions that can be used in EDL files  */
 /*                                                                  */
 /* Syntax:                                                          */
 /*                                                                  */
-/*               name, # args [ , access ] ;                        */
+/*               name, num_args [ , access ] ;                      */
 /*                                                                  */
-/* where `name' is the name of the function and `#args' is the      */
+/* where `name' is the name of the function and `num_args' is the   */
 /* number of arguments - use a negative number for functions with   */
 /* variable number of arguments. The optional parameter `access'    */
 /* is the access flag, where ALL means that it can be used in all   */
 /* sections of an EDL file while EXP says that the function can     */
-/* be used only in the EXPERIMENTS section, i.e. it's probably a    */
+/* be used only in the EXPERIMENTS section, e.g. when it is a       */
 /* function that accesses a device. The default is EXP. Finally,    */
-/* PREP says that the function may only be used in the preparation  */
-/* of an experiment.                                                */
+/* PREP says that the function may only be used in the PREPARATION  */
+/* section (and thus will never really talk with the device).       */
+/*                                                                  */
+/* You may use C style and C++ style comments in this file, i.e     */
+/* comments enclosed in a pair of '/*' and '*/' or commants that    */
+/* start with a double slash '//' and extend to the end of line.    */
 /*                                                                  */
 /********************************************************************/
 
 
-// Function exported by the User_Functions modules
+/* Function exported by the User_Functions modules */
 
 get_phase_cycled_area, -1, EXP;
 
 
-// Functions exported by the magnet power supply drivers */
+/* Functions exported by the magnet power supply drivers */
 
 magnet_name, 0, ALL;            // returns the device name
 magnet_setup, 2, ALL;           // set start field and sweep step size
@@ -57,12 +62,14 @@ sweep_up, 0, EXP;               // sweep magnet up
 sweep_down, 0, EXP;             // sweep magnet down
 reset_field, 0, EXP;            // go back to start field
 
-// Functions for the W_BAND power supply driver only
+
+/* Functions for the W_BAND power supply driver only */
 
 magnet_use_correction, 0, PREP; // if called field corrections are applied
 magnet_use_dac_port, 1, PREP;   // to set the lock-ins DAC port to be used
 
-// Functions exported by the field meter drivers (BH15, ER035M)
+
+/* Functions exported by the field meter drivers (BH15, ER035M) */
 
 gaussmeter_name, 0, ALL;        // returns the device name
 find_field, 0, EXP;             // return current field value
@@ -72,8 +79,9 @@ gaussmeter_wait, 0, EXP;        // wait for field to stabilize
 measure_field, 0, EXP;          // return field value (ER035M_SA, ER035M_SAS
 								// and PT2025)
 
-// Functions exported by the pulser drivers (DG2020, HFS9000)
-// (functions involving phases and keyboard for DG2020 only)
+
+/* Functions exported by the pulser drivers (DG2020, HFS9000)
+   (functions involving phases and keyboard for DG2020 only) */
 
 pulser_name, 0, ALL;            // returns the device name
 pulser_state, -1, ALL;          // switches pulser on/off
@@ -89,8 +97,8 @@ pulser_cw_mode, 0, PREP;        // CW mode experiment (DG2020/Berlin only)
 pulser_stop_on_update, 1, ALL;  // sets stop during updates (HFS9000 only)
 
 
-// Functions exported by the lock-in amplifier drivers
-// (Stanford Research 510, 530, 810, 830, and Bruker ER 023 M signal channel)
+/* Functions exported by the lock-in amplifier drivers
+   (Stanford Research 510, 530, 810, 830, and Bruker ER023M signal channel) */
 
 lockin_name, 0, ALL;            // returns the device name
 lockin_get_data, -1, EXP;       // returns the lock-in voltage 
@@ -116,8 +124,8 @@ lockin_ct, -1, ALL;             // (ER023M)
 lockin_mf, -1, ALL;             // (ER023M)
 
 
-// Functions exported by the digitizer
-// (TDS520, TDS520A, TDS520C, TDS540, TDS744A, TDS754A, LeCroy 9400 )
+/* Functions exported by the digitizer
+   (TDS520, TDS520A, TDS520C, TDS540, TDS744A, TDS754A, LeCroy 9400 ) */
 
 digitizer_name, 0, ALL;                 // returns the device name
 digitizer_define_window, -1, PREP;      // defines a cursor window
@@ -142,7 +150,8 @@ digitizer_meas_channel_ok, 1, ALL;      // only for internal use !
 
 digitizer_averaging, -1, ALL;           // LeCroy9400 only
 
-// Functions exported by the rf synthesizer (HP8647A)
+
+/* Functions exported by the rf synthesizer (HP8647A) */
 
 synthesizer_name, 0, ALL;             // returns the device name
 synthesizer_state, -1, ALL;           // set/get state (ON/OFF)
@@ -162,14 +171,14 @@ synthesizer_mod_source, -1, EXP;
 synthesizer_mod_ampl, -1, EXP;
 
 
-// Functions exported by the boxcar (EGG4402)
+/* Functions exported by the boxcar (EGG4402) */
 
 boxcar_name, 0, ALL;
 boxcar_curve_length, -1, EXP;
 boxcar_get_curve, -1, EXP;
 
 
-// Functions exported by the voltmeter (Kontron 4060)
+/* Functions exported by the voltmeter (Kontron 4060) */
 
 voltmeter_name, 0, ALL;
 voltmeter_get_data, 0, EXP;
@@ -177,10 +186,11 @@ voltmeter_ac_measurement, 0, EXP;
 voltmeter_dc_measurement, 0, EXP;
 
 
-// Functions exported by the temperature controller (Lake Shore 330)
+/* Functions exported by the temperature controller (Lake Shore 330) */
 
 temp_contr_name, 0, ALL;
 temp_contr_lock_keyboard, -1, EXP;
 temp_contr_temperature, 0, EXP;
 temp_contr_sensor_unit, -1, EXP;
 temp_contr_sample_channel, -1, EXP;
+
