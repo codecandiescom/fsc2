@@ -28,6 +28,7 @@ float_slice, 1, ALL;            // creates an float array slice
 get_phase_cycled_area_1d, -1, EXP;
 get_phase_cycled_area_2d, -1, EXP;
 
+
 // Functions exported by the magnet power supply drivers (S_BAND)
 
 magnet_setup, 2, ALL;           // set start field and sweep step size
@@ -37,6 +38,7 @@ sweep_up, 0, EXP;               // sweep magnet up
 sweep_down, 0, EXP;             // sweep magnet down
 reset_field, 0, EXP;            // go back to start field
 
+
 // Functions exported by the field meter drivers (BH15, ER035M)
 
 find_field, 0, EXP;             // return current field value
@@ -44,6 +46,7 @@ field_resolution, 0, EXP;       // returns resolution of field meter
 field_meter_wait, 0, EXP;       // wait a bit for field to stabilize
 
 measure_field, 0, EXP;          // return field value (ER035M_SA)
+
 
 // Functions exported by the pulser drivers (DG2020)
 
