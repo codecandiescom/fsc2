@@ -916,6 +916,38 @@ static bool parent_reader( CommStruct *header )
 			parent_freeze( header->data.int_data );
 			break;
 
+		case C_CLABEL :
+			TRY
+			{
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
+				pipe_read( data, ( size_t ) header->data.len );
+				exp_clabel( data, header->data.len );
+				TRY_SUCCESS;
+			}
+			OTHERWISE
+			{
+				T_free( data );
+				return FAIL;
+			}
+			T_free( data );
+			break;
+
+		case C_XABLE :
+			TRY
+			{
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
+				pipe_read( data, ( size_t ) header->data.len );
+				exp_xable( data, header->data.len );
+				TRY_SUCCESS;
+			}
+			OTHERWISE
+			{
+				T_free( data );
+				return FAIL;
+			}
+			T_free( data );
+			break;
+
 		default :                     /* this better never gets triggered... */
 			fsc2_assert( 1 == 0 );
 	}
@@ -1008,12 +1040,9 @@ static bool child_reader( void *ret, CommStruct *header )
 			}
 			return OK;
 
-		case C_LAYOUT_REPLY  :
-		case C_BDELETE_REPLY :
-		case C_SDELETE_REPLY :
-		case C_IDELETE_REPLY :
-		case C_MDELETE_REPLY :
-		case C_ODELETE_REPLY :
+		case C_LAYOUT_REPLY  : case C_BDELETE_REPLY : case C_SDELETE_REPLY :
+		case C_IDELETE_REPLY : case C_MDELETE_REPLY : case C_ODELETE_REPLY :
+		case C_CLABEL_REPLY  : case C_XABLE_REPLY   :
 			return ( header->data.long_data != 0 ? OK : FAIL );
 	}
 
@@ -1219,7 +1248,8 @@ bool writer( int type, ... )
 		case C_SCREATE   : case C_SDELETE : case C_SSTATE  : case C_SCHANGED :
 		case C_ICREATE   : case C_IDELETE : case C_ISTATE  : case C_ICHANGED :
 		case C_MCREATE   : case C_MDELETE : case C_MCHOICE : case C_MCHANGED :
-		case C_TBCHANGED : case C_TBWAIT  : case C_ODELETE :
+		case C_TBCHANGED : case C_TBWAIT  : case C_ODELETE : case C_CLABEL   :
+		case C_XABLE     :
 			fsc2_assert( Internals.I_am == CHILD );
 
 			header.data.len = va_arg( ap, ptrdiff_t );
@@ -1265,12 +1295,9 @@ bool writer( int type, ... )
 			va_end( ap );
 			return pipe_write( ( char * ) data, ( size_t ) header.data.len );
 
-		case C_LAYOUT_REPLY  :
-		case C_BDELETE_REPLY :
-		case C_SDELETE_REPLY :
-		case C_IDELETE_REPLY :
-		case C_MDELETE_REPLY :
-		case C_ODELETE_REPLY :
+		case C_LAYOUT_REPLY  : case C_BDELETE_REPLY : case C_SDELETE_REPLY :
+		case C_IDELETE_REPLY : case C_MDELETE_REPLY : case C_ODELETE_REPLY :
+		case C_CLABEL_REPLY  : case C_XABLE_REPLY   :
 			fsc2_assert( Internals.I_am == PARENT );
 
 			header.data.long_data = va_arg( ap, long );
