@@ -219,8 +219,8 @@ MainLoop;
 # Callback function for the digitizer menu, makes sure only channels that
 # exist can be picked - fortunately, $channel and $trig_channel will be
 # changed automatically if they are not in the new set of channels.
-# Actually, the options method for Optionmenus isn't documented but if
-# you look at the source you'll find it...
+# Actually, the options method for Optionmenus isn't officially documented
+# but if you look at the source you'll find it...
 
 sub digitizer_check {
 
