@@ -178,6 +178,10 @@ bool run( void )
 
 static bool start_gpib_and_rulbus( void )
 {
+#if defined WITH_RULBUS
+	int retval;
+#endif
+
 	/* Disable some buttons and show a watch cusor */
 
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );

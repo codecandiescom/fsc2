@@ -459,9 +459,9 @@ ifdef WITH_RULBUS
 		INCLUDES += -I$(rulbus_incl_path)
 	endif
 	ifdef rulbus_lib_path
-		LFLAGS += -L$(rulbus_lib_path)
+		LIBS += -L$(rulbus_lib_path)
 	endif
-	LFLAGS += -lrulbus
+	LIBS   += -lrulbus
 	CFLAGS += -DWITH_RULBUS
 endif
 
