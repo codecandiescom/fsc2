@@ -1321,8 +1321,8 @@ void rs690_check_fs( void )
 /* of 16 ns each bit represents a channel of one of the output connectors.  */
 /* For a time base of 8 ns only 8 channels can be associated with a word,   */
 /* and first the high and then the low byte of a word is output to these 8  */
-/* channels )to be able to clock out data at a 125 MHz rate while word      */
-/* loading happens at 62.5 MHz only).                                       */
+/* channels) to be able to clock out data at a 125 MHz rate while new words */
+/* can be loaded only in 16 ns).                                            */
 /* Until now the fields in the FS structures were treated as needed for a   */
 /* 16 ns time base. But now we have adjust the fields so that we can simply */
 /* write out 16 bit words. In the simplest case the length of a FS period   */
@@ -1343,7 +1343,6 @@ void rs690_check_fs( void )
 static void rs690_correct_fs_for_8ns( void )
 {
 	FS *n,
-	   *nn = NULL,
 	   *p = NULL;
 	int fr;
 	int i;
@@ -1383,8 +1382,8 @@ static void rs690_correct_fs_for_8ns( void )
 			n = p;
 		}
 
-		/* If the current FS is now only one Tick long we're done, we will
-		   have to shift a Tick of the next FS into it. */
+		/* If the current FS is now only one Tick long we continue with the
+		   next one, we will have to shift a Tick of the next FS into it. */
 
 		if ( n->len == 1 )
 		{
@@ -1399,15 +1398,6 @@ static void rs690_correct_fs_for_8ns( void )
 
 		for ( i = 0; i <= rs690.last_used_field; i++ )
 			n->fields[ i ] |= n->fields[ i ] << 8;
-
-		/* IF a new FS was inserted we have to deal with the successor of this
-           new FS in the next run through the loop*/
-
-		if ( nn != NULL )
-		{
-			 n = p = nn;
-			 nn = NULL;
-		}
 	}			
 
 	for ( i = 0; i <= rs690.last_used_field; i++ )
@@ -1441,7 +1431,6 @@ static void rs690_correct_fs_for_8ns( void )
 static void rs690_correct_fs_for_4ns( void )
 {
 	FS *n,
-	   *nn = NULL,
 	   *p = NULL;
 	int fr;
 	int i, j;
@@ -1501,15 +1490,6 @@ static void rs690_correct_fs_for_4ns( void )
 			for ( j = 0; j < 3; j++ )
 				n->fields[ i ] = ( n->fields[ i ] << 4 ) |
 								 ( n->fields[ i ] & 0xF );
-
-		/* IF a new FS was inserted we have to deal with the successor of
-		   this additional FS in the next run through the loop */
-
-		if ( nn != NULL )
-		{
-			 n = p = nn;
-			 nn = NULL;
-		}
 	}			
 
 	for ( i = 0; i <= rs690.last_used_field; i++ )
