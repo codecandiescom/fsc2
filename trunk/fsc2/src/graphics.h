@@ -59,6 +59,9 @@ typedef struct {
 	Pixmap pm;
 	GC gc;                  /* gc for pixmap */
 
+	int x_cur,              /* last reported pointer position in canvas */
+		y_cur;
+
 	bool is_box;
 	GC box_gc;
 	int box_x,
@@ -133,6 +136,7 @@ typedef struct {
 
 
 #include "fsc2.h"
+#include "fsc2.h"
 
 void start_graphics( void );
 void stop_graphics( void );
@@ -144,6 +148,5 @@ void recalc_XPoints_of_curve( Curve_1d *cv );
 void redraw_canvas( Canvas *c );
 void repaint_canvas( Canvas *c );
 void switch_off_special_cursors( void );
-void accept_new_data( void );
 
 #endif   /* ! GRAPHICS_HEADER */

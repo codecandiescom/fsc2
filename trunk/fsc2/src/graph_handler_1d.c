@@ -9,12 +9,13 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c );
 void release_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c );
 void motion_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c );
 void save_scale_state( Curve_1d *cv );
-bool change_x_range( int x_cur );
-bool change_y_range( int y_cur );
-bool change_xy_range( int x_cur, int y_cur );
-bool zoom_x( int x_cur );
-bool zoom_y( int y_cur );
-bool zoom_xy( int x_cur, int cur_y );
+bool change_x_range( Canvas *c );
+bool change_y_range( Canvas *c );
+bool change_xy_range( Canvas *c );
+bool zoom_x( Canvas *c );
+bool zoom_y( Canvas *c );
+bool zoom_xy( Canvas *c );
+void shift_XPoints_of_curve( Canvas *c, Curve_1d *cv );
 
 
 /*--------------------------------------------------------*/
@@ -67,25 +68,25 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 	long i;
 	Curve_1d *cv;
 	int old_button_state = G.button_state;
-	int x_cur, y_cur, dummy;
+	int dummy;
 
 
 	/* In the axes areas two buttons pressed simultaneously doesn't has a
 	special meaning, so don't care about another button. Also don't react if
 	the pressed buttons have lost there meaning */
 
-	if ( ( c != &G.canvas && G.real_button_state != 0 ) ||
-		 ( G.button_state == 0 && G.real_button_state != 0 ) )
+	if ( ( c != &G.canvas && G.raw_button_state != 0 ) ||
+		 ( G.button_state == 0 && G.raw_button_state != 0 ) )
 	{
-		G.real_button_state |= 1 << ( ev->xbutton.button - 1 );
+		G.raw_button_state |= 1 << ( ev->xbutton.button - 1 );
 		return;
 	}
 
-	G.real_button_state |= ( 1 << ( ev->xbutton.button - 1 ) );
+	G.raw_button_state |= ( 1 << ( ev->xbutton.button - 1 ) );
 
 	/* Middle and right or all three buttons at once don't mean a thing */
 
-	if ( G.real_button_state >= 6 )
+	if ( G.raw_button_state >= 6 )
 		return;
 
 	G.button_state |= ( 1 << ( ev->xbutton.button - 1 ) );
@@ -101,22 +102,22 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 	if ( obj == run_form->canvas )        /* in canvas window */
 		G.drag_canvas = 3;
 
-	fl_get_win_mouse( window, &x_cur, &y_cur, &dummy );
+	fl_get_win_mouse( window, &c->x_cur, &c->y_cur, &dummy );
 
 	switch ( G.button_state )
 	{
 		case 1 :                               /* left button */
 			fl_set_cursor( window, G.cur_1 );
 
-			G.x_start = x_cur;
-			G.y_start = y_cur;
+			G.x_start = c->x_cur;
+			G.y_start = c->y_cur;
 
 			/* Set up variables for drawing the rubber boxes */
 
 			switch ( G.drag_canvas )
 			{
 				case 1 :                       /* in x-axis window */
-					c->box_x = x_cur;
+					c->box_x = c->x_cur;
 					c->box_w = 0;
 					c->box_y = c->h / 2 - 1;
 					c->box_h = 2;
@@ -125,15 +126,15 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 
 				case 2 :                       /* in y-axis window */
 					c->box_x = c->w / 2 - 1;
-					c->box_y = y_cur;
+					c->box_y = c->y_cur;
 					c->box_w = 2;
 					c->box_h = 0;
 					c->is_box = SET;
 					break;
 
 				case 3 :                       /* in canvas window */
-					c->box_x = x_cur;
-					c->box_y = y_cur;
+					c->box_x = c->x_cur;
+					c->box_y = c->y_cur;
 					c->box_w = c->box_h = 0;
 					c->is_box = SET;
 					break;
@@ -145,8 +146,8 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 		case 2 :                               /* middle button */
 			fl_set_cursor( window, G.cur_2 );
 
-			G.x_start = x_cur;
-			G.y_start = y_cur;
+			G.x_start = c->x_cur;
+			G.y_start = c->y_cur;
 
 			/* Store data for undo operation */
 
@@ -154,13 +155,10 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 			{
 				cv = G.curve[ i ];
 
-				if ( ! cv->active )
-				{
-					cv->can_undo = UNSET;
-					continue;
-				}
-				else
+				if ( cv->active )
 					save_scale_state( cv );
+				else
+					cv->can_undo = UNSET;
 			}
 			break;
 
@@ -176,8 +174,8 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 		case 4 :                               /* right button */
 			fl_set_cursor( window, G.cur_3 );
 
-			G.x_start = x_cur;
-			G.y_start = y_cur;
+			G.x_start = c->x_cur;
+			G.y_start = c->y_cur;
 			break;
 
 		case 5 :                               /* left and right button */
@@ -185,8 +183,8 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 
 			if ( G.canvas.is_box == UNSET && old_button_state != 4 )
 			{
-				G.x_start = x_cur;
-				G.y_start = y_cur;
+				G.x_start = c->x_cur;
+				G.y_start = c->y_cur;
 			}
 			else
 				G.canvas.is_box = UNSET;
@@ -202,36 +200,34 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 
 void release_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 {
-	int x_cur, y_cur, dummy;
+	int dummy;
 	bool scale_changed = UNSET;
 
 
 	obj = obj;
 
-	/* If the released button didn't had a meaning forget about it */
+	/* If the released button didn't has a meaning just clear it from the
+	   button state pattern and then forget about it */
 
 	if ( ! ( ( 1 << ( ev->xbutton.button - 1 ) ) & G.button_state ) )
 	{
-		G.real_button_state &= ~ ( 1 << ( ev->xbutton.button - 1 ) );
+		G.raw_button_state &= ~ ( 1 << ( ev->xbutton.button - 1 ) );
 		return;
 	}
 
-	/* Get mouse posiion and restrict it to the canvas */
+	/* Get mouse position and restrict it to the canvas */
 
-	fl_get_win_mouse( window, &x_cur, &y_cur, &dummy );
+	fl_get_win_mouse( window, &c->x_cur, &c->y_cur, &dummy );
 
-	if ( x_cur < 0 )
-		x_cur = 0;
-	if ( x_cur >= ( int ) G.canvas.w )
-		x_cur = G.canvas.w - 1;
+	if ( c->x_cur < 0 )
+		c->x_cur = 0;
+	if ( c->x_cur >= ( int ) G.canvas.w )
+		c->x_cur = G.canvas.w - 1;
 
-	if ( y_cur < 0 )
-		y_cur = 0;
-	if ( y_cur >= ( int ) G.canvas.h )
-		y_cur = G.canvas.h - 1;
-
-
-	fl_reset_cursor( window );
+	if ( c->y_cur < 0 )
+		c->y_cur = 0;
+	if ( c->y_cur >= ( int ) G.canvas.h )
+		c->y_cur = G.canvas.h - 1;
 
 	switch ( G.button_state )
 	{
@@ -239,15 +235,16 @@ void release_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 			switch ( G.drag_canvas )
 			{
 				case 1 :                       /* x-axis window */
-					scale_changed = change_x_range( x_cur );
+					scale_changed = change_x_range( c );
 					break;
 
 				case 2 :                       /* in y-axis window */
-					scale_changed = change_y_range( y_cur );
+					scale_changed = change_y_range( c );
 					break;
 
 				case 3 :                       /* in canvas window */
-					scale_changed = change_xy_range( x_cur, y_cur );
+					scale_changed = change_xy_range( c );
+					break;
 			}
 			c->is_box = UNSET;
 			break;
@@ -256,22 +253,24 @@ void release_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 			switch ( G.drag_canvas )
 			{
 				case 1 :                       /* in x-axis window */
-					scale_changed = zoom_x( x_cur );
+					scale_changed = zoom_x( c );
 					break;
 
 				case 2 :                       /* in y-axis window */
-					scale_changed = zoom_y( y_cur );
+					scale_changed = zoom_y( c );
 					break;
 
 				case 3 :                       /* in canvas window */
-					scale_changed = zoom_xy( x_cur, y_cur );
+					scale_changed = zoom_xy( c );
 					break;
 			}
 			break;
 	}
 
 	G.button_state = 0;
-	G.real_button_state &= ~ ( 1 << ( ev->xbutton.button - 1 ) );
+	G.raw_button_state &= ~ ( 1 << ( ev->xbutton.button - 1 ) );
+
+	fl_reset_cursor( window );
 
 	if ( scale_changed )
 	{
@@ -297,10 +296,8 @@ void motion_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 	Curve_1d *cv;
 	XEvent new_ev;
 	long i;
-	int x_cur, y_cur, dummy;
+	int dummy;
 	bool scale_changed = UNSET;
-	double factor = G.real_button_state == 6 ? 5.0 : 1.0;
-
 
 	
 	obj = obj;
@@ -323,14 +320,14 @@ void motion_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 		fl_XNextEvent( ev );                  /* get the next event */
 	}
 
-	fl_get_win_mouse( window, &x_cur, &y_cur, &dummy );
+	fl_get_win_mouse( window, &c->x_cur, &c->y_cur, &dummy );
 
 	switch ( G.button_state )
 	{
 		case 1 :                               /* left mouse button */
 			if ( G.drag_canvas & 1 )           /* x-axis or canvas window */
 			{
-				c->box_w = x_cur - G.x_start;
+				c->box_w = c->x_cur - G.x_start;
 
 				if ( c->box_x + c->box_w >= ( int ) c->w )
 					c->box_w = c->w - c->box_x - 1;
@@ -341,7 +338,7 @@ void motion_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 
 			if ( G.drag_canvas & 2 )           /* y-axis or canvas window */
 			{
-				c->box_h = y_cur - G.y_start ;
+				c->box_h = c->y_cur - G.y_start ;
 
 				if ( c->box_y + c->box_h >= ( int ) c->h )
 					c->box_h = c->h - c->box_y - 1;
@@ -361,17 +358,14 @@ void motion_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 				if ( ! cv->active )
 					continue;
 
-				if ( G.drag_canvas & 1 )       /* x-axis or canvas window */
-					cv->x_shift += factor * ( x_cur - G.x_start ) / cv->s2d_x;
-				if ( G.drag_canvas & 2 )       /* y-axis or canvas window */
-					cv->y_shift -= factor * ( y_cur - G.y_start ) / cv->s2d_y;
+				/* Recalculate the offsets and shift curves in the canvas */
 
-				recalc_XPoints_of_curve( cv );
+				shift_XPoints_of_curve( c, cv );
 				scale_changed = SET;
 			}
 
-			G.x_start = x_cur;
-			G.y_start = y_cur;
+			G.x_start = c->x_cur;
+			G.y_start = c->y_cur;
 
 			if ( G.is_fs && scale_changed )
 			{
@@ -382,7 +376,7 @@ void motion_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 			redraw_canvas( &G.canvas );
 			break;
 
-		case 3 : case 5 :                 /* left and middle or right button */
+		case 3 : case 5 :               /* left and (middle or right) button */
 			repaint_canvas( &G.canvas );
 			break;
 	}
@@ -406,7 +400,7 @@ void save_scale_state( Curve_1d *cv )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-bool change_x_range( int x_cur )
+bool change_x_range( Canvas *c )
 {
 	long i;
 	bool scale_changed = UNSET;
@@ -414,7 +408,7 @@ bool change_x_range( int x_cur )
 	double x1, x2;
 
 
-	if ( abs( G.x_start - x_cur ) > 4 )
+	if ( abs( G.x_start - c->x_cur ) > 4 )
 	{
 		for ( i = 0; i < G.nc; i++ )
 		{
@@ -426,7 +420,7 @@ bool change_x_range( int x_cur )
 			save_scale_state( cv );
 
 			x1 = G.x_start / cv->s2d_x - cv->x_shift;
-			x2 = x_cur / cv->s2d_x - cv->x_shift;
+			x2 = c->x_cur / cv->s2d_x - cv->x_shift;
 
 			cv->x_shift = - d_min( x1, x2 );
 			cv->s2d_x = ( double ) ( G.canvas.w - 1 ) / fabs( x1 - x2 );
@@ -443,7 +437,7 @@ bool change_x_range( int x_cur )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-bool change_y_range( int y_cur )
+bool change_y_range( Canvas *c )
 {
 	long i;
 	bool scale_changed = UNSET;
@@ -451,7 +445,7 @@ bool change_y_range( int y_cur )
 	double y1, y2;
 
 
-	if ( abs( G.y_start - y_cur ) > 4 )
+	if ( abs( G.y_start - c->y_cur ) > 4 )
 	{
 		for ( i = 0; i < G.nc; i++ )
 		{
@@ -463,7 +457,7 @@ bool change_y_range( int y_cur )
 			save_scale_state( cv );
 
 			y1 = 1.0 - G.y_start / cv->s2d_y - cv->y_shift;
-			y2 = 1.0 - y_cur / cv->s2d_y - cv->y_shift;
+			y2 = 1.0 - c->y_cur / cv->s2d_y - cv->y_shift;
 
 			cv->y_shift = 1.0 - d_max( y1, y2 );
 			cv->s2d_y = ( double ) ( G.canvas.h - 1 ) / fabs( y1 - y2 );
@@ -480,7 +474,7 @@ bool change_y_range( int y_cur )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-bool change_xy_range( int x_cur, int y_cur )
+bool change_xy_range( Canvas *c )
 {
 	long i;
 	bool scale_changed = UNSET;
@@ -498,12 +492,12 @@ bool change_xy_range( int x_cur, int y_cur )
 		save_scale_state( cv );
 		cv->can_undo = UNSET;
 
-		if ( abs( G.x_start - x_cur ) > 4 )
+		if ( abs( G.x_start - c->x_cur ) > 4 )
 		{
 			cv->can_undo = SET;
 
 			x1 = G.x_start / cv->s2d_x - cv->x_shift;
-			x2 = x_cur / cv->s2d_x - cv->x_shift;
+			x2 = c->x_cur / cv->s2d_x - cv->x_shift;
 
 			cv->x_shift = - d_min( x1, x2 );
 			cv->s2d_x = ( double ) ( G.canvas.w - 1 ) / fabs( x1 - x2 );
@@ -511,12 +505,12 @@ bool change_xy_range( int x_cur, int y_cur )
 			scale_changed = SET;
 		}
 
-		if ( abs( G.y_start - y_cur ) > 4 )
+		if ( abs( G.y_start - c->y_cur ) > 4 )
 		{
 			cv->can_undo = SET;
 
 			y1 = 1.0 - G.y_start / cv->s2d_y - cv->y_shift;
-			y2 = 1.0 - y_cur / cv->s2d_y - cv->y_shift;
+			y2 = 1.0 - c->y_cur / cv->s2d_y - cv->y_shift;
 
 			cv->y_shift = 1.0 - d_max( y1, y2 );
 			cv->s2d_y = ( double ) ( G.canvas.h - 1 ) / fabs( y1 - y2 );
@@ -535,7 +529,7 @@ bool change_xy_range( int x_cur, int y_cur )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-bool zoom_x( int x_cur )
+bool zoom_x( Canvas *c )
 {
 	long i;
 	bool scale_changed = UNSET;
@@ -543,7 +537,7 @@ bool zoom_x( int x_cur )
 	double px;
 
 
-	if ( abs( G.x_start - x_cur ) > 4 )
+	if ( abs( G.x_start - c->x_cur ) > 4 )
 	{
 		for ( i = 0; i < G.nc; i++ )
 		{
@@ -555,13 +549,13 @@ bool zoom_x( int x_cur )
 			save_scale_state( cv );
 
 			px = G.x_start / cv->s2d_x - cv->x_shift;
-			if ( G.x_start > x_cur )
+			if ( G.x_start > c->x_cur )
 				cv->s2d_x *= d_min( 4.0,
-							     1.0 + 3.0 * ( double ) ( G.x_start - x_cur ) /
+							  1.0 + 3.0 * ( double ) ( G.x_start - c->x_cur ) /
 								                       ( double ) G.x_axis.w );
 			else
 				cv->s2d_x /= d_min( 4.0,
-								 1.0 + 3.0 * ( double ) ( x_cur - G.x_start ) /
+							  1.0 + 3.0 * ( double ) ( c->x_cur - G.x_start ) /
 								                       ( double ) G.x_axis.w );
 
 			cv->x_shift = G.x_start / cv->s2d_x - px;
@@ -578,7 +572,7 @@ bool zoom_x( int x_cur )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-bool zoom_y( int y_cur )
+bool zoom_y( Canvas *c )
 {
 	long i;
 	bool scale_changed = UNSET;
@@ -586,7 +580,7 @@ bool zoom_y( int y_cur )
 	double py;
 
 
-	if ( abs( G.y_start - y_cur ) > 4 )
+	if ( abs( G.y_start - c->y_cur ) > 4 )
 	{
 		for ( i = 0; i < G.nc; i++ )
 		{
@@ -598,13 +592,13 @@ bool zoom_y( int y_cur )
 			save_scale_state( cv );
 
 			py = 1.0 - G.y_start / cv->s2d_y - cv->y_shift;
-			if ( G.y_start < y_cur )
+			if ( G.y_start < c->y_cur )
 				cv->s2d_y *= d_min( 4.0,
-								 1.0 + 3.0 * ( double ) ( y_cur - G.y_start ) /
+							  1.0 + 3.0 * ( double ) ( c->y_cur - G.y_start ) /
 								                       ( double ) G.y_axis.h );
 			else
 				cv->s2d_y /= d_min( 4.0,
-								 1.0 + 3.0 * ( double ) ( G.y_start - y_cur ) /
+							  1.0 + 3.0 * ( double ) ( G.y_start - c->y_cur ) /
 								                       ( double ) G.y_axis.h );
 
 			cv->y_shift = 1.0 - G.y_start / cv->s2d_y - py;
@@ -621,7 +615,7 @@ bool zoom_y( int y_cur )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-bool zoom_xy( int x_cur, int y_cur )
+bool zoom_xy( Canvas *c )
 {
 	long i;
 	bool scale_changed = UNSET;
@@ -639,19 +633,19 @@ bool zoom_xy( int x_cur, int y_cur )
 		save_scale_state( cv );
 		cv->can_undo = UNSET;
 
-		if ( abs( G.x_start - x_cur ) > 4 )
+		if ( abs( G.x_start - c->x_cur ) > 4 )
 		{
 			cv->can_undo = SET;
 
 			px = G.x_start / cv->s2d_x - cv->x_shift;
 
-			if ( G.x_start > x_cur )
+			if ( G.x_start > c->x_cur )
 				cv->s2d_x *= d_min( 4.0,
-								 1.0 + 3.0 * ( double ) ( G.x_start - x_cur ) /
+							  1.0 + 3.0 * ( double ) ( G.x_start - c->x_cur ) /
 								                       ( double ) G.x_axis.w );
 			else
 				cv->s2d_x /= d_min( 4.0,
-								 1.0 + 3.0 * ( double ) ( x_cur - G.x_start ) /
+							  1.0 + 3.0 * ( double ) ( c->x_cur - G.x_start ) /
 								                       ( double ) G.x_axis.w );
 
 			cv->x_shift = G.x_start / cv->s2d_x - px;
@@ -659,18 +653,18 @@ bool zoom_xy( int x_cur, int y_cur )
 			scale_changed = SET;
 		}
 
-		if ( abs( G.y_start - y_cur ) > 4 )
+		if ( abs( G.y_start - c->y_cur ) > 4 )
 		{
 			cv->can_undo = SET;
 
 			py = 1.0 - G.y_start / cv->s2d_y - cv->y_shift;
-			if ( G.y_start < y_cur )
+			if ( G.y_start < c->y_cur )
 				cv->s2d_y *= d_min( 4.0,
-								 1.0 + 3.0 * ( double ) ( y_cur - G.y_start ) /
+							  1.0 + 3.0 * ( double ) ( c->y_cur - G.y_start ) /
 								                       ( double ) G.y_axis.h );
 			else
 				cv->s2d_y /= d_min( 4.0,
-								 1.0 + 3.0 * ( double ) ( G.y_start - y_cur ) /
+							  1.0 + 3.0 * ( double ) ( G.y_start - c->y_cur ) /
 								                       ( double ) G.y_axis.h );
 
 			cv->y_shift = 1.0 - G.y_start / cv->s2d_y - py;
@@ -684,3 +678,61 @@ bool zoom_xy( int x_cur, int y_cur )
 
 	return scale_changed;
 }
+
+
+/*-----------------------------------------------------------------------*/
+/* This is basically a simplified version of `recalc_XPoints_of_curve()' */
+/* because we need to do much less calculations, i.e. just add an offset */
+/* to all XPoints instead of going through all the scalings...           */
+/*-----------------------------------------------------------------------*/
+
+void shift_XPoints_of_curve( Canvas *c, Curve_1d *cv )
+{
+	long j, k;
+	int dx = 0,
+		dy = 0;
+	int factor;
+
+
+	cv->up = cv->down = cv->left = cv->right = UNSET;
+
+	/* Additionally pressing the right mouse button increases the amount the
+	   curves are shifted by a factor of 5 */
+
+	factor = G.raw_button_state == 6 ? 5 : 1;
+
+	/* Calculate scaled shift factors */
+
+	if ( G.drag_canvas & 1 )                      /* x-axis or canvas window */
+	{
+		dx = factor * ( c->x_cur - G.x_start );
+		cv->x_shift += ( double ) dx / cv->s2d_x;
+	}
+
+	if ( G.drag_canvas & 2 )                      /* y-axis or canvas window */
+	{
+		dy = factor * ( c->y_cur - G.y_start );
+		cv->y_shift -= ( double ) dy / cv->s2d_y;
+	}
+
+	/* Add the shifts to the XPoints */
+
+	for ( k = 0, j = 0; j < G.nx; j++ )
+	{
+		if ( cv->points[ j ].exist )
+		{
+			cv->xpoints[ k ].x = i2shrt( cv->xpoints[ k ].x + dx );
+			cv->xpoints[ k ].y = i2shrt( cv->xpoints[ k ].y + dy );
+
+			if ( cv->xpoints[ k ].x < 0 )
+				cv->left = SET;
+			if ( cv->xpoints[ k ].x >= ( int ) G.canvas.w )
+				cv->right = SET;
+			if ( cv->xpoints[ k ].y < 0 )
+				cv->up = SET;
+			if ( cv->xpoints[ k++ ].y >= ( int ) G.canvas.h )
+				cv->down = SET;
+		}
+	}
+}
+

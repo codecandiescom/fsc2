@@ -65,6 +65,8 @@
 #include "run.h"
 #include "chld_func.h"
 #include "graphics.h"
+#include "graph_handler.h"
+#include "accept.h"
 
 
 /* The diverse lexers */
