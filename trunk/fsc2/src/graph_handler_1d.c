@@ -288,8 +288,9 @@ void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 		{
 			G.is_fs = UNSET;
 			fl_set_button( run_form->full_scale_button, 0 );
-			fl_set_object_helper( obj, "Exempt curve %ld from\n"
-								  "rescaling operations" );
+			fl_set_object_helper( run_form->full_scale_button,
+								  "Rescale curves to fit into the window\n"
+								  "and switch on automatic rescaling" );
 		}			
 
 		redraw_all_1d( );

@@ -1125,7 +1125,7 @@ void fs_button_callback( FL_OBJECT *a, long b )
 		else                     /* full scale got switched off */
 		{	
 			fl_set_object_helper( run_form->full_scale_button,
-								  "Rescale curve to fit into the window\n"
+								  "Rescale curves to fit into the window\n"
 								  "and switch on automatic rescaling" );
 
 			if ( G.active_curve != -1 )
