@@ -3,8 +3,8 @@ DEVICES:
 VARS:
 
 I, J, K;
-N = 20,
-M = 20;
+N = 50,
+M = 30;
 j[ 4, N ];
 k[ N ];
 a, b;
