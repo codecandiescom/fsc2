@@ -538,7 +538,7 @@ of global variables and checking the command line options it tries to
 connect to a kind of daemon process (or starts it if it's not already
 running).  This daemon is taking care of situations where @code{fsc2} is
 running in non-exclusive mode, i.e.@: when more than instance of
-@code{fsc2} is to be run at the same time, and it will tell new
+@code{fsc2} is allowed to be run at the same time, and it will tell new
 instances about what they are allowed to do and what not to avoid more
 than one instance trying to access the same devices at the same time. It
 also is supposed to remove things like lock files, shared memory
