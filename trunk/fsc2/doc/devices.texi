@@ -119,12 +119,13 @@ a short message is printed.
 The only situation that still is a bit more problematical are cases
 where two identical devices are to be used simultaneously. Due to
 limitations not only of @acronym{fsc2} but also to the way the libraries
-used for accessing the GPIB bus works you can't simply list the device
-twice in the @code{DEVICES} section and then use them as outlines
-above. Instead, two device modules with different names have to be
-created for these identical devices and made known to the program.
+used for accessing the GPIB bus works you can't simply list the same
+device twice in the @code{DEVICES} section and then use these as
+outlines above. Instead, two device modules with different names have to
+be created for the identical devices and made known to the program.
 Fortunately, there's a Perl script that will automatically deal with
-this problem, please see one of the later chapters (@pxref{Cloning Devices})
+this problem, please see one of the later chapters (@pxref{Cloning
+Devices})
 
 
 @node Magnet Functions, Gaussmeter Functions, Introduction, Device Functions
