@@ -236,7 +236,7 @@ PREPARATIONS:
 pulser_cw_mode( );
 magnet_setup( start_field, field_step );\n";
 if ( $tc ne "Don't set" ) {
-	print F "lockin_time_constant( $tc );\n";
+	print F "lockin_time_constant( tc );\n";
 }
 
 if ( $sens ne "Don't set" ) {
