@@ -598,7 +598,6 @@ static double hjs_sfc_set_field( double field )
 	double v_step;
 	Var *Func_ptr;
 	int acc;
-	Var *v;
 
 
 	v_step = ( field - hjs_sfc.B0V ) / hjs_sfc.slope;

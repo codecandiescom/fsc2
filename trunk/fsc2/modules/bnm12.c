@@ -146,7 +146,7 @@ int bnm12_init_hook( void )
 	T_free( func );
 	vars_push( INT_VAR, DIO_NUMBER );     /* push the DIO number */
 	vars_push( STR_VAR, DEVICE_NAME );    /* push the new pass-phrase */
-	v = func_call( Func_ptr );
+	v = func_call( Func_ptr );            /* call the function */
 
 	if ( v->val.lval != 1 )
 	{

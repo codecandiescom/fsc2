@@ -121,8 +121,6 @@ int keithley228a_init_hook( void )
 	int i;
 	int *first_DAC_port;
 	int *last_DAC_port;
-	int seq;
-	char *fn;
 	int dev_num;
 
 
@@ -803,7 +801,6 @@ static double keithley228a_set_current( double new_current )
 	char cmd[ 100 ];
 	Var *func_ptr;
 	int acc;
-	char *fn;
 
 
 	fsc2_assert( fabs( new_current ) <= KEITHLEY228A_MAXMAX_CURRENT );

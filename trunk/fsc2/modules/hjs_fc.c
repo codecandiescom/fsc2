@@ -210,12 +210,7 @@ int hjs_fc_init_hook( void )
 		func = CHAR_P T_free( func );
 		vars_push( STR_VAR, DEVICE_NAME );    /* push the new pass-phrase */
 
-		if ( ( v = func_call( Func_ptr ) ) == NULL )
-		{
-			print( FATAL, "Internal error detected at %s:%d.\n",
-				   __FILE__, __LINE__ );
-			THROW( EXCEPTION );
-		}
+		v = func_call( Func_ptr );
 
 		if ( v->val.lval != 1 )
 		{
@@ -905,7 +900,6 @@ static void hjs_fc_set_dac( double volts )
 {
 	Var *Func_ptr;
 	int acc;
-	Var *v;
 
 
 	if ( ( Func_ptr = func_get( hjs_fc.dac_func, &acc ) ) == NULL )
@@ -917,15 +911,7 @@ static void hjs_fc_set_dac( double volts )
 
 	vars_push( STR_VAR, DEVICE_NAME );       /* push the pass-phrase */
 	vars_push( FLOAT_VAR, volts );
-
-	if ( ( v = func_call( Func_ptr ) ) == NULL )
-	{
-		print( FATAL, "Internal error detected at %s:%d.\n",
-			   __FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
-
-	vars_pop( v );
+	vars_pop( func_call( Func_ptr ) );
 }
 
 
