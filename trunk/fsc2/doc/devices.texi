@@ -3195,7 +3195,8 @@ spectrapro_300i;
 in the @code{DEVICES} section. 
 
 Some of the functions listed below will only work when the monochromator
-is used in conjunction with the Spec-10 CCD camera by Roper Scientific.
+is used in conjunction with a CCD camera (and have been tested only with
+the Spec-10 CCD camera by Roper Scientific).
 
 @table @samp
 
@@ -3228,6 +3229,7 @@ nm} and @w{1400 nm}.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
+
 
 @anchor{monochromator_groove_density}
 @item monochromator_groove_density()
