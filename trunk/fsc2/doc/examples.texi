@@ -139,7 +139,7 @@ enough space for all points of the spectrum.
 
 The variables @code{I} and @code{J} are simple counters and
 @code{File_1} and @code{File_2} are integer variables that we will
-use for file handles - we are going to use two files, one for storing
+use for file handles -- we are going to use two files, one for storing
 intermediate results, i.e.@: all single run spectra, and a second one
 for saving the end results, the mean values of the data of all runs.
 Finally, @code{tc} is going to be used for the lock-in's time constant.
@@ -163,7 +163,7 @@ the magnetic fields (in Gauss) and the @i{y}-axis will represent the
 measured signal intensity in micro-Volts.
 
 The first thing done in the @code{EXPERIMENT} section is asking the user
-to supply two file names - what we get back from the functions are
+to supply two file names -- what we get back from the functions are
 integer numbers that are going to be used later to indicate into which
 of the two files data are to be written.
 
@@ -196,11 +196,11 @@ number of runs done so far.
 
 If you should have any trouble understanding the @i{x}-coordinate given
 as an integer numbers while on the screen the scale is to be shown in
-field units, here's an explanation: in the @code{init_1d()}
-(@pxref{init_1d}) function call during the @code{PREPARATIONS} section
-we told the program that the first @i{x}-axis value would be at a field
-of the value of @code{start_field} and that all following fields would
-be equally spaced by a field difference according to the value of the
+field units, here's an explanation: in the @code{init_1d()} function
+(@pxref{init_1d}) call during the @code{PREPARATIONS} section we told
+the program that the first @i{x}-axis value would be at a field of the
+value of @code{start_field} and that all following fields would be
+equally spaced by a field difference according to the value of the
 variable @code{field_step}. The program uses this information to convert
 a @i{x}-coordinate of @code{1} to make the data point appear at the
 field scale value of @code{start_field}, a @i{x}-coordinate of @code{2}
@@ -221,7 +221,7 @@ All now still needed in the inner loop is to sweep to a new magnetic
 field (which, according to the our call of @code{magnet_setup()}
 (@pxref{magnet_setup}) in the @code{PREPARATIONS} section is supposed to
 be @code{field_step} higher than the current value). When the magnet has
-reached the new field the @code{sweep_up()} (@pxref{sweep_up}) function
+reached the new field the @code{sweep_up()} function (@pxref{sweep_up})
 returns the new field value which gets stored in the variable
 @code{field}.
 
@@ -658,7 +658,7 @@ being swept.
 The following 4 lines (46-49) are for creating a set of radio buttons.
 Radio buttons always appear in groups and the important property is that
 always only one of them can be switched on. That's exactly what we need
-to control if the magnet is to be swept up or down or stopped - it can
+to control if the magnet is to be swept up or down or stopped -- it can
 only be in one of these states. To create a button we need to call the
 function @code{button_create()} (@pxref{button_create}). For the first
 of group of radio buttons it takes just two arguments, the first one
@@ -758,7 +758,7 @@ the display at @i{x}-coordinate @code{I} and afterwards we increment
 @code{I} to be prepared for the next set of data points.
 
 Before now also stepping the field up or down we first have to check the
-state of the sweep buttons - the user may have pushed one of them. This
+state of the sweep buttons -- the user may have pushed one of them. This
 is what happens in the lines 74 to 89. Checking the state of a button is
 done using the same function that already was used to set the state of a
 button, @code{button_state()} (@pxref{button_state}), but without a
@@ -771,10 +771,10 @@ active but we're not sweeping up (i.e.@: when @code{Sweep_State} isn't
 @code{1}) we'll have to change the @code{Sweep_State} variable to in
 accordance with the users request. To also give a visual indication that
 the sweep directon changed we then draw a marker at the current
-coordinate. This is one via the @code{draw_marker()}
-(@pxref{draw_marker}) function. It takes two arguments, the
-@i{x}-coordinate and a string for the color of the marker, and will draw
-a vertical dashed line in the selected color.
+coordinate. This is one via the @code{draw_marker()} function
+(@pxref{draw_marker}). It takes two arguments, the @i{x}-coordinate and
+a string for the color of the marker, and will draw a vertical dashed
+line in the selected color.
 
 Of course, if the sweep-up button isn't active we also have to check the
 sweep-down and the stop-sweep buttons, in exactly the same way as we did
@@ -786,7 +786,7 @@ the stop-sweep button is active). But we have to be a bit careful:
 before stepping up or down the field we have to make sure that the new
 field value is still within the allowed limits for the magnet. (If we
 don't take care here the script might be stopped by the driver for the
-magnet - but most drivers will handle the situation more gracefully by
+magnet -- but most drivers will handle the situation more gracefully by
 simply refusing to sweep the field out of the allowed limits, but you
 shouldn't count on this.)
 
@@ -795,7 +795,7 @@ magnet to set the new field by calling the function @code{set_field()}
 (@pxref{set_field}).  It returns the value of the new field, which we
 store in the @code{field} variable. When done with this we still have to
 update the output field for displaying the current field by calling the
-@code{output_value()} (@pxref{output_value}) function. It takes two
+@code{output_value()} function (@pxref{output_value}). It takes two
 arguments, the handle of the output field we got when it was created and
 the new value to be displayed.
 
@@ -833,11 +833,11 @@ in both the variables @code{field} and @code{last_field}. Of course, we
 also have the output field showing the current field. On the other hand,
 if the value isn't acceptable we must notify the user which we do by
 resetting the input field to its previous value, using again the
-@code{input_value()} (@pxref{input_value}) function.
+@code{input_value()} function (@pxref{input_value}).
 
 Now we're nearly done, there only remain two more buttons to be taken
-care of. Handling the button for stopping the acquisition is simple - we
-just have to get its state and set the @code{Pause_State} variable
+care of. Handling the button for stopping the acquisition is simple --
+we just have to get its state and set the @code{Pause_State} variable
 accordingly, which is done in line 133.
 
 Also dealing with the button for clearing the display isn't complicated.
@@ -855,7 +855,7 @@ also remove the markers that might have been drawn, using the functions
 remove all curves and markers, otherwise you would have to supply a list
 of curve numbers and marker handles).  But we also call the function
 @code{rescale()} (@pxref{rescale}) to reduce the @i{x}-scaling to some
-reasonable value (here @code{64}) - if we wouldn't do so and the number
+reasonable value (here @code{64}) -- if we wouldn't do so and the number
 of points displayed before removing the curves was very large, e.g.@:
 10000, the @i{x}-scaling would remain set for displaying 10000 points,
 which would probably be rather not what the user expects.
@@ -917,7 +917,7 @@ digitizer instead of a lock-in amplifier to do the detection:
 51 
 52 PULSE_3: FUNCTION = DETECTION,
 53          START    = PULSE_2.START + PULSE_2.LENGTH / 2 + tau,
-54          LENGTH   = 5 ns;
+54          LENGTH   = 10 ns;
 55 
 56 magnet_setup( start_field, end_field );
 57 init_1d( 1, 0, start_field, field_step,
@@ -956,6 +956,117 @@ i.e.@: the start and end field and the field sweep with. Then we declare
 a variable with the length of a pi-half pulse and the edge-to-edge
 distance of the two pulses we're going to use. 
 
+Finally, we have a variable for storing the current field, an array with
+two elements for the echo area and an area off-signal, another array for
+digitizer window descriptors (to be explained later) and a counter
+variable.
+
+Then follows a section which we haven't had to deal with until now, the
+@code{ASSIGNMENTS} section. It is for the basic set up of the pulser.
+
+As the very first thing (line 35) we need to set the time base the
+pulser is going to be used with. It always has to be the first
+instruction because all timings in later statements concerning the
+pulser must be integer multiples of this time base and the program can
+only check this when it already knows about the time base.
+
+The next statment sets the trigger mode for the pulser. Here we tell
+@code{fsc2} to use the internal trigger of the pulser and to take care
+that the repetition frequency is @w{200 Hz}. If we wouldn't set a
+repetition frequency (or time), the pulser would repeat the pulse
+sequence with the highest possible rate. This wouldn't make to much
+sense, not only because didgitizers usually can't sample data that fast,
+but also because we need some time for the spin system to relax back to
+Boltzmann distribution before applying the pulse sequence again.
+
+The following lines are for setting up pulser functions. Each pulse is
+supposed to have a function. Typical functions are @code{MICROWAVE},
+@code{TWT}, @code{RADIO_FREQUENCY}, @code{DETECTION} and many more.
+For this simple experiment we only need two functions, we need microwave
+pulses and another pulse to trigger the digitizer at the right moment,
+i.e.@: a detection pulse. For each of the used functions the output
+channel(s) of the pulser must be defined, i.e.@: on which of its
+connectors the pulse will appear. Here we tell @code{fsc2} to route
+microwave pulses to the output pod @code{1} and the detection pulse to
+pod @code{3}. Additionally, we also set the high voltage for the
+microwave pulses to @w{+5 V} and the low voltage to @w{0 V}.
+
+The declaration of the pulses happens in the @code{PREPARATIONS}
+section, starting at line 44. Pulses always start with the word
+@code{PULSE} (but which can be abbreviated to a simple @code{P}),
+followed by an optional underscore and end in a unique number which must
+be non-negative. @code{PULSE_7}, @code{PULSE7}, @code{P_7} and @code{P7}
+are all legal names of the same pulse. For each pulse at least its
+function and start position must be set. As long as its length isn't
+set the pulse cannot be used (there is an exception for pulsers that can
+generate trigger pulses of only a fixed length).
+
+In line 44 the definition of pulse @code{PULSE_1} (which also could be
+called @code{P1}) starts: its function is set to @code{MICROWAVE},
+i.e.@: it will be output on the pulsers pod designated for microwave
+pulses in the @code{ASSIGNMENTS} section, its starting position is
+@w{0 ns} after the trigger and its length is set to the the value stored
+in the variable @code{pi_half}.
+
+@code{PULSE_2} is also a microwave pulse, but is starts displaced by a
+time @code{tau} after the falling edge of the first pulse,
+@code{PULSE_1}. As you can see from the code you can use the properties
+of already pulses by a combination of the pulse name, a dot, and the
+name of the property.
+
+Finally, @code{PULSE_3} is the trigger pulse for the digitizer. It is
+supposed to appear exactly on top of the echo, i.e.@: after twice the
+time between the middle of the first and the second pulse. Its length 
+isn't really that important, a rather short pulse should do fine.
+
+The next lines starting at line 56 should already be well known from the
+first script for a normal @i{cw}-experiment: the magnet and the graphics
+get initialized.
+
+Because we use here a digitizer to measure the echo area we also should
+set up the digitizer. Calling the function
+@code{digitizer_num_averages()} (@pxref{digitizer_num_averages}) we set
+the digitizer to always accumulate the results of 100 repetitions of the
+pulse sequence. @code{digitizer_trigger_channel()}
+(@pxref{digitizer_trigger_chhannel}) tells the digitizer to expect the
+trigger signal on its @code{AUX} channel. The next call of
+@code{digitizer_trigger_position()} (@pxref{digitizer_trigger_position})
+sets the position within the trace it records. By setting it to 0.2 the
+digitzer will use a pretrigger a fifth (of 20%) of the measured trace.
+
+Finally, we must define ranges for measuring the area, otherwise the
+digitizer would return the area of the full trace. This is done by
+calling the @code{digitizer_define_window()} function
+(@pxref{digitizer_define_window}), which expects up to two arguments,
+the start position of the range (relative to the trigger position and
+its length. It returns an integer number which in the following is used
+in further function calls for the digitizer. Here we define two windows,
+with the first on top of the echo and another one far of the echo to
+allow background subtraction. The window handles returned by the
+function calls are stored in the array @code{W}.
+
+Now we are done with all preparations and can start with the
+@code{EXPERIMENT} section. The whole experiment is done within a
+@code{WHILE} loop, which is repeated until the field has reached the end
+field.
+
+Since the pulser is already running the first thing to be done in the
+loop is to start an acquisition sequence of the digitizer by calling
+@code{digitizer_start_acquisition()}
+(@pxref{digitizer_start_acquisition}). This function only returns when
+the digitizer is finished accumulating the requested number of traces.
+When it is done we first fetch the area where the echo is supposed to be
+by calling @code{digitizer_get_area()} (@pxref{digitizer_get_area}). The
+function expects two arguments, the channel used for measuring (here
+channel 1, @code{CH1}), and the handle for the window previously
+defined. After storing the result in the first element of array
+@code{area} we call the function again to also get the off-signal area.
+
+All now to be done is to display the area, or to be precise, the
+difference between the on-signal and the off-signal areas, multiplied by
+1.0e12 because in the call of @code{init_1d()} we promised to display
+the signal in units of mV times ns, but the digitizer returns the areas
+always in Vs units.
 
 
 
