@@ -927,11 +927,12 @@ void dg2020_full_reset( void )
 
 	while ( p != NULL )
 	{
-		/* First we check if the pulse has been used at all, send a warning
-           and delete it if it hasn't (unless we haven't ben told to keep
-		   all pulses, even unused ones) */
+		/* After the test run check if the pulse has been used at all, send
+		   a warning and delete it if it hasn't (unless we haven't ben told
+		   to keep all pulses, even unused ones) */
 
-		if ( ! p->has_been_active && ! dg2020.keep_all )
+		if ( FSC2_MODE != EXPERIMENT &&
+			 ! p->has_been_active && ! dg2020.keep_all )
 		{
 			if ( p->num >=0 )
 				print( WARN, "Pulse #%ld is never used.\n", p->num );

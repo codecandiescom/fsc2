@@ -456,12 +456,15 @@ int ep385_exp_hook( void )
 
 	/* Initialize the device */
 
+	ep385_IN_SETUP = SET;
 	if ( ! ep385_init( DEVICE_NAME ) )
 	{
+		ep385_IN_SETUP = UNSET;
 		print( FATAL, "Failure to initialize the pulser: %s\n",
 			   gpib_error_msg );
 		THROW( EXCEPTION );
 	}
+	ep385_IN_SETUP = UNSET;
 
 	return 1;
 }
@@ -474,6 +477,11 @@ int ep385_end_of_exp_hook( void )
 {
 	ep385_run( UNSET );
 	gpib_local( ep385.device );
+
+	/* Reset the internal representation back to its initial state
+	   in case another experiment is started */
+
+	ep385_full_reset( );
 
 	return 1;
 }

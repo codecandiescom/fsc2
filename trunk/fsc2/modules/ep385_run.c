@@ -524,10 +524,10 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function is called after the test run to reset all the variables */
-/* describing the state of the pulser to their initial values.      */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* Function is called after the test run and experiments to reset all the */
+/* variables describing the state of the pulser to their initial values.  */
+/*------------------------------------------------------------------------*/
 
 void ep385_full_reset( void )
 {
@@ -541,11 +541,12 @@ void ep385_full_reset( void )
 
 	while ( p != NULL )
 	{
-		/* First we check if the pulse has been used at all, send a warning
-           and delete it if it hasn't (unless we haven't ben told to keep
-		   all pulses, even unused ones) */
+		/* After the test run check if the pulse has been used at all, send
+		   a warning and delete it if it hasn't (unless we haven't ben told
+		   to keep all pulses, even unused ones) */
 
-		if ( ! p->has_been_active && ! ep385.keep_all )
+		if ( FSC2_MODE != EXPERIMENT &&
+			 ! p->has_been_active && ! ep385.keep_all )
 		{
 			print( WARN, "Pulse #%ld is never used.\n", p->num );
 			p = ep385_delete_pulse( p, SET );
@@ -599,8 +600,8 @@ void ep385_full_reset( void )
 
 			pm_entry = f->pm[ f->next_phase * f->num_channels + j ];
 
-			ch->num_active_pulses = 0;
-			for ( m = 0; ( p = pm_entry[ m ] ) != NULL; m++ )
+			for ( ch->num_active_pulses = 0, m = 0;
+				  ( p = pm_entry[ m ] ) != NULL; m++ )
 			{
 				if ( p->is_active )
 					continue;
@@ -611,8 +612,8 @@ void ep385_full_reset( void )
 				pp->len = p->len;
 				pp->pulse = p;
 
-				/* Extend pulses for which a shape pulse has been created
-				   automatically a bit */
+				/* Automatically extend pulses for which a shape pulse has
+				   been created a bit */
 
 				if ( p->function->self != PULSER_CHANNEL_PULSE_SHAPE &&
 					 p->sp != NULL )
