@@ -211,7 +211,7 @@ Var *vars_get( char *name )
 	Var *ptr;
 
 
-	/* try to find the variable with the name passed to the function */
+	/* Try to find the variable with the name passed to the function */
 
 	for ( ptr = var_list; ptr != NULL; ptr = ptr->next )
 		if ( ! strcmp( ptr->name, name ) )
@@ -270,13 +270,13 @@ Var *vars_add( Var *v1, Var *v2 )
 	Var *new_var;
 
 
-	/* make sure that `v1' and `v2' exist, are integers or float values 
+	/* Make sure that `v1' and `v2' exist, are integers or float values 
 	   and have an value assigned to it */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR );
 	vars_check( v2, INT_VAR | FLOAT_VAR );
 
-	/* now add the values while taking care to get the type right */
+	/* Add the values while taking care to get the type right */
 
 	if ( v1->type == INT_VAR )
 	{
@@ -295,7 +295,7 @@ Var *vars_add( Var *v1, Var *v2 )
 			new_var = vars_push( FLOAT_VAR, v1->val.dval + v2->val.dval );
 	}
 
-	/* pop the variables from the variable stack (if they belong to it) */
+	/* Pop the variables from the variable stack (if they belong to it) */
 
 	vars_pop( v1 );
 	vars_pop( v2 );
@@ -317,13 +317,13 @@ Var *vars_sub( Var *v1, Var *v2 )
 	Var *new_var;
 
 
-	/* make sure that `v1' and `v2' exist, are integers or float values 
+	/* Make sure that `v1' and `v2' exist, are integers or float values 
 	   and have an value assigned to it */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR );
 	vars_check( v2, INT_VAR | FLOAT_VAR );
 
-	/* now subtract the values while taking care to get the type right */
+	/* Subtract the values while taking care to get the type right */
 
 	if ( v1->type == INT_VAR )
 	{
@@ -342,7 +342,7 @@ Var *vars_sub( Var *v1, Var *v2 )
 			new_var = vars_push( FLOAT_VAR, v1->val.dval - v2->val.dval );
 	}
 
-	/* pop the variables from the variable stack (if they belong to it) */
+	/* Pop the variables from the variable stack (if they belong to it) */
 
 	vars_pop( v1 );
 	vars_pop( v2 );
@@ -364,13 +364,13 @@ Var *vars_mult( Var *v1, Var *v2 )
 	Var *new_var;
 
 
-	/* make sure that `v1' and `v2' exist, are integers or float values 
+	/* Make sure that `v1' and `v2' exist, are integers or float values 
 	   and have an value assigned to it */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR );
 	vars_check( v2, INT_VAR | FLOAT_VAR );
 
-	/* now multiply the values while taking care to get the type right */
+	/* Multiply the values while taking care to get the type right */
 
 	if ( v1->type == INT_VAR )
 	{
@@ -389,7 +389,7 @@ Var *vars_mult( Var *v1, Var *v2 )
 			new_var = vars_push( FLOAT_VAR, v1->val.dval * v2->val.dval );
 	}
 
-	/* pop the variables from the variable stack (if they belong to it) */
+	/* Pop the variables from the variable stack (if they belong to it) */
 
 	vars_pop( v1 );
 	vars_pop( v2 );
@@ -411,13 +411,13 @@ Var *vars_div( Var *v1, Var *v2 )
 	Var *new_var;
 
 
-	/* make sure that `v1' and `v2' exist, are integers or float values
+	/* Make sure that `v1' and `v2' exist, are integers or float values
 	   and have an value assigned to it */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR );
 	vars_check( v2, INT_VAR | FLOAT_VAR );
 
-	/* make sure the denominator is not zero */
+	/* Make sure the denominator is not zero */
 
 	if ( ( v2->type == INT_VAR && v2->val.lval == 0 ) ||
 		 ( v2->type == FLOAT_VAR && v2->val.dval == 0.0 ) )
@@ -426,7 +426,7 @@ Var *vars_div( Var *v1, Var *v2 )
 		THROW( EXCEPTION );
 	}
 
-	/* calculate the result and it push onto the stack */
+	/* Calculate the result and it push onto the stack */
 
 	if ( v1->type == INT_VAR )
 	{
@@ -445,7 +445,7 @@ Var *vars_div( Var *v1, Var *v2 )
 			new_var = vars_push( FLOAT_VAR, v1->val.dval / v2->val.dval );
 	}
 
-	/* pop the variables from the stack */
+	/* Pop the variables from the stack */
 
 	vars_pop( v1 );
 	vars_pop( v2 );
@@ -467,13 +467,13 @@ Var *vars_mod( Var *v1, Var *v2 )
 	Var *new_var;
 
 
-	/* make sure that `v1' and `v2' exist, are integers or float values
+	/* Make sure that `v1' and `v2' exist, are integers or float values
 	   and have an value assigned to it */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR );
 	vars_check( v2, INT_VAR | FLOAT_VAR );
 
-	/* make sure the second value is not zero */
+	/* Make sure the second value is not zero */
 
 	if ( ( v2->type == INT_VAR && v2->val.lval == 0 ) ||
 		 ( v2->type == FLOAT_VAR && v2->val.dval == 0.0 ) )
@@ -482,7 +482,7 @@ Var *vars_mod( Var *v1, Var *v2 )
 		THROW( EXCEPTION );
 	}
 
-	/* calculate the result and it push onto the stack */
+	/* Calculate the result and it push onto the stack */
 
 	if ( v1->type == INT_VAR )
 	{
@@ -502,7 +502,7 @@ Var *vars_mod( Var *v1, Var *v2 )
 								 fmod( v1->val.dval, v2->val.dval ) );
 	}
 
-	/* pop the variables from the stack */
+	/* Pop the variables from the stack */
 
 	vars_pop( v1 );
 	vars_pop( v2 );
@@ -527,13 +527,13 @@ Var *vars_pow( Var *v1, Var *v2 )
 		 i;
 
 
-	/* make sure that `v1' and `v2' exist, are integers or float values
+	/* Make sure that `v1' and `v2' exist, are integers or float values
 	   and have an value assigned to it */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR );
 	vars_check( v2, INT_VAR | FLOAT_VAR );
 
-	/* make sure the base is not negative while the exponent 
+	/* Make sure the base is not negative while the exponent 
 	   is not an integer */
 
 	if ( ( ( v1->type == INT_VAR && v1->val.lval < 0 ) ||
@@ -545,7 +545,7 @@ Var *vars_pow( Var *v1, Var *v2 )
 		THROW( EXCEPTION );
 	}
 
-	/* calculate the result and it push onto the stack */
+	/* Calculate the result and it push onto the stack */
 
 	if ( v1->type == INT_VAR )
 	{
@@ -578,7 +578,7 @@ Var *vars_pow( Var *v1, Var *v2 )
 								 pow( v1->val.dval, v2->val.dval ) );
 	}
 
-	/* pop the variables from the stack */
+	/* Pop the variables from the stack */
 
 	vars_pop( v1 );
 	vars_pop( v2 );
@@ -598,7 +598,7 @@ Var *vars_pow( Var *v1, Var *v2 )
 
 Var *vars_negate( Var *v )
 {
-	/* make sure that `v' exists, has integer or float type and has
+	/* Make sure that `v' exists, has integer or float type and has
 	   an value assigned to it */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -630,7 +630,7 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 	Var *new_var;
 
 
-	/* make sure that `v1' and `v2' exist, are integers or float values
+	/* Make sure that `v1' and `v2' exist, are integers or float values
 	   and have an value assigned to it */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR );
@@ -654,7 +654,7 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 			assert( 1 == 0 );
 	}
 
-	/* pop the variables from the stack */
+	/* Pop the variables from the stack */
 
 	vars_pop( v1 );
 	vars_pop( v2 );
@@ -678,8 +678,8 @@ Var *vars_push( int type, ... )
 	va_list ap;
 
 
-	/* get memory for the new variable to be apppended to the stack
-	   and setits type */
+	/* Get memory for the new variable to be apppended to the stack
+	   and set its type */
 
 	new_stack_var = T_malloc( sizeof( Var ) );
 	new_stack_var->type = type;
@@ -706,9 +706,11 @@ Var *vars_push( int type, ... )
 			break;
 
 		case FUNC :
-			/* understanding about the function pointer seems to be too
-			   complicated for va_arg() when written directly thus `FnctPtr'
-			   is a typedef (see start of file) */
+
+			/* Understanding the function pointer seems to be too complicated
+			   for va_arg() when written directly thus `FnctPtr' is a typedef
+			   (see start of file) */
+
 			new_stack_var->val.fnct = va_arg( ap, FnctPtr );
 			break;
 
@@ -743,13 +745,13 @@ Var *vars_push( int type, ... )
 
 	va_end( ap );
 	
-	/* clear its `flag' and set the `name' and `next' entry to NULL */
+	/* Clear its `flag' and set the `name' and `next' entry to NULL... */
 
 	new_stack_var->name = NULL;
 	new_stack_var->next = NULL;
 	new_stack_var->flags = 0;
 
-	/* and finally append it to the end of the stack */
+	/* ...and finally append it to the stack */
 
 	if ( ( stack = Var_Stack ) == NULL )
 	{
@@ -764,7 +766,7 @@ Var *vars_push( int type, ... )
 		new_stack_var->prev = stack;
 	}
 
-	/* return address of the new stack variable */
+	/* Return the address of the new stack variable */
 
 	return new_stack_var;
 }
@@ -784,7 +786,7 @@ void vars_pop( Var *v )
 	if ( v == NULL )
 		return;
 
-	/* figure out if v is on the stack */
+	/* Figure out if 'v' is on the stack */
 
 	while ( stack )
 		if ( stack == v )
@@ -795,7 +797,7 @@ void vars_pop( Var *v )
 			stack = stack->next;
 		}
 
-	/* if v is on the stack remove it */
+	/* If it is on the stack remove it */
 
 	if ( stack != NULL )
 	{
@@ -859,9 +861,9 @@ void vars_clean_up( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* free_vars() removes all variables from the list of variables */
-/*--------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* free_vars() removes all variables from the list of variables. */
+/*---------------------------------------------------------------*/
 
 void free_vars( void )
 {
@@ -904,6 +906,17 @@ void free_vars( void )
 }
 
 
+/*-------------------------------------------------------------------*/
+/* vars_check() first checks that the variable passed to it as the   */
+/* first argument really exists and then tests if the variable has   */
+/* the type passed as the second argument. The type to be tested for */
+/* can not only be a simple type but tests for different types at    */
+/* once are possible by specifying the types logically ored, i.e. to */
+/* test if a variable has integer or floating point type use         */
+/*               INT_VAR | FLOAT_VAR                                 */
+/* as the second argument.                                           */
+/*-------------------------------------------------------------------*/
+
 void vars_check( Var *v, int type )
 {
 	int i;
@@ -913,12 +926,12 @@ void vars_check( Var *v, int type )
 							 "INTEGER ARRAY SLICE", "FLOAT ARRAY SLICE",
 	                         "ARRAY REFERENCE" };
 	
-	/* being paranoid we first check that the variable exists at all -
+	/* Being paranoid we first check that the variable exists at all -
 	   probably this can be left out later. */
 
 	assert( vars_exist( v ) );
 
-	/* check that the variable has a value assigned to it */
+	/* Check that the variable has a value assigned to it */
 
 	if ( v->type == UNDEF_VAR )
 	{
@@ -936,7 +949,7 @@ void vars_check( Var *v, int type )
 		}
 	}
 	
-	/* check that the variable has the correct type */
+	/* Check that the variable has the correct type */
 
 	if ( ! ( v->type & type ) )
 	{
@@ -968,8 +981,8 @@ void vars_warn_new( Var *v )
 		else
 		{
 			/* ERROR: transient variables shouldn't have a name (with the
-			   only exception for functions, but then we should never end
-			   up here...) */ 
+			   only exception for functions, but then we shouldn't end
+			   up here anyway...) */ 
 
 			eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s.\n",
 					__FILE__, __LINE__ );
@@ -979,8 +992,10 @@ void vars_warn_new( Var *v )
 }
 
 
-/*---------------------------------------------------------*/
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* vars_exist() checks if a variable really exists by looking it */
+/* up in the variable list as well as on the variable stack.     */
+/*---------------------------------------------------------------*/
 
 bool vars_exist( Var *v )
 {
@@ -1001,7 +1016,6 @@ bool vars_exist( Var *v )
 }
 
 
-
 /*-------------------------------------------------------------------*/
 /* This function is called when a `VAR_TOKEN [' combination is found */
 /* in the input. For a new array it sets its type. Everything else   */
@@ -1014,7 +1028,7 @@ Var *vars_arr_start( Var *v )
 {
 	Var *ret;
 
-	/* test if variable exists */
+	/* <PARANOIA> Test if variable exists </PARANOIA> */
 
 	assert( vars_exist( v ) );
 
@@ -1033,7 +1047,7 @@ Var *vars_arr_start( Var *v )
 	else
 		vars_check( v, INT_ARR | FLOAT_ARR );
 
-	/* push variable with generic pointer to array onto the stack */
+	/* Push variable with generic pointer to array onto the stack */
 
 	ret = vars_push( ARR_PTR, NULL, v );
 	return ret;
@@ -1060,24 +1074,29 @@ Var *vars_arr_lhs( Var *v )
 
 	a = v->from;
 
-	/* count the variable below v on the stack */
+	/* Count the variable below v on the stack */
 
 	for ( dim = 0, cv = v->next; cv != 0; cv = cv->next )
 		if ( cv->type != UNDEF_VAR )
 			dim++;
 
-	/* if the array is new we need to set it up */
+	/* If the array is new we need to set it up */
 
 	if ( a->flags & NEW_VARIABLE )
 		return vars_setup_new_array( a, dim, v );
 
-	/* push a pointer to the indexed element onto the stack */
+	/* Push a pointer to the indexed element onto the stack */
 
 	return vars_get_lhs_pointer( a, v, dim );
 }
 
 
 /*----------------------------------------------------------------------*/
+/* The function is called when after an array variable and the list of  */
+/* indices the final closing braket ']' is found in the input file. It  */
+/* evaluates the index list and returns an ARR_PTR variable pointing to */
+/* the indexed array element (or slice, if there is one index less than */
+/* the array has dimensions).                                           */
 /*----------------------------------------------------------------------*/
 
 Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
@@ -1086,7 +1105,7 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
 	long index;
 
 
-	/* check that there are enough indices on the stack (since variable sized
+	/* Check that there are enough indices on the stack (since variable sized
        arrays allow assignment of array slices there needs to be only one
        index less than the dimension of the array) */
 
@@ -1097,7 +1116,7 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
 		THROW( EXCEPTION );
 	}
 
-	/* check that there are not too many indices */
+	/* Check that there are not too many indices */
 
 	if ( dim > a->dim )
 	{
@@ -1106,7 +1125,7 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
 		THROW( EXCEPTION );
 	}
 
-	/* for arrays that still are variable sized we need assignment of a
+	/* For arrays that still are variable sized we need assignment of a
        complete slice in order to determine the missing size of the last
        dimension */
 
@@ -1159,6 +1178,8 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
 
 
 /*----------------------------------------------------------------------*/
+/* The functions calculates the pointer to an element (or slice) of the */
+/* array 'a' from a list of indices on the stack, starting at 'v'.      */
 /*----------------------------------------------------------------------*/
 
 long vars_calc_index( Var *a, Var *v )
@@ -1166,7 +1187,6 @@ long vars_calc_index( Var *a, Var *v )
 	Var  *vn;
 	int  i, cur;
 	long index;
-
 
 
 	/* Run through all the indices on the variable stack */
@@ -1197,7 +1217,7 @@ long vars_calc_index( Var *a, Var *v )
 			cur = ( int ) v->val.dval - ARRAY_OFFSET;
 		}
 
-		/* Check that the index a number not a `*' */
+		/* Check that the index is a number and not a `*' */
 
 		if ( cur == - ARRAY_OFFSET && v->flags & VARIABLE_SIZED )
 		{
@@ -1252,8 +1272,12 @@ long vars_calc_index( Var *a, Var *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* The function creates a new array 'a' od dimension 'd' with the sizes of */
+/* the dimensions specified by a list of indices on the stack, starting    */
+/* at 'v'. If the list conatains only one index less than the dimension, a */
+/* variable sized array is created.                                        */
+/*-------------------------------------------------------------------------*/
 
 Var *vars_setup_new_array( Var *a, int dim, Var *v )
 {
@@ -1368,7 +1392,7 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 /* Function is called if an element or a slice of an array is accessed  */
 /* after the indices are read in. Prior to the call of this function    */
 /* vars_arr_start() has been called and pushed a generic pointer to the */
-/* array (i.e. of type ARR_PTR) */
+/* array (i.e. of type ARR_PTR)                                         */
 /*----------------------------------------------------------------------*/
 
 Var *vars_arr_rhs( Var *v )
@@ -1477,13 +1501,7 @@ void vars_assign( Var *src, Var *dest )
 		case INT_TRANS_ARR : case FLOAT_TRANS_ARR :  /* transient array */
 			vars_ass_from_trans_ptr( src, dest );
 			break;
-/*
-		case INT_ARR : case FLOAT_ARR :
-			eprint( FATAL, "%s:%ld: A complete array can't be used in an "
-					"assignment (try `%s[]' instead).\n",
-					Fname, Lc, src->name );
-			THROW( EXCEPTION );
-*/
+
 		default :
 			assert( 1 == 0 );           /* we never should end here... */
 	}
@@ -1493,12 +1511,16 @@ void vars_assign( Var *src, Var *dest )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* Function assigns a value to a variable or an element of an array, thus */
+/* only INT_VAR, FLOAT_VAR and ARR_PTR are allowed as types of the des-   */
+/* tination variable 'dest'. The source has to be a simple variable, i.e. */
+/* must be of type INT_VAR or FLOAT_VAR.                                  */
+/*------------------------------------------------------------------------*/
 
 void vars_ass_from_var( Var *src, Var *dest )
 {
-	/* don't do the assignment if the right hand side has no value */
+	/* Don't do an assignment if right hand side has no value */
 
 	if ( src->flags & NEW_VARIABLE )
 	{
@@ -1508,7 +1530,7 @@ void vars_ass_from_var( Var *src, Var *dest )
 		THROW( EXCEPTION );
 	}
 
-	/* stop if left hand side needs an array slice but all we have is
+	/* Stop if left hand side needs an array slice but all we have is
 	   a variable */
 
 	if ( dest->flags & NEED_SLICE )
@@ -1519,7 +1541,7 @@ void vars_ass_from_var( Var *src, Var *dest )
 		THROW( EXCEPTION );
 	}
 
-	/* if the destination variable is still completely new set its type */
+	/* If the destination variable is still completely new set its type */
 
 	if ( dest->type == UNDEF_VAR )
 	{
@@ -1527,11 +1549,10 @@ void vars_ass_from_var( Var *src, Var *dest )
 		dest->flags &= ~NEW_VARIABLE;
 	}
 
-	/* Now do the assignment - take care: the left hand side variable can be
+	/* Do the assignment - take care: the left hand side variable can be
 	   either a real variable or an array pointer with the void pointer
-	   `val.gptr' in the variable structure pointing to the data to be set in
-	   an array.
-	*/
+	   `val.gptr' in the variable structure pointing to the data to be set
+	   in an array.  */
 
 	switch ( dest->type )
 	{
@@ -1584,8 +1605,10 @@ void vars_ass_from_var( Var *src, Var *dest )
 }
  
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*------------------------------------------------------*/
+/* The function assigns complete array slices. Both the */
+/* source and the destination type must be ARR_PTR.     */  
+/*------------------------------------------------------*/
 
 void vars_ass_from_ptr( Var *src, Var *dest )
 {
@@ -1594,11 +1617,11 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 	int i;
 
 
-	/* may be that's paranoid, but... */
+	/* May be that's paranoid, but... */
 
 	assert( src->from->type & ( INT_ARR | FLOAT_ARR ) );
 
-	/* we can't assign from an array slice to a variable */
+	/* We can't assign from an array slice to a variable */
 
 	if ( dest->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -1614,9 +1637,9 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 	d = dest->from;
 	s = src->from;
 
-	/* Do allocation of memory (set size of missing dimension to the last one
-	   of the source array) if the destination array needs it, otherwise check
-	   that sizes of the array sizes is equal. */
+	/* Allocate memory (set size of missing dimension to the last one of the
+	   source array) if the destination array needs it, otherwise check that
+	   size of both the arrays is equal. */
 
 	if ( d->flags & NEED_ALLOC )
 	{
@@ -1642,7 +1665,7 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 		if ( d->sizes[ d->dim - 1 ] != s->sizes[ s->dim - 1 ] )
 		{
 			eprint( FATAL, "%s:%ld: Arrays (or slices of) `%s' and `%s' have "
-					"different size.\n", Fname, Lc, d->name, s->name );
+					"different sizes.\n", Fname, Lc, d->name, s->name );
 			THROW( EXCEPTION );
 		}
 
@@ -1658,7 +1681,7 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 		eprint( WARN, "%s:%ld: Assignment of float array (slice) `%s' to "
 				"integer array `%s'.\n", Fname, Lc, s->name, d->name );
 
-	/* get also the correct type of pointer for the data source - the pointer
+	/* Get also the correct type of pointer for the data source - the pointer
 	   to the start of the slice is always stored as a void pointer */
 
 	if ( s->type == INT_ARR )
@@ -1666,7 +1689,7 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 	else
 		src->val.dpnt = ( double * ) src->val.gptr;
 
-	/* Now copy the array slice */
+	/* Finally copy the array slice */
 
 	for ( i = 0; i < d->sizes[ d->dim - 1 ]; i++ )
 	{
@@ -1689,6 +1712,9 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 
 
 /*----------------------------------------------------------------------*/
+/* Function also assigns an array slice, but here the source must be an */
+/* transient integer or float array while the destination type is again */
+/* an ARR_PTR.                                                          */
 /*----------------------------------------------------------------------*/
 
 void vars_ass_from_trans_ptr( Var *src, Var *dest )
@@ -1699,7 +1725,7 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 	long   *slptr;
 
 
-	/* we can't assign from a transient array to a variable */
+	/* We can't assign from a transient array to a variable */
 
 	if ( dest->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -1786,8 +1812,12 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+/* Function initializes a new array. When called the stack at 'v' contains  */
+/* all the data for the initialization (the last data on top of the stack)  */
+/* and, directly below the data, an ARR_PTR to the array to be initialized. */
+/* If 'v' is NULL no inititialisation has to be done.                       */
+/*--------------------------------------------------------------------------*/
 
 void vars_arr_init( Var *v )
 {
@@ -1797,7 +1827,7 @@ void vars_arr_init( Var *v )
 		 *a;
 
 
-	/* if there are no initialization data this is indicated by a variable
+	/* If there are no initialization data this is indicated by a variable
 	   of type UNDEF_VAR - just pop it as well as the array pointer */
 
 	if ( v->type == UNDEF_VAR )
@@ -1808,10 +1838,9 @@ void vars_arr_init( Var *v )
 	}
 
 	/* The variable pointer this function gets passed is a pointer to the very
-       last initialization datum on the variable stack. Now we've got to work
-       our way up in the variable stack until we find the first non-data
-       variable, indicated by having the IS_META property set in its flags,
-	   which should be a pointer to an array. */
+       last initialization data on the variable stack. Now we've got to work
+       our way doen the variable stack until we find the first non-data
+       variable which must be of ARR_PTR type. */
 
 	while ( v->type != ARR_PTR )
 		v = v->prev;
@@ -1839,7 +1868,7 @@ void vars_arr_init( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* count number of initializers and check that it fits the number of
+	/* Count number of initializers and check that it fits the number of
        elements the array */
 
 	for ( p1 = v->next, ni = 0; p1 != NULL; ni++, p1 = p1->next )
@@ -1856,7 +1885,7 @@ void vars_arr_init( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* Finaly do the assignments - walk through the data and copy them into
+	/* Finally do the assignments - walk through the data and copy them into
 	   the area for data in the array */
 
 	if ( a->type == INT_ARR )
@@ -1898,7 +1927,7 @@ void vars_arr_init( Var *v )
 /*--------------------------------------------------------------------------*/
 /* This function is called from the parsers for variable or function tokens */
 /* possibly followed by a unit. If there was no unit the second argument is */
-/* NULL and nothing has to be done. If it isn't NULL we've got top check    */
+/* NULL and nothing has to be done. If it isn't NULL we've got to check     */
 /* that the token is really a simple number and multiply it then with the   */
 /* unit. If the variable or function token is an array we have to drop out  */
 /* of parsing and print an error message instead.                           */
@@ -1912,8 +1941,10 @@ Var *apply_unit( Var *var, Var *unit )
 			return vars_mult( var, vars_push( INT_VAR, 1 ) );
 		if ( var->type & ( INT_ARR | FLOAT_ARR ) )
 			return vars_push( ARR_REF, var );
+		if ( var->type & ( INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_PTR ) )
+			 return var;
 
-		assert( 1 == 0 );
+		assert( 1 == 0 );           /* This better never happens... */
 	}
 	else
 	{

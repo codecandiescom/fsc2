@@ -67,7 +67,9 @@ Var *f_sqrt( Var *v  );
 Var *f_print( Var *v  );
 Var *f_wait( Var *v  );
 Var *f_init_display( Var *v );
-
+Var *f_dim( Var *v );
+Var *f_size( Var *v );
+Var *f_sizes( Var *v );
 
 
 /* The following variables are shared with loader.c which adds further 
@@ -103,7 +105,10 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "print",        f_print,        -1, ACCESS_ALL, 0 },
 	{ "wait",         f_wait,          1, ACCESS_ALL, 0 },
 	{ "init_display", f_init_display, -1, ACCESS_ALL, 0 },
-	{ NULL,           NULL,            0, 0,          0 }  
+	{ "dim",          f_dim,           1, ACCESS_ALL, 0 },
+	{ "size",         f_size,          2, ACCESS_ALL, 0 },
+	{ "sizes",        f_sizes,         1, ACCESS_ALL, 0 },
+	{ NULL,           NULL,            0, 0,          0 }
 	                                     /* marks last entry, don't remove ! */
 };
 
@@ -955,4 +960,47 @@ Var *f_init_display( Var *v )
 
 	graphics_init( dim, l1, l2 );
 	return vars_push( INT_VAR, 1 );
+}
+
+
+
+Var *f_dim( Var *v )
+{
+	vars_check( v, ARR_REF );
+	return vars_push( INT_VAR, ( long ) v->from->dim );
+}
+
+Var *f_size( Var *v )
+{
+	int size;
+
+
+	vars_check( v, ARR_REF );
+	vars_check( v->next, INT_VAR | FLOAT_VAR );
+
+	if ( v->next->type == FLOAT_VAR )
+	{
+		eprint( WARN, "%s:%ld: WARNING: Float value used as index for array "
+				"`%s' in function `size'.\n", Fname, Lc, v->from->name );
+		size = ( int ) v->next->val.dval - ARRAY_OFFSET;
+	}
+	else
+		size = ( int ) v->next->val.lval - ARRAY_OFFSET;
+
+	if ( size >= v->from->dim )
+	{
+		eprint( FATAL, "%s:%ld: Array `%s' has only %d dimensions, can't "
+				"return size of %d. dimension.\n", Fname, Lc, v->from->name,
+				v->from->dim, size );
+		THROW( EXCEPTION );
+	}
+
+	return vars_push( INT_VAR, ( long ) v->from->sizes[ size ] );
+}
+
+
+Var *f_sizes( Var *v )
+{
+	vars_check( v, ARR_REF );
+	return vars_push( INT_TRANS_ARR, v->from->sizes, ( long ) v->from->dim );
 }
