@@ -159,6 +159,11 @@ Berlin 360 GHz spectrometer Oxford magnet sweep power supply
 Frankfurt S-band magnet via homebuilt DAC, broad field range
 @item s_band_magnet_narrow
 Frankfurt S-band magnet via homebuilt DAC, narrow field range
+@item hjs_sfc
+Pseudo-decive for magnet control in the Osnabrueck group (without field
+measurement)
+@item hjs_fc
+Pseudo-decive for magnet control in the Osnabrueck group
 @end table
 @noindent
 Because magnets hardly ever get changed (and if @code{fsc2} is set up
@@ -220,6 +225,32 @@ used for the SR510 and SR530 and port 4 for the SR810 and SR830 lock-in
 amplifier. But there exists also a function to directly select the DAC
 port to be used, see below.
 
+Both the modules for the controlling the magnets in the group of H.-J.@:
+Steinhoff in Osnabrueck are not for real devices but instead they use
+further modules to achive field control. The first of the two modules
+can set the field only according to a previous calibration because it
+does not have any access to a gaussmeter while the second uses the
+Bruker BNM12 gaussmeter. Both modules require the DA converter of the
+home-built DA and AD converter (module @code{hjs_daadc}, see below). The
+@code{hjs_fc} module also depends on the module for the the Bruker BNM12
+gaussmeter (@code{bnm12}) and the WITIO-48 DIO card (module
+@code{witio_48}, also see below) for reading values from the Bruker
+BNM12 gaussmeter. These required modules have to be listed
+@strong{before} the module itself, so in the @code{DEVICES} section
+they would appear as
+@example
+hjs_daadc;
+hjs_sfc;
+@end example
+@noindent
+and
+@example
+hjs_daadc;
+witio_48;
+bnm12;
+hjs_fc;
+@end example
+
 
 @table @samp
 @anchor{magnet_name}
@@ -266,6 +297,9 @@ experiment is restarted (i.e.@: if no new @code{EDL} file has been
 loaded in between) this shortened calibration is done anyways to check
 that the parameters didn't change significantly since the last run.
 
+This function does not exist for the modules @code{hfs_sfc} and
+@code{hjs_fc}.
+
 
 @anchor{set_field}
 @item set_field()
@@ -279,20 +313,21 @@ The function returns the new value of the field (which, in some cases
 might differ a bit from the requested value due to the properties of the
 device, i.e.@: restrictions of the esolution).
 
-For the @strong{AEG} magnets the function also accepts a second optional
-parameter, the maximum acceptable deviation of the field from the value
-to be set. For example by the call
+For the @strong{AEG} magnets and the @code{hjs_fc} module the function
+also accepts a second optional parameter, the maximum acceptable
+deviation of the field from the value to be set. For example by the call
 @example
 set_field( 3421.5 G, 0.2 G );
 @end example
 @noindent
 the field will be set to a value between @w{3421.3 G} and @w{3421.7 G}.
 
-If in the case of @strong{AEG} magnets this second parameter is missing
-the precision of the gaussmeter used for measuring the field is used. If
-the maximum deviation parameter is smaller than the precision of the
-gaussmeter the precision of the gaussmeter is used instead. The function
-can only be called in the @code{EXPERIMENT} section.
+If in the case of @strong{AEG} magnets (or the @code{hjs_fc} module)
+this second parameter is missing the precision of the gaussmeter used
+for measuring the field is used. If the maximum deviation parameter is
+smaller than the precision of the gaussmeter the precision of the
+gaussmeter is used instead. The function can only be called in the
+@code{EXPERIMENT} section.
 
 For the Oxford magnet sweep power supply (@code{ips20_4}) this function will
 automatically stop a running sweep.
@@ -373,7 +408,8 @@ magnet (@code{keithley228a}) and the @w{360 GHz} spectrometer magnet
 (@code{ips20_4}) the actual current through the magnets sweep coil is
 returned.
 
-The function can only be used in the @code{EXPERIMENT} section.
+The function can only be used in the @code{EXPERIMENT} section and is
+not available for the @code{hjs_sfc} module.
 
 
 @anchor{magnet_use_correction}
@@ -400,6 +436,7 @@ while for the SR810 and SR830 all values in the range between @code{1}
 and @code{4} may be used.
 
 The function can only be used in the @code{PREPARATIONS} section.
+
 
 @anchor{magnet_sweep}
 @item magnet_sweep()

@@ -46,6 +46,8 @@
 * hp8672a::         HP RF Synthesizer HP8672A
 * hjs_attenuator::  Home-built microwave attenuator
 * hjs_daadc::       Home-built AD and DA converter
+* hjs_sfc::         Simple Field Control (Steinhoff group, Osnabrueck)
+* hjs_fc::          Field Control (Steinhoff group, Osnabrueck)
 * ips20_4::         Oxford Magnet Sweep Power Supply IPS20-4
 * keithley228a::    Magnet Power Supply Keithley 228A (Berlin W-Band)
 * kontron4060::     Kontron 4060 Voltmeter
@@ -90,6 +92,10 @@
 @strong{Module name}: @code{aeg_s_band}
 
 @paragraphindent 0
+@strong{Additionally required modules}: @code{er035m} or @code{er035m_s}
+or @code{bh15}
+
+@paragraphindent 0
 @strong{Description}: Power supply for AEG magnet with home-built
 computer control to be used with an S-band spectrometer. Requires either
 the @code{er035m} or @code{er035_s} NMR gaussmeter (with @code{F0}
@@ -128,6 +134,10 @@ with @code{bh15} range is @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
 @strong{Module name}: @code{aeg_x_band}
+
+@paragraphindent 0
+@strong{Additionally required modules}: @code{er035m} or @code{er035m_s}
+or @code{bh15}
 
 @paragraphindent 0
 @strong{Description}: Power supply for AEG magnet with home-built
@@ -202,6 +212,9 @@ measured is from @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
 @strong{Module name}: @code{bnm12}
+
+@paragraphindent 0
+@strong{Additionally required module}: @code{witio_48}
 
 @paragraphindent 0
 @strong{Description}: Bruker BNM12 NMR Gaussmeter can only be used
@@ -904,7 +917,7 @@ allowed -- change the configuration file to allow higher output levels.
 @end ifnottex
 
 @paragraphindent 0
-@strong{Module name}: @code{hjs_daadc}
+@strong{Module name}: @code{hjs_attenuator}
 
 @paragraphindent 0
 @strong{Description}: Home-built computer controlled microwave
@@ -933,7 +946,7 @@ setting.
 @c #############################################################
 
 
-@node hjs_daadc, ips20_4, hjs_attenuator, Device Reference
+@node hjs_daadc, hjs_sfc, hjs_attenuator, Device Reference
 @iftex
 @subheading Home-built AD and DA converter
 @end iftex
@@ -967,7 +980,92 @@ voltage can be reduced via a potentiometer at the front panel.
 @c #############################################################
 
 
-@node ips20_4, keithley228a, hjs_daadc, Device Reference
+@node hjs_sfc, hjs_fc, hjs_daadc, Device Reference
+@iftex
+@subheading Simple Field Control (Steinhoff group, Osnabrueck)
+@end iftex
+@ifnottex
+@section Simple Field Control (Steinhoff group, Osnabrueck)
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{hjs_sfc}
+
+@paragraphindent 0
+@strong{Additionally required module}: @code{hjs_daadc}
+
+@paragraphindent 0
+@strong{Description}: Pseudo-device module used for controlling magnets
+in the group of H.-J.@: Steinhoff at the University of
+Osnabrueck. There's no device that gets controlled directly by this
+module but instead the magnetic field is controlled via the output
+voltage of a home-built DA and AD converter, using the module
+@code{hjs_daadc}. The module requires a previous calibration of the
+relation of the DAC output voltage and the resulting field, with these
+data getting set in the configuration file for the module.  Because
+there's no gaussmeter to control the real field only this calibration
+can be used. When this module is used the DAC of the DA and AD converter
+can't be used, it gets reserved automatically for this module.
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{magnet_name()}            @tab @ref{magnet_name}
+@item @code{magnet_setup()}           @tab @ref{magnet_setup}
+@item @code{set_field()}              @tab @ref{set_field}
+@item @code{sweep_up()}               @tab @ref{sweep_up}
+@item @code{sweep_down()}             @tab @ref{sweep_down}
+@item @code{reset_field()}            @tab @ref{reset_field}
+@end multitable
+
+
+@c #############################################################
+
+
+@node hjs_fc, ips20_4, hjs_sfc, Device Reference
+@iftex
+@subheading Field Control (Steinhoff group, Osnabrueck)
+@end iftex
+@ifnottex
+@section Field Control (Steinhoff group, Osnabrueck)
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{hjs_fc}
+
+@paragraphindent 0
+@strong{Additionally required module}: @code{hjs_daadc}, @code{witio_48}
+and @code{bnm12}
+
+@paragraphindent 0
+@strong{Description}: Pseudo-device module used for controlling magnets
+in the group of H.-J.@: Steinhoff at the University of
+Osnabrueck. There's no device that gets controlled directly by this
+module but instead the magnetic field is controlled via the output
+voltage of a home-built DA and AD converter, using the module
+@code{hjs_daadc} and the field is measured by the Bruker BNM12
+gaussmeter (which in turn requires the @code{witio_48} module for the
+WITIO-48 DIO card for reading in the measured field). When this module
+is used neither the DAC of the DA and AD converter nor the first DIO
+(@code{DIO1}) of the WITIO-48 DIO card can be used, both get reserved
+automatically for this module.
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{magnet_name()}            @tab @ref{magnet_name}
+@item @code{magnet_setup()}           @tab @ref{magnet_setup}
+@item @code{set_field()}              @tab @ref{set_field}
+@item @code{sweep_up()}               @tab @ref{sweep_up}
+@item @code{sweep_down()}             @tab @ref{sweep_down}
+@item @code{reset_field()}            @tab @ref{reset_field}
+@end multitable
+
+
+@c #############################################################
+
+
+@node ips20_4, keithley228a, hjs_fc, Device Reference
 @iftex
 @subheading Oxford Magnet Sweep Power Supply IPS20-4
 @end iftex
@@ -1018,6 +1116,9 @@ temperature controller transfering data between GPIB and Oxford ISOBUS.
 
 @paragraphindent 0
 @strong{Module name}: @code{keithley228a}
+
+@paragraphindent 0
+@strong{Additionally required module}: @code{sr510} (can be changed)
 
 @paragraphindent 0
 @strong{Description}: Keithley 228A power supply used as sweep coil
