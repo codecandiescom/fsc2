@@ -181,6 +181,8 @@ bool exit_hooks_are_run = UNSET;
 int border_offset_x;
 int border_offset_y;
 
+int stop_button_mask = 0;
+
 Graphics G;
 KEY *Key;
 int Key_ID = -1;
@@ -243,6 +245,8 @@ extern bool exit_hooks_are_run;
 
 extern int border_offset_x;
 extern int border_offset_y;
+
+extern int stop_button_mask;
 
 extern Graphics G;
 extern KEY *Key;

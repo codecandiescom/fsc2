@@ -166,6 +166,7 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 {
 	int flags = 0;
 	int cur_arg = 1;
+	char *bn;
 	int i;
 
 
@@ -217,23 +218,31 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 		{
 			if ( flags & DO_TEST )
 			{
-				eprint( FATAL, "fsc2: Can't have both flags `-S' and "
+				fprintf( stderr, "fsc2: Can't have both flags `-S' and "
 						"`-T'.\n" );
 				usage( );
 			}
 
 			if ( argv[ cur_arg ][ 2 ] == '\0' && *argc == cur_arg + 1 )
 			{
-				eprint( FATAL, "fsc2 -S: No input file.\n" );
+				fprintf( stder, "fsc2 -S: No input file.\n" );
 				usage( );
 			}
 
-			*fname = argv[ cur_arg ][ 2 ] != '\0' ?
-				     &argv[ cur_arg ][ 2 ] : argv[ cur_arg + 1 ];
-			
-			for ( i = cur_arg; i < *argc - 1; i++ )
-				argv[ i ] = argv[ i + 2 ];
-			*argc -= 2;
+			if ( argv[ cur_arg ][ 2 ] != '\0' )
+			{
+				*fname = argv[ cur_arg ] + 2;
+				for ( i = cur_arg; i < *argc; i++ )
+					argv[ i ] = argv[ i + 1 ];
+				*argc -= 1;
+			}
+			else
+			{
+				*fname = argv[ cur_arg + 1 ];
+				for ( i = cur_arg; i < *argc - 1; i++ )
+					argv[ i ] = argv[ i + 2 ];
+				*argc -= 2;
+			}
 
 			flags |= DO_LOAD | DO_START;
 			break;
@@ -243,26 +252,67 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 		{
 			if ( flags & DO_START )
 			{
-				eprint( FATAL, "fsc2: Can't have both flags `-S' and "
+				fprintf( stderr, "fsc2: Can't have both flags `-S' and "
 						"`-T'.\n" );
 				usage( );
 			}
 
 			if ( argv[ cur_arg ][ 2 ] == '\0' && *argc == cur_arg + 1 )
 			{
-				eprint( FATAL, "fsc2 -T: No input file\n" );
+				fprintf( stderr, "fsc2 -T: No input file\n" );
 				usage( );
 			}
 
-			*fname = argv[ cur_arg ][ 2 ] != '\0' ?
-				     &argv[ cur_arg ][ 2 ] : argv[ cur_arg + 1 ];
-
-			for ( i = cur_arg; i < *argc - 1; i++ )
-				argv[ i ] = argv[ i + 2 ];
-			*argc -= 2;
+			if ( argv[ cur_arg ][ 2 ] != '\0' )
+			{
+				*fname = argv[ cur_arg ] + 2;
+				for ( i = cur_arg; i < *argc; i++ )
+					argv[ i ] = argv[ i + 1 ];
+				*argc -= 1;
+			}
+			else
+			{
+				*fname = argv[ cur_arg + 1 ];
+				for ( i = cur_arg; i < *argc - 1; i++ )
+					argv[ i ] = argv[ i + 2 ];
+				*argc -= 2;
+			}
 
 			flags |= DO_LOAD | DO_TEST;
 			break;
+		}
+
+		if ( ! strncmp( argv[ cur_arg ], "-sb", 3 ) )
+		{
+			if ( argv[ cur_arg ][ 2 ] == '\0' && *argc == cur_arg + 1 )
+			{
+				fprintf( stderr, "fsc2 -sb: Missing button number\n" );
+				usage( );
+			}
+
+			if ( argv[ cur_arg ][ 3 ] != 0 )
+			{
+				bn = argv[ cur_arg ] + 3;
+				for ( i = cur_arg; i < *argc; i++ )
+					argv[ i ] = argv[ i + 1 ];
+				*argc -= 1;
+			}
+			else
+			{
+				bn = argv[ cur_arg + 1 ];
+				for ( i = cur_arg; i < *argc - 1; i++ )
+					argv[ i ] = argv[ i + 2 ];
+				*argc -= 2;
+			}
+
+			if ( ! isdigit( *bn ) || *( bn + 1 ) != '\0' ||
+				 *bn > '7' || *bn < '0')
+			{
+				fprintf( stderr, "fsc2 -sb %s: Invalid button number\n", bn );
+				usage( );
+			}
+
+			stop_button_mask = *bn - '0'
 		}
 
 		if ( argv[ cur_arg ][ 0 ] != '-' && *argc == cur_arg + 1 )
@@ -1236,6 +1286,9 @@ void usage( void )
 			 "  -S FILE    start interpreting FILE (i.e. start the "
 			 "experiment)\n"
 			 "  --delete   delete input file when fsc2 is done with it\n"
+             "  -sb NUMBER Mask for mouse buttons to be used to stop "
+			 "experiment\n"
+			 "             1 = left, 2 = middle, 3 = right button\n"
 			 "  -geometry geometry\n"
 			 "             specify preferred size and position of main "
 			 "window\n"
