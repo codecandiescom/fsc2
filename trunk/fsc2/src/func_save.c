@@ -100,7 +100,7 @@ Var *f_getf( Var *var )
 	int i;
 	char *s[ 5 ] = { NULL, NULL, NULL, NULL, NULL };
 	FILE *fp;
-	long len;
+	size_t len;
 	struct stat stat_buf;
 	static char *r = NULL;
 	char *new_r, *m;
@@ -1561,7 +1561,7 @@ Var *f_save_c( Var *v )
 static int T_fprintf( int file_num, const char *fmt, ... )
 {
 	int n;                      /* number of bytes we need to write */
-	static int size;            /* guess for number of characters needed */
+	static size_t size;         /* guess for number of characters needed */
 	static char *p;
 	va_list ap;
 	char *new_name;
