@@ -68,7 +68,7 @@ Var_T *f_is_file( UNUSED_ARG Var_T *v )
  * 6. Default extension to add (in case it's not already there) (optional)
  *---------------------------------------------------------------------------*/
 
-Var_T *f_openf( Var_T *var )
+Var_T *f_openf( Var_T *v )
 {
 	Var_T *cur;
 	int i;
@@ -101,17 +101,17 @@ Var_T *f_openf( Var_T *var )
 
 	if ( Fsc2_Internals.mode == TEST )
 	{
-		for ( i = 0, cur = var; i < 6 && cur != NULL; i++, cur = cur->next )
+		for ( i = 0, cur = v; i < 6 && cur != NULL; i++, cur = cur->next )
 			vars_check( cur, STR_VAR );
 		return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 	}
 
 	/* Check the arguments and supply default values if necessary */
 
-	for ( i = 0, cur = var; i < 6 && cur != NULL; i++, cur = cur->next )
+	for ( i = 0, cur = v; i < 6 && cur != NULL; i++, cur = cur->next )
 		vars_check( cur, STR_VAR );
 
-	fn = var->val.sptr;
+	fn = v->val.sptr;
 
 	if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
 		goto got_file;
@@ -120,7 +120,7 @@ Var_T *f_openf( Var_T *var )
 		return batch_mode_file_open( *fn == '\0' ? NULL : fn );
 
 	if ( *fn == '\0' )
-		return f_getf( var->next );
+		return f_getf( v->next );
 
 	/* Now ask for confirmation if the file already exists and try to open
 	   it for writing */
@@ -132,7 +132,7 @@ Var_T *f_openf( Var_T *var )
 		if ( 2 == show_choices( m, 2, "Yes", "No", NULL, 2, SET ) )
 		{
 			T_free( m );
-			return f_getf( var->next );
+			return f_getf( v->next );
 		}
 		T_free( m );
 	}
@@ -161,7 +161,7 @@ Var_T *f_openf( Var_T *var )
 							  "       Please select a different file." );
 		}
 
-		return f_getf( var->next );
+		return f_getf( v->next );
 	}
 
  got_file:
@@ -224,7 +224,7 @@ Var_T *f_openf( Var_T *var )
  * 5. Default extension to add (in case it's not already there)
  *---------------------------------------------------------------------------*/
 
-Var_T *f_getf( Var_T *var )
+Var_T *f_getf( Var_T *v )
 {
 	Var_T *cur;
 	int i;
@@ -259,9 +259,9 @@ Var_T *f_getf( Var_T *var )
 
 	if ( Fsc2_Internals.mode == TEST )
 	{
-		for ( i = 0, cur = var; i < 5 && cur != NULL; i++, cur = cur->next )
+		for ( i = 0, cur = v; i < 5 && cur != NULL; i++, cur = cur->next )
 			vars_check( cur, STR_VAR );
-		if ( i > 0 && *var->val.sptr == '\\' )
+		if ( i > 0 && *v->val.sptr == '\\' )
 			print( WARN, "Use of hard-coded file names is deprecated, please "
 				   "use open_file() instead.\n" );
 		return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
@@ -269,7 +269,7 @@ Var_T *f_getf( Var_T *var )
 
 	/* Check the arguments and supply default values if necessary */
 
-	for ( i = 0, cur = var; i < 5 && cur != NULL; i++, cur = cur->next )
+	for ( i = 0, cur = v; i < 5 && cur != NULL; i++, cur = cur->next )
 	{
 		vars_check( cur, STR_VAR );
 		s[ i ] = cur->val.sptr;

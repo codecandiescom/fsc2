@@ -85,18 +85,19 @@ struct Call_Stack {
 
 bool functions_init( void );
 void functions_exit( void );
-int func_exists( const char *name );
-Var_T *func_get( const char *name, int *acc );
-Var_T *func_get_long( const char *name, int *acc, bool flag );
-Var_T *func_call( Var_T *f );
+int func_exists( const char * /* name */ );
+Var_T *func_get( const char * /* name */, int * /* acc */ );
+Var_T *func_get_long( const char * /* name */, int * /* acc */,
+					  bool /* flag */ );
+Var_T *func_call( Var_T * /* f */ );
 void close_all_files( void );
-Call_Stack_T *call_push( Func_T *f, Device_T *device, const char *device_name,
-						 int dev_count );
+Call_Stack_T *call_push( Func_T * /* f */, Device_T * /* device */,
+						 const char */* device_name */, int /* dev_count */ );
 Call_Stack_T *call_pop( void );
 
 /* from func_list_lexer.flex */
 
-size_t func_list_parse( Func_T **fncts, size_t num_func );
+size_t func_list_parse( Func_T ** /* fncts */, size_t /* num_func */ );
 
 #endif  /* ! FUNC_HEADER */
 

@@ -30,16 +30,17 @@
 
 void load_all_drivers( void );
 int exists_device( const char *name );
-bool exists_device_type( const char *type );
-bool exists_function( const char *name );
+bool exists_device_type( const char * /* type */ );
+bool exists_function( const char * /* name */ );
 void run_test_hooks( void );
 void run_end_of_test_hooks( void );
 void run_exp_hooks( void );
 void run_end_of_exp_hooks( void );
 void run_exit_hooks( void );
 void run_child_exit_hooks( void );
-int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr );
-void unload_device( Device_T *dev );
+int get_lib_symbol( const char * /* from */, const char * /* symbol */,
+					void ** /* symbol_ptr */ );
+void unload_device( Device_T * /* dev */ );
 
 
 #endif  /* ! LOADER_HEADER */

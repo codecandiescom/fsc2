@@ -1038,7 +1038,7 @@ Var_T *convert_to_channel_number( const char *channel_name )
  *-----------------------------------------------------------------------*/
 
 double fsc2_simplex( size_t n, double *x, double *dx, void *par,
-					 double func( double *x, void *par ), double epsilon )
+					 double ( *func )( double *x, void *par ), double epsilon )
 {
     double *p,              /* matrix of the (n + 1) simplex corners */
 		   *y,              /* array of function values at the corners */
