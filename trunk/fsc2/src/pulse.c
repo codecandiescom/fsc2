@@ -22,10 +22,12 @@ static void   sort_pulse_list( void );
 
 /*----------------------------------------------*/
 /* Extracts the pulse number from a pulse name. */
+/* Don't call with inval string, i.e. one that  */
+/* doesn't contain a number.                    */
 /* ->                                           */
 /*    * pulse name string                       */
 /* <-                                           */
-/*    * pulse number or -1 on error             */
+/*    * pulse number                            */
 /*----------------------------------------------*/
 
 int ps2n( char *txt )
@@ -33,11 +35,10 @@ int ps2n( char *txt )
 	long num;
 
 
-	if ( *txt == '.' )
-		return Cur_Pulse->num;
-
-	while ( ! isdigit( *txt ) )
+	while ( txt != NULL && ! isdigit( *txt ) )
 		txt++;
+
+	assert( txt != NULL );          /* Paranoia ? */
 
 	num = strtol( txt, NULL, 10 );
 	if ( errno == ERANGE )
