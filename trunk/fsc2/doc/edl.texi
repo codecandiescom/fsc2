@@ -718,8 +718,8 @@ by simply prepending a minus sign
   -a         ->   @{ -0.5, -1.0, -2.0 @};
 @end example
 
-But it's also possible to add or subtract a number from each element of
-an array:
+But it's also possible to add or subtract a number to or from each
+element of an array:
 @example
   a + 5      ->   @{ 5.5, 6.0, 7.0 @}
   a - 3      ->   @{ -2.5, -2.0, -1.0 @}

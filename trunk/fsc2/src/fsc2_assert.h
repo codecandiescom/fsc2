@@ -32,11 +32,11 @@ typedef struct {
 } Fsc2_Assert;
 
 
-void fsc2_assert_print( const char *expression, const char *filename,
-						unsigned int line );
+int fsc2_assert_print( const char *expression, const char *filename,
+					   unsigned int line );
 
 #ifdef NDEBUG
-#define fsc2_assert( ignore ) ( ( void ) 0 )
+#define fsc2_assert( ignore ) ( 0 )
 #else
 #define fsc2_assert( expression )    \
        ( ( void ) ( ( expression ) ? \

@@ -28,8 +28,8 @@
 Fsc2_Assert Assert_struct;
 
 
-void fsc2_assert_print( const char *expression, const char *filename,
-						unsigned int line )
+int fsc2_assert_print( const char *expression, const char *filename,
+					   unsigned int line )
 {
 	fprintf( stderr, "%s:%u: failed assertion: %s\n", filename, line,
 			 expression );
@@ -38,6 +38,8 @@ void fsc2_assert_print( const char *expression, const char *filename,
 	Assert_struct.line = line;
 	Assert_struct.filename = filename;
 	abort( );
+
+	return 0;
 }
 
 

@@ -259,7 +259,6 @@ bool section_parser( int section )
 
 		TRY_SUCCESS;
 		return OK;
-
 	}
 	CATCH( SYNTAX_ERROR_EXCEPTION )
 	{
@@ -271,8 +270,6 @@ bool section_parser( int section )
 		eprint( FATAL, SET, "Missing semicolon before (or on) this line.\n" );
 		return FAIL;
 	}
-	OTHERWISE
-		return FAIL;
 
 	return FAIL;
 }
