@@ -558,8 +558,8 @@ that there are several differences between the Frankfurt S-band and the
 Berlin X-band spectrometer. And all the following is only relevant if
 phase cycling is to be used.
 
-@strong{Berlin X-band spectrometer} (@strong{Sony/Tektronix DG2020}
-and @strong{Bruker EP385} and @strong{Interface Technology RS690}):
+@strong{Berlin X-band spectrometer} (@strong{Sony/Tektronix DG2020},
+@strong{Bruker EP385} and @strong{Interface Technology RS690}):
 
 The Berlin bridge setup is rather simple in that it expects pulses with
 different phases to appear on different input connectors of the
