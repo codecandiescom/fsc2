@@ -48,7 +48,7 @@ modules:
 
 untest:
 	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" \
-		 -a -e gpib_new.c -a -e gpib_new.h]; then \
+		 -a -e gpib_new.c -a -e gpib_new.h ]; then \
 		mv gpib.c gpib_old.c; \
 		mv gpib.h gpib_old.h; \
 		mv gpib_new.c gpib.c; \
