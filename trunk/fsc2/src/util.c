@@ -684,7 +684,7 @@ inline long lrnd( double x )
 		return LONG_MAX;
 	if ( x < LONG_MIN )
 		return LONG_MIN;
-	return ( long ) rint( c );
+	return ( long ) rint( x );
 }
 
 
@@ -694,5 +694,5 @@ inline long irnd( double x )
 		return LONG_MAX;
 	if ( x < LONG_MIN )
 		return LONG_MIN;
-	return ( long ) rint( c );
+	return ( long ) rint( x );
 }

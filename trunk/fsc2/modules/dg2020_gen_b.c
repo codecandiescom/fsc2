@@ -470,10 +470,10 @@ bool dg2020_set_trig_in_impedance( int state )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_set_repeat_time( double time )
+bool dg2020_set_repeat_time( double rep_time )
 {
 	if ( dg2020.is_repeat_time &&
-		 dg2020.repeat_time != dg2020_double2ticks( time ) )
+		 dg2020.repeat_time != dg2020_double2ticks( rep_time ) )
 	{
 		eprint( FATAL, SET, "%s: A different repeat time/frequency of %s/"
 				"%g Hz has already been set.\n", pulser_struct.name,
@@ -498,15 +498,15 @@ bool dg2020_set_repeat_time( double time )
 		THROW( EXCEPTION )
 	}
 
-	if ( time <= 0 )
+	if ( rep_time <= 0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid zero or negative repeat time: "
-				"%s.\n", pulser_struct.name, dg2020_ptime( time ) );
+				"%s.\n", pulser_struct.name, dg2020_ptime( rep_time ) );
 		THROW( EXCEPTION )
 	}
 
 
-	dg2020.repeat_time = dg2020_double2ticks( time );
+	dg2020.repeat_time = dg2020_double2ticks( rep_time );
 	dg2020.is_repeat_time = SET;
 
 	return OK;

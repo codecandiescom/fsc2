@@ -31,7 +31,7 @@
 /* i.e. a integer multiple of the time base                        */
 /*-----------------------------------------------------------------*/
 
-Ticks dg2020_double2ticks( double time )
+Ticks dg2020_double2ticks( double p_time )
 {
 	double ticks;
 
@@ -43,11 +43,11 @@ Ticks dg2020_double2ticks( double time )
 		THROW( EXCEPTION )
 	}
 
-	ticks = time / dg2020.timebase;
+	ticks = p_time / dg2020.timebase;
 
 	if ( fabs( ticks - lrnd( ticks ) ) > 1.0e-2 )
 	{
-		char *t = T_strdup( dg2020_ptime( time ) );
+		char *t = T_strdup( dg2020_ptime( p_time ) );
 		eprint( FATAL, SET, "%s: Specified time of %s is not an integer "
 				"multiple of the pulser time base of %s.\n",
 				pulser_struct.name, t, dg2020_ptime( dg2020.timebase ) );
@@ -140,18 +140,18 @@ PULSE *dg2020_get_pulse( long pnum )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-const char *dg2020_ptime( double time )
+const char *dg2020_ptime( double p_time )
 {
 	static char buffer[ 128 ];
 
-	if ( fabs( time ) >= 1.0 )
-		sprintf( buffer, "%g s", time );
-	else if ( fabs( time ) >= 1.e-3 )
-		sprintf( buffer, "%g ms", 1.e3 * time );
-	else if ( fabs( time ) >= 1.e-6 )
-		sprintf( buffer, "%g us", 1.e6 * time );
+	if ( fabs( p_time ) >= 1.0 )
+		sprintf( buffer, "%g s", p_time );
+	else if ( fabs( p_time ) >= 1.e-3 )
+		sprintf( buffer, "%g ms", 1.e3 * p_time );
+	else if ( fabs( p_time ) >= 1.e-6 )
+		sprintf( buffer, "%g us", 1.e6 * p_time );
 	else
-		sprintf( buffer, "%g ns", 1.e9 * time );
+		sprintf( buffer, "%g ns", 1.e9 * p_time );
 
 	return buffer;
 }

@@ -124,7 +124,7 @@ bool dg2020_set_pulse_function( long pnum, int function )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_set_pulse_position( long pnum, double time )
+bool dg2020_set_pulse_position( long pnum, double p_time )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
 
@@ -137,15 +137,15 @@ bool dg2020_set_pulse_position( long pnum, double time )
 		THROW( EXCEPTION )
 	}
 
-	if ( time < 0 )
+	if ( p_time < 0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid (negative) start position for "
 				"pulse %ld: %s.\n", pulser_struct.name, pnum,
-				dg2020_ptime( time ) );
+				dg2020_ptime( p_time ) );
 		THROW( EXCEPTION )
 	}
 
-	p->pos = dg2020_double2ticks( time );
+	p->pos = dg2020_double2ticks( p_time );
 	p->is_pos = SET;
 
 	if ( ! p->initial_is_pos && ! TEST_RUN && I_am == PARENT )
@@ -166,7 +166,7 @@ bool dg2020_set_pulse_position( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_set_pulse_length( long pnum, double time )
+bool dg2020_set_pulse_length( long pnum, double p_time )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
 
@@ -178,20 +178,20 @@ bool dg2020_set_pulse_length( long pnum, double time )
 		THROW( EXCEPTION )
 	}
 
-	if ( time < 0.0 )
+	if ( p_time < 0.0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid negative length set for "
 				"pulse %ld: %s.\n", pulser_struct.name, pnum,
-				dg2020_ptime( time ) );
+				dg2020_ptime( p_time ) );
 		THROW( EXCEPTION )
 	}
 
-	p->len = dg2020_double2ticks( time );
+	p->len = dg2020_double2ticks( p_time );
 	p->is_len = SET;
 
 	if ( ! p->initial_is_len && ! TEST_RUN && I_am == PARENT )
 	{
-		p->initial_len = dg2020_double2ticks( time );
+		p->initial_len = dg2020_double2ticks( p_time );
 		p->initial_is_len = SET;
 	}
 	else if ( ! p->is_old_len )
@@ -207,7 +207,7 @@ bool dg2020_set_pulse_length( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_set_pulse_position_change( long pnum, double time )
+bool dg2020_set_pulse_position_change( long pnum, double p_time )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
 
@@ -220,19 +220,19 @@ bool dg2020_set_pulse_position_change( long pnum, double time )
 		THROW( EXCEPTION )
 	}
 
-	if ( dg2020_double2ticks( time ) == 0 )
+	if ( dg2020_double2ticks( p_time ) == 0 )
 	{
 		eprint( SEVERE, SET, "%s: Zero position change value for pulse "
 				"%ld.\n", pulser_struct.name, pnum );
 		return FAIL;
 	}
 
-	p->dpos = dg2020_double2ticks( time );
+	p->dpos = dg2020_double2ticks( p_time );
 	p->is_dpos = SET;
 
 	if ( ! p->initial_is_dpos && ! TEST_RUN && I_am == PARENT )
 	{
-		p->initial_dpos = dg2020_double2ticks( time );
+		p->initial_dpos = dg2020_double2ticks( p_time );
 		p->initial_is_dpos = SET;
 	}
 
@@ -243,7 +243,7 @@ bool dg2020_set_pulse_position_change( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_set_pulse_length_change( long pnum, double time )
+bool dg2020_set_pulse_length_change( long pnum, double p_time )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
 
@@ -256,19 +256,19 @@ bool dg2020_set_pulse_length_change( long pnum, double time )
 		THROW( EXCEPTION )
 	}
 
-	if ( dg2020_double2ticks( time ) == 0 )
+	if ( dg2020_double2ticks( p_time ) == 0 )
 	{
 		eprint( SEVERE, SET, "%s: Zero length change value for pulse "
 				"%ld.\n", pulser_struct.name, pnum );
 		return FAIL;
 	}
 
-	p->dlen = dg2020_double2ticks( time );
+	p->dlen = dg2020_double2ticks( p_time );
 	p->is_dlen = SET;
 
 	if ( ! p->initial_is_dlen && ! TEST_RUN && I_am == PARENT )
 	{
-		p->initial_dlen = dg2020_double2ticks( time );
+		p->initial_dlen = dg2020_double2ticks( p_time );
 		p->initial_is_dlen = SET;
 	}
 
@@ -333,7 +333,7 @@ bool dg2020_get_pulse_function( long pnum, int *function )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_get_pulse_position( long pnum, double *time )
+bool dg2020_get_pulse_position( long pnum, double *p_time )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
 
@@ -345,7 +345,7 @@ bool dg2020_get_pulse_position( long pnum, double *time )
 		THROW( EXCEPTION )
 	}
 
-	*time = dg2020_ticks2double( p->pos );
+	*p_time = dg2020_ticks2double( p->pos );
 	return OK;
 }
 
@@ -353,7 +353,7 @@ bool dg2020_get_pulse_position( long pnum, double *time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_get_pulse_length( long pnum, double *time )
+bool dg2020_get_pulse_length( long pnum, double *p_time )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
 
@@ -365,7 +365,7 @@ bool dg2020_get_pulse_length( long pnum, double *time )
 		THROW( EXCEPTION )
 	}
 
-	*time = dg2020_ticks2double( p->len );
+	*p_time = dg2020_ticks2double( p->len );
 	return OK;
 }
 
@@ -373,7 +373,7 @@ bool dg2020_get_pulse_length( long pnum, double *time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_get_pulse_position_change( long pnum, double *time )
+bool dg2020_get_pulse_position_change( long pnum, double *p_time )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
 
@@ -385,7 +385,7 @@ bool dg2020_get_pulse_position_change( long pnum, double *time )
 		THROW( EXCEPTION )
 	}
 
-	*time = dg2020_ticks2double( p->dpos );
+	*p_time = dg2020_ticks2double( p->dpos );
 	return OK;
 }
 
@@ -393,7 +393,7 @@ bool dg2020_get_pulse_position_change( long pnum, double *time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_get_pulse_length_change( long pnum, double *time )
+bool dg2020_get_pulse_length_change( long pnum, double *p_time )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
 
@@ -405,7 +405,7 @@ bool dg2020_get_pulse_length_change( long pnum, double *time )
 		THROW( EXCEPTION )
 	}
 
-	*time = dg2020_ticks2double( p->dlen );
+	*p_time = dg2020_ticks2double( p->dlen );
 	return OK;
 }
 
@@ -433,20 +433,20 @@ bool dg2020_get_pulse_phase_cycle( long pnum, long *cycle )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_change_pulse_position( long pnum, double time )
+bool dg2020_change_pulse_position( long pnum, double p_time )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
 
 
-	if ( time < 0 )
+	if ( p_time < 0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid (negative) start position for "
 				"pulse %ld: %s.\n", pulser_struct.name, pnum,
-				dg2020_ptime( time ) );
+				dg2020_ptime( p_time ) );
 		THROW( EXCEPTION )
 	}
 
-	if ( p->is_pos && dg2020_double2ticks( time ) == p->pos )
+	if ( p->is_pos && dg2020_double2ticks( p_time ) == p->pos )
 	{
 		eprint( WARN, SET, "%s: Old and new position of pulse %ld are "
 				"identical.\n", pulser_struct.name, pnum );
@@ -459,7 +459,7 @@ bool dg2020_change_pulse_position( long pnum, double time )
 		p->is_old_pos = SET;
 	}
 
-	p->pos = dg2020_double2ticks( time );
+	p->pos = dg2020_double2ticks( p_time );
 	p->is_pos = SET;
 
 	p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
@@ -475,20 +475,20 @@ bool dg2020_change_pulse_position( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_change_pulse_length( long pnum, double time )
+bool dg2020_change_pulse_length( long pnum, double p_time )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
 
 
-	if ( time < 0 )
+	if ( p_time < 0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid (negative) length for pulse %ld: "
 				"%s.\n", pulser_struct.name, pnum,
-				dg2020_ptime( time ) );
+				dg2020_ptime( p_time ) );
 		THROW( EXCEPTION )
 	}
 
-	if ( p->is_len && p->len == dg2020_double2ticks( time ) )
+	if ( p->is_len && p->len == dg2020_double2ticks( p_time ) )
 	{
 		eprint( WARN, SET, "%s: Old and new length of pulse %ld are "
 				"identical.\n", pulser_struct.name, pnum );
@@ -501,7 +501,7 @@ bool dg2020_change_pulse_length( long pnum, double time )
 		p->is_old_len = SET;
 	}
 
-	p->len = dg2020_double2ticks( time );
+	p->len = dg2020_double2ticks( p_time );
 	p->is_len = SET;
 
 	p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
@@ -517,19 +517,19 @@ bool dg2020_change_pulse_length( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_change_pulse_position_change( long pnum, double time )
+bool dg2020_change_pulse_position_change( long pnum, double p_time )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
 
 
-	if ( dg2020_double2ticks( time ) == 0 && TEST_RUN )
+	if ( dg2020_double2ticks( p_time ) == 0 && TEST_RUN )
 	{
 		eprint( SEVERE, SET, "%s: Zero position change value for pulse "
 				"%ld.\n", pulser_struct.name, pnum );
 		return FAIL;
 	}
 
-	p->dpos = dg2020_double2ticks( time );
+	p->dpos = dg2020_double2ticks( p_time );
 	p->is_dpos = SET;
 
 	return OK;
@@ -539,19 +539,19 @@ bool dg2020_change_pulse_position_change( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_change_pulse_length_change( long pnum, double time )
+bool dg2020_change_pulse_length_change( long pnum, double p_time )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
 
 
-	if ( dg2020_double2ticks( time ) == 0 && TEST_RUN )
+	if ( dg2020_double2ticks( p_time ) == 0 && TEST_RUN )
 	{
 		eprint( SEVERE, SET, "%s: Zero length change value for pulse %ld.\n",
 				pulser_struct.name, pnum );
 		return FAIL;
 	}
 
-	p->dlen = dg2020_double2ticks( time );
+	p->dlen = dg2020_double2ticks( p_time );
 	p->is_dlen = SET;
 
 	return OK;
