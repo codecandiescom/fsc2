@@ -48,4 +48,4 @@ don't find anything you don't want me to know about, you can still
 forward it on to me.
 
 Finally, sending crash mails can also be disabled when starting the
-program by passing it the "-noCrashMail" option.
+program by invoking it the "-noCrashMail" option.
