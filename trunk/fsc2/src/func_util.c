@@ -1020,46 +1020,49 @@ Var *f_clearcv( Var *v )
 		*ca = 0;
 		count = 1;
 	}
-
-	/* Otherwise run through all arguments, treating each as a new curve
-	   number */
-
-	while ( v != NULL )
+	else
 	{
-		/* Check variable type and get curve number */
+		/* Otherwise run through all arguments, treating each as a new curve
+		   number */
 
-		vars_check( v, INT_VAR | FLOAT_VAR );         /* get number of curve */
-
-		if ( v->type == INT_VAR )
-			curve = v->val.lval;
-		else
+		do
 		{
-			if ( TEST_RUN )
-				eprint( WARN, "%s:%ld: Floating point value used as curve "
-						"number.\n", Fname, Lc );
-			curve = lround( v->val.dval );
-		}
+			/* Check variable type and get curve number */
 
-		/* Make sure the curve exists */
+			vars_check( v, INT_VAR | FLOAT_VAR );     /* get number of curve */
 
-		if ( curve < 0 || curve > G.nc )
+			if ( v->type == INT_VAR )
+				curve = v->val.lval;
+			else
+			{
+				if ( TEST_RUN )
+					eprint( WARN, "%s:%ld: Floating point value used as curve "
+							"number in function `clear_curve'.\n", Fname, Lc );
+				curve = lround( v->val.dval );
+			}
+
+			/* Make sure the curve exists */
+
+			if ( curve < 0 || curve > G.nc )
+			{
+				if ( TEST_RUN )
+					eprint( SEVERE, "%s:%ld: Can't clear curve %ld, curve "
+							"does not exist.\n", Fname, Lc, curve );
+				continue;
+			}
+
+			/* Store curve number */
+
+			ca = T_realloc( ca, ( count + 1 ) * sizeof( long ) );
+			ca[ count++ ] = curve - 1;
+		} while ( ( v = v->next ) != NULL );
+		
+		if ( ca == NULL )
 		{
-			if ( TEST_RUN )
-				eprint( WARN, "%s:%ld: Can't clear curve %ld, curve does not "
-						"exist.\n", Fname, Lc, curve );
-
-			if ( ca != NULL )
-				T_free( ca );
-
+			eprint( SEVERE, "%s:%ld: No valid argument found in function "
+					"`clear_curve'.\n", Fname, Lc );
 			return vars_push( INT_VAR, 0 );
 		}
-
-		/* Store curve number */
-
-		ca = T_realloc( ca, ( count + 1 ) * sizeof( long ) );
-		ca[ count++ ] = curve - 1;
-
-		v = v->next;
 	}
 
 	/* In a test run this all there is to be done */
