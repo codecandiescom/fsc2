@@ -81,7 +81,7 @@ int tds520a_init_hook( void )
 	tds520a.num_windows = 0;
 	tds520a.data_source = TDS520A_UNDEF;
 	tds520a.meas_source = TDS520A_UNDEF;
-	tds520a.lock_state  = UNSET;
+	tds520a.lock_state  = SET;
 
 	for ( i = TDS520A_CH1; i < MAX_CHANNELS; i++ )
 		tds520a.is_sens[ i ] = UNSET;

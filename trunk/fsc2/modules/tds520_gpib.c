@@ -36,6 +36,13 @@ bool tds520_init( const char *name )
 
 	tds520.is_reacting = SET;
 
+	sprintf( buffer, "LOC %s\n", tds520.lock_state ? "ALL" : "NON" );
+	if ( gpib_write( tds520.device, buffer, strlen( buffer ) ) == FAILURE )
+	{
+		gpib_local( tds520.device );
+        return FAIL;
+	}
+
     /* Get record length and trigger position */
 
 	if ( tds520.is_rec_len )
@@ -647,6 +654,9 @@ double tds520_get_area( int channel, WINDOW *w, bool use_cursor )
 {
 	double *data, area, window;
 	long length, i;
+	double pos;
+	char buf[ 100 ];
+	long len = 100;
 
 
 	/* If asked to simulate using the cursors (as may be used with the newer
@@ -671,9 +681,23 @@ double tds520_get_area( int channel, WINDOW *w, bool use_cursor )
 
 	T_free( data );
 
+	/* To be able to get comparable results to the built-in measurement
+	   method of the other digitizers we have to subtract the position
+	   setting */
+
+	if ( channel >= TDS520_CH1 && channel <= TDS520_CH2 )
+	{
+		sprintf( buf, "CH%1d:POS?\n", channel + 1 );
+		if ( gpib_write( tds520.device, buf, strlen( buf ) ) == FAILURE ||
+			 gpib_read( tds520.device, buf, &len ) == FAILURE )
+			tds520_gpib_failure( );
+
+		pos = T_atof( buf );
+	}
+
 	/* Return the integrated area, multiplied by the the time per point */
 
-	return area * tds520.timebase / TDS_POINTS_PER_DIV;
+	return ( area - length * pos ) * tds520.timebase / TDS_POINTS_PER_DIV;
 }
 
 
@@ -734,7 +758,7 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	sprintf( cmd, "DAT:START %ld;:DAT:STOP %ld\n", 
 			 w != NULL ? w->start_num : 1,
-			 w != NULL ? w->end_num : tds520.rec_len );
+			 w != NULL ? w->end_num - 1 : tds520.rec_len );
 	if ( gpib_write( tds520.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds520_gpib_failure( );
 

@@ -85,7 +85,7 @@ int tds754a_init_hook( void )
 	tds754a.num_windows = 0;
 	tds754a.data_source = TDS754A_UNDEF;
 	tds754a.meas_source = TDS754A_UNDEF;
-	tds754a.lock_state  = UNSET;
+	tds754a.lock_state  = SET;
 
 	for ( i = TDS754A_CH1; i < MAX_CHANNELS; i++ )
 		tds754a.is_sens[ i ] = UNSET;

@@ -366,7 +366,7 @@ Var *f_init_1d( Var *v )
 	/* Now evaluate the arguments */
 
 	if ( v == NULL )
-		return vars_push( INT_VAR, 1 );
+		goto init_1d_done;
 
 	if ( v->type == STR_VAR )
 		goto labels_1d;
@@ -390,7 +390,7 @@ Var *f_init_1d( Var *v )
 	}
 
 	if ( ( v = v->next ) == NULL )
-		return vars_push( INT_VAR, 1 );
+		goto init_1d_done;
 
 	if ( v->type == STR_VAR )
 		goto labels_1d;
@@ -410,7 +410,7 @@ Var *f_init_1d( Var *v )
 		G.nx = DEFAULT_1D_X_POINTS;
 
 	if ( ( v = v->next ) == NULL )
-		return vars_push( INT_VAR, 1 );
+		goto init_1d_done;
 
 	if ( v->type == STR_VAR )
 		goto labels_1d;
@@ -423,7 +423,7 @@ Var *f_init_1d( Var *v )
 		if ( v->next == NULL || 
 			 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
-			eprint( FATAL, "%s:%ld: Real word coordinate given but no "
+			eprint( FATAL, "%s:%ld: Real word coordinate found but missing "
 					       "increment in %s().", Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
@@ -437,12 +437,15 @@ Var *f_init_1d( Var *v )
 			G.rwc_start[ X ] = ARRAY_OFFSET;
 			G.rwc_delta[ X ] = 1.0;
 		}
+
+		if ( G.rwc_delta[ X ] == 0.0 )
+			G.rwc_delta[ X ] = 1.0;
 	}
 
 	if ( ( v = v->next ) == NULL )
-		return vars_push( INT_VAR, 1 );
+		goto init_1d_done;
 
-labels_1d:
+ labels_1d:
 
 	vars_check ( v, STR_VAR );
 	G.label[ X ] = T_strdup( v->val.sptr );
@@ -452,6 +455,8 @@ labels_1d:
 		vars_check ( v, STR_VAR );
 		G.label[ Y ] = T_strdup( v->val.sptr );
 	}
+
+ init_1d_done:
 
 	G.nx_orig = G.nx;
 	G.rwc_start_orig[ X ] = G.rwc_start[ X ];
@@ -491,7 +496,7 @@ Var *f_init_2d( Var *v )
 	/* Now evaluate the arguments */
 
 	if ( v == NULL )
-		return vars_push( INT_VAR, 1 );
+		goto init_2d_done;
 
 	if ( v->type == STR_VAR )
 		goto labels_2d;
@@ -515,7 +520,7 @@ Var *f_init_2d( Var *v )
 	}
 
 	if ( ( v = v->next ) == NULL )
-		return vars_push( INT_VAR, 1 );
+		goto init_2d_done;
 
 	if ( v->type == STR_VAR )
 		goto labels_2d;
@@ -535,7 +540,7 @@ Var *f_init_2d( Var *v )
 		G.nx = DEFAULT_2D_X_POINTS;
 
 	if ( ( v = v->next ) == NULL )
-		return vars_push( INT_VAR, 1 );
+		goto init_2d_done;
 
 	if ( v->type == STR_VAR )
 		goto labels_2d;
@@ -555,7 +560,7 @@ Var *f_init_2d( Var *v )
 		G.ny = DEFAULT_2D_Y_POINTS;
 
 	if ( ( v = v->next ) == NULL )
-		return vars_push( INT_VAR, 1 );
+		goto init_2d_done;
 
 	if ( v->type == STR_VAR )
 		goto labels_2d;
@@ -585,7 +590,7 @@ Var *f_init_2d( Var *v )
 	}
 
 	if ( ( v = v->next ) == NULL )
-		return vars_push( INT_VAR, 1 );
+		goto init_2d_done;
 
 	if ( v->type == STR_VAR )
 		goto labels_2d;
@@ -615,9 +620,9 @@ Var *f_init_2d( Var *v )
 	}
 
 	if ( ( v = v->next ) == NULL )
-		return vars_push( INT_VAR, 1 );
+		goto init_2d_done;
 
-labels_2d:
+ labels_2d:
 
 	vars_check( v, STR_VAR );
 	G.label[ X ] = T_strdup( v->val.sptr );
@@ -633,6 +638,8 @@ labels_2d:
 		vars_check( v, STR_VAR );
 		G.label[ Z ] = T_strdup( v->val.sptr );
 	}
+
+ init_2d_done:
 
 	G.nx_orig = G.nx;
 	G.ny_orig = G.ny;

@@ -40,6 +40,13 @@ bool tds540_init( const char *name )
 
 	tds540.is_reacting = SET;
 
+	sprintf( buffer, "LOC %s\n", tds540.lock_state ? "ALL" : "NON" );
+	if ( gpib_write( tds540.device, buffer, strlen( buffer ) ) == FAILURE )
+	{
+		gpib_local( tds540.device );
+        return FAIL;
+	}
+
     /* Get record length and trigger position */
 
 	if ( tds540.is_rec_len )
@@ -743,15 +750,18 @@ double tds540_get_area( int channel, WINDOW *w, bool use_cursor )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Measures the area without using te buit-in measurement method but */
-/* by fetching the curve in the window and integrating it 'by hand'. */
-/*-------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Measures the area without using the built-in measurement method but */
+/* by fetching the curve in the window and integrating it 'by hand'.   */
+/*---------------------------------------------------------------------*/
 
 static double tds540_get_area_wo_cursor( int channel, WINDOW *w )
 {
 	double *data, area;
 	long length, i;
+	double pos;
+	char buf[ 100 ];
+	long len = 100;
 
 
 	tds540_get_curve( channel, w, &data, &length, UNSET );
@@ -761,9 +771,22 @@ static double tds540_get_area_wo_cursor( int channel, WINDOW *w )
 
 	T_free( data );
 
+	/* To be able to get comparable results to the built-in measurement
+	   method we have to subtract the position setting */
+
+	if ( channel >= TDS540_CH1 && channel <= TDS540_CH4 )
+	{
+		sprintf( buf, "CH%1d:POS?\n", channel + 1 );
+		if ( gpib_write( tds540.device, buf, strlen( buf ) ) == FAILURE ||
+			 gpib_read( tds540.device, buf, &len ) == FAILURE )
+			tds540_gpib_failure( );
+
+		pos = T_atof( buf );
+	}
+
 	/* Return the integrated area, multiplied by the the time per point */
 
-	return area * tds540.timebase / TDS_POINTS_PER_DIV;
+	return ( area - length * pos ) * tds540.timebase / TDS_POINTS_PER_DIV;
 }
 
 
@@ -813,7 +836,7 @@ bool tds540_get_curve( int channel, WINDOW *w, double **data, long *length,
 	{
 		sprintf( cmd, "DAT:STAR %ld;STOP %ld\n", 
 				 w != NULL ? w->start_num : 1,
-				 w != NULL ? w->end_num : tds540.rec_len );
+				 w != NULL ? w->end_num - 1: tds540.rec_len );
 		if ( gpib_write( tds540.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds540_gpib_failure( );
 	}

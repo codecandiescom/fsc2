@@ -80,7 +80,7 @@ int tds540_init_hook( void )
 	tds540.num_windows = 0;
 	tds540.data_source = TDS540_UNDEF;
 	tds540.meas_source = TDS540_UNDEF;
-	tds540.lock_state  = UNSET;
+	tds540.lock_state  = SET;
 
 	for ( i = TDS540_CH1; i < MAX_CHANNELS; i++ )
 		tds540.is_sens[ i ] = UNSET;
