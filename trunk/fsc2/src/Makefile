@@ -20,16 +20,16 @@
 # Boston, MA 02111-1307, USA.
 
 
-c_sources     = fsc2.c xinit.c pulser.c util.c exceptions.c variables.c    \
-				vars_add.c vars_sub.c vars_mult.c vars_div.c vars_mod.c    \
-				vars_pow.c vars_util.c func.c func_basic.c func_util.c     \
-				func_save.c chld_func.c func_intact.c func_intact_b.c      \
-				func_intact_s.c func_intact_o.c func_intact_m.c T.c        \
-				phases.c devices.c exp.c run.c comm.c accept.c gpib_if.c   \
-				loader.c conn.c mail.c ipc.c print.c serial.c graphics.c   \
-				graph_handler_1d.c graph_handler_2d.c graph_cut.c bugs.c   \
-				fsc2_assert.c dump.c module_util.c fsc2d.c global.c        \
-				help.c edit.c
+c_sources     = fsc2.c xinit.c pulser.c util.c exceptions.c variables.c     \
+				vars_rhs.c vars_lhs.c vars_add.c vars_sub.c vars_mult.c     \
+				vars_div.c vars_mod.c vars_pow.c vars_util.c func.c         \
+				func_basic.c func_util.c func_save.c chld_func.c            \
+				func_intact.c func_intact_b.c func_intact_s.c               \
+				func_intact_o.c func_intact_m.c T.c phases.c devices.c      \
+				exp.c run.c comm.c accept.c gpib_if.c loader.c conn.c       \
+				mail.c ipc.c print.c serial.c graphics.c graph_handler_1d.c \
+				graph_handler_2d.c graph_cut.c bugs.c fsc2_assert.c dump.c  \
+				module_util.c fsc2d.c global.c help.c edit.c
 ifdef WITH_HTTP_SERVER
 c_sources    += http.c dump_graphic.c
 endif
