@@ -2276,6 +2276,7 @@ static void tools_callback( FL_OBJECT *obj, long data )
 	long lval;
 	double dval;
 	const char *buf;
+	char obuf[ MAX_INPUT_CHARS + 1 ];
 
 
 	data = data;
@@ -2315,6 +2316,7 @@ static void tools_callback( FL_OBJECT *obj, long data )
 
 		case INT_INPUT :
 			buf = fl_get_input( obj );
+
 			if ( *buf == '\0' )
 			{
 				lval = 0;
@@ -2322,6 +2324,15 @@ static void tools_callback( FL_OBJECT *obj, long data )
 			}
 			else
 				sscanf( buf, "%ld", &lval );
+
+			snprintf( obuf, MAX_INPUT_CHARS + 1, "%ld", lval );
+			if ( strcmp( buf, obuf ) )
+			{
+				snprintf( obuf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
+				fl_set_input( io->self, obuf );
+				break;
+			}
+
 			if ( lval != io->val.lval )
 				io->val.lval = lval;
 			break;
@@ -2335,6 +2346,12 @@ static void tools_callback( FL_OBJECT *obj, long data )
 			}
 			else
 				sscanf( buf, "%lf", &dval );
+			if ( fpclassify( dval ) != FP_NORMAL )
+			{
+				snprintf( obuf, MAX_INPUT_CHARS + 1, "%f", io->val.dval );
+				fl_set_input( io->self, obuf );
+				break;
+			}
 			if ( dval != io->val.dval )
 				io->val.dval = dval;
 			break;
