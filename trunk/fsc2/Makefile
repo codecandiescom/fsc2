@@ -87,7 +87,7 @@ MAIL_ADDRESS     := Jens.Toerring@physik.fu-berlin.de
 
 SHELL            := /bin/sh
 CC               := gcc
-CFLAGS           := -ggdb -O2 -Wall -Wwrite-strings -Wstrict-prototypes \
+CFLAGS           := -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 					-Wmissing-declarations -W
 				    # -DMDEBUG # for malloc debugging
 				    # -DDEBUG

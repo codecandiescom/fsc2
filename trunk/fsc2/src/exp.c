@@ -42,6 +42,7 @@ static bool in_for_lex = UNSET;   // set while handling for loop condition part
 static long token_count;
 static CB_Stack *cb_stack = NULL; // curly brace stack
 
+extern int exp_testparse( void );         /* from exp_parser.y */
 
 extern int exp_runparse( void );          /* from exp_run_parser.y */
 extern int conditionparse( void );        /* from condition_parser.y */
@@ -67,7 +68,8 @@ static bool pop_curly_brace( void );
 static void loop_setup( void );
 static void setup_while_or_repeat( int type, long *pos );
 static void setup_if_else( long *pos, Prg_Token *cur_wr );
-static void save_restore_variables( bool flag )
+static void exp_syntax_check( void );
+static void save_restore_variables( bool flag );
 
 
 
@@ -342,6 +344,13 @@ void store_exp( FILE *in )
 	/* Check and initialise if's and loops */
 
 	loop_setup( );
+
+	/* Now we have to do a syntax check - some syntax errors might not be
+	   found even when running the test because some IF or UNLESS conditions
+	   never get triggered. It has also the advantage that syntax erors
+	   will be found immediately instead after a long test run. */
+
+	exp_syntax_check( );
 }
 
 
@@ -448,7 +457,7 @@ void forget_prg( void )
 	prg_length = 0;
 
 	/* Get rid of structures for curly braces that may have been survived
-	   when an exeptioon got thrown */
+	   when an exception got thrown */
 
 	while ( pop_curly_brace( ) )
 		;
@@ -747,6 +756,23 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 	eprint( FATAL, UNSET, "Missing `}' for %s starting at %s:%ld.\n",
 			in_if ? "IF or UNLESS" : "ELSE", cur->Fname, cur->Lc );
 	THROW( EXCEPTION );
+}
+
+
+/*--------------------------------------------*/
+/*--------------------------------------------*/
+
+static void exp_syntax_check( void )
+{
+}
+
+
+/*--------------------------------------------*/
+/*--------------------------------------------*/
+
+int exp_testlex( void )
+{
+	return 0;
 }
 
 

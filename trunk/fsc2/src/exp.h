@@ -156,6 +156,7 @@ typedef struct CB_ {
 
 void store_exp( FILE *in );
 void forget_prg( void );
+int exp_testlex( void );
 void exp_test_run( void );
 int exp_runlex( void );
 int conditionlex( void );
