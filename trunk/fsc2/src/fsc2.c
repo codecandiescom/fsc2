@@ -138,9 +138,8 @@ void xforms_init( int *argc, char *argv[] )
 	fl_get_object_geometry( main_form->error_browser, &x2, &y2, &w2, &h2 );
 	h = y2 - y1 - h1;
 	H = h1 + h2 + h;
-	fl_set_slider_bounds( main_form->win_slider, 30.0, ( double ) H - 30.0 );
 	fl_set_slider_value( main_form->win_slider,
-						 ( double ) ( h1 + h / 2 ) );
+						 ( double ) ( h1 + h / 2 ) / H );
 
 	fl_show_form( main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
 				  FL_FULLBORDER, "fsc2" );
@@ -751,7 +750,7 @@ void clean_up( void )
 void win_slider_callback( FL_OBJECT *a, long b )
 {
 	FL_Coord h, H;
-	FL_Coord new ;
+	FL_Coord new_h1 ;
 	FL_Coord x1, y1, w1, h1, x2, y2, w2, h2;
 
 
@@ -764,10 +763,21 @@ void win_slider_callback( FL_OBJECT *a, long b )
 
 	h = y2 - y1 - h1;
 	H = y2 - y1 + h2;
-	new = ( FL_Coord ) fl_get_slider_value( a ) - h / 2;
 
-	fl_set_object_size( main_form->browser, w1, new );
-	fl_set_object_geometry( main_form->error_browser, x2, y1 + new + h,
-							w2, H - ( new + h ) );
+	new_h1 = ( FL_Coord ) ( H * fl_get_slider_value( a ) - h / 2 );
+	if ( new_h1 < 30 )
+	{
+		new_h1 = 30;
+		fl_set_slider_value( a, ( double ) ( new_h1 + h / 2 ) / H );
+	}
+	if ( new_h1 > H - h - 30 )
+	{
+		new_h1 = H - h - 30;
+		fl_set_slider_value( a, ( double ) ( new_h1 + h / 2 ) / H );
+	}
+
+	fl_set_object_size( main_form->browser, w1, new_h1 );
+	fl_set_object_geometry( main_form->error_browser, x2, y1 + new_h1 + h,
+							w2, H - ( new_h1 + h ) );
 	fl_unfreeze_form( main_form->fsc2 );
 }

@@ -89,7 +89,6 @@ fsc2: $(objects) $(header)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %_lexer.flex,%,$<) -o$@ $<
 
 mods: $(modules:.c=.so)
-#	export LD_LIBRARY_PATH=$(shell pwd)
 
 %.so: %.c $(header)
 	$(CC) $(CFLAGS) -c -fPIC -DPIC $< -o $*.lo

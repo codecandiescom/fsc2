@@ -7,23 +7,28 @@
 #include "gpib.h"
 
 
+/* name of device as given in GPIB configuration file /etc/gpib.conf */
 
-#define DEVICE_NAME "STANFORD_SR510"    /* name, compare /etc/gpib.conf */
+#define DEVICE_NAME "STANFORD_SR510"
 
+
+/* declaration of exported functions */
 
 int sr510_init_hook( void );
 int sr510_exp_hook( void );
 void sr510_exit_hook( void );
 
 Var *lockin_get_data( Var *v );
+Var *lockin_get_adc_data( Var *v );
 Var *lockin_sensitivity( Var *v );
 Var *lockin_time_constant( Var *v );
 Var *lockin_phase( Var *v );
 
 
+/* typedefs and global variables used only in this file */
+
 typedef struct
 {
-	const char *name;
 	int device;
 	int Sens;
 	bool Sens_warn;
@@ -35,18 +40,23 @@ typedef struct
 
 static SR510 sr510;
 
-/* lists of valid sensitivity and time constant settings
-   (the last three entries in the sensitivity list are only usable when the
-   EXPAND button is switched on!) */
+/* lists of valid sensitivity and time constant settings (the last three
+   entries in the sensitivity list are only usable when the EXPAND button
+   is switched on!) */
 
 static double slist[ ] = { 5.0e-1, 2.0e-1, 1.0e-1, 5.0e-2, 2.0e-2,
 						   1.0e-2, 5.0e-3, 2.0e-3, 1.0e-3, 5.0e-4,
 						   2.0e-4, 1.0e-4, 5.0e-5, 2.0e-5, 1.0e-5,
 						   5.0e-6, 2.0e-6, 1.0e-6, 5.0e-7, 2.0e-7,
 						   1.0e-7, 5.0e-8, 2.0e-8, 1.0e-8 };
+
+/* list of all available time constants */
+
 static double tcs[ ] = { 1.0e-3, 3.0e-3, 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1,
 						 1.0, 3.0, 10.0, 30.0, 100.0 };
 
+
+/* declaration of all functions used only in this file */
 
 static bool lockin_init( const char *name, int *device );
 static double sr510_get_data( void );
@@ -60,30 +70,37 @@ static double sr510_set_phase( double phase );
 
 
 
-/*--------------------------------------------------*/
-/*--------------------------------------------------*/
+/*------------------------------------*/
+/* Init hook function for the module. */
+/*------------------------------------*/
 
 
 int sr510_init_hook( void )
 {
+	/* Aet global variable to indicate that GPIB bus is needed */
+
 	need_GPIB = SET;
-	sr510.name = DEVICE_NAME;
-	sr510.Sens = -1;
-	sr510.Sens_warn = UNSET;
-	sr510.P = UNSET;
-	sr510.TC = -1;
-	sr510.TC_warn = UNSET;
+
+	/* Reset several variables in the structure describing the device */
+
+	sr510.Sens = -1;             /* no sensitivity has to be set at start of */
+	sr510.Sens_warn = UNSET;     /* experiment and no warning concerning the */
+                                 /* sensitivity setting has been printed yet */
+	sr510.P = UNSET;             /* no phase has to be set at start of the */
+	                             /* experiment */
+	sr510.TC = -1;               /* no time constant has to be set at the */
+	sr510.TC_warn = UNSET;       /* start of the experiment and no warning */
+	                             /* concerning it has been printed yet */
 	return 1;
 }
 
 
 /*--------------------------------------------------*/
+/* Start of experiment hook function for the module */
 /*--------------------------------------------------*/
 
 int sr510_exp_hook( void )
 {
-
-
 	/* Nothing to be done yet in a test run */
 
 	if ( TEST_RUN )
@@ -91,7 +108,7 @@ int sr510_exp_hook( void )
 
 	/* Initialize the lock-in */
 
-	if ( ! lockin_init( sr510.name, &sr510.device ) )
+	if ( ! lockin_init( DEVICE_NAME, &sr510.device ) )
 	{
 		eprint( FATAL, "sr510: Can't access the lock-in amplifier.\n" );
 		THROW( EXCEPTION );
@@ -101,8 +118,9 @@ int sr510_exp_hook( void )
 }
 
 
-/*--------------------------------------------------*/
-/*--------------------------------------------------*/
+/*------------------------------------------------*/
+/* End of experiment hook function for the module */
+/*------------------------------------------------*/
 
 void sr510_exit_hook( void )
 {
@@ -114,43 +132,111 @@ void sr510_exit_hook( void )
 
 
 /*---------------------------------------------------------------------*/
-/* This function returns either the lock-in voltage (if called with no */
-/* argument) or the voltage at one of the 4 ADCs on the backside of    */
-/* the lock-in (if called with a numeric argument between 1 and 4).    */
-/* The returned value is always the voltage in V.                      */
+/* Function returns the lock-in voltage. Returned value is the voltage */
+/* in V, with the range depending on the current sensitivity setting.  */
 /*---------------------------------------------------------------------*/
 
 Var *lockin_get_data( Var *v )
 {
-	/* If no parameter is passed to the function this means we need the
-	   lock-in voltage */
+	v = v;
+
+	if ( TEST_RUN )                  /* return dummy value in test run */
+		return vars_push( FLOAT_VAR, 0.0 );
+	else
+		return vars_push( FLOAT_VAR, sr510_get_data( ) );
+}
+
+
+/*-----------------------------------------------------------------*/
+/* Function returns the voltage at one or more of the 4 ADC ports  */
+/* on the backside of the lock-in amplifier. The argument(s) must  */
+/* be integers between 1 and 4.                                    */
+/* There are two different ways to call this function:             */
+/* 1. If called with a single integer argument the voltage of the  */
+/*    corresponding ADC port is returned.                          */
+/* 2. If called with a list of integer arguments an array with the */
+/*    voltages of all the corresponding ports is returned.         */
+/* Returned values are in the interval [ -10.24V, +10.24V ].       */
+/*-----------------------------------------------------------------*/
+
+Var *lockin_get_adc_data( Var *v )
+{
+	long num_args, i;
+	double *voltages;
+	Var *cv;
+
 
 	if ( v == NULL )
 	{
-		if ( TEST_RUN )
-			return vars_push( FLOAT_VAR, 0.0 );
-		else
-			return vars_push( FLOAT_VAR, sr510_get_data( ) );
-	}
-
-	/* Otherwise the voltage at one of the four ADC's at the backside is
-	   needed */
-
-	vars_check( v, INT_VAR );
-
-	if ( ( long ) VALUE( v ) < 1 || ( long ) VALUE( v ) > 4 )
-	{
-		eprint( FATAL, "sr510: Invalid ADC channel number (%ld), valid "
-				"channel are in the range 1-4.\n", ( long ) VALUE( v ) );
+		eprint( FATAL, "sr510: Missing argument for function "
+				 "'lockin_get_adc_data'.\n" );
 		THROW( EXCEPTION );
 	}
 
-	if ( TEST_RUN )
-		return vars_push( FLOAT_VAR, 0.0 );
+	vars_check( v, INT_VAR );
 
-	return vars_push( FLOAT_VAR, sr510_get_adc_data( ( long ) VALUE( v ) ) );
-}
+	/* If called with just one argument return the voltage of the
+	   addressed port */
+
+	if ( v->next == NULL )
+	{
+		if ( ( long ) VALUE( v ) < 1 || ( long ) VALUE( v ) > 4 )
+		{
+			eprint( FATAL, "sr510: Invalid ADC channel number (%ld) in call "
+					"of 'lockin_get_adc_data', valid channel are in the "
+					"range 1-4.\n", ( long ) VALUE( v ) );
+			THROW( EXCEPTION );
+		}
+
+		if ( TEST_RUN )                  /* return dummy value in test run */
+			return vars_push( FLOAT_VAR, 0.0 );
+
+		return vars_push( FLOAT_VAR,
+						  sr510_get_adc_data( ( long ) VALUE( v ) ) );
+	}
+
+	/* If function is called with a list of port numbers the voltage for each
+	   of them is fetched and the results are returned as an float array */
+
+	/* count number of arguments and check them */
 	
+	for ( cv = v->next, num_args = 1; cv != NULL;
+		  cv = cv->next, num_args++ )
+		vars_check( cv, INT_VAR );
+		
+	/* get memory for storing the voltages */
+
+	voltages = T_malloc( num_args * sizeof( double ) );
+
+	/* get voltage from each of the ports in the list */
+
+	for ( i = 0; v != NULL; i++, v = v->next )
+	{
+		if ( ( long ) VALUE( v ) < 1 || ( long ) VALUE( v ) > 4 )
+		{
+			eprint( FATAL, "sr510: Invalid ADC channel number (%ld) in "
+					"call of 'lockin_get_adc_data', valid channel are in "
+					"the range 1-4.\n", ( long ) VALUE( v ) );
+			T_free( voltages );
+			THROW( EXCEPTION );
+		}
+
+		if ( TEST_RUN )
+			voltages[ i ] = 0.0;      /* return dummy value in test run */
+		else
+			voltages[ i ] = sr510_get_adc_data( ( long ) VALUE( v ) );
+	}
+
+	/* push the array of results onto the variable stack */
+
+	cv = vars_push( FLOAT_TRANS_ARR, voltages, num_args );
+
+	/* finally free array of voltages and return the stack variable */
+
+	T_free( voltages );
+	return cv;
+}
+
 
 /*-------------------------------------------------------------------------*/
 /* Returns or sets sensitivity of the lock-in amplifier. If called with no */
@@ -168,7 +254,7 @@ Var *lockin_sensitivity( Var *v )
 
 	if ( v == 0 )
 	{
-		if ( TEST_RUN )
+		if ( TEST_RUN )                  /* return dummy value in test run */
 			return vars_push( FLOAT_VAR, 0.5 );
 		else
 		{
@@ -456,10 +542,9 @@ bool lockin_init( const char *name, int *device )
 	if ( gpib_write( *device, "I1\n", 3 ) == FAILURE )
 		return FAIL;
 
-	/* If sensitivity, time constant or the phase values were set in one of
-	   the preparation sections only the value to be used was stored and we
-	   have to do the actual setting now because the lock-in could not be
-	   accessed before */
+	/* If sensitivity, time constant or phase were set in one of the
+	   preparation sections only the value was stored and we have to do the
+	   actual setting now because the lock-in could not be accessed before */
 
 	if ( sr510.Sens != -1 )
 		sr510_set_sens( sr510.Sens );
@@ -496,8 +581,8 @@ double sr510_get_data( void )
 
 /*----------------------------------------------------------*/
 /* lockin_get_adc() returns the value of the voltage at one */
-/* of the six ADC ports.                                    */
-/* -> Number of the ADC channel (1-6)                       */
+/* of the 4 ADC ports.                                      */
+/* -> Number of the ADC channel (1-4)                       */
 /*-------------------------- -------------------------------*/
 
 double sr510_get_adc_data( long channel )
@@ -572,6 +657,10 @@ void sr510_set_sens( int Sens )
 {
 	char buffer[10];
 
+
+	/* Coding of sensitivity commands work just the other way round as
+	   in the list of sensitivities 'slist', i.e. 1 stands for the highest
+	   sensitivity (10nV) and 24 for the lowest (500mV) */
 
 	Sens = 25 - Sens;
 
@@ -651,7 +740,10 @@ void sr510_set_tc( int TC )
 		THROW( EXCEPTION );
 	}
 
-	/* Also set the POST time constant */
+	/* Also set the POST time constant where 'T2,0' switches it off, 'T2,1'
+	   sets it to 100ms and 'T1,2' to 1s */
+
+	/* Recheck this in the manual !!!!!!!!!! */
 
 	if ( TC <= 4 && gpib_write( sr510.device, "T2,0\n", 5 ) == FAILURE )
 	{

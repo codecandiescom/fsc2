@@ -47,8 +47,8 @@ pulser_set_timebase, 1, PREP;   // sets timebase for pulser
 
 // Functions exported by the lock-in amplifier drivers
 
-lockin_get_data, -1, EXP;       // returns either the voltage or the
-				                // voltage measured at one of the ADCs
+lockin_get_data, 0, EXP;        // returns the lock-in voltage 
+lockin_get_adc_data, -1, EXP;   // returns the ADC voltage(s)
 lockin_sensitivity, -1, ALL;    // getss or sets the sensitivity
 lockin_time_constant, -1, ALL;  // gets or sets the time constant
 lockin_phase, -1, ALL;          // gets or sets the phase
