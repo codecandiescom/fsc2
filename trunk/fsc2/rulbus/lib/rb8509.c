@@ -184,10 +184,10 @@ void rulbus_adc12_card_exit( int handle )
 }
 
 
-/*----------------------------------------------------*
- * Function for selecting which channnel of the card is to be used
- * in conversions
- *----------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function for selecting which channnel of the card
+ * is to be used in conversions
+ *---------------------------------------------------*/
 
 int rulbus_adc12_set_channel( int handle, int channel )
 {
