@@ -846,37 +846,42 @@ void win_slider_callback( FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*-----------------------------------------------------*/
-/* Function for figuring out if a window is iconified. */
-/* Returns 1 if it is, 0 if it isn't and -1 on errors. */
-/*-----------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Function for figuring out if a window is iconified. It returns 1 if */
+/* it is, 0 if it isn't and -1 on errors. Please note that there's a   */
+/* potential race condition when immedately after this test the state  */
+/* of the window gets changed.                                         */
+/*---------------------------------------------------------------------*/
+
+#define WM_STATE_ELEMENTS 1
 
 int is_iconic( Display *d, Window w )
 {
-	Atom a, act_type;
-	int act_format;
-	unsigned long nitems, left_over;
-	unsigned long *prop = NULL;
-	int ret;
+	Atom xa_wm_state, actual_type;
+	unsigned char *property = NULL;
+	int actual_format;
+	unsigned long nitems, leftover;
+	int status;
 
-	if ( ( a = XInternAtom( d, "WM_STATE", True ) ) == 0 )
+	if ( ( xa_wm_state = XInternAtom( d, "WM_STATE", True ) ) == 0 )
 		return -1;
 
-	ret = XGetWindowProperty( fl_get_display( ), w, a, 0,
-							  ( CHAR_BIT * sizeof * prop ) / 32,
-							  False, AnyPropertyType, &act_type, &act_format,
-							  &nitems, &left_over, ( char ** ) &prop );
+	status = XGetWindowProperty( fl_get_display( ), w, xa_wm_state, 0,
+								 WM_STATE_ELEMENTS, False, xa_wm_state,
+								 &actual_type, &actual_format,
+								 &nitems, &leftover, &property );
 
-	if ( ret != Success || prop == NULL || a != act_type || nitems != 1 )
+	if ( status != Success || property == NULL ||
+		 xa_wm_state != actual_type || nitems != 1 )
 	{
-		if ( prop != NULL )
-			XFree( ( char * ) prop );
+		if ( property != NULL )
+			XFree( property );
 		return -1;
 	}
  
-	ret = *prop == IconicState;           /* defined in <X11/Xutil.h> */
-	XFree( ( char * ) prop );
-	return ret;
+	status = * ( unsigned long * ) property == IconicState;
+	XFree(  property );
+	return status;
 }
 
 
