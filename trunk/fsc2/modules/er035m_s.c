@@ -64,8 +64,7 @@ typedef struct
 
 static NMR nmr;
 static char serial_port[ ] = "/dev/ttyS*";
-static char er035m_s_eol[ ] = "\n";      /* end of command string (compare
-											settings at back side of device) */
+static char er035m_s_eol[ ] = "\r\n";
 
 
 /* The gaussmeter seems to be more cooperative if we wait for some time
@@ -193,6 +192,12 @@ int er035m_s_exp_hook( void )
 
 	nmr.state = ER035M_S_UNKNOWN;
 
+	if ( er035m_s_write( "ED", 2 ) == FAIL )
+	{
+		eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
+		THROW( EXCEPTION );
+	}
+
 try_again:
 
 	if ( er035m_s_write( "PS", 2 ) == FAIL )
@@ -214,7 +219,7 @@ try_again:
 	   the gaussmeter is either in locked state or is actively searching to
 	   achieve the lock (if it's just in TRANS L-H or H-L state check again) */
 
-	bp = buffer + 2;     /* skip first two chars of status byte */
+	bp = buffer;
 
 	do     /* loop through remaining chars in status byte */
 	{
@@ -308,7 +313,7 @@ try_again:
 				break;
 		}
 
-	} while ( *bp++ != '\r' ); 
+	} while ( *bp++ ); 
 
 
 	/* Switch the display on */
@@ -336,7 +341,7 @@ try_again:
 		THROW( EXCEPTION );
 	}
 
-	switch ( buffer[ 2 ] )
+	switch ( buffer[ 0 ] )
 	{
 		case '1' :                    /* set resolution to 2 digits */
 			if ( er035m_s_write( "RS2", 3 ) == FAIL )
@@ -457,7 +462,7 @@ Var *find_field( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		bp = buffer + 2;   /* skip first two chars of status byte */
+		bp = buffer;
 
 		do     /* loop through remaining chars in status byte */
 		{
@@ -506,7 +511,7 @@ Var *find_field( Var *v )
 					break;
 			}
 
-		} while ( *bp++ != '\r' );
+		} while ( *bp++ );
 	};
 
 	/* Finally  get current field value */
@@ -602,7 +607,7 @@ static double er035m_s_get_field( void )
 	/* Finally interpret the field value string */
 
 	*( state_flag - 1 ) = '\0';
-	sscanf( buffer + 2, "%lf", &nmr.field );
+	sscanf( buffer, "%lf", &nmr.field );
 
 	return nmr.field;
 }
@@ -651,6 +656,9 @@ static bool er035m_s_write( const char *buf, long len )
 
 static bool er035m_s_read( char *buf, long *len )
 {
+	char *ptr;
+
+
 	if ( buf == NULL || *len == 0 )
 		return OK;
 
@@ -659,6 +667,15 @@ static bool er035m_s_read( char *buf, long *len )
 		er035m_s_close( );
 		return FAIL;
 	}
+
+	/* Make buffer end with zero and remove trailing `*'s */
+
+	*( strchr( buf, '\r' ) ) = '\0';
+	*len = strlen( buf );
+	for ( ptr = buf; *ptr == '*'; ptr++ )
+		;
+	*len -= ( long ) ( ptr - buf );
+	memmove( buf, ptr, *len + 1 );
 
 	return OK;
 }
@@ -678,14 +695,14 @@ static bool er035m_s_comm( int type, ... )
 	{
 		case SERIAL_INIT :
 			if ( ( nmr.fd =
-				  open( serial_port, O_WRONLY | O_NOCTTY | O_NONBLOCK ) ) < 0 )
+				  open( serial_port, O_RDWR | O_NOCTTY | O_NONBLOCK ) ) < 0 )
 				return FAIL;
 
 			tcgetattr( nmr.fd, &nmr.old_tio );
 			memcpy( ( void * ) &nmr.new_tio, ( void * ) &nmr.old_tio,
 					sizeof( struct termios ) );
-			nmr.new_tio.c_cflag = SERIAL_BAUDRATE | CS8 | CRTSCTS;
-			tcflush( nmr.fd, TCIFLUSH );
+			nmr.new_tio.c_cflag = SERIAL_BAUDRATE | CS8;
+			tcflush( nmr.fd, TCIOFLUSH );
 			tcsetattr( nmr.fd, TCSANOW, &nmr.new_tio );
 			break;
 
@@ -699,7 +716,7 @@ static bool er035m_s_comm( int type, ... )
 		case SERIAL_WRITE :
 			buf = va_arg( ap, char * );
 			len = va_arg( ap, long );
-			if ( write( nmr.fd, ( void * ) buf, len ) != len )
+			if ( write( nmr.fd, buf, len ) != len )
 			{
 				va_end( ap );
 				return FAIL;
@@ -709,13 +726,15 @@ static bool er035m_s_comm( int type, ... )
 		case SERIAL_READ :
 			buf = va_arg( ap, char * );
 			lptr = va_arg( ap, long * );
-			*lptr = read( nmr.fd, ( void * ) buf, *lptr );
+			*lptr = read( nmr.fd, buf, *lptr );
 			if ( *lptr < 0 )
 			{
 				*lptr = 0;
 				va_end( ap );
 				return FAIL;
 			}
+			for ( len = 0; len < *lptr; len++ )
+				buf[ len ] &= 0x7f;
 			break;
 
 		default :
