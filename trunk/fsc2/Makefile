@@ -225,17 +225,27 @@ install:
                $(libdir)/magnet.so $(libdir)/pulser.so \
 			   $(libdir)/tds520c.so; \
 		ln -s $(libdir)/dg2020_f.so $(libdir)/dg2020.so; \
+		chown fsc2.fsc2 $(libdir)/dg2020.so; \
 		ln -s $(libdir)/aeg_s_band.so $(libdir)/s_band.so; \
+		chown fsc2.fsc2 $(libdir)/s_band.so; \
 		ln -s $(libdir)/bh15.so $(libdir)/gaussmeter.so; \
+		chown fsc2.fsc2 $(libdir)/gaussmeter.so; \
 		ln -s $(libdir)/aeg_s_band.so $(libdir)/magnet.so; \
+		chown fsc2.fsc2 $(libdir)/magnet.so; \
 		ln -s $(libdir)/sr510.so $(libdir)/lockin.so; \
+		chown fsc2.fsc2 $(libdir)/lockin.so; \
 		ln -s $(libdir)/dg2020_f.so $(libdir)/pulser.so; \
+		chown fsc2.fsc2 $(libdir)/pulser.so; \
 		ln -s $(libdir)/tds520a.so $(libdir)/tds520c.so; \
+		chown fsc2.fsc2 $(libdir)/tds520c.so; \
 	fi
 	if [ `hostname --fqdn` = "moebi.fu-berlin.de" ]; then \
 		ln -s $(libdir)/dg2020_b.so $(libdir)/pulser.so; \
+		chown fsc2.fsc2 $(libdir)/pulser.so; \
 		ln -s $(libdir)/aeg_x_band.so $(libdir)/magnet.so; \
+		chown fsc2.fsc2 $(libdir)/magnet.so; \
 		ln -s $(libdir)/er035m_s.so $(libdir)/gaussmeter.so; \
+		chown fsc2.fsc2 $(libdir)/gaussmeter.so; \
 	fi
 
 
