@@ -142,9 +142,9 @@ struct MESSAGE_QUEUE {
 
 
 enum {
-	DATA_1D,
-	DATA_2D,
-	REQUEST
+	DATA_1D = 1,
+	DATA_2D = 2,
+	REQUEST = 4
 };
 
 
