@@ -185,7 +185,6 @@ int gpib_shutdown( void )
 
 	while ( 1 )
 	{
-		gpib_local( cur_dev->number );
 		T_free( cur_dev->name );
 		if ( cur_dev->prev != NULL )
 		{
