@@ -52,7 +52,7 @@ enum {
 
 
 #define TRY \
-    if ( exception_env_stack_pos >= MAX_NESTED_EXCEPTION - 1 ) \
+    if ( exception_env_stack_pos >= MAX_NESTED_EXCEPTION ) \
 	{ \
 	    syslog( LOG_ERR, "INTERNAL ERROR: Too many exceptions at %s:%d.\n", \
 				__FILE__, __LINE__ ); \
