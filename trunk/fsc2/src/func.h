@@ -10,11 +10,11 @@
 
 typedef struct
 {
-	const char *name;                    /* name of the function */
-    Var * ( * fnct )( Var * );           /* pointer to the function */
-	long nargs;                          /* number of arguments */
-    int access_flag;                     /* asscessibility flag */
-	bool to_be_loaded;                   /* if set function has to be loaded */
+	const char *name;                 /* name of the function */
+    Var * ( * fnct )( Var * );        /* pointer to the function */
+	long nargs;                       /* number of arguments */
+    int access_flag;                  /* asscessibility flag */
+	bool to_be_loaded;                /* if set function has to be loaded */
 } Func;
 
 
