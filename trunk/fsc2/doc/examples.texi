@@ -110,7 +110,7 @@ the field range:
 53   fsave( File_2, "% Field step      = # G\n", field_step );
 54   fsave( File_2, "% Number of runs  = #\n", Number_of_runs );
 55   fsave( File_2, "% Time constant   = # ms\n", tc * 1.0e3 );
-56   save( File_2, mean / Number_of_runs );
+56   save( File_2, mean_data / Number_of_runs );
 @end example
 
 The @code{DEVICES} section is identical to the original script, again we
@@ -185,7 +185,7 @@ data value but multiplied by @code{1.0e6} because the value returned by
 the lock-in amplifiers is always in Volts and we want to display the
 value in code micro-Volts, and the number of the curve, @code{1}. The
 next three arguments are for the new mean value, we only have to take
-care to divide the @code{mean_value} array element by @code{I}, the
+care to divide the @code{mean_data} array element by @code{I}, the
 number of runs done so far.
 
 If you should have any trouble understanding that the @i{x}-coordinate
@@ -218,17 +218,18 @@ returns the new field value which gets stored in the variable
 When the inner loop has been repeated @code{Number_of_points} times we
 have reached the end field and now have to start a new run. First we
 write a single new line into the file for the data of all runs to have a
-visual indication where the data of a new run start. Then we have to get
-the field back to the start field, which can be done by calling the
+visual indication where the data of the new run start. Then we have to
+get the field back to the start field, which can be done by calling the
 function @code{reset_field()} (@pxref{reset_field}) (you actually also
 could also tell the magnet to go to a field of @code{start_field()} by
-calling @code{set_field()} (@pxref{set_field})). Finally, we have to
-remove the data from the last run but keeping the curve with the mean
-values. This is done by calling the function @code{clear_curve()}
-(@pxref{clear_curve}) with the number of the curve to remove as the
-parameter. This done we can go back to repeating the inner loop.
+calling @code{set_field()} (@pxref{set_field}) with @code{start_field()}
+as its only argument). Finally, we have to remove the data of the last
+run from the screen but keeping the curve with the mean values. This is
+done by calling the function @code{clear_curve()} (@pxref{clear_curve})
+with the number of the curve to remove (which is 1) as the
+parameter. Then we proceed with the inner loop.
 
-When the experiment finally is done, i.e.@: it's finished doing the
+When the experiment finally is done, i.e.@: we're finished doing the
 @code{Number_of_runs} repetitions of the field sweep we end up at line
 51 where we now can store the whole array of mean values, together with
 some information about the experimental parameters. Please note that
