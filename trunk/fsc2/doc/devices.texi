@@ -12,6 +12,7 @@
 * Digitizer Functions::     Functions for accessing the oscilloscopes.
 * Pulser Functions::
 * Synthesizer Functions::
+* Multi-Device Functions::
 @end menu
 @end ifinfo
 
@@ -675,7 +676,7 @@ time interval.
 
 
 
-@node Synthesizer Functions, , Pulser Functions, Device Functions
+@node Synthesizer Functions, Multi-Device Functions, Pulser Functions, Device Functions
 @section Synthesizer functions
 @cindex Synthesizer functions
 The only implemented synthesizer so far is the HP8647A. Its module is
@@ -767,5 +768,28 @@ argument can't be used).
 
 @item synthesizer_mod_ampl()
 @findex synthesizer_mod_ampl()
+
+@end table
+
+@node Multi-Device Functions, , Synthesizer Functions, Device Functions
+@section Multi-Device functions
+@cindex Multi-Device functions
+
+There are a few convenience functions that work with two or more
+devices. They use the single-device functions (and thus will print error
+messages if the modules for the required devices aren't loaded or don't
+if the modules don't support the needed functions). The module they are
+defined in is automatically loaded, so it needs no special entry in the
+@code{DEVICES} section.
+
+
+@table @samp
+
+@item get_phase_cycled_area_1d()
+@findex get_phase_cycled_area_1d()
+
+
+@item get_phase_cycled_area_2d()
+@findex get_phase_cycled_area_2d()
 
 @end table
