@@ -165,8 +165,13 @@ Var *f_bcreate( Var *v )
 		memcpy( pos, &coll, sizeof( long ) );   /* store colleague button */
 		pos += sizeof( long );
 
-		strcpy( ( char * ) pos, Fname );        /* store current file name */
-		pos += strlen( Fname ) + 1;
+		if ( Fname )
+		{
+			strcpy( ( char * ) pos, Fname );    /* store current file name */
+			pos += strlen( Fname ) + 1;
+		}
+		else
+			*( ( char * ) pos++ ) = '\0';
 
 		if ( label )                            /* store label string */
 		{
@@ -693,8 +698,13 @@ Var *f_screate( Var *v )
 		memcpy( pos, &end_val, sizeof( double ) );
 		pos += sizeof( double );
 
-		strcpy( ( char * ) pos, Fname );        /* store current file name */
-		pos += strlen( Fname ) + 1;
+		if ( Fname )
+		{
+			strcpy( ( char * ) pos, Fname );    /* store current file name */
+			pos += strlen( Fname ) + 1;
+		}
+		else
+			*( ( char * ) pos++ ) = '\0';
 
 		if ( label )                            /* store label string */
 		{

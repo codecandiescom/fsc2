@@ -483,7 +483,7 @@ double *exp_sstate( void *buffer, long len )
 	{
 		char *old_Fname = Fname;
 		long old_Lc = Lc;
-		long lval;
+		long val;
 		Var *Func_ptr;
 		Var *ret = NULL;
 		int access;
@@ -504,9 +504,9 @@ double *exp_sstate( void *buffer, long len )
 		vars_push( INT_VAR, *( ( long * ) pos ) );
 		pos += sizeof( long );
 
-		memcpy( &lval, pos, sizeof( long ) );
+		memcpy( &val, pos, sizeof( long ) );
 		pos += sizeof( long );
-		if ( lval > 0 )
+		if ( val > 0 )
 			vars_push( FLOAT_VAR, * ( ( double * ) pos ) );
 		pos += sizeof( double );
 
