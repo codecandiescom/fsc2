@@ -673,6 +673,33 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
+double tds520_get_amplitude( int channel, WINDOW *w )
+{
+	double *data, min, max;
+	long length, i;
+
+
+	tds520_get_curve( channel, w, &data, &length );
+
+	min = HUGE_VAL;
+	max = - HUGE_VAL;
+	for ( i = 0; i < length; i++ )
+	{
+		max = d_max( data[ i ], max );
+		min = d_min( data[ i ], min );
+	}
+
+	T_free( data );
+
+	/* Return the difference between highest and lowest value */
+
+	return max - min;
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
 void tds520_gpib_failure( void )
 {
 	eprint( FATAL, "%s: Communication with device failed.\n", DEVICE_NAME );

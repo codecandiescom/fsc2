@@ -600,3 +600,94 @@ Var *digitizer_get_curve( Var *v )
 	T_free( array );
 	return nv;
 }
+
+
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+Var *digitizer_get_amplitude( Var *v )
+{
+	WINDOW *w;
+	int ch, i;
+	Var *nv;
+
+
+	/* The first variable got to be a channel number */
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: %s: Missing arguments in call of "
+				"function `digitizer_get_amplitude'.\n", Fname, Lc,
+				DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_VAR );
+	for ( ch = 0; ch <= TDS754A_REF4; ch++ )
+		if ( ch == ( int ) v->val.lval )
+			break;
+
+	if ( ch > TDS754A_REF4 )
+	{
+		eprint( FATAL, "%s:%ld: %s: Invalid channel specification.\n",
+				Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+
+	tds754a.channels_in_use[ ch ] = SET;
+
+	v = vars_pop( v );
+
+	/* Now check if there's a variable with a window number and check it */
+
+	if ( v != NULL )
+	{
+		vars_check( v, INT_VAR );
+		if ( ( w = tds754a.w ) == NULL )
+		{
+			eprint( FATAL, "%s:%ld: %s: No measurement windows have been "
+					"defined.\n", Fname, Lc, DEVICE_NAME );
+			THROW( EXCEPTION );
+		}
+
+		while ( w != NULL )
+		{
+			if ( w->num == v->val.lval )
+			{
+				w->is_used = SET;
+				v = vars_pop( v );
+				break;
+			}
+			w = w->next;
+		}
+
+		if ( w == NULL )
+		{
+			eprint( FATAL, "%s:%ld: %s: Measurement window %ld has not "
+					"been defined.\n", Fname, Lc, DEVICE_NAME, v->val.lval );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+		w = NULL;
+
+	if ( v != NULL )
+	{
+		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
+				"function `digitizer_get_area'.\n", Fname, Lc, DEVICE_NAME );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
+	/* Talk to digitizer only in the real experiment, otherwise return a dummy
+	   array */
+
+	if ( I_am == CHILD )
+	{
+		nv = vars_push( FLOAT_VAR, tds754a_get_amplitude( ch, w ) );
+		return nv;
+	}
+
+	nv = vars_push( FLOAT_VAR, 1.23e-7 );
+	return nv;
+}

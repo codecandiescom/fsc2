@@ -97,6 +97,7 @@ Var *digitizer_trigger_channel( Var *v );
 Var *digitizer_start_acquisition( Var *v );
 Var *digitizer_get_area( Var *v );
 Var *digitizer_get_curve( Var *v );
+Var *digitizer_get_amplitude( Var *v );
 
 
 /* declaration of internally used functions */
@@ -132,8 +133,7 @@ double tds754a_get_sens( int channel );
 bool tds754a_start_aquisition( void );
 double tds754a_get_area( int channel, WINDOW *w );
 bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length );
-
-
+double tds754a_get_amplitude( int channel, WINDOW *w );
 
 
 

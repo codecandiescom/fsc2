@@ -743,6 +743,66 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length )
 }
 
 
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+double tds754a_get_amplitude( int channel, WINDOW *w )
+{
+	char cmd[ 50 ] = "MEASU:IMM:SOURCE ";
+	char reply[ 40 ];
+	long length = 40;
+
+
+	/* Set measurement type to area */
+
+    if ( gpib_write( tds754a.device, "MEASU:IMM:TYP AMP\n" ) == FAILURE )
+		tds754a_gpib_failure( );
+
+	assert( channel >= 0 && channel < TDS754A_AUX1 );
+
+	/* Set channel (if the channel is not already set) */
+
+	if ( channel != tds754a.meas_source )
+	{
+		strcat( cmd, Channel_Names[ channel ] );
+		strcat( cmd, "\n" );
+		if ( gpib_write( tds754a.device, cmd ) == FAILURE )
+			tds754a_gpib_failure( );
+		tds754a.meas_source = channel;
+	}
+
+	/* Set the cursors */
+
+	tds754a_set_meas_window( w );
+
+	/* Wait for measurement to finish (use polling) */
+
+	do
+	{
+		if ( do_quit )
+			THROW( EXCEPTION );
+
+		length = 40;
+		usleep( 100000 );
+		if ( gpib_write( tds754a.device, "BUSY?\n" ) == FAILURE ||
+			 gpib_read( tds754a.device, reply, &length ) == FAILURE )
+			tds754a_gpib_failure( );
+	} while ( reply[ 0 ] == '1' ); 
+
+
+	/* Get the the amplitude */
+
+	length = 40;
+	if ( gpib_write( tds754a.device, "*WAI\n" ) == FAILURE ||
+		 gpib_write( tds754a.device, "MEASU:IMM:VAL?\n" ) == FAILURE ||
+		 gpib_read( tds754a.device, reply, &length ) == FAILURE )
+		tds754a_gpib_failure( );
+
+	reply[ length - 1 ] = '\0';
+	return T_atof( reply );
+}
+
+
 /*-------------------------------------------------------------------------*/
 /* Unfortunately, the digitizer sometimes seems to have problems returning */
 /* data when there's not a short delay between the write and read command. */
