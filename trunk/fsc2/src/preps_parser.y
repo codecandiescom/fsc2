@@ -110,8 +110,9 @@ ass:     '=' expr                  { vars_assign( $2, $2->prev ); }
        | MINA expr                 { Var **C = &( $2->prev );
 	                                 vars_assign( vars_sub( vars_val( *C ),
 															$2 ), *C ); }
-       | MULA expr                 { vars_assign( vars_mult( $2->prev, $2 ),
-												  $2->prev ); }
+       | MULA expr                 { Var **C = &( $2->prev );
+	                                 vars_assign( vars_mult( vars_val( *C ),
+															 $2 ), *C ); }
        | DIVA expr                 { Var **C = &( $2->prev );
 	                                 vars_assign( vars_div( vars_val( *C ),
 															$2 ), *C ); }
