@@ -114,7 +114,7 @@ function make_auto() {
 echo "/* Automatically created - change carefully */" > driver/autoconf.h
 echo "" >> driver/autoconf.h
 echo "#define NI6601_MAJOR    $MAJOR" >> driver/autoconf.h
-test $DEBUG -ne 0 || echo "#define NI6601_DEBUG" >> driver/autoconf.h
+test $DEBUG -ne 0 || echo "#define NI6601_DEBUG    1" >> driver/autoconf.h
 echo "#define NI6601_PREFIX   \"$PREFIX\"" >> driver/autoconf.h
 
 } # end of make_auto()

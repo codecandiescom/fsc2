@@ -16,4 +16,6 @@ rs_spec10_incl     := /usr/local/include/pvcam
 rs_spec10_libs     := libpvcam.so
 WITH_WITIO_48      := yes
 witio_48_libs      := libwitio_48.so
+WITH_PCI_MIO_16E_1 := yes
+pci_mio_16e_1_libs := libni_daq.so
 MAIL_ADDRESS       := jens

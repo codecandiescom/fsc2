@@ -70,7 +70,7 @@ int ni_daq_msc_set_clock_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed,
 /* and for enabling and disabling the frequency output             */
 /*-----------------------------------------------------------------*/
 
-int ni_daq_msc_set_clock_output( int board, NI_DAQ_CLOCK_TYPE clock,
+int ni_daq_msc_set_clock_output( int board, NI_DAQ_CLOCK_TYPE daq_clock,
 								 NI_DAQ_STATE on_off )
 {
 	NI_DAQ_MSC_ARG msc;
@@ -80,18 +80,19 @@ int ni_daq_msc_set_clock_output( int board, NI_DAQ_CLOCK_TYPE clock,
 	if ( ( ret = ni_daq_basic_check( board ) ) < 0 )
 		return ret;
 
-	if ( ( clock != NI_DAQ_FAST_CLOCK && clock != NI_DAQ_SLOW_CLOCK ) ||
+	if ( ( daq_clock != NI_DAQ_FAST_CLOCK &&
+		   daq_clock != NI_DAQ_SLOW_CLOCK ) ||
 		 ( on_off != NI_DAQ_ENABLED && on_off != NI_DAQ_DISABLED ) )
         return ni_daq_errno = NI_DAQ_ERR_IVA;
 
 	msc.cmd = NI_DAQ_MSC_CLOCK_OUTPUT;
-	msc.clock = clock;
+	msc.clock = daq_clock;
 	msc.output_state = on_off;
 
 	if ( ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_MSC, &msc ) < 0 )
 		return ni_daq_errno = NI_DAQ_ERR_INT;
 
-	ni_daq_dev[ board ].msc_state.clock = clock;
+	ni_daq_dev[ board ].msc_state.clock = daq_clock;
 	ni_daq_dev[ board ].msc_state.output_state = on_off;
 
 	return ni_daq_errno = NI_DAQ_OK;
@@ -102,7 +103,7 @@ int ni_daq_msc_set_clock_output( int board, NI_DAQ_CLOCK_TYPE clock,
 /* Function for determining all current clock settings of the board */
 /*------------------------------------------------------------------*/
 
-int ni_daq_msc_get_clock_state( int board, NI_DAQ_CLOCK_TYPE *clock,
+int ni_daq_msc_get_clock_state( int board, NI_DAQ_CLOCK_TYPE *daq_clock,
 								NI_DAQ_STATE *on_off,
 								NI_DAQ_CLOCK_SPEED_VALUE *speed,
 								int *divider )
@@ -113,10 +114,11 @@ int ni_daq_msc_get_clock_state( int board, NI_DAQ_CLOCK_TYPE *clock,
 	if ( ( ret = ni_daq_basic_check( board ) ) < 0 )
 		return ret;
 
-	if ( clock == NULL || on_off == NULL || speed == NULL || divider == NULL )
+	if ( daq_clock == NULL || on_off == NULL ||
+		 speed == NULL || divider == NULL )
 		return ni_daq_errno = NI_DAQ_ERR_IVA;
 
-	*clock = ni_daq_dev[ board ].msc_state.clock;
+	*daq_clock = ni_daq_dev[ board ].msc_state.clock;
 	*on_off = ni_daq_dev[ board ].msc_state.output_state;
 	*speed = ni_daq_dev[ board ].msc_state.speed;
 	*divider = ni_daq_dev[ board ].msc_state.divider;

@@ -1122,6 +1122,16 @@ static bool er035m_s_read( char *buf, size_t *len )
 	if ( ! er035m_s_comm( SERIAL_READ, buf, len ) )
 		return FAIL;
 
+	/* It sometimes happens that len isn't zero but we didn't really get
+	   anything (when Radek and Andreas didn't attach the gaussmeter to
+	   the right serial port) */
+
+	if ( buf[ 0 ] == '\0' )
+	{
+		print( FATAL, "Can't read from device\n" );
+		THROW( EXCEPTION );
+	}
+
 	/* If the prompt character send by the device with each reply isn't known
 	   yet take it to be the very first byte read (default is '*' but who
 	   knows if this got changed by some unlucky coincidence...) */

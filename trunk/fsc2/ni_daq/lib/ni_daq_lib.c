@@ -63,7 +63,7 @@ static const char *ni_daq_errlist[ ] = {
     "Unspecified error when opening device file",    /* NI_DAQ_ERR_DFP */
     "Internal driver or library error",              /* NI_DAQ_ERR_INT */
 	"Board is missing AO capabilities",              /* NI_DAQ_ERR_NAO */
-	"Missing AI channel setup",                      /* NI_DAQ_ERR_NSS */
+	"Missing channel setup",                         /* NI_DAQ_ERR_NSS */
 	"Missing AI acquisition setup",                  /* NI_DAQ_ERR_NAS */
 	"Not enough memory",                             /* NI_DAQ_ERR_NEM */
 	"Timing impossible to realize",                  /* NI_DAQ_ERR_NPT */

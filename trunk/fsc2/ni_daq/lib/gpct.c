@@ -28,12 +28,12 @@
 #include "ni_daq_lib.h"
 
 
-static int ni_daq_gpct_check_source( int source );
+static int ni_daq_gpct_check_source( NI_DAQ_INPUT source );
 static int ni_daq_gpct_state( int board, int counter, int *state );
 static int ni_daq_gpct_is_armed( int board, int counter, int *state );
 static int ni_daq_gpct_time_to_ticks( int board, int counter,
 									  double gate_length, unsigned long *ticks,
-									  int *source );
+									  NI_DAQ_INPUT *source );
 
 
 
@@ -96,7 +96,7 @@ int ni_daq_gpct_get_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE *speed )
 /* stopped by a call of ni_daq_gpct_stop_counter().                */
 /*-----------------------------------------------------------------*/
 
-int ni_daq_gpct_start_counter( int board, int counter, int source )
+int ni_daq_gpct_start_counter( int board, int counter, NI_DAQ_INPUT source )
 {
 	int ret;
 	int state;
@@ -140,7 +140,7 @@ int ni_daq_gpct_start_counter( int board, int counter, int source )
 /*----------------------------------------------------------------------*/
 
 int ni_daq_gpct_start_gated_counter( int board, int counter,
-									 double gate_length, int source )
+									 double gate_length, NI_DAQ_INPUT source )
 {
 	int ret;
 	int pulser;
@@ -324,7 +324,7 @@ int ni_daq_gpct_single_pulse( int board, int counter, double duration )
 	NI_DAQ_GPCT_ARG a;
 	unsigned long len;
 	int state;
-	int source = -1;
+	NI_DAQ_INPUT source = NI_DAQ_INVALID_INPUT;
 
 
 	if ( ( ret = ni_daq_basic_check( board ) ) < 0 )
@@ -382,7 +382,7 @@ int ni_daq_gpct_continuous_pulses( int board, int counter,
 	int state;
 	NI_DAQ_GPCT_ARG a;
 	unsigned long ht, lt;
-	int source = -1;
+	NI_DAQ_INPUT source = NI_DAQ_INVALID_INPUT;
 
 
 	if ( ( ret = ni_daq_basic_check( board ) ) < 0 )
@@ -395,7 +395,7 @@ int ni_daq_gpct_continuous_pulses( int board, int counter,
 									  &ht, &source ) < 0 ||
 		   ni_daq_gpct_time_to_ticks( board, counter, low_phase,
 									  &lt, &source ) < 0 ) &&
-		 ( source = -1,
+		 ( source = NI_DAQ_INVALID_INPUT,
 		   ni_daq_gpct_time_to_ticks( board, counter, low_phase,
 									  &lt, &source ) < 0 ||
 		   ni_daq_gpct_time_to_ticks( board, counter, high_phase,
@@ -456,7 +456,7 @@ int ni_daq_gpct_stop_pulses( int board, int counter )
 /* Function checks if a counter source value is correct */
 /*------------------------------------------------------*/
 
-static int ni_daq_gpct_check_source( int source )
+static int ni_daq_gpct_check_source( NI_DAQ_INPUT source )
 {
     if ( source < 0 ||
 		 ( source > NI_DAQ_RTSI_6 && source != NI_DAQ_IN_TIMEBASE2 &&
@@ -550,7 +550,7 @@ int ni_daq_gpct_init( int board )
 
 static int ni_daq_gpct_time_to_ticks( int board, int counter,
 									  double duration, unsigned long *ticks,
-									  int *source )
+									  NI_DAQ_INPUT *source )
 {
 	int state;
 	unsigned int poss_clock = 0;

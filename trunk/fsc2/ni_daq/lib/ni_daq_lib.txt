@@ -219,7 +219,7 @@ On failure the function returns one of the following error codes
 
 ======================================================================
 
-int ni_daq_msc_set_clock_output( int board, NI_DAQ_CLOCK_TYPE clock,
+int ni_daq_msc_set_clock_output( int board, NI_DAQ_CLOCK_TYPE daq_clock,
                                  NI_DAQ_STATE on_off )
 
 This function is for selecting one of the two clocks and enabling (or
@@ -241,7 +241,7 @@ On failure the function returns one of the following error codes
 
 ======================================================================
 
-int ni_daq_msc_get_clock_state( int board, NI_DAQ_CLOCK_TYPE *clock,
+int ni_daq_msc_get_clock_state( int board, NI_DAQ_CLOCK_TYPE *daq_clock,
                                 NI_DAQ_STATE *on_off,
                                 NI_DAQ_CLOCK_SPEED_VALUE *speed,
                                 int *divider )

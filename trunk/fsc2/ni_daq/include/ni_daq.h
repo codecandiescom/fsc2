@@ -25,6 +25,10 @@
 */
 
 
+#if ! defined NI_DAQ_HEADER
+#define NI_DAQ_HEADER
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -54,13 +58,13 @@ const char *ni_daq_strerror( void );
    as well as for determining the boards current state in this respect */
 
 int ni_daq_msc_set_clock_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed, 
-								int divider );
-int ni_daq_msc_set_clock_output( int board, NI_DAQ_CLOCK_TYPE clock,
-								 NI_DAQ_STATE on_off );
-int ni_daq_msc_get_clock_state( int board, NI_DAQ_CLOCK_TYPE *clock,
-								NI_DAQ_STATE *on_off,
-								NI_DAQ_CLOCK_SPEED_VALUE *speed,
-								int *divider );
+				int divider );
+int ni_daq_msc_set_clock_output( int board, NI_DAQ_CLOCK_TYPE daq_clock,
+				 NI_DAQ_STATE on_off );
+int ni_daq_msc_get_clock_state( int board, NI_DAQ_CLOCK_TYPE *daq_clock,
+				NI_DAQ_STATE *on_off,
+				NI_DAQ_CLOCK_SPEED_VALUE *speed,
+				int *divider );
 
 
 /* Functions for the AI subsystem */
@@ -68,47 +72,47 @@ int ni_daq_msc_get_clock_state( int board, NI_DAQ_CLOCK_TYPE *clock,
 int ni_daq_ai_set_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed );
 int ni_daq_ai_get_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE *speed );
 int ni_daq_ai_channel_configuration( int board, int num_channels,
-									 int *channels, NI_DAQ_AI_TYPE *types,
-									 NI_DAQ_POLARITY *polarities,
-									 double *ranges,
-									 NI_DAQ_STATE *dither_enable );
+				     int *channels, NI_DAQ_AI_TYPE *types,
+				     NI_DAQ_POLARITY *polarities,
+				     double *ranges,
+				     NI_DAQ_STATE *dither_enable );
 int ni_daq_ai_acq_setup( int board, NI_DAQ_INPUT start,
-						 NI_DAQ_POLARITY start_polarity,
-						 NI_DAQ_INPUT scan_start,
-						 NI_DAQ_POLARITY scan_polarity,
-						 double scan_duration,
-						 NI_DAQ_INPUT conv_start,
-						 NI_DAQ_POLARITY conv_polarity,
-						 double conv_duration,
-						 size_t num_scans );
+			 NI_DAQ_POLARITY start_polarity,
+			 NI_DAQ_INPUT scan_start,
+			 NI_DAQ_POLARITY scan_polarity,
+			 double scan_duration,
+			 NI_DAQ_INPUT conv_start,
+			 NI_DAQ_POLARITY conv_polarity,
+			 double conv_duration,
+			 size_t num_scans );
 int ni_daq_ai_start_acq( int board );
 int ni_daq_ai_stop_acq( int board );
 ssize_t ni_daq_ai_get_acq_data( int board, double *volts[ ],
-								size_t offset, size_t num_data_per_channel,
-								int wait_for_end );
+				size_t offset, size_t num_data_per_channel,
+				int wait_for_end );
 
 /* Functions for the AO subsystem */
 
-int ni_daq_ao_channel_configuration( int board, int *channels,
-									 int num_channels,
-									 NI_DAQ_STATE *external_reference,
-									 NI_DAQ_BU_POLARITY *polarity );
-int ni_daq_ao( int board, int *channels, int num_channels, double *values );
+int ni_daq_ao_channel_configuration( int board, int num_channels,
+				     int *channels,
+				     NI_DAQ_STATE *external_reference,
+				     NI_DAQ_BU_POLARITY *polarity );
+int ni_daq_ao( int board, int num_channels, int *channels, double *values );
 
 
 /* Functions for the GPCT subsystem */
 
 int ni_daq_gpct_set_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed );
 int ni_daq_gpct_get_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE *speed );
-int ni_daq_gpct_start_counter( int board, int counter, int source );
+int ni_daq_gpct_start_counter( int board, int counter, NI_DAQ_INPUT source );
 int ni_daq_gpct_start_gated_counter( int board, int counter,
-									 double gate_length, int source );
+				     double gate_length, NI_DAQ_INPUT source );
 int ni_daq_gpct_stop_counter( int board, int counter );
 int ni_daq_gpct_get_count( int board, int counter, int wait_for_end,
 					  unsigned long *count, int *state );
 int ni_daq_gpct_single_pulse( int board, int counter, double duration );
 int ni_daq_gpct_continuous_pulses( int board, int counter,
-								   double high_phase, double low_phase );
+				   double high_phase, double low_phase );
 int ni_daq_gpct_stop_pulses( int board, int counter );
 
 
@@ -145,7 +149,7 @@ enum {
 #define NI_DAQ_ERR_DFP  -14
 #define NI_DAQ_ERR_INT  -15
 #define NI_DAQ_ERR_NAO  -16
-#define NI_DAQ_ERR_NSS  -17
+#define NI_DAQ_ERR_NCS  -17
 #define NI_DAQ_ERR_NAS  -18
 #define NI_DAQ_ERR_NEM  -19
 #define NI_DAQ_ERR_NPT  -20
@@ -154,3 +158,22 @@ enum {
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
+
+
+#endif /* ! NI_DAQ_HEADER */
+
+
+/*
+ * Local variables:
+ * c-basic-offset: 8
+ * c-indent-level: 8
+ * c-brace-imaginary-offset: 0
+ * c-brace-offset: 0
+ * c-argdecl-indent: 4
+ * c-label-ofset: -4
+ * c-continued-statement-offset: 4
+ * c-continued-brace-offset: 0
+ * indent-tabs-mode: t
+ * tab-width: 8
+ * End:
+ */

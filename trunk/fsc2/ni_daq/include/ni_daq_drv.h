@@ -25,8 +25,8 @@
 */
 
 
-#if ! defined NI_DAQ_HEADER
-#define NI_DAQ_HEADER
+#if ! defined NI_DAQ_DRV_HEADER
+#define NI_DAQ_DRV_HEADER
 
 #ifdef __cplusplus
 extern "C" {
@@ -61,33 +61,34 @@ typedef enum {
 
 
 typedef enum {
-	NI_DAQ_IN_TIMEBASE1    = 0,
-	NI_DAQ_AI_START1_Pulse = 0,
-	NI_DAQ_SI_TC           = 0,
-	NI_DAQ_SI2_TC          = 0,
-	NI_DAQ_SAME_AS_SI      = 0,
-	NI_DAQ_DIV_TC          = 0,
-	NI_DAQ_AI_IN_TIMEBASE1 = 0,
-	NI_DAQ_AO_IN_TIMEBASE1 = 0,
-	NI_DAQ_G_IN_TIMEBASE1  = 0,
-	NI_DAQ_PFI0            = 1,
-	NI_DAQ_TRIG1           = 1,
-	NI_DAQ_PFI1            = 2,
-	NI_DAQ_TRIG2           = 2,
-	NI_DAQ_PFI2            = 3,
-	NI_DAQ_CONVERT         = 3,
-	NI_DAQ_PFI3            = 4,
-	NI_DAQ_GCTR1_SOURCE    = 4,
-	NI_DAQ_PFI4            = 5,
-	NI_DAQ_GPCTR1_GATE     = 5,
-	NI_DAQ_PFI5            = 6,
-	NI_DAQ_UPDATE          = 6,
-	NI_DAQ_PFI6            = 7,
-	NI_DAQ_WFTTRIG         = 7,
-	NI_DAQ_PFI7            = 8,
-	NI_DAQ_STARTSCAN       = 8,
-	NI_DAQ_PFI8            = 9,
-	NI_DAQ_GPCTR0_SOURCE   = 9,
+	NI_DAQ_INVALID_INPUT   = -1,
+	NI_DAQ_IN_TIMEBASE1    =  0,
+	NI_DAQ_AI_START1_Pulse =  0,
+	NI_DAQ_SI_TC           =  0,
+	NI_DAQ_SI2_TC          =  0,
+	NI_DAQ_SAME_AS_SI      =  0,
+	NI_DAQ_DIV_TC          =  0,
+	NI_DAQ_AI_IN_TIMEBASE1 =  0,
+	NI_DAQ_AO_IN_TIMEBASE1 =  0,
+	NI_DAQ_G_IN_TIMEBASE1  =  0,
+	NI_DAQ_PFI0            =  1,
+	NI_DAQ_TRIG1           =  1,
+	NI_DAQ_PFI1            =  2,
+	NI_DAQ_TRIG2           =  2,
+	NI_DAQ_PFI2            =  3,
+	NI_DAQ_CONVERT         =  3,
+	NI_DAQ_PFI3            =  4,
+	NI_DAQ_GPCTR1_SOURCE   =  4,
+	NI_DAQ_PFI4            =  5,
+	NI_DAQ_GPCTR1_GATE     =  5,
+	NI_DAQ_PFI5            =  6,
+	NI_DAQ_UPDATE          =  6,
+	NI_DAQ_PFI6            =  7,
+	NI_DAQ_WFTTRIG         =  7,
+	NI_DAQ_PFI7            =  8,
+	NI_DAQ_STARTSCAN       =  8,
+	NI_DAQ_PFI8            =  9,
+	NI_DAQ_GPCTR0_SOURCE   =  9,
 	NI_DAQ_PFI9            = 10,
 	NI_DAQ_GPCTR0_GATE     = 10,
 	NI_DAQ_RTSI_0          = 11,
@@ -370,7 +371,7 @@ typedef struct {
 #endif
 
 
-#endif /* ! NI_DAQ_HEADER */
+#endif /* ! NI_DAQ_DRV_HEADER */
 
 
 /*

@@ -62,6 +62,7 @@ struct NI_DAQ_AI_STATE {
 
 struct NI_DAQ_AO_STATE {
 	NI_DAQ_BU_POLARITY polarity[ 2 ];
+	int is_channel_setup[ 2 ];
 	NI_DAQ_STATE ext_ref[ 2 ];
 	double volts[ 2 ];
 	NI_DAQ_CLOCK_SPEED_VALUE speed;

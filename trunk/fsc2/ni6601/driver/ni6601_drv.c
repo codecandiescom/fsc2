@@ -525,11 +525,8 @@ static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
 
 		if ( readw( board->regs.joint_status[ oc ] ) &
 		     Gi_COUNTING( oc ) )
-			interruptible_sleep_on_timeout( &board->waitqueue, 1 );
-
-//			wait_event_interruptible( board->waitqueue,
-//						  board->TC_irq_raised[ oc ] );
-
+			wait_event_interruptible( board->waitqueue,
+						  board->TC_irq_raised[ oc ] );
 		ni6601_irq_disable( board, oc );
 
 		writew( G1_RESET | G0_RESET,
@@ -539,7 +536,6 @@ static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
 			PDEBUG( "Aborted by signal\n" );
 			return -EINTR;
 		}
-
 	}
 
 	/* Read the SW save register to get the current count value */
@@ -766,6 +762,7 @@ static void ni6601_irq_enable( Board *board, int counter )
 	board->TC_irq_raised[ counter ] = 0;
 	if ( ! board->irq_enabled[ counter ] )
 	{
+		PDEBUG( "Enabling IRQ for counter %d\n", counter );
 		writew( Gi_TC_INTERRUPT_ACK, board->regs.irq_ack[ counter ] );
 		writew( Gi_TC_INTERRUPT_ENABLE( counter ),
 			board->regs.irq_enable[ counter ] );
@@ -782,6 +779,8 @@ static void ni6601_irq_disable( Board *board, int counter )
 {
 	if ( board->irq_enabled[ counter ] )
 	{
+		PDEBUG( "Disabling IRQ for counter %d\n", counter );
+
 		writew( 0, board->regs.irq_enable[ counter ] );
 		writew( Gi_TC_INTERRUPT_ACK,
 			board->regs.irq_ack[ counter ] );
@@ -801,8 +800,6 @@ static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
 	int i;
 
 
-	printk( KERN_NOTICE "In IRQ handler!!!!\n" );
-
 	if ( irq != board->irq ) {
 		PDEBUG( "Invalid interrupt num: %d\n", irq );
 		return;
@@ -816,6 +813,7 @@ static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
 			writew( Gi_TC_INTERRUPT_ACK,
 				board->regs.irq_ack[ i ] );
 			board->TC_irq_raised[ i ]++;
+			wake_up_interruptible( &board->waitqueue );
 		}
 }
 
