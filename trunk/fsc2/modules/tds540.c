@@ -535,7 +535,7 @@ Var *digitizer_record_length( Var *v )
 			if ( tds540.is_rec_len )
 				return vars_push( INT_VAR, tds540.rec_len );
 
-			eprint( FATAL, SEt, "%s: Function %s() with no argument can "
+			eprint( FATAL, SET, "%s: Function %s() with no argument can "
 					"only be used in the EXPERIMENT section.\n",
 					DEVICE_NAME, Cur_Func );
 			THROW( EXCEPTION );

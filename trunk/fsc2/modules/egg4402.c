@@ -369,7 +369,7 @@ Var *boxcar_get_curve( Var *v )
 
 			if ( last < 0 || last >= max_points )
 			{
-				eprint( FATAL, SET. "%s: Invalid value (%ld) for last "
+				eprint( FATAL, SET, "%s: Invalid value (%ld) for last "
 						"point in function %s().\n", DEVICE_NAME, last + 1,
 						Cur_Func );
 				THROW( EXCEPTION );

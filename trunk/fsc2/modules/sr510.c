@@ -280,7 +280,7 @@ Var *lockin_sensitivity( Var *v )
 
 	if ( sens < 0.0 )
 	{
-		eprint( FATAL, SET. "%s: Invalid negative sensitivity.\n",
+		eprint( FATAL, SET, "%s: Invalid negative sensitivity.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}

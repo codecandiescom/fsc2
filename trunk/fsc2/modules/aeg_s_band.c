@@ -554,7 +554,8 @@ static double aeg_s_band_field_check( double field, bool *err_flag )
 		{
 			eprint( FATAL, SET, "%s: Field (%lf G) too high for Bruker ER035M "
 					"gaussmeter in %s(), maximum is %d G.\n", DEVICE_NAME,
-					field, Cur_Func,  int ) AEG_S_BAND_WITH_ER035M_MAX_FIELD );
+					field, Cur_Func,
+					( int ) AEG_S_BAND_WITH_ER035M_MAX_FIELD );
 			if ( ! TEST_RUN )
 			{
 				*err_flag = SET;
