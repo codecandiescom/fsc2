@@ -1213,7 +1213,7 @@ For an array defined as
 X[ 8 ] = @{ 1, 2, 3, 4, 5, 6, 7, 8 @}
 @end example
 @noindent
-the call of @code{slice}
+the call of @code{slice()}
 @example
 slice( X, 3, 4 );
 @end example
@@ -1268,12 +1268,14 @@ array, and returns the size of this dimension. I.e.@: for an array defined as
 @findex sizes()
 This function is similar to @code{size()} but only takes an array as
 argument an returns a new one-dimensional array with the sizes of the
-different dimensions. I.e.@: use it the following way:
-
+different dimensions.
 @example
 X[ 4, 2, 5 ]
 Dim_X[ * ];
 
 Dim_X = size( X );
 @end example
+will set the array @code{Dim_X} to @code{4, 2, 5}.
+
+
 @end table
