@@ -108,12 +108,20 @@ extern double ma_list[ MAX_MA_INDEX + 1 ];
 /* Constants for dealing with the conversion time - we dont allow conversion
    times below 3.2 ms because we need to use "single mode" (where the signal
    channel only sends one ADC value when addressed as talker instead of a
-   continuous stream which it does in "continuous mode") */
+   continuous stream which it does in "continuous mode"). */
 
 #define MIN_CT_MULT           10       /* 3.2 ms */
 #define MAX_CT_MULT           9999     /* ~ 3.2 s */
 #define UNDEF_CT_MULT         -1
 #define BASE_CT               3.2e-4   /* minimum conversion time */
+
+/* Conversion times between 40 ms and 64 ms (i.e. for CT values between 125
+   and 200) lead, according to my tests, to garbled data for large signal
+   amplitudes. Until someone at Bruker is able to tell me how to deal with
+   this problem we'll have to avoid using these conversion times. */
+
+#define BAD_LOW_CT_MULT       123
+#define BAD_HIGH_CT_MULT      200
 
 
 /* Constants for dealing with the harmonic setting */
