@@ -22,6 +22,7 @@
 
 static void cut_calc_curve( int dir, long index );
 static void cut_recalc_XPoints( void );
+static void cut_integrate_point( long index, double val );
 static void G_init_cut_curve( void );
 static int cut_form_close_handler( FL_FORM *a, void *b );
 static void cut_setup_canvas( Canvas *c, FL_OBJECT *obj );
@@ -484,28 +485,56 @@ bool cut_num_points_changed( int dir, long num_points )
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
-bool cut_new_point( long curve, long x_index, long y_index, double val )
+bool cut_new_points( long curve, long x_index, long y_index, long len )
 {
+	Scaled_Point *sp;
 	long index;
-	long xp_index;
-	long i, j;
-	Curve_1d *cv = &G.cut_curve;
-	Scaled_Point *cvp;
 
 
-	/* Nothing to be done if either the cross section isn't drawn, the new
-	   point does not belong to the currently shown curve or if the new
-	   point isn't laying on the cross section curve */
+	/* Nothing to be done if either the cross section isn't drawn or the new
+	   points do not belong to the currently shown curve */
 
-	if ( ! G.is_cut || curve != G.active_curve ||
-		 ( CG.cut_dir == X && x_index != CG.index ) ||
-		 ( CG.cut_dir == Y && y_index != CG.index ) )
+	if ( ! G.is_cut || curve != G.active_curve )
 		return FAIL;
 
-	/* Calculate index of the new point in data set and set its value */
+	/* We need a different handling for cuts in X and Y direction. If the cut
+	   is in X direction we have to pick no more than one point from the new
+	   data while for Y direction cuts we need either all the data or none */
 
-	index = CG.cut_dir == X ? y_index : x_index;
-	cv->points[ index ].v = val;
+	if ( CG.cut_dir == X )
+	{
+		if ( x_index > CG.index || x_index + len <= CG.index )
+			return FAIL;
+
+		sp = G.curve_2d[ G.active_curve ]->points + y_index * G.nx + CG.index;
+		cut_integrate_point( y_index, sp->v );
+	}
+	else
+	{
+		if ( y_index != CG.index )
+			return FAIL;
+
+		/* All new points are on the cut */
+
+		sp = G.curve_2d[ G.active_curve ]->points + y_index * G.nx + x_index;
+		for ( index = x_index; index < x_index + len; sp++, index++ )
+			cut_integrate_point( index, sp->v );
+	}
+
+	return OK;
+}
+
+
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
+static void cut_integrate_point( long index, double val )
+{
+	Curve_1d *cv = &G.cut_curve;
+	Scaled_Point *cvp;
+	long xp_index;
+	long i, j;
+
 
 	/* If this is a completely new point it as to be integrated into the
 	   array of XPoints (which have to be sorted in ascending order of the
@@ -540,10 +569,11 @@ bool cut_new_point( long curve, long x_index, long y_index, double val )
 					cvp->xp_ref++;
 		}
 
+		cv->points[ index ].v = val;
 		cv->points[ index ].exist = SET;
 		cv->count++;
 
-		/* Calculate the x-coordiante of the new point and figure out if it
+		/* Calculate the x-coordinate of the new point and figure out if it
 		   exceeds the borders of the canvas */
 
 		cv->xpoints[ xp_index ].x = d2shrt( cv->s2d[ X ]
@@ -567,8 +597,6 @@ bool cut_new_point( long curve, long x_index, long y_index, double val )
 		cv->up = SET;
 	if ( cv->xpoints[ xp_index ].y >= ( int ) G.cut_canvas.h )
 		cv->down = SET;
-
-	return OK;
 }
 
 
