@@ -235,7 +235,7 @@ enum {
 
 /* Define names for often used digitizer channels - if more get added put
    them before the very last element and don't forget also to update the
-   array with the channel names. */
+   array with the channel names defined near the start of fsc2.c. */
 
 enum {
 	CHANNEL_INVALID = -1,
