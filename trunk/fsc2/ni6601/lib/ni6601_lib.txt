@@ -205,7 +205,7 @@ events and 4294967296 (ULONG_MAX + 1).
 The current state of the counter, i.e. if the counter is still counting
 or is already stopped is returned in the variable pointed to by the
 'state' argument (unless 'state' is NULL). The variable 'state' is
-pointing to will either get set to 'NI6601_BUSY' or 'NI6601_BUSY'.
+pointing to will either get set to 'NI6601_BUSY' or 'NI6601_IDLE'.
 
    int board             Board number
    int counter           Number of the counter
