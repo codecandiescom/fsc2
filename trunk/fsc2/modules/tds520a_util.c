@@ -9,12 +9,14 @@ static void tds520a_window_check_2( void );
 static void tds520a_window_check_3( void );
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+/* Returns a string with a time value with a resonable unit. */
+/*-----------------------------------------------------------*/
 
 const char *tds520a_ptime( double time )
 {
 	static char buffer[ 128 ];
+
 
 	if ( fabs( time ) >= 1.0 )
 		sprintf( buffer, "%g s", time );

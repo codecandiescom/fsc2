@@ -117,7 +117,7 @@ void tds520_do_pre_exp_checks( void )
 			}
 	}
 
-	/* Make sure the windows are ok, i.e. cursorsd can be positioned exactly
+	/* Make sure the windows are ok, i.e. cursors can be positioned exactly
 	   and are still within the range of the digitizers record length */
 
 	tds520_window_check_2( );
