@@ -195,7 +195,12 @@ ${dg2020_f:.c=.lo}: dg2020_f.h $(headers)
 ${dg2020_b:.c=.lo}: dg2020_b.h $(headers)
 ${tds754a:.c=.lo}: tds754a.h $(headers)
 ${tds520a:.c=.lo}: tds520a.h $(headers)
-${hp8647a:.c=.lo}: $(headers)
+${hp8647a:.c=.lo}: hp8647a.h $(headers)
+
+hp8647a_lexer.c: modules/hp8647a_lexer.flex $(header)
+	$(FLEX) $(FLEXFLAGS)$(notdir $(patsubst %lexer.flex,%,$<)) -o$@ $<
+	sed -e 's/register char \*yy_cp, \*yy_bp;/register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
+	mv -f $@.x $@
 
 %.lo: %.c $(headers)
 	$(CC) $(CFLAGS) -c -fPIC $< -o $*.lo
