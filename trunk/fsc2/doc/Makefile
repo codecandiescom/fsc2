@@ -55,7 +55,7 @@ fsc2.html: $(docs)
 ps: fsc2.ps
 
 fsc2.ps: $(docs) $(patsubst %.png,%.eps,$(figures))
-	if [ "`eval tex -help 2>/dev/null`" -a \
+	@if [ "`eval tex -help 2>/dev/null`" -a \
 		 "`eval dvips --help 2>/dev/null`" ]; then \
 		./texi2dvi -c fsc2.texi; \
 		dvips fsc2.dvi; \
@@ -70,7 +70,7 @@ fsc2.ps: $(docs) $(patsubst %.png,%.eps,$(figures))
 pdf: fsc2.pdf
 
 fsc2.pdf: $(docs) $(patsubst %.png,%.pdf,$(figures))
-	if [ "`eval pdftex --help 2>/dev/null`" ]; then \
+	@if [ "`eval pdftex --help 2>/dev/null`" ]; then \
 		./texi2dvi --pdf -c fsc2.texi; \
 	else \
 		echo "Can't make PDF documentation, program pdftex not found."; \

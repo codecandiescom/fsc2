@@ -290,12 +290,14 @@ export            # export all variables to sub-makes
 
 .SUFFIXES:
 .PHONY: all install-strip install clean distclean pack \
+		all-docs info-docs html-docs ps-docs pdf-docs  \
         install-pion.anorg.chemie.uni-frankfurt.de     \
 		install-crowley.physik.fu-berlin.de            \
 		install-moebi.physik.fu-berlin.de              \
 		install-door.physik.fu-berlin.de               \
 		install-isaak.physik.fu-berlin.de              \
-		install-crowley.none
+		install-crowley.none                           \
+		ZIP
 
 
 # Default rule: make the main program, the primary lexer and the modules
@@ -303,14 +305,6 @@ export            # export all variables to sub-makes
 
 all:
 	$(MAKE) -C src all
-	cp src/fsc2 .
-	cp src/fsc2_clean .
-	cp src/fsc2_connect .
-	-$(RM) $(RMFLAGS) fsc2_start fsc2_test fsc2_load
-	$(LN) $(LNFLAGS) fsc2_connect fsc2_start
-	$(LN) $(LNFLAGS) fsc2_connect fsc2_test
-	$(LN) $(LNFLAGS) fsc2_connect fsc2_load
-	cp modules/*.so .
 	$(MAKE) -C utils all
 	$(MAKE) -C doc all
 
@@ -327,10 +321,10 @@ install:
 	$(INSTALL) -d $(auxdir)
 	$(INSTALL) -d $(docdir)
 
-	$(EXEC_INSTALL) -m 6755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
-	$(EXEC_INSTALL) -m 755  -o $(OWNER) -g $(GROUP) fsc2_clean $(libdir)
-	$(EXEC_INSTALL) -m 644  -o $(OWNER) -g $(GROUP) *.so $(libdir)
-	$(EXEC_INSTALL) -m 755  -o $(OWNER) -g $(GROUP) fsc2_connect $(bindir)
+	$(EXEC_INSTALL) -m 6755 -o $(OWNER) -g $(GROUP) src/fsc2 $(bindir)
+	$(EXEC_INSTALL) -m 755  -o $(OWNER) -g $(GROUP) src/fsc2_clean $(libdir)
+	$(EXEC_INSTALL) -m 644  -o $(OWNER) -g $(GROUP) modules/*.so $(libdir)
+	$(EXEC_INSTALL) -m 755  -o $(OWNER) -g $(GROUP) src/fsc2_connect $(bindir)
 
 	-$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test \
 					  $(bindir)/fsc2_load
@@ -338,14 +332,65 @@ install:
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_test
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_load
 
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) Functions $(libdir)
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) Devices $(libdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/Functions $(libdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/Devices $(libdir)
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) aux/*.xpm $(auxdir)
 
 	$(MAKE) -C utils install
-	$(MAKE) $(INSTALL_MACHINE)
 	$(MAKE) -C scripts install
 	$(MAKE) -C doc install
+	if [ "$(INSTALL_MACHINE)" = "install-unknown" ]; then  \
+		$(MAKE) $(INSTALL_MACHINE);                        \
+	fi
+
+
+# make all types of documentation
+
+all-docs:
+	$(MAKE) -C doc all
+
+# make info documentation
+
+info-docs:
+	$(MAKE) -C doc info
+
+# make html documentation
+
+html-docs:
+	$(MAKE) -C doc html
+
+# make Postscript documentation
+
+ps-docs:
+	$(MAKE) -C doc ps
+
+# make PDF documentation
+
+pdf-docs:
+	$(MAKE) -C doc pdf
+
+
+# `clean' deletes all the files remaining from the compilation while
+# `distclean' also removes all executables and shared libraries
+
+clean:
+	$(MAKE) -C src clean
+	$(MAKE) -C modules clean
+	$(MAKE) -C doc clean
+
+distclean:
+	$(MAKE) -C doc distclean
+	$(MAKE) -C utils distclean
+	$(MAKE) clean
+	-$(RM) $(RMFLAGS) fsc2 fsc2_clean fsc2_connect fsc2_start fsc2_test \
+					  fsc2_load *.so *~
+
+
+# Clean up everything for a distribution and create a zipped tarball
+
+pack:
+	$(MAKE) distclean
+	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
 
 
 # Here links of module libraries for often used devices for the different
@@ -354,8 +399,6 @@ install:
 # a link with the name magnet.so allows to use 'magnet' as an alternative name
 # for the power supply in EDL programs. Don't forget to delete already
 # existing links before creating new ones!
-
-install-unknown:
 
 install-pion.anorg.chemie.uni-frankfurt.de:
 	-$(RM) $(RMFLAGS) $(libdir)/dg2020.so $(libdir)/s_band.so     \
@@ -418,55 +461,6 @@ install-isaak.physik.fu-berlin.de:
 
 install-crowley.none:
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) hp8647a.table $(libdir)
-
-
-# make all types of documentation
-
-all-docs:
-	$(MAKE) -C doc all
-
-# make info documentation
-
-info-docs:
-	$(MAKE) -C doc info
-
-# make html documentation
-
-html-docs:
-	$(MAKE) -C doc html
-
-# make Postscript documentation
-
-ps-docs:
-	$(MAKE) -C doc ps
-
-# make PDF documentation
-
-pdf-docs:
-	$(MAKE) -C doc pdf
-
-
-# `clean' deletes all the files remaining from the compilation while
-# `distclean' also removes all executables and shared libraries
-
-clean:
-	$(MAKE) -C src clean
-	$(MAKE) -C modules clean
-	$(MAKE) -C doc clean
-
-distclean:
-	$(MAKE) -C doc distclean
-	$(MAKE) -C utils distclean
-	$(MAKE) clean
-	-$(RM) $(RMFLAGS) fsc2 fsc2_clean fsc2_connect fsc2_start fsc2_test \
-					  fsc2_load *.so *~
-
-
-# Clean up everything for a distribution and create a zipped tarball
-
-pack:
-	$(MAKE) distclean
-	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
 
 
 # Create zipped tarball and write it to the ZIP drive (at home or on moebi
