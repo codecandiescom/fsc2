@@ -471,6 +471,7 @@ void win_slider_callback( FL_OBJECT *a, long b )
 	fl_unfreeze_form( main_form->fsc2 );
 }
 
+#if 0
 
 /*------------------------------------------------------------*/  
 /*------------------------------------------------------------*/  
@@ -496,3 +497,5 @@ static int fsc2_xio_error_handler( Display *d )
 	fprintf( stderr, "fsc2 (%d) killed by a fatal X error.\n", getpid( ) );
 	exit( EXIT_FAILURE );
 }
+
+#endif

@@ -25,7 +25,7 @@ To create the complete documentation you will also need
 17) gzip
 
 
-The XFORMS library is available from e.g.
+The XFORMS library is available from e.g. (some links may be outdated)
 
   ftp.cs.ruu.nl/pub/XFORMS
   einstein.phys.uwm.edu/pub/xforms
@@ -37,17 +37,19 @@ The XFORMS library is available from e.g.
 
 
 The GPIB library consists of a library and a module to interface GPIB cards.
-You can either use the one written by me (works with 2.0, 2.2 and 2.4
-kernels), the older LLP library to be found at
+You can either use the one I've written (works, as ar as I know, for fsc2
+with 2.2 and 2.4 kernels and should also work with 2.0 kernels but I really
+didn't test yet), the older LLP library to be found at
 
   ftp.llp.fu-berlin.de/pub/linux/LINUX-LAB/IEEE488
 
-(probably won't work with 2.2. and 2.4 kernels) or the one from National
-Instruments, to be downloaded from
+(which, at least the last time I checked, didn't work with 2.2. and 2.4
+kernels) or the one from National Instruments, to be downloaded from
 
   http://www.natinst.com
 
-(works with 2.2 kernels). Unfortunately, only the LLP library supports cards
+(which is supposed to work with 2.2 kernels, but I couldn't get it to
+function reliable). Unfortunately, only the LLP library supports cards
 from other companies than National Instruments.
 
 
@@ -55,19 +57,23 @@ B) Preparing for Installation
 =============================
 
 After installing the required tools and libraries and extracting the archive
-go into the new directory called fsc2. Edit the Makefile in this subdirectory.
+go into the newly created directory fsc2. Edit the Makefile in this
+subdirectory.
 
-Normally, the program and all auxiliary files will be installed in /usr/local
-(specifically /usr/local/bin, /usr/local/lib/fsc2, /usr/local/info and
-/usr/local/share/doc). To change this edit the first lines of the Makefile.
+Normally, the fsc2 and all auxiliary files needed will be installed below
+/usr/local (specifically /usr/local/bin, /usr/local/lib/fsc2,
+/usr/local/info and /usr/local/share/doc). To change this edit the first
+lines of the Makefile.
 
-If you use the National Instruments GPIB driver you can change the place
-where fsc2 expects the configuration file. Usually this does not need to be
-changed.
-While running fsc2 may write information about the activity on the GPIB bus
-into a log file. You may change the default, /tmp/gpib.log, to something more
-appropriate, or even /dev/null. You can also set the verbosity of the logs by
-changing the variable GPIB_LOG_LEVEL to either HIGH, MEDIUM, LOW or OFF.
+If you use the National Instruments GPIB driver you can set the place
+where fsc2 expects the configuration file. But usually this does not need
+to be changed.
+
+While running fsc2 may write information about the activity on the GPIB
+bus into a log file. You may change the default, /tmp/gpib.log, to
+something appropriate for you (or even /dev/null). You can also set the
+verbosity of the logs by changing the variable GPIB_LOG_LEVEL to either
+HIGH, MEDIUM, LOW or OFF.
 
 If you are still using the old libc (version 1) please search for the line
 
@@ -78,18 +84,17 @@ If you are still using the old libc (version 1) please search for the line
 and relace 'pion.anorg.chemie.uni-frankfurt.de' with the fully qualified
 hostname of your machine.
 
-
 Now also edit the Makefile in the subdirectory 'src'. Here you should search
 for the lines starting with the label '.PHONY:' and add a line with the
 fully qualified hostname of your machine.
 
-Now search for the comment
+Next search for the comment
 
   # Machine specific stuff: different GPIB interfaces and resource files
   # for the graphical interface are needed...
 
-below you will find an entry for each machine fsc2 is currently running on.
-A typical entry for as machine is
+following which  you will find an entry for each machine fsc2 is currently
+running on. A typical entry for a machine is
 
   pion.anorg.chemie.uni-frankfurt.de:
 	  $(MAKE) hi_res
@@ -98,7 +103,7 @@ A typical entry for as machine is
 Please append a similar entry for your machine (please take care that the
 second and third line has to start with a tabulator character, not simple
 spaces). If your machine has a high resolution display, i.e. a 17" monitor
-or better keep the line
+or even better keep the line
 
 	  $(MAKE) hi_res
 
@@ -114,10 +119,9 @@ If you use the National Instruments library change it to
 
 	  $(MAKE) gpib_ni
 
-If you use my GPIB library use instead
+but you use my GPIB library use instead
 
 	  $(MAKE) gpib_jtt
-
 
 You may finally also want to edit the Makefile in the subdirectory 'utils'
 to check if the location for the emacs EDL mode file suits your setup.
@@ -130,21 +134,24 @@ Go back into the main directory of the package and type 'make'. This may
 take some time to finish. A few warnings may show up during the compilation,
 especially when the documentation is created and some of the required tools
 are not available. It can even happen that make stops with an error message
-in this case. This does *not* mean that the program didn't compile
-succesfully!
+in this case (i.e. during making the documenntation). This does *not* mean
+that the program didn't compile succesfully!
 
 Please don't start make from one of the subdirectories, this is bound to
 fail.
 
 If you get more than a few warnings during the compilation stage of the
-program or the make process even fails you should send me an email with the
-output of make.
+program or the make process even fails there you should send me an email
+with the output of make.
 
 When the compilation of the program succeded (even though the creation of
 the documentation failed at some stage), you can now install the program
 by typing 'make install'. Normally, you will need root privileges to do so.
 You should skip the installation if you changed the installation directory
-from '/usr/local' to './', i.e. the main directory of the package.
+from '/usr/local' to './', i.e. the main directory of the package. If making
+the documentation failed with an error also the installion may fail during
+installation of the documentation, but this is not a something to get woried
+about...
 
 
 D) Simple Tests
