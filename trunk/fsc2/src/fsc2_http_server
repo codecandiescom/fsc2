@@ -29,7 +29,7 @@ use IO::Socket::INET;
 use POSIX;
 use Fcntl_Lock;
 
-# Set PATH to the minmum (we're running in tainted mode)
+# Reduce PATH to the minmum necessary (we're running in tainted mode)
 
 $ENV{ PATH } = '/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin';
 
@@ -38,7 +38,7 @@ my $client;            # The Most Important Entity ;-)
 my $max_reqs = 16;     # how many simultaneous requests get accepted
 my $crlf = "\r\n";     # RFC 2616 requires this as the newline character
 my $has_pnmtopng;      # does the pnmtopng utility exist?
-my $has_ppmtojpeg;     # does the ppmtojpeg utility exist?
+my $has_pnmtojpeg;     # does the pnmtojpeg utility exist?
 my $fs;                # flock structure for locking of STDOUT
 my $version = 0.5;
 my $hostname = `hostname -f`;
@@ -79,15 +79,15 @@ $SIG{ PIPE } = sub { close $client; exit 0 };
 $SIG{ CHLD } = sub { 1 until waitpid( -1, WNOHANG ) == -1 };
 
 
-# Check if the pnmtopng and/or ppmtojpg utility is available by trying to
+# Check if the pnmtopng and/or pnmtojpg utility is available by trying to
 # convert a trivially simple test image, otherwise we can't send the display
 # and cross section windows of fsc2
 
 my @a = `echo -n "P6 1 1 255\n000" | pnmtopng 2>/dev/null`;
 $has_pnmtopng = defined $a[ 0 ];
 
-@a = `echo -n "P6 1 1 255\n000" | ppmtojpeg 2>/dev/null`;
-$has_ppmtojpeg = defined $a[ 0 ];
+@a = `echo -n "P6 1 1 255\n000" | pnmtojpeg 2>/dev/null`;
+$has_pnmtojpeg = defined $a[ 0 ];
 
 
 # Ok, fire up the server - isn't OOP plus a few helpful modules nice? ;-)
@@ -307,7 +307,7 @@ sub serve_main {
 
 	if ( $f->{ 'png' } and $has_pnmtopng ) {
 		$ext = "png";
-	} elsif ( $f->{ 'jpeg' } and $has_ppmtojpeg ) {
+	} elsif ( $f->{ 'jpeg' } and $has_pnmtojpeg ) {
 		$ext = "jpeg";
 	}
 
@@ -445,7 +445,7 @@ sub serve_pics {
 
 	if ( $state !~ /^0$/o and
 		 ( ( $ext eq "png" and $has_pnmtopng ) or
-		   ( $ext eq "jpeg" and $has_ppmtojpeg ) ) ) {
+		   ( $ext eq "jpeg" and $has_pnmtojpeg ) ) ) {
 		$file = <STDIN>;
 		stdout_lock( 0 );
 		chomp $file;
@@ -466,7 +466,7 @@ sub serve_pics {
 		if ( $ext eq "png" ) {
 			$data = `pnmtopng -compression 9 $file`;
 		} else {
-			$data = `ppmtojpeg $file`;
+			$data = `pnmtojpeg $file`;
 		}
 		unlink $file;
 	} elsif ( $state =~ /^0$/o ) {
@@ -482,7 +482,7 @@ sub serve_pics {
 
 	if ( $state !~ /^0$/o and
 		 ( ( $ext eq "png" and $has_pnmtopng ) or
-		   ( $ext eq "jpeg" and $has_ppmtojpeg ) ) ) {
+		   ( $ext eq "jpeg" and $has_pnmtojpeg ) ) ) {
 		print "Content-Length: " . length( $data ) . "$crlf$crlf";
 		print $data if $req =~ /^GET$/io;
 	} else {
