@@ -2794,7 +2794,7 @@ static long do_printf( int file_num, Var *v )
 						break;
 
 					default :
-						if ( *( fmt_end + 1 ) < '0' || *( fmt_end + 1 ) > '7' )
+						if ( *( fmt_end + 1 ) < '0' || *( fmt_end + 1 ) > '3' )
 						{
 							eprint( FATAL, SET, "Invalid escape sequence in "
 									"format string in %s().\n", Cur_Func );
@@ -2805,24 +2805,25 @@ static long do_printf( int file_num, Var *v )
 						esc_len = 1;
 
 						if ( *( fmt_end + 2 ) >= '0' &&
-							 *( fmt_end + 2 ) <= '0' )
+							 *( fmt_end + 2 ) <= '7' )
 						{
 							*fmt_end = *fmt_end * 8 + *( fmt_end + 2 ) - '0';
 							esc_len = 2;
-						}
 
-						if ( *( fmt_end + 3 ) >= '0' &&
-							 *( fmt_end + 3 ) <= '7' )
-						{
-							if ( *( fmt_end + 3 ) > '3' )
+							if ( *( fmt_end + 3 ) >= '0' &&
+								 *( fmt_end + 3 ) <= '3' )
 							{
-								eprint( FATAL, SET, "'Escape sequence out of "
-										"range in format string in %s().\n",
-										Cur_Func );
-							}
+								{
+									eprint( FATAL, SET, "'Escape sequence out "
+											"of range in format string in "
+											"%s().\n", Cur_Func );
+									THROW( EXCEPTION );
+								}
 
-							*fmt_end = *fmt_end * 8 + *( fmt_end + 3 ) - '0';
-							esc_len = 3;
+								*fmt_end = *fmt_end * 8
+									       + *( fmt_end + 3 ) - '0';
+								esc_len = 3;
+							}
 						}
 
 						memmove( fmt_end + 1, fmt_end + 1 + esc_len,
@@ -3066,16 +3067,18 @@ static long do_printf( int file_num, Var *v )
 								*fmt_end = *fmt_end * 8
 									       + *( fmt_end + 2 ) - '0';
 								esc_len = 2;
-							}
 
-							if ( *( fmt_end + 3 ) >= '0' &&
-								 *( fmt_end + 3 ) <= '7' )
-							{
-								if ( *( fmt_end + 3 ) > '3' )
+								if ( *( fmt_end + 3 ) >= '0' &&
+									 *( fmt_end + 3 ) <= '7' )
 								{
-									eprint( FATAL, SET, "'Escape sequence out "
-											"of range in format string in "
-											"%s().\n", Cur_Func );
+									if ( *( fmt_end + 3 ) > '3' )
+									{
+										eprint( FATAL, SET, "'Escape sequence "
+												"out of range in format "
+												"string in %s().\n",
+												Cur_Func );
+										THROW( EXCEPTION );
+									}
 								}
 
 								*fmt_end = *fmt_end * 8
