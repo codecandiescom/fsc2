@@ -155,7 +155,7 @@ int rulbus_adc12_card_init( int handle )
 	
 	switch ( i )
 	{
-		case 0 :    /* 0 V to +10.2375 V   or   -10.24 to +10.235 V
+		case 0 :    /* 0 V to +10.2375 V   or   -10.24 to +10.235 V */
 			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
 			{
 				Vmin = 0.0;
@@ -168,7 +168,7 @@ int rulbus_adc12_card_init( int handle )
 			}
 			break;
 
-		case 1:     /* 0 V to +10.0 V   or   -10.0 V to +10.0 V
+		case 1:     /* 0 V to +10.0 V   or   -10.0 V to +10.0 V */
 			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
 			{
 				Vmin = 0.0;
@@ -181,7 +181,7 @@ int rulbus_adc12_card_init( int handle )
 			}
 			break;
 
-		case 2 :    /* 0 V to +5.11875 V   or   -5.12 V to +5.1175 V
+		case 2 :    /* 0 V to +5.11875 V   or   -5.12 V to +5.1175 V */
 			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
 			{
 				Vmin = 0.0;
@@ -194,7 +194,7 @@ int rulbus_adc12_card_init( int handle )
 			}
 			break;
 
-		case 3 :    /* 0 V to +5.0 V   or   -5.0 V to +5.0 V
+		case 3 :    /* 0 V to +5.0 V   or   -5.0 V to +5.0 V */
 			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
 			{
 				Vmin = 0.0;
