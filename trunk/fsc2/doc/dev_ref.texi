@@ -974,7 +974,7 @@ voltage can be reduced via a potentiometer at the front panel.
 @item @code{daq_maximum_output_voltage()} @tab @ref{daq_maximum_output_voltage}
 @item @code{daq_reserve_adc()}            @tab @ref{daq_reserve_adc}
 @item @code{daq_get_voltage()}            @tab @ref{daq_get_voltage}
-@item @code{daq_dac_parameter()}          @tab @ref{daq_dac_parameter()}
+@item @code{daq_dac_parameter()}          @tab @ref{daq_dac_parameter}
 @end multitable
 
 
@@ -1289,7 +1289,7 @@ library are part of the @code{fsc2} package)
 @item @code{daq_name()}                   @tab @ref{daq_name}
 @item @code{daq_reserve_dac()}            @tab @ref{daq_reserve_dac}
 @item @code{daq_set_voltage()}            @tab @ref{daq_set_voltage}
-@item @code{daq_dac_parameter()}          @tab @ref{daq_dac_parameter()}
+@item @code{daq_dac_parameter()}          @tab @ref{daq_dac_parameter}
 @end multitable
 
 

@@ -124,6 +124,33 @@ int hjs_sfc_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
+	/* Finally determine the minimum and maximum output voltage and
+	   the voltage resolution of the DAC */
+
+	func = get_string( "daq_dac_parameter#%d", dev_num );
+
+	if ( ! func_exists( func ) ||
+		 ( Func_ptr = func_get( func, &acc ) ) == NULL )
+	{
+		print( FATAL, "Function for determining the DAC parameters is "
+			   "missing.\n" );
+		THROW( EXCEPTION );
+	}
+
+	func = CHAR_P T_free( func );
+	vars_push( STR_VAR, DEVICE_NAME );    /* push the new pass-phrase */
+	
+	v = func_call( Func_ptr );
+
+	if ( v->type != FLOAT_ARR || v->len != 3 )
+	{
+		print( FATAL, "Unexpected data received from DAC.\n" );
+		THROW( EXCEPTION );
+	}
+
+	hjs_sfc.dac_range = v->val.dpnt[ 1 ] - v->val.dpnt[ 0 ];
+	vars_pop( v );
+
 	return 1;
 }
 
@@ -520,9 +547,9 @@ Var *magnet_calibration_file( Var *v )
 
 static double hjs_sfc_field_check( double field )
 {
-	/* When checking the field we must take into consideration that for
-	   some magnets the field at 0 V is the highest possible field while
-	   for others it's lowest field. */
+	/* When checking the field we must take into consideration that for some
+	   magnets the field the minimum DAC output voltage is the highest
+	   possible field while for others it's lowest field. */
 
 	if ( hjs_sfc.slope < 0.0 )
 	{
@@ -540,18 +567,18 @@ static double hjs_sfc_field_check( double field )
 			THROW( EXCEPTION );
 		}
 
-		if ( field < hjs_sfc.B0V + 10.0 * hjs_sfc.slope )
+		if ( field < hjs_sfc.B0V + hjs_sfc.dac_range * hjs_sfc.slope )
 		{
 			if ( FSC2_MODE == EXPERIMENT )
 			{
 				print( FATAL, "Field of %.2lf G is too low, increasing to "
-					   "minimum of %.2lf G.\n",
-					   field, hjs_sfc.B0V + 10.0 * hjs_sfc.slope );
-				return hjs_sfc.B0V + 10.0 * hjs_sfc.slope;
+					   "minimum of %.2lf G.\n", field,
+					   hjs_sfc.B0V + hjs_sfc.dac_range * hjs_sfc.slope );
+				return hjs_sfc.B0V + hjs_sfc.dac_range * hjs_sfc.slope;
 			}
 
 			print( FATAL, "Field of %.2lf G is too low, minimum is %.2lf G.\n",
-				   field, hjs_sfc.B0V + 10.0 * hjs_sfc.slope );
+				   field, hjs_sfc.B0V + hjs_sfc.dac_range * hjs_sfc.slope );
 			THROW( EXCEPTION );
 		}
 	}
@@ -571,18 +598,19 @@ static double hjs_sfc_field_check( double field )
 			THROW( EXCEPTION );
 		}
 
-		if ( field > hjs_sfc.B0V + 10.0 * hjs_sfc.slope )
+		if ( field > hjs_sfc.B0V + hjs_sfc.dac_range * hjs_sfc.slope )
 		{
 			if ( FSC2_MODE == EXPERIMENT )
 			{
 				print( FATAL, "Field of %.2lf G is too high, reducing to "
-					   "maximum of %.2lf G.\n",
-					   field, hjs_sfc.B0V + 10.0 * hjs_sfc.slope );
-				return hjs_sfc.B0V + 10.0 * hjs_sfc.slope;
+					   "maximum of %.2lf G.\n", field,
+					   hjs_sfc.B0V + hjs_sfc.dac_range * hjs_sfc.slope );
+				return hjs_sfc.B0V + hjs_sfc.dac_range * hjs_sfc.slope;
 			}
 
 			print( FATAL, "Field of %.2lf G is too high, maximum is "
-				   "%.2lf G.\n", field, hjs_sfc.B0V + 10.0 * hjs_sfc.slope );
+				   "%.2lf G.\n", field,
+				   hjs_sfc.B0V + hjs_sfc.dac_range * hjs_sfc.slope );
 			THROW( EXCEPTION );
 		}
 	}

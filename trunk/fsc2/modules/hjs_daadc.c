@@ -582,6 +582,12 @@ Var *daq_dac_parameter( Var *v )
 	double params[ 3 ];
 
 
+	/* If the first argument is a string we assume it's a pass-phrase
+	   (which we acually don't require). */
+
+	if ( v != NULL && v->type == STR_VAR )
+		v = vars_pop( v );
+
 	if ( v != NULL && v->next == NULL )
 	{
 		print( WARN, "Function does not take an argument for this DAQ.\n" );

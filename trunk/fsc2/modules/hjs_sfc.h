@@ -66,6 +66,7 @@ struct HJS_SFC {
 	bool is_field_step;		/* flag, set if field step size is defined */
 
 	char *dac_func;
+	double dac_range;
 
 	double act_field;		/* used internally */
 	bool is_act_field;
