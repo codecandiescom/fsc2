@@ -338,8 +338,9 @@ Var *magnet_setup( Var *v )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Function for switching use of corrections to the field on and off. */
+/*--------------------------------------------------------------------*/
 
 Var *magnet_use_correction( Var *v )
 {
@@ -359,6 +360,8 @@ Var *magnet_use_correction( Var *v )
 
 
 /*--------------------------------------------------------------*/
+/* Function for selecting the DAC port of the lock-in amplifier */
+/* to be used for the corrections to the field.                 */
 /*--------------------------------------------------------------*/
 
 Var *magnet_use_dac_port( Var *v )
@@ -911,8 +914,8 @@ static double keithley228a_current_check( double current )
 /* linearities and small jumps has been directly taken from the previous    */
 /* program. Here's the comment from this program about the rationale and    */
 /* the way it is done (sorry, to lazy to translate it especially since I'm  */
-/* not sure if it still is a reasonable approach and if the data used are   */
-/* still valid):                                                            */
+/* not sure if it still is a reasonable approach and the data used still    */
+/* valid):                                                                  */
 /* Nun zu den weiteren Feinheiten : Leider stellte sich heraus, dass das    */
 /* Power Supply zwar sein Spezifikationen erfuellt, aber eben nur gerade.   */
 /* Die erreichte Genauigkeit von 10 mA beim Sweepbereich von 10 A ist	    */
@@ -984,9 +987,9 @@ static void keithley228a_get_corrected_current( double c, double *psc,
 		offsets[ ] =   { 0.00793, 0.007257, 0.004831, 0.000866, -0.000962,
 						 0.0, 0.000252, -0.012237, -0.033361, -0.043436 },
 	    pos_jumps[ ] = { 0.00, 0.14, 0.92, 1.06, 1.97, 2.11, 3.02, 3.16,
-					    4.07, 4.21, 5.12, 5.26, 6.04, 6.18, 7.09, 7.23,
-					    8.14, 8.28, 9.19, 9.33, 10.0, 100.0 },
-	    neg_jumps[ ] = { 0.00, -0.13, -0.26, -0.38, -0.64, -0.76, -0.89,
+					     4.07, 4.21, 5.12, 5.26, 6.04, 6.18, 7.09, 7.23,
+					     8.14, 8.28, 9.19, 9.33, 10.0, 100.0 },
+	    neg_jumps[ ] = {  0.00, -0.13, -0.26, -0.38, -0.64, -0.76, -0.89,
 						 -1.01, -1.27, -1.39, -1.65, -1.77, -1.90, -2.02,
 						 -2.28, -2.40, -2.66, -2.78, -2.91, -3.03, -3.29,
 						 -3.41, -3.67, -3.79, -3.92, -4.04, -4.30, -4.42,
