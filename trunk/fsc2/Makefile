@@ -375,9 +375,9 @@ ifneq ($(MAKECMDGOALS),release)
 	CFLAGS       += -ggdb
 else
 	CFLAGS       += -DNDEBUG                # switch off all debugging code
-ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
-	CFLAGS           += -DLIBC_MDEBUG       # for libc memory debugging
-endif
+	ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
+		CFLAGS           += -DLIBC_MDEBUG       # for libc memory debugging
+	endif
 endif
 
 
@@ -386,9 +386,9 @@ endif
 
 ifeq ($(MAKECMDGOALS),mdebug)
 	CFLAGS       += -DFSC2_MDEBUG           # for built-in malloc debugging
-ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
-	CFLAGS           += -DLIBC_MDEBUG       # for libc memory debugging
-endif
+	ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
+		CFLAGS           += -DLIBC_MDEBUG       # for libc memory debugging
+	endif
 endif
 
 
@@ -400,10 +400,11 @@ LFLAGS			 := $(OPT) -shared -fpic  # needed for libraries
 
 
 ifeq ($(MPATROL),YES)
-	CONFFLAGS    += -DMPATROL
+	CONFFLAGS   +:= -DMPATROL
 	LIBS         := -L/usr/local/lib -lmpatrol -lelf -L/usr/X11R6/lib -lforms \
 					-lX11 -lXpm -lm -ldl
 else
+	CONFFLAGS    :=
 	LIBS         := -L/usr/X11R6/lib -lforms -lX11 -lXpm -lm -ldl
 				    # -lmcheck   # for malloc debugging
 				    # -lefence   # to run with efence
@@ -496,28 +497,28 @@ ifneq ($(GPIB_LIBRARY),NONE)
 	endif
 
 	ifdef GPIB_CONF_FILE
-		CONFFLAGS        += -DGPIB_CONF_FILE=\"$(patsubst % ,%,$(GPIB_CONF_FILE))\"
+		CONFFLAGS += -DGPIB_CONF_FILE=\"$(patsubst % ,%,$(GPIB_CONF_FILE))\"
 	else
-		CONFFLAGS        += -DGPIB_CONF_FILE=\"/etc/gpib.conf\"
+		CONFFLAGS += -DGPIB_CONF_FILE=\"/etc/gpib.conf\"
 	endif
 endif
 
 ifdef GPIB_LOG_FILE
-	CONFFLAGS            += -DGPIB_LOG_FILE=\"$(patsubst % ,%,$(GPIB_LOG_FILE))\"
+	CONFFLAGS += -DGPIB_LOG_FILE=\"$(patsubst % ,%,$(GPIB_LOG_FILE))\"
 else
-	CONFFLAGS            += -DGPIB_LOG_FILE=\"/tmp/gpib.log\"
+	CONFFLAGS += -DGPIB_LOG_FILE=\"/tmp/gpib.log\"
 endif
 
 ifeq ($(GPIB_LOG_LEVEL),HIGH)
-	CONFFLAGS            += -DGPIB_LOG_LEVEL=LL_ALL
+	CONFFLAGS += -DGPIB_LOG_LEVEL=LL_ALL
 else
 	ifeq ($(GPIB_LOG_LEVEL),MEDIUM)
-		CONFFLAGS        += -DGPIB_LOG_LEVEL=LL_CE
+		CONFFLAGS += -DGPIB_LOG_LEVEL=LL_CE
 	else
 		ifeq ($(GPIB_LOG_LEVEL),OFF)
-			CONFFLAGS    += -DGPIB_LOG_LEVEL=LL_NONE
+			CONFFLAGS += -DGPIB_LOG_LEVEL=LL_NONE
 		else
-			CONFFLAGS    += -DGPIB_LOG_LEVEL=LL_ERR
+			CONFFLAGS += -DGPIB_LOG_LEVEL=LL_ERR
 		endif
 	endif
 endif
@@ -589,7 +590,7 @@ ifdef WITH_RULBUS
 	ifdef rulbus_lib_path
 		LIBS += -L$(rulbus_lib_path)
 	endif
-	LIBS   += -lrulbus
+	LIBS      += -lrulbus
 	CONFFLAGS += -DWITH_RULBUS
 endif
 
@@ -597,7 +598,7 @@ endif
 ifdef WITH_HTTP_SERVER
 	ifdef DEFAULT_HTTP_PORT
 		CONFFLAGS += -DWITH_HTTP_SERVER \
-					 -DDEFAULT_HTTP_PORT=$(DEFAULT_HTTP_PORT)
+					  -DDEFAULT_HTTP_PORT=$(DEFAULT_HTTP_PORT)
 	else
 		CONFFLAGS += -DWITH_HTTP_SERVER -DDEFAULT_HTTP_PORT=8080
 	endif
@@ -648,15 +649,15 @@ endif
 # for the built-in mail transport agent.
 
 ifdef MAIL_ADDRESS
-	CONFFLAGS         += -DMAIL_ADDRESS=\"$(patsubst % ,%,$(MAIL_ADDRESS))\"
+	CONFFLAGS += -DMAIL_ADDRESS=\"$(patsubst % ,%,$(MAIL_ADDRESS))\"
 	ifndef USE_FSC2_MTA
 		MAIL_PROGRAM  := $(shell which mail)
 		ifneq ($(word 1,$(MAIL_PROGRAM)),which:)
 			CONFFLAGS += -DMAIL_PROGRAM=\"$(MAIL_PROGRAM)\"
 		endif
 	else
-		LIBS          += -lresolv
-		CONFFLAGS     += -DUSE_FSC2_MTA
+		LIBS      += -lresolv
+		CONFFLAGS += -DUSE_FSC2_MTA
 	endif
 endif
 
@@ -749,9 +750,10 @@ fsc2_config.h: Makefile $(MACHINE_INCLUDE)
 	else                                     \
 		echo "Creating fsc2_config.h...";    \
 	fi
+	echo $(CONFFLAGS)
 	@echo "/*--- Created automatically, don't change ---*/" > fsc2_config.h
-	@echo -e $(patsubst -D%,\\n#define %,$(subst =, ,$(CONFFLAGS))) | \
-		sort | uniq >> fsc2_config.h
+	@echo -e $(patsubst -D%,\\n#define %,$(subst =, ,$(CONFFLAGS))) >> \
+		  fsc2_config.h
 
 
 # Create a file with as much as possible information about the files
