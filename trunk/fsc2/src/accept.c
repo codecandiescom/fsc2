@@ -452,6 +452,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	long i, j;
 	Scaled_Point *sp;
 
+
 	/* Test if the curve number is OK */
 
 	if ( curve >= G.nc )
@@ -621,11 +622,14 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	cv->rwc_start[ Z ] = rw_min;
 
 	for ( i = 0; i < G.nc; i++ )
-		if ( G.scale_changed || ( i == curve && cv->scale_changed ) )
+	{
+		cv = G.curve_2d[ i ];
+		if ( cv->scale_changed && cv->is_fs )
+		{
 			recalc_XPoints_of_curve_2d( cv );
-
-	G.scale_changed = UNSET;
-	cv->scale_changed = UNSET;
+			cv->scale_changed = UNSET;
+		}
+	}
 }
 
 
@@ -664,11 +668,13 @@ static void incr_x( long x_index, long len )
 		cv->xpoints_s = T_realloc( cv->xpoints_s,
 								   new_Gnx * G.ny * sizeof( XPoint ) );
 
-		cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
+		if ( cv->is_fs )
+		{
+			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
 			                                        ( double ) ( new_Gnx - 1 );
+			cv->scale_changed = SET;
+		}
 	}
-
-	G.scale_changed = SET;
 }
 
 
@@ -698,10 +704,12 @@ static void incr_y( long y_index )
 			for ( k = 0; k < G.nx; sp++, k++ )
 				sp->exist = UNSET;
 
-		cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
+		if ( cv->is_fs )
+		{
+			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
+			cv->scale_changed = SET;
+		}
 	}
-
-	G.scale_changed = SET;
 }
 
 
@@ -748,10 +756,12 @@ static void incr_x_and_y( long x_index, long len, long y_index )
 		/* Reorganise the old elements to fit into the new array and clear
 		   the the new elements in the already existing rows */
 
-		cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
+		if ( cv->is_fs )
+		{
+			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
 			                                        ( double ) ( new_Gnx - 1 );
-		cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
+			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
+			cv->scale_changed = SET;
+		}
 	}
-
-	G.scale_changed = SET;
 }
