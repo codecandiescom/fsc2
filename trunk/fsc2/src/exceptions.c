@@ -20,6 +20,7 @@
 /*      ...                                                                */
 /*  }                                                                      */
 /*                                                                         */
+/*  Further changes are checks to avoid overflow of the exception stack.   */
 /***************************************************************************/
 
 
@@ -30,14 +31,14 @@
 
 void longjmperror( void );
 
-jmp_buf       exception_env_stack[ MAX_NESTED_EXCEPTION ];
-unsigned int  exception_env_stack_pos;
-unsigned int  exception_id;
+jmp_buf      exception_env_stack[ MAX_NESTED_EXCEPTION ];
+unsigned int exception_env_stack_pos = 0;
+unsigned int exception_id;
 
 
 void longjmperror( void )
 {
 	syslog( LOG_ERR, "INTERNAL ERROR: Uncaught exception %d at %s:%d.\n",
 			exception_id, __FILE__, __LINE__ );
-	exit( exception_id );
+	exit( - exception_id );
 }

@@ -20,6 +20,7 @@
 /*      ...                                                                */
 /*  }                                                                      */
 /*                                                                         */
+/*  Further changes are checks to avoid overflow of the exception stack.   */
 /***************************************************************************/
 
 
