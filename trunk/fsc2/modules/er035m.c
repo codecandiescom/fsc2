@@ -33,7 +33,8 @@
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-#define TEST_FIELD 2000.0        /* returned as current field in test run */
+#define ER035M_TEST_FIELD 2000.0    /* returned as current field in test run */
+#define ER035M_TEST_RES   0.001
 
 
 /* exported functions and symbols */
@@ -420,7 +421,7 @@ Var *find_field( Var *v )
 
 	v = v;
 	if ( TEST_RUN )
-		return vars_push( FLOAT_VAR, TEST_FIELD );
+		return vars_push( FLOAT_VAR, ER035M_TEST_FIELD );
 
 
 	/* If gaussmeter is in oscillator up/down state or the state is unknown
@@ -515,7 +516,7 @@ Var *gaussmeter_resolution( Var *v )
 	if ( ! TEST_RUN )
 		return vars_push( FLOAT_VAR, nmr.resolution == LOW ? 0.01 : 0.001 );
 	else
-		return vars_push( FLOAT_VAR, 0.001 );
+		return vars_push( FLOAT_VAR, ER035M_TEST_RES );
 }
 
 

@@ -32,6 +32,9 @@
 const char generic_type[ ] = DEVICE_TYPE;
 
 
+#define BH15_TEST_FIELD   0.0
+
+
 int bh15_init_hook( void );
 int bh15_test_hook( void );
 int bh15_exp_hook( void );
@@ -308,7 +311,7 @@ static double bh15_get_field( void )
 
 
 	if ( TEST_RUN )
-		return 0.0;
+		return BH15_TEST_FIELD;
 
 	do
 	{

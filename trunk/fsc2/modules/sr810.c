@@ -43,7 +43,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define SR810_TEST_PHASE         0.0
 #define SR810_TEST_MOD_FREQUENCY 5.0e3
 #define SR810_TEST_MOD_LEVEL     1.0
-#define SR810_TEST_MOD_MODE      1         // this must be INTERNAL
+#define SR810_TEST_MOD_MODE      1         // this must be INTERNAL, i.e. 1
 
 
 #define NUM_ADC_PORTS         4
@@ -81,9 +81,9 @@ Var *lockin_dac_voltage( Var *v );
 Var *lockin_sensitivity( Var *v );
 Var *lockin_time_constant( Var *v );
 Var *lockin_phase( Var *v );
-Var *lockin_mod_freq( Var *v );
-Var *lockin_mod_mode( Var *v );
-Var *lockin_mod_level( Var *v );
+Var *lockin_ref_freq( Var *v );
+Var *lockin_ref_mode( Var *v );
+Var *lockin_ref_level( Var *v );
 Var *lockin_lock_keyboard( Var *v );
 
 
@@ -749,7 +749,7 @@ Var *lockin_phase( Var *v )
 /* Sets or returns the lock-in modulation frequency */
 /*--------------------------------------------------*/
 
-Var *lockin_mod_freq( Var *v )
+Var *lockin_ref_freq( Var *v )
 {
 	long harm;
 	double freq;
@@ -808,7 +808,7 @@ Var *lockin_mod_freq( Var *v )
 /*------------------------------------------------------------------*/
 /*------------------------------------------------------------------*/
 
-Var *lockin_mod_mode( Var *v )
+Var *lockin_ref_mode( Var *v )
 {
 	v = v;
 
@@ -822,7 +822,7 @@ Var *lockin_mod_mode( Var *v )
 /*------------------------------------------------------------------*/
 /*------------------------------------------------------------------*/
 
-Var *lockin_mod_level( Var *v )
+Var *lockin_ref_level( Var *v )
 {
 	double level;
 
@@ -835,9 +835,9 @@ Var *lockin_mod_level( Var *v )
 		{
 			if ( I_am == PARENT )
 			{
-				eprint( FATAL, SET, "%s: Function `lockin_mod_level' "
-						"with no argument can only be used in the EXPERIMENT "
-						"section.\n", DEVICE_NAME );
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION );
 			}
 
@@ -1285,9 +1285,9 @@ static double sr810_set_mod_freq( double freq )
 }
 
 
-/*---------------------------------------------------------------*/
-/* ??????????? What does this really return ?????????            */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------*/
+/* Returns 1 for internal, 0 for external reference source */
+/*---------------------------------------------------------*/
 
 static long sr810_get_mod_mode( void )
 {

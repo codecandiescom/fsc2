@@ -34,6 +34,8 @@
 const char generic_type[ ] = DEVICE_TYPE;
 
 
+#define EGG4402_TEST_CURVE_LENGTH  4096
+
 /* Declaration of exported functions */
 
 int egg4402_init_hook( void );
@@ -150,7 +152,7 @@ Var *boxcar_curve_length( Var *v )
 	if ( v == NULL )
 	{
 		if ( TEST_RUN )
-			return vars_push( INT_VAR, 128 );
+			return vars_push( INT_VAR, EGG4402_TEST_CURVE_LENGTH );
 
 		if ( gpib_write( egg4402.device, "CL\n", 3 ) == FAILURE )
 			egg4402_failure( );
@@ -340,14 +342,9 @@ Var *boxcar_get_curve( Var *v )
 			THROW( EXCEPTION );
 	}
 
-	if ( TEST_RUN )
-		max_points = 4096;
-	else
-	{
-		cl = boxcar_curve_length( NULL );
-		max_points = cl->val.lval;
-		vars_pop( cl );
-	}
+	cl = boxcar_curve_length( NULL );
+	max_points = cl->val.lval;
+	vars_pop( cl );
 
 	if ( v == NULL )
 	{
