@@ -3,8 +3,8 @@
 # $Id$
 #
 # Script checks if for each malloc(), calloc(), strdup() or realloc() there's
-# also a free(). To be able to use it define MDEBUG when compiling fsc2 and
-# run it with stderr redirected to a file which in turn is feed to the script.
+# also a free(). To use it define MDEBUG when compiling fsc2, run fsc2 with
+# stderr redirected to a file and then feed the resulting file to this script.
 
 use strict;
 
