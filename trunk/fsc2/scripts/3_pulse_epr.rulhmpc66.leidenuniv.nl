@@ -521,7 +521,7 @@ pulser_state( \"ON\" );
 
 FOR I = 1 : N_Points {
 	wait( 1.1 * repeat_time * N_Avg );
-	data = daq_get_voltage( CH0 );
+	data = - daq_get_voltage( CH0 );
 	display( I, data );
 	fsave( File, \"#,#\\n\", field, data );
 	IF I != N_Points {

@@ -471,7 +471,7 @@ pulser_state( \"ON\" );
 
 FOREVER {
 	wait( 1.1 * repeat_time * N_Avg );
-	data = daq_get_voltage( CH0 );
+	data = - daq_get_voltage( CH0 );
 	display( I, data );
 	fsave( File, \"#,#\\n\", p2_to_p3_dist * ( I - 1 ) * 1.0e9, data );
 	pulser_shift( );
