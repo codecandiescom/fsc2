@@ -802,8 +802,8 @@ static bool er035m_sas_comm( int type, ... )
 			break;
 
 		default :
-			eprint( FATAL, UNSET, "%s: INTERNAL ERROR detected at %s:%d.\n",
-					DEVICE_NAME, __FILE__, __LINE__ );
+			print( FATAL, "INTERNAL ERROR detected at %s:%d.\n",
+				   __FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}
 

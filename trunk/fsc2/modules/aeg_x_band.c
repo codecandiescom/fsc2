@@ -145,8 +145,8 @@ int aeg_x_band_init_hook( void )
 
 	if ( ret == LIB_ERR_NO_SYM )
 	{
-		eprint( FATAL, UNSET, "fsc2: INTERNAL ERROR detected at %s:%d.\n",
-				__FILE__, __LINE__ );
+		print( FATAL, "INTERNAL ERROR detected at %s:%d.\n",
+			   __FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
 

@@ -1,4 +1,4 @@
-/*
+*
   $Id$
 
   Copyright (C) 2001 Jens Thoms Toerring
@@ -864,8 +864,8 @@ static bool er035m_s_comm( int type, ... )
 			break;
 
 		default :
-			eprint( FATAL, UNSET, "%s: INTERNAL ERROR detected at %s:%d.\n",
-					DEVICE_NAME, __FILE__, __LINE__ );
+			print( FATAL, UNSET, "INTERNAL ERROR detected at %s:%d.\n",
+				   __FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}
 
