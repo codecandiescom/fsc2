@@ -158,8 +158,6 @@ static void unpack_and_accept( void *ptr )
 	nsets = * ( int * ) ptr;
 	ptr += sizeof( int );
 
-	/* The 
-
 	if ( nsets < 0 )                /* special for clear curve commands etc. */
 	{
 		other_data_request( nsets, ptr );
