@@ -25,7 +25,7 @@
 #define cursor6_height 21
 #define cursor6_x_hot 11
 #define cursor6_y_hot 2
-static unsigned char cursor6_bits[] = {
+static char cursor6_bits[] = {
   0x00, 0x00, 0x00,
   0x00, 0x04, 0x00,
   0x00, 0x0e, 0x00,

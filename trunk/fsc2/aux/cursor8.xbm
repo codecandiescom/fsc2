@@ -25,7 +25,7 @@
 #define cursor8_height 21
 #define cursor8_x_hot 1
 #define cursor8_y_hot 10
-static unsigned char cursor8_bits[] = {
+static char cursor8_bits[] = {
   0x00, 0x00, 0x00,
   0x00, 0x00, 0x00,
   0x00, 0x00, 0x00,	

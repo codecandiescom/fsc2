@@ -70,11 +70,15 @@
 
 /* Create a bool type - this is stolen from gcc's stdbool.h ;-) */
 
+#ifndef __cplusplus
+
 typedef enum
 {
-	false = 0,
-	true  = 1
+	  false = 0,
+	  true  = 1
 } bool;
+
+#endif
 
 #define FAIL    false
 #define UNSET   false
