@@ -27,13 +27,16 @@ static void hp8647a_check_complete( void );
 bool hp8647a_init( const char *name )
 {
 	double att;
+	char buffer[ 10 ];
+	long length = 10;
 	int i;
 
 
 	if ( gpib_init_device( name, &hp8647a.device ) == FAILURE )
         return FAIL;
 
-	if ( gpib_write( hp8647a.device, "*OPC\n", 5 ) == FAILURE )
+	if ( gpib_write( hp8647a.device, "*OPC?\n", 6 ) == FAILURE ||
+		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
 		return FAIL;
 
 	HP8647A_INIT = SET;

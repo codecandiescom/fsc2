@@ -27,15 +27,9 @@ CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 				 # -DMDEBUG # for malloc debugging \
 				 # -DDEBUG \
 				 # -DMAX_DEBUG # for debugging of digitizer
-
-ifneq ($(shell hostname -f),door.physik.fu-berlin.de)
-LIBS           = -L/usr/X11R6/lib -lforms -lX11 -lgpib -lfl -lm -ldl \
+LIBS           = -L/usr/X11R6/lib -L/usr/local/lib -lforms -lX11 -lgpib \
+				 -lfl -lm -ldl
 				 #  -lmcheck   # for malloc debugging
-else
-LIBS           = -L/usr/X11R6/lib -lforms -lX11 -lfl -lm -ldl \
-				 #  -lmcheck   # for malloc debugging
-endif
-
 LDFLAGS        = -Wl,-E
 BISON          = bison
 BISONFLAGS     = -d -v -t -p

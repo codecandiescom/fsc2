@@ -8,8 +8,10 @@
 
 #include "fsc2.h"
 #include "gpib_if.h"
+#include <sys/timeb.h>
 
 
+extern void gpibrestart( FILE *fp );
 extern int gpibparse( void );
 
 
@@ -648,7 +650,6 @@ int gpib_wait( int device, int mask, int *status )
 int gpib_write( int device, const char *buffer, long length )
 {
 	GPIB_Device *devp;
-	char *buf;
 
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
@@ -682,16 +683,10 @@ int gpib_write( int device, const char *buffer, long length )
         return FAILURE;
     }
 
-	buf = T_malloc( length );
-	buf[ --length ] = '\0';
-	strncpy( buf, buffer, length );
-
     if ( ll > LL_ERR )
-        gpib_write_start( devp->name, buf, length );
+        gpib_write_start( devp->name, buffer, length );
 
-	ibwrt( device, buf, ( unsigned long ) length );
-
-	T_free( buf );
+	ibwrt( device, ( char * ) buffer, ( unsigned long ) length );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_write", devp->name );
@@ -875,14 +870,18 @@ void gpib_log_message( const char *fmt, ... )
 static void gpib_log_date( void )
 {
     static char tc[ 26 ];
+	struct timeb mt;
     time_t t;
 
 
     t = time( NULL );
     strcpy( tc, asctime( localtime( &t ) ) );
+	tc[ 10 ] = '\0';
+	tc[ 19 ] = '\0';
     tc[ 24 ] = '\0';
+	ftime( &mt );
 	seteuid( EUID );
-    fprintf( gpib_log, "[%s] ", tc );
+    fprintf( gpib_log, "[%s %s %s.%03d] ", tc, tc + 20, tc + 11, mt.millitm );
 	seteuid( getuid( ) );
 }
 

@@ -8,6 +8,7 @@
 
 #include "fsc2.h"
 #include "gpib_if.h"
+#include <sys/timeb.h>
 
 
 /*----------------------------------------------------------------*/
@@ -807,14 +808,18 @@ void gpib_log_message( const char *fmt, ... )
 static void gpib_log_date( void )
 {
     static char tc[ 26 ];
+	struct timeb mt;
     time_t t;
 
 
     t = time( NULL );
     strcpy( tc, asctime( localtime( &t ) ) );
+	tc[ 10 ] = '\0';
+	tc[ 19 ] = '\0';
     tc[ 24 ] = '\0';
+	ftime( &mt );
 	seteuid( EUID );
-    fprintf( gpib_log, "[%s] ", tc );
+    fprintf( gpib_log, "[%s %s %s.%03d] ", tc, tc + 20, tc + 11, mt.millitm );
 	seteuid( getuid( ) );
 }
 
