@@ -1740,10 +1740,11 @@ the real pulses will change.
 @findex pulser_shift()
 This function can be called with either no argument or with a list of
 (comma separated) pulse identifiers (pulse numbers will also do). If no
-argument is given the position of all pulses which have a
-@code{DELTA_START} defined is shifted by their respective
-@code{DELTA_START}. If there is only one argument or a list of pulses
-only the start position of the listed pulses are changed.
+argument is given the positions of all pulses which have a
+@code{DELTA_START} defined and are currently active (i.e.@: don't have a
+length of 0) are shifted by their respective @code{DELTA_START}. If
+there is only one argument or a list of pulses only the start position
+of the listed pulses are changed.
 
 
 @anchor{pulser_increment}
@@ -1751,8 +1752,9 @@ only the start position of the listed pulses are changed.
 @findex pulser_increment()
 This function can be called with either no argument or with a list of
 (comma separated) pulse identifiers (pulse numbers will also do). If no
-argument is given the length of all pulses which have a
-@code{DELTA_LENGTH} defined is incremented by their respective
+argument is given the lengths of all pulses which have a
+@code{DELTA_LENGTH} defined and are currently active (i.e.@: don't have
+a length of 0) are incremented by their respective
 @code{DELTA_LENGTH}. If there is only one argument or a list of pulses
 only the lengths of the listed pulses are changed.
 

@@ -635,6 +635,7 @@ sub redraw {
 		my $yt = 10 + ( $i + 0.75 ) * $self->hstep;
 
 		for my $cp ( @$pl ) {
+			next if $cp->len == 0;
 			my $x1 = $cp->start - $self->offset - $ch->delay + $Delay;
 			my $x2 = $cp->start + $cp->len - $self->offset
 					 - $ch->delay + $Delay;
