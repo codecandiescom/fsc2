@@ -304,7 +304,7 @@ Var *dio_value( Var *v )
 			else
 				uval &= 0xFFUL;
 
-			print( SEVER, "Value of %ld to be output is too large for the "
+			print( SEVERE, "Value of %ld to be output is too large for the "
 				   "current I/O mode of the DIO, truncating it to %lu.\n",
 				   val, uval );
 		}

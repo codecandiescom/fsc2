@@ -1745,3 +1745,4 @@ library are part of the @code{fsc2} package)
 @item @code{dio_name()}           @tab @ref{dio_name}
 @item @code{dio_mode()}           @tab @ref{dio_mode}
 @item @code{dio_value()}          @tab @ref{dio_value}
+@end multitable

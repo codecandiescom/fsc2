@@ -1112,8 +1112,8 @@ Var *pulser_shift( Var *v )
 
 		if ( ( p->pos += p->dpos ) < 0 )
 		{
-			print( FATAL, "Shifting the position of pulse #%ld leads to an "
-				   "invalid  negative position of %s.\n",
+			print( FATAL, "Shifting the position of pulse #%ld would result "
+				   "in a negative position of %s.\n",
 				   p->num, dg2020_pticks( p->pos ) );
 			THROW( EXCEPTION );
 		}
