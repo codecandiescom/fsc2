@@ -1,6 +1,6 @@
 @c $Id$
 
-@node Functions, Device Functions, EDL, Top
+@node Built-in Functions, Device Functions, EDL, Top
 @chapter Built-in Functions
 
 @ifinfo
@@ -12,7 +12,7 @@
 @end ifinfo
 
 
-@node Output functions, Mathematical functions, Functions, Functions
+@node Output functions, Mathematical functions, Built-in Functions, Built-in Functions
 @section Output functions
 @cindex output functions
 
@@ -104,7 +104,7 @@ specified value turns out to be too small it is adjusted automatically
 in the experiment so that all data fit into the display.
 @item
 Start value of x-axis. If missing (or undefined, see next point) point
-numbers are printed, starting with 1 (if acronym{FORTRAN} style array
+numbers are printed, starting with 1 (if @acronym{FORTRAN} style array
 offsets are used, for C style arrays the starting value is 0).
 @item
 Increment for data along the x-axis (thus restricting the display to equally
@@ -382,7 +382,7 @@ defaults to "Please enter a comment:".
 @end table
 
 
-@node Mathematical functions, Auxiliary functions, Output functions, Functions
+@node Mathematical functions, Auxiliary functions, Output functions, Built-in Functions
 @section Mathematical functions
 @cindex mathematical functions
 
@@ -514,7 +514,7 @@ elements of an array).
 
 
 
-@node Auxiliary functions, , Mathematical functions, Functions
+@node Auxiliary functions, , Mathematical functions, Built-in Functions
 @section Auxiliary functions
 @cindex auxiliary functions
 
