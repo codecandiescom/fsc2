@@ -841,7 +841,7 @@ When a tabe file is used there remains the question for which frequency
 to use the attenuation has been set e.g.@: by
 @code{synthesizer_attenuation()}. To set this reference frequency the
 function @code{synthesizer_att_ref_freq()} can be used. If the function
-isn't called a frequency of @{14 MHz} is used.
+isn't called a frequency of @w{14 MHz} is used.
 
 
 
