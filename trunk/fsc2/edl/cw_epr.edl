@@ -28,7 +28,7 @@ kd = 2 Hz;
 data[ Num_Points ];
 avg[ Num_Points ];
 
-I, J = 1;
+I, J = 0;
 File1, File2;
 
 
@@ -48,7 +48,9 @@ File2 = clone_file( File1, "dat", "act" );
 
 FOREVER {
 
+	wait( 5 s );
 	reset_field( );
+	J += 1;
 
 	print( "Starting #. run", J );
 

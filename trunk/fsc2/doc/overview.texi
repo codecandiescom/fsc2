@@ -108,9 +108,9 @@ new bugs into @acronym{fsc2} itself.
 
 The advantages of the approach taken in @code{fsc2} have made it
 possible to use it successfully to control spectrometers in S-, X- and
-W-band, using completely different hardware, and for all kinds of
-experiments, ranging from cw-EPR, ENDOR, EPR on transient signals to
-experiments with pulsed microwave excitation and with and without phase
+W-band and even at 360 GHz, using completely different hardware, and for
+all kinds of experiments, ranging from cw-EPR, ENDOR, EPR on transient
+signals to experiments with pulsed microwave excitation and phase
 cycling.
 
 The manual is organized along the following lines: the next chapter
