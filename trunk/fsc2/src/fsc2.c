@@ -743,6 +743,11 @@ void clean_up( void )
 }
 
 
+/*------------------------------------------------------------*/  
+/* Callback function for movements of the slider that adjusts */
+/* the sizes of the program and the error/output  browser     */
+/*------------------------------------------------------------*/  
+
 void win_slider_callback( FL_OBJECT *a, long b )
 {
 	FL_Coord h, H;
