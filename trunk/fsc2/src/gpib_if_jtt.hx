@@ -37,13 +37,6 @@
 #define GPIB_JTT
 
 
-#if defined ( GPIB_IF_JTT_MAIN_SRC )
-	#define GPIB_VARIABLE
-#else
-	#define GPIB_VARIABLE extern
-#endif
-
-
 #define DMA_SIZE 64512    /* compare this with entry in /etc/gpib.conf ! */
 
 
@@ -57,21 +50,21 @@ struct GPIB_DEV {
 };
 
 
-GPIB_VARIABLE int gpib_init( const char *log_file_name, int log_level );
-GPIB_VARIABLE int gpib_shutdown( void );
-GPIB_VARIABLE int gpib_init_device( const char *device_name, int *dev );
-GPIB_VARIABLE int gpib_timeout( int device, int period );
-GPIB_VARIABLE int gpib_clear_device( int device );
-GPIB_VARIABLE int gpib_local( int device );
-GPIB_VARIABLE int gpib_trigger( int device );
-GPIB_VARIABLE int gpib_wait( int device, int mask, int *status );
-GPIB_VARIABLE int gpib_write( int device, const char *buffer, long length );
-GPIB_VARIABLE int gpib_read( int device, char *buffer, long *length );
-GPIB_VARIABLE int gpib_serial_poll( int device, unsigned char *stb );
-GPIB_VARIABLE void gpib_log_message( const char *fmt, ... );
+int gpib_init( const char *log_file_name, int log_level );
+int gpib_shutdown( void );
+int gpib_init_device( const char *device_name, int *dev );
+int gpib_timeout( int device, int period );
+int gpib_clear_device( int device );
+int gpib_local( int device );
+int gpib_trigger( int device );
+int gpib_wait( int device, int mask, int *status );
+int gpib_write( int device, const char *buffer, long length );
+int gpib_read( int device, char *buffer, long *length );
+int gpib_serial_poll( int device, unsigned char *stb );
+void gpib_log_message( const char *fmt, ... );
 
 
-GPIB_VARIABLE char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
+extern char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
 
 
 #define SUCCESS   0

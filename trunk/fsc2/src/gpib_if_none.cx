@@ -22,11 +22,10 @@
 */
 
 
-#define GPIB_IF_NONE_MAIN_SRC
-
-
 #include "fsc2.h"
 #include "gpib_if.h"
+
+char gpib_error_msg[ 1024 ];      /* global for GPIB error messages */
 
 
 int gpib_init( const char *log_file_name, int log_level )

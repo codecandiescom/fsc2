@@ -22,9 +22,6 @@
 */
 
 
-#define GPIB_IF_LLP_MAIN_SRC
-
-
 #include "fsc2.h"
 #include "gpib_if.h"
 #include <sys/timeb.h>
@@ -57,7 +54,15 @@
 
 
 /*------------------------------------------------------------------------*/
-/* functions used only locally                                            */
+/* exported variables                                                     */
+/*------------------------------------------------------------------------*/
+
+
+char gpib_error_msg[ 1024 ];            /* global for GPIB error messages */
+
+
+/*------------------------------------------------------------------------*/
+/* local functions                                                        */
 /*------------------------------------------------------------------------*/
 
 
@@ -79,16 +84,19 @@ static void close_on_exec_hack( int *fd_list );
 
 
 /*------------------------------------------------------------------------*/
-/* global variables                                                       */
+/* local global variables                                                 */
 /*------------------------------------------------------------------------*/
 
 
-int ll;                         /* log level                              */
-int gpib_is_active = 0;         /* flag, set after initialization of bus  */
-int controller;                 /* device number assigned to controller   */
-int timeout;                    /* stores actual timeout period           */
-FILE *gpib_log;                 /* file pointer of GPIB log file          */
-GPIB_DEV *gpib_dev_list = NULL; /* list of symbolic names of devices etc. */
+static int ll;                         /* log level                       */
+static int gpib_is_active = 0;         /* flag, set after initialization
+										  of bus                          */
+static int controller;                 /* device number assigned to
+										  controller                      */
+static int timeout;                    /* stores actual timeout period    */
+static FILE *gpib_log;                 /* file pointer of GPIB log file   */
+static GPIB_DEV *gpib_dev_list = NULL; /* list of symbolic names of
+										  devices etc.                    */
 
 
 /*-------------------------------------------------------------------------*/

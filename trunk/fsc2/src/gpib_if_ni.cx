@@ -22,17 +22,14 @@
 */
 
 
-#define GPIB_IF_NI_MAIN_SRC
-
-
 #include "fsc2.h"
 #include "gpib_if.h"
 #include <sys/timeb.h>
 
 
 extern int gpibparse( void );
-
 extern FILE *gpibin;
+
 
 /*----------------------------------------------------------------*/
 /* GPIB_LOG_FILE is the name of the default file to which logging */
@@ -54,7 +51,16 @@ extern FILE *gpibin;
 
 
 /*------------------------------------------------------------------------*/
-/* functions used only locally                                            */
+/* exported variables                                                     */
+/*------------------------------------------------------------------------*/
+
+
+char gpib_error_msg[ 1024 ];            /* global for GPIB error messages */
+int gpiblineno;                         /* used in the lexer for the
+										   configuration file */
+
+/*------------------------------------------------------------------------*/
+/* local functions                                                        */
 /*------------------------------------------------------------------------*/
 
 
@@ -75,11 +81,8 @@ static int *get_fd_list( void );
 static void close_on_exec_hack( int *fd_list );
 
 
-static GPIB_Device devices[ GPIB_MAX_DEV ];
-
-
 /*------------------------------------------------------------------------*/
-/* global variables                                                       */
+/* local global variables                                                 */
 /*------------------------------------------------------------------------*/
 
 
@@ -88,6 +91,7 @@ static int gpib_is_active = 0;      /* flag, set after initialization of bus */
 static FILE *gpib_log;              /* file pointer of GPIB log file         */
 static int num_devices = 0;
 static int num_init_devices = 0;
+static GPIB_Device devices[ GPIB_MAX_DEV ];
 static char gpib_error_buffer[ GPIB_ERROR_BUFFER_LENGTH ];
 
 
