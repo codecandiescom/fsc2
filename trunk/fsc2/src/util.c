@@ -273,7 +273,7 @@ bool fsc2_locking( void )
 		/* Try to read the PID of the process holding the lock as well as the
 		   user name from the lock file and append it to the error message */
 
-		if ( read( fd, ( void * ) buf, 127 * sizeof( char ) ) != -1 &&
+		if ( read( fd, ( void * ) buf, 127 ) != -1 &&
 			 ( name = strchr( buf, '\n' ) + 1 ) != NULL )
 		{
 			*( name - 1 ) = '\0';

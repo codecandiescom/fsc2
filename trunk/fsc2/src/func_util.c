@@ -2178,7 +2178,7 @@ static void T_fprintf( int file_num, const char *func, const char *fmt, ... )
 
 	/* First we've got to find out how many characters we need to write out */
 
-	p = T_malloc( size * sizeof( char ) );
+	p = T_malloc( size );
 
 	while ( 1 ) {
 
@@ -2209,7 +2209,7 @@ static void T_fprintf( int file_num, const char *func, const char *fmt, ... )
             }
         }
 
-		p = T_realloc( p, size * sizeof( char ) );
+		p = T_realloc( p, size );
     }
 
     /* Now we try to write the string to the file */

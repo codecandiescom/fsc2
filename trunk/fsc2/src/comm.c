@@ -384,7 +384,7 @@ long reader( void *ret )
 			/* Send back just one character as indicator that the message has
 			   been read by the user */
 
-			write( pd[ WRITE ], "X", sizeof( char ) );
+			write( pd[ WRITE ], "X", 1 );
 
 			/* Get rid of the string and return */
 
@@ -412,7 +412,7 @@ long reader( void *ret )
 			/* Send back just one character as indicator that the alert has
 			   been acknowledged by the user */
 
-			write( pd[ WRITE ], "X", sizeof( char ) );
+			write( pd[ WRITE ], "X", 1 );
 
 			/* Get rid of the string and return */
 
@@ -832,7 +832,7 @@ void writer( int type, ... )
 
 			/* wait for random character to be sent back as acknowledgement */
 
-			read( pd[ READ ], &ack, sizeof( char ) );
+			read( pd[ READ ], &ack, 1 );
 			break;
 
 		case C_SHOW_ALERT :
@@ -852,7 +852,7 @@ void writer( int type, ... )
 
 			/* Wait for a random character to be sent back as acknowledgment */
 
-			pipe_read( pd[ READ ], &ack, sizeof( char ) );
+			pipe_read( pd[ READ ], &ack, 1 );
 			break;
 
 		case C_SHOW_CHOICES :
