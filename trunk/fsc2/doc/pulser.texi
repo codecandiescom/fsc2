@@ -29,7 +29,6 @@
 * Setting up the Pulser::  @code{ASSIGNMENTS} and @code{PHASES} section
 * Defining Pulses::        How to define pulses
 * Using Pulses::           How to use pulses in the experiment
-* Caveats::                Further things necessary to know
 @end menu
 @end ifinfo
 
@@ -609,7 +608,7 @@ and pulses will not be deleted even if they seem to be unused.
 
 
 The @code{PHASES} section is for defining phase sequences and,
-optionally, aquisition sequences. As the word says a phase sequence
+optionally, acquisition sequences. As the word says a phase sequence
 defines for one (or more) pulses the sequence of phases the pulse is
 switched between in the experiment. For example, in a phase cycled
 stimulated echo experiment the first microwave pulse usually is set
@@ -653,10 +652,10 @@ acqusition sequence which of the signals from the two digitizer channels
 has to be used. The first channel is named @code{A} and the second
 @code{B}. In this case one usually also needs two acquisition sequences,
 one for the real part and one for the imaginary part of the signal. To
-distinguish between the sequences one appends either @code{1} or
-@code{2} to the keyword (optionally with an underscore in between. As an
-example here the phase and acquisition sequence definitions for an
-inversion revocery experiment with FID detection and phase cycling:
+distinguish between the sequences append either @code{1} or @code{2} to
+the keyword (optionally with an underscore in between. As an example
+here the phase and acquisition sequence definitions for an inversion
+revocery experiment with FID detection and phase cycling:
 @example
 PHASE_SEQUENCE_1       = +x, +x, +x, +x, -x, -x, -x, -x;
 PHASE_SEQUENCE_2       = +x, -x, +y, -y, +x, -x, +y, -y;
@@ -664,8 +663,10 @@ ACQUISITION_SEQUENCE_1 = +A, -A, +B, -B, +A, -A, +B, -B;
 ACQUISITION_SEQUENCE_2 = +B, -B, -A, +A, +B, -B, -A, +A;
 @end example
 
-The definition of acquisition sequences is optional. If defined the
-lengths have to be identical to the lengths of the phase sequences.
+The definition of acquisition sequences is optional and only needed if
+the function @code{get_phase_cycled_area()} (see below) is going to be
+used. If defined their lengths have to be identical to the lengths of
+the phase sequences.
 
 
 
@@ -755,49 +756,52 @@ PULSE_2:    FUNCTION     = PULSE_1.FUNCTION,
 
 @c ########################################################
 
-@node Using Pulses, Caveats, Defining Pulses, Using Pulsers
+@node Using Pulses, , Defining Pulses, Using Pulsers
 @section Using Pulses
 
 
-When pulses have been defined and the experiment is started with the
-begin of the @code{EXPERIMENT} section, all pulses get set (as long as
+When pulses have been defined and the experiment is started (indicated by
+the begin of the @code{EXPERIMENT} section) all pulses get set (as long as
 their lengths are defined and non-zero) and all channels or PODs that
 have been assigned pulses (that are really used in the experiment) are
 switched on.
 
-There are several methods to change the properties of pulses. To change
-the start position of pulse 1 by the start position change time
+There are two methods to change the properties of pulses. TZhe first one
+works by calling a dedicated function. To change the start position of,
+for example, pulse 1 by the start position change time
 (@code{DELTA_START}) as defined in the properties of the pulse the
 function @code{pulser_shift()} (see also @ref{Pulser Functions}) can be
 used:
 @example
 pulser_shift( P1 );      // or  pulser_shift( 1 );
 @end example
-If the start position of several pulses has to be changed, this function
-also accepts a (comma separated) list of pulses. If the function is
-called with no arguments the start position of all pulses that have the
-@code{DELTA_START} property defined are changed.
+Also the start position of several pulses at once can be changed because
+this function also accepts a (comma separated) list of pulses. If the
+function is called with no arguments at all the start positions of all
+pulses that have the @code{DELTA_START} property defined are changed.
 
-There is a similar function for changing the length of a pulse by it's
-@code{DELTA_LENGTH}, @code{pulser_increment()} (see also @ref{Pulser
-Functions}):
+There is a similar function for changing the length of pulses by their
+@code{DELTA_LENGTH}, called @code{pulser_increment()} (see also
+@ref{Pulser Functions}):
 @example
 pulser_increment( P3 );  // or  pulser_increment( 3 );
 @end example
-As for the @code{pulser_shift()} function, also here a comma separated
-list of pulses can be passed to the function and calling it with no
-arguments automatically lengthens all pulses that have the
-@code{DELTA_LENGTH} property defined.
+As for the @code{pulser_shift()} function also this functions accepts a
+comma separated list of pulses, and calling it with no arguments
+automatically lengthens all pulses that have the @code{DELTA_LENGTH}
+property defined.
 
-But it is also possible to change the start position or length of a
-pulse directly and in increments differing from @code{DELTA_START} or
-@code{DELTA_LENGTH}. If, for example, the position of pulse 4 has to be
-changed to @w{500 ns} and its length to @w{120 ns}, one may write
+The second method allows to you to change the start position or length
+of a pulse directly and in increments differing from @code{DELTA_START}
+or @code{DELTA_LENGTH}. If, for example, the position of pulse 4 has to
+be changed to @w{500 ns} and its length to @w{120 ns}, one may simply
+write
 @example
 P4.START  = 500 ns;
 P4.LENGTH = 120 ns;
 @end example
-Please note that by setting the length of a pulse to 0 you switch it off.
+This method can also be used to switch off a pulse completely by
+assigning 0 to the pulse length.
 
 Of course, as in the definition of the pulses in the @code{PREPARATION}
 section the properties of the pulse itself and other pulses can be used
@@ -806,9 +810,9 @@ in setting the new values, e.g.:
 P4.START  = P3.START + 200 ns;
 P4.LENGTH = 2 * P4.LENGTH + 20 ns;
 @end example
-Actually, these properties (i.e.@: start position and length and the
-corresponding delta's) of pulses can be treated nearly as if they are
-just normal variables.
+As you see, these properties (i.e.@: start positions and lengths and the
+corresponding delta start positions and lengths) of pulses can be treated
+nearly as if they are just normal variables.
 
 Also the values for @code{DELTA_START} and @code{DELTA_LENGTH} can be
 changed in this way at any time during the experiment:
@@ -816,21 +820,22 @@ changed in this way at any time during the experiment:
 P4.DELTA_START  = 20 ns;
 P4.DELTA_LENGTH = 10 ns;
 @end example
-This holds even if they haven't been defined in the @code{PREPARATION}
-section at all.
+This holds even if these properties haven't been defined in the
+@code{PREPARATION} section at all.
 
 The only pulse properties that may not be changed during the experiment
 are the function and the phase sequence associated with the pulse.
 
 There is only one point that needs to be taken care of: Just calling one
-of these functions does not change the real pulses immediately. Instead,
-all these changes are stored internally in the program. The changes get
-only send to the pulser when the function @code{pulser_update()} (see
-also @ref{Pulser Functions}) is called. Therefor, the normal way to
-change the pulse pattern is to change all necessary pulse properties and
-when everything is done @code{pulser_update()} is called to commit the
-changes. In this moment the program will also do all its usual checks,
-e.g.@: it will test that no pulses overlap.
+of these methods to change pulse properties does not change the real
+pulses immediately. Instead, all these changes are stored internally in
+the program. The changes get only send to the pulser when the function
+@code{pulser_update()} (see also @ref{Pulser Functions}) is
+called. Therefor, the normal way to change the pulse pattern is to
+change all necessary pulse properties and when everything is done
+@code{pulser_update()} is called to commit the changes. In this moment
+the program will also do all its usual checks, e.g.@: it will test that
+no pulses overlap.
 
 There is a further function that resets all pulses to their intial
 state, @code{pulser_pulse_reset()}. This function can, for example, be
@@ -844,9 +849,9 @@ section.
 Here is now a somewhat shortened example of a 2 pulse Hahn-echo
 experiment. Two microwave pulses are needed, a pi-half and a pi pulse,
 plus a pulse to trigger the digitizer. The trigger pulse must move twice
-as fast as the second microwave pulse because the distance of the
-expected echo from the second pulse is always as large as the distance
-between both the microwave pulses.
+as fast as the second microwave pulse because the distance of the echo
+from the second pulse is always as large as the distance between both
+the microwave pulses.
 @example
 DEVICES:
 
@@ -861,6 +866,7 @@ pi_pulse  = 100 ns;
 
 I, J;
 data[ 20, 1024];
+Window;
 
 ASSIGNMENTS:
 
@@ -885,12 +891,14 @@ P2:   FUNCTION    = DETECTION,       // trigger pulse
       START       = P1.START + P1.LENGTH / 2 + tau_0,
       DELTA_START = 2 * delta_tau;
 
+Window = digitizer_define_window( P2.START + 250 ns, 100 ns );
+
 EXPERIMENT:
 
 FOR J = 1 : 20 @{          // repeat experiment 20 times
     FOR I = 1 : 1024 @{
         digitizer_start_acquisition( );
-        data[ J, I ] = digitizer_get_area( CH1 );
+        data[ J, I ] = digitizer_get_area( CH1, Window );
         pulser_shift( );             // move all pulses
         pulser_update( );            // commit the changes
     @}
@@ -900,13 +908,13 @@ FOR J = 1 : 20 @{          // repeat experiment 20 times
 
 
 Beside the functions for changing the positions and lengths of pulses
-there are also functions to set the phase of the pulses, as needed for
+there are also functions to adjust the phases of pulses, needed for
 for phase cycled experiments. When the experiment starts the phase of
-pulse is set to the first phase of its associated phase sequence (as
-defined in the @code{PHASES} section). To switch to the next phase the
+a pulse is set to the first phase of its associated phase sequence
+(defined in the @code{PHASES} section). To switch to the next phase the
 function @code{pulser_next_phase()} (see also @ref{Pulser Functions})
-has to be used. In contrast to the functions @code{pulser_shift()}
-and @code{pulser_increment()} this function can not be used for phase
+has to be used. In contrast to the functions @code{pulser_shift()} and
+@code{pulser_increment()} this function can not be used for phase
 changes of individual pulses but alway applies to all pulses that have
 been assigned a phase sequence. Thus this function does not accepts any
 arguments.
@@ -914,8 +922,8 @@ arguments.
 Again, the necessary changes are only send to the pulser when the
 function @code{pulser_update()} is called afterwards. By repeatedly
 invoking @code{pulser_next_phase()} one can run through the complete
-phase sequence. To reset all pulses to their start phases (i.e.@: the
-first of the associated phase sequence) the function
+phase sequence. To reset all pulses to their start phase (i.e.@: the
+first phase of the associated phase sequence) the function
 @code{pulser_phase_reset()} (see also @ref{Pulser Functions}) can be
 used.
 
@@ -984,13 +992,15 @@ P3:  FUNCTION    = DETECTION,
 
 init_1d( );
 
+Window = digitizer_define_window( P3.START + 250 ns, 100 ns );
+
 EXPERIMENT:
 
 FOR I = 1: 128 @{
     data = 0.0;
     FOR J = 1 : 4 @{
         digitizer_start_acquisition( );
-        area = digitizer_get_area( CH1 );
+        area = digitizer_get_area( CH1, Window );
 
         IF J == 1 | J == 4 @{
             data += area;     // add 1st & 4th area
@@ -998,23 +1008,32 @@ FOR I = 1: 128 @{
             data -= area;     // subtract 2nd & 3rd area
         @}
 
-        display( I, data );
         pulser_next_phase( );
         pulser_update( );
     @}
 
+    display( I, data );
     pulser_shift( );
     pulser_update( );
 @}
 @end example
 
-The inner loop in this example runs through the 4 different phase
-settings and adds up the areas with the correct sign. Instead of writing
-this loop one could also define an acquisition sequence and use the
-@acronym{EDL} function @code{get_phase_cycled_area()}. This function
-automatically does everything spelled out explicitely in the loop in the
-previous example and thus makes the program much more legible. The only
-changes needed are in the @code{PHASES} and @code{EXPERIMENT} section:
+
+@anchor{ Simplified pulse cycling }
+@subsection Simplified pulse cycling
+@cindex Simplified pulse cycling
+
+
+The inner loop in the privious example runs through the 4 different
+phase settings, adding up the areas with the correct sign. Instead of
+writing out this loop one could also define an acquisition sequence and
+use the @acronym{EDL} function @code{get_phase_cycled_area()}. This
+function does everything automatically that had to be spelled out
+explicitely in the loop in the previous example and thus makes the
+program much simpler. The only changes needed are in the @code{PHASES}
+and @code{EXPERIMENT} section: first, an acquistion sequence must be
+defined and, second, the whole inner loop can be replaced by a single
+function call.
 @example
 PHASES:
 
@@ -1024,10 +1043,12 @@ ACQUISITION_SEQUENCE =  +,  -,  -,  +;
 
 ...
 
+Window = digitizer_define_window( P3.START + 250 ns, 100 ns );
+
 EXPERIMENT:
 
 FOR I = 1: 128 @{
-    data = get_phase_cycled_area( CH1 );
+    data = get_phase_cycled_area( CH1, Window );
     display( I, data );
     pulser_shift( );
     pulser_update( );
@@ -1036,19 +1057,65 @@ FOR I = 1: 128 @{
 As can be seen from this example @code{get_phase_cycled_area()} not only
 sets the pulse phases but also starts the digitizer acquisition, fetches
 the measured areas from the digitizer and adds up the areas according to
-to the acquisition sequence.
+the acquisition sequence.
 
+@code{get_phase_cycled_area()} can handle one as well as two acquisition
+sequences, see below. But also a single acquisistion sequence may need
+data from two different digitizer channels, for example an acquisistion
+sequence like this:
+@example
+ACQUISITION_SEQUENCE =  +A, -B, -A, +B;
+@end example
+which means that the value for the first phase setting has to be fetched
+from the first digitizer channel (associated with @code{A}) and that for
+the second phase setting the value from the second digitizer channel
+(associated with @code{B}) has to be subtracted, etc. In this case
+@code{get_phase_cycled_area()} expects its second argument to be the
+second digitizer channel, i.e.@: it must be called like this:
+@example
+data = get_phase_cycled_area( CH1, CH2, Window );
+@end example
 
-@c ########################################################
+In some cases one might be interested not only in the value from just
+one digitizer window but from two or more. Thus you may specify,
+following the digitizer channel(s) to be used for fetching data as many
+windows as you need. For each of the windows the phase cycled area is
+measured.  Of course, in these cases not just one data value will be
+returned but an array of data values with as many elements as there are
+digitizer windows passed to the function. It is the responsibility of
+the writer of the @acronym{EDL} program to supply an array long enough
+to hold exactly as many data as returned by the function. Here's an
+example:
+@example
+VARIABLES:
 
-@node Caveats, , Using Pulses, Using Pulsers
-@section Caveats
+Window_1, Window_2;
+I;
+data[ 2 ];
 
-Whenever an @acronym{EDL} file is tested, this involves also tests of
-the pulser settings. During the check of the program it is tested that
-pulses don't start to overlap and that the pulse sequence doesn't get
-longer than the maximum length the digitizer allows. So, as long as
-@acronym{fsc2} is able to completely check the program before it is run
-no errors (except communication problems) should happen during the
-experiment.
+PHASES:
 
+PHASE_SEQUENCE_0     = +x, -x, +x, -x;  // for 1st pulse
+PHASE_SEQUENCE_1     = +x, +x, -x, -x;  // for 2nd pulse
+ACQUISITION_SEQUENCE = +A, -B, -A, +B;
+
+...
+
+Window_1 = digitizer_define_window( P3.START + 250 ns, 100 ns );
+Window_2 = digitizer_define_window( P3.START + 650 ns );
+
+EXPERIMENT:
+
+FOR I = 1: 128 @{
+    data = get_phase_cycled_area( CH1, CH2, Window_1, Window_2 );
+    display( I, data[ 1 ], 1, I, data[ 2 ], 2 );
+    pulser_shift( );
+    pulser_update( );
+@}
+@end example
+
+Finally, if there are two acquisition sequences
+@code{get_phase_cycled_area()} will return 2 values for each
+digitizer window. Thus it will returns an array of values, where the
+first two values are the data from both the acquisition sequences of the
+first window, the next two from the second window etc.
