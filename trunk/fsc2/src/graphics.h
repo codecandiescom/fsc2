@@ -238,7 +238,6 @@ typedef struct {
 void start_graphics( void );
 void stop_graphics( void );
 void graphics_free( void );
-void free_graphics( void );
 void make_label_string( char *lstr, double num, int res );
 void create_label_pixmap( Canvas *c, int coord, char *label );
 void switch_off_special_cursors( void );
@@ -249,6 +248,7 @@ void redraw_axis( int coord );
 void change_scale( int is_set, double *vals );
 void change_label( char **label );
 void rescale( long new_nx, long new_ny );
+void redraw_canvas_2d( Canvas *c );
 
 
 #endif   /* ! GRAPHICS_HEADER */
