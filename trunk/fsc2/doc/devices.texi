@@ -1660,10 +1660,15 @@ only the lengths of the listed pulses are changed.
 @findex pulser_pulse_reset()
 This function can be called with either no argument or with a list of
 (comma separated) pulse identifiers (pulse numbers will also do). If no
-argument is given all pulses are reset to their initial state, i.e.@:
-the state of the pulses set in the @code{PREPARATIONS} section.  If
-called with one argument or a list of pulses only the pulses from the
-list are reset back to their initial state.
+argument is given all pulses are reset to their initial states, i.e.@:
+the states of the pulses set in the @code{PREPARATIONS} section. The
+function also does a reset of all pulse phases, as done by
+@code{pulser_phase_reset()}. It does @strong{not} update the pulser, if
+you want to reset all pulses @strong{and} and also update the pulser use
+the function @code{pulser_reset()} instead.
+
+If called with one argument or a list of pulses only the pulses from the
+list are set back to their initial states.
 
 
 @anchor{pulser_next_phase}
@@ -1703,9 +1708,8 @@ by calling @code{pulser_update()}.
 @findex pulser_reset()
 This function does not take any arguments at all. It switches the pulser
 back to the initial state it was in at the start of the experiment. It
-is basically identical to calling both @code{pulser_pulse_reset()} and
-@code{pulser_phase_reset()} without arguments.  This function also
-immediately updates the pulse sequence, as it is done by calling
+includes the complete functionality of @code{pulser_pulse_reset()} but
+also immediately updates the pulser as it is done by calling
 @code{pulser_update()}.
 
 
