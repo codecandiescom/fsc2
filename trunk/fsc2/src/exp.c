@@ -88,10 +88,9 @@ void store_exp( FILE *in )
 				prg_token[ prg_length ].tv.vptr = T_malloc( sizeof( Var ) );
 				memcpy( prg_token[ prg_length ].tv.vptr, Var_Stack,
 						sizeof( Var ) );
-				vars_pop( Var_Stack );
-
 				prg_token[ prg_length ].tv.vptr->name =
-					get_string_copy( prg_token[ prg_length ].tv.vptr->name );
+					get_string_copy( Var_Stack->name );
+				vars_pop( Var_Stack );
 				break;
 
 			case E_VAR_REF :
