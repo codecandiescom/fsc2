@@ -60,6 +60,55 @@ const char *strip_path( const char *path )
 }
 
 
+/*-----------------------------------------------------------------*/
+/* get_file_length() returns the number of lines in a file as well */
+/* as the number of digits in the number of lines. To do so a      */ 
+/* short awk script is used (wc can't be used since it returns a   */
+/* number of lines to short by one if the last line does not end   */
+/* with a newline char).                                           */
+/* ->                                                              */
+/*   * name of file                                                */
+/*   * pointer for returning number of digits of number of lines   */
+/* <-                                                              */
+/*   * number of lines or -1: not enough memory, -2: popen failure */
+/*-----------------------------------------------------------------*/
+
+long get_file_length( char *name, int *len )
+{
+	char *pc;
+	FILE *pp;
+	long lc, i;
+
+
+	/* Get some memory for the pipe command */
+
+	pc = ( char * ) malloc( 20 + strlen( AWK_PROG ) + strlen( in_file ) );
+	if ( pc  == NULL )
+		return( -1 );                        /* FATAL: no memory */
+
+	/* set up pipe to 'awk' (defined via AWK_PROG) and read number of lines */
+
+	strcpy( pc, AWK_PROG" 'END{print NR}' " );
+	strcat( pc, name );
+	if ( ( pp = popen( pc, "r" ) ) == NULL )
+	{
+		free( pc );
+		return( -2 );                  /* popen() failed */
+	}
+
+	fscanf( pp, "%ld", &lc );
+	pclose( pp );
+	free( pc );
+
+	/* count number of digits of number of lines */
+
+	for ( i = lc, *len = 1; ( i /= 10 ) > 0; ++( *len ) )
+		;
+
+	return( lc );
+}
+
+
 void eprint( int severity, const char *fmt, ... )
 {
 	va_list ap;

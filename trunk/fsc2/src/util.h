@@ -10,6 +10,7 @@ char *get_string( size_t len );
 char *string_to_lower( char *str );
 void *get_memcpy( const void *array, size_t size );
 const char *strip_path( const char *path );
+long get_file_length( char *name, int *len );
 void eprint( int severity, const char *fmt, ... );
 
 inline long   rnd( double x );
