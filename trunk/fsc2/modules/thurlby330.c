@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 2002 Anton Savitsky
+  Copyright (C) 1999-2003 Anton Savitsky / Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -42,16 +42,22 @@ int thurlby330_end_of_exp_hook( void );
 Var *powersupply_name( Var *v );
 Var *powersupply_damping( Var *v );
 Var *powersupply_channel_state( Var *v );
-Var *powersupply_set_voltage( Var *v );
-Var *powersupply_get_voltage( Var *v );
-Var *powersupply_set_current( Var *v );
-Var *powersupply_get_current( Var *v );
+Var *powersupply_voltage( Var *v );
+Var *powersupply_voltage_limit( Var *v );
+Var *powersupply_current( Var *v );
+Var *powersupply_current_limit( Var *v );
 Var *powersupply_command( Var *v );
 
 
 /* Locally used functions */
 
 static bool thurlby330_init( const char *name );
+static double thurlby330_set_voltage( long channel, double voltage );
+static double thurlby330_get_voltage( long channel );
+static double thurlby330_get_voltage_limit( long channel );
+static double thurlby330_set_current( long channel, double current );
+static double thurlby330_get_current( long channel );
+static double thurlby330_get_current_limit( long channel );
 static bool thurlby330_command( const char *cmd );
 static bool thurlby330_talk( const char *cmd, char *reply, long *length );
 static void thurlby330_failure( void );
@@ -185,7 +191,6 @@ Var *powersupply_damping( Var *v )
 
 	thurlby330_talk( "*OPC?\n", reply, &length );
 	reply[ length - 1 ] = '\0';
-	print( NO_ERROR, "OP Reply is : \"%s\"\n", reply );
 
 	return vars_push( INT_VAR, status );
 }
@@ -234,7 +239,6 @@ Var *powersupply_channel_state( Var *v )
 
 	thurlby330_talk( "*OPC?\n", reply, &length );
 	reply[ length - 1 ] = '\0';
-	print( NO_ERROR, "OP Reply is : \"%s\"\n", reply );
 
 	return vars_push( INT_VAR, status );
 }
@@ -242,21 +246,17 @@ Var *powersupply_channel_state( Var *v )
 
 /*---------------------------------------------------------------*/
 /* Function sets or returns the voltage at one of the 2 outputs. */
-/* The argument must be the output number, either 1 or 2, the    */
-/* second the voltage in the range between 0 V and 32 V (in 10mV */
-/* steps). If there isn't a second argument the set output       */
-/* voltage (which may differ from the real output voltage in     */
-/* case the required current would be to high ) is returned      */
-/* (which is initially set to 0 V).                              */
+/* The first argument must be the output number, either 1 or 2,  */
+/* the second the voltage in the range between 0 V and 32 V (in  */
+/* 10mV steps). If there isn't a second argument the voltage at  */
+/* the outputs is returned (which may be smaller than the        */
+/* voltage that had been set due to the current limit).          */
 /*---------------------------------------------------------------*/
 
-Var *powersupply_set_voltage( Var *v )
+Var *powersupply_voltage( Var *v )
 {
 	long channel;
-	double voltage = 0.0;
-	char buffer[ 100 ];
-	char reply[ 100 ];
-	long length = 100;
+	double voltage;
 
 
 	if ( v == NULL )
@@ -275,22 +275,15 @@ Var *powersupply_set_voltage( Var *v )
 	{
 		if ( FSC2_MODE == TEST )
 			return vars_push( FLOAT_VAR, TEST_VOLTAGE );
-
-		sprintf( buffer, "V%ld?\n", channel );
-		thurlby330_talk( buffer, reply, &length);
-
-		reply[ length - 2 ] = '\0';
-		voltage = T_atod( reply + 3 );
-		print( NO_ERROR, "Reply is : \"%f\"\n", voltage );
-		return vars_push( FLOAT_VAR, voltage );
+		return vars_push( FLOAT_VAR, thurlby330_get_voltage( channel ) );
 	}
 
 	/* Second argument must be a voltage between 0 V and 32 V */
 
 	voltage = get_double( v, "voltage" );
 
-	if (  voltage < MIN_VOLTAGE ||
-		  voltage >= MAX_VOLTAGE + 0.5 * VOLTAGE_RESOLUTION )
+	if ( voltage < MIN_VOLTAGE ||
+		 voltage >= MAX_VOLTAGE + 0.5 * VOLTAGE_RESOLUTION )
 	{
 		print( FATAL, "Voltage of %.1f V is out of valid range "
 			   "(%.1f to %.1f V).\n", voltage, MIN_VOLTAGE, MAX_VOLTAGE );
@@ -302,25 +295,22 @@ Var *powersupply_set_voltage( Var *v )
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, voltage );
 
-	sprintf( buffer, "V%ld V %.2f\n", channel, voltage );
-	thurlby330_command( buffer );
-
-	return vars_push( FLOAT_VAR, voltage );
+	return vars_push( FLOAT_VAR, thurlby330_set_voltage( channel, voltage ) );
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function returns the actual voltage at one of the 2 outputs. */
-/* The argument must be the output number, either 1 or 2.       */
-/*--------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Function sets the voltage limit (which is identical to setting */
+/* voltage using powersupply_voltage()) when called with two      */
+/* arguments. If called with only one argument the voltage limit  */
+/* setting is returned. The initial voltage limit (i.e. when the  */
+/* module is started is 0 V.                                      */
+/*----------------------------------------------------------------*/
 
-Var *powersupply_get_voltage( Var *v )
+Var *powersupply_voltage_limit( Var *v )
 {
 	long channel;
 	double voltage;
-	char buffer[ 100 ];
-	char reply[ 100 ];
-	long length = 100;
 
 
 	if ( v == NULL )
@@ -333,35 +323,51 @@ Var *powersupply_get_voltage( Var *v )
 
 	channel = thurlby330_get_channel( v );
 
+	/* If there's no second argument return the voltage limit for the
+	   selected channel */
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+	{
+		if ( FSC2_MODE == TEST )
+			return vars_push( FLOAT_VAR, TEST_VOLTAGE );
+		return vars_push( FLOAT_VAR, thurlby330_get_voltage_limit( channel ) );
+	}
+
+	/* Otherwise set a new current limit (which is actually the same as
+	   setting a current with powersupply_current()) */
+
+	voltage = get_double( v, "voltage limit" );
+
+	if ( voltage < MIN_VOLTAGE ||
+		 voltage >= MAX_VOLTAGE + 0.5 * VOLTAGE_RESOLUTION )
+	{
+		print( FATAL, "Voltage limit of %f A is out of valid range "
+			   "(%.1f to %.1f A).\n", voltage, MIN_VOLTAGE, MAX_VOLTAGE );
+		THROW( EXCEPTION );
+	}
+
+	too_many_arguments( v );
+
 	if ( FSC2_MODE == TEST )
-		return vars_push( FLOAT_VAR, TEST_VOLTAGE );
+		return vars_push( FLOAT_VAR, voltage );
 
-	sprintf( buffer, "V%ldO?\n", channel );
-	thurlby330_talk( buffer, reply, &length);
-
-	reply[ length - 2 ] = '\0';
-	voltage = T_atod( reply );
-	print( NO_ERROR, "Reply is : \"%f\"\n", voltage );
-	return vars_push( FLOAT_VAR, voltage );
+	return vars_push( FLOAT_VAR, thurlby330_set_voltage( channel, voltage ) );
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function sets current limit or returns the setted current   */
-/* at one of the 2 outputs. The first argument must be the     */
-/* output number, either 1 or 2, the second the current in the */ 
-/* range between 0 A and 3 A (in 1mA steps). If there isn't a  */
-/* second argument the setted output voltage is returned       */
-/* (which is initially set to 0 V).                            */
-/*-------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Function sets or returns the current at one of the 2 outputs. */
+/* The first argument must be the output number, either 1 or 2,  */
+/* the second the current in the range between 0 A and 3 A (in   */
+/* 1 mA steps). If there isn't a second argument the current at  */
+/* the outputs is returned (which may be smaller than the        */
+/* current that had been set due to the voltage limit).          */
+/*---------------------------------------------------------------*/
 
-Var *powersupply_set_current( Var *v )
+Var *powersupply_current( Var *v )
 {
 	long channel;
 	double current;
-	char buffer[ 100 ];
-	char reply[ 100 ];
-	long length = 100;
 
 
 	if ( v == NULL )
@@ -374,21 +380,14 @@ Var *powersupply_set_current( Var *v )
 
 	channel = thurlby330_get_channel( v );
 
-	/* If no second argument is specified return the actual setting */
+	/* If no second argument is specified return the current output by
+	 the power supply (not the current limit) */
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
 		if ( FSC2_MODE == TEST )
 			return vars_push( FLOAT_VAR, TEST_CURRENT );
-
-		sprintf( buffer, "I%ld?\n", channel );
-		thurlby330_talk( buffer, reply, &length);
-
-		reply[ length - 2 ] = '\0';
-		current = T_atod( reply + 3 );
-
-		print( NO_ERROR, "Current is : %f\n", current );
-		return vars_push( FLOAT_VAR, current );
+		return vars_push( FLOAT_VAR, thurlby330_get_current( channel ) );
 	}
 
 	/* Otherwise the second argument must be a current between 0 A and 3 A */
@@ -408,26 +407,22 @@ Var *powersupply_set_current( Var *v )
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, current );
 
-	sprintf( buffer, "I%ld %.3f\n", channel, current );
-	thurlby330_command( buffer );
-
-	return vars_push( FLOAT_VAR, current );
+	return vars_push( FLOAT_VAR, thurlby330_set_current( channel, current ) );
 }
 
 
-/*---------------------------------------------------------*/
-/* Function returns the actual voltage at one of the 2     */
-/* outputs. The argument must be the output number, either */
-/* 1 or 2                                                  */
-/*---------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Function sets the current limit (which is identical to setting */
+/* current using powersupply_current()) when called with two      */
+/* arguments. If called with only one argument the current limit  */
+/* setting is returned. The initial current limit (i.e. when the  */
+/* module is started is 0 A.                                      */
+/*----------------------------------------------------------------*/
 
-Var *powersupply_get_current( Var *v )
+Var *powersupply_current_limit( Var *v )
 {
 	long channel;
 	double current;
-	char buffer[ 100 ];
-	char reply[ 100 ];
-	long length = 100;
 
 
 	if ( v == NULL )
@@ -440,16 +435,34 @@ Var *powersupply_get_current( Var *v )
 
 	channel = thurlby330_get_channel( v );
 
+	/* If there's no further variable return the current limit setting */
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+	{
+		if ( FSC2_MODE == TEST )
+			return vars_push( FLOAT_VAR, TEST_CURRENT );
+		return vars_push( FLOAT_VAR, thurlby330_get_current_limit( channel ) );
+	}
+
+	/* Otherwise set a new current limit (which is actually the same as
+	   setting a current with powersupply_current()) */
+
+	current = get_double( v, "current limit" );
+
+	if ( current < MIN_CURRENT ||
+		 current >= MAX_CURRENT + 0.5 * CURRENT_RESOLUTION )
+	{
+		print( FATAL, "Current limit of %f A is out of valid range "
+			   "(%.1f to %.1f A).\n", current, MIN_CURRENT, MAX_CURRENT );
+		THROW( EXCEPTION );
+	}
+
+	too_many_arguments( v );
+
 	if ( FSC2_MODE == TEST )
-		return vars_push( FLOAT_VAR, TEST_CURRENT );
+		return vars_push( FLOAT_VAR, current );
 
-	sprintf( buffer, "I%ldO?\n", channel );
-	thurlby330_talk( buffer, reply, &length);
-
-	reply[ length - 2 ] = '\0';
-	current = T_atod( reply );
-	print( NO_ERROR, "Reply is : \"%f\"\n", current );
-	return vars_push( FLOAT_VAR, current );
+	return vars_push( FLOAT_VAR, thurlby330_set_current( channel, current ) );
 }
 
 
@@ -496,6 +509,119 @@ static bool thurlby330_init( const char *name )
         return FAIL;
 
 	return OK;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static double thurlby330_set_voltage( long channel, double voltage )
+{
+	char buffer[ 100 ];
+
+
+	fsc2_assert( channel == 1 || channel == 2 );
+	fsc2_assert( voltage >= MIN_VOLTAGE &&
+				 voltage <= MAX_VOLTAGE + 0.5 * VOLTAGE_RESOLUTION );
+
+	sprintf( buffer, "V%ld V %.2f\n", channel, voltage );
+	thurlby330_command( buffer );
+	return voltage;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static double thurlby330_get_voltage( long channel )
+{
+	char buffer[ 100 ];
+	char reply[ 100 ];
+	long length = 100;
+
+
+	fsc2_assert( channel == 1 || channel == 2 );
+
+	sprintf( buffer, "V%ldO?\n", channel );
+	thurlby330_talk( buffer, reply, &length );
+	reply[ length - 2 ] = '\0';
+	return T_atod( reply );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static double thurlby330_get_voltage_limit( long channel )
+{
+	char buffer[ 100 ];
+	char reply[ 100 ];
+	long length = 100;
+
+
+	fsc2_assert( channel == 1 || channel == 2 );
+
+	sprintf( buffer, "V%ld?\n", channel );
+	thurlby330_talk( buffer, reply, &length );
+	reply[ length - 2 ] = '\0';
+	return T_atod( reply + 3 );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static double thurlby330_set_current( long channel, double current )
+{
+	char buffer[ 100 ];
+
+
+	fsc2_assert( channel == 1 || channel == 2 );
+	fsc2_assert( current >= MIN_CURRENT &&
+				 current <= MAX_CURRENT + 0.5 * CURRENT_RESOLUTION );
+
+	sprintf( buffer, "I%ld %.3f\n", channel, current );
+	thurlby330_command( buffer );
+
+	return current;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static double thurlby330_get_current( long channel )
+{
+	char buffer[ 100 ];
+	char reply[ 100 ];
+	long length = 100;
+
+
+	fsc2_assert( channel == 1 || channel == 2 );
+
+	sprintf( buffer, "I%ldO?\n", channel );
+	thurlby330_talk( buffer, reply, &length );
+	reply[ length - 2 ] = '\0';
+	return T_atod( reply );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static double thurlby330_get_current_limit( long channel )
+{
+	char buffer[ 100 ];
+	char reply[ 100 ];
+	long length = 100;
+
+
+	fsc2_assert( channel == 1 || channel == 2 );
+
+	sprintf( buffer, "I%ld?\n", channel );
+	thurlby330_talk( buffer, reply, &length );
+	reply[ length - 2 ] = '\0';
+	return T_atod( reply + 3 );
 }
 
 
