@@ -1238,7 +1238,7 @@ Var *f_exp( Var *v )
 	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 	for ( i = 0; i < len; i++ )
 	{
-		res = tanh( is_int ? ( double ) *ilp++ : *idp++ );
+		res = exp( is_int ? ( double ) *ilp++ : *idp++ );
 
 		if ( res == 0.0 && errno == ERANGE )
 			print( WARN, "Result underflow - result is set to 0.\n" );
