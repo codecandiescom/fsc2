@@ -30,7 +30,7 @@
 
 #include "sr830.conf"
 
-const char generic_type[ ] = "lockin";
+const char generic_type[ ] = DEVICE_TYPE;
 
 
 #define NUM_ADC_PORTS         4

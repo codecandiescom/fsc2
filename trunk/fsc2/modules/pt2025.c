@@ -30,8 +30,8 @@
 
 #include "pt2025.conf"
 
+const char generic_type[ ] = DEVICE_TYPE;
 
-const char generic_type[ ] = "gaussmeter";
 
 #define MAX_TRIES   100
 

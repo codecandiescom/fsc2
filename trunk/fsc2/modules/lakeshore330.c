@@ -30,7 +30,7 @@
 
 #include "lakeshore330.conf"
 
-const char generic_type[ ] = "temperature_controller";
+const char generic_type[ ] = DEVICE_TYPE;
 
 
 #define SAMPLE_CHANNEL_A       0

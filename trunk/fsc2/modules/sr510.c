@@ -30,7 +30,7 @@
 
 #include "sr510.conf"
 
-const char generic_type[ ] = "lockin";
+const char generic_type[ ] = DEVICE_TYPE;
 
 
 /* Declaration of exported functions */

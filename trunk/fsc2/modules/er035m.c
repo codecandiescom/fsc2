@@ -30,7 +30,7 @@
 
 #include "er035m.conf"
 
-const char generic_type[ ] = "gaussmeter";
+const char generic_type[ ] = DEVICE_TYPE;
 
 
 #define TEST_FIELD 2000.0        /* returned as current field in test run */

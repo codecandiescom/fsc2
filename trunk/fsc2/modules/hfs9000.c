@@ -27,7 +27,7 @@
 #include "hfs9000.h"
 #include "gpib_if.h"
 
-const char generic_type[ ] = "pulser";
+const char generic_type[ ] = DEVICE_TYPE;
 
 
 

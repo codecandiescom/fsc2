@@ -27,7 +27,7 @@
 
 #include "tds744a.h"
 
-const char generic_type[ ] = "digitzer";
+const char generic_type[ ] = DEVICE_TYPE;
 
 
 /* This array must be set to the available record lengths of the digitizer

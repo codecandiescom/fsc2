@@ -29,7 +29,7 @@
 
 #include "aeg_x_band.conf"
 
-const char generic_type[ ] = "magnet";
+const char generic_type[ ] = DEVICE_TYPE;
 
 
 /* Exported functions */

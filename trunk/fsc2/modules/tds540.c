@@ -27,7 +27,7 @@
 
 #include "tds540.h"
 
-const char generic_type[ ] = "digitzer";
+const char generic_type[ ] = DEVICE_TYPE;
 
 
 static Var *get_area( Var *v, bool use_cursor );

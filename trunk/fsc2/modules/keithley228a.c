@@ -30,7 +30,7 @@
 
 #include "keithley228a.conf"
 
-const char generic_type[ ] = "magnet";
+const char generic_type[ ] = DEVICE_TYPE;
 
 
 /* Here is a list of the supported lock-in amplifiers plus the default DAC

@@ -30,7 +30,7 @@
 
 #include "kontron4060.conf"
 
-const char generic_type[ ] = "voltmeter";
+const char generic_type[ ] = DEVICE_TYPE;
 
 
 /* Declaration of exported functions */
