@@ -247,7 +247,7 @@ int hp8647a_set_mod_param( Var *v, double *dres, int *ires )
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
 		if ( v->type == INT_VAR )
-			eprint( WARN, "%s:%ld: %s: Integer vale used as modulation "
+			eprint( WARN, "%s:%ld: %s: Integer value used as modulation "
 					"amplitude.\n", Fname, Lc, DEVICE_NAME );
 		*dres = VALUE( v );
 		return 1;

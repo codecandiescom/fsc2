@@ -252,6 +252,14 @@ int hp8647a_get_mod_type( void )
 	int i;
 
 
+	if ( TEST_RUN )
+	{
+		if ( hp8647a.mod_type_is_set )
+			return hp8647a.mod_type;
+		else
+			return MOD_TYPE_FM;
+	}
+
 	for ( i = 0; i < NUM_MOD_TYPES; i++ )
 	{
 		length = 100;
@@ -349,6 +357,14 @@ int hp8647a_get_mod_source( int type )
 
 
 	assert( type >= 0 && type < NUM_MOD_TYPES );
+
+	if ( TEST_RUN )
+	{
+		if ( hp8647a.mod_source_is_set[ type ] )
+			return hp8647a.mod_source[ type ];
+		else
+			return MOD_SOURCE_AC;
+	}
 
 	sprintf( cmd, "%s:SOUR?", types[ type ] );
 	length = 100;
@@ -485,9 +501,18 @@ double hp8647a_get_mod_ampl( int type )
 	const char *cmds[ ] = { "FM:DEV?", "AM:DEPT?", "PM:DEV?" };
 	char buffer[ 100 ];
 	long length = 100;
+	double defaults[ ] = { 1.0e5, 100.0, 10.0 };
 
 
 	assert( type >= 0 && type < NUM_MOD_TYPES );
+
+	if ( TEST_RUN )
+	{
+		if ( hp8647a.mod_ampl_is_set[ type ] )
+			return hp8647a.mod_ampl[ type ];
+		else
+			return defaults[ type ];
+	}
 
 	if ( gpib_write( hp8647a.device, cmds[ type ], strlen( cmds[ type ] ) )
 		 == FAILURE ||
