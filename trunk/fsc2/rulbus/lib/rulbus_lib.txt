@@ -390,12 +390,12 @@ the function rulbus_close() is invoked.
 int rulbus_get_card_info( const char *card_name, RULBUS_CARD_INFO *card_info )
 
 This function can be used to obtain information about the contents
-of an entry int the configuration file for a certain card without
-calling rulbus_open() (and thus without accessing the hardware). All
-it does is opening the configuration file, reading it in and returning
-returning the information about the card specified by the string
-'card_name'. It returns the information about the card in a user-
-defined structure of type RULBUS_CARD_INFO which is typedef'ed to
+of an entry in the Rulbus configuration file for a certain card even
+without calling rulbus_open() (and thus without accessing the hardware).
+All it does is opening the configuration file, reading it in and returning
+the information about the card specified by the string 'card_name'.
+It returns the information about the card in a user-defined structure
+of type RULBUS_CARD_INFO which is typedef'ed to
 
       typedef struct {
       	  int type;
@@ -430,6 +430,11 @@ it by 2047.
 'intr_delay' is only set for RB8514_DELAY cards and represents the
 shortest possible delay (in seconds) that can be created by the card.
 
+Please note: Since, as long as rulbus_open() hasn't been called or after
+a call of rulbus_close(), the Rulbus configuration file gets reread on
+each invocation the returned information can change when the Rulbus
+configuration file has changed between the invocations.
+
 
 ======================================================================
 
@@ -438,7 +443,7 @@ III rb8509_adc12 (12-bit ADC) Functions
 ---------------------------------------
 
 On intitialization (when rulbus_card_open() is called) the card is
-set up to use channel 0, a gain of 1 and to use internal trigger
+set up to use channel 0, a gain of 1 and to run in internal trigger
 mode.
 
 
@@ -597,11 +602,12 @@ the card is left in the state it is at that moment.
 
 int rulbus_rb8514_delay_set_clock_frequency( int handle, double freq )
 
-In order to be able to create delays when passed the delay time the
-library needs to know the frequency of the input clock. Therefor
-before the function rulbus_rb8514_delay_set_delay() can be called
-successfully, rulbus_rb8514_delay_set_clock_frequency() must have
-been called to inform the library about the clock frequency (in Hz).
+In order to be able to create delays when passed a delay time (instead
+of a number of clock ticks) the library needs to know the frequency of
+the input clock. It is therefore required that before the function
+rulbus_rb8514_delay_set_delay() is called to do a (successful) call
+of rulbus_rb8514_delay_set_clock_frequency() to inform the library
+about the clocks frequency (in Hz).
 
 On success the function returns RULBUS_OK, otherwise a negative value
 indicating the reason for the failure.
