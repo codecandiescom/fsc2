@@ -70,7 +70,7 @@ displays with a resolution of less than 1152x870, for all other to
 
 @item @option{-geometry geometry_string}
 This option specifies the preferred size and position of the main
-window in the form @code{_height_x_width_+_x-position_+_y-position_},
+window in the form @code{height x width + x-position + y-position},
 see also the man page for X for a description of correct formats of
 geometry strings.
 
