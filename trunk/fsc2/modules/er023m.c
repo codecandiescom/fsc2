@@ -78,13 +78,16 @@ int er023m_init_hook( void )
 			er023m.calib[ i ].is_ph[ 1 ] = 
 				er023m.calib[ i ].is_ma = UNSET;
 
+	for ( i = 0; i <= MAX_MA_INDEX; i++ )
+		ma_list[ i ] = 100.0 * pow( 10.0, ( double ) -i / 20.0 );
+
 	/* Set several more variables in the structure describing the device */
 
 	er023m.rg_index = UNDEF_RG_INDEX;
 	er023m.tc_index = UNDEF_TC_INDEX;
 	er023m.phase    = UNDEF_PHASE;
 	er023m.mf_index = UNDEF_MF_INDEX;
-	er023m.ma       = UNDEF_MOD_ATT;
+	er023m.ma_index = UNDEF_MA_INDEX;
 	er023m.of       = UNDEF_OF;
 	er023m.ha       = UNDEF_HARMONIC;
 	er023m.ct_mult  = UNDEF_CT_MULT;
@@ -159,8 +162,11 @@ Var *lockin_get_data( Var *v )
 	if ( TEST_RUN )                  /* return dummy value in test run */
 		return vars_push( FLOAT_VAR, ER023M_TEST_DATA );
 
+	val = ( double ) er023m_get_data( );
+/*
 	val = ( ( double ) ( er023m_get_data( ) - er023m.min )
 			* er023m.scale_factor - 1.0 ) / rg_list[ er023m.rg_index ];
+*/
 	return vars_push( FLOAT_VAR, val );
 }
 
@@ -720,6 +726,101 @@ Var *lockin_ref_freq( Var *v )
 	}
 
 	return vars_push( FLOAT_VAR, mf_list[ mf_index ] );
+}
+
+
+/*--------------------------------------------------------------------------*/
+/* Returns or sets the modulation amplitude. If called without an argument  */
+/* the modulation amplitude is returned (in G). If called with an argument  */
+/* the modulation amplitude is set to this value.                           */
+/*--------------------------------------------------------------------------*/
+
+Var *lockin_ref_level( Var *v )
+{
+	double ma;
+	int ma_index = UNDEF_MA_INDEX;
+	int old_ma_index;
+	int i;
+
+
+	if ( v == NULL )
+	{
+		if ( TEST_RUN )
+			return vars_push( FLOAT_VAR,
+						   ma_list[ er023m.ma_index == UNDEF_MA_INDEX ?
+								    ER023M_TEST_MA_INDEX : er023m.ma_index ] );
+		else
+		{
+			if ( I_am == PARENT )
+			{
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
+				THROW( EXCEPTION )
+			}
+			return vars_push( FLOAT_VAR, ma_list[ er023m_get_ma( ) ] );
+		}
+	}
+
+	old_ma_index = er023m.ma_index;
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == INT_VAR )
+		eprint( WARN, SET, "%s: Integer value used as modulation amplitude.\n",
+				DEVICE_NAME );
+	ma = VALUE( v );
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
+	if ( ma < 0.0 )
+	{
+		eprint( FATAL, SET, "%s: Negative modulation amplitude in %s().\n",
+				DEVICE_NAME, Cur_Func );
+		THROW( EXCEPTION )
+	}
+
+	/* Find a valid amplitude nearest to the one we got */
+
+	for ( i = 0; i < MAX_MA_INDEX; i++ )
+		if ( ma <= ma_list[ i ] && ma > ma_list[ i + 1 ] )
+		{
+			ma_index = i
+				   + ( ( ma / ma_list[ i ] > ma_list[ i + 1 ] / ma ) ? 0 : 1 );
+			break;
+		}
+
+	if ( ma_index == UNDEF_MA_INDEX )
+	{
+		if ( ma > ma_list[ 0 ] )
+			ma_index = 0;
+		else
+			ma_index = MAX_MA_INDEX;
+
+		eprint( WARN, SET, "%s: Modulation amplitude of %.2f G is too "
+				"%s, using %.2 G instead.\n", DEVICE_NAME,
+				ma, ma_index == 0 ? "high" : "low", ma_list[ ma_index ] );
+	}
+	else if ( fabs( ma - ma_list[ ma_index ] ) > ma * 5.0e-2 )
+		eprint( WARN, SET, "%s: Can't set modulation amplitude to %.2f G, "
+				"using %.2f G instead.\n",
+				DEVICE_NAME, ma, ma_list[ ma_index ] );
+
+	if ( ! TEST_RUN )
+	{
+		er023m.ma_index = ma_index;
+		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
+			er023m_set_ma( ma_index );
+			
+	}
+	
+	return vars_push( FLOAT_VAR, ma_list[ ma_index ] );
 }
 
 

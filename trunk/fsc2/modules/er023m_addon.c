@@ -186,8 +186,8 @@ Var *lockin_ma( Var *v )
 	{
 		if ( TEST_RUN )
 			return vars_push( INT_VAR, ( long )
-							  ( er023m.ma == UNDEF_MOD_ATT ?
-								ER023M_TEST_MOD_ATT : er023m.ma ) );
+							  ( er023m.ma_index == UNDEF_MA_INDEX ?
+								ER023M_TEST_MA_INDEX : er023m.ma_index ) );
 		else
 		{
 			if ( I_am == PARENT )
@@ -197,7 +197,7 @@ Var *lockin_ma( Var *v )
 						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
 			}
-			return vars_push( INT_VAR, (long ) er023m_get_ma( ) );
+			return vars_push( INT_VAR, ( long ) er023m_get_ma( ) );
 		}
 	}
 
@@ -220,20 +220,20 @@ Var *lockin_ma( Var *v )
 			;
 	}
 
-	if ( ma > MOD_OFF || ma < MIN_MOD_ATT )
+	if ( ma > MAX_MA_INDEX || ma < MIN_MA_INDEX )
 	{
 		eprint( FATAL, SET, "%s: Value %d for modulation attenuation is too "
-				"%s, must be in range %d-%d.\n", DEVICE_NAME, ma,
-				ma > MOD_OFF ? "large" : "low", MIN_MOD_ATT, MOD_OFF );
+				"%s, must be in range %d-%d.\n",
+				DEVICE_NAME, ma, ma > MAX_MA_INDEX ? "large" : "low",
+				MIN_MA_INDEX, MAX_MA_INDEX );
 		THROW( EXCEPTION )
 	}
 
 	if ( ! TEST_RUN )
 	{
-		er023m.ma = ma;
+		er023m.ma_index = ma;
 		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			er023m_set_ma( ma );
-			
+			er023m_set_ma( ma );			
 	}
 	
 	return vars_push( INT_VAR, ( long ) ma );
@@ -298,7 +298,7 @@ Var *lockin_ct( Var *v )
 	{
 		eprint( SEVERE, SET, "%s: Minimum usuable conversion time multiplier "
 				"is %d, using this value instead of %d.\n", DEVICE_NAME,
-				TC_MIN_INDEX, ct_mult );
+				MIN_CT_MULT, ct_mult );
 		ct_mult = MIN_CT_MULT;
 	}
 
@@ -314,7 +314,7 @@ Var *lockin_ct( Var *v )
 	{
 		er023m.ct_mult = ct_mult;
 		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			er023m_set_tc( ct_mult );
+			er023m_set_ct( ct_mult );
 	}
 	
 	return vars_push( INT_VAR, ( long ) ct_mult );

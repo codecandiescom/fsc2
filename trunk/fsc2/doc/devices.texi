@@ -504,20 +504,19 @@ without an argument, i.e.@: as a query.
 @findex lockin_ref_freq()
 The function can be used to query the modulation frequency and, for the
 @strong{SR810}, @strong{SR830} and @strong{ER023M} to set the modulation
-frequency (both the other models need an external modulation
-frequency). If called with no argument the current modulation frequency
-is returned. If called with an argument (@strong{SR810}, @strong{SR830}
-and @strong{ER023M} only) the modulation frequency is set.
+frequency (both the other models need an external modulation). If called
+with no argument the current modulation frequency is returned. If called
+with an argument the modulation frequency is set.
 
 If for the @strong{SR810} and @strong{SR830} the frequency is not within
 the admissible range an error message is printed and the experiment is
-stopped).  The admissible range depends on the harmonics setting, see
-the manual for more details.
+stopped. The admissible range depends on the harmonics setting, see
+the manuals for full details.
 
 For the @strong{ER023M} only certain modulation frequencies can be set,
 these are @code{100 kHz}, @code{50 kHz}, @code{25 kHz}, @code{12.5 kHz},
 @code{6.25 kHz} and @code{3.125 kHz}. If a modulation frequency is
-specified that does not fit one of these values the next valid
+specified that does not fit one of these values the nearest valid
 frequency is used.
 
 Before the @code{EXPERIMENT} section this function can't be called in
@@ -526,12 +525,16 @@ query mode, i.e.@: without an argument.
 
 @item lockin_ref_level()
 @findex lockin_ref_level()
-This function can be only used with the models @strong{SR810} and
-@strong{SR830}. It queries (if called with no argument) or sets (if
-called with an argument) the level of the modulation frequency. The
+This function can be only used with the models @strong{SR810},
+@strong{SR830} and the @strong{ER023M}. It queries (if called with no
+argument) or sets (if called with an argument) the level of the
+modulation frequency. For the @strong{Stanford} lock-in amplifiers the
 allowed levels are between @w{4 mV} and @w{5 V}, if the argument is not
 within this range an error message is printed and the experiment is
-stopped.
+stopped. For the @strong{Bruker ER023M} signal channel the range is (as
+long as no calibration has been done) between @w{10 mG} and @w{100 G}
+(but don't expect the values to have any real meaning without a
+calibration).
 
 Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e.@: without an argument.

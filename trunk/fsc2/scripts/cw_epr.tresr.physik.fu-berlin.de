@@ -50,8 +50,7 @@ my $sens2              = "E+3";
 my $old_sens2          = $sens2;
 my $phase;
 my $mod_freq           = "Don't set";
-my $mod_amp            = 40;
-my $old_mod_amp        = $mod_amp;
+my $mod_amp            = 0.1;
 my $how                = 'Start experiment';
 
 
@@ -260,14 +259,12 @@ my $f8_l1 = $f8->Label( '-text'           => 'Modulation amplitude:',
 my $f8_v = $f8->Entry( '-textvariable'    => \$mod_amp,
                        '-width'           => '8',
                        '-validate'        => 'key',
-                       '-validatecommand' => \&mod_amp_check,
+                       '-validatecommand' => \&is_numeric,
                        '-relief'          => 'sunken' );
-my $f8_l2 = $f8->Label( '-text'           => ' ',
+my $f8_l2 = $f8->Label( '-text'           => 'G',
                         '-width'          => 1 );
 $balloon->attach( $f8_v, '-balloonmsg'    =>
-                  "Set the lock-in amplifiers modulation amplitude\n" .
-                  "- use values between 0 and 80 (0 for maximum.\n" .
-                  "and 80 for minumum amplitude)" );
+                  "Set the lock-in amplifiers modulation amplitude\n" );
 $f8->pack( %fp );
 $f8_l1->pack( %wp );
 $f8_v->pack( %wp );
@@ -354,7 +351,7 @@ sub get_defs {
 
     goto done_reading unless defined( $ne = <F> ) and $ne =~ /^\d+$/;
     chomp $ne;
-    goto done_reading unless $ne >= 0 and $ne <= 80;
+    goto done_reading unless $ne > 0;
     $mod_amp = $ne;
 
     goto done_reading unless defined( $ne = <F> )
@@ -380,6 +377,7 @@ sub store_defs {
     $start_field = 0 if $start_field eq ".";
     $end_field = 0 if $end_field eq ".";
     $field_step = 0 if $field_step eq ".";
+	$mod_amp = 0 if $mod_amp =~ /^\.?/;
 
     print F "# Do not edit - created automatically!\n";
 
@@ -392,15 +390,7 @@ sub store_defs {
         print F "unset\n";
     }
 
-    print F "$mod_freq\n";
-
-    if ( defined( $mod_amp ) and $mod_amp !~ /^$/ ) {
-        print F "$mod_amp\n";
-    } else {
-        print F "unset\n";
-    }
-
-    print F "$how\n";
+    print F "$mod_freq\n$how\n";
 
     close F;
 }
@@ -426,29 +416,6 @@ sub sens_check {
 
     $old_sens1 = $sens1;
     $old_sens2 = $sens2;
-}
-
-
-#############################################
-
-sub mod_amp_check {
-
-    my $new_val = shift;
-
-    return 1 if $new_val eq "";
-
-    if ( $new_val !~ /^\d*$/ ) {
-        $mod_amp = substr( $new_val, 0, -1 );
-        return;
-    }
-
-    if ( $new_val < 0 or $new_val > 80 ) {
-        show_message( "Use a value between 0 and 80" );
-        $mod_amp = $old_mod_amp;
-        return;
-    }
-
-    $old_mod_amp = $new_val;
 }
 
 
@@ -543,6 +510,11 @@ sub do_checks {
         return -1;
     }
 
+	if ( $mod_amp !~ /^\.?$/ && $mod_amp > 100 ) {
+		&show_message( "Maximum modulation amplitude is 100 G." );
+		return -1;
+	}
+
     return 0;
 }
 
@@ -599,12 +571,11 @@ F2 = get_file( \"File to store averaged data:\" );
 save_program( F1, \"# \" );
 save_comment( F1, \"# \" );\n\n";
 
-
-print F "lockin_ma( $mod_amp );\n" if $mod_amp !~ /^Don't set$/;
+print F "lockin_sensitivity( $sens1$sens2 );\n" if $sens1 !~ /^Don't set$/;
 print F "lockin_phase( $phase );\n"
     if defined( $phase ) and $phase =~ /^[+-]?\d+$/;
 print F "lockin_ref_freq( $mod_freq );\n" if $mod_freq !~ /^Don't set$/;
-print F "lockin_sensitivity( $sens1$sens2 );\n" if $sens1 !~ /^Don't set$/;
+print F "lockin_ref_level( $mod_amp G );\n" if $mod_amp !~ /^\.?$/;
     if ( $tc !~ /^Don't set$/ ) {
         print F "tc = $tc;
 lockin_time_constant( tc );\n";

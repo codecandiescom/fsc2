@@ -40,7 +40,7 @@
 #define ER023M_TEST_TC_INDEX      15        /* time constant ~ 300 ms */
 #define ER023M_TEST_PHASE         0
 #define ER023M_TEST_MF_INDEX      1         /* 50 kHz */
-#define ER023M_TEST_MOD_ATT       40
+#define ER023M_TEST_MA_INDEX      40
 #define ER023M_TEST_CT_MULT       102       /* ~ 300 ms */
 #define ER023M_TEST_OF            50
 #define ER023M_TEST_HARMONIC      0         /* 1st harmonic */
@@ -95,6 +95,16 @@ double mf_list[ MAX_MF_INDEX + 1 ];
 extern double mf_list[ MAX_MF_INDEX + 1 ];
 #endif
 
+#define MIN_MA_INDEX           0
+#define MAX_MA_INDEX          80
+#define UNDEF_MA_INDEX        -1
+
+
+#ifdef ER023M_MAIN
+double ma_list[ MAX_MA_INDEX + 1 ];
+#else
+extern double ma_list[ MAX_MA_INDEX + 1 ];
+#endif
 
 /* Constants for dealing with the conversion time - we dont allow conversion
    times below 3.2 ms because we need to use "single mode" (where the signal
@@ -105,14 +115,6 @@ extern double mf_list[ MAX_MF_INDEX + 1 ];
 #define MAX_CT_MULT           9999     /* ~ 3.2 s */
 #define UNDEF_CT_MULT         -1
 #define BASE_CT               3.2e-4   /* minimum conversion time */
-
-
-/* Constants for dealing with the modulation attenuation */
-
-#define MAX_MOD_ATT           79
-#define MIN_MOD_ATT           0
-#define MOD_OFF               80
-#define UNDEF_MOD_ATT         -1
 
 
 /* Constants for dealing with the harmonic setting */
@@ -169,7 +171,7 @@ typedef struct {
 	int ct_mult;          /* conversion time multiplicator */
 	int mf_index;         /* modulation frequency index */
 	int phase;            /* modulation phase */
-	int ma;               /* modulation attenuation */
+	int ma_index;         /* modulation attenuation index */
 	int of;               /* offset */
 	int ha;               /* harmonic setting */
 	int re;               /* resonator number */
@@ -210,6 +212,7 @@ Var *lockin_phase( Var *v );
 Var *lockin_offset( Var *v );
 Var *lockin_conversion_time( Var *v );
 Var *lockin_ref_freq( Var *v );
+Var *lockin_ref_level( Var *v );
 Var *lockin_harmonic( Var *v );
 Var *lockin_resonator( Var *v );
 Var *lockin_is_overload( Var *v );

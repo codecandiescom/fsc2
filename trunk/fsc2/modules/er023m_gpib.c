@@ -74,6 +74,11 @@ bool er023m_init( const char *name )
 				er023m.tc_index = TC_MIN_INDEX;
 				er023m_set_tc( er023m.tc_index );
 			}
+			if ( er023m.tc_index > TC_MAX_INDEX )
+			{
+				er023m.tc_index = TC_MAX_INDEX;
+				er023m_set_tc( er023m.tc_index );
+			}
 		}
 
 		/* Set the conversion time - if it hasn't been specified by the user
@@ -105,10 +110,10 @@ bool er023m_init( const char *name )
 
 		/* Set or fetch the modulation attenuation */
 
-		if ( er023m.ma != UNDEF_MOD_ATT )
-			er023m_set_ma( er023m.ma );
+		if ( er023m.ma_index != UNDEF_MA_INDEX )
+			er023m_set_ma( er023m.ma_index );
 		else
-			er023m.ma = er023m_get_ma( );
+			er023m.ma_index = er023m_get_ma( );
 
 		/* Set or fetch the offset */
 
@@ -259,7 +264,6 @@ void er023m_set_tc( int tc_index )
 {
 	char buf[ 30 ];
 
-
 	fsc2_assert( tc_index >= TC_MIN_INDEX && tc_index <= TC_MAX_INDEX );
 
 	sprintf( buf, "TC%d\r", tc_index );
@@ -380,14 +384,14 @@ int er023m_get_ma( void )
 /* Sets the modulation attenuation, allowed values are between 0 and 80 */
 /*----------------------------------------------------------------------*/
 
-void er023m_set_ma( int ma )
+void er023m_set_ma( int ma_index )
 {
 	char buf[ 30 ];
 
 
-	fsc2_assert( ma >= MIN_MOD_ATT && ma <= MOD_OFF );
+	fsc2_assert( ma_index >= MIN_MA_INDEX && ma_index <= MAX_MA_INDEX );
 
-	sprintf( buf, "MA%d\r", ma );
+	sprintf( buf, "MA%d\r", ma_index );
 	if ( gpib_write( er023m.device, buf, strlen( buf ) ) == FAILURE )
 		er023m_failure( );
 }
