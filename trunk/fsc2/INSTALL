@@ -304,13 +304,12 @@ E) Getting started
 
 The subdirectory 'edl' contains several several EDL programs that you can
 use to get an impression of fsc2 and to become acquainted with the syntax.
-Unfortunately, some of the files will not work - I didn't had time yet to
-systematically weed out the ones that are outdated. There are a few programs
-that should even work without any devices, these are
+Many of the files in there are just for testing purposes and a few may
+not even work. But there are a few that work without any devices, some
+of them are
 
   a.edl
   gr.edl
-  stoch.edl
   qq.edl
   z.edl
   zz.edl
@@ -318,14 +317,14 @@ that should even work without any devices, these are
   2_td.edl
   tools.edl
 
-Just start by typing 'fsc2 edl/a.edl' or 'fsc2 edl/z.edl' (assuming you're
+Just start by typing 'fsc2 edl/qq.edl' or 'fsc2 edl/z.edl' (assuming you're
 still in fsc2's main directory) and click onto the "Start" button to get an
 idea about how fsc2 displays 1- and 2-dimensional data sets.
 
-             November 28, 2002             Much luck, Jens
+             January 17, 2003             Much luck, Jens
 --
        _  _____  _____
       | ||_   _||_   _|         Jens.Toerring@physik.fu-berlin.de
-   _  | |  | |    | |           AG Moebius, Institut fuer Moelkuelphysik
-  | |_| |  | |    | |           Fachbereich Physik, Freie Universitaet Berlin
-   \___/ens|_|homs|_|oerring    Tel: ++49 (0)30 838 - 53394 / FAX: - 56046
+   _  | |  | |    | |           
+  | |_| |  | |    | |           Urbanstr. 176, D-10961 Berlin
+   \___/ens|_|homs|_|oerring    +49 (0)30 692 86 27
