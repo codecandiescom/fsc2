@@ -5,6 +5,7 @@
 OWNER              := fsc2
 GROUP              := uucp
 GPIB_LIBRARY       := NI
+BROWSER            := mozilla
 NUM_SERIAL_PORTS   := 2
 SERIAL_LOCK_DIR    := /var/lock
 WITH_RULBUS        := yes

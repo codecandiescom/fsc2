@@ -114,6 +114,19 @@ GPIB_LOG_LEVEL     := HIGH
 # GPIB_HEADER_DIR    := /usr/include/gpib
 
 
+# Define the default editor to use for editing when the "Edit" button gets
+# pressed or for writing a bug report
+
+EDITOR             := vi
+
+
+# Define the default browser to use when the "Help" button gets pressed and
+# the manual is to be shown, currently supported are netscape, mozilla,
+# opera, konqueror, galeon, lnyx and w3m.
+
+BROWSER            := netscape
+
+
 # NUM_SERIAL_PORTS defines the number of serial ports that are available on
 # the computer (or how many you want to allow fsc2 to use) and defaults to 0
 # if not set (in which case no serial ports can be used).
@@ -440,6 +453,16 @@ endif
 
 ifndef OWNER
 	OWNER = fsc2
+endif
+
+
+ifdef EDITOR
+	INCLUDES += -DEDITOR=\"$(EDITOR)\"
+endif
+
+
+ifdef BROWSER
+	INCLUDES += -DBROWSER=\"$(BROWSER)\"
 endif
 
 
