@@ -43,16 +43,17 @@ Var *f_abort( Var *v )
 
 	v = v;                       /* keeps the compiler happy */
 
-	print( NO_ERROR, "Exit due to call of abort().\n" );
-
 	if ( Internals.mode != TEST )
 	{
 		str = get_string( "Exit due to call of abort() in\n"
 						  "%s at line %ld.", EDL.Fname, EDL.Lc );
 		show_message( str );
 		T_free( str );
+		print( NO_ERROR, "Experiment stopped due to call of abort().\n" );
 		THROW( ABORT_EXCEPTION );
 	}
+	else
+		print( NO_ERROR, "During test run encountered call of abort().\n" );
 
 	return NULL;
 }

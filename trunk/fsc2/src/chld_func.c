@@ -37,7 +37,7 @@ void show_message( const char *str )
 	if ( Internals.I_am == PARENT )
 	{
 		if ( Internals.cmdline_flags & DO_CHECK )
-			fprintf( stdout, "%s", str );
+			fprintf( stdout, "%s\n", str );
 		else
 		{
 			switch_off_special_cursors( );
@@ -82,6 +82,7 @@ void show_alert( const char *str )
 		{
 			for ( i = 0; i < 3 && strs[ i ] != NULL; i++ )
 				fprintf( stdout, "%s", strs[ i ] );
+			fprintf( stdout, "\n" );
 		}
 		else
 		{
