@@ -32,7 +32,6 @@
 static Var *square( Var *v );
 static Var *islice( Var *v );
 static Var *fslice( Var *v );
-static Var *f_xxx( Var *v );
 
 
 static Function_List FL[ ] =
@@ -40,7 +39,6 @@ static Function_List FL[ ] =
 	{ "square", square },
 	{ "int_slice", islice },
 	{ "float_slice", fslice },
-	{ "int", f_xxx },
 	{ NULL,   NULL }
 };
 
@@ -132,25 +130,4 @@ Var *fslice( Var *v )
 
 	x = T_calloc( size, sizeof( double ) );
 	return vars_push( FLOAT_TRANS_ARR, x, size );
-}
-
-
-Var *f_xxx( Var *v )
-{
-	double arg;
-
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		arg = ( double ) v->val.lval;
-	else
-		arg = v->val.dval;
-
-	if ( arg < 0.0 )
-	{
-		eprint( FATAL, "%s:%ld: Argument for function `sqrt' is negative.\n", 
-				Fname, Lc );
-		THROW( FUNCTION_EXCEPTION );
-	}
-	return vars_push( FLOAT_VAR, sqrt( arg ) );
 }

@@ -36,14 +36,7 @@
    the variable for the function. Again, for functions with a variable number
    of arguments removing the arguments is impossible - the function has to do
    it by itself. Finally the result of the function is pushed onto the stack.
-
-   To add a new function append its declaration to the declarations just below
-   this text and its properties (i.e. name as used in the EDL file, its name
-   as declared here, its number of arguments and finally its accessibility) as
-   another element to the `fncts' structure (don't change the very last entry
-   marking the end of the structure's entries!). And, of course, define it
-   somewhere here in this file...
-*/
+/
 
 
 static Var *f_int( Var *v  );
@@ -69,12 +62,7 @@ static Var *f_print( Var *v  );
 
 
 
-
-/* extend this list to your heart's content but make sure the function
-   to be called is defined and the following list still ends with two
-   NULL's and two zeros...*/
-
-static Func def_fncts[ ] =
+static Func def_fncts[ ] =              /* List of built-in functions */
 {
 	{ "int",    f_int,     1, ACCESS_ALL_SECTIONS	},
 	{ "float",  f_float,   1, ACCESS_ALL_SECTIONS	},
@@ -99,6 +87,8 @@ static Func def_fncts[ ] =
 	{ NULL,     NULL,      0, 0 }        /* marks last entry, don't remove ! */
 };
 
+
+
 static int num_def_func;
 static int num_func;
 static Func *fncts;
@@ -106,11 +96,20 @@ static Func *fncts;
 
 bool functions_init_hook( void )
 {
+	/* count number of built-in functions */
+
 	for ( num_def_func = 0; def_fncts[ num_def_func ].fnct != NULL;
 		  num_def_func++ )
 		;
 
 	num_func = num_def_func;
+
+	/* 1. Get new memory for the functions structures and copy the built in
+	      functions into it.
+	   2. Parse the file `Functions' where all additional functions have to
+	      be listed.
+	   3. Get addresses of all functions defined in file `User_Functions.c'.
+	*/
 
 	TRY
 	{
