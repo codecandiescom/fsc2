@@ -314,7 +314,7 @@ script now would look like this:
 DEVICES:
   er035m_s;              // gaussmeter module
   aeg_x_band;            // magnet module
-=== LoCKIN menu [ "SR510", "SR530", "SR810" ] [ 2 ] "Lock-in amplifier:"
+=== LOCKIN menu [ "SR510", "SR530", "SR810" ] [ 2 ] "Lock-in amplifier:"
   LOCKIN;                    // lock-in amplifier module
 
 VARIABLES:
