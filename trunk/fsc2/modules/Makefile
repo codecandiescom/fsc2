@@ -62,6 +62,7 @@ export        # export all symbols to the sub-makefiles
 		install-tresr.physik.fu-berlin.de               \
 		install-sunone.chemie.unibas.ch                 \
 		install-crowley.none                            \
+		install-dorimare.nowhere                        \
 		uninstall-pion.anorg.chemie.uni-frankfurt.de    \
 		uninstall-crowley.physik.fu-berlin.de           \
 		uninstall-moebi.physik.fu-berlin.de             \
@@ -69,7 +70,8 @@ export        # export all symbols to the sub-makefiles
 		uninstall-isaak.physik.fu-berlin.de             \
 		uninstall-tresr.physik.fu-berlin.de             \
 		uninstall-sunone.chemie.unibas.ch               \
-		uninstall-crowley.none
+		uninstall-crowley.none                          \
+		uninstall-dorimare.nowhere
 
 
 # Making the modules consisting of just one file is simple, to make the
@@ -165,6 +167,9 @@ install-moebi.physik.fu-berlin.de:
 install-crowley.none:
 	$(MAKE) $(UNINSTALL_MACHINE)
 
+install-dorimare.nowhere:
+	$(MAKE) $(UNINSTALL_MACHINE)
+
 
 # How to uninstall the modules
 
@@ -208,6 +213,8 @@ uninstall-sunone.chemie.unibas.ch:
 uninstall-moebi.physik.fu-berlin.de:
 
 uninstall-crowley.none:
+
+uninstall-dorimare.nowhere::
 
 
 # How to clean up the mess we created

@@ -98,11 +98,12 @@ MAIL_ADDRESS     := Jens.Toerring@physik.fu-berlin.de
 
 #MPATROL          := YES                  # define this in order to use mpatrol
 
-OPT              := -O2
+OPT              := -O0
 
 SHELL            := /bin/sh
 CC               := gcc
-CFLAGS           := -ggdb $(OPT) -I/usr/X11R6/include/X11 \
+CFLAGS           := -ggdb $(OPT) -I/usr/X11R6/include \
+					-I/usr/X11R6/include/X11 \
 					-Wall \
 					-Wwrite-strings \
 					-Wstrict-prototypes \
@@ -247,6 +248,14 @@ ifeq ($(machine_name),crowley.none)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
 
+ifeq ($(machine_name),dorimare.nowhere)
+	OWNER              := fsc2
+	GROUP              := uucp
+	GPIB_LIBRARY       := JTT
+	INSTALL_MACHINE    := install-$(machine_name)
+	UNINSTALL_MACHINE  := uninstall-$(machine_name)
+endif
+
 # Pass lots of variables to the source files...
 # For directories make sure they end with a `/'.
 
@@ -380,7 +389,8 @@ export            # export all variables to sub-makes
 		specific-tresr.physik.fu-berlin.de            \
 		specific-sunone.chemie.unibas.ch              \
 		specific-moebi.physik.fu-berlin.de            \
-		specific-crowley.none
+		specific-crowley.none                         \
+		specific-dorimare.nowhere
 
 
 # Default rule: make the main program, the primary lexer and the modules
@@ -522,6 +532,8 @@ specific-sunone.chemie.unibas.ch:
 specific-moebi.physik.fu-berlin.de:
 
 specific-crowley.none:
+
+specific-dorimare.nowhere:
 
 
 # Create zipped tarball and write it to the ZIP drive (at home or on isaak
