@@ -556,10 +556,10 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
 
 
-@anchor{draw_marker}
-@item draw_marker()
-@findex draw_marker()
-This function is only available for 1D graphics and draws a vertical
+@anchor{draw_marker_1d}
+@item draw_marker_1d()
+@findex draw_marker_1d()
+This function can be used for 1D graphics and draws a vertical
 dashed line on the display window. It expects at least one argument, an
 integer number defining the @i{x}-position of the marker to be drawn. A
 second, optional argument is the color of the marker, here one may
@@ -585,12 +585,78 @@ marker is not used at all (but must be given and must be larger than
 @code{0}), the marker will always be drawn at the newest point for the
 first displayed curve. Thus also can't delete markers in this mode.
 
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} program.
+
+
+@anchor{draw_marker_2d}
+@item draw_marker_2d()
+@findex draw_marker_2d()
+This function can be used for 2D graphics and draws a box in the display
+window. It expects at least two arguments, integer numbers defining the
+@i{x}- and @i{y}-position of the marker to be drawn. As a third argument
+the curve number can be specified - if it is missing the marker is drawn
+over the currently displayed curve. The fourth (optional) argument is
+the color of the marker, here one may specify either an integer number
+or a string:
+@multitable @columnfractions 0.15 .35 .35
+@item Number @tab String @tab Color
+@item @code{0} @tab @code{"WHITE"} @tab white
+@item @code{1} @tab @code{"RED"} @tab red
+@item @code{2} @tab @code{"GREEN"} @tab green
+@item @code{3} @tab @code{"YELLOW"} @tab yellow
+@item @code{4} @tab @code{"BLUE"} @tab blue
+@item @code{5} @tab @code{"BLACK"} @tab black
+@item @code{6} @tab @code{"DELETE"} @tab black
+@end multitable
+@noindent
+The last color, @code{"DELETE"}, is invisible obviously not a color but
+can be used to delete a marker at the specified position (if more than
+one marker has been set for that position only the first, older one will
+be deleted).
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} program.
+
+
+@anchor{draw_marker}
+@item draw_marker()
+@findex draw_marker()
+This function can be called instead of @code{draw_marker_1d()} or
+@code{draw_marker_2d()} when only either a 1D- or a 2D-display is used
+(but not both at once).
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} program.
+
+
+@anchor{clear_marker_1d}
+@item clear_marker_1d()
+@findex clear_marker_1d()
+This function deletes all previously set 1D markers. It accepts no arguments.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} program.
+
+
+@anchor{clear_marker_2d}
+@item clear_marker_2d()
+@findex clear_marker_2d()
+This function deletes all previously set 2D markers. It accepts no arguments.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} program.
+
 
 @anchor{clear_marker}
 @item clear_marker()
 @findex clear_marker()
-This function is only available for 1D graphics and deletes all
-previously set markers. It accepts no arguments.
+This function can be called instead of @code{clear_marker_1d()} or
+@code{clear_marker_2d()} when only either a 1D- or a 2D-display is used
+(but not both at once).
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} program.
 
 
 @anchor{print}
