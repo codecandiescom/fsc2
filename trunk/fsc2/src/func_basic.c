@@ -62,6 +62,15 @@ static void get_array_params( Var *v, const char *name, long *len,
 						Fname, Lc, name );
 				THROW( EXCEPTION );
 			}
+
+			if ( v->from->flags & NEED_ALLOC )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function %s() is "
+						"a dynamically sized array of still unknown size.\n",
+						Fname, Lc, name );
+				THROW( EXCEPTION );
+			}
+
 			*len = v->from->sizes[ 0 ];
 			if ( v->from->type == INT_ARR )
 				*ilp = v->from->val.lpnt;
