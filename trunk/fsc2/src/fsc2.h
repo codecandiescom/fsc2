@@ -353,9 +353,7 @@ extern Graphics_2d_T G_2d;
 extern Cut_Graphics_T G_cut;
 
 extern bool Need_GPIB;
-#if defined WITH_RULBUS
 extern bool Need_RULBUS;
-#endif
 
 extern PA_Seq_T PA_Seq;
 
