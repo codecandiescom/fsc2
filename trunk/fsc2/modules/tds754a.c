@@ -10,6 +10,16 @@
 #define DEVICE_NAME "TDS754A"
 
 
+typedef struct
+{
+	int device;
+} TDS754A;
+
+static TDS754A tds754a;
+
+
+
+
 /* declaration of exported functions */
 
 int tds754a_init_hook( void );
@@ -19,10 +29,14 @@ void tds754a_exit_hook( void );
 
 
 
+
+/*******************************************/
+/*   We start with the hook functions...   */
+/*******************************************/
+
 /*------------------------------------*/
 /* Init hook function for the module. */
 /*------------------------------------*/
-
 
 int tds754a_init_hook( void )
 {
