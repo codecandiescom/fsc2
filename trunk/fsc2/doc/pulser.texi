@@ -383,7 +383,9 @@ become associated with them are really going to be used for, but it is
 probably a good idea not to use e.g.@: the @code{MICROWAVE} function for
 something completely different (or other people will have major problems
 understanding what your @code{EDL} program is supposed to do and there's
-no obfuscated EDL contest yet;-).
+no obfuscated EDL contest yet;-). Besides, some of the pulser modules
+also define special functions (e.g.@: for sutomatically setting TWT
+pulses) that only work with certain of these functions.
 
 The functions @code{OTHER_1} to @code{OTHER_4} should be used in cases
 where none of the function names seem to fit the special purpose you
