@@ -20,7 +20,7 @@ typedef struct {
 } RULBUS_EPP_IOCTL_ARGS;
 
 There are only two possible ioctl() requests, RULBUS_EPP_IOC_READ to read
-one or more bytes from a card and RULBUS_EPP_IOC_WRITE to write on or
+one or more bytes from a card and RULBUS_EPP_IOC_WRITE to write one or
 more bytes.
 
 
@@ -39,8 +39,8 @@ user supplied buffer pointed to by the 'data' member.
 On failure the ioctl() function returns -1 and 'errno' is set to a value
 indicating the reasons for the failure. If the device isn't open errno is
 set to ENODEV. If the 'rack' member is larger than 15, 'offset' not between
-1 and 0xFE or 'len' less than 1, or 'len' is larger than 1 and 'data' is
-NULL errno is set to EINVAL. If not enough memory can be allocated for
+1 and 0xFE or 'len' is less than 1 or, while 'len' is larger than 1, 'data'
+is NULL errno is set to EINVAL. If not enough memory can be allocated for
 internal buffers errno is set to ENOMEM. If the communication with the
 interface fails (usually due to a timeout) errno is set to EIO. On failure
 to copy the read data to the user supplied buffer errno is set to EACCES.
@@ -61,8 +61,8 @@ are copied from the user supplied buffer pointed to by the 'data' member.
 On failure the ioctl() function returns -1 and 'errno' is set to a value
 indicating the reasons for the failure. If the device isn't open errno is
 set to ENODEV. If the 'rack' member is larger than 15, 'offset' not between
-1 and 0xFE or 'len' less than 1, or 'len' is larger than 1 and 'data' is
-NULL errno is set to EINVAL. If not enough memory can be allocated for
+1 and 0xFE or 'len' is less than 1, or, while 'len' is larger than 1, 'data'
+is NULL errno is set to EINVAL. If not enough memory can be allocated for
 internal buffers errno is set to ENOMEM. On failure to copy the data to
 be written from the user supplied buffer errno is set to EACCES. If the
 communication with the interface fails (usually due to a timeout) errno
