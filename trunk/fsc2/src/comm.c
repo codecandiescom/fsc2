@@ -333,7 +333,7 @@ int new_data_callback( XEvent *a, void *b )
 long reader( void *ret )
 {
 	CommStruct header;
-	char *str[ 4 ] = { NULL, NULL, NULL, NULL };
+	char *str[ 5 ] = { NULL, NULL, NULL, NULL };
 	int i;
 	int n1, n2;
 	long retval = 0;
