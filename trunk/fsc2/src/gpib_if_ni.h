@@ -1,4 +1,4 @@
-/*
+#/*
   $Id$
 
   Copyright (C) 2001 Jens Thoms Toerring
@@ -81,8 +81,6 @@ typedef struct {
 
 
 #if defined GPIB_CONF_FILE
-#define GPIB_CONF_FILE GPIB_CONF
-#else
 #define GPIB_CONF_FILE  "/etc/gpib.conf"
 #endif
 

@@ -49,7 +49,7 @@ all:
 			    -o "$(GPIB_LIBRARY)" = "ni"                     \
 			    -o "$(GPIB_LIBRARY)" = "jtt"                    \
 			    -o "$(GPIB_LIBRARY)" = "none" \) ]; then        \
-		$(MAKE) fsc2_rsc_lr.so fsc2_rsc_hr.so gpib;             \
+		$(MAKE) gpib fsc2_rsc_lr.so fsc2_rsc_hr.so;             \
 		$(MAKE) fsc2 fsc2_clean fsc2_connect modules;           \
 	else                                                        \
 		echo "****************************************";        \
@@ -141,6 +141,11 @@ gpib:
 	    	  -o gpib_lexer.ll -nt gpib_lexer.l ]; then         \
 			$(RM) $(RMFLAGS) gpib_lexer.l;                      \
 			$(LN) $(LNFLAGS) gpib_lexer.ll gpib_lexer.l;        \
+		fi;                                                     \
+		if [ ! -e gpib_parser.y                                 \
+	    	  -o gpip_parser.yy -nt gpib_parser.y ]; then       \
+			$(RM) $(RMFLAGS) gpib_parser.y;                     \
+			$(LN) $(LNFLAGS) gpib_parser.yy gpib_parser.y;      \
 		fi;                                                     \
 	fi
 
