@@ -518,8 +518,9 @@ static void fsc2_save_conf( void )
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Function sets 'EDL.infile' to the complete name of an EDL input file */
+/*----------------------------------------------------------------------*/
 
 static bool get_edl_file( char *fname )
 {
@@ -554,8 +555,9 @@ static bool get_edl_file( char *fname )
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Function for running an experiment without using any GUI elements */
+/*-------------------------------------------------------------------*/
 
 static void no_gui_run( void )
 {
@@ -727,38 +729,40 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 				  EXIT_SUCCESS : EXIT_FAILURE );
 		}
 
-		if ( strlen( argv[ cur_arg ] ) == 4 &&
-			 ! strcmp( argv[ cur_arg ], "-NGR" ) )
+		if ( strlen( argv[ cur_arg ] ) == 3 &&
+			 ! strcmp( argv[ cur_arg ], "-ng" ) )
 		{
 			if ( flags & DO_CHECK )
 			{
-				fprintf( stderr, "fsc2: Can't have both flags '-NGR' and "
+				fprintf( stderr, "fsc2: Can't have both flags '-ng' and "
 						"'-X' at once.\n" );
 				usage( EXIT_FAILURE );
 			}
 
 			if ( flags & BATCH_MODE )
 			{
-				fprintf( stderr, "fsc2: Can't have both flags '-NGR' and "
+				fprintf( stderr, "fsc2: Can't have both flags '-ng' and "
 						"'-B' at once.\n" );
 				usage( EXIT_FAILURE );
 			}
 
-			/* no file name with "-NGR" option ? */
+			/* no file name with "-ng" option ? */
 
 			if ( argv[ ++cur_arg ] == NULL )
 			{
-				fprintf( stderr, "fsc2 -NGR: No input file.\n" );
+				fprintf( stderr, "fsc2 -ng: No input file.\n" );
 				exit( EXIT_FAILURE );
 			}
 
-			if ( ( in_file_fp = fopen( argv[ cur_arg ], "r" ) ) == NULL )
+			if ( ! get_edl_file( argv[ cur_arg ] ) )
+				return EXIT_FAILURE;
+
+			if ( ( in_file_fp = fopen( EDL.in_file, "r" ) ) == NULL )
 			{
-				fprintf( stderr, "Can't open file '%s'.\n", argv[ cur_arg ] );
+				fprintf( stderr, "Can't open file '%s'.\n", EDL.in_file );
 				exit( EXIT_FAILURE );
 			}
 
-			EDL.in_file = T_strdup( argv[ cur_arg ] );
 			flags |= NO_GUI_RUN;
 
 			*argc -= 2;
@@ -768,7 +772,7 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 				exit( EXIT_FAILURE );
 			}
 
-			break;
+			return flags;
 		}
 
 		if ( ( strlen( argv[ cur_arg ] ) == 2 &&
@@ -2024,6 +2028,7 @@ void usage( int return_status )
 			 "  -T FILE    run syntax check on FILE\n"
 			 "  -S FILE    start experiment interpreting FILE\n"
 			 "  -B FILE... run in batch mode\n"
+			 "  -ng FILE   run experiment without any graphics\n"
 			 "  --delete   delete input file when fsc2 is done with it\n"
 			 "  -non-exclusive\n"
 			 "             run in non-exclusive mode, allowing more than\n"
