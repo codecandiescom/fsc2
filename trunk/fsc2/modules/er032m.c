@@ -510,7 +510,6 @@ static void er032m_init( void )
 	/* Set the start field and the field step if magnet_setup() has been
 	   called, otherwise measure current field and make CF identical to
 	   the current field. */
-
 	if ( magnet.is_init )
 		er032m_start_field( );
 	else
