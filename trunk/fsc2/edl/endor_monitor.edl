@@ -42,7 +42,6 @@ EXPERIMENT:
 lockin_lock_keyboard( 0 );
 
 B0 = button_create( "NORMAL_BUTTON", "Clear curve" );
-
 S1 = slider_create( "VALUE_SLIDER", min_freq * 1.0e-6, max_freq * 1.0e-6,
 					"RF frequency (MHz)" );
 slider_value( S1, freq * 1.0e-6 );
@@ -50,21 +49,17 @@ B1 = button_create( "RADIO_BUTTON", "Sweep frequency up" );
 B2 = button_create( "RADIO_BUTTON", B1, "Stop frequency sweep" );
 B3 = button_create( "RADIO_BUTTON", B1, "Sweep frequency down" );
 button_state( B2, 1 );
-
 S2 = slider_create( "VALUE_SLIDER", min_step_freq * 1.0e-3,
 					max_step_freq * 1.0e-3, "Step frequency (kHz)" );
 slider_value( S2, step_freq * 1.0e-3 );
-
 B4 = button_create( "PUSH_BUTTON", "RF power on/off" );
-
 S3 = slider_create( "VALUE_SLIDER", -100 db, -3 db, "Attenuation (db)" );
 slider_value( S3, atten );
-
 B5 = button_create( "PUSH_BUTTON", "Pause" );
 
 FOREVER {
 
-	/* Clear curve if the corresponding button has been pressed */
+	/* Remove curve if "Clear curve" button has been pressed */
 
 	IF button_state( B0 ) {
 		clear_curve( );
@@ -79,7 +74,7 @@ FOREVER {
 		synthesizer_frequency( freq );
 	}
 
-	/* Get new step frequency */
+	/* Check value of step frequency slider */
 
 	step_freq = slider_value( S2 ) * 1.0e3;
 
@@ -108,7 +103,7 @@ FOREVER {
 
 	/* If sweep up button is pressed calculate new frequency. If it's still
 	   within the limits set synthesizer and slider accordingly, otherwise
-	   set to maximum frequency and active stopped sweep button */
+	   set to maximum frequency and activate sweep stopped button */
 
 	IF button_state( B1 ) {
 		old_freq = freq;
@@ -125,12 +120,12 @@ FOREVER {
 
 	/* If sweep down button is pressed calculate new frequency. If it's still
 	   within the limits set synthesizer and slider accordingly, otherwise
-	   set to minimum frequency and active stopped sweep button */
+	   set to minimum frequency and activate sweep stopped button */
 
 	IF button_state( B3 ) {
 		old_freq = freq;
-		freq += step_freq;
-		IF freq < max_freq {
+		freq -= step_freq;
+		IF freq < min_freq {
 			freq = min_freq;
 			button_state( B2, 1 );
 		}
@@ -140,8 +135,8 @@ FOREVER {
 		}
 	}
 
-	/* Get new value from lock-in and display it and wait for duration of
-	   lock-in time constant */
+	/* Get new value from lock-in, display it and wait for duration of
+	   lock-ins time constant */
 
 	display( I, lockin_get_data( ) );
 	I += 1;
