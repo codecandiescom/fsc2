@@ -265,7 +265,7 @@ long T_atol( const char *txt )
 /*---------------------------------------------------------------------*/
 /*---------------------------------------------------------------------*/
 
-long T_atoi( const char *txt )
+int T_atoi( const char *txt )
 {
 	long ret;
 
@@ -277,7 +277,7 @@ long T_atoi( const char *txt )
 		THROW( EXCEPTION );
 	}
 
-	return ret;
+	return ( int ) ret;
 }
 
 

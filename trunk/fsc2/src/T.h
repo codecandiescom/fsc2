@@ -33,7 +33,7 @@ void *T_realloc( void *ptr, size_t size );
 void *T_free( void *ptr );
 char *T_strdup( const char *str );
 long T_atol( const char *txt );
-long T_atoi( const char *txt );
+int T_atoi( const char *txt );
 double T_atof( const char *txt );
 
 
