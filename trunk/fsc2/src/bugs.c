@@ -82,13 +82,13 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	/* Write a header and the contents of the two browsers into the file */
 
 	fprintf( tmp,
-			 "Please enter a description of the bug you found. Also list\n"
-			 "information about the circumstances that triggered the bug\n"
-			 "as far as you think they might be relevant. Were you able\n"
-			 "to reproduce the bug?\n"
-			 "\n\n\n\n\n\n\n\n\n"
-			 " Please do not change anything below this line. Thank you.\n"
-		     "***********************************************************\n" );
+			 "Please describe the bug you found as exactly as possible.\n"
+			 "Also all information about the circumstances that triggered\n"
+			 "the bug might prove useful, even if they might look to be\n"
+			 "irrelevant. And, finally, were you able to reproduce the\n"
+			 "bug or did you encounter it just once?\n\n\n\n\n\n\n\n\n\n"
+			 "Please do not change anything below this line. Thank you.\n"
+		     "*********************************************************\n" );
 
 	fprintf( tmp, "Content of program browser:\n\n" );
 	lines = fl_get_browser_maxline( GUI.main_form->browser );
