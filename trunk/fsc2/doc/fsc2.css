@@ -23,8 +23,7 @@
 
 body {}
 
-code { color : #0000FF;
-	   font-family : monospace;
+code { font-family : monospace;
        font-weight : bold;
 	 }
 
