@@ -196,7 +196,7 @@ WS          [\n=,:. ]+
 ";"         return ';';              /* end of statement character */
 
 			/* handling of invalid input */
-.           THROW( INVALID_INPUT_EXCEPTION );
+.+          THROW( INVALID_INPUT_EXCEPTION );
 
 <<EOF>>	    {
 				Phases_Next_Section = NO_SECTION;
