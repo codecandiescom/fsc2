@@ -333,9 +333,13 @@ FUNC        {IDENT}"#"[0-9]+
 "^"         return '^';       /* exponentiation operator */
 ":"         return ':';       /* condition separator in for loops */
 "!"         return E_NOT;     /* logical negation operator */
+"NOT"       return E_NOT;     /* logical negation operator */
 "&"         return E_AND;     /* logical and operator */
+"AND"       return E_AND;     /* logical and operator */
 "|"         return E_OR;      /* logical or operator */
+"OR"        return E_OR;      /* logical or operator */
 "~"         return E_XOR;     /* logical exclusive or (xor) operator */
+"XOR"       return E_XOR;     /* logical exclusive or (xor) operator */
 "+="        return E_PLSA;
 "-="        return E_MINA;
 "*="        return E_MULA;

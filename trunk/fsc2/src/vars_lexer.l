@@ -314,9 +314,13 @@ WS          [\n \t]+
 "%"         return '%';       /* modulo operator */
 "^"         return '^';       /* exponentiation operator */
 "!"         return NOT;       /* logical negation operator */
+"NOT"       return NOT;       /* logical negation operator */
 "&"         return AND;       /* logical and operator */
+"AND"       return AND;       /* logical and operator */
 "|"         return OR;        /* logical or operator */
+"OR"        return OR;        /* logical or operator */
 "~"         return XOR;       /* logical exclusive or (xor) operator */
+"XOR"       return XOR;       /* logical exclusive or (xor) operator */
 "?"         return '?';
 ":"         return ':';
 
