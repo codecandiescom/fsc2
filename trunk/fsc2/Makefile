@@ -113,10 +113,11 @@ EXEC_INSTALL     := install
 
 # These variables are used internally in the make process
 
-mdir             := $(shell pwd)
-sdir             := $(mdir)/src
-adir             := $(mdir)/aux
-cdir             := $(mdir)/config
+fdir             := $(shell pwd)
+sdir             := $(fdir)/src
+mdir             := $(fdir)/modules
+adir             := $(fdir)/aux
+cdir             := $(fdir)/config
 
 
 # Set up a variable with the machines FQDN
@@ -138,25 +139,25 @@ endif
 ifdef bindir
 	CFLAGS += -Dbindir=\"$(bindir:/=)/\"
 else
-	CFLAGS += -Dbindir=\"$(mdir)/bin/\"
+	CFLAGS += -Dbindir=\"$(fdir)/bin/\"
 endif
 
 ifdef libdir
 	CFLAGS += -Dlibdir=\"$(libdir:/=)/\"
 else
-	CFLAGS += -Dlibdir=\"$(mdir)/lib/fsc2/\"
+	CFLAGS += -Dlibdir=\"$(fdir)/lib/fsc2/\"
 endif
 
 ifdef auxdir
 	CFLAGS += -Dauxdir=\"$(auxdir:/=)/\" -I$(adir)
 else
-	CFLAGS += -Dauxdir=\"$(mdir)/lib/fsc2/aux/\" -I$(adir)
+	CFLAGS += -Dauxdir=\"$(fdir)/lib/fsc2/aux/\" -I$(adir)
 endif
 
 ifdef docdir
 	CFLAGS += -Ddocdir=\"$(docdir:/=)/\"
 else
-	CFLAGS += -Ddocdir=\"$(mdir)/share/doc/\"
+	CFLAGS += -Ddocdir=\"$(fdir)/share/doc/\"
 endif
 
 ifdef GPIB_LOG_FILE
@@ -300,6 +301,10 @@ export            # export all variables to sub-makes
 # (the Makefile for modules is called via the Makefile in src)
 
 all:
+	grep '$$Id$(sdir)/Makefile $(mdir)/Makefile  \
+				 $(sdir)/*.[chly] $(mdir)/*.[chl] |          \
+	grep -v 'sed\|grep' |                                    \
+	sed -e 's/^.*$$Id$$.*/\1/g' > version
 	$(MAKE) -C src all
 	$(MAKE) -C utils all
 	$(MAKE) -C doc all
@@ -320,6 +325,7 @@ install:
 
 	$(MAKE) -C src install
 	$(MAKE) -C modules install
+	$(INSTALL) -m  644 -o $(OWNER) -g $(GROUP) version $(libdir)
 	$(MAKE) -C utils install
 	$(MAKE) -C scripts install
 	$(MAKE) -C doc install
@@ -329,6 +335,7 @@ install:
 # How to get rid of everything that got installed
 
 uninstall:
+	-$(RM) $(RMFLAGS) $(libdir)/version
 	-$(RM) $(RMFLAGS) $(libdir)/Functions
 	-$(RM) $(RMFLAGS) $(libdir)/Devices
 	-for file in $(adir)/*.xpm; do                     \
@@ -363,7 +370,7 @@ distclean:
 	$(MAKE) -C modules distclean
 	$(MAKE) -C doc distclean
 	$(MAKE) -C utils distclean
-	-$(RM) $(RMFLAGS) *~
+	-$(RM) $(RMFLAGS) version *~
 
 
 # Clean up everything for a distribution and create a zipped tarball

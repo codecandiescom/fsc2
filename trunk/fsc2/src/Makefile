@@ -44,18 +44,18 @@ SLFLAGS        = -shared -fpic
 # Default target - make only GPIB_LIBRARY is set correctly
 
 all:
-	@if [ -n "$(GPIB_LIBRARY)"                            \
-		  -a \(    "$(GPIB_LIBRARY)" = "old"              \
-			    -o "$(GPIB_LIBRARY)" = "ni"               \
-			    -o "$(GPIB_LIBRARY)" = "jtt"              \
-			    -o "$(GPIB_LIBRARY)" = "none" \) ]; then  \
-		$(MAKE) fsc2_rsc_lr.so fsc2_rsc_hr.so gpib;       \
-		$(MAKE) fsc2 fsc2_clean fsc2_connect modules;     \
-	else                                                  \
-		echo "****************************************";  \
-		echo "*   Make not correctly configured!     *";  \
-		echo "****************************************";  \
-		exit 2;                                           \
+	@if [ -n "$(GPIB_LIBRARY)"                                  \
+		  -a \(    "$(GPIB_LIBRARY)" = "old"                    \
+			    -o "$(GPIB_LIBRARY)" = "ni"                     \
+			    -o "$(GPIB_LIBRARY)" = "jtt"                    \
+			    -o "$(GPIB_LIBRARY)" = "none" \) ]; then        \
+		$(MAKE) fsc2_rsc_lr.so fsc2_rsc_hr.so gpib;             \
+		$(MAKE) fsc2 fsc2_clean fsc2_connect modules;           \
+	else                                                        \
+		echo "****************************************";        \
+		echo "*   Make not correctly configured!     *";        \
+		echo "****************************************";        \
+		exit 2;                                                 \
 	fi
 
 
