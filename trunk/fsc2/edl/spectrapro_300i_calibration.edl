@@ -1,77 +1,75 @@
-  /*---------------------------------------------------------------*/
-  /* EDL script for doing a calibration of the combination of the  */
-  /* Acton SpectraPro 300i monochromator and the Roper Scientific  */
-  /* Spec-10 CCD camera.                                           */
-  /*                                                               */
-  /* The script tries to determine the offset angle and the factor */
-  /* for setting the correct center frequency of the monochromator */
-  /* as well as the inclusion angle, the focal length the angle    */
-  /* the CCD chip is out of the focal plane. These data are        */
-  /* written to file to read in in order to allow the display of   */
-  /* a well-calibrated wavelength scale.                           */
-  /*                                                               */
-  /* A calibration is done in several steps:                       */
-  /* 1. Select the grating for which the calibration is to be done */
-  /* 2. Select the type of calibration to be executed, either      */
-  /*    zero offset and grating adjust or dispersion.              */
-  /* 3. If zero offset and grating adjust has been selected the    */
-  /*    monochromator is set to 0 nm. On clicking on the button    */
-  /*    labeled "Calibrate offset" the program automatically tries */
-  /*    to determine the optimum setting for the offset. If the    */
-  /*    0th order line afterwards is at the center position you    */
-  /*    can continue, otherwise repeat the procedure. When you are */
-  /*    satisfied with the result press the "Continue" button      */
-  /* 4. In the input field labeled "Reference wavelength" enter    */
-  /*    wavelength of a wellknown and strong single line in the    */
-  /*    spectrum. The monochromators wavelength will now be set to */
-  /*    this wavelength. In the "Line position" input field enter  */
-  /*    the wavelength where it appears in the spectrum (you may   */
-  /*    use the "Peak find" button to improve the input value).    */
-  /*    then press the "Accept position" button. The monochromator */
-  /*    will now move the line a bit. Repeat the above procedure.  */
-  /*    The line should now be shifted to the correct position on  */
-  /*    wavelength scale. If the new position isn't correct yet    */
-  /*    repeat the above procedure. When satisfied press the       */
-  /*    "Done" button.                                             */
-  /* 4. If dispersion calibration has been selected choose the     */
-  /*    center wavelengths so that a well known line is once at    */
-  /*    the left side of the display and once at the right side.   */
-  /*    Repeat this for at least 2 calibration lines (to get a     */
-  /*    minimum of 4 data sets). Each time measure the position    */
-  /*    of the line relative to the displayed scale. The data for  */
-  /*    center wavelength, line wavelength, line position and      */
-  /*    diffraction order (shown in the main windows lower browser */
-  /*    after the "Add data set" button has been pressed) are used */
-  /*    to calculate the calibration parameters. The calculated    */
-  /*    parameters are displayed when at least 4 data sets have    */
-  /*    been entered.                                              */
-  /* 5. Repeat the above procedure until the calibrations for all  */
-  /*    gratings is done.                                          */
-  /* 6. When the script gets stopped by clicking on the "Stop"     */
-  /*    select a file for writing out the calibration parameter.   */
-  /*    The default extension for the file is ".calib".            */
-  /*                                                               */
-  /* $Id$ */
-  /*                                                               */
-  /* Copyright (C) 1999-2003 Jens Thoms Toerring                   */
-  /*                                                               */
-  /* This file is part of fsc2.                                    */
-  /*                                                               */
-  /* Fsc2 is free software; you can redistribute it and/or modify  */
-  /* it under the terms of the GNU General Public License as       */
-  /* published by the Free Software Foundation; either version 2,  */
-  /* or (at your option) any later version.                        */
-  /*                                                               */
-  /* Fsc2 is distributed in the hope that it will be useful,       */
-  /* but WITHOUT ANY WARRANTY; without even the implied warranty   */
-  /* of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  */
-  /* the GNU General Public License for more details.              */
-  /*                                                               */
-  /* You should have received a copy of the GNU General Public     */
-  /* License along with fsc2; see the file COPYING.  If not, write */
-  /* to the Free Software Foundation, 59 Temple Place - Suite 330, */
-  /* Boston, MA 02111-1307, USA.                                   */
-  /*---------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* EDL script for calibration of the Acton SpectraPro 300i monochromator */
+/* in combination with the Roper Scientific Spec-10 CCD camera.          */
+/*                                                                       */
+/* The script allows to determine on the one hand the zero offset and    */
+/* the factor for setting the correct center frequency of the mono-      */
+/* chromator and, on the other hand, the inclusion angle, focal length   */
+/* and the detector angle, i.e. the  angle the CCD chip is out of the    */
+/* focal plane. The latter data are written to file to read in in order  */
+/* to allow the display of a well-calibrated wavelength scale while the  */
+/* zero offset and the grating adjust value are stored in the internal   */
+/* non-volatile memory of the monochromator.                             */
+/*                                                                       */
+/* A complete calibration is done in several steps:                      */
+/* 1. Select the grating for which the calibration is to be done.        */
+/* 2. Select the type of calibration, either zero offset and grating     */
+/*    adjust (which always must be calibrated first!) or dispersion.     */
+/* 3. If zero offset and grating adjust have been selected the  mono-    */
+/*    chromator is set to 0 nm. If the 0th order line is not exactly at  */
+/*    center of the CCD chip click on the button labeled "Calibrate      */
+/*    offset". The program now automatically tries to determine the      */
+/*    optimum setting for the offset. Redo the procedure if the 0th      */
+/*    order does not end up at the center of the chip, otherwise click   */
+/*    on continue.                                                       */
+/* 4. In the input field labeled "Reference wavelength" enter the wave-  */
+/*    length of a well-known, strong single line in the spectrum. The    */
+/*    monochromators wavelength will now be set to this wavelength. In   */
+/*    the "Line position" input field enter the wavelength where the     */
+/*    line appears in the spectrum (use the "Peak find" button to find   */
+/*    the exact center of the line), then press the "Accept position"    */
+/*    button. The monochromator will now move the line a bit. Repeat the */
+/*    above procedure. The line should now be shifted to the center of   */
+/*    the CCD chip. If the new position isn't correct yet repeat the     */
+/*    above procedure. When satisfied press the "Done" button.           */
+/* 4. If dispersion calibration is to be done select a center wave-      */
+/*    lengths at which well-known, strong line (the "reference wave-     */
+/*    lengt") his once at the left side of the display and once at the   */
+/*    right side. Repeat this for at least 2 calibration lines (to get a */
+/*    minimum of 4 data sets). Each time measure the position of the     */
+/*    line. The data for center wavelength, reference line wavelength,   */
+/*    line position and diffraction order (shown in the main windows     */
+/*    lower browser after the "Add data set" button has been pressed)    */
+/*    are used to calculate the calibration parameters. The calculated   */
+/*    parameters are displayed when at least 4 data sets have been       */
+/*    entered.                                                           */
+/* 5. Repeat the above procedure until the calibrations for all gratings */
+/*    is done.                                                           */
+/* 6. When the script gets stopped by clicking on the "Stop" select a    */
+/*    file for writing out the calibration parameter.  The default file  */
+/*    extension is ".calib".                                             */
+/*                                                                       */
+/* $Id$ */
+/*                                                                       */
+/* Copyright (C) 1999-2003 Jens Thoms Toerring                           */
+/*                                                                       */
+/* This file is part of fsc2.                                            */
+/*                                                                       */
+/* Fsc2 is free software; you can redistribute it and/or modify it       */
+/* under the terms of the GNU General Public License as published by	 */
+/* the Free Software Foundation; either version 2, or (at your option)	 */
+/* any later version.													 */
+/* 																		 */
+/* Fsc2 is distributed in the hope that it will be useful, but WITHOUT	 */
+/* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY	 */
+/* or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public		 */
+/* License for more details.											 */
+/* 																		 */
+/* You should have received a copy of the GNU General Public License	 */
+/* along with fsc2; see the file COPYING.  If not, write to the Free	 */
+/* Software Foundation, 59 Temple Place - Suite 330, Boston, MA			 */
+/* 02111-1307, USA.                                                      */
+/*-----------------------------------------------------------------------*/
 
 
 DEVICES:
@@ -89,7 +87,7 @@ ia_def = 30.3;            /* default value of inclusion angle */
 fl_def = 0.3 m;           /* default value of focal length */
 da_def = 0.0;             /* default value of detector angle */
 
-LW_def_1200 = 50;         /* default linewidth (in pixel) for a grating
+LW_def_1200 = 100;        /* default linewidth (in pixel) for a grating
 							 with 1200 grooves per mm */
 
 /* -> There is nothing that needs changes below this line <- */
@@ -109,6 +107,7 @@ LW,                       /* half-range for peak finding */
 CP,                       /* center position from maximum search */
 cp0,                      /* results of peak findings */
 cp1,
+cp[ * ],
 C1,
 C2,
 DO,                       /* Execute button */
@@ -183,11 +182,9 @@ FOREVER
 /*                                                                         */
 /*                            STAGE 0                                      */
 /*                                                                         */
+/*                     (Re-) Initialization                                */
+/*                                                                         */
 /***************************************************************************/
-
-	/* At the very start (or after the calibration of one of the gratings has
-	   been finished) (re)-create the first form for selecting the grating to
-	    be calibrated. */
 
 	IF State == 0 {
 
@@ -203,7 +200,7 @@ FOREVER
 									 sprint( "Grating \##", I ) );
 		}
 
-		button_state( GN[ CG ], "ON" );
+		button_state( GN[ monochromator_grating( ) ], "ON" );
 		GO = button_create( "NORMAL_BUTTON", "Select calibration type" );
 		hide_toolbox( 0 );
 	    change_label_1d( "Line position [pixel]" );
@@ -214,10 +211,9 @@ FOREVER
 /*                                                                         */
 /*                            STAGE 1                                      */
 /*                                                                         */
+/*              Selection of grating to be calibrated                      */
+/*                                                                         */
 /***************************************************************************/
-
-	/* When a grating has been selected create the form selecting the tpye
-	   of calibration to be done, i.e. either offset&adjust or dispersion. */
 
 	IF State == 1 & button_state( GO ) {
 
@@ -237,6 +233,7 @@ FOREVER
 		FOR I = NUM_GRATINGS : 1 : -1 {
 			button_delete( GN[ I ] );
 		}
+		hide_toolbox( 0 );
 
 		/* Reset the number of calibration values for the selected grating. */
 
@@ -252,6 +249,7 @@ FOREVER
 
 		/* Create the form for selecting the calibration type to do */
 		
+		hide_toolbox( 1 );
 		C1 = button_create( "RADIO_BUTTON", "Offset & Adjust calibration" );
 		C2 = button_create( "RADIO_BUTTON", C1, "Dispersion calibration" );
 		GO = button_create( "NORMAL_BUTTON", "Start calibration" );
@@ -264,6 +262,8 @@ FOREVER
 /*                                                                         */
 /*                            STAGE 2                                      */
 /*                                                                         */
+/*                   Selection of calibration type                         */
+/*                                                                         */
 /***************************************************************************/
 
 	IF State == 2 & button_state( GO ) {
@@ -274,17 +274,17 @@ FOREVER
 
 		IF State == 3 {
 
+			/* Set the monochromator to a center wavelength of 0 nm. */
+
+			monochromator_wavelength( 0.0 );
+
 			/* Remove any possibly existing calibration, then get scaling in
 			   pixel units and set the x-axis accordingly (taking into account
 			   a possibly already set pixel offset). */
 
-			monochromator_set_calibration( CG, "OFF" );
+			monochromator_set_calibration( CG, "DELETE" );
 			scale = monochromator_wavelength_axis( );
 			change_scale_1d( scale[ 1 ], scale[ 2 ] );
-
-			/* Set the monochromator to a center wavelength of 0 nm. */
-
-			monochromator_wavelength( 0.0 );
 
 			/* Get the currently set values for offet and adjust. */
 
@@ -297,6 +297,39 @@ FOREVER
 								 "Line position [pixel]" );
 			DO = button_create( "NORMAL_BUTTON", "Calibrate offset" );
 			GO = button_create( "NORMAL_BUTTON", "Continue" );
+
+			FOR I = 1 : 10 {
+				Spec = ccd_camera_get_spectrum( );
+				display_1d( 1, Spec );
+
+				CP = index_of_max( Spec );
+
+				IF CP - LW < 1 | CP + LW > W[ 1 ] {
+					show_message( "Line seems to be too near to the edge.\n" );
+					object_enable( DO, "ON" );
+					NEXT;
+				}
+
+				cp[ I ] = find_peak( slice( Spec, CP - LW, 2 * LW + 1 ) )
+				  		  + CP - LW - 1;
+
+				IF cp[ I ] < 0 {
+					show_message( "Can't find a line.\n" );
+					object_enable( DO, "ON" );
+					NEXT;
+				}
+
+				IF cp[ I ] < 1 | cp[ I ] + LW > W[ 1 ] {
+					show_message( "Line seems to be too near to the edge.\n" );
+					object_enable( DO, "ON" );
+					NEXT;
+				}
+			}
+
+			cp0 = mean( cp, 1, 10 );
+
+			draw_marker_1d( round( cp0 ) );
+			output_value( LP, ( cp0 - 1 ) * scale[ 2 ] + scale[ 1 ] );
 
 		} ELSE {
 
@@ -316,8 +349,11 @@ FOREVER
 			lp  = 0.0;
 
 			CL = button_create( "NORMAL_BUTTON", "Find peak" );
-			DO = button_create( "NORMAL_BUTTON", "Accept position" );
-			GO = button_create( "NORMAL_BUTTON", "Done" );
+			ADD = button_create( "NORMAL_BUTTON", "Add new data set" );
+			RESET_LAST = button_create( "NORMAL_BUTTON",
+										"Remove latest data set" );
+			RESET_ALL = button_create( "NORMAL_BUTTON", "Reset all" );
+			DONE = button_create( "NORMAL_BUTTON", "Done" );
 
 			monochromator_set_calibration( CG, ia, fl, da );
 			scale = monochromator_wavelength_axis( ) / 1 nm;
@@ -335,9 +371,9 @@ FOREVER
 /*                                                                         */
 /*                            STAGE 3                                      */
 /*                                                                         */
+/*                Calibration of the zero offset                           */
+/*                                                                         */
 /***************************************************************************/
-
-	/* Deal with the user adjusting the zero offset. */
 
 	IF State == 3 & toolbox_changed( ) {
 
@@ -350,33 +386,42 @@ FOREVER
 
 		IF button_state( DO ) {
 
+			object_enable( DO, "OFF" );
+
 			/* Try to find the current peak position (in units of pixels
 			   relative to the left edge) by first looking for the largest
 			   value in the spectrum (which should always be near to the 0th
 			   order line) and then doing a peak finding. */
 
-			Spec = ccd_camera_get_spectrum( );
-			display_1d( 1, Spec );
+			FOR I = 1 : 10 {
+				Spec = ccd_camera_get_spectrum( );
+				display_1d( 1, Spec );
 
-			CP = index_of_max( Spec );
+				CP = index_of_max( Spec );
 
-			IF CP - LW < 1 | CP + LW > W[ 1 ] {
-				show_message( "Line seems to be too near to the edge.\n" );
-				NEXT;
+				IF CP - LW < 1 | CP + LW > W[ 1 ] {
+					show_message( "Line seems to be too near to the edge.\n" );
+					object_enable( DO, "ON" );
+					NEXT;
+				}
+
+				cp[ I ] = find_peak( slice( Spec, CP - LW, 2 * LW + 1 ) )
+				  		  + CP - LW - 1;
+
+				IF cp[ I ] < 0 {
+					show_message( "Can't find a line.\n" );
+					object_enable( DO, "ON" );
+					NEXT;
+				}
+
+				IF cp[ I ] < 1 | cp[ I ] + LW > W[ 1 ] {
+					show_message( "Line seems to be too near to the edge.\n" );
+					object_enable( DO, "ON" );
+					NEXT;
+				}
 			}
 
-			cp0 = find_peak( slice( Spec, CP - LW, 2 * LW + 1 ) )
-				  + CP - LW - 1;
-
-			IF cp0 < 0 {
-				show_message( "Can't find a line.\n" );
-				NEXT;
-			}
-
-			IF cp0 < 1 | cp0 + LW > W[ 1 ] {
-				show_message( "Line seems to be too near to the edge.\n" );
-				NEXT;
-			}
+			cp0 = mean( cp, 1, 10 );
 
 			draw_marker_1d( round( cp0 ) );
 			output_value( LP, ( cp0 - 1 ) * scale[ 2 ] + scale[ 1 ] );
@@ -385,31 +430,43 @@ FOREVER
 			   to avoid doing the same all over again in case the user does
 			   another run. Then try to find the line at its new position. */
 
-			io_new = io + 0.2 + 0.1 * ( random( ) - 0.5 ); 
+			IF io >= 0.0 {
+				io_new = io - 0.5 + 0.1 * ( random( ) - 0.5 );
+			} ELSE {
+				io_new = io + 0.5 + 0.1 * ( random( ) - 0.5 );
+			}
 
 			monochromator_zero_offset( CG, io_new );
 
-			Spec = ccd_camera_get_spectrum( );
-			display_1d( 1, Spec );
+			FOR I = 1 : 10 {
+				Spec = ccd_camera_get_spectrum( );
+				display_1d( 1, Spec );
 
-			CP = index_of_max( Spec );
+				CP = index_of_max( Spec );
 
-			IF CP - LW < 1 | CP + LW > W[ 1 ] {
-				show_message( "Line seems to be too near to the edge.\n" );
-				NEXT;
+				IF CP - LW < 1 | CP + LW > W[ 1 ] {
+					show_message( "Line seems to be too near to the edge.\n" );
+					object_enable( DO, "ON" );
+					NEXT;
+				}
+
+				cp[ I ] = find_peak( slice( Spec, CP - LW, 2 * LW + 1 ) )
+				  		  + CP - LW - 1;
+
+				IF cp[ I ]  < 0 {
+					show_message( "Can't find a line.\n" );
+					object_enable( DO, "ON" );
+					NEXT;
+				}
+
+				IF cp[ I ] < 1 | cp[ I ] > W[ 1 ] {
+					show_message( "Line seems to be too near to the edge.\n" );
+					object_enable( DO, "ON" );
+					NEXT;
+				}
 			}
 
-			cp1 = find_peak( slice( Spec, CP - LW, 2 * LW + 1 ) )
-				  + CP - LW - 1;
-
-			IF cp1 < 0 {
-				show_message( "Can't find a line.\n" );
-				NEXT;
-			}
-			IF cp1 < 1 | cp1 > W[ 1 ] {
-				show_message( "Line seems to be too near to the edge.\n" );
-				NEXT;
-			}
+			cp1 = mean( cp, 1, 10 );
 
 			clear_marker_1d( );
 			draw_marker_1d( round( cp1 ) );
@@ -418,38 +475,47 @@ FOREVER
 			/* Calculate the offset that should move the line to the zero
 			   position and set the monochromator accordingly */
 
-			io -=   ( cp0 - 0.5 * ( W[ 1 ] - 1 ) )
+			io -=   ( cp0 - 0.5 * ( W[ 1 ] + 1 ) )
 				  * ( io_new - io ) / ( cp1 - cp0 );
 
 			monochromator_zero_offset( CG, io );
 
 			/* Get another spectrum and again find the line */
 
-			Spec = ccd_camera_get_spectrum( );
-			display_1d( 1, Spec );
+			FOR I = 1 : 10 {
+				Spec = ccd_camera_get_spectrum( );
+				display_1d( 1, Spec );
 
-			CP = index_of_max( Spec );
+				CP = index_of_max( Spec );
 
-			IF CP - LW < 1 | CP + LW > W[ 1 ] {
-				show_message( "Line seems to be too near to the edge.\n" );
-				NEXT;
+				IF CP - LW < 1 | CP + LW > W[ 1 ] {
+					show_message( "Line seems to be too near to the edge.\n" );
+					object_enable( DO, "ON" );
+					NEXT;
+				}
+
+				cp[ I ] = find_peak( slice( Spec, CP - LW, 2 * LW + 1 ) )
+				  		  + CP - LW - 1;
+
+				IF cp[ I ] < 0 {
+					show_message( "Can't find a line.\n" );
+					object_enable( DO, "ON" );
+					NEXT;
+				}
+
+				IF cp[ I ] < 1 | cp[ I ] > W[ 1 ] {
+					show_message( "Line seems to be too near to the edge.\n" );
+					object_enable( DO, "ON" );
+					NEXT;
+				}
 			}
 
-			cp1 = find_peak( slice( Spec, CP - LW, 2 * LW + 1 ) )
-				  + CP - LW - 1;
-
-			IF cp1 < 0 {
-				show_message( "Can't find a line.\n" );
-				NEXT;
-			}
-			IF cp1 < 1 | cp1 > W[ 1 ] {
-				show_message( "Line seems to be too near to the edge.\n" );
-				NEXT;
-			}
+			cp1 = mean( cp, 1, 10 );
 
 			clear_marker_1d( );
 			draw_marker_1d( round( cp1 ) );
 			output_value( LP, ( cp1 - 1 ) * scale[ 2 ] + scale[ 1 ] );
+			object_enable( DO, "ON" );
 		}
 
 		/* When the user is satisfied delete the form and create a new one
@@ -473,6 +539,7 @@ FOREVER
 			object_enable( DO, "OFF" );
 			GO = button_create( "NORMAL_BUTTON", "Done" );
 
+			clear_marker_1d( );
 			monochromator_set_calibration( CG, ia, fl, da );
 			scale = monochromator_wavelength_axis( ) / 1 nm;
 			change_scale_1d( scale[ 1 ], scale[ 2 ] );
@@ -491,14 +558,13 @@ FOREVER
 /*                                                                         */
 /*                            STAGE 4                                      */
 /*                                                                         */
+/*               Calibration of the grating adjust value                   */
+/*                                                                         */
 /***************************************************************************/
-
-	/* The next step is the determination of the rotation parameter for the
-	   grating. */
 
 	IF State == 4 & toolbox_changed( ) {
 
-		/* Deal with changes of wavelength of the reference line. */
+		/* Deal with changes of wavelength of the center line. */
 
 		IF input_changed( CWL )
 		{
@@ -514,10 +580,13 @@ FOREVER
 			scale = monochromator_wavelength_axis( ) / 1 nm;
 			change_scale_1d( scale[ 1 ], scale[ 2 ] );
 
+			/* Set the line position input field to the center wavelength */
+
+			clear_marker_1d( );
 			input_value( LP, cwl );
 			lp = 0.5 * ( W[ 1 ] - 1 );
 			output_value( LP, ( lp - 1 ) * scale[ 2 ] + scale[ 1 ] );
-			clear_marker_1d( );
+			draw_marker_1d( round( lp ) );
 
 			object_enable( LP, "ON" );
 			object_enable( DO, "ON" );
@@ -547,10 +616,10 @@ FOREVER
 
 		/* Deal with clicks on the "Find peak" button */
 
-		IF button_changed( CL )
+		IF button_state( CL )
 		{
 			/* Try to find the line at the position the user entered. Complain
-			   if the position is very near to the limits or mno line can
+			   if the position is too near to the limits or no line could
 			   be found */
 
 			IF round( lp - LW ) < 1 | round( lp + LW ) > W[ 1 ] {
@@ -559,7 +628,7 @@ FOREVER
 			}
 
 			new_val = find_peak( slice( Spec, round( lp - LW ), 2 * LW + 1 ) )
-				      + lp - LW - 1;
+				      + round( lp - LW ) - 1;
 
 			IF new_val < 0 {
 				show_message( "Sorry, can' find a line, try again." );
@@ -575,21 +644,49 @@ FOREVER
 		/* Deal with clicks on the "Accept position" button. */
 
 		IF button_state( DO ) {
-
 			IF First_adjust == 0 {
 				First_adjust = 1;
+
+				object_enable( CWL, "OFF" );
+				object_enable( CL, "OFF" );
+				object_enable( LP, "OFF" );
 				object_enable( GO, "OFF" );
-				cp0 = input_value( LP );
-				ig_new = ig + 0.2 + 0.1 * ( random( ) - 0.5 ); 
+				object_enable( DO, "OFF" );
+
+				cp0 = ( input_value( LP ) - scale[ 1 ] ) / scale[ 2 ];
+
+				IF ig >= 0.0 {
+					ig_new = ig - 0.2 + 0.1 * ( random( ) - 0.5 );
+				} ELSE { 
+					ig_new = ig + 0.2 + 0.1 * ( random( ) - 0.5 );
+				}
+
 				monochromator_grating_adjust( CG, ig_new );
+
 				clear_marker_1d( );
+
+				object_enable( LP, "ON" );
+				object_enable( CL, "ON" );
+				object_enable( DO, "ON" );
+
 			} ELSE {
+
 				First_adjust = 0;
-				cp1 = input_value( LP );
-				ig -= ( cp0 - 0.5 * ( W[ 1 ] - 1 ) )
-					  * ( io_new - ig ) / ( cp1 - cp0 );
+
+				object_enable( LP, "OFF" );
+				object_enable( DO, "OFF" );
+
+				cp1 = ( input_value( LP ) - scale[ 1 ] ) / scale[ 2 ];
+				ig -=   ( cp0 - 0.5 * ( W[ 1 ] -1 ) )
+					  * ( ig_new - ig ) / ( cp1 - cp0 );
+
 				monochromator_grating_adjust( CG, ig );
+
 				clear_marker_1d( );
+
+				object_enable( CWL, "OFF" );
+				object_enable( LP, "ON" );
+				object_enable( DO, "ON" );
 				object_enable( GO, "ON" );
 			}
 		}
@@ -601,6 +698,7 @@ FOREVER
 			hide_toolbox( 1 );
 			object_delete( GO, DO, CL, LP, CWL );
 			hide_toolbox( 0 );
+			clear_marker_1d( );
 			State = 0;
 		}
 	}
@@ -608,6 +706,8 @@ FOREVER
 /***************************************************************************/
 /*                                                                         */
 /*                            STAGE 5                                      */
+/*                                                                         */
+/*                    Dispersion calibration                               */
 /*                                                                         */
 /***************************************************************************/
 
@@ -629,6 +729,7 @@ FOREVER
 			cwl = new_val;
 			monochromator_wavelength( cwl * 1 nm );
 
+			clear_marker_1d( );
 			monochromator_set_calibration( CG, ia, fl, da );
 			scale = monochromator_wavelength_axis( ) / 1 nm;
 			change_scale_1d( scale[ 1 ], scale[ 2 ] );
@@ -662,6 +763,8 @@ FOREVER
 
 		IF button_state( CL )
 		{
+			clear_marker_1d( );
+
 			cp0 = lp + 0.5 * ( W[ 1 ] - 1 );
 
 			IF round( cp0 - LW ) < 1 | round( cp0 + LW ) > W[ 1 ] {
@@ -669,8 +772,8 @@ FOREVER
 				NEXT;
 			}
 
-			cp0 = find_peak( slice( Spec, cp0 - LW, 2 * LW + 1 ) )
-				  + cp0 - LW - 1;
+			cp0 = find_peak( slice( Spec, round( cp0 - LW ), 2 * LW + 1 ) )
+				  + round( cp0 - LW ) - 1;
 
 			IF cp0 < 0 {
 				show_message( "Can't find a line.\n" );
@@ -695,6 +798,8 @@ FOREVER
 					  - 0.5 * ( W[ 1 ] - 1 );
 			IF abs( new_val ) < 0.5 * ( W[ 1 ] - 1 ) {
 				lp = new_val;
+				clear_marker_1d( );
+				draw_marker( round( lp + 0.5 * ( W[ 1 ] - 1 ) ) );
 			} ELSE {
 				input_value( LP, ( lp + 0.5 * ( W[ 1 ] - 1 ) ) * scale[ 2 ]
 							 	 + scale[ 1 ] );
@@ -728,7 +833,7 @@ FOREVER
 
 			print( "#:  # nm,  #,  # nm,  # nm\n", Count[ CG ],
 				   l[ Count[ CG ] ] / 1 nm, M[ Count[ CG ] ],
-				   lc[ Count[ CG ] ],
+				   lc[ Count[ CG ] ] / 1 nm,
 				   ( px[ Count[ CG ] ] + 0.5 * ( W[ 1 ] - 1 ) ) * scale[ 2 ]
 				   + scale[ 1 ] );
 
@@ -796,9 +901,9 @@ FOREVER
 			}
 			Count[ CG ] = 0;
 			IF size( l ) >= 4 {
-				l  = slice( l, 1, 1 );
+				l  = slice( l,  1, 1 );
 				lc = slice( lc, 1, 1 );
-				M  = slice( M, 1, 1 );
+				M  = slice( M,  1, 1 );
 				px = slice( px, 1, 1 );
 			}
 			hide_toolbox( 0 );
@@ -832,9 +937,9 @@ FOREVER
 			Count[ CG ] -= 1;
 
 			IF Count[ CG ] >= 3 {
-				l = slice( l, 1, Count[ CG ] );
+				l  = slice( l,  1, Count[ CG ] );
 				lc = slice( lc, 1, Count[ CG ] );
-				M = slice( M, 1, Count[ CG ] );
+				M  = slice( M,  1, Count[ CG ] );
 				px = slice( px, 1, Count[ CG ] );
 			}
 
@@ -865,11 +970,12 @@ FOREVER
 			print( "\n" );
 			hide_toolbox( 1 );
 			object_delete( DONE, RESET_ALL, RESET_LAST,
-						   ADD, LP, DFO, LWL, CWL );
+						   ADD, CL, LP, DFO, LWL, CWL );
 			IF Count[ CG ] >= 4 {
 				output_delete( DA, FL, IA );
 			}
 			hide_toolbox( 0 );
+			clear_marker_1d( );
 			State = 0;
 		}
 	}
@@ -877,14 +983,16 @@ FOREVER
 
 /***************************************************************************/
 /*                                                                         */
-/*                            STAGE 5                                      */
+/*                            STAGE 7                                      */
+/*                                                                         */
+/*                      Saving the results                                 */
 /*                                                                         */
 /***************************************************************************/
 
 ON_STOP:
 
-/* Check if there was a complete calibration for at least one if the
-   gratings (i.e. the numberof data sets for the grating is at least 4). */
+/* Check if there's a complete calibration for at least one if the gratings
+	(i.e. the number of data sets for the grating is at least 4). */
 
 FOR I = 1 : NUM_GRATINGS {
 	IF Count[ I ] >= 4 {
@@ -892,12 +1000,12 @@ FOR I = 1 : NUM_GRATINGS {
 	}
 }
 
-/* If there is a valid calibration ask the user for a calibration file and
+/* If there's a valid calibration ask the user for a calibration file and
    write out all sets of complete calibration data into it. */
 
 IF I <= NUM_GRATINGS {
-	File = get_file( "Select name of the calibration file:", "*.calib", "", "",
-				     "calib" );
+	File = get_file( "Select name of the calibration file:",
+					 "*.calib", "", "", "calib" );
 
 	FOR I = 1 : NUM_GRATINGS {
 		IF Count[ I ] < 4 {

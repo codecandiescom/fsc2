@@ -316,8 +316,8 @@ void spectrapro_300i_open( void )
 		spectrapro_300i_comm_fail( );
 
 	spectrapro_300i_get_gratings( );
-	spectrapro_300i.current_grating = spectrapro_300i_get_grating( ) - 1;
-	spectrapro_300i.turret = spectrapro_300i_get_turret( ) - 1;
+	spectrapro_300i.current_gn = spectrapro_300i_get_grating( );
+	spectrapro_300i.tn = spectrapro_300i_get_turret( );
 }
 
 
@@ -384,13 +384,13 @@ void spectrapro_300i_set_wavelength( double wavelength )
 long spectrapro_300i_get_turret( void )
 {
 	const char *reply;
-	long turret;
+	long tn;
 
 
 	reply = spectrapro_300i_talk( "?TURRET", 20 );
-	turret = T_atol( reply );
+	tn = T_atol( reply ) - 1;
 	T_free( ( void * ) reply );
-	return turret;
+	return tn;
 }
 
 
@@ -398,19 +398,19 @@ long spectrapro_300i_get_turret( void )
 /* Function tells the monochromator to switch to a different turret. */
 /*-------------------------------------------------------------------*/
 
-void spectrapro_300i_set_turret( long turret )
+void spectrapro_300i_set_turret( long tn )
 {
 	char *buf;
 
 
 	CLOBBER_PROTECT( buf );
 
-	fsc2_assert( turret >= 1 && turret <= MAX_TURRETS );
+	fsc2_assert( tn >= 0 && tn < MAX_TURRETS );
 
-	if ( spectrapro_300i.turret == turret - 1 )
+	if ( spectrapro_300i.tn == tn )
 		return;
 
-	buf = get_string( "%ld TURRET", turret );
+	buf = get_string( "%ld TURRET", tn + 1 );
 
 	TRY
 	{
@@ -434,13 +434,13 @@ void spectrapro_300i_set_turret( long turret )
 long spectrapro_300i_get_grating( void )
 {
 	const char *reply;
-	long grating;
+	long gn;
 
 
 	reply = spectrapro_300i_talk( "?GRATING", 20 );
-	grating = T_atol( reply );
+	gn = T_atol( reply ) - 1;
 	T_free( ( void * ) reply );
-	return grating;
+	return gn;
 }
 
 
@@ -448,22 +448,22 @@ long spectrapro_300i_get_grating( void )
 /* Function tells to monochromator to switch to a different grating. */
 /*-------------------------------------------------------------------*/
 
-void spectrapro_300i_set_grating( long grating )
+void spectrapro_300i_set_grating( long gn )
 {
 	char *buf;
 
 
 	CLOBBER_PROTECT( buf );
 
-	fsc2_assert( grating >= 1 && grating <= MAX_GRATINGS &&
-				 grating - spectrapro_300i.turret * 3 >= 1 &&
-				 grating - spectrapro_300i.turret * 3 <= 3 &&
-				 spectrapro_300i.grating[ grating - 1 ].is_installed );
+	fsc2_assert( gn >= 0 && gn < MAX_GRATINGS &&
+				 gn - spectrapro_300i.tn * 3 >= 0 &&
+				 gn - spectrapro_300i.tn * 3 <= 2 &&
+				 spectrapro_300i.grating[ gn ].is_installed );
 
-	if ( spectrapro_300i.current_grating == grating - 1 )
+	if ( spectrapro_300i.current_gn == gn )
 		return;
 
-	buf = get_string( "%ld GRATING", grating );
+	buf = get_string( "%ld GRATING", gn + 1 );
 
 	TRY
 	{
@@ -636,7 +636,7 @@ void spectrapro_300i_get_gratings( void )
 /* setting for one of the gratings.                    */
 /*-----------------------------------------------------*/
 
-long spectrapro_300i_get_offset( long grating )
+long spectrapro_300i_get_offset( long gn )
 {
 	const char *reply;
 	char *sp, *nsp;
@@ -644,7 +644,7 @@ long spectrapro_300i_get_offset( long grating )
 	long i;
 
 
-	fsc2_assert( grating >= 1 && grating <= MAX_GRATINGS );
+	fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
 
 	reply = spectrapro_300i_talk( "MONO-EESTATUS", 4096 );
 
@@ -656,7 +656,7 @@ long spectrapro_300i_get_offset( long grating )
 
 	sp += strlen( "offset" );
 
-	for ( i = 0; i < grating; i++ )
+	for ( i = 0; i <= gn; i++ )
 	{
 		offset = strtol( sp, &nsp, 10 );
 		if ( sp == nsp ||
@@ -681,24 +681,22 @@ long spectrapro_300i_get_offset( long grating )
 /* time, mainly because of the required reset.              */
 /*----------------------------------------------------------*/
 
-void spectrapro_300i_set_offset( long grating, long offset )
+void spectrapro_300i_set_offset( long gn, long offset )
 {
 	char *buf;
 
 
 	CLOBBER_PROTECT( buf );
-	CLOBBER_PROTECT( grating );
+	CLOBBER_PROTECT( gn );
 
-	fsc2_assert( grating >= 1 && grating <= MAX_GRATINGS );
+	fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
 
-	grating--;
-
-	fsc2_assert( spectrapro_300i.grating[ grating ].is_installed );
-	fsc2_assert ( labs( offset - ( grating % 3 ) * INIT_OFFSET ) <=
+	fsc2_assert( spectrapro_300i.grating[ gn ].is_installed );
+	fsc2_assert ( labs( offset - ( gn % 3 ) * INIT_OFFSET ) <=
 				  INIT_OFFSET_RANGE /
-				  spectrapro_300i.grating[ grating ].grooves );
+				  spectrapro_300i.grating[ gn ].grooves );
 
-	buf = get_string( "%ld %ld INIT-SP300-OFFSET", offset, grating );
+	buf = get_string( "%ld %ld INIT-SP300-OFFSET", offset, gn );
 
 	TRY
 	{
@@ -715,7 +713,7 @@ void spectrapro_300i_set_offset( long grating, long offset )
 	buf = spectrapro_300i_talk( "MONO-RESET", 4096 );
 	T_free( buf );
 
-	spectrapro_300i_set_grating( grating + 1 );
+	spectrapro_300i_set_grating( gn );
 
 	buf = get_string( "%.3f GOTO", 1.0e9 * spectrapro_300i.wavelength );
 
@@ -738,7 +736,7 @@ void spectrapro_300i_set_offset( long grating, long offset )
 /* setting for one of the gratings.                       */
 /*--------------------------------------------------------*/
 
-long spectrapro_300i_get_adjust( long grating )
+long spectrapro_300i_get_adjust( long gn )
 {
 	const char *reply;
 	char *sp, *nsp;
@@ -746,7 +744,7 @@ long spectrapro_300i_get_adjust( long grating )
 	long i;
 
 
-	fsc2_assert( grating >= 1 && grating <= MAX_GRATINGS );
+	fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
 
 	reply = spectrapro_300i_talk( "MONO-EESTATUS", 4096 );
 
@@ -758,7 +756,7 @@ long spectrapro_300i_get_adjust( long grating )
 
 	sp += strlen( "adjust" );
 
-	for ( i = 0; i < grating; i++ )
+	for ( i = 0; i <= gn; i++ )
 	{
 		gadjust = strtol( sp, &nsp, 10 );
 		if ( sp == nsp ||
@@ -783,21 +781,19 @@ long spectrapro_300i_get_adjust( long grating )
 /* because of the required reset.                                    */
 /*-------------------------------------------------------------------*/
 
-void spectrapro_300i_set_adjust( long grating, long adjust )
+void spectrapro_300i_set_adjust( long gn, long adjust )
 {
 	char *buf;
 
 
 	CLOBBER_PROTECT( buf );
-	CLOBBER_PROTECT( grating );
+	CLOBBER_PROTECT( gn );
 
-	fsc2_assert( grating >= 1 && grating <= MAX_GRATINGS );
-	fsc2_assert( spectrapro_300i.grating[ grating - 1 ].is_installed );
+	fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
+	fsc2_assert( spectrapro_300i.grating[ gn ].is_installed );
 	fsc2_assert ( labs( adjust - INIT_ADJUST ) <= INIT_ADJUST_RANGE );
 
-	grating--;
-
-	buf = get_string( "%ld %ld INIT-SP300-GADJUST", adjust, grating );
+	buf = get_string( "%ld %ld INIT-SP300-GADJUST", adjust, gn );
 
 	TRY
 	{
@@ -814,7 +810,7 @@ void spectrapro_300i_set_adjust( long grating, long adjust )
 	buf = spectrapro_300i_talk( "MONO-RESET", 4096 );
 	T_free( buf );
 
-	spectrapro_300i_set_grating( grating + 1 );
+	spectrapro_300i_set_grating( gn );
 
 	buf = get_string( "%.3f GOTO", 1.0e9 * spectrapro_300i.wavelength );
 
@@ -837,14 +833,14 @@ void spectrapro_300i_set_adjust( long grating, long adjust )
 /* memory of the monochromator.                          */
 /*-------------------------------------------------------*/
 
-void spectrapro_300i_install_grating( char *part_no, long grating )
+void spectrapro_300i_install_grating( long gn, const char *part_no )
 {
 	char *buf;
 
 
-	fsc2_assert( grating >= 1 && grating <= MAX_GRATINGS );
+	fsc2_assert( gn >= 1 && gn <= MAX_GRATINGS );
 
-	buf = get_string( "%s %ld INSTALL", part_no, grating );
+	buf = get_string( "%s %ld INSTALL", part_no, gn + 1 );
 
 	TRY
 	{
@@ -865,14 +861,14 @@ void spectrapro_300i_install_grating( char *part_no, long grating )
 /* non-volatile memory of the monochromator.              */
 /*--------------------------------------------------------*/
 
-void spectrapro_300i_uninstall_grating( long grating )
+void spectrapro_300i_uninstall_grating( long gn )
 {
 	char *buf;
 
 
-	fsc2_assert( grating >= 1 && grating <= MAX_GRATINGS );
+	fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
 
-	buf = get_string( "%ld UNINSTALL", grating );
+	buf = get_string( "%ld UNINSTALL", gn + 1 );
 
 	TRY
 	{

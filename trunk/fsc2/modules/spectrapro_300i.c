@@ -31,10 +31,10 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-static void spectrapro_300i_arr_conv( long g, double cwl, long num_pixels,
+static void spectrapro_300i_arr_conv( long gn, double cwl, long num_pixels,
 									  double pixel_width,
 									  Var *src, Var *dest );
-static double spectrapro_300i_conv( long g, double cwl, long num_pixels,
+static double spectrapro_300i_conv( long gn, double cwl, long num_pixels,
 									double pixel_width, double px );
 
 
@@ -64,8 +64,8 @@ int spectrapro_300i_init_hook( void )
 		spectrapro_300i.grating[ i ].installed_in_test = UNSET;
 	}
 
-	spectrapro_300i.turret = 0;
-	spectrapro_300i.current_grating = 0;
+	spectrapro_300i.tn = 0;
+	spectrapro_300i.current_gn = 0;
 	spectrapro_300i.wavelength = 5.0e-7;
 	spectrapro_300i.use_calib = 0;
 
@@ -155,15 +155,13 @@ Var *monochromator_name( Var *v )
 Var *monochromator_grating( Var *v )
 {
 	long grating;
+	long gn;
 
 
 	if ( v == 0 )
-		return vars_push( INT_VAR, spectrapro_300i.current_grating + 1 );
+		return vars_push( INT_VAR, spectrapro_300i.current_gn + 1 );
 
 	grating = get_strict_long( v, "grating number" );
-
-	if ( FSC2_MODE == TEST )
-		spectrapro_300i.grating[ grating - 1 ].used_in_test = SET;
 
 	if ( grating < 1 || grating > MAX_GRATINGS )
 	{
@@ -175,24 +173,29 @@ Var *monochromator_grating( Var *v )
 		}
 
 		print( SEVERE,  "Invalid grating number, keeping grating #%ld\n",
-			   spectrapro_300i.current_grating + 1 );
-		return vars_push( INT_VAR, spectrapro_300i.current_grating + 1 );
+			   spectrapro_300i.current_gn + 1 );
+		return vars_push( INT_VAR, spectrapro_300i.current_gn + 1 );
 	}
+
+	gn = grating - 1;
+
+	if ( FSC2_MODE == TEST )
+		spectrapro_300i.grating[ gn ].used_in_test = SET;
 
 	if ( FSC2_MODE == EXPERIMENT )
 	{
-		if ( ! spectrapro_300i.grating[ grating - 1 ].is_installed )
+		if ( ! spectrapro_300i.grating[ gn ].is_installed )
 		{
 			print( SEVERE,  "No grating #%ld is installed, keeping grating "
-				   "#%ld\n", grating, spectrapro_300i.current_grating + 1 );
-			return vars_push( INT_VAR, spectrapro_300i.current_grating + 1 );
+				   "#%ld\n", grating, spectrapro_300i.current_gn + 1 );
+			return vars_push( INT_VAR, spectrapro_300i.current_gn + 1 );
 		}
 
-		if ( grating - spectrapro_300i.turret * 3 < 1 ||
-			 grating - spectrapro_300i.turret * 3 > 3 )
+		if ( gn - spectrapro_300i.tn * 3 < 0 ||
+			 gn - spectrapro_300i.tn * 3 > 2 )
 		{
 			print( FATAL, "Can't switch to grating #ld while turret #ld is "
-				   "in use.\n", grating, spectrapro_300i.turret + 1 );
+				   "in use.\n", grating, spectrapro_300i.tn + 1 );
 			THROW( EXCEPTION );
 		}
 	}
@@ -200,9 +203,9 @@ Var *monochromator_grating( Var *v )
 	too_many_arguments( v );
 
 	if ( FSC2_MODE == EXPERIMENT )
-		spectrapro_300i_set_grating( grating );
+		spectrapro_300i_set_grating( gn );
 
-	spectrapro_300i.current_grating = grating - 1;
+	spectrapro_300i.current_gn = gn;
 
 	return vars_push( INT_VAR, grating );
 }
@@ -219,12 +222,13 @@ Var *monochromator_grating( Var *v )
 Var *monochromator_turret( Var *v )
 {
 	long turret;
-	long new_grat;
+	long tn;
+	long new_gn;
 	long i;
 
 
 	if ( v == 0 )
-		return vars_push( INT_VAR, spectrapro_300i.turret + 1 );
+		return vars_push( INT_VAR, spectrapro_300i.tn + 1 );
 
 	turret = get_strict_long( v, "turret number" );
 
@@ -238,51 +242,50 @@ Var *monochromator_turret( Var *v )
 		}
 
 		print( SEVERE,  "Invalid turret number, keeping turret #%ld\n",
-			   spectrapro_300i.turret + 1 );
-		return vars_push( INT_VAR, spectrapro_300i.turret + 1 );
+			   spectrapro_300i.tn + 1 );
+		return vars_push( INT_VAR, spectrapro_300i.tn + 1 );
 	}
+
+	tn = turret - 1;
 
 	/* During the test run we don't have to do anything */
 
 	if ( FSC2_MODE != EXPERIMENT )
 	{
-		spectrapro_300i.turret = turret - 1;		
+		spectrapro_300i.tn = tn;
 		return vars_push( INT_VAR, turret );
 	}
 
 	/* Same if the new turret is identical to the current turret */
 
-	if ( turret - 1 == spectrapro_300i.turret )
+	if ( tn == spectrapro_300i.tn )
 		return vars_push( INT_VAR, turret );
 
 	/* Figure out the new grating to use */
 
-	new_grat = spectrapro_300i.current_grating +
-			   3 * ( turret - 1 - spectrapro_300i.turret );
+	new_gn = spectrapro_300i.current_gn + 3 * ( tn - spectrapro_300i.tn );
 
-	if ( ! spectrapro_300i.grating[ new_grat ].is_installed )
+	if ( ! spectrapro_300i.grating[ new_gn ].is_installed )
 	{
-		for ( i = 3 * ( turret - 1 ); i < 3 * turret; i++ )
+		for ( i = 3 * tn; i < 3 * ( tn + 1 ); i++ )
 			if ( spectrapro_300i.grating[ i ].is_installed )
 				break;
 
-		if ( i == 3 * turret )
+		if ( i >= 3 * ( tn + 1 ) )
 		{
 			print( FATAL, "Can't switch to turret #%ld, no grating installed "
-				   "for this turret.\n" );
+				   "for this turret.\n", turret );
 			THROW( EXCEPTION );
 		}
 
-		new_grat = i;
+		new_gn = i;
 	}
 
-	print( NO_ERROR, "Switching to grating #%ld.\n", new_grat + 1 );
+	spectrapro_300i_set_turret( tn );
+	spectrapro_300i.tn = tn;
 
-	spectrapro_300i_set_turret( turret );
-	spectrapro_300i.turret = turret - 1;
-
-	spectrapro_300i_set_turret( new_grat + 1 );
-	spectrapro_300i.current_grating = new_grat;	
+	spectrapro_300i_set_grating( new_gn );
+	spectrapro_300i.current_gn = new_gn;	
 
 	return vars_push( INT_VAR, turret );
 }
@@ -371,19 +374,22 @@ Var *monochromator_wavelength( Var *v )
 Var *monochromator_install_grating( Var *v )
 {
 	long grating;
+	long gn;
 
 
 	grating = get_strict_long( v->next, "grating position" );
 
-	if ( grating < 1 && grating > MAX_GRATINGS )
+	if ( grating < 1 || grating > MAX_GRATINGS )
 	{
 		print( FATAL, "Invalid grating position, must be in range between "
 			   "1 and %d.\n", MAX_GRATINGS );
 		THROW( EXCEPTION );
 	}
 
+	gn = grating - 1;
+
 	if ( FSC2_MODE == EXPERIMENT && ! strcmp( v->val.sptr, "UNINSTALL" ) &&
-		 ! spectrapro_300i.grating[ grating - 1 ].is_installed )
+		 ! spectrapro_300i.grating[ gn ].is_installed )
 	{
 		print( SEVERE,  "Grating #%ld is not installed, can't uninstall "
 			   "it.\n" );
@@ -393,9 +399,9 @@ Var *monochromator_install_grating( Var *v )
 	if ( FSC2_MODE == TEST )
 	{
 		if ( ! strcmp( v->val.sptr, "UNINSTALL" ) )
-			spectrapro_300i.grating[ grating - 1 ].used_in_test = SET;
+			spectrapro_300i.grating[ gn ].used_in_test = SET;
 		else
-			spectrapro_300i.grating[ grating - 1 ].installed_in_test = SET;
+			spectrapro_300i.grating[ gn ].installed_in_test = SET;
 	}
 
 	v = vars_pop( v );
@@ -427,13 +433,13 @@ Var *monochromator_install_grating( Var *v )
 	{
 		if ( ! strcmp( v->val.sptr, "UNINSTALL" ) )
 		{
-			spectrapro_300i_uninstall_grating( grating );
-			spectrapro_300i.grating[ grating - 1 ].is_installed = UNSET;
+			spectrapro_300i_uninstall_grating( gn );
+			spectrapro_300i.grating[ gn ].is_installed = UNSET;
 		}
 		else
 		{
-			spectrapro_300i_install_grating( v->val.sptr, grating );
-			spectrapro_300i.grating[ grating - 1 ].is_installed = SET;
+			spectrapro_300i_install_grating( gn, v->val.sptr );
+			spectrapro_300i.grating[ gn ].is_installed = SET;
 		}
 	}
 
@@ -448,16 +454,16 @@ Var *monochromator_install_grating( Var *v )
 
 Var *monochromator_groove_density( Var *v )
 {
-	long grating;
+	long gn;
 
 
 	if ( v == NULL )
-		grating = spectrapro_300i.current_grating;
+		gn = spectrapro_300i.current_gn;
 	else
 	{
-		grating = get_strict_long( v, "grating number" ) - 1;
+		gn = get_strict_long( v, "grating number" ) - 1;
 
-		if ( grating < 0 && grating >= MAX_GRATINGS )
+		if ( gn < 0 || gn >= MAX_GRATINGS )
 		{
 			print( FATAL, "Invalid grating number, must be in range between "
 				   "1 and %d.\n", MAX_GRATINGS );
@@ -467,17 +473,17 @@ Var *monochromator_groove_density( Var *v )
 		too_many_arguments( v );
 	}
 	
-	if ( ! spectrapro_300i.grating[ grating ].is_installed )
+	if ( ! spectrapro_300i.grating[ gn ].is_installed )
 	{
-		print( FATAL, "Grating #%ld isn't installed.\n", grating + 1 );
+		print( FATAL, "Grating #%ld isn't installed.\n", gn + 1 );
 		THROW( EXCEPTION );
 	}
 
 	if ( FSC2_MODE == TEST )
-		spectrapro_300i.grating[ grating ].used_in_test = SET;
+		spectrapro_300i.grating[ gn ].used_in_test = SET;
 
 	return vars_push( FLOAT_VAR,
-					  ( double ) spectrapro_300i.grating[ grating ].grooves );
+					  ( double ) spectrapro_300i.grating[ gn ].grooves );
 }
 
 
@@ -585,7 +591,7 @@ Var *monochromator_wavelength_axis( Var * v )
 	Var *cv;
 	double pixel_width;
 	long num_pixels;
-	long g;
+	long gn;
 	double wl;
 	double wl_low;
 	double wl_hi;
@@ -658,20 +664,20 @@ Var *monochromator_wavelength_axis( Var * v )
 
 	if ( v != NULL )
 	{
-		g = get_strict_long( v, "grating number" ) - 1;
-		if ( g < 0 || g >= MAX_GRATINGS )
+		gn = get_strict_long( v, "grating number" ) - 1;
+		if ( gn < 0 || gn >= MAX_GRATINGS )
 		{
-			print( FATAL, "Invalid grating #%ld.\n", g + 1 );
+			print( FATAL, "Invalid grating #%ld.\n", gn + 1 );
 			THROW( EXCEPTION );
 		}
 	}
 	else
-		g = spectrapro_300i.current_grating;
+		gn = spectrapro_300i.current_gn;
 
-	if ( ! spectrapro_300i.grating[ g ].is_calib )
+	if ( ! spectrapro_300i.grating[ gn ].is_calib )
 	{
 		print( SEVERE, "No (complete) calibration for current grating #%ld "
-			   "found.\n", g + 1 );
+			   "found.\n", gn + 1 );
 		cv = vars_push( FLOAT_ARR, NULL, 2 );
 		cv->val.dpnt[ 0 ] = - 0.5 * ( double ) ( num_pixels - 1 );
 		cv->val.dpnt[ 1 ] = 1;
@@ -692,8 +698,9 @@ Var *monochromator_wavelength_axis( Var * v )
 
 	too_many_arguments( v );
 
-	wl_low = spectrapro_300i_conv( g, wl, num_pixels, pixel_width, 1 );
-	wl_hi = spectrapro_300i_conv( g, wl, num_pixels, pixel_width, num_pixels );
+	wl_low = spectrapro_300i_conv( gn, wl, num_pixels, pixel_width, 1 );
+	wl_hi = spectrapro_300i_conv( gn, wl, num_pixels, pixel_width,
+								  num_pixels );
 
 	cv = vars_push( FLOAT_ARR, NULL, 2 );
 	cv->val.dpnt[ 1 ] = ( wl_hi - wl_low ) / ( num_pixels - 1 );
@@ -715,7 +722,7 @@ Var *monochromator_wavelength_axis( Var * v )
 
 Var *monochromator_calc_wavelength( Var *v )
 {
-	long g;
+	long gn;
 	double cwl;
 	Var *cv;
 	long num_pixels;
@@ -742,20 +749,20 @@ Var *monochromator_calc_wavelength( Var *v )
 
 	if ( v->next != NULL )
 	{
-		g = get_strict_long( v, "grating number" ) - 1;
-		if ( g < 0 || g >= MAX_GRATINGS )
+		gn = get_strict_long( v, "grating number" ) - 1;
+		if ( gn < 0 || gn >= MAX_GRATINGS )
 		{
-			print( FATAL, "Invalid grating #%ld.\n", g + 1 );
+			print( FATAL, "Invalid grating #%ld.\n", gn + 1 );
 			THROW( EXCEPTION );
 		}
 	}
 	else
-		g = spectrapro_300i.current_grating;
+		gn = spectrapro_300i.current_gn;
 		
-	if ( ! spectrapro_300i.grating[ g ].is_calib )
+	if ( ! spectrapro_300i.grating[ gn ].is_calib )
 	{
 		print( SEVERE, "No (complete) calibration for current grating #%ld "
-			   "found.\n", g + 1 );
+			   "found.\n", gn + 1 );
 		switch( v->type )
 		{
 			case INT_VAR :
@@ -837,7 +844,7 @@ Var *monochromator_calc_wavelength( Var *v )
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 		return vars_push( FLOAT_VAR,
-						  spectrapro_300i_conv( g, cwl, num_pixels,
+						  spectrapro_300i_conv( gn, cwl, num_pixels,
 												pixel_width, VALUE( v ) ) );
 
 	if ( v->type & ( INT_ARR | FLOAT_ARR ) )
@@ -845,7 +852,7 @@ Var *monochromator_calc_wavelength( Var *v )
 	else
 		cv = vars_push( FLOAT_REF, v );
 
-	spectrapro_300i_arr_conv( g, cwl, num_pixels, pixel_width, v, cv );
+	spectrapro_300i_arr_conv( gn, cwl, num_pixels, pixel_width, v, cv );
 
 	return cv;
 }
@@ -858,7 +865,7 @@ Var *monochromator_calc_wavelength( Var *v )
 /* into array 'dest'.                                            */
 /*---------------------------------------------------------------*/
 
-static void spectrapro_300i_arr_conv( long g, double cwl, long num_pixels,
+static void spectrapro_300i_arr_conv( long gn, double cwl, long num_pixels,
 									  double pixel_width, Var *src, Var *dest )
 {
 	ssize_t i;
@@ -878,7 +885,7 @@ static void spectrapro_300i_arr_conv( long g, double cwl, long num_pixels,
 				px = ( double ) src->val.lpnt[ i ];
 			else
 				px = src->val.dpnt[ i ];
-			dest->val.dpnt[ i ] = spectrapro_300i_conv( g, cwl, num_pixels,
+			dest->val.dpnt[ i ] = spectrapro_300i_conv( gn, cwl, num_pixels,
 														pixel_width, px );
 		}
 		return;
@@ -887,7 +894,8 @@ static void spectrapro_300i_arr_conv( long g, double cwl, long num_pixels,
 	fsc2_assert( src->type & ( INT_REF | FLOAT_REF ) );
 
 	for ( i = 0; i < src->len; i++ )
-		spectrapro_300i_arr_conv( g, cwl, num_pixels, pixel_width, src, dest );
+		spectrapro_300i_arr_conv( gn, cwl, num_pixels, pixel_width,
+								  src, dest );
 }
 
 
@@ -896,7 +904,7 @@ static void spectrapro_300i_arr_conv( long g, double cwl, long num_pixels,
 /* and starting there with 1) into the wavelength at that position.   */
 /*--------------------------------------------------------------------*/
 
-static double spectrapro_300i_conv( long g, double cwl, long num_pixels,
+static double spectrapro_300i_conv( long gn, double cwl, long num_pixels,
 									double pixel_width, double px )
 {
 	double inclusion_angle_2;
@@ -920,11 +928,11 @@ static double spectrapro_300i_conv( long g, double cwl, long num_pixels,
 		px = ( double ) num_pixels;
 	}
 
-	inclusion_angle_2 = 0.5 * spectrapro_300i.grating[ g ].inclusion_angle;
-	focal_length = spectrapro_300i.grating[ g ].focal_length;
-	detector_angle = spectrapro_300i.grating[ g ].detector_angle;
+	inclusion_angle_2 = 0.5 * spectrapro_300i.grating[ gn ].inclusion_angle;
+	focal_length = spectrapro_300i.grating[ gn ].focal_length;
+	detector_angle = spectrapro_300i.grating[ gn ].detector_angle;
 
-	grating_angle = asin( 0.5 * cwl * spectrapro_300i.grating[ g ].grooves
+	grating_angle = asin( 0.5 * cwl * spectrapro_300i.grating[ gn ].grooves
 						  / cos( inclusion_angle_2 ) );
 
 	x = pixel_width * ( px - 0.5 * ( double ) ( num_pixels + 1 ) );
@@ -932,7 +940,7 @@ static double spectrapro_300i_conv( long g, double cwl, long num_pixels,
 				  / ( focal_length + x * sin( detector_angle ) ) );
 	return (   sin( grating_angle - inclusion_angle_2 )
 			 + sin( grating_angle + inclusion_angle_2 + theta ) )
-		   / spectrapro_300i.grating[ g ].grooves;
+		   / spectrapro_300i.grating[ gn ].grooves;
 }
 
 
@@ -951,6 +959,7 @@ static double spectrapro_300i_conv( long g, double cwl, long num_pixels,
 Var *monochromator_set_calibration( Var *v )
 {
 	long grating;
+	long gn;
 	double inclusion_angle;
 	double focal_length;
 	double detector_angle;
@@ -965,21 +974,23 @@ Var *monochromator_set_calibration( Var *v )
 
 	grating = get_strict_long( v, "grating number" );
 
-	if ( grating < 1 && grating > MAX_GRATINGS )
+	if ( grating < 1 || grating > MAX_GRATINGS )
 	{
 		print( FATAL, "Invalid grating number, must be in range between "
 			   "1 and %d.\n", MAX_GRATINGS );
 		THROW( EXCEPTION );
 	}
 
-	if ( ! spectrapro_300i.grating[ grating - 1 ].is_installed )
+	gn = grating - 1;
+
+	if ( ! spectrapro_300i.grating[ gn ].is_installed )
 	{
 		print( FATAL, "Grating #%ld isn't installed.\n", grating );
 		THROW( EXCEPTION );
 	}
 
 	if ( FSC2_MODE == TEST )
-		spectrapro_300i.grating[ grating - 1 ].used_in_test = SET;
+		spectrapro_300i.grating[ gn ].used_in_test = SET;
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
@@ -989,7 +1000,7 @@ Var *monochromator_set_calibration( Var *v )
 
 	if ( v->type == STR_VAR )
 	{
-		if ( strcasecmp( v->val.sptr, "DELETE_CALIBRATION" ) )
+		if ( strcasecmp( v->val.sptr, "DELETE" ) )
 		{
 			print( FATAL, "Invalid second argument.\n" );
 			THROW( EXCEPTION );
@@ -997,11 +1008,11 @@ Var *monochromator_set_calibration( Var *v )
 		
 		too_many_arguments( v );
 
-		spectrapro_300i.grating[ grating - 1 ].is_calib = UNSET;
+		spectrapro_300i.grating[ gn ].is_calib = UNSET;
 
 		spectrapro_300i.use_calib = UNSET;
 		for ( i = 0; i < MAX_GRATINGS; i++ )
-			if ( spectrapro_300i.grating[ grating - 1 ].is_calib )
+			if ( spectrapro_300i.grating[ gn ].is_calib )
 				spectrapro_300i.use_calib = SET;
 
 		return vars_push( INT_VAR, 1 );
@@ -1039,10 +1050,10 @@ Var *monochromator_set_calibration( Var *v )
 
 	too_many_arguments( v );
 
-	spectrapro_300i.grating[ grating - 1 ].inclusion_angle = inclusion_angle;
-	spectrapro_300i.grating[ grating - 1 ].focal_length    = focal_length;
-	spectrapro_300i.grating[ grating - 1 ].detector_angle  = detector_angle;
-	spectrapro_300i.grating[ grating - 1 ].is_calib        = SET;
+	spectrapro_300i.grating[ gn	].inclusion_angle = inclusion_angle;
+	spectrapro_300i.grating[ gn	].focal_length    = focal_length;
+	spectrapro_300i.grating[ gn	].detector_angle  = detector_angle;
+	spectrapro_300i.grating[ gn	].is_calib        = SET;
 	spectrapro_300i.use_calib = SET;
 
 	return vars_push( INT_VAR, 1 );
@@ -1061,6 +1072,7 @@ Var *monochromator_set_calibration( Var *v )
 Var *monochromator_zero_offset( Var *v )
 {
 	long grating;
+	long gn;
 	double offset;
 
 
@@ -1072,39 +1084,40 @@ Var *monochromator_zero_offset( Var *v )
 
 	grating = get_strict_long( v, "grating number" );
 
-	if ( grating < 1 && grating > MAX_GRATINGS )
+	if ( grating < 1 || grating > MAX_GRATINGS )
 	{
 		print( FATAL, "Invalid grating number, must be in range between "
 			   "1 and %d.\n", MAX_GRATINGS );
 		THROW( EXCEPTION );
 	}
 
-	if ( ! spectrapro_300i.grating[ grating - 1 ].is_installed )
+	gn = grating - 1;
+
+	if ( ! spectrapro_300i.grating[ gn ].is_installed )
 	{
 		print( FATAL, "Grating #%ld isn't installed.\n", grating );
 		THROW( EXCEPTION );
 	}
 
 	if ( FSC2_MODE == TEST )
-		spectrapro_300i.grating[ grating - 1 ].used_in_test = SET;
+		spectrapro_300i.grating[ gn ].used_in_test = SET;
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
-		if ( FSC2_MODE == TEST )
-			return vars_push( FLOAT_VAR,
-						  spectrapro_300i.grating[ grating - 1 ].init_offset );
+		if ( FSC2_MODE == EXPERIMENT )
+			spectrapro_300i.grating[ gn ].init_offset =
+				( ( double ) spectrapro_300i_get_offset( gn )
+				  - ( gn % 3 ) * INIT_OFFSET )
+				* spectrapro_300i.grating[ gn ].grooves / INIT_OFFSET_RANGE;
 		return vars_push( FLOAT_VAR,
-						  spectrapro_300i_get_offset( grating )
-						  / INIT_OFFSET_RANGE );
+						  spectrapro_300i.grating[ gn ].init_offset );
 	}
 
-	offset = get_double( v, "grating offset value" );
+	offset = get_double( v, "zero offset value" );
 
-	if ( abs( lrnd( offset * INIT_OFFSET_RANGE /
-					spectrapro_300i.grating[ grating ].grooves ) ) >
-		 INIT_OFFSET_RANGE / spectrapro_300i.grating[ grating ].grooves )
+	if ( abs( offset ) > 1.0 )
 	{
-		print( FATAL, "Grating offset value is too large, valid range is "
+		print( FATAL, "Zero offset value is too large, valid range is "
 			   "[-1,+1].\n" );
 		THROW( EXCEPTION );
 	}
@@ -1112,12 +1125,12 @@ Var *monochromator_zero_offset( Var *v )
 	too_many_arguments( v );
 
 	if ( FSC2_MODE == EXPERIMENT )
-		spectrapro_300i_set_offset( grating,
-								lrnd( offset * INIT_OFFSET_RANGE /
-									 spectrapro_300i.grating[ grating ].grooves
-								   + ( ( grating - 1 ) % 3 ) * INIT_OFFSET ) );
+		spectrapro_300i_set_offset( gn,
+									lrnd( offset * INIT_OFFSET_RANGE /
+										  spectrapro_300i.grating[ gn ].grooves
+										  + ( gn % 3 ) * INIT_OFFSET ) );
 
-	spectrapro_300i.grating[ grating - 1 ].init_offset = offset;
+	spectrapro_300i.grating[ gn ].init_offset = offset;
 
 	return vars_push( FLOAT_VAR, offset );
 }
@@ -1138,6 +1151,7 @@ Var *monochromator_zero_offset( Var *v )
 Var *monochromator_grating_adjust( Var *v )
 {
 	long grating;
+	long gn;
 	double gadjust;
 
 
@@ -1149,49 +1163,51 @@ Var *monochromator_grating_adjust( Var *v )
 
 	grating = get_strict_long( v, "grating number" );
 
-	if ( grating < 1 && grating > MAX_GRATINGS )
+	gn = grating - 1;
+
+	if ( grating < 0 || grating >= MAX_GRATINGS )
 	{
 		print( FATAL, "Invalid grating number, must be in range between "
 			   "1 and %d.\n", MAX_GRATINGS );
 		THROW( EXCEPTION );
 	}
 
-	if ( ! spectrapro_300i.grating[ grating - 1 ].is_installed )
+	if ( ! spectrapro_300i.grating[ gn ].is_installed )
 	{
 		print( FATAL, "Grating #%ld isn't installed.\n", grating );
 		THROW( EXCEPTION );
 	}
 
 	if ( FSC2_MODE == TEST )
-		spectrapro_300i.grating[ grating - 1 ].used_in_test = SET;
+		spectrapro_300i.grating[ gn ].used_in_test = SET;
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
-		if ( FSC2_MODE == TEST )
-			return vars_push( FLOAT_VAR,
-						  spectrapro_300i.grating[ grating - 1 ].init_adjust );
+		if ( FSC2_MODE == EXPERIMENT )
+			spectrapro_300i.grating[ gn ].init_adjust =
+				( double ) ( spectrapro_300i_get_adjust( gn ) - INIT_ADJUST )
+				/ INIT_ADJUST_RANGE;
+
 		return vars_push( FLOAT_VAR,
-						  spectrapro_300i_get_adjust( grating )
-						  / INIT_ADJUST_RANGE );
+						  spectrapro_300i.grating[ gn ].init_adjust );
 	}
 
 	gadjust = get_double( v, "grating adjust value" );
 
-	if ( abs( lrnd( gadjust * INIT_ADJUST_RANGE ) ) > INIT_ADJUST_RANGE )
+	if ( abs( gadjust ) > 1.0 )
 	{
-		print( FATAL, "Grating adjust value is too large, valid range is "
-			   "[-1,1].\n" );
+		print( FATAL, "Grating adjust value of %2.f is too large, valid "
+			   "range is [-1,1].\n", gadjust );
 		THROW( EXCEPTION );
 	}
 
 	too_many_arguments( v );
 
 	if ( FSC2_MODE == EXPERIMENT )
-		spectrapro_300i_set_adjust( grating,
-									lrnd( gadjust * INIT_ADJUST_RANGE
-										  + INIT_ADJUST ) );
+		spectrapro_300i_set_adjust( gn, lrnd( gadjust * INIT_ADJUST_RANGE
+											  + INIT_ADJUST ) );
 
-	spectrapro_300i.grating[ grating - 1 ].init_adjust = gadjust;
+	spectrapro_300i.grating[ gn ].init_adjust = gadjust;
 
 	return vars_push( FLOAT_VAR, gadjust );
 }
@@ -1233,6 +1249,7 @@ Var *monochromator_calibrate( Var *v )
 	Var *cv;
 	int acc;
 	long grating;
+	long gn;
 	double *x = NULL, *dx;
 	double epsilon;
 	double val;
@@ -1262,21 +1279,23 @@ Var *monochromator_calibrate( Var *v )
 
 	grating = get_strict_long( v, "grating number" );
 
-	if ( grating < 1 && grating > MAX_GRATINGS )
+	if ( grating < 1 || grating > MAX_GRATINGS )
 	{
 		print( FATAL, "Invalid grating number, must be in range between "
 			   "1 and %d.\n", MAX_GRATINGS );
 		THROW( EXCEPTION );
 	}
 
-	if ( ! spectrapro_300i.grating[ grating - 1 ].is_installed )
+	gn = grating - 1;
+
+	if ( ! spectrapro_300i.grating[ gn ].is_installed )
 	{
 		print( FATAL, "Grating #%ld isn't installed.\n", grating );
 		THROW( EXCEPTION );
 	}
 
 	if ( FSC2_MODE == TEST )
-		spectrapro_300i.grating[ grating - 1 ].used_in_test = SET;
+		spectrapro_300i.grating[ gn ].used_in_test = SET;
 
 	v = vars_pop( v );
 
@@ -1397,7 +1416,7 @@ Var *monochromator_calibrate( Var *v )
 
 		/* Get the grating constant */
 
-		c.d = 1.0 / spectrapro_300i.grating[ grating - 1 ].grooves;
+		c.d = 1.0 / spectrapro_300i.grating[ gn ].grooves;
 	
 		/* Get the pixel size of the camera */
 

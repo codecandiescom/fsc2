@@ -40,8 +40,8 @@ struct SPECTRAPRO_300I {
 	bool is_open;           /* is the device file open ? */
     struct termios *tio;    /* serial port terminal interface structure */
 	double wavelength;      /* current wavelength */
-	long turret;            /* current turret, range 0-2 */
-	long current_grating;   /* current grating, range 0-8 */
+	long tn;                /* current turret number, range 0-2 */
+	long current_gn;        /* current grating number, range 0-8 */
 	bool use_calib;         /* can calibration info be used ? */
 	struct {
 		bool is_installed;  /* is grating installed at all ? */
@@ -126,16 +126,16 @@ void spectrapro_300i_close( void );
 double spectrapro_300i_get_wavelength( void );
 void spectrapro_300i_set_wavelength( double wavelength );
 long spectrapro_300i_get_turret( void );
-void spectrapro_300i_set_turret( long turret );
+void spectrapro_300i_set_turret( long tn );
 long spectrapro_300i_get_grating( void );
-void spectrapro_300i_set_grating( long grating );
+void spectrapro_300i_set_grating( long gn );
 void spectrapro_300i_get_gratings( void );
-long spectrapro_300i_get_offset( long grating );
-void spectrapro_300i_set_offset( long grating, long offset );
-long spectrapro_300i_get_adjust( long grating );
-void spectrapro_300i_set_adjust( long grating, long adjust );
-void spectrapro_300i_install_grating( char *part_no, long grating );
-void spectrapro_300i_uninstall_grating( long grating );
+long spectrapro_300i_get_offset( long gn );
+void spectrapro_300i_set_offset( long gn, long offset );
+long spectrapro_300i_get_adjust( long gn );
+void spectrapro_300i_set_adjust( long gn, long adjust );
+void spectrapro_300i_install_grating( long gn, const char *part_no );
+void spectrapro_300i_uninstall_grating( long gn );
 
 
 void spectrapro_300i_read_calib( FILE *fp, const char *calib_file );
