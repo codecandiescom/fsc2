@@ -299,6 +299,7 @@ if ( $num_runs != 1 ) {
 	fsave( \"\\n\" );
     IF ( J < N_runs ) \{
 		reset_field( );
+		wait( tc );
 	\}
 \}
 
