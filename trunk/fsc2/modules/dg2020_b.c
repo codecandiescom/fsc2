@@ -543,8 +543,9 @@ int dg2020_b_end_of_exp_hook( void )
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
 		f = dg2020.function + i;
-		f->pulse_params = PULSE_PARAMS_P T_free( f->pulse_params );
-		f->old_pulse_params = PULSE_PARAMS_P T_free( f->old_pulse_params );
+		if ( f->pulse_params )
+			f->pulse_params = PULSE_PARAMS_P T_free( f->pulse_params );
+		f->old_pulse_params = NULL;
 	}
 
 	/* Finally reset the internal representation back to its initial state

@@ -273,12 +273,19 @@ static void dg2020_basic_functions_check( void )
 				f->num_active_pulses++;
 		}
 
-		/* Check if the function has pulses assigned to it, otherwise print
-		   a warning and reduce the number of channels it gets to 1 */
+		/* Check if the function has pulses assigned to it, if not print
+		   a warning, otherwise allocate memory for two sets of pulse
+		   parameter structures for the function. */
 
 		if ( f->num_pulses == 0 )
 			print( WARN, "No pulses have been assigned to function '%s'.\n",
 				   f->name );
+		else
+		{
+			f->pulse_params = PULSE_PARAMS_P T_malloc( 2 * f->num_pulses
+												   * sizeof *f->pulse_params );
+			f->old_pulse_params = f->pulse_params + f->num_pulses;
+		}
 
 		/* Check that for functions that need phase cycling there was also a
 		   PHASE_SETUP command */

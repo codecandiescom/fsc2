@@ -215,28 +215,21 @@ void dg2020_do_checks( FUNCTION *f )
 	int i;
 
 
+	memcpy( f->old_pulse_params, f->pulse_params,
+			f->num_pulses * sizeof *f->pulse_params );
+	f->num_params = f->num_active_pulses;
+	
 	if ( f->num_active_pulses == 0 )
 		return;
 
-	if ( f->old_pulse_params )
-		T_free( f->old_pulse_params );
-	f->old_pulse_params = f->pulse_params;
-	f->num_params = f->num_active_pulses;
-	f->pulse_params = PULSE_PARAMS_P T_malloc( f->num_params
-											   * sizeof *f->pulse_params );
-	
 	for ( i = 0; i < f->num_active_pulses; i++ )
 	{
 		p = f->pulses[ i ];
 
-		if ( ! p->is_active )
-			continue;
-
-		pp = f->pulse_params + i;
+		p->old_pp = p->pp + f->num_pulses;
+		p->pp = pp = f->pulse_params + i;
 
 		pp->pulse = p;
-		p->old_pp = p->pp;
-		p->pp = pp;
 		pp->pos = p->pos + f->delay;
 		pp->len = p->len;
 
