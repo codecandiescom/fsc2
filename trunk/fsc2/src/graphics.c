@@ -33,7 +33,7 @@ void start_graphics( void )
 {
 	XCharStruct font_prop;
 	int dummy;
-	char *bitmap_file;
+	char *pixmap_file;
 
 
 	/* Create the form for running experiments */
@@ -42,12 +42,22 @@ void start_graphics( void )
 
 	/* It still need some modifications... */
 
-	bitmap_file = get_string( strlen( libdir ) + strlen( "/undo.xbm" ) );
-	strcpy( bitmap_file, libdir );
+	pixmap_file = get_string( strlen( libdir ) + strlen( "/undo.xpm" ) );
+	strcpy( pixmap_file, libdir );
 	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
-		strcat( bitmap_file, "/" );
-	strcat( bitmap_file, "undo.xbm" );
-    fl_set_bitmapbutton_file( run_form->undo_button, bitmap_file );
+		strcat( pixmap_file, "/" );
+	strcat( pixmap_file, "undo.xpm" );
+    fl_set_pixmapbutton_file( run_form->undo_button, pixmap_file );
+	T_free( pixmap_file );
+
+	pixmap_file = get_string( strlen( libdir ) + strlen( "/printer.xpm" ) );
+	strcpy( pixmap_file, libdir );
+	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
+		strcat( pixmap_file, "/" );
+	strcat( pixmap_file, "printer.xpm" );
+    fl_set_pixmapbutton_file( run_form->print_button, pixmap_file );
+	T_free( pixmap_file );
+	fl_set_object_helper( run_form->print_button, "Print results" );
 
 	fl_set_object_helper( run_form->stop, "Stop the running program" );
 	fl_set_object_helper( run_form->undo_button,
@@ -79,6 +89,8 @@ void start_graphics( void )
 		fl_set_button( run_form->curve_2_button, 0 );
 		fl_set_button( run_form->curve_3_button, 0 );
 		fl_set_button( run_form->curve_4_button, 0 );
+
+		fl_set_object_callback( run_form->print_button, print_2d, 0 );
 
 		G.active_curve = 0;
 	}
