@@ -1321,7 +1321,7 @@ Var *f_rms( Var *v )
 		}
 		else
 		{
-			val += *idp * idp;
+			val += *idp * *idp;
 			idp++;
 		}
 
