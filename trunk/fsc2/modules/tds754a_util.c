@@ -101,11 +101,6 @@ void tds754a_do_pre_exp_checks( void )
 		tds754a.gated_state = UNSET;
 		return;
 	}
-	else
-	{
-		tds754a_set_gated_meas( SET );
-		tds754a.gated_state = SET;
-	}
 
 	/* If not get the distance of the cursors on the digitizers screen and
 	   use it as the default width. */
@@ -191,6 +186,11 @@ void tds754a_do_pre_exp_checks( void )
 			THROW( EXCEPTION );
 		}
     }
+
+	/* Now that al windows are properly set we switch on gated measurements */
+
+	tds754a_set_gated_meas( SET );
+	tds754a.gated_state = SET;
 
 	/* If the widths of all windows are equal we switch on tracking cursor
 	   mode and set the cursors to the position of the first window */
