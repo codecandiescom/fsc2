@@ -1076,7 +1076,7 @@ bool magnet_do( int command )
 
 		case SERIAL_TRIGGER :                 /* send trigger pattern */
 			data[ 0 ] = 0x20;
-			fsc2_write( magnet.fd, ( void * ) &data, 1 );
+			fsc2_serial_write( magnet.fd, ( void * ) &data, 1 );
 			usleep( SERIAL_TIME );
 			break;
 
