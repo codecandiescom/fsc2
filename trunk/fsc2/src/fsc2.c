@@ -96,9 +96,8 @@ int main( int argc, char *argv[ ] )
 
 	if ( uname( &utsbuf ) == 0 &&
 		 utsbuf.machine[ 0 ] == 'i' &&
-		 utsbuf.machine[ 1 ] >= '3' && utsbuf.machine[ 1 ] <= '6'
-		 utsbuf.machine[ 2 ] == '8' &&
-		 utsbuf.machine[ 3 ] == '6' )
+		 utsbuf.machine[ 1 ] >= '3' && utsbuf.machine[ 1 ] <= '6' &&
+		 ! strncmp( utsbuf.machine + 2, "86", 2 ) )
 		is_i386 = SET;
 
 	/* First we have to test for command line arguments */
