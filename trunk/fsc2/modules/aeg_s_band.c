@@ -21,6 +21,7 @@
   Boston, MA 02111-1307, USA.
 */
 
+
 #include "fsc2.h"
 #include <termios.h>
 #include <unistd.h>
