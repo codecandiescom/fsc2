@@ -104,21 +104,21 @@ line:    P_TOK prop
 ;
 
 ass:     '=' expr                  { vars_assign( $2, $2->prev ); }
-       | PLSA expr                 { Var **C = &( $2->prev );
-	                                 vars_assign( vars_add( vars_val( *C ),
-															$2 ), *C ); }
-       | MINA expr                 { Var **C = &( $2->prev );
-	                                 vars_assign( vars_sub( vars_val( *C ),
-															$2 ), *C ); }
-       | MULA expr                 { Var **C = &( $2->prev );
-	                                 vars_assign( vars_mult( vars_val( *C ),
-															 $2 ), *C ); }
-       | DIVA expr                 { Var **C = &( $2->prev );
-	                                 vars_assign( vars_div( vars_val( *C ),
-															$2 ), *C ); }
-       | MODA expr                 { Var **C = &( $2->prev );
-	                                 vars_assign( vars_div( vars_val( *C ),
-															$2 ), *C ); }
+       | PLSA expr                 { Var *C = $2->prev;
+	                                 vars_assign( vars_add( vars_val( C ),
+															$2 ), C ); }
+       | MINA expr                 { Var *C = $2->prev;
+	                                 vars_assign( vars_sub( vars_val( C ),
+															$2 ), C ); }
+       | MULA expr                 { Var *C = $2->prev;
+	                                 vars_assign( vars_mult( vars_val( C ),
+															 $2 ), C ); }
+       | DIVA expr                 { Var *C = $2->prev;
+	                                 vars_assign( vars_div( vars_val( C ),
+															$2 ), C ); }
+       | MODA expr                 { Var *C = $2->prev;
+	                                 vars_assign( vars_div( vars_val( C ),
+															$2 ), C ); }
 ;                                     
 
 
