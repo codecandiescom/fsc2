@@ -60,7 +60,7 @@ extern char *varstext;
 
 %token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN KT_TOKEN MGT_TOKEN
 %token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
-%type <vptr> expr arrass list1 list1a list2 list3 unit
+%type <vptr> expr arrass list1 list1a list2 list3 list3a unit
 
 
 
@@ -172,7 +172,7 @@ list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
        | list1a list1b
 ;
 
-list1a:   expr                     { }
+list1a:   expr                     { $$ = $1; }
         | '*'                      { ( $$ = vars_push( INT_VAR, 0 ) )->flags
 										                   |= VARIABLE_SIZED; }
 ;
@@ -184,30 +184,57 @@ list1b:   /* empty */
 /* list of data for initialization of a newly declared array */
 
 arrass:   '{' '}'                  { $$ = vars_push( UNDEF_VAR ); }
-        | '{' list2 '}'            { $$ = $2; }
+        | '{' list2 l2e '}'        { $$ = $2; }
+	    | '{' ','                  { print( FATAL, "Superfluous comma in "
+											"initializer list.\n" );
+	                                 THROW( EXCEPTION ); }
 ;
 
-list2:   expr
+l2e:     /* empty */
+       | ','                       { print( FATAL, "Superfluous comma in "
+											"initializer list.\n" );
+	                                 THROW( EXCEPTION ); }
+;
+
+list2:   expr                      { $$ = $1; }
        | list2 ',' expr            { $$ = $3; }
 ;
 
 /* list of indices for access of an array element */
 
 list3:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
-	   | expr list3a               { }
+	   | list3a l3e                { }
+	   | ','                       { print( FATAL, "Superfluous comma in "
+											"array index list.\n" );
+	                                 THROW( EXCEPTION ); }
 ;
 
-list3a:   /* empty */
+l3e:     /* empty */
+       | ','                       { print( FATAL, "Superfluous comma in "
+											"array index list.\n" );
+	                                 THROW( EXCEPTION ); }
+;
+
+list3a:   expr
 	    | list3a ',' expr
 ;
 
 /* list of function arguments */
 
 list4:   /* empty */
-       | exprs list4a
+       | list4a l4e
+       | ','                       { print( FATAL, "Superfluous comma in "
+											"function argument list.\n" );
+	                                 THROW( EXCEPTION ); }
 ;
 
-list4a:   /* empty */
+l4e:     /* empty */
+       | ','                       { print( FATAL, "Superfluous comma in "
+											"function argument list.\n" );
+	                                 THROW( EXCEPTION ); }
+;
+
+list4a:   exprs
         | list4a ',' exprs
 ;
 
