@@ -7,8 +7,8 @@ Programs for controlling spectrometers are usually home-written and
 often restricted to doing a certain set of experiments with a fixed
 hardware base. In contrast, fsc2 is much more flexible because, on
 the one hand, it interprets a rather simple but powerful scripting
-language EDL (Experiment Description Language) and, on the other hand,
-has a strictly modular approach to the handling of devices. This allows
+language (EDL, Experiment Description Language) and, on the other hand,
+has a strictly modular approach to handling of devices. This allows
 setting up a completely new experiment or changing an already existing
 one fast and easily without requiring any detailed knowledge of the
 internals of fsc2 or on how exactly the devices have to be controlled.
@@ -16,15 +16,16 @@ internals of fsc2 or on how exactly the devices have to be controlled.
 Download
 --------
 
-You can download the sources for the program and the device modules or
-the documentation from
+You can download the sources for the program and the device modules from
 
        http://www.physik.fu-berlin.de/~toerring/fsc2.tar.gz
+
+The documentation in Postscript or PDF format is at
 
 	   http://www.physik.fu-berlin.de/~toerring/fsc2/fsc2.ps.gz
 	   http://www.physik.fu-berlin.de/~toerring/fsc2/fsc2/fsc2.pdf
 
-or just read the HTTP version of the documentation at
+You will find an online version of the documentation at
 
        http://www.physik.fu-berlin.de/~toerring/fsc2
 
