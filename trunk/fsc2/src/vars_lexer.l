@@ -83,6 +83,7 @@ STR         \x5[^\x6]*\x6
 ESTR        \x5.*\x3\n.*\n
 
 INT         [0-9]+
+HEX         0[xX][0-9A-Fa-f]+
 EXPO        [EDed][+-]?{INT}
 FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
@@ -205,6 +206,11 @@ WS          [\n \t]+
 			/* Handling of integer and floating point numbers */
 {INT}       {
 				varslval.lval = T_atol( varstext );
+                return INT_TOKEN;
+            }
+
+{HEX}       {
+				varslval.lval = T_htol( varstext );
                 return INT_TOKEN;
             }
 
