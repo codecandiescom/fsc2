@@ -732,7 +732,7 @@ static bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 
 		   The first happens on a Linux system with kernel 2.0.36 while the
 		   latter happens on a newer system, e.g. 2.2.12. On the older system
-		   this leads to trouble: After he parent sent its data and While the
+		   this leads to trouble: After he parent sent its data and while the
 		   child is still waiting for data or has just started to read the
 		   parent also sends a DO_SEND signal. This may interrupt the child's
 		   read(), returning -1 with errno set to EINTR while nothing or not
