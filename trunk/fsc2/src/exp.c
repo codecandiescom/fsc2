@@ -47,16 +47,12 @@ extern int exp_testparse( void );         /* from exp_parser.y */
 extern int exp_runparse( void );          /* from exp_run_parser.y */
 extern int conditionparse( void );        /* from condition_parser.y */
 
-
 Token_Val exp_val;                        /* exported to exp_lexer.flex */
 
 extern int explex( void );                /* from exp_lexer.flex */
 extern FILE *expin;                       /* from exp_lexer.flex */
 extern Token_Val exp_runlval;             /* from exp_run_parser.y */
 extern Token_Val conditionlval;           /* from condition_parser.y */
-
-extern char *Fname;
-extern long Lc;
 
 extern void exprestart( FILE *expin );
 
@@ -72,29 +68,26 @@ static void exp_syntax_check( void );
 static void save_restore_variables( bool flag );
 
 
-
 /*-----------------------------------------------------------------------------
-   This routine stores the experiment section of an EDL file in the form of
-   tokens (together with their semantic values if there are any) as returned
-   by the lexer. Thus it serves as a kind of intermediate between the lexer
-   and the parser. This is necessary for two reasons: First, the experiment
-   section may contain loops. Without an intermediate it would be rather
-   difficult to run through the loops since we would have to re-read and
-   re-tokenise the input file again and again, which not only would be
-   painfully slow but also difficult since what we read is not the real EDL
-   file(s) but a pipe that contains what remains after filtering through the
-   program `fsc2_clean'. Second, we will have to run through the experiment
-   section at least two times, first for syntax and sanity checks and then
-   again for really doing the experiment. Again, without an intermediate for
-   storing the tokenised form of the experiment section this would necessitate
-   reading the input files at least two times.
+  This routine stores the experiment section of an EDL file in the form of
+  tokens (together with their semantic values if there are any) as returned
+  by the lexer. Thus it serves as a kind of intermediate between the lexer
+  and the parser. This is necessary for two reasons: First, the experiment
+  section may contain loops. Without an intermediate it would be rather
+  difficult to run through the loops since we would have to re-read and
+  re-tokenise the input file again and again, which not only would be
+  painfully slow but also difficult since what we read is not the real EDL
+  file(s) but a pipe that contains what remains after filtering through the
+  program `fsc2_clean'. Second, we will have to run through the experiment
+  section at least three times, first for syntax and sanity checks, then for
+  the test run and finally for really doing the experiment.
 
-   By having an intermediate between the lexer and the parser we avoid several
-   problems. We don't have to re-read and re-tokenise the input file. We also
-   can find out about loops and handle them later by simply feeding the parser
-   the loop again and again. Of course, beside storing the experiment section
-   in tokenised form as done by this function, we also need a routine that
-   later feeds the stored tokens to the parser(s) - exp_runlex().
+  By having an intermediate between the lexer and the parser we avoid several
+  problems. We don't have to re-read and re-tokenise the input file. We also
+  can find out about loops and handle them later by simply feeding the parser
+  the loop again and again. Of course, beside storing the experiment section
+  in tokenised form as done by this function, we also need routines that later
+  feed the stored tokens to the parsers - exp_testlex() and exp_runlex().
 -----------------------------------------------------------------------------*/
 
 
@@ -303,8 +296,7 @@ void store_exp( FILE *in )
 			case BREAK_TOK : case CONT_TOK :
 				if ( ! in_loop )
 				{
-					eprint( FATAL, SET, "Found a %s statement not located "
-							"within a loop.\n",
+					eprint( FATAL, SET, "%s statement not within a loop.\n",
 							ret == BREAK_TOK ? "BREAK" : "NEXT" );
 					THROW( EXCEPTION );
 				}
@@ -375,12 +367,12 @@ static void push_curly_brace( const char *Fname, long Lc )
 
 
 /*---------------------------------------------------------------------------*/
-/* Function is called when a closing curly brace is found in the inpit file  */
-/* to delete the entry on the curly brace stack for the corresponding        */
+/* Function is called when a closing curly brace is found in the input file  */
+/* to remove the entry on the curly brace stack for the corresponding        */
 /* opening brace. It returns OK when there was a corresponding opening brace */
-/* (i.e. the number of opening and closing braces aren't unbalanced in favor */
-/* of closing braces), otherwise FAIL is returned. This function is also     */
-/* when getting rid of the curly brace stack after an exception was thrown.  */
+/* (i.e. opening and closing braces aren't unbalanced in favour of closing), */
+/* otherwise FAIL is returned. This function is also used when getting rid   */
+/* of the curly brace stack after an exception was thrown.                   */
 /*---------------------------------------------------------------------------*/
 
 static bool pop_curly_brace( void )
@@ -629,7 +621,8 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 	Prg_Token *cur = prg_token + *pos;
 	long i = *pos + 1;
 	bool in_if = SET;
-	bool dont_need_close_parans = UNSET;      /* set for IF-ELSE constructs */
+	bool dont_need_close_parans = UNSET;           /* set for IF-ELSE and 
+													  UNLESS-ELSE constructs */
 
 
 	/* Start with some sanity checks */
@@ -661,12 +654,24 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 				break;
 
 			case CONT_TOK :
-				fsc2_assert( cur_wr != NULL );
+				if ( cur_wr == NULL )
+				{
+					eprint( FATAL, UNSET, "%s:%ld: NEXT statement not within "
+							"a loop.\n",
+							prg_token[ i ].Fname, prg_token[ i ].Lc );
+					THROW( EXCEPTION );
+				}
 				prg_token[ i ].start = cur_wr;
 				break;
 
 			case BREAK_TOK :
-				fsc2_assert( cur_wr != NULL );
+				if ( cur_wr == NULL )
+				{
+					eprint( FATAL, UNSET, "%s:%ld: BREAK statement not within "
+							"a loop.\n",
+							prg_token[ i ].Fname, prg_token[ i ].Lc );
+					THROW( EXCEPTION );
+				}
 				prg_token[ i ].start = cur_wr;
 				break;
 
