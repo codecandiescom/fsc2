@@ -478,7 +478,11 @@ static void dg2020_setup_pmatrix( FUNCTION *f )
 
 	assert( f->pm != NULL && f->pcm == NULL );
 
-	if ( f->num_channels < f->pc_len * ( PHASE_CW - PHASE_PLUS_X + 1 ) )
+	/* If the number of needed channels is smaller than the size of the phase
+	   type / phase sequence matrix we will need one extra channel for the
+	   constant voltage */
+
+	if ( f->num_needed_channels < f->pc_len * ( PHASE_CW - PHASE_PLUS_X + 1 ) )
 		cur_channel = 1;
 	else
 		cur_channel = 0;
@@ -503,9 +507,6 @@ static void dg2020_setup_pmatrix( FUNCTION *f )
 static void dg2020_pulse_start_setup( void )
 {
 }
-
-
-
 
 
 /*--------------------------------------------------------------------------

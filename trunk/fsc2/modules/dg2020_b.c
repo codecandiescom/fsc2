@@ -288,25 +288,48 @@ void dg2020_b_exit_hook( void )
 	dg2020_Pulses = NULL;
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		if ( dg2020.function[ i ].pcm != NULL )
+		{
+			T_free( dg2020.function[ i ].pcm );
+			dg2020.function[ i ].pcm = NULL;
+		}
+		
 		if ( dg2020.function[ i ].pulses != NULL )
 			T_free( dg2020.function[ i ].pulses );
+	}
 }
 
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 Var *pulser_update( Var *v)
 {
 	return vars_push( INT_VAR, 1 );
 }
 
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 Var *pulser_next_phase( Var *v)
 {
 	return vars_push( INT_VAR, 1 );
 }
 
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 Var *pulser_shift( Var *v)
 {
 	return vars_push( INT_VAR, 1 );
 }
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 Var *pulser_increment( Var *v)
 {
