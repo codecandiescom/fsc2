@@ -37,7 +37,7 @@ int fsc2_assert_print( const char *expression, const char *filename,
 
 
 #ifdef NDEBUG
-#define fsc2_assert( ignore ) ( 0 )
+#define fsc2_assert( expression ) ( ( void ) 0 )
 #else
 #define fsc2_assert( expression )    \
        ( ( void ) ( ( expression ) ? \
