@@ -28,6 +28,8 @@
 #define EXCEPTIONS_HEADER
 
 #include <setjmp.h>
+#include <syslog.h>
+
 
 enum {
 	NO_EXCEPTION                = 0,               /* must be 0 ! */
