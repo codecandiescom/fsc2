@@ -1034,7 +1034,7 @@ static double sr510_set_dac_voltage( long channel, double voltage )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-void sr510_lock_state( bool lock )
+static void sr510_lock_state( bool lock )
 {
 	char cmd[ 100 ];
 

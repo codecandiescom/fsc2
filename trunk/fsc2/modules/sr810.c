@@ -1398,7 +1398,7 @@ static double sr810_set_ref_level( double level )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-void sr810_lock_state( bool lock )
+static void sr810_lock_state( bool lock )
 {
 	char cmd[ 100 ];
 
