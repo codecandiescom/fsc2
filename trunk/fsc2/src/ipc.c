@@ -46,7 +46,7 @@ union semun {
 /* it waits for some time hoping for the parent process to remove    */
 /* other segments in the mean time. On success it writes the "magic" */
 /* string "fsc2" into the start of the segment and returns a pointer */
-/* to the following memory. If it fails completely it returns -1.    */
+/* to the following memory. If it fails completely it returns NULL.  */
 /*-------------------------------------------------------------------*/
 
 void *get_shm( int *shm_id, long len )
@@ -70,17 +70,17 @@ void *get_shm( int *shm_id, long len )
 					__FILE__, __LINE__, errno );
 #endif
 			lower_permissions( );
-			return ( void * ) -1;
+			return NULL;
 		}
 	}
 
 	/* Attach to the shared memory segment - if this should fail (improbable)
-	   return -1 and let the calling routine handle the mess... */
+	   return NULL and let the calling routine deal with the mess... */
 
 	if ( ( buf = shmat( *shm_id, NULL, 0 ) ) == ( void * ) - 1 )
 	{
 		lower_permissions( );
-		return ( void * ) -1;
+		return NULL;
 	}
 
 	/* Now write a "magic" string into the start of the shared memory to make
@@ -96,10 +96,10 @@ void *get_shm( int *shm_id, long len )
 /*---------------------------------------------------------------*/
 /* Function tries to attach to the shared memory associated with */
 /* 'key'. On success it returns a pointer to the memory region   */
-/* (skipping the "magic" string "fsc2"), on error it returns -1. */
+/* (skipping the magic string "fsc2"), on error it returns NULL. */
 /*---------------------------------------------------------------*/
 
-void *attach_shm( int key )
+char *attach_shm( int key )
 {
 	void *buf;
 
@@ -116,11 +116,11 @@ void *attach_shm( int key )
 #endif
 		shmctl( key, IPC_RMID, NULL );       /* delete the segment */
 		lower_permissions( );
-		return ( void * ) -1;
+		return ( void * ) NULL;
 	}
 
 	lower_permissions( );
-	return ( void * ) ( ( char * ) buf + 4 );
+	return ( char * ) buf + 4;
 }
 
 

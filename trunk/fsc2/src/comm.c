@@ -134,8 +134,7 @@ void setup_comm( void )
 	   memory buffers with the data the parent is supposed to display. */
 
 	if ( ( Comm.MQ = ( MESSAGE_QUEUE * ) get_shm( &Comm.MQ_ID,
-                                                  sizeof *Comm.MQ ) )
-		 == ( MESSAGE_QUEUE * ) -1 )
+                                                  sizeof *Comm.MQ ) ) == NULL )
 	{
 		Comm.MQ_ID = -1;
 		for ( i = 0; i < 4; i++ )

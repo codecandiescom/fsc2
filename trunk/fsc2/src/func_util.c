@@ -1023,7 +1023,7 @@ Var *f_dmode( Var *v )
 
 	/* Now try to get a shared memory segment */
 
-	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
 	{
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
@@ -1180,7 +1180,7 @@ Var *f_cscale_1d( Var *v )
 
 	/* Now try to get a shared memory segment */
 
-	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
 	{
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
@@ -1313,7 +1313,7 @@ Var *f_cscale_2d( Var *v )
 
 	/* Now try to get a shared memory segment */
 
-	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
 	{
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
@@ -1479,7 +1479,7 @@ Var *f_clabel_1d( Var *v )
 
 	/* Now try to get a shared memory segment */
 
-	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
 	{
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
@@ -1613,7 +1613,7 @@ Var *f_clabel_2d( Var *v )
 
 	/* Now try to get a shared memory segment */
 
-	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
 	{
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
@@ -1771,7 +1771,7 @@ Var *f_rescale_1d( Var *v )
 
 	/* Now try to get a shared memory segment */
 
-	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
 	{
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
@@ -1881,7 +1881,7 @@ Var *f_rescale_2d( Var *v )
 
 	/* Now try to get a shared memory segment */
 
-	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
 	{
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
@@ -2054,7 +2054,7 @@ Var *f_display_1d( Var *v )
 
 	/* Now try to get a shared memory segment */
 
-	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
 	{
 		T_free( dp );
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
@@ -2244,7 +2244,7 @@ Var *f_display_2d( Var *v )
 
 	/* Now try to get a shared memory segment */
 
-	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
 	{
 		T_free( dp );
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
@@ -2756,7 +2756,7 @@ Var *f_clearcv_1d( Var *v )
 	len =   sizeof len + sizeof type + sizeof count
 		  + count * sizeof *ca;
 
-	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
 	{
 		T_free( ca );
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
@@ -2904,7 +2904,7 @@ Var *f_clearcv_2d( Var *v )
 	len =   sizeof len + sizeof type + sizeof count
 		  + count * sizeof *ca;
 
-	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
 	{
 		T_free( ca );
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
@@ -3083,7 +3083,7 @@ Var *f_setmark_1d( Var *v )
 
 	len = sizeof len + sizeof type + sizeof position + sizeof color;
 
-	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
 	{
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
@@ -3248,7 +3248,7 @@ Var *f_setmark_2d( Var *v )
 	len =   sizeof len + sizeof type + sizeof x_pos + sizeof y_pos
 		  + sizeof color + sizeof curve;
 
-	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
 	{
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
@@ -3388,7 +3388,7 @@ Var *f_clearmark_1d( Var *v )
 
 	len = sizeof len + sizeof type;
 
-	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
 	{
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
@@ -3494,7 +3494,7 @@ Var *f_clearmark_2d( Var *v )
 
 	len = sizeof len + sizeof type + MAX_CURVES * sizeof *curves;
 
-	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
 	{
 		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );

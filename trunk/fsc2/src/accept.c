@@ -98,9 +98,8 @@ void accept_new_data( bool empty_queue )
 		   sometimes does (seems to be 2.0 kernels only) so we better have a
 		   bit more of error output until this is finally sorted out. */
 
-		if ( ( buf =
-			    ( char * ) attach_shm( Comm.MQ->slot[ Comm.MQ->low ].shm_id ) )
-			 == ( char * ) - 1 )
+		if ( ( buf = attach_shm( Comm.MQ->slot[ Comm.MQ->low ].shm_id ) )
+			 == NULL )
 		{
 #ifndef NDEBUG
 			eprint( FATAL, UNSET, "Internal communication error at %s:%d, "
