@@ -25,7 +25,7 @@
 
 @setfilename fsc2.info
 @settitle fsc2
-@set lastupdate January 14, 2003
+@set lastupdate January 15, 2003
 @iftex
 @afourpaper
 @end iftex
@@ -153,6 +153,7 @@ translation approved by the Free Software Foundation.
 @include modules.texi
 @include dev_ref.texi
 @include reserved.texi
+@include emacs.texi
 @include ack.texi
 @include gpl.texi
 
