@@ -448,12 +448,12 @@ static void fork_failure( int stored_errno )
 			break;
 
 		default :
-			if ( errno < sys_nerr )
+			if ( stored_errno < sys_nerr )
 				eprint( FATAL, UNSET, "System error \"%s\" when trying to "
-						"start experiment.\n", sys_errlist[ errno ] );
+						"start experiment.\n", sys_errlist[ stored_errno ] );
 			else
 				eprint( FATAL, UNSET, "Unknown system error (errno = %d) "
-						"when trying to start experiment.\n", errno );
+						"when trying to start experiment.\n", stored_errno );
 			fl_show_alert( "FATAL Error", "System error on start of "
 						   "experiment.", NULL, 1 );
 			break;
