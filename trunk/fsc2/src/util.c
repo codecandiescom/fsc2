@@ -262,6 +262,17 @@ inline short d2shrt( double a )
 	return ( short ) rnd( a );
 }
 
+
+inline short i2shrt( int a )
+{
+	if ( a > SHRT_MAX )
+		return SHRT_MAX;
+	if ( a < SHRT_MIN )
+		return SHRT_MIN;
+	return ( short ) a;
+}
+
+
 inline int    i_max( int    a, int    b ) { return a > b ? a : b ; }
 inline int    i_min( int    a, int    b ) { return a < b ? a : b ; }
 inline long   l_max( long   a, long   b ) { return a > b ? a : b ; }
