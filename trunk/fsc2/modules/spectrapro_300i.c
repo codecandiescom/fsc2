@@ -21,13 +21,11 @@
   Boston, MA 02111-1307, USA.
 */
 
+#define SPECTRAPRO_300I_MAIN
 
-#include "fsc2_module.h"
 
+#include "spectrapro_300i.h"
 
-/* Include configuration information for the device */
-
-#include "spectrapro_300i.conf"
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
@@ -36,16 +34,6 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define SPECTRAPRO_300I_WAIT  100000   /* 100 ms */
 
 
-int spectrapro_300i_init_hook( void );
-int spectrapro_300i_exp_hook( void );
-int spectrapro_300i_end_of_exp_hook( void );
-void spectrapro_300i_exit_hook( void );
-Var *monochromator_name( Var *v );
-Var *monochromator_turret( Var *v );
-Var *monochromator_grating( Var *v );
-Var *monochromator_wavelength( Var *v );
-Var *monochromator_install_grating( Var *v );
-Var *monochromator_groove_density( Var *v );
 static bool spectrapro_300i_open( void );
 static bool spectrapro_300i_close( void );
 static long spectrapro_300i_get_turret( void );
@@ -59,26 +47,6 @@ static char *spectrapro_300i_talk( const char *buf, size_t len,
 								   long wait_cycles );
 static bool spectrapro_300i_comm( int type, ... );
 static void spectrapro_300i_comm_fail( void );
-
-
-typedef struct SPECTRAPRO_300I SPECTRAPRO_300I;
-
-struct SPECTRAPRO_300I {
-	bool is_needed;         /* is the gaussmter needed at all? */
-    struct termios *tio;    /* serial port terminal interface structure */
-	double wavelength;
-	long turret;            /* current turret, range 0-2 */
-	long max_gratings;      /* current grating, range 0-2 */
-	long current_grating;
-	struct {
-		bool is_installed;
-		long grooves;       /* number of grooves per m */
-		double blaze;       /* blaze wavelength (negative if not appicable) */
-	} grating[ MAX_GRATINGS ];
-};
-
-
-SPECTRAPRO_300I spectrapro_300i;
 
 
 enum {
@@ -106,12 +74,14 @@ int spectrapro_300i_init_hook( void )
 	for ( i = 0; i < MAX_GRATINGS; i++ )
 	{
 		spectrapro_300i.grating[ i ].is_installed = SET;
-		spectrapro_300i.grating[ i ].grooves = 1.2e6;
+		spectrapro_300i.grating[ i ].grooves = 1200000;
 		spectrapro_300i.grating[ i ].blaze = 7.5e-7;
 	}
 
 	spectrapro_300i.turret = 0;
 	spectrapro_300i.current_grating = 0;
+	spectrapro_300i.wavelength = 5.0e-7;
+	spectrapro_300i.use_calib = 0;
 
 	return 1;
 }
@@ -128,6 +98,7 @@ int spectrapro_300i_exp_hook( void )
 	if ( ! spectrapro_300i_open( ) )
 		spectrapro_300i_comm_fail( );
 
+	spectrapro_300i.use_calib = 0;
 	spectrapro_300i_get_gratings( );
 	spectrapro_300i.current_grating = spectrapro_300i_get_grating( ) - 1;
 	spectrapro_300i.turret = spectrapro_300i_get_turret( ) - 1;
@@ -460,7 +431,7 @@ Var *monochromator_groove_density( Var *v )
 	}
 
 	return vars_push( FLOAT_VAR,
-					  spectrapro_300i.grating[ grating - 1 ].grooves );
+				   ( double ) spectrapro_300i.grating[ grating - 1 ].grooves );
 }
 
 
@@ -779,10 +750,7 @@ static void spectrapro_300i_send( const char *buf )
 	TRY
 	{
 		if ( ! spectrapro_300i_comm( SERIAL_READ, lbuf, &len ) )
-		{
-			T_free( lbuf );
 			spectrapro_300i_comm_fail( );
-		}
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -839,10 +807,7 @@ static char *spectrapro_300i_talk( const char *buf, size_t len,
 	TRY
 	{
 		if ( ! spectrapro_300i_comm( SERIAL_READ, lbuf, &comm_len ) )
-		{
-			T_free( lbuf );
 			spectrapro_300i_comm_fail( );
-		}
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -863,10 +828,7 @@ static char *spectrapro_300i_talk( const char *buf, size_t len,
 	TRY
 	{
 		if ( ! spectrapro_300i_comm( SERIAL_READ, lbuf, &len ) )
-		{
-			T_free( lbuf );
 			spectrapro_300i_comm_fail( );
-		}
 		TRY_SUCCESS;
 	}
 	OTHERWISE
