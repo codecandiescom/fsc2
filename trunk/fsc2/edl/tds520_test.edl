@@ -23,7 +23,7 @@ digitizer_trigger_channel( AUX2 );
 
 FOR I = 1 : 200 {
 	digitizer_start_acquisition( );
-	curve[ 1 ] = digitizer_get_curve( CH1 );
+	curve[ 1 ] = digitizer_get_curve( AUX2 );
     display( 1, I, curve[ 1 ], 1 );
 }
 

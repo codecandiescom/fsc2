@@ -10,6 +10,7 @@ freq = 5 MHz;
 dfreq = 0.1 MHz;
 dt;
 
+
 PREPARATIONS:
 
 synthesizer_modulation( "PHASE", "AC", 9.0 );

@@ -1,0 +1,148 @@
+DEVICES:
+
+sr830;
+ips20_4;
+
+
+
+VARIABLES:
+
+current = 0 A;
+sweep_rate = 50 mV / 60 s;
+acq_rate = 2 Hz;
+
+Sweep_State = 0;
+
+
+I = 1;
+new_current, new_sweep_rate, new_acq_rate;
+Sweep_Up, Sweep_Stop, Sweep_Down;
+Current, Sweep_Rate, Acq_Rate;
+Clear, Close;
+Sweep_State = 0;
+del_time;
+
+
+PREPARATIONS:
+
+
+init_1d( 1, "Points", "Signal [mV]" );
+
+
+
+EXPERIMENT:
+
+current = get_field( );
+acq_rate = 1.0 / lockin_get_sample_time( );
+lockin_auto_setup( 1.0 / acq_rate, 1 );
+lockin_lock_keyboard( 0 );
+
+
+
+Sweep_Up   = button_create( "RADIO_BUTTON", "Sweep up" );
+Sweep_Stop = button_create( "RADIO_BUTTON", Sweep_Up, "Stop sweep" );
+Sweep_Down = button_create( "RADIO_BUTTON", Sweep_Up, "Sweep Down" );
+button_state( Sweep_Stop, 1 );
+
+Current    = input_create( "FLOAT_INPUT", current, "Set new current (in A)" );
+Sweep_Rate = input_create( "FLOAT_INPUT", sweep_rate * 60.0,
+						   "Set new sweep rate (in A/min)" );
+Acq_Rate   = input_create( "FLOAT_INPUT", acq_rate, 	
+						   "Set new acqusition rate (in Hz)" );
+
+Clear = button_create( "NORMAL_BUTTON", "Clear Screen" );
+Close = button_create( "NORMAL_BUTTON", "Close" );
+
+
+FOREVER {
+
+	IF button_state( Sweep_Up ) & Sweep_State != 1 {
+		IF Sweep_State == 0 {
+			magnet_sweep( 1 );
+			Sweep_State = 1;
+			lockin_auto_acquisition( 1 );
+		}
+
+		IF Sweep_State == -1 {
+			lockin_auto_acquisition( 0 );
+			magnet_sweep( 1 );
+			Sweep_State = 1;
+			lockin_auto_acquisition( 1 );
+		}
+	}
+
+	IF button_state( Sweep_Down ) & Sweep_State != -1 {
+		IF Sweep_State == 0 {
+			magnet_sweep( -1 );
+			Sweep_State = -1;
+			lockin_auto_acquisition( 1 );
+		}
+
+		IF Sweep_State == 1 {
+			lockin_auto_acquisition( 0 );
+			magnet_sweep( -1 );
+			Sweep_State = -1;
+			lockin_auto_acquisition( 1 );
+		}
+	}
+
+	IF button_state( Sweep_Stop ) & Sweep_State != 0 {
+		lockin_auto_acquisition( 0 );	
+		magnet_sweep( 0 );
+		Sweep_State = 0;
+	}
+
+	new_current = input_value( Current );
+	IF abs( current - new_current ) > 0.00001 {
+		IF new_current > 7.0 | new_current < -7.0 {
+			current = get_field( );
+			input_value( Current, current );
+		} ELSE {
+			current = new_current;
+			set_field( current );
+			button_state( Sweep_Stop, 1 );
+			Sweep_State = 0;
+		}
+	}
+
+	new_sweep_rate = input_value( Sweep_Rate );
+	IF abs( sweep_rate - new_sweep_rate ) > 0.001 {
+		IF new_current / 60 s <= 1 A & new_current / 60 s >= -1 A {
+			sweep_rate = new_sweep_rate / 60.0;
+			magnet_sweep_rate( sweep_rate );
+		}
+		input_value( Sweep_Rate, sweep_rate );
+	}
+
+	new_acq_rate = input_value( Acq_Rate );	
+	IF abs( acq_rate - new_acq_rate ) > 0.0001 {
+		IF new_acq_rate <= 512 & new_acq_rate >= 0.0625 {
+			lockin_auto_setup( 1.0 / acq_rate, 1 );
+			acq_rate = 1.0 / lockin_get_sample_time( );
+		}
+		input_value( Acq_Rate, acq_rate );
+	}			
+
+	IF button_state( Clear ) {
+		clear_curve( );
+		rescale( 32 );
+		I = 1;
+	}
+
+	IF button_state( Close ) {
+		IF Sweep_State != 0 {
+			lockin_auto_acquisition( 0 );	
+			magnet_sweep( 0 );
+		}
+		BREAK;
+	}
+
+	IF Sweep_State != 0 {
+		display( I, lockin_get_data( 1 ) * 1.0e3 );
+		I += 1;
+		del_time = 1.0 / acq_rate - delta_time( );
+		IF del_time > 0.0 {
+			wait( del_time );
+		}
+	}
+}	

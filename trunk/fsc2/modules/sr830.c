@@ -420,7 +420,7 @@ Var *lockin_get_data( Var *v )
 	{
 		channels[ i ] = get_long( v, "channel number" );
 
-		if ( channels[ i ] ==  DSP_CH_Xnoise ||
+		if ( channels[ i ] == DSP_CH_Xnoise ||
 			 channels[ i ] == DSP_CH_Ynoise )
 		{
 			if ( ! sr830.is_auto_running )
@@ -1167,9 +1167,8 @@ Var *lockin_auto_setup( Var *v )
 	{
 		if ( ( v = vars_pop( v ) ) == NULL )
 		{
-			if ( FSC2_MODE == PREPARATION )
-				for ( ; i < DISPLAY_CHANNELS; i++ )
-					dsp_ch[ i ] = DSP_CH_UNDEF;
+			for ( ; i < DISPLAY_CHANNELS; i++ )
+				dsp_ch[ i ] = DSP_CH_UNDEF;
 			break;
 		}
 
@@ -1217,7 +1216,7 @@ Var *lockin_auto_setup( Var *v )
 		sr830_set_sample_time( st_index );
 
 		for ( i = 0; i < DISPLAY_CHANNELS &&
-					 sr830.dsp_ch[ i ] != DSP_CH_UNDEF; i++ )
+				     sr830.dsp_ch[ i ] != DSP_CH_UNDEF; i++ )
 			sr830_set_display_channel( i, sr830.dsp_ch[ i ] );
 
 		if ( sr830.is_auto_running )
@@ -1491,11 +1490,11 @@ static void sr830_get_xy_data( double *data, long *channels, int num_channels )
 	buffer[ length - 1 ] = '\0';
 	bp_cur = buffer;
 
-	for ( i = 0; i < num_channels; bp_cur = bp_next, i++ )
+	for ( i = 0; i < num_channels; bp_cur = bp_next + 1, i++ )
 	{
 		if ( i != num_channels - 1 )
 		{
-			bp_next = strchr( bp_cur, ',' ) + 1;
+			bp_next = strchr( bp_cur, ',' );
 
 			if ( bp_next == NULL )
 			{
@@ -1503,7 +1502,7 @@ static void sr830_get_xy_data( double *data, long *channels, int num_channels )
 				THROW( EXCEPTION );
 			}
 			else
-				*( bp_next - 1 ) = '\0';
+				*bp_next = '\0';
 		}
 
 		data[ i ] = T_atod( bp_cur );

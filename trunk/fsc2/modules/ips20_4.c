@@ -75,8 +75,11 @@ static double ips20_4_set_sweep_rate( double sweep_rate );
 static double ips20_4_get_sweep_rate( void );
 static double ips20_4_goto_current( double current );
 static int ips20_4_set_activity( int activity );
+static long ips20_4_talk( const char *message, char *reply, long length );
 static void ips20_4_comm_failure( void );
 
+
+#define MESSAGE_AVAILABLE 0x10
 
 
 typedef struct {
@@ -225,9 +228,11 @@ int ips20_4_exp_hook( void )
 
 int ips20_4_end_of_exp_hook( void )
 {
+	ips20_4_to_local( );
+
 	ips20_4 = ips20_4_stored;
 
-	ips20_4_to_local( );
+	ips20_4.sweep_state = STOPPED;
 	ips20_4.device = -1;
 
 	return 1;
@@ -542,6 +547,9 @@ static void magnet_stop_sweep( void )
 
 Var *magnet_sweep_rate( Var *v )
 {
+	double sweep_rate;
+
+
 	if ( v == NULL )
 		switch( FSC2_MODE )
 		{
@@ -559,8 +567,11 @@ Var *magnet_sweep_rate( Var *v )
 				return vars_push( FLOAT_VAR, ips20_4.sweep_rate );
 		}
 
-	ips20_4.sweep_rate =
-					 ips20_4_sweep_rate_check( get_double( v, "sweep rate" ) );
+	sweep_rate = ips20_4_sweep_rate_check( get_double( v, "sweep rate" ) );
+	if ( ips20_4.is_sweep_rate && sweep_rate == ips20_4.sweep_rate )
+		return vars_push( FLOAT_VAR, ips20_4.sweep_rate );
+
+	ips20_4.sweep_rate = sweep_rate;
 	ips20_4.is_sweep_rate = SET;
 
 	if ( FSC2_MODE == EXPERIMENT )
@@ -587,7 +598,7 @@ static bool ips20_4_init( const char *name )
 {
 	char cmd[ 100 ];
 	char reply[ 100 ];
-	long length = 100;
+	long length;
 	double cur_limit;
 	bool was_hold = UNSET;
 
@@ -602,35 +613,29 @@ static bool ips20_4_init( const char *name )
         return FAIL;
 	}
 
+	if ( gpib_clear_device( ips20_4.device ) == FAILURE )
+		ips20_4_comm_failure( );
+
+	usleep( 100000 );
+
 	/* Bring both the GPIB master device (ITC 503) as well as the sweep power
 	   supply in remote state */
 
-	sprintf( cmd, "@%1dC3\n", MASTER_ISOBUS_ADDRESS );
-	length = 100;
-	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE ||
-		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
-		ips20_4_comm_failure( );
+	sprintf( cmd, "@%1dC3\r", MASTER_ISOBUS_ADDRESS );
+	ips20_4_talk( cmd, reply, 100 );
 
-	sprintf( cmd, "@%1dQ0\n", MASTER_ISOBUS_ADDRESS );
+	sprintf( cmd, "@%1dQ0\r", MASTER_ISOBUS_ADDRESS );
 	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE )
 		ips20_4_comm_failure( );
 
-	sprintf( cmd, "@%1d\n", IPS20_4_ISOBUS_ADDRESS );
-	length = 100;
-	if ( gpib_write( ips20_4.device, cmd, 3 ) == FAILURE )
-		ips20_4_comm_failure( );
-
-	sprintf( cmd, "@%1dC3\n", IPS20_4_ISOBUS_ADDRESS );
-	length = 100;
-	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE ||
-		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
-		ips20_4_comm_failure( );
+	sprintf( cmd, "@%1dC3\r", IPS20_4_ISOBUS_ADDRESS );
+	ips20_4_talk( cmd, reply, 100 );
 
 	/* Set the sweep power supply to send and accept data with extended
 	   resolution (this is one of the few commands that don't produce a
 	   reply) */
 
-	sprintf( cmd, "@%1dQ4\n", IPS20_4_ISOBUS_ADDRESS );
+	sprintf( cmd, "@%1dQ4\r", IPS20_4_ISOBUS_ADDRESS );
 	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE )
 		ips20_4_comm_failure( );
 
@@ -648,26 +653,19 @@ static bool ips20_4_init( const char *name )
 	   allowed current range (unless they are larger than the ones set in the
 	   configuration file). */
 
-	sprintf( cmd, "@%1dR21\n", IPS20_4_ISOBUS_ADDRESS );
-	length = 100;
-	if ( gpib_write( ips20_4.device, cmd, 6 ) == FAILURE ||
-		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
-		ips20_4_comm_failure( );
-
+	sprintf( cmd, "@%1dR21\r", IPS20_4_ISOBUS_ADDRESS );
+	length = ips20_4_talk( cmd, reply, 100 );
 	reply[ length - 1 ] = '\0';
-	cur_limit = T_atod( reply ) / 60.0;
+	cur_limit = T_atod( reply + 1 );
 
 	if ( cur_limit > MIN_CURRENT )
 		ips20_4.min_current = cur_limit;
 
-	sprintf( cmd, "@%1dR22\n", IPS20_4_ISOBUS_ADDRESS );
-	length = 100;
-	if ( gpib_write( ips20_4.device, cmd, 6 ) == FAILURE ||
-		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
-		ips20_4_comm_failure( );
+	sprintf( cmd, "@%1dR22\r", IPS20_4_ISOBUS_ADDRESS );
+	length = ips20_4_talk( cmd, reply, 100 );
 
 	reply[ length - 1 ] = '\0';
-	cur_limit = T_atod( reply ) / 60.0;
+	cur_limit = T_atod( reply + 1 );
 
 	if ( cur_limit < MAX_CURRENT )
 		ips20_4.max_current = cur_limit;
@@ -741,20 +739,15 @@ static void ips20_4_to_local( void )
 {
 	char cmd[ 20 ];
 	char reply[ 100 ];
-	long length = 100;
 
 
-	sprintf( cmd, "@%1dC0\n", IPS20_4_ISOBUS_ADDRESS );
-	length = 100;
-	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE ||
-		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
-		ips20_4_comm_failure( );
+	ips20_4_set_activity( HOLD );
 
-	sprintf( cmd, "@%1dC0\n", MASTER_ISOBUS_ADDRESS );
-	length = 100;
-	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE ||
-		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
-		ips20_4_comm_failure( );
+	sprintf( cmd, "@%1dC0\r", IPS20_4_ISOBUS_ADDRESS );
+	ips20_4_talk( cmd, reply, 100 );
+
+	sprintf( cmd, "@%1dC0\r", MASTER_ISOBUS_ADDRESS );
+	ips20_4_talk( cmd, reply, 100 );
 
 	gpib_local( ips20_4.device );
 }
@@ -767,17 +760,14 @@ static void ips20_4_get_complete_status( void )
 {
 	char cmd[ 100 ];
 	char reply[ 100 ];
-	long length = 100;
 
 
 	/* Get all information about the state of the magnet power supply and
 	   analyze the reply which has the form "XmnAnCnMmnPmn" where m and n
 	   are single decimal digits. */
 
-	sprintf( cmd, "@%1dX\n", IPS20_4_ISOBUS_ADDRESS );
-	length = 100;
-	if ( gpib_write( ips20_4.device, cmd, 4 ) == FAILURE ||
-		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
+	sprintf( cmd, "@%1dX\r", IPS20_4_ISOBUS_ADDRESS );
+	if ( ips20_4_talk( cmd, reply, 100 ) < 15 )
 		ips20_4_comm_failure( );
 
 	/* Check system status data */
@@ -908,8 +898,16 @@ static void ips20_4_get_complete_status( void )
 			break;
 
 		default :
+			/* The manual claims that the above are the only values we should
+			   expect, but as usual the manual is shamelessly lying. At least
+			   for the current magnet the character 'C` seems to be returned.
+			   Because we don't have any better documentation we simply accept
+			   whatever the device tells us...
+
 			print( FATAL, "Received invalid reply from device.\n" );
 			THROW( EXCEPTION );
+			*/
+			break;
 	}
 
 	/* Check mode status */
@@ -952,13 +950,17 @@ static void ips20_4_get_complete_status( void )
 			THROW( EXCEPTION );
 	}
 
-	/* The polarity status bytes are always '0' according to the manual */
+	/* The polarity status bytes are always '0' according to the manual,
+	 but as usual the manual is lying, the device sends '7' or '2' and '0'.
+	 Due to lack of better documentation we simply ignore the P field...
 
 	if ( reply[ 13 ] != '0' || reply[ 14 ] != '0' )
 	{
 		print( FATAL, "Received invalid reply from device.\n" );
 		THROW( EXCEPTION );
 	}
+
+	*/
 }
 
 
@@ -1123,16 +1125,14 @@ static double ips20_4_get_act_current( void )
 {
 	char cmd[ 20 ];
 	char reply[ 100 ];
-	long length = 100;
+	long length;
 
 
-	sprintf( cmd, "@%1dR0\n", IPS20_4_ISOBUS_ADDRESS );
-	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE ||
-		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
-		ips20_4_comm_failure( );
+	sprintf( cmd, "@%1dR0\r", IPS20_4_ISOBUS_ADDRESS );
+	length = ips20_4_talk( cmd, reply, 100 );
 
 	reply[ length - 1 ] = '\0';
-	return T_atod( reply );
+	return T_atod( reply + 1 );
 }
 
 
@@ -1143,15 +1143,11 @@ static double ips20_4_set_target_current( double current )
 {
 	char cmd[ 30 ];
 	char reply[ 100 ];
-	long length = 100;
 
 
 	current = ips20_4_current_check( current );
-	sprintf( cmd, "@%1dI%.4f\n", IPS20_4_ISOBUS_ADDRESS, current );
-
-	if ( gpib_write( ips20_4.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
-		ips20_4_comm_failure( );
+	sprintf( cmd, "@%1dI%.4f\r", IPS20_4_ISOBUS_ADDRESS, current );
+	ips20_4_talk( cmd, reply, 100 );
 
 	return current;
 }
@@ -1164,16 +1160,14 @@ static double ips20_4_get_target_current( void )
 {
 	char cmd[ 30 ];
 	char reply[ 100 ];
-	long length = 100;
+	long length;
 
 
-	sprintf( cmd, "@%1dR5\n", IPS20_4_ISOBUS_ADDRESS );
-	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE ||
-		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
-		ips20_4_comm_failure( );
+	sprintf( cmd, "@%1dR5\r", IPS20_4_ISOBUS_ADDRESS );
+	length = ips20_4_talk( cmd, reply, 100 );
 
 	reply[ length - 1 ] = '\0';
-	return T_atod( reply );
+	return T_atod( reply + 1 );
 }
 
 
@@ -1184,15 +1178,12 @@ static double ips20_4_set_sweep_rate( double sweep_rate )
 {
 	char cmd[ 30 ];
 	char reply[ 100 ];
-	long length = 100;
 
 
 	sweep_rate = ips20_4_sweep_rate_check( sweep_rate );
 
-	sprintf( cmd, "@%1dS%.3f\n", IPS20_4_ISOBUS_ADDRESS, sweep_rate );
-	if ( gpib_write( ips20_4.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
-		ips20_4_comm_failure( );
+	sprintf( cmd, "@%1dS%.3f\r", IPS20_4_ISOBUS_ADDRESS, sweep_rate * 60.0 );
+	ips20_4_talk( cmd, reply, 100 );
 
 	return sweep_rate;
 }
@@ -1204,16 +1195,14 @@ static double ips20_4_get_sweep_rate( void )
 {
 	char cmd[ 30 ];
 	char reply[ 100 ];
-	long length = 100;
+	long length;
 
 
-	sprintf( cmd, "@%1dR6\n", IPS20_4_ISOBUS_ADDRESS );
-	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE ||
-		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
-		ips20_4_comm_failure( );
+	sprintf( cmd, "@%1dR6\r", IPS20_4_ISOBUS_ADDRESS );
+	length = ips20_4_talk( cmd, reply, 100 );
 
 	reply[ length - 1 ] = '\0';
-	return T_atod( reply );
+	return T_atod( reply + 1 ) / 60.0;
 }
 
 
@@ -1252,7 +1241,6 @@ static int ips20_4_set_activity( int activity )
 {
 	char cmd[ 20 ];
 	char reply[ 100 ];
-	long length = 100;
 	int act;
 
 
@@ -1276,12 +1264,58 @@ static int ips20_4_set_activity( int activity )
 			THROW( EXCEPTION );
 	}
 
-	sprintf( cmd, "@%1dA%1d\n", IPS20_4_ISOBUS_ADDRESS, act );
-	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE ||
-		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
-		ips20_4_comm_failure( );
+	sprintf( cmd, "@%1dA%1d\r", IPS20_4_ISOBUS_ADDRESS, act );
+	ips20_4_talk( cmd, reply, 100 );
 
 	return activity;
+}
+
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+static long ips20_4_talk( const char *message, char *reply, long length )
+{
+	unsigned char stb;
+	long len = length;
+
+
+ start:
+
+	if ( gpib_write( ips20_4.device, message, strlen( message ) ) == FAILURE )
+		ips20_4_comm_failure( );
+
+	do {
+		stop_on_user_request( );
+
+		usleep( 500 );
+
+		if ( gpib_serial_poll( ips20_4.device, &stb ) == FAILURE )
+			ips20_4_comm_failure( );
+	} while ( ! ( stb & MESSAGE_AVAILABLE ) );
+
+ reread:
+
+	usleep( 100000 );
+
+	stop_on_user_request( );
+
+	if ( gpib_read( ips20_4.device, reply, &len ) == FAILURE )
+		ips20_4_comm_failure( );
+
+	/* If device mis-understood the command send it again */
+
+	if ( reply[ 0 ] == '?' )
+		goto start;
+
+	/* If the first character of the reply isn't equal to the third character
+	   of the message we probably read the reply for a previous command and
+	   try to read again... */
+
+	if ( reply[ 0 ] != message[ 2 ] )
+		goto reread;
+
+	return len;
 }
 
 
