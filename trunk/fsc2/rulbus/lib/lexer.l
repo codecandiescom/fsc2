@@ -210,8 +210,12 @@ DEC      [+-]*[1-9][0-9]*
 			       }
 
 {FLOAT}            {
+	                   char *endptr;
+
 	                   count( );
-					   rulbus_lval.dval = atof( rulbus_text );
+					   rulbus_lval.dval = strtod( rulbus_text, &endptr );
+                       if ( *endptr != '\0' )
+                           return ERR_TOKEN;
 					   return FLOAT_TOKEN;
 		           }
 
@@ -229,19 +233,25 @@ DEC      [+-]*[1-9][0-9]*
 
 {OCT}              { /* octal number */
 			           count( );
-					   sscanf( rulbus_text, "%o", &rulbus_lval.ival ); 
+					   if ( sscanf( rulbus_text, "%o",
+									&rulbus_lval.ival ) != 1 )
+						   return ERR_TOKEN;
 					   return NUM_TOKEN;
                    }
 
 {HEX}              { /* hexadecimal number */
 			           count( );
-					   sscanf( rulbus_text + 2, "%x", &rulbus_lval.ival );
+					   if ( sscanf( rulbus_text + 2, "%x",
+									&rulbus_lval.ival ) != 1 )
+						   return ERR_TOKEN;
 					   return NUM_TOKEN;
                    }
 
 {DEC}              { /* decimal number */
 			           count( );
-					   sscanf( rulbus_text, "%d", &rulbus_lval.ival ); 
+					   if ( sscanf( rulbus_text, "%d",
+									&rulbus_lval.ival ) != 1 )
+						   return ERR_TOKEN;
 					   return NUM_TOKEN;
                    }
 
@@ -254,7 +264,7 @@ DEC      [+-]*[1-9][0-9]*
 					   rulbus_lval.sval = p = rulbus_text + 1;
 					   while ( *p && *p != *rulbus_text )
 						   p++;
-					   if ( ! *p )
+					   if ( *p != *rulbus_text )
 						   return ERR_TOKEN;
 					   *p = '\0';
 					   return STR_TOKEN;

@@ -41,8 +41,9 @@ will use '/dev/rulbus_epp' per default.
 
 For each rack connected to the Rulbus interface that you want to use
 you need a line starting with the keyword 'rack' and a rack name (a
-string, enclosed in either single or double quotes) and followed by a
-set of further instructions enclosed in curly braces:
+string, enclosed in either single or double quotes, but please note
+that you can't use the delimiter within the string) and followed by
+a set of further instructions enclosed in curly braces:
 
 rack "top rack" {
 
