@@ -32,6 +32,7 @@ static double datanh( double arg );
 #define C2K_OFFSET   273.16
 #define D2R_FACTOR   ( atan( 1.0 ) / 45.0 )
 #define R2D_FACTOR   ( 45.0 / atan( 1.0 ) )
+#define WZ2F_FACTOR  2.99792558e10         /* speed of light times 100 */
 
 
 /*----------------------------------------------------------------*/
@@ -2454,8 +2455,9 @@ Var *f_square( Var *v )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Function for converting magnetic fields from Gauss to Tesla */
+/*-------------------------------------------------------------*/
 
 Var *f_G2T( Var *v )
 {
@@ -2508,8 +2510,9 @@ Var *f_G2T( Var *v )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Function for converting magnetic fields from Tesla to Gauss */
+/*-------------------------------------------------------------*/
 
 Var *f_T2G( Var *v )
 {
@@ -2562,8 +2565,9 @@ Var *f_T2G( Var *v )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Function for converting temperatures from degree Celsius to Kevin */
+/*-------------------------------------------------------------------*/
 
 Var *f_C2K( Var *v )
 {
@@ -2616,8 +2620,9 @@ Var *f_C2K( Var *v )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Function for converting temperatures from Kevin to degree Celsius */
+/*-------------------------------------------------------------------*/
 
 Var *f_K2C( Var *v )
 {
@@ -2670,8 +2675,9 @@ Var *f_K2C( Var *v )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*------------------------------------------------------*/
+/* Function for converting values in degrees to radians */
+/*------------------------------------------------------*/
 
 Var *f_D2R( Var *v )
 {
@@ -2724,8 +2730,9 @@ Var *f_D2R( Var *v )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*------------------------------------------------------*/
+/* Function for converting values in radians to degrees */
+/*------------------------------------------------------*/
 
 Var *f_R2D( Var *v )
 {
@@ -2768,6 +2775,275 @@ Var *f_R2D( Var *v )
 				else
 				{
 					new_var->val.vptr[ i ] = f_R2D( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
+			return new_var;
+	}
+
+	fsc2_assert( 1 == 0 );
+	return NULL;
+}
+
+
+/*-------------------------------------------------------------------------*/
+/* Function for converting wave lengths (in m) to wavenumbers (i.e. cm^-1) */
+/*-------------------------------------------------------------------------*/
+
+Var *f_WL2WZ( Var *v )
+{
+	Var *new_var;
+	ssize_t i;
+	long *lsrc, *ldest;
+	double *dsrc, *ddest;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
+
+	switch ( v->type )
+	{
+		case INT_VAR :
+			if ( v->val.lval == 0 )
+			{
+				print( FATAL, "Can't convert 0 m to a wave number.\n" );
+				THROW( EXCEPTION );
+			}
+			return vars_push( FLOAT_VAR, 0.01 / ( double ) v->val.lval );
+
+		case FLOAT_VAR :
+			if ( v->val.dval == 0.0 )
+			{
+				print( FATAL, "Can't convert 0 m to a wave number.\n" );
+				THROW( EXCEPTION );
+			}
+			return vars_push( FLOAT_VAR, 0.01 / v->val.dval );
+
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, ldest++ )
+			{
+				if ( *lsrc == 0 )
+				{
+					print( FATAL, "Can't convert 0 m to a wave number.\n" );
+					THROW( EXCEPTION );
+				}
+				*ddest = 0.01 / ( double ) *lsrc;
+			}
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, ddest++ )
+			{
+				if ( *dsrc == 0.0 )
+				{
+					print( FATAL, "Can't convert 0 m to a wave number.\n" );
+					THROW( EXCEPTION );
+				}
+				*ddest = 0.01 / *dsrc;
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+				{
+					new_var->val.vptr[ i ] = f_WL2WZ( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
+			return new_var;
+	}
+
+	fsc2_assert( 1 == 0 );
+	return NULL;
+}
+
+
+/*-------------------------------------------------------------------------*/
+/* Function for converting wavenumbers (i.e. cm^-1) to wave lengths (in m) */
+/*-------------------------------------------------------------------------*/
+
+Var *f_WZ2WL( Var *v )
+{
+	Var *new_var;
+	ssize_t i;
+	long *lsrc, *ldest;
+	double *dsrc, *ddest;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
+
+	switch ( v->type )
+	{
+		case INT_VAR :
+			if ( v->val.lval == 0 )
+			{
+				print( FATAL, "Can't convert 0 cm^-1 to a wavelength.\n" );
+				THROW( EXCEPTION );
+			}
+			return vars_push( FLOAT_VAR, 0.01 / ( double ) v->val.lval );
+
+		case FLOAT_VAR :
+			if ( v->val.dval == 0.0 )
+			{
+				print( FATAL, "Can't convert 0 cm^-1 to a wavelength.\n" );
+				THROW( EXCEPTION );
+			}
+			return vars_push( FLOAT_VAR, 0.01 / v->val.dval );
+
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, ldest++ )
+			{
+				if ( *lsrc == 0 )
+				{
+					print( FATAL, "Can't convert 0 cm^-1 to a wavelength.\n" );
+					THROW( EXCEPTION );
+				}
+				*ddest = 0.01 / ( double ) *lsrc;
+			}
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, ddest++ )
+			{
+				if ( *dscr == 0.0 )
+				{
+					print( FATAL, "Can't convert 0 cm^-1 to a wavelength.\n" );
+					THROW( EXCEPTION );
+				}
+				*ddest = 0.01 / *dsrc;
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+				{
+					new_var->val.vptr[ i ] = f_WZ2WL( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
+			return new_var;
+	}
+
+	fsc2_assert( 1 == 0 );
+	return NULL;
+}
+
+
+/*-------------------------------------------------------------------------*/
+/* Function for converting frequencies (in Hz) to wavenumbers (i.e. cm^-1) */
+/*-------------------------------------------------------------------------*/
+
+Var *f_F2WZ( Var *v )
+{
+	Var *new_var;
+	ssize_t i;
+	long *lsrc, *ldest;
+	double *dsrc, *ddest;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
+
+	switch ( v->type )
+	{
+		case INT_VAR :
+			return vars_push( FLOAT_VAR, v->val.lval / WZ2F_FACTOR );
+
+		case FLOAT_VAR :
+			return vars_push( FLOAT_VAR, v->val.dval / WZ2F_FACTOR );
+
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, ldest++ )
+				*ddest = *lsrc / WZ2F_FACTOR;
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, ddest++ )
+				*ddest = *dsrc / WZ2F_FACTOR;
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+				{
+					new_var->val.vptr[ i ] = f_F2WZ( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
+			return new_var;
+	}
+
+	fsc2_assert( 1 == 0 );
+	return NULL;
+}
+
+
+/*-------------------------------------------------------------------------*/
+/* Function for converting wavenumbers (i.e. cm^-1) to frequencies (in Hz) */
+/*-------------------------------------------------------------------------*/
+
+Var *f_WZ2F( Var *v )
+{
+	Var *new_var;
+	ssize_t i;
+	long *lsrc, *ldest;
+	double *dsrc, *ddest;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
+
+	switch ( v->type )
+	{
+		case INT_VAR :
+			return vars_push( FLOAT_VAR, WZ2F_FACTOR * v->val.lval );
+
+		case FLOAT_VAR :
+			return vars_push( FLOAT_VAR, WZ2F_FACTOR * v->val.dval );
+
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, ldest++ )
+				*ddest = WZ2F_FACTOR * *lsrc;
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, ddest++ )
+				*ddest = WZ2F_FACTOR *  *dsrc;
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+				{
+					new_var->val.vptr[ i ] = f_WZ2F( v->val.vptr[ i ] );
 					new_var->val.vptr[ i ]->from = new_var;
 				}
 			return new_var;
