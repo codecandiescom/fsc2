@@ -143,6 +143,34 @@ const char *show_input( const char *content, const char *label )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
+static const char *handle_input( const char *content, const char *label )
+{
+	if ( label != NULL && label != '\0' )
+		fl_set_object_label( input_form->comm_input, label );
+	else
+		fl_set_object_label( input_form->comm_input, "Enter your comment:" );
+
+	fl_set_input( input_form->comm_input, content );
+
+	fl_show_form( input_form->input_form,
+				  FL_PLACE_MOUSE | FL_FREE_SIZE, FL_FULLBORDER,
+				  "fsc2: Comment editor" );
+
+	while ( fl_do_forms( ) != input_form->comm_done )
+		;
+
+	if ( fl_form_is_visible( input_form->input_form ) )
+		fl_hide_form( input_form->input_form );
+
+	return fl_get_input( input_form->comm_input );
+}
+
+
+/*--------------------------------------------------------------*/
+/* Child and parent side function for passing the arguments and */
+/* the return value of the layout() function.                   */
+/*--------------------------------------------------------------*/
+
 bool exp_layout( void *buffer, long len )
 {
 	if ( I_am == CHILD )
@@ -193,8 +221,10 @@ bool exp_layout( void *buffer, long len )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Child and parent side function for passing the arguments and */
+/* the return values of the button_create() function.           */
+/*--------------------------------------------------------------*/
 
 long *exp_bcreate( void *buffer, long len )
 {
@@ -270,8 +300,10 @@ long *exp_bcreate( void *buffer, long len )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Child and parent side function for passing the arguments and */
+/* the return value of the button_delete() function.            */
+/*--------------------------------------------------------------*/
 
 bool exp_bdelete( void *buffer, long len )
 {
@@ -323,8 +355,10 @@ bool exp_bdelete( void *buffer, long len )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Child and parent side function for passing the arguments and */
+/* the return values of the button_state() function .           */
+/*--------------------------------------------------------------*/
 
 long exp_bstate( void *buffer, long len )
 {
@@ -383,8 +417,10 @@ long exp_bstate( void *buffer, long len )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Child and parent side function for passing the arguments and */
+/* the return values of the slider_create() function .          */
+/*--------------------------------------------------------------*/
 
 long *exp_screate( void *buffer, long len )
 {
@@ -460,8 +496,10 @@ long *exp_screate( void *buffer, long len )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Child and parent side function for passing the arguments and */
+/* the return value of the slider_delete() function.            */
+/*--------------------------------------------------------------*/
 
 bool exp_sdelete( void *buffer, long len )
 {
@@ -516,8 +554,10 @@ bool exp_sdelete( void *buffer, long len )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Child and parent side function for passing and returning the */
+/* arguments and results of the slider_value() function         */
+/*--------------------------------------------------------------*/
 
 double *exp_sstate( void *buffer, long len )
 {
@@ -583,30 +623,4 @@ double *exp_sstate( void *buffer, long len )
 		writer( C_SSTATE_REPLY, 2 * sizeof( double ), res );
 		return NULL;
 	}
-}
-
-
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
-
-static const char *handle_input( const char *content, const char *label )
-{
-	if ( label != NULL && label != '\0' )
-		fl_set_object_label( input_form->comm_input, label );
-	else
-		fl_set_object_label( input_form->comm_input, "Enter your comment:" );
-
-	fl_set_input( input_form->comm_input, content );
-
-	fl_show_form( input_form->input_form,
-				  FL_PLACE_MOUSE | FL_FREE_SIZE, FL_FULLBORDER,
-				  "fsc2: Comment editor" );
-
-	while ( fl_do_forms( ) != input_form->comm_done )
-		;
-
-	if ( fl_form_is_visible( input_form->input_form ) )
-		fl_hide_form( input_form->input_form );
-
-	return fl_get_input( input_form->comm_input );
 }
