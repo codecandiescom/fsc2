@@ -39,6 +39,8 @@ int pci_mio_16e_1_init_hook( void )
 	int i;
 
 
+	pci_mio_16e_1.board = -1;
+
 	pci_mio_16e_1.ai_state.is_busy = UNSET;
 	pci_mio_16e_1.ai_state.is_channel_setup = UNSET;
 	pci_mio_16e_1.ai_state.is_acq_setup = UNSET;
@@ -48,7 +50,14 @@ int pci_mio_16e_1_init_hook( void )
 	pci_mio_16e_1.ai_state.polarities = NULL;
 
 	for ( i = 0; i < 2; i++ )
+	{
+		pci_mio_16e_1.ao_state.reserved_by[ i ] = NULL;
+		pci_mio_16e_1.ao_state.external_reference[ i ] = NI_DAQ_DISABLED;
+		pci_mio_16e_1.ao_state.polarity[ i ] = NI_DAQ_BIPOLAR;
+		pci_mio_16e_1.ao_state.is_used[ i ] = UNSET;
+
 		pci_mio_16e_1.gpct_state.states[ i ] = 0;
+	}
 
 	pci_mio_16e_1.msc_state.daq_clock = PCI_MIO_16E_1_TEST_CLOCK;
 	pci_mio_16e_1.msc_state.on_off = PCI_MIO_16E_1_TEST_STATE;
@@ -62,16 +71,35 @@ int pci_mio_16e_1_init_hook( void )
 /*---------------------------------------------------------*/
 /*---------------------------------------------------------*/
 
+int pci_mio_16e_1_test_hook( void )
+{
+	int i;
+
+
+	pci_mio_16e_1_stored = pci_mio_16e_1;
+
+	for ( i = 0; i < 2; i++ )
+		if ( pci_mio_16e_1.ao_state.reserved_by[ i ] )
+			pci_mio_16e_1_stored.ao_state.reserved_by[ i ] =
+					CHAR_P T_strdup( pci_mio_16e_1.ao_state.reserved_by[ i ] );
+
+	return 1;
+}
+
+
+/*---------------------------------------------------------*/
+/*---------------------------------------------------------*/
+
 int pci_mio_16e_1_end_of_test_hook( void )
 {
 	if ( pci_mio_16e_1.ai_state.ranges != NULL )
 		pci_mio_16e_1.ai_state.ranges =
 									   T_free( pci_mio_16e_1.ai_state.ranges );
-		if ( pci_mio_16e_1.ai_state.polarities != NULL )
-			pci_mio_16e_1.ai_state.polarities =
-								   T_free( pci_mio_16e_1.ai_state.polarities );
+	if ( pci_mio_16e_1.ai_state.polarities != NULL )
+		pci_mio_16e_1.ai_state.polarities =
+							CHAR_P T_free( pci_mio_16e_1.ai_state.polarities );
 
-		return 1;
+	return 1;
 }
 
 
@@ -80,7 +108,25 @@ int pci_mio_16e_1_end_of_test_hook( void )
 
 int pci_mio_16e_1_exp_hook( void )
 {
+	int i;
+
+
+	/* Restore state from before the start of the test run */
+
+	for ( i = 0; i < 2; i++ )
+		if ( pci_mio_16e_1.ao_state.reserved_by[ i ] )
+			pci_mio_16e_1.ao_state.reserved_by[ i ] =
+					  CHAR_P T_free( pci_mio_16e_1.ao_state.reserved_by[ i ] );
+
+	pci_mio_16e_1 = pci_mio_16e_1_stored;
+
+	for ( i = 0; i < 2; i++ )
+		if ( pci_mio_16e_1_stored.ao_state.reserved_by[ i ] )
+			pci_mio_16e_1.ao_state.reserved_by[ i ] =
+			 CHAR_P T_strdup( pci_mio_16e_1_stored.ao_state.reserved_by[ i ] );
+
 	if ( ( pci_mio_16e_1.board = ni_daq_open( BOARD_DEVICE_FILE ) ) < 0 )
+	{
 		switch ( pci_mio_16e_1.board )
 		{
 			case NI_DAQ_OK :
@@ -89,7 +135,7 @@ int pci_mio_16e_1_exp_hook( void )
 			case NI_DAQ_ERR_NSB :
 				print( FATAL, "Invalid board name, check configuration "
 					   "file for board.\n" );
-				THROW( EXCEPTION );
+				break;
 
 			case NI_DAQ_ERR_NDV :
 				print( FATAL, "Driver for board not loaded.\n" );
@@ -98,29 +144,48 @@ int pci_mio_16e_1_exp_hook( void )
 			case NI_DAQ_ERR_ACS :
 				print( FATAL, "No permissions to open device file for "
 					   "board.\n" );
-				THROW( EXCEPTION );
+				break;
 
 			case NI_DAQ_ERR_DFM :
 				print( FATAL, "Device file for board missing.\n" );
-				THROW( EXCEPTION );
+				break;
 
 			case NI_DAQ_ERR_DFP :
 				print( FATAL, "Unspecified error when opening device file for "
 					   "board.\n" );
-				THROW( EXCEPTION );
+				break;
 
 			case NI_DAQ_ERR_BBS :
 				print( FATAL, "Board already in use by another program.\n" );
-				THROW( EXCEPTION );
+				break;
 
 			case NI_DAQ_ERR_INT :
 				print( FATAL, "Internal error in board driver or library.\n" );
-				THROW( EXCEPTION );
+				break;
 
 			default :
 				print( FATAL, "Unrecognized error when trying to access the "
 					   "board.\n" );
-				THROW( EXCEPTION );
+				break;
+		}
+
+		THROW( EXCEPTION );
+	}
+
+	/* Initialize the AO channels as far as required */
+
+	for ( i = 0; i < 2; i++ )
+		if ( ni_daq_ao_channel_configuration( pci_mio_16e_1.board, 1, &i,
+								 pci_mio_16e_1.ao_state.external_reference + i,
+								 pci_mio_16e_1.ao_state.polarity + i ) < 0 ||
+
+
+			 ( pci_mio_16e_1.ao_state.is_used &&
+			   ni_daq_ao( pci_mio_16e_1.board, 1, &i,
+						  pci_mio_16e_1.ao_state.volts + i  ) < 0 ) )
+		{
+			print( FATAL, "Failure to initialize AO channels\n ");
+			THROW( EXCEPTION );
 		}
 
 	return 1;
@@ -132,7 +197,17 @@ int pci_mio_16e_1_exp_hook( void )
 
 int pci_mio_16e_1_end_of_exp_hook( void )
 {
-	ni_daq_close( pci_mio_16e_1.board );
+	int i;
+
+
+	if ( pci_mio_16e_1.board >= 0 )
+		ni_daq_close( pci_mio_16e_1.board );
+
+	for ( i = 0; i < 2; i++ )
+		if ( pci_mio_16e_1.ao_state.reserved_by[ i ] )
+			pci_mio_16e_1.ao_state.reserved_by[ i ] =
+					  CHAR_P T_free( pci_mio_16e_1.ao_state.reserved_by[ i ] );
+
 	return 1;
 }
 
@@ -142,10 +217,18 @@ int pci_mio_16e_1_end_of_exp_hook( void )
 
 void pci_mio_16e_1_exit_hook( void )
 {
+	int i;
+
+
 	/* This shouldn't be necessary, I just want to make 100% sure that
 	   the device file for the board is really closed */
 
-	ni_daq_close( pci_mio_16e_1.board );
+	if ( pci_mio_16e_1.board >= 0 )
+		ni_daq_close( pci_mio_16e_1.board );
+
+	for ( i = 0; i < 2; i++ )
+		if ( pci_mio_16e_1_stored.ao_state.reserved_by[ i ] )
+			   CHAR_P T_free( pci_mio_16e_1_stored.ao_state.reserved_by[ i ] );
 }
 
 

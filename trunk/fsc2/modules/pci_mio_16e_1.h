@@ -67,6 +67,9 @@ struct PCI_MIO_16E_1 {
 	} ai_state;
 
 	struct {
+		bool is_used[ 2 ];
+		double volts[ 2 ];
+		char *reserved_by[ 2 ] ;
 		NI_DAQ_STATE external_reference[ 2 ];
 		NI_DAQ_BU_POLARITY polarity[ 2 ];
 	} ao_state;
@@ -85,12 +88,13 @@ struct PCI_MIO_16E_1 {
 } PCI_MIO_16E_1;
 
 
-extern struct PCI_MIO_16E_1 pci_mio_16e_1;
+extern struct PCI_MIO_16E_1 pci_mio_16e_1, pci_mio_16e_1_stored;
 
 
 /* Functions from pci_mio_16e_1.c */
 
 int pci_mio_16e_1_init_hook( void );
+int pci_mio_16e_1_test_hook( void );
 int pci_mio_16e_1_end_of_test_hook( void );
 int pci_mio_16e_1_exp_hook( void );
 int pci_mio_16e_1_end_of_exp_hook( void );
@@ -108,6 +112,7 @@ Var *daq_ai_get_curve( Var * v );
 
 /* Functions from pci_mio_16e_1_ao.c */
 
+Var *daq_reserve_dac( Var *v );
 Var *daq_ao_channel_setup( Var *v );
 Var *daq_set_voltage( Var *v );
 
