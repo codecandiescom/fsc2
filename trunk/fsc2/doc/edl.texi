@@ -26,7 +26,7 @@ daunting task if you have no programming experience at all this has the
 advantage that you have complete control over the way the experiment is
 done. So you don't have to rely on some programmer (who probably isn't
 around when you need him most) to have got everything right. And writing
-@acronym{EDL} programs isn't that difficult.
+@acronym{EDL} programs really isn't that difficult.
 
 
 An @acronym{EDL} program is roughly structured along the way an
@@ -34,9 +34,9 @@ experiment is done. Before you start an experiment you first have to
 select the devices to be used and set them up. So also the first part of
 an @acronym{EDL} program mainly consists of specifying the devices to be
 controlled by the program and setting their parameter, i.e@: the time
-base of the digitizer or which pulses are to be created by the pulser.
-And as you would now start the experiment the second part of the
-@acronym{EDL} program describes how the experiment is to be done.
+base of the digitizer or which pulses are to be created by the pulse
+generator.  And as you would now start the experiment the second part of
+the @acronym{EDL} program describes how the experiment is to be done.
 
 To give you an impression here's an example for a simple cw-EPR
 experiment:
@@ -71,7 +71,7 @@ WHILE field <= end_field
     data = lockin_get_data( );
     display( I, data );
     save( data );
-    I += 1;
+    I = I + 1;
     field = sweep_up( );
     wait( 300 ms );
 @}
@@ -81,7 +81,7 @@ Obviously, the very first section of the program, starting with the
 keyword @code{DEVICES:}, is for specifying the names of the devices to
 be used (everything after the double-slashes are comments). In the
 example these are the Bruker ER035M gaussmeter, the AEG X-band magnet
-and the Standford Research lock-in amplifier SR530.
+and the Stanford Research lock-in amplifier SR530.
 
 In the following section, started by the keyword @code{VARIABLES:}, all
 variables that are going to be used in the program are listed and, if
@@ -159,8 +159,10 @@ amplifier and are only available when a lock-in is specified.
 Fortunately, usually these functions are available for all types of
 lock-in amplifiers (possibly with minor variations) so that using a
 different lock-in does not require a major rewrite of the program except
-changing its name in the @code{DEVICES} section. To find out about all
-built-in and device functions, their arguments and etc.@: have a look at
+changing its name in the @code{DEVICES} section.
+
+To find out about all built-in and device functions, their arguments,
+the sections of  and etc.@: have a look at
 the appropriate parts of this manual.
 
 
@@ -211,7 +213,7 @@ these sections is part of a whole chapter.
 As you already have seen the @code{PREPARATIONS} section is for setting
 up the other devices and the graphics. But this is also the section
 where the pulses are going to be defined. For more details about this
-see the chapter about pulsers and pulses.
+see the chapter about pulse generators and pulses.
 
 
 Finally, there is the @code{EXPERIMENT} section. As you already have
@@ -249,7 +251,7 @@ newline characters in between) by a colon, `@code{:}'.
 Each section of the program consists of statements. What a valid
 statement is may depend on the section (e.g.@: in the @code{DEVICES}
 section all valid statements are just the names of devices while in
-other sections a valid statement may be a compilcated equation), but in
+other sections a valid statement may be a complicated equation), but in
 all cases a statement must always be ended with a semicolon, `@code{;}'.
 There is nothing special about line endings, i.e.@: a statement can span
 several lines, so @acronym{fsc2} recognizes the end of a statement only
@@ -267,11 +269,13 @@ start_field       =               3360.0G;
 
 @acronym{EDL} programs use lots of function calls. There are no obvious
 differences between variable names and function names (all start with a
-character, followed by more characters, numbers or underscore charcters,
-`@code{_}'). So to make clear that such a word is a function it has to
+character, followed by more characters, numbers or underscore
+characters). So to make clear that such a word is a function it has to
 be followed by a pair of parenthesis, `@code{(}' and `@code{)}', even if
-the function doesn't accept arguments. If the function does accept more
-than one argument they have to be separated by commas.
+the function doesn't accept arguments (spaces, tabulator or newline
+characters are allowed between the function name and the opening
+parenthesis). If the function does accept more than one argument the
+arguments have to be separated by commas.
 
 
 
@@ -363,7 +367,7 @@ types of the arrays follow the same convention as with normal variables,
 i.e@: if the name starts with an upper case character it is an integer
 array, if it starts with a lower case character it is a floating point
 array. To define an array append the sizes of the dimensions of the
-array, separated by commata, in square brackets. E.g.
+array, separated by commas, in square brackets. E.g.
 @example
 A[ 100 ];
 b[ 4, 7, 3 ];
