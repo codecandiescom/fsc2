@@ -87,7 +87,7 @@ int pt2025_exp_hook( void )
 	{
 		eprint( FATAL, UNSET, "%s: Failed to initialize device.\n",
 				DEVICE_NAME );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	return 1;
@@ -197,20 +197,20 @@ static double pt2025_get_field( void )
 		{
 			eprint( FATAL, UNSET, "%s: Can't access the NMR gaussmeter.\n",
 					DEVICE_NAME );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( toupper( *buf ) == 'L' )
 			break;
 
 		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+			THROW( USER_BREAK_EXCEPTION )
 
 		if ( count > 1 )
 			usleep( 250000 );
 
 		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+			THROW( USER_BREAK_EXCEPTION )
 
 	} while ( --count > 0 );
 
@@ -218,7 +218,7 @@ static double pt2025_get_field( void )
 	{
 		eprint( FATAL, SET, "%s: NMR gaussmeter can't lock on the current "
 				"field in %s().\n", DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	sscanf( buf + 1, "%lf", &field );

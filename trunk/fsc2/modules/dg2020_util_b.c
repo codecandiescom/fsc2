@@ -40,7 +40,7 @@ Ticks dg2020_double2ticks( double time )
 	{
 		eprint( FATAL, SET, "%s: Can't set a time because no pulser time "
 				"base has been set.\n", pulser_struct.name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	ticks = time / dg2020.timebase;
@@ -52,7 +52,7 @@ Ticks dg2020_double2ticks( double time )
 				"multiple of the pulser time base of %s.\n",
 				pulser_struct.name, t, dg2020_ptime( dg2020.timebase ) );
 		T_free( t );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	return ( Ticks ) lround( ticks );
@@ -82,7 +82,7 @@ void dg2020_check_pod_level_diff( double high, double low )
 		eprint( FATAL, SET, "%s: Low voltage level is above high level, use "
 				"keyword INVERT to invert the polarity.\n",
 				pulser_struct.name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( high - low > MAX_POD_VOLTAGE_SWING + 0.1 * VOLTAGE_RESOLUTION )
@@ -90,7 +90,7 @@ void dg2020_check_pod_level_diff( double high, double low )
 		eprint( FATAL, SET, "%s: Difference between high and low "
 				"voltage of %g V is too big, maximum is %g V.\n",
 				pulser_struct.name, high - low, MAX_POD_VOLTAGE_SWING );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( high - low < MIN_POD_VOLTAGE_SWING - 0.1 * VOLTAGE_RESOLUTION )
@@ -98,7 +98,7 @@ void dg2020_check_pod_level_diff( double high, double low )
 		eprint( FATAL, SET, "%s: Difference between high and low "
 				"voltage of %g V is too small, minimum is %g V.\n",
 				pulser_struct.name, high - low, MIN_POD_VOLTAGE_SWING );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 }
 
@@ -116,7 +116,7 @@ PULSE *dg2020_get_pulse( long pnum )
 	{
 		eprint( FATAL, SET, "%s: Invalid pulse number: %ld.\n",
 				pulser_struct.name, pnum );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	while ( cp != NULL )
@@ -130,7 +130,7 @@ PULSE *dg2020_get_pulse( long pnum )
 	{
 		eprint( FATAL, SET, "%s: Referenced pulse %ld does not exist.\n",
 				pulser_struct.name, pnum );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	return cp;
@@ -271,7 +271,7 @@ void dg2020_calc_padding( void )
 		eprint( FATAL, UNSET, "%s: The requested pulse sequences don't fit "
 				"into the pulsers memory. You could try a longer pulser time "
 				"base.\n", pulser_struct.name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* If no repeat time or frequency has been set we're done */
@@ -329,7 +329,7 @@ void dg2020_calc_padding( void )
 		eprint( FATAL, UNSET, "%s: Can't set the repetition rate for the "
 				"experiment because it wouldn't fit into the pulsers "
 				"memory.\n", pulser_struct.name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Calculate and set new size of pulse pattern */

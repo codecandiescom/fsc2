@@ -790,7 +790,7 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 	do
 	{
 		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+			THROW( USER_BREAK_EXCEPTION )
 
 		len = 10;
 		usleep( 100000 );
@@ -887,7 +887,7 @@ void tds520_gpib_failure( void )
 {
 	eprint( FATAL, UNSET, "%s: Communication with device failed.\n",
 			DEVICE_NAME );
-	THROW( EXCEPTION );
+	THROW( EXCEPTION )
 }
 
 

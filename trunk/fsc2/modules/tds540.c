@@ -170,7 +170,7 @@ int tds540_exp_hook( void )
 	{
 		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
 				DEVICE_NAME, gpib_error_msg );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	tds540_do_pre_exp_checks( );
@@ -262,7 +262,7 @@ Var *digitizer_define_window( Var *v )
 		eprint( FATAL, SET, "%s: Maximum number of digitizer windows (%ld) "
 				"exceeded in %s().\n",
 				DEVICE_NAME, MAX_NUM_OF_WINDOWS, Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( v != NULL )
@@ -288,7 +288,7 @@ Var *digitizer_define_window( Var *v )
 			{
 				eprint( FATAL, SET, "%s: Zero or negative width for window "
 						"in %s().\n", DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 			is_win_width = SET;
 
@@ -365,7 +365,7 @@ Var *digitizer_timebase( Var *v )
 			eprint( FATAL, SET, "%s: Function %s() with no argument can "
 					"only be used in the EXPERIMENT section.\n",
 					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		tds540.timebase = tds540_get_timebase( );
@@ -377,14 +377,14 @@ Var *digitizer_timebase( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Digitizer time base can only be set before"
 				" the EXPERIMENT section starts.\n", DEVICE_NAME );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( tds540.is_timebase )
 	{
 		eprint( FATAL, SET, "%s: Digitizer time base has already been "
 				"set.\n", DEVICE_NAME );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -396,7 +396,7 @@ Var *digitizer_timebase( Var *v )
 		eprint( FATAL, SET, "%s: Invalid zero or negative time base: %s "
 				"in %s().\n",
 				DEVICE_NAME, tds540_ptime( timebase ), Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Pick the allowed timebase nearest to the user supplied value */
@@ -459,7 +459,7 @@ Var *digitizer_sensitivity( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Missing parameter in call of %s().\n",
 				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_check( v, INT_VAR );
@@ -468,7 +468,7 @@ Var *digitizer_sensitivity( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Can't set or obtain sensitivity for "
 				"specified channel in %s().\n", DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	channel = v->val.lval;
@@ -490,7 +490,7 @@ Var *digitizer_sensitivity( Var *v )
 			eprint( FATAL, SET, "%s: Function %s() with no argument can "
 					"only be used in the EXPERIMENT section.\n",
 					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		tds540.sens[ channel ] = tds540_get_sens( channel );
@@ -505,7 +505,7 @@ Var *digitizer_sensitivity( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Sensitivity setting is out of range in "
 				"%s().\n", DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	tds540.sens[ channel ] = sens;
@@ -547,7 +547,7 @@ Var *digitizer_num_averages( Var *v )
 			eprint( FATAL, SET, "%s: Function %s() with no argument can "
 					"only be used in the EXPERIMENT section.\n",
 					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		tds540.num_avg = tds540_get_num_avg( );
@@ -571,13 +571,13 @@ Var *digitizer_num_averages( Var *v )
 		eprint( FATAL, SET, "%s: Can't do zero averages. If you want "
 				"to set sample mode specify 1 as number of averages.\n",
 				DEVICE_NAME );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 	else if ( num_avg < 0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid negative number of averages: "
 				"%ld.\n", DEVICE_NAME, num_avg );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	tds540.num_avg = num_avg;
@@ -639,7 +639,7 @@ Var *digitizer_record_length( Var *v )
 			eprint( FATAL, SET, "%s: Function %s() with no argument can "
 					"only be used in the EXPERIMENT section.\n",
 					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( ! tds540_get_record_length( &rec_len ) )
@@ -668,7 +668,7 @@ Var *digitizer_record_length( Var *v )
 		{
 			eprint( FATAL, SET, "%s: Record length %ld too long.\n",
 					DEVICE_NAME, rec_len );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( rec_len == record_lengths[ i ] )
@@ -723,7 +723,7 @@ Var *digitizer_trigger_position( Var *v )
 			eprint( FATAL, SET, "%s: Function %s() with no argument can "
 					"only be used in the EXPERIMENT section.\n",
 					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( ! tds540_get_trigger_pos( &trig_pos ) )
@@ -742,7 +742,7 @@ Var *digitizer_trigger_position( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Invalid trigger position: %f, must be in "
 				"interval [0,1].\n", DEVICE_NAME, trig_pos );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	tds540.trig_pos = trig_pos;
@@ -796,7 +796,7 @@ Var *digitizer_trigger_channel( Var *v )
 			eprint( FATAL, SET, "%s: Function %s() with no argument can "
 					"only be used in the EXPERIMENT section.\n",
 					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		return vars_push( tds540_get_trigger_channel( ) );
@@ -808,7 +808,7 @@ Var *digitizer_trigger_channel( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Invalid trigger channel name in %s().\n",
 				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
     switch ( v->val.lval )
@@ -826,7 +826,7 @@ Var *digitizer_trigger_channel( Var *v )
 			eprint( FATAL, SET, "%s: Channel %s can't be used as trigger "
 					"channel in %s().\n", DEVICE_NAME,
 					Channel_Names[ v->val.lval ], Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
     }
 
 	vars_pop( v );
@@ -880,7 +880,7 @@ static Var *get_area( Var *v, bool use_cursor )
 	{
 		eprint( FATAL, SET, "%s: Missing arguments in call of "
 				"function %s().\n", DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_check( v, INT_VAR );
@@ -892,7 +892,7 @@ static Var *get_area( Var *v, bool use_cursor )
 	{
 		eprint( FATAL, SET, "%s: Invalid channel specification in %s().\n",
 				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	tds540.channels_in_use[ ch ] = SET;
@@ -909,7 +909,7 @@ static Var *get_area( Var *v, bool use_cursor )
 		{
 			eprint( FATAL, SET, "%s: No measurement windows have been "
 					"defined for %s().\n", DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		while ( w != NULL )
@@ -927,7 +927,7 @@ static Var *get_area( Var *v, bool use_cursor )
 		{
 			eprint( FATAL, SET, "%s: Measurement window has not been "
 					"defined for %s().\n", DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	}
 	else
@@ -987,7 +987,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	{
 		eprint( FATAL, SET, "%s: Missing arguments in call of "
 				"function %s().\n", DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_check( v, INT_VAR );
@@ -999,7 +999,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	{
 		eprint( FATAL, SET, "%s: Invalid channel specification in %s().\n",
 				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	tds540.channels_in_use[ ch ] = SET;
@@ -1015,7 +1015,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 		{
 			eprint( FATAL, SET, "%s: No measurement windows have been "
 					"defined for %s().\n", DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		while ( w != NULL )
@@ -1033,7 +1033,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 		{
 			eprint( FATAL, SET, "%s: Measurement window has not been "
 					"defined for %s().\n", DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	}
 	else
@@ -1106,7 +1106,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	{
 		eprint( FATAL, SET, "%s: Missing arguments in call of function "
 				"%s().\n", DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_check( v, INT_VAR );
@@ -1118,7 +1118,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	{
 		eprint( FATAL, SET, "%s: Invalid channel specification in %s().\n",
 				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	tds540.channels_in_use[ ch ] = SET;
@@ -1134,7 +1134,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 		{
 			eprint( FATAL, SET, "%s: No measurement windows have been "
 					"defined for %s().\n", DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		while ( w != NULL )
@@ -1152,7 +1152,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 		{
 			eprint( FATAL, SET, "%s: Measurement window has not been "
 					"defined for %s().\n", DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	}
 	else
@@ -1221,7 +1221,7 @@ Var *digitizer_lock_keyboard( Var *v )
 			{
 				eprint( FATAL, SET, "%s: Invalid argument in call of "
 						"function %s().\n", DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 		}
 	}

@@ -289,7 +289,7 @@ bool dg2020_set_pulse_phase_cycle( long pnum, long cycle )
 	{
 		eprint( FATAL, SET, "%s: Pulse %ld has already been assigned a "
 				"phase cycle.\n", pulser_struct.name, pnum );
-		THROW(EXCEPTION )
+		THROW( EXCEPTION )
 	}
 
 	while ( pc != NULL )
@@ -323,7 +323,7 @@ bool dg2020_get_pulse_function( long pnum, int *function )
 	{
 		eprint( FATAL, SET, "%s: The function of pulse %ld hasn't been "
 				"set.\n", pulser_struct.name, pnum );
-		THROW(EXCEPTION )
+		THROW( EXCEPTION )
 	}
 
 	*function = p->function->self;
@@ -342,7 +342,7 @@ bool dg2020_get_pulse_position( long pnum, double *time )
 	{
 		eprint( FATAL, SET, "%s: The start position of pulse %ld hasn't "
 				"been set.\n", pulser_struct.name, pnum );
-		THROW(EXCEPTION )
+		THROW( EXCEPTION )
 	}
 
 	*time = dg2020_ticks2double( p->pos );
@@ -362,7 +362,7 @@ bool dg2020_get_pulse_length( long pnum, double *time )
 	{
 		eprint( FATAL, SET, "%s: Length of pulse %ld hasn't been set.\n",
 				pulser_struct.name, pnum );
-		THROW(EXCEPTION )
+		THROW( EXCEPTION )
 	}
 
 	*time = dg2020_ticks2double( p->len );
@@ -382,7 +382,7 @@ bool dg2020_get_pulse_position_change( long pnum, double *time )
 	{
 		eprint( FATAL, SET, "%s: The position change of pulse %ld hasn't "
 				"been set.\n", pulser_struct.name, pnum );
-		THROW(EXCEPTION )
+		THROW( EXCEPTION )
 	}
 
 	*time = dg2020_ticks2double( p->dpos );
@@ -402,7 +402,7 @@ bool dg2020_get_pulse_length_change( long pnum, double *time )
 	{
 		eprint( FATAL, SET, "%s: Length change of pulse %ld hasn't been "
 				"set.\n", pulser_struct.name, pnum );
-		THROW(EXCEPTION )
+		THROW( EXCEPTION )
 	}
 
 	*time = dg2020_ticks2double( p->dlen );

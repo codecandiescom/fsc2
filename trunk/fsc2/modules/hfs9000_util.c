@@ -40,7 +40,7 @@ Ticks hfs9000_double2ticks( double time )
 	{
 		eprint( FATAL, SET, "%s: Can't set a time because no pulser time "
 				"base has been set.\n", pulser_struct.name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	ticks = time / hfs9000.timebase;
@@ -52,7 +52,7 @@ Ticks hfs9000_double2ticks( double time )
 				"multiple of the pulser time base of %s.\n",
 				pulser_struct.name, t, hfs9000_ptime( hfs9000.timebase ) );
 		T_free( t );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	return ( Ticks ) lround( ticks );
@@ -82,7 +82,7 @@ void hfs9000_check_pod_level_diff( double high, double low )
 		eprint( FATAL, SET, "%s: Low voltage level is above high level, "
 				"use keyword INVERT to invert the polarity.\n",
 				pulser_struct.name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( high - low > MAX_POD_VOLTAGE_SWING + 0.1 * VOLTAGE_RESOLUTION )
@@ -90,7 +90,7 @@ void hfs9000_check_pod_level_diff( double high, double low )
 		eprint( FATAL, SET, "%s: Difference between high and low "
 				"voltage of %g V is too big, maximum is %g V.\n",
 				pulser_struct.name, high - low, MAX_POD_VOLTAGE_SWING );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( high - low < MIN_POD_VOLTAGE_SWING - 0.1 * VOLTAGE_RESOLUTION )
@@ -98,7 +98,7 @@ void hfs9000_check_pod_level_diff( double high, double low )
 		eprint( FATAL, SET, " %s: Difference between high and low "
 				"voltage of %g V is too small, minimum is %g V.\n",
 				pulser_struct.name, high - low, MIN_POD_VOLTAGE_SWING );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 }
 
@@ -116,7 +116,7 @@ PULSE *hfs9000_get_pulse( long pnum )
 	{
 		eprint( FATAL, SET, "%s: Invalid pulse number: %ld.\n",
 				pulser_struct.name, pnum );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	while ( cp != NULL )
@@ -130,7 +130,7 @@ PULSE *hfs9000_get_pulse( long pnum )
 	{
 		eprint( FATAL, SET, "%s: Referenced pulse %ld does not exist.\n",
 				pulser_struct.name, pnum );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	return cp;

@@ -79,11 +79,11 @@ Var *f_getf( Var *var )
 	old_File_List = NULL;
 
 	/* If there was a call of `f_save()' without a previous call to `f_getf()'
-	   `f_save()' did already call `f_getf()' by itself and now don't expects
-	   file identifiers anymore - in this case `No_File_Numbers' is set. So,
-	   if we get a call to `f_getf()' while `No_File_Numbers' is set we must
-	   tell the user that he can't have it both ways, i.e. (s)he either has to
-	   call `f_getf()' before any call to `f_save()' or never. */
+	   then `f_save()' already called `f_getf()' by itself and now does not
+	   expects file identifiers anymore - in this case `No_File_Numbers' is
+	   set. So, if we get a call to `f_getf()' while `No_File_Numbers' is set
+	   we must tell the user that he can't have it both ways, i.e. (s)he
+	   either has to call `f_getf()' before any call to `f_save()' or never. */
 
 	if ( No_File_Numbers )
 	{
@@ -1884,8 +1884,12 @@ get_repl_retry:
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Function to check if a number passed to it is a valid file handle. */
+/* This requires that the number is an integer variable. It returns 1 */
+/* if there's an already opened file associated with this number and  */
+/* 0 if there isn't.                                                  */
+/*--------------------------------------------------------------------*/
 
 Var *f_is_file( Var *v )
 {

@@ -480,7 +480,7 @@ void tds520a_gpib_failure( void )
 {
 	eprint( FATAL, UNSET, "%s: Communication with device failed.\n",
 			DEVICE_NAME );
-	THROW( EXCEPTION );
+	THROW( EXCEPTION )
 }
 
 
@@ -746,7 +746,7 @@ double tds520a_get_area( int channel, WINDOW *w, bool use_cursor )
 	do
 	{
 		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+			THROW( USER_BREAK_EXCEPTION )
 
 		length = 40;
 		usleep( 100000 );
@@ -866,7 +866,7 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length,
 	do
 	{
 		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+			THROW( USER_BREAK_EXCEPTION )
 
 		len = 10;
 		usleep( 100000 );
@@ -955,7 +955,7 @@ double tds520a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 	do
 	{
 		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+			THROW( USER_BREAK_EXCEPTION )
 
 		length = 40;
 		usleep( 100000 );

@@ -101,7 +101,7 @@ static bool hfs9000_update_pulses( bool flag )
 		CATCH( EXCEPTION )
 		{
 			if ( flag )
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 
 			for ( p = hfs9000_Pulses; p != NULL; p = p->next )
 			{
@@ -155,7 +155,7 @@ void hfs9000_do_checks( FUNCTION *f )
 							"for function `%s' is too long. Perhaps you "
 							"should try the MAXIMUM_PATTERN_LENGTH command.\n",
 							pulser_struct.name, Function_Names[ f->self ] );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			f->num_active_pulses = i + 1;
@@ -176,7 +176,7 @@ void hfs9000_do_checks( FUNCTION *f )
 					eprint( FATAL, SET, "%s: Pulses %ld and %ld begin to "
 							"overlap.\n", pulser_struct.name,
 							p->num, f->pulses[ i + 1 ]->num );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 			else if ( p->pos + p->len == f->pulses[ i + 1 ]->pos )
 			{

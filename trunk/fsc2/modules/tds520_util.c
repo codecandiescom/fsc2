@@ -125,7 +125,7 @@ void tds520_do_pre_exp_checks( void )
 		{
 			eprint( FATAL, UNSET, "%s: Can't determine a reasonable value for "
 					"still undefined window widths.\n", DEVICE_NAME );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		for ( w = tds520.w; w != NULL; w = w->next )
@@ -292,7 +292,7 @@ static void tds520_window_check_3( void )
         {
 			eprint( FATAL, UNSET, "%s: Window %ld doesn't fit into current "
 					"digitizer time range.\n", DEVICE_NAME, w->num );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		/* Take care: Numbers start from 1 ! */
@@ -306,7 +306,7 @@ static void tds520_window_check_3( void )
         {
 			eprint( FATAL, UNSET, "%s: Window %ld has width of less than 1 "
 					"point.\n", DEVICE_NAME, w->num );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
     }
 }

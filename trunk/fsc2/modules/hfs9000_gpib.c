@@ -68,7 +68,7 @@ bool hfs9000_init( const char *name )
 	{
 		eprint( FATAL, UNSET, "%s: Timebase of pulser has not been set.\n",
 				pulser_struct.name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Set lead delay to zero for all used channels */
@@ -400,5 +400,5 @@ static void hfs9000_gpib_failure( void )
 {
 	eprint( FATAL, UNSET, "%s: Communication with device failed.\n",
 			pulser_struct.name );
-	THROW( EXCEPTION );
+	THROW( EXCEPTION )
 }

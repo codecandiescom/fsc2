@@ -105,7 +105,7 @@ DU       {IU}|{FU}
 \n			hp8647a_Lc++;
 
 			/* handling of EOF within a comment -> fatal error */
-<<EOF>>		THROW( EOF_IN_COMMENT_EXCEPTION );
+<<EOF>>		THROW( EOF_IN_COMMENT_EXCEPTION )
 
 			/* end of comment but not end of line */
 {EREM1}		yy_pop_state( );
@@ -140,7 +140,7 @@ DU       {IU}|{FU}
 
 <<EOF>>		return 0;
 
-.           THROW( INVALID_INPUT_EXCEPTION );
+.           THROW( INVALID_INPUT_EXCEPTION )
 
 
 		/*----------------------*/
@@ -161,7 +161,7 @@ void hp8647a_read_table( FILE *fp )
 	{
 		eprint( FATAL, UNSET, "%s: Internal error while reading attenuation "
                 "table.\n", DEVICE_NAME );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Keep the lexer happy... */
@@ -185,20 +185,20 @@ void hp8647a_read_table( FILE *fp )
 		eprint( FATAL, UNSET, "%s: Unexpected end of table file `%s' in "
                 "comment starting at line %ld.\n", DEVICE_NAME,
                 hp8647a.table_file, hp8647a_Comm_Lc );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 	CATCH( DANGLING_END_OF_COMMENT )
 	{
 		eprint( FATAL, UNSET, "%s: End of comment found in table file `%s' "
                 "at line %ld.\n",
                 DEVICE_NAME, hp8647a.table_file, hp8647a_Lc );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 	CATCH( INVALID_INPUT_EXCEPTION )
 	{
 		eprint( FATAL, UNSET, "%s: Invalid entry in table file  `%s' at line "
                 "%ld.\n", DEVICE_NAME, hp8647a.table_file, hp8647a_Lc );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 }
 
@@ -286,7 +286,7 @@ static void hp8647a_new_table_entry( int type, double val )
 			eprint( FATAL, UNSET, "%s: Missing final %s in table file `%s'.\n",
 					DEVICE_NAME, is_freq ? "attenuation" : "frequency",
 					hp8647a.table_file );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		/* Check that there are at least two entries in the table */
@@ -295,7 +295,7 @@ static void hp8647a_new_table_entry( int type, double val )
 		{
 			eprint( FATAL, UNSET, "%s: Table file `%s' contains less than 2 "
 					"entries.\n", DEVICE_NAME, hp8647a.table_file );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		/* Cut back table size to the amount of memory really needed and sort
@@ -320,7 +320,7 @@ static void hp8647a_new_table_entry( int type, double val )
 		eprint( FATAL, UNSET, "%s: Error while reading table file `%s': Two "
 				"attenuation values in a row at line %ld.\n", DEVICE_NAME,	 
 				hp8647a.table_file, hp8647a_Lc );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( type == IS_FREQ && is_freq )
@@ -328,7 +328,7 @@ static void hp8647a_new_table_entry( int type, double val )
 		eprint( FATAL, UNSET, "%s: Error while reading table file `%s': Two "
 				"frequency values in a row at line %ld.\n", DEVICE_NAME,	 
 				hp8647a.table_file, hp8647a_Lc );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* If the type is indetermined either set it to the not yet set type
@@ -359,7 +359,7 @@ static void hp8647a_new_table_entry( int type, double val )
 			eprint( FATAL, UNSET, "%s: Invalid negative RF frequency found "
 					"in the table file `%s' at line %ld.\n", DEVICE_NAME,
 					hp8647a.table_file, hp8647a_Lc );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( val > MAX_FREQ || val < MIN_FREQ )
@@ -380,7 +380,7 @@ static void hp8647a_new_table_entry( int type, double val )
 					"range is %.1f dB.\n", DEVICE_NAME, val,
 					hp8647a.table_file,
 					hp8647a_Lc, hp8647a.min_attenuation - MAX_ATTEN );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	    hp8647a.att_table[ hp8647a.att_table_len ].att = val;
 		is_att = SET;
@@ -412,7 +412,7 @@ static int hp8647a_comp( const void *a, const void *b )
 	{
 		eprint( FATAL, UNSET, "%s: Frequency %s Hz appears twice in table "
 				"file `%s'\n", DEVICE_NAME, A->freq, hp8647a.table_file );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	return A->freq < B->freq ? -1 : 1;

@@ -119,7 +119,7 @@ int lakeshore330_exp_hook( void )
 	{
 		eprint( FATAL, UNSET, "%s: Initialization of device failed.\n",
 				DEVICE_NAME );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 	Cur_Func = NULL;
 	return 1;
@@ -199,7 +199,7 @@ Var *temp_contr_sample_channel( Var *v )
 		{
 			eprint( FATAL, SET, "%s: Invalid sample channel number (%ld) "
 					"in %s().\n", DEVICE_NAME, channel, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	}
 	else
@@ -209,7 +209,7 @@ Var *temp_contr_sample_channel( Var *v )
 		{
 			eprint( FATAL, SET, "%s: Invalid sample channel (\"%s\") in "
 					"%s().\n", DEVICE_NAME, v->val.sptr, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 		channel = ( long ) ( *v->val.sptr - 'A' );
 	}
@@ -258,7 +258,7 @@ Var *temp_contr_sensor_unit( Var *v )
 		{
 			eprint( FATAL, SET, "%s: Invalid unit number (%d) in %s().\n",
 					DEVICE_NAME, unit, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	}
 	else
@@ -274,7 +274,7 @@ Var *temp_contr_sensor_unit( Var *v )
 		{
 			eprint( FATAL, SET, "%s: Invalid unit (\"%s\") in %s().\n",
 					DEVICE_NAME, v->val.sptr, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	}
 
@@ -329,7 +329,7 @@ Var *temp_contr_lock_keyboard( Var *v )
 			{
 				eprint( FATAL, SET, "%s: Invalid argument in call of "
 						"function %s().\n", DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 		}
 	}
@@ -409,7 +409,7 @@ static double lakeshore330_sens_data( void )
 	{
 		eprint( FATAL, SET, "%s: Error reading temperature in %s().\n",
 				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	sscanf( buf, "%lf", &temp );
@@ -455,7 +455,7 @@ static long lakeshore330_get_unit( void )
 
 	eprint( FATAL, SET, "%s: Device returned invalid unit \"%s\" in "
 			"%s().\n", DEVICE_NAME, *buf, Cur_Func );
-	THROW( EXCEPTION );
+	THROW( EXCEPTION )
 
 	return -1;
 }
@@ -505,5 +505,5 @@ static void lakeshore330_gpib_failure( void )
 {
 	eprint( FATAL, UNSET, "%s: Communication with device failed.\n",
 			DEVICE_NAME );
-	THROW( EXCEPTION );
+	THROW( EXCEPTION )
 }
