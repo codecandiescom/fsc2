@@ -550,8 +550,6 @@ static void set_buttons_for_run( int active )
 	}
 	else
 	{
-		fl_freeze_form( fsc2_main_form );
-
 		fl_activate_object( main_form->Load );
 		fl_set_object_lcol( main_form->Load, FL_BLACK );
 

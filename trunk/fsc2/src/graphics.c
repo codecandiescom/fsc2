@@ -867,7 +867,6 @@ void stop_graphics( void )
 	{
 		fl_free_form( run_main_form );
 		run_form = NULL;
-		fl_redraw_form( fsc2_main_form );
 	}
 
 	if ( G_stored )
