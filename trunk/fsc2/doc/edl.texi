@@ -61,7 +61,6 @@ VARIABLES:
 PREPARATIONS:
 
   magnet_setup( start_field, field_step );
-  lockin_sensitivity( 5 uV );
   lockin_time_constant( 300 ms );
   init_1d( );
 
@@ -94,13 +93,12 @@ and another variable, @code{data}, for storing the data received from
 the lock-in amplifier, are declared.
 
 In the next section, following the @code{PREPARATIONS:} keyword, the
-devices are set up. The function @code{magnet_setup} tells the magnet
-to start with the field stored in the variable @w{@code{start_field}}
-and to use a step size of @w{@code{field_step}}. Next, the lock-in
-amplifier is set to a sensitivity of @w{5 uV} and a time constant of
-@w{300 ms}. The last function call in the section, @code{init_1d()},
-tells the program that this is a 1-dimensional experiment and to use
-the appropriate kind of display for the data.
+devices are set up. The function @code{magnet_setup} tells the magnet to
+start with the field stored in the variable @w{@code{start_field}} and
+to use a step size of @w{@code{field_step}}. Next, the lock-in time
+constant is set to @w{300 ms}. The last function call in this section,
+@code{init_1d()}, tells the program that this is a 1-dimensional
+experiment and to use the appropriate kind of display for the data.
 
 Now we're already done with the preparations and can start the
 experiment, as indicated by the keyword @code{EXPERIMENT:}. The whole
@@ -157,15 +155,14 @@ called when the device they are defined for is listed in the
 @w{@code{lockin_sensitivity}}, @w{@code{lockin_time_constant}} and
 @w{@code{lockin_get_data}} are obviously targeted at the lock-in
 amplifier and are only available when a lock-in amplifier module is
-specified. Fortunately, these functions usually will be available for
-all types of lock-in amplifiers (possibly with minor variations) so that
-using a different lock-in amplifier does not require a major rewrite of
-the @acronym{EDL} program except changing its name in the @code{DEVICES}
-section.
+specified. Most of these functions are available for all types of
+lock-in amplifiers (possibly with minor variations) so that using a
+different lock-in amplifier usually does not require a major rewrite of
+the @acronym{EDL} program but just changing teh lock-in's name in the
+@code{DEVICES} section.
 
 To find out about all built-in and device functions, their arguments and
-when they may be used have a look at the appropriate parts of this
-manual.
+when they may be used have a look at the later parts of this manual.
 
 
 @node Sections, Syntax, Basics, EDL
@@ -395,7 +392,7 @@ E[ 2, 1 ] = 4     E[ 2, 2 ] = 5     E[ 2, 3 ] = 6
 @end example
 
 
-There are some situations where on doesn't know the size of an array in
+There are some situations where one doesn't know the size of an array in
 advance, so setting it in the @code{VARIABLES} section is
 impossible. Therefor, one may also define arrays with the size of the
 last dimension remaining undefined by specifying a @code{*} instead of a
@@ -846,7 +843,17 @@ expressions (e.g.@: numbers):
 @end multitable
 @end quotation
 
-And here is also an example for using simple numbers in a condition,
+Please note, that using comparisons between floating point numbers may
+not work as you expect them to do. This is a result of the way floating
+point numbers are stored by computer sinternally, i.e.@: as binary
+numbers. Many numbers, that can be expressed easily in a decimal system,
+e.g.@: @code{0.1}, are, when expressed using the binary system, infinite
+fractions. But because the computer can only store a finite number of
+bits for the number rounding errors will occur. Thus @code{0.1} and the
+result of e.g.@: @code{0.7 / 7} can be different numbers and a
+comparison for equality will fail.
+
+Here is now an example for using simple numbers in a condition,
 using the fact that a non-zero value is always interpreted as TRUE:
 
 @example
@@ -910,14 +917,13 @@ condition becomes true.
 @subsection FOR loops
 @cindex FOR loops
 
-Before the @code{WHILE} loop one often has to initialize the loop
-variables and within the statement block the loop variable has to be
-updated. In many cases (for example in both the examples fro the
-@code{WHILE} loop) it is simpler to use a @code{FOR} loop instead,
-because setting the loop variable as well as updating the loop is
-automatically done in the condition part. Here's an example that does
-exactly the same as the first of the two examples for @code{WHILE}
-loops:
+Before the @code{WHILE} loop one has to initialize the loop variable and
+within the statement block it has to be updated. In many cases (for
+example in both the examples for the @code{WHILE} loop above) it is
+simpler to use a @code{FOR} loop instead, because setting the loop
+variable as well as updating it is automatically done in the condition
+part. Here's an example that does exactly the same as the first of the
+two examples for @code{WHILE} loops:
 @cindex FOR
 
 @example
@@ -1044,10 +1050,8 @@ IF x >= 0 @{
 @}
 @end example
 @noindent
-This is basically the Heavyside function that is zero for all arguments
-less than zero and one everywhere else.
 
-But things can get even more complex -- you can follow the @code{ELSE}
+But things can also get more complex -- you can follow the @code{ELSE}
 directly by another @code{IF}. Let's assume that you need to set
 @code{x} to 1 if it's larger than 1, to 0 if it belongs to the interval
 @w{[ 0, 1 ]} and to -1 if it's smaller than 0. Then you could use:
@@ -1087,7 +1091,7 @@ program before the experiment is done. This happens when the condition
 to be tested depends either on user input (e.g.@ tests, if the user
 pressed a button etc.) or on the results of a measurement itself. In
 these cases the flow of control of the program can not be known in
-advance and thus a thorough test is impossible. Therefor it can occur
+advance and thus a thorough test is impossible. Therefor it can happen
 that the test run of the experiment succeeds but the actual experiment
 stops with an error that had not been anticipated.
 @end cartouche

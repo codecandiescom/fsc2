@@ -385,7 +385,10 @@ Var *f_bcreate( Var *v )
 
 	new_io->ID = ID;
 	new_io->type = ( int ) type;
-	new_io->state = 0;
+	if ( type == RADIO_BUTTON && coll == -1 )
+		new_io->state = 1;
+	else
+		new_io->state = 0;
 	new_io->self = NULL;
 	new_io->group = NULL;
 	new_io->label = label;

@@ -351,7 +351,6 @@ Var *lockin_sensitivity( Var *v )
 	   within 1 percent, we utter a warning message (but only once). */
 
 	for ( i = 0; i < 23; i++ )
-	{
 		if ( sens <= slist[ i ] && sens >= slist[ i + 1 ] )
 		{
 			if ( slist[ i ] / sens < sens / slist[ i + 1 ] )
@@ -360,7 +359,9 @@ Var *lockin_sensitivity( Var *v )
 				Sens = i + 2;
 			break;
 		}
-	}
+
+	if ( Sens < 0 && sens < slist[ 24 ] * 1.01 )
+		Sens = 24;
 
 	if ( Sens > 0 &&                                   /* value found ? */
 		 fabs( sens - slist[ Sens - 1 ] ) > sens * 1.0e-2 && /* error > 1% ? */

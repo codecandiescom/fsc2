@@ -468,6 +468,9 @@ Var *lockin_sensitivity( Var *v )
 			break;
 		}
 
+	if ( Sens < 0 && sens < slist[ 26 ] * 1.01 )
+		Sens = 26;
+
 	if ( Sens >= 0 &&                                    /* value found ? */
 		 fabs( sens - slist[ Sens ] ) > sens * 1.0e-2 && /* error > 1% ? */
 		 ! sr810.Sens_warn  )                            /* no warning yet ? */
@@ -497,8 +500,8 @@ Var *lockin_sensitivity( Var *v )
 		if ( ! sr810.Sens_warn )                      /* no warn message yet */
 		{
 			if ( sens >= 1.0 )
-				eprint( WARN, SET, "%s: Sensitivity of %.0lf V is too "
-						"low, using %.0lf V instead.\n",
+				eprint( WARN, SET, "%s: Sensitivity of %.0lf mV is too "
+						"low, using %.0lf mV instead.\n",
  						DEVICE_NAME, sens * 1.0e3, slist[ Sens ] * 1.0e3 );
 			else
 				eprint( WARN, SET, "%s: Sensitivity of %.0lf nV is too "

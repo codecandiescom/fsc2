@@ -453,11 +453,11 @@ Var *lockin_sensitivity( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* We try to match the sensitivity passed to the function by checking if
-	   it fits in between two of the valid values and setting it to the nearer
-	   one and, if this doesn't work, we set it to the minimum or maximum
-	   value, depending on the size of the argument. If the value does not fit
-	   within 1 percent, we utter a warning message (but only once). */
+	/* Try to match the sensitivity passed to the function by checking if it
+	   fits in between two of the valid values and setting it to the nearer
+	   one and, if this doesn't work, set it to the minimum or maximum value,
+	   depending on the size of the argument. If the value does not fit within
+	   1 percent, utter a warning message (but only once). */
 
 	for ( i = 0; i < 25; i++ )
 		if ( sens >= slist[ i ] && sens <= slist[ i + 1 ] )
@@ -466,6 +466,9 @@ Var *lockin_sensitivity( Var *v )
 				   ( ( slist[ i ] / sens > sens / slist[ i + 1 ] ) ? 0 : 1 );
 			break;
 		}
+
+	if ( Sens < 0 && sens < slist[ 26 ] * 1.01 )
+		Sens = 26;
 
 	if ( Sens >= 0 &&                                    /* value found ? */
 		 fabs( sens - slist[ Sens ] ) > sens * 1.0e-2 && /* error > 1% ? */

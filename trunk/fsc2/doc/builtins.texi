@@ -596,7 +596,8 @@ Both label and help text may contain some escape sequences, namely
 help text) and `@code{\\}', standing for the backslash character to
 allow a backslash in front of an `n'.
 
-All buttons start in the deactivated state.
+All buttons start in the deactivated state except the 'leader' of a
+group of radio buttons.
 
 
 @anchor{button_delete}
