@@ -189,8 +189,8 @@ static int witio_48_get_ioport( void )
 			break;
 
 	if ( base > ( unsigned char * ) 0x300 ) {
-		printk( KERN_ERR "witio_48: Can't get region at boards base "
-			"address %p\n", board.base );
+		printk( KERN_ERR "witio_48: Invalid board base address: %p\n",
+			board.base );
 		return 1;
 	}
 
@@ -198,8 +198,8 @@ static int witio_48_get_ioport( void )
 	   11 bytes */
 
 	if ( check_region( ( unsigned long ) base, 0x0BUL ) < 0 ) {
-		printk( KERN_ERR "witio_48: Can't get region at boards base "
-			"address %p\n", board.base );
+		printk( KERN_ERR "witio_48: Can't obtain region at boards "
+			"base address: %p\n", board.base );
 		return 1;
 	}
 
@@ -841,7 +841,7 @@ static void witio_48_set_crtl( int dio )
 
 static void witio_48_board_out( unsigned char *addr, unsigned char byte )
 {
-    outb_p( byte, ( PORT ) addr );
+	outb( byte, ( PORT ) addr );
 }
 
 
@@ -851,7 +851,7 @@ static void witio_48_board_out( unsigned char *addr, unsigned char byte )
 
 static unsigned char witio_48_board_in( unsigned char *addr )
 {
-	return inb_p( ( PORT ) addr );
+	return inb( ( PORT ) addr );
 }
 
 
