@@ -170,7 +170,7 @@ Ampere (and @code{nA, uA, mA, kA} and @code{MA})
 @item Hz
 Hertz (and @code{nHz, uHz, mHz, kHz} and @code{MHz})
 @item dB
-dB (dezi-Bell)
+dB (deci-Bell)
 @end table
 
 Of course, also the reserved words can't be used as variable names. But

@@ -53,7 +53,7 @@ somewhat contrived example:
 print( "The # of # is: #", "sine", x, sin( x ) );
 @end example
 @noindent
-This will print (if x equals 0.5):
+This will print (assuming @code{x} equals 0.5):
 
 @example
 The sine of 0.500000 is: 0.479426
