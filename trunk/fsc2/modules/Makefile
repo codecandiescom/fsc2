@@ -82,7 +82,7 @@ rb_pulser       := rb_pulser.c rb_pulser_gen.c rb_pulser_pulse.c \
 
 comp_modules    := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400  \
 				   hp8672a $(hp864_list) $(tds_list) spectrapro_300i        \
-				   hjs_attenuator hjs_sfc lecroy9400_s spex_cd2a rs_sml01
+				   hjs_attenuator hjs_sfc spex_cd2a rs_sml01
 
 
 # Additional modules that only get created on demand (they require some
