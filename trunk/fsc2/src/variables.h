@@ -33,7 +33,6 @@
 typedef struct Var_
 {
 	char *name;                         /* name of the variable or array */
-	bool new_flag;                      /* set while no data are assigned */
 	int type;                           /* type of the variable - see below */
 	union
 	{
@@ -43,10 +42,13 @@ typedef struct Var_
 		double *dpnt;                       /* for double arrays */
 		char *sptr;                         /* for strings */
 		struct Var_ * ( * fnct )( struct Var_ * );  /* for functions */
+		struct Var_ *vptr;                  /* for array references */
 	} val;
-	long dim;             /* dimension of array / number of args of function */
-	long *sizes;
-	long len;             /* total len of array / position in function list */
+	int dim;              /* dimension of array */
+	int *sizes;
+	long len;             /* total len of array */
+	long flags;
+	struct Var_ *from;
 	struct Var_ *next;
 } Var;
 

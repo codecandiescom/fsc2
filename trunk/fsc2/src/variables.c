@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.20  1999/07/21 23:01:23  jens
+   *** empty log message ***
+
    Revision 1.19  1999/07/21 15:26:32  jens
    *** empty log message ***
 
@@ -59,6 +62,7 @@
 
 
 #include "fsc2.h"
+
 
 
 /*
@@ -291,7 +295,7 @@ Var *vars_new( char *name )
 	/* Set relevant entries in the new structure and make it the very first
 	   element in the list of variables */
 
-	vp->new_flag = SET;          /* set flag to indicate it's new */
+	vp->flags = NEW_VARIABLE;    /* set flag to indicate it's new */
 	vp->type = UNDEF_VAR;        /* set type to still undefined */
 
 	vp->next = var_list;         /* set pointer to it's successor */
@@ -338,7 +342,7 @@ Var *vars_new_assign( Var *src, Var *dest )
 
 	dest->type = IF_FUNC( dest->name[ 0 ] ) ? INT_VAR : FLOAT_VAR;
 
-	if ( ! src->new_flag )
+	if ( ! ( src->flags & NEW_VARIABLE ) )
 	{
 		if ( dest->type == INT_VAR )
 		{
@@ -359,7 +363,7 @@ Var *vars_new_assign( Var *src, Var *dest )
 				dest->val.dval = src->val.dval;
 		}
 
-		dest->new_flag = UNSET;
+		dest->flags &= ~NEW_VARIABLE;
 	}
 	else
 	{
@@ -871,9 +875,26 @@ Var *vars_push( int type, ... )
 
 		case STR_VAR :
 			new_stack_var->val.sptr = get_string_copy( va_arg( ap, char * ) );
+			break;
 
 		case FUNC :
-			new_stack_var->name = NULL;
+			/* passing the function pointer to assign it here proved to be
+			   too difficult for my limited understanding of C or the type
+			   analyser in va_arg( ) is broken... */
+			break;
+
+		case ARR_PTR :
+			new_stack_var->val.vptr = va_arg( ap, Var * );
+			break;
+
+		case INT_PTR :
+			new_stack_var->val.lpnt = va_arg( ap, long * );
+			new_stack_var->from = va_arg( ap, Var * );
+			break;
+
+		case FLOAT_PTR :
+			new_stack_var->val.dpnt = va_arg( ap, double * );
+			new_stack_var->from = va_arg( ap, Var * );
 			break;
 
 		default :
@@ -882,10 +903,11 @@ Var *vars_push( int type, ... )
 
 	va_end( ap );
 	
-	/* clear its `new_flag' and set the `next' entry to NULL */
+	/* clear its `flag' and set the `name' and `next' entry to NULL */
 
-	new_stack_var->new_flag = UNSET;
+	new_stack_var->name = NULL;
 	new_stack_var->next = NULL;
+	new_stack_var->flags = 0;
 
 	/* and finally append it to the end of the stack */
 
@@ -965,7 +987,7 @@ void vars_del_stack( void )
 /*    * pointer to the new variable to be used for the array */
 /*-----------------------------------------------------------*/
 
-void vars_arr_start( Var *a )
+void qvars_arr_start( Var *a )
 {
 	if ( a->type != UNDEF_VAR )
 	{
@@ -994,7 +1016,7 @@ void vars_arr_start( Var *a )
 /*    * pointer to variable with size of the next dimension */
 /*----------------------------------------------------------*/
 
-void vars_arr_extend( Var *a, Var *s )
+void qvars_arr_extend( Var *a, Var *s )
 {
 	long size;
 
@@ -1033,10 +1055,10 @@ void vars_arr_extend( Var *a, Var *s )
 	/* extend the `sizes' entry and store the size for this dimension */
 
 	if ( a->sizes == NULL )
-		a->sizes = ( long * ) T_malloc( sizeof( long ) );
+		a->sizes = ( int * ) T_malloc( sizeof( int ) );
 	else
-		a->sizes = ( long * ) T_realloc( ( void * ) a->sizes,
-										 ( a->dim + 1 )* sizeof( long ) );
+		a->sizes = ( int * ) T_realloc( ( void * ) a->sizes,
+										( a->dim + 1 )* sizeof( int ) );
 	a->sizes[ a->dim++ ] = size;
 
 	if ( s )                 /* only for non-variable-size arrays */
@@ -1085,7 +1107,7 @@ void vars_arr_init( Var *a, Var *d )
 
 	/* check that there are not more initializers than elements in the array */
 
-	if ( ! a->new_flag && cur_elem == a->len )
+	if ( ! ( a->flags & NEW_VARIABLE ) && cur_elem == a->len )
 	{
 		eprint( FATAL, "%s:%ld: Too many initializers for array `%s'.\n",
 				Fname, Lc, a->name );
@@ -1100,7 +1122,7 @@ void vars_arr_init( Var *a, Var *d )
 	/* if the array has the `new_flag' still set, i.e. this is the very first
 	   asssignment, allocate memory for the data */
 
-	if ( a->new_flag )
+	if ( a->flags & NEW_VARIABLE )
 	{
 		for ( a->len = 1, i = 0; i < a->dim; ++i )
 			a->len *= a->sizes[ i ];
@@ -1112,7 +1134,7 @@ void vars_arr_init( Var *a, Var *d )
 			a->val.dpnt = ( double * ) T_calloc( ( size_t ) a->len,
 												 sizeof( double ) );
 
-		a->new_flag = UNSET;
+		a->flags &= NEW_VARIABLE;
 	}
 
 	/* assign the new data to the array - if the array is an integer array but
@@ -1276,7 +1298,7 @@ void vars_arr_assign( Var *a, Var *v )
 
 	/* allocate memory if the array has its `new_flag' still set */
 
-	if ( Arr_Stack->var->new_flag )
+	if ( Arr_Stack->var->flags & NEW_VARIABLE )
 	{
 		for ( len = Arr_Stack->var->sizes[ 0 ], i = 1;
 			  i < Arr_Stack->var->dim; ++i )
@@ -1289,7 +1311,7 @@ void vars_arr_assign( Var *a, Var *v )
 			Arr_Stack->var->val.dpnt =
 				( double * ) T_malloc( len * sizeof( double ) );
 		Arr_Stack->var->len = len;
-		Arr_Stack->var->new_flag = UNSET;
+		Arr_Stack->var->flags &= ~NEW_VARIABLE;
 	}
 
 	/* check that there are enough indices */
@@ -1483,7 +1505,7 @@ void vars_check2( Var *v, int type )
 	/* being paranoid we first check that the variable exists at all -
 	   probably this can be left out later. */
 
-	vars_exist( v );
+	assert( vars_exist( v ) );
 
 	/* check that the variable has a value assigned to it */
 
@@ -1564,7 +1586,7 @@ void vars_check( Var *v )
 
 void vars_warn_new( Var *v )
 {
- 	if ( v->new_flag )
+ 	if ( v->flags & NEW_VARIABLE )
 	{
 		if ( v->name != NULL )
 			eprint( WARN, "%s:%ld: WARNING: Variable `%s' has never been "
@@ -1622,7 +1644,7 @@ Var *vars_assign( Var *src, Var *dest )
 		dest->val.dval = ( src->type == INT_VAR ) ?
 			                          ( double ) src->val.lval : src->val.dval;
 
-	dest->new_flag = UNSET;
+	dest->flags &= ~NEW_VARIABLE;
 
 	/* pop source variable from variables stack and return the new variable */
 
@@ -1646,6 +1668,279 @@ bool vars_exist( Var *v )
 
 	eprint( FATAL, "fsc2: INTERNAL ERROR: Use of non-existing "
 			"variable detected at %s:%d.\n", __FILE__, __LINE__ );
-	THROW( VARIABLES_EXCEPTION );
+	return( FAIL );
 }
 
+
+/*-------------------------------------------------------------------*/
+/* This function is called when a `VAR_TOKEN [' combination is found */
+/* in the input. For a new array it sets its type. Everything else   */
+/* it does is pushing a variable with a pointer to the array onto    */
+/* the stack.                                                        */
+/*-------------------------------------------------------------------*/
+
+
+Var *vars_arr_start( Var *v )
+{
+	/* test if variable exists */
+
+	assert( vars_exist( v ) );
+
+	/* check if the array is completely new (type is still UNDEF_VAR) or
+	   otherwise if its really an array */
+
+	if ( v->type == UNDEF_VAR )
+		v->type = IF_FUNC( v->name[ 0 ] ) ? INT_ARR : FLOAT_ARR;
+	else
+		vars_check2( v, INT_ARR | FLOAT_ARR );
+
+	/* push variable with generic pointer to array onto the stack */
+
+	return( vars_push( ARR_PTR, v ) );
+}
+
+
+/*---------------------------------------------------------------------*/
+/* This function is called when on the left hand side of an assignment */
+/* the end of the list of array indices is found (indicated by a `]'). */
+/* It gets passed a pointer to a variable that points to the array.    */
+/* All the variables below this variable are indices for the array     */
+/* element. The only exception is the case that the array is still new */
+/* - then these variables indicate the sizes of the dimensions.        */
+/*---------------------------------------------------------------------*/
+
+Var *vars_arr_set( Var *v )
+{
+	int dim;
+	Var *a, *cv, *ret;
+	long index;
+
+
+	/* check that it's really a variable with a generic array pointer */
+
+	vars_check2( v, ARR_PTR );
+
+	/* count the variable below v on the stack */
+
+	for ( dim = 0, cv = v->next; cv != 0; ++dim, cv = cv->next )
+		;
+
+	if ( dim == 0 )
+	{
+		eprint( FATAL, "%s:%ld: Missing array dimensions.\n", Fname, Lc );
+		THROW( VARIABLES_EXCEPTION );
+	}
+
+	/* if the referenced array is still new set its dimension and allocate
+	   memory for it and return the variable allowing indexing */
+
+	a = v->val.vptr;
+
+	if ( a->flags & NEW_VARIABLE )
+		return( vars_setup_new_array( a, dim, v->next ) );
+
+	/* now check if this is a variable sized array and is still `new' -
+	   in this case all we can do is leave the stack untouched  - the function
+	   for the assignment to an array slice has to do all things, i.e.
+	   determining the size of the last dimension, allocating memory and
+	   calculating the location for storing its data all by itself */
+
+	if ( a->flags & VARIABLE_SIZED && a->flags & NEW_VARIABLE )
+		return( v );
+
+	/* check that there are enough indices on the stack */
+
+	if ( ( ! ( a->flags &= VARIABLE_SIZED ) && dim != a->dim ) ||
+		 ( a->flags &= VARIABLE_SIZED && a->dim - 1 ) )
+	{
+		eprint( FATAL, "%s:%ld: Array `%s' is %d-dimensional but only "
+				"indices are given.\n", Fname, Lc, a->name, a->dim, dim );
+		THROW( VARIABLES_EXCEPTION );
+	}
+
+	/* check that there are not too many indices */
+
+	if ( dim > a->dim )
+	{
+		eprint( FATAL, "%s:%ld: Array `%s' is %d-dimensional but more "
+				"indices are given.\n", Fname, Lc, a->name, a->dim );
+		THROW( VARIABLES_EXCEPTION );
+	}
+
+	/* calculate the pointer to the indexed array element and push it onto
+	   the stack */
+
+	index = vars_calc_index( a, v->next );
+
+	/* pop the variable with the array pointer */
+
+	vars_pop( v );
+
+	/* push a pointer the accessed element onto the stack */
+
+	if ( a->type == INT_ARR )
+		ret = vars_push( INT_PTR, a->val.lpnt + index, a );
+	else
+		ret = vars_push( FLOAT_PTR, a->val.dpnt + index, a );
+
+	if ( a->flags & VARIABLE_SIZED && dim == a->dim - 1 )
+		ret->flags |= NEED_ARRAY_SLICE;
+
+	return( ret );
+}
+
+
+long vars_calc_index( Var *a, Var *v )
+{
+	Var *vn;
+	int i, cur;
+	long index;
+
+
+	for ( i = 0, index = 0; v != NULL; ++i, v = vn )
+	{
+		/* check the variable with the size */
+
+		vars_check2( v, INT_VAR | FLOAT_VAR );
+
+		/* get current size and warn if the index is a float variable */
+
+		if ( v->type == INT_VAR )
+			cur = v->val.lval - ARRAY_OFFSET;
+		else
+		{
+			eprint( WARN, "%s:%ld: WARNING: Float variable used as index #%d "
+					"for array `%s'.\n", Fname, Lc, i + 1, a->name );
+			cur = ( int ) v->val.dval - ARRAY_OFFSET;
+		}
+
+		/* check that the index is not too small or too large */
+
+		if ( cur < 0 )
+		{
+			eprint( FATAL, "%s:%ld: Invalid array index #%d (value=%d) for "
+					"array `%s', minimum is %d.\n",
+					Fname, Lc, i + 1, cur + ARRAY_OFFSET, ARRAY_OFFSET );
+		THROW( VARIABLES_EXCEPTION );
+		}
+
+		if ( cur >= a->sizes[ i ] )
+		{
+			eprint( FATAL, "%s:%ld: Invalid array index #%d (value=%d) for "
+					"array `%s', maximum is %d.\n",
+					Fname, Lc, i + 1, cur + ARRAY_OFFSET,
+					a->sizes[ i ] - 1 + ARRAY_OFFSET );
+			THROW( VARIABLES_EXCEPTION );
+		}
+
+		/* update the index */
+
+		index += index * a->sizes[ i ] + cur;
+
+		/* pop the variable with the index */
+
+		vn = v->next;
+		vars_pop( v );
+	}
+
+	/* make sure we didn't botched the indexing arithmetic */
+
+	assert( index < a->len );
+
+	return( index );
+}
+
+
+Var *vars_setup_new_array( Var *a, int dim, Var *v )
+{
+	int i, cur;
+	Var *vn;
+
+
+	/* set array's dimension and allocate memory for their sizes */
+
+	a->dim = dim;
+	a->sizes = T_malloc( dim * sizeof( int ) );
+
+	/* run through the variables with the sizes */
+
+	for ( i = 0; v != NULL; ++i, v = vn )
+	{
+		/* check the variable with the size */
+
+		vars_check2( v, INT_VAR | FLOAT_VAR );
+
+		/* check the value of variable with the size and set the corresponding
+		   entry in the array's field for sizes */
+
+		if ( v->type == INT_ARR )
+		{
+			/* if the the very last variable with the sizes has the flag
+			   VARIABLE_SIZED set this is going to be a dynamically sized
+			   array - set the corresponding flag in the array variable,
+			   don't reset its NEW_VARIABLE flag and don't allocate memory
+			   and return a variable with a NULL pointer so that no simple
+			   assignments can be done. */
+
+			if ( v->flags & VARIABLE_SIZED )
+			{
+				if ( i != dim - 1 )
+				{
+					eprint( FATAL, "%s:%ld: Only the very last dimension of "
+							"an array can be set dynamically.\n", Fname, Lc );
+					THROW( VARIABLES_EXCEPTION );
+				}
+
+				a->flags |= VARIABLE_SIZED;
+				
+				vars_pop( v );
+				if ( a->type == INT_VAR )	
+					return( vars_push( INT_PTR, NULL, a) );
+				else
+					return( vars_push( FLOAT_PTR, NULL, a ) );
+			}
+
+			cur = ( int ) v->val.lval;
+		}
+		else
+		{
+			eprint( WARN, "%s:%ld: WARNING: FLOAT value (value=%f) used as "
+					"size in definition of array `%s'.\n",
+					Fname, Lc, v->val.dval, a->name );
+			cur = ( int ) v->val.dval;
+		}
+
+		if ( cur < 2 )
+		{
+			eprint( FATAL, "%s:%ld: Invalid size (value=%d) used in "
+					"definition of array `%s', minimum is 2.\n",
+					Fname, Lc, cur, a->name );
+			THROW( VARIABLES_EXCEPTION );
+		}
+
+		a->sizes[ i ] = cur;
+
+		/* pop the variable with the size */
+
+		vn = v->next;
+		vars_pop( v );
+	}
+
+	/* calculate number of elements and allocate memory */
+
+	for ( a->len = 1, i = 0; i < a->dim; ++i )
+		a->len *= a->sizes[ i ];
+	
+	if ( a->type == INT_VAR )
+		a->val.lpnt = ( long * ) T_calloc( ( size_t ) a->len, sizeof( long ) );
+	else
+		a->val.dpnt = ( double * ) T_calloc( ( size_t ) a->len,
+											 sizeof( double ) );
+
+	a->flags &= ~NEW_VARIABLE;
+
+	if ( a->type == INT_VAR )	
+		return( vars_push( INT_PTR, a->val.lpnt, a ) );
+	else
+		return( vars_push( FLOAT_PTR, a->val.dpnt, a ) );
+}

@@ -112,6 +112,17 @@ enum {
 	INT_ARR     = ( 1 << 3 ),
 	FLOAT_ARR   = ( 1 << 4 ),
 	FUNC        = ( 1 << 5 ),
+	ARR_PTR     = ( 1 << 6 ),
+	INT_PTR     = ( 1 << 7 ),
+	FLOAT_PTR   = ( 1 << 8 )
+};
+
+
+enum {
+	NEW_VARIABLE       = ( 1 << 0 ),
+	TRANSIENT_VARIABLE = ( 1 << 1 ),
+	VARIABLE_SIZED     = ( 1 << 2 ),
+	NEED_ARRAY_SLICE   = ( 1 << 3 )
 };
 
 
