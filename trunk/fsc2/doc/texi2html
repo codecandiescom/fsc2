@@ -6,8 +6,9 @@
 # CVS version:
 # $Id$
 #
-# Slightly hacked to get some additional effects...
-#                                                   J. T. Toerring
+# Slightly hacked to get some additional effects and to make the
+# output acceptable by the W3C validator.
+#                                          J. T. Toerring
 #
 ############################################################################
 #
@@ -61,7 +62,7 @@ Send bugs and suggestions to <texi2html\@mathematik.uni-kl.de>
 EOT
 
 # Version: set in configure.in
-$THISVERSION = '1.64';
+$THISVERSION = '1.64 (modified by JTT)';
 $THISPROG = "texi2html $THISVERSION";	# program name and version
 
 # The man page for this program is included at the end of this file and can be
@@ -723,7 +724,7 @@ sub T2H_DEFAULT_print_Top
   if ($T2H_THIS_SECTION)
   {
     # if top-level node has content, then print it with extra header
-    print $fh "<H1>$T2H_NAME{Top}</H1>"
+    print $fh "<H1>$T2H_NAME{Top}</H1><P>"
       unless ($T2H_HAS_TOP_HEADING);
     t2h_print_lines($fh, $T2H_THIS_SECTION)
   }
@@ -840,8 +841,6 @@ sub T2H_DEFAULT_print_chapter_footer
 #
 # Set the default body text, inserted between <BODY ... >
 
-$T2H_BODYTEXT = 'LANG="EN" BGCOLOR="#FFFFFF" TEXT="#000000" LINK="#0000FF" VLINK="#800080" ALINK="#FF0000"';
-
 # text inserted after <BODY ...>
 
 $T2H_AFTER_BODY_OPEN = '';
@@ -865,9 +864,9 @@ sub T2H_DEFAULT_print_page_head
   my $fh = shift; 
   my $longtitle = "$T2H_THISDOC{title}: $T2H_NAME{This}";
   print $fh <<EOT;
-<HTML>
 $T2H_DOCTYPE
 <!-- Created on $T2H_TODAY by $THISPROG -->
+<HTML>
 <HEAD>
 <TITLE>$longtitle</TITLE>
 <META NAME="description" CONTENT="$longtitle">
@@ -879,7 +878,7 @@ $T2H_EXTRA_HEAD
 <LINK REL=STYLESHEET TYPE="text/css" HREF="fsc2.css">
 </HEAD>
 
-<BODY $T2H_BODYTEXT>
+<BODY>
 $T2H_AFTER_BODY_OPEN
 EOT
 }
@@ -893,6 +892,7 @@ sub T2H_DEFAULT_print_page_foot
 This document was generated
 $T2H_ADDRESS
 using <A HREF="$T2H_HOMEPAGE"><I>texi2html</I></A>
+</FONT>
 $T2H_PRE_BODY_CLOSE
 </BODY>
 </HTML>
@@ -5002,6 +5002,7 @@ sub html_reset {
 
 sub html_push {
     local($what) = @_;
+
     push(@html_stack, $html_element);
     $html_element = $what;
 }
