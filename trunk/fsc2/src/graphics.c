@@ -2402,7 +2402,7 @@ void rescale_1d( long new_nx )
 	Marker_1D *m;
 
 
-	/* Return immediately on unreasonable values */
+	/* Return immediately on negative values, they're silently ignored */
 
 	if ( new_nx < 0 )
 		return;
@@ -2426,15 +2426,15 @@ void rescale_1d( long new_nx )
 	if ( max_x != 0 )
 		max_x++;
 	else
-		max_x = DEFAULT_1D_X_POINTS;
+		max_x = MIN_1D_X_POINTS;
 
 	/* Make sure we don't rescale to less than the current number of
 	   points (or the minumum value, if larger) */
 
-	if ( new_nx < DEFAULT_1D_X_POINTS )
+	if ( new_nx < MIN_1D_X_POINTS )
 	{
-		if ( max_x < DEFAULT_1D_X_POINTS )
-			max_x = DEFAULT_1D_X_POINTS;
+		if ( max_x < MIN_1D_X_POINTS )
+			max_x = MIN_1D_X_POINTS;
 	}
 	else if ( new_nx > max_x )
 		max_x = new_nx;
@@ -2505,11 +2505,11 @@ void rescale_2d( long *new_dims )
 	if ( max_x != 0 )
 		max_x++;
 	else
-		max_x = DEFAULT_2D_X_POINTS;
+		max_x = MIN_2D_X_POINTS;
 	if ( max_y != 0 )
 		 max_y++;
 	else
-		max_y = DEFAULT_2D_Y_POINTS;
+		max_y = MIN_2D_Y_POINTS;
 
 	/* Figure out the correct new values - at least the current points must
 	   still be displayable and at least the minimum sizes must be kept */
