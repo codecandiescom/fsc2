@@ -85,10 +85,7 @@ void start_graphics( void )
 		G.rwc_delta[ X ] = G.rwc_delta_orig[ X ];
 
 		for ( i = X; i <= Y; i++ )
-			if ( G.label_orig[ i ] != NULL )
-				G.label[ i ] = T_strdup( G.label_orig[ i ] );
-			else
-				G.label[ i ] = NULL;
+			G.label[ i ] = T_strdup( G.label_orig[ i ] );
 	}
 	else
 	{
@@ -100,10 +97,7 @@ void start_graphics( void )
 		G.rwc_delta[ Y ] = G.rwc_delta_orig[ Y ];
 
 		for ( i = X; i <= Z; i++ )
-			if ( G.label_orig[ i ] != NULL )
-				G.label[ i ] = T_strdup( G.label_orig[ i ] );
-			else
-				G.label[ i ] = NULL;
+			G.label[ i ] = T_strdup( G.label_orig[ i ] );
 	}
 
 	/* Create the forms for running experiments */

@@ -362,7 +362,7 @@ Var *f_init_1d( Var *v )
 	G.rwc_start[ X ] = ( double ) ARRAY_OFFSET;
 	G.rwc_delta[ X ] = 1.0;
 	for ( i = X; i <= Z; i++ )
-		G.label[ i ] = NULL;
+		G.label[ i ] = G.label_orig[ i ] = NULL;
 
 	/* Now evaluate the arguments */
 
@@ -463,7 +463,7 @@ Var *f_init_1d( Var *v )
 	G.rwc_start_orig[ X ] = G.rwc_start[ X ];
 	G.rwc_delta_orig[ X ] = G.rwc_delta[ X ];
 
-	for ( i = X; i <= Z; i++ )
+	for ( i = X; i <= Y; i++ )
 	{
 		G.label_orig[ i ] = G.label[ i ];
 		G.label[ i ] = NULL;
@@ -493,7 +493,7 @@ Var *f_init_2d( Var *v )
 	G.rwc_start[ X ] = G.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
 	G.rwc_delta[ X ] = G.rwc_delta[ Y ] = 1.0; 
 	for ( i = X; i <= Z; i++ )
-		G.label[ i ] = NULL;
+		G.label[ i ] = G.label_orig[ i ] = NULL;
 
 	/* Now evaluate the arguments */
 
