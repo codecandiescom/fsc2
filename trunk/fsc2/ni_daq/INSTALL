@@ -378,7 +378,12 @@ please run the command\n\
 \n\
          /etc/init.d/ni_daq start\n\
 \n\
-    to load the module and create device files." 11 60
+    to load the module and create device files.\n\
+    If the module is already loaded please use\n\
+\n\
+         /etc/init.d/ni_daq restart\n\
+\n\
+      to replace it by the new version." 16 60
 		fi
 	fi
 fi
