@@ -852,7 +852,8 @@ tds754a       := tds754a.c tds754a_gpib.c tds754a_util.c
 The module @code{tds754a} consists of the four @code{C} source files
 listed here. You have to create a similar entry for your own
 module. After you've down so you're done and can now re-compile to
-create the new module.
+create the new module and re-install to make it available to
+@acronym{fsc2}.
 
 When you want to compile a module 'by hand' you'll have to make sure
 that the @file{src} and the @file{config} directory are in the include
