@@ -264,6 +264,9 @@ list1:   /* empty */
 /* list of function arguments */
 
 list2:   /* empty */
+       | ','                      { print( FATAL, "Semicolon at start of "
+										   "function argument list.\n" );
+									THROW( EXCEPTION ); }
        | exprs
        | list2 ',' exprs
 ;
@@ -271,6 +274,10 @@ list2:   /* empty */
 exprs:   expr
        | E_STR_TOKEN
          strs
+	   | ','                      { print( FATAL, "Two semicolons without a "
+										   "value in between in function "
+										   "argument list.\n" );
+	   								THROW( EXCEPTION ); }
 ;
 
 strs:    /* empty */
