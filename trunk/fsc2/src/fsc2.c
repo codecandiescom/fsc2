@@ -34,6 +34,8 @@ static void start_editor( void );
 static void start_help_browser( void );
 static void set_main_signals( void );
 static void usage( void );
+static int fsc2_x_error_handler( Display *d, XErrorEvent *err );
+static int fsc2_xio_error_handler( Display *d );
 
 
 /**************************/
@@ -297,6 +299,9 @@ static bool xforms_init( int *argc, char *argv[] )
 
 	if ( fl_initialize( argc, argv, "fsc2", 0, 0 ) == NULL )
 		return FAIL;
+
+//	XSetErrorHandler( fsc2_x_error_handler );
+//	XSetIOErrorHandler( fsc2_xio_error_handler );
 
 	/* Set some properties of goodies */
 
@@ -1336,4 +1341,30 @@ void usage( void )
 			 "%s/fsc2.pdf or %s/fsc2_frame.html\n"
 			 "or type \"info fsc2\".\n", dd, dd, dd );
 	T_free( dd );
+}
+
+
+/*------------------------------------------------------------*/  
+/*------------------------------------------------------------*/  
+
+static int fsc2_x_error_handler( Display *d, XErrorEvent *err )
+{
+	char err_str[ 1024 ];
+
+
+	XGetErrorText( d, err->error_code, err_str, 1024 );
+	fprintf( stderr, "fsc2 (%d) killed by an X error: %s.\n",
+			 getpid( ), err_str );
+	exit( EXIT_FAILURE );
+}
+
+
+/*------------------------------------------------------------*/  
+/*------------------------------------------------------------*/  
+
+static int fsc2_xio_error_handler( Display *d )
+{
+	d = d;
+	fprintf( stderr, "fsc2 (%d) killed by a fatal X error.\n", getpid( ) );
+	exit( EXIT_FAILURE );
 }

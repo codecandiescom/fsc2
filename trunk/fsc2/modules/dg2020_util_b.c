@@ -275,7 +275,7 @@ void dg2020_calc_padding( void )
 	{
 		if ( padding < 0 )
 		{
-			const char *t = dg2020_pticks( dg2020.max_seq_len );
+			char *t = T_strdup( dg2020_pticks( dg2020.max_seq_len ) );
 			eprint( SEVERE, "%s: Pulse pattern is %s long and thus longer "
 					"than the repeat time of %s.", pulser_struct.name,
 					t, dg2020_pticks( dg2020.repeat_time ) );
