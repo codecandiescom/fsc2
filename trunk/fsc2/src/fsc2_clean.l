@@ -374,12 +374,12 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 {IKILO}/[^a-zA-z0-9_]   unit_spec( yytext,  3, 0.0 );
 {IMEGA}/[^a-zA-z0-9_]   unit_spec( yytext,  6, 0.0 );
 
-{INANOC}/[^a-zA-z0-9_]  unit_spec( yytext, -9, -273.16 );
-{IMICROC}/[^a-zA-z0-9_] unit_spec( yytext, -6, -273.16 );
-{IMILLIC}/[^a-zA-z0-9_] unit_spec( yytext, -3, -273.16 );
-{INONEC}/[^a-zA-z0-9_]  unit_spec( yytext,  0, -273.16 );
-{IKILOC}/[^a-zA-z0-9_]  unit_spec( yytext,  3, -273.16 );
-{IMEGAC}/[^a-zA-z0-9_]  unit_spec( yytext,  6, -273.16 );
+{INANOC}/[^a-zA-z0-9_]  unit_spec( yytext, -9, 273.16 );
+{IMICROC}/[^a-zA-z0-9_] unit_spec( yytext, -6, 273.16 );
+{IMILLIC}/[^a-zA-z0-9_] unit_spec( yytext, -3, 273.16 );
+{INONEC}/[^a-zA-z0-9_]  unit_spec( yytext,  0, 273.16 );
+{IKILOC}/[^a-zA-z0-9_]  unit_spec( yytext,  3, 273.16 );
+{IMEGAC}/[^a-zA-z0-9_]  unit_spec( yytext,  6, 273.16 );
 
 {FNANO}/[^a-zA-z0-9_]   unit_spec( yytext, -9, 0.0 );
 {FMICRO}/[^a-zA-z0-9_]  unit_spec( yytext, -6, 0.0 );
@@ -388,12 +388,12 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 {FKILO}/[^a-zA-z0-9_]   unit_spec( yytext,  3, 0.0 );
 {FMEGA}/[^a-zA-z0-9_]   unit_spec( yytext,  6, 0.0 );
 
-{FNANOC}/[^a-zA-z0-9_]  unit_spec( yytext, -9, -273.16 );
-{FMICROC}/[^a-zA-z0-9_] unit_spec( yytext, -6, -273.16 );
-{FMILLIC}/[^a-zA-z0-9_] unit_spec( yytext, -3, -273.16 );
-{FNONEC}/[^a-zA-z0-9_]  unit_spec( yytext,  0, -273.16 );
-{FKILOC}/[^a-zA-z0-9_]  unit_spec( yytext,  3, -273.16 );
-{FMEGAC}/[^a-zA-z0-9_]  unit_spec( yytext,  6, -273.16 );
+{FNANOC}/[^a-zA-z0-9_]  unit_spec( yytext, -9, 273.16 );
+{FMICROC}/[^a-zA-z0-9_] unit_spec( yytext, -6, 273.16 );
+{FMILLIC}/[^a-zA-z0-9_] unit_spec( yytext, -3, 273.16 );
+{FNONEC}/[^a-zA-z0-9_]  unit_spec( yytext,  0, 273.16 );
+{FKILOC}/[^a-zA-z0-9_]  unit_spec( yytext,  3, 273.16 );
+{FMEGAC}/[^a-zA-z0-9_]  unit_spec( yytext,  6, 273.16 );
 
 {INTs}/[^a-zA-z0-9_]    unit_spec( yytext, -5, 0.0 );
 {IUT}/[^a-zA-z0-9_]     unit_spec( yytext, -2, 0.0 );
