@@ -77,7 +77,7 @@ possibly in the GPIB configuration file) is needed.
 
 Please enter a new device name (the old name is SR510) :  SR510_B
 
-Thanks, that's all the information needed...
+Thanks, that's all the information we need...
 
 Everything worked out well. Now you simply have to re-make fsc2
 (just cd to the main directory and type 'make' and, when this

@@ -70,6 +70,17 @@ die "Sorry, no module with this name seems to exist.\n"
 	unless -e "../config/$dev.conf" and
 	       -e "../modules/$dev.c";
 
+print "\nPlease enter the name for the new module    :  ";
+$new_dev = <>;
+chomp $new_dev;
+die "Sorry, invalid module name, it doesn't consists of just letters\n" .
+	"numbers and underscores.\n" unless $new_dev =~ /^[A-Za-z0-9_]+$/;
+die "Sorry, old and new module name are identical.\n" if $dev eq $new_dev;
+die "Sorry, a module with the name $new_dev already seems to exist.\n"
+	if -e "../config/$new_dev.conf" or
+	   -e "../config/$new_dev.c";
+
+
 open( F, "< ../config/$dev.conf" ) or die
 		"Can't open configration file $dev.conf.\n";
 while ( defined( $line = <F> ) ) {
@@ -79,29 +90,20 @@ while ( defined( $line = <F> ) ) {
 	}
 }
 close F;
-
-die "Sorry, can't find DEVICE_NAME in configuration file " .
-	"../config/$dev.conf.\n" unless defined $dev_name;
-print "\nPlease enter the name for the new module    :  ";
-$new_dev = <>;
-chomp $new_dev;
-die "Sorry, invalid module name.\n" unless $new_dev =~ /^[A-Za-z0-9_]+$/;
-die "Sorry, old and new module name are identical.\n" if $dev eq $new_dev;
-die "Sorry, a module with the name $new_dev already seems to exist.\n"
-	if -e "../config/$new_dev.conf" or
-	   -e "../config/$new_dev.c";
-
+die "Sorry, can't find device name (a #defined DEVICE_NAME) in\n" .
+	"configuration file ../config/$dev.conf.\n" unless defined $dev_name;
 
 print "\nAlso a device name (to be used in error messages and\n" .
 	  "possibly in the GPIB configuration file) is needed.\n\n" .
 	  "Please enter a new device name (the old name is $dev_name) :  ";
 $new_dev_name = <>;
 chomp $new_dev_name;
-die "Sorry, invalid device name.\n" unless $new_dev =~ /^[A-Za-z0-9_]+$/;
+die "Sorry, invalid device name, it doesn't consists of just letters\n" .
+	"numbers and underscores.\n" unless $new_dev =~ /^[A-Za-z0-9_]+$/;
 die "Sorry, the old and the new device name are identical.\n"
 	if $dev_name eq $new_dev_name;
 
-print "\nThanks, that's all the information needed...\n\n";
+print "\nThanks, that's all the information we need...\n\n";
 
 
 #
@@ -121,7 +123,7 @@ while ( defined( $line = <F> ) ) {
 }
 close F;
 
-die "Sorry, can't find module in module makefile ../modules/Makefile.\n"
+die "Sorry, can't find module $dev.c in module makefile ../modules/Makefile.\n"
 	unless $kind != -1;
 
 #
@@ -146,7 +148,7 @@ open( Fout, "> ../config/Devices" );
 while ( defined( $line = <Fin> ) ) {
 	print Fout $line;
 }
-print Fout "$new_dev     // added automatically be clone_device\n";
+print Fout "$new_dev      // added automatically by clone_device\n";
 
 close Fin;
 close Fout;
