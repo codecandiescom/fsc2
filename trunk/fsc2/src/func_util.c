@@ -30,11 +30,15 @@ typedef struct {
 	long ny;
 	long nc;
 	int type;
-	Var *v;
+	long len;
+	long lval;
+	double dval;
+	void *ptr;
 } DPoint;
 
 
 static DPoint *eval_display_args( Var *v, int dim, int *npoints );
+static void eval_disp_array( Var **v, int dim, DPoint **dp, int *nsets );
 
 extern sigjmp_buf alrm_env;
 extern volatile sig_atomic_t can_jmp_alrm;
@@ -1658,7 +1662,11 @@ Var *f_display_1d( Var *v )
 
 	dp = eval_display_args( v, 1, &nsets );
 
-	fsc2_assert( nsets >= 1 );
+	if ( nsets == 0 )
+	{
+		T_free( dp );
+		return vars_push( INT_VAR, 0L );
+	}
 
 	if ( Internals.mode == TEST )
 	{
@@ -1674,11 +1682,13 @@ Var *f_display_1d( Var *v )
 		  + sizeof nsets                /* number of sets to be sent */
 		  + nsets * (                   /* x-, y-index, number and data type */
 					    sizeof dp->nx + sizeof dp->nc 
-					  + sizeof dp->v->type );
+					  + sizeof dp->type );
 
 	for ( i = 0; i < nsets; i++ )
 	{
-		switch( dp[ i ].v->type )
+		fsc2_assert( dp[ i ].len > 0 );
+
+		switch( dp[ i ].type )
 		{
 			case INT_VAR :
 				len += sizeof( long );
@@ -1689,11 +1699,11 @@ Var *f_display_1d( Var *v )
 				break;
 
 			case INT_ARR :
-				len += sizeof( long ) + dp[ i ].v->len * sizeof( long );
+				len += sizeof( long ) + dp[ i ].len * sizeof( long );
 				break;
 
 			case FLOAT_ARR :
-				len += sizeof( long ) + dp[ i ].v->len * sizeof( double );
+				len += sizeof( long ) + dp[ i ].len * sizeof( double );
 				break;
 
 			default :                   /* this better never happens... */
@@ -1732,54 +1742,33 @@ Var *f_display_1d( Var *v )
 		memcpy( ptr, &dp[ i ].nc, sizeof dp[ i ].nc );  /* curve number */
 		ptr += sizeof dp[ i ].nc;
 
-		switch( dp[ i ].v->type )                       /* and now the data  */
+		memcpy( ptr, &dp[ i ].type, sizeof dp[ i ].type );
+		ptr += sizeof dp[ i ].type;
+
+		switch( dp[ i ].type )                          /* and now the data  */
 		{
 			case INT_VAR :
-				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
-				ptr += sizeof dp[ i ].v->type;
-				memcpy( ptr, &dp[ i ].v->val.lval,
-						sizeof dp[ i ].v->val.lval );
-				ptr += sizeof dp[ i ].v->val.lval;
+				memcpy( ptr, &dp[ i ].lval, sizeof dp[ i ].lval );
+				ptr += sizeof dp[ i ].lval;
 				break;
 
 			case FLOAT_VAR :
-				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
-				ptr += sizeof dp[ i ].v->type;
-				memcpy( ptr, &dp[ i ].v->val.dval,
-						sizeof dp[ i ].v->val.dval );
-				ptr += sizeof dp[ i ].v->val.dval;
+				memcpy( ptr, &dp[ i ].dval, sizeof dp[ i ].dval );
+				ptr += sizeof dp[ i ].dval;
 				break;
 
 			case INT_ARR :
-				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
-				ptr += sizeof dp[ i ].v->type;
-
-				len = dp[ i ].v->len;
-				memcpy( ptr, &len, sizeof len );
-				ptr += sizeof len;
-
-				if ( len > 0 )
-				{
-					memcpy( ptr, dp[ i ].v->val.lpnt,
-							len * sizeof *dp[ i ].v->val.lpnt );
-					ptr += len * sizeof *dp[ i ].v->val.lpnt;
-				}
+				memcpy( ptr, &dp[ i ].len, sizeof dp[ i ].len );
+				ptr += sizeof dp[ i ].len;
+				memcpy( ptr, dp[ i ].ptr, dp[ i ].len * sizeof( long ) );
+				ptr += dp[ i ].len * sizeof( long );
 				break;
 
 			case FLOAT_ARR :
-				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
-				ptr += sizeof dp[ i ].v->type;
-
-				len = dp[ i ].v->len;
-				memcpy( ptr, &len, sizeof len );
-				ptr += sizeof len;
-
-				if ( len > 0 )
-				{
-					memcpy( ptr, dp[ i ].v->val.dpnt,
-							len * sizeof *dp[ i ].v->val.dpnt );
-					ptr += len * sizeof *dp[ i ].v->val.dpnt;
-				}
+				memcpy( ptr, &dp[ i ].len, sizeof dp[ i ].len );
+				ptr += sizeof dp[ i ].len;
+				memcpy( ptr, dp[ i ].ptr, dp[ i ].len * sizeof( double ) );
+				ptr += dp[ i ].len * sizeof( double );
 				break;
 
 			default :                   /* this better never happens... */
@@ -1846,7 +1835,11 @@ Var *f_display_2d( Var *v )
 
 	dp = eval_display_args( v, 2, &nsets );
 
-	fsc2_assert( nsets >= 1 );
+	if ( nsets == 0 )
+	{
+		T_free( dp );
+		return vars_push( INT_VAR, 0L );
+	}
 
 	if ( Internals.mode == TEST )
 	{
@@ -1862,11 +1855,13 @@ Var *f_display_2d( Var *v )
 		  + sizeof nsets                /* number of sets to be sent */
 		  + nsets * (                   /* x-, y-index, number and data type */
 					    sizeof dp->nx + sizeof dp->ny + sizeof dp->nc 
-					  + sizeof dp->v->type );
+					  + sizeof dp->type );
 
 	for ( i = 0; i < nsets; i++ )
 	{
-		switch( dp[ i ].v->type )
+		fsc2_assert( dp[ i ].len > 0 );
+
+		switch( dp[ i ].type )
 		{
 			case INT_VAR :
 				len += sizeof( long );
@@ -1877,20 +1872,12 @@ Var *f_display_2d( Var *v )
 				break;
 
 			case INT_ARR :
-				len += sizeof( long )
-					   + dp[ i ].v->len * sizeof *dp[ i ].v->val.lpnt;
+				len += sizeof( long ) + dp[ i ].len * sizeof( long );
 				break;
 
 			case FLOAT_ARR :
-				len += sizeof( long )
-					   + dp[ i ].v->len * sizeof *dp[ i ].v->val.dpnt;
+				len += sizeof( long ) + dp[ i ].len * sizeof( double );
 				break;
-
-			case INT_REF : case FLOAT_REF :
-				print( FATAL,"Only one-dimensional arrays or slices of "
-					   "more-dimensional arrays can be displayed.\n" );
-				T_free( dp );
-				THROW( EXCEPTION );
 
 			default :                   /* this better never happens... */
 				T_free( dp );
@@ -1931,52 +1918,33 @@ Var *f_display_2d( Var *v )
 		memcpy( ptr, &dp[ i ].nc, sizeof dp[ i ].nc );  /* curve number */
 		ptr += sizeof dp[ i ].nc;
 
-		switch( dp[ i ].v->type )                       /* and now the data  */
+		memcpy( ptr, &dp[ i ].type, sizeof dp[ i ].type );
+		ptr += sizeof dp[ i ].type;
+
+		switch( dp[ i ].type )                          /* and now the data  */
 		{
 			case INT_VAR :
-				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
-				ptr += sizeof dp[ i ].v->type;
-				memcpy( ptr, &dp[ i ].v->val.lval,
-						sizeof dp[ i ].v->val.lval );
-				ptr += sizeof dp[ i ].v->val.lval;
+				memcpy( ptr, &dp[ i ].lval, sizeof dp[ i ].lval );
+				ptr += sizeof dp[ i ].lval;
 				break;
 
 			case FLOAT_VAR :
-				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
-				ptr += sizeof dp[ i ].v->type;
-				memcpy( ptr, &dp[ i ].v->val.dval,
-						sizeof dp[ i ].v->val.dval );
-				ptr += sizeof dp[ i ].v->val.dval;
+				memcpy( ptr, &dp[ i ].dval, sizeof dp[ i ].dval );
+				ptr += sizeof dp[ i ].dval;
 				break;
 
 			case INT_ARR :
-				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
-				ptr += sizeof dp[ i ].v->type;
-				len = dp[ i ].v->len;
-				memcpy( ptr, &len, sizeof len );
-				ptr += sizeof len;
-
-				if ( len > 0 )
-				{
-					memcpy( ptr, dp[ i ].v->val.lpnt,
-							len * sizeof *dp[ i ].v->val.lpnt );
-					ptr += len * sizeof *dp[ i ].v->val.lpnt;
-				}
+				memcpy( ptr, &dp[ i ].len, sizeof dp[ i ].len );
+				ptr += sizeof dp[ i ].len;
+				memcpy( ptr, dp[ i ].ptr, dp[ i ].len * sizeof( long ) );
+				ptr += dp[ i ].len * sizeof( long );
 				break;
 
 			case FLOAT_ARR :
-				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
-				ptr += sizeof dp[ i ].v->type;
-				len = dp[ i ].v->len;
-				memcpy( ptr, &len, sizeof len );
-				ptr += sizeof len;
-
-				if ( len > 0 )
-				{
-					memcpy( ptr, dp[ i ].v->val.dpnt,
-							len * sizeof *dp[ i ].v->val.dpnt );
-					ptr += len * sizeof *dp[ i ].v->val.dpnt;
-				}
+				memcpy( ptr, &dp[ i ].len, sizeof dp[ i ].len );
+				ptr += sizeof dp[ i ].len;
+				memcpy( ptr, dp[ i ].ptr, dp[ i ].len * sizeof( double ) );
+				ptr += dp[ i ].len * sizeof( double );
 				break;
 
 			default :                   /* this better never happens... */
@@ -2012,6 +1980,8 @@ static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 	DPoint *dp = NULL;
 
 
+	CLOBBER_PROTECT( v );
+
 	*nsets = 0;
 	if ( v == NULL )
 	{
@@ -2023,7 +1993,16 @@ static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 	{
 		/* Get (more) memory for the sets */
 
-		dp = DPOINT_P T_realloc( dp, ( *nsets + 1 ) * sizeof *dp );
+		TRY
+		{
+			dp = DPOINT_P T_realloc( dp, ( *nsets + 1 ) * sizeof *dp );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( dp );
+			RETHROW( );
+		}
 
 		/* Check and store the x-index */
 
@@ -2069,9 +2048,60 @@ static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 			THROW( EXCEPTION );
 		}
 
-		vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR );
+		TRY
+		{
+			vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+						INT_REF | FLOAT_REF );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( dp );
+			RETHROW( );
+		}
 
-		dp[ *nsets ].v = v;
+		dp[ *nsets ].type = v->type;
+
+		switch ( v->type )
+		{
+			case INT_VAR :
+				dp[ *nsets ].len = 1;
+				dp[ *nsets ].lval = v->val.lval;
+				break;
+
+			case FLOAT_VAR :
+				dp[ *nsets ].len = 1;
+				dp[ *nsets ].dval = v->val.dval;
+				break;
+
+			case INT_ARR :
+				if ( v->len == 0 )
+				{
+					print( WARN, "Request to draw zero-length array.\n" );
+					if ( ( v = v->next ) != NULL )
+						v = v->next;
+					continue;
+				}
+				dp[ *nsets ].len = v->len;
+				dp[ *nsets ].ptr = v->val.lpnt;
+				break;
+
+			case FLOAT_ARR :
+				if ( v->len == 0 )
+				{
+					print( WARN, "Request to draw zero-length array.\n" );
+					if ( ( v = v->next ) != NULL )
+						v = v->next;
+					continue;
+				}
+				dp[ *nsets ].len = v->len;
+				dp[ *nsets ].ptr = v->val.dpnt;
+				break;
+
+			case INT_REF : case FLOAT_REF :
+				eval_disp_array( &v, dim, &dp, nsets );
+				continue;
+		}
 
 		/* There can be several curves and we check if there's a curve number,
 		   then we test and store it. If there were only coordinates and data
@@ -2094,6 +2124,8 @@ static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 
 		dp[ *nsets ].nc = get_long( v, "curve number" ) - 1;
 
+		v = v->next;
+
 		if ( dp[ *nsets ].nc < 0 ||
 			 dp[ *nsets ].nc >= ( dim == 1 ? G1.nc : G2.nc ) )
 		{
@@ -2105,9 +2137,125 @@ static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 
 		( *nsets )++;
 
-	} while ( ( v = v->next ) != NULL );
+	} while ( v != NULL );
 
 	return dp;
+}
+
+
+/*-------------------------------------------------*/
+/*-------------------------------------------------*/
+
+static void eval_disp_array( Var **v, int dim, DPoint **dp, int *nsets )
+{
+	long count;
+	ssize_t i;
+	long j;
+	long nx_offset;
+	long ny_offset;
+	long cn;
+
+
+	CLOBBER_PROTECT( count );
+
+	/* Drawing 2-dimensional arrays only works for 2D-display */
+
+	if ( dim != 2 )
+	{
+		print( FATAL, "Can't draw more than 1D-arrays in 1D-display.\n" );
+		T_free( *dp );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( *v )->dim > 2 )
+	{
+		print( FATAL, "Can't draw arrays with more than 2 dimensions.\n" );
+		T_free( *dp );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( *v )->len == 0 )
+	{
+		print( WARN, "Request to draw zero-length 2D-array.\n" );
+		return;
+	}
+
+	/* Figure out how many 1D-arrays we really have to draw */
+
+	for ( count = i = 0; i < ( *v )->len; i++ )
+		if ( ( *v )->val.vptr[ i ] != NULL && ( *v )->val.vptr[ i ]->len != 0 )
+			count++;
+
+	/* If all sub-arrays have zero length nothing further has to be done */
+
+	if ( count == 0 )
+	{
+		print( WARN, "All sub-arrays of 2D-array to be drawn have zero "
+			   "length.\n" );
+		return;
+	}
+
+	/* Extend the array of structures to as many as we need for all the
+	   1D-arrays */
+
+	if ( count > 1 )
+	{
+		TRY
+		{
+			*dp = DPOINT_P T_realloc( *dp, ( *nsets + count ) * sizeof **dp );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( *dp );
+			THROW( EXCEPTION );
+		}
+	}
+
+	/* The x- and y-coordinate of the first array have already been set,
+	   we need them also for the other arrays */
+
+	nx_offset = ( *dp )[ *nsets ].nx;
+	ny_offset = ( *dp )[ *nsets ].ny;
+
+	/* Now set up all the structures for the different array */
+
+	for ( j = i = 0; i < ( *v )->len; i++ )
+	{
+		if ( ( *v )->val.vptr[ i ] == NULL || ( *v )->val.vptr[ i ]->len == 0 )
+			continue;
+
+		( *dp )[ *nsets + j ].nx   = nx_offset;
+		( *dp )[ *nsets + j ].ny   = ny_offset + i;
+		( *dp )[ *nsets + j ].type = ( *v )->val.vptr[ i ]->type;
+		( *dp )[ *nsets + j ].len  = ( *v )->val.vptr[ i ]->len;
+		( *dp )[ *nsets + j ].ptr = ( *dp )[ *nsets + j ].type == INT_ARR ?
+								   ( void * ) ( *v )->val.vptr[ i ]->val.lpnt :
+								   ( void * ) ( *v )->val.vptr[ i ]->val.dpnt;
+		j++;
+	}
+
+	/* Finally, the curve number has to set for all the new structures */
+
+	if ( ( *v = ( *v )->next ) == NULL )
+	{
+		if ( *nsets != 0 )
+		{
+			print( FATAL, "Missing curve number\n" );
+			T_free( *dp );
+			THROW( EXCEPTION );
+		}
+
+		cn = 0;
+	}
+	else
+		cn = get_long( *v, "curve number" ) - 1;
+
+	for ( j = 0; j < count; j++ )
+		( *dp )[ *nsets + j ].nc = cn;
+
+	*nsets += count;		
+	return;
 }
 
 
