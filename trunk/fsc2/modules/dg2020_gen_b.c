@@ -69,10 +69,10 @@ bool dg2020_assign_function( int function, long pod )
 
 	/* Check that pod number is in valid range */
 
-	if ( pod < 0 || pod > MAX_PODS )
+	if ( pod < 0 || pod > NUM_PODS )
 	{
 		print( FATAL, "Invalid pod number: %ld, valid pod number are %d-%d.\n",
-			   pod, 0, MAX_PODS - 1 );
+			   pod, 0, NUM_PODS - 1 );
 		THROW( EXCEPTION );
 	}
 
@@ -605,9 +605,10 @@ bool dg2020_phase_setup_prep( int phs, int type, int dummy, long pod )
 
 	/* Check that pod number is in valid range */
 
-	if ( pod < 0 || pod >= MAX_PODS )
+	if ( pod < 0 || pod >= NUM_PODS )
 	{
-		print( FATAL, "Invalid pod number %ld.\n", pod );
+		print( FATAL, "Invalid pod number %ld, valid range is %ld-%ld.\n",
+			   pod, 0, NUM_PODS );
 		THROW( EXCEPTION );
 	}
 

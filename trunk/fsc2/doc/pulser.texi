@@ -406,12 +406,15 @@ they are simply called @code{CH0} to @code{CH7}, while for the
 @strong{Tektronix HFS9003} they are divided into sets of channels
 belonging to the different channel boards in the device (at least one
 board and a maximum of three), so channels are named @code{A1} to
-@code{A4}, @code{B1} to @code{B4} and @code{C1} to @code{C4}. 
+@code{A4}, @code{B1} to @code{B4} and @code{C1} to
+@code{C4}. Additionally, the @strong{Tektronix HFS9003} has a trigger
+output channel that can produce a single pulse of @w{5 ns} duration,
+this special channel is named @code{TRIG_OUT}.
 
 In contrast, the @strong{Sony/Tektronix DG2020} has 36 internal channels
 (named @code{CH0} to @code{CH35}) that have to be mapped to what is
-called a POD, that in both cases (Frankfurt S-band and Berlin X-band
-spectrometer) has 12 real output connectors, named @code{P0} to
+called a POD, which (for both the Frankfurt S-band and and the Berlin
+X-band spectrometer) has 12 real output connectors, named @code{P0} to
 @code{P11}.
 
 Finally, the @strong{Interface Technology RS690} has 4 sets of output

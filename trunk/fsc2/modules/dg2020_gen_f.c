@@ -73,10 +73,10 @@ bool dg2020_assign_function( int function, long pod )
 	POD *p = dg2020.pod + pod;
 
 
-	if ( pod < 0 || pod > MAX_PODS )
+	if ( pod < 0 || pod > NUM_PODS )
 	{
 		print( FATAL, "Invalid pod number: %ld, valid pod numbers are "
-			   "%d-%d.\n", pod, 0, MAX_PODS - 1 );
+			   "%d-%d.\n", pod, 0, NUM_PODS - 1 );
 		THROW( EXCEPTION );
 	}
 

@@ -78,8 +78,7 @@ Var *pulser_command( Var *v );
 #define MIN_TIMEBASE            5.0e-9  /* minimum pulser time base: 5 ns */
 #define MAX_TIMEBASE            0.1     /* maximum pulser time base: 0.1 s */
 
-#define MAX_PODS                12      /* number of pods */
-#define MAX_CHANNELS            36      /* number of channels */
+#define MAX_CHANNELS            36      /* number of internal channels */
 
 
 # define MIN_POD_HIGH_VOLTAGE  -2.0     /* for P3420 (Variable Output Pod) */

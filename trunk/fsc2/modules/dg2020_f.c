@@ -129,7 +129,7 @@ int dg2020_f_init_hook( void )
 
 	dg2020.block[ 0 ].is_used = dg2020.block[ 1 ].is_used = UNSET;
 
-	for ( i = 0; i < MAX_PODS; i++ )
+	for ( i = 0; i < NUM_PODS; i++ )
 	{
 		dg2020.pod[ i ].self = i;
 		dg2020.pod[ i ].function = NULL;

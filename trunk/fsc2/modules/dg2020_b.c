@@ -151,7 +151,7 @@ int dg2020_b_init_hook( void )
 	dg2020.dummy_phase_setup = NULL;
 	dg2020.num_dummy_phase_setups = 0;
 
-	for ( i = 0; i < MAX_PODS; i++ )
+	for ( i = 0; i < NUM_PODS; i++ )
 	{
 		dg2020.pod[ i ].self = i;
 		dg2020.pod[ i ].function = NULL;

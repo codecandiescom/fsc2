@@ -283,7 +283,7 @@ bool dg2020_init( const char *name )
 
 	/* Set up the pod output voltages */
 
-	for ( i = 0; i < MAX_PODS; i++ )
+	for ( i = 0; i < NUM_PODS; i++ )
 	{
 		if ( dg2020.pod[ i ].function == NULL )
 			continue;
@@ -385,7 +385,7 @@ bool dg2020_channel_assign( int channel, int pod )
 
 
 	fsc2_assert( channel >= 0 && channel < MAX_CHANNELS &&
-				 pod >= 0 && pod < MAX_PODS );
+				 pod >= 0 && pod < NUM_PODS );
 
 	sprintf( cmd, "OUTP:PODA:CH%d:ASSIGN %d\n", pod, channel );
 	dg2020_command( cmd );
