@@ -647,10 +647,6 @@ Var *lockin_sensitivity( Var *v )
 			break;
 		}
 
-	if ( sens_index == UNDEF_SENS_INDEX &&
-		 sens < sens_list[ SENS_ENTRIES - 1 ] * 1.01 )
-		sens_index = SENS_ENTRIES - 1;
-
 	if ( sens_index >= 0 &&                                 /* value found ? */
 		 fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2 &&
                                                             /* error > 1% ? */
