@@ -959,10 +959,10 @@ channels, 2 function channels (needed for averaging).
 
 @node  me6000, ni6601, lecroy9400, Device Reference
 @iftex
-@subheading Meilhaus Electronic GmbH ME-6000 and ME.6100 DAC card
+@subheading Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
 @end iftex
 @ifnottex
-@section Meilhaus Electronic GmbH ME-6000 and ME.6100 DAC card
+@section Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
 @end ifnottex
 
 @paragraphindent 0
