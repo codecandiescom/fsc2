@@ -364,8 +364,7 @@ void store_exp( FILE *in )
 /*-------------------------------------------------------------------------*/
 /* Function is called for each opening curly brace found in the input file */
 /* to store the current file name and line number and thus to be able to   */
-/* print more informative error messages when there are less closing than  */
-/* opening braces.                                                         */
+/* print more informative error messages if the braces don't match up.     */
 /*-------------------------------------------------------------------------*/
 
 static void push_curly_brace( const char *Fname, long Lc )

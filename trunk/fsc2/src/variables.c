@@ -2143,7 +2143,6 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 		else
 		{
 			fsc2_assert( 1 == 0 );
-			break;
 		}
 	}
 
