@@ -1022,7 +1022,7 @@ sub start_exp {
 
 	local *F;
 
-	open( F, "|fsc2_load" )
+	open( F, "|fsc2_start" )
 		or die "Can't find utility fsc2_start" . ".\n";
 
 	print F <<EOF;

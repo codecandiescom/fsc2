@@ -456,13 +456,13 @@ jens@@crowley:~/Lab/fsc2> export FSC2_CHILD_DEBUG=1
 @end example
 @noindent
 When this environment variable is defined (what you set it to doesn't
-matter if it's not an empty string) the child process will sleep for
-about ten hour before it starts, which should be more than enough for
-you to attach to it. Moreover, when @code{FSC2_CHILD_DEBUG} is set a
-line telling you the PID of the child process is printed out when the
-child process gets started. All you have to do is to start the debugger
-with the PID to attach to. Here's an example of a typical session where
-I start to debug the child process using @code{gdb}:
+matter if it's not an empty string) the child process will @code{sllep()}
+for about 10 hours or until it receives a signal, e.g.@: due to the debugger
+attaching to it. Moreover, when @code{FSC2_CHILD_DEBUG} is set a line
+telling you the PID of the child process is printed out when the child
+process gets started. All you have to do is to start the debugger with
+the PID to attach to. Here's an example of a typical session where I start
+to debug the child process using @code{gdb}:
 @example
 jens@@crowley:~/Lab/fsc2 > export FSC2_CHILD_DEBUG=1
 jens@@crowley:~/Lab/fsc2 > src/fsc2 &
