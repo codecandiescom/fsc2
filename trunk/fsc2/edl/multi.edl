@@ -11,7 +11,7 @@ init_1d( 2 );
 
 PREPARATIONS:
 
-print( "#\n", lockin_name( ) );
+print( "#\n", lockin_name#1( ) );
 print( "#\n", lockin_name#2( ) );
 print( "#\n", lockin_name#3( ) );
 print( "#\n", lockin_name#4( ) );

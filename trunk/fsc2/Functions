@@ -105,6 +105,7 @@ digitizer_get_curve, -1, EXP;
 digitizer_get_curve_fast, -1, EXP;
 digitizer_get_amplitude, -1, EXP;
 digitizer_get_amplitude_fast, -1, EXP;
+digitizer_run, 0, EXP;
 digitizer_lock_keyboard, -1, EXP;       // Lock or unlock the keyboard
 
 digitizer_get_channel_number, 1, ALL;   // only for internal use !

@@ -429,7 +429,7 @@ Var *digitizer_sensitivity( Var *v )
 
 Var *digitizer_num_averages( Var *v )
 {
-	double num_avg;
+	long num_avg;
 	
 
 	if ( v == NULL )
@@ -757,10 +757,18 @@ Var *digitizer_get_area( Var *v )
 	return get_area( v, tds744a.w != NULL ? SET : UNSET );
 }
 
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 Var *digitizer_get_area_fast( Var *v )
 {
 	return get_area( v, UNSET );
 }
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 static Var *get_area( Var *v, bool use_cursor )
 {
@@ -853,10 +861,18 @@ Var *digitizer_get_curve( Var *v )
 	return get_curve( v, tds744a.w != NULL ? SET : UNSET );
 }
 
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 Var *digitizer_get_curve_fast( Var *v )
 {
 	return get_curve( v, UNSET );
 }
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 static Var *get_curve( Var *v, bool use_cursor )
 {
@@ -966,10 +982,18 @@ Var *digitizer_get_amplitude( Var *v )
 	return get_amplitude( v, SET );
 }
 
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 Var *digitizer_get_amplitude_fast( Var *v )
 {
 	return get_amplitude( v, UNSET );
 }
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 static Var *get_amplitude( Var *v, bool use_cursor )
 {
@@ -1056,6 +1080,18 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 
 	nv = vars_push( FLOAT_VAR, 1.23e-7 );
 	return nv;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *digitizer_run( Var *v )
+{
+	v = v;
+	if ( ! TEST_RUN )
+		tds744a_free_running( );
+	return vars_push( INT_VAR,1 );
 }
 
 

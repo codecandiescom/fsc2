@@ -477,7 +477,7 @@ bool tds520_clear_SESR( void )
 
 void tds520_finished( void )
 {
-	const char *cmd = "*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n";
+	const char *cmd = "*SRE 0;:ACQ:STOPA RUNST;STATE RUN;:LOC NON\n";
 
 
 	if ( ! tds520.is_reacting )
@@ -613,6 +613,7 @@ bool tds520_set_sens( int channel, double sens )
 
 	sprintf( cmd, "%s:SCA ", Channel_Names[ channel ] );
 	gcvt( sens, 8, cmd + strlen( cmd ) );
+	strcat( cmd, "\n" );
 	if ( gpib_write( tds520.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds520_gpib_failure( );
 
@@ -842,6 +843,17 @@ void tds520_gpib_failure( void )
 {
 	eprint( FATAL, "%s: Communication with device failed.\n", DEVICE_NAME );
 	THROW( EXCEPTION );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+void tds520_free_running( void )
+{
+	if ( gpib_write( tds520.device, "ACQ:STOPA RUNST;STATE RUN\n", 26 )
+		 == FAILURE )
+		tds520_gpib_failure( );
 }
 
 

@@ -485,7 +485,7 @@ bool tds520a_clear_SESR( void )
 
 void tds520a_finished( void )
 {
-	const char *cmd = "*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n";
+	const char *cmd = "*SRE 0;:ACQ:STOPA RUNST;STATE RUN;:LOC NON\n";
 
 
 	if ( ! tds520a.is_reacting )
@@ -651,6 +651,7 @@ bool tds520a_set_sens( int channel, double sens )
 
 	sprintf( cmd, "%s:SCA ", Channel_Names[ channel ] );
 	gcvt( sens, 8, cmd + strlen( cmd ) );
+	strcat( cmd, "\n" );
 	if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds520a_gpib_failure( );
 
@@ -959,6 +960,17 @@ static double tds520a_get_amplitude_wo_cursor( int channel, WINDOW *w )
 	/* Return the difference between highest and lowest value */
 
 	return max - min;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+void tds520a_free_running( void )
+{
+	if ( gpib_write( tds520a.device, "ACQ:STOPA RUNST;STATE RUN\n", 26 )
+		 == FAILURE )
+		tds520a_gpib_failure( );
 }
 
 

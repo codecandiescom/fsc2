@@ -489,7 +489,7 @@ bool tds744a_clear_SESR( void )
 
 void tds744a_finished( void )
 {
-	const char *cmd = "*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n";
+	const char *cmd = "*SRE 0;:ACQ:STOPA RUNST;STATE RUN;:LOC NON\n";
 
 
 	if ( ! tds744a.is_reacting )
@@ -682,6 +682,7 @@ bool tds744a_set_sens( int channel, double sens )
 
 	sprintf( cmd, "%s:SCA ", Channel_Names[ channel ] );
 	gcvt( sens, 8, cmd + strlen( cmd ) );
+	strcat( cmd, "\n" );
 	if ( gpib_write( tds744a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds744a_gpib_failure( );
 
@@ -1004,6 +1005,17 @@ int gpib_read_w( int device, char *buffer, long *length )
 {
 	usleep( 2000 );
 	return gpib_read( device, buffer, length );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+void tds744a_free_running( void )
+{
+	if ( gpib_write( tds744a.device, "ACQ:STOPA RUNST;STATE RUN\n", 26 )
+		 == FAILURE )
+		tds744a_gpib_failure( );
 }
 
 

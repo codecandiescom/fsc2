@@ -59,7 +59,7 @@ typedef struct
 	double sens[ MAX_CHANNELS ];
 	double is_sens[ MAX_CHANNELS ];
 
-	double num_avg;
+	long num_avg;
 	bool is_num_avg;
 
 	WINDOW *w;               /* start element of list of windows             */
@@ -115,6 +115,7 @@ Var *digitizer_get_curve( Var *v );
 Var *digitizer_get_curve_fast( Var *v );
 Var *digitizer_get_amplitude( Var *v );
 Var *digitizer_get_amplitude_fast( Var *v );
+Var *digitizer_run( Var *v );
 Var *digitizer_lock_keyboard( Var *v );
 
 
@@ -156,6 +157,7 @@ double tds520c_get_area( int channel, WINDOW *w, bool use_cursor );
 bool tds520c_get_curve( int channel, WINDOW *w, double **data, long *length,
 						bool use_cursor );
 double tds520c_get_amplitude( int channel, WINDOW *w, bool use_cursor );
+void tds520c_free_running( void );
 bool tds520c_lock_state( bool lock );
 
 

@@ -957,6 +957,14 @@ void clean_up( void )
 	int i;
 
 
+	/* Get rid of the last remains of graphics */
+
+	for ( i = X; i <= Z; i++ )
+		if ( G.label[ i ] != NULL )
+			G.label[ i ] = T_free( G.label[ i ] );
+
+	G.is_init = UNSET;
+
 	/* Clear up the compilation structure */
 
 	for ( i = 0; i < 3; ++i )

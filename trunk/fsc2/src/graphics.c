@@ -33,7 +33,7 @@ static void rescale_1d( long new_nx );
 static void rescale_2d( long new_nx, long new_ny );
 
 
-static Graphics *G_stored;
+static Graphics *G_stored = NULL;
 static int cur_1,
 	       cur_2,
 	       cur_3,
@@ -86,8 +86,8 @@ void start_graphics( void )
 	if ( G.dim == 2 )
 		cut_form = create_form_cut( );
 
-	/* They still need some modifications - first set the pixmaps and
-	   help texts for the Undo and Print buttons */
+	/* The forms still need some modifications - first set the pixmaps
+	   and help texts for the Undo and Print buttons */
 
 	pixmap_file = get_string( strlen( auxdir ) + strlen( "/undo.xpm" ) );
 	strcpy( pixmap_file, auxdir );
@@ -789,8 +789,6 @@ void stop_graphics( void )
 		memcpy( &G, G_stored, sizeof( Graphics ) );
 		T_free( G_stored );
 	}
-
-	G.is_init = UNSET;
 }
 
 
@@ -826,8 +824,7 @@ void graphics_free( void )
 
 			T_free( cv->points );
 			T_free( cv->xpoints );
-			T_free( cv );
-			G.curve_2d[ i ] = NULL;
+			cv = T_free( cv );
 		}
 	else
 		for ( i = 0; i < G.nc; i++ )
@@ -845,17 +842,13 @@ void graphics_free( void )
 			T_free( cv2->points );
 			T_free( cv2->xpoints );
 			T_free( cv2->xpoints_s );
-			T_free( cv2 );
-			G.curve_2d[ i ] = NULL;
+			cv2 = T_free( cv2 );
 		}
 
-	for ( coord = Y; coord <= ( G.dim == 1 ? Y : Z ); coord++ )
-		if ( G.label[ coord ] != NULL )
-		{
-			G.label[ coord ] = T_free( G.label[ coord ] );
-			if ( G.font != NULL )
+	if ( G.font != NULL )
+		for ( coord = Y; coord <= ( G.dim == 1 ? Y : Z ); coord++ )
+			if ( G.label[ coord ] != NULL )
 				XFreePixmap( G.d, G.label_pm[ coord ] );
-		}
 }
 
 

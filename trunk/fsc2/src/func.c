@@ -362,7 +362,7 @@ Var *func_call( Var *f )
 		THROW( EXCEPTION );
 	}
 
-	for ( ap = f; ap != NULL; ap = ap == ret ? ap->next : vars_pop( ap ) )
+	for ( ap = f; ap != NULL; ap = ( ap == ret ) ? ap->next : vars_pop( ap ) )
 		;
 
 	return ret;

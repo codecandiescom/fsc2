@@ -285,7 +285,7 @@ long tds540_get_num_avg( void )
 	if ( tds540_get_acq_mode( ) == AVERAGE )
 	{
 		if ( gpib_write( tds540.device,"ACQ:NUMAV?\n", 11 ) == FAILURE ||
-			 gpib_read( tds540.device, reply, &length) == FAILURE )
+			 gpib_read( tds540.device, reply, &length ) == FAILURE )
 			tds540_gpib_failure( );
 
 		reply[ length - 1 ] = '\0';
@@ -488,7 +488,7 @@ bool tds540_clear_SESR( void )
 
 void tds540_finished( void )
 {
-	const char *cmd = "*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n";
+	const char *cmd = "*SRE 0;:ACQ:STOPA RUNST;STATE RUN;:LOC NON\n";
 
 
 	if ( ! tds540.is_reacting )
@@ -654,6 +654,7 @@ bool tds540_set_sens( int channel, double sens )
 
 	sprintf( cmd, "%s:SCA ", Channel_Names[ channel ] );
 	gcvt( sens, 8, cmd + strlen( cmd ) );
+	strcat( cmd, "\n" );
 	if ( gpib_write( tds540.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds540_gpib_failure( );
 
@@ -672,7 +673,7 @@ bool tds540_start_aquisition( void )
 	   3. set stop after sequence */
 
     if ( ! tds540_clear_SESR( ) ||
-         gpib_write( tds540.device, "ACQ:STATE RUN;STOPA SEQ\n", 24 )
+         gpib_write( tds540.device,"ACQ:STATE STOP;STOPA SEQ;STATE RUN\n", 35 )
 		 == FAILURE )
 		tds540_gpib_failure( );
 
@@ -963,6 +964,17 @@ static double tds540_get_amplitude_wo_cursor( int channel, WINDOW *w )
 	/* Return the difference between highest and lowest value */
 
 	return max - min;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+void tds540_free_running( void )
+{
+	if ( gpib_write( tds540.device, "ACQ:STOPA RUNST;STATE RUN\n", 26 )
+		 == FAILURE )
+		tds540_gpib_failure( );
 }
 
 
