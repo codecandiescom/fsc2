@@ -91,13 +91,10 @@
    (32768 kB !), so I hope this never going to happen...  If it should ever
    hapen this will result in the measurement getting stopped with an
    `internal communication error'.
-
 */
 
 
-
 #include "fsc2.h"
-
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/param.h>
