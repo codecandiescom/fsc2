@@ -82,6 +82,7 @@ pt2025        // Metrolab NMR teslameter
 // Synthesizers
 
 hp8647a       // HP RF synthesizer
+hp8672a       // HP RF synthesizer
 
 
 // Box-car integrators

@@ -1788,8 +1788,8 @@ of an @code{EDL} program.
 @node Synthesizer Functions, Temperature Controller Functions, Pulser Functions, Device Functions
 @section Synthesizer Functions
 @cindex Synthesizer Functions
-The only implemented synthesizers so far are the HP8647A and
-HP8672A. Its modules are loaded by specifying
+The only implemented synthesizers so far are the @code{HP8647A} and
+@code{HP8672A}. Their modules are loaded by specifying
 @example
 hp8647a
 hp8672a
