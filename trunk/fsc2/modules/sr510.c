@@ -172,97 +172,34 @@ Var *lockin_get_data( Var *v )
 /* Function returns the voltage at one or more of the 4 ADC ports  */
 /* on the backside of the lock-in amplifier. The argument(s) must  */
 /* be integers between 1 and 4.                                    */
-/* There are two different ways to call this function:             */
-/* 1. If called with a single integer argument the voltage of the  */
-/*    corresponding ADC port is returned.                          */
-/* 2. If called with a list of integer arguments an array with the */
-/*    voltages of all the corresponding ports is returned.         */
 /* Returned values are in the interval [ -10.24V, +10.24V ].       */
 /*-----------------------------------------------------------------*/
 
 Var *lockin_get_adc_data( Var *v )
 {
-	long num_args, i, port;
-	double *voltages;
-	Var *cv, *vn;
+	long port;
 
-
-	if ( v == NULL )
-	{
-		eprint( FATAL, "%s:%ld: sr510: Missing argument for function "
-				 "'lockin_get_adc_data'.", Fname, Lc );
-		THROW( EXCEPTION );
-	}
 
 	vars_check( v, INT_VAR );
 
 	/* If called with just one argument return the voltage of the
 	   addressed port */
 
-	if ( v->next == NULL )
+	port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
+	vars_pop( v );
+
+	if ( port < 1 || port > 4 )
 	{
-		port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
-		vars_pop( v );
-
-		if ( port < 1 || port > 4 )
-		{
-			eprint( FATAL, "%s:%ld: sr510: Invalid ADC channel number (%ld) "
-					"in call of 'lockin_get_adc_data', valid channel are in "
-					"the range 1-4.", Fname, Lc, port );
-			THROW( EXCEPTION );
-		}
-
-		if ( TEST_RUN )                  /* return dummy value in test run */
-			return vars_push( FLOAT_VAR, 0.0 );
-
-		return vars_push( FLOAT_VAR, sr510_get_adc_data( port ) );
+		eprint( FATAL, "%s:%ld: sr510: Invalid ADC channel number (%ld) "
+				"in call of 'lockin_get_adc_data', valid channel are in "
+				"the range 1-4.", Fname, Lc, port );
+		THROW( EXCEPTION );
 	}
 
-	/* If function is called with a list of port numbers the voltage for each
-	   of them is fetched and the results are returned as an float array */
+	if ( TEST_RUN )                  /* return dummy value in test run */
+		return vars_push( FLOAT_VAR, 0.0 );
 
-	/* count number of arguments and check them */
-	
-	for ( cv = v->next, num_args = 1; cv != NULL;
-		  cv = cv->next, num_args++ )
-		vars_check( cv, INT_VAR );
-		
-	/* get memory for storing the voltages */
-
-	voltages = T_malloc( num_args * sizeof( double ) );
-
-	/* get voltage from each of the ports in the list */
-
-	for ( i = 0; v != NULL; i++, v = vn )
-	{
-		port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
-
-		if ( port < 1 || port > 4 )
-		{
-			eprint( FATAL, "%s:%ld: sr510: Invalid ADC channel number (%ld) "
-					"in call of 'lockin_get_adc_data', valid channel are in "
-					"the range 1-4.", Fname, Lc, port );
-			T_free( voltages );
-			THROW( EXCEPTION );
-		}
-
-		if ( TEST_RUN )
-			voltages[ i ] = 0.0;      /* return dummy value in test run */
-		else
-			voltages[ i ] = sr510_get_adc_data( port );
-
-		vn = v->next;
-		vars_pop( v );
-	}
-
-	/* push the array of results onto the variable stack */
-
-	cv = vars_push( FLOAT_TRANS_ARR, voltages, num_args );
-
-	/* finally free array of voltages and return the stack variable */
-
-	T_free( voltages );
-	return cv;
+	return vars_push( FLOAT_VAR, sr510_get_adc_data( port ) );
 }
 
 
