@@ -62,6 +62,14 @@ bool dg2020_do_update( void )
 		THROW( EXCEPTION );
 	}
 
+	if ( FSC2_MODE == TEST )
+	{
+		if ( dg2020.dump_file != NULL )
+			dg2020_dump_channels( dg2020.dump_file );
+		if ( dg2020.show_file != NULL )
+			dg2020_dump_channels( dg2020.show_file );
+	}
+
 	dg2020.needs_update = UNSET;
 	return OK;
 }

@@ -42,6 +42,8 @@ void dg2020_f_exit_hook( void );
 
 
 Var *pulser_name( Var *v );
+Var *pulser_show_pulses( Var *v );
+Var *pulser_dump_pulses( Var *v );
 Var *pulser_state( Var *v );
 Var *pulser_channel_state( Var *v );
 Var *pulser_update( Var *v );
@@ -231,6 +233,10 @@ typedef struct
 								the memory needed for padding */
 	bool is_grace_period;
 	Ticks grace_period;
+
+	FILE *show_file;
+	FILE *dump_file;
+
 } DG2020;
 
 
@@ -382,6 +388,7 @@ void dg2020_calc_padding( void );
 bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length );
 void dg2020_set( char *arena, Ticks start, Ticks len, Ticks offset );
 int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length );
+void dg2020_dump_channels( FILE *fp );
 
 
 /* Functions from dg2020_init_f.c */

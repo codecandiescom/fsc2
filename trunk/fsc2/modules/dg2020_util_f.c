@@ -529,6 +529,51 @@ int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
 }
 
 
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+void dg2020_dump_channels( FILE *fp )
+{
+	FUNCTION *f;
+	POD *pod;
+	PULSE *p;
+	int i, j, k;
+
+
+	if ( fp == NULL )
+		return;
+
+	fprintf( fp, "===\n" );
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = dg2020.function + i;
+
+		if ( ! f->is_needed || f->num_channels == 0 )
+			continue;
+
+		for ( j = 0; j < f->num_pods; j++ )
+		{
+			pod = f->pod[ j ];
+
+			fprintf( fp, "%s:%d", f->name, pod->self );
+			for ( k = 0; k < f->num_pulses; k++ )
+			{
+				p = f->pulses + k;
+				if ( ! p->is_active )
+					continue;
+				if ( p->pc == NULL ||
+					 f->phase_setup->pod[ 
+						 p->pc->sequence[ f->next_phase ] - PHASE_PLUS_X ]
+					 == pod )
+					fprintf( fp, " %ld %ld %ld", p->num, p->pos, p->len );
+			}
+			fprintf( fp, "\n" );
+		}
+	}
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
