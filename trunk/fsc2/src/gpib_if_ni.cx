@@ -1124,7 +1124,7 @@ int gpib_dev_setup( GPIB_Device *temp_dev )
 
     /* Copy to real device structure and increment device count */
 
-    memcpy( devices + num_devices++, temp_dev, sizeof( Device ) );
+    memcpy( devices + num_devices++, temp_dev, sizeof *temp_dev );
 
     return 0;
 }
