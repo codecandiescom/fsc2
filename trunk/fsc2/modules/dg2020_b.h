@@ -148,7 +148,7 @@ typedef struct _F_ {
 	bool is_high_level;
 	bool is_low_level;
 
-	bool *pm;
+	char *pm;
 	struct _C_ **pcm;            // phase matrix
 
 } FUNCTION;
@@ -164,8 +164,8 @@ typedef struct _C_ {
 	int self;
 	FUNCTION *function;
 	bool needs_update;
-	bool *old;
-	bool *new;
+	char *old;
+	char *new;
 } CHANNEL;
 
 
@@ -364,8 +364,8 @@ bool dg2020_find_phase_pulse( PULSE *p, PULSE ***pl, int *num );
 Ticks dg2020_get_max_seq_len( void );
 void dg2020_calc_padding( void );
 bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length );
-void dg2020_set( bool *arena, Ticks start, Ticks len, Ticks offset );
-int dg2020_diff( bool *old, bool *new, Ticks *start, Ticks *length );
+void dg2020_set( char *arena, Ticks start, Ticks len, Ticks offset );
+int dg2020_diff( char *old, char *new, Ticks *start, Ticks *length );
 
 
 /* The functions from dg2020_init_b.c */

@@ -440,8 +440,7 @@ void dg2020_commit( FUNCTION *f, bool flag )
 
 	for ( i = 0; i < f->num_needed_channels; i++ )
 	{
-		f->channel[ i ]->old = T_calloc( 2 * dg2020.max_seq_len,
-										 sizeof( bool ) );
+		f->channel[ i ]->old = T_calloc( 2 * dg2020.max_seq_len, 1 );
 		f->channel[ i ]->new = f->channel[ i ]->old + dg2020.max_seq_len;
 	}
 

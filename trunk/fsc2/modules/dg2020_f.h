@@ -379,8 +379,8 @@ int dg2020_get_phase_pulse_list( FUNCTION *f, CHANNEL *channel,
 Ticks dg2020_get_max_seq_len( void );
 void dg2020_calc_padding( void );
 bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length );
-void dg2020_set( bool *arena, Ticks start, Ticks len, Ticks offset );
-int dg2020_diff( bool *old, bool *new, Ticks *start, Ticks *length );
+void dg2020_set( char *arena, Ticks start, Ticks len, Ticks offset );
+int dg2020_diff( char *old, char *new, Ticks *start, Ticks *length );
 
 
 /* Functions from dg2020_init_f.c */

@@ -231,8 +231,7 @@ void hfs9000_set( char *arena, Ticks start, Ticks len, Ticks offset )
 {
 	fsc2_assert( start + len + offset <= hfs9000.max_seq_len );
 
-	memset( ( void * ) ( arena + offset + start ),
-			( int ) SET, len * sizeof( bool ) );
+	memset( arena + offset + start, SET, len );
 }
 
 
@@ -273,7 +272,7 @@ int hfs9000_diff( char *old, char *new, Ticks *start, Ticks *length )
 		return 0;
 	}
 
-	/* store the start position (including the offset and the necessary one
+	/* Store the start position (including the offset and the necessary one
 	   due to the pulsers firmware bug) and store if we wave to reset (-1)
 	   or to set (1) */
 

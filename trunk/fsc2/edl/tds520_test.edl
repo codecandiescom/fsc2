@@ -1,7 +1,6 @@
 DEVICES:
 
-tds520;
-tds540;
+tds520a;
 
 
 VARIABLES:
@@ -19,19 +18,15 @@ EXPERIMENT:
 
 change_scale( 0, 1.0e6 * digitizer_timebase() / 50.0 );
 digitizer_lock_keyboard( "ON" );
+digitizer_trigger_channel( AUX2 );
 
 
 FOR I = 1 : 200 {
 	digitizer_start_acquisition( );
-	digitizer_start_acquisition#2( );
-	curve[ 1 ] = digitizer_get_curve( CH3 );
-	curve[ 1 ] = digitizer_get_curve#2( CH3 );
+	curve[ 1 ] = digitizer_get_curve( CH1 );
     display( 1, I, curve[ 1 ], 1 );
 }
 
 ON_STOP:
 
 digitizer_run( );
-FOR I = 1 : 10 {
-	wait( 1 );
-}

@@ -45,7 +45,7 @@ save_program( F2 );
 WHILE field <= end_field {
 	digitizer_start_acquisition( );
 	data = digitizer_get_curve( FUNC_E );
-	FOR J = 1 : size( data, 1 ) {
+	FOR J = 1 : size( data ) {
 		fsave( F1, "# ", data[ J ] );
 	}
 	fsave( F1, "\n" );

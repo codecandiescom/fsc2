@@ -819,7 +819,7 @@ void dg2020_commit( FUNCTION * f, bool flag )
 	PULSE *p;
 	int i;
 	Ticks start, len;
-	bool *old, *new;
+	char *old, *new;
 	int what;
 	bool needs_changes = UNSET;
 	int ch;
@@ -859,8 +859,8 @@ void dg2020_commit( FUNCTION * f, bool flag )
 	   quite some computer time but probable is faster, or at least easier to
 	   understand and to debug, than any alternative I came up with... */
 
-	old = T_calloc( ( size_t ) dg2020.max_seq_len, sizeof( bool ) );
-	new = T_calloc( ( size_t ) dg2020.max_seq_len, sizeof( bool ) );
+	old = T_calloc( 2 * ( size_t ) dg2020.max_seq_len, 1 );
+	new = old + dg2020.max_seq_len;
 
 	for ( i = 0; i < f->num_pulses; i++ )
 	{
@@ -898,7 +898,6 @@ void dg2020_commit( FUNCTION * f, bool flag )
 	}
 
 	T_free( old );
-	T_free( new );
 }
 
 

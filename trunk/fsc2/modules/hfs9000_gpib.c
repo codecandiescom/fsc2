@@ -37,6 +37,8 @@ bool hfs9000_init( const char *name )
 {
 	int i;
 	char cmd[ 100 ];
+	char reply[ 100 ];
+	long len = 100;
 
 
 	if ( gpib_init_device( name, &hfs9000.device ) == FAILURE )
@@ -49,7 +51,13 @@ bool hfs9000_init( const char *name )
 	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 		hfs9000_gpib_failure( );
 
-	/* Stop the pulser */
+	/* Get current run state ans stop the pulser */
+
+	if ( gpib_write( hfs9000.device, "TBAS:RUN?\n", 10 ) == FAILURE ||
+		 gpib_read( hfs9000.device, reply, &len ) == FAILURE )
+		hfs9000_gpib_failure( );
+
+	hfs9000.has_been_running = reply[ 0 ] == '1';
 
 	if ( gpib_write( hfs9000.device, "TBAS:RUN OFF\n", 13 ) == FAILURE )
 		hfs9000_gpib_failure( );
@@ -69,6 +77,19 @@ bool hfs9000_init( const char *name )
 		eprint( FATAL, UNSET, "%s: Timebase of pulser has not been set.\n",
 				pulser_struct.name );
 		THROW( EXCEPTION )
+	}
+
+	/* Switch off all channels */
+
+	for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
+	{
+		if ( hfs9000.channel[ i ].function == NULL ||
+			 ! hfs9000.channel[ i ].function->is_used )
+			continue;
+
+		sprintf( cmd, "PGENA:CH%1d:OUTP OFF\n", i );
+		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
+			hfs9000_gpib_failure( );
 	}
 
 	/* Set lead delay to zero for all used channels */

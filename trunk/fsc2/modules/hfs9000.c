@@ -171,7 +171,6 @@ int hfs9000_test_hook( void )
 	   pulser for the test run */
 
 
-	hfs9000.has_been_running = hfs9000.is_running;
 	hfs9000_IN_SETUP = SET;
 	hfs9000_init_setup( );
 	hfs9000_IN_SETUP = UNSET;
@@ -218,7 +217,6 @@ int hfs9000_exp_hook( void )
 	int i;
 
 
-
 	if ( ! hfs9000_is_needed )
 		return 1;
 
@@ -250,7 +248,7 @@ int hfs9000_exp_hook( void )
 		}
 
 
-	hfs9000_run( hfs9000.has_been_running );
+	hfs9000_run( SET );
 
 	return 1;
 }
@@ -267,10 +265,9 @@ int hfs9000_end_of_exp_hook( void )
 	if ( ! hfs9000_is_needed )
 		return 1;
 
-	hfs9000_run( STOP );
 	gpib_write( hfs9000.device, cmd, strlen( cmd ) );
+	hfs9000_run( hfs9000.has_been_running );
 	gpib_local( hfs9000.device );
-	hfs9000.has_been_running = hfs9000.is_running;
 
 	return 1;
 }
@@ -660,6 +657,7 @@ Var *pulser_pulse_reset( Var *v )
 			hfs9000.needs_update = SET;
 	}
 
+	pulser_update( NULL );
 	return vars_push( INT_VAR, 1 );
 }
 

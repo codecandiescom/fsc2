@@ -21,7 +21,7 @@
 
 open( IN, "ipcs -m|" ) or die "Can't call ipcs -m\n";
 while ( <IN> ) {
-	if ( /^0x\d+ (\d+) / ) {
+	if ( /^0x\d+ (\d+)/ ) {
 		print "Deleting shared memory segment #$1.\n";
 		system "ipcrm shm $1 > /dev/null";
 	}

@@ -184,8 +184,7 @@ void dg2020_basic_pulse_check( void )
 			if ( p->function->pm == NULL )      /* if it doesn't exist yet */
 			{
 				p->function->pm = T_malloc( p->pc->len * 
-											( PHASE_CW - PHASE_PLUS_X + 1 ) *
-											sizeof( bool ) );
+											( PHASE_CW - PHASE_PLUS_X + 1 ) );
 				for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
 					for ( j = 0; j < p->pc->len; j++ )
 						p->function->pm[ i * p->pc->len + j ] = UNSET;

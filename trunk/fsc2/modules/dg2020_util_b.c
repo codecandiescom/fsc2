@@ -406,25 +406,24 @@ bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void dg2020_set( bool *arena, Ticks start, Ticks len, Ticks offset )
+void dg2020_set( char *arena, Ticks start, Ticks len, Ticks offset )
 {
 	fsc2_assert( start + len + offset <= dg2020.max_seq_len );
 
-	memset( ( void * ) ( arena + offset + start ),
-			( int ) SET, len * sizeof( bool ) );
+	memset( arena + offset + start, SET, len );
 }
 
 
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-int dg2020_diff( bool *old, bool *new, Ticks *start, Ticks *length )
+int dg2020_diff( char *old, char *new, Ticks *start, Ticks *length )
 {
 	static Ticks where = 0;
 	int ret;
-	bool *a = old + where,
+	char *a = old + where,
 		 *b = new + where;
-	bool cur_state;
+	char cur_state;
 
 
 	/* If we reached the end of the arena in the last call return 0 */
