@@ -399,11 +399,11 @@ static void add_function( int num, void *new_func, Device *new_dev )
 
 static void resolve_device_name( Device *dev )
 {
-	dev->generic_type = ( const char * ) dlsym( dev->driver.handle,
-												"device_name" );
+	dev->device_name = ( const char * ) dlsym( dev->driver.handle,
+											   "device_name" );
 
 	if ( dlerror( ) != NULL )               /* symbol not found in library ? */
-		dev->generic_type = NULL;
+		dev->device_name = NULL;
 
 	return;
 }
