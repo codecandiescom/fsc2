@@ -159,10 +159,10 @@ install:
 	if [ -f fsc2.pdf ]; then                                           \
 		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.pdf $(docdir);  \
 	fi
-	-install-info -r $(infodir)/fsc2.info.gz $(infodir)/dir
+	-install-info --remove --info-dir=$(infodir) $(infodir)/fsc2.info.gz
 	-$(RM) $(RMFLAGS) $(infodir)/fsc2.info*.gz
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.info* $(infodir)
-	-install-info $(infodir)/fsc2.info $(infodir)/dir 
+	-install-info --info-dir=$(infodir) $(infodir)/fsc2.info
 	gzip -9 -f $(infodir)/fsc2.info*
 
 
