@@ -56,24 +56,24 @@ MAX_LEN = 16777215;
 PREPARATIONS:
 
 P1:   FUNCTION = MW,
-	  START    = 180 ns,
-	  LENGTH   = 60 ns;
+      START    = 180 ns,
+      LENGTH   = 60 ns;
 
 P2:   FUNCTION = MW,
-	  START    = 460 ns,
-	  LENGTH   = 60 ns;
+      START    = 460 ns,
+      LENGTH   = 60 ns;
 
 P3:   FUNCTION = MW,
-	  START    = 760 ns,
-	  LENGTH   = 100 ns;
+      START    = 760 ns,
+      LENGTH   = 100 ns;
 
 P4:   FUNCTION = RF,
-	  START    = 360 ns,
-	  LENGTH   = 100 ns;
+      START    = 360 ns,
+      LENGTH   = 100 ns;
 
 P5:   FUNCTION = DETECTION,
-	  START    = 310 ns,
-	  LENGTH   = 100 ns;
+      START    = 310 ns,
+      LENGTH   = 100 ns;
 
 init_1d( );
 
@@ -141,330 +141,349 @@ synthesizer_frequency( freq );
 
 FOREVER {
 
-	/* Most of the following only needs to be run when the user changed
-	   something in the toolbox... */
+    /* Most of the following only needs to be run when the user changed
+       something in the toolbox... */
 
-	IF toolbox_changed( ) {
+    IF toolbox_changed( ) {
 
-		/* The first part of the loop is dealing with the pulse settings. It
-		   gets a bit complicated because we have to check the new settings for
-		   each pulse so it won't make the pulser kill the experiment just
-		   because the pulse can't be set... */
+        /* The first part of the loop is dealing with the pulse settings. It
+           gets a bit complicated because we have to check the new settings for
+           each pulse so it won't make the pulser kill the experiment just
+           because a pulse can't be set... */
 
-		/* Checks for first MW pulse */
+        /* Checks for first MW pulse */
 
-		IF input_changed( PS[ 1 ] ) {
-			NP = input_value( PS[ 1 ] );
-			IF NP % 10 != 0 {
-				input_value( PS[ 1 ], PSV[ 1 ] * 10 );
-			} ELSE {
-				NP /= 10;
-				IF NP < PMS[ 1 ] OR NP + PLV[ 1 ] + PMS[ 2 ] >= PSV[ 2 ] {
-					input_value( PS[ 1 ], PSV[ 1 ] * 10 );
-				} ELSE {
-					PSV[ 1 ] = NP;
-					P1.START = NP * 10 ns;
-					pulser_update( );
-				}
-			}
-		}
+        IF input_changed( PS[ 1 ] ) {
+            NP = input_value( PS[ 1 ] );
+            IF NP % 10 != 0 OR NP < 0 {
+                input_value( PS[ 1 ], PSV[ 1 ] * 10 );
+            } ELSE {
+                NP /= 10;
+                IF NP < PMS[ 1 ] OR NP + PLV[ 1 ] + PMS[ 2 ] >= PSV[ 2 ] {
+                    input_value( PS[ 1 ], PSV[ 1 ] * 10 );
+                } ELSE {
+                    PMS[ 4 ] = round( pulser_pulse_minimum_specs( P4 )
+                                      / 10 ns ) - PSV[ 1 ] + NP;
+                    PMS[ 5 ] = round( pulser_pulse_minimum_specs( P5 )
+                                      / 10 ns ) - PSV[ 1 ] + NP;
+                    PSV[ 1 ] = NP;
+                    P1.START = NP * 10 ns;
 
-		IF input_changed( PL[ 1 ] ) {
-			NL = input_value( PL[ 1 ] );
-			IF NL % 10 != 0 {
-				input_value( PL[ 1 ], PLV[ 1 ] * 10 );
-			} ELSE {
-				NL /= 10;
-				IF NL < 0 OR PSV[ 1 ] + NL + PMS[ 2 ] >= PSV[ 2 ] {
-					input_value( PL[ 1 ], PLV[ 1 ] * 10 );
-				} ELSE {
-					PLV[ 1 ] = NL;
-					P1.LENGTH = NL * 10 ns;
-					pulser_update( );
-				}
-			}
-		}
+                    IF PSV[ 4 ] < PMS[ 4 ] {
+                        PSV[ 4 ] = PMS[ 4 ];
+                        P5.START = PMS[ 4 ] * 10 ns;
+                        input_value( PS[ 4 ], PSV[ 4 ] * 10 );
+                    }
 
-		/* Checks for second MW pulse */
+                    PMS[ 5 ] = round( pulser_pulse_minimum_specs( P5 )
+                                      / 10 ns );
+                    IF PSV[ 5 ] < PMS[ 5 ] {
+                        PSV[ 5 ] = PMS[ 5 ];
+                        P5.START = PMS[ 5 ] * 10 ns;
+                        input_value( PS[ 5 ], PSV[ 5 ] * 10 );
+                    }
 
-		IF input_changed( PS[ 2 ] ) {
-			NP = input_value( PS[ 2 ] );
-			IF NP % 10 != 0 {
-				input_value( PS[ 2 ], PSV[ 2 ] * 10 );
-			} ELSE {
-				NP /= 10;
-				IF NP <= PSV[ 1 ] + PLV[ 1 ] + PMS[ 2 ] OR
-				   NP + PLV[ 2 ] + PMS[ 3 ] >= PSV[ 3 ] {
-					input_value( PS[ 2 ], PSV[ 2 ] * 10 );
-				} ELSE {
-					PSV[ 2 ] = NP;
-					P2.START = NP * 10 ns;
-					pulser_update( );
-				}
-			}
-		}
+                    pulser_update( );
+                }
+            }
+        }
 
-		IF input_changed( PL[ 2 ] ) {
-			NL = input_value( PL[ 2 ] );
-			IF NL % 10 != 0 {
-				input_value( PL[ 2 ], PLV[ 2 ] * 10 );
-			} ELSE {
-				NL /= 10;
-				IF NL < 0 OR PSV[ 2 ] + NL + PMS[ 3 ] >= PSV[ 3 ] {
-					input_value( PL[ 2 ], PLV[ 2 ] * 10 );
-				} ELSE {
-					PLV[ 2 ] = NL;
-					P2.LENGTH = NL * 10 ns;
-					pulser_update( );
-				}
-			}
-		}
+        IF input_changed( PL[ 1 ] ) {
+            NL = input_value( PL[ 1 ] );
+            IF NL % 10 != 0 OR NL <= 0 {
+                input_value( PL[ 1 ], PLV[ 1 ] * 10 );
+            } ELSE {
+                NL /= 10;
+                IF PSV[ 1 ] + NL + PMS[ 2 ] >= PSV[ 2 ] {
+                    input_value( PL[ 1 ], PLV[ 1 ] * 10 );
+                } ELSE {
+                    PLV[ 1 ] = NL;
+                    P1.LENGTH = NL * 10 ns;
+                    pulser_update( );
+                }
+            }
+        }
 
-		/* Checks for third MW pulse */
+        /* Checks for second MW pulse */
 
-		IF input_changed( PS[ 3 ] ) {
-			NP = input_value( PS[ 3 ] );
-			IF NP % 10 != 0 {
-				input_value( PS[ 3 ], PSV[ 3 ] * 10 );
-			} ELSE {
-				NP /= 10;
-				IF NP <= PSV[ 2 ] + PLV[ 2 ] + PMS[ 3 ] OR
-				   NP + PLV[ 3 ] > MAX_LEN {
-					input_value( PS[ 3 ], PSV[ 3 ] * 10 );
-				} ELSE {
-					PSV[ 3 ] = NP;
-					P3.START = NP * 10 ns;
-					pulser_update( );
-				}
-			}
-		}
+        IF input_changed( PS[ 2 ] ) {
+            NP = input_value( PS[ 2 ] );
+            IF NP % 10 != 0 OR NP < 0 {
+                input_value( PS[ 2 ], PSV[ 2 ] * 10 );
+            } ELSE {
+                NP /= 10;
+                IF NP < PSV[ 1 ] + PLV[ 1 ] + PMS[ 2 ] OR
+                   NP + PLV[ 2 ] + PMS[ 3 ] >= PSV[ 3 ] {
+                    input_value( PS[ 2 ], PSV[ 2 ] * 10 );
+                } ELSE {
+                    PSV[ 2 ] = NP;
+                    P2.START = NP * 10 ns;
+                    pulser_update( );
+                }
+            }
+        }
 
-		IF input_changed( PL[ 3 ] ) {
-			NL = input_value( PL[ 3 ] );
-			IF NL % 10 != 0 {
-				input_value( PL[ 3 ], PLV[ 3 ] * 10 );
-			} ELSE {
-				NL /= 10;
-				IF NL < 0 OR PSV[ 3 ] + NL > MAX_LEN {
-					input_value( PL[ 3 ], PLV[ 3 ] * 10 );
-				} ELSE {
-					PLV[ 3 ] = NL;
-					P3.LENGTH = NL * 10 ns;
-					pulser_update( );
-				}
-			}
-		}
+        IF input_changed( PL[ 2 ] ) {
+            NL = input_value( PL[ 2 ] );
+            IF NL % 10 != 0 OR NL < 0 OR ( NL == 0 AND PLV[ 3 ] != 0 ) {
+                input_value( PL[ 2 ], PLV[ 2 ] * 10 );
+            } ELSE {
+                NL /= 10;
+                IF PSV[ 2 ] + NL + PMS[ 3 ] >= PSV[ 3 ] {
+                    input_value( PL[ 2 ], PLV[ 2 ] * 10 );
+                } ELSE {
+                    PLV[ 2 ] = NL;
+                    P2.LENGTH = NL * 10 ns;
+                    pulser_update( );
+                }
+            }
+        }
 
-		/* Checks for the RF Pulse */
+        /* Checks for third MW pulse */
 
-		IF input_changed( PS[ 4 ] ) {
-			NP = input_value( PS[ 4 ] );
-			IF NP % 10 != 0 {
-				input_value( PS[ 4 ], PSV[ 4 ] * 10 );
-			} ELSE {
-				NP /= 10;
-				PMS[ 4 ] = round( pulser_pulse_minimum_specs( P4 ) / 10 ns );
-				IF NP <= PMS[ 4 ] OR NP > MAX_LEN {
-					input_value( PS[ 4 ], PSV[ 4 ] * 10 );
-				} ELSE {
-					PSV[ 4 ] = NP;
-					P4.START = NP * 10 ns;
-					pulser_update( );
-				}
-			}
-		}
+        IF input_changed( PS[ 3 ] ) {
+            NP = input_value( PS[ 3 ] );
+            IF NP % 10 != 0 OR NP < 0 {
+                input_value( PS[ 3 ], PSV[ 3 ] * 10 );
+            } ELSE {
+                NP /= 10;
+                IF NP < PSV[ 2 ] + PLV[ 2 ] + PMS[ 3 ] OR
+                   NP + PLV[ 3 ] > MAX_LEN {
+                    input_value( PS[ 3 ], PSV[ 3 ] * 10 );
+                } ELSE {
+                    PSV[ 3 ] = NP;
+                    P3.START = NP * 10 ns;
+                    pulser_update( );
+                }
+            }
+        }
 
-		IF input_changed( PL[ 4 ] ) {
-			NL = input_value( PL[ 4 ] );
-			IF NL % 10 != 0 {
-				input_value( PL[ 4 ], PLV[ 4 ] * 10 );
-			} ELSE {
-				NL /= 10;
-				IF NL < 0 OR NL > MAX_LEN {
-					input_value( PL[ 4 ], PLV[ 4 ] * 10 );
-				} ELSE {
-					PLV[ 4 ] = NL;
-					P4.LENGTH = NL * 10 ns;
-					pulser_update( );
-				}
-			}
-		}
+        IF input_changed( PL[ 3 ] ) {
+            NL = input_value( PL[ 3 ] );
+            IF NL % 10 != 0 OR NL < 0 {
+                input_value( PL[ 3 ], PLV[ 3 ] * 10 );
+            } ELSE {
+                NL /= 10;
+                IF PSV[ 3 ] + NL > MAX_LEN {
+                    input_value( PL[ 3 ], PLV[ 3 ] * 10 );
+                } ELSE {
+                    PLV[ 3 ] = NL;
+                    P3.LENGTH = NL * 10 ns;
+                    pulser_update( );
+                }
+            }
+        }
 
-		/* Checks for the detection Pulse */
+        /* Checks for the RF Pulse */
 
-		IF input_changed( PS[ 5 ] ) {
-			NP = input_value( PS[ 5 ] );
-			IF NP % 10 != 0 {
-				input_value( PS[ 5 ], PSV[ 5 ] * 10 );
-			} ELSE {
-				NP /= 10;
-				PMS[ 5 ] = round( pulser_pulse_minimum_specs( P5 ) / 10 ns );
-				IF NP <= PMS[ 5 ] OR NP + PLV[ 5 ] > MAX_LEN {
-					input_value( PS[ 5 ], PSV[ 5 ] * 10 );
-				} ELSE {
-					PSV[ 5 ] = NP;
-					P5.START = NP * 10 ns;
-					pulser_update( );
-				}
-			}
-		}
+        IF input_changed( PS[ 4 ] ) {
+            NP = input_value( PS[ 4 ] );
+            IF NP % 10 != 0 OR NP < 0 {
+                input_value( PS[ 4 ], PSV[ 4 ] * 10 );
+            } ELSE {
+                NP /= 10;
+                PMS[ 4 ] = round( pulser_pulse_minimum_specs( P4 ) / 10 ns );
+                IF NP < PMS[ 4 ] OR NP > MAX_LEN {
+                    input_value( PS[ 4 ], PSV[ 4 ] * 10 );
+                } ELSE {
+                    PSV[ 4 ] = NP;
+                    P4.START = NP * 10 ns;
+                    pulser_update( );
+                }
+            }
+        }
 
-		IF input_changed( PL[ 5 ] ) {
-			NL = input_value( PL[ 5 ] );
-			IF NL % 10 != 0 {
-				input_value( PL[ 5 ], PLV[ 5 ] * 10 );
-			} ELSE {
-				NL /= 10;
-				IF NL < 0 OR PSV[ 5 ] + NL > MAX_LEN {
-					input_value( PL[ 5 ], PLV[ 5 ] * 10 );
-				} ELSE {
-					PLV[ 5 ] = NL;
-					P5.LENGTH = NL * 10 ns;
-					pulser_update( );
-				}
-			}
-		}
+        IF input_changed( PL[ 4 ] ) {
+            NL = input_value( PL[ 4 ] );
+            IF NL % 10 != 0 OR NL < 0 {
+                input_value( PL[ 4 ], PLV[ 4 ] * 10 );
+            } ELSE {
+                NL /= 10;
+                IF NL > MAX_LEN {
+                    input_value( PL[ 4 ], PLV[ 4 ] * 10 );
+                } ELSE {
+                    PLV[ 4 ] = NL;
+                    P4.LENGTH = NL * 10 ns;
+                    pulser_update( );
+                }
+            }
+        }
 
-		/* Deal with RF frequency changes */
+        /* Checks for the detection Pulse */
 
-		IF input_changed( Freq ) {
-		    new_freq = input_value( Freq ) * 1 MHz;
-			IF new_freq < 9 kHz OR new_freq > 1100 MHz {
-				input_value( Freq, freq );
-			} ELSE {
-				freq = new_freq;
-				synthesizer_frequency( freq );
-			}
-		}
+        IF input_changed( PS[ 5 ] ) {
+            NP = input_value( PS[ 5 ] );
+            IF NP % 10 != 0 OR NP < 0 {
+                input_value( PS[ 5 ], PSV[ 5 ] * 10 );
+            } ELSE {
+                NP /= 10;
+                PMS[ 5 ] = round( pulser_pulse_minimum_specs( P5 ) / 10 ns );
+                IF NP < PMS[ 5 ] OR NP + PLV[ 5 ] > MAX_LEN {
+                    input_value( PS[ 5 ], PSV[ 5 ] * 10 );
+                } ELSE {
+                    PSV[ 5 ] = NP;
+                    P5.START = NP * 10 ns;
+                    pulser_update( );
+                }
+            }
+        }
 
-		/* Deal with RF attenuation changes */
+        IF input_changed( PL[ 5 ] ) {
+            NL = input_value( PL[ 5 ] );
+            IF NL % 10 != 0 OR NL < 0 {
+                input_value( PL[ 5 ], PLV[ 5 ] * 10 );
+            } ELSE {
+                NL /= 10;
+                IF PSV[ 5 ] + NL > MAX_LEN {
+                    input_value( PL[ 5 ], PLV[ 5 ] * 10 );
+                } ELSE {
+                    PLV[ 5 ] = NL;
+                    P5.LENGTH = NL * 10 ns;
+                    pulser_update( );
+                }
+            }
+        }
 
-		IF input_changed( Att ) {
-			new_att = input_value( Att );
-			IF new_att < -140 dB OR new_att > 13 dB {
-			    input_value( Att, att );
-			} ELSE {
-				att = new_att;
-				synthesizer_attenuation( att );
-			}
-		}
+        /* Deal with RF frequency changes */
 
-		/* Button for switching RF power on or off */
+        IF input_changed( Freq ) {
+            new_freq = input_value( Freq ) * 1 MHz;
+            IF new_freq < 9 kHz OR new_freq > 1100 MHz {
+                input_value( Freq, freq );
+            } ELSE {
+                freq = new_freq;
+                synthesizer_frequency( freq );
+            }
+        }
 
-		IF button_changed( RF_ON_OFF ) {
-		    synthesizer_state( button_state( RF_ON_OFF ) );
-		}
+        /* Deal with RF attenuation changes */
 
-		/* The second section of the loop deals with the buttons and entry
-		   fields for field control.... */
+        IF input_changed( Att ) {
+            new_att = input_value( Att );
+            IF new_att < -140 dB OR new_att > 13 dB {
+                input_value( Att, att );
+            } ELSE {
+                att = new_att;
+                synthesizer_attenuation( att );
+            }
+        }
 
-		/* Check if the sweep up button has been pressed and start sweeping up
-		   (unless we're already sweeping up) */
+        /* Button for switching RF power on or off */
 
-		IF  Sweep_State != UP AND button_state( Sweep_Up ) {
-			IF Sweep_State == STOPPED {
-				magnet_sweep( UP );
-				Sweep_State = UP;
-			}
+        IF button_changed( RF_ON_OFF ) {
+            synthesizer_state( button_state( RF_ON_OFF ) );
+        }
 
-			IF Sweep_State == DOWN {
-				magnet_sweep( UP );
-				Sweep_State = UP;
-			}
+        /* The second section of the loop deals with the buttons and entry
+           fields for field control.... */
 
-			draw_marker( I + 1, "YELLOW" );
-			button_state( Pause, "OFF" );
-		}
+        /* Check if the sweep up button has been pressed and start sweeping up
+           (unless we're already sweeping up) */
 
-		/* Check if the sweep down button has been pressed and start sweeping
-		   down (unless we're already sweeping down) */
+        IF  Sweep_State != UP AND button_state( Sweep_Up ) {
+            IF Sweep_State == STOPPED {
+                magnet_sweep( UP );
+                Sweep_State = UP;
+            }
 
-		IF Sweep_State != DOWN AND button_state( Sweep_Down ) {
-			IF Sweep_State == STOPPED {
-				magnet_sweep( DOWN );
-				Sweep_State = DOWN;
-			}
+            IF Sweep_State == DOWN {
+                magnet_sweep( UP );
+                Sweep_State = UP;
+            }
 
-			IF Sweep_State == UP {
-				magnet_sweep( DOWN );
-				Sweep_State = DOWN;
-			}
+            draw_marker( I + 1, "YELLOW" );
+            button_state( Pause, "OFF" );
+        }
 
-			draw_marker( I + 1, "BLUE" );
-			button_state( Pause, "OFF" );
-		}
+        /* Check if the sweep down button has been pressed and start sweeping
+           down (unless we're already sweeping down) */
 
-		/* Check if the sweep stop button has been pressed while we're
-		   sweeping */
+        IF Sweep_State != DOWN AND button_state( Sweep_Down ) {
+            IF Sweep_State == STOPPED {
+                magnet_sweep( DOWN );
+                Sweep_State = DOWN;
+            }
 
-		IF Sweep_State != STOPPED AND button_state( Sweep_Stop ) {
-			magnet_sweep( STOPPED );
-			Sweep_State = STOPPED;
-			draw_marker( I + 1, "RED" );
-		}
+            IF Sweep_State == UP {
+                magnet_sweep( DOWN );
+                Sweep_State = DOWN;
+            }
 
-		/* Check if a new field has been set - if yes go to the new field
-		   (which automatically stops a sweep) after checking that it's within
-		   the allowed limits */
+            draw_marker( I + 1, "BLUE" );
+            button_state( Pause, "OFF" );
+        }
 
-		new_set_field = input_value( New_Field );
-		IF abs( new_set_field - new_field ) > 0.149 G {
-			IF new_set_field > 114304 G OR new_set_field < 0 G {
-				input_value( New_Field, new_field );
-			} ELSE {
-				Sweep_State = STOPPED;
-				new_field = new_set_field;
-				button_state( Sweep_Stop, "ON" );
-				current_field = set_field( new_field );
-				draw_marker( I + 1, "RED" );
-			}
-			output_value( Current_Field, current_field );
-		}
+        /* Check if the sweep stop button has been pressed while we're
+           sweeping */
 
-		/* Check if a new sweep rate has been set - if yes set the new rate
-		   after checking that it's within the allowed limits */
+        IF Sweep_State != STOPPED AND button_state( Sweep_Stop ) {
+            magnet_sweep( STOPPED );
+            Sweep_State = STOPPED;
+            draw_marker( I + 1, "RED" );
+        }
 
-		new_sweep_rate = abs( input_value( Sweep_Rate ) );
-		IF abs( sweep_rate - new_sweep_rate ) > 0.01 {
-			IF new_sweep_rate <= 33.1 AND new_sweep_rate >= 0.23814 {
-				sweep_rate = magnet_sweep_rate( new_sweep_rate );
-				IF Sweep_State != STOPPED {
-					draw_marker( I + 1, "GREEN" )
-				}
-			}
-			input_value( Sweep_Rate, sweep_rate );
-		}
+        /* Check if a new field has been set - if yes go to the new field
+           (which automatically stops a sweep) after checking that it's within
+           the allowed limits */
 
-		/* Check if the clear curve button has been pressed */
+        new_set_field = input_value( New_Field );
+        IF abs( new_set_field - new_field ) > 0.149 G {
+            IF new_set_field > 114304 G OR new_set_field < 0 G {
+                input_value( New_Field, new_field );
+            } ELSE {
+                Sweep_State = STOPPED;
+                new_field = new_set_field;
+                button_state( Sweep_Stop, "ON" );
+                current_field = set_field( new_field );
+                draw_marker( I + 1, "RED" );
+            }
+            output_value( Current_Field, current_field );
+        }
 
-		IF button_state( Clear ) {
-			clear_curve( );
-			clear_marker( );
-			rescale( 64 );
-			I = 0;
-		}
+        /* Check if a new sweep rate has been set - if yes set the new rate
+           after checking that it's within the allowed limits */
 
-		Pause_Display = button_state( Pause );
-	}
+        new_sweep_rate = abs( input_value( Sweep_Rate ) );
+        IF abs( sweep_rate - new_sweep_rate ) > 0.01 {
+            IF new_sweep_rate <= 33.1 AND new_sweep_rate >= 0.23814 {
+                sweep_rate = magnet_sweep_rate( new_sweep_rate );
+                IF Sweep_State != STOPPED {
+                    draw_marker( I + 1, "GREEN" )
+                }
+            }
+            input_value( Sweep_Rate, sweep_rate );
+        }
 
-	/* The fourth and final part of the loop are the things that need to be
-	   done each time through the loop and mostly deals with getting data from
-	   the ADC (that gets its input from the boxcar integrator) */
+        /* Check if the clear curve button has been pressed */
 
-	/* Update the output field with the current field if necessary */
+        IF button_state( Clear ) {
+            clear_curve( );
+            clear_marker( );
+            rescale( 64 );
+            I = 0;
+        }
 
-	UNLESS Sweep_State == STOPPED {
-		current_field = get_field( );
-		output_value( Current_Field, current_field );
-	}
+        Pause_Display = button_state( Pause );
+    }
 
-	IF ! Pause_Display {
-		I += 1;
-		wait( 0.2 s );
-		display( I, daq_get_voltage( CH0 ) );
-	} ELSE {
-		wait( 0.2 s );
-	}
+    /* The fourth and final part of the loop are the things that need to be
+       done each time through the loop and mostly deals with getting data from
+       the ADC (that gets its input from the boxcar integrator) */
+
+    /* Update the output field with the current field if necessary */
+
+    UNLESS Sweep_State == STOPPED {
+        current_field = get_field( );
+        output_value( Current_Field, current_field );
+    }
+
+    IF ! Pause_Display {
+        I += 1;
+        wait( 0.2 s );
+        display( I, daq_get_voltage( CH0 ) );
+    } ELSE {
+        wait( 0.2 s );
+    }
 }
 
 
@@ -473,5 +492,5 @@ ON_STOP:
 /* At the and of the experiment make sure the sweep is stopped */
 
 IF Sweep_State != STOPPED {
-	magnet_sweep( STOPPED );
+    magnet_sweep( STOPPED );
 }
