@@ -91,6 +91,7 @@ devices to be used in the experiment.
 @menu
 * Overview::                Basic concepts of fsc2.
 * GUI::                     The graphical user interface
+* Web Server::              Monitoring the experiment via the net
 * EDL::                     Description of EDL the language.
 * Built-in Functions::      Built-in functions.
 * Device Functions::        Functions for accessing devices.
@@ -138,6 +139,7 @@ translation approved by the Free Software Foundation.
 
 @include overview.texi
 @include gui.texi
+@include http.texi
 @include edl.texi
 @include builtins.texi
 @include devices.texi
