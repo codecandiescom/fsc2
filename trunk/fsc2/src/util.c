@@ -93,7 +93,7 @@ char *string_to_lower( char *str )
 		return NULL;
 	for ( ptr = str; *ptr; ptr++ )
 		if ( isupper( *ptr ) )
-			*ptr = tolower( *ptr );
+			*ptr = ( char ) tolower( *ptr );
 
 	return str;
 }
