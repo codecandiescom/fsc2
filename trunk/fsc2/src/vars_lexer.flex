@@ -349,7 +349,7 @@ static int vars_get_channel_name( void )
 	{
 		vars_push( STR_VAR, varstext );
 		v = func_call( func );
-		if ( v !=NULL && v->val.lval != UNDEFINED )
+		if ( v != NULL && v->val.lval != UNDEFINED )
 			 return VAR_REF;
 	}
 

@@ -17,7 +17,8 @@
 #define NUM_SERIAL_PORTS 2
 
 
-/* Define the default delay for phase pulses needed for phase switching */
+/* Define the default delay for phase pulses needed for phase switching 
+   (used in for the Frankfurt pulser) */
 
 #define DEFAULT_PHASE_SWITCH_DELAY 2e-8    /* 20 ns */
 
@@ -27,7 +28,7 @@
    strange artefacts at the end of an experiment) etc. If the pulser time base
    is larger we try to allow for at least one time base at the end of the
    pulse sequence. Define GRACE_PERIOD as 0 to switch off setting of a grace
-   period. */
+   period. (used in for the Frankfurt pulser) */
 
 #define GRACE_PERIOD 1e-8                  /* 10 ns */
 
@@ -40,7 +41,6 @@
    number of available colors...) */
 
 #define NUM_COLORS 128
-
 
 
 /******************************************************************/
@@ -123,9 +123,8 @@ enum {
 };
 
 
-/* Define the different functions pulses may have (it's not too dangerous here
-   to add further ones as long as the first two and the last remain unchanged)
-*/
+/* Define the different functions pulses may have (it's not dangerous here to
+   add further ones as long as the first two and the last remain unchanged) */
 
 enum {
 	PULSER_CHANNEL_NO_TYPE = -1,
@@ -165,9 +164,9 @@ extern const char *Function_Names[ ];
 /* Define access types for functions in certain sections */
 
 enum {
-	ACCESS_EXP,
-	ACCESS_PREP,
-	ACCESS_ALL,
+	ACCESS_EXP,         // only in experiment phase
+	ACCESS_PREP,        // only in preparation phase
+	ACCESS_ALL,         // everywhere
 };
 
 
@@ -246,11 +245,8 @@ enum {
 
 /* convenience macros for accessing the value of simple variables
    (but be careful with the VALUE macro: the returned value is always
-   a double !)
-*/
+   a double !) */
 
-
-#define fatal_error  THROW( EXCEPTION );
 #define INT          val.lval
 #define FLOAT        val.dval
 #define VALUE( a )   ( ( a )->type == INT_VAR ?            \
@@ -260,9 +256,9 @@ enum {
 /* return codes from function get_lib_symbol() (in func.c) */
 
 enum {
-	LIB_OK          =  0,
-	LIB_ERR_NO_LIB  = -1,
-	LIB_ERR_NO_SYM  = -2,
+	LIB_OK          =  0,        // everything fine
+	LIB_ERR_NO_LIB  = -1,        // library not found
+	LIB_ERR_NO_SYM  = -2,        // symbol not found in library
 };
 
 
