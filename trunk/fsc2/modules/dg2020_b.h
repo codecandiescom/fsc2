@@ -39,40 +39,6 @@
 #define DG2020_B_GPIB_DEBUG 1
 */
 
-/* Here are all the directly exported functions (i.e. exported either implicit
-   as a hook functions or via the Functions data base) */
-
-int dg2020_b_init_hook( void );
-int dg2020_b_test_hook( void );
-int dg2020_b_end_of_test_hook( void );
-int dg2020_b_exp_hook( void );
-int dg2020_b_end_of_exp_hook( void );
-void dg2020_b_exit_hook( void );
-
-
-Var_T *pulser_name( Var_T *v );
-Var_T *pulser_automatic_shape_pulses( Var_T *v );
-Var_T *pulser_automatic_twt_pulses( Var_T *v );
-Var_T *pulser_show_pulses( Var_T *v );
-Var_T *pulser_dump_pulses( Var_T *v );
-Var_T *pulser_shape_to_defense_minimum_distance( Var_T *v );
-Var_T *pulser_defense_to_shape_minimum_distance( Var_T *v );
-Var_T *pulser_minimum_twt_pulse_distance( Var_T *v );
-Var_T *pulser_keep_all_pulses( Var_T *v );
-Var_T *pulser_maximum_pattern_length( Var_T *v );
-Var_T *pulser_state( Var_T *v );
-Var_T *pulser_channel_state( Var_T *v );
-Var_T *pulser_update( Var_T *v );
-Var_T *pulser_shift( Var_T *v );
-Var_T *pulser_increment( Var_T *v );
-Var_T *pulser_next_phase( Var_T *v );
-Var_T *pulser_phase_reset( Var_T *v );
-Var_T *pulser_pulse_reset( Var_T *v );
-Var_T *pulser_reset( Var_T *v );
-Var_T *pulser_reset( Var_T *v );
-Var_T *pulser_lock_keyboard( Var_T *v );
-Var_T *pulser_command( Var_T *v );
-
 
 /* Definitions needed for the pulser */
 
@@ -389,6 +355,41 @@ struct DG2020 {
 
 
 extern DG2020_T dg2020;
+
+
+/* Here are all the directly exported functions (i.e. exported either implicit
+   as a hook functions or via the Functions data base) */
+
+int dg2020_b_init_hook( void );
+int dg2020_b_test_hook( void );
+int dg2020_b_end_of_test_hook( void );
+int dg2020_b_exp_hook( void );
+int dg2020_b_end_of_exp_hook( void );
+void dg2020_b_exit_hook( void );
+
+
+Var_T *pulser_name( Var_T *v );
+Var_T *pulser_automatic_shape_pulses( Var_T *v );
+Var_T *pulser_automatic_twt_pulses( Var_T *v );
+Var_T *pulser_show_pulses( Var_T *v );
+Var_T *pulser_dump_pulses( Var_T *v );
+Var_T *pulser_shape_to_defense_minimum_distance( Var_T *v );
+Var_T *pulser_defense_to_shape_minimum_distance( Var_T *v );
+Var_T *pulser_minimum_twt_pulse_distance( Var_T *v );
+Var_T *pulser_keep_all_pulses( Var_T *v );
+Var_T *pulser_maximum_pattern_length( Var_T *v );
+Var_T *pulser_state( Var_T *v );
+Var_T *pulser_channel_state( Var_T *v );
+Var_T *pulser_update( Var_T *v );
+Var_T *pulser_shift( Var_T *v );
+Var_T *pulser_increment( Var_T *v );
+Var_T *pulser_next_phase( Var_T *v );
+Var_T *pulser_phase_reset( Var_T *v );
+Var_T *pulser_pulse_reset( Var_T *v );
+Var_T *pulser_reset( Var_T *v );
+Var_T *pulser_reset( Var_T *v );
+Var_T *pulser_lock_keyboard( Var_T *v );
+Var_T *pulser_command( Var_T *v );
 
 
 /* Here follow the functions from dg2020_gen_b.c */

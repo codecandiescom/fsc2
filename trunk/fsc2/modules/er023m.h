@@ -174,7 +174,6 @@ struct ER023M {
 	unsigned char st;     /* status byte */
 	bool st_is_valid;     /* when set use the stored value of the status byte,
 							 otherwise fetch from device */
-
 };
 
 
