@@ -592,7 +592,7 @@ static int ni6601_start_pulses( Board *board, NI6601_PULSES *arg )
 	/* Load counter with 1 so we're able to start the first pulse as
 	   fast as possible, i.e. 100 ns after arming the counter */
 
-	writel( 1, board->regs.load_a[ p.counter ] );
+	writel( 1UL, board->regs.load_a[ p.counter ] );
 	writew( LOAD, board->regs.command[ p.counter ] );
 
 	/* Use normal counting and no second gating */
@@ -695,7 +695,7 @@ static int ni6601_start_counting( Board *board, NI6601_COUNTER *arg )
 
 	/* Load counter from A, set counting direction and arm */
 
-	writel( 0, board->regs.load_a[ c.counter ] );
+	writel( 0UL, board->regs.load_a[ c.counter ] );
 	writew( cmd_bits, board->regs.command[ c.counter ] );
 
 	return 0;

@@ -32,15 +32,21 @@ void ni6601_release_resources( Board *boards, int board_count )
 			iounmap( boards[ i ].mite );
 			boards[ i ].mite = NULL;
 		}
+
 		if ( boards[ i ].addr ) {
 			iounmap( boards[ i ].addr );
 			boards[ i ].addr;
 		}
+
 		if ( boards[ i ].irq ) {
 			free_irq( boards[ i ].irq, boards + i );
 			boards[ i ].irq = 0;
 		}
-		pci_release_regions( boards[ i ].dev );
+
+		if ( boards[ i ].dev ) {
+			pci_release_regions( boards[ i ].dev );
+			boards[ i ].dev = NULL;
+		}
 	}
 }
 
