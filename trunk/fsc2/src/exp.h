@@ -50,7 +50,7 @@ typedef union {
 #define BREAK_TOK      2055
 #define REPEAT_TOK     2056
 #define FOR_TOK        2057
-#define ON_QUIT_TOK    3333
+#define ON_STOP_TOK    3333
 
 
 typedef struct 
