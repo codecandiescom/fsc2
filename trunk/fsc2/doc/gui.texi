@@ -455,9 +455,9 @@ top of the high-field signal are to large and drawn in white.
 
 @subsection Getting cross sections
 
-Quite often one would like to see a cross section through the data
-set. This can be down by holding down the @code{Shift} key and clicking
-with the left mouse button into the x- or y-axis area at the place you
+Quite often one needs to see a cross section through the data set. This
+can be down by holding down the @code{Shift} key and clicking with the
+left mouse button into either the x- or y-axis area at the place you
 want the cross section. When you release the left mouse button a new
 window opens up showing the cross section (please keep the @code{Shift}
 key pressed down until the window is shown. While the left mouse button
@@ -477,6 +477,7 @@ only shows a 1D-curve it also has a z-axis. On this axis a red indicator
 shows for which value in either x- or y-direction the cross section was
 taken.
 @ifnotinfo
+
 @image{fsc2fig6,11cm,}
 
 @end ifnotinfo
