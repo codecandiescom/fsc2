@@ -414,7 +414,7 @@ sub serve_pics {
 	stdout_lock( 1 ) or exit 1;
 	print STDOUT $which;
 	1 while defined ( $state = <STDIN> ) and $state =~ /^$/o;
-	return stdout_lock( 0 ) unless defined $state;
+	return undef unless defined $state;
 
 	# If we get a positive reply from fsc2 (it's sending us a character which
 	# is not '0') the next thing it sends is the name of a file with the
@@ -425,6 +425,7 @@ sub serve_pics {
 		 ( ( $ext eq "png" and $has_pnmtopng ) or
 		   ( $ext eq "jpeg" and $has_ppmtojpeg ) ) ) {
 		$file = <STDIN>;
+		stdout_lock( 0 );
 		chomp $file;
 
 		# Untaint the file name, then check that file permission and
@@ -440,6 +441,7 @@ sub serve_pics {
 		die "File received from fsc2 has the wrong owner.\n"
 			unless defined $info[ 4 ] and $info[ 4 ] == $<;
 
+
 		if ( $ext eq "png" ) {
 			$data = `pnmtopng -compression 9 $file`;
 		} else {
@@ -447,6 +449,7 @@ sub serve_pics {
 		}
 		unlink $file;
 	} elsif ( $state =~ /^0$/o ) {
+		stdout_lock( 0 );
 		$file = "$auxdir/na.$ext";
 		open( $fh, $file ) or
 			return not_found( "fsc2_$which$ext", $req );
