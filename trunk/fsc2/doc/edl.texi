@@ -31,6 +31,7 @@
 * Syntax::                  Basic syntax of EDL scripts.
 * Variables::               Using variables and arrays.
 * Assignment operations::   Assigning to variables.
+* Array ranges::            Indexing parts of arrays
 * Arithmetic::              Doing calculations with variables.
 * Conditional  operator::   Using the '? : ' construct
 * Control structures::      Flow control in EDL scripts.
@@ -536,8 +537,9 @@ h[ *, 2 ];  /* WRONG! */
 @end example
 
 The length of the 1-dimensional array @code{M} from the above example
-remains undetermined until a value is assigned to at least one of the
-array element. If you now assign a value to the 25th element like this
+remains undetermined until a value has been assigned to at least one
+of the array element. If you now assign a value to the 25th element
+like this
 @example
 M[ 25 ] = 42;
 @end example
@@ -585,7 +587,7 @@ j[ *, * ];
 @noindent
 can be thought of as an array (of still undetermined length) of arrays
 which also have no length yet (or a length of 0). When you now assign
-a value to one of the lowest-level arrays like
+a value to one an element like this
 @example
 j[ 7, 9 ] = 3.1415927;
 @end example
@@ -597,14 +599,14 @@ sub-arrays -- the 1st to the 6th sub-array are still undefined (having a
 length of 0).
 
 Only if you assign a value to the elements of one of these other
-sub-arrays it will start to exist, e.g.@: by having
+sub-arrays it will start be created, e.g.@: by having
 @example
 j[ 3, 2 ] = 2.7182818;
 @end example
 @noindent
 Now both the 3rd and the 7th sub-array of @code{j} exist - but no others
 (i.e.@: the 1st, 2nd, 4th, 5th and 6th sub-array do not exist yet and
-trying to use a value in one of these sub-arrays will result in an error
+trying to use a value of one of these sub-arrays will result in an error
 message). And both these sub-arrays have different lengths, the 3rd
 sub-array has a length of only 2, while the 7th sub-array has a length
 of 9.
@@ -641,7 +643,7 @@ elements, 1-dimensional arrays to its sub-sub-arrays, 2-dimensional
 3-dimensional matrix to it.
 
 
-@node Assignment operations, Arithmetic, Variables, EDL
+@node Assignment operations, Array ranges, Variables, EDL
 @section Assignment operations
 @cindex Assignment operations
 
@@ -728,7 +730,53 @@ be not what you want a warning is printed to inform you about this
 potential problem.
 
 
-@node Arithmetic, Conditional operator, Assignment operations, EDL
+@node Array ranges, Arithmetic, Assignment operations, EDL
+@section Array ranges
+@cindex Array ranges
+
+Until now we were talking about array indexing as if it would only be
+possible to index a single element or whole subarrays, i.e.@: if we
+have an array defined in the @code{VARIABLES} section as
+@example
+k[ 5, 8 ];
+@end example
+@noindent
+then the first element of the first row or the last subarray would be
+indexed as
+@example
+k[ 1, 1 ]
+k[ 5 ]
+@end example
+But it is also possible to parts of array by using range indexing. E.g.@:
+@example
+k[ 1, 2 : 4 ]
+@end example
+@noindent
+is an one-dimensional array, consisting of the second to the fourth element
+of the first row of @code{k}. And
+@example
+k[ 2 : 4, 7 ]
+@end example
+@noindent
+is also an one-dimensional array of the three elements, having the
+values @code{k[2,7]}, @code{k[3,7]} and @code{k[4,7]}. Finally,
+@example
+k[ 2 : 4, 3 : 7 ]
+@end example
+@noindent
+is a two-dimensional array of rank @code{3x5}. Using
+@example
+k[ 2 : 4, 3 : 7 ] += 1;
+@end example
+@noindent
+would add @code{1} to the third to seventh element of the second to
+fourth row of the array @code{k}.
+
+Array indexing with ranges can be used on both the left as well as
+the right hand side of an assignment.
+
+
+@node Arithmetic, Conditional operator, Array ranges, EDL
 @section Arithmetic
 @cindex Arithmetic
 
