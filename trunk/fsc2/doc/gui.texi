@@ -149,7 +149,9 @@ The next figure shows you the main window of @acronym{fsc2} with an
 @acronym{EDL} program loaded (the name of the loaded program is shown in
 the widow title) and the test already been done. The program has written
 out some text already during the test, thus some lines are shown in the
-output browser.  @image{fsc2fig2,11cm}
+output browser.
+
+@image{fsc2fig2,11cm}
 @end ifnotinfo
 
 
