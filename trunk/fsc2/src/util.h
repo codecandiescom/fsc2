@@ -34,6 +34,8 @@ const char *slash( const char *path );
 long get_file_length( FILE *fp, int *len );
 void eprint( int severity, bool print_fl, const char *fmt, ... );
 void print( int severity, const char *fmt, ... );
+void raise_permissions( void );
+void lower_permissions( void );
 FILE *filter_edl( const char *name, FILE *fp );
 bool fsc2_locking( void );
 int fsc2_usleep( unsigned long us_dur, bool quit_on_signal );
@@ -41,29 +43,6 @@ int is_in( const char *supplied_in, const char **alternatives, int max );
 void i2rgb( double h, int *rgb );
 void create_colors( void );
 Var *get_digitizer_channel_number( const char *channel_name );
-
-inline void raise_permissions( void );
-inline void lower_permissions( void );
-
-inline unsigned long d2color( double a );
-
-inline short  d2shrt( double a );
-inline unsigned short d2ushrt( double a );
-inline short  i2shrt( int a );
-inline unsigned short i2ushrt( int a );
-
-inline int    i_max( int    a, int    b );
-inline int    i_min( int    a, int    b );
-inline long   l_max( long   a, long   b );
-inline long   l_min( long   a, long   b );
-inline float  f_max( float  a, float  b );
-inline float  f_min( float  a, float  b );
-inline double d_max( double a, double b );
-inline double d_min( double a, double b );
-inline size_t s_min( size_t a, size_t b );
-
-inline long lrnd( double x );
-inline int irnd( double x );
 
 
 #endif  /* ! UTIL_HEADER */

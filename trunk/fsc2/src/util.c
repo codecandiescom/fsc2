@@ -474,6 +474,33 @@ void print( int severity, const char *fmt, ... )
 }
 
 
+/*---------------------------------------------------------------------*/
+/* The program starts with the EUID and EGID set to the ones of fsc2,  */
+/* but these privileges get dropped immediately. Only for some special */
+/* actions (like dealing with shared memory and lock and log files)    */
+/* this function is called to change the EUID and EGID to the one of   */
+/* fsc2.                                                               */
+/*---------------------------------------------------------------------*/
+
+void raise_permissions( void )
+{
+	seteuid( Internals.EUID );
+	setegid( Internals.EGID );
+}
+
+
+/*---------------------------------------------------------------------*/
+/* This function sets the EUID and EGID to the one of the user running */
+/* the program.                                                        */
+/*---------------------------------------------------------------------*/
+
+void lower_permissions( void )
+{
+	seteuid( getuid( ) );
+	setegid( getgid( ) );
+}
+
+
 /*-------------------------------------------------------------------------*/
 /* This routine takes the input file and feeds it to 'fsc2_clean' which is */
 /* running as a child process. The output of fsc2_clean gets written to a  */

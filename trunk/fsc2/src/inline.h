@@ -27,8 +27,6 @@
 /* to be a good idea...                                             */
 /********************************************************************/
 
-static inline void raise_permissions( void );
-static inline void lower_permissions( void );
 static inline short d2shrt( double a );
 static inline short i2shrt( int a );
 static inline unsigned short d2ushrt( double a );
@@ -44,32 +42,6 @@ static inline double d_min( double a, double b );
 static inline size_t s_min( size_t a, size_t b );
 static inline long lrnd( double x );
 static inline int irnd( double x );
-
-/*---------------------------------------------------------------------*/
-/* The program starts with the EUID and EGID set to the ones of fsc2,  */
-/* but these privileges get dropped immediately. Only for some special */
-/* actions (like dealing with shared memory and lock and log files)    */
-/* this function is called to change the EUID and EGID to the one of   */
-/* fsc2.                                                               */
-/*---------------------------------------------------------------------*/
-
-static inline void raise_permissions( void )
-{
-	seteuid( Internals.EUID );
-	setegid( Internals.EGID );
-}
-
-
-/*---------------------------------------------------------------------*/
-/* This function sets the EUID and EGID to the one of the user running */
-/* the program.                                                        */
-/*---------------------------------------------------------------------*/
-
-static inline void lower_permissions( void )
-{
-	seteuid( getuid( ) );
-	setegid( getgid( ) );
-}
 
 
 /*-------------------------------------------------------------------------*/

@@ -51,6 +51,7 @@
 #include "fsc2_types.h"
 #include "global.h"
 #include "fsc2_assert.h"
+#include "inline.h"
 #include "exceptions.h"
 #include "T.h"
 #include "variables.h"
