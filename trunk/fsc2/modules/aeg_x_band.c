@@ -488,6 +488,8 @@ Var *sweep_down( Var *v )
 
 Var *reset_field( Var *v )
 {
+	v = v;
+
 	if ( ! magnet.is_field )
 	{
 		eprint( FATAL, SET, "%s: Start field has not been defined in "

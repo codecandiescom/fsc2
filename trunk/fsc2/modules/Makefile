@@ -23,7 +23,7 @@
 simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c \
 				 aeg_s_band.c aeg_x_band.c er035m.c er035m_s.c \
 				 er035m_sa.c er035m_sas.c bh15.c keithley228a.c egg4402.c \
-				 kontron4060.c lakeshore330.c pt2025.c
+				 kontron4060.c lakeshore330.c pt2025.c er032m.c
 
 comp_modules  := dg2020_f dg2020_b hfs9000 tds754a tds744a tds540 tds520c \
                  tds520a tds520 hp8647a
