@@ -3,7 +3,14 @@
 'ig 00 ';
 ###############################################################################
 #
-# >>> Slightly hacked to get some additional effects... JTT <<<
+# CVS version:
+# $Id$
+#
+# Slightly hacked to get some additional effects...
+#                                                   J. T. Toerring
+#
+############################################################################
+#
 #
 # texi2html: Program to transform Texinfo documents to HTML
 #
@@ -37,8 +44,6 @@ require 5.0;
 #
 ###############################################################################
 
-# CVS version:
-# $Id$
 
 # Homepage:
 $T2H_HOMEPAGE = <<EOT;

@@ -468,6 +468,11 @@ from functions that return arrays of a size that would be difficult or
 impossible to determine before the experiment is actually started,
 e.g.@: curves fetched from a digitizing oscilloscope.
 
+Please note that only 1-dimensional variable sized arrays can be
+initialized in which case the size of the array is set automatically to
+the number of initializers supplied (and then can't be changed
+anymore). More-dimensional variable sized arrays can not be initialized.
+
 
 @node Arithmetic, Control structures, Variables, EDL
 @section Arithmetic

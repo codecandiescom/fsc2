@@ -408,16 +408,16 @@ export            # export all variables to sub-makes
 # Switch off all implicit rules
 
 .SUFFIXES:
-.PHONY: all install-strip install uninstall version   \
-		clean distclean mostly_clean tags pack ZIP    \
-		pion.anorg.chemie.uni-frankfurt.de    		  \
-		crowley.physik.fu-berlin.de           		  \
-		door.physik.fu-berlin.de              		  \
-		isaak.physik.fu-berlin.de             		  \
-		moebpc3.physik.fu-berlin.de           		  \
-		tresr.physik.fu-berlin.de             		  \
-		sunone.chemie.unibas.ch               		  \
-		crowley.none                          		  \
+.PHONY: all install-strip install uninstall version    \
+		test clean distclean mostlyclean tags pack ZIP \
+		pion.anorg.chemie.uni-frankfurt.de    		   \
+		crowley.physik.fu-berlin.de           		   \
+		door.physik.fu-berlin.de              		   \
+		isaak.physik.fu-berlin.de             		   \
+		moebpc3.physik.fu-berlin.de           		   \
+		tresr.physik.fu-berlin.de             		   \
+		sunone.chemie.unibas.ch               		   \
+		crowley.none                          		   \
 		dorimare.nowhere
 
 
@@ -518,7 +518,7 @@ distclean:
 	$(MAKE) -C utils distclean
 	-$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog *~
 
-mostly_clean:
+mostlyclean:
 	$(MAKE) -C src distclean
 	$(MAKE) -C modules distclean
 	$(MAKE) -C doc clean
@@ -530,6 +530,12 @@ mostly_clean:
 
 tags:
 	-find . -name "*.[chly]" -print | etags -o $(tagsfile) -
+
+
+# Run a set of test EDL programs
+
+test:
+	$(MAKE) -C tests
 
 
 # Clean up everything for a distribution and create a zipped tarball

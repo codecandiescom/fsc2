@@ -1,11 +1,15 @@
 #! /bin/sh
 # texi2dvi --- produce DVI (or PDF) files from Texinfo (or LaTeX) sources.
 #
+############################################################################
+#
 # $Id$
 #
 # Added a rather dirty hack (will only work for fsc2) to enable pdftex to
 # find the figure files even when running in clean mode. It's just one line,
 # look for comment with JTT as marker...              J. T. Toerring
+#
+############################################################################
 #
 # Old CVS entry:
 # Id: texi2dvi,v 0.43 1999/09/28 19:36:53 karl Exp
