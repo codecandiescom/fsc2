@@ -208,7 +208,7 @@ sub serve_main {
 	# of the page
 
 	print "HTTP/1.0 200 OK$crlf" . def_txt( ) .
-		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
+		  "Content-Type: text/html; charset=ISO-8859-1$crlf" .
 		  "$crlf" .
 		  "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">$crlf" .
 		  "<HTML>$crlf<HEAD>$crlf" .
