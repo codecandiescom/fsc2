@@ -52,7 +52,7 @@ static double bh15_get_field( void );
 static bool bh15_command( const char *cmd );
 
 
-static struct BH15 {
+static struct {
 	int state;
 	int device;
 	const char *name;

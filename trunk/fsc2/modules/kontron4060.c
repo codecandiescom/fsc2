@@ -60,12 +60,10 @@ static void kontron4060_failure( void );
 
 typedef struct KONTRON4060 KONTRON4060;
 
-struct KONTRON4060 {
+static struct {
 	int device;
 	int meas_type;
-};
-
-static KONTRON4060 kontron4060;
+} kontron4060;
 
 
 

@@ -45,8 +45,6 @@
 #include "rs_spec10.conf"
 
 
-typedef struct RS_SPEC10 RS_SPEC10;
-
 struct RS_SPEC10 {
 	const char *dev_file;
 	int16 handle;
@@ -76,7 +74,10 @@ struct RS_SPEC10 {
 };
 
 
-extern RS_SPEC10 *rs_spec10, rs_spec10_prep, rs_spec10_test, rs_spec10_exp;
+extern struct RS_SPEC10 *rs_spec10,
+						 rs_spec10_prep,
+						 rs_spec10_test,
+						 rs_spec10_exp;
 
 
 #define RS_SPEC10_TEST_TEMP      180.0    /* in Kelvin */
