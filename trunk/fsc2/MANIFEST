@@ -91,6 +91,8 @@ config/me6000.conf
 config/ni6601.conf
 config/pci_mio_16e_1.conf
 config/pt2025.conf
+config/rb8509.conf
+config/rb8509.conf~
 config/rs690.conf
 config/rs_sml01.conf
 config/rs_spec10.conf
@@ -256,6 +258,7 @@ modules/pci_mio_16e_1_gpct.c
 modules/pci_mio_16e_1_msc.c
 modules/pci_mio_16e_1_util.c
 modules/pt2025.c
+modules/rb8509.c
 modules/rs690.c
 modules/rs690.h
 modules/rs690_gen.c

@@ -380,6 +380,30 @@ void rs_sml01_check_mod_ampl( double freq )
 }
 
 
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
+#if defined WITH_PULSE_MODULATION
+
+char *rs_sml01_pretty_print( double t )
+{
+	static char ts[ 30 ];
+
+	if ( t >= 1.0 )
+		sprintf( ts, "%.8f s", t );
+	else if ( t >= 1.0e-3 )
+		sprintf( ts, "%.5f ms", t * 1.0e3 );
+	else if ( t >= 1.0e-6 )
+		sprintf( ts, "%.2f us", t * 1.0e6);
+	else
+		sprintf( ts, "%d ns", irnd( t * 1.0e9 ) );
+
+	return ts;
+}
+
+#endif
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

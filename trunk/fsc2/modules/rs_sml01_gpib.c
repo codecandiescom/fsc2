@@ -671,9 +671,6 @@ void rs_sml01_set_pulse_delay( double delay )
 	rs_sml01_check_complete( );
 }
 
-#endif /* WITH_PULSE_MODULATION */
-
-
 
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
@@ -688,6 +685,8 @@ static double rs_sml01_get_pulse_delay( void )
 	buffer[ length - 1 ] = '\0';
 	return T_atod( buffer );
 }
+
+#endif /* WITH_PULSE_MODULATION */
 
 
 /*-------------------------------------------------------------*/
