@@ -68,7 +68,6 @@ device number." \
     test -n $MAJOR || REPEAT=1
     test -z `echo $MAJOR | tr -d '[:digit:]'` || REPEAT=1
     test \( $MAJOR -ge 0 -a $MAJOR -le 254 \) || REPEAT=1
-    fi
 done
 
 # Ask for further compilation options
