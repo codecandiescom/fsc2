@@ -1144,11 +1144,20 @@ elements of an array).
 
 
 @table @samp
+@anchor{end}
+@item end()
+@findex end()
+The function simulates the user clicking onto the @code{Stop} button in
+the display window. If there is an @code{ON_STOP} label flow of control
+will be transfered to the code following the @code{ON_STOP} label,
+otherwise the program will be stopped immediately.
+
+
 @anchor{abort}
 @item abort()
 @findex abort()
 The function will abort the currently running program immediately, so
-it's kind of an emergency exit when nothing else will do. When called
+it is a kind of an emergency exit when nothing else will do. When called
 it displays a message box on the screen to inform the user.
 
 
