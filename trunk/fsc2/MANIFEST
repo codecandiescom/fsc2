@@ -11,6 +11,7 @@ Makefile
 README
 README.mail
 TODO
+rs_letter.txt
 
 Fcntl_Lock/Changes
 Fcntl_Lock/Fcntl_Lock.pm
@@ -79,6 +80,7 @@ config/me6000.conf
 config/ni6601.conf
 config/pt2025.conf
 config/rs690.conf
+config/rs_spec10.conf
 config/s_band_magnet_broad.conf
 config/s_band_magnet_narrow.conf
 config/sr510.conf
@@ -91,6 +93,7 @@ config/tds520c.conf
 config/tds540.conf
 config/tds744a.conf
 config/tds754a.conf
+config/thurlby330.conf
 
 doc/GUIfy.texi
 doc/Makefile
@@ -216,6 +219,10 @@ modules/rs690_init.c
 modules/rs690_pulse.c
 modules/rs690_run.c
 modules/rs690_util.c
+modules/rs_spec10.c
+modules/rs_spec10.h
+modules/rs_spec10_int.c
+modules/rs_spec10_util.c
 modules/s_band_magnet.c.tmpl
 modules/sr510.c
 modules/sr530.c
@@ -230,6 +237,7 @@ modules/tds744a.h
 modules/tds754a.h
 modules/tds_gpib.c.tmpl
 modules/tds_util.c.tmpl
+modules/thurlby330.c
 
 scripts/Makefile
 scripts/cw_endor.crowley.physik.fu-berlin.de
