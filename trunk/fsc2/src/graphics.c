@@ -1266,10 +1266,12 @@ void stop_graphics( void )
 
 		if ( G.dim & 1 )
 			for ( i = X; i <= Y; i++ )
-				G_1d.label[ i ] = CHAR_P T_free( G_1d.label[ i ] );
+				if ( G_1d.label[ i ] )
+					G_1d.label[ i ] = CHAR_P T_free( G_1d.label[ i ] );
 		if ( G.dim & 2 )
 			for ( i = X; i <= Z; i++ )
-				G_2d.label[ i ] = CHAR_P T_free( G_2d.label[ i ] );
+				if ( G_2d.label[ i ] )
+					G_2d.label[ i ] = CHAR_P T_free( G_2d.label[ i ] );
 
 		if ( G.font )
 			XFreeFont( G.d, G.font );
