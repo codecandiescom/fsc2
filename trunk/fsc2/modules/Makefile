@@ -147,7 +147,7 @@ install:
 
 install-pion.anorg.chemie.uni-frankfurt.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
-	-$(LN) $(LNFLAGS)  $(libdir)/dg2020_f.so $(libdir)/dg2020.so
+	-$(LN) $(LNFLAGS) $(libdir)/dg2020_f.so $(libdir)/dg2020.so
 	-chown $(OWNER).$(GROUP) $(libdir)/dg2020.so
 	-$(LN) $(LNFLAGS) $(libdir)/dg2020_f.so $(libdir)/pulser.so
 	-chown $(OWNER).$(GROUP) $(libdir)/pulser.so
@@ -168,38 +168,36 @@ install-crowley.physik.fu-berlin.de:
 	-chown $(OWNER).$(GROUP) $(libdir)/synthesizer.so
 	-$(LN) $(LNFLAGS) $(libdir)/egg4402so $(libdir)/boxcar.so
 	-chown $(OWNER).$(GROUP) $(libdir)/boxcar.so
-	-$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
 
 install-moebi.physik.fu-berlin.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
 	-$(LN) $(LNFLAGS) $(libdir)/dg2020_b.so $(libdir)/pulser.so
-	-chown fsc2.fsc2 $(libdir)/pulser.so
+	-chown $(OWNER).$(GROUP) $(libdir)/pulser.so
 	-$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.so $(libdir)/magnet.so
-	-chown fsc2.fsc2 $(libdir)/magnet.so
+	-chown $(OWNER).$(GROUP) $(libdir)/magnet.so
 	-$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
-	-chown fsc2.fsc2 $(libdir)/gaussmeter.so
+	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
 
 install-door.physik.fu-berlin.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
 	-$(LN) $(LNFLAGS) $(libdir)/hfs9000.so $(libdir)/hfs9003.so
-	-chown fsc2.fsc2 $(libdir)/hfs9003.so
+	-chown $(OWNER).$(GROUP) $(libdir)/hfs9003.so
 	-$(LN) $(LNFLAGS) $(libdir)/keithley228a.so $(libdir)/w_band.so
-	-chown fsc2.fsc2 $(libdir)/w_band.so
+	-chown $(OWNER).$(GROUP) $(libdir)/w_band.so
 	-$(LN) $(LNFLAGS) $(libdir)/keithley228a.so $(libdir)/magnet.so
-	-chown fsc2.fsc2 $(libdir)/magnet.so
-	-$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/hp8647a.table $(libdir)
+	-chown $(OWNER).$(GROUP) $(libdir)/magnet.so
 
 install-isaak.physik.fu-berlin.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
 	-$(LN) $(LNFLAGS) $(libdir)/dg2020_b.so $(libdir)/pulser.so
-	-chown fsc2.fsc2 $(libdir)/pulser.so
+	-chown $(OWNER).$(GROUP) $(libdir)/pulser.so
 	-$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.so $(libdir)/magnet.so
-	-chown fsc2.fsc2 $(libdir)/magnet.so
+	-chown $(OWNER).$(GROUP) $(libdir)/magnet.so
 	-$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
-	-chown fsc2.fsc2 $(libdir)/gaussmeter.so
+	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
 
 install-crowley.none:
-	-$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
+	$(MAKE) $(UNINSTALL_MACHINE)
 
 
 # How to uninstall the modules
@@ -234,7 +232,6 @@ uninstall-door.physik.fu-berlin.de:
 	-$(RM) $(RMFLAGS) $(libdir)/hfs9003.so
 	-$(RM) $(RMFLAGS) $(libdir)/w_band.so
 	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
-	-$(RM) $(RMFLAGS) $(libdir)/hp8647a.table
 
 uninstall-isaak.physik.fu-berlin.de:
 	-$(RM) $(RMFLAGS) $(libdir)/pulser.so
@@ -242,7 +239,6 @@ uninstall-isaak.physik.fu-berlin.de:
 	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
 
 uninstall-crowley.none:
-	-$(RM) $(RMFLAGS) $(libdir)/hp8647a.table
 
 
 # How to clean up the mess we created
