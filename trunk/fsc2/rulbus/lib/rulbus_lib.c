@@ -316,6 +316,7 @@ int rulbus_open( void )
 	/* Call initialization functions of all card drivers that may be needed */
 
 	for ( i = 0; i < rulbus_num_card_handlers; i++ )
+	{
 		if ( rulbus_card_handler[ i ].init &&
 			 ( retval = rulbus_card_handler[ i ].init( ) ) != RULBUS_OK )
 		{
@@ -326,6 +327,7 @@ int rulbus_open( void )
 
 			return rulbus_errno = retval;
 		}
+	}
 
 	return rulbus_errno = RULBUS_OK;
 }
@@ -597,6 +599,7 @@ static int rulbus_check_config( void )
 				break;
 
 		rulbus_card[ i ].handler = rulbus_card_handler + j;
+		rulbus_card[ i ].in_use = UNSET;
 	}
 
 	return RULBUS_OK;
