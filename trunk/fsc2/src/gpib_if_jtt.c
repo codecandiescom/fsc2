@@ -110,7 +110,7 @@ int gpib_init( char *log_file_name, int log_level )
 
     if ( gpib_init_controller( ) != SUCCESS )   /* initialise the controller */
     {
-        strcpy( gpib_error_msg, "Can't initialize controller !" );
+        strcpy( gpib_error_msg, "Initialization of controller failed!" );
 
 		/* Get rid of the device list if it's already created */
 
@@ -328,7 +328,7 @@ int gpib_init_device( const char *device_name, int *dev )
 		else
 			gpib_dev_list = NULL;
 		T_free( cur_dev );
-        sprintf( gpib_error_msg, "Can't initialise device %s, status = 0x%x",
+        sprintf( gpib_error_msg, "Can't initialize device %s, status = 0x%x",
 				 device_name, gpib_status );
 		return FAILURE;
 	}
