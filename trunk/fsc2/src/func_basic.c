@@ -1696,7 +1696,7 @@ Var *f_islice( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	array = T_calloc( size, sizeof( long ) );
+	array = T_calloc( ( size_t ) size, sizeof( long ) );
 	ret = vars_push( INT_ARR, array, ( size_t ) size );
 	T_free( array );
 
