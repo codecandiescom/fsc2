@@ -70,13 +70,14 @@ fsc2.ps: $(docs) $(patsubst %.png,%.eps,$(pngs)) \
 
 
 ifneq ($(word 1,$(shell which convert)),which:)
-%.eps: %.png
-	convert -page `identify -format "%wx%h" $<` $< $@
 %.eps: $(adir)/%.xbm
-	convert -page `identify -format "%wx%h" $<` $< $@
-else
+	convert $< $@
 %.eps: %.png
-	pngtopnm $< | pnmtops -nocenter -noturn > $@
+	convert $< $@
+else
+%.pdf: $(figures)
+	@echo "Can't make PostScript documentation, program 'convert' not found."; \
+	exit 1;
 endif
 
 
@@ -92,9 +93,9 @@ fsc2.pdf: $(docs) $(patsubst %.png,%.pdf,$(pngs)) \
 
 
 ifneq ($(word 1,$(shell which convert)),which:)
-%.pdf: %.png
-	convert -compress Zip -page `identify -format "%wx%h" $<` $< $@
 %.pdf: $(adir)/%.xbm
+	convert -compress Zip -page `identify -format "%wx%h" $<` $< $@
+%.pdf: %.png
 	convert -compress Zip -page `identify -format "%wx%h" $<` $< $@
 else
 %.pdf: $(figures)
@@ -112,8 +113,7 @@ install:
 	$(INSTALL) -m 444 fsc2.1.gz $(mandir)/man1
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2*.html $(docdir)
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.css $(docdir)
-	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2fig*.png $(docdir)
-	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) cursor*.png $(docdir)
+	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) $(figures) $(docdir)
 	if [ -f fsc2.ps ]; then \
 		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.ps $(docdir); \
 	fi

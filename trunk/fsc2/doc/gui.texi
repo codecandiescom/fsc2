@@ -66,7 +66,7 @@ changed to @code{Stop Test} and can be used to abort the test. After the
 test finished succesfully the button becomes inactive until a new
 program is loaded (or the current program is reloaded).
 @item Using the @code{Start} button you start the execution of the
-@acronym{EDL} program, i.e.@ you start the experiment.
+@acronym{EDL} program, i.e.@: you start the experiment.
 @item The @code{Quit} button aborts @acronym{fsc2}.
 @item Pressing the @code{Help} button will try to start a browser with
 the HTML documentation for @acronym{fsc2}. You can select the browser to
@@ -107,7 +107,7 @@ changed to @code{Stop Test} and can be used to abort the test. After the
 test finished succesfully the button becomes inactive until a new
 program is loaded (or the current program is reloaded).
 @item Using the @code{Start} button you start execution of the
-@acronym{EDL} program, i.e.@ you start the measurement.
+@acronym{EDL} program, i.e.@: you start the measurement.
 @item The @code{Quit} button is for leaving @acronym{fsc2}.
 @item Pressing the @code{Help} button will start try to start a browser
 with the HTML documentation for @acronym{fsc2}. You can select the browser to
@@ -173,7 +173,7 @@ used for displaying just curves or color-coded surfaces, see the
 functions @code{init_1d()} and @code{init_2d()} in the later sections.
 The first type of display is well suited for showing the results of
 typical cw-measured EPR data or traces fetched from digitizers, while
-the second type is for visualizing real 2d-experiments, i.e.@ all
+the second type is for visualizing real 2d-experiments, i.e.@: all
 experiments where not just one parameter is changed during the
 experiment but two.
 
@@ -202,7 +202,7 @@ because no rescaling has been done).
 
 The topmost buttons on the left side (which both are switched on) let
 you decide which of the curves will be included in rescaling operations
-- this way you can rescale curves individually to account for e.g.@
+- this way you can rescale curves individually to account for e.g.@:
 different sensitivity settings.
 
 The two buttons below, labeled @code{Undo} and @code{Print} allow you to
@@ -215,6 +215,7 @@ when the experiment is finished its label changes to
 button. While this button is active the display is resized automatically
 so that all data fit into the display area.
 
+@end ifnotinfo
 
 @subsubsection Examining data
 
@@ -223,7 +224,11 @@ during the experiment you have to move the mouse into the display area
 onto the point you're interested in. Now press both the left and the
 right mouse button simultaneously (or first the left one, then the
 middle one while keeping the left button pressed down). The cursor
-changes to a crosshair, @image{cursor4,5mm,}, and in the upper left hand
+changes to a crosshair cursor
+@ifnotinfo
+,@image{cursor4,5mm,},
+@end ifnotinfo
+and in the upper left hand
 corner the exact coordinates of the current mouse position is
 shown. Because different curves can have a different scaling, if you
 have more than one curve displayed the coordinates in the scaling system
@@ -232,7 +237,16 @@ of each curve are shown.
 Beside finding out the exact values of your measured data you also may
 determine differences between different data points. If you press both
 the left and the right mouse button simultaneously the cursor changes to
-a encircled crosshair, @image{cursor5,5mm,}. After moving the mouse while
+a encircled crosshair cursor
+@ifnotinfo
+,@image{cursor5,5mm,}.
+@end ifnotinfo
+@ifnothtml
+@ifnottex
+.
+@end ifnottex
+@end ifnothtml
+After moving the mouse while
 keeping both buttons pressed down a circle is drawn at the position you
 started from and a vertical and horizontal dashed line from this point
 to the current mouse position. In the left upper corner of the
@@ -244,20 +258,88 @@ and the current mouse position.
 
 
 To zoom into the data displayed in the window click the left mouse
-button in the area where the data are displayed. This will change the
-arrow mouse pointer to an icon, @image{cursor1,5mm,}, that indicates
+button in the area where the data are displayed. If you do so the arrow
+mouse pointer changes to a symbol
+@ifnotinfo
+, @image{cursor1,5mm,}
+@end ifnotinfo
+, indicating
 that you're in zoom mode. If you now move the mouse while keeping the
-left moused button pressed down a rectangular box is drawn from the
-position where the mouse button was pressed to the current mouse
-position. When the left mouse button is released the display will be
-rescaled so that the area of the box is magnified to fill the display
-area. You also can use this method in the areas displaying the
-axis. Here also a small box is shown, indicating the range that will be
-magnified. If done in the area of the x-axis only the x-scaling is
+left moused button pressed down a dashed rectangular box is drawn from
+the position where the mouse button was pressed first to the current
+mouse position. When the left mouse button is released the display will
+be rescaled so that the area of this box is magnified to fill the whole
+display area. You can also use this method in the areas of the
+axis. Here also a small box is shown, indicating the section that will
+be magnified. If done in the area of the x-axis only the x-scaling is
 changed, while when used in the y-axis area only a magnification in
 y-direction happens.
 
-
-
-
+You can also move the curves around on the screen. When you pres the
+middle mouse button somewhere in the display are the cursor changes to a
+hand
+@ifnotinfo
+, @image{cursor2,5mm,}.
 @end ifnotinfo
+@ifnothtml
+@ifnottex
+.
+@end ifnottex
+@end ifnothtml
+While you keep the middle mouse button
+pressed down the displayed curves will move around following the mouse.
+As in the case of zooming you can restrict movements to either the x- or
+y-direction by pressing the middle mousebutton in the area of the x-axis
+or the y-axis.
+
+Finally, there's a third method to change the scaling. Whenever you
+press the right mouse button in either the display area or the axis
+field the cursor changes to a magnifiying glass
+@ifnotinfo
+, @image{cursor3,5mm,}.
+@end ifnotinfo
+@ifnothtml
+@ifnottex
+.
+@end ifnottex
+@end ifnothtml
+When you move the mouse around at first nothing
+will happen, but if you release the mouse button the display will either
+get magnified or de-magnified.  This follows the following rules: The
+point where you pressed the left mouse button will stay at exactly the
+same position. If you move the mouse up, the display will be
+de-magnified in y-direction only, if ypou move the mouse down, it will
+be magnified in this direction. By moving the mouse to the right you can
+reduce the x-scale, by moving to the left you increase the x-scaling. If
+you do this operation in the areas of either the x- or y-axis only the
+corresponding scaling gets changed. The factor by which the scle is
+changed depends on how far away from the starting point you moved the
+mouse before releasing the left button. If you move the mouse along the
+whole length of the display area the scaling is changed by a factor of
+4.
+
+You don't have to change the scaling or the position for all curves at
+once - this is what the buttons with the numbers in the colors of the
+curves are meant for. Rescaling or moving will only apply to curves for
+which the corresponding button is active, i.e.@: pressed down. By
+de-activating one or more of these buttons you can extempt the
+corresponding curves (i.e.@: the curves with the same color as the button)
+from all rescaling or movement operations.
+
+Of course, this leads to a problem: If you de-activate some of the
+buttons and rescale, the question is for which curve the axis scales are
+now valid.  That's the reason why the horizontal line of the x-axis and
+the vertical line of the y-axis is not black but colored: When the lines
+are red, you can b sure that the displayed axis scales are valid for (at
+least) athe red curve, if they are green they are valid for (at least)
+the green curve, etc. As a rule, the axis scale is always valid for the
+lowest numbered curve for which its button is activated. That's also the
+reason why, when examining data (using either the middle or right button
+together with the left button), not just one pair of values is displayed
+but as many pairs as there are curves.
+
+Finally, when you zoom into the display parts of a curve or a complete
+curve will not fit into the display anymore. To indicate into which
+direction you have to look for the missing parts of the curve on each
+side in which non-displayable data of a curve can be found an arrow in
+the color of the curve will be shown.
