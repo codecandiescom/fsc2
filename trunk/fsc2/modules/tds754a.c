@@ -508,8 +508,11 @@ Var *digitizer_get_channel_number( Var *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Function either sets or returns the current record length of the */
+/* digitizer. When trying to set a record length that does not fit  */
+/* the possible settings the next larger is used instead.           */
+/*------------------------------------------------------------------*/
 
 Var *digitizer_record_length( Var *v )
 {

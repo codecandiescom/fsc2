@@ -8,7 +8,7 @@
 #include "gpib_if.h"
 
 
-#define DEVICE_NAME "TDS540"      /* compare entry in /etc/gpib.conf ! */
+#define DEVICE_NAME "TDS540"     /* compare entry in /etc/gpib.conf ! */
 
 #define TDS_POINTS_PER_DIV 50
 

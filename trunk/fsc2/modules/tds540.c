@@ -129,7 +129,6 @@ void tds540_exit_hook( void )
 }
 
 
-
 /*------------------------------------------*/
 /*------------------------------------------*/
 
@@ -496,8 +495,11 @@ Var *digitizer_get_channel_number( Var *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Function either sets or returns the current record length of the */
+/* digitizer. When trying to set a record length that does not fit  */
+/* the possible settings the next larger is used instead.           */
+/*------------------------------------------------------------------*/
 
 Var *digitizer_record_length( Var *v )
 {
@@ -638,7 +640,7 @@ Var *digitizer_trigger_position( Var *v )
 /*----------------------------------------------------------------------*/
 /* This is not a function that users should usually call but a function */
 /* that allows other functions to check if a certain number stands for  */
-/* channel that can be used in measurements.                            */
+/* a channel that can be used in measurements.                          */
 /*----------------------------------------------------------------------*/
 
 Var *digitizer_meas_channel_ok( Var *v )
@@ -732,7 +734,7 @@ Var *digitizer_start_acquisition( Var *v )
 
 Var *digitizer_get_area( Var *v )
 {
-	return get_area( v, SET );
+	return get_area( v, tds540.w != NULL ? SET : UNSET );
 }
 
 Var *digitizer_get_area_fast( Var *v )
