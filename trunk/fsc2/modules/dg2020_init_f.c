@@ -25,6 +25,7 @@
 #include "dg2020_f.h"
 
 
+static void dg2020_init_print( FILE *fp );
 static void dg2020_basic_pulse_check( void );
 static void dg2020_basic_functions_check( void );
 static void dg2020_distribute_channels( void );
@@ -47,6 +48,47 @@ void dg2020_init_setup( void )
 	dg2020_basic_functions_check( );
 	dg2020_distribute_channels( );
 	dg2020_pulse_start_setup( );
+
+	if ( dg2020.dump_file != NULL )
+	{
+		dg2020_init_print( dg2020.dump_file );
+		dg2020_dump_channels( dg2020.dump_file );
+	}
+	if ( dg2020.show_file != NULL )
+	{
+		dg2020_init_print( dg2020.show_file );
+		dg2020_dump_channels( dg2020.show_file );
+	}
+}
+
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
+static void dg2020_init_print( FILE *fp )
+{
+	FUNCTION *f;
+	int i;
+
+
+	if ( fp == NULL )
+		return;
+
+	fprintf( fp, "TB: %g\nD: %ld\n===\n", dg2020.timebase,
+			 dg2020.neg_delay );
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = dg2020.function + i;
+
+		if ( ! f->is_needed || f->pod == NULL )
+			continue;
+
+		fprintf( fp, "%s:%d %ld\n", f->name, f->pod->self, f->delay );
+
+		if ( f->pod2 != NULL )
+			fprintf( fp, "%s:%d %ld\n", f->name, f->pod2->self, f->delay );
+	}
 }
 
 
@@ -83,7 +125,7 @@ static void dg2020_basic_pulse_check( void )
 		{
 			print( FATAL, "Function '%s' of pulse #%ld hasn't been declared "
 				   "in the ASSIGNMENTS section.\n",
-				   Function_Names[ p->function->self ], p->num );
+				   p->function->name, p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -134,7 +176,7 @@ static void dg2020_basic_pulse_check( void )
 		{
 			print( FATAL, "Pulse #%ld needs phase cycling but its function "
 				   "(%s) isn't associated with a phase function.\n",
-				   p->num, Function_Names[ p->function->self ] );
+				   p->num, p->function->name );
 			THROW( EXCEPTION );
 		}
 
@@ -194,7 +236,7 @@ static void dg2020_basic_functions_check( void )
 			if ( f->is_used && ! f->is_needed )
 			{
 				print( WARN, "No pulses have been assigned to function "
-					   "'%s'.\n", Function_Names[ i ] );
+					   "'%s'.\n", f->name );
 				f->is_used = UNSET;
 
 				for ( j = 0; j < f->num_channels; j++ )
@@ -216,8 +258,7 @@ static void dg2020_basic_functions_check( void )
 			if ( PSeq == NULL )
 			{
 				print( WARN, "Phase functions '%s' isn't needed, because no "
-					   "phase sequences have been defined.\n",
-					   Function_Names[ f->self ] );
+					   "phase sequences have been defined.\n", f->name );
 				f->is_used = UNSET;
 
 				for ( j = 0; j < f->num_channels; j++ )
@@ -235,8 +276,7 @@ static void dg2020_basic_functions_check( void )
 			if ( f->phase_func == NULL )
 			{
 				print( WARN, "Phase function '%s' isn't needed, because it's "
-					   "not associated with a function.\n",
-					   Function_Names[ f->self ] );
+					   "not associated with a function.\n", f->name );
 				f->is_used = UNSET;
 
 				for ( j = 0; j < f->num_channels; j++ )
@@ -254,7 +294,7 @@ static void dg2020_basic_functions_check( void )
 			if ( f->pod2 == NULL)
 			{
 				print( FATAL, "Function '%s' needs two pods assigned to it.\n",
-					   Function_Names[ i ] );
+					   f->name );
 				THROW( EXCEPTION );
 			}
 
@@ -264,8 +304,8 @@ static void dg2020_basic_functions_check( void )
 			{
 				print( FATAL, "Missing data on how to convert the pulse "
 					   "phases into pod outputs for function '%s'. Add a "
-					   "%s_SETUP command in the ASSIGNMENTS section.\n",
-						Function_Names[ i ], Function_Names[ i ] );
+					   "PHASE_SETUP command in the ASSIGNMENTS section.\n",
+						f->name );
 				THROW( EXCEPTION );
 			}
 		}
@@ -275,7 +315,7 @@ static void dg2020_basic_functions_check( void )
 		if ( f->pod == NULL )
 		{
 			print( FATAL, "No pod has been assigned to function '%s'.\n",
-				   Function_Names[ i ] );
+				   f->name );
 			THROW( EXCEPTION );
 		}
 
@@ -311,8 +351,7 @@ static void dg2020_basic_functions_check( void )
 			{
 				print( WARN, "Function '%s' is associated with phase function "
 					   "'%s' but none of its pulses need phase cycling.\n",
-						Function_Names[ f->self ],
-						Function_Names[ f->phase_func->self ] );
+						f->name, f->phase_func->name );
 
 				for ( j = 0; j < f->phase_func->num_channels; j++ )
 				{
@@ -338,7 +377,7 @@ static void dg2020_basic_functions_check( void )
 		if ( f->num_channels > f->num_needed_channels )
 			print( WARN, "For function '%s' only %d channel%s needed instead "
 				   "of the %d assigned to it.\n",
-				   Function_Names[ i ], f->num_needed_channels,
+				   f->name, f->num_needed_channels,
 				   f->num_needed_channels == 1 ? " is" : "s are",
 				   f->num_channels );
 
@@ -373,8 +412,7 @@ static void dg2020_basic_functions_check( void )
 		{
 			print( WARN, "Phase function '%s' isn't needed because function "
 				   "'%s' it is associated with is not used.\n",
-					Function_Names[ f->phase_func->self ],
-					Function_Names[ f->self ] );
+					f->phase_func->name, f->name );
 
 			for ( j = 0; j < f->phase_func->num_channels; j++ )
 			{

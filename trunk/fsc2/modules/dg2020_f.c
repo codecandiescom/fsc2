@@ -113,6 +113,9 @@ int dg2020_f_init_hook( void )
 	dg2020.is_grace_period = UNSET;
 	dg2020.is_max_seq_len = UNSET;
 
+	dg2020.dump_file = NULL;
+	dg2020.show_file = NULL;
+
 	dg2020.block[ 0 ].is_used = dg2020.block[ 1 ].is_used = UNSET;
 
 	for ( i = 0; i < MAX_PODS; i++ )
@@ -124,6 +127,7 @@ int dg2020_f_init_hook( void )
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
 		dg2020.function[ i ].self = i;
+		dg2020.function[ i ].name = Function_Names[ i ];
 		dg2020.function[ i ].is_used = UNSET;
 		dg2020.function[ i ].is_needed = UNSET;
 		dg2020.function[ i ].pod = NULL;
@@ -175,9 +179,31 @@ int dg2020_f_test_hook( void )
 	/* Check consistency of pulser settings and do everything to setup the
 	   pulser for the test run */
 
-	dg2020_IN_SETUP = SET;
-	dg2020_init_setup( );
-	dg2020_IN_SETUP = UNSET;
+	TRY
+	{
+		dg2020_IN_SETUP = SET;
+		dg2020_init_setup( );
+		dg2020_IN_SETUP = UNSET;
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		dg2020_IN_SETUP = UNSET;
+		if ( dg2020.dump_file )
+		{
+			fclose( dg2020.dump_file );
+			dg2020.dump_file = NULL;
+		}
+
+		if ( dg2020.show_file )
+		{
+			fclose( dg2020.show_file );
+			dg2020.show_file = NULL;
+		}
+
+		RETHROW( );
+	}
+
 
 	/* We need some somewhat different functions (or disable some) for setting
 	   of pulse properties */
@@ -200,6 +226,18 @@ int dg2020_f_test_hook( void )
 
 int dg2020_f_end_of_test_hook( void )
 {
+	if ( dg2020.dump_file != NULL )
+	{
+		fclose( dg2020.dump_file );
+		dg2020.dump_file = NULL;
+	}
+
+	if ( dg2020.show_file != NULL )
+	{
+		fclose( dg2020.show_file );
+		dg2020.show_file = NULL;
+	}
+
 	if ( ! dg2020_is_needed )
 		return 1;
 
@@ -318,6 +356,161 @@ Var *pulser_name( Var *v )
 {
 	v = v;
 	return vars_push( STR_VAR, DEVICE_NAME );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_show_pulses( Var *v )
+{
+	int pd[ 2 ];
+	pid_t pid;
+
+
+	v = v;
+
+	if ( FSC2_IS_CHECK_RUN )
+		return vars_push( INT_VAR, 1 );
+
+	if ( dg2020.show_file != NULL )
+		return vars_push( INT_VAR, 1 );
+
+	if ( pipe( pd ) == -1 )
+	{
+		if ( errno == EMFILE || errno == ENFILE )
+			print( FATAL, "Failure, running out of system resources.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( ( pid =  fork( ) ) < 0 )
+	{
+		if ( errno == ENOMEM || errno == EAGAIN )
+			print( FATAL, "Failure, running out of system resources.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	/* Here's the childs code */
+
+	if ( pid == 0 )
+	{
+		static char *cmd = NULL;
+
+
+		close( pd[ 1 ] );
+
+		if ( dup2( pd[ 0 ], STDIN_FILENO ) == -1 )
+		{
+			goto filter_failure;
+			close( pd[ 0 ] );
+		}
+
+		close( pd[ 0 ] );
+
+		TRY
+		{
+			cmd = get_string( "%s%sfsc2_pulses", bindir, slash( bindir ) );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			goto filter_failure;
+
+		execl( cmd, "fsc2_pulses", NULL );
+
+	filter_failure:
+
+		T_free( cmd );
+		_exit( EXIT_FAILURE );
+	}
+
+	/* And finally the code for the parent */
+
+	close( pd[ 0 ] );
+	dg2020.show_file = fdopen( pd[ 1 ], "w" );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_dump_pulses( Var *v )
+{
+	char *name;
+	char *m;
+	struct stat stat_buf;
+
+
+	v = v;
+
+	if ( FSC2_IS_CHECK_RUN )
+		return vars_push( INT_VAR, 1 );
+
+	if ( dg2020.dump_file != NULL )
+	{
+		print( WARN, "Pulse dumping is already switched on.\n" );
+		return vars_push( INT_VAR, 1 );
+	}
+
+	do
+	{
+		name = T_strdup( fl_show_fselector( "File for dumping pulses:", "./",
+											"*.pls", NULL ) );
+		if ( name == NULL || *name == '\0' )
+		{
+			T_free( name );
+			return vars_push( INT_VAR, 0 );
+		}
+
+		if  ( 0 == stat( name, &stat_buf ) )
+		{
+			m = get_string( "The selected file does already exist:\n%s\n"
+							"\nDo you really want to overwrite it?", name );
+			if ( 1 != show_choices( m, 2, "Yes", "No", NULL, 2 ) )
+			{
+				T_free( m );
+				name = CHAR_P T_free( name );
+				continue;
+			}
+			T_free( m );
+		}
+
+		if ( ( dg2020.dump_file = fopen( name, "w+" ) ) == NULL )
+		{
+			switch( errno )
+			{
+				case EMFILE :
+					show_message( "Sorry, you have too many open files!\n"
+								  "Please close at least one and retry." );
+					break;
+
+				case ENFILE :
+					show_message( "Sorry, system limit for open files "
+								  "exceeded!\n Please try to close some "
+								  "files and retry." );
+				break;
+
+				case ENOSPC :
+					show_message( "Sorry, no space left on device for more "
+								  "file!\n    Please delete some files and "
+								  "retry." );
+					break;
+
+				default :
+					show_message( "Sorry, can't open selected file for "
+								  "writing!\n       Please select a "
+								  "different file." );
+			}
+
+			name = CHAR_P T_free( name );
+			continue;
+		}
+	} while ( dg2020.dump_file == NULL );
+
+	T_free( name );
+
+	return vars_push( INT_VAR, 1 );
 }
 
 
@@ -564,8 +757,7 @@ Var *pulser_next_phase( Var *v )
 
 		if ( ! f->is_used && FSC2_MODE == TEST )
 		{
-			print( SEVERE, "Phase function '%s' is not used.\n",
-				   Function_Names[ f->self ] );
+			print( SEVERE, "Phase function '%s' is not used.\n", f->name );
 			return vars_push( INT_VAR, 0 );
 		}
 
@@ -630,8 +822,7 @@ Var *pulser_phase_reset( Var *v )
 
 		if ( ! f->is_used && FSC2_MODE == TEST )
 		{
-			print( SEVERE, "Phase function '%s' is not used.\n",
-				   Function_Names[ f->self ] );
+			print( SEVERE, "Phase function '%s' is not used.\n", f->name );
 			return vars_push( INT_VAR, 0 );
 		}
 

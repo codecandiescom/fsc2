@@ -83,7 +83,7 @@ bool dg2020_assign_function( int function, long pod )
 	if ( p->function != NULL )
 	{
 		print( FATAL, "Pod number %ld has already been assigned to function "
-			   "'%s'.\n", pod, Function_Names[ p->function->self ] );
+			   "'%s'.\n", pod, p->function->name );
 		THROW( EXCEPTION );
 	}
 
@@ -97,14 +97,14 @@ bool dg2020_assign_function( int function, long pod )
 			 f->self != PULSER_CHANNEL_PHASE_2 )
 		{
 			print( FATAL, "A pod has already been assigned to function "
-				   "'%s'.\n", Function_Names[ f->self ] );
+				   "'%s'.\n", f->name );
 			THROW( EXCEPTION );
 		}
 
 		if ( f->pod2 != NULL )
 		{
 			print( FATAL, "There have already been two pods assigned to "
-				   "function '%s'.\n", Function_Names[ f->self ] );
+				   "function '%s'.\n", f->name );
 			THROW( EXCEPTION );
 		}
 
@@ -139,12 +139,12 @@ bool dg2020_assign_channel_to_function( int function, long channel )
 		if ( c->function->self == function )
 		{
 			print( SEVERE, "Channel %ld is assigned twice to function '%s'.\n",
-				   channel, Function_Names[ c->function->self ] );
+				   channel, c->function->name );
 			return FAIL;
 		}
 
 		print( FATAL, "Channel %ld is already used for function '%s'.\n",
-			   channel, Function_Names[ c->function->self ] );
+			   channel, c->function->name );
 		THROW( EXCEPTION );
 	}
 
@@ -556,16 +556,14 @@ bool dg2020_set_phase_reference( int phase, int function )
 	if ( p->phase_func != NULL )
 	{
 		print( FATAL, "Phase function '%s' has already been associated with "
-			   "function '%s'.\n", Function_Names[ p->self ],
-			   Function_Names[ p->phase_func->self ] );
+			   "function '%s'.\n", p->name, p->phase_func->name );
 		THROW( EXCEPTION );
 	}
 
 	if ( f->phase_func != NULL )
 	{
 		print( FATAL, "Function '%s' has already been associated with phase "
-			   "function '%s'.\n", Function_Names[ f->self ],
-			   Function_Names[ f->phase_func->self ] );
+			   "function '%s'.\n", f->name, f->phase_func->name );
 		THROW( EXCEPTION );
 	}
 
