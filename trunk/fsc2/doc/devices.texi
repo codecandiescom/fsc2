@@ -155,6 +155,8 @@ Bruker ER032M Field Controller
 Berlin W-band magnet sweep power supply Keithley 228A
 @item ips20_4
 Berlin 360 GHz spectrometer Oxford magnet sweep power supply
+@item ips120_10
+Leiden 275 GHz spectrometer Oxford magnet power supply
 @item s_band_magnet_broad
 Frankfurt S-band magnet via homebuilt DAC, broad field range
 @item s_band_magnet_narrow
@@ -173,13 +175,13 @@ name of the gaussmeter has to appear @b{before} the magnet module entry
 in the @code{DEVICES} section. See the next section for the implemented
 gaussmeter and the related functions.
 
-All magnet power supplies (except the one used with the Oxford magnet
-for the @w{360 GHz} spectrometer) don't do continuous sweeps but the
-field current is stepped instead. Thus many of the functions discussed
-in the following don't expect sweep rates are but field (or current, see
-below) step sizes for defining a sweep. The only exception is the power
-supply for the Oxford magnet, here only continuous sweeps can be done
-and sweep rates must be specified.
+All magnet power supplies (except the ones used with the Oxford magnets)
+don't do continuous sweeps but the field current is instead stepped.
+Thus many of the functions discussed in the following don't expect sweep
+rates are but field (or current, see below) step sizes for defining a
+sweep. The only exception are the power supplies for the Oxford magnets,
+here only continuous sweeps can be done and sweep rates must be
+specified.
 
 If an @strong{AEG} magnet module is listed in the @code{DEVICES} section
 the program will try to calibrate the field sweep parameters at the
@@ -268,10 +270,13 @@ G}.
 Use current instead of field units for the Keithley 228A power supply
 (@code{keithley228a}).
 
-Because the Oxford magnet sweep power supply (@code{ips20_4}) does
-continuous sweeps (instead of simulating a sweep by stepping the
+Because the Oxford IPS20-4 magnet sweep power supply (@code{ips20_4})
+does continuous sweeps (instead of simulating a sweep by stepping the
 current) the second argument isn't the sweep step size but must be the
 sweep rate in units of @code{A/s}.
+
+Sinilarily, for the Oxford IPS120-10 power suppky (@code{ips120_10})
+the second argument is the sweep rate in @code{G/s}.
 
 For the @strong{Bruker ER032M} field controller for some combinations of
 the start field and field step size deviations between the requested
@@ -326,8 +331,8 @@ smaller than the precision of the gaussmeter the precision of the
 gaussmeter is used instead. The function can only be called in the
 @code{EXPERIMENT} section.
 
-For the Oxford magnet sweep power supply (@code{ips20_4}) this function will
-automatically stop a running sweep.
+For both the Oxford magnet sweep power supplies (@code{ips20_4} and
+@code{ips120_10}) this function will automatically stop a running sweep.
 
 For the @strong{Bruker ER032M} field controller setting a field with
 this function while also having initialized the magnet using
@@ -359,8 +364,9 @@ reliable) not to use the sweep functions at all but the
 @code{set_field()} function (which always checks and if necessary
 re-adjusts the field if necessray) in these cases instead.
 
-This function is not available for the Oxford sweep power supply, module
-@code{ips20_4}. Use the function @code{magnet_sweep} instead.
+This function is not available for the Oxford power supplyies (modules
+@code{ips20_4} and @code{ips120_10}). Use the function
+@code{magnet_sweep} instead.
 
 
 @anchor{sweep_down}
@@ -373,8 +379,9 @@ defined in @code{magnet_setup()}. The function can only be called in the
 
 The function returns the new field value.
 
-This function is not available for the Oxford magnet sweep power supply
-(@code{ips20_4}). Use the function @code{magnet_sweep} instead.
+This function is not available for the Oxford magnet power supplies
+(modules @code{ips20_4} and @code{ips120_10}). Use the function
+@code{magnet_sweep} instead.
 
 
 @anchor{reset_field}
@@ -385,8 +392,8 @@ in @code{magnet_setup()} (which has to be called before).
 
 The function returns the new field value.
 
-Please note that for the Oxford magnet sweep power supply
-(@code{ips20_4}) calling this function also automatically stops a
+Please note that for the Oxford magnet power supplies (@code{ips20_4}
+and @code{ips120_10}) calling this function also automatically stops a
 running sweep.
 
 The function can only be used in the @code{EXPERIMENT} section.
@@ -438,11 +445,12 @@ The function can only be used in the @code{PREPARATIONS} section.
 @anchor{magnet_sweep}
 @item magnet_sweep()
 @findex magnet_sweep()
-This function is only available for the Oxford magnet sweep power supply
-(@code{ips20_4}) to control its continuous sweep. It can be called with
-either an integer argument of @code{1} to start a sweep to higher field
-and current values, an argument of @code{-1} to start a downward sweep
-or, finally, an argument of @code{0} to stop a running sweep.
+This function is only available for the Oxford magnet sweep power
+supplies (@code{ips20_4} and @code{ips120_10}) to control their
+continuous sweep. It can be called with either an integer argument of
+@code{1} to start a sweep to higher field and current values, an
+argument of @code{-1} to start a downward sweep or, finally, an argument
+of @code{0} to stop a running sweep.
 
 To be able to do a sweep a sweep rate must have been set. This can be
 either done by a call of the function @code{magnet_setup()} (see above)
@@ -463,27 +471,29 @@ The function can only be used in the @code{EXPERIMENT} section.
 @anchor{magnet_sweep_rate}
 @item magnet_sweep_rate()
 @findex magnet_sweep_rate()
-This function is only available for the Oxford magnet sweep power supply
-(@code{ips20_4}) to set or query the sweep rate for continuous sweeps.
-If no argument is passed to the function the currently set sweep rate is
-returned. Otherwise a (positive) sweep rate in units of @code{A/s} must be
-passed to the function.
+This function is only available for the Oxford magnet power supplies
+(@code{ips20_4} and @code{ips120_10}) to set or query the sweep rate for
+continuous sweeps.  If no argument is passed to the function the
+currently set sweep rate is returned. Otherwise a (positive) sweep rate
+in units of either @code{A/s} (for the IPS20-4) or @code{G/s) (for the
+IPS120_19) must be passed to the function.
 
 
 @anchor{magnet_goto_field_on_end}
 @item magnet_goto_field_on_end()
 @findex magnet_goto_field_on_end()
-This function is only available for the Oxford magnet sweep power supply
-(@code{ips20_4}) and the S-band field drivers
+This function is only available for the Oxford magnet power supplies
+(@code{ips20_4} and @code{ips120_10}) and the S-band field modules
 @code{s_band_magnet_narrow} and @code{s_band_magnet_broad}. It allows to
-set a target current that the magnet will be swept to @b{after} the
-experiment has ended (per default the magnet would stay at the last
-field position for the Oxford magnet supply or move to the middle of the
-allowed field range for both the other drivers). This function can be
+set a target current or field that the magnet will be swept to @b{after}
+the experiment has ended (per default the magnet would stay at the last
+field position for the Oxford magnet supplies or move to the middle of
+the allowed field range for the S-band drivers). This function can be
 called in the @code{PREPARATION} as well the @code{EXPERIMENT} section
-and returns the target current the magnet will sweep to after the end of
-the experiment.  If called more than once the current of the last call
-will be used.
+and returns for the IPS20-4 the target current and for the three other
+modules the target field the magnet will sweept to after the end of the
+experiment.  If called more than once the current or field of the last
+call will be used.
 
 
 @anchor{magnet_B0}
