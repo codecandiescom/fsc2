@@ -369,6 +369,9 @@ static RULBUS_DELAY_CARD *rulbus_delay_card_find( int handle )
 	int i;
 
 
+	if ( handle < 0 )
+		return NULL;
+
 	for ( i = 0; i < rulbus_num_delay_cards; i++ )
 		if ( handle == rulbus_delay_card[ i ].handle )
 			return rulbus_delay_card + i;
