@@ -90,11 +90,13 @@ typedef struct _F_ {
 
 } FUNCTION;
 
+
 typedef struct _C_ {
 	int self;
 	FUNCTION *function;
 	bool needs_update;
 } CHANNEL;
+
 
 typedef struct {
 	int device;              // GPIB number of the device
