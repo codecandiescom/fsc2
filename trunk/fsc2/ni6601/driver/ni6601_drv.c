@@ -56,6 +56,7 @@ struct file_operations ni6601_file_ops = {
 };
 
 
+
 /*-------------------------------------------------------*/
 /* Function that gets executed when the module is loaded */
 /*-------------------------------------------------------*/
@@ -174,7 +175,7 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 	board->mite_phys = pci_resource_start( dev, 0 );
 	board->mite_len  = pci_resource_len( dev, 0 );
 	if ( ( board->mite = ioremap( board->mite_phys, board->mite_len ) )
-	     == NULL ) {
+								    == NULL ) {
 		PDEBUG( "Can't remap MITE memory range for board %d\n",
 			board - boards );
 		goto init_failure;
@@ -183,7 +184,7 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 	board->addr_phys = pci_resource_start( dev, 1 );
 	board->addr_len  = pci_resource_len( dev, 1 );
 	if ( ( board->addr = ioremap( board->addr_phys, board->addr_len ) )
-	     == NULL ) {
+	     							    == NULL ) {
 		PDEBUG( "Can't remap TIO memory range for board %d\n",
 			board - boards );
 		goto init_failure;
@@ -193,6 +194,7 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 
 	writel( ( board->addr_phys & 0xFFFFFF00L ) | 0x80,
 		board->mite + 0xC0 );
+
 	/* Request the interrupt used by the board */
 
 	if ( request_irq( dev->irq, ni6601_irq_handler, SA_SHIRQ,
@@ -209,6 +211,7 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 		board->irq_enabled[ i ] = 0;
 		board->TC_irq_raised[ i ] = 0;
 	}
+
 	init_waitqueue_head( &board->waitqueue );
 
 	spin_lock_init( &board->spinlock );
@@ -496,24 +499,27 @@ static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
 
 	if ( cs.wait_for_end ) {
 
-		int oc = cs.counter + ( cs.counter & 1 ) ? -1 : 1;
+		int oc = cs.counter + ( cs.counter & 1 ? -1 : 1 );
 
 		ni6601_irq_enable( board, oc );
 
 		if ( readw( board->regs.joint_status[ oc ] ) &
 		     Gi_COUNTING( oc ) )
-			wait_event_interruptible( board->waitqueue,
-						  board->TC_irq_raised[ oc ] );
+			interruptible_sleep_on_timeout( &board->waitqueue, 1 );
+
+//			wait_event_interruptible( board->waitqueue,
+//						  board->TC_irq_raised[ oc ] );
 
 		ni6601_irq_disable( board, oc );
+
+		writew( G1_RESET | G0_RESET,
+			board->regs.joint_reset[ cs.counter ] );
 
 		if ( signal_pending( current ) ) {
 			PDEBUG( "Aborted by signal\n" );
 			return -EINTR;
 		}
 
-		writew( G1_RESET | G0_RESET,
-			board->regs.joint_reset[ cs.counter ] );
 	}
 
 	/* Read the SW save register to get the current count value */
@@ -524,11 +530,11 @@ static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
 	   readings are identical */
 
 	if ( readw( board->regs.joint_status[ cs.counter ] ) &
-	     Gi_ARMED( cs.counter & 1 ) )
+	     Gi_ARMED( cs.counter ) )
 		while ( cs.count != ( next_val =
 				 readl( board->regs.sw_save[ cs.counter ] ) ) )
 			cs.count = next_val;
-
+	
 	if ( copy_to_user( arg, &cs, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
 		return -EACCES;
@@ -602,7 +608,7 @@ static int ni6601_start_pulses( Board *board, NI6601_PULSES *arg )
 		ni6601_disable_out( board, NI6601_OUT( p.counter ) );
 
 	/* Set the count for the duration of the high and the low voltage
-	   phase of the pulse (after suntracting 1) */
+	   phase of the pulse (after subtracting 1) */
 
 	writel( p.high_ticks - 1, board->regs.load_a[ p.counter ] );
 	writel( p.low_ticks - 1,  board->regs.load_b[ p.counter ] );
@@ -641,7 +647,7 @@ static int ni6601_start_counting( Board *board, NI6601_COUNTER *arg )
 	u16 source_bits;
 	u16 mode_bits = OUTPUT_MODE_TC;
 	int use_gate;
-	u16 cmd_bits = ALWAYS_UP | LOAD | ARM;
+	u16 cmd_bits = ALWAYS_UP | LOAD;// | ARM;
 
 
 	if ( copy_from_user( &c, arg, sizeof *arg ) ) {
@@ -689,10 +695,13 @@ static int ni6601_start_counting( Board *board, NI6601_COUNTER *arg )
 
 	writew( mode_bits, board->regs.mode[ c.counter ] );
 
-	/* Load counter from A, set counting direction and arm */
+	/* Load counter from A, set counting direction etc., then arm
+	   (arming while loading does not seems to work for some of the
+	   counters...) */
 
 	writel( 0UL, board->regs.load_a[ c.counter ] );
 	writew( cmd_bits, board->regs.command[ c.counter ] );
+	writew( cmd_bits | ARM, board->regs.command[ c.counter ] );
 
 	return 0;
 }
@@ -716,7 +725,7 @@ static int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg )
 	/* Test if the counter is armed */
 
 	a.state =  ( readw( board->regs.joint_status[ a.counter ] ) &
-		     Gi_ARMED( a.counter & 1 ) ) ? 1 : 0;
+		     Gi_ARMED( a.counter ) ) ? 1 : 0;
 	
 	if ( copy_to_user( arg, &a, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
@@ -734,9 +743,13 @@ static int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg )
 static void ni6601_irq_enable( Board *board, int counter )
 {
 	board->TC_irq_raised[ counter ] = 0;
-	writew( Gi_TC_INTERRUPT_ENABLE( counter ),
-		board->regs.irq_enable[ counter ] );
-	board->irq_enabled[ counter ] = 1;
+	if ( ! board->irq_enabled[ counter ] )
+	{
+		writew( Gi_TC_INTERRUPT_ACK, board->regs.irq_ack[ counter ] );
+		writew( Gi_TC_INTERRUPT_ENABLE( counter ),
+			board->regs.irq_enable[ counter ] );
+		board->irq_enabled[ counter ] = 1;
+	}
 }
 
 
@@ -746,8 +759,13 @@ static void ni6601_irq_enable( Board *board, int counter )
 
 static void ni6601_irq_disable( Board *board, int counter )
 {
-	writew( 0, board->regs.irq_enable[ counter ] );
-	board->irq_enabled[ counter ] = 0;
+	if ( board->irq_enabled[ counter ] )
+	{
+		writew( 0, board->regs.irq_enable[ counter ] );
+		writew( Gi_TC_INTERRUPT_ACK,
+			board->regs.irq_ack[ counter ] );
+		board->irq_enabled[ counter ] = 0;
+	}
 }
 
 
@@ -767,12 +785,15 @@ static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
 		return;
 	}
 
-	PDEBUG( "Got interrupt\n" );
-
 	for ( i = 0; i < 4; i++ )
 		if ( board->irq_enabled[ i ] &&
 		     mask == ( readw( board->regs.status[ i ] ) & mask ) )
-			board->TC_irq_raised[ i ] = 1;
+		{
+			PDEBUG( "Interrupt for counter %d\n", i );
+			writew( Gi_TC_INTERRUPT_ACK,
+				board->regs.irq_ack[ i ] );
+			board->TC_irq_raised[ i ]++;
+		}
 }
 
 
