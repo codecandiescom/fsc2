@@ -343,7 +343,7 @@ The approach requires some channels of communication between the two
 processes. Because the user interaction task has to draw the new data
 the execution task will have to send the newly acquired data to the user
 interaction task and for the other way round the user interaction task
-must be able to stop the experiment when the user hit the @code{Stop}
+must be able to stop the experiment when the user hits the @code{Stop}
 button. But this is done in a way that usually can't be impeded by user
 interruptions. The only exceptions are cases where the further execution
 of the experiment depends on user input, e.g.@: if within the experiment
@@ -355,24 +355,25 @@ user interaction task) and the child process (the task running the
 experiment) is basically a one-way communication -- the child process
 must pass newly acquired data to be drawn to the parent process. The
 child processes stores the new data (together with the information where
-they are to be drawn) in a shared memory segment and stores the the key
-for this memory segment in an used slot in a buffer (that is also
+they are to be drawn) in a shared memory segment and stores the key
+for this memory segment in a still unused slot in a buffer (that also
 resides in shared memory). Then it sends the parent process a signal to
-inform it that new data are available and can continue immediately.
+inform it that new data are available and continues immediately.
 
 
 The parent, one the other hand, gets interrupted immediately by the
-signal (even while it is doing some other tasks on behalf of the user)
-and can deal with the new data whenever it has the time to do so.
+signal (even while it is doing some other tasks on behalf of the user),
+removes and stores the key for the memory segment, and can now deal with
+the new data whenever it has the time to do so.
 
 
 Problems can arise only if the child process creates new data at a much
-higher rate than the parent can deal with them, in which case the buffer
-for segment keys would get filled up@footnote{The buffer is is guarded
+higher rate than the parent can accept them, in which case the buffer
+for memory segment keys would fill up@footnote{The buffer is is guarded
 against overflows by a semaphore that is initialized to the number of
 slots in the buffer and on which the child process does a down operation
 before writing data into the buffer while the parent process posts it
-after removing an item.}. Only in this case the child process would have
+after removing an item.}. Only in this case the child process will have
 to halt the experiment until the parent empties some of the slots for
 keys in the buffer. But, fortunately, in practice this rarely
 happens. And as a further safeguard against this happening the parent is

@@ -211,11 +211,11 @@ will repeat the pulse sequence at the highest possible rate.
 
 For the @strong{Bruker EP385} pulser the highest repetition frequency is
 about @w{777.5 Hz} (when using the internal clock, otherwise multiply
-the external clocks oscillation period by 160768 to get the exact length
-of the repeat time). Repetition times can be only set in increments of
-@w{102.4 us} of the shortest time (or in increments of 12800 times the
-external clocks oscillation period). If necessary, repetition
-frequencies are set to the next lower allowed value.
+the external clocks oscillation period by 160768 to compute the exact
+length of the minimum repeat time). Repetition times can be only set in
+increments of @w{102.4 us} of the shortest repeat time (or in increments
+of 12800 times the external clocks oscillation period). If necessary,
+repetition frequencies are set to the next lower allowed value.
 
 
 On the other hand, when using an external trigger one may want to set
