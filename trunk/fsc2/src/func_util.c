@@ -261,7 +261,7 @@ Var *f_wait( Var *v )
 		return vars_push( INT_VAR, do_quit ? 0 : 1 );
 	}
 
-	if ( how_long > LONG_MAX )
+	if ( how_long > ( double ) LONG_MAX )
 	{
 		eprint( FATAL, "%s:%ld: Time of more that %ld seconds as argument "
 				"of function %s().\n", Fname, Lc, LONG_MAX, Cur_Func );
@@ -317,7 +317,7 @@ Var *f_wait( Var *v )
 	{
 		can_jmp_alrm = 1;
 		setitimer( ITIMER_REAL, &sleepy, NULL );
-		for( ; ; )
+		while ( 1 )
 			pause( );
 	}
 

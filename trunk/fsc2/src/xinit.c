@@ -7,22 +7,25 @@
 #include <X11/Xresource.h>
 
 
+static int main_form_close_handler( FL_FORM *a, void *b );
 static void set_up_app_options( FL_CMD_OPT app_opt[ ] );
 static int fsc2_x_error_handler( Display *d, XErrorEvent *err );
 static int fsc2_xio_error_handler( Display *d );
 
 
 #if ( SIZE == HI_RES )
-#define WIN_MIN_WIDTH    200
-#define WIN_MIN_HEIGHT   370
+#define WIN_MIN_WIDTH    220
+#define WIN_MIN_HEIGHT   570
 #define NORMAL_FONT_SIZE FL_LARGE_SIZE
 #define SMALL_FONT_SIZE  FL_SMALL_SIZE
+#define TOOLS_FONT_SIZE  FL_MEDIUM_FONT
 #define SLIDER_SIZE      0.075
 #else
 #define WIN_MIN_WIDTH    200
 #define WIN_MIN_HEIGHT   320
 #define NORMAL_FONT_SIZE FL_SMALL_SIZE
 #define SMALL_FONT_SIZE  FL_TINY_SIZE
+#define TOOLS_FONT_SIZE  FL_SMALL_FONT
 #define SLIDER_SIZE      0.1
 #endif
 
@@ -127,11 +130,11 @@ bool xforms_init( int *argc, char *argv[] )
 	/* Set default font sizes */
 
 	xcntl.browserFontSize = NORMAL_FONT_SIZE;
-	xcntl.buttonFontSize  = NORMAL_FONT_SIZE;
-	xcntl.inputFontSize   = NORMAL_FONT_SIZE;
-	xcntl.labelFontSize   = NORMAL_FONT_SIZE;
-	xcntl.choiceFontSize  = NORMAL_FONT_SIZE;
-	xcntl.sliderFontSize  = NORMAL_FONT_SIZE;
+	xcntl.buttonFontSize  = TOOLS_FONT_SIZE;
+	xcntl.inputFontSize   = TOOLS_FONT_SIZE;
+	xcntl.labelFontSize   = TOOLS_FONT_SIZE;
+	xcntl.choiceFontSize  = TOOLS_FONT_SIZE;
+	xcntl.sliderFontSize  = TOOLS_FONT_SIZE;
 
 	/* Set the default font size for browsers */
 

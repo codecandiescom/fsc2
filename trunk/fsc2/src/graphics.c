@@ -49,7 +49,6 @@ extern FL_resource xresources[ ];
 #define DEFAULT_AXISFONT_1 "*-lucida-bold-r-normal-sans-14-*"
 #define DEFAULT_AXISFONT_2 "lucidasanstypewriter-14"
 #define DEFAULT_AXISFONT_3 "9x15"
-#define PIXLABEL_FONTSIZE  FL_SMALL_SIZE
 #else
 #define WIN_MIN_1D_WIDTH   300
 #define WIN_MIN_2D_WIDTH   350
@@ -57,12 +56,11 @@ extern FL_resource xresources[ ];
 #define DEFAULT_AXISFONT_1 "*-lucida-bold-r-normal-sans-10-*"
 #define DEFAULT_AXISFONT_2 "lucidasanstypewriter-10"
 #define DEFAULT_AXISFONT_3 "9x10"
-#define PIXLABEL_FONTSIZE  FL_TINY_SIZE
 #endif
 
 
 /*----------------------------------------------------------------------*/
-/* Initialises and shows the window for displaying measurement results. */
+/* Initializes and shows the window for displaying measurement results. */
 /*----------------------------------------------------------------------*/
 
 void start_graphics( void )
@@ -96,7 +94,6 @@ void start_graphics( void )
 		fl_set_pixmapbutton_file( run_form->undo_button, pixmap_file );
 		fl_set_object_helper( run_form->undo_button,
 							  "Undo last rescaling operation" );
-		fl_set_object_lsize( run_form->undo_button, PIXLABEL_FONTSIZE );
 
 		if ( G.dim == 2 )
 		{
@@ -116,7 +113,6 @@ void start_graphics( void )
 	{
 		fl_set_pixmapbutton_file( run_form->print_button, pixmap_file );
 		fl_set_object_helper( run_form->print_button, "Print window" );
-		fl_set_object_lsize( run_form->print_button, PIXLABEL_FONTSIZE );
 
 		if ( G.dim == 2 )
 		{

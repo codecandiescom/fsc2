@@ -21,11 +21,12 @@
 
 
 static void cut_calc_curve( int dir, long index, bool has_been_shown );
+static void G_init_cut_curve( void );
+static void cut_setup_canvas( Canvas *c, FL_OBJECT *obj );
+static void cut_canvas_off( Canvas *c, FL_OBJECT *obj );
+static int cut_form_close_handler( FL_FORM *a, void *b );
 static void cut_recalc_XPoints( void );
 static void cut_integrate_point( long index, double val );
-static void G_init_cut_curve( void );
-static int cut_form_close_handler( FL_FORM *a, void *b );
-static void cut_setup_canvas( Canvas *c, FL_OBJECT *obj );
 static int cut_canvas_handler( FL_OBJECT *obj, Window window, int w, int h,
 							   XEvent *ev, void *udata );
 static void cut_reconfigure_window( Canvas *c, int w, int h );
@@ -35,7 +36,6 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 								 XEvent *ev, Canvas *c );
 static void cut_motion_handler( FL_OBJECT *obj, Window window,
 								XEvent *ev, Canvas *c );
-static void cut_canvas_off( Canvas *c, FL_OBJECT *obj );
 static void redraw_cut_canvas( Canvas *c );
 static void repaint_cut_canvas( Canvas * );
 static void redraw_cut_axis( int coord );
@@ -138,9 +138,6 @@ void cut_show( int dir, long index )
 
 		if ( cut_has_been_shown )
 		{
-			cut_x += border_offset_x - 1;
-			cut_y += border_offset_y - 1;
-
 			fl_set_form_geometry( cut_form->cut, cut_x, cut_y, cut_w, cut_h );
 			needs_pos = SET;
 		}
@@ -159,9 +156,13 @@ void cut_show( int dir, long index )
 		cut_setup_canvas( &G.cut_canvas, cut_form->cut_canvas );
 
 		G_init_cut_curve( );
+
 	}
 	else if ( ! is_mapped )
+	{
 		XMapWindow( G.d, cut_form->cut->window );
+		XMoveWindow( G.d, cut_form->cut->window, cut_x + 1, cut_y + 1 );
+	}
 
 	fl_raise_form( cut_form->cut );
 
@@ -223,6 +224,329 @@ void cut_show( int dir, long index )
 	/* Draw the curve and the axes */
 
 	redraw_all_cut_canvases( );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static void cut_setup_canvas( Canvas *c, FL_OBJECT *obj )
+{
+	XSetWindowAttributes attributes;
+	FL_HANDLE_CANVAS ch = cut_canvas_handler;
+
+
+	c->obj = obj;
+
+	/* We need to make sure the canvas hasn't a size less than 1 otherwise
+	   hell will break loose... */
+
+	if ( obj->w > 0 )
+		c->w = obj->w;
+	else
+		c->w = 1;
+	if ( obj->h > 0 )
+		c->h = obj->h;
+	else
+		c->h = 1;
+
+	create_pixmap( c );
+
+	fl_add_canvas_handler( c->obj, Expose, ch, ( void * ) c );
+
+	if ( G.is_init )
+	{
+		attributes.backing_store = NotUseful;
+		attributes.background_pixmap = None;
+		XChangeWindowAttributes( G.d, FL_ObjWin( c->obj ),
+								 CWBackingStore | CWBackPixmap,
+								 &attributes );
+		c->is_box = UNSET;
+
+		fl_add_canvas_handler( c->obj, ConfigureNotify, ch, ( void * ) c );
+		fl_add_canvas_handler( c->obj, ButtonPress, ch, ( void * ) c );
+		fl_add_canvas_handler( c->obj, ButtonRelease, ch, ( void * ) c );
+		fl_add_canvas_handler( c->obj, MotionNotify, ch, ( void * ) c );
+
+		/* Get motion events only when first or second button is pressed
+		   (this got to be set *after* requesting motion events) */
+
+		fl_remove_selected_xevent( FL_ObjWin( obj ),
+								   PointerMotionMask | PointerMotionHintMask |
+			                       ButtonMotionMask );
+		fl_add_selected_xevent( FL_ObjWin( obj ),
+								Button1MotionMask | Button2MotionMask );
+
+		c->font_gc = XCreateGC( G.d, FL_ObjWin( obj ), 0, 0 );
+		XSetForeground( G.d, c->font_gc, fl_get_pixel( FL_BLACK ) );
+		XSetFont( G.d, c->font_gc, G.font->fid );
+
+		XSetForeground( G.d, c->box_gc, fl_get_pixel( FL_RED ) );
+
+		if ( c == &G.cut_canvas )
+			XSetForeground( G.d, c->gc, fl_get_pixel( FL_BLACK ) );
+	}
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+static void cut_canvas_off( Canvas *c, FL_OBJECT *obj )
+{
+	FL_HANDLE_CANVAS ch = cut_canvas_handler;
+
+
+	fl_remove_canvas_handler( obj, Expose, ch );
+
+	fl_remove_canvas_handler( obj, ConfigureNotify, ch );
+	fl_remove_canvas_handler( obj, ButtonPress, ch );
+	fl_remove_canvas_handler( obj, ButtonRelease, ch );
+	fl_remove_canvas_handler( obj, MotionNotify, ch );
+
+	XFreeGC( G.d, c->font_gc );
+
+	delete_pixmap( c );
+
+	G.is_cut = UNSET;
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+void G_init_cut_curve( void )
+{
+	Curve_1d *cv = &G.cut_curve;
+	unsigned int depth;
+	int i;
+
+
+	/* Create cursors */
+
+	cur_1 = fl_create_bitmap_cursor( cursor_1_bits, cursor_1_bits,
+									 cursor_1_width, cursor_1_height,
+									 cursor_1_x_hot, cursor_1_y_hot );
+	cur_2 = fl_create_bitmap_cursor( cursor_2_bits, cursor_2_bits,
+									 cursor_2_width, cursor_2_height,
+									 cursor_2_x_hot, cursor_2_y_hot );
+	cur_3 = fl_create_bitmap_cursor( cursor_3_bits, cursor_3_bits,
+									 cursor_3_width, cursor_3_height,
+									 cursor_3_x_hot, cursor_3_y_hot );
+	cur_4 = fl_create_bitmap_cursor( cursor_4_bits, cursor_4_bits,
+									 cursor_4_width, cursor_4_height,
+									 cursor_4_x_hot, cursor_4_y_hot );
+	cur_5 = fl_create_bitmap_cursor( cursor_5_bits, cursor_5_bits,
+									 cursor_5_width, cursor_5_height,
+									 cursor_5_x_hot, cursor_5_y_hot );
+	cur_6 = fl_create_bitmap_cursor( cursor_6_bits, cursor_6_bits,
+									 cursor_6_width, cursor_6_height,
+									 cursor_6_x_hot, cursor_6_y_hot );
+	cur_7 = fl_create_bitmap_cursor( cursor_7_bits, cursor_7_bits,
+									 cursor_7_width, cursor_7_height,
+									 cursor_7_x_hot, cursor_7_y_hot );
+	cur_8 = fl_create_bitmap_cursor( cursor_8_bits, cursor_8_bits,
+									 cursor_8_width, cursor_8_height,
+									 cursor_8_x_hot, cursor_8_y_hot );
+	CG.cur_1 = cur_1;
+	CG.cur_2 = cur_2;
+	CG.cur_3 = cur_3;
+	CG.cur_4 = cur_4;
+	CG.cur_5 = cur_5;
+	CG.cur_6 = cur_6;
+	CG.cur_7 = cur_7;
+	CG.cur_8 = cur_8;
+
+	fl_set_cursor_color( CG.cur_1, FL_RED, FL_WHITE	);
+	fl_set_cursor_color( CG.cur_2, FL_RED, FL_WHITE	);
+	fl_set_cursor_color( CG.cur_3, FL_RED, FL_WHITE	);
+	fl_set_cursor_color( CG.cur_4, FL_RED, FL_WHITE	);
+	fl_set_cursor_color( CG.cur_5, FL_RED, FL_WHITE	);
+	fl_set_cursor_color( CG.cur_6, FL_RED, FL_WHITE	);
+	fl_set_cursor_color( CG.cur_7, FL_RED, FL_WHITE	);
+	fl_set_cursor_color( CG.cur_8, FL_RED, FL_WHITE	);
+
+	/* Allocate memory for the curve and its data */
+
+	cv->points = NULL;
+	cv->xpoints = NULL;
+
+	/* Create a GC for drawing the curve and set its colour */
+
+	cv->gc = XCreateGC( G.d, G.cut_canvas.pm, 0, 0 );
+	XSetForeground( G.d, cv->gc, fl_get_pixel( G.colors[ G.active_curve ] ) );
+
+	/* Create pixmaps for the out-of-range arrows (in the colors associated
+	   with the four possible curves) */
+
+	depth = fl_get_canvas_depth( G.cut_canvas.obj );
+
+	for ( i = 0; i < MAX_CURVES; i++ )
+	{
+		CG.up_arrows[ i ] =
+			XCreatePixmapFromBitmapData( G.d, G.cut_canvas.pm, up_arrow_bits,
+										 up_arrow_width, up_arrow_height,
+										 fl_get_pixel( G.colors[ i ] ),
+										 fl_get_pixel( FL_BLACK ), depth );
+		CG.up_arrow_w = up_arrow_width;
+		CG.up_arrow_h = up_arrow_width;
+
+		CG.down_arrows[ i ] =
+			XCreatePixmapFromBitmapData( G.d, G.cut_canvas.pm, down_arrow_bits,
+										 down_arrow_width, down_arrow_height,
+										 fl_get_pixel( G.colors[ i ] ),
+										 fl_get_pixel( FL_BLACK ), depth );
+		CG.down_arrow_w = down_arrow_width;
+		CG.down_arrow_h = down_arrow_width;
+
+		CG.left_arrows[ i ] =
+			XCreatePixmapFromBitmapData( G.d, G.cut_canvas.pm, left_arrow_bits,
+										 left_arrow_width, left_arrow_height,
+										 fl_get_pixel( G.colors[ i ] ),
+										 fl_get_pixel( FL_BLACK ), depth );
+		CG.left_arrow_w = left_arrow_width;
+		CG.left_arrow_h = left_arrow_width;
+
+		CG.right_arrows[ i ] = 
+			XCreatePixmapFromBitmapData( G.d, G.cut_canvas.pm,
+										 right_arrow_bits, right_arrow_width,
+										 right_arrow_height,
+										 fl_get_pixel( G.colors[ i ] ),
+										 fl_get_pixel( FL_BLACK ), depth );
+		CG.right_arrow_w = right_arrow_width;
+		CG.right_arrow_h = right_arrow_width;
+
+		CG.is_fs[ i ] = SET;
+		CG.has_been_shown[ i ] = UNSET;
+		CG.can_undo[ i ] = UNSET;
+	}
+
+	/* Set the pixmaps for the out-of-range arrow to the pixmaps with the
+	   color associated with the currently displayed curve */
+
+	cv->up_arrow    = CG.up_arrows[    G.active_curve ];
+	cv->down_arrow  = CG.down_arrows[  G.active_curve ];
+	cv->left_arrow  = CG.left_arrows[  G.active_curve ];
+	cv->right_arrow = CG.right_arrows[ G.active_curve ];
+
+	/* Create a GC for the font and set the appropriate colour */
+
+	cv->font_gc = XCreateGC( G.d, FL_ObjWin( G.cut_canvas.obj ), 0, 0 );
+	if ( G.font != NULL )
+		XSetFont( G.d, cv->font_gc, G.font->fid );
+	XSetForeground( G.d, cv->font_gc,
+					fl_get_pixel( G.colors[ G.active_curve ] ) );
+	XSetBackground( G.d, cv->font_gc, fl_get_pixel( FL_BLACK ) );
+
+	CG.nx = 0;
+
+	fl_set_object_shortcutkey( cut_form->top_button, XK_Page_Up );
+	fl_set_object_shortcutkey( cut_form->bottom_button, XK_Page_Down );
+
+	/* The cut windows y-axis is always the same as the promary windows
+	   z-axis, so we can re-use the label */
+
+	if ( G.label[ Z ] != NULL && G.font != NULL )
+	{
+		G.label_pm[ Y + 3 ] = G.label_pm[ Z ];
+		G.label_w[ Y + 3 ]  = G.label_w[ Z ];
+		G.label_h[ Y + 3 ]  = G.label_h[ Z ];
+	}
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+static int cut_form_close_handler( FL_FORM *a, void *b )
+{
+	a = a;
+	b = b;
+
+	cut_close_callback( cut_form->cut_close_button, 0 );
+	return FL_IGNORE;
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+void cut_form_close( void )
+{
+	int i;
+	Curve_1d *cv = &G.cut_curve;
+
+
+	if ( ! is_shown )
+		return;
+
+	/* Get rid of canvas related stuff (needs to be done *before*
+	   hiding the form) */
+
+	cut_canvas_off( &G.cut_x_axis, cut_form->cut_x_axis );
+	cut_canvas_off( &G.cut_y_axis, cut_form->cut_y_axis );
+	cut_canvas_off( &G.cut_z_axis, cut_form->cut_z_axis );
+	cut_canvas_off( &G.cut_canvas, cut_form->cut_canvas );
+
+	/* Deallocate the pixmaps for the out-of-range arrows */
+
+	for ( i = 0; i < MAX_CURVES; i++ )
+	{
+		XFreePixmap( G.d, CG.up_arrows[ i ] );
+		XFreePixmap( G.d, CG.down_arrows[ i ] );
+		XFreePixmap( G.d, CG.left_arrows[ i ] );
+		XFreePixmap( G.d, CG.right_arrows[ i ] );
+	}
+
+	/* Get rid of pixmap for label */
+
+	if ( CG.cut_dir == X && G.label[ X ] != NULL && G.font != NULL )
+		XFreePixmap( G.d, G.label_pm[ Z + 3 ] );
+
+	/* Get rid of GCs and memory allocated for the curve */
+
+	XFreeGC( G.d, cv->font_gc );
+	cv->points  = T_free( cv->points );
+	cv->xpoints = T_free( cv->xpoints );
+
+	cut_x = cut_form->cut->x;
+	cut_y = cut_form->cut->y;
+	cut_w = cut_form->cut->w;
+	cut_h = cut_form->cut->h;
+
+	fl_hide_form( cut_form->cut );
+
+	fl_free_form( cut_form->cut );
+
+	is_shown = is_mapped = UNSET;
+}
+
+
+/*----------------------------------------------------------------*/
+/* Instead of calling fl_hide_form() we directly unmap the window */
+/* to make it easier to show it again (otherwise we would have to */
+/* dirst delete and later to recreate lots of stuff).             */
+/*----------------------------------------------------------------*/
+
+void cut_close_callback( FL_OBJECT *a, long b )
+{
+	int i;
+
+
+	a = a;
+	b = b;
+
+	G.is_cut = is_mapped = UNSET;
+
+	cut_x = cut_form->cut->x;
+	cut_y = cut_form->cut->y;
+	cut_w = cut_form->cut->w;
+	cut_h = cut_form->cut->h;
+
+	XUnmapWindow( G.d, cut_form->cut->window );
+
+	for ( i = 0; i < MAX_CURVES; i++ )
+		CG.has_been_shown[ i ] = UNSET;
 }
 
 
@@ -734,224 +1058,6 @@ static void cut_integrate_point( long index, double val )
 		cv->up = SET;
 	if ( cv->xpoints[ xp_index ].y >= ( int ) G.cut_canvas.h )
 		cv->down = SET;
-}
-
-
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
-
-void G_init_cut_curve( void )
-{
-	Curve_1d *cv = &G.cut_curve;
-	unsigned int depth;
-	int i;
-
-
-	/* Create cursors */
-
-	cur_1 = fl_create_bitmap_cursor( cursor_1_bits, cursor_1_bits,
-									 cursor_1_width, cursor_1_height,
-									 cursor_1_x_hot, cursor_1_y_hot );
-	cur_2 = fl_create_bitmap_cursor( cursor_2_bits, cursor_2_bits,
-									 cursor_2_width, cursor_2_height,
-									 cursor_2_x_hot, cursor_2_y_hot );
-	cur_3 = fl_create_bitmap_cursor( cursor_3_bits, cursor_3_bits,
-									 cursor_3_width, cursor_3_height,
-									 cursor_3_x_hot, cursor_3_y_hot );
-	cur_4 = fl_create_bitmap_cursor( cursor_4_bits, cursor_4_bits,
-									 cursor_4_width, cursor_4_height,
-									 cursor_4_x_hot, cursor_4_y_hot );
-	cur_5 = fl_create_bitmap_cursor( cursor_5_bits, cursor_5_bits,
-									 cursor_5_width, cursor_5_height,
-									 cursor_5_x_hot, cursor_5_y_hot );
-	cur_6 = fl_create_bitmap_cursor( cursor_6_bits, cursor_6_bits,
-									 cursor_6_width, cursor_6_height,
-									 cursor_6_x_hot, cursor_6_y_hot );
-	cur_7 = fl_create_bitmap_cursor( cursor_7_bits, cursor_7_bits,
-									 cursor_7_width, cursor_7_height,
-									 cursor_7_x_hot, cursor_7_y_hot );
-	cur_8 = fl_create_bitmap_cursor( cursor_8_bits, cursor_8_bits,
-									 cursor_8_width, cursor_8_height,
-									 cursor_8_x_hot, cursor_8_y_hot );
-	CG.cur_1 = cur_1;
-	CG.cur_2 = cur_2;
-	CG.cur_3 = cur_3;
-	CG.cur_4 = cur_4;
-	CG.cur_5 = cur_5;
-	CG.cur_6 = cur_6;
-	CG.cur_7 = cur_7;
-	CG.cur_8 = cur_8;
-
-	fl_set_cursor_color( CG.cur_1, FL_RED, FL_WHITE	);
-	fl_set_cursor_color( CG.cur_2, FL_RED, FL_WHITE	);
-	fl_set_cursor_color( CG.cur_3, FL_RED, FL_WHITE	);
-	fl_set_cursor_color( CG.cur_4, FL_RED, FL_WHITE	);
-	fl_set_cursor_color( CG.cur_5, FL_RED, FL_WHITE	);
-	fl_set_cursor_color( CG.cur_6, FL_RED, FL_WHITE	);
-	fl_set_cursor_color( CG.cur_7, FL_RED, FL_WHITE	);
-	fl_set_cursor_color( CG.cur_8, FL_RED, FL_WHITE	);
-
-	/* Allocate memory for the curve and its data */
-
-	cv->points = NULL;
-	cv->xpoints = NULL;
-
-	/* Create a GC for drawing the curve and set its colour */
-
-	cv->gc = XCreateGC( G.d, G.cut_canvas.pm, 0, 0 );
-	XSetForeground( G.d, cv->gc, fl_get_pixel( G.colors[ G.active_curve ] ) );
-
-	/* Create pixmaps for the out-of-range arrows (in the colors associated
-	   with the four possible curves) */
-
-	depth = fl_get_canvas_depth( G.cut_canvas.obj );
-
-	for ( i = 0; i < MAX_CURVES; i++ )
-	{
-		CG.up_arrows[ i ] =
-			XCreatePixmapFromBitmapData( G.d, G.cut_canvas.pm, up_arrow_bits,
-										 up_arrow_width, up_arrow_height,
-										 fl_get_pixel( G.colors[ i ] ),
-										 fl_get_pixel( FL_BLACK ), depth );
-		CG.up_arrow_w = up_arrow_width;
-		CG.up_arrow_h = up_arrow_width;
-
-		CG.down_arrows[ i ] =
-			XCreatePixmapFromBitmapData( G.d, G.cut_canvas.pm, down_arrow_bits,
-										 down_arrow_width, down_arrow_height,
-										 fl_get_pixel( G.colors[ i ] ),
-										 fl_get_pixel( FL_BLACK ), depth );
-		CG.down_arrow_w = down_arrow_width;
-		CG.down_arrow_h = down_arrow_width;
-
-		CG.left_arrows[ i ] =
-			XCreatePixmapFromBitmapData( G.d, G.cut_canvas.pm, left_arrow_bits,
-										 left_arrow_width, left_arrow_height,
-										 fl_get_pixel( G.colors[ i ] ),
-										 fl_get_pixel( FL_BLACK ), depth );
-		CG.left_arrow_w = left_arrow_width;
-		CG.left_arrow_h = left_arrow_width;
-
-		CG.right_arrows[ i ] = 
-			XCreatePixmapFromBitmapData( G.d, G.cut_canvas.pm,
-										 right_arrow_bits, right_arrow_width,
-										 right_arrow_height,
-										 fl_get_pixel( G.colors[ i ] ),
-										 fl_get_pixel( FL_BLACK ), depth );
-		CG.right_arrow_w = right_arrow_width;
-		CG.right_arrow_h = right_arrow_width;
-
-		CG.is_fs[ i ] = SET;
-		CG.has_been_shown[ i ] = UNSET;
-		CG.can_undo[ i ] = UNSET;
-	}
-
-	/* Set the pixmaps for the out-of-range arrow to the pixmaps with the
-	   color associated with the currently displayed curve */
-
-	cv->up_arrow    = CG.up_arrows[    G.active_curve ];
-	cv->down_arrow  = CG.down_arrows[  G.active_curve ];
-	cv->left_arrow  = CG.left_arrows[  G.active_curve ];
-	cv->right_arrow = CG.right_arrows[ G.active_curve ];
-
-	/* Create a GC for the font and set the appropriate colour */
-
-	cv->font_gc = XCreateGC( G.d, FL_ObjWin( G.cut_canvas.obj ), 0, 0 );
-	if ( G.font != NULL )
-		XSetFont( G.d, cv->font_gc, G.font->fid );
-	XSetForeground( G.d, cv->font_gc,
-					fl_get_pixel( G.colors[ G.active_curve ] ) );
-	XSetBackground( G.d, cv->font_gc, fl_get_pixel( FL_BLACK ) );
-
-	CG.nx = 0;
-
-	fl_set_object_shortcutkey( cut_form->top_button, XK_Page_Up );
-	fl_set_object_shortcutkey( cut_form->bottom_button, XK_Page_Down );
-
-	/* The cut windows y-axis is always the same as the promary windows
-	   z-axis, so we can re-use the label */
-
-	if ( G.label[ Z ] != NULL && G.font != NULL )
-	{
-		G.label_pm[ Y + 3 ] = G.label_pm[ Z ];
-		G.label_w[ Y + 3 ]  = G.label_w[ Z ];
-		G.label_h[ Y + 3 ]  = G.label_h[ Z ];
-	}
-}
-
-
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
-
-static int cut_form_close_handler( FL_FORM *a, void *b )
-{
-	a = a;
-	b = b;
-
-	cut_close_callback( cut_form->cut_close_button, 0 );
-	return FL_IGNORE;
-}
-
-
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
-
-static void cut_setup_canvas( Canvas *c, FL_OBJECT *obj )
-{
-	XSetWindowAttributes attributes;
-	FL_HANDLE_CANVAS ch = cut_canvas_handler;
-
-
-	c->obj = obj;
-
-	/* We need to make sure the canvas hasn't a size less than 1 otherwise
-	   hell will break loose... */
-
-	if ( obj->w > 0 )
-		c->w = obj->w;
-	else
-		c->w = 1;
-	if ( obj->h > 0 )
-		c->h = obj->h;
-	else
-		c->h = 1;
-
-	create_pixmap( c );
-
-	fl_add_canvas_handler( c->obj, Expose, ch, ( void * ) c );
-
-	if ( G.is_init )
-	{
-		attributes.backing_store = NotUseful;
-		attributes.background_pixmap = None;
-		XChangeWindowAttributes( G.d, FL_ObjWin( c->obj ),
-								 CWBackingStore | CWBackPixmap,
-								 &attributes );
-		c->is_box = UNSET;
-
-		fl_add_canvas_handler( c->obj, ConfigureNotify, ch, ( void * ) c );
-		fl_add_canvas_handler( c->obj, ButtonPress, ch, ( void * ) c );
-		fl_add_canvas_handler( c->obj, ButtonRelease, ch, ( void * ) c );
-		fl_add_canvas_handler( c->obj, MotionNotify, ch, ( void * ) c );
-
-		/* Get motion events only when first or second button is pressed
-		   (this got to be set *after* requesting motion events) */
-
-		fl_remove_selected_xevent( FL_ObjWin( obj ),
-								   PointerMotionMask | PointerMotionHintMask |
-			                       ButtonMotionMask );
-		fl_add_selected_xevent( FL_ObjWin( obj ),
-								Button1MotionMask | Button2MotionMask );
-
-		c->font_gc = XCreateGC( G.d, FL_ObjWin( obj ), 0, 0 );
-		XSetForeground( G.d, c->font_gc, fl_get_pixel( FL_BLACK ) );
-		XSetFont( G.d, c->font_gc, G.font->fid );
-
-		XSetForeground( G.d, c->box_gc, fl_get_pixel( FL_RED ) );
-
-		if ( c == &G.cut_canvas )
-			XSetForeground( G.d, c->gc, fl_get_pixel( FL_BLACK ) );
-	}
 }
 
 
@@ -1519,66 +1625,6 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void cut_form_close( void )
-{
-	int i;
-	Curve_1d *cv = &G.cut_curve;
-
-
-	if ( is_shown )
-	{
-		/* Get rid of canvas related stuff (needs to be done *before*
-		   hiding the form) */
-
-		cut_canvas_off( &G.cut_x_axis, cut_form->cut_x_axis );
-		cut_canvas_off( &G.cut_y_axis, cut_form->cut_y_axis );
-		cut_canvas_off( &G.cut_z_axis, cut_form->cut_z_axis );
-		cut_canvas_off( &G.cut_canvas, cut_form->cut_canvas );
-
-		/* Deallocate the pixmaps for the out-of-range arrows */
-
-		for ( i = 0; i < MAX_CURVES; i++ )
-		{
-			XFreePixmap( G.d, CG.up_arrows[ i ] );
-			XFreePixmap( G.d, CG.down_arrows[ i ] );
-			XFreePixmap( G.d, CG.left_arrows[ i ] );
-			XFreePixmap( G.d, CG.right_arrows[ i ] );
-		}
-
-		/* Get rid of pixmap for label */
-
-		if ( CG.cut_dir == X && G.label[ X ] != NULL && G.font != NULL )
-			XFreePixmap( G.d, G.label_pm[ Z + 3 ] );
-
-		/* Get rid of GCs and memory allocated for the curve */
-
-		XFreeGC( G.d, cv->font_gc );
-		cv->points  = T_free( cv->points );
-		cv->xpoints = T_free( cv->xpoints );
-
-		if ( cut_form->cut )
-			fl_hide_form( cut_form->cut );
-	}
-
-	if ( cut_form->cut )
-	{
-		cut_x = cut_form->cut->x;
-		cut_y = cut_form->cut->y;
-		cut_w = cut_form->cut->w;
-		cut_h = cut_form->cut->h;
-
-		fl_free_form( cut_form->cut );
-	}
-	else
-		cut_has_been_shown = UNSET;
-
-	is_shown = is_mapped = UNSET;
-}
-
-
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
-
 void cut_undo_button_callback( FL_OBJECT *a, long b )
 {
 	double temp_s2d,
@@ -1617,52 +1663,6 @@ void cut_undo_button_callback( FL_OBJECT *a, long b )
 	}
 
 	redraw_all_cut_canvases( );
-}
-
-
-/*---------------------------------------------------------------*/
-/* Instead of calling fl_hide_form() we directly unmap the forms */
-/* window, otherwise there were some "bad window" messages on    */
-/* showing the form again (obviously on redrawing the canvases)  */
-/*---------------------------------------------------------------*/
-
-void cut_close_callback( FL_OBJECT *a, long b )
-{
-	int i;
-
-
-	a = a;
-	b = b;
-
-	G.is_cut = UNSET;
-
-	XUnmapWindow( G.d, cut_form->cut->window );
-	is_mapped = UNSET;
-	for ( i = 0; i < MAX_CURVES; i++ )
-		CG.has_been_shown[ i ] = UNSET;
-}
-
-
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
-
-static void cut_canvas_off( Canvas *c, FL_OBJECT *obj )
-{
-	FL_HANDLE_CANVAS ch = cut_canvas_handler;
-
-
-	fl_remove_canvas_handler( obj, Expose, ch );
-
-	fl_remove_canvas_handler( obj, ConfigureNotify, ch );
-	fl_remove_canvas_handler( obj, ButtonPress, ch );
-	fl_remove_canvas_handler( obj, ButtonRelease, ch );
-	fl_remove_canvas_handler( obj, MotionNotify, ch );
-
-	XFreeGC( G.d, c->font_gc );
-
-	delete_pixmap( c );
-
-	G.is_cut = UNSET;
 }
 
 
