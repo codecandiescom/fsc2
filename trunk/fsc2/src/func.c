@@ -659,8 +659,8 @@ Var *f_sqrt( Var *v )
    float data and strings. To get a value printed the format string has
    to contain the character `#'. The escape character is the backslash,
    with a double backslash for printing one backslash. Beside the `\#'
-   combination to print a `#' most of the escape sequences from printf()
-   ('\a', '\b', '\f', '\n', '\r', '\t', '\v' and '\"') do function.
+   combination to print a `#' aome of the escape sequences from printf()
+   ('\n', '\t', and '\"') do work.
 
    The function returns the number of variables it printed, not counting
    the format string.
