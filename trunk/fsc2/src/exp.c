@@ -505,7 +505,7 @@ void prim_exp_run( void )
 		while ( cur_prg_token != NULL &&
 				cur_prg_token < prg_token + prg_length )
 		{
-			if ( ! just_testing && prg_length % 16 )
+			if ( ! just_testing && prg_length % 8 == 0 )
 				fl_check_only_forms( );
 
 			switch ( cur_prg_token->token )
@@ -623,7 +623,7 @@ int prim_exp_runlex( void )
 	if ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
 	{
 		if ( TEST_RUN && ! just_testing &&
-			 ( cur_prg_token - prg_token ) % 16 )
+			 ( cur_prg_token - prg_token ) % 8 == 0 )
 			fl_check_only_forms( );
 
 		Fname = cur_prg_token->Fname;

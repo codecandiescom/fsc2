@@ -539,8 +539,6 @@ int return_status;
 
 void run_child( void )
 {
-	int dummy = 1;
-
 	/* Set up pointers and global variables used with the signal handlers,
 	   and set handler for DO_SEND signals */
 
@@ -548,8 +546,6 @@ void run_child( void )
 	cur_prg_token = prg_token;
 	do_send = do_quit = UNSET;
 	signal( DO_SEND, do_send_handler );
-
-//	while ( dummy );
 
 	while ( 1 )
 	{
