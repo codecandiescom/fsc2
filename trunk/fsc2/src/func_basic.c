@@ -32,7 +32,7 @@ static double datanh( double arg );
 #define C2K_OFFSET   273.16
 #define D2R_FACTOR   ( atan( 1.0 ) / 45.0 )
 #define R2D_FACTOR   ( 45.0 / atan( 1.0 ) )
-#define WZ2F_FACTOR  2.99792558e10         /* speed of light times 100 */
+#define WN2F_FACTOR  2.99792558e10         /* speed of light times 100 */
 
 
 /*----------------------------------------------------------------*/
@@ -2789,7 +2789,7 @@ Var *f_R2D( Var *v )
 /* Function for converting wave lengths (in m) to wavenumbers (i.e. cm^-1) */
 /*-------------------------------------------------------------------------*/
 
-Var *f_WL2WZ( Var *v )
+Var *f_WL2WN( Var *v )
 {
 	Var *new_var;
 	ssize_t i;
@@ -2853,7 +2853,7 @@ Var *f_WL2WZ( Var *v )
 					new_var->val.vptr[ i ] = NULL;
 				else
 				{
-					new_var->val.vptr[ i ] = f_WL2WZ( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ] = f_WL2WN( v->val.vptr[ i ] );
 					new_var->val.vptr[ i ]->from = new_var;
 				}
 			return new_var;
@@ -2868,7 +2868,7 @@ Var *f_WL2WZ( Var *v )
 /* Function for converting wavenumbers (i.e. cm^-1) to wave lengths (in m) */
 /*-------------------------------------------------------------------------*/
 
-Var *f_WZ2WL( Var *v )
+Var *f_WN2WL( Var *v )
 {
 	Var *new_var;
 	ssize_t i;
@@ -2932,7 +2932,7 @@ Var *f_WZ2WL( Var *v )
 					new_var->val.vptr[ i ] = NULL;
 				else
 				{
-					new_var->val.vptr[ i ] = f_WZ2WL( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ] = f_WN2WL( v->val.vptr[ i ] );
 					new_var->val.vptr[ i ]->from = new_var;
 				}
 			return new_var;
@@ -2947,7 +2947,7 @@ Var *f_WZ2WL( Var *v )
 /* Function for converting frequencies (in Hz) to wavenumbers (i.e. cm^-1) */
 /*-------------------------------------------------------------------------*/
 
-Var *f_F2WZ( Var *v )
+Var *f_F2WN( Var *v )
 {
 	Var *new_var;
 	ssize_t i;
@@ -2961,23 +2961,23 @@ Var *f_F2WZ( Var *v )
 	switch ( v->type )
 	{
 		case INT_VAR :
-			return vars_push( FLOAT_VAR, v->val.lval / WZ2F_FACTOR );
+			return vars_push( FLOAT_VAR, v->val.lval / WN2F_FACTOR );
 
 		case FLOAT_VAR :
-			return vars_push( FLOAT_VAR, v->val.dval / WZ2F_FACTOR );
+			return vars_push( FLOAT_VAR, v->val.dval / WN2F_FACTOR );
 
 		case INT_ARR :
 			new_var = vars_make( FLOAT_ARR, v );
 			for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
 				  i < v->len; i++, lsrc++, ldest++ )
-				*ddest = *lsrc / WZ2F_FACTOR;
+				*ddest = *lsrc / WN2F_FACTOR;
 			return new_var;
 
 		case FLOAT_ARR :
 			new_var = vars_make( FLOAT_ARR, v );
 			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
 				  i < v->len; i++, dsrc++, ddest++ )
-				*ddest = *dsrc / WZ2F_FACTOR;
+				*ddest = *dsrc / WN2F_FACTOR;
 			}
 			return new_var;
 
@@ -2988,7 +2988,7 @@ Var *f_F2WZ( Var *v )
 					new_var->val.vptr[ i ] = NULL;
 				else
 				{
-					new_var->val.vptr[ i ] = f_F2WZ( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ] = f_F2WN( v->val.vptr[ i ] );
 					new_var->val.vptr[ i ]->from = new_var;
 				}
 			return new_var;
@@ -3003,7 +3003,7 @@ Var *f_F2WZ( Var *v )
 /* Function for converting wavenumbers (i.e. cm^-1) to frequencies (in Hz) */
 /*-------------------------------------------------------------------------*/
 
-Var *f_WZ2F( Var *v )
+Var *f_WN2F( Var *v )
 {
 	Var *new_var;
 	ssize_t i;
@@ -3017,23 +3017,23 @@ Var *f_WZ2F( Var *v )
 	switch ( v->type )
 	{
 		case INT_VAR :
-			return vars_push( FLOAT_VAR, WZ2F_FACTOR * v->val.lval );
+			return vars_push( FLOAT_VAR, WN2F_FACTOR * v->val.lval );
 
 		case FLOAT_VAR :
-			return vars_push( FLOAT_VAR, WZ2F_FACTOR * v->val.dval );
+			return vars_push( FLOAT_VAR, WN2F_FACTOR * v->val.dval );
 
 		case INT_ARR :
 			new_var = vars_make( FLOAT_ARR, v );
 			for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
 				  i < v->len; i++, lsrc++, ldest++ )
-				*ddest = WZ2F_FACTOR * *lsrc;
+				*ddest = WN2F_FACTOR * *lsrc;
 			return new_var;
 
 		case FLOAT_ARR :
 			new_var = vars_make( FLOAT_ARR, v );
 			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
 				  i < v->len; i++, dsrc++, ddest++ )
-				*ddest = WZ2F_FACTOR *  *dsrc;
+				*ddest = WN2F_FACTOR *  *dsrc;
 			return new_var;
 
 		case INT_REF : case FLOAT_REF :
@@ -3043,7 +3043,7 @@ Var *f_WZ2F( Var *v )
 					new_var->val.vptr[ i ] = NULL;
 				else
 				{
-					new_var->val.vptr[ i ] = f_WZ2F( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ] = f_WN2F( v->val.vptr[ i ] );
 					new_var->val.vptr[ i ]->from = new_var;
 				}
 			return new_var;

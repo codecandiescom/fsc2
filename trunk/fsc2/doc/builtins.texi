@@ -2123,6 +2123,34 @@ Converts a number or all elements of an 1- or more-dimensional array,
 assumed to represent angles in radians, to degrees.
 
 
+@anchor{WL_to_WN}
+@item WL_to_WN()
+@findex WL_to_WN()
+Converts a wave length (in @code{m}) or all elements of an 1- or
+more-dimensional array of wave lengths to wavenumbers (in @code{cm^-1}).
+
+
+@anchor{WN_to_WL}
+@item WN_to_WL()
+@findex WN_to_WL()
+Converts a wavenumber (in @code{cm^-1}) or all elements of an 1- or
+more-dimensional array of wavenumbers to wave lengths (in @code{m}).
+
+
+@anchor{F_to_WN}
+@item F_to_WN()
+@findex F_to_WN()
+Converts a frequency (in @code{Hz}) or all elements of an 1- or
+more-dimensional array of frequencies to wavenumbers (in @code{cm^-1}).
+
+
+@anchor{WN_to_F}
+@item WN_to_F()
+@findex WN_to_F()
+Converts a wavenumber (in @code{cm^-1}) or all elements of an 1- or
+more-dimensional array of wavenumbers to frequencies (in @code{Hz}).
+
+
 @anchor{slice}
 @item slice()
 @findex slice()
