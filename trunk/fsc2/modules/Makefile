@@ -126,7 +126,7 @@ export        # export all symbols to the sub-makefiles
 
 .SUFFIXES:
 
-.PHONY: all modules install uninstall clean distclean   \
+.PHONY: all modules install uninstall cleanup clean
 
 
 # Making the modules consisting of just one file is simple, to make the
@@ -256,11 +256,11 @@ uninstall:
 
 # How to clean up the mess we created
 
-clean:
+cleanup:
 	$(RM) $(RMFLAGS) *.o *_lexer.c cscope.out *.make *~
 
-distclean:
-	$(MAKE) clean
+clean:
+	$(MAKE) cleanup
 	-for n in $(tds_list); do                     \
 		for m in "" _util _gpib; do               \
 			$(RM) $(RMFLAGS) $$n$$m.c;            \

@@ -233,7 +233,7 @@ BROWSER            := netscape
 # (Rijksuniversiteit Leiden BUS) and the devices connected to it. If the
 # include file for the library isn't in one of the standard places (i.e.
 # '/usr/include' or '/usr/local/include') you have to specify the complete
-# path to the place where it installed (e.g. '/usr/xxx/yyy).If the library
+# path to the place where it installed (e.g. '/usr/xxx/yyy). If the library
 # for the card isn't in a place where the linker will find it automatically
 # (e.g. '/usr/lib' and '/usr/local/lib') you need to also specify the full
 # absolute path for the library. You must make sure that the library for the
@@ -336,44 +336,59 @@ mchdir           := $(fdir)/machines
 
 SHELL            := /bin/sh
 CC               := gcc
-CFLAGS           := -Wall \
-					-Wwrite-strings \
-					-Wstrict-prototypes \
-					-Wmissing-prototypes \
-					-Wmissing-declarations \
-					-W \
-					-Wshadow \
-					-Wpointer-arith \
-					-Waggregate-return \
-					-Wnested-externs \
-					-Wcast-align \
+CFLAGS           := -Wall                   \
+					-Wwrite-strings         \
+					-Wstrict-prototypes     \
+					-Wmissing-prototypes    \
+					-Wmissing-declarations  \
+					-W                      \
+					-Wshadow                \
+					-Wpointer-arith         \
+					-Waggregate-return      \
+					-Wnested-externs        \
+					-Wcast-align            \
 				    # -Wconversion
 				    # -Wsign-compare      # missing in older gcc versions
 				    # -Wbad-function-cast # too many false positives
 				    # -Wcast-qual         # too many false positives
-				    # -Wundef             # fails in bison/flex created files
+				    # -Wundef             # fails for bison/flex created files
 				    # -ansi               # fails on inline/asm
-				    # -pedantic
+				    # -pedantic           # ditto
 
+
+# If make gets started with 'make debug' switch off optimization and enable
+# built-in memory debugging
 
 ifeq ($(findstring debug,$(MAKECMDGOALS)),debug)
 	CFLAGS       += -O0
+	CFLAGS       += -DFSC2_MDEBUG           # for built-in malloc debugging
 else
 	CFLAGS       +=	$(OPTIMIZATION)
 endif
 
+
+# If make gets stated with 'make release' switch off all debugging code
+# (i.e. mostly assert() calls etc.). Otherwise enable debug symbols in
+# code and libc memory debugging (if available)
+
 ifneq ($(MAKECMDGOALS),release)
 	CFLAGS       += -ggdb
 else
-	CFLAGS       += -DNDEBUG              # switch off all debugging code
+	CFLAGS       += -DNDEBUG                # switch off all debugging code
+ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
+	CFLAGS           += -DLIBC_MDEBUG       # for libc memory debugging
 endif
+endif
+
+
+# If make gets started with 'make mdebug' enable both internal memory
+# debugging options as well as libc memory debugging (if available)
 
 ifeq ($(MAKECMDGOALS),mdebug)
-	CFLAGS       += -DFSC2_MDEBUG         # for built-in malloc debugging
-endif
-
+	CFLAGS       += -DFSC2_MDEBUG           # for built-in malloc debugging
 ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
-CFLAGS           += -DLIBC_MDEBUG       # for libc memory debugging
+	CFLAGS           += -DLIBC_MDEBUG       # for libc memory debugging
+endif
 endif
 
 
