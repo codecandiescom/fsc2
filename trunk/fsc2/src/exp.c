@@ -121,6 +121,7 @@ void store_exp( FILE *in )
 	static bool is_restart = UNSET;
 	long parenthesis_count = 0;
 	long square_brace_count = 0;
+	long i;
 
 
 	/* Set input file */
@@ -143,6 +144,13 @@ void store_exp( FILE *in )
 
 	if ( EDL.prg_length <= 0 )
 		return;
+
+	EDL.prg_token->end = EDL.prg_token + 1;
+
+	for ( i = 1; i < EDL.prg_length - 1; i++ )
+		EDL.prg_token[ i ].end   = EDL.prg_token + i + 1;
+
+	EDL.prg_token[ i ].end = NULL;
 
 	/* Check that all parentheses and braces are balanced */
 
@@ -396,6 +404,7 @@ static void get_and_store_tokens( long *parenthesis_count,
 
 			default :
 				memcpy( &cur->tv, &Exp_Val, sizeof cur->tv );
+				break;
 		}
 
 		EDL.prg_length++;
@@ -1070,7 +1079,7 @@ static void deal_with_token_in_test( void )
 				cur->counter = 0;
 				EDL.cur_prg_token = cur->start;
 			}
-			else
+			else                            /* get out of infinite loop! */
 			{
 				cur->counter = 0;
 				EDL.cur_prg_token = cur->end;
@@ -1091,9 +1100,7 @@ static void deal_with_token_in_test( void )
 			break;
 			
 		case ELSE_TOK :
-			if ( ( cur + 1 )->token == '{' )
-				EDL.cur_prg_token += 2;
-			else
+			if ( ( ++EDL.cur_prg_token )->token == '{' )
 				EDL.cur_prg_token++;
 			break;
 

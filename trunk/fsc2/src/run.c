@@ -1330,17 +1330,16 @@ static void do_measurement( void )
 
 static void deal_with_program_tokens( void )
 {
-	Prg_Token_T *cur;
+	Prg_Token_T *cur = EDL.cur_prg_token;
 
 
-	switch ( EDL.cur_prg_token->token )
+	switch ( cur->token )
 	{
 		case '}' :
-			EDL.cur_prg_token = EDL.cur_prg_token->end;
+			EDL.cur_prg_token = cur->end;
 			break;
 
 		case WHILE_TOK :
-			cur = EDL.cur_prg_token;
 			if ( test_condition( cur ) )
 			{
 				cur->counter = 1;
@@ -1354,7 +1353,6 @@ static void deal_with_program_tokens( void )
 			break;
 
 		case UNTIL_TOK :
-			cur = EDL.cur_prg_token;
 			if ( ! test_condition( cur ) )
 			{
 				cur->counter = 1;
@@ -1368,9 +1366,9 @@ static void deal_with_program_tokens( void )
 			break;
 
 		case REPEAT_TOK :
-			cur = EDL.cur_prg_token;
 			if ( cur->counter == 0 )
 				get_max_repeat_count( cur );
+
 			if ( ++cur->count.repl.act <= cur->count.repl.max )
 			{
 				cur->counter++;
@@ -1384,7 +1382,6 @@ static void deal_with_program_tokens( void )
 			break;
 
 		case FOR_TOK :
-			cur = EDL.cur_prg_token;
 			if ( cur->counter == 0 )
 				get_for_cond( cur );
 
@@ -1401,27 +1398,24 @@ static void deal_with_program_tokens( void )
 			break;
 
 		case FOREVER_TOK :
-			EDL.cur_prg_token = EDL.cur_prg_token->start;
+			EDL.cur_prg_token = cur->start;
 			break;
 
 		case BREAK_TOK :
-			EDL.cur_prg_token->start->counter = 0;
-			EDL.cur_prg_token = EDL.cur_prg_token->start->end;
+			cur->start->counter = 0;
+			EDL.cur_prg_token = cur->start->end;
 			break;
 
 		case NEXT_TOK :
-			EDL.cur_prg_token = EDL.cur_prg_token->start;
+			EDL.cur_prg_token = cur->start;
 			break;
 
 		case IF_TOK : case UNLESS_TOK :
-			cur = EDL.cur_prg_token;
 			EDL.cur_prg_token = test_condition( cur ) ? cur->start : cur->end;
 			break;
 
 		case ELSE_TOK :
-			if ( ( EDL.cur_prg_token + 1 )->token == '{' )
-				EDL.cur_prg_token += 2;
-			else
+			if ( ( ++EDL.cur_prg_token )->token == '{' )
 				EDL.cur_prg_token++;
 			break;
 
