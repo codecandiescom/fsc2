@@ -49,11 +49,10 @@ The simplest approach to dealing with device-specific functions would
 have been to have a set of functions for each individual device, all
 with different names. Then one would have a different function for
 e.g.@: fetching data from each of a series of different digitizing
-oscilloscopes. But this would become a nuisance for whenever for example
-the oscilloscope had to be changed in the experimental setup, because
-then one would have to carefully check all function calls in the
-@code{EDL} scripts and adjust the names of the functions to fit the new
-digitizer.
+oscilloscopes. But this would become a nuisance whenever the
+oscilloscope had to be changed in the experimental setup. One then would
+have to carefully check all function calls in the @code{EDL} scripts and
+adjust the names of the functions to fit the new digitizer.
 
 Thus it's more reasonable to have generic functions for similar devices
 that usually have a lot in common. It's not only much more convenient to
@@ -67,19 +66,19 @@ instead of
 new_data = tds754a_get_curve( 1 );        // get curve from channel 1
 @end example
 @noindent
-but one doesn't has to change dozens of references to the TDS754A
-oscilloscope in each and every @code{EDL} program when someone else
-needs just this oscilloscope for a few days and one has to do with the
-TDS520 oscilloscope in between.
+nad not to change dozens of references to the TDS754A oscilloscope in
+each and every @code{EDL} program when someone else needs just this
+oscilloscope for a few days and one has to do with the TDS520
+oscilloscope in between.
 
-Of course, using generic functions is not the silver bullet for all and
-each situations - if e.g.@: the new lock-in amplifier has only one
+Of course, using generic functions is not the silver bullet for each and
+all situations - if e.g.@: the new lock-in amplifier has only one
 channel while the one used previously had two no abstraction will make
 the new lock-in it have two channels. This means that, while a lot of
 abstraction is possible, not all device functions can be completely
 identical for all devices of the same type. Thus, while the names of the
 functions remain identical, the arguments the functions are called with
-may differ sometimes for different devices. But while this can be
+sometimes may differ for different devices. But while this can be
 annoyingly enough it at least reduces the amount of changes to be done
 to the @code{EDL} program considerably.
 
@@ -93,8 +92,8 @@ sr510;         // first lock-in amplifier
 sr830;         // second lock-in amplifier
 @end example
 @noindent
-If now data from the first lock-in amplifier are needed one simply uses
-the normal way to get data, i.e.@: the usual function name:
+If now data from the first lock-in amplifier are needed one simply may
+uses the normal way to get data, i.e.@: the usual function name:
 @example
 data_from_1st_lockin = lockin_get_data( );
 @end example
@@ -110,26 +109,26 @@ lock-in amplifiers from the list of devices is meant.
 
 Of course, if there are three lock-ins listed in the DEVICE section for
 the third one would have to append @code{"#3"} to the function name
-etc. (One could also append the string @code{"#1"} to the name of the
+etc. (One also can append the string @code{"#1"} to the name of the
 function for the first lock-in amplifier, but that's optional.)
 
 In situations where only the module of the second of two similar devices
 defines a function (e.g.@: because the first device doesn't has the
-necessary capabilities) the function can be used without and with
-appending the @code{"#2"} to the function name. To remind about this
+necessary capabilities) the function can be used with and without
+appending the @code{"#2"} to the function name. To remind you about this
 a short message is printed.
 
 
 The only situation that still is a bit more problematical are cases
-where two identical devices are to be used simultaneously. Due to
-limitations not only of @code{fsc2} but already to the way the libraries
-used for accessing the GPIB bus works you can't simply list the same
-device twice in the @code{DEVICES} section and then use these as
-outlined above. Instead, two device modules with different names have to
-be created for the identical devices and made known to the program.
-Fortunately, there's a Perl script that will automatically deal with
-this problem, please see one of the later chapters (@pxref{Cloning
-Devices})
+where two absolutely identical devices are to be used
+simultaneously. Due to limitations not only of @code{fsc2} but already
+to the way the libraries used for accessing the GPIB bus works you can't
+simply list the same device twice in the @code{DEVICES} section and then
+use these as outlined above. Instead, two device modules with different
+names have to be created for the identical devices and made known to the
+program.  Fortunately, there's a Perl script that will automatically
+deal with this problem, please see one of the later chapters
+(@pxref{Cloning Devices})
 
 
 @node Magnet Functions, Gaussmeter Functions, Introduction, Device Functions
@@ -156,9 +155,9 @@ Frankfurt S-band magnet via homebuilt DAC, broad field range
 Frankfurt S-band magnet via homebuilt DAC, narrow field range
 @end table
 @noindent
-Because magnets hardly ever get changed (and if the program is set up
-correctly for the experiment) one can use @code{magnet} as the module
-name instead after a proper installation of the program.
+Because magnets hardly ever get changed (and if @code{fsc2} is set up
+correctly for the spectrometer) one can use @code{magnet} as the module
+name instead.
 
 Since it is not possible for the @strong{AEG} magnets to measure the
 field using just the magnet power supply it is necessary also to specify
@@ -168,16 +167,17 @@ in the @code{DEVICES} section. See the next section for the implemented
 gaussmeter and the related functions.
 
 All magnet power supplies except the magnet used for the @w{360 GHz}
-don't really do continues sweeps but the field current is stepped. Thus
+don't really do continuous sweeps but the field current is stepped. Thus
 normally no sweep rates are used but field (or current, see below) step
 sizes are needed when defining a sweep. The only exception is the power
-supply for the Oxford magnet, here continuous sweeps can be done.
+supply for the Oxford magnet, here continuous sweeps can be done and
+sweep reates must be specified.
 
 If a @strong{AEG} magnet module is listed in the @code{DEVICES} section
 the program will try to calibrate the field sweep parameters at the
 start of the experiment, i.e.@: it will sweep the field up and down for
-some time, please be patient. See below on how to reduce the amount of
-time spent with field calibration.
+some time, so please be patient. Also see below on how to reduce the
+amount of time spent with field calibration.
 
 The Keithley 228A power supply is used for the sweep coil of Berlin
 W-band magnet. Because there is no well-defined relationship between the
@@ -187,22 +187,22 @@ measurements for this device the following functions expect arguments in
 current units (i.e. Ampere) instead of field units (i.e. Gauss) as the
 other devices.
 
-The same holds for the magnet used for the @w{360 GHz} spectrometer. 
+The same holds for the magnet used for the @w{360 GHz} spectrometer.
 Here also no fixed relation between the current and the field can be
 given, so also for this module all values have to be given in current
-units instead of field units.
+instead of field units.
 
-Because the normal current resolution of the Keithley power supply is not
-sufficient an additional device is needed supplying DC voltages in the
-range between @w{-10 V} and @w{+10 V} to the modulation input of the
+Because the normal current resolution of the Keithley power supply is
+not sufficient an additional device is needed supplying DC voltages in
+the range between @w{-10 V} and @w{+10 V} to the modulation input of the
 power supply. Currently the DAC ports of one of the Stanford Research
 lock-in amplifiers (SR510, SR530, SR810 or SR830)) are used for this
 purpose. Which of the lock-ins is used can be specified during
-compilation by a corresponding entry in the configuration file for the
-Keithley driver, usually the @code{SR510} lock-in amplifier. Alternatively,
-if no lock-in has been set in the configuration file the
-@code{keithley228a} module will assume that the first lock-in listed in
-the devices section is to be used.
+compilation by an entry in the configuration file for the Keithley
+driver, usually the @code{SR510} lock-in amplifier. Alternatively, if no
+lock-in has been set in the configuration file the @code{keithley228a}
+module will assume that the first lock-in listed in the devices section
+is to be used.
 
 In the configuration file it also can be defined which of the DAC ports
 of the lock-in amplifiers is to be used. If not defined, port 6 will be
@@ -221,10 +221,11 @@ Returns a string with the name of the magnet that is being used.
 @anchor{magnet_setup}
 @item magnet_setup()
 @findex magnet_setup()
-The function can be called to set the start field and the field step
-size used in sweeps. The function expects two floating point parameters,
-the start field, e.g.@: @w{0.345 T}, and, in most cases, the step size,
-e.g.@: @w{0.35 G}.
+The function can be called in the @code{PREPARATIONS} section to set the
+start field and the field step size used in sweeps.  The function
+expects two floating point parameters, the start field or current,
+e.g.@: @w{0.345 T}, and, in most cases, the step size, e.g.@: @w{0.35
+G}.
 
 Use current instead of field units for the Keithley 228A power supply
 (@code{keithley228a}).
@@ -233,9 +234,6 @@ Because the Oxford magnet sweep power supply (@code{ips20_4}) does
 continuous sweeps (instead of simulating a sweep by stepping the
 current) the second argument isn't the sweep step size but must be the
 sweep rate in units of @code{A/s}.
-
-The function can only be called before the @code{EXPERIMENT} section
-starts.
 
 
 @anchor{magnet_fast_init}
@@ -258,7 +256,7 @@ and will set the magnetic field to this value. For the Keithley power
 supply (@code{keithley228a}) and the @w{360 GHz} magnet (@code{ips20_4})
 specify a current value.
 
-The function returns the new value of the field (which, in same cases
+The function returns the new value of the field (which, in some cases
 might differ a bit from the requested value due to the properties of the
 device, i.e.@: restrictions of the esolution).
 
@@ -349,13 +347,17 @@ returned.
 
 The function can only be used in the @code{EXPERIMENT} section.
 
+
 @anchor{magnet_use_correction}
 @item magnet_use_correction()
 @findex magnet_use_correction()
 This function is only defined for the Keithley power supply
-(@code{keithley228a}) and accepts no arguments. If it is called
+(@code{keithley228a}) and accepts no more than one argument. If it is
+called with no argument or a non-zero number or the string @code{"ON"}
 corrections are applied to reduce the effects of certain inaccuracies of
-the power supply.
+the power supply. If called with either an agument of @code{0} or a
+string @code{"OFF"} the use of these corrections is switched off.
+Per default @strong{no} corrections are used.
 
 
 @anchor{magnet_use_dac_port}

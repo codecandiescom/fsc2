@@ -100,6 +100,7 @@ typedef struct {
 	bool is_req_current;      /* flag, set if start current is defined */
 	bool is_current_step;     /* flag, set if current step size is defined */
 	bool use_correction;      /* flag, set if corrections are to be applied */
+	bool use_corr_orig;
 	char *lockin_append;      /* string to append to lockin function names */
 } Keithley228a;
 
@@ -235,6 +236,7 @@ int keithley228a_init_hook( void )
 	keithley228a.is_req_current  = UNSET;
 	keithley228a.is_current_step = UNSET;
 	keithley228a.use_correction  = UNSET;
+	keithley228a.use_corr_orig   = UNSET;
 
 	return 1;
 }
@@ -245,6 +247,8 @@ int keithley228a_init_hook( void )
 
 int keithley228a_exp_hook( void )
 {
+	keithley228a.use_correction = keithley228a.use_corr_orig;
+
 	if ( ! keithley228a_init( DEVICE_NAME ) )
 	{
 		print( FATAL, "Initialization of device failed: %s\n",
@@ -339,10 +343,18 @@ Var *magnet_setup( Var *v )
 
 Var *magnet_use_correction( Var *v )
 {
-	v = v;
+	if ( v == NULL )
+		keithley228a.use_correction = SET;
+	else
+	{
+		keithley228a.use_correction = get_boolean( v );
+		too_many_arguments( );
+	}
 
-	keithley228a.use_correction = SET;
-	return vars_push( INT_VAR, 1 );
+	if ( FSC2_MODE == PREPARATION )
+		keithley228a.use_corr_orig  = keithley228a.use_correction;
+
+	return vars_push( INT_VAR, ( long ) keithley228a.use_correction );
 }
 
 
