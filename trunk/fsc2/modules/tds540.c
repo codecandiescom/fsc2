@@ -368,7 +368,7 @@ Var *digitizer_timebase( Var *v )
 	tds540.is_timebase = SET;
 
 	if ( FSC2_MODE == EXPERIMENT )
-		tds540_set_timebase( tds540.time_base );
+		tds540_set_timebase( tds540.timebase );
 
 	return vars_push( FLOAT_VAR, tds540.timebase );
 }
@@ -424,7 +424,7 @@ Var *digitizer_sensitivity( Var *v )
 				THROW( EXCEPTION )
 
 			case TEST :
-				return vars_push( FLOAT_VAR, tds540.is_sens[ channel ] :
+				return vars_push( FLOAT_VAR, tds540.is_sens[ channel ] ?
 							tds540.sens[ channel ] : TDS540_TEST_SENSITIVITY );
 
 			case EXPERIMENT :
@@ -632,7 +632,7 @@ Var *digitizer_trigger_position( Var *v )
 				THROW( EXCEPTION )
 
 			case TEST :
-				return vars_push( FLOAT_VAR, tds540.is_trig_pos :
+				return vars_push( FLOAT_VAR, tds540.is_trig_pos ?
 								  tds540.trig_pos : TDS540_TEST_TRIG_POS );
 
 			case EXPERIMENT :
