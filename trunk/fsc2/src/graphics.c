@@ -35,6 +35,11 @@ static int cur_1,
 	       cur_5,
 	       cur_6,
 	       cur_7;
+static int cut_cur_1,
+	       cut_cur_2,
+	       cut_cur_3,
+	       cut_cur_4,
+	       cut_cur_5;
 
 
 /*----------------------------------------------------------------------*/
@@ -98,6 +103,13 @@ void start_graphics( void )
 	fl_set_object_helper( run_form->stop, "Stop the experiment" );
 	fl_set_object_helper( run_form->full_scale_button,
 						  "Switch off automatic rescaling" );
+	if ( G.dim == 2 )
+	{
+		fl_set_object_helper( cut_form->cut_close_button,
+							  "Close the window" );
+		fl_set_object_helper( cut_form->cut_full_scale_button,
+							  "Switch off automatic rescaling" );
+	}
 
 	/* Store the current state of the Graphics structure - to be restored
 	   after the experiment */
@@ -145,7 +157,6 @@ void start_graphics( void )
 	else
 	{
 		fl_set_canvas_decoration( run_form->z_axis, FL_FRAME_BOX );
-
 		fl_set_canvas_decoration( cut_form->cut_x_axis, FL_FRAME_BOX );
 		fl_set_canvas_decoration( cut_form->cut_y_axis, FL_FRAME_BOX );
 		fl_set_canvas_decoration( cut_form->cut_z_axis, FL_FRAME_BOX );
@@ -305,6 +316,21 @@ static void G_struct_init( void )
 		cur_7 = fl_create_bitmap_cursor( cursor_7_bits, cursor_7_bits,
 										 cursor_7_width, cursor_7_height,
 										 cursor_7_x_hot, cursor_7_y_hot );
+		cut_cur_1 = fl_create_bitmap_cursor( cursor_1_bits, cursor_1_bits,
+											 cursor_1_width, cursor_1_height,
+											 cursor_1_x_hot, cursor_1_y_hot );
+		cut_cur_2 = fl_create_bitmap_cursor( cursor_2_bits, cursor_2_bits,
+											 cursor_2_width, cursor_2_height,
+											 cursor_2_x_hot, cursor_2_y_hot );
+		cut_cur_3 = fl_create_bitmap_cursor( cursor_3_bits, cursor_3_bits,
+											 cursor_3_width, cursor_3_height,
+											 cursor_3_x_hot, cursor_3_y_hot );
+		cut_cur_4 = fl_create_bitmap_cursor( cursor_4_bits, cursor_4_bits,
+											 cursor_4_width, cursor_4_height,
+											 cursor_4_x_hot, cursor_4_y_hot );
+		cut_cur_5 = fl_create_bitmap_cursor( cursor_5_bits, cursor_5_bits,
+											 cursor_5_width, cursor_5_height,
+											 cursor_5_x_hot, cursor_5_y_hot );
 	}
 
 	G.cur_1 = cur_1;
@@ -314,6 +340,12 @@ static void G_struct_init( void )
 	G.cur_5 = cur_5;
 	G.cur_6 = cur_6;
 	G.cur_7 = cur_7;
+
+	G.cut_cur_1 = cut_cur_1;
+	G.cut_cur_2 = cut_cur_2;
+	G.cut_cur_3 = cut_cur_3;
+	G.cut_cur_4 = cut_cur_4;
+	G.cut_cur_5 = cut_cur_5;
 
 	/* On the first call also create the colours needed for 2D displays */
 
@@ -467,6 +499,12 @@ static void G_init_curves_2d( void )
 	fl_set_cursor_color( G.cur_5, FL_BLACK, FL_WHITE );
 	fl_set_cursor_color( G.cur_6, FL_BLACK, FL_WHITE );
 	fl_set_cursor_color( G.cur_7, FL_BLACK, FL_WHITE );
+
+	fl_set_cursor_color( G.cut_cur_1, FL_BLACK, FL_RED );
+	fl_set_cursor_color( G.cut_cur_2, FL_BLACK, FL_RED );
+	fl_set_cursor_color( G.cut_cur_3, FL_BLACK, FL_RED );
+	fl_set_cursor_color( G.cut_cur_4, FL_BLACK, FL_RED );
+	fl_set_cursor_color( G.cut_cur_5, FL_BLACK, FL_RED );
 
 	for ( i = 0; i < G.nc; i++ )
 	{
@@ -804,15 +842,18 @@ static void setup_canvas( Canvas *c, FL_OBJECT *obj )
 								 &attributes );
 		c->is_box = UNSET;
 
-		fl_remove_selected_xevent( FL_ObjWin( obj ),
-								   PointerMotionMask | PointerMotionHintMask );
-		fl_add_selected_xevent( FL_ObjWin( obj ),
-								Button1MotionMask | Button2MotionMask );
-
 		fl_add_canvas_handler( c->obj, ConfigureNotify, ch, ( void * ) c );
 		fl_add_canvas_handler( c->obj, ButtonPress, ch, ( void * ) c );
 		fl_add_canvas_handler( c->obj, ButtonRelease, ch, ( void * ) c );
 		fl_add_canvas_handler( c->obj, MotionNotify, ch, ( void * ) c );
+
+		/* Get motion events only when first or second button is pressed */
+
+		fl_remove_selected_xevent( FL_ObjWin( obj ),
+								   PointerMotionMask | PointerMotionHintMask |
+			                       ButtonMotionMask );
+		fl_add_selected_xevent( FL_ObjWin( obj ),
+								Button1MotionMask | Button2MotionMask );
 
 		c->font_gc = XCreateGC( G.d, FL_ObjWin( obj ), 0, 0 );
 		XSetForeground( G.d, c->font_gc, fl_get_pixel( FL_BLACK ) );
@@ -1242,7 +1283,7 @@ void curve_button_callback( FL_OBJECT *obj, long data )
 	}
 	else
 	{
-		/* Make buttons work like radio buttons but also allow to switch off
+		/* Make buttons work like radio buttons but also allow switching off
 		   all of them */
 
 		if ( data - 1 == G.active_curve )     /* shown curve is switched off */

@@ -33,7 +33,6 @@ int canvas_handler_2d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 	Canvas *c = ( Canvas * ) udata;
 
 
-	obj = obj;
 	window = window;
 
 	switch ( ev->type )
