@@ -84,6 +84,7 @@ static Var *CV;
 %token <lval> INT_TOKEN
 %token <dval> FLOAT_TOKEN
 %token <sptr> STR_TOKEN
+%token AND OR XOR NOT
 %token EQ LT LE GT GE
 
 %token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
@@ -210,6 +211,10 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
 											 "predefined function.\n",
 											 Fname, Lc, $1->name );
 	                                 THROW( EXCEPTION ); }
+       | expr AND expr       	   { $$ = vars_comp( COMP_AND, $1, $3 ); }
+       | expr OR expr        	   { $$ = vars_comp( COMP_OR, $1, $3 ); }
+       | expr XOR expr       	   { $$ = vars_comp( COMP_XOR, $1, $3 ); }
+       | NOT expr            	   { $$ = vars_lnegate( $2 ); }
        | expr EQ expr              { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
        | expr LT expr              { $$ = vars_comp( COMP_LESS, $1, $3 ); }
        | expr GT expr              { $$ = vars_comp( COMP_LESS, $3, $1 ); }
@@ -226,6 +231,7 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | '-' expr %prec NEG        { $$ = vars_negate( $2 ); }
        | '(' expr ')' unit         { $$ = apply_unit( $2, $4 ); }
 ;
+
 
 unit:    /* empty */               { $$ = NULL; }
        | NT_TOKEN  				   { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
@@ -274,7 +280,7 @@ sep2:    /* empty */
 
 /* handling of time base lines */
 
-tb:       TB_TOKEN expr            { p_set_timebase( $2 ); }
+tb:      TB_TOKEN expr             { p_set_timebase( $2 ); }
 ;
 
 /* handling of trigger mode lines */
