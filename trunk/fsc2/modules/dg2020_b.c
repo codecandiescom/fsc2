@@ -200,11 +200,6 @@ int dg2020_b_init_hook( void )
 
 int dg2020_b_test_hook( void )
 {
-	if ( dg2020_Pulses == NULL )
-	{
-		dg2020_is_needed = UNSET;
-		return 1;
-	}
 
 	/* Check consistency of pulse settings and do everything to setup the
 	   pulser for the test run */
@@ -245,6 +240,9 @@ int dg2020_b_test_hook( void )
 		dg2020_change_pulse_position_change;
 	pulser_struct.set_pulse_length_change = dg2020_change_pulse_length_change;
 
+	if ( dg2020_Pulses == NULL )
+		dg2020_is_needed = UNSET;
+
 	return 1;
 }
 
@@ -260,7 +258,11 @@ int dg2020_b_end_of_test_hook( void )
 
 
 	if ( ! dg2020_is_needed )
+	{
+		dg2020.max_seq_len = dg2020_get_max_seq_len( );
+		dg2020_calc_padding( );
 		return 1;
+	}
 
 	if ( dg2020.dump_file != NULL )
 	{

@@ -780,66 +780,6 @@ static void dg2020_defense_shape_check( FUNCTION *shape )
 	}
 }
 
-#if 0
-/*-----------------------------------------------------------*/
-/* Function creates all active pulses in the channels of the */
-/* pulser assigned to the function passed as argument.       */
-/*-----------------------------------------------------------*/
-
-void dg2020_set_pulses( FUNCTION *f )
-{
-	PULSE *p;
-	PULSE_PARAMS *pp;
-	Ticks start, end;
-	int i, j;
-
-
-	fsc2_assert( f->self != PULSER_CHANNEL_PHASE_1 &&
-				 f->self != PULSER_CHANNEL_PHASE_2 );
-
-	/* Always set the very first bit to LOW state, see the rant about the bugs
-	   in the pulser firmware at the start of dg2020_gpib_b.c. Then set the
-	   rest of the channels to off state. */
-
-	for ( i = 0; i < f->num_needed_channels; i++ )
-	{
-		dg2020_set_constant( f->channel[ i ]->self, -1, 1, LOW );
-		dg2020_set_constant( f->channel[ i ]->self, 0, dg2020.mem_size - 1,
-							 type_OFF( f ) );
-	}
-
-	/* Now simply run through all active pulses of the channel */
-
-	if ( f->num_pulses == 0 )
-		return;
-
-	for ( pp = f->pulse_params, i = 0; i < f->num_params; pp++, i++ )
-	{
-		if ( ! pp->pulse->is_active )
-			continue;
-
-		/* Set the area of the pulse itself */
-
-		start = pp->pos;
-		end = pp->pos + pp->len;
-
-		for ( j = 0; j < f->pc_len; j++ )
-		{
-			if ( pp->pulse->channel[ j ] == NULL )   /* skip unused channels */
-				continue;
-
-			if ( start != end )
-				dg2020_set_constant( pp->pulse->channel[ j ]->self, start,
-									 end - start, type_ON( f ) );
-			pp->pulse->is_old_pos = pp->pulse->is_old_pos = SET;
-		}
-	}
-
-	for ( p = f->pulses[ 0 ], i = 0; i < f->num_pulses; p = f->pulses[ ++i ] )
-		p->was_active = p->is_active;
-}
-#endif
-
 
 /*-----------------------------------------------------------*/
 /* Function creates all active pulses in the channels of the */

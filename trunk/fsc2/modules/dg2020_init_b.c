@@ -658,7 +658,7 @@ static void dg2020_create_shape_pulses( void )
 	PULSE *np, *cp, *rp, *p1, *p2, *old_end;
 
 
-	if ( ! dg2020.auto_shape_pulses )
+	if ( ! dg2020.auto_shape_pulses || dg2020_Pulses == NULL )
 		return;
 
 	/* Find the end of the pulse list (to be able to add further shape
@@ -740,9 +740,6 @@ static void dg2020_create_shape_pulses( void )
 		np->needs_update = rp->needs_update;
 	}
 
-	if ( np != old_end )
-		spf->is_needed = SET;
-
 	/* Now after we got all the necessary shape pulses we've got to check
 	   that they don't overlap when they are for pulses of different
 	   functions (overlaps for pulses of the same function will be detected
@@ -787,7 +784,7 @@ static void dg2020_create_twt_pulses( void )
 	PULSE *np, *cp, *rp, *old_end;
 
 
-	if ( ! dg2020.auto_twt_pulses )
+	if ( ! dg2020.auto_twt_pulses  || dg2020_Pulses == NULL )
 		return;
 
 	/* Find the end of the pulse list (to be able to add further TWT
@@ -869,9 +866,6 @@ static void dg2020_create_twt_pulses( void )
 
 		np->needs_update = rp->needs_update;
 	}
-
-	if ( np != old_end )
-		tpf->is_needed = SET;
 }
 
 

@@ -288,7 +288,7 @@ bool dg2020_init( const char *name )
 			dg2020_channel_assign( f->channel[ 0 ]->self,
 								   f->pod[ 0 ]->self );
 		else
-			for ( j = 0; j <= PHASE_MINUS_Y - PHASE_PLUS_X; j++ )
+			for ( j = 0; j < NUM_PHASE_TYPES; j++ )
 				if ( f->phase_setup->is_set[ j ] )
 					dg2020_channel_assign( f->pcm[ j * f->pc_len + 0 ]->self,
 										   f->phase_setup->pod[ j ]->self );
