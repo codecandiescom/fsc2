@@ -19,8 +19,7 @@ bool hfs9000_new_pulse( long pnum )
 	{
 		if ( cp->num == pnum )
 		{
-			eprint( FATAL, "%s:%ld: %s: Can't create pulse with number %ld, "
-					"it already exists.\n",
+			eprint( FATAL, "%s:%ld: %s: Pulse %ld already exists.\n",
 					Fname, Lc, pulser_struct.name, pnum );
 			THROW( EXCEPTION );
 		}
@@ -66,6 +65,7 @@ bool hfs9000_set_pulse_function( long pnum, int function )
 {
 	PULSE *p = hfs9000_get_pulse( pnum );
 	PULSE *pl = hfs9000_Pulses;
+	FUNCTION *f = &hfs9000.function[ function ];
 
 
 	if ( function == PULSER_CHANNEL_PHASE_1 || 
@@ -84,7 +84,7 @@ bool hfs9000_set_pulse_function( long pnum, int function )
 		THROW( EXCEPTION );
 	}
 
-	if ( hfs9000.function[ function ].channel == NULL )
+	if ( f->channel == NULL )
 	{
 		eprint( FATAL, "%s:%ld: %s: No channel has been assigned to function "
 				"`%s'.\n", Fname, Lc, pulser_struct.name,
@@ -92,11 +92,10 @@ bool hfs9000_set_pulse_function( long pnum, int function )
 		THROW( EXCEPTION );
 	}
 
-	/* There can be only one pulse for the function associated with the
-	   TRIGGER_OUT channel and its length has to be either zero or equal the
-	   pulsers timebase */
+	/* There can be only one pulse for the function associated with Trigger
+	   Out and its length is fixed (to 20 ns) */
 
-	if ( hfs9000.function[ function ].channel->self == HFS9000_TRIG_OUT )
+	if ( f->channel->self == HFS9000_TRIG_OUT )
 	{
 		for ( ; pl != NULL; pl = pl->next )
 		{
@@ -135,7 +134,7 @@ bool hfs9000_set_pulse_function( long pnum, int function )
 		}
 	}
 
-	p->function = &hfs9000.function[ function ];
+	p->function = f;
 	p->channel = p->function->channel;
 	p->is_function = SET;
 	p->function->is_needed = SET;
@@ -553,8 +552,8 @@ bool hfs9000_change_pulse_length_change( long pnum, double time )
 	if ( p->is_function && p->function->channel &&
 		 p->function->channel->self == HFS9000_TRIG_OUT )
 	{
-		eprint( FATAL, "%s:%ld: %s: Length of Trigger Out pulse %ld can't be "
-				"changed.\n", Fname, Lc, pulser_struct.name, pnum );
+		eprint( FATAL, "%s:%ld: %s: Length change of Trigger Out pulse %ld "
+				"can't be set.\n", Fname, Lc, pulser_struct.name, pnum );
 		THROW( EXCEPTION );
 	}
 
