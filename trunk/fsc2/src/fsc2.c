@@ -95,6 +95,8 @@ int main( int argc, char *argv[ ] )
     Internals.child_pid = 0;
     Internals.http_pid = 0;
 
+	/* Set up a lot of global variables */
+
 	Internals.state = STATE_IDLE;
 	Internals.mode = PREPARATION;
 	Internals.in_hook = UNSET;
@@ -139,7 +141,7 @@ int main( int argc, char *argv[ ] )
 	/* Check via the lock file if there is already a process holding a lock,
 	   otherwise create one. This has to done after parsing the command line
 	   arguments because it should still be possible to test an EDL program
-	   via the '-t' flag although someone else is running fsc. */
+	   via the '-t' flag although someone else is running fsc2. */
 
 	if ( ! fsc2_locking( ) )
 		return EXIT_FAILURE;
@@ -169,8 +171,8 @@ int main( int argc, char *argv[ ] )
 		fname = argv[ 1 ];
 	}
 
-	/* If '--delete' was given on the command line store flags that the input
-	   files needs to be deleted */
+	/* If '--delete' was given on the command line set flags that says that
+	   the input files needs to be deleted */
 
 	if ( fname != NULL && Internals.cmdline_flags & DO_DELETE )
 		delete_file = delete_old_file = SET;
@@ -574,7 +576,7 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 static void final_exit_handler( void )
 {
 	/* Stop the process that is waiting for external connections as well
-	   as the child process */
+	   as the child process and the HTTP server */
 
 	if ( Internals.conn_pid > 0 )
 		kill( Internals.conn_pid, SIGTERM );
@@ -611,9 +613,9 @@ static void final_exit_handler( void )
 	setuid( Internals.EUID );
 	unlink( FSC2_LOCKFILE );
 
-	/* If program was killed by a signal indicating an unrecoverable error
-	   print out a message and (if this feature isn't switched off) send me
-	   an email */
+	/* If the program was killed by a signal indicating an unrecoverable
+	   error print out a message and (if this feature isn't switched off) 
+	   send an email */
 
 	if ( fsc2_death != 0 && fsc2_death != SIGTERM )
 	{
