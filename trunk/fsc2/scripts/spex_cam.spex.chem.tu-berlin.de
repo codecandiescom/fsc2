@@ -3652,10 +3652,9 @@ EOF
 			display_1d( 1, scan, 1 );
 			Next_X = CCD_Points - Overlap_Points + 1;
 		} ELSE {
-			K = 1;
-
 			spec -= min;
 
+			K = 1;
 			FOR L = Next_X : Next_X + Overlap_Points - 1 {
 				scan[ L ] = ( spec[ K ] + scan[ L ] ) / 2;
 				K += 1;
