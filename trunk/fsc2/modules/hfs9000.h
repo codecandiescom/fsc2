@@ -80,16 +80,16 @@ Var *pulser_command( Var *v );
 #define IS_NORMAL_CHANNEL( x ) ( ( x ) > 1 && ( x ) <= 4 )
 #endif
 #if NUM_CHANNEL_CARDS == 2
-#define MAX_CHANNEL            9
-#define IS_NORMAL_CHANNEL( x ) ( ( x ) > 1 && ( x ) <= 9 )
+#define MAX_CHANNEL            8
+#define IS_NORMAL_CHANNEL( x ) ( ( x ) > 1 && ( x ) <= 8 )
 #endif
 #if NUM_CHANNEL_CARDS == 3
-#define MAX_CHANNEL            14
-#define IS_NORMAL_CHANNEL( x ) ( ( x ) > 0 && ( x ) <= 14 )
+#define MAX_CHANNEL            12
+#define IS_NORMAL_CHANNEL( x ) ( ( x ) > 0 && ( x ) <= 12 )
 #endif
 
-#define CHANNEL_LETTER( x )   ( 'A' + ( x ) % 5 )
-#define CHANNEL_NUMBER( x )   ( '0' + ( x ) % 5 )
+#define CHANNEL_LETTER( x )   ( 'A' + ( ( x ) - 1 ) / 4 )
+#define CHANNEL_NUMBER( x )   ( '1' + ( ( x ) - 1 ) % 4 )
 
 
 #define MIN_POD_HIGH_VOLTAGE  -1.5

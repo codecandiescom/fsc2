@@ -366,42 +366,42 @@ long hfs9000_ch_to_num( long channel )
 		case CHANNEL_B1 :
 			if ( NUM_CHANNEL_CARDS < 2 )
 				break;
-			return 6;
+			return 5;
 
 		case CHANNEL_B2 :
 			if ( NUM_CHANNEL_CARDS < 2 )
 				break;
-			return 7;
+			return 6;
 
 		case CHANNEL_B3 :
 			if ( NUM_CHANNEL_CARDS < 2 )
 				break;
-			return 8;
+			return 7;
 
 		case CHANNEL_B4 :
 			if ( NUM_CHANNEL_CARDS < 2 )
 				break;
-			return 9;
+			return 8;
 
 		case CHANNEL_C1 :
 			if ( NUM_CHANNEL_CARDS < 3 )
 				break;
-			return 11;
+			return 9;
 
 		case CHANNEL_C2 :
 			if ( NUM_CHANNEL_CARDS < 3 )
 				break;
-			return 12;
+			return 10;
 
 		case CHANNEL_C3 :
 			if ( NUM_CHANNEL_CARDS < 3 )
 				break;
-			return 13;
+			return 11;
 
 		case CHANNEL_C4 :
 			if ( NUM_CHANNEL_CARDS < 3 )
 				break;
-			return 14;
+			return 12;
 	}
 
 	print( FATAL, "Pulser has no channel named '%s'.\n",
