@@ -69,7 +69,6 @@ bool rb_pulser_new_pulse( long pnum )
 	cp->initial_is_pos = cp->initial_is_len = cp->initial_is_dpos
 				  	   = cp->initial_is_dlen = UNSET;
 
-	cp->needs_update = UNSET;
 	cp->has_been_active = cp->was_active = UNSET;
 
 	return OK;
