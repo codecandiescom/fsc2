@@ -1706,21 +1706,23 @@ The following mathematical function can be used in all section of an
 @anchor{int}
 @item int()
 @findex int()
-Converts a number (or all the elements of an array) to integer type by
-truncating all digits following the decimal point.
+Converts a number (or all the elements of an 1- or more-dimensional
+array) to integer type by truncating all digits following the decimal
+point.
 
 
 @anchor{float}
 @item float()
 @findex float()
-Converts a number (or all the elements of an array) to floating point type.
+Converts a number (or all the elements of an 1- or more-dimensional
+array) to floating point type.
 
 
 @anchor{round}
 @item round()
 @findex round()
-Converts a floating point number (or all the elements of an array) to the
-nearest integer, i.e.@:
+Converts a floating point number (or all the elements of an 1- or
+more-dimensional array) to the nearest integer, i.e.@:
 
 @example
 round( 8.5 ) = 9    round( 8.49 ) = 8    round( -1.75 ) = -2
@@ -1730,8 +1732,9 @@ round( 8.5 ) = 9    round( 8.49 ) = 8    round( -1.75 ) = -2
 @anchor{floor}
 @item floor()
 @findex floor()
-Converts a floating point number (or all the elements of an array) to the
-largest integer that is not larger than the argument, i.e.@:
+Converts a floating point number (or all the elements of an 1- or
+more-dimensional array) to the largest integer that is not larger than
+the argument, i.e.@:
 
 @example
 floor( 8.6 ) = 8    floor( -8.6 ) = -9
@@ -1741,8 +1744,9 @@ floor( 8.6 ) = 8    floor( -8.6 ) = -9
 @anchor{ceil}
 @item ceil()
 @findex ceil()
-Converts a floating point number (or all the elements of an array) to the
-smallest integer that is not less than the argument, i.e.@:
+Converts a floating point number (or all the elements of an 1- or
+more-dimensional array) to the smallest integer that is not less than
+the argument, i.e.@:
 
 @example
 round( 8.6 ) = 9     round( -8.6 ) = -8
@@ -1753,14 +1757,14 @@ round( 8.6 ) = 9     round( -8.6 ) = -8
 @item abs()
 @findex abs()
 Returns the absolute value of an integer or floating point number (or
-all the elements of an one-dimensional array) .
+all the elements of an 1- or more-dimensional array) .
 
 
 @anchor{max_of}
 @item max_of()
 @findex max_of()
 Returns the largest value of all arguments. Arguments can be any number
-of numbers or (one-dimensional) arrays. If all arguments are integer
+of numbers or 1- or more-dimensional arrays. If all arguments are integer
 numbers an integer number is returned, otherwise a floating point value.
 
 
@@ -1768,19 +1772,23 @@ numbers an integer number is returned, otherwise a floating point value.
 @item min_of()
 @findex min_of()
 Returns the smallest value of all arguments. Arguments can be any number
-of numbers or (one-dimensional) arrays. If all arguments are integer
+of numbers or 1- or more-dimensional arrays. If all arguments are integer
 numbers an integer number is returned, otherwise a floating point value.
 
 
 @anchor{mean}
 @item mean()
 @findex mean()
-Expects an one-dimensional array as input and returns the mean value of
-the array elements. Optionally, it accepts up to two more integer
-arguments, the start index of the first element of the array to be
-included into the calculation and the number of elements to be used. If
-the length parameter is missing all elements up to the end of the array
-are used.
+Expects an 1- or more-dimensional array as input and returns the mean
+value of the array elements. Optionally, it accepts up to two more
+integer arguments, the start index of the first element of the
+(1-dimensional) array or the index of the first submatrix (for
+more-dimensional array) to be included into the calculation and the
+number of elements to be used. If the length parameter is missing all
+elements up to the end of the 1D-array or all remaining sub-matrices of
+the more-dimensional array are used, otherwise only the number of
+elements or sub-arrays specified as the third argument are used.
+.
 
 
 @anchor{rms}
@@ -1789,16 +1797,20 @@ are used.
 Expects an one-dimensional array as input and returns the square root of
 the sum of the squared array elements, divided by the number of
 elements.  Optionally, it accepts up to two more integer arguments, the
-index of the first element of the array to be included into the
-calculation and the number of elements to be used. If the length
-parameter is missing all elements up to the end of the array are used.
+index of the first element of the 1-dimensional array or the index of
+the first sub-matrix (for more-dimensional arrays) to be included into
+the calculation and the number of elements to be used. If the length
+parameter is missing all elements up to the end of the array or all
+remaining sub-arrays are used, otherwise only as many array elements or
+sub-matrices as specified by the third argument are used..
 
 
 @anchor{sqrt}
 @item sqrt()
 @findex sqrt()
 Returns the square root of an integer or floating point number (or all
-the elements of an array). The argument must be a positive number.
+the elements of an 1- or more-dimensional array). The argument must be a
+positive number.
 
 
 @anchor{random}
@@ -1834,90 +1846,93 @@ since 00:00:00 UTC, January 1, 1970 is used as the seed.
 @anchor{sin}
 @item sin()
 @findex sin()
-Returns the sine of the argument (simple number or all elements of an
-array), with the argument interpreted as the angle in radian.
+Returns the sine of the argument (simple number or all elements of an 1-
+or more-dimensional array), with the argument interpreted as the angle
+in radian.
 
 
 @anchor{cos}
 @item cos()
 @findex cos()
 Returns the cosine of the argument (simple number or all elements of an
-array), with the argument interpreted as the angle in radian.
+1- or more-dimensional array), with the argument interpreted as the
+angle in radian.
 
 
 @anchor{tan}
 @item tan()
 @findex tan()
 Returns the tangent of the argument (simple number or all elements of an
-array), with the argument interpreted as the angle in radian.
+1- or more-dimensional array), with the argument interpreted as the
+angle in radian.
 
 
 @anchor{asin}
 @item asin()
 @findex asin()
 Returns the inverse of the sine function of the argument (simple number
-or all elements of an array) as an angle in radian. The argument must be in
-the interval @w{[-1, 1]}, the result an element of the interval
-@w{[-pi/2, pi/2]}.
+or all elements of an 1- or more-dimensional array) as an angle in
+radian. The argument must be in the interval @w{[-1, 1]}, the result an
+element of the interval @w{[-pi/2, pi/2]}.
 
 
 @anchor{acos}
 @item acos()
 @findex acos()
 Returns the inverse of the cosine function of the argument (simple
-number or all elements of an array) as an angle in radian. The argument
-must be in the interval @w{[-1, 1]}, the result an element of the
-interval @w{[0, pi]}.
+number or all elements of an 1- or more-dimensional array) as an angle
+in radian. The argument must be in the interval @w{[-1, 1]}, the result
+an element of the interval @w{[0, pi]}.
 
 
 @anchor{atan}
 @item atan()
 @findex atan()
 Returns the inverse of the tangent function of the argument (simple
-number or all elements of an array) as an angle in radian, the result an
-element of the interval @w{[-pi, pi]}.
+number or all elements of an 1- or more-dimensional array) as an angle
+in radian, the result an element of the interval @w{[-pi, pi]}.
 
 
 @anchor{sinh}
 @item sinh()
 @findex sinh()
 Returns the hyperbolic sine of the argument (simple number or all elements
-of an array).
+of an 1- or more-dimensional array).
 
 
 @anchor{cosh}
 @item cosh()
 @findex cosh()
 Returns the hyperbolic cosine of the argument (simple number or all elements
-of an array).
+of an 1- or more-dimensional array).
 
 
 @anchor{tanh}
 @item tanh()
 @findex tanh()
 Returns the hyperbolic tangent of the argument (simple number or all
-elements of an array).
+elements of an 1- or more-dimensional array).
 
 
 @anchor{asinh}
 @item asinh()
 @findex asinh()
 Returns the inverse of the hyperbolic sine function of the argument
-(simple number or all elements of an array).
+(simple number or all elements of an 1- or more-dimensional array).
 
 
 @anchor{acosh}
 @item acosh()
 @findex acosh()
 Returns the inverse of the hyperbolic cosine function of the argument
-(simple number or all elements of an array).
+(simple number or all elements of an 1- or more-dimensional array ).
 
 
 @anchor{atanh}
 @item atanh()
 @findex atanh()
 Returns the inverse of the hyperbolic tangent function of the argument
-(simple number or all elements of an array).
+(simple number or all elements of an 1- or more-dimensional array).
 
 @end table
 
@@ -1985,6 +2000,53 @@ accepts is more than 2.1 billion seconds (or about 68 years).
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
+
+
+@anchor{T_to_G}
+@item T_to_G()
+@findex T_to_G()
+Converts a number or all elements of an 1- or more-dimensional array,
+assumed to have a unit of Tesla, to Gauss (by multiplying with
+@code{1.0e-4}).
+
+
+@anchor{G_to_T}
+@item G_to_T()
+@findex G_to_T()
+Converts a number or all elements of an 1- or more-dimensional array,
+assumed to have a unit of Gauss, to Tesla (by multiplying with
+@code{1.0e-4}).
+
+
+@anchor{C_to_K}
+@item C_to_K()
+@findex C_to_K()
+Converts a number or all elements of an 1- or more-dimensional array,
+assumed to have a unit of degree Celsius, to Kelvin (by adding
+@code{273.16}).
+
+
+@anchor{K_to_C}
+@item K_to_C()
+@findex K_to_C()
+Converts a number or all elements of an 1- or more-dimensional array,
+assumed to have a unit of Kelvin, to degree Celsius (by subtracting
+@code{273.16}).
+
+
+@anchor{D_to_R}
+@item D_to_R()
+@findex D_to_R()
+Converts a number or all elements of an 1- or more-dimensional array,
+assumed to represent angles in degrees, to radians.
+
+
+@anchor{R_to_D}
+@item R_to_D()
+@findex R_to_D()
+Converts a number or all elements of an 1- or more-dimensional array,
+assumed to represent angles in radians, to degrees.
+
 
 @anchor{slice}
 @item slice()
