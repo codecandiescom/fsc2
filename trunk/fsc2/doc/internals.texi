@@ -584,7 +584,7 @@ Once a file has been read in the @code{Test} button gets activated.
 When it gets clicked on the function @code{test_file()} gets invoked and
 that's were things get interesting. As you will find over and over again
 in the program is starts with lots of testing and adjustments of the
-buttons of the main form. (If you should worry about lines like
+buttons of the main form. (Should you worry what the lines like
 @example
 notify_conn( BUSY_SIGNAL );
 @end example
@@ -593,9 +593,9 @@ notify_conn( BUSY_SIGNAL );
 notify_conn( UNBUSY_SIGNAL );
 @end example
 @noindent
-are about: these tell the child process listening for external
-connections that @code{fsc2} is at the moment too busy accepting a new
-@code{EDL} script and then that it's again prepared to load sucg a
+are about: they tell the child process listening for external
+connections that @code{fsc2} is at the moment too busy to accept new
+@code{EDL} scripts and then that it's again prepared to load such a
 script.)
 
 The real fun starts at the line
