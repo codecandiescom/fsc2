@@ -481,19 +481,20 @@ taken.
 @image{fsc2fig6,11cm,}
 
 @end ifnotinfo
-This axis area can also be used to choose a different cross
-section. When you press the left mouse button in that area
-the cursor changes to an arrow pointing to the left
+This z-axis area can also be used to choose a different cross
+section. When you press the left mouse button in that area the cursor
+changes to an arrow pointing to the left
 @ifnotinfo
 , @image{cursor8,5mm,},
 @end ifnotinfo
-and if you move the mouse (while keeping the button pressed down) new
-cross sections are displayed and the indicator gets redrawn at which
-position the current cross section was taken. If you want to run through
-all cross sections sequentially you can also use the up- and down-cursor
-keys on the keyboard. To get to the first cross section (i.e.@: the one
-at the lower end of the z-scale) press the @code{Page down} key, to get
-to the last press the @code{Page up} key.
+and if you move the mouse (while keeping the left mouse button pressed
+down) new cross sections are displayed corrseponding to the current
+mouse position (and the indicator gets redrawn at the position of the
+current cross section). If you want to run through all cross sections
+sequentially you can also use the up- and down-cursor keys. To get to
+the first cross section (i.e.@: the one at the lower end of the z-scale)
+press the @code{Page down} key, to get to the last press the @code{Page
+up} key.
 
 
 Of course, getting data values and differences between data as well as
