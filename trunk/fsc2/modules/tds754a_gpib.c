@@ -494,7 +494,7 @@ bool tds754a_clear_SESR( void )
 
 void tds754a_finished( void )
 {
-	const char *cmd = "*SRE 0;:ACQ:STOPA RUNST;STATE RUN:;LOC NON\n";
+	const char *cmd = "*SRE 0;:ACQ:STOPA RUNST;STATE RUN;:LOC NON\n";
 
 
 	if ( ! tds754a.is_reacting )
