@@ -2274,7 +2274,7 @@ Var *f_save( Var *v )
 				break;
 
 			case FLOAT_VAR :
-				if ( ! T_fprintf( file_num, "%#g\n", v->val.dval ) )
+				if ( ! T_fprintf( file_num, "%#.9g\n", v->val.dval ) )
 					THROW( EXCEPTION );
 				break;
 
@@ -2291,7 +2291,7 @@ Var *f_save( Var *v )
 				
 			case FLOAT_TRANS_ARR :
 				for ( i = 0; i < v->len; i++ )
-					if ( ! T_fprintf( file_num, "%#g\n", v->val.dpnt[ i ] ) )
+					if ( ! T_fprintf( file_num, "%#.9g\n", v->val.dpnt[ i ] ) )
 						THROW( EXCEPTION );
 				break;
 
@@ -2553,7 +2553,7 @@ Var *f_fsave( Var *v )
 					break;
 
 				case FLOAT_VAR :
-					strcpy( ep, "%#g" );
+					strcpy( ep, "%#.9g" );
 					T_fprintf( file_num, cp, cv->val.dval );
 					break;
 
