@@ -158,7 +158,7 @@ void spex_cd2a_set_wavelength( void )
 	/* When the wavelength or wavenumber is in absolute units we have to
 	   send the already offset-corrected wavelength or or wavenumber, but
 	   when in delta-wavenumber mode we have to remove the offset because
-	   it's already in the laser line position */
+	   it's already included in the laser line position */
 
 	if ( spex_cd2a.mode == WN )
 		spex_cd2a_print( mess + 2, 8,
@@ -183,9 +183,9 @@ void spex_cd2a_set_wavelength( void )
 }
 
 
-/*----------------------------*/
-/* Function for ending a scan */
-/*----------------------------*/
+/*------------------------------*/
+/* Function for stopping a scan */
+/*------------------------------*/
 
 void spex_cd2a_halt( void )
 {
@@ -195,9 +195,9 @@ void spex_cd2a_halt( void )
 }
 
 
-/*-----------------------------------------------*/
-/* Function for starting a (triggered burs) scan */
-/*-----------------------------------------------*/
+/*------------------------------------------------*/
+/* Function for starting a (triggered burst) scan */
+/*------------------------------------------------*/
 
 void spex_cd2a_start_scan( void )
 {
@@ -322,7 +322,7 @@ void spex_cd2a_scan_start( void )
 	/* When the wavelength or wavenumber is in absolute units we have to
 	   send the already offset-corrected wavelength or or wavenumber, but
 	   when in delta-wavenumber mode we have to remove the offset because
-	   it's already in the laser line position */
+	   it's already included in the laser line position */
 
 	if ( spex_cd2a.mode == WN )
 		spex_cd2a_print( mess + 2, 8,
@@ -345,7 +345,9 @@ void spex_cd2a_scan_start( void )
 
 /*---------------------------------------------------------------------*/
 /* Function for sending the end point of scans to the upper wavelength */
-/* and lower wavenumber limit.                                         */
+/* and lower wavenumber limit (since we never know the end point of a  */
+/* scan in advance the end point is set to the maximum wavelength or   */
+/* minimum wavenumber).                                                */
 /*---------------------------------------------------------------------*/
 
 static void spex_cd2a_scan_end( void )
@@ -368,7 +370,7 @@ static void spex_cd2a_scan_end( void )
 
 
 /*---------------------------------------------*/
-/* Function for setting the step size in scans */
+/* Function for setting the step size of scans */
 /*---------------------------------------------*/
 
 void spex_cd2a_scan_step( void )
@@ -653,8 +655,8 @@ static void spex_cd2a_read_ack( void )
 /* when it received a command. Most commands not only send an  */
 /* ACK/CAN sequence but also make the device transmit position */
 /* information until the command is executed. This function    */
-/* looks for the sequence to expected for a command, throwing  */
-/* an exception if it isn't coming from the device.            */
+/* looks for the sequence to be expected for a command,        */
+/* throwing an exception if it isn't coming from the device.   */
 /*-------------------------------------------------------------*/
 
 static void spex_cd2a_read_cmd_ack( const char *cmd )
