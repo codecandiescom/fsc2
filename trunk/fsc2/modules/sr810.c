@@ -11,10 +11,22 @@
 
 #define DEVICE_NAME "SR810"
 
-#define NUM_ADC_PORTS     4
-#define NUM_DAC_PORTS     4
-#define DAC_MAX_VOLTAGE   10.5
-#define DAC_MIN_VOLTAGE  -10.5
+#define NUM_ADC_PORTS         4
+#define NUM_DAC_PORTS         4
+#define DAC_MAX_VOLTAGE       10.5
+#define DAC_MIN_VOLTAGE      -10.5
+
+#define MAX_REF_FREQ          102000.0
+#define MIN_REF_FREQ          0.001
+
+#define REF_MODE_INTERNAL     1
+#define REF_MODE_EXTERNAL     0
+
+#define MAX_REF_LEVEL         5.0
+#define MIN_REF_LEVEL         4.0e-3
+
+#define MAX_HARMONIC          19999
+#define MIN_HARMONIC          1
 
 
 /* declaration of exported functions */
@@ -30,6 +42,9 @@ Var *lockin_set_dac_data( Var *v );
 Var *lockin_sensitivity( Var *v );
 Var *lockin_time_constant( Var *v );
 Var *lockin_phase( Var *v );
+Var *lockin_ref_freq( Var *v );
+Var *lockin_ref_mode( Var *v );
+Var *lockin_ref_level( Var *v );
 
 
 /* typedefs and global variables used only in this file */
@@ -43,7 +58,14 @@ typedef struct
 	bool P;
 	int TC;
 	bool TC_warn;
+	double ref_freq;
+	bool RF;
+	double ref_level;
+	bool RL;
+	long harmonic;
+	bool H;
 } SR810;
+
 
 static SR810 sr810;
 
@@ -75,6 +97,14 @@ static double sr810_get_tc( void );
 static void sr810_set_tc( int TC );
 static double sr810_get_phase( void );
 static double sr810_set_phase( double phase );
+static double sr810_get_ref_freq( void );
+static double sr810_set_ref_freq( double freq );
+static long sr810_get_ref_mode( void );
+static long sr810_get_harmonic( void );
+static long sr810_set_harmonic( long harmonic );
+static double sr810_get_ref_level( void );
+static double sr810_set_ref_level( double level );
+
 
 
 
@@ -100,6 +130,10 @@ int sr810_init_hook( void )
 	sr810.TC = -1;               /* no time constant has to be set at the */
 	sr810.TC_warn = UNSET;       /* start of the experiment and no warning */
 	                             /* concerning it has been printed yet */
+	sr810.RF = UNSET;            /* no reference frequency has to be set */
+	sr810.H = UNSET;             /* no harmonics has to be set */
+	sr810.RL = UNSET;            /* no rference level has to b set */
+
 	return 1;
 }
 
@@ -548,6 +582,143 @@ Var *lockin_phase( Var *v )
 }
 
 
+/*-----------------------------------------------------------------*/
+/* Sets or returns the lock-in reference frequency                 */
+/*-----------------------------------------------------------------*/
+
+Var *lockin_ref_freq( Var *v )
+{
+	long harm;
+	double freq;
+
+
+	/* Without an argument just return current phase settting */
+
+	if ( v == NULL )
+	{
+		if ( TEST_RUN )
+			return vars_push( FLOAT_VAR, 1.0e5 );
+		else
+		{
+			if ( I_am == PARENT )
+			{
+				eprint( FATAL, "%s:%ld: sr810: Function `lockin_ref_freq' "
+						"with no argument can only be used in the EXPERIMENT "
+						"section.", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+
+			return vars_push( FLOAT_VAR, sr810_get_ref_freq( ) );
+		}
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	freq = VALUE( v );
+	vars_pop( v );
+	
+	if ( sr810_get_ref_mode( ) != REF_MODE_INTERNAL )
+	{
+		eprint( FATAL, "%s:%ld: sr810: Can't set reference frequency while "
+				"reference source isn't internal.", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	if ( TEST_RUN )
+		harm = sr810.H ? sr810.harmonic : 1;
+	else
+		harm = sr810_get_harmonic( );
+
+	if ( freq < MIN_REF_FREQ || freq > MAX_REF_FREQ / ( double ) harm )
+	{
+		if ( harm == 1 )
+			eprint( FATAL, "%s:%ld: sr810: Reference frequency of %f Hz is "
+					"not within valid range (%f Hz - %f Hz).", Fname, Lc,
+					MIN_REF_FREQ, MAX_REF_FREQ );
+		else
+			eprint( FATAL, "%s:%ld: sr810: Reference frequency of %f Hz with "
+					"harmonic set to %ld is not within valid range "
+					"(%f Hz - %f Hz).", Fname, Lc, MIN_REF_FREQ,
+					MAX_REF_FREQ / ( double ) harm );
+		THROW( EXCEPTION );
+	}
+
+	if ( TEST_RUN )
+		return vars_push( FLOAT_VAR, freq );
+
+	if ( I_am == CHILD )                /* if called in EXPERIMENT section */
+		return vars_push( FLOAT_VAR, sr810_set_ref_freq( freq ) );
+	else                                /* if called in preparation sections */
+	{
+		sr810.ref_freq = freq;
+		sr810.RF = SET;
+		return vars_push( FLOAT_VAR, freq );
+	}
+}
+
+
+/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+
+Var *lockin_ref_mode( Var *v )
+{
+	v = v;
+	return vars_push( INT_VAR, sr810_get_ref_mode( ) );
+}
+
+
+/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+
+Var *lockin_ref_level( Var *v )
+{
+	double level;
+
+
+	if ( v == NULL )
+	{
+		if ( TEST_RUN )
+			return vars_push( FLOAT_VAR, 1.0 );
+		else
+		{
+			if ( I_am == PARENT )
+			{
+				eprint( FATAL, "%s:%ld: sr810: Function `lockin_ref_level' "
+						"with no argument can only be used in the EXPERIMENT "
+						"section.", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+
+			return vars_push( FLOAT_VAR, sr810_get_ref_level( ) );
+		}
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	level = VALUE( v );
+	vars_pop( v );
+	
+	if ( level < MIN_REF_LEVEL || level > MAX_REF_LEVEL )
+	{
+		eprint( FATAL, "%s:%ld: sr810: Reference level of %f V is not within "
+				"valid range (%f V - %f V).", Fname, Lc, MIN_REF_LEVEL,
+				MAX_REF_LEVEL );
+		THROW( EXCEPTION );
+	}
+
+	if ( TEST_RUN )
+		return vars_push( FLOAT_VAR, level );
+
+	if ( I_am == CHILD )                /* if called in EXPERIMENT section */
+		return vars_push( FLOAT_VAR, sr810_set_ref_level( level ) );
+	else                                /* if called in preparation sections */
+	{
+		sr810.ref_level = level;
+		sr810.RL = SET;
+		return vars_push( FLOAT_VAR, level );
+	}
+}
+
+
+
 /******************************************************/
 /* The following functions are only used internally ! */
 /******************************************************/
@@ -588,10 +759,16 @@ static bool sr810_init( const char *name )
 
 	if ( sr810.Sens != -1 )
 		sr810_set_sens( sr810.Sens );
-	if ( sr810.P == SET )
+	if ( sr810.P )
 		sr810_set_phase( sr810.phase );
 	if ( sr810.TC != -1 )
 		sr810_set_tc( sr810.TC );
+	if ( sr810.H )
+		sr810_set_harmonic( sr810.harmonic );
+	if ( sr810.RF )
+		sr810_set_ref_freq( sr810.ref_freq );
+	if ( sr810.RL )
+		sr810_set_ref_level( sr810.ref_level );
 
 	return OK;
 }
@@ -691,7 +868,7 @@ static void sr810_set_dac_data( long channel, double voltage )
 	char buffer [ 40 ] = "AUXV ";
 
 	assert( channel >= 1 && channel <= 4 );
-	assert( voltage >= -10.5 && voltage <= 10.5 );
+	assert( voltage >= DAC_MIN_VOLTAGE && voltage <= DAC_MAX_VOLTAGE );
 
 	sprintf( buffer + 5, "%ld,%f", channel, voltage );
 
@@ -806,7 +983,7 @@ static double sr810_get_phase( void )
 	double phase;
 
 
-	if ( gpib_write( sr810.device, "PHAS?\n", 5L ) == FAILURE ||
+	if ( gpib_write( sr810.device, "PHAS?", 5L ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
@@ -816,7 +993,7 @@ static double sr810_get_phase( void )
 	buffer[ length - 1 ] = '\0';
 	phase = T_atof( buffer );
 
-	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
+	while ( phase >= 360.0 )        /* convert to 0-359 degree range */
 		phase -= 360.0;
 
 	if ( phase < 0.0 )
@@ -840,7 +1017,7 @@ static double sr810_set_phase( double phase )
 	char buffer[ 20 ];
 
 
-	sprintf( buffer, "PHAS %.2f\n", phase );
+	sprintf( buffer, "PHAS %.2f", phase );
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
 		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
@@ -848,4 +1025,157 @@ static double sr810_set_phase( double phase )
 	}
 
 	return phase;
+}
+
+
+static double sr810_get_ref_freq( void )
+{
+	char buffer[ 40 ];
+	long length = 40;
+
+
+	if ( gpib_write( sr810.device, "FREQ?", 5L ) == FAILURE ||
+		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
+	{
+		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
+		THROW( EXCEPTION );
+	}
+
+	buffer[ length - 1 ] = '\0';
+	return T_atof( buffer );
+}
+
+
+/*---------------------------------------------------------------*/
+/* Functions sets the phase to a value between 0 and 360 degree. */
+/*---------------------------------------------------------------*/
+
+static double sr810_set_ref_freq( double freq )
+{
+	char buffer[ 40 ];
+	double real_freq;
+
+
+	sprintf( buffer, "FREQ %.4f", freq );
+	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
+	{
+		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
+		THROW( EXCEPTION );
+	}
+
+	/* Take care: The product of the harmonic and the reference frequency
+	   can't be larger than 102 kHz, otherwise the reference frequency is
+	   reduced to a value that fits this restriction. Thus we better check
+	   which value has been really set... */
+
+	real_freq = sr810_get_ref_freq( );
+	if ( ( real_freq - freq ) / freq > 1.0e-4 && real_freq - freq > 1.0e-4 )
+	{
+		eprint( FATAL, "sr810: Failed to set reference frequency to %f Hz.",
+				freq );
+		THROW( EXCEPTION );
+	}
+
+	return real_freq;
+}
+
+
+static long sr810_get_ref_mode( void )
+{
+	char buffer[ 10 ];
+	long length = 10;
+
+
+	if ( gpib_write( sr810.device, "FMOD?", 5L ) == FAILURE ||
+		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
+	{
+		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
+		THROW( EXCEPTION );
+	}
+
+	buffer[ length - 1 ] = '\0';
+	return T_atol( buffer );
+}
+
+
+static long sr810_get_harmonic( void )
+{
+	char buffer[ 20 ];
+	long length = 20;
+
+
+	if ( gpib_write( sr810.device, "HARM?", 5L ) == FAILURE ||
+		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
+	{
+		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
+		THROW( EXCEPTION );
+	}
+
+	buffer[ length - 1 ] = '\0';
+	return  T_atol( buffer );
+}
+
+
+static long sr810_set_harmonic( long harmonic )
+{
+	char buffer[ 20 ];
+
+
+	assert( harmonic >= MIN_HARMONIC && harmonic <= MAX_HARMONIC );
+
+	sprintf( buffer, "HARM %ld", harmonic );
+	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
+	{
+		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
+		THROW( EXCEPTION );
+	}
+
+	/* Take care: The product of the harmonic and the reference frequency
+	   can't be larger than 102 kHz, otherwise the harmonic is reduced to a
+	   value that fits this restriction. So we better check on the value
+	   that has been really set... */
+
+	if ( harmonic != sr810_get_harmonic( ) )
+	{
+		eprint( FATAL, "sr810: Failed to set harmonic to %ld.", harmonic );
+		THROW( EXCEPTION );
+	}
+
+	return harmonic;
+}
+
+
+static double sr810_get_ref_level( void )
+{
+	char buffer[ 20 ];
+	long length = 20;
+
+
+	if ( gpib_write( sr810.device, "SLVL?", 5L ) == FAILURE ||
+		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
+	{
+		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
+		THROW( EXCEPTION );
+	}
+
+	buffer[ length - 1 ] = '\0';
+	return T_atof( buffer );
+}
+
+
+static double sr810_set_ref_level( double level )
+{
+	char buffer[ 50 ];
+
+
+	assert( level >= MIN_REF_LEVEL && level <= MAX_REF_LEVEL );
+
+	sprintf( buffer, "SLVL %f", level );
+	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
+	{
+		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
+		THROW( EXCEPTION );
+	}
+
+	return level;
 }
