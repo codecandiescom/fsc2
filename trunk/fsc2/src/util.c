@@ -75,7 +75,10 @@ char *get_string( const char *fmt, ... )
 		break;
 	}
 
-	if ( ( size_t ) wr + 1 < len )  /* trim string to number of needed chars */
+	/* Trim the string to the number of required characters (only needed for
+	   older glibc, up to 2.0.6). */
+
+	if ( ( size_t ) wr + 1 < len )
 		T_realloc( c, ( size_t ) wr + 1 );
 
 	return c;

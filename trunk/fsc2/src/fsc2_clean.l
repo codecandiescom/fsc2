@@ -862,8 +862,8 @@ static void lower_permissions( void )
 
 static ssize_t output( const char *fmt, ... )
 {
-	char *c = NULL;
-	size_t len = OUTPUT_TRY_LENGTH;
+	static char *c = NULL;
+	static size_t len = OUTPUT_TRY_LENGTH;
 	va_list ap;
 	int wr;
 	size_t bytes_to_write;
@@ -871,27 +871,29 @@ static ssize_t output( const char *fmt, ... )
 	size_t already_written = 0;
 
 
+	if ( c == NULL )
+		c = CHAR_P T_malloc( len );
 
 	while ( 1 )
 	{
-		c = CHAR_P T_realloc( c, len );
 		va_start( ap, fmt );
 		wr = vsnprintf( c, len, fmt, ap );
 		va_end( ap );
 
-		if ( wr < 0 )         /* indicates not enough space with older glibs */
-		{
+		/* Older versions of glibc return a negativ value when there wasn't
+		   enough space in the output string, newer ones return the number
+		   of chars required, not counting the trailing '\0'. */
+
+		if ( wr >= 0 && ( size_t ) wr + 1 <= len )
+			break;
+
+		if ( wr < 0 )                    /* for older glibcs */
 			len *= 2;
-			continue;
-		}
 
-		if ( ( size_t ) wr + 1 > len )   /* newer glibs return the number of */
-		{	                             /* chars needed, not counting the   */
-			len = wr + 1;                /* trailing '\0'                    */
-			continue;
-		}
+		if ( ( size_t ) wr + 1 > len )   /* for newer glibcs */
+			len = wr + 1;
 
-		break;
+		c = CHAR_P T_realloc( c, len );
 	}
 
 	bytes_to_write = strlen( c );
@@ -915,7 +917,6 @@ static ssize_t output( const char *fmt, ... )
 		already_written += bytes_written;
 	}
 
-	T_free( c );
 	return bytes_written;
 }
 
