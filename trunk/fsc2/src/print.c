@@ -884,6 +884,7 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 			T_free( label );
 			TRY_SUCCESS;
 		}
+		CATCH( OUT_OF_MEMORY_EXCEPTION ) { }
 
 		y = y_0;
 
@@ -936,6 +937,7 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 			T_free( label );
 			TRY_SUCCESS;
 		}
+		CATCH( OUT_OF_MEMORY_EXCEPTION ) { }
 
 		x = x_0;
 
@@ -967,6 +969,7 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 		x = x_0 + w + 17.0;
 
 		if ( G.label[ Z ] != NULL )
+		{
 			TRY
 			{
 				label = paren_replace( G.label[ Z ] );
@@ -976,6 +979,8 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 				T_free( label );
 				TRY_SUCCESS;
 			}
+			CATCH( OUT_OF_MEMORY_EXCEPTION ) { }
+		}
 
 		/* Make the color scale */
 
