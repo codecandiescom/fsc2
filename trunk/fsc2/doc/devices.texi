@@ -5369,9 +5369,9 @@ experiment is started.
 @anchor{chopper_create_trigger}
 @item chopper_create_trigger()
 @findex chopper_create_trigger()
-This function makes the electronics controlling the chopper create a TTL
-trigger pulse the next time the light path gets opened, e.g.@: to
-trigger an acquisition.
+This function makes the electronics controlling the chopper create a
+@code{TTL} trigger pulse the next time the light path gets opened,
+e.g.@: to trigger an acquisition.
 
 
 @end table

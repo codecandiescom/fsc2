@@ -707,9 +707,9 @@ the range is @w{1460 G} to @w{19900 G}.
 
 @paragraphindent 0
 @strong{Description}: Light chopper used in the group of G.@: Gescheidt
-(University of Graz, Austria). This module doesn't control the device
-directly but, via some homebuild electronics, by using a data
-acquisition card, currently the National Instruments PCI-MIO-16E-4 DAQ
+(Graz University of Technology, Austria). This module doesn't control
+the device directly but, via some homebuild electronics, by using a data
+acquisition card, currently the National Instruments PCI-MIO-16E-1 DAQ
 card.
 
 @paragraphindent 0
