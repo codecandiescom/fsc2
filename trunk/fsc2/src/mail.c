@@ -370,11 +370,11 @@ static int do_send( const char *rec_host, const char *to,
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Function for making a connection to the machine prepared to receive mail */
-/* for the domain passed to the function in 'remote'. The function also     */
-/* needs to know about the local machine avoid creating a loop.             */
-/*--------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* Function for making a connection to a machine prepared to receive mail */
+/* for the domain passed to the function in 'remote'. The function also   */
+/* needs to know about the local machine avoid creating a loop.           */
+/*------------------------------------------------------------------------*/
 
 static int open_mail_socket( const char *remote, const char *local )
 {
