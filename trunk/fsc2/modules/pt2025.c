@@ -52,7 +52,7 @@ Var *gaussmeter_command( Var *v );
 static bool pt2025_init( const char *name );
 static double pt2025_get_field( void );
 static void pt2025_set_resolution( int res );
-static bool pt2005_command( const char *cmd );
+static bool pt2025_command( const char *cmd );
 
 
 #define PROBE_ORIENTATION_PLUS       0
