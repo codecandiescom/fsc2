@@ -190,8 +190,8 @@ void new_data_handler( int sig_type, void *data )
 	else
 	{
 		Message_Queue[ message_queue_high ].shm_id = Key->shm_id;
-		Message_Queue[ message_queue_high++ ].type = Key->type;
-		message_queue_high %= QUEUE_SIZE;
+		Message_Queue[ message_queue_high ].type = Key->type;
+		message_queue_high = ( message_queue_high + 1 ) % QUEUE_SIZE;
 		fl_trigger_object( run_form->redraw_dummy);
 
 		if ( Key->type == DATA )
