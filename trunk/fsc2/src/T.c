@@ -86,7 +86,7 @@ long T_atol( const char *txt )
 	long ret;
 
 
-	ret = T_atol( txt );
+	ret = strtol( txt, NULL, 10 );
 	if ( errno == ERANGE )
 	{
 		eprint( FATAL, "%s:%ld: Integer number out of range: "
