@@ -591,7 +591,7 @@ bool dl_fsc2_rsc( void )
 	{
 		lib_name = get_string( "%s%sfsc2_rsc_%cr.so", libdir, slash( libdir ),
 							   GUI.G_Funcs.size == LOW ? 'l' : 'h' );
-		handle = dlopen( lib_name, RTLD_NOW );
+		handle = dlopen( lib_name, RTLD_LAZY );
 	}
 
 	if ( handle == NULL )
