@@ -325,7 +325,12 @@ void hfs9000_dump_channels( FILE *fp )
 		if ( ! f->is_needed )
 			continue;
 
-		fprintf( fp, "%s:%d", f->name, f->channel->self );
+		if ( f->channel->self == HFS9000_TRIG_OUT )
+			fprintf( fp, "%s:TRIG_OUT", f->name );
+		else
+			fprintf( fp, "%s:%c%c", f->name,
+					 CHANNEL_LETTER( f->channel->self ),
+					 CHANNEL_NUMBER( f->channel->self ) );
 		for ( k = 0; k < f->num_active_pulses; k++ )
 			fprintf( fp, " %ld %ld %ld",
 					 f->pulses[ k ]->num,
