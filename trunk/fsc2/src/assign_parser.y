@@ -400,19 +400,15 @@ list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
 /* list of function arguments */
 
 list2:   /* empty */
-       | ','                       { print( FATAL, "Semicolon at start of "
-											"function argument list.\n" );
-									 THROW( EXCEPTION ); }
-       | exprs
-	   | list2 ',' exprs
+       | exprs list3
 ;
+
+list3:   /* empty */
+       | list3 ',' exprs
+
 
 exprs:   expr                      { }
        | STR_TOKEN                 { vars_push( STR_VAR, $1 ); }
-	   | ','                       { print( FATAL, "Two semicolons without a "
-											"value in between in function "
-											"argument list.\n" );
-	   								 THROW( EXCEPTION ); }
 ;
 
 /* separator between keyword and value */
