@@ -8,6 +8,10 @@
 #include "gpib_if.h"
 
 
+int gpib_read_w( int device, char *buffer, long *length );
+
+
+
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
@@ -24,8 +28,7 @@ bool tds754a_init( const char *name )
 
     /* Set digitizer to short form of replies */
 
-    if ( gpib_write( tds754a.device, "VERB OFF\n" ) == FAILURE ||
-         gpib_write( tds754a.device, "HEAD OFF\n" ) == FAILURE )
+    if ( gpib_write( tds754a.device, "*CLS;:VERB OFF;:HEAD OFF\n" )== FAILURE )
 	{
 		gpib_local( tds754a.device );
         return FAIL;
@@ -34,7 +37,7 @@ bool tds754a_init( const char *name )
     /* Get record length and trigger position */
 
     if ( ! tds754a_get_record_length( &tds754a.rec_len ) ||
-         ! tds754a_get_trigger_pos( &tds754a.trig_pos ) )
+		 ! tds754a_get_trigger_pos( &tds754a.trig_pos ) )
 	{
 		gpib_local( tds754a.device );
         return FAIL;
@@ -122,7 +125,7 @@ double tds754a_get_timebase( void )
 
 
 	if ( gpib_write( tds754a.device, "HOR:MAI:SCA?\n" ) == FAILURE ||
-		 gpib_read( tds754a.device, reply, &length ) == FAILURE )
+		 gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	reply[ length - 1 ] = '\0';
@@ -155,14 +158,17 @@ bool tds754a_get_record_length( long *ret )
 {
     char reply[ 30 ];
     long length = 30;
+	char *r = reply;
 
 
     if ( gpib_write( tds754a.device, "HOR:RECO?\n" ) == FAILURE ||
-         gpib_read( tds754a.device, reply, &length ) == FAILURE )
+         gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
         return FAIL;
 
     reply[ length - 1 ] = '\0';
-    *ret = T_atol( reply );
+	while ( ! isdigit( *r ) && *r++ )
+		;
+    *ret = T_atol( r );
     return OK;
 }
 
@@ -177,7 +183,7 @@ bool tds754a_get_trigger_pos( double *ret )
 
 
     if ( gpib_write( tds754a.device, "HOR:TRIG:POS?\n" ) == FAILURE ||
-         gpib_read( tds754a.device, reply, &length ) == FAILURE )
+         gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
         return FAIL;
 
     reply[ length - 1 ] = '\0';
@@ -199,7 +205,7 @@ long tds754a_get_num_avg( void )
 	if ( tds754a_get_acq_mode( ) == AVERAGE )
 	{
 		if ( gpib_write( tds754a.device,"ACQ:NUMAV?\n" ) == FAILURE ||
-			 gpib_read( tds754a.device, reply, &length) == FAILURE )
+			 gpib_read_w( tds754a.device, reply, &length) == FAILURE )
 			tds754a_gpib_failure( );
 
 		reply[ length - 1 ] = '\0';
@@ -264,7 +270,7 @@ int tds754a_get_acq_mode( void )
 
 
 	if ( gpib_write( tds754a.device, "ACQ:MOD?\n" ) == FAILURE ||
-		 gpib_read ( tds754a.device, reply, &length ) == FAILURE )
+		 gpib_read_w ( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	if ( *reply == 'A' )		/* digitizer is in average mode */
@@ -285,7 +291,7 @@ int tds754a_get_acq_mode( void )
 
 bool tds754a_get_cursor_position( int cur_no, double *cp )
 {
-	char cmd[ 30 ] = "CURS:VBA:POSITION";
+	char cmd[ 40 ] = "CURS:VBA:POSITION";
     char reply[ 30 ];
     long length = 30;
 
@@ -293,7 +299,7 @@ bool tds754a_get_cursor_position( int cur_no, double *cp )
 
 	strcat( cmd, cur_no == 1 ? "1?\n" : "2?\n" );
     if ( gpib_write( tds754a.device, cmd ) == FAILURE ||
-         gpib_read( tds754a.device, reply, &length ) == FAILURE )
+         gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
@@ -349,8 +355,8 @@ int tds754a_get_trigger_channel( void )
     long length = 30;
 
 
-    if ( gpib_write( tds754a.device, "TRIG:MAI:EDGE:SOU?\n" ) == FAILURE ||
-		 gpib_read( tds754a.device, reply, &length ) == FAILURE )
+    if ( gpib_write( tds754a.device, "TRIG:MAI:EDGE:SOU?\n" ) == FAILURE
+		 || gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
     reply[ 3 ] = '\0';
@@ -389,7 +395,7 @@ bool tds754a_clear_SESR( void )
 
 
     if ( gpib_write( tds754a.device, "*ESR?\n" ) == FAILURE ||
-		 gpib_read( tds754a.device, reply, &length ) == FAILURE )
+		 gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	return OK;
@@ -515,7 +521,7 @@ bool tds754a_display_channel( int channel )
 
 	sprintf( cmd, "SEL:%s?\n", Channel_Names[ channel ] );
     if ( gpib_write( tds754a.device, cmd ) == FAILURE ||
-         gpib_read( tds754a.device, reply, &length ) == FAILURE )
+         gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
     /* if not switch it on */
@@ -536,7 +542,7 @@ bool tds754a_display_channel( int channel )
 
 double tds754a_get_sens( int channel )
 {
-    char cmd[ 20 ];
+    char cmd[ 30 ];
     char reply[ 30 ];
     long length = 30;
 
@@ -545,7 +551,7 @@ double tds754a_get_sens( int channel )
 
 	sprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
 	if ( gpib_write( tds754a.device, cmd ) == FAILURE ||
-		 gpib_read( tds754a.device, reply, &length ) == FAILURE )
+		 gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
@@ -614,15 +620,15 @@ double tds754a_get_area( int channel, WINDOW *w )
 		length = 40;
 		usleep( 100000 );
 		if ( gpib_write( tds754a.device, "BUSY?\n" ) == FAILURE ||
-			 gpib_read( tds754a.device, reply, &length ) == FAILURE )
-			tds520a_gpib_failure( );
+			 gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
+			tds754a_gpib_failure( );
 	} while ( reply[ 0 ] == '1' ); 
 
 	/* Get the the area */
 
 	length = 40;
-	if ( gpib_write( tds754a.device, "MEASU:IMM:VAL?\n" ) == FAILURE ||
-		 gpib_read( tds754a.device, reply, &length ) == FAILURE )
+	if ( gpib_write( tds754a.device, "*WAI;:MEASU:IMM:VAL?\n" ) == FAILURE ||
+		 gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	reply[ length - 1 ] = '\0';
@@ -671,26 +677,26 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length )
 		len = 10;
 		usleep( 100000 );
 		if ( gpib_write( tds754a.device, "BUSY?\n" ) == FAILURE ||
-			 gpib_read( tds754a.device, reply, &len ) == FAILURE )
-			tds520a_gpib_failure( );
+			 gpib_read_w( tds754a.device, reply, &len ) == FAILURE )
+			tds754a_gpib_failure( );
 	} while ( reply[ 0 ] == '1' ); 
 
 	/* Ask digitizer to send the curve */
 
-	if ( gpib_write( tds754a.device, "CURV?\n" ) == FAILURE )
+	if ( gpib_write( tds754a.device, "*WAI;:CURV?\n" ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	/* Read just the first two bytes, these are a '#' character plus the
 	   number of digits of the following number */
 
 	len = 2;
-	if ( gpib_read( tds754a.device, reply, &len ) == FAILURE )
+	if ( gpib_read_w( tds754a.device, reply, &len ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	/* Get the number of data bytes to follow */
 
 	len = ( long ) ( reply[ 1 ] - '0' );
-	if ( gpib_read( tds754a.device, reply, &len ) == FAILURE )
+	if ( gpib_read_w( tds754a.device, reply, &len ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	reply[ len ] = '\0';
@@ -707,7 +713,7 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length )
 	/* Now get all the data bytes... */
 
 	len = len + 1;
-	if ( gpib_read( tds754a.device, buffer, &len ) == FAILURE )
+	if ( gpib_read_w( tds754a.device, buffer, &len ) == FAILURE )
 	{
 		T_free( buffer );
 		T_free( *data );
@@ -728,4 +734,17 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length )
 	T_free( buffer );
 
 	return OK;
+}
+
+
+/*-------------------------------------------------------------------------*/
+/* Unfortunately, the digitizer sometimes seems to have problems returning */
+/* data when there's not a short delay between the write and read command. */
+/* I found empirically that waiting 2 ms seems to get rid of the problem.  */
+/*-------------------------------------------------------------------------*/
+
+int gpib_read_w( int device, char *buffer, long *length )
+{
+	usleep( 2000 );
+	return gpib_read( device, buffer, length );
 }
