@@ -232,8 +232,13 @@ void death_mail( int signo )
 		 == NULL )
 		return;
 
+#if defined _GNU_SOURCE
 	fprintf( mail, "fsc2 (%d, %s) killed by %s signal.\n\n", getpid( ),
 			 I_am == CHILD ? "CHILD" : "PARENT", strsignal( signo ) );
+#else
+	fprintf( mail, "fsc2 (%d, %s) killed by signal %d.\n\n", getpid( ),
+			 I_am == CHILD ? "CHILD" : "PARENT", signo );
+#endif
 
 #ifndef NDEBUG
 	if ( signo == SIGABRT )

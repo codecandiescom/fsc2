@@ -90,7 +90,7 @@ void DumpStack( void )
 	/* Don't crash on SIGPIPE if child process fails to exec (in this case
 	   the output will only contain the addresses) */
 
-	sact.sa_handler = SIG_IGN;
+	sact.sa_handler = ( void ( * )( int ) ) SIG_IGN;
 	sact.sa_flags = 0;
 	sigaction( SIGPIPE, &sact, NULL );
 

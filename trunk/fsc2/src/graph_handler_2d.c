@@ -1674,7 +1674,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 	{
 		/* Draw coloured line of scale */
 
-		y = G.x_scale_offset;
+		y = i2shrt( G.x_scale_offset );
 		XSetForeground( G.d, cv->gc,
 						fl_get_pixel( G.colors[ G.active_curve ] ) );
 		XFillRectangle( G.d, c->pm, cv->gc, 0, y - 2, c->w, 3 );
@@ -1701,7 +1701,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 					XDrawString( G.d, c->pm, c->font_gc, x - width / 2,
 								 y + G.label_dist + G.font_asc, lstr,
 								 strlen( lstr ) );
-					last = x + width / 2;
+					last = i2shrt( x + width / 2 );
 				}
 			}
 			else if ( medium % medium_factor == 0 )    /* medium line */
@@ -1716,7 +1716,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 	{
 		/* Draw coloured line of scale */
 
-		x = c->w - G.y_scale_offset;
+		x = i2shrt( c->w - G.y_scale_offset );
 		XSetForeground( G.d, cv->gc,
 						fl_get_pixel( G.colors[ G.active_curve ] ) );
 		XFillRectangle( G.d, c->pm, cv->gc, x, 0, 3, c->h );
@@ -1754,7 +1754,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 	{
 		/* Draw coloured line of scale */
 
-		x = G.z_scale_offset;
+		x = i2shrt( G.z_scale_offset );
 		XSetForeground( G.d, cv->gc,
 						fl_get_pixel( G.colors[ G.active_curve ] ) );
 		XFillRectangle( G.d, c->pm, cv->gc, x - 2, 0, 3, c->h );

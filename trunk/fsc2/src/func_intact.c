@@ -2758,7 +2758,7 @@ static bool check_format_string( const char *buf )
 	while ( isdigit( *bp ) )
 		bp++;
 
-	return ( bool ) ( lcp == bp );
+	return lcp == bp ? OK : FAIL;
 }
 
 

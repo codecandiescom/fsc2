@@ -729,7 +729,7 @@ static void cut_recalc_XPoints( void )
 			continue;
 
 		xp->x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
-		xp->y = ( short ) G.cut_canvas.h - 1 -
+		xp->y = i2short( G.cut_canvas.h ) - 1 -
 			   d2shrt( cv->s2d[ Y ] * ( cv->points[ j ].v + cv->shift[ Y ] ) );
 		sp->xp_ref = k;
 
@@ -906,7 +906,7 @@ bool cut_data_rescaled( long curve, double y_min, double y_max )
 			{
 				sp->v = ssp->v;
 				cv->xpoints[ sp->xp_ref ].y =
-					( short ) G.cut_canvas.h - 1
+					i2shrt( G.cut_canvas.h ) - 1
 					     - d2shrt( cv->s2d[ Y ] * ( sp->v + cv->shift[ Y ] ) );
 			}
 	}
@@ -918,7 +918,7 @@ bool cut_data_rescaled( long curve, double y_min, double y_max )
 			{
 				sp->v = ssp->v;
 				cv->xpoints[ sp->xp_ref ].y =
-					( short ) G.cut_canvas.h - 1
+					i2shrt( G.cut_canvas.h )- 1
 					     - d2shrt( cv->s2d[ Y ] * ( sp->v + cv->shift[ Y ] ) );
 			}
 	}
@@ -1118,7 +1118,7 @@ static void cut_integrate_point( long p_index, double val )
 	/* Calculate the y-coordinate of the (new) point and figure out if it
 	   exceeds the borders of the canvas */
 
-	cv->xpoints[ xp_index ].y = ( short ) G.cut_canvas.h - 1
+	cv->xpoints[ xp_index ].y = i2shrt( G.cut_canvas.h ) - 1
 		            - d2shrt( cv->s2d[ Y ]
 							  * ( cv->points[ p_index ].v + cv->shift[ Y ] ) );
 
@@ -2217,7 +2217,7 @@ static void cut_make_scale( Canvas *c, int coord )
 	{
 		/* Draw coloured line of scale */
 
-		y = G.x_scale_offset;
+		y = i2shrt( G.x_scale_offset );
 		XFillRectangle( G.d, c->pm, cv->gc, 0, y - 2, c->w, 3 );
 
 		/* Draw all the ticks and numbers */
@@ -2242,7 +2242,7 @@ static void cut_make_scale( Canvas *c, int coord )
 					XDrawString( G.d, c->pm, c->font_gc, x - width / 2,
 								 y + G.label_dist + G.font_asc, lstr,
 								 strlen( lstr ) );
-					last = x + width / 2;
+					last = i2shrt( x + width / 2 );
 				}
 			}
 			else if ( medium % medium_factor == 0 )    /* medium line */
@@ -2257,7 +2257,7 @@ static void cut_make_scale( Canvas *c, int coord )
 	{
 		/* Draw coloured line of scale */
 
-		x = c->w - G.y_scale_offset;
+		x = ishrt( c->w - G.y_scale_offset );
 		XFillRectangle( G.d, c->pm, cv->gc, x, 0, 3, c->h );
 
 		/* Draw all the ticks and numbers */
@@ -2293,7 +2293,7 @@ static void cut_make_scale( Canvas *c, int coord )
 	{
 		/* Draw coloured line of scale */
 
-		x = G.z_scale_offset;
+		x = i2shrt( G.z_scale_offset );
 		XFillRectangle( G.d, c->pm, cv->gc, x - 2, 0, 3, c->h );
 
 		/* Draw all the ticks and numbers */
@@ -2327,7 +2327,7 @@ static void cut_make_scale( Canvas *c, int coord )
 
 		/* Finally draw the triangle indicating the position of the cut */
 
-		triangle[ 0 ].x = x - G.long_tick_len - 3;
+		triangle[ 0 ].x = i2shrt( x - G.long_tick_len - 3 );
 		if ( CG.cut_dir == X )
 			triangle[ 0 ].y = d2shrt( ( G.cut_z_axis.h - 1 ) *
 					 ( 1.0 - ( double ) CG.index / ( double ) ( G.nx - 1 ) ) );
@@ -2335,9 +2335,9 @@ static void cut_make_scale( Canvas *c, int coord )
 			triangle[ 0 ].y = d2shrt( ( G.cut_z_axis.h - 1 ) *
 					 ( 1.0 - ( double ) CG.index / ( double ) ( G.ny - 1 ) ) );
 		triangle[ 1 ].x = - ( G.z_scale_offset - G.long_tick_len - 10 );
-		triangle[ 1 ].y = - G.long_tick_len / 3;
+		triangle[ 1 ].y = i2shrt( - G.long_tick_len / 3 );
 		triangle[ 2 ].x = 0;
-		triangle[ 2 ].y = 2 * ( G.long_tick_len / 3 );
+		triangle[ 2 ].y = i2shrt( 2 * ( G.long_tick_len / 3 ) );
 		XFillPolygon( G.d, c->pm, G.curve_2d[ 0 ]->gc, triangle, 3,
 					  Convex, CoordModePrevious );
 	}
