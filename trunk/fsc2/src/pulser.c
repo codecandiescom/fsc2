@@ -16,7 +16,7 @@ static PHS phs[ 2 ];
 static Cur_PHS = -1;
 
 
-*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
 /* Function clears the complete pulser structure, that has to be */
 /* set up by the init_hook( ) function of the pulser driver      */
 /*---------------------------------------------------------------*/
