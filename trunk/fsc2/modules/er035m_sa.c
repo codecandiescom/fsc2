@@ -321,12 +321,12 @@ try_again:
 
 	if ( nmr.state != ER035M_SA_LOCKED )
 	{
-		v = find_field( NULL );
+		v = measure_field( NULL );
 		nmr.field = v->val.dval;
 		vars_pop( v );
 	}
 	else
-		nmr.field = er035m_SA_get_field( );
+		nmr.field = er035m_sa_get_field( );
 
 	return 1;
 }
