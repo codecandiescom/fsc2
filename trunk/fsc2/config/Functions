@@ -228,6 +228,8 @@ synthesizer_command, 1, EXP;
 boxcar_name, 0, ALL;
 boxcar_curve_length, -1, EXP;
 boxcar_get_curve, -1, EXP;
+boxcar_start_acquisition, 0, EXP;
+boxcar_stop_acquisition, 0, EXP;
 boxcar_command, 1, EXP;
 
 

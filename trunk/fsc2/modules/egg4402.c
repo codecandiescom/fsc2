@@ -44,13 +44,15 @@ int egg4402_end_of_exp_hook( void );
 Var *boxcar_name( Var *v );
 Var *boxcar_curve_length( Var *v );
 Var *boxcar_get_curve( Var *v );
+Var *boxcar_start_acquisition( Var *v );
+Var *boxcar_stop_acquisition( Var *v );
 Var *boxcar_command( Var *v);
 
 /* Locally used functions */
 
 static bool egg4402_init( const char *name );
 static void egg4402_failure( void );
-static void egg4402_query( char *buffer, long *length );
+static void egg4402_query( char *buffer, long *length, bool wait_for_stop );
 static bool egg4402_command( const char *cmd );
 
 
@@ -150,7 +152,7 @@ Var *boxcar_curve_length( Var *v )
 			return vars_push( INT_VAR, EGG4402_TEST_CURVE_LENGTH );
 
 		egg4402_command( "CL\n" );
-		egg4402_query( buffer, &length );
+		egg4402_query( buffer, &length, UNSET );
 
 		buffer[ length - 1 ] = '\0';
 		return vars_push( INT_VAR, T_atol( buffer ) );
@@ -374,7 +376,7 @@ Var *boxcar_get_curve( Var *v )
 #endif
 #endif
 
-		egg4402_query( ( char * ) buffer, &length );
+		egg4402_query( ( char * ) buffer, &length, curve_type ? UNSET : SET );
 		gpib_timeout( egg4402.device, old_timo );
 		TRY_SUCCESS;
 	}
@@ -418,6 +420,30 @@ Var *boxcar_get_curve( Var *v )
 	return cl;
 }
 
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *boxcar_start_acquisition( Var *v )
+{
+	if ( FSC2_MODE == EXPERIMENT )
+		egg4402_command( "START\n" );
+
+	return vars_push( INT_VAR, 1L );
+}
+	
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *boxcar_stop_acquisition( Var *v )
+{
+	if ( FSC2_MODE == EXPERIMENT )
+		egg4402_command( "STOP\n" );
+
+	return vars_push( INT_VAR, 1L );
+}
+	
 
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
@@ -479,21 +505,24 @@ static void egg4402_failure( void )
 /*--------------------------------------------------*/
 /*--------------------------------------------------*/
 
-static void egg4402_query( char *buffer, long *length )
+static void egg4402_query( char *buffer, long *length, bool wait_for_stop )
 {
 	unsigned char stb;
 	long dummy = 1;
 
 
+	/* Before trying to read anything from the device check that both the
+	   COMMAND DONE and the OUTPUT READY bits are reset. If 'wait_for_stop'
+	   is set wait also for the CURVE NOT RUNNING bit to become set. */
+
 	do
 	{
 		stop_on_user_request( );
-
 		fsc2_usleep( 100000, UNSET );
-
 		if ( gpib_serial_poll( egg4402.device, &stb ) == FAILURE )
 			egg4402_failure( );
-	} while ( ! ( stb & 0x80 ) && ! ( stb & 1 ) );
+	} while ( ( ! ( stb & 0x80 ) && ! ( stb & 1 ) ) ||
+			  ( wait_for_stop && ! ( stb & 4 ) ) );
 
 	if ( gpib_read( egg4402.device, buffer, length ) == FAILURE )
 		egg4402_failure( );
