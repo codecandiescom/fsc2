@@ -96,17 +96,18 @@ bool hfs9000_set_pulse_function( long pnum, int function )
 	   TRIGGER_OUT channel and its length has to be either zero or equal the
 	   pulsers timebase */
 
-	if ( hfs9000.function[ function ].channel->self == HFS9000_TRIG_OUT )
+	if ( hfs9000.function[ function ].channel &&
+		 hfs9000.function[ function ].channel->self == HFS9000_TRIG_OUT )
 	{
 		for ( ; pl != NULL; pl = pl->next )
 		{
-			if ( ! pl->is_function )
+			if ( ! pl->is_function || ! pl->function->channel )
 				continue;
 
 			if ( pl->function->channel->self == HFS9000_TRIG_OUT )
 			{
 				eprint( FATAL, "%s:%ld: %s: There can be only one pulse for "
-						"the TRIGGER_OUT channel.\n", Fname, Lc,
+						"the Trigger Out channel.\n", Fname, Lc,
 						pulser_struct.name );
 				THROW( EXCEPTION );
 			}
@@ -114,15 +115,18 @@ bool hfs9000_set_pulse_function( long pnum, int function )
 
 		if ( p->is_len && p->len > 1 )
 		{
-			eprint( FATAL, "%s:%ld: %s: Length of trigger out pulse has to be "
-					"either 0 or %s.\n", Fname, Lc, pulser_struct.name,
-					hfs9000_ptime( hfs9000.timebase ) );
-			THROW( EXCEPTION );
+			p->len = 1;
+			if ( p->real_len > 1.01 * HFS9000_TRIG_OUT_PULSE_LEN ||
+				 p->real_len < 0.99 * HFS9000_TRIG_OUT_PULSE_LEN )
+				eprint( WARN, "%s:%ld: %s: Length of Trigger Out pulse has "
+						"been adjusted to fixed length of %s.\n", Fname, Lc,
+						pulser_struct.name,
+						hfs9000_ptime( HFS9000_TRIG_OUT_PULSE_LEN ) );
 		}
 
 		if ( p->is_dlen )
 		{
-			eprint( FATAL, "%s:%ld: %s: Trigger out pulses are not allowed to "
+			eprint( FATAL, "%s:%ld: %s: Trigger Out pulses are not allowed to "
 					"have a pulse length change set.\n", Fname, Lc,
 					pulser_struct.name );
 			THROW( EXCEPTION );
@@ -204,17 +208,12 @@ bool hfs9000_set_pulse_length( long pnum, double time )
 		THROW( EXCEPTION );
 	}
 
-	if ( p->function != NULL && p->function->self == HFS9000_TRIG_OUT &&
-		 ( time > 1.01 * HFS9000_TRIG_OUT_PULSE_LEN ||
-		   time < 0.99 * HFS9000_TRIG_OUT_PULSE_LEN )
-	{
-		eprint( FATAL, "%s:%ld: %s: Length of pulse for TRIGGER_OUT can be "
-				"only either 0 or %s.\n", Fname, Lc, pulser_struct.name,
-				hfs9000_ptime( HFS9000_TRIG_OUT_PULSE_LEN ) );
-		THROW( EXCEPTION );
-	}
-
-	p->len = hfs9000_double2ticks( time );
+	p->real_len = time;
+	if ( p->is_function && p->function->channel &&
+		 p->function->channel->self == HFS9000_TRIG_OUT )
+		p->len = trig_out_pulse_length( time );
+	else
+		p->len = hfs9000_double2ticks( time );
 	p->is_len = SET;
 
 	if ( ! p->initial_is_len && ! TEST_RUN && I_am == PARENT )
@@ -291,7 +290,8 @@ bool hfs9000_set_pulse_length_change( long pnum, double time )
 		return FAIL;
 	}
 
-	if ( p->function && p->function->self == HFS9000_TRIG_OUT )
+	if ( p->is_function && p->function->channel &&
+		 p->function->channel->self == HFS9000_TRIG_OUT )
 	{
 		eprint( FATAL, "%s:%ld: %s: For pulses on TRIG_OUT no pulse length "
 				"change can be set.\n", Fname, Lc, pulser_struct.name, pnum );
@@ -366,6 +366,14 @@ bool hfs9000_get_pulse_length( long pnum, double *time )
 		THROW(EXCEPTION );
 	}
 
+	if ( p->is_function && p->function->channel &&
+		 p->function->channel->self == HFS9000_TRIG_OUT )
+	{
+		eprint( FATAL, "%s:%ld: %s: Length of Trigger Out pulse %ld can't "
+				"be referenced.\n", Fname, Lc, pulser_struct.name, pnum );
+		THROW( EXCEPTION );
+	}
+
 	*time = hfs9000_ticks2double( p->len );
 	return OK;
 }
@@ -411,8 +419,9 @@ bool hfs9000_get_pulse_length_change( long pnum, double *time )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Function for changing the pulse position while the experiment is run. */
+/*-----------------------------------------------------------------------*/
 
 bool hfs9000_change_pulse_position( long pnum, double time )
 {
@@ -453,8 +462,9 @@ bool hfs9000_change_pulse_position( long pnum, double time )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Function for changing the pulse length while the experiment is run. */
+/*---------------------------------------------------------------------*/
 
 bool hfs9000_change_pulse_length( long pnum, double time )
 {
@@ -469,21 +479,17 @@ bool hfs9000_change_pulse_length( long pnum, double time )
 		THROW( EXCEPTION );
 	}
 
-	if ( p->function->self == HFS9000_TRIG_OUT &&
-		 ( time > 1.01 * HFS9000_TRIG_OUT_PULSE_LEN ||
-		   time < 0.99 * HFS9000_TRIG_OUT_PULSE_LEN )
+	if ( p->is_len )
 	{
-		eprint( FATAL, "%s:%ld: %s: Length of pulse for TRIGGER_OUT can only "
-				"be either 0 or %s.\n", Fname, Lc, pulser_struct.name,
-				hfs9000_ptime( HFS9000_TRIG_OUT_PULSE_LEN ) );
-		THROW( EXCEPTION );
-	}
-
-	if ( p->is_len && p->len == hfs9000_double2ticks( time ) )
-	{
-		eprint( WARN, "%s:%ld: %s: Old and new length of pulse %ld are "
-				"identical.\n", Fname, Lc, pulser_struct.name, pnum );
-		return OK;
+		if ( ( p->is_function && p->function->channel &&
+			   p->function->channel->self == HFS9000_TRIG_OUT &&
+			   p->len == trig_out_pulse_length( time ) ) ||
+			 p->len == hfs9000_double2ticks( time ) )
+		{
+			eprint( WARN, "%s:%ld: %s: Old and new length of pulse %ld are "
+					"identical.\n", Fname, Lc, pulser_struct.name, pnum );
+			return OK;
+		}
 	}
 
 	if ( p->is_len && ! p->is_old_len )
@@ -492,7 +498,11 @@ bool hfs9000_change_pulse_length( long pnum, double time )
 		p->is_old_len = SET;
 	}
 
-	p->len = hfs9000_double2ticks( time );
+	if ( p->is_function && p->function->channel &&
+		 p->function->channel->self == HFS9000_TRIG_OUT )
+		p->len = trig_out_pulse_length( time );
+	else
+		p->len = hfs9000_double2ticks( time );
 	p->is_len = SET;
 
 	p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
@@ -535,7 +545,8 @@ bool hfs9000_change_pulse_length_change( long pnum, double time )
 	PULSE *p = hfs9000_get_pulse( pnum );
 
 
-	if ( p->function->self == HFS9000_TRIG_OUT )
+	if ( p->is_function && p->function->channel &&
+		 p->function->channel->self == HFS9000_TRIG_OUT )
 	{
 		eprint( FATAL, "%s:%ld: %s: For pulses on TRIG_OUT no pulse length "
 				"change can be set.\n", Fname, Lc, pulser_struct.name, pnum );
