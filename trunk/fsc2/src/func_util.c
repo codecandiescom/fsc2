@@ -2389,3 +2389,30 @@ get_repl_retry:
 	T_free( mess );
 	goto get_repl_retry;
 }
+
+
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
+Var *f_is_file( Var *v )
+{
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing argument in call of function "
+				"is_file().\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	if ( v->type != INT_VAR )
+	{
+		eprint( FATAL, "%s:%ld: Parameter of function is_file() is not a "
+				"file handler.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+    if ( v->val.lval < 0 || v->val.lval >= File_List_Len ||
+		 File_List[ file_num ].fp == NULL )
+		return vars_push( INT_VAR, 0 );
+
+	return vars_push( INT_VAR, 1 );
+}

@@ -28,6 +28,7 @@ Var *f_fsave(   Var *v );
 Var *f_save_p(  Var *v );
 Var *f_save_o(  Var *v );
 Var *f_save_c(  Var *v );
+Var *f_is_file( Var *v );
 
 
 #endif  /* ! FUNC_UTIL_HEADER */
