@@ -94,7 +94,7 @@ static void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 	long i;
 	Curve_2d *cv;
 	int old_button_state = G.button_state;
-	int keymask;
+	unsigned int keymask;
 
 
 	/* In the axes areas two buttons pressed simultaneously doesn't has a
@@ -260,7 +260,7 @@ static void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 								Canvas *c )
 {
-	int keymask;
+	unsigned int keymask;
 	bool scale_changed = UNSET;
 
 
@@ -398,7 +398,7 @@ static void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 							   Canvas *c )
 {
 	XEvent new_ev;
-	int keymask;
+	unsigned int keymask;
 	bool scale_changed = UNSET;
 
 

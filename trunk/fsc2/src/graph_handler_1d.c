@@ -91,7 +91,7 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 	long i;
 	Curve_1d *cv;
 	int old_button_state = G.button_state;
-	int dummy;
+	unsigned int dummy;
 
 
 	/* In the axes areas two buttons pressed simultaneously doesn't has a

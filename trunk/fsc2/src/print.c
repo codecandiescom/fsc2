@@ -60,7 +60,7 @@ static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, long dir );
 static void eps_draw_surface( FILE *fp, int cn );
 static void eps_draw_contour( FILE *fp, int cn );
 static void do_print( char *name, const char *command );
-static int start_printing( char **argv, char *name );
+static void start_printing( char **argv, char *name );
 
 
 
@@ -1330,7 +1330,7 @@ static void do_print( char *name, const char *command )
 /* Starts a `grand-child' process to do the actual printing. */
 /*-----------------------------------------------------------*/
 
-static int start_printing( char **argv, char *name )
+static void start_printing( char **argv, char *name )
 {
 	int i;
 	pid_t new_pid;

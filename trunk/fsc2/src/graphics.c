@@ -60,16 +60,17 @@ static int cur_1,
 	       cur_5,
 	       cur_6,
 	       cur_7;
-static int display_x, display_y, display_w, display_h;
+static int display_x, display_y;
+static unsigned display_w, display_h;
 static bool display_has_been_shown = UNSET;
 
 extern FL_resource xresources[ ];
 
 
 static struct {
-	int	WIN_MIN_1D_WIDTH;
-	int	WIN_MIN_2D_WIDTH;
-	int	WIN_MIN_HEIGHT;
+	unsigned int WIN_MIN_1D_WIDTH;
+	unsigned int WIN_MIN_2D_WIDTH;
+	unsigned int WIN_MIN_HEIGHT;
 	int	SMALL_FONT_SIZE;
 	const char *DEFAULT_AXISFONT_1;
 	const char *DEFAULT_AXISFONT_2;

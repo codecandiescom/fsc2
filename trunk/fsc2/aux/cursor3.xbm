@@ -25,7 +25,7 @@
 #define cursor3_height 20
 #define cursor3_x_hot 5
 #define cursor3_y_hot 5
-static unsigned char cursor3_bits[] = {
+static const char cursor3_bits[] = {
   0xE0, 0x07, 0x00,
   0x18, 0x0F, 0x00,
   0x04, 0x14, 0x00,

@@ -25,7 +25,7 @@
 #define cursor2_height 20
 #define cursor2_x_hot 7
 #define cursor2_y_hot 11
-static unsigned char cursor2_bits[] = {
+static const char cursor2_bits[] = {
   0x80, 0x01, 0x00,
   0x70, 0x0E, 0x00,
   0x48, 0x12, 0x00,

@@ -25,7 +25,7 @@
 #define cursor4_height 20
 #define cursor4_x_hot 9
 #define cursor4_y_hot 9
-static unsigned char cursor4_bits[] = {
+static const char cursor4_bits[] = {
   0x00, 0x02, 0x00,
   0x00, 0x02, 0x00,
   0x00, 0x02, 0x00,
