@@ -2095,7 +2095,7 @@ RF output.
 The function queries or sets the RF output frequency. If called to set
 the frequency it accepts a frequency as the only argument. For the
 @code{HP8647A} the frequency must be in the range between @w{250 kHz}
-and @w{1000 MHz}, for the @code{HP8648B} between @w{10 kHz} and @{2 GHz}
+and @w{1000 MHz}, for the @code{HP8648B} between @w{10 kHz} and @w{2 GHz}
 and for the @code{HP8672A} between @w{xxx MHz} and @w{18 GHz}. The
 frequency set by the very first call of this function is also the
 function that is set automatically by a call of the function
