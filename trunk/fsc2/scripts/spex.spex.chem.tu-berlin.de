@@ -292,7 +292,7 @@ FOREVER {
 			NEXT;
 		}
 
-		N_points = int( ceil( ( start_wn - end_wn ) / step_size ) + 1 );
+		N_points = int( ceil( ( start_wn - end_wn ) / step_size ) ) + 1;
 
 		IF N_points < 2 {
 			show_message( "Step size is too large" );
