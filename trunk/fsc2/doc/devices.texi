@@ -7,7 +7,7 @@
 @menu
 * Introduction::            
 * Magnet Functions::        Functions for controlling the magnet.
-* Gaussmeter Functions::    Functions for meeasuring the magnetic field.
+* Gaussmeter Functions::    Functions for measuring the magnetic field.
 * Lock-In Functions::       Functions for accessing the lock-in amplifiers.
 * Digitizer Functions::     Functions for accessing the oscilloscopes.
 * Pulser Functions::
@@ -47,7 +47,7 @@ two channels - but wait, actually, it can: whenever the program is asked
 for data from channel 2 it may rotate the phase lock-in phase by 90
 degrees, waits for another time constant, gets the value and you
 basically have two channels, at least realized in software (of course,
-there's a penality - measurements take at least twice the time needed
+there's a penalty - measurements take at least twice the time needed
 with a two-channel lock-in amplifier). But there can be real hard
 limitations - if you've got a device with only 2 DACs no software
 trickery will ever magically convert it into a device with 4 DACs
@@ -196,7 +196,7 @@ The function can only be called in the @code{EXPERIMENT} section.
 @item field_resolution()
 @findex field_resolution()
 The function returns the resolution in Gauss used in measurements of the
-magnetc field. The function can only be called in the @code{EXPERIMENT}
+magnetic field. The function can only be called in the @code{EXPERIMENT}
 section.
 
 @end table
@@ -317,7 +317,7 @@ sensitivity that has been set.
 
 For the models SR510 and SR530 a sensitivity 10 times higher than the
 maximum sensitivity can be specified, in which case the @code{EXPAND}
-button is automatically swiched on.
+button is automatically switched on.
 
 Before the @code{EXPERIMENT} section this function can't be called
 without an argument, i.e. as a query.
@@ -357,7 +357,7 @@ the current reference frequency is returned. If called with an argument
 (models SR810 and SR830 only) the reference frequency is set. If the
 frequency is not within the the admissible range an error message is
 printed and the experiment is stopped) - the admissible range depends on
-the harmonics setting, see the maual for more details.
+the harmonics setting, see the manual for more details.
 
 Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e. without an argument.
@@ -380,7 +380,7 @@ query mode, i.e. without an argument.
 @section Digitizer functions
 @cindex Digitizer functions
 
-The digitizing oscilloscopes currently implemented are the Thektronix
+The digitizing oscilloscopes currently implemented are the Tektronix
 TDS520, TDS520A, TDS744A and TDS754A. The corresponding module names to
 be used in the @code{DEVICES} section are
 @example
@@ -406,7 +406,7 @@ only if either it has been already called with an argument or in the
 @item digitizer_num_averages()
 @findex digitizer_num_averages()
 The function queries (if called with no argument) or sets (if called
-with an argument) the number of averages done by the oscilliscope.  The
+with an argument) the number of averages done by the oscilloscope.  The
 function can be used in query mode only in the @code{EXPERIMENT}
 section. The argument for the number of averages must be at least 1
 (which will switch the oscilloscope into @code{SAMPLE} mode). If the
@@ -445,11 +445,11 @@ only if either it has been already called with an argument or in the
 @item digitizer_define_window()
 @findex digitizer_define_window()
 The function can be used to define a time window to be used in later
-calls of the functions to measure an area, an amplituide or to fetch a
+calls of the functions to measure an area, an amplitude or to fetch a
 curve from the oscilloscope. It needs at least two arguments, a
 non-negative window number that must not be used before and the
 starting point of the interval (in seconds). Optionally, there can be a
-third argument with the width of the window (also in sconds). If no
+third argument with the width of the window (also in seconds). If no
 width argument is passed to the function the distance between the cursor
 pair shown on the oscilloscopes screen is going to be used.
 
@@ -477,9 +477,9 @@ This function can only be used in the @code{PREPARATIONS} section of the
 
 @item digitizer_start_acquisition()
 @findex digitizer_start_acquisition()
-This function starts an acqusistion sequence of the
-oscilloscope. Previously measured curves are discarded and a new data
-are sampled until the requested number of averages has been sampled.
+This function starts an acquisition sequence of the
+oscilloscope. Previously measured curves are discarded and new data
+are sampled until the requested number of averages has been reached.
 The function can only be used in the @code{EXPERIMENT} section of the
 @acronym{EDL} file.
 
@@ -522,7 +522,7 @@ which is than used to compute the area. To give some visual feedback
 also for this model the cursors are moved to the borders of the
 interval.
 
-The function will automatically wait until a still running acquistition
+The function will automatically wait until a still running acquisition
 sequence is finished before measuring the area. 
 
 This function can only be used in the @code{EXPERIMENT} section of an
@@ -577,7 +577,7 @@ The function positions the cursors at the start and end point of the
 specified window (or the first and last point if no window as been
 specified) to give a visual feedback.
 
-The function will automatically wait until a still running acquistition
+The function will automatically wait until a still running acquisition
 sequence is finished before returning a curve. The data will be returned
 as an array of floating point numbers and it's the users responsibility
 to supply an array for storing the data. Usually, this will be an array
@@ -631,7 +631,7 @@ which is than used to compute the amplitude. To give some visual
 feedback also for this model the cursors are moved to the borders of the
 interval.
 
-The function will automatically wait until a still running acquistition
+The function will automatically wait until a still running acquisition
 sequence is finished before measuring the amplitude.
 
 This function can only be used in the @code{EXPERIMENT} section of an
@@ -639,7 +639,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 @item digitizer_get_amplitude_fast()
 @findex digitizer_get_amplitude_fast()
-This function is nearly identivcal to @code{digitizer_get_amplitude()}
+This function is nearly identical to @code{digitizer_get_amplitude()}
 except that the function to compute amplitudes built into the digitizer
 isn't used and the cursors aren't positioned at the start and end of the
 time interval.
@@ -730,7 +730,7 @@ been set by calling the function with an argument).
 
 @item synthesizer_step_frequency()
 @findex synthesizer_step_frequency()
-The function quieries or sets the RF step frequency to be used in calls
+The function queries or sets the RF step frequency to be used in calls
 of the functions @code{synthesizer_sweep_up()} and
 @code{synthesizer_sweep_down()} (see below). In order to set the step
 frequency it expects one argument, the step frequency in Hz. The step

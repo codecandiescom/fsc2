@@ -220,7 +220,7 @@ b[ 4, 7, 3 ];
 @end example
 @noindent
 defines a 1-dimensional integer array @code{A} with 100 elements and a
-floationg point array @code{b} of rank 4x7x3.
+floating point array @code{b} of rank 4x7x3.
 
 
 Arrays are automatically initialized with zeros for all elements. On the
@@ -430,7 +430,7 @@ the left, i.e.@:
 (This is not a very useful example but here for sake of completeness.)
 
 The exponentiation operator, `@code{^}', has the next highest
-precedence, i.e.@: it `binds' more thightly than any other binary
+precedence, i.e.@: it `binds' more tightly than any other binary
 operator. If there is more than one of these operators in a row the
 expression will evaluated from the right to the left:
 @example
@@ -476,7 +476,7 @@ right of the expression:
  a | b & c    @r{will be treated as if written as}    ( a | b ) & c
 @end example
 
-Finally, the lowest precedence operators are the comparision operators
+Finally, the lowest precedence operators are the comparison operators
 (also the be discussed below in more detail), the test for equality,
 `@code{==}' (not to be confused with the assignment operator
 `@code{=}'), the test for inequality, `@code{!=}', and the remaining
@@ -500,7 +500,7 @@ use parenthesis -- this won't slow down the program significantly.
 @cindex Arithmetic with arrays
 
 
-Beside the usual artithmetic with numbers it is also possible to use
+Beside the usual arithmetic with numbers it is also possible to use
 arithmetic with (one-dimensional) arrays. Also all built-in functions
 can (as far as this makes any sense) can be applied to these kinds of
 arrays.
@@ -628,7 +628,7 @@ expression). Here's an example:
 
 This snippet will calculate the sum of all integers between 1 and 100
 (of course, there are more elegant ways to do this, but it's just an
-example). After the initialisation of the two variables `@code{I}' and
+example). After the initialization of the two variables `@code{I}' and
 `@code{SUM}' the @code{REPEAT} loop starts with 100 as the number of
 repetitions. Now, in curly braces, i.e.@: between `@code{@{}' and
 `@code{@}}', follow the statements to be executed in the loop.
@@ -657,7 +657,7 @@ Again, an example:
 @end example
 
 This program snippet (that could also have been written using a
-@code{REPEAT} loop) calculates the factorial of 6. After initialising
+@code{REPEAT} loop) calculates the factorial of 6. After initializing
 the variables `@code{I}' and `@code{Fact}' it is tested in the loop
 condition if `@code{I}' is still not larger that 6. If this is true, the
 following block of statements is executed.
@@ -668,8 +668,8 @@ expressions (e.g.@: numbers):
 @quotation
 @cindex == (comparison operator)
 @cindex comparison operator
-@cindex != (unequality)
-@cindex unequality `!='
+@cindex != (unequal)
+@cindex unequal `!='
 @cindex < (less than)
 @cindex less than `<'
 @cindex <= (less or equal)

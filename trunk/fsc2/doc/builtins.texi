@@ -61,7 +61,7 @@ The sine of 0.500000 is: 0.479426
 
 There are special sequences allowed in the @i{format string}. They all
 start with an @i{escape character}, the backslash @code{\}. Here's a
-list of all the recognised special sequences:
+list of all the recognized special sequences:
 
 @table @samp
 @cindex escape characters (in @code{print()} function)
@@ -89,7 +89,7 @@ will produce output even in the test run.
 @item init_1d()
 @anchor{init_1d}
 @findex init_1d()
-Initialises the display for one-dimensional experiments - without a call to
+Initializes the display for one-dimensional experiments - without a call to
 this function no data will be displayed. The function takes up to six
 arguments but all of them are optional. They are:
 
@@ -147,7 +147,7 @@ coordinates'.
 @item init_2d()
 @anchor{init_2d}
 @findex init_2d()
-Initialises the display for two-dimensional experiments - without a call to
+Initializes the display for two-dimensional experiments - without a call to
 this function no data will be displayed. The function takes up to nine
 arguments but all of them are optional. They are:
 
@@ -200,7 +200,7 @@ This function has to be called to display data in 1-dimensional as well as
 @enumerate
 @item
 The (x) point number of the data point (if only a single number is given
-as the third arument) or the point number of the first data point in the
+as the third argument) or the point number of the first data point in the
 data array passed as third argument.
 @item
 Only in 2D-experiments: The y-point number of the data point or the point
@@ -250,7 +250,7 @@ first one is usually the string to be printed in the file selector. If
 it is missing or is the empty string (use `@code{""}' to create an empty
 string) it defaults to `@i{Please enter a file name:}'. The second
 argument is a pattern for the file name, defaulting to `@i{*.dat}'. You
-may use all the usal wildcard characters you're used to from the
+may use all the usual wildcard characters you're used to from the
 shell. The third argument is the directory the search for the file name
 should start from. Finally, as the fourth and last argument you may pass
 a file name to the function as the default file that appears in the
@@ -260,9 +260,9 @@ But there's also an alternative. If the very first string (that is
 usually used for the prompt string) starts with a backslash `@code{\}'
 the following characters (i.e.@: everything except the leading
 backslash) are taken as the name of the file to be used automatically.
-The file selector will not be shown and instead the hardcoded file name
+The file selector will not be shown and instead the hard-coded file name
 will be used. Only if opening this file fails the remaining parameters
-will be used when asking for an alternative file (except the propmt
+will be used when asking for an alternative file (except the prompt
 string, the default will be used).
 
 If @code{get_file()} is never called, on the first call to a function
