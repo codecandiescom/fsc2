@@ -277,7 +277,7 @@ uns16 *rs_spec10_get_pic( void )
 
 
 	getcwd( cur_dir, PATH_MAX );
-	chdir( "/usr/local/lib" );
+	chdir( PVCAM_DATA_DIR );
 
 	region.s1   = rs_spec10->ccd.roi[ 0 ];
 	region.p1   = rs_spec10->ccd.roi[ 1 ];
