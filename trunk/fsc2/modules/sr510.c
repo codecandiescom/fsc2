@@ -77,7 +77,7 @@ static double sr510_set_phase( double phase );
 
 int sr510_init_hook( void )
 {
-	/* Aet global variable to indicate that GPIB bus is needed */
+	/* Set global variable to indicate that GPIB bus is needed */
 
 	need_GPIB = SET;
 
