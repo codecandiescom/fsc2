@@ -257,8 +257,24 @@ void run_test_hooks( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded && cd->driver.is_test_hook &&
 			 ! cd->driver.test_hook( ) )
-			eprint( WARN, "Initialisation for test run of module `%s.so' "
+			eprint( SEVERE, "Initialisation for test run of module `%s.so' "
 					"failed.\n", cd->name );
+}
+
+
+/*--------------------------------------------------------------*/
+/* Functions runs the end-of-test hook functions of all modules */
+/*--------------------------------------------------------------*/
+
+void run_end_of_test_hooks( void )
+{
+	Device *cd;
+
+	for ( cd = Device_List; cd != NULL; cd = cd->next )
+		if ( cd->is_loaded && cd->driver.is_end_of_test_hook &&
+			 ! cd->driver.end_of_test_hook( ) )
+			eprint( SEVERE, "Final checks after test run failed fer module "
+					"`%s.so'.\n", cd->name );
 }
 
 
@@ -273,7 +289,7 @@ void run_exp_hooks( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded && cd->driver.is_exp_hook &&
 			 ! cd->driver.exp_hook( ) )
-			eprint( WARN, "Initialisation for experiment of module `%s.so' "
+			eprint( SEVERE, "Initialisation for experiment of module `%s.so' "
 					"failed.\n", cd->name );
 }
 
@@ -296,7 +312,7 @@ void run_end_of_exp_hooks( void )
 		{
 			if ( cd->is_loaded && cd->driver.is_end_of_exp_hook &&
 				 ! cd->driver.end_of_exp_hook( ) )
-				eprint( WARN, "Resetting module `%s.so' after experiment "
+				eprint( SEVERE, "Resetting module `%s.so' after experiment "
 						"failed.\n", cd->name );
 			TRY_SUCCESS;
 		}
