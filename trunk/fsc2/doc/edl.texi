@@ -95,7 +95,7 @@ accepted section keywords:
 
 @itemize @bullet
 @item @code{DEVICES}, @code{DEV}, @code{DEVS}, @code{DEVICE}
-@item @code{ASSIGNMENTS}, @code{ASS}, @code{ASS}, @code{ASSIGNMENT}
+@item @code{ASSIGNMENTS}, @code{ASS}, @code{ASSIGNMENT}
 @item @code{VARIABLES}, @code{VAR}, @code{VARS}, @code{VARIABLE}
 @item @code{PHASES}, @code{PHA}, @code{PHAS}, @code{PHASE}
 @item @code{PREPARATIONS}, @code{PREP}, @code{PREPS}, @code{PREPARATION}
