@@ -84,6 +84,13 @@ OII         O(THER)?_?2:?
 OIII        O(THER)?_?3:?
 OIV         O(THER)?_?4:?
 
+DEL         ((D)|(DEL)|(DELAY)):?
+POD         P(OD)?
+CH          C(H(ANNEL)?)?
+INV         I(NV(ERT(ED)?)?)?
+VH          V_?H(IGH)?
+VL          V_?L(OW)?
+
 TB          T(IME)?_?B(ASE)?:?
 TM          T(RIG(GER)?)?_?M(ODE)?:?
 
@@ -97,11 +104,6 @@ THRESH      L(EV(EL)?)?
 REPT        REP(EAT)?_?T(IME)?
 REPF        REP(EAT)?_?F(REQ(UENCY)?)?
 
-
-DEL         ((D)|(DEL)|(DELAY)):?
-POD         P(OD)?
-CH          C(H(ANNEL)?)?
-INV         I(NV(ERT(ED)?)?)?
 
 WS          [\n=: ]+
 
@@ -207,6 +209,10 @@ WS          [\n=: ]+
 {CH}        return CH_TOKEN;
 
 {INV}       return INV_TOKEN;
+
+{VH}        return VH_TOKEN;
+
+{VL}        return VL_TOKEN;
 
             /* keywords related to time base and trigger mode */
 
@@ -385,7 +391,7 @@ int assignments_parser( FILE *in )
 		 is_restart = SET;
 
 	assignparse( );
-	assign_end( );
+/*	assign_end( ); */
 
 	return Assign_Next_Section;
 }

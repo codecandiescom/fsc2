@@ -765,9 +765,9 @@ void clean_up( void )
 
 	delete_device_name_list( );
 
-	/* clear up assignments structures etc. */
+	/* (re)initialize the structure for the pulser modules */
 
-	assign_clear( );
+	pulser_struct_init( );
 
 	/* clear up structures for phases */
 

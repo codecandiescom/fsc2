@@ -3,12 +3,12 @@
 */
 
 
-
 #include "fsc2.h"
 
 
 static void is_driver( void );
-static void is_func( bool ( *func ) ( ), const char *text );
+static void is_func( void *func, const char *text );
+static double is_mult_ns( double val, const char * text );
 
 
 
@@ -32,7 +32,6 @@ void pulser_struct_init( void )
 	pulser_struct.set_timebase = NULL;
 	pulser_struct.set_trigger_mode = NULL;
 	pulser_struct.set_repeat_time = NULL;
-	pulser_struct.set_repeat_frequency = NULL;
 	pulser_struct.set_trig_in_level = NULL;
 	pulser_struct.set_trig_in_slope = NULL;
 	pulser_struct.set_pulse_function = NULL;
@@ -70,7 +69,7 @@ static void is_driver( void )
    isn't explicitely needed).
 */
 
-static void is_func( bool ( *func ) ( ), const char *text )
+static void is_func( void *func, const char *text )
 {
 	is_driver( );
 
@@ -142,7 +141,7 @@ void p_assign_pod( long func, Var *v )
 	/* finally call the function (if it exists...) */
 
 	is_func( pulser_struct.assign_function, "assigning function to pod" );
-	pulser_struct.assign_function( func, pod );
+	( *pulser_struct.assign_function )( func, pod );
 }
 
 
@@ -181,13 +180,13 @@ void p_assign_channel( long func, Var *v )
 	if ( pulser_struct.assign_channel_to_function == NULL )
 	{
 		is_func( pulser_struct.assign_function, "assigning function to pod" );
-		pulser_struct.assign_function( func, channel );
+		( *pulser_struct.assign_function )( func, channel );
 	}
 	else
 	{
 		is_func( pulser_struct.assign_channel_to_function,
 				 "assigning function to channel" );
-		pulser_struct.assign_channel_to_function( func, channel );
+		( *pulser_struct.assign_channel_to_function )( func, channel );
 	}
 }
 
@@ -228,7 +227,7 @@ void p_set_delay( long func, Var *v )
 	/* finally call the function (if it exists...) */
 
 	is_func( pulser_struct.set_delay_function, "setting a delay" );
-	pulser_struct.set_delay_function( func, delay );
+	( *pulser_struct.set_delay_function )( func, delay );
 }
 
 
@@ -242,7 +241,7 @@ void p_inv( long func )
 			func <= PULSER_CHANNEL_FUNC_MAX );
 
 	is_func( pulser_struct.invert_function, "inverting a channel" );
-	pulser_struct.invert_function( func );
+	( *pulser_struct.invert_function )( func );
 }
 
 
@@ -273,7 +272,7 @@ void p_set_v_high( long func, Var *v )
 
 	is_func( pulser_struct.set_function_high_level,
 			 "setting high voltage level" );
-	pulser_struct.set_function_high_level( func, voltage );
+	( *pulser_struct.set_function_high_level )( func, voltage );
 }
 
 
@@ -304,7 +303,7 @@ void p_set_v_low( long func, Var *v )
 
 	is_func( pulser_struct.set_function_low_level,
 			 "setting low voltage level" );
-	pulser_struct.set_function_low_level( func, voltage );
+	( *pulser_struct.set_function_low_level )( func, voltage );
 }
 
 
@@ -329,7 +328,7 @@ void p_set_timebase( Var *v )
 
 	/* check that the timebase has a reasonable value */
 
-	if ( timebase < 0.99.e-9 )
+	if ( timebase < 0.99e-9 )
 	{
 		eprint( FATAL, "%s:%ld: Invalid timebase: %f\n", Fname, Lc, timebase );
 		THROW( EXCEPTION );
@@ -340,7 +339,7 @@ void p_set_timebase( Var *v )
 	/* finally call the function (if it exists...) */
 
 	is_func( pulser_struct.set_timebase,"setting the timebase" );
-	pulser_struct.set_timebase( timebase );
+	( *pulser_struct.set_timebase )( timebase );
 }
 
 
@@ -377,7 +376,7 @@ void p_set_trigger_mode( Var *v)
 	/* finally call the function (if it exists...) */
 
 	is_func( pulser_struct.set_trigger_mode, "setting the trigger mode" );
-	pulser_struct.set_trigger_mode( mode );
+	( *pulser_struct.set_trigger_mode )( mode );
 }
 
 /*
@@ -403,7 +402,7 @@ void p_set_trigger_slope( Var *v )
 
 	vars_pop( v );
 
-	if ( mode != POSITIVE && mode != NEGATIVE )
+	if ( slope != POSITIVE && slope != NEGATIVE )
 	{
 		eprint( FATAL, "%s:%ld: Invalid trigger slope specification.\n", 
 				Fname, Lc );
@@ -413,7 +412,7 @@ void p_set_trigger_slope( Var *v )
 	/* finally call the function (if it exists...) */
 
 	is_func( pulser_struct.set_trig_in_slope, "setting the trigger slope" );
-	pulser_struct.set_trig_in_slope( slope );
+	( *pulser_struct.set_trig_in_slope )( slope );
 }
 
 
@@ -440,7 +439,7 @@ void p_set_trigger_level( Var *v )
 	/* finally call the function (if it exists...) */
 
 	is_func( pulser_struct.set_trig_in_level, "setting the trigger level" );
-	pulser_struct.set_trig_in_level( level );
+	( *pulser_struct.set_trig_in_level )( level );
 }
 
 
@@ -464,7 +463,7 @@ void p_set_rep_time( Var *v )
 
 	vars_pop( v );
 
-	if ( time < 0.99.e-9 )
+	if ( time < 0.99e-9 )
 	{
 		eprint( FATAL, "%s:%ld: Invalid repeat time: %f s\n",
 				Fname, Lc, time );
@@ -476,7 +475,7 @@ void p_set_rep_time( Var *v )
 	/* finally call the function (if it exists...) */
 
 	is_func( pulser_struct.set_repeat_time, "setting a repeat time" );
-	pulser_struct.set_repeat_time( time );
+	( *pulser_struct.set_repeat_time )( time );
 }
 
 
@@ -515,5 +514,7 @@ void p_set_rep_freq( Var *v )
 	/* finally call the function (if it exists...) */
 
 	is_func( pulser_struct.set_repeat_time, "setting a repeat frequency" );
-	pulser_struct.set_repeat_time( time );
+	( *pulser_struct.set_repeat_time )( time );
 }
+
+
