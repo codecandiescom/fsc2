@@ -1315,8 +1315,8 @@ be raised at any instance in the program and leads to the flow of
 control being changed to a place were the error can be handled.
 
 As far as raising exceptions in a module is concerned it's very
-simple. If you run into an error that can't be handled by the module
-just use something like
+simple. If you run into an error that can't be handled within the module
+just use
 @example
 if ( non_recoverable_error )
     THROW( EXCEPTION );
@@ -1331,12 +1331,13 @@ dealt with in modules.
 
 @subsubsection More on programming with exceptions
 
-Of course, to allow the `throwing' of exceptions there must be a place that
-will `catch' the exception, otherwise the exception will simply kill the
-program. Lets assume that you have a function @code{foo()}, that in turn
-calls a lot of other functions, each of which might lead to non-recoverable
-errors and that can't be handled by the functions themselves. The way to
-handle this problem with exceptions is demonstrated by the following example:
+Of course, to allow the `throwing' of exceptions there must be a place
+that will `catch' the exception, otherwise the exception will simply
+kill the program. Lets assume that you have a function @code{foo()},
+that in turn calls a lot of other functions, each of which might lead to
+non-recoverable errors and that can't be handled within the functions
+themselves. The way to handle this problem with exceptions is
+demonstrated by the following example:
 @example
 TRY
 @{
@@ -1354,20 +1355,20 @@ CATCH( EXCEPTION )
 @noindent
 With @code{TRY} the program is told that the following code might throw
 an exception. If everything works out well and no exception is thrown
-the @code{CATCH()} block is never executed and in which case
-@code{TRY_SUCCESS} must be called. But if an error happens and an
-exception is thrown the flow of control is changed immediately from the
-function the exception is thrown in to the first statements in the
-@code{CATCH()} block.
+the @code{CATCH()} block is never executed and in this case
+@code{TRY_SUCCESS} must be called to do some cleaning up. But if an
+error happens and an exception gets thrown the flow of control is
+changed immediately from the function the exception is thrown in to the
+first statements in the @code{CATCH()} block.
 
 @code{CATCH} can be used to catch a specific exception and you can have
 several of them for different types of exceptions. If you want to catch
 all types of exceptions in one go you can use @code{OTHERWISE}
 @findex OTHERWISE
-instead.
-Finally, if you need to do some cleaning up but can not really deal
-with the error condition you can catch the exception using either
-@code{CATCH} or @code{OTHERWISE} and then re-throw the exception by calling
+instead of @code{CATCH}.  Finally, if you can not really deal with the
+error condition but need to do some cleaning up but before bailing out
+you can catch the exception using either @code{CATCH} or
+@code{OTHERWISE} and then re-throw the exception by calling
 @code{PASSTHROUGH()}
 @findex PASSTHROUGH()
 to pass it on to higher level routines that are supposed to take care of
@@ -1414,26 +1415,36 @@ of the following two types. @code{OUT_OF_MEMORY_EXCEPTION} will only be
 thrown by @acronym{fsc2}s special functions for memory allocation (see
 next section), so don't throw it yourself without a very good reason. A
 @code{USER_BREAK_EXCEPTION} should be thrown from within a module when
-the module is doing something rather time consuming (e.g.@: waiting for a
-device to become ready or doing some calibration) and the module detects
-that the user has pressed the stop button. To find about the this you
-can use a macro, @code{DO_STOP} - if it returns @code{TRUE} the user has
-pressed the stop button. Here's some code taken from the module for a
-digitizer. It waits indefinitely in a loop for the digitizer to become
-ready. To allow the user to break from it within the loop @code{DO_STOP}
-is tested, and if set, an @code{USER_BREAK_EXCEPTION} is thrown:
+the module is doing something rather time consuming (e.g.@: waiting for
+a device to become ready or doing some calibration). In this case you
+should think about checking if the user pressed the @code{Stop}
+buttom. To find out you can use a macro, @code{DO_STOP} -- if it
+returns @code{TRUE} the user has pressed the stop button. Ifyour
+prepared to stop on the users request you simply have to throw an
+@code{USER_BREAK_EXCEPTION}.
+
+
+Here's some code taken from the module for a digitizer. It waits
+indefinitely in a loop for the digitizer to become finished with a
+measurement. To allow the user to break from it within this loop
+@code{DO_STOP} is tested, and if set, an @code{USER_BREAK_EXCEPTION} is
+thrown:
 @example
-do
+while ( 1 )                   /* loop forever */
 @{
     if ( DO_STOP )
         THROW( USER_BREAK_EXCEPTION );
 
     length = 40;
     usleep( 100000 );
+
     if ( gpib_write( tds754a.device, "BUSY?\n", 6 ) == FAILURE ||
          gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
         THROW( EXCEPTION );
-@} while ( reply[ 0 ] == '1' ); 
+
+    if ( reply[ 0 ] == '1' )  /* leave loop when digitizer is ready */
+        break;
+@}
 @end example
 
 
@@ -1451,15 +1462,15 @@ from an article by Peter Simons in the the iX magazine
 @findex T_strdup()
 
 There are special function for @acronym{fsc2} for allocating memory.
-These functions does not only allocates memory but also checks that the
-allocation really returns as much memory as you asked for (i.e.@: on
-failure the program gets stopped and an appropriate error message is
-printed). That means that you don't have to care for error handling - if
-the functions return everything is ok, otherwise they won't return at
-all. The first of these functions is called @code{T_malloc()} (think
-about it as @i{tested malloc}). And, of course, there is also a
-replacement for @code{realloc()} and @code{calloc()}, called
-@code{T_realloc()} and @code{T_calloc()}. Also for duplication of
+These functions not only allocate memory but also check that the
+allocation really returned as much memory as you asked for (on failure
+the program is stopped and an appropriate error message is
+printed). That means that you don't have to care for error handling --
+if thesr memory allocation functions return everything is ok, otherwise
+they won't return at all. The first of these functions called
+@code{T_malloc()} (think about it as @i{tested malloc}). And, of course,
+there is also a replacement for @code{realloc()} and @code{calloc()},
+called @code{T_realloc()} and @code{T_calloc()}. For the duplication of
 strings you should use @code{T_strdup()} instead of the normal
 @code{strdup()}. And, to make things complete, the replacement for
 @code{free()} is called @code{T_free()}. All five functions accept the
@@ -1476,12 +1487,11 @@ For @code{T_free()} there's is small deviation from the behavior of
 the normal @code{free()} function. @code{T_free()} returns a @code{void}
 pointer, which is always @code{NULL}.
 
-There might be cases where you want a call of one of the functions
-allocating memory to return even if it fails. In this case you have
-to do the call within a @code{TRY} block and be prepared to catch an
-exception that gets thrown when the memory allocation fails. The
-exception that will be thrown is an @code{OUT_OF_MEMORY_EXCEPTION}.
-Here's some example code:
+There might be cases where you need a call of one of the functions for
+allocation of memory to return even if it fails. In this case you have
+to call the fucntion from within a @code{TRY} block and be prepared to
+catch the @code{OUT_OF_MEMORY_EXCEPTION} exception that gets thrown when
+the memory allocation fails. Here's some example code:
 @example
 TRY
 @{
