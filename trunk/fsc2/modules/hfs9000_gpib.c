@@ -260,7 +260,7 @@ static void hfs9000_setup_trig_in( void )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-void hfs9000_set_constant( int channel, Ticks start, Ticks length, int state )
+bool hfs9000_set_constant( int channel, Ticks start, Ticks length, int state )
 {
 	char cmd[ 100 ];
 
@@ -269,25 +269,94 @@ void hfs9000_set_constant( int channel, Ticks start, Ticks length, int state )
 			 channel, start, length, state ? "#HFF" : "0" );
 	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 		hfs9000_gpib_failure( );
+
+	return OK;
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*-------------------------------------*/
+/* Sets the trigger out pulse position */
+/*-------------------------------------*/
 
-void hfs9000_set_trig_out_pulse( void )
+bool hfs9000_set_trig_out_pulse( void )
 {
 	FUNCTION *f = hfs9000.channel[ HFS9000_TRIG_OUT ].function;
 	PULSE *p = f->pulses[ 0 ];
 	char cmd[ 100 ];
 
 
-	if ( p->is_active )
-	{
-		sprintf( cmd, "TBAS:TOUT:PER %ld", p->pos + f->delay );
-		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
-			hfs9000_gpib_failure( );
-	}
+	sprintf( cmd, "TBAS:TOUT:PER %ld", p->pos + f->delay );
+	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
+		hfs9000_gpib_failure( );
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------*/
+/* Sets the run mode of the the pulser - either running or stopped */
+/* after waiting for previous commands to finish (that's what the  */
+/* "*WAI;" bit in the command is about)                            */
+/* ->                                                              */
+/*  * state to be set: 1 = START, 0 = STOP                         */
+/* <-                                                              */
+/*  * 1: ok, 0: error                                              */
+/*-----------------------------------------------------------------*/
+
+bool hfs9000_run( bool flag )
+{
+	char cmd[ 100 ];
+
+
+	if ( flag == hfs9000.is_running )          // if already in requested state
+		return OK;
+
+	sprintf( cmd, "*WAI;:TBAS:RUN %s", flag ? "ON" : "OFF" );
+
+	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
+		hfs9000_gpib_failure( );
+
+	hfs9000.is_running = flag;
+	return OK;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+bool hfs9000_get_channel_state( int channel )
+{
+	char cmd[ 100 ];
+	char reply[ 100 ];
+	long len = 100;
+
+
+	assert ( channel >= MIN_CHANNEL && channel <= MAX_CHANNEL );
+
+	sprintf( cmd, "PGENA:CH%1d:OUT?", channel );
+	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( hfs9000.device, reply, &len ) == FAILURE )
+		hfs9000_gpib_failure( );
+
+	return reply[ 0 ] == '1';
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+bool hfs9000_set_channel_state( int channel, bool flag )
+{
+	char cmd[ 100 ];
+
+
+	assert ( channel >= MIN_CHANNEL && channel <= MAX_CHANNEL );
+
+	sprintf( cmd, "*WAI;:PGENA:CH%1d:OUTP %s", channel, flag ? "ON" : "OFF" );
+	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
+		hfs9000_gpib_failure( );
+
+	return OK;
 }
 
 
