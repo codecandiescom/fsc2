@@ -1186,7 +1186,7 @@ Var *f_init_1d( Var *v )
 		v = v->next;
 		G.rwc_delta[ X ] = VALUE( v );
 
-		if ( G.rwc_start[ X ] == 0.0 && G.rwc_delta[ X ] == 0.0 )
+		if ( G.rwc_delta[ X ] == 0.0 )
 		{
 			G.rwc_start[ X ] = ARRAY_OFFSET;
 			G.rwc_delta[ X ] = 1.0;
@@ -1317,7 +1317,7 @@ Var *f_init_2d( Var *v )
 		v = v->next;
 		G.rwc_delta[ X ] = VALUE( v );
 
-		if ( G.rwc_start[ X ] == 0.0 && G.rwc_delta[ X ] == 0.0 )
+		if ( G.rwc_delta[ X ] == 0.0 )
 		{
 			G.rwc_start[ X ] = ( double ) ARRAY_OFFSET;
 			G.rwc_delta[ X ] = 1.0;
@@ -1347,7 +1347,7 @@ Var *f_init_2d( Var *v )
 		v = v->next;
 		G.rwc_delta[ Y ] = VALUE( v );
 		
-		if ( G.rwc_start[ Y ] == 0.0 && G.rwc_delta[ Y ] == 0.0 )
+		if ( G.rwc_delta[ Y ] == 0.0 )
 		{
 			G.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
 			G.rwc_delta[ Y ] = 1.0;
