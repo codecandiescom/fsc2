@@ -668,8 +668,8 @@ static void print_header( FILE *fp, char *name )
 
 	fprintf( fp, "%%%%EndProlog\n\n" );
 
-	/* Try to set up a font that also supports umlauts etc., thanks to
-	   Adobe Systems Inc, PostScript Language Reference 3rd edition */
+	/* Try to setup a font that also supports umlauts etc., thanks to
+	   Adobe Systems Inc., "PostScript Language Reference" 3rd edition */
 
 	fprintf( fp, "/Times-Roman findfont\n"
 				 "dup length dict begin\n"
