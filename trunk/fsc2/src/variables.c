@@ -1573,7 +1573,7 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 	if ( dest->type & ( INT_VAR | FLOAT_VAR ) )
 	{
 		eprint( FATAL, "%s:%ld: Left hand side of assignment is a variable "
-				"while right hand side is an array slice.\n", Fname, Lc ); 
+				"while right hand side is an array (slice).\n", Fname, Lc ); 
 		THROW( EXCEPTION );
 	}
 
@@ -1611,7 +1611,7 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 	{
 		if ( d->sizes[ d->dim - 1 ] != s->sizes[ s->dim - 1 ] )
 		{
-			eprint( FATAL, "%s:%ld: Array slices of array `%s' and `%s' have "
+			eprint( FATAL, "%s:%ld: Arrays (or slices of) `%s' and `%s' have "
 					"different size.\n", Fname, Lc, d->name, s->name );
 			THROW( EXCEPTION );
 		}
@@ -1625,7 +1625,7 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 	/* Warn on float to integer assignment */
 
 	if ( d->type == INT_ARR && s->type == FLOAT_ARR )
-		eprint( WARN, "%s:%ld: Assignment of slice of float array `%s' to "
+		eprint( WARN, "%s:%ld: Assignment of float array (slice) `%s' to "
 				"integer array `%s'.\n", Fname, Lc, s->name, d->name );
 
 	/* get also the correct type of pointer for the data source - the pointer
@@ -1674,7 +1674,7 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 	if ( dest->type & ( INT_VAR | FLOAT_VAR ) )
 	{
 		eprint( FATAL, "%s:%ld: Left hand side of assignment is a variable "
-				"while right hand side is an array slice.\n", Fname, Lc ); 
+				"while right hand side is an array (slice).\n", Fname, Lc ); 
 		THROW( EXCEPTION );
 	}
 
@@ -1726,8 +1726,8 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 	/* Warn on float to integer assignment */
 
 	if ( d->type == INT_ARR && src->type == FLOAT_TRANS_ARR )
-		eprint( WARN, "%s:%ld: Assignment of slice of float type to integer "
-				"array `%s'.\n", Fname, Lc, d->name );
+		eprint( WARN, "%s:%ld: Assignment of float array (or slice) to "
+				"integer array `%s'.\n", Fname, Lc, d->name );
 
 	/* Now copy the transient array as slice to the destination */
 
