@@ -6,11 +6,22 @@ hp8647a;
 
 VARIABLES:
 
-timebase = 200ns;
+timebase = 200 ns;
 
-start_freq =   5 MHz;
-end_freq   =  25 MHz;
-step_freq  = 200 kHz;
+=== SF float [ 0.25 : 1000 ] [ 5 ] "Start frequency:" "MHz"
+=== if ( SF < DF )
+start_freq = SF MHz;
+=== else
+start_freq = EF MHz;
+=== endif
+=== EF float [ 0.25 : 1000 ] [ 25 ] "End frequency:" "MHz"
+=== if ( SF < DF )
+end_freq   = EF MHz;
+=== else
+end_freq   = SF MHz;
+=== endif
+=== DF float [ 1 : 10000 ] [ 200 ] "Step frequency:" "kHz"
+step_freq  = DF kHz;
 atten      = -13 dB;
 
 
@@ -49,7 +60,7 @@ synthesizer_state( 1 );
 
 FOR I = 1 : N_points {
     digitizer_start_acquisition( );
-	data[ I ] = digitizer_get_amplitude_fast( CH1 );
+	data[ I ] = digitizer_get_amplitude( CH1 );
 	display( I, data[ I ], 1 );
 	IF v_low > data[ I ] {
 		v_low = data[ I ];
