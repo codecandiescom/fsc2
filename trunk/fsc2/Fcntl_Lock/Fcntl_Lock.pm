@@ -470,4 +470,4 @@ Jens Thoms Toerring <Jens.Toerring@physik.fu-berlin.de>
 
 =head1 SEE ALSO
 
-L<perl>, L<fcntl(2)>, L<lseek(2)>.
+L<perl(1)>, L<fcntl(2)>, L<lseek(2)>.
