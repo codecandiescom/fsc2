@@ -564,8 +564,10 @@ Var *field_meter_wait( Var *v )
 static double er035m_s_get_field( void )
 {
 	char buffer[ 21 ];
+	char *vs;
 	char *state_flag;
 	long length;
+	double sign;
 
 
 	/* Repeat asking for field value until it's correct up to LSD */
@@ -607,7 +609,11 @@ static double er035m_s_get_field( void )
 	/* Finally interpret the field value string */
 
 	*( state_flag - 1 ) = '\0';
-	sscanf( buffer, "%lf", &nmr.field );
+	sign = buffer[ 0 ] == '+' ? +1.0 : -1.0;
+	for ( vs = buffer; ! isdigit( *vs ); vs++ )
+		;
+	sscanf( vs, "%lf", &nmr.field );
+	nmr.field *= sign;
 
 	return nmr.field;
 }
