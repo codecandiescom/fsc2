@@ -1,5 +1,5 @@
 
-Please read the following carefully before trying to install and run fsc.
+Please read the following carefully before trying to install and run fsc2.
 
 A) Requirements
 ===============
@@ -59,11 +59,10 @@ kernels) or the one from National Instruments, to be downloaded from
 
   http://www.natinst.com
 
-(which is supposed to work with 2.2 kernels, but I couldn't get it to
-function reliable). Unfortunately, only the LLP library supports cards
-from other companies than National Instruments. You may also compile
-fsc2 without having a GPIB library, but then devices controlled via the
-GPIB bus can't be used.
+(which is supposed to work with 2.2 kernels). Unfortunately, only the LLP
+library supports cards from other companies than National Instruments. You
+may also compile fsc2 without having a GPIB library, but then devices
+controlled via the GPIB bus can't be used for obvious reasons.
 
 
 B) Permissions and Related Problems
@@ -83,10 +82,10 @@ to the one of fsc2.
 What group the fsc2 account belongs to does not matter. Relevant is only
 the group of the executable, i.e the file itself. I would recommend to
 use the group that has read and write access for the serial port device
-files, (/dev/ttyS* where * stands for a positive number). On most Linux
+files, (/dev/ttyS* where * stands for a positive number). On many Linux
 systems I have seen this group was either 'uucp' or 'dialout'. If the
-fsc2 executable file is owned by this group teh program automatically has
-the permisssion to access the device files. Otherwise you will have to
+fsc2 executable file is owned by this group the program automatically has
+the permisssion to access these device files. Otherwise you will have to
 either change the modes of the files to allow access by 'other', i.e.
 make them world readable and writable, or to make all users of fsc2 belong
 to this group (probably as one of their supplementary groups).
@@ -225,7 +224,7 @@ Just start by typing 'fsc2 a.edl' or 'fsc2 z.edl' and click onto the "Start"
 button to get an idea about how fsc2 displays 1-dimensional and 2-dimensional
 data sets.
 
-             22-8-2001             Have fun, Jens
+             22-10-2001             Have fun, Jens
 
 -----------------------------------------------------------------------------
        _  _____  _____
