@@ -747,8 +747,8 @@ endif
 	$(RM) $(RMFLAGS) $(libdir)/version.ugz
 	$(RM) $(RMFLAGS) $(libdir)/Functions
 	$(RM) $(RMFLAGS) $(libdir)/Devices
-	for file in $(adir)/*.xpm; do                      \
-		$(RM) $(RMFLAGS) $(auxdir)/`basename $$file`;  \
+	for file in $(adir)/*.xpm $(adir)/*.jpeg $(adir)/*.png $(adir)/*.gif; do  \
+		$(RM) $(RMFLAGS) $(auxdir)/`basename $$file`;                         \
 	done
 	$(MAKE) -C $(sdir) uninstall
 	$(MAKE) -C $(mdir) uninstall
