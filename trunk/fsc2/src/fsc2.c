@@ -1026,7 +1026,7 @@ void test_file( FL_OBJECT *a, long b )
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 	running_test = UNSET;
 
-	if ( ! user_break )
+	if ( state && ! user_break )
 	{
 		is_tested = SET;                  /* show that file has been tested */
 		a->u_ldata = 0;
