@@ -1433,12 +1433,11 @@ void vars_check( Var *v, int type )
 		t = v->type;
 		while ( ! ( ( t >>= 1 ) & 1 ) )
 			i++;
-		if ( Cur_Func == NULL )
+		if ( CS == NULL )
 			eprint( FATAL, SET, "Variable of type %s can't be used in this "
 					"context.\n", types[ i ] );
 		else
-			eprint( FATAL, SET, "Invalid variable type %s in %s().\n",
-					types[ i ], Cur_Func );
+			print( FATAL, "Invalid variable type %s.\n", types[ i ] );
 		THROW( EXCEPTION );
 	}
 

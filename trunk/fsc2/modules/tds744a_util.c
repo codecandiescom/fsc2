@@ -131,8 +131,8 @@ void tds744a_do_pre_exp_checks( void )
 
 		if ( width == 0.0 )
 		{
-			eprint( FATAL, UNSET, "%s: Can't determine a reasonable value for "
-					"the missing window widths.\n", DEVICE_NAME );
+			print( FATAL, "Can't determine a reasonable value for the missing "
+				   "window widths.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -251,9 +251,8 @@ static void tds744a_window_check_2( void )
 			cs = ( cs / tb ) * tb;
 			dcs = cs * fac / TDS744A_POINTS_PER_DIV;
 			buffer = T_strdup( tds744a_ptime( dcs ) );
-			eprint( WARN, UNSET, "%s: Start point of window %ld had to be "
-					"readjusted from %s to %s.\n", DEVICE_NAME, w->num,
-					tds744a_ptime( w->start ), buffer );
+			print( WARN, "Start point of window %ld had to be readjusted from "
+				   "%s to %s.\n", w->num, tds744a_ptime( w->start ), buffer );
 			T_free( buffer );
 			w->start = dcs;
 		}
@@ -275,9 +274,8 @@ static void tds744a_window_check_2( void )
 		{
 			dcd = tds744a.timebase / TDS744A_POINTS_PER_DIV;
 			buffer = T_strdup( tds744a_ptime( dcd ) );
-			eprint( SEVERE, UNSET, "%s: Width of window %ld had to be "
-					"readjusted from %s to %s.\n", DEVICE_NAME, w->num,
-					tds744a_ptime( w->width  ), buffer );
+			print( SEVERE, "Width of window %ld had to be readjusted from %s "
+				   "to %s.\n", w->num, tds744a_ptime( w->width ), buffer );
 			T_free( buffer );
 			w->width = dcd;
 		}
@@ -286,9 +284,8 @@ static void tds744a_window_check_2( void )
 			cd = ( cd / tb ) * tb;
 			dcd = cd * fac / TDS744A_POINTS_PER_DIV;
 			buffer = T_strdup( tds744a_ptime( dcd ) );
-			eprint( WARN, UNSET, "%s: Width of window %ld had to be "
-					"readjusted from %s to %s.\n", DEVICE_NAME, w->num,
-					tds744a_ptime( w->width ), buffer );
+			print( WARN, "Width of window %ld had to be readjusted from %s to "
+				   "%s.\n", w->num, tds744a_ptime( w->width ), buffer );
 			T_free( buffer );
 			w->width = dcd;
 		}
@@ -322,8 +319,8 @@ static void tds744a_window_check_3( void )
              w->start < - tds744a.trig_pos * window ||
              w->start + w->width < - tds744a.trig_pos * window )
         {
-			eprint( FATAL, UNSET, "%s: Window %ld doesn't fit into current "
-					"digitizer time range.\n", DEVICE_NAME, w->num );
+			print( FATAL, "Window %ld doesn't fit into current digitizer time "
+				   "range.\n", w->num );
 			THROW( EXCEPTION );
 		}
 
@@ -337,8 +334,8 @@ static void tds744a_window_check_3( void )
 
 		if ( w->end_num - w->start_num <= 0 )
         {
-			eprint( FATAL, UNSET, "%s: Window %ld has width of less than 1 "
-					"point.\n", DEVICE_NAME, w->num );
+			print( FATAL, "Window %ld has width of less than 1 point.\n",
+				   w->num );
 			THROW( EXCEPTION );
 		}
     }
@@ -485,14 +482,12 @@ long tds744a_translate_channel( int dir, long channel )
 			case DIGITIZER_CHANNEL_FUNC_F :
 			case DIGITIZER_CHANNEL_EXT    :
 			case DIGITIZER_CHANNEL_EXT10  :
-				eprint( FATAL, SET, "%s: Digitizer has no channel %s as used "
-						"in %s().\n", DEVICE_NAME,
-						Digitizer_Channel_Names[ channel ], Cur_Func );
+				print( FATAL, "Digitizer has no channel %s.\n",
+					   Digitizer_Channel_Names[ channel ] );
 				THROW( EXCEPTION );
 
 			default :
-				eprint( FATAL, SET, "%s: Invalid channel number %ld used in "
-						"%s().\n", DEVICE_NAME, channel, Cur_Func );
+				print( FATAL, "Invalid channel number %ld.\n", channel );
 				THROW( EXCEPTION );
 		}
 	}
@@ -540,8 +535,8 @@ long tds744a_translate_channel( int dir, long channel )
 				return DIGITIZER_CHANNEL_LINE;
 
 			default :
-				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-						__FILE__, __LINE__ );
+				print( FATAL, "Internal error detected at %s:%d.\n",
+					   __FILE__, __LINE__ );
 				THROW( EXCEPTION );
 		}
 	}

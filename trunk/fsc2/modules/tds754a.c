@@ -734,7 +734,7 @@ static Var *get_area( Var *v, bool use_cursor )
 
 	if ( ch > TDS754A_REF4 )
 	{
-		print( FATAL, "Invalid channel %s.\n", Channel_Names[ ch ], Cur_Func );
+		print( FATAL, "Invalid channel %s.\n", Channel_Names[ ch ] );
 		THROW( EXCEPTION );
 	}
 

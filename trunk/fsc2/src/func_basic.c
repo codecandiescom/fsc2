@@ -42,7 +42,7 @@ Var *f_abort( Var *v )
 
 	v = v;                       /* keeps the compiler happy */
 
-	eprint( NO_ERROR, SET, "Exit due to call of %s().\n", Cur_Func );
+	eprint( NO_ERROR, SET, "Exit due to call of abort().\n" );
 
 	if ( ! TEST_RUN )
 	{
@@ -813,7 +813,7 @@ Var *f_cosh( Var *v )
 	{
 		res = cosh( VALUE( v ) );
 		if ( res == HUGE_VAL && errno == ERANGE )
-			print( SEVERE, "Result overflow.\n", Cur_Func );
+			print( SEVERE, "Result overflow.\n" );
 		return vars_push( FLOAT_VAR, res );
 	}
 
@@ -825,7 +825,7 @@ Var *f_cosh( Var *v )
 	{
 		res = cosh( is_int ? ( double ) *ilp++ : *idp++ );
 		if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
-			print( SEVERE, "Result overflow.\n", Cur_Func );
+			print( SEVERE, "Result overflow.\n" );
 
 		rdp[ i ] = res;
 	}
@@ -1472,7 +1472,7 @@ Var *f_mean( Var *v )
 		if ( a_index < 0 )
 		{
 			print( FATAL, "Invalid array index (%ld).\n",
-				   a_index + ARRAY_OFFSET, Cur_Func );
+				   a_index + ARRAY_OFFSET );
 			THROW( EXCEPTION );
 		}
 

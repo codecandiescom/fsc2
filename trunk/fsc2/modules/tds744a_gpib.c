@@ -482,8 +482,7 @@ int tds744a_get_trigger_channel( void )
 
 void tds744a_gpib_failure( void )
 {
-	eprint( FATAL, UNSET, "%s: Communication with device failed.\n",
-			DEVICE_NAME );
+	print( FATAL, "Communication with device failed.\n" );
 	THROW( EXCEPTION );
 }
 
@@ -694,9 +693,9 @@ bool tds744a_set_sens( int channel, double sens )
 
 		if ( strncmp( reply, "MEG", 3 ) )
 		{
-			eprint( FATAL, ! TDS744A_INIT, "%s: Can't set sensitivity of "
-					"channel %s to %f V while input impedance is 50 Ohm.\n",
-					DEVICE_NAME, Channel_Names[ channel ], sens );
+			print( FATAL, "Can't set sensitivity of channel %s to %f V while "
+				   "input impedance is 50 Ohm.\n",
+				   Channel_Names[ channel ], sens );
 			THROW( EXCEPTION );
 		}
 	}

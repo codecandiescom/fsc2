@@ -985,7 +985,7 @@ Var *f_screate( Var *v )
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
-		print( FATAL, "Missing slider minimum value.\n", Cur_Func );
+		print( FATAL, "Missing slider minimum value.\n" );
 		THROW( EXCEPTION );
 	}
 
