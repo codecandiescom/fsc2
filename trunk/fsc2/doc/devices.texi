@@ -567,7 +567,6 @@ the digitizer:
 @code{2}, @code{3} or @code{4}
 @item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,
 alternatively, @code{5}, @code{6}, @code{7} or @code{8}
-@item
 @end itemize
 @item TDS744A
 @item TDS754A
