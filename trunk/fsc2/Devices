@@ -28,6 +28,7 @@ sr830         // Stanford Research lock-in amplifier, model 830
 
 aeg_s_band    // S-band AEG magnet power supply (Frankfurt)
 aeg_x_band    // X-band AEG magnet power supply (Berlin)
+keithley228a  // W-band magnet power supply (Berlin)
 
 er035m        // Bruker NMR gaussmeter (connected to IEEE bus)
 er035m_s      // Bruker NMR gaussmeter (connected to serial port)

@@ -639,7 +639,7 @@ Var *lockin_dac_voltage( Var *v )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid lock-in DAC channel number %ld, "
 				"valid channels are in the range from %d to %d.\n", Fname, Lc,
-				DEVICE_NAME, channel, first_DAC_port, last_C_port );
+				DEVICE_NAME, channel, first_DAC_port, last_DAC_port );
 		THROW( EXCEPTION );
 	}
 

@@ -12,13 +12,15 @@
 
 /*******************************************************************/
 /* Here is defined to which DAC port of the different lock-ins the */
-/*     modulation input of the power supply is connected to        */
+/* modulation input of the power supply is connected to, if this   */
+/* needs to be changed just for a few experiments use the function */
+/* 'magnet_use_dac_port' instead of changing the defaults and      */
+/* and recompiling!                                                */
 /*******************************************************************/
 
-#define	SR510_DAC_PORT 6
-#define	SR530_DAC_PORT 6
-#define	SR810_DAC_PORT 1
-#define	SR830_DAC_PORT 1
+static const char *lockins[ ] = { "sr510", "sr530", "sr810", "sr830", NULL };
+static int dac_ports[ ] = { 6, 6, 1, 1 };
+
 
 #define V_TO_A_FACTOR	      -97.5   /* Conversion factor of voltage at DAC */
 
@@ -41,10 +43,12 @@ int keithley228a_end_of_exp_hook( void );
 
 Var *magnet_setup( Var *v );
 Var *magnet_use_correction( Var *v );
+Var *magnet_use_dac_port( Var *v );
 Var *set_current( Var *v );
 Var *sweep_up( Var *v );
 Var *sweep_down( Var *v );
 Var *reset_current( Var *v );
+
 
 /* internally used functions */
 
@@ -66,6 +70,7 @@ typedef struct {
 
 	bool state;               /* STANDBY or OPERATE */
 
+	const char *lockin_name;  /* name of the lock-in to use */
 	int lockin_dac_port;      /* number of the DAC port of the lock-in the
 								 modulation input is connected to */
 
@@ -85,6 +90,7 @@ typedef struct {
 static Keithley228a keithley228a;
 
 
+
 /*----------------------------------------------------------------*/
 /* Here we check if also a driver for a field meter is loaded and */
 /* test if this driver will be loaded before the magnet driver.   */
@@ -94,29 +100,38 @@ int keithley228a_init_hook( void )
 {
 	Var *func_ptr;
 	int access;
+	int i;
 
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
 	need_GPIB = SET;
 
-	/* Check if there's a lock-in amplifier with a DAC */
+	/* We need the lock-in driver called *before* the magnet driver since
+	   the lock-ins DAC is needed in the initialization of the magnet.
+	   Probably we should implement a solution that brings the devices
+	   automatically into the correct sequence instead of this hack, but
+	   that's not as simple as it might look...
+	   First check if there's a lock-in amplifier with a DAC and get the
+	   default DAC port number, then check if a function for setting the
+	   DAC port exists */
 
-	if ( ! exist_device( "sr510" ) &&
-		 ! exist_device( "sr530" ) &&
-		 ! exist_device( "sr810" ) &&
-		 ! exist_device( "sr830" ) )
+	keithley228a.lockin_dac_port = -1;
+	keithley228a.lockin_name = NULL;
+	for ( i = 0; lockins[ i ] != NULL; i++ )
+		if ( exist_device( lockins[ i ] ) )
+		{
+			keithley228a.lockin_name = lockins[ i ];
+			keithley228a.lockin_dac_port = dac_ports[ i ];
+			break;
+		}
+
+	if ( keithley228a.lockin_name == NULL )
 	{
 		eprint( FATAL, "%s: Can't find a driver for a lock-in amplifier with "
 				"a DAC.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
-
-	/* We need the lock-in driver called *before* the magnet driver since
-	   the lock-ins DAC is needed in the initialization of the magnet.
-	   Probably we should implement a solution that brings the devices
-	   automatically into the correct sequence instead of this hack, but
-	   that's not as simple as it might look... */
 
 	if ( ( func_ptr = func_get( "lockin_dac_voltage", &access ) ) == NULL )
 	{
@@ -126,18 +141,6 @@ int keithley228a_init_hook( void )
 		THROW( EXCEPTION );
 	}
 	vars_pop( func_ptr );
-
-	/* Set the port number of the lock-ins DAC the modulation input of
-	   the power supply is connected to */
-
-	if ( exist_device( "sr510" ) )
-		keithley228a.lockin_dac_port = SR510_DAC_PORT;
-	else if ( exist_device( "sr530" ) )
-		keithley228a.lockin_dac_port = SR530_DAC_PORT;
-	else if ( exist_device( "sr810" ) )
-		keithley228a.lockin_dac_port = SR810_DAC_PORT;
-	else if ( exist_device( "sr830" ) )
-		keithley228a.lockin_dac_port = SR830_DAC_PORT;
 
 	/* Unset some flags in the power supplies structure */
 
@@ -236,6 +239,50 @@ Var *magnet_use_correction( Var *v )
 
 	keithley228a.use_correction = SET;
 	return vars_push( INT_VAR, 1 );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+Var *magnet_use_dac_port( Var *v )
+{
+	int port;
+	int *first_DAC_port;
+	int *last_DAC_port;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == FLOAT_VAR )
+	{
+		eprint( WARN, "%s:%ld: %s: Integer value used for DAC port.\n",
+				Fname, Lc, DEVICE_NAME );
+		port = ( int ) lround( v->val.dval );
+	}
+	else
+		port = ( int ) v->val.lval;
+
+	if ( get_lib_symbol( keithley228a.lockin_name, "first_DAC_port",
+						 ( void ** ) &first_DAC_port ) != LIB_OK ||
+		 get_lib_symbol( keithley228a.lockin_name, "last_DAC_port",
+						 ( void ** ) &last_DAC_port ) != LIB_OK )
+	{
+		eprint( FATAL, "%s:%ld: %s: Can't find necessary symbols in library "
+				"for lock-in amplifier %s\n", Fname, Lc, DEVICE_NAME,
+				keithley228a.lockin_name );
+		THROW( EXCEPTION );
+	}
+
+	if ( port < *first_DAC_port || port > *last_DAC_port )
+	{
+		eprint( FATAL, "%s:%ld: %s: Invalid DAC port number %d, valid range "
+				"for lock-in %s is %d to %d\n", Fname, Lc, DEVICE_NAME, port,
+				keithley228a.lockin_name, *first_DAC_port, *last_DAC_port );
+		THROW( EXCEPTION );
+	}
+
+	keithley228a.lockin_dac_port = port;
+	return vars_push( INT_VAR, ( long ) port );
 }
 
 
@@ -559,7 +606,7 @@ static double keithley228a_goto_current( double new_current )
 	double dummy;
 
 	
-	assert( fabs( new_current > 10.0 ) );       /* paranoia ? */
+	assert( fabs( new_current <= 10.0 ) );       /* paranoia ? */
 
 	/* Nothing really to be done in a test run */
 
@@ -629,7 +676,7 @@ static double keithley228a_set_current( double new_current )
 	int access;
 
 
-	assert( fabs( new_current > 10.0 ) );       /* paranoia ? */
+	assert( fabs( new_current <= 10.0 ) );       /* paranoia ? */
 
 	if ( ! keithley228a.use_correction )
 	{
