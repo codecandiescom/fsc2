@@ -147,65 +147,65 @@ install:
 
 install-pion.anorg.chemie.uni-frankfurt.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
-	$(LN) $(LNFLAGS)  $(libdir)/dg2020_f.so $(libdir)/dg2020.so
-	chown $(OWNER).$(GROUP) $(libdir)/dg2020.so
-	$(LN) $(LNFLAGS) $(libdir)/dg2020_f.so $(libdir)/pulser.so
-	chown $(OWNER).$(GROUP) $(libdir)/pulser.so
-	$(LN) $(LNFLAGS) $(libdir)/aeg_s_band.so $(libdir)/s_band.so
-	chown $(OWNER).$(GROUP) $(libdir)/s_band.so
-	$(LN) $(LNFLAGS) $(libdir)/aeg_s_band.so $(libdir)/magnet.so
-	chown $(OWNER).$(GROUP) $(libdir)/magnet.so
-	$(LN) $(LNFLAGS) $(libdir)/bh15.so $(libdir)/gaussmeter.so
-	chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
-	$(LN) $(LNFLAGS) $(libdir)/sr510.so $(libdir)/lockin.so
-	chown $(OWNER).$(GROUP) $(libdir)/lockin.so
+	-$(LN) $(LNFLAGS)  $(libdir)/dg2020_f.so $(libdir)/dg2020.so
+	-chown $(OWNER).$(GROUP) $(libdir)/dg2020.so
+	-$(LN) $(LNFLAGS) $(libdir)/dg2020_f.so $(libdir)/pulser.so
+	-chown $(OWNER).$(GROUP) $(libdir)/pulser.so
+	-$(LN) $(LNFLAGS) $(libdir)/aeg_s_band.so $(libdir)/s_band.so
+	-chown $(OWNER).$(GROUP) $(libdir)/s_band.so
+	-$(LN) $(LNFLAGS) $(libdir)/aeg_s_band.so $(libdir)/magnet.so
+	-chown $(OWNER).$(GROUP) $(libdir)/magnet.so
+	-$(LN) $(LNFLAGS) $(libdir)/bh15.so $(libdir)/gaussmeter.so
+	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
+	-$(LN) $(LNFLAGS) $(libdir)/sr510.so $(libdir)/lockin.so
+	-chown $(OWNER).$(GROUP) $(libdir)/lockin.so
 
 install-crowley.physik.fu-berlin.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
-	$(LN) $(LNFLAGS) $(libdir)/er035m_sas.so $(libdir)/gaussmeter.so
-	chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
-	$(LN) $(LNFLAGS) $(libdir)/hp8647a.so $(libdir)/synthesizer.so
-	chown $(OWNER).$(GROUP) $(libdir)/synthesizer.so
-	$(LN) $(LNFLAGS) $(libdir)/egg4402so $(libdir)/boxcar.so
-	chown $(OWNER).$(GROUP) $(libdir)/boxcar.so
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
+	-$(LN) $(LNFLAGS) $(libdir)/er035m_sas.so $(libdir)/gaussmeter.so
+	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
+	-$(LN) $(LNFLAGS) $(libdir)/hp8647a.so $(libdir)/synthesizer.so
+	-chown $(OWNER).$(GROUP) $(libdir)/synthesizer.so
+	-$(LN) $(LNFLAGS) $(libdir)/egg4402so $(libdir)/boxcar.so
+	-chown $(OWNER).$(GROUP) $(libdir)/boxcar.so
+	-$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
 
 install-moebi.physik.fu-berlin.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
-	$(LN) $(LNFLAGS) $(libdir)/dg2020_b.so $(libdir)/pulser.so
-	chown fsc2.fsc2 $(libdir)/pulser.so
-	$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.so $(libdir)/magnet.so
-	chown fsc2.fsc2 $(libdir)/magnet.so
-	$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
-	chown fsc2.fsc2 $(libdir)/gaussmeter.so
+	-$(LN) $(LNFLAGS) $(libdir)/dg2020_b.so $(libdir)/pulser.so
+	-chown fsc2.fsc2 $(libdir)/pulser.so
+	-$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.so $(libdir)/magnet.so
+	-chown fsc2.fsc2 $(libdir)/magnet.so
+	-$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
+	-chown fsc2.fsc2 $(libdir)/gaussmeter.so
 
 install-door.physik.fu-berlin.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
-	$(LN) $(LNFLAGS) $(libdir)/hfs9000.so $(libdir)/hfs9003.so
-	chown fsc2.fsc2 $(libdir)/hfs9003.so
-	$(LN) $(LNFLAGS) $(libdir)/keithley228a.so $(libdir)/w_band.so
-	chown fsc2.fsc2 $(libdir)/w_band.so
-	$(LN) $(LNFLAGS) $(libdir)/keithley228a.so $(libdir)/magnet.so
-	chown fsc2.fsc2 $(libdir)/magnet.so
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/hp8647a.table $(libdir)
+	-$(LN) $(LNFLAGS) $(libdir)/hfs9000.so $(libdir)/hfs9003.so
+	-chown fsc2.fsc2 $(libdir)/hfs9003.so
+	-$(LN) $(LNFLAGS) $(libdir)/keithley228a.so $(libdir)/w_band.so
+	-chown fsc2.fsc2 $(libdir)/w_band.so
+	-$(LN) $(LNFLAGS) $(libdir)/keithley228a.so $(libdir)/magnet.so
+	-chown fsc2.fsc2 $(libdir)/magnet.so
+	-$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/hp8647a.table $(libdir)
 
 install-isaak.physik.fu-berlin.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
-	$(LN) $(LNFLAGS) $(libdir)/dg2020_b.so $(libdir)/pulser.so
-	chown fsc2.fsc2 $(libdir)/pulser.so
-	$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.so $(libdir)/magnet.so
-	chown fsc2.fsc2 $(libdir)/magnet.so
-	$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
-	chown fsc2.fsc2 $(libdir)/gaussmeter.so
+	-$(LN) $(LNFLAGS) $(libdir)/dg2020_b.so $(libdir)/pulser.so
+	-chown fsc2.fsc2 $(libdir)/pulser.so
+	-$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.so $(libdir)/magnet.so
+	-chown fsc2.fsc2 $(libdir)/magnet.so
+	-$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
+	-chown fsc2.fsc2 $(libdir)/gaussmeter.so
 
 install-crowley.none:
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
+	-$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
 
 
 # How to uninstall the modules
 
 uninstall:
-	for f in *.so; do                     \
+	-for f in *.so; do                     \
 		$(RM) $(RMFLAGS) $(libdir)/$$f;   \
 	done
 	if [ "$(UNINSTALL_MACHINE)" != "uninstall-unknown" ]; then  \

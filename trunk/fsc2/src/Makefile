@@ -169,7 +169,7 @@ uninstall:
 	-$(RM) $(RMFLAGS) $(bindir)/fsc2 $(bindir)/fsc2_clean
 					  $(bindir)/fsc2_connect $(bindir)/fsc2_start
 					  $(bindir)/fsc2_test $(bindir)/fsc2_load
-	for f in *.so; do                    \
+	-for f in *.so; do                    \
 		$(RM) $(RMFLAGS) $(libdir)/$$f;  \
 	done
 
