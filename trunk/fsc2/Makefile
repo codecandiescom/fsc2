@@ -528,15 +528,15 @@ docs:
 
 
 me6x00:
-	me6x00/INSTALL
+	cd me6x00; ./INSTALL; cd $(fdir)
 
 
 ni6601:
-	ni6601/INSTALL
+	cd ni6601; ./INSTALL; cd $(fdir)
 
 
 witio_48:
-	witio_48/INSTALL
+	cd witio_48; ./INSTALL; cd $(fdir)
 
 
 # Create a header file with configuration information from the contents of
