@@ -1474,9 +1474,9 @@ next section), so don't throw it yourself without a very good reason. A
 the module is doing something rather time consuming (e.g.@: waiting for
 a device to become ready or doing some calibration). In this case you
 should think about checking if the user pressed the @code{Stop}
-buttom. To find out you can use a macro, @code{DO_STOP} -- if it
-returns @code{TRUE} the user has pressed the stop button. Ifyour
-prepared to stop on the users request you simply have to throw an
+buttom. To find out you can use a macro, @code{DO_STOP} -- if it returns
+@code{TRUE} the user has pressed the stop button. If you're prepared to
+stop on the users request you simply have to throw an
 @code{USER_BREAK_EXCEPTION}.
 
 

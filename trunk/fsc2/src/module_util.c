@@ -47,6 +47,7 @@ inline bool get_do_stop( void )
 	return do_quit && react_to_do_quit;
 }
 
+
 /*--------------------------------------------------------------*/
 /* This function might be called to check if there are any more */
 /* variables on the variable stack, representing superfluous    */
