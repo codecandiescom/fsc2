@@ -165,10 +165,10 @@ double hp8647a_get_att_from_table( double freq )
 	if ( freq == hp8647a.att_table[ i_high ].freq )
 		return hp8647a.att_table[ i_high ].att;
 
-	i_cur = floor( ( i_high - i_low ) *
-				   ( freq - hp8647a.att_table[ i_low ].freq ) /
-				   (   hp8647a.att_table[ i_high ].freq 
-					 - hp8647a.att_table[ i_low ].freq ) ) + i_low;
+	i_cur = lrnd( floor( ( i_high - i_low ) *
+						 ( freq - hp8647a.att_table[ i_low ].freq ) /
+						 (   hp8647a.att_table[ i_high ].freq 
+							 - hp8647a.att_table[ i_low ].freq ) ) ) + i_low;
 
 	if ( freq > hp8647a.att_table[ i_cur ].freq )
 	{
