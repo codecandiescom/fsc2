@@ -156,7 +156,7 @@ int er023m_end_of_exp_hook( void )
 
 Var *lockin_name( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -822,7 +822,7 @@ Var *lockin_is_overload( Var *v )
 	long res;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_MODE == TEST )
 		return vars_push( INT_VAR, 0 );

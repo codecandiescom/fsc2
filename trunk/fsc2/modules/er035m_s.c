@@ -411,7 +411,7 @@ void er035m_s_end_hook( void )
 
 Var *gaussmeter_name( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -429,7 +429,7 @@ Var *find_field( Var *v )
 	long retries;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, ER035M_TEST_FIELD );
@@ -672,7 +672,7 @@ Var *gaussmeter_command( Var *v )
 
 Var *gaussmeter_wait( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_MODE == EXPERIMENT && nmr.is_needed )
 		fsc2_usleep( ( nmr.resolution == LOW ? 10 : 20 ) * E2_US, UNSET );

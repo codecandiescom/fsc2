@@ -264,7 +264,7 @@ void ips20_4_exit_hook( void )
 
 Var *magnet_name( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -315,8 +315,7 @@ Var *magnet_setup( Var *v )
 
 Var *get_field( Var *v )
 {
-	v = v;
-
+	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_MODE == TEST )
 	{
@@ -609,7 +608,7 @@ Var *magnet_sweep_rate( Var *v )
 
 Var *reset_field( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return set_field( vars_push( FLOAT_VAR, ips20_4.start_current ) );
 }
 

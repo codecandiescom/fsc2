@@ -293,7 +293,7 @@ void keithley228a_exit_hook( void )
 
 Var *magnet_name( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -430,7 +430,7 @@ Var *set_field( Var *v )
 
 Var *get_field( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return vars_push( FLOAT_VAR, keithley228a.current );
 }
 
@@ -443,7 +443,7 @@ Var *sweep_up( Var *v )
 	double new_current;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( ! keithley228a.is_current_step )
 	{
@@ -469,7 +469,7 @@ Var *sweep_down( Var *v )
 	double new_current;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( ! keithley228a.is_current_step )
 	{
@@ -492,7 +492,7 @@ Var *sweep_down( Var *v )
 
 Var *reset_field( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( ! keithley228a.is_req_current )
 	{

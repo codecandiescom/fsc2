@@ -206,7 +206,7 @@ void er032m_exit_hook( void )
 
 Var *magnet_name( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -267,7 +267,7 @@ Var *sweep_up( Var *v )
 	int steps;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( ! magnet.is_init )
 	{
@@ -317,7 +317,7 @@ Var *sweep_down( Var *v )
 	int steps;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( ! magnet.is_init )
 	{
@@ -364,7 +364,7 @@ Var *sweep_down( Var *v )
 
 Var *reset_field( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( ! magnet.is_init )
 	{
@@ -387,7 +387,7 @@ Var *reset_field( Var *v )
 
 Var *get_field( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, magnet.act_field );

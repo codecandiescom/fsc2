@@ -185,7 +185,6 @@ bool dg2020_init( const char *name )
 #endif
 
 
-
 	if ( gpib_init_device( name, &dg2020.device ) == FAILURE )
 		return FAIL;
 

@@ -169,7 +169,7 @@ void hp8672a_exit_hook( void )
 
 Var *synthesizer_name( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -467,7 +467,7 @@ Var *synthesizer_sweep_up( Var *v )
 	double att;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( ! hp8672a.step_freq_is_set )
 	{
@@ -526,7 +526,7 @@ Var *synthesizer_sweep_down( Var *v )
 	Var *nv;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 	hp8672a.step_freq *= -1.0;
 	nv = synthesizer_sweep_up( NULL );
 	hp8672a.step_freq *= -1.0;
@@ -540,7 +540,7 @@ Var *synthesizer_sweep_down( Var *v )
 
 Var *synthesizer_reset_frequency( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( ! hp8672a.start_freq_is_set )
 	{

@@ -130,7 +130,7 @@ int kontron4060_end_of_exp_hook( void )
 
 Var *voltmeter_name( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -141,7 +141,7 @@ Var *voltmeter_name( Var *v )
 
 Var *voltmeter_ac_measurement( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_MODE == EXPERIMENT &&
 		 gpib_write( kontron4060.device, "M1\n", 3 ) == FAILURE )
@@ -158,7 +158,7 @@ Var *voltmeter_ac_measurement( Var *v )
 
 Var *voltmeter_dc_measurement( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_MODE == EXPERIMENT &&
 		 gpib_write( kontron4060.device, "M0\n", 3 ) == FAILURE )
@@ -181,7 +181,7 @@ Var *voltmeter_get_data( Var *v )
 	double val;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, TEST_VOLTAGE );

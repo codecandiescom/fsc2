@@ -352,7 +352,7 @@ void er035m_sa_exit_hook( void )
 
 Var *gaussmeter_name( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -369,7 +369,7 @@ Var *measure_field( Var *v )
 	long length;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, ER035M_TEST_FIELD );

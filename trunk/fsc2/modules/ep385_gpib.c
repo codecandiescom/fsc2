@@ -47,7 +47,7 @@ bool ep385_init( const char *name )
 
 
 #ifdef EP385_GPIB_DEBUG
-	name = name;
+	UNUSED_ARGUMENT( name );
 #endif
 
 	if ( gpib_init_device( name, &ep385.device ) == FAILURE )
