@@ -18,14 +18,30 @@ my $N_runs     = 20;
 
 my $how        = 'Start program';
 
+
+my $old_val;
+
+# Create all the graphic stuff
+
 my $mw = MainWindow->new( );
+
+my $f0 = $mw->Frame( )->pack( '-side' => 'top',
+							  '-fill' => 'x',
+							  '-padx' => '2m',
+							  '-pady' => '2m' );
 
 
 my $f1 = $mw->Frame( );
-my $f1_l1 = $f1->Label( '-text' => 'Start frequency: ' );
+my $f1_l1 = $f1->Label( '-text' => 'Start frequency:',
+						'-width' => '20',
+						'anchor' => 'w' );
 my $f1_v = $f1->Entry( '-textvariable' => \$start_freq,
+					   '-width' => '6',
+					   '-validate' => 'key',
+					   '-vcmd' => \&is_numeric,
 					   '-relief' => 'sunken' );
-my $f1_l2 = $f1->Label( '-text' => ' MHz' );
+my $f1_l2 = $f1->Label( '-text' => 'MHz',
+						'-width' => 3 );
 
 $f1->pack( '-side' => 'top',
 		   '-fill' => 'x',
@@ -39,14 +55,23 @@ $f1_v->pack( '-side' => 'left',
 			  '-fill' => 'x',
 			  '-padx' => '3m',
 			  '-expand' => 1 );
-$f1_l2->pack( '-side' => 'left' );
+$f1_l2->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
 
 
 my $f2 = $mw->Frame( );
-my $f2_l1 = $f2->Label( '-text' => 'End frequency: ' );
+my $f2_l1 = $f2->Label( '-text' => 'End frequency:',
+						'-width' => '20',
+						'anchor' => 'w' );
 my $f2_v = $f2->Entry( '-textvariable' => \$end_freq,
+					   '-width' => '6',
+					   '-validate' => 'key',
+					   '-vcmd' => \&is_numeric,
 					   '-relief' => 'sunken' );
-my $f2_l2 = $f2->Label( '-text' => ' MHz' );
+my $f2_l2 = $f2->Label( '-text' => 'MHz',
+						'-width' => 3 );
 
 $f2->pack( '-side' => 'top',
 		   '-fill' => 'x',
@@ -60,14 +85,23 @@ $f2_v->pack( '-side' => 'left',
 			  '-fill' => 'x',
 			  '-padx' => '3m',
 			  '-expand' => 1 );
-$f2_l2->pack( '-side' => 'left' );
+$f2_l2->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
 
 
 my $f3 = $mw->Frame( );
-my $f3_l1 = $f3->Label( '-text' => 'Step frequency: ' );
+my $f3_l1 = $f3->Label( '-text' => 'Step frequency:',
+						'-width' => '20',
+						'anchor' => 'w' );
 my $f3_v = $f3->Entry( '-textvariable' => \$step_freq,
+					   '-width' => '6',
+					   '-validate' => 'key',
+					   '-vcmd' => \&is_numeric,
 					   '-relief' => 'sunken' );
-my $f3_l2 = $f3->Label( '-text' => ' kHz' );
+my $f3_l2 = $f3->Label( '-text' => 'kHz',
+						'-width' => 3 );
 
 $f3->pack( '-side' => 'top',
 		   '-fill' => 'x',
@@ -81,15 +115,23 @@ $f3_v->pack( '-side' => 'left',
 			  '-fill' => 'x',
 			  '-padx' => '3m',
 			  '-expand' => 1 );
-$f3_l2->pack( '-side' => 'left' );
-
+$f3_l2->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
 
 
 my $f4 = $mw->Frame( );
-my $f4_l1 = $f4->Label( '-text' => 'Attenuation: ' );
+my $f4_l1 = $f4->Label( '-text' => 'Attenuation:',
+						'-width' => '20',
+						'anchor' => 'w' );
 my $f4_v = $f4->Entry( '-textvariable' => \$atten,
+					   '-width' => '6',
+					   '-validate' => 'key',
+					   '-vcmd' => \&is_numeric,
 					   '-relief' => 'sunken' );
-my $f4_l2 = $f4->Label( '-text' => ' db' );
+my $f4_l2 = $f4->Label( '-text' => 'db',
+						'-width' => 3 );
 
 $f4->pack( '-side' => 'top',
 		   '-fill' => 'x',
@@ -103,14 +145,23 @@ $f4_v->pack( '-side' => 'left',
 			  '-fill' => 'x',
 			  '-padx' => '3m',
 			  '-expand' => 1 );
-$f4_l2->pack( '-side' => 'left' );
+$f4_l2->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
 
 
 my $f5 = $mw->Frame( );
-my $f5_l1 = $f5->Label( '-text' => 'Modulation freqnuecy: ' );
+my $f5_l1 = $f5->Label( '-text' => 'Modulation frequency:',
+						'-width' => '20',
+						'anchor' => 'w' );
 my $f5_v = $f5->Entry( '-textvariable' => \$mod_freq,
+					   '-width' => '6',
+					   '-validate' => 'key',
+					   '-vcmd' => \&is_numeric,
 					   '-relief' => 'sunken' );
-my $f5_l2 = $f5->Label( '-text' => ' kHz' );
+my $f5_l2 = $f5->Label( '-text' => 'kHz',
+						'-width' => 3 );
 
 $f5->pack( '-side' => 'top',
 		   '-fill' => 'x',
@@ -124,14 +175,23 @@ $f5_v->pack( '-side' => 'left',
 			  '-fill' => 'x',
 			  '-padx' => '3m',
 			  '-expand' => 1 );
-$f5_l2->pack( '-side' => 'left' );
+$f5_l2->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
 
 
 my $f6 = $mw->Frame( );
-my $f6_l1 = $f6->Label( '-text' => 'Modulation amplitude: ' );
+my $f6_l1 = $f6->Label( '-text' => 'Modulation amplitude:',
+						'-width' => '20',
+						'anchor' => 'w' );
 my $f6_v = $f6->Entry( '-textvariable' => \$mod_ampl,
+					   '-width' => '6',
+					   '-validate' => 'key',
+					   '-vcmd' => \&is_numeric,
 					   '-relief' => 'sunken' );
-my $f6_l2 = $f6->Label( '-text' => ' kHz' );
+my $f6_l2 = $f6->Label( '-text' => 'kHz',
+						'-width' => 3 );
 
 $f6->pack( '-side' => 'top',
 		   '-fill' => 'x',
@@ -145,14 +205,23 @@ $f6_v->pack( '-side' => 'left',
 			  '-fill' => 'x',
 			  '-padx' => '3m',
 			  '-expand' => 1 );
-$f6_l2->pack( '-side' => 'left' );
-
+$f6_l2->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
 
 
 my $f7 = $mw->Frame( );
-my $f7_l1 = $f7->Label( '-text' => 'Number of runs: ' );
+my $f7_l1 = $f7->Label( '-text' => 'Number of runs:',
+						'-width' => '20',
+						'anchor' => 'w' );
 my $f7_v = $f7->Entry( '-textvariable' => \$N_runs,
+					   '-width' => '6',
+					   '-validate' => 'key',
+					   '-vcmd' => \&is_numeric,
 					   '-relief' => 'sunken' );
+my $f7_l2 = $f7->Label( '-text' => '    ',
+						'-width' => 3 );
 
 $f7->pack( '-side' => 'top',
 		   '-fill' => 'x',
@@ -166,18 +235,38 @@ $f7_v->pack( '-side' => 'left',
 			  '-fill' => 'x',
 			  '-padx' => '3m',
 			  '-expand' => 1 );
+$f7_l2->pack( '-side' => 'left',
+			  '-fill' => 'x',
+			  '-padx' => '3m',
+			  '-expand' => 1 );
 
 
-$mw->Optionmenu( '-options' => [ ( 'sr510', 'sr530', 'sr810', 'sr830' ) ],
-				 '-text' => 'sr810',
-				 '-variable' => \$lockin
-			   )->pack( '-padx' => '3m',
-					    '-pady' => '3m' );
+my $f8 = $mw->Frame( );
+my $f8_l = $f8->Label( '-text' => 'Lock-in amplifier:',
+						'-width' => '20',
+						'anchor' => 'w' );
+my $f8_m = $f8->Optionmenu( '-options' =>
+							[ ( 'sr510', 'sr530', 'sr810', 'sr830' ) ],
+							'-text' => 'sr810',
+							'-width' => 9,
+							'-variable' => \$lockin,
+							'-command' => [ \&li_conf, $lockin ] );
+$f8->pack( '-side' => 'top',
+		   '-fill' => 'x',
+		   '-padx' => '2m',
+		   '-pady' => '2m' );
+$f8_l->pack( '-side' => 'left',
+			 '-fill' => 'x',
+			 '-padx' => '3m',
+			 '-expand' => 1 );
+$f8_m->pack( '-padx' => '3m',
+			 '-pady' => '3m',
+			 '-fill' => 'x' );
 
 $mw->Optionmenu( '-options' => [ ( 'Start program', 'Test program',
 								   'Load into fsc2' ) ],
 				 '-variable' => \$how,
-				 '-command' => sub{ &write_out( $how ) }
+				 '-command' => \&write_out
 			   )->pack( '-padx' => '3m',
 					    '-pady' => '3m' );
 
@@ -189,16 +278,40 @@ $mw->Button( '-text' => 'Quit',
 MainLoop;
 
 
+sub is_numeric {
+
+	my $new_val = shift;
+	shift;
+	my $old_val = shift;
+
+	return $new_val =~ /^[+-]?([0-9]+(\.[0-9]*)?)?$/;
+}
+
+sub li_conf {
+
+	my ( $self, $li ) = @_;
+
+	if ( $li =~ /^sr8/ ) {
+		$f5_v->configure( '-state' => 'normal' );
+	} else {
+		$f5_v->configure( '-state' => 'disabled' );
+		$mod_freq = "";
+	}
+}
+
+
 sub write_out {
 
-my $how = shift;
-my $text;
+return if &do_checks( ) != 0;
 
-$how = "start" if $how =~ /^Start/;
-$how = "test"  if $how =~ /^Test/;
-$how = "load"  if $how =~ /^Load/;
+my $how2;
+my $text = "";
 
-open( F, "|fsc2_$how" ) or die "Can't find utility.\n";
+$how2 = "start" if $how =~ /^Start/;
+$how2 = "test"  if $how =~ /^Test/;
+$how2 = "load"  if $how =~ /^Load/;
+
+open( F, "|fsc2_$how2" ) or die "Can't find utility.\n";
 
 print F
 "DEVICES:
@@ -319,16 +432,166 @@ if ( $? != 0 ) {
     } elsif ( $? >> 8 == 1 ) {
         $text = "Someone else is running fsc2.";
     } elsif ( $? >> 8 == 2 ) {
-        $text = "fsc2 is currently busy.";
+        $text = "fsc2 is busy.";
     } elsif ( $? >> 8 == 3 ) {
         $text = "Internal error of fsc2.";
     } elsif ( $? >> 8 == 4 ) {
         $text = "Could not start fsc2.";
     }
 
+    &show_message( $text ) if $text !~ /^$/;
+}
+}
+
+
+sub do_checks {
+
+	my $text = "";
+
+	if ( $start_freq =~ /^$/ ) {
+		$text = "Start frequency hasn't been set.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $start_freq < 1 ) {
+		$text = "Start frequency is too low.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $start_freq > 50 ) {
+		$text = "Start frequency is too high.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $end_freq =~ /^$/ ) {
+		$text = "End frequency hasn't been set.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $end_freq < 1 ) {
+		$text = "End frequency is too low.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $end_freq > 50 ) {
+		$text = "End frequency is too high.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $start_freq < 1 ) {
+		$text = "Start frequency is too low.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $step_freq =~ /^$/ ) {
+		$text = "Step frequency hasn't been set.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( abs( $step_freq / 1000 ) > abs( $end_freq - $start_freq ) ) {
+		$text = "Step frequency is too large.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $end_freq < $start_freq && $step_freq > 0 ) {
+		$text = "End frequency lower than start frequency\n" .
+		        "while step frequency isn't negative.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $atten =~ /^$/ ) {
+		$text = "End frequency hasn't been set.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $atten > -3 ) {
+		$text = "Attenuation is too low.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $atten < -136 ) {
+		$text = "Attenuation is too high.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $lockin =~ /^sr8/ ) {
+		if ( $mod_freq =~ /^$/ ) {
+			$text = "End frequency hasn't been set.";
+			&show_message( $text );
+			return -1;
+		}
+
+		if ( $mod_freq <= 0 ) {
+			$text = "Modulation frequency is too low.";
+			&show_message( $text );
+			return -1;
+		}
+
+		if ( $mod_freq > 100 ) {
+			$text = "Modulation frequency is too high.";
+			&show_message( $text );
+			return -1;
+		}
+	}
+
+	if ( $mod_ampl =~ /^$/ ) {
+		$text = "Modulation amplitude hasn't been set.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $mod_ampl <= 0 ) {
+		$text = "Modulation amplitude is too low.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $mod_ampl > 100 ) {
+		$text = "Modulation amplitude is too high.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $atten =~ /^$/ ) {
+		$text = "End frequency hasn't been set.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $N_runs =~ /^$/ ) {
+		$text = "Number of runs hasn't been set.";
+		&show_message( $text );
+		return -1;
+	}
+
+	if ( $N_runs < 1 ) {
+		$text = "Number of runs is too small.";
+		&show_message( $text );
+		return -1;
+	}
+
+	return 0;
+}
+
+
+sub show_message {
+	my $text = shift;
+
     $mw->messageBox( '-icon' => 'error',
                      '-type' => 'Ok',
 	                 '-title' => 'Error',
                      '-message' => $text );
-}
 }
