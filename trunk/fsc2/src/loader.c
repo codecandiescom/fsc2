@@ -603,7 +603,7 @@ void run_exp_hooks( void )
 				call_push( NULL, cd, cd->device_name, cd->count );
 
 				if ( ! cd->driver.exp_hook( ) )
-					eprint( SEVERE, UNSET, "Initialisation of experiment "
+					eprint( SEVERE, UNSET, "Initialization of experiment "
 							"failed for module '%s'.\n", cd->name );
 				else
 					cd->driver.exp_hook_is_run = SET;
