@@ -608,8 +608,6 @@ void ni_daq_two_channel_pulses( double delay, double scan_duration )
 				THROW( EXCEPTION );
 
 			default :
-				print( NO_ERROR, "len_hi_0 = %f, len_low = %f, len_del = %f\n",
-					   len_hi_0*1e6, len_low*1e6, len_del*1e6 );
 				print( FATAL, "Can't create output trigger.%s\n",
 					   ni_daq_strerror() );
 				THROW( EXCEPTION );
@@ -628,8 +626,6 @@ void ni_daq_two_channel_pulses( double delay, double scan_duration )
 				THROW( EXCEPTION );
 
 			default :
-				print( NO_ERROR, "len_hi_1 = %f, len_del = %f\n",
-					   len_hi_1*1e6, len_del*1e6 );
 				print( FATAL, "Can't create output trigger.%s\n",
 					   ni_daq_strerror());
 				THROW( EXCEPTION );
@@ -648,8 +644,6 @@ void ni_daq_two_channel_pulses( double delay, double scan_duration )
 				THROW( EXCEPTION );
 
 			default :
-				print( NO_ERROR, "len_hi_1 = %f, len_del = %f\n",
-					   len_hi_1*1e6, len_del*1e6 );
 				print( FATAL, "Can't create output trigger.%s\n",
 					   ni_daq_strerror() );
 				THROW( EXCEPTION );
@@ -669,8 +663,6 @@ void ni_daq_two_channel_pulses( double delay, double scan_duration )
 				THROW( EXCEPTION );
 
 			default :
-				print( NO_ERROR, "len_hi_0 = %f, len_low = %f, len_del = %f\n",
-					   len_hi_0*1e6, len_low*1e6, len_del*1e6 );
 				print( FATAL, "Can't create output trigger.%s\n",
 					   ni_daq_strerror() );
 				THROW( EXCEPTION );

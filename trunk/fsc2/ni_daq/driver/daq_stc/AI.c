@@ -675,8 +675,11 @@ static int AI_START1_setup( Board *board, NI_DAQ_ACQ_SETUP *a )
 		return -EINVAL;
 	}
 
+	/* Everywhere else NI_DAQ_GOUT_0 is 19, but for AI_START1_Select
+	   it's 18... */
+
 	if ( a->START1_source == NI_DAQ_GOUT_0 )
-		a->START1_source - 1;
+		a->START1_source -= 1;
 
 	board->AI.START1_source = a->START1_source;
 
@@ -774,7 +777,7 @@ static int AI_SI2_setup( Board *board, NI_DAQ_ACQ_SETUP *a )
 		return -EINVAL;
 	}
 
-	/* What the SI2 counter counts is either the same as for the SI
+	/* What the SI2 counter counts is either the same as the SI
 	   counter or the AI subsystems (fast) timebase */
 
 	if ( a->SI2_source != NI_DAQ_SAME_AS_SI )
@@ -1005,6 +1008,8 @@ int AI_start_acq( Board *board )
 
 	board->func->stc_writew( board, STC_AI_Command_1, cmd_1 );
 
+	board->stc.AI_Command_1 &= ~ ( AI_SC_Arm | AI_SI_Arm | AI_SI2_Arm );
+
 	/* Now set the condition when to stop */
 
 	cmd_2 |= AI_End_On_SC_TC;
@@ -1027,9 +1032,6 @@ int AI_start_acq( Board *board )
 					 AI_START1_Pulse );
 		board->stc.AI_Command_2 &= ~ AI_START1_Pulse;
 	}
-
-	board->stc.AI_Command_1 &= ~ ( AI_DIV_Arm | AI_SC_Arm |
-				       AI_SI_Arm | AI_SI2_Arm );
 
 	return 0;
 }
