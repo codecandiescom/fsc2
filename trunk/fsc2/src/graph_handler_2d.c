@@ -99,11 +99,14 @@ static void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 	/* In the axes areas two buttons pressed simultaneously doesn't has a
 	   special meaning, so don't care about another button. Also don't react
-	   if the pressed buttons have lost there meaning */
+	   if the pressed buttons have lost there meaning, there's no curve or
+	   the curve has no scaling set yet */
 
 	if ( ( c != &G.canvas && G.raw_button_state != 0 ) ||
 		 ( G.button_state == 0 && G.raw_button_state != 0 ) ||
-		 G.active_curve == -1 )
+		 G.active_curve == -1 ||
+		 ! G.curve_2d[ G.active_curve ]->is_scale_set
+		)
 	{
 		G.raw_button_state |= 1 << ( ev->xbutton.button - 1 );
 		return;

@@ -1001,7 +1001,7 @@ bool cut_new_points( long curve, long x_index, long y_index, long len )
 		if ( x_index > CG.index || x_index + len <= CG.index )
 			return FAIL;
 
-		sp = G.curve_2d[ G.active_curve ]->points + y_index * G.nx + CG.index;
+		sp = G.curve_2d[ curve ]->points + y_index * G.nx + CG.index;
 		cut_integrate_point( y_index, sp->v );
 	}
 	else
@@ -1011,7 +1011,7 @@ bool cut_new_points( long curve, long x_index, long y_index, long len )
 
 		/* All new points are on the cut */
 
-		sp = G.curve_2d[ G.active_curve ]->points + y_index * G.nx + x_index;
+		sp = G.curve_2d[ curve ]->points + y_index * G.nx + x_index;
 		for ( index = x_index; index < x_index + len; sp++, index++ )
 			cut_integrate_point( index, sp->v );
 	}
@@ -1290,11 +1290,14 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 
 	/* In the axes areas pressing two buttons simultaneously doesn't has a
 	   special meaning, so don't care about another button. Also don't react
-	   if the pressed buttons have lost there meaning */
+	   if the pressed buttons have lost there meaning, there is no curve
+	   displayed or the curve has no scaling yet */
 
 	if ( ( c != &G.cut_canvas && G.raw_button_state != 0 ) ||
 		 ( G.button_state == 0 && G.raw_button_state != 0 ) ||
-		 G.active_curve == -1 )
+		 G.active_curve == -1 ||
+		 ! G.curve_2d[ G.active_curve ]->is_scale_set
+		)
 	{
 		G.raw_button_state |= 1 << ( ev->xbutton.button - 1 );
 		return;
@@ -2014,7 +2017,7 @@ void redraw_cut_axis( int coord )
 					   c->w - 5 - G.label_w[ coord + 3 ], 0 );
 	}
 
-	if ( G.active_curve != -1 )
+	if ( G.active_curve != -1 && G.curve_2d[ G.active_curve ]->is_scale_set )
 		cut_make_scale( c, coord );
 	XCopyArea( G.d, c->pm, FL_ObjWin( c->obj ), c->gc,
 			   0, 0, c->w, c->h, 0, 0 );
