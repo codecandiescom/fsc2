@@ -288,7 +288,7 @@ bool dg2020_set_trigger_mode( int mode )
 		if ( dg2020.is_trig_in_slope )
 		{
 			eprint( FATAL, "%s:%ld: %s: INTERNAL trigger mode and setting a "
-					"trigger slope is incompatible.", Fname, Lc,
+					"trigger slope isn't possible.", Fname, Lc,
 					pulser_struct.name );
 			THROW( EXCEPTION );
 		}
@@ -296,7 +296,7 @@ bool dg2020_set_trigger_mode( int mode )
 		if ( dg2020.is_trig_in_level )
 		{
 			eprint( FATAL, "%s:%ld: %s: INTERNAL trigger mode and setting a "
-					"trigger level is incompatible.", Fname, Lc,
+					"trigger level isn't possible.", Fname, Lc,
 					pulser_struct.name );
 			THROW( EXCEPTION );
 		}
@@ -304,7 +304,7 @@ bool dg2020_set_trigger_mode( int mode )
 		if ( dg2020.is_trig_in_impedance )
 		{
 			eprint( FATAL, "%s:%ld: %s: INTERNAL trigger mode and setting a "
-					"trigger impedance is incompatible.", Fname, Lc,
+					"trigger impedance isn't possible.", Fname, Lc,
 					pulser_struct.name );
 			THROW( EXCEPTION );
 		}
@@ -314,7 +314,7 @@ bool dg2020_set_trigger_mode( int mode )
 		if ( dg2020.is_repeat_time )
 		{
 			eprint( FATAL, "%s:%ld: %s: EXTERNAL trigger mode and setting a "
-					"repeat time or frequency is incompatible.", Fname, Lc,
+					"repeat time or frequency isn't possible.", Fname, Lc,
 					pulser_struct.name );
 			THROW( EXCEPTION );
 		}
@@ -322,7 +322,7 @@ bool dg2020_set_trigger_mode( int mode )
 		if ( dg2020.is_neg_delay )
 		{
 			eprint( FATAL, "%s:%ld: %s: EXTERNAL trigger mode and using "
-					"negative delays for functions is incompatible.",
+					"negative delays for functions isn't possible.",
 					Fname, Lc, pulser_struct.name );
 			THROW( EXCEPTION );
 		}
@@ -364,7 +364,7 @@ bool dg2020_set_trig_in_level( double voltage )
 	{
 		eprint( FATAL, "%s:%ld: %s: Setting a trigger level (implicitly "
 				"selecting EXTERNAL trigger mode) while using negative delays "
-				"for functions is incompatible.", Fname, Lc,
+				"for functions isn't possible.", Fname, Lc,
 				pulser_struct.name );
 		THROW( EXCEPTION );
 	}
@@ -413,7 +413,7 @@ bool dg2020_set_trig_in_slope( int slope )
 	{
 		eprint( FATAL, "%s:%ld: %s: Setting a trigger slope (implicitly "
 				"selecting EXTERNAL trigger mode) while using negative delays "
-				"for functions is incompatible.", Fname, Lc,
+				"for functions isn't possible.", Fname, Lc,
 				pulser_struct.name );
 		THROW( EXCEPTION );
 	}
@@ -451,7 +451,7 @@ bool dg2020_set_trig_in_impedance( int state )
 	{
 		eprint( FATAL, "%s:%ld: %s: Setting a trigger impedance (implicitly "
 				"selecting EXTERNAL trigger mode) while using negative delays "
-				"for functions is incompatible.", Fname, Lc,
+				"for functions isn't possible.", Fname, Lc,
 				pulser_struct.name );
 		THROW( EXCEPTION );
 	}
@@ -471,7 +471,7 @@ bool dg2020_set_repeat_time( double time )
 	if ( dg2020.is_repeat_time &&
 		 dg2020.repeat_time != dg2020_double2ticks( time ) )
 	{
-		eprint( FATAL, "%s:%ld: %s: A different repeat time/frequency of %s /"
+		eprint( FATAL, "%s:%ld: %s: A different repeat time/frequency of %s/"
 				"%g Hz has already been set.", Fname, Lc, pulser_struct.name,
 				dg2020_pticks( dg2020.repeat_time ),
 				1.0 / dg2020_ticks2double( dg2020.repeat_time ) );
@@ -481,7 +481,7 @@ bool dg2020_set_repeat_time( double time )
 	if ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == EXTERNAL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Setting a repeat time/frequency and "
-				"trigger mode to EXTERNAL is incompatible.", Fname, Lc,
+				"trigger mode to EXTERNAL isn't possible.", Fname, Lc,
 				pulser_struct.name );
 		THROW( EXCEPTION );
 	}
@@ -489,7 +489,7 @@ bool dg2020_set_repeat_time( double time )
 	if ( dg2020.is_trig_in_slope || dg2020.is_trig_in_level )
 	{
 		eprint( FATAL, "%s:%ld: %s: Setting a repeat time/frequency and a "
-				"trigger slope or level is incompatible.", Fname, Lc,
+				"trigger slope or level isn't possible.", Fname, Lc,
 				pulser_struct.name );
 		THROW( EXCEPTION );
 	}
@@ -546,7 +546,10 @@ bool dg2020_set_phase_reference( int phase, int function )
 
 /*-----------------------------------------------------------------------*/
 /* This function is called for each of the definitions of how a phase is */
-/* realizes by the combination of to pod channel outputs.                */
+/* realized by the combination of pod channel outputs. There are 2 pod   */
+/* channels and each of the 4 phase types has to be realized by a        */
+/* different combination (i.e. both off, both on or one off and the      */
+/* other on).                                                            */
 /* 'function' is the phase function the data are to be used for (i.e. 0  */
 /*   means PHASE_1, 1 means PHASE_2, 2 means both)                       */
 /* 'type' means the type of phase, see global.h (PHASE_PLUS/MINUX_X/Y)   */
@@ -651,7 +654,7 @@ bool dg2020_phase_setup( int func )
 
 	assert( Cur_PHS != -1 && Cur_PHS == func );
 
-	/* Now check that for all phase types the data are set */
+	/* Check that for all phase types data are set */
 
 	for ( i = 0; i < 4; i++ )
 	{
@@ -675,8 +678,8 @@ bool dg2020_phase_setup( int func )
 			= SET;
 	}
 
-	/* Finally check that the data are consistent, i.e. different phase types
-	   haven't been assigned the same data */
+	/* Check that the data are consistent, i.e. different phase types haven't
+	   been assigned the same data */
 
 	for ( i = 0; i < 4; i++ )
 	{
@@ -695,11 +698,11 @@ bool dg2020_phase_setup( int func )
 	}
 
 	if ( func == 0 || func == 2 )
-		ret1 =
-			dg2020_phase_setup_finalize( PULSER_CHANNEL_PHASE_1, phs[ func ] );
+		ret1 = dg2020_phase_setup_finalize( PULSER_CHANNEL_PHASE_1,
+											phs[ func ] );
 	if ( func == 1 || func == 2 )
-		ret2 =
-			dg2020_phase_setup_finalize( PULSER_CHANNEL_PHASE_2, phs[ func ] );
+		ret2 = dg2020_phase_setup_finalize( PULSER_CHANNEL_PHASE_2,
+											phs[ func ] );
 
 	Cur_PHS = -1;
 
