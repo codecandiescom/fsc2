@@ -121,9 +121,9 @@ typedef struct {
 
 	double laser_wavenumber;         /* in cm^-1 */
 
-	double start;                    /* in m */
-	double step;                     /* in m or cm^-1, depending on mode */
-	bool is_init;
+	double scan_start;               /* in m */
+	double scan_step;                /* in m or cm^-1, depending on mode */
+	bool scan_is_init;
 	bool in_scan;                    /* set while scanning */
 
 	double mini_step;
@@ -149,11 +149,11 @@ void spex_cd2a_child_exit_hook( void );
 int spex_cd2a_end_of_exp_hook( void );
 
 Var *monochromator_name( Var *v );
-Var *monochromator_init( Var *v );
+Var *monochromator_scan_setup( Var *v );
 Var *monochromator_wavelength( Var *v );
 Var *monochromator_wavenumber( Var *v );
 Var *monochromator_start_scan( Var *v );
-Var *monochromator_scan( Var *v );
+Var *monochromator_scan_step( Var *v );
 Var *monochromator_laser_line( Var *v );
 Var *monochromator_groove_density( Var *v );
 Var *monochromator_shutter_limits( Var *v );
@@ -162,6 +162,8 @@ Var *monochromator_shutter_limits( Var *v );
 void spex_cd2a_init( void );
 void spex_cd2a_set_wavelength( void );
 void spex_cd2a_halt( void );
+void spex_cd2a_scan_start( void );
+void spex_cd2a_scan_step( void );
 void spex_cd2a_start_scan( void );
 void spex_cd2a_trigger( void );
 void spex_cd2a_set_laser_line( void );

@@ -306,7 +306,7 @@ ccd_camera_pixel_size, 0, ALL;
 ccd_camera_pixel_area, 0, ALL;
 
 
-/* Functions exported by monochromators (Acton SpectaPro-300i) */
+/* Functions exported by monochromators (Acton SpectaPro-300i, SPEX-CD2A) */
 
 monochromator_name, 0, ALL;		          // returns the device name
 monochromator_turret, -1, EXP;            // set/query current turret
@@ -321,10 +321,10 @@ monochromator_load_calibration, -1, EXP;  // read in calibration file
 monochromator_zero_offset, -1, EXP;
 monochromator_grating_adjust, -1, EXP;
 monochromator_calibrate, -1, EXP;
-monochromator_init, 2, PREP;
+monochromator_scan_setup, -1, ALL;
 monochromator_wavenumber, -1, ALL;
 monochromator_start_scan, 0, EXP;
-monochromator_scan, 0, EXP;
+monochromator_scan_step, 0, EXP;
 monochromator_laser_line, -1, ALL;
 monochromator_shutter_limits, -1, ALL;
 

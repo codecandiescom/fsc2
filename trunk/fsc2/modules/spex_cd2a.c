@@ -35,8 +35,10 @@ const char generic_type[ ] = DEVICE_TYPE;
 SPEX_CD2A spex_cd2a, spex_cd2a_stored;
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+
+/*------------------------------------------------------------*/
+/* Function that gets called when the module has been loaded. */
+/*------------------------------------------------------------*/
 
 int spex_cd2a_init_hook( void )
 {
@@ -238,7 +240,7 @@ int spex_cd2a_init_hook( void )
 	spex_cd2a.is_wavelength = UNSET;
 	spex_cd2a.laser_wavenumber = 0.0;
 
-	spex_cd2a.is_init = UNSET;
+	spex_cd2a.scan_is_init = UNSET;
 
 	spex_cd2a.use_calib = 0;
 
@@ -248,8 +250,9 @@ int spex_cd2a_init_hook( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* Function called (in the parents context) at the start of the experiment */
+/*-------------------------------------------------------------------------*/
 
 int spex_cd2a_test_hook( void )
 {
@@ -278,8 +281,10 @@ int spex_cd2a_exp_hook( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Function gets called just before the child process doing the */
+/* experiment exits.                                            */
+/*--------------------------------------------------------------*/
 
 void spex_cd2a_child_exit_hook( void )
 {
@@ -289,6 +294,7 @@ void spex_cd2a_child_exit_hook( void )
 
 
 /*-----------------------------------------------------------------------*/
+/* Function called (in the parents context) at the end of the experiment */
 /*-----------------------------------------------------------------------*/
 
 int spex_cd2a_end_of_exp_hook( void )
@@ -309,15 +315,44 @@ Var *monochromator_name( Var *v )
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* Function can be used to either determine the current settings for scans */
+/* (by calling it without an argument) or to set new scan parameters. In   */
+/* the second case two arguments are required, the start position of the   */
+/* scan and the scan step size. If a new scan setup is done while the      */
+/* device is already doing a scan (is in scan mode) the currently running  */
+/* scan is aborted.                                                        */
+/*-------------------------------------------------------------------------*/
 
-Var *monochromator_init( Var *v )
+Var *monochromator_scan_setup( Var *v )
 {
 	double start, step;
 	long num_steps;
+	double vals[ 2 ];
 
 
+	if ( v == NULL )
+	{
+		if ( ! spex_cd2a.scan_is_init )
+		{
+			print( FATAL, "No scan setup has been done.\n" );
+			THROW( EXCEPTION );
+		}
+
+		if ( spex_cd2a.mode && WN_MODES )
+			vals[ 0 ] = spex_cd2a_wl2mwn( spex_cd2a.scan_start );
+		else
+			vals[ 0 ] = spex_cd2a.scan_start;
+		vals[ 1 ] = spex_cd2a.scan_step;
+
+		return vars_push( FLOAT_ARR, vals, 2 );
+	}
+
+	if ( v->next == NULL )
+	{
+		print( FATAL, "Missing scan step size argument.\n" );
+		THROW( EXPERIMENT );
+	}
 
 	if ( spex_cd2a.mode & WN_MODES )
 	{
@@ -441,21 +476,41 @@ Var *monochromator_init( Var *v )
 				   1.0e-9 * num_steps * spex_cd2a.mini_step );
 	}
 
-	spex_cd2a.start = start;
-	spex_cd2a.step = num_steps * spex_cd2a.mini_step;
-	if ( spex_cd2a.mode && WND )
-		spex_cd2a.step *= -1.0;
-	spex_cd2a.is_init = SET;
+	too_many_arguments( v );
 
-	return vars_push( INT_VAR, 1L );
+	spex_cd2a.scan_start = start;
+	spex_cd2a.scan_step = num_steps * spex_cd2a.mini_step;
+	if ( spex_cd2a.mode && WND )
+		spex_cd2a.scan_step *= -1.0;
+	spex_cd2a.scan_is_init = SET;
+
+	/* Stop a possibly already running scan, then set the new start position
+	   and step size */
+
+	spex_cd2a_halt( );
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		spex_cd2a_scan_start( );
+		spex_cd2a_scan_step( );
+	}
+
+	if ( spex_cd2a.mode && WN_MODES )
+		vals[ 0 ] = spex_cd2a_wl2mwn( spex_cd2a.scan_start );
+	else
+		vals[ 0 ] = spex_cd2a.scan_start;
+	vals[ 1 ] = spex_cd2a.scan_step;
+
+	return vars_push( FLOAT_ARR, vals, 2 );
 }
 
 
-/*-----------------------------------------------------------*/
-/* Set or query the current wavelength of the monochromator  */
-/* (always return the absolute wavelength in m, even when in */
-/* wave-number mode).                                        */
-/*-----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+/* Set or query the current wavelength of the monochromator */
+/* (always return the absolute wavelength in m, even when   */
+/* in wave-number mode). If the monochromator is currently  */
+/* doing scan and a new wavelength is set the currently     */
+/* running scan is aborted.                                 */
+/*----------------------------------------------------------*/
 
 Var *monochromator_wavelength( Var *v )
 {
@@ -464,7 +519,7 @@ Var *monochromator_wavelength( Var *v )
 
 	if ( v == NULL )
 	{
-		if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.is_init )
+		if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.scan_is_init )
 		{
 			print( FATAL, "Wavelength hasn't been set yet.\n ");
 			THROW( EXCEPTION );
@@ -513,6 +568,8 @@ Var *monochromator_wavelength( Var *v )
 /*----------------------------------------------------------------------*/
 /* Queries the current wave-number (in cm^-1 of the monochromator. When */
 /* in wave-number offset mode the difference to the laser line is used. */
+/* If the monochromator is currently doing scan and a new wavenumber is */
+/* set the currently running scan is aborted.                           */
 /*----------------------------------------------------------------------*/
 
 Var *monochromator_wavenumber( Var *v )
@@ -559,11 +616,14 @@ Var *monochromator_wavenumber( Var *v )
 		spex_cd2a.wavelength = wl;
 		spex_cd2a.is_wavelength = SET;
 
+		if ( spex_cd2a.in_scan )
+			spex_cd2a_halt( );
+
 		spex_cd2a_set_wavelength( );
 	}
 	else
 	{
-		if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.is_init )
+		if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.scan_is_init )
 		{
 			print( FATAL, "Wavenumber hasn't been set yet,\n ");
 			THROW( EXCEPTION );
@@ -575,15 +635,18 @@ Var *monochromator_wavenumber( Var *v )
 
 
 /*------------------------------------------------------------------*/
+/* Function for starting a new scan: the monocromator is driven to  */
+/* the start position of the scan. If the monochromator was already */
+/* doing a scan the old scan is aborted.                            */
 /*------------------------------------------------------------------*/
 
 Var *monochromator_start_scan( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 
-	if ( ! spex_cd2a.is_init )
+	if ( ! spex_cd2a.scan_is_init )
 	{
-		print( FATAL, "Missing scan initialization.\n" );
+		print( FATAL, "Missing scan setup.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -597,16 +660,18 @@ Var *monochromator_start_scan( Var *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+/* Function for doing a scan step, requires that a scan setup */
+/* has been done and a scan already has been started.         */
+/*------------------------------------------------------------*/
 
-Var *monochromator_scan( Var *v )
+Var *monochromator_scan_step( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 
-	if ( ! spex_cd2a.is_init )
+	if ( ! spex_cd2a.scan_is_init )
 	{
-		print( FATAL, "Missing sweep initialization.\n" );
+		print( FATAL, "Missing scan setup.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -617,7 +682,7 @@ Var *monochromator_scan( Var *v )
 	}
 
 	if ( spex_cd2a.mode == WL &&
-		 spex_cd2a.wavelength + spex_cd2a.step > spex_cd2a.upper_limit )
+		 spex_cd2a.wavelength + spex_cd2a.scan_step > spex_cd2a.upper_limit )
 	{
 		print( FATAL, "Scan reached upper limit of wave-length range.\n" );
 		THROW( EXCEPTION );
@@ -625,7 +690,7 @@ Var *monochromator_scan( Var *v )
 
 	if ( spex_cd2a.mode == WL &&
 		 spex_cd2a_wn2wl( spex_cd2a_wl2wn( spex_cd2a.wavelength )
-						  + spex_cd2a.step ) > spex_cd2a.upper_limit )
+						  + spex_cd2a.scan_step ) > spex_cd2a.upper_limit )
 	{
 		print( FATAL, "Scan reached lower limit of wave-number range.\n" );
 		THROW( EXCEPTION );
@@ -635,19 +700,30 @@ Var *monochromator_scan( Var *v )
 
 	if ( spex_cd2a.mode == WL )
 	{
-		spex_cd2a.wavelength += spex_cd2a.step;
+		spex_cd2a.wavelength += spex_cd2a.scan_step;
 		return vars_push( FLOAT_VAR, spex_cd2a.wavelength );
 	}
 
 	spex_cd2a.wavelength =
 					   spex_cd2a_wn2wl( spex_cd2a_wl2wn( spex_cd2a.wavelength )
-										+ spex_cd2a.step );
+										+ spex_cd2a.scan_step );
 	return vars_push( FLOAT_VAR, spex_cd2a_wl2mwn( spex_cd2a.wavelength ) );
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Function for setting the laser line position. This can only be */
+/* for monochromators the are wave.number driven. When a laser    */
+/* line has been set in the following only relative wavenumbers   */
+/* can be used (i.e. differences between the laser line position  */
+/* and absolute wavenumbers), and all functions involving wave-   */
+/* numbers return relative positions. A laser line position can   */
+/* switched of (reverting also to use of absolute wave-numbers)   */
+/* by setting a zero or negatibe laser line position.             */
+/* If called without an argument the function returns the current */
+/* Setting of the laser line position (always in absolute wave-   */
+/* numbers) or zero if no laser line position is set.             */
+/*----------------------------------------------------------------*/
 
 Var *monochromator_laser_line( Var *v )
 {
@@ -717,8 +793,12 @@ Var *monochromator_groove_density( Var *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Function for querying setting the limits for shutters (if installed). */
+/* To set new limits the function expects two arguments, first the lower */
+/* limit and the upper limit (where the lower limit must not be a larger */
+/* number than the upper limit).                                         */
+/*-----------------------------------------------------------------------*/
 
 Var *monochromator_shutter_limits( Var *v )
 {
@@ -773,7 +853,7 @@ Var *monochromator_shutter_limits( Var *v )
 
 		if ( l[ 0 ] > l[ 1 ] )
 		{
-			print( FATAL, "Lower shutter limit larger than upper shuuter "
+			print( FATAL, "Lower shutter limit larger than upper shutter "
 				   "limit.\n ");
 			THROW( EXCEPTION );
 		}

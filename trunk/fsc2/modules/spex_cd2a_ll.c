@@ -36,32 +36,39 @@
 #define CAN   '\x18'
 
 
-static void spex_cd2a_scan_type( void );
-static void spex_cd2a_sweep_start( void );
-static void spex_cd2a_sweep_start( void );
-static void spex_cd2a_sweep_end( void );
-static void spex_cd2a_sweep_step( void );
+static void spex_cd2a_scan_end( void );
 static void spex_cd2a_print( char *mess, int digits, double val );
 static size_t spex_cd2a_write( int type, const char *mess );
-static void spex_cd2a_read_param_ack( void );
+static void spex_cd2a_read_ack( void );
 static void spex_cd2a_read_cmd_ack( const char *cmd );
 static void spex_cd2a_read_set_pos_ack( void );
-static void spex_cd2a_read_start_sweep_ack( void );
-static void spex_cd2a_read_sweep_ack( void );
-static void spex_cd2a_read_halt_ack( void );
+static void spex_cd2a_read_start_scan_ack( void );
+static void spex_cd2a_read_scan_ack( void );
 static void spex_cd2a_comm_fail( void );
 static void spex_cd2a_wrong_data( void );
+static ssize_t spex_cd2a_pos_mess_len( void );
+static void spex_cd2a_pos_mess_check( const char *bp );
 
 
+static ssize_t pos_mess_len;
 static bool do_print_message = UNSET;
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------*/
+/* Function for initializing the monochromator to bring it into */
+/* a well-defined state.                                        */
+/*--------------------------------------------------------------*/
 
 void spex_cd2a_init( void )
 {
-	/* First check if the device is prepared to talk with us by sending a
-	   command that's not doing anything relevant */
+	/* First calculate the length of position length messages, so we don't
+	   have to recalculate it all of the time. */
+
+	pos_mess_len = spex_cd2a_pos_mess_len( );
+
+	/* Now check if the device is prepared to talk with us by sending it the
+	   command to use burst scans - that's the only type of scans supported
+	   anyway (with bursts induced by software triggers). */
 
 	do_print_message = UNSET;
 
@@ -71,7 +78,7 @@ void spex_cd2a_init( void )
 		{
 			fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
 
-			spex_cd2a_write( PARAMETER, "BI1.0" );
+			spex_cd2a_write( PARAMETER, "TYB" );
 			TRY_SUCCESS;
 		}
 		CATCH( EXCEPTION )
@@ -92,33 +99,54 @@ void spex_cd2a_init( void )
 
 	do_print_message = SET;
 
+	/* Set the laser line position if the monochromator is wave-number driven
+	   (if not set the laser line gets switched off automatically to make
+	   the device accept wave-numbers in absolute units). */
+
 	if ( spex_cd2a.mode & WN_MODES )
 		spex_cd2a_set_laser_line( );
 
-	if ( spex_cd2a.is_init )
-	{
-		spex_cd2a_scan_type( );
-		spex_cd2a_sweep_start( );
-		spex_cd2a_sweep_end( );
-		spex_cd2a_sweep_step( );
-		spex_cd2a_write( PARAMETER, "NS1" );
+	/* Set the end of scans to the upper wavelength or lower wavenumber limit
+	   and the number of scan repetitions to 1. */
 
-		spex_cd2a.is_wavelength = SET;
-		spex_cd2a.wavelength = spex_cd2a.start;
+	spex_cd2a_scan_end( );
+	spex_cd2a_write( PARAMETER, "NS1" );
+
+	/* If a wavelength was set in the PREPARATIONS section set it now. */
+
+	if ( spex_cd2a.is_wavelength )
 		spex_cd2a_set_wavelength( );
+
+	/* If there was a scan setup send the values to the device now and, if
+	   no wave-length or -number was set, set it to the value of the start
+	   position of the scan. */
+
+	if ( spex_cd2a.scan_is_init )
+	{
+		spex_cd2a_scan_start( );
+		spex_cd2a_scan_step( );
+
+		if ( spex_cd2a.is_wavelength )
+		{
+			spex_cd2a.wavelength = spex_cd2a.scan_start;
+			spex_cd2a_set_wavelength( );
+			spex_cd2a.is_wavelength = SET;
+		}
 	}
-	else if ( spex_cd2a.is_wavelength )
-		spex_cd2a_set_wavelength( );
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*---------------------------------------------------*/
+/* Function for setting a new wave-length or -number */
+/*---------------------------------------------------*/
 
 void spex_cd2a_set_wavelength( void )
 {
 	char mess[ 11 ] = "SE";
 
+
+	/* If we're in scan mode we need to stop the currently running scan
+	   before we can set a new position */
 
 	if ( spex_cd2a.in_scan )
 		spex_cd2a_halt( );
@@ -147,25 +175,25 @@ void spex_cd2a_set_wavelength( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*----------------------------*/
+/* Function for ending a scan */
+/*----------------------------*/
 
 void spex_cd2a_halt( void )
 {
 	if ( FSC2_MODE == EXPERIMENT )
 		spex_cd2a_write( COMMAND, "H" );
-
 	spex_cd2a.in_scan = UNSET;
 }
 
 
-/*------------------------------------------*/
-/* Function for starting a (triggered) scan */
-/*------------------------------------------*/
+/*-----------------------------------------------*/
+/* Function for starting a (triggered burs) scan */
+/*-----------------------------------------------*/
 
 void spex_cd2a_start_scan( void )
 {
-	fsc2_assert( spex_cd2a.is_init );
+	fsc2_assert( spex_cd2a.scan_is_init );
 
 	/* If we're already scanning stop the current scan */
 
@@ -176,7 +204,7 @@ void spex_cd2a_start_scan( void )
 		spex_cd2a_write( COMMAND, "T" );
 
 	spex_cd2a.in_scan = SET;
-	spex_cd2a.wavelength = spex_cd2a.start;
+	spex_cd2a.wavelength = spex_cd2a.scan_start;
 }
 
 
@@ -193,8 +221,19 @@ void spex_cd2a_trigger( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Function for setting the position of the laser line. This is only */
+/* possible when the monochromator is wave-number driven. It also    */
+/* switches the way positions are treated by the device: if no laser */
+/* line position is set positions are handled as absolute wave-      */
+/* numbers. But when the laser line is set, positions are treated as */
+/* relative to the laser line (i.e. position of the laser line minus */
+/* the absolute position). The only execption is when setting the    */
+/* laser line position itself: the value passed to the device is     */
+/* always treated as a position in  absolute wave-numbers.           */
+/* The laser line position can also be switched off (thus reverting  */
+/* to absolute positions) by setting the laser line position to 0.   */
+/*-------------------------------------------------------------------*/
 
 void spex_cd2a_set_laser_line( void )
 {
@@ -204,9 +243,9 @@ void spex_cd2a_set_laser_line( void )
 	if ( FSC2_MODE != EXPERIMENT )
 		return;
 
-	spex_cd2a_write( PARAMETER, mess );
-
-	if ( spex_cd2a.mode == WND )
+	if ( spex_cd2a.mode == WN )
+		spex_cd2a_write( PARAMETER, mess );
+	else
 	{
 		spex_cd2a_print( mess + 2, 8, spex_cd2a.laser_wavenumber );
 		spex_cd2a_write( PARAMETER, mess );
@@ -221,6 +260,8 @@ void spex_cd2a_set_shutter_limits( void )
 {
 	char mess[ 11 ] = "SL";
 
+
+	fsc2_assert( spex_cd2a.has_shutter );
 
 	if ( FSC2_MODE != EXPERIMENT )
 		return;
@@ -242,42 +283,39 @@ void spex_cd2a_set_shutter_limits( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*--------------------------------------------------*/
+/* Function for setting the start position of scans */
+/*--------------------------------------------------*/
 
-static void spex_cd2a_scan_type( void )
-{
-	spex_cd2a_write( PARAMETER, "TYB" );
-}
-
-
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
-
-static void spex_cd2a_sweep_start( void )
+void spex_cd2a_scan_start( void )
 {
 	char mess[ 11 ] = "ST";
 
 
+	if ( FSC2_MODE != EXPERIMENT )
+		return;
+
 	if ( spex_cd2a.mode & WN_MODES )
 		spex_cd2a_print( mess + 2, 8,
-						 spex_cd2a_wl2mwn( spex_cd2a.start ) );
+						 spex_cd2a_wl2mwn( spex_cd2a.scan_start ) );
 	else
 	{
 		if ( UNITS == NANOMETER )
-			spex_cd2a_print( mess + 2, 8, 10e9 * spex_cd2a.start );
+			spex_cd2a_print( mess + 2, 8, 10e9 * spex_cd2a.scan_start );
 		else
-			spex_cd2a_print( mess + 2, 8, 10e10 * spex_cd2a.start );
+			spex_cd2a_print( mess + 2, 8, 10e10 * spex_cd2a.scan_start );
 	}
 
 	spex_cd2a_write( PARAMETER, mess );
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Function for sending the end point of scans to the upper wavelength */
+/* and lower wavenumber limit.                                         */
+/*---------------------------------------------------------------------*/
 
-static void spex_cd2a_sweep_end( void )
+static void spex_cd2a_scan_end( void )
 {
 	char mess[ 11 ] = "EN";
 
@@ -296,15 +334,19 @@ static void spex_cd2a_sweep_end( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*---------------------------------------------*/
+/* Function for setting the step size in scans */
+/*---------------------------------------------*/
 
-static void spex_cd2a_sweep_step( void )
+void spex_cd2a_scan_step( void )
 {
 	char mess[ 9 ] = "BI";
 
 
-	spex_cd2a_print( mess + 2, 6, fabs( spex_cd2a.step ) );
+	if ( FSC2_MODE != EXPERIMENT )
+		return;
+
+	spex_cd2a_print( mess + 2, 6, fabs( spex_cd2a.scan_step ) );
 	spex_cd2a_write( PARAMETER, mess );
 }	
 
@@ -480,6 +522,9 @@ static size_t spex_cd2a_write( int type, const char *mess )
 
 	tm[ len++ ] = '\r';
 
+	/* The device don't seem to accept commands unless there's a short
+	   delay since the last transmission... */
+
 	if ( type == COMMAND )
 		fsc2_usleep( 10000, UNSET );
 
@@ -493,7 +538,7 @@ static size_t spex_cd2a_write( int type, const char *mess )
 	T_free( tm );
 
 	if ( type == PARAMETER )
-		spex_cd2a_read_param_ack( );
+		spex_cd2a_read_ack( );
 	else
 		spex_cd2a_read_cmd_ack( mess );
 
@@ -501,28 +546,40 @@ static size_t spex_cd2a_write( int type, const char *mess )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Function for reading the acknowledgement send by the device when it  */
+/* received a parameter or a command.                                   */ 
+/*----------------------------------------------------------------------*/
 
-static void spex_cd2a_read_param_ack( void )
+static void spex_cd2a_read_ack( void )
 {
 	char buf[ 7 ];
 	ssize_t r = 0;
 
 
 	while ( r < 2 )
+	{
 		if ( ( r += fsc2_serial_read( SERIAL_PORT, buf + r,
-									  7 - r, 500000, SET ) ) <= 0 )
+									  7 - r, 1000000, SET ) ) <= 0 )
 			spex_cd2a_comm_fail( );
+
+		/* A message starting with a NAK means that there are some
+		   communication problems */
+
+		if ( r > 0 && *buf == NAK )
+		{
+			print( FATAL, "Communication problem with device.\n" );
+			THROW( EXCEPTION );
+		}
+	}
+
+	/* Device send an ACK and a CAN so everything is fine */
 
 	if ( buf[ 0 ] == ACK && buf[ 1 ] == CAN )
 		return;
 
-	if ( buf[ 0 ] == NAK )
-	{
-		print( FATAL, "Communication problem with device.\n" );
-		THROW( EXCEPTION );
-	}
+	/* An ACK followed by BEL means something went wrong and we get an
+	   error code in the next to bytes. */
 
 	if ( buf[ 0 ] == ACK || buf[ 1 ] == '\a' )
 	{
@@ -532,12 +589,17 @@ static void spex_cd2a_read_param_ack( void )
 		THROW( EXCEPTION );
 	}
 
+	/* If none of the above was received from the device things went really
+	   wrong... */
+
 	spex_cd2a_wrong_data( );
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Most commands not only send a ACK, CAN sequence but also make the   */
+/* device transmit position information until the command is executed. */
+/*---------------------------------------------------------------------*/
 
 static void spex_cd2a_read_cmd_ack( const char *cmd )
 {
@@ -548,15 +610,15 @@ static void spex_cd2a_read_cmd_ack( const char *cmd )
 			break;
 
 		case 'T' :
-			spex_cd2a_read_start_sweep_ack( );
+			spex_cd2a_read_start_scan_ack( );
 			break;
 
 		case 'E' :
-			spex_cd2a_read_sweep_ack( );
+			spex_cd2a_read_scan_ack( );
 			break;
 
 		case 'H' :
-			spex_cd2a_read_halt_ack( );
+			spex_cd2a_read_ack( );
 			break;
 
 		default :
@@ -564,15 +626,18 @@ static void spex_cd2a_read_cmd_ack( const char *cmd )
 	}
 }
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------*/
+/* Function for handling of messages received after a position command */
+/* ("P") has been send to the device.                                  */
+/*---------------------------------------------------------------------*/
 
 static void spex_cd2a_read_set_pos_ack( void )
 {
 	char buf[ 20 ];
 	ssize_t to_be_read = 5;
 	ssize_t already_read = 0;
-	char *bp, *ep;
+	char *bp;
 	bool done = UNSET;
 
 	
@@ -586,19 +651,21 @@ static void spex_cd2a_read_set_pos_ack( void )
 		stop_on_user_request( );
 	}
 
+	/* According to the manual the device is supposed to send an ACK and
+	   then a CAN, but tests did show that it instead sends a CAN, an ACK,
+	   and then a CAN for three times before it starts reporting the
+	   current position until the final position is reached. */
+
 	if ( buf[ 0 ] != CAN || buf[ 1 ] != ACK || buf[ 2 ] != CAN ||
 		 buf[ 3 ] != CAN || buf[ 4 ] != CAN )
 		spex_cd2a_wrong_data( );
 
-	to_be_read = 11;
-	if ( spex_cd2a.data_format == STANDARD )
-		to_be_read += 2;
-	if ( spex_cd2a.use_checksum )
-		to_be_read += 2;
-	if ( spex_cd2a.sends_lf )
-		to_be_read++;
+	/* Keep reading until the final position is reached, each time carefully
+	   testing what the device is sending. */
 
-	do
+	to_be_read = pos_mess_len;
+
+	while ( ! done )
 	{
 		already_read = 0;
 
@@ -613,6 +680,8 @@ static void spex_cd2a_read_set_pos_ack( void )
 		}
 
 		bp = buf;
+
+		/* In STANDARD data format the first byte has to be a STX */
 
 		if ( spex_cd2a.data_format == STANDARD && *bp++ != STX )
 			spex_cd2a_wrong_data( );
@@ -632,77 +701,35 @@ static void spex_cd2a_read_set_pos_ack( void )
 				spex_cd2a_wrong_data( );
 		}
 
-		/* Check that the reported unit is reasonable */
+		/* Check the rest of the message */
 
-		if ( ( spex_cd2a.mode == WN && *bp == 'W' ) ||
-			 ( spex_cd2a.mode == WL &&
-			   ( ( spex_cd2a.units == NANOMETER && *bp == 'N' ) ||
-				 ( spex_cd2a.units == ANGSTROEM && *bp == 'A' ) ) ) )
-			bp++;
-		else
-			spex_cd2a_wrong_data( );
-
-		/* Check that the reported wave-length or -number is reasonable */
-
-		errno = 0;
-		strtod( bp, &ep );
-		if ( errno || ep != bp + 8 )
-			spex_cd2a_wrong_data( );
-
-		bp += 8;
-
-		if ( spex_cd2a.data_format == STANDARD && *bp++ != ETX )
-			spex_cd2a_wrong_data( );
-
-		/* Skip the checksum if there's one */
-
-		if ( spex_cd2a.use_checksum )
-			bp += 2;
-
-		if ( *bp++ != '\r' )
-			spex_cd2a_wrong_data( );
-
-		if ( spex_cd2a.sends_lf && *bp != '\n' )
-			spex_cd2a_wrong_data( );
-
-	} while ( ! done );
+		spex_cd2a_pos_mess_check( bp );
+	}
 }
 		
 
 /*-----------------------------------------------------------------------*/
+/* Function for handling of messages received after a start trigger scan */
+/* command ("T") has been send to the device.                            */
 /*-----------------------------------------------------------------------*/
 
-static void spex_cd2a_read_start_sweep_ack( void )
+static void spex_cd2a_read_start_scan_ack( void )
 {
 	char buf[ 20 ];
-	ssize_t to_be_read = 2;
+	ssize_t to_be_read = pos_mess_len;
 	ssize_t already_read = 0;
-	char *bp, *ep;
+	char *bp;
 	bool done = UNSET;
 
 	
-	while ( already_read < to_be_read )
-	{
-		if ( ( already_read +=
-			   fsc2_serial_read( SERIAL_PORT, buf + already_read,
-								 to_be_read - already_read, 1000000,
-								 SET ) ) < 0 )
-			spex_cd2a_comm_fail( );
-		stop_on_user_request( );
-	}
+	/* Read the ACK and CAN that get send at first (or an error indication) */
 
-	if ( buf[ 0 ] != ACK || buf[ 1 ] != CAN )
-		spex_cd2a_wrong_data( );
+	spex_cd2a_read_ack( );
 
-	to_be_read = 11;
-	if ( spex_cd2a.data_format == STANDARD )
-		to_be_read += 2;
-	if ( spex_cd2a.use_checksum )
-		to_be_read += 2;
-	if ( spex_cd2a.sends_lf )
-		to_be_read++;
+	/* Now repeatedly read in the current position until the start position
+	   for the scan is reached. */
 
-	do
+	while ( ! done )
 	{
 		already_read = 0;
 
@@ -736,77 +763,35 @@ static void spex_cd2a_read_start_sweep_ack( void )
 				spex_cd2a_wrong_data( );
 		}
 
-		/* Check that the reported unit is reasonable */
+		/* Check the rest of the message */
 
-		if ( ( spex_cd2a.mode == WN && *bp == 'W' ) ||
-			 ( spex_cd2a.mode == WL &&
-			   ( ( spex_cd2a.units == NANOMETER && *bp == 'N' ) ||
-				 ( spex_cd2a.units == ANGSTROEM && *bp == 'A' ) ) ) )
-			bp++;
-		else
-			spex_cd2a_wrong_data( );
-
-		/* Check that the reported wave-length or -number is reasonable */
-
-		errno = 0;
-		strtod( bp, &ep );
-		if ( errno || ep != bp + 8 )
-			spex_cd2a_wrong_data( );
-
-		bp += 8;
-
-		if ( spex_cd2a.data_format == STANDARD && *bp++ != ETX )
-			spex_cd2a_wrong_data( );
-
-		/* Skip the checksum if there's one */
-
-		if ( spex_cd2a.use_checksum )
-			bp += 2;
-
-		if ( *bp++ != '\r' )
-			spex_cd2a_wrong_data( );
-
-		if ( spex_cd2a.sends_lf && *bp != '\n' )
-			spex_cd2a_wrong_data( );
-
-	} while ( ! done );
+		spex_cd2a_pos_mess_check( bp );
+	}
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Function for handling of messages received after a trigger command */
+/* ("E") during a burst scan has been send to the device.             */
+/*--------------------------------------------------------------------*/
 
-static void spex_cd2a_read_sweep_ack( void )
+static void spex_cd2a_read_scan_ack( void )
 {
 	char buf[ 20 ];
-	ssize_t to_be_read = 2;
+	ssize_t to_be_read = pos_mess_len;
 	ssize_t already_read = 0;
-	char *bp, *ep;
+	char *bp;
 	bool done = UNSET;
 
 	
-	while ( already_read < to_be_read )
-	{
-		if ( ( already_read +=
-			   fsc2_serial_read( SERIAL_PORT, buf + already_read,
-								 to_be_read - already_read, 1000000,
-								 SET ) ) < 0 )
-			spex_cd2a_comm_fail( );
-		stop_on_user_request( );
-	}
+	/* Read the ACK and CAN that get send at first (or an error indication) */
 
-	if ( buf[ 0 ] != ACK || buf[ 1 ] != CAN )
-		spex_cd2a_wrong_data( );
+	spex_cd2a_read_ack( );
 
-	to_be_read = 11;
-	if ( spex_cd2a.data_format == STANDARD )
-		to_be_read += 2;
-	if ( spex_cd2a.use_checksum )
-		to_be_read += 2;
-	if ( spex_cd2a.sends_lf )
-		to_be_read++;
+	/* Now repeatedly read in the position until the burst movement is
+	   complete */
 
-	do
+	while ( ! done )
 	{
 		already_read = 0;
 
@@ -840,70 +825,16 @@ static void spex_cd2a_read_sweep_ack( void )
 				spex_cd2a_wrong_data( );
 		}
 
-		/* Check that the reported unit is reasonable */
+		/* Check the rest of the message */
 
-		if ( ( spex_cd2a.mode == WN && *bp == 'W' ) ||
-			 ( spex_cd2a.mode == WL &&
-			   ( ( spex_cd2a.units == NANOMETER && *bp == 'N' ) ||
-				 ( spex_cd2a.units == ANGSTROEM && *bp == 'A' ) ) ) )
-			bp++;
-		else
-			spex_cd2a_wrong_data( );
-
-		/* Check that the reported wave-length or -number is reasonable */
-
-		errno = 0;
-		strtod( bp, &ep );
-		if ( errno || ep != bp + 8 )
-			spex_cd2a_wrong_data( );
-
-		bp += 8;
-
-		if ( spex_cd2a.data_format == STANDARD && *bp++ != ETX )
-			spex_cd2a_wrong_data( );
-
-		/* Skip the checksum if there's one */
-
-		if ( spex_cd2a.use_checksum )
-			bp += 2;
-
-		if ( *bp++ != '\r' )
-			spex_cd2a_wrong_data( );
-
-		if ( spex_cd2a.sends_lf && *bp != '\n' )
-			spex_cd2a_wrong_data( );
-
-	} while ( ! done );
-}
-
-
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
-
-static void spex_cd2a_read_halt_ack( void )
-{
-	char buf[ 2 ];
-	ssize_t to_be_read = 2;
-	ssize_t already_read = 0;
-
-	
-	while ( already_read < to_be_read )
-	{
-		if ( ( already_read +=
-			   fsc2_serial_read( SERIAL_PORT, buf + already_read,
-								 to_be_read - already_read, 1000000,
-								 SET ) ) < 0 )
-			spex_cd2a_comm_fail( );
-		stop_on_user_request( );
+		spex_cd2a_pos_mess_check( bp );
 	}
-
-	if ( buf[ 0 ] != ACK || buf[ 1 ] != CAN )
-		spex_cd2a_wrong_data( );
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Function that gets called to close the device file for the device */
+/*-------------------------------------------------------------------*/
 
 void spex_cd2a_close( void )
 {
@@ -931,6 +862,85 @@ static void spex_cd2a_wrong_data( void )
 {
 	print( FATAL, "Device send unexpected data.\n" );
 	THROW( EXCEPTION );
+}
+
+
+/*-------------------------------------------------------------------------*/
+/* Function calculates the length of position messages send by the device. */
+/* The message consists at least of a status char, a char indicating the   */
+/* unit, an eigth byte long floating point number in ASCII format and a    */
+/* carriage return. When STANDARD data format is used the message starts   */
+/* with a STX char and an ETX char is send directly after tne number. If   */
+/* checksums are transmitted two additional bytes are send directly before */
+/* carriage return. And if the device is set up to send a linefeed this is */
+/* send at the end of the string.                                          */
+/*-------------------------------------------------------------------------*/
+
+static ssize_t spex_cd2a_pos_mess_len( void )
+{
+	ssize_t len = 11;
+
+
+	if ( spex_cd2a.data_format == STANDARD )
+		len += 2;
+	if ( spex_cd2a.use_checksum )
+		len += 2;
+	if ( spex_cd2a.sends_lf )
+		len++;
+
+	return len;
+}
+
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
+static void spex_cd2a_pos_mess_check( const char *bp )
+{
+	char *ep;
+
+
+	/* Check that the reported unit is reasonable */
+
+	if ( ( spex_cd2a.mode == WN && *bp == 'W' ) ||
+		 ( spex_cd2a.mode == WND && *bp == 'D' ) ||
+		 ( spex_cd2a.mode == WL &&
+		   ( ( spex_cd2a.units == NANOMETER && *bp == 'N' ) ||
+			 ( spex_cd2a.units == ANGSTROEM && *bp == 'A' ) ) ) )
+		bp++;
+	else
+		spex_cd2a_wrong_data( );
+
+	/* Check that the reported wave-length or -number is reasonable, i.e.
+	   is a number consisting of 8 bytes. */
+
+	errno = 0;
+	strtod( bp, &ep );
+	if ( errno || ep != bp + 8 )
+		spex_cd2a_wrong_data( );
+
+	bp += 8;
+
+	/* In STANDARD data format the next byte has to be an ETX */
+
+	if ( spex_cd2a.data_format == STANDARD && *bp++ != ETX )
+		spex_cd2a_wrong_data( );
+
+	/* Skip the checksum if the device is configured to send one */
+
+	if ( spex_cd2a.use_checksum )
+		bp += 2;
+
+	/* Next byte must be a carriage return */
+
+	if ( *bp++ != '\r' )
+		spex_cd2a_wrong_data( );
+
+	/* Finally, there might be a linefeed if the device is configured to
+	   do send one */
+
+	if ( spex_cd2a.sends_lf && *bp != '\n' )
+		spex_cd2a_wrong_data( );
 }
 
 
