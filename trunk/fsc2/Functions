@@ -64,7 +64,7 @@ lockin_time_constant, -1, ALL;  // gets or sets the time constant
 lockin_phase, -1, ALL;          // gets or sets the phase
 lockin_ref_freq, -1, ALL;       // Get or set reference frequency (SR810 only)
 lockin_ref_mode, 0, EXP;        // Get reference mode (SR810 only)
-lockin_ref_levek, -1, ALL;      // Get or set refernce level (SR810 only)
+lockin_ref_level, -1, ALL;      // Get or set reference level (SR810 only)
 
 
 // functions exported by the digitizer (TDS754A)
@@ -76,16 +76,17 @@ digitizer_trigger_channel, 1, PREP;     // set or get trigger channel
 digitizer_start_acquisition, 0, EXP;
 digitizer_get_area, -1, EXP;
 digitizer_get_curve, -1, EXP;
+
 digitizer_get_channel_number, 1, ALL;   // only for internal use !
 
 
 // functions exported by the rf synthesizer (HP8647A)
 
-synthesizer_state, -1, ALL;
-synthesizer_frequency, -1, ALL;
-synthesizer_attenuation, -1, ALL;
-synthesizer_step_frequency, -1, ALL;
-synthesizer_sweep_up, 0, EXP;
-synthesizer_sweep_down, 0, EXP;
-synthesizer_reset_frequency, 0, EXP;
-synthesizer_use_table, -1, PREP;
+synthesizer_state, -1, ALL;           // set/get state (ON/OFF)
+synthesizer_frequency, -1, ALL;       // set/get frequency
+synthesizer_attenuation, -1, ALL;     // set/get attenuation
+synthesizer_step_frequency, -1, ALL;  // set/get sweep step frequency
+synthesizer_sweep_up, 0, EXP;         // sweep up
+synthesizer_sweep_down, 0, EXP;       // sweep down
+synthesizer_reset_frequency, 0, EXP;  // go back to start frequency
+synthesizer_use_table, -1, PREP;      // set attenuation-table to use in sweeps
