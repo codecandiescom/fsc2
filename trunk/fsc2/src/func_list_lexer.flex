@@ -46,7 +46,7 @@ LWS      ^[\t ]+
 WS       [\t ]+
 TWS      [\t ]+\n
 
-IDENT    [A-ZA-Z_0-9]+
+IDENT    [A-Za-z_0-9]+
 
 %x      comm
 
