@@ -241,7 +241,7 @@ void rb_pulser_delay_card_setup( void )
 
 				delta = p->pos + f->delay - start;
 
-				if ( delta < 0.0 )
+				if ( delta < - PRECISION * rb_pulser.timebase )
 				{
 					if ( j == 0 )
 						print( FATAL, "Pulse #%ld of function '%s' starts too "
@@ -252,6 +252,9 @@ void rb_pulser_delay_card_setup( void )
 							   f->pulses[ j - 1 ]->num );
 					THROW( EXCEPTION );
 				}
+
+				if ( delta < 0.0 )
+					delta = 0.0;
 
 				dT = Ticks_rnd( delta / rb_pulser.timebase );
 				shift = dT * rb_pulser.timebase - delta;

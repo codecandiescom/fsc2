@@ -640,6 +640,48 @@ Var *pulser_pulse_reset( Var *v )
 }
 
 
+/*---------------------------------------------------------------------*
+ * This is a special funtion for the Rulbus pulser only which returns
+ * some minimum values for a pulse: for each first pulse of a function
+ * the earliest possible position for the pulse, for all others the
+ * minimum delay between the pulse and its predecessor.
+ *---------------------------------------------------------------------*/
+
+Var *pulser_pulse_minimum_specs( Var *v )
+{
+	PULSE *p = rb_pulser_get_pulse( get_strict_long( v, "pulse number" ) );
+	double t = 0.0;
+
+
+	if ( p->function == rb_pulser.function + PULSER_CHANNEL_MW )
+	{
+		if ( p == p->function->pulses[ 0 ] )
+			t =   delay_card[ INIT_DELAY ].intr_delay
+				+ delay_card[ MW_DELAY_0 ].intr_delay;
+		else if ( p == p->function->pulses[ 1 ] )
+			t =   delay_card[ MW_DELAY_1 ].intr_delay
+				+ delay_card[ MW_DELAY_2 ].intr_delay;
+		else if ( p == p->function->pulses[ 2 ] )
+			t =   delay_card[ MW_DELAY_3 ].intr_delay
+				+ delay_card[ MW_DELAY_4 ].intr_delay;
+		else
+			fsc2_assert( 1 == 0 );
+	}
+	else if ( p->function == rb_pulser.function + PULSER_CHANNEL_RF )
+		t =   delay_card[ INIT_DELAY ].intr_delay
+			+ delay_card[ RF_DELAY ].intr_delay
+			+ SYNTHESIZER_DELAY;
+	else if ( p->function == rb_pulser.function + PULSER_CHANNEL_DET )
+		t =   delay_card[ INIT_DELAY ].intr_delay
+			+ delay_card[ DET_DELAY_0 ].intr_delay
+			+ delay_card[ DET_DELAY_1 ].intr_delay;
+	else
+		fsc2_assert( 1 == 0 );
+
+	return vars_push( FLOAT_VAR, t );
+}
+
+
 /*----------------------------------------------------------*
  * Function for intialization of the stuctures representing
  * the Rulbus cards the pulser is made of
