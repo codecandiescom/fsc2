@@ -148,16 +148,16 @@ install-pion.anorg.chemie.uni-frankfurt.de:
 					  $(libdir)/tds520c.so
 	ln -s $(libdir)/dg2020_f.so $(libdir)/dg2020.so
 	chown fsc2.fsc2 $(libdir)/dg2020.so
-	ln -s $(libdir)/aeg_s_band.so $(libdir)/s_band.so
-	chown fsc2.fsc2 $(libdir)/s_band.so
-	ln -s $(libdir)/bh15.so $(libdir)/gaussmeter.so
-	chown fsc2.fsc2 $(libdir)/gaussmeter.so
-	ln -s $(libdir)/aeg_s_band.so $(libdir)/magnet.so
-	chown fsc2.fsc2 $(libdir)/magnet.so
-	ln -s $(libdir)/sr510.so $(libdir)/lockin.so
-	chown fsc2.fsc2 $(libdir)/lockin.so
 	ln -s $(libdir)/dg2020_f.so $(libdir)/pulser.so
 	chown fsc2.fsc2 $(libdir)/pulser.so
+	ln -s $(libdir)/aeg_s_band.so $(libdir)/s_band.so
+	chown fsc2.fsc2 $(libdir)/s_band.so
+	ln -s $(libdir)/aeg_s_band.so $(libdir)/magnet.so
+	chown fsc2.fsc2 $(libdir)/magnet.so
+	ln -s $(libdir)/bh15.so $(libdir)/gaussmeter.so
+	chown fsc2.fsc2 $(libdir)/gaussmeter.so
+	ln -s $(libdir)/sr510.so $(libdir)/lockin.so
+	chown fsc2.fsc2 $(libdir)/lockin.so
 	ln -s $(libdir)/tds520a.so $(libdir)/tds520c.so
 	chown fsc2.fsc2 $(libdir)/tds520c.so
 

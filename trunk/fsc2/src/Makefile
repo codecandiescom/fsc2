@@ -84,9 +84,9 @@ clean:
 # unfortunately, for the pion we need a different GPIB interface...
 
 pion:
-	if [ ! -e gpib_if_new.c -a ! -e gpib_if_new.c ]; then \
+	if [ ! -e gpib_if_new.c -a ! -e gpib_if_new.h ]; then \
 		mv gpib_if.c gpib_if_new.c; \
-		mv gpib_if.c gpib_if_new.c; \
+		mv gpib_if.h gpib_if_new.h; \
 		mv gpib_if_old.c gpib_if.c; \
 		mv gpib_if_old.h gpib_if.h; \
 	fi
