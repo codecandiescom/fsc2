@@ -94,12 +94,12 @@ void cut_init( void )
 	if ( GUI.G_Funcs.size == LOW )
 	{
 		GC_sizes.WIN_MIN_WIDTH  = 350;
-		GC_sizes.WIN_MIN_HEIGHT = 250;
+		GC_sizes.WIN_MIN_HEIGHT = 220;
 	}
 	else
 	{
 		GC_sizes.WIN_MIN_WIDTH  = 500;
-		GC_sizes.WIN_MIN_HEIGHT = 350;
+		GC_sizes.WIN_MIN_HEIGHT = 310;
 	}
 }
 

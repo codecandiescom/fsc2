@@ -64,6 +64,7 @@ static struct {
 	unsigned int WIN_MIN_1D_WIDTH;
 	unsigned int WIN_MIN_2D_WIDTH;
 	unsigned int WIN_MIN_HEIGHT;
+	unsigned int CURVE_BUTTON_HEIGHT;
 
 	int SMALL_FONT_SIZE;
 
@@ -103,6 +104,7 @@ static struct {
 void start_graphics( void )
 {
 	int i;
+	unsigned diff;
 
 
 	if ( ! display_has_been_shown )
@@ -196,11 +198,23 @@ void start_graphics( void )
 	/* Set minimum size for display window and switch on full scale button */
 
 	if ( G.dim & 1 || ! G.is_init )
+	{
+		if ( ! G.is_init || G1.nc == 1 )
+			diff = MAX_CURVES * GI.CURVE_BUTTON_HEIGHT;
+		else
+			diff = ( MAX_CURVES - G1.nc ) * GI.CURVE_BUTTON_HEIGHT;
 		fl_winminsize( GUI.run_form_1d->run_1d->window,
-					   GI.WIN_MIN_1D_WIDTH, GI.WIN_MIN_HEIGHT );
+					   GI.WIN_MIN_1D_WIDTH, GI.WIN_MIN_HEIGHT - diff );
+	}
 	if ( G.dim & 2 )
+	{
+		if ( G2.nc == 1 )
+			diff = MAX_CURVES * GI.CURVE_BUTTON_HEIGHT;
+		else
+			diff = ( MAX_CURVES - G2.nc ) * GI.CURVE_BUTTON_HEIGHT;
 		fl_winminsize( GUI.run_form_2d->run_2d->window,
-					   GI.WIN_MIN_2D_WIDTH, GI.WIN_MIN_HEIGHT );
+					   GI.WIN_MIN_2D_WIDTH, GI.WIN_MIN_HEIGHT - diff );
+	}
 
 	if ( G.dim & 1 )
 		fl_set_button( GUI.run_form_1d->full_scale_button_1d, 1 );
@@ -290,6 +304,7 @@ static void fonts_init( void )
 static void set_default_sizes( void )
 {
 	int flags;
+	unsigned diff;
 
 
 	/* If the display windows have never been shown before evaluate the
@@ -383,24 +398,34 @@ static void set_default_sizes( void )
 	{
 		if ( ! GI.is_1d_size )
 		{
+			if ( ! G.is_init || G1.nc == 1 )
+				diff = MAX_CURVES * GI.CURVE_BUTTON_HEIGHT;
+			else
+				diff = ( MAX_CURVES - G1.nc ) * GI.CURVE_BUTTON_HEIGHT;
+
 			GI.display_1d_w = GI.display_w;
 			if ( GI.display_1d_w < GI.WIN_MIN_1D_WIDTH )
 				GI.display_1d_w = GI.WIN_MIN_1D_WIDTH;
 
 			GI.display_1d_h = GI.display_h;
-			if ( GI.display_1d_h < GI.WIN_MIN_HEIGHT )
-				GI.display_1d_w = GI.WIN_MIN_HEIGHT;
+			if ( GI.display_1d_h < GI.WIN_MIN_HEIGHT - diff )
+				GI.display_1d_w = GI.WIN_MIN_HEIGHT - diff;
 		}
 
 		if ( ! GI.is_2d_size )
 		{
+			if ( ! G.is_init || G2.nc == 1 )
+				diff = MAX_CURVES * GI.CURVE_BUTTON_HEIGHT;
+			else
+				diff = ( MAX_CURVES - G2.nc ) * GI.CURVE_BUTTON_HEIGHT;
+
 			GI.display_2d_w = GI.display_w;
 			if ( GI.display_2d_w < GI.WIN_MIN_2D_WIDTH )
 				GI.display_2d_w = GI.WIN_MIN_2D_WIDTH;
 
 			GI.display_2d_h = GI.display_h;
-			if ( GI.display_2d_h < GI.WIN_MIN_HEIGHT )
-				GI.display_2d_w = GI.WIN_MIN_HEIGHT;
+			if ( GI.display_2d_h < GI.WIN_MIN_HEIGHT - diff )
+				GI.display_2d_w = GI.WIN_MIN_HEIGHT - diff;
 		}
 	}
 
@@ -433,13 +458,14 @@ static void set_defaults( void )
 {
 	if ( GUI.G_Funcs.size == LOW )
 	{
-		GI.WIN_MIN_1D_WIDTH   = 300;
-		GI.WIN_MIN_2D_WIDTH   = 350;
-		GI.WIN_MIN_HEIGHT     = 380;
-		GI.SMALL_FONT_SIZE    = FL_TINY_SIZE;
-		GI.DEFAULT_AXISFONT_1 = "*-lucida-bold-r-normal-sans-10-*";
-		GI.DEFAULT_AXISFONT_2 = "lucidasanstypewriter-10";
-		GI.DEFAULT_AXISFONT_3 = "fixed";
+		GI.WIN_MIN_1D_WIDTH    = 300;
+		GI.WIN_MIN_2D_WIDTH    = 350;
+		GI.WIN_MIN_HEIGHT      = 360;
+		GI.CURVE_BUTTON_HEIGHT = 35;
+		GI.SMALL_FONT_SIZE     = FL_TINY_SIZE;
+		GI.DEFAULT_AXISFONT_1  = "*-lucida-bold-r-normal-sans-10-*";
+		GI.DEFAULT_AXISFONT_2  = "lucidasanstypewriter-10";
+		GI.DEFAULT_AXISFONT_3  = "fixed";
 
 		G.scale_tick_dist   =  4;
 		G.short_tick_len    =  3;
@@ -455,13 +481,14 @@ static void set_defaults( void )
 	}
 	else
 	{
-		GI.WIN_MIN_1D_WIDTH   = 400;
-		GI.WIN_MIN_2D_WIDTH   = 500;
-		GI.WIN_MIN_HEIGHT     = 435;
-		GI.SMALL_FONT_SIZE    = FL_SMALL_SIZE;
-		GI.DEFAULT_AXISFONT_1 = "*-lucida-bold-r-normal-sans-14-*";
-		GI.DEFAULT_AXISFONT_2 = "lucidasanstypewriter-14";
-		GI.DEFAULT_AXISFONT_3 = "fixed";
+		GI.WIN_MIN_1D_WIDTH    = 400;
+		GI.WIN_MIN_2D_WIDTH    = 500;
+		GI.WIN_MIN_HEIGHT      = 460;
+		GI.CURVE_BUTTON_HEIGHT = 40;
+		GI.SMALL_FONT_SIZE     = FL_SMALL_SIZE;
+		GI.DEFAULT_AXISFONT_1  = "*-lucida-bold-r-normal-sans-14-*";
+		GI.DEFAULT_AXISFONT_2  = "lucidasanstypewriter-14";
+		GI.DEFAULT_AXISFONT_3  = "fixed";
 
 		G.scale_tick_dist   =   6;
 		G.short_tick_len    =   5;
