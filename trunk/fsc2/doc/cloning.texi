@@ -115,6 +115,6 @@ correctly.
 
 For devices attached to the serial port you must change the serial port
 setting in the configuration file for the device (the configuration
-files for all devices are in the @file{conf} subdirectory below
+files for all devices are in the @file{config} subdirectory below
 @code{fsc2}s main directory and the file name is identical to the device
 name and has the extension @code{.conf}).
