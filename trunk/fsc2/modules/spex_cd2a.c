@@ -841,74 +841,6 @@ Var *monochromator_laser_line( Var *v )
 
 
 /*------------------------------------------------------------------*/
-/* Function for telling the driver about an offset between what the */
-/* driver reports to the user and where a line is supposed to be.   */
-/* The function is to be called with the difference between the     */
-/* expected position and the position where the line really appears */
-/* according to scales derived from the values reported by the      */
-/* driver. If, for example a sweep is done from 400 nm to 404 nm,   */
-/* with the laser line appearing at 401 nm while it is expected to  */
-/* be at 402 nm the function should be called with a value of +1 nm */
-/* to correct for this offset.                                      */
-/* For wavelength driven monochromators the offset must be given in */
-/* wavelength units, while for wavenumber driven monochromators in  */
-/* wavenumber units (i.e. cm^-1).                                   */
-/*------------------------------------------------------------------*/
-
-Var *monochromator_offset( Var *v )
-{
-	double offset;
-	double new_offset;
-
-
-	if ( v == NULL )
-		return vars_push( FLOAT_VAR, spex_cd2a.offset );
-
-	/* A new offset can only be set for wavenumber driven monochromators
-	   while in absolute wavenumber mode */
-
-	if ( spex_cd2a.mode == WND )
-	{
-		print( FATAL, "Monochromator offset can't be set while in relative "
-			   "wavenumber mode. Set the laser line position to 0 before "
-			   "attempting to change the offset.\n" );
-		THROW( EXCEPTION );
-	}
-
-	if ( spex_cd2a.mode & WN_MODES )
-		new_offset = get_double( v, "wavenumber offset" );
-	else
-		new_offset = get_double( v, "wavelength offset" );
-
-	offset = spex_cd2a.offset - new_offset;
-
-#if defined SPEX_CD2A_MAX_OFFSET
-	if ( spex_cd2a.mode & WN_MODES && offset > SPEX_CD2A_MAX_OFFSET )
-	{
-		print( FATAL, "Offset of %.4f cm^-1 is unrealistically high. If this "
-			   "isn't an error change the \"SPEX_CD2A_MAX_OFFSET\" setting in "
-			   "the device configuration file and recompile.\n", new_offset );
-		THROW( EXCEPTION );
-	}
-
-	if ( spex_cd2a.mode == WL && fabs( 1.0e9 * offset )
-		 											   > SPEX_CD2A_MAX_OFFSET )
-	{
-		print( FATAL, "Offset of %.5f nm is unrealistically high. If this "
-			   "isn't an error change the \"SPEX_CD2A_MAX_OFFSET\" setting in "
-			   "the device configuration file and recompile.\n",
-			   1.0e9 * new_offset );
-		THROW( EXCEPTION );
-	}
-#endif
-
-	spex_cd2a.offset = offset;
-
-	return vars_push( FLOAT_VAR, spex_cd2a.offset );
-}
-
-
-/*------------------------------------------------------------------*/
 /* Function returns the number of grooves per meter of the grating. */
 /*------------------------------------------------------------------*/
 
@@ -1039,6 +971,122 @@ Var *monochromator_shutter_limits( Var *v )
 	}
 
 	return vars_push( FLOAT_ARR, l, 2 );
+}
+
+
+/*--------------------------------------------------------------------*/
+/* Function for calibration of the monochromator. It tells the driver */
+/* 1. about an offset between what the driver reports to the user and */
+/*    where a line is supposed to be.                                 */
+/* 2. (optionally) the width of a single pixel on the CCD camera      */
+/*                                                                    */
+/* The function is to be called at least with the difference between  */
+/* the expected position and the position where the line really       */
+/* appears according to scales derived from the values reported by    */
+/* the driver. If, for example a sweep is done from 400 nm to 404 nm, */
+/* with the laser line appearing at 401 nm while it is expected to be */
+/* at 402 nm the function should be called with a value of +1 nm to   */
+/* to correct for this offset. Since the wavelengths or wavenumbers   */
+/* the user is dealing with are already offset-corrected the argument */
+/* isn't taken to be the offset itself but is subtracted from the     */
+/* existing value of the offset.                                      */
+/* For wavelength driven monochromators the offset must be given in   */
+/* wavelength units, while for wavenumber driven monochromators in    */
+/* wavenumber units (i.e. cm^-1).                                     */
+/*                                                                    */
+/* If there's another argument it has to be the wavelength or wave-   */
+/* number (depending on the type of the monochromator) difference     */
+/* between two pixels of the CCD camera. If not given the old value   */
+/* is retained.                                                       */
+/*                                                                    */
+/* If called without an argument the function returns an array of two */
+/* values with the offset and the pixel difference. A value of 0 for  */
+/* the pixel difference means that no calibration of this value has   */
+/* been done.                                                         */
+/*--------------------------------------------------------------------*/
+
+
+Var *monochromator_calibrate( Var *v )
+{
+	double pixel_diff;
+	double offset;
+	double new_offset;
+	double field[ 2 ];
+
+
+	if ( v == NULL )
+	{
+		field[ 0 ] = spex_cd2a.offset;
+		field[ 1 ] = spex_cd2a.pixel_diff;
+		return vars_push( FLOAT_ARR, field, 2 );
+	}
+
+	/* A new offset can only be set for wavenumber driven monochromators
+	   while in absolute wavenumber mode */
+
+	if ( spex_cd2a.mode == WND )
+	{
+		print( FATAL, "Monochromator offset can't be set while in relative "
+			   "wavenumber mode. Set the laser line position to 0 before "
+			   "attempting to change the calibration.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( spex_cd2a.mode & WN_MODES )
+		new_offset = get_double( v, "wavenumber offset" );
+	else
+		new_offset = get_double( v, "wavelength offset" );
+
+	offset = spex_cd2a.offset - new_offset;
+
+#if defined SPEX_CD2A_MAX_OFFSET
+	if ( spex_cd2a.mode & WN_MODES && offset > SPEX_CD2A_MAX_OFFSET )
+	{
+		print( FATAL, "Offset of %.4f cm^-1 is unrealistically high. If this "
+			   "isn't an error change the \"SPEX_CD2A_MAX_OFFSET\" setting in "
+			   "the device configuration file and recompile.\n", new_offset );
+		THROW( EXCEPTION );
+	}
+
+	if ( spex_cd2a.mode == WL && fabs( 1.0e9 * offset )
+		 											   > SPEX_CD2A_MAX_OFFSET )
+	{
+		print( FATAL, "Offset of %.5f nm is unrealistically high. If this "
+			   "isn't an error change the \"SPEX_CD2A_MAX_OFFSET\" setting in "
+			   "the device configuration file and recompile.\n",
+			   1.0e9 * new_offset );
+		THROW( EXCEPTION );
+	}
+#endif
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		if ( spex_cd2a.mode & WN_MODES )
+			pixel_diff = get_double( v, "wavelength difference for one CCD "
+									 "camera pixel" );
+		else
+			pixel_diff = get_double( v, "wavenumber difference for one CCD "
+									 "camera pixel" );
+
+		if ( pixel_diff < 0.0 )
+		{
+			print( FATAL, "Invalid negative wave%s difference for one CCD "
+				   "camera pixel.\n",
+				   spex_cd2a.mode & WN_MODES ? "number" : "length" );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+		pixel_diff = spex_cd2a.pixel_diff;
+
+	too_many_arguments( v );
+
+	spex_cd2a.offset = offset;
+	spex_cd2a.pixel_diff = pixel_diff;
+
+	field[ 0 ] = spex_cd2a.offset;
+	field[ 1 ] = spex_cd2a.pixel_diff;
+	return vars_push( FLOAT_ARR, field, 2 );
 }
 
 

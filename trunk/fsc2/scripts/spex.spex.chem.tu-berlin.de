@@ -147,6 +147,7 @@ I;
 data[ * ];
 P_count = 0;
 offset;
+calib[ 2 ];
 Accepted = 0;
 
 
@@ -160,9 +161,11 @@ EXPERIMENT:
 laser_line = monochromator_laser_line( );
 nll = laser_line;
 monochromator_laser_line( 0.0 );
+calib = monochromator_calibrate( );
+offset = calib[ 1 ];
 
-IF laser_line - monochromator_offset( ) >= 46000.0 / 3.0 + 2 AND
-   laser_line - monochromator_offset( ) <= 43998.0 {
+IF laser_line - offset >= 46000.0 / 3.0 + 2 AND
+   laser_line - offset <= 43998.0 {
 	start_wn = laser_line + 2 cm^-1;
 	end_wn   = laser_line - 2 cm^-1;
 	P_count  = 2;
@@ -222,8 +225,7 @@ FOREVER {
 			NEXT;
 		}
 
-		IF new - monochromator_offset( ) > 44000.0 OR
-		   new - monochromator_offset( ) < 46000.0 / 3.0 {
+		IF new - offset > 44000.0 OR new - offset < 46000.0 / 3.0 {
 			input_value( B_swn, start_wn );
 			NEXT;
 		}
@@ -244,8 +246,7 @@ FOREVER {
 			NEXT;
 		}
 
-		IF new - monochromator_offset( ) > 44000.0 OR
-		   new - monochromator_offset( ) < 46000.0 / 3.0 {
+		IF new - offset > 44000.0 OR new - offset < 46000.0 / 3.0 {
 			input_value( B_ewn, end_wn );
 			NEXT;
 		}
@@ -371,7 +372,7 @@ FOREVER {
 	IF button_state( B_acc ) {
 
 		offset = nll - lpos;
-		monochromator_offset( offset );
+		monochromator_calibrate( offset );
 		lpos = nll;
 		input_value( B_lpos, lpos );
 		start_wn += offset;
@@ -381,6 +382,8 @@ FOREVER {
 		change_scale( start_wn, - step_size );
 		clear_marker( );
 		draw_marker_1d( round( ( start_wn - lpos ) / step_size + 1 ) );
+		calib = monochromator_calibrate( );
+		offset = calib[ 1 ];
 		Accepted = 1;
 	}
 }
