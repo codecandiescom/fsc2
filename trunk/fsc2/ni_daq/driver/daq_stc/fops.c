@@ -254,7 +254,7 @@ static ssize_t ni_daq_read( struct file *filep, char *buff, size_t count,
 			   board->irq_hand[ IRQ_AI_SC_TC ].raised ||
 			   board->irq_hand[ IRQ_AI_STOP ].raised ) ) {
 			daq_irq_disable( board, IRQ_AI_STOP );
-			return -EAGAIN;
+			return -EINTR;
 		}
 
 		daq_irq_disable( board, IRQ_AI_STOP );

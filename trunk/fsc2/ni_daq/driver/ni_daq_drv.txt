@@ -458,7 +458,7 @@ finish by an ioctl() call for the AI subsystem with the 'cmd' element
 of the NI_DAQ_AI_ARG structure being set to NI_DAQ_AI_ACQ_WAIT. The
 call will only return when the acquisition is done except when a signal
 is received before the acquisition is finished, in which case errno will
-be set to EAGAIN. When no acquisition is under way when this ioctl() call
+be set to EINTR. When no acquisition is under way when this ioctl() call
 is done errno is set to EIO.
 
 
@@ -757,7 +757,7 @@ non-zero value the function will wait for the other counter to stop
 before the value of the counter under consideration is returned
 and both counters are stopped (only if a signal is received the
 function returns immediately, indicating failure with errno being
-set to EAGAIN).
+set to EINTR).
 
 On return from the ioctl() call the 'count' element of the NI_DAQ_GPCT_ARG
 structure will be set to the current value of the counter. Please note
@@ -1073,11 +1073,13 @@ yet started it is automatically started by calling read(). If there was
 no valid AI acquisition initialization read() returns indicating failure
 and errno is set to EINVAL.
 
-Invoking read() returns as many data as are currently available - if none
+Invoking read() returns as many data as are currently available. If none
 are available yet and the boards device file was open()ed in blocking
-mode th function blocks until data become available. A return value
-indicating failure is returned and errno is set to EAGAIN when a signal
-is received before the data became available.
+mode the function blocks until data become available. If the board was
+opened in non-blocking mode and there are no data an return value
+indicating error (-1) is returned an errno is set to EAGAIN. A return
+of -1 is returned and errno is set to EINTR when a signal is received
+before data have become available.
 
 The number of data points returned by a read() call is always a multiple
 of the number of data points to be expected from one scan (which is the

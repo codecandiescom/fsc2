@@ -339,7 +339,7 @@ static int GPCT_get_count( Board *board, unsigned int counter,
 
 		if ( signal_pending( current ) ) {
 			PDEBUG( "Aborted by signal\n" );
-			return -EAGAIN;
+			return -EINTR;
 		}
 
 		*count = board->func->stc_readl( board,

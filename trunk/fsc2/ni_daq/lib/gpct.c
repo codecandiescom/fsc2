@@ -299,7 +299,7 @@ int ni_daq_gpct_get_count( int board, int counter, int wait_for_end,
 
 	if ( ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_GPCT, &a ) < 0 )
 		return ni_daq_errno =
-						 ( errno == EAGAIN ) ? NI_DAQ_ERR_ITR : NI_DAQ_ERR_INT;
+						 ( errno == EINTR ) ? NI_DAQ_ERR_ITR : NI_DAQ_ERR_INT;
 
 	*count = a.count;
 

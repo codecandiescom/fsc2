@@ -1056,7 +1056,7 @@ static int AI_acq_wait( Board *board )
 	     wait_event_interruptible( board->AI.waitqueue,
 				   board->irq_hand[ IRQ_AI_SC_TC ].raised ) ) {
 		PDEBUG( "Aborted by signal\n" );
-		return -EAGAIN;
+		return -EINTR;
 	}
 
 	/* Disable the interrupt and release possibly used trigger input

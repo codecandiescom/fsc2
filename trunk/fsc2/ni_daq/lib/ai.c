@@ -519,7 +519,7 @@ ssize_t ni_daq_ai_get_acq_data( int board, double *volts[ ],
 
 		if ( ret < 0 )
 		{
-			if ( errno == EAGAIN )
+			if ( errno == EINTR )
 			{
 				free( buf );
 				return ni_daq_errno = NI_DAQ_ERR_SIG;
@@ -546,7 +546,7 @@ ssize_t ni_daq_ai_get_acq_data( int board, double *volts[ ],
 			if ( ret < 0 )
 			{
 				free( buf );
-				if ( errno == EAGAIN )
+				if ( errno == EINTR )
 					return ni_daq_errno = NI_DAQ_ERR_SIG;
 				else
 					return ni_daq_errno = NI_DAQ_ERR_INT;
@@ -566,7 +566,7 @@ ssize_t ni_daq_ai_get_acq_data( int board, double *volts[ ],
 	if ( count < 0 )
 	{
 		free( buf );
-		if ( errno == EAGAIN )
+		if ( errno == EINTR )
 			return ni_daq_errno = NI_DAQ_ERR_SIG;
 		else if ( errno == EAGAIN )
 			return 0;
@@ -596,14 +596,22 @@ ssize_t ni_daq_ai_get_acq_data( int board, double *volts[ ],
 		{
 			range /= ( 1 << ni_daq_dev[ board ].props.num_ai_bits ) - 1;
 			for ( j = 0, bp = buf + 2 * i; j < count; j++, bp += step )
+			{
+				if ( * ( unsigned short int * ) bp > 4095 )
+					fprintf( stderr, "%u\n", * ( unsigned short int * ) bp );
 				volts[ i ][ j + offset ] =
 										 range * * ( unsigned short int * ) bp;
+			}
 		}
 		else
 		{
 			range /= 0.5 * ( 1 << ni_daq_dev[ board ].props.num_ai_bits ) - 1;
 			for ( j = 0, bp = buf + 2 * i; j < count; j++, bp += step )
+			{
+				if ( * ( short int * ) bp > 2047 || * ( short int * ) bp < -2047 )
+					fprintf( stderr, "%d%d - %d/%d, %d\n", i, ni_daq_dev[ board ].ai_state.num_data_per_scan, j, count, * ( short int * ) bp );
 				volts[ i ][ j + offset ]= range * * ( short int * ) bp;
+			}
 		}
 	}
 
