@@ -1036,7 +1036,7 @@ argument:
 Name: cut
 Width: 620
 Height: 450
-Number of Objects: 13
+Number of Objects: 15
 
 --------------------
 class: FL_BOX
@@ -1272,6 +1272,42 @@ gravity: FL_NorthWest FL_SouthWest
 name: cut_y_axis
 callback: 
 argument: 
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 110 15 20 20
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: &A
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: up_button
+callback: cut_next_index
+argument: 0
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 110 45 20 20
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: &B
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: down_button
+callback: cut_next_index
+argument: 1
 
 ==============================
 create_the_forms

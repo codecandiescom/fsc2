@@ -40,11 +40,11 @@ FOR K = 1 : M
 //									  j[ 3, I ], j[ 4, I ] );
 	}
 
-	FOR L = 1 : N {
-		display( K, L, j[ 1, L ], 1 );
-	}
+//	FOR L = 1 : N {
+//		display( K, L, j[ 1, L ], 1 );
+//	}
 
-	display( //1, 1, j[ 1 ], 1, 
+	display( 1, K, j[ 1 ], 1, 
 			 1, K, j[ 2 ], 2,
 			 1, K, j[ 3 ], 3,
 	         1, K, j[ 4 ], 4 );

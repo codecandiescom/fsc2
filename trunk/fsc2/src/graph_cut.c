@@ -151,6 +151,8 @@ void cut_show( int dir, long index )
 				G.label_h[ Z + 3 ] = G.label_h[ Y ];
 			}
 		}
+
+		fl_set_object_callback( cut_form->cut_print_button, print_1d, - dir );
 	}
 
 	/* Calculate all the points of the cross section curve */
@@ -1275,7 +1277,7 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 					if ( G.cut_select == CUT_SELECT_X )
 						cut_show( CG.cut_dir,
 							    lround( ( double ) ( c->h - 1 - c->ppos[ Y ] )
-							    * ( ( CG.cut_dir == X ? G.ny : G.nx ) - 1 )
+							    * ( ( CG.cut_dir == X ? G.nx : G.ny ) - 1 )
 								/ c->h ) );
 					break;
 
@@ -2522,4 +2524,16 @@ void cut_clear_curve( long curve )
 
 	G.cut_curve.points = T_free( G.cut_curve.points );
 	G.cut_curve.xpoints = T_free( G.cut_curve.xpoints );
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+void cut_next_index( FL_OBJECT *a, long b )
+{
+	a = a;
+
+
+	cut_show( CG.cut_dir, CG.index + ( b == 0 ? 1 : -1 ) );
 }

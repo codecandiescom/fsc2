@@ -1,4 +1,4 @@
-/** Header file generated with fdesign on Sun Nov 12 19:09:20 2000.**/
+/** Header file generated with fdesign on Fri Nov 24 18:20:10 2000.**/
 
 #ifndef FD_fsc2_h_
 #define FD_fsc2_h_
@@ -25,6 +25,7 @@ extern void curve_button_callback(FL_OBJECT *, long);
 extern void cut_undo_button_callback(FL_OBJECT *, long);
 extern void cut_close_callback(FL_OBJECT *, long);
 extern void cut_fs_button_callback(FL_OBJECT *, long);
+extern void cut_next_index(FL_OBJECT *, long);
 
 
 /**** Forms and Objects ****/
@@ -115,6 +116,8 @@ typedef struct {
 	FL_OBJECT *cut_x_axis;
 	FL_OBJECT *cut_full_scale_button;
 	FL_OBJECT *cut_z_axis;
+	FL_OBJECT *up_button;
+	FL_OBJECT *down_button;
 	FL_OBJECT *cut_y_axis;
 } FD_cut;
 

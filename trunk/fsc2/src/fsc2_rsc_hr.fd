@@ -1036,7 +1036,7 @@ argument:
 Name: cut
 Width: 1030
 Height: 800
-Number of Objects: 13
+Number of Objects: 15
 
 --------------------
 class: FL_BOX
@@ -1254,6 +1254,42 @@ gravity: FL_NoGravity FL_NoGravity
 name: 
 callback: curve_button_callback
 argument: -4
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 155 25 35 30
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: &A
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: up_button
+callback: cut_next_index
+argument: 0
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 155 65 35 30
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: &B
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: down_button
+callback: cut_next_index
+argument: 1
 
 --------------------
 class: FL_CANVAS

@@ -356,6 +356,12 @@ FD_cut *create_form_cut(void)
     fl_set_button_shortcut(obj,"4",1);
     fl_set_object_boxtype(obj,FL_NO_BOX);
     fl_set_object_callback(obj,curve_button_callback,-4);
+  fdui->up_button = obj = fl_add_button(FL_NORMAL_BUTTON,155,25,35,30,"");
+    fl_set_button_shortcut(obj,"&A",1);
+    fl_set_object_callback(obj,cut_next_index,0);
+  fdui->down_button = obj = fl_add_button(FL_NORMAL_BUTTON,155,65,35,30,"");
+    fl_set_button_shortcut(obj,"&B",1);
+    fl_set_object_callback(obj,cut_next_index,1);
   fdui->cut_y_axis = obj = fl_add_canvas(FL_NORMAL_CANVAS,95,10,150,715,"");
     fl_set_object_gravity(obj, FL_NorthWest, FL_SouthWest);
     fl_set_object_resize(obj, FL_RESIZE_Y);

@@ -33,8 +33,8 @@ double margin = 25.0;             /* margin (in mm) to leave on all sides */
 
 static int get_print_file( FILE **fp, char **name );
 static void print_header( FILE *fp, char *name );
-static void eps_make_scale( FILE *fp, void *cv, int coord );
-static void eps_draw_curve_1d( FILE *fp, int i );
+static void eps_make_scale( FILE *fp, void *cv, int coord, int dim );
+static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, int dir );
 static void eps_draw_contour( FILE *fp, int cn );
 static void do_print( char *name, const char *command );
 static int start_printing( char **argv );
@@ -58,11 +58,11 @@ void print_1d( FL_OBJECT *obj, long data )
 
 	/* Find out about the way to print and get a file, then print the header */
 
-   if ( ( type = get_print_file( &fp, &name ) ) == 0 )
-   {
-	   fl_activate_object( obj );
-	   return;
-   }
+	if ( ( type = get_print_file( &fp, &name ) ) == 0 )
+	{
+		fl_activate_object( obj );
+		return;
+	}
 
 	print_header( fp, name );
 
@@ -81,16 +81,24 @@ void print_1d( FL_OBJECT *obj, long data )
 	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp s\n",
 			 x_0 - 0.5, y_0 - 0.5, h + 1.0, w + 1.0, - ( h + 1.0 ) );
 
-	for ( i = 0; i < G.nc; i++ )
+	if ( obj == run_form->print_button )
 	{
-		if ( G.curve[ i ]->active )
-			break;
-	}
+		for ( i = 0; i < G.nc; i++ )
+		{
+			if ( G.curve[ i ]->active )
+				break;
+		}
 
-	if ( i != G.nc )
+		if ( i != G.nc )
+		{
+			eps_make_scale( fp, ( void * ) G.curve[ i ], X, 1 );
+			eps_make_scale( fp, ( void * ) G.curve[ i ], Y, 1 );
+		}
+	}
+	else
 	{
-		eps_make_scale( fp, ( void * ) G.curve[ i ], X );
-		eps_make_scale( fp, ( void * ) G.curve[ i ], Y );
+		eps_make_scale( fp, ( void * ) &G.cut_curve, X, ( int ) data );
+		eps_make_scale( fp, ( void * ) &G.cut_curve, Y, ( int ) data );
 	}
 
 	/* Restrict drawings to the frame */
@@ -98,8 +106,13 @@ void print_1d( FL_OBJECT *obj, long data )
 	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp clip newpath\n",
 			 x_0 - 0.1, y_0 - 0.1, h + 0.2, w + 0.2, - ( h + 0.2 ) );
 
-	for ( i = G.nc - 1; i >= 0; i-- )
-		eps_draw_curve_1d( fp, i );
+	if ( obj == run_form->print_button )
+	{
+		for ( i = G.nc - 1; i >= 0; i-- )
+			eps_draw_curve_1d( fp, G.curve[ i ], i, 1 );
+	}
+	else
+		eps_draw_curve_1d( fp, &G.cut_curve, 0, ( int ) data );
 
 	fprintf( fp, "showpage\n" );
 	fclose( fp );
@@ -157,8 +170,8 @@ void print_2d( FL_OBJECT *obj, long data )
 	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp s\n",
 			 x_0 - 0.5, y_0 - 0.5, h + 1.0, w + 1.0, - ( h + 1.0 ) );
 
-	eps_make_scale( fp, G.curve_2d[ G.active_curve ], X );
-	eps_make_scale( fp, G.curve_2d[ G.active_curve ], Y );
+	eps_make_scale( fp, G.curve_2d[ G.active_curve ], X, 2 );
+	eps_make_scale( fp, G.curve_2d[ G.active_curve ], Y, 2 );
 
 	/* Restrict drawings to the frame */
 
@@ -284,7 +297,7 @@ static int get_print_file( FILE **fp, char **name )
 		}
 		TRY_SUCCESS;
 	}
-	CATCH (EXCEPTION )
+	CATCH ( EXCEPTION )
 		obj = print_form->cancel_button;
 
 	if ( 1 == fl_get_button( print_form->A4 ) )
@@ -500,7 +513,7 @@ static void print_header( FILE *fp, char *name )
 /* Draws the scales for both 1D and 2D graphics */
 /*----------------------------------------------*/
 
-static void eps_make_scale( FILE *fp, void *cv, int coord )
+static void eps_make_scale( FILE *fp, void *cv, int coord, int dim )
 {
 	double rwc_delta,          /* distance between small ticks (in rwc) */
 		   order,              /* and its order of magnitude */
@@ -522,23 +535,44 @@ static void eps_make_scale( FILE *fp, void *cv, int coord )
 	double x, y;
 	char lstr[ 128 ];
 	double s2d[ 2 ];
+	int r_coord;
+	double rwcs, rwcd;
+	char *label;
 
 
-	if ( G.dim == 1 )
+
+	if ( dim == 1 )
 	{
 		s2d[ X ] = w * ( ( Curve_1d * ) cv )->s2d[ X ] / G.canvas.w;
 		s2d[ Y ] = h * ( ( Curve_1d * ) cv )->s2d[ Y ] / G.canvas.h;
+		rwcs = G.rwc_start[ coord ];
+		rwcd = G.rwc_delta[ coord ];
 	}
-	else
+	else if ( dim == 2 )
 	{
 		s2d[ X ] = w * ( ( Curve_2d * ) cv )->s2d[ X ] / G.canvas.w;
 		s2d[ Y ] = h * ( ( Curve_2d * ) cv )->s2d[ Y ] / G.canvas.h;
+		rwcs = G.rwc_start[ coord ];
+		rwcd = G.rwc_delta[ coord ];
+	}
+	else
+	{
+		s2d[ X ] = w * ( ( Curve_1d * ) cv )->s2d[ X ] / G.cut_canvas.w;
+		s2d[ Y ] = h * ( ( Curve_1d * ) cv )->s2d[ Y ] / G.cut_canvas.h;
+
+		if ( coord == X )
+			r_coord = ( dim < 0 ? X : Y );
+		else
+			r_coord = Z;
+
+		rwcs = G.curve_2d[ G.active_curve ]->rwc_start[ r_coord ];
+		rwcd = G.curve_2d[ G.active_curve ]->rwc_delta[ r_coord ];
 	}
 
 	/* The distance between the smallest ticks should be about 6 points -
 	   calculate the corresponding delta in real word units */
 
-	rwc_delta = 1.5 * fabs( G.rwc_delta[ coord ] ) / s2d[ coord ];
+	rwc_delta = 1.5 * fabs( rwcd ) / s2d[ coord ];
 
 	/* Now scale this distance to the interval [ 1, 10 [ */
 
@@ -576,28 +610,26 @@ static void eps_make_scale( FILE *fp, void *cv, int coord )
 
 	/* Calculate the final distance between the small ticks in points */
 
-	d_delta_fine = s2d[ coord ] * rwc_delta / fabs( G.rwc_delta[ coord ] );
+	d_delta_fine = s2d[ coord ] * rwc_delta / fabs( rwcd );
 
 	/* `rwc_start' is the first value in the display (i.e. the smallest x or y
 	   value still shown in the frame), `rwc_start_fine' the position of the
 	   first small tick (both in real world coordinates) and, finally,
 	   `d_start_fine' is the same position but in points */
 
-	if ( G.dim == 1 )
-		rwc_start = G.rwc_start[ coord ]
-		        - ( ( Curve_1d * ) cv )->shift[ coord ] * G.rwc_delta[ coord ];
-	else
-		rwc_start = G.rwc_start[ coord ]
-		        - ( ( Curve_2d * ) cv )->shift[ coord ] * G.rwc_delta[ coord ];
+	if ( dim <= 1 )
+		rwc_start = rwcs - ( ( Curve_1d * ) cv )->shift[ coord ] * rwcd;
+	else if ( dim == 2 )
+		rwc_start = rwcs - ( ( Curve_2d * ) cv )->shift[ coord ] * rwcd;
 
-	if ( G.rwc_delta[ coord ] < 0 )
+	if ( rwcd < 0 )
 		rwc_delta *= -1.0;
 
 	modf( rwc_start / rwc_delta, &rwc_start_fine );
 	rwc_start_fine *= rwc_delta;
 
-	d_start_fine = s2d[ coord ] * ( rwc_start_fine - rwc_start ) /
-		                                                  G.rwc_delta[ coord ];
+	d_start_fine = s2d[ coord ] * ( rwc_start_fine - rwc_start ) / rwcd;
+
 	if ( lround( d_start_fine ) < 0 )
 		d_start_fine += d_delta_fine;
 
@@ -606,8 +638,8 @@ static void eps_make_scale( FILE *fp, void *cv, int coord )
 	modf( rwc_start / ( medium_factor * rwc_delta ), &rwc_start_medium );
 	rwc_start_medium *= medium_factor * rwc_delta;
 
-	d_start_medium = s2d[ coord ] * ( rwc_start_medium - rwc_start ) /
-			                                              G.rwc_delta[ coord ];
+	d_start_medium = s2d[ coord ] * ( rwc_start_medium - rwc_start ) / rwcd;
+
 	if ( lround( d_start_medium ) < 0 )
 		d_start_medium += medium_factor * d_delta_fine;
 
@@ -618,8 +650,8 @@ static void eps_make_scale( FILE *fp, void *cv, int coord )
 	modf( rwc_start / ( coarse_factor * rwc_delta ), &rwc_start_coarse );
 	rwc_start_coarse *= coarse_factor * rwc_delta;
 
-	d_start_coarse = s2d[ coord ] * ( rwc_start_coarse - rwc_start ) /
-			                                              G.rwc_delta[ coord ];
+	d_start_coarse = s2d[ coord ] * ( rwc_start_coarse - rwc_start ) / rwcd;
+
 	if ( lround( d_start_coarse ) < 0 )
 	{
 		d_start_coarse += coarse_factor * d_delta_fine;
@@ -636,10 +668,14 @@ static void eps_make_scale( FILE *fp, void *cv, int coord )
 	{
 		/* Draw the x-axis label string */
 
-		if ( G.label[ X ] != NULL )
+		if ( dim == 1 || dim == 2 )
+			label = G.label[ X ];
+		else
+			label = G.label[ dim < 0 ? X : Y ];
+
+		if ( label != NULL )
 			fprintf( fp, "%f (%s) cw sub %f m (%s) show\n",
-					 paper_height - margin, G.label[ X ], margin,
-					 G.label[ X ] );
+					 paper_height - margin, label, margin, label );
 
 		y = y_0;
 
@@ -678,10 +714,15 @@ static void eps_make_scale( FILE *fp, void *cv, int coord )
 	{
 		/* Draw the y-axis label string */
 
-		if ( G.label[ Y ] != NULL )
+		if ( dim == 1 || dim == 2 )
+			label = G.label[ Y ];
+		else
+			label = G.label[ Z ];
+
+		if ( label != NULL )
 			fprintf( fp, "gs %f (%s) ch add %f (%s) cw sub t 90 r 0 0 m (%s) "
-					 "show gr\n", margin, G.label[ Y ], paper_width - margin,
-					 G.label[ Y ], G.label[ Y ] );
+					 "show gr\n", margin, label, paper_width - margin,
+					 label, label );
 
 		x = x_0;
 
@@ -714,15 +755,23 @@ static void eps_make_scale( FILE *fp, void *cv, int coord )
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
-static void eps_draw_curve_1d( FILE *fp, int i )
+static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, int dir )
 {
-	Curve_1d *cv = G.curve[ i ];
 	double s2d[ 2 ];
 	long k;
+	long max_points = ( dir == 1 || dir == -1 ) ? G.nx : G.ny;
 
 
-	s2d[ X ] = w * cv->s2d[ X ] / G.canvas.w;
-	s2d[ Y ] = h * cv->s2d[ Y ] / G.canvas.h;
+	if ( dir == 1 )
+	{
+		s2d[ X ] = w * cv->s2d[ X ] / G.canvas.w;
+		s2d[ Y ] = h * cv->s2d[ Y ] / G.canvas.h;
+	}
+	else
+	{
+		s2d[ X ] = w * cv->s2d[ X ] / G.cut_canvas.w;
+		s2d[ Y ] = h * cv->s2d[ Y ] / G.cut_canvas.h;
+	}
 
 	fprintf( fp, "gs 0.2 slw 1 slc\n" );
 
@@ -760,10 +809,10 @@ static void eps_draw_curve_1d( FILE *fp, int i )
 	/* Find the very first point and move to it */
 
 	k = 0;
-	while ( ! cv->points[ k ].exist && k < G.nx )
+	while ( ! cv->points[ k ].exist && k < max_points )
 		k++;
 
-	if ( k >= G.nx )                /* is there only just one ? */
+	if ( k >= max_points )/* is there only just one ? */
 		return;
 
 	fprintf( fp, "%f %f m\n", x_0 + s2d[ X ] * ( k + cv->shift[ X ] ),
@@ -772,7 +821,7 @@ static void eps_draw_curve_1d( FILE *fp, int i )
 
 	/* Draw all other points */
 
-	for ( ; k < G.nx; k++ )
+	for ( ; k < max_points; k++ )
 	{
 		if (  cv->points[ k ].exist )
 			fprintf( fp, "%f %f l\n", x_0 + s2d[ X ] * ( k + cv->shift[ X ] ),
