@@ -91,9 +91,9 @@ script:
    disadvantage is that then the device file assocated with the board
    can't be created in advance because the major device number may not
    always be the same. But, fortunately, the creation (and deletion) of
-   the device files can be done automatically, e.g. by an init script
+   the device file can be done automatically, e.g. by an init script
    that loads the module for the WITIO-48 card and creates device files
-   when the computer is booted and deletes the device files at shutdown.
+   when the computer is booted and deletes the device file at shutdown.
    (The init script supplied with the driver expects your system to
    conform to the Linux Standard Base Specifications version 1.1.0 (LSB)
    or higher, if it doesn't you may have to apply a few changes to the

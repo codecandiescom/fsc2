@@ -71,8 +71,8 @@ script:
    result!
 
    Major device numbers must be in the range between 1 and 254. The file
-   '/proc/devices' is a list of all devices currently used and their
-   major number, so never pick one of these. It's best to choose a
+   '/proc/devices' is a list of all currently used devices and their
+   major numbers, so never pick one of these. It's best to choose a
    number that's completely unused yet - a list of the numbers already
    assigned to certain devices can be found in the kernel documentation 
    in '/usr/src/linux/Documentation/devices.txt'. I'd recommend to use a
@@ -82,16 +82,16 @@ script:
    As a (perhaps better) alternative to specifying a fixed major device
    number you can also use a dynamically assigned major device number.
    This happens when you specify a major device number of 0. The only
-   disadvantage is that device files cannot be created in advance
-   because the major device number may not always be the same. But,
-   fortunately, the creation (and deletion) of the device files can be
-   done automatically, e.g. by an init script that loads the module for
-   the NI6601 card and creates device files when the computer is booted
-   and deletes the device files at shutdown. (The init script supplied
-   with the driver expects your system to conform to the Linux Standard
-   Base Specifications version 1.1.0 (LSB) or higher, if it doesn't you
-   may have to apply a few changes to the script and install it as well
-   as the links in the runlevel directories manually.)
+   disadvantage is that then the device files associated with the boards
+   can't be created in advance because the major device number may not
+   always be the same. But, fortunately, the creation (and deletion) of
+   the device files can be done automatically, e.g. by an init script that
+   loads the module for the NI6601 cards and creates device files when the
+   computer is booted and deletes the device files at shutdown. (The init
+   script supplied with the driver expects your system to conform to the
+   Linux Standard Base Specifications version 1.1.0 (LSB) or higher, if it
+   doesn't you may have to apply a few changes to the script and install
+   it as well as the links in the runlevel directories manually.)
 
 2. Debugging code: When debugging code is included into the driver internal
    function calls as well as some additional information will be added to
