@@ -932,7 +932,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 			/* Tell the cross section handler about the new data, its return
 			   value indicates if the cut needs to be redrawn */
 
-			need_cut_redraw |= cut_new_points( curve, x_index, j, x_len );
+			need_cut_redraw |= cut_new_points( curve, x_index, i, x_len );
 		}
 	}
 
