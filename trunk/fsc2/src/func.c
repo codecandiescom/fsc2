@@ -166,8 +166,7 @@ bool functions_init( void )
 
 	/* Count number of built-in functions */
 
-	for ( Num_Func = 0; Def_Fncts[ Num_Func ].fnct != NULL;
-		  Num_Func++ )
+	for ( Num_Func = 0; Def_Fncts[ Num_Func ].fnct != NULL; Num_Func++ )
 		;
 
 	/*
@@ -181,7 +180,6 @@ bool functions_init( void )
 
 	TRY
 	{
-		Fncts = NULL;
 		Fncts = T_malloc( ( Num_Func + 1 ) * sizeof( Func ) );
 		memcpy( Fncts, Def_Fncts, ( Num_Func + 1 ) * sizeof( Func ) );
 		Num_Func = func_list_parse( &Fncts, Num_Func );
