@@ -25,6 +25,9 @@ static void setup_canvas( Canvas *c, FL_OBJECT *obj );
 static void canvas_off( Canvas *c, FL_OBJECT *obj );
 
 
+static Graphics *G_stored;
+
+
 /*----------------------------------------------------------------------*/
 /* Initialises and shows the window for displaying measurement results. */
 /*----------------------------------------------------------------------*/
@@ -64,6 +67,12 @@ void start_graphics( void )
 						  "Undo last rescaling operation" );
 	fl_set_object_helper( run_form->full_scale_button,
 						  "Switch off automatic rescaling" );
+
+
+	/* Store the state of the current state of the Graphics structure - to
+	   be restored after the experiment */
+
+	G_stored = get_memcpy( &G, sizeof( Graphics ) );
 
 	if ( G.dim == 1 )
 	{
@@ -552,7 +561,10 @@ void stop_graphics( void )
 	if ( fl_form_is_visible( run_form->run ) )
 			fl_hide_form( run_form->run );
 
-		fl_free_form( run_form->run );
+	fl_free_form( run_form->run );
+
+	memcpy( &G, G_stored, sizeof( Graphics ) );
+	T_free( G_stored );
 }
 
 
