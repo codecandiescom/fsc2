@@ -746,7 +746,7 @@ EOT
 
     my $text;
     if ( $? != 0 ) {
-        if ( $? >> 8 == -1 ) {
+        if ( $? >> 8 == 255 ) {
             $text = "Internal error.";
         } elsif ( $? >> 8 == 1 ) {
             $text = "Someone else is running fsc2.";
