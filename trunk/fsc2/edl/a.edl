@@ -61,18 +61,17 @@ EXP:
 
 
 FOR K = 1 : 5 {
-print( "Run \##\n", K );
-clear_curve( 4 );
-delta_time( );
-FOR I = 1 : N  {
-	J = ( I / 10  )^2;
-//	print( "#! = #", I, J);
-	display( I, delta_time(), 1,// J + K * N, 1,
-			 I, 10 * I + K * N, 2,
-			 I, ( 0.1 * I )^2 * sin( 0.06 * I ) + K * N, 3,
-			 N + 1 - I, 20 * I + K * N, 4 );
-wait( 150ms );
-}
+	print( "Run \##\n", K );
+	clear_curve( 4 );
+	delta_time( );
+	FOR I = 1 : N  {
+		J = ( I / 10  )^2;
+		display( I, delta_time(), 1,// J + K * N, 1,
+				 I, 10 * I + K * N, 2,
+				 I, ( 0.1 * I )^2 * sin( 0.06 * I ) + K * N, 3,
+				 N + 1 - I, 20 * I + K * N, 4 );
+		wait( 150 ms );
+	}
 }
 
 

@@ -21,7 +21,6 @@ extern bool No_File_Numbers;
 extern bool Dont_Save;
 
 
-static void f_wait_alarm_handler( int sig_type );
 static DPoint *eval_display_args( Var *v, int *npoints );
 static int get_save_file( Var **v, const char *calling_function );
 static bool print_array( Var *v, long cur_dim, long *start, int fid );
@@ -29,11 +28,11 @@ static bool print_slice( Var *v, int fid );
 static bool print_browser( int browser, int fid, const char* comment );
 static void T_fprintf( int file_num, const char *fmt, ... );
 
+extern void child_sig_handler( int signo );
 
-/* Flag used in f_wait() and its siganl handler, f_wait_alarm_handler() */
-
-static volatile bool is_sigalarm = UNSET;
-
+extern jmp_buf alrm_env;
+extern volatile sig_atomic_t can_jmp_alrm;
+extern volatile bool is_alrm;
 
 /*------------------------------------------------------------------------
    Prints variable number of arguments using a format string supplied as
@@ -278,36 +277,22 @@ Var *f_wait( Var *v )
 	sleepy.it_value.tv_usec = lround( modf( how_long, &secs ) * 1.0e6 );
 	sleepy.it_value.tv_sec = ( long ) secs;
 
-	is_sigalarm = UNSET;
-	signal( SIGALRM, f_wait_alarm_handler );
-	setitimer( ITIMER_REAL, &sleepy, NULL );
+	/* Wait for SIGALRM or DO_QUIT signal, ignore DO_SEND */
 
-	/* Wake up if SIGALRM or DO_QUIT signal is received */
-
-	while ( ! do_quit && ! is_sigalarm )
-		pause( );
+	if ( sigsetjmp( alrm_env, 1 ) == 0 )
+	{
+		can_jmp_alrm = SET;
+		setitimer( ITIMER_REAL, &sleepy, NULL );
+		for( ; ; )
+			pause( );
+	}
 
 	/* Return 1 if end of sleeping time was reached, 0 if do_quit was set.
 	   Set handling for SIGALRM to ignore, because after receipt of a
 	   'do_quit' signal the timer may still be running and otherwise the 
-	   resulting signal could kill the child prematurely ! */
+	   resulting signal could kill the child prematurely */
 
-	signal( SIGALRM, SIG_IGN );
 	return vars_push( INT_VAR, do_quit ? 0 : 1 );
-}
-
-
-/*--------------------------------------------------------------------------*/
-/* f_wait_alarm_handler() accepts the alarm signal, it doesn't got to do    */
-/* anything since the alarm signal will wake up f_wait() from its pause() - */
-/* but without it the alarm signal would kill the process, i.e. the child.  */
-/*--------------------------------------------------------------------------*/
-
-static void f_wait_alarm_handler( int sig_type )
-{
-	assert( sig_type == SIGALRM );
-	signal( SIGALRM, f_wait_alarm_handler );
-	is_sigalarm = SET;
 }
 
 

@@ -21,8 +21,7 @@ static void set_buttons_for_run( int active );
 /* Routines of the child process doing the measurement */
 
 static void run_child( void );
-static void do_send_handler( int sig_type );
-static void do_quit_handler( int sig_type );
+void child_sig_handler( int signo );
 static void do_measurement( void );
 
 
@@ -31,6 +30,8 @@ static void do_measurement( void );
 static volatile bool child_is_ready;
 static volatile bool child_is_quitting;
 
+jmp_buf alrm_env;
+volatile bool can_jmp_alrm = UNSET;
 
 
 /*-------------------------------------------------------------------*/
@@ -484,6 +485,9 @@ static int return_status;
 
 static void run_child( void )
 {
+	struct sigaction sact;
+
+
 	I_am = CHILD;
 
 
@@ -502,13 +506,33 @@ static void run_child( void )
 	pd[ WRITE ] = pd[ 3 ];
 
 	/* Set up pointers and global variables used with the signal handlers
-	   and set handler for DO_SEND signals */
+	   and set the handlers for the DO_SEND and DO_QUIT signals */
 
 	return_status = OK;
 	cur_prg_token = prg_token;
 	do_send = do_quit = UNSET;
-	signal( DO_SEND, do_send_handler );
-	signal( DO_QUIT, do_quit_handler );
+
+	sact.sa_handler = child_sig_handler;
+	sigemptyset( &sact.sa_mask );
+	sigaddset( &sact.sa_mask, DO_QUIT );
+	sigaddset( &sact.sa_mask, SIGALRM );
+	sact.sa_flags = SA_RESTART;
+	if ( sigaction( DO_SEND, &sact, NULL ) < 0 )
+		_exit( -1 );
+
+	sact.sa_handler = child_sig_handler;
+	sigemptyset( &sact.sa_mask );
+	sigaddset( &sact.sa_mask, DO_SEND );
+	sigaddset( &sact.sa_mask, SIGALRM );
+	sact.sa_flags = 0;
+	if ( sigaction( DO_QUIT, &sact, NULL ) < 0 )
+		_exit( -1 );
+
+	sact.sa_handler = child_sig_handler;
+	sigemptyset( &sact.sa_mask );
+	sact.sa_flags = 0;
+	if ( sigaction( SIGALRM, &sact, NULL ) < 0 )
+		_exit( -1 );
 
 /*
 {
@@ -555,33 +579,47 @@ static void run_child( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* do_send_handler() is the handler for the DO_SEND signal sent */
-/* by the parent to the child asking it to send (further) data. */
-/*--------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* This is the signal handler for all three signals the child is */
+/* interested in. The signal handler should always be installed  */
+/* for a signal with blocking both the other signals to avoid    */
+/* interrupting the handler with another signal thus interfering */
+/* with the return via siglongjump().                            */
+/* And there's an additional twist: The SIGALRM signal can only  */
+/* come from the f_wait() function (see func_util.c). Here we    */
+/* we wait in a pause() for SIGALRM to get a reliable timer. On  */
+/* the other hand, the pause() also has to be interruptible by   */
+/* the DO_QUIT signal, so by falling through from the switch of  */
+/* for this signal it is guaranteed that also this signal will   */
+/* end the pause(). In all other cases (i.e. when we're not      */
+/* waiting in the pause() in f_wait()) nothing bad happens.      */
+/*---------------------------------------------------------------*/
 
-static void do_send_handler( int sig_type )
+void child_sig_handler( int signo )
 {
-	assert( sig_type == DO_SEND );
-	signal( DO_SEND, do_send_handler );
-	do_send = SET;
+	switch ( signo )
+	{
+		case DO_SEND :
+			do_send = SET;
+			return;
+
+		case DO_QUIT :
+			do_quit = SET;
+			/* fall through ! */
+
+		case SIGALRM :
+			if ( can_jmp_alrm )
+			{
+				can_jmp_alrm = 0;
+				siglongjmp( alrm_env, 1 );
+			}
+			return;
+
+		default :
+			_exit( -1 );
+	}
 }
-
-
-/*----------------------------------------------------------------------*/
-/* do_quit_handler() is the handlers for the DO_QUIT signal sent by the */
-/* parent to the child telling it to exit. It just sets a flag instead  */
-/* of killing the child immediately because this might lead to problems */
-/* with devices expecting to be serviced.                               */
-/*----------------------------------------------------------------------*/
-
-static void do_quit_handler( int sig_type )
-{
-	assert( sig_type == DO_QUIT );
-	signal( DO_QUIT, do_quit_handler );
-	do_quit = SET;
-}
-
+			
 
 /*-------------------------------------------------------------------*/
 /* do_measurement() runs through and executes all commands. Since it */
