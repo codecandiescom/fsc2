@@ -142,22 +142,22 @@ double hp8647a_get_att_from_table( double freq )
 	}
 
 	/* Find the indices of the two entries in the table (that has been sorted
-	   in ascending order of frequencies) between which the frequency is
-	   laying. In most cases the frequencies in the table will be equally
-	   spaced, so we use bisecting employing the mean slope of the current
-	   interval for our guesses. This is probably the fasted method for the
-	   most common case (value is found after first run through loop) but may
-	   be slow in other cases. */
+	   in ascending order of frequencies) bracketing the frequency. In most
+	   cases the frequencies in the table are equally spaced, so we use
+	   bisecting employing the mean slope of the current interval for our
+	   guesses. This is probably the fasted method for the most common case
+	   (value is found after first run through loop) but may be slow in other
+	   cases. */
 
 	i_low = 0;
 	i_high = hp8647a.att_table_len - 1;
-	i_cur = i_low;
 
 	while ( i_high - i_low > 1 )
 	{
-		i_cur = lround( (   hp8647a.att_table[ i_high ].freq 
-						  - hp8647a.att_table[ i_low ].freq )
-						/ ( freq - hp8647a.att_table[ i_low ].freq ) ) + i_low;
+		i_cur = floor( ( i_high - i_low ) *
+					   ( freq - hp8647a.att_table[ i_low ].freq ) /
+					   (   hp8647a.att_table[ i_high ].freq 
+						 - hp8647a.att_table[ i_low ].freq ) ) + i_low;
 		if ( freq > hp8647a.att_table[ i_cur ].freq )
 			i_low = i_cur;
 		else
