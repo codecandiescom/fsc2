@@ -234,7 +234,7 @@ from the lock-in amplifier. The parameters, that may be passed to the
 function differ according to the model.
 @table @samp
 @item SR510
-No argument is allowed - the function returns the measured value of the
+No argument is allowed -- the function returns the measured value of the
 only channel as a floating point number (i.e.@: in Volts).
 
 @item SR530
@@ -244,8 +244,7 @@ with a value of either @code{1} or @code{2}, in which case the measure
 value from channel 1 or 2 is returned. Finally, two arguments can be
 given, with values of @code{1} or @code{2}. In this case a 1-dimensional
 array with two elements is returned, containing the measured values of
-the corresponding channels. The function can only be called in the
-@code{EXPERIMENT} section.
+the corresponding channels.
 
 @item SR810
 @item SR830
@@ -275,6 +274,8 @@ The function can only be called in the @code{EXPERIMENT} section.
 The function returns the voltage at one of the ADC ports numbered at the
 back side of the lock-in amplifier. Allowed values of the required
 argument are between 1 and 4, corresponding to the port numbering.
+
+The function can only be called in the @code{EXPERIMENT} section.
 
 @item lockin_dac_voltage()
 @findex lockin_dac_voltage()
