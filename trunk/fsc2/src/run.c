@@ -1,4 +1,3 @@
-
 /*
   $Id$
 
@@ -210,7 +209,8 @@ static void error_while_iconified( void )
 
 /*-------------------------------------------------------------------*/
 /* This function first does some smaller changes to the GUI and then */
-/* starts the GPIB bus if at least one of the devices needs it.      */
+/* starts the GPIB bus, the RULBUS and does some initialization for  */
+/* serial port subsystem.                                            */
 /*-------------------------------------------------------------------*/
 
 static bool start_gpib_and_rulbus( void )
@@ -263,6 +263,8 @@ static bool start_gpib_and_rulbus( void )
 		return FAIL;
 	}
 #endif
+
+	fsc2_serial_exp_init( SERIAL_LOG_FILE, SERIAL_LOG_LEVEL );
 
 	return OK;
 }
