@@ -210,7 +210,7 @@ int ni_daq_perror( const char *s )
 
 /*---------------------------------------------------------------*/
 /* Returns a string with a short descriptive text of the error   */
-/* encountered in the last invocation of one of the ni6601_xxx() */
+/* encountered in the last invocation of one of the ni_daq_xxx() */
 /* functions.                                                    */
 /*---------------------------------------------------------------*/
 
