@@ -23,7 +23,6 @@ static void vars_params( Var *v, long *elems, long **lpnt, double **dpnt )
 	*lpnt = NULL;
 	*dpnt = NULL;
 
-
 	switch ( v->type )
 	{
 		case INT_VAR :
