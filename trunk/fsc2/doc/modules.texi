@@ -667,7 +667,7 @@ currently set time constant, otherwise it sets the time constant to the
 value passed to the function (at least if the value is reasonable). You
 should try to follow this convention if possible.
 
-Another convention I am following when iunventing function names is that
+Another convention I am following when inventing function names is that
 if there one can only either set a certain value for a device or one can
 only get some data from a device I always use either @code{set} or
 @code{get} in the function name. E.g.@: its not possible to send data
