@@ -1168,7 +1168,7 @@ void repaint_canvas_2d( Canvas *c )
 	unsigned int w, h;
 	Curve_2d *cv;
 	Pixmap pm;
-	double x_pos, y_pos, z_pos, z_pos_1, z_pos_2;
+	double x_pos, y_pos, z_pos = 0, z_pos_1 = 0, z_pos_2 = 0;
 
 
 	/* If no or either the middle or the left button is pressed no extra stuff

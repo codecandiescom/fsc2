@@ -110,7 +110,9 @@ fsc2: $(objects) $(header)
 
 %.c: %.flex $(header)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %_lexer.flex,%,$<) -o$@ $<
-
+	mv $@ $@.x
+	sed -e 's/register char \*yy_cp, \*yy_bp;/register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@.x > $@
+	rm -f $@.x
 
 # make the modules - the pulser and digitizer modules have to be handled
 # specially since each has its own header file and is divided into several
