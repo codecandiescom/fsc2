@@ -73,6 +73,7 @@ static void lakeshore330_set_unit( long unit );
 static long lakeshore330_get_unit( void );
 static void lakeshore330_lock( int state );
 static bool lakeshore330_command( const char *cmd );
+static bool lakeshore330_talk( const char *cmd, char *reply, long *length );
 static void lakeshore330_gpib_failure( void );
 
 
@@ -390,9 +391,7 @@ static double lakeshore330_sens_data( void )
 	double temp;
 
 
-	if ( gpib_write( lakeshore330.device, "SDAT?\n", 6 ) == FAILURE ||
-		 gpib_read( lakeshore330.device, buf, &len ) == FAILURE )
-		lakeshore330_gpib_failure( );
+	lakeshore330_talk( "SDAT?\n", buf, &len );
 
 	if ( *buf != '-' && *buf != '+' && ! isdigit( *buf ) )
 	{
@@ -417,8 +416,7 @@ static void lakeshore330_set_unit( long unit )
 	fsc2_assert( unit >= UNIT_KELVIN && unit <= UNIT_SENSOR );
 
 	sprintf( buf, "SUNI %c\n", in_units[ unit ] );
-	if ( gpib_write( lakeshore330.device, buf, strlen( buf ) ) == FAILURE )
-		lakeshore330_gpib_failure( );
+	lakeshore330_command( buf );
 }
 
 
@@ -433,9 +431,7 @@ static long lakeshore330_get_unit( void )
 	long i;
 
 
-	if ( gpib_write( lakeshore330.device, "SUNI?\n", 6 ) == FAILURE ||
-		 gpib_read( lakeshore330.device, buf, &len ) == FAILURE )
-		lakeshore330_gpib_failure( );
+	lakeshore330_talk( "SUNI?\n", buf, &len );
 
 	for ( i = 0; i <= UNITS_MILLIVOLTS; i++ )
 		if ( *buf == out_units[ i ] )
@@ -459,9 +455,7 @@ static long lakeshore330_sample_channel( long channel )
 	fsc2_assert( channel == SAMPLE_CHANNEL_A || channel == SAMPLE_CHANNEL_B );
 
 	sprintf( buf, "SCHN %c\n", ( char ) ( channel + 'A' ) );
-	if ( gpib_write( lakeshore330.device, buf, strlen( buf ) ) == FAILURE )
-		lakeshore330_gpib_failure( );
-
+	lakeshore330_command( buf );
 	fsc2_usleep( 500000, UNSET );
 	return lakeshore330.sample_channel = channel;
 }
@@ -478,9 +472,7 @@ static void lakeshore330_lock( int state )
 	fsc2_assert( state >= LOCK_STATE_LOCAL && state <= LOCK_STATE_REMOTE_LLO );
 
 	sprintf( cmd, "MODE %d\n", state );
-	if ( gpib_write( lakeshore330.device, cmd, strlen( cmd ) ) == FAILURE )
-		lakeshore330_gpib_failure( );
-
+	lakeshore330_command( cmd );
 	lakeshore330.lock_state = state;
 }
 
@@ -491,6 +483,19 @@ static void lakeshore330_lock( int state )
 static bool lakeshore330_command( const char *cmd )
 {
 	if ( gpib_write( lakeshore330.device, cmd, strlen( cmd ) ) == FAILURE )
+		lakeshore330_gpib_failure( );
+
+	return OK;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool lakeshore330_talk( const char *cmd, char *reply, long *length )
+{
+	if ( gpib_write( lakeshore330.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( lakeshore330.device, reply, length ) == FAILURE )
 		lakeshore330_gpib_failure( );
 
 	return OK;

@@ -27,6 +27,7 @@
 
 
 static bool is_acquiring = UNSET;
+static bool lecroy9400_talk( const char *cmd, char *reply, long *length );
 
 
 /*-----------------------------------------------------------------*/
@@ -121,10 +122,7 @@ double lecroy9400_get_timebase( void )
 	long length = 30;
 
 
-	if ( gpib_write( lecroy9400.device, "TD,?", 4 ) == FAILURE ||
-		 gpib_read( lecroy9400.device, reply, &length ) == FAILURE )
-		lecroy9400_gpib_failure( );
-
+	lecroy9400_talk( "TD,?", reply, &length );
 	reply[ length - 1 ] = '\0';
 	return T_atod( reply );
 }
@@ -156,9 +154,7 @@ int lecroy9400_get_trigger_source( void )
 	int src = LECROY9400_UNDEF;
 
 
-	if ( gpib_write( lecroy9400.device, "TRD,?", 5 ) == FAILURE ||
-		 gpib_read( lecroy9400.device, reply, &length ) == FAILURE )
-		lecroy9400_gpib_failure( );
+	lecroy9400_talk( "TRD,?", reply, &length );
 
 	if ( reply[ 0 ] == 'C' )
 		src = reply[ 1 ] == '1' ? LECROY9400_CH1 : LECROY9400_CH2;
@@ -210,10 +206,7 @@ double lecroy9400_get_trigger_level( void )
 	long length = 30;
 
 
-	if ( gpib_write( lecroy9400.device, "TRL,?", 5 ) == FAILURE ||
-		 gpib_read( lecroy9400.device, reply, &length ) == FAILURE )
-		lecroy9400_gpib_failure( );
-
+	lecroy9400_talk( "TRL,?", reply, &length );
 	reply[ length - 1 ] = '\0';
 	return T_atod( reply );
 }
@@ -248,10 +241,7 @@ double lecroy9400_get_sens( int channel )
 	fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
 
 	sprintf( cmd, "C%1dVD,?", channel + 1 );
-	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( lecroy9400.device, reply, &length ) == FAILURE )
-		lecroy9400_gpib_failure( );
-
+	lecroy9400_talk( cmd, reply, &length );
     reply[ length - 1 ] = '\0';
 	lecroy9400.sens[ channel ] = T_atod( reply );
 
@@ -293,10 +283,7 @@ double lecroy9400_get_offset( int channel )
 	fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
 
 	sprintf( cmd, "C%1dOF,?", channel + 1 );
-	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( lecroy9400.device, reply, &length ) == FAILURE )
-		lecroy9400_gpib_failure( );
-
+	lecroy9400_talk( cmd, reply, &length );
     reply[ length - 1 ] = '\0';
 	lecroy9400.sens[ channel ] = T_atod( reply );
 
@@ -339,10 +326,7 @@ int lecroy9400_get_coupling( int channel )
 	fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
 
 	sprintf( cmd, "C%1dCP,?", channel + 1 );
-	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( lecroy9400.device, reply, &length ) == FAILURE )
-		lecroy9400_gpib_failure( );
-
+	lecroy9400_talk( cmd, reply, &length );
     reply[ length - 1 ] = '\0';
 
 	if ( reply[ 0 ] == 'A' )
@@ -394,13 +378,8 @@ bool lecroy9400_is_displayed( int channel )
 
 	fsc2_assert( channel >= LECROY9400_CH1 && channel <= LECROY9400_FUNC_F );
 
-	if ( gpib_write( lecroy9400.device, cmds[ channel - LECROY9400_CH1 ], 6 )
-		 == FAILURE ||
-		 gpib_read( lecroy9400.device, reply, &length ) == FAILURE )
-		lecroy9400_gpib_failure( );
-
+	lecroy9400_talk( cmds[ channel - LECROY9400_CH1 ], reply, &length );
     reply[ length - 1 ] = '\0';
-
 	return strcmp( reply, "ON" ) ? UNSET : SET;
 }
 
@@ -485,12 +464,7 @@ bool lecroy9400_get_desc( int channel )
 
 	fsc2_assert( channel >= LECROY9400_CH1 && channel <= LECROY9400_FUNC_F );
 
-	if ( gpib_write( lecroy9400.device, cmds[ channel ], 8 ) == FAILURE ||
-		 gpib_read( lecroy9400.device,
-					( char * ) lecroy9400.wv_desc[ channel ], &len )
-		 == FAILURE )
-		lecroy9400_gpib_failure( );
-
+	lecroy9400_talk( cmds[ channel ], lecroy9400.wv_desc[ channel ], &len );
 	return OK;
 }
 
@@ -662,9 +636,7 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 
 	snprintf( cmd, 100, "RD,%s.DA,1,%ld,0,0",
 			  ch == LECROY9400_FUNC_E ? "FE" : "FF", *length );
-	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( lecroy9400.device, ( char * ) data, &len ) == FAILURE )
-		lecroy9400_gpib_failure( );
+	lecroy9400_talk( cmd, data, &len );
 
 	*length = ( ( long ) data[ 2 ] * 256 + ( long ) data[ 3 ] ) / 2;
 
@@ -712,6 +684,18 @@ void lecroy9400_free_running( void )
 bool lecroy9400_command( const char *cmd )
 {
 	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy9400_gpib_failure( );
+	return OK;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool lecroy9400_talk( const char *cmd, char *reply, long *length )
+{
+	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( lecroy9400.device, reply, length ) == FAILURE )
 		lecroy9400_gpib_failure( );
 	return OK;
 }
