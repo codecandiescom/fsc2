@@ -1,6 +1,6 @@
-Library for the Rulbus (Rijksuniversiteit Leiden BUS) with support
-         for the rb8509_adc12, rb8510_dac12, rb8514_delay,
-                 rb8515_clock and rb_generic cards
+   Library for the Rulbus (Rijksuniversiteit Leiden BUS) with support
+   			for the rb8509_adc12, rb8510_dac12, rb8514_delay,
+   					rb8515_clock and rb_generic cards
 
   $Id$
 
