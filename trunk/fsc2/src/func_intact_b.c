@@ -453,10 +453,10 @@ static void f_bdelete_child( Var *v )
 }
 
 
-/*----------------------------------------------------------*/
-/* Part of the f_bedelete() function only run by the parent */
-/* process, which actually removes the button.              */
-/*----------------------------------------------------------*/
+/*---------------------------------------------------------*/
+/* Part of the f_bdelete() function only run by the parent */
+/* process, which actually removes the button.             */
+/*---------------------------------------------------------*/
 
 static void f_bdelete_parent( Var *v )
 {

@@ -36,9 +36,9 @@ struct {
 	int NORMAL_BUTTON_ADD_X;
 	int NORMAL_BUTTON_ADD_Y;
 
-	int MENUE_WIDTH;
-	int MENUE_ADD_X;
-	int MENUE_ADD_Y;
+	int MENU_WIDTH;
+	int MENU_ADD_X;
+	int MENU_ADD_Y;
 
 	int PUSH_BUTTON_SIZE;
 	int RADIO_BUTTON_SIZE;
@@ -76,7 +76,7 @@ static void int_input_setup( IOBJECT *io );
 static void float_input_setup( IOBJECT *io );
 static void int_output_setup( IOBJECT *io );
 static void float_output_setup( IOBJECT *io );
-static void menue_setup( IOBJECT *io );
+static void menu_setup( IOBJECT *io );
 static void tools_callback( FL_OBJECT *ob, long data );
 static Var *f_tb_changed_child( Var *v );
 static Var *f_tb_wait_child( Var *v );
@@ -117,9 +117,9 @@ void toolbox_create( long layout )
 		FI_sizes.IN_OUT_HEIGHT       = 25;
 		FI_sizes.IN_OUT_WIDTH        = 150;
 
-		FI_sizes.MENUE_WIDTH         = 150;
-		FI_sizes.MENUE_ADD_X         = 30;
-		FI_sizes.MENUE_ADD_Y         = 20;
+		FI_sizes.MENU_WIDTH         = 150;
+		FI_sizes.MENU_ADD_X         = 30;
+		FI_sizes.MENU_ADD_Y         = 20;
 
 		FI_sizes.SYMBOL_SIZE_IN      = 30;
 	}
@@ -142,9 +142,9 @@ void toolbox_create( long layout )
 		FI_sizes.IN_OUT_HEIGHT       = 35;
 		FI_sizes.IN_OUT_WIDTH        = 210;
 
-		FI_sizes.MENUE_WIDTH         = 210;
-		FI_sizes.MENUE_ADD_X         = 40;
-		FI_sizes.MENUE_ADD_Y         = 30;
+		FI_sizes.MENU_WIDTH         = 210;
+		FI_sizes.MENU_ADD_X         = 40;
+		FI_sizes.MENU_ADD_Y         = 30;
 
 		FI_sizes.SYMBOL_SIZE_IN      = 40;
 	}
@@ -1035,7 +1035,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io, int *w, int *h )
 			break;
 
 		case MENU :
-			menue_setup( io );
+			menu_setup( io );
 			break;
 
 		default :
@@ -1504,11 +1504,11 @@ static  void float_output_setup( IOBJECT *io )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Creates a menue, determines its size and sets some properties */
-/*---------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Creates a menu, determines its size and sets some properties */
+/*--------------------------------------------------------------*/
 
-static void menue_setup( IOBJECT *io )
+static void menu_setup( IOBJECT *io )
 {
 	long i;
 	int wt, ht;
@@ -1526,10 +1526,10 @@ static void menue_setup( IOBJECT *io )
 		io->h = i_max( ht, io->h );
 	}
 
-	io->w += FI_sizes.MENUE_ADD_X;
-	if ( io->w < FI_sizes.MENUE_WIDTH )
-		io->w = FI_sizes.MENUE_WIDTH;
-	io->h += FI_sizes.MENUE_ADD_Y;
+	io->w += FI_sizes.MENU_ADD_X;
+	if ( io->w < FI_sizes.MENU_WIDTH )
+		io->w = FI_sizes.MENU_WIDTH;
+	io->h += FI_sizes.MENU_ADD_Y;
 
 	io->self = fl_add_choice( FL_NORMAL_CHOICE2, io->x, io->y,
 							  io->w, io->h, io->label );
