@@ -744,7 +744,7 @@ Var *lockin_harmonic( Var *v )
 									ER023M_TEST_HARMONIC : er023m.ha ) );
 
 			case EXPERIMENT :
-				return vars_push( INT_VAR, ( long ) ( er023m_get_ph( ) + 1 ) );
+				return vars_push( INT_VAR, ( long ) ( er023m_get_ha( ) + 1 ) );
 		}
 
 	ha = ( int ) get_long( v, "harmonic" ) - 1;
