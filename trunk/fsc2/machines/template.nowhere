@@ -121,7 +121,7 @@ SERIAL_LOCK_DIR   := /var/lock
 # The next two lines must be uncommented if you want support for the National
 # Instruments 6601 GPCT card. If the library for the card isn't in a place
 # where the linker will find it automatically (e.g. '/usr/lib' and
-# '/usr/local/lib') you need to specify the full absolut path for the
+# '/usr/local/lib') you need to specify the full absolute path for the
 # library (e.g. '/usr/xxx/yyy/libni6601.so'). You must make sure that the
 # library for the card is already installed if you want to build fsc2 with
 # support for the card.
@@ -133,7 +133,7 @@ SERIAL_LOCK_DIR   := /var/lock
 # Uncommented the next two lines if you want support for the Meilhaus
 # Electronics 6000 or 6100 DAC card. If the library for the card isn't in a
 # place where the linker will find it automatically (e.g. '/usr/lib' and
-# '/usr/local/lib') you need to specify the full absolut path for the
+# '/usr/local/lib') you need to specify the full absolute path for the
 # library  (e.g. '/opt/zzz/ttt/libme6x00.so'). You must make sure that the
 # library for the card is already installed if you want to build fsc2 with
 # support for the card.
@@ -145,7 +145,7 @@ SERIAL_LOCK_DIR   := /var/lock
 # The next two lines must be uncommented if you want support for the Wasco
 # WITIO-48 DIO card. If the library for the card isn't in a place where the
 # linker will find it automatically (e.g. '/usr/lib' and '/usr/local/lib')
-# you need to specify the full absolut path for the library (e.g.
+# you need to specify the full absolute path for the library (e.g.
 # '/usr/xxx/yyy/libwitio_48.so'). You must make sure that the library for
 # the card is already installed if you want to build fsc2 with support for
 # the card.
@@ -174,7 +174,7 @@ SERIAL_LOCK_DIR   := /var/lock
 # The next two lines must be uncommented if you want support for the National
 # Instruments PCI-MIO-16E-1 card. If the library for the card isn't in a place
 # where the linker will find it automatically (e.g. '/usr/lib' and
-# '/usr/local/lib') you need to specify the full absolut path for the
+# '/usr/local/lib') you need to specify the full absolute path for the
 # library (e.g. '/usr/xxx/yyy/libni_daq.so'). You must make sure that the
 # library for the card is already properly installed if you want to build
 # fsc2 with support for the card.
@@ -190,7 +190,7 @@ SERIAL_LOCK_DIR   := /var/lock
 # path to the place where it installed (e.g. '/usr/xxx/yyy).If the library
 # for the card isn't in a place where the linker will find it automatically
 # (e.g. '/usr/lib' and '/usr/local/lib') you need to also specify the full
-# absolut path for the library. You must make sure that the library for the
+# absolute path for the library. You must make sure that the library for the
 # Rulbus interface is already properly installed if you want to build fsc2
 # with support for it.
 

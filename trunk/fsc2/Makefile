@@ -27,8 +27,8 @@
 #  if necessary. Please take care, most settings are case-sensitive!    #
 #                                                                       #
 #  Also consider using a configuration file for your machine in the     #
-#  'machines' subdirectory. You simply can copy the 'template.nowhere'  #
-#  file in this directory to a file with the fully qualified hostname   #
+#  'machines' subdirectory. You can simply copy the 'template.nowhere'  #
+#  file in this directory to a file with the fully qualified host name  #
 #  of your machine (that's what 'hostname -f' returns when you enter    #
 #  it at the command line) and then edit this file. Then, whenever you  #
 #  want to install a new version of fsc2 you only have to copy this     #
@@ -52,7 +52,7 @@ prefix             := /usr/local
 # Next the owner and the group of fsc2 all files that will be installed has
 # to be set. I would recommended to create a special account for the program,
 # with 'fsc2' being the natural choice (which is also the default). The group
-# that owns the files, escpecially the executable fsc2 should be one that
+# that owns the files, especially the executable fsc2 should be one that
 # allows access to the device files. See the longer discussion in section B
 # of the INSTALL file.
 
@@ -90,7 +90,7 @@ GPIB_CONF_FILE     := /etc/gpib.conf
 # log file will be created in. Don't use a partition on which you don't have
 # at least a few megabytes to spare, depending on the type of experiments
 # you will do the file can become rather long. But the file will not grow
-# indefintely, if you start a new experiment its previous contents get
+# indefinitely, if you start a new experiment its previous contents get
 # overwritten. If no file is specified logs will be written to stderr.
 
 GPIB_LOG_FILE      := /tmp/gpib.log
@@ -136,7 +136,7 @@ NUM_SERIAL_PORTS   := 2
 
 # The second variable, SERIAL_LOCK_DIR, is the directory where UUCP style
 # lock files for the serial ports are created. This should be '/var/lock'
-# according to version 2.2 of the Filesystem Hierachy Standard. Either fsc2
+# according to version 2.2 of the File-system Hierachy Standard. Either fsc2
 # itself or all its users must have read and write permissions for this
 # directory. Also see the longer discussion in section C of the INSTALL file.
 
@@ -146,7 +146,7 @@ SERIAL_LOCK_DIR    := /var/lock
 # The next two lines must be uncommented if you want support for the National
 # Instruments 6601 GPCT card. If the library for the card isn't in a place
 # where the linker will find it automatically (e.g. '/usr/lib' and
-# '/usr/local/lib') you need to specify the full absolut path for the
+# '/usr/local/lib') you need to specify the full absolute path for the
 # library (e.g. '/usr/xxx/yyy/libni6601.so'). You must make sure that the
 # library for the card is already properly installed if you want to build
 # fsc2 with support for the card.
@@ -158,7 +158,7 @@ SERIAL_LOCK_DIR    := /var/lock
 # Uncommented the next two lines if you want support for the Meilhaus
 # Electronics 6000 or 6100 DAC card. If the library for the card isn't in a
 # place where the linker will find it automatically (e.g. '/usr/lib' and
-# '/usr/local/lib') you need to specify the full absolut path for the
+# '/usr/local/lib') you need to specify the full absolute path for the
 # library  (e.g. '/opt/zzz/ttt/libme6x00.so'). You must make sure that the
 # library for the card is already properly installed if you want to build
 # fsc2 with support for the card.
@@ -170,7 +170,7 @@ SERIAL_LOCK_DIR    := /var/lock
 # The next two lines must be uncommented if you want support for the Wasco
 # WITIO-48 DIO card. If the library for the card isn't in a place where the
 # linker will find it automatically (e.g. '/usr/lib' and '/usr/local/lib')
-# you need to specify the full absolut path for the library (e.g.
+# you need to specify the full absolute path for the library (e.g.
 # '/usr/xxx/yyy/libwitio_48.so'). You must make sure that the library for
 # the card is already properly installed if you want to build fsc2 with
 # support for the card.
@@ -199,7 +199,7 @@ SERIAL_LOCK_DIR    := /var/lock
 # The next two lines must be uncommented if you want support for the National
 # Instruments PCI-MIO-16E-1 card. If the library for the card isn't in a place
 # where the linker will find it automatically (e.g. '/usr/lib' and
-# '/usr/local/lib') you need to specify the full absolut path for the
+# '/usr/local/lib') you need to specify the full absolute path for the
 # library (e.g. '/usr/xxx/yyy/libni_daq.so'). You must make sure that the
 # library for the card is already properly installed if you want to build
 # fsc2 with support for the card.
@@ -215,7 +215,7 @@ SERIAL_LOCK_DIR    := /var/lock
 # path to the place where it installed (e.g. '/usr/xxx/yyy).If the library
 # for the card isn't in a place where the linker will find it automatically
 # (e.g. '/usr/lib' and '/usr/local/lib') you need to also specify the full
-# absolut path for the library. You must make sure that the library for the
+# absolute path for the library. You must make sure that the library for the
 # Rulbus interface is already properly installed if you want to build fsc2
 # with support for it.
 
@@ -663,7 +663,7 @@ built:
 
 
 # Creates everything that allows the web server to be run (on condition that
-# the use of the web server insn't switched off)
+# the use of the web server isn't switched off)
 
 http_server:
 ifdef WITH_HTTP_SERVER
