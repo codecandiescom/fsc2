@@ -74,12 +74,12 @@ struct Var {
 
 	union
 	{
-		long   lval;               /* for integer values */
-		double dval;               /* for float values */
-		long   *lpnt;              /* for integer arrays */
-		double *dpnt;              /* for double arrays */
-		char   *sptr;              /* for strings */
-		Var    **vptr;             /* for array references */
+		long        lval;          /* for integer values */
+		double      dval;          /* for float values */
+		long        *lpnt;         /* for integer arrays */
+		double      *dpnt;         /* for double arrays */
+		char        *sptr;         /* for strings */
+		Var         **vptr;        /* for array references */
 		struct Func *fnct;         /* for functions */
 	} val;
 
