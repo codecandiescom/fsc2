@@ -27,14 +27,15 @@ void dg2020_do_update( void )
 	/* Resort the pulses and, while in a test run, we also have to check that
 	   the new pulse settings are reasonable */
 
-
+/*
 	if ( ! TEST_RUN )
 		printf( "\nChanges to the channels:\n\n" );
-
+*/
 
 	dg2020_reorganize_pulses( TEST_RUN );
 
 
+/*
 	{
 		PULSE *p = dg2020_Pulses;
 
@@ -57,7 +58,7 @@ void dg2020_do_update( void )
 		}
 		printf( "\n" );
 	}
-
+*/
 
 	/* Finally commit all changes */
 
@@ -478,22 +479,10 @@ done_setting:
 	if ( phase_p->is_old_len && phase_p->old_len == phase_p->len )
 		phase_p->is_old_len = UNSET;
 
-if ( phase_p->is_active )
-	printf( "\n 13131313131\n"
-			"num = %ld\n"
-			"pos = %ld\n"
-			"len = %ld\n"
-			"old_pos = %ld\n"
-			"old_len = %ld\n"
-			"%s\n\n", phase_p->num, phase_p->pos, phase_p->len,
-			phase_p->old_pos, phase_p->old_len,
-			NEEDS_UPDATE( phase_p ) ? "reset" : "unchanged" );
-			
-
 	phase_p->needs_update = NEEDS_UPDATE( phase_p );
 
 	if ( phase_p->len < -1 )
-		printf( "!Q!Q!Q! pulse %ld has len of %ld\n",
+		printf( "!O!O!O! pulse %ld has a lenght of %ld\n",
 				phase_p->num, phase_p->len );
 }
 
@@ -828,8 +817,6 @@ void dg2020_commit( FUNCTION * f, bool flag )
 	old = T_calloc( dg2020.max_seq_len, sizeof( bool ) );
 	new = T_calloc( dg2020.max_seq_len, sizeof( bool ) );
 
-	printf( "Handling channel %d\n", f->pulses[ 0 ]->channel->self );
-
 	for ( i = 0; i < f->num_pulses; i++ )
 	{
 		p = f->pulses[ i ];
@@ -860,8 +847,6 @@ void dg2020_commit( FUNCTION * f, bool flag )
 	if ( needs_changes )
 	{
 		ch = f->pulses[ 0 ]->channel->self;
-		printf( "Changing channel %d\n", ch );
-
 		while ( ( what = dg2020_diff( old, new, &start, &len ) ) != 0 )
 			dg2020_set_constant( ch, start, len,
 								 what == -1 ? OFF( f ) : ON( f ) );
