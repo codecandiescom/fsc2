@@ -55,7 +55,8 @@ keywords in Keyword_strong are
    VARIABLES:, VAR:, VARS:, VARIABLE:,
    PHASES:, PHA:, PHAS:, PHASE:,
    PREPARATIONS:, PREP:, PREPS:, PREPARATION:,
-   EXPERIMENT:, EXP:, ON_STOP:,
+   EXPERIMENT:, EXP:,
+   ON_STOP:,
    {, }
 end keywords
 
