@@ -2315,14 +2315,26 @@ static void tools_callback( FL_OBJECT *obj, long data )
 
 		case INT_INPUT :
 			buf = fl_get_input( obj );
-			sscanf( buf, "%ld", &lval );
+			if ( *buf == '\0' )
+			{
+				lval = 0;
+				fl_set_input( io->self, "0" );
+			}
+			else
+				sscanf( buf, "%ld", &lval );
 			if ( lval != io->val.lval )
 				io->val.lval = lval;
 			break;
 
 		case FLOAT_INPUT :
 			buf = fl_get_input( obj );
-			sscanf( buf, "%lf", &dval );
+			if ( *buf == '\0' )
+			{
+				dval = 0;
+				fl_set_input( io->self, "0" );
+			}
+			else
+				sscanf( buf, "%lf", &dval );
 			if ( dval != io->val.dval )
 				io->val.dval = dval;
 			break;
