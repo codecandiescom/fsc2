@@ -56,6 +56,7 @@ inline float  f_max( float  a, float  b );
 inline float  f_min( float  a, float  b );
 inline double d_max( double a, double b );
 inline double d_min( double a, double b );
+inline size_t s_min( size_t a, size_t b );
 
 inline long lrnd( double x );
 inline int irnd( double x );

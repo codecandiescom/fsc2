@@ -254,7 +254,7 @@ Var *vars_add_to_int_arr( Var *v1, Var *v2 )
 			 THROW( EXCEPTION )
 		}
 		else
-			elems = l_min( elems, v1_len );
+			elems = s_min( elems, v1_len );
 	}
 
 	if ( v2_lpnt )
@@ -341,7 +341,7 @@ Var *vars_add_to_float_arr( Var *v1, Var *v2 )
 			THROW( EXCEPTION )
 		}
 		else
-			elems = l_min( v1_len, elems );
+			elems = s_min( v1_len, elems );
 	}
 
 	dp = T_malloc( elems * sizeof( double ) );
@@ -507,7 +507,7 @@ Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
 			THROW( EXCEPTION )
 		}
 		else
-			elems = l_min( v1_len, elems );
+			elems = s_min( v1_len, elems );
 	}
 
 	if ( v2_lpnt )
@@ -593,7 +593,7 @@ Var *vars_sub_from_float_arr( Var *v1, Var *v2 )
 			THROW( EXCEPTION )
 		}
 		else
-			elems = l_min( v1_len, elems );
+			elems = s_min( v1_len, elems );
 	}
 
 	dp = T_malloc( elems * sizeof( double ) );
@@ -757,7 +757,7 @@ Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
 			THROW( EXCEPTION )
 		}
 		else
-			elems = l_min( v1_len, elems );
+			elems = s_min( v1_len, elems );
 	}
 
 	if ( v2_lpnt )
@@ -843,7 +843,7 @@ Var *vars_mult_by_float_arr( Var *v1, Var *v2 )
 			THROW( EXCEPTION )
 		}
 		else
-			elems = l_min( v1_len, elems );
+			elems = s_min( v1_len, elems );
 	}
 
 	dp = T_malloc( elems * sizeof( double ) );
@@ -1042,7 +1042,7 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 			THROW( EXCEPTION )
 		}
 		else
-			elems = l_min( v1_len, elems );
+			elems = s_min( v1_len, elems );
 	}
 
 	if ( v2_lpnt )
@@ -1134,7 +1134,7 @@ Var *vars_div_of_float_arr( Var *v1, Var *v2 )
 			THROW( EXCEPTION )
 		}
 		else
-			elems = l_min( v1_len, elems );
+			elems = s_min( v1_len, elems );
 	}
 
 	dp = T_malloc( elems * sizeof( double ) );
@@ -1350,7 +1350,7 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 			THROW( EXCEPTION )
 		}
 		else
-			elems = l_min( v1_len, elems );
+			elems = s_min( v1_len, elems );
 	}
 
 	if ( v2_lpnt )
@@ -1442,7 +1442,7 @@ Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
 			THROW( EXCEPTION )
 		}
 		else
-			elems = l_min( v1_len, elems );
+			elems = s_min( v1_len, elems );
 	}
 
 	dp = T_malloc( elems * sizeof( double ) );
@@ -1725,7 +1725,7 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 			THROW( EXCEPTION )
 		}
 		else
-			elems = l_min( v1_len, elems );
+			elems = s_min( v1_len, elems );
 	}
 
 	if ( v2_lpnt )
@@ -1849,7 +1849,7 @@ Var *vars_pow_of_float_arr( Var *v1, Var *v2 )
 			THROW( EXCEPTION )
 		}
 		else
-			elems = l_min( v1_len, elems );
+			elems = s_min( v1_len, elems );
 	}
 
 	dp = T_malloc( elems * sizeof( double ) );

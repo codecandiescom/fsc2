@@ -36,7 +36,7 @@ typedef Var_pointer_returning_Function *FnctPtr;
 /* local variables */
 
 static bool is_sorted = UNSET;
-static long num_vars = 0;
+static size_t num_vars = 0;
 
 
 /* locally used functions */
@@ -280,7 +280,7 @@ void vars_sort( void )
 	Var *ptr,
 		*next_ptr,
 		*new_var_list;
-	long i;
+	size_t i;
 
 
 	/* Find out how many variables exist */

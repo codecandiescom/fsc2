@@ -198,7 +198,6 @@ size_t func_list_parse( Func **fncts, size_t num_func )
 	TRY
 	{
 		num = fll_count_functions( *fncts, num_predef_func );
-		fsc2_assert( num >= 0 );
 		TRY_SUCCESS;
 	}
 	OTHERWISE

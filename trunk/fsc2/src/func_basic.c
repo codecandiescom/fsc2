@@ -1625,7 +1625,7 @@ Var *f_square( Var *v )
 	switch ( v->type )
 	{
 		case INT_VAR :
-			if ( ( double ) v->val.lval >= sqrt( LONG_MAX ) )
+			if ( ( double ) v->val.lval >= sqrt( ( double ) LONG_MAX ) )
 				eprint( SEVERE, SET, "Integer overflow in function %s().\n",
 						Cur_Func );
 			return vars_push( INT_VAR, v->val.lval * v->val.lval );
@@ -1642,7 +1642,7 @@ Var *f_square( Var *v )
 		rlp = T_malloc( len * sizeof( long ) );
 		for ( i = 0; i < len; ilp++, i++ )
 		{
-			if ( ( double ) *ilp >= sqrt( LONG_MIN ) )
+			if ( ( double ) *ilp >= sqrt( ( double ) LONG_MIN ) )
 				eprint( SEVERE, SET, "Integer overflow in function %s().\n",
 						Cur_Func );
 			rlp[ i ] = *ilp * *ilp;

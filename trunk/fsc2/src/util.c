@@ -678,6 +678,7 @@ inline float  f_max( float  a, float  b ) { return a > b ? a : b; }
 inline float  f_min( float  a, float  b ) { return a < b ? a : b; }
 inline double d_max( double a, double b ) { return a > b ? a : b; }
 inline double d_min( double a, double b ) { return a < b ? a : b; }
+inline size_t s_min( size_t a, size_t b ) { return a < b ? a : b; }
 
 
 inline long lrnd( double x )

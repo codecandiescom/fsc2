@@ -91,7 +91,7 @@ bool dg2020_reorganize_pulses( bool flag )
 			 f->self == PULSER_CHANNEL_PHASE_2 )
 			continue;
 
-		qsort( f->pulses, f->num_pulses, sizeof( PULSE * ),
+		qsort( f->pulses, ( size_t ) f->num_pulses, sizeof( PULSE * ),
 			   dg2020_start_compare );
 
 		/* Check the pulse positions and lengths, if test fails in test run
@@ -859,8 +859,8 @@ void dg2020_commit( FUNCTION * f, bool flag )
 	   quite some computer time but probable is faster, or at least easier to
 	   understand and to debug, than any alternative I came up with... */
 
-	old = T_calloc( dg2020.max_seq_len, sizeof( bool ) );
-	new = T_calloc( dg2020.max_seq_len, sizeof( bool ) );
+	old = T_calloc( ( size_t ) dg2020.max_seq_len, sizeof( bool ) );
+	new = T_calloc( ( size_t ) dg2020.max_seq_len, sizeof( bool ) );
 
 	for ( i = 0; i < f->num_pulses; i++ )
 	{
