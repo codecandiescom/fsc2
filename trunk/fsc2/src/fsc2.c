@@ -36,7 +36,7 @@ static bool display_file( char *name, FILE *fp );
 
 
 /**************************/
-/* Here the fun starts... */
+/*     Here we go...      */
 /**************************/
 
 int main( int argc, char *argv[ ] )
@@ -53,7 +53,7 @@ int main( int argc, char *argv[ ] )
 #endif
 
 	/* With the option "-t" just test the file and output results to stderr
-	   - this can be used to test a file e.g. from emacs's "M-x compile"
+	   - this can be used to test a file e.g. with emacs' "M-x compile"
 	   feature or from the shell without any graphics stuff involved */
 
 	if ( argc > 1 && ! strcmp( argv[ 1 ], "-t" ) )

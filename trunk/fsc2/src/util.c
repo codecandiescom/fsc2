@@ -213,14 +213,12 @@ void eprint( int severity, const char *fmt, ... )
 
 		if ( I_am == PARENT )
 		{
-			if ( buffer[ strlen( buffer ) - 1 ] == '\n' )
-				buffer[ strlen( buffer ) - 1 ] = '\0';
 			fl_freeze_form( main_form->error_browser->form );
 			fl_add_browser_line( main_form->error_browser, buffer );
 
 			fl_set_browser_topline( main_form->error_browser,
-				   fl_get_browser_maxline( main_form->error_browser )
-				 - fl_get_browser_screenlines( main_form->error_browser ) + 1);
+				  fl_get_browser_maxline( main_form->error_browser )
+				- fl_get_browser_screenlines( main_form->error_browser ) + 1 );
 
 			fl_unfreeze_form( main_form->error_browser->form );
 		}

@@ -791,11 +791,16 @@ Var *f_print( Var *v )
 	bool print_anyway = UNSET;
 
 	
-	/* a call to print() without any argument is legal but rather
-	   unreasonable... */
+	/* a call to print() without any argument just prints a newline */
 
 	if ( v == NULL )
+	{
+		if ( ! just_testing )
+			eprint( NO_ERROR, "\x7E" );
+		else
+			eprint( NO_ERROR, "\n" );
 		return vars_push( INT_VAR, 0 );
+	}
 
 	/* make sure the first argument is a string */
 
@@ -907,7 +912,11 @@ Var *f_print( Var *v )
 	/* now lets start printing... */
 
 	cp = fmt;
-	strcat( cp, "\x7E" );
+	if ( ! just_testing )
+		strcat( cp, "\x7E" );
+	else
+		strcat( cp, "\n" );
+
 	cv = v->next;
 	while ( ( ep = strstr( cp, "\x01\x01\x01\x01\x01" ) ) != NULL )
 	{
@@ -917,17 +926,26 @@ Var *f_print( Var *v )
 				switch ( cv->type )
 				{
 					case INT_VAR :
-						strcpy( ep, "%ld\x7F" );
+						if ( ! just_testing )
+							strcpy( ep, "%ld\x7F" );
+						else
+							strcpy( ep, "%ld" );
 						eprint( NO_ERROR, cp, cv->val.lval );
 						break;
 
 					case FLOAT_VAR :
-						strcpy( ep, "%#g\x7F" );
+						if ( ! just_testing )
+							strcpy( ep, "%#g\x7F" );
+						else
+							strcpy( ep, "%#g" );
 						eprint( NO_ERROR, cp, cv->val.dval );
 						break;
 
 					case STR_VAR :
-						strcpy( ep, "%s\x7F" );
+						if ( ! just_testing )
+							strcpy( ep, "%s\x7F" );
+						else
+							strcpy( ep, "%s" );
 						eprint( NO_ERROR, cp, cv->val.sptr );
 						break;
 
