@@ -693,7 +693,7 @@ static void rs690_setup_channels( void )
 		else
 		{
 			/* Tell the user that the channel is never used when it never
-			   contained any pulses and its function is not set up for phase
+			   contained a pulse and its function is not set up for phase
 			   cycling */
 
 			if ( ! ch->function->phase_setup )
