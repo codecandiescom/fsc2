@@ -278,6 +278,11 @@ scripts/endor_monitor.crowley.physik.fu-berlin.de~
 scripts/trepr.isaak.fu-berlin.de
 scripts/tresr.sunone.chemie.unibas.ch
 
+src/#assign_parser.c#
+src/#condition_parser.c#
+src/#conn.c#
+src/#devices_lexer.c#
+src/#devices_list_lexer.c#
 src/Makefile
 src/T.c
 src/T.h
