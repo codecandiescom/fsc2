@@ -104,6 +104,20 @@ $f3_v->pack( %wp );
 $f3_l2->pack( %wp );
 
 
+my $f5 = $mw->Frame( );
+my $f5_l1 = $f5->Label( '-text' => 'Maximum field error:',
+						'-width' => '20',
+						'anchor' => 'w' );
+my $f5_v = $f5->Entry( '-textvariable' => \$field_error,
+					   '-width' => '8',
+					   '-validate' => 'key',
+					   '-validatecommand' => \&is_numeric,
+					   '-relief' => 'sunken',
+					   'state' => $sweep_method eq 'sweep' ?
+					   'disabled' : 'normal' );
+my $f5_l2 = $f5->Label( '-text' => 'G',
+						'-width' => 1 );
+
 
 my $f4 = $mw->Frame( );
 my $f4_l = $f4->Label( '-text' => 'Sweep method:',
@@ -120,20 +134,6 @@ $f4_l->pack( %wp );
 $f4_m->pack( %wp );
 
 
-my $f5 = $mw->Frame( );
-my $f5_l1 = $f5->Label( '-text' => 'Maximum field error:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f5_v = $f5->Entry( '-textvariable' => \$field_error,
-					   '-width' => '8',
-					   '-validate' => 'key',
-					   '-validatecommand' => \&is_numeric,
-					   '-relief' => 'sunken',
-					   'state' => $sweep_method eq 'sweep' ?
-					   'disabled' : 'normal' );
-my $f5_l2 = $f5->Label( '-text' => 'G',
-						'-width' => 1 );
-
 $f5->pack( %fp );
 $f5_l1->pack( %wp );
 $f5_v->pack( %wp );
@@ -148,7 +148,7 @@ my $f6_l1 = $f6->Label( '-text' => 'Number of runs:',
 my $f6_v = $f6->Entry( '-textvariable' => \$num_runs,
 					   '-width' => '8',
 					   '-validate' => 'key',
-					   '-validatecommand' => sub { $_[ 0 ] =~ /^\s*\d+\s*$/ },
+					   '-validatecommand' => sub { $_[ 0 ] =~ /^\s*\d*\s*$/ },
 					   '-relief' => 'sunken' );
 my $f6_l2 = $f6->Label( '-text' => ' ',
 						'-width' => 1 );
@@ -249,7 +249,7 @@ my $ne;
 if ( $ARGV[ 0 ] ) {
 	open( F, "<$ARGV[ 0 ]" ) or return;
 } else {
-	open( F, "<$ENV{ HOME }/.cw_epr" ) or return;
+	open( F, "<$ENV{ HOME }/.fsc2/.cw_epr" ) or return;
 }
 
 goto done_reading unless defined( $ne = <F> ) and $ne =~ /^(cw)|(pulsed)$/;
@@ -306,7 +306,8 @@ close F;
 sub store_defs {
 	local *F;
 
-	open( F, ">$ENV{ HOME }/.cw_epr" ) or return;
+	mkdir "$ENV{ HOME }/.fsc2", 0777 unless -e "$ENV{ HOME }/.fsc2";
+	open( F, ">$ENV{ HOME }/.fsc2/.cw_epr" ) or return;
 
 	$start_field = 0 if $start_field eq ".";
 	$end_field = 0 if $end_field eq ".";
@@ -336,7 +337,7 @@ sub write_out {
 return if &do_checks( ) != 0;
 
 local *F;
-
+my $text;
 my $how2;
 
 $how2 = "start" if $how =~ /^Start/;
@@ -494,6 +495,28 @@ print F "
 		wait( tc );
 	\}
 \}";
+}
+
+close F;
+
+# Notify the user if sending the program to fsc2 failed for some reasons
+
+if ( $? != 0 ) {
+    if ( $? >> 8 == -1 ) {
+        $text = "Internal error.";
+    } elsif ( $? >> 8 == 1 ) {
+        $text = "Someone else is running fsc2.";
+    } elsif ( $? >> 8 == 2 ) {
+        $text = "fsc2 is currently busy.";
+    } elsif ( $? >> 8 == 3 ) {
+        $text = "Internal error of fsc2.";
+    } elsif ( $? >> 8 == 4 ) {
+        $text = "Could not start fsc2.";
+    } else {
+        $text = "Something strange is going on here.";
+    }
+
+    &show_message( $text ) if $? >> 8 != 0;
 }
 }
 

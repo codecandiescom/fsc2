@@ -13,7 +13,8 @@ my $atten      = -5;
 my $mod_freq   = 19;
 my $mod_ampl   = 80;
 my $N_runs     = 20;
-
+my $tc         = "Don't set";
+my $sens       = "Don't set";
 my $how        = 'Start program';
 
 
@@ -26,6 +27,10 @@ my %wp = ( '-side' => 'left',
 		   '-fill' => 'x',
 		   '-padx' => '3m',
 		   '-expand' => 1 );
+
+# Get defaults
+
+&get_defs;
 
 # Create all the graphic stuff
 
@@ -152,7 +157,7 @@ my $f7_l1 = $f7->Label( '-text' => 'Number of runs:',
 my $f7_v = $f7->Entry( '-textvariable' => \$N_runs,
 					   '-width' => '6',
 					   '-validate' => 'key',
-					   '-validatecommand' => \&is_numeric,
+					   '-validatecommand' => sub { $_[ 0 ] =~ /^s*\d*\s*$/ },
 					   '-relief' => 'sunken' );
 my $f7_l2 = $f7->Label( '-text' => '    ',
 						'-width' => 3 );
@@ -176,6 +181,42 @@ $f8->pack( %fp );
 $f8_l->pack( %wp );
 $f8_m->pack( %wp );
 
+
+my $f9 = $mw->Frame( );
+my $f9_l = $f9->Label( '-text' => 'Time constant:',
+					   '-width' => '20',
+					   'anchor' => 'w' );
+my $f9_m = $f9->Optionmenu( '-options' =>
+                            [ ( "Don't set", '100 s', ' 30 s', ' 10 s',
+                                '  3 s', '  1 s', '300 ms', '100 ms', ' 30 ms',
+                                ' 10 ms', '  3 ms', '  1 ms' ) ],
+							'-width' => 9,
+							'-variable' => \$tc );
+$f9->pack( %fp );
+$f9_l->pack( %wp );
+$f9_m->pack( %wp );
+
+
+my $f10 = $mw->Frame( );
+my $f10_l = $f10->Label( '-text' => 'Sensitivity:',
+						'-width' => '20',
+						'anchor' => 'w' );
+my $f10_m = $f10->Optionmenu( '-options' =>
+                            [ ( "Don't set", '500 mV', '200 mV', '100 mV',
+                                ' 50 mV', ' 20 mV', ' 10 mV', '  5 mv',
+                                '  2 mV', '  1 mV', '500 uV', '200 uV',
+                                '100 uV', ' 50 uV', ' 20 uV', ' 10 uV',
+                                '  5 uV', '  2 uV', '  1 uV',
+                                '500 nV', '200 nV', '100 nV', ' 50 nV',
+                                ' 10 nV', '  5 nV', '  2 nV', '  1 nV' ) ],
+							'-width' => 9,
+							'-variable' => \$sens );
+$f10->pack( %fp );
+$f10_l->pack( %wp );
+$f10_m->pack( %wp );
+
+
+
 $mw->Optionmenu( '-options' => [ ( 'Start program', 'Test program',
 								   'Load into fsc2' ) ],
 				 '-variable' => \$how,
@@ -184,7 +225,7 @@ $mw->Optionmenu( '-options' => [ ( 'Start program', 'Test program',
 					    '-pady' => '3m' );
 
 $mw->Button( '-text' => 'Quit',
-			 '-command' => [ destroy => $mw ]
+			 '-command' => sub { &store_defs; $mw->destroy }
 		   )->pack( '-padx' => '3m',
 					'-pady' => '3m' );
 
@@ -193,10 +234,93 @@ MainLoop;
 
 #############################################
 
+sub get_defs {
+
+local *F;
+my $ne;
+
+if ( $ARGV[ 0 ] ) {
+	open( F, "<$ARGV[ 0 ]" ) or return;
+} else {
+	open( F, "<$ENV{ HOME }/.fsc2/.endor" ) or return;
+}
+
+goto done_reading unless defined( $ne = <F> )
+	and $ne =~ /^SR(5|8)(1|3)0$/;
+chomp $ne;
+$lockin = $ne;
+
+goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+chomp $ne;
+$start_freq = $ne;
+
+goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+chomp $ne;
+$end_freq = $ne;
+
+goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+chomp $ne;
+$step_freq = $ne;
+
+goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+chomp $ne;
+$atten = $ne;
+
+goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+chomp $ne;
+$mod_freq = $ne;
+
+goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+chomp $ne;
+$mod_ampl = $ne;
+
+goto done_reading unless defined( $ne = <F> ) and $ne =~ /^\d+$/;
+chomp $ne;
+$N_runs = $ne;
+
+goto done_reading unless defined( $ne = <F> )
+	 and $ne =~ /(^Don't set)|([13]0{0,2} m?s)$/;
+chomp $ne;
+$tc = $ne;
+
+goto done_reading unless defined( $ne = <F> )
+	 and $ne =~ /(^Don't set)|(([125]0{0,2}) [mun]V)$/;
+chomp $ne;
+$sens = $ne;
+
+done_reading:
+close F;
+}
+
+
+#############################################
+
+sub store_defs {
+	local *F;
+
+	mkdir "$ENV{ HOME }/.fsc2", 0777 unless -e "$ENV{ HOME }/.fsc2";
+	open( F, ">$ENV{ HOME }/.fsc2/.endor" ) or return;
+
+	$start_freq = 0 if $start_freq eq ".";
+	$end_freq = 0 if $end_freq eq ".";
+	$step_freq = 0 if $step_freq eq ".";
+	$atten = 0 if $atten eq ".";
+	$mod_freq = 0 if $mod_freq eq ".";
+	$mod_ampl = 0 if $mod_ampl eq ".";
+
+	print F "$lockin\n$start_freq\n$end_freq\n$step_freq\n$atten\n" .
+	    "$mod_freq\n$mod_ampl\nN_runs\n$tc\n$sens\n";
+
+	close F;
+}
+
+
+#############################################
+
 sub is_numeric {
 
 	my $new_val = shift;
-	return $new_val =~ /^[+-]?([0-9]+(\.[0-9]*)?)?$/;
+	return $new_val =~ /^[+-]?((\d+\.?(\d+)?)|(\.(\d+)?))?$/;
 }
 
 
@@ -265,10 +389,7 @@ VARIABLES:
 start_freq  = $start_freq MHz;
 end_freq    = $end_freq MHz;
 step_freq   = $step_freq kHz;
-
-attenuation = $atten db;
-
-";
+attenuation = $atten db;\n";
 
 if ( $lockin =~ /^SR8/ ) {
 	print F "mod_freq    = $mod_freq kHz;\n";
@@ -276,11 +397,15 @@ if ( $lockin =~ /^SR8/ ) {
 	print F "mod_freq;\n";
 }
 
+if ( $tc eq "Don't set" ) {
+	print F "tc;\n";
+} else {
+	print F "tc = $tc;\n";
+}
+
 print F
 "mod_ampl    = $mod_ampl kHz;
-
 N_runs      = $N_runs;
-
 
 I = 0;
 J;
@@ -289,7 +414,6 @@ K = 1;
 N_points = ceil( abs( ( end_freq - start_freq ) / step_freq ) ) + 1;
 data[ N_points ];
 mean[ N_points ];
-tc;
 File_1, File_2;
 
 
@@ -302,48 +426,56 @@ synthesizer_frequency( start_freq );
 synthesizer_modulation( \"FM\", \"EXT DC\", mod_ampl );
 
 init_1d( 2, N_points, start_freq * 1e-6, step_freq * 1e-6,
-		 \"Frequency / MHz\", \"Signal / V\" ); 
-
-
-EXPERIMENT:
+		 \"Frequency / MHz\", \"Signal / V\" );\n";
+print F "lockin_time_constant( tc );\n" if $tc ne "Don't set";
+print F "lockin_sensitivity( $sens );\n" if $sens ne "Don't set";
+print F "\n\nEXPERIMENT:
 
 File_1 = get_file( \"File for storing all runs:\" );
 File_2 = get_file( \"File for storing final result:\" );
-
-";
+fsave( File_2, \"% Start frequency = # MHz\\n\"
+               \"% End frequency   = # MHz\\n\"
+               \"% Step frequency  = # kHz\\n\"
+               \"% Lock-in sens.   = # V\\n\"
+               \"% Time constant   = # s\\n\"
+               \"% Phase           = #\\n\"
+               \"% Mod. frequency  = # kHz\\n\"
+               \"% Mod. amplitude  = # kHz\\n%\\n\",
+       start_freq * 10e-6, end_freq * 10e-6, step_freq * 10e-3,
+       lockin_sensitivity( ), lockin_time_constant( ), lockin_phase( ),
+       mod_freq * 1e-3, mod_ampl * 1e-3 );
+save_comment( File_2, \"% \" );
+save_program( File_2, \"% \" );\n\n";
 
 # Neither the SR510 nor the SR530 can set the reference frequency nor
 # its level...
 
 if ( $lockin =~ /^SR8/ ) {
-	print F
-"lockin_ref_freq( mod_freq );
+	print F "lockin_ref_freq( mod_freq );
 lockin_ref_level( 1 V );\n";
 } else {
 	print F "mod_freq = lockin_ref_freq( );\n";
 }
 
-print F
-"tc = lockin_time_constant( );
-
-synthesizer_state( 1 );
+print F "tc = lockin_time_constant( );\n" if $tc eq "Don't set";
+print F "synthesizer_state( 1 );
 
 FOR I = 1 : N_runs
 {
-	print( \"Starting #. run of #\\n\", I, N_runs );
+	print( \"Starting #. run out of #\\n\", I, N_runs );
 
-    FOR J = 1 : N_points 
+	FOR J = 1 : N_points
 	{
-        data[ J ] = lockin_get_data( );
-        display( J, data[ J ], 1, J, ( mean[ J ] + data[ J ] ) / I, 2 );
-	    synthesizer_frequency( start_freq + J * step_freq );
-        wait( tc );
-    }
+		data[ J ] = lockin_get_data( );
+		display( J, data[ J ], 1, J, ( mean[ J ] + data[ J ] ) / I, 2 );
+		synthesizer_frequency( start_freq + J * step_freq );
+		wait( tc );
+	}
 
 	save( File_1, data );
 	mean += data;
 	K = I;
-    synthesizer_frequency( start_freq );
+	synthesizer_frequency( start_freq );
 }
 
 
@@ -353,22 +485,13 @@ synthesizer_state( 0 );
 
 IF I > 0
 {
-	save_program( File_2, \"% \" );
-	fsave( File_2, \"%\\n% Lock-in sens.  = # V\\n\"
-		           \"% Time constant  = # s\\n\"
-		           \"% Phase          = #\\n\"
-		           \"% Mod. frequency = # kHz\\n\"
-		           \"% Mod. amplitude = # kHz\\n%\\n\",
-		   lockin_sensitivity( ), tc, lockin_phase( ),
-		   mod_freq * 1e-3, mod_ampl * 1e-3 );
-	save_comment( File_2, \"% \", \"Sample: \\nTemperature = \\nField = \\n\",
-				  \"Please enter additional comments:\" );
-	fsave( File_2, \"%\\n\" );
-	save( File_2, mean / K );
+    save( File_2, mean / K );
 }
 ";
 
 close( F );
+
+# Notify the user if sending the program to fsc2 failed for some reasons
 
 if ( $? != 0 ) {
     if ( $? >> 8 == -1 ) {
@@ -376,14 +499,16 @@ if ( $? != 0 ) {
     } elsif ( $? >> 8 == 1 ) {
         $text = "Someone else is running fsc2.";
     } elsif ( $? >> 8 == 2 ) {
-        $text = "fsc2 is busy.";
+        $text = "fsc2 is currently busy.";
     } elsif ( $? >> 8 == 3 ) {
         $text = "Internal error of fsc2.";
     } elsif ( $? >> 8 == 4 ) {
         $text = "Could not start fsc2.";
+    } else {
+        $text = "Something strange is going on here.";
     }
 
-    &show_message( $text ) if $text !~ /^$/;
+    &show_message( $text ) if $? >> 8 != 0;
 }
 }
 
@@ -394,7 +519,7 @@ sub do_checks {
 
 	my $text = "";
 
-	if ( $start_freq =~ /^$/ ) {
+	if ( $start_freq =~ /^\.?$/ ) {
 		$text = "Start frequency hasn't been set.";
 		&show_message( $text );
 		return -1;
@@ -412,7 +537,7 @@ sub do_checks {
 		return -1;
 	}
 
-	if ( $end_freq =~ /^$/ ) {
+	if ( $end_freq =~ /^\.?$/ ) {
 		$text = "End frequency hasn't been set.";
 		&show_message( $text );
 		return -1;
@@ -430,7 +555,7 @@ sub do_checks {
 		return -1;
 	}
 
-	if ( $step_freq =~ /^$/ ) {
+	if ( $step_freq =~ /^\.?$/ ) {
 		$text = "Step frequency hasn't been set.";
 		&show_message( $text );
 		return -1;
@@ -456,8 +581,8 @@ sub do_checks {
 		return -1;
 	}
 
-	if ( $atten =~ /^$/ ) {
-		$text = "End frequency hasn't been set.";
+	if ( $atten =~ /^\.?$/ ) {
+		$text = "Attenuation hasn't been set.";
 		&show_message( $text );
 		return -1;
 	}
@@ -475,8 +600,8 @@ sub do_checks {
 	}
 
 	if ( $lockin =~ /^SR8/ ) {
-		if ( $mod_freq =~ /^$/ ) {
-			$text = "End frequency hasn't been set.";
+		if ( $mod_freq =~ /^\.?$/ ) {
+			$text = "Modulation frequency hasn't been set.";
 			&show_message( $text );
 			return -1;
 		}
@@ -494,7 +619,7 @@ sub do_checks {
 		}
 	}
 
-	if ( $mod_ampl =~ /^$/ ) {
+	if ( $mod_ampl =~ /^\.?$/ ) {
 		$text = "Modulation amplitude hasn't been set.";
 		&show_message( $text );
 		return -1;
@@ -508,12 +633,6 @@ sub do_checks {
 
 	if ( $mod_ampl > 100 ) {
 		$text = "Modulation amplitude is too high.";
-		&show_message( $text );
-		return -1;
-	}
-
-	if ( $atten =~ /^$/ ) {
-		$text = "End frequency hasn't been set.";
 		&show_message( $text );
 		return -1;
 	}
