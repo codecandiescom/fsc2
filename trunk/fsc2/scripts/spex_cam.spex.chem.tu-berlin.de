@@ -1927,36 +1927,38 @@ FOR I = 1 : N_scans {
 	avg += spec;
 	display_1d( 1, spec, 1, 1, avg / I, 2 );
 
-	IF toolbox_changed( ) {
-		IF button_state( B_eas ) {
-			end( );
-		}
+	IF ! toolbox_changed( ) {
+		NEXT;
+	}
 
-		IF button_state( B_wl ) {
-			change_label_1d( "Wavelength [nm]" );
-			IF ( laser_line != 0.0 ) {
-				change_scale_1d( 1.0e7 / ( laser_line - start_wn ),
-								 1.0e7 / ( laser_line - cwn ) -
-							     1.0e7 / ( laser_line - cwn + step_wn ) );
-			} ELSE {
-				change_scale_1d( 1.0e7 / start_wn,
-								 1.0e7 / cwn - 1.0e7 / ( cwn + step_wn ) );
-			}
-		}
+	IF button_state( B_eas ) {
+		end( );
+	}
 
-		IF button_state( B_abs ) {
-			change_label_1d( "Wavenumbers [abs. cm^-1]" );
-			IF ( laser_line != 0.0 ) {
-				change_scale( laser_line - start_wn, - step_wn );
-			} ELSE {
-				change_scale( start_wn, - step_wn );
-			}
+	IF button_state( B_wl ) {
+		change_label_1d( "Wavelength [nm]" );
+		IF ( laser_line != 0.0 ) {
+			change_scale_1d( 1.0e7 / ( laser_line - start_wn ),
+							 1.0e7 / ( laser_line - cwn ) -
+						     1.0e7 / ( laser_line - cwn + step_wn ) );
+		} ELSE {
+			change_scale_1d( 1.0e7 / start_wn,
+							 1.0e7 / cwn - 1.0e7 / ( cwn + step_wn ) );
 		}
+	}
 
-		IF laser_line != 0.0 AND button_state( B_rel ) {
-			change_label_1d( "Wavenumbers [rel. cm^-1]" );
-			change_scale( start_wn, step_wn );
+	IF button_state( B_abs ) {
+		change_label_1d( "Wavenumbers [abs. cm^-1]" );
+		IF ( laser_line != 0.0 ) {
+			change_scale( laser_line - start_wn, - step_wn );
+		} ELSE {
+			change_scale( start_wn, - step_wn );
 		}
+	}
+
+	IF laser_line != 0.0 AND button_state( B_rel ) {
+		change_label_1d( "Wavenumbers [rel. cm^-1]" );
+		change_scale( start_wn, step_wn );
 	}
 }
 
