@@ -173,7 +173,7 @@ list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
 										                   |= VARIABLE_SIZED; }
        | list1 ',' expr
        | list1 ',' '*'             { ( $$ = vars_push( INT_VAR, 0 ) )->flags
-										 |= VARIABLE_SIZED; }
+										                   |= VARIABLE_SIZED; }
 ;
 
 /* list of data for initialization of a newly declared array */

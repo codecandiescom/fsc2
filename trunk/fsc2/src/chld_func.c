@@ -36,8 +36,13 @@ void show_message( const char *str )
 {
 	if ( Internals.I_am == PARENT )
 	{
-		switch_off_special_cursors( );
-		fl_show_messages( str );
+		if ( Internals.cmdline_flags & DO_CHECK )
+			fprintf( stdout, "%s", str );
+		else
+		{
+			switch_off_special_cursors( );
+			fl_show_messages( str );
+		}
 	}
 	else
 	{
@@ -55,12 +60,11 @@ void show_message( const char *str )
 void show_alert( const char *str )
 {
 	char *strc, *strs[ 3 ];
+	int i;
 
 
 	if ( Internals.I_am == PARENT )
 	{
-		switch_off_special_cursors( );
-
 		strc = T_strdup( str );
 		strs[ 0 ] = strc;
 		if ( ( strs[ 1 ] = strchr( strs[ 0 ], '\n' ) ) != NULL )
@@ -74,7 +78,17 @@ void show_alert( const char *str )
 		else
 			strs[ 1 ] = strs[ 2 ] = NULL;
 
-		fl_show_alert( strs[ 0 ], strs[ 1 ], strs[ 2 ], 1 );
+		if ( Internals.cmdline_flags & DO_CHECK )
+		{
+			for ( i = 0; i < 3 && strs[ i ] != NULL; i++ )
+				fprintf( stdout, "%s", strs[ i ] );
+		}
+		else
+		{
+			switch_off_special_cursors( );
+			fl_show_alert( strs[ 0 ], strs[ 1 ], strs[ 2 ], 1 );
+		}
+
 		T_free( strc );
 	}
 	else
@@ -102,8 +116,16 @@ int show_choices( const char *text, int numb, const char *b1, const char *b2,
 
 	if ( Internals.I_am == PARENT )
 	{
-		switch_off_special_cursors( );
-		return fl_show_choices( text, numb, b1, b2, b3, def );
+		if ( Internals.cmdline_flags & DO_CHECK )
+		{
+			fprintf( stdout, "%s\n%s %s %s\n", text, b1, b2, b3 );
+			return def != 0 ? def : 1;
+		}
+		else
+		{
+			switch_off_special_cursors( );
+			return fl_show_choices( text, numb, b1, b2, b3, def );
+		}
 	}
 	else
 	{

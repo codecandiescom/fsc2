@@ -36,7 +36,7 @@ extern Func Def_Fncts[ ];   /* structures for list of built-in functions */
 static size_t num_func;
 static int Max_Devices_of_a_Kind;
 
-static void resolve_hook_functions( Device *dev, const char *dev_name );
+static void resolve_hook_functions( Device *dev );
 static void load_functions( Device *dev );
 static void resolve_functions( Device *dev );
 static void add_function( int num, void *new_func, Device *new_dev );
@@ -48,7 +48,7 @@ static void resolve_generic_type( Device *dev );
 /*-------------------------------------------------------------------------*/
 /* Function is called after the DEVICES section has been read in. It loads */
 /* the library files and tries to resolve the references to the functions  */
-/* listed in `Functions' and stores pointers to the functions in `Fncts'.  */
+/* listed in 'Functions' and stores pointers to the functions in 'Fncts'.  */
 /*-------------------------------------------------------------------------*/
 
 void load_all_drivers( void )
@@ -76,7 +76,7 @@ void load_all_drivers( void )
 	/* Because some multiply defined functions may have been added resort
 	   the function list to make searching via bsearch() possible */
 
-	qsort( Fncts, Num_Func, sizeof( Func ), func_cmp );
+	qsort( Fncts, Num_Func, sizeof *Fncts, func_cmp );
 
 	/* Create and initialize a structure needed for the pulsers */
 
@@ -86,7 +86,7 @@ void load_all_drivers( void )
 	/* This done run the init hooks (if they exist) and warn if they don't
 	   return successfully (if an init hook thinks it should kill the whole
 	   program it is supposed to throw an exception). To keep modules writers
-	   from erroneously unsetting the global variable `need_GPIB' it's stored
+	   from erroneously unsetting the global variable 'need_GPIB' it's stored
 	   before each init_hook() function is called and is restored to its
 	   previous values if necessary. */
 
@@ -106,7 +106,7 @@ void load_all_drivers( void )
 
 				call_push( NULL, cd->device_name );
 				if ( ! cd->driver.init_hook( ) )
-					eprint( WARN, UNSET, "Initialisation of module `%s.so' "
+					eprint( WARN, UNSET, "Initialisation of module '%s.so' "
 							"failed.\n", cd->name );
 				call_pop( );
 			}
@@ -176,67 +176,62 @@ bool exists_function( const char *name )
 
 /*-------------------------------------------------------------------*/
 /* Function links a library file with the name passed to it (after   */
-/* adding the extension `.so') and then tries to find all references */
-/* to functions listed in the function data base `Functions'.        */
+/* adding the extension '.so') and then tries to find all references */
+/* to functions listed in the function data base 'Functions'.        */
 /*-------------------------------------------------------------------*/
 
 static void load_functions( Device *dev )
 {
-	char *lib_name;
-	const char *dev_name;
+	char *lib_name = NULL;
+	char *ld_path;
+	char *ld = NULL;
+	char *ldc;
 
 
-	/* Assemble name of library to be loaded - this will also work for cases
-	   where the device name contains a relative path */
+	/* Try to open the library for the device. We first try to find it in
+	   directories defined by the environment variable "LD_LIBRARY_PATH". If
+	   this fails (and this is not part of the testing procedure) we also try
+	   the compiled-in path to the libraries. */
 
-	lib_name = get_string( "%s%s%s.so", libdir, slash( libdir ), dev->name );
-
-	/* Try to open the library. If it can't be found in the place defined at
-	   compilation time give it another chance by checking the paths defined
-	   by LD_LIBRARY_PATH - but only if the device name doesn't contain a
-	   path. The last possibility is that the device name already contains a
-	   absolute path, probably because it's set via a link. */
-
-	dlerror( );               /* make sure it's NULL before we continue */
-	dev->driver.handle = dlopen( lib_name, RTLD_NOW );
-
-	if ( dev->driver.handle == NULL )
+	if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
 	{
-		dlerror( );           /* make sure it's NULL before we continue */
-		dev->driver.handle = dlopen( strip_path( lib_name ), RTLD_NOW );
+		ld = T_strdup( ld_path );
+		for ( ldc = strtok( ld, ":" ); ldc != NULL; ldc = strtok( NULL, ":" ) )
+		{
+			lib_name = get_string( "%s%s%s.so", ldc, slash( ldc ), dev->name );
+			if ( ( dev->driver.handle = dlopen( lib_name, RTLD_NOW ) )
+				 != NULL )
+				break;
+			lib_name = T_free( lib_name );
+		}
+		T_free( ld );
 	}
 
-	if ( dev->driver.handle == NULL )
+	if ( dev->driver.handle == NULL &&
+		 ! ( Internals.cmdline_flags & DO_CHECK ) )
 	{
-		dlerror( );           /* make sure it's NULL before we continue */
-		strcpy( lib_name, dev->name );
-		strcat( lib_name, ".so" );
+		lib_name = get_string( "%s%s%s.so", libdir, slash( libdir ),
+							   dev->name );
 		dev->driver.handle = dlopen( lib_name, RTLD_NOW );
-	}
-
-	if ( dev->driver.handle == NULL )
-	{
-		eprint( FATAL, UNSET, "Can't open module for device `%s': %s\n",
-				strip_path( dev->name ), dlerror( ) );
-		T_free( lib_name );
-		THROW( EXCEPTION );
 	}
 
 	T_free( lib_name );
 
+	if ( dev->driver.handle == NULL )
+	{
+		eprint( FATAL, UNSET, "Can't open module for device '%s'.\n",
+				dev->name );
+		THROW( EXCEPTION );
+	}
+
 	dev->is_loaded = SET;
-
-	/* The device name used as prefix in the hook functions may not contain
-	   a path */
-
-	dev_name = strip_path( dev->name );
 
 	/* Now that we know that the module exists and can be used try to resolve
 	   all functions we may need */
 
 	resolve_device_name( dev );
 	resolve_generic_type( dev );
-	resolve_hook_functions( dev, dev_name );
+	resolve_hook_functions( dev );
 	resolve_functions( dev );
 }
 
@@ -246,28 +241,22 @@ static void load_functions( Device *dev )
 /* and determines the pointers to these functions.                    */
 /*--------------------------------------------------------------------*/
 
-static void resolve_hook_functions( Device *dev, const char *dev_name )
+static void resolve_hook_functions( Device *dev )
 {
 	char *hook_func_name;
 	char *app;
 
 
-	dev->driver.is_init_hook =
-		dev->driver.is_test_hook =
-			dev->driver.is_end_of_test_hook =
-				dev->driver.is_exp_hook =
-					dev->driver.is_end_of_exp_hook =
-						dev->driver.is_exit_hook =
-							dev->driver.exp_hook_is_run = UNSET;
-
 	/* If there is function with the name of the library file and the
 	   appended string "_init_hook" store it and set corresponding flag
 	   (the string will be reused for the other hook functions, so make
-	   it long enough that the longest name will fit into it) */
+	   it long enough that the longest name will fit into it). Strip any
+	   path before the device name - it may set via a symbolic link to some
+	   other directory than the normal module directory. */
 
-	hook_func_name = T_malloc( strlen( dev_name ) + 18 );
-	strcpy( hook_func_name, dev_name );
-	app = hook_func_name + strlen( dev_name );
+	hook_func_name = T_malloc( strlen( strip_path( dev->name ) ) + 18 );
+	strcpy( hook_func_name, strip_path( dev->name ) );
+	app = hook_func_name + strlen( strip_path( dev->name ) );
 	strcpy( app, "_init_hook" );
 
 	dlerror( );           /* make sure it's NULL before we continue */
@@ -279,7 +268,6 @@ static void resolve_hook_functions( Device *dev, const char *dev_name )
 	/* Get test hook function if available */
 
 	strcpy( app, "_test_hook" );
-
 	dlerror( );           /* make sure it's NULL before we continue */
 	dev->driver.test_hook =
 		     ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
@@ -289,7 +277,6 @@ static void resolve_hook_functions( Device *dev, const char *dev_name )
 	/* Get end-of-test hook function if available */
 
 	strcpy( app, "_end_of_test_hook" );
-
 	dlerror( );           /* make sure it's NULL before we continue */
 	dev->driver.end_of_test_hook =
 		     ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
@@ -299,7 +286,6 @@ static void resolve_hook_functions( Device *dev, const char *dev_name )
 	/* Get pre-experiment hook function if available */
 
 	strcpy( app, "_exp_hook" );
-
 	dlerror( );           /* make sure it's NULL before we continue */
 	dev->driver.exp_hook =
 		     ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
@@ -309,7 +295,6 @@ static void resolve_hook_functions( Device *dev, const char *dev_name )
 	/* Get end-of-experiment hook function if available */
 
 	strcpy( app, "_end_of_exp_hook" );
-
 	dlerror( );           /* make sure it's NULL before we continue */
 	dev->driver.end_of_exp_hook =
 		     ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
@@ -319,7 +304,6 @@ static void resolve_hook_functions( Device *dev, const char *dev_name )
 	/* Finally check if there's also an exit hook function */
 
 	strcpy( app, "_exit_hook" );
-
 	dlerror( );           /* make sure it's NULL before we continue */
 	dev->driver.exit_hook =
 		    ( void ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
@@ -332,10 +316,10 @@ static void resolve_hook_functions( Device *dev, const char *dev_name )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Runs through all the functions in the function list and if they need */
-/* to be resolved it tries to find them in the device driver functions. */
-/*----------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Run through all the functions in the function list and if they need */
+/* to be resolved try to find them in the device driver functions.     */
+/*---------------------------------------------------------------------*/
 
 static void resolve_functions( Device *dev )
 {
@@ -345,7 +329,7 @@ static void resolve_functions( Device *dev )
 
 	for ( num = 0; num < num_func; num++ )
 	{
-		/* Don't try to load functions that are not listed in `Functions' */
+		/* Don't try to load functions that are not listed in 'Functions' */
 
 		if ( ! Fncts[ num ].to_be_loaded )
 			continue;
@@ -370,7 +354,7 @@ static void resolve_functions( Device *dev )
 			if ( dev->count != 1 )
 			{
 				eprint( NO_ERROR, UNSET, "Functions %s() and %s#%d() are both "
-						"defined by module `%s'.\n", Fncts[ num ].name,
+						"defined by module '%s'.\n", Fncts[ num ].name,
 						Fncts[ num ].name, dev->count, dev->name );
 				add_function( num, cur, dev );
 			}
@@ -402,7 +386,7 @@ static void add_function( int num, void *new_func, Device *new_dev )
 					   Fncts[ num ].device->generic_type ) != 0 ) )
 	{
 		eprint( FATAL, SET, "Functions both with name %s() are defined in "
-				"modules of different types, `%s' and `%s'.\n",
+				"modules of different types, '%s' and '%s'.\n",
 				Fncts[ num ].name, Fncts[ num ].device->name, new_dev->name );
 		THROW( EXCEPTION );
 	}
@@ -501,7 +485,7 @@ void run_test_hooks( void )
 				call_push( NULL, cd->device_name );
 				if ( ! cd->driver.test_hook( ) )
 					eprint( SEVERE, UNSET, "Initialisation of test run failed "
-							"for module `%s'.\n", cd->name );
+							"for module '%s'.\n", cd->name );
 				call_pop( );
 			}
 
@@ -542,7 +526,7 @@ void run_end_of_test_hooks( void )
 				call_push( NULL, cd->device_name );
 				if ( ! cd->driver.end_of_test_hook( ) )
 					eprint( SEVERE, UNSET, "Final checks after test run "
-							"failed for module `%s'.\n", cd->name );
+							"failed for module '%s'.\n", cd->name );
 				call_pop( );
 			}
 
@@ -584,7 +568,7 @@ void run_exp_hooks( void )
 				call_push( NULL, cd->device_name );
 				if ( ! cd->driver.exp_hook( ) )
 					eprint( SEVERE, UNSET, "Initialisation of experiment "
-							"failed for module `%s'.\n", cd->name );
+							"failed for module '%s'.\n", cd->name );
 				else
 					cd->driver.exp_hook_is_run = SET;
 
@@ -642,19 +626,28 @@ void run_end_of_exp_hooks( void )
 
 		cd->driver.exp_hook_is_run = UNSET;
 
-		if ( cd->is_loaded && cd->driver.is_end_of_exp_hook )
+		if ( ! cd->is_loaded || ! cd->driver.is_end_of_exp_hook )
+			continue;
+
+		TRY
 		{
 			call_push( NULL, cd->device_name );
 
 			TRY
 			{
 				if( ! cd->driver.end_of_exp_hook( ) )
-					eprint( SEVERE, UNSET, "Resetting module `%s' after "
+					eprint( SEVERE, UNSET, "Resetting module '%s' after "
 							"experiment failed.\n", cd->name );
 				TRY_SUCCESS;
 			}
 
 			call_pop( );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			Internals.in_hook = UNSET;
+			RETHROW( );
 		}
 	}
 
@@ -690,19 +683,28 @@ void run_exit_hooks( void )
 			 ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
 			Cur_Pulser--;
 
+		if ( ! cd->is_loaded || ! cd->driver.is_exit_hook )
+			continue;
+
 		TRY
 		{
-			if ( cd->is_loaded && cd->driver.is_exit_hook )
+			call_push( NULL, cd->device_name );
+
+			TRY
 			{
-				call_push( NULL, cd->device_name );
 				cd->driver.exit_hook( );
+				TRY_SUCCESS;
 			}
 
+			call_pop( );
 			TRY_SUCCESS;
 		}
-
-		if ( cd->is_loaded && cd->driver.is_exit_hook )
-			call_pop( );
+		OTHERWISE
+		{
+			Internals.in_hook = UNSET;
+			Internals.exit_hooks_are_run = SET;
+			RETHROW( );
+		}
 	}
 
 	Internals.in_hook = UNSET;
@@ -721,14 +723,14 @@ void run_exit_hooks( void )
 /* other and probably more difficult or dangerous method to do it anyway. */
 /*                                                                        */
 /* ->                                                                     */
-/*    1. Name of the module (without the `.so' extension) the symbol is   */
+/*    1. Name of the module (without the '.so' extension) the symbol is   */
 /*       to be loaded from                                                */
 /*    2. Name of the symbol to be loaded                                  */
 /*    3. Pointer to void pointer for returning the address of the symbol  */
 /*                                                                        */
 /* <-                                                                     */
 /*    Return value indicates success or failure (see global.h for defi-   */
-/*    nition of the the return codes). On success `symbol_ptr' contains   */
+/*    nition of the the return codes). On success 'symbol_ptr' contains   */
 /*    the address of the symbol.                                          */
 /*------------------------------------------------------------------------*/
 

@@ -115,30 +115,30 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
   is much easier to handle for a computer. For this reason there exists the
   variable stack (which actually isn't a stack but a linked list).
 
-  So, if the lexer finds an identifier like `A', it first tries to get a
-  pointer to the variable named `A' in the variables list by calling
+  So, if the lexer finds an identifier like 'A', it first tries to get a
+  pointer to the variable named 'A' in the variables list by calling
   vars_get(). If this fails (and we're just parsing the VARIABLES section of
   the EDL file, otherwise it would utter an error message) a new variable is
   created instead by a call to vars_new(). The resulting pointer is passed
   to the parser.
 
-  Now, the parser sees the `=' bit of text and realizes it has to do an
+  Now, the parser sees the '=' bit of text and realizes it has to do an
   assignment and thus branches to evaluate the right hand side of the
-  expression. In this branch, the parser sees the `B' and pushes a copy of the
-  variable `B' onto the variables stack, containing just the necessary
-  information, i.e. its type and value. It then finds the `+' and branches
-  recursively to evaluate the expression to the right of the `+'. Here, the
-  parser sees just the numerical value `3.25' and pushes it onto the variables
+  expression. In this branch, the parser sees the 'B' and pushes a copy of the
+  variable 'B' onto the variables stack, containing just the necessary
+  information, i.e. its type and value. It then finds the '+' and branches
+  recursively to evaluate the expression to the right of the '+'. Here, the
+  parser sees just the numerical value '3.25' and pushes it onto the variables
   stack, thus creating another transient stack variable with the value 3.25
-  (and type FLOAT_VAL). Now the copy of `B' and the variable with the value of
+  (and type FLOAT_VAL). Now the copy of 'B' and the variable with the value of
   3.25 are on the variables stack and the parser can continue by adding the
   values of both these variables. It does so by calling vars_add(), creating
   another transient stack variable for the result and removing both the
   variables used as arguments. It finally returns to the state it started
-  from, the place where it found the `A =' bit, with a stack variable holding
+  from, the place where it found the 'A =' bit, with a stack variable holding
   the result of the evaluation of the right hand side. All left to be done now
   is to call vars_assign() which assigns the value of the stack variable to
-  `A'. The stack variable with the right hand side result is than removed from
+  'A'. The stack variable with the right hand side result is than removed from
   the stack. If we're a bit paranoid we can make sure everything worked out
   fine by checking that the variable stack is now empty. Quite simple, isn't
   it?
@@ -146,10 +146,10 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
   What looks like a lot of complicated work to do something rather simple
   has the advantage that, due to its recursive nature, it can be used
   without any changes for much more complicated situations. Instead of the
-  value 3.25 we could have a complicated expression to add to `B', which
+  value 3.25 we could have a complicated expression to add to 'B', which
   will be handled auto-magically by a deeper recursion, thus breaking up the
   complicated task into small, simple tasks, that can be handled easily.
-  Also, `B' could be a more complicated expression instead which would be
+  Also, 'B' could be a more complicated expression instead which would be
   handled in the same way.
 
   Now, what about arrays? If the lexer finds an identifier (it doesn't know
@@ -161,11 +161,11 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
 
             variable_identifier [
 
-  where `variable_identifier' is a array name. It calls vars_arr_start()
+  where 'variable_identifier' is a array name. It calls vars_arr_start()
   where, if the array is still completely new, the type of the array is set to
   INT_CONT_ARR or FLOAT_CONT_ARR (depending on the result of the macro
   IF_FUNC(), see above). Finally, it pushes a transient variable onto the
-  stack of type ARR_PTR with the `from' element in the variable structure
+  stack of type ARR_PTR with the 'from' element in the variable structure
   pointing to the original array. This transient variable serves as a kind of
   marker since the next thing the parser is going to do is to read all indices
   and push them onto the stack.
@@ -173,7 +173,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
   The next tokens have to be numbers - either simple numbers or computed
   numbers (i.e. results of function calls or elements of arrays). These are
   the indices of the array. We've reached the end of the list of indices when
-  the the closing bracket `]' is found in the input. Now the stack looks like
+  the the closing bracket ']' is found in the input. Now the stack looks like
   this:
 
                last index ->    number      <- top of stack
@@ -196,8 +196,8 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
   assignment, vars_arr_lhs() is called. Again, from the indices the element of
   the array to be set is calculated, but, since the the right and side of the
   assignment is not known yet, again an ARR_PTR transient variable is pushed
-  onto the stack with the generic pointer `gptr' in the union in the variables
-  structure pointing to the accessed element and the `from' field pointing to
+  onto the stack with the generic pointer 'gptr' in the union in the variables
+  structure pointing to the accessed element and the 'from' field pointing to
   the array. After the calculation of the right hand side, i.e. the value to
   be assigned to the array element, vars_assign() is called with both the
   calculated value and the ARR_PTR on the top of the stack. All vars_assign()
@@ -212,16 +212,16 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
   instead of doing the normal element lookup. In this routine the indices
   are interpreted as sizes for the dimensions of the array and memory is
   allocated for the elements of the array. It returns a ARR_PTR to the array
-  with the NEED_INIT flag in the `flags' element of the variables structure
+  with the NEED_INIT flag in the 'flags' element of the variables structure
   (of the transient variable) is set, a list of data (in curly brackets,
-  i.e. `{' and `}' following as an assignment will be interpreted as data
+  i.e. '{' and '}' following as an assignment will be interpreted as data
   for initializing the array.
 
   But beside these fixed sized arrays there are also variable sized arrays.
   These are needed e.g. for storing data sets received from the transient
   recorder where it is sometimes impossible to know the length of the data set
   in advance. Only the very last dimension of an array may be variable sized
-  and making it variable sized is indicated by writing a star (`*') as the
+  and making it variable sized is indicated by writing a star ('*') as the
   size of this dimension. In contrast to fixed sized arrays, variable sized
   arrays cannot be initialized and the very first assignment to such an array
   must be an array slice, i.e. an one-dimensional array. This is done by
@@ -396,7 +396,7 @@ Var *vars_add( Var *v1, Var *v2 )
 	char *new_str;
 
 
-	/* Make sure that `v1' and `v2' exist, are integers or float values or
+	/* Make sure that 'v1' and 'v2' exist, are integers or float values or
 	   arrays (or pointers thereto) */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
@@ -489,7 +489,7 @@ Var *vars_sub( Var *v1, Var *v2 )
 	Var *new_var = NULL;
 
 
-	/* Make sure that `v1' and `v2' exist, are integers or float values or
+	/* Make sure that 'v1' and 'v2' exist, are integers or float values or
 	   arrays (or pointers thereto) */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
@@ -563,7 +563,7 @@ Var *vars_mult( Var *v1, Var *v2 )
 	Var *new_var = NULL;
 
 
-	/* Make sure that `v1' and `v2' exist, are integers or float values or
+	/* Make sure that 'v1' and 'v2' exist, are integers or float values or
 	   arrays (or pointers thereto) */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
@@ -637,7 +637,7 @@ Var *vars_div( Var *v1, Var *v2 )
 	Var *new_var = NULL;
 
 
-	/* Make sure that `v1' and `v2' exist, are integers or float values or
+	/* Make sure that 'v1' and 'v2' exist, are integers or float values or
 	   arrays (or pointers thereto) */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
@@ -711,7 +711,7 @@ Var *vars_mod( Var *v1, Var *v2 )
 	Var *new_var = NULL;
 
 
-	/* Make sure that `v1' and `v2' exist, are integers or float values or
+	/* Make sure that 'v1' and 'v2' exist, are integers or float values or
 	   arrays (or pointers thereto) */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
@@ -772,7 +772,7 @@ Var *vars_mod( Var *v1, Var *v2 )
 
 
 /*------------------------------------------------------------------*/
-/* vars_pow() takes `v1' to the power of `v2' and pushes the result */
+/* vars_pow() takes 'v1' to the power of 'v2' and pushes the result */
 /* onto the stack.                                                  */
 /* ->                                                               */
 /*    * pointers to two variable structures                         */
@@ -785,7 +785,7 @@ Var *vars_pow( Var *v1, Var *v2 )
 	Var  *new_var = NULL;
 
 
-	/* Make sure that `v1' and `v2' exist, are integers or float values or
+	/* Make sure that 'v1' and 'v2' exist, are integers or float values or
 	   arrays (or pointers thereto) */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
@@ -865,7 +865,7 @@ Var *vars_negate( Var *v )
 	double *idp = NULL;
 
 
-	/* Make sure that `v' exists, has integer or float type or is an array
+	/* Make sure that 'v' exists, has integer or float type or is an array
 	   and has an value assigned to it */
 
 	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
@@ -914,7 +914,7 @@ Var *vars_negate( Var *v )
 		case ARR_REF :
 			if ( v->from->dim != 1 )
 			{
-				eprint( FATAL, SET, "Argument of function `int()' is "
+				eprint( FATAL, SET, "Argument of function 'int()' is "
 						"neither a number nor a 1-dimensional array.\n" );
 				THROW( EXCEPTION );
 			}
@@ -994,7 +994,7 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 	if ( v1 && v1->type == STR_VAR && v2 && v2->type == STR_VAR )
 		return vars_str_comp( comp_type, v1, v2 );
 
-	/* Make sure that `v1' and `v2' exist, are integers or float values
+	/* Make sure that 'v1' and 'v2' exist, are integers or float values
 	   and have an value assigned to it */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR );
@@ -1491,7 +1491,7 @@ void vars_check( Var *v, int type )
 	{
 		fsc2_assert( v->name != NULL );         /* just a bit paranoid ? */
 
-		eprint( FATAL, SET, "The accessed variable `%s' has not been "
+		eprint( FATAL, SET, "The accessed variable '%s' has not been "
 				"assigned a value.\n", v->name );
 		THROW( EXCEPTION );
 	}
@@ -1523,7 +1523,7 @@ static void vars_warn_new( Var *v )
  	if ( v->flags & NEW_VARIABLE )
 	{
 		fsc2_assert( v->name != NULL );            /* just a bit paranoid ? */
-		eprint( WARN, SET, "Variable `%s' has not been assigned a value.\n",
+		eprint( WARN, SET, "Variable '%s' has not been assigned a value.\n",
 				v->name );
 	}
 }
@@ -1561,7 +1561,7 @@ bool vars_exist( Var *v )
 
 
 /*-------------------------------------------------------------------*/
-/* This function is called when a `VAR_TOKEN [' combination is found */
+/* This function is called when a 'VAR_TOKEN [' combination is found */
 /* in the input. For a new array it sets its type. Everything else   */
 /* it does is pushing a variable with a pointer to the array onto    */
 /* the stack.                                                        */
@@ -1601,7 +1601,7 @@ Var *vars_arr_start( Var *v )
 
 /*----------------------------------------------------------------------*/
 /* The function is called when the end of an array access (indicated by */
-/* the `]') is found on the left hand side of an assignment. If it is   */
+/* the ']') is found on the left hand side of an assignment. If it is   */
 /* called for a new array the indices found on the stack are the sizes  */
 /* for the different dimensions of the array and are used to setup the  */
 /* the array.                                                           */
@@ -1659,7 +1659,7 @@ static Var *vars_get_lhs_pointer( Var *v, int n )
 
 	if ( n < a->dim - 1 )
 	{
-		eprint( FATAL, SET, "Not enough indices found for array `%s'.\n",
+		eprint( FATAL, SET, "Not enough indices found for array '%s'.\n",
 				a->name );
 		THROW( EXCEPTION );
 	}
@@ -1669,7 +1669,7 @@ static Var *vars_get_lhs_pointer( Var *v, int n )
 	if ( n > a->dim )
 	{
 		eprint( FATAL, SET, "Too many indices (%d) found for "
-				"%d-dimensional array `%s'.\n", n, a->dim, a->name );
+				"%d-dimensional array '%s'.\n", n, a->dim, a->name );
 		THROW( EXCEPTION );
 	}
 
@@ -1680,11 +1680,11 @@ static Var *vars_get_lhs_pointer( Var *v, int n )
 	if ( a->flags & NEED_ALLOC && n != a->dim - 1 )
 	{
 		if ( a->dim != 1 )
-			eprint( FATAL, SET, "Size of array `%s' is still unknown, "
+			eprint( FATAL, SET, "Size of array '%s' is still unknown, "
 					"only %d ind%s allowed here.\n", a->name, a->dim - 1,
 					( a->dim == 2 ) ? "ex is" : "ices are" );
 		else
-			eprint( FATAL, SET, "Size of array `%s' is still unknown, "
+			eprint( FATAL, SET, "Size of array '%s' is still unknown, "
 					"no indices are allowed here.\n", a->name );
 		THROW( EXCEPTION );
 	}
@@ -1700,7 +1700,7 @@ static Var *vars_get_lhs_pointer( Var *v, int n )
 
 	/* If the array is still variable sized and thus needs memory allocated we
 	   push a pointer to the array onto the stack and store the indexed slice
-	   in the variables structure `len' element. Otherwise we push a variable
+	   in the variables structure 'len' element. Otherwise we push a variable
 	   onto the stack with a pointer to the indexed element or slice.*/
 
 	if ( a->flags & NEED_ALLOC )
@@ -1756,15 +1756,15 @@ static long vars_calc_index( Var *a, Var *v )
 		else
 		{
 			eprint( WARN, SET, "Float variable used as index #%d for array "
-					"`%s'.\n", i + 1, a->name );
+					"'%s'.\n", i + 1, a->name );
 			cur = ( int ) v->val.dval - ARRAY_OFFSET;
 		}
 
-		/* Check that the index is a number and not a `*' */
+		/* Check that the index is a number and not a '*' */
 
 		if ( cur == - ARRAY_OFFSET && v->flags & VARIABLE_SIZED )
 		{
-			eprint( FATAL, SET, "A `*' as index is only allowed in the "
+			eprint( FATAL, SET, "A '*' as index is only allowed in the "
 					"declaration of an array, not in an assignment.\n" );
 			THROW( EXCEPTION );
 		}
@@ -1774,7 +1774,7 @@ static long vars_calc_index( Var *a, Var *v )
 		if ( cur < 0 )
 		{
 			eprint( FATAL, SET, "Invalid array index #%d (value=%d) for "
-					"array `%s', minimum is %d.\n",
+					"array '%s', minimum is %d.\n",
 					i + 1, cur + ARRAY_OFFSET, a->name, ARRAY_OFFSET );
 			THROW( EXCEPTION );
 		}
@@ -1793,7 +1793,7 @@ static long vars_calc_index( Var *a, Var *v )
 				 || v->next != NULL || i != a->dim - 1 )
 			{
 				eprint( FATAL, SET, "Invalid array index #%d (value=%d) "
-						"for array `%s', maximum is %d.\n",
+						"for array '%s', maximum is %d.\n",
 						i + 1, cur + ARRAY_OFFSET, a->name,
 						a->sizes[ i ] - 1 + ARRAY_OFFSET );
 				THROW( EXCEPTION );
@@ -1811,7 +1811,7 @@ static long vars_calc_index( Var *a, Var *v )
 	{
 		if ( v->next != NULL )        /* i.e. UNDEF_VAR not as last index */
 		{
-			eprint( FATAL, SET, "Missing array index for array `%s'.\n",
+			eprint( FATAL, SET, "Missing array index for array '%s'.\n",
 					a->name );
 			THROW( EXCEPTION );
 		}
@@ -1847,7 +1847,7 @@ static Var *vars_setup_new_array( Var *v, int dim )
 	if ( v->next->type == UNDEF_VAR )
 	{
 		eprint( FATAL, SET, "Missing indices in declaration of array "
-				"`%s'.\n", a->name );
+				"'%s'.\n", a->name );
 		THROW( EXCEPTION );
 	}
 
@@ -1873,44 +1873,44 @@ static Var *vars_setup_new_array( Var *v, int dim )
 		   entry in the arrays field for sizes */
 
 		if ( v->type == INT_VAR )
-		{
-			/* If the the very last variable with the sizes has the flag
-			   VARIABLE_SIZED set this is going to be a dynamically sized
-			   array - set the corresponding flag in the array variable,
-			   don't reset its NEW_VARIABLE flag and don't allocate memory
-			   and return a variable with a generic pointer to the array. */
-
-			if ( v->flags & VARIABLE_SIZED )
-			{
-				if ( i != dim - 1 )
-				{
-					eprint( FATAL, SET, "Only the very last dimension of "
-							"an array can be set dynamically.\n" );
-					THROW( EXCEPTION );
-				}
-
-				vars_pop( v );
-
-				a->flags |= IS_DYNAMIC;
-				a->sizes[ i ] = 0;
-				a->flags |= NEED_ALLOC;
-				ret = vars_push( ARR_PTR, NULL, a );
-				return ret;
-			}
-
 			cur = ( int ) v->val.lval;
-		}
 		else
 		{
-			eprint( WARN, SET, "FLOAT value (value=%f) used as size in "
-					"definition of array `%s'.\n", v->val.dval, a->name );
-			cur = ( int ) v->val.dval;
+			eprint( WARN, SET, "FLOAT value (%f) used as size in definition "
+					"of array '%s'.\n", v->val.dval, a->name );
+			cur = irnd( v->val.dval );
+		}
+
+		/* If the the very last variable with the sizes has the VARIABLE_SIZED
+		   flag set this is going to be a dynamically sized array - set the
+		   corresponding flag in the array variable, don't reset its
+		   NEW_VARIABLE flag and don't allocate memory and return a variable
+		   with a generic pointer to the array. */
+
+		if ( v->flags & VARIABLE_SIZED )
+		{
+
+			if ( i != dim - 1 )
+			{
+				eprint( FATAL, SET, "Only the very last dimension of "
+						"an array can be set dynamically.\n" );
+				THROW( EXCEPTION );
+			}
+
+			vars_pop( v );
+
+			a->flags |= IS_DYNAMIC;
+			a->sizes[ i ] = 0;
+			a->flags |= NEED_ALLOC;
+			ret = vars_push( ARR_PTR, NULL, a );
+			ret->len = 0;
+			return ret;
 		}
 
 		if ( cur < 2 )
 		{
-			eprint( FATAL, SET, "Invalid size (value=%d) used in definition "
-					"of array `%s', minimum is 2.\n", cur, a->name );
+			eprint( FATAL, SET, "Invalid size (%d) used in definition of "
+					"array '%s', minimum is 2.\n", cur, a->name );
 			THROW( EXCEPTION );
 		}
 
@@ -1925,7 +1925,8 @@ static Var *vars_setup_new_array( Var *v, int dim )
 	else
 		a->val.dpnt = T_calloc( a->len, sizeof *a->val.dpnt );
 
-	return vars_push( ARR_PTR, NULL, a );
+	return vars_push( ARR_PTR, a->type == INT_CONT_ARR ?
+					  ( void * ) a->val.lpnt : ( void * ) a->val.dpnt, a );
 }
 
 
@@ -1949,7 +1950,7 @@ Var *vars_arr_rhs( Var *v )
 	to an array. While doing so we also count the number of indices on the
 	stack, 'dim'. If the last entry on the stack is an undefined variable it
 	means we found a reference to an 1-dimensional array, i.e. something like
-	`j[ ]'. */
+	'j[ ]'. */
 
 	dim = 0;
 
@@ -1969,7 +1970,7 @@ Var *vars_arr_rhs( Var *v )
 
 	if ( a->flags & NEED_ALLOC )
 	{
-		eprint( FATAL, SET, "Array `%s' is dynamically sized and its size "
+		eprint( FATAL, SET, "Array '%s' is dynamically sized and its size "
 				"is still unknown.\n", a->name );
 		THROW( EXCEPTION );
 	}
@@ -1979,7 +1980,7 @@ Var *vars_arr_rhs( Var *v )
 
 	if ( dim < a->dim - 1 )
 	{
-		eprint( FATAL, SET, "Not enough indices supplied for array `%s'.\n",
+		eprint( FATAL, SET, "Not enough indices supplied for array '%s'.\n",
 				a->name );
 		THROW( EXCEPTION );
 	}
@@ -1989,7 +1990,7 @@ Var *vars_arr_rhs( Var *v )
 	if ( dim > a->dim )
 	{
 		eprint( FATAL, SET, "Too many indices supplied for %d-dimensional "
-				"array `%s'.\n", a->dim, a->name );
+				"array '%s'.\n", a->dim, a->name );
 		THROW( EXCEPTION );
 	}
 
@@ -2089,14 +2090,14 @@ static void vars_ass_from_var( Var *src, Var *dest )
 
 	if ( dest->flags & NEED_SLICE )
 	{
-		eprint( FATAL, SET, "In assignment to array `%s' an array slice is "
+		eprint( FATAL, SET, "In assignment to array '%s' an array slice is "
 				"needed on the right hand side.\n", dest->from->name );
 		THROW( EXCEPTION );
 	}
 
 	if ( dest->flags & NEED_ALLOC )
 	{
-		eprint( FATAL, SET, "Assignment to dynamic array `%s' that has a "
+		eprint( FATAL, SET, "Assignment to dynamic array '%s' that has a "
 				"still undefined size.\n", dest->name );
 		THROW( EXCEPTION );
 	}
@@ -2111,7 +2112,7 @@ static void vars_ass_from_var( Var *src, Var *dest )
 
 	/* Do the assignment - take care: the left hand side variable can be
 	   either a real variable or an array pointer with the void pointer
-	   `val.gptr' in the variable structure pointing to the data to be set
+	   'val.gptr' in the variable structure pointing to the data to be set
 	   in an array.  */
 
 	switch ( dest->type )
@@ -2241,7 +2242,8 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 
 	if ( dest->type == ARR_PTR )
 	{
-		fsc2_assert( dest->flags & NEED_SLICE );
+		fsc2_assert( dest->flags & NEED_SLICE ||
+					 dest->from->flags & NEED_INIT );
 
 		d = dest->from;
 		s = src->from;
@@ -2275,7 +2277,7 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 		{
 			if ( d->sizes[ d->dim - 1 ] != s->sizes[ s->dim - 1 ] )
 			{
-				eprint( FATAL, SET, "Arrays (or slices of) `%s' and `%s' "
+				eprint( FATAL, SET, "Arrays (or slices of) '%s' and '%s' "
 						"have different sizes.\n", d->name, s->name );
 				THROW( EXCEPTION );
 			}
@@ -2305,7 +2307,7 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 		}
 		else if ( d->len != s->sizes[ s->dim - 1 ] )
 		{
-			eprint( FATAL, SET, "Arrays (or slices of) `%s' and `%s' "
+			eprint( FATAL, SET, "Arrays (or slices of) '%s' and '%s' "
 					"have different sizes.\n", d->name, s->name );
 			THROW( EXCEPTION );
 		}
@@ -2314,8 +2316,8 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 	/* Warn on float to integer assignment */
 
 	if ( d->type == INT_CONT_ARR && s->type == FLOAT_CONT_ARR )
-		eprint( WARN, SET, "Assignment of float array (slice) `%s' to "
-				"integer array `%s'.\n", s->name, d->name );
+		eprint( WARN, SET, "Assignment of float array (slice) '%s' to "
+				"integer array '%s'.\n", s->name, d->name );
 
 	/* Now do the actual copying - if both types are identical a fast memcpy()
 	   will do the job, otherwise we need to do it 'by hand' */
@@ -2438,7 +2440,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 	{
 		if ( d->sizes[ d->dim - 1 ] != src->len )
 		{
-			eprint( FATAL, SET, "Array slice assigned to array `%s' does "
+			eprint( FATAL, SET, "Array slice assigned to array '%s' does "
 					"not fit its length.\n", d->name );
 			THROW( EXCEPTION );
 		}
@@ -2453,7 +2455,7 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 
 	if ( d->type == INT_CONT_ARR && src->type == FLOAT_ARR )
 		eprint( WARN, SET, "Assignment of float array (or slice) to "
-				"integer array `%s'.\n", d->name );
+				"integer array '%s'.\n", d->name );
 
 	/* Now copy the transient array as slice to the destination - if both
 	   variable types fit a fast memcpy() will do the job while in the other
@@ -2520,9 +2522,9 @@ void vars_arr_init( Var *v )
 
 	/* The variable pointer this function gets passed is a pointer to the very
        last initialization data on the variable stack. Now we've got to work
-       our way down the variable stack until we find the first non-data
-       variable which must be of ARR_PTR type. While doing so, we also count
-       the number of initializers, 'ni', on the stack. */
+       our way up the variable stack until we find the first non-data variable
+       which must be of ARR_PTR type. While doing so, we also count the number
+       of initializers, 'ni', on the stack. */
 
 	ni = 0;
 	while ( v->type != ARR_PTR )
@@ -2533,37 +2535,55 @@ void vars_arr_init( Var *v )
 	a = v->from;
 	vars_check( a, INT_CONT_ARR | FLOAT_CONT_ARR );
 
-
-	/* Variable sized arrays can't be initialized, they need the assignment of
-	   an array slice to determine the still unknown size of their very last
-	   dimension */
-
-	if ( a->flags & NEED_ALLOC )
-	{
-		eprint( FATAL, SET, "Variable sized array `%s' can not be "
-				"initialized.\n", a->name );
-		THROW( EXCEPTION );
-	}
-
 	/* If the array isn't newly declared we can't do an assignment */
 
 	if ( ! ( a->flags & NEED_INIT ) )
 	{
-		eprint( FATAL, SET, "Initialization of array `%s' only allowed "
+		eprint( FATAL, SET, "Initialization of array '%s' only allowed "
 				"immediately after declaration.\n", a->name );
 		THROW( EXCEPTION );
+	}
+
+	/* Only 1-dimensional variable sized arrays can be initialized which
+	   automatically fixes the size of the array */
+
+	if ( a->flags & NEED_ALLOC )
+	{
+		if ( a->dim != 1 )
+		{
+			eprint( FATAL, SET, "Only 1-dimensional variable sized arrays can "
+					"be initialized, but '%s' is %d-dimensional.\n",
+					a->name, a->dim );
+			THROW( EXCEPTION );
+		}
+
+		if ( ni < 2 )
+		{
+			eprint( FATAL, SET, "Ony got one value as initializer for "
+					"1-dimensional variable sized array '%s'.\n", a->name );
+			THROW( EXCEPTION );
+		}
+
+		a->len = a->sizes[ 0 ] = ni;
+
+		if ( a->type == INT_CONT_ARR )
+			a->val.lpnt = T_malloc( a->len * sizeof *a->val.lpnt );
+		else
+			a->val.dpnt = T_malloc( a->len * sizeof *a->val.dpnt );
+
+		a->flags &= ~NEED_ALLOC;
 	}
 
 	/* Check that the number of initializers fits the number of elements of
        the array */
 
 	if ( ni < a->len )
-		eprint( WARN, SET, "Less initializers for array `%s' than it has "
+		eprint( WARN, SET, "Less initializers for array '%s' than it has "
 				"elements.\n", a->name );
 
 	if ( ni > a->len )
 	{
-		eprint( FATAL, SET, "Too many initializers for array `%s'.\n",
+		eprint( FATAL, SET, "Too many initializers for array '%s'.\n",
 				a->name );
 		THROW( EXCEPTION );
 	}
@@ -2587,7 +2607,7 @@ void vars_arr_init( Var *v )
 			else
 			{
 				eprint( WARN, SET, "Floating point value used in "
-						"initialization of integer array `%s'.\n", a->name );
+						"initialization of integer array '%s'.\n", a->name );
 				*v->val.lpnt++ = ( long ) p1->val.dval;
 			}
 		}
@@ -2623,7 +2643,7 @@ Var *apply_unit( Var *var, Var *unit )
 	{
 		fsc2_assert( var->name != NULL );         /* just a bit paranoid ? */
 
-		eprint( FATAL, SET, "The accessed variable `%s' has not been "
+		eprint( FATAL, SET, "The accessed variable '%s' has not been "
 				"assigned a value.\n", var->name );
 		THROW( EXCEPTION );
 	}

@@ -380,7 +380,7 @@ static bool parent_reader( CommStruct *header )
 				else if ( header->data.str_len[ 0 ] == 0 )
 					str[ 0 ] = T_strdup( "" );
 
-				fl_show_messages( str[ 0 ] );
+				show_message( str[ 0 ] );
 				TRY_SUCCESS;
 			}
 			OTHERWISE
@@ -948,9 +948,6 @@ bool writer( int type, ... )
 				 ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
 				return FAIL;
 			break;
-
-			/* Wait for some acknowledgement to be sent back */
-
 
 		case C_SHOW_ALERT :
 			fsc2_assert( Internals.I_am == CHILD );

@@ -64,7 +64,7 @@ my %wp = ( '-side' => 'left',
 # Create all the graphic stuff
 
 my $mw = MainWindow->new( );
-$mw->title( "cw_epr" );
+$mw->title( "cw_epr_ud" );
 
 my $mf = $mw->Frame( '-relief' => 'ridge', '-borderwidth' => '1m' );
 
@@ -274,7 +274,7 @@ sub get_defs {
 	if ( $ARGV[ 0 ] ) {
 		open( F, "<$ARGV[ 0 ]" ) or return;
 	} else {
-		open( F, "<$ENV{ HOME }/.fsc2/cw_epr" ) or return;
+		open( F, "<$ENV{ HOME }/.fsc2/cw_epr_ud" ) or return;
 	}
 
 	goto done_reading unless defined( $ne = <F> ) and $ne =~ /^#/;
@@ -345,7 +345,7 @@ sub store_defs {
 	 local *F;
 
 	 mkdir "$ENV{ HOME }/.fsc2", 0777 unless -e "$ENV{ HOME }/.fsc2";
-	 open( F, ">$ENV{ HOME }/.fsc2/cw_epr" ) or return;
+	 open( F, ">$ENV{ HOME }/.fsc2/cw_epr_ud" ) or return;
 
 	 $start_current = 0 if $start_current eq ".";
 	 $end_current = 0 if $end_current eq ".";
@@ -589,7 +589,7 @@ sub write_out {
 	print F
 "/***************************************************************************/
 /*      EDL program for running cw-EPR experiments with the 360 GHz        */
-/*                         spectrometer.                                   */
+/*         spectrometer measuring both during sweep up and down.           */
 /***************************************************************************/
 
 
@@ -638,6 +638,7 @@ lockin_auto_setup( 1 / kd, 1 );
 EXPERIMENT:
 
 File = get_file( );
+
 IF is_file( File ) {
 	fsave( File, \"% 1st row X, all following rows Y, \"
 				 \"parameters at end\\n\" );
@@ -654,15 +655,14 @@ FOREVER {
 print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
 print F
 "
+	J += 1;
+	print( \"Starting #. run\\n\", J );
+
+	data = 0.0;
 	magnet_sweep( \"$dir\" );
 	lockin_auto_acquisition( \"ON\" );
 
-	J += 1;
-	print( \"Starting #. run\\n\", J );
-	data = 0.0;
-
 	FOR I = 1 : Num_Points {
-
 		data[ I ] = lockin_get_data( );
 		display( I, data[ I ], 1, I, ( avg[ I ] + data[ I ] ) / J, 2 );
 	}
@@ -680,7 +680,42 @@ print F
 	avg += data;
 	clear_curve( 1, 3 );
 	display( 1, data, 3 );
-	print( \"#. run finished, sweeping magnet to start current.\\n\", J );
+
+	set_field( start_current + ( Num_Points - 1 ) * step_size );
+";
+print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
+print F
+"
+	J += 1;
+	print( \"Starting #. run\\n\", J );
+
+	data = 0.0;
+";
+if ( $dir eq "UP" ) {
+	print F "    magnet_sweep( \"DOWN\" );\n";
+} else {
+	print F "    magnet_sweep( \"UP\" );\n";
+}
+print F "    lockin_auto_acquisition( \"ON\" );
+
+	FOR I = Num_Points : 1 : -1 {
+		data[ I ] = lockin_get_data( );
+		display( I, data[ I ], 1, I, ( avg[ I ] + data[ I ] ) / J, 2 );
+	}
+
+	magnet_sweep( \"STOP\" );
+	lockin_auto_acquisition( \"OFF\" );
+
+	IF is_file( File ) {
+		FOR K = 1 : Num_Points {
+			fsave( File, \"# \", data[ K ] );
+		}
+		fsave( File, \"\\n\" );
+	}
+
+	avg += data;
+	clear_curve( 1, 3 );
+	display( 1, data, 3 );
 }
 
 
@@ -706,7 +741,7 @@ IF is_file( File ) {
 			}
 			fsave( File, \"\\n\" );
 		}
-	} ELSE IF I <= Num_Points {
+	} ELSE IF ( J % 2 == 1 & I <= Num_Points ) |  ( J % 2 == 0 & I >= 1 ) {
 		FOR I = 1 : Num_Points {
 			fsave( File, \"# \", data[ I ] );
 		}
@@ -715,7 +750,7 @@ IF is_file( File ) {
 
     fsave( File,
            \"% Date:                    # #\\n\"
-           \"% Magnet:\\n\"
+           \"% Magnet (measuring during both sweep up and down):\\n\"
            \"%   Start current:         # A\\n\"
            \"%   End current:           # A\\n\"
            \"%   Sweep rate:            # A/min\\n\"
@@ -729,7 +764,7 @@ IF is_file( File ) {
            \"%   Modulation amplitude:  # V\\n\"
            \"% Number of runs:          #\\n\"
            \"% Number of points:        #\\n\",
-           date(), time(),
+		   date(), time(),
 		   start_current, start_current + ( Num_Points - 1 ) * step_size,
 		   sweep_rate * 60.0, " . ( $sleep_time ne "" ? $sleep_time : 0 ) .
            ", lockin_sensitivity( ) * 1.0e3, tc, kd,

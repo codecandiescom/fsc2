@@ -53,6 +53,7 @@ volatile bool conn_child_replied;
 
 /* Locally used functions */
 
+static void check_run( void );
 static void test_machine_type( void );
 static int scan_args( int *argc, char *argv[ ], char **fname );
 static void final_exit_handler( void );
@@ -70,6 +71,7 @@ static void set_main_signals( void );
 int main( int argc, char *argv[ ] )
 {
 	char *fname;
+
 
 #if defined MDEBUG
 	if ( mcheck( NULL ) != 0 )
@@ -185,6 +187,9 @@ int main( int argc, char *argv[ ] )
 	set_main_signals( );
 	atexit( final_exit_handler );
 
+	if ( Internals.cmdline_flags & DO_CHECK )
+		check_run( );
+
 	/* Only if starting the server for external connections succeeds really
 	   start the main loop */
 
@@ -218,6 +223,65 @@ int main( int argc, char *argv[ ] )
 	xforms_close( );
 
 	return EXIT_SUCCESS;
+}
+
+
+/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+
+static void check_run( void )
+{
+	static bool user_break = UNSET;
+	long i;
+
+
+	fl_set_object_callback( GUI.main_form->test_file, NULL, 0 );
+	fl_deactivate_object( GUI.main_form->Load );
+	fl_set_object_lcol( GUI.main_form->Load, FL_INACTIVE_COL );
+	fl_deactivate_object( GUI.main_form->reload );
+	fl_set_object_lcol( GUI.main_form->reload, FL_INACTIVE_COL );
+	fl_deactivate_object( GUI.main_form->Edit );
+	fl_set_object_lcol( GUI.main_form->Edit, FL_INACTIVE_COL );
+	fl_deactivate_object( GUI.main_form->run );
+	fl_set_object_lcol( GUI.main_form->run, FL_INACTIVE_COL );
+	fl_deactivate_object( GUI.main_form->quit );
+	fl_set_object_lcol( GUI.main_form->quit, FL_INACTIVE_COL );
+	fl_deactivate_object( GUI.main_form->test_file );
+	fl_set_object_lcol( GUI.main_form->test_file, FL_INACTIVE_COL );
+
+	user_break = UNSET;
+	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
+	scan_main( in_file );
+	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+
+	if ( user_break ||
+		 EDL.compilation.error[ FATAL ]  != 0 ||
+		 EDL.compilation.error[ SEVERE ] != 0 ||
+		 EDL.compilation.error[ WARN ]   != 0 )
+		exit( EXIT_FAILURE );
+
+	fl_activate_object( GUI.main_form->Load );
+	fl_set_object_lcol( GUI.main_form->Load, FL_BLACK );
+	fl_activate_object( GUI.main_form->reload );
+	fl_set_object_lcol( GUI.main_form->reload, FL_BLACK );
+	fl_activate_object( GUI.main_form->Edit );
+	fl_set_object_lcol( GUI.main_form->Edit, FL_BLACK );
+	fl_activate_object( GUI.main_form->run );
+	fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
+	fl_activate_object( GUI.main_form->quit );
+	fl_set_object_lcol( GUI.main_form->quit, FL_BLACK );
+
+	for ( i = 0; i < Internals.num_test_runs; i++ )
+	{
+		if ( ! run( ) )
+			exit( EXIT_FAILURE );
+		while ( fl_do_forms( ) != GUI.main_form->quit )
+			/* empty */ ;
+		if ( Internals.check_return > 1 )
+			exit( EXIT_FAILURE );
+	}
+
+	exit( EXIT_SUCCESS );
 }
 
 
@@ -264,6 +328,13 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 	{
 		if ( ! strcmp( argv[ cur_arg ], "-t" ) )
 		{
+			if ( flags & DO_CHECK )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags `-t' and "
+						"`-X'.\n" );
+				usage( EXIT_FAILURE );
+			}
+
 			/* no file name with "-t" option ? */
 
 			if ( argv[ ++cur_arg ] == NULL )
@@ -321,6 +392,13 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 
 		if ( ! strncmp( argv[ cur_arg ], "-S", 2 ) )
 		{
+			if ( flags & DO_CHECK )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags `-S' and "
+						"`-X'.\n" );
+				usage( EXIT_FAILURE );
+			}
+
 			if ( flags & DO_TEST )
 			{
 				fprintf( stderr, "fsc2: Can't have both flags `-S' and "
@@ -355,16 +433,23 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 
 		if ( ! strncmp( argv[ cur_arg ], "-T", 2 ) )
 		{
+			if ( flags & DO_CHECK )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags `-T' and "
+						"`-X'.\n" );
+				usage( EXIT_FAILURE );
+			}
+
 			if ( flags & DO_START )
 			{
-				fprintf( stderr, "fsc2: Can't have both flags `-S' and "
-						"`-T'.\n" );
+				fprintf( stderr, "fsc2: Can't have both flags `-T' and "
+						"`-S'.\n" );
 				usage( EXIT_FAILURE );
 			}
 
 			if ( argv[ cur_arg ][ 2 ] == '\0' && *argc == cur_arg + 1 )
 			{
-				fprintf( stderr, "fsc2 -T: No input file\n" );
+				fprintf( stderr, "fsc2 -T: No input file.\n" );
 				usage( EXIT_FAILURE );
 			}
 
@@ -387,6 +472,71 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			break;
 		}
 
+		if ( ! strncmp( argv[ cur_arg ], "-X", 2 ) )
+		{
+			if ( flags & DO_CHECK )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags `-X' and "
+						"`-t'.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( flags & DO_START )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags `-X' and "
+						"`-S'.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( flags & DO_TEST )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags `-X' and "
+						"`-T'.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( argv[ cur_arg ][ 2 ] == '\0' )
+				Internals.num_test_runs = 1;
+			else
+				for ( Internals.num_test_runs = 0, i = 2;
+					  argv[ cur_arg ][ i ] != '\0'; i++ )
+					if ( isdigit( argv[ cur_arg ][ i ] ) )
+						Internals.num_test_runs = Internals.num_test_runs * 10 
+							+ ( argv[ cur_arg ][ i ] - '0' );
+					else
+					{
+						fprintf( stderr, "Flag '-X' needs a numerical "
+								 "argument but got `%s'.\n",
+								 argv[ cur_arg ] + 2);
+						usage( EXIT_FAILURE );
+					}
+
+			if ( *argc == cur_arg + 1 )
+			{
+				fprintf( stderr, "fsc2 -X: No input file.\n" );
+				usage( EXIT_FAILURE );
+			}
+			else
+			{
+				*fname = argv[ cur_arg + 1 ];
+				for ( i = cur_arg; i < *argc - 1; i++ )
+					argv[ i ] = argv[ i + 2 ];
+				*argc -= 2;
+			}
+
+			if ( Internals.num_test_runs == 0 )
+			{
+				Internals.just_testing = SET;
+				Internals.cmdline_flags |= NO_MAIL;
+
+				seteuid( getuid( ) );
+				setegid( getgid( ) );
+				exit( scan_main( *fname ) ? EXIT_SUCCESS : EXIT_FAILURE );
+			}
+
+			flags |= NO_MAIL | DO_LOAD | DO_CHECK;
+		}
+
 		cur_arg++;
 	}
 
@@ -397,7 +547,7 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 /*----------------------------------------------------------*/
 /* This function is called after either exit() is called or */
 /* it returns from main(). Here some cleanup is done that   */
-/* is necessary even oif the program crashed.               */
+/* is necessary even if the program crashed.                */
 /*----------------------------------------------------------*/
 
 static void final_exit_handler( void )
@@ -467,9 +617,10 @@ void load_file( FL_OBJECT *a, long reload )
 	struct stat file_stat;
 
 
+	a = a;                          /* keep the compiler happy... */
+
 	notify_conn( BUSY_SIGNAL );
 	old_in_file= NULL;
-	a = a;
 
 	/* If new file is to be loaded get its name and store it, otherwise use
 	   previous name */
@@ -526,6 +677,9 @@ void load_file( FL_OBJECT *a, long reload )
 
 	if ( access( in_file, R_OK ) == -1 )
 	{
+		if ( Internals.cmdline_flags & DO_CHECK )
+			exit ( EXIT_FAILURE );
+
 		if ( errno == ENOENT )
 			fl_show_alert( "Error", "Sorry, file not found:", in_file, 1 );
 		else
@@ -538,6 +692,9 @@ void load_file( FL_OBJECT *a, long reload )
 
 	if ( ( fp = fopen( in_file, "r" ) ) == NULL )
 	{
+		if ( Internals.cmdline_flags & DO_CHECK )
+			exit ( EXIT_FAILURE );
+
 		fl_show_alert( "Error", "Sorry, can't open file:", in_file, 1 );
 		old_in_file = T_free( old_in_file );
 		notify_conn( UNBUSY_SIGNAL );
@@ -1438,7 +1595,8 @@ void notify_conn( int signo )
        experiment is running - in this case fsc2 is busy anyway and the
        connection process has already been informed about this. */
 
-	if ( Internals.conn_pid <= 0 || Internals.child_pid > 0 )
+	if ( Internals.conn_pid <= 0 || Internals.child_pid > 0 ||
+		 Internals.cmdline_flags & DO_CHECK )
 		return;
 
 	kill( Internals.conn_pid, signo );

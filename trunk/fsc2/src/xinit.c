@@ -275,8 +275,17 @@ bool xforms_init( int *argc, char *argv[ ] )
 			* ( ( int * ) xresources[ SLIDERFONTSIZE ].var );
 	fl_set_defaults( FL_PDSliderFontSize, &xcntl );
 
-	if ( ! dl_fsc2_rsc( ) )
-		 return FAIL;
+	/* Load the functions for creating forms from the library dealing
+	   with graphics */
+
+	TRY
+	{
+		if ( ! dl_fsc2_rsc( ) )
+			return FAIL;
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+		return FAIL;
 
 	/* Create and display the main form */
 
@@ -495,28 +504,45 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 
 bool dl_fsc2_rsc( void )
 {
-	char *lib_name;
-	void *handle;
+	char *lib_name = NULL;
+	void *handle = NULL;
+	char *ld_path;
+	char *ld = NULL;
+	char *ldc;
 
 
-	/* Assemble name of library to be loaded - this will also work for cases
-	   where the name contains a relative path */
+	/* Try to open the library with the stuff dealing with creating the forms.
+	   We first try to find it in directories defined by the environment
+	   variable "LD_LIBRARY_PATH". If this fails (and this is not part of the
+	   testing procedure) we also try the compiled-in path to the libraries. */
 
-	lib_name = get_string( "%s%sfsc2_rsc_%cr.so", libdir, slash( libdir ),
-						   GUI.G_Funcs.size == LOW ? 'l' : 'h' );
+	if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
+	{
+		ld = T_strdup( ld_path );
+		for ( ldc = strtok( ld, ":" ); ldc != NULL; ldc = strtok( NULL, ":" ) )
+		{
+			lib_name = get_string( "%s%sfsc2_rsc_%cr.so", ldc, slash( ldc ),
+								   GUI.G_Funcs.size == LOW ? 'l' : 'h' );
+			if ( ( handle = dlopen( lib_name, RTLD_NOW ) ) != NULL )
+				break;
+			lib_name = T_free( lib_name );
+		}
+		T_free( ld );
+	}
 
-	/* Try to open the library. If it can't be found in the place defined at
-	   compilation time give it another chance by trying the paths defined
-	   by LD_LIBRARY_PATH. */
-
-	handle = dlopen( lib_name, RTLD_NOW );
-
-	if ( handle == NULL )
-		handle = dlopen( strip_path( lib_name ), RTLD_NOW );
+	if ( handle == NULL && ! ( Internals.cmdline_flags & DO_CHECK ) )
+	{
+		lib_name = get_string( "%s%sfsc2_rsc_%cr.so", libdir, slash( libdir ),
+							   GUI.G_Funcs.size == LOW ? 'l' : 'h' );
+		handle = dlopen( lib_name, RTLD_NOW );
+	}
 
 	if ( handle == NULL )
 	{
-		fprintf( stderr, "Can't open graphics library `%s'\n", lib_name );
+		if ( lib_name == NULL )
+			lib_name = get_string( "fsc2_rsc_%cr.so",
+								   GUI.G_Funcs.size == LOW ? 'l' : 'h' );
+		fprintf( stderr, "Can't open graphics library '%s'.\n", lib_name );
 		T_free( lib_name );
 		return FAIL;
 	}
@@ -526,7 +552,7 @@ bool dl_fsc2_rsc( void )
 		       ( FD_fsc2 * ( * )( void ) ) dlsym( handle, "create_form_fsc2" );
 	if ( dlerror( ) != NULL )
 	{
-		fprintf( stderr, "Error in graphics library `%s'\n", lib_name );
+		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
 		T_free( lib_name );
 		return FAIL;
 	}
@@ -536,7 +562,7 @@ bool dl_fsc2_rsc( void )
 		         ( FD_run * ( * )( void ) ) dlsym( handle, "create_form_run" );
 	if ( dlerror( ) != NULL )
 	{
-		fprintf( stderr, "Error in graphics library `%s'\n", lib_name );
+		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
 		T_free( lib_name );
 		return FAIL;
 	}
@@ -546,7 +572,7 @@ bool dl_fsc2_rsc( void )
 		                             dlsym( handle, "create_form_input_form" );
 	if ( dlerror( ) != NULL )
 	{
-		fprintf( stderr, "Error in graphics library `%s'\n", lib_name );
+		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
 		T_free( lib_name );
 		return FAIL;
 	}
@@ -556,7 +582,7 @@ bool dl_fsc2_rsc( void )
 		     ( FD_print * ( * )( void ) ) dlsym( handle, "create_form_print" );
 	if ( dlerror( ) != NULL )
 	{
-		fprintf( stderr, "Error in graphics library `%s'\n", lib_name );
+		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
 		T_free( lib_name );
 		return FAIL;
 	}
@@ -566,7 +592,7 @@ bool dl_fsc2_rsc( void )
 		         ( FD_cut * ( * )( void ) ) dlsym( handle, "create_form_cut" );
 	if ( dlerror( ) != NULL )
 	{
-		fprintf( stderr, "Error in graphics library `%s'\n", lib_name );
+		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
 		T_free( lib_name );
 		return FAIL;
 	}
@@ -577,7 +603,7 @@ bool dl_fsc2_rsc( void )
 											     "create_form_print_comment" );
 	if ( dlerror( ) != NULL )
 	{
-		fprintf( stderr, "Error in graphics library `%s'\n", lib_name );
+		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
 		T_free( lib_name );
 		return FAIL;
 	}
@@ -603,7 +629,7 @@ static int main_form_close_handler( FL_FORM *a, void *b )
 	xforms_close( );
 
 	exit( EXIT_SUCCESS );
-	return FL_OK;
+	return FL_OK;                    /* keeps the compiler happy... */
 }
 
 

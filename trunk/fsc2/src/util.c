@@ -310,6 +310,9 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
                 + 1 );
 
 			fl_unfreeze_form( GUI.main_form->error_browser->form );
+
+			if ( Internals.cmdline_flags & DO_CHECK )
+				fprintf( stdout, "%s", buffer );
 		}
 		else
 			writer( C_EPRINT, buffer );
@@ -428,6 +431,9 @@ void print( int severity, const char *fmt, ... )
                 + 1 );
 
 			fl_unfreeze_form( GUI.main_form->error_browser->form );
+
+			if ( Internals.cmdline_flags & DO_CHECK )
+				fprintf( stdout, "%s", buffer );
 		}
 		else
 			writer( C_EPRINT, buffer );

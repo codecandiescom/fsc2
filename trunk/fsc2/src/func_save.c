@@ -59,7 +59,7 @@ Var *f_is_file( Var *v )
 
 	if ( v->type != INT_VAR )
 	{
-		print( FATAL, "Arguments isn't a file handle.\n" );
+		print( FATAL, "Argument isn't a file handle.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -135,6 +135,9 @@ Var *f_getf( Var *var )
 		vars_check( cur, STR_VAR );
 		s[ i ] = cur->val.sptr;
 	}
+
+	if ( Internals.cmdline_flags & DO_CHECK )
+		goto got_file;
 
 	/* First string is the message */
 
@@ -265,6 +268,8 @@ getfile_retry:
 		goto getfile_retry;
 	}
 
+ got_file:
+
 	for ( i = 0; i < 4; i++ )
 		T_free( s[ i ] );
 
@@ -293,7 +298,10 @@ getfile_retry:
 		THROW( EXCEPTION );
 	}
 
-	EDL.File_List[ EDL.File_List_Len ].fp = fp;
+	if ( Internals.cmdline_flags & DO_CHECK )
+		EDL.File_List[ EDL.File_List_Len ].fp = stdout;
+	else
+		EDL.File_List[ EDL.File_List_Len ].fp = fp;
 	EDL.File_List[ EDL.File_List_Len ].name = r;
 
 	/* Switch buffering off so we're sure everything gets written to disk
@@ -1454,7 +1462,7 @@ Var *f_save_c( Var *v )
 	const char *cc = NULL;
 	char *c = NULL,
 		 *l = NULL,
-		 *r,
+		 *r = NULL,
 		 *cl, *nl;
 
 	/* Determine the file identifier */
@@ -1495,7 +1503,8 @@ Var *f_save_c( Var *v )
 	/* Show the comment editor and get the returned contents (just one string
 	   with embedded newline chars) */
 
-	r = T_strdup( show_input( c, l ) );
+	if ( ! ( Internals.cmdline_flags & DO_CHECK ) )
+		 r = T_strdup( show_input( c, l ) );
 
 	if ( r == NULL )
 		return vars_push( INT_VAR, 1 );

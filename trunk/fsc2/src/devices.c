@@ -47,37 +47,56 @@ void device_add( const char *name )
 	static char *real_name;         /* static because otherwise possibly
 									   clobbered by TRY (longjmp) */
 	const char *search_name;
-	char *lib_name;
+	char *lib_name = NULL;
 	struct stat buf;
 	int length;
 	Device *cd;
+	char *ld_path;
+	char *ld = NULL;
+	char *ldc;
 
 
 	dev_name = string_to_lower( T_strdup( name ) );
 	real_name = NULL;
 
 	/* First we've got to check if the name refers to a device driver that is
-	   a symbolic link to the `real' device. If so get the real name by
+	   a symbolic link to the 'real' device. If so get the real name by
 	   following the link. This way it's possible to have more convenient,
-	   locally adjustable names for the devices. */
+	   locally adjustable names for the devices. As usual, we first check
+	   paths defined the environment variable 'LD_LIBRARY_PATH' and then in
+	   the compiled-in path (except when this is a check run). */
 
-	lib_name = get_string( "%s%s%s.so", libdir, slash( libdir ), dev_name );
-
-	/* Try to access the module (also allow the name to be defined via
-	   LD_LIBRARY_PATH) - don't follow links yet */
-
-	if ( lstat( lib_name, &buf ) < 0 &&
-		 lstat( strip_path( lib_name ), &buf ) < 0 )
+	if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
 	{
-		eprint( FATAL, UNSET, "Can't find or access module `%s.so'.\n",
+		ld = T_strdup( ld_path );
+		for ( ldc = strtok( ld, ":" ); ldc != NULL; ldc = strtok( NULL, ":" ) )
+		{
+			lib_name = get_string( "%s%s%s.so", ldc, slash( ldc ), dev_name );
+			if ( lstat( lib_name, &buf ) == 0 )
+				break;
+			lib_name = T_free( lib_name );
+		}
+		T_free( ld );
+	}
+
+	if ( lib_name == NULL && ! ( Internals.cmdline_flags & DO_CHECK ) )
+	{
+		lib_name = get_string( "%s%s%s.so",
+							   libdir, slash( libdir ), dev_name );
+		if ( lstat( lib_name, &buf ) < 0 )
+			lib_name = T_free( lib_name );
+	}
+
+	if ( lib_name == NULL )
+	{
+		eprint( FATAL, UNSET, "Can't find or access module '%s.so'.\n",
 				dev_name );
-		T_free( lib_name );
 		T_free( dev_name );
 		THROW( EXCEPTION );
 	}
 
 	/* If the module is a symbolic link try to figure out the name of the file
-	   the symbolic link points to and store it in `real_name' */
+	   the symbolic link points to and store it in 'real_name' */
 
 	if ( S_ISLNK( buf.st_mode ) )
 	{
@@ -92,7 +111,7 @@ void device_add( const char *name )
 					pathmax = PATH_MAX_GUESS;
 				else
 				{
-					eprint( FATAL, UNSET, "%s:%u: This operating system "
+					eprint( FATAL, UNSET, "%s:%ld: This operating system "
 							"sucks!\n", __FILE__, __LINE__ );
 					T_free( lib_name );
 					T_free( dev_name );
@@ -104,7 +123,7 @@ void device_add( const char *name )
 		real_name = T_malloc( pathmax + 1 );
 		if ( ( length = readlink( lib_name, real_name, pathmax ) ) < 0 )
 		{
-			eprint( FATAL, UNSET, "Can't follow symbolic link for `%s'.\n",
+			eprint( FATAL, UNSET, "Can't follow symbolic link for '%s'.\n",
 					lib_name );
 			T_free( lib_name );
 			T_free( dev_name );
@@ -118,7 +137,7 @@ void device_add( const char *name )
 
 		if ( strcmp( real_name + length - 3, ".so" ) )
 		{
-			eprint( FATAL, UNSET, "Module `%s' used for device `%s' hasn't "
+			eprint( FATAL, UNSET, "Module '%s' used for device '%s' hasn't "
 					"extension \".so\".\n", real_name, dev_name );
 			T_free( lib_name );
 			T_free( dev_name );
@@ -132,8 +151,8 @@ void device_add( const char *name )
 	T_free( lib_name );
 
 	/* Now test if the device is in the list of device names, either with the
-	   real name or the alternate name - because `real_name' might start with
-	   a path but the names in `Devices' are just names without a path
+	   real name or the alternate name - because 'real_name' might start with
+	   a path but the names in 'Devices' are just names without a path
 	   compare only after stripping off the path */
 
 	search_name = real_name != NULL ? strip_path( real_name ) : NULL;
@@ -145,7 +164,7 @@ void device_add( const char *name )
 
 	if ( dl == NULL )
 	{
-		eprint( FATAL, SET, "Device `%s' not found in device name data "
+		eprint( FATAL, SET, "Device '%s' not found in device name data "
 				"base.\n", dev_name );
 		T_free( real_name );
 		T_free( dev_name );
@@ -158,7 +177,7 @@ void device_add( const char *name )
 		if ( ! strcmp( cd->name, dev_name ) ||
 			 ( real_name != NULL && ! strcmp( cd->name, real_name ) ) )
 		{
-			eprint( FATAL, SET, "Device `%s' is listed twice in the "
+			eprint( FATAL, SET, "Device '%s' is listed twice in the "
 					"DEVICES section%s%s.\n", dev_name, real_name != NULL ?
 					", the first time possibly under the name " : "",
 					real_name != NULL ? real_name : "" );
@@ -207,14 +226,27 @@ void device_append_to_list( const char *dev_name )
 	}
 	else
 	{
-		EDL.Device_List = cd = T_malloc( sizeof( Device ) );
+		EDL.Device_List = cd = T_malloc( sizeof *cd );
 		cd->prev = NULL;
 	}
+
+	/* Initialize the new structure */
 
 	cd->name = T_strdup( dev_name );
 	cd->is_loaded = UNSET;
 	cd->next = NULL;
 	cd->count = 1;
+
+	/* Initialize members of the driver member */
+
+	cd->driver.handle = NULL;
+	cd->driver.is_init_hook =
+		cd->driver.is_test_hook =
+			cd->driver.is_end_of_test_hook =
+				cd->driver.is_exp_hook =
+					cd->driver.is_end_of_exp_hook =
+						cd->driver.is_exit_hook =
+							cd->driver.exp_hook_is_run = UNSET;
 }
 
 

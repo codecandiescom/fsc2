@@ -134,6 +134,9 @@ typedef struct {
 
 	int cmdline_flags;           /* Stores command line options */
 
+	long num_test_runs;          /* Number of test runs with '-X' flag */
+	long check_return;           /* Result of check run, 1 is ok */
+
 	int I_am;                    /* Indicates if we're running the parent
 									or the child process (it's either set to
 									PARENT or to CHILD) */

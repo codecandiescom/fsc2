@@ -521,13 +521,17 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 {
 	b = b;
 
-	if ( ! child_is_quitting )   /* missing notification by the child ? */
-		fl_show_alert( "Fatal Error", "Experiment stopped prematurely.",
+
+	if ( ! ( Internals.cmdline_flags & DO_CHECK ) )
+	{
+		if ( ! child_is_quitting )   /* missing notification by the child ? */
+			fl_show_alert( "Fatal Error", "Experiment stopped prematurely.",
 					   NULL, 2 );
 
-	if ( ! a->u_ldata )          /* return status indicates error ? */
-		fl_show_alert( "Fatal Error", "Experiment had to be stopped.",
-					   NULL, 3 );
+		if ( ! a->u_ldata )          /* return status indicates error ? */
+			fl_show_alert( "Fatal Error", "Experiment had to be stopped.",
+						   NULL, 3 );
+	}
 
 	stop_measurement( NULL, 1 );
 }
@@ -659,6 +663,14 @@ void stop_measurement( FL_OBJECT *a, long b )
 	if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
 		fl_set_object_helper( GUI.run_form->stop, "Remove this window" );
 	fl_unfreeze_form( GUI.run_form->run );
+
+	if ( Internals.cmdline_flags & DO_CHECK )
+	{
+		stop_graphics( );
+		set_buttons_for_run( 1 );
+		Internals.check_return = b;
+		fl_trigger_object( GUI.main_form->quit );
+	}
 }
 
 

@@ -293,13 +293,14 @@ enum {
 };
 
 enum {
-	DO_LOAD    =  1,
-	DO_TEST    =  2,
-	DO_START   =  4,
-	DO_SIGNAL  =  8,
-	DO_DELETE  = 16,
-	NO_MAIL    = 32,
-	NO_BALLOON = 64
+	DO_LOAD    =   1,
+	DO_TEST    =   2,
+	DO_START   =   4,
+	DO_SIGNAL  =   8,
+	DO_DELETE  =  16,
+	NO_MAIL    =  32,
+	NO_BALLOON =  64,
+	DO_CHECK   = 128                  /* used for check runs on new versions */
 };
 
 /* Convenience macros for accessing the value of simple variables
