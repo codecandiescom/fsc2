@@ -247,7 +247,7 @@ FUNC        {IDENT}"#"[0-9]+
 				if ( ( t = strrchr( prepstext, '#' ) ) != NULL )
 				{
 					if ( ( Cur_Pulser = T_atol( t + 1 ) - 1 ) >=
-                         EDL.Num_Pulsers )
+                         EDL.Num_Pulsers || Cur_Pulser < 0 )
 					{
 						print( FATAL, "There is no pulser #%ld\n",
 							   Cur_Pulser + 1 );

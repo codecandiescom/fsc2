@@ -567,8 +567,6 @@ static void ass_func( int function )
 		p_phase_ref( Cur_PHS, function );
 	else
 	{
-		fprintf( stderr, "%s:%ld: Cur_Pulser = %ld, Cur_PHS = %d\n",
-				 EDL.Fname, EDL.Lc, Cur_Pulser, Cur_PHS );
 		print( FATAL, "Syntax error near '%s' when using pulser %s.\n",
 				assigntext, pulser_struct[ Cur_Pulser ].name );
 		THROW( EXCEPTION );

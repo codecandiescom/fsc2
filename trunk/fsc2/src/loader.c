@@ -658,13 +658,6 @@ void run_end_of_exp_hooks( void )
 		TRY
 		{
 			call_push( NULL, cd, cd->device_name, cd->count );
-			TRY_SUCCESS;
-		}
-		CATCH( OUT_OF_MEMORY_EXCEPTION )
-			continue;
-
-		TRY
-		{
 			if( ! cd->driver.end_of_exp_hook( ) )
 				eprint( SEVERE, UNSET, "Resetting module '%s' after "
 						"experiment failed.\n", cd->name );
@@ -698,14 +691,13 @@ void run_exit_hooks( void )
 	for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
 		/* empty */ ;
 
-	Cur_Pulser = EDL.Num_Pulsers;
 	Internals.in_hook = SET;
 
 	for ( ; cd != NULL; cd = cd->prev )
 	{
 		if ( cd->generic_type != NULL &&
 			 ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
-			Cur_Pulser--;
+			Cur_Pulser = EDL.Num_Pulsers - 1;
 
 		if ( ! cd->is_loaded || ! cd->driver.is_exit_hook )
 			continue;
@@ -713,19 +705,16 @@ void run_exit_hooks( void )
 		TRY
 		{
 			call_push( NULL, cd, cd->device_name, cd->count );
-			TRY_SUCCESS;
-		}
-		CATCH( OUT_OF_MEMORY_EXCEPTION )
-			continue;
-
-		TRY
-		{
 			cd->driver.exit_hook( );
 			call_pop( );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
 			call_pop( );
+
+		if ( cd->generic_type != NULL &&
+			 ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+			EDL.Num_Pulsers--;
 	}
 
 	Internals.in_hook = UNSET;
@@ -782,16 +771,16 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* This routine expects the name of a device and returns the position in  */
-/* the list of devices with the same function, as indicated by the        */
-/* generic type string. I.e. if you have loaded modules for three lock-in */
-/* amplifiers and you pass this function the name of one of them it looks */
-/* at the sequence the devices were listed in the DEVICES section and     */
-/* returns the sequence number of the device, in this case either 1, 2 or */
-/* 3. In case of errors (or if the devices generic_type string isn't set) */
-/* the funtion returns 0.                                                 */
-/*------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* This routine expects the name of a device and returns the position in   */
+/* the list of devices with the same function, as indicated by the         */
+/* generic type string. I.e. if you have loaded modules for three lock-in  */
+/* amplifiers and you pass this function the name of one of them it loops  */
+/* over the devices listed in the DEVICES section and returns the sequence */
+/* number of the device, in this example either 1, 2 or 3. In case of      */
+/* errors (or if the devices generic_type string isn't set) the funtion    */
+/* returns 0.                                                              */
+/*-------------------------------------------------------------------------*/
 
 int get_lib_number( const char *name )
 {
@@ -839,11 +828,25 @@ void unload_device( Device *dev )
 	if ( dev->driver.handle &&
 		 ! Internals.exit_hooks_are_run && dev->driver.is_exit_hook )
 	{
-		TRY                             /* catch exceptions from the exit   */
-		{                               /* hooks, we've got to run them all */
+		if ( dev->generic_type != NULL &&
+			 ! strcasecmp( dev->generic_type, PULSER_GENERIC_TYPE ) )
+			Cur_Pulser = EDL.Num_Pulsers - 1;
+
+		Internals.in_hook = SET;
+		TRY
+		{
+			call_push( NULL, dev, dev->device_name, dev->count );
 			dev->driver.exit_hook( );
+			call_pop( );
 			TRY_SUCCESS;
 		}
+		OTHERWISE
+			call_pop( );
+
+		if ( dev->generic_type != NULL &&
+			 ! strcasecmp( dev->generic_type, PULSER_GENERIC_TYPE ) )
+			EDL.Num_Pulsers--;
+		Internals.in_hook = UNSET;
 	}
 
 	dlclose( dev->driver.handle );

@@ -252,7 +252,7 @@ void device_append_to_list( const char *dev_name )
 
 /*---------------------------------------------------------------------*/
 /* Function deletes the whole list of device structures after running  */
-/* the corresponding exit hook functions unloading the modules.        */
+/* the corresponding exit hook functions and unloading the modules.    */
 /*---------------------------------------------------------------------*/
 
 void delete_devices( void )
