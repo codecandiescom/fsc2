@@ -662,7 +662,7 @@ int me6x00_wraparound( int board, int dac, int size, unsigned short *buf )
 
 /*--------------------------------------------------------------------*/
 /* This function gets called always before a board is really accessed */
-/* to determine if the board number is valid. If the board has never  */
+/* to determine if the board number is valid. If the board has not    */
 /* been used before the function will try to open() the device file   */
 /* for the board and then ask the module for informations about the   */
 /* board, i.e. vendor ID, type of board, serial number etc., and      */
@@ -672,13 +672,14 @@ int me6x00_wraparound( int board, int dac, int size, unsigned short *buf )
 /* already in use by some other process and the function returns the  */
 /* appropriate error number.                                          */
 /* Another possibility for failure is an internal error (which, of    */
-/* course should never happen ;-).                                    */
+/* course, should never happen ;-).                                   */
 /* On success the boards file descriptor is opened and 0 is returned. */
 /*--------------------------------------------------------------------*/
 
 static int check_board( int board )
 {
 	char name[ 20 ] = "/dev/" ME6X00_DEVICE_NAME;
+	struct stat buf;
 
 
 	if ( board < 0 || board >= ME6X00_MAX_BOARDS )
@@ -689,44 +690,57 @@ static int check_board( int board )
 
 	if ( ! dev_info[ board ].is_init )
 	{
-		/* If the file descriptor associated with the board is negative we
-		   already found out that there's no such board (or we got an
-		   internal error when trying to access it) */
-
-		if ( dev_info[ board ].fd < 0 )
-		{
-			error_message = ME6X00_ERR_NSB_MESS;
-			return ME6X00_ERR_NSB;
-		}
-
 		/* Cobble together the device file name */
 
 		snprintf( name + strlen( name ), 20 - strlen( name ), "%d", board );
+
+		/* Check if the device file exists and can be accessed */
+
+		if ( stat( name, &buf ) < 0 )
+			switch ( errno )
+			{
+				case ENOENT :
+				{
+					error_message = ME6X00_ERR_NDF_MESS;
+					return ME6X00_ERR_NDF;
+				}
+
+				case EACCES :
+				{
+					error_message = ME6X00_ERR_ACS_MESS;
+					return ME6X00_ERR_ACS;
+				}
+
+				default :
+				{
+					error_message = ME6X00_ERR_DFP_MESS;
+					return ME6X00_ERR_DFP;
+				}
+			}
 
 		/* Try to open it in non-blocking mode */
 
 		dev_info[ board ].fd = open( name, O_RDWR | O_NONBLOCK );
 
 		if ( dev_info[ board ].fd < 0 )
-		{
-			if ( errno == ENODEV || errno == ENXIO )
+			switch( errno )
 			{
-				error_message = ME6X00_ERR_NSB_MESS;
-				return ME6X00_ERR_NSB;
+				case ENODEV : case ENXIO :
+					error_message = ME6X00_ERR_NDV_MESS;
+					return ME6X00_ERR_NDV;
+
+				case EACCES :
+					error_message = ME6X00_ERR_ACS_MESS;
+					return ME6X00_ERR_ACS;
+
+				case EBUSY :
+					error_message = ME6X00_ERR_BSY_MESS;
+					return ME6X00_ERR_BSY;
+
+				default :
+					error_message = ME6X00_ERR_DFP_MESS;
+					return ME6X00_ERR_DFP;
 			}
-
-			if ( errno == EBUSY )
-			{
-				dev_info[ board ].fd = 0;
-				error_message = ME6X00_ERR_BSY_MESS;
-				return ME6X00_ERR_BSY;
-			}
-
-			error_message = ME6X00_ERR_NDF_MESS;
-			return ME6X00_ERR_NDF;
-		}
-
-		dev_info[ board ].is_init = 1;
 
 		/* This should never happen and we give up on the board... */
 
@@ -734,7 +748,6 @@ static int check_board( int board )
 					&dev_info[ board ].info ) < 0 )
 		{
 			close( dev_info[ board ].fd );
-			dev_info[ board ].fd = -1;
 			error_message = ME6X00_ERR_INT_MESS;
 			return ME6X00_ERR_INT;
 		}
@@ -767,6 +780,8 @@ static int check_board( int board )
 				error_message = ME6X00_ERR_INT_MESS;
 				return ME6X00_ERR_INT;
 		}
+
+		dev_info[ board ].is_init = 1;
 	}
 
 	return 0;

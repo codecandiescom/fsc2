@@ -62,10 +62,10 @@ int me6x00_wraparound( int board, int dac, int size, unsigned short *buf );
 
 
 #define ME6X00_ERR_IBN  -1
-#define ME6X00_ERR_NSB  -2
-#define ME6X00_ERR_IFR  -3
-#define ME6X00_ERR_BSY  -4
-#define ME6X00_ERR_NDF  -5
+#define ME6X00_ERR_IFR  -2
+#define ME6X00_ERR_BSY  -3
+#define ME6X00_ERR_NDF  -4
+#define ME6X00_ERR_ACS  -5
 #define ME6X00_ERR_NAP  -6
 #define ME6X00_ERR_DAC  -7
 #define ME6X00_ERR_TDC  -8
@@ -76,14 +76,16 @@ int me6x00_wraparound( int board, int dac, int size, unsigned short *buf );
 #define ME6X00_ERR_IBS -13
 #define ME6X00_ERR_BNO -14
 #define ME6X00_ERR_ABS -15
+#define ME6X00_ERR_DFP -16
+#define ME6X00_ERR_NDV -17
 
-#define ME6X00_ERR_INT -17
+#define ME6X00_ERR_INT -18
 
 #define ME6X00_ERR_IBN_MESS "Invalid board number"
-#define ME6X00_ERR_NSB_MESS "No such board"
 #define ME6X00_ERR_IFR_MESS "Invalid frequency"
 #define ME6X00_ERR_BSY_MESS "Board is busy"
 #define ME6X00_ERR_NDF_MESS "No device file"
+#define ME6X00_ERR_ACS_MESS "No permissions to open file"
 #define ME6X00_ERR_NAP_MESS "Command can't be used with ME6X00 boards"
 #define ME6X00_ERR_DAC_MESS "Invalid DAC channel number"
 #define ME6X00_ERR_TDC_MESS "Invalid DAC channel for requested operation"
@@ -94,6 +96,7 @@ int me6x00_wraparound( int board, int dac, int size, unsigned short *buf );
 #define ME6X00_ERR_IBS_MESS "Invalid buffer size"
 #define ME6X00_ERR_BNO_MESS "Board not open"
 #define ME6X00_ERR_ABS_MESS "Operation aborted due to signal"
-
+#define ME6X00_ERR_DFP_MESS  "Unspecified error when opening device file"
+#define ME6X00_ERR_NDV_MESS  "No driver loaded for board"
 
 #define ME6X00_ERR_INT_MESS "Internal library error"

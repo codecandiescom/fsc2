@@ -62,8 +62,8 @@ expected:
     NI6601_ERR_INT    Internal driver or library error
 
 
-All functions except ni6601_close() may return at least one of the
-following error codes:
+All functions (except ni6601_close() and ni6601_error_message()) may
+return at least one of the following error codes:
 
     NI6601_ERR_NSB    NI6601_ERR_NSC   	NI6601_ERR_DFM
     NI6601_ERR_DFP    NI6601_ERR_NDV    NI6601_ERR_ACS
@@ -74,7 +74,7 @@ of the functions anymore.
 
 
 All functions require the number of the board as the first argument.
-This argument is an integer numberbetween 0 and (NI6601_MAX_BOARDS - 1)
+This argument is an integer number between 0 and (NI6601_MAX_BOARDS - 1)
 or the number of installed boards minus 1, whatever is smaller.
 
 
