@@ -36,13 +36,13 @@ Var *measure_field( Var *v );
 
 /* internally used functions */
 
-static double er035m_s_get_field( void );
-static bool er035m_s_open( void );
-static bool er035m_s_close( void );
-static bool er035m_s_write( const char *buf );
-static bool er035m_s_read( char *buf, long *len );
-static bool er035m_s_comm( int type, ... );
-static void er035_s_comm_fail( void );
+static double er035m_sas_get_field( void );
+static bool er035m_sas_open( void );
+static bool er035m_sas_close( void );
+static bool er035m_sas_write( const char *buf );
+static bool er035m_sas_read( char *buf, long *len );
+static bool er035m_sas_comm( int type, ... );
+static void er035_sas_comm_fail( void );
 
 
 
@@ -179,7 +179,7 @@ int er035m_sas_exp_hook( void )
 
 	if ( ! er035m_sas_open( ) )
 		er035_sas_comm_fail( );
-	usleep( ER035M_S_WAIT );
+	usleep( ER035M_SAS_WAIT );
 
 	if ( ! er035m_sas_write( "REM" ) )
 		er035_sas_comm_fail( );
@@ -353,7 +353,7 @@ try_again:
 
 	if ( nmr.state != ER035M_SAS_LOCKED )
 	{
-		v = find_field( NULL );
+		v = measure_field( NULL );
 		nmr.field = v->val.dval;
 		vars_pop( v );
 	}
@@ -405,117 +405,119 @@ Var *measure_field( Var *v )
 	char buffer[ 21 ];
 	char *bp;
 	long length;
+	long retries;
 
 
 	v = v;
 	if ( TEST_RUN )
 		return vars_push( FLOAT_VAR, 0.0 );
 
-	/* If gaussmeter is in oscillator up/down state or the state is unknown
-	   (i.e. it's standing somewhere but not searching) search for field.
-	   Starting with searching down is just as probable the wrong decision
-	   as searching up... */
 
-	if ( ( nmr.state == ER035M_SA_OU_ACTIVE ||
-		   nmr.state == ER035M_SA_OD_ACTIVE ||
-		   nmr.state == ER035M_SA_UNKNOWN ) &&
-		 gpib_write( nmr.device, "SD\r" ) == FAILURE )
+	/* If gaussmeter is in oscillator up/down state or the state is unknown
+	   (i.e. it's standing somewhere and not searching at all) search for the
+	   field. Starting with searching down is just as probable the wrong
+	   decision as searching up... */
+
+	if ( ( nmr.state == ER035M_SAS_OU_ACTIVE ||
+		   nmr.state == ER035M_SAS_OD_ACTIVE ||
+		   nmr.state == ER035M_SAS_UNKNOWN ) &&
+		 er035m_sas_write( "SD" ) == FAIL )
 	{
-		eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", nmr.name );
+		eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
-	usleep( ER035M_SA_WAIT );
+	usleep( ER035M_SAS_WAIT );
 
-	/* wait for gaussmeter to go into lock state (or FAILURE) */
+	/* Wait for gaussmeter to go into lock state (or FAIL) */
 
-	while ( nmr.state != ER035M_SA_LOCKED )
+	while ( nmr.state != ER035M_SAS_LOCKED )
 	{
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+		/* Get status byte and check if lock was achieved - sometimes the
+		   fucking thing does not answer (i.e. it just seems to send the
+		   prompt character and nothing else) so in this case we give it
+		   another chance (or even two, see FAIL_RETRIES above) */
 
-		/* Get status byte and check if lock was achieved */
-
-		if ( gpib_write( nmr.device, "PS\r" ) == FAILURE )
+		for ( retries = FAIL_RETRIES; ; retries-- )
 		{
-			eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n",
-					nmr.name );
-			THROW( EXCEPTION );
+			if ( DO_STOP )
+				THROW( USER_BREAK_EXCEPTION );
+
+			if ( er035m_sas_write( "PS" ) == FAIL )
+				er035_sas_comm_fail( );
+			usleep( ER035M_SAS_WAIT );
+
+			length = 20;
+			if ( er035m_sas_read( buffer, &length ) == FAIL )
+				break;
+
+			if ( retries <= 0 )
+				er035_sas_comm_fail( );
 		}
-		usleep( ER035M_SA_WAIT );
 
-		length = 20;
-		if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
-		{
-			eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n",
-					nmr.name );
-			THROW( EXCEPTION );
-		}
+		bp = buffer;
 
-		bp = buffer + 2;   /* skip first two chars of status byte */
-
-		do     /* loop through remaining chars in status byte */
+		do     /* loop through the chars in the status byte */
 		{
 			switch ( *bp )
 			{
+				case '0' : case '1' :  /* probe indicator data -> OK */
+					break;
+
+				case '2' :             /* no probe -> error */
+					eprint( FATAL, "%s: No field probe connected to the NMR "
+							"gaussmeter.\n", DEVICE_NAME );
+					THROW( EXCEPTION );
+
 				case '4' : case '5' :  /* TRANS L-H or H-L -> test again */
 					break;
 
 				case '7' : case '8' :  /* MOD POS or NEG -> just go on */
 					break;
 
-				case '9' :      /* System in lock -> very good... */
-					nmr.state = ER035M_SA_LOCKED;
+				case '9' :      /* System finally in lock -> very good... */
+					nmr.state = ER035M_SAS_LOCKED;
 					break;
 
 				case 'A' :      /* FIELD ? -> error */
 					eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
-							"problem.\n", nmr.name );
+							"problem.\n", DEVICE_NAME );
 					THROW( EXCEPTION );
 
 				case 'B' :      /* SU active -> OK */
-					nmr.state = ER035M_SA_SU_ACTIVE;
+					nmr.state = ER035M_SAS_SU_ACTIVE;
 					break;
 
 				case 'C' :      /* SD active */
-					nmr.state = ER035M_SA_SD_ACTIVE;
+					nmr.state = ER035M_SAS_SD_ACTIVE;
 					break;
 
 				case 'D' :      /* OU active -> error (should never happen) */
-					nmr.state = ER035M_SA_OU_ACTIVE;
+					nmr.state = ER035M_SAS_OU_ACTIVE;
 					eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
-							"problem.\n", nmr.name );
+							"problem.\n", DEVICE_NAME );
 					THROW( EXCEPTION );
 
 				case 'E' :      /* OD active -> error (should never happen) */
-					nmr.state = ER035M_SA_OD_ACTIVE;
+					nmr.state = ER035M_SAS_OD_ACTIVE;
 					eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
-							"problem.\n", nmr.name );
+							"problem.\n", DEVICE_NAME );
 					THROW( EXCEPTION );
 
-				case 'F' :      /* Search active but at a search limit -> OK*/
-					nmr.state = ER035M_SA_SEARCH_AT_LIMIT;
+				case 'F' :      /* Search active but at a search limit -> OK */
+					nmr.state = ER035M_SAS_SEARCH_AT_LIMIT;
 					break;
-			}
 
-		} while ( *bp++ != '\r' );
-	};
+				default :
+					eprint( FATAL, "%s: Undocumented data received from the "
+							"NMR gaussmeter.\n", DEVICE_NAME );
+					THROW( EXCEPTION );
+			}
+		} while ( *++bp );
+	}
 
 	/* Finally  get current field value */
 
-	return vars_push( FLOAT_VAR, er035m_sa_get_field( ) );
-}
-
-
-/*-------------------------------------------------------*/
-/*-------------------------------------------------------*/
-
-Var *field_resolution( Var *v )
-{
-	v = v;
-	if ( ! TEST_RUN )
-		return vars_push( FLOAT_VAR, nmr.resolution == LOW ? 0.01 : 0.001 );
-	else
-		return vars_push( FLOAT_VAR, 0.001 );
+	return vars_push( FLOAT_VAR, er035m_sas_get_field( ) );
 }
 
 

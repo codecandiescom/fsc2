@@ -31,6 +31,7 @@ aeg_x_band    // X-band AEG magnet power supply (Berlin)
 er035m        // Bruker NMR gaussmeter (connected to IEEE bus)
 er035m_s      // Bruker NMR gaussmeter (connected to serial port)
 er035m_sa     // Bruker NMR gaussmeter (connected to IEEE bus, stand alone)
+er035m_sas    // Bruker NMR gaussmeter (connected to serial port, stand alone)
 
 bh15          // Bruker field controller
 
