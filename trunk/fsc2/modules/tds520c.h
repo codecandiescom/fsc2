@@ -62,12 +62,14 @@
 #define TDS520C_AUX2  10         /* Auxiliary (for triggger only) */
 #define TDS520C_LIN   11         /* Line In (for triggger only) */
 
+#define GENERAL_TO_TDS520C 0
+#define TDS520C_TO_GENERAL 1
 
 
 /* Structure for description of a `window' on the digitizer, made up from the
    area between the pair of cursors */
 
-typedef struct _W {
+typedef struct W_ {
 	long num;                   /* number of window                          */
 	bool is_used;               /* flag, set when window has been used       */
 	double start;               /* start of window (in time units)           */
@@ -77,8 +79,8 @@ typedef struct _W {
 	bool is_start;              /* flag, set if start of window has been set */
 	bool is_width;              /* flag, set if width of window has been set */
 	long num_points;            /* number of data points between the cursors */
-	struct _W *next;            /* pointer to next window structure          */
-	struct _W *prev;            /* pointer to previous window structure      */
+	struct W_ *next;            /* pointer to next window structure          */
+	struct W_ *prev;            /* pointer to previous window structure      */
 } WINDOW;
 
 
@@ -138,7 +140,6 @@ Var *digitizer_define_window( Var *v );
 Var *digitizer_timebase( Var *v );
 Var *digitizer_sensitivity( Var *v );
 Var *digitizer_num_averages( Var *v );
-Var *digitizer_get_channel_number( Var *v );
 Var *digitizer_record_length( Var *v );
 Var *digitizer_trigger_position( Var *v );
 Var *digitizer_meas_channel_ok( Var *v );
@@ -162,6 +163,7 @@ void tds520c_do_pre_exp_checks( void );
 void tds520c_set_meas_window( WINDOW *w );
 void tds520c_set_curve_window( WINDOW *w );
 void tds520c_set_window( WINDOW *w );
+long tds520c_translate_channel( int dir, long channel );
 
 bool tds520c_init( const char *name );
 double tds520c_get_timebase( void );

@@ -62,6 +62,9 @@
 #define TDS520A_LIN   11         /* Line In (for triggger only) */
 
 
+#define GENERAL_TO_TDS520A 0
+#define TDS520A_TO_GENERAL 1
+
 
 /* Structure for description of a `window' on the digitizer, made up from the
    area between the pair of cursors */
@@ -137,7 +140,6 @@ Var *digitizer_define_window( Var *v );
 Var *digitizer_timebase( Var *v );
 Var *digitizer_sensitivity( Var *v );
 Var *digitizer_num_averages( Var *v );
-Var *digitizer_get_channel_number( Var *v );
 Var *digitizer_record_length( Var *v );
 Var *digitizer_trigger_position( Var *v );
 Var *digitizer_meas_channel_ok( Var *v );
@@ -161,6 +163,7 @@ void tds520a_do_pre_exp_checks( void );
 void tds520a_set_meas_window( WINDOW *w );
 void tds520a_set_curve_window( WINDOW *w );
 void tds520a_set_window( WINDOW *w );
+long tds520a_translate_channel( int dir, long channel );
 
 bool tds520a_init( const char *name );
 double tds520a_get_timebase( void );

@@ -462,8 +462,7 @@ Var *digitizer_sensitivity( Var *v )
 	if ( channel < TDS520_CH1 || channel > TDS520_CH2 )
 	{
 		eprint( FATAL, SET, "%s: Can't set or obtain sensitivity for "
-				"specified channel %s.\n", DEVICE_NAME,
-				Channel_Names[ channel ] );
+				"channel %s.\n", DEVICE_NAME, Channel_Names[ channel ] );
 		THROW( EXCEPTION )
 	}
 
@@ -789,11 +788,12 @@ Var *digitizer_trigger_channel( Var *v )
 
 	vars_check( v, INT_VAR );
 	channel = tds520_translate_channel( GENERAL_TO_TDS520, v->val.lval );
+	vars_pop( v );
 
 	if ( channel < 0 || channel >= MAX_CHANNELS )
 	{
-		eprint( FATAL, SET, "%s: Invalid trigger channel name in %s().\n",
-				DEVICE_NAME, Cur_Func );
+		eprint( FATAL, SET, "%s: Invalid trigger channel %s in %s().\n",
+				DEVICE_NAME, Channel_Names[ channel ], Cur_Func );
 		THROW( EXCEPTION )
 	}
 
@@ -815,7 +815,6 @@ Var *digitizer_trigger_channel( Var *v )
 			THROW( EXCEPTION )
     }
 
-	vars_pop( v );
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -873,6 +872,7 @@ static Var *get_area( Var *v, bool use_cursor )
 
 	vars_check( v, INT_VAR );
 	channel = tds520_translate_channel( GENERAL_TO_TDS520, v->val.lval );
+	v = vars_pop( v );
 
 	for ( ch = 0; ch <= TDS520_REF4; ch++ )
 		if ( ch == ( int ) channel )
@@ -887,8 +887,6 @@ static Var *get_area( Var *v, bool use_cursor )
 	}
 
 	tds520.channels_in_use[ ch ] = SET;
-
-	v = vars_pop( v );
 
 	/* Now check if there's a variable with a window number and check it */
 
@@ -984,6 +982,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 	vars_check( v, INT_VAR );
 	channel = tds520_translate_channel( GENERAL_TO_TDS520, v->val.lval );
+	v = vars_pop( v );
 
 	for ( ch = 0; ch <= TDS520_REF4; ch++ )
 		if ( ch == ( int ) channel )
@@ -998,8 +997,6 @@ static Var *get_curve( Var *v, bool use_cursor )
 	}
 
 	tds520.channels_in_use[ ch ] = SET;
-
-	v = vars_pop( v );
 
 	/* Now check if there's a variable with a window number and check it */
 
@@ -1106,6 +1103,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 
 	vars_check( v, INT_VAR );
 	channel = tds520_translate_channel( GENERAL_TO_TDS520, v->val.lval );
+	v = vars_pop( v );
 
 	for ( ch = 0; ch <= TDS520_REF4; ch++ )
 		if ( ch == ( int ) v->val.lval )
@@ -1120,8 +1118,6 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	}
 
 	tds520.channels_in_use[ ch ] = SET;
-
-	v = vars_pop( v );
 
 	/* Now check if there's a variable with a window number and check it */
 
