@@ -43,11 +43,13 @@ Var *voltmeter_name( Var *v );
 Var *voltmeter_get_data( Var *v );
 Var *voltmeter_ac_measurement( Var *v );
 Var *voltmeter_dc_measurement( Var *v );
+Var *voltmeter_command( Var *v );
 
 
 /* Locally used functions */
 
 static bool kontron4060_init( const char *name );
+static bool kontron4060_command( const char *cmd );
 static void kontron4060_failure( void );
 
 
@@ -193,6 +195,37 @@ Var *voltmeter_get_data( Var *v )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *voltmeter_command( Var *v )
+{
+	static char *cmd;
+
+
+	cmd = NULL;
+	vars_check( v, STR_VAR );
+	
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		TRY
+		{
+			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+			kontron4060_command( cmd );
+			T_free( cmd );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( cmd );
+			RETHROW( );
+		}
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
 /*--------------------------------------------------*/
 /*--------------------------------------------------*/
 
@@ -227,6 +260,18 @@ static bool kontron4060_init( const char *name )
 	/* Get one value - the first one always seems to be bogus */
 
 	vars_pop( voltmeter_get_data( NULL ) );
+
+	return OK;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool kontron4060_command( const char *cmd )
+{
+	if ( gpib_write( kontron4060.device, cmd, strlen( cmd ) ) == FAILURE )
+		kontron4060_failure( );
 
 	return OK;
 }

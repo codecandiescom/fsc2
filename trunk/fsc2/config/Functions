@@ -216,6 +216,7 @@ voltmeter_name, 0, ALL;
 voltmeter_get_data, 0, EXP;
 voltmeter_ac_measurement, 0, EXP;
 voltmeter_dc_measurement, 0, EXP;
+voltmeter_command, 1, EXP;
 
 
 /* Functions exported by the temperature controller (Lakeshore 330) */
@@ -225,9 +226,11 @@ temp_contr_lock_keyboard, -1, EXP;
 temp_contr_temperature, 0, EXP;
 temp_contr_sensor_unit, -1, EXP;
 temp_contr_sample_channel, -1, EXP;
+temp_contr_command, 1, EXP;
 
 
 /* Functions exported by the frequency counter (HP5340A) */
 
 freq_counter_name, 0, ALL;
 freq_counter_measure, 0, EXP;
+freq_counter_command, 1, EXP;

@@ -488,7 +488,7 @@ static void lakeshore330_lock( int state )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-static bool pt2025_command( const char *cmd )
+static bool lakeshore330_command( const char *cmd )
 {
 	if ( gpib_write( lakeshore330.device, cmd, strlen( cmd ) ) == FAILURE )
 		lakeshore330_gpib_failure( );
