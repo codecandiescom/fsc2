@@ -70,8 +70,8 @@ while ( <$if> ) {
         next;
     }
 
-    # If line ends in a backslash append the next line to it (which then also
-    # must be a line starting with the 'guify' signature)
+    # If the line ends in a backslash append the next line to it (which
+	# then also must be a line starting with the 'guify' signature)
 
     my $cur_line = $_;
     $lino = $.;
@@ -117,7 +117,7 @@ while ( <$if> ) {
         next;
     }
 
-    # Lines defining variables must be analyzed directly
+    # Lines defining variables must be analyzed immediately
 
     if ( $cur_line =~ /$var_entry/o ) {
         chomp $cur_line;
@@ -144,7 +144,7 @@ close $if;
 die "Unbalanced if-endif construct(s)\n" if $if_level > 0;
 die "No variables found in input\n" if @vars == 0;
 
-# Set values for variables that don't have been given a default value
+# Set values for variables that don't have been assigned a default value
 
 for ( @vars ) {
     if ( exists $$_{ value } and defined $$_{ value } ) {
@@ -190,6 +190,8 @@ write_script( );
 # Finally make the new script executable
 
 chmod( 0755, $ARGV[ 1 ] ) if $ARGV[ 1 ];
+
+# And that's it ;-)
 
 
 ################################################################
@@ -296,7 +298,7 @@ sub get_int_limits {
         die "Not an integer number ($min) at line $lino\n"
             if defined $min and $min !~ /^$int_rep$/o;
 
-        die "Not a integer number ($max) at line $lino\n"
+        die "Not an integer number ($max) at line $lino\n"
             if defined $max and $max !~ /^$int_rep$/o;
 
         if ( defined( $min ) and defined( $max ) and $min > $max ) {
@@ -370,7 +372,7 @@ sub get_default_value {
         }
     } elsif ( $hr->{ type } =~ /^float$/ ) {
         if ( $val =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?/o ) {
-            die "Initil value for $hr->{ name } does not fit into range at " .
+            die "Default value for $hr->{ name } does not fit into range at " .
                 "line $lino\n"
                     if ( defined $hr->{ max } and $hr->{ max } < $val ) or
                        ( defined $hr->{ min } and $hr->{ min } > $val );
@@ -502,7 +504,7 @@ $fsc2_apply_frame->pack( -side => "bottom",
 
 EOT
 
-    # Now write the code for creating the editing fields for the variables
+    # Now write the code for creating the input fields for the variables
 
     for ( @vars ) {
         print <<"EOT";
@@ -573,8 +575,8 @@ EOT
 EOT
     }
 
-    # Finally add the menu for selection how to run the generated EDL script
-    # and the Apply- and Quit-button
+    # Finally add the menu for selection of how to run the generated EDL
+    # script and the Apply- and Quit-button
 
     print <<"EOT";
 \$fsc2_main_frame->pack( \%fp, -pady => '1m' );
@@ -594,8 +596,8 @@ EOT
 " if $$_{ type } =~ /^file$/o;
     }
 
-    # Ok, everything needed for the graphical interface done. After the
-    # MainLoop() call follow all the funcions needed by the script
+    # Ok, everything needed for the graphical interface has been done. After
+    # the MainLoop() call all the funcions needed by the script follow...
 
     print <<"EOT";
 MainLoop;
@@ -662,16 +664,16 @@ sub write_out {
 
 EOT
 
-	# The user may change the variables from within the conditions. We must
-	# avoid that these changes also change the variables in the rest of the
-	# script and thus use variables local to the current funtion.
+	# The user may change variables from within the conditions. We must
+	# avoid that these changes "bubble up" to the rest of the script and
+    # therefore use variables local to the current funtion.
 
 	print "    my \$$$_{ name } = \$$$_{ name }\{ value \};\n" for ( @vars );
 
     # Here the body of the EDL script that the script we are just writing is
     # going to send to fsc2 is written. For normal lines we just have to
-    # double all backslashes, escape double quotes and dollars and prepend
-    # an (escaped) $ to the variable names.
+    # double all backslashes, escape double quotes and $'s and prepend an
+    # (escaped) $ to the variable names.
     # For the possibly embedded if, else, elsif and endif commands we
     # have to built in some Perl code to allow the written script to
     # decide which parts need to be written to the EDL script depending
