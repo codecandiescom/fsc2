@@ -38,6 +38,7 @@ typedef struct {
 bool functions_init( void );
 void functions_exit( void );
 Var *func_get( const char *name, int *access );
+Var *func_get_long( const char *name, int *access, bool flag );
 Var *func_call( Var *f );
 void close_all_files( void );
 
