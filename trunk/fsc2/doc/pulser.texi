@@ -345,7 +345,7 @@ have in mind.
 
 Before giving an example it is important to point out that there are
 some major differences between the @strong{Sony/Tektronix DG2020} on the
-one hand and the @strong{Tektronix HFS9003} and teh @strong{Bruker
+one hand and the @strong{Tektronix HFS9003} and the @strong{Bruker
 EP385} on the other. The @strong{Tektronix HFS9003} and the
 @strong{Bruker EP385} are quite simple in that they have just a number
 (4 and 8, respectively) of output channels. In contrast, the
@@ -407,7 +407,7 @@ DETECTION: CH = 7;
 @end example
 @noindent
 (This example will only work with the @strong{Bruker EP385}, the
-@strong{Tektronix HFS9003} has only 4 channels and does not allow teh
+@strong{Tektronix HFS9003} has only 4 channels and does not allow
 assignment of more than one channel to a single function.)
 
 Here a list of the pod and/or channel numbers that can be used for the
