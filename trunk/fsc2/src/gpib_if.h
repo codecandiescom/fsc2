@@ -15,10 +15,14 @@
 
 /* In older versions of the GPIB driver ERR was defined but this clashes
    with newer kernel versions. So, if you still use an old GPIB driver
-   uncomment the following line... */
-/*
+   the following line is needed... */
+
+#if ! defined( IBERR )
+#warning "**************************************************"
+#warning "* Using ERR will conflict with post-2.2 kernels! *"
+#warning "**************************************************"
 #define IBERR ERR
-*/
+#endif
 
 
 #if defined ( __GPIB__ )
