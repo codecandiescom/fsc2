@@ -531,7 +531,7 @@ debugging to allow access by all users (or at least you). Don't forget
 to reset the permissions when you're done.
 
 
-This point out of the way I'll now want to start the @i{tour de force}
+This point out of the way I'm now going to start a @i{tour de force}
 through the sources. When @code{fsc2} is invoked it starts with the
 @code{main()} function in the file @file{fsc2.c}. After setting up lots
 of global variables and checking the command line options it tries to
