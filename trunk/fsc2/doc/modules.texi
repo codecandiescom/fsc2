@@ -1386,7 +1386,7 @@ double experiment_time( void )
 @noindent
 
 
-@subsection Wainting for short times
+@subsection Waiting for short times
 @cindex fsc2_usleep()
 @findex fsc2_usleep()
 
