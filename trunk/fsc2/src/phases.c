@@ -86,7 +86,7 @@ Phase_Sequence *phase_seq_start( long phase_seq_num )
 		cp = cp->next;
 	}
 
-	/* create new sequence, append it to end of list and  initialize it */
+	/* create new sequence, append it to end of list and initialize it */
 
 	cp = T_malloc( sizeof( Phase_Sequence ) );
 
