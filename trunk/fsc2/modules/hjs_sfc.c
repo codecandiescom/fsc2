@@ -514,13 +514,14 @@ Var *magnet_calibration_file( Var *v )
 /*                                           */
 /*-------------------------------------------*/
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-----------------------------------------------------*/
+/* Tests if a field value is with the admissible range */
+/*-----------------------------------------------------*/
 
 static double hjs_sfc_field_check( double field )
 {
 	/* When checking the field we must take into consideration that for
-	   some magnets the field at 0 V is the highest possible field, while
+	   some magnets the field at 0 V is the highest possible field while
 	   for others it's lowest field. */
 
 	if ( hjs_sfc.slope < 0.0 )
@@ -590,8 +591,9 @@ static double hjs_sfc_field_check( double field )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*---------------------------------------------------------*/
+/* Set a new field by outputting a new voltage at the DAC. */
+/*---------------------------------------------------------*/
 
 static double hjs_sfc_set_field( double field )
 {
