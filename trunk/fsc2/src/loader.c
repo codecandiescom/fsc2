@@ -25,6 +25,9 @@ extern Func Def_Fncts[ ];   /* structures for list of built-in functions */
 void load_all_drivers( void )
 {
 	Device *cd;
+	bool saved_need_gpib;
+	bool saved_need_Serial_Port[ NUM_SERIAL_PORTS ];
+	int i;
 
 
 	/* Treat "User_Functions" also as a kind of device driver and append
@@ -39,22 +42,38 @@ void load_all_drivers( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		load_functions( cd );
 
-	/* This done we run the init hooks (if one exists) and warn if it didn't
-	   return successfully (if the init hook thinks it should kill the whole
-	   program it's supposed to throw an exception) */
+	/* This done we run the init hooks (if they exist) and warn if they didn't
+	   return successfully (if an init hook thinks it should kill the whole
+	   program it's supposed to throw an exception). To keep the modules
+	   writers from erroneously unsetting the global variables `need_gpib' and
+	   `need_Serial_Port' they are stored before each init_hook() function is
+	   called and, if necessary, are restored to their previous values. */
 
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
+	{
+		saved_need_gpib = need_gpib;
+		memcpy( saved_need_Serial_Port, need_Serial_Port,
+				NUM_SERIAL_PORTS * sizeof( bool ) );
+
 		if ( cd->is_loaded && cd->driver.is_init_hook &&
 			 ! cd->driver.init_hook( ) )
 			eprint( WARN, "Initialisation of module `%s.so' failed.",
 					cd->name );
+
+		if ( need_gpib == UNSET && saved_need_gpib == SET )
+			need_gpib = SET;
+		for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
+			if ( need_Serial_Port[ i ] == UNSET &&
+				 saved_need_Serial_Port[ i ] == SET )
+				need_Serial_Port[ i ] = SET;
+	}
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function tests if a device driver, passed to the function by name, */
-/* is loaded.                                                         */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------*/
+/* Function tests if hte device driver passed */
+/* to the function by name is loaded.         */
+/*--------------------------------------------*/
 
 bool exist_device( const char *name )
 {
@@ -68,9 +87,9 @@ bool exist_device( const char *name )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Routine tests if a function, passed to the routine by name, exists. */
-/*---------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Routine tests if a function passed to the routine by name exists. */
+/*-------------------------------------------------------------------*/
 
 bool exist_function( const char *name )
 {
@@ -219,7 +238,7 @@ void load_functions( Device *dev )
 		}
 
 		/* Allow overloading of built-in functions - but only once, next time
-		   just print severe warning and do nothing */
+		   print severe warning and don't overload! */
 
 		if ( num < Num_Def_Func && Fncts[ num ].fnct != NULL )
 		{
@@ -231,8 +250,9 @@ void load_functions( Device *dev )
 				continue;
 			}
 
-			eprint( NO_ERROR, "  Overloading built-in function `%s()' from "
-					"module `%s.so'.", Fncts[ num ].name, dev->name );
+			eprint( WARN, "  Overloading built-in function `%s()' with "
+					"function from module `%s.so'.",
+					Fncts[ num ].name, dev->name );
 		}
 
 		Fncts[ num ].fnct = cur;
@@ -349,24 +369,24 @@ void run_exit_hooks( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* This function is intended to allow user defined modules access to the */
-/* symbols in another module. Probably it's a BAD thing if they do, but  */
-/* sometimes it might be inevitable, so we better include this instead   */
-/* of having the writer of a module trying to figure out some other and  */
-/* probably more difficult or dangerous method to do it anyway.          */
-/*                                                                       */
-/* ->                                                                    */
-/*    1. Name of the module (without the `.so' extension) the symbol is  */
-/*       to be loaded from                                               */
-/*    2. Name of the symbol to be loaded                                 */
-/*    3. Pointer to void pointer for returning the address of the symbol */
-/*                                                                       */
-/* <-                                                                    */
-/*    Return value indicates success or failure (see global.h for defi-  */
-/*    nition of the the return codes). On success `symbol_ptr' contains  */
-/*    the address of the symbol.                                         */ 
-/*-----------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* This function is intended to allow user defined modules access to the  */
+/* symbols defined in another module. Probably it's a BAD thing if they   */
+/* do, but sometimes it might be inevitable, so we better include this    */
+/* instead of having the writer of a module trying to figure out some     */
+/* other and probably more difficult or dangerous method to do it anyway. */
+/*                                                                        */
+/* ->                                                                     */
+/*    1. Name of the module (without the `.so' extension) the symbol is   */
+/*       to be loaded from                                                */
+/*    2. Name of the symbol to be loaded                                  */
+/*    3. Pointer to void pointer for returning the address of the symbol  */
+/*                                                                        */
+/* <-                                                                     */
+/*    Return value indicates success or failure (see global.h for defi-   */
+/*    nition of the the return codes). On success `symbol_ptr' contains   */
+/*    the address of the symbol.                                          */ 
+/*------------------------------------------------------------------------*/
 
 int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 {
