@@ -57,6 +57,12 @@ extern void assignparse( void );
 
 int Assign_Next_Section;
 
+int Cur_Pulser;
+
+/* locally used functions */
+
+static void set_cur_pulser( void );
+
 %}
 
 
@@ -88,24 +94,24 @@ INT         [0-9]+
 EXPO        [EDed][+-]?{INT}
 FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
-MW          M(ICRO)?_?W(AVE)?:?
-TWT         T(RAVELING)?_?W(AVE)?_?T(UBE)?:?
-TWT_GATE    T(RAVELING)?_?W(AVE)?_?T(UBE)?_?G(ATE)?:?
-DET         DET(ECTION)?:?
-DET_GATE    DET(ECTION)?_?G(ATE)?:?
-DEF         DEF(ENSE)?:?
-RF          R(ADIO)?_?F(REQ(UENCY)?)?:?
-RF_GATE     R(ADIO)?_?F(REQ(UENCY)?)?_?G(ATE)?:?
-PSH         P(ULSE)?_?SH(APE(R)?)?:?
-OI          O(THER)?(_?1)?:?
-OII         O(THER)?_?2:?
-OIII        O(THER)?_?3:?
-OIV         O(THER)?_?4:?
-PH1         PH(ASE)?(_?1)?:?
-PH2         PH(ASE)?_?2:?
+MW          M(ICRO)?_?W(AVE)?(#{INT})?:?
+TWT         T(RAVELING)?_?W(AVE)?_?T(UBE)?(#{INT})?:?
+TWT_GATE    T(RAVELING)?_?W(AVE)?_?T(UBE)?_?G(ATE)?(#{INT})?:?
+DET         DET(ECTION)?(#{INT})?:?
+DET_GATE    DET(ECTION)?_?G(ATE)?(#{INT})?:?
+DEF         DEF(ENSE)?(#{INT})?:?
+RF          R(ADIO)?_?F(REQ(UENCY)?)?(#{INT})?:?
+RF_GATE     R(ADIO)?_?F(REQ(UENCY)?)?_?G(ATE)?(#{INT})?:?
+PSH         P(ULSE)?_?SH(APE(R)?)?(#{INT})?:?
+OI          O(THER)?(_?1)?(#{INT})?:?
+OII         O(THER)?_?2?(#{INT}):?
+OIII        O(THER)?_?3?(#{INT}):?
+OIV         O(THER)?_?4?(#{INT}):?
+PH1         PH(ASE)?(_?1)?(#{INT})?:?
+PH2         PH(ASE)?_?2(#{INT})?:?
 
-PHS1        PH(ASE)?_S(ETUP)?(_?1)?:?
-PHS2        PH(ASE)?_S(ETUP)?_?2:?
+PHS1        PH(ASE)?_S(ETUP)?(_?1)?(#{INT})?:?
+PHS2        PH(ASE)?_S(ETUP)?_?2(#{INT})?:?
 
 PX			"+"?[xX]:?
 PY			"+"?[yY]:?
@@ -124,10 +130,10 @@ INV         INV(ERT(ED)?)?
 VH          V_?H(IGH)?
 VL          V_?L(OW)?
 
-TB          T(IME)?_?B(ASE)?:?
-TM          T(RIG(GER)?)?_?M(ODE)?:?
-MPL         MAX(IMUM)?_?PATT(ERN)?_LEN(GTH)?
-KAP         KEEP_?ALL_?PULSES:?
+TB          T(IME)?_?B(ASE)?(#{INT}):?
+TM          T(RIG(GER)?)?_?M(ODE)?(#{INT}):?
+MPL         MAX(IMUM)?_?PATT(ERN)?_LEN(GTH)(#{INT})?
+KAP         KEEP_?ALL_?PULSES(#{INT}):?
 
 INTERN      INT(ERN(AL)?)?
 EXTERN      EXT(ERN(AL)?)?
@@ -141,10 +147,10 @@ HIGH        H(IGH)?
 REPT        REP(EAT)?_?T(IME)?
 REPF        REP(EAT)?_?F(REQ(UENCY)?)?
 
-PSD1        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?(_?1)?:?
-PSD2        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?_?2:?
+PSD1        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?(_?1)?(#{INT})?:?
+PSD2        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?_?2(#{INT})?:?
 
-GP          G(RACE)?_?P(ERIOD)?:?
+GP          G(RACE)?_?P(ERIOD)?(#{INT})?:?
 
 TO          TRIG(GER)?_?OUT
 
@@ -221,10 +227,12 @@ WS          [\n=: ]+
 			}
 
 {PHS1}		{
-				assignlval.lval = 0;
+			    set_cur_pulser( );
+  				assignlval.lval = 0;
 				return PHS_TOK;
 			}
 {PHS2}		{
+			    set_cur_pulser( );
 				assignlval.lval = 1;
 				return PHS_TOK;
 			}
@@ -256,34 +264,80 @@ WS          [\n=: ]+
 {ON}        return ON_TOK;
 {OFF}       return OFF_TOK;
 
-{MW}        return MW_TOKEN;
+{MW}        {
+				set_cur_pulser( );
+				return MW_TOKEN;
+			}
 
-{TWT}       return TWT_TOKEN;
+{TWT}       {
+				set_cur_pulser( );
+				return TWT_TOKEN;
+			}
 
-{TWT_GATE}  return TWT_GATE_TOKEN;
+{TWT_GATE}  {
+				set_cur_pulser( );
+				return TWT_GATE_TOKEN;
+			}
 
-{DET}       return DET_TOKEN;
+{DET}       {
+				set_cur_pulser( );
+				return DET_TOKEN;
+			}
 
-{DET_GATE}  return DET_GATE_TOKEN;
+{DET_GATE}  {
+				set_cur_pulser( );
+				return DET_GATE_TOKEN;
+			}
 
-{DEF}       return DEF_TOKEN;
+{DEF}       {
+				set_cur_pulser( );
+				return DEF_TOKEN;
+			}
 
-{RF}        return RF_TOKEN;
+{RF}        {
+				set_cur_pulser( );
+				return RF_TOKEN;
+			}
 
-{RF_GATE}   return RF_GATE_TOKEN;
+{RF_GATE}   {
+				set_cur_pulser( );
+				return RF_GATE_TOKEN;
+			}
 
-{PSH}       return PSH_TOKEN;
+{PSH}       {
+				set_cur_pulser( );
+				return PSH_TOKEN;
+			}
 
-{PH1}       return PH1_TOKEN;
-{PH2}       return PH2_TOKEN;
+{PH1}       {
+				set_cur_pulser( );
+				return PH1_TOKEN;
+			}
 
-{OI}        return OI_TOKEN;
+{PH2}       {
+				set_cur_pulser( );
+				return PH2_TOKEN;
+			}
 
-{OII}       return OII_TOKEN;
+{OI}        {
+				set_cur_pulser( );
+				return OI_TOKEN;
+			}
 
-{OIII}      return OIII_TOKEN;
+{OII}       {
+				set_cur_pulser( );
+				return OII_TOKEN;
+			}
 
-{OIV}       return OIV_TOKEN;
+{OIII}      {
+				set_cur_pulser( );
+				return OIII_TOKEN;
+			}
+
+{OIV}       {
+				set_cur_pulser( );
+				return OIV_TOKEN;
+			}
 
 {POD}       return POD_TOKEN;
 
@@ -299,9 +353,21 @@ WS          [\n=: ]+
 
             /* keywords related to time base and trigger mode */
 
-{TB}        return TB_TOKEN;
-{TM}        return TM_TOKEN;
-{MPL}       return MPL_TOKEN;
+{TB}		{
+				set_cur_pulser( );
+				return TB_TOKEN;
+			}
+
+{TM}		{
+				set_cur_pulser( );
+				return TM_TOKEN;
+			}
+
+{MPL}		{
+				set_cur_pulser( );
+				return MPL_TOKEN;
+			}
+
 {INTERN}    return INTERN_TOKEN;
 {EXTERN}    return EXTERN_TOKEN;
 {SL}        return SLOPE_TOKEN;
@@ -320,8 +386,11 @@ WS          [\n=: ]+
 			}
 {REPT}      return REPT_TOKEN;
 {REPF}      return REPF_TOKEN;
-{GP}        return GP_TOKEN;
 
+{GP}		{
+				set_cur_pulser( );
+				return GP_TOKEN;
+			}
 
 "\x4nunit"   return NU_TOKEN;
 "\x4uunit"   return UU_TOKEN;
@@ -508,6 +577,17 @@ int assignments_parser( FILE *in )
 	assignparse( );
 
 	return Assign_Next_Section;
+}
+
+
+static void set_cur_pulser( void )
+{
+	const char *t;
+
+
+	Cur_Pulser = 0;
+	if ( ( t = strchr( assigntext, '#' ) ) != NULL )
+		Cur_Pulser = T_atol( t + 1 );
 }
 
 
