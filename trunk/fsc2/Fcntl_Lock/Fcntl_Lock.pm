@@ -32,7 +32,8 @@ our @EXPORT = qw( F_GETLK F_SETLK F_SETLKW
 our $VERSION = '0.04';
 
 # Set up an hash with the error messages, but only for errno's that Errno
-# knows about
+# knows about. The texts represent what's written in the man pages for
+# Linux and TRUE64.
 
 my %fcntl_error_texts;
 
@@ -40,14 +41,16 @@ BEGIN {
 	my $err;
 
 	if ( $err = eval { &Errno::EACCES } ) {
-		$fcntl_error_texts{ $err } = "Lock is held by other processes";
+		$fcntl_error_texts{ $err } = "File or segment already locked or " .
+			                         "memory-mapped by other process(es)";
 	}
 	if ( $err = eval { &Errno::EAGAIN } ) {
-		$fcntl_error_texts{ $err } = "File hsd been memory-mapped by other " .
-		                             "process";
+		$fcntl_error_texts{ $err } = "File or segment already locked or " .
+			                         "memory-mapped by other process(es)";
 	}
 	if ( $err = eval { &Errno::EBADF } ) {
-		$fcntl_error_texts{ $err } = "Not an open file handle or descriptor";
+		$fcntl_error_texts{ $err } = "Not an open file handle or descriptor " .
+			                         "or not open or writing (with F_WRLCK)";
 	}
 	if ( $err = eval { &Errno::EDEADLK } ) {
 		$fcntl_error_texts{ $err } = "Operation would cause a deadlock";
@@ -64,7 +67,16 @@ BEGIN {
 									 "failure (e.g. NFS)";
 	}
 	if ( $err = eval { &Errno::EINVAL } ) {
-		$fcntl_error_texts{ $err } = "Internal error in Fcntl_Lock module";
+		$fcntl_error_texts{ $err } = "Illegal parameter or file does not " .
+			                         "support locking";
+	}
+	if ( $err = eval { &Errno::EOVERFLOW } ) {
+		$fcntl_error_texts{ $err } = "On of the parameters to be returned " .
+			                         "can not be represented correctly";
+	}
+	if ( $err = eval { &Errno::ENETUNREACH } ) {
+		$fcntl_error_texts{ $err } = "File is on remote machine that can " .
+			                         "not be reached anymore";
 	}
 }
 
@@ -142,22 +154,21 @@ sub l_whence {
 sub l_start {
     my $flock_struct = shift;
 
-    if ( @_ ) { $flock_struct->{ l_start } = shift };
+    if ( @_ ) { $flock_struct->{ l_start } = shift }
 	return $flock_struct->{ l_start };
 }
 
 
 ###########################################################
-#
+# Take care: negative lengths may be allowed, e.g. on TRUE64 the man page
+# says that when l_len is positive, the lock starts at l_start and ends at
+# l_start + l_len, while for negative lengths the lock instead is for the
+# region from l_start + l_len to l_start - 1.
 
 sub l_len {
     my $flock_struct = shift;
 
-	if ( @_ ) {
-		my $l_len = shift;
-		croak "Invalid value for l_end member" if $l_len < 0;
-		$flock_struct->{ l_len } = $l_len;
-	}
+	if ( @_ ) { $flock_struct->{ l_len } = shift }
     return $flock_struct->{ l_len };
 }
 
@@ -211,6 +222,7 @@ sub fcntl_system_error {
 sub fcntl_lock {
 	my ( $flock_struct, $fh, $action ) = @_;
 	my $ret;
+	my $err;
 
 	croak "Missing arguments to fcntl_lock()"
 		unless defined $flock_struct and defined $fh and defined $action;
@@ -219,9 +231,10 @@ sub fcntl_lock {
 										   $action == F_SETLKW;
 
 	my $fd = ref( $fh ) ? fileno( $fh ) : $fh;
-	if ( $ret = C_fcntl_lock( $fd, $action, $flock_struct ) ) {
+	if ( $ret = C_fcntl_lock( $fd, $action, $flock_struct, $err ) ) {
 		$flock_struct->{ errno } = $flock_struct->{ error } = undef;
 	} else {
+		die "Internal error in Fcntl_Lock module detected" if $err;
 		$flock_struct->{ errno } = $! + 0;
 		$flock_struct->{ error } = defined $fcntl_error_texts{ $! + 0 } ?
 			$fcntl_error_texts{ $! + 0 } : "Unexpected error: $!";
@@ -360,13 +373,10 @@ errno is set to B<EINTR>.
 
 =back
 
-On success the function returns the string "0 but true". Should you ever get
-a return value of 'undef' with errno ($!) being set to B<EINVAL> chances are
-high that you found a bug in the module.
-
-If the function fails (as indicated by an 'undef' return value) you can either
-immediately evaluate the error number ($!, $ERRNO or $OS_ERROR) directly or
-check for it at some later time. There exist three functions for this purpose:
+On success the function returns the string "0 but true". If the function fails
+(as indicated by an 'undef' return value) you can either immediately evaluate
+the error number ($!, $ERRNO or $OS_ERROR) directly or check for it at some
+later time. There exist three functions for this purpose:
 
 =over 4
 
@@ -379,8 +389,10 @@ the function returns 'undef'.
 =item B<fcntl_error>
 
 The function returns a short description of the error that happened during the
-latest call of B<fcntl_lock> with the flock structure object. If there was no
-error the function returns 'undef'.
+latest call of B<fcntl_lock> with the flock structure object. Please take the
+messages with a grain of salt, they represent what Linux and TRUE64 tell
+what the error numbers mean, there could be differences (and additional error
+numbers) on other systems. If there was no error the function returns 'undef'.
 
 =item B<fcntl_system_error>
 

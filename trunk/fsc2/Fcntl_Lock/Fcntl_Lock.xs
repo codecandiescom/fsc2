@@ -20,19 +20,22 @@ PROTOTYPES: ENABLE
 
 
 SV *
-C_fcntl_lock( fd, function, flock_hash )
+C_fcntl_lock( fd, function, flock_hash, int_err )
 	int fd
 	int function
 	SV *flock_hash
+	SV *int_err
 
 	INIT:
 		unsigned char flock_struct[ STRUCT_SIZE ];
 		HV *fh;
 		SV **sv_type, **sv_whence, **sv_start, **sv_len, **sv_pid;
 
+		sv_setiv( int_err, 0 );
+
 		if ( ! SvROK( flock_hash ) )
 		{
-				errno = EINVAL;
+				sv_setiv( int_err, 1 );
 				XSRETURN_UNDEF;
 		}
 
@@ -57,7 +60,7 @@ C_fcntl_lock( fd, function, flock_hash )
 				break;
 
 			default :
-				errno = EINVAL;
+				sv_setiv( int_err, 1 );
 				XSRETURN_UNDEF;
 		}
 
@@ -70,7 +73,7 @@ C_fcntl_lock( fd, function, flock_hash )
 			 ( sv_len	 = hv_fetch( fh, "l_len",    5, 0 ) ) == NULL ||
 			 ( sv_pid	 = hv_fetch( fh, "l_pid",    5, 0 ) ) == NULL )
 		{
-			errno = EINVAL;
+			sv_setiv( int_err, 1 );
 			XSRETURN_UNDEF;
 		}
 
