@@ -386,7 +386,7 @@ void G_init_cut_curve( void )
 	for ( i = 0; i < 8; i++ )
 		fl_set_cursor_color( CG.cursor[ i ], FL_RED, FL_WHITE );
 
-	/* Allocate memory for the curve and its data */
+	/* Clear the pointer to the still non-existent points */
 
 	cv->points = NULL;
 	cv->xpoints = NULL;
@@ -2681,9 +2681,6 @@ void cut_clear_curve( long curve )
 	for ( sp = G.cut_curve.points, i = 0; i < CG.nx; sp++, i++ )
 		sp->exist = UNSET;
 	G.cut_curve.count = 0;
-
-	G.cut_curve.points = T_free( G.cut_curve.points );
-	G.cut_curve.xpoints = T_free( G.cut_curve.xpoints );
 }
 
 

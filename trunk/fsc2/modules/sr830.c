@@ -323,6 +323,9 @@ int sr830_end_of_exp_hook( void )
 {
 	int i;
 
+
+	sr830_auto( 0 );
+
 	/* Switch lock-in back to local mode */
 
 	if ( sr830.device >= 0 )
@@ -402,7 +405,7 @@ Var *lockin_get_data( Var *v )
 				THROW( EXCEPTION );
 			}
 
-			for ( j = 0; j < DISPLAY_CHANNELS; i++ )
+			for ( j = 0; j < DISPLAY_CHANNELS; j++ )
 				if ( channels[ i ] == sr830.dsp_ch[ j ] )
 					break;
 
@@ -1356,6 +1359,10 @@ static bool sr830_init( const char *name )
 		else
 			sr830.dac_voltage[ i ] = sr830_get_dac_data( i + 1 );
 
+	/* Stop any still running auto-acquisition and clear the internal buffer */
+
+	sr830_auto( 0 );
+
 	if ( sr830.is_auto_setup )
 	{
 		sr830_set_sample_time( sr830.st_index );
@@ -1426,11 +1433,9 @@ static void sr830_get_xy_data( double *data, long *channels, int num_channels )
 					return;
 				}
 
-		if ( i == 0 )
-			sprintf( cmd + strlen( cmd ), "%ld\n", channels[ i ] );
-		else
-			sprintf( cmd + strlen( cmd ), ",%ld\n", channels[ i ] );
+		sprintf( cmd + strlen( cmd ), i == 0 ? "%ld" : ",%ld", channels[ i ] );
 	}
+	strcat( cmd, "\n" );
 
 	/* Get the data from the lock-in */
 
@@ -1445,15 +1450,18 @@ static void sr830_get_xy_data( double *data, long *channels, int num_channels )
 
 	for ( i = 0; i < num_channels; bp_cur = bp_next, i++ )
 	{
-		bp_next = strchr( bp_cur, ',' ) + 1;
-
-		if ( bp_next == NULL )
+		if ( i != num_channels - 1 )
 		{
-			print( FATAL, "Lock-in amplifier does not react properly.\n" );
-			THROW( EXCEPTION );
+			bp_next = strchr( bp_cur, ',' ) + 1;
+
+			if ( bp_next == NULL )
+			{
+				print( FATAL, "Lock-in amplifier does not react properly.\n" );
+				THROW( EXCEPTION );
+			}
+			else
+				*( bp_next - 1 ) = '\0';
 		}
-		else
-			*( bp_next - 1 ) = '\0';
 
 		data[ i ] = T_atod( bp_cur );
 	}
@@ -1480,28 +1488,31 @@ static void sr830_get_xy_auto_data( double *data, long *channels,
 	   buffer they have to be returned. */
 
 	for ( ak = nk = i = 0; i < num_channels; i++ )
+	{
 		for ( j = 0; j < DISPLAY_CHANNELS; j++ )
 			if ( channels[ i ] == sr830.dsp_ch[ j ] )
 			{
 				auto_channels[ ak ].pos = i;
 				auto_channels[ ak++ ].type = channels[ i ];
+				break;
 			}
-			else
-				new_channels[ nk++ ] = channels[ i ];
+
+		if ( j == DISPLAY_CHANNELS )
+			new_channels[ nk++ ] = channels[ i ];
+	}
 
 	/* First fetch the 'normal' data by calling the 'normal' function again
-	   (take care that it needs to return data for at least 2 channel). */
+	   (take care that it needs to return data for at least 2 channels). */
 
 	if ( nk > 0 )
 	{
 		if ( nk == 1 )
 		{
-			new_channels[ nk + 1 ] = 
-								   new_channels[ 0 ] % NUM_DIRECT_CHANNELS + 1;
+			new_channels[ 1 ] = new_channels[ 0 ] % NUM_DIRECT_CHANNELS + 1;
 			sr830_get_xy_data( data, new_channels, nk + 1 );
 		}
 		else
-			sr830_get_xy_data( data, new_channels, nk + 1 );
+			sr830_get_xy_data( data, new_channels, nk );
 	}
 
 	/* Now also fetch the auto-data and insert them into their correct
@@ -1580,7 +1591,7 @@ static double sr830_get_dac_data( long port )
 
 	fsc2_assert( port >= 1 && port <= 4 );
 
-	sprintf( buffer, "AUXV %ld\n", port );
+	sprintf( buffer, "AUXV? %ld\n", port );
 	if ( gpib_write( sr830.device, buffer, strlen( buffer ) ) == FAILURE ||
 		 gpib_read( sr830.device, buffer, &len )== FAILURE )
 		sr830_failure( );
@@ -1947,7 +1958,7 @@ static void sr830_set_display_channel( int channel, long type )
 	}
 #endif
 
-	sprintf( cmd, "DDEF %d,%d,0\n", channel, symbol_to_dsp[ type ] );
+	sprintf( cmd, "DDEF %d,%d,0\n", channel + 1, symbol_to_dsp[ type ] );
 	if ( gpib_write( sr830.device, cmd, strlen( cmd ) ) == FAILURE )
 		sr830_failure( );
 }
@@ -2049,6 +2060,7 @@ static double sr830_get_auto_data( int type )
 	long length = 100;
 	int channel;
 	int i;
+	char *ptr;
 
 
 	for ( channel = 0; channel < DISPLAY_CHANNELS; channel++ )
@@ -2088,22 +2100,28 @@ static double sr830_get_auto_data( int type )
 	   extremely slow external trigger is used polling can take up to 16 s in
 	   the worst (but probably rather unrealistic) case. */
 
-	while ( sr830.stored_data <= sr830.data_fetched[ channel ] );
+	while ( sr830.stored_data <= sr830.data_fetched[ channel ] )
 	{
 		stop_on_user_request( );
 
+		length = 100;
 		if ( gpib_write( sr830.device, "SPTS?\n", 6 ) == FAILURE ||
 			 gpib_read( sr830.device, buffer, &length ) == FAILURE )
 			sr830_failure( );
 
 		buffer[ length - 1 ] = '\0';
-		sr830.stored_data = T_atol( buffer );
+
+		ptr = buffer;
+		while ( ! isdigit( *ptr ) )
+			ptr++;
+
+		sr830.stored_data = T_atol( ptr );
 	} 
 
 	sprintf( cmd, "TRCA? %d,%ld,1\n",
-			 channel, sr830.data_fetched[ channel ]++ );
-	length = 100;
+			 channel + 1, sr830.data_fetched[ channel ]++ );
 
+	length = 100;
 	if ( gpib_write( sr830.device, cmd, strlen( cmd) ) == FAILURE ||
 		 gpib_read( sr830.device, buffer, &length ) == FAILURE )
 		sr830_failure( );
