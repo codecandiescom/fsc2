@@ -769,7 +769,7 @@ static void witio_48_1x24_dio_in( WITIO_48_DATA *data )
 	int need_crtl_update = 0;
 
 
-	for ( i = 2; i >= 0; i++, data->value <<= 8 )
+	for ( i = 0; i <= 2; i++ )
 		if ( board.states[ dio ].state[ i ] != READ_ALL ) {
 			need_crtl_update = 1;
 			board.states[ dio ].state[ i ] = READ_ALL;
@@ -778,9 +778,12 @@ static void witio_48_1x24_dio_in( WITIO_48_DATA *data )
 	if (  need_crtl_update )
 		witio_48_set_crtl( dio );
 
-	for ( data->value = 0, i = 2; i >= 0; i++, data->value <<= 8 )
+	for ( data->value = 0, i = 2; i >= 0; i-- )
+	{
+		data->value <<= 8;
 		data->value |=
-			witio_48_board_in( board.regs.port[ dio ][ i ] );
+			      witio_48_board_in( board.regs.port[ dio ][ i ] );
+	}
 }
 
 
