@@ -44,8 +44,8 @@ Features
 
 * Device are not hard-coded into fsc2. Instead, devices are dealt with
   by modules that get loaded on demand (a single instruction in an EDL
-  script). For each sort of devices a set of EDL functions exists to
-  set up the device and fetch measured data. This allows e.g. to employ
+  script). For each kind of devices a unique set of EDL functions exists
+  to set up the device and fetch measured data. This allows e.g. to employ
   a different device with similar functionality by usually changing not
   more than a single line in an EDL script.
 
@@ -63,7 +63,7 @@ Features
   that allows the user to remotely monitor the state of an experiment.
 
 * Currently fsc2 controls devices that are either connected via the
-  serial ports or the GPIB bus.
+  serial ports or the GPIB bus and two devices on PCI cards.
 
 * Writing new device modules (or adapting existing ones for a new device)
   shouldn't be too difficult for anyone having some experience with
@@ -71,14 +71,14 @@ Features
   are already part of the package and can be used as a starting point
   for developing drivers for new devices.
 
-* fsc2 is well-documented, an 180 page documentation in HTML, info,
+* fsc2 is well-documented, an 200+ page documentation in HTML, info,
   PostScript and PDF format, covering all aspects of fsc2, i.e the
   graphical interface, the EDL language, device functions and writing of
   new device modules, is part of the package.
 
 * fsc2 has been extensively tested and is currently used to control seven
-  EPR spectrometers, using a broad range of different devices and   
-  experimental techniques.
+  EPR spectrometers and a Single Molecule spectrometer, using a broad range
+  of different devices and experimental techniques.
 
 * The complete sources for the program and all device modules are available
   under the GNU Public License, so they can be adapted or extended to fit
