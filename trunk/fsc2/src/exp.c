@@ -155,10 +155,38 @@ void store_exp( FILE *in )
 				break;
 
 			case '{' :
+				if ( paranthesis_count != 0 )
+				{
+					eprint( FATAL, SET, "More '(' than ')` found before a "
+							"'{'.\n" );
+					THROW( EXCEPTION );
+				}
+
+				if ( square_brace_count != 0 )
+				{
+					eprint( FATAL, SET, "More '[' than ']` found before a "
+							"'{'.\n" );
+					THROW( EXCEPTION );
+				}
+
 				curly_brace_count++;
 				break;
 
 			case '}' :
+				if ( paranthesis_count != 0 )
+				{
+					eprint( FATAL, SET, "More '(' than ')` found before a "
+							"'}'.\n" );
+					THROW( EXCEPTION );
+				}
+
+				if ( square_brace_count != 0 )
+				{
+					eprint( FATAL, SET, "More '[' than ']` found before a "
+							"'}'.\n" );
+					THROW( EXCEPTION );
+				}
+
 				if ( --curly_brace_count < 0 )
 				{
 					eprint( FATAL, SET, "Found '}' without matching '{'.\n" );
@@ -198,6 +226,22 @@ void store_exp( FILE *in )
 				memcpy( prg_token[ prg_length ].tv.vptr, Var_Stack,
 						sizeof( Var ) );
 				vars_pop( Var_Stack );
+				break;
+
+			case ';' :
+				if ( paranthesis_count != 0 )
+				{
+					eprint( FATAL, SET, "More '(' than ')` found at end of"
+							"statement.\n" );
+					THROW( EXCEPTION );
+				}
+
+				if ( square_brace_count != 0 )
+				{
+					eprint( FATAL, SET, "More '[' than ']` found at end of "
+							"of statement.\n" );
+					THROW( EXCEPTION );
+				}
 				break;
 
 			default :
