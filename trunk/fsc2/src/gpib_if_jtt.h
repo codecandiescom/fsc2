@@ -12,7 +12,7 @@
 
 #include <gpib.h>
 
-#define JENS_GPIB_DRIVER
+#define GPIB_JTT
 
 
 #if defined ( __GPIB_IF__ )

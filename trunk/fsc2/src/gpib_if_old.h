@@ -12,6 +12,8 @@
 
 #include <gpib/ib.h>
 
+#define GPIB_OLD
+
 
 /* In older versions of the GPIB driver ERR was defined but this clashes
    with newer kernel versions. So, if you still use an old GPIB driver

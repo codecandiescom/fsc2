@@ -12,6 +12,8 @@
 
 #include <sys/ugpib.h>
 
+#define GPIB_NI
+
 #define GPIB_MAX_DEV 15
 #define GPIB_NAME_MAX 14
 
