@@ -71,14 +71,14 @@ endif
 		$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $$hp8647a_table $(libdir);  \
 	fi
 
-	hp8648b_table=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_TABLE_FILE' hp8648b.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_TABLE_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                                   \
+	hp8648b_table=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_TABLE_FILE' hp8648b.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_TABLE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                                   \
 	if [      -n "$$hp8648b_table"                                            \
 		 -a   -e $$hp8648b_table                                              \
 		 -a ! -e $(libdir)/$$hp8648b_table ]; then                            \
 		$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $$hp8648b_table $(libdir);  \
 	fi
 
-	hjs_attenuator_calib=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE' hjs_attenuator.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                 \
+	hjs_attenuator_calib=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE' hjs_attenuator.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                 \
 	if [      -n "$$hjs_attenuator_calib"                                 \
 		 -a   -e $$hjs_attenuator_calib                                   \
 		 -a ! -e $(libdir)/$$hjs_attenuator_calib ]; then                 \
@@ -86,7 +86,7 @@ endif
                                                   $(libdir);              \
 	fi
 
-	spectrapro_300i_calib=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE' spectrapro_300i.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                \
+	spectrapro_300i_calib=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE' spectrapro_300i.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                \
 	if [      -n "$$spectrapro_300i_calib"                                 \
 		 -a   -e $$spectrapro_300i_calib                                   \
 		 -a ! -e $(libdir)/$$spectrapro_300i_calib ]; then                 \
@@ -94,7 +94,7 @@ endif
                                                   $(libdir);               \
 	fi
 
-	hjs_sfc_calib=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE' hjs_sfc.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                                 \
+	hjs_sfc_calib=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE' hjs_sfc.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                                 \
 	if [      -n "$$hjs_sfc_calib"                                            \
 		 -a   -e $$hjs_sfc_calib                                              \
 		 -a ! -e $(libdir)/$$hjs_sfc_calib ]; then                            \
