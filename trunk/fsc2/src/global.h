@@ -160,7 +160,7 @@ enum {
 
 enum {
 	PARENT = 0,
-	CHILD
+	CHILD  = 1
 };
 
 

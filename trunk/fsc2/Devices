@@ -1,3 +1,9 @@
+/***********************************************************************/
+/* This is the device name data base used by fsc2. To add a new device */
+/* just append its name to this file - the names are case-insensitive. */
+/* C and C++ style comments can be used within this file.              */
+/***********************************************************************/
+
 
 DG2020        // Sony/Tektronix Data generator
 

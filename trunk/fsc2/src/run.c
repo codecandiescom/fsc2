@@ -19,12 +19,11 @@ static void set_buttons( int active );
 
 static void run_child( void );
 static void do_send_handler( int sig_type );
-static void do_quit_handler_0( int sig_type );
-static void do_quit_handler_1( int sig_type );
+static void do_quit_handler( int sig_type );
 static bool do_measurement( void );
 
 
-/* Global variables used by parent, child and signal handlers */
+/* Locally used global variables used in parent, child and signal handlers */
 
 static bool is_data_saved;
 static bool child_is_ready;
@@ -50,7 +49,7 @@ bool run( void )
     char *gpib_log = ( char * ) GPIB_LOG_FILE;
 
 
-	/* If there are no commands we're already done :) */
+	/* If there are no commands we're already done */
 
 	if ( prg_token == NULL || prg_length == 0 )
 		return OK;
@@ -70,7 +69,9 @@ bool run( void )
 	if ( need_GPIB && gpib_init( &gpib_log, LL_ERR ) == FAILURE )
 	{
 		eprint( FATAL, "Can't initialize GPIB bus.\n" );
-		THROW( EXCEPTION );
+		set_buttons( 1 );
+		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
+		return FAIL;
 	}
 
 	/* Run all the experiment hooks - on failure reset GPIB bus */
@@ -534,26 +535,25 @@ void run_child( void )
 	cur_prg_token = prg_token;
 	do_send = do_quit = UNSET;
 	signal( DO_SEND, do_send_handler );
+	signal( DO_QUIT, do_quit_handler );
 
-	while ( 1 )
-	{
-		signal( DO_QUIT, do_quit_handler_1 );
-		kill( getppid( ), NEW_DATA );             /* tell parent we're ready */
+	kill( getppid( ), NEW_DATA );           /* tell parent we're ready */
+	while ( ! do_send )                     /* wait for parents reply */
+		pause( );
 
-		while ( ! do_send )                       /* wait for parents reply */
-			pause( );
-		do_send = UNSET;
+	do_measurement( );
 
-		if ( ! do_measurement( ) || do_quit )
-		{
-			if ( cur_prg_token != prg_token + prg_length && ! do_quit )
-				return_status = FAIL;             /* signal hardware failure */
-			do_quit_handler_0( DO_QUIT );
-		}
+	if ( cur_prg_token != prg_token + prg_length && ! do_quit )
+		return_status = FAIL;               /* hardware failure ? */
 
-		signal( DO_QUIT, do_quit_handler_0 );
-
-	}
+	close( pd[ READ ] );                    /* close read end of pipe */
+	close( pd[ WRITE ] );                   /* close also write end of pipe */
+	signal( DO_QUIT, do_quit_handler );     /* set signal handler */
+	do_quit = UNSET;
+	kill( getppid( ), QUITTING );    /* signal parent that child is exiting */
+	while ( ! do_quit )              /* wait for acceptance of this signal  */
+		pause( );
+	_exit( return_status );          /* ...and that's the end of it all */
 }
 
 
@@ -572,44 +572,14 @@ void do_send_handler( int sig_type )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* do_quit_handler_0() is one of two handlers for the DO_QUIT signal sent  */
-/* by the parent to the child telling it to exit. While the other handler, */
-/* do_quit_handler_1(), just sets a flag, this handler really kills the    */
-/* child process. It is either invoked by receipt of a DO_QUIT signal or   */
-/* when the child exits - either because it received a DO_QUIT signal,     */
-/* handled by the other handler, the experiment is finished or there was   */
-/* a hardware problem.                                                     */
-/* It sets the DO_QUIT handler to the other handler, sends the parent a    */
-/* QUITTING signal and waits for the parent to reply by sending  a DO_QUIT */
-/* signal.                                                                 */
-/*-------------------------------------------------------------------------*/
-
-void do_quit_handler_0( int sig_type )
-{
-	if ( sig_type != DO_QUIT )
-		return;
-
-	close( pd[ READ ] );                    /* close read end of pipe */
-	close( pd[ WRITE ] );                   /* close also write end of pipe */
-	signal( DO_QUIT, do_quit_handler_1 );     /* set (other) signal handler */
-	do_quit = UNSET;
-	kill( getppid( ), QUITTING );    /* signal parent that child is exiting */
-	while ( ! do_quit )              /* wait for acceptance of this signal  */
-		pause( );
-	_exit( return_status );          /* ...and that's the end of it */
-}
-
-
 /*----------------------------------------------------------------------*/
-/* do_quit_handler_1() is the other of the two handlers for the DO_QUIT */
-/* signal sent by the parent to the child telling it to exit. It just   */
-/* sets a flag and is used while run_child() is acquiring data, when    */
-/* killing the child immediately might lead to problems with devices    */
-/* expecting to be serviced.                                            */
+/* do_quit_handler() is the handlers for the DO_QUIT signal sent by the */
+/* parent to the child telling it to exit. It just sets a flag instead  */
+/* of killing the child immediately because this might lead to problems */
+/* with devices expecting to be serviced.                               */
 /*----------------------------------------------------------------------*/
 
-void do_quit_handler_1( int sig_type )
+void do_quit_handler( int sig_type )
 {
 	if ( sig_type != DO_QUIT )
 		return;
@@ -638,7 +608,7 @@ bool do_measurement( void )
 
 		while ( cur_prg_token != NULL &&
 				cur_prg_token < prg_token + prg_length &&
-				! do_quit && ! Is_Written )
+				! do_quit )
 		{
 			switch ( cur_prg_token->token )
 			{
@@ -722,19 +692,7 @@ bool do_measurement( void )
 
 		TRY_SUCCESS;
 	}
-	OTHERWISE
-	{
-		save_restore_pulses( UNSET );
-		save_restore_variables( UNSET );
-		return FAIL;
-	}
 
-	if ( Is_Written )
-	{
-		Is_Written = UNSET;
-		return OK;
-	}
-	
 	save_restore_pulses( UNSET );
 	save_restore_variables( UNSET );
 	return FAIL;

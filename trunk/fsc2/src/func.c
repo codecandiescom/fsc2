@@ -71,34 +71,35 @@ Var *f_log( Var *v  );
 Var *f_sqrt( Var *v  );
 Var *f_print( Var *v  );
 Var *f_wait( Var *v  );
-
+Var *f_init_display( Var *v );
 
 
 static Func def_fncts[ ] =              /* List of built-in functions */
 {
-	{ "int",    f_int,     1, ACCESS_ALL_SECTIONS, 0 },
-	{ "float",  f_float,   1, ACCESS_ALL_SECTIONS, 0 },
-	{ "round",  f_round,   1, ACCESS_ALL_SECTIONS, 0 },
-	{ "floor",  f_floor,   1, ACCESS_ALL_SECTIONS, 0 },
-	{ "ceil",   f_ceil,    1, ACCESS_ALL_SECTIONS, 0 },
-	{ "abs",    f_abs,     1, ACCESS_ALL_SECTIONS, 0 },
-	{ "sin",    f_sin,     1, ACCESS_ALL_SECTIONS, 0 },
-	{ "cos",    f_cos,     1, ACCESS_ALL_SECTIONS, 0 },
-	{ "tan",    f_tan,     1, ACCESS_ALL_SECTIONS, 0 },
-	{ "asin",   f_asin,    1, ACCESS_ALL_SECTIONS, 0 },
-	{ "acos",   f_acos,    1, ACCESS_ALL_SECTIONS, 0 },
-	{ "atan",   f_atan,    1, ACCESS_ALL_SECTIONS, 0 },
-	{ "sinh",   f_sinh,    1, ACCESS_ALL_SECTIONS, 0 },
-	{ "cosh",   f_cosh,    1, ACCESS_ALL_SECTIONS, 0 },
-	{ "tanh",   f_tanh,    1, ACCESS_ALL_SECTIONS, 0 },
-	{ "exp",    f_exp,     1, ACCESS_ALL_SECTIONS, 0 },
-	{ "ln",     f_ln,      1, ACCESS_ALL_SECTIONS, 0 },
-	{ "log",    f_log,     1, ACCESS_ALL_SECTIONS, 0 },
-	{ "sqrt",   f_sqrt,    1, ACCESS_ALL_SECTIONS, 0 },
-	{ "print",  f_print,  -1, ACCESS_ALL_SECTIONS, 0 },
-	{ "wait",   f_wait,    1, ACCESS_ALL_SECTIONS, 0 },
-	{ NULL,     NULL,      0, 0,                   0 }   /* marks last entry, 
-															don't remove ! */
+	{ "int",          f_int,           1, ACCESS_ALL_SECTIONS, 0 },
+	{ "float",        f_float,         1, ACCESS_ALL_SECTIONS, 0 },
+	{ "round",        f_round,         1, ACCESS_ALL_SECTIONS, 0 },
+	{ "floor",        f_floor,         1, ACCESS_ALL_SECTIONS, 0 },
+	{ "ceil",         f_ceil,          1, ACCESS_ALL_SECTIONS, 0 },
+	{ "abs",          f_abs,           1, ACCESS_ALL_SECTIONS, 0 },
+	{ "sin",          f_sin,           1, ACCESS_ALL_SECTIONS, 0 },
+	{ "cos",          f_cos,           1, ACCESS_ALL_SECTIONS, 0 },
+	{ "tan",          f_tan,           1, ACCESS_ALL_SECTIONS, 0 },
+	{ "asin",         f_asin,          1, ACCESS_ALL_SECTIONS, 0 },
+	{ "acos",         f_acos,          1, ACCESS_ALL_SECTIONS, 0 },
+	{ "atan",         f_atan,          1, ACCESS_ALL_SECTIONS, 0 },
+	{ "sinh",         f_sinh,          1, ACCESS_ALL_SECTIONS, 0 },
+	{ "cosh",         f_cosh,          1, ACCESS_ALL_SECTIONS, 0 },
+	{ "tanh",         f_tanh,          1, ACCESS_ALL_SECTIONS, 0 },
+	{ "exp",          f_exp,           1, ACCESS_ALL_SECTIONS, 0 },
+	{ "ln",           f_ln,            1, ACCESS_ALL_SECTIONS, 0 },
+	{ "log",          f_log,           1, ACCESS_ALL_SECTIONS, 0 },
+	{ "sqrt",         f_sqrt,          1, ACCESS_ALL_SECTIONS, 0 },
+	{ "print",        f_print,        -1, ACCESS_ALL_SECTIONS, 0 },
+	{ "wait",         f_wait,          1, ACCESS_ALL_SECTIONS, 0 },
+	{ "init_display", f_init_display, -1, ACCESS_ALL_SECTIONS, 0 },
+	{ NULL,           NULL,            0, 0,                   0 }  
+	                                     /* marks last entry, don't remove ! */
 };
 
 
@@ -524,6 +525,9 @@ Var *func_get( const char *name, int *access )
 	return NULL;
 }
 
+
+/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
 
 Var *func_call( Var *f )
 {
@@ -1190,4 +1194,41 @@ void f_wait_alarm_handler( int sig_type )
 		return;
 
 	signal( SIGALRM, f_wait_alarm_handler );
+}
+
+
+Var *f_init_display( Var *v )
+{
+	long dim;
+	char *l1, *l2;
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == INT_VAR )
+		dim = v->val.lval;
+	else
+		dim = rnd( v->val.dval );
+
+	if ( v->next != NULL )
+	{
+		vars_check( v->next, STR_VAR );
+		l1 = v->next->val.sptr;
+
+		if ( v->next->next != NULL )
+		{
+			vars_check( v->next->next, STR_VAR );
+			l2 = v->next->next->val.sptr;
+
+		}
+		else
+			l2 = NULL;
+	}
+	else
+		l1 = l2 = NULL;
+
+	if ( I_am ==  PARENT )
+		graphics_init( dim, l1, l2 );
+	else
+		writer( C_INIT_GRAPHICS, dim, l1, l2 );
+
+	return vars_push( INT_VAR, 1 );
 }
