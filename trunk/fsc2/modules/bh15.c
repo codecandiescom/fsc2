@@ -38,7 +38,7 @@ int bh15_exp_hook( void );
 int bh15_end_of_exp_hook( void );
 void bh15_exit_hook( void );
 
-Var *field_name( Var *v );
+Var *gaussmeter_name( Var *v );
 Var *find_field( Var *v );
 Var *field_resolution( Var *v );
 Var *field_meter_wait( Var *v );

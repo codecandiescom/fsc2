@@ -177,7 +177,7 @@ int aeg_s_band_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	if ( ! exists_function( "field_resolution" ) )
+	if ( ! exists_function( "gaussmeter_resolution" ) )
 	{
 		eprint( FATAL, UNSET, "%s: Function to determine field measurement "
 				"resolution is missing.\n", DEVICE_NAME );
@@ -212,7 +212,7 @@ int aeg_s_band_exp_hook( void )
 	/* Get the maximum deviation from requested field depending on the
 	   resolution of the field meter */
 
-	v = func_call( func_get( "field_resolution", &acc ) );
+	v = func_call( func_get( "gaussmeter_resolution", &acc ) );
 	magnet.max_deviation = VALUE( v );
 	vars_pop( v );
 
@@ -682,7 +682,7 @@ static bool magnet_init( void )
 
 try_again:
 
-	vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
+	vars_pop( func_call( func_get( "gaussmeter_wait", &acc ) ) );
 
 	v = func_call( func_get( "find_field", &acc ) );
 	magnet.meas_field = v->val.dval;
@@ -701,10 +701,10 @@ try_again:
 			THROW( USER_BREAK_EXCEPTION );
 
 		magnet_do( SERIAL_TRIGGER );
-		vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
+		vars_pop( func_call( func_get( "gaussmeter_wait", &acc ) ) );
 	}
 
-	vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
+	vars_pop( func_call( func_get( "gaussmeter_wait", &acc ) ) );
 
 	v = func_call( func_get( "find_field", &acc ) );
 	magnet.meas_field = v->val.dval;
@@ -731,10 +731,10 @@ try_again:
 			THROW( USER_BREAK_EXCEPTION );
 
 		magnet_do( SERIAL_TRIGGER );
-		vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
+		vars_pop( func_call( func_get( "gaussmeter_wait", &acc ) ) );
 	}
 
-	vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
+	vars_pop( func_call( func_get( "gaussmeter_wait", &acc ) ) );
 
 	v = func_call( func_get( "find_field", &acc ) );
 	magnet.meas_field = v->val.dval;
@@ -884,7 +884,7 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 	   that something has gone wrong (maybe some luser switched the magnet
 	   from remote to local? ) */
 
-	vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
+	vars_pop( func_call( func_get( "gaussmeter_wait", &acc ) ) );
 
 	v = func_call( func_get( "find_field", &acc ) );
 	magnet.meas_field = v->val.dval;
