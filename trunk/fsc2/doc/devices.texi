@@ -2115,7 +2115,7 @@ The function queries or sets the output attenuation. If called to set
 the attenuation it accepts one argument, the attenuation. For the
 @code{HP8647A} the attenuation must be in the range between @w{+10 db}
 and @w{-136 db} with a resolution of @w{0.1 db}, for the @code{HP8648B}
-between @w{+14.5 dv} and @w{-136 db} (with the same resolution) and for
+between @w{+14.5 db} and @w{-136 db} (with the same resolution) and for
 the @code{HP8672A} between @w{+3 db} and @w{-120 db} with a resolution
 of @w{1 db}.
 
@@ -2194,8 +2194,8 @@ passed to the function as a (string) argument. If no argument is given a
 default table file is used (typically this is
 @file{/usr/local/lib/fsc2/hp8647a.table} for the @code{HP8647A},
 @file{/usr/local/lib/fsc2/hp8648b.table} for the @code{HP8648B} and
-@file{/usr/local/lib/fsc2/hp8672a.table} for the @code{HP8672A}, but it
-may depend on the installation).
+@file{/usr/local/lib/fsc2/hp8672a.table} for the @code{HP8672A}, but this
+may depend on the installation of @code{fsc2}).
 
 The table file must consist of pairs of entries, a frequency and a
 corresponding attenuation in db. The attenuation is being added to the
@@ -2238,8 +2238,8 @@ to use the attenuation has been set e.g.@: by
 function @code{synthesizer_att_ref_freq()} can be used. If the function
 isn't called a frequency of @w{14 MHz} is used for the @code{HP8647A}
 and @code{HP8648B} and @w{2 GHz} for the @code{HP8672A} (but this is a
-compile time constant that can be adjsuted in the configuration file for
-the device).
+compile time constant that can be adjusted in the configuration file for
+the device by changing the definition of @code{DEF_ATT_REF_FREQ}).
 
 
 @anchor{synthesizer_modulation}
