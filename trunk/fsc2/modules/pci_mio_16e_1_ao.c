@@ -25,11 +25,11 @@
 #include "pci_mio_16e_1.h"
 
 
-/*--------------------------------------------------------------------------*/
-/* Functions allows to reserve (or un-reserve) a DAC channel so that in the */
-/* following changes to the DAC channel require a pass-phrase (i.e. when    */
-/* calling the function daq_ao_channel_setup and daq_set_voltage().         */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Functions allows to reserve (or un-reserve) a DAC channel so that in the
+ * following changes to the DAC channel require a pass-phrase (i.e. when
+ * calling the function daq_ao_channel_setup and daq_set_voltage().
+ *--------------------------------------------------------------------------*/
 
 Var_T *daq_reserve_dac( Var_T *v )
 {
@@ -100,10 +100,10 @@ Var_T *daq_reserve_dac( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function for setting up an AO channels, can set the polarity */
-/* and if an external reference is to be used                   */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function for setting up an AO channels, can set the polarity
+ * and if an external reference is to be used
+ *--------------------------------------------------------------*/
 
 Var_T *daq_ao_channel_setup( Var_T *v )
 {
@@ -326,9 +326,9 @@ Var_T *daq_ao_channel_setup( Var_T *v )
 }
 
 
-/*-----------------------------------------------------*/
-/* Function for outputting an volatge at an AO channel */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function for outputting an volatge at an AO channel
+ *-----------------------------------------------------*/
 
 Var_T *daq_set_voltage( Var_T *v )
 {
