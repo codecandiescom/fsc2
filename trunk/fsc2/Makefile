@@ -36,6 +36,7 @@ FLEXFLAGS      = -B -P
 RM             = -rm
 RMFLAGS        = -f
 AWK            = /usr/bin/awk
+INSTALL        = install
 
 
 ############################################################################
@@ -119,38 +120,37 @@ all:
 # Install the program in $bindir and all the other stuff in $libdir, $auxdir
 # and $docdir. Finally (for some sites) create aliases for devices.
 
+install-strip:
+	$(MAKE) INSTALL='$(INSTALL) -s' install
+
 install:
-	install -d $(bindir)
-	install -m 6755 -o fsc2 -g fsc2 fsc2 $(bindir)
-#	install -m 6755 -o fsc2 -g fsc2 -s fsc2 $(bindir)
-	install -d $(libdir)
-	install -d $(auxdir)
-	install -d $(docdir)
+	$(INSTALL) -d $(bindir)
+	$(INSTALL) -m 6755 -o fsc2 -g fsc2 fsc2 $(bindir)
+	$(INSTALL) -d $(libdir)
+	$(INSTALL) -d $(auxdir)
+	$(INSTALL) -d $(docdir)
 	$(MAKE) -C utils install
-	install -m 755 -o fsc2 -g fsc2 fsc2_connect $(bindir)
-#	install -m 755 -o fsc2 -g fsc2 -s fsc2_connect $(bindir)
+	$(INSTALL) -m 755 -o fsc2 -g fsc2 fsc2_connect $(bindir)
 	$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test \
 					 $(bindir)/fsc2_load
 	ln -s $(bindir)/fsc2_connect $(bindir)/fsc2_start
 	ln -s $(bindir)/fsc2_connect $(bindir)/fsc2_test
 	ln -s $(bindir)/fsc2_connect $(bindir)/fsc2_load
-	install -m 755 -o fsc2 -g fsc2 fsc2_clean $(libdir)
-#	install -m 755 -o fsc2 -g fsc2 -s fsc2_clean $(libdir)
-	install -m 644 -o fsc2 -g fsc2 Functions $(libdir)
-	install -m 644 -o fsc2 -g fsc2 Devices $(libdir)
-	install -m 644 -o fsc2 -g fsc2 *.so $(libdir)
-#	install -m 644 -o fsc2 -g fsc2 -s *.so $(libdir)
+	$(INSTALL) -m 755 -o fsc2 -g fsc2 fsc2_clean $(libdir)
+	$(INSTALL) -m 644 -o fsc2 -g fsc2 Functions $(libdir)
+	$(INSTALL) -m 644 -o fsc2 -g fsc2 Devices $(libdir)
+	$(INSTALL) -m 644 -o fsc2 -g fsc2 *.so $(libdir)
 	$(RM) $(RMFLAGS) $(libdir)/hfs9003.so $(libdir)/w_band.so
 	ln -s $(libdir)/hfs9000.so $(libdir)/hfs9003.so
 	ln -s $(libdir)/keithley228a.so $(libdir)/w_band.so
-	install -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
-	install -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
+	$(INSTALL) -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
+	$(INSTALL) -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
 	$(MAKE) install-$(shell hostname -f)
 	$(MAKE) -C scripts all
-	install -m 444 -o fsc2 -g fsc2 doc/fsc2.html $(docdir)
-	install -m 444 -o fsc2 -g fsc2 doc/fsc2_*.html $(docdir)
-	install -m 444 -o fsc2 -g fsc2 doc/fsc2.ps $(docdir)
-	install -m 444 -o fsc2 -g fsc2 doc/fsc2.pdf $(docdir)
+	$(INSTALL) -m 444 -o fsc2 -g fsc2 doc/fsc2.html $(docdir)
+	$(INSTALL) -m 444 -o fsc2 -g fsc2 doc/fsc2_*.html $(docdir)
+	$(INSTALL) -m 444 -o fsc2 -g fsc2 doc/fsc2.ps $(docdir)
+	$(INSTALL) -m 444 -o fsc2 -g fsc2 doc/fsc2.pdf $(docdir)
 
 
 install-pion.anorg.chemie.uni-frankfurt.de:
