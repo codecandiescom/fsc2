@@ -267,7 +267,7 @@ static void rulbus_epp_detach( struct parport *port )
  * that a device has been registered we must claim the port - and we only
  * will unclaim it when the device file is closed, there's no daisy chaining
  * possible with this device. Next we must check that the device is present
- * and talks EPP. Only then we can be rather sure we got it.
+ * and talks EPP. Only then we can be reasonably sure we got it.
  *---------------------------------------------------------------------------*/
 
 static int rulbus_open( struct inode *inode_p, struct file *file_p )
@@ -621,9 +621,9 @@ static inline int rulbus_clear_epp_timeout( void )
 }
 
 
-/*-------------------------------------------------------*
- * Function tests if last transfer resulted in a timeout
- *-------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function tests if the last transfer resulted in a timeout
+ *-----------------------------------------------------------*/
 
 static inline unsigned char rulbus_epp_timout_check( void )
 {
@@ -631,8 +631,10 @@ static inline unsigned char rulbus_epp_timout_check( void )
 }
 
 
-/*------------------------------------------------------*
- *------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function for reading a data byte from the parallel port,
+ * if necessary after switching from write to read mode
+ *---------------------------------------------------------*/
 
 static inline unsigned char rulbus_parport_read_data( void )
 {
@@ -643,8 +645,10 @@ static inline unsigned char rulbus_parport_read_data( void )
 }
 
 
-/*------------------------------------------------------*
- *------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function for reading an address byte from the parallel port,
+ * if necessary after switching from write to read mode
+ *--------------------------------------------------------------*/
 
 static inline unsigned char rulbus_parport_read_addr( void )
 {
@@ -656,6 +660,8 @@ static inline unsigned char rulbus_parport_read_addr( void )
 
 
 /*------------------------------------------------------*
+ * Function for writing a data byte to the parallel port,
+ * if necessary after switching from read to write mode
  *------------------------------------------------------*/
 
 static inline void rulbus_parport_write_data( unsigned char data )
@@ -667,8 +673,10 @@ static inline void rulbus_parport_write_data( unsigned char data )
 }
 
 
-/*------------------------------------------------------*
- *------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function for writing an address byte to the parallel port,
+ * if necessary after switching from read to write mode
+ *------------------------------------------------------------*/
 
 static inline void rulbus_parport_write_addr( unsigned char addr )
 {
@@ -692,7 +700,7 @@ static inline void rulbus_parport_reverse( void )
 
 /*----------------------------------------------------------------*
  * Function tries to determine if the Rulbus interface is present
- * by writing to different address patterns and then checking if
+ * by writing two different address patterns and then checking if
  * they can be read back.
  *----------------------------------------------------------------*/
 
