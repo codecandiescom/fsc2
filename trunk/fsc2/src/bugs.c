@@ -247,13 +247,17 @@ void death_mail( int signo )
 {
 #if defined ( MAIL_ADDRESS ) && defined ( MAIL_PROGRAM )
 
+#define DM_BUF_SIZE 512
+
 	FILE *mail;
 	char cur_line[ FL_BROWSER_LINELENGTH ];
 	char *clp;
 	int lines;
 	int i;
-	char buffer[ 512 ];
-	int count;
+	char buffer[ DM_BUF_SIZE ];
+	size_t count;
+	char *vfn;
+	FILE *vfp;
 
 
 	if ( ( mail = popen( MAIL_PROGRAM " -s 'fsc2 crash' " MAIL_ADDRESS, "w" ) )
@@ -272,7 +276,7 @@ void death_mail( int signo )
 
 	if ( fail_mess_fd >= 0 )
 	{
-		while ( ( count = read( fail_mess_fd, buffer, 512 ) ) > 0 )
+		while ( ( count = read( fail_mess_fd, buffer, DM_BUF_SIZE ) ) > 0 )
 			fwrite( buffer, count, 1, mail );
 		fprintf( mail, "\n" );
 		close( fail_mess_fd );
@@ -306,6 +310,22 @@ void death_mail( int signo )
 		fputs( fl_get_browser_line( main_form->error_browser, ++i ), mail );
 		fputc( ( int ) '\n', mail );
 	}
+
+	vfn = get_string( strlen( libdir ) + strlen( "/version " ) );
+	strcpy( vfn, libdir );
+	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
+		strcat( vfn, "/" );
+	strcat( vfn, "version" );
+
+	if ( ( vfp = fopen( vfn, "r" ) ) != NULL )
+	{
+		fputs( "\n\nVersion:\n\n", mail );
+		while ( ( count = fread( buffer, DM_BUF_SIZE, 1, vfp ) ) != 0 )
+			fwrite( buffer, count, 1, mail );
+		fclose( vfp );
+	}
+
+	T_free( vfn );
 
 	pclose( mail );
 #endif
