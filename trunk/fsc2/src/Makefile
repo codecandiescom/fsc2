@@ -12,11 +12,11 @@ objects       = $(sources:.c=.o)
 headers       = ${c_sources:.c=.h} global.h
 
 
-export headers     # export headers to the modules Makefile
+export headers             # export headers to the modules Makefile
 
 
 .SUFFIXES:
-.PHONY: all clean distclean hi_res lo_res gpib_old gpib_jtt gpib_ni \
+.PHONY: all clean distclean hi_res low_res gpib_old gpib_jtt gpib_ni \
 		pion.anorg.chemie.uni-frankfurt.de \
 		moebi.physik.fu-berlin.de \
 		door.physik.fu-berlin.de \
@@ -110,7 +110,7 @@ hi_res:
 		echo "#define SIZE HI_RES" >> fsc2_rsc.h;  \
 	fi
 
-lo_res:
+low_res:
 	if [ ! -e fsc2_rsc.c -o ! -e fsc2_rsc.h        \
 		 -o -nt fsc2_rsc_lr.c fsc2_rsc.c           \
 		 -o -nt fsc2_rsc_lr.h fsc2_rsc.h ]; then   \
