@@ -138,11 +138,15 @@ either HIGH, MEDIUM, LOW or OFF (but to help me find bugs setting it to
 HIGH is recommended, the log file will be truncated to zero length each time
 a new experiment is started).
 
-The next two variables, NUM_SERIAL_PORTS and SERIAL_LOCK_DIR, are used in
-handling of the serial ports. NUM_SERIAL_PORTS should be set to the number
+Finally, if the header files for the GPIB library aren't in either
+'/usr/include' or '/usr/local/include' you will have to tell fsc2 where to
+look for them by setting the variable GPIB_HEADER_DIR accordingly.
+
+The next two variables, NUM_SERIAL_PORTS and SERIAL_LOCK_DIR, are used for
+dealing with the serial ports. NUM_SERIAL_PORTS should be set to the number
 of serial ports that your computer has (or how many of these you want fsc2
-to have access to). If the variable is not set (or set to 0) no serial ports
-can be used.
+to have access to). If the variable is not set (or is set to 0) no serial
+ports can be used.
 
 SERIAL_LOCK_DIR must be a string with the name of the directory where UUCP
 type lock files for the serial ports are created (there is a convention that
