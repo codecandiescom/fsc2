@@ -83,11 +83,14 @@ typedef enum
 
 #define FAIL    false
 #define UNSET   false
+#if ! defined FALSE
 #define FALSE   false
+#endif
 #define OK      true
 #define SET     true
+#if ! defined TRUE
 #define TRUE    true
-
+#endif
 
 /* Define some useful abbreviations - never ever change these ! */
 

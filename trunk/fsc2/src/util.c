@@ -1009,6 +1009,7 @@ void create_colors( void )
 		i2rgb( ( double ) i / ( double ) ( NUM_COLORS - 1 ), rgb );
 		fl_mapcolor( i + FL_FREE_COL1,
 					 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
+		G2.color_list[ i ] = fl_get_pixel( FL_FREE_COL1 + i );
 	}
 
 	/* Finally create colours for values too small or too large */
@@ -1016,10 +1017,12 @@ void create_colors( void )
 	i2rgb( -1.0, rgb );
 	fl_mapcolor( NUM_COLORS + FL_FREE_COL1,
 				 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
+	G2.color_list[ i++ ] = fl_get_pixel( FL_FREE_COL1 + NUM_COLORS );
 
 	i2rgb( 2.0, rgb );
 	fl_mapcolor( NUM_COLORS + FL_FREE_COL1 + 1,
 				 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
+	G2.color_list[ i ] = fl_get_pixel( FL_FREE_COL1 + NUM_COLORS + 1 );
 }
 
 
