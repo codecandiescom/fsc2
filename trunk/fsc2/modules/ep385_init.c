@@ -122,6 +122,9 @@ void ep385_init_setup( void )
 		RETHROW( );
 	}
 
+	ep385_calc_max_length( ep385.function + PULSER_CHANNEL_TWT );
+	ep385_calc_max_length( ep385.function + PULSER_CHANNEL_TWT_GATE );
+
 	if ( ep385.dump_file != NULL )
 		ep385_dump_channels( ep385.dump_file );
 

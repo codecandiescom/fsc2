@@ -160,6 +160,8 @@ typedef struct _F_ {
 	Ticks min_left_twt_padding;
 	Ticks min_right_twt_padding;
 
+	Ticks max_len;
+
 } FUNCTION;
 
 
@@ -377,6 +379,7 @@ const char *ep385_ptime( double p_time );
 const char *ep385_pticks( Ticks ticks );
 int ep385_pulse_compare( const void *A, const void *B );
 void ep385_dump_channels( FILE *fp );
+void ep385_calc_max_length( FUNCTION *f );
 
 
 /* Functions fron ep385_run.c */

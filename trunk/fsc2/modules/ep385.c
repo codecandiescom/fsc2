@@ -113,6 +113,9 @@ int ep385_init_hook( void )
 	ep385.is_timebase = UNSET;
 	ep385.timebase_mode = EXTERNAL;
 
+	ep385.trig_in_mode = INTERNAL;
+	ep385.repeat_time = MIN_REPEAT_TIMES;
+
 	ep385.dump_file = NULL;
 	ep385.show_file = NULL;
 
@@ -158,6 +161,7 @@ int ep385_init_hook( void )
 		f->has_auto_twt_pulses = UNSET;
 		for ( j = 0; j <= MAX_CHANNELS; j++ )
 			f->channel[ j ] = NULL;
+		f->max_len = 0;
 	}
 
 	ep385_is_needed = SET;
@@ -264,6 +268,28 @@ int ep385_end_of_test_hook( void )
 
 	if ( ! ep385.is_cw_mode )
 		ep385_full_reset( );
+
+	/* Check that TWT duty cycle isn't exceeded due to excessive length of
+	   TWT and TWT_GATE pulses */
+
+	if ( ep385.trig_in_mode == INTERNAL )
+	{
+		f = ep385.function + PULSER_CHANNEL_TWT;
+		if ( f->is_used && f->num_channels > 0 &&
+			 f->max_len > MAX_TWT_DUTY_CYCLE
+						  * ( MAX_MEMORY_BLOCKS * BITS_PER_MEMORY_BLOCK +
+							  REPEAT_TICKS * ep385.repeat_time ) )
+			print( SEVERE, "Duty cycle of TWT exceeded due to length of %s "
+				   "pulses.\n", f->name );
+
+		f = ep385.function + PULSER_CHANNEL_TWT_GATE;
+		if ( f->is_used && f->num_channels > 0 &&
+			 f->max_len > MAX_TWT_DUTY_CYCLE
+						  * ( MAX_MEMORY_BLOCKS * BITS_PER_MEMORY_BLOCK +
+							  REPEAT_TICKS * ep385.repeat_time ) )
+			print( SEVERE, "Duty cycle of TWT exceeded due to length of %s "
+				   "pulses.\n", f->name );
+	}
 
 	/* If in the test it was found that shape and defense pulses got too
 	   near to each other bail out */

@@ -834,7 +834,37 @@ static void ep385_commit( bool flag )
 	/* Only really set the pulses while doing an experiment */
 
 	if ( ! flag )
+	{
+		ep385.function[ PULSER_CHANNEL_TWT ].max_len =
+			ep385.function[ PULSER_CHANNEL_TWT_GATE ].max_len = 0;
+	}
+
+	ep385_calc_max_length( ep385.function + PULSER_CHANNEL_TWT );
+	ep385_calc_max_length( ep385.function + PULSER_CHANNEL_TWT_GATE );
+
+	if ( ! flag )
+	{
 		ep385_set_channels( );
+
+		if ( ep385.trig_in_mode == INTERNAL )
+		{
+			f = ep385.function + PULSER_CHANNEL_TWT;
+			if ( f->is_used && f->num_channels > 0 &&
+				 f->max_len > MAX_TWT_DUTY_CYCLE
+							  * ( MAX_MEMORY_BLOCKS * BITS_PER_MEMORY_BLOCK +
+								  REPEAT_TICKS * ep385.repeat_time ) )
+				print( SEVERE, "Duty cycle of TWT exceeded due to length of "
+					   "%s pulses.\n", f->name );
+
+			f = ep385.function + PULSER_CHANNEL_TWT_GATE;
+			if ( f->is_used && f->num_channels > 0 &&
+				 f->max_len > MAX_TWT_DUTY_CYCLE
+							  * ( MAX_MEMORY_BLOCKS * BITS_PER_MEMORY_BLOCK +
+								  REPEAT_TICKS * ep385.repeat_time ) )
+				print( SEVERE, "Duty cycle of TWT exceeded due to length of "
+					   "%s pulses.\n", f->name );
+		}
+	}
 	else
 	{
 		if ( ep385.dump_file != NULL )

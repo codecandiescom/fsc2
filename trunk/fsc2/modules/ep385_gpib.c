@@ -60,7 +60,7 @@ bool ep385_init( const char *name )
 		strcat( cmd, "STS3;IEC0;" );
 
 	/* Set the shot-repetition time (if the user didn't specify one set the
-	   shortesrt possible one) */
+	   shortest possible one) */
 
 	if ( ep385.is_repeat_time )
 		sprintf( cmd + strlen( cmd ), "SRT%ld;", ep385.repeat_time );
