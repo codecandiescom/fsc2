@@ -308,10 +308,10 @@ void rb_pulser_run( bool state )
 				 												 != RULBUS_OK )
 				rb_pulser_failure( SET, "Failure to start pulser" );
 
-			/* Now get the ERT card to run by first setting the trigger slope
-			   to falling, then to raising edge. That makes it emit a pulse
-			   and afterwards it keeps running because it's own end pulse is
-			   fed to itself as the trigger input */
+			/* Now get the ERT card running by toggling the trigger slope,
+			   first to falling, then to raising edge. That makes it emit an
+			   end pulse and afterwards it keeps running because it's own end
+			   pulse is fed back to itself as the trigger input */
 
 			if ( rulbus_rb8514_delay_set_trigger(
 									  rb_pulser.delay_card[ ERT_DELAY ].handle,
