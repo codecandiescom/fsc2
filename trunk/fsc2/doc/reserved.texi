@@ -146,6 +146,7 @@
 @item @code{LEV}              @tab
 @item @code{LEVEL}            @tab
 @item @code{LIN}              @tab Digitizer channel name
+@item @code{LINE}             @tab Digitizer channel name
 @item @code{LOW}              @tab
 @item                         @tab
 @item @code{MA}               @tab Unit, Mega-Ampere

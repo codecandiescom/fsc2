@@ -92,7 +92,7 @@ DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
 PH          PH(ASE(SEQ(UENCE)?)?)?_?([0-9])?
 
-CHT         ((CH1)|(CH2)|(CH3)|(CH4)|(AUX)|(MATH1)|(MATH2)|(MATH3)|(REF1)|(REF2)|(REF3)|(REF4)|(LINE))
+CHT         ((CH1)|(CH2)|(CH3)|(CH4)|(AUX)|(MATH1)|(MATH2)|(MATH3)|(REF1)|(REF2)|(REF3)|(REF4)|(LIN(E)?))
 
 WS          [\n \t]+
 
@@ -392,7 +392,10 @@ static Var *exp_get_channel_name( void )
 	if ( ( func = func_get_long( "digitizer_get_channel_number",
 								 &access, SET ) ) != NULL )
 	{
-		vars_push( STR_VAR, exptext );
+		if ( ! strcmp( exptext, "LIN" ) )
+			vars_push( STR_VAR, "LINE" );
+		else
+			vars_push( STR_VAR, exptext );
 		v = func_call( func );
 		if ( v != NULL && v->val.lval != UNDEFINED )
 			 return v;

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w  -*- cperl -*-
 #
 # Copyright (c) 2001 Jens Thoms Toerring
 #
