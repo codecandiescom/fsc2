@@ -63,15 +63,15 @@ void dg2020_basic_pulse_check( void )
 
 		if ( ! p->is_function )
 		{
-			eprint( FATAL, "%s: Pulse %ld is not associated with a "
+			eprint( FATAL, UNSET, "%s: Pulse %ld is not associated with a "
 					"function.\n", pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 
 		if ( ! p->function->is_used )
 		{
-			eprint( FATAL, "%s: The function `%s' of pulse %ld hasn't been "
-					"declared in the ASSIGNMENTS section.\n",
+			eprint( FATAL, UNSET, "%s: The function `%s' of pulse %ld hasn't "
+					"been declared in the ASSIGNMENTS section.\n",
 					pulser_struct.name, Function_Names[ p->function->self ],
 					p->num );
 			THROW( EXCEPTION );
@@ -97,9 +97,9 @@ void dg2020_basic_pulse_check( void )
 		if ( p->is_pos && p->is_len && p->len != 0 &&
 			 p->pos + p->len + p->function->delay >= MAX_PULSER_BITS )
 		{
-			eprint( FATAL, "%s: Pulse %ld does not fit into the pulsers "
-					"memory. You could try a longer pulser time base.\n",
-					pulser_struct.name, p->num );
+			eprint( FATAL, UNSET, "%s: Pulse %ld does not fit into the "
+					"pulsers memory. You could try a longer pulser time "
+					"base.\n", pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -109,8 +109,8 @@ void dg2020_basic_pulse_check( void )
 		{
 			if ( p->function->num_pods == 1 )
 			{
-				eprint( FATAL, "%s: Phase %ld needs phase cycling but its "
-						"function `%s' has only one pod assigned to it.\n",
+				eprint( FATAL, UNSET, "%s: Phase %ld needs phase cycling but "
+						"its function `%s' has only one pod assigned to it.\n",
 						pulser_struct.name, p->num,
 						Function_Names[ p->function->self ] );
 				THROW( EXCEPTION );
@@ -118,8 +118,8 @@ void dg2020_basic_pulse_check( void )
 
 			if ( p->function->phase_setup == NULL )
 			{
-				eprint( FATAL, "%s: Pulse %ld needs phase cycling but a "
-						"phase setup for its function `%s' is missing.\n",
+				eprint( FATAL, UNSET, "%s: Pulse %ld needs phase cycling but "
+						"a phase setup for its function `%s' is missing.\n",
 						pulser_struct.name, p->num,
 						Function_Names[ p->function->self ] );
 				THROW( EXCEPTION );
@@ -130,9 +130,9 @@ void dg2020_basic_pulse_check( void )
 				cur_type = p->pc->sequence[ i ];
 				if  ( cur_type < PHASE_PLUS_X || cur_type > PHASE_CW )
 				{
-					eprint( FATAL, "%s: Pulse %ld needs phase type `%s' but "
-							"this type isn't possible with this driver.\n",
-							pulser_struct.name, p->num,
+					eprint( FATAL, UNSET, "%s: Pulse %ld needs phase type "
+							"`%s' but this type isn't possible with this "
+							"driver.\n", pulser_struct.name, p->num,
 							Phase_Types[ cur_type ] );
 					THROW( EXCEPTION );
 				}
@@ -145,8 +145,8 @@ void dg2020_basic_pulse_check( void )
 		{
 			if ( p->function->phase_setup == NULL )
 			{
-				eprint( FATAL, "%s: Function `%s' has more than one pod "
-						"but association between pods and phases is "
+				eprint( FATAL, UNSET, "%s: Function `%s' has more than one "
+						"pod but association between pods and phases is "
 						"missing.\n", pulser_struct.name,
 						Function_Names[ p->function->self ] );
 				THROW( EXCEPTION );
@@ -214,8 +214,9 @@ static void dg2020_basic_functions_check( void )
 
 		if ( ! f->is_needed )
 		{
-			eprint( WARN, "%s: No pulses have been assigned to function "
-					"`%s'.\n", pulser_struct.name, Function_Names[ i ] );
+			eprint( WARN, UNSET, "%s: No pulses have been assigned to "
+					"function `%s'.\n",
+					pulser_struct.name, Function_Names[ i ] );
 			f->is_used = UNSET;
 
 			for ( j = 0; j < f->num_channels; j++ )
@@ -232,8 +233,8 @@ static void dg2020_basic_functions_check( void )
 
 		if ( f->num_pods == 0 )
 		{
-			eprint( FATAL, "%s: No pod has been assigned to function `%s'.\n",
-					pulser_struct.name, Function_Names[ i ] );
+			eprint( FATAL, UNSET, "%s: No pod has been assigned to function "
+					"`%s'.\n", pulser_struct.name, Function_Names[ i ] );
 			THROW( EXCEPTION );
 		}
 
@@ -261,8 +262,8 @@ static void dg2020_basic_functions_check( void )
 
 		if ( f->num_pods > 1 && f->phase_setup == NULL )
 		{
-			eprint( FATAL, "%s: Missing phase setup for function `%s'.\n",
-					pulser_struct.name, Function_Names[ i ] );
+			eprint( FATAL, UNSET, "%s: Missing phase setup for function "
+					"`%s'.\n", pulser_struct.name, Function_Names[ i ] );
 			THROW( EXCEPTION );
 		}
 
@@ -341,9 +342,10 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 
 		if ( j == f->num_pods )                 /* not found ? */
 		{
-			eprint( FATAL, "%s: According to the the phase setup pod %d is "
-					"needed for function `%s' but it's not assigned to it.\n",
-					pulser_struct.name, f->phase_setup->pod[ i ]->self,
+			eprint( FATAL, UNSET, "%s: According to the the phase setup pod "
+					"%d is needed for function `%s' but it's not assigned to "
+					"it.\n", pulser_struct.name,
+					f->phase_setup->pod[ i ]->self,
 					Function_Names[ f->self ] );
 			THROW( EXCEPTION );
 		}
@@ -357,9 +359,9 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 	{
 		if ( f->phase_setup->is_needed[ i ] && ! f->phase_setup->is_set[ i ] )
 		{
-			eprint( FATAL, "%s: Phase type `%s' is needed for function `%s' "
-					"but it hasn't been not defined in a PHASE_SETUP "
-					"command.\n", pulser_struct.name,
+			eprint( FATAL, UNSET, "%s: Phase type `%s' is needed for "
+					"function `%s' but it hasn't been not defined in a "
+					"PHASE_SETUP command.\n", pulser_struct.name,
 					Phase_Types[ i + PHASE_PLUS_X ],
 					Function_Names[ f->self ] );
 			THROW( EXCEPTION );
@@ -411,16 +413,16 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 				   a pulse but to just to create a constant voltage. */
 
 				if ( f->phase_setup->is_needed[ j ] )
-					eprint( FATAL, "%s: Pod %ld can't be used for phase type "
-							"`%s' and `%s' at the same time.\n",
+					eprint( FATAL, UNSET, "%s: Pod %ld can't be used for "
+							"phase type `%s' and `%s' at the same time.\n",
 							pulser_struct.name,
 							f->phase_setup->pod[ i ]->self,
 							Phase_Types[ i + PHASE_PLUS_X ],
 							Phase_Types[ j + PHASE_PLUS_X ] );
 				else
-					eprint( FATAL, "%s: Pod %ld is needed for phase type `%s' "
-							"and can't be also used for other phase types.\n",
-							pulser_struct.name,
+					eprint( FATAL, UNSET, "%s: Pod %ld is needed for phase "
+							"type `%s' and can't be also used for other phase "
+							"types.\n", pulser_struct.name,
 							f->phase_setup->pod[ i ]->self,
 							Phase_Types[ i + PHASE_PLUS_X ] );
 				THROW( EXCEPTION );
@@ -455,9 +457,10 @@ static void dg2020_distribute_channels( void )
 
 	if ( dg2020.needed_channels > MAX_CHANNELS )
 	{
-		eprint( FATAL, "%s: Running the experiment would require %d pulser "
-				"channels but only %d are available.\n", pulser_struct.name, 
-				dg2020.needed_channels, ( int ) MAX_CHANNELS );
+		eprint( FATAL, UNSET, "%s: Running the experiment would require %d "
+				"pulser channels but only %d are available.\n",
+				pulser_struct.name, dg2020.needed_channels,
+				( int ) MAX_CHANNELS );
 		THROW( EXCEPTION );
 	}
 
@@ -648,8 +651,8 @@ static void dg2020_cw_init( void )
 
 		if ( dg2020.function[ i ].is_used )
 		{
-			eprint( WARN, "%s: Function `%s' can't be used in CW mode.\n",
-					pulser_struct.name, Function_Names[ i ] );
+			eprint( WARN, UNSET, "%s: Function `%s' can't be used in CW "
+					"mode.\n", pulser_struct.name, Function_Names[ i ] );
 			dg2020.function[ i ].is_used = UNSET;
 		}
 	}
@@ -661,8 +664,9 @@ static void dg2020_cw_init( void )
 
 	if ( f->phase_setup == NULL )
 	{
-		eprint( FATAL, "%s: CW mode needs a phase setup for the function "
-				"`%s'.\n", pulser_struct.name,  Function_Names[ f->self ] );
+		eprint( FATAL, UNSET, "%s: CW mode needs a phase setup for the "
+				"function `%s'.\n", pulser_struct.name,
+				Function_Names[ f->self ] );
 		THROW( EXCEPTION );
 	}
 
@@ -670,8 +674,8 @@ static void dg2020_cw_init( void )
 
 	if ( ! f->phase_setup[ PHASE_CW ].is_set )
 	{
-		eprint( FATAL, "%s: Pod for CW channel hasn't been set in phase "
-				"setup.\n", pulser_struct.name );
+		eprint( FATAL, UNSET, "%s: Pod for CW channel hasn't been set in "
+				"phase setup.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
@@ -679,8 +683,8 @@ static void dg2020_cw_init( void )
 
 	if ( f->num_pods <= 1 )
 	{
-		eprint( FATAL, "%s: Not enough pods (i.e. not at least 2) have been "
-				"assigned to function `%s'.\n", pulser_struct.name,
+		eprint( FATAL, UNSET, "%s: Not enough pods (i.e. not at least 2) have "
+				"been assigned to function `%s'.\n", pulser_struct.name,
 				Function_Names[ f->self ] );
 		THROW( EXCEPTION );
 	}
