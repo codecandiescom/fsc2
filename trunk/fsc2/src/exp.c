@@ -615,8 +615,8 @@ void prim_exp_run( void )
 /* Routine works as a kind of virtual lexer by simply passing the    */
 /* parser the tokens we got from the lexer in store_exp(). The only  */
 /* exception are tokens dealing with flow control - for most of them */
-/* parser gets an end of file signaled, onyl the `}' is handled by   */
-/* the parser itself (but also as an EOF)                            */
+/* the parser gets signaled an end of file, only the `}' is handled  */
+/* by the parser itself (but also as an EOF).                        */
 /*-------------------------------------------------------------------*/
 
 int prim_exp_runlex( void )
@@ -690,7 +690,7 @@ int prim_exp_runlex( void )
 
 /*------------------------------------------------------------------------*/
 /* This routines returnes the tokens to the parser while the condition of */
-/* a while, repeat, for or if is parsed.                                  */
+/* a while, repeat or for or if is parsed.                                */
 /*------------------------------------------------------------------------*/
 
 int conditionlex( void )
