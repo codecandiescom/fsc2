@@ -841,6 +841,13 @@ Var *synthesizer_mod_ampl( Var *v )
 		return vars_push( INT_VAR, hp8672a.mod_ampl[ hp8672a.mod_type ] );
 	}
 
+	if ( ! hp8672a.mod_type_is_set )
+	{
+		print( FATAL, "Can't set modulation amplitude as long as "
+			   "modulation type isn't set.\n" );
+		THROW( EXCEPTION );
+	}
+
 	ampl = get_double( v, "modulation amplitude" );
 
 	too_many_arguments( v );
@@ -851,8 +858,11 @@ Var *synthesizer_mod_ampl( Var *v )
 	if ( FSC2_MODE == EXPERIMENT )
 		hp8672a_set_modulation( );
 
-
-	return vars_push( FLOAT_VAR, hp8672a.mod_ampl[ hp8672a.mod_type ] );
+	if ( hp8672a.mod_type == MOD_TYPE_AM )
+		return vars_push( FLOAT_VAR,
+						  am_ampl[ hp8672a.mod_ampl[ hp8672a.mod_type ] ]  );
+	return vars_push( FLOAT_VAR,
+					  fm_ampl[ hp8672a.mod_ampl[ hp8672a.mod_type ] ]  );
 }
 
 
