@@ -5,6 +5,7 @@ docs  = $(wildcard fsc2_*.texi)
 
 
 all:
+	$(MAKE) info
 	$(MAKE) html
 	$(MAKE) ps
 	$(MAKE) pdf

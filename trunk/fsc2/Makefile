@@ -162,6 +162,11 @@ tags:
 all-docs:
 	$(MAKE) -C doc html ps
 
+# make just the info documentation
+
+info-docs:
+	$(MAKE) -C doc info
+
 # make just the html documentation
 
 html-docs:
