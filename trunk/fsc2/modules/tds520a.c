@@ -1043,7 +1043,6 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 {
 	WINDOW *w;
 	int ch;
-	Var *nv;
 
 
 	/* The first variable got to be a channel number */
@@ -1108,15 +1107,12 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	}
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
-	   array */
+	   value */
 
-	if ( FSC2_MODE == EXPERIMENT )
-		nv = vars_push( FLOAT_VAR,
-						tds520a_get_amplitude( ch, w, use_cursor ) );
-	else
-		nv = vars_push( FLOAT_VAR, 1.23e-7 );
+	if ( FSC2_MODE == TEST )
+		return vars_push( FLOAT_VAR, 1.23e-7 );
 
-	return nv;
+	return vars_push( FLOAT_VAR, tds520a_get_amplitude( ch, w, use_cursor ) );
 }
 
 

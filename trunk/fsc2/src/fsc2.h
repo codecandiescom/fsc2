@@ -163,6 +163,7 @@ FD_cut *cut_form;
 FL_FORM *cut_main_form;
 
 int I_am = PARENT;
+int FSC2_MODE = PREPARATION;
 int pd[ 4 ];                    /* pipe descriptors */
 int conn_pd[ 2 ];
 pid_t child_pid = 0;            /* pid of child */
@@ -234,6 +235,7 @@ extern FD_input_form *input_form;
 extern FD_cut *cut_form;
 
 extern int I_am;
+extern int FSC2_MODE;
 extern int pd[ ];                  /* pipe descriptors */
 extern int conn_pd[ ];
 extern pid_t child_pid;            /* pid of child */
