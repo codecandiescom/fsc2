@@ -135,8 +135,6 @@ hide_toolbox( "OFF" );
 PMS[ 1 ] = round( pulser_pulse_minimum_specs( P1 ) / 10 ns );
 PMS[ 2 ] = round( pulser_pulse_minimum_specs( P2 ) / 10 ns );
 PMS[ 3 ] = round( pulser_pulse_minimum_specs( P3 ) / 10 ns );
-PMS[ 4 ] = round( pulser_pulse_minimum_specs( P4 ) / 10 ns );
-PMS[ 5 ] = round( pulser_pulse_minimum_specs( P5 ) / 10 ns );
 
 synthesizer_frequency( freq );
 
@@ -265,6 +263,7 @@ FOREVER {
 				input_value( PS[ 4 ], PSV[ 4 ] * 10 );
 			} ELSE {
 				NP /= 10;
+				PMS[ 4 ] = round( pulser_pulse_minimum_specs( P4 ) / 10 ns );
 				IF NP <= PMS[ 4 ] OR NP > MAX_LEN {
 					input_value( PS[ 4 ], PSV[ 4 ] * 10 );
 				} ELSE {
@@ -299,6 +298,7 @@ FOREVER {
 				input_value( PS[ 5 ], PSV[ 5 ] * 10 );
 			} ELSE {
 				NP /= 10;
+				PMS[ 5 ] = round( pulser_pulse_minimum_specs( P5 ) / 10 ns );
 				IF NP <= PMS[ 5 ] OR NP + PLV[ 5 ] > MAX_LEN {
 					input_value( PS[ 5 ], PSV[ 5 ] * 10 );
 				} ELSE {
@@ -366,12 +366,12 @@ FOREVER {
 				magnet_sweep( UP );
 				Sweep_State = UP;
 			}
-	
+
 			IF Sweep_State == DOWN {
 				magnet_sweep( UP );
 				Sweep_State = UP;
 			}
-	
+
 			draw_marker( I + 1, "YELLOW" );
 			button_state( Pause, "OFF" );
 		}

@@ -419,8 +419,6 @@ FOREVER {
 
 ON_STOP:
 
-pulser_state( \"OFF\" );
-
 fsave( File,
 	   \"% Date:                   # #\\n\"
 	   \"% Script:                 2_pulse_T2\\n\"

@@ -481,8 +481,6 @@ FOREVER {
 
 ON_STOP:
 
-pulser_state( \"OFF\" );
-
 fsave( File,
 	   \"% Date:                   # #\\n\"
 	   \"% Script:                 3_pulse_EM\\n\"

@@ -676,10 +676,12 @@ Var_T *pulser_pulse_minimum_specs( Var_T *v )
 	}
 	else if ( p->function == rb_pulser.function + PULSER_CHANNEL_RF )
 		t =   rb_pulser.delay_card[ INIT_DELAY ].intr_delay
+			+ rb_pulser.delay_card[ INIT_DELAY ].delay
 			+ rb_pulser.delay_card[ RF_DELAY ].intr_delay
 			+ SYNTHESIZER_INTRINSIC_DELAY;
 	else if ( p->function == rb_pulser.function + PULSER_CHANNEL_DET )
 		t =   rb_pulser.delay_card[ INIT_DELAY ].intr_delay
+			+ rb_pulser.delay_card[ INIT_DELAY ].delay
 			+ rb_pulser.delay_card[ DET_DELAY_0 ].intr_delay
 			+ rb_pulser.delay_card[ DET_DELAY_1 ].intr_delay;
 	else
@@ -774,6 +776,8 @@ static void rb_pulser_card_setup( void )
 
 		rb_pulser.delay_card[ i ].intr_delay = card_info.intr_delay;
 	}
+
+	rb_pulser.delay_card[ INIT_DELAY ].old_delay = -1;
 }
 
 

@@ -402,6 +402,19 @@ static void rb_pulser_commit( bool flag )
 			rb_pulser_write_pulses( rb_pulser.dump_file );
 		if ( rb_pulser.show_file != NULL )
 			rb_pulser_write_pulses( rb_pulser.show_file );
+
+#if 0
+		for ( i = INIT_DELAY, card = rb_pulser.delay_card + i;
+			  i < NUM_DELAY_CARDS; card++, i++ )
+		{
+			if ( card->old_delay != card->delay )
+			{
+				fprintf( stderr, "%d: %ld\n", i, card->delay );
+				card->old_delay = card->delay;
+			}
+		}
+#endif
+
 		return;
 	}
 
