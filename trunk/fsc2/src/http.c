@@ -111,7 +111,7 @@ void server_callback( FL_OBJECT *obj, long a )
 /* Function execs the web server as a child process with its standard */
 /* input and output redirected to two pipes. We're going to check the */
 /* read end of one of the pipes regularly to see if the server needs  */
-/* some data and send these back on the other pipe.                   */
+/* some data and then send them via the other pipe.                   */
 /*--------------------------------------------------------------------*/
 
 static void spawn_server( void )
