@@ -13,6 +13,7 @@ my $sweep_method       = "sweep_up/sweep_down";
 my $field_error        = "";
 my $hidden_field_error = "";
 my $num_runs           = 1;
+my $pulses_per_trace   = 10;
 my $digitizer          = 'TDS520A';
 my @channels_1         = qw/ CH1 CH2 MATH1 MATH2 MATH3 /;
 my @channels_2         = qw/ CH1 CH2 CH3 CH4 MATH1 MATH2 MATH3 /;
@@ -27,7 +28,7 @@ my $num_avg            = 1;
 my $how                = 'Start experiment';
 
 
-my ( $f8_m, $f9_m );
+#my ( $f8_m, $f9_m );
 
 
 my %fp = ( '-side' => 'top',
@@ -123,30 +124,43 @@ my $f6_l2 = $f6->Label( '-text' => ' ',
 						'-width' => 1 );
 
 my $f7 = $mw->Frame( );
-my $f7_l1 = $f7->Label( '-text' => 'Digitizer:',
+my $f7_l1 = $f7->Label( '-text' => 'Laser flashes per trace:',
 						'-width' => '20',
 						'anchor' => 'w' );
-my $f7_m = $f7->Optionmenu( '-options' => [ 'TDS520', 'TDS520A', 'TDS520C',
+my $f7_v = $f7->Entry( '-textvariable' => \$pulses_per_trace,
+					   '-width' => '8',
+					   '-validate' => 'key',
+					   '-validatecommand' => sub { $_[ 0 ] =~ /^\s*\d*\s*$/ },
+					   '-relief' => 'sunken' );
+my $f7_l2 = $f7->Label( '-text' => ' ',
+						'-width' => 1 );
+
+
+my $f8 = $mw->Frame( );
+my $f8_l1 = $f8->Label( '-text' => 'Digitizer:',
+						'-width' => '20',
+						'anchor' => 'w' );
+my $f8_m = $f8->Optionmenu( '-options' => [ 'TDS520', 'TDS520A', 'TDS520C',
 											'TDS540', 'TDS744A', 'TDS754A' ],
 							'-width' => 9,
 							'-command' => \&digitizer_check,
 							'-variable' => \$digitizer );
 
 
-my $f8 = $mw->Frame( );
-my $f8_l1 = $f8->Label( '-text' => 'Measurement channel:',
-						'-width' => '20',
-						'anchor' => 'w' );
-$f8_m = $f8->Optionmenu( '-options' => $channels,
-						 '-width' => 9,
-						 '-variable' => \$channel );
-
 my $f9 = $mw->Frame( );
-my $f9_l1 = $f9->Label( '-text' => 'Trigger channel:',
+my $f9_l1 = $f9->Label( '-text' => 'Measurement channel:',
 						'-width' => '20',
 						'anchor' => 'w' );
-$f9_m = $f9->Optionmenu( '-options' => $trig_channels,
-						 '-width' => 9,
+my $f9_m = $f9->Optionmenu( '-options' => $channels,
+							'-width' => 9,
+							'-variable' => \$channel );
+
+my $f10 = $mw->Frame( );
+my $f10_l1 = $f10->Label( '-text' => 'Trigger channel:',
+						  '-width' => '20',
+						  'anchor' => 'w' );
+my $f10_m = $f10->Optionmenu( '-options' => $trig_channels,
+							  '-width' => 9,
 						 '-variable' => \$trig_channel );
 
 # Get defaults
@@ -186,7 +200,8 @@ $f6_l2->pack( %wp );
 
 $f7->pack( %fp );
 $f7_l1->pack( %wp );
-$f7_m->pack( %wp );
+$f7_v->pack( %wp );
+$f7_l2->pack( %wp );
 
 $f8->pack( %fp );
 $f8_l1->pack( %wp );
@@ -196,6 +211,9 @@ $f9->pack( %fp );
 $f9_l1->pack( %wp );
 $f9_m->pack( %wp );
 
+$f10->pack( %fp );
+$f10_l1->pack( %wp );
+$f10_m->pack( %wp );
 
 
 $mw->Optionmenu( '-options' => [ ( 'Start experiment', 'Test program',
