@@ -50,6 +50,17 @@ static bool cut_zoom_xy( Canvas *c );
 static void cut_save_scale_state( void );
 
 
+extern FL_resource xresources[ ];
+
+#if ( SIZE == HI_RES )
+#define WIN_MIN_WIDTH   350
+#define WIN_MIN_HEIGHT  435
+#else
+#define WIN_MIN_WIDTH   300
+#define WIN_MIN_HEIGHT  380
+#endif
+
+
 static bool is_shown  = UNSET;  /* set on fl_show_form()    */
 static bool is_mapped = UNSET;  /* set while form is mapped */
 static Cut_Graphics CG;
@@ -76,6 +87,9 @@ static int cur_1,
 
 void cut_show( int dir, long index )
 {
+	int flags, x, y, w, h;
+
+
 	/* Don't do anything if no curve is currently displayed */
 
 	if ( G.active_curve == -1 )
@@ -93,16 +107,40 @@ void cut_show( int dir, long index )
 
 	if ( ! is_shown )
 	{
-		fl_show_form( cut_form->cut,
-					  FL_PLACE_MOUSE | FL_FREE_SIZE, FL_FULLBORDER,
-					  "fsc2: Cross section" );
+		if ( * ( ( char * ) xresources[ CUTGEOMETRY ].var ) != '\0' )
+		{
+			flags = XParseGeometry( ( char * ) xresources[ CUTGEOMETRY ].var,
+									&x, &y, &w, &h );
+			if ( XValue & flags && YValue & flags )
+				fl_set_form_position( cut_form->cut, x, y );
+			if ( WidthValue & flags && HeightValue & flags )
+			{
+				if ( w < WIN_MIN_WIDTH )
+					w = WIN_MIN_WIDTH;
+
+				if ( h < WIN_MIN_HEIGHT )
+					h = WIN_MIN_HEIGHT;
+
+				fl_set_form_size( cut_form->cut, w, h );
+			}
+
+			if ( XValue & flags && YValue & flags )
+				fl_show_form( cut_form->cut, FL_PLACE_POSITION,
+							  FL_FULLBORDER, "fsc2: Cross section" );
+			else
+				fl_show_form( cut_form->cut, FL_PLACE_MOUSE | FL_FREE_SIZE,
+							  FL_FULLBORDER, "fsc2: Cross section" );
+		}
+		else
+			fl_show_form( cut_form->cut, FL_PLACE_MOUSE | FL_FREE_SIZE,
+						  FL_FULLBORDER, "fsc2: Cross section" );
 
 		cut_setup_canvas( &G.cut_x_axis, cut_form->cut_x_axis );
 		cut_setup_canvas( &G.cut_y_axis, cut_form->cut_y_axis );
 		cut_setup_canvas( &G.cut_z_axis, cut_form->cut_z_axis );
 		cut_setup_canvas( &G.cut_canvas, cut_form->cut_canvas );
 
-		fl_winminsize( cut_form->cut->window, 500, 335 );
+		fl_winminsize( cut_form->cut->window, WIN_MIN_WIDTH, WIN_MIN_HEIGHT );
 		fl_set_form_atclose( cut_form->cut, cut_form_close_handler, NULL );
 
 		G_init_cut_curve( );
