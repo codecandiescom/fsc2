@@ -136,10 +136,19 @@ long p_num( char *txt )
 
 void is_pulser_driver( void )
 {
+	if ( Num_Pulsers == 0 )
+	{
+		eprint( FATAL, SET, "No pulser module has been loaded - can't use "
+				"pulser-specific functions.\n" );
+		THROW( EXCEPTION );
+	}
+
+	fsc2_assert( Cur_Pulser >= 0 && Cur_Pulser < Num_Pulsers );
+
 	if ( pulser_struct[ Cur_Pulser ].name == NULL )
 	{
-		eprint( FATAL, SET, "No pulser driver has been loaded - can't use "
-				"pulser-specific functions.\n" );
+		eprint( FATAL, SET, "No driver has been loaded for pulser #%ld - "
+				"can't use pulser-specific functions.\n", Cur_Pulser + 1 );
 		THROW( EXCEPTION );
 	}
 }
@@ -271,6 +280,8 @@ void p_assign_channel( long func, Var *v )
 	static long channel;
 
 
+	is_pulser_driver( );
+
 	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
 				 func <= PULSER_CHANNEL_FUNC_MAX );
 
@@ -328,6 +339,8 @@ void p_set_delay( long func, Var *v )
 	static double delay;
 
 
+	is_pulser_driver( );
+
 	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
 				 func <= PULSER_CHANNEL_FUNC_MAX );
 
@@ -366,6 +379,8 @@ void p_set_delay( long func, Var *v )
 
 void p_inv( long func )
 {
+	is_pulser_driver( );
+
 	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
 				 func <= PULSER_CHANNEL_FUNC_MAX );
 
@@ -397,6 +412,8 @@ void p_set_v_high( long func, Var *v )
 {
 	static double voltage;
 
+
+	is_pulser_driver( );
 
 	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
 				 func <= PULSER_CHANNEL_FUNC_MAX );
@@ -438,6 +455,8 @@ void p_set_v_low( long func, Var *v )
 	static double voltage;
 
 
+	is_pulser_driver( );
+
 	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
 				 func <= PULSER_CHANNEL_FUNC_MAX );
 
@@ -477,6 +496,8 @@ void p_set_timebase( Var *v )
 	static double timebase;
 
 
+	is_pulser_driver( );
+
 	/* Check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -514,6 +535,8 @@ void p_set_trigger_mode( Var *v )
 {
 	static int mode;
 
+
+	is_pulser_driver( );
 
 	/* Check the variable and get its value */
 
@@ -563,6 +586,8 @@ void p_set_trigger_slope( Var *v )
 {
 	static int slope;
 
+
+	is_pulser_driver( );
 
 	/* Check the variable and get its value */
 
@@ -614,6 +639,8 @@ void p_set_trigger_level( Var *v )
 	static double level;
 
 
+	is_pulser_driver( );
+
 	/* Check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -650,6 +677,8 @@ void p_set_trigger_impedance( Var *v )
 	static int state;
 
 
+	is_pulser_driver( );
+
 	/* Check the variable and get its value */
 
 	vars_check( v, INT_VAR );
@@ -685,6 +714,8 @@ void p_set_rep_time( Var *v )
 {
 	static double rep_time;
 
+
+	is_pulser_driver( );
 
 	/* Check the variable and get its value */
 
@@ -730,6 +761,8 @@ void p_set_rep_freq( Var *v )
 {
 	static double freq, rep_time;
 
+
+	is_pulser_driver( );
 
 	/* Check the variable and get its value */
 
@@ -781,6 +814,8 @@ void p_set_max_seq_len( Var *v )
 	static double seq_len;
 
 
+	is_pulser_driver( );
+
 	/* Check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -818,6 +853,7 @@ void p_set_max_seq_len( Var *v )
 
 void p_phase_ref( int func, int ref )
 {
+	is_pulser_driver( );
     is_pulser_func( pulser_struct[ Cur_Pulser ].set_phase_reference,
                     "setting a function for phase cycling" );
 
@@ -892,6 +928,7 @@ long p_new( long pnum )
 	P_List *new_plist;
 
 
+	is_pulser_driver( );
 	is_pulser_func( pulser_struct[ Cur_Pulser ].new_pulse,
 					"creating a new pulse" );
 
@@ -936,6 +973,8 @@ long p_new( long pnum )
 
 void p_set( long pnum, int type, Var *v )
 {
+	is_pulser_driver( );
+
 	/* Now the correct driver function is called. All switches just check that
 	   the variable has the correct type and the driver function exists. */
 
@@ -1047,6 +1086,8 @@ Var *p_get_by_num( long pnum, int type )
 	P_List *cur_p;
 
 
+	is_pulser_driver( );
+
 	v = NULL;
 
 	for ( cur_p = plist; cur_p != NULL; cur_p = cur_p->next )
@@ -1145,6 +1186,8 @@ Var *p_get_by_num( long pnum, int type )
 
 void p_phs_setup( int func, int type, int pod, long val )
 {
+	is_pulser_driver( );
+
 	/* A few sanity checks before we call the pulsers handler function */
 
 	fsc2_assert( type >= PHASE_TYPES_MIN && type <= PHASE_TYPES_MAX );
@@ -1179,6 +1222,8 @@ void p_phs_setup( int func, int type, int pod, long val )
 
 void p_phs_end( int func )
 {
+	is_pulser_driver( );
+
 	fsc2_assert( func == 0 || func == 1 );      /* phase function correct ? */
 
 	call_push( NULL, pulser_struct[ Cur_Pulser ].name );
@@ -1236,6 +1281,8 @@ void p_set_psd( int func, Var *v )
 
 void p_set_gp( Var *v )
 {
+	is_pulser_driver( );
+
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	is_pulser_func( pulser_struct[ Cur_Pulser ].set_grace_period,
 					"setting a grace period" );
@@ -1264,6 +1311,8 @@ void p_set_gp( Var *v )
 
 void keep_all_pulses( void )
 {
+	is_pulser_driver( );
+
 	is_pulser_func( pulser_struct[ Cur_Pulser ].keep_all_pulses,
 					"enforcing of keeping all pulses" );
 
@@ -1290,6 +1339,8 @@ void keep_all_pulses( void )
 
 void p_exists_function( int function )
 {
+	is_pulser_driver( );
+
 	fsc2_assert( function >= PULSER_CHANNEL_FUNC_MIN &&
 				 function <= PULSER_CHANNEL_FUNC_MAX );
 

@@ -60,7 +60,7 @@ EXP:
 
 F1 = get_file();
 
-FOR K = 1 : 5
+FOR K = 1 : 5 {
 	print( "\TRun \##\n", K );
 	clear_curve( 4 );
 	dt1 = 700 us;
@@ -109,3 +109,4 @@ FOR I = 1 : size( c, 1 ) {
 		fsave( F1, "c[ #, # ] = #\n", I, J, c[ I, J ] );
 	}
 }
+

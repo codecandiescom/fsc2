@@ -14,6 +14,7 @@ init_1d( 4, 32, "Blödsinn [nT]", "Schwachsinn [V]" );
 
 EXPERIMENT:
 
+hide_toolbox( 1 );
 layout( "VERTICAL" );
 BID1 = button_create( "NORMAL_BUTTON", "Clear curve",
 					  "Removes the currently\ndisplayed curve" );
@@ -36,6 +37,8 @@ I5   = input_create( "INT_INPUT", NX, "Points in x direction" );
 
 FILE1 = get_file( "", "*.dat", "", "", "dat" );
 FILE2 = clone_file( FILE1, "dat", "dxx" );
+
+hide_toolbox( 0 );
 
 FOREVER {
 
@@ -67,7 +70,15 @@ FOREVER {
 
 ON_STOP:
 
-slider_delete( SID1 );
-input_delete( I1 );
+hide_toolbox( 1 );
+wait( 2 );
+hide_toolbox( 0 );
+wait( 2 );
+hide_toolbox( 1 );
+wait( 2 );
+hide_toolbox( 0 );
+
+
+object_delete( SID1, I1, I2, I3, BID1 );
 
 wait( 6 );
