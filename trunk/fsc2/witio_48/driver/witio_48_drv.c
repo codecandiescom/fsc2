@@ -117,11 +117,9 @@ static int __init witio_48_init( void )
 	   (two single 24-bit DIOs) and set the structure with the current
 	   state accordingly. */
 
-	for ( i = 0; i < 2; i++ )
-	{
+	for ( i = 0; i < 2; i++ ) {
 		board.states[ i ].mode = WITIO_48_MODE_1x24;
-		for ( j = 0; j < 3; j++ )
-		{
+		for ( j = 0; j < 3; j++ ) {
 			board.states[ i ].state[ j ] = READ_ALL;
 			board.states[ i ].out_value[ j ] = 0;
 		}
@@ -206,8 +204,7 @@ static int witio_48_get_ioport( void )
 
 	/* Finally set up the pointers to the registers on the board */
 
-	for ( i = 0; i < 2; i++ )
-	{
+	for ( i = 0; i < 2; i++ ) {
 		for ( j = 0; j < 3; j++ )
 			board.regs.port[ i ][ j ] = base++;
 		board.regs.control[ i ] = base++;
@@ -293,48 +290,54 @@ static int witio_48_ioctl( struct inode *inode_p, struct file *file_p,
 		return -EINVAL;
 	}
 
-    switch ( cmd ) {
-	    case WITIO_48_IOC_SET_MODE :
-		    if ( witio_48_get_from_user( arg, ( void * ) &state_struct,
-						 sizeof state_struct ) ) 
-			    return -EACCES;
-		    ret_val = witio_48_set_mode( &state_struct );
-		    break;
+	switch ( cmd ) {
+		case WITIO_48_IOC_SET_MODE :
+			if ( witio_48_get_from_user( arg,
+						     ( void * ) &state_struct,
+						     sizeof state_struct ) ) 
+				return -EACCES;
+			ret_val = witio_48_set_mode( &state_struct );
+			break;
 
-	    case WITIO_48_IOC_GET_MODE :
-		    if ( witio_48_get_from_user( arg, ( void * ) &state_struct,
-						 sizeof state_struct ) ) 
-			    return -EACCES;
-		    if ( ( ret_val = witio_48_get_mode( &state_struct ) )
-			 != 0 )
-			    break;
-		    __copy_to_user( ( WITIO_48_DIO_MODE * ) arg, &state_struct,
-				    sizeof( WITIO_48_DIO_MODE ) );
-		    break;
+		case WITIO_48_IOC_GET_MODE :
+			if ( witio_48_get_from_user( arg,
+						     ( void * ) &state_struct,
+						     sizeof state_struct ) ) 
+				return -EACCES;
+			if ( ( ret_val = witio_48_get_mode( &state_struct ) )
+			     != 0 )
+				break;
+			__copy_to_user( ( WITIO_48_DIO_MODE * ) arg,
+					&state_struct,
+					sizeof( WITIO_48_DIO_MODE ) );
+			break;
 
-	    case WITIO_48_IOC_DIO_OUT :
-		    if ( witio_48_get_from_user( arg, ( void * ) &data_struct,
-						 sizeof data_struct ) )
-			    return -EACCES;
-		    ret_val = witio_48_dio_out( &data_struct );
-		    break;
+		case WITIO_48_IOC_DIO_OUT :
+			if ( witio_48_get_from_user( arg,
+						     ( void * ) &data_struct,
+						     sizeof data_struct ) )
+				return -EACCES;
+			ret_val = witio_48_dio_out( &data_struct );
+			break;
 
-	    case WITIO_48_IOC_DIO_IN :
-		    if ( witio_48_get_from_user( arg, ( void * ) &data_struct,
-						 sizeof data_struct ) )
-			    return -EACCES;
-		    if ( ( ret_val = witio_48_dio_in( &data_struct ) ) != 0 )
-			    break;
-		    __copy_to_user( ( WITIO_48_DATA * ) arg, &data_struct,
-				    sizeof( WITIO_48_DATA ) );
-		    break;
+		case WITIO_48_IOC_DIO_IN :
+			if ( witio_48_get_from_user( arg,
+						     ( void * ) &data_struct,
+						     sizeof data_struct ) )
+				return -EACCES;
+			if ( ( ret_val = witio_48_dio_in( &data_struct ) )
+			     != 0 )
+				break;
+			__copy_to_user( ( WITIO_48_DATA * ) arg, &data_struct,
+					sizeof( WITIO_48_DATA ) );
+			break;
 
-	    default :                        /* we can never end up here... */
-		    PDEBUG( "Invalid ioctl() call\n" );
-		    ret_val = -EINVAL;
-    }
+		default :                     /* we can never end up here... */
+			PDEBUG( "Invalid ioctl() call\n" );
+			ret_val = -EINVAL;
+	}
 
-    return ret_val;
+	return ret_val;
 }
 
 
@@ -427,8 +430,7 @@ static int witio_48_dio_out( WITIO_48_DATA *data )
 	   to the control registers if the direction changed (i.e. the port
 	   (or parts of it) had been used for input before) */
 
-	switch ( board.states[ dio ].mode )
-	{
+	switch ( board.states[ dio ].mode ) {
 		case WITIO_48_MODE_3x8 :
 			witio_48_3x8_dio_out( data );
 			break;
@@ -466,8 +468,7 @@ static void witio_48_3x8_dio_out( WITIO_48_DATA *data )
 	witio_48_board_out( board.regs.port[ dio ][ ch ], data->value & 0xFF );
 	board.states[ dio ].out_value[ ch ] = data->value & 0xFF;
 
-	if ( board.states[ dio ].state[ ch ] != WRITE_ALL )
-	{
+	if ( board.states[ dio ].state[ ch ] != WRITE_ALL ) {
 		board.states[ dio ].state[ ch ] = WRITE_ALL;
 		witio_48_set_crtl( dio );
 	}
@@ -496,8 +497,7 @@ static void witio_48_2x12_dio_out( WITIO_48_DATA *data )
 			    data->value & 0xFF );
 	board.states[ dio ].out_value[ ch ] = data->value & 0xFF;
 
-	if ( board.states[ dio ].state[ ch ] != READ_ALL )
-	{
+	if ( board.states[ dio ].state[ ch ] != READ_ALL ) {
 		need_crtl_update = 1;
 		board.states[ dio ].state[ ch ] = READ_ALL;
 	}
@@ -517,21 +517,17 @@ static void witio_48_2x12_dio_out( WITIO_48_DATA *data )
 
 	/* If necessary set the control port to output the value */
 
-	if ( board.states[ dio ].state[ ch ] != WRITE_ALL )
-	{
+	if ( board.states[ dio ].state[ ch ] != WRITE_ALL ) {
 		board.states[ dio ].state[ ch ] = WRITE_ALL;
 		witio_48_set_crtl( dio );
 	}
 		
 	if ( ch == WITIO_48_CHANNEL_0 &&
-	     board.states[ dio ].state[ C ] & READ_UPPER )
-	{
+	     board.states[ dio ].state[ C ] & READ_UPPER ) {
 		need_crtl_update = 1;
 		board.states[ dio ].state[ C ] ^= READ_UPPER;
-	}
-	else if ( ch == WITIO_48_CHANNEL_1 &&
-		  board.states[ dio ].state[ C ] & READ_LOWER )
-	{
+	} else if ( ch == WITIO_48_CHANNEL_1 &&
+		    board.states[ dio ].state[ C ] & READ_LOWER ) {
 		need_crtl_update = 1;
 		board.states[ dio ].state[ C ] ^= READ_LOWER;
 	}
@@ -554,13 +550,11 @@ static void witio_48_1x24_dio_out( WITIO_48_DATA *data )
 	int need_crtl_update = 0;
 
 
-	for ( i = 0; i < 3; val >>= 8, i++ )
-	{
+	for ( i = 0; i < 3; val >>= 8, i++ ) {
 		witio_48_board_out( board.regs.port[ dio ][ i ], val & 0xFF );
 		board.states[ dio ].out_value[ i ] = val & 0xFF;
 
-		if ( board.states[ dio ].state[ i ] != WRITE_ALL )
-		{
+		if ( board.states[ dio ].state[ i ] != WRITE_ALL ) {
 			need_crtl_update = 1;
 			board.states[ dio ].state[ i ] = WRITE_ALL;
 		}
@@ -587,27 +581,22 @@ static void witio_48_16_8_dio_out( WITIO_48_DATA *data )
 	int need_crtl_update = 0;
 
 
-	if ( ch == WITIO_48_CHANNEL_0 )
-	{
+	if ( ch == WITIO_48_CHANNEL_0 ) {
 		for ( i = 0; i < 2; val >>= 8, i++ )
 		{
 			witio_48_board_out( board.regs.port[ dio ][ i ],
 					    val & 0xFF );
 			board.states[ dio ].out_value[ i ] = val & 0xFF;
-			if ( board.states[ dio ].state[ i ] != WRITE_ALL )
-			{
+			if ( board.states[ dio ].state[ i ] != WRITE_ALL ) {
 				need_crtl_update = 1;
 				board.states[ dio ].state[ i ] = WRITE_ALL;
 			}
 		}
-	}
-	else
-	{
+	} else {
 		witio_48_board_out( board.regs.port[ dio ][ C ], val & 0xFF );
 		board.states[ dio ].out_value[ C ] = val & 0xFF;
 
-		if ( board.states[ dio ].state[ C ] != WRITE_ALL )
-		{
+		if ( board.states[ dio ].state[ C ] != WRITE_ALL ) {
 			need_crtl_update = 1;
 			board.states[ dio ].state[ C ] = WRITE_ALL;
 		}
@@ -652,8 +641,7 @@ static int witio_48_dio_in( WITIO_48_DATA *data )
 	   to the control registers if the direction changed (i.e. the port
 	   (or parts of it) had been used for input before) */
 
-	switch ( board.states[ dio ].mode )
-	{
+	switch ( board.states[ dio ].mode ) {
 		case WITIO_48_MODE_3x8 :
 			witio_48_3x8_dio_in( data );
 			break;
@@ -688,8 +676,7 @@ static void witio_48_3x8_dio_in( WITIO_48_DATA *data )
 	int ch  = data->channel;
 
 
-	if ( board.states[ dio ].state[ ch ] != READ_ALL )
-	{
+	if ( board.states[ dio ].state[ ch ] != READ_ALL ) {
 		board.states[ dio ].state[ ch ] = READ_ALL;
 		witio_48_set_crtl( dio );
 	}
@@ -716,21 +703,17 @@ static void witio_48_2x12_dio_in( WITIO_48_DATA *data )
 	/* If necessary set up the control port to allow reading in the
 	   data */
 
-	if ( board.states[ dio ].state[ ch ] != READ_ALL )
-	{
+	if ( board.states[ dio ].state[ ch ] != READ_ALL ) {
 		need_crtl_update = 1;
 		board.states[ dio ].state[ ch ] = READ_ALL;
 	}
 
 	if ( ch == WITIO_48_CHANNEL_0 &&
-	     ! ( board.states[ dio ].state[ C ] & READ_UPPER ) )
-	{
+	     ! ( board.states[ dio ].state[ C ] & READ_UPPER ) ) {
 		need_crtl_update = 1;
 		board.states[ dio ].state[ C ] |= READ_UPPER;
-	}
-	else if ( ch == WITIO_48_CHANNEL_1 &&
-		  ! ( board.states[ dio ].state[ C ] & READ_LOWER ) )
-	{
+	} else if ( ch == WITIO_48_CHANNEL_1 &&
+		    ! ( board.states[ dio ].state[ C ] & READ_LOWER ) ) {
 		need_crtl_update = 1;
 		board.states[ dio ].state[ C ] |= READ_LOWER;
 	}
@@ -761,8 +744,7 @@ static void witio_48_1x24_dio_in( WITIO_48_DATA *data )
 
 
 	for ( i = 2; i >= 0; i++, data->value <<= 8 )
-		if ( board.states[ dio ].state[ i ] != READ_ALL )
-		{
+		if ( board.states[ dio ].state[ i ] != READ_ALL ) {
 			need_crtl_update = 1;
 			board.states[ dio ].state[ i ] = READ_ALL;
 		}
@@ -792,11 +774,9 @@ static void witio_48_16_8_dio_in( WITIO_48_DATA *data )
 	int need_crtl_update = 0;
 
 
-	if ( ch == WITIO_48_CHANNEL_0 )
-	{
+	if ( ch == WITIO_48_CHANNEL_0 ) {
 		for ( i = 1; i >= 0; i++, data->value <<= 8 )
-			if ( board.states[ dio ].state[ i ] != READ_ALL )
-			{
+			if ( board.states[ dio ].state[ i ] != READ_ALL ) {
 				need_crtl_update = 1;
 				board.states[ dio ].state[ i ] = READ_ALL;
 			}
@@ -807,11 +787,8 @@ static void witio_48_16_8_dio_in( WITIO_48_DATA *data )
 		for ( data->value = 0, i = 1; i >= 0; i++, data->value <<= 8 )
 			data->value |=
 			      witio_48_board_in( board.regs.port[ dio ][ i ] );
-	}
-	else
-	{
-		if ( board.states[ dio ].state[ C ] != READ_ALL )
-		{
+	} else {
+		if ( board.states[ dio ].state[ C ] != READ_ALL ) {
 			board.states[ dio ].state[ C ] = READ_ALL;
 			witio_48_set_crtl( dio );
 		}
@@ -868,7 +845,7 @@ static void witio_48_board_out( unsigned char *addr, unsigned char byte )
 
 static unsigned char witio_48_board_in( unsigned char *addr )
 {
-    return inb_p( ( PORT ) addr );
+	return inb_p( ( PORT ) addr );
 }
 
 
