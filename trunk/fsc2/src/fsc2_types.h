@@ -107,6 +107,7 @@
 #define G_HASH_ENTRY_P
 #define PULSE_P
 #define PULSE_PP
+#define PULSE_PPP
 #define DG2020_STORE_P
 #define CHANNEL_PP
 #define WINDOW_P
