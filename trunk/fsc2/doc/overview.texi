@@ -94,17 +94,17 @@ devices are hard-coded into the program and just changing one device
 requires a major rewrite. In contrast, @acronym{fsc2} has a strictly
 modular approach to the handling of devices. For each device a seperate
 module exists that only gets loaded if it is listed explicitely in the
-@acronym{EDL} program that this device is needed. Thus changing the
-experiment to work with e.g.@: a different lock-in amplifier or
-digitizer usually does not require more than changing one line of the
-@acronym{EDL} program (at least as long as the devices are not too
-different in their capabilities). Moreover, this is also a major
-advantage when a new device has to be integrated. Instead of changing
-the whole program that controls the experiment only a module for the new
-device has to be written. Writing such a module does not even require a
-thorough understanding of the way @acronym{fsc2} works but only some
-knowledge about a few conventions (which are explained in detail in one
-of the parts of this manual). This also allows the module to be tested
+@acronym{EDL} program as required. Thus changing the experiment to work
+with e.g.@: a different lock-in amplifier or digitizer usually does not
+require more than changing one line of the @acronym{EDL} program (at
+least as long as the devices are not too different in their
+capabilities). Moreover, this is also a major advantage when a new
+device has to be integrated. Instead of changing the whole program that
+controls the experiment only a module for the new device has to be
+written. Writing such a module does not even require a thorough
+understanding of the way @acronym{fsc2} works but only some knowledge
+about a few conventions (which are explained in detail in one of the
+parts of this manual). This also allows the module to be tested
 independently of the main program and there is no danger of introducing
 new bugs into @acronym{fsc2} itself.
 
