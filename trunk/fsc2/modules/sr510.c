@@ -337,7 +337,7 @@ Var *lockin_sensitivity( Var *v )
 		 sens < sens_list[ SENS_ENTRIES - 1 ] * 1.01 )
 		sens_index = SENS_ENTRIES - 1;
 
-	if ( sens_index > 0 &&                                  /* value found ? */
+	if ( sens_index >= 0 &&                                 /* value found ? */
 		 fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2 &&
 		                                                   /* error > 1% ? */
 		 ! sr510.sens_warn  )                       /* no warn message yet ? */
@@ -440,7 +440,7 @@ Var *lockin_time_constant( Var *v )
 			break;
 		}
 
-	if ( tc_index > 0 &&                                    /* value found ? */
+	if ( tc_index >= 0 &&                                   /* value found ? */
 		 fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2 &&  /* error > 1%? */
 		 ! sr510.tc_warn )                          /* no warn message yet ? */
 	{

@@ -38,7 +38,6 @@ static void convert_escapes( char *str );
 extern FL_resource xresources[ ];
 extern FL_IOPT xcntl;
 static int tool_x, tool_y;
-static int tool_x_place, tool_y_place;
 static bool tool_has_been_shown = UNSET;
 static bool is_frozen = UNSET;
 static bool needs_pos = SET;
@@ -166,14 +165,17 @@ void parent_freeze( int freeze )
 	{
 		if ( needs_pos )
 		{
-			fl_set_form_position( Tool_Box->Tools,
-								  tool_x_place, tool_y_place );
+			fl_set_form_position( Tool_Box->Tools, tool_x, tool_y );
 			fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
 						  FL_FULLBORDER, "fsc2: Tools" );
 		}
 		else
+		{
 			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
 						  FL_FULLBORDER, "fsc2: Tools" );
+			tool_x = Tool_Box->Tools->x;
+			tool_y = Tool_Box->Tools->y;
+		}
 
 		tool_has_been_shown = SET;
 		fl_winminsize( Tool_Box->Tools->window,
@@ -181,11 +183,12 @@ void parent_freeze( int freeze )
 	}
 	else if ( ! is_frozen && freeze )
 	{
-		tool_x_place = Tool_Box->Tools->x;
-		tool_y_place = Tool_Box->Tools->y;
-
 		if ( fl_form_is_visible( Tool_Box->Tools ) )
+		{
+			tool_x = Tool_Box->Tools->x;
+			tool_y = Tool_Box->Tools->y;
 			fl_hide_form( Tool_Box->Tools );
+		}
 
 		needs_pos = SET;
 	}
@@ -713,10 +716,12 @@ Var *f_bdelete( Var *v )
 			{
 				if ( Tool_Box->Tools )
 				{
-					tool_x = Tool_Box->Tools->x;
-					tool_y = Tool_Box->Tools->y;
-
-					fl_hide_form( Tool_Box->Tools );
+					if ( fl_form_is_visible( Tool_Box->Tools ) )
+					{
+						tool_x = Tool_Box->Tools->x;
+						tool_y = Tool_Box->Tools->y;
+						fl_hide_form( Tool_Box->Tools );
+					}
 					fl_free_form( Tool_Box->Tools );
 				}
 				else
@@ -1374,10 +1379,12 @@ Var *f_sdelete( Var *v )
 			{
 				if ( Tool_Box->Tools )
 				{
-					tool_x = Tool_Box->Tools->x;
-					tool_y = Tool_Box->Tools->y;
-
-					fl_hide_form( Tool_Box->Tools );
+					if ( fl_form_is_visible( Tool_Box->Tools ) )
+					{
+						tool_x = Tool_Box->Tools->x;
+						tool_y = Tool_Box->Tools->y;
+						fl_hide_form( Tool_Box->Tools );
+					}
 					fl_free_form( Tool_Box->Tools );
 				}
 				else
@@ -2021,10 +2028,12 @@ Var *f_idelete( Var *v )
 			{
 				if ( Tool_Box->Tools )
 				{
-					tool_x = Tool_Box->Tools->x;
-					tool_y = Tool_Box->Tools->y;
-
-					fl_hide_form( Tool_Box->Tools );
+					if ( fl_form_is_visible( Tool_Box->Tools ) )
+					{
+						tool_x = Tool_Box->Tools->x;
+						tool_y = Tool_Box->Tools->y;
+						fl_hide_form( Tool_Box->Tools );
+					}
 					fl_free_form( Tool_Box->Tools );
 				}
 				else
@@ -2312,10 +2321,12 @@ void tools_clear( void )
 
 	if ( Tool_Box->Tools )
 	{
-		tool_x = Tool_Box->Tools->x;
-		tool_y = Tool_Box->Tools->y;
-
-		fl_hide_form( Tool_Box->Tools );
+		if ( fl_form_is_visible( Tool_Box->Tools ) )
+		{
+			tool_x = Tool_Box->Tools->x;
+			tool_y = Tool_Box->Tools->y;
+			fl_hide_form( Tool_Box->Tools );
+		}
 	}
 
 	for ( io = Tool_Box->objs; io != NULL; io = next )
@@ -2360,11 +2371,12 @@ static void recreate_Tool_Box( void )
 
 	if ( Tool_Box->Tools != NULL )
 	{
-		tool_x = Tool_Box->Tools->x;
-		tool_y = Tool_Box->Tools->y;
-
 		if ( fl_form_is_visible( Tool_Box->Tools ) )
+		{
+			tool_x = Tool_Box->Tools->x;
+			tool_y = Tool_Box->Tools->y;
 			fl_hide_form( Tool_Box->Tools );
+		}
 
 		for ( io = Tool_Box->objs; io != NULL; io = io->next )
 		{
@@ -2443,17 +2455,16 @@ static void recreate_Tool_Box( void )
 						  FL_FULLBORDER, "fsc2: Tools" );
 		}
 		else
+		{
 			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
 						  FL_FULLBORDER, "fsc2: Tools" );
+			tool_x = Tool_Box->Tools->x;
+			tool_y = Tool_Box->Tools->y;
+		}
 
 		tool_has_been_shown = SET;
 		fl_winminsize( Tool_Box->Tools->window,
 					   FI_sizes.WIN_MIN_WIDTH, FI_sizes.WIN_MIN_HEIGHT );
-	}
-	else
-	{
-		tool_x_place = tool_x;
-		tool_y_place = tool_y;
 	}
 }
 

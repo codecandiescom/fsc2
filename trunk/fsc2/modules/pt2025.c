@@ -167,21 +167,25 @@ Var *gaussmeter_resolution( Var *v )
 		}
 
 		if ( FSC2_MODE == TEST && pt2025.resolution == UNDEF_RESOLUTION )
-			return vars_push( FLOAT_VAR, 0.001  );
+			return vars_push( FLOAT_VAR, 0.001 );
 		return vars_push( FLOAT_VAR, pt2025.resolution == LOW ? 0.01 : 0.001 );
 	}
 
 	res = get_double( v, "resolution" );
 
-	if ( res > 0.011 || res < 0.0009 )
+	if ( res <= 0.0 )
 	{
-		print( FATAL, "Invalid resolution setting: %f.\n", res );
+		print( FATAL, "Invalid resolution of %f G.\n", res );
 		THROW( EXCEPTION );
 	}
 
 	too_many_arguments( v );
 
-	pt2025.resolution = res < 0.00333 ? HIGH : LOW;
+	pt2025.resolution = res < sqrt( 1.0e-5 ) ? HIGH : LOW;
+
+	if ( res > 0.0101 || res < 0.00099 )
+		print( WARN, "Can't set resolution to %.3f G, using %.3f G instead.\n",
+			   res, pt2025.resolution == LOW ? 0.01 : 0.001 );
 
 	if ( FSC2_MODE == EXPERIMENT )
 		pt2025_set_resolution( pt2025.resolution );

@@ -36,11 +36,17 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define ER035M_TEST_FIELD 2000.0   /* returned as current fireld in test run */
 #define ER035M_TEST_RES   0.001
 
+#define LOW_RES     0               /* 0.1 G */
+#define MEDIUM_RES  1               /* 0.01 G */
+#define HIGH_RES    2               /* 0.001 G */
+#define UNDEF_RES  -1
+
+static int res_list[ 3 ] = { 0.1, 0.01, 0.001 };
+
 
 /* exported functions and symbols */
 
 int er035m_s_init_hook( void );
-int er035m_s_test_hook( void );
 int er035m_s_exp_hook( void );
 int er035m_s_end_of_exp_hook( void );
 void er035m_s_end_hook( void );
@@ -56,12 +62,14 @@ bool is_gaussmeter = UNSET;         /* tested by magnet power supply driver */
 /* internally used functions */
 
 static double er035m_s_get_field( void );
+static int er035m_s_get_resolution( void );
+static void er035m_s_set_resolution( int res_index );
 static bool er035m_s_open( void );
 static bool er035m_s_close( void );
 static bool er035m_s_write( const char *buf );
 static bool er035m_s_read( char *buf, long *len );
 static bool er035m_s_comm( int type, ... );
-static void er035_s_comm_fail( void );
+static void er035m_s_comm_fail( void );
 
 
 
@@ -164,17 +172,9 @@ int er035m_s_init_hook( void )
 
 	nmr.is_needed = SET;
 	nmr.state = ER035M_S_UNKNOWN;
+	nmr.resolution = UNDEF_RES;
 	nmr.prompt = '\0';
 
-	return 1;
-}
-
-
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
-
-int er035m_s_test_hook( void )
-{
 	return 1;
 }
 
@@ -189,24 +189,35 @@ int er035m_s_exp_hook( void )
 	int try_count = 0;
 	Var *v;
 	long retries;
+	int cur_res;
 
 
 	if ( ! nmr.is_needed )
 		return 1;
 
 	if ( ! er035m_s_open( ) )
-		er035_s_comm_fail( );
+		er035m_s_comm_fail( );
 	usleep( ER035M_S_WAIT );
 
 	if ( ! er035m_s_write( "REM" ) )
-		er035_s_comm_fail( );
+		er035m_s_comm_fail( );
 	usleep( ER035M_S_WAIT );
 
 	/* Switch the display on */
 
 	if ( er035m_s_write( "ED" ) == FAIL )
-		er035_s_comm_fail( );
+		er035m_s_comm_fail( );
 	usleep( ER035M_S_WAIT );
+
+	/* Find out the curent resolution, and if necessary, change it to the
+	   value requested by the user */
+
+	cur_res = er035m_s_get_resolution( );
+
+	if ( nmr.resolution == UNDEF_RES )
+		nmr.resolution = cur_res;
+	else if ( nmr.resolution != cur_res )
+		er035m_s_set_resolution( res_list[ nmr.resolution ] );
 
 	/* Ask gaussmeter to send status byte and test if it does - sometimes the
 	   fucking thing does not answer (i.e. it just seems to send the prompt
@@ -223,7 +234,8 @@ try_again:
 			THROW( USER_BREAK_EXCEPTION );
 
 		if ( er035m_s_write( "PS" ) == FAIL )
-			er035_s_comm_fail( );
+			er035m_s_comm_fail( );
+
 		usleep( ER035M_S_WAIT );
 
 		length = 20;
@@ -231,7 +243,7 @@ try_again:
 			break;
 
 		if ( retries <= 0 )
-			er035_s_comm_fail( );
+			er035m_s_comm_fail( );
 	}
 
 	/* Now look if the status byte says that device is OK where OK means that
@@ -249,43 +261,37 @@ try_again:
 			case '0' :      /* Probe F0 is connected -> OK for S-band */
 				if ( exists_device( "aeg_s_band" ) )
 					break;
-				print( FATAL, "Wrong field probe (F0) connected to the NMR "
-					   "gaussmeter.\n" );
+				print( FATAL, "Wrong field probe (F0) connected.\n" );
 				THROW( EXCEPTION );
 				
 			case '1' :      /* Probe F1 is connected -> OK for X-band */
 				if ( exists_device( "aeg_x_band" ) )
 					break;
-				print( FATAL, "Wrong field probe (F1) connected to the NMR "
-					   "gaussmeter.\n" );
+				print( FATAL, "Wrong field probe (F1) connected.\n" );
 				THROW( EXCEPTION );
 
 			case '2' :      /* No probe connected -> error */
-				print( FATAL, "No field probe connected to the NMR "
-					   "gaussmeter.\n" );
+				print( FATAL, "No field probe connected.\n" );
 				THROW( EXCEPTION );
 
 			case '3' :      /* Error temperature -> error */
-				print( FATAL, "Temperature error from NMR gaussmeter.\n" );
+				print( FATAL, "Temperature error.\n" );
 				THROW( EXCEPTION );
 
 			case '4' :      /* TRANS L-H -> test again */
 				if ( try_count++ < 10 )
 					goto try_again;
-				print( FATAL, "NMR gaussmeter can't find the actual "
-					   "field.\n" );
+				print( FATAL, "Can't find the .\n" );
 				THROW( EXCEPTION );
 
 			case '5' :      /* TRANS L-H -> test again */
 				if ( try_count++ < 10 )
 					goto try_again;
-				print( FATAL, "NMR gaussmeter can't find the actual "
-					   "field.\n" );
+				print( FATAL, "Can't find the field.\n" );
 				THROW( EXCEPTION );
 
 			case '6' :      /* MOD OFF -> error (should never happen) */
-				print( FATAL, "Modulation of NMR gaussmeter is switched "
-					   "off.\n" );
+				print( FATAL, "Modulation is switched off.\n" );
 				THROW( EXCEPTION );
 
 			case '7' :      /* MOD POS -> OK (default state) */
@@ -299,8 +305,7 @@ try_again:
 				break;
 
 			case 'A' :      /* FIELD ? -> error (doesn't seem to work) */
-				print( FATAL, "NMR gaussmeter has an unidentifiable "
-					   "problem.\n" );
+				print( FATAL, "Unidentifiable device problem.\n" );
 				THROW( EXCEPTION );
 
 			case 'B' :      /* SU active -> OK */
@@ -324,45 +329,10 @@ try_again:
 				break;
 
 			default :
-				print( FATAL, "Undocumented data received from the NMR "
-					   "gaussmeter.\n" );
+				print( FATAL, "Undocumented data received.\n" );
 				THROW( EXCEPTION );
 		}
 	} while ( *++bp ); 
-
-	/* Find out the resolution and set it to at least 2 digits */
-
-	if ( er035m_s_write( "RS" ) == FAIL )
-		er035_s_comm_fail( );
-	usleep( ER035M_S_WAIT );
-
-	length = 20;
-	if ( er035m_s_read( buffer, &length ) == FAIL )
-		er035_s_comm_fail( );
-
-	switch ( buffer[ 0 ] )
-	{
-		case '1' :                    /* set resolution to 2 digits */
-			if ( er035m_s_write( "RS2" ) == FAIL )
-				er035_s_comm_fail( );
-			usleep( ER035M_S_WAIT );
-			/* drop through */
-
-		case '2' :
-			nmr.resolution = LOW;
-			break;
-
-		case '3' :
-			nmr.resolution = HIGH;
-			break;
-
-		default :                     /* should never happen... */
-		{
-			print( FATAL, "Undocumented data received from the NMR "
-				   "gaussmeter.\n" );
-			THROW( EXCEPTION );
-		}
-	}
 
 	/* If the gaussmeter is already locked just get the field value, other-
 	   wise try to achieve locked state */
@@ -448,7 +418,7 @@ Var *find_field( Var *v )
 		   nmr.state == ER035M_S_OD_ACTIVE ||
 		   nmr.state == ER035M_S_UNKNOWN ) &&
 		 er035m_s_write( "SD" ) == FAIL )
-		er035_s_comm_fail( );
+		er035m_s_comm_fail( );
 	usleep( ER035M_S_WAIT );
 
 	/* Wait for gaussmeter to go into lock state (or FAIL) */
@@ -466,7 +436,7 @@ Var *find_field( Var *v )
 				THROW( USER_BREAK_EXCEPTION );
 
 			if ( er035m_s_write( "PS" ) == FAIL )
-				er035_s_comm_fail( );
+				er035m_s_comm_fail( );
 			usleep( ER035M_S_WAIT );
 
 			length = 20;
@@ -474,7 +444,7 @@ Var *find_field( Var *v )
 				break;
 
 			if ( retries <= 0 )
-				er035_s_comm_fail( );
+				er035m_s_comm_fail( );
 		}
 
 		bp = buffer;
@@ -549,22 +519,66 @@ Var *find_field( Var *v )
 
 Var *gaussmeter_resolution( Var *v )
 {
-	if ( v != NULL )
+	double res;
+	int i;
+	int res_index = UNDEF_RES;
+
+
+	if ( v == NULL )
 	{
-		print( FATAL, "This function cannot be called with arguments.\n" );
+		if ( FSC2_MODE == PREPARATION && nmr.resolution == UNDEF_RES )
+		{
+			no_query_possible( );
+			THROW( EXCEPTION );
+		}
+
+		if ( FSC2_MODE == TEST && nmr.resolution == UNDEF_RES )
+			return vars_push( FLOAT_VAR, ER035M_TEST_RES );
+
+		return vars_push( FLOAT_VAR, res_list[ nmr.resolution ] );
+	}
+
+	res = get_double( v, "resolution" );
+
+	too_many_arguments( v );
+
+	if ( res <= 0 )
+	{
+		print( FATAL, "Invalid resolution of %f G.\n", res );
 		THROW( EXCEPTION );
 	}
 
-	if ( FSC2_MODE == PREPARATION )
+	/* Try to match the requested resolution, if necessary use the nearest
+	   possible value */
+
+	for ( i = 0; i < 2; i++ )
+		if ( res <= res_list[ i ] && res >= res_list[ i + 1 ] )
+		{
+			res_index = i +
+				 ( ( res / res_list[ i ] > res_list[ i + 1 ] / res ) ? 0 : 1 );
+			break;
+		}
+
+	if ( res_index == UNDEF_RES )
 	{
-		no_query_possible( );
-		THROW( EXCEPTION );
+		if ( res >= res_list[ LOW_RES ] )
+			res_index = LOW_RES;
+		if ( res <= res_list[ HIGH_RES ] )
+			res_index = HIGH_RES;
 	}
 
-	if ( FSC2_MODE == TEST )
-		return vars_push( FLOAT_VAR, ER035M_TEST_RES );
+	if ( fabs( res_list[ res_index ] - res ) > 1.0e-2 * res_list[ res_index ] )
+		print( WARN, "Can't set resolution to %.3f G, using %.3f G instead.\n",
+			   res, res_list[ res_index ] );
 
-	return vars_push( FLOAT_VAR, nmr.resolution == LOW ? 0.01 : 0.001 );
+	fsc2_assert( res_index >= LOW_RES && res_index <= HIGH_RES );
+
+	nmr.resolution = res_index;
+
+	if ( FSC2_MODE == EXPERIMENT )
+		er035m_s_set_resolution( nmr.resolution );
+
+	return vars_push( FLOAT_VAR, res_list[ nmr.resolution ] );
 }
 
 
@@ -627,7 +641,7 @@ static double er035m_s_get_field( void )
 				THROW( USER_BREAK_EXCEPTION );
 
 			if ( er035m_s_write( "PF" ) == FAIL )
-				er035_s_comm_fail( );
+				er035m_s_comm_fail( );
 			usleep( ER035M_S_WAIT );
 
 			length = 20;
@@ -635,7 +649,7 @@ static double er035m_s_get_field( void )
 				break;
 
 			if ( retries <= 0 )
-				er035_s_comm_fail( );
+				er035m_s_comm_fail( );
 		}
 
 		/* Disassemble field value and flag showing the state */
@@ -674,6 +688,70 @@ static double er035m_s_get_field( void )
 	sscanf( vs, "%lf", &nmr.field );
 
 	return nmr.field;
+}
+
+
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
+static int er035m_s_get_resolution( void )
+{
+	int retries;
+	char buffer[ 20 ];
+	long length = 20;
+
+
+	for ( retries = FAIL_RETRIES; ; retries-- )
+	{
+		if ( DO_STOP )
+			THROW( USER_BREAK_EXCEPTION );
+
+		if ( er035m_s_write( "RS" ) == FAIL )
+			er035m_s_comm_fail( );
+
+		usleep( ER035M_S_WAIT );
+
+		length = 20;
+		if ( er035m_s_read( buffer, &length ) == OK )
+			break;
+
+		if ( retries <= 0 )
+			er035m_s_comm_fail( );
+	}
+
+	switch ( buffer[ 2 ] )
+	{
+		case '1' :
+			return LOW_RES;
+
+		case '2' :
+			return MEDIUM_RES;
+
+		case '3' :
+			return HIGH_RES;
+	}
+
+	print( FATAL, "Undocumented data received.\n" );
+	THROW( EXCEPTION );
+
+	return UNDEF_RES;
+}
+
+
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
+static void er035m_s_set_resolution( int res_index )
+{
+	char buf[ 4 ];
+
+
+	sprintf( buf, "RS%1d", res_index + 1 );
+	if ( er035m_s_write( buf ) == FAIL )
+		er035m_s_comm_fail( );
+
+	usleep( ER035M_S_WAIT );
+
 }
 
 
@@ -886,7 +964,7 @@ static bool er035m_s_comm( int type, ... )
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 
-void er035_s_comm_fail( void )
+void er035m_s_comm_fail( void )
 {
 	print( FATAL, "Can't access the NMR gaussmeter.\n" );
 	THROW( EXCEPTION );

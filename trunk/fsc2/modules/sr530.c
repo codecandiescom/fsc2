@@ -379,9 +379,9 @@ Var *lockin_sensitivity( Var *v )
 		 sens < sens_list[ SENS_ENTRIES - 1 ] * 1.01 )
 		sens_index = SENS_ENTRIES - 1;
 
-	if ( sens_index > 0 &&                             /* value found ? */
+	if ( sens_index >= 0 &&                         /* value found ? */
 		 fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2 &&
-                                                       /* error > 1% ? */
+                                                    /* error > 1% ? */
 		 ! sr530.sens_warn  )                       /* no warn message yet ? */
 	{
 		if ( sens >= 1.0e-3 )
@@ -483,8 +483,8 @@ Var *lockin_time_constant( Var *v )
 			break;
 		}
 
-	if ( tc_index > 0 &&                                    /* value found ? */
-		 fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2 )   /* error > 1% ? */
+	if ( tc_index >= 0 &&                                   /* value found ? */
+		 fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2 )   /* error > 1% ?  */
 	{
 		if ( tc >= 1.0 )
 			print( WARN, "Can't set time constant to %g s, using %.0lf s "
