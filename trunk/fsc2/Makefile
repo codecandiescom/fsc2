@@ -157,7 +157,7 @@ SHELL            := /bin/sh
 CC               := gcc
 CFLAGS           := $(OPTIMIZATION) \
 					-ggdb \
-					-I$(fdir) -I/usr/X11R6/include \
+					-I$(fdir) -I$(adir) -I/usr/X11R6/include \
 					-I/usr/X11R6/include/X11 -I/usr/local/include \
 					-Wall \
 					-Wwrite-strings \
@@ -332,8 +332,6 @@ CONFFLAGS += -Dlibdir=\"$(libdir:/=)/\"
 CONFFLAGS += -Dauxdir=\"$(auxdir:/=)/\"
 CONFFLAGS += -Dudir=\"$(udir:/=)/\"
 CONFFLAGS += -Ddocdir=\"$(docdir:/=)/\"
-
-CFLAGS    += -I$(adir)
 
 ifdef GPIB_LOG_FILE
 	CONFFLAGS += -DGPIB_LOG_FILE=\"$(GPIB_LOG_FILE)\"
