@@ -5,18 +5,18 @@
 use strict;
 use Tk;
 
-my $lockin		 = 'SR810';
-my $start_field  = 3350;
-my $end_field	 = 3500;
-my $field_step	 = 1;
-my $sweep_method = "sweep_up/sweep_down";
-my $field_error  = "";
-my $hidden_field_error  = "";
-my $num_runs	 = 1;
-my $tc			 = "Don't set";
-my $sens		 = "Don't set";
-my $how			 = 'Start experiment';
-my $bridge		 = 'cw';
+my $lockin		       = 'SR810';
+my $start_field        = 3350;
+my $end_field	       = 3500;
+my $field_step	       = 1;
+my $sweep_method       = "sweep_up/sweep_down";
+my $field_error        = "";
+my $hidden_field_error = "";
+my $num_runs	       = 1;
+my $tc			       = "Don't set";
+my $sens		       = "Don't set";
+my $how			       = 'Start experiment';
+my $bridge		       = 'cw';
 
 
 my %fp = ( '-side' => 'top',
