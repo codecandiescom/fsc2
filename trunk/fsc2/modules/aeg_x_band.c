@@ -823,7 +823,7 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 {
 	double mini_steps;
 	int steps;
-	double remainder;
+	double remain;
 	double max_dev;
 	int i;
 	static double last_diff;  /* field difference in last step */
@@ -855,7 +855,7 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 	   steps with the minimum step size remain ? */
 
 	steps = ( int ) floor( fabs( mini_steps ) / MAGNET_MAX_STEP );
-	remainder = mini_steps - sign( mini_steps ) * steps * MAGNET_MAX_STEP;
+	remain = mini_steps - sign( mini_steps ) * steps * MAGNET_MAX_STEP;
 
 	/* Now do all the steps to reach the target field */
 
@@ -876,7 +876,7 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 	if ( DO_STOP )
 		THROW( USER_BREAK_EXCEPTION )
 
-	if ( ( magnet.step = remainder ) != 0.0 )
+	if ( ( magnet.step = remain ) != 0.0 )
 	{
 		magnet_do( SERIAL_VOLTAGE );
 		magnet_do( SERIAL_TRIGGER );
@@ -936,7 +936,7 @@ static void magnet_sweep( int dir )
 {
 	int steps, i;
 	double mini_steps;
-	double remainder;
+	double remain;
 	double over_shot;
 	
 
@@ -979,7 +979,7 @@ static void magnet_sweep( int dir )
 	   and how large a step for the rest. */
 
 	steps = ( int ) floor( fabs( mini_steps ) / MAGNET_MAX_STEP );
-	remainder = mini_steps - sign( mini_steps ) * steps * MAGNET_MAX_STEP;
+	remain = mini_steps - sign( mini_steps ) * steps * MAGNET_MAX_STEP;
 
 	/* Now do all the steps to reach the target field */
 
@@ -1002,7 +1002,7 @@ static void magnet_sweep( int dir )
 	if ( DO_STOP )
 		THROW( USER_BREAK_EXCEPTION )
 
-	if ( ( magnet.step = remainder ) != 0.0 )
+	if ( ( magnet.step = remain ) != 0.0 )
 	{
 		magnet_do( SERIAL_VOLTAGE );
 		magnet_do( SERIAL_TRIGGER );

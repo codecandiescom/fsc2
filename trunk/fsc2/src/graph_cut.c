@@ -1947,12 +1947,12 @@ static void repaint_cut_canvas( Canvas *c )
 
 			strcpy( buf, " " );
 			make_label_string( buf + 1, x_pos,
-						  ( int ) lround( floor( log10( fabs(
-				          scv->rwc_delta[ r_coord ] ) / cv->s2d[ X ] ) ) - 2 );
+					    ( int ) lround( floor( log10( fabs(
+				        scv->rwc_delta[ r_coord ] ) / cv->s2d[ X ] ) ) - 2 ) );
 			strcat( buf, "   " ); 
 			make_label_string( buf + strlen( buf ), y_pos,
-							    ( int ) lround( floor( log10( fabs(
-							    scv->rwc_delta[ Z ] ) / cv->s2d[ Y ] ) ) - 2 );
+							  ( int ) lround( floor( log10( fabs(
+							  scv->rwc_delta[ Z ] ) / cv->s2d[ Y ] ) ) - 2 ) );
 			strcat( buf, " " );
 
 			if ( G.font != NULL )

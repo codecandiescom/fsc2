@@ -351,7 +351,7 @@ long reader( void *ret )
 
 	/* Get the header - failure indicates that the child is dead */
 
-	if ( ! pipe_read( pd[ READ ], &header, sizeof( CommStruct ) ) )
+	if ( ! pipe_read( pd[ READ ], ( char * ) &header, sizeof( CommStruct ) ) )
 		return 0;
 
 	switch ( header.type )
@@ -449,8 +449,8 @@ long reader( void *ret )
 
 			/* Get number of buttons and number of default button */
 
-			pipe_read( pd[ READ ], &n1, sizeof( int ) );
-			pipe_read( pd[ READ ], &n2, sizeof( int ) );
+			pipe_read( pd[ READ ], ( char * ) &n1, sizeof( int ) );
+			pipe_read( pd[ READ ], ( char * ) &n2, sizeof( int ) );
 
 			/* Get message text and button labels */
 
