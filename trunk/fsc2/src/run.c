@@ -1076,11 +1076,11 @@ static void setup_child_signals( void )
 	struct sigaction sact;
 	int sig_list[ ] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE,
 						SIGSEGV, SIGPIPE, SIGTERM, SIGUSR1, SIGCHLD, SIGCONT,
-						SIGTTIN, SIGTTOU, SIGBUS, SIGVTALRM, 0 };
-	int i;
+						SIGTTIN, SIGTTOU, SIGBUS, SIGVTALRM };
+	size_t i;
 
 
-	for ( i = 0; sig_list[ i ] != 0; i++ )
+	for ( i = 0; i < sizeof sig_list / sizeof *sig_list; i++ )
 	{
 		sact.sa_handler = child_sig_handler;
 		sigemptyset( &sact.sa_mask );
@@ -1156,6 +1156,10 @@ static void child_sig_handler( int signo )
 		case SIGTTOU :
 		case SIGVTALRM :
 			return;
+
+		case SIGPIPE:
+			if ( Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) )
+				return;
 	}
 
 	/* All remaining signals are deadly... */
