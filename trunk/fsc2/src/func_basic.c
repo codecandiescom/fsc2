@@ -3443,9 +3443,9 @@ Var *f_reverse( Var *v )
 			break;
 
 		case INT_ARR :
-			new_var = vars_make( INT_ARR, v );
-			for ( lsrc = v->val.lpnt, ldest = new_var->val.lpnt, i = 0;
-				  i < v->len / 2; i++, lsrc++, ldest++ )
+			new_var = vars_push( INT_ARR, v->val.lpnt, v->len );
+			for ( lsrc = new_var->val.lpnt, ldest = lsrc + new_var->len - 1;
+				  lsrc < ldest; lsrc++, ldest-- )
 			{
 				ltemp = *lsrc;
 				*lsrc = *ldest;
@@ -3454,9 +3454,9 @@ Var *f_reverse( Var *v )
 			break;
 
 		case FLOAT_ARR :
-			new_var = vars_make( FLOAT_ARR, v );
-			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
-				  i < v->len / 2; i++, dsrc++, ddest++ )
+			new_var = vars_push( FLOAT_ARR, v->val.dpnt, v->len );
+			for ( dsrc = new_var->val.dpnt, ddest = dsrc + new_var->len - 1;
+				  dsrc < ddest; dsrc++, ddest-- )
 			{
 				dtemp = *dsrc;
 				*dsrc = *ddest;
