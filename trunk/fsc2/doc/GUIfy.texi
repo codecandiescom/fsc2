@@ -192,7 +192,7 @@ user. You don't have to give both a start and end value, if e.g.@: the
 end value is missing the conversion program will only make sure that the
 value of @code{START_FIELD} is always at least 2000 but won't care about
 the end value (but you will need the colon, @code{:}, to make clear if
-you mean the lower or upper boarder).
+you mean the lower or upper limit).
 
 The next item, a single number in square braces, is the default value
 for the variable, i.e.@: the value to be shown when the script is
@@ -519,8 +519,8 @@ Thus, in the comparisons you have the whole power of Perl at your finger
 tips, including all of its regular expression evaluation machinery. If
 you know Perl you'll be able to do really weird things with this, you
 could even put complete little Perl scripts into the @w{condition ;-)}
-Be careful not to change the variables from within the condition unless
-that's exactly what you want to do.
+Just be careful not to change the variables from within the condition
+(unless that's exactly what you want to do).
 
 
 @node Interfacing, , fsc2_guify, GUI-fying
