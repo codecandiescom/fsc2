@@ -28,6 +28,7 @@ int s_band_exp_hook( void );
 void s_band_exit_hook( void );
 
 Var *magnet_setup( Var *v );
+Var *magnet_fast_init( Var *v );
 Var *set_field( Var *v );
 Var *sweep_up( Var *v );
 Var *sweep_down( Var *v );
@@ -262,13 +263,6 @@ void s_band_exit_hook( void )
 /*-------------------------------------------------------------------*/
 
 
-Var *magnet_fast_init( Var *v )
-{
-	v = v;
-	magnet.fast_init = SET;
-	return vars_push( INT_VAR, 1 );
-}
-
 Var *magnet_setup( Var *v )
 {
 	/* check that both variables are reasonable */
@@ -326,6 +320,14 @@ Var *magnet_setup( Var *v )
 	magnet.field_step = VALUE( v->next );
 	magnet.is_field = magnet.is_field_step = SET;
 
+	return vars_push( INT_VAR, 1 );
+}
+
+
+Var *magnet_fast_init( Var *v )
+{
+	v = v;
+	magnet.fast_init = SET;
 	return vars_push( INT_VAR, 1 );
 }
 
