@@ -15,6 +15,18 @@ static bool check_format_string( const char *buf );
 static void convert_escapes( char *str );
 
 
+extern FL_resource xresources[ ];
+extern FL_IOPT xcntl;
+
+
+#if ( SIZE == HI_RES )
+#define WIN_MIN_WIDTH  50
+#define WIN_MIN_HEIGHT 50
+#else
+#define WIN_MIN_WIDTH  30
+#define WIN_MIN_HEIGHT 30
+#endif
+
 
 /*------------------------------------------------------------*/
 /* Function sets the layout of the tool box, either vertical  */
@@ -803,6 +815,7 @@ Var *f_screate( Var *v )
 	IOBJECT *new_io, *ioi;
 	int type;
 	double start_val, end_val;
+	double step = 0.0;
 	char *label = NULL;
 	char *help_text = NULL;
 	long ID = 0;
@@ -885,6 +898,20 @@ Var *f_screate( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	if ( v->next != NULL && v->next->type & ( INT_VAR | FLOAT_VAR ) )
+	{
+		v = vars_pop( v );
+		vars_check( v, INT_VAR | FLOAT_VAR );
+		step = fabs( VALUE( v ) );
+		if ( step > end_val - start_val )
+		{
+			eprint( FATAL, "%s:%ld: Slider step size larger than difference "
+					"between minimum and maximum value in %s().\n",
+					Fname, Lc, Cur_Func );
+			THROW( EXCEPTION );
+		}
+	}
+
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check( v, STR_VAR );
@@ -918,7 +945,7 @@ Var *f_screate( Var *v )
 		size_t len;
 
 
-		len = 2 * sizeof( long ) + 2 * sizeof( double );
+		len = 2 * sizeof( long ) + 3 * sizeof( double );
 		if ( Fname )
 			len += strlen( Fname ) + 1;
 		else
@@ -944,6 +971,9 @@ Var *f_screate( Var *v )
 		pos += sizeof( double );
 
 		memcpy( pos, &end_val, sizeof( double ) );
+		pos += sizeof( double );
+
+		memcpy( pos, &step, sizeof( double ) );
 		pos += sizeof( double );
 
 		if ( Fname )
@@ -1023,7 +1053,11 @@ Var *f_screate( Var *v )
 	new_io->self = NULL;
 	new_io->start_val = start_val;
 	new_io->end_val = end_val;
+	new_io->step = step;
 	new_io->value = 0.5 * ( end_val + start_val );
+	if ( step != 0.0 )
+		new_io->value = lround( ( new_io->value - start_val ) / step ) * step
+		                + start_val;
 	new_io->label = label;
 	new_io->help_text = help_text;
 	
@@ -2104,6 +2138,7 @@ static void recreate_Tool_Box( void )
 {
 	IOBJECT *io;
 	bool needs_pos = SET;
+	int flags, wx, wy, ww, wh;
 
 
 	if ( TEST_RUN )        /* just to make sure... */
@@ -2167,6 +2202,28 @@ static void recreate_Tool_Box( void )
 	{
 		needs_pos = UNSET;
 		Tool_Box->Tools = fl_bgn_form( FL_UP_BOX, Tool_Box->w, Tool_Box->h );
+
+		if ( * ( ( char * ) xresources[ TOOLGEOMETRY ].var ) != '\0' )
+		{
+			flags = XParseGeometry( ( char * ) xresources[ TOOLGEOMETRY ].var,
+									&wx, &wy, &ww, &wh );
+
+			if ( XValue & flags && YValue & flags )
+			{
+				fl_set_form_position( Tool_Box->Tools, wx, wy );
+				needs_pos = SET;
+			}
+
+			if ( WidthValue & flags && HeightValue & flags )
+			{
+				if ( ww < WIN_MIN_WIDTH )
+					ww = WIN_MIN_WIDTH;
+				if ( wh < WIN_MIN_HEIGHT )
+					wh = WIN_MIN_HEIGHT;
+
+				fl_set_form_size( Tool_Box->Tools, ww, wh );
+			}
+		}
 	}
 
 	for ( io = Tool_Box->objs; io != NULL; io = io->next )
@@ -2179,6 +2236,7 @@ static void recreate_Tool_Box( void )
 	fl_show_form( Tool_Box->Tools, needs_pos ?
 				  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
 				  FL_FULLBORDER, "fsc2: Tools" );
+	fl_winminsize( Tool_Box->Tools->window, WIN_MIN_WIDTH, WIN_MIN_HEIGHT );
 }
 
 
@@ -2275,6 +2333,12 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_slider_bounds( io->self, io->start_val, io->end_val );
 			fl_set_slider_value( io->self, io->value );
 			fl_set_slider_return( io->self, FL_RETURN_END );
+			fl_set_object_lsize( io->self, xcntl.sliderFontSize );
+			if ( io->step != 0.0 )
+				fl_set_slider_step( io->self, io->step );
+			else
+				fl_set_slider_step( io->self,
+								 fabs( io->end_val - io->start_val ) / 200.0 );
 			break;
 
 		case VALUE_SLIDER :
@@ -2285,12 +2349,16 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_slider_bounds( io->self, io->start_val, io->end_val );
 			fl_set_slider_value( io->self, io->value );
 			fl_set_slider_return( io->self, FL_RETURN_END );			
-			fl_set_slider_step( io->self,
-								fabs( io->end_val - io->start_val ) / 200.0 );
 			prec = - floor( log10 ( ( io->end_val - io->start_val ) /
 									( 0.825 * io->w ) ) );
 			fl_set_slider_precision( io->self,
 									prec <= 0.0 ? 0 : ( int ) lround( prec ) );
+			if ( io->step != 0.0 )
+				fl_set_slider_step( io->self, io->step );
+			else
+				fl_set_slider_step( io->self,
+								 fabs( io->end_val - io->start_val ) / 200.0 );
+			fl_set_object_lsize( io->self, xcntl.sliderFontSize );
 			break;
 
 		case INT_INPUT :
@@ -2351,9 +2419,8 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			assert( 1 == 0 );
 	}
 
-	fl_set_object_gravity( io->self, FL_NoGravity, FL_NoGravity );
-	fl_set_object_lsize( io->self, FONT_SIZE );
-	fl_set_object_lstyle( io->self, FL_BOLD_STYLE );
+	fl_set_object_resize( io->self, FL_RESIZE_X );
+	fl_set_object_gravity( io->self, FL_NorthWest, FL_NoGravity );
 	fl_set_object_callback( io->self, tools_callback, 0 );
 	if ( io->help_text != NULL && *io->help_text != '\0' )
 		fl_set_object_helper( io->self, io->help_text );
