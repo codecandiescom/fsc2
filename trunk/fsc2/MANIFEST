@@ -8,7 +8,6 @@ INSTALL
 Makefile
 README
 TODO
-install
 
 Fcntl_Lock/Changes
 Fcntl_Lock/Fcntl_Lock.pm
