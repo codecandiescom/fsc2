@@ -57,19 +57,19 @@ Fcntl_Lock - Perl extension for file locking with fcntl(2)
 =head1 DESCRIPTION
 
 File locking in Perl is usually done using the flock(2) function.
-Unfortunately, this only allows locks on whole files and is often implemented
-in terms of flock(2), which has some shortcomings.
+Unfortunately, this only allows locks on whole files and is often
+implemented in terms of flock(2), which has some shortcomings.
 
-Using this module file locking via fcntl(2) can be done (obviously, this
-restricts the use of the module to systems that have a fcntl(2) system
-call). Before a file (or parts of a file) can be locked, an object simulating
-a flock structure must be created and its properties set. Afterwards, by
-calling the function B<fcntl_lock()> a lock can be set or it can be determined
-which process currently holds the lock.
+Using this module file locking via fcntl(2) can be done (obviously,
+this restricts the use of the module to systems that have a fcntl(2)
+system call). Before a file (or parts of a file) can be locked, an
+object simulating a flock structure must be created and its properties
+set. Afterwards, by calling the function B<fcntl_lock()> a lock can be
+set or it can be determined which process currently holds the lock.
 
 =cut
 
-# Set up an hash with the error messages, but only for errno's that Errno
+# Set up a hash with the error messages, but only for errno's that Errno
 # knows about. The texts represent what's written in SUSV3 and in the man
 # pages for Linux, TRUE64, OpenBSD3 and Solaris8.
 
@@ -137,8 +137,8 @@ To create a new flock structure object simple call B<new>:
 
   fs = Fcntl_Lock->new;
 
-You also can pass the B<new> function a set of key-value pairs to initialize
-the members of the flock structure, e.g.
+You also can pass the B<new> function a set of key-value pairs to
+initialize the members of the flock structure, e.g.
 
   $fs = Fcntl_Lock->new( 'l_type'   => F_WRLCK,
                          'l_whence' => SEEK_SET,
@@ -178,8 +178,8 @@ sub new {
 
 =pod
 
-The following functions are for setting and quering the properties of the
-object simulating the flock structure:
+The following functions are for setting and quering the properties of
+the object simulating the flock structure:
 
 =over 4
 
@@ -432,10 +432,10 @@ sub fcntl_error {
 
 The previous function, B<fcntl_error>, tries to return a string with some
 relevance to the locking operation (i.e. "File or segment already locked
-by other process(es)" instead of "Permission denied"). If instead you want
-to obtain the normal system error message one gets when using $!
-B<fcntl_system_error> can be called instead. Also this function returns
-'undef' if there was no error.
+by other process(es)" instead of "Permission denied"). If you want to obtain
+the normal system error message one gets when using $! B<fcntl_system_error>
+can be called instead. Also this function returns 'undef' if there was no
+error.
 
 =back
 

@@ -45,6 +45,11 @@ the real size and alignment of the flock structure and writes out an
 include file. The data from this file are then used to populate (or extract
 data from) the flock structure of the correct type.
 
+ACKNOWLEDGMENTS
+
+Thanks to Mark-Jason Dominus <mjd@plover.com> and Benjamin Goldberg
+<goldbb2@earthlink.net> for discussions, code and encouragement.
+
 COPYRIGHT AND LICENCE
 
 This program is free software; you can redistribute it and/or modify it
