@@ -1,0 +1,21 @@
+DEVICES:
+
+tds520;
+
+VARIABLES:
+
+k[ * ];
+
+b[ 3 ] = { 1.2, 2.4, 3.6 };
+c[ 4 ] = { 1.2, 2.4, 3.6, 4.8 };
+
+PREPARATIONS:
+
+EXPERIMENT:
+
+
+k = digitizer_get_curve( CH1 );
+
+k[ 150 ] = 12;
+
+print( "\T# # # #\n", k[ 1 ], k[ 122 ], k[ 123 ], k[ 150 ] );
