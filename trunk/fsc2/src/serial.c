@@ -45,7 +45,7 @@
 static struct {
 	bool in_use;
 	const char* devname;
-	const char* dev_file;
+	char* dev_file;
 } Serial_Port[ NUM_SERIAL_PORTS ];
 #endif
 
@@ -103,6 +103,7 @@ void fsc2_request_serial_port( int sn, const char *devname )
 	/* Test if device file exists and we have read and write permissions */
 
 	raise_permissions( );
+
 	if ( access( Serial_Port[ sn ].dev_file, R_OK | W_OK) == -1 )
 	{
 		if ( errno == ENOENT )
@@ -121,6 +122,8 @@ void fsc2_request_serial_port( int sn, const char *devname )
 
 
 /*----------------------------------------------------------------------*/
+/* This function is called only ones at the start of fsc2 to initialise */
+/* the structure used in granting access to the serial ports.           */
 /*----------------------------------------------------------------------*/
 
 void fsc2_serial_init( void )
@@ -139,8 +142,11 @@ void fsc2_serial_init( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* This function is called after the end of an experiment (or when a new */
+/* EDL file is loaded) to reset the structure used in granting access to */
+/* the serial ports.                                                     */
+/*-----------------------------------------------------------------------*/
 
 void fsc2_serial_cleanup( void )
 {
@@ -151,7 +157,7 @@ void fsc2_serial_cleanup( void )
 	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
 	{
 		if ( Serial_Port[ i ].in_use )
-			Serial_Port[ i ].dev_file = T_free( Serial_Port[ sn ].dev_file );
+			Serial_Port[ i ].dev_file = T_free( Serial_Port[ i ].dev_file );
 		Serial_Port[ i ].devname = NULL;
 		Serial_Port[ i ].in_use = UNSET;
 	}
@@ -167,7 +173,7 @@ int fsc2_serial_open( int sn, int flags )
 	int fd;
 
 
-	/* First check if serial port has been requested */
+	/* Check if serial port has been requested */
 
 	if ( ! Serial_Port[ sn ].in_use )
 	{
