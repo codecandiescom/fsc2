@@ -199,9 +199,9 @@ static void load_functions( Device *dev )
 
 
 	/* Try to open the library for the device. We first try to find it in
-	   directories defined by the environment variable "LD_LIBRARY_PATH". If
-	   this fails (and this is not part of the testing procedure) we also try
-	   the compiled-in path to the libraries. */
+	   directories defined by the environment variable "LD_LIBRARY_PATH".
+	   If this fails (and this is not part of the testing procedure) we
+	   also try the compiled-in path to the libraries. */
 
 	if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
 	{
