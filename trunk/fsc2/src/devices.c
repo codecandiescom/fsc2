@@ -128,6 +128,8 @@ void device_add( const char *name )
 
 		*( real_name + length - 3 ) = '\0';
 	}
+	else
+		real_name = dev_name;
 
 	T_free( lib_name );
 
