@@ -460,14 +460,10 @@ automatically to the name of the file the user selects unless the file
 name already has this extension. This way one can enforce an extension
 for the file name.
 
-But there's also an alternative. If the very first string (that is
-usually used for the prompt string) starts with a backslash `@code{\}'
-the following characters (i.e.@: everything except the leading
-backslash) are taken as the name of the file to be used automatically.
-The file selector will not be shown and instead the hard-coded file name
-will be used. Only if opening this file fails the remaining parameters
-will be used when asking for an alternative file (except the prompt
-string, the default will be used).
+The function used to support also an alternative method, where a hard-
+coded file name could be used. While this still works it is deprecated
+and shouldn't be used anymore. Please use the @code{open_file()}
+function instead!
 
 If @code{get_file()} has never been called on the first call to a
 function from the @code{save_xxx()}-family the user is asked to select a
@@ -475,6 +471,23 @@ file and this file is used exclusively in further
 @code{save_xxx()}-calls.  That means that calling @code{get_file()}
 after the default file has already been opened is not allowed, call it
 either before the first save-operation or never at all!
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} program.
+
+
+@anchor{open_file}
+@item open_file( )
+@findex open_file()
+Thsi function is similar to the previous one with the main difference
+that one may specify an hard-coded file name in the program. The
+function will use its first argument as a file name and try to open this
+file. If the file already exists (or can't be opened)  a warning will be
+shown and,on user request will show up a file selector to allow
+selecting a different file, just as the @code{get_file()}. Thus the
+arguments that the function accets are identical to the ones of
+@code{get_file()} with the only exception that the first argument is an
+additional string for the file name.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
