@@ -97,6 +97,9 @@ static bool ep385_update_pulses( bool flag )
 		{
 			ch = f->channel[ j ];
 
+			if ( ch->num_pulses == 0 )
+				continue;
+
 			/* Copy the old pulse list for the channel so the new state can
 			   be compared to the old state and an update is done only when
 			   needed. */

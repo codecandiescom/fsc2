@@ -141,8 +141,8 @@ const char *ep385_pticks( Ticks ticks )
 
 int ep385_pulse_compare( const void *A, const void *B )
 {
-	PULSE_PARAMS *a = *( PULSE_PARAMS ** ) A,
-		         *b = *( PULSE_PARAMS ** ) B;
+	PULSE_PARAMS *a = ( PULSE_PARAMS * ) A,
+		         *b = ( PULSE_PARAMS * ) B;
 
 	return a->pos <= b->pos ? -1 : 1;
 }

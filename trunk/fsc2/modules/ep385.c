@@ -71,7 +71,7 @@ int ep385_init_hook( void )
 	pulser_struct.set_trig_in_level = NULL;
 	pulser_struct.set_trig_in_slope = NULL;
 	pulser_struct.set_trig_in_impedance = NULL;
-	pulser_struct.set_max_seq_len = ep385_set_max_seq_len;
+	pulser_struct.set_max_seq_len = NULL;
 
 	pulser_struct.set_phase_reference = ep385_set_phase_reference;
 
@@ -106,7 +106,6 @@ int ep385_init_hook( void )
 	ep385.is_repeat_time = UNSET;
 	ep385.is_neg_delay = UNSET;
 	ep385.neg_delay = 0;
-	ep385.is_max_seq_len = UNSET;
 
 	for ( i = 0; i < MAX_CHANNELS; i++ )
 	{
@@ -129,7 +128,6 @@ int ep385_init_hook( void )
 		ep385.function[ i ].num_pulses = 0;
 		ep385.function[ i ].pulses = NULL;
 		ep385.function[ i ].pm = NULL;
-		ep385.function[ i ].max_seq_len = 0;
 		ep385.function[ i ].delay = 0;
 		ep385.function[ i ].is_delay = UNSET;
 		ep385.function[ i ].next_phase = 0;
@@ -224,21 +222,21 @@ int ep385_exp_hook( void )
 	if ( ! ep385.is_cw_mode )
 	{
 		/* Now we have to tell the pulser about all the pulses */
-
-		ep385_IN_SETUP = SET;
 /*
+		ep385_IN_SETUP = SET;
+
 		if ( ! ep385_reorganize_pulses( UNSET ) )
 		{
 			ep385_IN_SETUP = UNSET;
 			THROW( EXCEPTION );
 		}
-*/
+
 		ep385_IN_SETUP = UNSET;
 
 		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 			if ( ep385.function[ i ].is_used )
 				ep385_set_pulses( &ep385.function[ i ] );
-
+*/
 		/* Finally tell the pulser to update (we're always running in manual
 		   update mode) and than switch the pulser into run mode */
 

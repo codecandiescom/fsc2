@@ -420,15 +420,26 @@ static void ep385_setup_channels( void )
 
 		/* Create two lists of pulse parameters for the channel */
 
-		ch->pulse_params = PULSE_PARAMS_P T_malloc( 2 * ch->num_pulses *
-													sizeof *ch->pulse_params );
-		ch->old_pulse_params = ch->pulse_params + ch->num_pulses;
-
-		for ( j = 0; j < ch->num_pulses; j++ )
+		if ( ch->num_pulses > 0 )
 		{
-			ch->pulse_params->pos = ch->pulse_params->len =
-				ch->old_pulse_params->pos = ch->old_pulse_params->len = 0;
-			ch->pulse_params->pulse = ch->old_pulse_params->pulse = NULL;
+			ch->pulse_params =
+				PULSE_PARAMS_P T_malloc( 2 * ch->num_pulses *
+										 sizeof *ch->pulse_params );
+			ch->old_pulse_params = ch->pulse_params + ch->num_pulses;
+
+			for ( j = 0; j < ch->num_pulses; j++ )
+			{
+				ch->pulse_params->pos = ch->pulse_params->len =
+					ch->old_pulse_params->pos = ch->old_pulse_params->len = 0;
+				ch->pulse_params->pulse = ch->old_pulse_params->pulse = NULL;
+			}
+		}
+		else
+		{
+			print( WARN, "Channel %d used for function '%s' is not used.\n",
+				   ch->self + CHANNEL_OFFSET,
+				   Function_Names[ ch->function->self ] );
+			ch->pulse_params = ch->old_pulse_params = NULL;
 		}
 	}
 }
@@ -466,6 +477,13 @@ void ep385_pulse_start_setup( void )
 		for ( j = 0; j < f->num_channels; j++ )
 		{
 			ch = f->channel[ j ];
+
+			if ( ch->num_pulses == 0 )
+			{
+				ch->num_active_pulses = ch->old_num_active_pulses = 0;
+				continue;
+			}
+
 			pm_entry = f->pm[ f->next_phase * f->num_channels + j ];
 
 			ch->num_active_pulses = 0;
@@ -477,8 +495,9 @@ void ep385_pulse_start_setup( void )
 															 p->pos + f->delay;
 					ch->pulse_params[ ch->num_active_pulses ].len =
 					ch->old_pulse_params[ ch->num_active_pulses ].len = p->len;
-					ch->pulse_params[ ch->num_active_pulses++ ].pulse =
-					ch->old_pulse_params[ ch->num_active_pulses++ ].pulse = p;
+					ch->pulse_params[ ch->num_active_pulses ].pulse =
+					ch->old_pulse_params[ ch->num_active_pulses ].pulse = p;
+					ch->num_active_pulses++;
 				}
 
 			ch->old_num_active_pulses = ch->num_active_pulses;

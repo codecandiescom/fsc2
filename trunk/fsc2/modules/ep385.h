@@ -132,8 +132,6 @@ typedef struct _F_ {
 	int next_phase;
 	int pc_len;                 /* length of the phase cycle */
 
-	long max_seq_len;          /* maximum length of the pulse sequence */
-
 	Ticks delay;               /* delay for the function/channel combination */
 	bool is_delay;
 } FUNCTION;
@@ -188,9 +186,6 @@ typedef struct {
 
 	Ticks neg_delay;
 	bool is_neg_delay;       /* if any of the functions has a negative delay */
-
-	long max_seq_len;        /* maximum length of all pulse sequences */
-	bool is_max_seq_len;
 
 	FUNCTION function[ PULSER_CHANNEL_NUM_FUNC ];
 	CHANNEL channel[ MAX_CHANNELS ];
@@ -280,7 +275,6 @@ bool ep385_assign_channel_to_function( int function, long channel );
 bool ep385_set_function_delay( int function, double delay );
 bool ep385_set_trigger_mode( int mode );
 bool ep385_set_repeat_time( double rep_time );
-bool ep385_set_max_seq_len( double seq_len );
 bool ep385_set_phase_reference( int phase, int function );
 bool ep385_phase_setup_prep( int func, int type, int dummy, long channel );
 bool ep385_phase_setup( int func );
