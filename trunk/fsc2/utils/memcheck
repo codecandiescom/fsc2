@@ -73,7 +73,7 @@ if ( ( keys %h1 ) ) {
 	for ( keys %h1 ) {
 		print $h1{ $_ };
 		my @e = split / /, $h1{ $_ };
-		print " called from `addr2line -e $exe $e[ $#e ]`";
+		print " called from " . `addr2line -e $exe $e[ $#e ]`;
 	}
 }
 
@@ -82,7 +82,7 @@ if ( ( keys %h2 ) ) {
 	for ( keys %h2 ) {
 		print $h2{ $_ };
 		my @e = split / /, $h2{ $_ };
-		print " called from `addr2line -e $exe $e[ $#e ]`";
+		print " called from " . `addr2line -e $exe $e[ $#e ]`;
 	}
 }
 
