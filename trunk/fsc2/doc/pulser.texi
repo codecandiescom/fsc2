@@ -572,7 +572,7 @@ for the pulse.
 Now all you have to do is to tell the program once which pulser pod
 channel is connected to which phase input of the bridge (and, to allow
 for some sanity checks, which functions is to be phase cycled). This is
-done via the following statement in the @code{ASSIGNMENTS} section:
+done via a statement in the @code{ASSIGNMENTS} section like the following:
 @example
 PHASE_SETUP:  MICROWAVE,
                X: POD = 1,
@@ -582,19 +582,26 @@ PHASE_SETUP:  MICROWAVE,
               CW: 3;
 @end example
 @noindent
-In this example you obviously want to phase cycle the microwave pulses
-and the @code{+X} input connector of the bridge is connected to pod
-channel 1 of the pulser etc.@footnote{As usual, the keyword
-@code{PHASE_SETUP} can be abbreviated, either to @code{PH_SETUP},
-@code{PHASE_S}, or @code{PHS}.}  Since you actually can have 2 phase
-cycled function, you may append either @code{1} or @code{_1} and
-@code{2} or @code{_2} to distinguish between the two phase setups,
-i.e.@: @code{PHASE_SETUP_1}. Please replace the @code{POD} keyword by
-@code{CH} for the @strong{Bruker EP385} (which doesn't has pods).
+or
+PHASE_SETUP:  MICROWAVE,
+               X: CH = C1,
+              +Y: CH = C2,
+              -X: CH = C4,
+              -Y: C5,
+@end example
+@noindent
+(depending on the pulser you use).  In this example you obviously want
+to phase cycle the microwave pulses and the @code{+X} input connector of
+the bridge is connected to pod channel 1 (or output connector C1) of the
+pulser etc.@footnote{As usual, the keyword @code{PHASE_SETUP} can be
+abbreviated, either to @code{PH_SETUP}, @code{PHASE_S}, or @code{PHS}.}
+Since you actually can have 2 phase cycled function, you may append
+either @code{1} or @code{_1} and @code{2} or @code{_2} to distinguish
+between the two phase setups, i.e.@: @code{PHASE_SETUP_1}.
 
 Please note that you only have to supply settings for phases that are
-really needed in the experiment, e.g.@: if in the experiment only
-the @code{+x} and @code{-x} phase is needed only channels for both these
+really needed in the experiment, e.g.@: if in the experiment only the
+@code{+x} and @code{-x} phases are needed only channels for both these
 phases have to be specified.
 
 
