@@ -314,15 +314,15 @@ to do the experiment, i.e.@: to interpret the @code{EXPERIMENT} section.
 
 
 But there is a twist. Just before starting to interpret the
-@code{EXPERIMENT} section @code{fsc2} splits itself into two
-independent processes by doing a @code{fork()}. If you use the @code{ps}
-command to list all your running processes suddenly a new instance of
-@code{fsc2} will be listed@footnote{Please note that already before the
-experiment gets started you will find two instances of @code{fsc2}
-running, during the experiment there are three.}. One of these two
-processes is doing the interpretation of the @code{EXPERIMENT} section
-while the other process is responsible for the graphics and all
-interaction with the user.
+@code{EXPERIMENT} section @code{fsc2} splits itself into two independent
+processes by doing a @code{fork()}. If you use the @code{ps} command to
+list all your running processes suddenly a new instance of @code{fsc2}
+will be listed@footnote{Please note that already before the experiment
+gets started you will find two instances of @code{fsc2} running, during
+the experiment there are (at least) three.}. One of these two processes
+is doing the interpretation of the @code{EXPERIMENT} section, i.e.@: is
+runing the experiment, while the other process is responsible for the
+graphics and all interaction with the user.
 
 
 The main reason for splitting the execution of the experiment into two
@@ -331,15 +331,16 @@ as concerned with acquiring data from the devices etc.@: should be
 unimpeded (at least as far as possible) from the task of dealing with
 user requests to allow maximum execution speed and to make the timing of
 the experiment less dependent on user interruptions. Take for example
-the case that the user starts to move one of @code{fsc2}s windows
-around on the screen. As long as she is moving the window no other
-instructions of the program can be executed, which effectively would
-stop the experiment for this time even though nothing really relevant
-happens. By having one task for the actual execution of the experiment
-and one for the user interaction this problem vanishes because the task
-for the experiment can continue while only the other task is
-blocked. This, of course, also applies to all other actions the user may
-initiate, e.g.@: resizing of windows, magnification of data etc.
+the case that the user starts to move one of @code{fsc2}s windows around
+on the screen. As long as she is moving the window no other instructions
+of the program can be executed, which effectively would stop the
+experiment for this time even though nothing really relevant happens. By
+having one task for the actual execution of the experiment and one for
+the user interaction this problem vanishes because the task for the
+experiment can continue while only the other task, responcible for the
+user interaction, is blocked. This, of course, also applies to all other
+actions the user may initiate, e.g.@: resizing of windows, magnification
+of data etc.
 
 
 The approach requires some channels of communication between the two
@@ -356,12 +357,13 @@ a new file has to be opened and the name must be selected by the user.
 The most important part of the communication between parent process (the
 user interaction task) and the child process (the task running the
 experiment) is basically a one-way communication -- the child process
-must pass newly acquired data to be drawn to the parent process. The
-child processes stores the new data (together with the information where
-they are to be drawn) in a shared memory segment and stores the key
-for this memory segment in a still unused slot in a buffer (that also
-resides in shared memory). Then it sends the parent process a signal to
-inform it that new data are available and continues immediately.
+must pass on newly acquired data to be drawn by the parent process. The
+child processes writes the new data (together with the information where
+they are to be drawn) into a shared memory segment and stores the key
+for this memory segment in a still unused slot in another buffer (that
+also resides in shared memory). Then it sends the parent process a
+signal to inform it that new data are available and continues
+immediately.
 
 
 The parent, one the other hand, gets interrupted immediately by the
@@ -383,3 +385,11 @@ happens. And as a further safeguard against this happening the parent is
 written in a way that it will empty slots in the buffer as fast as
 possible, if necessary deferring to draw data or to react to user
 requests.
+
+
+There is also a second communication channel for cases where the task
+running the experiment needs some user input. Typical cases are requests
+for file names, but also requests for information about the state of
+objects in the toolbox. Here the task running the experiment always has
+to wait for a reaction by the user interaction task (which in turn may
+have to wait for user input).
