@@ -28,9 +28,11 @@ c_sources     = fsc2.c xinit.c pulser.c util.c exceptions.c variables.c   \
 				conn.c ipc.c fsc2_assert.c dump.c serial.c
 bison_sources = $(wildcard *_parser.y)
 flex_sources  = $(wildcard *_lexer.l)
-sources       = $(bison_sources:.y=.c) $(flex_sources:.l=.c) ${c_sources}
+sources       = $(bison_sources:.y=.c) $(flex_sources:.l=.c) $(c_sources)
 objects       = $(sources:.c=.o)
+resources     = $(wildcard fsc2_rsc_*r.fd)
 headers       = ${c_sources:.c=.h} global.h
+all_headers   = $(headers) $(bison_sources:.y=.h) $(resources:.fd=.h)
 
 export headers        # export list of header files to the modules Makefile
 
@@ -67,13 +69,14 @@ fsc2: $(objects)
 modules:
 	$(MAKE) -C ../modules all
 
-%.o: %.c $(headers)
+%.o: %.c $(all_headers)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-%.c: %.y $(headers)
-	$(BISON) $(BISONFLAGS) $(patsubst %_parser.y,%,$<) -o $@ $<
+%.c %.h: %.y $(headers)
+	$(BISON) $(BISONFLAGS) $(patsubst %_parser.y,%,$<) \
+		-o $(addsuffix .c,$(basename $@)) $<
 
-%.c: %.l $(headers)
+%.c: %.l $(all_headers)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %_lexer.l,%,$<) -o$@ $<
 	sed -e 's/register char \*yy_cp, \*yy_bp;/\
 		register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
@@ -85,35 +88,27 @@ modules:
 fsc2_clean: fsc2_clean.o exceptions.o
 	$(CC) -o $@ $^ -lm
 
-fsc2_clean.c: fsc2_clean.l $(headers)
+fsc2_clean.c: fsc2_clean.l
 	$(FLEX) -B -o$@ $<
 
 
-# Make utilities for interfacing with fsc2
+# Make utility for interfacing with fsc2
 
 fsc2_connect: fsc2_connect.o
 	$(CC) -o $@ $^
 
 
-# Create files and links needed for for graphical interface - they need making
-# if either fsc2_rsc.[ch] or fsc2_rsc_[hl]r.[ch] don't exist or the file they
-# are made from is newer
+# Create libraries for the graphical interface
 
 %.so: %.o
 	$(LD) $(SLFLAGS) $^ -o $@
 	chmod 644 $@
 
-fsc2_rsc_lr.o: fsc2_rsc_lr.c
+$(resources:.fd=.o): %.o: %.c %.h
 	$(CC) $(CFLAGS) -c $(SLFLAGS) $< -o $@
 
-fsc2_rsc_hr.o: fsc2_rsc_hr.c
-	$(CC) $(CFLAGS) -c $(SLFLAGS) $< -o $@
-
-fsc2_rsc_lr.c: fsc2_rsc_lr.fd
-	fdesign -convert fsc2_rsc_lr.fd;
-
-fsc2_rsc_hr.c: fsc2_rsc_hr.fd
-	fdesign -convert fsc2_rsc_hr.fd;
+%.c %.h: %.fd
+	fdesign -convert $<
 
 
 # Create files and links needed for the GPIB interface - they need making if
@@ -188,4 +183,3 @@ distclean:
 # don't automatically delete intermediate files created by bison and flex
 
 .PRECIOUS: %.c
-
