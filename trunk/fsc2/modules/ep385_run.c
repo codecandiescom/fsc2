@@ -551,7 +551,7 @@ void ep385_full_reset( void )
 	while ( p != NULL )
 	{
 		/* After the test run check if the pulse has been used at all, send
-		   a warning and delete it if it hasn't (unless we haven't ben told
+		   a warning and delete it if it hasn't (unless we haven't been told
 		   to keep all pulses, even unused ones) */
 
 		if ( FSC2_MODE != EXPERIMENT &&

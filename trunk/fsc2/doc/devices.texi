@@ -2709,13 +2709,13 @@ The largest value that can be returned is @w{2147483647}, i.e. @w{2^31 -
 @item counter_intermediate_count()
 @findex counter_intermediate_count()
 The function returns the current value of a counter. The counter may
-still be running, in which case repeated calls of the function will
-return an updated value according to the new number of events that
-happened between invocations of the function. The function requires on
-argument, the counter for which the current value is to be returned. It
-must be specified by one of the symbolic names between @code{CH0} and
-@code{CH3} (please @strong{don't} use numbers directly, the mapping
-between the symbolic values and channel numbers is non-trivial).
+still be running, in which case each call of the function will return an
+updated value according to the number of events that happened between
+invocations of the function. The function requires one argument, the
+counter for which the current value is to be returned. It must be
+specified by one of the symbolic names between @code{CH0} and @code{CH3}
+(please @strong{don't} use numbers directly, the mapping between the
+symbolic values and channel numbers is non-trivial).
 
 The largest value that can be returned for a counter is @w{2147483647},
 i.e. @w{2^31 - 1}.
@@ -2747,13 +2747,12 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{counter_stop_counter}
 @item counter_stop_counter()
 @findex counter_stop_counter()
-This function can be used to stop a counter independent of the purpose
-(i.e.@: counting or pulse train creation) it was started. It requires
-one argument, the counter for which the current value is to be
-returned. It must be specified by one of the symbolic values between
-@code{CH0} and @code{CH3} (please @strong{don't} use numbers directly,
-the mapping between the symbolic values and channel numbers is
-non-trivial).
+This function can be used to stop a counter independently of the purpose
+(i.e.@: counting or pulse train creation, see below) it was started
+for. It requires one argument, the counter to be stopped. It must be
+specified by one of the symbolic values between @code{CH0} and
+@code{CH3} (please @strong{don't} use numbers directly, the mapping
+between the symbolic values and channel numbers is non-trivial).
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -2765,7 +2764,7 @@ Beside being used as event counters the counters can also be used to
 create pulses on its default output port. This function can be used to
 create a single pulse on the output port. It requires two arguments, the
 first being the counter to be used, specified by a symbolic value
-between @code{CH0} and @code{3}. If the requested counter is already
+between @code{CH0} and @code{CH3}. If the requested counter is already
 running the function will fail. The second argument is the length of the
 pulse, which must be between @w{100 ns} and about @w{214.748 s} and must
 be an integer multiple of @w{50 ns}.
@@ -2778,14 +2777,15 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @findex counter_continuous_pulses()
 This function allows to create a continuous train of pulses. It requires
 at least two arguments, the first being the counter to be used,
-specified by a symbolic value between @code{CH0} and @code{3}. If the
+specified by a symbolic value between @code{CH0} and @code{CH3}. If the
 requested counter is already running the function will fail. The second
 argument is the length of the pulse, which must be between @w{100 ns}
 and about @w{214.748 s} and must be an integer multiple of @w{50 ns}.
 
 If no third argument is specified the distance between pulses will be
-identical to the pulse length. By specifying a third argument (with the
-same restrictions as for the second argument) the distance between
+identical to the pulse length (resulting in a pulse frequncey of twice
+the value of the second argument). By specifying a third argument (with
+the same restrictions as for the second argument) the distance between
 pulses can be set.
 
 To stop creation of pulses (and to free the counter for other uses) the
