@@ -1672,7 +1672,7 @@ static Var *vars_get_lhs_pointer( Var *v, int n )
 
 static long vars_calc_index( Var *a, Var *v )
 {
-	unsigned int i, cur;
+	int i, cur;
 	long a_index;
 
 
@@ -1727,7 +1727,7 @@ static long vars_calc_index( Var *a, Var *v )
 		   and readjust it to the currenty possible maximum value hoping that
 		   everthing will work out well in the experiment. */
 
-		if ( cur >= a->sizes[ i ] )
+		if ( cur >= ( int ) a->sizes[ i ] )
 		{
 			if ( ! ( ( a->flags & IS_DYNAMIC ) && TEST_RUN )
 				 || v->next != NULL || i != a->dim - 1 )
@@ -2151,7 +2151,7 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 {
 	Var *d,
 		*s;
-	int i;
+	unsigned int i;
 
 
 	/* May be that's paranoid, but... */
@@ -2307,7 +2307,7 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 {
 	Var *d;
-	int i;
+	unsigned int i;
 	double *sdptr = NULL;
 	long *slptr = NULL;
 	bool dest_needs_pop = UNSET;
