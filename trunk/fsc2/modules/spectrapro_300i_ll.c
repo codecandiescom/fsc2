@@ -272,11 +272,35 @@ double spectrapro_300i_min( double *x, void *par )
 
 void spectrapro_300i_open( void )
 {
+	char reply[ 100 ];
+	size_t len;
+	int i;
+
+
 	if ( ! spectrapro_300i_comm( SERIAL_INIT ) )
 	{
-		print( FATAL, "Can't contact the monochromator.\n" );
+		print( FATAL, "Can't open device file for monochromator.\n" );
 		THROW( EXCEPTION );
 	}
+
+	/* Now a quick check that we can talk to the monochromator, it should be
+	   able to send us its model string wihin one second or something is
+	   definitely hosed... */
+
+	if ( ! spectrapro_300i_comm( SERIAL_WRITE, "MODEL" ) )
+		spectrapro_300i_comm_fail( );
+
+	for ( i = 0; i < 10; i++ )
+	{
+		len = 100;
+		if ( spectrapro_300i_comm( SERIAL_READ, reply, &len ) && len != 0 )
+			break;
+		fsc2_usleep( SPECTRAPRO_300I_WAIT, UNSET );
+		stop_on_user_request( );
+	}
+
+	if ( i == 10 )
+		spectrapro_300i_comm_fail( );
 
 	spectrapro_300i.is_open = SET;
 	spectrapro_300i_get_gratings( );
