@@ -137,6 +137,10 @@ bool scan_main( char *file )
 	bool split_error;
 
 
+	/* forget everything about previous tests */
+
+	clean_up( );
+
 	/* Parse the function and the device name data base */
 
 	if ( ! functions_init( ) || ! device_list_parse( ) )
