@@ -123,11 +123,6 @@ void xforms_init( int *argc, char *argv[] )
 	FL_Coord x1, y1, w1, h1, x2, y2, w2, h2;
 
 
-
-	/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
-
-	G.dim = 0;
-
 	fl_initialize( argc, argv, "fsc2", 0, 0 );
 
 	/* Create and display the main form */
