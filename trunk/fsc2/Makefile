@@ -36,7 +36,7 @@ AWK            = /usr/bin/awk
 
 SHELL          = /bin/sh
 CC             = gcc
-CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes
+CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 				 -Wmissing-prototypes -Wmissing-declarations -W \
 				 # -DDEBUG \
 				 # -DMDEBUG # for malloc debugging
