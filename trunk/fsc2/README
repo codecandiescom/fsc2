@@ -1,16 +1,33 @@
 About fsc2
 ----------
 
-fsc2 is a program for controlling spectrometers. Most often, such
-programs are home-written and tend to be restricted to doing a certain
-set of experiments and a fixed set of devices. In contrast, fsc2 is
-much more flexible because it interprets a rather simple but powerful
-scripting language (EDL, Experiment Description Language) and has a
-strictly modular approach to handling of devices. This allows setting
-up a completely new experiment or changing an already existing one
-fast and easily without requiring any detailed knowledge of the
-internals of fsc2 or how exactly devices are to be controlled by the
-computer.
+fsc2 is a program, running under Linux, for controlling spectrometers.
+Programs for spectrometer control usually are home-written and often
+restricted to doing a certain set of experiments with only a fixed set
+of devices. In contrast, fsc2 is much more flexible because it was
+written with three main aims:
+
+ * It should be easy for the user to set up new experiments without
+   having to change the main program, i.e. without a programmer getting
+   involved.
+
+ * Devices should be exchangeable and support for new devices not
+   necessitate changes of the basic program.
+
+ * Users doing just standard experiments should only need to interact
+   with a simple grapical user interface.
+
+This flexibility has beed achieved by making fsc2 basically an interpreter
+for a rather simple but powerful scripting language (EDL, Experiment
+Description Language) and employing a strictly modular approach to the
+handling of devices. This allows setting up a completely new experiment
+or changing an already existing one fast and easily without requiring
+any detailed knowledge of the internals of fsc2 or how exactly devices
+are to be controlled by the computer - everything needed is to become
+aquainted with the EDL scripting language. Moreover, an already working
+script for an experiment can be swiftly made to display a graphical user
+interface for just entering the currently required experimental parameters
+by adding a few extra lines and then running it through a Perl script.
 
 
 Download
@@ -33,7 +50,7 @@ You also will find an online version of the documentation at:
 Features
 --------
 
-* The EDL language used top describe experiments is similar to other
+* The EDL language used to describe experiments is similar to other
   medium to high level languages, borrowing from e.g. MathLab, Fortran,
   C and Perl etc. Moreover, it comes with a lot of functions for data
   handling, displaying and saving in completely user defined ways. Thus
@@ -146,7 +163,8 @@ Suported devices
 
  Box-car integrators:
 
-  * EG&G PARC Box-Car Integrator 4402 (download of measured data only)
+  * EG&G PARC Box-Car Integrator 4402 (download of data and starting and
+    stopping measurements only)
 
  DAC cards:
 
@@ -157,6 +175,16 @@ Suported devices
 
   * National Instruments NI6601 (Linux device driver comes with the
     package)
+
+ CCD cameras:
+
+  * Roper Scientific Spec-10 CCD Camera (requires a Linux device driver
+    and the PVCAM library, both of which can be downloaded from Roper
+	Scientifics FTP server)
+
+ Mocochromators:
+
+  * Acton Research SpectraPro-300i Monochromator
 
  Power supplies:
 
