@@ -89,6 +89,9 @@ static bool Func_is_set = UNSET;
 %token INTERN_TOKEN          /* INTERNAL */
 %token EXTERN_TOKEN          /* EXTERNAL */
 
+%token TTL_TOKEN             /* TTL */
+%token ECL_TOKEN             /* ECL */
+
 %token SLOPE_TOKEN           /* SLOPE */
 %token NEG_TOKEN             /* NEGATIVE */
 %token POS_TOKEN             /* POSITIVE */
@@ -419,7 +422,16 @@ sep2:    /* empty */
 
 /* handling of TIME_BASE commands */
 
-tb:      TB_TOKEN expr             { p_set_timebase( $2 ); }
+tb:      TB_TOKEN tb1
+;
+
+tb1:      expr                     { p_set_timebase( $1 ); }
+		  sep2 tb2
+        | tb2 expr                 { p_set_timebase( $2 ); }
+;
+
+tb2:      TTL_TOKEN sep2           { p_set_timebase_level( TTL_LEVEL ); }
+        | ECL_TOKEN sep2           { p_set_timebase_level( ECL_LEVEL ); }
 ;
 
 /* handling of TRIGGER_MODE lines */

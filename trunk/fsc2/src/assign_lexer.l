@@ -353,6 +353,9 @@ WS          [\n=: ]+
 				return CHN_TOKEN;
             }
 
+"TTL"       return TTL_TOKEN;
+"ECL"       return ECL_TOKEN;
+
 {POD}       return POD_TOKEN;
 
 {DEL}       return DEL_TOKEN;
