@@ -88,7 +88,7 @@ static Var *CV;
 %token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN
 
 %type <dval> 
-%type <vptr> expr list1 unit thresh slope sl_val rept repf
+%type <vptr> expr list1 unit sl_val
 
 %left EQ LT LE GT GE
 %left '+' '-'
@@ -154,60 +154,39 @@ func:    MW_TOKEN                  { Channel_Type = PULSER_CHANNEL_MW; }
 pcd:    /* empty */                { p_assign_channel( Channel_Type, 
 													   vars_push( INT_VAR,
 															   UNDEFINED ) ); }
-      | pcd podd
+      | pcd pod
       | pcd chd
-      | pcd deld
-      | pcd invd
+      | pcd del
+      | pcd inv
 	  | pcd vh
       | pcd vl
 ;
 
 
-podd:   pod
-      | pod ','
-;
-
-pod:    POD_TOKEN INT_TOKEN        { p_assign_pod( Channel_Type,
-												  vars_push( INT_VAR, $2 ) ); }
-      | POD_TOKEN '=' INT_TOKEN    { p_assign_pod( Channel_Type,
+pod:    POD_TOKEN sep1
+        INT_TOKEN sep2             { p_assign_pod( Channel_Type,
 												  vars_push( INT_VAR, $3 ) ); }
 ;								  
 								  
-chd:    CH_TOKEN ch1			  
-      | CH_TOKEN '=' ch1		  
+chd:    CH_TOKEN sep1 ch1
+;
 								  
-ch1:    INT_TOKEN                  { p_assign_channel( Channel_Type,
+ch1:    INT_TOKEN sep2             { p_assign_channel( Channel_Type,
 												  vars_push( INT_VAR, $1 ) ); }
-      | INT_TOKEN ','              { p_assign_channel( Channel_Type,
-												  vars_push( INT_VAR, $1 ) ); }
-      | ch1 INT_TOKEN              { p_assign_channel( Channel_Type,
-												  vars_push( INT_VAR, $2 ) ); }
-      | ch1 INT_TOKEN ','          { p_assign_channel( Channel_Type,
+      | ch1 INT_TOKEN sep2         { p_assign_channel( Channel_Type,
 												  vars_push( INT_VAR, $2 ) ); }
 ;								  
 								  
-deld:   del						  
-      | del ','					  
+del:    DEL_TOKEN sep1 expr sep2   { p_set_delay( Channel_Type, $3 ); }
 ;								  
 								  
-del:    DEL_TOKEN expr             { p_set_delay( Channel_Type, $2 ); }
-      | DEL_TOKEN '=' expr         { p_set_delay( Channel_Type, $3 ); }
-;								  
-								  
-invd:   INV_TOKEN                  { p_inv( Channel_Type ); }
-      | INV_TOKEN ','              { p_inv( Channel_Type ); }
+inv:    INV_TOKEN sep2             { p_inv( Channel_Type ); }
 ;
 
-vh:     VH_TOKEN '=' expr          { p_set_v_high( Channel_Type, $3 ); }
-      | VH_TOKEN expr              { p_set_v_high( Channel_Type, $2 ); }
-      | VH_TOKEN '=' expr ','      { p_set_v_high( Channel_Type, $3 ); }
-      | VH_TOKEN expr ','          { p_set_v_high( Channel_Type, $2 ); }
+vh:     VH_TOKEN sep1 expr sep2    { p_set_v_high( Channel_Type, $3 ); }
 ;
 
-vl:     VL_TOKEN '=' expr          { p_set_v_low( Channel_Type, $3 ); }
-      | VL_TOKEN expr              { p_set_v_low( Channel_Type, $2 ); }
-      | VL_TOKEN '=' expr ','      { p_set_v_low( Channel_Type, $3 ); }
-      | VL_TOKEN expr ','          { p_set_v_low( Channel_Type, $2 ); }
+vl:     VL_TOKEN sep1 expr sep2    { p_set_v_low( Channel_Type, $3 ); }
 ;
 
 expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
@@ -278,6 +257,18 @@ exprs:   expr                      { }
        | STR_TOKEN                 { vars_push( STR_VAR, $1 ); }
 ;
 
+/* separator between keyword and value */
+
+sep1:    /* empty */
+       | '='
+       | ':'
+;
+
+/* seperator between different keyword-value pairs */
+
+sep2:    /* empty */           
+       | ','
+;
 
 /* handling of time base lines */
 
@@ -290,54 +281,32 @@ tm:       TM_TOKEN tmp
 ;
 
 tmp:      /* empty */
-        | tmp exter                { p_set_trigger_mode( vars_push( INT_VAR,
+        | tmp exter sep2           { p_set_trigger_mode( vars_push( INT_VAR,
 																EXTERNAL ) ); }
-		| tmp exter ','            { p_set_trigger_mode( vars_push( INT_VAR,
-																EXTERNAL ) ); }
-        | tmp slope                { p_set_trigger_slope( $2 ); }
-        | tmp slope ','            { p_set_trigger_slope( $2 ); }
-        | tmp thresh               { p_set_trigger_level( $2 ); }
-        | tmp thresh ','           { p_set_trigger_level( $2 ); }
-        | tmp inter                { p_set_trigger_mode( vars_push( INT_VAR,
+        | tmp inter sep2           { p_set_trigger_mode( vars_push( INT_VAR,
 																INTERNAL ) ); }
-        | tmp inter ','            { p_set_trigger_mode( vars_push( INT_VAR,
-																INTERNAL ) ); }
-        | tmp rept                 { p_set_rep_time( $2 ); }
-        | tmp rept ','             { p_set_rep_time( $2 ); }
-        | tmp repf                 { p_set_rep_freq( $2 ); }
-        | tmp repf ','             { p_set_rep_freq( $2 ); }
+        | tmp SLOPE_TOKEN sep1
+		  sl_val sep2              { p_set_trigger_slope( $4 ); }
+        | tmp THRESH_TOKEN sep1
+		  expr sep2                { p_set_trigger_level( $4 ); }
+        | tmp REPT_TOKEN sep1
+		  expr sep2                { p_set_rep_time( $4 ); }
+        | tmp REPF_TOKEN sep1
+		  expr sep2                 { p_set_rep_freq( $4 ); }
 ;
 
-exter:    MODE_TOKEN '=' EXTERN_TOKEN
-        | MODE_TOKEN EXTERN_TOKEN
+exter:    MODE_TOKEN sep1 EXTERN_TOKEN
         | EXTERN_TOKEN
 ;
 
-slope:    SLOPE_TOKEN '=' sl_val   { $$ = $3; }
-	    | SLOPE_TOKEN sl_val       { $$ = $2; }
+inter:    MODE_TOKEN sep1 INTERN_TOKEN
+        | INTERN_TOKEN
 ;
 
 sl_val:   NEG_TOKEN                { $$ = vars_push( INT_VAR, NEGATIVE ); }
         | POS_TOKEN                { $$ = vars_push( INT_VAR, POSITIVE ); }
         | '-'                      { $$ = vars_push( INT_VAR, NEGATIVE ); }
 		| '+'                      { $$ = vars_push( INT_VAR, POSITIVE ); }
-;
-
-thresh:   THRESH_TOKEN '=' expr    { $$ = $3; }
-        | THRESH_TOKEN expr        { $$ = $2; }
-;
-
-inter:    MODE_TOKEN '=' INTERN_TOKEN
-        | MODE_TOKEN INTERN_TOKEN
-        | INTERN_TOKEN
-;
-
-rept:     REPT_TOKEN '=' expr      { $$ = $3; }
-        | REPT_TOKEN expr          { $$ = $2; }
-;
-
-repf:     REPF_TOKEN '=' expr      { $$ = $3; }
-        | REPF_TOKEN expr          { $$ = $2; }
 ;
 
 
