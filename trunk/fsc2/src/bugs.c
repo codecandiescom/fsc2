@@ -153,21 +153,13 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	ed = getenv( "EDITOR" );
 	if ( ed == NULL || *ed == '\0' )
 	{
-		cmd = T_malloc( 7 + strlen( filename ) );
-		strcpy( cmd, "vi" );
+		cmd = T_malloc( 16 + strlen( filename ) );
+		strcpy( cmd, "xterm -e vi" );
 	}
 	else
 	{
-		cmd = T_malloc( 5 + strlen( ed ) + strlen( filename ) );
-		strcpy( cmd, ed );
-
-		/* If the EDITOR environment variable contains the '-nw' option
-		   get rid of it - we need a new window! */
-
-		if ( ( clp = strstr( cmd, "-nw" ) ) != NULL && clp - 1 > cmd &&
-			 isblank( *( clp - 1 ) ) &&
-			 ( *( clp + 3 ) == '\0' || isblank( *( clp + 3 ) ) ) )
-			strcpy( clp, clp + 3 );
+		cmd = T_malloc( 14 + strlen( ed ) + strlen( filename ) );
+		sprintf( cmd, "xterm -e %s", ed );
 	}
 	
 	strcat( cmd, " +6 " );         /* does this work with all editors ? */

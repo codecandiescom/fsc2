@@ -448,6 +448,7 @@ bool hfs9000_get_pulse_length_change( long pnum, double *p_time )
 bool hfs9000_change_pulse_position( long pnum, double p_time )
 {
 	PULSE *p = hfs9000_get_pulse( pnum );
+	static Ticks new_pos = 0;
 
 
 	if ( p_time < 0 )
@@ -455,10 +456,26 @@ bool hfs9000_change_pulse_position( long pnum, double p_time )
 		eprint( FATAL, SET, "%s: Invalid (negative) start position for "
 				"pulse %ld: %s.\n", pulser_struct.name, pnum,
 				hfs9000_ptime( p_time ) );
-		THROW( EXCEPTION )
+		if ( I_am == CHILD )
+			return FAIL;
+		else
+			THROW( EXCEPTION )
 	}
 
-	if ( p->is_pos && hfs9000_double2ticks( p_time ) == p->pos )
+	TRY
+	{
+		new_pos = hfs9000_double2ticks( p_time );
+		TRY_SUCCESS;
+	}
+	CATCH( EXCEPTION )
+	{
+		if ( I_am == CHILD )
+			return FAIL;
+		else
+			THROW( EXCEPTION )
+	}
+
+	if ( p->is_pos && new_pos == p->pos )
 	{
 		eprint( WARN, SET, "%s: Old and new position of pulse %ld are "
 				"identical.\n", pulser_struct.name, pnum );
@@ -471,7 +488,7 @@ bool hfs9000_change_pulse_position( long pnum, double p_time )
 		p->is_old_pos = SET;
 	}
 
-	p->pos = hfs9000_double2ticks( p_time );
+	p->pos = new_pos;
 	p->is_pos = SET;
 
 	p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
@@ -491,13 +508,30 @@ bool hfs9000_change_pulse_position( long pnum, double p_time )
 bool hfs9000_change_pulse_length( long pnum, double p_time )
 {
 	PULSE *p = hfs9000_get_pulse( pnum );
+	static Ticks new_len = 0;
 
 
 	if ( p_time < 0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid (negative) length for pulse %ld: "
 				"%s.\n", pulser_struct.name, pnum, hfs9000_ptime( p_time ) );
-		THROW( EXCEPTION )
+		if ( I_am == CHILD )
+			return FAIL;
+		else
+			THROW( EXCEPTION )
+	}
+
+	TRY
+	{
+		new_len = hfs9000_double2ticks( p_time );
+		TRY_SUCCESS;
+	}
+	CATCH( EXCEPTION )
+	{
+		if ( I_am == CHILD )
+			return FAIL;
+		else
+			THROW( EXCEPTION )
 	}
 
 	if ( p->is_len && p->is_function && p->function->channel )
@@ -506,10 +540,13 @@ bool hfs9000_change_pulse_length( long pnum, double p_time )
 		{
 			eprint( FATAL, SET, "%s: Length of Trigger Out pulse %ld can't "
 					"be changed.\n", pulser_struct.name, pnum );
-			THROW( EXCEPTION )
+			if ( I_am == CHILD )
+				return FAIL;
+			else
+				THROW( EXCEPTION )
 		}
 
-		if ( p->len == hfs9000_double2ticks( p_time ) )
+		if ( p->len == new_len )
 		{
 			eprint( WARN, SET, "%s: Old and new length of pulse %ld are "
 					"identical.\n", pulser_struct.name, pnum );
@@ -523,7 +560,7 @@ bool hfs9000_change_pulse_length( long pnum, double p_time )
 		p->is_old_len = SET;
 	}
 
-	p->len = hfs9000_double2ticks( p_time );
+	p->len = new_len;
 	p->is_len = SET;
 
 	p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
@@ -542,16 +579,30 @@ bool hfs9000_change_pulse_length( long pnum, double p_time )
 bool hfs9000_change_pulse_position_change( long pnum, double p_time )
 {
 	PULSE *p = hfs9000_get_pulse( pnum );
+	static Ticks new_dpos = 0;
 
 
-	if ( hfs9000_double2ticks( p_time ) == 0 && TEST_RUN )
+	TRY
+	{
+		new_dpos = hfs9000_double2ticks( p_time );
+		TRY_SUCCESS;
+	}
+	CATCH( EXCEPTION )
+	{
+		if ( I_am == CHILD )
+			return FAIL;
+		else
+			THROW( EXCEPTION )
+	}
+
+	if ( new_dpos == 0 && TEST_RUN )
 	{
 		eprint( SEVERE, SET, "%s: Zero position change value for pulse "
 				"%ld.\n", pulser_struct.name, pnum );
 		return FAIL;
 	}
 
-	p->dpos = hfs9000_double2ticks( p_time );
+	p->dpos = new_dpos;
 	p->is_dpos = SET;
 
 	return OK;
@@ -564,6 +615,7 @@ bool hfs9000_change_pulse_position_change( long pnum, double p_time )
 bool hfs9000_change_pulse_length_change( long pnum, double p_time )
 {
 	PULSE *p = hfs9000_get_pulse( pnum );
+	static Ticks new_dlen = 0;
 
 
 	if ( p->is_function && p->function->channel &&
@@ -571,17 +623,33 @@ bool hfs9000_change_pulse_length_change( long pnum, double p_time )
 	{
 		eprint( FATAL, SET, "%s: Length change of Trigger Out pulse %ld "
 				"can't be set.\n", pulser_struct.name, pnum );
-		THROW( EXCEPTION )
+		if ( I_am == CHILD )
+			return FAIL;
+		else
+			THROW( EXCEPTION )
 	}
 
-	if ( hfs9000_double2ticks( p_time ) == 0 && TEST_RUN )
+	TRY
+	{
+		new_dlen = hfs9000_double2ticks( p_time );
+		TRY_SUCCESS;
+	}
+	CATCH( EXCEPTION )
+	{
+		if ( I_am == CHILD )
+			return FAIL;
+		else
+			THROW( EXCEPTION )
+	}
+
+	if ( new_dlen == 0 && TEST_RUN )
 	{
 		eprint( SEVERE, SET, "%s: Zero length change value for pulse "
 				"%ld.\n", pulser_struct.name, pnum );
 		return FAIL;
 	}
 
-	p->dlen = hfs9000_double2ticks( p_time );
+	p->dlen = new_dlen;
 	p->is_dlen = SET;
 
 	return OK;

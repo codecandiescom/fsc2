@@ -371,7 +371,7 @@ all:
 					 $(cdir)/Functions $(cdir)/Devices $(cdir)/*.conf |  \
 		grep -v 'sed\|grep' |                                            \
 			sed -e 's/^.*$$Id\: \(.*\) jens Exp $$.*/\1/g' |             \
-				gzip -c -9 | uuencode -m - > version.ugz
+				gzip -c -9 | uuencode - > version.ugz
 	$(MAKE) -C src all
 	$(MAKE) -C utils all
 	$(MAKE) -C doc all

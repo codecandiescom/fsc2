@@ -429,11 +429,11 @@ void dg2020_commit( FUNCTION *f, bool flag )
 	/* In a real run we now have to change the pulses. The only way to keep
 	   the number and length of commands to be sent to the pulser at a minimum
 	   while getting it right in every imaginable case is to create two images
-	   of the pulser channel states, one before the changes and a second one
-	   after the changes. These images are compared and only that parts where
-	   differences are found are changed. Of course, that needs quite some
-	   computer time but probable is faster, or at least easier to understand
-	   and to debug, than any alternative I came up with...
+	   of the pulser channel states, one of the current state and a second one
+	   of the state after the changes. These images are compared and only that
+	   parts where differences are found are changed. Of course, that needs
+	   quite some computer time but probable is faster, or at least easier to
+	   understand and to debug, than any alternative I came up with...
 
 	   First allocate memory for the old and the new states of the channels
 	   used by the function */
