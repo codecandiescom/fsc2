@@ -1018,7 +1018,7 @@ static bool setup_phase( int func, PHS phs )
 		return FAIL;
 	}
 
-	memcpy( dg2020.function[ func].phs, phs, sizeof( PHS ) );
+	memcpy( &dg2020.function[ func].phs, &phs, sizeof( PHS ) );
 	dg2020.function[ func ].is_phs = SET;
 
 	return OK;
