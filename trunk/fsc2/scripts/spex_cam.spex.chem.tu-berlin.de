@@ -1674,7 +1674,7 @@ EOF
 	close $g;
 	unlink $fn;
 
-	if ( defined $reply and $reply =~ /^Please press the "REMOTE" button/ ) {
+	if ( defined $pd and $pd =~ /^Please press the "REMOTE" button/ ) {
 		main::show_message( "Please press the \"REMOTE\" button at\n" .
 							"the console to allow computer control\n" .
 							"of the monochromator." );
