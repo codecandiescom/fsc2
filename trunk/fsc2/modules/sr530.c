@@ -371,7 +371,15 @@ Var *lockin_sensitivity( Var *v )
 		eprint( WARN, SET, "%s: Integer value used as sensitivity in %s().\n",
 				DEVICE_NAME, Cur_Func );
 	sens = VALUE( v );
-	vars_pop( v );
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
 
 	if ( sens < 0.0 )
 	{
@@ -488,7 +496,15 @@ Var *lockin_time_constant( Var *v )
 		eprint( WARN, SET, "Integer value used as time constant in %s().\n",
 				DEVICE_NAME, Cur_Func );
 	tc = VALUE( v );
-	vars_pop( v );
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
 
 	if ( tc < 0.0 )
 	{
@@ -594,7 +610,15 @@ Var *lockin_phase( Var *v )
 		eprint( WARN, SET, "%s: Integer value used as phase in %s().\n",
 				DEVICE_NAME, Cur_Func );
 	phase = VALUE( v );
-	vars_pop( v );
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
 
 	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
 		phase -= 360.0;
@@ -762,6 +786,15 @@ Var *lockin_lock_keyboard( Var *v )
 				THROW( EXCEPTION );
 			}
 		}
+	}
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
 	}
 
 	if ( ! TEST_RUN )

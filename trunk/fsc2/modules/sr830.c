@@ -480,7 +480,15 @@ Var *lockin_sensitivity( Var *v )
 		eprint( WARN, SET, "%s: Integer value used as sensitivity.\n",
 				DEVICE_NAME );
 	sens = VALUE( v );
-	vars_pop( v );
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
 
 	if ( sens < 0.0 )
 	{
@@ -595,7 +603,15 @@ Var *lockin_time_constant( Var *v )
 		eprint( WARN, SET, "%s: Integer value used as time constant.\n",
 				DEVICE_NAME );
 	tc = VALUE( v );
-	vars_pop( v );
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
 
 	if ( tc < 0.0 )
 	{
@@ -712,7 +728,15 @@ Var *lockin_phase( Var *v )
 	if ( v->type == INT_VAR )
 		eprint( WARN, SET, "%s: Integer value used as phase.\n", DEVICE_NAME );
 	phase = VALUE( v );
-	vars_pop( v );
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
 
 	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
 		phase -= 360.0;
@@ -766,8 +790,16 @@ Var *lockin_ref_freq( Var *v )
 		eprint( WARN, SET, "%s: Integer value used as modulation "
 				"frequency.\n", DEVICE_NAME );
 	freq = VALUE( v );
-	vars_pop( v );
 	
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
 	if ( ! TEST_RUN && sr830_get_mod_mode( ) != MOD_MODE_INTERNAL )
 	{
 		eprint( FATAL, SET, "%s: Can't set modulation frequency while "
@@ -832,8 +864,16 @@ Var *lockin_ref_level( Var *v )
 		eprint( WARN, SET, "%s: Integer value used as modulation level.\n",
 				DEVICE_NAME );
 	level = VALUE( v );
-	vars_pop( v );
 	
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
 	if ( level < MIN_MOD_LEVEL || level > MAX_MOD_LEVEL )
 	{
 		eprint( FATAL, SET, "%s: Modulation level of %f V is not within "
@@ -901,6 +941,15 @@ Var *lockin_lock_keyboard( Var *v )
 				THROW( EXCEPTION );
 			}
 		}
+	}
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
 	}
 
 	if ( ! TEST_RUN )

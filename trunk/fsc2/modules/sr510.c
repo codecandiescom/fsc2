@@ -228,8 +228,8 @@ Var *lockin_name( Var *v )
 Var *lockin_get_data( Var *v )
 {
 	if ( v != NULL )
-		eprint( WARN, SET, "%s: Useless parameter in call of "
-				"lockin_get_data().\n", DEVICE_NAME );
+		eprint( WARN, SET, "%s: Useless parameter%s in call of %s().\n",
+				DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
 
 	if ( TEST_RUN )                  /* return dummy value in test run */
 		return vars_push( FLOAT_VAR, 0.0 );
@@ -254,7 +254,7 @@ Var *lockin_get_adc_data( Var *v )
 
 	if ( v->type == FLOAT_VAR )
 		eprint( WARN, SET, "%s: Floating point number used as ADC port "
-				"number.\n", DEVICE_NAME );
+				"number in %s().\n", DEVICE_NAME, Cur_Func );
 
 	port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
 
@@ -295,9 +295,9 @@ Var *lockin_sensitivity( Var *v )
 		{
 			if ( I_am == PARENT )
 			{
-				eprint( FATAL, SET, "%s: Function `lockin_sensitivity' "
-						"with no argument can only be used in the EXPERIMENT "
-						"section.\n", DEVICE_NAME );
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION );
 			}
 			return vars_push( FLOAT_VAR, sr510_get_sens( ) );
@@ -306,15 +306,23 @@ Var *lockin_sensitivity( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "Integer value used as sensitivity.\n",
-				DEVICE_NAME );
+		eprint( WARN, SET, "Integer value used as sensitivity in %s().\n",
+				DEVICE_NAME, Cur_Func );
 	sens = VALUE( v );
-	vars_pop( v );
 
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+	
 	if ( sens < 0.0 )
 	{
-		eprint( FATAL, SET, "%s: Invalid negative sensitivity.\n",
-				DEVICE_NAME );
+		eprint( FATAL, SET, "%s: Invalid negative sensitivity in %s().\n",
+				DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -412,9 +420,9 @@ Var *lockin_time_constant( Var *v )
 		{
 			if ( I_am == PARENT )
 			{
-				eprint( FATAL, SET, "%s: Function `lockin_time_constant'"
-						" with no argument can only be used in the EXPERIMENT "
-						"section.\n", DEVICE_NAME );
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION );
 			}
 			return vars_push( FLOAT_VAR, sr510_get_tc( ) );
@@ -423,14 +431,23 @@ Var *lockin_time_constant( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as time constant.\n",
-				DEVICE_NAME );
+		eprint( WARN, SET, "%s: Integer value used as time constant "
+				"in %s().\n", DEVICE_NAME, Cur_Func );
 	tc = VALUE( v );
-	vars_pop( v );
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
 
 	if ( tc <= 0.0 )
 	{
-		eprint( FATAL, SET, "%s: Invalid time constant.\n", DEVICE_NAME );
+		eprint( FATAL, SET, "%s: Invalid time constant in %s().\n",
+				DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -522,9 +539,9 @@ Var *lockin_phase( Var *v )
 		{
 			if ( I_am == PARENT )
 			{
-				eprint( FATAL, SET, "%s: Function `lockin_phase' with "
-						"no argument can only be used in the EXPERIMENT "
-						"section.\n", DEVICE_NAME );
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION );
 			}
 			return vars_push( FLOAT_VAR, sr510_get_phase( ) );
@@ -535,11 +552,19 @@ Var *lockin_phase( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as phase.\n",
-				DEVICE_NAME );
+		eprint( WARN, SET, "%s: Integer value used as phase in %s().\n",
+				DEVICE_NAME, Cur_Func );
 	phase = VALUE( v );
-	vars_pop( v );
 
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+	
 	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
 		phase -= 360.0;
 
@@ -587,9 +612,8 @@ Var *lockin_ref_freq( Var *v )
 	{
 		if ( I_am == PARENT )
 		{
-			eprint( FATAL, SET, "%s: Function `lockin_ref_freq' "
-					"can only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME );
+			eprint( FATAL, SET, "%s: Function %s() can only be used in the "
+					"EXPERIMENT section.\n", DEVICE_NAME, Cur_Func );
 			THROW( EXCEPTION );
 		}
 		return vars_push( FLOAT_VAR, sr510_get_ref_freq( ) );
@@ -614,8 +638,8 @@ Var *lockin_dac_voltage( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "%s: Missing arguments in call of function "
-				"`lockin_dac_voltage'.\n", DEVICE_NAME );
+		eprint( FATAL, SET, "%s: Missing argument in call of function %s().\n",
+				DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -624,7 +648,7 @@ Var *lockin_dac_voltage( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == FLOAT_VAR )
 		eprint( WARN, SET, "%s: Floating point number used as DAC channel "
-				"number.\n", DEVICE_NAME );
+				"number in %s().\n", DEVICE_NAME, Cur_Func );
 
 	channel = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
 	v = vars_pop( v );
@@ -647,15 +671,15 @@ Var *lockin_dac_voltage( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as DAC voltage.\n",
-				DEVICE_NAME );
+		eprint( WARN, SET, "%s: Integer value used as DAC voltage in %s().\n",
+				DEVICE_NAME, Cur_Func );
 
 	voltage = VALUE( v );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		eprint( WARN, SET, "%s: Superfluous arguments in call of function "
-				"`lockin_dac_voltage'.\n", DEVICE_NAME );
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
 		while ( ( v = vars_pop( v ) ) != NULL ) 
 				;
 	}
@@ -702,13 +726,22 @@ Var *lockin_lock_keyboard( Var *v )
 				lock = SET;
 			else
 			{
-				eprint( FATAL, SET, "%s: Invalid argument in call of "
-						"`lockin_lock_keyboard'.\n", DEVICE_NAME );
+				eprint( FATAL, SET, "%s: Invalid argument in call of %s().\n",
+						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION );
 			}
 		}
 	}
 
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+	
 	if ( ! TEST_RUN )
 		sr510_lock_state( lock );
 
