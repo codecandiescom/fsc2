@@ -1311,7 +1311,7 @@ void usage( void )
 			 "             set the font to be used in the axis in the "
 			 "display window\n"
 			 "  -noCrashMail\n"
-			 "             don't send mail when fsc2 crashes\n"
+			 "             don't send email when fsc2 crashes\n"
 			 "  -h, --help\n"
 			 "             display this help text and exit\n\n"
 			 "For a complete documentation see either %s/fsc2.ps,\n"
