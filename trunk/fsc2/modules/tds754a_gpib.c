@@ -616,7 +616,7 @@ double tds754a_get_area( int channel, WINDOW *w, bool use_cursor )
 	do
 	{
 		if ( do_quit )
-			THROW( EXCEPTION );
+			THROW( USER_BREAK_EXCEPTION );
 
 		length = 40;
 		usleep( 100000 );
@@ -712,7 +712,7 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 	do
 	{
 		if ( do_quit )
-			THROW( EXCEPTION );
+			THROW( USER_BREAK_EXCEPTION );
 
 		len = 10;
 		usleep( 100000 );
@@ -802,7 +802,7 @@ double tds754a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 	do
 	{
 		if ( do_quit )
-			THROW( EXCEPTION );
+			THROW( USER_BREAK_EXCEPTION );
 
 		length = 40;
 		usleep( 100000 );
