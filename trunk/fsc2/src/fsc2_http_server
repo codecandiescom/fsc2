@@ -31,7 +31,7 @@ use Errno;
 my $client;            # The Most Important Entity ;-)
 my $max_reqs = 16;     # how many simultaneous requests get accepted
 
-# Check if we got a port number as the first argument...
+# Check if we got a port number as the first command line argument...
 
 my $port = 8080;
 $port = $ARGV[ 0 ] if
@@ -103,7 +103,7 @@ while ( $client = $server->accept( ) ) {
 
 
 #########################################################
-#
+# This function deals with a new connection fromt he outside world
 
 sub serve {
 
@@ -142,7 +142,7 @@ sub serve {
 
 	return unless defined $txt;
 
-	# Ok, now it's finally our turn...
+	# Ok, now it's finally our turn to send something back...
 
 	if ( $file =~ m|^/(index.html*)*$|o ) {
 		serve_main( $has_png, $has_gif );
@@ -188,6 +188,8 @@ sub serve_main {
 
 	return unless defined $state;
 
+	# First send some meta-information for the browser
+
 	print "HTTP/1.0 200 OK\r\n" .
 		  "Date: $date\r\n" .
 		  "Server: fsc2/0.1\r\n" .
@@ -196,9 +198,14 @@ sub serve_main {
 		  "Connection: close\r\n" .
 		  "Expires: $date\r\n\r\n";
 
+	# And here starts the HTTP page
+
 	print "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">\r\n" .
 		  "<HTML><HEAD>\r\n" .
 		  "<meta name=\"robots\" content=\"noindex\">\r\n";
+
+	# Send the logo and the status information
+
 
 	if ( $state =~ /^[0-3]$/o ) {
 		print "<TITLE>fsc2: $st1[ $state ]</TITLE></HEAD>\r\n";
@@ -224,6 +231,9 @@ sub serve_main {
 		return;
 	}
 
+	# Now tell the client where to look for the graphics fsc2 currently
+	# displays
+
 	if ( $state =~ /^[1-3]$/ and ( $has_png or $has_gif ) ) {
 		stdout_lock( ) or exit 1;
 		print STDOUT 'W';
@@ -244,8 +254,9 @@ sub serve_main {
 				  if $state =~ /^3$/;
 	}
 
-	# Ask fsc2 for the contents of the error browser and, when we got it (and
-	# if there's any content), pass it on to the client after some changes.
+	# Finally, ask fsc2 for the contents of the error browser and, when we
+	# got it (and if there's any content), pass it on to the client after
+	# some changes.
 
 	stdout_lock( ) or exit 1;
 	print STDOUT 'E';
@@ -293,8 +304,8 @@ sub serve_logo {
 		  "Expires: $edate\r\n" .
 		  "Content-Type: image/$type\r\n" .
 		  "Content-Length: " . ( stat( $auxdir . $file ) )[ 7 ] . "\r\n\r\n";
-	print <F>;
 
+	print <F>;
 	close F;
 }
 
@@ -344,6 +355,7 @@ sub serve_pics {
 		  "Expires: $date\r\n" .
 		  "Content-Type: image/$ext\r\n" .
 		  "Content-Length: " . ( stat( $file ) )[ 7 ] . "\r\n\r\n";
+
 	print <F>;
 	unlink $file unless $file =~ /na\.$ext$/;
 	close F;
@@ -422,8 +434,9 @@ sub rfc_1123_date {
 
 
 #########################################################
-# Creates an advisory lock on STDOUT. Uses fcntl() in a somewhat cryptic way
-# because flock() doesn't seem to work at all...
+# Creates an advisory lock on STDOUT. Uses fcntl() instead of flock() in a
+# rather cryptic way (about which I am not too happy) because flock() does
+# not seem to work at all...
 
 sub stdout_lock {
 	return defined fcntl STDOUT, F_SETLKW,
