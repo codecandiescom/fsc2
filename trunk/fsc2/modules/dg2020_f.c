@@ -56,6 +56,7 @@ int dg2020_init_hook( void )
 	pulser_struct.set_repeat_time = dg2020_set_repeat_time;
 	pulser_struct.set_trig_in_level = dg2020_set_trig_in_level;
 	pulser_struct.set_trig_in_slope = dg2020_set_trig_in_slope;
+	pulser_struct.set_trig_in_impedance = dg2020_set_trig_in_impedance;
 
 	pulser_struct.set_phase_reference = dg2020_set_phase_reference;
 
@@ -188,6 +189,9 @@ int dg2020_end_of_test_hook( void )
 
 int dg2020_exp_hook( void )
 {
+	int i;
+
+
 	if ( ! dg2020_is_needed )
 		return 1;
 
@@ -199,12 +203,19 @@ int dg2020_exp_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	/* Now we have to really setup the pulser */
+	/* Now we have to tell the pulser about all the pulses */
 
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		if ( ! dg2020.function[ i ].is_used )
+			continue;
+		dg2020_set_pulses( &dg2020.function[ i ] );
+	}
 
+	/* Finally tell the pulser to update we're always running in manual
+	   update mode) and than switch the pulser into run mode */
 
-	/* Finally we switch the pulser into run mode */
-
+	dg2020_update_data( );
 	if ( ! dg2020_run( START ) )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
@@ -304,6 +315,13 @@ Var *pulser_shift( Var *v )
 		vars_check( v, INT_VAR );
 		p = dg2020_get_pulse( v->val.lval );
 
+		if ( ! p->is_pos )
+		{
+			eprint( FATAL, "%s:ld: DG2020: Pulse %ld has no position set, so "
+					"shifting it is impossible.\n", Fname, Lc, p->num );
+			THROW( EXCEPTION );
+		}
+
 		if ( ! p->is_dpos )
 		{
 			eprint( FATAL, "%s:%ld: DG2020: Time for position change hasn't "
@@ -326,6 +344,9 @@ Var *pulser_shift( Var *v )
 		}
 
 		/* If the pulse is active we've got to update the pulser */
+
+		if ( ! p->is_active && p->is_len && p->len > 0 )
+			p->is_active = p->has_been_active = SET;
 
 		if ( p->is_active )
 		{
@@ -370,6 +391,13 @@ Var *pulser_increment( Var *v )
 		vars_check( v, INT_VAR );
 		p = dg2020_get_pulse( v->val.lval );
 
+		if ( ! p->is_len )
+		{
+			eprint( FATAL, "%s:%ld: DG2020: Pulse %ld has no length set, so "
+					"imcrementing it is impossibe.\n", Fname, Lc, p->num );
+			THROW( EXCEPTION );
+		}
+
 		if ( ! p->is_dlen )
 		{
 			eprint( FATAL, "%s:%ld: DG2020: Length change time hasn't been "
@@ -385,18 +413,21 @@ Var *pulser_increment( Var *v )
 
 		if ( ( p->len += p->dlen ) < 0 )
 		{
-			eprint( FATAL, "%s:%ld: DG2020: Incrementing the pulse length "
-					"of pulse %ld leads to an invalid negative pulse length "
-					"of %s.\n", Fname, Lc, p->num, dg2020_pticks( p->len ) );
+			eprint( FATAL, "%s:%ld: DG2020: Incrementing the length of pulse "
+					"%ld leads to an invalid negative pulse length of %s.\n",
+					Fname, Lc, p->num, dg2020_pticks( p->len ) );
 			THROW( EXCEPTION );
 		}
 
 		was_active = p->is_active;
 
+		if ( p->len == 0 )
+			p->is_active = UNSET;
+
 		/* If the pulse wasn't active but has now got a non-zero length and has
 		   a defined position as well it becomes active */
 
-		if ( ! p->is_active && p->len > 0 && p->is_pos )
+		if ( ! p->is_active && p->is_pos && p->len > 0 )
 			p->is_active = p->has_been_active = SET;
 
 		/* If the pulse was or is active we've got to update the pulser */
@@ -540,7 +571,7 @@ Var *pulser_pulse_reset( Var *v )
 
 		/* Pulse gets active if it has a position and a non-zero length */
 
-		p->is_active = ( p->is_pos && p->is_len && p->len > 0 );
+		p->is_active = ( p->is_pos && p->is_len );
 
 		/* If the pulse was or is active we've got to update the pulser */
 

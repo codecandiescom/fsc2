@@ -4,7 +4,7 @@
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-   STILL COMPLETELY UNTESTED: Handling of EXTERNAL trigger mode by setting one
+   STILL COMPLETELY UNTESTED: Handling of EXTERNAL trigger mode by creating one
    block with "DATA:SEQ:TWAIT" for this block and running in enhanced mode. I
    urgently need access to a real device for testing if this is the way to do
    it - the manual is no help at all at trying to figure out what to do...
@@ -138,7 +138,7 @@ bool dg2020_init( const char *name )
 
 
 	if ( gpib_init_device( name, &dg2020.device ) == FAILURE )
-		dg2020_gpib_failure( );
+		return FAIL;
 
     /* Set pulser to short form of replies */
 
@@ -152,31 +152,31 @@ bool dg2020_init( const char *name )
 		dg2020_gpib_failure( );
 	dg2020.is_running = 0;
 
-	/* switch off remote command debugging function */
+	/* Switch off remote command debugging function */
 
 	gpib_write( dg2020.device, "DEB:SNO:STAT OFF", 16 );
 
-	/* switch on phase lock for internal oscillator */
+	/* Switch on phase lock for internal oscillator */
 
 	if ( gpib_write( dg2020.device, "SOUR:OSC:INT:PLL ON", 19 ) == FAILURE )
 		dg2020_gpib_failure( );
 
-	/* delete all blocks */
+	/* Delete all blocks */
 
 	if ( gpib_write( dg2020.device, "DATA:BLOC:DEL:ALL", 17 ) == FAILURE )
 		dg2020_gpib_failure( );
 
-	/* remove all sequence definitions */
+	/* Remove all sequence definitions */
 
 	if ( gpib_write( dg2020.device, "DATA:SEQ:DEL:ALL", 16 ) == FAILURE )
 		dg2020_gpib_failure( );
 
-	/* switch to manual update mode */
+	/* Switch to manual update mode */
 
 	if ( gpib_write( dg2020.device, "MODE:UPD MAN", 12 ) == FAILURE )
 		dg2020_gpib_failure( );
 
-	/* set the time base */
+	/* Set the time base */
 
 	if ( ! dg2020_set_timebase( dg2020.timebase ) )
 		dg2020_gpib_failure( );
@@ -186,7 +186,7 @@ bool dg2020_init( const char *name )
 	if ( ! dg2020_set_memory_size( ( long ) dg2020.mem_size ) )
 		dg2020_gpib_failure( );
 
-	/* switch on repeat mode for INTERNAL trigger mode and enhanced mode for
+	/* Switch on repeat mode for INTERNAL trigger mode and enhanced mode for
 	   EXTERNAL trigger mode - in the later case also set trigger level and
 	   slope */
 
@@ -203,6 +203,8 @@ bool dg2020_init( const char *name )
 			dg2020_set_trigger_in_level( dg2020.trig_in_level );
 		if ( dg2020.is_trig_in_slope )
 			dg2020_set_trigger_in_level( dg2020.trig_in_slope );
+		if ( dg2020.is_trig_in_impedance )
+			dg2020_set_trigger_in_impedance( dg2020.trig_in_impedance );
 	}
 		
 
@@ -526,18 +528,18 @@ bool pulser_set_channel( int channel, Ticks address,
 	Ticks k, l;
 
 
-	/* check parameters, allocate memory and set up start of command string */
+	/* Check parameters, allocate memory and set up start of command string */
 
 	if ( ! dg2020_prep_cmd( &cmd, channel, address, length ) )
 		return FAIL;
 
-	/* assemble rest of command string */
+	/* Assemble rest of command string */
 
 	for ( k = 0, l = strlen( cmd ); k < length; ++k, ++l )
 		cmd[ l ] = ( pattern[ k ] ? '1' : '0' );
 	cmd[ l ] = '\0';
 
-	/* send the command string to the pulser */
+	/* Send command string to the pulser */
 
 	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
@@ -584,19 +586,19 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 		return OK;
 	}
 
-	/* check parameters, allocate memory and set up start of command string */
+	/* Check parameters, allocate memory and set up start of command string */
 
 	if ( ! dg2020_prep_cmd( &cmd, channel, address, length ) )
 		return FAIL;
 
-	/* assemble rest of command string */
+	/* Assemble rest of command string */
 
 	for ( k = 0, cptr = cmd + strlen( cmd ); k < length; *cptr++ = s, ++k )
 		;
 	*cptr++ = '\n';
 	*cptr = '\0';
 
-	/* send the command string to the pulser */
+	/* Send the command string to the pulser */
 
 	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
@@ -658,6 +660,20 @@ bool dg2020_set_trigger_in_slope( int slope )
 
 	sprintf( cmd, "TRIG:SLO %s",
 			 slope == POSITIVE ? "POS" : "NEG" );
+
+	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
+		dg2020_gpib_failure( );
+
+	return OK;
+}
+
+
+bool dg2020_set_trigger_in_impedance( int state )
+{
+	char cmd[ 100 ];
+
+	sprintf( cmd, "TRIG:IMP %s",
+			 state == LOW ? "LOW" : "HIGH" );
 
 	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );

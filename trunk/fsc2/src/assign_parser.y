@@ -72,12 +72,15 @@ int Cur_PHST;
 
 %token THRESH_TOKEN          /* THRESHOLD */
 
+%token IMP_TOKEN             /* IMPEDANCE */
+%token HL_TOKEN              /* LOW or HIGH */
+
 %token REPT_TOKEN            /* REPEAT TIME */
 %token REPF_TOKEN            /* REPEAT FREQUENCY */
 
 %token PSD_TOKEN             /* PHASE SWITCH DELAY */
 
-%token <lval> PHS_TOK PSD_TOKEN
+%token <lval> PHS_TOK PSD_TOKEN HL_TOKEN
 %token PX_TOK PY_TOK PMX_TOK PMY_TOK POD1_TOK POD2_TOK ON_TOK OFF_TOK
 
 
@@ -398,6 +401,9 @@ tmp:      /* empty */
 		  expr sep2                { p_set_rep_time( $4 ); }
         | tmp REPF_TOKEN sep1
 		  expr sep2                 { p_set_rep_freq( $4 ); }
+        | tmp IMP_TOKEN sep1
+		  HL_TOKEN sep2             { p_set_trigger_impedance(
+			                                      vars_push( INT_VAR, $4 ) ); }
 ;
 
 exter:    MODE_TOKEN sep1 EXTERN_TOKEN

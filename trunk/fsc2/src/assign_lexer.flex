@@ -113,12 +113,15 @@ SL          SL(OPE)?
 NEG         NEG(ATIVE)?
 POS         POS(ITIVE)?
 THRESH      LEV(EL)?
+IMP         IMP(EDANCE)?
+LOW         L(OW)?
+HIGH        H(IGH)?
 REPT        REP(EAT)?_?T(IME)?
 REPF        REP(EAT)?_?F(REQ(UENCY)?)?
 
 PSD1        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?_?1:?
 PSD2        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?_?2:?
-PSD        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?):?
+PSD         PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?):?
 
 WS          [\n=: ]+
 
@@ -265,6 +268,15 @@ WS          [\n=: ]+
 {NEG}       return NEG_TOKEN;
 {POS}       return POS_TOKEN;
 {THRESH}    return THRESH_TOKEN;
+{IMP}       return IMP_TOKEN;
+{LOW}       {
+				assignlval.lval = LOW;
+				return HL_TOKEN;
+			}
+{HIGH}      {
+				assignlval.lval = HIGH;
+				return HL_TOKEN;
+			}
 {REPT}      return REPT_TOKEN;
 {REPF}      return REPF_TOKEN;
 

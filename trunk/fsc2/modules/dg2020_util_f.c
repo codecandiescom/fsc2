@@ -226,6 +226,32 @@ bool dg2020_find_phase_pulse( PULSE *p, PULSE ***pl, int *num )
 
 
 /*---------------------------------------------------------------------------
+  This function finds all the pulses of a phase function that belong to the
+  same channel and returns them as a sorted list.
+---------------------------------------------------------------------------*/
+
+int dg2020_get_phase_pulse_list( FUNCTION *f, CHANNEL *channel, PULSE ***list )
+{
+	int i;
+	int num_pulses = 0;
+
+
+	*list = NULL;
+	for ( i = 0; i < f->num_pulses; i++ )
+	{
+		if ( f->pulses[ i ]->channel != channel )
+			continue;
+		*list = T_realloc( *list, ( num_pulses + 1 ) * sizeof( PULSE * ) );
+		*( *list + num_pulses++ ) = f->pulses[ i ];
+	}
+
+	qsort( list, num_pulses, sizeof( PULSE * ), dg2020_start_compare );
+
+	return num_pulses;
+}
+
+
+/*---------------------------------------------------------------------------
 ---------------------------------------------------------------------------*/
 
 Ticks dg2020_get_max_seq_len( void )

@@ -170,6 +170,13 @@ bool dg2020_set_pulse_position_change( long pnum, double time )
 		THROW( EXCEPTION );
 	}
 
+	if ( dg2020_double2ticks( time ) == 0 )
+	{
+		eprint( SEVERE, "%s:%ld: DG2020: Zero position change value for pulse "
+				"%ld. Useless value isn't set.\n", Fname, Lc, pnum );
+		return FAIL;
+	}
+
 	p->dpos = p->initial_dpos = dg2020_double2ticks( time );
 	p->is_dpos = p->initial_is_dpos = SET;
 
@@ -191,6 +198,13 @@ bool dg2020_set_pulse_length_change( long pnum, double time )
 				"already been set to %s.\n", Fname, Lc, pnum,
 				dg2020_pticks( p->len ) );
 		THROW( EXCEPTION );
+	}
+
+	if ( dg2020_double2ticks( time ) == 0 )
+	{
+		eprint( SEVERE, "%s:%ld: DG2020: Zero length change value for pulse "
+				"%ld. Useless value isn't set.\n", Fname, Lc, pnum );
+		return FAIL;
 	}
 
 	p->dlen = p->initial_dlen = dg2020_double2ticks( time );
@@ -370,21 +384,26 @@ bool dg2020_change_pulse_position( long pnum, double time )
 		THROW( EXCEPTION );
 	}
 
+	if ( dg2020_double2ticks( time ) == p->pos )
+	{
+		eprint( WARN, "%s:%ld: DG2020: Old and new position of pulse %ld are "
+				"identical.\n", Fname, Lc, pnum );
+		return OK;
+	}
+
 	if ( ! p->is_old_pos )
 	{
 		p->old_pos = p->pos;
 		p->is_old_pos = SET;
 	}
+
 	p->pos = dg2020_double2ticks( time );
 
 	/* If a previously inactive pulse gets a position set and also has a
 	   non-zero length it becomes active */
 
-	if ( ! p->is_pos && p->len > 0 )
-	{
-		p->is_active = SET;
-		p->has_been_active = SET;
-	}
+	if ( ! p->is_pos && p->is_len && p->len > 0 )
+		p->is_active = p->has_been_active = SET;
 
 	p->is_pos = SET;
 
@@ -426,11 +445,19 @@ bool dg2020_change_pulse_length( long pnum, double time )
 		THROW( EXCEPTION );
 	}
 
+	if ( p->len == dg2020_double2ticks( time ) )
+	{
+		eprint( WARN, "%s:%ld: DG2020: Old and new length of pulse %ld are "
+				"identical.\n", Fname, Lc, pnum );
+		return OK;
+	}
+
 	if ( ! p->is_old_len )
 	{
 		p->old_len = p->len;
 		p->is_old_len = SET;
 	}
+
 	p->len = dg2020_double2ticks( time );
 	p->is_len = SET;
 
@@ -439,10 +466,7 @@ bool dg2020_change_pulse_length( long pnum, double time )
 
 	if ( ! p->is_active && p->is_pos && p->len > 0 )
 		p->is_active = p->has_been_active = SET;
-
-	/* If the pulse length becomes zero the pulse gets inactive */
-
-	if ( p->len == 0 )
+	else
 		p->is_active = UNSET;
 
 		/* If the pulse was or is active we've got to update the pulser */
@@ -473,6 +497,13 @@ bool dg2020_change_pulse_position_change( long pnum, double time )
 	PULSE *p = dg2020_get_pulse( pnum );
 
 
+	if ( dg2020_double2ticks( time ) == 0 )
+	{
+		eprint( SEVERE, "%s:%ld: DG2020: Zero position change value for pulse "
+				"%ld. Useless value isn't set.\n", Fname, Lc, pnum );
+		return FAIL;
+	}
+
 	p->dpos = dg2020_double2ticks( time );
 	p->is_dpos = SET;
 
@@ -487,6 +518,13 @@ bool dg2020_change_pulse_length_change( long pnum, double time )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
 
+
+	if ( dg2020_double2ticks( time ) == 0 )
+	{
+		eprint( SEVERE, "%s:%ld: DG2020: Zero length change value for pulse "
+				"%ld. Useless value isn't set.\n", Fname, Lc, pnum );
+		return FAIL;
+	}
 
 	p->dlen = dg2020_double2ticks( time );
 	p->is_dlen = SET;

@@ -256,23 +256,31 @@ bool dg2020_set_trigger_mode( int mode )
 	{
 		if ( dg2020.is_trig_in_slope )
 		{
-			eprint( FATAL, "%s:%ld: DG2020: Internal trigger mode and setting "
+			eprint( FATAL, "%s:%ld: DG2020: INTERNAL trigger mode and setting "
 					"a trigger slope is incompatible.\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
 
 		if ( dg2020.is_trig_in_level )
 		{
-			eprint( FATAL, "%s:%ld: DG2020: Internal trigger mode and setting "
+			eprint( FATAL, "%s:%ld: DG2020: INTERNAL trigger mode and setting "
 					"a trigger level is incompatible.\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
+
+		if ( dg2020.is_trig_in_impedance )
+		{
+			eprint( FATAL, "%s:%ld: DG2020: INTERNAL trigger mode and setting "
+					"a trigger impedance is incompatible.\n", Fname, Lc );
+			THROW( EXCEPTION );
+		}
+
 	}
 	else
 	{
 		if ( dg2020.is_repeat_time )
 		{
-			eprint( FATAL, "%s:%ld: DG2020: External trigger mode and setting "
+			eprint( FATAL, "%s:%ld: DG2020: EXTERNAL trigger mode and setting "
 					"a repeat time or frequency is incompatible.\n",
 					Fname, Lc );
 			THROW( EXCEPTION );
@@ -301,18 +309,12 @@ bool dg2020_set_trig_in_level( double voltage )
 		THROW( EXCEPTION );
 	}
 
-	if ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL )
+	if ( ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) ||
+		 dg2020.is_repeat_time )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Internal trigger mode and setting "
-				"a trigger level is incompatible.\n", Fname, Lc );
-		THROW( EXCEPTION );
-	}
-
-	if ( dg2020.is_repeat_time )
-	{
-		eprint( FATAL, "%s:%ld: DG2020: Setting a repeat time as well as "
-				"a trigger level is incompatible.\n", Fname, Lc );
-		THROW( EXCEPTION );
+		eprint( SEVERE, "%s:%ld: DG2020: Setting a trigger level is useless "
+				"in INTERNAL trigger mode.\n", Fname, Lc );
+		return FAIL;
 	}
 
 	if ( voltage > MAX_TRIG_IN_LEVEL || voltage < MIN_TRIG_IN_LEVEL )
@@ -345,22 +347,43 @@ bool dg2020_set_trig_in_slope( int slope )
 		THROW( EXCEPTION );
 	}
 
-	if ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL )
+	if ( ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) ||
+		 dg2020.is_repeat_time)
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Internal trigger mode and setting "
-				"a trigger slope is incompatible.\n", Fname, Lc );
-		THROW( EXCEPTION );
-	}
-
-	if ( dg2020.is_repeat_time )
-	{
-		eprint( FATAL, "%s:%ld: DG2020: Setting a repeat time as well as "
-				"a trigger slope is incompatible.\n", Fname, Lc );
-		THROW( EXCEPTION );
+		eprint( SEVERE, "%s:%ld: DG2020: Setting a trigger slope is useless "
+				"in INTERNAL trigger mode.\n", Fname, Lc );
+		return FAIL;
 	}
 
 	dg2020.trig_in_slope = slope;
 	dg2020.is_trig_in_slope = SET;
+
+	return OK;
+}
+
+
+bool dg2020_set_trig_in_impedance( int state )
+{
+	assert( state == LOW || state == HIGH );
+
+	if ( dg2020.is_trig_in_impedance && dg2020.trig_in_impedance != state )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: A trigger impedance (%s) "
+				"has already been set.\n", Fname, Lc,
+				state == LOW ? "LOW = 50 Ohm" : "HIGH = 1 kOhm" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) ||
+		 dg2020.is_repeat_time)
+	{
+		eprint( SEVERE, "%s:%ld: DG2020: Setting a trigger impedance is "
+				"useless in INTERNAL trigger mode.\n", Fname, Lc );
+		return FAIL;
+	}
+
+	dg2020.trig_in_impedance = state;
+	dg2020.is_trig_in_impedance = SET;
 
 	return OK;
 }

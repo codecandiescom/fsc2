@@ -156,11 +156,13 @@ typedef struct
 	int trig_in_mode;        //	EXTERNAL or INTERNAL
 	int trig_in_slope;       //	only in EXTERNAL mode
 	double trig_in_level;    //	only in EXTERNAL mode
+	int trig_in_impedance;   //	only in EXTERNAL mode
 	Ticks repeat_time;       //	only in INTERNAL mode
 
 	bool is_trig_in_mode;
 	bool is_trig_in_slope;
 	bool is_trig_in_level;
+	bool is_trig_in_impedance;
 	bool is_repeat_time;
 
 	long max_seq_len;        // maximum length of all pulse sequences
@@ -272,6 +274,7 @@ bool dg2020_set_function_low_level( int function, double voltage );
 bool dg2020_set_trigger_mode( int mode );
 bool dg2020_set_trig_in_level( double voltage );
 bool dg2020_set_trig_in_slope( int slope );
+bool dg2020_set_trig_in_impedance( int state );
 bool dg2020_set_repeat_time( double time );
 
 bool dg2020_set_phase_reference( int phase, int function );
@@ -314,6 +317,8 @@ const char *dg2020_pticks( Ticks ticks );
 CHANNEL *dg2020_get_next_free_channel( void );
 int dg2020_start_compare( const void *A, const void *B );
 bool dg2020_find_phase_pulse( PULSE *p, PULSE ***pl, int *num );
+int dg2020_get_phase_pulse_list( FUNCTION *f, CHANNEL *channel,
+								 PULSE ***list );
 Ticks dg2020_get_max_seq_len( void );
 void dg2020_calc_padding( void );
 bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length );
@@ -344,7 +349,10 @@ void dg2020_reorganize_phases( FUNCTION *f, bool flag );
 void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 								PULSE *p, int nth, bool flag );
 void dg2020_finalize_phase_pulses( int func );
-void dg2020_commit( FUNCTION * f );
+void dg2020_set_pulses( FUNCTION *f );
+void dg2020_set_phase_pulses( FUNCTION *f );
+void dg2020_commit( FUNCTION * f, bool flag );
+void dg2020_commit_phases( FUNCTION * f, bool flag );
 
 
 /* Finally the functions from dg2020_gpib.c */
@@ -365,4 +373,5 @@ bool dg2020_set_pod_high_level( int pod, double voltage );
 bool dg2020_set_pod_low_level( int pod, double voltage );
 bool dg2020_set_trigger_in_level( double voltage );
 bool dg2020_set_trigger_in_slope( int slope );
+bool dg2020_set_trigger_in_impedance( int state );
 void dg2020_gpib_failure( void );

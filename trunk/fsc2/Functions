@@ -45,8 +45,9 @@ field_meter_wait, 0, EXP;       // wait a bit for field to stabilize
 pulser_start, 0, EXP;           // switches the pulser into run mode
 pulser_shift, -1, EXP;          // shift pulse positions
 pulser_increment, -1, EXP;      // change pulse lengths
-pulser_reset, -1, EXP;          // set back pulses to initial state
-
+pulser_pulse_reset, -1, EXP;    // set back pulses to initial state
+pulser_next_phase, -1, EXP;
+pulser_phase_reset, -1, EXP;
 
 // Functions exported by the lock-in amplifier drivers (SR510)
 
