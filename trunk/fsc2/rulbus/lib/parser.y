@@ -43,6 +43,7 @@ static int new_card( void );
 static int set_name( const char *name );
 static int set_addr( unsigned int addr );
 static int set_type( unsigned int type );
+static int set_nchan( unsigned int chan );
 static int set_range( unsigned int range );
 static int set_polar( const char *polar );
 static int set_rack( void );
@@ -57,7 +58,8 @@ static void rulbus_error( const char *s );
 }
 
 %token FILE_TOKEN RACK_TOKEN CARD_TOKEN NAME_TOKEN TYPE_TOKEN ADDR_TOKEN
-%token RANGE_TOKEN POLAR_TOKEN NUM_TOKEN CARD_TYPE_TOKEN STR_TOKEN ERR_TOKEN
+%token RANGE_TOKEN POLAR_TOKEN NUM_TOKEN CARD_TYPE_TOKEN STR_TOKEN
+%token NCHAN_TOKEN ERR_TOKEN
 
 %type <ival> NUM_TOKEN CARD_TYPE_TOKEN
 %type <sval> STR_TOKEN
@@ -105,6 +107,9 @@ cdata:    /* empty */
 												return ret; }
 		| cdata TYPE_TOKEN sep1 CARD_TYPE_TOKEN sep2
 										  { if ( ( ret =  set_type( $4 ) ) )
+												return ret; }
+		| cdata NCHAN_TOKEN sep1 NUM_TOKEN sep2
+										  { if ( ( ret =  set_nchan( $4 ) ) )
 												return ret; }
 		| cdata RANGE_TOKEN sep1 NUM_TOKEN sep2
 										  { if ( ( ret =  set_range( $4 ) ) )
@@ -178,6 +183,7 @@ static int new_card( void )
 	rulbus_card[ rulbus_num_cards ].name = NULL;
 	rulbus_card[ rulbus_num_cards ].addr = RULBUS_INVALID_ADDR;
 	rulbus_card[ rulbus_num_cards ].type = -1;
+	rulbus_card[ rulbus_num_cards ].nchan = -1;
 	rulbus_card[ rulbus_num_cards ].range = -1;
 	rulbus_card[ rulbus_num_cards++ ].polar = -1;
 
@@ -251,6 +257,25 @@ static int set_type( unsigned int type )
 	return RULBUS_OK;
 }
 
+
+/*---------------------------------------------------------*
+ *---------------------------------------------------------*/
+
+static int set_nchan( unsigned int nchan )
+{
+	/* Check that the card hasn't already been assigned a number of channels */
+
+	if ( rulbus_card[ rulbus_num_cards - 1 ].nchan != -1 )
+		return RULBUS_CHN_DUP;
+
+	/* Check that it's not too large */
+
+	if ( nchan < 1 || nchan > ADC12_MAX_CHANNELS )
+		return RULBUS_CHN_INV;
+
+	rulbus_card[ rulbus_num_cards - 1 ].nchan = nchan;
+	return RULBUS_OK;
+}
 
 /*------------------------------------------------------*
  * Function that gets called when a card range is found 
