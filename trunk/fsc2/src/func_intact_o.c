@@ -100,7 +100,8 @@ Var *f_ocreate( Var *var )
 			type = FLOAT_OUTPUT;
 		else
 		{
-			print( FATAL, "Unknown input or output object type: '%s'.\n" );
+			print( FATAL, "Unknown input or output object type: '%s'.\n",
+				   v->val.sptr );
 			THROW( EXCEPTION );
 		}
 	}

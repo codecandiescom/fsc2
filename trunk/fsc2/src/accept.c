@@ -206,16 +206,19 @@ static void unpack_and_accept( int dim, char *ptr )
 
 			case INT_ARR :
 				memcpy( &len, ptr, sizeof len );
-				if ( len == 0 )
-					continue;
 				ptr_next = ptr + sizeof len + len * sizeof( long );
 				break;
 
 			case FLOAT_ARR :
 				memcpy( &len, ptr, sizeof len );
-				if ( len == 0 )
-					continue;
 				ptr_next = ptr + sizeof len + len * sizeof( double );
+				break;
+
+			case INT_REF : case FLOAT_REF :
+				fsc2_assert( dim == DATA_2D );
+				memcpy( &len, ptr, sizeof len );
+				ptr += sizeof len;
+				ptr_next = ptr + len;
 				break;
 
 #ifndef NDEBUG
@@ -734,13 +737,15 @@ static void accept_1d_data_sliding( long curve, int type, char *ptr )
 static void accept_2d_data( long x_index, long y_index, long curve, int type,
 							char *ptr )
 {
-	long len = 0, count;
+	long x_len = 0;
+	long y_len = 0;
+	long count;
 	char *cur_ptr;
 	double data;
 	long ldata;
 	double new_rwc_delta_z, fac, off, old_rw_min;
 	Curve_2d *cv;
-	long i;
+	long i, j;
 	Scaled_Point *sp;
 	bool need_cut_redraw = UNSET;
 	bool xy_scale_changed = UNSET;
@@ -757,36 +762,39 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	}
 #endif
 
-	/* Get number of new data points and pointer to start of data */
+	/* Get number of new data points and pointer to the start of the data */
 
-	len = get_number_of_new_points( &ptr, type );
+	x_len = get_number_of_new_points( &ptr, type );
+
+	if ( type & ( INT_REF | FLOAT_REF ) )
+		memcpy( &y_len, ptr, sizeof y_len );
 
 	cv = G2.curve_2d[ curve ];
 
 	/* Check if the new data fit into the already allocated memory, otherwise
 	   extend the memory area. */
 
-	if ( x_index + len > G2.nx )
+	if ( x_index + x_len > G2.nx )
 	{
 		xy_scale_changed = SET;
-		if ( y_index >= G2.ny )
-			need_cut_redraw |= incr_x_and_y( x_index, len, y_index );
+		if ( y_index + y_len >= G2.ny )
+			need_cut_redraw |= incr_x_and_y( x_index, x_len, y_index + y_len );
 		else
-			need_cut_redraw |= incr_x( x_index, len );
+			need_cut_redraw |= incr_x( x_index, x_len );
 	}
-	else if ( y_index >= G2.ny )
+	else if ( y_index + y_len >= G2.ny )
 	{
 		xy_scale_changed = SET;
-		need_cut_redraw |= incr_y( y_index );
+		need_cut_redraw |= incr_y( y_index + y_len );
 	}
 
 	/* Find maximum and minimum of old and new data and, if the minimum or
-	   maximum changed, all old data have to be (re)scaled */
+	   maximum changed, (re)scale all old data */
 
 	old_rw_min = cv->rw_min;
 
 	if ( ( cv->scale_changed =
-		   get_new_extrema( &cv->rw_max, &cv->rw_min, ptr, len, type ) ) )
+		   get_new_extrema( &cv->rw_max, &cv->rw_min, ptr, x_len, type ) ) )
 	{
 		new_rwc_delta_z = cv->rw_max - cv->rw_min;
 
@@ -835,50 +843,98 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	/* Now we're finished with rescaling and can set the new number of points
 	   if necessary */
 
-	if ( x_index + len > G2.nx )
-		G2.nx = x_index + len;
-	if ( y_index >= G2.ny )
+	if ( x_index + x_len > G2.nx )
+		G2.nx = x_index + x_len;
+	if ( y_index + y_len >= G2.ny )
 	{
-		G2.ny = y_index + 1;
+		G2.ny = y_index + y_len + 1;
 		need_cut_redraw = SET;
 	}
 
 	/* Include the new data into the scaled data */
 
-	for ( cur_ptr = ptr, i = x_index,
-		  sp = cv->points + y_index * G2.nx + x_index;
-		  i < x_index + len; sp++, i++ )
+	if ( type & ( INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR ) )
 	{
-		if ( type & ( INT_VAR | INT_ARR ) )
+		for ( cur_ptr = ptr, i = x_index,
+			  sp = cv->points + y_index * G2.nx + x_index;
+			  i < x_index + x_len; sp++, i++ )
 		{
-			memcpy( &ldata, cur_ptr, sizeof ldata );
-			data = ( double ) ldata;
-			cur_ptr += sizeof ldata;
+			if ( type & ( INT_VAR | INT_ARR ) )
+			{
+				memcpy( &ldata, cur_ptr, sizeof ldata );
+				data = ( double ) ldata;
+				cur_ptr += sizeof ldata;
+			}
+			else
+			{
+				memcpy( &data, cur_ptr, sizeof data );
+				cur_ptr += sizeof data;
+			}
+
+			if ( cv->is_scale_set )
+				sp->v = ( data - cv->rw_min ) / cv->rwc_delta[ Z ];
+			else
+				sp->v = data;
+
+			/* Increase the point count if the point is new and mark it as
+			   set */
+
+			if ( ! sp->exist )
+			{
+				cv->count++;
+				sp->exist = SET;
+			}
 		}
-		else
+
+		/* Tell the cross section handler about the new data, its return value
+		   indicates if the cut needs to be redrawn */
+
+		need_cut_redraw |= cut_new_points( curve, x_index, y_index, x_len );
+	}
+	else
+	{
+		ptr += sizeof y_len;
+		for ( cur_ptr = ptr, i = y_index; i < y_index + y_len; i++ )
 		{
-			memcpy( &data, cur_ptr, sizeof data );
-			cur_ptr += sizeof data;
-		}
+			sp = cv->points + i * G2.nx + x_index;
+			memcpy( &x_len, cur_ptr, sizeof x_len );
+			cur_ptr += sizeof x_len;
 
-		if ( cv->is_scale_set )
-			sp->v = ( data - cv->rw_min ) / cv->rwc_delta[ Z ];
-		else
-			sp->v = data;
+			for ( j = 0; j < x_len; sp++, j++ )
+			{
+				if ( type == INT_REF )
+				{
+					memcpy( &ldata, cur_ptr, sizeof ldata );
+					data = ( double ) ldata;
+					cur_ptr += sizeof ldata;
+				}
+				else
+				{
+					memcpy( &data, cur_ptr, sizeof data );
+					cur_ptr += sizeof data;
+				}
 
-		/* Increase the point count if the point is new and mark it as set */
+				if ( cv->is_scale_set )
+					sp->v = ( data - cv->rw_min ) / cv->rwc_delta[ Z ];
+				else
+					sp->v = data;
 
-		if ( ! sp->exist )
-		{
-			cv->count++;
-			sp->exist = SET;
+				/* Increase the point count if the point is new and mark it as
+				   set */
+
+				if ( ! sp->exist )
+				{
+					cv->count++;
+					sp->exist = SET;
+				}
+			}
+
+			/* Tell the cross section handler about the new data, its return
+			   value indicates if the cut needs to be redrawn */
+
+			need_cut_redraw |= cut_new_points( curve, x_index, j, x_len );
 		}
 	}
-
-	/* Tell the cross section handler about the new data, its return value
-	   indicates if the cut needs to be redrawn */
-
-	need_cut_redraw |= cut_new_points( curve, x_index, y_index, len );
 
 	/* We're done when nothing is to be drawn because no scaling for the curve
 	   is set */
@@ -915,6 +971,10 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 static long get_number_of_new_points( char **ptr, int type )
 {
 	long len = 0;
+	char *ptr_2d;
+	long x_len;
+	long y_len;
+	long i;
 
 
 	switch ( type )
@@ -926,6 +986,28 @@ static long get_number_of_new_points( char **ptr, int type )
 		case INT_ARR : case FLOAT_ARR :
 			memcpy( &len, *ptr, sizeof len );
 			*ptr += sizeof len;
+			break;
+
+		case INT_REF :
+			memcpy( &y_len, *ptr, sizeof len );
+			ptr_2d = *ptr + sizeof y_len;
+			for ( i = 0; i < y_len; i++ )
+			{
+				memcpy( &x_len, ptr_2d, sizeof x_len );
+				ptr_2d += sizeof x_len + x_len * sizeof( long );
+				len = l_max( len, x_len );
+			}
+			break;
+
+		case FLOAT_REF :
+			memcpy( &y_len, *ptr, sizeof len );
+			ptr_2d = *ptr + sizeof y_len;
+			for ( i = 0; i < y_len; i++ )
+			{
+				memcpy( &x_len, ptr_2d, sizeof x_len );
+				ptr_2d += sizeof x_len + x_len * sizeof( double );
+				len = l_max( len, x_len );
+			}
 			break;
 
 #ifndef NDEBUG
@@ -958,29 +1040,67 @@ static bool get_new_extrema( double *max, double *min, char *ptr,
 							 long len, int type )
 {
 	double data, old_max, old_min;
-	long i;
+	long i, j;
 	long ldata;
+	long x_len;
+	long y_len;
 
 
 	old_max = *max;
 	old_min = *min;
 
-	for ( i = 0; i < len; i++ )
-	{
-		if ( type & ( INT_VAR | INT_ARR ) )
+	if ( type & ( INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR ) )
+		for ( i = 0; i < len; i++ )
 		{
-			memcpy( &ldata, ptr, sizeof ldata );
-			data = ( double ) ldata;
-			ptr += sizeof ldata;
-		}
-		else
-		{
-			memcpy( &data, ptr, sizeof data );
-			ptr += sizeof data;
-		}
+			if ( type & ( INT_VAR | INT_ARR ) )
+			{
+				memcpy( &ldata, ptr, sizeof ldata );
+				data = ( double ) ldata;
+				ptr += sizeof ldata;
+			}
+			else
+			{
+				memcpy( &data, ptr, sizeof data );
+				ptr += sizeof data;
+			}
 
-		*max = d_max( data, *max );
-		*min = d_min( data, *min );
+			*max = d_max( data, *max );
+			*min = d_min( data, *min );
+		}
+	else if ( type == INT_REF )
+	{
+		memcpy( &y_len, ptr, sizeof y_len );
+		ptr += sizeof y_len;
+		for ( i = 0; i < y_len; i++ )
+		{
+			memcpy( &x_len, ptr, sizeof x_len );
+			ptr += sizeof x_len;
+			for ( j = 0; j < x_len; j++ )
+			{
+				memcpy( &ldata, ptr, sizeof ldata );
+				data = ( double ) ldata;
+				ptr += sizeof ldata;
+				*max = d_max( data, *max );
+				*min = d_min( data, *min );
+			}
+		}
+	}
+	else if ( type == FLOAT_REF )
+	{
+		memcpy( &y_len, ptr, sizeof y_len );
+		ptr += sizeof y_len;
+		for ( i = 0; i < y_len; i++ )
+		{
+			memcpy( &x_len, ptr, sizeof x_len );
+			ptr += sizeof x_len;
+			for ( j = 0; j < x_len; j++ )
+			{
+				memcpy( &data, ptr, sizeof data );
+				ptr += sizeof data;
+				*max = d_max( data, *max );
+				*min = d_min( data, *min );
+			}
+		}
 	}
 
 	return *max > old_max || *min < old_min;

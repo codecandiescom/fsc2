@@ -35,11 +35,11 @@ struct DPoint {
 	long lval;
 	double dval;
 	void *ptr;
+	Var *vptr;
 };
 
 
 static DPoint *eval_display_args( Var *v, int dim, int *npoints );
-static void eval_disp_array( Var **v, int dim, DPoint **dp, int *nsets );
 
 extern sigjmp_buf alrm_env;
 extern volatile sig_atomic_t can_jmp_alrm;
@@ -2004,9 +2004,9 @@ Var *f_display_1d( Var *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/* f_display() is used to send new data to the display system. */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* f_display_2d() is used to send new 2D data to the display system. */
+/*-------------------------------------------------------------------*/
 
 Var *f_display_2d( Var *v )
 {
@@ -2016,7 +2016,8 @@ Var *f_display_2d( Var *v )
 	void *buf;
 	char *ptr;
 	int nsets;
-	int i;
+	int i, j;
+	long x_len, y_len;
 
 
 	/* We can't display data without a previous initialization */
@@ -2057,13 +2058,15 @@ Var *f_display_2d( Var *v )
 
 	fsc2_assert( Internals.I_am == CHILD );
 
-	/* Determine the required amount of shared memory */
+	/* Determine the required amount of shared memory, we need to pass on
+	   the total length of the of the data segment, the number of sets and
+	   for each set the x- and y-indices, the curve numbers, the type of
+	   the data and, of course, the data. */
 
-	len =   sizeof len                  /* length field itself */
-		  + sizeof nsets                /* number of sets to be sent */
-		  + nsets * (                   /* x-, y-index, number and data type */
-					    sizeof dp->nx + sizeof dp->ny + sizeof dp->nc 
-					  + sizeof dp->type );
+	len =   sizeof len
+		  + sizeof nsets
+		  + nsets * (   sizeof dp->nx + sizeof dp->ny
+					  + sizeof dp->nc + sizeof dp->type );
 
 	for ( i = 0; i < nsets; i++ )
 	{
@@ -2085,6 +2088,14 @@ Var *f_display_2d( Var *v )
 
 			case FLOAT_ARR :
 				len += sizeof( long ) + dp[ i ].len * sizeof( double );
+				break;
+
+			case INT_REF :
+				len += sizeof( long ) + dp[ i ].len;
+				break;
+
+			case FLOAT_REF :
+				len += sizeof( long ) + dp[ i ].len;
 				break;
 
 			default :                   /* this better never happens... */
@@ -2155,6 +2166,56 @@ Var *f_display_2d( Var *v )
 				ptr += dp[ i ].len * sizeof( double );
 				break;
 
+			case INT_REF :
+				memcpy( ptr, &dp[ i ].len, sizeof dp[ i ].len );
+				ptr += sizeof dp[ i ].len;
+				y_len = dp[ i ].vptr->len;
+				memcpy( ptr, &y_len, sizeof y_len );
+				ptr += sizeof y_len;
+				for ( j = 0; j < y_len; j++ )
+				{
+					if ( dp[ i ].vptr->val.vptr[ j ] == NULL )
+					{
+						x_len = 0;
+						memcpy( ptr, &x_len, sizeof x_len );
+						ptr += sizeof x_len;
+						continue;
+					}
+
+					x_len = dp[ i ].vptr->val.vptr[ j ]->len;
+					memcpy( ptr, &x_len, sizeof x_len );
+					ptr += sizeof x_len;
+					memcpy( ptr, dp[ i ].vptr->val.vptr[ j ]->val.lpnt,
+							x_len * sizeof( long ) );
+					ptr += x_len * sizeof( long );
+				}
+				break;
+
+			case FLOAT_REF :
+				memcpy( ptr, &dp[ i ].len, sizeof dp[ i ].len );
+				ptr += sizeof dp[ i ].len;
+				y_len = dp[ i ].vptr->len;
+				memcpy( ptr, &y_len, sizeof y_len );
+				ptr += sizeof y_len;
+				for ( j = 0; j < y_len; j++ )
+				{
+					if ( dp[ i ].vptr->val.vptr[ j ] == NULL )
+					{
+						x_len = 0;
+						memcpy( ptr, &x_len, sizeof x_len );
+						ptr += sizeof x_len;
+						continue;
+					}
+
+					x_len = dp[ i ].vptr->val.vptr[ j ]->len;
+					memcpy( ptr, &x_len, sizeof x_len );
+					ptr += sizeof x_len;
+					memcpy( ptr, dp[ i ].vptr->val.vptr[ j ]->val.lpnt,
+							x_len * sizeof( double ) );
+					ptr += x_len * sizeof( double );
+				}
+				break;
+
 			default :                   /* this better never happens... */
 				T_free( dp );
 				eprint( FATAL, UNSET, "Internal communication error at "
@@ -2186,9 +2247,11 @@ Var *f_display_2d( Var *v )
 static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 {
 	DPoint *dp = NULL;
+	long i;
 
 
 	CLOBBER_PROTECT( v );
+	CLOBBER_PROTECT( dp );
 
 	*nsets = 0;
 	if ( v == NULL )
@@ -2306,9 +2369,45 @@ static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 				dp[ *nsets ].ptr = v->val.dpnt;
 				break;
 
-			case INT_REF : case FLOAT_REF :
-				eval_disp_array( &v, dim, &dp, nsets );
-				continue;
+			case INT_REF :
+				if ( v->len == 0 )
+				{
+					print( WARN, "Request to draw an empty 2D-array.\n" );
+					if ( ( v = v->next ) != NULL )
+						v = v->next;
+					continue;
+				}
+
+				dp[ *nsets ].len = sizeof( long );
+				for ( i = 0; i < v->len; i++ )
+				{
+					dp[ *nsets ].len += sizeof( long );
+					if ( v->val.vptr[ i ] != NULL )
+						dp[ *nsets ].len +=
+										v->val.vptr[ i ]->len * sizeof( long );
+				}
+				dp[ *nsets ].vptr = v;
+				break;
+
+			case FLOAT_REF :
+				if ( v->len == 0 )
+				{
+					print( WARN, "Request to draw an empty 2D-array.\n" );
+					if ( ( v = v->next ) != NULL )
+						v = v->next;
+					continue;
+				}
+
+				dp[ *nsets ].len = sizeof( long );
+				for ( i = 0; i < v->len; i++ )
+				{
+					dp[ *nsets ].len += sizeof( long );
+					if ( v->val.vptr[ i ] != NULL )
+						dp[ *nsets ].len +=
+									  v->val.vptr[ i ]->len * sizeof( double );
+				}
+				dp[ *nsets ].vptr = v;
+				break;
 		}
 
 		/* There can be several curves and we check if there's a curve number,
@@ -2320,7 +2419,7 @@ static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 		{
 			if ( *nsets != 0 )
 			{
-				print( FATAL, "Missing curve number\n" );
+				print( FATAL, "Missing curve number.\n" );
 				T_free( dp );
 				THROW( EXCEPTION );
 			}
@@ -2348,135 +2447,6 @@ static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 	} while ( v != NULL );
 
 	return dp;
-}
-
-
-/*-------------------------------------------------*/
-/*-------------------------------------------------*/
-
-static void eval_disp_array( Var **v, int dim, DPoint **dp, int *nsets )
-{
-	long count;
-	ssize_t i;
-	long j;
-	long nx_offset;
-	long ny_offset;
-	long cn;
-
-
-	CLOBBER_PROTECT( count );
-
-	/* Drawing 2-dimensional arrays only works for 2D-display */
-
-	if ( dim != 2 )
-	{
-		print( FATAL, "Can't draw more than 1D-arrays in 1D-display.\n" );
-		T_free( *dp );
-		THROW( EXCEPTION );
-	}
-
-	if ( ( *v )->dim > 2 )
-	{
-		print( FATAL, "Can't draw arrays with more than 2 dimensions.\n" );
-		T_free( *dp );
-		THROW( EXCEPTION );
-	}
-
-	if ( ( *v )->len == 0 )
-	{
-		print( WARN, "Request to draw zero-length 2D-array.\n" );
-		if ( ( *v = ( *v )->next ) != NULL )
-			*v = ( *v )->next;
-		return;
-	}
-
-	/* Figure out how many 1D-arrays we really have to draw */
-
-	for ( count = i = 0; i < ( *v )->len; i++ )
-		if ( ( *v )->val.vptr[ i ] != NULL && ( *v )->val.vptr[ i ]->len != 0 )
-			count++;
-
-	/* If all sub-arrays have zero length nothing further has to be done
-	   except removing the variable (and possibly the curve number) from
-	   the stack. */
-
-	if ( count == 0 )
-	{
-		print( WARN, "All sub-arrays of 2D-array to be drawn have zero "
-			   "length.\n" );
-		if ( ( *v = ( *v )->next ) != NULL )
-			*v = ( *v )->next;
-		return;
-	}
-
-	/* Extend the array of structures to as many as we need for all the
-	   1D-arrays */
-
-	if ( count > 1 )
-	{
-		TRY
-		{
-			*dp = DPOINT_P T_realloc( *dp, ( *nsets + count ) * sizeof **dp );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			T_free( *dp );
-			THROW( EXCEPTION );
-		}
-	}
-
-	/* The x- and y-coordinate of the first array to be drawn have already
-	   been set but we need them also for the other arrays */
-
-	nx_offset = ( *dp + *nsets )->nx;
-	ny_offset = ( *dp + *nsets )->ny;
-
-	/* Now set up all the structures for the different array */
-
-	for ( j = *nsets, i = 0; i < ( *v )->len; i++ )
-	{
-		if ( ( *v )->val.vptr[ i ] == NULL || ( *v )->val.vptr[ i ]->len == 0 )
-			continue;
-
-		( *dp + j )->nx   = nx_offset;
-		( *dp + j )->ny   = ny_offset + i;
-		( *dp + j )->type = ( *v )->val.vptr[ i ]->type;
-		( *dp + j )->len  = ( *v )->val.vptr[ i ]->len;
-		( *dp + j )->ptr  = ( *dp + j )->type == INT_ARR ?
-								( void * ) ( *v )->val.vptr[ i ]->val.lpnt :
-								( void * ) ( *v )->val.vptr[ i ]->val.dpnt;
-		j++;
-	}
-
-	/* Finally, the curve number has to set for all the new structures */
-
-	if ( ( *v = ( *v )->next ) == NULL )
-	{
-		if ( *nsets != 0 )
-		{
-			print( FATAL, "Missing curve number\n" );
-			T_free( *dp );
-			THROW( EXCEPTION );
-		}
-
-		cn = 0;
-	}
-	else
-	{
-		cn = get_long( *v, "curve number" ) - 1;
-		*v = ( *v )->next;
-
-		if ( cn < 0 || cn >= G2.nc )
-		{
-			print( FATAL, "Invalid curve number (%ld).\n", cn );
-			T_free( *dp );
-			THROW( EXCEPTION );
-		}
-	}
-
-	for ( j = 0; j < count; j++ )
-		( *dp + ( *nsets )++ )->nc = cn;
 }
 
 
@@ -2851,7 +2821,7 @@ Var *f_setmark_1d( Var *v )
 
 	if ( v == NULL )
 	{
-		print( WARN, "Missing arguments\n" );
+		print( WARN, "Missing arguments.\n" );
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -2978,7 +2948,7 @@ Var *f_setmark_2d( Var *v )
 
 	if ( v == NULL )
 	{
-		print( WARN, "Missing arguments\n" );
+		print( WARN, "Missing arguments.\n" );
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -2992,7 +2962,7 @@ Var *f_setmark_2d( Var *v )
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
-		print( WARN, "Missing y-position arguments\n" );
+		print( WARN, "Missing y-position arguments.\n" );
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -3302,6 +3272,179 @@ Var *f_clearmark_2d( Var *v )
 	/* All the rest has now to be done by the parent process... */
 
 	return vars_push( INT_VAR, 1L );
+}
+
+
+/*---------------------------------------------------------------------*/
+/* Function for finding the peak of a signal. The function will return */
+/* useful results only when the signal to noise ratio is rather good   */
+/* (should be at least in the order of 250) and the baseline is more   */
+/* or less straight (i.e. does only change linearly). The function     */
+/* makes no special assumptions about the form of the signal (except   */
+/* that it's a peak, not something looking like the derivative of a    */
+/* peak) and returns the index the point where the area under the peak */
+/* is half the total area, so it should also work with unsymmetric     */
+/*peaks.                                                               */
+/*---------------------------------------------------------------------*/
+
+Var *f_find_peak( Var *v )
+{
+	double *arr;
+	ssize_t len;
+	double sum;
+	double max;
+	double min;
+	double middle;
+	double pos;
+	ssize_t i;
+
+
+	vars_check( v, INT_ARR | FLOAT_ARR );
+
+	len = v->len;
+	arr = T_malloc( len * sizeof *arr );
+
+	/* We start by calculating numerically the derivative of the curve.
+	   While doing so we add up the values of all points of the derivative
+	   make the derivative have a mean value of zero */
+
+	arr[ 0 ] = v->type == INT_ARR ?
+			   ( double ) ( v->val.lpnt[ 1 ] - v->val.lpnt[ 0 ] ) : 
+			   ( v->val.dpnt[ 1 ] - v->val.dpnt[ 0 ] );
+	sum = arr[ 0 ];
+
+	if ( v->type == INT_ARR )
+		for ( i = 1; i < len - 1; i++ )
+		{
+			arr[ i ] = 0.5 * ( v->val.lpnt[ i + 1 ] - v->val.lpnt[ i - 1 ] );
+			sum += arr[ i ];
+		}
+	else
+		for ( i = 1; i < len - 1; i++ )
+		{
+			arr[ i ] = 0.5 * ( v->val.dpnt[ i + 1 ] - v->val.dpnt[ i - 1 ] );
+			sum += arr[ i ];
+		}
+
+	arr[ len - 1 ] = v->type == INT_ARR ?
+			  ( double ) ( v->val.lpnt[ len - 1 ] - v->val.lpnt[ len - 2 ] ) : 
+			  ( v->val.dpnt[ len - 1 ] - v->val.dpnt[ len - 2 ] );
+
+	sum = ( sum + arr[ len - 1 ] ) / len;
+
+	/* Now integrate once to get back the original curve after subtracting the
+	   mean of the derivative from each point */
+
+	arr[ 0 ] -= sum;
+	for ( i = 1; i < len; i++ )
+		arr[ i ] += arr[ i - 1 ] - sum;
+
+	max = min = arr[ 0 ];
+
+	/* Integrate another time and fin maximum and minimum of the resulting
+	   curve */
+
+	for ( i = 1; i < len; i++ )
+	{
+		arr[ i ] += arr[ i - 1 ];
+		max = d_max( max, arr[ i ] );
+		min = d_min( min, arr[ i ] );
+	}
+
+	/* Find the position where the curves value is exactly between the minimum
+	   and maximum, that's about where the peak should be... */
+
+	middle = 0.5 * ( max - min );
+
+	for ( i = 0; i < len; i++ )
+		if ( arr[ i ] >= middle )
+			break;
+
+	if ( i == len )
+	{
+		T_free( arr );
+		if ( Internals.mode != TEST )
+			return vars_push( FLOAT_VAR, -1.0 );
+		else
+			return vars_push( FLOAT_VAR, 0.5 * len + 1.0 + ARRAY_OFFSET );
+	}
+
+	pos = i + 1.0 + ARRAY_OFFSET
+		  - ( arr[ i ] - middle ) / ( arr[ i ] - arr[ i - 1 ] );
+	T_free( arr );
+	return vars_push( FLOAT_VAR, pos );
+}
+
+
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
+Var *f_index_of_max( Var *v )
+{
+	long ind = 0;
+	long lmax = INT_MIN;
+	double dmax = -HUGE_VAL;
+	ssize_t i;
+
+
+	vars_check( v, INT_ARR | FLOAT_ARR );
+
+	if ( v->type == INT_ARR )
+	{
+		for ( i = 0; i < v->len; i++ )
+			if ( v->val.lpnt[ i ] > lmax )
+			{
+				lmax = v->val.lpnt[ i ];
+				ind = i;
+			}
+	}
+	else
+	{
+		for ( i = 0; i < v->len; i++ )
+			if ( v->val.dpnt[ i ] > dmax )
+			{
+				dmax = v->val.dpnt[ i ];
+				ind = i;
+			}
+	}
+
+	return vars_push( INT_VAR, ind + ARRAY_OFFSET );
+}
+
+
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
+Var *f_index_of_min( Var *v )
+{
+	long ind = 0;
+	ssize_t i;
+	long lmin = INT_MAX;
+	double dmin = HUGE_VAL;
+
+
+	vars_check( v, INT_ARR | FLOAT_ARR );
+
+	if ( v->type == INT_ARR )
+	{
+		for ( i = 0; i < v->len; i++ )
+			if ( v->val.lpnt[ i ] < lmin )
+			{
+				lmin = v->val.lpnt[ i ];
+				ind = i;
+			}
+	}
+	else
+	{
+		for ( i = 0; i < v->len; i++ )
+			if ( v->val.dpnt[ i ] < dmin )
+			{
+				dmin = v->val.dpnt[ i ];
+				ind = i;
+			}
+	}
+
+	return vars_push( INT_VAR, ind + ARRAY_OFFSET );
 }
 
 
