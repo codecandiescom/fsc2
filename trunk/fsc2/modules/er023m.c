@@ -22,13 +22,21 @@
 */
 
 
-#define ER023M_MAIN
-
 #include "er023m.h"
+
+
+/*--------------------------------*/
+/* global variables of the module */
+/*--------------------------------*/
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
+ER023M er023m;
+double rg_list[ RG_MAX_INDEX + 1 ];
+double tc_list[ TC_MAX_INDEX + 1 ];
+double mf_list[ MAX_MF_INDEX + 1 ];
+double ma_list[ MAX_MA_INDEX + 1 ];
 
 static ER023M er023m_store;
 

@@ -22,13 +22,25 @@
 */
 
 
-#define RS690_MAIN
-
-
 #include "rs690.h"
+
+
+/*--------------------------------*/
+/* global variables of the module */
+/*--------------------------------*/
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
+
+RS690 rs690;
+bool rs690_is_needed = UNSET;
+PULSE *rs690_Pulses = NULL;
+bool rs690_IN_SETUP = UNSET;
+PHASE_SETUP rs690_phs[ 2 ];
+double rs690_fixed_timebases[ NUM_FIXED_TIMEBASES ] =
+													{ 4.0e-9, 8.0e-9, 1.6e-8 };
+unsigned short rs690_default_fields[ 4 * NUM_HSM_CARDS ];
+
 
 static bool in_reset = UNSET;
 

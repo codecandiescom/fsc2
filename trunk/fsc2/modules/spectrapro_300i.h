@@ -75,15 +75,7 @@ struct CALIB_PARAMS {
 };
 
 
-#if defined SPECTRAPRO_300I_MAIN
-
-SPECTRAPRO_300I spectrapro_300i;
-
-#else
-
 extern SPECTRAPRO_300I spectrapro_300i;
-
-#endif
 
 
 /* Default start values for calibrations */

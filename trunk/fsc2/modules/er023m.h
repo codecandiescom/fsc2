@@ -53,11 +53,7 @@
 #define MAX_RG                1.0e7
 #define UNDEF_RG_INDEX        -1
 
-#ifdef ER023M_MAIN
-double rg_list[ RG_MAX_INDEX + 1 ];
-#else
 extern double rg_list[ RG_MAX_INDEX + 1 ];
-#endif
 
 
 /* Constants and definitions for dealing with the time constant -
@@ -71,16 +67,11 @@ extern double rg_list[ RG_MAX_INDEX + 1 ];
 #define MIN_TC                1.0e-5
 #define UNDEF_TC_INDEX        -1
 
-#ifdef ER023M_MAIN
-double tc_list[ TC_MAX_INDEX + 1 ];
-#else
 extern double tc_list[ TC_MAX_INDEX + 1 ];
-#endif
 
 /* Constants for dealing with the phase */
 
 #define UNDEF_PHASE           -1
-
 
 /* Constants and definitions for dealing with the modulation frequency  */
 
@@ -88,22 +79,13 @@ extern double tc_list[ TC_MAX_INDEX + 1 ];
 #define MAX_MOD_FREQ          1.0e5
 #define UNDEF_MF_INDEX        -1
 
-#ifdef ER023M_MAIN
-double mf_list[ MAX_MF_INDEX + 1 ];
-#else
 extern double mf_list[ MAX_MF_INDEX + 1 ];
-#endif
 
 #define MIN_MA_INDEX           0
 #define MAX_MA_INDEX          80
 #define UNDEF_MA_INDEX        -1
 
-
-#ifdef ER023M_MAIN
-double ma_list[ MAX_MA_INDEX + 1 ];
-#else
 extern double ma_list[ MAX_MA_INDEX + 1 ];
-#endif
 
 /* Constants for dealing with the conversion time - we dont allow conversion
    times below 3.2 ms because we need to use "single mode" (where the signal
@@ -200,11 +182,7 @@ struct ER023M {
 };
 
 
-#ifdef ER023M_MAIN
-ER023M er023m;
-#else
 extern ER023M er023m;
-#endif
 
 
 /* Declaration of exported functions */
