@@ -80,7 +80,9 @@ Acquisition_Sequence ASeq[ 2 ];
 Pulse *Plist = NULL;
 Pulse *Cur_Pulse = NULL;
 
-int TEST_RUN;
+int TEST_RUN = 0;            /* flag, set while EXPERIMENT section is tested */
+int need_GPIB = 0;           /* flag, set if GPIB bus is needed */
+
 
 #else   /*  ! FSC2_MAIN */
 
@@ -108,6 +110,7 @@ extern Pulse *Plist;
 extern Pulse *Cur_Pulse;
 
 extern int TEST_RUN;
+extern int need_GPIB;
 
 #endif
 
