@@ -267,7 +267,7 @@ void load_file( FL_OBJECT *a, long reload )
 
 	/* Test if the file is readable and can be opened */
 
-	if ( access( fn , R_OK ) == -1 )
+	if ( access( fn, R_OK ) == -1 )
 	{
 		if ( errno == ENOENT )
 			fl_show_alert( "Error", "Sorry, file not found:", fn, 1 );
