@@ -218,10 +218,10 @@ MainLoop;
 
 #############################################
 # Callback function for the digitizer menu, makes sure only channels that
-# exist can be picked - fortunately, $channel and $trig_channel will be
-# changed automatically if they are not in the new set of channels.
-# Actually, the options method for Optionmenus isn't officially documented
-# but if you look at the source you'll find it...
+# exist for the selected digitizer can be picked - fortunately, $channel
+# and $trig_channel will be changed automatically if they are not in the
+# new set of channels. Actually, the options method for Optionmenus isn't
+# officially documented but if you look at the source you'll find it...
 
 sub digitizer_check {
 
@@ -410,6 +410,7 @@ close F;
 
 
 #############################################
+# Stores current settings as default on exit
 
 sub store_defs {
 	local *F;
@@ -432,6 +433,7 @@ sub store_defs {
 
 
 #############################################
+# Shows an error message box
 
 sub show_message {
 	my $text = shift;
@@ -444,12 +446,16 @@ sub show_message {
 
 
 #############################################
+# Checks the paramter and then writes the EDL program
 
 sub write_out {
 
 return if &do_checks( ) != 0;
 
 local *F;
+
+open( F, "|fsc2_" . lc $how )
+	or die "Can't find utility fsc2_" . lc $how . ".\n";
 
 print F
 "DEVICES:
