@@ -345,16 +345,16 @@ void start_graphics( void )
 			G.font = XLoadQueryFont( G.d,
 									 ( char * ) xresources[ AXISFONT ].var );
 
-		if ( G.font == NULL )
+		if ( ! G.font )
 			G.font = XLoadQueryFont( G.d, DEFAULT_AXISFONT_1 );
 
-		if ( G.font == NULL )
+		if ( ! G.font )
 			G.font = XLoadQueryFont( G.d, DEFAULT_AXISFONT_2 );
 
-		if ( G.font == NULL )
+		if ( ! G.font )
 			G.font = XLoadQueryFont( G.d, DEFAULT_AXISFONT_3 );
 
-		if ( G.font != NULL )
+		if ( G.font )
 			XTextExtents( G.font, "Xp", 2, &dummy, &G.font_asc, &G.font_desc,
 						  &font_prop );
 
@@ -892,9 +892,9 @@ void graphics_free( void )
 			cv2 = T_free( cv2 );
 		}
 
-	if ( G.font != NULL )
+	if ( G.font )
 		for ( coord = Y; coord <= ( G.dim == 1 ? Y : Z ); coord++ )
-			if ( G.label[ coord ] != NULL )
+			if ( G.label[ coord ] )
 				XFreePixmap( G.d, G.label_pm[ coord ] );
 }
 
