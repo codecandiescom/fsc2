@@ -65,10 +65,10 @@ args:   /* empty */
       | args EOS_TOKEN sep1 NUM_TOKEN sep2	 { dev.eos = $4; }
       | args TIMO_TOKEN sep1 NUM_TOKEN sep2  { dev.timo = $4; }
       | args TIMO_TOKEN sep1 TIME_TOKEN sep2 { dev.timo = $4; }
-	  | args REOS_TOKEN sep1 bool sep2		 { dev.eosmode |= $4 * GPIB_REOS; }
-	  | args XEOS_TOKEN sep1 bool sep2		 { dev.eosmode |= $4 * GPIB_XEOS; }
-      | args BIN_TOKEN sep1 bool sep2		 { dev.eosmode |= $4 * GPIB_BIN; }
-      | args EOT_TOKEN sep1 bool sep2		 { dev.eosmode |= $4 * GPIB_EOT; }
+	  | args REOS_TOKEN sep1 bool sep2		 { dev.eosmode |= $4 * REOS; }
+	  | args XEOS_TOKEN sep1 bool sep2		 { dev.eosmode |= $4 * XEOS; }
+      | args BIN_TOKEN sep1 bool sep2		 { dev.eosmode |= $4 * BIN; }
+      | args EOT_TOKEN sep1 bool sep2		 { dev.eosmode |= $4 * EOT; }
       | args MASTER_TOKEN sep2               { dev.flags |= IS_MASTER; }
       | args FILE_TOKEN sep1 STR_TOKEN sep2  { }
       | args ERR_TOKEN sep1 STR_TOKEN sep2   { }
@@ -95,9 +95,8 @@ sep2:   /* empty */
 void gpiberror( const char *s )
 {
 	extern char *gpibtext;
-	s = s;                /* keeps the compiler happy... */
+
 
 	printf( "%s at token '%s'\n", s, gpibtext );
-
 	ibsta |= IBERR;
 }

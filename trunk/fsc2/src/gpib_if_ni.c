@@ -11,7 +11,6 @@
 #include <sys/timeb.h>
 
 
-extern void gpibrestart( FILE *fp );
 extern int gpibparse( void );
 
 
@@ -23,15 +22,6 @@ extern int gpibparse( void );
 
 
 #define CONTROLLER  "gpib0"      /* symbolic name of the controller */
-
-
-#define SRQ      0x40    /* SRQ bit in device status register */
-#define TIMEOUT  T10s    /* GPIB timeout period set at initialization */
-
-
-#define ON  1
-#define OFF 0
-
 
 #define TEST_BUS_STATE                                               \
         if ( ! gpib_is_active )                                      \
@@ -73,6 +63,7 @@ int ll;                         /* log level                              */
 int gpib_is_active = 0;         /* flag, set after initialization of bus  */
 FILE *gpib_log;                 /* file pointer of GPIB log file          */
 int num_devices = 0;
+int num_init_devices = 0;
 
 
 /*-------------------------------------------------------------------------*/
@@ -120,10 +111,7 @@ int gpib_init( char *log_file_name, int log_level )
 	}
 
 	if ( gpib_parse_config( GPIB_CONF_FILE ) != SUCCESS )
-	{
-        strcpy( gpib_error_msg, "Can't initialize GPIB bus !" );
 		return FAILURE;
-	}
 
     gpib_is_active = 1;
     return SUCCESS;
@@ -137,7 +125,6 @@ int gpib_init( char *log_file_name, int log_level )
 
 static int gpib_parse_config( const char *file )
 {
-	static bool is_restart = UNSET;
     extern FILE *gpibin;
     FILE *fp;
     int retval;
@@ -151,12 +138,6 @@ static int gpib_parse_config( const char *file )
     }
 
     gpibin = fp;
-
-	if ( is_restart )
-	    gpibrestart( gpibin );
-	else
-		is_restart = SET;
-
     if ( ( retval = gpibparse( ) ) != 0 )
         iberr = ECAP;
 
@@ -228,6 +209,7 @@ int gpib_shutdown( void )
 		{
 			gpib_local( devices[ i ].number );
 			ibonl( devices[ i ].number, 0 );
+			num_init_devices--;
 		}
 
     if ( ll > LL_NONE )
@@ -339,12 +321,30 @@ int gpib_init_device( const char *device_name, int *dev )
         return FAILURE;
 	}
 
+	if ( num_init_devices >= GPIB_MAX_INIT_DEVICES )
+	{
+		sprintf( gpib_error_msg, "Can't open device %s, too many open "
+				 "devices.\n", device_name );
+		if ( ll > LL_NONE )
+			gpib_log_function_end( "gpib_init_device", device_name );
+        return FAILURE;
+	}
+
+	if ( devices[ i ].is_online )
+	{
+		sprintf( gpib_error_msg, "Device %s is already online.\n",
+				 device_name );
+		if ( ll > LL_NONE )
+			gpib_log_function_end( "gpib_init_device", device_name );
+        return SUCCESS;
+	}
+
 	devices[ i ].number = ibdev( 0, devices[ i ].pad, devices[ i ].sad,
 								 devices[ i ].timo,
 								 ( ( devices[ i ].eosmode &
-									 ( GPIB_REOS | GPIB_XEOS | GPIB_BIN ) )
-								   << 8 ) | ( devices[ i ].eos & 0xff ),
-								 devices[ i ].eosmode & GPIB_EOT ? 1 : 0);
+									 ( REOS | XEOS | BIN ) ) << 8 ) |
+								 ( devices[ i ].eos & 0xff ),
+								 devices[ i ].eosmode & EOT ? 1 : 0 );
 
     if ( devices[ i ].number < 0 )
 	{
@@ -357,6 +357,7 @@ int gpib_init_device( const char *device_name, int *dev )
 
 	devices[ i ].is_online = 1;
 	*dev = devices[ i ].number;
+	num_init_devices++;
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_init_device", device_name );

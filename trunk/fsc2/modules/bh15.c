@@ -116,8 +116,7 @@ int bh15_exp_hook( void )
 	if ( gpib_init_device( bh15.name, &bh15.device ) == FAILURE )
 	{
 		bh15.device = -1;
-		eprint( FATAL, "BH15: Can't access the Bruker BH15 field "
-				"controller.\n" );
+		eprint( FATAL, "BH15: Can't initialize device:%s\n ", gpib_error_msg );
 		THROW( EXCEPTION );
 	}
 

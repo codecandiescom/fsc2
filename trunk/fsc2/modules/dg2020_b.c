@@ -223,8 +223,8 @@ int dg2020_b_exp_hook( void )
 	
 	if ( ! dg2020_init( DEVICE_NAME ) )
 	{
-		eprint( FATAL, "%s: Failure to initialize the pulser.\n",
-				pulser_struct.name );
+		eprint( FATAL, "%s: Failure to initialize the pulser: %s\n",
+				pulser_struct.name, gpib_error_msg );
 		THROW( EXCEPTION );
 	}
 

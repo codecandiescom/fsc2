@@ -75,7 +75,7 @@ bool run( void )
 
 	if ( need_GPIB && gpib_init( NULL, LL_ALL ) == FAILURE )
 	{
-		eprint( FATAL, "Can't initialize GPIB bus.\n" );
+		eprint( FATAL, "Can't initialize GPIB bus: %s\n", gpib_error_msg );
 		set_buttons_for_run( 1 );
 		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 		return FAIL;

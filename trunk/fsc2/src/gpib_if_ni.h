@@ -14,16 +14,13 @@
 
 #define GPIB_NI
 
-#define GPIB_MAX_DEV 15
-#define GPIB_NAME_MAX 14
+#define GPIB_MAX_DEV      30
+#define GPIB_NAME_MAX     14
+#define GPIB_MAX_INIT_DEV 14
 
 /* End-of-string (EOS) modes */
 
-#define GPIB_REOS     0x04      /* Terminate reads on EOS     */
-#define GPIB_XEOS     0x08      /* Set EOI with EOS on writes */
-#define GPIB_BIN      0x10      /* Do 8-bit compare on EOS    */
-#define GPIB_EOT      0x01      /* Send END with last byte    */
-
+#define EOT         0x01            /* Send END with last byte    */
 #define IS_MASTER   ( 1 << 1 )
 
 

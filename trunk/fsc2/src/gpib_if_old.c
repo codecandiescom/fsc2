@@ -110,7 +110,7 @@ int gpib_init( char *log_file_name, int log_level )
 
     if ( gpib_init_controller( ) != SUCCESS )   /* initialize the controller */
     {
-        strcpy( gpib_error_msg, "Can't initialize GPIB bus !" );
+        strcpy( gpib_error_msg, "Can't initialize controller !" );
 
 		/* Get rid of the device list if it's already created */
 

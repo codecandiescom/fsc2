@@ -158,7 +158,9 @@ int er035m_exp_hook( void )
 	if ( gpib_init_device( nmr.name, &nmr.device ) == FAILURE )
 	{
 		nmr.device = -1;
-		er035m_failure( );
+		eprint( FATAL, "%s: Initialization of device failed: %s\n",
+				DEVICE_NAME, gpib_error_msg );
+		THROW( EXCEPTION );
 	}
 	usleep( ER035M_WAIT );
 

@@ -171,7 +171,11 @@ int sr830_exp_hook( void )
 	/* Initialize the lock-in */
 
 	if ( ! sr830_init( DEVICE_NAME ) )
-		sr830_failure( );
+	{
+		eprint( FATAL, "%s: Initialization of device failed: %s\n",
+				DEVICE_NAME, gpib_error_msg );
+		THROW( EXCEPTION );
+	}
 
 	return 1;
 }

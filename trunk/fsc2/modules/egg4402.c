@@ -71,12 +71,16 @@ int egg4402_exp_hook( void )
 	if ( TEST_RUN )
 		return 1;
 
-	/* Initialize the lock-in */
+	/* Initialize the box-car */
 
 	egg4402.fatal_error = UNSET;
 
 	if ( ! egg4402_init( DEVICE_NAME ) )
-		egg4402_failure( );
+	{
+		eprint( FATAL, "%s: Initialization of device failed: %s\n",
+				DEVICE_NAME, gpib_error_msg );
+		THROW( EXCEPTION );
+	}
 
 	return 1;
 }
