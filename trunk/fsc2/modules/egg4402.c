@@ -22,16 +22,20 @@ int egg4402_end_of_exp_hook( void );
 Var *boxcar_curve_length( Var *v );
 Var *boxcar_get_curve( Var *v );
 
-bool egg4402_init( const char *name );
-void egg4402_failure( void );
-void egg4402_query( char *buffer, long *length );
+
+/* Locally used functions */
+
+static bool egg4402_init( const char *name );
+static void egg4402_failure( void );
+static void egg4402_query( char *buffer, long *length );
 
 
 
 typedef struct
 {
 	int device;
-	bool fatal_error;
+	bool fatal_error;  /* set on communication errors to avoid long delays on
+						  exit due to communication with non-reacting device */
 } EGG4402;
 
 
@@ -96,17 +100,8 @@ int egg4402_end_of_exp_hook( void )
 }
 
 
-
-bool egg4402_init( const char *name )
-{
-	assert( egg4402.device < 0 );
-
-	if ( gpib_init_device( name, &egg4402.device ) == FAILURE )
-        return FAIL;
-
-	return OK;
-}
-
+/*--------------------------------------------------*/
+/*--------------------------------------------------*/
 
 Var *boxcar_curve_length( Var *v )
 {
@@ -141,23 +136,24 @@ Var *boxcar_curve_length( Var *v )
 		num_points = v->val.lval;
 	else
 	{
-		eprint( WARN, "%s:%ld: %s: Floating point number used as numerb of "
-				"points in boxcar_curve_length().\n", Fname, Lc, DEVICE_NAME );
+		eprint( WARN, "%s:%ld: %s: Floating point number used as numer of "
+				"points in function `boxcar_curve_length'.\n",
+				Fname, Lc, DEVICE_NAME );
 		num_points = lround( v->val.dval );
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of "
-				"points in boxcar_curve_length().\n", Fname, Lc, DEVICE_NAME );
+		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of points in "
+				"function `boxcar_curve_length'.\n", Fname, Lc, DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
 
 	if ( num_points < 32 || num_points > 4096 )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid number of points in "
-				"in boxcar_curve_length().\n", Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, "%s:%ld: %s: Invalid number of points in function "
+				"`boxcar_curve_length'.\n", Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -168,7 +164,8 @@ Var *boxcar_curve_length( Var *v )
 		if ( inter != 1 && inter & 1 )
 		{
 			eprint( FATAL, "%s:%ld: %s: Invalid number of points (%ld) in "
-					"in boxcar_curve_length().\n", Fname, Lc, DEVICE_NAME,
+					"function `boxcar_curve_length'.\n",
+					Fname, Lc, DEVICE_NAME,
 					num_points );
 			THROW( EXCEPTION );
 		}
@@ -184,6 +181,9 @@ Var *boxcar_curve_length( Var *v )
 	return vars_push( INT_VAR, num_points );
 }
 
+
+/*--------------------------------------------------*/
+/*--------------------------------------------------*/
 
 Var *boxcar_get_curve( Var *v )
 {
@@ -221,20 +221,21 @@ Var *boxcar_get_curve( Var *v )
 		else
 		{
 			eprint( WARN, "%s:%ld: %s: Floating point number used as curve "
-					"type in boxcar_get_curve().\n", Fname, Lc, DEVICE_NAME );
+					"type in function `boxcar_get_curve'.\n",
+					Fname, Lc, DEVICE_NAME );
 			curve_type = lround( v->val.dval );
 		}
 
 		if ( ( v = vars_pop( v ) ) == NULL )
 		{
-			eprint( FATAL, "%s:%ld: %s: Missing curve number in "
-					"boxcar_get_curve().\n", Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, "%s:%ld: %s: Missing curve number in function "
+					"`boxcar_get_curve'.\n", Fname, Lc, DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 
 		v = vars_pop( v );
 	}
-	else
+	else                             /* first argument is a string */
 	{
 		curve_type = -1;
 
@@ -277,17 +278,19 @@ Var *boxcar_get_curve( Var *v )
 		if ( curve_type == -1 )
 		{
 			eprint( FATAL, "%s:%ld: %s: Invalid 1. argument (`%s') in "
-					"boxcar_get_curve().\n", Fname, Lc, DEVICE_NAME );
+					"function `boxcar_get_curve'.\n", Fname, Lc, DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 
 		v = vars_pop( v );
 	}
 
+	/* Check validity of curve type and number argument */
+
 	if ( curve_type == 0 && ( curve_number < 1 || curve_number > 2 ) )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid live curve number %d in "
-				"boxcar_get_curve().\n", Fname, Lc, DEVICE_NAME,
+		eprint( FATAL, "%s:%ld: %s: Invalid live curve number %d in function "
+				"`boxcar_get_curve'.\n", Fname, Lc, DEVICE_NAME,
 				curve_number );
 			THROW( EXCEPTION );
 	}
@@ -295,7 +298,7 @@ Var *boxcar_get_curve( Var *v )
 	if ( curve_type == 1 && ( curve_number < 1 || curve_number > 3 ) )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid memory curve number %d in "
-				"boxcar_get_curve().\n", Fname, Lc, DEVICE_NAME,
+				"function `boxcar_get_curve'.\n", Fname, Lc, DEVICE_NAME,
 				curve_number );
 			THROW( EXCEPTION );
 	}
@@ -322,7 +325,7 @@ Var *boxcar_get_curve( Var *v )
 		else
 		{
 			eprint( WARN, "%s:%ld: %s: Floating point number used as first "
-				"point to get in boxcar_get_curve().\n", Fname, Lc,
+				"point in function `boxcar_get_curve'.\n", Fname, Lc,
 					DEVICE_NAME );
 			first = lround( v->val.dval ) - 1;
 		}
@@ -330,7 +333,7 @@ Var *boxcar_get_curve( Var *v )
 		if ( first < 0 || first >= max_points )
 		{
 			eprint( FATAL, "%s:%ld: %s: Invalid value (%ld) for first point "
-					"of curve to be fetched in boxcar_get_curve().\n", Fname,
+					"of curve in function `boxcar_get_curve'.\n", Fname,
 					Lc, DEVICE_NAME, first + 1 );
 			THROW( EXCEPTION );
 		}
@@ -344,7 +347,7 @@ Var *boxcar_get_curve( Var *v )
 			else
 			{
 				eprint( WARN, "%s:%ld: %s: Floating point number used as last "
-						"point to get in boxcar_get_curve().\n", Fname, Lc,
+						"point in function `boxcar_get_curve'.\n", Fname, Lc,
 						DEVICE_NAME );
 				last = lround( v->val.dval ) - 1;
 			}
@@ -352,8 +355,8 @@ Var *boxcar_get_curve( Var *v )
 			if ( last < 0 || last >= max_points )
 			{
 				eprint( FATAL, "%s:%ld: %s: Invalid value (%ld) for last "
-						"point of curve to be fetched in "
-						"boxcar_get_curve().\n", Fname, Lc, DEVICE_NAME,
+						"point in function `boxcar_get_curve'.\n",
+						Fname, Lc, DEVICE_NAME,
 						last + 1 );
 				THROW( EXCEPTION );
 			}
@@ -361,16 +364,17 @@ Var *boxcar_get_curve( Var *v )
 
 		if ( first >= last )
 		{
-			eprint( FATAL, "%s:%ld: %s: Last point not larger than fist point "
-					"in boxcar_get_curve().\n", Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, "%s:%ld: %s: Last point not larger than first "
+					"point in function `boxcar_get_curve'.\n",
+					Fname, Lc, DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of "
-				"points in boxcar_get_curve().\n", Fname, Lc, DEVICE_NAME );
+		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of points in "
+				"function `boxcar_get_curve'.\n", Fname, Lc, DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -386,19 +390,29 @@ Var *boxcar_get_curve( Var *v )
 		return cl;
 	}
 
-	length = num_points * 20 * sizeof( char ) + 1;
+	/* Get a buffer large enough to hold all data */
+
+	length = num_points * 15 * sizeof( char ) + 1;
 	buffer = T_malloc( length );
+
+	/* Set transfer type to ASCII float */
 
 	if ( gpib_write( egg4402.device, "NT 1\n" ) == FAILURE )
 		egg4402_failure( );
+
+	/* Set the curve to use for the transfer */
 
 	sprintf( cmd, "CRV %ld %ld\n", curve_type, curve_number );
 	if ( gpib_write( egg4402.device, cmd ) == FAILURE )
 		egg4402_failure( );
 	
+	/* Tell the boxcar to send points */
+
 	sprintf( cmd, "DC %ld %ld\n", first, num_points );
 	if ( gpib_write( egg4402.device, cmd ) == FAILURE )
 		egg4402_failure( );
+
+	/* Try to read the data - on failure we still have to free the buffer */
 
 	TRY
 	{
@@ -411,6 +425,9 @@ Var *boxcar_get_curve( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	/* Get a buffer for the data in binary form and convert the ASCII data */
+
+	buffer[ length - 1 ] = '\0';
 	ret_buffer = T_malloc( num_points * sizeof( double ) );
 
 	for ( i = 0, cc = buffer; i < num_points; cc = cn, i++ )
@@ -419,12 +436,12 @@ Var *boxcar_get_curve( Var *v )
 		if ( cn == NULL )
 		{
 			T_free( buffer );
-			eprint( FATAL, "%s:%ld: %s: Received unexpected data in "
-					"boxcar_get_curve().\n", Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, "%s:%ld: %s: Received unexpected data in function "
+					"`boxcar_get_curve'.\n", Fname, Lc, DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 		*cn = '\0';
-		cn += 2;
+		cn += 2;                  /* the boxcar uses "\r\n" as separator */
 
 		ret_buffer[ i ] = T_atof( cc );
 	}
@@ -437,16 +454,36 @@ Var *boxcar_get_curve( Var *v )
 }
 
 
-void egg4402_failure( void )
+/*--------------------------------------------------*/
+/*--------------------------------------------------*/
+
+static bool egg4402_init( const char *name )
 {
-	eprint( FATAL, "%s: Communication with box-car failed.\n",
+	assert( egg4402.device < 0 );
+
+	if ( gpib_init_device( name, &egg4402.device ) == FAILURE )
+        return FAIL;
+
+	return OK;
+}
+
+
+/*--------------------------------------------------*/
+/*--------------------------------------------------*/
+
+static void egg4402_failure( void )
+{
+	eprint( FATAL, "%s: Communication with boxcar failed.\n",
 			DEVICE_NAME );
 	egg4402.fatal_error = SET;
 	THROW( EXCEPTION );
 }
 
 
-void egg4402_query( char *buffer, long *length )
+/*--------------------------------------------------*/
+/*--------------------------------------------------*/
+
+static void egg4402_query( char *buffer, long *length )
 {
 	unsigned char stb;
 	long dummy = 1;
