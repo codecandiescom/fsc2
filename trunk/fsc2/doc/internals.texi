@@ -31,23 +31,23 @@ to write a new module for a device (or if you get upset about things
 
 As you will already have understood, @code{fsc2} is basically an
 interpreter for @code{EDL} programs. Normal interpreters interpret each
-line of input individually, i.e.@: analyzing a line, and, if the line is
+line of input individually, i.e.@: analyze a line, and, if the line is
 syntactically correct, execute it. That's what @code{fsc2} also does,
 but only for the parts before the @code{EXPERIMENT} section. In
 contrast, the interpretation of the @code{EXPERIMENT} section of an
 @code{EDL} file consists of several steps. In the first step the
 @code{EXPERIMENT} section as a whole is read in and only syntax checks
-are done. In the second step, a complete test run of @code{EXPERIMENT}
+are done. In the second step a complete test run of @code{EXPERIMENT}
 section of the program is done to avoid that the experiment will have to
-be stopped due obvious logical errors in the @code{EDL} program. The
+be stopped due to obvious logical errors in the @code{EDL} program. The
 device modules are involved, i.e.@: they already can do all kinds of
 checks on what can be expected to happen during the real experiment and
 detect possible problems.
 
 Only if all these tests succeeded the third step, the execution of the
 @code{EXPERIMENT} section of the @code{EDL} program, is started, i.e.@:
-the experiment is run. If the experiment is restarted (without reloading
-the @code{EDL} file) only this third step is repeated.
+the experiment is run. When an experiment is restarted (without
+reloading the @code{EDL} file) only this third step is repeated.
 
 
 @ifinfo
@@ -68,27 +68,27 @@ token by token fashion, where tokens are e.g.@: variable or function
 names, numbers, braces, semicolons, section labels etc. This is mainly
 done by the code within the files which you'll find in the @file{src}
 directory, having an extension of @code{.l}. As you will see there's
-such a file for each of the different sections an @code{EDL} program
-may contain. Actually, there are some extra ones, @file{split_lexer.l}
-is a central switch for the first stage that calls the individual
-tokenizers in turn on finding the section labels and deals with errors
-conditions they can't handle. Two extra tokenizers,
-@file{devices_list_lexer.l} and @file{func_list_lexer.l} are for
-analyzing the files with the list of device modules,
-@file{conf/Devices}, and the list of functions, @file{conf/Functions}
-(they also contain some additional @code{C} code for interpreting the
-tokens).
+such a file for each of the different sections an @code{EDL} program may
+contain. Actually, there are some extra ones, @file{split_lexer.l} is
+the central switch for the first stage that calls the individual
+tokenizers in turn when finding a section label and also deals with
+error conditions that can't be handled by the section interpreters. Two
+extra tokenizers, @file{devices_list_lexer.l} and
+@file{func_list_lexer.l} are for analyzing the files with the list of
+device modules, @file{conf/Devices}, and the list of functions,
+@file{conf/Functions} (they also contain some additional @code{C} code
+for interpreting the tokens).
 
 
-Finally, there is @file{fsc2_clean.l}. @code{EDL} expects its input to
-be a single file in a certain format. Thus it does not deal directly
-with the input files (there can be more than one when there are
-@code{#INCLUDE} statements in an @code{EDL} program).Therefor, there's
+Finally, there is @file{fsc2_clean.l}. @code{EDL} itself expects its
+input to be a single file in a certain format. Thus it does not deal
+directly with the input files (there can be more than one when there are
+@code{#INCLUDE} statements in an @code{EDL} program). Therefore, there's
 an extra program, @file{fsc2_clean} that translates the input @code{EDL}
 script into a form that the main program understands. @code{fsc2_clean}
 for example removes all comments, includes files for @code{#INCLUDE}
-statements, adds information about line numbers and file names etc.@:, and
-then passes this cleaned-up input to the @code{fsc2} program. If you are
+statements, adds information about line numbers and file names etc.@:,
+and then passes this cleaned-up input to @code{fsc2}. If you are
 interested what @code{fsc2} really sees of an @code{EDL} file you can
 run @code{fsc2_clean} with the @code{EDL} file as its standard input,
 i.e.@:
@@ -107,7 +107,7 @@ devices are loaded and the functions defined in the modules are included
 into @code{fsc2}'s internal list of functions that can be used from
 within the @code{EDL} program. While reading the @code{VARIABLES}
 section the newly defined variables are added to @code{fsc2}'s list of
-variables, and, if necessary, are also initialized.
+variables, and, if necessary, also initialized.
 
 
 While the tokenizers (i.e.@: the files with an extension of @code{.l})
@@ -135,8 +135,8 @@ Floating point variable named 'a'
 Equal operator
 Integer variable named 'B_x'
 Plus operator
-Integer number with value 3
-End of statement character
+Integer number with a value of 3
+End of statement character: ;
 @end example
 @noindent
 The parser, in turn, has a list of all syntactically correct
@@ -145,7 +145,7 @@ all syntactically correct statements but contains a set of rules that
 define exactly how such statements may look like. One of these rules for
 example is that a variable name and an equal operator may be followed by
 either a variable, a function call or an integer or floating point
-number. Anything not fitting this pattern is an syntax error.}, together
+number. Anything not fitting this pattern is a syntax error.}, together
 with the information what to do for these statements. One of the rules
 is that a statement consisting of sequence of the tokens
 @example
@@ -154,18 +154,18 @@ integer number, end of statement character
 @end example
 @noindent
 is syntactically correct and that for this sequence of tokens some
-@code{C} code has to be executed that fetches the contents of the
-variable @code{B_x}, adds to it the value of the integer number and
-finally stores the result into the variable @code{a}. Statements that
-are not in the parsers list are @i{per definitionem} syntactically
-incorrect. For example, there is no rule on how to deal with a sequence
-of tokens as the one above but with the integer number missing. Because
-the parser looks at the statements token by token it won't complain
-while getting the first four tokens up to the plus. Only if the end of
-statement operator, the semicolon, is found directly following the plus
-sign it will recognize that there is no rule on how to deal with the
-situation, print the error message @code{Syntax error near token
-';'} (plus the file name and line number) and abort.
+@code{C} code has to be executed that fetches the value of the variable
+@code{B_x}, adds it to the integer number and finally stores the result
+into the variable @code{a}. Statements that are not in the parsers list
+are @i{per definitionem} syntactically incorrect. For example, there is
+no rule on how to deal with a sequence of tokens as the one above but
+with the integer number missing. Because the parser looks at the
+statements token by token it won't complain while getting the first four
+tokens up to the plus. Only if the end of statement operator, the
+semicolon, is found directly after the plus sign it will recognize
+that there is no rule on how to deal with the situation, print the error
+message @code{Syntax error near token ';'} (plus the file name and line
+number) and abort.
 
 
 The @code{EXPERIMENT} section is handled differently. Most important,
@@ -201,21 +201,22 @@ When @code{fsc2} interprets this line it will call the appropriate
 function in the module for the lock-in amplifier with a floating point
 number of @code{0.0001} as the argument (the module does not have to
 take care of dealing with units, they are already translated by
-@code{fsc2}).  The module function for setting the lock-in amplifiers
-sensitivity should now check the argument it got passed (there may or may
-not be a sensitivity setting of @code{0.0001} and only the module knows
-about it). If the argument is reasonable the module should store the
-value to be set when the lock-in amplifier gets initialized at the start
-of the experiment.
+@code{fsc2}, or, to be precise, by @code{fsc2_clean}).  The module
+function for setting the lock-in amplifiers sensitivity should now check
+the argument it got passed (there may or may not be a sensitivity
+setting of @code{0.0001} and only the module knows about this). If the
+argument is reasonable the module should store the value, to be set when
+the lock-in amplifier finally gets initialized at the start of the
+experiment.
 
-How to deal with completely wrong arguments or arguments that don't fit
-(e.g.@: if the argument is @code{40 uV} but the lock-in amplifier has
-only sensitivity settings of @code{30 uV} and @code{100 uV}) is
-completely up to the writer of the module, @code{fsc2} will accept
-whatever the module returns. For example, the module may accept the
-argument after converting it to something more correct and printing out
-a warning or it may bail out and tell @code{fsc2} to stop with
-interpreting the @code{EDL} file.
+How to deal with wrong arguments or arguments that don't fit (e.g.@: if
+the argument is @code{40 uV} but the lock-in amplifier has only
+sensitivity settings of @code{30 uV} and @code{100 uV}) is completely up
+to the writer of the module, @code{fsc2} will accept whatever the module
+returns. For example, the module may accept the argument after
+converting it to something more fitting and printing out a warning or it
+may bail out and tell @code{fsc2} to stop with interpreting the
+@code{EDL} script.
 
 
 Another thing module writers should keep in mind is that this first (and
@@ -252,7 +253,7 @@ By doing a test run, on the other hand, for example the function for
 setting the magnet to a new field will be called with all values that
 are to be expected during the real experiment and thus invalid field
 settings can be detected in advance. Doing a test run is much faster
-than running the experiment itself, because during the test run the
+than running the experiment itself because during the test run the
 devices will not be accessed (which usually uses at least 90% of the
 whole time), calls of the @code{wait()} function do not make the program
 sleep for the requested time, no graphics are drawn etc.
@@ -275,18 +276,18 @@ and the module should test at the time of device initialization if these
 arguments were really acceptable and, if not, stop the experiment.
 
 
-One real-world example of this case are the settings for windows for the
-digitizers, defining the parts of the complete measured curve that get
-returned or that are integrated over etc. Because during the test run
-neither the time base nor the amount of pre-trigger the digitizer is set
-to are known (unless both have been set explicitely from the @code{EDL}
-program) it can't be tested if the windows start and end positions are
-within the time slice the digitizer measures. Thus the module can just
-store these settings and tell @code{fsc2} that they seem to be
-reasonable. Only when the experiment starts and the module has it's
-first chance of finding out the real time base and pre-trigger setting
-it can do the necessary checks on the window settings and should abort
-the experiment at the earliest possible point of time if necessary.
+One real-world example of this case are the settings for a "window" for
+the digitizers, defining the part of a curve that get returned or that
+is integrated over etc. Because during the test run neither the time
+base nor the amount of pre-trigger the digitizer is set to are known
+(unless both have been set explicitely from the @code{EDL} program) it
+can't be tested if the windows start and end position are within the
+time slice the digitizer measures. Thus the module can just store these
+settings and tell @code{fsc2} that they seem to be reasonable. Only when
+the experiment starts and the module has it's first chance of finding
+out the real time base and pre-trigger setting it can do the necessary
+checks on the windows settings and should abort the experiment at the
+earliest possible point of time if necessary.
 
 
 To make things a bit easier when writing modules two hook functions can
@@ -319,19 +320,19 @@ processes by doing a @code{fork()}. If you use the @code{ps} command to
 list all your running processes suddenly a new instance of @code{fsc2}
 will be listed@footnote{Please note that already before the experiment
 gets started you will find two instances of @code{fsc2} running, during
-the experiment there are (at least) three.}. One of these two processes
-is doing the interpretation of the @code{EXPERIMENT} section, i.e.@: is
-runing the experiment, while the other process is responsible for the
+the experiment there are (at least) three.}. One of the two processes is
+doing the interpretation of the @code{EXPERIMENT} section, i.e.@: is
+running the experiment, while another process is responsible for the
 graphics and all interaction with the user.
 
 
 The main reason for splitting the execution of the experiment into two
-separate tasks is the following: The execution of the experiment, as far
+separate tasks is the following: the execution of the experiment, as far
 as concerned with acquiring data from the devices etc.@: should be
 unimpeded (at least as far as possible) from the task of dealing with
 user requests to allow maximum execution speed and to make the timing of
 the experiment less dependent on user interruptions. Take for example
-the case that the user starts to move one of @code{fsc2}'s windows around
+the case that the user starts to move one of @code{fsc2}s windows around
 on the screen. As long as she is moving the window no other instructions
 of the program can be executed, which effectively would stop the
 experiment for this time even though nothing really relevant happens. By
@@ -374,7 +375,7 @@ the new data whenever it has the time to do so.
 
 Problems can arise only if the child process creates new data at a much
 higher rate than the parent can accept them, in which case the buffer
-for memory segment keys would fill up@footnote{The buffer is is guarded
+for memory segment keys would fill up@footnote{The buffer is guarded
 against overflows by a semaphore that is initialized to the number of
 slots in the buffer and on which the child process does a down operation
 before writing data into the buffer while the parent process posts it
