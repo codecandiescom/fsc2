@@ -375,7 +375,8 @@ Finally, some combinations of characters take on a special meaning when
 they follow a number directly (i.e.@: with only spaces or tabulator
 characters in between). These are some physical units with or without
 the characters @code{n} (nano), @code{u} (micro), @code{m} (milli),
-@code{k} (kilo) and @code{M} (mega).  Here's the complete list:
+@code{k} (kilo) and @code{M} (mega) (only wave numbers can't be
+preceeded by such a character).  Here's the complete list:
 @quotation
 @multitable {Hz} {Decibel (and @code{ndb, udb, mdb, kdb} and @code{Mdb})}
 @item @code{s}  @tab Seconds (and @code{ns, us, ms, ks} and @code{Ms})
@@ -388,13 +389,14 @@ the characters @code{n} (nano), @code{u} (micro), @code{m} (milli),
 @item @code{K}  @tab Kelvin (and @code{nK, uK, mK, kK} and @code{MK})
 @item @code{dB} @tab Decibel (and @code{ndB, udB, mdB, kdB} and @code{MdB})
 @item @code{db} @tab Decibel (and @code{ndb, udb, mdb, kdb} and @code{Mdb})
+@item @code{cm^-1} @tab wave numbers, i.e.@: inverse of a @code{cm}
 @end multitable
 @end quotation
 @noindent
 Please note that all device functions return values in units of seconds,
-meters, Gauss, Volts, Amperes, Hertz, Kelvin and dB or products of these
-units. While you can use Tesla in the @code{EDL} script all functions
-return values in Gauss!
+meters, Gauss, Volts, Amperes, Hertz, Kelvin, dB and cm^-1 or products
+of these units. While you can use Tesla in the @code{EDL} script all
+functions return values in Gauss!
 
 
 @anchor{Variable types}

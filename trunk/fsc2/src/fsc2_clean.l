@@ -124,14 +124,14 @@ UNIT     ("m"|"s"|"G"|"V"|"A"|"Hz"|"dB"|"db"|"K")
 INANO    {INT}[\t \r]*"n"{UNIT}
 IMICRO   {INT}[\t \r]*"u"{UNIT}
 IMILLI   {INT}[\t \r]*"m"{UNIT}
-INONE    {INT}[\t \r]*{UNIT}
+INONE    {INT}[\t \r]*({UNIT}|cm^-1)
 IKILO    {INT}[\t \r]*"k"{UNIT}
 IMEGA    {INT}[\t \r]*"M"{UNIT}
 
 FNANO    {FLOAT}[\t \r]*"n"{UNIT}
 FMICRO   {FLOAT}[\t \r]*"u"{UNIT}
 FMILLI   {FLOAT}[\t \r]*"m"{UNIT}
-FNONE    {FLOAT}[\t \r]*{UNIT}
+FNONE    {FLOAT}[\t \r]*({UNIT}|cm^-1)
 FKILO    {FLOAT}[\t \r]*"k"{UNIT}
 FMEGA    {FLOAT}[\t \r]*"M"{UNIT}
 
