@@ -334,8 +334,6 @@ inline short i2shrt( int a )
 
 inline unsigned long d2color( double a )
 {
-	printf( "%f -> ", a );
-
 	if ( a <= - 0.5 / ( double ) NUM_COLORS )
 		return fl_get_pixel( FL_BLACK );
 	if ( a >= 1.0 + 0.5 / ( double ) NUM_COLORS )
