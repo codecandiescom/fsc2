@@ -5,7 +5,7 @@
 #include "fsc2.h"
 
 
-char *get_string_copy( char *str )
+char *get_string_copy( const char *str )
 {
 	char *new;
 

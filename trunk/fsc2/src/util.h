@@ -5,7 +5,7 @@
 #if ! defined UTIL_HEADER
 #define UTIL_HEADER
 
-char *get_string_copy( char *str );
+char *get_string_copy( const char *str );
 char *get_string( size_t len );
 void eprint( int severity, const char *fmt, ... );
 
