@@ -265,7 +265,7 @@ static bool no_prog_to_run( void )
 	run_end_of_exp_hooks( );
 
 #if defined WITH_RULBUS
-	if ( need_RULBUS
+	if ( need_RULBUS )
 		 rulbus_close( );
 #endif
 
@@ -354,7 +354,7 @@ static bool init_devs_and_graphics( void )
 		vars_del_stack( );
 
 #if defined WITH_RULBUS
-		if ( need_RULBUS
+		if ( need_RULBUS )
 			 rulbus_close( );
 #endif
 
@@ -467,7 +467,7 @@ static void fork_failure( int stored_errno )
 	run_end_of_exp_hooks( );
 
 #if defined WITH_RULBUS
-	if ( need_RULBUS
+	if ( need_RULBUS )
 		 rulbus_close( );
 #endif
 
@@ -737,7 +737,7 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 	run_end_of_exp_hooks( );
 
 #if defined WITH_RULBUS
-	if ( need_RULBUS
+	if ( need_RULBUS )
 		 rulbus_close( );
 #endif
 
