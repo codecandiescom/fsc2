@@ -64,4 +64,7 @@ digitizer_define_window, -1, ALL; // defines a cursor window
 digitizer_timebase, -1, ALL;      // set or get the time base
 digitizer_num_averages, -1, ALL;  // set or get number of averages
 digitizer_get_channel_number, 1, ALL;
-digitizer_set_trigger_channel, 1, ALL;
+digitizer_trigger_channel, 1, ALL;
+digitizer_start_acquisition, 0, EXP;
+digitizer_get_area, -1, EXP;
+digitizer_get_curve, -1, EXP;
