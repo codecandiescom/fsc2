@@ -127,6 +127,7 @@ struct HP8647A {
 
 extern HP8647A hp8647a;
 extern const char *mod_types[ ];
+extern const char *mod_sources[ ];
 
 
 /* functions defined in "hp8647a_util.c" */
