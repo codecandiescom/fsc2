@@ -310,7 +310,6 @@ struct Graphics_1d {
 	Curve_1d *curve[ MAX_CURVES ];
 
 	Marker_1D *marker_1d;   /* linked list of markers */
-
 };
 
 
@@ -360,7 +359,6 @@ struct Graphics_2d {
 
 	bool is_cut;            /* set when cross section window is shown */
 	int cut_select;
-
 };
 
 

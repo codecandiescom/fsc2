@@ -80,6 +80,7 @@ Var *f_WN2F(    Var *v );
 Var *f_islice(  Var *v );
 Var *f_fslice(  Var *v );
 Var *f_lspace(  Var *v );
+Var *f_reverse( Var *v );
 
 
 #endif  /* ! FUNC_BASIC_HEADER */

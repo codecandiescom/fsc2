@@ -653,9 +653,12 @@ void run_exp_hooks( void )
 
 			/* Give user a chance to stop while running the experiment hooks */
 
-			fl_check_only_forms( );
-			if ( EDL.do_quit && EDL.react_to_do_quit )
-				THROW( USER_BREAK_EXCEPTION );
+			if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+			{
+				fl_check_only_forms( );
+				if ( EDL.do_quit && EDL.react_to_do_quit )
+					THROW( USER_BREAK_EXCEPTION );
+			}
 		}
 
 		TRY_SUCCESS;
@@ -700,7 +703,7 @@ void run_end_of_exp_hooks( void )
 	for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
 		/* empty */ ;
 
-	for ( cd = EDL.Device_List; cd != NULL; cd = cd->prev )
+	for ( ; cd != NULL; cd = cd->prev )
 	{
 		fsc2_assert( EDL.Call_Stack == NULL );
 

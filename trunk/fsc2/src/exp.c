@@ -884,7 +884,8 @@ void exp_test_run( void )
 
 			/* Give the 'Stop Test' button a chance to get tested... */
 
-			if ( ! Internals.just_testing && token_count >= CHECK_FORMS_AFTER )
+			if ( ! ( Internals.cmdline_flags & TEST_ONLY ) &&
+				 token_count >= CHECK_FORMS_AFTER )
 			{
 				fl_check_only_forms( );
 				token_count %= CHECK_FORMS_AFTER;
@@ -1593,7 +1594,11 @@ bool test_for_cond( Prg_Token *cur )
 bool check_result( Var *v )
 {
     if ( ! ( v->type & ( INT_VAR | FLOAT_VAR ) ) )
-		return FALSE;
+	{
+		print( FATAL, "Only integer and floating point values can be used "
+			   "in tests.\n" );
+		THROW( EXCEPTION );
+	}
 
 	/* Test the result - everything nonzero returns OK */
 

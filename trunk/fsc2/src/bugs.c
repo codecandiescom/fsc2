@@ -275,35 +275,40 @@ void death_mail( int signo )
 		fprintf( mail, "In EDL program %s at line = %ld\n\n",
 				 EDL.Fname, EDL.Lc );
 
-	fputs( "Content of program browser:\n\n"
-		   "--------------------------------------------------\n\n", mail );
-
-	lines = fl_get_browser_maxline( GUI.main_form->browser );
-	for ( i = 0; i < lines; )
+	if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
 	{
-		strcpy( cur_line, fl_get_browser_line( GUI.main_form->browser, ++i ) );
-		clp = cur_line;
-		if ( *clp == '@' )
+		fputs( "Content of program browser:\n\n"
+			   "--------------------------------------------------\n\n",
+			   mail );
+
+		lines = fl_get_browser_maxline( GUI.main_form->browser );
+		for ( i = 0; i < lines; )
 		{
-			if ( *( clp + 1 ) == 'n' )
-				continue;
-			while ( *clp++ != 'f' )
-				/* empty */ ;
+			strcpy( cur_line,
+					fl_get_browser_line( GUI.main_form->browser, ++i ) );
+			clp = cur_line;
+			if ( *clp == '@' )
+			{
+				if ( *( clp + 1 ) == 'n' )
+					continue;
+				while ( *clp++ != 'f' )
+					/* empty */ ;
+			}
+			fputs( clp, mail );
+			fputc( '\n', mail );
 		}
-		fputs( clp, mail );
-		fputc( '\n', mail );
-	}
 
-	fputs( "--------------------------------------------------\n\n"
-		   "Content of output browser:\n"
-		   "--------------------------------------------------\n", mail );
+		fputs( "--------------------------------------------------\n\n"
+			   "Content of output browser:\n"
+			   "--------------------------------------------------\n", mail );
 
-	lines = fl_get_browser_maxline( GUI.main_form->error_browser );
-	for ( i = 0; i < lines; )
-	{
-		fputs( fl_get_browser_line( GUI.main_form->error_browser, ++i ),
-               mail );
-		fputc( ( int ) '\n', mail );
+		lines = fl_get_browser_maxline( GUI.main_form->error_browser );
+		for ( i = 0; i < lines; )
+		{
+			fputs( fl_get_browser_line( GUI.main_form->error_browser, ++i ),
+				   mail );
+			fputc( ( int ) '\n', mail );
+		}
 	}
 
 	snprintf( vfn, PATH_MAX + 20, "%s%sversion.ugz", libdir, slash( libdir ) );

@@ -312,14 +312,15 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
 			fl_addto_browser_chars( GUI.main_form->error_browser, buffer );
 
 			fl_set_browser_topline( GUI.main_form->error_browser,
-				  fl_get_browser_maxline( GUI.main_form->error_browser )
-				- fl_get_browser_screenlines( GUI.main_form->error_browser )
-                + 1 );
+				   fl_get_browser_maxline( GUI.main_form->error_browser )
+				   - fl_get_browser_screenlines( GUI.main_form->error_browser )
+                   + 1 );
 
 			fl_unfreeze_form( GUI.main_form->error_browser->form );
 
 			if ( Internals.cmdline_flags & DO_CHECK )
-				fprintf( stdout, "%s", buffer );
+				fprintf( severity == NO_ERROR ? stdout : stderr,
+						 "%s", buffer );
 		}
 		else
 			writer( C_EPRINT, buffer );
@@ -327,15 +328,17 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
 	else                               /* simple test run ? */
 	{
 		if ( severity != NO_ERROR )
-			fprintf( stdout, "%c ", severity[ "FSW" ] );      /* Hehe... */
+			fprintf( stderr, "%c ", severity[ "FSW" ] );      /* Hehe... */
 
 		if ( print_fl && EDL.Fname )
-			fprintf( stdout, "%s:%ld: ", EDL.Fname, EDL.Lc );
+			fprintf( severity == NO_ERROR ? stdout : stderr,
+					 "%s:%ld: ", EDL.Fname, EDL.Lc );
 
 		va_start( ap, fmt );
-		vfprintf( stdout, fmt, ap );
+		vfprintf( severity == NO_ERROR ? stdout : stderr, fmt, ap );
 		va_end( ap );
-		fflush( stdout );
+		if ( severity == NO_ERROR )
+			fflush( stdout );
 	}
 }
 
@@ -436,14 +439,15 @@ void print( int severity, const char *fmt, ... )
 			fl_addto_browser_chars( GUI.main_form->error_browser, buffer );
 
 			fl_set_browser_topline( GUI.main_form->error_browser,
-				  fl_get_browser_maxline( GUI.main_form->error_browser )
-				- fl_get_browser_screenlines( GUI.main_form->error_browser )
-                + 1 );
+				   fl_get_browser_maxline( GUI.main_form->error_browser )
+				   - fl_get_browser_screenlines( GUI.main_form->error_browser )
+				   + 1 );
 
 			fl_unfreeze_form( GUI.main_form->error_browser->form );
 
 			if ( Internals.cmdline_flags & DO_CHECK )
-				fprintf( stdout, "%s", buffer );
+				fprintf( severity == NO_ERROR ? stdout : stderr,
+						 "%s", buffer );
 		}
 		else
 			writer( C_EPRINT, buffer );
@@ -451,32 +455,37 @@ void print( int severity, const char *fmt, ... )
 	else                               /* simple test run ? */
 	{
 		if ( severity != NO_ERROR )
-			fprintf( stdout, "%c ", severity[ "FSW" ] );      /* Hehe... */
+			fprintf( stderr, "%c ", severity[ "FSW" ] );      /* Hehe... */
 
 		if ( ! Internals.in_hook && EDL.Fname )
-			fprintf( stdout, "%s:%ld: ", EDL.Fname, EDL.Lc );
+			fprintf( severity == NO_ERROR ? stdout : stderr,
+					 "%s:%ld: ", EDL.Fname, EDL.Lc );
 
 		if ( EDL.Call_Stack != NULL )
 		{
 			if ( EDL.Call_Stack->f == NULL )
 			{
 				if ( EDL.Call_Stack->dev_name != NULL )
-					fprintf( stdout, "%s: ", EDL.Call_Stack->dev_name );
+					fprintf( severity == NO_ERROR ? stdout : stderr,
+							 "%s: ", EDL.Call_Stack->dev_name );
 			}
 			else
 			{
 				if ( EDL.Call_Stack->f->device != NULL )
-					fprintf( stdout, "%s: ", EDL.Call_Stack->f->device->name );
+					fprintf( severity == NO_ERROR ? stdout : stderr,
+							 "%s: ", EDL.Call_Stack->f->device->name );
 
 				if ( EDL.Call_Stack->f->name != NULL )
-					fprintf( stdout, "%s(): ", EDL.Call_Stack->f->name );
+					fprintf( severity == NO_ERROR ? stdout : stderr,
+							 "%s(): ", EDL.Call_Stack->f->name );
 			}
 		}
 
 		va_start( ap, fmt );
-		vfprintf( stdout, fmt, ap );
+		vfprintf( severity == NO_ERROR ? stdout : stderr, fmt, ap );
 		va_end( ap );
-		fflush( stdout );
+		if ( severity == NO_ERROR )
+			fflush( stdout );
 	}
 }
 

@@ -681,11 +681,8 @@ static void run_sigchld_handler( int signo )
 
 #if ! defined NDEBUG
 		if ( WIFSIGNALED( return_status ) )
-		{
 			fprintf( stderr, "Child process %d died due to signal %d\n",
 					 pid, WTERMSIG( return_status ) );
-			fflush( stderr );
-		}
 #endif
 
 		Internals.child_pid = 0;                         /* child is dead... */
@@ -996,7 +993,6 @@ static void run_child( void )
 	if ( ( fcd = getenv( "FSC2_CHILD_DEBUG" ) ) != NULL && *fcd != '\0' )
 	{
 		fprintf( stderr, "Child process pid = %d\n", getpid( ) );
-		fflush( stderr );
 		sleep( 36000 );
 	}
 	else

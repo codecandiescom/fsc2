@@ -12,4 +12,6 @@ ni6601_libs        := libni6601.so
 me6000_libs        := libme6x00.so
 WITH_SPEC10        := yes
 rs_spec10_incl     := /usr/local/include/pvcam
+rs_spec10_libs     := libpvcam.so
+BROWSER            := konqueror
 MAIL_ADDRESS       := toerring@spex.chem.tu-berlin.de

@@ -24,8 +24,6 @@
 
 #include "spex_cd2a.h"
 
-#define SPEX_CD2A_TEST
-
 
 #define PARAMETER  0
 #define COMMAND    1
@@ -551,7 +549,7 @@ static size_t spex_cd2a_write( int type, const char *mess )
 
 
 #ifdef SPEX_CD2A_TEST
-	fprintf( stderr, "%s\n", mess );
+//	fprintf( stderr, "%s\n", mess );
 	return 0;
 #endif
 

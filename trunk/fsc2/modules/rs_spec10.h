@@ -28,9 +28,7 @@
 /* Define the following for test purposes where no real communication with
    the camera is supposed to happen */
 
-/*
 #define RS_SPEC10_TEST
-*/
 
 /* The following sequence of includes and undefining BIG_ENDIAN is
    required to avoid some compiler warnings. The include files coming
@@ -60,8 +58,11 @@ struct RS_SPEC10 {
 	struct {
 		uns16 max_size[ 2 ];      /* number of pixels in x- and y-direction */
 		uns16 roi[ 4 ];
+		bool roi_is_set;
 		long bin[ 2 ];
+		bool bin_is_set;
 		bool bin_mode;            /* 0: hardware binning, 1: software bin. */
+		bool bin_mode_is_set;
 		double exp_res;
 		flt64 exp_min_time;
 		uns32 exp_time;           /* exposure time in multiples of 1 us */
@@ -97,6 +98,7 @@ extern struct RS_SPEC10 *rs_spec10,
 int rs_spec10_init_hook( void );
 int rs_spec10_test_hook( void );
 int rs_spec10_exp_hook( void );
+void rs_spec10_child_exit_hook( void );
 int rs_spec10_end_of_exp_hook( void );
 void rs_spec10_exit_hook( void );
 
@@ -123,6 +125,8 @@ void rs_spec10_error_handling( void );
 
 /* Functions from rs_spec10_util.c */
 
+bool rs_spec10_read_state( void );
+bool rs_spec10_store_state( void );
 double rs_spec10_k2c( double tk );
 double rs_spec10_c2k( double tc );
 int16 rs_spec10_k2ic( double tk );

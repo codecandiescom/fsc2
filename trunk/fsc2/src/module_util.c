@@ -44,7 +44,7 @@ int get_mode( void )
 
 int get_check_state( void )
 {
-	return Internals.cmdline_flags & DO_CHECK || Internals.just_testing;
+	return Internals.cmdline_flags & ( DO_CHECK | TEST_ONLY | NO_GUI_RUN );
 }
 
 

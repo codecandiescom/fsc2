@@ -1145,6 +1145,13 @@ void vars_assign( Var *src, Var *dest )
 		THROW( EXCEPTION );
 	}
 
+	if ( src->type == STR_VAR )
+	{
+		print( FATAL, "Variable of type STRING can't be used in this "
+			   "context.\n" );
+		THROW( EXCEPTION );
+	}
+
 	if ( ! ( src->type & ( INT_VAR | FLOAT_VAR |
 						   INT_ARR | FLOAT_ARR |
 						   INT_REF | FLOAT_REF ) ) )
