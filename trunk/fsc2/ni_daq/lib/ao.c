@@ -31,8 +31,8 @@
 /*--------------------------------------------------------------------*/
 /*--------------------------------------------------------------------*/
 
-int ni_daq_ao_channel_configuration( int board, int *channels,
-									 int num_channels,
+int ni_daq_ao_channel_configuration( int board, int num_channels,
+									 int *channels,
 									 NI_DAQ_STATE *external_reference,
 									 NI_DAQ_BU_POLARITY *polarity )
 {
@@ -71,6 +71,7 @@ int ni_daq_ao_channel_configuration( int board, int *channels,
 	}
 
 	ao.cmd = NI_DAQ_AO_CHANNEL_SETUP;
+
 	for ( i = 0; i < num_channels; i++ )
 	{
 		ch = channels[ i ];
@@ -94,14 +95,7 @@ int ni_daq_ao_channel_configuration( int board, int *channels,
 
 		if ( ( ret = ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_AO, &ao ) )
 			 < 0 )
-			switch ( ret )
-			{
-				case EACCES :
-					return ni_daq_errno = NI_DAQ_ERR_ACS;
-
-				default :
-					return ni_daq_errno = NI_DAQ_ERR_INT;
-			}
+			return ni_daq_errno = NI_DAQ_ERR_INT;
 
 		if ( ni_daq_dev[ board ].ao_state.ext_ref[ ch ] !=
 			 										  external_reference[ i ] )
@@ -114,6 +108,7 @@ int ni_daq_ao_channel_configuration( int board, int *channels,
 
 		ni_daq_dev[ board ].ao_state.polarity[ ch ] = polarity[ i ];
 		ni_daq_dev[ board ].ao_state.ext_ref[ ch ] = external_reference[ i ];
+		ni_daq_dev[ board ].ao_state.is_channel_setup[ ch ] = 1;
 	}
 
 	return ni_daq_errno = NI_DAQ_OK;
@@ -122,7 +117,7 @@ int ni_daq_ao_channel_configuration( int board, int *channels,
 /*--------------------------------------------------------------------*/
 /*--------------------------------------------------------------------*/
 
-int ni_daq_ao( int board, int *channels, int num_channels, double *values )
+int ni_daq_ao( int board, int num_channels, int *channels, double *values )
 {
     int ret;
 	int i;
@@ -146,6 +141,10 @@ int ni_daq_ao( int board, int *channels, int num_channels, double *values )
 
 		if ( ch < 0 || ch >= ni_daq_dev[ board ].props.num_ao_channels )
 			return ni_daq_errno = NI_DAQ_ERR_IVA;
+
+		if ( ! ni_daq_dev[ board ].ao_state.is_channel_setup[ i ] )
+			return ni_daq_error = NI_DAQ_ERR_NSS;
+
 
 		if ( ni_daq_dev[ board ].ao_state.ext_ref[ ch ] == NI_DAQ_DISABLED )
 		{
@@ -185,21 +184,19 @@ int ni_daq_ao( int board, int *channels, int num_channels, double *values )
 
 		if ( ( ret = ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_AO, &ao ) )
 			 < 0 )
-			switch ( ret )
-			{
-				case EACCES :
-					return ni_daq_errno = NI_DAQ_ERR_ACS;
-
-				default :
-					return ni_daq_errno = NI_DAQ_ERR_INT;
-			}
+			return ni_daq_errno = NI_DAQ_ERR_INT;
 	}
 
 	return ni_daq_errno = NI_DAQ_OK;
 }
 
 
+/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+
 int ni_daq_ao_init( int board )
 {
+	for ( ch = 0; ch < 2; ch++ )
+		ni_daq_dev[ board ].ao_state.is_channel_setup[ ch ] = 0;
 	return 0;
 }

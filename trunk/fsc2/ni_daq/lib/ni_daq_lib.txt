@@ -16,7 +16,7 @@ To use the library you will have to include the header file 'ni_daq.h'.
 
 The library supplies the following groups of functions:
 
-a) Administrative and miscellaneous functions:
+A) Administrative and miscellaneous functions:
 
     ni_daq_open()
     ni_daq_close()
@@ -27,7 +27,7 @@ a) Administrative and miscellaneous functions:
     ni_daq_msc_set_clock_output()
     ni_daq_msc_get_clock_state()
 
-b) Functions for analog input (AI):
+B) Functions for analog input (AI):
 
     ni_daq_ai_set_speed()
     ni_daq_ai_get_speed()
@@ -36,12 +36,12 @@ b) Functions for analog input (AI):
     ni_daq_ai_start_acq()
     ni_daq_ai_get_acq_data()
 
-c) Functions for analog output (AO):
+C) Functions for analog output (AO):
 
     ni_daq_ao_channel_configuration()
     ni_daq_ao()
 
-d) Counter/pulser functions (GPCT):
+D) Counter/pulser functions (GPCT):
 
     ni_daq_gpct_set_speed()
     ni_daq_gpct_get_speed()
@@ -53,7 +53,7 @@ d) Counter/pulser functions (GPCT):
     ni_daq_gpct_continuous_pulses()
     ni_daq_gpct_stop_pulses()
 
-e) DIO functions (DIO):
+E) DIO functions (DIO):
 
     ni_daq_dio_write()
     ni_daq_dio_read()
@@ -81,7 +81,7 @@ following values can be expected:
     NI_DAQ_ERR_DFP       Unspecified error when opening device file
     NI_DAQ_ERR_INT       Internal driver or library error
     NI_DAQ_ERR_NAO       Board is missing AO capabilities
-    NI_DAQ_ERR_NSS       Missing AI channel setup
+    NI_DAQ_ERR_NCS       Missing channel setup
     NI_DAQ_ERR_NAS       Missing AI acquisition setup
     NI_DAQ_ERR_NEM       Not enough memory
     NI_DAQ_ERR_NPT       Timing impossible to realize
@@ -129,6 +129,8 @@ subsystems does not change, but the slow speed clock encountered by
 the subsystems is changed.
 
 
+A. Administrative and miscellaneous functions
+---------------------------------------------
 
 ======================================================================
 
@@ -274,6 +276,12 @@ On failure the function returns one of the following error codes
 
     NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_IVA
 
+
+======================================================================
+
+
+B. Functions for analog input (AI)
+----------------------------------
 
 ======================================================================
 
@@ -522,7 +530,7 @@ ni_daq_ai_channel_configuration().
 On failure the function returns one of the following error codes
 
     NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO    NI_DAQ_ERR_IVA    NI_DAQ_ERR_INT
-    NI_DAQ_ERR_IVS    NI_DAQ_ERR_NPT    NI_DAQ_ERR_NSS    NI_DAQ_ERR_NEM
+    NI_DAQ_ERR_IVS    NI_DAQ_ERR_NPT    NI_DAQ_ERR_NCS    NI_DAQ_ERR_NEM
 
 
 ======================================================================
@@ -543,7 +551,7 @@ the function ni_daq_ai_get_acq_data().
 
 On failure the function returns one of the following error codes
 
-    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_INT    NI_DAQ_ERR_NSS
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_INT    NI_DAQ_ERR_NCS
     NI_DAQ_ERR_NAS    NI_DAQ_ERR_NEM
 
 
@@ -619,9 +627,90 @@ On success the function returns the number of data that have been acquired
 for each channel (but never more than 'num_data_per_channel'). On failure
 the function returns one of the following error codes
 
-    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_INT    NI_DAQ_ERR_NSS
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_INT    NI_DAQ_ERR_NCS
     NI_DAQ_ERR_NAS    NI_DAQ_ERR_NEM
 
 
 ======================================================================
+
+
+C. Functions for analog output (AO)
+-----------------------------------
+
+======================================================================
+
+int ni_daq_ao_channel_configuration( int board, int num_channels,
+									 int *channels,
+									 NI_DAQ_STATE *external_reference,
+									 NI_DAQ_BU_POLARITY *polarity )
+
+
+Before analog output can be done the channels to be used have to be
+set up, which is done using this function.
+
+Beside the board handle the function expects the four further arguments.
+The first of these is the number of channels to be set up. The next is
+an array of the channel numbers identifiying the channels to set up,
+which can range between 0 and the maximum number of available AO channels
+minus one. Then follows an array of values of type NI_DAQ_STATE, which
+can be set to either
+
+    NI_DAQ_ENABLED   or    NI_DAQ_DISABLED
+
+and which determine if for the corresponding channel if the output
+voltage is created from the internal reference voltage of 10 V is to
+be used (when set to NI_DAQ_DISABLED) or an external reference voltage
+applied to the EXT_REF input pin is to be used.
+
+The final argument is an array of values of type NI_DAQ_BU_POLARITY,
+which can be set to 
+
+   NI_DAQ_BIPOLAR   or   NI_DAQ_UNIPOLAR
+
+and determine if the output voltage of the corresponding channel is to be
+symmetrically in the range between the negative and positive reference
+voltage (if set to NI_DAQ_BIPOLAR) or only between 0 V and the maximum
+of the reference voltage.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_NAO    NI_DAQ_ERR_IVA
+    NI_DAQ_ERR_INT
+
+
+======================================================================
+
+int ni_daq_ao( int board, int num_channels, int *channels, double *values );
+
+This function can be called to do an AO conversion for a set of channels
+(if ni_daq_ao_channel_configuration() had been called previously for these
+channels).
+
+It expects four arguments, first the handle for the board, then the number
+of channels and an array of channel numbers (between 0 and the maximum
+number of available AO channels minus one). The last argument is a pointer
+of as many doubles as there are channels. For channels using the internal
+voltage reference of 10 V this must be a number between -10 and +10 (if
+the channel has been set up for bipolar output) or 0 an 10 (when the channel
+was set up for unipolar output), representing the voltage to be output.
+For channels using an external reference applied to the EXT_REF pin this
+must be a number between -1 and +1 (if the channel has been set up for
+bipolar output) or 0 an 1 (when the channel was set up for unipolar output),
+where the intervsal represents the range covered by the external reference
+voltage.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_NAO    NI_DAQ_ERR_IVA
+    NI_DAQ_ERR_NCS    NI_DAQ_ERR_INT
+
+
+======================================================================
+
+
+D Counter/pulser functions (GPCT)
+---------------------------------
+
+======================================================================
+
 
