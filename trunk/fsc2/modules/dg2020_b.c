@@ -355,25 +355,7 @@ Var *pulser_state( Var *v )
 	if ( v == NULL )
 		return vars_push( INT_VAR, ( long ) dg2020.is_running );
 
-	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-
-	if ( v->type == INT_VAR )
-		state = v->val.lval != 0 ? SET : UNSET;
-	else if ( v->type == FLOAT_VAR )
-		state = v->val.dval != 0.0 ? SET : UNSET;
-	else
-	{
-		if ( ! strcasecmp( v->val.sptr, "OFF" ) )
-			 state = UNSET;
-		else if ( ! strcasecmp( v->val.sptr, "ON" ) )
-			state = SET;
-		else
-		{
-			eprint( FATAL, SET, "%s: Invalid argument in call of "
-					"`pulser_state'.\n", DEVICE_NAME );
-			THROW( EXCEPTION )
-		}
-	}
+	state = get_boolean( v, DEVICE_NAME );
 
 	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( INT_VAR, ( long ) ( dg2020.is_running = state ) );
@@ -509,7 +491,6 @@ Var *pulser_shift( Var *v )
 	{
 		long ret = 1;
 
-
 		for ( p = dg2020_Pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dpos )
 				ret &= pulser_shift( vars_push( INT_VAR, p->num ) )->val.lval;
@@ -520,8 +501,8 @@ Var *pulser_shift( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		vars_check( v, INT_VAR );
-		p = dg2020_get_pulse( v->val.lval );
+		p = dg2020_get_pulse( get_strict_long( v, "pulse number",
+											   DEVICE_NAME ) );
 
 		if ( ! p->is_pos )
 		{
@@ -597,7 +578,6 @@ Var *pulser_increment( Var *v )
 	{
 		long ret = 1;
 
-
 		for ( p = dg2020_Pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dlen )
 				ret &=
@@ -609,8 +589,8 @@ Var *pulser_increment( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		vars_check( v, INT_VAR );
-		p = dg2020_get_pulse( v->val.lval );
+		p = dg2020_get_pulse( get_strict_long( v, "pulse number",
+											   DEVICE_NAME ) );
 
 		if ( ! p->is_len )
 		{
@@ -664,6 +644,7 @@ Var *pulser_next_phase( Var *v )
 {
 	int j;
 	FUNCTION *f;
+	long phase_number;
 
 
 	if ( dg2020.is_cw_mode )
@@ -699,15 +680,16 @@ Var *pulser_next_phase( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		vars_check( v, INT_VAR );
-		if ( v->val.lval != 1 && v->val.lval != 2 )
+		phase_number = get_strict_long( v, "phase number", DEVICE_NAME );
+
+		if ( phase_number != 1 && phase_number != 2 )
 		{
 			eprint( FATAL, SET, "%s: Invalid phase number: %ld.\n",
-					pulser_struct.name, v->val.lval );
+					pulser_struct.name, phase_number );
 			THROW( EXCEPTION )
 		}
 
-		f = dg2020_phs[ v->val.lval - 1 ].function;
+		f = dg2020_phs[ phase_number - 1 ].function;
 
 		if ( ! f->is_used )
 		{
@@ -742,6 +724,7 @@ Var *pulser_phase_reset( Var *v )
 {
 	int j;
 	FUNCTION *f;
+	long phase_number;
 
 
 	if ( dg2020.is_cw_mode )
@@ -777,15 +760,16 @@ Var *pulser_phase_reset( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		vars_check( v, INT_VAR );
-		if ( v->val.lval != 1 && v->val.lval != 2 )
+		phase_number = get_strict_long( v, "phase number", DEVICE_NAME );
+
+		if ( phase_number != 1 && phase_number != 2 )
 		{
 			eprint( FATAL, SET, "%s: Invalid phase number: %ld.\n",
-					pulser_struct.name, v->val.lval );
+					pulser_struct.name, phase_number );
 			THROW( EXCEPTION )
 		}
 
-		f = dg2020_phs[ v->val.lval - 1 ].function;
+		f = dg2020_phs[ phase_number - 1 ].function;
 
 		if ( ! f->is_used )
 		{
@@ -854,8 +838,8 @@ Var *pulser_pulse_reset( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		vars_check( v, INT_VAR );
-		p = dg2020_get_pulse( v->val.lval );
+		p = dg2020_get_pulse( get_strict_long( v, "pulse number",
+											   DEVICE_NAME ) );
 
 		/* Reset all changeable properties back to their initial values */
 

@@ -54,8 +54,11 @@ inline void too_many_arguments( Var *v, const char *device )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+/* This function just tells the user that a function can't be */
+/* called ithout an argument (unless we are in the EXPERIMENT */
+/* section) and then trows an exception.                      */
+/*------------------------------------------------------------*/
 
 inline void no_query_possible( const char *device )
 {
@@ -92,4 +95,66 @@ inline double get_double( Var *v, const char *snippet, const char *device )
 				device, snippet, Cur_Func );
 
 	return v->type == INT_VAR ? v->val.lval : v->val.dval;
+}
+
+
+/*----------------------------------------------------------------------*/
+/* This function can be called to get the value of a variable that must */
+/* be an integer variable. If it isn't an error message is printed and  */
+/* only when the program is interpreting the EXPERIMENT section and the */
+/* variable is a floating point variable no exception is thrown but its */
+/* value is converted to an int and this value returned.                */
+/*----------------------------------------------------------------------*/
+
+inline long get_strict_long( Var *v, const char *snippet, const char *device )
+{
+	if ( v->type == FLOAT_VAR )
+	{
+		if ( FSC2_MODE == EXPERIMENT )
+		{
+			eprint( SEVERE, SET, "%s: Floating point number used as %s "
+					"in %s(), trying to continue!\n",
+					device, snippet, Cur_Func );
+			vars_check( v, FLOAT_VAR );
+			return lrnd( v->val.dval );
+		}
+
+		eprint( FATAL, SET, "%s: Floating point number can't be used as "
+				"%s in %s().\n", device, snippet, Cur_Func );
+		THROW( EXCEPTION )
+	}
+
+	vars_check( v, INT_VAR );
+	return v->val.lval;
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+inline bool get_boolean( v, const char *device )
+{
+	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+
+	if ( v->type == FLOAT_VAR )
+	{
+		eprint( WARN, SET, "%s: Floating point number found where boolean "
+				"type value was expected in %s().\n", device, Cur_Func );
+		return v->val.dval != 0.0;
+	}
+	else if ( v->type == STR_VAR )
+	{
+		if ( ! strcasecmp( v->val.sptr, "OFF" ) )
+			return UNSET;
+		else if ( ! strcasecmp( v->val.sptr, "ON" ) )
+			return SET;
+		else
+		{
+			eprint( FATAL, SET, "%s: Invalid argument (%s) in call of "
+					"function %s().\n", device, v->val.sptr, Cur_Func );
+			THROW( EXCEPTION )
+		}
+	}
+
+	return v->val.lval != 0;
 }

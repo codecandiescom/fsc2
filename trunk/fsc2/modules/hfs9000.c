@@ -324,25 +324,7 @@ Var *pulser_state( Var *v )
 	if ( v == NULL )
 		return vars_push( INT_VAR, ( long ) hfs9000.is_running );
 
-	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-
-	if ( v->type == INT_VAR )
-		state = v->val.lval != 0 ? SET : UNSET;
-	else if ( v->type == FLOAT_VAR )
-		state = v->val.dval != 0.0 ? SET : UNSET;
-	else
-	{
-		if ( ! strcasecmp( v->val.sptr, "OFF" ) )
-			 state = UNSET;
-		else if ( ! strcasecmp( v->val.sptr, "ON" ) )
-			state = SET;
-		else
-		{
-			eprint( FATAL, SET, "%s: Invalid argument in call of "
-					"`pulser_state'.\n", DEVICE_NAME );
-			THROW( EXCEPTION )
-		}
-	}
+	state = get_boolean( v, DEVICE_NAME );
 
 	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( INT_VAR, ( long ) ( hfs9000.is_running = state ) );
@@ -370,9 +352,7 @@ Var *pulser_channel_state( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR );
-
-	channel = v->val.lval;
+	channel = get_strict_long( v, "pulser channel", DEVICE_NAME );
 
 	if ( channel < MIN_CHANNEL || channel > MAX_CHANNEL )
 	{
@@ -462,8 +442,8 @@ Var *pulser_shift( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		vars_check( v, INT_VAR );
-		p = hfs9000_get_pulse( v->val.lval );
+		p = hfs9000_get_pulse( get_strict_long( v, "pulse number",
+												DEVICE_NAME ) );
 
 		if ( ! p->is_pos )
 		{
@@ -537,8 +517,8 @@ Var *pulser_increment( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		vars_check( v, INT_VAR );
-		p = hfs9000_get_pulse( v->val.lval );
+		p = hfs9000_get_pulse( get_strict_long( v, "pulse number",
+												DEVICE_NAME ) );
 
 		if ( ! p->is_len )
 		{
@@ -619,8 +599,8 @@ Var *pulser_pulse_reset( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		vars_check( v, INT_VAR );
-		p = hfs9000_get_pulse( v->val.lval );
+		p = hfs9000_get_pulse( get_strict_long( v, "pulse number",
+												DEVICE_NAME ) );
 
 		/* Reset all changeable properties back to their initial values */
 
@@ -680,8 +660,9 @@ Var *pulser_lock_keyboard( Var *v )
 
 Var *pulser_stop_on_update( Var *v )
 {
-	vars_check( v, INT_VAR );
-	hfs9000.stop_on_update = v->val.lval == 0 ? UNSET : SET;
+	hfs9000.stop_on_update = get_strict_long( v, "boolean value",
+											  DEVICE_NAME ) == 0 ? UNSET : SET;
+
 	return vars_push( INT_VAR, ( long ) hfs9000.stop_on_update );
 }
 

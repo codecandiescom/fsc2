@@ -392,8 +392,8 @@ Var *digitizer_sensitivity( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR );
-	channel = tds744a_translate_channel( GENERAL_TO_TDS744A, v->val.lval );
+	channel = tds744a_translate_channel( GENERAL_TO_TDS744A,
+						 get_strict_long( v, "channel number", DEVICE_NAME ) );
 
 	if ( channel > TDS744A_CH4 )
 	{
@@ -625,8 +625,8 @@ Var *digitizer_meas_channel_ok( Var *v )
 	long channel;
 
 
-	vars_check( v, INT_VAR );
-	channel = tds744a_translate_channel( GENERAL_TO_TDS744A, v->val.lval );
+	channel = tds744a_translate_channel( GENERAL_TO_TDS744A,
+						 get_strict_long( v, "channel number", DEVICE_NAME ) );
 
 	if ( channel > TDS744A_REF4 )
 		return vars_push( INT_VAR, 0 );
@@ -662,8 +662,8 @@ Var *digitizer_trigger_channel( Var *v )
 						TDS744A_TO_GENERAL, tds744a_get_trigger_channel( ) ) );
 		}
 
-	vars_check( v, INT_VAR );
-	channel = tds744a_translate_channel( GENERAL_TO_TDS744A, v->val.lval );
+	channel = tds744a_translate_channel( GENERAL_TO_TDS744A,
+						 get_strict_long( v, "channel number", DEVICE_NAME ) );
 
     switch ( channel )
     {
@@ -738,10 +738,9 @@ static Var *get_area( Var *v, bool use_cursor )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR );
-	ch = ( int ) tds744a_translate_channel( GENERAL_TO_TDS744A, v->val.lval );
+	ch = ( int ) tds744a_translate_channel( GENERAL_TO_TDS744A,
+						 get_strict_long( v, "channel number", DEVICE_NAME ) );
 	
-
 	if ( ch > TDS744A_REF4 )
 	{
 		eprint( FATAL, SET, "%s: Invalid channel %s used in %s().\n",
@@ -755,7 +754,7 @@ static Var *get_area( Var *v, bool use_cursor )
 
 	if ( ( v  = vars_pop( v ) ) != NULL )
 	{
-		vars_check( v, INT_VAR );
+		long win_num;
 
 		if ( ( w = tds744a.w ) == NULL )
 		{
@@ -764,9 +763,11 @@ static Var *get_area( Var *v, bool use_cursor )
 			THROW( EXCEPTION )
 		}
 
+		win_num = get_strict_long( v, "window_number", DEVICE_NAME );
+
 		while ( w != NULL )
 		{
-			if ( w->num == v->val.lval )
+			if ( w->num == win_num )
 			{
 				w->is_used = SET;
 				break;
@@ -835,8 +836,8 @@ static Var *get_curve( Var *v, bool use_cursor )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR );
-	ch = ( int ) tds744a_translate_channel( GENERAL_TO_TDS744A, v->val.lval );
+	ch = ( int ) tds744a_translate_channel( GENERAL_TO_TDS744A,
+						 get_strict_long( v, "channel number", DEVICE_NAME ) );
 
 	if ( ch > TDS744A_REF4 )
 	{
@@ -851,7 +852,8 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		vars_check( v, INT_VAR );
+		long win_num;
+
 		if ( ( w = tds744a.w ) == NULL )
 		{
 			eprint( FATAL, SET, "%s: No measurement windows have been "
@@ -859,9 +861,11 @@ static Var *get_curve( Var *v, bool use_cursor )
 			THROW( EXCEPTION )
 		}
 
+		win_num = get_strict_long( v, "window_number", DEVICE_NAME );
+
 		while ( w != NULL )
 		{
-			if ( w->num == v->val.lval )
+			if ( w->num == win_num )
 			{
 				w->is_used = SET;
 				break;
@@ -943,8 +947,8 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR );
-	ch = ( int ) tds744a_translate_channel( GENERAL_TO_TDS744A, v->val.lval );
+	ch = ( int ) tds744a_translate_channel( GENERAL_TO_TDS744A,
+						 get_strict_long( v, "channel number", DEVICE_NAME ) );
 
 	if ( ch > TDS744A_REF4 )
 	{
@@ -959,7 +963,8 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		vars_check( v, INT_VAR );
+		long win_num;
+
 		if ( ( w = tds744a.w ) == NULL )
 		{
 			eprint( FATAL, SET, "%s: No measurement windows have been "
@@ -967,9 +972,11 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 			THROW( EXCEPTION )
 		}
 
+		win_num = get_strict_long( v, "window number", DEVICE_NAME );
+
 		while ( w != NULL )
 		{
-			if ( w->num == v->val.lval )
+			if ( w->num == win_num )
 			{
 				w->is_used = SET;
 				break;
@@ -1025,26 +1032,7 @@ Var *digitizer_lock_keyboard( Var *v )
 		lock = SET;
 	else
 	{
-		vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-
-		if ( v->type == INT_VAR )
-			lock = v->val.lval != 0;
-		else if ( v->type == FLOAT_VAR )
-			lock = v->val.dval != 0.0;
-		else
-		{
-			if ( ! strcasecmp( v->val.sptr, "OFF" ) )
-				lock = UNSET;
-			else if ( ! strcasecmp( v->val.sptr, "ON" ) )
-				lock = SET;
-			else
-			{
-				eprint( FATAL, SET, "%s: Invalid argument in call of "
-						"function %s().\n", DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
-			}
-		}
-
+		lock = get_boolean( v, DEVICE_NAME );
 		too_many_arguments( v, DEVICE_NAME );
 	}
 

@@ -209,29 +209,7 @@ Var *synthesizer_state( Var *v )
 											 hp8647a_get_output_state( ) ) );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-
-	if ( v->type == FLOAT_VAR )
-	{
-		eprint( WARN, SET, "%s: Float variable used for synthesizer "
-				"state.\n", DEVICE_NAME );
-		state = ( v->val.dval != 0.0 );
-	}
-	else if ( v->type == INT_VAR )
-		state = ( v->val.lval != 0 );
-	else
-	{
-		if ( ( res = is_in( v->val.sptr, on_off_str, 2 ) ) == -1 )
-		{
-			eprint( FATAL, SET, "Invalid parameter \"s\" in call of "
-					"function `synthesizer_state'.\n", DEVICE_NAME,
-					v->val.sptr );
-			THROW( EXCEPTION )
-		}
-
-		state = res ? UNSET : SET;
-	}
-
+	state = get_boolean( v, DEVICE_NAME );
 	too_many_arguments( v, DEVICE_NAME );
 
 	hp8647a.state = state;
@@ -951,8 +929,6 @@ Var *synthesizer_mod_source( Var *v )
 
 	vars_check( v, STR_VAR | INT_VAR );
 
-	too_many_arguments( v, DEVICE_NAME );
-
 	if ( v->type == INT_VAR )
 	{
 		source = ( int ) v->val.lval;
@@ -989,6 +965,9 @@ Var *synthesizer_mod_source( Var *v )
 				THROW( EXCEPTION )
 		}
 	}
+
+	too_many_arguments( v, DEVICE_NAME );
+
 
 	if ( hp8647a.mod_type == MOD_TYPE_OFF )
 	{
