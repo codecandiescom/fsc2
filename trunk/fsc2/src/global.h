@@ -14,7 +14,7 @@ typedef  unsigned char  bool;
 
 /* Define the name of fsc2's lock file */
 
-#define LOCKFILE "/tmp/fsc2.lock"
+#define LOCKFILE "/tmp/fsc2.lck"
 
 
 /* Defines the number of serial ports on the system */
