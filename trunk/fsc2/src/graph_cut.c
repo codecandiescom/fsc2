@@ -799,9 +799,9 @@ void G_init_cut_curve( void )
 	/* Set the pixmaps for the out-of-range arrow to the pixmaps with the
 	   color associated with the currently displayed curve */
 
-	cv->up_arrow    = CG.up_arrows[ G.active_curve ];
-	cv->down_arrow  = CG.down_arrows[ G.active_curve ];
-	cv->left_arrow  = CG.left_arrows[ G.active_curve ];
+	cv->up_arrow    = CG.up_arrows[    G.active_curve ];
+	cv->down_arrow  = CG.down_arrows[  G.active_curve ];
+	cv->left_arrow  = CG.left_arrows[  G.active_curve ];
 	cv->right_arrow = CG.right_arrows[ G.active_curve ];
 
 	/* Create a GC for the font and set the appropriate colour */
@@ -814,6 +814,9 @@ void G_init_cut_curve( void )
 	XSetBackground( G.d, cv->font_gc, fl_get_pixel( FL_BLACK ) );
 
 	CG.nx = 0;
+
+	fl_set_object_shortcutkey( cut_form->top_button, XK_Page_Up );
+	fl_set_object_shortcutkey( cut_form->bottom_button, XK_Page_Down );
 
 	/* The cut windows y-axis is always the same as the promary windows
 	   z-axis, so we can re-use the label */
@@ -2532,6 +2535,25 @@ void cut_next_index( FL_OBJECT *a, long b )
 {
 	a = a;
 
+	switch( data )
+	{
+		case 0 :
+			cut_show( CG.cut_dir, CG.index + 1 );
+			break;
 
-	cut_show( CG.cut_dir, CG.index + ( b == 0 ? 1 : -1 ) );
+		case 1 :
+			cut_show( CG.cut_dir, CG.index - 1 );
+			break;
+
+		case 2:
+			if ( dir == X )
+				cut_show( CG.cut_dir, G.nx - 1 );
+			else
+				cut_show( CG.cut_dir, G.ny - 1 );
+			break;
+
+		case 3 :
+			cut_show( CG.cut_dir, 0 );
+			break;
+	}
 }
