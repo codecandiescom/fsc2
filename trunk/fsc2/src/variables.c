@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.29  1999/07/28 14:13:03  jens
+   *** empty log message ***
+
    Revision 1.28  1999/07/28 08:22:40  jens
    Started to update the comments.
 
@@ -124,7 +127,7 @@ typedef VarretFnct *FnctPtr;
   followed by as many characters, numbers and underscores as the user wants
   it to have.
 
-  Non-transient variables have one of thefollowing types: They're either an
+  Non-transient variables have one of the following types: They're either an
   integer or float variable (INT_VAR or FLOAT_VAR, which translates to C's
   long and double type) or an integer or float array (INT_ARR or FLOAT_ARR) of
   as many dimensions as the user thinks it should have. Since at the moment of
@@ -222,7 +225,7 @@ typedef VarretFnct *FnctPtr;
                                 ARR_PTR
 
   i.e. on the top we've the indices followed by the pointer to the array.  The
-  next step depends if this is an access to an array element (i.e. its found
+  next step depends if this is an access to an array element (i.e. it's found
   on the right hand side of an assignment) or if an array element is to be set
   (i.e. its on thre left hand side). In the first case the function
   vars_arr_rhs() is called.
@@ -244,76 +247,28 @@ typedef VarretFnct *FnctPtr;
   stored in the ARR_PTR and remove both transient variables from the stack.
 
   Things get a bit more complicated if the array on the left hand side is
-  completely new (and we're still in the VARIABLES section where defining new
-  variables and arrays is allowed). In this case, the indices aren't supposed
-  to mean a certain element but are the sizes of the dimensions of the array.
-  So, if the array is new, instead of vars_arr_lhs() vars_setup_new_array() is
-  called. 
+  completely new (and we're still in the VARIABLES section where defining
+  new variables and arrays is allowed). In this case, the indices aren't
+  supposed to mean a certain element but are the sizes of the dimensions of
+  the array.  If the array is new, vars_arr_lhs() calls vars_setup_new_array()
+  instead of doing the normal element lookup. In this routine the indices
+  are interpreted as sizes for the dimesions of the array and memory is
+  allocated for the elements of the array. It returns a ARR_PTR to the array
+  with the NEED_INIT flag in the `flags' element of the variables structure
+  (of the transient variable) is set, a list of data (in curly brackets,
+  i.e. `{' and `}' following as an assignment will be interpreted as data
+  for initializing the array.
+
+  But beside these fixed sized arrays there are also variable sized arrays.
+  These are needed e.g. for storing data sets received from the transient
+  recorder where it is sometimes impossible to know the length of the data
+  set in advance. Only the very last dimension of an array may be variable
+  sized and making it variable sized is indicated by writing a star (`*') as
+  the size of this dimension. In contrast to fixed sized arrays variable
+  sized arrays cannot be initialized and the very first assignment to such
+  an array must be an array slice.
 
 
-
-
-  (see below for an exception). By a
-  call to vars_arr_extend() the dimension of the array is set to one and the
-  list of sizes for the dimensions is updated to reflect the value of the
-  expression, i.e. the size for the very first dimension of the
-  array. Finally, the transient variable with the size of this first
-  dimension is popped from tha variable stack. The next token to be found by
-  the parser has to be either a comma followed by another expression or a
-  closing bracket. In the first case, i.e. if we have a two-dimensional
-  array, var_arr_extend() is called again. Here the dimension of the array
-  is incremented and the list for the sizes of the dimensions is extended
-  and updated.  Finally, the transient variable with the size of the new
-  dimension is removed. If instead a closing bracket, `]', is found, the
-  parser has to do nothing, since everything relevant for the array is
-  already set. Instead, the parser now expects an initialization of the
-  array, i.e an equal sign `=' followed by a list of data (these can also
-  have the form of an expression) in curly braces, `{' and `}'. Again, we
-  may check that the variables stack is empty, otherwise something went
-  horribly wrong.
-
-  The one exception from this scheme is that the very last dimension of an
-  array can be dynamically set. This is achieved by not giving an expression
-  but a star (`*') as the very last dimension. But there are special rules
-  for dynamically sized arrays: Since their purpose is to allow storing of
-  complete curves obtained from a device (where the exact length of the data
-  is not known in advance) the still undetermined size is only finally
-  determined by such an operation. Previous to this operation, it is
-  forbidden to either initialize arrays of this type or to assign data to
-  its elements.
-
-  Arrays make evaluating expressions a bit more complicated - the expression
-  could be an array element with the indices in turn being array elements
-  with their indices being... So, if in the evaluation of an expression an
-  array element is detected, a pointer to a new entry of the form
-
-  typedef struct AStack_
-  {
-    Var *var;
-	long act_entry;
-	long *entries;
-	struct AStack_ *next;
-  }
-
-  is pushed onto the array stack by a call to the function vars_push_astack().
-  The structure's element `var' points to the variable of the arrray,
-  `act_entry' is zero at first (we're just dealing with the very first index
-  of the arrray) and the first slot in `entries' is set to the value of the
-  index (`entries' has as many slots as te array has dimensions).
-
-  If the parser finds another index, the function vars_update_astack()
-  increments `act_entry' and stores the value of the new index in the next
-  free slot of `entries' (of the topmost element of the array stack). Of
-  course, some checking has to be done to make sure, that there are not more
-  indices then there are dimensions in the array.
-
-  Finally, when the parser finds a closing bracket, it calls vars_pop_astack()
-  which pushes the array element indexed by the data in `entries' as a
-  transient variable onto the variables stack and removes the entry for the
-  array from the array stack.
-
-  Again, after completely evaluating an assignment, one should make sure
-  everything work out fine by checking that the array stack is empty.
 
 */
 
@@ -371,7 +326,7 @@ Var *vars_new( char *name )
 
 	vp->next = var_list;         /* set pointer to it's successor */
 	if ( var_list != NULL )      /* set previous pointer in successor */
-		var_list->prev = vp;
+		var_list->prev = vp;     /* (if this isn't the very first) */ 
     var_list = vp;               /* make it the head of the list */
 
 	return vp;                   /* return pointer to the structure */
@@ -643,8 +598,9 @@ Var *vars_mod( Var *v1, Var *v2 )
 
 Var *vars_pow( Var *v1, Var *v2 )
 {
-	Var *new_var;
-	long ires, i;
+	Var  *new_var;
+	long ires,
+		 i;
 
 
 	/* make sure that `v1' and `v2' exist, are integers or float values
@@ -676,7 +632,7 @@ Var *vars_pow( Var *v1, Var *v2 )
 			if ( v2->type == INT_VAR )
 			{
 				for ( ires = v1->val.lval, i = 1;
-					  i < labs( v2->val.lval ); ++i )
+					  i < labs( v2->val.lval ); i++ )
 					ires *= v1->val.lval;
 				if ( v2->val.lval >= 0 )
 					new_var = vars_push( INT_VAR, ires );
@@ -874,9 +830,9 @@ Var *vars_push( int type, ... )
 			break;
 
 		case FUNC :
-			/* getting the function pointer seems to be to complicated for
-			   va_arg() when written directly thus `FnctPtr' is a typedef
-			   (see start of file) */
+			/* understanding about the function pointer seems to be too
+			   complicated for va_arg() when written directly thus `FnctPtr'
+			   is a typedef (see start of file) */
 			new_stack_var->val.fnct = va_arg( ap, FnctPtr );
 			break;
 
@@ -1003,7 +959,6 @@ void vars_del_stack( void )
 void vars_clean_up( void )
 {
 	vars_del_stack( );
-/*	vars_del_astack( );*/
 	free_vars( );
 }
 
@@ -1152,7 +1107,8 @@ Var *vars_arr_start( Var *v )
 Var *vars_arr_lhs( Var *v )
 {
 	int dim;
-	Var *a, *cv;
+	Var *a,
+		*cv;
 
 
 	while ( v->type != ARR_PTR )
@@ -1164,7 +1120,7 @@ Var *vars_arr_lhs( Var *v )
 
 	for ( dim = 0, cv = v->next; cv != 0; cv = cv->next )
 		if ( cv->type != UNDEF_VAR )
-			++dim;
+			dim++;
 
 	/* if the array is new we need to set it up */
 
@@ -1182,7 +1138,7 @@ Var *vars_arr_lhs( Var *v )
 
 Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
 {
-	Var *ret;
+	Var  *ret;
 	long index;
 
 
@@ -1262,15 +1218,15 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
 
 long vars_calc_index( Var *a, Var *v )
 {
-	Var *vn;
-	int i, cur;
+	Var  *vn;
+	int  i, cur;
 	long index;
 
 
 
 	/* run through all the indices on the variable stack */
 
-	for ( i = 0, index = 0; v != NULL; ++i, v = vn )
+	for ( i = 0, index = 0; v != NULL; i++, v = vn )
 	{
 		if ( v->type == UNDEF_VAR )
 		{
@@ -1347,8 +1303,10 @@ long vars_calc_index( Var *a, Var *v )
 
 Var *vars_setup_new_array( Var *a, int dim, Var *v )
 {
-	int i, cur;
-	Var *vn, *ret;
+	int i,
+		cur;
+	Var *vn,
+		*ret;
 
 
 	if ( v->next->type == UNDEF_VAR )
@@ -1372,7 +1330,7 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 	vars_pop( v );
 	v = vn;
 
-	for ( i = 0; v != NULL; ++i )
+	for ( i = 0; v != NULL; i++ )
 	{
 		/* check the variable with the size */
 
@@ -1460,8 +1418,8 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 
 Var *vars_arr_rhs( Var *v )
 {
-	int dim;
-	Var *a, *cv;
+	int  dim;
+	Var  *a, *cv;
 	long index;
 
 
@@ -1487,7 +1445,7 @@ Var *vars_arr_rhs( Var *v )
 
 	/* count the indices on the stack */
 
-	for ( dim = 0, cv = v->next; cv != 0; ++dim, cv = cv->next )
+	for ( dim = 0, cv = v->next; cv != 0; dim++, cv = cv->next )
 		;
 
 	/* check that the number of indices is not less than the dimension of the
@@ -1748,7 +1706,7 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 
 	/* Now copy the array slice */
 
-	for ( i = 0; i < d->sizes[ d->dim - 1 ]; ++i )
+	for ( i = 0; i < d->sizes[ d->dim - 1 ]; i++ )
 	{
 		if ( d->type == INT_ARR )
 		{
@@ -1768,6 +1726,9 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 }
 
 
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
 
 void vars_ass_from_trans_ptr( Var *src, Var *dest )
 {
@@ -1844,7 +1805,7 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 	else
 		sdptr = src->val.dpnt;
 
-	for ( i = 0; i < d->sizes[ d->dim - 1 ]; ++i )
+	for ( i = 0; i < d->sizes[ d->dim - 1 ]; i++ )
 	{
 		if ( d->type == INT_ARR )
 		{
@@ -1865,10 +1826,15 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 
 
 
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
 void vars_arr_init( Var *v )
 {
 	long ni;
-	Var *p1, *p2, *a;
+	Var  *p1,
+		 *p2,
+		 *a;
 
 
 	/* if there are no initialization data this is indicated by a variable
@@ -1889,9 +1855,9 @@ void vars_arr_init( Var *v )
 
 	while ( v->type != ARR_PTR )
 		v = v->prev;
-	vars_check( v->from, INT_ARR | FLOAT_ARR );
-
 	a = v->from;
+	vars_check( a, INT_ARR | FLOAT_ARR );
+
 
 	/* Variable sized arays can't be initialized, they need the assignment of
 	   an array slice to determine the still unknown size of their very last
@@ -1913,10 +1879,10 @@ void vars_arr_init( Var *v )
 		THROW( VARIABLES_EXCEPTION );
 	}
 
-	/* count number of initializers and check that it fits the length of
-	   the array */
+	/* count number of initializers and check that it fits the number of
+       elements the array */
 
-	for ( p1 = v->next, ni = 0; p1 != NULL; ++ni, p1 = p1->next )
+	for ( p1 = v->next, ni = 0; p1 != NULL; ni++, p1 = p1->next )
 		;
 
 	if ( ni < a->len )
