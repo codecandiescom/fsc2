@@ -513,7 +513,7 @@ Var *field_meter_wait( Var *v )
 /* will return the settled value but will report a failure if gaussmeter */
 /* isn't in lock state. Another reason for a failure is a field that is  */
 /* too unstable to achieve the requested resolution eventhough the       */
-/* gaussmetere is already in lock state.                                 */
+/* gaussmeter is already in lock state.                                  */
 /* Take care: If the gaussmeter isn't already in the lock state call     */
 /*            the function find_field() instead.                         */
 /*-----------------------------------------------------------------------*/
