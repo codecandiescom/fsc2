@@ -63,12 +63,16 @@ void print_1d( FL_OBJECT *obj, long data )
 
 	print_header( fp, name );
 
-	x_0 = 50;
-	y_0 = 45;
-	w = paper_height - 75;
-	h = paper_width - 70;
+	/* Set the area for the graph - on all sides leave a margin of 25 mm and
+	   20 mm for the x-axis and 25 for the y-axis labels and tick marks */
 
-	/* Draw the frame and the scales */
+	x_0 = 50.0;                       /* 25 mm margin & 25 mm for the y-axis */
+	y_0 = 45.0;                       /* 25 mm margin & 20 mm for the x-axis */
+	w = paper_height - 25.0 - x_0;    /* 25 mm margin */
+	h = paper_width - 25.0 - y_0;     /* 25 mm margin */
+
+	/* Draw the frame and the scales (just 0.5 mm outside the the area for the
+       graph) */
 
 	fprintf( fp, "0.05 slw\n" );
 	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp s\n",
@@ -554,8 +558,8 @@ void eps_make_scale( FILE *fp, void *cv, int coord )
 	order = pow( 10.0, mag );
 	modf( rwc_delta / order, &rwc_delta );
 
-	/* Now get a `smooth' value for the ticks distance, i.e. either 2, 2.5,
-	   5 or 10 and convert it to real world coordinates */
+	/* Now get a `smooth' value for the real world ticks distance, i.e. either
+	   2, 2.5, 5 or 10 */
 
 	if ( rwc_delta <= 2.0 )       /* in [ 1, 2 ] -> units of 2 */
 	{
@@ -650,7 +654,9 @@ void eps_make_scale( FILE *fp, void *cv, int coord )
 
 		y = y_0;
 
-		fprintf( fp, "-1000\n" );
+		/* Set the minimum start position of a x-axis tick label */
+
+		fprintf( fp, "%f\n", d_start_fine - 45.0 );
 
 		/* Draw all the ticks and numbers */
 
@@ -853,11 +859,11 @@ void eps_draw_contour( FILE *fp, int cn )
 			{
 				if ( ! cv->points[ k ].exist )
 				{
-					fprintf( fp, "gs 0.5 sgr\n"
+					fprintf( fp, "0.5 sgr\n"
 							 "%f %f m\n"
 							 "0 %f 2 copy rl\n"
 							 "%f 0 rl\n"
-							 "neg rl cp fill gr\n",
+							 "neg rl cp fill\n",
 							 x_0 + s2d[ X ] * ( i + cv->shift[ X ] ) - dw,
 							 y_0 + s2d[ Y ] * ( j + cv->shift[ X ] ) - dh,
 							 2.0 * dh, 2.0 * dw );
