@@ -15,15 +15,15 @@ er035m_sas;                  // gauss meter
 VARIABLES:
 
 start_freq  = 10.5 MHz;
-end_freq    =  23 MHz;
-step_freq   = 50 kHz;          
+end_freq    = 23.0 MHz;
+step_freq   =   50 kHz;          
 
 attenuation =  -5.5 dB;
 
-N_runs      = 20;             // how many times to repeat the whole experiment
+N_runs      = 20;            // how many times to repeat the whole experiment
 N_averages  = 50;            // number of averages per frequency point
 
-N_max_base_curves = 10;       // how many curve to use for baseline correction
+N_max_base_curves = 10;      // how many curve to use for baseline correction
 
 window_start = 3 us;         // start of integration window (after trigger)
 window_width = 5 us;         // width of integration window
