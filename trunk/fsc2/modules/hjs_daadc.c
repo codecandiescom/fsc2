@@ -56,6 +56,8 @@ Var *daq_reserve_adc( Var *v );
 Var *daq_maximum_output_voltage( Var *v );
 Var *daq_set_voltage( Var *v );
 Var *daq_get_voltage( Var *v );
+Var *daq_dac_parameter( Var *v );
+
 
 static int hjs_daadc_da_volts_to_val( double volts );
 static double hjs_daadc_val_to_ad_volts( int val );
@@ -567,6 +569,32 @@ Var *daq_get_voltage( Var *v )
 
 	return vars_push( FLOAT_VAR,
 					  hjs_daadc_val_to_ad_volts( hjs_daadc_in( ) ) );
+}
+
+
+/*------------------------------------------------------*/
+/* Function for returning the DAC settings (minimum and */
+/* maximum output voltage and voltage resolution).      */
+/*------------------------------------------------------*/
+
+Var *daq_dac_parameter( Var *v )
+{
+	double params[ 3 ];
+
+
+	if ( v != NULL && v->next == NULL )
+	{
+		print( WARN, "Function does not tahe an argument for this DAQ.\n" );
+		v = vars_pop( v );
+	}
+
+	too_many_arguments( v );
+
+	params[ 0 ] = MIN_OUT_VOLTS;
+	params[ 1 ] = hjs_daadc.max_volts;
+	params[ 2 ] = ( params[ 1 ] - params[ 0 ] ) / 4095.0;
+
+	return vars_push( FLOAT_ARR, params, ( ssize_t ) 3 );
 }
 
 

@@ -272,6 +272,7 @@ daq_reserve_dac, -1, ALL;
 daq_reserve_adc, -1, ALL;
 daq_set_voltage, -1, ALL;
 daq_get_voltage, -1, ALL;
+daq_dac_parameter, -1, ALL;
 
 
 /* Functions exported by event counters (NatInst 6601) */

@@ -56,6 +56,7 @@ void me6000_exit_hook( void );
 Var *daq_name( Var *v );
 Var *daq_reserve_dac( Var *v );
 Var *daq_set_voltage( Var *v );
+Var *daq_dac_parameter( Var *v );
 
 
 /* Locally used functions */
@@ -430,6 +431,34 @@ Var *daq_set_voltage( Var *v )
 	me6000.dac[ dac ].volts = volts;
 
 	return vars_push( FLOAT_VAR, 0.0 );
+}
+
+
+/*------------------------------------------------------*/
+/* Function for returning the DAC settings (minimum and */
+/* maximum output voltage and voltage resolution).      */
+/*------------------------------------------------------*/
+
+Var *daq_dac_parameter( Var *v )
+{
+	double params[ 3 ];
+
+
+	/* A channel argument does not make too much sense for tis board because
+	   the output levels etc. for all channels are identical, so just throw
+	   it away (and don't complain if there's no argument). */
+
+	if ( v != NULL )
+	{
+		get_strict_long( v, "channel number" );
+		too_many_arguments( vars_pop( v ) );
+	}
+		
+	params[ 0 ] = MIN_VOLTS;
+	params[ 1 ] = MAX_VOLTS;
+	params[ 2 ] = ( params[ 1 ] - params[ 0 ] ) / 65535.0;
+
+	return vars_push( FLOAT_ARR, params, ( ssize_t ) 3 );
 }
 
 
