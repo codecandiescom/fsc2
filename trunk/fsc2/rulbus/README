@@ -135,6 +135,11 @@ It is possible that after installing the libraries the linker still has
 problems finding them. In this case you may have to run 'ldconfig' to
 rebuild the linkers database of libraries.
 
+When you're done with installing program you will still have to write
+a configuration file for the Rulbus. listing which devices are sitting
+in which racks. Please see the rulbus_lib.txt file in the 'lib' sub-
+directory for more information.
+
 
 IV. Documentation
 =================
