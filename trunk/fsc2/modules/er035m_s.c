@@ -852,6 +852,6 @@ static bool er035m_s_comm( int type, ... )
 
 void er035_s_comm_fail( void )
 {
-	eprint( FATAL, "%s: Can't access the NMR gaussmeter.", DEVICE_NANE );
+	eprint( FATAL, "%s: Can't access the NMR gaussmeter.", DEVICE_NAME );
 	THROW( EXCEPTION );
 }
