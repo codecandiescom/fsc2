@@ -171,13 +171,7 @@ bool scan_main( const char *name, FILE *fp )
 	/* Make the lexer read its input from the output of fsc2_clean */
 
 	if ( ( splitin = filter_edl( name, fp ) ) == NULL )
-	{
-#ifndef NDEBUG
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-				__FILE__, __LINE__ );
-#endif
 		return FAIL;
-	}
 
 	/* Parse the predigested EDL file, i.e. what we get back from fsc2_clean */
 

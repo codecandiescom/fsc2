@@ -30,7 +30,7 @@ FOR I = 1 : M {
 	wait( 0.05 s );
 }
 
-wait( 0.2 s );
+wait( 1 s );
 
 WHILE  d > 2 {
 	FOR I = 1 : 4 {
@@ -45,5 +45,5 @@ WHILE  d > 2 {
 	v = f[ 2 ] - f[ 1 ];
 	d = sqrt( 2 * mean( v * v ) );
 	v /= d;
-	wait( 0.1 s );
+	wait( 0.2 s );
 }
