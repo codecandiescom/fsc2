@@ -104,16 +104,13 @@ void dg2020_basic_pulse_check( void )
 
 		/* Check phase cycling of pulse */
 
-		if ( p->pc )
+		if ( p->pc && p->function->phase_func == NULL )
 		{
-			if ( p->function->phase_func == NULL )
-			{
-				eprint( FATAL, "%s: Pulse %ld needs phase cycling but its "
-						"function (%s) isn't associated with a phase "
-						"function.", pulser_struct.name, p->num,
-						Function_Names[ p->function->self ] );
-				THROW( EXCEPTION );
-			}
+			eprint( FATAL, "%s: Pulse %ld needs phase cycling but its "
+					"function (%s) isn't associated with a phase function.",
+					pulser_struct.name, p->num,
+					Function_Names[ p->function->self ] );
+			THROW( EXCEPTION );
 		}
 
 		if ( p->is_active )
