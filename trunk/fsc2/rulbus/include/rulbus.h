@@ -149,3 +149,4 @@ int rulbus_clock_set_frequency( int handle, int freq );
 #define RULBUS_RD_ERR   -42
 #define RULBUS_CRD_BSY  -43
 #define RULBUS_INV_VLT  -44
+#define RULBUS_TIM_OUT  -45

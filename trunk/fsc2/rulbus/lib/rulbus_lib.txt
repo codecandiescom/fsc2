@@ -178,6 +178,7 @@ Here is the complete list of error codes with a short explanation:
     RULBUS_RD_ERR    Read error
     RULBUS_CRD_BSY   Card is busy
     RULBUS_INV_VLT   Voltage out of range
+    RULBUS_TIM_OUT   Timeout
 
 
 ----------------------------------------------------------------------

@@ -86,6 +86,7 @@ static const char *rulbus_errlist[ ] = {
 	"Read error"                                       /* RULBUS_RD_ERR  */
 	"Card is busy",                                    /* RULBUS_CRD_BSY */
 	"Voltage out of range",                            /* RULBUS_INV_VLT */
+	"Rulbus timeout"                                   /* RULBUS_TIM_OUT */
 };
 
 
@@ -626,8 +627,23 @@ static int rulbus_write_rack( unsigned char rack, unsigned char addr,
 							  unsigned char *data, size_t len )
 {
 	RULBUS_EPP_IOCTL_ARGS args = { rack, addr, *data, data, len };
+	int retval;
 
-	return ioctl( fd, RULBUS_EPP_IOC_WRITE, &args );
+
+	if ( ( retval = ioctl( fd, RULBUS_EPP_IOC_WRITE, &args ) ) <= 0 )
+		switch ( errno )
+		{
+			case ENOMEM :
+				return RULBUS_NO_MEM;
+
+			case -EIO :
+				return RUBLUS_TIM_OUT;
+
+			default :                     /* catch all for impossible errors */
+				return RULBUS_WRT_ERR;
+		}
+
+	return retval;
 }
 
 
@@ -640,11 +656,22 @@ static int rulbus_write_rack( unsigned char rack, unsigned char addr,
 static int rulbus_read_rack( unsigned char rack, unsigned char addr,
 							 unsigned char *data, size_t len )
 {
-	int retval;
 	RULBUS_EPP_IOCTL_ARGS args = { rack, addr, 0, data, len };
+	int retval;
+
 
 	if ( ( retval = ioctl( fd, RULBUS_EPP_IOC_WRITE, &args ) ) <= 0 )
-		return retval;
+		switch ( errno )
+		{
+			case ENOMEM :
+				return RULBUS_NO_MEM;
+
+			case -EIO :
+				return RUBLUS_TIM_OUT;
+
+			default :                     /* catch all for impossible errors */
+				return RULBUS_RD_ERR;
+		}
 
 	if ( len == 1 )
 		*data = args.byte;
