@@ -1383,7 +1383,7 @@ of the one-dimensional array.
 @findex sizes()
 This function is similar to @code{size()} but only takes an array as
 argument and returns a new one-dimensional array with the sizes of the
-different dimensions.
+different dimensions of the input array.
 @example
 X[ 4, 2, 5 ]
 Dim_X[ * ];
