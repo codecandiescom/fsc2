@@ -417,7 +417,7 @@ bool hfs9000_set_trig_in_slope( int slope )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool hfs9000_set_min_seq_len( double seq_len )
+bool hfs9000_set_max_seq_len( double seq_len )
 {
 	if ( hfs9000.is_max_seq_len &&
 		 hfs9000.max_seq_len != hfs9000_double2ticks( seq_len ) )

@@ -61,7 +61,7 @@ int dg2020_f_init_hook( void )
 	pulser_struct.set_trig_in_level = dg2020_set_trig_in_level;
 	pulser_struct.set_trig_in_slope = dg2020_set_trig_in_slope;
 	pulser_struct.set_trig_in_impedance = dg2020_set_trig_in_impedance;
-	pulser_struct.set_min_seq_len = dg2020_set_min_seq_len;
+	pulser_struct.set_max_seq_len = dg2020_set_max_seq_len;
 
 	pulser_struct.set_phase_reference = dg2020_set_phase_reference;
 

@@ -504,7 +504,7 @@ bool dg2020_set_repeat_time( double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_set_min_seq_len( double seq_len )
+bool dg2020_set_max_seq_len( double seq_len )
 {
 	if ( dg2020.is_max_seq_len &&
 		 dg2020.max_seq_len != dg2020_double2ticks( seq_len ) )

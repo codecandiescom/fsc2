@@ -33,7 +33,7 @@ void pulser_struct_init( void )
 	pulser_struct.set_trig_in_level = NULL;
 	pulser_struct.set_trig_in_slope = NULL;
 	pulser_struct.set_trig_in_impedance = NULL;
-	pulser_struct.set_min_seq_len = NULL;
+	pulser_struct.set_max_seq_len = NULL;
 	pulser_struct.set_phase_reference = NULL;
 	pulser_struct.set_grace_period = NULL;
 	pulser_struct.set_pulse_function = NULL;
@@ -241,7 +241,7 @@ void p_set_delay( long func, Var *v )
 	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
 			func <= PULSER_CHANNEL_FUNC_MAX );
 
-	/* check the variable and get its value */
+	/* Check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	delay = ( ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval );
@@ -249,7 +249,7 @@ void p_set_delay( long func, Var *v )
 
 	delay = is_mult_ns( delay, "Delay" );
 
-	/* finally call the function (if it exists...) */
+	/* Finally call the function (if it exists...) */
 
 	is_pulser_func( pulser_struct.set_function_delay, "setting a delay" );
 	( *pulser_struct.set_function_delay )( func, delay );
@@ -283,13 +283,13 @@ void p_set_v_high( long func, Var *v )
 	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
 			func <= PULSER_CHANNEL_FUNC_MAX );
 
-	/* check the variable and get its value */
+	/* Check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	voltage = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
 	vars_pop( v );
 
-	/* finally call the function (if it exists...) */
+	/* Finally call the function (if it exists...) */
 
 	is_pulser_func( pulser_struct.set_function_high_level,
 					"setting high voltage level" );
@@ -310,13 +310,13 @@ void p_set_v_low( long func, Var *v )
 	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
 			func <= PULSER_CHANNEL_FUNC_MAX );
 
-	/* check the variable and get its value */
+	/* Check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	voltage = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
 	vars_pop( v );
 
-	/* finally call the function (if it exists...) */
+	/* Finally call the function (if it exists...) */
 
 	is_pulser_func( pulser_struct.set_function_low_level,
 					"setting low voltage level" );
@@ -332,7 +332,7 @@ void p_set_timebase( Var *v )
 {
 	double timebase;
 
-	/* check the variable and get its value */
+	/* Check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	timebase = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
@@ -340,7 +340,7 @@ void p_set_timebase( Var *v )
 
 	timebase = is_mult_ns( timebase, "Time base"  );
 
-	/* finally call the function (if it exists...) */
+	/* Finally call the function (if it exists...) */
 
 	is_pulser_func( pulser_struct.set_timebase,"setting the timebase" );
 	( *pulser_struct.set_timebase )( timebase );
@@ -355,7 +355,7 @@ void p_set_trigger_mode( Var *v )
 {
 	int mode;
 
-	/* check the variable and get its value */
+	/* Check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -377,7 +377,7 @@ void p_set_trigger_mode( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* finally call the function (if it exists...) */
+	/* Finally call the function (if it exists...) */
 
 	is_pulser_func( pulser_struct.set_trigger_mode,
 					"setting the trigger mode" );
@@ -392,7 +392,7 @@ void p_set_trigger_slope( Var *v )
 {
 	int slope;
 
-	/* check the variable and get its value */
+	/* Check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -414,7 +414,7 @@ void p_set_trigger_slope( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* finally call the function (if it exists...) */
+	/* Finally call the function (if it exists...) */
 
 	is_pulser_func( pulser_struct.set_trig_in_slope,
 					"setting the trigger slope" );
@@ -431,13 +431,13 @@ void p_set_trigger_level( Var *v )
 	double level;
 
 
-	/* check the variable and get its value */
+	/* Check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	level = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
 	vars_pop( v );
 
-	/* finally call the function (if it exists...) */
+	/* Finally call the function (if it exists...) */
 
 	is_pulser_func( pulser_struct.set_trig_in_level,
 					"setting the trigger level" );
@@ -454,13 +454,13 @@ void p_set_trigger_impedance( Var *v )
 	int state;
 
 
-	/* check the variable and get its value */
+	/* Check the variable and get its value */
 
 	vars_check( v, INT_VAR );
 	state = ( int ) v->val.lval;
 	vars_pop( v );
 
-	/* finally call the function (if it exists...) */
+	/* Finally call the function (if it exists...) */
 
 	is_pulser_func( pulser_struct.set_trig_in_impedance,
 					"setting the trigger impedance" );
@@ -477,7 +477,7 @@ void p_set_rep_time( Var *v )
 	double time;
 
 
-	/* check the variable and get its value */
+	/* Check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	time = ( v->type == INT_VAR ) ? ( double ) v->val.lval :  v->val.dval;
@@ -492,7 +492,7 @@ void p_set_rep_time( Var *v )
 
 	time = is_mult_ns( time, "Repeat time" );
 
-	/* finally call the function (if it exists...) */
+	/* Finally call the function (if it exists...) */
 
 	is_pulser_func( pulser_struct.set_repeat_time, "setting a repeat time" );
 	( *pulser_struct.set_repeat_time )( time );
@@ -508,7 +508,7 @@ void p_set_rep_freq( Var *v )
 	double freq, time;
 
 
-	/* check the variable and get its value */
+	/* Check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	freq = ( v->type == INT_VAR ) ? ( double ) v->val.lval :  v->val.dval;
@@ -521,12 +521,12 @@ void p_set_rep_freq( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* make sure we get a repeat time that's a multiple of 1 ns */
+	/* Make sure we get a repeat time that's a multiple of 1 ns */
 
 	time = 1.0 / freq;
 	time = lround( time * 1.0e9 ) * 1.0e-9;
 
-	/* finally call the function (if it exists...) */
+	/* Finally call the function (if it exists...) */
 
 	is_pulser_func( pulser_struct.set_repeat_time,
 					"setting a repeat frequency" );
@@ -534,14 +534,18 @@ void p_set_rep_freq( Var *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Function for setting a user defined maximum patern length for the */
+/* pulser. This is needed when in the EDL program FOREVER loops are  */
+/* used because in this case in the test the maximum length can't be */
+/* determined.                                                       */
+/*-------------------------------------------------------------------*/
 
-void p_set_min_seq_len( Var *v )
+void p_set_max_seq_len( Var *v )
 {
 	double seq_len;
 
-	/* check the variable and get its value */
+	/* Check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	seq_len = ( v->type == INT_VAR ) ? ( double ) v->val.lval :  v->val.dval;
@@ -549,9 +553,9 @@ void p_set_min_seq_len( Var *v )
 
 	/* Call the appropriate function (if it exists) */
 
-    is_pulser_func( pulser_struct.set_min_seq_len,
-                    "setting a minimum pattern length" );
-	( *pulser_struct.set_min_seq_len )( seq_len );
+    is_pulser_func( pulser_struct.set_max_seq_len,
+                    "setting a maximum pattern length" );
+	( *pulser_struct.set_max_seq_len )( seq_len );
 }
 
 
@@ -794,16 +798,18 @@ Var *p_get_by_num( long pnum, int type )
 }
 
 
-/*----------------------------------------------------------------------------
-  'function' is the phase function the data are to be used for (i.e. 0 means
-    PHASE_1, 1 means PHASE_2, 2 means both)
-  'type' means the type of phase, see global.h (PHASE_PLUS/MINUX_X/Y)
-  'pod' means if the value is for the first or the second pod channel
-    (0: first pod channel, 1: second pod channel, -1: pick the one not set yet)
-  'val' means high or low to be set on the pod channel to set the requested
-    phase(0: low, !0: high)
-  'protocol' characterizes the way the phase setup is declared in the input.
------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* 'function' is the phase function the data are to be used for (i.e. 0 */
+/*	means PHASE_1, 1 means PHASE_2, 2 means both)                       */
+/* 'type' means the type of phase, see global.h (PHASE_PLUS/MINUX_X/Y)  */
+/* 'pod' means if the value is for the first or the second pod channel  */
+/* (0: first pod channel, 1: second pod channel, -1: pick the one not   */
+/* set yet)                                                             */
+/* 'val' means high or low to be set on the pod channel to set the      */
+/* requested phase(0: low, !0: high)                                    */
+/* 'protocol' characterizes the way the phase setup is declared in the  */
+/* input.                                                               */
+/*----------------------------------------------------------------------*/
 
 void p_phs_setup( int func, int type, int pod, long val, long protocol )
 {
