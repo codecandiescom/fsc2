@@ -254,10 +254,7 @@ static Var *vars_float_var_sub( Var *v1, Var *v2, bool exc )
 			break;
 
 		case INT_ARR :
-			if ( v2->flags & IS_TEMP )
-				new_var = v2;
-			else
-				new_var = vars_push( FLOAT_ARR, NULL, v2->len );
+			new_var = vars_push( FLOAT_ARR, NULL, v2->len );
 
 			for ( i = 0; i < new_var->len; i++ )
 			{
@@ -268,9 +265,8 @@ static Var *vars_float_var_sub( Var *v1, Var *v2, bool exc )
 				new_var->val.dpnt[ i ] = dr;
 			}
 
+			vars_pop( v1 );
 			vars_pop( v2 );
-			if ( v2 != new_var )
-				vars_pop( v2 );
 
 			break;
 
