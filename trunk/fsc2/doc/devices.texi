@@ -1656,12 +1656,12 @@ Pulsers}. Several of the aspects of the following short descriptions of
 the pulser functions will probably only become understandable after
 reading the chapter about pulsers and pulses.
 
-Please note: Most functions for changing pulses will @strong{not} lead
-to an immediate change of the pulse sequence the pulser outputs. E.g.@:
-calling the function @code{pulser_shift()} (for moving pulses) will not
-shift the pulses immediately. Instead, all changes to pulses are
-recorded and but only executed when the function @code{pulser_update()}
-gets called.
+@strong{Please note}: Most functions for changing pulses will
+@strong{not} lead to an immediate change of the pulse sequence the
+pulser outputs. E.g.@: calling the function @code{pulser_shift()} (for
+moving pulses) will not shift the pulses immediately. Instead, all
+changes to pulses are recorded and but only executed when the function
+@code{pulser_update()} gets called.
 
 The reason for this is twofold: Changes to only parts of the pulses
 might lead to a pulse sequence, which can't be output, e.g.@: because
@@ -2799,21 +2799,21 @@ If an output voltage has already been set for an output port the last
 set voltage is returned when the function is called without a second
 argument.
 
-Please note that the latest set output voltage will still appear on the
-ouput port after the program is finished. If it is required that the
-output voltage reverts to a default value at the end of the experiment
-please put a command for setting this voltage into the @code{ON_STOP}
-section of the @code{EDL} script.
+@strong{Please note}: the latest set output voltage will still appear on
+the output port after the program is finished. If it is required that
+the output voltage reverts to a default value at the end of the
+experiment please put a command for setting this voltage into the
+@code{ON_STOP} section of the @code{EDL} script.
 
 For the home-built DA and AD card the output voltage will automatically
 drop to @w{0 V} if the function @code{daq_get_voltage()} (see below)
 is called without a previous call of the function for setting an output
 voltage.
 
-Please note: if the DAC channel had previously reserved by a call of the
-function @code{daq_reserve_dac()} the pass-phrase specified in that call
-has to be passed to the function as the very first argument if you want
-to be able to change the output voltage of the DAC channel.
+@strong{Please note}: if the DAC channel had previously reserved by a
+call of the function @code{daq_reserve_dac()} the pass-phrase specified
+in that call has to be passed to the function as the very first argument
+if you want to be able to change the output voltage of the DAC channel.
 
 The function can be used in the @code{EXPERIMENT} as well as in the
 @code{PREPARATIONS} section.
@@ -2838,10 +2838,10 @@ If this function hasn't been called the program will assume that the
 potentiometer is set to its maximum of 10 and output voltages of the
 DA converter are between @w{0 V} and @w{+10 V}.
 
-Please note: if the DAC channel had previously reserved by a call of the
-function @code{daq_reserve_dac()} the pass-phrase specified in that call
-has to be passed to the function as the very first argument if you want
-to be able to change the maximum output voltage.
+@strong{Please note}: if the DAC channel had previously reserved by a
+call of the function @code{daq_reserve_dac()} the pass-phrase specified
+in that call has to be passed to the function as the very first argument
+if you want to be able to change the maximum output voltage.
 
 The function can be used in the @code{EXPERIMENT} as well as in the
 @code{PREPARATIONS} section.
@@ -2882,16 +2882,16 @@ This function is only available for the home-built AD and DA converter.
 It accepts no arguments and returns the current voltage at the input of
 the AD converter, a value between @w{-10 V} and @w{+10 V}.
 
-Please note: If this function is called without a previous call of the
-function @code{daq_set_voltage()} (see above) the voltage at the output
-of the DA converter will switch to @w{0 V} automatically. So you should
-call @code{daq_set_voltage()} always before @code{daq_get_voltage()} if
-something is connected to the DA output!
+@strong{Please note}: If this function is called without a previous call
+of the function @code{daq_set_voltage()} (see above) the voltage at the
+output of the DA converter will switch to @w{0 V} automatically. So you
+should call @code{daq_set_voltage()} always before
+@code{daq_get_voltage()} if something is connected to the DA output!
 
-Note also: if the ADC had previously reserved by a call of the function
-@code{daq_reserve_adc()} the pass-phrase specified in that call has to
-be passed to the function as the very first argument if you want to be
-able to read in the voltage at the ADC.
+@strong{Note also}: if the ADC had previously reserved by a call of the
+function @code{daq_reserve_adc()} the pass-phrase specified in that call
+has to be passed to the function as the very first argument if you want
+to be able to read in the voltage at the ADC.
 
 The function can be used in the @code{EXPERIMENT} section only.
 
@@ -2986,10 +2986,10 @@ the function @code{dio_value()}.
 If no mode is set for a DIO the mode for 24-bit input and output is used
 per default.
 
-Please note: if the DIO had previously reserved by a call of the
-function @code{dio_reserve_dio()} the pass-phrase specified in that call
-has to be passed to the function as the very first argument if you want
-to be able to change the mode of the DIO.
+@strong{Please note}: if the DIO had previously reserved by a call of
+the function @code{dio_reserve_dio()} the pass-phrase specified in that
+call has to be passed to the function as the very first argument if you
+want to be able to change the mode of the DIO.
 
 
 
@@ -3058,16 +3058,16 @@ output the value for @code{CH2}.
 
 @end table
 
-Please note: trying to output a negative value will make the program
-abort immediately as will trying to output too large a value during the
-test run. During the experiment a too large value will be truncated to
-the allowed range by stripping off the higher order bits and a warning
-message is printed out.
+@strong{Please note}: trying to output a negative value will make the
+program abort immediately as will trying to output too large a value
+during the test run. During the experiment a too large value will be
+truncated to the allowed range by stripping off the higher order bits
+and a warning message is printed out.
 
-Note also: if the DIO had previously reserved by a call of the function
-@code{dio_reserve_dio()} the pass-phrase specified in that call has to
-be passed to the function as the very first argument if you want to be
-able to read from or write to the DIO.
+@strong{Note also}: if the DIO had previously reserved by a call of the
+function @code{dio_reserve_dio()} the pass-phrase specified in that call
+has to be passed to the function as the very first argument if you want
+to be able to read from or write to the DIO.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -3139,12 +3139,13 @@ the length of time the counter is supposed to count. This time must be
 between @w{100 ns} and about @w{214.748 s} and must be an integer
 multiple of @w{50 ns}.
 
-Please note: This function requires not only one counter channel, i.e.@:
-the one passed to the function as the first argument, but also a second,
-adjacent counter. If @code{CH0} is specified as the counter channel also
-@code{CH1} will be needed and vice versa, and if @code{CH2} is specified
-also @code{CH3} is required and vice versa. If the adjacent counter is
-already in use for some other purpose the function fails.
+@strong{Please note}: This function requires not only one counter
+channel, i.e.@: the one passed to the function as the first argument,
+but also a second, adjacent counter. If @code{CH0} is specified as the
+counter channel also @code{CH1} will be needed and vice versa, and if
+@code{CH2} is specified also @code{CH3} is required and vice versa. If
+the adjacent counter is already in use for some other purpose the
+function fails.
 
 If called without a further argument the counter will count events on
 its default input. Alternatively, as a second argument, the source of
@@ -4104,7 +4105,7 @@ invocation of the function @code{mw_attenuator_use_table()}. Attenuation
 values within this range but not listed in the table are handled by
 linear interpolation of the nearest neighboring values.
 
-Please note: it is required that the function
+@strong{Please note}: it is required that the function
 @code{mw_attenuator_initial_attenuation()} has been called before the
 first invocation of this function to make the module aware about the
 setting of the attenuation when the experiment was started.
