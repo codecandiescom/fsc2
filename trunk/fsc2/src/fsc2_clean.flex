@@ -288,25 +288,25 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 {INANO}/[^a-zA-z_]   unit_spec( yytext, 0, -9 );
 {IMICRO}/[^a-zA-z_]  unit_spec( yytext, 0, -6 );
 {IMILLI}/[^a-zA-z_]  unit_spec( yytext, 0, -3 );
-{INONE}/[^a-zA-z_]   unit_spec( yytext, 0, 0 );
-{IKILO}/[^a-zA-z_]   unit_spec( yytext, 0, 3 );
-{IMEGA}/[^a-zA-z_]   unit_spec( yytext, 0, 6 );
+{INONE}/[^a-zA-z_]   unit_spec( yytext, 0,  0 );
+{IKILO}/[^a-zA-z_]   unit_spec( yytext, 0,  3 );
+{IMEGA}/[^a-zA-z_]   unit_spec( yytext, 0,  6 );
 
 {FNANO}/[^a-zA-z_]   unit_spec( yytext, 1, -9 );
 {FMICRO}/[^a-zA-z_]  unit_spec( yytext, 1, -6 );
 {FMILLI}/[^a-zA-z_]  unit_spec( yytext, 1, -3 );
-{FNONE}/[^a-zA-z_]   unit_spec( yytext, 1, 0 );
-{FKILO}/[^a-zA-z_]   unit_spec( yytext, 1, 3 );
-{FMEGA}/[^a-zA-z_]   unit_spec( yytext, 1, 6 );
+{FNONE}/[^a-zA-z_]   unit_spec( yytext, 1,  0 );
+{FKILO}/[^a-zA-z_]   unit_spec( yytext, 1,  3 );
+{FMEGA}/[^a-zA-z_]   unit_spec( yytext, 1,  6 );
 
 {INTs}/[^a-zA-z_]    unit_spec( yytext, 0, -5 );
 {IUT}/[^a-zA-z_]     unit_spec( yytext, 0, -2 );
-{IMT}/[^a-zA-z_]     unit_spec( yytext, 0, 1 );
-{IT}/[^a-zA-z_]      unit_spec( yytext, 0, 4 );
+{IMT}/[^a-zA-z_]     unit_spec( yytext, 0,  1 );
+{IT}/[^a-zA-z_]      unit_spec( yytext, 0,  4 );
 {FNT}/[^a-zA-z_]     unit_spec( yytext, 1, -5 );
 {FUT}/[^a-zA-z_]     unit_spec( yytext, 1, -2 );
-{FMT}/[^a-zA-z_]     unit_spec( yytext, 1, 1 );
-{FT}/[^a-zA-z_]      unit_spec( yytext, 1, 4 );
+{FMT}/[^a-zA-z_]     unit_spec( yytext, 1,  1 );
+{FT}/[^a-zA-z_]      unit_spec( yytext, 1,  4 );
 
 "nT"/[^a-zA-z_]      printf( "\x4ntesla" );
 "uT"/[^a-zA-z_]      printf( "\x4utesla" );
