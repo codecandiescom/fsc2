@@ -47,7 +47,7 @@ communication with the new device. The only exception is some basic
 knowledge about @acronym{fsc2}'s variables. They are explained in one of
 the following sections. But modules may also be used for other purposes
 than including new devices - one might also write modules that supply
-new mathematical functions or other useful functionalities. But in the
+new mathematical functions or other useful functionalities. But the
 following the discussion will concentrate on modules for new devices.
 
 But let's start with a short summary of the things a module has to do.
