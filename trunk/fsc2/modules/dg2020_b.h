@@ -151,6 +151,7 @@ typedef struct
 typedef struct _PHS_
 {
 	bool is_set[ PHASE_CW - PHASE_PLUS_X + 1 ];
+	bool is_needed[ PHASE_CW - PHASE_PLUS_X + 1 ];
 	POD *pod[ PHASE_CW - PHASE_PLUS_X + 1 ];
 	FUNCTION *function;
 } PHASE_SETUP;
@@ -195,9 +196,6 @@ typedef struct
 
 	Ticks mem_size;          // size of the complete sequence, i.e. including
 	                         // the memory needed for padding
-	bool is_grace_period;
-	Ticks grace_period;
-
 } DG2020;
 
 
