@@ -251,12 +251,14 @@ typedef struct _p_ {
 bool dg2020_is_needed = UNSET;
 DG2020 dg2020;
 PULSE *dg2020_Pulses = NULL;
+bool dg2020_IN_SETUP = UNSET;
 
 #else
 
 extern bool dg2020_is_needed;
 extern DG2020 dg2020;
 extern PULSE *dg2020_Pulses;
+extern bool dg2020_IN_SETUP;
 
 #endif
 
