@@ -1,25 +1,42 @@
+/*-----------------------------------------------------------------------
+	This script is for testing soem aspects of 2D-graphics of fsc2,
+	No warnings or errors should occur or something is seriously broken.
+
+	$Id$
+-------------------------------------------------------------------------*/ 
+
 VARIABLES:
 
-m = 200.0;
+M = 200;
+m = float( M );
 f[ 4, 2 ] = { 0.0, 0.0, 0.0, m, m, m, m, 0.0 };
 d = m;
-v[ * ] = { 0.0, 0.0 }; //f[ 1 ];
+v[ * ] = { 0.0, 0.0 };
 vt;
 I;
 K[ 2 ];
+l[ M ];
 
 
 PREPARATIONS:
 
-init_2d( 1, round( m ), round( m ), 0, 1.0 / m, 0, 1.0 / m );
+init_2d( 1, M, M, 0, 1.0 / m, 0, 1.0 / m );
 
 EXPERIMENT:
+
+FOR I = 1 : M {
+	l = ( 3.0 * ( M - I ) ) / ( M - 1 );
+	display( 1, I, l );
+	wait( 0.05 s );
+}
+
+wait( 0.2 s );
 
 WHILE  d > 2 {
 	FOR I = 1 : 4 {
 		f[ I ] += v;
 		K = round( f[ I ] + 1 );
-		display( K[ 1 ] , K[ 2 ], I );
+		display( K[ 1 ] , K[ 2 ], I % 4 );
 		vt = -1 * v[ 1 ];
 		v[ 1 ] = v[ 2 ];
 		v[ 2 ] = vt;
@@ -28,6 +45,5 @@ WHILE  d > 2 {
 	v = f[ 2 ] - f[ 1 ];
 	d = sqrt( 2 * mean( v * v ) );
 	v /= d;
-
-	wait( 0.05 s );
+	wait( 0.1 s );
 }

@@ -1,10 +1,10 @@
-/*-----------------------------------------------------------------------
-	This script for testing all built-in functions of fsc2 dealing with
-	with graphical elements the user can define, set, query and delete.
-	No warnings or errors should occur or something is seriously broken.
+/*-------------------------------------------------------------------------
+	This script is for testing all built-in functions of fsc2 dealing with
+	with graphical elements the user can define, set, query and delete. No
+	warnings or errors should occur or something is seriously broken.
 
 	$Id$
--------------------------------------------------------------------------*/ 
+---------------------------------------------------------------------------*/ 
 
 VARIABLES:
 
