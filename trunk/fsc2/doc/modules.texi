@@ -456,11 +456,11 @@ The function returns on success a variable that is either an integer or
 float value or a pointer to an array or matrix. On failure (e.g.@:
 because the accessed element does not exist) an exception is thrown.
 
-If you have a 1-dimensional array of integers named @code{ivar_1d} and
+If you have a 1-dimensional array of integers named @code{i_arr_1d} and
 you want to determine its fourth element you can call this function like
 this
 @example
-    elem = get_element( ivar_1d, 1, 3 );
+    elem = get_element( i_arr_1d, 1, 3 );
 @end example
 @noindent
 and the returned variable @code{elem} will be of type @code{INT_VAR},
@@ -469,13 +469,13 @@ that array indices start at @code{0}, so the fourth element has the
 index @code{3}).
 
 If, in contrast, you want the element @code{[3,2,5]} of the variable
-@code{fvar_3d} pointing a three-dimensional floating point matrix
+@code{f_arr_3d} pointing a three-dimensional floating point matrix
 you would call the function as
 @example
-    elem = get_element( var_3d, 3, 3, 2, 5 );
+    elem = get_element( f_arr_3d, 3, 3, 2, 5 );
 @end example
 
-You can also call the function with less indices as the matrix has
+You can also call the function with less indices than the matrix has
 dimensions. In this case the function returns a variable pointing to
 the indexed array or sub-matrix.
 
