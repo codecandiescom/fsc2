@@ -33,7 +33,8 @@ typedef struct Pulse_ {
 	Phase_Sequence *phase;    /* phase sequence for pulse */
 
 
-	struct Pulse_ *rp;        /* list of replacement pulses */
+	int *nrp;                 /* list of numbers of replacement pulses */
+	struct Pulse_ **rp;       /* list of replacement pulses */
 	int n_rp;                 /* number of replacement pulses */
 
 	struct Pulse_ *next;      /* pointer to next pulse in list */
@@ -48,24 +49,18 @@ enum {
 	P_LEN     = ( 1 << 2 ),
 	P_DPOS    = ( 1 << 3 ),
 	P_DLEN    = ( 1 << 4 ),
-	P_MAXLEN  = ( 1 << 5 )
+	P_MAXLEN  = ( 1 << 5 ),
+	P_REPL    = ( 1 << 6 )
 };
 
 
-Pulse *n2p( char *txt );
-Pulse *pulse_new( int num );
+int    ps2n( char *txt );
+Pulse *pulse_new( char *txt );
 Pulse *pulse_find( int num );
+Var   *pulse_get_prop( char *txt, int type );
 void   pulse_set( Pulse *p, int type, Var *v );
-Var   *pulse_get_by_addr( Pulse *p, int type );
-Var   *pulse_get_by_num( int pnum, int type );
-bool   pulse_exist( Pulse *p );
-void   pulse_set_func( Pulse *p, Var *v );
-void   pulse_set_pos( Pulse *p, Var *v );
-void   pulse_set_len( Pulse *p, Var *v );
-void   pulse_set_dpos( Pulse *p, Var *v );
-void   pulse_set_dlen( Pulse *p, Var *v );
-void   pulse_set_maxlen( Pulse *p, Var *v );
-void save_restore_pulses( bool flag );
+void   basic_pulse_check( void );
+void   save_restore_pulses( bool flag );
 void   delete_pulses( void );
 
 

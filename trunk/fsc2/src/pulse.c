@@ -6,6 +6,20 @@
 #include "fsc2.h"
 
 
+/* local functions */
+
+static Var   *pulse_get_by_addr( Pulse *p, int type );
+static bool   pulse_exist( Pulse *p );
+static void   pulse_set_func( Pulse *p, Var *v );
+static void   pulse_set_pos( Pulse *p, Var *v );
+static void   pulse_set_len( Pulse *p, Var *v );
+static void   pulse_set_dpos( Pulse *p, Var *v );
+static void   pulse_set_dlen( Pulse *p, Var *v );
+static void   pulse_set_maxlen( Pulse *p, Var *v );
+static void   pulse_set_repl( Pulse *p, Var *v );
+static void   sort_pulse_list( void );
+
+
 /*----------------------------------------------*/
 /* Extracts the pulse number from a pulse name. */
 /* ->                                           */
@@ -14,41 +28,53 @@
 /*    * pulse number or -1 on error             */
 /*----------------------------------------------*/
 
-Pulse *n2p( char *txt )
+int ps2n( char *txt )
 {
 	long num;
 
 
 	if ( *txt == '.' )
-		return Cur_Pulse;
+		return Cur_Pulse->num;
 
 	while ( ! isdigit( *txt ) )
 		txt++;
 
 	num = strtol( txt, NULL, 10 );
-	if ( errno == ERANGE || num > INT_MAX )
+	if ( errno == ERANGE )
 	{
 		eprint( FATAL, "%s:%ld: Pulse number out of range (0-%d).\n",
-				Fname, Lc,  MAX_PULSE_NUM - 1 );
+				Fname, Lc, MAX_PULSE_NUM - 1 );
 		THROW( EXCEPTION );
 	}
 
-	return pulse_find( ( int ) num );
+	if ( num > INT_MAX )
+	{
+		eprint( FATAL, "%s:%ld: Pulse number %ld out of range (0-%d).\n",
+				Fname, Lc, num, MAX_PULSE_NUM - 1 );
+		THROW( EXCEPTION );
+	}
+
+	return ( int ) num;
 }
 
 
+/*-------------------------------------------------------*/
 /* Creates a new pulse and appends it to the pulse list. */
+/*-------------------------------------------------------*/
 
-Pulse *pulse_new( int num )
+Pulse *pulse_new( char *txt )
 {
 	Pulse *p;
+	int num;
 
+
+	num = ps2n( txt );
 
 	/* check that the pulse does not already exists */
 
 	if ( pulse_find( num ) != NULL )
 	{
-		eprint( FATAL, "%s:%ld: Pulse with number %d already exists.\n",
+		eprint( FATAL, "%s:%ld: Pulse %d already exists.\n",
 				Fname, Lc, num );
 		THROW( EXCEPTION );
 	}
@@ -69,6 +95,7 @@ Pulse *pulse_new( int num )
 	p->num = num;
 	p->set_flags = 0;
 	p->rp = NULL;
+	p->nrp = NULL;
 	p->n_rp = 0;
 
 	Plist = p;
@@ -157,6 +184,10 @@ void pulse_set( Pulse *p, int type, Var *v )
 			pulse_set_maxlen( p, v );
 			break;
 
+		case P_REPL :
+			pulse_set_repl( p, v );
+			break;
+
 		default :                 /* this should never happen... */
 			assert( 1 == 0 );
 	}
@@ -164,6 +195,9 @@ void pulse_set( Pulse *p, int type, Var *v )
 	vars_pop( v );
 }
 
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
 
 Var *pulse_get_by_addr( Pulse *p, int type )
 {
@@ -232,21 +266,30 @@ Var *pulse_get_by_addr( Pulse *p, int type )
 }
 
 
-Var *pulse_get_by_num( int pnum, int type )
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+Var *pulse_get_prop( char *txt, int type )
 {
-	Pulse *p;
+	int num;
+	Pulse *cp;
 
 
-	if ( ( p = pulse_find( pnum ) ) == NULL )
+	num = ps2n( txt );
+	cp = pulse_find( num );
+	if ( cp == NULL )
 	{
-		eprint( FATAL, "%s:%l: Pulse with number %d does not exists.\n",
-				Fname, Lc, pnum );
+		eprint( FATAL, "%s:%ld: Referenced pulse %d does not exist.\n",
+				Fname, Lc, num );
 		THROW( EXCEPTION );
 	}
 
-	return pulse_get_by_addr( p, type );
+	return pulse_get_by_addr( cp, type );
 }
 
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
 
 bool pulse_exist( Pulse *p )
 {
@@ -259,6 +302,9 @@ bool pulse_exist( Pulse *p )
 	return FAIL;
 }
 
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
 
 void pulse_set_func( Pulse *p, Var *v )
 {
@@ -282,6 +328,9 @@ void pulse_set_func( Pulse *p, Var *v )
 	p->set_flags |= P_FUNC;
 }
 
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
 
 void pulse_set_pos( Pulse *p, Var *v )
 {
@@ -317,6 +366,9 @@ void pulse_set_pos( Pulse *p, Var *v )
 }
 
 
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
 void pulse_set_len( Pulse *p, Var *v )
 {
 	long val;
@@ -350,6 +402,9 @@ void pulse_set_len( Pulse *p, Var *v )
 }
 
 
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
 void pulse_set_dpos( Pulse *p, Var *v )
 {
 	long val;
@@ -376,6 +431,9 @@ void pulse_set_dpos( Pulse *p, Var *v )
 	p->set_flags |= P_DPOS;
 }
 
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
 
 void pulse_set_dlen( Pulse *p, Var *v )
 {
@@ -404,6 +462,9 @@ void pulse_set_dlen( Pulse *p, Var *v )
 }
 
 
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
 void pulse_set_maxlen( Pulse *p, Var *v )
 {
 	long val;
@@ -431,13 +492,171 @@ void pulse_set_maxlen( Pulse *p, Var *v )
 }
 
 
+/*-------------------------------------------------------------------*/
+/* Adds (another) pulse to the list of numbers of replacement pulses */
+/*-------------------------------------------------------------------*/
+
+void pulse_set_repl( Pulse *p, Var *v )
+{
+	/* no checking needed, already done by parser... */
+
+	p->nrp = T_realloc( p->nrp, ( p->n_rp + 1 ) * sizeof( int ) );
+	p->nrp[ p->n_rp++ ] = ( int ) v->val.lval;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+void basic_pulse_check( void )
+{
+	Pulse *cp;
+
+
+	if ( Plist == NULL )
+		return;
+
+	sort_pulse_list( );
+
+	for ( cp = Plist; cp != NULL; cp = cp->next )
+	{
+		/* Check the pulse replacement setup */
+
+		if ( cp->n_rp != 0 )
+		{
+			int i;
+
+			if ( ! ( cp->set_flags & P_MAXLEN ) )
+			{
+				eprint( WARN, "Replacement pulses for pulse %d have been set "
+						"but no maximum pulse length.\n", cp->num );
+				cp->n_rp = 0;
+				T_free( cp->nrp );
+				cp->nrp = NULL;
+				goto cont_check;
+			}
+
+			if ( cp->func != PULSER_CHANNEL_TWT_GATE &&
+				 cp->func != PULSER_CHANNEL_RF_GATE )
+			{
+				eprint( FATAL, "Function of pulse %d is neither TWT_GATE nor "
+						"RF_GATE but replacement pulses are defined.\n",
+						cp->num );
+				THROW( EXCEPTION );
+			}
+
+			cp->rp = T_malloc( cp->n_rp * sizeof( Pulse * ) );
+
+			if ( cp->len > cp->maxlen )
+			{
+				eprint( WARN, "Length of pulse %d is already at start longer "
+						"than the maximum length.\n", cp->num );
+				cp->is_active = UNSET;
+			}
+			else
+				cp->is_active = SET;
+
+			for ( i = 0; i < cp->n_rp; i++ )
+			{
+				cp->rp[ i ] = pulse_find( cp->nrp[ i ] );
+
+				if ( cp->rp[ i ] == cp )
+				{
+					eprint( FATAL, "Pulse %d can't be replaced by itself.\n",
+							cp->num );
+					THROW( EXCEPTION );
+				}
+
+				if ( cp->rp[ i ] == NULL )
+				{
+					eprint( FATAL, "Replacement pulse %d for pulse %d has not "
+							"been defined.\n", cp->nrp[ i ], cp->num );
+					THROW( EXCEPTION );
+				}
+
+				if ( cp->rp[ i ]->n_rp != 0 )
+				{
+					eprint( FATAL, "Replacement pulse %d for pulse %d itself "
+							"has replacement pulses defined.\n",
+							cp->nrp[ i ], cp->num );
+					THROW( EXCEPTION );
+				}
+
+				if ( cp->rp[ i ]->set_flags & P_FUNC )
+				{
+					if ( cp->rp[ i ]->func != cp->func )
+					{
+						eprint( FATAL, "Function of replacement pulse %d is "
+								"different from the one it has to replace "
+								"(pulse %d).\n", cp->nrp[ i ], cp->num );
+						THROW( EXCEPTION );
+					}
+				}
+				else     /* function of replacement pulse has not been set ? */
+				{
+					Var *v;
+
+					pulse_set_func( cp->rp[ i ],
+									v = vars_push( INT_VAR, cp->func ) );
+					vars_pop( v );
+				}
+
+				cp->rp[ i ]->is_active
+					                  = ( cp->len > cp->maxlen ) ? SET : UNSET;
+			}
+
+			T_free( cp->nrp );
+			cp->nrp = NULL;
+		}
+	}
+
+    /* Now check if at least all relevant properties are set */
+
+cont_check:
+	for ( cp = Plist; cp != NULL; cp = cp->next )
+	{
+		if ( ! ( cp->set_flags & P_FUNC ) )
+		{
+			eprint( FATAL, "Function of pulse %d has not been defined.\n",
+					cp->num );
+			THROW( EXCEPTION );
+		}
+
+		if ( ! ( cp->set_flags & P_POS ) )
+		{
+			eprint( FATAL, "Start position of pulse %d has not been "
+					"defined.\n", cp->num );
+			THROW( EXCEPTION );
+		}
+
+		if ( ! ( cp->set_flags & P_LEN ) )
+		{
+			eprint( FATAL, "Length of pulse %d has not been defined.\n",
+					cp->num );
+			THROW( EXCEPTION );
+		}
+
+		if ( cp->set_flags & P_MAXLEN && cp->n_rp == 0 )
+		{
+			eprint( FATAL, "Maximum length of pulse %d has been defined "
+					"but no replacement pulses.\n",
+					cp->num );
+			THROW( EXCEPTION );
+		}
+	}
+}
+
+
+/*--------------------------------------------------------------*/
+/* Save or restore starting values of the pulses (for test run) */
+/*--------------------------------------------------------------*/
+
 void save_restore_pulses( bool flag )
 {
 	Pulse *cp;
 
 	if ( flag )
-	{
-		for ( cp = Pulse; cp != NULL; cp = cp->next )
+		for ( cp = Plist; cp != NULL; cp = cp->next )
 		{
 			cp->store.pos       = cp->pos;
 			cp->store.len       = cp->len;
@@ -445,8 +664,8 @@ void save_restore_pulses( bool flag )
 			cp->store.dlen      = cp->dlen;
 			cp->store.is_active = cp->is_active;
 		}
-		else
-		for ( cp = Pulse; cp != NULL; cp = cp->next )
+	else
+		for ( cp = Plist; cp != NULL; cp = cp->next )
 		{
 			cp->pos       = cp->store.pos;
 			cp->len       = cp->store.len;
@@ -454,11 +673,71 @@ void save_restore_pulses( bool flag )
 			cp->dlen      = cp->store.dlen;
 			cp->is_active = cp->store.is_active;
 		}
-	}
 }
 
 
+/*------------------------------------------------------------*/
+/* Sorts the pulse list according to the pulse numbers - this */
+/* is only done to print out possible error messages in a     */
+/* reasonable sequence.                                       */
+/*------------------------------------------------------------*/
 
+void sort_pulse_list( void )
+{
+	Pulse *new_Plist = Plist;
+	Pulse *cp, *cpn, *cpl, *cplp;
+
+
+	cp = Plist->next;                   /* get second element */
+	if ( cp == NULL )                   /* just one pulse in the list ? */
+		return;
+
+	new_Plist->next->prev = NULL;       
+	new_Plist->next = NULL;
+	
+	for ( ; cp != NULL; cp = cpn )
+	{
+		cpn = cp->next;
+		if ( cp->next != NULL )
+			cp->next->prev = NULL;
+		
+		for ( cpl = new_Plist; cpl != NULL; cpl = cpl->next )
+		{
+			if ( cp->num < cpl->num )
+				break;
+			else
+				cplp = cpl;
+		}
+
+		if ( cpl == new_Plist )     /* pulse at very start of list ? */
+		{
+			cp->prev = NULL;
+			cp->next = new_Plist;
+			cp->next->prev = cp;
+			new_Plist = cp;
+			continue;
+		}
+
+		if ( cpl == NULL )          /* pulse at end of list ? */
+		{
+			cplp->next = cp;
+			cp->prev = cplp;
+			cp->next = NULL;
+			continue;
+		}
+
+		cp->next = cplp->next;
+		cplp->next = cp->next->prev = cp;
+		cp->prev = cplp;
+		
+	}
+
+	Plist = new_Plist;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
 
 void delete_pulses( void )
 {
@@ -466,6 +745,10 @@ void delete_pulses( void )
 
 	for ( cp = Plist; cp != NULL; cp = cpn )
 	{
+		if ( cp->rp != NULL )
+			T_free( cp->rp );
+		if ( cp->nrp != NULL )
+			T_free( cp->nrp );
 		cpn = cp->next;
 		T_free( cp );
 	}

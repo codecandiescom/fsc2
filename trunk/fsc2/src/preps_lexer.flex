@@ -79,7 +79,7 @@ DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
 PH          PH(ASE(SEQ(UENCE)?)?)?_?{INT}?
 ML          M(AX(IMUM)?)?_?L(EN(GTH)?)?
-RP          R(EPL(ACEMENT)?)?_?P((ULSE)?S?)?
+RP          REPL(ACEMENT)?_?(P((ULSE)?S?)?)?
 
 WS          [\n \t]+
 
@@ -167,23 +167,6 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 			/* all pulse related keywords... */
 
-{P}":"?     {
-				char *t = prepstext;
-				long num;
-
-				while ( ! isdigit( *t ) )
-					t++; 
-				num = strtol( t, NULL, 10 );
-				if ( errno == ERANGE || num > INT_MAX )
-				{
-					eprint( FATAL, "%s:%ld: Pulse number out of range.\n",
-								   Fname, Lc );
-					THROW( EXCEPTION );
-				}
-			    Cur_Pulse = pulse_new( ( int ) num );
-				return P_TOK;
-			}
-
 {F}         return F_TOK;
 {S}			return S_TOK;
 {L}			return L_TOK;
@@ -193,38 +176,56 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 {ML}        return ML_TOK;
 {RP}        return RP_TOK;
 
+
 			/* combinations of pulse and property, e.g. `P3.LEN' */
 
-{P}?"."{F}  {
+{P}"."{F}   {
 				prepslval.vptr = pulse_get_prop( prepstext, P_FUNC );
 				return VAR_REF;
             }
 
-{P}?"."{S}  {
+{P}"."{S}   {
 				prepslval.vptr = pulse_get_prop( prepstext, P_POS );
 				return VAR_REF;
             }
 
-{P}?"."{L}  {
+{P}"."{L}   {
 				prepslval.vptr = pulse_get_prop( prepstext, P_LEN );
 				return VAR_REF;
             }
 
-{P}?"."{DS} {
+{P}"."{DS}  {
 				prepslval.vptr = pulse_get_prop( prepstext, P_DPOS );
 				return VAR_REF;
             }
 
-{P}?"."{DL} {
+{P}"."{DL}  {
 				prepslval.vptr = pulse_get_prop( prepstext, P_DLEN );
 				return VAR_REF;
             }
 
-{P}?"."{ML} {
+{P}"."{ML}  {
 				prepslval.vptr = pulse_get_prop( prepstext, P_MAXLEN );
 				return VAR_REF;
             }
 
+{P}":"      {
+			    Cur_Pulse = pulse_new( prepstext );
+				return P_TOK;
+			}
+
+
+{P}/[\t \n,;] {
+				if ( Cur_Pulse == NULL )
+				{
+					Cur_Pulse = pulse_new( prepstext );
+					return P_TOK;
+				}
+
+				prepslval.vptr =
+				              vars_push( INT_VAR, ( long ) ps2n( prepstext ) );
+				return( RPP_TOK );
+			}
 
 {MW}        {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_MW );
@@ -352,6 +353,7 @@ int preparations_parser( FILE *in )
 	}
 	compilation.sections[ PREPARATIONS_SECTION ] = SET;
 
+	Cur_Pulse = NULL;
 	prepsin = in;
 
 	/* Keep the lexer happy... */
@@ -362,6 +364,8 @@ int preparations_parser( FILE *in )
 		 is_restart = SET;
 
 	prepsparse( );
+	basic_pulse_check( );
+
 
 	return Preps_Next_Section;
 }

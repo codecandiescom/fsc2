@@ -53,6 +53,7 @@ static Var *CV;
 %token <lval> INT_TOKEN
 %token <dval> FLOAT_TOKEN
 %token <sptr> STR_TOKEN
+%token <vptr> RPP_TOK
 %token EQ LT LE GT GE
 
 %token NS_TOKEN US_TOKEN MS_TOKEN S_TOKEN
@@ -71,12 +72,14 @@ static Var *CV;
 
 
 input:   /* empty */
-       | input ';'
-       | input line ';'            { assert( Var_Stack == NULL ); }
+       | input ';'                 { Cur_Pulse = NULL; }
+       | input line ';'            { Cur_Pulse = NULL;
+	                                 assert( Var_Stack == NULL ); }
        | input error ';'           { THROW( SYNTAX_ERROR_EXCEPTION ); }
        | input line line           { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | input SECTION_LABEL       { assert( Var_Stack == NULL );
+       | input SECTION_LABEL       { Cur_Pulse = NULL;
+	                                 assert( Var_Stack == NULL );
 	                                 YYACCEPT; }
 ;
 
@@ -100,7 +103,15 @@ prop:   /* empty */
        | prop DS_TOK sep1 expr sep2 { pulse_set( Cur_Pulse, P_DPOS, $4 ); }
        | prop DL_TOK sep1 expr sep2 { pulse_set( Cur_Pulse, P_DLEN, $4 ); }
        | prop ML_TOK sep1 expr sep2 { pulse_set( Cur_Pulse, P_MAXLEN, $4 ); }
+       | prop RP_TOK sep1 rps sep2
 ;
+
+/* replacement pulse settings */
+
+rps:     RPP_TOK                    { pulse_set( Cur_Pulse, P_REPL, $1 ); }
+       | rps sep2 RPP_TOK           { pulse_set( Cur_Pulse, P_REPL, $3 ); }
+;
+
 
 /* separator between keyword and value */
 
@@ -138,7 +149,7 @@ expr:    INT_TOKEN unit           { $$ = vars_mult( vars_push( INT_VAR, $1 ),
 										vars_pop( $6 );
 									    $$ = CV;
 									} }
-       | VAR_REF                  { $$ = $1; }
+       | VAR_REF
        | VAR_TOKEN '('            { eprint( FATAL, "%s:%ld: `%s' isn't a "
 											"function.\n", Fname, Lc,
 											$1->name );

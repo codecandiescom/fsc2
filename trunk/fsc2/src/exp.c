@@ -500,12 +500,14 @@ void prim_exp_run( void )
 		/* 1. Run the test run hook functions of the modules.
 		   2. Save the variables so we can reset them to their intial values
 		      when the test run is completed.
+		   3. Save the relevant values from the pulse structures.
 		   3. Set up a signal handler so that it's possible to stop the test
 		      if there are e.g. infinite loops.
 		*/
 
 		TEST_RUN = 1;
 		save_restore_variables( SET );
+		save_restore_pulses( SET );
 		set_stop_signal_handler( SET );
 		run_test_hooks( );
 
@@ -609,6 +611,7 @@ void prim_exp_run( void )
 
 	set_stop_signal_handler( UNSET );
 	Fname = NULL;
+	save_restore_pulses( UNSET );
 	save_restore_variables( UNSET );
 	TEST_RUN = 0;
 }
