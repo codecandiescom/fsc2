@@ -73,10 +73,10 @@ time slices is:
 @example
 TIMEBASE: 5 ns;
 @end example
-Alternatively, one may also write @code{TB:}, @code{T_B}, @code{TBASE:},
-@code{T_BASE:}, @code{TIMEB}, @code{TIME_B:} or @code{TIME_BASE:} insetad
-of @code{TIMEBASE:}. Please note that, whatever form you choose, it has
-to end with a colon.
+Alternatively, one may also write @code{TB:}, @code{T_B},
+@code{TBASE:}, @code{T_BASE:}, @code{TIMEB}, @code{TIME_B:} or
+@code{TIME_BASE:} insetad of @code{TIMEBASE:}. Please note that,
+whatever form you choose, it has to end with a colon.
 
 The minumum and maximum values for the timebase differ for both types of
 pulsers:
@@ -113,7 +113,14 @@ or the frequency the experiment is repeated. For this type of triggering
 on the @strong{Sony/Tektronix DG2020} (unfortunately, this can't be done
 with the @strong{Tektronix HFS9000}, so an external trigger must be
 used) an additional keyword can be specified, either @code{REPEAT_TIME}
-or @code{REPEAT_FREQUENCY}, i.e.@ one may use
+or @code{REPEAT_FREQUENCY}@footnote{@code{REPEAT_TIME} and
+@code{REPEAT_FREQUENCY} may also be abbreviated to @code{REPT},
+@code{REP_T}, @code{REPTIME}, @code{REPEAT_TIME}, @code{REPEAT_T},
+@code{REPEATT} or @code{REPEATTIME} and @code{REPF}, @code{REP_F},
+@code{REPFREQ}, @code{REP_FREQ}, @code{REPFREQUENCY},
+@code{REP_FREQUENCY}, @code{REPEATF}, @code{REPEAT_F},
+@code{REPEATFREQ}, @code{REPEAT_FREQ} or @code{REPEATFREQUENCY}.},
+i.e.@ one may use:
 @example
 TRIGGER_MODE: INTERNAL, REPEAT_TIME = 10 ms;
 @end example
@@ -125,16 +132,14 @@ to set the repetition rate of the the experiment to @w{100 Hz}. Please
 note that the repeat time must be an intege multiple of the timebase of
 the pulser.
 
-@code{REPEAT_TIME} and @code{REPEAT_FREQUENCY} may also be abbreviated
-to @code{REPT}, @code{REP_T}, @code{REPTIME}, @code{REPEAT_TIME},
-@code{REPEAT_T}, @code{REPEATT} or @code{REPEATTIME} and @code{REPF},
-@code{REP_F}, @code{REPFREQ}, @code{REP_FREQ}, @code{REPFREQUENCY},
-@code{REP_FREQUENCY}, @code{REPEATF}, @code{REPEAT_F},
-@code{REPEATFREQ}, @code{REPEAT_FREQ} or @code{REPEATFREQUENCY}.
 
-On the other hand, when using an external trigger one may want to set the
-trigger level, slope and, possibly, the tripper input impedance. This
-done using a statement similar to one of these:
+On the other hand, when using an external trigger one may want to set
+the trigger level, slope and, possibly, the tripper input
+impedance. This done using a statement similar to one of
+these@footnote{The keywords @code{LEVEL} can be shortend to @code{LEV},
+@code{SLOPE} to @code{SL}, @code{POSITIVE} to @code{POS},
+@code{NEGATIVE} to @code{NEG}, @code{IMPEDANCE} to @code{IMP} and,
+finally, @code{HIGH} to @code{H} and @code{LOW} to @code{L}.}:
 @example
 TRIG_MODE: EXTERNAL, LEVEL = 3.5 V, SLOPE = NEGATIVE, IMPEDANCE = LOW;
 @end example
@@ -144,11 +149,6 @@ TM: EXTERNAL, LEVEL = -1.2 V, SLOPE = POSITIVE, IMPEDANCE = HIGH;
 @end example
 Please note: The trigger input impedance can only be set for the
 @strong{Sony/Tektronix DG2020}.
-
-The keywords @code{LEVEL} can be shortend to @code{LEV}, @code{SLOPE} to
-@code{SL}, @code{POSITIVE} to @code{POS}, @code{NEGATIVE} to @code{NEG},
-@code{IMPEDANCE} to @code{IMP} and, finally, @code{HIGH} to @code{H} and
-@code{LOW} to @code{L}.
 
 @anchor{Channel setup}
 @subsubsection Channel setup
@@ -253,7 +253,7 @@ internal channels to use via a statement like this:
 MICROWAVE: POD = 1, 2, 3, 4  CHANNEL = 31, 32, 33, 34;
 RF:        POD = 6           CHANNEL = 35;
 RF_GATE:   POD = 7           CHANNEL = 17;
-DETECTION: POD = 11;    // leave it to program to select the channel
+DETECTION: POD = 11;   // leave it to the program to select the channel
 @end example
 
 
@@ -268,17 +268,18 @@ RF:        POD = 6           V_HIGH = 2.6 V, V_LOW = 0 V;
 RF_GATE:   POD = 7           V_HIGH = 5 V,   V_LOW = 0 V;
 @end example
 Please note that the high voltage must always be larger than the low
-voltage. Instead of @code{V_HIGH} you can also write @code{VHIGH},
+voltage@footnote{Instead of @code{V_HIGH} you can also write @code{VHIGH},
 @code{V_H} or @code{VH} and for @code{V_LOW} you may use @code{VLOW},
-@code{V_L} or @code{VL}.
+@code{V_L} or @code{VL}.}.
 
 If a function requires the output levels to be inverted (i.e.@ that the
 voltage is high while there are no pulses and low on pulses) use the
-@code{INVERTED} keyword:
+@code{INVERTED} keyword@footnote{The keyword @code{INVERTED} can be
+shortened to @code{INVERT} or @code{INV}.}:
 @example
 RF:        POD = 6           V_HIGH = 2.6 V, V_LOW = 0 V, INVERTED;
 @end example
-The keyword @code{INVERTED} can be shortened to @code{INVERT} or @code{INV}.
+
 
 Finally, in order to take care of different cable lengths a delay for a
 function can be set. This delay will be automatically added to the start
@@ -287,8 +288,11 @@ position of each pulse of this function:
 MICROWAVE: POD = 1, 2, 3, 4  DELAY = 50 ns;
 @end example
 For obvious reasons setting negative delays is only possible when using
-internal trigger mode. The keyword @code{DELAY} can be abbreviated to
-@code{DEL}.
+internal trigger mode@footnote{The obvious reason is, of course,
+causality - the pulser can't know when the external trigger is going to
+happen, so starting before the trigger is detected would a bit
+difficult:-). By the way, the keyword @code{DELAY} can be abbreviated to
+@code{DEL}.}.
 
 
 @anchor{Phase channel setup}
@@ -325,11 +329,11 @@ PHASE_SETUP:  MW,
 @end example
 In this example you obviously want to phase cycle the microwave pulses
 and the @code{+X} input of the bridge is connected to pod channel 1 of
-the pulser etc. As usual, the keyword @code{PHASE_SETUP} can be
-abbreviated, to either @code{PH_SETUP}, @code{PHASE_S}, or @code{PHS}.
-And, since you actually can have 2 phase cycled function, you can append
-either @code{1} or @code{_1} and @code{2} or @code{_2} to distinguish
-between the two phase setups, i.e.@ @code{PHASE_SETUP_1}.
+the pulser etc@footnote{As usual, the keyword @code{PHASE_SETUP} can be
+abbreviated to either @code{PH_SETUP}, @code{PHASE_S}, or @code{PHS}.}
+Moreover, since you actually can have 2 phase cycled function, you can
+append either @code{1} or @code{_1} and @code{2} or @code{_2} to
+distinguish between the two phase setups, i.e.@ @code{PHASE_SETUP_1}.
 
 
 @strong{Frankurt S-band spectrometer}:
