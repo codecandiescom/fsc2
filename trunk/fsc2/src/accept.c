@@ -385,7 +385,7 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 
 	/* Include the new data into the scaled data */
 
-	for ( cur_ptr = ptr, sp = G.curve[ curve ]->points, i = x_index;
+	for ( cur_ptr = ptr, i = x_index, sp = G.curve[ curve ]->points + x_index;
 		  i < x_index + len; sp++, i++ )
 	{
 		if ( type & ( INT_VAR | INT_ARR ) )
