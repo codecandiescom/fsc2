@@ -585,6 +585,7 @@ PHASE_SETUP:  MICROWAVE,
 @end example
 @noindent
 or
+@example
 PHASE_SETUP:  MICROWAVE,
                X: CH = C1,
               +Y: CH = C2,

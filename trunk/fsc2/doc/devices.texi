@@ -1643,8 +1643,8 @@ an argument of @code{1} you may switch back to the default behavior.
 @item pulser_cw_mode()
 @findex pulser_cw_mode()
 This function exists for the Berlin X-band pulser modules
-@code{dg2020_b} and @code{ep385} only. It tells the pulser to create an
-output suitable for cw EPR measurements.
+@code{dg2020_b}, @code{ep385} and @code{rs690} only. It tells the pulser
+to create an output suitable for cw EPR measurements.
 
 This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} program.
@@ -1654,14 +1654,14 @@ of an @code{EDL} program.
 @item pulser_shape_to_defense_minimum_distance()
 @findex pulser_shape_to_defense_minimum_distance()
 This function exists for the Berlin X-band pulser modules
-@code{dg2020_b} and @code{ep385} only. It sets the minimum allowed
-distance between the end of a pulse shaper pulse and the start of a
-defense pulse to avoid destroying the detector by excessive microwave
-power. The default minimum value for this distance is intentionally set
-to an unreasonably long value and this function allows to reduce (but
-also enlarge) the value. As another security measure the function
-requires the user to explicitely confirm the new value before an
-experiment is started.
+@code{dg2020_b}, @code{ep385} and @code{rs690} only. It sets the minimum
+allowed distance between the end of a pulse shaper pulse and the start
+of a defense pulse to avoid destroying the detector by excessive
+microwave power. The default minimum value for this distance is
+intentionally set to an unreasonably long value and this function allows
+to reduce (but also enlarge) the value. As another security measure the
+function requires the user to explicitely confirm the new value before
+an experiment is started.
 
 This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} program.
@@ -1671,14 +1671,14 @@ of an @code{EDL} program.
 @item pulser_defense_to_shape_minimum_distance()
 @findex pulser_defense_to_shape_minimum_distance()
 This function exists for the Berlin X-band pulser modules
-@code{dg2020_b} and @code{ep385} only. It sets the minimum allowed
-distance between the end of a defense pulse and the start of a pulse
-shaper pulse to avoid destroying the detector by excessive microwave
-power. The default minimum value for this distance is intentionally set
-to an unreasonably long value and this function allows to reduce (but
-also enlarge) the value. As another security measure the function
-requires the user to explicitely confirm the new value before an
-experiment is started.
+@code{dg2020_b}, @code{ep385} and @code{rs690} only. It sets the minimum
+allowed distance between the end of a defense pulse and the start of a
+pulse shaper pulse to avoid destroying the detector by excessive
+microwave power. The default minimum value for this distance is
+intentionally set to an unreasonably long value and this function allows
+to reduce (but also enlarge) the value. As another security measure the
+function requires the user to explicitely confirm the new value before
+an experiment is started.
 
 This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} program.
@@ -1688,13 +1688,13 @@ of an @code{EDL} program.
 @item pulser_automatic_shape_pulses()
 @findex pulser_automatic_shape_pulses()
 This function exists for the Berlin X-band pulser modules
-@code{dg2020_b} and @code{ep385} only. It tells @code{fsc2} to
-automatically create pulse shaper pulses in the @code{PULSE_SHAPE}
-function. Obviously, this requires that a pod or channel has been
-assigned to the @code{PULSE_SHAPE} function. The first (and required)
-argument is the function for which shape pulses are to be created,
-typically this will be @code{MICROWAVE} in which case shape pulses are
-created for all microwave pulses.
+@code{dg2020_b}, @code{ep385} and @code{rs690} only. It tells
+@code{fsc2} to automatically create pulse shaper pulses in the
+@code{PULSE_SHAPE} function. Obviously, this requires that a pod or
+channel has been assigned to the @code{PULSE_SHAPE} function. The first
+(and required) argument is the function for which shape pulses are to be
+created, typically this will be @code{MICROWAVE} in which case shape
+pulses are created for all microwave pulses.
 
 The shape pulses have exactly the same length as the pulses they are
 created for. The pulses the shape pulses are created for in turn are
@@ -1741,12 +1741,13 @@ of an @code{EDL} program.
 @item pulser_automatic_twt_pulses()
 @findex pulser_automatic_twt_pulses()
 This function exists for the Berlin X-band pulser modules
-@code{dg2020_b} and @code{ep385} only. It tells @code{fsc2} to
-automatically create in the @code{TWT} function. Obviously, this
-requires that a pod or channel has been assigned to the @code{TWT}
-function. The first (and required) argument is the function for which
-TWT pulses are to be created, typically this will be @code{MICROWAVE} in
-which case shape pulses are created for all microwave pulses.
+@code{dg2020_b}, @code{ep385} and @code{rs690} only. It tells
+@code{fsc2} to automatically create in the @code{TWT}
+function. Obviously, this requires that a pod or channel has been
+assigned to the @code{TWT} function. The first (and required) argument
+is the function for which TWT pulses are to be created, typically this
+will be @code{MICROWAVE} in which case shape pulses are created for all
+microwave pulses.
 
 Usually, the TWT pulses will have to start before the pulse for which
 they were created. The amount of time the TWT pulse starts before its
@@ -1761,6 +1762,12 @@ more than one function (e.g.@: for both the @code{MICROWAVE} and the
 @code{OTHER_2} function) and also additional TWT pulses can be created
 manually. It isn't a problem if the TWT pulses would overlap, if
 necessary they are shortenend.
+
+Since TWTs often require a minimum distance between pulses the
+automatically created pulses will automatically lengthened to cover too
+short a distance between them. The minimum TWT pulse distance is a
+compile time constant that can be adjusted in the configuration file for
+the module.
 
 This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} program.

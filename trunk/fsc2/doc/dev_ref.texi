@@ -182,15 +182,26 @@ measured is from @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
 @strong{Description}: Sony/Tektronix Data generator DG2020, used as
-pulser for the Berlin X-band spectrometer, with 36 internal channels and
-12 output pod channels.
+pulser for the Berlin X-band spectrometer.
 
 @paragraphindent 0
-Timebases: Between @w{5 ns} and @w{100 ms}, maximum pulse voltage
-between @w{-2 V} and @w{7 V}, minimum pulse voltage between @w{-3 V} and
-@w{6 V}, difference must be not more than @w{9 V} and at least @w{0.5
-V}, resolution of pulse voltages is @w{0.1 V}. Trigger-in levels
-can range from @w{-5 V} to @w{5 V}.
+Time base: between @w{5 ns} and @w{100 ms}@*
+Maximum pulse voltage: between @w{-2 V} and @w{7 V}@*
+Minimum pulse voltage: between @w{-3 V} and @w{6 V}@*
+Difference between minimum and maximum pulse voltage must be not more
+than @w{9 V} and at least @w{0.5 V}.@*
+Pulse voltage resolution: @w{0.1 V}@*
+Trigger-in level: Between @w{-5 V} to @w{5 V}@*
+Trigger-in voltage resolution: @w{0.1 V}@*
+Trigger-in impedance: 50 Ohm (@code{LOW}) or 1 kOhm (@code{HIGH})@*
+Number of output connectors (POD): 12@*
+Number of internal channels: 36
+
+@paragraphindent 0
+Due to some problems with the firmware of the device pulse sequences
+always start with a state where the output of all connectors is the
+minimum pulse voltage for the duration of the time base (this also holds
+for function/output channels declared as @code{INVERTED}).
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
@@ -204,6 +215,7 @@ can range from @w{-5 V} to @w{5 V}.
 @item @code{pulser_cw_mode()}        @tab @ref{pulser_cw_mode}
 @item @code{pulser_shift()}          @tab @ref{pulser_shift}
 @item @code{pulser_increment()}      @tab @ref{pulser_increment}
+@item @code{pulser_reset()}          @tab @ref{pulser_reset}
 @item @code{pulser_next_phase()}     @tab @ref{pulser_next_phase}
 @item @code{pulser_phase_reset()}    @tab @ref{pulser_phase_reset}
 @item @code{pulser_pulse_reset()}    @tab @ref{pulser_pulse_reset}
@@ -230,15 +242,26 @@ can range from @w{-5 V} to @w{5 V}.
 
 @paragraphindent 0
 @strong{Description}: Sony/Tektronix Data generator DG2020, used as
-pulser for the Frankfurt S-band spectrometer, with 36 internal channels
-and 12 output pod channels.
+pulser for the Frankfurt S-band spectrometer,
 
 @paragraphindent 0
-Timebases: Between @w{5 ns} and @w{100 ms}, maximum pulse voltage
-between @w{-2 V} and @w{7 V}, minimum pulse voltage between @w{-3 V} and
-@w{6 V}, difference must be not more than @w{9 V} and at least @w{0.5
-V}, resolution of pulse voltages is @w{0.1 V}. Trigger-in levels can
-range from @w{-5 V} to @w{5 V}.
+Time base: between @w{5 ns} and @w{100 ms}@*
+Maximum pulse voltage: between @w{-2 V} and @w{7 V}@*
+Minimum pulse voltage: between @w{-3 V} and @w{6 V}@*
+Difference between minimum and maximum pulse voltage must be not more
+than @w{9 V} and at least @w{0.5 V}.@*
+Pulse voltage resolution: @w{0.1 V}@*
+Trigger-in level: Between @w{-5 V} to @w{5 V}@*
+Trigger-in voltage resolution: @w{0.1 V}@*
+Trigger-in impedance: 50 Ohm (@code{LOW}) or 1 kOhm (@code{HIGH})@*
+Number of output connectors (POD): 12@*
+Number of internal channels: 36
+
+@paragraphindent 0
+Due to some problems with the firmware of the device pulse sequences
+always start with a state where the output of all connectors is the
+minimum pulse voltage for the duration of the time base (this also holds
+for function/output channels declared as @code{INVERTED}).
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
@@ -252,6 +275,7 @@ range from @w{-5 V} to @w{5 V}.
 @item @code{pulser_cw_mode()}        @tab @ref{pulser_cw_mode}
 @item @code{pulser_shift()}          @tab @ref{pulser_shift}
 @item @code{pulser_increment()}      @tab @ref{pulser_increment}
+@item @code{pulser_reset()}          @tab @ref{pulser_reset}
 @item @code{pulser_next_phase()}     @tab @ref{pulser_next_phase}
 @item @code{pulser_phase_reset()}    @tab @ref{pulser_phase_reset}
 @item @code{pulser_pulse_reset()}    @tab @ref{pulser_pulse_reset}
@@ -301,10 +325,16 @@ already measured curves is currently supported.
 
 @paragraphindent 0
 @strong{Description}: Bruker Pulse Programmer EP385, used as
-pulser for the Berlin X-band spectrometer, with 8 output channels.
+pulser for the Berlin X-band spectrometer
 
 @paragraphindent 0
-Timebases: Internal: @w{8 ns}, External: @w{8 ns} and slower
+Time base: internal clock @w{8 ns}, external clock @w{8 ns} and slower@*
+Minimum repetition time: internal clock @w{1.286 ms}, external clock
+160768 times time base@*
+Repetition time increments: internal clock @w{102.4 us}, external clock
+12800 times time base@*
+Maximum number of pulses per channel: 59@*
+Output channels: 8
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
@@ -318,6 +348,7 @@ Timebases: Internal: @w{8 ns}, External: @w{8 ns} and slower
 @item @code{pulser_cw_mode()}        @tab @ref{pulser_cw_mode}
 @item @code{pulser_shift()}          @tab @ref{pulser_shift}
 @item @code{pulser_increment()}      @tab @ref{pulser_increment}
+@item @code{pulser_reset()}          @tab @ref{pulser_reset}
 @item @code{pulser_next_phase()}     @tab @ref{pulser_next_phase}
 @item @code{pulser_phase_reset()}    @tab @ref{pulser_phase_reset}
 @item @code{pulser_pulse_reset()}    @tab @ref{pulser_pulse_reset}
@@ -543,12 +574,15 @@ the range is @w{1460 G} to @w{19900 G}.
 in the Berlin W-band spectrometer. No support for phase cycled experiments.
 
 @paragraphindent 0
-Timebases: Between @w{1.6 ns} and @w{20 us}, maximum pulse voltage
-between @w{-1.5 V} and @w{5.5 V}, minimum pulse voltage between @w{-2 V}
-and @w{5 V}, difference must be not more than @w{5.5 V} and at least
-@w{0.5 V}, resolution of pulse voltages is @w{10 mV}. Trigger-in levels
-can range from @w{-4.7 V} to @w{4.7 V}.
-
+Time base: between @w{1.6 ns} and @w{20 us}@*
+Maximum pulse voltage: between @w{-1.5 V} and @w{5.5 V}@*
+Minimum pulse voltage: between @w{-2 V} and @w{5 V}@*
+Difference must be not more than @w{5.5 V} and at least @w{0.5 V}@*
+Resolution of pulse voltages: @w{10 mV}@*
+Trigger-in levels: between @w{-4.7 V} to @w{4.7 V}@*
+Resolution of trigger-in voltages: @w{10 mV}@*
+Number of channels: 4 plus a TRIGGER_OUT channel@*
+Fixed length of TRIGGER_OUT pulse: @w{20 ns}
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
@@ -562,6 +596,7 @@ can range from @w{-4.7 V} to @w{4.7 V}.
 @item @code{pulser_update()}          @tab @ref{pulser_update}
 @item @code{pulser_shift()}           @tab @ref{pulser_shift}
 @item @code{pulser_increment()}       @tab @ref{pulser_increment}
+@item @code{pulser_reset()}           @tab @ref{pulser_reset}
 @item @code{pulser_pulse_reset()}     @tab @ref{pulser_pulse_reset}
 @item @code{pulser_lock_keyboard()}   @tab @ref{pulser_lock_keyboard}
 @item @code{pulser_stop_on_update()}  @tab @ref{pulser_stop_on_update}
@@ -586,10 +621,22 @@ can range from @w{-4.7 V} to @w{4.7 V}.
 for the Berlin 360 GHz spectrometer.
 
 @paragraphindent 0
-Timebases: @w{4 ns}, @w{8 ns} and @w{16 ns} with internal clock, @w{4
-ns} and longer with external clock (either @code{TTL} or @code{ECL} input). 
-Trigger-in either via @code{TTL} or @code{ECL} input connector.
+Time base: internal clock @w{4 ns}, @w{8 ns} and @w{16 ns}, external
+clock @w{4 ns} and longer (either via @code{TTL} or @code{ECL} level
+input connector)@*
+Trigger-in: either via @code{TTL} or @code{ECL} level input connector@*
+Number of channels: 16 (4 per output connector) with internal @w{4 ns}
+time base or external clock, 32 (8 per output connector) with internal @w{8 ns}
+time base, 64 (16 per output connector) with internal @w{16 ns} time base@*
+Maximum repetition time: 2,147,483,647 times the time base for external
+clock or @w{4 ns} internal clock (i.e. @w{8.5899 s}), @w{17.1799 s} for
+@w{8 ns} internal time base, @w{34.3597} for @w{16 ns} internal time base
 
+@paragraphindent 0
+When using an external clock or the internal @w{4 ns} time base under
+for certain pulse seqences the repetition time may be increases slightly
+(but never more than 3 times the time base), with an @w{8 ns} time base
+the repetition time may become larger by @w{8 ns}.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
@@ -603,8 +650,13 @@ Trigger-in either via @code{TTL} or @code{ECL} input connector.
 @item @code{pulser_update()}          @tab @ref{pulser_update}
 @item @code{pulser_shift()}           @tab @ref{pulser_shift}
 @item @code{pulser_increment()}       @tab @ref{pulser_increment}
+@item @code{pulser_reset()}           @tab @ref{pulser_reset}
 @item @code{pulser_pulse_reset()}     @tab @ref{pulser_pulse_reset}
 @item @code{pulser_lock_keyboard()}   @tab @ref{pulser_lock_keyboard}
+@item @code{pulser_shape_to_defense_minimum_distance()} @tab @ref{pulser_shape_to_defense_minimum_distance}
+@item @code{pulser_defense_to_shape_minimum_distance()} @tab @ref{pulser_defense_to_shape_minimum_distance}
+@item @code{pulser_automatic_shape_pulses()} @tab @ref{pulser_automatic_shape_pulses}
+@item @code{pulser_automatic_twt_pulses()} @tab @ref{pulser_automatic_twt_pulses}
 @item @code{pulser_show_pulses()}     @tab @ref{pulser_show_pulses}
 @item @code{pulser_dump_pulses()}     @tab @ref{pulser_dump_pulses}
 @end multitable
