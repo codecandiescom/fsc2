@@ -395,7 +395,7 @@ bool tds520_clear_SESR( void )
 
 void tds520_finished( void )
 {
-	char *cmd = "ACQ:STATE STOP;*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n";
+	const char *cmd = "ACQ:STATE STOP;*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n";
 
 
     tds520_clear_SESR( );

@@ -247,7 +247,7 @@ bool tds754a_set_num_avg( long num_avg )
 	else
 	{
 		sprintf( cmd, "ACQ:NUMAV %ld\n", num_avg );
-		if ( gpib_write( tds754a.device, cmd ) == FAILURE ||
+		if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE ||
 			 gpib_write( tds754a.device, "ACQ:MOD AVE\n", 12 ) == FAILURE )
 			tds754a_gpib_failure( );
 	}
@@ -410,7 +410,7 @@ bool tds754a_clear_SESR( void )
 
 void tds754a_finished( void )
 {
-	char *cmd = "ACQ:STATE STOP;*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n";
+	const char *cmd = "ACQ:STATE STOP;*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n";
 
 
     tds754a_clear_SESR( );
