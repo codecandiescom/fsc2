@@ -36,11 +36,12 @@ The library supplies the following functions:
     ni6601_dio_read()
     ni6601_is_counter_armed()
     ni6601_close()
-	ni6601_error_message()
+	ni6601_perror()
+	ni6601_strerror()
 
 
 All functions return an integer, indicating success or failure. On success,
-'NI6601_OK' (which is just 0) is returned. On failure a negative number,
+'NI6601_OK' (which is just 0) is returned. On failure a negative number
 is returned, indicating the type of failure. The following values can be
 expected:
 
@@ -62,8 +63,21 @@ expected:
     NI6601_ERR_INT    Internal driver or library error
 
 
-All functions (except ni6601_close() and ni6601_error_message()) may
-return at least one of the following error codes:
+The absolute value of the error code can be used as an index into a an
+array of short descriptions of the error encountered, defined as
+
+extern const char *ni6601_errlist[ ];
+
+The length of this array is given by the (constant) global variable
+
+extern const int ni6601_nerr;
+
+i.e. the largest  message number provided by the array of error messages
+is ni6601_nerr - 1.
+
+
+All functions (except ni6601_close(), ni6601_perror() and ni6601_strerror())
+may return at least one of the following error codes:
 
     NI6601_ERR_NSB    NI6601_ERR_NSC   	NI6601_ERR_DFM
     NI6601_ERR_DFP    NI6601_ERR_NDV    NI6601_ERR_ACS
@@ -340,9 +354,19 @@ Beside the error codes mentioned above the function may return:
 
 ======================================================================
 
-const char *ni6601_error_message( void )
+int ni6601_perror( const char *s )
 
-The function returns a short error message about the reason the last
-call of one of the functions in the library failed. If there was no
-error during the last functuin call an empty string is returned.
+The function prints produces a message on the standard error output,
+describing the error encountered during the last call of one of the
+ni6601_xxx() functions. First (if s is not NULL and *s is not '\0')
+the argument string s is printed, followed by a colon and a blank.
+Then follows the error message and a new-line. The function returns
+the number of printed characters.
 
+
+======================================================================
+
+const char *ni6601_strerror( void )
+
+The function returns a string with the error message for the last
+call of one of the ni6601_xxx() functions.

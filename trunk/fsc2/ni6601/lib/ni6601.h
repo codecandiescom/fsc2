@@ -67,7 +67,12 @@ int ni6601_generate_single_pulse( int board, int counter, double duration );
 int ni6601_dio_write( int board, unsigned char bits, unsigned char mask );
 int ni6601_dio_read( int board, unsigned char *bits, unsigned char mask );
 int ni6601_is_counter_armed( int board, int counter, int *state );
-const char *ni6601_error_message( void );
+int ni6601_perror( const char *s );
+const char *ni6601_strerror( void );
+
+
+extern const char *ni6601_errlist[ ];
+extern const int ni6601_nerr;
 
 
 #define NI6601_OK        0
@@ -86,22 +91,6 @@ const char *ni6601_error_message( void );
 #define NI6601_ERR_DFM -13
 #define NI6601_ERR_DFP -14
 #define NI6601_ERR_INT -15
-
-#define NI6601_ERR_NSB_MESS  "No such board"
-#define NI6601_ERR_NSC_MESS  "No such counter"
-#define NI6601_ERR_CBS_MESS  "Counter is busy"
-#define NI6601_ERR_IVA_MESS  "Invalid argument"
-#define NI6601_ERR_WFC_MESS  "Can't wait for continuous counter to stop"
-#define NI6601_ERR_BBS_MESS  "Board is busy"
-#define NI6601_ERR_IVS_MESS  "Source argument invalid"
-#define NI6601_ERR_BNO_MESS  "Board not open"
-#define NI6601_ERR_NDV_MESS  "No driver loaded for board"
-#define NI6601_ERR_NCB_MESS  "Neighbouring counter is busy"
-#define NI6601_ERR_ITR_MESS  "Interrupted by signal"
-#define NI6601_ERR_ACS_MESS  "No permissions to open device file"
-#define NI6601_ERR_DFM_MESS  "Device file does not exist"
-#define NI6601_ERR_DFP_MESS  "Unspecified error when opening device file"
-#define NI6601_ERR_INT_MESS  "Internal driver or library error"
 
 
 #ifdef __cplusplus
