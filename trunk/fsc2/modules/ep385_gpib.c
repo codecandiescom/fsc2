@@ -55,8 +55,7 @@ bool ep385_init( const char *name )
 
 	/* Stop and reset pulser */
 
-	if ( gpib_write( ep385.device, "TIM;STQ\r", 8 ) == FAILURE )
-		ep385_gpib_failure( );
+	ep385_command( "TIM;STQ\r" );
 
 	strcpy( cmd, "TIM;" );
 
@@ -86,14 +85,12 @@ bool ep385_init( const char *name )
 
 	strcat( cmd, "SPE65535;LPS1;SPL1;MEM16\r" );
 
-	if ( gpib_write( ep385.device, cmd, strlen( cmd ) ) == FAILURE )
-		ep385_gpib_failure( );
+	ep385_command( cmd );
 
 	/* Tell the pulser to accept the values and to enable the time base for
 	   tiggering */
 
-	if ( gpib_write( ep385.device, "TIM;SET;TRY\r", 12 ) == FAILURE )
-		ep385_gpib_failure( );
+	ep385_command( "TIM;SET;TRY\r" );
 
 	ep385_do_update( );
 
@@ -106,14 +103,7 @@ bool ep385_init( const char *name )
 
 bool ep385_run( bool state )
 {
-	const char *buf;
-
-
-	buf = state ? "TIM;SET;TRY;SFT\r" : "TIM;STP\r";
-
-	if ( gpib_write( ep385.device, buf , strlen( buf ) ) == FAILURE )
-		ep385_gpib_failure( );
-
+	ep385_command( state ? "TIM;SET;TRY;SFT\r" : "TIM;STP\r" );
 	ep385.is_running = state;
 
 	return OK;
@@ -160,8 +150,7 @@ bool ep385_set_channels( void )
 				buf[ strlen( buf ) - 1 ] = '\r';
 			}
 
-			if ( gpib_write( ep385.device, buf, strlen( buf ) ) == FAILURE )
-				ep385_gpib_failure( );
+			ep385_command( buf );
 		}
 	}
 
