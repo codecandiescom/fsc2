@@ -91,6 +91,7 @@ int dg2020_init_hook( void )
 
 	for ( i = 0; i < MAX_PODS; i++ )
 	{
+		dg2020.pod[ i ].self = i;
 		dg2020.pod[ i ].function = NULL;
 	}
 
@@ -105,6 +106,7 @@ int dg2020_init_hook( void )
 		dg2020.function[ i ].num_channels = 0;
 		dg2020.function[ i ].num_pulses = 0;
 		dg2020.function[ i ].pulses = NULL;
+		dg2020.function[ i ].next_phase = 0;
 		dg2020.function[ i ].phase_func = NULL;
 		dg2020.function[ i ].is_inverted = UNSET;
 		dg2020.function[ i ].delay = 0;
@@ -114,7 +116,10 @@ int dg2020_init_hook( void )
 	}
 
 	for ( i = 0; i < MAX_CHANNELS; i++ )
+	{
+		dg2020.channel[ i ].self = i;
 		dg2020.channel[ i ].function = NULL;
+	}
 
 	dg2020_is_needed = SET;
 
@@ -409,6 +414,48 @@ Var *pulser_increment( Var *v )
 				THROW( EXCEPTION );
 			}
 		}
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_next_phase( Var *v )
+{
+	FUNCTION *f;
+
+
+	if ( v == NULL )
+	{
+		pulser_next_phase( vars_push( INT_VAR, 1 ) );
+		pulser_next_phase( vars_push( INT_VAR, 2 ) );
+	}
+
+	for ( ; v != NULL; v = vars_pop( v ) )
+	{
+		vars_check( v, INT_VAR );
+		if ( v->val.lval != 1 && v->val.lval != 2 )
+		{
+			eprint( FATAL, "%s:%ld: DG2020: Invalid phase number: %ld.\n",
+					Fname, Lc, v->val.lval );
+			THROW( EXCEPTION );
+		}
+
+		f = &dg2020.function[ v->val.lval == 1 ? PULSER_CHANNEL_PHASE_1 :
+							  PULSER_CHANNEL_PHASE_2 ];
+		vars_pop( v );
+
+		if ( f->next_phase >= f->num_channels )
+			f->next_phase = 0;
+
+		if ( ! dg2020_channel_assign( f->channel[ f->next_phase++ ]->self,
+									  f->pod->self ) ||
+			 ! dg2020_channel_assign( f->channel[ f->next_phase++ ]->self,
+									  f->pod2->self ) )
+			return vars_push( INT_VAR, 0 );
 	}
 
 	return vars_push( INT_VAR, 1 );

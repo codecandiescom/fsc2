@@ -20,7 +20,9 @@ void dg2020_exit_hook( void );
 Var *pulser_start( Var *v );
 Var *pulser_shift( Var *v );
 Var *pulser_increment( Var *v );
-Var *pulser_reset( Var *v );
+Var *pulser_next_phase( Var *v );
+Var *pulser_phase_reset( Var *v );
+Var *pulser_pulse_reset( Var *v );
 
 
 
@@ -98,6 +100,7 @@ typedef struct _F_ {
 
 	bool needs_phases;           // set if phase cycling is needed
 
+	int next_phase;
 	struct _F_ *phase_func;      // for phase functions here's stored which
 	                             // function it's going to take care of while
 	                             // for normal functions it's a pointer to the
@@ -123,11 +126,13 @@ typedef struct _F_ {
 
 
 typedef struct _P_ {
+	int self;
 	FUNCTION *function;
 } POD;
 
 
 typedef struct _C_ {
+	int self;
 	FUNCTION *function;
 } CHANNEL;
 
@@ -311,6 +316,7 @@ int dg2020_start_compare( const void *A, const void *B );
 bool dg2020_find_phase_pulse( PULSE *p, PULSE ***pl, int *num );
 Ticks dg2020_get_max_seq_len( void );
 void dg2020_calc_padding( void );
+bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length );
 
 
 /* The functions from dg2020_init.c */
@@ -346,4 +352,12 @@ void dg2020_commit( FUNCTION * f );
 bool dg2020_init( const char *name );
 bool dg2020_run( bool flag );
 bool dg2020_set_timebase( double timebase );
+bool dg2020_set_memory_size( long mem_size );
+bool dg2020_channel_assign(  int channel, int pod );
 bool dg2020_update_data( void );
+bool dg2020_make_blocks( int num_blks, BLOCK *block );
+bool dg2020_make_seq( int num_blks, BLOCK *block );
+bool pulser_set_channel( int channel, Ticks address,
+						 Ticks length, char *pattern );
+bool dg2020_set_constant( int channel, Ticks address,
+						  Ticks length, int state );
