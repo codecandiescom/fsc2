@@ -594,7 +594,7 @@ static bool ips20_4_init( const char *name )
 
 	/* First we have to set up the ITC503 temperature controller which
 	   actually does the whole GPIB communication and passes on commands
-	   to the sweep power supply and returns its replies. */
+	   to the sweep power supply and returns its replies via the ISOBUS. */
 
 	if ( gpib_init_device( name, &ips20_4.device ) == FAILURE )
 	{

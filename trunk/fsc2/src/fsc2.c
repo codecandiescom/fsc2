@@ -1247,8 +1247,8 @@ void run_help( FL_OBJECT *a, long b )
 /* It is called after a fork(), so it may not return. Which     */
 /* browser is used depends on the environment variable BROWSER, */
 /* currently the program only knows how to deal with Netscape,  */
-/* opera, konqueror, lnyx or w3m. If BROWSER isn't set Netscape */
-/* is used.                                                     */
+/* mozilla, opera, konqueror, lnyx or w3m. If BROWSER isn't set */
+/* Netscape is used as the default.                             */
 /*--------------------------------------------------------------*/
 
 static void start_help_browser( void )
@@ -1284,7 +1284,8 @@ static void start_help_browser( void )
 		av[ 2 ] = T_strdup( browser );
 		av[ 3 ] = get_string( "%s%shtml/fsc2.html", docdir, slash( docdir ) );
 	}
-	else if ( browser && strcasecmp( browser, "netscape" ) )
+	else if ( browser && ( strncasecmp( browser, "netscape", 8 ) ||
+						   strcasecmp( browser, "mozilla" ) ) )
 	{
 		av[ 0 ] = T_strdup( browser );
 		av[ 1 ] = get_string( "file:%s%s%shtml/fsc2.html",

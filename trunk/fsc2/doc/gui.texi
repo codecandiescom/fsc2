@@ -76,9 +76,9 @@ used while an experiment is running.
 @item Pressing the @code{Help} button will try to start a browser with
 the HTML documentation for @acronym{fsc2}. You can select the browser to
 be used by setting the environment variable @code{BROWSER} to the name
-of your favorite browser (at least @code{opera}, @code{netscape},
+of your favorite browser (@code{netscape}, @code{mozilla}, @code{opera},
 @code{konqueror}, @code{lynx} and @code{w3m} should work without
-problems). The default browser is @code{netscape}.
+problems). The default browser is @code{Netscape}.
 @item The @code{Bug report} button will open an editor window
 where you can compose a mail with a bug report. The editor that will be
 used for writing the mail depends on the environment variable
@@ -118,10 +118,10 @@ program is loaded (or the current program is reloaded).
 @acronym{EDL} program, i.e.@: you start the measurement.
 @item The @code{Quit} button is for leaving @acronym{fsc2}.
 @item Pressing the @code{Help} button will start try to start a browser
-with the HTML documentation for @acronym{fsc2}. You can select the browser to
-use by setting the environment variable @code{BROWSER} to the name of
-your favorite browser (at least opera, netscape, konqueror, lynx and
-w3m should work without problems). The default browser is Netscape.
+with the HTML documentation for @acronym{fsc2}. You can select the
+browser to use by setting the environment variable @code{BROWSER} to the
+name of your favorite browser (netscape, mozilla, opera, konqueror, lynx
+and w3m should work without problems). The default browser is Netscape.
 @item Finally, the @code{Bug report} button will open an editor window
 where you can compose a bug report. When you're finished writing the
 mail @acronym{fsc2} will let you decide if you really want to mail the
