@@ -159,7 +159,10 @@ measured signal intensity in micro-Volts.
 The first thing done in the @code{EXPERIMENT} section is asking the user
 to supply two file names -- what we get back from the functions are
 integer numbers that are going to be used later to indicate into which
-of the two files data are to be written.
+of the two files data are to be written (should the user have hit the
+@code{Cancel} button to indicate that (s)he doesn't want to write out
+the data the number returned will tell @code{fsc2} not to open a file
+and skip writing data to the file).
 
 The next step (line 31) is to determine the lock-in amplifiers time
 constant, we will have to wait for this time after a field sweep step to
