@@ -913,7 +913,7 @@ static bool get_serial_lock( int sn )
 	char buf[ 128 ];
 	const char *bp;
 	int n;
-	int pid = -1;
+	long pid = -1;
 	int mask;
 
 
@@ -940,7 +940,7 @@ static bool get_serial_lock( int sn )
 				bp++;
 
 			if ( *bp && isdigit( *bp ) )
-				n = sscanf( bp, "%d", &pid );
+				n = sscanf( bp, "%ld", &pid );
 
 			if ( n == 0 || n == EOF )
 			{
@@ -1037,7 +1037,7 @@ static bool get_serial_lock( int sn )
 	umask( mask );
     chown( Serial_Port[ sn ].lock_file, Fsc2_Internals.EUID,
 		   Fsc2_Internals.EGID );
-    snprintf( buf, sizeof( buf ), "%10d\n", ( int ) getpid( ) );
+    snprintf( buf, sizeof( buf ), "%10ld\n", ( long ) getpid( ) );
     write( fd, buf, strlen( buf ) );
     close( fd );
 
