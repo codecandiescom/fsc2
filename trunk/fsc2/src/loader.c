@@ -1,4 +1,4 @@
-Q/*
+/*
   $Id$
 
   Copyright (C) 1999-2004 Jens Thoms Toerring
@@ -58,6 +58,8 @@ void load_all_drivers( void )
 	bool saved_need_RULBUS;
 
 
+	CLOBBER_PROTECT( cd );
+
 	/* Treat "User_Functions" also as a kind of device driver and append
 	   the device structure to the end of the list of devices */
 
@@ -115,6 +117,7 @@ void load_all_drivers( void )
 				if ( ! cd->driver.init_hook( ) )
 					eprint( WARN, UNSET, "Initialisation of module "
 							"'%s.fsc2_so' failed.\n", cd->name );
+
 				call_pop( );
 				vars_del_stack( );
 			}
@@ -147,15 +150,7 @@ void load_all_drivers( void )
 		   already have their init hooks run */
 
 		for ( cd = cd->prev; cd != NULL; cd = cd->prev )
-			TRY
-			{
-				unload_device( cd );
-				TRY_SUCCESS;
-			}
-			OTHERWISE
-			{
-				/* nothing to be done, keep going with the next driver */
-			}
+			unload_device( cd );
 
 		RETHROW( );
 	}
@@ -548,6 +543,7 @@ void run_test_hooks( void )
 	{
 		for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
 		{
+
 			fsc2_assert( EDL.Call_Stack == NULL );
 
 			if ( cd->is_loaded && cd->driver.is_test_hook )
