@@ -63,7 +63,7 @@ librulbus.a: ${lib_sources:.c=.o} $(lib_headers)
 install:
 	install -d $(lib_dir)
 	install -d $(incl_dir)
-	install -m 644 librulbus.so $(lib_dir)
+	install -m 755 librulbus.so $(lib_dir)
 	install -m 644 librulbus.a $(lib_dir)
 	install -m 644 ../include/rulbus.h $(incl_dir)
 

@@ -57,7 +57,7 @@ ni_test: ni_test.c libni6601.so
 install:
 	$(INSTALL) -d $(lib_dir)
 	$(INSTALL) -d $(incl_dir)
-	$(INSTALL) -m 644 libni6601.so $(lib_dir)
+	$(INSTALL) -m 755 libni6601.so $(lib_dir)
 	$(INSTALL) -m 644 libni6601.a  $(lib_dir)
 	$(INSTALL) -m 644 ni6601.h $(incl_dir)
 

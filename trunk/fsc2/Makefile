@@ -208,7 +208,7 @@ BROWSER            := netscape
 # be changed if the library isn't in a place where the linker will find it
 # automatically(e.g. '/usr/lib' and '/usr/local/lib'). In this case it must
 # be the full absolute path to of the library (for example
-#  '/usr/lib/pvcam/libpvcam.so'). You must make sure that the header files
+# '/usr/lib/pvcam/libpvcam.so'). You must make sure that the header files
 # and the library for the camera are already properly installed if you want
 # to build fsc2 with support for the camera.
 

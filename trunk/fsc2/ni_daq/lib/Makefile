@@ -53,7 +53,7 @@ libni_daq.a: ${sources:.c=.o} $(headers)
 
 install:
 	$(INSTALL) -d $(lib_dir)
-	$(INSTALL) -m 644 libni_daq.so $(lib_dir)
+	$(INSTALL) -m 755 libni_daq.so $(lib_dir)
 	$(INSTALL) -m 644 libni_daq.a  $(lib_dir)
 
 clean:

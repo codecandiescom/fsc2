@@ -241,7 +241,7 @@ $(addsuffix .c,$(s_band_list)): %.c: s_band_magnet.c.tmpl
 
 install:
 	$(INSTALL) -d $(libdir)
-	$(EXEC_INSTALL) -m  644 -o $(OWNER) -g $(GROUP) *.fsc2_so $(libdir)
+	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) *.fsc2_so $(libdir)
 	if [ -r $(mchdir)/$(machine_name)-install ]; then  \
 		$(MAKE) install-$(machine_name);               \
 	fi
