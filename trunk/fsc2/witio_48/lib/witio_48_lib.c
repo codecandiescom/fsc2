@@ -307,7 +307,7 @@ static int check_channel( WITIO_48_DIO dio, WITIO_48_CHANNEL channel )
 
 
 /*---------------------------------------------------------------*/
-/* Internally used function to test a user supplied outout value */
+/* Internally used function to test a user supplied output value */
 /*---------------------------------------------------------------*/
 
 static int check_value( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
