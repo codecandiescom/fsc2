@@ -1040,6 +1040,8 @@ static bool display_file( char *name, FILE *fp )
 			line[ 5 ] = 'f';
 		}
 
+		/* Also color all lines staring with a '#' */
+
 		if ( *lp == '#' )
 		{
 			memmove( line + 5, line, strlen( line ) + 1 );
