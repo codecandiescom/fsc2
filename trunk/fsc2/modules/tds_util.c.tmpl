@@ -30,8 +30,8 @@ static void tds_tmpl_window_check_2( Window_T *w );
 static void tds_tmpl_window_check_3( Window_T *w );
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
 const char *tds_tmpl_ptime( double p_time )
 {
@@ -51,9 +51,9 @@ const char *tds_tmpl_ptime( double p_time )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Deletes all window by removing them from the linked list of windows */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Deletes all window by removing them from the linked list of windows
+ *---------------------------------------------------------------------*
 
 void tds_tmpl_delete_windows( TDS_TMPL_T *s )
 {
@@ -68,8 +68,8 @@ void tds_tmpl_delete_windows( TDS_TMPL_T *s )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
 void tds_tmpl_do_pre_exp_checks( void )
 {
@@ -153,9 +153,9 @@ void tds_tmpl_do_pre_exp_checks( void )
 }
 
 
-/*------------------------------------------*/
-/* Checks if for all windows a width is set */
-/*------------------------------------------*/
+/*------------------------------------------*
+ * Checks if for all windows a width is set
+ *------------------------------------------*/
 
 static void tds_tmpl_window_check_1( bool *is_start, bool *is_width )
 {
@@ -174,8 +174,8 @@ static void tds_tmpl_window_check_1( bool *is_start, bool *is_width )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ *---------------------------------------------------------------------*/
 
 void tds_tmpl_window_checks( Window_T *w )
 {
@@ -184,18 +184,18 @@ void tds_tmpl_window_checks( Window_T *w )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* It's not possible to set arbitrary cursor positions and distances,  */
-/* they have to be multiples of the smallest time resolution of the    */
-/* digitizer which is the time base divided by TDS_TMPL_POINTS_PER_DIV. */
-/* The function tests if the requested cursor positions and distance   */
-/* fit these requirements and if not the values are readjusted. While  */
-/* settings for the position and width of the window not being exact   */
-/* multiples of the resultion are probably no serious errors a window  */
-/* width of less than the resolution is a hint for a real problem. And */
-/* while we're at it we also try to find out if all window widths are  */
-/* equal - than we can use tracking cursors.                           */
-/*---------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * It's not possible to set arbitrary cursor positions and distances,
+ * they have to be multiples of the smallest time resolution of the
+ * digitizer which is the time base divided by TDS_TMPL_POINTS_PER_DIV.
+ * The function tests if the requested cursor positions and distance
+ * fit these requirements and if not the values are readjusted. While
+ * settings for the position and width of the window not being exact
+ * multiples of the resultion are probably no serious errors a window
+ * width of less than the resolution is a hint for a real problem. And
+ * while we're at it we also try to find out if all window widths are
+ * equal - than we can use tracking cursors.
+ *----------------------------------------------------------------------*/
 
 static void tds_tmpl_window_check_2( Window_T *w )
 {
@@ -280,11 +280,11 @@ static void tds_tmpl_window_check_2( Window_T *w )
 }
 
 
-/*-------------------------------------------------------------*/
-/* This function checks if the window fits into the digitizers */
-/* measurement window and calculates the position of the start */
-/* and the end of the windows in units of points.              */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * This function checks if the window fits into the digitizers
+ * measurement window and calculates the position of the start
+ * and the end of the windows in units of points.
+ *-------------------------------------------------------------*/
 
 static void tds_tmpl_window_check_3( Window_T *w )
 {
@@ -452,16 +452,16 @@ static void tds_tmpl_window_check_3( Window_T *w )
 }
 
 
-/*--------------------------------------------------------------*/
-/* The function is used to translate back and forth between the */
-/* channel numbers the way the user specifies them in the EDL   */
-/* program and the channel numbers as specified in the header   */
-/* file. When the channel number can't be mapped correctly, the */
-/* way the function reacts depends on the value of the third    */
-/* argument: If this is UNSET, an error message gets printed    */
-/* and an exception is thrown. If it is SET -1 is returned to   */
-/* indicate the error.                                          */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * The function is used to translate back and forth between the
+ * channel numbers the way the user specifies them in the EDL
+ * program and the channel numbers as specified in the header
+ * file. When the channel number can't be mapped correctly, the
+ * way the function reacts depends on the value of the third
+ * argument: If this is UNSET, an error message gets printed
+ * and an exception is thrown. If it is SET -1 is returned to
+ * indicate the error
+ *--------------------------------------------------------------*/
 
 long tds_tmpl_translate_channel( int dir, long channel, bool flag )
 {
@@ -626,18 +626,18 @@ long tds_tmpl_translate_channel( int dir, long channel, bool flag )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* During preparations section several function calls change the   */
-/* structure describing the digitzers internal state. When the     */
-/* experiment starts the digitizer has to be set up to coincide    */
-/* with this state. But during the test run as well as during      */
-/* the experiment this state description usually becomes changed.  */
-/* To be able to repeat the experiment always starting with the    */
-/* same state of the digitizer (at least as far as the user has    */
-/* defined it, the state directly before the test run or an        */
-/* experiment has to be stored and, following a test run or an     */
-/* experiment has to be reset. And that's what this function does. */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * During preparations section several function calls change the
+ * structure describing the digitzers internal state. When the
+ * experiment starts the digitizer has to be set up to coincide
+ * with this state. But during the test run as well as during
+ * the experiment this state description usually becomes changed.
+ * To be able to repeat the experiment always starting with the
+ * same state of the digitizer (at least as far as the user has
+ * defined it, the state directly before the test run or an
+ * experiment has to be stored and, following a test run or an
+ * experiment has to be reset. And that's what this function does.
+ *-----------------------------------------------------------------*/
 
 void tds_tmpl_store_state( TDS_TMPL_T *dest, TDS_TMPL_T *src )
 {
@@ -674,18 +674,18 @@ void tds_tmpl_store_state( TDS_TMPL_T *dest, TDS_TMPL_T *src )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Whenever the user changes timebase, record length or trigger */
-/* position either via the program or manually (if the lock of  */
-/* the keyboard is switched off) the positions of the windows   */
-/* have to be recalculated and, if necessary, readjusted.       */
-/* Unfortunately, we can't check without a lot of additional    */
-/* work if the user changes on of the parameters mentioned      */
-/* above manually. Therefor, this function should be called     */
-/* whenever a function might change, query or just rely on the  */
-/* validity of this parameters and the digitizers keyboard      */
-/* isn't locked.                                                */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Whenever the user changes timebase, record length or trigger
+ * position either via the program or manually (if the lock of
+ * the keyboard is switched off) the positions of the windows
+ * have to be recalculated and, if necessary, readjusted.
+ * Unfortunately, we can't check without a lot of additional
+ * work if the user changes on of the parameters mentioned
+ * above manually. Therefor, this function should be called
+ * whenever a function might change, query or just rely on the
+ * validity of this parameters and the digitizers keyboard
+ * isn't locked.
+ *--------------------------------------------------------------*/
 
 void tds_tmpl_state_check( double timebase, long rec_len, double trig_pos )
 {
@@ -819,14 +819,14 @@ void tds_tmpl_state_check( double timebase, long rec_len, double trig_pos )
 
 #ifndef NO_GATED_MEASUREMENTS
 
-/*-------------------------------------------------------------------*/
-/* This function fisrt checks if all window widths are idendentical. */
-/* Then it positions the cursors at the end points of the window the */
-/* function got passed (or to both ends of the digitizers record     */
-/* length if a NULL pointer was passed to the function. Finally, it  */
-/* switches tracking cursors on or off, depending if the widths of   */
-/* all windows are equal or not.                                     */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * This function fisrt checks if all window widths are idendentical.
+ * Then it positions the cursors at the end points of the window the
+ * function got passed (or to both ends of the digitizers record
+ * length if a NULL pointer was passed to the function. Finally, it
+ * switches tracking cursors on or off, depending if the widths of
+ * all windows are equal or not.
+ *-------------------------------------------------------------------
 
 void tds_tmpl_set_tracking( Window_T *w )
 {
@@ -876,15 +876,15 @@ void tds_tmpl_set_tracking( Window_T *w )
 }
 
 
-/*------------------------------------------------------------------*/
-/* This function is called for measurements on curves (i.e. area or */
-/* amplitude). If a window gets passed to the function the cursors  */
-/* positioned a the ends of the window and gated measurement mode   */
-/* is switched on (i.e. the device will do the calculation on the   */
-/* points between the cursors automatically), otherwise gated       */
-/* measurement mode is switched off and the device will do the      */
-/* calculation on the complete curve.                               */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * This function is called for measurements on curves (i.e. area or
+ * amplitude). If a window gets passed to the function the cursors
+ * positioned a the ends of the window and gated measurement mode
+ * is switched on (i.e. the device will do the calculation on the
+ * points between the cursors automatically), otherwise gated
+ * measurement mode is switched off and the device will do the
+ * calculation on the complete curve.
+ *------------------------------------------------------------------*/
 
 void tds_tmpl_set_meas_window( Window_T *w )
 {
@@ -915,12 +915,12 @@ void tds_tmpl_set_meas_window( Window_T *w )
 }
 
 
-/*----------------------------------------------------------*/
-/* This function is the equivalent to the previous function */
-/* 'tds_tmpl_set_meas_window()' but for cases were not a     */
-/* measurement on a curve is to be done but when a curve    */
-/* is to be fetched from the digitizer.                     */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * This function is the equivalent to the previous function
+ * 'tds_tmpl_set_meas_window()' but for cases were not a
+ * measurement on a curve is to be done but when a curve
+ * is to be fetched from the digitizer.
+ *----------------------------------------------------------*/
 
 void tds_tmpl_set_curve_window( Window_T *w )
 {
@@ -939,13 +939,13 @@ void tds_tmpl_set_curve_window( Window_T *w )
 }
 
 
-/*----------------------------------------------------------------*/
-/* This function sets the cursors to the end points of the window */
-/* it got passed as its argument. If all windows have equal width */
-/* we can be sure tracking mode has already been set and only the */
-/* first cursor must be repositioned, otherwise both cursors need */
-/* to be set.                                                     */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * This function sets the cursors to the end points of the window
+ * it got passed as its argument. If all windows have equal width
+ * we can be sure tracking mode has already been set and only the
+ * first cursor must be repositioned, otherwise both cursors need
+ * to be set.
+ *----------------------------------------------------------------*/
 
 void tds_tmpl_set_window( Window_T *w )
 {
@@ -973,8 +973,8 @@ void tds_tmpl_set_window( Window_T *w )
 #endif
 
 
-/*----------------------------------------------------------------*/
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ *----------------------------------------------------------------*/
 
 Window_T *tds_tmpl_get_window_by_number( long win_num )
 {

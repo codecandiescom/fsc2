@@ -33,8 +33,8 @@ static bool in_init = UNSET;
 static bool acquisition_is_running = UNSET;
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
 bool tds_tmpl_init( const char *name )
 {
@@ -218,9 +218,9 @@ bool tds_tmpl_init( const char *name )
 }
 
 
-/*---------------------------------*/
-/* Returns the digitizers timebase */
-/*---------------------------------*/
+/*---------------------------------*
+ * Returns the digitizers timebase
+ *---------------------------------*/
 
 double tds_tmpl_get_timebase( void )
 {
@@ -234,9 +234,9 @@ double tds_tmpl_get_timebase( void )
 }
 
 
-/*-------------------------------------*/
-/* Sets the timebase of the digitizer */
-/*-------------------------------------*/
+/*------------------------------------*
+ * Sets the timebase of the digitizer
+ *------------------------------------*/
 
 void tds_tmpl_set_timebase( double timebase )
 {
@@ -250,9 +250,9 @@ void tds_tmpl_set_timebase( double timebase )
 }
 
 
-/*-----------------------------------------------------*/
-/* tds_tmpl_set_record_length() sets the record length. */
-/*-----------------------------------------------------*/
+/*------------------------------------------------------*
+ * tds_tmpl_set_record_length() sets the record length.
+ *------------------------------------------------------*/
 
 void tds_tmpl_set_record_length( long num_points )
 {
@@ -266,9 +266,9 @@ void tds_tmpl_set_record_length( long num_points )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* tds_tmpl_get_record_length() returns the current record length. */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * tds_tmpl_get_record_length() returns the current record length.
+ *-----------------------------------------------------------------*/
 
 long tds_tmpl_get_record_length( void )
 {
@@ -286,10 +286,10 @@ long tds_tmpl_get_record_length( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Sets the trigger position, range of paramters is [0,1] where */
-/* 0 means no pretrigger while 1 indicates maximum pretrigger   */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Sets the trigger position, range of paramters is [0,1] where
+ * 0 means no pretrigger while 1 indicates maximum pretrigger
+ *--------------------------------------------------------------*/
 
 void tds_tmpl_set_trigger_pos( double pos )
 {
@@ -303,10 +303,10 @@ void tds_tmpl_set_trigger_pos( double pos )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Returns the current trigger position in the intervall [0,1] where */
-/* 0 means no pretrigger while 1 indicates maximum pretrigger        */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Returns the current trigger position in the intervall [0,1] where
+ * 0 means no pretrigger while 1 indicates maximum pretrigger
+ *-------------------------------------------------------------------*/
 
 double tds_tmpl_get_trigger_pos( void )
 {
@@ -320,9 +320,9 @@ double tds_tmpl_get_trigger_pos( void )
 }
 
 
-/*-----------------------------------------*/
-/* Function returns the number of averages */
-/*-----------------------------------------*/
+/*-----------------------------------------*
+ * Function returns the number of averages
+ *-----------------------------------------*
 
 long tds_tmpl_get_num_avg( void )
 {
@@ -341,9 +341,9 @@ long tds_tmpl_get_num_avg( void )
 }
 
 
-/*--------------------------------------*/
-/* Function sets the number of averages */
-/*--------------------------------------*/
+/*--------------------------------------*
+ * Function sets the number of averages
+ *--------------------------------------*/
 
 void tds_tmpl_set_num_avg( long num_avg )
 {
@@ -373,10 +373,10 @@ void tds_tmpl_set_num_avg( long num_avg )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function returns the data acquisition mode. If the digitizer is neither */
-/* in average nor in sample mode, it is switched to sample mode.           */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function returns the data acquisition mode. If the digitizer is neither
+ * in average nor in sample mode, it is switched to sample mode.
+ *-------------------------------------------------------------------------*/
 
 int tds_tmpl_get_acq_mode( void )
 {
@@ -396,10 +396,10 @@ int tds_tmpl_get_acq_mode( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Returns the position of the first or second cursor, depending */
-/* on the value of the argument passed to the function (1 or 2 ) */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Returns the position of the first or second cursor, depending
+ * on the value of the argument passed to the function (1 or 2 )
+ *---------------------------------------------------------------*/
 
 double tds_tmpl_get_cursor_position( int cur_no )
 {
@@ -416,9 +416,9 @@ double tds_tmpl_get_cursor_position( int cur_no )
 }
 
 
-/*----------------------------------------------*/
-/* Returns the distance between the two cursors */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Returns the distance between the two cursors
+ *----------------------------------------------*/
 
 double tds_tmpl_get_cursor_distance( void )
 {
@@ -427,9 +427,9 @@ double tds_tmpl_get_cursor_distance( void )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Sets the trigger channel according to the number passed as argument */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Sets the trigger channel according to the number passed as argument
+ *---------------------------------------------------------------------*/
 
 void tds_tmpl_set_trigger_channel( int ch )
 {
@@ -450,9 +450,9 @@ void tds_tmpl_set_trigger_channel( int ch )
 }
 
 
-/*-----------------------------------------------*/
-/* Returns number of the current trigger channel */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Returns number of the current trigger channel
+ *-----------------------------------------------*/
 
 int tds_tmpl_get_trigger_channel( void )
 {
@@ -503,9 +503,9 @@ int tds_tmpl_get_trigger_channel( void )
 }
 
 
-/*-----------------------------------*/
-/* Called on communication problems */
-/*-----------------------------------*/
+/*----------------------------------*
+ * Called on communication problems
+ *----------------------------------*/
 
 void tds_tmpl_gpib_failure( void )
 {
@@ -515,10 +515,10 @@ void tds_tmpl_gpib_failure( void )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* tds_tmpl_clear_SESR() reads the the standard event status register */
-/* and thereby clears it - if this isn't done no SRQs are flagged !   */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * tds_tmpl_clear_SESR() reads the the standard event status register
+ * and thereby clears it - if this isn't done no SRQs are flagged !
+ *--------------------------------------------------------------------*/
 
 void tds_tmpl_clear_SESR( void )
 {
@@ -530,9 +530,9 @@ void tds_tmpl_clear_SESR( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Does all the necessary work after an experiment is finished. */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Does all the necessary work after an experiment is finished.
+ *--------------------------------------------------------------*/
 
 void tds_tmpl_finished( void )
 {
@@ -548,9 +548,9 @@ void tds_tmpl_finished( void )
 }
 
 
-/*--------------------------------------*/
-/* Positions the first or second cursor */
-/*--------------------------------------*/
+/*--------------------------------------*
+ * Positions the first or second cursor
+ *--------------------------------------*/
 
 void tds_tmpl_set_cursor( int cur_num, double pos )
 {
@@ -566,9 +566,9 @@ void tds_tmpl_set_cursor( int cur_num, double pos )
 }
 
 
-/*--------------------------------------------*/
-/* Function tests if a channel is switched on */
-/*--------------------------------------------*/
+/*--------------------------------------------*
+ * Function tests if a channel is switched on
+ *--------------------------------------------*/
 
 bool tds_tmpl_display_channel_state( int channel )
 {
@@ -586,9 +586,9 @@ bool tds_tmpl_display_channel_state( int channel )
 }
 
 
-/*--------------------------------------------------------*/
-/* Function switches a channel of the digitizer on or off */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Function switches a channel of the digitizer on or off
+ *--------------------------------------------------------*/
 
 void tds_tmpl_display_channel( int channel, bool on_flag )
 {
@@ -617,9 +617,9 @@ void tds_tmpl_display_channel( int channel, bool on_flag )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Returns the sensitivity of the channel passed as the argument */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Returns the sensitivity of the channel passed as the argument
+ *---------------------------------------------------------------*/
 
 double tds_tmpl_get_sens( int channel )
 {
@@ -640,9 +640,9 @@ double tds_tmpl_get_sens( int channel )
 }
 
 
-/*--------------------------------------------------------*/
-/* Sets the sensitivity of one of the digitizers channels */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Sets the sensitivity of one of the digitizers channels
+ *--------------------------------------------------------*/
 
 void tds_tmpl_set_sens( int channel, double sens )
 {
@@ -687,8 +687,8 @@ void tds_tmpl_set_sens( int channel, double sens )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
 void tds_tmpl_start_acquisition( void )
 {
@@ -704,8 +704,8 @@ void tds_tmpl_start_acquisition( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
 double tds_tmpl_get_area( int channel, Window_T *w, bool use_cursor )
 {
@@ -788,10 +788,10 @@ double tds_tmpl_get_area( int channel, Window_T *w, bool use_cursor )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Measures the area without using the built-in measurement method but */
-/* by fetching the curve in the window and integrating it 'by hand'.   */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Measures the area without using the built-in measurement method but
+ * by fetching the curve in the window and integrating it 'by hand'.
+ *---------------------------------------------------------------------*/
 
 static double tds_tmpl_get_area_wo_cursor( int channel, Window_T *w )
 {
@@ -828,17 +828,17 @@ static double tds_tmpl_get_area_wo_cursor( int channel, Window_T *w )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function for fetching a curve from one of the channels of the device. */
-/* The first argument is the channel, the second a pointer to a WINDOW   */
-/* structure holding information about which section of the whole curve  */
-/* is to be fetched, 'data' is a pointer to a a double pointer, that on  */
-/* return from the function will point to an allocated memory area with  */
-/* 'length' double data (thus it is the resonsibility of the user of the */
-/* function to deallocate the memory when it isn't used any more) and    */
-/* 'use_cursors' is a flag that indicates that the section of the curve  */
-/* fetched fromt the device is to be encolsed by two vertical cursors.   */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for fetching a curve from one of the channels of the device.
+ * The first argument is the channel, the second a pointer to a WINDOW
+ * structure holding information about which section of the whole curve
+ * is to be fetched, 'data' is a pointer to a a double pointer, that on
+ * return from the function will point to an allocated memory area with
+ * 'length' double data (thus it is the resonsibility of the user of the
+ * function to deallocate the memory when it isn't used any more) and
+ * 'use_cursors' is a flag that indicates that the section of the curve
+ * fetched fromt the device is to be encolsed by two vertical cursors.
+ *-----------------------------------------------------------------------*/
 
 void tds_tmpl_get_curve( int channel, Window_T *w, double **data, long *length,
 						 bool use_cursor )
@@ -982,8 +982,8 @@ void tds_tmpl_get_curve( int channel, Window_T *w, double **data, long *length,
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
 double tds_tmpl_get_amplitude( int channel, Window_T *w, bool use_cursor )
 {
@@ -1066,10 +1066,10 @@ double tds_tmpl_get_amplitude( int channel, Window_T *w, bool use_cursor )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Gets the amplitude without the built-in measurement method but by */
-/* fetching the curve in the window and integrating it 'by hand'.    */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Gets the amplitude without the built-in measurement method but by
+ * fetching the curve in the window and integrating it 'by hand'.
+ *-------------------------------------------------------------------*/
 
 static double tds_tmpl_get_amplitude_wo_cursor( int channel, Window_T *w )
 {
@@ -1095,9 +1095,9 @@ static double tds_tmpl_get_amplitude_wo_cursor( int channel, Window_T *w )
 }
 
 
-/*----------------------------------------*/
-/* Sets the digitizer to run continuously */
-/*----------------------------------------*/
+/*----------------------------------------*
+ * Sets the digitizer to run continuously
+ *----------------------------------------*/
 
 void tds_tmpl_free_running( void )
 {
@@ -1105,8 +1105,8 @@ void tds_tmpl_free_running( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 void tds_tmpl_lock_state( bool lock )
 {
@@ -1136,8 +1136,8 @@ void tds_tmpl_lock_state( bool lock )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 void tds_tmpl_copy_curve( int src, int dest )
 {
@@ -1169,10 +1169,10 @@ void tds_tmpl_copy_curve( int src, int dest )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* This command is for sending a command to the device. On failure */
-/* an error message gets printed and an exception is thrown.       */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * This command is for sending a command to the device. On failure
+ * an error message gets printed and an exception is thrown.
+ *-----------------------------------------------------------------*/
 
 bool tds_tmpl_command( const char *cmd )
 {
@@ -1182,11 +1182,11 @@ bool tds_tmpl_command( const char *cmd )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* This function is for sending a query to the device and getting back its */
-/* reply. When writing or reading from the device fails an exception is    */
-/* thrown, otherwise up to *length characters are returned in 'reply'.     */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * This function is for sending a query to the device and getting back its
+ * reply. When writing or reading from the device fails an exception is
+ * thrown, otherwise up to *length characters are returned in 'reply'.
+ *-------------------------------------------------------------------------*/
 
 static bool tds_tmpl_talk( const char *cmd, char *reply, long *length )
 {
@@ -1201,8 +1201,8 @@ static bool tds_tmpl_talk( const char *cmd, char *reply, long *length )
    gated measurements or has no tracking cursors */
 
 #ifndef NO_GATED_MEASUREMENTS
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
 void tds_tmpl_set_track_cursors( bool flag )
 {
@@ -1214,8 +1214,8 @@ void tds_tmpl_set_track_cursors( bool flag )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 void tds_tmpl_set_gated_meas( bool flag )
 {
@@ -1227,8 +1227,8 @@ void tds_tmpl_set_gated_meas( bool flag )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 void tds_tmpl_set_snap( bool flag )
 {
