@@ -45,6 +45,8 @@ static int fsc2_xio_error_handler( Display *d );
 #define N_APP_OPT 18
 #endif
 
+GUI_Stuff GUI;
+
 FL_IOPT xcntl;
 
 char xGeoStr[ 64 ], xdisplayGeoStr[ 64 ], x_1d_displayGeoStr[ 64 ],

@@ -25,6 +25,10 @@
 #include "fsc2.h"
 
 
+Phase_Sequence *PSeq = NULL;
+Acquisition_Sequence ASeq[ 2 ] = { { UNSET, NULL, 0 }, { UNSET, NULL, 0 } };
+
+
 static long cur_aseq;
 
 

@@ -38,7 +38,8 @@
 #include "right_arrow.xbm"
 
 
-extern Cut_Graphics CG;             /* exported by graph_cut.c */
+Graphics G;
+
 
 static void fonts_init( void );
 static void set_default_sizes( void );

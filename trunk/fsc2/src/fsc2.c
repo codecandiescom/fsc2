@@ -22,8 +22,6 @@
 */
 
 
-#define FSC2_MAIN
-
 #include "fsc2.h"
 
 
@@ -33,6 +31,28 @@
 
 #include <sys/utsname.h>
 #include "serial.h"
+
+
+/* Global variables */
+
+char *prog_name;                 /* Name the program was started with */
+
+INTERNALS Internals;
+EDL_Stuff EDL;
+COMMUNICATION Comm;
+
+bool need_GPIB = UNSET;          /* Flag, set if GPIB bus is needed */
+
+const char *Channel_Names[ NUM_CHANNEL_NAMES ] =
+	{ "CH1", "CH2", "CH3", "CH4", "MATH1", "MATH2", "MATH3",
+	  "REF1", "REF2", "REF3", "REF4", "AUX", "AUX1", "AUX2", "LINE",
+	  "MEM_C", "MEM_D", "FUNC_E", "FUNC_F", "EXT", "EXT10",
+	  "CH0", "CH5", "CH6", "CH7", "CH8", "CH9", "CH10", "CH11",
+	  "CH12", "CH13", "CH14", "CH15",
+	  "DEFAULT_SOURCE", "SOURCE_0", "SOURCE_1", "SOURCE_2", "SOURCE_3",
+	  "NEXT_GATE", "TIMEBASE_1", "TIMEBASE_2" };
+
+const char *Phase_Types[ NUM_PHASE_TYPES ] = { "+X", "-X", "+Y", "-Y" };
 
 
 /* Locally used global variables */

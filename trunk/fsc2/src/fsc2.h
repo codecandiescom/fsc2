@@ -49,11 +49,11 @@
 #include <pwd.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <sys/param.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <forms.h>
-
 
 /* inclusion of programs own header files */
 
@@ -67,6 +67,7 @@
 #include "bugs.h"
 #include "xinit.h"
 #include "comm.h"
+#include "mail.h"
 #include "ipc.h"
 #include "exceptions.h"
 #include "T.h"
@@ -290,56 +291,6 @@ struct GUI_Stuff {
 
 /* Global variables */
 
-#if defined ( FSC2_MAIN )
-
-INTERNALS Internals;
-EDL_Stuff EDL;
-COMMUNICATION Comm;
-GUI_Stuff GUI;
-Graphics G;
-Graphics_1d G1;
-Graphics_2d G2;
-Cut_Graphics CG;
-
-char *prog_name;                 /* Name the program was started with */
-bool need_GPIB = UNSET;          /* Flag, set if GPIB bus is needed */
-
-Pulser_Struct *pulser_struct = NULL;
-Phase_Sequence *PSeq = NULL;
-Acquisition_Sequence ASeq[ 2 ] = { { UNSET, NULL, 0 }, { UNSET, NULL, 0 } };
-long Cur_Pulser = -1;
-
-const char *Channel_Names[ NUM_CHANNEL_NAMES ] =
-	{ "CH1", "CH2", "CH3", "CH4", "MATH1", "MATH2", "MATH3",
-	  "REF1", "REF2", "REF3", "REF4", "AUX", "AUX1", "AUX2", "LINE",
-	  "MEM_C", "MEM_D", "FUNC_E", "FUNC_F", "EXT", "EXT10",
-	  "CH0", "CH5", "CH6", "CH7", "CH8", "CH9", "CH10", "CH11",
-	  "CH12", "CH13", "CH14", "CH15",
-	  "DEFAULT_SOURCE", "SOURCE_0", "SOURCE_1", "SOURCE_2", "SOURCE_3",
-	  "NEXT_GATE", "TIMEBASE_1", "TIMEBASE_2" };
-
-const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ] =
-			{ "MW",
-			  "PULSE_SHAPE",
-              "PHASE_1",
-              "PHASE_2",
-              "TWT",
-              "TWT_GATE",
-              "DEFENSE",
-              "DETECTION",
-			  "DETECTION_GATE",
-              "RF",
-              "RF_GATE",
-			  "OTHER_1",
-              "OTHER_2",
-              "OTHER_3",
-              "OTHER_4" };
-
-const char *Phase_Types[ NUM_PHASE_TYPES ] = { "+X", "-X", "+Y", "-Y" };
-
-
-#else   /*  ! FSC2_MAIN */
-
 extern INTERNALS Internals;
 extern EDL_Stuff EDL;
 extern COMMUNICATION Comm;
@@ -351,7 +302,6 @@ extern Cut_Graphics CG;
 
 
 extern bool need_GPIB;
-extern char *prog_name;
 
 extern Pulser_Struct *pulser_struct;
 extern Phase_Sequence *PSeq;
@@ -362,8 +312,6 @@ extern const char *Channel_Names[ NUM_CHANNEL_NAMES ];
 extern const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ];
 extern const char *Phase_Types[ NUM_PHASE_TYPES ];
 
-
-#endif
 
 
 #endif  /* ! FSC2_HEADER */

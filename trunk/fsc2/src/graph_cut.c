@@ -39,6 +39,9 @@
 #include "right_arrow.xbm"
 
 
+Cut_Graphics CG;
+
+
 static void cut_calc_curve( int dir, long p_index, bool has_been_shown );
 static void G_init_cut_curve( void );
 static void cut_setup_canvas( Canvas *c, FL_OBJECT *obj );
@@ -66,7 +69,6 @@ static bool cut_zoom_x( Canvas *c );
 static bool cut_zoom_y( Canvas *c );
 static bool cut_zoom_xy( Canvas *c );
 static void cut_save_scale_state( void );
-
 
 
 extern FL_resource xresources[ ];

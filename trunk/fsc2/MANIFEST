@@ -346,7 +346,7 @@ src/ipc.h
 src/loader.c
 src/loader.h
 src/mail.c
-src/mial
+src/mail.h
 src/module_util.c
 src/module_util.h
 src/phases.c

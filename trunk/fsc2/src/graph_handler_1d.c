@@ -25,6 +25,9 @@
 #include "fsc2.h"
 
 
+Graphics_1d G1;
+
+
 static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 							  Canvas *c );
 static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
