@@ -108,7 +108,6 @@ VL          V_?L(OW)?
 TB          T(IME)?_?B(ASE)?:?
 TM          T(RIG(GER)?)?_?M(ODE)?:?
 
-MODE        MODE
 INTERN      INT(ERN(AL)?)?
 EXTERN      EXT(ERN(AL)?)?
 SL          SL(OPE)?
@@ -281,7 +280,6 @@ WS          [\n=: ]+
 
 {TB}        return TB_TOKEN;
 {TM}        return TM_TOKEN;
-{MODE}      return MODE_TOKEN;
 {INTERN}    return INTERN_TOKEN;
 {EXTERN}    return EXTERN_TOKEN;
 {SL}        return SLOPE_TOKEN;

@@ -68,7 +68,6 @@ static bool Func_is_set = UNSET;
 %token TB_TOKEN              /* TIMEBASE */
 %token TM_TOKEN              /* TRIGGERMODE */
 
-%token MODE_TOKEN            /* MODE */
 %token INTERN_TOKEN          /* INTERNAL */
 %token EXTERN_TOKEN          /* EXTERNAL */
 
@@ -403,12 +402,10 @@ tmp:      /* empty */
 			                                      vars_push( INT_VAR, $4 ) ); }
 ;
 
-exter:    MODE_TOKEN sep1 EXTERN_TOKEN
-        | EXTERN_TOKEN
+exter:    EXTERN_TOKEN
 ;
 
-inter:    MODE_TOKEN sep1 INTERN_TOKEN
-        | INTERN_TOKEN
+inter:    INTERN_TOKEN
 ;
 
 sl_val:   NEG_TOKEN                { $$ = vars_push( INT_VAR, NEGATIVE ); }
