@@ -447,7 +447,7 @@ sub cond_check {
 
 ################################################################
 # All the rest is the routine that writes the new script. That's the
-# most tricky part and it unfortunately also looks like this...
+# real tricky part and it unfortunately also looks like this...
 
 sub write_script {
 
