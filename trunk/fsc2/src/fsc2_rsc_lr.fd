@@ -462,7 +462,7 @@ argument:
 --------------------
 class: FL_CANVAS
 type: NORMAL_CANVAS
-box: 160 395 450 50
+box: 160 395 455 50
 boxtype: FL_FRAME_BOX
 colors: FL_NoColor FL_COL1
 alignment: FL_ALIGN_CENTER

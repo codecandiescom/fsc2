@@ -159,7 +159,7 @@ FD_run *create_form_run(void)
     fl_set_object_callback(obj,undo_button_callback,0);
   fdui->canvas = obj = fl_add_canvas(FL_NORMAL_CANVAS,160,5,455,390,"");
     fl_set_object_gravity(obj, FL_NorthWest, FL_SouthEast);
-  fdui->x_axis = obj = fl_add_canvas(FL_NORMAL_CANVAS,160,395,450,50,"");
+  fdui->x_axis = obj = fl_add_canvas(FL_NORMAL_CANVAS,160,395,455,50,"");
     fl_set_object_gravity(obj, FL_SouthWest, FL_SouthEast);
     fl_set_object_resize(obj, FL_RESIZE_X);
   fdui->print_button = obj = fl_add_pixmapbutton(FL_NORMAL_BUTTON,10,275,45,55,"Print");
