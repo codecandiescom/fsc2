@@ -113,10 +113,6 @@ int main( int argc, char *argv[ ] )
 
 	globals_init( argv[ 0 ] );
 
-	/* Figure out if the machine has an INTEL type processor */
-
-	test_machine_type( );
-
 	/* Run a first test of the command line arguments */
 
 	Internals.cmdline_flags = scan_args( &argc, argv, &fname );
@@ -309,6 +305,12 @@ static void globals_init( const char *pname )
 	Internals.tb_wait = TB_WAIT_NOT_RUNNING;
 	Internals.http_server_died = UNSET;
 	Internals.conn_request = UNSET;
+	Internals.is_linux_i386 = UNSET;
+
+	/* Figure out if the machine has an INTEL i386 type processor and we're
+	   running under Linux */
+
+	test_machine_type( );
 
 	if ( pname != NULL )
 		prog_name = pname;
@@ -463,8 +465,6 @@ static void test_machine_type( void )
 		 ! strncmp( utsbuf.machine + 2, "86", 2 ) &&
 		 ! strcasecmp( utsbuf.sysname, "linux" ) )
 		Internals.is_linux_i386 = SET;
-	else
-		Internals.is_linux_i386 = UNSET;
 }
 
 
