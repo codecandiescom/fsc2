@@ -113,6 +113,7 @@ typedef struct
 	long harmonic;
 	bool is_harmonic;
 	double dac_voltage[ NUM_DAC_PORTS ];
+	bool is_dac_voltage[ NUM_DAC_PORTS ];
 } SR830;
 
 
@@ -150,6 +151,7 @@ static void sr830_get_xy_data( double *data, long *channels,
 							   int num_channels );
 static double sr830_get_adc_data( long channel );
 static double sr830_set_dac_data( long channel, double voltage );
+static double sr830_get_dac_data( long port );
 static double sr830_get_sens( void );
 static void sr830_set_sens( int sens_index );
 static double sr830_get_tc( void );
@@ -195,7 +197,10 @@ int sr830_init_hook( void )
 	sr830.is_harmonic  = UNSET;
 
 	for ( i = 0; i < NUM_DAC_PORTS; i++ )
+	{
 		sr830.dac_voltage[ i ] = 0.0;
+		sr830.is_dac_voltage[ i ] = UNSET;
+	}
 
 	return 1;
 }
@@ -346,8 +351,8 @@ Var *lockin_get_data( Var *v )
 /*---------------------------------------------------------------*/
 /* Function returns the voltage at one of the 4 ADC ports on the */
 /* backside of the lock-in amplifier. The argument must be an    */
-/* integers between 1 and 4.                                     */
-/* Returned values are in the interval [ -10.5 V, +10.5 V ].     */
+/* integer between 1 and 4.                                      */
+/* Returned values are in the range between -10.5 V and +10.5 V. */
 /*---------------------------------------------------------------*/
 
 Var *lockin_get_adc_data( Var *v )
@@ -355,7 +360,7 @@ Var *lockin_get_adc_data( Var *v )
 	long port;
 
 
-	port = get_double( v, "ADC port number" );
+	port = get_long( v, "ADC port number" );
 
 	if ( port < 1 || port > NUM_ADC_PORTS )
 	{
@@ -425,6 +430,7 @@ Var *lockin_dac_voltage( Var *v )
 	too_many_arguments( v );
 	
 	sr830.dac_voltage[ port - 1 ] = voltage;
+	r830.is_dac_voltage[ port - 1 ] = SET;
 
 	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( FLOAT_VAR, voltage );
@@ -973,7 +979,10 @@ static bool sr830_init( const char *name )
 		sr830_set_mod_level( sr830.mod_level );
 
 	for ( i = 0; i < NUM_DAC_PORTS; i++ )
-		sr830_set_dac_data( i + 1, sr830.dac_voltage[ i ] );
+		if ( sr830.is_dac_voltage[ i ] )
+			sr830_set_dac_data( i + 1, sr830.dac_voltage[ i ] );
+		else
+			sr830.dac_voltage = sr830_get_dac_data( i + 1 );
 
 	return OK;
 }
@@ -1096,6 +1105,30 @@ static double sr830_set_dac_data( long port, double voltage )
 
 	return voltage;
 }
+
+
+/*-----------------------------------------------------------------*/
+/* lockin_set_dac() returns the voltage at one of the 4 DAC ports. */
+/* -> Number of the DAC channel (1-4)                              */
+/*-------------------------- --------------------------------------*/
+
+static double sr830_get_dac_data( long port )
+{
+	char buffer [ 40 ];
+	long len = 40;
+
+
+	fsc2_assert( port >= 1 && port <= 4 );
+
+	sprintf( buffer, "AUXV %ld\n", port );
+	if ( gpib_write( sr830.device, buffer, strlen( buffer ) ) == FAILURE ||
+		 gpib_reda( sr830.device, buffer, &len )== FAILURE )
+		sr830_failure( );
+
+	buffer[ length - 1 ] = '\0';
+	return T_atod( buffer );
+}
+
 
 /*-----------------------------------------------------------------------*/
 /* Function determines the sensitivity setting of the lock-in amplifier. */

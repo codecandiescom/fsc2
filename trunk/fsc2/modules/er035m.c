@@ -245,9 +245,10 @@ try_again:
 		er035m_failure( );
 
 	/* Now look if the status byte says that device is OK where OK means that
-	   for the X-Band magnet the F0-probe is connected, modulation is on and
-	   the gaussmeter is either in locked state or is actively searching to
-	   achieve the lock (if it's just in TRANS L-H or H-L state check again) */
+	   for the X-band magnet the F1 probe and for the S-band the F0 probe is
+	   connected, modulation is on and the gaussmeter is either in locked
+	   state or is actively searching to achieve the lock (if it's just in
+	   TRANS L-H or H-L state check again) */
 
 	bp = buffer + 2;     /* skip first two chars of status byte */
 

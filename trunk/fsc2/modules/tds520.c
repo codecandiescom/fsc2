@@ -452,6 +452,10 @@ Var *digitizer_num_averages( Var *v )
 	{
 		print( FATAL, "Can't do zero averages. If you want to set sample mode "
 			   "specify 1 as number of averages.\n" );
+
+		if ( FSC2_MODE == EXPERIMENT )
+			return vars_push( INT_VAR, tds520.num_avg );
+
 		THROW( EXCEPTION );
 	}
 	else if ( num_avg < 0 )

@@ -269,7 +269,7 @@ try_again:
 	}
 
 	/* Now look if the status byte says that device is OK where OK means that
-	   for the X-Band magnet the F0-probe and for the S-band the F1-probe is
+	   for the X-band magnet the F1 probe and for the S-band the F0 probe is
 	   connected, modulation is on and the gaussmeter is either in locked
 	   state or is actively searching to achieve the lock (if it's just in
 	   TRANS L-H or H-L state check again) */
@@ -625,11 +625,11 @@ Var *gaussmeter_probe_orientation( Var *v )
 		return vars_push( INT_VAR, ( long ) nmr.probe_orientation );
 	}
 
-	/* While the manual claims something different these idiots at Bruker
-	   made sure it doesn't really. I'm still waiting for the day that I
-	   see a device by these guys where the way the computer interface works
-	   (if it works at all) is just remotely similar to what they claim
-	   in the manuals (which usually are a complete piece of shit anyway.) */
+	/* While the manual claims something different neither setting nor
+	   querying the modulation (and thereby the probe orientation) using
+	   the "MO" command does not really seem to work. The only way to
+	   figure out the modulation in a reliable way seems to be to look
+	   at the status information using "PS". */
 
 	print( FATAL, "Device does not allow setting of probe orientation.\n" );
 	THROW( EXPERIMENT );
