@@ -133,8 +133,10 @@ void accept_new_data( void )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* This function examines the new data, interpreting the start field */
+/* and calls the appropriate functions dealing with the data.        */
+/*-------------------------------------------------------------------*/
 
 static void unpack_and_accept( void *ptr )
 {
@@ -148,8 +150,15 @@ static void unpack_and_accept( void *ptr )
 	long len;
 
 
+	/* The first item of a new data package indicates the amount of data
+	   sets that needs handling. The only exeption is when this indicator
+	   is negative, in whih case these aren't data to be displayed but
+	   special commands for clearing curves, scale changes etc. */
+
 	nsets = * ( int * ) ptr;
 	ptr += sizeof( int );
+
+	/* The 
 
 	if ( nsets < 0 )                /* special for clear curve commands etc. */
 	{
@@ -207,8 +216,11 @@ static void unpack_and_accept( void *ptr )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+/* Function for handling special commands that come disguised as data, like */
+/* commands for clearing curves, changing scales etc. Here the type of the  */
+/* command is determined and the appropriate functions are called.          */
+/*--------------------------------------------------------------------------*/
 
 static void other_data_request( int type, void *ptr )
 {
@@ -264,8 +276,10 @@ static void other_data_request( int type, void *ptr )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* This function handles the storing and displaying of new data points */
+/* when 1D graphics is used.                                           */
+/*---------------------------------------------------------------------*/
 
 static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 {
@@ -473,8 +487,10 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* This function handles the storing and displaying of new data points */
+/* when 2D graphics is used.                                           */
+/*---------------------------------------------------------------------*/
 
 static void accept_2d_data( long x_index, long y_index, long curve, int type,
 							void *ptr )
