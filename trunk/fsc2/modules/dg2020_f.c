@@ -590,7 +590,6 @@ Var *pulser_next_phase( Var *v )
 
 		f = &dg2020.function[ v->val.lval == 1 ? PULSER_CHANNEL_PHASE_1 :
 							  PULSER_CHANNEL_PHASE_2 ];
-		vars_pop( v );
 
 		if ( ! f->is_used && TEST_RUN )
 		{
@@ -657,7 +656,6 @@ Var *pulser_phase_reset( Var *v )
 
 		f = &dg2020.function[ v->val.lval == 1 ? PULSER_CHANNEL_PHASE_1 :
 							  PULSER_CHANNEL_PHASE_2 ];
-		vars_pop( v );
 
 		if ( ! f->is_used && TEST_RUN )
 		{

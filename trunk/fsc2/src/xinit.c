@@ -389,10 +389,6 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 {
-	static char def_null[ ] = "0";
-	static char def_none[ ] = "";
-
-
 	app_opt[ GEOMETRY ].option            = T_strdup( "-geometry" );
 	app_opt[ GEOMETRY ].specifier         = T_strdup( "*.geometry" );
 	app_opt[ GEOMETRY ].argKind           = XrmoptionSepArg;
@@ -401,22 +397,22 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 	app_opt[ BROWSERFONTSIZE ].option     =  T_strdup( "-browserFontSize" );
 	app_opt[ BROWSERFONTSIZE ].specifier  = T_strdup( "*.browserFontSize" );
 	app_opt[ BROWSERFONTSIZE ].argKind    = XrmoptionSepArg;
-	app_opt[ BROWSERFONTSIZE ].value      = ( caddr_t ) def_null;
+	app_opt[ BROWSERFONTSIZE ].value      = ( caddr_t ) "0";
 
 	app_opt[ BUTTONFONTSIZE	].option      = T_strdup( "-buttonFontSize" );
 	app_opt[ BUTTONFONTSIZE	].specifier   = T_strdup( "*.buttonFontSize" );
 	app_opt[ BUTTONFONTSIZE	].argKind     = XrmoptionSepArg;
-	app_opt[ BUTTONFONTSIZE	].value       = ( caddr_t ) def_null;
+	app_opt[ BUTTONFONTSIZE	].value       = ( caddr_t ) "0";
 
 	app_opt[ INPUTFONTSIZE ].option       = T_strdup( "-inputFontSize" );
 	app_opt[ INPUTFONTSIZE ].specifier    = T_strdup( "*.inputFontSize" );
 	app_opt[ INPUTFONTSIZE ].argKind      = XrmoptionSepArg;
-	app_opt[ INPUTFONTSIZE ].value        = ( caddr_t ) def_null;
+	app_opt[ INPUTFONTSIZE ].value        = ( caddr_t ) "0";
 
 	app_opt[ LABELFONTSIZE ].option       = T_strdup( "-labelFontSize" );
 	app_opt[ LABELFONTSIZE ].specifier    = T_strdup( "*.labelFontSize" );
 	app_opt[ LABELFONTSIZE ].argKind      = XrmoptionSepArg;
-	app_opt[ LABELFONTSIZE ].value        = ( caddr_t ) def_null;
+	app_opt[ LABELFONTSIZE ].value        = ( caddr_t ) "0";
 
 	app_opt[ DISPLAYGEOMETRY ].option     = T_strdup( "-displayGeometry" );
 	app_opt[ DISPLAYGEOMETRY ].specifier  = T_strdup( "*.displayGeometry" );
@@ -441,34 +437,34 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 	app_opt[ CHOICEFONTSIZE ].option      = T_strdup( "-choiceFontSize" );
 	app_opt[ CHOICEFONTSIZE ].specifier   = T_strdup( "*.choiceFontSize" );
 	app_opt[ CHOICEFONTSIZE ].argKind     = XrmoptionSepArg;
-	app_opt[ CHOICEFONTSIZE ].value       = ( caddr_t ) def_null;
+	app_opt[ CHOICEFONTSIZE ].value       = ( caddr_t ) "0";
 
 	app_opt[ SLIDERFONTSIZE ].option      = T_strdup( "-sliderFontSize" );
 	app_opt[ SLIDERFONTSIZE ].specifier   = T_strdup( "*.sliderFontSize" );
 	app_opt[ SLIDERFONTSIZE ].argKind     = XrmoptionSepArg;
-	app_opt[ SLIDERFONTSIZE ].value       = ( caddr_t ) def_null;
+	app_opt[ SLIDERFONTSIZE ].value       = ( caddr_t ) "0";
 
 	app_opt[ FILESELFONTSIZE ].option     =
 		                                   T_strdup( "-fileselectorFontSize" );
 	app_opt[ FILESELFONTSIZE ].specifier  =
 		                                  T_strdup( "*.fileselectorFontSize" );
 	app_opt[ FILESELFONTSIZE ].argKind    = XrmoptionSepArg;
-	app_opt[ FILESELFONTSIZE ].value      = ( caddr_t ) def_null;
+	app_opt[ FILESELFONTSIZE ].value      = ( caddr_t ) "0";
 
 	app_opt[ HELPFONTSIZE ].option        = T_strdup( "-helpFontSize" );
 	app_opt[ HELPFONTSIZE ].specifier     = T_strdup( "*.helpFontSize" );
 	app_opt[ HELPFONTSIZE ].argKind       = XrmoptionSepArg;
-	app_opt[ HELPFONTSIZE ].value         = ( caddr_t ) def_null;
+	app_opt[ HELPFONTSIZE ].value         = ( caddr_t ) "0";
 
 	app_opt[ STOPMOUSEBUTTON ].option     = T_strdup( "-stopMouseButton" );
 	app_opt[ STOPMOUSEBUTTON ].specifier  = T_strdup( "*.stopMouseButton" );
 	app_opt[ STOPMOUSEBUTTON ].argKind    = XrmoptionSepArg;
-	app_opt[ STOPMOUSEBUTTON ].value      = ( caddr_t ) def_none;
+	app_opt[ STOPMOUSEBUTTON ].value      = ( caddr_t ) "";
 
 	app_opt[ NOCRASHMAIL ].option         = T_strdup( "-noCrashMail" );
 	app_opt[ NOCRASHMAIL ].specifier      = T_strdup( "*.noCrashMail" );
 	app_opt[ NOCRASHMAIL ].argKind        = XrmoptionNoArg;
-	app_opt[ NOCRASHMAIL ].value          = ( caddr_t ) def_null;
+	app_opt[ NOCRASHMAIL ].value          = ( caddr_t ) "0";
 
 	app_opt[ RESOLUTION	].option          = T_strdup( "-size" );
 	app_opt[ RESOLUTION	].specifier       = T_strdup( "*.size" );

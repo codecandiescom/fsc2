@@ -508,7 +508,7 @@ static void dg2020_create_phase_pulses( FUNCTION *f )
 	{
 		f->num_active_pulses = 0;
 
-		for ( j = 0; j < ASeq[ 0 ].len; j++ )
+		for ( j = 0; j < PSeq->len; j++ )
 			for ( l = 0; l < 2; l++ )
 			{
 				p = dg2020_new_phase_pulse( f, f->phase_func->pulses[ i ], i,

@@ -96,8 +96,14 @@ static Var *get_phase_cycled_area_1( Var *v )
 
 	if ( ASeq[ 0 ].defined )
 		aseq = ASeq;
-	else
+	else if ( ASeq[ 0 ].defined )
 		aseq = ASeq + 1;
+	else
+	{
+		eprint( FATAL, SET, "%s(): No acquisition sequence has been "
+				"defined.\n", Cur_Func );
+		THROW( EXCEPTION )
+	}
 
 	/* The first time we get here we need to do some basic checks, i.e. find
 	   out if all needed functions can be used */
@@ -131,8 +137,8 @@ static Var *get_phase_cycled_area_1( Var *v )
 
 	if ( ! get_channel_number( V, Cur_Func, channel ) )
 	{
-		eprint( FATAL, SET, "%s(): Invalid digitizer "
-				"channel number: %ld.\n", Cur_Func, channel[ 0 ] );
+		eprint( FATAL, SET, "%s(): Invalid digitizer channel number: %ld.\n",
+				Cur_Func, channel[ 0 ] );
 		THROW( EXCEPTION )
 	}
 
@@ -333,9 +339,9 @@ static Var *get_phase_cycled_area_2( Var *v )
 		first_time = UNSET;
 	}
 
-	if ( ! aseq[ 1 ]->defined )
+	if ( ! aseq[ 0 ]->defined || ! aseq[ 1 ]->defined )
 	{
-		eprint( FATAL, SET, "%s(): Second acquisition sequence (B) hasn't "
+		eprint( FATAL, SET, "%s(): Only one acquisition sequence has "
 				"been defined.\n", Cur_Func );
 		THROW( EXCEPTION )
 	}

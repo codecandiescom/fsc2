@@ -25,7 +25,7 @@
 #include "fsc2.h"
 
 
-long cur_aseq;
+static long cur_aseq;
 
 
 /*-------------------------------------------------------*/
@@ -262,22 +262,10 @@ void phases_end( void )
 			THROW( EXCEPTION )
 		}
 
-	/* If one or both acquisition sequences are undefined set it to default
-	   values (+A for first, +B for second) */
-
-	for ( i = 0; i < 2; i++ )
-		if ( ! ASeq[ i ].defined )
-		{
-			ASeq[ i ].defined = SET;
-			ASeq[ i ].len = PSeq->len;
-			ASeq[ i ].sequence = T_malloc( ASeq[ i ].len * sizeof( int ) );
-			for ( j = 0; j < PSeq->len; j++ )
-				ASeq[ i ].sequence[ j ] = ( i == 0 ) ? ACQ_PLUS_A : ACQ_PLUS_B;
-		}
-
 	/* Check that lengths of acquisition and phase sequences are identical */
 
-	if ( ASeq[ 0 ].len != PSeq->len || ASeq[ 1 ].len != PSeq->len )
+	if ( ( ASeq[ 0 ].defined && ASeq[ 0 ].len != PSeq->len ) ||
+		 ( ASeq[ 1 ].defined && ASeq[ 1 ].len != PSeq->len ) )
 	{
 		eprint( FATAL, UNSET, "Lengths of phase and acquisition sequences "
 				"defined in PHASES section differ.\n" );

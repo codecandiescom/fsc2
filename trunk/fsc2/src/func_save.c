@@ -590,7 +590,7 @@ Var *f_save( Var *v )
 
 static int print_array( Var *v, long cur_dim, long *start, int fid )
 {
-	long i;
+	unsigned int i;
 	int total_count = 0;
 	int count = 0;
 
@@ -628,7 +628,7 @@ static int print_array( Var *v, long cur_dim, long *start, int fid )
 
 static int print_slice( Var *v, int fid )
 {
-	long i;
+	unsigned int i;
 	int count = 0;
 
 

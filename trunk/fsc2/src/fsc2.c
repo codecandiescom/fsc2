@@ -617,8 +617,8 @@ static void start_editor( void )
 {
 	char *ed, *ep;
 	char **argv, **final_argv;
-	int argc = 1, i;
-	char def_args[ 3 ][ 6 ] = { "xterm", "-e", "vi" };
+	int argc = 1,
+		i;
 
 
 	/* Try to find content of environment variable "EDITOR" - if it doesn't
@@ -630,9 +630,9 @@ static void start_editor( void )
 	{
 		argv = T_malloc( 5 * sizeof ( char * ) );
 
-		argv[ 0 ] = def_args[ 0 ];
-		argv[ 1 ] = def_args[ 1 ];
-		argv[ 2 ] = def_args[ 2 ];
+		argv[ 0 ] = ( char * ) "xterm";
+		argv[ 1 ] = ( char * ) "-e";
+		argv[ 2 ] = ( char * ) "vi";
 		argv[ 3 ] = in_file;
 		argv[ 4 ] = NULL;
 	}
@@ -649,8 +649,8 @@ static void start_editor( void )
 		{
 			argv = T_malloc( 5 * sizeof ( char * ) );
 
-			argv[ 0 ] = def_args[ 0 ];
-			argv[ 1 ] = def_args[ 1 ];
+			argv[ 0 ] = ( char * ) "xterm";
+			argv[ 1 ] = ( char * ) "-e";
 			argv[ 2 ] = ed;
 			argv[ 3 ] = in_file;
 			argv[ 4 ] = NULL;
@@ -669,8 +669,8 @@ static void start_editor( void )
 		
 			argv = T_malloc( ( argc + 5 ) * sizeof ( char * ) );
 
-			argv[ 0 ] = def_args[ 0 ];
-			argv[ 1 ] = def_args[ 1 ];
+			argv[ 0 ] = ( char * ) "xterm";
+			argv[ 1 ] = ( char * ) "-e";
 			for ( ep = ed, i = 2; i < argc + 2; ++i )
 			{
 				argv[ i ] = ep;

@@ -978,7 +978,8 @@ Var *vars_negate( Var *v )
 /*      COMP_LESS_EQUAL)                                                    */
 /*    * pointers to the two variables                                       */
 /* <-                                                                       */
-/*    * 1 (TRUE) or 0 (FALSE) depending on result of comparison             */
+/*    * integer variable with value of 1 (true) or 0 (false) depending on   */
+/*      the result of the comparison                                        */
 /*--------------------------------------------------------------------------*/
 
 Var *vars_comp( int comp_type, Var *v1, Var *v2 )

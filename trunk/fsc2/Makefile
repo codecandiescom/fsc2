@@ -88,17 +88,23 @@ MAIL_ADDRESS     := Jens.Toerring@physik.fu-berlin.de
 SHELL            := /bin/sh
 CC               := gcc
 CFLAGS           := -ggdb -O2 -I/usr/X11R6/include/X11 \
-					-Wall -Wwrite-strings -Wstrict-prototypes \
-					-Wmissing-declarations -W -Wshadow \
-					-Wpointer-arith -Wsign-compare -Waggregate-return \
-					-Wnested-externs -Wsign-compare -Wcast-align \
-				    -Wbad-function-cast # fails in two places in src/util.c
-				    # -Wcast-qual # fails in a few places
-				    # -Wundef     # fails due in bison and lex created files
-				    # -ansi       # fails due to inline
-
-				    # -DNDEBUG    # switches off build-in debugging code 
-				    # -DMDEBUG    # for malloc debugging
+					-Wall \
+					-Wwrite-strings \
+					-Wstrict-prototypes \
+					-Wmissing-declarations \
+					-W \
+					-Wshadow \
+					-Wpointer-arith \
+					-Waggregate-return \
+					-Wnested-externs \
+					-Wcast-align
+				    # -Wsign-compare      # missing in older gcc versions
+				    # -Wbad-function-cast # too many false positives
+				    # -Wcast-qual         # too many false positives
+				    # -Wundef             # fails in bison/flex created files
+				    # -ansi               # fails due to inline/asm
+				    # -DNDEBUG            # switch off build-in debugging code 
+				    # -DMDEBUG            # for malloc debugging
 LD				 := ld
 LIBS             := -L/usr/X11R6/lib -L/usr/local/lib -lforms -lX11 -lm -ldl
 				    # -lmcheck   # for malloc debugging

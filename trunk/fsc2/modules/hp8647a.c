@@ -242,7 +242,7 @@ Var *synthesizer_state( Var *v )
 	if ( TEST_RUN || I_am == PARENT )
 		return vars_push( INT_VAR, ( long ) state );
 
-	return vars_push( INT_VAR, hp8647a_set_output_state( state ) ? 1L : 0L );
+	return vars_push( INT_VAR, ( long ) hp8647a_set_output_state( state ) );
 }
 
 /*---------------------------------------------------------------------*/
