@@ -631,7 +631,7 @@ static bool ips20_4_init( const char *name )
 	if ( gpib_clear_device( ips20_4.device ) == FAILURE )
 		ips20_4_comm_failure( );
 
-	usleep( 100000 );
+	usleep( 250000 );
 
 	/* Bring both the GPIB master device (ITC 503) as well as the sweep power
 	   supply in remote state */
@@ -775,16 +775,45 @@ static void ips20_4_get_complete_status( void )
 {
 	char cmd[ 100 ];
 	char reply[ 100 ];
+	long len = 100;
+	long offset = 0;
+	int i, max_retries = 3;
 
 
 	/* Get all information about the state of the magnet power supply and
 	   analyze the reply which has the form "XmnAnCnMmnPmn" where m and n
-	   are single decimal digits. */
+	   are single decimal digits.
+	   This transmission seems to have problems when the device was just
+	   switched on, so we try to deal with situations gracefully where the
+	   device returns data that it isn't supposed to send (at least if we
+	   would still be inclined after all these years to believe in what's
+	   written in manuals ;-) */
 
 	sprintf( cmd, "@%1dX\r", IPS20_4_ISOBUS_ADDRESS );
-	if ( ips20_4_talk( cmd, reply, 100 ) < 15 )
+	if ( gpib_write( ips20_4.device, cmd, strlen( cmd ) ) == FAILURE )
 		ips20_4_comm_failure( );
 
+	for ( i = 0; i < max_retries; i++ )
+	{
+		if ( gpib_read( ips20_4.device, reply + offset, &len ) == FAILURE )
+			ips20_4_comm_failure( );
+
+		if ( reply[ 0 ] != 'X' )
+		{
+			len = 100;
+			continue;
+		}
+
+		if ( offset + len < 15 )
+		{
+			offset += len;
+			len = 100;
+			continue;
+		}
+
+		break;
+	}
+	
 	/* Check system status data */
 
 	switch ( reply[ 1 ] )
