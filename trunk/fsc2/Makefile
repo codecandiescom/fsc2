@@ -162,6 +162,7 @@ sdir             := $(fdir)/src
 mdir             := $(fdir)/modules
 adir             := $(fdir)/aux
 udir             := $(fdir)/utils
+ddir             := $(fdir)/doc
 cdir             := $(fdir)/config
 ldir             := $(fdir)/Fcntl_Lock
 
@@ -493,10 +494,10 @@ all: config.h
 		echo "Configuring for machine $(machine_name)...";  \
 		$(MAKE) $(machine_name);                            \
 	fi
-	$(MAKE) -C src gpib_setup
+	$(MAKE) -C $(sdir) gpib_setup
 	$(MAKE) built
 	$(MAKE) tags
-	$(MAKE) -C src all
+	$(MAKE) -C $(src) all
 ifdef WITH_HTTP_SERVER
 	@if [ ! -e $(ldir)/Makefile                                \
 		  -o $(ldir)/Makefile.PL -nt $(ldir)/Makefile ]; then  \
@@ -504,10 +505,10 @@ ifdef WITH_HTTP_SERVER
 		perl Makefile.PL;                                      \
 		cd $(fdir);                                            \
 	fi
-	$(MAKE) -C Fcntl_Lock
+	$(MAKE) -C $(ldir)
 endif
-	$(MAKE) -C utils all
-	$(MAKE) -C doc all
+	$(MAKE) -C $(udir) all
+	$(MAKE) -C $(ddir) all
 
 
 # Create a header file with configuration information from the contents of
@@ -557,16 +558,16 @@ install:
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/na.gif    $(auxdir)
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/na.jpeg   $(auxdir)
 
-	$(MAKE) -C src install
-	$(MAKE) -C modules install
+	$(MAKE) -C $(srdir) install
+	$(MAKE) -C $(mdir) install
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) version.ugz $(libdir)
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/hp8647a.table $(libdir)
 ifdef WITH_HTTP_SERVER
 	$(MAKE) -C Fcntl_Lock install
 endif
-	$(MAKE) -C utils install
+	$(MAKE) -C $(udir) install
 	$(MAKE) -C scripts install
-	$(MAKE) -C doc install
+	$(MAKE) -C $(ddir) install
 
 
 # How to get rid of everything that got installed - requires that the
@@ -580,14 +581,14 @@ uninstall:
 	-for file in $(adir)/*.xpm; do                     \
 		$(RM) $(RMFLAGS) $(auxdir)/`basename $$file`;  \
 	done
-	$(MAKE) -C src uninstall
-	$(MAKE) -C modules uninstall
+	$(MAKE) -C $(sdir) uninstall
+	$(MAKE) -C $(mdir) uninstall
 ifdef WITH_HTTP_SERVER
 	$(MAKE) -C Fcntl_Lock uninstall
 endif
-	$(MAKE) -C utils uninstall
+	$(MAKE) -C $(udir) uninstall
 	$(MAKE) -C scripts uninstall
-	$(MAKE) -C doc uninstall
+	$(MAKE) -C $(ddir) uninstall
 	-if [ -z "`ls -A $(bindir)`" ]; then  \
 		rmdir $(bindir);                  \
 	fi
@@ -613,27 +614,27 @@ version:
 # 'distclean' but does not remove the documentation.
 
 clean:
-	$(MAKE) -C src clean
-	$(MAKE) -C modules clean
-	$(MAKE) -C doc clean
+	$(MAKE) -C $(sdir) clean
+	$(MAKE) -C $(mdir) clean
+	$(MAKE) -C $(ddir) clean
 
 distclean:
-	$(MAKE) -C src distclean
-	$(MAKE) -C modules distclean
-	$(MAKE) -C doc distclean
+	$(MAKE) -C $(sdir) distclean
+	$(MAKE) -C $(mdir) distclean
+	$(MAKE) -C $(ddir) distclean
 ifdef WITH_HTTP_SERVER
-	if [ -e Fcntl_$(ldir)/Makefile ]; then  \
-		$(MAKE) -C Fcntl_Lock distclean;    \
+	if [ -e $(ldir)/Makefile ]; then      \
+		$(MAKE) -C $(ldir) distclean;  \
 	fi
 endif
-	$(MAKE) -C utils distclean
+	$(MAKE) -C $(udir) distclean
 	-$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog config.h *~
 
 mostlyclean:
-	$(MAKE) -C src distclean
-	$(MAKE) -C modules distclean
-	$(MAKE) -C doc clean
-	$(MAKE) -C utils distclean
+	$(MAKE) -C $(sdir) distclean
+	$(MAKE) -C $(mdir) distclean
+	$(MAKE) -C $(ddir) clean
+	$(MAKE) -C $(udir) distclean
 	-$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog *~
 
 
@@ -666,8 +667,8 @@ manifest:
 	@echo '$$' >> MANIFEST
 	@echo '#' >> MANIFEST
 
-	@for dir in . Fcntl_Lock aux config doc modules scripts src \
-		 tests utils; do \
+	@for dir in . $(ldir) $(adir) $(cdir) $(ddir) $(mdir) scripts $(sdir) \
+		 tests $(udir); do \
 		echo "" >> MANIFEST; \
 		'ls' -1F $$dir | grep -v '/' | sed "s/^/$$dir\//" | \
 		sed 's/\.\///' | sed 's/\*$$//' >> MANIFEST; \
