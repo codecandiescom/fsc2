@@ -35,6 +35,9 @@ Var *f_bcreate( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	/* First argument must be type of button ("NORMAL_BUTTON", "PUSH_BUTTON"
+	   or "RADIO_BUTTON" or 0, 1, 2) */
+
 	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
 	if ( v->type == INT_VAR || v->type == FLOAT_VAR )
@@ -66,8 +69,8 @@ Var *f_bcreate( Var *v )
 
 	v = vars_pop( v );
 
-	/* For radio buttons the next argument could be the ID of a button
-	   belonging to the same group */
+	/* For radio buttons the next argument is the ID of the first button
+	   belonging to the group (except for the first button itself) */
 
 	if ( type == RADIO_BUTTON )
 	{
@@ -110,12 +113,16 @@ Var *f_bcreate( Var *v )
 		}
 	}
 
+	/* Next argument is the label string */
+
 	if ( v != NULL )
 	{
 		vars_check( v, STR_VAR );
 		label = get_string_copy( v->val.sptr );
 		v = vars_pop( v );
 	}
+
+	/* Final argument can be a help text */
 
 	if ( v != NULL )
 	{
@@ -132,6 +139,10 @@ Var *f_bcreate( Var *v )
 			;
 	}
 
+	/* Since the child process can't use graphics it has to write the
+	   parameter into a buffer, pass it to the parent process and ask the
+	   parent to create the button */
+
 	if ( I_am == CHILD )
 	{
 		void *buffer, *pos;
@@ -139,6 +150,8 @@ Var *f_bcreate( Var *v )
 		long *result;
 		size_t len;
 
+
+		/* Calculate length of buffer needed */
 
 		len = 3 * sizeof( long );
 		if ( Fname )
@@ -156,24 +169,24 @@ Var *f_bcreate( Var *v )
 
 		pos = buffer = T_malloc( len );
 
-		memcpy( pos, &Lc, sizeof( long ) );     /* store current line number */
+		memcpy( pos, &Lc, sizeof( long ) );     /* current line number */
 		pos += sizeof( long );
 
-		memcpy( pos, &type, sizeof( long ) );   /* store button type */
+		memcpy( pos, &type, sizeof( long ) );   /* button type */
 		pos += sizeof( long );
 
-		memcpy( pos, &coll, sizeof( long ) );   /* store colleague button */
+		memcpy( pos, &coll, sizeof( long ) );   /* colleague button */
 		pos += sizeof( long );
 
 		if ( Fname )
 		{
-			strcpy( ( char * ) pos, Fname );    /* store current file name */
+			strcpy( ( char * ) pos, Fname );    /* current file name */
 			pos += strlen( Fname ) + 1;
 		}
 		else
 			*( ( char * ) pos++ ) = '\0';
 
-		if ( label )                            /* store label string */
+		if ( label )                            /* label string */
 		{
 			strcpy( ( char * ) pos, label );
 			pos += strlen( label ) + 1;
@@ -181,7 +194,7 @@ Var *f_bcreate( Var *v )
 		else
 			*( ( char * ) pos++ ) = '\0';
 
-		if ( help_text )                        /* store help text string */
+		if ( help_text )                        /* help text string */
 		{
 			strcpy( ( char * ) pos, help_text );
 			pos += strlen( help_text ) + 1;
@@ -189,19 +202,24 @@ Var *f_bcreate( Var *v )
 		else
 			*( ( char * ) pos++ ) = '\0';
 
+
+		/* Pass buffer to parent and ask it to create the button. It returns a
+		   buffer with two longs, the first one indicating success or failure
+		   (value is 1 or 0), the second being the buttons ID */
+
 		result = exp_bcreate( buffer, ( long ) ( pos - buffer ) );
 
 		T_free( label );
 		T_free( help_text );
 
-		if ( result[ 0 ] == 0 )
+		if ( result[ 0 ] == 0 )      /* failure -> bomb out */
 		{
 			T_free( result );
 			THROW( EXCEPTION );
 		}
 
 		new_ID = result[ 1 ];
-		T_free( result );
+		T_free( result );           /* free result buffer */
 		return vars_push( INT_VAR, new_ID );
 	}
 
@@ -236,6 +254,8 @@ Var *f_bcreate( Var *v )
 	new_io->partner = coll;
 	new_io->is_created = UNSET;
 	new_io->delete_after_test = TEST_RUN ? SET : UNSET;
+
+	/* If this isn't just a test run really draw the new button */
 
 	if ( ! TEST_RUN )
 	{
@@ -274,12 +294,21 @@ Var *f_bdelete( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	/* All the arguments are button numbers */
+
 	while ( v != NULL )
 	{
+		/* Since the buttons 'belong' to the parent, the child needs to ask
+		   the parent to delete the button. The ID of each button to be deleted
+		   gets passed to te parent in a buffer and the parent is asked to
+		   delete th button */
+
 		if ( I_am == CHILD )
 		{
 			void *buffer, *pos;
 
+
+			/* Do all possible checking of the parameter */
 
 			if ( v->type != INT_VAR || v->val.lval < 0 )
 			{
@@ -288,23 +317,29 @@ Var *f_bdelete( Var *v )
 				THROW( EXCEPTION );
 			}
 
-			buffer = T_malloc( 2 * sizeof( long ) + strlen( Fname ) + 1 );
+			/* Get a bufer long enough and write data */
 
-			pos = buffer;
-			memcpy( pos, &Lc, sizeof( long ) );
+			pos = buffer =
+				T_malloc( 2 * sizeof( long ) + strlen( Fname ) + 1 );
+
+			memcpy( pos, &Lc, sizeof( long ) );       /* current line number */
 			pos += sizeof( long );
-			memcpy( pos, &v->val.lval, sizeof( long ) );
+			memcpy( pos, &v->val.lval, sizeof( long ) );  /* button ID */
 			pos += sizeof( long );
 			strcpy( pos, Fname );
-			pos += strlen( ( char * ) pos ) + 1;
+			pos += strlen( ( char * ) pos ) + 1;      /* current file name */
 
 			v = vars_pop( v );
+
+			/* Ask parent to delete the buton, bomb out on failure */
 
 			if ( ! exp_bdelete( buffer, ( long ) ( pos - buffer ) ) )
 				THROW( EXCEPTION );
 
 			continue;
 		}
+
+		/* Do checks on parameter */
 
 		if ( Tool_Box == NULL )
 		{
@@ -336,7 +371,7 @@ Var *f_bdelete( Var *v )
 				Tool_Box->objs = io->next;
 		}
 
-		/* Delete the button */
+		/* Delete the button (its not drawn in a test run!) */
 
 		if ( ! TEST_RUN )
 		{
@@ -344,8 +379,10 @@ Var *f_bdelete( Var *v )
 			fl_free_object( io->self );
 		}
 
-		/* Special care has to be taken for radio buttons if the first one
-		   (i.e. the other refer to) is deleted */
+		/* Special care has to be taken for the first radio buttons of a group
+		   (i.e. the other refer to) is deleted - the next button from the
+		   group must be made group leader and the remaining buttons must get
+		   told about it) */
 
 		if ( ( ! TEST_RUN || io->delete_after_test ) &&
 			 io->type == RADIO_BUTTON && io->partner == -1 )
@@ -398,24 +435,25 @@ Var *f_bdelete( Var *v )
 		v = vars_pop( v );
 	}
 
-	if ( I_am == CHILD )
+	/* The child process is already done */
+
+	if ( I_am == CHILD || TEST_RUN )
 		return vars_push( INT_VAR, 1 );
 
-	if ( ! TEST_RUN )
-	{
-		recreate_Tool_Box( );
+	/* Redraw the form without the deleted buttons */
 
-		if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
-			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-						  FL_FULLBORDER, "fsc2: Tools" );
-		else
-		{
-			fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
-			fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-						  FL_FULLBORDER, "fsc2: Tools" );
-		}
-		XFlush( fl_get_display( ) );
+	recreate_Tool_Box( );
+
+	if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
+		fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
+					  FL_FULLBORDER, "fsc2: Tools" );
+	else
+	{
+		fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
+		fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
+					  FL_FULLBORDER, "fsc2: Tools" );
 	}
+	XFlush( fl_get_display( ) );
 
 	return vars_push( INT_VAR, 1 );
 }
