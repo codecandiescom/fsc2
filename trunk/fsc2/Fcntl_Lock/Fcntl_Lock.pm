@@ -71,7 +71,7 @@ process currently holds the lock.
 
 # Set up an hash with the error messages, but only for errno's that Errno
 # knows about. The texts represent what's written in SUSV3 and in the man
-# pages for Linux and TRUE64.
+# pages for Linux, TRUE64, OpenBSD3 and Solaris8.
 
 my %fcntl_error_texts;
 
@@ -80,7 +80,8 @@ BEGIN {
 
 	if ( $err = eval { &Errno::EACCES } ) {
 		$fcntl_error_texts{ $err } = "File or segment already locked " .
-			                         "by other process(es)";
+			                         "by other process(es) or file is " .
+									 "mmap()ed to virtual memory";
 	}
 	if ( $err = eval { &Errno::EAGAIN } ) {
 		$fcntl_error_texts{ $err } = "File or segment already locked " .
@@ -95,7 +96,8 @@ BEGIN {
 		$fcntl_error_texts{ $err } = "Operation would cause a deadlock";
 	}
 	if ( $err = eval { &Errno::EFAULT } ) {
-		$fcntl_error_texts{ $err } = "Lock outside accessible address space";
+		$fcntl_error_texts{ $err } = "Lock outside accessible address space " .
+			                         "or to many locked regions";
 	}
 	if ( $err = eval { &Errno::EINTR } ) {
 		$fcntl_error_texts{ $err } = "Operation interrupted by a signal";
@@ -114,6 +116,10 @@ BEGIN {
 			                         "can not be represented correctly";
 	}
 	if ( $err = eval { &Errno::ENETUNREACH } ) {
+		$fcntl_error_texts{ $err } = "File is on remote machine that can " .
+			                         "not be reached anymore";
+	}
+	if ( $err = eval { &Errno::ENOLINK } ) {
 		$fcntl_error_texts{ $err } = "File is on remote machine that can " .
 			                         "not be reached anymore";
 	}
