@@ -43,10 +43,10 @@
    process. The child process rarely needs data from the parent.  These cases
    are when the child needs the parent process to display a message or alert
    box etc. and than has to wait for the result. That means that the
-   communication is always synchronous, i.e. the child has not to expect data
-   at random moments but only as the result of a previous write operation.
-   Thus for these functions we don't have to set up a scheme using signals
-   (it even knows what kind of data to expect as reply).
+   communication is always synchronous, i.e. the child don't has to expect
+   data at random moments but only as the result of its own previous write
+   operation.  Thus, for these functions we don't have to set up a scheme using
+   signals (the child process even knows what kind of data to expect as reply).
 
    Because of this asymmetry there are several types of messages which can
    only be send by the child process and read only by the parent process.
@@ -57,15 +57,18 @@
 		C_SHOW_CHOICES
 		C_SHOW_FSELECTOR
 		C_INIT_GRAPHICS
-
+		C_DATA
 */
 
 
 
 #include "fsc2.h"
 
+/* locally used routines */
 
 static void pipe_read( int fd, void *buf, size_t bytes_to_read );
+static Data_Buffer *get_new_data_buffer( void );
+
 
 
 long reader( void *ret )
@@ -75,8 +78,10 @@ long reader( void *ret )
 	long dim;
 	int i;
 	int n1, n2;
+	long nx, ny;
 	long retval;
 	char *retstr = NULL;
+	Data_Buffer *dbuf;
 
 
 	pipe_read( pd[ READ ], &header, sizeof( CS ) );
@@ -191,9 +196,11 @@ long reader( void *ret )
 			break;
 
 		case C_INIT_GRAPHICS :                /* only to be read by parent */
-			/* read in the dimension */
+			/* read the dimension and the numbers of points */
 
 			pipe_read( pd[ READ ], &dim, sizeof( long ) );
+			pipe_read( pd[ READ ], &nx, sizeof( long ) );
+			pipe_read( pd[ READ ], &ny, sizeof( long ) );
 
 			/* get length of both label strings from header and read them */
 
@@ -210,13 +217,50 @@ long reader( void *ret )
 
 			/* call the function with the parameters just read */
 
-			graphics_init( dim, str[ 0 ], str[ 1 ] );
+			graphics_init( dim, nx, ny, str[ 0 ], str[ 1 ] );
 
 			/* get rid of the label strings */
 
 			for ( i = 0; i < 2 ; i++ )
 				if ( str[ i ] != NULL )
 					T_free( str[ i ] );
+			break;
+
+		case C_DATA :
+			dbuf = get_new_data_buffer( );
+
+			/* get x- an y-indices and the data type */
+
+			pipe_read( pd[ READ ], &dbuf->nx, sizeof( long ) );
+			pipe_read( pd[ READ ], &dbuf->ny, sizeof( long ) );
+			pipe_read( pd[ READ ], &dbuf->type, sizeof( int ) );
+
+			switch( dbuf->type )
+			{
+				case INT_VAR :
+					dbuf->data.lval = header.data.long_data;
+					break;
+
+				case FLOAT_VAR :
+					dbuf->data.dval = header.data.double_data;
+					break;
+
+				case INT_TRANS_ARR :
+					dbuf->len = header.data.len;
+					dbuf->data.lpnt = T_malloc( dbuf->len * sizeof( long ) );
+					pipe_read( pd[ READ ], &dbuf->data.lpnt,
+							   dbuf->len * sizeof( long ) );
+					break;
+
+				case FLOAT_TRANS_ARR :
+					dbuf->len = header.data.len;
+					dbuf->data.dpnt = T_malloc( dbuf->len * sizeof( double ) );
+					pipe_read( pd[ READ ], &dbuf->data.dpnt,
+							   dbuf->len * sizeof( double ) );
+					break;
+			}
+			
+			pipe_read( pd[ READ ], &dbuf->overdraw_flag, sizeof( int ) );
 			break;
 
 		case C_STR :
@@ -309,10 +353,16 @@ void pipe_read( int fd, void *buf, size_t bytes_to_read )
 	C_SHOW_CHOICES   : question string (char *), number of buttons (1-3) (int),
                        3 strings with texts for buttons (char *), number of
                        default button (int) (parameter as in fl_show_choices())
-	C_INIT_GRAPHICS  : dimensionality of plot (2 or 3) (long), x- and y-label
+	C_INIT_GRAPHICS  : dimensionality of plot (2 or 3) (long), number of points
+	                   in x- and y-direction (long) and the x- and y-label
                        strings (char *)
 	C_SHOW_FSELECTOR : 4 strings (char *) with identical meaning as the para-
 	                   meter for fl_show_fselector()
+	C_DATA           : x- and y-indices (long)
+	                   data type (int)
+					   for arrays: length of array (long)
+					   data - either long, double, long * or double *
+					   overdraw flag (int)
 	C_STR            : string (char *)
 	C_INT            : integer data (int)
 	C_LONG,          : long integer data (long)
@@ -320,8 +370,8 @@ void pipe_read( int fd, void *buf, size_t bytes_to_read )
 	C_DOUBLE         : double data (double)
 
 	The types C_EPRINT, C_SHOW_MESSAGE, C_SHOW_ALERT, C_SHOW_CHOICES,
-	C_SHOW_FSELECTOR and C_INIT_GRAPHICS are only to be used by the child
-	process!
+	C_SHOW_FSELECTOR, C_INIT_GRAPHICS and C_DATA are only to be used by the
+	child process!
 */
 
 
@@ -332,8 +382,12 @@ void writer( int type, ... )
 	char *str[ 4 ];
 	long dim;
 	int n1, n2;
+	long nx, ny;
+	int data_type;
 	int i;
 	char ack;
+	long *lpnt;
+	double *dpnt;
 
 
 	/* The child process has to wait for the parent process to become ready to
@@ -408,6 +462,8 @@ void writer( int type, ... )
 
 		case C_INIT_GRAPHICS :            /* only to be written by child */
 			dim = va_arg( ap, long );
+			nx = va_arg( ap, long );
+			ny = va_arg( ap, long );
 			for ( i = 0; i < 2; i++ )
 			{
 				str[ i ] = va_arg( ap, char * );
@@ -417,10 +473,13 @@ void writer( int type, ... )
 					header.data.str_len[ i ] = 0;
 			}
 
-			/* Send header, dimension and the label strings */
+			/* Send header, dimension, numbers of points  and label strings */
 
 			write( pd[ WRITE ], &header, sizeof( CS ) );
 			write( pd[ WRITE ], &dim, sizeof( long ) );
+			write( pd[ WRITE ], &nx, sizeof( long ) );
+			write( pd[ WRITE ], &ny, sizeof( long ) );
+
 			if ( str[ 0 ] != NULL )
 				write( pd[ WRITE ], str[ 0 ], header.data.str_len[ 0 ] );
 			if ( str[ 1 ] != NULL )
@@ -445,6 +504,57 @@ void writer( int type, ... )
 			for ( i = 0; i < 4; i++ )
 				if ( str[ i ] != NULL )
 					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
+			break;
+
+		case C_DATA :
+			/* Get x- and y-indices */
+
+			nx = va_arg( ap, long );
+			ny = va_arg( ap, long );
+
+			/* Get data type and - for arrays, the array length */
+
+			data_type = va_arg( ap, int );
+			if ( data_type & ( INT_TRANS_ARR | FLOAT_TRANS_ARR ) )
+				header.data.len = ( size_t ) va_arg( ap, long );
+
+			/* Get the data or, for arrays, pointers to the data. For simple
+			   data types the data are stored in the header. */
+
+			switch( data_type )
+			{
+				case INT_VAR :
+					header.data.long_data = va_arg( ap, long );
+					break;
+
+				case FLOAT_VAR :
+					header.data.double_data = va_arg( ap, double );
+					break;
+
+				case INT_TRANS_ARR :
+					lpnt = va_arg( ap, long * );
+					break;
+
+				case FLOAT_TRANS_ARR :
+					dpnt = va_arg( ap, double * );
+					break;
+			}
+
+			/* Get the overdraw flag */
+
+			n1 = va_arg( ap, int );
+
+			/* Now send all the data */
+
+			write( pd[ WRITE ], &header, sizeof( CS ) );
+			write( pd[ WRITE ], &nx, sizeof( long ) );
+			write( pd[ WRITE ], &ny, sizeof( long ) );
+			write( pd[ WRITE ], &data_type, sizeof( int ) );
+			if ( data_type == INT_TRANS_ARR )
+				write( pd[ WRITE ], lpnt, header.data.len * sizeof( long ) );
+			if ( data_type == FLOAT_TRANS_ARR )
+				write( pd[ WRITE ], dpnt, header.data.len * sizeof( double ) );
+			write( pd[ WRITE ], &n1, sizeof( int ) );
 			break;
 
 		case C_STR :
@@ -486,4 +596,62 @@ void writer( int type, ... )
 
 
 	va_end( ap );
+}
+
+
+Data_Buffer *get_new_data_buffer( void )
+{
+	Data_Buffer *ndbuf;
+
+	if ( DBuf == NULL )
+		return T_malloc( sizeof( Data_Buffer ) );
+
+	ndbuf = DBuf;
+
+	while ( ndbuf != NULL )
+		ndbuf = ndbuf->next;
+
+	ndbuf->next = T_malloc( sizeof( Data_Buffer ) );
+	return ndbuf->next;
+}
+
+
+void delete_data_buffer( Data_Buffer *buf )
+{
+	Data_Buffer *prev_buf;
+
+
+	if ( buf == NULL )
+		return;
+
+	/* Free memory allocated for arrays */
+
+	if ( buf->type == INT_TRANS_ARR && buf->data.lpnt != NULL )
+		T_free( buf->data.lpnt );
+
+	if ( buf->type == FLOAT_TRANS_ARR && buf->data.dpnt != NULL )
+		T_free( buf->data.dpnt );
+
+	/* Unlink the buffer from the list of data buffers */
+
+	if ( buf == DBuf )                   /* buffer is at start of list */
+	{
+		DBuf = buf->next;
+		T_free( buf );
+		return;
+	}
+
+	prev_buf = DBuf;
+	while ( prev_buf->next != buf )
+		prev_buf = prev_buf->next;
+
+	prev_buf->next = buf->next;
+	T_free( buf );
+}
+
+
+void delete_all_data_buffers( void )
+{
+	while ( DBuf != NULL )
+		delete_data_buffer( DBuf );
 }

@@ -9,10 +9,9 @@ extern int prim_exp_runparse( void );     /* from prim_exp__run_parser.y */
 static void new_data_handler( int sig_type, void *data );
 static void quitting_handler( int sig_type, void *data );
 static void run_sigchld_handler( int sig_type, void *data );
-static void init_exp_grafics( void );
 static FILE *get_save_file( void );
 static void clear_up_after_measurement( void );
-static void set_buttons( int active );
+static void set_buttons_for_run( int active );
 
 
 /* Routines of the child process doing the measurement */
@@ -61,7 +60,7 @@ bool run( void )
 
 	/* Disable some buttons */
 
-	set_buttons( 0 );
+	set_buttons_for_run( 0 );
 	fl_set_cursor( FL_ObjWin( main_form->run ), XC_watch );
 
 	/* If the devices need the GPIB bus initialize it now */
@@ -69,7 +68,7 @@ bool run( void )
 	if ( need_GPIB && gpib_init( &gpib_log, LL_ERR ) == FAILURE )
 	{
 		eprint( FATAL, "Can't initialize GPIB bus.\n" );
-		set_buttons( 1 );
+		set_buttons_for_run( 1 );
 		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 		return FAIL;
 	}
@@ -86,19 +85,14 @@ bool run( void )
 	{
 		run_exit_hooks( );
 		gpib_shutdown( );
-		set_buttons( 1 );
+		set_buttons_for_run( 1 );
 		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 		return FAIL;
 	}
 
 	/* Open window for displaying measured data and disable save button */
 
-	init_exp_grafics( );
-	fl_deactivate_object( run_form->save );
-	fl_set_object_lcol( run_form->save, FL_INACTIVE_COL );
-	fl_show_form( run_form->run, FL_PLACE_MOUSE, FL_FULLBORDER,
-				  "fsc: Run" );
-	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
+	start_graphics( );
 
 	/* Open pipes for passing data between child and parent process - we need
 	 two pipes, one for the parent process to write to the child process and
@@ -154,6 +148,7 @@ bool run( void )
 		close( pd[ 0 ] );
 		close( pd[ 3 ] );
 		pd[ 0 ] = pd[ 2 ];
+		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 		return OK;
 	}
 
@@ -177,6 +172,7 @@ bool run( void )
 	run_exit_hooks( );
 	if ( need_GPIB )
 		gpib_shutdown( );
+	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 	stop_measurement( NULL, 1 );
 	is_data_saved = SET;
 	clear_up_after_measurement( );
@@ -334,17 +330,6 @@ void stop_measurement( FL_OBJECT *a, long b )
 }
 
 
-/*----------------------------------------------------------------*/
-/* init_exp_grafics() does everything necessary to initialize the */
-/* display of the measured data.                                  */
-/*----------------------------------------------------------------*/
-
-void init_exp_grafics( void )
-{
-	fl_clear_xyplot( run_form->xy_plot );
-}
-
-
 /*----------------------------------------------------------*/
 /* save_data() allowes to store the measured data after the */
 /* measurement is finished.                                 */
@@ -486,22 +471,21 @@ void clear_up_after_measurement( void )
 	}
 
 	fl_set_object_label( run_form->stop, "Stop" );
-	if ( fl_form_is_visible( run_form->run ) )
-		fl_hide_form( run_form->run );
 
-	set_buttons( 1 );
+	stop_graphics( );
+	set_buttons_for_run( 1 );
 	child_pid = 0;
 }
 
 
 /*----------------------------------------------------------*/
-/* set_buttons() makes the buttons in the main form for     */
-/* running another experient and quitting inaccesible while */
-/* a measurement is running and makes them accesible again  */
-/* when the experiment is finished.                         */
+/* set_buttons_for_run() makes the buttons in the main form */
+/* for running another experient and quitting inaccesible   */
+/* while a measurement is running and makes them accesible  */
+/* again when the experiment is finished.                   */
 /*----------------------------------------------------------*/
 
-void set_buttons( int active )
+void set_buttons_for_run( int active )
 {
 	if ( active == 0 )
 	{
@@ -521,8 +505,6 @@ void set_buttons( int active )
 		fl_set_object_lcol( main_form->quit, FL_BLACK );
 		fl_unfreeze_form( main_form->fsc2 );
 	}
-
-	XFlush( fl_get_display( ) );
 }
 
 

@@ -67,6 +67,7 @@ Var *f_sqrt( Var *v  );
 Var *f_print( Var *v  );
 Var *f_wait( Var *v  );
 Var *f_init_display( Var *v );
+Var *f_display( Var *v );
 Var *f_dim( Var *v );
 Var *f_size( Var *v );
 Var *f_sizes( Var *v );
@@ -105,6 +106,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "print",        f_print,        -1, ACCESS_ALL, 0 },
 	{ "wait",         f_wait,          1, ACCESS_ALL, 0 },
 	{ "init_display", f_init_display, -1, ACCESS_ALL, 0 },
+	{ "display",      f_display,      -1, ACCESS_EXP, 0 },
 	{ "dim",          f_dim,           1, ACCESS_ALL, 0 },
 	{ "size",         f_size,          2, ACCESS_ALL, 0 },
 	{ "sizes",        f_sizes,         1, ACCESS_ALL, 0 },
@@ -930,41 +932,208 @@ void f_wait_alarm_handler( int sig_type )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* f_init_display() has to be called to initialize the display system. It  */
+/* expects a variable number of arguments but at least two. The first arg- */
+/* ument has to be the dimensionality, 2 or 3. The Second argument is the  */
+/* number of points in x-direction, and for 3D graphics the third must be  */
+/* the number of points in y-direction. Then follow optional label strings */
+/* for the x- and y-axes.                                                  */
+/*-------------------------------------------------------------------------*/
 
 Var *f_init_display( Var *v )
 {
 	long dim;
+	long nx, ny;
 	char *l1, *l2;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing arguments for function "
+				"`init_display()'.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR );                /* get dimension */
+
 	if ( v->type == INT_VAR )
 		dim = v->val.lval;
 	else
 		dim = rnd( v->val.dval );
 
-	if ( v->next != NULL )
+	if ( dim < 2 || dim > 3 )
 	{
-		vars_check( v->next, STR_VAR );
-		l1 = v->next->val.sptr;
+		eprint( FATAL, "%s:%ld: Invalid display dimension (%ld) in "
+				"`init_display()', valid values are 2 or 3.\n",
+				Fname, Lc, dim );
+		THROW( EXCEPTION );
+	}
 
-		if ( v->next->next != NULL )
+	v = v->next;
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing number of points in x-direction in "
+				"`init_display()'.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR );  /* get # of points in x-direction */
+
+	if ( v->type == INT_VAR )
+		nx = v->val.lval;
+	else
+		nx = rnd( v->val.dval );
+
+	v = v->next;
+
+	if ( dim == 3 )                  /* for 3D get # of points in y-direction*/
+	{
+		if ( v == NULL )
 		{
-			vars_check( v->next->next, STR_VAR );
-			l2 = v->next->next->val.sptr;
-
+			eprint( FATAL, "%s:%ld: Missing number of points in y-direction "
+					"in init_display()'.\n", Fname, Lc );
+			THROW( EXCEPTION );
 		}
+
+		vars_check( v, INT_VAR | FLOAT_VAR );
+
+		if ( v->type == INT_VAR )
+			ny = v->val.lval;
 		else
+			ny = rnd( v->val.dval );
+
+		v = v->next;
+	}
+
+	if ( v != NULL )                  /* get x-label */
+	{
+		vars_check( v, STR_VAR );
+		l1 = v->val.sptr;
+		if ( strlen( l1 ) == 0 )
+			l1 = NULL;
+		v = v->next;
+	}
+	else
+		l1 = NULL;
+
+	if ( v != NULL && dim == 3 )
+	{
+		vars_check( v, STR_VAR );
+		l2 = v->val.sptr;
+		if ( strlen( l2 ) == 0 )
 			l2 = NULL;
 	}
 	else
-		l1 = l2 = NULL;
+		l2 = NULL;
 
-	graphics_init( dim, l1, l2 );
+	graphics_init( dim, nx, ny, l1, l2 );
 	return vars_push( INT_VAR, 1 );
 }
 
+
+/*-----------------------------------------------------------------*/
+/*  */
+/*-----------------------------------------------------------------*/
+
+Var *f_display( Var *v )
+{
+	int nx, ny;
+	int overdraw_flag = 1;
+
+
+	/* We can't display daa without a previous initialization */
+
+	if ( ! G.is_init )
+	{
+		if ( ! G.is_warn )                         /* warn only once */
+		{
+			eprint( WARN, "%s:%ld: Can't display data, missing "
+					"initialization.\n", Fname, Lc );
+			G.is_warn = SET;
+		}
+
+		return vars_push( INT_VAR, 0 );
+	}
+
+	/* Get the x-index for the data */
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing x-index in `display()'.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	
+	if ( v->type == INT_VAR )
+		nx = v->val.lval;
+	else
+		nx = rnd( v->val.dval );
+
+	v = v->next;
+
+	if ( G.dim == 3 )                          /* get y-index for 3D data */
+	{
+		if ( v == NULL )
+		{
+			eprint( FATAL, "%s:%ld: Missing y-index in `display()'.\n",
+					Fname, Lc );
+			THROW( EXCEPTION );
+		}
+		
+		vars_check( v, INT_VAR | FLOAT_VAR );
+	
+		if ( v->type == INT_VAR )
+			ny = v->val.lval;
+		else
+			ny = rnd( v->val.dval );
+
+		v = v->next;
+	}
+	else
+		ny = 0;
+
+	/* Now check type of data */
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing data in `display()'.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
+	if ( v->next != NULL )
+		overdraw_flag = 0;
+
+	if ( I_am == PARENT )
+		return vars_push( INT_VAR, 1 );
+
+	switch( v->type )
+	{
+		case INT_VAR :
+			writer( C_DATA, nx, ny, INT_VAR, v->val.lval, overdraw_flag );
+			break;
+
+		case FLOAT_VAR :
+			writer( C_DATA, nx, ny, FLOAT_VAR, v->val.dval, overdraw_flag );
+			break;
+
+		case INT_TRANS_ARR :
+			writer( C_DATA, nx, ny, INT_TRANS_ARR, v->len, v->val.lpnt,
+					overdraw_flag );
+			break;
+
+		case FLOAT_TRANS_ARR :
+			writer( C_DATA, nx, ny, FLOAT_TRANS_ARR, v->len, v->val.dpnt,
+					overdraw_flag );
+			break;
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
 
 /*---------------------------------------------*/
 /* Function returns the dimension of an array. */
