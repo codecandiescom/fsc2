@@ -503,11 +503,16 @@ Var *lockin_time_constant( Var *v )
 			tc_index = TC_ENTRIES - 1;
 
 		if ( tc >= 1.0 )
-			print( WARN, "Time constant of %g s is too large, using %.0lf s "
-				   "instead.\n", tc, tc_list[ tc_index ] );
+			print( WARN, "Time constant of %0.lf s is too large, using "
+				   "%.0lf s instead.\n", tc, tc_list[ tc_index ] );
+		else if ( tc >= 1.0e-3 )
+			print( WARN, "Time constant of %.0lf ms is too short, using "
+				   "%.0lf ms instead.\n",
+				   tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
 		else
-			print( WARN, "Time constant of %g ms is too short, using %.0lf ms "
-				   "instead.\n", tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
+			print( WARN, "Time constant of %lf ms is too short, using "
+				   "%.0lf ms instead.\n",
+				   tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
 	}
 
 	too_many_arguments( v );

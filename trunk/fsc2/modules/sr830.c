@@ -789,10 +789,15 @@ Var *lockin_time_constant( Var *v )
 				print( WARN, "Time constant of %.0lf ks is too large, using "
 					   "%.0lf ks instead.\n",
 					   tc * 1.0e-3, tc_list[ tc_index ] * 1.0e-3 );
-			else
+			else if ( tc >= 1.0e-6 )
 				print( WARN, "Time constant of %.0lf us is too small, using "
 					   "%.0lf us instead.\n",
 					   tc * 1.0e6, tc_list[ tc_index ] * 1.0e6 );
+			else
+				print( WARN, "Time constant of %lf us is too small, using "
+					   "%.0lf us instead.\n",
+					   tc * 1.0e6, tc_list[ tc_index ] * 1.0e6 );
+
 			sr830.tc_warn = SET;
 		}
 	}
