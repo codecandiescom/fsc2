@@ -96,7 +96,8 @@ crowley.none:
 
 
 # How to create the graphical interface files - they need making if either
-# fsc2_rsc.[ch] doesn't exist or the files they're made from are newer
+# fsc2_rsc.[ch] or fsc2_resc_[hl]r.[ch] doesn't exist or the files they're
+# made from are newer
 
 hi_res:
 	if [ ! -e fsc2_rsc.c -o ! -e fsc2_rsc.h          \
@@ -125,8 +126,8 @@ low_res:
 
 # How to create the GPIB interface files - they need making if either
 # gpib_if.[ch] doesn't exit or the files they're made from are newer.
-# When using the NI driver additionally the parser and lexer for the
-# GPIB configuration file are needed
+# When using the NI driver also the parser and lexer for the GPIB
+# configuration file are needed
 
 gpib_old:
 	if [ ! -e gpib_if.c -o ! -e gpib_if.h            \
