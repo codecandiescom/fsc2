@@ -67,6 +67,7 @@ static bool pop_curly_brace( void );
 static void loop_setup( void );
 static void setup_while_or_repeat( int type, long *pos );
 static void setup_if_else( long *pos, Prg_Token *cur_wr );
+static void save_restore_variables( bool flag )
 
 
 
@@ -1494,7 +1495,7 @@ bool test_for_cond( Prg_Token *cur )
 /* and restoring !!!                                                        */
 /*--------------------------------------------------------------------------*/
 
-void save_restore_variables( bool flag )
+static void save_restore_variables( bool flag )
 {
 	Var *src;
 	Var *cpy;
