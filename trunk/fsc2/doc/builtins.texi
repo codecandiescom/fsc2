@@ -562,7 +562,12 @@ letters doesn't matter). The second argument must be the minimum value
 the slider can be adjusted to and the third argument is the maximum
 value. The minimum value must always be smaller than the maximum value.
 
-As in the case of buttons there are to more (optional) arguments, the
+A third, optional paramter is the step size to be used, i.e.@: the
+minimum increment the slider value can be changed. Of course, this
+value has to be smaller than the differenece between the minimum and
+maximum value of the slider.
+
+As in the case of buttons there are two more (optional) arguments, the
 label to be shown below the slider and a help text. The same escape
 sequences as for button labels and help texts.
 
