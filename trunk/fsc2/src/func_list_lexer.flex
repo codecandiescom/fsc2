@@ -239,7 +239,7 @@ int fll_count_functions( Func *fncts, int num_def_func )
 	int ret_token;
 	int last_token = 0;
 	int num = 0;
-	int i;
+	int i = -1;
 
 
 	Lc = 1;
@@ -265,7 +265,6 @@ int fll_count_functions( Func *fncts, int num_def_func )
 					fncts[ i ].nargs = 0;
 					fncts[ i ].access_flag = ACCESS_EXP;
 					fncts[ i ].to_be_loaded = SET;
-
 					break;
 				}
 		}
