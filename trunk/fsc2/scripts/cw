@@ -233,7 +233,7 @@ print F
 "\n\nASSIGNMENTS:
 
 TIMEBASE:	  5 ns;
-MICROWAVE:	  POD = 1, 5, V_HIGH = 5 V, V_LOW = 0 V, INV;
+MICROWAVE:	  POD = 1, 2, 3, 4, 5, V_HIGH = 5 V, V_LOW = 0 V, INV;
 PHASE_SETUP:  MICROWAVE, CW: 5;
 
 
