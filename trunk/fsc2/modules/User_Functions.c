@@ -41,8 +41,8 @@ static void pc_basic_check( const char *func_1, bool *is_1, const char *func_2,
 							bool *is_2, const char *str );
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
 Var_T *get_phase_cycled_area( Var_T *v )
 {
@@ -53,22 +53,22 @@ Var_T *get_phase_cycled_area( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* This function is called in cases where there is only one        */
-/* acquisition sequence.                                           */
-/* Expected arguments:                                             */
-/* 1. 1 or 2 digitizer channel numbers (if the second argument is  */
-/*    a digitizer channel or a window number can be seen from the  */
-/*    value, window numbers always start at WINDOW_START_NUMBER,   */
-/*    which should be much larger than the highest channel number. */
-/* 3. Any number of digitizer windows (none means just return area */
-/*    of full width curve)                                         */
-/* Return value:                                                   */
-/*    For zero or 1 window: Floating point variable with phase     */
-/*    cycled area                                                  */
-/*    For more than 1 window: Array of floating point values with  */
-/*    phase cycled area for each window                            */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * This function is called in cases where there is only one
+ * acquisition sequence.
+ * Expected arguments:
+ * 1. 1 or 2 digitizer channel numbers (if the second argument is
+ *    a digitizer channel or a window number can be seen from the
+ *    value, window numbers always start at WINDOW_START_NUMBER,
+ *    which should be much larger than the highest channel number.
+ * 3. Any number of digitizer windows (none means just return area
+ *    of full width curve)
+ * Return value:
+ *    For zero or 1 window: Floating point variable with phase
+ *    cycled area
+ *    For more than 1 window: Array of floating point values with
+ *    phase cycled area for each window
+ *-----------------------------------------------------------------*/
 
 static Var_T *get_phase_cycled_area_1( Var_T *v )
 {
@@ -272,20 +272,20 @@ static Var_T *get_phase_cycled_area_1( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Expected arguments:                                             */
-/* 1. 2 digitizer channel numbers (if the second argument is a     */
-/*    digitizer channel or a window number can be seen from the    */
-/*    value, window numbers always start at WINDOW_START_NUMBER,   */
-/*    which should be much larger than the highest channel number. */
-/* 3. Any number of digitizer windows (none means just return area */
-/*    of full width curve)                                         */
-/* Return value:                                                   */
-/*    For zero or 1 window: Floating point variable with phase     */
-/*    cycled area                                                  */
-/*    For more than 1 window: Array of floating point values with  */
-/*    phase cycled area for each window                            */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Expected arguments:
+ * 1. 2 digitizer channel numbers (if the second argument is a
+ *    digitizer channel or a window number can be seen from the
+ *    value, window numbers always start at WINDOW_START_NUMBER,
+ *    which should be much larger than the highest channel number.
+ * 3. Any number of digitizer windows (none means just return area
+ *    of full width curve)
+ * Return value:
+ *    For zero or 1 window: Floating point variable with phase
+ *    cycled area
+ *    For more than 1 window: Array of floating point values with
+ *    phase cycled area for each window
+ *-----------------------------------------------------------------*/
 
 static Var_T *get_phase_cycled_area_2( Var_T *v )
 {
@@ -554,11 +554,11 @@ static Var_T *get_phase_cycled_area_2( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Checks if the variable 'v', used in the function 'func_name', holds a */
-/* value that is a channel number to be used with the current digitizer. */
-/* If it is the value is returned in 'channel'.                          */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Checks if the variable 'v', used in the function 'func_name', holds a
+ * value that is a channel number to be used with the current digitizer.
+ * If it is the value is returned in 'channel'.
+ *-----------------------------------------------------------------------*/
 
 static bool get_channel_number( Var_T *v, long *channel )
 {
@@ -587,8 +587,8 @@ static bool get_channel_number( Var_T *v, long *channel )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
 
 static void pc_basic_check( const char *func_1, bool *is_1, const char *func_2,
 							bool *is_2, const char *str )
