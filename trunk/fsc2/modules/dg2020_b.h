@@ -345,8 +345,6 @@ int dg2020_diff( bool *old, bool *new, Ticks *start, Ticks *length );
 /* The functions from dg2020_init.c */
 
 void dg2020_init_setup( void );
-void dg2020_basic_pulse_check( void );
-void dg2020_basic_functions_check( void );
 void dg2020_distribute_channels( void );
 void dg2020_pulse_start_setup( void );
 void dg2020_create_phase_pulses( FUNCTION *f );

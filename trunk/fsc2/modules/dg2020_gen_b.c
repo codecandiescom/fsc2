@@ -88,7 +88,7 @@ bool dg2020_assign_function( int function, long pod )
 	}
 	
 	f->is_used = SET;
-	f->num_pods++;
+	f->pod[ f->num_pods++ ] = p;
 	p->function = f;
 
 	return OK;
@@ -586,6 +586,8 @@ bool dg2020_phase_setup_prep( int phs, int type, int pod, long val,
 				Phase_Types[ type ] );
 		THROW( EXCEPTION );
 	}
+
+	type -= PHASE_PLUS_X;
 
 	/* Complain if a pod has already been assigned for this phase type */
 
