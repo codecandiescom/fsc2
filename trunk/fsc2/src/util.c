@@ -47,7 +47,7 @@ char *string_to_lower( char *str )
 		if ( isupper( *ptr ) )
 			*ptr = tolower( *ptr );
 
-	return( str );
+	return str;
 }
 
 
@@ -61,7 +61,7 @@ void *get_memcpy( const void *array, size_t size )
 
 	new = T_malloc( size );
 	memcpy( new, array, size );
-	return( new );
+	return new;
 }
 
 
@@ -99,9 +99,9 @@ const char *strip_path( const char *path )
     char *cp;
     
     if ( ( cp = strrchr( path, '/' ) ) == NULL )
-        return( path );
+        return path;
     else
-        return( ++cp );
+        return ++cp;
 }
 
 
@@ -133,7 +133,7 @@ long get_file_length( char *name, int *len )
 		TRY_SUCCESS;
 	}
 	OTHERWISE
-		return( -1 );                        /* FATAL: no memory */
+		return -1;                       /* FATAL: no memory */
 
 	/* set up pipe to 'awk' (defined via AWK_PROG) and read number of lines */
 
@@ -142,7 +142,7 @@ long get_file_length( char *name, int *len )
 	if ( ( pp = popen( pc, "r" ) ) == NULL )
 	{
 		T_free( pc );
-		return( -2 );                  /* popen() failed */
+		return -2;                       /* popen() failed */
 	}
 
 	fscanf( pp, "%ld", &lc );
@@ -154,7 +154,7 @@ long get_file_length( char *name, int *len )
 	for ( i = lc, *len = 1; ( i /= 10 ) > 0; ++( *len ) )
 		;
 
-	return( lc );
+	return lc;
 }
 
 

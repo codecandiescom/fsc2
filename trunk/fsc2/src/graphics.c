@@ -68,7 +68,6 @@ void start_graphics( void )
 	fl_set_object_helper( run_form->full_scale_button,
 						  "Switch off automatic rescaling" );
 
-
 	/* Store the current state of the Graphics structure - to be restored
 	   after the experiment */
 
@@ -114,7 +113,7 @@ void start_graphics( void )
 		fl_set_canvas_decoration( run_form->z_axis, FL_FRAME_BOX );
 	fl_set_canvas_decoration( run_form->canvas, FL_NO_FRAME );
 
-	/* Show only the needed buttons */
+	/* Show only buttons really needed */
 
 	if ( G.is_init )
 	{
@@ -156,7 +155,7 @@ void start_graphics( void )
 
 	G.d = FL_FormDisplay( run_form->run );
 
-	/* Set minimum size for display window switch on the full scale button */
+	/* Set minimum size for display window and switch on full scale button */
 
 	if ( G.dim == 1 )
 		fl_winminsize( run_form->run->window, 400, 335 );

@@ -58,11 +58,11 @@ int main( int argc, char *argv[ ] )
 		if ( argv[ 2 ] == NULL )          /* no file name with "-t" option ? */
 		{
 			fprintf( stderr, "fsc2 -t: No input file\n" );
-			return( 1 );
+			return EXIT_FAILURE;
 		}
 
 		just_testing = SET;        /* signal "just_testing"-mode to eprint() */
-		return( scan_main( argv[ 2 ] ) ? EXIT_SUCCESS : EXIT_FAILURE );
+		return scan_main( argv[ 2 ] ) ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
 	else
 		just_testing = UNSET;
@@ -107,7 +107,7 @@ int main( int argc, char *argv[ ] )
 			TRY_SUCCESS;
 		}
 		OTHERWISE
-			return( EXIT_FAILURE );
+			return EXIT_FAILURE;
 
 		load_file( main_form->browser, 1 );
 	}
@@ -133,7 +133,7 @@ int main( int argc, char *argv[ ] )
 
 	assert( exception_env_stack_pos == 0 );
 
-	return( EXIT_SUCCESS );
+	return EXIT_SUCCESS;
 }
 
 
@@ -655,15 +655,15 @@ static bool display_file( char *name, FILE *fp )
 		{
 			case 0 :                  /* file length is zero */
 				fl_show_alert( "Error", "File is empty.", NULL, 1 );
-				return( FAIL );
+				return FAIL;
 
 			case -1 :                 /* not enough memory left */
-				return( FAIL );
+				return FAIL;
 
 			case -2 :                 /* popen() failure */
 				fl_show_alert( "Error", "Can't determine length of file:",
 							   name, 1 );
-				return( FAIL );
+				return FAIL;
 		}
 	}
 
@@ -701,7 +701,7 @@ static bool display_file( char *name, FILE *fp )
 	/* Unfreeze and thus redisplay the browser */
 
 	fl_unfreeze_form( main_form->browser->form );
-	return( OK );
+	return OK;
 }
 
 

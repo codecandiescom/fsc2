@@ -138,7 +138,7 @@ PREP        return PREP_TOKEN;
 				THROW( EXCEPTION );
 			}
 
-<<EOF>>		return( 0 );
+<<EOF>>		return 0;
 
 
 

@@ -123,7 +123,7 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 				THROW( EXCEPTION );
 			}
 
-<<EOF>>		return( 0 );
+<<EOF>>		return 0;
 
 
 

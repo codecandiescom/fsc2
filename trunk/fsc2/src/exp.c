@@ -856,7 +856,7 @@ bool test_condition( Prg_Token *cur )
 		condition = Var_Stack->val.dval ? OK : FAIL;
 
 	vars_pop( Var_Stack );
-	return( condition );
+	return condition;
 }
 
 
