@@ -26,10 +26,10 @@
 @ifinfo
 @menu
 * Introduction::            
-* Magnet Functions::        Functions for controlling the magnet.
-* Gaussmeter Functions::    Functions for measuring the magnetic field.
-* Lock-In Functions::       Functions for accessing the lock-in amplifiers.
-* Digitizer Functions::     Functions for accessing the oscilloscopes.
+* Magnet Functions::
+* Gaussmeter Functions::
+* Lock-In Functions::
+* Digitizer Functions::
 * Pulser Functions::
 * Synthesizer Functions::
 * Temperature Controller Functions::

@@ -160,7 +160,7 @@ close Fout;
 #
 
 print "Everything worked out well. Now you simply have to re-make fsc2\n" .
-      "(just cd to the main directory and type 'make' and, when this\n" .
+      "(just cd back to the main directory and type 'make' and, when this\n" .
 	  "succeeds, become root and type 'make install').\n\n" .
 	  "If the device is controlled via the GPIB bus you still have to\n" .
 	  "update the GPIB configuration file manually (usually, it's\n" .
