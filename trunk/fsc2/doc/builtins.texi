@@ -1150,15 +1150,18 @@ elements of an array).
 The function simulates the user clicking onto the @code{Stop} button in
 the display window. If there is an @code{ON_STOP} label flow of control
 will be transfered to the code following the @code{ON_STOP} label,
-otherwise the program will be stopped immediately.
+otherwise the program will be stopped immediately. This function can be
+used in the @code{EXPERIMENT} section only and not after the
+@code{ON_STOP} label.
 
 
 @anchor{abort}
 @item abort()
 @findex abort()
-The function will abort the currently running program immediately, so
-it is a kind of an emergency exit when nothing else will do. When called
-it displays a message box on the screen to inform the user.
+The function will abort the currently running program immediately, so it
+is a kind of an emergency exit when nothing else will do. When called it
+displays a message box on the screen to inform the user. This function
+can only be used in the @code{EXPERIMENT} section
 
 
 @anchor{date}

@@ -44,7 +44,7 @@ typedef struct {
 
 	bool ( *set_timebase )( double timebase );
 	bool ( *set_trigger_mode )( int mode );
-	bool ( *set_repeat_time )( double time );
+	bool ( *set_repeat_time )( double rep_time );
 	bool ( *set_trig_in_level )( double voltage );
 	bool ( *set_trig_in_slope )( int slope );
 	bool ( *set_trig_in_impedance )( int state );
@@ -54,24 +54,24 @@ typedef struct {
 
 	bool ( *new_pulse )( long pulse_number );
 	bool ( *set_pulse_function )( long pulse_number, int function );
-	bool ( *set_pulse_position )( long pulse_number, double time );
-	bool ( *set_pulse_length )( long pulse_number, double time );
-	bool ( *set_pulse_position_change )( long pulse_number, double time );
-	bool ( *set_pulse_length_change )( long pulse_number, double time );
+	bool ( *set_pulse_position )( long pulse_number, double ptime );
+	bool ( *set_pulse_length )( long pulse_number, double ptime );
+	bool ( *set_pulse_position_change )( long pulse_number, double ptime );
+	bool ( *set_pulse_length_change )( long pulse_number, double ptime );
 	bool ( *set_pulse_phase_cycle )( long pulse_number, long cycle );
 
 	bool ( *get_pulse_function )( long pulse_number, int *function );
-	bool ( *get_pulse_position )( long pulse_number, double *time );
-	bool ( *get_pulse_length )( long pulse_number, double *time );
-	bool ( *get_pulse_position_change )( long pulse_number, double *time );
-	bool ( *get_pulse_length_change )( long pulse_number, double *time );
+	bool ( *get_pulse_position )( long pulse_number, double *ptime );
+	bool ( *get_pulse_length )( long pulse_number, double *ptime );
+	bool ( *get_pulse_position_change )( long pulse_number, double *ptime );
+	bool ( *get_pulse_length_change )( long pulse_number, double *ptime );
 	bool ( *get_pulse_phase_cycle )( long pulse_number, long *cycle );
 
 	bool ( *phase_setup_prep )( int func, int type, int pod, long val,
 								long protocol);
 	bool ( *phase_setup )( int function );
-	bool ( *set_phase_switch_delay )( int function, double time );
-	bool ( *set_grace_period )( double time );
+	bool ( *set_phase_switch_delay )( int function, double del_time );
+	bool ( *set_grace_period )( double gp_time );
 	bool ( *keep_all_pulses )( void );
 
 } Pulser_Struct;

@@ -838,6 +838,8 @@ void exp_test_run( void )
 {
 	Prg_Token *cur;
 	long old_FLL = File_List_Len;
+	bool is_do_quit = UNSET;
+
 
 	Fname = T_free( Fname );
 
@@ -872,6 +874,22 @@ void exp_test_run( void )
 			{
 				fl_check_only_forms( );
 				token_count %= CHECK_FORMS_AFTER;
+			}
+
+			/* This will be set by the end() function which simulates
+			   pressing the "Stop" button in the display window */
+
+			if ( do_quit )
+			{
+				if ( On_Stop_Pos < 0 )                /* no ON_STOP part ? */
+				{
+					cur_prg_token = NULL;             /* -> stop immediately */
+					break;
+				}
+				else                                  /* goto ON_STOP part */
+					cur_prg_token = prg_token + On_Stop_Pos;
+
+				do_quit = UNSET;
 			}
 
 			switch ( cur_prg_token->token )

@@ -488,27 +488,27 @@ void p_set_trigger_impedance( Var *v )
 
 void p_set_rep_time( Var *v )
 {
-	double time;
+	double rep_time;
 
 
 	/* Check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	time = ( v->type == INT_VAR ) ? ( double ) v->val.lval :  v->val.dval;
+	rep_time = ( v->type == INT_VAR ) ? ( double ) v->val.lval :  v->val.dval;
 	vars_pop( v );
 
-	if ( time < 9.9e-10 )
+	if ( rep_time < 9.9e-10 )
 	{
-		eprint( FATAL, SET, "Invalid repeat time: %g s.\n", time );
+		eprint( FATAL, SET, "Invalid repeat time: %g s.\n", rep_time );
 		THROW( EXCEPTION )
 	}
 
-	time = is_mult_ns( time, "Repeat time" );
+	rep_time = is_mult_ns( rep_time, "Repeat time" );
 
 	/* Finally call the function (if it exists...) */
 
 	is_pulser_func( pulser_struct.set_repeat_time, "setting a repeat time" );
-	( *pulser_struct.set_repeat_time )( time );
+	( *pulser_struct.set_repeat_time )( rep_time );
 }
 
 
@@ -518,7 +518,7 @@ void p_set_rep_time( Var *v )
 
 void p_set_rep_freq( Var *v )
 {
-	double freq, time;
+	double freq, rep_time;
 
 
 	/* Check the variable and get its value */
@@ -535,13 +535,13 @@ void p_set_rep_freq( Var *v )
 
 	/* Make sure we get a repeat time that's a multiple of 1 ns */
 
-	time = lround( 1.0 / freq * 1.0e9 ) * 1.0e-9;
+	rep_time = lround( 1.0 / freq * 1.0e9 ) * 1.0e-9;
 
 	/* Finally call the function (if it exists) */
 
 	is_pulser_func( pulser_struct.set_repeat_time,
 					"setting a repeat frequency" );
-	( *pulser_struct.set_repeat_time )( time );
+	( *pulser_struct.set_repeat_time )( rep_time );
 }
 
 
@@ -754,7 +754,7 @@ Var *p_get( char *txt, int type )
 Var *p_get_by_num( long pnum, int type )
 {
 	int function;
-	double time;
+	double ptime;
 	long cycle;
 	Var *v = NULL;
 
@@ -771,29 +771,29 @@ Var *p_get_by_num( long pnum, int type )
 		case P_POS :
 			is_pulser_func( pulser_struct.get_pulse_position,
 							"returning a pulses position" );
-			( *pulser_struct.get_pulse_position )( pnum, &time );
-			v = vars_push( FLOAT_VAR, time );
+			( *pulser_struct.get_pulse_position )( pnum, &ptime );
+			v = vars_push( FLOAT_VAR, ptime );
 			break;
 
 		case P_LEN :
 			is_pulser_func( pulser_struct.get_pulse_length,
 							"returning a pulses length" );
-			( *pulser_struct.get_pulse_length )( pnum, &time );
-			v = vars_push( FLOAT_VAR, time );
+			( *pulser_struct.get_pulse_length )( pnum, &ptime );
+			v = vars_push( FLOAT_VAR, ptime );
 			break;
 
 		case P_DPOS :
 			is_pulser_func( pulser_struct.get_pulse_position_change,
 							"returning a pulses position change" );
-			( *pulser_struct.get_pulse_position_change )( pnum, &time );
-			v = vars_push( FLOAT_VAR, time );
+			( *pulser_struct.get_pulse_position_change )( pnum, &ptime );
+			v = vars_push( FLOAT_VAR, ptime );
 			break;
 
 		case P_DLEN :
 			is_pulser_func( pulser_struct.get_pulse_length_change,
 							"returning a pulses length change" );
-			( *pulser_struct.get_pulse_length_change )( pnum, &time );
-			v = vars_push( FLOAT_VAR, time );
+			( *pulser_struct.get_pulse_length_change )( pnum, &ptime );
+			v = vars_push( FLOAT_VAR, ptime );
 			break;
 
 		case P_PHASE :

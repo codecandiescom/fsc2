@@ -207,7 +207,8 @@ bool functions_init( void )
 
 static int func_cmp1( const void *a, const void *b )
 {
-	return strcmp( ( ( Func * ) a )->name, ( ( Func * ) b )->name );
+	return strcmp( ( ( const Func * ) a )->name,
+				   ( ( const Func * ) b )->name );
 }
 
 

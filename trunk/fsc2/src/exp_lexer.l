@@ -247,10 +247,18 @@ FUNC        {IDENT}"#"[0-9]+
 				{
 					if ( acc == ACCESS_PREP )
 					{
-						eprint( FATAL, SET, "Function `%s' can't be used in "
+						eprint( FATAL, SET, "Function %s() can't be used in "
 								"the EXPERIMENT section.\n", exptext );
 						THROW( EXCEPTION )
 					}
+
+					if ( ! strcmp( exptext, "end" ) && On_Stop_Pos >= 0 )
+					{
+						eprint( FATAL, SET, "Function %s() can not be called "
+								"after the ON_STOP label.\n", exptext );
+						THROW( EXCEPTION )
+					}
+
 					return E_FUNC_TOKEN;
 				}
                 else
@@ -273,6 +281,14 @@ FUNC        {IDENT}"#"[0-9]+
 								"the EXPERIMENT section.\n", exptext );
 						THROW( EXCEPTION )
 					}
+
+					if ( ! strcmp( exptext, "end" ) && On_Stop_Pos >= 0 )
+					{
+						eprint( FATAL, SET, "Function %s() can not be called "
+								"after the ON_STOP label.\n", exptext );
+						THROW( EXCEPTION )
+					}
+
 					return E_FUNC_TOKEN;
 				}
 

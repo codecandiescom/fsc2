@@ -326,7 +326,8 @@ void vars_sort( void )
 
 static int comp_vars_1( const void *a, const void *b )
 {
-	return strcmp( ( ( Func * ) a )->name, ( ( Func * ) b )->name );
+	return strcmp( ( ( const Func * ) a )->name,
+				   ( ( const Func * ) b )->name );
 }
 
 
@@ -336,7 +337,7 @@ static int comp_vars_1( const void *a, const void *b )
 
 static int comp_vars_2( const void *a, const void *b )
 {
-	return strcmp( ( char * ) a , ( ( Func * ) b )->name );
+	return strcmp( ( const char * ) a , ( ( const Func * ) b )->name );
 }
 
 
