@@ -48,13 +48,16 @@ const char *show_input( const char *content, const char *label );
 bool exp_layout( char *buffer, ptrdiff_t len );
 long *exp_bcreate( char *buffer, ptrdiff_t len );
 bool exp_bdelete( char *buffer, ptrdiff_t len );
-long exp_bstate( char *buffer, ptrdiff_t len );
+long *exp_bstate( char *buffer, ptrdiff_t len );
 long *exp_screate( char *buffer, ptrdiff_t len );
 bool exp_sdelete( char *buffer, ptrdiff_t len );
 double *exp_sstate( char *buffer, ptrdiff_t len );
 long *exp_icreate( char *buffer, ptrdiff_t len );
 bool exp_idelete( char *buffer, ptrdiff_t len );
 INPUT_RES *exp_istate( char *buffer, ptrdiff_t len );
+long *exp_mcreate( char *buffer, ptrdiff_t len );
+bool exp_mdelete( char *buffer, ptrdiff_t len );
+long *exp_mchoice( char *buffer, ptrdiff_t len );
 bool exp_objdel( char *buffer, ptrdiff_t len );
 
 

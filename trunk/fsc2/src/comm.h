@@ -40,6 +40,7 @@ enum {
 	C_EPRINT = 0,
 	C_SHOW_MESSAGE,
 	C_SHOW_ALERT,
+	C_ACK,
 	C_SHOW_CHOICES,
 	C_SHOW_FSELECTOR,
 	C_PROG,
@@ -70,6 +71,12 @@ enum {
 	C_IDELETE_REPLY,
 	C_ISTATE,
 	C_ISTATE_REPLY,
+	C_MCREATE,
+	C_MCREATE_REPLY,
+	C_MDELETE,
+	C_MDELETE_REPLY,
+	C_MCHOICE,
+	C_MCHOICE_REPLY,
 	C_ODELETE,
 	C_ODELETE_REPLY,
 	C_FREEZE
@@ -119,8 +126,8 @@ enum {
 void setup_comm( void );
 void end_comm( void );
 int new_data_callback( XEvent *a, void *b );
-long reader( void *ret );
-void writer( int type, ... );
+bool reader( void *ret );
+bool writer( int type, ... );
 void send_data( int type, int shm_id );
 
 

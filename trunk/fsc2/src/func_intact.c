@@ -31,7 +31,7 @@ static IOBJECT *find_object_from_ID( long ID );
 static void recreate_Tool_Box( void );
 static FL_OBJECT *append_object_to_form( IOBJECT *io );
 static void tools_callback( FL_OBJECT *ob, long data );
-static bool check_format_string( const char *buf );
+static bool check_format_string( char *buf );
 static void convert_escapes( char *str );
 static void check_label( char *str );
 static void store_geometry( void );
@@ -146,8 +146,9 @@ Var *f_freeze( Var *v )
 
 	is_now_frozen = get_boolean( v );
 
-	if ( Internals.I_am == CHILD )
-		writer( C_FREEZE, ( int ) is_now_frozen );
+	if ( Internals.I_am == CHILD &&
+		 ! writer( C_FREEZE, ( int ) is_now_frozen ) )
+		THROW( EXCEPTION );
 
 	return vars_push( INT_VAR, ( long ) is_now_frozen );
 }
@@ -163,7 +164,6 @@ void parent_freeze( int freeze )
 		is_frozen = freeze ? SET : UNSET;
 		return;
 	}
-
 
 	if ( is_frozen && ! freeze )
 	{
@@ -248,8 +248,18 @@ Var *f_layout( Var *v )
 				break;
 
 			default :
-				print( FATAL, "Unknown layout keyword `%s'.\n", v->val.sptr );
-				THROW( EXCEPTION );
+				if ( Internals.I_am == PARENT )
+				{
+					print( FATAL, "Unknown layout keyword `%s'.\n",
+						   v->val.sptr );
+					THROW( EXCEPTION );
+				}
+				else
+				{
+					print( FATAL, "Unknown layout keyword `%s', using default "
+						   "vertical layout.\n", v->val.sptr );
+					return vars_push( INT_VAR, 0 );
+				}
 		}
 
 	/* The child has no control over the graphical stuff, it has to pass all
@@ -260,7 +270,8 @@ Var *f_layout( Var *v )
 		char *buffer, *pos;
 		size_t len;
 
-		len = 2 * sizeof( long );
+		len = sizeof EDL.Lc + sizeof layout;
+
 		if ( EDL.Fname )
 			len += strlen( EDL.Fname ) + 1;
 		else
@@ -268,11 +279,11 @@ Var *f_layout( Var *v )
 
 		pos = buffer = T_malloc( len );
 
-		memcpy( pos, &EDL.Lc, sizeof( long ) );   /* current line number */
-		pos += sizeof( long );
+		memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
+		pos += sizeof EDL.Lc;
 
-		memcpy( pos, &layout, sizeof( long ) );   /* type of layout */
-		pos += sizeof( long );
+		memcpy( pos, &layout, sizeof layout );   /* type of layout */
+		pos += sizeof layout;
 
 		if ( EDL.Fname )
 		{
@@ -292,12 +303,12 @@ Var *f_layout( Var *v )
 
 	/* Set up structure for tool box */
 
-	Tool_Box = T_malloc( sizeof( TOOL_BOX ) );
+	Tool_Box = T_malloc( sizeof *Tool_Box );
 	Tool_Box->layout = layout;
 	Tool_Box->Tools = NULL;                       /* no form created yet */
 	Tool_Box->objs = NULL;                        /* and also no objects */
 
-	return vars_push( INT_VAR, ( long ) layout );
+	return vars_push( INT_VAR, layout );
 }
 
 
@@ -309,10 +320,9 @@ Var *f_bcreate( Var *v )
 {
 	long type;
 	long coll = -1;
-	IOBJECT *cio;
 	char *label = NULL;
 	char *help_text = NULL;
-	IOBJECT *new_io, *ioi;
+	IOBJECT *new_io = NULL, *ioi, *cio;
 	long ID = 0;
 
 
@@ -412,37 +422,6 @@ Var *f_bcreate( Var *v )
 		}
 	}
 
-	/* Next argument is the label string */
-
-	if ( v != NULL )
-	{
-		vars_check( v, STR_VAR );
-		label = T_strdup( v->val.sptr );
-		check_label( label );
-		convert_escapes( label );
-		v = vars_pop( v );
-	}
-
-	/* Final argument can be a help text */
-
-	if ( v != NULL )
-	{
-		vars_check( v, STR_VAR );
-		help_text = T_strdup( v->val.sptr );
-		convert_escapes( help_text );
-		v = vars_pop( v );
-	}
-
-	/* Warn and get rid of superfluous arguments */
-
-	if ( v != NULL )
-	{
-		print( WARN, "Too many arguments, discarding superfluous "
-			   "arguments.\n" );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
-
 	/* Since the child process can't use graphics it has to write the
 	   parameter into a buffer, pass it to the parent process and ask the
 	   parent to create the button */
@@ -455,9 +434,32 @@ Var *f_bcreate( Var *v )
 		size_t len;
 
 
+		/* Next argument is the label string */
+
+		if ( v != NULL )
+		{
+			vars_check( v, STR_VAR );
+			label = v->val.sptr;
+
+			/* Final argument can be a help text */
+
+			if ( v->next != NULL )
+			{
+				vars_check( v->next, STR_VAR );
+				help_text = v->next->val.sptr;
+
+				/* Warn and get rid of superfluous arguments */
+			
+				if ( v->next->next != NULL )
+					print( WARN, "Too many arguments, discarding superfluous "
+						   "arguments.\n" );
+			}
+		}
+
 		/* Calculate length of buffer needed */
 
-		len = 3 * sizeof( long );
+		len = sizeof EDL.Lc + sizeof type + sizeof coll;
+
 		if ( EDL.Fname )
 			len += strlen( EDL.Fname ) + 1;
 		else
@@ -473,14 +475,14 @@ Var *f_bcreate( Var *v )
 
 		pos = buffer = T_malloc( len );
 
-		memcpy( pos, &EDL.Lc, sizeof( long ) ); /* current line number */
-		pos += sizeof( long );
+		memcpy( pos, &EDL.Lc, sizeof EDL.Lc ); /* current line number */
+		pos += sizeof EDL.Lc;
 
-		memcpy( pos, &type, sizeof( long ) );   /* button type */
-		pos += sizeof( long );
+		memcpy( pos, &type, sizeof type );     /* button type */
+		pos += sizeof type;
 
-		memcpy( pos, &coll, sizeof( long ) );   /* group leaders ID */
-		pos += sizeof( long );
+		memcpy( pos, &coll, sizeof coll );     /* group leaders ID */
+		pos += sizeof coll;
 
 		if ( EDL.Fname )
 		{
@@ -507,14 +509,11 @@ Var *f_bcreate( Var *v )
 			*pos++ = '\0';
 
 
-		/* Pass buffer to parent and ask it to create the button. It returns a
-		   buffer with two longs, the first one indicating success or failure
-		   (value is 1 or 0), the second being the buttons ID */
+		/* Pass buffer to the parent and ask it to create the button. It
+		   returns a buffer with two longs, the first indicating success
+		   or failure (value is 1 or 0), the second being the buttons ID */
 
 		result = exp_bcreate( buffer, pos - buffer );
-
-		T_free( label );
-		T_free( help_text );
 
 		if ( result[ 0 ] == 0 )      /* failure -> bomb out */
 		{
@@ -528,20 +527,89 @@ Var *f_bcreate( Var *v )
 		return vars_push( INT_VAR, new_ID );
 	}
 
+	/* Here follows the part that is run by the parent process only */
+
+	/* Next argument is the label string */
+
+	if ( v != NULL )
+	{
+		vars_check( v, STR_VAR );
+
+		TRY
+		{
+			label = T_strdup( v->val.sptr );
+			check_label( label );
+			convert_escapes( label );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( label );
+			RETHROW( );
+		}
+
+		v = vars_pop( v );
+	}
+
+	/* Final argument can be a help text */
+
+	if ( v != NULL )
+	{
+		TRY
+		{
+			vars_check( v, STR_VAR );
+			help_text = T_strdup( v->val.sptr );
+			convert_escapes( help_text );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( help_text );
+			T_free( label );
+			RETHROW( );
+		}
+
+		v = vars_pop( v );
+	}
+
+	/* Warn and get rid of superfluous arguments */
+
+	if ( v != NULL )
+	{
+		print( WARN, "Too many arguments, discarding superfluous "
+			   "arguments.\n" );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
 	/* Now that we're done with checking the parameters we can create the new
        button - if the Tool_Box doesn't exist yet we've got to create it now */
 
-	if ( Tool_Box == NULL )
+	TRY
 	{
-		Tool_Box = T_malloc( sizeof( TOOL_BOX ) );
-		Tool_Box->objs = NULL;
-		Tool_Box->layout = VERT;
-		Tool_Box->Tools = NULL;
-	}
+		if ( Tool_Box == NULL )
+		{
+			Tool_Box = T_malloc( sizeof *Tool_Box );
+			Tool_Box->objs = NULL;
+			Tool_Box->layout = VERT;
+			Tool_Box->Tools = NULL;
+		}
 
+		new_io = T_malloc( sizeof *new_io );
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( new_io );
+		T_free( help_text );
+		T_free( label );
+		RETHROW( );
+	}
+		
 	if ( Tool_Box->objs == NULL )
 	{
-		new_io = Tool_Box->objs = T_malloc( sizeof( IOBJECT ) );
+		Tool_Box->objs = new_io;
 		new_io->next = new_io->prev = NULL;
 	}
 	else
@@ -549,7 +617,7 @@ Var *f_bcreate( Var *v )
 		for ( ioi = Tool_Box->objs; ioi->next != NULL; ioi = ioi->next )
 			;
 		ID = ioi->ID + 1;
-		new_io = ioi->next = T_malloc( sizeof( IOBJECT ) );
+		ioi->next = new_io;
 		new_io->prev = ioi;
 		new_io->next = NULL;
 	}
@@ -566,10 +634,9 @@ Var *f_bcreate( Var *v )
 	new_io->help_text = help_text;
 	new_io->partner = coll;
 
-	/* If this isn't just a test run really draw the new button */
+	/* Draw the new button */
 
-	if ( Internals.mode != TEST )
-		recreate_Tool_Box( );
+	recreate_Tool_Box( );
 
 	return vars_push( INT_VAR, new_io->ID );
 }
@@ -599,12 +666,12 @@ Var *f_bdelete( Var *v )
 
 	/* Loop over all button numbers */
 
-	while ( v != NULL )
+	do
 	{
 		/* Since the buttons 'belong' to the parent, the child needs to ask
 		   the parent to delete the button. The ID of each button to be deleted
 		   gets passed to the parent in a buffer and the parent is asked to
-		   delete the button */
+		   delete the button. */
 
 		if ( Internals.I_am == CHILD )
 		{
@@ -622,7 +689,8 @@ Var *f_bdelete( Var *v )
 
 			/* Get a long enough buffer and write data */
 
-			len = 2 * sizeof( long );
+			len = sizeof EDL.Lc + sizeof v->val.lval;
+
 			if ( EDL.Fname )
 				len += strlen( EDL.Fname ) + 1;
 			else
@@ -630,11 +698,11 @@ Var *f_bdelete( Var *v )
 
 			pos = buffer = T_malloc( len );
 
-			memcpy( pos, &EDL.Lc, sizeof( long ) );   /* current line number */
-			pos += sizeof( long );
+			memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
+			pos += sizeof EDL.Lc;
 
-			memcpy( pos, &v->val.lval, sizeof( long ) );  /* button ID */
-			pos += sizeof( long );
+			memcpy( pos, &v->val.lval, sizeof v->val.lval );  /* button ID */
+			pos += sizeof v->val.lval;
 
 			if ( EDL.Fname )
 			{
@@ -644,109 +712,107 @@ Var *f_bdelete( Var *v )
 			else
 				*pos++ = '\0';
 
-			v = vars_pop( v );
-
 			/* Ask parent to delete the button, bomb out on failure */
 
 			if ( ! exp_bdelete( buffer, pos - buffer ) )
 				THROW( EXCEPTION );
-
-			continue;
 		}
-
-		/* No tool box -> no buttons -> no buttons to delete... */
-
-		if ( Tool_Box == NULL || Tool_Box->objs == NULL )
-		{
-			print( FATAL, "No buttons have been defined yet.\n" );
-			THROW( EXCEPTION );
-		}
-
-		/* Check the parameters */
-
-		if ( v->type != INT_VAR || v->val.lval < 0 ||
-			 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
-			 ( io->type != NORMAL_BUTTON &&
-			   io->type != PUSH_BUTTON   &&
-			   io->type != RADIO_BUTTON ) )
-		{
-			print( FATAL, "Invalid button identifier.\n" );
-			THROW( EXCEPTION );
-		}
-
-		/* Remove button from the linked list */
-
-		if ( io->next != NULL )
-			io->next->prev = io->prev;
-		if ( io->prev != NULL )
-			io->prev->next = io->next;
 		else
-			Tool_Box->objs = io->next;
-
-		/* Delete the button (it's not drawn in a test run!) */
-
-		if ( Internals.mode != TEST )
 		{
-			fl_delete_object( io->self );
-			fl_free_object( io->self );
-		}
 
-		/* Special care has to be taken for the first radio buttons of a group
-		   (i.e. the one the others refer to) is deleted - the next button
-		   from the group must be made group leader and the remaining buttons
-		   must get told about it) */
+			/* No tool box -> no buttons -> no buttons to delete... */
 
-		if ( io->type == RADIO_BUTTON && io->partner == -1 )
-		{
-			for ( nio = io->next; nio != NULL; nio = nio->next )
-				if ( nio->type == RADIO_BUTTON && nio->partner == io->ID )
-				{
-					new_anchor = nio->ID;
-					nio->partner = -1;
-					break;
-				}
-
-			if ( nio != NULL )
-				for ( nio = nio->next; nio != NULL; nio = nio->next )
-					if ( nio->type == RADIO_BUTTON && nio->partner == io->ID )
-						nio->partner = new_anchor;
-		}
-
-		T_free( ( void * ) io->label );
-		T_free( ( void * ) io->help_text );
-		T_free( io );
-
-		if ( Tool_Box->objs == NULL )
-		{
-			if ( Internals.mode != TEST )
+			if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 			{
-				if ( Tool_Box->Tools )
-				{
-					if ( fl_form_is_visible( Tool_Box->Tools ) )
-					{
-						store_geometry( );
-						fl_hide_form( Tool_Box->Tools );
-					}
-
-					fl_free_form( Tool_Box->Tools );
-				}
-				else
-					tool_has_been_shown = UNSET;
+				print( FATAL, "No buttons have been defined yet.\n" );
+				THROW( EXCEPTION );
 			}
 
-			Tool_Box = T_free( Tool_Box );
+			/* Check the parameters */
 
-			if ( ( v = vars_pop( v ) ) != NULL )
+			if ( v->type != INT_VAR || v->val.lval < 0 ||
+				 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
+				 ( io->type != NORMAL_BUTTON &&
+				   io->type != PUSH_BUTTON   &&
+				   io->type != RADIO_BUTTON ) )
 			{
 				print( FATAL, "Invalid button identifier.\n" );
 				THROW( EXCEPTION );
 			}
 
-			return vars_push( INT_VAR, 1 );
-		}
+			/* Remove button from the linked list */
 
-		v = vars_pop( v );
-	}
+			if ( io->next != NULL )
+				io->next->prev = io->prev;
+			if ( io->prev != NULL )
+				io->prev->next = io->next;
+			else
+				Tool_Box->objs = io->next;
+
+			/* Delete the button (it's not drawn in a test run!) */
+
+			if ( Internals.mode != TEST )
+			{
+				fl_delete_object( io->self );
+				fl_free_object( io->self );
+			}
+
+			/* Special care has to be taken for the first radio buttons of a
+			   group (i.e. the one the others refer to) is deleted - the next
+			   button from the group must be made group leader and the
+			   remaining buttons must get told about it) */
+
+			if ( io->type == RADIO_BUTTON && io->partner == -1 )
+			{
+				for ( nio = io->next; nio != NULL; nio = nio->next )
+					if ( nio->type == RADIO_BUTTON && nio->partner == io->ID )
+					{
+						new_anchor = nio->ID;
+						nio->partner = -1;
+						break;
+					}
+
+				if ( nio != NULL )
+					for ( nio = nio->next; nio != NULL; nio = nio->next )
+						if ( nio->type == RADIO_BUTTON &&
+							 nio->partner == io->ID )
+							nio->partner = new_anchor;
+			}
+
+			T_free( ( void * ) io->label );
+			T_free( ( void * ) io->help_text );
+			T_free( io );
+
+			if ( Tool_Box->objs == NULL )
+			{
+				if ( Internals.mode != TEST )
+				{
+					if ( Tool_Box->Tools )
+					{
+						if ( fl_form_is_visible( Tool_Box->Tools ) )
+						{
+							store_geometry( );
+							fl_hide_form( Tool_Box->Tools );
+						}
+						
+						fl_free_form( Tool_Box->Tools );
+					}
+					else
+						tool_has_been_shown = UNSET;
+				}
+				
+				Tool_Box = T_free( Tool_Box );
+				
+				if ( ( v = vars_pop( v ) ) != NULL )
+				{
+					print( FATAL, "Invalid button identifier.\n" );
+					THROW( EXCEPTION );
+				}
+
+				return vars_push( INT_VAR, 1 );
+			}
+		}
+	} while ( ( v = vars_pop( v ) ) != NULL );
 
 	/* The child process is already done here, and also a test run */
 
@@ -791,6 +857,7 @@ Var *f_bstate( Var *v )
 		long chld_state = -1;
 		char *buffer, *pos;
 		size_t len;
+		long *result;
 
 
 		/* Basic check of button identifier - always the first parameter */
@@ -819,7 +886,8 @@ Var *f_bstate( Var *v )
 
 		/* Make up buffer to send to parent process */
 
-		len = 3 * sizeof( long );
+		len = sizeof EDL.Lc + sizeof ID + sizeof chld_state;
+
 		if ( EDL.Fname )
 			len += strlen( EDL.Fname ) + 1;
 		else
@@ -827,15 +895,15 @@ Var *f_bstate( Var *v )
 
 		pos = buffer = T_malloc( len );
 
-		memcpy( pos, &EDL.Lc, sizeof( long ) ); /* current line number */
-		pos += sizeof( long );
+		memcpy( pos, &EDL.Lc, sizeof EDL.Lc ); /* current line number */
+		pos += sizeof EDL.Lc;
 
-		memcpy( pos, &ID, sizeof( long ) );     /* buttons ID */
-		pos += sizeof( long );
+		memcpy( pos, &ID, sizeof ID );     /* buttons ID */
+		pos += sizeof ID;
 
-		memcpy( pos, &chld_state, sizeof( long ) );
+		memcpy( pos, &chld_state, sizeof chld_state );
 		                                        /* state to be set (negative */
-		pos += sizeof( long );                  /* if not to be set)         */
+		pos += sizeof chld_state;               /* if not to be set)         */
 
 		if ( EDL.Fname )
 		{
@@ -848,10 +916,18 @@ Var *f_bstate( Var *v )
 		/* Ask parent process to return or set the state - bomb out if it
 		   returns a negative value, indicating a severe error */
 
-		chld_state = exp_bstate( buffer, pos - buffer );
+		result = exp_bstate( buffer, pos - buffer );
 
-		if ( chld_state < 0 )
+		/* Bomb out if parent returns failure */
+
+		if ( result[ 0 ] == 0 )
+		{
+			T_free( result );
 			THROW( EXCEPTION );
+		}
+
+		chld_state = result[ 1 ];
+		T_free( result );
 
 		return vars_push( INT_VAR, chld_state );
 	}
@@ -953,7 +1029,7 @@ Var *f_bstate( Var *v )
 
 Var *f_screate( Var *v )
 {
-	IOBJECT *new_io, *ioi;
+	IOBJECT *new_io = NULL, *ioi;
 	int type;
 	double start_val, end_val;
 	double step = 0.0;
@@ -1054,32 +1130,6 @@ Var *f_screate( Var *v )
 		}
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		vars_check( v, STR_VAR );
-		if ( *v->val.sptr != '\0' )
-		{
-			label = T_strdup( v->val.sptr );
-			check_label( label );
-			convert_escapes( label );
-		}
-	}
-
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		vars_check( v, STR_VAR );
-		help_text = T_strdup( v->val.sptr );
-		convert_escapes( help_text );
-	}
-
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		print( WARN, "Too many arguments, discarding superfluous "
-			   "arguments.\n" );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
-
 	/* Again, the child process has to pass the parameter to the parent and
 	   ask it to create the slider */
 
@@ -1091,7 +1141,25 @@ Var *f_screate( Var *v )
 		size_t len;
 
 
-		len = 2 * sizeof( long ) + 3 * sizeof( double );
+		if ( ( v = vars_pop( v ) ) != NULL )
+		{
+			vars_check( v, STR_VAR );
+			label = v->val.sptr;
+
+			if ( v->next != NULL )
+			{
+				vars_check( v->next, STR_VAR );
+				help_text = v->next->val.sptr;
+
+				if ( v->next->next != NULL )
+					print( WARN, "Too many arguments, discarding superfluous "
+						   "arguments.\n" );
+			}
+		}
+
+		len =   sizeof EDL.Lc + sizeof type
+			  + sizeof start_val + sizeof end_val + sizeof step;
+
 		if ( EDL.Fname )
 			len += strlen( EDL.Fname ) + 1;
 		else
@@ -1107,20 +1175,20 @@ Var *f_screate( Var *v )
 
 		pos = buffer = T_malloc( len );
 
-		memcpy( pos, &EDL.Lc, sizeof( long ) ); /* store current line number */
-		pos += sizeof( long );
+		memcpy( pos, &EDL.Lc, sizeof EDL.Lc ); /* store current line number */
+		pos += sizeof EDL.Lc;
 
-		memcpy( pos, &type, sizeof( long ) );   /* store slider type */
-		pos += sizeof( long );
+		memcpy( pos, &type, sizeof type );     /* store slider type */
+		pos += sizeof type;
 
-		memcpy( pos, &start_val, sizeof( double ) );
-		pos += sizeof( double );
+		memcpy( pos, &start_val, sizeof start_val );
+		pos += sizeof start_val;
 
-		memcpy( pos, &end_val, sizeof( double ) );
-		pos += sizeof( double );
+		memcpy( pos, &end_val, sizeof end_val );
+		pos += sizeof end_val;
 
-		memcpy( pos, &step, sizeof( double ) );
-		pos += sizeof( double );
+		memcpy( pos, &step, sizeof step );
+		pos += sizeof step;
 
 		if ( EDL.Fname )
 		{
@@ -1152,9 +1220,6 @@ Var *f_screate( Var *v )
 
 		result = exp_screate( buffer, pos - buffer );
 
-		T_free( label );
-		T_free( help_text );
-
 		/* Bomb out if parent returns failure */
 
 		if ( result[ 0 ] == 0 )
@@ -1165,23 +1230,85 @@ Var *f_screate( Var *v )
 
 		new_ID = result[ 1 ];
 		T_free( result );
+
 		return vars_push( INT_VAR, new_ID );
+	}
+
+	/* Here follows the part that is run by the parent process only */
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		vars_check( v, STR_VAR );
+
+		if ( *v->val.sptr != '\0' )
+		{
+			TRY
+			{
+				label = T_strdup( v->val.sptr );
+				check_label( label );
+				convert_escapes( label );
+				TRY_SUCCESS;
+			}
+			OTHERWISE
+			{
+				T_free( label );
+				RETHROW( );
+			}
+		}
+	}
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		TRY
+		{
+			vars_check( v, STR_VAR );
+			help_text = T_strdup( v->val.sptr );
+			convert_escapes( help_text );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( help_text );
+			T_free( label );
+			RETHROW( );
+		}
+	}
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		print( WARN, "Too many arguments, discarding superfluous "
+			   "arguments.\n" );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
 	}
 
 	/* Now that we're done with checking the parameters we can create the new
        button - if the Tool_Box doesn't exist yet we've got to create it now */
 
-	if ( Tool_Box == NULL )
+	TRY
 	{
-		Tool_Box = T_malloc( sizeof( TOOL_BOX ) );
-		Tool_Box->objs = NULL;
-		Tool_Box->layout = VERT;
-		Tool_Box->Tools = NULL;
+		if ( Tool_Box == NULL )
+		{
+			Tool_Box = T_malloc( sizeof *Tool_Box );
+			Tool_Box->objs = NULL;
+			Tool_Box->layout = VERT;
+			Tool_Box->Tools = NULL;
+		}
+
+		new_io = T_malloc( sizeof *new_io );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( new_io );
+		T_free( help_text );
+		T_free( label );
+		RETHROW( );
 	}
 
 	if ( Tool_Box->objs == NULL )
 	{
-		new_io = Tool_Box->objs = T_malloc( sizeof( IOBJECT ) );
+		Tool_Box->objs = new_io;
 		new_io->next = new_io->prev = NULL;
 	}
 	else
@@ -1189,7 +1316,7 @@ Var *f_screate( Var *v )
 		for ( ioi = Tool_Box->objs; ioi->next != NULL; ioi = ioi->next )
 			;
 		ID = ioi->ID + 1;
-		new_io = ioi->next = T_malloc( sizeof( IOBJECT ) );
+		ioi->next = new_io;
 		new_io->prev = ioi;
 		new_io->next = NULL;
 	}
@@ -1207,10 +1334,9 @@ Var *f_screate( Var *v )
 	new_io->label = label;
 	new_io->help_text = help_text;
 
-	/* If this isn't a test run the slider must also be drawn */
+	/* Draw the new slider */
 
-	if ( Internals.mode != TEST )
-		recreate_Tool_Box( );
+	recreate_Tool_Box( );
 
 	return vars_push( INT_VAR, new_io->ID );
 }
@@ -1238,7 +1364,7 @@ Var *f_sdelete( Var *v )
 
 	/* Loop over all slider IDs */
 
-	while ( v != NULL )
+	do
 	{
 		/* Child has no control over the sliders, it has to ask the parent
 		   process to delete the button */
@@ -1257,7 +1383,7 @@ Var *f_sdelete( Var *v )
 				THROW( EXCEPTION );
 			}
 
-			len = 2 * sizeof( long );
+			len = sizeof EDL.Lc + sizeof v->val.lval;
 
 			if ( EDL.Fname )
 				len += strlen( EDL.Fname ) + 1;
@@ -1266,11 +1392,11 @@ Var *f_sdelete( Var *v )
 
 			pos = buffer = T_malloc( len );
 
-			memcpy( pos, &EDL.Lc, sizeof( long ) );  /* current line number */
-			pos += sizeof( long );
+			memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
+			pos += sizeof EDL.Lc;
 
-			memcpy( pos, &v->val.lval, sizeof( long ) );
-			pos += sizeof( long );               /* slider ID */
+			memcpy( pos, &v->val.lval, sizeof v->val.lval );
+			pos += sizeof v->val.lval;              /* slider ID */
 
 			if ( EDL.Fname )
 			{
@@ -1280,90 +1406,85 @@ Var *f_sdelete( Var *v )
 			else
 				*pos++ = '\0';
 
-			v = vars_pop( v );
-
 			/* Bomb out on failure */
 
 			if ( ! exp_sdelete( buffer, pos - buffer ) )
 				THROW( EXCEPTION );
-
-			continue;                   /* delete next slider */
 		}
-
-		/* No tool box -> no sliders to delete */
-
-		if ( Tool_Box == NULL || Tool_Box->objs == NULL )
-		{
-			print( FATAL, "No sliders have been defined yet.\n" );
-			THROW( EXCEPTION );
-		}
-
-		/* Check that slider with the ID exists */
-
-		if ( v->type != INT_VAR || v->val.lval < 0 ||
-			 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
-			 ( io->type != NORMAL_SLIDER &&
-			   io->type != VALUE_SLIDER ) )
-		{
-			print( FATAL, "Invalid slider identifier.\n" );
-			THROW( EXCEPTION );
-		}
-
-		/* Remove slider from the linked list */
-
-		if ( io->next != NULL )
-			io->next->prev = io->prev;
-		if ( io->prev != NULL )
-			io->prev->next = io->next;
 		else
-			Tool_Box->objs = io->next;
-
-		/* Delete the slider object if its drawn */
-
-		if ( Internals.mode != TEST && io->self )
 		{
-			fl_delete_object( io->self );
-			fl_free_object( io->self );
-		}
+			/* No tool box -> no sliders to delete */
 
-		T_free( ( void * ) io->label );
-		T_free( ( void * ) io->help_text );
-		T_free( io );
-
-		/* If this was the very last object delete also the form */
-
-		if ( Tool_Box->objs == NULL )
-		{
-			if ( Internals.mode != TEST )
+			if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 			{
-				if ( Tool_Box->Tools )
-				{
-					if ( fl_form_is_visible( Tool_Box->Tools ) )
-					{
-						store_geometry( );
-						fl_hide_form( Tool_Box->Tools );
-					}
-
-					fl_free_form( Tool_Box->Tools );
-				}
-				else
-					tool_has_been_shown = UNSET;
+				print( FATAL, "No sliders have been defined yet.\n" );
+				THROW( EXCEPTION );
 			}
 
-			Tool_Box = T_free( Tool_Box );
+			/* Check that slider with the ID exists */
 
-			if ( ( v = vars_pop( v ) ) != NULL )
+			if ( v->type != INT_VAR || v->val.lval < 0 ||
+				 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
+				 ( io->type != NORMAL_SLIDER &&
+				   io->type != VALUE_SLIDER ) )
 			{
 				print( FATAL, "Invalid slider identifier.\n" );
 				THROW( EXCEPTION );
 			}
 
-			return vars_push( INT_VAR, 1 );
+			/* Remove slider from the linked list */
+
+			if ( io->next != NULL )
+				io->next->prev = io->prev;
+			if ( io->prev != NULL )
+				io->prev->next = io->next;
+			else
+				Tool_Box->objs = io->next;
+
+			/* Delete the slider object if its drawn */
+
+			if ( Internals.mode != TEST && io->self )
+			{
+				fl_delete_object( io->self );
+				fl_free_object( io->self );
+			}
+
+			T_free( ( void * ) io->label );
+			T_free( ( void * ) io->help_text );
+			T_free( io );
+
+			/* If this was the very last object delete also the form */
+
+			if ( Tool_Box->objs == NULL )
+			{
+				if ( Internals.mode != TEST )
+				{
+					if ( Tool_Box->Tools )
+					{
+						if ( fl_form_is_visible( Tool_Box->Tools ) )
+						{
+							store_geometry( );
+							fl_hide_form( Tool_Box->Tools );
+						}
+
+						fl_free_form( Tool_Box->Tools );
+					}
+					else
+						tool_has_been_shown = UNSET;
+				}
+
+				Tool_Box = T_free( Tool_Box );
+
+				if ( v->next != NULL )
+				{
+					print( FATAL, "Invalid slider identifier.\n" );
+					THROW( EXCEPTION );
+				}
+
+				return vars_push( INT_VAR, 1 );
+			}
 		}
-
-
-		v = vars_pop( v );
-	}
+	} while ( ( v = vars_pop( v ) ) != NULL );
 
 	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Tool_Box )
 		return vars_push( INT_VAR, 1 );
@@ -1435,7 +1556,7 @@ Var *f_svalue( Var *v )
 				;
 		}
 
-		len = 3 * sizeof( long ) + sizeof( double );
+		len = sizeof EDL.Lc + sizeof ID + sizeof state + sizeof val;
 
 		if ( EDL.Fname )
 			len += strlen( EDL.Fname ) + 1;
@@ -1444,17 +1565,17 @@ Var *f_svalue( Var *v )
 
 		pos = buffer = T_malloc( len );
 
-		memcpy( pos, &EDL.Lc, sizeof( long ) );    /* current line number */
-		pos += sizeof( long );
+		memcpy( pos, &EDL.Lc, sizeof EDL.Lc );     /* current line number */
+		pos += sizeof EDL.Lc;
 
-		memcpy( pos, &ID, sizeof( long ) );        /* sliders ID */
-		pos += sizeof( long );
+		memcpy( pos, &ID, sizeof ID );             /* sliders ID */
+		pos += sizeof ID;
 
-		memcpy( pos, &state, sizeof( long ) );     /* needs slider setting ? */
-		pos += sizeof( long );
+		memcpy( pos, &state, sizeof state );       /* needs slider setting ? */
+		pos += sizeof state;
 
-		memcpy( pos, &val, sizeof( double ) );     /* new slider value */
-		pos += sizeof( double );
+		memcpy( pos, &val, sizeof val );           /* new slider value */
+		pos += sizeof val;
 
 		if ( EDL.Fname )
 		{
@@ -1472,7 +1593,7 @@ Var *f_svalue( Var *v )
 
 		/* Bomb out on failure */
 
-		if ( res[ 0 ] < 0 )
+		if ( res[ 0 ] < 0.0 )
 		{
 			T_free( res );
 			THROW( EXCEPTION );
@@ -1559,7 +1680,7 @@ Var *f_icreate( Var *v )
 	char *label = NULL;
 	char *help_text = NULL;
 	char *form_str = NULL;
-	IOBJECT *new_io, *ioi;
+	IOBJECT *new_io = NULL, *ioi;
 	long ID = 0;
 	long lval = 0;
 	double dval = 0.0;
@@ -1642,56 +1763,6 @@ Var *f_icreate( Var *v )
 		v = vars_pop( v );
 	}
 
-	/* Next argument is the label string */
-
-	if ( v != NULL )
-	{
-		vars_check( v, STR_VAR );
-		label = T_strdup( v->val.sptr );
-		check_label( label );
-		convert_escapes( label );
-		v = vars_pop( v );
-	}
-
-	/* Next argument can be a help text */
-
-	if ( v != NULL )
-	{
-		vars_check( v, STR_VAR );
-		help_text = T_strdup( v->val.sptr );
-		convert_escapes( help_text );
-		v = vars_pop( v );
-	}
-
-	/* Final argument can be a C format string */
-
-	if ( v != NULL )
-	{
-		vars_check( v, STR_VAR );
-		if ( type == INT_INPUT || type == INT_OUTPUT )
-			print( WARN, "Can't set format string for integer data.\n" );
-		else
-		{
-			if ( ! check_format_string( v->val.sptr ) )
-			{
-				print( FATAL, "Invalid format string \"%s\".\n", v->val.sptr );
-				THROW( EXCEPTION );
-			}
-			form_str = T_strdup( v->val.sptr );
-		}
-		v = vars_pop( v );
-	}
-
-	/* Warn and get rid of superfluous arguments */
-
-	if ( v != NULL )
-	{
-		print( WARN, "Too many arguments, discarding superfluous "
-			   "arguments.\n" );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
-
 	/* Since the child process can't use graphics it has to write the
 	   parameter into a buffer, pass it to the parent process and ask the
 	   parent to create the button */
@@ -1704,11 +1775,44 @@ Var *f_icreate( Var *v )
 		size_t len;
 
 
+		/* Next argument is the label string */
+
+		if ( v != NULL )
+		{
+			vars_check( v, STR_VAR );
+			label = v->val.sptr;
+
+			/* Next argument can be a help text */
+		
+			if ( v->next != NULL )
+			{
+				vars_check( v->next, STR_VAR );
+				help_text = v->next->val.sptr;
+
+				/* Final argument can be a C format string */
+
+				if ( v->next->next != NULL )
+				{
+					vars_check( v->next->next, STR_VAR );
+					if ( type == INT_INPUT || type == INT_OUTPUT )
+						print( WARN, "Can't set format string for integer "
+							   "data.\n" );
+					form_str = v->next->next->val.sptr;
+
+					/* Warn and get rid of superfluous arguments */
+
+					if ( v->next->next->next != NULL )
+						print( WARN, "Too many arguments, discarding "
+							   "superfluous arguments.\n" );
+				}
+			}
+		}
+
 		/* Calculate length of buffer needed */
 
-		len = 2 * sizeof( long )
+		len = sizeof EDL.Lc + sizeof type
 			  + ( ( type == INT_INPUT || type == INT_OUTPUT ) ?
-				  sizeof( long ) : sizeof( double ) );
+				  sizeof lval : sizeof dval );
 
 		if ( EDL.Fname )
 			len += strlen( EDL.Fname ) + 1;
@@ -1732,21 +1836,21 @@ Var *f_icreate( Var *v )
 
 		pos = buffer = T_malloc( len );
 
-		memcpy( pos, &EDL.Lc, sizeof( long ) );     /* current line number */
-		pos += sizeof( long );
+		memcpy( pos, &EDL.Lc, sizeof EDL.Lc );     /* current line number */
+		pos += sizeof EDL.Lc;
 
-		memcpy( pos, &type, sizeof( long ) );       /* object type */
-		pos += sizeof( long );
+		memcpy( pos, &type, sizeof type );         /* object type */
+		pos += sizeof type;
 
 		if ( type == INT_INPUT || type == INT_OUTPUT )
 		{
-			memcpy( pos, &lval, sizeof( long ) );
-			pos += sizeof( long );
+			memcpy( pos, &lval, sizeof lval );
+			pos += sizeof lval;
 		}
 		else
 		{
-			memcpy( pos, &dval, sizeof( double ) );
-			pos += sizeof( double );
+			memcpy( pos, &dval, sizeof dval );
+			pos += sizeof dval;
 		}
 
 		if ( EDL.Fname )
@@ -1796,10 +1900,6 @@ Var *f_icreate( Var *v )
 
 		result = exp_icreate( buffer, pos - buffer );
 
-		T_free( label );
-		T_free( help_text );
-		T_free( form_str );
-
 		if ( result[ 0 ] == 0 )      /* failure -> bomb out */
 		{
 			T_free( result );
@@ -1812,20 +1912,136 @@ Var *f_icreate( Var *v )
 		return vars_push( INT_VAR, new_ID );
 	}
 
+	/* All the remaining code is run by the paren process only */
+
+	/* Next argument is the label string */
+
+	if ( v != NULL )
+	{
+		vars_check( v, STR_VAR );
+
+		TRY
+		{
+			label = T_strdup( v->val.sptr );
+			check_label( label );
+			convert_escapes( label );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( label );
+			RETHROW( );
+		}
+
+		v = vars_pop( v );
+	}
+
+	/* Next argument can be a help text */
+
+	if ( v != NULL )
+	{
+		TRY
+		{
+			vars_check( v, STR_VAR );
+			help_text = T_strdup( v->val.sptr );
+			convert_escapes( help_text );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( help_text );
+			T_free( label );
+			RETHROW( );
+		}
+
+		v = vars_pop( v );
+	}
+
+	/* Final argument can be a C format string */
+
+	if ( v != NULL )
+	{
+		TRY
+		{
+			vars_check( v, STR_VAR );
+			if ( type == INT_INPUT || type == INT_OUTPUT )
+				print( WARN, "Can't set format string for integer data.\n" );
+			else
+			{
+				form_str = T_strdup( v->val.sptr );
+				if ( ! check_format_string( form_str ) )
+				{
+					print( FATAL, "Invalid format string \"%s\".\n",
+						   v->val.sptr );
+					THROW( EXCEPTION );
+				}
+			}
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( form_str );
+			T_free( help_text );
+			T_free( label );
+			RETHROW( );
+		}
+			
+		v = vars_pop( v );
+	}
+
+	/* Warn and get rid of superfluous arguments */
+
+	if ( v != NULL )
+	{
+		print( WARN, "Too many arguments, discarding superfluous "
+			   "arguments.\n" );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
 	/* Now that we're done with checking the parameters we can create the new
        button - if the Tool_Box doesn't exist yet we've got to create it now */
 
-	if ( Tool_Box == NULL )
+	TRY
 	{
-		Tool_Box = T_malloc( sizeof( TOOL_BOX ) );
-		Tool_Box->objs = NULL;
-		Tool_Box->layout = VERT;
-		Tool_Box->Tools = NULL;
-	}
+		if ( Tool_Box == NULL )
+		{
+			Tool_Box = T_malloc( sizeof *Tool_Box );
+			Tool_Box->objs = NULL;
+			Tool_Box->layout = VERT;
+			Tool_Box->Tools = NULL;
+		}
 
+		new_io = T_malloc( sizeof *new_io );
+
+		/* We already do the following here while we're in the TRY block... */
+
+		new_io->form_str = NULL;
+		if ( type == FLOAT_INPUT || type == FLOAT_OUTPUT )
+		{
+			if ( form_str )
+				new_io->form_str = T_strdup( form_str );
+			else
+				new_io->form_str = T_strdup( "%g" );
+		}
+
+		form_str = T_free( form_str );
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( new_io );
+		if ( type == FLOAT_INPUT || type == FLOAT_OUTPUT )
+			T_free( new_io->form_str );
+		T_free( help_text );
+		T_free( label );
+		RETHROW( );
+	}
+		
 	if ( Tool_Box->objs == NULL )
 	{
-		new_io = Tool_Box->objs = T_malloc( sizeof( IOBJECT ) );
+		Tool_Box->objs = new_io;
 		new_io->next = new_io->prev = NULL;
 	}
 	else
@@ -1833,7 +2049,7 @@ Var *f_icreate( Var *v )
 		for ( ioi = Tool_Box->objs; ioi->next != NULL; ioi = ioi->next )
 			;
 		ID = ioi->ID + 1;
-		new_io = ioi->next = T_malloc( sizeof( IOBJECT ) );
+		ioi->next = new_io;
 		new_io->prev = ioi;
 		new_io->next = NULL;
 	}
@@ -1849,22 +2065,9 @@ Var *f_icreate( Var *v )
 	new_io->label = label;
 	new_io->help_text = help_text;
 
-	if ( type == FLOAT_INPUT || type == FLOAT_OUTPUT )
-	{
-		if ( form_str )
-			new_io->form_str = strdup( form_str );
-		else
-			new_io->form_str = T_strdup( "%g" );
-	}
-	else
-		new_io->form_str = NULL;
+	/* Draw the new object */
 
-	T_free( form_str );
-
-	/* If this isn't just a test run really draw the new object */
-
-	if ( Internals.mode != TEST )
-		recreate_Tool_Box( );
+	recreate_Tool_Box( );
 
 	return vars_push( INT_VAR, new_io->ID );
 }
@@ -1893,7 +2096,7 @@ Var *f_idelete( Var *v )
 
 	/* Loop over all object numbers */
 
-	while ( v != NULL )
+	do
 	{
 		/* Since the object 'belong' to the parent, the child needs to ask
 		   the parent to delete the object. The ID of each object to be deleted
@@ -1915,7 +2118,7 @@ Var *f_idelete( Var *v )
 
 			/* Get a bufer long enough and write data */
 
-			len = 2 * sizeof( long );
+			len = sizeof EDL.Lc + sizeof v->val.lval;
 
 			if ( EDL.Fname )
 				len += strlen( EDL.Fname ) + 1;
@@ -1924,11 +2127,11 @@ Var *f_idelete( Var *v )
 
 			pos = buffer = T_malloc( len );
 
-			memcpy( pos, &EDL.Lc, sizeof( long ) );   /* current line number */
-			pos += sizeof( long );
+			memcpy( pos, &EDL.Lc, sizeof EDL.Lc );    /* current line number */
+			pos += sizeof EDL.Lc;
 
-			memcpy( pos, &v->val.lval, sizeof( long ) );  /* object ID */
-			pos += sizeof( long );
+			memcpy( pos, &v->val.lval, sizeof v->val.lval );  /* object ID */
+			pos += sizeof v->val.lval;
 
 			if ( EDL.Fname )
 			{
@@ -1938,89 +2141,87 @@ Var *f_idelete( Var *v )
 			else
 				*pos++ = '\0';
 
-			v = vars_pop( v );
-
 			/* Ask parent to delete the object, bomb out on failure */
 
 			if ( ! exp_idelete( buffer, pos - buffer ) )
 				THROW( EXCEPTION );
-
-			continue;
 		}
-
-		/* No tool box -> no objects -> no objects to delete... */
-
-		if ( Tool_Box == NULL || Tool_Box->objs == NULL )
-		{
-			print( FATAL, "No input or output objects have been defined "
-				   "yet.\n" );
-			THROW( EXCEPTION );
-		}
-
-		/* Do checks on parameters */
-
-		if ( v->type != INT_VAR || v->val.lval < 0 ||
-			 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
-			 ( io->type != INT_INPUT && io->type != FLOAT_INPUT &&
-			   io->type != INT_OUTPUT && io->type != FLOAT_OUTPUT ) )
-		{
-			print( FATAL, "Invalid input or output object identifier.\n" );
-			THROW( EXCEPTION );
-		}
-
-		/* Remove object from the linked list */
-
-		if ( io->next != NULL )
-			io->next->prev = io->prev;
-		if ( io->prev != NULL )
-			io->prev->next = io->next;
 		else
-			Tool_Box->objs = io->next;
-
-		/* Delete the object (its not drawn in a test run!) */
-
-		if ( Internals.mode != TEST )
 		{
-			fl_delete_object( io->self );
-			fl_free_object( io->self );
-		}
+			/* No tool box -> no objects -> no objects to delete... */
 
-		T_free( ( void * ) io->label );
-		T_free( ( void * ) io->help_text );
-		T_free( io->form_str );
-		T_free( io );
-
-		if ( Tool_Box->objs == NULL )
-		{
-			if ( Internals.mode != TEST )
+			if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 			{
-				if ( Tool_Box->Tools )
-				{
-					if ( fl_form_is_visible( Tool_Box->Tools ) )
-					{
-						store_geometry( );
-						fl_hide_form( Tool_Box->Tools );
-					}
-
-					fl_free_form( Tool_Box->Tools );
-				}
-				else
-					tool_has_been_shown = UNSET;
+				print( FATAL, "No input or output objects have been defined "
+					   "yet.\n" );
+				THROW( EXCEPTION );
 			}
 
-			Tool_Box = T_free( Tool_Box );
+			/* Do checks on parameters */
 
-			if ( ( v = vars_pop( v ) ) != NULL )
+			if ( v->type != INT_VAR || v->val.lval < 0 ||
+				 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
+				 ( io->type != INT_INPUT  && io->type != FLOAT_INPUT &&
+				   io->type != INT_OUTPUT && io->type != FLOAT_OUTPUT ) )
 			{
 				print( FATAL, "Invalid input or output object identifier.\n" );
 				THROW( EXCEPTION );
 			}
 
-			return vars_push( INT_VAR, 1 );
-		}
+			/* Remove object from the linked list */
 
-		v = vars_pop( v );
-	}
+			if ( io->next != NULL )
+				io->next->prev = io->prev;
+			if ( io->prev != NULL )
+				io->prev->next = io->next;
+			else
+				Tool_Box->objs = io->next;
+
+			/* Delete the object (its not drawn in a test run!) */
+
+			if ( Internals.mode != TEST )
+			{
+				fl_delete_object( io->self );
+				fl_free_object( io->self );
+			}
+
+			T_free( io->label );
+			T_free( io->help_text );
+			if ( io->type == FLOAT_INPUT || io->type == FLOAT_OUTPUT )
+				T_free( io->form_str );
+			T_free( io );
+
+			if ( Tool_Box->objs == NULL )
+			{
+				if ( Internals.mode != TEST )
+				{
+					if ( Tool_Box->Tools )
+					{
+						if ( fl_form_is_visible( Tool_Box->Tools ) )
+						{
+							store_geometry( );
+							fl_hide_form( Tool_Box->Tools );
+						}
+
+						fl_free_form( Tool_Box->Tools );
+					}
+					else
+						tool_has_been_shown = UNSET;
+				}
+
+				Tool_Box = T_free( Tool_Box );
+
+				if ( v->next != NULL )
+				{
+					print( FATAL, "Invalid input or output object "
+						   "identifier.\n" );
+					THROW( EXCEPTION );
+				}
+
+				return vars_push( INT_VAR, 1 );
+			}
+		}
+	} while ( ( v = vars_pop( v ) ) != NULL );
 
 	/* The child process is already done here, and in a test run we're also */
 
@@ -2105,8 +2306,8 @@ Var *f_ivalue( Var *v )
 				;
 		}
 
-		len = 3 * sizeof( long );
-		len += state > 1 ? sizeof( double ) : sizeof( long );
+		len =   sizeof EDL.Lc + sizeof ID + sizeof state
+			  + ( state <= 1 ? sizeof lval : sizeof dval );
 
 		if ( EDL.Fname )
 			len += strlen( EDL.Fname ) + 1;
@@ -2115,24 +2316,24 @@ Var *f_ivalue( Var *v )
 
 		pos = buffer = T_malloc( len );
 
-		memcpy( pos, &EDL.Lc, sizeof( long ) ); /* current line number */
-		pos += sizeof( long );
+		memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
+		pos += sizeof EDL.Lc;
 
-		memcpy( pos, &ID, sizeof( long ) );     /* sliders ID */
-		pos += sizeof( long );
+		memcpy( pos, &ID, sizeof ID );          /* sliders ID */
+		pos += sizeof ID;
 
-		memcpy( pos, &state, sizeof( long ) );  /* needs input setting ? */
-		pos += sizeof( long );
+		memcpy( pos, &state, sizeof state );    /* needs input setting ? */
+		pos += sizeof state;
 
 		if ( state <= 1 )                       /* new object value */
 		{
-			memcpy( pos, &lval, sizeof( long ) );
-			pos += sizeof( long );
+			memcpy( pos, &lval, sizeof lval );
+			pos += sizeof lval;
 		}
 		else
 		{
-			memcpy( pos, &dval, sizeof( double ) );
-			pos += sizeof( double );
+			memcpy( pos, &dval, sizeof dval );
+			pos += sizeof dval;
 		}
 
 		if ( EDL.Fname )
@@ -2249,6 +2450,661 @@ Var *f_ivalue( Var *v )
 }
 
 
+/*---------------------------*/
+/* Creates a new menu object */
+/*---------------------------*/
+
+Var *f_mcreate( Var *v )
+{
+	Var *lv;
+	long num_strs = 0;
+	size_t len = 0;
+	IOBJECT *new_io, *ioi;
+	long ID = 0;
+	long i;
+
+
+	if ( ! FI_sizes.is_init )
+		func_intact_init( );
+
+	/* At least a label and two menu entries must be specified */
+
+	if ( v == NULL || v->next == NULL || v->next->next == NULL)
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	for ( lv = v; lv != NULL; num_strs++, lv = lv->next )
+	{
+		if ( lv->type != STR_VAR )
+		{
+			print( FATAL, "All arguments must be strings.\n" );
+			THROW( EXCEPTION );
+		}
+
+		len += strlen( lv->val.sptr ) + 1;
+	}
+
+	if ( Internals.I_am == CHILD )
+	{
+		char *buffer, *pos;
+		long new_ID;
+		long *result;
+		size_t l;
+
+
+		len += sizeof EDL.Lc + sizeof num_strs;
+
+		if ( EDL.Fname )
+			len += strlen( EDL.Fname ) + 1;
+		else
+			len++;
+
+		pos = buffer = T_malloc( len );
+
+		memcpy( pos, &EDL.Lc, sizeof EDL.Lc );     /* current line number */
+		pos += sizeof EDL.Lc;
+
+		memcpy( pos, &num_strs, sizeof num_strs );
+		pos += sizeof num_strs;
+
+		if ( EDL.Fname )
+		{
+			l = strlen( EDL.Fname ) + 1;
+			memcpy( pos, EDL.Fname, l );           /* current file name */
+			pos += l;
+		}
+		else
+			*pos++ = '\0';
+
+		for ( ; v != NULL; v = v->next )
+		{
+			l = strlen( v->val.sptr ) + 1;
+			memcpy( pos, v->val.sptr, l );
+			pos += l;
+		}
+
+		/* Pass buffer to parent and ask it to create the menu  object.
+		   It returns a buffer with two longs, the first one indicating
+		   success or failure (1 or 0), the second being the new objects ID */
+
+		result = exp_mcreate( buffer, pos - buffer );
+
+		if ( result[ 0 ] == 0 )      /* failure -> bomb out */
+		{
+			T_free( result );
+			THROW( EXCEPTION );
+		}
+
+		new_ID = result[ 1 ];
+		T_free( result );           /* free result buffer */
+
+		return vars_push( INT_VAR, new_ID );
+	}
+
+	/* Now that we're done with checking the parameters we can create the new
+       button - if the Tool_Box doesn't exist yet we've got to create it now */
+
+	if ( Tool_Box == NULL )
+	{
+		Tool_Box = T_malloc( sizeof *Tool_Box );
+		Tool_Box->objs = NULL;
+		Tool_Box->layout = VERT;
+		Tool_Box->Tools = NULL;
+	}
+
+	new_io = NULL;
+
+	TRY
+	{
+		new_io = T_malloc( sizeof *new_io );
+		if ( Tool_Box->objs == NULL )
+		{
+			Tool_Box->objs = new_io;
+			new_io->next = new_io->prev = NULL;
+		}
+		else
+		{
+			for ( ioi = Tool_Box->objs; ioi->next != NULL; ioi = ioi->next )
+				;
+			ID = ioi->ID + 1;
+			ioi->next = new_io;
+			new_io->prev = ioi;
+			new_io->next = NULL;
+		}
+
+		new_io->ID = ID;
+		new_io->type = MENU;
+		new_io->self = NULL;
+		new_io->state = 1;
+
+		new_io->label = NULL;
+		new_io->menu_items = NULL;
+
+		new_io->label = T_strdup( v->val.sptr );
+		v = vars_pop( v );
+
+		check_label( new_io->label );
+		convert_escapes( new_io->label );
+
+		new_io->help_text = NULL;
+
+		new_io->num_items = num_strs - 1;
+		new_io->menu_items = T_malloc( new_io->num_items
+									   * sizeof *new_io->menu_items );
+
+		for  ( i = 0; i < new_io->num_items; i++ )
+			new_io->menu_items[ i ] = NULL;
+		for ( i = 0; v != NULL && i < new_io->num_items;
+			  i++, v = vars_pop( v ) )
+			new_io->menu_items[ i ] = T_strdup( v->val.sptr );
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		if ( new_io != NULL )
+		{
+			T_free( new_io->label );
+			if ( new_io->menu_items != NULL )
+			{
+				for ( i = 0; i < new_io->num_items; i++ )
+					T_free( new_io->menu_items[ i ] );
+				T_free( new_io->menu_items );
+			}
+
+			if( Tool_Box->objs == new_io )
+				Tool_Box->objs = NULL;
+			else
+				ioi->next = NULL;
+
+			T_free( new_io );
+		}
+
+		RETHROW( );
+	}
+
+	/* Draw the new menu */
+
+	recreate_Tool_Box( );
+
+	return vars_push( INT_VAR, new_io->ID );
+}
+
+
+/*----------------------------------*/
+/* Deletes one or more menu objects */
+/*----------------------------------*/
+
+Var *f_mdelete( Var *v )
+{
+	IOBJECT *io;
+	long i;
+
+
+	if ( ! FI_sizes.is_init )
+		func_intact_init( );
+
+	/* At least one menu ID is needed... */
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Loop over all slider IDs */
+
+	do
+	{
+		/* Child has no control over the sliders, it has to ask the parent
+		   process to delete the button */
+
+		if ( Internals.I_am == CHILD )
+		{
+			char *buffer, *pos;
+			size_t len;
+
+
+			/* Very basic sanity check */
+
+			if ( v->type != INT_VAR || v->val.lval < 0 )
+			{
+				print( FATAL, "Invalid slider identifier.\n" );
+				THROW( EXCEPTION );
+			}
+
+			len = sizeof EDL.Lc + sizeof v->val.lval;
+
+			if ( EDL.Fname )
+				len += strlen( EDL.Fname ) + 1;
+			else
+				len++;
+
+			pos = buffer = T_malloc( len );
+
+			memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( pos, &v->val.lval, sizeof v->val.lval );
+			pos += sizeof v->val.lval;                   /* menu ID */
+
+			if ( EDL.Fname )
+			{
+				strcpy( pos, EDL.Fname );            /* current file name */
+				pos += strlen( EDL.Fname ) + 1;
+			}
+			else
+				*pos++ = '\0';
+
+			/* Bomb out on failure */
+
+			if ( ! exp_mdelete( buffer, pos - buffer ) )
+				THROW( EXCEPTION );
+		}
+		else
+		{
+			/* No tool box -> no menu to delete */
+
+			if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+			{
+				print( FATAL, "No menus have been defined yet.\n" );
+				THROW( EXCEPTION );
+			}
+
+			/* Check that menu with the ID exists */
+
+			if ( v->type != INT_VAR || v->val.lval < 0 ||
+				 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
+				 io->type != MENU )
+			{
+				print( FATAL, "Invalid menu identifier.\n" );
+				THROW( EXCEPTION );
+			}
+
+			/* Remove menu from the linked list */
+
+			if ( io->next != NULL )
+				io->next->prev = io->prev;
+			if ( io->prev != NULL )
+				io->prev->next = io->next;
+			else
+				Tool_Box->objs = io->next;
+
+			/* Delete the menu object if its drawn */
+
+			if ( Internals.mode != TEST && io->self )
+			{
+				fl_delete_object( io->self );
+				fl_free_object( io->self );
+			}
+
+			T_free( ( void * ) io->label );
+			for ( i = 0; i < io->num_items; i++ )
+				T_free( ( void * ) io->menu_items[ i ] );
+			T_free( io->menu_items );
+			T_free( io );
+
+			/* If this was the very last object delete also the form */
+
+			if ( Tool_Box->objs == NULL )
+			{
+				if ( Internals.mode != TEST )
+				{
+					if ( Tool_Box->Tools )
+					{
+						if ( fl_form_is_visible( Tool_Box->Tools ) )
+						{
+							store_geometry( );
+							fl_hide_form( Tool_Box->Tools );
+						}
+
+						fl_free_form( Tool_Box->Tools );
+					}
+					else
+						tool_has_been_shown = UNSET;
+				}
+
+				Tool_Box = T_free( Tool_Box );
+
+				if ( ( v = vars_pop( v ) ) != NULL )
+				{
+					print( FATAL, "Invalid menu identifier.\n" );
+					THROW( EXCEPTION );
+				}
+
+				return vars_push( INT_VAR, 1 );
+			}
+		}
+	} while ( ( v = vars_pop( v ) ) != NULL );
+
+	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Tool_Box )
+		return vars_push( INT_VAR, 1 );
+
+	/* Redraw the tool box without the menu */
+
+	recreate_Tool_Box( );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/* Sets or returns the selected item in a menu object */
+/*----------------------------------------------------*/
+
+Var *f_mchoice( Var *v )
+{
+	IOBJECT *io;
+	long select_item = 0;
+
+
+	if ( ! FI_sizes.is_init )
+		func_intact_init( );
+
+	/* We need at least the ID of the menu */
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing argumnts.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Again, the child doesn't know about the menu, so it got to ask the
+	   parent process */
+
+	if ( Internals.I_am == CHILD )
+	{
+		long ID;
+		char *buffer, *pos;
+		size_t len;
+		long *result;
+
+
+		/* Basic check of menu identifier - always the first parameter */
+
+		if ( v->type != INT_VAR || v->val.lval < 0 )
+		{
+			print( FATAL, "Invalid menu identifier.\n" );
+			THROW( EXCEPTION );
+		}
+		ID = v->val.lval;
+
+		/* If there's a second parameter it's the item in the menu to set */
+
+		if ( ( v = vars_pop( v ) ) != NULL )
+		{
+			select_item = get_strict_long( v, "menu item number" );
+
+			/* All menu item numbers must be larger than 0, but since we're
+			   already running the experiment we don't bomb out but return the
+			   currently selected item instead */
+
+			if ( select_item <= 0 )
+			{
+				print( SEVERE, "Invalid menu item number %ld.\n",
+					   select_item );
+				select_item = 0;
+			}
+		}
+
+		/* No more parameters accepted... */
+
+		if ( ( v = vars_pop( v ) ) != NULL )
+		{
+			print( WARN, "Too many arguments, discarding superfluous "
+				   "arguments.\n" );
+			while ( ( v = vars_pop( v ) ) != NULL )
+				;
+		}
+
+		/* Make up buffer to send to parent process */
+
+		len = sizeof EDL.Lc + sizeof ID + sizeof select_item;
+
+		if ( EDL.Fname )
+			len += strlen( EDL.Fname ) + 1;
+		else
+			len++;
+
+		pos = buffer = T_malloc( len );
+
+		memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
+		pos += sizeof EDL.Lc;
+
+		memcpy( pos, &ID, sizeof ID );          /* buttons ID */
+		pos += sizeof ID;
+
+		memcpy( pos, &select_item, sizeof select_item );
+		                                        /* menu item to be set (or */
+		pos += sizeof select_item;              /* 0 if not to be set)     */
+
+		if ( EDL.Fname )
+		{
+			strcpy( pos, EDL.Fname );           /* current file name */
+			pos += strlen( EDL.Fname ) + 1;
+		}
+		else
+			*pos++ = '\0';
+
+		/* Ask parent process to return or set the menu item - bomb out if it
+		   returns a non-positive value, indicating a severe error */
+
+		result = exp_mchoice( buffer, pos - buffer );
+
+		if ( result[ 0 ] == 0 )      /* failure -> bomb out */
+		{
+			T_free( result );
+			THROW( EXCEPTION );
+		}
+
+		select_item = result[ 1 ];
+		T_free( result );           /* free result buffer */
+
+		return vars_push( INT_VAR, select_item );
+	}
+
+	/* No tool box -> no menus -> no menu item to set or get... */
+
+	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	{
+		print( FATAL, "No menus have been defined yet.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Check the button ID parameter */
+
+	if ( v->type != INT_VAR || v->val.lval < 0 ||
+		 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
+		 io->type != MENU )
+	{
+		print( FATAL, "Invalid menu identifier.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* If there's no second parameter just return the currently selected menu
+	   item */
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+		return vars_push( INT_VAR, io->state );
+
+	/* The optional second argument is the menu item to be set */
+
+	select_item = get_strict_long( v, "menu item number" );
+
+	/* A number less than 1 can only happen during the testing stage and
+	   we bomb out */
+
+	if ( select_item <= 0 )
+	{
+		print( FATAL, "Invalid menu item number %ld.\n", select_item );
+		THROW( EXCEPTION );
+	}
+
+	/* If the menu item number is larger than the total mumber of items
+	   we better bomb out (during the experiment we deal with this by just
+	   returning the currently selected choice) */
+
+	if ( select_item > io->num_items )
+	{
+		if ( Internals.mode == TEST )
+		{
+			print( FATAL, "Invalid menu item number %ld, there are only %ld "
+				   "items.\n", io->num_items );
+			THROW( EXCEPTION );
+		}
+
+		print( SEVERE, "Invalid menu item number %ld, there are only %ld "
+			   "items.\n", io->num_items );
+		return vars_push( INT_VAR, io->state );
+	}
+
+	/* If this isn't a test run set the new menu item */
+
+	io->state = select_item;
+	if ( Internals.mode != TEST )
+		fl_set_choice( io->self, select_item );
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		print( WARN, "Too many arguments, discarding superfluous "
+			   "arguments.\n" );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
+	return vars_push( INT_VAR, select_item );
+}
+
+
+/*--------------------------------------------------------------------*/
+/* Deletes one or more objects, parameter are one or more object IDs. */
+/*--------------------------------------------------------------------*/
+
+Var *f_objdel( Var *v )
+{
+	if ( ! FI_sizes.is_init )
+		func_intact_init( );
+
+	/* We need the ID of the button to delete */
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Loop over all object numbers */
+
+	do
+	{
+		/* Since the object 'belong' to the parent, the child needs to ask
+		   the parent to delete the object. The ID of each object to be deleted
+		   gets passed to the parent in a buffer and the parent is asked to
+		   delete the object */
+
+		if ( Internals.I_am == CHILD )
+		{
+			char *buffer, *pos;
+			size_t len;
+
+			/* Do all possible checking of the parameter */
+
+			if ( v->type != INT_VAR || v->val.lval < 0 )
+			{
+				print( FATAL, "Invalid object identifier.\n" );
+				THROW( EXCEPTION );
+			}
+
+			/* Get a bufer long enough and write data */
+
+			len = sizeof EDL.Lc + sizeof v->val.lval;
+
+			if ( EDL.Fname )
+				len += strlen( EDL.Fname ) + 1;
+			else
+				len++;
+
+			pos = buffer = T_malloc( len );
+
+			memcpy( pos, &EDL.Lc, sizeof EDL.Lc );    /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( pos, &v->val.lval, sizeof v->val.lval );    /* object ID */
+			pos += sizeof v->val.lval;
+
+			if ( EDL.Fname )
+			{
+				strcpy( pos, EDL.Fname );             /* current file name */
+				pos += strlen( EDL.Fname ) + 1;
+			}
+			else
+				*pos++ = '\0';
+
+			/* Ask parent to delete the object, bomb out on failure */
+
+			if ( ! exp_objdel( buffer, pos - buffer ) )
+				THROW( EXCEPTION );
+		}
+		else
+		{
+			IOBJECT *io = NULL;
+
+
+			/* No tool box -> no objects -> no objects to delete... */
+
+			if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+			{
+				print( FATAL, "No objects have been defined yet.\n" );
+				THROW( EXCEPTION );
+			}
+
+			/* Do checks on parameters */
+
+			if ( v->type != INT_VAR || v->val.lval < 0 ||
+				 ( io = find_object_from_ID( v->val.lval ) ) == NULL )
+			{
+				print( FATAL, "Invalid object identifier.\n" );
+				THROW( EXCEPTION );
+			}
+
+			switch ( io->type )
+			{
+				case NORMAL_BUTTON :
+				case PUSH_BUTTON :
+				case RADIO_BUTTON :
+					vars_pop( f_bdelete( vars_push( INT_VAR, v->val.lval ) ) );
+					break;
+
+				case NORMAL_SLIDER :
+				case VALUE_SLIDER :
+					vars_pop( f_sdelete( vars_push( INT_VAR, v->val.lval ) ) );
+					break;
+
+				case INT_INPUT :
+				case FLOAT_INPUT :
+				case INT_OUTPUT :
+				case FLOAT_OUTPUT :
+					vars_pop( f_idelete( vars_push( INT_VAR, v->val.lval ) ) );
+					break;
+
+				case MENU:
+					vars_pop( f_mdelete( vars_push( INT_VAR, v->val.lval ) ) );
+					break;
+
+				default :
+					eprint( FATAL, UNSET, "Internal error at %s:%u.\n",
+							__FILE__, __LINE__ );
+					THROW( EXCEPTION );
+			}
+		}
+	} while ( ( v = vars_pop( v ) ) != NULL );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
 /*----------------------------------------------------------------------*/
 /* Returns a pointer to an object given its number or NULL if not found */
 /*----------------------------------------------------------------------*/
@@ -2278,6 +3134,7 @@ static IOBJECT *find_object_from_ID( long ID )
 void tools_clear( void )
 {
 	IOBJECT *io, *next;
+	long i;
 
 
 	is_frozen = UNSET;
@@ -2307,8 +3164,19 @@ void tools_clear( void )
 			fl_free_object( io->self );
 		}
 
-		T_free( ( void * ) io->label );
-		T_free( ( void * ) io->help_text );
+		T_free( io->label );
+		T_free( io->help_text );
+
+		if ( io->type == FLOAT_INPUT || io->type == FLOAT_OUTPUT )
+			T_free( io->form_str );
+
+		if ( io->type == MENU && io->menu_items != NULL )
+		{
+			for ( i = 0; i < io->num_items; i++ )
+				T_free( io->menu_items[ i ] );
+			T_free( io->menu_items );
+		}
+
 		T_free( io );
 	}
 
@@ -2331,7 +3199,7 @@ static void recreate_Tool_Box( void )
 	unsigned int tool_w, tool_h;
 
 
-	if ( Internals.mode == TEST )        /* just to make sure... */
+	if ( Internals.mode == TEST )        /* no drawing in test mode */
 		return;
 
 	/* If the tool box already exists we've got to find out its position
@@ -2396,6 +3264,9 @@ static void recreate_Tool_Box( void )
 	Tool_Box->w = last_io->x + FI_sizes.OBJ_WIDTH + FI_sizes.OFFSET_X0;
 	Tool_Box->h = last_io->y + FI_sizes.OBJ_HEIGHT + FI_sizes.OFFSET_Y0;
 
+	if ( last_io->type == MENU )
+		Tool_Box->h += 10;
+
 	fl_set_form_size( Tool_Box->Tools, Tool_Box->w, Tool_Box->h );
 	fl_adjust_form_size( Tool_Box->Tools );
 
@@ -2444,6 +3315,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 	double prec;
 	char buf[ MAX_INPUT_CHARS + 1 ];
 	IOBJECT *nio;
+	long i;
 
 
 	/* Calculate the width and height of the new object */
@@ -2466,7 +3338,8 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 				  io->prev->type == INT_INPUT     ||
 				  io->prev->type == FLOAT_INPUT   ||
 				  io->prev->type == INT_OUTPUT    ||
-				  io->prev->type == FLOAT_OUTPUT ?
+				  io->prev->type == FLOAT_OUTPUT  ||
+				  io->prev->type == MENU ?
 				  FI_sizes.LABEL_VERT_OFFSET : 0 );
 		}
 		else
@@ -2611,6 +3484,17 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_input( io->self, buf );
 			break;
 
+		case MENU :
+			io->w = FI_sizes.INPUT_WIDTH;
+			io->h = FI_sizes.BUTTON_HEIGHT;
+			io->self = fl_add_choice( FL_NORMAL_CHOICE2, io->x, io->y,
+									  io->w, io->h, io->label );
+			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
+			for ( i = 0; i < io->num_items; i++ )
+				fl_addto_choice( io->self, io->menu_items[ i ] );
+			fl_set_choice( io->self, io->state );
+			break;
+
 		default :
 			fsc2_assert( 1 == 0 );
 			break;
@@ -2739,6 +3623,10 @@ static void tools_callback( FL_OBJECT *obj, long data )
 			fl_set_input( io->self, obuf );
 			break;
 
+		case MENU :
+			io->state = fl_get_choice( io->self );
+			break;
+
 		default :                 /* this can never happen :) */
 			fsc2_assert( 1 == 0 );
 			break;
@@ -2749,7 +3637,7 @@ static void tools_callback( FL_OBJECT *obj, long data )
 /*------------------------------------------------------*/
 /*------------------------------------------------------*/
 
-static bool check_format_string( const char *buf )
+static bool check_format_string( char *buf )
 {
 	const char *bp = buf;
 	const char *lcp;
@@ -2913,132 +3801,6 @@ static void check_label( char *str )
 
 	print( FATAL, "Invalid label string.\n" );
 	THROW( EXCEPTION );
-}
-
-
-/*--------------------------------------------------------------------*/
-/* Deletes one or more objects, parameter are one or more object IDs. */
-/*--------------------------------------------------------------------*/
-
-Var *f_objdel( Var *v )
-{
-	if ( ! FI_sizes.is_init )
-		func_intact_init( );
-
-	/* We need the ID of the button to delete */
-
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
-
-	/* Loop over all object numbers */
-
-	while ( v != NULL )
-	{
-		/* Since the object 'belong' to the parent, the child needs to ask
-		   the parent to delete the object. The ID of each object to be deleted
-		   gets passed to the parent in a buffer and the parent is asked to
-		   delete the object */
-
-		if ( Internals.I_am == CHILD )
-		{
-			char *buffer, *pos;
-			size_t len;
-
-			/* Do all possible checking of the parameter */
-
-			if ( v->type != INT_VAR || v->val.lval < 0 )
-			{
-				print( FATAL, "Invalid object identifier.\n" );
-				THROW( EXCEPTION );
-			}
-
-			/* Get a bufer long enough and write data */
-
-			len = 2 * sizeof( long );
-			if ( EDL.Fname )
-				len += strlen( EDL.Fname ) + 1;
-			else
-				len++;
-
-			pos = buffer = T_malloc( len );
-
-			memcpy( pos, &EDL.Lc, sizeof( long ) );   /* current line number */
-			pos += sizeof( long );
-			memcpy( pos, &v->val.lval, sizeof( long ) );        /* object ID */
-			pos += sizeof( long );
-			if ( EDL.Fname )
-			{
-				strcpy( pos, EDL.Fname );             /* current file name */
-				pos += strlen( EDL.Fname ) + 1;
-			}
-			else
-				*pos++ = '\0';
-
-			v = vars_pop( v );
-
-			/* Ask parent to delete the object, bomb out on failure */
-
-			if ( ! exp_objdel( buffer, pos - buffer ) )
-				THROW( EXCEPTION );
-
-			continue;
-		}
-		else
-		{
-			IOBJECT *io = NULL;
-
-
-			/* No tool box -> no objects -> no objects to delete... */
-
-			if ( Tool_Box == NULL || Tool_Box->objs == NULL )
-			{
-				print( FATAL, "No objects have been defined yet.\n" );
-				THROW( EXCEPTION );
-			}
-
-			/* Do checks on parameters */
-
-			if ( v->type != INT_VAR || v->val.lval < 0 ||
-				 ( io = find_object_from_ID( v->val.lval ) ) == NULL )
-			{
-				print( FATAL, "Invalid object identifier.\n" );
-				THROW( EXCEPTION );
-			}
-
-			switch ( io->type )
-			{
-				case NORMAL_BUTTON :
-				case PUSH_BUTTON :
-				case RADIO_BUTTON :
-					vars_pop( f_bdelete( vars_push( INT_VAR, v->val.lval ) ) );
-					break;
-
-				case NORMAL_SLIDER :
-				case VALUE_SLIDER :
-					vars_pop( f_sdelete( vars_push( INT_VAR, v->val.lval ) ) );
-					break;
-
-				case INT_INPUT :
-				case FLOAT_INPUT :
-				case INT_OUTPUT :
-				case FLOAT_OUTPUT :
-					vars_pop( f_idelete( vars_push( INT_VAR, v->val.lval ) ) );
-					break;
-
-				default :
-					eprint( FATAL, UNSET, "Internal error at %s:%u.\n",
-							__FILE__, __LINE__ );
-					THROW( EXCEPTION );
-			}
-
-			v = vars_pop( v );
-		}
-	}
-
-	return vars_push( INT_VAR, 1 );
 }
 
 

@@ -470,7 +470,7 @@ static void quitting_handler( int signo )
 static void run_sigchld_handler( int signo )
 {
 	int return_status;
-#if defined ( DEBUG )
+#if ! defined NDEBUG
 	int pid;
 #endif
 	int errno_saved;
@@ -479,7 +479,7 @@ static void run_sigchld_handler( int signo )
 	signo = signo;
 	errno_saved = errno;
 
-#if ! defined ( DEBUG )
+#if defined NDEBUG
 	if ( wait( &return_status ) != Internals.child_pid )
 #else
 	if ( ( pid = wait( &return_status ) ) != Internals.child_pid )
@@ -489,7 +489,7 @@ static void run_sigchld_handler( int signo )
 		return;                       /* if some other child process died... */
 	}
 
-#if defined ( DEBUG )
+#if ! defined NDEBUG
 	if ( WIFSIGNALED( return_status ) )
 	{
 		fprintf( stderr, "Child process %d died due to signal %d\n",
@@ -851,7 +851,7 @@ static void child_sig_handler( int signo )
 	{
 		case DO_QUIT :                             /* aka SIGUSR2 */
 			if ( ! EDL.react_to_do_quit )
-				break;
+				return;
 			EDL.do_quit = SET;
 			/* fall through ! */
 
@@ -861,7 +861,7 @@ static void child_sig_handler( int signo )
 				can_jmp_alrm = 0;
 				siglongjmp( alrm_env, 1 );
 			}
-			break;
+			return;
 
 		/* Ignored signals : */
 
@@ -873,12 +873,13 @@ static void child_sig_handler( int signo )
 		case SIGTTIN :
 		case SIGTTOU :
 		case SIGVTALRM :
-			break;
+			return;
 
 		/* All remaining signals are deadly... */
 
 		default :
-			if ( ! ( Internals.cmdline_flags & NO_MAIL ) )
+			if ( ! ( Internals.cmdline_flags & NO_MAIL ) &&
+				 signo != SIGTERM )
 			{
 				DumpStack( );
 				death_mail( signo );

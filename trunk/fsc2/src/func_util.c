@@ -804,9 +804,8 @@ Var *f_cscale( Var *v )
 
 	fsc2_assert( Internals.I_am == CHILD );
 
-	len =   sizeof( long )                /* length field itself */
-		  + 2 * sizeof( int )             /* type field and flags */
-		  + 4 * sizeof( double );         /* new scale settings */
+	len =   sizeof len + sizeof type + sizeof is_set
+		  + sizeof x_0 + sizeof dx + sizeof y_0 + sizeof dy;
 
 	/* Now try to get a shared memory segment */
 
@@ -821,26 +820,26 @@ Var *f_cscale( Var *v )
 
 	ptr = buf;
 
-	memcpy( ptr, &len, sizeof( long ) );               /* total length */
-	ptr += sizeof( long );
+	memcpy( ptr, &len, sizeof len );                   /* total length */
+	ptr += sizeof len;
 
-	memcpy( ptr, &type, sizeof( int ) );               /* type indicator  */
-	ptr += sizeof( int );
+	memcpy( ptr, &type, sizeof type );                 /* type indicator  */
+	ptr += sizeof type;
 
-	memcpy( ptr, &is_set, sizeof( int ) );             /* flags */
-	ptr += sizeof( int );
+	memcpy( ptr, &is_set, sizeof is_set );             /* flags */
+	ptr += sizeof is_set;
 
-	memcpy( ptr, &x_0, sizeof( double ) );             /* new x-offset */
-	ptr += sizeof( double );
+	memcpy( ptr, &x_0, sizeof x_0 );                   /* new x-offset */
+	ptr += sizeof x_0;
 
-	memcpy( ptr, &dx, sizeof( double ) );              /* new x-increment */
-	ptr += sizeof( double );
+	memcpy( ptr, &dx, sizeof dx );                     /* new x-increment */
+	ptr += sizeof dx;
 
-	memcpy( ptr, &y_0, sizeof( double ) );             /* new y-offset */
-	ptr += sizeof( double );
+	memcpy( ptr, &y_0, sizeof y_0 );                   /* new y-offset */
+	ptr += sizeof y_0;
 
-	memcpy( ptr, &dy, sizeof( double ) );              /* new y-increment */
-	ptr += sizeof( double );
+	memcpy( ptr, &dy, sizeof dy );                     /* new y-increment */
+	ptr += sizeof dy;
 
 	/* Detach from the segment with the data segment */
 
@@ -923,10 +922,9 @@ Var *f_clabel( Var *v )
 
 	fsc2_assert( Internals.I_am == CHILD );
 
-	len =   4 * sizeof( long )            /* length field and label lengths */
-		  + sizeof( int );                /* type field */
+	len = sizeof len + sizeof type;
 	for ( i = X; i <= Z; i++ )
-		len += lengths[ i ];
+		len += sizeof *lengths + lengths[ i ];
 
 	/* Now try to get a shared memory segment */
 
@@ -944,16 +942,16 @@ Var *f_clabel( Var *v )
 
 	ptr = buf;
 
-	memcpy( ptr, &len, sizeof( long ) );               /* total length */
-	ptr += sizeof( long );
+	memcpy( ptr, &len, sizeof len );                   /* total length */
+	ptr += sizeof len;
 
-	memcpy( ptr, &type, sizeof( int ) );               /* type indicator  */
-	ptr += sizeof( int );
+	memcpy( ptr, &type, sizeof type );                 /* type indicator  */
+	ptr += sizeof type;
 
 	for ( i = X; i <= Z; i++ )
 	{
-		memcpy( ptr, lengths + i, sizeof( long ) );
-		ptr += sizeof( long );
+		memcpy( ptr, lengths + i, sizeof *lengths );
+		ptr += sizeof *lengths;
 		if ( lengths[ i ] > 1 )
 		{
 			memcpy( ptr, l[ i ], lengths[ i ] );
@@ -1063,8 +1061,7 @@ Var *f_rescale( Var *v )
 
 	fsc2_assert( Internals.I_am == CHILD );
 
-	len =   3 * sizeof( long )          /* length field and number of points */
-		  + sizeof( int );              /* type field */
+	len = sizeof len + sizeof type + sizeof new_nx + sizeof new_ny;
 
 	/* Now try to get a shared memory segment */
 
@@ -1079,17 +1076,17 @@ Var *f_rescale( Var *v )
 
 	ptr = buf;
 
-	memcpy( ptr, &len, sizeof( long ) );               /* total length */
-	ptr += sizeof( long );
+	memcpy( ptr, &len, sizeof len );                   /* total length */
+	ptr += sizeof len;
 
-	memcpy( ptr, &type, sizeof( int ) );               /* type indicator  */
-	ptr += sizeof( int );
+	memcpy( ptr, &type, sizeof type );                 /* type indicator  */
+	ptr += sizeof type;
 
-	memcpy( ptr, &new_nx, sizeof( long ) );            /* new # of x points */
-	ptr += sizeof( long );
+	memcpy( ptr, &new_nx, sizeof new_nx );             /* new # of x points */
+	ptr += sizeof new_nx;
 
-	memcpy( ptr, &new_ny, sizeof( long ) );            /* new # of y points */
-	ptr += sizeof( long );
+	memcpy( ptr, &new_ny, sizeof new_ny );            /* new # of y points */
+	ptr += sizeof new_ny;
 
 	/* Detach from the segment with the data segment */
 
@@ -1117,6 +1114,7 @@ Var *f_display( Var *v )
 	char *ptr;
 	int nsets;
 	int i;
+	int type;
 
 
 	/* We can't display data without a previous initialization */
@@ -1146,8 +1144,8 @@ Var *f_display( Var *v )
 
 	/* Determine the needed amount of shared memory */
 
-	len =   sizeof( long )                /* length field itself */
-		  + sizeof( int )                 /* number of sets to be sent */
+	len =   sizeof len                    /* length field itself */
+		  + sizeof nsets                  /* number of sets to be sent */
 		  + 3 * nsets * sizeof( long )    /* x-, y-index and curve number */
 		  + nsets * sizeof( int );        /* data type */
 
@@ -1222,48 +1220,50 @@ Var *f_display( Var *v )
 
 	ptr = buf;
 
-	memcpy( ptr, &len, sizeof( long ) );               /* total length */
-	ptr += sizeof( long );
+	memcpy( ptr, &len, sizeof len );                   /* total length */
+	ptr += sizeof len;
 
-	memcpy( ptr, &nsets, sizeof( int ) );              /* # data sets  */
-	ptr += sizeof( int );
+	memcpy( ptr, &nsets, sizeof nsets );               /* # data sets  */
+	ptr += sizeof nsets;
 
 	for ( i = 0; i < nsets; i++ )
 	{
-		* ( long * ) ptr = dp[ i ].nx;                  /* x-index */
-		ptr += sizeof ( long );
+		memcpy( ptr, &dp[ i ].nx, sizeof dp[ i ].nx );  /* x-index */
+		ptr += sizeof dp[ i ].nx;
 
-		* ( long * ) ptr = dp[ i ].ny;                  /* y-index */
-		ptr += sizeof( long );
+		memcpy( ptr, &dp[ i ].ny, sizeof dp[ i ].ny );  /* y-index */
+		ptr += sizeof dp[ i ].ny;
 
-		* ( long * ) ptr = dp[ i ].nc;                  /* curve number */
-		ptr += sizeof( int );
+		memcpy( ptr, &dp[ i ].nc, sizeof dp[ i ].nc );  /* curve number */
+		ptr += sizeof dp[ i ].nc;
 
 		switch( dp[ i ].v->type )                       /* and now the data  */
 		{
 			case INT_VAR :
-				* ( int * ) ptr = dp[ i ].v->type;
-				ptr += sizeof( int );
-				* ( long * ) ptr = dp[ i ].v->val.lval;
-				ptr += sizeof( long );
+				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
+				ptr += sizeof dp[ i ].v->type;
+				memcpy( ptr, &dp[ i ].v->val.lval, sizeof dp[ i ].v->type );
+				ptr += sizeof dp[ i ].v->type;
 				break;
 
 			case FLOAT_VAR :
-				* ( int * ) ptr = dp[ i ].v->type;
-				ptr += sizeof( int );
-				memcpy( ptr, &dp[ i ].v->val.dval, sizeof( double ) );
-				ptr += sizeof( double );
+				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
+				ptr += sizeof dp[ i ].v->type;
+				memcpy( ptr, &dp[ i ].v->val.dval,
+						sizeof dp[ i ].v->val.dval );
+				ptr += sizeof dp[ i ].v->val.dval;
 				break;
 
 			case ARR_PTR :
 				fsc2_assert( dp[ i ].v->from->type == INT_CONT_ARR ||
 							 dp[ i ].v->from->type == FLOAT_CONT_ARR );
-				* ( int * ) ptr = dp[ i ].v->from->type;
-				ptr += sizeof( int );
 
-				* ( long * ) ptr = len =
-							dp[ i ].v->from->sizes[ dp[ i ].v->from->dim - 1 ];
-				ptr += sizeof( long );
+				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
+				ptr += sizeof dp[ i ].v->from->type;
+
+				len = dp[ i ].v->from->sizes[ dp[ i ].v->from->dim - 1 ];
+				memcpy( ptr, &len, sizeof len );
+				ptr += sizeof len;
 
 				if ( dp[ i ].v->from->type == INT_CONT_ARR )
 				{
@@ -1280,11 +1280,13 @@ Var *f_display( Var *v )
 			case ARR_REF :
 				fsc2_assert( dp[ i ].v->from->type == INT_CONT_ARR ||
 							 dp[ i ].v->from->type == FLOAT_CONT_ARR );
-				* ( int * ) ptr = dp[ i ].v->from->type;
-				ptr += sizeof( int );
 
-				* ( long * ) ptr = len = dp[ i ].v->from->sizes[ 0 ];
-				ptr += sizeof( long );
+				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->from->type );
+				ptr += sizeof dp[ i ].v->from->type;
+
+				len = dp[ i ].v->from->sizes[ 0 ];
+				memcpy( ptr, &len, sizeof len );
+				ptr += sizeof len;
 
 				if ( dp[ i ].v->from->type == INT_CONT_ARR )
 				{
@@ -1301,11 +1303,13 @@ Var *f_display( Var *v )
 				break;
 
 			case INT_ARR :
-				* ( int * ) ptr = INT_CONT_ARR;
-				ptr += sizeof( int );
+				type = INT_CONT_ARR;
+				memcpy( ptr, &type, sizeof type );
+				ptr += sizeof type;
 
-				* ( long * ) ptr = len = dp[ i ].v->len;
-				ptr += sizeof( long );
+				len = dp[ i ].v->len;
+				memcpy( ptr, &len, sizeof len );
+				ptr += sizeof len;
 
 				memcpy( ptr, dp[ i ].v->val.lpnt,
 						len * sizeof *dp[ i ].v->val.lpnt );
@@ -1313,11 +1317,13 @@ Var *f_display( Var *v )
 				break;
 
 			case FLOAT_ARR :
-				* ( int * ) ptr = FLOAT_CONT_ARR;
-				ptr += sizeof( int );
+				type = FLOAT_CONT_ARR;
+				memcpy( ptr, &type, sizeof type );
+				ptr += sizeof type;
 
-				* ( long * ) ptr = len = dp[ i ].v->len;
-				ptr += sizeof( long );
+				len = dp[ i ].v->len;
+				memcpy( ptr, &len, sizeof len );
+				ptr += sizeof len;
 
 				memcpy( ptr, dp[ i ].v->val.dpnt,
 						len * sizeof *dp[ i ].v->val.dpnt );
@@ -1567,7 +1573,8 @@ Var *f_clearcv( Var *v )
 
 	/* Now try to get a shared memory segment */
 
-	len = sizeof( int ) + ( count + 2 ) * sizeof( long );
+	len =   sizeof len + sizeof type + sizeof count
+		  + count * sizeof *ca;
 
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
@@ -1581,16 +1588,16 @@ Var *f_clearcv( Var *v )
 
 	ptr = buf;
 
-	memcpy( ptr, &len, sizeof( long ) );           /* total length */
-	ptr += sizeof( long );
+	memcpy( ptr, &len, sizeof len );               /* total length */
+	ptr += sizeof len;
 
-	memcpy( ptr, &type, sizeof( int ) );           /* type indicator  */
-	ptr += sizeof( int );
+	memcpy( ptr, &type, sizeof type );             /* type indicator  */
+	ptr += sizeof type;
 
-	memcpy( ptr, &count, sizeof( long ) );         /* curve number count */
-	ptr += sizeof( long );
+	memcpy( ptr, &count, sizeof count );           /* curve number count */
+	ptr += sizeof count;
 
-	memcpy( ptr, ca, count * sizeof( long ) );     /* array of curve numbers */
+	memcpy( ptr, ca, count * sizeof *ca );         /* array of curve numbers */
 
 	/* Detach from the segment with the data */
 

@@ -1185,7 +1185,7 @@ bool test_condition( Prg_Token *cur )
 
 	EDL.cur_prg_token++;                        /* skip the WHILE or IF etc. */
 	conditionparse( );                          /* get the value */
-	fsc2_assert( EDL.Var_Stack->next == NULL );/* Paranoia as usual... */
+	fsc2_assert( EDL.Var_Stack->next == NULL ); /* Paranoia as usual... */
 	fsc2_assert( EDL.cur_prg_token->token == '{' );
 
 	/* Make sure returned value is either integer or float */

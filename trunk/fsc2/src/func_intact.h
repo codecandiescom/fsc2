@@ -30,33 +30,36 @@
 
 typedef struct _IOBJ_ {
 
-	long ID;                /* ID of object */
+	long ID;                  /* ID of object */
 	FL_OBJECT *self;
-	struct _IOBJ_ *prev;    /* pointer to previous object */
-	struct _IOBJ_ *next;    /* pointer to next object */
+	struct _IOBJ_ *prev;      /* pointer to previous object */
+	struct _IOBJ_ *next;      /* pointer to next object */
 
-	int type;               /* object type (BUTTON, SLIDER, etc.) */
+	int type;                 /* object type (BUTTON, SLIDER, etc.) */
 
-	FL_COORD x,             /* position and dimensions of object */
+	FL_COORD x,               /* position and dimensions of object */
 		     y,
 		     w,
 		     h;
 
-	const char *label;      /* object label */
-	const char *help_text;  /* objects help text */
-	char *form_str;         /* C format string for in/output objects */
+	char *label;              /* object label */
+	char *help_text;          /* objects help text */
+	char *form_str;           /* C format string for in/output objects */
+	char **menu_items;        /* list of menu items */
+    int num_items;            /* number of entries of a menu */
 
-	volatile int state;     /* state (on/off) of press count (buttons) */
+	volatile int state;       /* state (on/off) of press count (buttons)
+								 or currently seletced menu item */
 
-	FL_OBJECT *group;       /* group a radio button belongs to */
+	FL_OBJECT *group;         /* group a radio button belongs to */
 	long partner;
 
-	volatile double value;  /* current value of slider */
-	double start_val,       /* maximum and minimum value */
+	volatile double value;    /* current value of slider */
+	double start_val,         /* maximum and minimum value */
 		   end_val,
-		   step;            /* step width of slider (0.0 means not set) */
+		   step;              /* step width of slider (0.0 means not set) */
 
-	union {                 /* value of INT or FLOAT in/output objects */
+	union {                   /* value of INT or FLOAT in/output objects */
 		long lval;
 		double dval;
 	} val;
@@ -65,11 +68,11 @@ typedef struct _IOBJ_ {
 
 
 typedef struct {
-	int layout;             /* 0 / 1 <-> vertical / horizontal */
+	int layout;               /* 0 / 1 <-> vertical / horizontal */
 	FL_FORM *Tools;
-	FL_COORD w,             /* size of form */
+	FL_COORD w,               /* size of form */
 		     h;
-	IOBJECT *objs;          /* linked list of objects in form */
+	IOBJECT *objs;            /* linked list of objects in form */
 } TOOL_BOX;
 
 
@@ -82,6 +85,7 @@ typedef struct {
 #define FLOAT_INPUT   6
 #define INT_OUTPUT    7
 #define FLOAT_OUTPUT  8
+#define MENU          9
 
 #define VERT          0
 #define HORI          1
@@ -105,6 +109,9 @@ Var *f_idelete( Var *v );
 Var *f_ivalue(  Var *v );
 Var *f_idelete( Var *v );
 Var *f_ivalue(  Var *v );
+Var *f_mcreate( Var *v );
+Var *f_mdelete( Var *v );
+Var *f_mchoice( Var *v );
 Var *f_objdel(  Var *v );
 Var *f_freeze(  Var *v );
 

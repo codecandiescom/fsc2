@@ -40,7 +40,10 @@ void show_message( const char *str )
 		fl_show_messages( str );
 	}
 	else
-		writer( C_SHOW_MESSAGE, str );
+	{
+		if ( ! writer( C_SHOW_MESSAGE, str ) || ! reader( NULL ) )
+			THROW( EXCEPTION );
+	}
 }
 
 
@@ -75,7 +78,10 @@ void show_alert( const char *str )
 		T_free( strc );
 	}
 	else
-		writer( C_SHOW_ALERT, str );
+	{
+		if ( ! writer( C_SHOW_ALERT, str ) || ! reader( NULL ) )
+			THROW( EXCEPTION );
+	}
 }
 
 
@@ -101,8 +107,9 @@ int show_choices( const char *text, int numb, const char *b1, const char *b2,
 	}
 	else
 	{
-		writer( C_SHOW_CHOICES, text, numb, b1, b2, b3, def );
-		reader( ( void * ) &ret );
+		if ( ! writer( C_SHOW_CHOICES, text, numb, b1, b2, b3, def ) ||
+			 ! reader( ( void * ) &ret ) )
+			THROW( EXCEPTION );
 		return ret;
 	}
 }
@@ -132,8 +139,9 @@ const char *show_fselector( const char *message, const char *directory,
 	}
 	else
 	{
-		writer( C_SHOW_FSELECTOR, message, directory, pattern, def );
-		reader( ( void * ) &ret );
+		if ( ! writer( C_SHOW_FSELECTOR, message, directory, pattern, def ) ||
+			 ! reader( ( void * ) &ret ) )
+			THROW( EXCEPTION );
 		return ret;
 	}
 }
@@ -153,8 +161,9 @@ const char *show_input( const char *content, const char *label )
 	}
 	else
 	{
-		writer( C_INPUT, content, label );
-		reader( ( void * ) &ret );
+		if ( ! writer( C_INPUT, content, label ) ||
+			 ! reader( ( void * ) &ret ) )
+			THROW( EXCEPTION );
 		return ret;
 	}
 }
@@ -196,9 +205,13 @@ bool exp_layout( char *buffer, ptrdiff_t len )
 {
 	if ( Internals.I_am == CHILD )
 	{
-		writer( C_LAYOUT, len, buffer );
+		if ( ! writer( C_LAYOUT, len, buffer ) )
+		{
+			T_free( buffer );
+			return FAIL;
+		}
 		T_free( buffer );
-		return reader( NULL ) ? SET : UNSET;
+		return reader( NULL );
 	}
 	else
 	{
@@ -207,27 +220,29 @@ bool exp_layout( char *buffer, ptrdiff_t len )
 		Var *Func_ptr;
 		int acc;
 		char *pos;
+		long type;
 
-
-		/* Get variable with address of function to create a button */
-
-		Func_ptr = func_get( "layout", &acc );
-
-		/* Unpack parameter and push them onto the stack */
-
-		pos = buffer;
-		memcpy( &EDL.Lc, pos, sizeof( long ) );   /* get current line number */
-		pos += sizeof( long );
-
-		vars_push( INT_VAR, * ( ( long * ) pos ) ); /* get layout type */
-		pos += sizeof( long );
-
-		EDL.Fname = pos;                            /* get current file name */
-
-		/* Call the function */
 
 		TRY
 		{
+			/* Get variable with address of function to create a button */
+
+			Func_ptr = func_get( "layout", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );    /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &type, pos, sizeof type );        /* get layout type */
+			vars_push( INT_VAR, type );
+			pos += sizeof type;
+
+			EDL.Fname = pos;                          /* current file name */
+
+			/* Call the function */
+
 			vars_pop( func_call( Func_ptr ) );
 			writer( C_LAYOUT_REPLY, 1L );
 			TRY_SUCCESS;
@@ -237,7 +252,7 @@ bool exp_layout( char *buffer, ptrdiff_t len )
 
 		EDL.Fname = old_Fname;
 		EDL.Lc = old_Lc;
-		return SET;
+		return OK;
 	}
 }
 
@@ -254,11 +269,16 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
 		long *result;
 
 
-		writer( C_BCREATE, len, buffer );
+		if ( ! writer( C_BCREATE, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
 		T_free( buffer );
-		result = T_malloc( 2 * sizeof( long ) );
-		reader( ( void * ) result );
-		return ( long * ) result;
+		result = T_malloc( 2 * sizeof *result );
+		if ( ! reader( ( void * ) result ) )
+			result[ 0 ] = 0;
+		return result;
 	}
 	else
 	{
@@ -270,39 +290,41 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
 		int acc;
 		long result[ 2 ];
 		char *pos;
+		long ID;
 
-
-		/* Get variable with address of function to create a button */
-
-		Func_ptr = func_get( "button_create", &acc );
-
-		/* Unpack parameter and push them onto the stack */
-
-		pos = buffer;
-		memcpy( &EDL.Lc, pos, sizeof( long ) );  /* get current line number */
-		pos += sizeof( long );
-
-		vars_push( INT_VAR, * ( ( long * ) pos ) );
-		pos += sizeof( long );
-
-		memcpy( &val, pos, sizeof( long ) );     /* get colleague */
-		if ( val >= 0 )
-			vars_push( INT_VAR, val );
-		pos += sizeof( long );
-
-		EDL.Fname = pos;                         /* get current file name */
-		pos += strlen( pos ) + 1;
-
-		vars_push( STR_VAR, pos );               /* get label string */
-		pos += strlen( pos ) + 1;
-
-		if ( *pos != '\0' )                      /* get help text */
-			vars_push( STR_VAR, pos );
-
-		/* Call the function */
 
 		TRY
 		{
+			/* Get variable with address of function to create a button */
+
+			Func_ptr = func_get( "button_create", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );   /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &ID, pos, sizeof ID );
+			vars_push( INT_VAR, ID );
+			pos += sizeof ID;
+
+			memcpy( &val, pos, sizeof val );         /* get colleague ID */
+			if ( val >= 0 )
+				vars_push( INT_VAR, val );
+			pos += sizeof val;
+
+			EDL.Fname = pos;                         /* current file name */
+			pos += strlen( pos ) + 1;
+
+			vars_push( STR_VAR, pos );               /* get label string */
+			pos += strlen( pos ) + 1;
+
+			if ( *pos != '\0' )                      /* get help text */
+				vars_push( STR_VAR, pos );
+
+			/* Call the function */
+
 			ret = func_call( Func_ptr );
 			result[ 0 ] = 1;
 			result[ 1 ] = ret->val.lval;
@@ -314,7 +336,8 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
 
 		EDL.Fname = old_Fname;
 		EDL.Lc = old_Lc;
-		writer( C_BCREATE_REPLY, 2 * sizeof( long ), result );
+		if ( ! writer( C_BCREATE_REPLY, sizeof result, result ) )
+			THROW( EXCEPTION );
 
 		return NULL;
 	}
@@ -330,9 +353,13 @@ bool exp_bdelete( char *buffer, ptrdiff_t len )
 {
 	if ( Internals.I_am == CHILD )
 	{
-		writer( C_BDELETE, len, buffer );
+		if ( ! writer( C_BDELETE, len, buffer ) )
+		{
+			T_free( buffer );
+			return FAIL;
+		}
 		T_free( buffer );
-		return reader( NULL ) ? SET: UNSET;
+		return reader( NULL );
 	}
 	else
 	{
@@ -341,27 +368,29 @@ bool exp_bdelete( char *buffer, ptrdiff_t len )
 		Var *Func_ptr;
 		int acc;
 		char *pos;
+		long ID;
 
-
-		/* Get variable with address of function to create a button */
-
-		Func_ptr = func_get( "button_delete", &acc );
-
-		/* Unpack parameter and push them onto the stack */
-
-		pos = buffer;
-		memcpy( &EDL.Lc, pos, sizeof( long ) ); /* get current line number */
-		pos += sizeof( long );
-
-		vars_push( INT_VAR, * ( ( long * ) pos ) );
-		pos += sizeof( long );
-
-		EDL.Fname = pos;                        /* get current file name */
-
-		/* Call the function */
 
 		TRY
 		{
+			/* Get variable with address of function to create a button */
+
+			Func_ptr = func_get( "button_delete", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );  /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &ID, pos, sizeof ID );
+			vars_push( INT_VAR, ID );
+			pos += sizeof ID;
+
+			EDL.Fname = pos;                        /* current file name */
+
+			/* Call the function */
+
 			vars_pop( func_call( Func_ptr ) );
 			writer( C_BDELETE_REPLY, 1L );
 			TRY_SUCCESS;
@@ -381,13 +410,23 @@ bool exp_bdelete( char *buffer, ptrdiff_t len )
 /* the return values of the button_state() function .           */
 /*--------------------------------------------------------------*/
 
-long exp_bstate( char *buffer, ptrdiff_t len )
+long *exp_bstate( char *buffer, ptrdiff_t len )
 {
 	if ( Internals.I_am == CHILD )
 	{
-		writer( C_BSTATE, len, buffer );
+		long *result;
+
+
+		if ( ! writer( C_BSTATE, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
 		T_free( buffer );
-		return reader( NULL ) ? SET : UNSET;
+		result = T_malloc( 2 * sizeof *result );
+		if ( ! reader( ( void * ) result ) )
+			result[ 0 ] = 0;
+		return result;
 	}
 	else
 	{
@@ -398,42 +437,49 @@ long exp_bstate( char *buffer, ptrdiff_t len )
 		Var *ret = NULL;
 		int acc;
 		char *pos;
+		long ID;
+		long result[ 2 ];
 
-		/* Get variable with address of function to create a button */
-
-		Func_ptr = func_get( "button_state", &acc );
-
-		/* Unpack parameter and push them onto the stack */
-
-		pos = buffer;
-		memcpy( &EDL.Lc, pos, sizeof( long ) );  /* get current line number */
-		pos += sizeof( long );
-
-		vars_push( INT_VAR, * ( ( long * ) pos ) );
-		pos += sizeof( long );
-
-		memcpy( &val, pos, sizeof( long ) );     /* get state to be set */
-		if ( val >= 0 )
-			vars_push( INT_VAR, val );
-		pos += sizeof( long );
-
-		EDL.Fname = pos;                         /* get current file name */
-
-		/* Call the function */
 
 		TRY
 		{
+			/* Get variable with address of function to create a button */
+
+			Func_ptr = func_get( "button_state", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );   /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &ID, pos, sizeof ID );
+			vars_push( INT_VAR, ID );
+			pos += sizeof ID;
+
+			memcpy( &val, pos, sizeof val );         /* get state to be set */
+			if ( val >= 0 )
+				vars_push( INT_VAR, val );
+			pos += sizeof val;
+
+			EDL.Fname = pos;                         /* current file name */
+
+			/* Call the function */
+
 			ret = func_call( Func_ptr );
-			writer( C_BSTATE_REPLY, ret->val.lval );
+			result[ 0 ] = 1;
+			result[ 1 ] = ret->val.lval;
 			vars_pop( ret );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
-			writer( C_BSTATE_REPLY, -1L );
+			result[ 0 ] = 0;
 
 		EDL.Fname = old_Fname;
 		EDL.Lc = old_Lc;
-		return 0;
+		if ( ! writer( C_BSTATE_REPLY, sizeof result, result ) )
+			THROW( EXCEPTION );
+		return NULL;
 	}
 }
 
@@ -450,11 +496,16 @@ long *exp_screate( char *buffer, ptrdiff_t len )
 		long *result;
 
 
-		writer( C_SCREATE, len, buffer );
+		if ( ! writer( C_SCREATE, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
 		T_free( buffer );
-		result = T_malloc( 2 * sizeof( long ) );
-		reader( ( void * ) result );
-		return ( long * ) result;
+		result = T_malloc( 2 * sizeof *result );
+		if ( ! reader( ( void * ) result ) )
+			result[ 0 ] = 0;
+		return result;
 	}
 	else
 	{
@@ -465,43 +516,45 @@ long *exp_screate( char *buffer, ptrdiff_t len )
 		int acc;
 		long result[ 2 ];
 		char *pos;
+		long ID;
+		double val;
+		int i;
 
-
-		/* Get variable with address of function to create a button */
-
-		Func_ptr = func_get( "slider_create", &acc );
-
-		/* Unpack parameter and push them onto the stack */
-
-		pos = buffer;
-		memcpy( &EDL.Lc, pos, sizeof( long ) );   /* get current line number */
-		pos += sizeof( long );
-
-		vars_push( INT_VAR, *( ( long * ) pos ) );
-		pos += sizeof( long );
-
-		vars_push( FLOAT_VAR, *( ( double * ) pos ) );
-		pos += sizeof( double );
-
-		vars_push( FLOAT_VAR, *( ( double * ) pos ) );
-		pos += sizeof( double );
-
-		vars_push( FLOAT_VAR, *( ( double * ) pos ) );
-		pos += sizeof( double );
-
-		EDL.Fname = pos;                          /* get current file name */
-		pos += strlen( pos ) + 1;
-
-		vars_push( STR_VAR, pos );               /* get label string */
-		pos += strlen( pos ) + 1;
-
-		if ( *pos != '\0' )                      /* get help text */
-			vars_push( STR_VAR, pos );
-
-		/* Call the function */
 
 		TRY
 		{
+			/* Get variable with address of function to create a button */
+
+			Func_ptr = func_get( "slider_create", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );    /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &ID, pos, sizeof ID );
+			vars_push( INT_VAR, ID );
+			pos += sizeof ID;
+
+			for ( i = 0; i < 3; i++ )
+			{
+				memcpy( &val, pos, sizeof val );
+				vars_push( FLOAT_VAR, val );
+				pos += sizeof val;
+			}
+
+			EDL.Fname = pos;                          /* current file name */
+			pos += strlen( pos ) + 1;
+
+			vars_push( STR_VAR, pos );               /* get label string */
+			pos += strlen( pos ) + 1;
+
+			if ( *pos != '\0' )                      /* get help text */
+				vars_push( STR_VAR, pos );
+
+			/* Call the function */
+
 			ret = func_call( Func_ptr );
 			result[ 0 ] = 1;
 			result[ 1 ] = ret->val.lval;
@@ -513,8 +566,8 @@ long *exp_screate( char *buffer, ptrdiff_t len )
 
 		EDL.Fname = old_Fname;
 		EDL.Lc = old_Lc;
-		writer( C_SCREATE_REPLY, 2 * sizeof( long ), result );
-
+		if ( ! writer( C_SCREATE_REPLY, sizeof result, result ) )
+			THROW( EXCEPTION );
 		return NULL;
 	}
 }
@@ -529,9 +582,13 @@ bool exp_sdelete( char *buffer, ptrdiff_t len )
 {
 	if ( Internals.I_am == CHILD )
 	{
-		writer( C_SDELETE, len, buffer );
+		if ( ! writer( C_SDELETE, len, buffer ) )
+		{
+			T_free( buffer );
+			return FAIL;
+		}
 		T_free( buffer );
-		return reader( NULL ) ? SET : UNSET;
+		return reader( NULL );
 	}
 	else
 	{
@@ -540,36 +597,35 @@ bool exp_sdelete( char *buffer, ptrdiff_t len )
 		Var *Func_ptr;
 		int acc;
 		char *pos;
+		long ID;
 
-
-		/* Get variable with address of function to create a button */
-
-		Func_ptr = func_get( "slider_delete", &acc );
-
-		/* Unpack parameter and push them onto the stack */
-
-		pos = buffer;
-		memcpy( &EDL.Lc, pos, sizeof( long ) );   /* get current line number */
-		pos += sizeof( long );
-
-		vars_push( INT_VAR, *( ( long * ) pos ) );
-		pos += sizeof( long );
-
-		EDL.Fname = pos;                          /* get current file name */
-
-		/* Call the function */
 
 		TRY
 		{
+			/* Get variable with address of function to create a button */
+
+			Func_ptr = func_get( "slider_delete", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );    /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &ID, pos, sizeof ID );
+			vars_push( INT_VAR, ID );
+			pos += sizeof ID;
+
+			EDL.Fname = pos;                          /* current file name */
+
+			/* Call the function */
+
 			vars_pop( func_call( Func_ptr ) );
 			writer( C_SDELETE_REPLY, 1L );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
-		{
-			T_free( buffer );
 			writer( C_SDELETE_REPLY, 0L );
-		}
 
 		EDL.Fname = old_Fname;
 		EDL.Lc = old_Lc;
@@ -590,11 +646,16 @@ double *exp_sstate( char *buffer, ptrdiff_t len )
 		double *result;
 
 
-		writer( C_SSTATE, len, buffer );
+		if ( ! writer( C_SSTATE, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
 		T_free( buffer );
-		result = T_malloc( 2 * sizeof( double ) );
-		reader( ( void * ) result );
-		return ( double * ) result;
+		result = T_malloc( 2 * sizeof *result );
+		if ( ! reader( ( void * ) result ) )
+			result[ 0 ] = -1.0;
+		return result;
 	}
 	else
 	{
@@ -606,45 +667,54 @@ double *exp_sstate( char *buffer, ptrdiff_t len )
 		int acc;
 		char *pos;
 		double res[ 2 ];
+		long ID;
 
-
-		/* Get variable with address of function to set/get slider value */
-
-		Func_ptr = func_get( "slider_value", &acc );
-
-		/* Unpack parameter and push them onto the stack */
-
-		pos = buffer;
-		memcpy( &EDL.Lc, pos, sizeof( long ) );   /* get current line number */
-		pos += sizeof( long );
-
-		vars_push( INT_VAR, *( ( long * ) pos ) );
-		pos += sizeof( long );
-
-		memcpy( &val, pos, sizeof( long ) );
-		pos += sizeof( long );
-		if ( val > 0 )
-			vars_push( FLOAT_VAR, * ( ( double * ) pos ) );
-		pos += sizeof( double );
-
-		EDL.Fname = pos;                          /* get current file name */
-
-		/* Call the function */
 
 		TRY
 		{
+			/* Get variable with address of function to set/get slider value */
+
+			Func_ptr = func_get( "slider_value", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );    /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &ID, pos, sizeof ID );
+			vars_push( INT_VAR, ID );
+			pos += sizeof ID;
+
+			memcpy( &val, pos, sizeof val );
+			pos += sizeof val;
+
+			if ( val > 0 )
+			{
+				double dval;
+
+				memcpy( &dval, pos, sizeof dval );
+				vars_push( FLOAT_VAR, dval );
+			}
+			pos += sizeof( double );
+
+			EDL.Fname = pos;                       /* get current file name */
+
+			/* Call the function */
+
 			ret = func_call( Func_ptr );
-			res[ 0 ] = 10.0;
+			res[ 0 ] = 1.0;
 			res[ 1 ] = ret->val.dval;
 			vars_pop( ret );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
-			res[ 0 ] = -10.0;
+			res[ 0 ] = -1.0;
 
 		EDL.Fname = old_Fname;
 		EDL.Lc = old_Lc;
-		writer( C_SSTATE_REPLY, 2 * sizeof( double ), res );
+		if ( ! writer( C_SSTATE_REPLY, sizeof res, res ) )
+			THROW( EXCEPTION );
 		return NULL;
 	}
 }
@@ -662,11 +732,16 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
 		long *result;
 
 
-		writer( C_ICREATE, len, buffer );
+		if ( ! writer( C_ICREATE, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
 		T_free( buffer );
 		result = T_malloc( 2 * sizeof( long ) );
-		reader( ( void * ) result );
-		return ( long * ) result;
+		if ( ! reader( ( void * ) result ) )
+			result[ 0 ] = 0;
+		return result;
 	}
 	else
 	{
@@ -680,60 +755,66 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
 		long type;
 
 
-		/* Get variable with address of function to create an input object */
-
-		Func_ptr = func_get( "input_create", &acc );
-
-		/* Unpack parameter and push them onto the stack */
-
-		pos = buffer;
-		memcpy( &EDL.Lc, pos, sizeof( long ) );   /* get current line number */
-		pos += sizeof( long );
-
-		type = * ( ( long * ) pos );
-		vars_push( INT_VAR, type );               /* type of input object */
-		pos += sizeof( long );
-
-		if ( type == INT_INPUT || type == INT_OUTPUT )
+		TRY
 		{
-			vars_push( INT_VAR, * ( ( long * ) pos ) );
-			pos += sizeof( long );
-		}
-		else
-		{
-			vars_push( FLOAT_VAR, * ( ( double * ) pos ) );
-			pos += sizeof( double );
-		}
+			/* Get function to create an input object */
 
-		EDL.Fname = pos;                         /* get current file name */
-		pos += strlen( pos ) + 1;
+			Func_ptr = func_get( "input_create", &acc );
 
-		vars_push( STR_VAR, pos );               /* get label string */
-		pos += strlen( pos ) + 1;
+			/* Unpack parameter and push them onto the stack */
 
-		if ( *pos != '\0' )                      /* get help text */
-		{
-			if ( * ( ( unsigned char * ) pos ) == 0xff )
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );   /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &type, pos, sizeof type );
+			vars_push( INT_VAR, type );              /* type of input object */
+			pos += sizeof type;
+
+			if ( type == INT_INPUT || type == INT_OUTPUT )
 			{
-				vars_push( STR_VAR, "" );
-				pos += 1;
+				long lval;
+
+				memcpy( &lval, pos, sizeof lval );
+				vars_push( INT_VAR, lval );
+				pos += sizeof lval;
 			}
 			else
 			{
-				vars_push( STR_VAR, pos );
-				pos += strlen( pos ) + 1;
+				double dval;
+
+				memcpy( &dval, pos, sizeof dval );
+				vars_push( FLOAT_VAR, dval );
+				pos += sizeof dval;
 			}
-		}
-		else
-			pos++;
 
-		if ( *pos != '\0' )                      /* get C format string */
-			vars_push( STR_VAR, pos );
+			EDL.Fname = pos;                         /* current file name */
+			pos += strlen( pos ) + 1;
 
-		/* Call the function */
+			vars_push( STR_VAR, pos );               /* get label string */
+			pos += strlen( pos ) + 1;
 
-		TRY
-		{
+			if ( *pos != '\0' )                      /* get help text */
+			{
+				if ( * ( ( unsigned char * ) pos ) == 0xff )
+				{
+					vars_push( STR_VAR, "" );
+					pos += 1;
+				}
+				else
+				{
+					vars_push( STR_VAR, pos );
+					pos += strlen( pos ) + 1;
+				}
+			}
+			else
+				pos++;
+
+			if ( *pos != '\0' )                      /* get C format string */
+				vars_push( STR_VAR, pos );
+
+			/* Call the function */
+
 			ret = func_call( Func_ptr );
 			result[ 0 ] = 1;
 			result[ 1 ] = ret->val.lval;
@@ -745,8 +826,8 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
 
 		EDL.Fname = old_Fname;
 		EDL.Lc = old_Lc;
-		writer( C_ICREATE_REPLY, 2 * sizeof( long ), result );
-
+		if ( ! writer( C_ICREATE_REPLY, sizeof result, result ) )
+			THROW( EXCEPTION );
 		return NULL;
 	}
 }
@@ -761,9 +842,13 @@ bool exp_idelete( char *buffer, ptrdiff_t len )
 {
 	if ( Internals.I_am == CHILD )
 	{
-		writer( C_IDELETE, len, buffer );
+		if ( ! writer( C_IDELETE, len, buffer ) )
+		{
+			T_free( buffer );
+			return FAIL;
+		}
 		T_free( buffer );
-		return reader( NULL ) ? SET : UNSET;
+		return reader( NULL );
 	}
 	else
 	{
@@ -772,27 +857,29 @@ bool exp_idelete( char *buffer, ptrdiff_t len )
 		Var *Func_ptr;
 		int acc;
 		char *pos;
+		long ID;
 
-
-		/* Get variable with address of function to delete an input object */
-
-		Func_ptr = func_get( "input_delete", &acc );
-
-		/* Unpack parameter and push them onto the stack */
-
-		pos = buffer;
-		memcpy( &EDL.Lc, pos, sizeof( long ) );   /* get current line number */
-		pos += sizeof( long );
-
-		vars_push( INT_VAR, * ( ( long * ) pos ) );
-		pos += sizeof( long );
-
-		EDL.Fname = pos;                          /* get current file name */
-
-		/* Call the function */
 
 		TRY
 		{
+			/* Get function to delete an input object */
+
+			Func_ptr = func_get( "input_delete", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );   /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &ID, pos, sizeof ID );
+			vars_push( INT_VAR, ID );
+			pos += sizeof ID;
+
+			EDL.Fname = pos;                          /* current file name */
+
+			/* Call the function */
+
 			vars_pop( func_call( Func_ptr ) );
 			writer( C_IDELETE_REPLY, 1L );
 			TRY_SUCCESS;
@@ -819,10 +906,15 @@ INPUT_RES *exp_istate( char *buffer, ptrdiff_t len )
 		INPUT_RES *input_res;
 
 
-		writer( C_ISTATE, len, buffer );
+		if ( ! writer( C_ISTATE, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
 		T_free( buffer );
-		input_res = T_malloc( sizeof( INPUT_RES ) );
-		reader( ( void * ) input_res );
+		input_res = T_malloc( sizeof *input_res );
+		if ( ! reader( ( void * ) input_res ) )
+			input_res->res = -1;
 		return input_res;
 	}
 	else
@@ -835,41 +927,49 @@ INPUT_RES *exp_istate( char *buffer, ptrdiff_t len )
 		int acc;
 		char *pos;
 		INPUT_RES input_res;
+		long ID;
 
-
-		/* Get variable with address of function to set/get slider value */
-
-		Func_ptr = func_get( "input_value", &acc );
-
-		/* Unpack parameter and push them onto the stack */
-
-		pos = buffer;
-		memcpy( &EDL.Lc, pos, sizeof( long ) );   /* get current line number */
-		pos += sizeof( long );
-
-		vars_push( INT_VAR, *( ( long * ) pos ) );  /* objects ID */
-		pos += sizeof( long );
-
-		memcpy( &type, pos, sizeof( long ) );
-		pos += sizeof( long );
-
-		if ( type == 1 )                            /* new integer value */
-		{
-			vars_push( INT_VAR, * ( ( long * ) pos ) );
-			pos += sizeof( long );
-		}
-		else if ( type == 2 )                       /* new float value */
-		{
-			vars_push( FLOAT_VAR, * ( ( double * ) pos ) );
-			pos += sizeof( double );
-		}
-
-		EDL.Fname = pos;                            /* get current file name */
-
-		/* Call the function */
 
 		TRY
 		{
+			/* Get variable with address of function to set/get slider value */
+
+			Func_ptr = func_get( "input_value", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );    /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &ID, pos, sizeof ID );            /* get menu ID */
+			vars_push( INT_VAR, ID );
+			pos += sizeof ID;
+
+			memcpy( &type, pos, sizeof type );
+			pos += sizeof type;
+
+			if ( type == 1 )                           /* new integer value */
+			{
+				long lval;
+
+				memcpy( &lval, pos, sizeof lval );
+				vars_push( INT_VAR, lval );
+				pos += sizeof lval;
+			}
+			else if ( type == 2 )                      /* new float value */
+			{
+				double dval;
+
+				memcpy( &dval, pos, sizeof dval );
+				vars_push( FLOAT_VAR, dval );
+				pos += sizeof dval;
+			}
+
+			EDL.Fname = pos;                            /* current file name */
+
+			/* Call the function */
+
 			ret = func_call( Func_ptr );
 			if ( ret->type == INT_VAR )
 			{
@@ -889,8 +989,223 @@ INPUT_RES *exp_istate( char *buffer, ptrdiff_t len )
 
 		EDL.Fname = old_Fname;
 		EDL.Lc = old_Lc;
-		writer( C_ISTATE_REPLY, sizeof( INPUT_RES ), &input_res );
+		if ( ! writer( C_ISTATE_REPLY, sizeof input_res, &input_res ) )
+			THROW( EXCEPTION );
 		return NULL;
+	}
+}
+
+
+/*--------------------------------------------------------------*/
+/* Child and parent side function for passing the arguments and */
+/* the return values of the menu_create() function.             */
+/*--------------------------------------------------------------*/
+
+long *exp_mcreate( char *buffer, ptrdiff_t len )
+{
+	if ( Internals.I_am == CHILD )
+	{
+		long *result;
+
+
+		if ( ! writer( C_MCREATE, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
+		T_free( buffer );
+		result = T_malloc( 2 * sizeof *result );
+		if ( ! reader( ( void * ) result ) )
+			result[ 0 ] = 0;
+		return result;
+	}
+	else
+	{
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
+		Var *Func_ptr;
+		Var *ret = NULL;
+		int acc;
+		long result[ 2 ];
+		char *pos;
+		long num_strs;
+		long i;
+
+
+		TRY
+		{
+			/* Get function to create an input object */
+
+			Func_ptr = func_get( "menu_create", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );   /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &num_strs, pos, sizeof num_strs );
+			pos += sizeof num_strs;
+
+			EDL.Fname = pos;                         /* current file name */
+			pos += strlen( pos ) + 1;
+
+			for ( i = 0; i < num_strs; i++ )
+			{
+				vars_push( STR_VAR, pos );
+				pos += strlen( pos ) + 1;
+			}
+
+			ret = func_call( Func_ptr );
+			result[ 0 ] = 1;
+			result[ 1 ] = ret->val.lval;
+			vars_pop( ret );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			result[ 0 ] = 0;
+
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
+		if ( ! writer( C_MCREATE_REPLY, sizeof result, result ) )
+			THROW( EXCEPTION );
+		return NULL;
+	}
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+bool exp_mdelete( char *buffer, ptrdiff_t len )
+{
+	if ( Internals.I_am == CHILD )
+	{
+		if ( ! writer( C_MDELETE, len, buffer ) )
+		{
+			T_free( buffer );
+			return FAIL;
+		}
+		T_free( buffer );
+		return reader( NULL );
+	}
+	else
+	{
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
+		Var *Func_ptr;
+		int acc;
+		char *pos;
+		long ID;
+
+
+		TRY
+		{
+			/* Get variable with address of function to delete a menu */
+
+			Func_ptr = func_get( "menu_delete", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );    /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &ID, pos, sizeof ID );            /* get menu ID */
+			vars_push( INT_VAR, ID );
+			pos += sizeof ID;
+
+			EDL.Fname = pos;                          /* current file name */
+
+			/* Call the function */
+
+			vars_pop( func_call( Func_ptr ) );
+			writer( C_MDELETE_REPLY, 1L );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			writer( C_MDELETE_REPLY, 0L );
+
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
+		return SET;
+	}
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+long *exp_mchoice( char *buffer, ptrdiff_t len )
+{
+	if ( Internals.I_am == CHILD )
+	{
+		long *result;
+
+
+		if ( ! writer( C_MCHOICE, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
+		T_free( buffer );
+		result = T_malloc( 2 * sizeof *result );
+		if ( ! reader( ( void * ) result ) )
+			result[ 0 ] = 0;
+		return result;
+	}
+	else
+	{
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
+		long val;
+		Var *Func_ptr;
+		Var *ret = NULL;
+		int acc;
+		char *pos;
+		long ID;
+		long result[ 2 ];
+
+
+		TRY
+		{
+			/* Get function for dealing with menu state */
+
+			Func_ptr = func_get( "menu_choice", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );   /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &ID, pos, sizeof ID );
+			vars_push( INT_VAR, ID );
+			pos += sizeof ID;
+
+			memcpy( &val, pos, sizeof val );         /* menu item to be set */
+			if ( val > 0 )
+				vars_push( INT_VAR, val );
+			pos += sizeof val;
+
+			EDL.Fname = pos;                         /* current file name */
+
+			/* Call the function */
+
+			ret = func_call( Func_ptr );
+			result[ 0 ] = 1;
+			result[ 1 ] = ret->val.lval;
+			vars_pop( ret );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			result[ 0 ] = 0;
+
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
+		if ( ! writer( C_MCHOICE_REPLY, sizeof result, result ) )
+			THROW( EXCEPTION );
+		return 0;
 	}
 }
 
@@ -904,9 +1219,13 @@ bool exp_objdel( char *buffer, ptrdiff_t len )
 {
 	if ( Internals.I_am == CHILD )
 	{
-		writer( C_ODELETE, len, buffer );
+		if ( ! writer( C_ODELETE, len, buffer ) )
+		{
+			T_free( buffer );
+			return FAIL;
+		}
 		T_free( buffer );
-		return reader( NULL ) ? SET : UNSET;
+		return reader( NULL );
 	}
 	else
 	{
@@ -915,27 +1234,29 @@ bool exp_objdel( char *buffer, ptrdiff_t len )
 		Var *Func_ptr;
 		int acc;
 		char *pos;
+		long ID;
 
-
-		/* Get variable with address of function to delete an input object */
-
-		Func_ptr = func_get( "object_delete", &acc );
-
-		/* Unpack parameter and push them onto the stack */
-
-		pos = buffer;
-		memcpy( &EDL.Lc, pos, sizeof( long ) );   /* get current line number */
-		pos += sizeof( long );
-
-		vars_push( INT_VAR, * ( ( long * ) pos ) );
-		pos += sizeof( long );
-
-		EDL.Fname = pos;                          /* get current file name */
-
-		/* Call the function */
 
 		TRY
 		{
+			/* Get function to delete an input object */
+
+			Func_ptr = func_get( "object_delete", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );    /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &ID, pos, sizeof ID );            /* get object ID */
+			vars_push( INT_VAR, ID );
+			pos += sizeof ID;
+
+			EDL.Fname = pos;                          /* current file name */
+
+			/* Call the function */
+
 			vars_pop( func_call( Func_ptr ) );
 			writer( C_ODELETE_REPLY, 1L );
 			TRY_SUCCESS;
@@ -948,7 +1269,6 @@ bool exp_objdel( char *buffer, ptrdiff_t len )
 		return SET;
 	}
 }
-
 
 
 /*

@@ -1,12 +1,40 @@
-#!/usr/local/bin/fsc2 -T
+#!/usr/bin/perl -w
+# -*- cperl -*-
+#
+# $Id$
+#
+# Copyright (C) 1999-2002 Jens Thoms Toerring
+#
+# This file is part of fsc2.
+#
+# Fsc2 is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# Fsc2 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with fsc2; see the file COPYING.  If not, write to
+# the Free Software Foundation, 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
 
-/***************************************************************************/
-/*                                                                         */
+use strict;
+use Tk;
+
+
+my $text;
+local *F;
+
+open( F, "|fsc2_test" ) or &show_message( "Can't find program 'fsc2_test'." );
+
+print F
+"/***************************************************************************/
 /*    EDL program for running cw-EPR test measurements with the 360 GHz    */
 /*    spectrometer.                                                        */
-/*                                                                         */
-/*    $Id$         */
-/*                                                                         */
 /***************************************************************************/
 
 
@@ -59,7 +87,7 @@ PREPARATIONS:
 
 /* We need just 1D graphics and 1 curve */
 
-init_1d( 1, "Points", "Signal [mV]" );
+init_1d( 1, \"Points\", \"Signal [mV]\" );
 
 
 EXPERIMENT:
@@ -110,21 +138,21 @@ lockin_lock_keyboard( SWITCH_OFF );
 
 /* Finally, create the form with the buttons for sweeping etc. */
 
-Sweep_Up   = button_create( "RADIO_BUTTON", "Sweep up" );
-Sweep_Stop = button_create( "RADIO_BUTTON", Sweep_Up, "Stop sweep" );
-Sweep_Down = button_create( "RADIO_BUTTON", Sweep_Up, "Sweep Down" );
+Sweep_Up   = button_create( \"RADIO_BUTTON\", \"Sweep up\" );
+Sweep_Stop = button_create( \"RADIO_BUTTON\", Sweep_Up, \"Stop sweep\" );
+Sweep_Down = button_create( \"RADIO_BUTTON\", Sweep_Up, \"Sweep Down\" );
 button_state( Sweep_Stop, SWITCH_ON );
 
-Current    = input_create( "FLOAT_INPUT", current, "Set new current (in A)" );
-Sweep_Rate = input_create( "FLOAT_INPUT", sweep_rate * 60.0,
-						   "Set new sweep rate (in A/min)" );
-Acq_Rate   = menu_create( "Lock-in acquisition rate", "32 Hz", "16 Hz", "8 Hz",
-						   "4 Hz", "2 Hz", "1 Hz", "1/2 Hz", "1/4 Hz",
-						   "1/8 Hz", "1/16 Hz" );
+Current    = input_create( \"FLOAT_INPUT\", current, \"Set new current (in A)\" );
+Sweep_Rate = input_create( \"FLOAT_INPUT\", sweep_rate * 60.0,
+						   \"Set new sweep rate (in A/min)\" );
+Acq_Rate   = menu_create( \"Lock-in acquisition rate\", \"32 Hz\", \"16 Hz\", \"8 Hz\",
+						   \"4 Hz\", \"2 Hz\", \"1 Hz\", \"1/2 Hz\", \"1/4 Hz\",
+						   \"1/8 Hz\", \"1/16 Hz\" );
 menu_choice( Acq_Rate, Cur_Acq_Rate );
 
-Save  = button_create( "NORMAL_BUTTON", "Save data" );
-Clear = button_create( "NORMAL_BUTTON", "Clear screen" );
+Save  = button_create( \"NORMAL_BUTTON\", \"Save data\" );
+Clear = button_create( \"NORMAL_BUTTON\", \"Clear screen\" );
 
 
 /* Now we're done with all preparations and can start to run the experiment
@@ -237,7 +265,7 @@ FOREVER
 	   also in this case the data in the lock-ins buffer aren't useful any-
 	   more so clean them by stopping and restarting the auto-acquisition. */
 
-	New_Acq_Rate = menu_choice( Acq_Rate );	
+	New_Acq_Rate = menu_choice( Acq_Rate );
 	IF New_Acq_Rate != Cur_Acq_Rate
 	{
 		Cur_Acq_Rate = New_Acq_Rate;
@@ -313,4 +341,42 @@ IF Sweep_State != STOPPED
 {
 	magnet_sweep( STOPPED );
 	lockin_auto_acquisition( SWITCH_OFF );
+}
+";
+
+
+
+# Notify the user if sending the program to fsc2 failed for some reasons
+
+if ( $? != 0 ) {
+    if ( $? >> 8 == -1 ) {
+        $text = "Internal error.";
+    } elsif ( $? >> 8 == 1 ) {
+        $text = "Someone else is running fsc2.";
+    } elsif ( $? >> 8 == 2 ) {
+        $text = "fsc2 is currently busy.";
+    } elsif ( $? >> 8 == 3 ) {
+        $text = "Internal error of fsc2.";
+    } elsif ( $? >> 8 == 4 ) {
+        $text = "Could not start fsc2.";
+    } else {
+        $text = "Something strange is going on here.";
+    }
+
+    &show_message( $text ) if $? >> 8 != 0;
+}
+
+#############################################
+#
+
+sub show_message {
+	my $text = shift;
+
+	my $mw = MainWindow->new;
+	$mw->geometry( "-2000-2000" );
+	$mw->messageBox( '-icon' => 'error',
+					 '-type' => 'Ok',
+					 '-title' => 'Error',
+					 '-message' => $text );
+	exit;
 }

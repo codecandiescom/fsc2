@@ -1,0 +1,33 @@
+DEVICES:
+
+sr830;
+
+VARIABLES:
+
+st = 4 ms;
+I;
+data[ 4 ];
+d;
+
+PREPARATIONS:
+
+lockin_auto_setup( st, 5 );
+init_1d( 4 );
+
+EXPERIMENT:
+
+lockin_auto_acquisition( 1 );
+
+//wait( 35 s );
+
+FOR I = 1 : 250 {
+
+//	  IF ( I == 190 ) {
+//		  wait( 10 s );
+//	  }
+	data = lockin_get_data( 5, 6, 1, 2 );
+	display( I, data[ 1 ], 1, I, data[ 2 ], 2,
+			 I, data[ 3 ], 3, I, data[ 4 ], 4 );
+	wait( 100 ms );
+}
+lockin_auto_acquisition( 0 );

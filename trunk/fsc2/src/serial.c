@@ -65,10 +65,13 @@ void fsc2_request_serial_port( int sn, const char *devname )
 	{
 		if ( NUM_SERIAL_PORTS > 1 )
 			eprint( FATAL, UNSET, "%s: Serial port number %d out of valid "
-					"range (0-%d).\n", sn, NUM_SERIAL_PORTS - 1, devname );
-		else
+					"range (0-%d).\n", devname, sn, NUM_SERIAL_PORTS - 1 );
+		else if ( NUM_SERIAL_PORTS == 1 )
 			eprint( FATAL, UNSET, "%s: Serial port number %d out of valid "
-					"range (0 is allowed only).\n", sn, devname );
+					"range (only 0 is allowed).\n", devname, sn );
+		else
+			eprint( FATAL, UNSET, "%s: No serial ports are available on this "
+					"machine.\n", devname );
 		THROW( EXCEPTION );
 	}
 

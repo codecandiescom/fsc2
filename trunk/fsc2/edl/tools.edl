@@ -1,0 +1,28 @@
+VARIABLES:
+
+B1, B2, B3, B4;
+S1, S2;
+I1, I2;
+M;
+
+
+EXPERIMENT:
+
+B1 = button_create( "NORMAL_BUTTON", "Normal button" );
+B2 = button_create( "PUSH_BUTTON", "Push button" );
+B3 = button_create( "RADIO_BUTTON", "Radio button" );
+B4 = button_create( "RADIO_BUTTON", B3, "Normal button" );
+
+S1 = slider_create( "NORMAL_SLIDER", 0.0, 10.0, "Normal slider" );
+slider_value( S1, 7 );
+S2 = slider_create( "VALUE_SLIDER", 0.0, 10, "Value slider" );
+slider_value( S2, 2.0 );
+
+I1 = input_create( "INT_INPUT", 42, "Input object" );
+I2 = input_create( "FLOAT_OUTPUT", 2.71828, "Output object" );
+
+M = menu_create( "Pop-up menu button", "Item 1", "Item 2", "Item 3" );
+
+FOREVER {
+	wait( 1 s );
+}

@@ -1,0 +1,59 @@
+DEVICES:
+
+ips20_4;
+
+
+VARIABLES:
+
+start_current = 2 A;
+sweep_rate    = 100 mA / 60 s;
+current;
+I = 1;
+
+
+PREPARATIONS:
+
+init_1d( );
+magnet_setup( start_current, sweep_rate );
+
+EXPERIMENT:
+
+current = get_field( );
+print( "current = # A\n", current );
+magnet_sweep( 1 );
+
+
+WHILE current < 2.4 A & magnet_sweep( ) {
+	wait( 0.3 s );
+	current = get_field( );
+	print( "#: current = # A\n", I, current );
+	display( I, current );
+	I += 1;
+}
+
+current = reset_field( );
+print( "\n#: current = # A\n\n", I, current );
+magnet_sweep_rate( 500 mA/ 60 s );
+
+magnet_sweep( -1 );
+WHILE current > -0.9 A {
+	wait( 0.3 s );
+	current = get_field( );
+	print( "#: current = # A\n", I, current );
+	display( I, current );
+	I += 1;
+}
+
+
+current = set_field( 0.5 A );
+print( "\ncurrent = # A\n\n", current );
+magnet_sweep_rate( 10 mA / 60 s) ;
+magnet_sweep( 1 );
+
+WHILE current < 1.9 A {
+	wait( 0.5 s );
+	current = get_field( );
+	print( "#: current = # A\n", I, current );
+	display( I, current );
+	I += 1;
+}

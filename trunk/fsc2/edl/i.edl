@@ -7,6 +7,9 @@ NX = 32;
 NNX;
 FILE1, FILE2;
 I = 0;
+M;
+M_STATE = 1;
+M_NEW_STATE;
 
 PREPARATIONS:
 
@@ -16,6 +19,8 @@ EXPERIMENT:
 
 hide_toolbox( 1 );
 layout( "VERTICAL" );
+M = menu_create( "Lock-in acquisition rate", "32 Hz", "16 Hz", "8 Hz", "4 Hz",
+				 "2 Hz", "1 Hz", "1/2 Hz", "1/4 Hz", "1/8 Hz", "1/16 Hz" );
 BID1 = button_create( "NORMAL_BUTTON", "Clear curve",
 					  "Removes the currently\ndisplayed curve" );
 BID2 = button_create( "PUSH_BUTTON", "RF On / Off" );
@@ -34,13 +39,19 @@ I2   = input_create( "FLOAT_INPUT", -13, "Noch eins", "Foobar", "%15.2f" );
 I3   = output_create( "INT_OUTPUT", 17, "", "Weiss auch nicht..." );
 I4   = output_create( "FLOAT_OUTPUT", -13, "Noch eins", "", "%.5f" );
 I5   = input_create( "INT_INPUT", NX, "Points in x direction" );
-
+/*
 FILE1 = get_file( "", "*.dat", "", "", "dat" );
 FILE2 = clone_file( FILE1, "dat", "dxx" );
-
+*/
 hide_toolbox( 0 );
 
 FOREVER {
+
+	M_NEW_STATE = menu_choice( M );
+	IF M_NEW_STATE != M_STATE {
+		print( "Now # is selected\n", M_NEW_STATE );
+		M_STATE = M_NEW_STATE;
+	}
 
 	IF ( button_state( BID1 ) ) {
 		button_state( BID4, 0 );
@@ -63,6 +74,7 @@ FOREVER {
 
 	NNX = input_value( I5 );
 	IF NNX != NX {
+		menu_choice( M, 3 );
 		rescale( NNX );
 		NX = NNX;
 	}
@@ -72,6 +84,7 @@ ON_STOP:
 
 show_message( "This\nis\nthe\nend,\nmy\nfriend!" );
 
+/*
 hide_toolbox( 1 );
 wait( 2 );
 hide_toolbox( 0 );
@@ -79,8 +92,10 @@ wait( 2 );
 hide_toolbox( 1 );
 wait( 2 );
 hide_toolbox( 0 );
+*/
 
-
+hide_toolbox( 1 );
 object_delete( SID1, I1, I2, I3, BID1 );
+hide_toolbox( 0 );
 
-wait( 6 );
+wait( 1 );
