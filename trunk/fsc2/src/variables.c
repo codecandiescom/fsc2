@@ -306,11 +306,18 @@ Var *vars_add( Var *v1, Var *v2 )
 			new_var = vars_add_to_float_arr( v1, v2 );
 			break;
 
-		case ARR_REF : case ARR_PTR :
+		case ARR_REF :
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_add_to_int_arr( v1->from, v2 );
 			else
 				new_var = vars_add_to_float_arr( v1->from, v2 );
+			break;
+
+		case ARR_PTR :
+			if ( v1->from->type == INT_ARR )
+				new_var = vars_add_to_int_arr( v1, v2 );
+			else
+				new_var = vars_add_to_float_arr( v1, v2 );
 			break;
 
 		default :

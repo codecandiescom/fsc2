@@ -165,9 +165,12 @@ Var *vars_add_to_int_arr( Var *v1, Var *v2 )
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
+	long *v1_lpnt;
+	long v1_len;
 
 
-	assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) );
+	assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) ||
+		    ( v1->type == ARR_PTR && v1->from->type == INT_ARR ) );
 
 	if ( v1->type == INT_ARR && v1->dim != 1 )
 	{
@@ -178,29 +181,40 @@ Var *vars_add_to_int_arr( Var *v1, Var *v2 )
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
 
+	if ( v1->type == ARR_PTR )
+	{
+		v1_lpnt = ( long * ) v1->val.gptr;
+		v1_len = v1->from->sizes[ v1->dim -1 ];
+	}
+	else
+	{
+		v1_lpnt = v1->val.lpnt;
+		v1_len = v1->len;
+	}
+
 	if ( elems == 1 )
 	{
 		if ( v2_lpnt )
 		{
-			lp = T_malloc( v1->len * sizeof( long ) );
-			for ( i = 0; i < v1->len; i++ )
-				lp[ i ] = v1->val.lpnt[ i ] + *v2_lpnt;
-			new_var = vars_push( INT_TRANS_ARR, lp, v1->len );
+			lp = T_malloc( v1_len * sizeof( long ) );
+			for ( i = 0; i < v1_len; i++ )
+				lp[ i ] = *v1_lpnt++ + *v2_lpnt;
+			new_var = vars_push( INT_TRANS_ARR, lp, v1_len );
 			T_free( lp );
 		}
 		else
 		{
-			dp = T_malloc( v1->len * sizeof( double ) );
-			for ( i = 0; i < v1->len; i++ )
-				dp[ i ] = ( double ) v1->val.lpnt[ i ] + *v2_dpnt;
-			new_var = vars_push( FLOAT_TRANS_ARR, dp, v1->len );
+			dp = T_malloc( v1_len * sizeof( double ) );
+			for ( i = 0; i < v1_len; i++ )
+				dp[ i ] = ( double ) *v1_lpnt++ + *v2_dpnt;
+			new_var = vars_push( FLOAT_TRANS_ARR, dp, v1_len );
 			T_free( dp );
 		}
 
 		return new_var;
 	}
 
-	if ( v1->len != elems )
+	if ( v1_len != elems )
 	{
 		eprint( FATAL, "%s:%ld: Sizes of array slices to be added differ.\n",
 				Fname, Lc );
@@ -211,7 +225,7 @@ Var *vars_add_to_int_arr( Var *v1, Var *v2 )
 	{
 		lp = T_malloc( elems * sizeof( long ) );
 		for ( i = 0; i < elems; i++ )
-			lp[ i ] = v1->val.lpnt[ i ] + *v2_lpnt++;
+			lp[ i ] = *v1_lpnt++ + *v2_lpnt++;
 		new_var = vars_push( INT_TRANS_ARR, lp, elems );
 		T_free( lp );
 	}
@@ -219,7 +233,7 @@ Var *vars_add_to_int_arr( Var *v1, Var *v2 )
 	{
 		dp = T_malloc( elems * sizeof( double ) );
 		for ( i = 0; i < elems; i++ )
-			dp[ i ] = ( double ) v1->val.lpnt[ i ] + *v2_dpnt++;
+			dp[ i ] = ( double ) *v1_lpnt++ + *v2_dpnt++;
 		new_var = vars_push( FLOAT_TRANS_ARR, dp, elems );
 		T_free( dp );
 	}
@@ -239,11 +253,14 @@ Var *vars_add_to_float_arr( Var *v1, Var *v2 )
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
+	double *v1_dpnt;
+	long v1_len;
 
 
-	assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) );
+	assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) ||
+		    ( v1->type == ARR_PTR && v1->from->type == FLOAT_ARR ) );
 
-	if ( v1->type == INT_ARR && v1->dim != 1 )
+	if ( v1->type == FLOAT_ARR && v1->dim != 1 )
 	{
 		eprint( FATAL, "%s:%ld: Arithmetic can be only done on numbers and "
 				"array slices.\n", Fname, Lc );
@@ -252,19 +269,30 @@ Var *vars_add_to_float_arr( Var *v1, Var *v2 )
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
 
+	if ( v1->type == ARR_PTR )
+	{
+		v1_dpnt = ( double * ) v1->val.gptr;
+		v1_len = v1->from->sizes[ v1->from->dim -1 ];
+	}
+	else
+	{
+		v1_dpnt = v1->val.dpnt;
+		v1_len = v1->len;
+	}
+
 	if ( elems == 1 )
 	{
-		dp = T_malloc( v1->len * sizeof( double ) );
-		for ( i = 0; i < v1->len; i++ )
-			dp[ i ] = v1->val.dpnt[ i ]
+		dp = T_malloc( v1_len * sizeof( double ) );
+		for ( i = 0; i < v1_len; i++ )
+			dp[ i ] = *v1_dpnt++
 				      + ( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		new_var = vars_push( FLOAT_TRANS_ARR, dp, v1->len );
+		new_var = vars_push( FLOAT_TRANS_ARR, dp, v1_len );
 		T_free( dp );
 
 		return new_var;
 	}
 
-	if ( v1->len != elems )
+	if ( v1_len != elems )
 	{
 		eprint( FATAL, "%s:%ld: Sizes of array slices to be added differ.\n",
 				Fname, Lc );
@@ -273,7 +301,7 @@ Var *vars_add_to_float_arr( Var *v1, Var *v2 )
 
 	dp = T_malloc( elems * sizeof( double ) );
 	for ( i = 0; i < elems; i++ )
-		dp[ i ] = v1->val.dpnt[ i ]
+		dp[ i ] = *v1_dpnt++
 			      + ( v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
 	new_var = vars_push( FLOAT_TRANS_ARR, dp, elems );
 	T_free( dp );
@@ -369,9 +397,12 @@ Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
+	long *v1_lpnt;
+	long v1_len;
 
 
-	assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) );
+	assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) ||
+		    ( v1->type == ARR_PTR && v1->from->type == INT_ARR ) );
 
 	if ( v1->type == INT_ARR && v1->dim != 1 )
 	{
@@ -382,29 +413,40 @@ Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
 
+	if ( v1->type == ARR_PTR )
+	{
+		v1_lpnt = ( long * ) v1->val.gptr;
+		v1_len = v1->from->sizes[ v1->dim -1 ];
+	}
+	else
+	{
+		v1_lpnt = v1->val.lpnt;
+		v1_len = v1->len;
+	}
+
 	if ( elems == 1 )
 	{
 		if ( v2_lpnt )
 		{
-			lp = T_malloc( v1->len * sizeof( long ) );
-			for ( i = 0; i < v1->len; i++ )
-				lp[ i ] = v1->val.lpnt[ i ] - *v2_lpnt;
-			new_var = vars_push( INT_TRANS_ARR, lp, v1->len );
+			lp = T_malloc( v1_len * sizeof( long ) );
+			for ( i = 0; i < v1_len; i++ )
+				lp[ i ] = *v1_lpnt++ - *v2_lpnt;
+			new_var = vars_push( INT_TRANS_ARR, lp, v1_len );
 			T_free( lp );
 		}
 		else
 		{
-			dp = T_malloc( v1->len * sizeof( double ) );
-			for ( i = 0; i < v1->len; i++ )
-				dp[ i ] = ( double ) v1->val.lpnt[ i ] - *v2_dpnt;
-			new_var = vars_push( FLOAT_TRANS_ARR, dp, v1->len );
+			dp = T_malloc( v1_len * sizeof( double ) );
+			for ( i = 0; i < v1_len; i++ )
+				dp[ i ] = ( double ) *v1_lpnt++ - *v2_dpnt;
+			new_var = vars_push( FLOAT_TRANS_ARR, dp, v1_len );
 			T_free( dp );
 		}
 
 		return new_var;
 	}
 
-	if ( v1->len != elems )
+	if ( v1_len != elems )
 	{
 		eprint( FATAL, "%s:%ld: Sizes of array slices to be subtracted "
 				"differ.\n", Fname, Lc );
@@ -415,7 +457,7 @@ Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
 	{
 		lp = T_malloc( elems * sizeof( long ) );
 		for ( i = 0; i < elems; i++ )
-			lp[ i ] = v1->val.lpnt[ i ] - *v2_lpnt++;
+			lp[ i ] = *v1_lpnt++ - *v2_lpnt++;
 		new_var = vars_push( INT_TRANS_ARR, lp, elems );
 		T_free( lp );
 	}
@@ -423,7 +465,7 @@ Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
 	{
 		dp = T_malloc( elems * sizeof( double ) );
 		for ( i = 0; i < elems; i++ )
-			dp[ i ] = ( double ) v1->val.lpnt[ i ] - *v2_dpnt++;
+			dp[ i ] = ( double ) *v1_lpnt++ - *v2_dpnt++;
 		new_var = vars_push( FLOAT_TRANS_ARR, dp, elems );
 		T_free( dp );
 	}
@@ -443,11 +485,14 @@ Var *vars_sub_from_float_arr( Var *v1, Var *v2 )
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
+	double *v1_dpnt;
+	long v1_len;
 
 
-	assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) );
+	assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) ||
+		    ( v1->type == ARR_PTR && v1->from->type == FLOAT_ARR ) );
 
-	if ( v1->type == INT_ARR && v1->dim != 1 )
+	if ( v1->type == FLOAT_ARR && v1->dim != 1 )
 	{
 		eprint( FATAL, "%s:%ld: Arithmetic can be only done on numbers and "
 				"array slices.\n", Fname, Lc );
@@ -456,19 +501,30 @@ Var *vars_sub_from_float_arr( Var *v1, Var *v2 )
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
 
+	if ( v1->type == ARR_PTR )
+	{
+		v1_dpnt = ( double * ) v1->val.gptr;
+		v1_len = v1->from->sizes[ v1->dim -1 ];
+	}
+	else
+	{
+		v1_dpnt = v1->val.dpnt;
+		v1_len = v1->len;
+	}
+
 	if ( elems == 1 )
 	{
-		dp = T_malloc( v1->len * sizeof( double ) );
-		for ( i = 0; i < v1->len; i++ )
-			dp[ i ] = v1->val.dpnt[ i ]
+		dp = T_malloc( v1_len * sizeof( double ) );
+		for ( i = 0; i < v1_len; i++ )
+			dp[ i ] = *v1_dpnt++
 				      - ( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		new_var = vars_push( FLOAT_TRANS_ARR, dp, v1->len );
+		new_var = vars_push( FLOAT_TRANS_ARR, dp, v1_len );
 		T_free( dp );
 
 		return new_var;
 	}
 
-	if ( v1->len != elems )
+	if ( v1_len != elems )
 	{
 		eprint( FATAL, "%s:%ld: Sizes of array slices to be subtracted "
 				"differ.\n", Fname, Lc );
@@ -477,7 +533,7 @@ Var *vars_sub_from_float_arr( Var *v1, Var *v2 )
 
 	dp = T_malloc( elems * sizeof( double ) );
 	for ( i = 0; i < elems; i++ )
-		dp[ i ] = v1->val.dpnt[ i ]
+		dp[ i ] = *v1_dpnt++
 			      - ( v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
 	new_var = vars_push( FLOAT_TRANS_ARR, dp, elems );
 	T_free( dp );
@@ -573,9 +629,12 @@ Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
+	long *v1_lpnt;
+	long v1_len;
 
 
-	assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) );
+	assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) ||
+		    ( v1->type == ARR_PTR && v1->from->type == INT_ARR ) );
 
 	if ( v1->type == INT_ARR && v1->dim != 1 )
 	{
@@ -586,29 +645,40 @@ Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
 
+	if ( v1->type == ARR_PTR )
+	{
+		v1_lpnt = ( long * ) v1->val.gptr;
+		v1_len = v1->from->sizes[ v1->dim -1 ];
+	}
+	else
+	{
+		v1_lpnt = v1->val.lpnt;
+		v1_len = v1->len;
+	}
+
 	if ( elems == 1 )
 	{
 		if ( v2_lpnt )
 		{
-			lp = T_malloc( v1->len * sizeof( long ) );
-			for ( i = 0; i < v1->len; i++ )
-				lp[ i ] = v1->val.lpnt[ i ] * *v2_lpnt;
-			new_var = vars_push( INT_TRANS_ARR, lp, v1->len );
+			lp = T_malloc( v1_len * sizeof( long ) );
+			for ( i = 0; i < v1_len; i++ )
+				lp[ i ] = *v1_lpnt * *v2_lpnt;
+			new_var = vars_push( INT_TRANS_ARR, lp, v1_len );
 			T_free( lp );
 		}
 		else
 		{
-			dp = T_malloc( v1->len * sizeof( double ) );
-			for ( i = 0; i < v1->len; i++ )
-				dp[ i ] = ( double ) v1->val.lpnt[ i ] * *v2_dpnt;
-			new_var = vars_push( FLOAT_TRANS_ARR, dp, v1->len );
+			dp = T_malloc( v1_len * sizeof( double ) );
+			for ( i = 0; i < v1_len; i++ )
+				dp[ i ] = ( double ) *v1_lpnt++ * *v2_dpnt;
+			new_var = vars_push( FLOAT_TRANS_ARR, dp, v1_len );
 			T_free( dp );
 		}
 
 		return new_var;
 	}
 
-	if ( v1->len != elems )
+	if ( v1_len != elems )
 	{
 		eprint( FATAL, "%s:%ld: Sizes of array slices to be multiplied "
 				"differ.\n", Fname, Lc );
@@ -619,7 +689,7 @@ Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
 	{
 		lp = T_malloc( elems * sizeof( long ) );
 		for ( i = 0; i < elems; i++ )
-			lp[ i ] = v1->val.lpnt[ i ] * *v2_lpnt++;
+			lp[ i ] = *v1_lpnt++ * *v2_lpnt++;
 		new_var = vars_push( INT_TRANS_ARR, lp, elems );
 		T_free( lp );
 	}
@@ -627,7 +697,7 @@ Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
 	{
 		dp = T_malloc( elems * sizeof( double ) );
 		for ( i = 0; i < elems; i++ )
-			dp[ i ] = ( double ) v1->val.lpnt[ i ] * *v2_dpnt++;
+			dp[ i ] = ( double ) *v1_lpnt++ * *v2_dpnt++;
 		new_var = vars_push( FLOAT_TRANS_ARR, dp, elems );
 		T_free( dp );
 	}
@@ -647,11 +717,14 @@ Var *vars_mult_by_float_arr( Var *v1, Var *v2 )
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
+	double *v1_dpnt;
+	long v1_len;
 
 
-	assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) );
+	assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) ||
+		    ( v1->type == ARR_PTR && v1->from->type == FLOAT_ARR ) );
 
-	if ( v1->type == INT_ARR && v1->dim != 1 )
+	if ( v1->type == FLOAT_ARR && v1->dim != 1 )
 	{
 		eprint( FATAL, "%s:%ld: Arithmetic can be only done on numbers and "
 				"array slices.\n", Fname, Lc );
@@ -660,19 +733,30 @@ Var *vars_mult_by_float_arr( Var *v1, Var *v2 )
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
 
+	if ( v1->type == ARR_PTR )
+	{
+		v1_dpnt = ( double * ) v1->val.gptr;
+		v1_len = v1->from->sizes[ v1->dim -1 ];
+	}
+	else
+	{
+		v1_dpnt = v1->val.dpnt;
+		v1_len = v1->len;
+	}
+
 	if ( elems == 1 )
 	{
-		dp = T_malloc( v1->len * sizeof( double ) );
-		for ( i = 0; i < v1->len; i++ )
-			dp[ i ] = v1->val.dpnt[ i ]
+		dp = T_malloc( v1_len * sizeof( double ) );
+		for ( i = 0; i < v1_len; i++ )
+			dp[ i ] = *v1_dpnt++
 				      * ( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		new_var = vars_push( FLOAT_TRANS_ARR, dp, v1->len );
+		new_var = vars_push( FLOAT_TRANS_ARR, dp, v1_len );
 		T_free( dp );
 
 		return new_var;
 	}
 
-	if ( v1->len != elems )
+	if ( v1_len != elems )
 	{
 		eprint( FATAL, "%s:%ld: Sizes of array slices to be multiplied "
 				"differ.\n", Fname, Lc );
@@ -681,7 +765,7 @@ Var *vars_mult_by_float_arr( Var *v1, Var *v2 )
 
 	dp = T_malloc( elems * sizeof( double ) );
 	for ( i = 0; i < elems; i++ )
-		dp[ i ] = v1->val.dpnt[ i ]
+		dp[ i ] = *v1_dpnt++
 			      * ( v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
 	new_var = vars_push( FLOAT_TRANS_ARR, dp, elems );
 	T_free( dp );
@@ -810,9 +894,12 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
+	long *v1_lpnt;
+	long v1_len;
 
 
-	assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) );
+	assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) ||
+		    ( v1->type == ARR_PTR && v1->from->type == INT_ARR ) );
 
 	if ( v1->type == INT_ARR && v1->dim != 1 )
 	{
@@ -823,31 +910,42 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
 
+	if ( v1->type == ARR_PTR )
+	{
+		v1_lpnt = ( long * ) v1->val.gptr;
+		v1_len = v1->from->sizes[ v1->dim -1 ];
+	}
+	else
+	{
+		v1_lpnt = v1->val.lpnt;
+		v1_len = v1->len;
+	}
+
 	if ( elems == 1 )
 	{
 		if ( v2_lpnt )
 		{
 			vars_div_check( ( double ) *v2_lpnt );
-			lp = T_malloc( v1->len * sizeof( long ) );
-			for ( i = 0; i < v1->len; i++ )
-				lp[ i ] = v1->val.lpnt[ i ] / *v2_lpnt;
-			new_var = vars_push( INT_TRANS_ARR, lp, v1->len );
+			lp = T_malloc( v1_len * sizeof( long ) );
+			for ( i = 0; i < v1_len; i++ )
+				lp[ i ] = *v1_lpnt++ / *v2_lpnt;
+			new_var = vars_push( INT_TRANS_ARR, lp, v1_len );
 			T_free( lp );
 		}
 		else
 		{
 			vars_div_check( *v2_dpnt );
-			dp = T_malloc( v1->len * sizeof( double ) );
-			for ( i = 0; i < v1->len; i++ )
-				dp[ i ] = ( double ) v1->val.lpnt[ i ] / *v2_dpnt;
-			new_var = vars_push( FLOAT_TRANS_ARR, dp, v1->len );
+			dp = T_malloc( v1_len * sizeof( double ) );
+			for ( i = 0; i < v1_len; i++ )
+				dp[ i ] = ( double ) *v1_lpnt++ / *v2_dpnt;
+			new_var = vars_push( FLOAT_TRANS_ARR, dp, v1_len );
 			T_free( dp );
 		}
 
 		return new_var;
 	}
 
-	if ( v1->len != elems )
+	if ( v1_len != elems )
 	{
 		eprint( FATAL, "%s:%ld: Sizes of array slices to be divided differ.\n",
 				Fname, Lc );
@@ -860,7 +958,7 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 		for ( i = 0; i < elems; i++ )
 		{
 			vars_div_check( ( double ) *v2_lpnt );
-			lp[ i ] = v1->val.lpnt[ i ] / *v2_lpnt++;
+			lp[ i ] = *v1_lpnt++ / *v2_lpnt++;
 		}
 		new_var = vars_push( INT_TRANS_ARR, lp, elems );
 		T_free( lp );
@@ -871,7 +969,7 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 		for ( i = 0; i < elems; i++ )
 		{
 			vars_div_check( *v2_dpnt );
-			dp[ i ] = ( double ) v1->val.lpnt[ i ] / *v2_dpnt++;
+			dp[ i ] = ( double ) *v1_lpnt++ / *v2_dpnt++;
 		}
 		new_var = vars_push( FLOAT_TRANS_ARR, dp, elems );
 		T_free( dp );
@@ -892,11 +990,14 @@ Var *vars_div_of_float_arr( Var *v1, Var *v2 )
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
+	double *v1_dpnt;
+	long v1_len;
 
 
-	assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) );
+	assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) ||
+		    ( v1->type == ARR_PTR && v1->from->type == FLOAT_ARR ) );
 
-	if ( v1->type == INT_ARR && v1->dim != 1 )
+	if ( v1->type == FLOAT_ARR && v1->dim != 1 )
 	{
 		eprint( FATAL, "%s:%ld: Arithmetic can be only done on numbers and "
 				"array slices.\n", Fname, Lc );
@@ -905,20 +1006,31 @@ Var *vars_div_of_float_arr( Var *v1, Var *v2 )
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
 
+	if ( v1->type == ARR_PTR )
+	{
+		v1_dpnt = ( double * ) v1->val.gptr;
+		v1_len = v1->from->sizes[ v1->dim -1 ];
+	}
+	else
+	{
+		v1_dpnt = v1->val.dpnt;
+		v1_len = v1->len;
+	}
+
 	if ( elems == 1 )
 	{
-		dp = T_malloc( v1->len * sizeof( double ) );
 		vars_div_check( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		for ( i = 0; i < v1->len; i++ )
-			dp[ i ] = v1->val.dpnt[ i ]
+		dp = T_malloc( v1_len * sizeof( double ) );
+		for ( i = 0; i < v1_len; i++ )
+			dp[ i ] = *v1_dpnt++
 				      / ( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		new_var = vars_push( FLOAT_TRANS_ARR, dp, v1->len );
+		new_var = vars_push( FLOAT_TRANS_ARR, dp, v1_len );
 		T_free( dp );
 
 		return new_var;
 	}
 
-	if ( v1->len != elems )
+	if ( v1_len != elems )
 	{
 		eprint( FATAL, "%s:%ld: Sizes of array slices to be divided differ.\n",
 				Fname, Lc );
@@ -929,7 +1041,7 @@ Var *vars_div_of_float_arr( Var *v1, Var *v2 )
 	for ( i = 0; i < elems; i++ )
 	{
 		vars_div_check( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		dp[ i ] = v1->val.dpnt[ i ]
+		dp[ i ] = *v1_dpnt++
 			      / ( v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
 	}
 	new_var = vars_push( FLOAT_TRANS_ARR, dp, elems );
@@ -1073,9 +1185,12 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
+	long *v1_lpnt;
+	long v1_len;
 
 
-	assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) );
+	assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) ||
+		    ( v1->type == ARR_PTR && v1->from->type == INT_ARR ) );
 
 	if ( v1->type == INT_ARR && v1->dim != 1 )
 	{
@@ -1086,31 +1201,42 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
 
+	if ( v1->type == ARR_PTR )
+	{
+		v1_lpnt = ( long * ) v1->val.gptr;
+		v1_len = v1->from->sizes[ v1->dim -1 ];
+	}
+	else
+	{
+		v1_lpnt = v1->val.lpnt;
+		v1_len = v1->len;
+	}
+
 	if ( elems == 1 )
 	{
 		if ( v2_lpnt )
 		{
 			vars_mod_check( ( double ) *v2_lpnt );
-			lp = T_malloc( v1->len * sizeof( long ) );
-			for ( i = 0; i < v1->len; i++ )
-				lp[ i ] = v1->val.lpnt[ i ] % *v2_lpnt;
-			new_var = vars_push( INT_TRANS_ARR, lp, v1->len );
+			lp = T_malloc( v1_len * sizeof( long ) );
+			for ( i = 0; i < v1_len; i++ )
+				lp[ i ] = *v1_lpnt++ % *v2_lpnt;
+			new_var = vars_push( INT_TRANS_ARR, lp, v1_len );
 			T_free( lp );
 		}
 		else
 		{
 			vars_mod_check( *v2_dpnt );
-			dp = T_malloc( v1->len * sizeof( double ) );
-			for ( i = 0; i < v1->len; i++ )
-				dp[ i ] = fmod( ( double ) v1->val.lpnt[ i ], *v2_dpnt );
-			new_var = vars_push( FLOAT_TRANS_ARR, dp, v1->len );
+			dp = T_malloc( v1_len * sizeof( double ) );
+			for ( i = 0; i < v1_len; i++ )
+				dp[ i ] = fmod( ( double ) *v1_lpnt++, *v2_dpnt );
+			new_var = vars_push( FLOAT_TRANS_ARR, dp, v1_len );
 			T_free( dp );
 		}
 
 		return new_var;
 	}
 
-	if ( v1->len != elems )
+	if ( v1_len != elems )
 	{
 		eprint( FATAL, "%s:%ld: Sizes of array slices modulo is to be "
 				"calculated from differ.\n", Fname, Lc );
@@ -1123,7 +1249,7 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 		for ( i = 0; i < elems; i++ )
 		{
 			vars_mod_check( ( double ) *v2_lpnt );
-			lp[ i ] = v1->val.lpnt[ i ] % *v2_lpnt++;
+			lp[ i ] = *v1_lpnt++ % *v2_lpnt++;
 		}
 		new_var = vars_push( INT_TRANS_ARR, lp, elems );
 		T_free( lp );
@@ -1134,7 +1260,7 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 		for ( i = 0; i < elems; i++ )
 		{
 			vars_mod_check( *v2_dpnt );
-			dp[ i ] = fmod( ( double ) v1->val.lpnt[ i ], *v2_dpnt++ );
+			dp[ i ] = fmod( ( double ) *v1_lpnt++, *v2_dpnt++ );
 		}
 		new_var = vars_push( FLOAT_TRANS_ARR, dp, elems );
 		T_free( dp );
@@ -1155,11 +1281,14 @@ Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
+	double *v1_dpnt;
+	long v1_len;
 
 
-	assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) );
+	assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) ||
+		    ( v1->type == ARR_PTR && v1->from->type == FLOAT_ARR ) );
 
-	if ( v1->type == INT_ARR && v1->dim != 1 )
+	if ( v1->type == FLOAT_ARR && v1->dim != 1 )
 	{
 		eprint( FATAL, "%s:%ld: Arithmetic can be only done on numbers and "
 				"array slices.\n", Fname, Lc );
@@ -1168,20 +1297,31 @@ Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
 
+	if ( v1->type == ARR_PTR )
+	{
+		v1_dpnt = ( double * ) v1->val.gptr;
+		v1_len = v1->from->sizes[ v1->dim -1 ];
+	}
+	else
+	{
+		v1_dpnt = v1->val.dpnt;
+		v1_len = v1->len;
+	}
+
 	if ( elems == 1 )
 	{
-		dp = T_malloc( v1->len * sizeof( double ) );
 		vars_mod_check( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		for ( i = 0; i < v1->len; i++ )
-			dp[ i ] = fmod( v1->val.dpnt[ i ],
+		dp = T_malloc( v1_len * sizeof( double ) );
+		for ( i = 0; i < v1_len; i++ )
+			dp[ i ] = fmod( *v1_dpnt,
 							v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		new_var = vars_push( FLOAT_TRANS_ARR, dp, v1->len );
+		new_var = vars_push( FLOAT_TRANS_ARR, dp, v1_len );
 		T_free( dp );
 
 		return new_var;
 	}
 
-	if ( v1->len != elems )
+	if ( v1_len != elems )
 	{
 		eprint( FATAL, "%s:%ld: Sizes of array slices modulo is to be "
 				"calculated from differ.\n", Fname, Lc );
@@ -1192,7 +1332,7 @@ Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
 	for ( i = 0; i < elems; i++ )
 	{
 		vars_mod_check( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt);
-		dp[ i ] = fmod( v1->val.dpnt[ i ],
+		dp[ i ] = fmod( *v1_dpnt++,
 						v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
 	}
 	new_var = vars_push( FLOAT_TRANS_ARR, dp, elems );
@@ -1370,9 +1510,12 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 	long *v2_lpnt;
 	double *dp = NULL;
 	double *v2_dpnt;
+	long *v1_lpnt;
+	long v1_len;
 
 
-	assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) );
+	assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) ||
+		    ( v1->type == ARR_PTR && v1->from->type == INT_ARR ) );
 
 	if ( v1->type == INT_ARR && v1->dim != 1 )
 	{
@@ -1383,21 +1526,32 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
 
+	if ( v1->type == ARR_PTR )
+	{
+		v1_lpnt = ( long * ) v1->val.gptr;
+		v1_len = v1->from->sizes[ v1->dim -1 ];
+	}
+	else
+	{
+		v1_lpnt = v1->val.lpnt;
+		v1_len = v1->len;
+	}
+
 	if ( elems == 1 )
 	{
 		if ( v2_lpnt )
 		{
-			lp = T_malloc( v1->len * sizeof( long ) );
-			for ( i = 0; i < v1->len; i++ )
+			lp = T_malloc( v1_len * sizeof( long ) );
+			for ( i = 0; i < v1_len; i++ )
 			{
 				if ( lp != NULL )
 				{
-					new_var = vars_int_pow( v1->val.lpnt[ i ], *v2_lpnt );
+					new_var = vars_int_pow( *v1_lpnt++, *v2_lpnt );
 					if ( new_var->type == INT_VAR )
 						lp[ i ] = new_var->val.lval;
 					else
 					{
-						dp = T_malloc( v1->len * sizeof( double ) );
+						dp = T_malloc( v1_len * sizeof( double ) );
 						for ( j = 0; j < i; j++ )
 							dp[ j ] = lp[ j ];
 						dp[ i ] = new_var->val.dval;
@@ -1408,39 +1562,37 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 					continue;
 				}
 
-				vars_pow_check( ( double ) v1->val.lpnt[ i ],
-								( double ) *v2_lpnt );
-				dp[ i ] = pow( ( double ) v1->val.lpnt[ i ],
-							   ( double ) *v2_lpnt );
+				vars_pow_check( ( double ) *v1_lpnt, ( double ) *v2_lpnt );
+				dp[ i ] = pow( ( double ) *v1_lpnt++, ( double ) *v2_lpnt );
 			}
 
 			if ( lp != NULL )
 			{
-				new_var = vars_push( INT_TRANS_ARR, lp, v1->len );
+				new_var = vars_push( INT_TRANS_ARR, lp, v1_len );
 				T_free( lp );
 			}
 			else
 			{
-				new_var = vars_push( FLOAT_TRANS_ARR, dp, v1->len );
+				new_var = vars_push( FLOAT_TRANS_ARR, dp, v1_len );
 				T_free( dp );
 			}
 		}
 		else
 		{
-			dp = T_malloc( v1->len * sizeof( double ) );
-			for ( i = 0; i < v1->len; i++ )
+			dp = T_malloc( v1_len * sizeof( double ) );
+			for ( i = 0; i < v1_len; i++ )
 			{
-				vars_pow_check( ( double ) v1->val.lpnt[ i ], *v2_dpnt );
-				dp[ i ] = pow( ( double ) v1->val.lpnt[ i ], *v2_dpnt );
+				vars_pow_check( ( double ) *v1_lpnt, *v2_dpnt );
+				dp[ i ] = pow( ( double ) *v1_lpnt++, *v2_dpnt );
 			}
-			new_var = vars_push( FLOAT_TRANS_ARR, dp, v1->len );
+			new_var = vars_push( FLOAT_TRANS_ARR, dp, v1_len );
 			T_free( dp );
 		}
 
 		return new_var;
 	}
 
-	if ( v1->len != elems )
+	if ( v1_len != elems )
 	{
 		eprint( FATAL, "%s:%ld: Sizes of array slices used in exponentiation "
 				"differ.\n", Fname, Lc );
@@ -1454,7 +1606,7 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 		{
 			if ( lp != NULL )
 			{
-				new_var = vars_int_pow( v1->val.lpnt[ i ], *v2_lpnt++ );
+				new_var = vars_int_pow( *v1_lpnt, *v2_lpnt++ );
 				if ( new_var->type == INT_VAR )
 					lp[ i ] = new_var->val.lval;
 				else
@@ -1470,10 +1622,8 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 				continue;
 			}
 
-			vars_pow_check( ( double ) v1->val.lpnt[ i ],
-							( double ) *v2_lpnt );
-			dp[ i ] = pow( ( double ) v1->val.lpnt[ i ],
-						   ( double ) *v2_lpnt++ );
+			vars_pow_check( ( double ) *v1_lpnt, ( double ) *v2_lpnt );
+			dp[ i ] = pow( ( double ) *v1_lpnt++, ( double ) *v2_lpnt++ );
 			}
 
 		if ( lp != NULL )
@@ -1492,8 +1642,8 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 		dp = T_malloc( elems * sizeof( double ) );
 		for ( i = 0; i < elems; i++ )
 		{
-			vars_pow_check( ( double ) v1->val.lpnt[ i ], *v2_dpnt );
-			dp[ i ] = pow( ( double ) v1->val.lpnt[ i ], *v2_dpnt++ );
+			vars_pow_check( ( double ) *v1_lpnt, *v2_dpnt );
+			dp[ i ] = pow( ( double ) *v1_lpnt++, *v2_dpnt++ );
 		}
 		new_var = vars_push( FLOAT_TRANS_ARR, dp, elems );
 		T_free( dp );
@@ -1514,11 +1664,14 @@ Var *vars_pow_of_float_arr( Var *v1, Var *v2 )
 	long *v2_lpnt;
 	double *dp;
 	double *v2_dpnt;
+	double *v1_dpnt;
+	long v1_len;
 
 
-	assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) );
+	assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) ||
+		    ( v1->type == ARR_PTR && v1->from->type == FLOAT_ARR ) );
 
-	if ( v1->type == INT_ARR && v1->dim != 1 )
+	if ( v1->type == FLOAT_ARR && v1->dim != 1 )
 	{
 		eprint( FATAL, "%s:%ld: Arithmetic can be only done on numbers and "
 				"array slices.\n", Fname, Lc );
@@ -1527,23 +1680,34 @@ Var *vars_pow_of_float_arr( Var *v1, Var *v2 )
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
 
+	if ( v1->type == ARR_PTR )
+	{
+		v1_dpnt = ( double * ) v1->val.gptr;
+		v1_len = v1->from->sizes[ v1->dim -1 ];
+	}
+	else
+	{
+		v1_dpnt = v1->val.dpnt;
+		v1_len = v1->len;
+	}
+
 	if ( elems == 1 )
 	{
-		dp = T_malloc( v1->len * sizeof( double ) );
-		for ( i = 0; i < v1->len; i++ )
+		dp = T_malloc( v1_len * sizeof( double ) );
+		for ( i = 0; i < v1_len; i++ )
 		{
-			vars_pow_check( v1->val.dpnt[ i ],
+			vars_pow_check( *v1_dpnt,
 							v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-			dp[ i ] = pow( v1->val.dpnt[ i ], 
+			dp[ i ] = pow( *v1_dpnt++, 
 						   v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
 		}
-		new_var = vars_push( FLOAT_TRANS_ARR, dp, v1->len );
+		new_var = vars_push( FLOAT_TRANS_ARR, dp, v1_len );
 		T_free( dp );
 
 		return new_var;
 	}
 
-	if ( v1->len != elems )
+	if ( v1_len != elems )
 	{
 		eprint( FATAL, "%s:%ld: Sizes of array slices used in exponentiation "
 				"differ.\n", Fname, Lc );
@@ -1553,9 +1717,8 @@ Var *vars_pow_of_float_arr( Var *v1, Var *v2 )
 	dp = T_malloc( elems * sizeof( double ) );
 	for ( i = 0; i < elems; i++ )
 	{
-		vars_pow_check( v1->val.dpnt[ i ],
-						v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		dp[ i ] = pow( v1->val.dpnt[ i ],
+		vars_pow_check( *v1_dpnt, v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
+		dp[ i ] = pow( *v1_dpnt++,
 					   v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
 	}
 	new_var = vars_push( FLOAT_TRANS_ARR, dp, elems );
@@ -1595,9 +1758,9 @@ Var *vars_array_check( Var *v1, Var *v2 )
 
 	/* If the left hand side has a defined size nothing needs to be done */
 
-	if ( v1->type == ARR_REF )
+	if ( v1->type == ARR_REF || v1->type == ARR_PTR )
 	{
-		if ( v1->from->dim != 1 )
+		if ( v1->type == ARR_REF && v1->from->dim != 1 )
 		{
 			eprint( FATAL, "%s:%ld: Arithmetic can be only done "
 					"on array slices.\n", Fname, Lc );
@@ -1665,7 +1828,7 @@ Var *vars_array_check( Var *v1, Var *v2 )
 			v = vars_push( FLOAT_TRANS_ARR, NULL, length );
 			break;
 
-		case ARR_REF :
+		case ARR_REF : case ARR_PTR :
 			if ( v1->from->type == INT_ARR )
 				v = vars_push( INT_TRANS_ARR, NULL, length );
 			else
