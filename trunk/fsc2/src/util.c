@@ -12,7 +12,7 @@
 
 char *get_string( size_t len )
 {
-	return T_malloc( ( len + 1 ) * sizeof( char ) );
+	return T_malloc( len + 1 );
 }
 
 
