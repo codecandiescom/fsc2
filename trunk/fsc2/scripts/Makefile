@@ -1,9 +1,7 @@
 # $Id$
 
 all:
-	ifdef install-$(shell hostname -f)
-		$(MAKE) install-$(shell hostname -f)
-	endif
+	$(MAKE) install-$(shell hostname -f)
 
 
 install-pion.anorg.chemie.uni-frankfurt.de: ;
