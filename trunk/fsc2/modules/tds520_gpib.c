@@ -440,38 +440,6 @@ bool tds520_set_cursor( int cur_num, double pos )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
-
-bool tds520_set_track_cursors( bool flag )
-{
-	char cmd[ 20 ];
-
-
-	sprintf( cmd, "CURS:MODE %s\n", flag ? "TRAC" : "IND" );
-    if ( gpib_write( tds520.device, cmd ) == FAILURE )
-		tds520_gpib_failure( );
-
-	return OK;
-}
-
-
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
-
-bool tds520_set_gated_meas( bool flag )
-{
-	char cmd[ 20 ];
-
-
-	sprintf( cmd, "MEASU:GAT %s\n", flag ? "ON" : "OFF" );
-    if ( gpib_write( tds520.device, cmd ) == FAILURE )
-		tds520_gpib_failure( );
-
-	return OK;
-}
-
-
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 

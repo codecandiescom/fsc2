@@ -90,17 +90,6 @@ void tds520_do_pre_exp_checks( void )
 		w = w->next;
 	}
 
-	/* That's all if no windows have been defined, we just switch off gated
-	   measurement mode, i.e. all measurement operations are done on the whole
-	   curve */
-
-	if ( tds520.w == NULL )
-	{
-		tds520_set_gated_meas( UNSET );
-		tds520.gated_state = UNSET;
-		return;
-	}
-
 	/* If not get the distance of the cursors on the digitizers screen and
 	   use it as the default width. */
 
@@ -183,54 +172,6 @@ void tds520_do_pre_exp_checks( void )
 			THROW( EXCEPTION );
 		}
     }
-
-	/* Now that al windows are properly set we switch on gated measurements */
-
-	tds520_set_gated_meas( SET );
-	tds520.gated_state = SET;
-
-	/* If the widths of all windows are equal we switch on tracking cursor
-	   mode and set the cursors to the position of the first window */
-
-	if ( tds520.is_equal_width )
-	{
-		tds520_set_cursor( 1, tds520.w->start );
-		tds520_set_cursor( 2, tds520.w->start + tds520.w->width );
-		tds520_set_track_cursors( SET );
-		tds520.cursor_pos = tds520.w->start;
-	}
-	else
-		tds520_set_track_cursors( UNSET );
-}
-
-
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
-
-void tds520_set_meas_window( WINDOW *w )
-{
-	tds520_set_window( w );
-
-	if ( w != NULL )
-	{
-		/* If not already in gated measurement state set it now */
-
-		if ( ! tds520.gated_state )
-		{
-			tds520_set_gated_meas( SET );
-			tds520.gated_state = SET;
-		}
-	}
-	else
-	{
-		/* If in gated measurement state switch it off */
-
-		if ( tds520.gated_state )
-		{
-			tds520_set_gated_meas( UNSET );
-			tds520.gated_state = UNSET;
-		}
-	}
 }
 
 

@@ -57,7 +57,6 @@ typedef struct
 	int num_windows;
 	bool is_equal_width;     /* all windows have equal width -> tracking     */
 							 /* cursors can be used without further checking */
-	bool gated_state;        /* Gated measurements ?                         */
 	bool snap_state;
 
 	int trigger_channel;
@@ -123,7 +122,6 @@ void tds520_gpib_failure( void );
 bool tds520_clear_SESR( void );
 void tds520_finished( void );
 bool tds520_set_cursor( int cur_num, double pos );
-bool tds520_set_gated_meas( bool flag );
 bool tds520_set_snap( bool flag );
 bool tds520_display_channel( int channel );
 double tds520_get_sens( int channel );
