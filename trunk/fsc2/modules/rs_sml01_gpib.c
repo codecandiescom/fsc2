@@ -31,6 +31,8 @@ static void rs_sml01_check_complete( void );
 static bool rs_sml01_talk( const char *cmd, char *reply, long *length );
 
 
+static int dev_handle;
+
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
@@ -40,7 +42,7 @@ bool rs_sml01_init( const char *name )
 	int i;
 
 
-	if ( gpib_init_device( name, &rs_sml01.device ) == FAILURE )
+	if ( gpib_init_device( name, &dev_handle ) == FAILURE )
         return FAIL;
 
 	/* Set up default settings */
@@ -210,7 +212,7 @@ static void rs_sml01_initial_mod_setup( void )
 
 void rs_sml01_finished( void )
 {
-	gpib_local( rs_sml01.device );
+	gpib_local( dev_handle );
 }
 
 
@@ -528,7 +530,7 @@ static void rs_sml01_check_complete( void )
 
 bool rs_sml01_command( const char *cmd )
 {
-	if ( gpib_write( rs_sml01.device, cmd, strlen( cmd ) ) == FAILURE )
+	if ( gpib_write( dev_handle, cmd, strlen( cmd ) ) == FAILURE )
 		rs_sml01_comm_failure( );
 	return OK;
 }
@@ -539,8 +541,8 @@ bool rs_sml01_command( const char *cmd )
 
 static bool rs_sml01_talk( const char *cmd, char *reply, long *length )
 {
-	if ( gpib_write( rs_sml01.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( rs_sml01.device, reply, length ) == FAILURE )
+	if ( gpib_write( dev_handle, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( dev_handle, reply, length ) == FAILURE )
 		rs_sml01_comm_failure( );
 	return OK;
 }
