@@ -280,9 +280,9 @@ void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 				case 1 :                       /* x-axis window */
 					if ( G.cut_select == NO_CUT_SELECT )
 						scale_changed = change_x_range_2d( c );
-					else if ( G.cut_select == CUT_SELECT_X &&
+					else if ( G.cut_select ==  &&
 							  keymask & ShiftMask )
-						printf( "Show x cut window\n" );
+						show_cut( X, c->box_x + c->box->w );
 					break;
 
 				case 2 :                       /* in y-axis window */
@@ -290,7 +290,7 @@ void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 						scale_changed = change_y_range_2d( c );
 					else if ( G.cut_select == CUT_SELECT_Y &&
 							  keymask & ShiftMask )
-						printf( "Show y cut window\n" );
+						show_cut( Y, c->box_y + c->box_h )
 					break;
 
 				case 4 :
@@ -399,8 +399,9 @@ void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 	switch ( G.button_state )
 	{
 		case 1 :                               /* left mouse button */
-			/* If we were in cut select mode and the shift button has become
-			   released get out of this mode */
+
+			/* If we were in cut select mode and the shift button has
+			   become released get out of this mode */
 
 			if ( ( G.cut_select == CUT_SELECT_X ||
 				   G.cut_select == CUT_SELECT_Y ) &&
