@@ -1697,7 +1697,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 
 		/* Draw all the ticks and numbers */
 
-		for ( cur_p = ( double ) c->h - 1.0 - d_start_fine; cur_p >= 0; 
+		for ( cur_p = ( double ) c->h - 1.0 - d_start_fine; cur_p > -0.5; 
 			  medium++, coarse++, cur_p -= d_delta_fine )
 		{
 			y = d2shrt( cur_p );
@@ -1735,7 +1735,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 
 		/* Draw all the ticks and numbers */
 
-		for ( cur_p = ( double ) c->h - 1.0 - d_start_fine; cur_p >= 0; 
+		for ( cur_p = ( double ) c->h - 1.0 - d_start_fine; cur_p > -0.5;
 			  medium++, coarse++, cur_p -= d_delta_fine )
 		{
 			y = d2shrt( cur_p );
