@@ -1,12 +1,13 @@
 # List of all (necessary) files of the package
 #
 # $Id$
+#
 
-Changes
 COPYING
+Changes
 INSTALL
-Makefile
 MANIFEST
+Makefile
 README
 README.mail
 TODO
@@ -15,8 +16,8 @@ xxx.edl
 Fcntl_Lock/Changes
 Fcntl_Lock/Fcntl_Lock.pm
 Fcntl_Lock/Fcntl_Lock.xs
-Fcntl_Lock/Makefile.PL
 Fcntl_Lock/MANIFEST
+Fcntl_Lock/Makefile.PL
 Fcntl_Lock/README
 Fcntl_Lock/sizes1.c
 Fcntl_Lock/sizes2.c
@@ -45,11 +46,14 @@ aux/right_arrow.xbm
 aux/undo.xpm
 aux/up_arrow.xbm
 
+config/Devices
+config/Functions
+config/README
+config/User_Functions.conf
 config/aeg_s_band.conf
 config/aeg_x_band.conf
 config/bh15.conf
 config/bnm12.conf
-config/Devices
 config/dg2020_b.conf
 config/dg2020_f.conf
 config/egg4402.conf
@@ -57,15 +61,10 @@ config/ep385.conf
 config/er023m.conf
 config/er032m.conf
 config/er035m.conf
+config/er035m_s.conf
 config/er035m_sa.conf
 config/er035m_sas.conf
-<<<<<<< MANIFEST
 config/gg_chopper.conf
-=======
-config/er035m_s.conf
-config/Functions
-config/gg_chopper.conf
->>>>>>> 1.48
 config/gpib.conf
 config/hfs9000.conf
 config/hjs_attenuator.calib
@@ -92,7 +91,6 @@ config/me6000.conf
 config/ni6601.conf
 config/pci_mio_16e_1.conf
 config/pt2025.conf
-config/README
 config/rs690.conf
 config/rs_sml01.conf
 config/rs_spec10.conf
@@ -106,30 +104,33 @@ config/sr510.conf
 config/sr530.conf
 config/sr810.conf
 config/sr830.conf
+config/tds520.conf
 config/tds520a.conf
 config/tds520c.conf
-config/tds520.conf
 config/tds540.conf
 config/tds744a.conf
 config/tds754a.conf
 config/thurlby330.conf
-config/User_Functions.conf
 config/witio_48.conf
 
+doc/GUIfy.texi
+doc/Makefile
 doc/ack.texi
-doc/background.gif
 doc/back.png
+doc/background.gif
 doc/builtins.texi
 doc/cloning.texi
 doc/cmd.texi
-doc/devices.texi
 doc/dev_ref.texi
+doc/devices.texi
 doc/edl.texi
 doc/emacs.texi
 doc/examples.texi
 doc/forward.png
 doc/fsc2.1
 doc/fsc2.css
+doc/fsc2.gif
+doc/fsc2.texi
 doc/fsc2fig1.png
 doc/fsc2fig2.png
 doc/fsc2fig3.png
@@ -137,10 +138,7 @@ doc/fsc2fig4.png
 doc/fsc2fig5.png
 doc/fsc2fig6.png
 doc/fsc2fig7.png
-doc/fsc2.gif
-doc/fsc2.texi
 doc/gpl.texi
-doc/GUIfy.texi
 doc/gui.texi
 doc/help.png
 doc/home.png
@@ -148,7 +146,6 @@ doc/http.texi
 doc/inactive.png
 doc/index.png
 doc/internals.texi
-doc/Makefile
 doc/modules.texi
 doc/next.png
 doc/overview.texi
@@ -163,6 +160,9 @@ doc/texinfo.tex
 doc/toc.png
 doc/up.png
 
+modules/Makefile
+modules/Makefile.tmpl
+modules/User_Functions.c
 modules/aeg_s_band.c
 modules/aeg_x_band.c
 modules/ag54830b.c
@@ -186,31 +186,27 @@ modules/dg2020_util_b.c
 modules/dg2020_util_f.c
 modules/egg4402.c
 modules/ep385.c
+modules/ep385.h
 modules/ep385_gen.c
 modules/ep385_gpib.c
-modules/ep385.h
 modules/ep385_init.c
 modules/ep385_pulse.c
 modules/ep385_run.c
 modules/ep385_util.c
-modules/er023m_addon.c
 modules/er023m.c
-modules/er023m_gpib.c
 modules/er023m.h
+modules/er023m_addon.c
+modules/er023m_gpib.c
 modules/er032m.c
 modules/er035m.c
+modules/er035m_s.c
 modules/er035m_sa.c
 modules/er035m_sas.c
-<<<<<<< MANIFEST
 modules/gg_chopper.c
-=======
-modules/er035m_s.c
-modules/gg_chopper.c
->>>>>>> 1.48
 modules/hfs9000.c
+modules/hfs9000.h
 modules/hfs9000_gen.c
 modules/hfs9000_gpib.c
-modules/hfs9000.h
 modules/hfs9000_init.c
 modules/hfs9000_pulse.c
 modules/hfs9000_run.c
@@ -226,15 +222,15 @@ modules/hjs_sfc.c
 modules/hjs_sfc.h
 modules/hjs_sfc_lexer.l
 modules/hp5340a.c
+modules/hp864.c.tmpl
 modules/hp8647a.h
 modules/hp8648b.h
-modules/hp864.c.tmpl
 modules/hp864_gpib.c.tmpl
 modules/hp864_lexer.l.tmpl
 modules/hp864_util.c.tmpl
 modules/hp8672a.c
-modules/hp8672a_gpib.c
 modules/hp8672a.h
+modules/hp8672a_gpib.c
 modules/hp8672a_lexer.l
 modules/hp8672a_util.c
 modules/ips120_10.c
@@ -243,17 +239,14 @@ modules/keithley228a.c
 modules/kontron4060.c
 modules/lakeshore330.c
 modules/lecroy9400.c
-modules/lecroy9400_gpib.c
 modules/lecroy9400.h
+modules/lecroy9400_gpib.c
 modules/lecroy9400_s.c
-modules/lecroy9400_serial.c
 modules/lecroy9400_s.h
+modules/lecroy9400_serial.c
 modules/lecroy9400_util.c
-modules/Makefile
-modules/Makefile.tmpl
 modules/me6000.c
 modules/ni6601.c
-<<<<<<< MANIFEST
 modules/pci_mio_16e_1.c
 modules/pci_mio_16e_1.h
 modules/pci_mio_16e_1_ai.c
@@ -262,38 +255,20 @@ modules/pci_mio_16e_1_dio.c
 modules/pci_mio_16e_1_gpct.c
 modules/pci_mio_16e_1_msc.c
 modules/pci_mio_16e_1_util.c
-=======
-modules/pci_mio_16e_1_ai.c
-modules/pci_mio_16e_1_ao.c
-modules/pci_mio_16e_1.c
-modules/pci_mio_16e_1_dio.c
-modules/pci_mio_16e_1_gpct.c
-modules/pci_mio_16e_1.h
-modules/pci_mio_16e_1_msc.c
-modules/pci_mio_16e_1_util.c
->>>>>>> 1.48
 modules/pt2025.c
 modules/rs690.c
+modules/rs690.h
 modules/rs690_gen.c
 modules/rs690_gpib.c
-modules/rs690.h
 modules/rs690_init.c
 modules/rs690_pulse.c
 modules/rs690_run.c
 modules/rs690_util.c
-<<<<<<< MANIFEST
 modules/rs_sml01.c
 modules/rs_sml01.h
 modules/rs_sml01_gpib.c
 modules/rs_sml01_lexer.l
 modules/rs_sml01_util.c
-=======
-modules/rs_sml01.c
-modules/rs_sml01_gpib.c
-modules/rs_sml01.h
-modules/rs_sml01_lexer.l
-modules/rs_sml01_util.c
->>>>>>> 1.48
 modules/rs_spec10.c
 modules/rs_spec10.h
 modules/rs_spec10_int.c
@@ -310,19 +285,19 @@ modules/sr510.c
 modules/sr530.c
 modules/sr810.c
 modules/sr830.c
+modules/tds.c.tmpl
+modules/tds520.h
 modules/tds520a.h
 modules/tds520c.h
-modules/tds520.h
 modules/tds540.h
 modules/tds744a.h
 modules/tds754a.h
-modules/tds.c.tmpl
 modules/tds_gpib.c.tmpl
 modules/tds_util.c.tmpl
 modules/thurlby330.c
-modules/User_Functions.c
 modules/witio_48.c
 
+scripts/Makefile
 scripts/cw_endor.crowley.physik.fu-berlin.de
 scripts/cw_endor.door.physik.fu-berlin.de
 scripts/cw_epr.door.physik.fu-berlin.de
@@ -330,18 +305,20 @@ scripts/cw_epr.dyson.physik.uni-osnabrueck.de
 scripts/cw_epr.freed.physik.uni-osnabrueck.de
 scripts/cw_epr.isaak.physik.fu-berlin.de
 scripts/cw_epr.moebpc3.physik.fu-berlin.de
-scripts/cw_epr_monitor.moebpc3.physik.fu-berlin.de
 scripts/cw_epr.pake.physik.uni-osnabrueck.de
+scripts/cw_epr.tresr.physik.fu-berlin.de
+scripts/cw_epr_monitor.moebpc3.physik.fu-berlin.de
 scripts/cw_epr_saturation.dyson.physik.uni-osnabrueck.de
 scripts/cw_epr_saturation.freed.physik.uni-osnabrueck.de
 scripts/cw_epr_saturation.pake.physik.uni-osnabrueck.de
-scripts/cw_epr.tresr.physik.fu-berlin.de
 scripts/endor_monitor.crowley.physik.fu-berlin.de
-scripts/Makefile
 scripts/spex.spex.chem.tu-berlin.de
 scripts/trepr.isaak.fu-berlin.de
 scripts/tresr.sunone.chemie.unibas.ch
 
+src/Makefile
+src/T.c
+src/T.h
 src/accept.c
 src/accept.h
 src/assign_lexer.l
@@ -361,9 +338,9 @@ src/devices_lexer.l
 src/devices_list_lexer.l
 src/devices_parser.y
 src/dump.c
+src/dump.h
 src/dump_graphic.c
 src/dump_graphic.h
-src/dump.h
 src/exceptions.c
 src/exceptions.h
 src/exp.c
@@ -371,27 +348,27 @@ src/exp.h
 src/exp_lexer.l
 src/exp_run_parser.y
 src/exp_test_parser.y
+src/fsc2.c
+src/fsc2.h
 src/fsc2_assert.c
 src/fsc2_assert.h
-src/fsc2.c
 src/fsc2_clean.l
 src/fsc2_connect.c
-src/fsc2d.c
-src/fsc2d.h
-src/fsc2.h
 src/fsc2_http_server
 src/fsc2_module.h
 src/fsc2_rsc_hr.fd
 src/fsc2_rsc_lr.fd
 src/fsc2_types.h
-src/func_basic.c
-src/func_basic.h
+src/fsc2d.c
+src/fsc2d.h
 src/func.c
 src/func.h
-src/func_intact_b.c
-src/func_intact_b.h
+src/func_basic.c
+src/func_basic.h
 src/func_intact.c
 src/func_intact.h
+src/func_intact_b.c
+src/func_intact_b.h
 src/func_intact_m.c
 src/func_intact_m.h
 src/func_intact_o.c
@@ -432,7 +409,6 @@ src/loader.c
 src/loader.h
 src/mail.c
 src/mail.h
-src/Makefile
 src/module_util.c
 src/module_util.h
 src/phases.c
@@ -450,8 +426,6 @@ src/run.h
 src/serial.c
 src/serial.h
 src/split_lexer.l
-src/T.c
-src/T.h
 src/util.c
 src/util.h
 src/variables.c
@@ -475,15 +449,16 @@ src/vars_util.h
 src/xinit.c
 src/xinit.h
 
+tests/Makefile
 tests/alloc.edl
 tests/built-ins.edl
 tests/cw_simul.edl
 tests/follow.edl
 tests/interact.edl
-tests/Makefile
 tests/sqrt.edl
 tests/tck.edl
 
+utils/Makefile
 utils/check_dist
 utils/clone_device
 utils/edl-mod.el
@@ -491,7 +466,6 @@ utils/edl.ssh
 utils/fsc2_guify
 utils/fsc2_pulses
 utils/ipcc
-utils/Makefile
 utils/memcheck
 
 me6x00/COPYING
@@ -499,20 +473,20 @@ me6x00/INSTALL
 me6x00/Makefile
 me6x00/README
 
-me6x00/driver/autoconf.h.example
 me6x00/driver/Makefile
+me6x00/driver/autoconf.h.example
 me6x00/driver/me6x00.c
-me6x00/driver/me6x00_drv.h
 me6x00/driver/me6x00.txt
+me6x00/driver/me6x00_drv.h
 me6x00/driver/pci-compat.h
 me6x00/driver/sysdep.h
 me6x00/driver/xilinx_firm.h
 
 me6x00/lib/Makefile
 me6x00/lib/me6x00.h
+me6x00/lib/me6x00.texi
 me6x00/lib/me6x00_lib.c
 me6x00/lib/me6x00_lib.txt
-me6x00/lib/me6x00.texi
 me6x00/lib/me_test.c
 
 me6x00/utils/me6x00
@@ -522,8 +496,8 @@ ni6601/INSTALL
 ni6601/Makefile
 ni6601/README
 
-ni6601/driver/autoconf.h.example
 ni6601/driver/Makefile
+ni6601/driver/autoconf.h.example
 ni6601/driver/ni6601_drv.c
 ni6601/driver/ni6601_drv.h
 ni6601/driver/ni6601_drv.txt
@@ -543,8 +517,8 @@ witio_48/INSTALL
 witio_48/Makefile
 witio_48/README
 
-witio_48/driver/autoconf.h.example
 witio_48/driver/Makefile
+witio_48/driver/autoconf.h.example
 witio_48/driver/witio_48_drv.c
 witio_48/driver/witio_48_drv.h
 witio_48/driver/witio_48_drv.txt
@@ -555,7 +529,6 @@ witio_48/lib/witio_48_lib.c
 witio_48/lib/witio_48_lib.txt
 
 witio_48/utils/witio_48
-<<<<<<< MANIFEST
 
 ni_daq/COPYING
 ni_daq/INSTALL
@@ -628,64 +601,7 @@ rulbus/lib/rb8509.c
 rulbus/lib/rb8510.c
 rulbus/lib/rb8514.c
 rulbus/lib/rb8515.c
-rulbus/lib/rt
-rulbus/lib/rt.c
 rulbus/lib/rulbus_lib.c
 rulbus/lib/rulbus_lib.txt
 
 rulbus/util/rulbus_epp
-=======
-
-ni_daq/INSTALL
-ni_daq/Makefile
-ni_daq/README
-
-ni_daq/driver/Makefile
-ni_daq/driver/ni_daq_drv.txt
-
-ni_daq/driver/daq_stc/AI.c
-ni_daq/driver/daq_stc/AO.c
-ni_daq/driver/daq_stc/DIO.c
-ni_daq/driver/daq_stc/fops.c
-ni_daq/driver/daq_stc/GPCT.c
-ni_daq/driver/daq_stc/Makefile
-ni_daq/driver/daq_stc/MSC.c
-
-ni_daq/driver/include/AI.h
-ni_daq/driver/include/AO.h
-ni_daq/driver/include/daq_stc.h
-ni_daq/driver/include/DIO.h
-ni_daq/driver/include/GPCT.h
-ni_daq/driver/include/MSC.h
-ni_daq/driver/include/ni_daq_board.h
-
-ni_daq/driver/pci_e_series/board.c
-ni_daq/driver/pci_e_series/board.h
-ni_daq/driver/pci_e_series/board_props.h
-ni_daq/driver/pci_e_series/caldac.c
-ni_daq/driver/pci_e_series/init.c
-ni_daq/driver/pci_e_series/io.c
-ni_daq/driver/pci_e_series/io.h
-ni_daq/driver/pci_e_series/Makefile
-ni_daq/driver/pci_e_series/mite.c
-ni_daq/driver/pci_e_series/mite.h
-
-ni_daq/include/ni_daq_drv.h
-ni_daq/include/ni_daq.h
-
-ni_daq/lib/ai.c
-ni_daq/lib/ao.c
-ni_daq/lib/dio.c
-ni_daq/lib/gpct.c
-ni_daq/lib/Makefile
-ni_daq/lib/msc.c
-ni_daq/lib/ni_daq_lib.c
-ni_daq/lib/ni_daq_lib.h
-ni_daq/lib/ni_daq_lib.txt
-
-ni_daq/misc_doc/clocks
-ni_daq/misc_doc/fout.txt
-ni_daq/misc_doc/registers.txt
-
-ni_daq/utils/ni_daq
-
