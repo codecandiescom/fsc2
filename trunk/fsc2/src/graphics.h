@@ -51,9 +51,12 @@ typedef struct {
 
 typedef struct {
 	bool is_fs;
+	bool is_scale_set;
+	bool scale_changed;
 
 	Scaled_Point *points;
-	XPoint *xpoints;
+	XPoint *xpoints,
+		   *xpoints_s;
 	long count;            /* points in curve */
 
 	unsigned short w, h;
@@ -64,6 +67,14 @@ typedef struct {
 
 	double s2d[ 3 ];       /* scaled to display data scale factors */
 	double shift[ 3 ];     /* offsets on scaled data */
+
+	double rwc_start[ 3 ];  /* real world coordinate start values */
+	double rwc_delta[ 3 ];  /* real world coordinate increment values */
+
+	double z_factor;
+
+	double rw_min;          /* minimum of real world y- or z-coordinates */
+	double rw_max;          /* maximum of real world y- or z-coordinates */
 
 	bool up,               /* flag, set if data don't fit into canvas */
 		 down,
@@ -76,9 +87,9 @@ typedef struct {
 		   right_arr;
 
 	bool can_undo;
-
 	double old_s2d[ 3 ];
 	double old_shift[ 3 ];
+	double old_z_factor;
 
 	GC font_gc;             /* gc for font */
 } Curve_2d;
@@ -178,8 +189,6 @@ void start_graphics( void );
 void stop_graphics( void );
 void graphics_free( void );
 void free_graphics( void );
-void make_scale_1d( Curve_1d *cv, Canvas *c, int coord );
-void make_scale_2d( Curve_2d *cv, Canvas *c, int coord );
 void make_label_string( char *lstr, double num, int res );
 void switch_off_special_cursors( void );
 void clear_curve( long curve );

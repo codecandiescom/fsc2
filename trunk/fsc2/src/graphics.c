@@ -5,8 +5,6 @@
 
 #include "fsc2.h"
 
-#define NUM_COLORS 128
-
 #include "c1.xbm"             /* bitmaps for cursors */
 #include "c2.xbm"
 #include "c3.xbm"
@@ -20,12 +18,12 @@
 
 
 static void G_struct_init( void );
+static void G_init_curves_1d( void );
+static void G_init_curves_2d( bool first_time );
 static void create_label_pixmap( int coord );
 static void setup_canvas( Canvas *c, FL_OBJECT *obj );
 static void create_colors( void );
-static void free_colors( void );
 static void canvas_off( Canvas *c, FL_OBJECT *obj );
-static void fs_rescale_2d( void );
 
 
 /*----------------------------------------------------------------------*/
@@ -129,7 +127,10 @@ void start_graphics( void )
 
 	/* Set minimum size for display window switch on the full scale button */
 
-	fl_winminsize( run_form->run->window, 400, 335 );
+	if ( G.dim == 1 )
+		fl_winminsize( run_form->run->window, 400, 335 );
+	else
+		fl_winminsize( run_form->run->window, 500, 335 );
 	fl_set_button( run_form->full_scale_button, 1 );
 
 	/* Load a font hopefully available on all machines (we try at least three,
@@ -155,8 +156,7 @@ void start_graphics( void )
 	setup_canvas( &G.y_axis, run_form->y_axis );
 	if ( G.dim == 2 )
 	{
-		create_colors( );
-		setup_canvas( &G.canvas, run_form->z_axis );
+		setup_canvas( &G.z_axis, run_form->z_axis );
 	}
 	setup_canvas( &G.canvas, run_form->canvas );
 
@@ -176,9 +176,6 @@ void start_graphics( void )
 void G_struct_init( void )
 {
 	static bool first_time = SET;
-	long i, j;
-	unsigned int depth = fl_get_canvas_depth( G.canvas.obj );
-	Curve_1d *cv;
 	int x, y;
 	unsigned int keymask;
 
@@ -210,12 +207,6 @@ void G_struct_init( void )
 										   c4_height, c4_x_hot, c4_y_hot );
 		G.cur_5 = fl_create_bitmap_cursor( c5_bits, c5_bits, c5_width,
 										   c5_height, c5_x_hot, c5_y_hot );
-
-		fl_set_cursor_color( G.cur_1, FL_RED, FL_WHITE );
-		fl_set_cursor_color( G.cur_2, FL_RED, FL_WHITE );
-		fl_set_cursor_color( G.cur_3, FL_RED, FL_WHITE );
-		fl_set_cursor_color( G.cur_4, FL_RED, FL_WHITE );
-		fl_set_cursor_color( G.cur_5, FL_RED, FL_WHITE );
 	}
 
 	/* Define colors for the curves (in principal this should be made
@@ -227,11 +218,43 @@ void G_struct_init( void )
 	G.colors[ 3 ] = FL_CYAN;
 
 	G.is_fs = SET;
-	G.scale_changed = SET;
+	G.scale_changed = UNSET;
 
-	G.rw_y_min = HUGE_VAL;
-	G.rw_y_max = - HUGE_VAL;
+	G.rw_min = HUGE_VAL;
+	G.rw_max = - HUGE_VAL;
 	G.is_scale_set = UNSET;
+
+	if ( G.dim == 1 )
+		G_init_curves_1d( );
+	else
+		G_init_curves_2d( first_time );
+
+	if ( G.label[ Y ] != NULL && G.font != NULL )
+		create_label_pixmap( Y );
+
+	if ( G.dim == 2 && G.label[ Z ] != NULL && G.font != NULL )
+		create_label_pixmap( Z );
+
+	first_time = UNSET;
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+void G_init_curves_1d( void )
+{
+	int i, j;
+	Curve_1d *cv;
+	unsigned int depth = fl_get_canvas_depth( G.canvas.obj );
+
+
+
+	fl_set_cursor_color( G.cur_1, FL_RED, FL_WHITE );
+	fl_set_cursor_color( G.cur_2, FL_RED, FL_WHITE );
+	fl_set_cursor_color( G.cur_3, FL_RED, FL_WHITE );
+	fl_set_cursor_color( G.cur_4, FL_RED, FL_WHITE );
+	fl_set_cursor_color( G.cur_5, FL_RED, FL_WHITE );
 
 	for ( i = 0; i < G.nc; i++ )
 	{
@@ -242,7 +265,7 @@ void G_struct_init( void )
 		cv->points = NULL;
 		cv->points = T_malloc( G.nx * sizeof( Scaled_Point ) );
 
-		for ( j = 0; j < G.nx; j++ )        /* no points are known in yet */
+		for ( j = 0; j < G.nx; j++ )           /* no points are known in yet */
 			cv->points[ j ].exist = UNSET;
 
 		cv->xpoints = NULL;
@@ -302,17 +325,129 @@ void G_struct_init( void )
 
 		cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) / ( double ) ( G.nx - 1 );
 		cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 );
+
 		cv->shift[ X ] = cv->shift[ Y ] = 0.0;
 
 		cv->count = 0;
 		cv->active = SET;
 		cv->can_undo = UNSET;
 	}
+}
 
-	if ( G.label[ Y ] != NULL && G.font != NULL )
-		create_label_pixmap( Y );
 
-	first_time = UNSET;
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+void G_init_curves_2d( bool first_time )
+{
+	int i, j;
+	Curve_2d *cv;
+	Scaled_Point *sp;
+	unsigned int depth = fl_get_canvas_depth( G.canvas.obj );
+
+
+	if ( first_time )
+		create_colors( );
+
+	fl_set_cursor_color( G.cur_1, FL_BLACK, FL_WHITE );
+	fl_set_cursor_color( G.cur_2, FL_BLACK, FL_WHITE );
+	fl_set_cursor_color( G.cur_3, FL_BLACK, FL_WHITE );
+	fl_set_cursor_color( G.cur_4, FL_BLACK, FL_WHITE );
+	fl_set_cursor_color( G.cur_5, FL_BLACK, FL_WHITE );
+
+	for ( i = 0; i < G.nc; i++ )
+	{
+		/* Allocate memory for the curve and its data */
+
+		cv = G.curve_2d[ i ] = T_malloc( sizeof( Curve_2d ) );
+
+		cv->points = NULL;
+		cv->points = T_malloc( G.nx * G.ny * sizeof( Scaled_Point ) );
+
+		for ( sp = cv->points, j = 0; j < G.nx * G.ny; sp++, j++ )
+			sp->exist = UNSET;
+
+		cv->xpoints = NULL;
+		cv->xpoints = T_malloc( G.nx * G.ny * sizeof( XPoint ) );
+		cv->xpoints_s = NULL;
+		cv->xpoints_s = T_malloc( G.nx * G.ny * sizeof( XPoint ) );
+
+		/* Create a GC for drawing the curve and set its color */
+
+		cv->gc = XCreateGC( G.d, G.canvas.pm, 0, 0 );
+		XSetForeground( G.d, cv->gc, fl_get_pixel( G.colors[ i ] ) );
+
+		/* Create pixmaps for the out-of-display arrows */
+
+		cv->up_arr =
+			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, ua_bits,
+										 ua_width, ua_height,
+										 fl_get_pixel( G.colors[ i ] ),
+										 fl_get_pixel( FL_INACTIVE ), depth );
+		G.ua_w = ua_width;
+		G.ua_h = ua_width;
+
+		cv->down_arr =
+			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, da_bits,
+										 da_width, da_height,
+										 fl_get_pixel( G.colors[ i ] ),
+										 fl_get_pixel( FL_INACTIVE ), depth );
+
+		G.da_w = da_width;
+		G.da_h = da_width;
+
+		cv->left_arr =
+			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, la_bits,
+										 la_width, la_height,
+										 fl_get_pixel( G.colors[ i ] ),
+										 fl_get_pixel( FL_INACTIVE ), depth );
+
+		G.la_w = la_width;
+		G.la_h = la_width;
+
+		cv->right_arr = 
+			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, ra_bits,
+										 ra_width, ra_height,
+										 fl_get_pixel( G.colors[ i ] ),
+										 fl_get_pixel( FL_INACTIVE ), depth );
+
+		G.ra_w = ra_width;
+		G.ra_h = ra_width;
+
+		/* Create a GC for the font and set the appropriate color */
+
+		cv->font_gc = XCreateGC( G.d, FL_ObjWin( G.canvas.obj ), 0, 0 );
+		if ( G.font != NULL )
+			XSetFont( G.d, cv->font_gc, G.font->fid );
+		XSetForeground( G.d, cv->font_gc, fl_get_pixel( FL_WHITE ) );
+		XSetBackground( G.d, cv->font_gc, fl_get_pixel( FL_BLACK ) );
+
+		/* Set the scaling factors for the curve */
+
+		cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) / ( double ) ( G.nx - 1 );
+		cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) ( G.ny - 1 );
+		cv->s2d[ Z ] = ( double ) ( G.z_axis.h - 1 );
+
+		cv->shift[ X ] = cv->shift[ Y ] = cv->shift[ Z ] = 0.0;
+
+		cv->z_factor = 1.0;
+
+		cv->rwc_start[ X ] = G.rwc_start[ X ];
+		cv->rwc_start[ Y ] = G.rwc_start[ Y ];
+		cv->rwc_delta[ X ] = G.rwc_delta[ X ];
+		cv->rwc_delta[ Y ] = G.rwc_delta[ Y ];
+
+		cv->count = 0;
+		cv->active = SET;
+		cv->can_undo = UNSET;
+
+		cv->is_fs = SET;
+		cv->scale_changed = UNSET;
+
+		cv->rw_min = HUGE_VAL;
+		cv->rw_max = - HUGE_VAL;
+		cv->is_scale_set = UNSET;
+	}
 }
 
 
@@ -389,7 +524,7 @@ void stop_graphics( void )
 		canvas_off( &G.canvas, run_form->canvas );
 
 		if ( G.dim == 2 )
-			free_colors( );
+			canvas_off( &G.z_axis, run_form->z_axis );
 	}
 
 	if ( fl_form_is_visible( run_form->run ) )
@@ -407,6 +542,7 @@ void graphics_free( void )
 	long i;
 	int coord;
 	Curve_1d *cv;
+	Curve_2d *cv2;
 
 
 	if ( G.dim == 1 )
@@ -435,6 +571,37 @@ void graphics_free( void )
 					T_free( cv->xpoints );
 
 				T_free( cv );
+				G.curve_2d[ i ] = NULL;
+			}
+		}
+	}
+	else
+	{
+		for ( i = 0; i < G.nc; i++ )
+		{
+			cv2 = G.curve_2d[ i ];
+
+			XFreeGC( G.d, cv2->gc );
+
+			XFreePixmap( G.d, cv2->up_arr );
+			XFreePixmap( G.d, cv2->down_arr );
+			XFreePixmap( G.d, cv2->left_arr );
+			XFreePixmap( G.d, cv2->right_arr );
+
+			XFreeGC( G.d, cv2->font_gc );
+
+			if ( cv2 != NULL )
+			{
+				if ( cv2->points != NULL )
+					T_free( cv2->points );
+
+				if ( cv2->xpoints != NULL )
+					T_free( cv2->xpoints );
+				if ( cv2->xpoints_s != NULL )
+					T_free( cv2->xpoints_s );
+
+				T_free( cv2 );
+				G.curve_2d[ i ] = NULL;
 			}
 		}
 	}
@@ -443,7 +610,6 @@ void graphics_free( void )
 		for ( coord = Y; coord <= Z; coord++ )
 			if ( G.label[ coord ] != NULL )
 				XFreePixmap( G.d, G.label_pm[ coord ] );
-
 }
 
 
@@ -471,21 +637,24 @@ void free_graphics( void )
 
 void canvas_off( Canvas *c, FL_OBJECT *obj )
 {
+	FL_HANDLE_CANVAS ch;
+
+
 	if ( G.dim == 1 )
-		fl_remove_canvas_handler( obj, Expose, canvas_handler_1d );
+		ch = canvas_handler_1d;
+	else
+		ch = canvas_handler_2d;
+
+	fl_remove_canvas_handler( obj, Expose, ch );
 
 	if ( G.is_init )
 	{
 		if ( G.dim == 1 )
 		{
-			fl_remove_canvas_handler( obj, ConfigureNotify,
-									  canvas_handler_1d );
-			fl_remove_canvas_handler( obj, ButtonPress,
-									  canvas_handler_1d );
-			fl_remove_canvas_handler( obj, ButtonRelease,
-									  canvas_handler_1d );
-			fl_remove_canvas_handler( obj, MotionNotify,
-									  canvas_handler_1d );
+			fl_remove_canvas_handler( obj, ConfigureNotify, ch );
+			fl_remove_canvas_handler( obj, ButtonPress, ch );
+			fl_remove_canvas_handler( obj, ButtonRelease, ch );
+			fl_remove_canvas_handler( obj, MotionNotify, ch );
 		}
 
 		XFreeGC( G.d, c->font_gc );
@@ -500,7 +669,13 @@ void canvas_off( Canvas *c, FL_OBJECT *obj )
 void setup_canvas( Canvas *c, FL_OBJECT *obj )
 {
 	XSetWindowAttributes attributes;
+	FL_HANDLE_CANVAS ch;
 
+
+	if ( G.dim == 1 )
+		ch = canvas_handler_1d;
+	else
+		ch = canvas_handler_2d;
 
 	c->obj = obj;
 
@@ -508,9 +683,7 @@ void setup_canvas( Canvas *c, FL_OBJECT *obj )
 	c->h = obj->h;
 	create_pixmap( c );
 
-	if ( G.dim == 1 )
-		fl_add_canvas_handler( c->obj, Expose, canvas_handler_1d,
-							   ( void * ) c );
+	fl_add_canvas_handler( c->obj, Expose, ch, ( void * ) c );
 
 	if ( G.is_init )
 	{
@@ -528,17 +701,10 @@ void setup_canvas( Canvas *c, FL_OBJECT *obj )
 		fl_add_selected_xevent( FL_ObjWin( obj ),
 								Button1MotionMask | Button2MotionMask );
 
-		if ( G.dim == 1 )
-		{
-			fl_add_canvas_handler( c->obj, ConfigureNotify, canvas_handler_1d,
-								   ( void * ) c );
-			fl_add_canvas_handler( c->obj, ButtonPress, canvas_handler_1d,
-								   ( void * ) c );
-			fl_add_canvas_handler( c->obj, ButtonRelease, canvas_handler_1d,
-								   ( void * ) c );
-			fl_add_canvas_handler( c->obj, MotionNotify, canvas_handler_1d,
-								   ( void * ) c );
-		}
+		fl_add_canvas_handler( c->obj, ConfigureNotify, ch, ( void * ) c );
+			fl_add_canvas_handler( c->obj, ButtonPress, ch, ( void * ) c );
+			fl_add_canvas_handler( c->obj, ButtonRelease, ch, ( void * ) c );
+			fl_add_canvas_handler( c->obj, MotionNotify, ch, ( void * ) c );
 
 		c->font_gc = XCreateGC( G.d, FL_ObjWin( obj ), 0, 0 );
 		XSetForeground( G.d, c->font_gc, fl_get_pixel( FL_BLACK ) );
@@ -572,7 +738,10 @@ void create_pixmap( Canvas *c )
 		{
 			G.pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), c->w,
 								  c->h, d );
-			XSetForeground( G.d, c->gc, fl_get_pixel( FL_BLACK ) );
+			if ( G.dim == 1 )
+				XSetForeground( G.d, c->gc, fl_get_pixel( FL_BLACK ) );
+			else
+				XSetForeground( G.d, c->gc, fl_get_pixel( FL_INACTIVE ) );
 		}
 		else
 			XSetForeground( G.d, c->gc, fl_get_pixel( FL_INACTIVE ) );
@@ -584,7 +753,10 @@ void create_pixmap( Canvas *c )
 	{
 		c->box_gc = XCreateGC( G.d, FL_ObjWin( c->obj ), 0, 0 );
 
-		XSetForeground( G.d, c->box_gc, fl_get_pixel( FL_RED ) );
+		if ( G.dim == 1 )
+			XSetForeground( G.d, c->box_gc, fl_get_pixel( FL_RED ) );
+		else
+			XSetForeground( G.d, c->box_gc, fl_get_pixel( FL_BLACK ) );
 		XSetLineAttributes( G.d, c->box_gc, 0, LineOnOffDash, CapButt,
 							JoinMiter );
 		XSetDashes( G.d, c->box_gc, 0, dashes, 2 );
@@ -615,30 +787,16 @@ void delete_pixmap( Canvas *c )
 
 void create_colors( void )
 {
-	int i;
+    FL_COLOR i;
 	int rgb[ 3 ];
 
 
-	for ( i = 0; i < NUM_COLORS + 2; i++ )
+	for ( i = 0; i < NUM_COLORS; i++ )
 	{
-		i22rgb( ( double ) ( i - 1 ) / ( double ) NUM_COLORS, rgb );
-		fl_mapcolor( i + FL_FREE_COL1, rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ]);
+		i2rgb( ( double ) i / ( double ) ( NUM_COLORS - 1 ), rgb );
+		fl_mapcolor( i + FL_FREE_COL1 + 1, 
+					 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
 	}
-}
-
-
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
-
-void free_colors( void )
-{
-	int i;
-	FL_COLOR colors[ NUM_COLORS + 2 ];
-
-	for ( i = 0; i < NUM_COLORS + 2; i++ )
-		colors[ i ] = i + FL_FREE_COL1;
-
-	fl_free_colors( colors, NUM_COLORS + 2 );
 }
 
 
@@ -668,22 +826,28 @@ void redraw_axis( int coord )
 						 G.label[ X ], strlen( G.label[ X ] ) );
 		}
 	}
-	else
+	else if ( coord == Y )
 	{
-		if ( coord == Y )
-			c = &G.y_axis;
-		else
-			c = &G.z_axis;
-		
+		c = &G.y_axis;
 		if ( G.label[ coord ] != NULL && G.font != NULL )
 			XCopyArea( G.d, G.label_pm[ coord ], c->pm, c->gc, 0, 0,
 					   G.label_w[ coord ], G.label_h[ coord ], 0, 0 );
 	}
+	else
+	{
+		c = &G.z_axis;
+		if ( G.label[ coord ] != NULL && G.font != NULL )
+			XCopyArea( G.d, G.label_pm[ coord ], c->pm, c->gc, 0, 0,
+					   G.label_w[ coord ], G.label_h[ coord ],
+					   c->w - 5 - G.label_w[ coord ], 0 );
+	}
 
-	if ( ! G.is_scale_set )                   /* no scaling -> no scale */
+	if ( ( G.dim == 1 && ! G.is_scale_set ) ||
+		 ( G.dim == 2 && ( G.active_curve == -1 ||
+						   ! G.curve_2d[ G.active_curve ]->is_scale_set ) ) )
 		return;
 
-	/* Find out the active curve for the label */
+	/* Find out the active curve for the axis */
 
 	if ( G.dim == 1 )
 	{
@@ -696,205 +860,10 @@ void redraw_axis( int coord )
 
 		if ( i == G.nc )                      /* no active curve -> no scale */
 			return;
+		make_scale_1d( cv, c, coord );
 	}
-	else
-		cv = G.curve[ G.active_curve ];
-
-	make_scale( cv, c, coord );
-}
-
-
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
-
-void make_scale( Curve_1d *cv, Canvas *c, int coord )
-{
-	double rwc_delta,          /* distance between small ticks (in rwc) */
-		   order,              /* and its order of magitude */
-		   mag;
-	double d_delta_fine,       /* distance between small ticks (in points) */
-		   d_start_fine,       /* position of first small tick (in points) */
-		   d_start_medium,     /* position of first medium tick (in points) */
-		   d_start_coarse,     /* position of first large tick (in points) */
-		   cur_p;              /* loop variable with position */
-	int medium_factor,         /* number of small tick spaces between medium */
-		coarse_factor;         /* and large tick spaces */
-	int medium,                /* loop counters for medium and large ticks */
-		coarse;
-	double rwc_start,          /* rwc value of first point */
-		   rwc_start_fine,     /* rwc value of first small tick */
-		   rwc_start_medium,   /* rwc value of first medium tick */
-		   rwc_start_coarse;   /* rwc value of first large tick */
-	double rwc_coarse;
-	short x, y;
-	char lstr[ 128 ];
-	int width;
-	short last = -1000;
-
-
-	/* The distance between the smallest ticks should be about 6 points -
-	   calculate the corresponding delta in real word units */
-
-	rwc_delta = 6.0 * fabs( G.rwc_delta[ coord ] ) / cv->s2d[ coord ];
-
-	/* Now scale this distance to the interval [ 1, 10 [ */
-
-	mag = floor( log10( rwc_delta ) );
-	order = pow( 10.0, mag );
-	modf( rwc_delta / order, &rwc_delta );
-
-	/* Now get a `smooth' value for the ticks distance, i.e. either 2, 2.5,
-	   5 or 10 and convert it to real world coordinates */
-
-	if ( rwc_delta <= 2.0 )       /* in [ 1, 2 ] -> units of 2 */
-	{
-		medium_factor = 5;
-		coarse_factor = 25;
-		rwc_delta = 2.0 * order;
-	}
-	else if ( rwc_delta <= 3.0 )  /* in ] 2, 2.5 ] -> units of 2.5 */
-	{
-		medium_factor = 4;
-		coarse_factor = 20;
-		rwc_delta = 2.5 * order;
-	}
-	else if ( rwc_delta <= 6.0 )  /* in ] 3, 5 ] -> units of 5 */
-	{
-		medium_factor = 2;
-		coarse_factor = 10;
-		rwc_delta = 5.0 * order;
-	}
-	else                          /* in ] 5, 10 [ -> units of 10 */
-	{
-		medium_factor = 5;
-		coarse_factor = 10;
-		rwc_delta = 10.0 * order;
-	}
-
-	/* Calculate the distance between the small ticks in points */
-
-	d_delta_fine = cv->s2d[ coord ] * rwc_delta / fabs( G.rwc_delta[ coord ] );
-
-
-	/* `rwc_start' is the first value in the display (i.e. the smallest x or y
-	   value still shown in the canvas), `rwc_start_fine' the position of the
-	   first small tick (both in real world coordinates) and, finally,
-	   `d_start_fine' is the same position but in points */
-
-	rwc_start = G.rwc_start[ coord ]
-		        - cv->shift[ coord ] * G.rwc_delta[ coord ];
-	if ( G.rwc_delta[ coord ] < 0 )
-		rwc_delta *= -1.0;
-
-	modf( rwc_start / rwc_delta, &rwc_start_fine );
-	rwc_start_fine *= rwc_delta;
-
-	d_start_fine = cv->s2d[ coord ] * ( rwc_start_fine - rwc_start ) /
-		                                                  G.rwc_delta[ coord ];
-	if ( lround( d_start_fine ) < 0 )
-		d_start_fine += d_delta_fine;
-
-
-	/* Calculate start index for first medium tick */
-
-	modf( rwc_start / ( medium_factor * rwc_delta ), &rwc_start_medium );
-	rwc_start_medium *= medium_factor * rwc_delta;
-
-	d_start_medium = cv->s2d[ coord ] * ( rwc_start_medium - rwc_start ) /
-			                                              G.rwc_delta[ coord ];
-	if ( lround( d_start_medium ) < 0 )
-		d_start_medium += medium_factor * d_delta_fine;
-
-	medium = lround( ( d_start_fine - d_start_medium ) / d_delta_fine );
-
-	/* Calculate start index for first large tick */
-
-	modf( rwc_start / ( coarse_factor * rwc_delta ), &rwc_start_coarse );
-	rwc_start_coarse *= coarse_factor * rwc_delta;
-
-	d_start_coarse = cv->s2d[ coord ] * ( rwc_start_coarse - rwc_start ) /
-			                                              G.rwc_delta[ coord ];
-	if ( lround( d_start_coarse ) < 0 )
-	{
-		d_start_coarse += coarse_factor * d_delta_fine;
-		rwc_start_coarse += coarse_factor * rwc_delta;
-	}
-
-	coarse = lround( ( d_start_fine - d_start_coarse ) / d_delta_fine );
-
-
-	/* Now, finally we got everything we need to draw the axis... */
-
-	rwc_coarse = rwc_start_coarse;
-
-	if ( coord == X )
-	{
-		y = 20;
-		XFillRectangle( G.d, c->pm, cv->gc, 0, y - 2, c->w, 3 );
-
-		for ( cur_p = d_start_fine; cur_p < c->w; 
-			  medium++, coarse++, cur_p += d_delta_fine )
-		{
-			x = d2shrt( cur_p );
-
-			if ( coarse % coarse_factor == 0 )
-			{
-				XDrawLine( G.d, c->pm, c->font_gc, x, y + 3, x, y - 14 );
-				if ( G.font == NULL )
-				{
-					rwc_coarse += coarse_factor * rwc_delta;
-					continue;
-				}
-
-				make_label_string( lstr, rwc_coarse, ( int ) mag );
-				width = XTextWidth( G.font, lstr, strlen( lstr ) );
-				if ( x - ( width >> 1 ) - 10 > last )
-				{
-					XDrawString( G.d, c->pm, c->font_gc, x - ( width >> 1 ),
-								 y + 7 + G.font_asc, lstr, strlen( lstr ) );
-					last = x + ( width >> 1 );
-				}
-				rwc_coarse += coarse_factor * rwc_delta;
-			}
-			else if ( medium % medium_factor == 0 )
-				XDrawLine( G.d, c->pm, c->font_gc, x, y, x, y - 10 );
-			else
-				XDrawLine( G.d, c->pm, c->font_gc, x, y, x, y - 5 );
-		}
-	}
-	else
-	{
-		x = c->w - 21;
-		XFillRectangle( G.d, c->pm, cv->gc, x, 0, 3, c->h );
-		XDrawLine( G.d, c->pm, cv->gc, x, 0, x, c->h - 1 );
-
-		for ( cur_p = c->h - 1 - d_start_fine; cur_p >= 0; 
-			  medium++, coarse++, cur_p -= d_delta_fine )
-		{
-			y = d2shrt( cur_p );
-
-			if ( coarse % coarse_factor == 0 )
-			{
-				XDrawLine( G.d, c->pm, c->font_gc, x - 3, y, x + 14, y );
-
-				if ( G.font == NULL )
-				{
-					rwc_coarse += coarse_factor * rwc_delta;
-					continue;
-				}
-
-				make_label_string( lstr, rwc_coarse, ( int ) mag );
-				width = XTextWidth( G.font, lstr, strlen( lstr ) );
-				XDrawString( G.d, c->pm, c->font_gc, x - 7 - width,
-							 y + ( G.font_asc >> 1 ) , lstr, strlen( lstr ) );
-				rwc_coarse += coarse_factor * rwc_delta;
-			}
-			else if ( medium % medium_factor == 0 )
-				XDrawLine( G.d, c->pm, c->font_gc, x, y, x + 10, y );
-			else
-				XDrawLine( G.d, c->pm, c->font_gc, x, y, x + 5, y );
-		}
-	}
+	else if ( G.active_curve != -1 )
+		make_scale_2d( G.curve_2d[ G.active_curve ], c, coord );
 }
 
 
@@ -983,48 +952,85 @@ void undo_button_callback( FL_OBJECT *a, long b )
 	long i;
 	bool is_undo = UNSET;
 	Curve_1d *cv;
-	double temp_s2d[ 2 ],
-		   temp_shift[ 2 ];
+	Curve_2d *cv2;
+	double temp_s2d,
+		   temp_shift;
+	double temp_z_factor;
+	int j;
 
 	a = a;
 	b = b;
 
 
-	for ( i = 0; i < G.nc; i++ )
+	if ( G.dim == 1 )
 	{
-		cv = G.curve[ i ];
+		for ( i = 0; i < G.nc; i++ )
+		{
+			cv = G.curve[ i ];
 
-		if ( ! cv->can_undo )
-			continue;
+			if ( ! cv->can_undo )
+				continue;
 
-		temp_s2d[ X ] = cv->s2d[ X ];
-		temp_s2d[ Y ] = cv->s2d[ Y ];
-		temp_shift[ X ] = cv->shift[ X ];
-		temp_shift[ Y ] = cv->shift[ Y ];
+			for ( j = 0; j <= Y; j++ )
+			{
+				temp_s2d = cv->s2d[ j ];
+				temp_shift = cv->shift[ j ];
 
-		cv->s2d[ X ] = cv->old_s2d[ X ];
-		cv->s2d[ Y ] = cv->old_s2d[ Y ];
-		cv->shift[ X ] = cv->old_shift[ X ];
-		cv->shift[ Y ] = cv->old_shift[ Y ];
+				cv->s2d[ j ] = cv->old_s2d[ j ];
+				cv->shift[ j ] = cv->old_shift[ j ];
 
-		cv->old_s2d[ X ] = temp_s2d[ X ];
-		cv->old_s2d[ Y ] = temp_s2d[ Y ];
-		cv->old_shift[ X ] = temp_shift[ X ];
-		cv->old_shift[ Y ] = temp_shift[ Y ];
+				cv->old_s2d[ j ] = temp_s2d;
+				cv->old_shift[ j ] = temp_shift;
+			}
 
-		is_undo = SET;
+			is_undo = SET;
 
-		recalc_XPoints_of_curve_1d( cv );
-	}
+			recalc_XPoints_of_curve_1d( cv );
+		}
 
-	if ( is_undo && G.is_fs )
-	{
-		G.is_fs = UNSET;
-		fl_set_button( run_form->full_scale_button, 0 );
-	}
+		if ( is_undo && G.is_fs )
+		{
+			G.is_fs = UNSET;
+			fl_set_button( run_form->full_scale_button, 0 );
+		}
 
-	if ( is_undo )
+		if ( is_undo )
 		redraw_all_1d( );
+	}
+	else
+	{
+		if ( G.active_curve == -1 || ! G.curve_2d[ G.active_curve ]->can_undo )
+			return;
+
+		cv2 = G.curve_2d[ G.active_curve ];
+
+		for ( j = 0; j <= Z; j++ )
+		{
+			temp_s2d = cv2->s2d[ j ];
+			temp_shift = cv2->shift[ j ];
+
+			cv2->s2d[ j ] = cv2->old_s2d[ j ];
+			cv2->shift[ j ] = cv2->old_shift[ j ];
+
+			cv2->old_s2d[ j ] = temp_s2d;
+			cv2->old_shift[ j ] = temp_shift;
+		}
+
+
+		temp_z_factor = cv2->z_factor;
+		cv2->z_factor = cv2->old_z_factor;
+		cv2->old_z_factor = temp_z_factor;
+
+		recalc_XPoints_of_curve_2d( cv2 );
+
+		if ( cv2->is_fs )
+		{
+			cv2->is_fs = UNSET;
+			fl_set_button( run_form->full_scale_button, 0 );
+		}
+
+		redraw_all_2d( );
+	}
 }
 
 
@@ -1051,6 +1057,37 @@ void fs_button_callback( FL_OBJECT *a, long b )
 
 	state = fl_get_button( run_form->full_scale_button );
 
+	if ( state == 1 )
+	{
+		if ( G.dim == 1 )
+			G.is_fs = SET;
+		else
+		{
+			if ( G.active_curve != -1 )
+				G.curve_2d[ G.active_curve ]->is_fs = SET;
+		}
+		fl_set_object_helper( run_form->full_scale_button,
+							  "Switch off automatic rescaling" );
+	}
+	else
+	{
+		if ( G.dim == 1 )
+		{
+			G.is_fs = UNSET;
+			fl_set_object_helper( run_form->full_scale_button,
+								  "Rescale curves to fit into the window\n"
+								  "and switch on automatic rescaling" );
+		}
+		else
+		{
+			if ( G.active_curve != -1 )
+				G.curve_2d[ G.active_curve ]->is_fs = UNSET;
+			fl_set_object_helper( run_form->full_scale_button,
+								  "Rescale curve to fit into the window\n"
+								  "and switch on automatic rescaling" );
+		}
+	}
+
 	if ( G.dim == 1 )
 	{
 		if ( state == 1 )        /* if button got switched on */
@@ -1071,47 +1108,38 @@ void fs_button_callback( FL_OBJECT *a, long b )
 
 			/* ... and rescale to full scale */
 
-			G.is_fs = SET;
 			fs_rescale_1d( );
-			fl_set_object_helper( run_form->full_scale_button,
-								  "Switch off automatic rescaling" );
 		}
-		else                     /* if button got switched off */
-		{
-			G.is_fs = UNSET;
-			fl_set_object_helper( run_form->full_scale_button,
-								  "Rescale curves to fit into the window\n"
-								  "and switch on automatic rescaling" );
-		}
+
+		redraw_all_1d( );
 	}
-	else
-		fs_rescale_2d( );
-
-	/* Redraw the graphic */
-
-	redraw_all_1d( );
+	else if ( G.active_curve != -1 )
+	{
+		if ( state == 1 )
+		{
+			G.curve_2d[ G.active_curve ]->is_fs = SET;
+			fs_rescale_2d( G.curve_2d[ G.active_curve ] );
+			redraw_all_2d( );
+		}
+		else
+			G.curve_2d[ G.active_curve ]->is_fs = UNSET;
+	}
 }
 
 
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
-
-void fs_rescale_2d( void )
-{
-}
-
-
-
 
 void curve_button_callback( FL_OBJECT *obj, long data )
 {
 	char hstr[ 128 ];
 
+
 	obj = obj;
-	G.curve[ data - 1 ]->active ^= SET;
 
 	if ( G.dim == 1 )
 	{
+		G.curve[ data - 1 ]->active ^= SET;
 		/* Change the help string for the button */
 
 		if ( fl_get_button( obj ) )
@@ -1122,7 +1150,7 @@ void curve_button_callback( FL_OBJECT *obj, long data )
 
 		fl_set_object_helper( obj, hstr );
 
-		/* Redraw both axis to make sure the axis fo the first active button
+		/* Redraw both axis to make sure the axis for the first active button
 		   is shown */
 
 		redraw_canvas_1d( &G.x_axis );
@@ -1130,9 +1158,10 @@ void curve_button_callback( FL_OBJECT *obj, long data )
 	}
 	else
 	{
-		
+		/* Make buttons work like radio buttons but also allow to switch off
+		   all of them */
 
-		if ( data == G.active_curve )         /* shown curve is switched off */
+		if ( data - 1 == G.active_curve )     /* shown curve is switched off */
 			G.active_curve = -1;
 		else
 		{
@@ -1155,8 +1184,13 @@ void curve_button_callback( FL_OBJECT *obj, long data )
 					break;
 			}
 
-			G.active_curve = data;
+			G.active_curve = data - 1;
+
+			fl_set_button( run_form->full_scale_button,
+						   G.curve_2d[ G.active_curve ]->is_fs );
 		}
+
+		redraw_all_2d( );
 	}
 
 }
@@ -1168,10 +1202,20 @@ void curve_button_callback( FL_OBJECT *obj, long data )
 void clear_curve( long curve )
 {
 	long i;
-	Curve_1d *cv = G.curve[ curve ];
+	Scaled_Point *sp;
 
 
-	for ( i = 0; i < G.nx; i++ )
-		cv->points[ i ].exist = UNSET;
-	cv->count = 0;
+	if ( G.dim == 1 )
+	{
+		for ( sp = G.curve[ curve ]->points, i = 0; i < G.nx; sp++, i++ )
+			sp->exist = UNSET;
+		G.curve[ curve ]->count = 0;
+	}
+	else
+	{
+		for ( sp = G.curve_2d[ curve ]->points, i = 0; i < G.nx * G.ny;
+			  sp++, i++ )
+			sp->exist = UNSET;
+		G.curve_2d[ curve ]->count = 0;
+	}
 }

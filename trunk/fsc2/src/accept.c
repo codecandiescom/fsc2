@@ -11,6 +11,9 @@ static bool other_data_request( int type, void * ptr );
 static void accept_1d_data( long x_index, long curve, int type, void *ptr );
 static void accept_2d_data( long x_index, long y_index, long curve, int type,
 							void *ptr );
+static void incr_x( long x_index, long len );
+static void incr_y( long y_index );
+static void incr_x_and_y( long x_index, long len, long y_index );
 
 
 /*---------------------------------------------------------------------------*/
@@ -101,6 +104,8 @@ void accept_new_data( void )
 
 	if ( G.dim == 1 )
 		redraw_all_1d( );
+	else
+		redraw_all_2d( );
 }
 
 
@@ -151,12 +156,12 @@ bool unpack_and_accept( void *ptr )
 				ptr_next = ptr + sizeof( double );
 				break;
 
-			case INT_TRANS_ARR :
+			case INT_ARR :
 				len = *( ( long * ) ptr );
 				ptr_next = ptr + ( len + 1 ) * sizeof( long );
 				break;
 
-			case FLOAT_TRANS_ARR :
+			case FLOAT_ARR :
 				len = *( ( long * ) ptr );
 				ptr_next = ptr + sizeof( long ) + len * sizeof( double );
 				break;
@@ -177,6 +182,9 @@ bool unpack_and_accept( void *ptr )
 	return OK;
 }
 
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 bool other_data_request( int type, void * ptr )
 {
@@ -208,9 +216,8 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 	long len;
 	long *l_data;
 	double *f_data;
-
-	double rw_y_max,
-		   rw_y_min;
+	double rw_max,
+		   rw_min;
 	void *cur_ptr;
 	double data;
 	double new_rwc_delta_y;
@@ -241,13 +248,13 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 			f_data = ( double * ) ptr;
 			break;
 
-		case INT_TRANS_ARR :
+		case INT_ARR :
 			len = *( ( long * ) ptr );
 			ptr += sizeof( long );
 			l_data = ( long * ) ptr;
 			break;
 
-		case FLOAT_TRANS_ARR :
+		case FLOAT_ARR :
 			len = *( ( long * ) ptr );
 			ptr += sizeof( long );
 			f_data = ( double * ) ptr;
@@ -255,10 +262,9 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 	}
 
 	/* If the number of points exceeds the size of the arrays for the curves
-	   we print an error message if the number was fixed by the call to
-	   init_1d(), otherwise we have to increase the sizes for all curves.
-	   But take care: While x_index + len may be greater than G.nx x_index
-	   can still be smaller than G.nx ! */
+	   we have to increase the sizes for all curves. But take care: While
+	   x_index + len may be greater than G.nx, x_index can still be smaller
+	   than G.nx ! */
 
 	if ( x_index + len > G.nx )
 	{
@@ -283,12 +289,12 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 
 	/* Find maximum and minimum of old and new data */
 
-	rw_y_max = G.rw_y_max;
-	rw_y_min = G.rw_y_min;
+	rw_max = G.rw_max;
+	rw_min = G.rw_min;
 
 	for ( cur_ptr = ptr, i = 0; i < len; i++ )
 	{
-		if ( type & ( INT_VAR | INT_TRANS_ARR ) )
+		if ( type & ( INT_VAR | INT_ARR ) )
 		{
 			data = ( double ) *( ( long * ) cur_ptr );
 			cur_ptr += sizeof( long );
@@ -299,19 +305,18 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 			cur_ptr += sizeof( double );
 		}
 
-		rw_y_max = d_max( data, rw_y_max );
-		rw_y_min = d_min( data, rw_y_min );
+		rw_max = d_max( data, rw_max );
+		rw_min = d_min( data, rw_min );
 	}
 
 	/* If the minimum or maximum has changed rescale all old scaled data */
 
-	if ( G.rw_y_max < rw_y_max || G.rw_y_min > rw_y_min )
+	if ( G.rw_max < rw_max || G.rw_min > rw_min )
 	{
-		new_rwc_delta_y = rw_y_max - rw_y_min;
+		new_rwc_delta_y = rw_max - rw_min;
 
 		if ( G.is_scale_set )
 		{
-
 			for ( i = 0; i < G.nc; i++ )
 			{
 				cv = G.curve[ i ];
@@ -319,13 +324,14 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 				for ( j = 0; j < G.nx; j++ )
 					if ( cv->points[ j ].exist )
 						cv->points[ j ].v = ( G.rwc_delta[ Y ]
-						        * cv->points[ j ].v + G.rw_y_min - rw_y_min ) /
+									* cv->points[ j ].v + G.rw_min - rw_min ) /
 							                                   new_rwc_delta_y;
 
 				if ( ! G.is_fs )
 				{
 					cv->s2d[ Y ] *= new_rwc_delta_y / G.rwc_delta[ Y ];
-					cv->shift[ Y ] *= G.rwc_delta[ Y ] / new_rwc_delta_y;
+					cv->shift[ Y ] = ( G.rwc_delta[ Y ] * cv->shift[ Y ]
+									   - G.rw_min + rw_min ) / new_rwc_delta_y;
 				}
 			}
 
@@ -335,14 +341,14 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 		/* If the data have not been scaled to [0,1] yet and the maximum
 		   value isn't identical to the minimum do the scaling now */
 
-		if ( ! G.is_scale_set && rw_y_max != rw_y_min )
+		if ( ! G.is_scale_set && rw_max != rw_min )
 		{
 			for ( i = 0; i < G.nc; i++ )
 			{
 				cv = G.curve[ i ];
 				for ( j = 0; j < G.nx; j++ )
 					if ( cv->points[ j ].exist )
-						cv->points[ j ].v = ( cv->points[ j ].v - rw_y_min ) /
+						  cv->points[ j ].v = ( cv->points[ j ].v - rw_min ) /
 						                                       new_rwc_delta_y;
 			}
 
@@ -350,8 +356,8 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 			G.is_scale_set = SET;
 		}
 
-		G.rw_y_min = rw_y_min;
-		G.rw_y_max = rw_y_max;
+		G.rw_min = rw_min;
+		G.rw_max = rw_max;
 		G.scale_changed = SET;
 	}
 
@@ -365,7 +371,7 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 
 	for ( cur_ptr = ptr, i = x_index; i < x_index + len; i++ )
 	{
-		if ( type & ( INT_VAR | INT_TRANS_ARR ) )
+		if ( type & ( INT_VAR | INT_ARR ) )
 		{
 			data = ( double ) *( ( long * ) cur_ptr );
 			cur_ptr += sizeof( long );
@@ -377,7 +383,7 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 		}
 
 		if ( G.is_scale_set )
-			G.curve[ curve ]->points[ i ].v = ( data - G.rw_y_min ) /
+			G.curve[ curve ]->points[ i ].v = ( data - G.rw_min ) /
 				                                              G.rwc_delta[ Y ];
 		else
 			G.curve[ curve ]->points[ i ].v = data;
@@ -396,7 +402,7 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 	if ( ! G.is_scale_set )
 		return;
 
-	G.rwc_start[ Y ] = rw_y_min;
+	G.rwc_start[ Y ] = rw_min;
 
 	for ( i = 0; i < G.nc; i++ )
 	{
@@ -415,4 +421,318 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 void accept_2d_data( long x_index, long y_index, long curve, int type,
 					 void *ptr )
 {
+	long len;
+	long *l_data;
+	double *f_data;
+	double rw_max,
+		   rw_min;
+	void *cur_ptr;
+	double data;
+	double new_rwc_delta_z;
+	Curve_2d *cv;
+	long i, j;
+	Scaled_Point *sp;
+
+	/* Test if the curve number is ok */
+
+	if ( curve >= G.nc )
+	{
+		eprint( FATAL, "$s:%ld: There is no curve %ld.\n", Fname, Lc,
+				curve + 1 );
+		THROW( EXCEPTION );
+	}
+
+	cv = G.curve_2d[ curve ];
+
+	/* Get the amount of new data and a pointer to the start of the data */
+
+	switch ( type )
+	{
+		case INT_VAR :
+			len = 1;
+			l_data = ( long * ) ptr;
+			break;
+
+		case FLOAT_VAR :
+			len = 1;
+			f_data = ( double * ) ptr;
+			break;
+
+		case INT_ARR :
+			len = *( ( long * ) ptr );
+			ptr += sizeof( long );
+			l_data = ( long * ) ptr;
+			break;
+
+		case FLOAT_ARR :
+			len = *( ( long * ) ptr );
+			ptr += sizeof( long );
+			f_data = ( double * ) ptr;
+			break;
+	}
+
+	/* Now test if the new data fit into the already allocated memory,
+	   otherwise extend the memory area. */
+
+	if ( x_index + len > G.nx )
+	{
+		if ( y_index >= G.ny )
+			incr_x_and_y( x_index, len, y_index );
+		else
+			incr_x( x_index, len );
+		G.scale_changed = SET;
+	}
+	else if ( y_index >= G.ny )
+	{
+		incr_y( y_index );
+		G.scale_changed = SET;
+	}
+
+	/* Find maximum and minimum of old and new data */
+
+	rw_max = cv->rw_max;
+	rw_min = cv->rw_min;
+
+	for ( cur_ptr = ptr, i = 0; i < len; i++ )
+	{
+		if ( type & ( INT_VAR | INT_ARR ) )
+		{
+			data = ( double ) *( ( long * ) cur_ptr );
+			cur_ptr += sizeof( long );
+		}
+		else
+		{
+			data = *( ( double * ) cur_ptr );
+			cur_ptr += sizeof( double );
+		}
+
+		rw_max = d_max( data, rw_max );
+		rw_min = d_min( data, rw_min );
+	}
+
+	/* If the minimum or maximum has changed rescale all old scaled data */
+
+	if ( cv->rw_max < rw_max || cv->rw_min > rw_min )
+	{
+		new_rwc_delta_z = rw_max - rw_min;
+
+		if ( cv->is_scale_set )
+		{
+			for ( sp = cv->points, j = 0; j < G.nx * G.ny; sp++, j++ )
+				if ( sp->exist )
+					sp->v = ( cv->rwc_delta[ Z ] * sp->v + cv->rw_min
+							  - rw_min ) / new_rwc_delta_z;
+
+			if ( ! cv->is_fs )
+			{
+				cv->s2d[ Z ] *= new_rwc_delta_z / cv->rwc_delta[ Z ];
+				cv->shift[ Z ] = ( cv->rwc_delta[ Z ] * cv->shift[ Z ]
+								   - cv->rw_min + rw_min ) / new_rwc_delta_z;
+				cv->z_factor *= new_rwc_delta_z / cv->rwc_delta[ Z ];
+			}
+		}
+
+		cv->rwc_delta[ Z ] = new_rwc_delta_z;
+
+
+		/* If the data have not been scaled to [0,1] yet and the maximum
+		   value isn't identical to the minimum do the scaling now */
+
+		if ( ! cv->is_scale_set && rw_max != rw_min )
+		{
+			for ( sp = cv->points, j = 0;
+				  j < G.nx * G.ny; sp++, j++ )
+				if ( sp->exist )
+					sp->v = ( sp->v - rw_min ) / new_rwc_delta_z;
+
+			cv->rwc_delta[ Z ] = new_rwc_delta_z;
+			cv->is_scale_set = SET;
+		}
+
+		cv->rw_min = rw_min;
+		cv->rw_max = rw_max;
+		cv->scale_changed = SET;
+	}
+
+	/* Now we're finished with rescaling and can set the new number of points
+	   if necessary */
+
+	if ( x_index + len > G.nx )
+		G.nx = x_index + len;
+	if ( y_index >= G.ny )
+		G.ny = y_index + 1;
+
+	/* Include the new data into the scaled data */
+
+	for ( cur_ptr = ptr, i = x_index,
+		  sp = &cv->points[ y_index * G.nx + x_index ];
+		  i < x_index + len; sp++, i++ )
+	{
+		if ( type & ( INT_VAR | INT_ARR ) )
+		{
+			data = ( double ) *( ( long * ) cur_ptr );
+			cur_ptr += sizeof( long );
+		}
+		else
+		{
+			data = *( ( double * ) cur_ptr );
+			cur_ptr += sizeof( double );
+		}
+
+		if ( cv->is_scale_set )
+			sp->v = ( data - cv->rw_min ) / cv->rwc_delta[ Z ];
+		else
+			sp->v = data;
+
+		/* Increase the point count if the point is new and mark it as set */
+
+		if ( ! sp->exist )
+		{
+			cv->count++;
+			sp->exist = SET;
+		}
+	}
+
+	if ( ! cv->is_scale_set )
+		return;
+
+	/* Calculate new points for display */
+
+	cv->rwc_start[ Z ] = rw_min;
+
+	for ( i = 0; i < G.nc; i++ )
+		if ( G.scale_changed || ( i == curve && cv->scale_changed ) )
+			recalc_XPoints_of_curve_2d( cv );
+
+	G.scale_changed = UNSET;
+	cv->scale_changed = UNSET;
+}
+
+
+/*----------------------------------------------*/
+/* Increments the number of data in x-direction */
+/*----------------------------------------------*/
+
+void incr_x( long x_index, long len )
+{
+	long i, j, k;
+	Curve_2d *cv;
+	long new_Gnx = x_index + len;
+	Scaled_Point *old_points;
+	Scaled_Point *sp;
+
+
+	for ( i = 0; i < G.nc; i++ )
+	{
+		cv = G.curve_2d[ i ];
+			
+		old_points = cv->points;
+		cv->points = T_malloc( new_Gnx * G.ny * sizeof( Scaled_Point ) );
+
+		for ( sp = cv->points, j = 0; j < G.ny; j++ )
+		{
+			memcpy( ( void * ) sp, ( void * ) ( old_points + j * G.nx ),
+					G.nx * sizeof( Scaled_Point ) );
+			for ( sp += G.nx, k = G.nx; k < new_Gnx; sp++, k++ )
+				sp->exist = UNSET;
+		}
+
+		T_free( old_points );
+
+		cv->xpoints = T_realloc( cv->xpoints,
+								 new_Gnx * G.ny * sizeof( XPoint ) );
+		cv->xpoints_s = T_realloc( cv->xpoints_s,
+								   new_Gnx * G.ny * sizeof( XPoint ) );
+
+		cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
+			                                        ( double ) ( new_Gnx - 1 );
+	}
+
+	G.scale_changed = SET;
+}
+
+
+/*----------------------------------------------*/
+/* Increments the number of data in y-direction */
+/*----------------------------------------------*/
+
+void incr_y( long y_index )
+{
+	long i, j, k;
+	Curve_2d *cv;
+	Scaled_Point *sp;
+
+
+	for ( i = 0; i < G.nc; i++ )
+	{
+		cv = G.curve_2d[ i ];
+			
+		cv->points = T_realloc( cv->points, G.nx * ( y_index + 1 )
+								            * sizeof( Scaled_Point ) );
+		cv->xpoints = T_realloc( cv->xpoints, G.nx * ( y_index + 1 )
+								              * sizeof( XPoint ) );
+		cv->xpoints_s = T_realloc( cv->xpoints_s, G.nx * ( y_index + 1 )
+								                   * sizeof( XPoint ) );
+
+		for ( sp = &cv->points[ G.ny * G.nx ], j = G.ny; j <= y_index; j++ )
+			for ( k = 0; k < G.nx; sp++, k++ )
+				sp->exist = UNSET;
+
+		cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
+	}
+
+	G.scale_changed = SET;
+}
+
+
+/*----------------------------------------------------------*/
+/* Increments the number of data in both x- and y-direction */
+/*----------------------------------------------------------*/
+
+void incr_x_and_y( long x_index, long len, long y_index )
+{
+	long i, j, k;
+	Curve_2d *cv;
+	long new_Gnx = x_index + len;
+	Scaled_Point *old_points;
+	Scaled_Point *sp;
+
+
+	for ( i = 0; i < G.nc; i++ )
+	{
+		cv = G.curve_2d[ i ];
+			
+		old_points = cv->points;
+		cv->points = T_malloc( new_Gnx * ( y_index + 1 )
+							   * sizeof( Scaled_Point ) );
+
+		for ( sp = cv->points, j = 0; j < G.ny; j++ )
+		{
+			memcpy( ( void * ) sp, ( void * ) ( old_points + j * G.nx ),
+					G.nx * sizeof( Scaled_Point ) );
+			for ( sp += G.nx, k = G.nx; k < new_Gnx; sp++, k++ )
+				sp->exist = UNSET;
+		}
+
+		for ( ; j <= y_index; j++ )
+			for ( k = 0; k < new_Gnx; sp++, k++ )
+				sp->exist = UNSET;
+
+		T_free( old_points );
+
+		cv->xpoints = T_realloc( cv->xpoints, new_Gnx * ( y_index + 1 )
+								              * sizeof( XPoint ) );
+		cv->xpoints_s = T_realloc( cv->xpoints_s, new_Gnx * ( y_index + 1 )
+								                  * sizeof( XPoint ) );
+
+		/* Reorganize the old elements to fit into the new array and clear
+		   the the new elements in the already existing rows */
+
+
+		cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
+			                                        ( double ) ( new_Gnx - 1 );
+		cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
+	}
+
+	G.scale_changed = SET;
 }

@@ -1457,17 +1457,23 @@ Var *vars_arr_rhs( Var *v )
 
 
 	/* The variable pointer this function gets passed is a pointer to the very
-       last index on the variable stack. Now we've got to work our way up in
-       the stack until we find the first non-index variable which has to be a
-       pointer to an array. While doing so we also count the number 'dim' of
-       indices on the stack */
+	last index on the variable stack. Now we've got to work our way up in the
+	stack until we find the first non-index variable which has to be a pointer
+	to an array. While doing so we also count the number 'dim' of indices on
+	the stack. If the last entry on the stack is an undefined variable this
+	means we ound a refrence to a 1-dimensional array, i.e. something like
+	`j[ ]'. */
 
 	dim = 0;
-	while ( v->type != ARR_PTR )
-	{
+
+	if ( v->type == UNDEF_VAR && v->prev->type == ARR_PTR )
 		v = v->prev;
-		dim++;
-	}
+	else
+		while ( v->type != ARR_PTR )
+		{
+			v = v->prev;
+			dim++;
+		}
 
 	a = v->from;                      /* Get array the pointer refers to */
 

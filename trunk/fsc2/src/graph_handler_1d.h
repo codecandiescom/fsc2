@@ -19,6 +19,7 @@ void redraw_all_1d( void );
 void redraw_canvas_1d( Canvas *c );
 void repaint_canvas_1d( Canvas *c );
 void fs_rescale_1d( void );
+void make_scale_1d( Curve_1d *cv, Canvas *c, int coord );
 
 
 #endif   /* ! GRAPH_HANDLER_1D_HEADER */
