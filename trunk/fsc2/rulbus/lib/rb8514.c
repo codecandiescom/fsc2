@@ -74,7 +74,7 @@ static inline long lrnd( double x );
 
 /*------------------------------------------------------------------*
  * Function for initializing the delay card subsystem (gets invoked
- * automatically by the rulbus_open( ) function, so it's not to be
+ * automatically by the rulbus_open() function, so it's not to be
  * called by the user directly)
  *------------------------------------------------------------------*/
 
@@ -88,8 +88,10 @@ int rulbus_rb8514_delay_init( void )
 
 /*------------------------------------------------------------------*
  * Function for deactivating the delay card subsystem (gets invoked
- * automatically by the rulbus_close( ) function, so it's not to be
- * called by the user directly)
+ * automatically by the rulbus_close() function, so it's not to be
+ * called by the user directly). Usually it won't even do anything,
+ * at least if rulbus_rb8514_delay_card_exit() has been called for
+ * all existing cards.
  *------------------------------------------------------------------*/
 
 void rulbus_rb8514_delay_exit( void )
@@ -103,11 +105,11 @@ void rulbus_rb8514_delay_exit( void )
 }
 
 
-/*----------------------------------------------------------------------*
+/*---------------------------------------------------------------------*
  * Function for initializing a single card (gets invoked automatically
- * by the rulbus_card_open( ) function, so it's not to be called by the
+ * by the rulbus_card_open() function, so it's not to be called by the
  * user directly)
- *----------------------------------------------------------------------*/
+ *---------------------------------------------------------------------*/
 
 int rulbus_rb8514_delay_card_init( int handle )
 {
@@ -148,13 +150,13 @@ int rulbus_rb8514_delay_card_init( int handle )
 }
 	
 
-/*----------------------------------------------------------------*
+/*---------------------------------------------------------------*
  * Function for deactivation a card (gets invoked automatically
- * by the rulbus_card_close( ) function, so it's not to be called
+ * by the rulbus_card_close() function, so it's not to be called
  * by the user directly)
- *----------------------------------------------------------------*/
+ *---------------------------------------------------------------*/
 
-void rulbus_rb8514_delay_card_exit( int handle )
+int rulbus_rb8514_delay_card_exit( int handle )
 {
 	RULBUS_RB8514_DELAY_CARD *card;
 
@@ -162,22 +164,33 @@ void rulbus_rb8514_delay_card_exit( int handle )
 	/* Try to find the card, if it doesn't exist just return */
 
 	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
-		return;
+		return rulbus_errno = RULBUS_OK;
 
 	/* Remove the entry for the card */
 
-	if ( card != rulbus_rb8514_delay_card + rulbus_num_delay_cards - 1 )
-		memcpy( card, card + 1, sizeof *card *
-				rulbus_num_delay_cards -
-				( card - rulbus_rb8514_delay_card ) - 1 );
+	if ( rulbus_num_delay_cards > 1 )
+	{
+		if ( card != rulbus_rb8514_delay_card + rulbus_num_delay_cards - 1 )
+			memmove( card, card + 1, sizeof *card *
+					 ( rulbus_num_delay_cards -
+					   ( card - rulbus_rb8514_delay_card ) - 1 ) );
 
-	card = realloc( rulbus_rb8514_delay_card,
-					( rulbus_num_delay_cards - 1 ) * sizeof *card );
+		card = realloc( rulbus_rb8514_delay_card,
+						( rulbus_num_delay_cards - 1 ) * sizeof *card );
 
-	if ( card != NULL )
+		if ( card == NULL )
+			return rulbus_errno = RULBUS_NO_MEMORY;
+
 		rulbus_rb8514_delay_card = card;
-
+	}
+	else
+	{
+		free( rulbus_rb8514_delay_card );
+		rulbus_rb8514_delay_card = NULL;
+	}
+		
 	rulbus_num_delay_cards--;
+	return rulbus_errno = RULBUS_OK;
 }
 
 

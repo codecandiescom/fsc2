@@ -105,7 +105,7 @@ int rulbus_generic_card_init( int handle )
  * by the user directly)
  *----------------------------------------------------------------*/
 
-void rulbus_generic_card_exit( int handle )
+int rulbus_generic_card_exit( int handle )
 {
 	RULBUS_GENERIC_CARD *card;
 
@@ -113,22 +113,25 @@ void rulbus_generic_card_exit( int handle )
 	/* Try to find the card, if it doesn't exist just return */
 
 	if ( ( card = rulbus_generic_card_find( handle ) ) == NULL )
-		return;
+		return rulbus_errno = RULBUS_OK;
 
 	/* Remove the entry for the card */
 
 	if ( card != rulbus_generic_card + rulbus_num_generic_cards - 1 )
-		memcpy( card, card + 1, sizeof *card *
-				rulbus_num_generic_cards -
-				( card - rulbus_generic_card ) - 1 );
+		memmove( card, card + 1, sizeof *card *
+				 ( rulbus_num_generic_cards -
+				   ( card - rulbus_generic_card ) - 1 ) );
 
 	card = realloc( rulbus_generic_card,
 					( rulbus_num_generic_cards - 1 ) * sizeof *card );
 
-	if ( card != NULL )
-		rulbus_generic_card = card;
+	if ( card == NULL )
+		return RULBUS_NO_MEMORY;
 
+	rulbus_generic_card = card;
 	rulbus_num_generic_cards--;
+
+	return rulbus_errno = RULBUS_OK;
 }
 
 

@@ -160,7 +160,7 @@ struct RULBUS_CARD_HANDLER {
 	int ( *init ) ( void );       /* module initialization function */
 	void ( *exit ) ( void );      /* module cleanup function */
 	int ( *card_init ) ( int );   /* card initialization function */
-	void ( *card_exit ) ( int );  /* card cleanup function */
+	int ( *card_exit ) ( int );  /* card cleanup function */
 	int is_init;                  /* module initialization flag */
 };
 
@@ -261,7 +261,6 @@ int rulbus_open( void )
 	rulbus_parser_init( );
     retval = rulbus_parse( );
 	rulbus_parser_clean_up( );
-
 	fclose( rulbus_in );
 	rulbus_parser_clean_up( );
 
@@ -519,7 +518,7 @@ int rulbus_write( int handle, unsigned char offset, unsigned char *data,
 								rulbus_card[ handle ].addr + offset,
 								data, len );
 
-	if ( retval != len )
+	if ( retval <= 0 )
 		return rulbus_errno = retval;
 
 	rulbus_errno = RULBUS_OK;
