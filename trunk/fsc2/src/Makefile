@@ -96,7 +96,7 @@ crowley.none:
 
 
 # How to create the graphical interface files - they need making if either
-# fsc2_rsc.[ch] or fsc2_rsc_[hl]r.[ch] doen't exist or the file they are
+# fsc2_rsc.[ch] or fsc2_rsc_[hl]r.[ch] don't exist or the file they are
 # made from are newer
 
 hi_res:
