@@ -35,8 +35,8 @@ install:
 uninstall:
 	-$(RM) $(RMFLAGS) $(emacs_dir)/edl-mod.el
 	-$(RM) $(RMFLAGS) $(emacs_dir)/edl-mod.elc
-	if [ -z "`ls -A $(emacs_dir)`" ]; then  \
-		rmdir $(emacs_dir);                 \
+	-if [ -z "`ls -A $(emacs_dir)`" ]; then  \
+		rmdir $(emacs_dir);                  \
 	fi
 
 distclean:

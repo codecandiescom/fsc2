@@ -343,6 +343,9 @@ install:
 	$(MAKE) -C doc install
 
 
+
+# How to get rid of everything that got installed
+
 uninstall:
 	-$(RM) $(RMFLAGS) $(libdir)/Functions
 	-$(RM) $(RMFLAGS) $(libdir)/Devices
@@ -363,6 +366,7 @@ uninstall:
 	-if [ -z "`ls -A $(libdir)`" ]; then  \
 		rmdir $(libdir);                  \
 	fi
+
 
 # `clean' deletes all the files remaining from the compilation while
 # `distclean' also removes all executables, shared libraries and documentation
