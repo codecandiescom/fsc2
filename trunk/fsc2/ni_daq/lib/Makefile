@@ -29,7 +29,7 @@ lib_dir   = $(prefix)/lib
 
 CFLAGS    = -ggdb -O0 -Wall -Wwrite-strings -Wstrict-prototypes \
 			-Wmissing-prototypes -Wmissing-declarations -W
-LDFLAGS   = -Wl,--version-script=ni_daq_lib.map
+LDFLAGS   = -Wl,-E
 INCLUDES  = -I../include -I.
 
 sources   = $(shell ls *.c)
@@ -42,7 +42,7 @@ headers   = ../include/ni_daq.h ../include/ni_daq_drv.h
 
 all: libni_daq.so libni_daq.a
 
-libni_daq.so: ${sources:.c=.o} $(headers) ni_daq_lib.map
+libni_daq.so: ${sources:.c=.o} $(headers)
 	$(CC) -shared -o $@ ${sources:.c=.o} $(LDFLAGS)
 
 libni_daq.a: ${sources:.c=.o} $(headers)
