@@ -3089,7 +3089,7 @@ channels set up for bipolar input the allowed ranges are @w{10 V},
 range settings are @w{10 V}, @w{5 V}, @w{2 V}, @w{1 V}, @w{500 mV},
 @w{200 mV} and @w{100 mV}.
 
-Then follwo three optional settings .The first one is the coupling of
+Then follow three optional settings. The first one is the coupling of
 the channel, which must be given by one of the strings @code{"Ground"},
 @code{"Floating"} or @code{"Differential"}. The first one,
 @code{"Ground"}, means that a ground-referenced signal source is
