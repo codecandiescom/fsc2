@@ -1052,8 +1052,14 @@ bool magnet_do( int command )
 	switch ( command )
 	{
 		case SERIAL_INIT :               /* open and initialize serial port */
-			if ( ( magnet.fd =
-				  open( serial_port, O_WRONLY | O_NOCTTY | O_NONBLOCK ) ) < 0 )
+			/* We need exclussive access to the serial port and we also need
+			   non-blocking mode to avoid hanging indefinitely if the other
+			   side does not react. O_NOCTTY is set because the serial port
+			   should not become the controlling terminal, otherwise line
+			   noise read as a CTRL-C might kill the program. */
+
+			if ( ( magnet.fd = open( serial_port,
+							O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) < 0 )
 				return FAIL;
 
 			tcgetattr( magnet.fd, &magnet.old_tio );

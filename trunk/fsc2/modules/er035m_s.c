@@ -793,6 +793,12 @@ static bool er035m_s_comm( int type, ... )
 	switch ( type )
 	{
 		case SERIAL_INIT :
+			/* We need exclussive access to the serial port and we also need
+			   non-blocking mode to avoid hanging indefinitely if the other
+			   side does not react. O_NOCTTY is set because the serial port
+			   should not become the controlling terminal, otherwise line
+			   noise read as a CTRL-C might kill the program. */
+
 			if ( ( nmr.fd = open( serial_port,
 							  O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) < 0 )
 				return FAIL;
@@ -801,9 +807,9 @@ static bool er035m_s_comm( int type, ... )
 			memcpy( &nmr.new_tio, &nmr.old_tio, sizeof( struct termios ) );
 
 			/* Switch off parity checking and use of 2 stop bits and clear
-			   character size mask, then set character size mask to CS8,
-			   set flag for ignoring modem lines, enable reading and, finally
-			   set the baud rate */
+			   character size mask, set character size mask to CS8 and the
+			   flag for ignoring modem lines, enable reading and, finally,
+			   set the baud rate. */
 
 			nmr.new_tio.c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
 
