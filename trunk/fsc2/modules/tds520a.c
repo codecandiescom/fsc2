@@ -131,9 +131,6 @@ int tds520a_test_hook( void )
 
 int tds520a_exp_hook( void )
 {
-	int i;
-
-
 	/* Reset the digitizer structure to the state it was set to in the
 	   preparations section - changes done to it in the test run are to
 	   be undone... */
@@ -159,9 +156,6 @@ int tds520a_exp_hook( void )
 
 int tds520a_end_of_exp_hook( void )
 {
-	int i;
-
-
 	tds520a_finished( );
 	return 1;
 }
@@ -651,7 +645,7 @@ Var *digitizer_trigger_position( Var *v )
 	if ( v == NULL )
 		switch ( FSC2_MODE )
 		{
-			case PREPAATION :
+			case PREPARATION :
 				if ( tds520a.is_trig_pos )
 					return vars_push( FLOAT_VAR, tds520a.trig_pos );
 
@@ -984,7 +978,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	else
 		w = NULL;
 
-	if ( ( v == vars_pop( v ) ) != NULL )
+	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		eprint( WARN, SET, "%s: Superfluous arguments in call of "
 				"function %s().\n", DEVICE_NAME, Cur_Func );
