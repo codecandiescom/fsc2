@@ -65,7 +65,7 @@ restricts the use of the module to systems that have a fcntl(2) system
 call). Before a file (or parts of a file) can be locked, an object simulating
 a flock structure must be created and its properties set. Afterwards, by
 calling the function B<fcntl_lock()> a lock can be set or it can be determined
- which process currently holds the lock.
+which process currently holds the lock.
 
 =cut
 
@@ -265,7 +265,8 @@ end of the file.
 According to SUSV3 negative values for B<l_start> are allowed (resulting
 in a lock ranging from B<l_start + l_len> to B<l_start - 1>) Unfortunately,
 not all systems allow this and will return an error when you try to obtain
-the lock, so please read the fcntl(2) man page carefully for details.
+the lock, so please read the fcntl(2) man page for your system carefully
+for details.
 
 =cut
 
@@ -469,4 +470,4 @@ Jens Thoms Toerring <Jens.Toerring@physik.fu-berlin.de>
 
 =head1 SEE ALSO
 
-L<perl>, L<fcntl>, L<lseek>.
+L<perl>, L<fcntl(2)>, L<lseek(2)>.
