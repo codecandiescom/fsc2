@@ -652,7 +652,7 @@ I = 0, J = 0, K;
 File;
 field = start_field;
 ";
-	if ( $start_field < $end_field ) {
+	if ( $start_field <= $end_field ) {
 		print F "step_size = sweep_rate / kd;\n";
 	} else {
 		print F "step_size = - sweep_rate / kd;\n";
