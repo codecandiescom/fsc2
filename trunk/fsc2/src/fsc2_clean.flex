@@ -52,7 +52,7 @@ char *get_string( size_t len );
 void *T_malloc( size_t size );
 void *T_calloc( size_t nmemb, size_t size );
 void *T_realloc( void *ptr, size_t size );
-void T_free( void *ptr );
+void *T_free( void *ptr );
 
 
 long Lc,
@@ -665,7 +665,7 @@ void *T_realloc( void *ptr, size_t size )
 }
 
 
-void T_free( void *ptr )
+void *T_free( void *ptr )
 {
 #if defined MDEBUG
 	fprintf( stderr, "free:    %p\n", ptr );
@@ -674,6 +674,7 @@ void T_free( void *ptr )
 #endif
 
 	free( ptr );
+	return NULL;
 }
 
 

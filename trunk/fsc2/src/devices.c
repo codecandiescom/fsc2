@@ -227,8 +227,7 @@ void delete_devices( void )
 	for ( ; cd != NULL; cd = cdp )
 	{
 		unload_device( cd );           /* run exit hooks and unload module */
-		if ( cd->name != NULL )
-			T_free( cd->name );
+		T_free( cd->name );
 		cdp = cd->prev;
 		T_free( cd );
 	}
@@ -248,8 +247,7 @@ void delete_device_name_list( void )
 
 	for ( cd = Device_Name_List; cd != NULL; cd = cdn )
 	{
-		if ( cd->name != NULL )
-			T_free( cd->name );
+		T_free( cd->name );
 		cdn = cd->next;
 		T_free( cd );
 	}

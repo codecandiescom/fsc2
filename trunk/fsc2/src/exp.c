@@ -528,9 +528,7 @@ void exp_test_run( void )
 	Prg_Token *cur;
 	long old_FLL = File_List_Len;
 
-	if ( Fname != NULL )
-		T_free( Fname );
-	Fname = NULL;
+	Fname = T_free( Fname );
 
 	TRY
 	{

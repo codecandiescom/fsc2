@@ -334,7 +334,7 @@ int new_data_callback( XEvent *a, void *b )
 long reader( void *ret )
 {
 	CommStruct header;
-	char *str[ 4 ];
+	char *str[ 4 ] = { NULL, NULL, NULL, NULL };
 	int i;
 	int n1, n2;
 	long retval = 0;
@@ -371,8 +371,7 @@ long reader( void *ret )
 
 			/* Get rid of the string and return */
 
-			if ( str[ 0 ] != NULL )
-				T_free( str[ 0 ] );
+			str[ 0 ] = T_free( str[ 0 ] );
 			retval = 0;
 
 			kill( child_pid, DO_SEND );
@@ -405,8 +404,7 @@ long reader( void *ret )
 
 			/* Get rid of the string and return */
 
-			if ( str[ 0 ] != NULL )
-				T_free( str[ 0 ] );
+			str[ 0 ] = T_free( str[ 0 ] );
 			retval = 0;
 			break;
 
@@ -434,8 +432,7 @@ long reader( void *ret )
 
 			/* Get rid of the string and return */
 
-			if ( str[ 0 ] != NULL )
-				T_free( str[ 0 ] );
+			str[ 0 ] = T_free( str[ 0 ] );
 			retval = 0;
 			break;
 
@@ -475,8 +472,7 @@ long reader( void *ret )
 			/* Get rid of the strings and return */
 
 			for ( i = 0; i < 4; i++ )
-				if ( str[ i ] != NULL )
-					T_free( str[ i ] );
+				str[ i ] = T_free( str[ i ] );
 			break;
 
 		case C_SHOW_FSELECTOR :
@@ -510,8 +506,7 @@ long reader( void *ret )
 			/* Get rid of parameter strings and return */
 
 			for ( i = 0; i < 4; i++ )
-				if ( str[ i ] != NULL )
-					T_free( str[ i ] );
+				str[ i ] = T_free( str[ i ] );
 			retval = 0;
 			break;
 
@@ -563,8 +558,7 @@ long reader( void *ret )
 				break;
 			}
 
-			if ( retstr != NULL )
-				T_free( retstr );
+			T_free( retstr );
 
 			retstr = get_string( header.data.len );
             if ( header.data.len > 0 )

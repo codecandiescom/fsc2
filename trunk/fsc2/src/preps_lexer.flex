@@ -107,8 +107,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			/* handling of file name lines */
 {FILE}      {
 				*( prepstext + prepsleng - 1 ) = '\0';
-				if ( Fname != NULL )
-					T_free( Fname );
+				T_free( Fname );
 				Fname = get_string_copy( prepstext + 2 );
 			}
 

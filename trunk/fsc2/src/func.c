@@ -167,7 +167,7 @@ void functions_exit( void )
 	/* Get rid of the names of loaded functions (but not the built-in ones) */
 
 	for ( i = 0; i < Num_Func; i++ )
-		if ( Fncts[ i ].to_be_loaded && Fncts[ i ].name != NULL )
+		if ( Fncts[ i ].to_be_loaded )
 			T_free( ( char * ) Fncts[ i ].name );
 
 	Fncts = T_free( Fncts );

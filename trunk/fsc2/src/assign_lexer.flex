@@ -140,8 +140,7 @@ WS          [\n=: ]+
 			/* handling of file name lines */
 {FILE}      {
 				*( assigntext + assignleng - 1 ) = '\0';
-				if ( Fname != NULL )
-					T_free( Fname );
+				T_free( Fname );
 				Fname = get_string_copy( assigntext + 2 );
 			}
 

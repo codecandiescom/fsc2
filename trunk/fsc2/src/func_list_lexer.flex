@@ -155,9 +155,7 @@ int func_list_parse( Func **fncts, int num_func )
 	int cur;
 
 
-	if ( Fname != NULL )
-	    T_free( Fname );
-
+	T_free( Fname );
 	Fname = get_string( strlen( libdir ) + strlen( "Functions" ) );
 	strcpy( Fname, libdir );
 	if ( libdir[ strlen( libdir ) - 1 ] != '/' )

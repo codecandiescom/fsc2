@@ -125,8 +125,7 @@ int main( int argc, char *argv[ ] )
 
 	clean_up( );
 	xforms_close( );
-	if ( in_file != NULL )
-		T_free( in_file );
+	T_free( in_file );
 
 	/* Delete the lock file */
 
@@ -285,8 +284,7 @@ void load_file( FL_OBJECT *a, long reload )
 			return;
 		}
 
-		if ( old_in_file != NULL )
-			T_free( old_in_file );
+		T_free( old_in_file );
 	}
 
 	/* Quit if this is a reload but name of previous file is empty */
@@ -796,9 +794,7 @@ void clean_up( void )
 
 	/* Deallocate memory used for file names */
 
-	if ( Fname != NULL )
-		T_free( Fname );
-	Fname = NULL;
+	Fname = T_free( Fname );
 
 	/* run exit hook functions and unlink modules */
 

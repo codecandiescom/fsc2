@@ -69,8 +69,7 @@ WS          [\n\t ]+
 			/* handling of file name lines */
 {FILE}      {
 				*( devicestext + devicesleng - 1 ) = '\0';
-				if ( Fname != NULL )
-					T_free( Fname );
+				T_free( Fname );
 				Fname = get_string_copy( devicestext + 2 );
 			}
 
