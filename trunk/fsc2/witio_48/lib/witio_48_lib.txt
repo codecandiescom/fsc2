@@ -11,18 +11,18 @@ simple DIO using the two 82C55A chips on the board and only with mode 0
 ("Betriebsart 0"). The 8254/82C54 timer/counter chips on the board are
 not supported.
 
-
+****************************************************************************
 * Please note: It is impossible to detect if a card actually exists (or    *
-* is at the address that has been specified as the I/O port base address). *
-* Thus all of the function will seem to work even though there is no card  *
-* at all installed (or the driver for the card was configured for a wrong  *
-* base I/O address). The only way to consistently check if a card exists   *
+* is at the address that has been specified as its I/O port base address). *
+* Thus all of the functions will seem to work even when there is no card   *
+* installed at all or the driver for the card was configured for a wrong   *
+* base I/O address. The only way to consistently check if a card exists    *
 * and the driver is correctly configured is to apply different inputs to   *
 * the DIO input(s) and check if the reported values are correct. When no   *
 * card exists or the driver is mis-configured the reported value will      *
 * most probably indicate that all input lines are in a high state what-    *
-* ever is really applied to the inputs.                                    +
-
+* ever is really applied to the inputs.                                    *
+****************************************************************************
 
 The 24-bit wide DIOs can be split up into either three 8-bit DIOs, two
 12-bit DIO, one 24-bit DIOs or one 16-bit and one 8-bit DIO. Splitting
