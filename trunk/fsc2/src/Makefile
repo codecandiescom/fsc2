@@ -1,15 +1,15 @@
 # $Id$
 
-c_sources      = fsc2.c pulser.c util.c exceptions.c variables.c vars_util.c \
-				 func.c func_basic.c func_util.c func_intact.c T.c phases.c  \
-				 exp.c devices.c run.c gpib_if.c comm.c chld_func.c          \
-				 graphics.c accept.c graph_handler_1d.c graph_handler_2d.c   \
-				 graph_cut.c loader.c bugs.c print.c conn.c ipc.c fsc2_rsc.c
-bison_sources  = $(filter-out gpib_parser.y,$(wildcard *_parser.y))
-flex_sources   = $(filter-out gpib_lexer.l,$(wildcard *_lexer.l))
-sources        = $(bison_sources:.y=.c) $(flex_sources:.l=.c) ${c_sources}
-objects        = $(sources:.c=.o)
-headers        = ${c_sources:.c=.h} global.h
+c_sources     = fsc2.c pulser.c util.c exceptions.c variables.c vars_util.c \
+			  	func.c func_basic.c func_util.c func_intact.c T.c phases.c  \
+			  	exp.c devices.c run.c gpib_if.c comm.c chld_func.c          \
+			  	graphics.c accept.c graph_handler_1d.c graph_handler_2d.c   \
+			  	graph_cut.c loader.c bugs.c print.c conn.c ipc.c fsc2_rsc.c
+bison_sources = $(filter-out gpib_parser.y,$(wildcard *_parser.y))
+flex_sources  = $(filter-out gpib_lexer.l,$(wildcard *_lexer.l))
+sources       = $(bison_sources:.y=.c) $(flex_sources:.l=.c) ${c_sources}
+objects       = $(sources:.c=.o)
+headers       = ${c_sources:.c=.h} global.h
 
 
 export headers     # export headers to the modules Makefile
@@ -25,7 +25,7 @@ export headers     # export headers to the modules Makefile
 
 
 all:
-	$(MAKE) $(whom_for)
+	$(MAKE) $(machine_name)                         # machine dependent stuff
 	$(MAKE) fsc2 fsc2_clean fsc2_connect modules
 
 

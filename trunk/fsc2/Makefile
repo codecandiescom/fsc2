@@ -46,13 +46,13 @@ EXEC_INSTALL   = install             # command for installing executables
 ########### (unless you really know what you're doing ...) #################
 ############################################################################
 
-# Set up a make variable with the machines full hostname
+# Set up a make variable with the machines FQDN
 
-whom_for       = $(shell hostname -f)
+machine_name   = $(shell hostname -f)
 
 # Last time I checked the pion still had the old libc...
 
-ifeq ($(whom_for),pion.anorg.chemie.uni-frankfurt.de)
+ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
 	CFLAGS    += -DIS_STILL_LIBC1
 endif
 
@@ -151,8 +151,8 @@ install:
 	$(INSTALL) -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
 
 	$(MAKE) -C utils install
-	if `grep install-$(whom_for) ./Makefile > /dev/null`; then \
-		$(MAKE) install-$(whom_for); \
+	if `grep install-$(machine_name) ./Makefile > /dev/null`; then \
+		$(MAKE) install-$(machine_name); \
 	fi
 	$(MAKE) -C scripts install
 	$(MAKE) -C doc install
