@@ -1,19 +1,21 @@
 use ExtUtils::MakeMaker;
 
-# Compile and run the program that creates the include file (first try the
-# version that also tries 'long long', then the one that only uses for 'long').
+use Config;
 
-if ( ( system( "make sizes1 >/dev/null 2>&1" ) or
-	   system( "./sizes1 >/dev/null 2>&1" ) ) and
-	 ( system( "make sizes2 >/dev/null 2>&1" ) or
-	   system( "./sizes2 >/dev/null 2>&1" ) ) ) {
+# Compile and run the program that creates the include file (first try the
+# version that also tries 'long long', then one that only uses 'long').
+
+if ( ( system $Config{cc}, qw( -o sizes1 sizes1.c ) or
+	   system "sizes1 >/dev/null 2>&1" ) and
+	 ( system $Config{cc}, qw( -o sizes2 sizes2.c ) or
+	   system "sizes2 >/dev/null 2>&1" ) ) {
 	unlink( "./sizes1" );
 	unlink( "./sizes2" );
 	die "Can't create the necessary header file.\n";
 }
-	
-unlink( "./sizes1" );
-unlink( "./sizes2" );
+
+unlink "./sizes1";
+unlink "./sizes2";
 
 # Now create the Makefile
 

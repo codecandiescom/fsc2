@@ -165,7 +165,7 @@ flock(2), which has some shortcomings.
 Using this module file locking via fcntl(2) can be done (obviously, this
 restricts the use of the module to systems that have a fcntl() system
 call). Before a file (or parts of a file) can be locked, an object simulating
-a flock structure must be created and its properties be set. Afterwards, by
+a flock structure must be created and its properties set. Afterwards, by
 calling the function fcntl_lock() a lock can be set or determined which
 process currently holds the lock.
 
@@ -262,14 +262,20 @@ errno is set to B<EINTR>.
 
 =back
 
-On success the function returns the string "0 but true".
-
+On success the function returns the string "0 but true". Should you ever get
+a return value of 'undef' with errno being set to B<EINVAL> chances are high
+that you found a bug in the module.
 
 =head2 EXPORT
 
 F_GETLK F_SETLK F_SETLKW
 F_RDLCK F_WRLCK F_UNLCK
 SEEK_SET SEEK_CUR SEEK_END
+
+=head1 CREDITS
+
+Mark-Jason Dominus <mjd@plover.com> and Benjamin Goldberg
+<goldbb2@earthlink.net> for discussions, code and encouragement.
 
 =head1 AUTHOR
 

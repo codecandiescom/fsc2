@@ -24,6 +24,7 @@ C_fcntl_lock( fd, function, flock_hash )
 	int fd
 	int function
 	SV *flock_hash
+
 	INIT:
 		unsigned char flock_struct[ STRUCT_SIZE ];
 		HV *fh;
@@ -38,7 +39,7 @@ C_fcntl_lock( fd, function, flock_hash )
 		fh = ( HV * ) SvRV( flock_hash );
 
 	CODE:
-		/* Unfortunately, we can't even be sure that the constants are not
+		/* Unfortunately, we can't even be sure that the constants aren't
 		   messed up... */
 
 		switch ( function )
@@ -73,7 +74,7 @@ C_fcntl_lock( fd, function, flock_hash )
 			XSRETURN_UNDEF;
 		}
 
-		/* Set up the the flock structure as expected by fcntl() with the
+		/* Set up the the flock structure expected by fcntl() with the
 		   values in the hash we got passed */
 
 		* ( LTYPE_TYPE * ) ( flock_struct + LTYPE_OFFSET ) =
@@ -96,7 +97,8 @@ C_fcntl_lock( fd, function, flock_hash )
 			XSRETURN_UNDEF;
 
 		/* If we're here to find out who's holding the lock we now must unpack
-		   the structure we got back from fcntl() */
+		   the structure we got back from fcntl() and store it in the hash
+		   we got passed. */
 
 		if ( function == REAL_F_GETLK )
 		{
@@ -114,7 +116,7 @@ C_fcntl_lock( fd, function, flock_hash )
 
 		/* Return the systems return value of the fcntl() call (which is 0) but
 		   in a way that can't be mistaken as meaning false (shamelessly stolen
-		   from pp_sys.c in the the Perl sources) */
+		   from pp_sys.c in the the Perl sources). */
 
 		RETVAL = newSVpvn( "0 but true", 10 );
 
