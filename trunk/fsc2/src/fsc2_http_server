@@ -115,9 +115,8 @@ sub serve {
 	( $req, $file ) = ( $1, $2 );
 	return illegal_request( $req, $txt ) unless $req =~ /^GET$/io;
 
-
-	# Check if client accepts png or gif files, we're done with listening
-	# when we get an empty line
+	# Check if client accepts PNG or GIF files and skip the rest of the noise,
+	# we're done with listening when we get an empty line
 
 	while ( defined( $txt = <$client> ) and $txt !~ /^\r*\n$/o ) {
 		$has_png = 1 if $txt =~ m|^\s*Accept:.*\s+image/png[^a-zA-Z0-9]|io;
@@ -128,7 +127,6 @@ sub serve {
 	# Give up if the client bailed out in between...
 
 	return unless defined $txt;
-
 
 	# Ok, now it's finally our turn...
 
@@ -186,7 +184,7 @@ sub serve_main {
 		print $client
 			"<P><CENTER><IMG SRC=\"fsc2." . ( $has_gif ? "gif" : "png" ) .
 			"\" ALT=\"fsc2\"></CENTER></P>\r\n"
-				if $has_png or $has_gif;
+			if $has_png or $has_gif;
 
 		print $client
 			"<P><CENTER><H1>Status:  $st2[ $state ]</H1></CENTER>\r\n" .
@@ -204,13 +202,13 @@ sub serve_main {
 		print $client
 			"<P><CENTER><H1>Status:  Something weird is happening here" .
 			"</H1></CENTER>\r\n" .
-			"<P>Sorry, you seem to have found a bug. Please tell nobody ;-) " .
+			"<P>Ok, you seem to have found a bug. Please tell nobody ;-) " .
 			"</P>\r\n</BODY></HTML>\r\n";
 		return;
 	}
 
 	# Ask fsc2 for the contents of the error browser and, when we got it,
-	# pass it on to the client in appropriate form
+	# pass it on to the client in the appropriate form
 
 	flock( STDIN, LOCK_EX );
 	print 'E';
@@ -228,7 +226,9 @@ sub serve_main {
 
 
 #########################################################
-#
+# If the logo file can be found were we expect it to be simply pass
+# it on to the client (and tell it that the logo won't change in the
+# near future, so it won't has to re-fetch it each time...)
 
 sub serve_logo {
 
@@ -241,16 +241,15 @@ sub serve_logo {
 	open( F, $auxdir . $file ) or return not_found( $file );
 
 	print $client <F> if print $client
-				"HTTP/1.0 200 OK\r\n" .
-				"Date: $date\r\n" .
-				 "Server: fsc2/0.1\r\n" .
-				 "Allow: GET\r\n" .
-				 "Accept-Ranges: none\r\n" .
-				 "Connection: close\r\n" .
-				 "Expires: $edate\r\n" .
-				 "Content-Type: image/$type\r\n" .
-				 "Content-Length: " . ( stat( $auxdir . $file ) )[ 7 ] .
-				 "\r\n\r\n";
+		"HTTP/1.0 200 OK\r\n" .
+		"Date: $date\r\n" .
+		"Server: fsc2/0.1\r\n" .
+		"Allow: GET\r\n" .
+		"Accept-Ranges: none\r\n" .
+		"Connection: close\r\n" .
+		"Expires: $edate\r\n" .
+		"Content-Type: image/$type\r\n" .
+		"Content-Length: " . ( stat( $auxdir . $file ) )[ 7 ] . "\r\n\r\n";
 
 	close F;
 }
