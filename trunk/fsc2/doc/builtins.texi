@@ -806,16 +806,17 @@ leader automatically.
 @anchor{button_state}
 @item button_state()
 @findex button_state()
-The function returns or sets the state of a button, depending on the
+This function returns or sets the state of a button, depending on the
 number of arguments passed to the function. The non-optional first
-argument is the identifier of the button as returned by the function
-@code{button_create()}. If there are no more arguments the state of the
-button is returned. There is a difference between the values returned in
-this case between normal buttons and push and radio buttons. For normal
-buttons the number of times the button was pressed since the last call
-of the function is returned. For push and radio buttons the state of the
-button, i.e.@: either @code{0}, meaning off, or @code{1} for on is
-returned.
+argument is the identifier of the button as irt was returned by the
+function @code{button_create()}. If there are no more arguments the
+state of the button is returned. There is a difference between the
+values returned for normal buttons on the one side and push and radio
+buttons on he other. For normal buttons a counter is maintained that
+counts the number of times the button was pressed and its value is
+returned and the counter is set back to zero at the same time. In
+contrast, for push and radio buttons the state of the button, i.e.@:
+either @code{0}, meaning off, or @code{1} for on is returned.
 
 If for push and radio buttons there is a second argument the state of
 the button will be be set. This argument must be either a string
@@ -826,12 +827,13 @@ and a non-zero number for on. The state of normal buttons cannot be set.
 @anchor{slider_create}
 @item slider_create()
 @findex slider_create()
-Sliders are for setting values in a predefined range. There are two
-types of sliders, normal sliders and value sliders. The only difference
-is that for value sliders there's an additional field showing the
-currently set value while for normal sliders there isn't such a visual
-feedback. As the function @code{button_create()} also this function
-returns a unique integer number to be used to identify the slider.
+Sliders are useful for setting values within a predefined range. There
+are two types of sliders, normal sliders and value sliders. The
+difference between these types is that for value sliders there is an
+additional field showing the currently set value while for normal
+sliders there isn't such a visual feedback. As already the function
+@code{button_create()} also this function returns a unique integer
+number to be used to identify the slider.
 
 The first argument the function expects is a string, either
 @code{"NORMAL_SLIDER"} or @code{"VALUE_SLIDER"} (the case of the
