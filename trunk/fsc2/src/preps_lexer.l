@@ -85,7 +85,7 @@ S           S(TART)?
 L			L(EN(GTH)?)?
 DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
-PC          PH(ASE)?_?C(YC(LE)?)?
+PC          PH(ASE)?_?C(YCLE)?
 
 PS          PH(ASE)?_?S(EQ(UENCE)?)?(_?[0-9]+)?
 

@@ -94,7 +94,7 @@ void *attach_shm( int key )
 
 	if ( ( buf = shmat( key, NULL, SHM_RDONLY ) ) == ( void * ) - 1 )
 	{
-		shmctl( key, IPC_RMID, NULL );                 /* delete the segment */
+		shmctl( key, IPC_RMID, NULL );       /* delete the segment */
 		if ( must_reset )
 			seteuid( getuid( ) );
 		return ( void * ) -1;
@@ -254,7 +254,7 @@ void delete_stale_shms( void )
 /* the new semaphore or -1 on error.                          */
 /*------------------------------------------------------------*/
 
-int sema_create( int val )
+int sema_create( void )
 {
 	int sema_id;
 	union semun sema_arg;
@@ -275,10 +275,10 @@ int sema_create( int val )
 		return -1;
 	}
 
-	sema_arg.val = 0
+	sema_arg.val = 0;
 	if ( ( semctl( sema_id, 0, SETVAL, sema_arg ) ) < 0 )
 	{
-		semctl( sema_id, 0, IPC_RMID, sema_arg );
+		semctl( sema_id, 0, IPC_RMID );
 		if ( must_reset )
 			seteuid( getuid( ) );
 		return -1;
@@ -298,7 +298,6 @@ int sema_create( int val )
 int sema_destroy( int sema_id )
 {
 	bool must_reset = UNSET;
-	union semun sema_arg;
 
 
 	if ( geteuid( ) != EUID )
@@ -307,7 +306,7 @@ int sema_destroy( int sema_id )
 		must_reset = SET;
 	}
 
-	if ( semctl( sema_id, 0, IPC_RMID, sema_arg ) < 0 )
+	if ( semctl( sema_id, 0, IPC_RMID ) < 0 )
 	{
 		if ( must_reset )
 			seteuid( getuid( ) );

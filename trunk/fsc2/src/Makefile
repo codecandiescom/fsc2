@@ -93,7 +93,7 @@ crowley.physik.fu-berlin.de:
 	$(MAKE) gpib_jtt
 
 door.physik.fu-berlin.de:
-	$(MAKE) hi_res
+	$(MAKE) low_res
 	$(MAKE) gpib_jtt
 
 crowley.none:
