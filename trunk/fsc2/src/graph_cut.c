@@ -1016,7 +1016,7 @@ bool cut_new_points( long curve, long x_index, long y_index, long len )
 			cut_integrate_point( index, sp->v );
 	}
 
-	/* Signal calling routine that redraw of cut curve is needed */
+	/* Signal calling routine that a  redraw of the cut curve is needed */
 
 	return OK;
 }
