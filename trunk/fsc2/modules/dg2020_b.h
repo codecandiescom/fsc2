@@ -101,6 +101,8 @@ typedef struct _F_ {
 	int num_needed_channels;     // number of channels really needed
 	struct _C_ *channel[ MAX_CHANNELS ];
 
+	bool need_constant;
+
 	int num_pulses;              // number of pulses assigned to the function
 	int num_active_pulses;       // number of pulses currenty in use
 	struct _p_ **pulses;         // list of pulse pointers

@@ -149,9 +149,9 @@ void dg2020_basic_pulse_check( void )
 		}
 
 		/* For functions with more than 1 pod (i.e. functions with phase
-		   cycling) we need to set up a matrix that stores for which which
-		   phase types are needed in each element of the phase cycle - this is
-		   needed for calculating the number of channels we will need */
+		   cycling) we need to set up a matrix that stores which phase types
+		   are needed in each element of the phase cycle - this is needed for
+		   calculating the number of channels we're going to need */
 
 		if ( p->function->num_pods > 1 )
 		{
@@ -282,7 +282,6 @@ static void dg2020_basic_functions_check( void )
 static int dg2020_calc_channels_needed( FUNCTION *f )
 {
 	int i, j;
-	bool is_all = SET;
 	int num_channels;
 
 
@@ -292,16 +291,17 @@ static int dg2020_calc_channels_needed( FUNCTION *f )
 	assert( f->pm != NULL );
 
 	num_channels = 0;
+	f->need_constant = UNSET;
 	for ( i = 0; i < f->pc_len; i++ )
-		for ( j = PHASE_PLUS_X; j <= PHASE_CW - PHASE_PLUS_X; j++ )
+		for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
 		{
-			if ( f->pm[ ( j - PHASE_PLUS_X ) * f->pc_len + i ] )
+			if ( f->pm[ j * f->pc_len + i ] )
 				num_channels++;
 			else
-				is_all = UNSET;
+				f->need_constant = SET;
 		}
 			
-	if ( ! is_all )            /* if we needed a constant voltage */
+	if ( f->need_constant )            /* if we needed a constant voltage */
 		num_channels++;
 
 	return num_channels;
@@ -492,14 +492,10 @@ static void dg2020_setup_phase_matrix( FUNCTION *f )
 
 	assert( f->pm != NULL && f->pcm == NULL );
 
-	/* If the number of needed channels is smaller than the size of the phase
-	   type / phase sequence matrix we will need one extra channel for the
-	   constant voltage */
+	/* If the function needs constant voltage channel we keep the channel with
+	   the lowest number for it */
 
-	if ( f->num_needed_channels < f->pc_len * ( PHASE_CW - PHASE_PLUS_X + 1 ) )
-		cur_channel = 1;
-	else
-		cur_channel = 0;
+	cur_channel = f->need_constant ? 1 : 0;
 
 	f->pcm = T_malloc( f->pc_len * ( PHASE_CW - PHASE_PLUS_X + 1 ) *
 					   sizeof( CHANNEL * ) );

@@ -170,7 +170,7 @@ enum {
 };
 
 
-/* Define the types of phases used in phase cycling - don't change the
+/* Defines the types of phases used in phase cycling - don't ever change the
    ordering, just add more to the end ! */
 
 enum {
