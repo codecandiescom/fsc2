@@ -40,6 +40,7 @@ static void spex_cd2a_scan_end( void );
 static void spex_cd2a_print( char *mess, int digits, double val );
 static size_t spex_cd2a_write( int type, const char *mess );
 static void spex_cd2a_read_ack( void );
+static char *spex_cd2a_read_mess( ssize_t to_be_read );
 static void spex_cd2a_read_cmd_ack( const char *cmd );
 static void spex_cd2a_read_set_pos_ack( void );
 static void spex_cd2a_read_start_scan_ack( void );
@@ -88,11 +89,15 @@ void spex_cd2a_init( void )
 									"of the monochromator.",
 									2, "Abort", "Done", NULL, 1 ) )
 				continue;
+			spex_cd2a.fatal_error = SET;
 			THROW( EXCEPTION);
 			
 		}
 		OTHERWISE
+		{
+			spex_cd2a.fatal_error = SET;
 			RETHROW( );
+		}
 
 		break;
 	}
@@ -171,10 +176,6 @@ void spex_cd2a_set_wavelength( void )
 		else
 			spex_cd2a_print( mess + 2, 8, 1.0e10 * spex_cd2a.wavelength );
 	}
-
-#ifdef SPEX_CD2A_TEST
-	fprintf( stderr, "%s\n", mess );
-#endif
 
 	spex_cd2a_write( PARAMETER, mess );
 
@@ -454,6 +455,7 @@ void spex_cd2a_open( void )
 						  O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
 	{
 		print( FATAL, "Can't open device file for monochromator.\n" );
+		spex_cd2a.fatal_error = SET;
 		THROW( EXCEPTION );
 	}
 
@@ -476,6 +478,7 @@ void spex_cd2a_open( void )
 			fsc2_serial_close( SERIAL_PORT );
 			print( FATAL, "Invalid setting for parity bit in "
 				   "configuration file for the device.\n" );
+			spex_cd2a.fatal_error = SET;
 			THROW( EXCEPTION );
 	}
 
@@ -492,6 +495,7 @@ void spex_cd2a_open( void )
 			fsc2_serial_close( SERIAL_PORT );
 			print( FATAL, "Invalid setting for number of stop bits in "
 				   "configuration file for the device.\n" );
+			spex_cd2a.fatal_error = SET;
 			THROW( EXCEPTION );
 	}
 
@@ -517,6 +521,7 @@ void spex_cd2a_open( void )
 			fsc2_serial_close( SERIAL_PORT );
 			print( FATAL, "Invalid setting for number of bits per "
 				   "in character configuration file for the device.\n" );
+			spex_cd2a.fatal_error = SET;
 			THROW( EXCEPTION );
 	}
 
@@ -557,7 +562,7 @@ static size_t spex_cd2a_write( int type, const char *mess )
 
 
 #ifdef SPEX_CD2A_TEST
-//	fprintf( stderr, "%s\n", mess );
+	fprintf( stderr, "%s\n", mess );
 	return 0;
 #endif
 
@@ -594,63 +599,168 @@ static size_t spex_cd2a_write( int type, const char *mess )
 
 	T_free( tmx );
 
-	if ( type == PARAMETER )
-		spex_cd2a_read_ack( );
-	else
+	spex_cd2a_read_ack( );
+	if ( type != PARAMETER )
 		spex_cd2a_read_cmd_ack( mess );
 
 	return ( size_t ) written;
 }
 
 
-/*------------------------------------------------------------*/
-/* Function for reading the acknowledgment send by the device */
-/* when it received a parameter.                              */ 
-/*------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Function for reading the acknowledgment send by the device, */
+/* consisting of <ACK> and <CAN> in case of success, <ACK> and */
+/* <BEL> in case of command errors and a single <NAK> in case  */
+/* of communication problems.                                  */
+/*-------------------------------------------------------------*/
 
 static void spex_cd2a_read_ack( void )
 {
-	char buf[ 7 ];
-	ssize_t r = 0;
+	char buf[ 8 ];
+	ssize_t received, len, count;
 
 
-	while ( r < 2 )
-	{
-		if ( ( r += fsc2_serial_read( SERIAL_PORT, buf + r,
-									  7 - r, 1000000, SET ) ) <= 0 )
+	/* Skip initial <CAN> characters, the device sometimes sends one without
+	   good reasons (at least in contrast to what's written in the manual) */
+
+	do {
+		if ( ( received = fsc2_serial_read( SERIAL_PORT, buf, 1,
+											1000000, SET ) ) <= 0 )
 			spex_cd2a_comm_fail( );
+	} while ( *buf == CAN );
 
-		/* A message starting with a NAK means that there are some
-		   communication problems */
-
-		if ( r > 0 && *buf == NAK )
-		{
-			print( FATAL, "Communication problem with device.\n" );
-			THROW( EXCEPTION );
-		}
+	while ( *buf != NAK )
+	{
+		if ( ( received = fsc2_serial_read( SERIAL_PORT, buf + 1,
+											1, 1000000, SET ) ) <= 0 )
+			spex_cd2a_comm_fail( );
 	}
 
-	/* Device send an ACK and a CAN so everything seems to be fine */
+	/* A <NAK> character means that there are communication problems */
+
+	if ( *buf == NAK )
+	{
+		print( FATAL, "Communication problem with device.\n" );
+		spex_cd2a.fatal_error = SET;
+		THROW( EXCEPTION );
+	}
+
+	/* If the device sends an <ACK><CAN> sequence everything is fine */
 
 	if ( buf[ 0 ] == ACK && buf[ 1 ] == CAN )
 		return;
 
-	/* An ACK followed by BEL means something went wrong and we got an
-	   error code in the next to bytes. */
+	/* A <BEL> character after the <ACK> means something went wrong and we're
+	   going to get the error code in the next bytes. A complete error message
+	   consists of two (printable) ASCII characters for the error code, an
+	   <EOT> character, optionally two checksum bytes, a <CR> and an optional
+	   <LF>. */
 
-	if ( buf[ 0 ] == ACK || buf[ 1 ] == '\a' )
+	if ( buf[ 0 ] == ACK && buf[ 1 ] == '\a' )
 	{
+		count = 0;
+		len = 4;
+		if ( spex_cd2a.use_checksum )
+			len += 2;
+		if ( spex_cd2a.sends_lf )
+			len++;
+
+		while ( len > 0 )
+		{
+			if ( ( received = fsc2_serial_read( SERIAL_PORT, buf + count + 2,
+												len - count, 1000000, SET ) )
+				 <= 0 )
+				spex_cd2a_comm_fail( );
+			count += received;
+			len -= received;
+		}
+
 		buf[ 4 ] = '\0';
 		if ( spex_cd2a_do_print_message )
-			print( FATAL, "Failure to execute command, error code: %s.\n",
+			print( FATAL, "Failure to execute command, error code: \"%s\".\n",
 			   buf + 2 );
+		spex_cd2a.fatal_error = SET;
 		THROW( EXCEPTION );
 	}
 
-	/* If none of the above was received from the device things went really
-	   wrong... */
+	/* If none of the above was received things went really wrong... */
 
 	spex_cd2a_wrong_data( );
+}
+
+
+/*----------------------------------------------------*/
+/* Function for reading in a message sent by the CD2A */
+/*----------------------------------------------------*/
+
+static char *spex_cd2a_read_mess( ssize_t to_be_read )
+{
+	static char buf[ 20 ];
+	ssize_t already_read = 0;
+	ssize_t old_already_read, i;
+	char *bp = buf + to_be_read - 1;
+
+
+	while ( already_read < to_be_read )
+	{
+		old_already_read = already_read;
+
+		if ( ( already_read +=
+			   fsc2_serial_read( SERIAL_PORT, buf + already_read,
+							  to_be_read - already_read, 1000000, SET ) ) < 0 )
+			spex_cd2a_comm_fail( );
+		stop_on_user_request( );
+
+		/* Throw away <CAN> characters, the device sends them sometimes in the
+		   middle of a message (contrary to what's written in the manual. But
+		   if the device sends a checksum we must be careful because the
+		   checksum could contain a value equivalent to <CAN>... */
+
+		if ( ! spex_cd2a.use_checksum )
+		{
+			for ( i = old_already_read; i < already_read; i++ )
+				if ( buf[ i ] == CAN )
+					memmove( buf + i, buf + i + 1, --already_read - i );
+		}
+		else
+		{
+			for ( i = old_already_read;
+				  i < already_read &&
+					  i < to_be_read - ( spex_cd2a.sends_lf ? 4 : 3 );
+				  i++ )
+				if ( buf[ i ] == CAN )
+					memmove( buf + i, buf + i + 1, --already_read - i );
+
+			for ( i = to_be_read - ( spex_cd2a.sends_lf ? 2 : 1 );
+				  i < already_read; i++ )
+				if ( buf[ i ] == CAN )
+					memmove( buf + i, buf + i + 1, --already_read - i );
+		}
+	}
+
+	/* In STANDARD data format the first byte has to be a <STX> character */
+
+	if ( spex_cd2a.data_format == STANDARD && buf[ 0 ] != STX )
+		spex_cd2a_wrong_data( );
+
+	/* Last character(s) of message must be <CR> or <CR><LR> */
+
+	if ( ( spex_cd2a.sends_lf && *bp-- != '\n' ) || *bp-- != '\r' )
+		spex_cd2a_wrong_data( );
+
+	/* Finally check end of message character which (in standard output mode)
+	   is <ETX> */
+
+	if ( spex_cd2a.data_format == STANDARD )
+	{
+		if ( spex_cd2a.use_checksum )
+			bp -= 2;
+
+		if ( *bp != ETX )
+			spex_cd2a_wrong_data( );
+	}
+
+	return spex_cd2a.data_format == STANDARD ? buf + 1 : buf;
 }
 
 
@@ -679,11 +789,8 @@ static void spex_cd2a_read_cmd_ack( const char *cmd )
 			spex_cd2a_read_scan_ack( );
 			break;
 
-		case 'H' :                /* "HALT" command */
-			spex_cd2a_read_ack( );
-			break;
-
 		default :                 /* no other commands are used */
+			spex_cd2a.fatal_error = SET;
 			fsc2_assert( 1 == 0 );
 	}
 }
@@ -696,59 +803,14 @@ static void spex_cd2a_read_cmd_ack( const char *cmd )
 
 static void spex_cd2a_read_set_pos_ack( void )
 {
-	char buf[ 20 ];
-	ssize_t to_be_read = 5;
-	ssize_t already_read = 0;
-	char *bp;
+	char *bp = spex_cd2a_read_mess( spex_cd2a_pos_mess_len );
 
-	
-	while ( already_read < to_be_read )
-	{
-		if ( ( already_read +=
-			   fsc2_serial_read( SERIAL_PORT, buf + already_read,
-								 to_be_read - already_read, 1000000,
-								 SET ) ) < 0 )
-			spex_cd2a_comm_fail( );
-		stop_on_user_request( );
-	}
 
-	/* According to the manual the device is supposed to send an ACK and
-	   then a CAN, but tests did show that instead it sends a CAN, an ACK,
-	   and then a CAN for three times before it starts reporting the
-	   current position until the final position is reached. */
-
-	if ( buf[ 0 ] != CAN || buf[ 1 ] != ACK || buf[ 2 ] != CAN ||
-		 buf[ 3 ] != CAN || buf[ 4 ] != CAN )
-		spex_cd2a_wrong_data( );
-
-	/* Keep reading until the final position is reached, each time carefully
-	   testing what the device is sending. */
-
-	to_be_read = spex_cd2a_pos_mess_len;
+	/* Repeatedly read in the current position until the final position has
+	   been reached. */
 
 	while ( 1 )
 	{
-		already_read = 0;
-
-		while ( already_read < to_be_read )
-		{
-			if ( ( already_read +=
-				   fsc2_serial_read( SERIAL_PORT, buf + already_read,
-									 to_be_read - already_read, 1000000,
-									 SET ) ) < 0 )
-				spex_cd2a_comm_fail( );
-			stop_on_user_request( );
-		}
-
-		bp = buf;
-
-		/* In STANDARD data format the first byte has to be a STX */
-
-		if ( spex_cd2a.data_format == STANDARD && *bp++ != STX )
-			spex_cd2a_wrong_data( );
-
-		/* Check that the reported status is reasonable */
-
 		switch ( *bp++ )
 		{
 			case '*' :          /* final position reached ? */
@@ -773,40 +835,14 @@ static void spex_cd2a_read_set_pos_ack( void )
 
 static void spex_cd2a_read_start_scan_ack( void )
 {
-	char buf[ 20 ];
-	ssize_t to_be_read = spex_cd2a_pos_mess_len;
-	ssize_t already_read = 0;
-	char *bp;
+	char *bp = spex_cd2a_read_mess( spex_cd2a_pos_mess_len );
 
 	
-	/* Read the ACK and CAN that get send at first (or an error indication) */
-
-	spex_cd2a_read_ack( );
-
-	/* Now repeatedly read in the current position until the start position
-	   for the scan is reached. */
+	/* Repeatedly read in the current position until the start position for
+	   the scan is reached. */
 
 	while ( 1 )
 	{
-		already_read = 0;
-
-		while ( already_read < to_be_read )
-		{
-			if ( ( already_read +=
-				   fsc2_serial_read( SERIAL_PORT, buf + already_read,
-									 to_be_read - already_read, 1000000,
-									 SET ) ) < 0 )
-				spex_cd2a_comm_fail( );
-			stop_on_user_request( );
-		}
-
-		bp = buf;
-
-		if ( spex_cd2a.data_format == STANDARD && *bp++ != STX )
-			spex_cd2a_wrong_data( );
-
-		/* Check that the reported status is reasonable */
-
 		switch ( *bp++ )
 		{
 			case 'S' :          /* final position reached ? */
@@ -831,40 +867,13 @@ static void spex_cd2a_read_start_scan_ack( void )
 
 static void spex_cd2a_read_scan_ack( void )
 {
-	char buf[ 20 ];
-	ssize_t to_be_read = spex_cd2a_pos_mess_len;
-	ssize_t already_read = 0;
-	char *bp;
+	char *bp = spex_cd2a_read_mess( spex_cd2a_pos_mess_len );
 
 	
-	/* Read the ACK and CAN that get send at first (or an error indication) */
-
-	spex_cd2a_read_ack( );
-
-	/* Now repeatedly read in the position until the burst movement is
-	   complete */
+	/* Repeatedly read in the position until the burst movement is complete */
 
 	while ( 1 )
 	{
-		already_read = 0;
-
-		while ( already_read < to_be_read )
-		{
-			if ( ( already_read +=
-				   fsc2_serial_read( SERIAL_PORT, buf + already_read,
-									 to_be_read - already_read, 1000000,
-									 SET ) ) < 0 )
-				spex_cd2a_comm_fail( );
-			stop_on_user_request( );
-		}
-
-		bp = buf;
-
-		if ( spex_cd2a.data_format == STANDARD && *bp++ != STX )
-			spex_cd2a_wrong_data( );
-
-		/* Check that the reported status is reasonable */
-
 		switch ( *bp++ )
 		{
 			case 'B' :          /* final position reached ? */
@@ -903,6 +912,7 @@ static void spex_cd2a_comm_fail( void )
 {
 	if ( spex_cd2a_do_print_message )
 		print( FATAL, "Can't access the monochromator.\n" );
+	spex_cd2a.fatal_error = SET;
 	THROW( EXCEPTION );
 }
 
@@ -915,6 +925,7 @@ static void spex_cd2a_comm_fail( void )
 static void spex_cd2a_wrong_data( void )
 {
 	print( FATAL, "Device send unexpected data.\n" );
+	spex_cd2a.fatal_error = SET;
 	THROW( EXCEPTION );
 }
 
@@ -970,7 +981,7 @@ static void spex_cd2a_pos_mess_check( const char *bp )
 	else
 		spex_cd2a_wrong_data( );
 
-	/* No follows an 8-byte long numeric field - for negative numbers
+	/* Now follows an 8-byte long numeric field - for negative numbers
 	   we have a minus sign which is possibly followed by spaces before
 	   the number starts. */
 
@@ -980,29 +991,6 @@ static void spex_cd2a_pos_mess_check( const char *bp )
 	errno = 0;
 	strtod( bp, &ep );
 	if ( errno || ep != eu + 9 )
-		spex_cd2a_wrong_data( );
-
-	bp = ep;
-
-	/* In STANDARD data format the next byte has to be an ETX */
-
-	if ( spex_cd2a.data_format == STANDARD && *bp++ != ETX )
-		spex_cd2a_wrong_data( );
-
-	/* Skip the checksum if the device is configured to send one */
-
-	if ( spex_cd2a.use_checksum )
-		bp += 2;
-
-	/* Next byte must be a carriage return */
-
-	if ( *bp++ != '\r' )
-		spex_cd2a_wrong_data( );
-
-	/* Finally, there might be a linefeed if the device is configured to
-	   send one */
-
-	if ( spex_cd2a.sends_lf && *bp != '\n' )
 		spex_cd2a_wrong_data( );
 }
 
