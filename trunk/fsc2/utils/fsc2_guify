@@ -661,8 +661,8 @@ sub write_out {
 EOT
 
 	# The user may change the variables from within the conditions. We must
-	# avoid that these changes are also visible in the rest of the script
-	# and thus use variables local to the current funtion in the script.
+	# avoid that these changes are also change the variables in the rest of
+	# the script and thus use variables local to the current funtion.
 
 	print "    my \$$$_{ name } = \$$$_{ name }\{ value \};\n" for ( @vars );
 
