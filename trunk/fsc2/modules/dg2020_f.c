@@ -1007,7 +1007,7 @@ static bool get_pulse_maxlen( long pnum, double *time )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-static bool setup_phases( int func, PHS phs )
+static bool setup_phase( int func, PHS phs )
 {
 	assert( func == PULSER_CHANNEL_PHASE_1 || func == PULSER_CHANNEL_PHASE_2 );
 

@@ -56,7 +56,7 @@ typedef struct {
 	bool ( *get_pulse_phase_cycle )( long pulse_number, int *cycle );
 	bool ( *get_pulse_maxlen )( long pulse_number, double *time );
 
-	bool ( *setup_phases )( int function, PHS phs );
+	bool ( *setup_phase )( int function, PHS phs );
 
 } Pulser_Struct;
 
