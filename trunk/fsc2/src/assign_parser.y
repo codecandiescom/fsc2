@@ -57,10 +57,6 @@ static Var *CV;
 %token CH_TOKEN              /* CHANNEL */
 %token DEL_TOKEN             /* DELAY */
 %token INV_TOKEN             /* INVERTED */
-%token NS_TOKEN              /* nsec */
-%token US_TOKEN              /* usec */
-%token MS_TOKEN              /* msec */
-%token S_TOKEN               /* sec */
 
 %token <vptr> VAR_TOKEN            /* variable */
 %token <vptr> VAR_REF
@@ -69,6 +65,8 @@ static Var *CV;
 %token <dval> FLOAT_TOKEN
 %token <sptr> STR_TOKEN
 %token EQ LT LE GT GE
+
+%token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
 
 %type <dval> 
 %type <vptr> expr list1 unit
@@ -222,10 +220,11 @@ expr:    INT_TOKEN unit           { $$ = vars_mult( vars_push( INT_VAR, $1 ),
 ;
 
 unit:    /* empty */               { $$ = vars_push( INT_VAR, 1L ); }
-       | NS_TOKEN                  { $$ = vars_push( INT_VAR, 1L ); }
-       | US_TOKEN                  { $$ = vars_push( INT_VAR, 1000L ); }
-       | MS_TOKEN                  { $$ = vars_push( INT_VAR, 1000000L ); }
-       | S_TOKEN                   { $$ = vars_push( INT_VAR, 1000000000L ); }
+       | NU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
+       | UU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
+       | MU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
+       | KU_TOKEN                  { $$ = vars_push( INT_VAR, 1000 ); }
+       | MEG_TOKEN                 { $$ = vars_push( INT_VAR, 1000000 ); }
 ;
 
 

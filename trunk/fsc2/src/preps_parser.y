@@ -57,7 +57,6 @@ static Var *CV;
 %token EQ LT LE GT GE
 %token AND OR XOR NOT
 
-%token NS_TOKEN US_TOKEN MS_TOKEN S_TOKEN
 %token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN
 %token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
 %type <vptr> expr unit list1
