@@ -6,7 +6,7 @@
 scripts = $(wildcard *.$(shell hostname -f))
 
 
-# install the these scripts in the bindir (but without the FQDN extension)
+# install these scripts in the bindir (but without the FQDN extension)
 
 install: $(scripts)
 	for file in $(scripts); \
