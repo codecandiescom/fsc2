@@ -45,7 +45,7 @@ find_field, 0, EXP;             // return current field value
 field_resolution, 0, EXP;       // returns resolution of field meter
 field_meter_wait, 0, EXP;       // wait a bit for field to stabilize
 
-measure_field, 0, EXP;          // return field value (ER035M_SA)
+measure_field, 0, EXP;          // return field value (ER035M_SA / ER035M_SAS)
 
 
 // Functions exported by the pulser drivers (DG2020)
