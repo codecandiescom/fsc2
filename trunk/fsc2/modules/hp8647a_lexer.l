@@ -150,7 +150,7 @@ void hp8647a_read_table( FILE *fp )
 	if ( is_restart )
 	    hp8647a_restart( hp8647a_in );
 	else
-		 is_restart = SET;
+		is_restart = SET;
 
 	hp8647a_Lc = 1;
 
@@ -279,8 +279,8 @@ static void hp8647a_new_table_entry( int type, double val )
 		}
 
 		/* Cut back table size to the amount of memory really needed and sort
-		   the table in ascending order with respect to the frequencies,
-		   finally get lowest and highest frequency */
+		   the table in ascending order with respect to the frequencies, then
+		   set lowest and highest frequency in structure for synthesizer */
 
 		T_realloc( hp8647a.att_table,
 				   hp8647a.att_table_len * sizeof ( ATT_TABLE_ENTRY ) );
@@ -297,7 +297,7 @@ static void hp8647a_new_table_entry( int type, double val )
 
 	if ( type == IS_ATT && is_att )
 	{
-		eprint( FATAL, "%s: Error while reading table file `%s': 2 "
+		eprint( FATAL, "%s: Error while reading table file `%s': Two "
 				"attenuation values in a row at line %ld.\n", DEVICE_NAME,	 
 				hp8647a.table_file, hp8647a_Lc );
 		THROW( EXCEPTION );
@@ -305,7 +305,7 @@ static void hp8647a_new_table_entry( int type, double val )
 
 	if ( type == IS_FREQ && is_freq )
 	{
-		eprint( FATAL, "%s: Error while reading table file `%s': 2 "
+		eprint( FATAL, "%s: Error while reading table file `%s': Two "
 				"frequency values in a row at line %ld.\n", DEVICE_NAME,	 
 				hp8647a.table_file, hp8647a_Lc );
 		THROW( EXCEPTION );
@@ -355,9 +355,9 @@ static void hp8647a_new_table_entry( int type, double val )
 	{
 		if ( val > MIN_ATTEN - MAX_ATTEN )
 		{
-			eprint( FATAL, "%s: Attenuation of %f dB in table file `%s', "
+			eprint( FATAL, "%s: Attenuation of %.1f dB in table file `%s', "
 					"line %ld, can't be achieved, maximum dynamic range is "
-					"%f dB.\n", DEVICE_NAME, val, hp8647a.table_file,
+					"%.1f dB.\n", DEVICE_NAME, val, hp8647a.table_file,
 					hp8647a_Lc, MIN_ATTEN - MAX_ATTEN );
 			THROW( EXCEPTION );
 		}
@@ -376,8 +376,10 @@ static void hp8647a_new_table_entry( int type, double val )
 }
 
 
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Comparison function sorting of the table entries in ascending */
+/* order of frequencies.                                         */
+/*---------------------------------------------------------------*/
 
 static int hp8647a_comp( const void *a, const void *b )
 {
