@@ -1,0 +1,883 @@
+@c $Id$
+@c
+@c Copyright (C) 1999-2002 Jens Thoms Toerring
+@c
+@c This file is part of fsc2.
+@c
+@c Fsc2 is free software; you can redistribute it and/or modify
+@c it under the terms of the GNU General Public License as published by
+@c the Free Software Foundation; either version 2, or (at your option)
+@c any later version.
+@c
+@c Fsc2 is distributed in the hope that it will be useful,
+@c but WITHOUT ANY WARRANTY; without even the implied warranty of
+@c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+@c GNU General Public License for more details.
+@c
+@c You should have received a copy of the GNU General Public License
+@c along with fsc2; see the file COPYING.  If not, write to
+@c the Free Software Foundation, 59 Temple Place - Suite 330,
+@c Boston, MA 02111-1307, USA.
+
+
+@node Example EDL Scripts, Command Line Options, Using Pulsers, Top
+@chapter Example EDL Scripts
+
+
+Since it is often much easier to understand a new language by examples
+then by just learning the vocabulary and the syntax here are a few
+example @code{EDL} scripts, together with an explanation of how they
+work. If the explanations may look a bit verbose, please bear with me, I
+tried to make it as comprehensive and easy to understand as possible.
+
+
+@ifinfo
+@menu
+* An enhanced cw-EPR experiment::
+* GUI-fying the script::
+* cw-EPR monitor script::
+* Hahn-echo detected EPR script::
+* ESEEM script::
+* Time-resolved EPR script::
+@end menu
+@end ifinfo
+
+
+@node An enhanced cw-EPR experiment, GUI-fying the script, Example EDL Scripts, Example EDL Scripts
+@section An enhanced cw-EPR experiment
+
+In the chapter describing the @code{EDL} language already a script for
+doing a very simple @i{cw}-EPR experiment was given. Here we will now
+enhance this script a bit to allow e.g.@: multiple runs over the field
+range:
+@example
+ 1 DEVICES:
+ 2   er035m_s;              // gaussmeter module
+ 3   aeg_x_band;            // magnet module
+ 4   sr530;                 // lock-in amplifier module
+ 5 
+ 6 VARIABLES:
+ 7   start_field    = 3360.0 G;
+ 8   end_field      = 3450.0 G;
+ 9   field_step     =    0.5 G;
+10   Number_of_runs = 10;
+11 
+12   field = start_field;
+13   Number_of_points = 1 + int( ( start_field - end_field ) 
+14                               / field_step );
+15   data;
+16   mean_data[ Number_of_points ];
+17   I, J;
+18   File_1, File_2;
+19   tc;
+20 
+21 PREPARATIONS:
+22   magnet_setup( start_field, field_step );
+23   init_1d( 2, Number_of_points, start_field, field_step,
+24            "Magnetic field [G]", "Signal strength [uV]"  );
+25 
+26 EXPERIMENT:
+27 
+28   File_1 = get_file( "File for storing all runs:" );
+29   File_2 = get_file( "File for storing end results:" );
+30 
+31   tc = lockin_time_constant( );
+32 
+33   FOR I = 1 : Number_of_runs
+34   @{
+35     FOR J = 1 : Number_of_points
+36     @{
+37       wait( tc );
+38       data = lockin_get_data( );
+39       mean_data[ J ] += data;
+40       display( J, 1.0e6 * data, 1,
+41                J, 1.0e6 * mean_data[ J ] / I, 2 );
+42       IF is_file( File_1 )
+43       @{
+44         fsave( File_1, "# #\n", field, data );
+45       @}
+46       field = sweep_up( );
+47     @}
+48 
+49     fsave( File_1, "\n" );
+50     field = reset_field( );
+51     clear_curve( 1 );
+52   @}
+53 
+54   IF is_file( File_2 )
+55   @{
+56     fsave( File_2, "% Start field     = # G\n", start_field );
+57     fsave( File_2, "% End field       = # G\n", end_field );
+58     fsave( File_2, "% Field step      = # G\n", field_step );
+59     fsave( File_2, "% Number of runs  = #\n", Number_of_runs );
+60     fsave( File_2, "% Time constant   = # ms\n", tc * 1.0e3 );
+61     save( File_2, mean / Number_of_runs );
+62   @}
+@end example
+
+The @code{DEVICES} section is identical to the original script, again we
+use the AEG X-band magnet (controlled via the Bruker @w{ER 035 M}
+gaussmeter) and the @w{SR 530} lock-in amplifier.
+
+Also the first lines of the @code{VARIABLES} section are identical, we
+need three variables for the start field, the end field and the field
+step size. But now also we need another variable for the number of runs
+we'll do during the experiment, which we declare in line 10.
+
+The following variables are all used for auxiliary
+variables. @code{Number_of_points} is automatically initialized to the
+number of points during one run (we got to add 1, otherwise we wouldn't
+the last point of the field range. The next variables, @code{data} and
+@code{mean_data} are both for storing the results f the experiment. But
+since (as the name indicates) @code{mean_data} is going to be used to
+store the mean value of all data points it needs to be an array with
+enough space for all points of the spectrum.
+
+The variables @code{I} and @code{J} are simple counters and
+@code{File_1} and @code{File_2} are integer variables that we will
+use for file handles - we are going to use two files, one for storing
+intermediate results, i.e.@: all single run spectra, and a second one
+for saving the end results, the mean values of the data of all runs.
+Finally, @code{tc} is going to be used for the lock-in's time constant.
+
+Also the first line of the @code{PREPARATIONS} section does not has
+changed, again we set up the magnet using @code{magnet_setup()}
+(@pxref{magnet_setup}) to be started at a field as stored in the
+variable @code{start_field} and tell it, that sweeps will be done with
+step sizes of @code{field_step}.
+
+But the graphics initialization with function @code{init_1d()}
+(@pxref{init_1d}) in line 23 has been changed a bit. Instead of using
+the defaults, we now request 2 curves (one for the newly measured data
+points and one for the mean values of all runs don so far).  Also, we
+indicate that the curves will be @code{Number_of_points} long.  The next
+two values set up the scale of the @i{x}-axis: the @i{x}-axis should
+start with a value of @code{start_field} and the difference between two
+points in @i{x}-direction is @code{field_step}. Finally, we also set
+labels for the @i{x}- and @i{y}-axis: the values at the @i{x}-axis are
+the magnetic fields (in Gauss) and the @i{y}-axis will represent the
+measured signal intensity in micro-Volts.
+
+The first thing done in the @code{EXPERIMENT} section is asking the user
+to supply two file names - what we get back from the functions are
+integer numbers that are going to be used later to indicate into which
+of the two files data are to be written.
+
+The next step (line 31) is to determine the lock-in amplifiers time
+constant, we will have to wait for this time after a field sweep step to
+give the it enough time to measure a new value.
+
+The actual experiment now contains of two loops, a main loop for doing
+all the consecutive runs over the field range, and an embedded loop for
+acquiring, displaying and storing each data point in a run. Both loops
+are realized by @code{FOR} loops because for both we now exactly how
+many times each one has to be repeated.
+
+Within the inner loop, i.e.@: for each data point we wait for the
+lock-in amplifiers time constant to measure a new data point at the
+current field, which we then fetch from the lock-in amplifier (line 38)
+and store it in the variable @code{data}. The new value now gets added
+to the appropriate element of the array of mean values.
+
+In line 40/41 the new data value and the new mean value both are
+displayed on the screen. The first three arguments of the call of the
+function @code{display()} (@pxref{display}) are the @i{x}-coordinate,
+which is just the loop counter variable, the @i{y}-coordinate, the new
+data value but multiplied by @code{1.0e6} because the value returned by
+the lock-in amplifiers is always in Volts and we want to display the
+value in code micro-Volts, and the number of the curve, @code{1}. The
+next three arguments are for the new mean value, we only have to take
+care to divide the @code{mean_value} array element by @code{I}, the
+number of runs done so far.
+
+If you should have any trouble understanding the @i{x}-coordinate given
+as an integer numbers while on the screen the scale is to be shown in
+field units, here's an explanation: in the @code{init_1d()}
+(@pxref{init_1d}) function call during the @code{PREPARATIONS} section
+we told the program that the first @i{x}-axis value would be at a field
+of the value of @code{start_field} and that all following fields would
+be equally spaced by a field difference according to the value of the
+variable @code{field_step}. The program uses this information to convert
+a @i{x}-coordinate of @code{1} to make the data point appear at the
+field scale value of @code{start_field}, a @i{x}-coordinate of @code{2}
+at @code{start_value + field_step} etc.
+
+The next instruction (line 42 ff.@:) is to store the newly measured
+value, together with the current field, in the first file. Because we
+can't be sure that the user really did open a file (and didn't instead
+choose not to save the data) we first check if the file number we got is
+a valid one by calling the function @code{is_file()}
+(@pxref{is_file}). Only if it returns a true we try to write to the
+file. In this case we use the function @code{fsave()} (@pxref{fsave}) to
+write both the current field (as stored in the variable @code{field})
+and the new data into the (first) file. According to the format string
+both values will appear on one line by itself.
+
+All now still needed in the inner loop is to sweep to a new magnetic
+field (which, according to the our call of @code{magnet_setup()}
+(@pxref{magnet_setup}) in the @code{PREPARATIONS} section is supposed to
+be @code{field_step} higher than the current value). When the magnet has
+reached the new field the @code{sweep_up()} (@pxref{sweep_up}) function
+returns the new field value which gets stored in the variable
+@code{field}.
+
+When the inner loop has been repeated @code{Number_of_points} times we
+have reached the end field and now have to start a new run. First we
+write a single new line into the file for the data of all runs to have a
+visual indication where the data of a new run start. Then we have to get
+the field back to the start field, which can be done by calling the
+function @code{reset_field()} (@pxref{reset_field}) (you actually also
+could also tell the magnet to go to a field of @code{start_field()} by
+calling @code{set_field()} (@pxref{set_field})). Finally, we have to
+remove the data from the last run but keeping the curve with the mean
+values. This is done by calling the function @code{clear_curve()}
+(@pxref{clear_curve}) with the number of the curve to remove as the
+parameter. This done we can go back to repeating the inner loop.
+
+When the experiment finally is done, i.e.@: it's finished doing the
+@code{Number_of_runs} repetitions of the field sweep we end up at line
+54 where we now can store the whole array of mean values, together with
+some information about the experimental parameters. Please note that
+using the function @code{save()} (@pxref{save}) it is possible to write
+whole (one-dimensional) arrays with one call, also this is an example
+that arithmetic can be done on arrays, here all array elements are
+automatically divided by @code{Number_of_runs} before being written to
+the file.
+
+
+@node GUI-fying the script, cw-EPR monitor script, An enhanced cw-EPR experiment, Example EDL Scripts
+@section GUI-fying the script
+
+Having a final look at the above script one may find that there are a
+few variables that always need editing when doing a new
+experiment. These are the start and end field, the field step size and
+the number of runs. Having to edit the script all of the time can become
+rather tedious. But there's a simple method to add a graphical user
+interface to the program that lets one edit the parameters and does not
+require to load the script into an editor, change it and then load the
+script into @code{fsc2}.
+
+All that is needed is to add and change a few lines.:
+@example
+ 1 === START_FIELD float [ 1460 : 19900 ] [ 3360 ] "Start field:" "G"
+ 2 === END_FIELD float [ 1460 : 19900 ] [ 3450 ] "End field:" "G"
+ 3 === FIELD_STEP float [ 1.1e-3 : ] [ 0.5 ] "Field step:" "G"
+ 4 === NUMBER_OF_RUNS int [ 1 : ] [ 10 ] "Number of runs:"
+ 5 DEVICES:
+ 6   er035m_s;              // gaussmeter module
+ 7   aeg_x_band;            // magnet module
+ 8   sr530;                 // lock-in amplifier module
+ 9 
+10 VARIABLES:
+11 === if START_FIELD < END_FIELD
+12   start_field    = START_FIELD G;
+13   end_field      = END_FIELD G;
+14 === else
+15   start_field    = END_FIELD G;
+16   end_field      = START_FIELD G;
+17 === endif
+19   field_step     = FIELD_STEP G;
+20   Number_of_runs = NUMBER_OF_RUNS;
+21 
+22   field = start_field;
+23   Number_of_points = 1 + int( ( start_field - end_field ) 
+24                               / field_step );
+25   data;
+26   mean_data[ Number_of_points ];
+27   I, J;
+38   File_1, File_2;
+39   tc;
+30 
+31 PREPARATIONS:
+32   magnet_setup( start_field, field_step );
+33   init_1d( 2, Number_of_points, start_field, field_step,
+34            "Magnetic field [G]", "Signal strength [uV]"  );
+35 
+36 EXPERIMENT:
+37 
+38   File_1 = get_file( "File for storing all runs:" );
+39   File_2 = get_file( "File for storing end results:" );
+40 
+41   tc = lockin_time_constant( );
+42 
+43   FOR I = 1 : Number_of_runs
+44   @{
+45     FOR J = 1 : Number_of_points
+46     @{
+47       wait( tc );
+48       data = lockin_get_data( );
+49       mean_data[ J ] += data;
+50       display( J, 1.0e6 * data, 1,
+51                J, 1.0e6 * mean_data[ J ] / I, 2 );
+52       IF is_file( File_1 )
+53       @{
+54         fsave( File_1, "# #\n", field, data );
+55       @}
+56       field = sweep_up( );
+57     @}
+58 
+59     fsave( File_1, "\n" );
+60     field = reset_field( );
+61     clear_curve( 1 );
+62   @}
+63 
+64   IF is_file( File_2 )
+65   @{
+66     fsave( File_2, "% Start field     = # G\n", start_field );
+67     fsave( File_2, "% End field       = # G\n", end_field );
+68     fsave( File_2, "% Field step      = # G\n", field_step );
+69     fsave( File_2, "% Number of runs  = #\n", Number_of_runs );
+70     fsave( File_2, "% Time constant   = # ms\n", tc * 1.0e3 );
+71     save( File_2, mean / Number_of_runs );
+72   @}
+@end example
+
+The new first four lines are for defining some special variables that
+will be used by the program for the graphical user interface. Each of
+the lines starts with three equal-signs in a row, followed by the
+variable name. This variable name must be different from all names
+already used in the @code{EDL} script and also may not be @code{EDL}
+keywords. Directly after the name follows the type of the variable,
+here we only use floating point and integer variables. The type is
+followed by the allowed range of the variable, enclosed in square braces
+and with the upper and lower limit separated by a colon, "@code{:}". As
+you can see, you may leave out one (or even both) limits. Here we use
+as the limits for the start and end field the field range that can be
+measured with the gaussmeter used. For the field step variable there's
+only a lower limit, the smallest step size possible with the magnet
+power supply. Also for the number of runs only a lower limit is given,
+which is @code{1} for obvious reasons.
+
+Following the ranges a default value may be given, also enclosed in
+square braces, we use here the values we previously had hard-coded into
+the script. Finally, two strings can be given to be shown on the left
+and right side of the entry field in the graphical user interface.
+
+With these declarations a program for the graphical user interface can
+be created automatically which will show four entry fields for filling
+in the parameters using the @code{fsc2_guify} tool. There will also be
+another button that allows to create the above script with the user
+supplied parameters filled in an to directly send it to @code{fsc2} for
+execution.
+
+Of course, for this tool to be able to fill in the user supplied
+parameters into the right positions we also must change a few lines.
+E.g.@: in the place where previously the start field was hard-coded into
+the script we now have to fill in the variable for the start field,
+@code{START_FIELD}, and the same hold for the end field, the field step
+size and the number of runs.
+
+There is already some security mechanism to keep the user from entering
+bogus parameters, the possibility to restrict the values of the
+variables to a certain range. This will keep the user from entering
+e.g.@: too small a field step size (or even a negative one) or less than
+one number of runs. But, unfortunately, it's still possible to enter an
+end field that is lower than the start field. To catch this kind of
+mistake, in the script above at line 11 it is checked that the value for
+the start field is lower than the end field before assigning
+@code{START_FIELD} and @code{END_FIELD} to the corresponding @code{EDL}
+variables. But if @code{START_FIELD} is higher than @code{END_FIELD} in
+line 14 ff.@: the assignment is reversed, so that the @code{EDL}
+variable @code{start_field} is guaranteed to be lower than
+@code{end_field} even when the user made a mistake while filling in the
+form.
+
+To finally create the program with the graphical user interface all we
+now to do is save the above script, e.g.@: with the file name
+@file{cw_epr.EDL} and, on the command line, apply the @code{fsc2_guify}
+tool to get an immediately executable program called @code{cw_epr}:
+@example
+fsc2_guify cw_epr.EDL cw_epr
+@end example
+@noindent
+From now on all an user has to do to start a @i{cw}-EPR experiment is to
+execute the @code{cw_epr} program, enter the parameters and push the
+button for starting the experiment.
+
+
+@node cw-EPR monitor script, Hahn-echo detected EPR script, GUI-fying the script, Example EDL Scripts
+@section cw-EPR monitor script
+
+Before doing a real experiment one often needs to optimize the
+experimental parameters like phase, amplification etc. In these cases it
+would be rather inconvenient to always start an experiment, check for
+e.g@: the signal intensity, adjust the parameters and restart again
+another test experiment. One rather would have a program where it
+possible to adjust the parameters while scanning the field region where
+the signal is to be expected. This can be done easily with a another
+@code{EDL} script. Here we also will make use of the built-in methods to
+create additional graphical elements like buttons, input fields etc.
+
+Before starting to write such a script lets collect the requirements:
+@itemize @bullet
+@item It should be possible to sweep up and down as well as to stop the
+      sweep. Whenever the sweep direction is changed or the sweep is
+      stopped a marker should be drawn.
+@item We need two entry fields to be able to enter a new field value and
+      sweep step size.
+@item The current field should be displayed in an output field.
+@item It should be possible to stop and restart acquiring new data from
+      the lock-in amplifier.
+@item We would like to be able to clear the display when the old data
+      aren't needed anymore.
+@item While running the test experiment the lock-in amplifiers keys
+      should still be usable to allow adjustment of phase, amplification
+      etc.
+@end itemize
+
+Now here is the complete @code{EDL} script:
+@example
+  1 DEVICES:
+  2 
+  3 er032m;       // Bruker field controller
+  4 sr530;        // SR 530 lock-in amplifier
+  5 
+  6 
+  7 VARIABLES:
+  8 
+  9 field;
+ 10 field_step = 0.5 G
+ 11 data[ 2 ];
+ 12 
+ 13 last_field;
+ 14 last_field_step = field_step;
+ 15 new_field, new_field_step;
+ 16 
+ 17 max_field = -50.0 G
+ 18 min_field = 23000.0 G;
+ 19 min_field_step = 1.0e-3 G;
+ 20 max_field_step = 100 G;
+ 21 
+ 22 I;
+ 23 
+ 24 Sweep_State = 0;   // 0: stopped, 1: up, -1: down
+ 25 Pause_State = 1;   // 0: running, 1: paused
+ 26 
+ 27 Sweep_Up, Sweep_Down, Sweep_Stop,
+ 28 Field_In, Field_Step_In, Field_Out,
+ 29 Pause, Clear;
+ 30 
+ 31 
+ 32 PREPARATIONS:
+ 33 
+ 34 init_1d( 2, "Points", "Signal [uV]" );
+ 35 
+ 36 
+ 37 EXPERIMENT:
+ 38 
+ 39 lockin_lock_keyboard( "OFF" );
+ 40 field = get_field( field );
+ 41 last_field = field;
+ 42 
+ 43 hide_toolbox( "ON" );
+ 44 Field_Out = output_create( "FLOAT_OUTPUT", field,
+ 45                            "Current field (in G)" );
+ 46 Sweep_Up   = button_create( "RADIO_BUTTON", "Sweep up" );
+ 47 Sweep_Stop = button_create( "RADIO_BUTTON", Sweep_Up, "Stop sweep" );
+ 48 Sweep_Down = button_create( "RADIO_BUTTON", Sweep_Up, "Sweep Down" );
+ 49 button_state( Sweep_Stop, "ON" );
+ 50 
+ 51 Field_In = input_create( "FLOAT_INPUT", field,
+ 52                          "Set a new field (in G)" );
+ 53 Field_Step_In = input_create( "FLOAT_INPUT", field_step,
+ 54                               "Set a new field step (in G)" );
+ 55 Pause = button_create( "PUSH_BUTTON", "Pause display" );
+ 56 button_state( Pause, Pause_State );
+ 57 Clear = button_create( "NORMAL_BUTTON", "Clear screen" );
+ 58 hide_toolbox( "OFF" );
+ 59 
+ 60 I = 1;
+ 61 
+ 62 FOREVER @{
+ 63 
+ 64   wait( lockin_time_constant( );
+ 65 
+ 66   IF Pause_State == 0
+ 67   @{
+ 68     data = lockin_get_data( 1, 2 );
+ 69     display( I, data[ 1 ] * 1.0e6, 1,
+ 70              I, data[ 2 ] * 1.0e6, 2 );
+ 71     I += 1;
+ 72   @} 
+ 73 
+ 74   IF button_state( Sweep_Up ) @{
+ 75     IF Sweep_State != 1 @{
+ 76       Sweep_State = 1;
+ 77       draw_marker( I, "RED" );
+ 78     @}
+ 79   @} ELSE IF button_state( Sweep_Down ) @{
+ 80     IF Sweep_State != -1 @{
+ 81       Sweep_State = -1;
+ 82       draw_marker( I, "GREEN" );
+ 83     @}
+ 84   @} ELSE @{
+ 85     IF Sweep_State != 0 @{
+ 86       Sweep_State = 0;
+ 87       draw_marker( I, "YELLOW" );
+ 88     @}
+ 89   @}
+ 90 
+ 91   IF Sweep_State == 1 @{
+ 92      IF field + field_step <= max_field @{
+ 93        field = set_field( field + field_step );
+ 94        output_value( Field_Out, field );
+ 95      @} ELSE @{
+ 96        Sweep_State = 0;
+ 97        button_state( Sweep_Stop, 1 );
+ 98        draw_marker( I, "YELLOW" );
+ 99      @}
+100    @} ELSE IF Sweep_State == -1 @{
+101      IF field - field_step >= min_field @{
+102        field = set_field( field - field_step );
+103        output_value( Field_Out, field );       
+104      @} ELSE @{
+105        Sweep_State = 0;
+106        button_state( Sweep_Stop, 1 );
+107        draw_marker( I, "YELLOW" );
+108      @}
+109   @}
+110 
+111   new_field = input_value( Field_In );
+112   IF new_field != last_field @{
+113     IF ( new_field >= min_field & new_field <= max_field @{
+114       field = set_field( new_field );
+115       output_field( Field_Out, field );
+116       last_field = new_field;
+117     @} ELSE @{
+118       input_field( Field_In, last_field );
+119     @}
+120   @}
+121 
+122   new_field_step = input_value( Field_Step_In );
+123   IF new_field_step != last_field_step @{
+124     IF new_field_step >= min_field_step &
+125        new_field_step <= max_field_step @{
+126       field_step = new_field_step;
+127       last_field_step = new_field_step;
+128     @} ELSE @{
+129       input_field( Field_Step_In, last_field_step );
+130     @}
+131   @}
+132 
+133   Pause_State = button_state( Pause );
+134 
+135   IF button_state( Clear ) @{
+136     clear_curve( );
+137     clear_marker( );
+138     rescale( 64 );
+139     I = 1;
+140   @}
+141 @}
+@end example
+
+I hope that this program doesn't look too daunting, but most of its
+length is due to checking and reacting for user input, the real content
+is rather small as you will see.
+
+The @code{DEVICES} section again is very simple, we're just loading the
+modules for the @code{Bruker} field controller and the @code{SR530}
+lock-in amplifier. Since this lock-in has to channels we will be able to
+display both the @i{x}- and the @i{y}-phase signal which might help to
+set the correct phase for the real experiment.
+
+The @code{VARIABLES} section has gotten rather long. But the most
+important variables are just the first three for the current field, the
+current field step size and an array with two elements for storing the
+@i{x}- and @i{y}-phase signal.
+
+The next four variables at line 13 to 15 are needed in the evaluation of
+the input fields for setting a new field and field step size. We will
+discuss their meaning later.
+
+The variables defined on line 17 to 20 for the minimum and maximum field
+and field step size are not strictly necessary. We also could have
+hard-coded the values into the program but at the cost of
+readability. Also, it is going to be easier to adapt the script for
+using a different field controller with a different set of limits when
+such values can be found in just one place instead of having them
+scattered all over the script.
+
+The variable @code{I} is just a counter variable which will tell us at
+which coordinate to draw the next measured data points.
+
+@code{Sweep_State} and @code{Pause_State} (line 24 and 25) are for
+remembering the current state the program is in. If @code{Sweep_State}
+is set to @code{1} the program is currently sweeping the field to higher
+values, if it is @code{0} the field sweep is stopped, and if it is
+@code{-1} we're sweeping down. If @code{Pause_State} is @code{0} we're
+supposed to measure and display new data, if it's @code{1} data
+acquistion is disabled.
+
+The final variables declared in the lines 27 to 29 are integer variables
+for storing handles for the graphical elements like buttons and in- and
+output fields. To e.g.@: determine if a button has been pressed we will
+need its handle.
+
+The @code{PREPARATIONS} section is very short, all which is done here is
+the initialization of the display: we need two curves for the @i{x}- and
+@i{y}-phase signal and we set the labels for the @i{x}- and @i{y}-axis.
+We can't know in advance how many points we're going to have to display,
+so the corresponding parameter in the function call has been left out.
+Since it is rather likely that while running the script the field will
+not be swept in just one direction (and in fixed steps) but will be
+swept up and down (or even stay at the same value for longer times) in
+unpredictable ways it's not possible to draw a reasonable @i{x}-axis
+scale, so also the parameters for defining the scale are omitted,
+instead we just display point numbers.
+
+Now we're getting to the most interesting part, the @code{EXPERIMENT}
+section. The first thing we do (line 39) is to re-enable the lock-in
+amplifiers keys. Normally, all keys of devices get disabled when the
+experiment starts, so we have to re-enable them if we want to manually
+change the settings.
+
+The second thing to be done is figure out at which field the magnet
+currently is and store it in both the variables @code{field} and
+@code{last_field}. Because we don't have a call of the function
+@code{magnet_setup()} (@pxref{magnet_setup}) in the @code{PREPARATIONS}
+section as in the previous example script the magnet will simply start
+of at the field value it has been set to manually.
+
+All the lines 43 to 58 are for setting up an additional window with
+graphical elements, i.e.@: buttons and in- and output fields. The first
+element is an output field, i.e. a field to just display values.  It is
+created by calling the function @code{output_create()}
+(@pxref{output_create}) with three arguments. The first is the type of
+the field where "FLOAT_OUTPUT" stands for a field for displaying
+floating point values. The second is the value to display in the field
+and the third is a label to appear below the field. Obviously, this
+first field is for displaying the current field position. The integer
+value returned by the function is later going to used when we have to
+refer to the field for updating the displayed value when the magnet is
+being swept.
+
+The following 4 lines (46-49) are for creating a set of radio buttons.
+Radio buttons always appear in groups and the important property is that
+always only one of them can be switched on. That's exactly what we need
+to control if the magnet is to be swept up or down or stopped - it can
+only be in one of these states. To create a button we need to call the
+function @code{button_create()} (@pxref{button_create}). For the first
+of group of radio buttons it takes just two arguments, the first one
+indicating the type of the button, i.e.@: @code{"RADIO_BUTTON"} (there
+are also other types of buttons as we will see soon) and a label to be
+drawn to the right of the button.
+
+For the other two radio buttons belonging to the group we need an
+additional argument to state to which group they belong to. This extra
+argument is simply the number of the first button of the group. It has
+to be given between the buttons type and the label string.
+
+After creating all three buttons we now select one of them as activated
+with a call to @code{button_state()} (@pxref{button_state}). When we
+want to set the state of a button we have to pass the function two
+arguments, the number associated with the button and the state, either
+@code{"ON"} or @code{"OFF"} (but @code{1} and @code{0} will also do). If
+we don't set one of the buttons of a group of radio buttons the first of
+the group will be selected per default. But since we better start off
+with the sweep being stopped we here have to manually set the
+corresponding button.
+
+Next we add two input fields where the user can enter a new field as
+well as a new field step size. This is down by a call of the function
+@code{input_create()} (@pxref{input_create}). Since both values are
+floating point numbers we use @code{"FLOAT_INPUT"} as the first
+argument. As already in the case of the function for creating an output
+field, the second argument is the value to be shown at first in the
+input field and the third argument is a label string.
+
+Finally two further buttons are created. The first one is for stopping
+and restarting the acquisition of data. This button must be either
+active or inactive, i.e.@: it's either pushed in or not. The natural
+choice in this case is to use a button of type @code{"PUSH_BUTTON"}
+whicg has exactly these properties. As we already have seen when
+creating radio buttons, the function to create a button is
+@code{button_create()} (@pxref{button_create}) and the first arguent
+passed to it must be the type of the button. The second argument is just
+the label string to be shown on its right side. Since push buttons start
+of in the inactive state per default but it is probably better not to
+start the experiment already acquiring data (the user probably first
+will have to set a reasonable field value) we have to activate button
+(indicating that the acquisition is stopped) by calling
+@code{button_state()} (@pxref{button_state}) with the buttons handle and
+the new state to be set.
+
+The second and last button for clearing the display is just a normal
+button, i.e.@: a button that just can be clicked on. This is indicated
+by the button type @code{"NORMAL_BUTTON"} as the first argument to
+@code{button_create()} (@pxref{button_create}).
+
+The creation of all the buttons and in- and output fields is enclosed by
+two calls of the function @code{hide_toolbox()} (@pxref{hide_toolbox})
+(line 43 and 58). Before we start creating the buttons etc.@: this
+disables the immediate display of the newly created window (labled
+"Toolbox") and the redraw for each new object. When we're done with
+adding new objects we "un-hide" the window and it willl now be shown
+with all the new buttons etc.@: at once.  Actually, this isn't
+necessary, it's just cosmetics to make the creation of the objects look
+nicer. The script will also work when you leave out both the lines.
+
+Just before entering the main loop for the experiment we set the counter
+variable @code{I}, which will be used as the @i{x}-coordinate when
+drawing new data points, to @code{1}, i.e.@: to represent the leftmost
+point in the display area.
+
+After all these preparations the real fun starts. Since we can't know in
+advance how many points the user is going to measure be use a
+@code{FOREVER} loop, i.e.@: a loop that will run until the user hits the
+@code{Stop} button. All of the test experiment will happen within this
+loop.
+
+The first action within the loop is to wait for the lock-in amplifiers
+time constant. In contrast to the previous script we don't determine the
+lock-ins time constant once at the start of the experiment but ask the
+lock-in each time we have to wait. This is necessary because the
+keyboard of the lock-in is unlocked, so the user can change the time
+constant whenever he likes, so we have to make sure that we always get
+the correct time constant.
+
+As you will notice, we also wait even when the acquisition is
+stopped. This is reasonable because otherwise loop would be repeated
+extremely fast in paused mode, uselessly eating up computer time.
+
+
+Unless the acquistion hasn't been stopped (i.e.@: as long as
+@code{Pause_State} isn't set) we now ask the lock-in amplifier for new
+data. To be able to display both the @i{x}- and @i{y}-phase signal we
+tell it to return data for both channel @code{1} and @code{2}. Of
+course, it must return 2 values, which it stores in an array with two
+elements, @code{data}. Please note, that not all lock-in amplifiers have
+two channels, for these we would have to change the program a bit to
+fetch and display only one data point.
+
+After having gotten both the new measured data points we draw them in
+the display at @i{x}-coordinate @code{I} and afterwards we increment
+@code{I} to be prepared for the next set of data points.
+
+Before now also stepping the field up or down we first have to check the
+state of the sweep buttons - the user may have pushed one of them. This
+is what happens in the lines 74 to 89. Checking the state of a button is
+done using the same function that already was used to set the state of a
+button, @code{button_state()} (@pxref{button_state}), but without a
+second argument, just with the button handle as the only argument. If a
+radio or push button is active it returns a non-zero number, otherwise
+@code{0}.
+
+The first of a series of tests is for the sweep up button. If it is
+active but we're not sweeping up (i.e.@: when @code{Sweep_State} isn't
+@code{1} we'll have to change the @code{Sweep_State} variable to in
+accordance with the users request. To also give a visual indication that
+the sweep directon changed we then draw a marker at the current
+coordinate. This is one via the @code{draw_marker()}
+(@pxref{draw_marker}) function. It takes two arguments, the
+@i{x}-coordinate and a string for the color of the marker, and will draw
+a vertical dashed line in the selected color.
+
+Of course, if the sweep-up button isn't active we also have to check the
+sweep-down and the stop-sweep buttons, in exactly the same way as we did
+for the sweep-up button. When we're done we know into which direction
+we have to sweep the field (or if we shouldn't do a field step at all).
+
+This brings us to the lines 91 to 109. Here the field is swept (unless
+the stop-sweep button is active). But we have to be a bit careful:
+before stepping up or down the field we have to make sure that the new
+field value is still within the allowed limits for the magnet. (If we
+don't take care here the script might be stopped by the driver for the
+magnet - but most drivers will handle the situation more gracefully by
+simply refusing to sweep the field out of the allowed limits, but you
+shouldn't count on this.)
+
+If the new field value is still within the allowed range we tell the
+magnet to set the new field by calling the function @code{set_field()}
+(@pxref{set_field}).  It returns the value of the new field, which we
+store in the @code{field} variable. When done with this we still have to
+update the output field for displaying the current field by calling the
+@code{output_value()} (@pxref{output_value}) function. It takes two
+arguments, the handle of the output field we got when it was created and
+the new value to be displayed.
+
+But if the new field is not within the magnets limits we have to
+automatically stop the sweep and give the user a visual feedback. This
+is done by setting the @code{Sweep_State} variable to @code{0},
+indicating a stopped sweep. By setting the variable we avoid that the
+next time we run through the loop the program again will try to change
+the field. And to notify the user about this we also activate the button
+the user would push for stopping a sweep and draw a marker in the same
+color that would be used in this case.
+
+But we're not finished yet. In the mean time the user might have entered
+a new field or field step value in one of the input fields. To be able
+to figure this out the last known value in these entry fields had been
+stored in the variables @code{last_field} and @code{last_field_step}.
+To check if something has changed we need to figure out the current
+values in the input fields and compare them to our stored version. If
+something changed we need to take appropriate action. This is what
+happens during lines 111 to 130.
+
+For both the field and the field step size we fetch the current value by
+calling @code{input_value()} (@pxref{input_value}) with just one
+argument, the entry fields handle, and store the returned value in a
+variable, @code{new_field} and @code{new_field_step}, respectively. Now
+we can compare the last recoded value to the current value of the input
+field. If they are identical nothing neeeds to be done.
+
+But if they should differ we shouldn't blindly set a new field or field
+step size but instead first check if the user supplied value is
+reasonable. So we have to compare it to the minimum and maximum field or
+field step size. If e.g.@: the new field value is within the allowed
+range we can tell the magnet to move to the requested field and store it
+in both the variables @code{field} and @code{last_field}. Of course, we
+also have the output field showing the current field. On the other hand,
+if the value isn't acceptable we must notify the user which we do by
+resetting the input field to its previous value, using again the
+@code{input_value()} (@pxref{input_value}) function.
+
+Now we're nearly done, there only remain two more buttons to be taken
+care of. Handling the button for stopping the acquisition is simple - we
+just have to get its state and set the @code{Pause_State} variable
+accordingly, which is done in line 133.
+
+Also dealing with the button for clearing the display isn't complicated.
+First we must determine if it had been clicked on in the mean
+time. Again, we can use the @code{button_state()} (@pxref{button_state})
+function. It will return a non-zero value if the button has been clicked
+on since the last invocation of the function for this button, otherwise
+@code{0}. (Actually, the value returned by the function is the number of
+times the button was clicked on since the last call.)
+
+If the user clicked onto the button we have to clear both the curves and
+also remove the markers that might have been drawn, using the functions
+@code{clear_curve()} (@pxref{clear_curve}) and @code{clear_marker()}
+(@pxref{clear_marker}) (if invoked without an argument the functions
+remove all curves and markers, otherwise you would have to supply a list
+of curve numbers and marker handles).  But we also call the function
+@code{rescale()} (@pxref{rescale}) to reduce the @i{x}-scaling to some
+reasonable value (here @code{64}) - if we wouldn't do so and the number
+of points displayed before removing the curves was very large, e.g.@:
+10000, the @i{x}-scaling would remain set for displaying 10000 points,
+which would probably be rather not what the user expects.
+
+Finally, we also have to set the counter variable @code{I} to @code{1}
+in order to have the next measured value drawn at the leftmost position
+of the display (instead to the right of the deleted curve).
+
+
+@node Hahn-echo detected EPR script, ESEEM script, cw-EPR monitor script, Example EDL Scripts
+@section Hahn-echo detected EPR script
+
+Still to be written...
+
+
+@node ESEEM script, Time-resolved EPR script, Hahn-echo detected EPR script, Example EDL Scripts
+@section ESEEM script
+
+
+Still to be written...
+
+
+
+@node Time-resolved EPR script, , ESEEM script, Example EDL Scripts
+@section Time-resolved EPR script
+
+
+Still to be written...
+
