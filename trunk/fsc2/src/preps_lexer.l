@@ -105,7 +105,7 @@ DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
 PC          PH(ASE)?_?C(YCLE)?
 
-PS          PH(ASE)?_?S(EQ(UENCE)?)?(_?[0-9]+)?
+PS          PH(ASE)?_?S(EQ(UENCE)?)?(_?[12])?
 
 CHT         ((CH[1-4])|(AUX[12]?)|(MATH[1-3])|(REF[1-4])|(LIN(E)?)|(MEM_[CD])|(FUNC_[EF])|(EXT(10)?))
 
