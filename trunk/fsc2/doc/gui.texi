@@ -473,13 +473,13 @@ in a change of the colors used for displaying the data. When changing
 the z-scaling it may happen that some of the data points can't be
 displayed with the available colors anymore. In this case data values
 larger than the maximum value of the z-axis will be drawn in white, and
-data that are too small are shown in black.
+data that are too small are shown in a dark kind of blue.
 
 @ifnotinfo
-Here is an example of how the display may look like after z-rescaling. A
+Here is an example of how the display may look after a z-rescaling. A
 lot of the values are too small to be drawn using the values shown on
-the z-scale and are thus drawn in black while the maximum values at the
-top of the high-field signal are too large and thus drawn in white.
+the z-scale and are thus drawn in dark blue while the maximum values at
+the top of the high-field signal are too large and thus drawn in white.
 
 @image{fsc2fig5,11cm,}
 
@@ -489,13 +489,13 @@ top of the high-field signal are too large and thus drawn in white.
 @subsection Getting cross sections
 
 Quite often one needs to examine cross sections through a 2D-data
-set. This can done by holding down the @code{<Shift>} key and clicking
-with the left mouse button into either the x- or y-axis area at the
-position you want the cross section of. When you release the left mouse
-button a new window pops up showing the cross section (please keep the
-@code{<Shift>} key pressed down until this new window is shown). While
-the left mouse button is pressed down the cursor is changed to a
-vertical or horizontal
+set. This can achieved by holding down the @code{<Shift>} key and
+clicking with the left mouse button into either the x- or y-axis area at
+the position you want the cross section of. When you release the left
+mouse button a new window pops up showing the cross section (please keep
+the @code{<Shift>} key pressed down until this new window is
+shown). While the left mouse button is pressed down the cursor is
+changed to a vertical or horizontal
 @ifnotinfo
 arrow, i.e.@: either @image{cursor6,5mm,} or @image{cursor7,5mm,}
 .
@@ -508,7 +508,7 @@ arrow.
 
 Even though the new window with the cross section through the data set
 only shows an 1D-curve it also has a z-axis. On this axis a red
-indicator shows the value for which the cross section either x- or
+indicator shows the value for which the cross section in either x- or
 y-direction was taken.
 @ifnotinfo
 
@@ -550,19 +550,19 @@ other direction is drawn.
 @section Tool Box Window
 
 Sometimes it is necessary to adjust certain values while a measurement
-is running. Usually, this is the case when one is trying to determine
-optimum parameters for an experiment. Therefore, it is possible to write
-an @code{EDL} program that creates several different kinds of objects
-allowing user input during the experiment. All these elements appear in
-a separate window, the tool box.
+is running. Often this happens when one is trying to determine optimum
+parameters for an experiment. Therefore @code{fsc2} allows to create
+several different kinds of graphical objects for user input during the
+experiment. All these elements appear in a separate window, the tool
+box.
 
-Please note, that @code{fsc2} usually will not be able to do a real
+Please note that @code{fsc2} usually will not be able to do a real
 thorough test before the experiment is started when the tool box is
 used. In this case the flow of control is often controlled by user input
-which can not be predicted. Therefore, @code{fsc2} has no possibility
-to determine which parts of the @code{EDL} will be run at what time
-and if data to be send to devices will be correct. For these reasons
-it is probably better not to use a tool box when running important
+which can not be predicted. Therefore @code{fsc2} may have no chance to
+determine which parts of the @code{EDL} will be run at what time and if
+data to be send to devices will be correct. For these reasons it is
+probably better not to use a tool box when running important
 experiments, or only a tool box to display (but not change) relevant
 data.
 
