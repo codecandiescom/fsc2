@@ -367,7 +367,7 @@ static void setup_signal_handlers( void )
 /*-----------------------------------------------------------*/
 /* Callback handler for the main "Stop" button during device */
 /* initialization (to allow stopping the experiment already  */
-/* at tis early stage).                                      */
+/* at this early stage).                                     */
 /*-----------------------------------------------------------*/
 
 static void stop_while_exp_hook( FL_OBJECT *a, long b )
@@ -544,6 +544,14 @@ void run_stop_button_callback( FL_OBJECT *a, long b )
 	/* Disable the stop button for the time until the child has died */
 
 	fl_set_object_callback( a, NULL, 0 );
+
+	/* If we're currently waiting for an event from the toolbox or for the
+	   timer to expire the child won't react to the DO_QUIT signal because
+	   it's still trying to read a reply from the parent. So we've got to
+	   give it this reply to let it die. */
+
+	if ( Internals.tb_wait != TB_WAIT_NOT_RUNNING )
+		tb_wait_handler( -1 );
 }
 
 
@@ -962,11 +970,9 @@ static void child_sig_handler( int signo )
 				if ( Internals.is_i386 )
 				{
 					asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-					Internals.crash_address =
-								   ( void * ) * ( EBP + CRASH_ADDRESS_OFFSET );
+					DumpStack( ( void * ) * ( EBP + CRASH_ADDRESS_OFFSET ) );
 				}
 #endif
-				DumpStack( );
 				death_mail( signo );
 			}
 
@@ -1105,7 +1111,7 @@ static void do_measurement( void )
 
 /*-----------------------------------------------------------------------*/
 /* The following is just a lengthy switch to deal with tokens that can't */
-/* be handled by the parser directly, i.e. tokens for flow control.      */
+/* be handled by the parser directly, the tokens for flow control.       */
 /* Control is transfered back to this function whenever the parser finds */
 /* the end-of-line delimiter (a colon), a closing curly brace or one of  */
 /* the flow control tokens.                                              */
