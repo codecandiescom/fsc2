@@ -60,9 +60,9 @@ int dg2020_b_init_hook( void )
 	/* We have to set up the global structure for the pulser, especially the
 	   pointers for the functions that will get called from pulser.c */
 
-	dg2020.needs_update   = UNSET;
-	dg2020.is_running     = SET;
-	dg2020.keep_all       = UNSET;
+	dg2020.needs_update = UNSET;
+	dg2020.is_running   = SET;
+	dg2020.keep_all     = UNSET;
 
 	pulser_struct.set_timebase = dg2020_store_timebase;
 
@@ -504,9 +504,15 @@ Var *pulser_shift( Var *v )
 	   have a position change time value set */
 
 	if ( v == NULL )
+	{
+		long ret = 1;
+
+
 		for ( p = dg2020_Pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dpos )
-				pulser_shift( vars_push( INT_VAR, p->num ) );
+				ret &= pulser_shift( vars_push( INT_VAR, p->num ) )->val.lval;
+		return vars_push( INT_VAR, ret );
+	}
 
 	/* Otherwise run through the supplied pulse list */
 
@@ -586,9 +592,16 @@ Var *pulser_increment( Var *v )
 	   that have a length change time value set */
 
 	if ( v == NULL )
+	{
+		long ret = 1;
+
+
 		for ( p = dg2020_Pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dlen )
-				pulser_increment( vars_push( INT_VAR, p->num ) );
+				ret &=
+					pulser_increment( vars_push( INT_VAR, p->num ) )->val.lval;
+		return vars_push( INT_VAR, ret );
+	}
 
 	/* Otherwise run through the supplied pulse list */
 
@@ -663,6 +676,9 @@ Var *pulser_next_phase( Var *v )
 
 	if ( v == NULL )
 	{
+		long res = 1;
+
+
 		if ( dg2020_phs[ 0 ].function == NULL &&
 			 dg2020_phs[ 1 ].function == NULL &&
 			 TEST_RUN )
@@ -673,9 +689,10 @@ Var *pulser_next_phase( Var *v )
 		}
 					
 		if ( dg2020_phs[ 0 ].function != NULL )
-			pulser_next_phase( vars_push( INT_VAR, 1 ) );
+			res &= pulser_next_phase( vars_push( INT_VAR, 1 ) )->val.lval;
 		if ( dg2020_phs[ 1 ].function != NULL )
-			pulser_next_phase( vars_push( INT_VAR, 2 ) );
+			res &= pulser_next_phase( vars_push( INT_VAR, 2 ) )->val.lval;
+		return vars_push( INT_VAR, res );
 	}
 
 	for ( ; v != NULL; v = vars_pop( v ) )
@@ -689,7 +706,6 @@ Var *pulser_next_phase( Var *v )
 		}
 
 		f = dg2020_phs[ v->val.lval - 1 ].function;
-		vars_pop( v );
 
 		if ( ! f->is_used )
 		{
@@ -738,6 +754,9 @@ Var *pulser_phase_reset( Var *v )
 
 	if ( v == NULL )
 	{
+		long ret = 1;
+
+
 		if ( dg2020_phs[ 0 ].function == NULL &&
 			 dg2020_phs[ 1 ].function == NULL &&
 			 TEST_RUN )
@@ -748,9 +767,10 @@ Var *pulser_phase_reset( Var *v )
 		}
 					
 		if ( dg2020_phs[ 0 ].function != NULL )
-			pulser_phase_reset( vars_push( INT_VAR, 1 ) );
+			ret &= pulser_phase_reset( vars_push( INT_VAR, 1 ) )->val.lval;
 		if ( dg2020_phs[ 1 ].function != NULL )
-			pulser_phase_reset( vars_push( INT_VAR, 2 ) );
+			ret &= pulser_phase_reset( vars_push( INT_VAR, 2 ) )->val.lval;
+		return vars_push( INT_VAR, ret );
 	}
 
 	for ( ; v != NULL; v = vars_pop( v ) )
@@ -764,7 +784,6 @@ Var *pulser_phase_reset( Var *v )
 		}
 
 		f = dg2020_phs[ v->val.lval - 1 ].function;
-		vars_pop( v );
 
 		if ( ! f->is_used )
 		{
@@ -814,13 +833,19 @@ Var *pulser_pulse_reset( Var *v )
 
 	if ( v == NULL )
 	{
+		long ret = 1;
+
+
 		if ( dg2020_phs[ 0 ].function != NULL ||
 			 dg2020_phs[ 1 ].function != NULL )
 			pulser_phase_reset( NULL );
 
 		for ( p = dg2020_Pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 )
-				pulser_pulse_reset( vars_push( INT_VAR, p->num ) );
+				ret &=
+				  pulser_pulse_reset( vars_push( INT_VAR, p->num ) )->val.lval;
+
+		return vars_push( INT_VAR, ret );
 	}
 
 	/* Otherwise run through the supplied pulse list */

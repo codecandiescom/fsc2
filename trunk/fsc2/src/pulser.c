@@ -39,6 +39,8 @@
 
 void pulser_struct_init( void )
 {
+	pulser_struct.has_phase_switch           = UNSET;
+
 	pulser_struct.name                       = NULL;
 
 	pulser_struct.assign_function            = NULL;
@@ -123,8 +125,8 @@ void is_pulser_func( void *func, const char *text )
 
 	if ( func == NULL )
 	{
-		eprint( FATAL, SET, "Function for %s is missing in driver for pulser "
-				"%s.\n", text, pulser_struct.name );
+		eprint( FATAL, SET, "%s: Function for %s not found in module.\n",
+				pulser_struct.name, text );
 		THROW( EXCEPTION )
 	}
 }
@@ -173,8 +175,7 @@ void p_assign_pod( long func, Var *v )
 
 	if ( pulser_struct.assign_channel_to_function == NULL )
 	{
-		eprint( FATAL, SET, "Sorry, pulser %s has no pods.\n",
-				pulser_struct.name );
+		eprint( FATAL, SET, "%s: Pulser has no pods.\n", pulser_struct.name );
 		THROW( EXCEPTION )
 	}
 
@@ -572,85 +573,65 @@ void p_set_max_seq_len( Var *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* `func' is either the phase functions number (Frankfurt version) */
-/* or the number of the PHASE_SETUP (Berlin version). `ref' is the */
-/* function the phase stuff is meant for.                          */  
-/*-----------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* `func' is either the phase functions number (pulser with phase switch) */
+/* or the number of the PHASE_SETUP (pulser without phase switch). `ref'  */
+/* is the function the phase stuff is meant for.                          */  
+/*------------------------------------------------------------------------*/
 
-void p_phase_ref( long prot, long func, int ref )
+void p_phase_ref( int func, int ref )
 {
     is_pulser_func( pulser_struct.set_phase_reference,
                     "setting a function for phase cycling" );
 
-	switch ( prot )
+	if ( pulser_struct.has_phase_switch )
 	{
-		case PHASE_FFM_PROT :
-			if ( ! exists_device( "dg2020_f" ) )
-			{
-				eprint( FATAL, SET, "Frankfurt phase syntax used with wrong "
-						"pulser driver.\n" );
-				THROW( EXCEPTION )
-			}
-
-			if ( func < PULSER_CHANNEL_FUNC_MIN ||
-				 func > PULSER_CHANNEL_FUNC_MAX )
-			{
-				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-						__FILE__, __LINE__ );
-				THROW( EXCEPTION )
-			}
-
-			if ( func != PULSER_CHANNEL_PHASE_1 &&
-				 func != PULSER_CHANNEL_PHASE_2 )
-			{
-				eprint( FATAL, SET, "Function `%s' can't be used as PHASE "
-						"functions.\n", Function_Names[ func ] );
-				THROW( EXCEPTION )
-			}
-
-			if ( ref == PULSER_CHANNEL_PHASE_1 ||
-				 ref == PULSER_CHANNEL_PHASE_2 )
-			{
-				eprint( FATAL, SET, "A PHASE function can't be phase "
-						"cycled.\n" );
-				THROW( EXCEPTION )
-			}
-			break;
-
-		case PHASE_BLN_PROT :
-			if ( ! exists_device( "dg2020_b" ) )
-			{
-				eprint( FATAL, SET, "Berlin phase syntax used with wrong "
-						"pulser driver.\n" );
-				THROW( EXCEPTION )
-			}
-
-			if ( ( func != 0 && func != 1 )    ||
-				 ref < PULSER_CHANNEL_FUNC_MIN ||
-				 ref > PULSER_CHANNEL_FUNC_MAX )
-			{
-				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-						__FILE__, __LINE__ );
-				THROW( EXCEPTION )
-			}
-
-			if ( ref == PULSER_CHANNEL_PHASE_1 ||
-				 ref == PULSER_CHANNEL_PHASE_2 )
-			{
-				eprint( FATAL, SET, "Phase functions can't be used with this "
-						"driver." );
-				THROW( EXCEPTION )
-			}
-			break;
-
-		default :
+		if ( func < PULSER_CHANNEL_FUNC_MIN ||
+			 func > PULSER_CHANNEL_FUNC_MAX )
+		{
 			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION )
+		}
+
+		if ( func != PULSER_CHANNEL_PHASE_1 &&
+			 func != PULSER_CHANNEL_PHASE_2 )
+		{
+			eprint( FATAL, SET, "%s: Function `%s' can't be used as PHASE "
+					"functions.\n",
+					pulser_struct.name, Function_Names[ func ] );
+			THROW( EXCEPTION )
+		}
+
+		if ( ref == PULSER_CHANNEL_PHASE_1 ||
+			 ref == PULSER_CHANNEL_PHASE_2 )
+		{
+			eprint( FATAL, SET, "%s: A PHASE function can't be phase "
+					"cycled.\n", pulser_struct.name );
+			THROW( EXCEPTION )
+		}
+	}
+	else
+	{
+		if ( ( func != 0 && func != 1 )    ||
+			 ref < PULSER_CHANNEL_FUNC_MIN ||
+			 ref > PULSER_CHANNEL_FUNC_MAX )
+		{
+			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION )
+		}
+
+		if ( ref == PULSER_CHANNEL_PHASE_1 ||
+			 ref == PULSER_CHANNEL_PHASE_2 )
+		{
+			eprint( FATAL, SET, "%s: Phase functions can't be used with this "
+					"driver.\n", pulser_struct.name );
+			THROW( EXCEPTION )
+		}
 	}
 
-    ( *pulser_struct.set_phase_reference )( ( int ) func, ref );
+    ( *pulser_struct.set_phase_reference )( func, ref );
 }
 
 
@@ -821,11 +802,9 @@ Var *p_get_by_num( long pnum, int type )
 /* set yet)                                                             */
 /* 'val' means high or low to be set on the pod channel to set the      */
 /* requested phase(0: low, !0: high)                                    */
-/* 'protocol' characterizes the way the phase setup is declared in the  */
-/* input.                                                               */
 /*----------------------------------------------------------------------*/
 
-void p_phs_setup( int func, int type, int pod, long val, long protocol )
+void p_phs_setup( int func, int type, int pod, long val )
 {
 	/* A few sanity checks before we call the pulsers handler function */
 
@@ -838,7 +817,7 @@ void p_phs_setup( int func, int type, int pod, long val, long protocol )
 					"setting up phase channels" );
 	is_pulser_func( pulser_struct.phase_setup, "setting up phase channels" );
 
-	( *pulser_struct.phase_setup_prep )( func, type, pod, val, protocol );	
+	( *pulser_struct.phase_setup_prep )( func, type, pod, val );	
 }
 
 
@@ -864,13 +843,6 @@ void p_set_psd( int func, Var *v )
 {
 	fsc2_assert( func == 0 || func == 1 );
 
-	if ( ! exists_device( "dg2020_f" ) )
-	{
-		eprint( FATAL, SET, "Frankfurt phase syntax used with wrong pulser "
-				"driver.\n" );
-		THROW( EXCEPTION )
-	}
-
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	is_pulser_func( pulser_struct.set_phase_switch_delay,
 					"setting a phase switch delay" );
@@ -890,13 +862,6 @@ void p_set_psd( int func, Var *v )
 
 void p_set_gp( Var *v )
 {
-	if ( ! exists_device( "dg2020_f" ) )
-	{
-		eprint( FATAL, SET, "Frankfurt phase syntax used with wrong pulser "
-				"driver.\n" );
-		THROW( EXCEPTION )
-	}
-
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	is_pulser_func( pulser_struct.set_grace_period,
 					"setting a grace period" );
@@ -917,4 +882,25 @@ void keep_all_pulses( void )
 	is_pulser_func( pulser_struct.keep_all_pulses,
 					"enforcing of keeping all pulses" );
 	( *pulser_struct.keep_all_pulses )( );
+}
+
+
+/*------------------------------------------------------------*/
+/* Checks if a function keyword is PHASE and if it is, if the */
+/* the pulser driver supports phase switches.                 */
+/*------------------------------------------------------------*/
+
+void p_exists_function( int function )
+{
+	fsc2_assert( function >= PULSER_CHANNEL_FUNC_MIN &&
+				 function <= PULSER_CHANNEL_FUNC_MAX );
+
+	if ( ( function == PULSER_CHANNEL_PHASE_1 ||
+		   function == PULSER_CHANNEL_PHASE_2 ) &&
+		 ! pulser_struct.has_phase_switch )
+	{
+		eprint( FATAL, SET, "%s: Pulse setup has no phase switches, so "
+				"PHASE functions can't be used.\n" );
+		THROW( EXCEPTION );
+	}
 }

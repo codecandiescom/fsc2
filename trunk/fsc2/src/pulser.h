@@ -33,6 +33,8 @@ typedef struct {
 	const char *name;
 	bool is_trigger_out;
 	long trigger_out_channel_number;
+	bool has_phase_switch;
+
 
 	bool ( *assign_function )( int function, long connector );
 	bool ( *assign_channel_to_function )( int function, long channel );
@@ -66,8 +68,7 @@ typedef struct {
 	bool ( *get_pulse_length_change )( long pulse_number, double *ptime );
 	bool ( *get_pulse_phase_cycle )( long pulse_number, long *cycle );
 
-	bool ( *phase_setup_prep )( int func, int type, int pod, long val,
-								long protocol);
+	bool ( *phase_setup_prep )( int func, int type, int pod, long val );
 	bool ( *phase_setup )( int function );
 	bool ( *set_phase_switch_delay )( int function, double del_time );
 	bool ( *set_grace_period )( double gp_time );
@@ -101,7 +102,7 @@ void p_set_trigger_impedance( Var *v );
 void p_set_rep_time( Var *v );
 void p_set_rep_freq( Var *v );
 void p_set_max_seq_len( Var *v );
-void p_phase_ref( long prot, long function, int ref );
+void p_phase_ref( int function, int ref );
 
 long p_num( char *txt );
 void is_pulser_driver( void );
@@ -113,13 +114,15 @@ void p_set( long pnum, int type, Var *v );
 Var *p_get( char *txt, int type );
 Var *p_get_by_num( long pnum, int type );
 
-void p_phs_setup( int func, int type, int pod, long val, long protocol );
+void p_phs_setup( int func, int type, int pod, long val );
 void p_phs_end( int func );
 
 void p_set_psd( int func, Var *v );
 void p_set_gp( Var *v );
 
 void keep_all_pulses( void );
+
+void p_exists_function( int function );
 
 
 #endif  /* ! PULSER_HEADER */

@@ -37,14 +37,12 @@ extern char *assigntext;
 
 static void assignerror( const char *s );
 static void ass_func( int function );
-static void set_protocol( long prot );
 
 /* locally used global variables */
 
 static int Channel_Type;
 static int Cur_PHS = -1;
 static int Cur_PHST = -1;
-static long Cur_PROT = PHASE_UNKNOWN_PROT;
 static bool Func_is_set = UNSET;
 
 %}
@@ -146,12 +144,16 @@ input:   /* empty */
 	                                 Cur_PHST = -1;
 									 Func_is_set = UNSET;
                                      fsc2_assert( Var_Stack == NULL ); }
-       | input SECTION_LABEL       { fsc2_assert( Var_Stack == NULL );
-	                                 Cur_PROT = PHASE_UNKNOWN_PROT;
+       | input SECTION_LABEL       { Channel_Type = PULSER_CHANNEL_NO_TYPE;
+	                                 Cur_PHS = -1;
+	                                 Cur_PHST = -1;
+	                                 fsc2_assert( Var_Stack == NULL );
 									 Func_is_set = UNSET;
 									 YYACCEPT; }
-       | input error ';'           { Func_is_set = UNSET;
-	                                 Cur_PROT = PHASE_UNKNOWN_PROT;
+       | input error ';'           { Channel_Type = PULSER_CHANNEL_NO_TYPE;
+	                                 Cur_PHS = -1;
+	                                 Cur_PHST = -1;
+	                                 Func_is_set = UNSET;
 		                             THROW ( SYNTAX_ERROR_EXCEPTION ) }
        | input ';'                 { Channel_Type = PULSER_CHANNEL_NO_TYPE;
 	                                 Cur_PHS = -1;
@@ -161,8 +163,9 @@ input:   /* empty */
 ;
 
 
-/* A (non-empty) line has to start with one of the channel keywords or either
-   TIMEBASE or TRIGGERMODE */
+/* A (non-empty) line has to start with one of the channel keywords, TIMEBASE,
+   TRIGGERMODE, the phase-setup keyword, GRACE_PERIOD, MAXIMUM_PATTERN_LEN,
+   PHASE_SWITCH_DELAY or KEEP_ALL_PULSES */
 
 line:    func                      { Func_is_set = SET; }
          pcd af
@@ -277,8 +280,8 @@ func:    MW_TOKEN                  { ass_func( PULSER_CHANNEL_MW ); }
 /* Pod and channel assignments consists of the POD and CHANNEL keyword,
    followed by the pod or channel number(s), and, optionally, a DELAY keyword
    followed by the delay time and the INVERTED keyword. The sequence of the
-   keywords is arbitrary. The last entry is for the Frankfurt version of the
-   pulser driver only. */
+   keywords is arbitrary. The last entry is for pulsers with phase switches
+   only. */
 
 
 pcd:    /* empty */
@@ -288,8 +291,7 @@ pcd:    /* empty */
       | pcd inv
 	  | pcd vh
       | pcd vl
-	  | pcd                        { set_protocol( PHASE_FFM_PROT ); }
-        func sep2
+	  | pcd func sep2
 ;
 
 pod:    POD_TOKEN sep1 pm
@@ -465,49 +467,46 @@ phs:      PHS_TOK                  { Cur_PHS = $1;
 ;
 
 phsl:     /* empty */
-		| phsl                     { set_protocol( PHASE_BLN_PROT ); }
+		| phsl
 		  func sep2
         | phsl PXY_TOK sep1        { Cur_PHST = $2; }
           phsp
 ;
 
 phsp:     /* empty */
-		| phsp phsv  sep2          { p_phs_setup( Cur_PHS, Cur_PHST, -1, $2,
-												  Cur_PROT ); }
+		| phsp phsv sep2           { p_phs_setup( Cur_PHS, Cur_PHST,
+												  -1, $2 ); }
         | phsp POD1_TOK sep1
-		  phsv sep2                { set_protocol( PHASE_FFM_PROT );
-			                         p_phs_setup( Cur_PHS, Cur_PHST, 0, $4,
-												  Cur_PROT ); }
+		  phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST,
+												  0, $4 ); }
         | phsp POD2_TOK sep1
-		  phsv sep2                { set_protocol( PHASE_FFM_PROT );
-			                         p_phs_setup( Cur_PHS, Cur_PHST, 1, $4,
-												  Cur_PROT ); }
+		  phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST,
+												  1, $4 ); }
 		| POD_TOKEN sep1 INT_TOKEN
-          sep2                     { set_protocol( PHASE_BLN_PROT );
-                                     p_phs_setup( Cur_PHS, Cur_PHST, 0, $3,
-												  Cur_PROT ); }
+          sep2                     { p_phs_setup( Cur_PHS, Cur_PHST,
+												  0, $3 ); }
 ;
 
-phsv:     INT_TOKEN
-        | ON_TOK                   { set_protocol( PHASE_FFM_PROT );
-		                             $$ = 1;}
-        | OFF_TOK                  { set_protocol( PHASE_FFM_PROT );
-		                             $$ = 0; }
+phsv:     INT_TOKEN                { $$ = $1; }
+        | ON_TOK                   { $$ =  1; }
+        | OFF_TOK                  { $$ =  0; }
 ;
 
-/* Handling of PHASE_SWITCH_DELAY commands (Frankfurt version only) */
+/* Handling of PHASE_SWITCH_DELAY commands (pulsers with phase switch only) */
 
-psd:      PSD_TOKEN expr           { p_set_psd( $1, $2 );
-                                     set_protocol( PHASE_FFM_PROT ); }
+psd:      PSD_TOKEN expr           { p_set_psd( $1, $2 ); }
 ;
 
-/* Handling of GRACE_PERIOD commands (Frankfurt version only) */
+/* Handling of GRACE_PERIOD commands (pulsers with phase switch only) */
 
-gp:       GP_TOKEN expr            { set_protocol( PHASE_FFM_PROT );
-                                     p_set_gp( $2 ); }
+gp:       GP_TOKEN expr            { p_set_gp( $2 ); }
 
 %%
 
+
+/*---------------------------------*/
+/* Called in case of syntax errors */
+/*---------------------------------*/
 
 static void assignerror ( const char *s )
 {
@@ -522,62 +521,52 @@ static void assignerror ( const char *s )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Called when a pulse function token has been found. If no function  */
-/* has been set yet (flag `Func_is_set' is still unset) just the      */
-/* global variable `Channel_Type' has to be set - thus we know that   */
-/* we're at a line with a function definition. `Func_is_set' is also  */
-/* set at the start of a (Berlin version) PHASE_SETUP line because a  */
-/* following function token is meant to be the function the phase     */
-/* setup is meant up.                                                 */
-/* If `Func_is_set' is set the function token is the function the     */
-/* phase function (Frankfurt version) or the PHASE_SETUP line (Berlin */
-/* is for.                                                            */
-/* `Func_is_set' has to be unset at the start of each line!           */
-/*--------------------------------------------------------------------*/
+/*----------------------------------------------------*/
+/* Called when a pulse function token has been found. */
+/*----------------------------------------------------*/
 
 static void ass_func( int function )
 {
+	/* If we're at the start of a function line (i.e. when 'Func_is_set' is
+	   unset) test if the function is usable (if there are no phase switches
+	   we can't use the PHASE functions). Then store the current function
+	   in a global variable for later use. */
+
 	if ( ! Func_is_set )
 	{
+		p_exists_function( function );
 		Channel_Type = function;
 		return;
 	}
 
-	switch ( Cur_PROT )
+	/* Otherwise there are two valid alternatives. We're either in within
+	   a function line - in this case we're dealing with a pulser that
+	   has phase switches and this is the declaration of the function that
+	   needs phase switching */
+
+	if ( Channel_Type != PULSER_CHANNEL_NO_TYPE )
 	{
-		case PHASE_FFM_PROT :             /* Frankfurt driver syntax */
-			p_phase_ref( Cur_PROT, Channel_Type, function );
-			break;
-
-		case PHASE_BLN_PROT :             /* Berlin driver syntax */
-			p_phase_ref( Cur_PROT, Cur_PHS, function );
-			break;
-
-		default :                         /* this better never happens... */
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
+		if ( pulser_struct.has_phase_switch )
+			p_phase_ref( Channel_Type, function );
+		else
+		{
+			eprint( FATAL, SET, "Syntax error near `%s' in when using pulser "
+					"module %s.\n", assigntext, pulser_struct.name );
 			THROW( EXCEPTION )
+		}
+		return;
 	}
-}
 
+	/* The other alternative is that we're dealing with a pulser with no
+	   phase switches. In this cas Cur_PHS most be set to the number of
+	   the PHASE_SETUP (i.e. 0 or 1 for the first or second PHASE_SETUP) */
 
-/*-----------------------------------------------------------------*/
-/* Called when it becomes clear which phase protocol (Frankfurt or */
-/* Berlin) is to be used. If a protocol is already recognized it   */
-/* can't be changed later. It mist be made sure that the global    */
-/* variable `Cur_Prot' is unset and reset to `PHASE_UNKNOWN_PROT'  */
-/* at the start and after the end of the ASSIGNMENTS section.      */
-/*-----------------------------------------------------------------*/
-
-static void set_protocol( long prot )
-{
-	if ( Cur_PROT != PHASE_UNKNOWN_PROT && Cur_PROT != prot )
+	if ( ! pulser_struct.has_phase_switch && Cur_PHS != -1 )
+		p_phase_ref( Cur_PHS, function );
+	else
 	{
-		eprint( FATAL, SET, "Mixing of Berlin and Frankfurt version "
-				"phase syntax.\n" );
+		eprint( FATAL, SET, "Syntax error near `%s' in when using pulser "
+				"module %s.\n", assigntext, pulser_struct.name );
 		THROW( EXCEPTION )
 	}
-
-	Cur_PROT = prot;
 }

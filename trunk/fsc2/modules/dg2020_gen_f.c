@@ -632,8 +632,7 @@ bool dg2020_phase_setup_prep( int func, int type, int pod, long val )
 	if ( type != PHASE_PLUS_X && type != PHASE_MINUS_X &&
 		 type != PHASE_PLUS_Y && type != PHASE_MINUS_Y )
 	{
-		eprint( FATAL, SET, "%s: Phase of type %s can't be used with this "
-				"driver.\n", Lc, pulser_struct.name, Phase_Types[ type ] );
+		eprint( FATAL, SET, "%s: Unknown phase type.\n", pulser_struct.name );
 		THROW( EXCEPTION )
 	}
 

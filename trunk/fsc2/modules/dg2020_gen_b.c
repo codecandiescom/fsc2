@@ -582,7 +582,7 @@ bool dg2020_set_phase_reference( int phs, int function )
 	if ( f->phase_setup != NULL )
 	{
 		eprint( SEVERE, SET, "%s: Phase setup for function %s has already "
-				"been done.\n", Lc, pulser_struct.name,
+				"been done.\n", pulser_struct.name,
 				Function_Names[ f->self ] );
 		return FAIL;
 	}
@@ -599,31 +599,18 @@ bool dg2020_set_phase_reference( int phs, int function )
 /* in a PHASE_SETUP commmand.                                          */
 /*---------------------------------------------------------------------*/
 
-bool dg2020_phase_setup_prep( int phs, int type, int pod, long val,
-							  long protocol )
+bool dg2020_phase_setup_prep( int phs, int type, int pod, long val )
 {
 	pod = pod;                        /* keep the compiler happy... */
 	fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
 
 	Cur_PHS = phs;
 
-	/* Check that we don't get stuff only to be used with the Frankfurt
-	   pulser driver */
-
-	if ( protocol != PHASE_UNKNOWN_PROT && protocol != PHASE_BLN_PROT )
-	{
-		eprint( FATAL, SET, "%s: Invalid syntax for this driver.\n",
-				pulser_struct.name );
-		THROW( EXCEPTION )
-	}
-
 	/* Make sure the phase type is supported */
 
 	if  ( type < PHASE_PLUS_X || type > PHASE_CW )
 	{
-		eprint( FATAL, SET, "%s: Phase type `%s' not supported by this "
-				"driver.\n", pulser_struct.name,
-				Phase_Types[ type ] );
+		eprint( FATAL, SET, "%s: Unknown phase type.\n", pulser_struct.name );
 		THROW( EXCEPTION )
 	}
 
@@ -665,7 +652,8 @@ bool dg2020_phase_setup_prep( int phs, int type, int pod, long val,
 bool dg2020_phase_setup( int phs )
 {
 	bool is_set = UNSET;
-	int i;
+	int i, j;
+	FUNCTION *f;
 
 
 	fsc2_assert( Cur_PHS != -1 && Cur_PHS == phs );
@@ -673,17 +661,54 @@ bool dg2020_phase_setup( int phs )
 	if ( dg2020_phs[ phs ].function == NULL )
 	{
 		eprint( SEVERE, SET, "%s: No function has been associated with "
-				"PHASE_%1d_SETUP.\n", pulser_struct.name, phs );
+				"PHASE_SETUP_%1d.\n", pulser_struct.name, phs );
 		return FAIL;
 	}
 
 	for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
-		is_set |= dg2020_phs[ phs ].is_set[ i ];		
+	{
+		if ( ! dg2020_phs[ phs ].is_set[ i ] )
+			 continue;
+
+		is_set = SET;
+		f = dg2020_phs[ phs ].function;
+
+		/* Check that the pod reseved for the current phase is reserved for
+		   the function that we're going to phasecycle */
+
+		for ( j = 0; j < f->num_pods; j++ )
+			if ( dg2020_phs[ phs ].pod[ i ] == f->pod[ j ] )
+				break;
+
+		if ( j == f->num_pods )
+		{
+			eprint( FATAL, UNSET, "%s: Pod %d needed for phase '%s' is not "
+					"reserved for function '%s'.\n",
+					pulser_struct.name, dg2020_phs[ phs ].pod[ i ]->self,
+					Phase_Types[ i ], Function_Names[ f->self ] );
+			THROW( EXCEPTION )
+		}
+
+		/* Check that the pod isn't already used for a different phase */
+
+		for ( j = 0; j < i; j++ )
+			if ( dg2020_phs[ phs ].is_set[ j ] &&
+				 dg2020_phs[ phs ].pod[ i ] == dg2020_phs[ phs ].pod[ j ] )
+			{
+				eprint( FATAL, UNSET, "%s: The same pod %d is used for "
+						"phases '%s' and '%s'.\n", pulser_struct.name,
+						dg2020_phs[ phs ].pod[ i ], Phase_Types[ j ],
+						Phase_Types[ i ] );
+				THROW( EXCEPTION )
+			}
+	}
+
+	/* Complain if no pods were declared for phase cycling */
 
 	if ( ! is_set )
 	{
 		eprint( SEVERE, SET, "%s: No pods have been assigned to phase "
-				"in PHASE_%1d_SETUP.\n", pulser_struct.name, phs );
+				"in PHASE_SETUP_%1d.\n", pulser_struct.name, phs );
 		return FAIL;
 	}
 
