@@ -226,6 +226,13 @@ bool xforms_init( int *argc, char *argv[ ] )
 						 ( double ) ( h1 + h / 2 - 0.5 * H * SLIDER_SIZE )
 						 / ( ( 1.0 - SLIDER_SIZE ) * H ) );
 
+	/* There's no use for the bug report button if either no mail address
+	   or no mail program has been set */
+
+#if ! defined( MAIL_ADDRESS ) || ! defined( MAIL_PROGRAM )
+	fl_hide_object( main_form->bug_report );
+#endif
+
 	/* Now show the form, taking user wishes about the geometry into account */
 
 	if ( * ( ( char * ) xresources[ GEOMETRY ].var ) != '\0' )
