@@ -37,13 +37,14 @@
 /* We have to make the lexer read the input byte by byte since it might be
    called from within another lexer and wants to use the same input - otherwise
    it would also read in input into its internal buffer belonging to the
-   calling lexer  */
+   calling lexer. */
 
-
-#define YY_INPUT( buf, result, max_size )                  \
-{                                                          \
-	int c = fgetc( expin );                                \
-	result = ( c == EOF ) ? YY_NULL : ( buf[ 0 ] = c, 1 ); \
+#define YY_INPUT( buf, result, max_size )                   \
+{                                                           \
+	int c;                                                  \
+	while ( ( c = fgetc( expin ) ) == EOF )                 \
+		/* empty */ ;                                       \
+	result = ( c == 0x07 ) ? YY_NULL : ( buf[ 0 ] = c, 1 ); \
 }
 
 #include "fsc2.h"
