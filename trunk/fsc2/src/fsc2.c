@@ -22,9 +22,10 @@ static double slider_size = 0.05;
 static bool delete_file = UNSET;
 static bool delete_old_file = UNSET;
 
+
 /* Locally used functions */
 
-
+static int main_form_close_handler( FL_FORM *a, void *b );
 static void final_exit_handler( void );
 static bool xforms_init( int *argc, char *argv[ ] );
 static void xforms_close( void );
@@ -363,6 +364,10 @@ static bool xforms_init( int *argc, char *argv[] )
 	fl_show_form( main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
 				  FL_FULLBORDER, "fsc2" );
 
+	/* Set close handler for main form */
+
+	fl_set_form_atclose( main_form->fsc2, main_form_close_handler, NULL );
+
 	/* Set c_cdata and u_cdata elements of load button structure */
 
 	main_form->Load->u_ldata = 0;
@@ -373,6 +378,25 @@ static bool xforms_init( int *argc, char *argv[] )
 	input_form = create_form_input_form( );
 
 	return OK;
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+static int main_form_close_handler( FL_FORM *a, void *b )
+{
+	a = a;
+	b = b;
+
+	if ( main_form->quit->active )
+		return FL_IGNORE;
+
+	clean_up( );
+	xforms_close( );
+
+	exit( EXIT_SUCCESS );
+	return FL_OK;
 }
 
 
