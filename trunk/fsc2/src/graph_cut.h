@@ -18,8 +18,11 @@ typedef struct {
 
 	bool is_fs[ MAX_CURVES ];
 	bool has_been_shown[ MAX_CURVES ];
-	double s2d[ MAX_CURVES ][ 3 ];
-	double shift[ MAX_CURVES ][ 3 ];
+	bool can_undo[ MAX_CURVES ];
+	double s2d[ MAX_CURVES ][ 2 ];
+	double shift[ MAX_CURVES ][ 2 ];
+	double old_s2d[ MAX_CURVES ][ 2 ];
+	double old_shift[ MAX_CURVES ][ 2 ];
 
 	int cur_1,
 		cur_2,
@@ -58,7 +61,7 @@ void cut_show( int dir, int pos );
 bool cut_data_rescaled( long curve, double y_min, double y_max );
 bool cut_num_points_changed( int dir, long num_points );
 bool cut_new_points( long curve, long x_index, long y_index, long len );
-void cut_new_data_redraw( void );
+void redraw_all_cut_canvases( void );
 void cut_new_curve_handler( void );
 void cut_form_close( void );
 void cut_undo_button_callback( FL_OBJECT *a, long b );

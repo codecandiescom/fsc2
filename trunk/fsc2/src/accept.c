@@ -626,7 +626,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	/* Update the cut window if necessary */
 
 	if ( need_cut_redraw )
-		cut_new_data_redraw( );
+		redraw_all_cut_canvases( );
 
 	for ( i = 0; i < G.nc; i++ )
 		cv->scale_changed = UNSET;

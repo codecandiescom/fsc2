@@ -102,7 +102,7 @@ static void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 	/* Find out which window gets the mouse events (all following mouse events
 	   go to this window until all buttons are released) */
-	   
+
 	if ( obj == run_form->x_axis )        /* in x-axis window */
 		G.drag_canvas = 1;
 	if ( obj == run_form->y_axis )        /* in y-axis window */
