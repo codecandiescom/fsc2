@@ -37,18 +37,20 @@ static long record_lengths[ ] = { 500, 1000, 2500, 5000, 15000, 50000, 0 };
 
 /* List of all allowed time base values (in seconds) */
 
-static double tb[ 32 ] = {                     500.0e-12,
-						     1.0e-9,   2.0e-9,   5.0e-9,
-						    12.5e-9,  25.0e-9,  50.0e-9,
-						   100.0e-9, 200.0e-9, 500.0e-9,
-						     1.0e-6,   2.0e-6,   5.0e-6,
-						    10.0e-6,  20.0e-6,  50.0e-6,
-						   100.0e-6, 200.0e-6, 500.0e-6,
-						     1.0e-3,   2.0e-3,   5.0e-3,
-						    10.0e-3,  20.0e-3,  50.0e-3,
-						   100.0e-3, 200.0e-3, 500.0e-3,
-						     1.0,      2.0,      5.0,
-						    10.0 };
+static double tb[ ] = {                     500.0e-12,
+						  1.0e-9,   2.0e-9,   5.0e-9,
+						 12.5e-9,  25.0e-9,  50.0e-9,
+						100.0e-9, 200.0e-9, 500.0e-9,
+						  1.0e-6,   2.0e-6,   5.0e-6,
+						 10.0e-6,  20.0e-6,  50.0e-6,
+						100.0e-6, 200.0e-6, 500.0e-6,
+						  1.0e-3,   2.0e-3,   5.0e-3,
+						 10.0e-3,  20.0e-3,  50.0e-3,
+						100.0e-3, 200.0e-3, 500.0e-3,
+						  1.0,      2.0,      5.0,
+						 10.0 };
+
+#define TB_ENTRIES ( sizeof tb / sizeof tb[ 0 ] )
 
 /* Maximum and minimum sensitivity settings (in V) of the measurement
    channels.
@@ -85,8 +87,8 @@ static struct {
 
 	bool lock_state;
 
-	bool is_sens[ TDS520C_CH2 + 1 ];
-	double sens[ TDS520C_CH2 + 1 ];
+	bool is_sens[ MAX_CHANNELS ];
+	double sens[ MAX_CHANNELS ];
 } tds520c_store;
 
 
@@ -201,7 +203,7 @@ int tds520c_end_of_exp_hook( void )
 	tds520c_store.is_equal_width = tds520c.is_equal_width;
 
 	tds520c.is_timebase          = tds520c_store.is_timebase;
-	tds520c.is_timebase          = tds520c_store.timebase;
+	tds520c.timebase             = tds520c_store.timebase;
 
 	tds520c_store.is_num_avg     = tds520c.is_num_avg;
 	tds520c.num_avg              = tds520c_store.num_avg;
@@ -348,7 +350,7 @@ Var *digitizer_timebase( Var *v )
 {
 	double timebase;
 	int TB = -1;
-	int i;
+	unsigned int i;
 	char *t;
 	
 
@@ -404,7 +406,7 @@ Var *digitizer_timebase( Var *v )
 
 	/* Pick the allowed timebase nearest to the user supplied value */
 
-	for ( i = 0; i < 31; i++ )
+	for ( i = 0; i < TB_ENTRIES - 1; i++ )
 		if ( timebase >= tb[ i ] && timebase <= tb[ i + 1 ] )
 		{
 			TB = i +
@@ -433,7 +435,7 @@ Var *digitizer_timebase( Var *v )
 		}
 		else
 		{
-		    timebase = tb[ 31 ];
+		    timebase = tb[ TB_ENTRIES - 1 ];
 			eprint( WARN, SET, "%s: Timebase of %s is too large, using "
 					"%s instead.\n", DEVICE_NAME,
 					t, tds520c_ptime( timebase ) );
