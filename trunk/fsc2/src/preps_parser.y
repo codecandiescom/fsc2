@@ -188,23 +188,23 @@ expr:    INT_TOKEN unit           { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | '(' expr ')' unit        { $$ = apply_unit( $2, $4 ); }
 ;
 
-unit:    /* empty */               { $$ = NULL; }
-       | NT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
-       | UT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
-       | MT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 10.0 ); }
-       | T_TOKEN                   { $$ = vars_push( FLOAT_VAR, 1.0e4 ); }
-       | NU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
-       | UU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
-       | MU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | KU_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
-       | MEG_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
+unit:    /* empty */              { $$ = NULL; }
+       | NT_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
+       | UT_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
+       | MT_TOKEN                 { $$ = vars_push( FLOAT_VAR, 10.0 ); }
+       | T_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e4 ); }
+       | NU_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
+       | UU_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
+       | MU_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
+       | KU_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
+       | MEG_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
 ;
 
 /* list of indices for access of an array element */
 
-list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
-	   | expr                      { $$ = $1; }
-       | list1 ',' expr            { $$ = $3; }
+list1:   /* empty */              { $$ = vars_push( UNDEF_VAR ); }
+	   | expr                     { $$ = $1; }
+       | list1 ',' expr           { $$ = $3; }
 ;
 
 /* list of function arguments */
@@ -214,8 +214,15 @@ list2:   /* empty */
 	   | list2 ',' exprs
 ;
 
-exprs:   expr                      { }
-       | STR_TOKEN                 { vars_push( STR_VAR, $1 ); }
+exprs:   expr                     { }
+       | STR_TOKEN                { vars_push( STR_VAR, $1 ); }
+         strs
+;
+
+strs:    /* empty */
+       | strs '+' STR_TOKEN       { Var *v;
+		                            v = vars_push( STR_VAR, $3 );
+	                                vars_add( v->prev, v ); }
 ;
 
 
@@ -231,6 +238,6 @@ void prepserror ( const char *s )
 				"section.\n", Fname, Lc );
 	else
 		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.\n",
-				Fname, Lc, prepstext );
+				Fname, Lc, isprint( *prepstext ) ? prepstext : prepstext + 1 );
 	THROW( EXCEPTION );
 }

@@ -174,6 +174,13 @@ list2:   /* empty */
 
 exprs:   expr                     { }
        | E_STR_TOKEN              { vars_push( STR_VAR, $1 ); }
+         strs
+;
+
+strs:    /* empty */
+       | strs '+' E_STR_TOKEN     { Var *v;
+		                            v = vars_push( STR_VAR, $3 );
+	                                vars_add( v->prev, v ); }
 ;
 
 
