@@ -208,6 +208,20 @@ void store_exp( FILE *in )
 		prg_length++;
 	}
 
+	/* Check that all curly braces are balanced - for the other types of
+	   paranthesis an syntax error should have been detected if they don't
+	   match up */
+
+	if ( curly_brace_count > 0 )
+	{
+		eprint( FATAL, "'{' without closing '}' detected at end of "
+				"program.\n" );
+		THROW( EXCEPTION );
+	}
+
+	assert( paranthesis_count == 0 );
+	assert( square_brace_count == 0 );
+
 	/* Check and initialise if's and loops */
 
 	loop_setup( );
