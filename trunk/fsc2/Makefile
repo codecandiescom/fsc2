@@ -498,9 +498,12 @@ all: config.h
 	$(MAKE) tags
 	$(MAKE) -C src all
 ifdef WITH_HTTP_SERVER
-	cd $(ldir);        \
-	perl Makefile.PL;  \
-	cd $(fdir)
+	@if [ ! -e $(ldir)/Makefile                                \
+		  -o $(ldir)/Makefile.PL -nt $(ldir)/Makefile ]; then  \
+		cd $(ldir);                                            \
+		perl Makefile.PL;                                      \
+		cd $(fdir);                                            \
+	fi
 	$(MAKE) -C Fcntl_Lock
 endif
 	$(MAKE) -C utils all

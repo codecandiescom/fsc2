@@ -264,7 +264,7 @@ bool ep385_set_repeat_time( double rep_time )
 		THROW( EXCEPTION );
 	}
 
-	/* Check that the repetition time is within the allowed limits */
+	/* Check that the repetition time is within the allowed limits. */
 
 	if ( rep_time <= 0 )
 	{
@@ -290,7 +290,8 @@ bool ep385_set_repeat_time( double rep_time )
 
 			print( FATAL, "Repeat time/frequency of %s/%g Hz is not within "
 				   "range of %s/%g Hz to %s/%g Hz.\n", ep385_ptime( rep_time ),
-				   tmin, 1.0 / min_repeat_time, tmax, 1.0 / max_repeat_time );
+				   1.0 / rep_time, tmin, 1.0 / min_repeat_time,
+				   tmax, 1.0 / max_repeat_time );
 			THROW( EXCEPTION );
 		}
 		OTHERWISE
@@ -303,9 +304,18 @@ bool ep385_set_repeat_time( double rep_time )
 		}
 	}
 
-	ep385.repeat_time = Ticksrnd( ceil( ( ep385_double2ticks( rep_time )
+	/* We will always use the whole available memory but no sweeps and loops,
+	   so the SHOT-repetition time (i.e. the time between the End-Of-SHOT-
+	   signal (at the rising edge of the ZTM-Out) and the start of the
+	   internal triggering of the next shot) we've got to set is the
+	   repetition time minus the time required for outputting the whole
+	   memory. And, of course, this time can only be set in multiples of
+	   REPEAT_TICKS times the time base. */
+
+	ep385.repeat_time = Ticksrnd(
+						  ceil( ( ep385_double2ticks( rep_time )
 								  - BITS_PER_MEMORY_BLOCK * MAX_MEMORY_BLOCKS )
-									/ (double ) REPEAT_TICKS ) );
+							    / ( double ) REPEAT_TICKS ) );
 	new_rep_time = ( ep385.repeat_time * REPEAT_TICKS 
 					 + BITS_PER_MEMORY_BLOCK * MAX_MEMORY_BLOCKS )
 				   * ep385.timebase;

@@ -71,9 +71,9 @@ static bool ep385_update_pulses( bool flag )
 {
 	static int i, j;
 	int l, m;
-	FUNCTION *f;
+	static FUNCTION *f;
 	PULSE *p;
-	CHANNEL *ch;
+	static CHANNEL *ch;
 	PULSE **pm_entry;
 	PULSE_PARAMS *pp;
 
@@ -239,6 +239,64 @@ static bool ep385_update_pulses( bool flag )
 	}
 
 	ep385_shape_padding_check_2( );
+
+	/* Now we still need a final check that the distance between the last
+	   defense pulse and the first shape pulse isn't too short - this is
+	   only relevant for very fast repetitions of the pulse sequence but
+	   needs to be tested - thanks to Celine Elsaesser for pointing this
+	   out. */
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = ep385.function + i;
+		if ( ( ! f->is_used && f->num_channels == 0 ) ||
+			 i == PULSER_CHANNEL_PHASE_1 ||
+			 i == PULSER_CHANNEL_PHASE_2 )
+			continue;
+
+		for ( j = 0; j < f->num_channels; j++ )
+		{
+			ch = f->channel[ j ];
+			if ( ch->num_active_pulses == 0 )
+				continue;
+
+			f->max_seq_len = Ticks_max( f->max_seq_len,
+						   ch->pulse_params[ ch->num_active_pulses - 1 ].pos +
+						   ch->pulse_params[ ch->num_active_pulses - 1 ].len );
+		}
+	}
+
+	if ( ep385.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
+		 ep385.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
+	{
+		Ticks add;
+		CHANNEL *cs =
+					 ep385.function[ PULSER_CHANNEL_PULSE_SHAPE ].channel[ 0 ],
+				*cd = ep385.function[ PULSER_CHANNEL_DEFENSE ].channel[ 0 ];
+		PULSE_PARAMS *shape_p = cs->pulse_params,
+					 *defense_p = cd->pulse_params + cd->num_active_pulses - 1;
+
+		add = shape_p->pos + cd->function->max_seq_len
+			  - defense_p->pos - defense_p->len;
+		if ( add < ep385.defense_2_shape )
+			cd->function->max_seq_len += ep385.defense_2_shape - add;
+	}
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = ep385.function + i;
+		if ( ( ! f->is_used && f->num_channels == 0 ) ||
+			 i == PULSER_CHANNEL_PHASE_1 ||
+			 i == PULSER_CHANNEL_PHASE_2 )
+			continue;
+
+		if ( f->max_seq_len > MAX_PULSER_BITS )
+		{
+			print( FATAL, "Pulse sequence for function '%s' is too long.\n",
+				   f->name );
+			THROW( EXCEPTION );
+		}
+	}
 
 	/* Now really send the new pulse settings to the device - an update is
 	   also required if no pulses have been defined, because in this case

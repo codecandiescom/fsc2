@@ -152,10 +152,12 @@ typedef struct _F_ {
 
 	struct _PHS_ *phase_setup;
 	int next_phase;
-	int pc_len;                 /* length of the phase cycle */
+	int pc_len;                /* length of the phase cycle */
 
 	Ticks delay;               /* delay for the function/channel combination */
 	bool is_delay;
+
+	long max_seq_len;          /* maximum length of the pulse sequence */
 
 	bool uses_auto_shape_pulses;
 	Ticks left_shape_padding;

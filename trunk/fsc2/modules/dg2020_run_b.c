@@ -134,9 +134,43 @@ bool dg2020_reorganize_pulses( bool flag )
 
 	}
 
+	/* Now we still need a final check that the distance between the last
+	   defense pulse and the first shape pulse isn't too short - this is
+	   only relevant for very fast repetitions of the pulse sequence but
+	   needs to be tested - thanks to Celine Elsaesser for pointing this
+	   out. */
+
+	if ( dg2020.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
+		 dg2020.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
+	{
+		Ticks add;
+		FUNCTION *fs = dg2020.function + PULSER_CHANNEL_PULSE_SHAPE,
+				 *fd = dg2020.function + PULSER_CHANNEL_DEFENSE;
+		PULSE_PARAMS *shape_p = fs->pulse_params,
+					 *defense_p = fd->pulse_params + fd->num_params - 1;
+
+		add = shape_p->pos + fd->max_seq_len - defense_p->pos - defense_p->len;
+		if ( add < dg2020.defense_2_shape )
+			fd->max_seq_len += dg2020.defense_2_shape - add;
+
+		if ( fd->max_seq_len >
+			 ( FSC2_MODE == TEST ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
+		{
+			if ( FSC2_MODE == TEST )
+				print( FATAL, "Pulse sequence for function '%s' does not fit "
+					   "into the pulsers memory.\n", fd->name );
+			else
+				print( FATAL, "Pulse sequence for function '%s' is too long. "
+					   "Perhaps you should try to use the "
+					   "pulser_maximum_pattern_length() function.\n",
+					   fd->name );
+			THROW( EXCEPTION );
+		}
+	}
+
 	/* Send all the changes to the pulser after some more checks */
 
-	dg2020_shape_padding_check_2 ( );
+	dg2020_shape_padding_check_2( );
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 		dg2020_commit( dg2020.function + i, flag );
@@ -731,14 +765,14 @@ static void dg2020_defense_shape_check( FUNCTION *shape )
 				}
 
 				if ( dg2020_IN_SETUP )
-					print( SEVERE, "Distance between PULSE_SHAPE pulse %s"
+					print( FATAL, "Distance between PULSE_SHAPE pulse %s"
 						   "#%ld and DEFENSE pulse #%ld is shorter than "
 						   "%s.\n", shape_p->sp ? "for pulse " : "", 
 						   shape_p->sp ? shape_p->sp->num : shape_p->num,
 						   defense_p->num,
 						   dg2020_pticks( dg2020.shape_2_defense ) );
 				else if ( ! dg2020.shape_2_defense_too_near )
-					print( SEVERE, "Distance between PULSE_SHAPE pulse %s"
+					print( FATAL, "Distance between PULSE_SHAPE pulse %s"
 						   "#%ld and DEFENSE pulse #%ld got shorter than "
 						   "%s.\n", shape_p->sp ? "for pulse " : "",
 						   shape_p->sp ? shape_p->sp->num : shape_p->num,
@@ -763,14 +797,14 @@ static void dg2020_defense_shape_check( FUNCTION *shape )
 
 				if ( dg2020_IN_SETUP )
 				{
-					print( SEVERE, "Distance between DEFENSE pulse #%ld and "
+					print( FATAL, "Distance between DEFENSE pulse #%ld and "
 						   "PULSE_SHAPE pulse %s#%ld is shorter than %s.\n",
 						   defense_p->num, shape_p->sp ? "for pulse " : "",
 						   shape_p->sp ? shape_p->sp->num : shape_p->num,
 						   dg2020_pticks( dg2020.defense_2_shape ) );
 				}
 				else if ( ! dg2020.defense_2_shape_too_near )
-					print( SEVERE, "Distance between DEFENSE pulse #%ld and "
+					print( FATAL, "Distance between DEFENSE pulse #%ld and "
 						   "PULSE_SHAPE pulse %s#%ld got shorter than %s.\n",
 						   defense_p->num, shape_p->sp ? "for pulse " : "",
 						   shape_p->sp ? shape_p->sp->num : shape_p->num,
