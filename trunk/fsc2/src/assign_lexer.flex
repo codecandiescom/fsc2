@@ -59,7 +59,6 @@ S           S(TART)?
 L			L(EN(GTH)?)?
 DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
-ML          M(AX(IMUM)?)?_?L(EN(GTH)?)?
 
 STR         \x5[^\x6]*\x6
 ESTR        \x5.*\x3\n.*\n
@@ -297,11 +296,6 @@ WS          [\n=: ]+
 
 {P}"."{DL}  {
 				assignlval.vptr = p_get( assigntext, P_DLEN );
-				return VAR_REF;
-            }
-
-{P}"."{ML}  {
-				assignlval.vptr = p_get( assigntext, P_MAXLEN );
 				return VAR_REF;
             }
 

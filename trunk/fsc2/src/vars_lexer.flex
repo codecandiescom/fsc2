@@ -75,7 +75,6 @@ S           S(TART)?
 L			L(EN(GTH)?)?
 DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
-ML          M(AX(IMUM)?)?_?L(EN(GTH)?)?
 
 WS          [\n \t]+
 
@@ -171,11 +170,6 @@ WS          [\n \t]+
 
 {P}"."{DL}  {
 				varslval.vptr = p_get( varstext, P_DLEN );
-				return VAR_REF;
-            }
-
-{P}"."{ML}  {
-				varslval.vptr = p_get( varstext, P_MAXLEN );
 				return VAR_REF;
             }
 

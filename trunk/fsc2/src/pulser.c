@@ -40,15 +40,12 @@ void pulser_struct_init( void )
 	pulser_struct.set_pulse_position_change = NULL;
 	pulser_struct.set_pulse_length_change = NULL;
 	pulser_struct.set_pulse_phase_cycle = NULL;
-	pulser_struct.set_pulse_maxlen = NULL;
-	pulser_struct.set_pulse_replacements = NULL;
 	pulser_struct.get_pulse_function = NULL;
 	pulser_struct.get_pulse_position = NULL;
 	pulser_struct.get_pulse_length = NULL;
 	pulser_struct.get_pulse_position_change = NULL;
 	pulser_struct.get_pulse_length_change = NULL;
 	pulser_struct.get_pulse_phase_cycle = NULL;
-	pulser_struct.get_pulse_maxlen = NULL;
 
 	pulser_struct.setup_phase = NULL;
 }
@@ -564,18 +561,9 @@ long p_new( long pnum )
 
 void p_set( long pnum, int type, Var *v )
 {
-	long np;                                 /* number of replacement pulses */
-	long *pl;                                /* list  of replacement pulses */
-	Var *first, *cur;
-	long i;
-
-
-	/* Now the correct driver function is called. All but the last switch just
-	   check that the variable has the correct type and that the driver
-	   function exists. Only the switch for setting replacement pulses has to
-	   be different: here we first need to count the number of variables on
-	   the stack, create an array of the pulse numbers and than call the
-	   appropriate function. */
+	/* Now the correct driver function is called. All switches just check that
+	   the variable has the correct type and that the driver function
+	   exists. */
 
 	switch ( type )
 	{
@@ -634,41 +622,8 @@ void p_set( long pnum, int type, Var *v )
 			vars_pop( v );
 			break;
 
-		case P_MAXLEN :
-			vars_check( v, INT_VAR | FLOAT_VAR );
-			is_pulser_func( pulser_struct.set_pulse_maxlen,
-							"setting a maximum length for a pulse" );
-			( *pulser_struct.set_pulse_maxlen )( pnum, VALUE( v ) );
-			vars_pop( v );
-			break;
-
-		case P_REPL :
-			is_pulser_func( pulser_struct.set_pulse_replacements,
-							"setting replacement pulses" );
-
-			/* check and count the variables on the stack (there's always 
-			   going to be at least one) */
-
-			vars_check( v, INT_VAR );
-			for ( first = v, np = 1; v->next != NULL; np++, v = v->next )
-				vars_check( v, INT_VAR );
-
-			/* create the array of replacment pulse numbers, while doing so
-			   get rid of stack variables that aren't needed any longer */
-
-			pl = T_malloc( np * sizeof( long ) );
-			for ( i = 0, v = first; i < np; i++ )
-			{
-				pl[ i ] = v->val.lval;
-				cur = v;
-				v = v->next;
-				vars_pop( cur );
-			}
-
-			( *pulser_struct.set_pulse_replacements )( pnum, np, pl );
-
-			T_free( pl );
-			break;
+		default:
+			assert( 1 == 0 );
 	}
 }
 
@@ -733,13 +688,6 @@ Var *p_get_by_num( long pnum, int type )
 							"returning a pulses phase cycle" );
 			( *pulser_struct.get_pulse_phase_cycle )( pnum, &cycle );
 			v = vars_push( INT_VAR, cycle );
-			break;
-
-		case P_MAXLEN :
-			is_pulser_func( pulser_struct.get_pulse_maxlen,
-							"returning a pulses maximum length" );
-			( *pulser_struct.get_pulse_maxlen )( pnum, &time );
-			v = vars_push( FLOAT_VAR, time );
 			break;
 
 		default :

@@ -71,8 +71,6 @@ L			L(EN(GTH)?)?
 DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
 PH          PH(ASE(SEQ(UENCE)?)?)?_?([0-9])?
-ML          M(AX(IMUM)?)?_?L(EN(GTH)?)?
-RP          R(EPL(ACEMENT)?)?_?P((ULSE)?S?)?
 
 WS          [\n \t]+
 
@@ -206,11 +204,6 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 {P}"."{DL}  {
 				exp_val.lval = p_num( exptext );
 				return E_PDLEN;
-            }
-
-{P}"."{ML}  {
-				exp_val.lval = p_num( exptext );
-				return E_PMAXLEN;
             }
 
 {IDENT}     {

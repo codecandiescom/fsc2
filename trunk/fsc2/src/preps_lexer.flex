@@ -82,8 +82,6 @@ L			L(EN(GTH)?)?
 DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
 PC          P(HA(SE)?)?_?C(YC(LE)?)?
-ML          M(AX(IMUM)?)?_?L(EN(GTH)?)?
-RP          REPL(ACEMENT)?_?(P((ULSE)?S?)?)?
 
 PS          P(HASE)?_?S(EQ(UENCE)?)?(_?[0-9]{1,2})?
 
@@ -179,13 +177,6 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 {DS}        return DS_TOK;
 {DL}        return DL_TOK;
 {PC}        return PC_TOK;
-{ML}        return ML_TOK;
-{RP}        {
-				/* push a marker variable */
-
-				prepslval.vptr = vars_push( INT_VAR, -1 );
-				return RP_TOK;
-            }
 
 			/* combinations of pulse and property, e.g. `P3.LEN' */
 
@@ -216,11 +207,6 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 {P}"."{PC}  {
 				prepslval.vptr = p_get( prepstext, P_PHASE );
-				return VAR_REF;
-            }
-
-{P}"."{ML}  {
-				prepslval.vptr = p_get( prepstext, P_MAXLEN );
 				return VAR_REF;
             }
 

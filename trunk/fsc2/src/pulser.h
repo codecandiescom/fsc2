@@ -43,10 +43,6 @@ typedef struct {
 	bool ( *set_pulse_position_change )( long pulse_number, double time );
 	bool ( *set_pulse_length_change )( long pulse_number, double time );
 	bool ( *set_pulse_phase_cycle )( long pulse_number, int cycle );
-	bool ( *set_pulse_maxlen )( long pulse_number, double time );
-	bool ( *set_pulse_replacements )( long pulse_number,
-									  long number_of_replacement_pulses,
-									  long *list_of_replacement_pulses );
 
 	bool ( *get_pulse_function )( long pulse_number, int *function );
 	bool ( *get_pulse_position )( long pulse_number, double *time );
@@ -54,7 +50,6 @@ typedef struct {
 	bool ( *get_pulse_position_change )( long pulse_number, double *time );
 	bool ( *get_pulse_length_change )( long pulse_number, double *time );
 	bool ( *get_pulse_phase_cycle )( long pulse_number, int *cycle );
-	bool ( *get_pulse_maxlen )( long pulse_number, double *time );
 
 	bool ( *setup_phase )( int function, PHS phs );
 
@@ -69,8 +64,6 @@ enum {
 	P_DPOS    = ( 1 << 3 ),
 	P_DLEN    = ( 1 << 4 ),
 	P_PHASE   = ( 1 << 5 ),
-	P_MAXLEN  = ( 1 << 6 ),
-	P_REPL    = ( 1 << 7 )
 };
 
 
