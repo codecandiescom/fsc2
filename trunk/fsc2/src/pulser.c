@@ -4,7 +4,7 @@
   This file is a kind of interface between the parser and the real pulser
   functions to make it easier to use different types of pulsers. Instead of
   the parser calling the pulser functions directly (which might even not
-  exist) one of the following functions are called that can not only find out
+  exist) one of the following functions is called that can not only find out
   if the corresponding pulser function exists, but can also do some
   preliminary error checking.  */
 
