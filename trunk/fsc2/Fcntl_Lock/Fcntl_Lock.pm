@@ -150,7 +150,7 @@ sub l_whence {
 
 ###########################################################
 # l_start can be both positive and negative (it only may not point to
-# something before the start of the file but which we can't check here).
+# something before the start of the file but that we can't check here).
 
 sub l_start {
     my $flock_struct = shift;
