@@ -132,7 +132,7 @@ tds754a.so: ${tds754a:.c=.lo} tds754a.h
 	$(CC) -shared -o $@ ${tds754a:.c=.lo} -lm $(LDFLAGS)
 	chmod 644 $@
 
-tds520.so: ${tds520a:.c=.lo} tds520a.h
+tds520a.so: ${tds520a:.c=.lo} tds520a.h
 	$(CC) -shared -o $@ ${tds520a:.c=.lo} -lm $(LDFLAGS)
 	chmod 644 $@
 

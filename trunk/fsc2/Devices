@@ -9,8 +9,7 @@ DG2020_F      // Sony/Tektronix data generator (Frankfurt version)
 DG2020_B      // Sony/Tektronix data generator (Berlin version)
 
 TDS754A       // Tektronix digitizing oscilloscope
-
-//TDS520C       // Tektronix digitizing oscilloscope
+TDS520A       // Tektronix digitizing oscilloscope
 
 SR510         // Stanford Research lock-in amplifier
 SR810         // Stanford Research lock-in amplifier
