@@ -224,8 +224,9 @@ int gpib_shutdown( void )
 /*-------------------------------------------------------------------------*/
 /* gpib_init_log() initialises the logging mechanism. If the logging level */
 /* is not LL_NONE, a log file will be opened. The name to be used for the  */
-/*  log file can be passed to the function, see below. If the file cannot  */
-/* be opened 'sterr' is used instead.                                      */
+/* log file can be passed to the function, see below. If the file cannot   */
+/* be opened 'sterr' is used instead. If the log file did not exist its    */
+/* permissions are set to allow read and write access for everyone.        */
 /* ->                                                                      */
 /*  * Pointer to the name of log file - if the pointer is NULL or does not */
 /*    point to a non-empty string the default log file name defined by     */
