@@ -71,7 +71,7 @@ void DumpStack( void )
 	int pipe_fd[ 4 ];
 	pid_t pid;
 	int i, k = 1;
-	char buf[ 32 ];
+	char buf[ 40 ];
 	char c;
 	struct sigaction sact;
 
@@ -163,27 +163,70 @@ void DumpStack( void )
 		/* Get return address of current subroutine and ask the process
 		   running ADDR2LINE to convert it into function name, source file
 		   and line number. (This fails for programs competely stripped of
-		   all debugging information as well as for library functions in
-		   which case question marks get returned. But using the address
-		   it is still possible to find out where the shit hit the fan with
-		   a debugger.) */
+		   all debugging information.) If the address indicates that the
+		   error hapened in loaded library we try at least to figure out
+		   if it comes from a device module ad we print the offset in the
+		   library, which we then can later check with addr2line. */
 
-		sprintf( buf, "%p\n", ( void * ) * ( EBP + 1 ) );
-		write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
+		next_addr = ( long ) * ( EBP + 1 );
 
-		sprintf( buf, "#%-3d %-10p  ", k++, ( void * ) * ( EBP + 1 ) );
-		write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
+		if ( next_addr < LIBRARY_OFFSET )
+		{
+			sprintf( buf, "%p\n", next_addr );
+			write( pipe_fd[ DUMP_PARENT_WRITE ], buf, next_addr );
 
-		/* Copy ADDR2LINE's reply to the answer pipe */
+			sprintf( buf, "#%-3d %-10p  ", k, ( void * ) * ( EBP + 1 ) );
+			write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
 
-		while ( read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) == 1 && c != '\n' )
-			write( answer_fd[ DUMP_ANSWER_WRITE ], &c, 1 );
+			/* Copy ADDR2LINE's reply to the answer pipe */
 
-		write( answer_fd[ DUMP_ANSWER_WRITE ], "() in ", 6 );
+			while ( read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) == 1 &&
+					c != '\n' )
+				write( answer_fd[ DUMP_ANSWER_WRITE ], &c, 1 );
 
-		while ( read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) == 1 && c != '\n' )
-			write( answer_fd[ DUMP_ANSWER_WRITE ], &c, 1 );
-		write( answer_fd[ DUMP_ANSWER_WRITE ], "\n", 1 );
+			write( answer_fd[ DUMP_ANSWER_WRITE ], "() in ", 6 );
+
+			while ( read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) == 1 &&
+					c != '\n' )
+				write( answer_fd[ DUMP_ANSWER_WRITE ], &c, 1 );
+			write( answer_fd[ DUMP_ANSWER_WRITE ], "\n", 1 );
+		}
+		else
+		{
+			/* Find last device module, assuming that the later a library
+			   got loaded the higher its adress is */
+
+			for ( cd = EDL.Device_List; cd != NULL && cd->next ! NULL;
+				  cd = cd->next )
+				/* empty */ ;
+
+			/* Now loo*/
+
+			while ( cd != NULL )
+			{
+				if ( ( long ) * ( char * ) cd->driver.handle > next_addr < 0 )
+				{
+					sprintf( buf, "#%-3d %-10p  in library", k, next_addr
+							 - ( long ) * ( char * ) cd->driver.handle );
+					write( answer_fd[ DUMP_ANSWER_WRITE ], buf,
+						   strlen( buf ) );
+					write( answer_fd[ DUMP_ANSWER_WRITE ], cd->driver.lib_name,
+						   strlen( cd->driver.lib_name ) );
+					write( answer_fd[ DUMP_ANSWER_WRITE ], "\n", 1 );
+					break;
+				}
+
+				cd = cd->prev;
+			}
+
+			if ( cd == NULL )
+			{
+				sprintf( buf, "#%-3d %-10p  ?\n", k, next_addr );
+				write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
+			}
+		}
+
+		k++;
 
 		/* Get value of ebp register for the next higher level stackframe */
 
