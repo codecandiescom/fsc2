@@ -371,15 +371,14 @@ Var *ccd_camera_get_picture( Var *v )
 	CLOBBER_PROTECT( width );
 	CLOBBER_PROTECT( height );
 
-	width  = l_max( ( rs_spec10->ccd.roi[ X + 2 ]
-					  - rs_spec10->ccd.roi[ X ] + 1 )
-					/ rs_spec10->ccd.bin[ X ], 1 );
-	height = l_max( ( rs_spec10->ccd.roi[ Y + 2 ]
-					  - rs_spec10->ccd.roi[ Y ] + 1 )
-					/ rs_spec10->ccd.bin[ Y ], 1 );
+	width  = ( rs_spec10->ccd.roi[ X + 2 ] - rs_spec10->ccd.roi[ X ] + 1 )
+			 / rs_spec10->ccd.bin[ X ];
+	height = ( rs_spec10->ccd.roi[ Y + 2 ] - rs_spec10->ccd.roi[ Y ] + 1 )
+			 / rs_spec10->ccd.bin[ Y ];
 
-	/* Make sure the dimensions of the ROI are not smaller than the
-	   binning area */
+	/* Make sure the dimensions of the ROI are not smaller than the binning
+	   area, otherwise print a warning an increase the ROI (as symmetrically
+	   as possible) to fit at least the binning area */
 
 	if ( width == 0 )
 	{
