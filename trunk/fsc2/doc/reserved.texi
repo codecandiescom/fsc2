@@ -79,6 +79,7 @@
 @item @code{float}            @tab Built-in function (@pxref{float})
 @item @code{floor}            @tab Built-in function (@pxref{floor})
 @item @code{FOR}              @tab Keyword for @code{FOR} loops
+@item @code{FOREVER}          @tab Keyword for @code{FOREVER} loops
 @item @code{fsave}            @tab Built-in function (@pxref{fsave})
 @item @code{FUNC}             @tab
 @item @code{FUNCTION}         @tab

@@ -407,13 +407,157 @@ defaults to "Please enter a comment:".
 @section Interaction functions
 @cindex interaction functions
 
+These functions allow the creation and handling of buttons and sliders
+that allow the user to influence the experiment when it is already
+running. If they are used it is not more possible to check the complete
+experiment before it is run because it is impossible to forsee which
+buttons or sliders are used at what moment. Therefore, these functions
+should only be used where it is really necessary, i.e.@: when trying to
+find the optimum parameters for an experiment but not in the final
+experiment.
+
+To display the buttons and sliders a new window is created on the first
+call of either the @code{button_create()} or @code{slider_create()}
+function. It will be automatically deleted when either all buttons and
+sliders are deleted again or at the end of an experiment. The functions
+can only be used within the @code{EXPERIMENT} section of the program.
+
+When the program is tested before the experiment is started it is
+assumed that all buttons are not pressed and switched off (unless they
+have been set by the function @code{button_state()}, and all sliders are
+assumed to be in the middle posiotion unless a different value has been
+set via the function @code{slider_value()}.
+
 
 @table @samp
+@item layout()
+@anchor{layout}
+@findex layout()
+The functions tells the program how to layout the buttons and sliders in
+the window, either vertically or horizontally. The function must be
+called either with the strings @code{"VERT"}, @code{"VERTICAL"},
+@code{"HORI"} or @code{"HORIZONTAL"} (the case of the letters doesn't
+matter). The numbers @code{0} and @code{1} can be used alternatively for
+vertical or horizontal layout.
+
+
 @item button_create()
 @anchor{button_create}
 @findex button_create()
+The function creates a new button and returns a unique integer number
+that has to be used in later calls to identify this button. There are
+three types of buttons, normal buttons that can be just pressed to
+create an event, push buttons that stay on or off, and finally radio
+buttons, that are also some kind of push buttons but that belong to a
+group of buttons of which only one button can be switched on at once,
+i.e.@: if a radio button gets pressed all the other radio buttons
+belonging to the group become automatically unset.
+
+Normal buttons are drawn as large rectangular buttons with the label
+within the button, push buttons are drawn as squares, standing on a
+corner, that become yellow when pressed and radio buttons as round
+buttons, that become red when activated.
+
+The first argument the function needs is the type of the button, i.e.@:
+on of the strings @code{"NORMAL_BUTTON"}, @code{"PUSH_BUTTON"} or
+@code{RADIO_BUTTON"} (the case of the letters doesn't matter).
+
+For a radio button it must be specified which group it belongs to. Each
+group has a button functioning as the group leader which is always the
+first button of the group. For all other members of this group the
+identifier of the group leader button must be specified as the second
+argument. I.e.@: to create a group of three rdio buttons you would use
+@example
+B_ID_1 = button_create( "RADIO_BUTTON", "Label 1" );
+B_ID_2 = button_create( "RADIO_BUTTON", B_ID_1, "Label 2" );
+B_ID_3 = button_create( "RADIO_BUTTON", B_ID_1, "Label 3" );
+@end example
+
+For all buttons except radio buttons the second (optional) argument is
+the string that is to appear as the label of the button. The final (also
+optional) argument is a further string that is an additional help text
+that will appear when the mouse remains for some time over the button.
+Both label and help text may contain some escape sequences, namely
+`@code{\n}', standing for a line break (to create a multi-line label or
+help text) and `@code{\\}', standing for the backslash character to
+allow a backslash in front of an `n'.
+
+All buttons start as unpressed and in the unset state.
+
+
+@item button_delete()
+@anchor{button_delete}
+@findex button_delete()
+Using this function one or more buttons can be deleted. It expects one
+or more button identifiers as returned by the function
+@code{button_create()}.
+
+If the group leader (i.e.@: the first button) of a group of radio
+buttons is deleted, the next button of the group becomes the new group
+leader automatically.
+
+
+@item button_state()
+@anchor{button_state}
+@findex button_state()
+The function returns or sets the state of a button, depending on the
+number of argument. The first argument is the identifier of the button
+as returned by the function @code{button_create()}. If there are no more
+arguments the state of the button is returned. There is a difference
+between normal buttons and push and radio buttons. For normal buttons
+the number of times the button was pressed since the last call of the
+function is returned. For push and radio butoons the state of the
+button, i.e.@: either @code{0} for off or @code{1} fro on is returned.
+
+If there is a second argument the state of push and radio buttons can be
+set. This argument must be a number, where @code{0} stands for off and a
+non-zero number for on. The state of normal buttons cannot be set.
+
+
+@item slider_create()
+@anchor{slider_create}
+@findex slider_create()
+Sliders are for setting values in a predefined range. There are two
+types of sliders, normal sliders and value sliders. The only difference
+is that for value sliders there's an additional field showing the
+currently set value while for normal sliders there isn't such a visual
+feedback. As the function @code{button_create()} also this function
+returns a unique integer number to be used to identify the slider.
+
+The first argument the function expects is a string, either
+@code{""NORMAL_SLIDER"} or @code{"VALUE_SLIDER"} (the case of the
+letters doesn't matter). The second argument must be the minimum value
+the slider can be adjusted to and the third argument is the maximum
+value. The minimum value must always be smaller than the maximum value.
+
+As in the case of buttons there are to more (optional) arguments, the
+label to be shown below the slider and a help text. The same escape
+sequences as for button labels and help texts can be used for sliders.
+
+All labels start of as set to the middle of the defined range.
+
+@item slider_delete()
+@anchor{slider_delete}
+@findex slider_delete()
+The function deletes on or more sliders. It expects one or more slider
+identifiers as returned by the function @code{slider_create()}.
+
+
+@item slider_create()
+@anchor{slider_value}
+@findex slider_value()
+This function returns or sets the value of a slider. The first argument
+must be a slider identifier as returned by the function
+@code{slider_create()}. If this is the only argument the value the
+slider is set to is returned. If there's a second value the slider is
+set to this value. Obviously, the value must be within the range of the
+slider as defined by the minimum and maximum value set in
+@code{slider_create()}, otherwise an error message is printed and the
+slider value is set to the next value still within the allowed range.
+
 
 @end table
+
 
 @node Mathematical functions, Auxiliary functions, Interaction functions, Built-in Functions
 @section Mathematical functions
