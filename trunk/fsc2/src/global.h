@@ -169,7 +169,8 @@ enum {
 };
 
 
-/* Define the types of phases used in phase cycling */
+/* Define the types of phases used in phase cycling - don't change the
+   ordering, just add more to the end ! */
 
 enum {
 	PHASE_PLUS_X,
