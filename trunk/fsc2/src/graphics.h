@@ -20,16 +20,17 @@ typedef	struct {
 typedef struct {
 	Scaled_Point *points;
 	XPoint *xpoints;
-	bool is_connected;
-	bool is_fs;
+	bool active;
 	long count;
 
 	GC gc;
 
-	double s2w_y;          /* scaled to window data scale factors */
-	double d2s_y;          /* data to scaled data scale factors   */
-	double fs_s2w_y;       /* scaled to window data scale factors */
-	double fs_d2s_y;       /* data to scaled data scale factors   */
+	double s2d_x;          /* scaled to window data x scale factors */
+	double s2d_y;          /* scaled to window data y scale factors */
+
+	double x_shift;
+	double y_shift;
+
 } Curve_1d;
 
 
@@ -37,6 +38,14 @@ typedef struct {
 	FL_OBJECT *obj;
 	Pixmap pm;
 	GC gc;                  /* gc for pixmap */
+
+	bool is_box;
+	GC box_gc;
+	int box_x,
+		box_y,
+		box_w,
+		box_h;
+
 	int x,                  /* position of canvas */
 		y;
 	unsigned int w,         /* width and height of canvas */
@@ -53,8 +62,8 @@ typedef struct {
 	bool is_nx;
 	bool is_ny;
 	bool is_scale_set;
-	bool x_scale_changed;
-	bool y_scale_changed;
+	bool scale_changed;
+	bool is_fs;
 
 	long dim;               /* dimensionality of display */
 	long nc;                /* number of curves (in 1D experiments) */
@@ -69,18 +78,14 @@ typedef struct {
 
 	double rw_y_min;       /* minimum of real world y coordinates */
 	double rw_y_max;       /* maximum of real world y coordinates */
-	double fs_rw2s;        /* real world to scaled data (y) scale factor */
-
-	double s2d_x;
-	double s2d_y;
-
-	long x_shift;
-	long y_shift;
+	double rw2s;           /* real world to scaled data (y) scale factor */
 
 	Display *d;             /* pointer to display structure */
 	Canvas x_axis;
 	Canvas y_axis;
 	Canvas canvas;
+
+	int drag_c;
 
 	Curve_1d *curve[ MAX_CURVES ];
 
