@@ -87,7 +87,7 @@ void DumpStack( void )
 	sact.sa_flags = 0;
 	sigaction( SIGCHLD, &sact, NULL );
 
-	/* Don't crash with SIGPIPE if child process fails to exec (in this case
+	/* Don't crash on SIGPIPE if child process fails to exec (in this case
 	   the output will only contain the addresses) */
 
 	sact.sa_handler = SIG_IGN;
@@ -151,19 +151,19 @@ void DumpStack( void )
 	asm( "mov %%ebp, %0" : "=g" ( EBP ) );
 
 	/* Loop over all stackframes, starting with the current one and working
-	   our way all up to the top - the topmost stackframe is reached when
+	   up the way to the top - the topmost stackframe would be reached when
 	   the content of ebp is zero, but this is already _libc_start_main(),
 	   so stop one frame earlier */
 
 	while ( * ( int * ) * EBP != 0 )
 	{
 		/* Get return address of current subroutine and ask the process
-		   running ADDR2LINE to convert it into a function name and the
-		   source file and line number. (This fails for programs competely
-		   stripped of all debugging information as well as for library
-		   functions in which case question marks get returned. But using
-		   the address it's still possible to find out via the debugger
-		   where the shit hit the fan.) */
+		   running ADDR2LINE to convert it into function name, source file
+		   and line number. (This fails for programs competely stripped of
+		   all debugging information as well as for library functions in
+		   which case question marks get returned. But using the address
+		   it is still possible to find outwhere the shit hit the fan using
+		   a debugger.) */
 
 		sprintf( buf, "%p\n", ( void * ) * ( EBP + 1 ) );
 		write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
