@@ -2,13 +2,13 @@ use ExtUtils::MakeMaker;
 
 use Config;
 
-# Compile and run the program that creates the include file (first try the
+# Compile and run the program that creates the include file (first try a
 # version that also tries 'long long', then one that only uses 'long').
 
 if ( ( system $Config{cc}, qw( -o sizes1 sizes1.c ) or
-	   system "sizes1 >/dev/null 2>&1" ) and
+	   system "./sizes1 >/dev/null 2>&1" ) and
 	 ( system $Config{cc}, qw( -o sizes2 sizes2.c ) or
-	   system "sizes2 >/dev/null 2>&1" ) ) {
+	   system "./sizes2 >/dev/null 2>&1" ) ) {
 	unlink( "./sizes1" );
 	unlink( "./sizes2" );
 	die "Can't create the necessary header file.\n";
