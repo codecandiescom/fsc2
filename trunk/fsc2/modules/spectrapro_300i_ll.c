@@ -43,10 +43,10 @@ static bool spectrapro_300i_comm( int type, ... );
 static void spectrapro_300i_comm_fail( void );
 
 
-/*-----------------------------------------------------------------------*/
-/* If the function succeeds it returns a file pointer to the calibration */
-/* file. Otherwise an exception is thrown.                               */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+/* If the function succeeds it returns a file pointer to the */
+/* calibration file. Otherwise an exception is thrown.       */
+/*-----------------------------------------------------------*/
 
 FILE *spectrapro_300i_find_calib( char *name )
 {
@@ -480,7 +480,7 @@ void spectrapro_300i_set_grating( long gn )
 /*-----------------------------------------------------------------*/
 /* Function queries the monochromator about informations about all */
 /* installed gratings and stores the data (groove density, blaze   */
-/* information in the internal structure for the monochromator.    */
+/* information) in the internal structure for the monochromator.   */
 /*-----------------------------------------------------------------*/
 
 void spectrapro_300i_get_gratings( void )
@@ -1252,8 +1252,9 @@ double spectrapro_300i_wn2wl( double wn )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*----------------------------------------------------------*/
+/* Function called on communication failure with the device */
+/*----------------------------------------------------------*/
 
 static void spectrapro_300i_comm_fail( void )
 {
