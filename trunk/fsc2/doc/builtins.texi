@@ -63,6 +63,10 @@ functions that can't be assigned to one of the other classes and
 consists of functions for dealing with time or date issues or for
 determining the sizes of arrays etc.
 
+Please note that all functions, built-in functions as well as device
+functions (discussed in the next chapter), always return a value, even
+if the return value sometimes doesn't make too much sense.
+
 
 @node Output functions, File handling functions, Built-in Functions, Built-in Functions
 @section Output functions

@@ -1138,15 +1138,16 @@ array when arithmetic with arrays is used.
 @cindex Conditional operator
 @cindex Conditional operator
 
-Quite often it depends on the result of a calculation or external input
-which part of the code of a program is to be executed. For these cases a
-constructs is needed that allows to tell the program to do something if
-e.g.@: the result of a calculation is less then @code{0} and to do
-something else if the result was larger or equal to @code{0}.  An
-admittedly somewhat contrived example would be the calculation of the
-square root of a number, making sure the number is multiplied by -1 in
-case it's negative. Using the conditional operator this can be written
-as
+Quite often it is necessary to make decide which part of the code of a
+program to execute and have this decision depend on the result of a
+calculation or external input. For these cases a constructs is required
+that allows to tell the program to do something if e.g.@: the result of
+a calculation is less then @code{0} and to do something else if the
+result was larger or equal to @code{0}.  An admittedly somewhat
+contrived example would be the calculation of the square root of a
+number, making sure the number is multiplied by -1 before calculating
+the root in case it's negative. Using the conditional operator this can
+be written as
 @example
 sqrt_of_val = ( val < 0.0 ) ? sqrt( -1.0 * val ) : sqrt( val );
 @end example
@@ -1154,17 +1155,18 @@ sqrt_of_val = ( val < 0.0 ) ? sqrt( -1.0 * val ) : sqrt( val );
 The conditional operator is somewhat special in that it consists of both
 the question mark, @code{?}, and the colon, @code{:}. It tells the
 program to evaluate the expression before the question mark and and
-then, depending on the result, execute either the expression before the
-colon or after the colon. Here it is tested if @code{val} is smaller
+then, depending on the result, execute either the expression before or
+after the colon. In the example it is tested if @code{val} is smaller
 than @code{0}, and if this is true, the square root of @code{val}
 multiplied by @code{-1} is taken, otherwise the square root of just
 @code{val} itself.
 
 Beside comparison for the number on the left hand side being smaller
-than the number on the right hand side, several other comparison
-operators exist. Here is a complete list of such comparison operators
-between two expressions (e.g.@: numbers or numerical results of a
-calculation, they can't be used with arrays):
+than the number on the right hand side, several other operators for
+comparisons exist. Now follows a complete list of such comparison
+operators, which can only be applied to expressions that result in
+numbers, e.g.@: either simple numbers, numerical variables or numerical
+results of a calculation, but never to arrays:
 @quotation
 @cindex == (equal to)
 @cindex equal to `=='
@@ -1189,24 +1191,25 @@ calculation, they can't be used with arrays):
 @end quotation
 
 Please note, that using comparisons between floating point numbers may
-not work as expected. This is a result of the finite precision of
-floating point numbers.  Thus, for example, @code{0.1} and the result of
-e.g.@: @code{0.7 / 7} can be different numbers, in which case a
-comparison for equality will fail. Thus comparison for equality should
-in principle only be used with integer numbers.
+not work as you may expect them to do. This is a result of the finite
+precision of floating point numbers.  Thus, for example, @code{0.1} and
+the result of e.g.@: @code{0.7 / 7} can have different values, in which
+case a comparison for equality will fail! Thus comparison for equality
+should in principle only be used with integer numbers.
 
 All these comparison operators actually do a calculation, resulting in a
 new number. When you see something like @code{a <= b} this evaluates to
-1 if the expression is true (i.e.@: if the value of @code{a} is less or
-equal to the value of @code{b}), otherwise to 0. In the test of the
-conditional execution operator (i.e.@: everything before the question
-mark) it is checked if the result is a non-zero number, which is taken
-as true, or if it's zero, which is interpreted as false. Thus instead of
-en expression with a comparison operator the test part could also
-consist of a simple number and what is going to be executed of the two
-alternatives after the question marks depends on the value of this
-number: if it is non-zero the first alternative is used, and if it is
-zero the second. Thus it would be valid to write:
+@code{1} if the expression is true (i.e.@: if the value of @code{a} is
+less or equal to the value of @code{b}), and otherwise to @code{0}. In
+the test of the conditional execution operator (i.e.@: everything before
+the question mark) it is checked if the result is a non-zero number,
+which then is taken as true, or if it's zero, which is interpreted as
+meaning false. Thus instead of an expression with a comparison operator
+the test part could also consist of just a simple number and what is
+going to be executed of the two alternatives after the question mark
+depends on the value of this number: if it is non-zero the first
+alternative is used, but if it is zero the second. Thus it would be
+valid to write:
 @example
 exp_of_val = val ? exp( val ) : 1;
 @end example
