@@ -79,6 +79,7 @@ int Cur_PHST;
 %token REPF_TOKEN            /* REPEAT FREQUENCY */
 
 %token PSD_TOKEN             /* PHASE SWITCH DELAY */
+%token GP_TOKEN              /* GRACE_PERIOD */
 
 %token <lval> PHS_TOK PSD_TOKEN HL_TOKEN
 %token PX_TOK PY_TOK PMX_TOK PMY_TOK POD1_TOK POD2_TOK ON_TOK OFF_TOK
@@ -137,26 +138,38 @@ line:    func pcd                  { }
        | func pcd TM_TOKEN         { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | func pcd PHS_TOK          { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | func pcd PSD_TOKEN        { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | func pcd GP_TOKEN         { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tb                        { }
        | tb func                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tb TM_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tb PHS_TOK                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tb PSD_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | tb GP_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tm                        { }
        | tm func                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tm TB_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tm PHS_TOK                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tm PSD_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | tm GP_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | phs                       { p_phs_end( Cur_PHS ); }
        | phs func                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | phs TB_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | phs TM_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | phs PSD_TOKEN             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | phs GP_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | psd                       { }
        | psd func                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | psd TB_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | psd TM_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | psd PHS_TOK               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | psd GP_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | gp                        { }
+       | gp	func                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | gp	TB_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | gp	TM_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | gp	PHS_TOK                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | gp	PSD_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | gp	GP_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;								   
 								   
 								   
@@ -452,6 +465,8 @@ phsv:     INT_TOKEN                { $$ = $1; }
 
 psd:      PSD_TOKEN expr           { p_set_psd( $1, $2 ); }
 ;
+
+gp:       GP_TOKEN expr            { p_set_gp( $1, $2 ); }
 
 %%
 

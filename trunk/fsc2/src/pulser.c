@@ -40,7 +40,9 @@ void pulser_struct_init( void )
 	pulser_struct.set_repeat_time = NULL;
 	pulser_struct.set_trig_in_level = NULL;
 	pulser_struct.set_trig_in_slope = NULL;
+	pulser_struct.set_trig_in_impedance = NULL;
 	pulser_struct.set_phase_reference = NULL;
+	pulser_struct.set_grace_period = NULL;
 	pulser_struct.set_pulse_function = NULL;
 	pulser_struct.set_pulse_position = NULL;
 	pulser_struct.set_pulse_length = NULL;
@@ -447,6 +449,29 @@ void p_set_trigger_level( Var *v )
 }
 
 
+/*----------------------------------------*/
+/* Function sets the trigger in impedance */
+/*----------------------------------------*/
+
+void p_set_trigger_impedance( Var *v )
+{
+	int state;
+
+
+	/* check the variable and get its value */
+
+	vars_check( v, INT_VAR );
+	state = ( int ) v->val.lval;
+	vars_pop( v );
+
+	/* finally call the function (if it exists...) */
+
+	is_pulser_func( pulser_struct.set_trig_in_impedance,
+					"setting the trigger impedance" );
+	( *pulser_struct.set_trig_in_impedance )( state );
+}
+
+
 /*-------------------------------------------------------------------*/
 /* Function for setting the (minimum) repeat time for the experiment */
 /*-------------------------------------------------------------------*/
@@ -844,6 +869,24 @@ void p_set_psd( int func, Var *v )
 	if ( func == 1 || func == 2 )
 		( *pulser_struct.set_phase_switch_delay )( PULSER_CHANNEL_PHASE_2,
 												   VALUE( v ) );
+
+	vars_pop( v );
+}
+
+
+/*
+  Function for setting the phase switch delay.
+  'func' is the phase function the data are to be used for (i.e. 0 means
+  PHASE_1, 1 means PHASE_2, 2 means both)
+*/
+
+void p_set_gp( Var *v )
+{
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	is_pulser_func( pulser_struct.set_grace_period,
+					"setting a grace period" );
+
+	( *pulser_struct.set_grace_period )( VALUE( v ) );
 
 	vars_pop( v );
 }

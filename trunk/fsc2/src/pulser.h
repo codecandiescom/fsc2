@@ -99,6 +99,7 @@ void p_phs_setup( int func, int type, int pod, long val );
 void p_phs_end( int func );
 
 void p_set_psd( int func, Var *v );
+void p_set_gp( Var *v );
 
 
 #endif  /* ! PULSER_HEADER */

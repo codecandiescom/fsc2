@@ -123,6 +123,8 @@ PSD1        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?_?1:?
 PSD2        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?_?2:?
 PSD         PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?):?
 
+GP          G(RACE)?_?P(ERIOD)?:?
+
 WS          [\n=: ]+
 
 
@@ -279,7 +281,7 @@ WS          [\n=: ]+
 			}
 {REPT}      return REPT_TOKEN;
 {REPF}      return REPF_TOKEN;
-
+{GP}        return GP_TOKEN;
 
 
 "\x4nunit"   return NU_TOKEN;
