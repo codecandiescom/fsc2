@@ -63,7 +63,8 @@ void accept_new_data( void )
 
 		detach_shm( buf, &Message_Queue[ message_queue_low ].shm_id );
 
-		/* Increment the low queue pointer */
+		/* Increment the low queue pointer, and, if the message queue was
+		   full so that the semaphore could not be posted, post it now */
 
 		message_queue_low = ( message_queue_low + 1 ) % QUEUE_SIZE;
 

@@ -114,7 +114,6 @@
 static bool pipe_read( int fd, void *buf, size_t bytes_to_read );
 static void send_browser( FL_OBJECT *browser );
 
-extern bool need_post;
 
 /*----------------------------------------------------------------*/
 /* This routine sets up the resources needed for the interprocess */
