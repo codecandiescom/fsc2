@@ -67,12 +67,12 @@ fsc2_connect.o: fsc2_connect.c
 
 
 clean:
-	$(RM) $(RMFLAGS) *.o *.output *_parser.[ch] *_lexer.c fsc2_clean.c \
-					 fsc2 fsc2_clean fsc2_connect mem gpib_if.[ch] \
-					 fsc2_rsc.[ch] gpib_parser.y gpib_lexer.l *.bak *~
+	$(RM) $(RMFLAGS) *.o *.output *_parser.[ch] *_lexer.c fsc2_clean.c fsc2 \
+					 fsc2_clean fsc2_connect gpib_if.[ch] fsc2_rsc.[ch] mem \
+					 gpib_parser.y gpib_lexer.l *~
 
 
-# Machine specific stuff: different GPIB interfaces and resource files \
+# Machine specific stuff: different GPIB interfaces and resource files
 # for the graphical interface are needed...
 
 pion.anorg.chemie.uni-frankfurt.de:
@@ -123,7 +123,7 @@ low_res:
 
 
 # How to create the GPIB interface files - they need making if either
-# gpib_if.[ch] doesn't exits or the files they're made from are newer
+# gpib_if.[ch] doesn't exit or the files they're made from are newer
 
 gpib_old:
 	if [ ! -e gpib_if.c -o ! -e gpib_if.h          \
