@@ -138,7 +138,6 @@
 
 
 #include "dg2020_b.h"
-#include "gpib_if.h"
 
 
 /* Functions that re used only locally... */

@@ -22,7 +22,7 @@
 */
 
 
-#include "fsc2.h"
+#include "fsc2_module.h"
 
 
 /* Include dummy configuration file */

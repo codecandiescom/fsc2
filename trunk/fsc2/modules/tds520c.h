@@ -22,8 +22,7 @@
 */
 
 
-#include "fsc2.h"
-#include "gpib_if.h"
+#include "fsc2_module.h"
 
 
 /* Include configuration information for the device */
@@ -130,6 +129,7 @@ typedef struct
 /* declaration of exported functions */
 
 int tds520c_init_hook( void );
+int tds520c_test_hook( void );
 int tds520c_exp_hook( void );
 int tds520c_end_of_exp_hook( void );
 void tds520c_exit_hook( void );
@@ -159,12 +159,13 @@ Var *digitizer_lock_keyboard( Var *v );
 /* declaration of internally used functions */
 
 const char *tds520c_ptime( double p_time );
-void tds520c_delete_windows( void );
+void tds520c_delete_windows( TDS520C *s );
 void tds520c_do_pre_exp_checks( void );
 void tds520c_set_meas_window( WINDOW *w );
 void tds520c_set_curve_window( WINDOW *w );
 void tds520c_set_window( WINDOW *w );
 long tds520c_translate_channel( int dir, long channel );
+void tds520c_store_state( TDS520C *dest, TDS520C *src );
 
 bool tds520c_init( const char *name );
 double tds520c_get_timebase( void );
@@ -205,11 +206,13 @@ TDS520C tds520c;
 const char *Channel_Names[ ] = { "CH1", "CH2", "MATH1", "MATH2", "MATH3",
 								 "REF1", "REF2", "REF3", "REF4",
 								 "AUX1", "AUX2", "LINE" };
+bool TDS520C_INIT = UNSET;
 
 #else
 
 extern TDS520C tds520c;
 extern const char *Channel_Names[ ];
+extern const bool TDS520C_INIT;
 
 #endif
 

@@ -23,7 +23,6 @@
 
 
 #include "hfs9000.h"
-#include "gpib_if.h"
 
 
 static void hfs9000_gpib_failure( void );

@@ -47,7 +47,7 @@ FOR K = 1 : M
 			 1, K, j[ 2 ], 2,
 			 1, K, j[ 3 ], 3,
 	         1, K, j[ 4 ], 4 );
-	wait( 500ms );
+	wait( 500 ms );
 }
 
 //change_scale( 1, 1, 1, 1 );

@@ -55,15 +55,15 @@ const char *tds744a_ptime( double p_time )
 /* Deletes a window by removing it from the linked list of windows */
 /*-----------------------------------------------------------------*/
 
-void tds744a_delete_windows( void )
+void tds744a_delete_windows( TDS744A *s )
 {
 	WINDOW *w;
 
 
-	while ( tds744a.w != NULL )
+	while ( s->w != NULL )
 	{
-		w = tds744a.w;
-		tds744a.w = w->next;
+		w = s->w;
+		s->w = w->next;
 		T_free( w );
 	}
 }
@@ -548,6 +548,42 @@ long tds744a_translate_channel( int dir, long channel )
 
 	fsc2_assert( 1 == 0 );
 	return -1;
+}
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+void tds744a_store_state( TDS744A *dest, TDS744A *src )
+{
+	WINDOW *w;
+	int i;
+
+
+	while ( dest->w != NULL )
+	{
+		w = dest->w;
+		dest->w = w->next;
+		T_free( w );
+	}
+
+	memcpy( dest, src, sizeof( TDS744A ) );
+
+	if ( src->num_windows == 0 )
+	{
+		dest->w = 0;
+		return;
+	}
+
+	dest->w = T_malloc( src->num_windows * sizeof( WINDOW ) );
+	for ( i = 0, w = src->w; w != NULL; i++, w = w->next )
+	{
+		memcpy( dest->w + i, w, sizeof( WINDOW ) );
+		if ( i != 0 )
+			dest->w->prev = dest->w - 1;
+		if ( w->next != NULL )
+			dest->w->next = dest->w + 1;
+	}
 }
 
 

@@ -702,14 +702,9 @@ bool tds520c_set_sens( int channel, double sens )
 
 		if ( strncmp( reply, "MEG", 3 ) )
 		{
-			if ( I_am == PARENT )
-				eprint( FATAL, UNSET, "%s: Can't set sensitivity of channel "
-						"%s to %f V while input impedance is 50 Ohm.\n",
-						DEVICE_NAME, Channel_Names[ channel ], sens );
-			else
-				eprint( FATAL, SET, "%s: Can't set sensitivity of channel "
-						"%s to %f V while input impedance is 50 Ohm.\n",
-						DEVICE_NAME, Channel_Names[ channel ], sens );
+			eprint( FATAL, ! TDS520C_INIT, "%s: Can't set sensitivity of "
+					"channel %s to %f V while input impedance is 50 Ohm.\n",
+					DEVICE_NAME, Channel_Names[ channel ], sens );
 			THROW( EXCEPTION )
 		}
 	}

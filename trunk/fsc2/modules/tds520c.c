@@ -220,7 +220,7 @@ Var *digitizer_define_window( Var *v )
 
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
-			win_width = get_doble( v, "window width", DEVICE_NAME );
+			win_width = get_double( v, "window width", DEVICE_NAME );
 
 			/* Allow window width to be zero in test run... */
 

@@ -29,8 +29,7 @@
    gaussmeter is only used to measure the field for calibration purposes. */
 
 
-#include "fsc2.h"
-#include "gpib_if.h"
+#include "fsc2_module.h"
 
 
 /* Include configuration information for the device */

@@ -25,7 +25,6 @@
 #define HFS9000_MAIN
 
 #include "hfs9000.h"
-#include "gpib_if.h"
 
 const char generic_type[ ] = DEVICE_TYPE;
 

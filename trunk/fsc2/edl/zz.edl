@@ -13,7 +13,6 @@ EXP:
 
 set_seed( 23423 );
 
-
 FOR K = 1:10000 {
 	display( ceil( N * random( ) ), ceil( M * random( ) ), random( ) );
 	wait( 150 ms );

@@ -550,7 +550,7 @@ void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
 	lecroy9400.rec_len[ channel ] = rec_len;
 	lecroy9400.is_reject[ channel ] = reject;
 
-	if ( TEST_RUN || ( I_am == PARENT && ! lecroy9400_IN_SETUP ) )
+	if ( FSC2_MODE != EXPERIMENT )
 		return;
 
 	snprintf( cmd, 100, "SEL,%s", channel == LECROY9400_FUNC_E ? "FE" : "FF" );

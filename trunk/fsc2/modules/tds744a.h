@@ -23,8 +23,7 @@
 
 
 
-#include "fsc2.h"
-#include "gpib_if.h"
+#include "fsc2_module.h"
 
 
 /* Include configuration information for the device */
@@ -133,6 +132,7 @@ typedef struct
 /* declaration of exported functions */
 
 int tds744a_init_hook( void );
+int tds744a_test_hook( void );
 int tds744a_exp_hook( void );
 int tds744a_end_of_exp_hook( void );
 void tds744a_exit_hook( void );
@@ -162,12 +162,13 @@ Var *digitizer_lock_keyboard( Var *v );
 /* declaration of internally used functions */
 
 const char *tds744a_ptime( double p_time );
-void tds744a_delete_windows( void );
+void tds744a_delete_windows( TDS744A *s );
 void tds744a_do_pre_exp_checks( void );
 void tds744a_set_meas_window( WINDOW *w );
 void tds744a_set_curve_window( WINDOW *w );
 void tds744a_set_window( WINDOW *w );
 long tds744a_translate_channel( int dir, long channel );
+void tds744a_store_state( TDS744A *dest, TDS744A *src );
 
 bool tds744a_init( const char *name );
 double tds744a_get_timebase( void );
@@ -210,12 +211,12 @@ const char *Channel_Names[ ] = { "CH1", "CH2", "CH3", "CH4",
 								 "MATH1", "MATH2", "MATH3", "REF1",
 								 "REF2", "REF3", "REF4",
 								 "AUX", "LINE" };
-
+bool TDS744A_INIT = UNSET;
 #else
 
 extern TDS744A tds744a;
 extern const char *Channel_Names[ ];
-
+extern const bool TDS744A_INIT;
 #endif
 
 
