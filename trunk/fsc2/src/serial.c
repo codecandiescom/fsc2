@@ -225,7 +225,7 @@ speed_t fsc2_cfgetospeed( struct termios *termios_p )
 
 
 	raise_permissions( );
-	ret = fsc2_cfgetospeed( termios_p );
+	ret = cfgetospeed( termios_p );
 	lower_permissions( );
 
 	return ret;
@@ -257,7 +257,7 @@ speed_t fsc2_cfgetispeed( struct termios *termios_p )
 
 
 	raise_permissions( );
-	ret = fsc2_cfgetispeed( termios_p );
+	ret = cfgetispeed( termios_p );
 	lower_permissions( );
 
 	return ret;
