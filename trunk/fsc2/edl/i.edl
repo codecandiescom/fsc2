@@ -26,8 +26,8 @@ SID2 = slider_create( "VALUE_SLIDER", -100.0, -3.0, "Attenuation",
 					  "Adjusts RF attenuation" );
 I1   = input_create( "INT_INPUT", 17, "Na, was wohl?", "Weiss auch nicht..." );
 I2   = input_create( "FLOAT_INPUT", -13, "Noch eins", "Foobar" );
-I3   = input_create( "INT_OUTPUT", 17, "Na, was wohl?", "Weiss auch nicht..." );
-I4   = input_create( "FLOAT_OUTPUT", -13, "Noch eins", "Foobar" );
+I3   = output_create( "INT_OUTPUT", 17, "Dies ist nur fuer output", "Weiss auch nicht..." );
+I4   = output_create( "FLOAT_OUTPUT", -13, "Noch eins", "Foobar" );
 
 FOREVER {
 
@@ -37,8 +37,6 @@ FOREVER {
 	}
 
 	I += 1;
-	print( "Input 1 : #\n", input_value( I1 ) );
-	print( "Input 2 : #\n", input_value( I2 ) );
 
 	IF input_value( I1 ) > 100 {
 		input_value( I3, I );
@@ -47,17 +45,6 @@ FOREVER {
 	IF input_value( I2 ) > 100.0 {
 		input_value( I4, 0.1 * I^2 );
 	}
-
-//	  print( "I = #\n", I );
-//	  print( "Button1 : #\n", button_state( BID1 ) );
-//	  print( "Button2 : #\n", button_state( BID2 ) );
-//	  print( "Button3 : #\n", button_state( BID3 ) );
-//	  print( "Button4 : #\n", button_state( BID4 ) );
-//	  print( "Button5 : #\n", button_state( BID5 ) );
-//	  print( "Button6 : #\n", button_state( BID6 ) );
-//	  print( "Button7 : #\n\n", button_state( BID7 ) );
-//	  print( "Slider1 : #\n", slider_value( SID1 ) );
-//	  print( "Slider2 : #\n\n", slider_value( SID2 ) );
 
 	display( I, slider_value( SID2 ) * slider_value( SID1 ) );
 	wait( 500 ms );
@@ -69,8 +56,3 @@ slider_delete( SID1 );
 input_delete( I1 );
 
 wait( 6 );
-
-
-
-//button_state( BID6, 1 );
-//button_delete( BID5 );
