@@ -784,14 +784,38 @@ Var *monochromator_wavelength_axis( Var *v )
 Var *monochromator_wavenumber_axis( Var * v )
 {
 	Var *cv;
+	Var *fv;
+	double wn;
+	int acc;
+	long num_pixels;
 
 
-	too_many_arguments( v );
+	if ( v != NULL )
+	{
+		wn = get_double( v, "center wavenumber" );
+		if ( wn <= 0.0 )
+		{
+			print( FATAL, "Invalid zero or negative center wavenumber\n" );
+			THROW( EXCEPTION );
+		}
+		too_many_arguments( v );
+		v = vars_push( FLOAT_VAR, 0.01 / wn );
+	}
 
-	cv = monochromator_wavelength_axis( NULL );
+	cv = monochromator_wavelength_axis( v );
 
-	cv->val.dpnt[ 0 ] = spex_cd2a_wl2mwn( cv->val.dpnt[ 0 ] );
-	cv->val.dpnt[ 1 ] = - spex_cd2a_cwn( cv->val.dpnt[ 1 ] );
+	fv = func_call( func_get( "ccd_camera_pixel_area", &acc ) );
+	num_pixels = fv->val.lpnt[ 0 ];
+	vars_pop( fv );
+
+	cv->val.dpnt[ 1 ] =
+				(   0.01 / (   cv->val.dpnt[ 0 ]
+							 + 0.5 * ( num_pixels - 1 ) * cv->val.dpnt[ 1 ] )
+				  - 0.01 / (   cv->val.dpnt[ 0 ]
+							 - 0.5 * ( num_pixels - 1 ) * cv->val.dpnt[ 1 ] ) )
+				/ ( num_pixels - 1 );
+
+	cv->val.dpnt[ 0 ] = 0.01 / cv->val.dpnt[ 0 ];
 
 	return cv;
 }
