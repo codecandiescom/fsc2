@@ -1897,6 +1897,70 @@ bool exp_xable( char *buffer, ptrdiff_t len )
 }
 
 
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+
+double *exp_getpos( char *buffer, ptrdiff_t len  )
+{
+	if ( Internals.I_am == CHILD )
+	{
+		double *result;
+
+
+		if ( ! writer( C_GETPOS, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
+
+		T_free( buffer );
+		result = LONG_P T_malloc( ( 2 * MAX_CURVES + 1 ) * sizeof *result );
+
+		if ( ! reader( ( void * ) result ) )
+		{
+			T_free( result );
+			THROW( EXCEPTION );
+		}
+
+		return result;
+	}
+	else
+	{
+		char *pos;
+		double result[ ( 2 * MAX_CURVES + 1 ) ];
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
+		int i;
+
+
+		pos = buffer;
+		memcpy( &EDL.Lc, pos, sizeof EDL.Lc );	    /* current line number */
+		pos += sizeof EDL.Lc;
+
+		EDL.Fname = pos;	                          /* current file name */
+
+		
+		if ( G.coord_display == 1 )
+			result[ 0 ] = ( double ) get_mouse_pos_1d( result + 1 );
+		else if ( G.coord_display == 2 )
+			result[ 0 ] = ( double ) get_mouse_pos_2d( result + 1 );
+		else if ( G.coord_display == 4 )
+			result[ 0 ] = ( double ) get_mouse_pos_cut( result + 1 );
+		else
+			for ( i = 0; i < 2 * MAX_CURVES + 1; i++ )
+				result[ i ] = 0.0;
+
+		writer( C_GETPOS, sizeof result, result );
+
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
+	}
+
+	return NULL;
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
