@@ -51,7 +51,7 @@ install:
 clean:
 	$(MAKE) -C driver clean
 	$(MAKE) -C lib clean
-	rm -f *~
+	rm -f *~ makelog
 
 distclean:
 	$(MAKE) clean
