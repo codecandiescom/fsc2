@@ -316,7 +316,8 @@ void death_mail( int signo )
 		close( fail_mess_fd );
 	}
 
-	fprintf( mail, "In EDL program Fname = %s at Lc = %ld\n\n", Fname, Lc );
+	if ( Fname != NULL )
+		fprintf( mail, "In EDL program %s at line = %ld\n\n", Fname, Lc );
 
 	fputs( "Content of program browser:\n\n"
 		   "--------------------------------------------------\n\n", mail );

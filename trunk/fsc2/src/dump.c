@@ -7,32 +7,33 @@
 
 
 enum {
-	PARENT_READ = 0,
-	CHILD_WRITE,
-	CHILD_READ,
-	PARENT_WRITE
+	DUMP_PARENT_READ = 0,
+	DUMP_CHILD_WRITE,
+	DUMP_CHILD_READ,
+	DUMP_PARENT_WRITE
 };
 
 enum {
-	ANSWER_READ = 0,
-	ANSWER_WRITE
+	DUMP_ANSWER_READ = 0,
+	DUMP_ANSWER_WRITE
 };
 
 
 /*-----------------------------------------------------------------------*/
+/* This function is highly hardware depended, i.e. it will only work on  */
+/* i386 type processors.                                                 */
+/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
 /* This function is called from the signal handler for 'deadly' signals, */
 /* e.g. SIGSEGV etc. It tries to figure out where this signal happend    */
 /* and creating a backtrace by running through the stackframes and       */
 /* determining from the return addresses and with the help of the GNU    */
 /* utility 'addr2line' the function name and the source file and line    */
 /* number. The result is written to the write end of a pipe that is      */
-/* (mis)used as a temporary buffer,from which the results can be read    */
+/* (mis)used as a temporary buffer, from which the results can be read   */
 /* later (the read end is a global variable named 'fail_mess_fd').       */
-/* This function is highly hardware depended, i.e. it will probably only */
-/* work with i386 type processors.                                       */
-/* If the macro ADDR2LINE isn't defined the function will do nothing. If */
-/* it is defined it must be the complete path to 'addr2line'. The best   */
-/* way to set it correctly is probably to have lines like                */
+/* If the macro ADDR2LINE isn't defined the function will do nothing.    */
+/* If it is defined it must be the complete path to 'addr2line'. The     */
+/* best way to set it correctly is probably to have lines like           */
 /* ADDR2LINE = $(shell which addr2line)                                  */
 /* ifneq ($(word 1,$(ADDR2LINE)),which:)                                 */
 /*     CFLAGS += -DADDR2LINE=\"$(ADDR2LINE)\"                            */
@@ -90,16 +91,16 @@ void DumpStack( void )
 
 	if ( ( pid = fork( ) ) == 0 )
 	{
-		close( pipe_fd[ PARENT_READ ] );
-		close( pipe_fd[ PARENT_WRITE ] );
+		close( pipe_fd[ DUMP_PARENT_READ ] );
+		close( pipe_fd[ DUMP_PARENT_WRITE ] );
 
 		close( STDOUT_FILENO );
 		close( STDERR_FILENO );
 		close( STDIN_FILENO );
 
-		dup2( pipe_fd[ CHILD_WRITE ], STDOUT_FILENO );
-		dup2( pipe_fd[ CHILD_WRITE ], STDERR_FILENO );
-		dup2( pipe_fd[ CHILD_READ  ], STDIN_FILENO );
+		dup2( pipe_fd[ DUMP_CHILD_WRITE ], STDOUT_FILENO );
+		dup2( pipe_fd[ DUMP_CHILD_WRITE ], STDERR_FILENO );
+		dup2( pipe_fd[ DUMP_CHILD_READ  ], STDIN_FILENO );
 
 		execl( ADDR2LINE, ADDR2LINE, "-C", "-f", "-e", bindir "fsc2", NULL );
 		_exit( EXIT_FAILURE );
@@ -113,8 +114,8 @@ void DumpStack( void )
 		return;
 	}
 
-	close( pipe_fd[ CHILD_READ  ] );
-	close( pipe_fd[ CHILD_WRITE ] );
+	close( pipe_fd[ DUMP_CHILD_READ  ] );
+	close( pipe_fd[ DUMP_CHILD_WRITE ] );
 
 	/* Load content of ebp register into EBP - ebp always points to the stack
 	   address before the return address of the current subroutine, and the
@@ -139,21 +140,21 @@ void DumpStack( void )
 		   where the shit hit the fan.) */
 
 		sprintf( buf, "%p\n", ( int * ) * ( EBP + 1 ) );
-		write( pipe_fd[ PARENT_WRITE ], buf, strlen( buf ) );
+		write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
 
 		sprintf( buf, "#%-3d %-10p  ", k++, ( int * ) * ( EBP + 1 ) );
-		write( answer_fd[ ANSWER_WRITE ], buf, strlen( buf ) );
+		write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
 
 		/* Copy ADDR2LINE's reply to the answer pipe */
 
-		while ( read( pipe_fd[ PARENT_READ ], &c, 1 ) == 1 && c != '\n' )
-			write( answer_fd[ ANSWER_WRITE ], &c, 1 );
+		while ( read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) == 1 && c != '\n' )
+			write( answer_fd[ DUMP_ANSWER_WRITE ], &c, 1 );
 
-		write( answer_fd[ ANSWER_WRITE ], "() in ", 6 );
+		write( answer_fd[ DUMP_ANSWER_WRITE ], "() in ", 6 );
 
-		while ( read( pipe_fd[ PARENT_READ ], &c, 1 ) == 1 && c != '\n' )
-			write( answer_fd[ ANSWER_WRITE ], &c, 1 );
-		write( answer_fd[ ANSWER_WRITE ], "\n", 1 );
+		while ( read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) == 1 && c != '\n' )
+			write( answer_fd[ DUMP_ANSWER_WRITE ], &c, 1 );
+		write( answer_fd[ DUMP_ANSWER_WRITE ], "\n", 1 );
 
 		/* Get value of ebp register for the next higher level stackframe */
 
@@ -162,11 +163,11 @@ void DumpStack( void )
 
 	kill( pid, SIGTERM );
 
-	close( pipe_fd[ PARENT_READ ] );
-	close( pipe_fd[ PARENT_WRITE ] );
-	close( answer_fd[ ANSWER_WRITE ] );
+	close( pipe_fd[ DUMP_PARENT_READ ] );
+	close( pipe_fd[ DUMP_PARENT_WRITE ] );
+	close( answer_fd[ DUMP_ANSWER_WRITE ] );
 
-	fail_mess_fd = answer_fd[ ANSWER_READ ];
+	fail_mess_fd = answer_fd[ DUMP_ANSWER_READ ];
 
 #endif  /* ! ADDR2LINE */
 }
