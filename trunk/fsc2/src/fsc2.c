@@ -777,10 +777,6 @@ void clean_up( void )
 
 	vars_clean_up( );
 
-	/* delete all the pulses */
-
-	delete_pulses( );
-
 	/* delete stored program */
 
 	forget_prg( );

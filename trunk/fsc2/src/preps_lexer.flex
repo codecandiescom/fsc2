@@ -178,106 +178,109 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 {DL}        return DL_TOK;
 {PH}        return PH_TOK;
 {ML}        return ML_TOK;
-{RP}        return RP_TOK;
+{RP}        {
+				/* push a marker variable */
 
+				prepslval.vptr = vars_push( INT_VAR, -1 );
+				return RP_TOK;
+            }
 
 			/* combinations of pulse and property, e.g. `P3.LEN' */
 
 {P}"."{F}   {
-				prepslval.vptr = pulse_get_prop( prepstext, P_FUNC );
+				prepslval.vptr = p_get( prepstext, P_FUNC );
 				return VAR_REF;
             }
 
 {P}"."{S}   {
-				prepslval.vptr = pulse_get_prop( prepstext, P_POS );
+				prepslval.vptr = p_get( prepstext, P_POS );
 				return VAR_REF;
             }
 
 {P}"."{L}   {
-				prepslval.vptr = pulse_get_prop( prepstext, P_LEN );
+				prepslval.vptr = p_get( prepstext, P_LEN );
 				return VAR_REF;
             }
 
 {P}"."{DS}  {
-				prepslval.vptr = pulse_get_prop( prepstext, P_DPOS );
+				prepslval.vptr = p_get( prepstext, P_DPOS );
 				return VAR_REF;
             }
 
 {P}"."{DL}  {
-				prepslval.vptr = pulse_get_prop( prepstext, P_DLEN );
+				prepslval.vptr = p_get( prepstext, P_DLEN );
 				return VAR_REF;
             }
 
 {P}"."{ML}  {
-				prepslval.vptr = pulse_get_prop( prepstext, P_MAXLEN );
+				prepslval.vptr = p_get( prepstext, P_MAXLEN );
 				return VAR_REF;
             }
 
 {P}":"      {
-			    Cur_Pulse = pulse_new( prepstext );
+			    Cur_Pulse = p_num( prepstext );
 				return P_TOK;
 			}
 
 
 {P}/[\t \n,;] {
-				if ( Cur_Pulse == NULL )
+				if ( Cur_Pulse < 0 )
 				{
-					Cur_Pulse = pulse_new( prepstext );
+					Cur_Pulse = p_num( prepstext );
 					return P_TOK;
 				}
 
-				prepslval.vptr = vars_push( INT_VAR,
-										 ( long ) get_pulse_num( prepstext ) );
+				prepslval.vptr = vars_push( INT_VAR, p_num( prepstext ) );
 				return( RPP_TOK );
 			}
 
 {MW}        {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_MW );
-				return VAR_REF;
+				return PFUNC;
 			}
 {TWT}       {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_TWT );
-				return VAR_REF;
+				return PFUNC;
 			}
 {TWT_GATE}  {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_TWT_GATE );
-				return VAR_REF;
+				return PFUNC;
 			}
 {DET}       {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DET );
-				return VAR_REF;
+				return PFUNC;
 			}
 {DET_GATE}  {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DET_GATE );
-				return VAR_REF;
+				return PFUNC;
 			}
 {RF}        {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_RF );
-				return VAR_REF;
+				return PFUNC;
 			}
 {RF_GATE}   {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_RF_GATE );
-				return VAR_REF;
+				return PFUNC;
 			}
 
 {OI}        {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_1 );
-				return VAR_REF;
+				return PFUNC;
 			}
 
 {OII}        {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_2 );
-				return VAR_REF;
+				return PFUNC;
 			}
 
 {OIII}      {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_3 );
-				return VAR_REF;
+				return PFUNC;
 			}
 
 {OIV}       {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_4 );
-				return VAR_REF;
+				return PFUNC;
 			}
 
 
@@ -387,7 +390,7 @@ int preparations_parser( FILE *in )
 	}
 	compilation.sections[ PREPARATIONS_SECTION ] = SET;
 
-	Cur_Pulse = NULL;
+	Cur_Pulse = -1;
 	prepsin = in;
 
 	/* Keep the lexer happy... */

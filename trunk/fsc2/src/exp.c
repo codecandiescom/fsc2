@@ -528,7 +528,6 @@ void exp_test_run( void )
 
 		TEST_RUN = SET;
 		save_restore_variables( SET );
-		save_restore_pulses( SET );
 		run_test_hooks( );
 
 		cur_prg_token = prg_token;
@@ -633,7 +632,6 @@ void exp_test_run( void )
 	OTHERWISE
 	{
 		Fname = NULL;
-		save_restore_pulses( UNSET );
 		save_restore_variables( UNSET );
 		
 		File_List_Len = old_FLL;
@@ -645,7 +643,6 @@ void exp_test_run( void )
 
 
 	Fname = NULL;
-	save_restore_pulses( UNSET );
 	save_restore_variables( UNSET );
 	File_List_Len = old_FLL;
 	TEST_RUN = UNSET;
