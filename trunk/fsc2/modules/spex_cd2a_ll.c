@@ -675,6 +675,9 @@ static void spex_cd2a_read_ack( void )
 			len -= received;
 		}
 
+		if ( buf[ 4 ] != EOT )
+			spex_cd2a_comm_fail( );
+
 		buf[ 4 ] = '\0';
 		if ( spex_cd2a_do_print_message )
 			print( FATAL, "Failure to execute command, error code: \"%s\".\n",
