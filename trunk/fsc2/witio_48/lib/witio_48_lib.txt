@@ -226,14 +226,14 @@ Beside the error codes mentioned above the function may return:
 
 ======================================================================
 
-int ni6601_close( void )
+int witio_48_close( void )
 
 The function can be used to close the boards device file and thus make
 the board accessible by other processes.
 
 The function returns in case of failure (device file wasn't open):
 
-    NI6601_ERR_BNO
+    WITIO_48_ERR_BNO
 
 
 ======================================================================
@@ -242,4 +242,5 @@ const char *witio_48_error_message( void )
 
 The function returns a short error message about the reason the last
 call of one of the functions in the library failed. If there was no
-error during the last functuin call an empty string is returned.
+error during the last function call  (or no function was called since
+the library was loaded) an empty string is returned.
