@@ -452,8 +452,33 @@ int ep385_exp_hook( void )
 
 int ep385_end_of_exp_hook( void )
 {
+	int i;
+	FUNCTION *fp;
+
+
 	if ( ! ep385_is_needed )
 		return 1;
+
+	/* Free allocated memory */
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = ep385.function + i;
+
+		if ( f->pulses != NULL )
+			f->pulses = PULSE_PP T_free( f->pulses );
+
+		if ( f->pm != NULL )
+		{
+			for ( j = 0; j < f->pc_len * f->num_channels; j++ )
+				T_free( f->pm[ j ] );
+			f->pm = PULSE_PPP T_free( f->pm );
+		}
+	}
+
+	for ( i = 0; i < MAX_CHANNELS; i++ )
+		ep385.channel[ i ].pulse_params =
+					PULSE_PARAMS_P T_free( ep385.channel[ i ].pulse_params );
 
 	ep385_run( UNSET );
 	gpib_local( ep385.device );

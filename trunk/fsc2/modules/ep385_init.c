@@ -78,8 +78,7 @@ void ep385_init_setup( void )
 			if ( f->pm != NULL )
 			{
 				for ( j = 0; j < f->pc_len * f->num_channels; j++ )
-					if ( f->pm[ j ] != NULL )
-						T_free( f->pm[ j ] );
+					T_free( f->pm[ j ] );
 				f->pm = PULSE_PPP T_free( f->pm );
 			}
 		}
