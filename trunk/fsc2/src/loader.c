@@ -482,10 +482,11 @@ static void add_function( int index, void *new_func, Device *new_dev,
 
 static void resolve_generic_type( Device *dev )
 {
+	dlerror( );                    /* make sure it's NULL before we continue */
 	dev->generic_type = ( const char * ) dlsym( dev->driver.handle,
 												"generic_type" );
 
-	if ( dlerror( ) != NULL )            /* symbol not found in library ? */
+	if ( dlerror( ) != NULL )               /* symbol not found in library ? */
 		dev->generic_type = NULL;
 }
 
@@ -647,9 +648,10 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 
 	/* Try to load the symbol */
 
+	dlerror( );                    /* make sure it's NULL before we continue */
 	*symbol_ptr = dlsym( cd->driver.handle, symbol );
 
-	if ( dlerror( ) != NULL )            /* symbol not found in library ? */
+	if ( dlerror( ) != NULL )               /* symbol not found in library ? */
 		return LIB_ERR_NO_SYM;
 
 	return LIB_OK;
