@@ -395,6 +395,48 @@ void delete_stale_shms( void )
 }
 
 
+/*---------------------------------------------------------------------*/
+/* Functions checks if a supplied input string is identical to one of  */
+/* `max' alternatives, pointed to by `altern', but neglecting the case */
+/* of the characters. Leading and trailing white space is removed from */
+/* the input string. The comparison is case insensitive. The function  */
+/* returns the index of the found altenative (i.e. a number between 0  */
+/* and max - 1) or -1 if none of the alternatives was identical to the */
+/* input string.                                                       */
+/*---------------------------------------------------------------------*/
+
+int is_in( const char *supplied_in, const char **altern, int max )
+{
+	char *in, *cpy;
+	const char *a;
+	int count;
+
+
+	assert( supplied_in && altern );
+
+	/* Get copy of input string and get rid of leading and trailing white
+	   space */
+
+	in = cpy = get_string_copy( supplied_in );
+	while ( isspace( *in ) )
+		in++;
+	while( isspace( cpy[ strlen( cpy ) - 1 ] ) )
+		cpy[ strlen( cpy ) - 1 ] = '\0';
+
+	/* Now check if the cleaned up input string is identical to one of the
+	   alternatives */
+
+	for ( cpy = in, a = *altern, count = 0; a && count < max;
+		  count++, a += strlen( a ) + 1 )
+		if ( ! strcasecmp( in, a ) )
+			break;
+
+	T_free( cpy );
+
+	return ( a && count < max ) ? count : 0;
+}
+
+
 /*------------------------------------------------------------------------*/
 /* Function converts intensities into rgb values (between 0 and 255). For */
 /* values below 0 a dark kind of violet is returned, for values above 1 a */
