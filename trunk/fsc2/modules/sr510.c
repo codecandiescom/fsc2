@@ -33,6 +33,17 @@
 const char generic_type[ ] = DEVICE_TYPE;
 
 
+/* Here values are defined that get returned by the driver in the test run
+   when the lock-in can't be accessed - these values must really be
+   reasonable ! */
+
+#define SR510_TEST_DAC_VOLATGE   0.0
+#define SR510_TEST_SENSITIVITY   0.5
+#define SR510_TEST_TIME_CONSTANT 0.1
+#define SR510_TEST_PHASE         0.0
+#define SR510_TEST_REF_FREQUENCY 5.0e3
+
+
 /* Declaration of exported functions */
 
 int sr510_init_hook( void );
@@ -256,7 +267,7 @@ Var *lockin_get_adc_data( Var *v )
 	}
 
 	if ( TEST_RUN )                  /* return dummy value in test run */
-		return vars_push( FLOAT_VAR, 0.0 );
+		return vars_push( FLOAT_VAR, SR510_TEST_DAC_VOLATGE );
 
 	return vars_push( FLOAT_VAR, sr510_get_adc_data( port ) );
 }
@@ -279,7 +290,7 @@ Var *lockin_sensitivity( Var *v )
 	if ( v == NULL )
 	{
 		if ( TEST_RUN )                  /* return dummy value in test run */
-			return vars_push( FLOAT_VAR, 0.5 );
+			return vars_push( FLOAT_VAR, SR510_TEST_SENSITIVITY );
 		else
 		{
 			if ( I_am == PARENT )
@@ -396,7 +407,7 @@ Var *lockin_time_constant( Var *v )
 	if ( v == NULL )
 	{
 		if ( TEST_RUN )
-			return vars_push( FLOAT_VAR, 0.1 );
+			return vars_push( FLOAT_VAR, SR510_TEST_TIME_CONSTANT );
 		else
 		{
 			if ( I_am == PARENT )
@@ -506,7 +517,7 @@ Var *lockin_phase( Var *v )
 	if ( v == NULL )
 	{
 		if ( TEST_RUN )
-			return vars_push( FLOAT_VAR, 0.0 );
+			return vars_push( FLOAT_VAR, SR510_TEST_PHASE );
 		else
 		{
 			if ( I_am == PARENT )
@@ -571,7 +582,7 @@ Var *lockin_ref_freq( Var *v )
 	}
 
 	if ( TEST_RUN )
-		return vars_push( FLOAT_VAR, 0.0 );
+		return vars_push( FLOAT_VAR, SR510_TEST_REF_FREQUENCY );
 	else
 	{
 		if ( I_am == PARENT )
