@@ -59,9 +59,9 @@ Var_T *f_abort( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------*/
-/* This is called for the end() EDL function */
-/*-------------------------------------------*/
+/*-------------------------------------------*
+ * This is called for the end() EDL function
+ *-------------------------------------------*/
 
 Var_T *f_stopsim( UNUSED_ARG Var_T *v )
 {
@@ -70,9 +70,9 @@ Var_T *f_stopsim( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------------*/
-/* Conversion float to integer (result is integer) */
-/*-------------------------------------------------*/
+/*-------------------------------------------------*
+ * Conversion float to integer (result is integer)
+ *-------------------------------------------------*/
 
 Var_T *f_int( Var_T *v )
 {
@@ -133,9 +133,9 @@ Var_T *f_int( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/* Conversion int to floating point (result is float) */
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ * Conversion int to floating point (result is float)
+ *----------------------------------------------------*/
 
 Var_T *f_float( Var_T *v )
 {
@@ -190,9 +190,9 @@ Var_T *f_float( Var_T *v )
 }
 
 
-/*--------------------------------------------------------*/
-/* Rounding of floating point numbers (result is integer) */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Rounding of floating point numbers (result is integer)
+ *--------------------------------------------------------*/
 
 Var_T *f_round( Var_T *v )
 {
@@ -254,9 +254,9 @@ Var_T *f_round( Var_T *v )
 }
 
 
-/*---------------------------------*/
-/* Floor value (result is integer) */
-/*---------------------------------*/
+/*---------------------------------*
+ * Floor value (result is integer)
+ *---------------------------------*/
 
 Var_T *f_floor( Var_T *v )
 {
@@ -317,9 +317,9 @@ Var_T *f_floor( Var_T *v )
 }
 
 
-/*-----------------------------------*/
-/* Ceiling value (result is integer) */
-/*-----------------------------------*/
+/*-----------------------------------*
+ * Ceiling value (result is integer)
+ *-----------------------------------*/
 
 Var_T *f_ceil( Var_T *v )
 {
@@ -380,9 +380,9 @@ Var_T *f_ceil( Var_T *v )
 }
 
 
-/*-------------------------------------------------*/
-/* abs of value (result has same as type argument) */
-/*-------------------------------------------------*/
+/*-------------------------------------------------*
+ * abs of value (result has same as type argument)
+ *-------------------------------------------------*/
 
 Var_T *f_abs( Var_T *v )
 {
@@ -457,10 +457,10 @@ Var_T *f_abs( Var_T *v )
 }
 
 
-/*------------------------------------------------------*/
-/* max of all values (result is a float variable unless */
-/* all inputs were integer values)                      */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * max of all values (result is a float variable unless
+ * all inputs were integer values)
+ *------------------------------------------------------*/
 
 Var_T *f_lmax( Var_T *v )
 {
@@ -531,10 +531,10 @@ Var_T *f_lmax( Var_T *v )
 }
 
 
-/*------------------------------------------------------*/
-/* min of all values (result is a float variable unless */
-/* all inputs were integer values)                      */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * min of all values (result is a float variable unless
+ * all inputs were integer values)
+ *------------------------------------------------------*/
 
 Var_T *f_lmin( Var_T *v )
 {
@@ -605,9 +605,9 @@ Var_T *f_lmin( Var_T *v )
 }
 
 
-/*-----------------------------------------------*/
-/* sin of argument (in radian) (result is float) */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * sin of argument (in radian) (result is float)
+ *-----------------------------------------------*/
 
 Var_T *f_sin( Var_T *v )
 {
@@ -664,9 +664,9 @@ Var_T *f_sin( Var_T *v )
 }
 
 
-/*-----------------------------------------------*/
-/* cos of argument (in radian) (result is float) */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * cos of argument (in radian) (result is float)
+ *-----------------------------------------------*/
 
 Var_T *f_cos( Var_T *v )
 {
@@ -723,9 +723,9 @@ Var_T *f_cos( Var_T *v )
 }
 
 
-/*-----------------------------------------------*/
-/* tan of argument (in radian) (result is float) */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * tan of argument (in radian) (result is float)
+ *-----------------------------------------------*/
 
 Var_T *f_tan( Var_T *v )
 {
@@ -792,9 +792,9 @@ Var_T *f_tan( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* asin (in radian) of argument (with -1 <= x <= 1) (result is float) */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * asin (in radian) of argument (with -1 <= x <= 1) (result is float)
+ *--------------------------------------------------------------------*/
 
 Var_T *f_asin( Var_T *v )
 {
@@ -868,9 +868,9 @@ Var_T *f_asin( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* acos (in radian) of argument (with -1 <= x <= 1) (result is float) */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * acos (in radian) of argument (with -1 <= x <= 1) (result is float)
+ *--------------------------------------------------------------------*/
 
 Var_T *f_acos( Var_T *v )
 {
@@ -944,9 +944,9 @@ Var_T *f_acos( Var_T *v )
 }
 
 
-/*------------------------------------------------*/
-/* atan (in radian) of argument (result is float) */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * atan (in radian) of argument (result is float)
+ *------------------------------------------------*/
 
 Var_T *f_atan( Var_T *v )
 {
@@ -999,9 +999,9 @@ Var_T *f_atan( Var_T *v )
 }
 
 
-/*------------------------------------*/
-/* sinh of argument (result is float) */
-/*------------------------------------*/
+/*------------------------------------*
+ * sinh of argument (result is float)
+ *------------------------------------*/
 
 Var_T *f_sinh( Var_T *v )
 {
@@ -1066,9 +1066,9 @@ Var_T *f_sinh( Var_T *v )
 }
 
 
-/*------------------------------------*/
-/* cosh of argument (result is float) */
-/*------------------------------------*/
+/*------------------------------------*
+ * cosh of argument (result is float)
+ *------------------------------------*/
 
 Var_T *f_cosh( Var_T *v )
 {
@@ -1133,9 +1133,9 @@ Var_T *f_cosh( Var_T *v )
 }
 
 
-/*------------------------------------*/
-/* tanh of argument (result is float) */
-/*------------------------------------*/
+/*------------------------------------*
+ * tanh of argument (result is float)
+ *------------------------------------*/
 
 Var_T *f_tanh( Var_T *v )
 {
@@ -1188,9 +1188,9 @@ Var_T *f_tanh( Var_T *v )
 }
 
 
-/*-----------------------------------------------*/
-/* Inverse of sinh of argument (result is float) */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Inverse of sinh of argument (result is float)
+ *-----------------------------------------------*/
 
 Var_T *f_asinh( Var_T *v )
 {
@@ -1277,9 +1277,9 @@ Var_T *f_asinh( Var_T *v )
 }
 
 
-/*-----------------------------------------------*/
-/* Inverse of cosh of argument (result is float) */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Inverse of cosh of argument (result is float)
+ *-----------------------------------------------*/
 
 Var_T *f_acosh( Var_T *v )
 {
@@ -1358,9 +1358,9 @@ Var_T *f_acosh( Var_T *v )
 }
 
 
-/*-----------------------------------------------*/
-/* Inverse of tanh of argument (result is float) */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * Inverse of tanh of argument (result is float)
+ *-----------------------------------------------*/
 
 Var_T *f_atanh( Var_T *v )
 {
@@ -1437,9 +1437,9 @@ Var_T *f_atanh( Var_T *v )
 }
 
 
-/*-----------------------------------*/
-/* exp of argument (result is float) */
-/*-----------------------------------*/
+/*-----------------------------------*
+ * exp of argument (result is float)
+ *-----------------------------------*/
 
 Var_T *f_exp( Var_T *v )
 {
@@ -1510,9 +1510,9 @@ Var_T *f_exp( Var_T *v )
 }
 
 
-/*-----------------------------------------------*/
-/* ln of argument (with x > 0) (result is float) */
-/*-----------------------------------------------*/
+/*-----------------------------------------------*
+ * ln of argument (with x > 0) (result is float)
+ *-----------------------------------------------*/
 
 Var_T *f_ln( Var_T *v )
 {
@@ -1595,9 +1595,9 @@ Var_T *f_ln( Var_T *v )
 }
 
 
-/*------------------------------------------------*/
-/* log of argument (with x > 0) (result is float) */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * log of argument (with x > 0) (result is float)
+ *------------------------------------------------*/
 
 Var_T *f_log( Var_T *v )
 {
@@ -1680,9 +1680,9 @@ Var_T *f_log( Var_T *v )
 }
 
 
-/*--------------------------------------------------*/
-/* sqrt of argument (with x >= 0) (result is float) */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * sqrt of argument (with x >= 0) (result is float)
+ *--------------------------------------------------*/
 
 Var_T *f_sqrt( Var_T *v )
 {
@@ -1757,9 +1757,9 @@ Var_T *f_sqrt( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Returns a random number between 0 and 1 (i.e. result is float) */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Returns a random number between 0 and 1 (i.e. result is float)
+ *----------------------------------------------------------------*/
 
 Var_T *f_random( Var_T *v )
 {
@@ -1792,8 +1792,8 @@ Var_T *f_random( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ *----------------------------------------------------------------------*/
 
 static bool grand_is_old = UNSET;
 
@@ -1828,12 +1828,12 @@ Var_T *f_grand( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Returns random numbers with Gaussian distribution, zero mean value   */
-/* and variance of 1. See W. H. Press, S. A. Teukolsky, W, T. Vettering */
-/* and B. P. Flannery, "Numerical Recipes in C", 2nd ed., Cambridge     */
-/* University Press 1992, pp. 288-290, for all the gory details.        */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Returns random numbers with Gaussian distribution, zero mean value
+ * and variance of 1. See W. H. Press, S. A. Teukolsky, W, T. Vettering
+ * and B. P. Flannery, "Numerical Recipes in C", 2nd ed., Cambridge
+ * University Press 1992, pp. 288-290, for all the gory details.
+ *----------------------------------------------------------------------*/
 
 static double gauss_random( void )
 {
@@ -1860,11 +1860,11 @@ static double gauss_random( void )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/* Sets a seed for the random number generator. It expects either a positive */
-/* integer as argument or none, in which case the current time (in seconds   */
-/* since 00:00:00 UTC, January 1, 1970) is used.                             */
-/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * Sets a seed for the random number generator. It expects either a positive
+ * integer as argument or none, in which case the current time (in seconds
+ * since 00:00:00 UTC, January 1, 1970) is used.
+ *---------------------------------------------------------------------------*/
 
 Var_T *f_setseed( Var_T *v )
 {
@@ -1909,14 +1909,14 @@ Var_T *f_setseed( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Returns a string with the current time in the form hh:mm:ss. */
-/* If a string argument is passed to the function the colons    */
-/* are replaced by the first two elements of the string (or the */
-/* first if there's only one character in the string). The new  */
-/* separator characters must be printable, i.e. between (and    */
-/* including) 0x20 and 0x7E for a 7-bit ASCII character set.    */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Returns a string with the current time in the form hh:mm:ss.
+ * If a string argument is passed to the function the colons
+ * are replaced by the first two elements of the string (or the
+ * first if there's only one character in the string). The new
+ * separator characters must be printable, i.e. between (and
+ * including) 0x20 and 0x7E for a 7-bit ASCII character set.
+ *--------------------------------------------------------------*/
 
 Var_T *f_time( Var_T *v )
 {
@@ -1984,14 +1984,14 @@ Var_T *f_time( Var_T *v )
 }
 
 
-/*----------------------------------------------------------*/
-/* Returns a floating point value with the time difference  */
-/* since the last call of the function (in us resolution).  */
-/* The function should be called automatically at the start */
-/* of an experiment so that the user gets the time since    */
-/* the start of the experiment when she calls this function */
-/* for the very first time.                                 */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Returns a floating point value with the time difference
+ * since the last call of the function (in us resolution).
+ * The function should be called automatically at the start
+ * of an experiment so that the user gets the time since
+ * the start of the experiment when she calls this function
+ * for the very first time.
+ *----------------------------------------------------------*/
 
 Var_T *f_dtime( UNUSED_ARG Var_T *v )
 {
@@ -2007,13 +2007,13 @@ Var_T *f_dtime( UNUSED_ARG Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* When called without an argument the function returns a string with the  */
-/* current date in a form like "Sat Jun 17, 2000". Alternatively, it may   */
-/* be called with a format string acceptable to the strftime(3) function   */
-/* as the only argument to force the function to return a string with the  */
-/* date in a user specified way (with a maximum length of 255 characters). */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * When called without an argument the function returns a string with the
+ * current date in a form like "Sat Jun 17, 2000". Alternatively, it may
+ * be called with a format string acceptable to the strftime(3) function
+ * as the only argument to force the function to return a string with the
+ * date in a user specified way (with a maximum length of 255 characters).
+ *-------------------------------------------------------------------------*/
 
 #define DEFAULT_DATE_FORMAT          "%a %b %d, %Y"
 #define DATE_FLAGS                   "aAbBcCdDeFGghHIjklmMnPrRsStTuUVWxXyYzZ+%"
@@ -2119,9 +2119,9 @@ Var_T *f_date( Var_T *v )
 }
 
 
-/*---------------------------------------------*/
-/* Function returns the dimension of an array. */
-/*---------------------------------------------*/
+/*---------------------------------------------*
+ * Function returns the dimension of an array.
+ *---------------------------------------------*/
 
 Var_T *f_dim( Var_T *v )
 {
@@ -2131,11 +2131,11 @@ Var_T *f_dim( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function returns the length of an array or the number of rows */
-/* of a matrix (for simple variables 1 is returned). For arrays  */
-/* or matrices 0 gets returned when no elements exist yet.       */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function returns the length of an array or the number of rows
+ * of a matrix (for simple variables 1 is returned). For arrays
+ * or matrices 0 gets returned when no elements exist yet.
+ *---------------------------------------------------------------*/
 
 Var_T *f_size( Var_T *v )
 {
@@ -2164,14 +2164,14 @@ Var_T *f_size( Var_T *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Calculates the mean of the elements of an one dimensional array.     */
-/* If only an array (or a pointer to an array is passed to the function */
-/* the mean of all array elements is calculated. If there's a second    */
-/* argument it's taken to be an index into the array at which the       */
-/* calculation of the mean starts. If there's a third argument it has   */
-/* be the number of elements to be included into the mean.              */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Calculates the mean of the elements of an one dimensional array.
+ * If only an array (or a pointer to an array is passed to the function
+ * the mean of all array elements is calculated. If there's a second
+ * argument it's taken to be an index into the array at which the
+ * calculation of the mean starts. If there's a third argument it has
+ * be the number of elements to be included into the mean.
+ *----------------------------------------------------------------------*/
 
 Var_T *f_mean( Var_T *v )
 {
@@ -2324,8 +2324,8 @@ Var_T *f_mean( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ *------------------------------------------------------------------*/
 
 Var_T *f_rms( Var_T *v )
 {
@@ -2446,10 +2446,10 @@ Var_T *f_rms( Var_T *v )
 }
 
 
-/*----------------------------------------------*/
-/* Function for creating a slice of an 1D array */
-/* or a submatrix of a more-dimensional matrix  */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Function for creating a slice of an 1D array
+ * or a submatrix of a more-dimensional matrix
+ *----------------------------------------------*/
 
 Var_T *f_slice( Var_T *v )
 {
@@ -2550,8 +2550,8 @@ Var_T *f_slice( Var_T *v )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
 
 Var_T *f_square( Var_T *v )
 {
@@ -2635,9 +2635,9 @@ Var_T *f_square( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function for converting magnetic fields from Gauss to Tesla */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function for converting magnetic fields from Gauss to Tesla
+ *-------------------------------------------------------------*/
 
 Var_T *f_G2T( Var_T *v )
 {
@@ -2694,9 +2694,9 @@ Var_T *f_G2T( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function for converting magnetic fields from Tesla to Gauss */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function for converting magnetic fields from Tesla to Gauss
+ *-------------------------------------------------------------*/
 
 Var_T *f_T2G( Var_T *v )
 {
@@ -2753,9 +2753,9 @@ Var_T *f_T2G( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function for converting temperatures from degree Celsius to Kevin */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for converting temperatures from degree Celsius to Kevin
+ *-------------------------------------------------------------------*/
 
 Var_T *f_C2K( Var_T *v )
 {
@@ -2813,9 +2813,9 @@ Var_T *f_C2K( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function for converting temperatures from Kevin to degree Celsius */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for converting temperatures from Kevin to degree Celsius
+ *-------------------------------------------------------------------*/
 
 Var_T *f_K2C( Var_T *v )
 {
@@ -2873,9 +2873,9 @@ Var_T *f_K2C( Var_T *v )
 }
 
 
-/*------------------------------------------------------*/
-/* Function for converting values in degrees to radians */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function for converting values in degrees to radians
+ *------------------------------------------------------*/
 
 Var_T *f_D2R( Var_T *v )
 {
@@ -2933,9 +2933,9 @@ Var_T *f_D2R( Var_T *v )
 }
 
 
-/*------------------------------------------------------*/
-/* Function for converting values in radians to degrees */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function for converting values in radians to degrees
+ *------------------------------------------------------*/
 
 Var_T *f_R2D( Var_T *v )
 {
@@ -2993,9 +2993,9 @@ Var_T *f_R2D( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function for converting wave lengths (in m) to wavenumbers (i.e. cm^-1) */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function for converting wave lengths (in m) to wavenumbers (i.e. cm^-1)
+ *-------------------------------------------------------------------------*/
 
 Var_T *f_WL2WN( Var_T *v )
 {
@@ -3076,9 +3076,9 @@ Var_T *f_WL2WN( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function for converting wavenumbers (i.e. cm^-1) to wave lengths (in m) */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function for converting wavenumbers (i.e. cm^-1) to wave lengths (in m)
+ *-------------------------------------------------------------------------*/
 
 Var_T *f_WN2WL( Var_T *v )
 {
@@ -3159,9 +3159,9 @@ Var_T *f_WN2WL( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function for converting frequencies (in Hz) to wavenumbers (i.e. cm^-1) */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function for converting frequencies (in Hz) to wavenumbers (i.e. cm^-1)
+ *-------------------------------------------------------------------------*/
 
 Var_T *f_F2WN( Var_T *v )
 {
@@ -3218,9 +3218,9 @@ Var_T *f_F2WN( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function for converting wavenumbers (i.e. cm^-1) to frequencies (in Hz) */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function for converting wavenumbers (i.e. cm^-1) to frequencies (in Hz)
+ *-------------------------------------------------------------------------*/
 
 Var_T *f_WN2F( Var_T *v )
 {
@@ -3277,8 +3277,8 @@ Var_T *f_WN2F( Var_T *v )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
 
 Var_T *f_islice( Var_T *v )
 {
@@ -3331,8 +3331,8 @@ Var_T *f_islice( Var_T *v )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
 
 Var_T *f_fslice( Var_T *v )
 {
@@ -3385,8 +3385,8 @@ Var_T *f_fslice( Var_T *v )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
 
 Var_T *f_lspace( Var_T *v )
 {
@@ -3420,8 +3420,8 @@ Var_T *f_lspace( Var_T *v )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
 
 Var_T *f_reverse( Var_T *v )
 {
@@ -3486,10 +3486,10 @@ Var_T *f_reverse( Var_T *v )
 }
 
 
-/*--------------------------------------------*/
-/* Function is used in the calculation of the */
-/* asinh(), acosh() and atanh() functions.    */
-/*--------------------------------------------*/
+/*--------------------------------------------*
+ * Function is used in the calculation of the
+ * asinh(), acosh() and atanh() functions.
+ *--------------------------------------------*/
 
 static double datanh( double arg )
 {
