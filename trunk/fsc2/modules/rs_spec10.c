@@ -28,7 +28,7 @@
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
-struct RS_SPEC10 *rs_spec10,
+struct RS_SPEC10 *rs_spec10 = NULL,
 				  rs_spec10_prep,
 				  rs_spec10_test,
 				  rs_spec10_exp;
@@ -50,21 +50,16 @@ int rs_spec10_init_hook( void )
 
 	rs_spec10->temp.is_setpoint = UNSET;
 
-	rs_spec10->ccd.roi[ X ]     = 0;
-	rs_spec10->ccd.roi[ Y ]     = 0;
-	rs_spec10->ccd.roi[ X + 2 ] = CCD_PIXEL_WIDTH - 1;
-	rs_spec10->ccd.roi[ Y + 2 ] = CCD_PIXEL_HEIGHT - 1;
+	/* Read in the file where the state of the CCD camera got stored */
+
+	rs_spec10->ccd.roi_is_set = UNSET;
+	rs_spec10->ccd.bin_is_set = UNSET;
+	rs_spec10->ccd.bin_mode_is_set = UNSET;
+
+	rs_spec10_read_state( );
 
 	rs_spec10->ccd.max_size[ X ] = CCD_PIXEL_WIDTH;
 	rs_spec10->ccd.max_size[ Y ] = CCD_PIXEL_HEIGHT;
-
-	rs_spec10->ccd.bin[ X ] = 1;
-	rs_spec10->ccd.bin[ Y ] = 1;
-
-	rs_spec10->ccd.exp_time =
-						   lrnd( CCD_EXPOSURE_TIME / CCD_EXPOSURE_RESOLUTION );
-
-	rs_spec10->ccd.bin_mode = HARDWARE_BINNING;  
 
 	/* Try to initialize the library */
 
@@ -105,8 +100,24 @@ int rs_spec10_exp_hook( void )
 	rs_spec10_exp = rs_spec10_prep;
 	rs_spec10 = &rs_spec10_exp;
 
+	/* Read in the file where the state of the CCD camera got stored,
+	   it might have been changed during a previous experiment */
+
+	rs_spec10_read_state( );
+
 	rs_spec10_init_camera( );
 	return 1;
+}
+
+
+/*--------------------------------------------------------------*/
+/* Function gets called just before the child process doing the */
+/* experiment exits.                                            */
+/*--------------------------------------------------------------*/
+
+void rs_spec10_child_exit_hook( void )
+{
+	rs_spec10_store_state( );
 }
 
 
@@ -132,6 +143,9 @@ int rs_spec10_end_of_exp_hook( void )
 
 void rs_spec10_exit_hook( void )
 {
+	if ( rs_spec10 == NULL )
+		return;
+
 	if ( rs_spec10->is_open )
 	{
 		pl_cam_close( rs_spec10->handle );
@@ -243,6 +257,7 @@ Var *ccd_camera_roi( Var *v )
 
 	for ( i = 0; i < 4; i++ )
 		rs_spec10->ccd.roi[ i ] = ( uns16 ) vroi[ i ] - 1;
+	rs_spec10->ccd.roi_is_set = SET;
 
 	return vars_push( INT_ARR, vroi, 4 );
 }
@@ -310,6 +325,7 @@ Var *ccd_camera_binning( Var *v )
 
 	for ( i = 0; i < 2; i++ )
 		rs_spec10->ccd.bin[ i ] = ( uns16 ) vbin[ i ];
+	rs_spec10->ccd.bin_is_set = SET;
 
 	return vars_push( INT_ARR, vbin, 2 );
 }
@@ -363,6 +379,8 @@ Var *ccd_camera_binning_method( Var *v )
 	}
 
 	too_many_arguments( v );
+
+	rs_spec10->ccd.bin_mode_is_set = UNSET;
 
 	return vars_push( INT_VAR, rs_spec10->ccd.bin_mode ? 1L : 0L );
 }
