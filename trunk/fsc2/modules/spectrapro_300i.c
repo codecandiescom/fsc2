@@ -162,9 +162,34 @@ Var *monochromator_wavelength( Var *v )
 
 	if ( wl < 0.0 )
 	{
-		print( FATAL, "Invalid negative wavelength.\n" );
-		THROW( EXCEPTION );
+		if ( FSC2_MODE == TEST )
+		{
+			print( FATAL, "Invalid negative wavelength.\n" );
+			THROW( EXCEPTION );
+		}
+
+		print( SEVERE, "Invalid negative wavelength, using 0 nm instead.\n" );
+		wl = 0.0;
 	}
+
+	if ( wl >= MAX_WAVELENGTH + 1.e12 )
+	{
+		if ( FSC2_MODE == TEST )
+		{
+			print( FATAL, "Wavelength of %.3f nm is too large, maximum "
+				   "wavelength is %.3f nm.\n",
+				   wl * 1e9, MAX_WAVELENGTH * 1e9 );
+			THROW( EXCEPTION );
+		}
+
+		print( SEVER, "Wavelength of %.3f nm is too large, using maximum "
+			   "wavelength of %.3f nm instead.\n",
+			   wl * 1e9, MAX_WAVELENGTH * 1e9 );
+		wl = MAX_WAVELENGTH;
+	}
+
+	if ( wl > MAX_WAVELENGTH )
+		wl = MAX_WAVELENGTH;
 
 	too_many_arguments( v );
 
