@@ -34,7 +34,7 @@ extern Func Def_Fncts[ ];   /* structures for list of built-in functions */
 
 
 
-static void resolve_hook_functions( Device *dev, char *dev_name );
+static void resolve_hook_functions( Device *dev, const char *dev_name );
 static void load_functions( Device *dev );
 static void resolve_functions( Device *dev );
 static void add_function( int index, void *new_func, Device *new_dev,
@@ -204,7 +204,7 @@ static void load_functions( Device *dev )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-static void resolve_hook_functions( Device *dev, char *dev_name )
+static void resolve_hook_functions( Device *dev, const char *dev_name )
 {
 	char *hook_func_name;
 	char *app;

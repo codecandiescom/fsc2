@@ -52,8 +52,7 @@ void device_add( const char *name )
 	int length;
 
 
-	dev_name = T_strdup( name );
-	string_to_lower( dev_name );
+	dev_name = string_to_lower( T_strdup( name ) );
 	real_name = NULL;
 
 	/* First we've got to check if the name refers to a device driver that is
