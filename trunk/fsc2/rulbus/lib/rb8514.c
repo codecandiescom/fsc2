@@ -463,9 +463,11 @@ int rulbus_rb8514_delay_set_output_pulse_polarity( int handle, int type,
 
 
 /*------------------------------------------------------------------*
- * Function to start a delay via software (by toggling the trigger
- * slope bit). Afterwards trigger slope is set back to the original
- * setting.
+ * Function to start a delay via software (by setting the trigger
+ * first to falling, then to raising edge). Afterwards, the trigger
+ * slope is set back to the original setting. And, to make sure we
+ * have a state transition from raising to falling edge it first
+ * gets set to raising edge (probably that's being too careful).
  *------------------------------------------------------------------*/
 
 int rulbus_rb8514_software_start( int handle )
@@ -482,6 +484,9 @@ int rulbus_rb8514_software_start( int handle )
 	bytes[ 1 ] = bytes[ 3 ] = card->ctrl | TRIGGER_ON_FALLING_EDGE;
 	
 	cnt = card->ctrl & TRIGGER_ON_FALLING_EDGE ? 4 : 3;
+
+	/* Take care not to set rulbus_errno to a positive value in case
+	   rulbus_write() returned with too short a byte count! */
 
 	if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
 								  bytes, cnt ) ) != ( int ) cnt )
@@ -510,39 +515,6 @@ int rulbus_rb8514_delay_busy( int handle )
 
 	rulbus_errno = RULBUS_OK;
 	return ( byte & DELAY_BUSY ) ? 1 : 0;
-}
-
-
-/*---------------------------------------------------------------*
- * According to the manual a delay can be started by setting the
- * trigger first to falling and the immediately to raising edge
- *---------------------------------------------------------------*/
-
-int rulbus_rb8514_delay_software_start( int handle )
-{
-	RULBUS_RB8514_DELAY_CARD *card;
-	unsigned char ctrl;
-	int retval;
-
-
-	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
-		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
-
-	ctrl = card->ctrl;
-
-	ctrl |= TRIGGER_ON_FALLING_EDGE;
-	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &ctrl, 1 ) ) != 1 )
-		return rulbus_errno = retval;
-		 
-	ctrl &= ~ TRIGGER_ON_FALLING_EDGE;
-	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &ctrl, 1 ) ) != 1 )
-		return rulbus_errno = retval;
-
-	if ( ctrl != card->ctrl &&
-		 ( retval = rulbus_write( handle, CONTROL_ADDR, &ctrl, 1 ) ) != 1 )
-		return rulbus_errno = retval;
-
-	return rulbus_errno = RULBUS_OK;
 }
 
 

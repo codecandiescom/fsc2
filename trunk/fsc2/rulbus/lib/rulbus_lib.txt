@@ -745,10 +745,12 @@ failure is returned.
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8514_delay_software_start( int handle )
+int rulbus_rb8514_software_start( int handle )
 
-Usually, delays get started on receipt of an external trigger. But with
-this function a delay can also be started via software.
+Usually, delays get started on receipt of an external trigger. Using with
+this function a delay can also be started via software (by toggling the
+trigger edge). On successful return the trigger slope is set back to the
+initial value.
 
 On success the function returns RULBUS_OK, otherwise a negative value
 indicating the reason for the failure.
