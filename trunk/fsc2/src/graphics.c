@@ -836,8 +836,8 @@ void create_label_pixmap( Canvas *c, int coord, char *label )
     G.label_pm[ r_coord ] = XCreatePixmap( G.d, FL_ObjWin( c->obj ), height,
 										   width,
 										   fl_get_canvas_depth( c->obj ) );
-	G.label_w[ r_coord ] = ( unsigned int ) height;
-	G.label_h[ r_coord ] = ( unsigned int ) width;
+	G.label_w[ r_coord ] = i2ushrt( height );
+	G.label_h[ r_coord ] = i2ushrt( width );
 
 	/* Now copy the contents of the intermediate pixmap to the final pixmap
 	   but rotated by 90 degree ccw */

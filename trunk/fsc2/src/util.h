@@ -46,6 +46,7 @@ inline unsigned long d2color( double a );
 inline short  d2shrt( double a );
 inline unsigned short d2ushrt( double a );
 inline short  i2shrt( int a );
+inline unsigned short i2ushrt( int a );
 
 inline int    i_max( int    a, int    b );
 inline int    i_min( int    a, int    b );

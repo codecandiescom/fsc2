@@ -972,8 +972,8 @@ static void reconfigure_window_2d( Canvas *c, int w, int h )
 
 	/* Set the new canvas sizes */
 
-	c->w = ( unsigned int ) w;
-	c->h = ( unsigned int ) h;
+	c->w = i2ushrt( w );
+	c->h = i2ushrt( h );
 
 	/* Calculate the new scale factors */
 
@@ -1120,8 +1120,8 @@ void recalc_XPoints_of_curve_2d( Curve_2d *cv )
 
 	cv->up = cv->down = cv->left = cv->right = ( cv->count != 0 );
 
-	cv->w = ( unsigned short ) ceil( cv->s2d[ X ] );
-	cv->h = ( unsigned short ) ceil( cv->s2d[ Y ] );
+	cv->w = d2ushrt( ceil( cv->s2d[ X ] ) );
+	cv->h = d2ushrt( ceil( cv->s2d[ Y ] ) );
 	dw = cv->w / 2;
 	dh = cv->h / 2;
 
@@ -1801,7 +1801,7 @@ static void make_color_scale( Canvas *c, Curve_2d *cv )
 	double h_inc;
 
 
-	h = ( unsigned int ) ceil( ( double ) c->h / ( double ) NUM_COLORS );
+	h = d2ushrt( ceil( ( double ) c->h / ( double ) NUM_COLORS ) );
 	h_inc = ( double ) c->h / ( double ) NUM_COLORS;
 
 	XDrawLine( G.d, c->pm, c->font_gc, G.z_line_offset, 0,

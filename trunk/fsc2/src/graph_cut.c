@@ -1180,8 +1180,8 @@ static void cut_reconfigure_window( Canvas *c, int w, int h )
 
 	/* Set the new canvas sizes */
 
-	c->w = ( unsigned int ) w;
-	c->h = ( unsigned int ) h;
+	c->w = i2ushrt( w );
+	c->h = i2ushrt( h );
 
 	/* Calculate the new scale factors */
 

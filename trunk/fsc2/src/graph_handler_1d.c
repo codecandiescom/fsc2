@@ -828,8 +828,8 @@ static void reconfigure_window_1d( Canvas *c, int w, int h )
 
 	/* Set the new canvas sizes */
 
-	c->w = ( unsigned int ) w;
-	c->h = ( unsigned int ) h;
+	c->w = i2ushrt( w );
+	c->h = i2ushrt( h );
 
 	/* Calculate the new scale factors */
 

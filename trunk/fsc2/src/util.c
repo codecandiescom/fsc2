@@ -658,6 +658,14 @@ inline short i2shrt( int a )
 	return ( short ) a;
 }
 
+inline unsigned short i2ushrt( int a )
+{
+	if ( a > USHRT_MAX )
+		return USHRT_MAX;
+	if ( a < 0 )
+		return 0;
+	return ( unsigned short ) a;
+}
 
 inline int    i_max( int    a, int    b ) { return a > b ? a : b; }
 inline int    i_min( int    a, int    b ) { return a < b ? a : b; }
