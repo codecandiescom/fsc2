@@ -48,10 +48,7 @@ void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 			 FILE *primary_fp, FILE **fp, int *incl_depth );
 void unit_spec( char *text, int power );
 char *T_strdup( const char *string );
-char *get_string( size_t len );
 void *T_malloc( size_t size );
-void *T_calloc( size_t nmemb, size_t size );
-void *T_realloc( void *ptr, size_t size );
 void *T_free( void *ptr );
 
 
@@ -371,6 +368,9 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 		/*----------------------*/
 
 
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
 int main( int argc, char *argv[ ] )
 {
 #if defined MDEBUG
@@ -452,6 +452,9 @@ int main( int argc, char *argv[ ] )
 }
 
 
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
 void include_handler( char *file )
 {
 	static YY_BUFFER_STATE primary_buf;
@@ -486,7 +489,8 @@ void include_handler( char *file )
 		else
 		{
 			*( file + strlen( file ) - 1 ) = '\0';
-			incl_file = get_string( strlen( file ) + strlen( DEF_INCL_DIR ) );
+			incl_file = T_malloc( strlen( file )
+								  + strlen( DEF_INCL_DIR ) + 2 );
 			strcpy( incl_file, DEF_INCL_DIR );
 			strcat( incl_file, "/" );
 			strcat( incl_file, file + 1 );
@@ -554,6 +558,9 @@ void include_handler( char *file )
 }
 
 
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
 void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 			 FILE *primary_fp, FILE **fp, int *incl_depth )
 {
@@ -576,7 +583,9 @@ void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 }
 
 
+/*-------------------------------------------------------------------------*/
 /* Takes combinations like "100ns" apart and writes them out as "100 nsec" */
+/*-------------------------------------------------------------------------*/
 
 void unit_spec( char *text, int power )
 {
@@ -644,6 +653,9 @@ void unit_spec( char *text, int power )
 }
 
 
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
 void *T_malloc( size_t size )
 {
 	void *mem;
@@ -660,37 +672,8 @@ void *T_malloc( size_t size )
 }
 
 
-void *T_calloc( size_t nmemb, size_t size )
-{
-	void *mem;
-
-
-	if ( ( mem = calloc( nmemb, size ) ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
-
-#if defined MDEBUG
-	fprintf( stderr, "calloc:  %p (%u)\n", mem, nmemb * size );
-#endif
-
-	return mem;
-}
-
-
-void *T_realloc( void *ptr, size_t size )
-{
-	void *new_ptr;
-
-
-	if ( ( new_ptr = realloc( ptr, size ) ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
-
-#if defined MDEBUG
-	fprintf( stderr, "realloc: %p -> %p (%u)\n", ptr, new_ptr, size );
-#endif
-
-	return new_ptr;
-}
-
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
 
 void *T_free( void *ptr )
 {
@@ -704,6 +687,9 @@ void *T_free( void *ptr )
 	return NULL;
 }
 
+
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
 
 char *T_strdup( const char *string )
 {
@@ -720,10 +706,4 @@ char *T_strdup( const char *string )
 #endif
 
 	return new;
-}
-
-
-char *get_string( size_t len )
-{
-	return T_malloc( ( len + 1 ) * sizeof( char ) );
 }
