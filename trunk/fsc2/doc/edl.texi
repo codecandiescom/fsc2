@@ -328,12 +328,11 @@ Here's the complete list:
 @multitable {Hz} {Hertz (and @code{nHz, uHz, mHz, kHz} and @code{MHz})}
 @item @code{s}  @tab Seconds (and @code{ns, us, ms, ks} and @code{Ms})
 @item @code{G}  @tab Gauss (and @code{nG, uG, mG, kG} and @code{MG})
-@item @code{T}  @tab Tesla (and @code{nT, uT} and @code{mT})
+@item @code{T}  @tab Tesla (and @code{nT, uT, mT, kT} and @code{MT})
 @item @code{V}  @tab Volt (and @code{nV, uV, mV, kV} and @code{MV})
 @item @code{A}  @tab Ampere (and @code{nA, uA, mA, kA} and @code{MA})
 @item @code{Hz} @tab Hertz (and @code{nHz, uHz, mHz, kHz} and @code{MHz})
-@item @code{db} @tab db (decibel) (and @code{ndb, udb, mdb, kdb} and
-@code{Mdb})
+@item @code{db} @tab Decibel (and @code{ndb, udb, mdb, kdb} and @code{Mdb})
 @end multitable
 @end quotation
 
