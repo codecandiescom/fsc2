@@ -54,6 +54,13 @@ enum {
 };
 
 
+enum {
+	   X = 0,
+	   Y,
+	   Z
+};
+
+
 /* Define the different section types */
 
 enum {
