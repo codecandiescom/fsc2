@@ -232,12 +232,6 @@ Var *f_openf( Var *var )
 /* 3. Default directory                                                      */
 /* 4. Default file name                                                      */
 /* 5. Default extension to add (in case it's not already there)              */
-/*                                                                           */
-/* The old method to hardcode a file name into the EDL program by sending    */
-/* the file name instead of the message string, but with a backslash '\' as  */
-/* the very first character (that will be skipped and not be used as part of */
-/* the file name) is deprecated and shouldn't been used anymore. If an hard- */
-/* coded file name is needed, the f_openf() function should be used instead. */
 /*---------------------------------------------------------------------------*/
 
 Var *f_getf( Var *var )
