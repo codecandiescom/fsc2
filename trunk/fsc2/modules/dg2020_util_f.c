@@ -19,8 +19,8 @@ Ticks dg2020_double2ticks( double time )
 
 	if ( ! dg2020.is_timebase )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Can't set a time because no pulser "
-				"time base has been set.",Fname, Lc );
+		eprint( FATAL, "%s:%ld: %s: Can't set a time because no pulser time "
+				"base has been set.", Fname, Lc, pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
@@ -29,9 +29,9 @@ Ticks dg2020_double2ticks( double time )
 	if ( fabs( ticks - lround( ticks ) ) > 1.0e-2 )
 	{
 		char *t = get_string_copy( dg2020_ptime( time ) );
-		eprint( FATAL, "%s:%ld: DG2020: Specified time of %s is not an "
-				"integer multiple of the pulser time base of %s.",
-				Fname, Lc, t, dg2020_ptime( dg2020.timebase ) );
+		eprint( FATAL, "%s:%ld: %s: Specified time of %s is not an integer "
+				"multiple of the pulser time base of %s.", Fname, Lc,
+				pulser_struct.name, t, dg2020_ptime( dg2020.timebase ) );
 		T_free( t );
 		THROW( EXCEPTION );
 	}
@@ -60,25 +60,25 @@ void dg2020_check_pod_level_diff( double high, double low )
 {
 	if ( low > high )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Low voltage level is above high "
-				"level, instead use keyword INVERT to invert the polarity.",
-				Fname, Lc );
+		eprint( FATAL, "%s:%ld: %s: Low voltage level is above high level, "
+				"instead use keyword INVERT to invert the polarity.",
+				Fname, Lc, pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
 	if ( high - low > MAX_POD_VOLTAGE_SWING + 0.01 )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Difference between high and low "
+		eprint( FATAL, "%s:%ld: %s: Difference between high and low "
 				"voltage of %g V is too big, maximum is %g V.", Fname, Lc,
-				high - low, MAX_POD_VOLTAGE_SWING );
+				pulser_struct.name, high - low, MAX_POD_VOLTAGE_SWING );
 		THROW( EXCEPTION );
 	}
 
 	if ( high - low < MIN_POD_VOLTAGE_SWING - 0.01 )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Difference between high and low "
+		eprint( FATAL, "%s:%ld: %s: Difference between high and low "
 				"voltage of %g V is too small, minimum is %g V.", Fname, Lc,
-				high - low, MIN_POD_VOLTAGE_SWING );
+				pulser_struct.name, high - low, MIN_POD_VOLTAGE_SWING );
 		THROW( EXCEPTION );
 	}
 }
@@ -94,8 +94,8 @@ PULSE *dg2020_get_pulse( long pnum )
 
 	if ( pnum < 0 )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Invalid pulse number: %ld.",
-				Fname, Lc, pnum );
+		eprint( FATAL, "%s:%ld: %s: Invalid pulse number: %ld.",
+				Fname, Lc, pulser_struct.name, pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -108,8 +108,8 @@ PULSE *dg2020_get_pulse( long pnum )
 
 	if ( cp == NULL )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Referenced pulse %ld does not "
-				"exist.", Fname, Lc, pnum );
+		eprint( FATAL, "%s:%ld: %s: Referenced pulse %ld does not exist.",
+				Fname, Lc, pulser_struct.name, pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -300,9 +300,9 @@ void dg2020_calc_padding( void )
 
 	if ( dg2020.max_seq_len >= MAX_PULSER_BITS )
 	{
-		eprint( FATAL, "DG2020: The requested pulse sequences don't fit into "
+		eprint( FATAL, "%s: The requested pulse sequences don't fit into "
 				"the pulsers memory. Maybe, you could try a longer pulser "
-				"time base.\n." );
+				"time base..", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
@@ -330,8 +330,8 @@ void dg2020_calc_padding( void )
 	if ( padding <= 0 )
 	{
 		if ( padding < 0 )
-			eprint( SEVERE, "DG2020: Pulse pattern is %s long and thus longer "
-					"than the repeat time of %s.",
+			eprint( SEVERE, "%s: Pulse pattern is %s long and thus longer "
+					"than the repeat time of %s.", pulser_struct.name,
 					dg2020_pticks( dg2020.max_seq_len ),
 					dg2020_pticks( dg2020.repeat_time ) );
 		dg2020.mem_size = dg2020.max_seq_len + 1;
@@ -355,9 +355,9 @@ void dg2020_calc_padding( void )
 
 	if ( dg2020.max_seq_len + padding + block_length >= MAX_PULSER_BITS )
 	{
-		eprint( FATAL, "DG2020: Can't set the repetition rate for the "
+		eprint( FATAL, "%s: Can't set the repetition rate for the "
 				"experiment because this wouldn't fit into the pulsers "
-				"memory." );
+				"memory.", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
