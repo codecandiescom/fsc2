@@ -406,7 +406,7 @@ Var *sweep_up( Var *v )
 
 	/* Check that new field value is still within bounds */
 
-	aeg_x_band_field_check( magnet.act_field + magnet.field_step, &err_flag );
+	aeg_s_band_field_check( magnet.act_field + magnet.field_step, &err_flag );
 	if ( err_flag )
 		return vars_push( FLOAT_VAR, magnet.act_field );
 
