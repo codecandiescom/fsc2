@@ -173,8 +173,9 @@ V. Acknowledgments
 Martin J. Moene (moene@biophys.LeidenUniv.nl) and Arno van Amersfoort
 (arnova@molphys.leidenuniv.nl) from the Physics department of the
 Rijksuniversiteit Leiden, who developed the interface, were extremely
-helpful by supplying all kinds of informations, very well-documented
-Windows code and answering all my stupid questions.
+helpful by supplying all kinds of informations, sending me very well-
+documented Windows code, answering all my stupid questions and even
+reading and pointing out errors in my code.
 
 Prof. Jan Schmidt and Prof. Edgar Groenen paid me for developing
 the driver and library in order to extend my fsc2 program to make
