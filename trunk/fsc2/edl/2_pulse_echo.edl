@@ -17,7 +17,7 @@ ASSIGNMENTS:
 TIME_BASE: timebase;
 TRIGGER_MODE: INTERNAL, REP_FREQ = 200 Hz;
 
-MICROWAVE:         POD =  1, 2, 3, 4, 5, 
+MICROWAVE:         POD =  1, 2, 3, 4, 5,
 				   CH = 35, 34, 33,
 				   V_HIGH = 5 V, V_LOW = 0 V,
 				   INVERTED;
