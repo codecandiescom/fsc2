@@ -26,7 +26,143 @@
 #include "serial.h"
 
 
-#if defined( NUM_SERIAL_PORTS ) && NUM_SERIAL_PORTS > 0
+/* If NUM_SERIAL_PORTS isn't defined or its value is less than 1 serial
+   ports can't be used. In this case we just supply functions that return
+   something indicating a failure or throw an exception. */
+
+#if ! defined( NUM_SERIAL_PORTS ) || NUM_SERIAL_PORTS < 1
+
+void fsc2_request_serial_port( int sn, const char *devname )
+{
+	UNUSED_ARGUMENT( sn );
+
+	eprint( FATAL, UNSET, "%s: Device needs serial port but fsc2 was "
+			"not compiled with support for serial port access.\n", devname );
+	THROW( EXCEPTION );
+}
+
+
+void fsc2_serial_init( void )
+{
+}
+
+
+void fsc2_serial_cleanup( void )
+{
+}
+
+
+void fsc2_final_serial_cleanup( void )
+{
+}
+
+
+struct termios *fsc2_serial_open( int sn, const char *devname, int flags )
+{
+	UNUSED_ARGUMENT( sn );
+	UNUSED_ARGUMENT( devname );
+	UNUSED_ARGUMENT( flags );
+
+	errno = EACCES;
+	return NULL;
+}
+
+
+void fsc2_serial_close( int sn )
+{
+	UNUSED_ARGUMENT( sn );
+}
+
+
+ssize_t fsc2_serial_write( int sn, const void *buf, size_t count,
+						   long us_wait, bool quit_on_signal )
+{
+	UNUSED_ARGUMENT( sn );
+	UNUSED_ARGUMENT( buf );
+	UNUSED_ARGUMENT( count );
+	UNUSED_ARGUMENT( us_wait );
+	UNUSED_ARGUMENT( quit_on_signal );
+
+	errno = EBADF;
+	return -1;
+}
+
+
+ssize_t fsc2_serial_read( int sn, void *buf, size_t count,
+						  long us_wait, bool quit_on_signal )
+{
+	UNUSED_ARGUMENT( sn );
+	UNUSED_ARGUMENT( buf );
+	UNUSED_ARGUMENT( count );
+	UNUSED_ARGUMENT( us_wait );
+	UNUSED_ARGUMENT( quit_on_signal );
+
+	errno = EBADF;
+	return -1;
+}
+
+
+int fsc2_tcgetattr( int sn, struct termios *termios_p )
+{
+	UNUSED_ARGUMENT( sn );
+	UNUSED_ARGUMENT( termios_p );
+
+	errno = EBADF;
+	return -1;
+}
+
+
+int fsc2_tcsetattr( int sn, int optional_actions, struct termios *termios_p )
+{
+	UNUSED_ARGUMENT( sn );
+	UNUSED_ARGUMENT( optional_actions );
+	UNUSED_ARGUMENT( termios_p );
+
+	errno = EBADF;
+	return -1;
+}
+
+
+int fsc2_tcsendbreak( int sn, int duration )
+{
+	UNUSED_ARGUMENT( sn );
+	UNUSED_ARGUMENT( duration );
+
+	errno = EBADF;
+	return -1;
+}
+
+int fsc2_tcdrain( int sn )
+{
+	UNUSED_ARGUMENT( sn );
+
+	errno = EBADF;
+	return -1;
+}
+
+int fsc2_tcflush( int sn, int queue_selector )
+{
+	UNUSED_ARGUMENT( sn );
+	UNUSED_ARGUMENT( queue_selector );
+
+	errno = EBADF;
+	return -1;
+}
+
+int fsc2_tcflow( int sn, int action )
+{
+	UNUSED_ARGUMENT( sn );
+	UNUSED_ARGUMENT( action );
+
+	errno = EBADF;
+	return -1;
+}
+
+#else
+
+/* If NUM_SERIAL_PORTS is defined and is larger than 0 we need full support
+   for serial ports. */
+
 static struct {
 	bool in_use;
 	const char* devname;
@@ -38,7 +174,7 @@ static struct {
 	struct termios old_tio,
 		           new_tio;
 } Serial_Port[ NUM_SERIAL_PORTS ];
-#endif
+
 
 static bool get_serial_lock( int sn );
 static void remove_serial_lock( int sn );
@@ -57,8 +193,6 @@ static void remove_serial_lock( int sn );
 
 void fsc2_request_serial_port( int sn, const char *devname )
 {
-#if defined( NUM_SERIAL_PORTS ) && NUM_SERIAL_PORTS > 0
-
 	/* Do some sanity checks on the serial port number */
 
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 )
@@ -102,13 +236,6 @@ void fsc2_request_serial_port( int sn, const char *devname )
 		Serial_Port[ sn ].lock_file = get_string( "%s/LCK..ttyS%d",
 												  SERIAL_LOCK_DIR, sn );
 #endif
-
-#else
-	UNUSED_ARGUMENT( sn );
-	eprintf( FATAL, UNSET, "%s: Device needs serial port but fsc2 was "
-			 "not compiled with support for serial port access.\n", devname );
-	THROW( EXCEPTION );
-#endif
 }
 
 
@@ -119,7 +246,6 @@ void fsc2_request_serial_port( int sn, const char *devname )
 
 void fsc2_serial_init( void )
 {
-#if defined( NUM_SERIAL_PORTS ) && NUM_SERIAL_PORTS > 0
 	int i;
 
 
@@ -133,35 +259,32 @@ void fsc2_serial_init( void )
 		Serial_Port[ i ].is_open     = UNSET;
 		Serial_Port[ i ].fd          = -1;
 	}
-#endif
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Function that gets called after te end of an experiment to close all */
+/* serial ports used during the experiment.                             */
+/*----------------------------------------------------------------------*/
 
 void fsc2_serial_cleanup( void )
 {
-#if defined( NUM_SERIAL_PORTS ) && NUM_SERIAL_PORTS > 0
 	int i;
 
 
 	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
 		if ( Serial_Port[ i ].is_open )
 			fsc2_serial_close( i );
-#endif
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* This function is called after the end of an experiment (or when a new */
-/* EDL file is loaded) to reset the structure used in granting access to */
-/* the serial ports.                                                     */
-/*-----------------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* This function is called when a new EDL file is loaded to reset */
+/* the structure used in granting access to the serial ports.     */
+/*----------------------------------------------------------------*/
 
 void fsc2_final_serial_cleanup( void )
 {
-#if defined( NUM_SERIAL_PORTS ) && NUM_SERIAL_PORTS > 0
 	int i;
 
 
@@ -172,16 +295,15 @@ void fsc2_final_serial_cleanup( void )
 
 		if ( Serial_Port[ i ].in_use )
 		{
-			Serial_Port[ i ].dev_file = CHAR_P 
-				                         T_free( Serial_Port[ i ].dev_file );
-			Serial_Port[ i ].lock_file = CHAR_P
-                                         T_free( Serial_Port[ i ].lock_file );
+			Serial_Port[ i ].dev_file =
+								   CHAR_P T_free( Serial_Port[ i ].dev_file );
+			Serial_Port[ i ].lock_file =
+								   CHAR_P T_free( Serial_Port[ i ].lock_file );
 		}
 
 		Serial_Port[ i ].devname   = NULL;
 		Serial_Port[ i ].in_use    = UNSET;
 	}
-#endif
 }
 
 
@@ -196,7 +318,6 @@ void fsc2_final_serial_cleanup( void )
 
 struct termios *fsc2_serial_open( int sn, const char *devname, int flags )
 {
-#if defined( NUM_SERIAL_PORTS ) && NUM_SERIAL_PORTS > 0
 	int fd;
 	int fd_flags;
 
@@ -267,14 +388,6 @@ struct termios *fsc2_serial_open( int sn, const char *devname, int flags )
 	Serial_Port[ sn ].is_open = SET;
 
 	return &Serial_Port[ sn ].new_tio;
-#else
-	UNUSED_ARGUMENT( sn );
-	UNUSED_ARGUMENT( devname );
-	UNUSED_ARGUMENT( flags );
-
-	errno = EACCES;
-	return NULL;
-#endif
 }
 
 
@@ -284,8 +397,6 @@ struct termios *fsc2_serial_open( int sn, const char *devname, int flags )
 
 void fsc2_serial_close( int sn )
 {
-#if defined( NUM_SERIAL_PORTS ) && NUM_SERIAL_PORTS > 0
-
 	/* Flush the port, reset the settings back to the original state and
 	   close the port */
 
@@ -303,9 +414,6 @@ void fsc2_serial_close( int sn )
 
 	if ( Serial_Port[ sn ].have_lock )
 		remove_serial_lock( sn );
-#else
-	UNUSED_ARGUMENT( sn );
-#endif
 }
 
 
@@ -768,6 +876,8 @@ int fsc2_tcflow( int sn, int action )
 
 	return ret_val;
 }
+
+#endif
 
 
 /*
