@@ -166,7 +166,7 @@ the @acronym{EDL} file.
 
 
 @node fsc2s Variables, New Modules, Module Overview, Modules
-@section How @acronym{fsc2}'s variables work and how to use them
+@section How fsc2's variables work and how to use them
 
 
 Of course, the first question is: Why do I have to know about this at
@@ -353,7 +353,7 @@ also access the contents of the union directly. Finally you may use
 to get the address of the start of a string variable.
 
 
-@subsection Returning data from an @acronym{EDL} function
+@subsection Returning data from EDL functions
 
 If your function just wants to return an integer or a float, things are
 very easy: just call the function @code{vars_push()} with the type of
@@ -979,7 +979,7 @@ you will still have to copy the library to the place where
 @acronym{fsc2} expects it, i.e.@: usually @file{/usr/local/lib/fsc2}.
 
 
-@subsection Calling @acronym{EDL} functions from modules
+@subsection Calling EDL functions from a modules
 
 Calling an @acronym{EDL} function (built-in as well as @acronym{EDL}
 functions defined in other modules) consists of three to four steps:
