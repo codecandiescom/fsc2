@@ -19,8 +19,8 @@ static void incr_x_and_y( long x_index, long len, long y_index );
 /*---------------------------------------------------------------------------*/
 /* This is the function that takes the new data from the message queue and   */
 /* displays them. On a call of this function all data sets in the queue will */
-/* be accepted, if there is a REQUEST in between it will be moved to the end */
-/* of the queue.                                                             */
+/* be accepted, if there is a REQUEST in between (there can only be one      */
+/* because REQUESTS need a reply) it will be moved to the end of the queue.  */
 /*---------------------------------------------------------------------------*/
 
 void accept_new_data( void )
@@ -33,7 +33,6 @@ void accept_new_data( void )
 	
 	while ( 1 )
 	{
-
 		/* Attach to the shared memory segment pointed to by the oldest
 		   entry in the message queue */
 
@@ -72,9 +71,9 @@ void accept_new_data( void )
 		if ( Message_Queue[ message_queue_low ].type == DATA )
 			continue;
 
-		/* If the new entry is a REQUEST but the following a DATA set exchange
-		   the entries and accept the data - this way the drawing of all data
-		   is done before REQUESTs are honoured */
+		/* If the next entry is a REQUEST but the one following is a DATA set
+		   exchange the entries and accept the data - this way the drawing of
+		   all data is done before REQUESTs are honoured */
 
   		mq_next = ( message_queue_low + 1 ) % QUEUE_SIZE;
 
@@ -121,7 +120,7 @@ static bool unpack_and_accept( void *ptr )
 	nsets = *( ( int * ) ptr );
 	ptr += sizeof( int );
 
-	if ( nsets < 0 )
+	if ( nsets < 0 )                     /* special for clear curve commands */
 		return other_data_request( nsets, ptr );
 
 	/* Accept the new data from all data set */
@@ -196,9 +195,9 @@ static bool other_data_request( int type, void * ptr )
 	if ( type != D_CLEAR_CURVE )
 		return FAIL;
 
-	count = * ( ( long * ) ptr );
+	count = * ( ( long * ) ptr );       /* length of list of curves to clear */
 	ptr += sizeof( long );
-	ca = ( long * ) ptr;
+	ca = ( long * ) ptr;                /* list of curve numbers */
 
 	for ( i = 0; i < count; i++ )
 		clear_curve( ca[ i ] );
@@ -518,7 +517,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 		rw_min = d_min( data, rw_min );
 	}
 
-	/* If the minimum or maximum has changed rescale all old scaled data */
+	/* If minimum or maximum changed all old scaled data have to be rescaled */
 
 	if ( cv->rw_max < rw_max || cv->rw_min > rw_min )
 	{
