@@ -168,12 +168,12 @@ Var *f_bcreate( Var *v )
 
 	if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
 		fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-					  FL_FULLBORDER, "" );
+					  FL_FULLBORDER, "fsc2: Tool box" );
 	else
 	{
 		fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
 		fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-					  FL_FULLBORDER, "" );
+					  FL_FULLBORDER, "fsc2: Tool box" );
 	}
 	XFlush( fl_get_display( ) );
 
@@ -281,12 +281,12 @@ Var *f_bdelete( Var *v )
 
 	if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
 		fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-					  FL_FULLBORDER, "" );
+					  FL_FULLBORDER, "fsc2: Tool box" );
 	else
 	{
 		fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
 		fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-					  FL_FULLBORDER, "" );
+					  FL_FULLBORDER, "fsc2: Tool box" );
 	}
 	XFlush( fl_get_display( ) );
 
@@ -509,12 +509,12 @@ Var *f_screate( Var *v )
 
 	if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
 		fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-					  FL_FULLBORDER, "" );
+					  FL_FULLBORDER, "fsc2: Tool box" );
 	else
 	{
 		fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
 		fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-					  FL_FULLBORDER, "" );
+					  FL_FULLBORDER, "fsc2: Tool box" );
 	}
 	XFlush( fl_get_display( ) );
 
@@ -602,12 +602,12 @@ Var *f_sdelete( Var *v )
 
 	if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
 		fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-					  FL_FULLBORDER, "" );
+					  FL_FULLBORDER, "fsc2: Tool box" );
 	else
 	{
 		fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
 		fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-					  FL_FULLBORDER, "" );
+					  FL_FULLBORDER, "fsc2: Tool box" );
 	}
 	XFlush( fl_get_display( ) );
 
