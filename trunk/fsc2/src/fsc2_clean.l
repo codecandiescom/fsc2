@@ -1,4 +1,4 @@
-/*
+/* -*-C-*-
   $Id$
 
   Copyright (C) 1999-2002 Jens Thoms Toerring
@@ -141,7 +141,7 @@ LWS      ^[\t ]+
 WS       [\t ]+
 TWS      [\t ]+\n
 
-SHEBANG ^#!.*$
+SHEBANG ^#!.*\n
 INCL    ^[ \t]*#INCLUDE[\t ]*
 IFN     \"[^"\n]*\"[\t ]*\n?|<[^>\n]*>[\t ]*\n?
 IFNE    [^"<\t \n]*\n?
@@ -412,20 +412,24 @@ int main( int argc, char *argv[ ] )
 
 	lower_permissions( );
 
-	/* Use stdin if no file name was passed to the program */
-
 	if ( argc < 2 )
 	{
 		yyin = stdin;
+		if ( yyin == NULL )
+		{
+			printf( "\x03\nCan't read from stdin.\n" );
+			return EXIT_FAILURE;
+		}
+
 		printf( "\x01\n" );
 		Fname = T_strdup( "" );
 	}
 	else
 	{
-		yyin = fopen( argv[ 1 ], "r" );
+		yyin = stdin;
 		if ( yyin == NULL )
 		{
-			printf( "\x03\nCan't open input file %s.\n", argv[ 1 ] );
+			printf( "\x03\nCan't read input file %s.\n", argv[ 1 ] );
 			return EXIT_FAILURE;
 		}
 
@@ -434,6 +438,7 @@ int main( int argc, char *argv[ ] )
 		printf( "\x01\n%s\n", argv[ 1 ] );
 		Fname = T_strdup( argv[ 1 ] );
 	}
+
 	Lc = 1;
 	Eol = SET;
 
@@ -443,6 +448,7 @@ int main( int argc, char *argv[ ] )
 	TRY
 	{
 		yylex( );
+		fclose( yyin );
 		TRY_SUCCESS;
 	}
 	CATCH( OUT_OF_MEMORY_EXCEPTION )
