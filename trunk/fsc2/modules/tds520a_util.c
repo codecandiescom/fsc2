@@ -90,9 +90,9 @@ void tds520a_do_pre_exp_checks( void )
 		w = w->next;
 	}
 
-	/* That's all if no windows have been defined we switch off gated
-	   measurement mode, i.e. all measurement operations are done on the
-	   whole curve */
+	/* That's all if no windows have been defined, we just switch off gated
+	   measurement mode, i.e. all measurement operations are done on the whole
+	   curve */
 
 	if ( tds520a.w == NULL )
 	{
@@ -113,7 +113,7 @@ void tds520a_do_pre_exp_checks( void )
 		if ( width == 0.0 )
 		{
 			eprint( FATAL, "%s: Can't determine a reasonable value for "
-					"the missing window widths.", DEVICE_NAME );
+					"still undefined window widths.", DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 
