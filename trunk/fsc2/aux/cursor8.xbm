@@ -21,11 +21,11 @@
   Boston, MA 02111-1307, USA.
 */
 
-#define cursor_8_width 21
-#define cursor_8_height 21
-#define cursor_8_x_hot 1
-#define cursor_8_y_hot 10
-static unsigned char cursor_8_bits[] = {
+#define cursor8_width 21
+#define cursor8_height 21
+#define cursor8_x_hot 1
+#define cursor8_y_hot 10
+static unsigned char cursor8_bits[] = {
   0x00, 0x00, 0x00,
   0x00, 0x00, 0x00,
   0x00, 0x00, 0x00,	

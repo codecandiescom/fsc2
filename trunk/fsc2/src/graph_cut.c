@@ -24,14 +24,14 @@
 
 #include "fsc2.h"
 
-#include "cursor_1.xbm"             /* bitmaps for cursors */
-#include "cursor_2.xbm"
-#include "cursor_3.xbm"
-#include "cursor_4.xbm"
-#include "cursor_5.xbm"
-#include "cursor_6.xbm"
-#include "cursor_7.xbm"
-#include "cursor_8.xbm"
+#include "cursor1.xbm"             /* bitmaps for cursors */
+#include "cursor2.xbm"
+#include "cursor3.xbm"
+#include "cursor4.xbm"
+#include "cursor5.xbm"
+#include "cursor6.xbm"
+#include "cursor7.xbm"
+#include "cursor8.xbm"
 
 #include "up_arrow.xbm"             /* arrow bitmaps */
 #include "down_arrow.xbm"
@@ -361,30 +361,30 @@ void G_init_cut_curve( void )
 
 	/* Create cursors */
 
-	cur_1 = fl_create_bitmap_cursor( cursor_1_bits, cursor_1_bits,
-									 cursor_1_width, cursor_1_height,
-									 cursor_1_x_hot, cursor_1_y_hot );
-	cur_2 = fl_create_bitmap_cursor( cursor_2_bits, cursor_2_bits,
-									 cursor_2_width, cursor_2_height,
-									 cursor_2_x_hot, cursor_2_y_hot );
-	cur_3 = fl_create_bitmap_cursor( cursor_3_bits, cursor_3_bits,
-									 cursor_3_width, cursor_3_height,
-									 cursor_3_x_hot, cursor_3_y_hot );
-	cur_4 = fl_create_bitmap_cursor( cursor_4_bits, cursor_4_bits,
-									 cursor_4_width, cursor_4_height,
-									 cursor_4_x_hot, cursor_4_y_hot );
-	cur_5 = fl_create_bitmap_cursor( cursor_5_bits, cursor_5_bits,
-									 cursor_5_width, cursor_5_height,
-									 cursor_5_x_hot, cursor_5_y_hot );
-	cur_6 = fl_create_bitmap_cursor( cursor_6_bits, cursor_6_bits,
-									 cursor_6_width, cursor_6_height,
-									 cursor_6_x_hot, cursor_6_y_hot );
-	cur_7 = fl_create_bitmap_cursor( cursor_7_bits, cursor_7_bits,
-									 cursor_7_width, cursor_7_height,
-									 cursor_7_x_hot, cursor_7_y_hot );
-	cur_8 = fl_create_bitmap_cursor( cursor_8_bits, cursor_8_bits,
-									 cursor_8_width, cursor_8_height,
-									 cursor_8_x_hot, cursor_8_y_hot );
+	cur_1 = fl_create_bitmap_cursor( cursor1_bits, cursor1_bits,
+									 cursor1_width, cursor1_height,
+									 cursor1_x_hot, cursor1_y_hot );
+	cur_2 = fl_create_bitmap_cursor( cursor2_bits, cursor2_bits,
+									 cursor2_width, cursor2_height,
+									 cursor2_x_hot, cursor2_y_hot );
+	cur_3 = fl_create_bitmap_cursor( cursor3_bits, cursor3_bits,
+									 cursor3_width, cursor3_height,
+									 cursor3_x_hot, cursor3_y_hot );
+	cur_4 = fl_create_bitmap_cursor( cursor4_bits, cursor4_bits,
+									 cursor4_width, cursor4_height,
+									 cursor4_x_hot, cursor4_y_hot );
+	cur_5 = fl_create_bitmap_cursor( cursor5_bits, cursor5_bits,
+									 cursor5_width, cursor5_height,
+									 cursor5_x_hot, cursor5_y_hot );
+	cur_6 = fl_create_bitmap_cursor( cursor6_bits, cursor6_bits,
+									 cursor6_width, cursor6_height,
+									 cursor6_x_hot, cursor6_y_hot );
+	cur_7 = fl_create_bitmap_cursor( cursor7_bits, cursor7_bits,
+									 cursor7_width, cursor7_height,
+									 cursor7_x_hot, cursor7_y_hot );
+	cur_8 = fl_create_bitmap_cursor( cursor8_bits, cursor8_bits,
+									 cursor8_width, cursor8_height,
+									 cursor8_x_hot, cursor8_y_hot );
 	CG.cur_1 = cur_1;
 	CG.cur_2 = cur_2;
 	CG.cur_3 = cur_3;
