@@ -38,7 +38,7 @@ base of the digitizer or which pulses are to be created by the pulse
 generator.  And as you would now start the experiment the second part of
 the @acronym{EDL} program describes how the experiment is to be done.
 
-To give you an impression here's an example for a simple cw-EPR
+To give you an impression here's an example for a relatively simple cw-EPR
 experiment:
 @example
 DEVICES:
@@ -105,27 +105,28 @@ appropriate kind of display for the data.
 Now we're already done with the preparations and can start the
 experiment, as indicated by the keyword @code{EXPERIMENT}. The whole
 experiment is done in a loop that is repeated as long as the value
-stored in the variable @code{field} is less or equal to
-@code{end_field}. To tell the program where the loop starts and ends
-all statements belonging to the loop are enclosed in curly braces,
+currently stored in the variable @code{field} is less or equal to
+@code{end_field}. To tell the program where the loop starts and ends all
+statements belonging to the loop are enclosed in curly braces,
 `@code{@{}' and `@code{@}}'.
 
-The first thing to do in the experiment is to fetch a new data point
-from the lock-in amplifier and to store it in the variable @code{data}.
-Next we need to display the data point, which is done via the call of
-the @code{display} function. Here two arguments are used, the number of
-the point (which is stored in the variable @code{I}) and the data point
-to display.
+The first thing to do in the experiment loop is to fetch a new data
+point from the lock-in amplifier and to store it in the variable
+@code{data}.  Next we have to display the data point, which is done via
+the call of the @code{display} function. Here two arguments are used,
+the number of the point, stored in the variable @code{I}, and the value
+of the corresponding data point.
 
 Of course, we also need to save the data point in a file. This is done
-by the function @code{save} that automatically writes its argument to a
-file. When the function is called the first time it will prompt you for
-the name of the file to use.
+by the call of the function @code{save} that automatically writes its
+argument to a file. When the function is called the first time it will
+prompt you for the name of the file to use.
 
 What remains to be done is to increment the counter variable @code{I}
 and to sweep up the field. The function @code{sweep_up} returns the new
-value of the field which is then used in the condition of the loop to
-decide if the experiment is finished, i.e.@: the end field is reached.
+value of the field, which is then used in the test of the loop condition
+to decide if the experiment is finished, i.e.@: the end field is
+reached.
 
 The last function call of @code{wait} makes the program wait for @w{300
 ms} (the lock-in amplifiers time constant) to give the lock-in amplifier
@@ -147,23 +148,24 @@ hours and you have to start all over again.
 
 
 As you can already see form the example most of a @acronym{EDL} program
-consists of function calls. Functions fall into two categories, built-in
-functions and device functions. Built-in functions (like @code{init_1d},
-@code{display}, @code{save} and @code{wait}) are always available, even
-when there is no @code{DEVICES} section. In contrast, device functions
-are bound to certain devices and are only usable when the device they
-belong to is listed in the @code{DEVICE} section. For example, the
-functions @w{@code{lockin_sensitivity}}, @w{@code{lockin_time_constant}}
-and @w{@code{lockin_get_data}} are obviously connected with the lock-in
-amplifier and are only available when a lock-in is specified.
-Fortunately, usually these functions are available for all types of
-lock-in amplifiers (possibly with minor variations) so that using a
-different lock-in does not require a major rewrite of the program except
-changing its name in the @code{DEVICES} section.
+consists of function calls. Functions can be devided into two
+categories, built-in functions and device functions. Built-in functions
+(like @code{init_1d}, @code{display}, @code{save} and @code{wait}) are
+always available, even when there is no @code{DEVICES} section. In
+contrast, device functions are bound to certain devices and are only
+usable when the device they belong to is listed in the @code{DEVICE}
+section. For example, the functions @w{@code{lockin_sensitivity}},
+@w{@code{lockin_time_constant}} and @w{@code{lockin_get_data}} are
+obviously targeted at the lock-in amplifier and are only available when
+a lock-in is specified. Fortunately, these functions usually will be
+available for all types of lock-in amplifiers (possibly with minor
+variations) so that using a different lock-in does not require a major
+rewrite of the @acronym{EDL} program except changing its name in the
+@code{DEVICES} section.
 
 To find out about all built-in and device functions, their arguments,
-the sections of  and etc.@: have a look at
-the appropriate parts of this manual.
+the sections of and etc.@: have a look at the appropriate parts of this
+manual.
 
 
 @node Sections, Syntax, Basics, EDL
@@ -190,25 +192,25 @@ is simply a list of all the devices that will be used in the experiment
 
 Please note that the section keyword has always to be followed by a
 colon, `@code{:}'. Another important syntax element is the semicolon,
-`@code{;}', that always ends a statement. So, you will also have to write a
-semicolon after each of the device names.
+`@code{;}', that always ends a line of code. So, you also have to write
+a semicolon after each of the device names.
 
 The @code{VARIABLES} section for declaring and initializing variables
 did also appear already in the example.
 
 Because pulses play such an important r@^ole in modern EPR experiments
 lots of elements for handling pulses and the pulser that creates them is
-built-in into @acronym{fsc2}. This is also reflected in two of the sic
-different sections, @code{ASSIGNMENTS} and @code{PHASES} being
-exclusively devoted to the pulser setup. The basic setup of the pulser
-(e.g.@: setting the time base and trigger mode as well as setting up the
-pulser channels) is done in the @code{ASSIGNMENTS} section. And the
-@code{PHASES} section is all about phase-cycling -- here you will have
-to define the phase sequences to be used in the experiment as well as
-the way the resulting echos will be added up. Because this is a rather
-extensive subject (and because of the different ways the pulser is
-integrated into the supported spectrometers, an in-depth explanation of
-these sections is part of a whole chapter.
+built-in into @acronym{fsc2}. This is also reflected in two of the
+sections, @code{ASSIGNMENTS} and @code{PHASES} being exclusively devoted
+to the pulser setup. The basic setup of the pulser (e.g.@: setting the
+time base and trigger mode as well as setting up the pulser channels) is
+done in the @code{ASSIGNMENTS} section while the @code{PHASES} section
+is all about phase-cycling -- here you will have to define the phase
+sequences to be used in the experiment as well as the way the resulting
+echos will be added up. Because this is a rather extensive subject (and
+because of the different ways the pulser is integrated into the
+supported spectrometers, an in-depth explanation of both these sections
+is part of a whole chapter.
 
 As you already have seen the @code{PREPARATIONS} section is for setting
 up the other devices and the graphics. But this is also the section
@@ -217,8 +219,8 @@ see the chapter about pulse generators and pulses.
 
 
 Finally, there is the @code{EXPERIMENT} section. As you already have
-seen this section is usually one or more loops (possibly with more loops
-nested into the main loops).
+seen this section usually consists of one or more loops (possibly with
+more loops nested into the main loops).
 
 
 While the sections of the @acronym{EDL} file don't have to appear in the
@@ -253,15 +255,15 @@ statement is may depend on the section (e.g.@: in the @code{DEVICES}
 section all valid statements are just the names of devices while in
 other sections a valid statement may be a complicated equation), but in
 all cases a statement must always be ended with a semicolon, `@code{;}'.
-There is nothing special about line endings, i.e.@: a statement can span
-several lines, so @acronym{fsc2} recognizes the end of a statement only
-if it finds a semicolon.
+There is nothing special about continuing a statement on a new line
+(i.e.@: a statement can span several lines), @acronym{fsc2} recognizes
+where a statement ends by the semicolon.
 
 Within a statement all characters like spaces, tabulator characters and
 newlines have no relevance at all (except separating variable names). So
-there's no difference at all between the following statements:
+there's no difference at all between the three following statements:
 @example
-start_field = 3360.0 G;
+start_field=3360.0 G;
 start_field       =               3360.0G;
                   start_field=
         3360.0 G;
@@ -270,13 +272,12 @@ start_field       =               3360.0G;
 @acronym{EDL} programs use lots of function calls. There are no obvious
 differences between variable names and function names (all start with a
 character, followed by more characters, numbers or underscore
-characters). So to make clear that such a word is a function it has to
+characters). To make clear that a word is a function it has to
 be followed by a pair of parenthesis, `@code{(}' and `@code{)}', even if
 the function doesn't accept arguments (spaces, tabulator or newline
 characters are allowed between the function name and the opening
 parenthesis). If the function does accept more than one argument the
 arguments have to be separated by commas.
-
 
 
 
