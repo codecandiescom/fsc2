@@ -651,7 +651,7 @@ Var *f_screate( Var *v )
 		long *result;
 
 
-		buffer = T_malloc( 2 * sizeof( long ) + 2 + sizeof( double )
+		buffer = T_malloc( 2 * sizeof( long ) + 2 * sizeof( double )
 						   + strlen( Fname ) + strlen( label )
 						   + strlen( help_text ) + 3 );
 		pos = buffer;
@@ -1189,7 +1189,7 @@ static void recreate_Tool_Box( void )
 		fl_free_object( Tool_Box->background_box );
 
 		fl_free_form( Tool_Box->Tools );
-		T_free( Tool_Box->Tools );
+		Tool_Box->Tools = NULL;
 	}
 
 	/* Now we've got to calculate its new size and create it */
@@ -1205,7 +1205,6 @@ static void recreate_Tool_Box( void )
 				           - ( io->type == NORMAL_BUTTON ?
 							   2 * NORMAL_BUTTON_DELTA : 0 );
 
-	
 	if ( Tool_Box->layout == VERT )
 	{
 		Tool_Box->w += OBJ_WIDTH;

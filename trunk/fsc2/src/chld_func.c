@@ -150,9 +150,13 @@ long *exp_bcreate( void *buffer, long len )
 		long *result;
 
 
+		fprintf( stderr, "exp_bcreate: before writer, len = %ld\n", len );
+		fflush( stderr );
 		writer( C_BCREATE, len, buffer );
 		T_free( buffer );
 		result = T_malloc( 2 * sizeof( long ) );
+		fprintf( stderr, "exp_bcreate: before reader\n" );
+		fflush( stderr );
 		reader( ( void * ) result );
 		return ( long * ) result;
 	}
@@ -340,9 +344,13 @@ long *exp_screate( void *buffer, long len )
 		long *result;
 
 
+		fprintf( stderr, "exp_screate: before writer, len = %ld\n", len );
+		fflush( stderr );
 		writer( C_SCREATE, len, buffer );
 		T_free( buffer );
 		result = T_malloc( 2 * sizeof( long ) );
+		fprintf( stderr, "exp_screate: before reader\n" );
+		fflush( stderr );
 		reader( ( void * ) result );
 		return ( long * ) result;
 	}
