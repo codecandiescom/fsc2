@@ -254,8 +254,8 @@ the documentation). This does *not* mean that the program didn't compile
 succesfully!
 
 If you start 'make' from one of the subdirectories only the things in this
-subdirectory get made, so if you want to build everything always start
-make from the main directory!
+subdirectory get made, so if you want to be sure that everything will get
+built always start 'make' from the main directory!
 
 If you get more than a few warnings (about problems with fsc2, not header
 files included by fsc2) during the compilation stage of the program or if
