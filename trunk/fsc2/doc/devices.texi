@@ -3047,7 +3047,9 @@ of the chip.
 If there is an argument this must be an array with 4 elements that
 specify the ROI as explained above. Further calls of the functions
 @code{ccd_camera_get_image()} and @code{ccd_camera_get_spectrum()} will
-return pictures or spectra from the ROI specified by the command.
+return pictures or spectra from the ROI specified by the command. If one
+of the elements of the array specifying the ROI is @code{0} the
+corresponding setting for the ROI remains unchanged.
 
 When no ROI has been specified per default the whole area of the CCD
 chip is used as the ROI.
