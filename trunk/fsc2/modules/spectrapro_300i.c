@@ -53,6 +53,8 @@ int spectrapro_300i_init_hook( void )
 		spectrapro_300i.grating[ i ].blaze = 7.5e-7;
 		spectrapro_300i.grating[ i ].init_offset = 0.0;
 		spectrapro_300i.grating[ i ].init_gadjust = 0.0;
+		spectrapro_300i.grating[ i ].used_in_test = UNSET;
+		spectrapro_300i.grating[ grating ].installed_in_test = UNSET;
 	}
 
 	spectrapro_300i.turret = 0;
@@ -69,10 +71,26 @@ int spectrapro_300i_init_hook( void )
 
 int spectrapro_300i_exp_hook( void )
 {
+	int i;
+
+
 	if ( ! spectrapro_300i.is_needed )
 		return 1;
 
+	for ( i = 0; i < MAX_GRATINGS; i++ )
+		spectrapro_300i.grating[ i ].is_installed = SET;
+
 	spectrapro_300i_open( );
+
+	for ( i = 0; i < MAX_GRATINGS; i++ )
+		if ( spectrapro_300i.grating[ grating ].used_in_test &&
+			 ! spectrapro_300i.grating[ grating ].is_installed  &&
+			 ! spectrapro_300i.grating[ grating ].installed_in_test )
+		{
+			print( FATAL, "Found during test run that non installed "
+				   "grating #%ld is used.\n", i + 1 );
+			THROW( EXCEPTION );
+		}
 
 	spectrapro_300i.use_calib = 0;
 
@@ -128,6 +146,9 @@ Var *monochromator_grating( Var *v )
 		return vars_push( INT_VAR, spectrapro_300i.current_grating + 1 );
 
 	grating = get_strict_long( v, "grating number" );
+
+	if ( FSC2_MODE == TEST )
+		spectrapro_300i.grating[ grating - 1 ].used_in_test = SET;
 
 	if ( grating < 1 || grating > MAX_GRATINGS )
 	{
@@ -252,8 +273,11 @@ Var *monochromator_turret( Var *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Function returns either the current set wavelength (if called with */
+/* no arguments) or moves the grating to a new center wavelength as   */
+/* specified (in meters) by the only argument.                        */
+/*--------------------------------------------------------------------*/
 
 Var *monochromator_wavelength( Var *v )
 {
@@ -334,13 +358,50 @@ Var *monochromator_wavelength( Var *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Function for installing or de-installing a grating. First argument */
+/* must be a valid grating number. The second argument is either the  */
+/* string "UNINSTALL" to de-install a grating (in which case the      */
+/* grating number must be the number of an already installed grating) */
+/* or a string with the part number of the grating, i.e. something    */
+/* like "1-120-750". A part number consists of a single digit, a      */
+/* hyphen, a three-digit number for the grooves density, another      */
+/* hyphen and either a number for the blaze wavelength or a string    */
+/* consisting of letters. Of course, to install a grating the grating */
+/* may not already used for a grating.                                */
+/*--------------------------------------------------------------------*/
 
 Var *monochromator_install_grating( Var *v )
 {
 	long grating;
 
+
+	grating = get_strict_long( v->next, "grating position" );
+
+	if ( grating < 1 && grating > MAX_GRATINGS )
+	{
+		print( FATAL, "Invalid grating position, must be in range between "
+			   "1 and %d.\n", MAX_GRATINGS );
+		THROW( EXCEPTION );
+	}
+
+	if ( FSC2_MODE == EXPERIMENT && ! strcmp( v->val.sptr, "UNINSTALL" ) &&
+		 ! spectrapro_300i.grating[ grating - 1 ].is_installed )
+	{
+		print( SEVERE,  "Grating #%ld is not installed, can't uninstall "
+			   "it.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( FSC2_MODE == TEST )
+	{
+		if ( ! strcmp( v->val.sptr, "UNINSTALL" ) )
+			spectrapro_300i.grating[ grating - 1 ].used_in_test = SET;
+		else
+			spectrapro_300i.grating[ grating - 1 ].installed_in_test = SET;
+	}
+
+	v = vars_pop( v );
 
 	if ( v->type != STR_VAR )
 	{
@@ -365,29 +426,28 @@ Var *monochromator_install_grating( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	grating = get_strict_long( v->next, "grating position" );
-
-	if ( grating < 1 && grating > MAX_GRATINGS )
-	{
-		print( FATAL, "Invalid grating position, must be in range between "
-			   "1 and %d.\n", MAX_GRATINGS );
-		THROW( EXCEPTION );
-	}
-
 	if ( FSC2_MODE == EXPERIMENT )
 	{
 		if ( ! strcmp( v->val.sptr, "UNINSTALL" ) )
+		{
 			spectrapro_300i_uninstall_grating( grating );
+			spectrapro_300i.grating[ grating - 1 ].is_installed = UNSET;
+		}
 		else
+		{
 			spectrapro_300i_install_grating( v->val.sptr, grating );
+			spectrapro_300i.grating[ grating - 1 ].is_installed = SET;
+		}
 	}
 
 	return vars_push( INT_VAR, 1 );
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Function returns the number of grooves per meter of a grating. */
+/* The only argument must be the number of an installed grating.  */
+/*----------------------------------------------------------------*/
 
 Var *monochromator_groove_density( Var *v )
 {
@@ -409,13 +469,29 @@ Var *monochromator_groove_density( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	if ( FSC2_MODE == TEST )
+		spectrapro_300i.grating[ grating - 1 ].used_in_test = SET;
+
 	return vars_push( FLOAT_VAR,
 				   ( double ) spectrapro_300i.grating[ grating - 1 ].grooves );
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* The function loads a calibration for the monochromator from a file.  */
+/* If no argument is passed to the function the tries to open a default */
+/* calibration file with a name that can be set via the definition of   */
+/* "DEFAULT_CALIB_FILE" in the configuration file for the device. If    */
+/* this file name is not an absolute path (i.e. starts with a slash)    */
+/* name of the directory where also the library for the monochromator   */
+/* resides is prepended.                                                */
+/* If there is an argument this must be a string with the name of the   */
+/* calibration file.                                                    */
+/* A calibration file may contain entries for one or more gratings. For */
+/* each grating the offset, inclusion angle, focal length and detector  */
+/* angle must be defined. Take a luck at the default calibration file   */
+/* for the details of the syntax.                                       */
+/*----------------------------------------------------------------------*/
 
 Var *monochromator_load_calibration( Var * v )
 {
@@ -632,10 +708,10 @@ Var *monochromator_wavelength_axis( Var * v )
 /* manually, i.e. instead of reading them from a file. It expects   */
 /* five arguments:                                                  */
 /* 1. grating number (grating must be installed)                    */
-/* 2. pixel offset                                                  */
-/* 3. inclusion angle                                               */
-/* 4. focal length                                                  */
-/* 5. detector angle                                                */
+/* 2. pixel offset (in pixels)                                      */
+/* 3. inclusion angle (in degree)                                   */
+/* 4. focal length (in meters)                                      */
+/* 5. detector angle (in degree)                                    */
 /*------------------------------------------------------------------*/
 
 Var *monochromator_set_calibration( Var *v )
@@ -655,6 +731,7 @@ Var *monochromator_set_calibration( Var *v )
 	}
 
 	grating = get_strict_long( v, "grating number" );
+
 	if ( grating < 1 && grating > MAX_GRATINGS )
 	{
 		print( FATAL, "Invalid grating number, must be in range between "
@@ -667,6 +744,9 @@ Var *monochromator_set_calibration( Var *v )
 		print( FATAL, "Grating #%ld isn't installed.\n", grating );
 		THROW( EXCEPTION );
 	}
+
+	if ( FSC2_MODE == TEST )
+		spectrapro_300i.grating[ grating - 1 ].used_in_test = SET;
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
@@ -745,8 +825,14 @@ Var *monochromator_set_calibration( Var *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* The function either returns or sets the value of the zero angle offset */
+/* for one of the gratings. The actual value is in the interval [-1,1],   */
+/* representing the range of of deviations that can be set (there is no   */
+/* obvious relation between this value and the offset angle).             */
+/* This function should only be used during the calibration of the        */
+/* monochromator.                                                         */
+/*------------------------------------------------------------------------*/
 
 Var *monochromator_init_offset( Var *v )
 {
@@ -761,6 +847,7 @@ Var *monochromator_init_offset( Var *v )
 	}
 
 	grating = get_strict_long( v, "grating number" );
+
 	if ( grating < 1 && grating > MAX_GRATINGS )
 	{
 		print( FATAL, "Invalid grating number, must be in range between "
@@ -773,6 +860,9 @@ Var *monochromator_init_offset( Var *v )
 		print( FATAL, "Grating #%ld isn't installed.\n", grating );
 		THROW( EXCEPTION );
 	}
+
+	if ( FSC2_MODE == TEST )
+		spectrapro_300i.grating[ grating - 1 ].used_in_test = SET;
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
@@ -809,8 +899,17 @@ Var *monochromator_init_offset( Var *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* The function either returns or sets the value that determines the */
+/* wavelength the monochromator moves to when it gets send a new     */
+/* wavelength. There is a default value, but to be able to do a      */
+/* calibration this default value is adjustable in a certain range.  */
+/* Using this function this deviation can be determined or set. The  */
+/* deviation is a value in the interval [-1,1] (0 stands for the     */
+/* default value).                                                   */
+/* This function should only be used during the calibration of the   */
+/* monochromator.                                                    */
+/*-------------------------------------------------------------------*/
 
 Var *monochromator_init_adjust( Var *v )
 {
@@ -825,6 +924,7 @@ Var *monochromator_init_adjust( Var *v )
 	}
 
 	grating = get_strict_long( v, "grating number" );
+
 	if ( grating < 1 && grating > MAX_GRATINGS )
 	{
 		print( FATAL, "Invalid grating number, must be in range between "
@@ -837,6 +937,9 @@ Var *monochromator_init_adjust( Var *v )
 		print( FATAL, "Grating #%ld isn't installed.\n", grating );
 		THROW( EXCEPTION );
 	}
+
+	if ( FSC2_MODE == TEST )
+		spectrapro_300i.grating[ grating - 1 ].used_in_test = SET;
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
@@ -935,11 +1038,21 @@ Var *monochromator_calibration( Var *v )
 
 	grating = get_strict_long( v, "grating number" );
 
+	if ( grating < 1 && grating > MAX_GRATINGS )
+	{
+		print( FATAL, "Invalid grating number, must be in range between "
+			   "1 and %d.\n", MAX_GRATINGS );
+		THROW( EXCEPTION );
+	}
+
 	if ( ! spectrapro_300i.grating[ grating - 1 ].is_installed )
 	{
 		print( FATAL, "Grating #%ld isn't installed.\n", grating );
 		THROW( EXCEPTION );
 	}
+
+	if ( FSC2_MODE == TEST )
+		spectrapro_300i.grating[ grating - 1 ].used_in_test = SET;
 
 	v = vars_pop( v );
 
