@@ -283,7 +283,7 @@ static int ni6601_open( struct inode *inode_p, struct file *file_p )
 /* Function gets executed when the device file for a board gets closed */
 /*---------------------------------------------------------------------*/
 
-static int ni6601_release( struct inode *inode_p, struct file * file_p )
+static int ni6601_release( struct inode *inode_p, struct file *file_p )
 {
 	int minor;
 	Board *board;
