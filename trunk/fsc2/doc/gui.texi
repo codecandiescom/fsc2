@@ -224,10 +224,15 @@ during the experiment you have to move the mouse into the display area
 onto the point you're interested in. Now press both the left and the
 right mouse button simultaneously (or first the left one, then the
 middle one while keeping the left button pressed down). The cursor
-changes to a crosshair cursor
+changes to a crosshair
 @ifnotinfo
-,@image{cursor4,5mm,},
+cursor, @image{cursor4,5mm,},
 @end ifnotinfo
+@ifnothtml
+@ifnottex
+cursor
+@end ifnottex
+@end ifnothtml
 and in the upper left hand corner a pair of values with the exact
 coordinates (in the units of the axis scales) of the current mouse
 position is shown. Because different curves can have a different scaling
@@ -238,10 +243,15 @@ the curve they belong to).
 Beside finding out the exact values of your measured data you also may
 determine differences between different data points. If you press both
 the left and the right mouse button simultaneously the cursor changes to
-a encircled crosshair cursor
+an encircled crosshair
 @ifnotinfo
-,@image{cursor5,5mm,}.
+cursor, @image{cursor5,5mm,},
 @end ifnotinfo
+@ifnothtml
+@ifnottex
+cursor
+@end ifnottex
+@end ifnothtml
 and a circle is drawn at the position where you pressed the mouse
 button.  When you move the mouse (while keeping both middle and right
 mouse buttons pressed down) a vertical and a horizontal dashed line from
@@ -257,11 +267,16 @@ displayed in the color of the curve they belong to.
 
 To zoom into the data displayed in the window click the left mouse
 button in the area where the data are displayed. If you do so the arrow
-mouse pointer changes to a symbol
+mouse pointer changes to a
 @ifnotinfo
-, @image{cursor1,5mm,}
+symbol, @image{cursor1,5mm,},
 @end ifnotinfo
-, indicating
+@ifnothtml
+@ifnottex
+symbol
+@end ifnottex
+@end ifnothtml
+indicating
 that you're in zoom mode. If you now move the mouse while keeping the
 left moused button pressed down a dashed rectangular box is drawn from
 the position where the mouse button was pressed first to the current
@@ -275,13 +290,12 @@ y-direction happens.
 
 You can also move the curves around on the screen. When you pres the
 middle mouse button somewhere in the display are the cursor changes to a
-hand
 @ifnotinfo
-, @image{cursor2,5mm,}.
+hand, @image{cursor2,5mm,}.
 @end ifnotinfo
 @ifnothtml
 @ifnottex
-.
+hand.
 @end ifnottex
 @end ifnothtml
 As long as you keep the middle mouse button pressed down the displayed
@@ -291,13 +305,13 @@ the middle mousebutton in the area of the x-axis or the y-axis.
 
 Finally, there's a third method to change the scaling. Whenever you
 press the right mouse button in either the display area or the axis
-fields the cursor changes to a magnifiying glass
+fields the cursor changes to a magnifiying
 @ifnotinfo
-, @image{cursor3,5mm,}.
+glass, @image{cursor3,5mm,}.
 @end ifnotinfo
 @ifnothtml
 @ifnottex
-.
+glass.
 @end ifnottex
 @end ifnothtml
 When you move the mouse at first nothing will happen, but if you release
@@ -354,3 +368,13 @@ all data will fit into the display. A side effect of having the
 automatically when new data arrive that wouldn't fit into the display
 area. To switch this behaviour off simply deactivate the @code{FS}
 button.
+
+
+@anchor{2D-Display}
+@subsection 2D-Display
+@cindex 2D-Display
+
+@ifnotinfo
+@image{fsc2fig4,11cm,}
+@image{fsc2fig5,11cm,}
+@end ifnotinfo

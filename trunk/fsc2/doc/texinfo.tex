@@ -3,7 +3,7 @@
 % Load plain if necessary, i.e., if running under initex.
 \expandafter\ifx\csname fmtname\endcsname\relax\input plain\fi
 %
-\def\texinfoversion{2001-07-15.21}
+\def\texinfoversion{2001-07-18.09}
 %
 % Copyright (C) 1985, 86, 88, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99
 % Free Software Foundation, Inc.
@@ -5632,7 +5632,7 @@ width0pt\relax} \fi
     \ifvmode
       \centerline{\dopdfimage{#1}{#2}{#3}}%
     \else
-      \dopdfimage{#1}{#2}{#3}
+      \dopdfimage{#1}{#2}{#3}%
     \fi
   \else
     % \epsfbox itself resets \epsf?size at each figure.
