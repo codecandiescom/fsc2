@@ -108,7 +108,7 @@ P2: FUNC=P1.FUNC,
 
 pi=pi-3;
 
-print( "P2.Len = #\n", P2.Len );
+print( "P2.Len = #\n", P2.LEN );
 
 ZZ[ 1, 1 ] = int( 0.7 );
 
@@ -220,12 +220,12 @@ WHILE I < 6
     }
 }
 
-if k < 3
+IF k < 3
 {
 	k = k + 5;
 
 }
-else
+ELSE
 {
 	k = k - 5;
 }
@@ -234,7 +234,7 @@ print( "\Tk = #\n", k );
 
 I = 1;
 N = 1;
-while ( I <= 13 )
+WHILE ( I <= 13 )
 {
   N = N * I;
   print( "\T#! = #\n", I, N );
@@ -250,7 +250,7 @@ print( "\T=> P1.Start = #\n\n\n", P1.Start );
 
 I = 1;
 N = 1;
-while ( I <= 13 )
+WHILE ( I <= 13 )
 {
   N = N * I;
   print( "\T#! = #\n", I, N );
@@ -258,48 +258,48 @@ while ( I <= 13 )
 }
 
 
-if ( I == 1 )
+IF ( I == 1 )
 {
 	print( "\T333333333\n" );
 }
-else
+ELSE
 {
 	print( "\T444444444\n" );
 }
 
-if ( I == 1 )
+IF ( I == 1 )
 {
 	print( "\T333333333\n" );
 }
-else
+ELSE
 {
 	print( "\T444444444\n" );
 }
 
-if k < 5
+IF k < 5
 {
 	print( "\T\nk = #\n", k );
 }
-else
+ELSE
 {
 	print( "\T\nk is too big (#) !\n", k );
 }
 
 I = 0;
-while I < 6
+WHILE I < 6
 {
 	print( "\T>>> I = #\n", I );
 	I = I + 1;
 
 	k = 0;
 
-	while k < 5
+	WHILE k < 5
 	{
-	    if I < 4 
+	    IF I < 4 
 		{
 			print( "\TI is less than 4\n" );
 		} 
-		else
+		ELSE
 		{
 			print( "\TI isn't less than 4\n" );
 		}
@@ -310,4 +310,4 @@ while I < 6
 print( "\T\nThis is not the end yet !\n\n" );
 
 I = 0;
-repeat 3 { I = I + 1; print( "\TI = #\n", I ) }
+REPEAT 3 { I = I + 1; print( "\TI = #\n", I ) }
