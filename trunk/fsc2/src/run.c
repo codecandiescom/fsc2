@@ -65,6 +65,7 @@ bool run( void )
 
 	set_buttons_for_run( 0 );
 	fl_set_cursor( FL_ObjWin( main_form->run ), XC_watch );
+	XFlush( fl_get_display( ) );
 
 	/* If the devices need the GPIB bus initialism it now */
 
