@@ -306,6 +306,7 @@ static bool no_prog_to_be_run( void )
 	run_end_of_exp_hooks( );
 	if ( need_GPIB )
 		gpib_shutdown( );
+	fsc2_serial_cleanup( );
 
 	set_buttons_for_run( 1 );
 	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );

@@ -1117,7 +1117,7 @@ void clean_up( void )
 
 	delete_devices( );
 	need_GPIB = UNSET;
-	fsc2_serial_cleanup( );
+	fsc2_final_serial_cleanup( );
 
 	/* Delete function list */
 
