@@ -37,7 +37,7 @@ static long record_lengths[ ] = { 500, 1000, 2500, 5000, 15000, 0 };
 
 /* List of all allowed time base values (in seconds) */
 
-static double tb[ ] = {                    500.0e-12,
+static double tb[ ] = {                     500.0e-12,
 						  1.0e-9,   2.0e-9,   5.0e-9,
 						 10.0e-9,  20.0e-9,  50.0e-9,
 						100.0e-9, 200.0e-9, 400.0e-9,
@@ -459,7 +459,7 @@ Var *digitizer_sensitivity( Var *v )
 	vars_check( v, INT_VAR );
 	channel = tds520_translate_channel( GENERAL_TO_TDS520, v->val.lval );
 
-	if ( channel < TDS520_CH1 || channel > TDS520_CH2 )
+	if ( channel > TDS520_CH2 )
 	{
 		eprint( FATAL, SET, "%s: Can't set or obtain sensitivity for "
 				"channel %s.\n", DEVICE_NAME, Channel_Names[ channel ] );

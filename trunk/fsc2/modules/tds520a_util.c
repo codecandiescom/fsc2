@@ -440,7 +440,7 @@ long tds520a_translate_channel( int dir, long channel )
 				return TDS520A_CH1;
 
 			case DIGITIZER_CHANNEL_CH2 :
-				return TDS520A_CH1;
+				return TDS520A_CH2;
 
 			case DIGITIZER_CHANNEL_MATH1 :
 				return TDS520A_MATH1;
