@@ -205,17 +205,15 @@ double is_mult_ns( double val, const char *text )
 	double ip, fp;
 
 	val *= 1.e9;
-	fp = modf( val, &ip );
+	fp = modf( val , &ip );
 
-	if ( fabs( fp ) > 1.e-2 )
+	if ( fabs( fp ) > 1.e-2 && fabs( fp ) < 0.99 )
 	{
 		print( FATAL, "%s must be an integer multiple of 1 ns.\n", text );
 		THROW( EXCEPTION );
 	}
 
-	if ( fp < 0.0 )
-		return ( ip - ( fp <= 0.5 ? 1 : 0 ) ) * 1.e-9;
-	return ( ip + ( fp >= 0.5 ? 1 : 0 ) ) * 1.e-9;
+	return lrnd( val ) * 1.0e-9;
 }
 
 
@@ -246,7 +244,7 @@ void p_assign_pod( long func, Var *v )
 
 	/* Check the variable and get its value */
 
-	pod = get_double( v, "pod number" );
+	pod = get_long( v, "pod number" );
 	vars_pop( v );
 
 	/* Finally call the function (if it exists...) */
