@@ -12,6 +12,8 @@
 
 #include <gpib.h>
 
+#define JENS_GPIB_DRIVER
+
 
 #if defined ( __GPIB_IF__ )
 	#define GPIB_VARIABLE

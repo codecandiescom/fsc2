@@ -436,7 +436,8 @@ Var *boxcar_get_curve( Var *v )
 			new_timo++;
 		new_timo += 11;
 		gpib_timeout( egg4402.device, new_timo );
-#if defined gpib_count
+
+#if defined JENS_GPIB_DRIVER
 		old_timo = ( int ) gpib_count;
 #else
 		old_timo = ( int ) ibcnt;
