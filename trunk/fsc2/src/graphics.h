@@ -305,7 +305,9 @@ typedef struct {
 	unsigned int label_w[ 6 ],    /* for both the 2D and cut window Y */
 				 label_h[ 6 ];    /* and Z labels */
 
-	int cursor[ 7 ];              /* the different cursors */
+	int cursor[ 7 ];        /* the different cursors */
+
+	unsigned long color_list[ NUM_COLORS + 2 ];
 
 	Canvas x_axis;
 	Canvas y_axis;

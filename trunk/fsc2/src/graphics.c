@@ -40,6 +40,7 @@
 
 extern Cut_Graphics CG;             /* exported by graph_cut.c */
 
+static void fonts_init( void );
 static void set_default_sizes( void );
 static void set_defaults( void );
 static void forms_adapt( void );
@@ -101,8 +102,6 @@ static struct {
 
 void start_graphics( void )
 {
-	XCharStruct font_prop;
-	int dummy;
 	int i;
 
 
@@ -131,10 +130,12 @@ void start_graphics( void )
 	{
 		G2.nx = G2.nx_orig;
 		G2.ny = G2.ny_orig;
-		G2.rwc_start[ X ] = G2.rwc_start_orig[ X ];
-		G2.rwc_delta[ X ] = G2.rwc_delta_orig[ X ];
-		G2.rwc_start[ Y ] = G2.rwc_start_orig[ Y ];
-		G2.rwc_delta[ Y ] = G2.rwc_delta_orig[ Y ];
+
+		for ( i = X; i <= Y; i++ )
+		{
+			G2.rwc_start[ i ] = G2.rwc_start_orig[ i ];
+			G2.rwc_delta[ i ] = G2.rwc_delta_orig[ i ];
+		}
 
 		for ( i = X; i <= Z; i++ )
 			G2.label[ i ] = T_strdup( G2.label_orig[ i ] );
@@ -201,29 +202,9 @@ void start_graphics( void )
 	if ( G.dim & 2 )
 		fl_set_button( GUI.run_form_2d->full_scale_button_2d, 1 );
 
-	/* Load a font hopefully available on all machines (beside the optionally
-	   userdefined font we try at three more before giving up */
+	/* Load fonts */
 
-	if ( G.is_init )
-	{
-		if ( * ( ( char * ) xresources[ AXISFONT ].var ) != '\0' )
-			G.font = XLoadQueryFont( G.d,
-									 ( char * ) xresources[ AXISFONT ].var );
-
-		if ( ! G.font )
-			G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_1 );
-
-		if ( ! G.font )
-			G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_2 );
-
-		if ( ! G.font )
-			G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_3 );
-
-		if ( G.font )
-			XTextExtents( G.font, "Xp", 2, &dummy, &G.font_asc, &G.font_desc,
-						  &font_prop );
-
-	}
+	fonts_init( );
 
 	/* Create the canvases for the axes and for drawing the data */
 
@@ -265,6 +246,35 @@ void start_graphics( void )
 	else
 		fl_raise_form( GUI.run_form_2d->run_2d );
 	G.is_fully_drawn = SET;
+}
+
+
+/*-----------------------------------------------------------------------*/
+/* Loads user defined font for the axis and label. If this font can't be */
+/* loaded tries some fonts hopefully available on all machines.          */
+/*-----------------------------------------------------------------------*/
+
+static void fonts_init( void )
+{
+	XCharStruct font_prop;
+	int dummy;
+
+
+	if ( ! G.is_init )
+		return;
+
+	if ( * ( ( char * ) xresources[ AXISFONT ].var ) != '\0' )
+		G.font = XLoadQueryFont( G.d, ( char * ) xresources[ AXISFONT ].var );
+
+	if ( G.font )
+		XTextExtents( G.font, "Xp", 2, &dummy, &G.font_asc, &G.font_desc,
+					  &font_prop );
+	else
+	{
+		G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_1 );
+		G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_2 );
+		G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_3 );
+	}
 }
 
 
@@ -754,8 +764,8 @@ int run_form_close_handler( FL_FORM *a, void *b )
 static void G_struct_init( void )
 {
 	static bool first_time = SET;
-	static int cursor_1d[ 7 ];
-	static int cursor_2d[ 7 ];
+	static int cursor_1d[ 8 ];
+	static int cursor_2d[ 8 ];
 	int i, x, y;
 	unsigned int keymask;
 
@@ -847,6 +857,7 @@ static void G_struct_init( void )
 											 cursor7_x_hot, cursor7_y_hot );
 
 		create_colors( );
+		memcpy( G_2d_stored->color_list, G2.color_list, sizeof G2.color_list );
 
 #if defined WITH_HTTP_SERVER
 		create_color_hash( );
