@@ -40,6 +40,8 @@ my $kd                 = "   2 Hz";
 my $how                = "Start experiment";
 my $sweep_rate         = "";
 my $tau_per_point;
+my $sweep_time;
+my $kdt                = "";
 my $old_kd = $kd;
 my $sleep_time         = 5;
 my @tcs                = ( '100 s', ' 30 s', ' 10 s', '  3 s', '  1 s',
@@ -193,13 +195,29 @@ my $f8_v = $f8->Entry( '-textvariable'    => \$tau_per_point,
 					   '-width'           => '8',
 					   '-state'           => 'disabled',
 					   '-relief'          => 'sunken' );
-my $f8_l2 = $f8->Label( '-text'           => '',
+my $f8_l2 = $f8->Label( '-text'           => 's',
 						'-width'          => 5 );
 
 $f8->pack( %fp );
 $f8_l1->pack( %wp );
 $f8_v->pack( %wp );
 $f8_l2->pack( %wp );
+
+my $f12 = $mf2->Frame( );
+my $f12_l1 = $f12->Label( '-text'           => 'Time for single sweep:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f12_v = $f12->Entry( '-textvariable'    => \$sweep_time,
+					   '-width'           => '8',
+					   '-state'           => 'disabled',
+					   '-relief'          => 'sunken' );
+my $f12_l2 = $f12->Label( '-text'           => '',
+						'-width'          => 5 );
+
+$f12->pack( %fp );
+$f12_l1->pack( %wp );
+$f12_v->pack( %wp );
+$f12_l2->pack( %wp );
 
 my $f10 = $mf2->Button( '-text'    => 'Evaluate',
 						'-state'   => 'disabled',
@@ -404,6 +422,7 @@ sub num_points_check {
 		 ( is_int( $_[ 0 ] ) and
 		   $_[ 0 ] <= ( $lockin eq "SR830" ? 16381 : 8191 ) ) ) {
 		check_eval( $start_current, $end_current, $_[ 0 ] );
+		st_set( $_[ 0 ] );
 		$f11_a->configure( '-state' => 'disabled' )
 			if $_[ 0 ] ne $num_points;
 		return 1;
@@ -462,7 +481,6 @@ sub tpp_set {
 	$tc =~ /([0-9]+) (m?)s/;
 	my $tc_val = $1 * ( $2 eq "m" ? 0.001 : 1.0 );
 
-	my $kdt;
 	for ( my $i = 0; $i <= $#kds; $i++ ) {
 		if ( $kd eq $kds[ $i ] ) {
 			$kdt = $kd_times[ $i ];
@@ -470,11 +488,33 @@ sub tpp_set {
 		}
 	}
 
-	$tau_per_point = sprintf( "%.0f", $kdt / $tc_val * 1e5 ) *1e-5;
+	$tau_per_point = sprintf( "%.0f", $kdt / $tc_val * 1e5 ) * 1e-5;
+	st_set( $num_points );
 
 	if ( $old_kd ne $kd ) {
 		$f11_a->configure( '-state' => 'disabled' );
 		$old_kd = $kd;
+	}
+}
+
+
+#############################################
+#
+
+sub st_set {
+
+	if ( $_[ 0 ] eq "" or $kdt eq "" ) {
+		$sweep_time = "";
+	} else {
+		my $duration = $kdt * $_[ 0 ];
+		if ( $duration < 3600 ) {
+			$sweep_time = int( $duration / 60 ) . ":" .
+				sprintf( "%02d", $duration % 60 );
+		} else {
+			$sweep_time = int( $duration / 3600 ) . ":" .
+				sprintf( "%02d", ( $duration / 60 ) % 60 ) . ":" .
+				sprintf( "%02d", $duration % 60 );
+		}
 	}
 }
 
@@ -625,8 +665,6 @@ current = start_current;
 		print F "step_size = - sweep_rate / kd;\n";
 	}
 print F "
-G_min = floor( abs( step_size ) * Num_Points / ( sweep_rate * 60 ) );
-G_sec = ceil( abs( step_size ) * Num_Points / sweep_rate ) - G_min * 60;
 
 
 PREPARATIONS:
@@ -650,7 +688,6 @@ IF is_file( File ) {
 }
 
 magnet_sweep_rate( sweep_rate );
-print( \"Estimated time for single sweep: # min # sec\\n\", G_min, G_sec );
 
 FOREVER {
 
