@@ -39,6 +39,7 @@ my $N_runs     = 20;
 my $tc         = "Don't set";
 my $sens       = "Don't set";
 my $how        = 'Start program';
+my $calls      = 0;
 
 
 my %fp = ( '-side' => 'top',
@@ -397,6 +398,7 @@ sub li_conf {
 
 sub write_out {
 
+return if $calls++ == 0;
 return if &do_checks( ) != 0;
 
 local *F;
