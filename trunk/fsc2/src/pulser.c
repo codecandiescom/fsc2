@@ -116,8 +116,8 @@ void is_pulser_func( void *func, const char *text )
 /*---------------------------------------------------------------------------*/
 /* Function tests if the time (in seconds) it gets passed is a reasonable    */
 /* integer multiple of 1 ns and tries to reduce rounding errors. If the time */
-/* more than 10 ps off from a multiple of a nanosecond an error message is   */
-/* output, using the piece of text passed to the function as the second      */
+/* is more than 10 ps off from a multiple of a nanosecond an error message   */
+/* is output, using the piece of text passed to the function as the second   */
 /* argument.                                                                 */
 /*---------------------------------------------------------------------------*/
 
