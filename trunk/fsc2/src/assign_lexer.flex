@@ -119,9 +119,8 @@ HIGH        H(IGH)?
 REPT        REP(EAT)?_?T(IME)?
 REPF        REP(EAT)?_?F(REQ(UENCY)?)?
 
-PSD1        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?_?1:?
+PSD1        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?(_?1)?:?
 PSD2        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?_?2:?
-PSD         PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?):?
 
 GP          G(RACE)?_?P(ERIOD)?:?
 
@@ -342,11 +341,6 @@ WS          [\n=: ]+
 
 {PSD2}		{
 				assignlval.lval	= 1;
-				return PSD_TOKEN;
-			}
-
-{PSD}		{
-				assignlval.lval	= 2;
 				return PSD_TOKEN;
 			}
 
