@@ -136,7 +136,7 @@ char *T_strdup( const char *str )
 
 #if defined MDEBUG
 	fprintf( stderr, "(%d) strdup:  %p (%u)\n",
-			 I_am == CHILD, mem, strlen( str ) );
+			 I_am == CHILD, new_str, strlen( str ) );
 	fflush( stderr );
 #endif
 

@@ -572,7 +572,7 @@ Var *f_bstate( Var *v )
 {
 	IOBJECT *io, *oio;
 	int state;
-	const char *on_off_str[ ] = { "ON", "OFF" };
+	const char *on_off_str[ ] = { "OFF", "ON" };
 
 
 
@@ -1483,8 +1483,8 @@ Var *f_icreate( Var *v )
 
 		/* Calculate length of buffer needed */
 
-		len = 3 * sizeof( long )
-			  + ( type == INT_INPUT ) ? sizeof( long ) : sizeof( double );
+		len = 2 * sizeof( long )
+			  + ( type == INT_INPUT ? sizeof( long ) : sizeof( double ) );
 		if ( Fname )
 			len += strlen( Fname ) + 1;
 		else
@@ -1830,7 +1830,7 @@ Var *f_ivalue( Var *v )
 				;
 		}
 
-		len = 2 * sizeof( long );
+		len = 3 * sizeof( long );
 		len += state > 1 ? sizeof( double ) : sizeof( long );
 		if ( Fname )
 			len += strlen( Fname ) + 1;
@@ -2346,12 +2346,18 @@ static void tools_callback( FL_OBJECT *obj, long data )
 			}
 			else
 				sscanf( buf, "%lf", &dval );
+
+/* Don't know yet how to do this on older machines... */
+
+#if defined( fpclassify ) & defined( FP_NORMAL )
 			if ( fpclassify( dval ) != FP_NORMAL )
 			{
 				snprintf( obuf, MAX_INPUT_CHARS + 1, "%f", io->val.dval );
 				fl_set_input( io->self, obuf );
 				break;
 			}
+#endif
+
 			if ( dval != io->val.dval )
 				io->val.dval = dval;
 			break;

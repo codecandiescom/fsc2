@@ -570,7 +570,7 @@ bool tds540_set_snap( bool flag )
 	}
 	else
 	{
-		sprintf( cmd, "DAT STAR 1;:DAT STOP %ld\n", tds540.rec_len );
+		sprintf( cmd, "DAT:STAR 1;STOP %ld\n", tds540.rec_len );
 		if ( gpib_write( tds540.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds540_gpib_failure( );
 	}		
@@ -806,7 +806,7 @@ bool tds540_get_curve( int channel, WINDOW *w, double **data, long *length,
 		tds540_set_curve_window( w );
 	else
 	{
-		sprintf( cmd, "DAT:START %ld;:DAT:STOP %ld\n", 
+		sprintf( cmd, "DAT:STAR %ld;STOP %ld\n", 
 				 w != NULL ? w->start_num : 1,
 				 w != NULL ? w->end_num : tds540.rec_len );
 		if ( gpib_write( tds540.device, cmd, strlen( cmd ) ) == FAILURE )

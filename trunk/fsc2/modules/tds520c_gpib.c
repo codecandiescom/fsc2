@@ -81,7 +81,7 @@ bool tds520c_init( const char *name )
 
     /* Set format of data transfer (binary, INTEL format) */
 
-    if ( gpib_write( tds520c.device, "DAT:ENC SRI;DAT:WID 2\n", 22 )
+    if ( gpib_write( tds520c.device, "DAT:ENC SRI;WID 2\n", 18 )
 		 == FAILURE )
 	{
 		gpib_local( tds520c.device );
@@ -569,7 +569,7 @@ bool tds520c_set_snap( bool flag )
 	}
 	else
 	{
-		sprintf( cmd, "DAT STAR 1;:DAT STOP %ld\n", tds520c.rec_len );
+		sprintf( cmd, "DAT:STAR 1;STOP %ld\n", tds520c.rec_len );
 		if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds520c_gpib_failure( );
 	}
@@ -831,7 +831,7 @@ bool tds520c_get_curve( int channel, WINDOW *w, double **data, long *length,
 		tds520c_set_curve_window( w );
 	else
 	{
-		sprintf( cmd, "DAT:START %ld;:DAT:STOP %ld\n", 
+		sprintf( cmd, "DAT:STAR %ld;STOP %ld\n", 
 				 w != NULL ? w->start_num : 1,
 				 w != NULL ? w->end_num : tds520c.rec_len );
 		if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE )

@@ -92,7 +92,7 @@ bool tds754a_init( const char *name )
 		
     /* Set unit for cursor setting commands to seconds, cursor types to VBAR */
 
-    if ( gpib_write( tds754a.device, "CURS:FUNC VBA:VBA:UNITS SECO\n", 29 )
+    if ( gpib_write( tds754a.device, "CURS:FUNC VBA;VBA:UNITS SECO\n", 29 )
 		 == FAILURE )
     {
         gpib_local( tds754a.device );
@@ -572,7 +572,7 @@ bool tds754a_set_snap( bool flag )
 	}
 	else
 	{
-		sprintf( cmd, "DAT STAR 1;:DAT STOP %ld\n", tds754a.rec_len );
+		sprintf( cmd, "DAT:STAR 1;STOP %ld\n", tds754a.rec_len );
 		if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds754a_gpib_failure( );
 	}		
@@ -833,7 +833,7 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 		tds754a_set_curve_window( w );
 	else
 	{
-		sprintf( cmd, "DAT:START %ld;:DAT:STOP %ld\n", 
+		sprintf( cmd, "DAT:START %ld;STOP %ld\n", 
 				 w != NULL ? w->start_num : 1,
 				 w != NULL ? w->end_num : tds754a.rec_len );
 		if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )

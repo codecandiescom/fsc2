@@ -1348,21 +1348,21 @@ Var *f_getf( Var *var )
 	if ( s[ 0 ] != NULL && s[ 0 ][ 0 ] == '\\' )
 		r = T_strdup( s[ 0 ] + 1 );
 
-	if ( s[ 0 ] == NULL || s[ 0 ] == "" || s[ 0 ][ 0 ] == '\\' )
+	if ( s[ 0 ] == NULL || s[ 0 ][ 0 ] == '\0' || s[ 0 ][ 0 ] == '\\' )
 		s[ 0 ] = T_strdup( "Please enter a file name:" );
 	else
 		s[ 0 ] = T_strdup( s[ 0 ] );
 
-	/* Second string is the is the file name pattern */
+	/* Second string is the file name pattern */
 
-	if ( s[ 1 ] == NULL || s[ 1 ] == "" )
+	if ( s[ 1 ] == NULL || s[ 1 ][ 0 ] == '\0' )
 		s[ 1 ] = T_strdup( "*.dat" );
 	else
 		s[ 1 ] = T_strdup( s[ 1 ] );
 
 	/* Third string is the default directory */
 
-	if ( s[ 2 ] == NULL || s[ 2 ] == "" )
+	if ( s[ 2 ] == NULL || s[ 2 ][ 1 ] == '\0' )
 	{
 		s[ 2 ] = NULL;
 		len = 0;
@@ -1391,8 +1391,7 @@ getfile_retry:
 	   file name was passed to the routine and this is not a repeat call) */
 
 	if ( r == NULL )
-		r = T_strdup( show_fselector( s[ 0 ], s[ 2 ], 
-											 s[ 1 ], s[ 3 ] ) );
+		r = T_strdup( show_fselector( s[ 0 ], s[ 2 ], s[ 1 ], s[ 3 ] ) );
 
 	if ( ( r == NULL || *r == '\0' ) &&
 		 show_choices( "Do you really want to cancel saving data?\n"
@@ -1482,7 +1481,7 @@ getfile_retry:
 	File_List[ File_List_Len ].fp = fp;
 	File_List[ File_List_Len ].name = r;
 
-	/* Switch buffering of so we're sure everything gets written to disk
+	/* Switch buffering off so we're sure everything gets written to disk
 	   immediately */
 
 	setbuf( File_List[ File_List_Len ].fp, NULL );

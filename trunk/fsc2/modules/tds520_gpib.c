@@ -527,9 +527,9 @@ bool tds520_set_snap( bool flag )
 	}
 	else
 	{
-		if ( gpib_write( tds520.device, "DAT STAR 1\n", 11 ) == FAILURE )
+		if ( gpib_write( tds520.device, "DAT:STAR 1\n", 11 ) == FAILURE )
 			tds520_gpib_failure( );
-		sprintf( cmd, "DAT STOP %ld\n", tds520.rec_len );
+		sprintf( cmd, "DAT:STOP %ld\n", tds520.rec_len );
 		if ( gpib_write( tds520.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds520_gpib_failure( );
 	}

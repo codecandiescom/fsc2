@@ -571,7 +571,7 @@ bool tds744a_set_snap( bool flag )
 	}
 	else
 	{
-		sprintf( cmd, "DAT STAR 1;:DAT STOP %ld\n", tds744a.rec_len );
+		sprintf( cmd, "DAT:STAR 1;STOP %ld\n", tds744a.rec_len );
 		if ( gpib_write( tds744a.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds744a_gpib_failure( );
 	}		
@@ -834,7 +834,7 @@ bool tds744a_get_curve( int channel, WINDOW *w, double **data, long *length,
 		tds744a_set_curve_window( w );
 	else
 	{
-		sprintf( cmd, "DAT:START %ld;:DAT:STOP %ld\n", 
+		sprintf( cmd, "DAT:STAR %ld;STOP %ld\n", 
 				 w != NULL ? w->start_num : 1,
 				 w != NULL ? w->end_num : tds744a.rec_len );
 		if ( gpib_write( tds744a.device, cmd, strlen( cmd ) ) == FAILURE )
