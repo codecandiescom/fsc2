@@ -172,8 +172,8 @@ void dg2020_basic_pulse_check( void )
 		else if ( p->function->num_pods > 1 )
 		{
 			/* If the function has more than one pod but no phase setup
-			   create a new dummy PHASE_SETUP which will use only the
-			   first pod for pulses (the other pods assigned to the function
+			   create a dummy phase setup in which only the first pod is
+			   used for pulses (the other pods assigned to the function
 			   will be constantly low). */
 
 			if ( p->function->phase_setup == NULL )
