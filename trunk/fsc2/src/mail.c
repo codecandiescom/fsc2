@@ -420,7 +420,7 @@ static int open_mail_socket( const char *remote, const char *local )
 		return -1;
 
 	/* If this is a local message (i.e. the domain to which the mail is to
-	   be send is identical to the lcoal host name) we try local delivery
+	   be send is identical to the local host name) we try local delivery
 	   first. Without doing so it would be impossible to send local mails
 	   on machines without an internet connection. */
 
