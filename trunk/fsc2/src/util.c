@@ -106,12 +106,12 @@ char *string_to_lower( char *str )
 
 void *get_memcpy( const void *array, size_t size )
 {
-	void *new;
+	void *new_mem;
 
 
-	new = T_malloc( size );
-	memcpy( new, array, size );
-	return new;
+	new_mem = T_malloc( size );
+	memcpy( new_mem, array, size );
+	return new_mem;
 }
 
 
