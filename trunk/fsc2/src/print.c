@@ -68,6 +68,7 @@ static void eps_draw_contour( FILE *fp, int cn );
 static void do_print( char *name, const char *command );
 static void print_comm( FILE *fp );
 static char **split_into_lines( int *num_lines );
+static char *paren_replace( const char *str );
 static void start_printing( char **argv, char *name );
 
 
@@ -701,24 +702,24 @@ static void print_header( FILE *fp, char *name )
 
 static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 {
-	double rwc_delta,          /* distance between small ticks (in rwc) */
-		   order,              /* and its order of magnitude */
+	double rwc_delta,           /* distance between small ticks (in rwc) */
+		   order,               /* and its order of magnitude */
 		   mag;
-	double d_delta_fine,       /* distance between small ticks (in points) */
-		   d_start_fine,       /* position of first small tick (in points) */
-		   d_start_medium,     /* position of first medium tick (in points) */
-		   d_start_coarse,     /* position of first large tick (in points) */
-		   cur_p;              /* loop variable with position */
-	int medium_factor,         /* number of small tick spaces between medium */
-		coarse_factor;         /* and large tick spaces */
-	int medium,                /* loop counters for medium and large ticks */
-		coarse;
-	double rwc_start = 0,      /* rwc value of first point */
-		   rwc_start_fine,     /* rwc value of first small tick */
-		   rwc_start_medium,   /* rwc value of first medium tick */
-		   rwc_start_coarse;   /* rwc value of first large tick */
-	double rwc_coarse;
-	double x, y;
+	static double d_delta_fine, /* distance between small ticks (in points) */
+		   d_start_fine,        /* position of first small tick (in points) */
+		   d_start_medium,      /* position of first medium tick (in points) */
+		   d_start_coarse,      /* position of first large tick (in points) */
+		   cur_p;               /* loop variable with position */
+	static int medium_factor,   /* number of small tick spaces between */
+			   coarse_factor;   /* medium and large tick spaces */
+	static int medium,          /* loop counters for medium and large ticks */
+			   coarse;
+	double rwc_start = 0,       /* rwc value of first point */
+		   rwc_start_fine,      /* rwc value of first small tick */
+		   rwc_start_medium,    /* rwc value of first medium tick */
+		   rwc_start_coarse;    /* rwc value of first large tick */
+	static double rwc_coarse;
+	static double x, y;
 	char lstr[ 128 ];
 	double s2d[ 3 ];
 	int r_coord;
@@ -857,14 +858,18 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 	{
 		/* Draw the x-axis label string */
 
-		if ( dim == 1 || dim == 2 )
-			label = G.label[ X ];
-		else
-			label = G.label[ dim < 0 ? X : Y ];
+		TRY
+		{
+			if ( dim == 1 || dim == 2 )
+				label = paren_replace( G.label[ X ] );
+			else
+				label = paren_replace( G.label[ dim < 0 ? X : Y ] );
 
-		if ( label != NULL )
 			fprintf( fp, "%f (%s) cw sub %f m (%s) show\n",
 					 x_0 + w, label, margin, label );
+			T_free( label );
+			TRY_SUCCESS;
+		}
 
 		y = y_0;
 
@@ -903,15 +908,20 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 	{
 		/* Draw the y-axis label string */
 
-		if ( dim == 1 || dim == 2 )
-			label = G.label[ Y ];
-		else
-			label = G.label[ Z ];
+		TRY
+		{
+			if ( dim == 1 || dim == 2 )
+				label = paren_replace( G.label[ Y ] );
+			else
+				label = paren_replace( G.label[ Z ] );
 
-		if ( label != NULL )
-			fprintf( fp, "gs %f (%s) ch add %f (%s) cw sub t 90 r 0 0 m (%s) "
-					 "show gr\n", margin, label, paper_width - margin,
+			if ( label != NULL )
+				fprintf( fp, "gs %f (%s) ch add %f (%s) cw sub t 90 r 0 0 m "
+						 "(%s) show gr\n", margin, label, paper_width - margin,
 					 label, label );
+			T_free( label );
+			TRY_SUCCESS;
+		}
 
 		x = x_0;
 
@@ -943,9 +953,15 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 		x = x_0 + w + 17.0;
 
 		if ( G.label[ Z ] != NULL )
-			fprintf( fp, "gs %f (%s) ch sub %f (%s) cw sub t 90 r 0 0 m (%s) "
-					 "show gr\n", x + 28.0, G.label[ Z ],
-					 paper_width - margin, G.label[ Z ], G.label[ Z ] );
+			TRY
+			{
+				label = paren_replace( G.label[ Z ] );
+				fprintf( fp, "gs %f (%s) ch sub %f (%s) cw sub t 90 r 0 0 m "
+							 "(%s) show gr\n", x + 28.0, label,
+						 paper_width - margin, label, label );
+				T_free( label );
+				TRY_SUCCESS;
+			}
 
 		/* Make the color scale */
 
@@ -1330,10 +1346,10 @@ static void print_comm( FILE *fp )
 	fprintf( fp, "5 (X) ch 1.5 mul add gs translate dup 0 0 m np\n"
 				 "(m) cw neg (X) ch -1.5 mul m\n"
 				 "(m) cw 2 mul add 0 rl\n"
-				 "0 (X) ch %d 2 mul 1 add mul rl\n"
+				 "0 (X) ch %d 1.65 mul 4 add mul rl\n"
 				 "(m) cw 2 mul add neg 0 rl cp\n"
-				 "gs %s f gr s\n",
-			 num_lines, print_with_color ? "0.95 dup dup srgb" : "0.95 sgr" );
+				 "gs 0.975 %s f gr s\n",
+			 num_lines - 1, print_with_color ? "dup dup srgb" : "sgr" );
 
 	fprintf( fp, "0 0 m\n"
 			     "count { dup show sw neg (X) ch 1.65 mul rm } repeat\n"
@@ -1360,7 +1376,7 @@ static void print_comm( FILE *fp )
 static char **split_into_lines( int *num_lines )
 {
 	static char **lines;
-	char *cp;
+	static char *cp;
 	static int nl;
 	static int cur_size;
 	static int i = 0;
@@ -1434,6 +1450,20 @@ static char **split_into_lines( int *num_lines )
 			lines[ i ] = T_malloc( count );
 			memcpy( lines[ i ], cp, count );
 			lines[ i ][ count - 1 ] = '\0';
+
+			TRY
+			{
+				cp = paren_replace( lines[ i ] );
+				TRY_SUCCESS;
+			}
+			OTHERWISE
+			{
+				T_free( lines[ i ] );
+				PASSTHROUGH( );
+			}
+
+			T_free( lines[ i ] );
+			lines[ i ] = cp;
 		}
 
 		TRY_SUCCESS;
@@ -1448,6 +1478,40 @@ static char **split_into_lines( int *num_lines )
 
 	*num_lines = nl;
 	return lines;
+}
+
+
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+static char *paren_replace( const char *str )
+{
+	char *sp;
+	char *cp;
+	long p_count, len, i;
+
+
+	if ( str == NULL )
+		return NULL;
+
+	for ( p_count = 0, len = 1, sp = ( char * ) str; *sp != '\0'; sp++, len++ )
+		if ( *sp == '(' || *sp == ')' )
+			p_count++;
+
+	if ( p_count == 0 )
+		return T_strdup( str );
+
+	cp = sp = T_malloc( len + p_count );
+	strcpy( sp, str );
+
+	for ( i = len; *cp != '\0'; i--, cp++ )
+		if ( *cp == '(' || *cp == ')' )
+		{
+			memmove( cp + 1, cp, i );
+			*cp++ = '\\';
+		}
+
+	return sp;
 }
 
 
