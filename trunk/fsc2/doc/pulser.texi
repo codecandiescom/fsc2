@@ -261,16 +261,16 @@ Beside defining at wich of the output connectors the output for a
 function will apear you can also set other properties for the pulses. As
 far as the hardware allows you may set the high and the low voltage for
 all pulses with this function by using the keywords @code{V_HIGH} and
-@code{V_LOW}:
+@code{V_LOW}@footnote{Instead of @code{V_HIGH} you can also write
+@code{VHIGH}, @code{V_H} or @code{VH} and for @code{V_LOW} you may use
+@code{VLOW}, @code{V_L} or @code{VL}.}:
 @example
 MICROWAVE: POD = 1, 2, 3, 4  V_HIGH = 4.3 V, V_LOW = -0.5 V;
 RF:        POD = 6           V_HIGH = 2.6 V, V_LOW = 0 V;
 RF_GATE:   POD = 7           V_HIGH = 5 V,   V_LOW = 0 V;
 @end example
 Please note that the high voltage must always be larger than the low
-voltage@footnote{Instead of @code{V_HIGH} you can also write @code{VHIGH},
-@code{V_H} or @code{VH} and for @code{V_LOW} you may use @code{VLOW},
-@code{V_L} or @code{VL}.}.
+voltage.
 
 If a function requires the output levels to be inverted (i.e.@ that the
 voltage is high while there are no pulses and low on pulses) use the
