@@ -178,7 +178,7 @@ try_again:
 				
 
 			case '1' :      /* Probe F1 is connected -> OK for X-band*/
-				if ( exist_device( "x_band" ) )
+				if ( exist_device( "aeg_x_band" ) )
 					break;
 				eprint( FATAL, "ER035M: Wrong field probe (F1) connected to "
 						"the NMR gaussmeter." );
