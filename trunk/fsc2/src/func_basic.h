@@ -32,6 +32,7 @@ Var *f_sqrt(    Var *v );
 Var *f_random(  Var *v );
 Var *f_setseed( Var *v );
 Var *f_time(    Var *v );
+Var *f_dtime(   Var *v );
 Var *f_date(    Var *v );
 Var *f_dim(     Var *v );
 Var *f_size(    Var *v );

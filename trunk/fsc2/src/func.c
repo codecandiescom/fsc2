@@ -74,6 +74,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "set_seed",      f_setseed,  1, ACCESS_ALL,  UNSET	},
     { "time",          f_time,     0, ACCESS_ALL,  UNSET	},
     { "date",          f_date,     0, ACCESS_ALL,  UNSET	},
+    { "delta_time",    f_dtime,    0, ACCESS_EXP,  UNSET    },
 	{ "print",         f_print,   -1, ACCESS_ALL,  UNSET	},
 	{ "wait",          f_wait,     1, ACCESS_ALL,  UNSET	},
 	{ "init_1d",       f_init_1d, -1, ACCESS_PREP, UNSET	},

@@ -1104,6 +1104,35 @@ Var *f_time( Var *v )
 }
 
 
+/*----------------------------------------------------------*/
+/* Returns a floating point value with the time difference  */
+/* since the last call of the function (in us resolution).  */
+/* The function should be called automatically at the start */
+/* of an experiment so that the user gets the time since    */
+/* the start of the experiment when she calls this function */
+/* for the very first time.                                 */
+/*----------------------------------------------------------*/
+
+Var *f_dtime( Var *v )
+{
+	struct timeval t_new;
+	static struct timeval t_old = { 0, 0 };
+	double diff;
+	long dsec, susec;
+
+
+	gettimeofday( &t_new, NULL );
+
+	dsec = t_new.tv_sec - t_old.tv_sec;
+	dusec = t_new.tv_usec - t_old.tv_usec;
+
+	t_old.tv_sec = t_new.tv_sec;
+	t_old.tv_usec = t_new.tv_usec;
+
+	return vars_push( FLOAT_VAR, ( double ) dsec + 1.e-6 * ( double ) dusec );
+}
+
+
 /*--------------------------------------------------------------------------*/
 /* Returns a string with the current date in a form like "Sat Jun 17, 2000" */
 /*--------------------------------------------------------------------------*/

@@ -553,13 +553,16 @@ void exp_test_run( void )
 		/* 1. Run the test run hook functions of the modules.
 		   2. Save the variables so we can reset them to their initial values
 		      when the test run is finished.
-		   3. Save the relevant values from the pulse structures.
-		   3. Set up a signal handler so that it's possible to stop the test
+		   3. Call the function f_dtime() to initialize the delta time
+		      counter.
+		   4. Save the relevant values from the pulse structures.
+		   5. Set up a signal handler so that it's possible to stop the test
 		      if there are e.g. infinite loops.
 		*/
 
 		TEST_RUN = SET;
 		save_restore_variables( SET );
+		vars_pop( f_dtime( NULL ) );
 		run_test_hooks( );
 
 		cur_prg_token = prg_token;

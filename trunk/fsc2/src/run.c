@@ -83,6 +83,7 @@ bool run( void )
 
 	TRY
 	{
+		vars_pop( f_dtime( NULL ) );
 		run_exp_hooks( );
 		check_for_further_errors( &compile_test, &compilation );
 		TRY_SUCCESS;
