@@ -137,21 +137,20 @@ are not available. It can even happen that make stops with an error message
 in this case (i.e. during making the documenntation). This does *not* mean
 that the program didn't compile succesfully!
 
-Please don't start make from one of the subdirectories, this is bound to
-fail.
+Please don't start 'make' from one of the subdirectories, this is bound to
+fail in most cases.
 
 If you get more than a few warnings during the compilation stage of the
 program or the make process even fails there you should send me an email
 with the output of make.
 
-When the compilation of the program succeded (even though the creation of
-the documentation failed at some stage), you can now install the program
-by typing 'make install'. Normally, you will need root privileges to do so.
+When the compilation of the program succeded (even though making the
+documentation failed at some stage), you can now install the program by
+typing 'make install'. Normally, you will need root privileges to do so.
 You should skip the installation if you changed the installation directory
 from '/usr/local' to './', i.e. the main directory of the package. If making
-the documentation failed with an error also the installion may fail during
-installation of the documentation, but this is not a something to get woried
-about...
+the documentation failed with an error also the installion may fail while
+installing the documentation, but this is not something to worry about...
 
 
 D) Simple Tests
@@ -159,8 +158,9 @@ D) Simple Tests
 
 The subdirectory 'edl' contains several several EDL programs that you can use
 to test fsc2 and get aquinted with the syntax. Please note that some of the
-files will not work - I didn't had time to systematically weed them out.
-There are a few programs that will even work without any devices, these are
+files will not work - I didn't had time to systematically weed out the ones
+that are outdated. There are a few programs that will even work without any
+devices, these are
 
   a.edl
   gr.edl
@@ -170,10 +170,9 @@ There are a few programs that will even work without any devices, these are
   2d_endor_test.edl
   2_td.edl
 
-Just start by typing 'fsc2 a.edl' or 'fsc2 z.edl' to get an idea about how
-fsc2 displays 1-dimensional and 2-dimensional data sets.
+Just start by typing 'fsc2 a.edl' or 'fsc2 z.edl' and click onto the "Start"
+button to get an idea about how fsc2 displays 1-dimensional and 2-dimensional
+data sets.
+                                            Have fun, Jens
 
-                            Lots of fun,
-                                          Jens Thoms Toerring
-
-                                 email: Jens.Toerring@physik.fu-berlin.de
+                               email: Jens.Toerring@physik.fu-berlin.de
