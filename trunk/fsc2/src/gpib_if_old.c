@@ -780,6 +780,50 @@ static void gpib_read_end( const char *dev_name, char *buffer, long received,
 }
 
 
+/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+
+int gpib_serial_poll( int device, unsigned char *stb )
+{
+	char *dev_name;
+
+
+    TEST_BUS_STATE;              /* bus not initialised yet ? */
+
+	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+	{
+		sprintf( gpib_error_msg, "CALL of gpib_serial_poll for unknown device "
+				 "(device number %d)\n", device );
+		return FAILURE;
+	}
+
+    if ( ll > LL_ERR )
+        gpib_log_function_start( "gpib_serial_poll", dev_name );
+
+    ibrsp( device, stb );
+
+    if ( ll > LL_NONE )
+        gpib_log_function_end( "gpib_serial_poll", dev_name );
+
+    if ( ibsta & ERR )
+    {
+        sprintf( gpib_error_msg, "Can't serial poll device %s, "
+				 "gpib_status = 0x%x", dev_name, ibsta );
+        return FAILURE;
+    }
+
+    if ( ll >= LL_CE )
+	{
+		seteuid( EUID );
+		fprintf( gpib_log, "-> Received status byte = 0x%x\n", *stb );
+		fflush( gpib_log );
+		seteuid( getuid( ) );
+	}
+
+    return SUCCESS;
+}
+
+
 /*----------------------------------------------------------------*/
 /* Prints the date and a user supplied message into the log file. */
 /* The user can call this function in exactely the same way as    */

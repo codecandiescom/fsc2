@@ -2,7 +2,7 @@
 
 simp_modules   = User_Functions.c sr510.c sr530.c sr810.c sr830.c \
 				 aeg_s_band.c aeg_x_band.c er035m.c er035m_s.c \
-				 er035m_sa.c er035m_sas.c bh15.c keithley228a.c
+				 er035m_sa.c er035m_sas.c bh15.c keithley228a.c egg4402.c
 dg2020_f       = dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
 				 dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
 dg2020_b       = dg2020_b.c dg2020_gen_b.c dg2020_pulse_b.c dg2020_util_b.c \
@@ -12,19 +12,16 @@ hfs9000        = hfs9000.c hfs9000_gen.c hfs9000_pulse.c hfs9000_util.c \
 tds754a        = tds754a.c tds754a_gpib.c tds754a_util.c
 tds744a        = tds744a.c tds744a_gpib.c tds744a_util.c
 tds540         = tds540.c  tds540_gpib.c  tds540_util.c
+tds520c        = tds520c.c tds520c_gpib.c tds520c_util.c
 tds520a        = tds520a.c tds520a_gpib.c tds520a_util.c
 tds520         = tds520.c  tds520_gpib.c  tds520_util.c
 hp8647a        = hp8647a.c hp8647a_util.c hp8647a_gpib.c hp8647a_lexer.c
-comp_modules   = dg2020_f dg2020_b hfs9000 tds754a tds744a tds540 tds520a \
-                 tds520 hp8647a
+comp_modules   = dg2020_f dg2020_b hfs9000 tds754a tds744a tds540 tds520c \
+                 tds520a tds520 hp8647a
 
 src_headers    = $(addprefix ../src/,$(headers))
 
 CFLAGS        += -I../src
-
-ifneq ($(shell hostname -f),pion.anorg.chemie.uni-frankfurt.de)
-	simp_modules += egg4402.c
-endif
 
 
 .SUFFIXES:
@@ -33,11 +30,6 @@ endif
 
 all: $(comp_modules:=.so) $(simp_modules:.c=.so)
 
-#$(comp_modules:=.so): $($($(subst .so,,$@)):.c=.o)
-#	$(CC) -shared -o $@ $(subst .c,.o,$($(subst .so,,$@))) -lm $(LDFLAGS)
-#	chmod 644 $@
-
-#$(comp_modules:.o): $(subst .o,.c,$@) $(src_headers)
 
 dg2020_f.so: ${dg2020_f:.c=.o}
 	$(CC) -shared -o $@ ${dg2020_f:.c=.o} -lm $(LDFLAGS)
@@ -63,6 +55,10 @@ tds540.so: ${tds540:.c=.o}
 	$(CC) -shared -o $@ ${tds540:.c=.o} -lm $(LDFLAGS)
 	chmod 644 $@
 
+tds520c.so: ${tds52ca:.c=.o}
+	$(CC) -shared -o $@ ${tds520c:.c=.o} -lm $(LDFLAGS)
+	chmod 644 $@
+
 tds520a.so: ${tds520a:.c=.o}
 	$(CC) -shared -o $@ ${tds520a:.c=.o} -lm $(LDFLAGS)
 	chmod 644 $@
@@ -85,6 +81,7 @@ ${hfs9000:.c=.o}:  hfs9000.h
 ${tds754a:.c=.o}:  tds754a.h
 ${tds744a:.c=.o}:  tds744a.h
 ${tds540:.c=.o}:   tds540.h
+${tds520c:.c=.o}:  tds520c.h
 ${tds520a:.c=.o}:  tds520a.h
 ${tds520:.c=.o}:   tds520.h
 ${hp8647a:.c=.o}:  hp8647a.h

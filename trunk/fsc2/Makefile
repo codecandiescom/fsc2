@@ -160,8 +160,7 @@ install:
 install-pion.anorg.chemie.uni-frankfurt.de:
 	$(RM) $(RMFLAGS)  $(libdir)/dg2020.so $(libdir)/s_band.so \
 					  $(libdir)/lockin.so $(libdir)/gaussmeter.so \
-					  $(libdir)/magnet.so $(libdir)/pulser.so \
-					  $(libdir)/tds520c.so
+					  $(libdir)/magnet.so $(libdir)/pulser.so
 	ln -s $(libdir)/dg2020_f.so $(libdir)/dg2020.so
 	chown fsc2.fsc2 $(libdir)/dg2020.so
 	ln -s $(libdir)/dg2020_f.so $(libdir)/pulser.so
@@ -174,8 +173,6 @@ install-pion.anorg.chemie.uni-frankfurt.de:
 	chown fsc2.fsc2 $(libdir)/gaussmeter.so
 	ln -s $(libdir)/sr510.so $(libdir)/lockin.so
 	chown fsc2.fsc2 $(libdir)/lockin.so
-	ln -s $(libdir)/tds520a.so $(libdir)/tds520c.so
-	chown fsc2.fsc2 $(libdir)/tds520c.so
 
 install-crowley.physik.fu-berlin.de:
 	$(INSTALL) -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
