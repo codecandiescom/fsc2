@@ -235,7 +235,7 @@ double hp8647a_get_att( double freq )
 int hp8647a_set_mod_param( Var *v )
 {
 	const char *type[ ] =   { "FM", "AM", "PHASE" },
-		       *source[ ] = { "EXT AC", "AC","EXT DC", "DC",
+		       *source[ ] = { "EXT AC", "AC", "EXT DC", "DC",
 							  "INT 1kHz", "INT 1 kHz", "INT 1", "1kHz",
 							  "1 kHz", "1", "INT 400Hz", "INT 400 Hz",
 							  "INT 400", "400Hz", "400 Hz", "400" };
