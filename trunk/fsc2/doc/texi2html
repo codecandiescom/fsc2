@@ -1059,20 +1059,20 @@ sub T2H_DEFAULT_print_navigation
 			&$button($fh, $vertical);
 		} elsif ($button eq ' ') { # handle space button
 			print $fh
-			$T2H_ICONS && $T2H_ACTIVE_ICONS{' '} ?
-				&$T2H_button_icon_img($button, $T2H_ACTIVE_ICONS{' '}) :
-			    $T2H_NAVIGATION_TEXT{' '};
+				$T2H_ICONS && $T2H_ACTIVE_ICONS{' '} ?
+					&$T2H_button_icon_img($button, $T2H_ACTIVE_ICONS{' '}) :
+					$T2H_NAVIGATION_TEXT{' '};
 		} elsif ($T2H_HREF{$button}) { # button is active
 			print $fh
 				$T2H_ICONS && $T2H_ACTIVE_ICONS{$button} ? # use icon ?
-					t2h_anchor('', $T2H_HREF{$button},  # yes
+				t2h_anchor('', $T2H_HREF{$button},  # yes
 						   &$T2H_button_icon_img($button,
 												 $T2H_ACTIVE_ICONS{$button},
 												 $T2H_NAME{$button}))
-						: # use text
+					: # use text
 						"[" .
-					    t2h_anchor('', $T2H_HREF{$button}, $T2H_NAVIGATION_TEXT{$button}) .
-					    "]";
+						t2h_anchor('', $T2H_HREF{$button},
+								   $T2H_NAVIGATION_TEXT{$button}) . "]";
 		} else { # button is passive
 			print $fh
 				$T2H_ICONS && $T2H_PASSIVE_ICONS{$button} ?
