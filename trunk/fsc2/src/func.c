@@ -36,7 +36,7 @@
    the variable for the function. Again, for functions with a variable number
    of arguments removing the arguments is impossible - the function has to do
    it by itself. Finally the result of the function is pushed onto the stack.
-/
+*/
 
 
 static Var *f_int( Var *v  );
