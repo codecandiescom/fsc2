@@ -238,7 +238,6 @@ void *get_shm( int *shm_id, long len )
 	void *buf;
 
 
-
 	while ( ( *shm_id = shmget( IPC_PRIVATE, len, IPC_CREAT | 0600 ) ) < 0 )
 	{
 		if ( errno == ENOSPC || errno == ENOMEM)  /* wait for 10 ms */
