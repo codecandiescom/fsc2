@@ -439,7 +439,7 @@ Var *synthesizer_step_frequency( Var *v )
 		vars_check( v, INT_VAR | FLOAT_VAR );
 
 		/* Allow setting of the step frequency in the PREPARATIONS section
-		   onl[y once */
+		   only once */
 
 		if ( ! TEST_RUN && I_am == PARENT && hp8647a.step_freq_is_set )
 		{
