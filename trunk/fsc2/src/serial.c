@@ -251,8 +251,8 @@ struct termios *fsc2_serial_open( int sn, const char *devname, int flags )
 			sizeof( struct termios ) );
 	lower_permissions( );
 
-	Serial_Port[ sn ].is_open = SET;
 	Serial_Port[ sn ].fd = fd;
+	Serial_Port[ sn ].is_open = SET;
 
 	return &Serial_Port[ sn ].new_tio;
 #else

@@ -1327,6 +1327,7 @@ CATCH( OUT_OF_MEMORY_EXCEPTION )
 
 
 @subsection @code{bool} type
+@cindex bool type
 
 @acronym{fsc2} already has a @code{typedef} for the @code{bool} type,
 i.e.@: for variables that can have only two values, either @code{1} or
