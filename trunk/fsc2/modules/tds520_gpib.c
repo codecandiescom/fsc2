@@ -695,7 +695,7 @@ double tds520_get_area( int channel, WINDOW *w, bool use_cursor )
 
 	if ( use_cursor )
 	{
-		window = tds520.timebase * tds520.rec_len / TDS_POINTS_PER_DIV;
+		window = tds520.timebase * tds520.rec_len / TDS520_POINTS_PER_DIV;
 
 		tds520_set_cursor( 1, w != NULL ?
 						   w->start : ( - tds520.trig_pos * window ) );
@@ -727,7 +727,7 @@ double tds520_get_area( int channel, WINDOW *w, bool use_cursor )
 
 	/* Return the integrated area, multiplied by the the time per point */
 
-	return ( area - length * pos ) * tds520.timebase / TDS_POINTS_PER_DIV;
+	return ( area - length * pos ) * tds520.timebase / TDS520_POINTS_PER_DIV;
 }
 
 
@@ -755,7 +755,7 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	if ( use_cursor )
 	{
-		window = tds520.timebase * tds520.rec_len / TDS_POINTS_PER_DIV;
+		window = tds520.timebase * tds520.rec_len / TDS520_POINTS_PER_DIV;
 		tds520_set_cursor( 1, w != NULL ?
 						   w->start : ( - tds520.trig_pos * window ) );
 		tds520_set_cursor( 2, w != NULL ?
@@ -862,7 +862,7 @@ double tds520_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 
 	if ( use_cursor )
 	{
-		window = tds520.timebase * tds520.rec_len / TDS_POINTS_PER_DIV;
+		window = tds520.timebase * tds520.rec_len / TDS520_POINTS_PER_DIV;
 		tds520_set_cursor( 1, w != NULL ?
 						   w->start : ( - tds520.trig_pos * window ) );
 		tds520_set_cursor( 2, w != NULL ?

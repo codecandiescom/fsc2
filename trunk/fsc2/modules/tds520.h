@@ -44,7 +44,7 @@
 
 
 
-#define TDS_POINTS_PER_DIV 50
+#define TDS520_POINTS_PER_DIV 50
 
 #define MAX_CHANNELS  12         /* number of channel names */
 

@@ -43,7 +43,7 @@
 #define TDS520A_TEST_TRIG_CHANNEL 0
 
 
-#define TDS_POINTS_PER_DIV 50
+#define TDS520A_POINTS_PER_DIV 50
 
 #define MAX_CHANNELS  12         /* number of channel names */
 
