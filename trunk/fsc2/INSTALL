@@ -58,8 +58,8 @@ After installing the required tools and libraries and extracting the archive
 go into the new directory called fsc2. Edit the Makefile in this subdirectory.
 
 Normally, the program and all auxiliary files will be installed in /usr/local
-(specifically /usr/local/bin, /usr/local/lib/fsc2 and /usr/local/info). To
-change this edit the first lines of the Makefile.
+(specifically /usr/local/bin, /usr/local/lib/fsc2, /usr/local/info and
+/usr/local/share/doc). To change this edit the first lines of the Makefile.
 
 If you use the National Instruments GPIB driver you can change the place
 where fsc2 expects the configuration file. Usually this does need to be

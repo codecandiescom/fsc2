@@ -84,7 +84,9 @@ clean:
 
 
 install:
-	$(INSTALL) -m 444 fsc2.1.gz /usr/local/man/man1
+	$(INSTALL) -d $(mandir)/man1
+	$(INSTALL) -m 444 fsc2.1.gz $(mandir)/man1
+	$(INSTALL) -d $(docdir)
 	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2*.html $(docdir)
 	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.css $(docdir)
 	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2fig*.png $(docdir)

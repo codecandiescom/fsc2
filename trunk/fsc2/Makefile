@@ -28,12 +28,13 @@ prefix         = /usr/local
 bindir         = $(prefix)/bin
 libdir         = $(prefix)/lib/fsc2
 auxdir         = $(libdir)/aux
-docdir         = $(libdir)/doc
-infodir        = /usr/local/info
+docdir         = $(prefix)/share/doc
+mandir         = $(prefix)/man
+infodir        = $(prefix)/info
 
 # Set the location of the GPIB configuration file (only needed with the
 # National Instruments GPIB library) and the file for writing logs about
-# the interaction on the GPIB bus
+# the activity on the GPIB bus. These settings are compiled into the program.
 
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log
@@ -76,12 +77,7 @@ EXEC_INSTALL   = install             # command for installing executables
 ########### (unless you really know what you're doing ...) #################
 ############################################################################
 
-# Define variables with full paths for the 'mail' and 'addr2line' programs
-
-MAIL_PROGRAM   = $(shell which mail)
-ADDR2LINE      = $(shell which addr2line)
-
-# Set up a make variable with the machines FQDN
+# Set up a variable with the machines FQDN
 
 machine_name   = $(shell hostname -f)
 
@@ -91,7 +87,7 @@ ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
 	CFLAGS    += -DIS_STILL_LIBC1
 endif
 
-# Pass GPIB_LOG and GPIB_CONF and other stuff via macros to the source files
+# Pass variables via macros to the source files
 # For directories make sure they end with a `/'.
 
 ifdef GPIB_LOG
@@ -134,7 +130,12 @@ ifdef MAIL_ADDRESS
 	CFLAGS += -DMAIL_ADDRESS=\"$(MAIL_ADDRESS)\"
 endif
 
-# Make sure the mailprogram and addr2line got found by which,
+# Define variables with full paths for the 'mail' and 'addr2line' programs
+
+MAIL_PROGRAM   = $(shell which mail)
+ADDR2LINE      = $(shell which addr2line)
+
+# Make sure the mail program and addr2line got found by which,
 # otherwise don't set the variables
 
 ifneq ($(word 1,$(MAIL_PROGRAM)),which:)
