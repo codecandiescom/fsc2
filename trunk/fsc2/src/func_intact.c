@@ -1732,7 +1732,10 @@ Var *f_icreate( Var *v )
 	if ( type == FLOAT_INPUT || type == FLOAT_OUTPUT )
 	{
 		if ( form_str )
-			new_io->form_str = form_str;
+		{
+			new_io->form_str = strdup( form_str );
+			T_free( form_str );
+		}
 		else
 			new_io->form_str = T_strdup( "%g" );
 	}

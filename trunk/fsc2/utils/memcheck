@@ -27,7 +27,9 @@
 
 use strict;
 
-my ( $h, %h1, %h2, @f, $key );
+my ( $h, %h1, %h2, @f, $key, $exe );
+
+$exe = ( -f "fsc2" ) ? "fsc2" : "/usr/local/bin/fsc2";
 
 while ( <> ) {
 
@@ -35,15 +37,17 @@ while ( <> ) {
 
 	$h = $f[ 0 ] eq "(0)" ? \%h1 : \%h2;
 
-	$$h{ $f[ 2 ] } = "$1 $f[ 2 ] at line $."
+	$$h{ $f[ 2 ] } = "$1 $f[ 2 ] called at `addr2line -e $exe $f[ 5 ]`"
 		if $f[ 1 ] =~ /^((malloc)|(calloc)|(strdup)):$/;
 
 	if ( $f[ 1 ] eq "realloc:" ) {
 		if ( $f[ 2 ] eq "(nil)" ) {
-			$$h{ $f[ 4 ] } = "$f[ 0 ]: realloc from (nil) $f[ 4 ]";
+			$$h{ $f[ 4 ] } = "$f[ 0 ]: realloc from (nil) $f[ 4 ] called at " .
+				             `addr2line -e $exe $f[ 7 ]`
 		} else {
 			if ( not defined $$h{ $f[ 2 ] } ) {
-				print "$f[ 0 ]: realloc error for $f[ 2 ] at $.\n";
+				print "$f[ 0 ]: realloc error for $f[ 2 ] called at " .
+					  `addr2line -e $exe $f[ 7 ]`
 			} else {
 				delete $$h{ $f[ 2 ] };
 			}
@@ -53,7 +57,8 @@ while ( <> ) {
 
 	if ( $f[ 1 ] eq "free:" ) {
 		if ( not defined $$h{ $f[ 2 ] } ) {
-			print "$f[ 0 ]: free error for $f[ 2 ] at line $.\n";
+			print "$f[ 0 ]: free error for $f[ 2 ] called at " .
+				  `addr2line -e $exe $f[ 4 ]`;
 		} else {
 			delete $$h{ $f[ 2 ] };
 		}
