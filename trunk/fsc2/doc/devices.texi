@@ -144,8 +144,12 @@ experiment, i.e.@: it will sweep the field up and down for some
 time, please be patient. See below on how to reduce the amount of time
 spent with field calibration.
 
-
 @table @samp
+@item magnet_name()
+@findex magnet_name()
+Returns a string with the name of the magnet tht is being used.
+
+
 @item magnet_setup()
 @findex magnet_setup()
 The function can be called to set the start field and the field step
@@ -257,6 +261,11 @@ All gaussmeter functions can only be used in queries in the
 @code{EXPERIMENT} section of the @acronym{EDL} program.
 
 @table @samp
+@item gaussmeter_name()
+@findex gaussmeter_name()
+Returns a string with the name of the gaussmeter being used.
+
+
 @item find_field()
 @findex find_field()
 This function is defined in the device drivers @code{er035m} and
@@ -265,8 +274,8 @@ Gauss.  The function can only be called in the @code{EXPERIMENT}
 section.
 
 
-@item field_resolution()
-@findex field_resolution()
+@item gaussmeter_resolution()
+@findex gaussmeter_resolution()
 This function is defined in the device drivers @code{er035m} and
 @code{er035m_s}. It returns the resolution in Gauss used in measurements
 of the magnetic field. The function can only be called in the
@@ -308,7 +317,13 @@ to set a parameter an argument has to be passed to the function. Because
 of these different modes of calling the functions one should carefully
 check the arguments to achieve the desired results.
 
+
 @table @samp
+@item lockin_name()
+@findex lockin_name()
+Returns a string with the name of the lock-in amplifier being used.
+
+
 @item lockin_get_data()
 @findex lockin_get_data()
 This is function only for queries, i.e.@: to fetch measured values
@@ -490,6 +505,11 @@ tds754a
 @end example
 
 @table @samp
+@item digitizer_name()
+@findex digitizer_name()
+Returns a string with the name of the digitizer being used.
+
+
 @item digitizer_timebase()
 @findex digitizer_timebase()
 The function queries (if called with no argument) or sets (if called
@@ -869,6 +889,10 @@ the pulser funtions will probably only become understandable after
 reading the chapter about pulsers and pulses.
 
 @table @samp
+@item pulser_name()
+@findex pulser_name()
+Returns a string with the name of the digitizer being used.
+
 
 @item pulser_lock_keyboard()
 @findex pulser_lock_keyboard()
@@ -935,6 +959,14 @@ phase, i.e.@: the first phase of the phase sequence (defined in the
 are passed to the function the phases of only these pulses are reset.
 
 
+@item pulser_stop_on_update()
+@findex pulser_stop_on_update()
+This function exists for the HFS9003 only. While doing updates of the
+pulser to set new pulse positions and length etc.@: it usually gets
+switched off. By calling this function with an argument of @code{0} you
+can tell to pulser to continue even while doing updates. If callled with
+an argumnt of @code{1} you may switch back to the default behaviour.
+
 @end table
 
 
@@ -952,6 +984,10 @@ in the @code{DEVICES} section.
 
 
 @table @samp
+@item synthesizer_name()
+@findex synthesizer_name()
+Returns a string with the name of the synthesizer being used.
+
 
 @item synthesizer_state()
 @findex synthesizer_state()
@@ -1198,6 +1234,10 @@ the @acronym{EDL} program.
 
 
 @table @samp
+@item temp_contr_name()
+@findex temp_contr_name()
+Returns a string with the name of the temperature controller being used.
+
 
 @item temp_contr_temperature()
 @findex temp_contr_temperature()
