@@ -62,6 +62,7 @@ bool setup_comm( void );
 void end_comm( void );
 long reader( void *ret );
 void writer( int type, ... );
+int new_data_callback( XEvent *a, void *b );
 
 
 #endif  /* ! COMM_HEADER */
