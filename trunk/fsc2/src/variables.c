@@ -2316,8 +2316,12 @@ void vars_check( Var *v, int type )
 	{
 		for ( i = 0, t = v->type; ! ( t & 1 ); t >>= 1, i++ )
 			/* empty */ ;
-		print( FATAL, "Variable of type %s can't be used in this context.\n",
-			   types[ i ] );
+		if ( v->name != NULL )
+			print( FATAL, "The variable '%s' of type %s can't be used in "
+				   "this context.\n", v->name, types[ i ] );
+		else
+			print( FATAL, "Variable of type %s can't be used in this "
+				   "context.\n", types[ i ] );
 		THROW( EXCEPTION );
 	}
 
