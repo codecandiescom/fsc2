@@ -41,32 +41,32 @@ This chapter tries to describe how to write new modules for use with
 @section What modules are good for
 
 
-Modules allow to extend the set of commands to be used in an @code{EDL}
-script. This is especially important if a new device needs to be
-integrated into @code{fsc2}. You don't have to change @code{fsc2} itself
-but just write a new module for the new devices. For this you don't have
-to understand completely how the @code{fsc2} works. You only must be
-able to write functions in C for the communication with the new device
-and understand a few basics about @code{fsc2}'s variables. They are
-explained in one of the following sections. But modules may also be used
-for other purposes beside handling devices - one might also write
-modules that supply new mathematical functions or other useful
-functionalities. But the following discussion will concentrate on
-modules for new devices, writing other kinds of modules is even simpler.
+Modules allow to extend the set of commands that can be used in an
+@code{EDL} script. This is especially important if a new device needs to
+be integrated into @code{fsc2}. You don't have to change @code{fsc2}
+itself but just write a new module for the devices. For this you don't
+have to understand completely how the @code{fsc2} works. You only must
+be able to write functions in C for the communication with the new
+device and understand a few basics about @code{fsc2}s variables. But
+modules may also be used for other purposes beside handling devices,
+one might also write modules that supply new mathematical functions or
+other useful functionalities. But the following discussion will
+concentrate on modules for new devices, writing other kinds of modules
+is even simpler.
 
 Let's start with a short summary of the things a module for a device has
 to do. Usually, a module contains a few functions that talk to the
 device via an hardware interface, e.g.@: the GPIB bus or a serial port
 (or whatever else there might be). As an example for the following a
 lock-in amplifier will be used. Probably the most basic operation is to
-get data from the amplifier. So one will have to create a function
-called, for example, @code{lockin_get_data()}. This name will be used in
-the module written in C as well as in the @code{EDL} file.
+fetch data from it. So one needs to create a function, called for
+example @code{lockin_get_data()}. This name will be used in the module
+written in C as well as in the @code{EDL} scripts using the function.
 
-Before starting to write a new module one has to decide about the name
-for the device, which will also be the name of the module. E.g.@: for the
-@i{Stanford Research 510} lock-in amplifier I picked the name SR510
-because that's what's written on the front panel.
+But before starting to write a new module one has to decide about the
+name for the device, which will also be the name of the module. E.g.@:
+for the @i{Stanford Research 510} lock-in amplifier I picked the name
+SR510 because that's what's written on the front panel.
 
 A new device has to be included into the device name data base called
 @file{Devices}
@@ -178,7 +178,7 @@ Now let's have a look at the way @code{fsc2} internally stores
 variables. Here is the (actually somewhat simplified) @code{typedef} of the
 structure for variables:
 @example
-typedef struct Var_
+typedef struct Var
 @{
     int type;                /* type of the variable */
     union
@@ -190,7 +190,7 @@ typedef struct Var_
         char   *sptr;        /* for string constants */
     @} val;
     size_t len;              /* length of array */
-    struct Var_ *next;       /* next variable on stack */
+    struct Var *next;        /* next variable on stack */
 @} Var;
 @end example
 
