@@ -1225,7 +1225,7 @@ x2 = 1.0 + ( val < 0 ? 5 : 9 );
 @noindent
 @code{x1} and @code{x2} will have different values. In the first line it
 is checked if @code{val} plus @code{1.0} is smaller than @code{0} and
-@code{x1} is set accordingly to either @ocde{5} or @code{9}, while in
+@code{x1} is set accordingly to either @code{5} or @code{9}, while in
 the second line it is checked if @code{val} is less than @code{0} and,
 depending on the result, either @code{5} or @code{9} is added to
 @code{1.0}, resulting in @code{6} or @code{10}. Also the follwing two
