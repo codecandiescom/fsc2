@@ -18,4 +18,7 @@ WITH_WITIO_48      := yes
 witio_48_libs      := libwitio_48.so
 WITH_PCI_MIO_16E_1 := yes
 pci_mio_16e_1_libs := libni_daq.so
+WITH_RULBUS        := yes
+rulbus_incl_path   := /usr/local/include
+rulbus_lib_path    := /usr/local/lib
 MAIL_ADDRESS       := jens

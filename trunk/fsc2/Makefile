@@ -197,14 +197,18 @@ SERIAL_LOCK_DIR    := /var/lock
 
 # The next two lines must be uncommented if you want support for the RULBUS
 # (Rijksuniversiteit Leiden BUS) and the devices connected to it. If the
-# library for the card isn't in a place where the linker will find it
-# automatically (e.g. '/usr/lib' and '/usr/local/lib') you need to specify
-# the full absolut path for the library (e.g. '/usr/xxx/yyy/librulbus.so').
-# You must make sure that the library for the card is already properly
-# installed if you want to build fsc2 with support for the card.
+# include file for the library isn't in one of the standard places (i.e.
+# '/usr/include' or '/usr/local/include') you have to specify the complete
+# path to the place where it installed (e.g. '/usr/xxx/yyy).If the library
+# for the card isn't in a place where the linker will find it automatically
+# (e.g. '/usr/lib' and '/usr/local/lib') you need to also specify the full
+# absolut path for the library. You must make sure that the library for the
+# Rulbus interface is already properly installed if you want to build fsc2
+# with support for it.
 
 # WITH_RULBUS        := yes
-# rulbus_libs        := librulbus.so
+# rulbus_incl_path   := /usr/lib/include
+# rulbus_lib_path    := /usr/lib/local
 
 
 # Comment out the next two lines if you don't want the ability to run a HTTP
@@ -419,7 +423,6 @@ else
 endif
 
 
-
 ifdef GPIB_HEADER_DIR
 	INCLUDES += -I$(GPIB_HEADER_DIR)
 endif
@@ -448,6 +451,17 @@ endif
 
 ifdef SERIAL_LOCK_DIR
 	CONFFLAGS += -DSERIAL_LOCK_DIR=\"$(SERIAL_LOCK_DIR)\"
+endif
+
+
+ifdef WITH_RULBUS
+	ifdef rulbus_incl_path
+		INCLUDES += -I$(rulbus_incl_path)
+	endif
+	ifdef rulbus_lib_path
+		LFLAGS += -L$(rulbus_lib_path)
+	endif
+	LFLAGS += -lrulbus
 endif
 
 
@@ -741,6 +755,7 @@ clean:
 	$(MAKE) -C ni6601 clean
 	$(MAKE) -C witio_48 clean
 	$(MAKE) -C ni_daq clean
+	$(MAKE) -C rulbus clean
 
 distclean:
 	$(MAKE) -C $(sdir) distclean
@@ -757,6 +772,7 @@ endif
 	$(MAKE) -C ni6601 distclean
 	$(MAKE) -C witio_48 distclean
 	$(MAKE) -C ni_daq distclean
+	$(MAKE) -C rulbus distclean
 
 mostlyclean:
 	$(MAKE) -C $(sdir) distclean
