@@ -71,8 +71,7 @@ bool rs690_init( const char *name )
 	   to timing simulator mode and set number of channels per connector
 	   (the number depends on the timebase) */
 
-	sprintf( cmd, "LOM0,TS,%s!", rs690.timebase_type == TIMEBASE_4_NS ?
-			 "4" : ( rs690.timebase_type == TIMEBASE_8_NS ? "8" : "16" ) );
+	sprintf( cmd, "LOM0,TS,%d!", ( 4 << rs690.timebase_type ) );
 	if ( gpib_write( rs690.device, cmd, strlen( cmd ) ) == FAILURE )
 		rs690_gpib_failure( );
 
