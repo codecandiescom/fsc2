@@ -39,9 +39,9 @@ my $unit_width  = 5;          # width for e.g. unit to right of the input field
 
 my @lines;
 my @vars;
-my $guify_entry = '^\s*===\s+';
+my $guify_entry = '^\s*===\s*';
 my $var_entry = $guify_entry .
-    '([A-Za-z0-9_]+)\s+(int|float|menu|file|button)(\s+(.*))?';
+    '([A-Za-z0-9_]+)\s+(int|float|menu|file|button)(\s*(.*))?';
 my $if_entry = $guify_entry . 'if\s*';
 my $elsif_entry = $guify_entry . 'elsif\s*';
 my $else_entry = $guify_entry . 'else\s*$';
@@ -258,7 +258,7 @@ sub get_float_limits {
         return $str;
     }
 
-    if ( $str =~ /^\s*(\[\s*([^:\t ]+)?\s*:\s*([^:\t ]+)?\s*\])(\s+(.*))?$/o ) {
+    if ( $str =~ /^\s*(\[\s*([^:\t ]+)?\s*:\s*([^:\t ]+)?\s*\])(\s*(.*))?$/o ) {
         $str = $5;
 
         $min = $2 if defined $2;
@@ -301,7 +301,7 @@ sub get_int_limits {
         return $str;
     }
 
-    if ( $str =~ /^(\[\s*([^:\t ]+)?\s*:\s*([^:\t ]+)?\s*\])(\s+(.*))?$/o ) {
+    if ( $str =~ /^(\[\s*([^:\t ]+)?\s*:\s*([^:\t ]+)?\s*\])(\s*(.*))?$/o ) {
         $str = $5;
 
         $min = $2 if defined $2;
@@ -337,7 +337,7 @@ sub get_menu_entries {
     my $string_rep = '"((\"|[^"])*)"';
 
     if ( $str =~
-         /^s*\[\s*($string_rep(\s*,\s*$string_rep)?)\s*\](\s+(.*)?)?$/o ) {
+         /^s*\[\s*($string_rep(\s*,\s*$string_rep)?)\s*\](\s*(.*)?)?$/o ) {
         $str = $8;
         my $mstr = $1;
         my @menu_entries;
@@ -370,7 +370,7 @@ sub get_default_value {
     return ( undef, undef ) unless defined $str;
 
     return ( undef, $str ) unless
-        $str =~ /^\s*\[\s*([^\]\t ]+)\s*\](\s+(.*)?)?$/o;
+        $str =~ /^\s*\[\s*([^\]\t ]+)\s*\](\s*(.*)?)?$/o;
 
     $val = $1;
     $str = $3;
@@ -422,11 +422,11 @@ sub get_default_value {
 sub get_string {
     my $str = shift;
 
-    return ( undef, undef ) unless defined $str;
+    return ( undef, undef ) if ! defined $str or $str =~ /^\s*$/;
 
     die "Syntax error at line $lino near \"$str\"\n" unless $str =~ /^\s*\"/o;
 
-    $str =~ /^\s*(\"([^\"]|\\\")*\")(\s+(.*)?)?$/o;
+    $str =~ /^\s*(\"([^\"]|\\\")*\")(\s*(.*)?)?$/o;
     return ( $1, $4 ) if defined $1;
     return ( undef, $str );
 }

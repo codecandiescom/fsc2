@@ -42,11 +42,11 @@ There is often a small set of standard experiments, each with a few
 parameters that need to be changed all of the time. For example in a
 cw-EPR experiment the start and end field and the sweep speed typically
 are such parameters. After some time it can become rather tedious having
-to edit the corresponding @code{EDL} script every time just to set these
-parameters. Besides, for someone not familiar with @code{fsc2}'s syntax
-who just wants to do a simple experiment it may appera to be too
-daunting a task to safely apply the necessary changes to an existing
-@code{EDL} script.
+to edit the corresponding @code{EDL} script every time you need to
+change these parameters. Besides, for someone not familiar with
+@code{fsc2}'s syntax and who just wants to do a simple experiment it may
+appear to be too daunting a task to safely apply the necessary changes
+to an existing @code{EDL} script.
 
 Fortunately, once you have written an @code{EDL} script it is rather
 simple to create a @code{Perl} script from the @code{EDL} script that
@@ -262,6 +262,29 @@ The new popup-menu will allow you to pick the model of the lock-in
 amplifier to be used in the experiment.
 
 @end ifnotinfo
+
+
+Another graphical element that can be used are simple check-buttons,
+i.e.@: buttons that can have two states, either activated or inactive.
+With such a buttom a variable gets associated that has the numerical
+value @code{1} if the button is activated and @code{0} if it's in the
+inactive state. You create such a button with a line like
+@example
+=== MY_BUTTON button [ ON ] "Text describing what the button does"
+@end example
+@noindent
+in the "enhanced @code{EDL} script.
+
+As usual, the first entry on that line after the three equal signs is
+the name of the variable associated with the button and the next entry
+denotes the type of the object, i.e.@: a button. Then follows an
+optional default value for the state of the button in square
+braces. Here you can either use @code{ON} or @code{1} to have the button
+activated by default or @code{OFF} or @code{0} to have is switched
+off. When the default value is not specified the button is switched off
+by default. Finally, one or two optional strings follow, the first one
+specifying the text to apear to the left of the button and the second at
+the right of it.
 
 
 Finally, there are @code{file} variables. These are for cases where you
