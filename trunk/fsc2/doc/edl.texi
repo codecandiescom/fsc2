@@ -14,7 +14,6 @@ This chapter describes the @acronym{EDL} language (@b{E}xperiment
 * Devices::
 * Variables::               Using variables and arrays.
 * Arithmetic::              Doing calculations with variables.
-* Arithmetic with arrays::  Calculations involving arrays.
 * Control structures::      Flow control in an EDL program.
 @end menu
 @end ifinfo
