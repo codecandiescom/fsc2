@@ -124,7 +124,7 @@ PULSE *dg2020_get_pulse( long pnum )
 
 	if ( cp == NULL )
 	{
-		print( FATAL, "Referenced pulse %ld does not exist.\n", pnum );
+		print( FATAL, "Referenced pulse #%ld does not exist.\n", pnum );
 		THROW( EXCEPTION );
 	}
 

@@ -231,7 +231,7 @@ static void ep385_channel_check( CHANNEL *ch )
 		pp = ch->pulse_params + i;
 		if ( pp->pos + pp->len > MAX_PULSER_BITS )
 		{
-			print( FATAL, "Pulse %ld of function '%s' does not fit into the "
+			print( FATAL, "Pulse #%ld of function '%s' does not fit into the "
 				   "pulsers memory.\n",
 				   pp->pulse->num, Function_Names[ ch->function->self ] );
 			THROW( EXCEPTION );
@@ -301,18 +301,21 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 			{
 				if ( FSC2_MODE == EXPERIMENT )
 				{
-					print( FATAL, "Distance between PULSE_SHAPE pulse %ld "
-						   "and DEFENSE pulse %ld got shorter than %s.\n",
+					print( FATAL, "Distance between PULSE_SHAPE pulse #%ld "
+						   "and DEFENSE pulse #%ld got shorter than %s.\n",
 						   shape_p->num, defense_p->num, ep385_ptime(
 							   ep385_ticks2double( ep385.shape_2_defense ) ) );
 					THROW( EXCEPTION );
 				}
 
-				print( SEVERE, "Distance between PULSE_SHAPE pulse %ld "
-					   "and DEFENSE pulse %ld got shorter than %s.\n",
-					   shape_p->num, defense_p->num, ep385_ptime(
-						   ep385_ticks2double( ep385.shape_2_defense ) ) );
-				ep385.shape_2_defense_too_near = SET;
+				if ( ! ep385.shape_2_defense_too_near )
+				{
+					print( SEVERE, "Distance between PULSE_SHAPE pulse #%ld "
+						   "and DEFENSE pulse #%ld got shorter than %s.\n",
+						   shape_p->num, defense_p->num, ep385_ptime(
+							   ep385_ticks2double( ep385.shape_2_defense ) ) );
+					ep385.shape_2_defense_too_near = SET;
+				}
 
 			}
 
@@ -322,18 +325,21 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 			{
 				if ( FSC2_MODE == EXPERIMENT )
 				{
-					print( FATAL, "Distance between DEFENSE pulse %ld and "
-						   "PULSE_SHAPE pulse %ld got shorter than %s.\n",
+					print( FATAL, "Distance between DEFENSE pulse #%ld and "
+						   "PULSE_SHAPE pulse #%ld got shorter than %s.\n",
 						   defense_p->num, shape_p->num, ep385_ptime(
 							   ep385_ticks2double( ep385.defense_2_shape ) ) );
 					THROW( EXCEPTION );
 				}
 
-				print( SEVERE, "Distance between DEFENSE pulse %ld and "
-					   "PULSE_SHAPE pulse %ld got shorter than %s.\n",
-					   defense_p->num, shape_p->num, ep385_ptime(
-						   ep385_ticks2double( ep385.defense_2_shape ) ) );
-				ep385.defense_2_shape_too_near = SET;
+				if ( ! ep385.defense_2_shape_too_near )
+				{
+					print( SEVERE, "Distance between DEFENSE pulse #%ld and "
+						   "PULSE_SHAPE pulse #%ld got shorter than %s.\n",
+						   defense_p->num, shape_p->num, ep385_ptime(
+							   ep385_ticks2double( ep385.defense_2_shape ) ) );
+					ep385.defense_2_shape_too_near = SET;
+				}
 			}
 		}
 	}
@@ -362,7 +368,7 @@ void ep385_full_reset( void )
 
 		if ( ! p->has_been_active && ! ep385.keep_all )
 		{
-			print( WARN, "Pulse %ld is never used.\n", p->num );
+			print( WARN, "Pulse #%ld is never used.\n", p->num );
 			p = ep385_delete_pulse( p );
 			continue;
 		}

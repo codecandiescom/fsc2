@@ -74,15 +74,15 @@ static void dg2020_basic_pulse_check( void )
 
 		if ( ! p->is_function )
 		{
-			print( FATAL, "Pulse %ld is not associated with a function.\n",
+			print( FATAL, "Pulse #%ld is not associated with a function.\n",
 				   p->num );
 			THROW( EXCEPTION );
 		}
 
 		if ( ! p->function->is_used )
 		{
-			print( FATAL, "Function '%s' of pulse %ld hasn't been declared in "
-				   "the ASSIGNMENTS section.\n",
+			print( FATAL, "Function '%s' of pulse #%ld hasn't been declared "
+				   "in the ASSIGNMENTS section.\n",
 				   Function_Names[ p->function->self ], p->num );
 			THROW( EXCEPTION );
 		}
@@ -99,7 +99,7 @@ static void dg2020_basic_pulse_check( void )
 			if ( p->is_pos &&
 				 p->function == &dg2020.function[ PULSER_CHANNEL_DET ] )
 			{
-				print( WARN, "Length of detection pulse %ld is being set to "
+				print( WARN, "Length of detection pulse #%ld is being set to "
 					   "%s.\n", p->num, dg2020_pticks( 1 ) );
 				p->len = 1;
 				p->is_len = SET;
@@ -123,7 +123,7 @@ static void dg2020_basic_pulse_check( void )
 		if ( p->is_pos && p->is_len &&
 			 p->pos + p->len + p->function->delay >= MAX_PULSER_BITS )
 		{
-			print( FATAL, "Pulse %ld does not fit into the pulsers memory. "
+			print( FATAL, "Pulse #%ld does not fit into the pulsers memory. "
 				   "You could try a longer pulser time base.\n", p->num );
 			THROW( EXCEPTION );
 		}
@@ -132,7 +132,7 @@ static void dg2020_basic_pulse_check( void )
 
 		if ( p->pc && p->function->phase_func == NULL )
 		{
-			print( FATAL, "Pulse %ld needs phase cycling but its function "
+			print( FATAL, "Pulse #%ld needs phase cycling but its function "
 				   "(%s) isn't associated with a phase function.\n",
 				   p->num, Function_Names[ p->function->self ] );
 			THROW( EXCEPTION );
@@ -617,7 +617,7 @@ static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 
 		if ( p->pos - f->delay < f->psd )
 		{
-			print( FATAL, "Pulse %ld starts too early to allow setting of a "
+			print( FATAL, "Pulse #%ld starts too early to allow setting of a "
 				   "phase pulse.\n", p->num );
 			THROW( EXCEPTION );
 		}

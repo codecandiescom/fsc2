@@ -520,7 +520,7 @@ Var *pulser_increment( Var *v )
 		if ( ! p->is_dlen )
 		{
 			print( FATAL, "Length change time hasn't been defined for pulse "
-				   "%ld.\n", p->num );
+				   "#%ld.\n", p->num );
 			THROW( EXCEPTION );
 		}
 

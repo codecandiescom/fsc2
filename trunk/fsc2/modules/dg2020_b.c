@@ -230,20 +230,17 @@ int dg2020_b_end_of_test_hook( void )
 	   near to each other bail out */
 
 	if ( dg2020.shape_2_defense_too_near )
-	{
 		print( FATAL, "Distance between PULSE_SHAPE and DEFENSE pulses was "
 			   "shorter than %s during the test run.\n",
 			   dg2020_ptime( dg2020_ticks2double( dg2020.shape_2_defense ) ) );
-		THROW( EXCEPTION );
-	}
 
 	if ( dg2020.defense_2_shape_too_near )
-	{
 		print( FATAL, "Distance between DEFENSE and PULSE_SHAPE pulses was "
 			   "shorter than %s during the test run.\n",
 			   dg2020_ptime( dg2020_ticks2double( dg2020.defense_2_shape ) ) );
+
+	if ( dg2020.shape_2_defense_too_near || dg2020.defense_2_shape_too_near )
 		THROW( EXCEPTION );
-	}
 
 	return 1;
 }

@@ -115,6 +115,7 @@ int ep385_init_hook( void )
 	ep385.is_defense_2_shape = UNSET;
 	ep385.shape_2_defense_too_near = UNSET;
 	ep385.defense_2_shape_too_near = UNSET;
+	ep385.is_confirmation = UNSET;
 
 	for ( i = 0; i < MAX_CHANNELS; i++ )
 	{
@@ -215,14 +216,16 @@ int ep385_end_of_test_hook( void )
 	if ( ep385.shape_2_defense_too_near )
 	{
 		print( FATAL, "Distance between PULSE_SHAPE and DEFENSE pulses was "
-			   "too small during test run.\n" );
+			   "shorter than %s during the test run.\n",
+			   ep385_ptime( ep385_ticks2double( ep385.shape_2_defense ) ) );
 		THROW( EXCEPTION );
 	}
 
 	if ( ep385.defense_2_shape_too_near )
 	{
 		print( FATAL, "Distance between DEFENSE and PULSE_SHAPE pulses was "
-			   "too small during test run.\n" );
+			   "shorter than %s during the test run.\n",
+			   ep385_ptime( ep385_ticks2double( ep385.defense_2_shape ) ) );
 		THROW( EXCEPTION );
 	}
 
@@ -244,14 +247,14 @@ int ep385_exp_hook( void )
 
 	/* Extra safety net: If the minimum distances between shape and defense
 	   pulses have been changed by calling the appropriate functions ask
-	   the user again if (s)he is 100% sure that's what (s)he really wants.
-	   If this was an error we might kill the detector...
-	   This extra bother to have to click on the "Yes" button can be switched
-	   off by commenting out the definition in config/ep385.conf of
+	   the user the first time the experiment gets started if (s)he is 100%
+	   sure that's what (s)he really wants. This can be switched off by
+	   commenting out the definition in config/ep385.conf of
 	   "ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION" */
 
 #if defined ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION
-	if ( ep385.is_shape_2_defense || ep385.is_defense_2_shape )
+	if ( ! ep385.is_confirmation && 
+		 ( ep385.is_shape_2_defense || ep385.is_defense_2_shape ) )
 	{
 		char str[ 500 ];
 
@@ -281,6 +284,8 @@ int ep385_exp_hook( void )
 
 		if ( 2 != show_choices( str, 2, "Abort", "Yes", "", 1 ) )
 			THROW( EXCEPTION );
+
+		ep385.is_confirmation = SET;
 	}
 #endif
 
@@ -606,7 +611,7 @@ Var *pulser_shift( Var *v )
 
 		if ( ! p->is_pos )
 		{
-			print( FATAL, "Pulse %ld has no position set, so shifting it "
+			print( FATAL, "Pulse #%ld has no position set, so shifting it "
 				   "isn't possible.\n", p->num );
 			THROW( EXCEPTION );
 		}
@@ -614,7 +619,7 @@ Var *pulser_shift( Var *v )
 		if ( ! p->is_dpos )
 		{
 			print( FATAL, "Amount of position change hasn't been defined for "
-				   "pulse %ld.\n", p->num );
+				   "pulse #%ld.\n", p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -626,7 +631,7 @@ Var *pulser_shift( Var *v )
 
 		if ( ( p->pos += p->dpos ) < 0 )
 		{
-			print( FATAL, "Shifting the position of pulse %ld leads to an "
+			print( FATAL, "Shifting the position of pulse #%ld leads to an "
 				   "invalid  negative position of %s.\n",
 				   p->num, ep385_pticks( p->pos ) );
 			THROW( EXCEPTION );
@@ -684,7 +689,7 @@ Var *pulser_increment( Var *v )
 
 		if ( ! p->is_len )
 		{
-			print( FATAL, "Pulse %ld has no length set, so incrementing its "
+			print( FATAL, "Pulse #%ld has no length set, so incrementing its "
 				   "length isn't possibe.\n", p->num );
 			THROW( EXCEPTION );
 		}
@@ -692,7 +697,7 @@ Var *pulser_increment( Var *v )
 		if ( ! p->is_dlen )
 		{
 			print( FATAL, "Length change time hasn't been defined for pulse "
-				   "%ld.\n", p->num );
+				   "#%ld.\n", p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -704,7 +709,7 @@ Var *pulser_increment( Var *v )
 
 		if ( ( p->len += p->dlen ) < 0 )
 		{
-			print( FATAL, "Incrementing the length of pulse %ld leads to an "
+			print( FATAL, "Incrementing the length of pulse #%ld leads to an "
 				   "invalid negative pulse length of %s.\n",
 				   p->num, ep385_pticks( p->len ) );
 			THROW( EXCEPTION );

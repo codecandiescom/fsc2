@@ -109,7 +109,7 @@ static void ep385_basic_pulse_check( void )
 
 		if ( ! p->is_function )
 		{
-			print( FATAL, "Pulse %ld is not associated with a function.\n",
+			print( FATAL, "Pulse #%ld is not associated with a function.\n",
 				   p->num );
 			THROW( EXCEPTION );
 		}
@@ -122,7 +122,7 @@ static void ep385_basic_pulse_check( void )
 		if ( f->num_channels == 0 )
 		{
 			print( FATAL, "No channel has been set for function '%s' used for "
-				   "pulse %ld.\n",
+				   "pulse #%ld.\n",
 				   Function_Names[ p->function->self ], p->num );
 			THROW( EXCEPTION );
 		}
@@ -268,7 +268,7 @@ static void ep385_create_phase_matrix( FUNCTION *f )
 
 				if ( ! f->phase_setup->is_set[ PHASE_PLUS_X ] )
 				{
-					print( FATAL, "Phase type '%s' is needed for pulse %ld "
+					print( FATAL, "Phase type '%s' is needed for pulse #%ld "
 						   "but it hasn't been not defined in a PHASE_SETUP "
 						   "command for its function '%s'.\n",
 						   Phase_Types[ PHASE_PLUS_X ], p->num,
@@ -325,7 +325,7 @@ static void ep385_create_phase_matrix( FUNCTION *f )
 
 			if ( ! f->phase_setup->is_set[ phase_type ] )
 			{
-				print( FATAL, "Phase type '%s' is needed for pulse %ld "
+				print( FATAL, "Phase type '%s' is needed for pulse #%ld "
 					   "but it hasn't been not defined in a PHASE_SETUP "
 					   "command for its function '%s'.\n",
 					   Phase_Types[ phase_type ], p->num,
@@ -530,7 +530,7 @@ static void ep385_channel_start_check( CHANNEL *ch )
 		pp = ch->pulse_params + i;
 		if ( pp->pos + pp->len > MAX_PULSER_BITS )
 		{
-			print( FATAL, "Pulse %ld of function '%s' does not fit into the "
+			print( FATAL, "Pulse #%ld of function '%s' does not fit into the "
 				   "pulsers memory.\n",
 				   pp->pulse->num, Function_Names[ ch->function->self ] );
 			THROW( EXCEPTION );
@@ -597,8 +597,8 @@ static void ep385_defense_shape_init_check( FUNCTION *shape )
 				 shape_p->pos + shape_p->len + ep385.shape_2_defense >
 				 defense_p->pos )
 			{
-				print( SEVERE, "Distance between PULSE_SHAPE pulse %ld "
-					   "and DEFENSE pulse %ld is shorter than %s.\n",
+				print( SEVERE, "Distance between PULSE_SHAPE pulse #%ld "
+					   "and DEFENSE pulse #%ld is shorter than %s.\n",
 					   shape_p->num, defense_p->num, ep385_ptime(
 						   ep385_ticks2double( ep385.shape_2_defense ) ) );
 				ep385.shape_2_defense_too_near = SET;
@@ -609,8 +609,8 @@ static void ep385_defense_shape_init_check( FUNCTION *shape )
 				 defense_p->pos + defense_p->len + ep385.defense_2_shape >
 				 shape_p->pos )
 			{
-				print( SEVERE, "Distance between DEFENSE pulse %ld and "
-					   "PULSE_SHAPE pulse %ld is shorter than %s.\n",
+				print( SEVERE, "Distance between DEFENSE pulse #%ld and "
+					   "PULSE_SHAPE pulse #%ld is shorter than %s.\n",
 					   defense_p->num, shape_p->num, ep385_ptime(
 						   ep385_ticks2double( ep385.defense_2_shape ) ) );
 				ep385.defense_2_shape_too_near = SET;
