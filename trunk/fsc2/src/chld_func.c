@@ -122,7 +122,8 @@ int show_choices( const char *text, int numb, const char *b1, const char *b2,
 const char *show_fselector( const char *message, const char *directory,
 							const char *pattern, const char *def )
 {
-	char *ret = NULL;
+	const char *ret = NULL;
+
 
 	if ( I_am == PARENT )
 	{

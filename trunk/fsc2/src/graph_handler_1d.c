@@ -130,7 +130,7 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 	switch ( G.button_state )
 	{
 		case 1 :                               /* left button */
-			fl_set_cursor( window, G.cur_1 );
+			fl_set_cursor( window, G.cursor[ ZOOM_BOX_CURSOR ] );
 
 			G.start[ X ] = c->ppos[ X ];
 			G.start[ Y ] = c->ppos[ Y ];
@@ -168,7 +168,7 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 			break;
 
 		case 2 :                               /* middle button */
-			fl_set_cursor( window, G.cur_2 );
+			fl_set_cursor( window, G.cursor[ MOVE_HAND_CURSOR ] );
 
 			G.start[ X ] = c->ppos[ X ];
 			G.start[ Y ] = c->ppos[ Y ];
@@ -187,7 +187,7 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 			break;
 
 		case 3:                                /* left and middle button */
-			fl_set_cursor( window, G.cur_4 );
+			fl_set_cursor( window, G.cursor[ CROSSHAIR_CURSOR ] );
 
 			/* Don't draw the box anymore */
 
@@ -196,14 +196,14 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 			break;
 
 		case 4 :                               /* right button */
-			fl_set_cursor( window, G.cur_3 );
+			fl_set_cursor( window, G.cursor[ ZOOM_LENS_CURSOR ] );
 
 			G.start[ X ] = c->ppos[ X ];
 			G.start[ Y ] = c->ppos[ Y ];
 			break;
 
 		case 5 :                               /* left and right button */
-			fl_set_cursor( window, G.cur_5 );
+			fl_set_cursor( window, G.cursor[ TARGET_CURSOR ] );
 
 			if ( G.canvas.is_box == UNSET && old_button_state != 4 )
 			{

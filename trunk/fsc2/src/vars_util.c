@@ -131,7 +131,7 @@ Var *vars_add_to_int_var( Var *v1, Var *v2 )
 
 	if ( v2_lpnt )
 	{
-		lp = T_malloc( elems * sizeof( long ) );
+		lp = T_malloc( elems * sizeof *lp );
 		for ( i = 0; i < elems; i++ )
 			lp[ i ] = v1->val.lval + *v2_lpnt++;
 		new_var = vars_push( INT_ARR, lp, elems );
@@ -139,7 +139,7 @@ Var *vars_add_to_int_var( Var *v1, Var *v2 )
 	}
 	else
 	{
-		dp = T_malloc( elems * sizeof( double ) );
+		dp = T_malloc( elems * sizeof *dp );
 		for ( i = 0; i < elems; i++ )
 			dp[ i ] = ( double ) v1->val.lval + *v2_dpnt++;
 		new_var = vars_push( FLOAT_ARR, dp, elems );
@@ -170,7 +170,7 @@ Var *vars_add_to_float_var( Var *v1, Var *v2 )
 		return vars_push( FLOAT_VAR, v1->val.dval
 						  + ( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt ) );
 
-	dp = T_malloc( elems * sizeof( double ) );
+	dp = T_malloc( elems * sizeof *dp );
 	for ( i = 0; i < elems; i++ )
 		dp[ i ] = v1->val.dval
 			      + ( v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
@@ -226,7 +226,7 @@ Var *vars_add_to_int_arr( Var *v1, Var *v2 )
 	{
 		if ( v2_lpnt )
 		{
-			lp = T_malloc( v1_len * sizeof( long ) );
+			lp = T_malloc( v1_len * sizeof *lp );
 			for ( i = 0; i < v1_len; i++ )
 				lp[ i ] = *v1_lpnt++ + *v2_lpnt;
 			new_var = vars_push( INT_ARR, lp, v1_len );
@@ -234,7 +234,7 @@ Var *vars_add_to_int_arr( Var *v1, Var *v2 )
 		}
 		else
 		{
-			dp = T_malloc( v1_len * sizeof( double ) );
+			dp = T_malloc( v1_len * sizeof *dp );
 			for ( i = 0; i < v1_len; i++ )
 				dp[ i ] = ( double ) *v1_lpnt++ + *v2_dpnt;
 			new_var = vars_push( FLOAT_ARR, dp, v1_len );
@@ -259,7 +259,7 @@ Var *vars_add_to_int_arr( Var *v1, Var *v2 )
 
 	if ( v2_lpnt )
 	{
-		lp = T_malloc( elems * sizeof( long ) );
+		lp = T_malloc( elems * sizeof *lp );
 		for ( i = 0; i < elems; i++ )
 			lp[ i ] = *v1_lpnt++ + *v2_lpnt++;
 		new_var = vars_push( INT_ARR, lp, elems );
@@ -267,7 +267,7 @@ Var *vars_add_to_int_arr( Var *v1, Var *v2 )
 	}
 	else
 	{
-		dp = T_malloc( elems * sizeof( double ) );
+		dp = T_malloc( elems * sizeof *dp );
 		for ( i = 0; i < elems; i++ )
 			dp[ i ] = ( double ) *v1_lpnt++ + *v2_dpnt++;
 		new_var = vars_push( FLOAT_ARR, dp, elems );
@@ -320,7 +320,7 @@ Var *vars_add_to_float_arr( Var *v1, Var *v2 )
 
 	if ( elems == 1 )
 	{
-		dp = T_malloc( v1_len * sizeof( double ) );
+		dp = T_malloc( v1_len * sizeof *dp );
 		for ( i = 0; i < v1_len; i++ )
 			dp[ i ] = *v1_dpnt++
 				      + ( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
@@ -344,7 +344,7 @@ Var *vars_add_to_float_arr( Var *v1, Var *v2 )
 			elems = s_min( v1_len, elems );
 	}
 
-	dp = T_malloc( elems * sizeof( double ) );
+	dp = T_malloc( elems * sizeof *dp );
 	for ( i = 0; i < elems; i++ )
 		dp[ i ] = *v1_dpnt++
 			      + ( v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
@@ -384,7 +384,7 @@ Var *vars_sub_from_int_var( Var *v1, Var *v2 )
 
 	if ( v2_lpnt )
 	{
-		lp = T_malloc( elems * sizeof( long ) );
+		lp = T_malloc( elems * sizeof *lp );
 		for ( i = 0; i < elems; i++ )
 			lp[ i ] = v1->val.lval - *v2_lpnt++;
 		new_var = vars_push( INT_ARR, lp, elems );
@@ -392,7 +392,7 @@ Var *vars_sub_from_int_var( Var *v1, Var *v2 )
 	}
 	else
 	{
-		dp = T_malloc( elems * sizeof( double ) );
+		dp = T_malloc( elems * sizeof *dp );
 		for ( i = 0; i < elems; i++ )
 			dp[ i ] = ( double ) v1->val.lval - *v2_dpnt++;
 		new_var = vars_push( FLOAT_ARR, dp, elems );
@@ -423,7 +423,7 @@ Var *vars_sub_from_float_var( Var *v1, Var *v2 )
 		return vars_push( FLOAT_VAR, v1->val.dval
 						  - ( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt ) );
 
-	dp = T_malloc( elems * sizeof( double ) );
+	dp = T_malloc( elems * sizeof *dp );
 	for ( i = 0; i < elems; i++ )
 		dp[ i ] = v1->val.dval
 			      - ( v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
@@ -478,7 +478,7 @@ Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
 	{
 		if ( v2_lpnt )
 		{
-			lp = T_malloc( v1_len * sizeof( long ) );
+			lp = T_malloc( v1_len * sizeof *lp );
 			for ( i = 0; i < v1_len; i++ )
 				lp[ i ] = *v1_lpnt++ - *v2_lpnt;
 			new_var = vars_push( INT_ARR, lp, v1_len );
@@ -486,7 +486,7 @@ Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
 		}
 		else
 		{
-			dp = T_malloc( v1_len * sizeof( double ) );
+			dp = T_malloc( v1_len * sizeof *dp );
 			for ( i = 0; i < v1_len; i++ )
 				dp[ i ] = ( double ) *v1_lpnt++ - *v2_dpnt;
 
@@ -512,7 +512,7 @@ Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
 
 	if ( v2_lpnt )
 	{
-		lp = T_malloc( elems * sizeof( long ) );
+		lp = T_malloc( elems * sizeof *lp );
 		for ( i = 0; i < elems; i++ )
 			lp[ i ] = *v1_lpnt++ - *v2_lpnt++;
 		new_var = vars_push( INT_ARR, lp, elems );
@@ -520,7 +520,7 @@ Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
 	}
 	else
 	{
-		dp = T_malloc( elems * sizeof( double ) );
+		dp = T_malloc( elems * sizeof *dp );
 		for ( i = 0; i < elems; i++ )
 			dp[ i ] = ( double ) *v1_lpnt++ - *v2_dpnt++;
 		new_var = vars_push( FLOAT_ARR, dp, elems );
@@ -572,7 +572,7 @@ Var *vars_sub_from_float_arr( Var *v1, Var *v2 )
 
 	if ( elems == 1 )
 	{
-		dp = T_malloc( v1_len * sizeof( double ) );
+		dp = T_malloc( v1_len * sizeof *dp );
 		for ( i = 0; i < v1_len; i++ )
 			dp[ i ] = *v1_dpnt++
 				      - ( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
@@ -596,7 +596,7 @@ Var *vars_sub_from_float_arr( Var *v1, Var *v2 )
 			elems = s_min( v1_len, elems );
 	}
 
-	dp = T_malloc( elems * sizeof( double ) );
+	dp = T_malloc( elems * sizeof *dp );
 	for ( i = 0; i < elems; i++ )
 		dp[ i ] = *v1_dpnt++
 			      - ( v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
@@ -635,7 +635,7 @@ Var *vars_mult_by_int_var( Var *v1, Var *v2 )
 
 	if ( v2_lpnt )
 	{
-		lp = T_malloc( elems * sizeof( long ) );
+		lp = T_malloc( elems * sizeof *lp );
 		for ( i = 0; i < elems; i++ )
 			lp[ i ] = v1->val.lval * *v2_lpnt++;
 		new_var = vars_push( INT_ARR, lp, elems );
@@ -643,7 +643,7 @@ Var *vars_mult_by_int_var( Var *v1, Var *v2 )
 	}
 	else
 	{
-		dp = T_malloc( elems * sizeof( double ) );
+		dp = T_malloc( elems * sizeof *dp );
 		for ( i = 0; i < elems; i++ )
 			dp[ i ] = ( double ) v1->val.lval * *v2_dpnt++;
 		new_var = vars_push( FLOAT_ARR, dp, elems );
@@ -674,7 +674,7 @@ Var *vars_mult_by_float_var( Var *v1, Var *v2 )
 		return vars_push( FLOAT_VAR, v1->val.dval
 						  * ( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt ) );
 
-	dp = T_malloc( elems * sizeof( double ) );
+	dp = T_malloc( elems * sizeof *dp );
 	for ( i = 0; i < elems; i++ )
 		dp[ i ] = v1->val.dval
 			      * ( v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
@@ -729,7 +729,7 @@ Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
 	{
 		if ( v2_lpnt )
 		{
-			lp = T_malloc( v1_len * sizeof( long ) );
+			lp = T_malloc( v1_len * sizeof *lp );
 			for ( i = 0; i < v1_len; i++ )
 				lp[ i ] = *v1_lpnt * *v2_lpnt;
 			new_var = vars_push( INT_ARR, lp, v1_len );
@@ -737,7 +737,7 @@ Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
 		}
 		else
 		{
-			dp = T_malloc( v1_len * sizeof( double ) );
+			dp = T_malloc( v1_len * sizeof *dp );
 			for ( i = 0; i < v1_len; i++ )
 				dp[ i ] = ( double ) *v1_lpnt++ * *v2_dpnt;
 			new_var = vars_push( FLOAT_ARR, dp, v1_len );
@@ -762,7 +762,7 @@ Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
 
 	if ( v2_lpnt )
 	{
-		lp = T_malloc( elems * sizeof( long ) );
+		lp = T_malloc( elems * sizeof *lp );
 		for ( i = 0; i < elems; i++ )
 			lp[ i ] = *v1_lpnt++ * *v2_lpnt++;
 		new_var = vars_push( INT_ARR, lp, elems );
@@ -770,7 +770,7 @@ Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
 	}
 	else
 	{
-		dp = T_malloc( elems * sizeof( double ) );
+		dp = T_malloc( elems * sizeof *dp );
 		for ( i = 0; i < elems; i++ )
 			dp[ i ] = ( double ) *v1_lpnt++ * *v2_dpnt++;
 		new_var = vars_push( FLOAT_ARR, dp, elems );
@@ -822,7 +822,7 @@ Var *vars_mult_by_float_arr( Var *v1, Var *v2 )
 
 	if ( elems == 1 )
 	{
-		dp = T_malloc( v1_len * sizeof( double ) );
+		dp = T_malloc( v1_len * sizeof *dp );
 		for ( i = 0; i < v1_len; i++ )
 			dp[ i ] = *v1_dpnt++
 				      * ( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
@@ -846,7 +846,7 @@ Var *vars_mult_by_float_arr( Var *v1, Var *v2 )
 			elems = s_min( v1_len, elems );
 	}
 
-	dp = T_malloc( elems * sizeof( double ) );
+	dp = T_malloc( elems * sizeof *dp );
 	for ( i = 0; i < elems; i++ )
 		dp[ i ] = *v1_dpnt++
 			      * ( v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
@@ -891,7 +891,7 @@ Var *vars_div_of_int_var( Var *v1, Var *v2 )
 
 	if ( v2_lpnt )
 	{
-		lp = T_malloc( elems * sizeof( long ) );
+		lp = T_malloc( elems * sizeof *lp );
 		for ( i = 0; i < elems; i++ )
 		{
 			vars_div_check( ( double ) *v2_lpnt );
@@ -902,7 +902,7 @@ Var *vars_div_of_int_var( Var *v1, Var *v2 )
 	}
 	else
 	{
-		dp = T_malloc( elems * sizeof( double ) );
+		dp = T_malloc( elems * sizeof *dp );
 		for ( i = 0; i < elems; i++ )
 		{
 			vars_div_check( *v2_dpnt );
@@ -946,7 +946,7 @@ Var *vars_div_of_float_var( Var *v1, Var *v2 )
 		}
 	}
 
-	dp = T_malloc( elems * sizeof( double ) );
+	dp = T_malloc( elems * sizeof *dp );
 	for ( i = 0; i < elems; i++ )
 	{
 		if ( v2_lpnt )
@@ -1013,7 +1013,7 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 		if ( v2_lpnt )
 		{
 			vars_div_check( ( double ) *v2_lpnt );
-			lp = T_malloc( v1_len * sizeof( long ) );
+			lp = T_malloc( v1_len * sizeof *lp );
 			for ( i = 0; i < v1_len; i++ )
 				lp[ i ] = *v1_lpnt++ / *v2_lpnt;
 			new_var = vars_push( INT_ARR, lp, v1_len );
@@ -1022,7 +1022,7 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 		else
 		{
 			vars_div_check( *v2_dpnt );
-			dp = T_malloc( v1_len * sizeof( double ) );
+			dp = T_malloc( v1_len * sizeof *dp );
 			for ( i = 0; i < v1_len; i++ )
 				dp[ i ] = ( double ) *v1_lpnt++ / *v2_dpnt;
 			new_var = vars_push( FLOAT_ARR, dp, v1_len );
@@ -1047,7 +1047,7 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 
 	if ( v2_lpnt )
 	{
-		lp = T_malloc( elems * sizeof( long ) );
+		lp = T_malloc( elems * sizeof *lp );
 		for ( i = 0; i < elems; i++ )
 		{
 			vars_div_check( ( double ) *v2_lpnt );
@@ -1058,7 +1058,7 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 	}
 	else
 	{
-		dp = T_malloc( elems * sizeof( double ) );
+		dp = T_malloc( elems * sizeof *dp );
 		for ( i = 0; i < elems; i++ )
 		{
 			vars_div_check( *v2_dpnt );
@@ -1114,7 +1114,7 @@ Var *vars_div_of_float_arr( Var *v1, Var *v2 )
 	if ( elems == 1 )
 	{
 		vars_div_check( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		dp = T_malloc( v1_len * sizeof( double ) );
+		dp = T_malloc( v1_len * sizeof *dp );
 		for ( i = 0; i < v1_len; i++ )
 			dp[ i ] = *v1_dpnt++
 				      / ( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
@@ -1137,7 +1137,7 @@ Var *vars_div_of_float_arr( Var *v1, Var *v2 )
 			elems = s_min( v1_len, elems );
 	}
 
-	dp = T_malloc( elems * sizeof( double ) );
+	dp = T_malloc( elems * sizeof *dp );
 	for ( i = 0; i < elems; i++ )
 	{
 		vars_div_check( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
@@ -1198,7 +1198,7 @@ Var *vars_mod_of_int_var( Var *v1, Var *v2 )
 
 	if ( v2_lpnt )
 	{
-		lp = T_malloc( elems * sizeof( long ) );
+		lp = T_malloc( elems * sizeof *lp );
 		for ( i = 0; i < elems; i++ )
 		{
 			vars_mod_check( ( double ) *v2_lpnt );
@@ -1209,7 +1209,7 @@ Var *vars_mod_of_int_var( Var *v1, Var *v2 )
 	}
 	else
 	{
-		dp = T_malloc( elems * sizeof( double ) );
+		dp = T_malloc( elems * sizeof *dp );
 		for ( i = 0; i < elems; i++ )
 		{
 			vars_mod_check( *v2_dpnt );
@@ -1254,7 +1254,7 @@ Var *vars_mod_of_float_var( Var *v1, Var *v2 )
 		}
 	}
 
-	dp = T_malloc( elems * sizeof( double ) );
+	dp = T_malloc( elems * sizeof *dp );
 	for ( i = 0; i < elems; i++ )
 	{
 		if ( v2_lpnt )
@@ -1321,7 +1321,7 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 		if ( v2_lpnt )
 		{
 			vars_mod_check( ( double ) *v2_lpnt );
-			lp = T_malloc( v1_len * sizeof( long ) );
+			lp = T_malloc( v1_len * sizeof *lp );
 			for ( i = 0; i < v1_len; i++ )
 				lp[ i ] = *v1_lpnt++ % *v2_lpnt;
 			new_var = vars_push( INT_ARR, lp, v1_len );
@@ -1330,7 +1330,7 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 		else
 		{
 			vars_mod_check( *v2_dpnt );
-			dp = T_malloc( v1_len * sizeof( double ) );
+			dp = T_malloc( v1_len * sizeof *dp );
 			for ( i = 0; i < v1_len; i++ )
 				dp[ i ] = fmod( ( double ) *v1_lpnt++, *v2_dpnt );
 			new_var = vars_push( FLOAT_ARR, dp, v1_len );
@@ -1355,7 +1355,7 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 
 	if ( v2_lpnt )
 	{
-		lp = T_malloc( elems * sizeof( long ) );
+		lp = T_malloc( elems * sizeof *lp );
 		for ( i = 0; i < elems; i++ )
 		{
 			vars_mod_check( ( double ) *v2_lpnt );
@@ -1366,7 +1366,7 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 	}
 	else
 	{
-		dp = T_malloc( elems * sizeof( double ) );
+		dp = T_malloc( elems * sizeof *dp );
 		for ( i = 0; i < elems; i++ )
 		{
 			vars_mod_check( *v2_dpnt );
@@ -1422,7 +1422,7 @@ Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
 	if ( elems == 1 )
 	{
 		vars_mod_check( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		dp = T_malloc( v1_len * sizeof( double ) );
+		dp = T_malloc( v1_len * sizeof *dp );
 		for ( i = 0; i < v1_len; i++ )
 			dp[ i ] = fmod( *v1_dpnt,
 							v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
@@ -1445,7 +1445,7 @@ Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
 			elems = s_min( v1_len, elems );
 	}
 
-	dp = T_malloc( elems * sizeof( double ) );
+	dp = T_malloc( elems * sizeof *dp );
 	for ( i = 0; i < elems; i++ )
 	{
 		vars_mod_check( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt);
@@ -1526,7 +1526,7 @@ Var *vars_pow_of_int_var( Var *v1, Var *v2 )
 
 	if ( v2_lpnt )
 	{
-		lp = T_malloc( elems * sizeof( long ) );
+		lp = T_malloc( elems * sizeof *lp );
 		for ( i = 0; i < elems; i++ )
 		{
 			if ( lp != NULL )
@@ -1536,7 +1536,7 @@ Var *vars_pow_of_int_var( Var *v1, Var *v2 )
 					lp[ i ] = new_var->val.lval;
 				else
 				{
-					dp = T_malloc( elems * sizeof( double ) );
+					dp = T_malloc( elems * sizeof *dp );
 					for ( j = 0; j < i; j++ )
 						dp[ j ] = lp[ j ];
 					dp[ i ] = new_var->val.dval;
@@ -1564,7 +1564,7 @@ Var *vars_pow_of_int_var( Var *v1, Var *v2 )
 	}
 	else
 	{
-		dp = T_malloc( elems * sizeof( double ) );
+		dp = T_malloc( elems * sizeof *dp );
 		for ( i = 0; i < elems; i++ )
 		{
 			vars_pow_check( ( double ) v1->val.lval, *v2_dpnt );
@@ -1603,7 +1603,7 @@ Var *vars_pow_of_float_var( Var *v1, Var *v2 )
 							   v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt ) );
 	}
 
-	dp = T_malloc( elems * sizeof( double ) );
+	dp = T_malloc( elems * sizeof *dp );
 	for ( i = 0; i < elems; i++ )
 	{
 		vars_pow_check( v1->val.dval,
@@ -1664,7 +1664,7 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 	{
 		if ( v2_lpnt )
 		{
-			lp = T_malloc( v1_len * sizeof( long ) );
+			lp = T_malloc( v1_len * sizeof *lp );
 			for ( i = 0; i < v1_len; i++ )
 			{
 				if ( lp != NULL )
@@ -1674,7 +1674,7 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 						lp[ i ] = new_var->val.lval;
 					else
 					{
-						dp = T_malloc( v1_len * sizeof( double ) );
+						dp = T_malloc( v1_len * sizeof *dp );
 						for ( j = 0; j < i; j++ )
 							dp[ j ] = lp[ j ];
 						dp[ i ] = new_var->val.dval;
@@ -1702,7 +1702,7 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 		}
 		else
 		{
-			dp = T_malloc( v1_len * sizeof( double ) );
+			dp = T_malloc( v1_len * sizeof *dp );
 			for ( i = 0; i < v1_len; i++ )
 			{
 				vars_pow_check( ( double ) *v1_lpnt, *v2_dpnt );
@@ -1730,7 +1730,7 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 
 	if ( v2_lpnt )
 	{
-		lp = T_malloc( elems * sizeof( long ) );
+		lp = T_malloc( elems * sizeof *lp );
 		for ( i = 0; i < elems; i++ )
 		{
 			if ( lp != NULL )
@@ -1740,7 +1740,7 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 					lp[ i ] = new_var->val.lval;
 				else
 				{
-					dp = T_malloc( elems * sizeof( double ) );
+					dp = T_malloc( elems * sizeof *dp );
 					for ( j = 0; j < i; j++ )
 						dp[ j ] = lp[ j ];
 					dp[ i ] = new_var->val.dval;
@@ -1768,7 +1768,7 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 	}
 	else
 	{
-		dp = T_malloc( elems * sizeof( double ) );
+		dp = T_malloc( elems * sizeof *dp );
 
 		for ( i = 0; i < elems; i++ )
 		{
@@ -1825,7 +1825,7 @@ Var *vars_pow_of_float_arr( Var *v1, Var *v2 )
 
 	if ( elems == 1 )
 	{
-		dp = T_malloc( v1_len * sizeof( double ) );
+		dp = T_malloc( v1_len * sizeof *dp );
 		for ( i = 0; i < v1_len; i++ )
 		{
 			vars_pow_check( *v1_dpnt,
@@ -1852,7 +1852,7 @@ Var *vars_pow_of_float_arr( Var *v1, Var *v2 )
 			elems = s_min( v1_len, elems );
 	}
 
-	dp = T_malloc( elems * sizeof( double ) );
+	dp = T_malloc( elems * sizeof *dp );
 
 	for ( i = 0; i < elems; i++ )
 	{

@@ -684,6 +684,15 @@ bool sr510_init( const char *name )
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 		return FAIL;
 
+	/* Check that there's reference input and the internal reference is
+	   locked to it, if not print a warning */
+
+	if ( buffer[ 0 ] & 4 )
+		print( SEVERE, "No reference input detected.\n" );
+	if ( buffer[ 0 ] & 8 )
+		print( SEVERE, "Reference oszillator not locked to reference "
+			   "input.\n" );
+
 	/* Lock the keyboard */
 
 	if ( gpib_write( sr510.device, "I1\n", 3 ) == FAILURE )

@@ -53,13 +53,7 @@ static void rescale_2d( long new_nx, long new_ny );
 
 
 static Graphics *G_stored = NULL;
-static int cur_1,
-	       cur_2,
-	       cur_3,
-	       cur_4,
-	       cur_5,
-	       cur_6,
-	       cur_7;
+static int cursor[ 7 ];
 static int display_x, display_y;
 static unsigned display_w, display_h;
 static bool display_has_been_shown = UNSET;
@@ -265,7 +259,7 @@ void start_graphics( void )
 	/* Store the current state of the Graphics structure - to be restored
 	   after the experiment */
 
-	G_stored = get_memcpy( &G, sizeof( Graphics ) );
+	G_stored = get_memcpy( &G, sizeof G );
 
 	if ( G.dim == 1 )
 	{
@@ -481,7 +475,7 @@ int run_form_close_handler( FL_FORM *a, void *b )
 static void G_struct_init( void )
 {
 	static bool first_time = SET;
-	int x, y;
+	int i, x, y;
 	unsigned int keymask;
 
 
@@ -498,48 +492,45 @@ static void G_struct_init( void )
 	if ( keymask & Button3Mask )
 		G.raw_button_state |= 4;
 
-	/* Create the  different cursors */
+	/* Create the different cursors and the colours needed for 2D displays */
 
 	if ( first_time )
 	{
-		cur_1 = fl_create_bitmap_cursor( cursor1_bits, cursor1_bits,
-										 cursor1_width, cursor1_height,
-										 cursor1_x_hot, cursor1_y_hot );
-		cur_2 = fl_create_bitmap_cursor( cursor2_bits, cursor2_bits,
-										 cursor2_width, cursor2_height,
-										 cursor2_x_hot, cursor2_y_hot );
-		cur_3 = fl_create_bitmap_cursor( cursor3_bits, cursor3_bits,
-										 cursor3_width, cursor3_height,
-										 cursor3_x_hot, cursor3_y_hot );
-		cur_4 = fl_create_bitmap_cursor( cursor4_bits, cursor4_bits,
-										 cursor4_width, cursor4_height,
-										 cursor4_x_hot, cursor4_y_hot );
-		cur_5 = fl_create_bitmap_cursor( cursor5_bits, cursor5_bits,
-										 cursor5_width, cursor5_height,
-										 cursor5_x_hot, cursor5_y_hot );
-		cur_6 = fl_create_bitmap_cursor( cursor6_bits, cursor6_bits,
-										 cursor6_width, cursor6_height,
-										 cursor6_x_hot, cursor6_y_hot );
-		cur_7 = fl_create_bitmap_cursor( cursor7_bits, cursor7_bits,
-										 cursor7_width, cursor7_height,
-										 cursor7_x_hot, cursor7_y_hot );
-	}
-
-	G.cur_1 = cur_1;
-	G.cur_2 = cur_2;
-	G.cur_3 = cur_3;
-	G.cur_4 = cur_4;
-	G.cur_5 = cur_5;
-	G.cur_6 = cur_6;
-	G.cur_7 = cur_7;
-
-	/* On the first call also create the colours needed for 2D displays */
-
-	if ( first_time )
+		cursor[ ZOOM_BOX_CURSOR ] = G.cursor[ ZOOM_BOX_CURSOR ] =
+					fl_create_bitmap_cursor( cursor1_bits, cursor1_bits,
+											 cursor1_width, cursor1_height,
+						   					 cursor1_x_hot, cursor1_y_hot );
+		cursor[ MOVE_HAND_CURSOR ] = G.cursor[ MOVE_HAND_CURSOR ] =
+					fl_create_bitmap_cursor( cursor2_bits, cursor2_bits,
+											 cursor2_width, cursor2_height,
+											 cursor2_x_hot, cursor2_y_hot );
+		cursor[ ZOOM_LENS_CURSOR ] = G.cursor[ ZOOM_LENS_CURSOR ] =
+					fl_create_bitmap_cursor( cursor3_bits, cursor3_bits,
+											 cursor3_width, cursor3_height,
+											 cursor3_x_hot, cursor3_y_hot );
+		cursor[ CROSSHAIR_CURSOR ] = G.cursor[ CROSSHAIR_CURSOR ] =
+					fl_create_bitmap_cursor( cursor4_bits, cursor4_bits,
+											 cursor4_width, cursor4_height,
+											 cursor4_x_hot, cursor4_y_hot );
+		cursor[ TARGET_CURSOR ] = G.cursor[ TARGET_CURSOR ] =
+					fl_create_bitmap_cursor( cursor5_bits, cursor5_bits,
+											 cursor5_width, cursor5_height,
+											 cursor5_x_hot, cursor5_y_hot );
+		cursor[ ARROW_UP_CURSOR ] = G.cursor[ ARROW_UP_CURSOR ] =
+					fl_create_bitmap_cursor( cursor6_bits, cursor6_bits,
+											 cursor6_width, cursor6_height,
+											 cursor6_x_hot, cursor6_y_hot );
+		cursor[ ARROW_RIGHT_CURSOR ] = G.cursor[ ARROW_RIGHT_CURSOR ] =
+					fl_create_bitmap_cursor( cursor7_bits, cursor7_bits,
+											 cursor7_width, cursor7_height,
+											 cursor7_x_hot, cursor7_y_hot );
 		create_colors( );
+	}
+	else
+		for ( i = 0; i < 7; i++ )
+			G.cursor[ i ] = cursor[ i ];
 
-	/* Define colours for the curves (in principal, this should be made
-       user-configurable...) */
+	/* Define colours for the curves (this should be made user-configurable) */
 
 	G.colors[ 0 ] = FL_TOMATO;
 	G.colors[ 1 ] = FL_GREEN;
@@ -583,17 +574,14 @@ static void G_init_curves_1d( void )
 
 	depth = fl_get_canvas_depth( G.canvas.obj );
 
-	fl_set_cursor_color( G.cur_1, FL_RED, FL_WHITE );
-	fl_set_cursor_color( G.cur_2, FL_RED, FL_WHITE );
-	fl_set_cursor_color( G.cur_3, FL_RED, FL_WHITE );
-	fl_set_cursor_color( G.cur_4, FL_RED, FL_WHITE );
-	fl_set_cursor_color( G.cur_5, FL_RED, FL_WHITE );
+	for ( i = 0; i < 5; i++ )
+		fl_set_cursor_color( G.cursor[ i ], FL_RED, FL_WHITE );
 
 	for ( i = 0; i < G.nc; i++ )
 	{
 		/* Allocate memory for the curve and its data */
 
-		cv = G.curve[ i ] = T_malloc( sizeof( Curve_1d ) );
+		cv = G.curve[ i ] = T_malloc( sizeof *cv );
 
 		cv->points = NULL;
 		cv->xpoints = NULL;
@@ -661,12 +649,12 @@ static void G_init_curves_1d( void )
 
 		/* Finally get memory for the data */
 
-		cv->points = T_malloc( G.nx * sizeof( Scaled_Point ) );
+		cv->points = T_malloc( G.nx * sizeof *cv->points );
 
 		for ( j = 0; j < G.nx; j++ )           /* no points are known in yet */
 			cv->points[ j ].exist = UNSET;
 
-		cv->xpoints = T_malloc( G.nx * sizeof( XPoint ) );
+		cv->xpoints = T_malloc( G.nx * sizeof *cv->xpoints );
 	}
 }
 
@@ -687,19 +675,14 @@ static void G_init_curves_2d( void )
 
 	depth = fl_get_canvas_depth( G.canvas.obj );
 
-	fl_set_cursor_color( G.cur_1, FL_BLACK, FL_WHITE );
-	fl_set_cursor_color( G.cur_2, FL_BLACK, FL_WHITE );
-	fl_set_cursor_color( G.cur_3, FL_BLACK, FL_WHITE );
-	fl_set_cursor_color( G.cur_4, FL_BLACK, FL_WHITE );
-	fl_set_cursor_color( G.cur_5, FL_BLACK, FL_WHITE );
-	fl_set_cursor_color( G.cur_6, FL_BLACK, FL_WHITE );
-	fl_set_cursor_color( G.cur_7, FL_BLACK, FL_WHITE );
+	for ( i = 0; i < 7; i++ )
+		fl_set_cursor_color( G.cursor[ i ], FL_BLACK, FL_WHITE );
 
 	for ( i = 0; i < G.nc; i++ )
 	{
 		/* Allocate memory for the curve */
 
-		cv = G.curve_2d[ i ] = T_malloc( sizeof( Curve_2d ) );
+		cv = G.curve_2d[ i ] = T_malloc( sizeof *cv );
 
 		cv->points = NULL;
 		cv->xpoints = NULL;
@@ -783,13 +766,13 @@ static void G_init_curves_2d( void )
 
 		/* Now get also memory for the data */
 
-		cv->points = T_malloc( G.nx * G.ny * sizeof( Scaled_Point ) );
+		cv->points = T_malloc( G.nx * G.ny * sizeof *cv->points );
 
 		for ( sp = cv->points, j = 0; j < G.nx * G.ny; sp++, j++ )
 			sp->exist = UNSET;
 
-		cv->xpoints = T_malloc( G.nx * G.ny * sizeof( XPoint ) );
-		cv->xpoints_s = T_malloc( G.nx * G.ny * sizeof( XPoint ) );
+		cv->xpoints = T_malloc( G.nx * G.ny * sizeof *cv->xpoints );
+		cv->xpoints_s = T_malloc( G.nx * G.ny * sizeof *cv->xpoints_s );
 
 	}
 }
@@ -925,7 +908,7 @@ void stop_graphics( void )
 
 	if ( G_stored )
 	{
-		memcpy( &G, G_stored, sizeof( Graphics ) );
+		memcpy( &G, G_stored, sizeof G );
 		G_stored = T_free( G_stored );
 		for ( i = X; i <= Z; i++ )
 			G.label[ i ] = NULL;
@@ -1812,12 +1795,12 @@ static void change_label_2d( char **label )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void rescale( long new_nx, long new_ny )
+void rescale( long *new_dims )
 {
 	if ( G.dim == 1 )
-		rescale_1d( new_nx );
+		rescale_1d( *new_dims );
 	else
-		rescale_2d( new_nx, new_ny );
+		rescale_2d( new_dims[ 0 ], new_dims[ 1 ] );
 }
 
 
@@ -1827,7 +1810,6 @@ void rescale( long new_nx, long new_ny )
 static void rescale_1d( long new_nx )
 {
 	long i, k, count;
-	Curve_1d *cv;
 	long max_x = 0;
 	Scaled_Point *sp;
 
@@ -1840,16 +1822,14 @@ static void rescale_1d( long new_nx )
 	/* Find the maximum x-index currently used by a point */
 
 	for ( k = 0; k < G.nc; k++ )
-	{
-		cv = G.curve[ k ];
-		count = cv->count;
-		for ( sp = cv->points, i = 0; i < G.nx && count != 0; sp++, i++ )
-			if ( sp->exist && i > max_x )
+		for ( count = G.curve[ k ]->count, sp = G.curve[ k ]->points, i = 0;
+			  count > 0; sp++, i++ )
+			if ( sp->exist )
 			{
-				max_x = i;
+				if( i > max_x )
+					max_x = i;
 				count--;
 			}
-	}
 
 	if ( max_x != 0 )
 		max_x++;
@@ -1869,10 +1849,10 @@ static void rescale_1d( long new_nx )
 
 	for ( k = 0; k < G.nc; k++ )
 	{
-		cv = G.curve[ k ];
-
-		cv->points = T_realloc( cv->points, max_x * sizeof( Scaled_Point ) );
-		cv->xpoints = T_realloc( cv->xpoints, max_x * sizeof( XPoint ) );
+		G.curve[ k ]->points = T_realloc( G.curve[ k ]->points,
+										max_x * sizeof *G.curve[ k ]->points );
+		G.curve[ k ]->xpoints = T_realloc( G.curve[ k ]->xpoints,
+									   max_x * sizeof *G.curve[ k ]->xpoints );
 
 		for ( i = G.nx, sp = G.curve[ k ]->points + i; i < max_x;
 			  sp++, i++ )
@@ -1883,13 +1863,12 @@ static void rescale_1d( long new_nx )
 
 	for ( k = 0; k < G.nc; k++ )
 	{
-		cv = G.curve[ k ];
 		if ( G.is_fs )
 		{
-			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 )
-				           / ( double ) ( G.nx - 1 );
+			G.curve[ k ]->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
+				                     ( double ) ( G.nx - 1 );
 			if ( G.is_scale_set )
-				recalc_XPoints_of_curve_1d( cv );
+				recalc_XPoints_of_curve_1d( G.curve[ k ] );
 		}
 	}
 
@@ -1903,7 +1882,6 @@ static void rescale_1d( long new_nx )
 static void rescale_2d( long new_nx, long new_ny )
 {
 	long i, j, k, l, count;
-	Curve_2d *cv;
 	long max_x = 0,
 		 max_y = 0;
 	Scaled_Point *sp, *old_sp, *osp;
@@ -1913,14 +1891,12 @@ static void rescale_2d( long new_nx, long new_ny )
 	if ( new_nx < 0 && new_ny < 0 )
 		return;
 
-	/* Find the maximum x and y index currently used */
+	/* Find the maximum x and y index used until now */
 
 	for ( k = 0; k < G.nc; k++ )
-	{
-		cv = G.curve_2d[ k ];
-		count = cv->count;
-		for ( j = 0, sp = cv->points; j < G.ny && count != 0; j++ )
-			for ( i = 0; i < G.nx && count != 0; sp++, i++ )
+		for ( j = 0, count = G.curve_2d[ k ]->count,
+			  sp = G.curve_2d[ k ]->points; count > 0; j++ )
+			for ( i = 0; i < G.nx && count > 0; sp++, i++ )
 				if ( sp->exist )
 				{
 					max_y = j;
@@ -1928,7 +1904,6 @@ static void rescale_2d( long new_nx, long new_ny )
 						max_x = i;
 					count--;
 				}
-	}
 
 	if ( max_x != 0 )
 		max_x++;
@@ -1956,18 +1931,16 @@ static void rescale_2d( long new_nx, long new_ny )
 
 	for ( k = 0; k < G.nc; k++ )
 	{
-		cv = G.curve_2d[ k ];
-			
 		/* Reorganize the old elements to fit into the new array and clear
 		   the the new elements in the already existing rows */
 
-		old_sp = osp = cv->points;
-		sp = cv->points = T_malloc( new_nx * new_ny * sizeof( Scaled_Point ) );
+		old_sp = osp = G.curve_2d[ k ]->points;
+		sp = G.curve_2d[ k ]->points = T_malloc( new_nx * new_ny
+												 * sizeof *sp );
 
 		for ( j = 0; j < l_min( G.ny, new_ny ); j++, osp += G.nx )
 		{
-			memcpy( sp, osp, l_min( G.nx, new_nx ) * sizeof( Scaled_Point ) );
-
+			memcpy( sp, osp, l_min( G.nx, new_nx ) * sizeof *sp );
 			if ( G.nx < new_nx )
 				for ( l = G.nx, sp += G.nx; l < new_nx; l++, sp++ )
 					sp->exist = UNSET;
@@ -1981,17 +1954,17 @@ static void rescale_2d( long new_nx, long new_ny )
 
 		T_free( old_sp );
 
-		cv->xpoints = T_realloc( cv->xpoints,
-								 new_nx * new_ny * sizeof( XPoint ) );
-		cv->xpoints_s = T_realloc( cv->xpoints_s,
-								   new_nx * new_ny * sizeof( XPoint ) );
+		G.curve_2d[ k ]->xpoints = T_realloc( G.curve_2d[ k ]->xpoints,
+						new_nx * new_ny * sizeof *G.curve_2d[ k ]->xpoints );
+		G.curve_2d[ k ]->xpoints_s = T_realloc( G.curve_2d[ k ]->xpoints_s,
+						new_nx * new_ny * sizeof *G.curve_2d[ k ]->xpoints_s );
 
-		if ( cv->is_fs )
+		if ( G.curve_2d[ k ]->is_fs )
 		{
-			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
-			                                         ( double ) ( new_nx - 1 );
-			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) /
-				                                     ( double ) ( new_ny - 1 );
+			G.curve_2d[ k ]->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
+			                            ( double ) ( new_nx - 1 );
+			G.curve_2d[ k ]->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) /
+				                        ( double ) ( new_ny - 1 );
 		}
 	}
 

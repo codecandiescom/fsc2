@@ -25,13 +25,14 @@
 #include "fsc2.h"
 
 
-extern bool need_post;                    /* defined in run.c */
-
 static void	unpack_and_accept( char *ptr );
 static void	other_data_request( int type, char *ptr );
 static void accept_1d_data( long x_index, long curve, int type, char *ptr );
 static void accept_2d_data( long x_index, long y_index, long curve, int type,
 							char *ptr );
+static long get_number_of_new_points( char **ptr, int type );
+static bool get_new_extrema( double *max, double *min, char *ptr,
+							 long len, int type );
 static bool	incr_x( long x_index, long len );
 static bool	incr_y( long y_index );
 static bool	incr_x_and_y( long x_index, long len, long y_index );
@@ -40,15 +41,15 @@ static bool	incr_x_and_y( long x_index, long len, long y_index );
 /*---------------------------------------------------------------------------*/
 /* This is the function that takes the new data from the message queue and   */
 /* displays them. On a call of this function all data sets in the queue will */
-/* be accepted, if there is a REQUEST in between (there can only be one      */
-/* because REQUESTS need a reply) it will be moved to the end of the queue.  */
+/* be accepted, if there is a REQUEST in between (there can only be one at a */
+/* time because REQUESTS need a reply) it will be moved to the end of the    */
+/* queue and then are dealt with by the the calling routine.                 */
 /*---------------------------------------------------------------------------*/
 
 void accept_new_data( void )
 {
 	char *buf;
 	int mq_next;
-	int shm_id;
 
 
 	while ( 1 )
@@ -58,7 +59,7 @@ void accept_new_data( void )
 		   fail it sometimes does (2.0 kernels only?) so we better have
 		   a bit more of error output until this is sorted out. */
 
-		if ( ( buf = attach_shm( Message_Queue[ message_queue_low ].shm_id ) )
+		if ( ( buf = attach_shm( MQ->slot[ MQ->low ].shm_id ) )
 			 == ( void * ) - 1 )
 		{
 #ifndef NDEBUG
@@ -66,8 +67,8 @@ void accept_new_data( void )
 					"message_queue_low = %d, shm_id = %d.\n"
 					"*** PLEASE SEND A BUG REPORT CITING THESE LINES *** "
 					"Thank you.\n",
-					__FILE__, __LINE__, message_queue_low,
-					Message_Queue[ message_queue_low ].shm_id );
+					__FILE__, __LINE__, MQ->low,
+					MQ->slot[ MQ->low ].shm_id );
 #else
 			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
@@ -85,57 +86,44 @@ void accept_new_data( void )
 		}
 		OTHERWISE
 		{
-			detach_shm( buf, &Message_Queue[ message_queue_low ].shm_id );
+			detach_shm( buf, &MQ->slot[ MQ->low ].shm_id );
 			PASSTHROUGH( );
 		}
 
 		/* Detach from shared memory segment and remove it */
 
-		detach_shm( buf, &Message_Queue[ message_queue_low ].shm_id );
+		detach_shm( buf, &MQ->slot[ MQ->low ].shm_id );
+		MQ->slot[ MQ->low ].shm_id = -1;
 
-		/* Increment the low queue pointer, and, if the message queue was
-		   full so that the semaphore could not be posted, post it now */
+		/* Increment the low queue pointer and post the data semaphore to
+		   tell the child that there's again room in the message queue. */
 
-		message_queue_low = ( message_queue_low + 1 ) % QUEUE_SIZE;
-
-		/* If the semaphore hasn't been posted yet (because it was full and
-		   could hold anymore data) do it now after we removed some data */
-
-		if ( need_post )
-		{
-			sema_post( semaphore );
-			need_post = UNSET;
-		}
+		MQ->low = ( MQ->low + 1 ) % QUEUE_SIZE;
+		sema_post( data_semaphore );
 
 		/* Return if all entries in the message queue are used up */
 
-		if ( message_queue_low == message_queue_high )
+		if ( MQ->low == MQ->high )
 			break;
 
-		/* Accept next data set if next entry in message queue is a data set */
+		/* Accept next data set if next slot in message queue contains DATA */
 
-		if ( Message_Queue[ message_queue_low ].type == DATA )
+		if ( MQ->slot[ MQ->low ].type == DATA )
 			continue;
 
-		/* If the next entry is a REQUEST but the one following is a DATA set
-		   exchange the entries and accept the data - this way the drawing of
-		   all data is done before REQUESTs are honoured */
+		/* Otherwise the next slot is occupied by a REQUEST. If this is the
+		   last occupied slot we're done (the calling routine will deal with
+		   it). Otherwise there are more DATA that we handle first by
+		   exchanging them with the current REQUEST entry. */
 
-  		mq_next = ( message_queue_low + 1 ) % QUEUE_SIZE;
+  		if ( ( mq_next = ( MQ->low + 1 ) % QUEUE_SIZE ) == MQ->high )
+  			break;
 
-  		if ( mq_next == message_queue_high )
-  			break;                                  /* REQUEST is last entry */
+  		MQ->slot[ MQ->low ].shm_id = MQ->slot[ mq_next ].shm_id;
+  		MQ->slot[ MQ->low ].type = DATA;
 
-  		/* Swap current REQUEST with next DATA set */
-
-  		shm_id = Message_Queue[ mq_next ].shm_id;
-
-  		Message_Queue[ mq_next ].shm_id =
-  			                         Message_Queue[ message_queue_low ].shm_id;
-  		Message_Queue[ mq_next ].type = REQUEST;
-
-  		Message_Queue[ message_queue_low ].shm_id = shm_id;
-  		Message_Queue[ message_queue_low ].type = DATA;
+  		MQ->slot[ mq_next ].shm_id = -1;
+  		MQ->slot[ mq_next ].type = REQUEST;
   	}
 
 	/* Finally display the new data by redrawing the canvas */
@@ -265,7 +253,7 @@ static void other_data_request( int type, char *ptr )
 			change_scale( is_set, ( double * ) ptr );
 			break;
 
-		case D_CHANGE_LABEL :                 /* rescale command */
+		case D_CHANGE_LABEL :                 /* change label command */
 			for ( i = X; i <= Z; i++ )
 			{
 				lengths[ i ] = * ( long * ) ptr;
@@ -277,7 +265,7 @@ static void other_data_request( int type, char *ptr )
 			break;
 
 		case D_CHANGE_POINTS :                /* rescale command */
-			rescale( * ( long * ) ptr, * ( ( long * ) ptr + 1 ) );
+			rescale( ( long * ) ptr );
 			break;
 
 		default :                             /* unknown command */
@@ -296,14 +284,15 @@ static void other_data_request( int type, char *ptr )
 static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 {
 	long len = 0;
-	double rw_max,
-		   rw_min;
 	char *cur_ptr;
 	double data;
 	double new_rwc_delta_y;
+	double old_rw_min;
+	double fac, off;
 	Curve_1d *cv;
 	long i, j;
 	Scaled_Point *sp;
+	long count;
 
 
 	/* Test if the curve number is OK */
@@ -319,40 +308,7 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 
 	/* Get the amount of new data and a pointer to the start of the data */
 
-	switch ( type )
-	{
-		case INT_VAR :
-			len = 1;
-			break;
-
-		case FLOAT_VAR :
-			len = 1;
-			break;
-
-		case INT_CONT_ARR :
-			len = * ( long * ) ptr;
-			ptr += sizeof( long );
-			break;
-
-		case FLOAT_CONT_ARR :
-			len = * ( long * ) ptr;
-			ptr += sizeof( long );
-			break;
-
-		default :
-			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-	}
-
-#ifndef NDEBUG
-	if ( len <= 0 )
-	{
-		eprint( FATAL, SET, "Internal error detected at %s:%d, no points"
-				"to be drawn: %ld.\n", __FILE__, __LINE__, len );
-		THROW( EXCEPTION );
-	}
-#endif
+	len = get_number_of_new_points( &ptr, type );
 
 	/* If the number of points exceeds the size of the arrays for the curves
 	   we have to increase the sizes for all curves. But take care: While
@@ -361,94 +317,77 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 
 	if ( x_index + len > G.nx )
 	{
-		for ( i = 0; i < G.nc; i++ )
+		for ( i = 0, cv = G.curve[ i ]; i < G.nc; i++, cv = G.curve[ i ] )
 		{
-			cv = G.curve[ i ];
-
 			cv->points = T_realloc( cv->points,
-								  ( x_index + len ) * sizeof( Scaled_Point ) );
+								  ( x_index + len ) * sizeof *cv->points );
 			cv->xpoints = T_realloc( cv->xpoints,
-									 ( x_index + len ) * sizeof( XPoint ) );
+									 ( x_index + len ) * sizeof *cv->xpoints );
 
 			for ( j = G.nx, sp = cv->points + j; j < x_index + len; sp++, j++ )
 				sp->exist = UNSET;
 
 			if ( G.is_fs )
 				cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
-				                              ( double ) ( x_index + len - 1 );
+							   ( double ) ( x_index + len - 1 );
 		}
 
-		if ( G.is_fs )
-			G.scale_changed = SET;
+		G.scale_changed = G.is_fs;
 	}
 
-	/* Find maximum and minimum of old and new data */
+	/* Find maximum and minimum of old and new data and, if the minimum or
+       maximum has changed, rescale all old scaled data*/
 
-	rw_max = G.rw_max;
-	rw_min = G.rw_min;
+	old_rw_min = G.rw_min;
 
-	for ( cur_ptr = ptr, i = 0; i < len; i++ )
+	if ( get_new_extrema( &G.rw_max, &G.rw_min, ptr, len, type ) )
 	{
-		if ( type & ( INT_VAR | INT_CONT_ARR ) )
-		{
-			data = ( double ) *( ( long * ) cur_ptr );
-			cur_ptr += sizeof( long );
-		}
-		else
-		{
-			data = *( ( double * ) cur_ptr );
-			cur_ptr += sizeof( double );
-		}
-
-		rw_max = d_max( data, rw_max );
-		rw_min = d_min( data, rw_min );
-	}
-
-	/* If the minimum or maximum has changed rescale all old scaled data */
-
-	if ( G.rw_max < rw_max || G.rw_min > rw_min )
-	{
-		new_rwc_delta_y = rw_max - rw_min;
+		new_rwc_delta_y = G.rw_max - G.rw_min;
 
 		if ( G.is_scale_set )
 		{
-			for ( i = 0; i < G.nc; i++ )
+			fac = G.rwc_delta[ Y ] / new_rwc_delta_y;
+			off = ( old_rw_min - G.rw_min ) / new_rwc_delta_y;
+
+			for ( i = 0, cv = G.curve[ i ]; i < G.nc; i++, cv = G.curve[ i ] )
 			{
-				cv = G.curve[ i ];
-
-				for ( j = 0, sp = cv->points; j < G.nx; sp++, j++ )
+				for ( sp = cv->points, count = cv->count;
+					  count > 0; sp++ )
 					if ( sp->exist )
-						sp->v = ( G.rwc_delta[ Y ] * sp->v
-								  + G.rw_min - rw_min ) / new_rwc_delta_y;
+					{
+						sp->v = fac * sp->v + off;
+						count--;
+					}
 
-				if ( ! G.is_fs )
-				{
-					cv->s2d[ Y ] *= new_rwc_delta_y / G.rwc_delta[ Y ];
-					cv->shift[ Y ] = ( G.rwc_delta[ Y ] * cv->shift[ Y ]
-									   - G.rw_min + rw_min ) / new_rwc_delta_y;
-				}
+				if ( G.is_fs )
+					continue;
+
+				cv->s2d[ Y ]  /= fac;
+				cv->shift[ Y ] = fac * cv->shift[ Y ] - off;
 			}
-
-			G.rwc_delta[ Y ] = new_rwc_delta_y;
 		}
 
-		/* If the data have not been scaled to [0,1] yet and the maximum
-		   value isn't identical to the minimum do the scaling now */
+		/* If the data had not been scaled to [0,1] yet and the maximum value
+		   isn't identical to the minimum anymore do the scaling now */
 
-		if ( ! G.is_scale_set && rw_max != rw_min )
+		if ( ! G.is_scale_set && G.rw_max != G.rw_min )
 		{
-			for ( i = 0; i < G.nc; i++ )
-				for ( j = 0, sp = G.curve[ i ]->points; j < G.nx; sp++, j++ )
-					if ( sp->exist )
-						  sp->v = ( sp->v - rw_min ) / new_rwc_delta_y;
+			fac = 1.0 / new_rwc_delta_y;
+			off = - G.rw_min / new_rwc_delta_y;
 
-			G.rwc_delta[ Y ] = new_rwc_delta_y;
+			for ( i = 0, cv = G.curve[ i ]; i < G.nc; i++, cv = G.curve[ i ] )
+				for ( sp = cv->points, count = cv->count; count > 0; sp++ )
+					if ( sp->exist )
+					{
+						  sp->v = fac * sp->v + off;
+						  count--;
+					}
+
 			G.is_scale_set = SET;
 		}
 
-		G.rw_min = rw_min;
-		G.rw_max = rw_max;
 		G.scale_changed = SET;
+		G.rwc_delta[ Y ] = new_rwc_delta_y;
 	}
 
 	/* Now we're finished with rescaling and can set the new number of points
@@ -492,14 +431,15 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 	if ( ! G.is_scale_set )
 		return;
 
-	G.rwc_start[ Y ] = rw_min;
+	G.rwc_start[ Y ] = G.rw_min;
 
-	for ( i = 0; i < G.nc; i++ )
-	{
-		if ( ! G.scale_changed && i != curve )
-			continue;
-		recalc_XPoints_of_curve_1d( G.curve[ i ] );
-	}
+	/* If scale didn't chang redraw only current curve, otherwise all curves */
+
+	if ( ! G.scale_changed )
+		recalc_XPoints_of_curve_1d( G.curve[ curve ] );
+	else
+		for ( i = 0; i < G.nc; i++ )
+			recalc_XPoints_of_curve_1d( G.curve[ i ] );
 
 	G.scale_changed = UNSET;
 }
@@ -514,13 +454,11 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 							char *ptr )
 {
 	long len = 0, count;
-	double rw_max,
-		   rw_min;
 	char *cur_ptr;
 	double data;
-	double new_rwc_delta_z;
+	double new_rwc_delta_z, fac, off, old_rw_min;
 	Curve_2d *cv;
-	long i, j;
+	long i;
 	Scaled_Point *sp;
 	bool need_cut_redraw = UNSET;
 	bool xy_scale_changed = UNSET;
@@ -537,47 +475,14 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	}
 #endif
 
+	/* Get number of new data points and pointer to start of data */
+
+	len = get_number_of_new_points( &ptr, type );
+
 	cv = G.curve_2d[ curve ];
 
-	/* Get the amount of new data and a pointer to the start of the data */
-
-	switch ( type )
-	{
-		case INT_VAR :
-			len = 1;
-			break;
-
-		case FLOAT_VAR :
-			len = 1;
-			break;
-
-		case INT_CONT_ARR :
-			len = * ( long * ) ptr;
-			ptr += sizeof( long );
-			break;
-
-		case FLOAT_CONT_ARR :
-			len = * ( long * ) ptr;
-			ptr += sizeof( long );
-			break;
-
-		default :
-			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-	}
-
-#ifndef NDEBUG
-	if ( len <= 0 )
-	{
-		eprint( FATAL, SET, "Internal error detected at %s:%d, no points"
-				"to be drawn: %ld.\n", __FILE__, __LINE__, len );
-		THROW( EXCEPTION );
-	}
-#endif
-
-	/* Now test if the new data fit into the already allocated memory,
-	   otherwise extend the memory area. */
+	/* Check if the new data fit into the already allocated memory, otherwise
+	   extend the memory area. */
 
 	if ( x_index + len > G.nx )
 	{
@@ -593,77 +498,56 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 		need_cut_redraw |= incr_y( y_index );
 	}
 
-	/* Find maximum and minimum of old and new data */
+	/* Find maximum and minimum of old and new data and, if the minimum or
+	   maximum changed, all old data have to be (re)scaled */
 
-	rw_max = cv->rw_max;
-	rw_min = cv->rw_min;
+	old_rw_min = cv->rw_min;
 
-	for ( cur_ptr = ptr, i = 0; i < len; i++ )
+	if ( ( cv->scale_changed = 
+		   get_new_extrema( &cv->rw_max, &cv->rw_min, ptr, len, type ) ) )
 	{
-		if ( type & ( INT_VAR | INT_CONT_ARR ) )
-		{
-			data = ( double ) * ( long * ) cur_ptr;
-			cur_ptr += sizeof( long );
-		}
-		else
-		{
-			data = * ( double * ) cur_ptr;
-			cur_ptr += sizeof( double );
-		}
-
-		rw_max = d_max( data, rw_max );
-		rw_min = d_min( data, rw_min );
-	}
-
-	/* If minimum or maximum changed all old scaled data have to be rescaled */
-
-	if ( cv->rw_max < rw_max || cv->rw_min > rw_min )
-	{
-		new_rwc_delta_z = rw_max - rw_min;
+		new_rwc_delta_z = cv->rw_max - cv->rw_min;
 
 		if ( cv->is_scale_set )
 		{
-			for ( sp = cv->points, count = cv->count, j = 0;
-				  count != 0 && j < G.nx * G.ny; sp++, j++ )
+			fac = cv->rwc_delta[ Z ] / new_rwc_delta_z;
+			off = ( old_rw_min - cv->rw_min ) / new_rwc_delta_z;
+
+			for ( sp = cv->points, count = cv->count; count > 0; sp++ )
 				if ( sp->exist )
 				{
-					sp->v = ( cv->rwc_delta[ Z ] * sp->v + cv->rw_min
-							  - rw_min ) / new_rwc_delta_z;
+					sp->v = fac * sp->v + off;
 					count--;
 				}
 
 			if ( ! cv->is_fs )
 			{
-				cv->s2d[ Z ] *= new_rwc_delta_z / cv->rwc_delta[ Z ];
-				cv->shift[ Z ] = ( cv->rwc_delta[ Z ] * cv->shift[ Z ]
-								   - cv->rw_min + rw_min ) / new_rwc_delta_z;
-				cv->z_factor *= new_rwc_delta_z / cv->rwc_delta[ Z ];
+				cv->s2d[ Z ] /= fac;
+				cv->shift[ Z ] = fac * cv->shift[ Z ] - off;
+				cv->z_factor /= fac;
 			}
 		}
 
-		/* If the data have not been scaled to [0,1] yet and the maximum
-		   value isn't identical to the minimum do the scaling now */
+		/* If data have not been scaled yet to interval [0,1] and maximum
+		   value has become different from minimum value do scaling now */
 
-		if ( ! cv->is_scale_set && rw_max != rw_min )
+		if ( ! cv->is_scale_set && cv->rw_max != cv->rw_min )
 		{
-			for ( sp = cv->points, count = cv->count, j = 0;
-				  count != 0 && j < G.nx * G.ny; sp++, j++ )
+			fac = 1.0 / new_rwc_delta_z;
+			off = - cv->rw_min / new_rwc_delta_z;
+
+			for ( sp = cv->points, count = cv->count; count > 0; sp++ )
 				if ( sp->exist )
 				{
-					sp->v = ( sp->v - rw_min ) / new_rwc_delta_z;
+					sp->v = fac * sp->v + off;
 					count--;
 				}
 
 			cv->is_scale_set = SET;
 		}
 
-		need_cut_redraw |= cut_data_rescaled( curve, rw_min, rw_max );
-
+		need_cut_redraw |= cut_data_rescaled( curve, cv->rw_min, cv->rw_max );
 		cv->rwc_delta[ Z ] = new_rwc_delta_z;
-
-		cv->rw_min = rw_min;
-		cv->rw_max = rw_max;
-		cv->scale_changed = SET;
 	}
 
 	/* Now we're finished with rescaling and can set the new number of points
@@ -672,7 +556,10 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	if ( x_index + len > G.nx )
 		G.nx = x_index + len;
 	if ( y_index >= G.ny )
+	{
 		G.ny = y_index + 1;
+		need_cut_redraw = SET;
+	}
 
 	/* Include the new data into the scaled data */
 
@@ -705,39 +592,111 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 		}
 	}
 
-	/* Tell the cross section handler about the new data */
+	/* Tell the cross section handler about the new data, its return value
+	   indicates if the cut needs to be redrawn */
 
 	need_cut_redraw |= cut_new_points( curve, x_index, y_index, len );
 
-	/* Nothing is to be done, i.e. nothing to be really drawn, when there is
-	   nothing to display yet, i.e. as long no scaling for the curve is set */
+	/* We're done when nothing is to be drawn because no scaling for the curve
+	   is set */
 
 	if ( ! cv->is_scale_set )
 		return;
 
 	/* Calculate new points for display */
 
-	cv->rwc_start[ Z ] = rw_min;
-
-	if ( cv->is_scale_set )
-	recalc_XPoints_of_curve_2d( cv );
+	cv->rwc_start[ Z ] = cv->rw_min;
 
 	for ( i = 0; i < G.nc; i++ )
 	{
-		if ( i == curve )
-			continue;
 		cv = G.curve_2d[ i ];
-		if ( xy_scale_changed && cv->is_scale_set )
+
+		if ( ! cv->is_scale_set )
+			continue;
+
+		if ( xy_scale_changed || i == curve )
 			 recalc_XPoints_of_curve_2d( cv );
+		cv->scale_changed = UNSET;
 	}
 
-	/* Update the cut window if necessary */
+	/* Finally update the cut window if necessary */
 
 	if ( need_cut_redraw )
 		redraw_all_cut_canvases( );
+}
 
-	for ( i = 0; i < G.nc; i++ )
-		cv->scale_changed = UNSET;
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+static long get_number_of_new_points( char **ptr, int type )
+{
+	long len = 0;
+
+
+	switch ( type )
+	{
+		case INT_VAR : case FLOAT_VAR :
+			len = 1;
+			break;
+
+		case INT_CONT_ARR : case FLOAT_CONT_ARR :
+			len = * ( long * ) *ptr;
+			*ptr += sizeof( long );
+			break;
+
+		default :
+			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION );
+	}
+
+#ifndef NDEBUG
+	if ( len <= 0 )
+	{
+		eprint( FATAL, SET, "Internal error detected at %s:%d, number of "
+				"points to be drawn: %ld.\n", __FILE__, __LINE__, len );
+		THROW( EXCEPTION );
+	}
+#endif
+
+	return len;
+}
+
+
+/*----------------------------------------------------------*/
+/* Determines the new maximum and minimum value of the data */
+/* set and returns if the maximum or minimum changes.       */
+/*----------------------------------------------------------*/
+
+static bool get_new_extrema( double *max, double *min, char *ptr,
+							 long len, int type )
+{
+	double data, old_max, old_min;
+	long i;
+
+
+	old_max = *max;
+	old_min = *min;
+
+	for ( i = 0; i < len; i++ )
+	{
+		if ( type & ( INT_VAR | INT_CONT_ARR ) )
+		{
+			data = ( double ) * ( long * ) ptr;
+			ptr += sizeof( long );
+		}
+		else
+		{
+			data = * ( double * ) ptr;
+			ptr += sizeof( double );
+		}
+
+		*max = d_max( data, *max );
+		*min = d_min( data, *min );
+	}
+
+	return *max > old_max || *min < old_min;
 }
 
 
@@ -749,37 +708,44 @@ static bool incr_x( long x_index, long len )
 {
 	long i, j, k;
 	Curve_2d *cv;
-	long new_Gnx = x_index + len;
+	long new_Gnx;
+	long new_num;
 	Scaled_Point *old_points;
 	Scaled_Point *sp;
 
+
+	new_Gnx = x_index + len;
+	new_num = new_Gnx * G.ny;
 
 	for ( i = 0; i < G.nc; i++ )
 	{
 		cv = G.curve_2d[ i ];
 			
 		old_points = cv->points;
-		cv->points = T_malloc( new_Gnx * G.ny * sizeof( Scaled_Point ) );
+		sp = cv->points = T_malloc( new_num * sizeof *sp );
 
-		for ( sp = cv->points, j = 0; j < G.ny; j++ )
+		for ( j = 0; j < G.ny; j++ )
 		{
-			memcpy( sp, old_points + j * G.nx, G.nx * sizeof( Scaled_Point ) );
-			for ( sp += G.nx, k = G.nx; k < new_Gnx; sp++, k++ )
+			memcpy( sp, old_points + j * G.nx, G.nx * sizeof *sp );
+			for ( k = G.nx, sp += k; k < new_Gnx; sp++, k++ )
 				sp->exist = UNSET;
 		}
 
 		T_free( old_points );
 
-		cv->xpoints = T_realloc( cv->xpoints,
-								 new_Gnx * G.ny * sizeof( XPoint ) );
+		cv->xpoints = T_realloc( cv->xpoints, new_num * sizeof *cv->xpoints );
 		cv->xpoints_s = T_realloc( cv->xpoints_s,
-								   new_Gnx * G.ny * sizeof( XPoint ) );
+								   new_num * sizeof *cv->xpoints_s );
 
 		if ( cv->is_fs )
-			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 )
-				           / ( double ) ( new_Gnx - 1 );
+			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
+						   ( double ) ( new_Gnx - 1 );
 		cv->scale_changed = SET;
 	}
+
+	/* Also tell the routines for drawing cuts about the changes and return
+	   the return value of this function (which indicates if a redraw of the
+	   cut is needed) */
 
 	return cut_num_points_changed( X, new_Gnx );
 }
@@ -791,32 +757,37 @@ static bool incr_x( long x_index, long len )
 
 static bool incr_y( long y_index )
 {
-	long i, j, k;
+	long i, k;
 	Curve_2d *cv;
 	Scaled_Point *sp;
-	long new_Gny = y_index + 1;
+	long new_Gny;
+	long new_num;
 
+
+	new_Gny = y_index + 1;
+	new_num = G.nx * new_Gny;
 
 	for ( i = 0; i < G.nc; i++ )
 	{
 		cv = G.curve_2d[ i ];
 			
-		cv->points = T_realloc( cv->points, G.nx * new_Gny
-											* sizeof( Scaled_Point ) );
-		cv->xpoints = T_realloc( cv->xpoints, G.nx * new_Gny
-											  * sizeof( XPoint ) );
-		cv->xpoints_s = T_realloc( cv->xpoints_s, G.nx * new_Gny
-												  * sizeof( XPoint ) );
+		cv->points = T_realloc( cv->points, new_num * sizeof *cv->points );
+		cv->xpoints = T_realloc( cv->xpoints, new_num * sizeof *cv->xpoints );
+		cv->xpoints_s = T_realloc( cv->xpoints_s,
+								   new_num * sizeof *cv->xpoints_s );
 
-		for ( sp = cv->points + G.ny * G.nx, j = G.ny; j < new_Gny; j++ )
-			for ( k = 0; k < G.nx; sp++, k++ )
-				sp->exist = UNSET;
+		for ( k = G.ny * G.nx, sp = cv->points + k; k < new_num; sp++, k++ )
+			sp->exist = UNSET;
 
 		if ( cv->is_fs )
-			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 )
-				           / ( double ) ( new_Gny - 1 );
+			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) /
+						   ( double ) ( new_Gny - 1 );
 		cv->scale_changed = SET;
 	}
+
+	/* Also tell the routines for drawing cuts about the changes and return
+	   the return value of this function (which indicates if a redraw of the
+	   cut is needed) */
 
 	return cut_num_points_changed( Y, new_Gny );
 }
@@ -830,51 +801,60 @@ static bool incr_x_and_y( long x_index, long len, long y_index )
 {
 	long i, j, k;
 	Curve_2d *cv;
-	long new_Gnx = x_index + len;
-	long new_Gny = y_index + 1;
+	long new_Gnx;
+	long new_Gny;
+	long new_num;
 	Scaled_Point *old_points;
 	Scaled_Point *sp;
 	bool ret = UNSET;
 
+
+	new_Gnx = x_index + len;
+	new_Gny = y_index + 1;
+	new_num = new_Gnx * new_Gny;
 
 	for ( i = 0; i < G.nc; i++ )
 	{
 		cv = G.curve_2d[ i ];
 
 		old_points = cv->points;
-		cv->points = T_malloc( new_Gnx * new_Gny * sizeof( Scaled_Point ) );
+		sp = cv->points = T_malloc( new_num * sizeof *sp );
 
 		/* Reorganise the old elements to fit into the new array and clear
 		   the new elements in the already existing rows */
 
-		for ( sp = cv->points, j = 0; j < G.ny; j++ )
+		for ( j = 0; j < G.ny; j++ )
 		{
-			memcpy( sp, old_points + j * G.nx, G.nx * sizeof( Scaled_Point ) );
-			for ( sp += G.nx, k = G.nx; k < new_Gnx; sp++, k++ )
+			memcpy( sp, old_points + j * G.nx, G.nx * sizeof *sp );
+			for ( k = G.nx, sp += k; k < new_Gnx; sp++, k++ )
 				sp->exist = UNSET;
 		}
 
-		for ( ; j < new_Gny; j++ )
-			for ( k = 0; k < new_Gnx; sp++, k++ )
-				sp->exist = UNSET;
+		/* Now also set the elements in the comletely new rows to unused */
+
+		for ( j = new_Gnx * G.ny; j < new_num; sp++, j++ )
+			sp->exist = UNSET;
 
 		T_free( old_points );
 
-		cv->xpoints = T_realloc( cv->xpoints, new_Gnx * new_Gny
-								              * sizeof( XPoint ) );
-		cv->xpoints_s = T_realloc( cv->xpoints_s, new_Gnx * new_Gny
-								                  * sizeof( XPoint ) );
+		cv->xpoints = T_realloc( cv->xpoints, new_num * sizeof *cv->xpoints );
+		cv->xpoints_s = T_realloc( cv->xpoints_s,
+								   new_num * sizeof *cv->xpoints_s );
 
 		if ( cv->is_fs )
 		{
-			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 )
-				           / ( double ) ( new_Gnx - 1 );
-			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 )
-				           / ( double ) ( new_Gny - 1 );
+			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
+						   ( double ) ( new_Gnx - 1 );
+			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) /
+						   ( double ) ( new_Gny - 1 );
 		}
 
 		cv->scale_changed = SET;
 	}
+
+	/* Also tell the routines for drawing cuts about the changes and return
+	   the return value of this function (which indicates if a redraw of the
+	   cut is needed) */
 
 	ret = cut_num_points_changed( X, new_Gnx );
 	return ret || cut_num_points_changed( Y, new_Gny );

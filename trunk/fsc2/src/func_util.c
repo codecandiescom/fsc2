@@ -789,10 +789,7 @@ Var *f_cscale( Var *v )
 	/* Wait for parent to become ready to accept new data, then store
 	   identifier and send signal to tell parent about the data */
 
-	sema_wait( semaphore );
-	Key->shm_id = shm_id;
-	Key->type = DATA;
-	kill( getppid( ), NEW_DATA );
+	send_data( DATA, shm_id );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -914,10 +911,7 @@ Var *f_clabel( Var *v )
 	/* Wait for parent to become ready to accept new data, then store
 	   identifier and send signal to tell parent about the data */
 
-	sema_wait( semaphore );
-	Key->shm_id = shm_id;
-	Key->type = DATA;
-	kill( getppid( ), NEW_DATA );
+	send_data( DATA, shm_id );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -1044,10 +1038,7 @@ Var *f_rescale( Var *v )
 	/* Wait for parent to become ready to accept new data, then store
 	   identifier and send signal to tell parent about the data */
 
-	sema_wait( semaphore );
-	Key->shm_id = shm_id;
-	Key->type = DATA;
-	kill( getppid( ), NEW_DATA );
+	send_data( DATA, shm_id );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -1097,7 +1088,7 @@ Var *f_display( Var *v )
 
 	len =   sizeof( long )                /* length field itself */
 		  + sizeof( int )                 /* number of sets to be sent */
-		  + 3 * nsets * sizeof( long )    /* x-, y-index and curve */
+		  + 3 * nsets * sizeof( long )    /* x-, y-index and curve number */
 		  + nsets * sizeof( int );        /* data type */
 	
 	for ( i = 0; i < nsets; i++ )
@@ -1179,26 +1170,26 @@ Var *f_display( Var *v )
 
 	for ( i = 0; i < nsets; i++ )
 	{
-		memcpy( ptr, &dp[ i ].nx, sizeof( long ) );     /* x-index */
+		* ( long * ) ptr = dp[ i ].nx;                  /* x-index */
+		ptr += sizeof (long );
+
+		* ( long * ) ptr = dp[ i ].ny;                  /* y-index */
 		ptr += sizeof( long );
 
-		memcpy( ptr, &dp[ i ].ny, sizeof( long ) );     /* y-index */
-		ptr += sizeof( long );
-
-		memcpy( ptr, &dp[ i ].nc, sizeof( long ) );     /* curve number */
+		* ( long * ) ptr = dp[ i ].nc;                  /* curve number */
 		ptr += sizeof( int );
 
 		switch( dp[ i ].v->type )                       /* and now the data  */
 		{
 			case INT_VAR :
-				memcpy( ptr, &dp[ i ].v->type, sizeof( int ) );
+				* ( int * ) ptr = dp[ i ].v->type;
 				ptr += sizeof( int );
-				memcpy( ptr, &dp[ i ].v->val.lval, sizeof( long ) );
+				* ( long * ) ptr = dp[ i ].v->val.lval;
 				ptr += sizeof( long );
 				break;
 
 			case FLOAT_VAR :
-				memcpy( ptr, &dp[ i ].v->type, sizeof( int ) );
+				* ( int * ) ptr = dp[ i ].v->type;
 				ptr += sizeof( int );
 				memcpy( ptr, &dp[ i ].v->val.dval, sizeof( double ) );
 				ptr += sizeof( double );
@@ -1207,23 +1198,21 @@ Var *f_display( Var *v )
 			case ARR_PTR :
 				fsc2_assert( dp[ i ].v->from->type == INT_CONT_ARR ||
 							 dp[ i ].v->from->type == FLOAT_CONT_ARR );
-				memcpy( ptr, &dp[ i ].v->from->type, sizeof( int ) );
+				* ( int * ) ptr = dp[ i ].v->from->type;
 				ptr += sizeof( int );
 
-				len = dp[ i ].v->from->sizes[ dp[ i ].v->from->dim - 1 ];
-				memcpy( ptr, &len, sizeof( long ) );
+				* ( long * ) ptr = len =
+							dp[ i ].v->from->sizes[ dp[ i ].v->from->dim - 1 ];
 				ptr += sizeof( long );
 
 				if ( dp[ i ].v->from->type == INT_CONT_ARR )
 				{
-					memcpy( ptr, dp[ i ].v->val.gptr,
-							len * sizeof( long ) );
+					memcpy( ptr, dp[ i ].v->val.gptr, len * sizeof( long ) );
 					ptr += len * sizeof( long );
 				}
 				else
 				{
-					memcpy( ptr, dp[ i ].v->val.gptr,
-							len * sizeof( double ) );
+					memcpy( ptr, dp[ i ].v->val.gptr, len * sizeof( double ) );
 					ptr += len * sizeof( double );
 				}
 				break;
@@ -1231,24 +1220,23 @@ Var *f_display( Var *v )
 			case ARR_REF :
 				fsc2_assert( dp[ i ].v->from->type == INT_CONT_ARR ||
 							 dp[ i ].v->from->type == FLOAT_CONT_ARR );
-				memcpy( ptr, &dp[ i ].v->from->type, sizeof( int ) );
+				* ( int * ) ptr = dp[ i ].v->from->type;
 				ptr += sizeof( int );
 					
-				len = dp[ i ].v->from->sizes[ 0 ];
-				memcpy( ptr, &len, sizeof( long ) );
+				* ( long * ) ptr = len = dp[ i ].v->from->sizes[ 0 ];
 				ptr += sizeof( long );
 
 				if ( dp[ i ].v->from->type == INT_CONT_ARR )
 				{
 					memcpy( ptr, dp[ i ].v->from->val.lpnt,
-							len * sizeof( long ) );
-					ptr += len * sizeof( long );
+							len * sizeof *dp[ i ].v->from->val.lpnt );
+					ptr += len * sizeof *dp[ i ].v->from->val.lpnt;
 				}
 				else
 				{
 					memcpy( ptr, dp[ i ].v->from->val.dpnt,
-							len * sizeof( double ) );
-					ptr += len * sizeof( double );
+							len * sizeof *dp[ i ].v->from->val.dpnt );
+					ptr += len * sizeof *dp[ i ].v->from->val.dpnt;
 				}
 				break;
 
@@ -1256,24 +1244,24 @@ Var *f_display( Var *v )
 				* ( int * ) ptr = INT_CONT_ARR;
 				ptr += sizeof( int );
 
-				len = dp[ i ].v->len;
-				memcpy( ptr, &len, sizeof( long ) );
+				* ( long * ) ptr = len = dp[ i ].v->len;
 				ptr += sizeof( long );
 
-				memcpy( ptr, dp[ i ].v->val.lpnt, len * sizeof( long ) );
-				ptr += len * sizeof( long );
+				memcpy( ptr, dp[ i ].v->val.lpnt,
+						len * sizeof *dp[ i ].v->val.lpnt );
+				ptr += len * sizeof *dp[ i ].v->val.lpnt;
 				break;
 
 			case FLOAT_ARR :
 				* ( int * ) ptr = FLOAT_CONT_ARR;
 				ptr += sizeof( int );
 
-				len = dp[ i ].v->len;
-				memcpy( ptr, &len, sizeof( long ) );
+				* ( long * ) ptr = len = dp[ i ].v->len;
 				ptr += sizeof( long );
 
-				memcpy( ptr, dp[ i ].v->val.lpnt, len * sizeof( double ) );
-				ptr += len * sizeof( double );
+				memcpy( ptr, dp[ i ].v->val.dpnt,
+						len * sizeof *dp[ i ].v->val.dpnt );
+				ptr += len * sizeof *dp[ i ].v->val.dpnt;
 				break;
 
 			default :                   /* this better never happens... */
@@ -1284,7 +1272,7 @@ Var *f_display( Var *v )
 		}
 	}
 
-	/* Detach from the segment with the data segment */
+	/* Detach from the segment with the data */
 
 	detach_shm( buf, NULL );
 
@@ -1295,10 +1283,7 @@ Var *f_display( Var *v )
 	/* Wait for parent to become ready to accept new data, then store
 	   identifier and send signal to tell parent about the data */
 
-	sema_wait( semaphore );
-	Key->shm_id = shm_id;
-	Key->type = DATA;
-	kill( getppid( ), NEW_DATA );
+	send_data( DATA, shm_id );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -1323,7 +1308,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 	{
 		/* Get (more) memory for the sets */
 
-		dp = T_realloc( dp, ( *nsets + 1 ) * sizeof( DPoint ) );
+		dp = T_realloc( dp, ( *nsets + 1 ) * sizeof *dp );
 
 		/* check and store the x-index */
 
@@ -1391,8 +1376,8 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 		v = v->next;
 
 		/* There can be several curves and we check if there's a curve number,
-		then we test and store it. If there are no more argument we default to
-		the first curve.*/
+		   then we test and store it. If there are no more argument we default
+		   to the first curve.*/
 
 		if ( v == NULL )
 		{
@@ -1459,7 +1444,7 @@ Var *f_clearcv( Var *v )
 		if ( TEST_RUN )
 			return vars_push( INT_VAR, 1 );
 
-		ca = T_malloc( sizeof( long ) );
+		ca = T_malloc( sizeof *ca );
 		*ca = 0;
 		count = 1;
 	}
@@ -1496,7 +1481,7 @@ Var *f_clearcv( Var *v )
 
 			/* Store curve number */
 
-			ca = T_realloc( ca, ( count + 1 ) * sizeof( long ) );
+			ca = T_realloc( ca, ( count + 1 ) * sizeof *ca );
 			ca[ count++ ] = curve - 1;
 		} while ( ( v = v->next ) != NULL );
 		
@@ -1558,10 +1543,7 @@ Var *f_clearcv( Var *v )
 	/* Wait for parent to become ready to accept new data, then store
 	   identifier and send signal to tell it about them */
 
-	sema_wait( semaphore );
-	Key->shm_id = shm_id;
-	Key->type = DATA;
-	kill( getppid( ), NEW_DATA );
+	send_data( DATA, shm_id );
 
 	/* All the rest has now to be done by the parent process... */
 

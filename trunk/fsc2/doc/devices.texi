@@ -471,11 +471,27 @@ Channel @code{2}
 Amplitude of data from channel @code{1} and @code{2} in polar coordinates
 @item 4
 Phase of data from channel @code{1} and @code{2} in polar coordinates
+@item 5
+Voltage at rear panel auxiliary ADC input 1
+@item 6
+Voltage at rear panel auxiliary ADC input 2
+@item 7
+Voltage at rear panel auxiliary ADC input 3
+@item 8
+Voltage at rear panel auxiliary ADC input 4
+@item 9
+X noise data - this is only allowed when the lock-in-amplifier is
+running in auto-acquisition mode (see below) and the CH1 display is set
+to display X noise.
+@item 10
+Y noise data - this is only allowed when the lock-in-amplifier is
+running in auto-acquisition mode (see below) and the CH2 display is set
+to display Y noise.
 @end table
-Finally, up to 4 arguments can be passed to the function with arguments as
-given above. In this case a 1-dimensional array is returned with as many
-data as there were arguments (in the sequence corresponding to the one
-of the arguments).
+Of these values up to 6 can be passed to the function. If there is more
+than one argument a 1-dimensional array is returned with as many data as
+there were arguments (in the sequence corresponding to the one of the
+arguments).
 
 @item ER023M
 No argument is allowed -- the function returns a floating point value.

@@ -159,8 +159,8 @@ int main( int argc, char *argv[ ] )
 	/* Only if starting the server for external connections succeeds really
 	   start the main loop */
 
-	if ( -1 != ( conn_pid = spawn_conn( cmdline_flags & ( DO_TEST | DO_START )
-										&& is_loaded ) ) )
+	if ( ( conn_pid = spawn_conn( cmdline_flags & ( DO_TEST | DO_START )
+								  && is_loaded ) ) != -1 )
 	{
 		/* Trigger test or start of current EDL program if the appropriate
 		   flags were passed to the program on the command line */
@@ -389,8 +389,10 @@ static void final_exit_handler( void )
 	/* Delete all shared memory and also semaphore (if it still exists) */
 
 	delete_all_shm( );
-	if ( semaphore >= 0 )
-		sema_destroy( semaphore );
+	if ( data_semaphore >= 0 )
+		sema_destroy( data_semaphore );
+	if ( request_semaphore >= 0 )
+		sema_destroy( request_semaphore );
 
 	/* Delete the lock file */
 

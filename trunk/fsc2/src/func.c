@@ -182,11 +182,11 @@ bool functions_init( void )
 
 	TRY
 	{
-		Fncts = T_malloc( Num_Func * sizeof( Func ) );
-		memcpy( Fncts, Def_Fncts, Num_Func * sizeof( Func ) );
-		qsort( Fncts, Num_Func, sizeof( Func ), func_cmp1 );
+		Fncts = T_malloc( Num_Func * sizeof *Fncts );
+		memcpy( Fncts, Def_Fncts, Num_Func * sizeof *Fncts );
+		qsort( Fncts, Num_Func, sizeof *Fncts, func_cmp1 );
 		Num_Func = func_list_parse( &Fncts, Num_Func );
-		qsort( Fncts, Num_Func, sizeof( Func ), func_cmp1 );
+		qsort( Fncts, Num_Func, sizeof *Fncts, func_cmp1 );
    		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -259,7 +259,7 @@ void functions_exit( void )
 
 int func_exists( const char *name )
 {
-	return NULL != bsearch( name, Fncts, Num_Func, sizeof( Func ), func_cmp2 );
+	return NULL != bsearch( name, Fncts, Num_Func, sizeof *Fncts, func_cmp2 );
 }
 
 
@@ -299,7 +299,7 @@ Var *func_get_long( const char *name, int *acc, bool flag )
 	   the variable stack with a pointer to the function and the number of
 	   arguments. Also copy the functions name and access flag. */
 
-	f = bsearch( name, Fncts, Num_Func, sizeof( Func ), func_cmp2 );
+	f = bsearch( name, Fncts, Num_Func, sizeof *Fncts, func_cmp2 );
 
 	if ( f == NULL )             /* function not found */
 		return NULL;
@@ -500,7 +500,7 @@ CALL_STACK *call_push( Func *f, const char *device_name )
 	CALL_STACK *cs;
 
 
-	cs = T_malloc( sizeof( CALL_STACK ) );
+	cs = T_malloc( sizeof *cs );
 	cs->prev = Call_Stack;
 	cs->f = f;
 	cs->dev_name = device_name;

@@ -39,6 +39,15 @@
 #define CUT_SELECT_Y      2
 #define CUT_SELECT_BREAK -1
 
+#define ZOOM_BOX_CURSOR    0
+#define MOVE_HAND_CURSOR   1
+#define ZOOM_LENS_CURSOR   2
+#define CROSSHAIR_CURSOR   3
+#define TARGET_CURSOR      4
+#define ARROW_UP_CURSOR    5
+#define ARROW_RIGHT_CURSOR 6
+#define ARROW_LEFT_CURSOR  7
+
 #define MAX_LABEL_LEN     128   /* maximum length of tick label string */
 
 
@@ -192,13 +201,7 @@ typedef struct {
 
 	FL_COLOR colors[ MAX_CURVES ];
 
-	int cur_1,                    /* the different cursors */
-	    cur_2,
-	    cur_3,
-	    cur_4,
-	    cur_5,
-		cur_6,
-		cur_7;
+	int cursor[ 7 ];              /* the different cursors */
 
 	XFontStruct *font;            /* font used for drawing texts */
 	int font_asc, font_desc;
@@ -270,7 +273,7 @@ void delete_pixmap( Canvas *c );
 void redraw_axis( int coord );
 void change_scale( int is_set, double *vals );
 void change_label( char **label );
-void rescale( long new_nx, long new_ny );
+void rescale( long *new_dims );
 void redraw_canvas_2d( Canvas *c );
 
 

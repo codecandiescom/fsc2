@@ -27,8 +27,6 @@
 #include "gpib_if.h"
 
 
-volatile bool need_post;
-
 extern int exp_runparse( void );              /* from exp_run_parser.y */
 extern FL_resource xresources[ ];             /* from xinit.c */
 
@@ -42,7 +40,6 @@ static void stop_while_exp_hook( FL_OBJECT *a, long b );
 static void setup_signal_handlers( void );
 static void fork_failure( int stored_errno );
 static void check_for_further_errors( Compilation *c_old, Compilation *c_all );
-static void new_data_handler( int signo	);
 static void quitting_handler( int signo	);
 static void run_sigchld_handler( int signo );
 static void set_buttons_for_run( int active );
@@ -67,7 +64,6 @@ sigjmp_buf alrm_env;
 volatile sig_atomic_t can_jmp_alrm = 0;
 
 static struct sigaction sigchld_oact,
-	                    new_data_oact,
 	                    quitting_oact;
 
 static int child_return_status;
@@ -140,8 +136,6 @@ bool run( void )
 	if ( child_pid != -1 )           /* if fork() succeeded */
 	{
 		FSC2_MODE = PREPARATION;
-		sema_post( semaphore );      /* we're ready to read data */
-		need_post = UNSET;
 		return OK;
 	}
 
@@ -294,22 +288,14 @@ static bool init_devs_and_graphics( void )
 /*-----------------------------------------------------------------*/
 /* Sets the signal handlers for all signals used for communication */
 /* between the parent and the child process. Finally, it activates */
-/* an idle callback routine which the parent uses for displaying   */
-/* new data (thus new data only get drawn when the parent process  */
-/* has some spare time, but this doesn't mean new data won't get   */
-/* accepted immediately, which is done in a signal handler of its  */
-/* own independently to guarantee minimum response times).         */
+/* an idle callback routine which the parent uses for accepting    */
+/* displaying of new data.                                         */
 /*-----------------------------------------------------------------*/
 
 static void setup_signal_handlers( void )
 {
 	struct sigaction sact;
 
-
-	sact.sa_handler = new_data_handler;
-	sigemptyset( &sact.sa_mask );
-	sact.sa_flags = 0;
-	sigaction( NEW_DATA, &sact, &new_data_oact );
 
 	sact.sa_handler = quitting_handler;
 	sigemptyset( &sact.sa_mask );
@@ -345,7 +331,6 @@ static void stop_while_exp_hook( FL_OBJECT *a, long b )
 static void fork_failure( int stored_errno )
 {
 	sigaction( SIGCHLD,  &sigchld_oact,  NULL );
-	sigaction( NEW_DATA, &new_data_oact, NULL );
 	sigaction( QUITTING, &quitting_oact, NULL );
 
 	switch ( stored_errno )
@@ -434,71 +419,6 @@ static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
 								  2, "No", "Yes", "", 1 ) )
 			THROW( EXCEPTION );
 	}
-}
-
-
-/*-------------------------------------------------------------------*/
-/* new_data_handler() is the handler for the NEW_DATA signal sent by */
-/* the child to the parent if there are new data.                    */
-/* The child will always store data in a shared memory segment. Then */
-/* it waits for the parent to become ready to accept the data by     */
-/* waiting for a semaphore to become posted. Next it puts the memory */
-/* segment key plus the identifier for the data type in a common     */
-/* shared memory segment and finally sends the parent a NEW_DATA     */
-/* signal to tell it that the data are ready to be fetched.          */
-/* This signal is handled by the parent in this signal handler. The  */
-/* parent has a buffer for storing the information about the data it */
-/* gets from the child, the message queue. It stores the information */
-/* about the data in the next free slot of the message queue and     */
-/* increments the marker pointing to the next free slot.             */
-/* There are two types of data, DATA and REQUESTS. Messages of type  */
-/* DATA simply get stored in the message queue and will be dealt     */
-/* with whenever there is time (via an idle callback). As long as    */
-/* the message queue isn't full yet, following a DATA message the    */
-/* semaphore gets posted again immediately, telling the child that   */
-/* the parent is prepared to accept further messages. If, on the     */
-/* other hand, the messages queue is full the semaphore can't be     */
-/* posted yet but only when some of the messages have been taken out */
-/* of the message queue. In this case the global variable need_post  */
-/* is set to tell the function removing items from the message queue */
-/* to post the semaphore when space has become available again in    */
-/* the queue.                                                        */
-/* In contrast, messages of type REQUEST come from functions where   */
-/* the child sends data not via shared memory segments but a pipe    */
-/* and usually awaits a reply from the parent. In this case the      */
-/* parent does not post the semaphore here but only when it is       */
-/* prepared to listen on the pipe. It does so only after it has      */
-/* dealt with all the earlier messages in the message queue. The     */
-/* child, in turn, waits for the semaphore before starting to write  */
-/* to the pipe.                                                      */
-/*-------------------------------------------------------------------*/
-
-static void new_data_handler( int signo )
-{
-	int errno_saved;
-
-
-	signo = signo;
-	errno_saved = errno;
-
-	Message_Queue[ message_queue_high ].shm_id = Key->shm_id;
-	Message_Queue[ message_queue_high ].type = Key->type;
-	message_queue_high = ( message_queue_high + 1 ) % QUEUE_SIZE;
-
-	/* If this are data tell child that it can send new data as long as
-	   the message queue isn't full, in which case we have to delay posting
-	   the semaphore until some old data have been removed - this is done
-	   in accept_new_data(). */
-
-	if ( Key->type == DATA )
-	{
-		if ( ( message_queue_high + 1 ) % QUEUE_SIZE != message_queue_low )
-			sema_post( semaphore );
-		else
-			need_post = SET;
-	}
-
-	errno = errno_saved;
 }
 
 
@@ -649,7 +569,6 @@ void stop_measurement( FL_OBJECT *a, long b )
 
 	fl_set_idle_callback( 0, NULL );
 
-	sigaction( NEW_DATA, &new_data_oact, NULL );
 	sigaction( QUITTING, &quitting_oact, NULL );
 
 	/* Reset all the devices and finally the GPIB bus */
@@ -857,9 +776,11 @@ static void child_sig_handler( int signo )
 {
 	switch ( signo )
 	{
-		case DO_QUIT :                /* aka SIGUSR2 */
+		case DO_QUIT :                             /* aka SIGUSR2 */
+			if ( ! react_to_do_quit )
+				break;
 			do_quit = SET;
-			/* really fall through ! */
+			/* fall through ! */
 
 		case SIGALRM :
 			if ( can_jmp_alrm )
@@ -891,7 +812,8 @@ static void child_sig_handler( int signo )
 			if ( kill( getppid( ), 0 ) == -1 && errno == ESRCH )
 			{
 				delete_all_shm( );
-				sema_destroy( semaphore );
+				sema_destroy( data_semaphore );
+				sema_destroy( request_semaphore );
 			}
 
 			do_quit = SET;

@@ -79,14 +79,6 @@ static struct {
 
 static bool is_mapped = UNSET;  /* set while form is mapped */
 Cut_Graphics CG;
-static int cur_1,
-	       cur_2,
-	       cur_3,
-	       cur_4,
-	       cur_5,
-	       cur_6,
-	       cur_7,
-	       cur_8;
 static int cut_x, cut_y;
 static unsigned int cut_w, cut_h;
 static bool cut_has_been_shown = UNSET;
@@ -358,47 +350,41 @@ void G_init_cut_curve( void )
 
 	/* Create cursors */
 
-	cur_1 = fl_create_bitmap_cursor( cursor1_bits, cursor1_bits,
-									 cursor1_width, cursor1_height,
-									 cursor1_x_hot, cursor1_y_hot );
-	cur_2 = fl_create_bitmap_cursor( cursor2_bits, cursor2_bits,
-									 cursor2_width, cursor2_height,
-									 cursor2_x_hot, cursor2_y_hot );
-	cur_3 = fl_create_bitmap_cursor( cursor3_bits, cursor3_bits,
-									 cursor3_width, cursor3_height,
-									 cursor3_x_hot, cursor3_y_hot );
-	cur_4 = fl_create_bitmap_cursor( cursor4_bits, cursor4_bits,
-									 cursor4_width, cursor4_height,
-									 cursor4_x_hot, cursor4_y_hot );
-	cur_5 = fl_create_bitmap_cursor( cursor5_bits, cursor5_bits,
-									 cursor5_width, cursor5_height,
-									 cursor5_x_hot, cursor5_y_hot );
-	cur_6 = fl_create_bitmap_cursor( cursor6_bits, cursor6_bits,
-									 cursor6_width, cursor6_height,
-									 cursor6_x_hot, cursor6_y_hot );
-	cur_7 = fl_create_bitmap_cursor( cursor7_bits, cursor7_bits,
-									 cursor7_width, cursor7_height,
-									 cursor7_x_hot, cursor7_y_hot );
-	cur_8 = fl_create_bitmap_cursor( cursor8_bits, cursor8_bits,
-									 cursor8_width, cursor8_height,
-									 cursor8_x_hot, cursor8_y_hot );
-	CG.cur_1 = cur_1;
-	CG.cur_2 = cur_2;
-	CG.cur_3 = cur_3;
-	CG.cur_4 = cur_4;
-	CG.cur_5 = cur_5;
-	CG.cur_6 = cur_6;
-	CG.cur_7 = cur_7;
-	CG.cur_8 = cur_8;
+	CG.cursor[ ZOOM_BOX_CURSOR ] =
+					fl_create_bitmap_cursor( cursor1_bits, cursor1_bits,
+											 cursor1_width, cursor1_height,
+											 cursor1_x_hot, cursor1_y_hot );
+	CG.cursor[ MOVE_HAND_CURSOR ] =
+					fl_create_bitmap_cursor( cursor2_bits, cursor2_bits,
+											 cursor2_width, cursor2_height,
+											 cursor2_x_hot, cursor2_y_hot );
+	CG.cursor[ ZOOM_LENS_CURSOR ] =
+					fl_create_bitmap_cursor( cursor3_bits, cursor3_bits,
+											 cursor3_width, cursor3_height,
+											 cursor3_x_hot, cursor3_y_hot );
+	CG.cursor[ CROSSHAIR_CURSOR ] =
+					fl_create_bitmap_cursor( cursor4_bits, cursor4_bits,
+											 cursor4_width, cursor4_height,
+											 cursor4_x_hot, cursor4_y_hot );
+	CG.cursor[ TARGET_CURSOR ] =
+					fl_create_bitmap_cursor( cursor5_bits, cursor5_bits,
+											 cursor5_width, cursor5_height,
+											 cursor5_x_hot, cursor5_y_hot );
+	CG.cursor[ ARROW_UP_CURSOR ] =
+					fl_create_bitmap_cursor( cursor6_bits, cursor6_bits,
+											 cursor6_width, cursor6_height,
+											 cursor6_x_hot, cursor6_y_hot );
+	CG.cursor[ ARROW_RIGHT_CURSOR ] =
+					fl_create_bitmap_cursor( cursor7_bits, cursor7_bits,
+											 cursor7_width, cursor7_height,
+											 cursor7_x_hot, cursor7_y_hot );
+	CG.cursor[ ARROW_LEFT_CURSOR ] =
+					fl_create_bitmap_cursor( cursor8_bits, cursor8_bits,
+											 cursor8_width, cursor8_height,
+											 cursor8_x_hot, cursor8_y_hot );
 
-	fl_set_cursor_color( CG.cur_1, FL_RED, FL_WHITE	);
-	fl_set_cursor_color( CG.cur_2, FL_RED, FL_WHITE	);
-	fl_set_cursor_color( CG.cur_3, FL_RED, FL_WHITE	);
-	fl_set_cursor_color( CG.cur_4, FL_RED, FL_WHITE	);
-	fl_set_cursor_color( CG.cur_5, FL_RED, FL_WHITE	);
-	fl_set_cursor_color( CG.cur_6, FL_RED, FL_WHITE	);
-	fl_set_cursor_color( CG.cur_7, FL_RED, FL_WHITE	);
-	fl_set_cursor_color( CG.cur_8, FL_RED, FL_WHITE	);
+	for ( i = 0; i < 8; i++ )
+		fl_set_cursor_color( CG.cursor[ i ], FL_RED, FL_WHITE );
 
 	/* Allocate memory for the curve and its data */
 
@@ -572,8 +558,8 @@ void cut_close_callback( FL_OBJECT *a, long b )
 
 	G.is_cut = is_mapped = UNSET;
 
-	cut_x = cut_form->cut->x;
-	cut_y = cut_form->cut->y;
+	cut_x = cut_form->cut->x - 1;
+	cut_y = cut_form->cut->y - 1;
 	cut_w = cut_form->cut->w;
 	cut_h = cut_form->cut->h;
 
@@ -678,8 +664,8 @@ static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 
 	/* Allocate memory for storing of scaled data and points for display */
 
-	cv->points = T_realloc( cv->points, CG.nx * sizeof( Scaled_Point ) );
-	cv->xpoints = T_realloc( cv->xpoints, CG.nx * sizeof( XPoint ) );
+	cv->points = T_realloc( cv->points, CG.nx * sizeof *cv->points );
+	cv->xpoints = T_realloc( cv->xpoints, CG.nx * sizeof *cv->xpoints );
 
 	/* Extract the existing scaled data of the cut from the 2d curve */
 
@@ -688,7 +674,7 @@ static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 		for ( i = 0, sp = cv->points, ssp = scv->points + CG.index;
 			  i < CG.nx; ssp += G.nx, sp++, i++ )
 			if ( ssp->exist )
-				memcpy( sp, ssp, sizeof( Scaled_Point ) );
+				memcpy( sp, ssp, sizeof *sp );
 			else
 				sp->exist = UNSET;
 	}
@@ -697,7 +683,7 @@ static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 		for ( i = 0, sp = cv->points, ssp = scv->points + CG.index * G.nx;
 			  i < CG.nx; ssp++, sp++, i++ )
 			if ( ssp->exist )
-				memcpy( sp, ssp, sizeof( Scaled_Point ) );
+				memcpy( sp, ssp, sizeof *sp );
 			else
 				sp->exist = UNSET;
 	}
@@ -874,10 +860,10 @@ bool cut_data_rescaled( long curve, double y_min, double y_max )
 			CG.old_s2d[ curve ][ Y ] *=
 			           ( y_max - y_min ) / G.curve_2d[ curve ]->rwc_delta[ Z ];
 			CG.old_shift[ curve ][ Y ] = 
-			     ( G.curve_2d[ curve ]->rwc_delta[ Z ]
-				   * CG.old_shift[ curve ][ Y ]
-				   - G.curve_2d[ curve ]->rwc_start[ Z ] + y_min ) 
-				 / ( y_max - y_min );
+							( G.curve_2d[ curve ]->rwc_delta[ Z ]
+							  * CG.old_shift[ curve ][ Y ]
+							  - G.curve_2d[ curve ]->rwc_start[ Z ] + y_min )
+							/ ( y_max - y_min );
 		}
 
 		if ( curve == G.active_curve )
@@ -905,8 +891,7 @@ bool cut_data_rescaled( long curve, double y_min, double y_max )
 			if ( ssp->exist )
 			{
 				sp->v = ssp->v;
-				cv->xpoints[ sp->xp_ref ].y =
-					i2shrt( G.cut_canvas.h ) - 1
+				cv->xpoints[ sp->xp_ref ].y = i2shrt( G.cut_canvas.h ) - 1
 					     - d2shrt( cv->s2d[ Y ] * ( sp->v + cv->shift[ Y ] ) );
 			}
 	}
@@ -917,8 +902,7 @@ bool cut_data_rescaled( long curve, double y_min, double y_max )
 			if ( ssp->exist )
 			{
 				sp->v = ssp->v;
-				cv->xpoints[ sp->xp_ref ].y =
-					i2shrt( G.cut_canvas.h )- 1
+				cv->xpoints[ sp->xp_ref ].y = i2shrt( G.cut_canvas.h )- 1
 					     - d2shrt( cv->s2d[ Y ] * ( sp->v + cv->shift[ Y ] ) );
 			}
 	}
@@ -953,8 +937,8 @@ bool cut_num_points_changed( int dir, long num_points )
 
 	/* Extend the arrays for the (scaled) data and the array of XPoints */
 
-	cv->points = T_realloc( cv->points, num_points * sizeof( Scaled_Point ) );
-	cv->xpoints = T_realloc( cv->xpoints, num_points * sizeof( XPoint ) );
+	cv->points = T_realloc( cv->points, num_points * sizeof *cv->points );
+	cv->xpoints = T_realloc( cv->xpoints, num_points * sizeof *cv->xpoints );
 
 	/* The new entries are not set yet */
 
@@ -970,6 +954,7 @@ bool cut_num_points_changed( int dir, long num_points )
 	{
 		CG.s2d[ G.active_curve ][ X ] = cv->s2d[ X ] =
 			 ( double ) ( G.cut_canvas.w - 1 ) / ( double ) ( num_points - 1 );
+
 		for ( sp = G.cut_curve.points, k = 0; k < CG.nx; sp++, k++ )
 			if ( sp->exist )
 				cv->xpoints[ sp->xp_ref ].x = d2shrt( cv->s2d[ X ] * k );
@@ -995,15 +980,15 @@ bool cut_new_points( long curve, long x_index, long y_index, long len )
 
 
 	/* Nothing to be done if either the cross section isn't drawn or the new
-	   points do not belong to the currently shown curve */
+	   points don't belong to the curve currently shown */
 
 	if ( ! G.is_cut || CG.curve == -1 || curve != G.active_curve )
 		return FAIL;
 
-	/* We need a different handling for cuts in X and Y direction. If the cut
-	   is in through the x-axis we have to pick no more than one point from
-	   the new data while for cuts through the y-axis we need either all the
-	   data or none at all */
+	/* We need a different handling for cuts in X and Y direction: if the cut
+	   is through the x-axis (vertical cut) we have to pick no more than one
+	   point from the new data while for cuts through the y-axis (horizontal
+	   cut) we either need all the data or none at all. */
 
 	if ( CG.cut_dir == X )
 	{
@@ -1013,16 +998,15 @@ bool cut_new_points( long curve, long x_index, long y_index, long len )
 		sp = G.curve_2d[ curve ]->points + y_index * G.nx + CG.index;
 
 #ifndef NDEBUG
-		/* There were two crashes, probably from the sp->v in the following
-		   cut_integrate_point() call, which I didn't find the reason for
-		   yet. Here I just try to avoid the problem in order to keep
-		   experiments from crashing. */
+		/* There were crashes from the cut_integrate_point() call which I
+		   couldn't find the reason for yet. Here I just try to avoid the
+		   problem in order to keep experiments from crashing. */
 
 		if ( sp == NULL )
 		{
-			eprint( SEVERE, UNSET, "Internal error detected at %s:%d, %ld.\n"
+			eprint( SEVERE, UNSET, "Internal error detected at %s:%d.\n"
 					"Please send a bug report immediately, including this "
-					"error message!\n", __FILE__, __LINE__, CG.index );
+					"error message!\n", __FILE__, __LINE__ );
 			return FAIL;
 		}
 #endif
@@ -1037,6 +1021,21 @@ bool cut_new_points( long curve, long x_index, long y_index, long len )
 		/* All new points are on the cut */
 
 		sp = G.curve_2d[ curve ]->points + y_index * G.nx + x_index;
+
+#ifndef NDEBUG
+		/* There were crashes in the cut_integrate_point() call which I
+		   couldn't find the reason for yet. Here I just try to avoid the
+		   problem in order to keep experiments from crashing. */
+
+		if ( sp == NULL )
+		{
+			eprint( SEVERE, UNSET, "Internal error detected at %s:%d.\n"
+					"Please send a bug report immediately, including this "
+					"error message!\n", __FILE__, __LINE__ );
+			return FAIL;
+		}
+#endif
+
 		for ( p_index = x_index; p_index < x_index + len; sp++, p_index++ )
 			cut_integrate_point( p_index, sp->v );
 	}
@@ -1074,7 +1073,7 @@ static void cut_integrate_point( long p_index, double val )
 		{
 			xp_index = cv->points[ p_index ].xp_ref = 0;
 			memmove( cv->xpoints + 1, cv->xpoints,
-					 cv->count * sizeof( XPoint ) );
+					 cv->count * sizeof *cv->xpoints );
 			for ( cvp = cv->points + 1, j = 1; j < CG.nx; cvp++, j++ )
 				if ( cvp->exist )
 					cvp->xp_ref++;
@@ -1086,7 +1085,7 @@ static void cut_integrate_point( long p_index, double val )
 			xp_index = cv->points[ p_index ].xp_ref =
 				                                    cv->points[ i ].xp_ref + 1;
 			memmove( cv->xpoints + xp_index + 1, cv->xpoints + xp_index,
-					 ( cv->count - xp_index ) * sizeof( XPoint ) );
+					 ( cv->count - xp_index ) * sizeof *cv->xpoints );
 			for ( j = p_index + 1, cvp = cv->points + j; j < CG.nx;
 				  cvp++, j++ )
 				if ( cvp->exist )
@@ -1367,7 +1366,7 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 			switch ( G.drag_canvas )
 			{
 				case 1 :                       /* in x-axis window */
-					fl_set_cursor( window, CG.cur_1 );
+					fl_set_cursor( window, CG.cursor[ ZOOM_BOX_CURSOR ] );
 
 					c->box_x = c->ppos[ X ];
 					c->box_w = 0;
@@ -1377,7 +1376,7 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 					break;
 
 				case 2 :                       /* in y-axis window */
-					fl_set_cursor( window, CG.cur_1 );
+					fl_set_cursor( window, CG.cursor[ ZOOM_BOX_CURSOR ] );
 
 					c->box_x = c->w
 						      - ( G.y_scale_offset + G.enlarge_box_width + 1 );
@@ -1388,7 +1387,7 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 					break;
 
 				case 4 :                       /* in z-axis window */
-					fl_set_cursor( window, CG.cur_8 );
+					fl_set_cursor( window, CG.cursor[ ARROW_LEFT_CURSOR ] );
 					G.cut_select = CUT_SELECT_X;
 					c->box_x = c->box_h = 0;
 					c->box_y = c->ppos[ Y ];
@@ -1397,7 +1396,7 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 					break;
 
 				case 7 :                       /* in canvas window */
-					fl_set_cursor( window, CG.cur_1 );
+					fl_set_cursor( window, CG.cursor[ ZOOM_BOX_CURSOR ] );
 
 					c->box_x = c->ppos[ X ];
 					c->box_y = c->ppos[ Y ];
@@ -1412,7 +1411,7 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 		case 2 :                               /* middle button */
 			if ( G.drag_canvas == 4 )
 				break;
-			fl_set_cursor( window, CG.cur_2 );
+			fl_set_cursor( window, CG.cursor[ MOVE_HAND_CURSOR ] );
 
 			G.start[ X ] = c->ppos[ X ];
 			G.start[ Y ] = c->ppos[ Y ];
@@ -1423,7 +1422,7 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 		case 3:                                /* left and middle button */
 			if ( G.drag_canvas == 4 )
 				break;
-			fl_set_cursor( window, CG.cur_4 );
+			fl_set_cursor( window, CG.cursor[ CROSSHAIR_CURSOR ] );
 
 			/* Don't draw the box anymore */
 
@@ -1434,7 +1433,7 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 		case 4 :                               /* right button */
 			if ( G.drag_canvas == 4 )
 				break;
-			fl_set_cursor( window, CG.cur_3 );
+			fl_set_cursor( window, CG.cursor[ ZOOM_LENS_CURSOR ] );
 
 			G.start[ X ] = c->ppos[ X ];
 			G.start[ Y ] = c->ppos[ Y ];
@@ -1443,7 +1442,7 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 		case 5 :                               /* left and right button */
 			if ( G.drag_canvas == 4 )
 				break;
-			fl_set_cursor( window, CG.cur_5 );
+			fl_set_cursor( window, CG.cursor[ TARGET_CURSOR ] );
 
 			if ( G.cut_canvas.is_box == UNSET && old_button_state != 4 )
 			{

@@ -114,6 +114,7 @@ typedef struct
 	long harmonic;
 	bool is_harmonic;
 	double dac_voltage[ NUM_DAC_PORTS ];
+	bool is_dac_voltage[ NUM_DAC_PORTS ];
 } SR810;
 
 
@@ -148,6 +149,7 @@ static double sr810_get_data( void );
 static void sr810_get_xy_data( double *data, long *channels,
 							   int num_channels );
 static double sr810_get_adc_data( long channel );
+static double sr810_get_dac_data( long port );
 static double sr810_set_dac_data( long channel, double voltage );
 static double sr810_get_sens( void );
 static void sr810_set_sens( int sens_index );
@@ -194,7 +196,10 @@ int sr810_init_hook( void )
 	sr810.is_mod_level = UNSET;
 
 	for ( i = 0; i < NUM_DAC_PORTS; i++ )
+	{
 		sr810.dac_voltage[ i ] = 0.0;
+		sr810.is_dac_voltage[ i ] = UNSET;
+	}
 
 	return 1;
 }
@@ -400,7 +405,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
-		if ( FSC2_MODE == PREPARATION )
+		if ( FSC2_MODE == PREPARATION && ! sr810.is_dac_voltage[ port - 1 ] )
 			no_query_possible( );
 
 		return vars_push( FLOAT_VAR, sr810.dac_voltage[ port - 1 ] );
@@ -420,6 +425,7 @@ Var *lockin_dac_voltage( Var *v )
 	too_many_arguments( v );
 	
 	sr810.dac_voltage[ port - 1 ] = voltage;
+	sr810.is_dac_voltage[ port - 1 ] = SET;
 
 	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( FLOAT_VAR, voltage );
@@ -965,7 +971,10 @@ static bool sr810_init( const char *name )
 		sr810_set_mod_level( sr810.mod_level );
 
 	for ( i = 0; i < NUM_DAC_PORTS; i++ )
-		sr810_set_dac_data( i + 1, sr810.dac_voltage[ i ] );
+		if ( sr810.is_dac_voltage )
+			sr810_set_dac_data( i + 1, sr810.dac_voltage[ i ] );
+		else
+			sr810.dac_voltage[ i ] = sr810_get_dac_data( i + 1 );
 
 	return OK;
 }
@@ -1069,15 +1078,16 @@ static double sr810_get_adc_data( long channel )
 }
 
 
-/*--------------------------------------------------------------*/
-/* lockin_set_dac() sets the voltage at one of the 4 DAC ports. */
-/* -> Number of the DAC channel (1-4)                           */
-/* -> Voltage to be set (-10.5 V - +10.5 V)                     */
-/*-------------------------- -----------------------------------*/
+/*-------------------------------------------------------------------*/
+/* sr810_set_dac_data () sets the voltage at one of the 4 DAC ports. */
+/* -> Number of the DAC channel (1-4)                                */
+/* -> Voltage to be set (-10.5 V - +10.5 V)                          */
+/*-------------------------- ----------------------------------------*/
 
 static double sr810_set_dac_data( long port, double voltage )
 {
 	char buffer [ 40 ];
+
 
 	fsc2_assert( port >= 1 && port <= 4 );
 	fsc2_assert( voltage >= DAC_MIN_VOLTAGE && voltage <= DAC_MAX_VOLTAGE );
@@ -1089,6 +1099,30 @@ static double sr810_set_dac_data( long port, double voltage )
 	return voltage;
 }
 
+
+/*---------------------------------------------------------------------*/
+/* sr810_get_dac_data() returns the voltage at one of the 4 DAC ports. */
+/* -> Number of the DAC channel (1-4)                                  */
+/*-------------------------- ------------------------------------------*/
+
+static double sr810_get_dac_data( long port )
+{
+	char buffer [ 40 ];
+	long len = 40;
+
+
+	fsc2_assert( port >= 1 && port <= 4 );
+
+	sprintf( buffer, "AUXV %ld\n", port );
+	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE ||
+		 gpib_read( sr810.device, buffer, &len )== FAILURE )
+		sr810_failure( );
+
+	buffer[ len - 1 ] = '\0';
+	return T_atod( buffer );
+}
+
+
 /*-----------------------------------------------------------------------*/
 /* Function determines the sensitivity setting of the lock-in amplifier. */
 /*-----------------------------------------------------------------------*/
@@ -1098,6 +1132,7 @@ static double sr810_get_sens( void )
 	char buffer[ 20 ];
 	long length = 20;
 	double sens;
+
 
 	/* Ask lock-in for the sensitivity setting */
 

@@ -26,24 +26,14 @@
 
 
 #include "fsc2.h"
-#include <sys/ipc.h>
-#include <sys/shm.h>
 
 
-/* Maximum number of shared memory segments - I didn't find a better way to
-   determine this number yet. In principle, it should be taken from one of the
-   include files, but alas, for the current version of Linux the header files
-   seem to be broken in this respect... */
+/* The size of the message queue - the higher it is the longer the child
+   process can continue without having to wait for the parent. But, on the
+   other hand, setting it to something much larger that the maximum number
+   of shared memory segments won't help... */
 
-#if ! defined SHMMNI
-#define SHMMNI 128
-#endif
-
-/* Maximum number of shared memory segments plus some safety margin - the
-   queue has always to be larger than the maximum number of shared segments,
-   so make sure SHMMNI is correct ! */
-
-#define QUEUE_SIZE ( SHMMNI + 8 )
+#define QUEUE_SIZE 256
 
 
 enum {
@@ -108,9 +98,17 @@ typedef struct {
 
 
 typedef struct {
-	int shm_id;
 	int type;
-} KEY;
+	int shm_id;
+} SLOT;
+
+
+typedef struct {
+	int low;
+	int high;
+	SLOT slot[ QUEUE_SIZE ];
+} MESSAGE_QUEUE;
+
 
 enum {
 	DATA,
@@ -123,6 +121,7 @@ void end_comm( void );
 int new_data_callback( XEvent *a, void *b );
 long reader( void *ret );
 void writer( int type, ... );
+void send_data( int type, int shm_id );
 
 
 #endif  /* ! COMM_HEADER */

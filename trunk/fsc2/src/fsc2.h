@@ -175,7 +175,8 @@ int pd[ 4 ];                    /* pipe descriptors */
 int conn_pd[ 2 ];
 pid_t child_pid = 0;            /* pid of child */
 pid_t conn_pid = -1;            /* pid of communication child */
-int semaphore = -1;
+int data_semaphore = -1;
+int request_semaphore = -1;
 volatile bool do_quit = UNSET;
 volatile bool conn_child_replied = UNSET;
 bool react_to_do_quit = SET;
@@ -187,10 +188,8 @@ int border_offset_y;
 int stop_button_mask = 0;
 
 Graphics G;
-KEY *Key;
-int Key_ID = -1;
-KEY *Message_Queue = NULL;
-volatile int message_queue_low, message_queue_high;
+MESSAGE_QUEUE *MQ = NULL;
+int MQ_ID = -1;
 
 FILE_LIST *File_List = NULL;
 int File_List_Len = 0;
@@ -253,7 +252,8 @@ extern int pd[ ];                  /* pipe descriptors */
 extern int conn_pd[ ];
 extern pid_t child_pid;            /* pid of child */
 extern pid_t conn_pid;
-extern int semaphore;
+extern int data_semaphore;
+extern int request_semaphore;
 extern volatile bool do_quit;
 extern bool react_to_do_quit;
 extern bool exit_hooks_are_run;
@@ -264,10 +264,8 @@ extern int border_offset_y;
 extern int stop_button_mask;
 
 extern Graphics G;
-extern KEY *Key;
-extern int Key_ID;
-extern KEY *Message_Queue;
-extern volatile int message_queue_low, message_queue_high;
+extern MESSAGE_QUEUE *MQ;
+extern int MQ_ID;
 extern volatile bool conn_child_replied;
 
 extern FILE_LIST *File_List;

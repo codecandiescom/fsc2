@@ -155,25 +155,23 @@ void delete_all_shm( void )
 	int i;
 
 
+	if ( MQ_ID < 0 )
+		return;
+
 	raise_permissions( );
 
-	/* If message queue exists check that all memory segments indixed in it
+	/* If message queue exists check that all memory segments indexed in it
 	   are deleted */
 
-	if ( Message_Queue != NULL )
-	{
-		for ( i = 0; i < QUEUE_SIZE; i++ )
-			if ( Message_Queue[ i ].shm_id >= 0 )
-			{
-				shmctl( Message_Queue[ i ].shm_id, IPC_RMID, NULL );
-				Message_Queue[ i ].shm_id = -1;
-			}
-	}
+	for ( i = 0; i < QUEUE_SIZE; i++ )
+		if ( MQ->slot[ i ].shm_id >= 0 )
+			shmctl( MQ->slot[ i ].shm_id, IPC_RMID, NULL );
 
 	/* Finally delete the master key (if its ID is valid, i.e. non-negative) */
 
-	if ( Key_ID >= 0 )
-		detach_shm( Key, &Key_ID );
+	detach_shm( MQ, &MQ_ID );
+	shmctl( MQ_ID, IPC_RMID, NULL );
+	MQ_ID = -1;
 
 	lower_permissions( );
 }
@@ -258,13 +256,13 @@ void delete_stale_shms( void )
 }
 
 
-/*------------------------------------------------------------*/
-/* Function creates a (System V) semaphore (with one set) and */
-/* initializes it to 0. It returns either the ID number of    */
-/* the new semaphore or -1 on error.                          */
-/*------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Function creates a (System V) semaphore with one set and initializes */
+/* it to the value supplied to the function. It returns either the ID   */
+/* of the new semaphore or -1 on error.                                 */
+/*----------------------------------------------------------------------*/
 
-int sema_create( void )
+int sema_create( int size )
 {
 	int sema_id;
 	union semun sema_arg;
@@ -279,7 +277,7 @@ int sema_create( void )
 		return -1;
 	}
 
-	sema_arg.val = 0;
+	sema_arg.val = size;
 	if ( ( semctl( sema_id, 0, SETVAL, sema_arg ) ) < 0 )
 	{
 		semctl( sema_id, 0, IPC_RMID, sema_arg );

@@ -110,6 +110,10 @@ lockin_ref_level, -1, EXP;      // Get/set mod. level (SR8x0 only)
 lockin_harmonic, -1, EXP;       // Get/set harmonic (SR8x0, ER023M)
 lockin_lock_keyboard, -1, EXP;  // Lock or unlock the keyboard (SRxy0)
 
+lockin_auto_setup, -1, ALL;        // (SR830)
+lockin_get_sample_time, 0, EXP;    // (SR830)
+lockin_auto_acquisition, -1, EXP;  // (SR830)
+
 lockin_is_overload, 0, EXP;     // (ER023M)
 lockin_offset, -1, ALL;         // (ER023M)
 lockin_conversion_time, -1, ALL;// (ER023M)

@@ -115,12 +115,16 @@ bool xforms_init( int *argc, char *argv[ ] )
 		 == NULL )
 		return FAIL;
 
-	/* Nowadays the xforms initalization obviously sets the locale to the
-	   one set in the environment variables. But for this program we need
-	   at least the "normal" formatting of numeric values, otherwise
-	   functions like strtod() don't work as expected. */
+	/* xforms sets the locale to the one set in the environment variables. But
+	   we need at least the "normal" formatting of numeric values, otherwise
+	   functions like strtod() work not as expected. */
 
 	setlocale( LC_NUMERIC, "C" );
+
+	/* We also must keep the main window always becoming the topmost window
+	   at the most inconvenient moments... */
+
+	fl_set_app_nomainform( 1 );
 
 	if ( *argc > 1 && argv[ 1 ][ 0 ] == '-' )
 	{

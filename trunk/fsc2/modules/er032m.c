@@ -173,7 +173,6 @@ int er032m_test_hook( void )
 
 int er032m_exp_hook( void )
 {
-	fsc2_assert( magnet.device == -1 );
 	er032m_init( );
 	return 1;
 }
@@ -186,7 +185,6 @@ int er032m_end_of_exp_hook( void )
 {
 	if ( magnet.device >= 0 )
 		gpib_local( magnet.device );
-	magnet.device = -1;
 	return 1;
 }
 

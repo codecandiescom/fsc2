@@ -63,8 +63,25 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define MAX_HARMONIC          19999
 #define MIN_HARMONIC          1
 
-#define NUM_CHANNELS          4        /* 11 would be possible but this doesn't
-										  make too much sense... */
+#define NUM_CHANNELS         10
+#define NUM_DIRECT_CHANNELS   8
+
+#define DISPLAY_CHANNELS      2
+
+#define DSP_CH_UNDEF          0
+#define DSP_CH_X              1
+#define DSP_CH_Y              2
+#define DSP_CH_R              3
+#define DSP_CH_theta          4
+#define DSP_CH_AUX1           5
+#define DSP_CH_AUX2           6
+#define DSP_CH_AUX3           7
+#define DSP_CH_AUX4           8
+#define DSP_CH_Xnoise         9         // only to be used in auto mode
+#define DSP_CH_Ynoise        10         // only to be used in auto mode
+
+#define MAX_DATA_AT_ONCE      6
+#define MAX_STORED_DATA   16383
 
 
 /* Declaration of exported functions */
@@ -86,6 +103,9 @@ Var *lockin_ref_freq( Var *v );
 Var *lockin_harmonic( Var *v );
 Var *lockin_ref_mode( Var *v );
 Var *lockin_ref_level( Var *v );
+Var *lockin_auto_setup( Var *v );
+Var *lockin_get_sample_time( Var *v );
+Var *lockin_auto_acquisition( Var *v );
 Var *lockin_lock_keyboard( Var *v );
 
 
@@ -114,6 +134,15 @@ typedef struct
 	bool is_harmonic;
 	double dac_voltage[ NUM_DAC_PORTS ];
 	bool is_dac_voltage[ NUM_DAC_PORTS ];
+
+	bool is_auto;
+	bool is_auto_setup;
+	long st_index;
+	bool set_sample_time_to_tc;
+	long dsp_ch[ DISPLAY_CHANNELS ];
+	long data_fetched[ DISPLAY_CHANNELS ];
+	long stored_data;
+
 } SR830;
 
 
@@ -123,6 +152,8 @@ static SR830 sr830_stored;
 
 #define UNDEF_SENS_INDEX -1
 #define UNDEF_TC_INDEX   -1
+#define UNDEF_ST_INDEX   -1
+#define ST_TRIGGRED      -2
 
 /* Lists of valid sensitivity settings */
 
@@ -131,17 +162,38 @@ static double sens_list[ ] = { 2.0e-9, 5.0e-9, 1.0e-8, 2.0e-8, 5.0e-8, 1.0e-7,
 							   2.0e-5, 5.0e-5, 1.0e-4, 2.0e-4, 5.0e-4, 1.0e-3,
 							   2.0e-3, 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2, 1.0e-1,
 							   2.0e-1, 5.0e-1, 1.0 };
+#define SENS_ENTRIES ( sizeof sens_list / sizeof sens_list[ 0 ] )
 
 /* List of all available time constants */
 
 static double tc_list[ ] = { 1.0e-5, 3.0e-5, 1.0e-4, 3.0e-4, 1.0e-3, 3.0e-3,
 							 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1, 1.0, 3.0, 1.0e1,
 							 3.0e1, 1.0e2, 3.0e2, 1.0e3, 3.0e3, 1.0e4, 3.0e4 };
-
-
-#define SENS_ENTRIES ( sizeof sens_list / sizeof sens_list[ 0 ] )
 #define TC_ENTRIES ( sizeof tc_list / sizeof tc_list[ 0 ] )
 
+
+#define ST_ENTRIES 14
+
+static double st_list[ ST_ENTRIES ];
+
+
+static long dsp_ch_list[ ][ DISPLAY_CHANNELS ] =
+							{ { DSP_CH_X, DSP_CH_Y },
+							  { DSP_CH_R, DSP_CH_theta },
+							  { DSP_CH_AUX1, DSP_CH_AUX2 },
+							  { DSP_CH_AUX3, DSP_CH_AUX4 },
+							  { DSP_CH_Ynoise, DSP_CH_Xnoise },
+							  { DSP_CH_UNDEF, DSP_CH_UNDEF }
+							};
+static int symbol_to_dsp[ ] = { 0, 0, 0, 1, 1, 3, 4, 3, 4, 2, 2 };
+static long dsp_to_symbol[ ][ DISPLAY_CHANNELS ] =
+							{ { DSP_CH_X, DSP_CH_Y },
+							  { DSP_CH_R, DSP_CH_theta },
+							  { DSP_CH_Ynoise, DSP_CH_Xnoise },
+							  { DSP_CH_AUX1, DSP_CH_AUX2 },
+							  { DSP_CH_AUX3, DSP_CH_AUX4 } };
+
+#define D2S_ENTRIES ( sizeof dsp_to_symbol / sizeof dsp_to_symbol[ 0 ][ 0 ] )
 
 /* Declaration of all functions used only within this file */
 
@@ -149,6 +201,8 @@ static bool sr830_init( const char *name );
 static double sr830_get_data( void );
 static void sr830_get_xy_data( double *data, long *channels,
 							   int num_channels );
+static void sr830_get_xy_auto_data( double *data, long *channels,
+									int num_channels );
 static double sr830_get_adc_data( long channel );
 static double sr830_set_dac_data( long channel, double voltage );
 static double sr830_get_dac_data( long port );
@@ -165,6 +219,12 @@ static long sr830_get_harmonic( void );
 static long sr830_set_harmonic( long harmonic );
 static double sr830_get_mod_level( void );
 static double sr830_set_mod_level( double level );
+static long sr830_set_sample_time( long st_index );
+static long sr830_get_sample_time( void );
+static void sr830_set_display_channel( int channel, long type );
+static long sr830_get_display_channel( int channel );
+static void sr830_auto( int flag );
+static double sr830_get_auto_data( int type );
 static void sr830_lock_state( bool lock );
 static void sr830_failure( void );
 
@@ -187,20 +247,37 @@ int sr830_init_hook( void )
 
 	sr830.device = -1;
 
-	sr830.sens_index   = UNDEF_SENS_INDEX;
-	sr830.sens_warn    = UNSET;
-	sr830.is_phase     = UNSET;
-	sr830.tc_index     = UNDEF_TC_INDEX;
-	sr830.tc_warn      = UNSET;
-	sr830.is_mod_freq  = UNSET;
-	sr830.is_mod_level = UNSET;
-	sr830.is_harmonic  = UNSET;
+	sr830.sens_index            = UNDEF_SENS_INDEX;
+	sr830.sens_warn             = UNSET;
+	sr830.is_phase              = UNSET;
+	sr830.tc_index              = UNDEF_TC_INDEX;
+	sr830.tc_warn               = UNSET;
+	sr830.is_mod_freq           = UNSET;
+	sr830.is_mod_level          = UNSET;
+	sr830.is_harmonic           = UNSET;
+	sr830.is_auto               = UNSET;
+	sr830.is_auto_setup         = UNSET;
+	sr830.st_index              = UNDEF_ST_INDEX;
+	sr830.set_sample_time_to_tc = UNSET;
+	sr830.stored_data           = 0;
 
 	for ( i = 0; i < NUM_DAC_PORTS; i++ )
 	{
 		sr830.dac_voltage[ i ] = 0.0;
 		sr830.is_dac_voltage[ i ] = UNSET;
 	}
+
+	for ( i = 0; i < DISPLAY_CHANNELS; i++ )
+	{
+		sr830.data_fetched[ i ] = 0;
+		sr830.dsp_ch[ i ] = DSP_CH_UNDEF;
+	}
+
+	/* Set up the sample time list - shortest times come first */
+
+	st_list[ 0 ] = 1.0 / 512.0;
+	for ( i = 1; i < ST_ENTRIES; i++ )
+		st_list[ i ] = 2.0 * st_list[ i - 1 ];
 
 	return 1;
 }
@@ -244,10 +321,16 @@ int sr830_exp_hook( void )
 
 int sr830_end_of_exp_hook( void )
 {
+	int i;
+
 	/* Switch lock-in back to local mode */
 
 	if ( sr830.device >= 0 )
 		gpib_local( sr830.device );
+
+	for ( i = 0; i < DISPLAY_CHANNELS; i++ )
+		sr830.data_fetched[ i ] = 0;
+	sr830.stored_data = 0;
 
 	sr830.device = -1;
 
@@ -286,12 +369,14 @@ Var *lockin_name( Var *v )
 
 Var *lockin_get_data( Var *v )
 {
-	double data[ 6 ] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-	long channels[ 6 ];
+	double data[ MAX_DATA_AT_ONCE ] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+	long channels[ MAX_DATA_AT_ONCE ];
 	int num_channels;
 	bool using_dummy_channels = UNSET;
-	int i;
+	int i, j;
 
+
+	/* No argument means just return the X data value */
 
 	if ( v == NULL )
 	{
@@ -301,9 +386,37 @@ Var *lockin_get_data( Var *v )
 			return vars_push( FLOAT_VAR, sr830_get_data( ) );
 	}
 
-	for ( num_channels = i = 0; i < 6 && v != NULL; i++, v = vars_pop( v ) )
+	
+
+	for ( num_channels = i = 0; i < MAX_DATA_AT_ONCE && v != NULL;
+		  i++, v = vars_pop( v ) )
 	{
 		channels[ i ] = get_long( v, "channel number" );
+
+		if ( channels[ i ] ==  DSP_CH_Xnoise ||
+			 channels[ i ] == DSP_CH_Ynoise )
+		{
+			if ( ! sr830.is_auto )
+			{
+				print( FATAL, "%c Noise can only be measured in "
+					   "auto-acquisition mode.\n",
+					   channels[ i ] == DSP_CH_Xnoise ? 'X' : 'Y' );
+				THROW( EXCEPTION );
+			}
+
+			for ( j = 0; j < DISPLAY_CHANNELS; i++ )
+				if ( channels[ i ] == sr830.dsp_ch[ j ] )
+					break;
+
+			if ( j == DISPLAY_CHANNELS )
+			{
+				print( FATAL, "%c Noise can only be measured when displayed "
+					   "in CH%d display.\n",
+					   channels[ i ] == DSP_CH_Xnoise ? 'X' : 'Y',
+					   channels[ i ] == DSP_CH_Xnoise ? 1 : 2 );
+				THROW( EXCEPTION );
+			}
+		}
 
 		if ( channels[ i ] < 1 || channels[ i ] > NUM_CHANNELS )
 		{
@@ -316,8 +429,8 @@ Var *lockin_get_data( Var *v )
 
 	if ( v != NULL )
 	{
-		print( SEVERE, "More than 6 parameters, discarding superfluous "
-			   "ones.\n" );
+		print( SEVERE, "More than %d parameters, discarding superfluous "
+			   "ones.\n", MAX_DATA_AT_ONCE );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -336,7 +449,7 @@ Var *lockin_get_data( Var *v )
 	if ( num_channels == 1 )
 	{
 		using_dummy_channels = SET;
-		channels[ num_channels++ ] = channels[ 0 ] % NUM_CHANNELS + 1;
+		channels[ num_channels++ ] = channels[ 0 ] % NUM_DIRECT_CHANNELS + 1;
 	}
 
 	sr830_get_xy_data( data, channels, num_channels );
@@ -410,7 +523,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
-		if ( FSC2_MODE == PREPARATION )
+		if ( FSC2_MODE == PREPARATION && ! sr830.is_dac_voltage[ port - 1 ] )
 			no_query_possible( );
 
 		return vars_push( FLOAT_VAR, sr830.dac_voltage[ port - 1 ] );
@@ -430,7 +543,7 @@ Var *lockin_dac_voltage( Var *v )
 	too_many_arguments( v );
 	
 	sr830.dac_voltage[ port - 1 ] = voltage;
-	r830.is_dac_voltage[ port - 1 ] = SET;
+	sr830.is_dac_voltage[ port - 1 ] = SET;
 
 	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( FLOAT_VAR, voltage );
@@ -885,6 +998,251 @@ Var *lockin_ref_level( Var *v )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
+Var *lockin_auto_setup( Var *v )
+{
+	double st;
+	double tc;
+	long st_index = UNDEF_ST_INDEX;
+    long dsp_ch[ DISPLAY_CHANNELS ];
+	int i, j;
+
+
+	if ( v == NULL )
+	{
+		if ( FSC2_MODE == PREPARATION )
+		{
+			print( FATAL, "Function can't be used for queries.\n" );
+			THROW( EXCEPTION );
+		}
+
+		print( SEVERE, "Function can't be used for queries.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	/* An integer value of 0 means that we should use a sample time equal
+	   or larger than the lock-in's time constant. A value of -1 tells
+	   us that an external triggger, applied to the rear panel trigger input
+	   is going to be used (the user wil have to take care that the trigger
+	   rate is not above 512 Hz). */
+
+	if ( v->type == INT_VAR && ( v->val.lval == 0 || v->val.lval == -1 ) )
+	{
+		if ( v->val.lval == 0 )
+		{
+			sr830.set_sample_time_to_tc = SET;
+
+			if ( FSC2_MODE != PREPARATION )
+			{
+				if ( FSC2_MODE == TEST )
+					tc = sr830.tc_index != UNDEF_TC_INDEX ?
+						SR830_TEST_TIME_CONSTANT : tc_list[ sr830.tc_index ];
+				else
+					tc = sr830_get_tc( );
+
+				st_index = 0;
+				while ( st_index < ST_ENTRIES - 1 && st_list[ st_index ] < tc )
+					st_index++;
+			}
+			else
+				st_index = ST_TRIGGRED;
+		}
+	}
+	else
+	{
+		st = get_double( v, "sample time" );
+
+		if ( st <= 0.0 )
+		{
+			print( FATAL, "Invalid zero or negative sample time.\n" );
+			THROW( EXCEPTION );
+		}
+
+		/* We try to match the sample time passed to the function by checking
+		   if it fits in between two of the valid values and setting it to the
+		   nearer one and, if this doesn't work, we set it to the minimum or
+		   maximum value, depending on the size of the argument. If the value
+		   does not fit within 5 percent, we utter a warning message (but only
+		   once). */
+	
+		for ( i = 0; i < ST_ENTRIES - 2; i++ )
+			if ( st >= st_list[ i ] && st <= st_list[ i + 1 ] )
+			{
+				st_index = i + ( ( st / st_list[ i ] <
+								   st_list[ i + 1 ] / st ) ? 0 : 1 );
+				break;
+			}
+
+		if ( st_index >= 0 &&                               /* value found ? */
+			 fabs( st - st_list[ st_index ] ) > st * 5.0e-2 )/* error > 5% ? */
+		{
+			if ( st >= 1.0 )
+				print( WARN, "Can't set sample time to %.0lf s, using %.0lf s "
+					   "instead.\n", st, st_list[ st_index ] );
+			else
+				print( WARN, "Can't set sample time to %.0lf ms, using "
+					   "%.0lf ms instead.\n", st * 1.0e3,
+					   st_list[ st_index ] * 1.0e3 );
+		}
+
+		if ( st_index == UNDEF_ST_INDEX )                 /* not found yet ? */
+		{
+			if ( st < st_list[ 0 ] )
+				st_index = 0;
+			else
+				st_index = ST_ENTRIES - 1;
+
+			if ( st > st_list[ ST_ENTRIES - 1 ] * 1.05 )
+				print( WARN, "Sample time of %.0lf s is too large, using "
+					   "%.0lf s instead.\n", st, st_list[ st_index ] );
+			else if ( st < st_list[ 0 ] * 0.95 )
+				print( WARN, "Sample time of %.0lf ms is too small, using "
+					   "%.0lf ms instead.\n",
+					   st * 1.0e3, st_list[ st_index ] * 1.0e3 );
+		}
+	}
+
+	/* The next (optional) parameter are the channels to be displayed
+	   (which in turn are the channels the values are sampled from). Not
+	   all combinations are possible, the first channnel allows only
+	   'X' and 'R' (corresponding to the numbers 1 and 3), while the
+	   second channel can only display 'Y' and 'theta' (coded by the
+	   numbers 2 and 4). All other combinations must be rejected. */
+
+	for ( i = 0; i < DISPLAY_CHANNELS; i++ )
+	{
+		if ( ( v = vars_pop( v ) ) == NULL )
+		{
+			if ( FSC2_MODE == PREPARATION )
+				for ( ; i < DISPLAY_CHANNELS; i++ )
+					dsp_ch[ i ] = DSP_CH_UNDEF;
+			break;
+		}
+
+		dsp_ch[ i ] = get_long( v, "channel to display" );
+
+		/* Accept 'o' to mean don't change */
+
+		if ( dsp_ch[ i ] == 0 )
+		{
+			dsp_ch[ i ] = DSP_CH_UNDEF;
+			continue;
+		}
+
+		for ( j = 0; ; )
+		{
+			if ( dsp_ch_list[ j ][ i ] == DSP_CH_UNDEF )
+			{
+				print( FATAL, "Invalid display type (%ld) for channel %d.\n",
+					   dsp_ch[ i ], i + 1 );
+				THROW( EXCEPTION );
+			}
+
+			if ( dsp_ch[ i ] == dsp_ch_list[ j++ ][ i ] )
+				break;
+		}
+	}
+
+	too_many_arguments( v );
+
+	sr830.is_auto_setup = SET;
+	sr830.st_index = st_index;
+	for ( i = 0; i < DISPLAY_CHANNELS; i++ )
+		sr830.dsp_ch[ i ] = dsp_ch[ i ];
+
+	/* In the experiment we now must set up the lock-in. If it is already
+	   running in auto mode it must be stopped and all already accumulated
+	   data have to be thrown away before setting the new state. Afterwards
+	   it must be restarted in this case. */
+
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		if ( sr830.is_auto )
+			sr830_auto( 0 );
+
+		sr830_set_sample_time( st_index );
+
+		for ( i = 0; i < DISPLAY_CHANNELS &&
+					 sr830.dsp_ch[ i ] != DSP_CH_UNDEF; i++ )
+			sr830_set_display_channel( i, sr830.dsp_ch[ i ] );
+
+		if ( sr830.is_auto )
+			sr830_auto( 1 );
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+Var *lockin_get_sample_time( Var *v )
+{
+	long st_index;
+	double tc;
+
+
+	v = v;
+
+	st_index = sr830.st_index;
+
+	switch ( FSC2_MODE )
+	{
+		case TEST :
+			if ( st_index == UNDEF_ST_INDEX )
+			{
+				tc = sr830.tc_index != UNDEF_TC_INDEX ?
+					SR830_TEST_TIME_CONSTANT : tc_list[ sr830.tc_index ];
+				st_index = 0;
+				while ( st_index < ST_ENTRIES - 1 && st_list[ st_index ] < tc )
+					st_index++;
+			}
+			break;
+
+		case EXPERIMENT :
+			st_index = sr830_get_sample_time( );
+			break;
+	}
+
+	if ( st_index == ST_TRIGGRED )
+		return vars_push( FLOAT_VAR, 0 );
+	return vars_push( FLOAT_VAR, st_list[ st_index ] );
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+Var *lockin_auto_acquisition( Var *v )
+{
+	bool state;
+
+
+	if ( ! sr830.is_auto_setup )
+	{
+		print( FATAL, "Missing initialization of auto-acquisition, use "
+			   "function lockin_auto_setup().\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( v == 0 )
+		return vars_push( INT_VAR, ( long ) sr830.is_auto );
+
+	state = get_boolean( v );
+	too_many_arguments( v );
+
+	if ( FSC2_MODE == EXPERIMENT )
+		sr830_auto( state );
+
+	sr830.is_auto = state;
+
+	return vars_push( INT_VAR, ( long ) state );
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
 Var *lockin_lock_keyboard( Var *v )
 {
 	bool lock;
@@ -982,7 +1340,17 @@ static bool sr830_init( const char *name )
 		if ( sr830.is_dac_voltage[ i ] )
 			sr830_set_dac_data( i + 1, sr830.dac_voltage[ i ] );
 		else
-			sr830.dac_voltage = sr830_get_dac_data( i + 1 );
+			sr830.dac_voltage[ i ] = sr830_get_dac_data( i + 1 );
+
+	if ( sr830.is_auto_setup )
+	{
+		sr830_set_sample_time( sr830.st_index );
+		for ( i = 0; i < DISPLAY_CHANNELS; i++ )
+			if ( sr830.dsp_ch[ i ] != DSP_CH_UNDEF )
+				sr830_set_display_channel( i, sr830.dsp_ch[ i ] );
+			else
+				sr830_get_display_channel( i );
+	}
 
 	return OK;
 }
@@ -997,6 +1365,14 @@ static double sr830_get_data( void )
 	char buffer[ 50 ];
 	long length = 50;
 
+
+	/* If in auto mode and the X channel is displayed in CH1 return the
+	   data from the lock-in's internal bufer */
+
+	if ( sr830.is_auto && sr830.dsp_ch[ 0 ] == DSP_CH_X )
+		return sr830_get_auto_data( DSP_CH_X );
+
+	/* Otherwise return fetch the directly measured data */
 
 	if ( gpib_write( sr830.device, "OUTP?1\n", 7 ) == FAILURE ||
 		 gpib_read( sr830.device, buffer, &length ) == FAILURE )
@@ -1017,16 +1393,24 @@ static void sr830_get_xy_data( double *data, long *channels, int num_channels )
 	char buffer[ 200 ];
 	long length = 200;
 	char *bp_cur, *bp_next;
-	int i;
+	int i, j;
 
 
-	fsc2_assert( num_channels >= 2 && num_channels <= 6 );
+	fsc2_assert( num_channels >= 2 && num_channels <= MAX_DATA_AT_ONCE );
 
-	/* Assemble the command to be send to the lock-in */
+	/* Assemble the command to be send to the lock-in - if we find that
+	   one of the channel gets its data from the lock-in's internal buffer
+	   pass everything to a different function. */
 
 	for ( i = 0; i < num_channels; i++ )
 	{
-		fsc2_assert( channels[ i ] > 0 && channels[ i ] <= NUM_CHANNELS );
+		if ( sr830.is_auto )
+			for ( j = 0; j < DISPLAY_CHANNELS; j++ )
+				if ( channels[ i ] == sr830.dsp_ch[ j ] )
+				{
+					sr830_get_xy_auto_data( data, channels, num_channels );
+					return;
+				}
 
 		if ( i == 0 )
 			sprintf( cmd + strlen( cmd ), "%ld\n", channels[ i ] );
@@ -1062,6 +1446,67 @@ static void sr830_get_xy_data( double *data, long *channels, int num_channels )
 }
 
 
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+static void sr830_get_xy_auto_data( double *data, long *channels,
+									int num_channels )
+{
+	int i, j, ak, nk;
+	struct {
+		int pos;
+		long type;
+		double data;
+	} auto_channels[ DISPLAY_CHANNELS ];
+	long new_channels[ MAX_DATA_AT_ONCE - 1 ];
+
+
+	/* First we'vo got to figure out how many of the data can be got from
+	   the lock-in's internal buffer and at which position in the data
+	   buffer they have to be returned. */
+
+	for ( ak = nk = i = 0; i < num_channels; i++ )
+		for ( j = 0; j < DISPLAY_CHANNELS; j++ )
+			if ( channels[ i ] == sr830.dsp_ch[ j ] )
+			{
+				auto_channels[ ak ].pos = i;
+				auto_channels[ ak++ ].type = channels[ i ];
+			}
+			else
+				new_channels[ nk++ ] = channels[ i ];
+
+	/* First fetch the 'normal' data by calling the 'normal' function again
+	   (take care that it needs to return data for at least 2 channel). */
+
+	if ( nk > 0 )
+	{
+		if ( nk == 1 )
+		{
+			new_channels[ nk + 1 ] = 
+								   new_channels[ 0 ] % NUM_DIRECT_CHANNELS + 1;
+			sr830_get_xy_data( data, new_channels, nk + 1 );
+		}
+		else
+			sr830_get_xy_data( data, new_channels, nk + 1 );
+	}
+
+	/* Now also fetch the auto-data and insert them into their correct
+	   positions in the data array */
+
+	for ( i = 0; i < ak; i++ )
+	{
+		auto_channels[ i ].data =
+							   sr830_get_auto_data( auto_channels[ i ].type  );
+
+		if ( auto_channels[ i ].pos < nk )
+			memmove( data + auto_channels[ i ].pos + 1,
+					 data + auto_channels[ i ].pos,
+					 ( nk - auto_channels[ i ].pos ) * sizeof *data );
+		data[ auto_channels[ i ].pos ] = auto_channels[ i ].data;
+	}
+}
+
+
 /*----------------------------------------------------------*/
 /* lockin_get_adc() returns the value of the voltage at one */
 /* of the 4 ADC ports.                                      */
@@ -1086,15 +1531,16 @@ static double sr830_get_adc_data( long channel )
 }
 
 
-/*--------------------------------------------------------------*/
-/* lockin_set_dac() sets the voltage at one of the 4 DAC ports. */
-/* -> Number of the DAC channel (1-4)                           */
-/* -> Voltage to be set (-10.5 V - +10.5 V)                     */
-/*-------------------------- -----------------------------------*/
+/*------------------------------------------------------*/
+/* Function sets the voltage at one of the 4 DAC ports. */
+/* -> Number of the DAC channel (1-4)                   */
+/* -> Voltage to be set (-10.5 V - +10.5 V)             */
+/*-------------------------- ---------------------------*/
 
 static double sr830_set_dac_data( long port, double voltage )
 {
 	char buffer [ 40 ];
+
 
 	fsc2_assert( port >= 1 && port <= 4 );
 	fsc2_assert( voltage >= DAC_MIN_VOLTAGE && voltage <= DAC_MAX_VOLTAGE );
@@ -1107,10 +1553,10 @@ static double sr830_set_dac_data( long port, double voltage )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* lockin_set_dac() returns the voltage at one of the 4 DAC ports. */
-/* -> Number of the DAC channel (1-4)                              */
-/*-------------------------- --------------------------------------*/
+/*---------------------------------------------------------*/
+/* Function returns the voltage at one of the 4 DAC ports. */
+/* -> Number of the DAC channel (1-4)                      */
+/*-------------------------- ------------------------------*/
 
 static double sr830_get_dac_data( long port )
 {
@@ -1122,10 +1568,10 @@ static double sr830_get_dac_data( long port )
 
 	sprintf( buffer, "AUXV %ld\n", port );
 	if ( gpib_write( sr830.device, buffer, strlen( buffer ) ) == FAILURE ||
-		 gpib_reda( sr830.device, buffer, &len )== FAILURE )
+		 gpib_read( sr830.device, buffer, &len )== FAILURE )
 		sr830_failure( );
 
-	buffer[ length - 1 ] = '\0';
+	buffer[ len - 1 ] = '\0';
 	return T_atod( buffer );
 }
 
@@ -1139,6 +1585,7 @@ static double sr830_get_sens( void )
 	char buffer[ 20 ];
 	long length = 20;
 	double sens;
+
 
 	/* Ask lock-in for the sensitivity setting */
 
@@ -1406,6 +1853,249 @@ static double sr830_set_mod_level( double level )
 		sr830_failure( );
 
 	return level;
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static long sr830_set_sample_time( long st_index )
+{
+	char cmd[ 100 ];
+
+
+	fsc2_assert( st_index != ST_TRIGGRED ||
+				 ( st_index >= 0 && st_index < ST_ENTRIES ) );
+
+	if ( st_index == ST_TRIGGRED )
+		sprintf( cmd, "SRAT 14\n" );
+	else
+		sprintf( cmd, "SRAT %ld\n", ST_ENTRIES - 1 - st_index );
+	if ( gpib_write( sr830.device, cmd, strlen( cmd ) ) == FAILURE )
+		sr830_failure( );
+
+	return st_index;
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static long sr830_get_sample_time( void )
+{
+	char buffer[ 100 ];
+	long length = 100;
+	long st_index;
+
+
+	if ( gpib_write( sr830.device, "SRAT ?\n", 7 ) == FAILURE ||
+		 gpib_read( sr830.device, buffer, &length ) == FAILURE )
+		sr830_failure( );
+
+	buffer[ length - 1 ] = '\0';
+	st_index = T_atol( buffer );
+	if ( ( st_index = T_atol( buffer ) ) == 14 )
+		st_index = ST_TRIGGRED;
+	else
+		st_index = ST_ENTRIES - 1 - st_index;
+
+	return st_index;
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static void sr830_set_display_channel( int channel, long type )
+{
+	char cmd[ 100 ];
+#ifndef NDEBUG
+	int i;
+#endif
+
+
+	/* My usual paranoia... */
+
+	fsc2_assert( channel >= 0 && channel < DISPLAY_CHANNELS );
+
+#ifndef NDEBUG
+	for ( i = 0; ; i++ )
+	{
+		if ( dsp_ch_list[ i ][ channel ] == DSP_CH_UNDEF )
+		{
+			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION );
+		}
+
+		if ( dsp_ch_list[ i ][ channel ] == type )
+			break;
+	}
+#endif
+
+	sprintf( cmd, "DDEF %d,%d,0\n", channel, symbol_to_dsp[ type ] );
+	if ( gpib_write( sr830.device, cmd, strlen( cmd ) ) == FAILURE )
+		sr830_failure( );
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static long sr830_get_display_channel( int channel )
+{
+	char cmd[ 100 ];
+	char buffer[ 100 ];
+	long length = 100;
+	long type;
+	char *sptr;
+
+
+	fsc2_assert( channel >= 0 && channel < DISPLAY_CHANNELS );
+
+	sprintf( cmd, "DDEF? %d\n", channel );
+	if ( gpib_write( sr830.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( sr830.device, buffer, &length ) == FAILURE )
+		sr830_failure( );
+
+	buffer[ length - 1 ] = '\0';
+	sptr = strchr( buffer, ',' );
+	if ( sptr == NULL )
+	{
+		print( FATAL, "Received invalid reply from device.\n" );
+		THROW( EXCEPTION );
+	}
+
+	*sptr = '\0';
+	if ( ( type = T_atol( buffer ) ) >= ( int ) D2S_ENTRIES )
+	{
+		print( FATAL, "Received invalid reply from device.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* If the display shows ratios of the ADC input switch it off */
+
+	if ( *( sptr + 1 ) != '0' )
+	{
+		type += 2;
+		sr830_set_display_channel( channel, type + 2 );
+	}
+
+	return dsp_to_symbol[ type ][ channel ];
+}
+
+
+/*-----------------------------------------------------------------*/
+/* Starts and stops auto-acquisition mode (i.e. storing of data at */
+/* constant time intervals). We only use "Shot" mode which has the */
+/* drawback that the number of data points sampled is limited to a */
+/* maximum of 16383 points for each of the two channels but avoids */
+/* problems with having to pause acquisition while reading data    */
+/* (which would make timing less exact). Hopefully, 16383 points   */
+/* will be enough in all cases.                                    */
+/* When stopped the buffer holding the data is automatically       */
+/* cleared. When an external trigger instead of the internal clock */
+/* is used the trigger start mode is automatically activated or    */
+/* deactivated.                                                    */
+/*-----------------------------------------------------------------*/
+
+static void sr830_auto( int flag )
+{
+	char cmd_1[ 2 ][ 6 ] = { "REST\n", "STRT\n",  };
+	char cmd_2[ 2 ][ 8 ] = { "TSTR 0\n", "TSTR 1\n" };
+	int i;
+
+
+	fsc2_assert( sr830.is_auto_setup == SET );
+	fsc2_assert( flag == 0 || flag == 1 );
+
+	if ( gpib_write( sr830.device, cmd_1[ flag ], 5 ) == FAILURE )
+		sr830_failure( );
+
+	if ( sr830.st_index == ST_TRIGGRED &&
+		 gpib_write( sr830.device, cmd_2[ flag ], 7 ) == FAILURE )
+		sr830_failure( );
+
+	if ( flag == 0 )
+	{
+		for ( i = 0; i < DISPLAY_CHANNELS; i++ )
+			sr830.data_fetched[ i ] = 0;
+		sr830.stored_data = 0;
+	}
+}	
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static double sr830_get_auto_data( int type )
+{
+	char cmd[ 100 ];
+	char buffer[ 100 ];
+	long length = 100;
+	int channel;
+	int i;
+
+
+	for ( channel = 0; channel < DISPLAY_CHANNELS; channel++ )
+		if ( sr830.dsp_ch[ channel ] == type )
+			break;
+
+#ifndef NDEBUG
+	if ( channel == DISPLAY_CHANNELS )
+	{
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+#endif
+
+	/* Check if the internal buffer did overflow (i.e. if we already fetched
+	   the maximum amount of data). In this case we need to take desperate
+	   measures: we simply empty the buffer completely, tell the user about
+	   the problem and hope for the best... */
+
+	if ( sr830.data_fetched[ channel ] >= MAX_STORED_DATA )
+	{
+		print( SEVERE, "Internal lock-in buffer did overflow for CH%1d, "
+			   "data in both channnels may have been lost.\n", channel + 1 );
+		if ( gpib_write( sr830.device, "REST\n", 5 ) == FAILURE )
+			sr830_failure( );
+
+		for ( i = 0; i < DISPLAY_CHANNELS; i++ )
+			sr830.data_fetched[ i ] = 0;
+		sr830.stored_data = 0;
+	}
+
+	/* Unless we already know that there are still unfetched data poll until
+	   data are available in the buffer (the 'data_fetched' entry in the
+	   lock-in's structure tells us how many we already got, so there must be
+	   at least on more data in the buffer or we have to wait). Unless an
+	   extremely slow external trigger is used polling can take up to 16 s in
+	   the worst (but probably rather unrealistic) case. */
+
+	while ( sr830.stored_data <= sr830.data_fetched[ channel ] );
+	{
+		stop_on_user_request( );
+
+		if ( gpib_write( sr830.device, "SPTS?\n", 6 ) == FAILURE ||
+			 gpib_read( sr830.device, buffer, &length ) == FAILURE )
+			sr830_failure( );
+
+		buffer[ length - 1 ] = '\0';
+		sr830.stored_data = T_atol( buffer );
+	} 
+
+	sprintf( cmd, "TRCA? %d,%ld,1\n",
+			 channel, sr830.data_fetched[ channel ]++ );
+	length = 100;
+
+	if ( gpib_write( sr830.device, cmd, strlen( cmd) ) == FAILURE ||
+		 gpib_read( sr830.device, buffer, &length ) == FAILURE )
+		sr830_failure( );
+
+	buffer[ length - 1 ] = '\0';
+	return T_atod( buffer );
 }
 
 

@@ -26,6 +26,8 @@
 #define IPC_HEADER
 
 #include "fsc2.h"
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 
 #if ! defined ( SEM_R )
@@ -47,7 +49,7 @@ void *attach_shm( int key );
 void detach_shm( void *buf, int *key );
 void delete_all_shm( void );
 void delete_stale_shms( void );
-int sema_create( void );
+int sema_create( int size );
 int sema_destroy( int sema_id );
 int sema_wait( int sema_id );
 int sema_post( int sema_id );

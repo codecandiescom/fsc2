@@ -45,14 +45,7 @@ typedef struct {
 	double old_s2d[ MAX_CURVES ][ 2 ];
 	double old_shift[ MAX_CURVES ][ 2 ];
 
-	int cur_1,
-		cur_2,
-		cur_3,
-		cur_4,
-		cur_5,
-		cur_6,
-		cur_7,
-	    cur_8;
+	int cursor[ 8];
 
 	Pixmap label_pm[ 3 ];    /* used for drawing of rotated text */
 	                         /* the second pixmap (text at y axis) is always

@@ -38,14 +38,10 @@
 #define GPIB_LOG_LEVEL LL_ERR
 #endif
 
-/* Signals sent by the parent and accepted by the child */
+/* Signals sent by the parent/child and accepted by the other side */
 
 #define DO_QUIT   SIGUSR2
-
-/* Signals sent by the child and accepted by the parent */
-
-#define NEW_DATA  SIGUSR1
-#define QUITTING  SIGUSR2
+#define QUITTING  DO_QUIT
 
 
 bool run( void );
