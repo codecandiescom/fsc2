@@ -127,7 +127,7 @@ void rulbus_close( void );
 int rulbus_perror( const char *s );
 const char *rulbus_strerror( void );
 int rulbus_card_open( const char *name );
-void rulbus_card_close( int handle );
+int rulbus_card_close( int handle );
 int rulbus_write( int handle, unsigned char offset, unsigned char *data,
 				  size_t len );
 int rulbus_read( int handle, unsigned char offset, unsigned char *data,

@@ -34,14 +34,14 @@ struct RULBUS_DELAY_CARD {
 	int handle;
 	unsigned char ctrl;
 	unsigned long delay;
-}
+};
 
 
 #define STATUS_ADDR   3
 #define CONTROL_ADDR  3
 
 
-/* Bytes in the control byte */
+/* Bits in the control byte */
 
 #define START_PULSE_OUT_1_ENABLE  ( 1 << 0 )
 #define END_PULSE_OUT_1_ENABLE    ( 1 << 1 )
@@ -51,6 +51,10 @@ struct RULBUS_DELAY_CARD {
 #define TRIGGER_ON_FALLING_EDGE   ( 1 << 5 )
 #define START_PULSE_POSITIVE      ( 1 << 6 )
 #define END_PULSE_POSITIVE        ( 1 << 7 )
+
+/* Bits in the status byte */
+
+#define DELAY_BUSY                ( 1 << 1 )
 
 #define INVALID_DELAY             ( RULBUS_DELAY_CARD_MAX + 1 )
 
@@ -144,7 +148,7 @@ void rulbus_delay_card_exit( int handle )
 
 	if ( card != rulbus_delay_card + rulbus_num_delay_cards - 1 )
 		memcpy( card, card + 1, sizeof *card *
-				rulbus_num_delay_cards - card - rulbus_delay_card - 1 );
+				rulbus_num_delay_cards - ( card - rulbus_delay_card ) - 1 );
 
 	card = realloc( rulbus_delay_card,
 					( rulbus_num_delay_cards - 1 ) * sizeof *card );
@@ -177,9 +181,15 @@ int rulbus_delay_set_delay( int handle, unsigned long delay )
 	if ( delay == card->delay )
 		return RULBUS_OK;
 
+	if ( ( retval = rulbus_read( handle, STATUS_ADDR, &byte, 1 ) ) < 0 )
+		 return retval;
+
+	if ( byte & DELAY_BUSY )
+		return RULBUS_CRD_BSY;
+
 	for ( i = 0; i < 3; delay >>= 8, i++ )
 	{
-		byte = unsigned char ( delay & 0xFF );
+		byte = ( unsigned char ) ( delay & 0xFF );
 		if ( ( retval = rulbus_write( handle, 2 - i, &byte, 1 ) ) < 0 )
 			 return retval;
 	}
@@ -208,14 +218,14 @@ int rulbus_delay_set_trigger( int handle, int edge )
 		 edge != RULBUS_DELAY_RAISING_EDGE )
 		return RULBUS_INV_ARG;
 
-	ctrl = card->ctlr;
+	ctrl = card->ctrl;
 
 	if ( edge == RULBUS_DELAY_FALLING_EDGE )
-		ctlr |= TRIGGER_ON_FALLING_EDGE;
+		ctrl |= TRIGGER_ON_FALLING_EDGE;
 	else
-		ctlr &= ~ TRIGGER_ON_FALLING_EDGE;
+		ctrl &= ~ TRIGGER_ON_FALLING_EDGE;
 
-	if ( ctrl == card->crtl )
+	if ( ctrl == card->ctrl )
 		return RULBUS_OK;
 
 	return rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 );
@@ -244,7 +254,7 @@ int rulbus_delay_set_output_pulse( int handle, int output, int type )
 		   type != RULBUS_DELAY_PULSE_BOTH ) )
 		return RULBUS_INV_ARG;
 
-	ctrl = card->crtl & 0xF0;
+	ctrl = card->ctrl & 0xF0;
 
 	if ( type & RULBUS_DELAY_OUTPUT_1 )
 	{
@@ -262,7 +272,7 @@ int rulbus_delay_set_output_pulse( int handle, int output, int type )
 			ctrl |= END_PULSE_OUT_2_ENABLE;
 	}
 
-	if ( ctrl == card->crtl )
+	if ( ctrl == card->ctrl )
 		return RULBUS_OK;
 
 	return rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 );
@@ -290,7 +300,7 @@ int rulbus_delay_set_output_pulse_polarity( int handle, int type, int pol )
 		   pol != RULBUS_DELAY_POLARITY_POSITIVE ) )
 		return RULBUS_INV_HND;
 
-	ctrl = card->crtl;
+	ctrl = card->ctrl;
 
 	if ( type & RULBUS_DELAY_START_PULSE )
 	{
@@ -308,7 +318,7 @@ int rulbus_delay_set_output_pulse_polarity( int handle, int type, int pol )
 			ctrl |= END_PULSE_POSITIVE;
 	}
 
-	if ( ctrl == card->crtl )
+	if ( ctrl == card->ctrl )
 		return RULBUS_OK;
 
 	return rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 );
@@ -332,11 +342,11 @@ int rulbus_delay_software_start( int handle )
 
 	ctrl = card->ctrl;
 
-	ctlr |= TRIGGER_ON_FALLING_EDGE;
+	ctrl |= TRIGGER_ON_FALLING_EDGE;
 	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &ctrl, 1 ) ) < 0 )
 		return retval;
 		 
-	ctlr &= ~ TRIGGER_ON_FALLING_EDGE;
+	ctrl &= ~ TRIGGER_ON_FALLING_EDGE;
 	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &ctrl, 1 ) ) < 0 )
 		return retval;
 
@@ -354,6 +364,9 @@ int rulbus_delay_software_start( int handle )
 
 static RULBUS_DELAY_CARD *rulbus_delay_card_find( int handle )
 {
+	int i;
+
+
 	for ( i = 0; i < rulbus_num_delay_cards; i++ )
 		if ( handle == rulbus_delay_card[ i ].handle )
 			return rulbus_delay_card + i;
