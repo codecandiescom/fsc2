@@ -688,7 +688,7 @@ void load_file( FL_OBJECT *a, long reload )
 	old_in_file = NULL;
 
 	/* If new file is to be loaded get its name and store it, otherwise use
-	   previous name */
+	   the previous name */
 
 	if ( ! reload )
 	{
@@ -697,7 +697,7 @@ void load_file( FL_OBJECT *a, long reload )
 		{
 			fn = fl_show_fselector( "Select input file:", NULL, "*.edl",
 									NULL );
-			if ( fn == NULL )
+			if ( fn == NULL || *fn == '\0' )
 			{
 				notify_conn( UNBUSY_SIGNAL );
 				return;
