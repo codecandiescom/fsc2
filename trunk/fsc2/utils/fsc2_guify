@@ -500,6 +500,7 @@ my %wp = ( -side => 'left',
            -fill => 'x',
            -expand => 1 );
 my %up = ( -side => 'left' );
+my $geom;
 
 my $fsc2_how_to_run = "Test program";
 my @fsc2_how_to_run = ( "Start experiment",
@@ -514,10 +515,18 @@ my $fsc2_apply_button = $fsc2_apply_frame->Button( -text => "Apply",
                                                    -command => \&write_out );
 $fsc2_apply_button->bind( "all", "<Alt-a>" => \&write_out );
 my $fsc2_quit_button = $fsc2_apply_frame->Button( -text => "Quit",
-                 -command => sub { &store_defs; $fsc2_main_window->destroy } );
+                 -command => sub { $fsc2_main_window->geometry =~
+							   					   /^\d+x\d+([+-]\d+[+-]\d+)$/;
+							   	   $geom = $1;
+							   	   &store_defs;
+                                   $fsc2_main_window->destroy } );
 $fsc2_quit_button->bind( "all",
                          "<Alt-q>" =>
-                         sub { &store_defs; $fsc2_main_window->destroy } );
+                         		sub { $fsc2_main_window->geometry =~
+							   					   /^\d+x\d+([+-]\d+[+-]\d+)$/;
+							   		  $geom = $1;
+							   		  &store_defs;
+									  $fsc2_main_window->destroy } );
 $fsc2_apply_frame->pack( -side => "bottom",
                          -fill => "x",
                          -padx => "4m" );
@@ -614,6 +623,7 @@ EOT
 \$fsc2_quit_button->pack( \%wp, padx => '5m', -pady => '3m' );
 
 load_defs( );
+\$fsc2_main_window->geometry( \$geom ) if defined \$geom;
 EOT
 
     for ( @vars ) {
@@ -845,6 +855,7 @@ EOT
 ";
 
     print <<'EOT';
+	print $fh "$geom\n" if defined $geom;
     close $fh;
 };
 
@@ -928,6 +939,10 @@ EOT
     }
     goto done_reading unless $found;
     $fsc2_how_to_run = $ne;
+
+    goto done_reading unless defined( $ne = <$fh> )
+							 and $ne =~ /^\s*([+-]\d+[+-]\d+)\s*$/;
+	$geom = $1;
 
   done_reading:
     close $fh;
