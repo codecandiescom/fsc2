@@ -134,7 +134,7 @@ sub read_input {
 
 		for ( my $i = 0; $i < @Function_Names; $i++ ) {
 			if ( $line =~
-				 /^($Function_Names[ $i ])(:((([A-H]|CH)?\d+)|TRIG))? ([+-]?\d+)( I)?$/ ) {
+				 /^($Function_Names[ $i ]):((([A-H]|CH)?\d+)|TRIG| ) ([+-]?\d+)( I)?$/ ) {
 				$Channels->add_channel( \$Function_Names[ $i ], $2, $5,
 										defined $6 ? 1 : 0 );
 				next CHANNEL_LINE;
@@ -1084,7 +1084,7 @@ sub add_pulse_list {
 	my ( $self, $step, $key ) = ( shift, shift, shift );
 	my $ch = $self->find_by_key( $key );
 
-	fail( "Invalid input at line $..\n" ) unless defined $ch;
+	::fail( "Invalid input at line $..\n" ) unless defined $ch;
 
 	$ch->add_pulse_list( $step, @_ );
 	$self->{ 'num_steps' } = $step if $step > $self->{ 'num_steps' };
@@ -1217,7 +1217,7 @@ sub get_pulse_list {
 
 	my ( $self, $step ) = ( shift, shift );
 
-	fail( "Invalid pulse list index\n" ) if $step < 0;
+	::fail( "Invalid pulse list index\n" ) if $step < 0;
 
 	return $self->{ 'plist' }[ $step ]->{ 'list' }
 		if defined $self->{ 'plist' }[ $step ] and
