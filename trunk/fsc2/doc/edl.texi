@@ -288,8 +288,8 @@ As usual, non-integer exponents can only be used with non-negative bases!
 
 
 @node Arithmetic on arrays, Arithmetic, Control structures,EDL
-@section Arithmetic
-@cindex arithmetic
+@section Arithmetic on arrays
+@cindex arithmetic on arrays
 
 
 Beside the usual artithmetic with numbers it is also possible to use
