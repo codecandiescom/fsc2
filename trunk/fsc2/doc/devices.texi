@@ -108,9 +108,9 @@ Calling this functions in the @code{PREPARATIONS} section will shorten
 the time used for the calibration of the field sweep at the start of the
 experiment. Unfortunately, this also reduces the precision of the field
 sweep. Whenever an experiment is restarted (i.e.@: if no new
-@acronym{EDL} file is loaded in between) this shortened calibration is
-done anyways to check that the parameters didn't check significantly
-since the last run.
+@acronym{EDL} file has been loaded in between) this shortened
+calibration is done anyways to check that the parameters didn't check
+significantly since the last run.
 
 
 @item set_field()
@@ -257,21 +257,21 @@ to achieve the desired results.
 @item lockin_get_data()
 @findex lockin_get_data()
 This function only allows queries, i.e.@: to fetch the measured value
-from the lock-in amplifier. The parameters, that may be passed to the
-function differ according to the model.
+from the lock-in amplifier. The parameters that may be passed to the
+function differ according to the model:
 @table @samp
 @item SR510
 No argument is allowed -- the function returns the measured value of the
 only channel as a floating point number (i.e.@: in Volts).
 
 @item SR530
-If no argument is specified the measured value at channel 1 is
+If no argument is specified the measured value at channel @code{1} is
 returned. Alternatively, one parameter may be passed to the function
 with a value of either @code{1} or @code{2}, in which case the measure
-value from channel 1 or 2 is returned. Finally, two arguments can be
-given, with values of @code{1} or @code{2}. In this case a 1-dimensional
-array with two elements is returned, containing the measured values of
-the corresponding channels.
+value from channel @code{1} or @code{2} is returned. Finally, two
+arguments can be given, with values of @code{1} or @code{2}. In this
+case a 1-dimensional array with two elements is returned, containing the
+measured values of the corresponding channels.
 
 @item SR810
 @item SR830
@@ -281,18 +281,18 @@ corresponding channel is returned. Possible channel numbers and their
 meaning are:
 @table @samp
 @item 1
-channel 1
+channel @code{1}
 @item 2
-channel 2
+channel @code{2}
 @item 3
-amplitude of data from channel 1 and 2 in polar coordinates
+amplitude of data from channel @code{1} and @code{2} in polar coordinates
 @item 4
-phase of data from channel 1 and 2 in polar coordinates
+phase of data from channel @code{1} and @code{2} in polar coordinates
 @end table
-Finally, up to 4 arguments can be passed to the function with the
-values given above. In this case a 1-dimensional array is returned with
-as many data as there were arguments (in the sequence corresponding the
-one of the arguments).
+Finally, up to 4 arguments can be passed to the function with the values
+given above. In this case a 1-dimensional array is returned with as many
+data as there were arguments (in the sequence corresponding to the one
+of the arguments).
 @end table
 The function can only be called in the @code{EXPERIMENT} section.
 
@@ -300,24 +300,25 @@ The function can only be called in the @code{EXPERIMENT} section.
 @findex lockin_get_adc_data()
 The function returns the voltage at one of the ADC ports numbered at the
 back side of the lock-in amplifier. Allowed values of the required
-argument are between 1 and 4, corresponding to the port numbering.
+argument are between @code{1} and @code{4}, corresponding to the port
+numbering.
 
 The function can only be called in the @code{EXPERIMENT} section.
 
 @item lockin_dac_voltage()
 @findex lockin_dac_voltage()
 The function can be used to set or query the voltage at one of the DAC
-ports at the back side of the lock-in amplifier. While for the
-models SR510 and SR530 the allowed values for the required arguments are
-5 or 6, for models SR810 and SR830 the values can range from 1 to 4,
-corresponding to the different numbers of DAC ports and their numbering
-printed on the back side. If no further argument is given the function
-returns the current voltage applied to the DAC port (which is
-automatically set to @w{0 V} at the initialization of the lock-in
-amplifier if no voltage has been set previous to the @code{EXPERIMENT}
-section). If a second argument is given the DAC will be set to the
-corresponding voltage. The function returns the voltage that has been
-set.
+ports at the back side of the lock-in amplifier. While for the models
+SR510 and SR530 the allowed values for the required arguments are
+@code{5} or @code{6}, for the models SR810 and SR830 the values can
+range from @code{1} to @code{4}, corresponding to the different numbers
+of DAC ports and their numbering printed on the back side. If no further
+argument is given the function returns the current voltage applied to
+the DAC port (which is automatically set to @w{0 V} at the
+initialization of the lock-in amplifier if no voltage has been set
+previous to the @code{EXPERIMENT} section). If a second argument is
+given the DAC will be set to the corresponding voltage. The function
+returns the voltage that has been set.
 
 For the models SR510 and SR530 this voltage has to be in the range
 between @w{-10.24 V} and @w{+10.24 V} while for the models SR810 and
@@ -331,7 +332,7 @@ without an argument, i.e as a query.
 This function can be used to query or set the sensitivity setting of the
 lock-in amplifier. If no argument is passed to the function the current
 sensitivity is returned. For the models SR510 and SR530 a 10 times
-higher sensitivity than the maximum adjustable sensitivity of @w{100 nV} is
+higher sensitivity than the sensitivity set on the front panel is
 returned when the @code{EXPAND} button is switched on.
 
 When called with a second argument the corresponding sensitivity is
@@ -809,7 +810,7 @@ argument or no argument at all.
 The only implemented synthesizer so far is the HP8647A. Its module is
 loaded by specifying
 @example
-hp8647a;
+hp8647a
 @end example
 @noindent
 in the @code{DEVICES} section.
