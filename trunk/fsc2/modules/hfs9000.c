@@ -216,7 +216,7 @@ int hfs9000_exp_hook( void )
 
 int hfs9000_end_of_exp_hook( void )
 {
-	char *cmd = "FPAN:MESS \"\""
+	const char *cmd = "FPAN:MESS \"\"";
 
 
 	if ( ! hfs9000_is_needed )
