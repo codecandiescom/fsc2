@@ -186,16 +186,15 @@ typedef struct _FS_ {
 	unsigned short fields[ 4 * NUM_HSM_CARDS ];   /* data for all channels */
 	Ticks pos;                         /* position of the slice */
 	Ticks len;                         /* length of the slice */
+	bool is_composite;
 	struct _FS_ *next;
 } FS;
 
 
 typedef struct {
 	int table_loops_1;
-	int table_len_1;
-	int table_loops_2;
-	int table_loops_3;
 	int middle_loops;
+	int table_loops_2;
 } FS_TABLE;
 
 

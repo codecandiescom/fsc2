@@ -9,12 +9,13 @@ I = 1;
 freq = 2000 MHz;
 dfreq = 0.1 MHz;
 dt;
+att = 3 db;
 
 
 PREPARATIONS:
 
-synthesizer_modulation#2( "PHASE", "AC", 9.0 );
-synthesizer_modulation( "FM", 1 MHz );
+//synthesizer_modulation( "PHASE", "AC", 9.0 );
+//synthesizer_modulation( "FM", 1 MHz );
 init_1d( );
 
 
@@ -22,19 +23,20 @@ EXPERIMENT:
 
 //print( "# # #\n", synthesizer_mod_type( ), synthesizer_mod_source( ),
 //	   synthesizer_mod_ampl( ) );
-print( "# #\n", synthesizer_mod_type( ), synthesizer_mod_ampl( ) );
+//print( "# #\n", synthesizer_mod_type( ), synthesizer_mod_ampl( ) );
 //synthesizer_modulation( "FM", "EXT DC", 900.9 Hz );
 
 synthesizer_frequency( freq );
+synthesizer_attenuation( att );
+synthesizer_state( "ON" );
 
 FOREVER {
+	att -= 1;
+	synthesizer_attenuation( att );
 	freq += dfreq;
 	delta_time( );
 	synthesizer_frequency( freq );
 	dt = delta_time( );
 	display( I, dt );
 	I += 1;
-	IF freq >= 20 MHz | freq <= 5 MHz {
-	   dfreq *= -1.0;
-	}
 }
