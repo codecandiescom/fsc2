@@ -3603,7 +3603,7 @@ Var *f_get_pos( UNUSED_ARG Var *v )
 /* Function for finding the peak of a signal. The function will return */
 /* useful results only when the signal to noise ratio is rather good   */
 /* (should be at least in the order of 250) and the baseline is more   */
-/* or less straight (i.e. does only changes linearly). The function     */
+/* or less straight (i.e. does only changes linearly). The function    */
 /* makes no special assumptions about the form of the signal (except   */
 /* that it's a peak, not something looking like the derivative of a    */
 /* peak) and returns the index the point where the area under the peak */
