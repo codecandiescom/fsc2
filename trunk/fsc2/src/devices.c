@@ -58,8 +58,7 @@ void device_add( const char *name )
 	/* First we've got to check if the name refers to a device driver that is
 	   a symbolic link to the `real' device. If so get the real name by
 	   following the link. This way it's possible to have more convenient,
-	   locally adjustable names for the devices. Therefor, we assemble the
-	   name of the modules corresponding to the device name */
+	   locally adjustable names for the devices. */
 
 	lib_name = get_string( "%s%s%s.so", libdir, slash( libdir ), dev_name );
 
