@@ -264,8 +264,8 @@ void fsc2_request_serial_port( int sn, const char *devname )
 			eprint( FATAL, UNSET, "%s: Serial port number %d out of valid "
 					"range (only 0 is allowed).\n", devname, sn );
 		else
-			eprint( FATAL, UNSET, "%s: No serial ports are available on this "
-					"machine.\n", devname );
+			eprint( FATAL, UNSET, "%s: Invalid serial port number %d.\n",
+					devname, sn );
 		THROW( EXCEPTION );
 	}
 
