@@ -19,6 +19,12 @@ void prepserror( const char *s );
 
 Var *P_Var;
 
+long One      = 1L;
+long Thousand = 1000L;
+long Million  = 1000000L;
+long Billion  = 1000000000L;
+
+
 %}
 
 
@@ -53,8 +59,9 @@ Var *P_Var;
 %token PRINT_TOK
 %token EQ LT LE GT GE
 
+%token NS_TOKEN US_TOKEN MS_TOKEN S_TOKEN
 
-%type <vptr> expr line
+%type <vptr> expr line time unit
 
 
 %left EQ LT LE GT GE
@@ -100,22 +107,40 @@ line:    P_TOK pprop               {}
 
 
 pprop:   /* empty */
-       | F_TOK sep FUNC_TOK         { pulse_set_func( Cur_Pulse, $3 ); }
+       | pprop F_TOK sep1 FUNC_TOK sep2  { pulse_set_func( Cur_Pulse, $4 ); }
+       | pprop S_TOK sep1 time sep2     { pulse_set_start( Cur_Pulse, $4 ); }
+       | pprop L_TOK sep1 time sep2     { pulse_set_len( Cur_Pulse, $4 ); }
+       | pprop DS_TOK sep1 time sep2     { pulse_set_dpos( Cur_Pulse, $4 ); }
+       | pprop DL_TOK sep1 time sep2    { pulse_set_dlen( Cur_Pulse, $4 ); }
+       | pprop ML_TOK sep1 time sep2    { pulse_set_maxlen( Cur_Pulse, $4 ); }
 ;
 
 
-sep:     /* empty */
+time:    expr unit                 { $$ = vars_mult( $1, $2 ); }
+;
+
+
+unit:   /* empty */                { $$ = vars_push( INT_VAR,
+													 &Default_Time_Base ); }
+      | NS_TOKEN                   { $$ = vars_push( INT_VAR, &One ); }
+      | US_TOKEN                   { $$ = vars_push( INT_VAR, &Thousand ); }
+      | MS_TOKEN                   { $$ = vars_push( INT_VAR, &Million ); }
+      | S_TOKEN                    { $$ = vars_push( INT_VAR, &Billion ); }
+;
+
+/* separator between keyword and value */
+
+sep1:    /* empty */
        | '='
        | ':'
 ;
 
 
+/* seperator between different keyword-value pairs */
 
-
-
-
-
-
+sep2:    /* empty */           
+       | ','
+;
 
 
 expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, &$1 ); }

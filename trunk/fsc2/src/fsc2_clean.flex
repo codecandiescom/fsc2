@@ -241,30 +241,30 @@ KEEP    [^\t" \n(/*)]+
             /* here some special handling of time specifications */
 
 
-{NS}/;      printf( "\x04nsec" );
+{NS}/(;|,)  printf( "\x04nsec" );
 {NS}        printf( "\x04nsec" );
-{US}/;      printf( "\x04usec" );
+{US}/(;|,)  printf( "\x04usec" );
 {US}        printf( "\x04usec" );
-{MS}/;      printf( "\x04msec" );
+{MS}/(;|,)  printf( "\x04msec" );
 {MS}        printf( "\x04msec" );
-{S}/;       printf( "\x04sec" );
+{S}/(;|,)   printf( "\x04sec" );
 {S}         printf( "\x04sec" );
 
-{INS}/;     time_spec( yytext, yyleng, "\x04nsec" );
+{INS}/(;|,) time_spec( yytext, yyleng, "\x04nsec" );
 {INS}       time_spec( yytext, yyleng, "\x04nsec" );
-{IUS}/;     time_spec( yytext, yyleng, "\x04usec" );
+{IUS}/(;|,) time_spec( yytext, yyleng, "\x04usec" );
 {IUS}       time_spec( yytext, yyleng, "\x04usec" );
-{IMS};      time_spec( yytext, yyleng, "\x04msec" );
+{IMS}/(;|,) time_spec( yytext, yyleng, "\x04msec" );
 {IMS}       time_spec( yytext, yyleng, "\x04msec" );
-{IS}/;      time_spec( yytext, yyleng, "\x04sec" );
+{IS}/(;|,)  time_spec( yytext, yyleng, "\x04sec" );
 {IS}        time_spec( yytext, yyleng, "\x04sec" );
-{FNS}/;     time_spec( yytext, yyleng, "\x04nsec" );
+{FNS}/(;|,) time_spec( yytext, yyleng, "\x04nsec" );
 {FNS}       time_spec( yytext, yyleng, "\x04nsec" );
-{FUS}/;     time_spec( yytext, yyleng, "\x04usec" );
+{FUS}/(;|,) time_spec( yytext, yyleng, "\x04usec" );
 {FUS}       time_spec( yytext, yyleng, "\x04usec" );
-{FMS};      time_spec( yytext, yyleng, "\x04msec" );
+{FMS}/(;|,) time_spec( yytext, yyleng, "\x04msec" );
 {FMS}       time_spec( yytext, yyleng, "\x04msec" );
-{FS}/;      time_spec( yytext, yyleng, "\x04sec" );
+{FS}/(;|,)  time_spec( yytext, yyleng, "\x04sec" );
 {FS}        time_spec( yytext, yyleng, "\x04sec" );
 
 			/* all the rest is simply copied to the output */

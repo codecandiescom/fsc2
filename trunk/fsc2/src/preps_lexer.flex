@@ -69,7 +69,7 @@ P           P(ULSE)?_?{INT}
 
 F           F(UNC(TION)?)?
 S           S(TART)?
-L			L(ENGTH)?
+L			L(EN(GTH)?)?
 DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
 PH          PH(ASE(SEQ(UENCE)?)?)?_?{INT}?
@@ -272,6 +272,11 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^:]+
 ";"			return( ';' );
 
 {WS}        /* skip white space */
+
+"\x4nsec"   return( NS_TOKEN );
+"\x4usec"   return( US_TOKEN );
+"\x4msec"   return( MS_TOKEN );
+"\x4sec"    return( S_TOKEN );
 
 			/* handling of invalid input */
 {UNREC}     {
