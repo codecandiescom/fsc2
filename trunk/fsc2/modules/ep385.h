@@ -44,6 +44,7 @@ void ep385_exit_hook( void );
 Var *pulser_name( Var *v );
 Var *pulser_automatic_shape_pulses( Var *v );
 Var *pulser_automatic_twt_pulses( Var *v );
+Var *pulser_show_pulses( Var *v );
 Var *pulser_dump_pulses( Var *v );
 Var *pulser_shape_to_defense_minimum_distance( Var *v );
 Var *pulser_defense_to_shape_minimum_distance( Var *v );
@@ -231,6 +232,8 @@ typedef struct {
 
 	bool is_confirmation;
 
+	FILE *show_file;
+
 	FILE *dump_file;
 
 	bool auto_shape_pulses;
@@ -373,7 +376,7 @@ PULSE *ep385_get_pulse( long pnum );
 const char *ep385_ptime( double p_time );
 const char *ep385_pticks( Ticks ticks );
 int ep385_pulse_compare( const void *A, const void *B );
-void ep385_dump_channels( void );
+void ep385_dump_channels( FILE *fp );
 
 
 /* Functions fron ep385_run.c */

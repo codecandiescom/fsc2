@@ -835,8 +835,13 @@ static void ep385_commit( bool flag )
 
 	if ( ! flag )
 		ep385_set_channels( );
-	else if ( ep385.dump_file != NULL )
-		ep385_dump_channels( );
+	else
+	{
+		if ( ep385.dump_file != NULL )
+			ep385_dump_channels( ep385.dump_file );
+		if ( ep385.show_file != NULL )
+			ep385_dump_channels( ep385.show_file );
+	}
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{

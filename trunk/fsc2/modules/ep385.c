@@ -114,6 +114,7 @@ int ep385_init_hook( void )
 	ep385.timebase_mode = EXTERNAL;
 
 	ep385.dump_file = NULL;
+	ep385.show_file = NULL;
 
 	ep385.is_shape_2_defense = UNSET;
 	ep385.is_defense_2_shape = UNSET;
@@ -210,6 +211,12 @@ int ep385_test_hook( void )
 			ep385.dump_file = NULL;
 		}
 
+		if ( ep385.show_file )
+		{
+			fclose( ep385.show_file );
+			ep385.show_file = NULL;
+		}
+
 		RETHROW( );
 	}
 
@@ -242,6 +249,12 @@ int ep385_end_of_test_hook( void )
 	{
 		fclose( ep385.dump_file );
 		ep385.dump_file = NULL;
+	}
+
+	if ( ep385.show_file != NULL )
+	{
+		fclose( ep385.show_file );
+		ep385.show_file = NULL;
 	}
 
 	if ( ! ep385_is_needed || ep385.is_cw_mode )
@@ -437,6 +450,12 @@ void ep385_exit_hook( void )
 	{
 		fclose( ep385.dump_file );
 		ep385.dump_file = NULL;
+	}
+
+	if ( ep385.show_file != NULL )
+	{
+		fclose( ep385.show_file );
+		ep385.show_file = NULL;
 	}
 
 	if ( ! ep385_is_needed )
@@ -711,6 +730,79 @@ Var *pulser_automatic_twt_pulses( Var *v )
 									   ep385.function[ func ].left_twt_padding;
 	ep385.function[ func ].min_right_twt_padding =
 									  ep385.function[ func ].right_twt_padding;
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_show_pulses( Var *v )
+{
+	int pd[ 2 ];
+	pid_t pid;
+
+
+	v = v;
+
+	if ( FSC2_IS_CHECK_RUN )
+		return vars_push( INT_VAR, 1 );
+
+	if ( ep385.show_file != NULL )
+		return vars_push( INT_VAR, 1 );
+
+	if ( pipe( pd ) == -1 )
+	{
+		if ( errno == EMFILE || errno == ENFILE )
+			print( FATAL, "Failure, running out of system resources.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	if ( ( pid =  fork( ) ) < 0 )
+	{
+		if ( errno == ENOMEM || errno == EAGAIN )
+			print( FATAL, "Failure, running out of system resources.\n" );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	/* Here's the childs code */
+
+	if ( pid == 0 )
+	{
+		static char *cmd = NULL;
+
+
+		close( pd[ 1 ] );
+
+		if ( dup2( pd[ 0 ], STDIN_FILENO ) == -1 )
+		{
+			goto filter_failure;
+			close( pd[ 0 ] );
+		}
+
+		close( pd[ 0 ] );
+
+		TRY
+		{
+			cmd = get_string( "%s%sfsc2_pulses", bindir, slash( bindir ) );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			goto filter_failure;
+
+		execl( cmd, "fsc2_pulses", NULL );
+
+	filter_failure:
+
+		T_free( cmd );
+		_exit( EXIT_FAILURE );
+	}
+
+	/* And finally the code for the parent */
+
+	close( pd[ 0 ] );
+	ep385.show_file = fdopen( pd[ 1 ], "w" );
 
 	return vars_push( INT_VAR, 1 );
 }

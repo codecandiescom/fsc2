@@ -157,17 +157,17 @@ int ep385_pulse_compare( const void *A, const void *B )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-void ep385_dump_channels( void )
+void ep385_dump_channels( FILE *fp )
 {
 	FUNCTION *f;
 	CHANNEL *ch;
 	int i, j, k;
 
 
-	if ( ep385.dump_file == NULL )
+	if ( fp == NULL )
 		return;
 
-	fprintf( ep385.dump_file, "===\n" );
+	fprintf( fp, "===\n" );
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
@@ -183,26 +183,26 @@ void ep385_dump_channels( void )
 			if ( ! ch->needs_update )
 				continue;
 
-			fprintf( ep385.dump_file, "%s:%d", f->name, ch->self );
+			fprintf( fp, "%s:%d", f->name, ch->self );
 			for ( k = 0; k < ch->num_active_pulses; k++ )
 				if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
 					 ch->pulse_params[ k ].pulse->sp != NULL )
-					fprintf( ep385.dump_file, " (%ld) %ld %ld",
+					fprintf( fp, " (%ld) %ld %ld",
 							 ch->pulse_params[ k ].pulse->sp->num,
 							 ch->pulse_params[ k ].pos,
 							 ch->pulse_params[ k ].len );
 				else if ( f->self == PULSER_CHANNEL_TWT &&
 						  ch->pulse_params[ k ].pulse->tp != NULL )
-					fprintf( ep385.dump_file, " (%ld) %ld %ld",
+					fprintf( fp, " (%ld) %ld %ld",
 							 ch->pulse_params[ k ].pulse->tp->num,
 							 ch->pulse_params[ k ].pos,
 							 ch->pulse_params[ k ].len );
 				else
-					fprintf( ep385.dump_file, " %ld %ld %ld",
+					fprintf( fp, " %ld %ld %ld",
 							 ch->pulse_params[ k ].pulse->num,
 							 ch->pulse_params[ k ].pos,
 							 ch->pulse_params[ k ].len );
-			fprintf( ep385.dump_file, "\n" );
+			fprintf( fp, "\n" );
 		}
 	}
 }

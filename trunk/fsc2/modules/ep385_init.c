@@ -73,6 +73,23 @@ void ep385_init_setup( void )
 			}
 		}
 
+		if ( ep385.show_file != NULL )
+		{
+			fprintf( ep385.show_file, "TB: %g\nD: %ld\n===\n", ep385.timebase,
+					 ep385.neg_delay );
+			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+			{
+				f = ep385.function + i;
+
+				if ( ! f->is_needed && f->num_channels == 0 )
+					continue;
+
+				for ( j = 0; j < f->num_channels; j++ )
+					fprintf( ep385.show_file, "%s:%d %ld\n",
+							 f->name, f->channel[ j ]->self, f->delay );
+			}
+		}
+
 		ep385_setup_channels( );
 		ep385_pulse_start_setup( );
 		TRY_SUCCESS;
@@ -106,7 +123,10 @@ void ep385_init_setup( void )
 	}
 
 	if ( ep385.dump_file != NULL )
-		ep385_dump_channels( );
+		ep385_dump_channels( ep385.dump_file );
+
+	if ( ep385.show_file != NULL )
+		ep385_dump_channels( ep385.show_file );
 }
 
 
