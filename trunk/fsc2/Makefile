@@ -115,7 +115,8 @@ MAIL_ADDRESS      := Jens.Toerring@physik.fu-berlin.de
 ##############################################################################
 # Here follow settings determining the make process - which compiler and
 # tools to use as well as their respective options. Better leave this alone
-# if you don't have a good reason to apply changes.
+# if you don't have a good reason to apply changes (put you will probably
+# need to if you don't use gcc)
 # Don't use '-fomit-frame-pointer' in CFLAGS on Intel processors (unless
 # you want to keep me from getting meaningful messages about crashes).
 ##############################################################################
@@ -125,10 +126,11 @@ MAIL_ADDRESS      := Jens.Toerring@physik.fu-berlin.de
 OPTIMIZATION     := -O2
 
 SHELL            := /bin/sh
-CC               := gcc
-CFLAGS           := -ggdb \
-					$(OPTIMIZATION) \
+CC               := icc
+CFLAGS           := $(OPTIMIZATION) \
+					-ggdb \
 					-I/usr/X11R6/include -I/usr/X11R6/include/X11 \
+					-I/usr/local/include \
 					-Wall \
 					-Wwrite-strings \
 					-Wstrict-prototypes \
