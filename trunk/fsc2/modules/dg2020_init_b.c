@@ -664,6 +664,13 @@ static PHASE_SETUP *dg2020_create_dummy_phase_setup( FUNCTION *f )
 	dg2020.dummy_phase_setup[ i ].pod[ 0 ] = f->pod[ 0 ];
 	dg2020.dummy_phase_setup[ i ].function = f;
 
+	for ( j = 1; j < NUM_PHASE_TYPES; j++ )
+	{
+		dg2020.dummy_phase_setup[ i ].is_set[ j ] = UNSET;
+		dg2020.dummy_phase_setup[ i ].is_needed[ j ] = UNSET;
+		dg2020.dummy_phase_setup[ i ].pod[ j ] = NULL;
+	}
+
 	return dg2020.dummy_phase_setup + i;
 }
 
