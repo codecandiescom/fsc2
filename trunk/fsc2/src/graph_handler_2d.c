@@ -640,9 +640,9 @@ static void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 }
 
 
-/*---------------------------------------------------------------*/
-/* Stores the current scaling state of the currently shown curve */
-/*---------------------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* Stores the scaling state of the currently shown curve */
+/*-------------------------------------------------------*/
 
 void save_scale_state_2d( Curve_2d *cv )
 {

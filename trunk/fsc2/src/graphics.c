@@ -1165,7 +1165,7 @@ static void G_init_curves_2d( void )
 		cv->rwc_delta[ Y ] = G2.rwc_delta[ Y ];
 
 		cv->count = 0;
-		cv->active = SET;
+		cv->active = i == 0;
 		cv->can_undo = UNSET;
 
 		cv->is_fs = SET;
@@ -2165,6 +2165,7 @@ void curve_button_callback_2d( FL_OBJECT *obj, long data )
 
 	if ( data - 1 == G2.active_curve )     /* shown curve is switched off */
 	{
+		G2.curve_2d[ G2.active_curve ]->active = UNSET;
 		G2.active_curve = -1;
 		sprintf( hstr, "Show curve %ld", data );
 		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
@@ -2172,6 +2173,9 @@ void curve_button_callback_2d( FL_OBJECT *obj, long data )
 	}
 	else
 	{
+		if ( G2.active_curve != -1 )
+			G2.curve_2d[ G2.active_curve ]->active = UNSET;
+
 		switch ( G2.active_curve )
 		{
 			case 0 :
@@ -2208,6 +2212,7 @@ void curve_button_callback_2d( FL_OBJECT *obj, long data )
 			fl_set_object_helper( obj, hstr );
 
 		G2.active_curve = data - 1;
+		G2.curve_2d[ G2.active_curve ]->active = SET;
 
 		fl_set_button( GUI.run_form_2d->full_scale_button_2d,
 					   G2.curve_2d[ G2.active_curve ]->is_fs );

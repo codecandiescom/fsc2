@@ -65,8 +65,13 @@ void accept_new_data( void )
 
 	CLOBBER_PROTECT( dim );
 
+	/* Get the time we arrived here, it's later used to avoid spending too
+	   much time in the follwoing loop */
+
 	gettimeofday( &time_struct, NULL );
 	start_time = time_struct.tv_sec + 1.0e-6 * time_struct.tv_sec;
+
+	/* Clear the flags that later tell us what really needs to be redrawn */
 
 	memset( scale_1d_changed, 0, 2 * sizeof *scale_1d_changed );
 	memset( scale_2d_changed, 0, 2 * sizeof *scale_2d_changed );
@@ -129,7 +134,7 @@ void accept_new_data( void )
 		if ( Comm.MQ->low == Comm.MQ->high )
 			break;
 
-		/* Do a redraw at least about every fifth of a second */
+		/* Also quit from the loop at least about every fifth of a second */
 
 		gettimeofday( &time_struct, NULL );
 		if ( time_struct.tv_sec + 1.0e-6 * time_struct.tv_sec
@@ -784,6 +789,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	Curve_2d *cv;
 	long i, j;
 	Scaled_Point *sp;
+	bool size_changed = UNSET;
 
 
 	/* Test if the curve number is OK */
@@ -817,21 +823,28 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 		if ( y_index + y_len >= G2.ny )
 		{
 			need_cut_redraw |= incr_x_and_y( x_index, x_len, y_index + y_len);
-			if ( cv->is_fs && cv->active )
+			if ( ( cv->active && cv->is_fs ) ||
+				 ( G2.active_curve != -1 &&
+				   G2.curve_2d[ G2.active_curve ]->is_fs ) )
 				scale_2d_changed[ X ] = scale_2d_changed[ Y ] = SET;
 		}
 		else
 		{
 			need_cut_redraw |= incr_x( x_index, x_len );
-			if ( cv->is_fs && cv->active )
-				scale_2d_changed[ X ] = SET;
+			scale_2d_changed[ X ] |= ( cv->active && cv->is_fs ) ||
+									 ( G2.active_curve != -1 &&
+									   G2.curve_2d[ G2.active_curve ]->is_fs );
 		}
+
+		size_changed = SET;
 	}
 	else if ( y_index + y_len >= G2.ny )
 	{
 		need_cut_redraw |= incr_y( y_index + y_len );
-		if ( cv->is_fs && cv->active )
-			scale_2d_changed[ Y ] = SET;
+		scale_2d_changed[ Y ] |= ( cv->active && cv->is_fs  ) ||
+								 ( G2.active_curve != -1 &&
+								   G2.curve_2d[ G2.active_curve ]->is_fs );
+		size_changed = SET;
 	}
 
 	/* Find maximum and minimum of old and new data and, if the minimum or
@@ -884,8 +897,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 				scale_2d_changed[ X ] = scale_2d_changed[ Y ] = SET;
 		}
 
-		if ( cv->is_fs && cv->active )
-			scale_2d_changed[ Z ] = SET;
+		scale_2d_changed[ Z ] |= cv->active && cv->is_fs;
 		need_cut_redraw |= cut_data_rescaled( curve, cv->rw_min, cv->rw_max );
 		cv->rwc_delta[ Z ] = new_rwc_delta_z;
 	}
@@ -992,24 +1004,31 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	if ( ! cv->is_scale_set )
 		return;
 
-	/* Calculate new points for display */
+	/* Set flags that indicate what needs to be recalculated and what needs
+	   to be redrawn */
 
 	cv->rwc_start[ Z ] = cv->rw_min;
 
+	/* Since new points were included a recalculation of the current curve
+	   is required */
+
+	cv->needs_recalc = SET;
+
+	/* All other curves only need to be recalculated if the x- or y-size
+	   has changed (and the curve is scaled at all) */
+
 	for ( i = 0; i < G2.nc; i++ )
-	{
-		cv = G2.curve_2d[ i ];
+		if ( G2.curve_2d[ i ]->is_scale_set && i != curve )
+			G2.curve_2d[ i ]->needs_recalc |= size_changed;
 
-		if ( ! cv->is_scale_set )
-			continue;
+	/* We need a redraw of the canvas if the currently displayed curve
+	   needs a recalculation because either the size(s) changed and ist's
+	   in full scale mode or because new data points got added to the curve. */
 
-		if ( scale_2d_changed[ X ] || scale_2d_changed[ Y ] ||
-			 scale_2d_changed[ Z ] || i == curve )
-			cv->needs_recalc = SET;
-
-		if ( i == curve )
-			need_2d_redraw = SET;
-	}
+	if ( G2.active_curve != -1 )
+		need_2d_redraw |= G2.curve_2d[ G2.active_curve ]->needs_recalc &&
+						  ( G2.curve_2d[ G2.active_curve ]->is_fs ||
+							G2.curve_2d[ G2.active_curve ] == cv );
 }
 
 
