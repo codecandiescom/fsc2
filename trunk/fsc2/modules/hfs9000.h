@@ -42,6 +42,8 @@ void hfs9000_exit_hook( void );
 
 
 Var *pulser_name( Var *v );
+Var *pulser_show_pulses( Var *v );
+Var *pulser_dump_pulses( Var *v );
 Var *pulser_state( Var *v );
 Var *pulser_channel_state( Var *v );
 Var *pulser_update( Var *v );
@@ -115,6 +117,7 @@ Var *pulser_stop_on_update( Var *v );
 
 typedef struct _F_ {
 	int self;                  /* the functions number */
+	const char *name;
 	bool is_used;              /* set if the function has been declared in
 								  the ASSIGNMENTS section */
 	bool is_needed;            /* set if the function has been assigned
@@ -189,6 +192,8 @@ typedef struct {
 
 	bool stop_on_update;     /* if not set the pulser does not get stopped
 								while doing an update */
+	FILE *dump_file;
+	FILE *show_file;
 } HFS9000;
 
 
@@ -311,6 +316,7 @@ int hfs9000_start_compare( const void *A, const void *B );
 Ticks hfs9000_get_max_seq_len( void );
 void hfs9000_set( char *arena, Ticks start, Ticks len, Ticks offset );
 int hfs9000_diff( char *old_p, char *new_p, Ticks *start, Ticks *length );
+void hfs9000_dump_channels( FILE *fp );
 
 
 /* Functions fron hfs9000_run.c */

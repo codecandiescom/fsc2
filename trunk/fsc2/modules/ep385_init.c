@@ -786,6 +786,8 @@ static void ep385_pulse_start_setup( void )
 			   ep385.function[ PULSER_CHANNEL_TWT_GATE ].is_used ) )
 			ep385_defense_shape_init_check( f );
 	}
+
+	ep385_shape_padding_check_2( );
 }
 
 
@@ -808,7 +810,7 @@ static void ep385_channel_start_check( CHANNEL *ch )
 	qsort( ch->pulse_params, ch->num_active_pulses,
 		   sizeof *ch->pulse_params, ep385_pulse_compare );
 
-	ep385_shape_padding_check( ch );
+	ep385_shape_padding_check_1( ch );
 	ep385_twt_padding_check( ch );
 }
 

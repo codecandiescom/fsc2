@@ -296,6 +296,38 @@ int hfs9000_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
 }
 
 
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+void hfs9000_dump_channels( FILE *fp )
+{
+	FUNCTION *f;
+	int i, k;
+
+
+	if ( fp == NULL )
+		return;
+
+	fprintf( fp, "===\n" );
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = hfs9000.function + i;
+
+		if ( ! f->is_needed )
+			continue;
+
+		fprintf( fp, "%s:%d", f->name, f->channel->self );
+		for ( k = 0; k < f->num_active_pulses; k++ )
+			fprintf( fp, " %ld %ld %ld",
+					 f->pulses[ k ]->num,
+					 f->pulses[ k ]->pos,
+					 f->pulses[ k ]->len );
+		fprintf( fp, "\n" );
+	}
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

@@ -153,7 +153,7 @@ static bool ep385_update_pulses( bool flag )
 			qsort( ch->pulse_params, ch->num_active_pulses,
 				   sizeof *ch->pulse_params, ep385_pulse_compare );
 
-			ep385_shape_padding_check( ch );
+			ep385_shape_padding_check_1( ch );
 			ep385_twt_padding_check( ch );
 
 			/* Compare old and new state, if nothing changed, i.e. the number
@@ -239,6 +239,8 @@ static bool ep385_update_pulses( bool flag )
 			}
 		}
 	}
+
+	ep385_shape_padding_check_2( );
 
 	if ( ep385.needs_update )
 		ep385_commit( flag );
@@ -561,17 +563,20 @@ void ep385_full_reset( void )
 			qsort( ch->pulse_params, ch->num_active_pulses,
 				   sizeof *ch->pulse_params, ep385_pulse_compare );
 
-			ep385_shape_padding_check( ch );
+			ep385_shape_padding_check_1( ch );
 			ep385_twt_padding_check( ch );
 		}
 	}
+
+	ep385_shape_padding_check_2( );
 }
 
 
-/*------------------------------------------------*/
-/*------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+/* Checks if shape padding can be set correctly for all pulses of a channel */
+/*--------------------------------------------------------------------------*/
 
-void ep385_shape_padding_check( CHANNEL *ch )
+void ep385_shape_padding_check_1( CHANNEL *ch )
 {
 	PULSE_PARAMS *pp, *ppp;
 	int i;
@@ -632,6 +637,78 @@ void ep385_shape_padding_check( CHANNEL *ch )
 			l_min( pp->pulse->function->min_right_shape_padding,
 				   pp->pulse->function->right_shape_padding + pp->pos );
 		pp->len = MAX_PULSER_BITS - pp->pos;
+	}
+}
+
+
+/*-----------------------------------------------------------------------*/
+/* In the shape padding checks fo single channels it could not be tested */
+/* if pulses with automatic shape padding in different channels would    */
+/* overlap, which needs to be done here.                                 */
+/*-----------------------------------------------------------------------*/
+
+void ep385_shape_padding_check_2( void )
+{
+	CHANNEL *ch1, *ch2;
+	FUNCTION *f1, *f2;
+	int i, j, k, l, m, n;
+	PULSE_PARAMS *pp1, *pp2;
+
+
+	/* We need to check all pulses of functions that expect automatically
+	   created shape pulses */
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f1 = ep385.function + i;
+
+		if ( ! f1->uses_auto_shape_pulses )
+			continue;
+
+		for ( j = 0; j < PULSER_CHANNEL_NUM_FUNC; j++ )
+		{
+			f2 = ep385.function + j;
+
+			if ( ! f2->uses_auto_shape_pulses )
+			continue;
+
+			/* Single channels already have been checked */
+
+			if ( f1 == f2 && f1->num_channels == 1 )
+				continue;
+
+			for ( k = 0; k < f1->num_channels; k++ )
+			{
+				ch1 = f1->channel[ k ];
+
+				for ( l = ( f1 == f2 ) ? k + 1 : 0; l < f2->num_channels; l++ )
+				{
+					ch2 = f2->channel[ l ];
+
+					for ( m = 0; m < ch1->num_active_pulses; m++ )
+					{
+						pp1 = ch1->pulse_params + m;
+
+						for ( n = 0; n < ch2->num_active_pulses; n++ )
+						{
+							pp2 = ch2->pulse_params + n;
+
+							if ( ( pp1->pos <= pp2->pos &&
+								   pp1->pos + pp1->len > pp2->pos ) ||
+								 ( pp1->pos > pp2->pos &&
+								   pp1->pos < pp2->pos + pp2->len ) )
+							{
+								print( FATAL, "Distance between pulses #%ld "
+									   "and #%ld too short to set shape "
+									   "padding.\n", pp1->pulse->num,
+									   pp2->pulse->num );
+								THROW( EXCEPTION );
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -777,37 +854,42 @@ PULSE *ep385_delete_pulse( PULSE *p, bool warn )
 			p->tp->tp = NULL;
 	}
 
-	/* First we've got to remove the pulse from its functions pulse list */
+	/* First we've got to remove the pulse from its functions pulse list (if
+	   it already made it into the functions pulse list) */
 
-	for ( i = 0; i < p->function->num_pulses; i++ )
-		if ( p->function->pulses[ i ] == p )
-			break;
-
-	fsc2_assert( i < p->function->num_pulses );             /* Paranoia */
-
-	/* Put the last of the functions pulses into the slot for the pulse to
-	   be deleted and shorten the list by one element */
-
-	if ( i != p->function->num_pulses - 1 )
-		p->function->pulses[ i ] =
-			p->function->pulses[ p->function->num_pulses - 1 ];
-
-	/* Now delete the pulse - if the deleted pulse was the last pulse of
-	   its function send a warning and mark the function as useless */
-
-	if ( p->function->num_pulses-- > 1 )
-		p->function->pulses = PULSE_PP
-					  T_realloc( p->function->pulses,
-								 p->function->num_pulses *
-								 sizeof *p->function->pulses );
-	else
+	if ( p->is_function && p->function->num_pulses > 0 &&
+		 p->function->pulses != NULL )
 	{
-		p->function->pulses = PULSE_PP T_free( p->function->pulses );
+		for ( i = 0; i < p->function->num_pulses; i++ )
+			if ( p->function->pulses[ i ] == p )
+				break;
 
-		if ( warn )
-			print( SEVERE, "Function '%s' isn't used at all because all its "
-				   "pulses are never used.\n", p->function->name );
-		p->function->is_used = UNSET;
+		fsc2_assert( i < p->function->num_pulses );             /* Paranoia */
+
+		/* Put the last of the functions pulses into the slot for the pulse to
+		   be deleted and shorten the list by one element */
+
+		if ( i != p->function->num_pulses - 1 )
+			p->function->pulses[ i ] =
+				p->function->pulses[ p->function->num_pulses - 1 ];
+
+		/* Now delete the pulse - if the deleted pulse was the last pulse of
+		   its function send a warning and mark the function as useless */
+
+		if ( p->function->num_pulses-- > 1 )
+			p->function->pulses = PULSE_PP
+									T_realloc( p->function->pulses,
+											   p->function->num_pulses
+											   * sizeof *p->function->pulses );
+		else
+		{
+			p->function->pulses = PULSE_PP T_free( p->function->pulses );
+
+			if ( warn )
+				print( SEVERE, "Function '%s' isn't used at all because all "
+					   "its pulses are never used.\n", p->function->name );
+			p->function->is_used = UNSET;
+		}
 	}
 
 	/* Now remove the pulse from the pulse list */

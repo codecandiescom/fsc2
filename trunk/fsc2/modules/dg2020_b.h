@@ -448,8 +448,6 @@ void dg2020_init_setup( void );
 
 bool dg2020_do_update( void );
 bool dg2020_reorganize_pulses( bool flag );
-void dg2020_shape_padding_check( FUNCTION *f );
-void dg2020_twt_padding_check( FUNCTION *f );
 void dg2020_do_checks( FUNCTION *f );
 void dg2020_full_reset( void );
 PULSE *dg2020_delete_pulse( PULSE *p, bool warn );
@@ -462,7 +460,6 @@ void dg2020_set_phase_pulses( FUNCTION *f );
 void dg2020_commit( FUNCTION * f, bool flag );
 void dg2020_commit_phases( FUNCTION * f, bool flag );
 void dg2020_cw_setup( void );
-void dg2020_defense_shape_check( FUNCTION *shape );
 
 
 /* Finally the functions from dg2020_gpib_b.c */

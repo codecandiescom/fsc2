@@ -57,6 +57,14 @@ bool hfs9000_do_update( void )
 
 	state = hfs9000_update_pulses( FSC2_MODE == TEST );
 
+	if ( FSC2_MODE == TEST )
+	{
+		if ( hfs9000.dump_file != NULL )
+			hfs9000_dump_channels( hfs9000.dump_file );
+		if ( hfs9000.show_file != NULL )
+			hfs9000_dump_channels( hfs9000.show_file );
+	}
+
 	hfs9000.needs_update = UNSET;
 	if ( restart && FSC2_MODE == EXPERIMENT )
 		hfs9000_run( START );

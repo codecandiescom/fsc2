@@ -29,6 +29,11 @@
 #define type_ON( f )   ( ( f )->is_inverted ? LOW : HIGH )
 #define type_OFF( f )  ( ( f )->is_inverted ? HIGH : LOW )
 
+static void dg2020_shape_padding_check_1( FUNCTION *f );
+static void dg2020_shape_padding_check_2( void );
+static void dg2020_twt_padding_check( FUNCTION *f );
+static void dg2020_defense_shape_check( FUNCTION *shape );
+
 
 /*-------------------------------------------------------------------------*/
 /* Function is called in the experiment after pulses have been changed to  */
@@ -124,10 +129,14 @@ bool dg2020_reorganize_pulses( bool flag )
 			return FAIL;
 		}
 
-		/* Send all the changes to the pulser */
-
-		dg2020_commit( f, flag );
 	}
+
+	/* Send all the changes to the pulser */
+
+	dg2020_shape_padding_check_2 ( );
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+		dg2020_commit( dg2020.function + i, flag );
 
 	return OK;
 }
@@ -142,7 +151,7 @@ bool dg2020_reorganize_pulses( bool flag )
 void dg2020_do_checks( FUNCTION *f )
 {
 	PULSE *p;
-	PULSE_PARAMS *pp;
+	PULSE_PARAMS *pp, *ppn;
 	int i, j;
 
 
@@ -184,7 +193,7 @@ void dg2020_do_checks( FUNCTION *f )
 		}
 	}
 
-	dg2020_shape_padding_check( f );
+	dg2020_shape_padding_check_1( f );
 	dg2020_twt_padding_check( f );
 
 	for ( i = 0; i < f->num_active_pulses; i++ )
@@ -210,15 +219,41 @@ void dg2020_do_checks( FUNCTION *f )
 
 		/* Check for overlap of pulses */
 
-		if ( i + 1 < f->num_active_pulses &&
-			 pp->pos + pp->len > f->pulse_params[ i + 1 ].pos )
+		if ( i + 1 < f->num_active_pulses )
+			ppn = f->pulse_params + i + 1;
+		else
+			ppn = NULL;
+
+		if ( ppn != NULL && pp->pulse->pos + pp->pulse->len > ppn->pulse->pos )
 		{
-			if ( dg2020_IN_SETUP )
-				print( FATAL, "Pulses #%ld and #%ld overlap.\n",
-					   pp->pulse->num, f->pulse_params[ i + 1 ].pulse->num );
+			if ( dg2020.auto_shape_pulses &&
+				 f->self == PULSER_CHANNEL_PULSE_SHAPE )
+			{
+				if ( pp->pulse->sp != NULL && ppn->pulse->sp != NULL &&
+					 pp->pulse->sp->function != ppn->pulse->sp->function )
+					print( FATAL, "Shape pulses for pulses #%ld function "
+						   "'%s') and #%ld (function '%s') %s"
+						   "overlap.\n", pp->pulse->sp->num,
+						   pp->pulse->sp->function->name, ppn->pulse->sp->num,
+						   ppn->pulse->sp->function->name,
+						   dg2020_IN_SETUP ? "" : "start to " );
+				if ( pp->pulse->sp != NULL && ppn->pulse->sp == NULL )
+					print( FATAL, "Automatically created shape pulse for "
+						   "pulse #%ld (function '%s') and SHAPE pulse "
+						   "#%ld %soverlap.\n", pp->pulse->sp->num,
+						   pp->pulse->sp->function->name, ppn->pulse->num,
+						   dg2020_IN_SETUP ? "" : "start to " );
+				else if ( pp->pulse->sp == NULL && ppn->pulse->sp != NULL )
+					print( FATAL, "Automatically created shape pulse for "
+						   "pulse #%ld (function '%s') and SHAPE pulse "
+						   "#%ld %soverlap.\n", ppn->pulse->sp->num,
+						   ppn->pulse->sp->function->name, pp->pulse->num,
+						   dg2020_IN_SETUP ? "" : "start to " );
+			}
 			else
-				print( FATAL, "Pulses #%ld and #%ld begin to overlap.\n",
-					   pp->pulse->num, f->pulse_params[ i + 1 ].pulse->num );
+				print( FATAL, "Pulses #%ld and #%ld of function '%s' %s"
+					   "overlap.\n", pp->pulse->num, ppn->pulse->num,
+					   f->name, dg2020_IN_SETUP ? "" : "start to "  );
 			THROW( EXCEPTION );
 		}
 	}
@@ -235,7 +270,7 @@ void dg2020_do_checks( FUNCTION *f )
 /*------------------------------------------------*/
 /*------------------------------------------------*/
 
-void dg2020_shape_padding_check( FUNCTION *f )
+static void dg2020_shape_padding_check_1( FUNCTION *f )
 {
 	PULSE_PARAMS *pp, *ppp;
 	int i;
@@ -271,6 +306,8 @@ void dg2020_shape_padding_check( FUNCTION *f )
 
 	for ( i = 1; i < f->num_active_pulses; i++ )
 	{
+		POD *pod_pp, *pod_ppp;
+
 		ppp = pp;
 		pp = pp + 1;
 
@@ -280,8 +317,31 @@ void dg2020_shape_padding_check( FUNCTION *f )
 		if ( ppp->pulse->sp == NULL && pp->pulse->sp == NULL )
 			continue;
 
+		/* If the pulses appear on different pods they may not overlap, but
+		   when they appear on the same pod we simply shorten on of them. */
+
+		pod_pp = pp->pulse->function->num_pods == 1 ?
+			pp->pulse->function->pod[ 0 ] :
+			pp->pulse->function->phase_setup->pod[
+				pp->pulse->pc->sequence[ f->next_phase ] - PHASE_PLUS_X ];
+		pod_ppp = ppp->pulse->function->num_pods == 1 ?
+			ppp->pulse->function->pod[ 0 ] :
+			ppp->pulse->function->phase_setup->pod[
+				ppp->pulse->pc->sequence[ f->next_phase ] - PHASE_PLUS_X ];
+
 		if ( ppp->pos + ppp->len > pp->pos )
-			ppp->len -= ppp->pos + ppp->len - pp->pos;
+		{
+			if ( pod_pp == pod_ppp )
+				ppp->len -= ppp->pos + ppp->len - pp->pos;
+			else
+			{
+				print( FATAL, "Distance between pulses #%ld and #%ld %stoo "
+					   "small to set shape padding.\n", ppp->pulse->num,
+					   pp->pulse->num, dg2020_IN_SETUP ? "" : "becomes " );
+				THROW( EXCEPTION );
+			}
+		}
+
 	}
 
 	/* Check that last pulse isn't too long */
@@ -322,7 +382,56 @@ void dg2020_shape_padding_check( FUNCTION *f )
 /*------------------------------------------------*/
 /*------------------------------------------------*/
 
-void dg2020_twt_padding_check( FUNCTION *f )
+static void dg2020_shape_padding_check_2( void )
+{
+	FUNCTION *f1, *f2;
+	PULSE_PARAMS *pp1, *pp2;
+	int i, j, k, l;
+
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f1 = dg2020.function + i;
+
+		if ( ! f1->uses_auto_shape_pulses )
+			continue;
+
+		for ( j = i + 1; j < PULSER_CHANNEL_NUM_FUNC; j++ )
+		{
+			f2 = dg2020.function + j;
+
+			if ( ! f2->uses_auto_shape_pulses )
+				continue;
+
+			for ( k = 0; k < f1->num_active_pulses; k++ )
+			{
+				pp1 = f1->pulse_params + k;
+
+				for ( l = 0; l < f2->num_active_pulses; l++ )
+				{
+					pp2 = f2->pulse_params + l;
+
+					if ( ( pp1->pos <= pp2->pos &&
+						   pp1->pos + pp1->len > pp2->pos ) ||
+						 ( pp1->pos > pp2->pos &&
+						   pp1->pos < pp2->pos + pp2->len ) )
+					{
+						print( FATAL, "Distance between pulses #%ld and #%ld "
+							   "too short to set shape padding.\n",
+							   pp1->pulse->num, pp2->pulse->num );
+						THROW( EXCEPTION );
+					}
+				}
+			}
+		}
+	}
+}
+
+
+/*------------------------------------------------*/
+/*------------------------------------------------*/
+
+static void dg2020_twt_padding_check( FUNCTION *f )
 {
 	PULSE_PARAMS *pp, *ppp;
 	int i;
@@ -451,8 +560,8 @@ void dg2020_twt_padding_check( FUNCTION *f )
 /*------------------------------------------------------------------------*/
 /* Function checks if the distance between pulse shape pulses and defense */
 /* pulses is large enough. The minimum lengths the shape_2_defense and    */
-/* defense_2_shape members of the ep395 structure. Both are set to rather */
-/* large values at first but can be customized by calling the EDL         */
+/* defense_2_shape members of the dg2020 structure. Both are set to       */
+/* rather large values at first but can be customized by calling the EDL  */
 /* functions pulser_shape_to_defense_minimum_distance() and               */
 /* pulser_defense_to_shape_minimum_distance() (names are intentionally    */
 /* that long).                                                            */
@@ -461,7 +570,7 @@ void dg2020_twt_padding_check( FUNCTION *f )
 /* mentioned EDL functions have been called.                              */
 /*------------------------------------------------------------------------*/
 
-void dg2020_defense_shape_check( FUNCTION *shape )
+static void dg2020_defense_shape_check( FUNCTION *shape )
 {
 	FUNCTION *defense = dg2020.function + PULSER_CHANNEL_DEFENSE;
 	PULSE *shape_p, *defense_p;
@@ -684,37 +793,42 @@ PULSE *dg2020_delete_pulse( PULSE *p, bool warn )
 			p->tp->tp = NULL;
 	}
 
-	/* First we've got to remove the pulse from its functions pulse list */
+	/* First we've got to remove the pulse from its functions pulse list (if
+	   it already made it into the functions pulse list) */
 
-	for ( i = 0; i < p->function->num_pulses; i++ )
-		if ( p->function->pulses[ i ] == p )
-			break;
-
-	fsc2_assert( i < p->function->num_pulses );  /* Paranoia */
-
-	/* Put the last of the functions pulses into the slot for the pulse to
-	   be deleted and shorten the list by one element */
-
-	if ( i != p->function->num_pulses - 1 )
-		p->function->pulses[ i ] =
-			p->function->pulses[ p->function->num_pulses - 1 ];
-
-	/* Now delete the pulse - if the deleted pulse was the last pulse of
-	   its function send a warning and mark the function as useless */
-
-	if ( p->function->num_pulses-- > 1 )
-		p->function->pulses = PULSE_PP
-					  T_realloc( p->function->pulses,
-								 p->function->num_pulses *
-								 sizeof *p->function->pulses );
-	else
+	if ( p->is_function && p->function->num_pulses > 0 &&
+		 p->function->pulses != NULL )
 	{
-		p->function->pulses = PULSE_PP T_free( p->function->pulses );
+		for ( i = 0; i < p->function->num_pulses; i++ )
+			if ( p->function->pulses[ i ] == p )
+				break;
 
-		if ( warn )
-			print( SEVERE, "Function '%s' isn't used at all because all its "
-				   "pulses are unused.\n", p->function->name );
-		p->function->is_used = UNSET;
+		fsc2_assert( i < p->function->num_pulses );  /* Paranoia */
+
+		/* Put the last of the functions pulses into the slot for the pulse to
+		   be deleted and shorten the list by one element */
+
+		if ( i != p->function->num_pulses - 1 )
+			p->function->pulses[ i ] =
+				p->function->pulses[ p->function->num_pulses - 1 ];
+
+		/* Now delete the pulse - if the deleted pulse was the last pulse of
+		   its function send a warning and mark the function as useless */
+
+		if ( p->function->num_pulses-- > 1 )
+			p->function->pulses = PULSE_PP
+									T_realloc( p->function->pulses,
+											   p->function->num_pulses
+											   * sizeof *p->function->pulses );
+		else
+		{
+			p->function->pulses = PULSE_PP T_free( p->function->pulses );
+
+			if ( warn )
+				print( SEVERE, "Function '%s' isn't used at all because all "
+					   "its pulses are unused.\n", p->function->name );
+			p->function->is_used = UNSET;
+		}
 	}
 
 	/* Now remove the pulse from the real pulse list */

@@ -55,18 +55,21 @@ void dg2020_init_setup( void )
 		dg2020_basic_functions_check( );
 		dg2020_distribute_channels( );
 
-		dg2020_init_print( dg2020.dump_file );
-		dg2020_init_print( dg2020.show_file );
-
 		dg2020_pulse_start_setup( );
 	}
 	else
 		dg2020_cw_init( );
 
 	if ( dg2020.dump_file != NULL )
+	{
+		dg2020_init_print( dg2020.dump_file );
 		dg2020_dump_channels( dg2020.dump_file );
+	}
 	if ( dg2020.show_file != NULL )
+	{
+		dg2020_init_print( dg2020.show_file );
 		dg2020_dump_channels( dg2020.show_file );
+	}
 }
 
 
