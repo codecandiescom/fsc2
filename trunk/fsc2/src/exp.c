@@ -12,6 +12,8 @@
 
 
 static bool in_for_lex = UNSET;
+static long token_count;
+
 
 extern int exp_runparse( void );          /* from exp_run_parser.y */
 extern int conditionparse( void );        /* from condition_parser.y */
