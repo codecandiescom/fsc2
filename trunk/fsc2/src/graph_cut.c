@@ -72,8 +72,8 @@ extern FL_resource xresources[ ];
 
 
 static struct {
-	int WIN_MIN_WIDTH;
-	int WIN_MIN_HEIGHT;
+	unsigned int WIN_MIN_WIDTH;
+	unsigned int WIN_MIN_HEIGHT;
 } GC_sizes;
 
 
@@ -87,7 +87,8 @@ static int cur_1,
 	       cur_6,
 	       cur_7,
 	       cur_8;
-static int cut_x, cut_y, cut_w, cut_h;
+static int cut_x, cut_y;
+static unsigned int cut_w, cut_h;
 static bool cut_has_been_shown = UNSET;
 
 
@@ -1314,7 +1315,7 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 							   XEvent *ev, Canvas *c )
 {
 	int old_button_state = G.button_state;
-	int keymask;
+	unsigned int keymask;
 
 
 	/* In the axes areas pressing two buttons simultaneously doesn't has a
@@ -1465,7 +1466,7 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 static void cut_release_handler( FL_OBJECT *obj, Window window,
 								 XEvent *ev, Canvas *c )
 {
-	int keymask;
+	unsigned int keymask;
 	bool scale_changed = UNSET;
 
 
@@ -1592,7 +1593,7 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 {
 	XEvent new_ev;
 	bool scale_changed = UNSET;
-	int keymask;
+	unsigned int keymask;
 	long p_index;
 
 	
@@ -2724,7 +2725,7 @@ void cut_change_dir( FL_OBJECT *a, long b )
 	Curve_1d *cv = &G.cut_curve;
 	Curve_2d *scv = G.curve_2d[ G.active_curve ];
 	long p_index;
-	int keymask;
+	unsigned int keymask;
 	int px, py;
 
 

@@ -91,7 +91,7 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 	long i;
 	Curve_1d *cv;
 	int old_button_state = G.button_state;
-	unsigned int dummy;
+	unsigned int keymask;
 
 
 	/* In the axes areas two buttons pressed simultaneously doesn't has a
@@ -125,7 +125,7 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 	if ( obj == run_form->canvas )        /* in canvas window */
 		G.drag_canvas = 3;
 
-	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &dummy );
+	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &keymask );
 
 	switch ( G.button_state )
 	{
@@ -225,7 +225,7 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 								Canvas *c )
 {
-	int dummy;
+	unsigned int keymask;
 	bool scale_changed = UNSET;
 
 
@@ -242,7 +242,7 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 	/* Get mouse position and restrict it to the canvas */
 
-	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &dummy );
+	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &keymask );
 
 	if ( c->ppos[ X ] < 0 )
 		c->ppos[ X ] = 0;
@@ -333,7 +333,7 @@ static void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 	Curve_1d *cv;
 	XEvent new_ev;
 	long i;
-	int dummy;
+	unsigned int keymask;
 	bool scale_changed = UNSET;
 
 	
@@ -357,7 +357,7 @@ static void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 		fl_XNextEvent( ev );                  /* get the next event */
 	}
 
-	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &dummy );
+	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &keymask );
 
 	switch ( G.button_state )
 	{

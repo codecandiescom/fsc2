@@ -308,7 +308,6 @@ void sig_handler( int signo )
 void contact_fsc2( int sock_fd, char *pname, char *fname )
 {
 	char line[ MAXLINE ];
-	ssize_t count;
 	char *prog_name;
 
 
@@ -319,7 +318,7 @@ void contact_fsc2( int sock_fd, char *pname, char *fname )
 		 != ( ssize_t ) strlen( line ) )
 		clean_up( fname, sock_fd, -1 );
 
-	if ( ( count = read_line( sock_fd, line, MAXLINE ) ) <= 0 )
+	if ( read_line( sock_fd, line, MAXLINE ) <= 0 )
 		clean_up( fname, sock_fd, -1 );
 
 	if ( ! strcmp( line, "FAIL\n" ) )
@@ -361,7 +360,7 @@ void contact_fsc2( int sock_fd, char *pname, char *fname )
 		 != ( ssize_t ) strlen( line ) )
 		clean_up( fname, sock_fd, -1 );
 
-	if ( ( count = read_line( sock_fd, line, MAXLINE ) ) <= 0 )
+	if ( read_line( sock_fd, line, MAXLINE ) <= 0 )
 		clean_up( fname, sock_fd, -1 );
 
 	if ( ! strcmp( line, "BUSY\n" ) )
@@ -377,7 +376,7 @@ void contact_fsc2( int sock_fd, char *pname, char *fname )
 		 != ( ssize_t ) strlen( line ) )
 		clean_up( fname, sock_fd, -1 );
 
-	if ( ( count = read_line( sock_fd, line, MAXLINE - 2 ) ) <= 0 )
+	if ( read_line( sock_fd, line, MAXLINE - 2 ) <= 0 )
 		clean_up( fname, sock_fd, -1 );
 
 	if ( ! strcmp( line, "FAIL\n" ) )
