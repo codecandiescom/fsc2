@@ -683,12 +683,17 @@ Var *synthesizer_use_table( Var *v )
 
 	if ( v == NULL )
 	{
-		hp8647a.table_file = get_string( strlen( libdir ) +
-										 strlen( DEFAULT_TABLE_FILE ) + 2 );
-		strcpy( hp8647a.table_file, libdir );
-		if ( libdir[ strlen( libdir ) - 1 ] != '/' )
-			strcat( hp8647a.table_file, "/" );
-		strcat( hp8647a.table_file, DEFAULT_TABLE_FILE );
+		if ( DEFAULT_TABLE_FILE[ 0 ] ==  '/' )
+			hp8647a.table_file = T_strdup( DEFAULT_TABLE_FILE );
+		else
+		{
+			hp8647a.table_file = get_string( strlen( libdir ) +
+											strlen( DEFAULT_TABLE_FILE ) + 2 );
+			strcpy( hp8647a.table_file, libdir );
+			if ( libdir[ strlen( libdir ) - 1 ] != '/' )
+				strcat( hp8647a.table_file, "/" );
+			strcat( hp8647a.table_file, DEFAULT_TABLE_FILE );
+		}
 
 		if ( ( tfp = hp8647a_open_table( hp8647a.table_file ) ) == NULL )
 		{

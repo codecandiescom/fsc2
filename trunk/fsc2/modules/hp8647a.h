@@ -24,13 +24,15 @@
 
 #include "fsc2.h"
 
-#define DEVICE_NAME "HP8647A"      /* compare entry in /etc/gpib.conf ! */
+
+/* Include configuration information for the device */
+
+#include "hp8647a.conf"
 
 
 #define MIN_FREQ        2.5e5            /* 250 kHz  */
 #define MAX_FREQ        1.0e9            /* 1000 MHz */
-#define MIN_MIN_ATTEN   3.0
-#define MIN_ATTEN      -5.0
+#define MIN_MIN_ATTEN   3.0              /* really the minimum attenuation */
 #define MAX_ATTEN      -136.0            /* -136 db  */
 #define ATT_RESOLUTION  0.1
 
@@ -50,10 +52,6 @@
 #define MAX_AM_AMPL     1.0e2
 #define MAX_PHASE_AMPL  10.0
 
-
-#define DEFAULT_TABLE_FILE "hp8647a.table"     /* libdir will be prepended ! */
-
-#define DEF_ATT_REF_FREQ   1.4e7               /* 14 MHz */
 
 /* declaration of exported functions */
 
