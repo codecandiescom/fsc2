@@ -133,9 +133,6 @@
      "FOREVER\\>"
      "ON\\>"
      "OFF\\>"
-     "#EXIT\\>"
-	 "#QUIT\\>"
-	 "#INCLUDE\\>"
      "[+-]?[xX]\\>"
      "[+-]?[yY]\\>"
 	 "[cC][wW]\\>" ) )
@@ -147,7 +144,13 @@
 	 "PHA\\(SE\\)?S?:"
 	 "PREP\\(ARATION\\)?S?:"
 	 "EXP\\(ERIMENT\\)?:"
-	 "ON_STOP:" ) )
+	 "ON_STOP:"
+     "#EXIT"
+     "#exit"
+	 "#QUIT"
+	 "#quit"
+	 "#INCLUDE"
+	 "#include"  ) )
 
 
 (defvar edl-unit-keywords
