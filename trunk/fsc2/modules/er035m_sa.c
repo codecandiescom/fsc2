@@ -37,7 +37,7 @@
 
 #include "er035m_sa.conf"
 
-const char generic_type[ ] = "field";
+const char generic_type[ ] = "gaussmeter";
 
 
 #define TEST_FIELD 2000.0        /* returned as current fireld in test run */

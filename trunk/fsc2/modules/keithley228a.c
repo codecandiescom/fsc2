@@ -33,13 +33,9 @@
 const char generic_type[ ] = "magnet";
 
 
-/*******************************************************************/
-/* Here is defined to which DAC port of the different lock-ins the */
-/* modulation input of the power supply is connected to, if this   */
-/* needs to be changed just for a few experiments use the function */
-/* 'magnet_use_dac_port' instead of changing the defaults and      */
-/* and recompiling!                                                */
-/*******************************************************************/
+/* Here is a list of the supported lock-in amplifiers plus the default DAC
+   ports used with each off them. The default DAC port list will only be
+   used when LOCKIN_DAC isn't defined in 'keithley228a.conf'. */
 
 static const char *lockins[ ] = { "sr510", "sr530", "sr810", "sr830", NULL };
 
@@ -51,7 +47,7 @@ static int dac_ports[ ] = { 6,       6,       4,       4      };
 #define KEITHLEY228A_MAX_VOLTAGE      5.0  /* admissible voltage range */
 #define KEITHLEY228A_MAX_SWEEP_SPEED  1.0  /* max. current change per second */
 
-#define KEITHLEY228A_MAXMAX_CURRENT  10.01 /* really maximum current ;-) */
+#define KEITHLEY228A_MAXMAX_CURRENT  10.01 /* really the maximum current ;-) */
 
 #define KEITHLEY228A_MAX_JUMP         0.1  /* maximum uncontrolled jump */
 
@@ -87,7 +83,6 @@ static void keithley228a_gpib_failure( void );
 static double keithley228a_current_check( double current );
 static void keithley228a_get_corrected_current( double c, double *psc,
 												double *dacv );
-
 
 
 typedef struct {

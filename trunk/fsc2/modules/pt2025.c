@@ -28,7 +28,7 @@
 
 #define DEVICE_NAME "PT2025"
 
-const char generic_type[ ] = "field";
+const char generic_type[ ] = "gaussmeter";
 
 #define MAX_TRIES   100
 

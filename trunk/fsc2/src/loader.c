@@ -122,8 +122,8 @@ bool exists_device( const char *name )
 
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded &&
-			 ! strcmp( strchr( cd->name, '/' ) == NULL ?
-					   cd->name : strrchr( cd->name, '/' ) + 1, name ) )
+			 ! strcasecmp( strchr( cd->name, '/' ) == NULL ?
+						   cd->name : strrchr( cd->name, '/' ) + 1, name ) )
 			return OK;
 
 	return FAIL;
@@ -638,9 +638,9 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 
 	for ( cd = Device_List; cd != 0; cd = cd->next )
 		if ( cd->is_loaded &&
-			 ( ! strcmp( cd->name, from ) || 
+			 ( ! strcasecmp( cd->name, from ) || 
 			   ( strchr( cd->name, '/' ) != NULL &&
-				 ! strcmp( strrchr( cd->name, '/' ) + 1, from ) ) ) )
+				 ! strcasecmp( strrchr( cd->name, '/' ) + 1, from ) ) ) )
 			break;
 
 	if ( cd == NULL )                    /* library not found ? */
@@ -661,12 +661,12 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 /*------------------------------------------------------------------------*/
 /* This routine expects the name of a device and returns the the position */
 /* in the list of devices with the same function, as indicated by the     */
-/* generic type string. I.e., if you have loaded modules for three lock-  */
-/* in amplifiers and you pass this function the name of one of them it    */
-/* looks at the sequence the devices were listed in the DEVICES section   */
-/* and returns the sequence number of the device, in this case either 1,  */
-/* 2 or 3. In case of errors (or if the devices generic_type string isn't */
-/* set) the funtion returns 0.                                            */
+/* generic type string. I.e. if you have loaded modules for three lock-in */
+/* amplifiers and you pass this function the name of one of them it looks */
+/* at the sequence the devices were listed in the DEVICES section and     */
+/* returns the sequence number of the device, in this case either 1, 2 or */
+/* 3. In case of errors (or if the devices generic_type string isn't set) */
+/* the funtion returns 0.                                                 */
 /*------------------------------------------------------------------------*/
 
 int get_lib_number( const char *name )
@@ -678,9 +678,9 @@ int get_lib_number( const char *name )
 
 	for ( cd = Device_List; cd != 0; cd = cd->next )
 		if ( cd->is_loaded && cd->generic_type != NULL &&
-			 ( ! strcmp( cd->name, name ) || 
+			 ( ! strcasecmp( cd->name, name ) || 
 			   ( strchr( cd->name, '/' ) != NULL &&
-				 ! strcmp( strrchr( cd->name, '/' ) + 1, name ) ) ) )
+				 ! strcasecmp( strrchr( cd->name, '/' ) + 1, name ) ) ) )
 		{
 			sd = cd;
 			break;
@@ -698,7 +698,7 @@ int get_lib_number( const char *name )
 			return num;
 
 		if ( cd->generic_type != NULL &&
-			 ! strcmp( cd->generic_type, sd->generic_type ) )
+			 ! strcasecmp( cd->generic_type, sd->generic_type ) )
 			num++;
 	}
 

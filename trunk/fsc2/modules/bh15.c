@@ -29,7 +29,7 @@
 
 #include "bh15.conf"
 
-const char generic_type[ ] = "field";
+const char generic_type[ ] = "gaussmeter";
 
 
 int bh15_init_hook( void );
