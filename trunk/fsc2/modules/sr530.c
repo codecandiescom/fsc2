@@ -86,6 +86,9 @@ static double sr530_set_dac_voltage( long channel, double voltage );
 
 int sr530_init_hook( void )
 {
+	int i;
+
+
 	/* Set global variable to indicate that GPIB bus is needed */
 
 	need_GPIB = SET;

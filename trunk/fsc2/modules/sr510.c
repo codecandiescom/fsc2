@@ -106,7 +106,7 @@ int sr510_init_hook( void )
 	                             /* concerning it has been printed yet */
 
 	for ( i = 0; i < 2; i++ )
-		src510.dac_voltage[ i ] = 0.0;
+		sr510.dac_voltage[ i ] = 0.0;
 
 	return 1;
 }
@@ -552,7 +552,7 @@ Var *lockin_dac_voltage( Var *v )
 		eprint( WARN, "%s:%ld: %s: Integer value used as DAC voltage.",
 				Fname, Lc, DEVICE_NAME );
 
-	voltage = FLOAT( v );
+	voltage = VALUE( v );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
@@ -623,7 +623,7 @@ bool sr510_init( const char *name )
 	if ( sr510.TC != -1 )
 		sr510_set_tc( sr510.TC );
 	for ( i = 0; i < 2; i++ )
-		sr510_set_dac_voltage( i + 5, sr510.dac_voltage[ i ];
+		sr510_set_dac_voltage( i + 5, sr510.dac_voltage[ i ] );
 		
 
 	return OK;
