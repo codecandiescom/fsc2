@@ -133,7 +133,7 @@ typedef struct {
                                     measurement */
 	pid_t conn_pid;              /* pid of child process for handling
 									communication with scripts */
-	volatile pid_t http_pid;     /* pid of child process that is a http server
+	pid_t http_pid;              /* pid of child process that is a http server
 									to allow viewing fsc2's state */
 	int http_port;               /* port the http server is running on */
 
