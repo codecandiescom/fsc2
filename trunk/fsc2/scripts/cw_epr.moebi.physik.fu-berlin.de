@@ -2,6 +2,8 @@
 
 # $Id$
 
+
+use Tk::Balloon;
 use strict;
 use Tk;
 
@@ -9,7 +11,7 @@ my $lockin		       = 'SR810';
 my $start_field        = 3350;
 my $end_field	       = 3500;
 my $field_step	       = 1;
-my $sweep_method       = "sweep_up/sweep_down";
+my $sweep_method       = "simple";
 my $field_error        = "";
 my $hidden_field_error = "";
 my $num_runs	       = 1;
@@ -38,6 +40,7 @@ my %wp = ( '-side' => 'left',
 
 my $mw = MainWindow->new( );
 $mw->title( "cw_epr" );
+my $ballon = $mw->Balloon( );
 
 my $f0 = $mw->Frame( );
 my $f0_l1 = $f0->Label( '-text' => 'Bridge:',
@@ -46,6 +49,9 @@ my $f0_l1 = $f0->Label( '-text' => 'Bridge:',
 my $f0_m = $f0->Optionmenu( '-options' => [ ( 'cw', 'pulsed' ) ],
 							'-width' => 9,
 							'-variable' => \$bridge );
+$ballon->attach( $f0_m,
+				 '-balloonmsg' => "Selects either cw bridge or\n" .
+                                  "bridge for pulsed experiments" );
 $f0->pack( %fp );
 $f0_l1->pack( %wp );
 $f0_m->pack( %wp );
@@ -60,6 +66,8 @@ my $f1_v = $f1->Entry( '-textvariable' => \$start_field,
 					   '-validate' => 'key',
 					   '-validatecommand' => \&is_numeric,
 					   '-relief' => 'sunken' );
+$ballon->attach( $f1_v,
+				 '-balloonmsg' => "Enter the start field (in Gauss)" );
 my $f1_l2 = $f1->Label( '-text' => 'G',
 						'-width' => 1 );
 
@@ -78,6 +86,8 @@ my $f2_v = $f2->Entry( '-textvariable' => \$end_field,
 					   '-validate' => 'key',
 					   '-validatecommand' => \&is_numeric,
 					   '-relief' => 'sunken' );
+$ballon->attach( $f2_v,
+				 '-balloonmsg' => "Enter the end field (in Gauss)" );
 my $f2_l2 = $f2->Label( '-text' => 'G',
 						'-width' => 1 );
 
@@ -96,6 +106,9 @@ my $f3_v = $f3->Entry( '-textvariable' => \$field_step,
 					   '-validate' => 'key',
 					   '-validatecommand' => \&is_numeric,
 					   '-relief' => 'sunken' );
+$ballon->attach( $f3_v,
+				 '-balloonmsg' => "Enter the size of the " .
+				                  "field steps (in Gauss)" );
 my $f3_l2 = $f3->Label( '-text' => 'G',
 						'-width' => 1 );
 
@@ -114,8 +127,13 @@ my $f5_v = $f5->Entry( '-textvariable' => \$field_error,
 					   '-validate' => 'key',
 					   '-validatecommand' => \&is_numeric,
 					   '-relief' => 'sunken',
-					   'state' => $sweep_method eq 'sweep' ?
+					   'state' => $sweep_method eq 'simple' ?
 					   'disabled' : 'normal' );
+$ballon->attach( $f5_v,
+				 '-balloonmsg' => "Sets maximum acceptable field\n" .
+				                  "deviation in tested sweep\n" .
+			                      "(in Gauss, not larger than\n" .
+				                  "10% of field step size)" );
 my $f5_l2 = $f5->Label( '-text' => 'G',
 						'-width' => 1 );
 
@@ -125,10 +143,14 @@ my $f4_l = $f4->Label( '-text' => 'Sweep method:',
 						'-width' => '20',
 						'anchor' => 'w' );
 my $f4_m = $f4->Optionmenu( '-options' =>
-							[ ( 'sweep', 'set_field' ) ],
+							[ ( 'simple', 'tested' ) ],
 							'-width' => 9,
 							'-variable' => \$sweep_method,
 						    '-command' => \&set_sweep_method );
+$ballon->attach( $f4_m,
+				 '-balloonmsg' => "Selects either a simple sweep\n" .
+				                  "(no intermediate checks of field)\n" .
+				                  "or a controlled sweep (slower)" );
 
 $f4->pack( %fp );
 $f4_l->pack( %wp );
@@ -246,7 +268,7 @@ MainLoop;
 #############################################
 
 sub set_sweep_method {
-	if ( $sweep_method eq 'sweep' ) {
+	if ( $sweep_method eq 'simple' ) {
 		$f5_v->configure( 'state' => 'disabled' );
 		$hidden_field_error = $field_error;
 		$field_error = "";
@@ -289,14 +311,14 @@ chomp $ne;
 $field_step = $ne;
 
 goto done_reading unless defined( $ne = <F> )
-	and $ne =~ /^(sweep)|(set_field)$/;
+	and $ne =~ /^(simple)|(tested)$/;
 chomp $ne;
 $sweep_method = $ne;
 
 goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
 chomp $ne;
 $hidden_field_error = $ne;
-$field_error = $ne if $sweep_method =~ /set_field/;
+$field_error = $ne if $sweep_method =~ /tested/;
 
 goto done_reading unless defined( $ne = <F> ) and $ne =~ /^\d+$/;
 chomp $ne;
@@ -333,7 +355,7 @@ sub store_defs {
 	$start_field = 0 if $start_field eq ".";
 	$end_field = 0 if $end_field eq ".";
 	$field_step = 0 if $field_step eq ".";
-	$field_error = 0 if $field_error eq ".";
+	$hidden_field_error = 0 if $hidden_field_error eq ".";
 
 	print F "# Do not edit - created automatically!\n";
 
@@ -386,7 +408,7 @@ field_step = ";
 print F $end_field > $start_field ? $field_step : - $field_step;
 print F " G;\n";
 print F "act_field;\nfield_error = $field_error G;\n"
-	if $sweep_method eq 'set_field';
+	if $sweep_method eq 'tested';
 print F
 "N_points = ceil( abs( end_field - start_field ) / abs( field_step ) ) + 1;
 data[ N_points ];
@@ -412,7 +434,7 @@ PHASE_SETUP:  MICROWAVE, CW: 5;\n" if $bridge =~ /pulsed/;
 print F "\n\nPREPARATIONS:\n\n";
 print F "pulser_cw_mode( );\n" if $bridge =~ /pulsed/;
 print F "magnet_setup( start_field, field_step );\n"
-	if $sweep_method eq 'sweep';
+	if $sweep_method eq 'simple';
 print F "lockin_time_constant( tc );\n" if $tc ne "Don't set";
 print F "lockin_sensitivity( $sens );\n" if $sens ne "Don't set";
 print F "init_1d( ";
@@ -439,7 +461,7 @@ save_program( \"% \", \"Sample:  \\nMicrowave frequency:  \\n\"
               \"Microwave power:  \\nTemperature:  \\n\" );\n\n";
 
 print F "act_field = set_field( start_field );\n"
-	if $sweep_method eq 'set_field';
+	if $sweep_method eq 'tested';
 print F "tc = lockin_time_constant( );\n\n" if $tc eq "Don't set";
 if ( $num_runs != 1 ) {
 	print F
@@ -451,7 +473,7 @@ if ( $num_runs != 1 ) {
 
 		new_data[ I ] = lockin_get_data( );\n\n\t\t";
 
-if ( $sweep_method eq 'sweep' ) {
+if ( $sweep_method eq 'simple' ) {
 	print F "fsave( \"# #\\n\", start_field + ( I - 1 ) * field_step, " .
 		    "new_data[ I ] );";
 } else {
@@ -462,7 +484,7 @@ print F "
 		         I, new_data[ I ], 3 );
 
 		IF ( I < N_points ) \{\n\t\t\t";
-if ( $sweep_method eq 'sweep' ) {
+if ( $sweep_method eq 'simple' ) {
 	print F "sweep_up( );";
 } else {
 	print F "act_field = set_field( start_field + I * field_step, " .
@@ -481,7 +503,7 @@ print F "tc );
 
 	fsave( \"\\n\" );
 	IF ( J < N_runs ) \{\n\t\t";
-if ( $sweep_method eq 'sweep' ) {
+if ( $sweep_method eq 'simple' ) {
 	print F	"reset_field( );";
 } else {
 	print F "act_field = set_field( start_field );";
@@ -505,7 +527,7 @@ FOR I = 1 : N_points \{
 	print F
 "FOR I = 1 : N_points \{
 	data[ I ] = lockin_get_data( );\n\t";
-if ( $sweep_method eq 'sweep' ) {
+if ( $sweep_method eq 'simple' ) {
 	print F "fsave( \"# #\\n\", " .
 		"start_field + ( I - 1 ) * field_step, data[ I ] );";
 } else {
@@ -514,7 +536,7 @@ if ( $sweep_method eq 'sweep' ) {
 print F "
 	display( I, data[ I ] );
 	IF ( I < N_points ) \{\n\t\t";
-if ( $sweep_method eq 'sweep' ) {
+if ( $sweep_method eq 'simple' ) {
 	print F "sweep_up( );";
 } else {
 	print F "act_field = set_field( start_field + I * field_step, field_error );";
@@ -590,9 +612,9 @@ sub do_checks {
 	}
 
 	$field_error = 0
-		if $sweep_method eq 'set_field' and $field_error =~ /^\.?$/;
+		if $sweep_method eq 'tested' and $field_error =~ /^\.?$/;
 
-	if ( $sweep_method eq 'set_field' and $field_error > 0.1 * $field_step ) {
+	if ( $sweep_method eq 'tested' and $field_error > 0.1 * $field_step ) {
 		&show_message( "Field error larger than\n10% of field step size." );
 		return -1;
 	}
