@@ -492,6 +492,8 @@ void prim_exp_run( void )
 		T_free( Fname );
 	Fname = NULL;
 
+	if ( prg_length == 0 )                       /* no program - no test */
+		return;
 
 	TRY
 	{
@@ -502,9 +504,10 @@ void prim_exp_run( void )
 		      if there are e.g. infinite loops.
 		*/
 
-		run_test_hooks( );
+		TEST_RUN = 1;
 		save_restore_variables( SET );
 		set_stop_signal_handler( SET );
+		run_test_hooks( );
 
 		cur_prg_token = prg_token;
 
@@ -600,12 +603,14 @@ void prim_exp_run( void )
 	{
 		set_stop_signal_handler( UNSET );
 		Fname = NULL;
+		TEST_RUN = 0;
 		PASSTHROU( );
 	}
 
 	set_stop_signal_handler( UNSET );
 	Fname = NULL;
 	save_restore_variables( UNSET );
+	TEST_RUN = 0;
 }
 
 

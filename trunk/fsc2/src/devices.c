@@ -7,6 +7,7 @@
 #include "fsc2.h"
 
 
+
 /* The string passed to the function is already allocated to the program
    and has to be deallocated here to avoid a memory leak! */
 
@@ -76,6 +77,7 @@ void delete_devices( void )
 {
 	Device *cd, *cdn;
 
+
 	if ( Device_List == NULL )
 		return;
 
@@ -86,7 +88,14 @@ void delete_devices( void )
 		if ( cd->is_loaded )
 		{
 			if ( cd->driver.is_exit_hook )
-				cd->driver.exit_hook( );
+			{
+				TRY                      /* catch exceptions from the exit   */
+				{                        /* hooks, we've got to run them all */
+					cd->driver.exit_hook( );
+					TRY_SUCCESS;
+				}
+			}
+
 			dlclose( cd->driver.handle );
 		}
 

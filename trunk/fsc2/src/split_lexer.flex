@@ -35,7 +35,7 @@ FILE        \x1\n.+\n
 LNUM        \x2\n[0-9]+\n
 ERR         \x3\n.+\n
 
-DEV         ^[ \t]*DEV(ICE)?S?:
+DEV         ^[\t ]*DEV(ICE)?S?:
 ASS         ^[\t ]*ASS(IGNMENT)?S?:
 VAR         ^[\t ]*VAR(IABLE)?S?:
 PHAS        ^[\t ]*PHA(SES)?:
@@ -109,6 +109,8 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 						Fname, Lc, splittext );
 				return FAIL;
 			}
+
+"\n"        /* dump carriage returns */
 
 			/* handling of invalid input */
 [^ \n]+		{

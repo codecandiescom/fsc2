@@ -836,8 +836,13 @@ Var *f_print( Var *v )
 	char *cp;
 	char *ep;
 	Var *cv;
-	int in_format, on_stack, s;
+	char *sptr;
+	int in_format,
+		on_stack,
+		s;
+	bool print_anyway = UNSET;
 
+	
 	/* a call to print() without any argument is legal but rather
 	   unreasonable... */
 
@@ -847,11 +852,17 @@ Var *f_print( Var *v )
 	/* make sure the first argument is a string */
 
 	vars_check( v, STR_VAR );
+	sptr = cp = v->val.sptr;
+	if ( *sptr == '\\' && *( sptr + 1 ) == 'T' )
+	{
+		sptr += 2;
+		print_anyway = SET;
+	}
 
 	/* count the number of specifiers `#' in the format string but don't count
 	   escaped `#' (i.e "\#") */
 
-	for ( in_format = 0, cp = v->val.sptr; ( cp = strchr( cp, '#' ) ) != NULL;
+	for ( in_format = 0, sptr; ( cp = strchr( cp, '#' ) ) != NULL;
 		  ++cp )
 		if ( cp == fmt || *( cp - 1 ) != '\\' )
 			in_format++;
@@ -877,14 +888,14 @@ Var *f_print( Var *v )
 
 	/* count number of `#' */
 
-	for ( cp = v->val.sptr, s = 0; *cp != '\0' ; ++cp )
+	for ( cp = sptr, s = 0; *cp != '\0' ; ++cp )
 		if ( *cp == '#' )
 			s++;
 
 	/* get string long enough to replace each `#' by a 4-char sequence */
 
-	fmt = get_string( strlen( v->val.sptr ) + 3 * s + 1 );
-	strcpy( fmt, v->val.sptr );
+	fmt = get_string( strlen( sptr ) + 3 * s + 1 );
+	strcpy( fmt, sptr );
 
 	for ( cp = fmt; *cp != '\0' ; ++cp )
 	{
@@ -949,6 +960,12 @@ Var *f_print( Var *v )
 			case '\"' :
 				*cp = '"';
 				break;
+
+			default :
+				eprint( WARN, "%s:%ld: Unknown escape sequence \\%c in "
+						"print() format string.\n", Fname, Lc, *( cp + 1 ) );
+				*cp = *( cp + 1 );
+				break;
 		}
 		
 		for ( ep = cp + 1; *ep != '\0'; ep++ )
@@ -963,23 +980,24 @@ Var *f_print( Var *v )
 	{
 		if ( cv != NULL )      /* skip printing if there are not enough data */
 		{
-			switch ( cv->type )
-			{
-				case INT_VAR :
-					strcpy( ep, "%d" );
-					eprint( NO_ERROR, cp, cv->val.lval );
-					break;
+			if ( ! TEST_RUN || print_anyway )
+				switch ( cv->type )
+				{
+					case INT_VAR :
+						strcpy( ep, "%ld" );
+						eprint( NO_ERROR, cp, cv->val.lval );
+						break;
 
-				case FLOAT_VAR :
-					strcpy( ep, "%#g" );
-					eprint( NO_ERROR, cp, cv->val.dval );
-					break;
+					case FLOAT_VAR :
+						strcpy( ep, "%#g" );
+						eprint( NO_ERROR, cp, cv->val.dval );
+						break;
 
-				case STR_VAR :
-					strcpy( ep, "%s" );
-					eprint( NO_ERROR, cp, cv->val.sptr );
-					break;
-			}
+					case STR_VAR :
+						strcpy( ep, "%s" );
+						eprint( NO_ERROR, cp, sptr );
+						break;
+				}
 
 			cv = cv->next;
 		}
@@ -987,7 +1005,7 @@ Var *f_print( Var *v )
 		cp = ep + 4;
 	}
 
-	if ( *cp != '\0' )
+	if ( *cp != '\0' && ( ! TEST_RUN || print_anyway ) )
 		eprint( NO_ERROR, cp );
 
 	/* finally free the copy of the format string and return number of

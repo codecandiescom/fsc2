@@ -6,6 +6,8 @@
 #include "fsc2.h"
 
 int User_Functions_init_hook( void );
+int User_Functions_test_hook( void );
+int User_Functions_exp_hook( void );
 void User_Functions_exit_hook( void );
 
 
@@ -23,8 +25,21 @@ Var *float_slice( Var *var );
 int User_Functions_init_hook( void )
 {
 	eprint( NO_ERROR, "This is User_Functions_init_hook()\n" );
-	return( 1 );
+	return 1;
 }
+
+int User_Functions_test_hook( void )
+{
+	eprint( NO_ERROR, "This is User_Functions_test_hook()\n" );
+	return 1;
+}
+
+int User_Functions_exp_hook( void )
+{
+	eprint( NO_ERROR, "This is User_Functions_exp_hook()\n" );
+	return 1;
+}
+
 void User_Functions_exit_hook( void )
 {
 	eprint( NO_ERROR, "This is User_Functions_exit_hook()\n" );
