@@ -2,6 +2,9 @@
   $Id$
 
   $Log$
+  Revision 1.7  1999/07/16 22:59:34  jens
+  I just learned: no C-style comments on the same line as a definition...
+
   Revision 1.6  1999/07/16 22:54:14  jens
   Mostly cosmetic changes.
 
@@ -53,27 +56,27 @@ int Vars_Next_Section;
 %}
 
 
-FILE        \x1\n.+\n                   /* filename */
-LNUM        \x2\n[0-9]+\n               /* line number */
-ERR         \x3\n.+\n                   /* error message */
+FILE        \x1\n.+\n
+LNUM        \x2\n[0-9]+\n
+ERR         \x3\n.+\n
 
-ASS         ^[ \t]*ASS(IGNMENT)?S?:     /* ASSIGNMENTS section */
-DEF         ^[ \t]*DEF(AULT)?S?:        /* DEFAULTS section */
-VAR         ^[ \t]*VAR(IABLE)?S?:       /* VARIABLES section */
-PHAS        ^[ \t]*PHA(SE)?S?:          /* PHASES section */
-PREP        ^[ \t]*PREP(ARATION)?S?:    /* PREPARATIONS section */
-EXP         ^[ \t]*EXP(ERIMENT)?S?:     /* EXPERIMENT section */
+ASS         ^[ \t]*ASS(IGNMENT)?S?:
+DEF         ^[ \t]*DEF(AULT)?S?:
+VAR         ^[ \t]*VAR(IABLE)?S?:
+PHAS        ^[ \t]*PHA(SE)?S?:
+PREP        ^[ \t]*PREP(ARATION)?S?:
+EXP         ^[ \t]*EXP(ERIMENT)?S?:
 
-STR         \x5.*\x6                    /* print format string */
-ESTR        \x5.*\x3\n.*\n              /* string with error */
+STR         \x5.*\x6
+ESTR        \x5.*\x3\n.*\n
 
 INT         [0-9]+
 EXPO        [EDed][+-]?{INT}
 FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
-IDENT       [A-Za-z]+[A-Za-z0-9_]*                   /* identifier */
-WS          [\n \t]+                                 /* white space */
-UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+    /* invalid input */
+IDENT       [A-Za-z]+[A-Za-z0-9_]*
+WS          [\n \t]+
+UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 
 
 		/*---------------*/
