@@ -1412,9 +1412,9 @@ void repaint_canvas_2d( Canvas *c )
 					                                              cv->s2d[ Y ];
 
 				if ( index_1 == -1 || index_2 == -1 )
-					sprintf( buf, "%#g   %#g ", x_pos, y_pos );
+					sprintf( buf, " %#g   %#g ", x_pos, y_pos );
 				else
-					sprintf( buf, "%#g   %#g   %#g ", x_pos, y_pos,
+					sprintf( buf, " %#g   %#g   %#g ", x_pos, y_pos,
 							 z_pos_1 - z_pos_2 );
 				if ( G.font != NULL )
 					XDrawImageString( G.d, pm, cv->font_gc, 5,
