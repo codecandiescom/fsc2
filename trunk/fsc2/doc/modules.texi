@@ -1472,8 +1472,15 @@ struct @{
     bool ( *set_trig_in_impedance )( int state );
 
     bool ( *set_max_seq_len )( double seq_len );
+    bool ( *keep_all_pulses )( void );
 
     bool ( *set_phase_reference )( int phase, int function );
+
+    bool ( *set_phase_switch_delay )( int function, double del_time );
+    bool ( *set_grace_period )( double gp_time );
+
+    bool ( *phase_setup_prep )( int func, int type, int pod, long val );
+    bool ( *phase_setup )( int function );
 
     bool ( *new_pulse )( long pulse_number );
     bool ( *set_pulse_function )( long pulse_number, int function );
@@ -1489,12 +1496,6 @@ struct @{
     bool ( *get_pulse_position_change )( long pulse_number, double *ptime );
     bool ( *get_pulse_length_change )( long pulse_number, double *ptime );
     bool ( *get_pulse_phase_cycle )( long pulse_number, long *cycle );
-
-    bool ( *phase_setup_prep )( int func, int type, int pod, long val );
-    bool ( *phase_setup )( int function );
-    bool ( *set_phase_switch_delay )( int function, double del_time );
-    bool ( *set_grace_period )( double gp_time );
-    bool ( *keep_all_pulses )( void );
 @} pulser_struct;
 @end example
 When a new @acronym{EDL} program is read, all the pointers in this
@@ -1502,7 +1503,7 @@ structure get set to @code{NULL} and the boolean variable
 @code{needs_phase_pulses} is set to false. When the @code{init_hook} of
 a module gets run it has to fill in values for the function pointers it
 supplies functions for. When the module does not define a function that
-can be called via one of the function pointer it must leave the
+would be called via one of the function pointer it must leave the
 corresponding entry in the structure unchanged, i.e.@: leave it a
 @code{NULL} pointer. Most of the following text will try to explain in
 detail the meaning of the arguments of the functions and what these
@@ -1530,8 +1531,12 @@ S-band spectrometer.
 Now follows a list of all functions that can be defined within a pulser
 module and advertised to @acronym{fsc2} by assigning a pointer to the
 function in the pulsers structure. All functions are supposed to return
-a boolean value. You can be sure that all time values that these
-function receive are integer multiples of one nanosecond.
+a boolean value. Please remember that not all functions must exist, if
+they don't exist and you don't supply a pointer for some of the
+functions in the pulser structure @acronym{fsc2} will tell the user
+automatically, that the ability associated with the function is not
+available with the driver. You can be sure that all time values that
+these function receive are integer multiples of one nanosecond.
 
 @table @samp
 
@@ -1598,9 +1603,9 @@ created phase pulses are used, i.e.@: the variable
 
 @item bool assign_function( int function, long connector )
 For pulsers of the second type, i.e.@: pulsers that have internal
-channels and independent output channels this function is used to assign
-a pulse function to one of the output functions, i.e.@: if in the
-function description the @code{POD} keyword is found:
+channels and independent output channels this function is used to
+associate a pulse function to one of the output functions, i.e.@: if in
+the function description the @code{POD} keyword is found:
 @example
 ASSIGNEMENTS:
 MW: POD = 3, ...
@@ -1662,18 +1667,288 @@ TRIGGER_MODE: EXTERNAL;
 @end example
 There are two possible values for the trigger mode, either external or
 internal. In @file{src/global.h} an enumeration is already defined for
-the values of @code{EXTERNAL} (set to @code{1}) and @code{INTERNAL} (set
-to @code{0}) and in order to avoid problems if the values should ever
-get changed you should use these predefined values.
+the values of @code{mode} with @code{EXTERNAL} (set to @code{1}) and
+@code{INTERNAL} (set to @code{0}). In order to avoid problems if the
+values should ever get changed you should use these predefined values.
 
 
 @item bool set_repeat_time( double rep_time )
+The function gets called to set a repetition time or a repetition
+frequency to do an pulsed experiment, i.e.@: when either the
+@code{REPETITION_TIME} or @code{REPETITION_FREQUENCY} keyword is found
+in the trigger mode description in the @code{ASSIGNMENTS} section.
+Obviously, to be able to set a repetition time or frequency the trigger
+mode must be internal and the module has to check that this is the case.
+
 
 @item bool set_trig_in_level( double voltage )
+This function is called when the @code{LEVEL} keyword is found in the
+trigger mode description in the @code{ASSIGNMENTS} section to set the
+trigger level for external trigger mode. The module should tell the user
+that setting a trigger level doesn't make sense in the case that the
+user specified internal trigger mode.
 
 @item bool set_trig_in_slope( int slope )
+This function is called when the @code{SLOPE} keyword is found in the
+trigger mode description in the @code{ASSIGNMENTS} section to set the
+trigger slope for external trigger mode.  In @file{src/global.h} an
+enumeration is already defined for the values of @code{slope} with
+@code{POSITIVE} (for triggering on the trigger input signal crossing the
+trigger level coming from a lower voltage and set to @code{1}) and
+@code{NEGATIVE} (set to @code{0}). In order to avoid problems if the
+values should ever get changed you should use these predefined
+values. The module should tell the user that setting a trigger slope
+doesn't make sense in the case that the user specified internal trigger
+mode.
 
 @item bool set_trig_in_impedance( int state )
+This function gets called to set the input impedance of the trigger
+input channel when the @code{IMPEDANCE} keyword is found in the trigger
+mode description in the @code{ASSIGNMENTS} section. In
+@file{src/global.h} an enumeration is already defined for the values of
+@code{state} with @code{HIGH} (set to @code{1}) and @code{LOW} (set to
+@code{0}). In order to avoid problems if the values should ever get
+changed you should use these predefined values -- this could be the case
+when a pulser has to be integrated that has more than two different
+trigger input impedances. The module should tell the user that setting a
+trigger input impedance doesn't make sense in the case that the user
+specified internal trigger mode.
+
+@item bool set_max_seq_len( double seq_len )
+This function is called when the @code{MAXIMUM_SEQUENCE_LENGTH} is found
+in the  @code{ASSIGNMENTS} section, i.e.@:
+@example
+ASSIGNMENTS:
+MAXIMUM_SEQUENCE_LENGTH: 10 us;
+@end example
+If you determine the maximum length of the pulser pattern in your module
+during the test run the value you get can be plain wrong if the
+@acronym{EDL} program contains e.g.@: @code{FOREVER} loops,
+@code{IF}/@code{ELSE} constructs etc.@: because it is not possible to
+determine during the test run which branches of the @acronym{EDL}
+program will be run in the real experiment. The
+@code{MAXIMUM_SEQUENCE_LENGTH} command should allow the user to correvt
+the possible wrong value when necessary.
+
+The obvious question is why bother at all to determine the maximum
+length of the pulse pattern and not use instead the maximum pattern
+length all the time? The reason is that clearing the whole pattern at
+the start of the experiment for some pulsers can take a rather long
+time. E.g.@: for the @strong{Sony/Tektronix DG2020} for each of the
+internal channels, that are going to be used, more than @w{64 kB} would
+have to be send to the pulser while in most experiments only a small
+fraction of the maximum pattern length is really needed.
+
+@item bool bool keep_all_pulses( void )
+This function is called when the @code{KEEP_ALL_PULSES} keyword is found
+in the @code{ASSIGNMENTS} section. If this function is called your
+module may not delete pulses that it found during the test run never to
+be used.
+
+The question, of course, is why delete pulses at all that are never used
+and not keep them? The reason is that, when doing phase cycling, it can
+happen that for each additional pulse lots of channels in the digitzer
+are needed, even to the point that the number of channels gets exceeded.
+Therefor, as a default, pulses that are found to be never used during
+the test run are removed (after printing out a message to the user).
+
+@item bool set_phase_reference( int phase, int function )
+This use of this function depends on how 
+@c XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+@c XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+@c XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+@item bool set_phase_switch_delay( int function, double del_time )
+This function is called when in the @code{ASSIGNMENTS} section a line like
+@example
+PHASE_SWITCH_DELAY: 40 ns;
+@end example
+is found. The module must use the value of the second argument
+@code{del_time} as the time that pulses of the phase function indicated
+by the first argument (which currently can be only either @code{1} or
+@code{2}) start before the 'real' pulses of the pulse function the phase
+function is associated with. Of course, if the module is not prepared to
+create phase pulses at all, this function does not need to exist and the
+corresponding entry in the pulsers structure should be left a NULL
+pointer. If no phase switch delay is set for a phase-cycled function it
+should (but that's not a necessity but just a recommendation) use a
+default value of @w{20 ns}.
+
+
+@item bool set_grace_period( double gp_time )
+This function is called when in the @code{ASSIGNMENTS} section a line like
+@example
+GRACE_PERIOD: 20 ns;
+@end example
+is found. The module must use the value of the second argument
+@code{gp_time} as the time that pulses of the phase function indicated
+by the first argument remain switched on after the 'real' pulses of the
+pulse function the phase function is associated with already ended. If
+these 'real' pulses get to near to each other to allow having both a
+phase switch delay as well as the 'grace period' the later may be
+reduced below the value set by the user. If the module is not prepared
+to create phase pulses at all, this function does not need to exist and
+the corresponding entry in the pulsers structure should be left a NULL
+pointer.
+
+
+@item bool phase_setup_prep( int func, int type, int pod, long val )
+@c XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+@c XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+@c XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+@item bool phase_setup( int function )
+@c XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+@c XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+@c XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+@item bool new_pulse( long pulse_number )
+This function is called when a new pulse definition is found in the
+@code{PREPARATONS} section, i.e.@: for lines starting like this
+@example
+PULSE_13: ...
+@end example
+For this the function will called (with @code{13} as the
+@code{pulse_number} argument) to tell the module that there's a new
+pulse to be dealt with. Pulse numbers are always non-negative, so
+negative pulse numbers can be used for pulses generated internally by
+the module.
+
+
+@item bool set_pulse_function( long pulse_number, int function )
+This function is called when the function of a new pulse is set in the
+@code{PREPARATIONS} section, i.e.@: for
+@example
+PULSE_13:   FUNCTION = MICROWAVE, ...
+@end example
+The first argument is the pulse number (you can be sure that the
+function @code{new_pulse()} will have been called before with this pulse
+number as argument) and the pulse function number as the second argument
+(see the discussion of pulse function number aboe in the description of
+the function @code{assign_channel_to_function()}).
+
+
+@item bool set_pulse_position( long pulse_number, double ptime )
+This is the function that gets called to tell the module about the
+start position of a pulse, i.e.@: for lines like
+@example
+PULSE_13: START = 100 ns, ...
+@end example
+within the experiment section or when during the experiment the position
+of a pulse is chenged directly by assigneing a new start position i.e.@:
+for lines like
+@example
+P13.START = 260 ns;
+@end example
+If you need different handling of both situatins you can asign a new
+function pointer to the corresponding structure entry at the start of
+the @code{EXPERIMENT} section, for example in the @code{exp_hook}
+function (or at any other time it is convenient).
+
+As in the case of the @code{set_pulse_function()} function the first
+argument is the pulse number, the second the start position of the pulse
+in seconds (but guaranteed to be an integer multiple of @w{1 ns}, you
+still will have to check if it's not negative and also that it isn't an
+integer multiple of the pulsers timebase).
+
+
+@item bool set_pulse_length( long pulse_number, double ptime )
+The function gets called when the length of a pulse is set in the
+@acronym{EDL} file. As usual, the first argument is the pulse number,
+the second is the initial length of the pulse in seconds. You will have
+to check yourself within the module that the pulse length hasn't an
+invalid value. If the length of the pulse is zero you should treat the
+pulse as switched off for the time being.
+
+
+@item bool set_pulse_position_change( long pulse_number, double ptime )
+This function is used to tell the module about the start position change
+of a pulse (i.e.@: when a pulse definition line containing the
+@code{DELTA_START} keyword is found in the @code{PREPARATIONS} section
+or a new value is assigned to the @code{DELTA_START} value of a pulse during
+the experiment), with the first argument being the pulse number, the
+second the start position change for the pulse (which might be
+negative).
+
+
+@item bool set_pulse_length_change( long pulse_number, double ptime )
+This function is used to tell the module about the length change of a
+pulse (i.e.@: when a pulse definition line containing the
+@code{DELTA_LENGTH} keyword is found in the @code{PREPARATIONS} section
+or a new value is assigned to the @code{DELTA_LENGTH} value of a pulse
+during the experiment), with the first argument being the pulse number,
+the second the length change for the pulse.
+
+
+@item bool set_pulse_phase_cycle( long pulse_number, long cycle )
+This function is called to set the phase sequence to be used for phase
+cycling the pulse indexed by the first argument, i.e.@: when commands
+like
+@example
+PULSE_13: PHASE_CYCLE = PHASE_SEQUENCE_1, ...
+@end example
+are found in the @code{EXPERIMENT} section of the @acronym{EDL} file.
+The second argument is either the number @code{1} or @code{2},
+indicating one of the currently allowed two phase sequences. But to
+avoid the necessity of changes of the module it is probably a good idea
+to test this value within the function.
+
+
+@item bool get_pulse_function( long pulse_number, int *function )
+This function is called by @acronym{fsc2} to find out about the function
+of a pulse from the module. If a pulse with the number passed to the
+function exists (otherwise the module should print out an error message
+and throw an exception), it should set the second argument to the number
+of the pulses function and return a true value. If no function has been
+set for the pulse an error message should be printed out and an
+exception has to be thrown.
+
+
+@item bool get_pulse_position( long pulse_number, double *ptime )
+This function is called by @acronym{fsc2} to find out about the current
+position of a pulse from the module. If a pulse with the number passed
+to the function exists (otherwise the module should print out an error
+message and throw an exception), it should set the second argument to
+the start position (in seconds) of the pulse. If no start position has
+been set for the pulse an error message should be printed out and an
+exception has to be thrown.
+
+
+
+@item bool get_pulse_length( long pulse_number, double *ptime )
+This function in the module is called to determine the current length of
+a pulse. If a pulse with the number passed as the first argument exists
+the second argument has to be set to the length of the pulse (in seconds).
+If no length has been set for the pulse an error message should be
+printed out and an exception has to be thrown.
+
+@item bool get_pulse_position_change( long pulse_number, double *ptime )
+This function should return the current setting of the position change
+setting for the pulse indexed by the argument in the variable pointed to
+by the second argument. If no start position change vale has been set
+for the pulse an error message should be printed out and an exception
+has to be thrown.
+
+
+@item bool get_pulse_length_change( long pulse_number, double *ptime )
+This function should return the current setting of the length change
+setting for the pulse indexed by the argument in the variable pointed to
+by the second argument. If no lange change value has been set for the
+pulse an error message should be printed out and an exception has to be
+thrown.
+
+
+@item bool get_pulse_phase_cycle( long pulse_number, long *cycle )
+The function should return the the number of the phase sequence (i.e.@:
+@code{1} or @code{2}) associated with the pulse associated with pulse
+with the number passed to the function as the first argument. If a phase
+sequence has been set for the pulse the number has to be written into
+the variable pointed to by @code{cycle}, otherwise (or if no pulse with
+the number of the first argument exists) an error message has to be
+printed out and an exception should be thrown.
 
 
 @end table
