@@ -869,6 +869,7 @@ static void run_child( void )
 	EDL.cur_prg_token = EDL.prg_token;
 	EDL.do_quit = UNSET;
 	setup_child_signals( );
+	dlclose( Internals.rsc_handle );
 
 #ifndef NDEBUG
 	/* Setting the environment variable FSC2_CHILD_DEBUG to a non-empty

@@ -647,6 +647,8 @@ bool dl_fsc2_rsc( void )
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
+		dlclose( Internals.rsc_handle );
+		Internals.rsc_handle = NULL;
 		T_free( lib_name );
 		return FAIL;
 	}
@@ -657,6 +659,8 @@ bool dl_fsc2_rsc( void )
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
+		dlclose( Internals.rsc_handle );
+		Internals.rsc_handle = NULL;
 		T_free( lib_name );
 		return FAIL;
 	}
@@ -667,6 +671,8 @@ bool dl_fsc2_rsc( void )
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
+		dlclose( Internals.rsc_handle );
+		Internals.rsc_handle = NULL;
 		T_free( lib_name );
 		return FAIL;
 	}
@@ -677,6 +683,8 @@ bool dl_fsc2_rsc( void )
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
+		dlclose( Internals.rsc_handle );
+		Internals.rsc_handle = NULL;
 		T_free( lib_name );
 		return FAIL;
 	}
@@ -687,6 +695,8 @@ bool dl_fsc2_rsc( void )
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
+		dlclose( Internals.rsc_handle );
+		Internals.rsc_handle = NULL;
 		T_free( lib_name );
 		return FAIL;
 	}
@@ -697,6 +707,8 @@ bool dl_fsc2_rsc( void )
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
+		dlclose( Internals.rsc_handle );
+		Internals.rsc_handle = NULL;
 		T_free( lib_name );
 		return FAIL;
 	}
@@ -736,6 +748,11 @@ void xforms_close( void )
 	if ( fl_form_is_visible( GUI.main_form->fsc2 ) )
 		fl_hide_form( GUI.main_form->fsc2 );
 	fl_free_form( GUI.main_form->fsc2 );
+
+	/* Close the library for the graphics resources */
+
+	if ( Internals.rsc_handle )
+		dlclose( Internals.rsc_handle );
 }
 
 
