@@ -28,7 +28,9 @@
 /* Define the following for test purposes where no real communication with
    the camera is supposed to happen */
 
+
 #define RS_SPEC10_TEST
+
 
 /* The following sequence of includes and undefining BIG_ENDIAN is
    required to avoid some compiler warnings. The include files coming
@@ -47,6 +49,15 @@
 
 #include "fsc2_module.h"
 #include "rs_spec10.conf"
+
+
+if ! defined RS_SPEC10_UPSIDE_DOWN
+#define RS_SPEC10_UPSIDE_DOWN 0
+#endif
+
+#if ! defined RS_SPEC10_MIRROR
+#defined RS_SPEC10_MIRROR 0
+#endif
 
 
 struct RS_SPEC10 {
