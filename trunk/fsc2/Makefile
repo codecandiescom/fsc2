@@ -754,7 +754,6 @@ fsc2_config.h: Makefile $(MACHINE_INCLUDE)
 	else                                     \
 		echo "Creating fsc2_config.h...";    \
 	fi
-	echo $(CONFFLAGS)
 	@echo "/*--- Created automatically, don't change ---*/" > fsc2_config.h
 	@echo -e $(patsubst -D%,\\n#define %,$(subst =, ,$(CONFFLAGS))) >> \
 		  fsc2_config.h
