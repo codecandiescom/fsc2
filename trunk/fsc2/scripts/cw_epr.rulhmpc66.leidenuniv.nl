@@ -187,7 +187,7 @@ $f3_l2->pack( %wp );
 
 
 my $f8 = $mf2->Frame( );
-my $f8_l1 = $f8->Label( '-text'           => 'tc per point:',
+my $f8_l1 = $f8->Label( '-text'           => 'tc\'s per point:',
 						'-width'          => '20',
 						'anchor'          => 'w' );
 my $f8_v = $f8->Entry( '-textvariable'    => \$tau_per_point,
@@ -639,8 +639,9 @@ sr810;
 VARIABLES:
 
 start_field = $start_field G;
-sweep_rate    = $sweep_rate G / 1 s;
-Num_Points    = $num_points;
+end_field   = $end_field G;
+sweep_rate  = $sweep_rate G / 1 s;
+Num_Points  = $num_points;
 
 tc = $TC;
 kd = $kdw Hz;
@@ -662,8 +663,9 @@ print F "
 
 PREPARATIONS:
 
-init_1d( 3, Num_Points, start_field, step_size,
-		 \"Field [G]\", \"Signal [mV]\" );
+init_1d( 3, Num_Points, ";
+	print F ( $start_field <= $end_field ) ? "start_field, " : "end_field, - ";
+	print F "step_size, \"Field [G]\", \"Signal [mV]\" );
 lockin_time_constant( tc );
 lockin_auto_setup( 1 / kd, 1 );
 
@@ -686,20 +688,34 @@ print F
 
 	J += 1;
 	print( \"Starting #. run\\n\", J );
+";
 
+	if ( $start_field < $end_field ) {
+		print F "
 	FOR I = 1 : Num_Points {
-
 		data[ J, I ] = lockin_get_data( );
-		display( I, data[ J, I ], 1, I, ( avg[ I ] + data[ J, I ] ) / J, 2 );
+		display_1d( I, data[ J, I ] * 1.0e6, 1,
+					I, ( avg[ I ] + data[ J, I ] ) / J  * 1.0e6, 2 );
+	}
+";
+	} else {
+		print F "
+	FOR I = Num_Points : 1 : - 1 {
+		data[ J, I ] = lockin_get_data( );
+		display_1d( I, data[ J, I ] * 1.0e6, 1,
+					I, ( avg[ I ] + data[ J, I ] ) / J  * 1.0e6, 2 );
+	}
+";
 	}
 
+	print F "
 	avg += data[ J ];
 
 	magnet_sweep( \"STOP\" );
 	lockin_auto_acquisition( \"OFF\" );
 
-	clear_curve( 1, 3 );
-	display( 1, data[ J ], 3 );
+	clear_curve_1d( 1, 3 );
+	display( 1, data[ J ] * 1.0e6, 3 );
 	print( \"#. run finished, sweeping magnet to start field.\\n\", J );
 }
 
@@ -711,17 +727,30 @@ IF magnet_sweep( ) {
 }
 lockin_auto_acquisition( \"OFF\" );
 
-IF J == 1 {
+IF J == 1 {";
+	if ( $start_field < $end_field ) {
+		print F "
 	FOR K = 1 : I - 1 {
 		fsave( File, \"#,#\", field + ( K - 1 ) * step_size,
 			   data[ 1, K ] );
 	}
+";
+	} else {
+		print F "
+	FOR K = I + 1 : Num_Points {
+		fsave( File, \"#,#\", field + ( K - 1 ) * step_size,
+			   data[ 1, K ] );
+	}
+";
+	}
+
+	print F "
 } ELSE {
 	IF I <= Num_Points {
 		J -= 1;
 	}
 
-	FOR I = 1 : Num_Points - 1 {
+	FOR I = 1 : Num_Points {
 		fsave( File, \"#\", field + ( I - 1 ) * step_size );
 		FOR K = 1 : J {
 			fsave( File, \",#\", data[ K, I ] );
@@ -730,7 +759,7 @@ IF J == 1 {
 	}
 
 	fsave( File, \"\\n\" );
-	FOR I = 1 : Num_Points - 1 {
+	FOR I = 1 : Num_Points {
 		fsave( File, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] / J );
 	}
 }
@@ -825,8 +854,9 @@ sr810;
 VARIABLES:
 
 start_field = $start_field G;
-sweep_rate    = $sweep_rate G / 1 s;
-Num_Points    = $num_points;
+end_field   = $end_field G
+sweep_rate  = $sweep_rate G / 1 s;
+Num_Points  = $num_points;
 
 tc = $TC;
 kd = $kdw Hz;
@@ -874,15 +904,16 @@ print F
 
 	FOR I = 1 : Num_Points {
 		data[ J, I ] = lockin_get_data( );
-		display( I, data[ J, I ], 1, I, ( avg[ I ] + data[ J, I ] ) / J, 2 );
+		display_1d( I, data[ J, I ] * 1.0e6, 1,
+					I, ( avg[ I ] + data[ J, I ] ) / J * 1.0e6, 2 );
 	}
 
 	lockin_auto_acquisition( \"OFF\" );
 	magnet_sweep( \"STOP\" );
 
 	avg += data[ J ];
-	clear_curve( 1, 3 );
-	display( 1, data[ J ], 3 );
+	clear_curve_1d( 1, 3 );
+	display_1d( 1, data[ J ] * 1.0e6, 3 );
 
 	set_field( start_field + ( Num_Points - 1 ) * step_size );
 ";
@@ -902,15 +933,16 @@ print F "    lockin_auto_acquisition( \"ON\" );
 
 	FOR I = Num_Points : 1 : -1 {
 		data[ J, I ] = lockin_get_data( );
-		display( I, data[ J, I ], 1, I, ( avg[ I ] + data[ J, I ] ) / J, 2 );
+		display_1d( I, data[ J, I ] * 1.0e6, 1,
+					I, ( avg[ I ] + data[ J, I ] ) / J * 1.0e6, 2 );
 	}
 
 	lockin_auto_acquisition( \"OFF\" );
 	magnet_sweep( \"STOP\" );
 
 	avg += data[ J ];
-	clear_curve( 1, 3 );
-	display( 1, data[ J ], 3 );
+	clear_curve_1d( 1, 3 );
+	display_1d( 1, data[ J ] * 1.0e6, 3 );
 }
 
 
@@ -923,7 +955,7 @@ IF magnet_sweep( ) {
 
 IF J == 1 {
 	FOR K = 1 : I - 1 {
-		fsave( File, \"#,#\", field + ( K - 1 ) * step_size,
+		fsave( File, \"#,#\\n\", field + ( K - 1 ) * step_size,
 			   data[ 1, K ] );
 	}
 } ELSE {
@@ -931,7 +963,7 @@ IF J == 1 {
 		J -= 1;
 	}
 
-	FOR I = 1 : Num_Points - 1 {
+	FOR I = 1 : Num_Points {
 		fsave( File, \"#\", field + ( I - 1 ) * step_size );
 		FOR K = 1 : J {
 			fsave( File, \",#\", data[ K, I ] );
@@ -940,7 +972,7 @@ IF J == 1 {
 	}
 
 	fsave( File, \"\\n\" );
-	FOR I = 1 : Num_Points - 1 {
+	FOR I = 1 : Num_Points {
 		fsave( File, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] );
 	}
 }
