@@ -92,3 +92,4 @@ synthesizer_reset_frequency, 0, EXP;  // go back to start frequency
 synthesizer_use_table, -1, PREP;      // set attenuation-table to use in sweeps
 synthesizer_att_ref_freq, -1, ALL;    // set frequency the attention setting
 									  // refers to
+synthesizer_modulation, -1, ALL;
