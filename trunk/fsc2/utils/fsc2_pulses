@@ -33,7 +33,7 @@ die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
     if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
 
 
-my ( $line, $time_base, $Delay );
+my ( $line, $time_base, $Delay, $has_auto_pulses );
 my $if = *STDIN;
 my $Channels = Channels->new;
 
@@ -102,6 +102,7 @@ sub read_input {
 
 	# Read the all the pulse settings
 
+	$has_auto_pulses = 0;
 	my $num = 0;
 	while( 1 ) {
 		last unless defined ( $line = <$if> );
@@ -110,6 +111,7 @@ sub read_input {
 			next;
 		}
 
+		$has_auto_pulses = 1 if $line =~ /\(\d+\)/;
 		my @bits = split /\s+/, $line;
 		die "Invalid input at line $..\n" unless $#bits % 3 == 0;
 		$Channels->add_pulse_list( $num, @bits );
@@ -593,47 +595,49 @@ sub new{
 	$F = $self->{ 'w' }->Frame( '-relief' => 'ridge',
 								'borderwidth' => '1m' );
 
-	$f = $F->Frame;
-	$l = $f->Label( '-text' => 'Position of parent: ', 'width' => 20,
-					'-anchor' => 'w' );
-	$e = $f->Entry( '-textvariable' => \$self->{ 'pp' },
-					 '-width' => 20,
-					 '-relief' => 'flat' );
-	$f->pack( '-side' => 'top', 'padx' => 2, 'pady' => 2 );
-	$l->pack( '-side' => 'left' );
-	$e->pack( '-side' => 'right' );
+	if ( $has_auto_pulses ) {
+		$f = $F->Frame;
+		$l = $f->Label( '-text' => 'Position of parent: ', 'width' => 20,
+						'-anchor' => 'w' );
+		$e = $f->Entry( '-textvariable' => \$self->{ 'pp' },
+						'-width' => 20,
+						'-relief' => 'flat' );
+		$f->pack( '-side' => 'top', 'padx' => 2, 'pady' => 2 );
+		$l->pack( '-side' => 'left' );
+		$e->pack( '-side' => 'right' );
 
-	$f = $F->Frame;
-	$l = $f->Label( '-text' => 'Length of parent: ', 'width' => 20,
-					'-anchor' => 'w' );
-	$e = $f->Entry( '-textvariable' => \$self->{ 'pl' },
-					 '-width' => 20,
-					 '-relief' => 'flat' );
-	$f->pack( '-side' => 'top', 'padx' => 2, 'pady' => 2 );
-	$l->pack( '-side' => 'left' );
-	$e->pack( '-side' => 'right' );
+		$f = $F->Frame;
+		$l = $f->Label( '-text' => 'Length of parent: ', 'width' => 20,
+						'-anchor' => 'w' );
+		$e = $f->Entry( '-textvariable' => \$self->{ 'pl' },
+						'-width' => 20,
+						'-relief' => 'flat' );
+		$f->pack( '-side' => 'top', 'padx' => 2, 'pady' => 2 );
+		$l->pack( '-side' => 'left' );
+		$e->pack( '-side' => 'right' );
 
-	$f = $F->Frame;
-	$l = $f->Label( '-text' => 'Function of parent: ', 'width' => 20,
-					'-anchor' => 'w' );
-	$e = $f->Entry( '-textvariable' => \$self->{ 'pf' },
-					 '-width' => 20,
-					 '-relief' => 'flat' );
-	$f->pack( '-side' => 'top', 'padx' => 2, 'pady' => 2 );
-	$l->pack( '-side' => 'left' );
-	$e->pack( '-side' => 'right' );
+		$f = $F->Frame;
+		$l = $f->Label( '-text' => 'Function of parent: ', 'width' => 20,
+						'-anchor' => 'w' );
+		$e = $f->Entry( '-textvariable' => \$self->{ 'pf' },
+						'-width' => 20,
+						'-relief' => 'flat' );
+		$f->pack( '-side' => 'top', 'padx' => 2, 'pady' => 2 );
+		$l->pack( '-side' => 'left' );
+		$e->pack( '-side' => 'right' );
 
-	$f = $F->Frame;
-	$l = $f->Label( '-text' => 'Pod/channel of parent: ', 'width' => 20,
-					'-anchor' => 'w' );
-	$e = $f->Entry( '-textvariable' => \$self->{ 'pc' },
-					 '-width' => 20,
-					 '-relief' => 'flat' );
-	$f->pack( '-side' => 'top', 'padx' => 2, 'pady' => 2 );
-	$l->pack( '-side' => 'left' );
-	$e->pack( '-side' => 'right' );
+		$f = $F->Frame;
+		$l = $f->Label( '-text' => 'Pod/channel of parent: ', 'width' => 20,
+						'-anchor' => 'w' );
+		$e = $f->Entry( '-textvariable' => \$self->{ 'pc' },
+						'-width' => 20,
+						'-relief' => 'flat' );
+		$f->pack( '-side' => 'top', 'padx' => 2, 'pady' => 2 );
+		$l->pack( '-side' => 'left' );
+		$e->pack( '-side' => 'right' );
 
-	$F->pack( '-side' => 'top', 'padx' => 2, 'pady' => 2 );
+		$F->pack( '-side' => 'top', 'padx' => 2, 'pady' => 2 );
+	}
 
 	return bless $self, $class;
 }
@@ -661,8 +665,6 @@ sub Enter {
 	my $pp = $i > 0 ? $pl->[ $i - 1 ] : undef;
 	my $np = exists( $pl->[ $i + 1 ] ) ? $pl->[ $i + 1 ] : undef;
 
-	$self->{ 'num' } = $num;
-
 	my ( $p1, $p2 ) = $self->pstart( $cp->start, $pod, $is_delay );
 
 	if ( $p1 ne $p2 ) {
@@ -685,8 +687,13 @@ sub Enter {
 							  + 0.5 * ( $np->len - $cp->len ) ) .")" : '';
 
 	if ( $num =~ /^\((\d+)\)$/ ) {
+		$self->{ 'num' } = $num . "    [auto]";
 		$self->parent( $1, $step, $is_delay );
 	}
+	else {
+		$self->{ 'num' } = $num;
+	}
+
 }
 
 #---------------------------------------------------------
