@@ -24,7 +24,7 @@ typedef struct {
 	bool ( *assign_function )( int function, long connector );
 	bool ( *assign_channel_to_function )( int function, long channel );
 	bool ( *invert_function )( int function );
-	bool ( *set_delay_function )( int function, double delay );
+	bool ( *set_function_delay )( int function, double delay );
 	bool ( *set_function_high_level )( int function, double high_voltage );
 	bool ( *set_function_low_level )( int function, double low_voltage );
 
