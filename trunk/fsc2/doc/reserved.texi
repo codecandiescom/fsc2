@@ -27,9 +27,9 @@
 
 
 @multitable { @code{MAXIMUM_PATTERN_LENGTH}} { Starts the @code{PREPARATIONS} section and lots more of text... }
-@item @code{#exit}            @tab Miscellaneous (@pxref{#exit statement})
-@item @code{#include}         @tab Miscellaneous (@pxref{#include statement})
-@item @code{#quit}            @tab Miscellaneous (@pxref{#quit statement})
+@item @code{#EXIT}            @tab Miscellaneous (@pxref{#EXIT statement})
+@item @code{#INCLUDE}         @tab Miscellaneous (@pxref{#INCLUDE statement})
+@item @code{#QUIT}            @tab Miscellaneous (@pxref{#QUIT statement})
 @item                         @tab
 @item @code{A}                @tab Unit, Ampere
 @item @code{abort}            @tab Built-in function (@pxref{abort})

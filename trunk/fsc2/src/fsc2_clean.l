@@ -133,11 +133,11 @@ WS       [\t ]+
 TWS      [\t ]+\n
 
 SHEBANG ^#!.*$
-INCL    ^[ \t]*#((INCLUDE)|(include))[\t ]*
+INCL    ^[ \t]*#INCLUDE[\t ]*
 IFN     \"[^"\n]*\"[\t ]*\n?|<[^>\n]*>[\t ]*\n?
 IFNE    [^"<\t \n]*\n?
-EXIT    ^[ \t]*#((EXIT)|(exit))[\t ]*
-QUIT    ^[ \t]*#((QUIT)|(quit))[\t ]*
+EXIT    ^[ \t]*#EXIT[\t ]*
+QUIT    ^[ \t]*#QUIT[\t ]*
 
 
 THROU   [+-][A-Za-z]+

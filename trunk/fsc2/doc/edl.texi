@@ -1122,39 +1122,39 @@ stops with an error that had not been anticipated.
 The following covers a few additional syntactic elements that didn't fit
 into any of the previous sections.
 
-@anchor{#include statement}
-@subsection @code{#include} statement
-@cindex #include statement
+@anchor{#INCLUDE statement}
+@subsection @code{#INCLUDE} statement
+@cindex #INCLUDE statement
 
 Everywhere within an @acronym{EDL} program one can include another
-@acronym{EDL} file. This is done using the @code{#include} keyword,
+@acronym{EDL} file. This is done using the @code{#INCLUDE} keyword,
 followed by the name of the file to be included, and has the same effect
 as if the included file had been pasted into the current @acronym{EDL}
-program. Included files may also contain @code{#include} statements, up
+program. Included files may also contain @code{#INCLUDE} statements, up
 to 16 levels deep.
 
 
-@anchor{#exit statement}
-@subsection @code{#exit} statement
-@cindex #exit statement
+@anchor{#EXIT statement}
+@subsection @code{#EXIT} statement
+@cindex #EXIT statement
 
-When the @code{#exit} statement is found in an @acronym{EDL} program
+When the @code{#EXIT} statement is found in an @acronym{EDL} program
 this is equivalent to end of the file - everything following the
 statement is discarded. In the main file of an @acronym{EDL} program
 means that this is the end of the @acronym{EDL} program. If instead the
-current file is an included file (see the @code{#include} statement)
+current file is an included file (see the @code{#INCLUDE} statement)
 @acronym{fsc2} will immediately return to parsing the file from which
 the current file was included.
 
 
-@anchor{#quit statement}
-@subsection @code{#quit} statement
-@cindex #quit statement
+@anchor{#QUIT statement}
+@subsection @code{#QUIT} statement
+@cindex #QUIT statement
 
-When the @code{#quit} statement is encountered in a file @acronym{fsc2}
+When the @code{#QUIT} statement is encountered in a file @acronym{fsc2}
 immediately treats this as the complete end of the @acronym{EDL} program
 and won't parse any further lines. In the main file of an @acronym{EDL}
-this is equivalent to the @code{#exit} statement. But while in an included
-@acronym{EDL} file @code{#exit} will induce @acronym{fsc2} to return to
-the including file, @code{#quit} makes @acronym{fsc2} stop completely,
+this is equivalent to the @code{#EXIT} statement. But while in an included
+@acronym{EDL} file @code{#EXIT} will induce @acronym{fsc2} to return to
+the including file, @code{#QUIT} makes @acronym{fsc2} stop completely,
 i.e.@: it will not even return to higher level @acronym{EDL} files.
