@@ -35,27 +35,28 @@
 
   Each variable has a certain type: It's either an integer or float variable
   (INT_VAR or FLOAT_VAR, which translates to C's long and double type) or it
-  is an integer or float array of as many dimensions as the user thinks it
-  should have (INT_ARR or FLOAT_ARR). Functions are just a funny kind of
+  is an integer or float array (INT_ARR or FLOAT_ARR) of as many dimensions
+  as the user thinks it should have. Functions are just a funny kind of
   variables of type FUNC, with the value being the result of the calculation
-  of the function value (plus possible other side effects). While the
-  variable still hasn't assigned a value to it it's type remains undefined,
-  i.e. UNDEF_VAR.
+  of the function value (plus possible other side effects). While a variable
+  still hasn't assigned a value to it it's type remains undefined, i.e.
+  UNDEF_VAR.
 
   What kind of type a variable has is controlled via the function IF_FUNC(),
   defined as macro in variables.h, which just gets to know about the very
   first character of the variable's name - if the function returns TRUE the
-  variable is an integer (or the array an integer array) otherwise it's type
-  is FLOAT. So, changing IF_FUNC() and recompiling will change the behaviour
-  of the program in this respect. Currently, as agreed with Axel and Thomas,
-  IF_FUNC returns TRUE for variables starting with a capital letters, thus
-  making the variable an integer. But this is easily changed...
+  variable is an integer (or the array is an integer array) otherwise its
+  type is FLOAT. So, changing IF_FUNC() and recompiling will change the
+  behaviour of the program in this respect. Currently, as agreed with Axel
+  and Thomas, IF_FUNC returns TRUE for variables starting with a capital
+  letters, thus making the variable an integer. But this is easily
+  changed...
 
   When the input file is read in, lines like
 
            A = B + 3.25;
 
-  are found. While this is rather convinient for a human a reverse polish
+  are found. While this is rather convenient for a human a reverse polish
   notation (RPN) for the right hand side of the assignment of the form
 
            B 3.25 +
@@ -66,67 +67,74 @@
   So, if the lexer finds an identifier like `A', it first tries to get a
   pointer to the variable named `A' in the variables list by calling
   vars_get(). If this fails (and we're just parsing the VARIABLES section of
-  an EDL file, otherwise it would utter an error message) it instead creates
-  a new variable by a call to vars_new(). The resulting pointer is passed to
-  the parser.
+  an EDL file, otherwise it would utter an error message) a new variable is
+  created instead by a call to vars_new(). The resulting pointer is passed
+  to the parser.
 
   Now, the parser sees the `=' bit of text and realizes it has to do an
   assignment and thus branches to evaluate the right hand side of the
-  expression. In this branch, the parser sees the `B` and pushes a pointer
+  expression. In this branch, the parser sees the `B' and pushes a pointer
   to a copy of the variable `B' onto the variables stack. It then finds the
   `+' and branches recursively to evaluate the expression to the right of
   the `+'. Here, the parser sees just the numerical value `3.25' and pushes
   it onto the variables stack, thus creating another transient variable on
   the stack with the value 3.25. It returns from the branch with the pointer
-  to this transient variable. Now a (transient) copy of `B' and a transient
-  variable with the value of 3.25 are on the variables stack and the parser
-  can continue by adding the values of both these variables. It does so by
-  calling vars_add(), creating another transient variable on the stack for
-  the result and removing both the variables used as arguments in the
-  addition. It finally returns to the state it started from, the place where
-  it found the `A =' bit, with a pointer to the transient variable with the
-  result of the evaluation of the right hand side. All left to be done now
-  is to call vars_new_assign() or vars_assign(), depending if we're still in
-  the VARIABLES section, which assigns the value of the transient variable
-  to the variable `A'. The transient variable is than removed from the
-  variables stack. If we're just a bit paranoid, we can make sure everything
+  to this transient variable. Now the (transient) copy of `B' and the
+  transient variable with the value of 3.25 are on the variables stack and
+  the parser can continue by adding the values of both these variables. It
+  does so by calling vars_add(), creating another transient variable on the
+  stack for the result and removing both the variables used as arguments. It
+  finally returns to the state it started from, the place where it found the
+  `A =' bit, with a pointer to the transient variable with the result of the
+  evaluation of the right hand side. All left to be done now is to call
+  vars_new_assign() or vars_assign(), depending if we're still in the
+  VARIABLES section, which assigns the value of the transient variable to
+  the variable `A'. The transient variable is than removed from the
+  variables stack. If we're a bit paranoid we can make sure everything
   worked out fine by checking that the variabe stack is now empty. Quite
   simple, isn't it?
   
-  What looks like a lot of complicated work to do something real simple has
-  the advantage that, due to its recursive nature, it can be used without any
-  changes for much more complicated situations. Instead of the value 3.25 we
-  could have a complicated expression to add to `B', which will be handled
-  automagically by a deeper recursion, thus breaking up the complicated task
-  into small, simple tasks, that can be handled easily. Also, `B' could be
-  a more complicated expression instead which would be handled in the same way.
+  What looks like a lot of complicated work to do something rather simple
+  has the advantage that, due to its recursive nature, it can be used
+  without any changes for much more complicated situations. Instead of the
+  value 3.25 we could have a complicated expression to add to `B', which
+  will be handled automagically by a deeper recursion, thus breaking up the
+  complicated task into small, simple tasks, that can be handled easily.
+  Also, `B' could be a more complicated expression instead which would be
+  handled in the same way.
 
   Now, what about arrays? Again, if the lexer finds an identifier (it
-  doesn't know about the difference between variables and variables) it
+  doesn't know about the difference between variables and arrays) it
   searches the variables list and if it doesn't find an entry with the same
   name it creates a new one (again, as long as we're in the VARIABLES
-  section where defining new variables and array is allowed). The parser
-  realizes that the user wants an array only when it finds a string of
+  section where defining new variables and array is allowed). The parser in
+  turn realizes that the user wants an array when it finds a string of
   tokens of the form
 
             variable_identifier [ 
 
-  where `variable_identifier' is a variable name. It calls vars_arr_start()
-  where the type of the array is set to INT_ARR or FLOAT_ARR (depending on the
-  result of the macro IF_FUNC(), see above) and its dimension is set to zero.
+  where `variable_identifier' is a variable or array name. It calls
+  vars_arr_start() where the type of the array is set to INT_ARR or
+  FLOAT_ARR (depending on the result of the macro IF_FUNC(), see above) and
+  its dimension is set to zero.
 
   The next token has to be an expression (see below for an exception). By a
-  call to vars_arr_extend() the dimension of te array is set to one and the
+  call to vars_arr_extend() the dimension of the array is set to one and the
   list of sizes for the dimensions is updated to reflect the value of the
-  expression. The very next token has to be either an comma followed by
-  another expression or a closing bracket. In the first case, i.e. if we have
-  a two-dimensional array, var_arr_extend() is called. Here the dimension of
-  the array is incremented and the list for the sizes of the dimensions is
-  extended and updated.  Finally, the transient variable with the size of the
-  new dimension is removed. If instead a closing bracket, `]', is found, the
-  parser has to do nothing, since everything relevant for the array is already
-  set. Instead, the parser now expects an initialization of the array. Again,
-  we may check that the variables stack is empty, otherwise something went
+  expression, i.e. the size for the very first dimension of the
+  array. Finally, the transient variable with the size of this first
+  dimension is popped from tha variable stack. The next token to be found by
+  the parser has to be either a comma followed by another expression or a
+  closing bracket. In the first case, i.e. if we have a two-dimensional
+  array, var_arr_extend() is called again. Here the dimension of the array
+  is incremented and the list for the sizes of the dimensions is extended
+  and updated.  Finally, the transient variable with the size of the new
+  dimension is removed. If instead a closing bracket, `]', is found, the
+  parser has to do nothing, since everything relevant for the array is
+  already set. Instead, the parser now expects an initialization of the
+  array, i.e an equal sign `=' followed by a list of data (these can also
+  have the form of an expression) in curly braces, `{' and `}'. Again, we
+  may check that the variables stack is empty, otherwise something went
   horribly wrong.
 
   The one exception from this scheme is that the very last dimension of an
