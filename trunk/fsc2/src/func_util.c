@@ -449,7 +449,7 @@ Var *f_sprint( Var *v )
 
 
 /*-----------------------------------------------*/
-/* Called for the EDF function "show_message()". */
+/* Called for the EDL function "show_message()". */
 /*-----------------------------------------------*/
 
 Var *f_showm( Var *v )
@@ -573,7 +573,7 @@ Var *f_wait( Var *v )
 	   happens sometimes, freezing the child process.
 
 	   To avoid this race condition a sigsetjmp() is executed before calling
-	   setitimer() and starting to wait. Since the SIGALRM can't have happend
+	   setitimer() and starting to wait. Since the SIGALRM can't have happened
 	   yet the sigsetjmp( ) will always return 0. Now we set a flag telling
 	   the signal handler that the jump buffer is initialized. Next we start
 	   setitimer() and finally start the pause(). This is done in an endless
@@ -1800,7 +1800,7 @@ Var *f_display( Var *v )
 	{
 		if ( ! G.is_warn )                         /* warn only once */
 		{
-			print( WARN, "Can't display data, missing initialisation\n" );
+			print( WARN, "Can't display data, missing initialization\n" );
 			G.is_warn = SET;
 		}
 
@@ -1842,7 +1842,7 @@ Var *f_display_1d( Var *v )
 	{
 		if ( ! G.is_warn )                         /* warn only once */
 		{
-			print( WARN, "Can't display data, missing initialisation\n" );
+			print( WARN, "Can't display data, missing initialization\n" );
 			G.is_warn = SET;
 		}
 
@@ -2016,7 +2016,7 @@ Var *f_display_2d( Var *v )
 	{
 		if ( ! G.is_warn )                         /* warn only once */
 		{
-			print( WARN, "Can't display data, missing initialisation\n" );
+			print( WARN, "Can't display data, missing initialization\n" );
 			G.is_warn = SET;
 		}
 
@@ -2111,7 +2111,7 @@ Var *f_display_2d( Var *v )
 	   x- and y-index, the curve number and the type of the data. Then, for
 	   single data points just the value, for 1D-arrays the length of the
 	   array and the data of the array, and for 2D-arrays first the total
-	   number of bytes that make up the wole information about the 2D-array,
+	   number of bytes that make up the whole information about the 2D-array,
 	   the number of 1D-arrays the 2D-array is made of and then for each of
 	   the 1D-arrays its length and data. */
 
@@ -2470,13 +2470,13 @@ static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 Var *f_clearcv( Var *v )
 {
 	/* This function can only be called in the EXPERIMENT section and needs
-	   a previous graphics initialisation */
+	   a previous graphics initialization */
 
 	if ( ! G.is_init )
 	{
 		if ( Internals.mode == TEST )
 			print( WARN, "Can't clear curve, missing graphics "
-				   "initialisation.\n" );
+				   "initialization.\n" );
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -2511,13 +2511,13 @@ Var *f_clearcv_1d( Var *v )
 
 
 	/* This function can only be called in the EXPERIMENT section and needs
-	   a previous graphics initialisation */
+	   a previous graphics initialization */
 
 	if ( ! G.is_init )
 	{
 		if ( Internals.mode == TEST )
 			print( WARN, "Can't clear curve, missing graphics "
-				   "initialisation.\n" );
+				   "initialization.\n" );
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -2649,13 +2649,13 @@ Var *f_clearcv_2d( Var *v )
 
 
 	/* This function can only be called in the EXPERIMENT section and needs
-	   a previous graphics initialisation */
+	   a previous graphics initialization */
 
 	if ( ! G.is_init )
 	{
 		if ( Internals.mode == TEST )
 			print( WARN, "Can't clear curve, missing graphics "
-				   "initialisation.\n" );
+				   "initialization.\n" );
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -2780,7 +2780,7 @@ Var *f_setmark( Var *v )
 	{
 		if ( Internals.mode == TEST )
 			print( WARN, "Can't draw marker, missing graphics "
-				   "initialisation.\n" );
+				   "initialization.\n" );
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -2817,12 +2817,12 @@ Var *f_setmark_1d( Var *v )
 
 
 	/* This function can only be called in the EXPERIMENT section and needs
-	   a previous graphics initialisation */
+	   a previous graphics initialization */
 
 	if ( ! G.is_init )
 	{
 		print( WARN, "Can't set a marker, missing graphics "
-			   "initialisation.\n" );
+			   "initialization.\n" );
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -2944,12 +2944,12 @@ Var *f_setmark_2d( Var *v )
 
 
 	/* This function can only be called in the EXPERIMENT section and needs
-	   a previous graphics initialisation */
+	   a previous graphics initialization */
 
 	if ( ! G.is_init )
 	{
 		print( WARN, "Can't set a marker, missing graphics "
-			   "initialisation.\n" );
+			   "initialization.\n" );
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -3093,7 +3093,7 @@ Var *f_clearmark( Var *v )
 	{
 		if ( Internals.mode == TEST )
 			print( WARN, "Can't clear markers, missing graphics "
-				   "initialisation.\n" );
+				   "initialization.\n" );
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -3125,12 +3125,12 @@ Var *f_clearmark_1d( Var *v )
 
 
 	/* This function can only be called in the EXPERIMENT section and needs
-	   a previous graphics initialisation */
+	   a previous graphics initialization */
 
 	if ( ! G.is_init )
 	{
 		print( WARN, "Can't clear markers, missing graphics "
-			   "initialisation.\n" );
+			   "initialization.\n" );
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -3208,12 +3208,12 @@ Var *f_clearmark_2d( Var *v )
 	UNUSED_ARGUMENT( v );
 
 	/* This function can only be called in the EXPERIMENT section and needs
-	   a previous graphics initialisation */
+	   a previous graphics initialization */
 
 	if ( ! G.is_init )
 	{
 		print( WARN, "Can't clear markers, missing graphics "
-			   "initialisation.\n" );
+			   "initialization.\n" );
 		return vars_push( INT_VAR, 0L );
 	}
 
@@ -3304,12 +3304,12 @@ Var *f_get_pos( Var *v )
 	nv = vars_push( FLOAT_ARR, NULL, 2 * MAX_CURVES + 2 );
 
 	/* This function can only be called in the EXPERIMENT section and needs
-	   a previous graphics initialisation */
+	   a previous graphics initialization */
 
 	if ( ! G.is_init )
 	{
 		print( WARN, "Can't get mouse position, missing graphics "
-			   "initialisation.\n" );
+			   "initialization.\n" );
 		return nv;
 	}
 
@@ -3360,7 +3360,7 @@ Var *f_get_pos( Var *v )
 /* makes no special assumptions about the form of the signal (except   */
 /* that it's a peak, not something looking like the derivative of a    */
 /* peak) and returns the index the point where the area under the peak */
-/* is half the total area, so it should also work with unsymmetric     */
+/* is half of the total area, so it should also work with asymmetric   */
 /* peaks.                                                              */
 /*---------------------------------------------------------------------*/
 
@@ -3565,7 +3565,7 @@ Var *f_mean_part_array( Var *v )
 	if ( v->len % size != 0 )
 	{
 		print( FATAL, "Length of array isn't an integer multiple of the "
-			   "subpartition size.\n" );
+			   "sub-partition size.\n" );
 		THROW( EXCEPTION );
 	}
 
