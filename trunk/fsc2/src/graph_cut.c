@@ -128,18 +128,8 @@ void cut_show( int dir, long index )
 
 			if ( XValue & flags && YValue & flags )
 			{
-				XWindowAttributes attr;
-				Window root, parent, *children;
-				int nchilds;
-
-				XQueryTree( fl_display, main_form->fsc2->window, &root,
-							&parent, &children, &nchilds );
-				XQueryTree( fl_display, parent, &root,
-							&parent, &children, &nchilds );
-				XGetWindowAttributes( fl_display, parent, &attr );
-
-				cut_x += main_form->fsc2->x - attr.x - 1;
-				cut_y += main_form->fsc2->y - attr.y - 1;
+				cut_x += border_offset_x - 1;
+				cut_y += border_offset_y - 1;
 
 				fl_set_form_position( cut_form->cut, cut_x, cut_y );
 				needs_pos = SET;
@@ -153,7 +143,7 @@ void cut_show( int dir, long index )
 		}
 
 		fl_show_form( cut_form->cut, needs_pos ?
-					  FL_PLACE_GEOMETRY : FL_PLACE_MOUSE | FL_FREE_SIZE,
+					  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
 					  FL_FULLBORDER, "fsc2: Cross section" );
 		cut_has_been_shown = SET;
 

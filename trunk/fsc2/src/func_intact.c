@@ -2236,18 +2236,8 @@ static void recreate_Tool_Box( void )
 
 			if ( XValue & flags && YValue & flags )
 			{
-				XWindowAttributes attr;
-				Window root, parent, *children;
-				int nchilds;
-
-				XQueryTree( fl_display, main_form->fsc2->window, &root,
-							&parent, &children, &nchilds );
-				XQueryTree( fl_display, parent, &root,
-							&parent, &children, &nchilds );
-				XGetWindowAttributes( fl_display, parent, &attr );
-
-				tool_x += main_form->fsc2->x - attr.x - 1;
-				tool_y += main_form->fsc2->y - attr.y - 1;
+				tool_x += border_offset_x - attr.x - 1;
+				tool_y += border_offset_y - attr.y - 1;
 				needs_pos = SET;
 			}
 		}

@@ -255,18 +255,8 @@ void start_graphics( void )
 
 		if ( XValue & flags && YValue & flags )
 		{
-			XWindowAttributes attr;
-			Window root, parent, *children;
-			int nchilds;
-
-			XQueryTree( fl_display, main_form->fsc2->window, &root,
-						&parent, &children, &nchilds );
-			XQueryTree( fl_display, parent, &root,
-						&parent, &children, &nchilds );
-			XGetWindowAttributes( fl_display, parent, &attr );
-
-			display_x += main_form->fsc2->x - attr.x - 1;
-			display_y += main_form->fsc2->y - attr.y - 1;
+			display_x += border_offset_x - 1;
+			display_y += border_offset_y - 1;
 
 			fl_set_form_position( run_form->run, display_x, display_y );
 			needs_pos = SET;
