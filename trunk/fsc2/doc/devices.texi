@@ -388,12 +388,13 @@ Finally, up to 4 arguments can be passed to the function with the values
 given above. In this case a 1-dimensional array is returned with as many
 data as there were arguments (in the sequence corresponding to the one
 of the arguments).
-@end table
-The function can only be called in the @code{EXPERIMENT} section.
 
 @item ER023M
 No argument is allowed -- the function returns a floating point value
 in the interval between +1 and -1.
+@end table
+The function can only be called in the @code{EXPERIMENT} section.
+
 
 
 @item lockin_get_adc_data()
