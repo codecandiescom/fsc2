@@ -3,7 +3,7 @@
 #
 # $Id$
 #
-# Copyright (C) 1999-2003 Jens Thoms Toerring
+# Copyright (C) 2003-2004 Jens Thoms Toerring
 #
 # This file is part of fsc2.
 #
@@ -571,17 +571,16 @@ sub evaluate {
 		}
 	}
 
-	my $sw = $cs / $kdt;
-	$sw = 1.39 * 1428.8 / 60 if $sw > 1.39 * 1428.8 / 60;
-	$sw = 0.01 * 1428.8 / 60 if $sw < 0.01 * 1428.8 / 60;
+	my $sweep_rate = $cs / $kdt;
+	$sweep_rate = 1.39 * 1428.8 / 60 if $sweep_rate > 1.39 * 1428.8 / 60;
+	$sweep_rate = 0.01 * 1428.8 / 60 if $sweep_rate < 0.01 * 1428.8 / 60;
 
 	if ( $e > $start_field ) {
-		$e = $start_field + ( $num_points - 1 ) * $sw * $kdt;
+		$e = $start_field + ( $num_points - 1 ) * $sweep_rate * $kdt;
 	} else {
-		$e = $start_field - ( $num_points - 1 ) * $sw * $kdt;
+		$e = $start_field - ( $num_points - 1 ) * $sweep_rate * $kdt;
 	}
 
-	$sweep_rate = $sw;
 	my $old_opt_end_fld = $opt_end_fld;
 	$end_field = $e;
 	$opt_end_fld = $old_opt_end_fld;
