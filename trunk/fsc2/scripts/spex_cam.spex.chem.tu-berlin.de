@@ -533,7 +533,7 @@ sub run {
     my $fh;
 
 	no warnings "exec";
-    unless ( open $fh, "|fsc2_iconic_start" ) {
+    unless ( open $fh, "|fsc2_start" ) {
 		main::show_message( "Can't start fsc2" );
 		return;
 	}
@@ -625,9 +625,16 @@ FOREVER {
            	NEXT;
        	}
 
+		hide_toolbox( "ON" );
 		wn = laser_line - new;
 		input_value( B_wna, wn );
 		monochromator_wavenumber( wn );
+		Spec = ccd_camera_get_spectrum( );
+		display_1d( 1, Spec );
+		clear_curve_2d( );
+		Image = ccd_camera_get_image( );
+		display_2d( 1, 1, Image );
+		hide_toolbox( "OFF" );
 	}
 
    	IF toolbox_changed( B_wna ) {
@@ -637,9 +644,18 @@ FOREVER {
            	NEXT;
        	}
 
-		wn =new;
-		input_value( B_wnr, laser_line - wn );
+		hide_toolbox( "ON" );
+		wn = new;
+		IF laser_line != 0.0 {
+			input_value( B_wnr, laser_line - wn );
+		}
 		monochromator_wavenumber( wn );
+		Spec = ccd_camera_get_spectrum( );
+		display_1d( 1, Spec );
+		clear_curve_2d( );
+		Image = ccd_camera_get_image( );
+		display_2d( 1, 1, Image );
+		hide_toolbox( "OFF" );
 	}
 
    	IF toolbox_changed( B_et ) {
@@ -760,7 +776,6 @@ FOREVER {
 
 	IF toolbox_changed( B_bin[ 2 ] ) {
 		New = input_value( B_bin[ 2 ] );
-		print( "#\\n", New );
 		IF New < 1 OR New > ROI[ 4 ] - ROI[ 2 ] - 1 {
 			input_value( B_bin[ 2 ], BIN[ 2 ] );
 			NEXT;
@@ -788,7 +803,7 @@ FOREVER {
 	}
 
 	IF button_state( B_gi ) {
-		object_enable( B_gi, "OFF" );
+		hide_toolbox( "ON" );
 		clear_curve_1d( );
 		Spec = ccd_camera_get_spectrum( );
 		rescale_1d( ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / BIN[ 1 ] );
@@ -801,7 +816,7 @@ FOREVER {
 		rescale_2d( ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / BIN[ 1 ],
 					( ROI[ 4 ] - ROI[ 2 ] + 1 ) / BIN[ 2 ] );
 		display_2d( 1, 1, Image );
-		object_enable( B_gi, "ON" );
+		hide_toolbox( "OFF" );
 	}
 }
 
@@ -1146,9 +1161,9 @@ FOREVER {
 		IF State == 0 {
 			old_lpos = lpos;
 			IF lpos <= 0.0 {
-				new_wn = wn - ( 0.3 - lpos / w ) * tw;
+				new_wn = wn + ( 0.3 - lpos / w ) * tw;
 			} ELSE {
-				new_wn = wn + ( 0.3 + lpos / w ) * tw;
+				new_wn = wn - ( 0.3 + lpos / w ) * tw;
 			}
 	        object_enable( B_gs, "OFF" );
 			monochromator_wavenumber( new_wn );
@@ -1164,7 +1179,9 @@ FOREVER {
 			IF lpos == old_lpos {
 				NEXT;
 			}
-			pixel_diff = ( new_wn -wn ) / ( old_lpos - lpos );
+
+			pixel_diff = ( wn - new_wn ) / ( old_lpos - lpos );
+
 			IF pixel_diff <= 0 cm^-1 {
 				State = 0;
         		clear_marker( );
@@ -1173,13 +1190,14 @@ FOREVER {
 				display_1d( 1, Spec );
 				NEXT;
 			}
+
 	        object_enable( B_gs, "OFF" );
 			tw = ( CCD_size[ 1 ] - 1 ) * pixel_diff;
 			wn = new_wn;
 			IF lpos <= 0.0 {
-				new_wn -= ( 0.3 - lpos / w ) * tw;
+				new_wn += ( 0.3 - lpos / w ) * tw;
 			} ELSE {
-				new_wn += ( 0.3 + lpos / w ) * tw;
+				new_wn -= ( 0.3 + lpos / w ) * tw;
 			}
 			monochromator_wavenumber( new_wn );
 			old_lpos = lpos;
@@ -1252,7 +1270,7 @@ FOREVER {
 		IF lpos == old_lpos {
 			NEXT;
 		}
-		new = ( new_wn - wn ) / ( old_lpos - lpos );
+		new = ( wn - new_wn ) / ( old_lpos - lpos );
 		IF new <= 0.0 cm^-1 {
 			NEXT;
 		}
@@ -1263,9 +1281,9 @@ FOREVER {
 		tw = ( CCD_size[ 1 ] - 1 ) * pixel_diff;
 		wn = new_wn;
 		IF lpos <= 0.0 {
-			new_wn -= ( 0.3 + 0.05 * random( ) - lpos / w ) * tw;
+			new_wn += ( 0.3 + 0.05 * random( ) - lpos / w ) * tw;
 		} ELSE {
-			new_wn += ( 0.3 + 0.05 * random( ) + lpos / w ) * tw;
+			new_wn -= ( 0.3 + 0.05 * random( ) + lpos / w ) * tw;
 		}
 		monochromator_wavenumber( new_wn );
 		old_lpos = lpos;
@@ -1652,7 +1670,7 @@ FOREVER {
 
 	IF button_state( B_conf ) {
 		IF ll != 0.0 {
-			monochromator_calibrate( lpos - ll + wn, pixel_diff );
+			monochromator_calibrate( ll - wn - lpos, pixel_diff );
 		} ELSE {
 			monochromator_calibrate( lpos - wn, pixel_diff );
 		}
@@ -2063,7 +2081,7 @@ sub realtime_run {
     my ( $fh, $lcwn );
 
 	no warnings "exec";
-    unless ( open $fh, "|fsc2_iconic_start" ) {
+    unless ( open $fh, "|fsc2_start" ) {
 		main::show_message( "Can't start fsc2" );
 		return;
 	}
@@ -2082,7 +2100,7 @@ rs_spec10;
 
 VARIABLES:
 
-cwn = $lcwn cm^-1;
+cwn = $$lcwn cm^-1;
 exposure_time = $$exp_time s;
 start_wn;
 step_wn;
@@ -2537,7 +2555,7 @@ sub single_run {
     my ( $fh, $lcwn );
 
 	no warnings "exec";
-    unless ( open $fh, "|fsc2_iconic_start" ) {
+    unless ( open $fh, "|fsc2_start" ) {
 		main::show_message( "Can't start fsc2" );
 		return;
 	}
@@ -2556,7 +2574,7 @@ rs_spec10;
 
 VARIABLES:
 
-cwn = $lcwn cm^-1;
+cwn = $$lcwn cm^-1;
 exposure_time = $$exp_time s;
 start_wn;
 step_wn;
@@ -3165,7 +3183,7 @@ sub multi_single_run {
     my ( $fh, $swn, $ewn );
 
 	no warnings "exec";
-    unless ( open $fh, "|fsc2_iconic_start" ) {
+    unless ( open $fh, "|fsc2_start" ) {
 		main::show_message( "Can't start fsc2" );
 		return;
 	}
@@ -3412,7 +3430,7 @@ sub multi_run {
     my ( $fh, $swn, $ewn );
 
 	no warnings "exec";
-    unless ( open $fh, "|fsc2_iconic_start" ) {
+    unless ( open $fh, "|fsc2_start" ) {
 		main::show_message( "Can't start fsc2" );
 		return;
 	}
@@ -3521,17 +3539,18 @@ overlap = ccd_width - ( spec_width - ccd_width ) / ( N_specs - 1 );
 overlap = ceil( overlap / step_wn ) * step_wn;
 Overlap_Points = round( overlap / step_wn ) - 1;
 
+N_Points = ( N_specs - 1 ) * ( CCD_Points - Overlap_Points ) + CCD_Points;
+
 IF laser_line != 0.0 {
-	end_wn = start_wn + ( N_specs - 1 ) * ( ccd_width - overlap ) + ccd_width;
+	end_wn = start_wn + ( N_Points - 1 ) * step_wn;
 	wn_increment = ccd_width - overlap + step_wn;
 	start_cwn = start_wn + 0.5 * ( ccd_width - step_wn ) + cwn_offset;
 } ELSE {
-	end_wn = start_wn - ( N_specs - 1 ) * ( ccd_width - overlap ) - ccd_width;
+	end_wn = start_wn - ( N_Points - 1 ) * step_wn;
 	wn_increment = overlap - ccd_width - step_wn;
 	start_cwn = start_wn - 0.5 * ( ccd_width - step_wn ) - cwn_offset;
 }
 
-N_Points = ( N_specs - 1 ) * ( CCD_Points - Overlap_Points ) + CCD_Points;
 
 // Create the toolbox and set the display axis
 
