@@ -214,7 +214,7 @@ void end_comm( void )
 
 	T_free( Message_Queue );
 
-	/* Detach from and remove the shared memory segment */
+	/* Detach and remove shared memory segment used for the message queue */
 
 	shmdt( ( void * ) ( ( char * ) Key - 4 ) );
 	shmctl( Key_Area, IPC_RMID, NULL );
@@ -241,9 +241,9 @@ void *get_shm( int *shm_id, long len )
 
 	while ( ( *shm_id = shmget( IPC_PRIVATE, len, IPC_CREAT | 0600 ) ) < 0 )
 	{
-		if ( errno == ENOSPC )           /* wait for 10 ms */
+		if ( errno == ENOSPC || errno == ENOMEM)  /* wait for 10 ms */
 			usleep( 10000 );
-		else                             /* non-recoverable failure... */
+		else                                      /* non-recoverable failure */
 			return ( void * ) -1;
 	}
 
@@ -332,7 +332,7 @@ long reader( void *ret )
 		case C_EPRINT :          
 			assert( I_am == PARENT );       /* only to be read by the parent */
 
-			/* get the string to be printed... */
+			/* Get the string to be printed... */
 
 			if ( header.data.str_len[ 0 ] > 0 )
 			{
@@ -350,7 +350,7 @@ long reader( void *ret )
 
 			eprint( NO_ERROR, "%s", str[ 0 ] );
 
-			/* get rid of the string and return */
+			/* Get rid of the string and return */
 
 			if ( str[ 0 ] != NULL )
 				T_free( str[ 0 ] );
@@ -379,12 +379,12 @@ long reader( void *ret )
 
 			kill( child_pid, DO_SEND );
 
-			/* send back just one character as indicator that the message has
+			/* Send back just one character as indicator that the message has
 			   been read by the user */
 
 			write( pd[ WRITE ], "X", sizeof( char ) );
 
-			/* get rid of the string and return */
+			/* Get rid of the string and return */
 
 			if ( str[ 0 ] != NULL )
 				T_free( str[ 0 ] );
@@ -408,12 +408,12 @@ long reader( void *ret )
 
 			kill( child_pid, DO_SEND );
 
-			/* send back just one character as indicator that the alert has
+			/* Send back just one character as indicator that the alert has
 			   been acknowledged by the user */
 
 			write( pd[ WRITE ], "X", sizeof( char ) );
 
-			/* get rid of the string and return */
+			/* Get rid of the string and return */
 
 			if ( str[ 0 ] != NULL )
 				T_free( str[ 0 ] );
@@ -423,12 +423,12 @@ long reader( void *ret )
 		case C_SHOW_CHOICES :
 			assert( I_am == PARENT );       /* only to be read by the parent */
 
-			/* get number of buttons and number of default button */
+			/* Get number of buttons and number of default button */
 
 			pipe_read( pd[ READ ], &n1, sizeof( int ) );
 			pipe_read( pd[ READ ], &n2, sizeof( int ) );
 
-			/* get message text and button labels */
+			/* Get message text and button labels */
 
 			for ( i = 0; i < 4; i++ )
 			{
@@ -447,13 +447,13 @@ long reader( void *ret )
 
 			kill( child_pid, DO_SEND );
 
-			/* show the question, get the button number and pass it back to
+			/* Show the question, get the button number and pass it back to
 			   the child process (which does a read in the mean time) */
 
 			writer( C_INT, show_choices( str[ 0 ], n1,
 										 str[ 1 ], str[ 2 ], str[ 3 ], n2 ) );
 
-			/* get rid of the strings and return */
+			/* Get rid of the strings and return */
 
 			for ( i = 0; i < 4; i++ )
 				if ( str[ i ] != NULL )
@@ -463,7 +463,7 @@ long reader( void *ret )
 		case C_SHOW_FSELECTOR :
 			assert( I_am == PARENT );       /* only to be read by the parent */
 
-			/* get the 4 parameter strings */
+			/* Get the 4 parameter strings */
 
 			for ( i = 0; i < 4; i++ )
 			{
@@ -482,13 +482,13 @@ long reader( void *ret )
 
 			kill( child_pid, DO_SEND );
 
-			/* call fl_show_fselector() and send the result back to the child
+			/* Call fl_show_fselector() and send the result back to the child
 			   process (which does a read in the mean time) */
 
 			writer( C_STR, fl_show_fselector( str[ 0 ], str[ 1 ],
 											  str[ 2 ], str[ 3 ] ) );
 
-			/* get rid of parameter strings and return */
+			/* Get rid of parameter strings and return */
 
 			for ( i = 0; i < 4; i++ )
 				if ( str[ i ] != NULL )
@@ -509,7 +509,7 @@ long reader( void *ret )
 		case C_INPUT :
 			assert( I_am == PARENT );       /* only to be read by the parent */
 
-			/* get length of predefined content and label from header and 
+			/* Get length of predefined content and label from header and 
 			   read them */
 
 			for ( i = 0; i < 2 ; i++ )
@@ -527,7 +527,7 @@ long reader( void *ret )
 
 			kill( child_pid, DO_SEND );
 
-			/* send string from input form to child */
+			/* Send string from input form to child */
 
 			writer( C_STR, show_input( str[ 0 ], str[ 1 ] ) );
 			retval = 0;
@@ -762,7 +762,7 @@ void writer( int type, ... )
 			if ( header.data.str_len[ 0 ] > 0 )
 				write( pd[ WRITE ], str[ 0 ], header.data.len );
 
-			/* wait for a random character to be sent back as acknowledgment */
+			/* Wait for a random character to be sent back as acknowledgment */
 
 			pipe_read( pd[ READ ], &ack, sizeof( char ) );
 			break;
@@ -805,7 +805,7 @@ void writer( int type, ... )
 		case C_SHOW_FSELECTOR :
 			assert( I_am == CHILD );      /* only to be written by the child */
 
-			/* set up header and write it */
+			/* Set up header and write it */
 
 			for ( i = 0; i < 4; i++ )
 			{
@@ -838,7 +838,7 @@ void writer( int type, ... )
 		case C_INPUT :
 			assert( I_am == CHILD );      /* only to be written by the child */
 
-			/* set up the two argument strings */
+			/* Set up the two argument strings */
 
 			for ( i = 0; i < 2; i++ )
 			{
@@ -851,7 +851,7 @@ void writer( int type, ... )
 					header.data.str_len[ i ] = strlen( str[ i ] );
 			}
 
-			/* send header and the two strings */
+			/* Send header and the two strings */
 
 			write( pd[ WRITE ], &header, sizeof( CS ) );
 			for ( i = 0; i < 2; i++ )

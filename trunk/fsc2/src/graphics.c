@@ -19,7 +19,7 @@
 
 static void G_struct_init( void );
 static void G_init_curves_1d( void );
-static void G_init_curves_2d( bool first_time );
+static void G_init_curves_2d( void );
 static void create_label_pixmap( int coord );
 static void setup_canvas( Canvas *c, FL_OBJECT *obj );
 static void create_colors( void );
@@ -61,11 +61,12 @@ void start_graphics( void )
 	}
 	else
 	{
-		fl_set_object_helper( run_form->curve_1_button, "Show curve 1" );
+		fl_set_object_helper( run_form->curve_1_button, "Hide curve 1" );
 		fl_set_object_helper( run_form->curve_2_button, "Show curve 2" );
 		fl_set_object_helper( run_form->curve_3_button, "Show curve 3" );
 		fl_set_object_helper( run_form->curve_4_button, "Show curve 4" );
 
+		fl_set_button( run_form->curve_1_button, 1 );
 		fl_set_button( run_form->curve_2_button, 0 );
 		fl_set_button( run_form->curve_3_button, 0 );
 		fl_set_button( run_form->curve_4_button, 0 );
@@ -146,7 +147,7 @@ void start_graphics( void )
 			G.font = XLoadQueryFont( G.d, "9x15" );
 
 		if ( G.font != NULL )
-			XTextExtents( G.font, "Xy", 2, &dummy, &G.font_asc, &G.font_desc,
+			XTextExtents( G.font, "Xp", 2, &dummy, &G.font_asc, &G.font_desc,
 						  &font_prop );
 	}
 
@@ -193,7 +194,8 @@ void G_struct_init( void )
 	if ( keymask & Button3Mask )
 		G.raw_button_state |= 4;
 
-	/* On the first call create the different cursors */
+	/* On the first call create the different cursors and the colors needed
+	   for 2D displays */
 
 	if ( first_time )
 	{
@@ -207,6 +209,8 @@ void G_struct_init( void )
 										   c4_height, c4_x_hot, c4_y_hot );
 		G.cur_5 = fl_create_bitmap_cursor( c5_bits, c5_bits, c5_width,
 										   c5_height, c5_x_hot, c5_y_hot );
+
+		create_colors( );
 	}
 
 	/* Define colors for the curves (in principal this should be made
@@ -227,7 +231,7 @@ void G_struct_init( void )
 	if ( G.dim == 1 )
 		G_init_curves_1d( );
 	else
-		G_init_curves_2d( first_time );
+		G_init_curves_2d( );
 
 	if ( G.label[ Y ] != NULL && G.font != NULL )
 		create_label_pixmap( Y );
@@ -338,16 +342,13 @@ void G_init_curves_1d( void )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-void G_init_curves_2d( bool first_time )
+void G_init_curves_2d( void )
 {
 	int i, j;
 	Curve_2d *cv;
 	Scaled_Point *sp;
 	unsigned int depth = fl_get_canvas_depth( G.canvas.obj );
 
-
-	if ( first_time )
-		create_colors( );
 
 	fl_set_cursor_color( G.cur_1, FL_BLACK, FL_WHITE );
 	fl_set_cursor_color( G.cur_2, FL_BLACK, FL_WHITE );
@@ -1150,7 +1151,8 @@ void curve_button_callback( FL_OBJECT *obj, long data )
 			sprintf( hstr, "Extempt curve %ld from\nrescaling operations",
 					 data );
 		else
-			sprintf( hstr, "Apply rescaling operations\nto curve %ld", data );
+			sprintf( hstr, "Include curve %ld into\nrescaling operations",
+					 data );
 
 		fl_set_object_helper( obj, hstr );
 
@@ -1173,20 +1175,31 @@ void curve_button_callback( FL_OBJECT *obj, long data )
 			{
 				case 0 :
 					fl_set_button( run_form->curve_1_button, 0 );
+					fl_set_object_helper( run_form->curve_1_button,
+										  "Show curve 1" );
 					break;
 
 				case 1 :
 					fl_set_button( run_form->curve_2_button, 0 );
+					fl_set_object_helper( run_form->curve_2_button,
+										  "Show curve 2" );
 					break;
 
 				case 2 :
 					fl_set_button( run_form->curve_3_button, 0 );
+					fl_set_object_helper( run_form->curve_3_button,
+										  "Show curve 3" );
 					break;
 
 				case 3 :
 					fl_set_button( run_form->curve_4_button, 0 );
+					fl_set_object_helper( run_form->curve_4_button,
+										  "Show curve 4" );
 					break;
 			}
+
+			sprintf( hstr, "Hide curve %ld", data );
+			fl_set_object_helper( obj, hstr );
 
 			G.active_curve = data - 1;
 

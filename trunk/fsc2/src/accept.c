@@ -34,6 +34,7 @@ void accept_new_data( void )
 	
 	while ( 1 )
 	{
+
 		/* Attach to the shared memory segment pointed to by the oldest
 		   entry in the message queue */
 
