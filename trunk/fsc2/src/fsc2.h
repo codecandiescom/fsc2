@@ -15,7 +15,10 @@
 
 /* defines for several things already needed in the programs header files */
 
-#define bool    unsigned char
+
+/* make bool synonymous to unsigned char */
+
+typedef bool unsigned char
 
 #define MAX_PHASE_SEQ_LEN  12    /* maximum length of phase sequence */
 
