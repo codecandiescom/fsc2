@@ -40,6 +40,11 @@ enum {
 };
 
 
+/*------------------------------------------------------------*/
+/* This function is the callback button for the "WWW" button  */
+/* in the main form for starting and stopping the HTTP server */
+/*------------------------------------------------------------*/
+
 void server_callback( FL_OBJECT *obj, long a )
 {
 	char *www_help;
