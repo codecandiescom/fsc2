@@ -250,14 +250,11 @@ Var *pulse_get_by_num( int pnum, int type )
 
 bool pulse_exist( Pulse *p )
 {
-	Pulse *n = Plist;
+	Pulse *n;
 
-	while ( n != NULL )
-	{
+	for ( n = Plist; n != NULL; n = n->next )
 		if ( n == p )
 			return OK;
-		n = n->next;
-	}
 
 	return FAIL;
 }
