@@ -95,6 +95,9 @@ GPIB_DEV *gpib_dev_list = NULL; /* list of symbolic names of devices etc. */
 
 int gpib_init( char **log_file_name, int log_level )
 {
+	GPIB_DEV *cur_dev;
+
+
      if ( gpib_is_active )
          return SUCCESS;
 
@@ -109,6 +112,29 @@ int gpib_init( char **log_file_name, int log_level )
     if ( gpib_init_controller( ) != SUCCESS )   /* initialise the controller */
     {
         strcpy( gpib_error_msg, "Can't initialise GPIB bus !" );
+
+		/* Get rid of the device list if it's already cretaed */
+
+		if ( gpib_dev_list != NULL )
+		{
+			for ( cur_dev = gpib_dev_list; cur_dev->next != NULL;
+			  cur_dev = cur_dev->next )
+				;
+
+			while ( 1 )
+			{
+				gpib_local( cur_dev->number );
+				T_free( cur_dev->name );
+				if ( cur_dev->prev != NULL )
+				{
+					cur_dev = cur_dev->prev;
+					T_free( cur_dev->next );
+				}
+				else
+					break;
+			}
+		}
+
         return FAILURE;
     }
 
