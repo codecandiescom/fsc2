@@ -28,7 +28,7 @@
 #include "T.h"
 #include "util.h"
 #include "variables.h"
-#include "func.h"
+#include "func.h"                 /* load before "devices.h" ! */
 #include "devices.h"
 #include "assign.h"
 #include "phases.h"
@@ -66,7 +66,9 @@ Var *var_list = NULL;
 Var *var_list_copy;
 Var *Var_Stack = NULL;
 
-Device *Dev_List = NULL;
+Device *Device_List = NULL;
+Device_Name *Device_Name_List = NULL;
+
 
 ASSIGNMENTS assignment[ PULSER_CHANNEL_PHASE_Y + 1 ];
 
@@ -87,7 +89,8 @@ extern Prg_Token *prg_token;
 extern long prg_length;
 extern Prg_Token *cur_prg_token;
 
-extern Device *Dev_List;
+extern Device *Device_List;
+extern Device_Name *Device_Name_List;
 
 extern Var *var_list;
 extern Var *var_list_copy;

@@ -136,9 +136,9 @@ IDENT    [A-Za-z_0-9]+
 		/*----------------------*/
 
 
-void device_list_parse( void )
+bool device_list_parse( void )
 {
-	Device *new_device;
+	Device_Name *new_device_name;
 
 
 	Fname = get_string_copy( "Devices" );
@@ -157,27 +157,22 @@ void device_list_parse( void )
 	{
 		while ( devices_listlex( ) )
 		{
-			new_device = T_malloc( sizeof( Device ) );
-			new_device->name = get_string_copy( devices_listtext );
-			string_to_lower( new_device->name );
-			new_device->is_loaded = UNSET;
-			new_device->next = Dev_List;
-			Dev_List = new_device;
+			new_device_name = T_malloc( sizeof( Device_Name ) );
+			new_device_name->name = get_string_copy( devices_listtext );
+			string_to_lower( new_device_name->name );
+			new_device_name->next = Device_Name_List;
+			Device_Name_List = new_device_name;
 		}
    		TRY_SUCCESS;
 	}
-	CATCH( DEVICES_EXCEPTION )
+	CATCH( OUT_OF_MEMORY_EXCEPTION )
 	{
 		fclose( devices_listin );
 		free( Fname );
-		PASSTHROU( );
-	}
-	CATCH( LIBRARY_EXCEPTION )
-	{
-		fclose( devices_listin );
-		free( Fname );
-		PASSTHROU( );
+		delete_device_name_list( );
+		return FAIL;
 	}
 
 	fclose( devices_listin );
+	return OK;
 }

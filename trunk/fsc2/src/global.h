@@ -160,4 +160,13 @@ typedef struct
 
 
 
+/* return codes from function get_lib_symbol() (in func.c) */
+
+enum {
+	LIB_NO_ERR      =  0,
+	LIB_ERR_NO_LIB  = -1,
+	LIB_ERR_NO_SYM  = -2
+};
+
+
 #endif FSC2_GLOBAL

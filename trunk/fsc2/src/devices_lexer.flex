@@ -155,38 +155,29 @@ int devices_parser( FILE *in )
 
 	Devices_Next_Section = OK;
 
-	clear_device_list( );
 	devicesin = in;
 
 	TRY
 	{
 		device_list_parse( );	
 		devicesparse( );
-		load_all_functions( );
+		load_all_drivers( );
 	}
 	CATCH( INVALID_INPUT_EXCEPTION )
 	{
 		eprint( FATAL, "%s:%ld: Invalid input in DEVICES section: "
 				"`%s'\n", Fname, Lc, devicestext );
-		clear_device_list( );
 		return FAIL;
     }
 	CATCH( CLEANER_EXCEPTION )
 	{
 		eprint( FATAL, "%s", devicestext + 2 );
-		clear_device_list( );
 		return FAIL;
 	}
 	CATCH( DEVICES_EXCEPTION )
-	{
-		clear_device_list( );
-		return( FAIL );
-	}
+		return FAIL;
 	CATCH( OUT_OF_MEMORY_EXCEPTION )
-	{
-		clear_device_list( );
-		return( FAIL );
-	}
+		return FAIL;
 
 	return Devices_Next_Section;
 }

@@ -132,15 +132,20 @@ bool split( char *file )
 	int i;
 
 
+	/* Parse the function and the device name data base */
+
+	if ( ! functions_init( ) )
+		return FAIL;
+
+	if ( ! device_list_parse( ) )
+	    return FAIL;
+
 	/* clear up the compilation structure */
 
 	for ( i = 0; i < 3; ++i )
 		compilation.error[ 3 ] = UNSET;
 	for ( i = ASSIGNMENTS_SECTION; i <= EXPERIMENT_SECTION; ++i )
 		compilation.sections[ i ] = UNSET;
-
-	if ( ! functions_init( ) )
-		return FAIL;
 
 	/* check that the file name is reasonable */
 
@@ -169,6 +174,8 @@ bool split( char *file )
 	if ( Fname != NULL )
 		free( Fname );
 
+	delete_device_name_list( );
+	delete_devices( );
 	functions_exit( );
 
 	return split_error;

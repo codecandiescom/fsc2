@@ -13,17 +13,6 @@ static int num_func;        /* number of built-in  and listed functions */
 static Func *fncts;         /* structure for list of functions */
 
 
-typedef struct {
-	void *handle;
-	void ( * lib_exit ) ( void );
-	bool is_exit_hook;
-} Lib_Struct;
-
-static Lib_Struct *Libs = NULL;
-static int Num_Libs;              /* number of dynamically loaded libaries */
-
-
-
 
 /* When in the input an identifier is found it is always tried first if the
    identifier is a function by a call to func_get(). If it is a function, a
@@ -125,10 +114,8 @@ bool functions_init( void )
 
 	/* 1. Get new memory for the functions structures and copy the built in
 	      functions into it.
-	   2. Parse the file `Functions' where all additional functions have to
-	      be listed.
-	   3. Get addresses of all functions declared in `Functions and defined
-	      in file `User_Functions.c' aka `User_Functions.so'
+	   2. Parse the function name data base `Functions' where all additional
+	      functions have to be listed.
 	*/
 
 	TRY
@@ -169,25 +156,6 @@ void functions_exit( void )
 		if ( fncts[ i ].name != NULL )
 			free( ( char * ) fncts[ i ].name );
 	free( fncts );
-
-	/* If there are loaded libraries run the exit hooks and unload them */
-
-	if ( Libs == NULL )
-		return;
-
-	for ( i = 0; i < Num_Libs; ++i )
-	{
-		if ( Libs[ i ].handle != NULL )
-		{
-			if ( Libs[ i ].is_exit_hook )
-				Libs[ i ].lib_exit( );
-			dlclose( Libs[ i ].handle );
-		}
-	}
-
-	free( Libs );
-	Libs = NULL;
-	Num_Libs = 0;
 }
 
 
@@ -197,91 +165,104 @@ void functions_exit( void )
 /* listed in `Files' and stores pointers to the functions in `Fncts'.     */
 /*------------------------------------------------------------------------*/
 
-void load_all_functions( void )
+void load_all_drivers( void )
 {
 	Device *cd;
 
-	load_functions( "User_Functions" );
 
-	for ( cd = Dev_List; cd != NULL; cd = cd->next )
-	{
-		load_functions( cd->name );
-		cd->is_loaded = SET;
-	}
+	/* Treat "User_Functions" also as a kind of device driver and append */
+	/* the device structure at the end of the list opf devices*/
+
+	device_append_to_list( "User_Functions" );
+
+	/* Link all functions from the device drivers (including "User_Functions"
+	   which comes last) and try to resolve the functions from the function
+	   list */
+
+	for ( cd = Device_List; cd != NULL; cd = cd->next )
+		load_functions( cd );
+
+	/* This done we run the init hooks (if one exists) - warn if it didn't
+	   return successfully (if the init hook thinks it should kill the whole
+	   program it' supposed to throw an exception) */
+
+	for ( cd = Device_List; cd != NULL; cd = cd->next )
+		if ( cd->is_loaded && cd->driver.is_init_hook &&
+			 ! cd->driver.lib_init( ) )
+			eprint( WARN, "Initialization of library `%s.so' failed.\n",
+					cd->name );
 }
 
 
 /*----------------------------------------------------------------------*/
-/* Function links a library file  with the name passed to it (after     */
-/* adding the  extension `so') and then tries to find still unresolved  */
+/* Function links a library file with the name passed to it (after      */
+/* adding the extension `so') and then tries to find still unresolved   */
 /* references to functions listed in the function data base `Function'. */
 /*----------------------------------------------------------------------*/
 
-void load_functions( const char *name )
+void load_functions( Device *dev )
 {
 	int num;
-	char *library;
+	char *lib_name;
 	char *init_func;
 	char *exit_func;
 	void *cur;
-	int ( * lib_init ) ( void );
 
 
 	/* Put together name of library to be loaded */
 
-	library = get_string( strlen( name ) + 4 );
-	strcpy( library, name );
-	strcat( library, ".so" );
+	lib_name = get_string( strlen( dev->name ) + 3 );
+	strcpy( lib_name, dev->name );
+	strcat( lib_name, ".so" );
 
 	/* Increase memory allocated for library handles and try to open
 	   dynamically loaded library */
 
-	Libs = T_realloc( Libs, ++Num_Libs * sizeof( Lib_Struct ) );
-	Libs[ Num_Libs - 1 ].handle = dlopen( library, RTLD_LAZY );
-	Libs[ Num_Libs - 1 ].is_exit_hook = UNSET;
-	free( library );
-	if ( Libs[ Num_Libs - 1 ].handle == NULL )
+	dev->driver.handle = dlopen( lib_name, RTLD_LAZY );
+	free( lib_name );
+	if ( dev->driver.handle == NULL )
 	{
-		eprint( FATAL, "Can't open library `%s.so', %s.\n",
-				name, dlerror( ) );
+		if ( strcmp( dev->name, "User_Functions" ) )
+			eprint( FATAL, "Can't open library `User_Functions.so'.\n" );
+		else
+			eprint( FATAL, "Can't open library for device `%s'.\n",
+					dev->name );
 		THROW( LIBRARY_EXCEPTION );
 	}
 
-	/* If there is a function with the name of the library file and the
-       appended string "_init_hook" run this init hook function and test if
-	   it returns TRUE */
+	dev->is_loaded = SET;
+	dev->driver.is_init_hook = UNSET;
+	dev->driver.is_exit_hook = UNSET;
 
-	init_func = T_malloc( strlen( name ) + 11 );
-	strcpy( init_func, name );
+	/* If there is function with the name of the library file and the
+	   appended string "_init_hook" store it and set corresponding flag */
+
+	init_func = T_malloc( strlen( dev->name ) + 10 );
+	strcpy( init_func, dev->name );
 	strcat( init_func, "_init_hook" );	
 
-	lib_init = dlsym( Libs[ Num_Libs - 1 ].handle, init_func );
+	dev->driver.lib_init = dlsym( dev->driver.handle, init_func );
+	if ( dlerror( ) == NULL )
+		dev->driver.is_init_hook = SET;
 	free( init_func );
-	if ( dlerror( ) == NULL && lib_init( ) == 0 )
-	{
-		eprint( WARN, "Initialization of library `%s.so' failed.\n",
-				name );
-		return;
-	}
-	
+		
 	/* Now check if there's also an exit hook function */
 
-	exit_func = T_malloc( strlen( name ) + 11 );
-	strcpy( exit_func, name );
+	exit_func = T_malloc( strlen( dev->name ) + 10 );
+	strcpy( exit_func, dev->name );
 	strcat( exit_func, "_exit_hook" );	
 
-	Libs[ Num_Libs - 1 ].lib_exit =
-		                       dlsym( Libs[ Num_Libs - 1 ].handle, init_func );
+	dev->driver.lib_exit = dlsym( dev->driver.handle, exit_func );
 	if ( dlerror( ) == NULL )
-		Libs[ Num_Libs - 1 ].is_exit_hook = SET;
+		dev->driver.is_exit_hook = SET;
 	free( exit_func );
 
-	eprint( NO_ERROR, "Loading functions from library `%s.so'.\n", name );
+	/* Run through all the functions in the function list and if they need
+	   to be resolved try to find them in the device driver functions - check
+	   that the function has not already been loaded (but overloading built-in
+	   functions is acceptable). */
 
-	/* Run trough all the functions in the function list and if they need
-	   loading  store the address of the function - check that the function
-	   has not already been loaded (but overloading built-in functions is
-	   acceptable). */
+	eprint( NO_ERROR, "Loading functions from library `%s.so'.\n", dev->name );
 
 	for ( num = 0; num < num_func; num++ )
 	{
@@ -290,7 +271,7 @@ void load_functions( const char *name )
 		if ( ! fncts[ num ].to_be_loaded )
 			continue;
 
-		cur = dlsym( Libs[ Num_Libs - 1 ].handle, fncts[ num ].name );
+		cur = dlsym( dev->driver.handle, fncts[ num ].name );
 
 		if ( dlerror( ) != NULL )     /* function not found in library ? */
 			continue;
@@ -326,6 +307,51 @@ void load_functions( const char *name )
 		fncts[ num ].fnct = cur;
 	}
 }
+
+
+/*-----------------------------------------------------------------------*/
+/* This function is intended to allow user defined modules access to the */
+/* symbols in another module. Probably it's a BAD thing if they do, but  */
+/* sometimes it might be inevitable, so we better include this instead   */
+/* of having the writer of a module trying to figure out some other and  */
+/* probably more difficult and even dangerous method to do it anyway.    */
+/*                                                                       */
+/* ->                                                                    */
+/*    1. Name of the module (without the `.so' bit) the symbol is to be  */
+/*       loaded from                                                     */
+/*    2. Name of the symbol to be loaded                                 */
+/*    3. Pointer to void pointer for returning the address of the symbol */
+/*                                                                       */
+/* <-                                                                    */
+/*    Return value indicates success or failure (see global.h for defi-  */
+/*    nition of the the return codes). On success `symbol_ptr' contains  */
+/*    the address of the symbol.                                         */ 
+/*-----------------------------------------------------------------------*/
+
+int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
+{
+	Device *cd;
+
+
+	/* Try to find the library fitting the name */
+
+	for ( cd = Device_List; cd != 0; cd = cd->next )
+		if ( ! strcmp( cd->name, from ) )
+			break;
+
+	if ( cd == NULL )                    /* library not found ? */
+		return LIB_ERR_NO_LIB;
+
+	/* Try to load the symbol */
+
+	*symbol_ptr = dlsym( cd->driver.handle, symbol );
+
+	if ( dlerror( ) != NULL )            /* symbol not found in library ? */
+		return LIB_ERR_NO_SYM;
+
+	return LIB_NO_ERR;
+}
+
 
 
 /*------------------------------------------------------------------------*/

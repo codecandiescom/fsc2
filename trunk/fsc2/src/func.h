@@ -18,10 +18,19 @@ typedef struct
 } Func;
 
 
+typedef struct {
+	void *handle;
+	int ( * lib_init ) ( void );
+	bool is_init_hook;
+	void ( * lib_exit ) ( void );
+	bool is_exit_hook;
+} Lib_Struct;
+
+
 bool functions_init( void );
 void functions_exit( void );
-void load_all_functions( void );
-void load_functions( const char *name );
+void load_all_drivers( void );
+int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr );
 Var *func_get( char *name, int *access );
 Var *func_call( Var *f );
 
