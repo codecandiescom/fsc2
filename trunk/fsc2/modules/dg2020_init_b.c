@@ -96,8 +96,9 @@ static void dg2020_init_print( FILE *fp )
 			continue;
 
 		for ( j = 0; j < f->num_pods; j++ )
-			fprintf( fp, "%s:%d %ld\n",
-					 f->name, f->pod[ j ]->self, f->delay );
+			fprintf( fp, "%s:%d %ld%s\n",
+					 f->name, f->pod[ j ]->self, f->delay,
+					 f->is_inverted ? " I" : "" );
 	}
 }
 
@@ -233,7 +234,7 @@ static void dg2020_basic_functions_check( void )
 	{
 		f = dg2020.function + i;
 
-		/* Phase functions not supported in this driver... */
+		/* Phase functions are not supported in this driver... */
 
 		fsc2_assert( ! f->is_used ||
 					 ( f->is_used &&

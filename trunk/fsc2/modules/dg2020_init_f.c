@@ -87,7 +87,8 @@ static void dg2020_init_print( FILE *fp )
 		fprintf( fp, "%s:%d %ld\n", f->name, f->pod->self, f->delay );
 
 		if ( f->pod2 != NULL )
-			fprintf( fp, "%s:%d %ld\n", f->name, f->pod2->self, f->delay );
+			fprintf( fp, "%s:%d %ld%s\n", f->name, f->pod2->self, f->delay,
+					 f->is_inverted ? " I" : "" );
 	}
 }
 
