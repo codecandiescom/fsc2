@@ -36,8 +36,6 @@ Var *get_phase_cycled_area( Var *v );
 
 static Var *get_phase_cycled_area_1( Var *v );
 static Var *get_phase_cycled_area_2( Var *v );
-
-
 static bool get_channel_number( Var *v, long *channel );
 static void pc_basic_check( const char *func_1, bool *is_1, const char *func_2,
 							bool *is_2, const char *str );

@@ -109,6 +109,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "date",            f_date,     		 0, ACCESS_ALL,  NULL, UNSET },
 	{ "delta_time",      f_dtime,    		 0, ACCESS_EXP,  NULL, UNSET },
 	{ "print",           f_print,	   INT_MIN, ACCESS_ALL,  NULL, UNSET },
+	{ "sprint",          f_sprint,	   INT_MIN, ACCESS_ALL,  NULL, UNSET },
 	{ "wait",            f_wait,     	     1, ACCESS_ALL,  NULL, UNSET },
 	{ "init_1d",         f_init_1d,  	    -6, ACCESS_PREP, NULL, UNSET },
 	{ "init_2d",         f_init_2d,  	   -10, ACCESS_PREP, NULL, UNSET },

@@ -1,0 +1,466 @@
+  /*---------------------------------------------------------------*/
+  /* EDL script for doing a calibration of the combination of the  */
+  /* Acton SpectraPro 300i monochromator and the Roper Scientific  */
+  /* Spec-10 CCD camera.                                           */
+  /*                                                               */
+  /* The script tries to determine the values of the pixel offset  */
+  /* from the center (due to misalignments between monochromator   */
+  /* and the CCD chip), the inclusion angle and the focal length   */
+  /* of the monochromator and the angle the CCD chip is out of     */
+  /* the focal plane.                                              */
+  /*                                                               */
+  /* A calibration is done in several steps:                       */
+  /* 1. Select the grating for which the calibration is to be done */
+  /* 2. Monochromator is set to 0 nm. Now adjust the pixel offset  */
+  /* so that the 0th order maximum is exactly at the zero position */
+  /*    of the scale                                               */
+  /* 3. Select the center wavelengths so that a well known line is */
+  /*    once at the left side of the display and once at the right */
+  /*    side. Repeat this for at least 2 calibration lines (to get */
+  /*    a minimum of 4 data sets). Each time measure the position  */
+  /*    of the line relative to the displayed scale. The data for  */
+  /*    center wavelength, line wavelength, line position and      */
+  /*    diffraction order (shown in the main windows lower browser */
+  /*    after the "Add data set" button has been pressed) are used */
+  /*    to calculate the calibration parameters. The calculated    */
+  /*    parameters are displayed when at least 4 data sets have    */
+  /*    been entered.                                              */
+  /* 4. Repeat the above procedure until calibrations for all      */
+  /*    gratings.                                                  */
+  /* 5. When the script gets stopped by clicking on the "Stop"     */
+  /*    select a file for writing out the calibration parameter.   */
+  /*    The default extension for the file is ".calib".            */
+  /*                                                               */
+  /* $Id$ */
+  /*                                                               */
+  /* Copyright (C) 1999-2003 Jens Thoms Toerring                   */
+  /*                                                               */
+  /* This file is part of fsc2.                                    */
+  /*                                                               */
+  /* Fsc2 is free software; you can redistribute it and/or modify  */
+  /* it under the terms of the GNU General Public License as       */
+  /* published by the Free Software Foundation; either version 2,  */
+  /* or (at your option) any later version.                        */
+  /*                                                               */
+  /* Fsc2 is distributed in the hope that it will be useful,       */
+  /* but WITHOUT ANY WARRANTY; without even the implied warranty   */
+  /* of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See  */
+  /* the GNU General Public License for more details.              */
+  /*                                                               */
+  /* You should have received a copy of the GNU General Public     */
+  /* License along with fsc2; see the file COPYING.  If not, write */
+  /* to the Free Software Foundation, 59 Temple Place - Suite 330, */
+  /* Boston, MA 02111-1307, USA.                                   */
+  /*---------------------------------------------------------------*/
+
+
+DEVICES:
+
+spectrapro_300i;          /* Acton SpectraPro 300i monochromator */
+rs_spec10;                /* Roper Scientific Spec-10 CCD camera */
+
+
+VARIABLES:
+
+exposure_time = 0.1 s;    /* exposure time for CCD camera */
+NUM_GRATINGS = 2;         /* number of installed gratings */
+
+/* -> There is nothing that needs changes below this line <- */
+
+State = 0;                /* state the program is currently in:
+							 0: start up, 1: selection of grating,
+							 2: determination of center position,
+							 3: fitting of calibration paramters */
+
+W[ 2 ];                   /* with and height of CCD chip */
+CG = 1;                   /* number of current grating */
+GN[ NUM_GRATINGS ],       /* grating buttons in first form */
+GO,                       /* Continue etc. button */
+CL,                       /* input field for 0th order line position */
+CWL,                      /* input field for center wavelength */
+DFO,                      /* input field for diffraction order */
+LWL,                      /* input field for wavelength of line */
+LP,                       /* input field for line position */
+ADD,                      /* button for adding new data set */
+RESET_LAST,               /* button for clearing last data set */
+RESET_ALL,                /* button for clearing all data sets */
+IA,                       /* output field for inclusion angle */
+FL,                       /* output field for focal length */
+DA,                       /* output field for detector angle */
+DONE;                     /* Done button */
+
+n0[ NUM_GRATINGS ] = 0;   /* array of pixel offsets for differnt gratings */ 
+cwl,                      /* last entered center wavelength */
+Dfo,                      /* last entered diffraction order */
+lwl,                      /* last entered line wavelength */
+lp;                       /* last entered line position */
+Count[ NUM_GRATINGS ];    /* number of entered data sets for gratings */
+
+Spec[ * ];                /* array of currently displayed spectrum */
+
+I;                        /* counter */
+new_val, New_val;         /* intermediate values */
+
+scale[ 2 ];               /* scaling values for x-axis */
+
+l[ * ];                   /* array of line wavelengths for current grating */
+lc[ * ];                  /* array of center wavelengths for current grating */
+M[ * ];                   /* array of diffraction orders for current grating */
+nx[ * ];                  /* array of line positions for current grating */
+calib[ NUM_GRATINGS, * ]; /* matrix of calibration parameters for gratings */
+
+File;                     /* file handle for calibration file */
+
+
+PREPARATIONS:
+
+W = ccd_camera_pixel_area( );
+init_1d( 1, W[ 1 ], "Pixel number" );
+
+
+EXPERIMENT:
+
+scale = monochromator_wavelength_axis( );
+ccd_camera_exposure_time( exposure_time );
+
+FOREVER
+{
+	/* Always update the displayed curve during the calibration procedure */
+
+	IF State > 1 {
+		Spec = ccd_camera_get_spectrum( );
+		display_1d( 1, Spec );
+	}
+
+	/* At the very start (or after the calibration of one of the gratings has
+	   been finished) create the first form for selecting the grating to be
+	   calibrated */
+
+	IF State == 0 {
+		clear_curve_1d( );
+		hide_toolbox( 1 );
+		GN[ 1 ] = button_create( "RADIO_BUTTON", "Grating #1" );
+		FOR I = 2 : NUM_GRATINGS {
+			GN[ I ] = button_create( "RADIO_BUTTON", GN[ 1 ],
+									 sprint( "Grating \##", I ) );
+		}
+		button_state( GN[ CG ], "ON" );
+		GO = button_create( "NORMAL_BUTTON", "Start Calibration" );
+		hide_toolbox( 0 );
+		State = 1;
+	} 
+
+	/* When a grating has been selected create the form for setting the
+	   pixel offset */
+
+	IF State == 1 & button_state( GO ) {
+
+		/* Figure out which grating to calibrate */
+
+		FOR I = 1 : NUM_GRATINGS {
+			IF button_state( GN[ I ] ) {
+				CG = I;
+				BREAK
+			}
+		}
+
+		/* Reset the number of calibration values for the selected grating */
+
+		Count[ CG ] = 0;
+
+		/* Set the scale to reflect a possibly already set pixel offset */
+
+		change_scale_1d( scale[ 1 ] - n0[ CG ], scale[ 2 ] );
+
+		/* Switch the monochromator to the selected grating and go to a
+		   a center wavelength of 0 nm */
+
+		monochromator_grating( CG );
+		monochromator_wavelength( 0.0 );
+
+		/* Create the next form for adjusting the pixel offset */
+
+		hide_toolbox( 1 );
+		button_delete( GO );
+		FOR I = NUM_GRATINGS : 1 : -1 {
+			button_delete( GN[ I ] );
+		}
+
+		CL = input_create( "FLOAT_INPUT", 0.0, "Position of center line" );
+		GO = button_create( "NORMAL_BUTTON", "Continue Calibration" );
+		hide_toolbox( 0 );
+		State = 2;
+	}
+
+	/* Deal with the user adjusting the pixel offset */
+
+	IF State == 2 {
+
+		/* Evaluate new value for position of center. Change the scale to
+		   reflect the new setting, catch unreasonable values. */
+
+		IF input_changed( CL ) {
+			new_val = input_value( CL );
+			IF new_val + n0[ CG ] <= 0.5 * ( W[ 1 ] + 1 ) &
+			   new_val + n0[ CG ] >= - 0.5 * ( W[ 1 ] + 1 ) {
+				n0[ CG ] += new_val;
+				change_scale_1d( scale[ 1 ] - n0[ CG ], scale[ 2 ] );
+			}
+			input_value( CL, 0.0 )
+		}
+
+		/* When the user is satisfied delete the form and create a new one
+		   for adjusting the dispersion properties of the grating */
+
+		IF button_state( GO ) {
+			button_delete( GO );
+			input_delete( CL );
+
+			hide_toolbox( 1 );
+			CWL = input_create( "FLOAT_INPUT", 0.0, "Center wavelength [nm]" );
+			cwl = 0.0;
+
+			DFO = input_create( "INT_INPUT", 1, "Diffraction order" );
+			Dfo = 1;
+
+			LWL = input_create( "FLOAT_INPUT", 0.0,
+								"Wavelength of line [nm]" );
+			lwl = 0.0;
+
+			LP  = input_create( "FLOAT_INPUT", 0.0, "Line position [pixel]" );
+			lp  = 0.0;
+
+			ADD = button_create( "NORMAL_BUTTON", "Add new data set" );
+			RESET_LAST = button_create( "NORMAL_BUTTON",
+										"Remove last data set" );
+			RESET_ALL = button_create( "NORMAL_BUTTON", "Reset all" );
+			DONE = button_create( "NORMAL_BUTTON", "Done" );
+			hide_toolbox( 0 );
+
+			/* If necessary shorten the arrays for the data sets */
+
+			IF size( l ) >= 4 {
+				l  = slice( l, 1, 1 );
+				lc = slice( lc, 1, 1 );
+				M  = slice( M, 1, 1 );
+				nx = slice( nx, 1, 1 );
+			}
+
+			State = 3;
+		}
+	}
+
+	/* Deal with the user adjusting the dispersion properties of the grating */
+
+	IF State == 3 {
+
+		/* Deal with changes of the center wavelength - must be between 0 nm
+		   and 1400 nm - and set the monochromator accordingly */
+
+		IF input_changed( CWL ) {
+			new_val = input_value( CWL );
+			IF new_val < 0 | new_val > 1400 {
+				input_value( CWL, cwl );
+				NEXT;
+			}
+
+			cwl = new_val;
+			monochromator_wavelength( cwl * 1 nm );
+		}
+
+		/* Deal with changes of the diffraction order - must be larger
+		   than 0 */
+
+		IF input_changed( DFO ) {
+			New_val = input_value( DFO );
+			IF New_val > 0 {
+				Dfo = New_val;
+			} ELSE {
+				input_value( DFO, Dfo );
+			}
+		}
+
+		/* Deal with changes of the wavelength of the line under consideration
+		   - must be at least 0 nm and below 10 um (such a large value could
+		   only happen for gratings with less than 10 grooves per mm) */
+
+		IF  input_changed( LWL ) {
+			new_val = input_value( LWL );
+			IF new_val < 0 | new_val > 10000 {
+				input_value( LWL, lwl );
+				NEXT;
+			}
+
+			lwl = new_val;
+		}
+
+		/* Deal with changes of the line position - the value must be in the
+		   range of pixels currently displayed */
+
+		IF input_changed( LP ) {
+			new_val = input_value( LP );
+			IF new_val + n0[ CG ] <= 0.5 * ( W[ 1 ] + 1 ) &
+			   new_val + n0[ CG ] >= - 0.5 * ( W[ 1 ] + 1 ) {
+				lp = new_val;
+			} ELSE {
+				input_value( LP, lp );
+			}
+		}
+
+		/* Deal with clicks on the "Add new data set" button. */
+
+		IF button_state( ADD ) {
+
+			/* Avoid that the user accidentally adds the same data set a
+			   second time. */
+
+			IF Count[ CG ] > 0 &
+			   abs( cwl - lc[ Count[ CG ] ] / 1 nm ) < 1.0e-3 &
+			   abs( lwl - l[ Count[ CG ] ] / 1 nm ) < 1.0e-3 &
+			   Dfo == M[ Count[ CG ] ] &
+			   abs( lp - nx[ Count[ CG ] ] ) < 1.0e-3 {
+				NEXT;
+			}
+
+			/* Add the data set to the arrays for the data sets and increase
+			   the count for the current grating. Then print out the accepted
+			   values. */
+
+			Count[ CG ] += 1;
+			lc[ Count[ CG ] ] = cwl * 1 nm;
+			l[ Count[ CG ] ] = lwl * 1 nm;
+			M[ Count[ CG ] ] = Dfo;
+			nx[ Count[ CG ] ] = lp;
+
+			print( "#:  # nm,  # nm,  #,  #\n", Count[ CG ],
+				   l[ Count[ CG ] ] / 1 nm, lc[ Count[ CG ] ] / 1 nm,
+				   M[ Count[ CG ] ], nx[ Count[ CG ] ] );
+
+			/* If there are at least 4 data sets calculate the the new
+			   calibration data and put them into the output fields. When
+			   this is the fourth data set the output fields need to be
+			   created. */
+
+
+			IF ( Count[ CG ] >= 4 )
+			{
+				calib[ CG ] = monochromator_calibration( CG, l, lc, M, nx );
+
+				IF Count[ CG ] == 4 {
+					hide_toolbox( 1 );
+					button_delete( DONE );
+					IA = output_create( "FLOAT_OUTPUT", calib[ CG, 1 ],
+										"Inclusion angle [degree]" );
+					FL = output_create( "FLOAT_OUTPUT", calib[ CG, 2 ] / 1 mm,
+										"Focal length [mm]" );
+					DA = output_create( "FLOAT_OUTPUT", calib[ CG, 3 ],
+										"Dectector angle [degree]" );
+					DONE = button_create( "NORMAL_BUTTON", "Done" );
+					hide_toolbox( 0 );
+				} ELSE {
+					output_value( IA, calib[ CG, 1 ] );
+					output_value( FL, calib[ CG, 2 ] / 1 mm );
+					output_value( DA, calib[ CG, 3 ] );
+				}
+			}
+		}
+
+		/* Deal with the clicks on the "Reset all" button - clear the arrays
+		   for the data sets and remove the output fields for the calibration
+		   data if necessary. */
+
+		IF button_state( RESET_ALL ) & Count[ CG ] > 0 {
+			print( "Deleting all data sets for grating \##\n", CG );
+			hide_toolbox( 1 );
+			IF Count[ CG ] >= 4 {
+				output_delete( DA, FL, IA );
+			}
+			Count[ CG ] = 0;
+			IF size( l ) >= 4 {
+				l  = slice( l, 1, 1 );
+				lc = slice( lc, 1, 1 );
+				M  = slice( M, 1, 1 );
+				nx = slice( nx, 1, 1 );
+			}
+			hide_toolbox( 0 );
+		}
+
+		/* Deal with clicks on the "Remove last data set" - remove the data
+		   set from the arrays for the data sets and, if necessary (i.e.
+		   when going from 4 to 3 data set) remove the output fields for
+		   the calibration. */
+
+		IF button_state( RESET_LAST ) & Count[ CG ] > 0 {
+			print( "Removing last data set for grating \##\n", CG );
+			IF Count[ CG ] == 4 {
+				hide_toolbox( 1 );
+				IF Count[ CG ] >= 4 {
+					output_delete( DA, FL, IA );
+				}
+				hide_toolbox( 0 );
+			}
+
+			IF Count[ CG ] > 1 {
+				Count[ CG ] -= 1;
+				l = slice( l, 1, Count[ CG ] );
+				lc = slice( lc, 1, Count[ CG ] );
+				M = slice( M, 1, Count[ CG ] );
+				nx = slice( nx, 1, Count[ CG ] );
+			} ELSE {
+				IF size( l ) >= 4 {
+					l  = slice( l, 1, 1 );
+					lc = slice( lc, 1, 1 );
+					M  = slice( M, 1, 1 );
+					nx = slice( nx, 1, 1 );
+				}
+				Count[ CG ] = 0;
+			}
+		}
+
+		/* Deal with clicks on the "Done" button - remove the form */
+
+		IF button_state( DONE ) {
+			print( "\n" );
+			hide_toolbox( 1 );
+			button_delete( DONE );
+			IF Count[ CG ] >= 4 {
+				output_delete( DA, FL, IA );
+			}
+			button_delete( RESET_ALL, RESET_LAST, ADD );
+			input_delete( LP, DFO, LWL, CWL );
+			hide_toolbox( 0 );
+			State = 0;
+		}
+	}
+}
+
+ON_STOP:
+
+/* Check if there was a complete calibration for at least one if the
+   gratings */
+
+FOR I = 1 : NUM_GRATINGS {
+	IF Count[ I ] >= 4 {
+		BREAK;
+	}
+}
+
+/* If there was ask the user for a calibration file and write all complete
+   calibratopon data into it. */
+
+IF I <= NUM_GRATINGS {
+	File = get_file( "Select name of the calibration file:", "*.calib", "", "",
+				     "calib" );
+
+	FOR I = 1 : NUM_GRATINGS {
+		IF Count[ I ] < 4 {
+			NEXT;
+		}
+
+		fsave( File, "\# Calibration parameter for grating \##\n\n", I );
+		fsave( File, "N_#                =  #\n", I, n0[ I ] );
+		fsave( File, "INCLUSION_ANGLE_#  =  #\n", I, calib[ I, 1 ] );
+		fsave( File, "FOCAL_LENGTH_#     =  # mm\n", I, calib[ I, 2 ] / 1 mm );
+		fsave( File, "DETECTOR_ANGLE_#   =  #\n\n", I, calib[ I, 3 ] );
+	}
+}

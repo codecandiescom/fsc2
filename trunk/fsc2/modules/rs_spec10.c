@@ -102,7 +102,7 @@ int rs_spec10_exp_hook( void )
 	rs_spec10_exp = rs_spec10_prep;
 	rs_spec10 = &rs_spec10_exp;
 
-//	rs_spec10_init_camera( );
+	rs_spec10_init_camera( );
 	return 1;
 }
 
@@ -115,7 +115,7 @@ int rs_spec10_end_of_exp_hook( void )
 {
 	if ( rs_spec10->is_open )
 	{
-//		pl_cam_close( rs_spec10->handle );
+		pl_cam_close( rs_spec10->handle );
 		rs_spec10->is_open = UNSET;
 	}
 

@@ -1133,7 +1133,7 @@ static void ff_format_check( Var *v )
 /*-----------------------------------------------------------------------*/
 /* This function is called by f_fsave() and f_ffsave() to do the actual  */
 /* printing. It loops over the format string and prints it argument by   */
-/* argument (unfortunately, there's portable no way to create a variable */
+/* argument (unfortunately, there's no portable way to create a variable */
 /* argument list, so it must be done this way). The function returns     */
 /* the number of character written.                                      */
 /*-----------------------------------------------------------------------*/

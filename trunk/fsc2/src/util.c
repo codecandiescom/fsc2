@@ -25,6 +25,9 @@
 #include "fsc2.h"
 
 
+static int fsc2_simplex_is_minimum( int n, double *y, double epsilon );
+
+
 /*------------------------------------------------------------------*/
 /* Function expects a format string as printf() and arguments which */
 /* must correspond to the given format string and returns a string  */
@@ -1058,6 +1061,262 @@ Var *convert_to_channel_number( const char *channel_name )
 #endif
 
 	return vars_push( INT_VAR, channel );
+}
+
+
+/*-----------------------------------------------------------------------*/
+/* Function for determining the minimum of a function using the SIMPLEX  */
+/* algorithm (see J.A. Nelder, R. Mead, Comp. J. 7, (1965), p. 308-313)  */
+/* Input arguments:                                                      */
+/* 1. number of parameters of function                                   */
+/* 2. array of starting values for the fit                               */
+/* 3. array of deviations of start values                                */
+/* 4. void pointer that gets passed on to the function to be minimized   */
+/* 5. address of function to be minimized - function has to accept the   */
+/*    following arguments:                                               */
+/*    a. pointer to (double array) of parameters                         */
+/*    b. void pointer (can be used to transfer further required data)    */
+/* 6. size of criterion for end of minimization: when the ratio between  */
+/*    the standard error of the function values at the corners of the    */
+/*    simplex to the mean of this function values is smaller than the    */
+/*    size minimization is stopped.                                      */
+/* When the function returns the data in the array with the start values */
+/* has been overwritten by the paramters that yield the mimimum value.   */
+/*-----------------------------------------------------------------------*/
+
+double fsc2_simplex( size_t n, double *x, double *dx, void *par,
+					 double func( double *x, void *par ), double epsilon )
+{
+    double *p,              /* matrix of the (n + 1) simplex corners */
+		   *y,              /* array of function values at the corners */
+		   *p_centroid,     /* coordinates of center of simplex */
+           *p_1st_try,      /* point after reflection */
+           *p_2nd_try,      /* point after expansion/contraction */
+           y_1st_try,       /* function value after reflection */
+           y_2nd_try,       /* function value after expansion/contraction */
+           y_lowest,        /* smallest function value */
+           y_highest,       /* largest function value */
+           y_2nd_highest,   /* second-largest function value */
+           alpha = 1.0,     /* reflection factor*/
+           beta = 0.5,      /* contraction factor*/
+           gamm = 2.0;      /* expansion factor */
+    size_t i, j;            /* counters */
+    size_t highest,         /* index of corner with largest/smallest */
+           lowest;          /* function value */
+
+
+	CLOBBER_PROTECT( i );
+
+    /* Get enough memory for the corners of the simplex, center points and
+	   function values at the (n + 1) corners */
+
+	p = T_malloc( ( n * ( n + 5 ) + 1 ) * sizeof *p );
+	p_centroid = p + n * ( n + 1 );
+    p_1st_try = p_centroid + n;
+    p_2nd_try = p_1st_try + n;
+    y = p_2nd_try + n;
+
+    /* Set up the corners of the simplex and calculate the function values
+	   at these positions */
+
+    for ( i = 0; i < n + 1; i++ )
+    {
+        for ( j = 0; j < n; j++ )
+            p[ i * n  + j ] = x[ j ];
+
+        if ( i != n )
+            p[ i * ( n + 1 ) ] += dx[ i ];
+
+		TRY
+		{
+			y[ i ] = func( p + i * n, par );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( p );
+			RETHROW( );
+		}
+    }
+
+    /* Here starts the loop for finding the minimum. It will only stop when
+	   the minimum criterion is satisfied. */
+
+    do
+    {
+		/* Determine index and function value of the corner with the lowest,
+		   the largest and the second largest function value */
+
+        lowest = ( y[ 0 ] < y[ 1 ] ) ? ( highest = 1, 0 ) : ( highest = 0, 1 );
+
+        y_lowest = y_2nd_highest = y[ lowest ];
+        y_highest = y[ highest ];
+
+        for ( i = 2; i < n + 1; i++ )
+        {
+            if ( y[ i ] < y_lowest )
+                y_lowest = y[ lowest = i ];
+
+            if ( y[ i ] > y_highest )
+            {
+                y_2nd_highest = y_highest;
+                y_highest = y[ highest = i ];
+            }
+            else
+                if ( y[ i ] > y_2nd_highest )
+                    y_2nd_highest = y[ i ];
+        }
+
+		/* Calculate center of simplex (excluding the corner with the largest
+		   function value) */
+
+        for ( j = 0; j < n; j++ )
+        {
+            for ( p_centroid[ j ] = 0.0, i = 0; i < n + 1; i++ )
+            {
+                if ( i == highest )
+                    continue;
+                p_centroid[ j ] += p[ i * n + j ];
+            }
+
+            p_centroid[ j ] /=  n;
+        }
+
+		/* Do a reflection, i.e. mirror the point with the largest function
+		   value at the center point and calculate the function value at
+		   this new point */
+
+        for ( j = 0; j < n; j++ )
+            p_1st_try[ j ] = ( 1.0 + alpha ) * p_centroid[ j ]
+							 - alpha * p[ highest * n + j ];
+
+		y_1st_try = func( p_1st_try, par );
+
+		/* If the function value at the new point is smaller than the largest
+		   value, the new point replaces the corner with the largest function
+		   value */
+		   
+        if ( y_1st_try < y_highest )
+        {
+            for ( j = 0; j < n; j++ )
+                p[ highest * n + j ] = p_1st_try[ j ];
+
+            y[ highest ] = y_1st_try;
+        }
+
+		/* If the function value at the new point even smaller than all other
+		   function values try an expansion of the simplex */
+
+        if ( y_1st_try < y_lowest )
+        {
+            for ( j = 0; j < n; j++ )
+                p_2nd_try[ j ] = gamm * p_1st_try[ j ] +
+								 ( 1.0 - gamm ) * p_centroid[ j ];
+
+			y_2nd_try = func( p_2nd_try, par );
+
+			/* If the expansion was successful, i.e. led to an even smaller
+			   function value, replace the corner with the largest function
+			   by this new improved new point */
+
+            if ( y_2nd_try < y_1st_try )
+            {
+                for ( j = 0; j < n; j++ )
+                    p[ highest * n + j ] = p_2nd_try[ j ];
+
+                y[ highest ] = y_2nd_try;
+            }
+
+            continue;                     /* start next cycle */
+        }
+
+		/* If the new point is at least smaller than the previous maximum
+		   value start a new cycle, otherwise try a contraction */
+
+        if ( y_1st_try < y_2nd_highest )
+            continue;                     /* start next cycle */
+
+        for ( j = 0; j < n; j++ )
+            p_2nd_try[ j ] = beta * p[ highest * n + j ]
+							 + ( 1.0 - beta ) * p_centroid[ j ];
+
+		y_2nd_try = func( p_2nd_try, par );
+
+		/* If the contraction was successful, i.e. led to a value that is
+		   smaller than the previous maximum value, the new point replaces
+		   the largest value. Otherwise the whole simplex gets contracted
+		   by shrinking all edges by a factor of 2 toward the point toward
+		   the point with the smallest function value. */
+
+        if ( y_2nd_try < y[ highest ] )
+        {
+            for ( j = 0; j < n; j++ )
+                p[ highest * n +  j ] = p_2nd_try[ j ];
+
+            y[ highest ] = y_2nd_try;
+        }
+        else
+            for ( i = 0; i < n + 1; i++ )
+            {
+                if ( i == lowest )
+                    continue;
+
+                for ( j = 0; j < n; j++ )
+                    p[ i * n + j ] =
+								0.5 * ( p[ i * n + j ] + p[ lowest * n +  j ]);
+
+				y[ i ] = func( p + n * i, par );
+            }
+    } while ( ! fsc2_simplex_is_minimum( n + 1, y, epsilon ) );
+
+	/* Pick the corner with the lowest function value and write its
+	   coordinates over the array with the start values, deallocate
+	   memory and return the minimum function value */
+
+    y_lowest = y[ 0 ];
+
+    for ( i = 1; i < n + 1; i++ )
+        if ( y_lowest > y[ i ] )
+            y_lowest = y[ lowest = i ];
+
+    for ( j = 0; j < n; j++ )
+        x[ j ] = p[ lowest * n + j ];
+
+    T_free( p );
+
+	return y_lowest;
+}
+
+
+/*-------------------------------------------------------------------*/
+/* Tests for the simplex() function if the minimum has been reached. */
+/* It checks if the ratio of the standard error of the function      */
+/* values at the corners of the simplex and the mean of the function */
+/* values is smaller than a constant 'epsilon'.                      */
+/* Arguments:                                                        */
+/* 1. number of corners of the simplex                               */
+/* 2. array of function values at the corners                        */
+/* 3. constant 'epsilon'                                             */
+/* Function returns 1 when the minimum has been found, 0 otherwise.  */
+/*-------------------------------------------------------------------*/
+
+static int fsc2_simplex_is_minimum( int n, double *y, double epsilon )
+{
+    int i;                      /* counter */
+    double yq,                  /* sum of function values */
+		   yq_2,                /* Sum of squares of function values */
+           dev;                 /* standard error of fucntion values */
+
+
+    for ( yq = 0.0, yq_2 = 0.0, i = 0; i < n; i++ )
+    {
+        yq += y[ i ];
+        yq_2 += y[ i ] * y[ i ];
+    }
+
+    dev = sqrt( ( yq_2 - yq * yq / n ) /  ( n - 1 ) );
+
+	return dev * n / fabs( yq ) < epsilon;
 }
 
 

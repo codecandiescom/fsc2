@@ -31,32 +31,6 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-#define SPECTRAPRO_300I_WAIT  100000   /* 100 ms */
-
-
-static bool spectrapro_300i_open( void );
-static bool spectrapro_300i_close( void );
-static long spectrapro_300i_get_turret( void );
-static void spectrapro_300i_set_turret( long turret );
-static long spectrapro_300i_get_grating( void );
-static void spectrapro_300i_set_grating( long grating );
-static void spectrapro_300i_get_gratings( void );
-static void spectrapro_300i_install_grating( char *part_no, long grating );
-static void spectrapro_300i_send( const char *buf );
-static char *spectrapro_300i_talk( const char *buf, size_t len,
-								   long wait_cycles );
-static bool spectrapro_300i_comm( int type, ... );
-static void spectrapro_300i_comm_fail( void );
-
-
-enum {
-	   SERIAL_INIT,
-	   SERIAL_EXIT,
-	   SERIAL_READ,
-	   SERIAL_WRITE
-};
-
-
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 
@@ -70,6 +44,7 @@ int spectrapro_300i_init_hook( void )
 	fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
 	spectrapro_300i.is_needed = SET;
+	spectrapro_300i.is_open = UNSET;
 
 	for ( i = 0; i < MAX_GRATINGS; i++ )
 	{
@@ -95,13 +70,9 @@ int spectrapro_300i_exp_hook( void )
 	if ( ! spectrapro_300i.is_needed )
 		return 1;
 
-	if ( ! spectrapro_300i_open( ) )
-		spectrapro_300i_comm_fail( );
+	spectrapro_300i_open( );
 
 	spectrapro_300i.use_calib = 0;
-	spectrapro_300i_get_gratings( );
-	spectrapro_300i.current_grating = spectrapro_300i_get_grating( ) - 1;
-	spectrapro_300i.turret = spectrapro_300i_get_turret( ) - 1;
 
 	return 1;
 }
@@ -112,7 +83,7 @@ int spectrapro_300i_exp_hook( void )
 
 int spectrapro_300i_end_of_exp_hook( void )
 {
-	if ( ! spectrapro_300i.is_needed )
+	if ( ! spectrapro_300i.is_needed || ! spectrapro_300i.is_open )
 		return 1;
 
 	spectrapro_300i_close( );
@@ -127,7 +98,8 @@ int spectrapro_300i_end_of_exp_hook( void )
 void spectrapro_300i_exit_hook( void )
 {
 	spectrapro_300i.is_needed = UNSET;
-	spectrapro_300i_close( );
+	if ( spectrapro_300i.is_open )
+		spectrapro_300i_close( );
 }
 
 
@@ -372,19 +344,20 @@ Var *monochromator_install_grating( Var *v )
 	if ( v->type != STR_VAR )
 	{
 		print( FATAL, "First variable must be a string with the part "
-			   "number, e.g. 1-120-500.\n" );
+			   "number, e.g. \"1-120-750\", or \"UNINSTALL\".\n" );
 		THROW( EXCEPTION );
 	}
 
 	/* Do some minimal checks on the part number */
 
-	if ( ! isdigit( v->val.sptr[ 0 ] ) ||
-		 v->val.sptr[ 0 ] != '-'       ||
-		 ! isdigit( v->val.sptr[ 2 ] ) ||
-		 ! isdigit( v->val.sptr[ 3 ] ) ||
-		 ! isdigit( v->val.sptr[ 4 ] ) ||
-		 ! v->val.sptr[ 5 ] != '-' || 
-		 strlen( v->val.sptr ) > 10 )
+	if ( strcmp( v->val.sptr, "UNINSTALL" ) &&
+		 ( ! isdigit( v->val.sptr[ 0 ] ) ||
+		   v->val.sptr[ 0 ] != '-'       ||
+		   ! isdigit( v->val.sptr[ 2 ] ) ||
+		   ! isdigit( v->val.sptr[ 3 ] ) ||
+		   ! isdigit( v->val.sptr[ 4 ] ) ||
+		   ! v->val.sptr[ 5 ] != '-' || 
+		   strlen( v->val.sptr ) > 10 ) )
 	{
 		print( FATAL, "First argument doesn't look like a valid part "
 			   "number.\n" );
@@ -401,7 +374,12 @@ Var *monochromator_install_grating( Var *v )
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )
-		spectrapro_300i_install_grating( v->val.sptr, grating );
+	{
+		if ( ! strcmp( v->val.sptr, "UNINSTALL" ) )
+			spectrapro_300i_uninstall_grating( grating );
+		else
+			spectrapro_300i_install_grating( v->val.sptr, grating );
+	}
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -438,535 +416,548 @@ Var *monochromator_groove_density( Var *v )
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 
-static bool spectrapro_300i_open( void )
+Var *monochromator_load_calibration( Var * v )
 {
-	return spectrapro_300i_comm( SERIAL_INIT );
-}
+	char *calib_file;
+	FILE *cfp;
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+	CLOBBER_PROTECT( cfp );
+	CLOBBER_PROTECT( calib_file );
 
-static bool spectrapro_300i_close( void )
-{
-	return spectrapro_300i_comm( SERIAL_EXIT );
-}
-
-
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
-
-static long spectrapro_300i_get_turret( void )
-{
-	const char *reply;
-	long turret;
-
-
-	reply = spectrapro_300i_talk( "?TURRET", 20, 1 );
-	turret = T_atol( reply );
-	T_free( ( void * ) reply );
-	return turret;
-}
-
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
-
-static void spectrapro_300i_set_turret( long turret )
-{
-	char *buf;
-
-
-	CLOBBER_PROTECT( buf );
-
-	fsc2_assert( turret >= 1 && turret <= MAX_TURRETS );
-
-	buf = get_string( "%ld TURRET", turret );
-
-	TRY
+	if ( v == NULL )
 	{
-		spectrapro_300i_send( buf );
-		T_free( buf );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( buf );
-		RETHROW( );
-	}
-
-}
-
-
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
-
-static long spectrapro_300i_get_grating( void )
-{
-	const char *reply;
-	long grating;
-
-
-	reply = spectrapro_300i_talk( "?GRATING", 20, 1 );
-	grating = T_atol( reply );
-	T_free( ( void * ) reply );
-	return grating;
-}
-
-
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
-
-static void spectrapro_300i_set_grating( long grating )
-{
-	char *buf;
-
-
-	CLOBBER_PROTECT( buf );
-
-	fsc2_assert( grating >= 1 && grating <= MAX_GRATINGS &&
-				 grating - spectrapro_300i.turret * 3 >= 1 &&
-				 grating - spectrapro_300i.turret * 3 <= 3 &&
-				 spectrapro_300i.grating[ grating - 1 ].is_installed );
-
-	buf = get_string( "%ld GRATING", grating );
-
-	TRY
-	{
-		spectrapro_300i_send( buf );
-		T_free( buf );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( buf );
-		RETHROW( );
-	}
-}
-
-
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
-
-static void spectrapro_300i_get_gratings( void )
-{
-	const char *reply;
-	const char *sp;
-	long gn, gr, bl;
-	int i;
-
-
-	reply = spectrapro_300i_talk( "?GRATINGS", 80 * MAX_GRATINGS, 5 );
-
-	for ( sp = reply, i = 0; i < MAX_GRATINGS; i++ )
-	{
-		while ( *sp != '\0' && ! isdigit( *sp ) )
-			sp++;
-
-		if ( *sp == '\0' )
-		{
-			T_free( ( void * ) reply );
-			spectrapro_300i_comm_fail( );
-		}
-
-		gn = 0;
-		while( *sp != '\0' && isdigit( *sp ) )
-			gn = gn * 10 + ( long ) ( *sp++ - '0' );
-
-		if ( *sp == '\0' || gn - 1 != i )
-		{
-			T_free( ( void * ) reply );
-			spectrapro_300i_comm_fail( );
-		}
-
-		while ( *sp != '\0' && isspace( *sp ) )
-			sp++;
-
-		if ( *sp == '\0' )
-		{
-			T_free( ( void * ) reply );
-			spectrapro_300i_comm_fail( );
-		}
-
-		if ( ! strncmp( sp, "Not Installed", 13 ) )
-		{
-			sp += 13;
-			continue;
-		}
-
-		if ( ! isdigit( *sp ) )
-		{
-			T_free( ( void * ) reply );
-			spectrapro_300i_comm_fail( );
-		}
-
-		gr = 0;
-		while( *sp != '\0' && isdigit( *sp ) )
-			gr = gr * 10 + ( long ) ( *sp++ - '0' );
-
-		if ( *sp == '\0' )
-		{
-			T_free( ( void * ) reply );
-			spectrapro_300i_comm_fail( );
-		}
-
-		spectrapro_300i.grating[ i ].grooves = gr * 1000;
-
-		while ( *sp != '\0' && isspace( *sp ) )
-			sp++;
-
-		if ( *sp == '\0' )
-		{
-			T_free( ( void * ) reply );
-			spectrapro_300i_comm_fail( );
-		}
-
-		if ( strncmp( sp, "g/mm BLZ=", 9 ) )
-		{
-			T_free( ( void * ) reply );
-			spectrapro_300i_comm_fail( );
-		}
-
-		sp += 9;
-
-		while ( *sp != '\0' && isspace( *sp ) )
-			sp++;
-
-		if ( *sp == '\0' )
-		{
-			T_free( ( void * ) reply );
-			spectrapro_300i_comm_fail( );
-		}
-
-		if ( ! isdigit( *sp ) )
-		{
-			spectrapro_300i.grating[ i ].blaze = -1;
-			while ( *sp != '\0' && isalpha( *sp ) )
-				sp++;
-			if ( *sp == '\0' )
-			{
-				T_free( ( void * ) reply );
-				spectrapro_300i_comm_fail( );
-			}
-		}
+		if ( DEFAULT_CALIB_FILE[ 0 ] ==  '/' )
+			calib_file = T_strdup( DEFAULT_CALIB_FILE );
 		else
+			calib_file = get_string( "%s%s%s", libdir, slash( libdir ),
+									 DEFAULT_CALIB_FILE );
+
+		TRY
 		{
-			bl = 0;
-			while( *sp != '\0' && isdigit( *sp ) )
-				bl = bl * 10 + ( long ) ( *sp++ - '0' );
-
-			if ( *sp == '\0' )
+			if ( ( cfp = spectrapro_300i_open_calib( calib_file ) ) == NULL )
 			{
-				T_free( ( void * ) reply );
-				spectrapro_300i_comm_fail( );
+				print( FATAL, "Default calibration file '%s' not found.\n",
+					   calib_file );
+				THROW( EXCEPTION );
 			}
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( calib_file );
+			RETHROW( );
+		}
+	}
+	else
+	{
+		vars_check( v, STR_VAR );
 
-			spectrapro_300i.grating[ i ].blaze = bl * 1.0e-9;
+		calib_file = T_strdup( v->val.sptr );
 
-			while ( *sp != '\0' && isspace( *sp ) )
-				sp++;
+		too_many_arguments( v );
 
-			if ( *sp == '\0' )
-			{
-				T_free( ( void * ) reply );
-				spectrapro_300i_comm_fail( );
-			}
+		TRY
+		{
+			cfp = spectrapro_300i_find_calib( calib_file );
+			TRY_SUCCESS;
+		}
+		CATCH( EXCEPTION )
+		{
+			T_free( calib_file );
+			RETHROW( );
+		}
+	}
 
-			if ( *sp == '\0' )
-			{
-				T_free( ( void * ) reply );
-				spectrapro_300i_comm_fail( );
-			}
+	TRY
+	{
+		spectrapro_300i_read_calib( cfp, calib_file );
+		TRY_SUCCESS;
+	}
+	CATCH( EXCEPTION )
+	{
+		fclose( cfp );
+		T_free( calib_file );
+		RETHROW( );
+	}
 
-			if ( strncmp( sp, "nm", 2 ) )
-			{
-				T_free( ( void * ) reply );
-				spectrapro_300i_comm_fail( );
-			}
+	fclose( cfp );
+	T_free( calib_file );
 
-			sp += 2;
+	spectrapro_300i.use_calib = SET;
+
+	return vars_push( INT_VAR, 1L );
+}
+
+
+/*-------------------------------------------------------------------*/
+/* Function returns an array of two values that are suitable for use */
+/* as axis description parameters required by by the change_scale()  */
+/* function (if the camera uses binning the second element may have  */
+/* to be multiplied by the x-binning width). Please note: since the  */
+/* axis is not really completely linear, the axis that gets displyed */
+/* when using these values is not 1000% correct!                     */
+/*-------------------------------------------------------------------*/
+
+Var *monochromator_wavelength_axis( Var * v )
+{
+	Var *cv;
+	double pixel_width;
+	long num_pixels;
+	size_t g;
+	double offset;
+	double inclusion_angle_2;
+	double focal_length;
+	double detector_angle;
+	double grating_angle;
+	double wl;
+	double wl_low;
+	double wl_hi;
+	double x;
+	double theta;
+	int acc;
+
+
+	UNUSED_ARGUMENT( v );
+
+	/* Check that we can talk with the camera */
+
+	if ( ! exists_device( "rs_spec10" ) )
+	{
+		print( FATAL, "Function can only be used when the module for the "
+			   "Roper Scientific Spec-10 CCD camera is loaded.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Get the width (in pixels) of the chip of the camera */
+
+	if ( ! func_exists( "ccd_camera_pixel_area" ) )
+	{
+		print( FATAL, "CCD camera has no function for determining the "
+			   "size of the chip.\n" );
+		THROW( EXCEPTION );
+	}
+
+	cv = func_call( func_get( "ccd_camera_pixel_area", &acc ) );
+
+	if ( cv->type != INT_ARR ||
+		 cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
+	{
+		print( FATAL, "Function of CCD for determining the size of the chip "
+			   "does not return a useful value.\n" );
+		THROW( EXCEPTION );
+	}
+
+	num_pixels = cv->val.lpnt[ 0 ];
+	vars_pop( cv );
+
+	/* Get the pixel size of the camera */
+
+	if ( ! func_exists( "ccd_camera_pixel_size" ) )
+	{
+		print( FATAL, "CCD camera has no function for determining the "
+			   "pixel size.\n" );
+		THROW( EXCEPTION );
+	}
+
+	cv = func_call( func_get( "ccd_camera_pixel_size", &acc ) );
+
+	if ( cv->type != FLOAT_VAR || cv->val.dval <= 0.0 )
+	{
+		print( FATAL, "Function of CCD for determining the pixel size "
+			   "does not return a useful value.\n" );
+		THROW( EXCEPTION );
+	}
+
+	pixel_width = cv->val.dval;
+	vars_pop( cv );
+
+	cv = vars_push( FLOAT_ARR, NULL, 2 );
+
+	/* If no calibration file has been read or there is no (complete)
+	   calibration for the current grating we just return values for
+	   a pixel count scale */
+
+	if ( ! spectrapro_300i.use_calib )
+	{
+		cv->val.dpnt[ 0 ] = - 0.5 * ( double ) ( num_pixels - 1 );
+		cv->val.dpnt[ 1 ] = 1;
+		return cv;
+	}
+
+	g = spectrapro_300i.current_grating;
+
+	if ( ! spectrapro_300i.grating[ g ].is_calib )
+	{
+		print( SEVERE, "No (complete) calibration for current grating #%ld "
+			   "found.\n", g + 1 );
+		cv->val.dpnt[ 0 ] = - 0.5 * ( double ) ( num_pixels - 1 );
+		cv->val.dpnt[ 1 ] = 1;
+		return cv;
+	}
+
+	wl = spectrapro_300i.wavelength;
+	offset = spectrapro_300i.grating[ g ].n0;
+	inclusion_angle_2 = 0.5 * spectrapro_300i.grating[ g ].inclusion_angle;
+	focal_length = spectrapro_300i.grating[ g ].focal_length;
+	detector_angle = spectrapro_300i.grating[ g ].detector_angle;
+
+	grating_angle = asin( 0.5 * wl * spectrapro_300i.grating[ g ].grooves
+						  / cos( inclusion_angle_2 ) );
+
+	x = - pixel_width * ( 0.5 * ( double ) ( num_pixels - 1 ) + offset );
+	theta = atan(   x * cos( detector_angle )
+				  / ( focal_length + x * sin( detector_angle ) ) );
+	wl_low = (   sin( grating_angle - inclusion_angle_2 )
+			   + sin( grating_angle + inclusion_angle_2 + theta ) )
+		     / spectrapro_300i.grating[ g ].grooves;
+
+	x = pixel_width * ( 0.5 * ( double ) ( num_pixels - 1 ) - offset );
+	theta = atan(   x * cos( detector_angle )
+				  / ( focal_length + x * sin( detector_angle ) ) );
+	wl_hi = (   sin( grating_angle - inclusion_angle_2 )
+			  + sin( grating_angle + inclusion_angle_2 + theta ) )
+		    / spectrapro_300i.grating[ g ].grooves;
+
+	cv->val.dpnt[ 0 ] = wl_low;
+	cv->val.dpnt[ 1 ] = ( wl_hi - wl_low ) / num_pixels;
+
+	return cv;
+}
+
+
+/*----------------------------------------------------------------------*/
+/* Function for calculating the calibration values of a grating of the  */
+/* monochromator. It takes the results of at least four measurements    */
+/* of pixel offsets for known lines from the center of the detector (at */
+/* possibly different center wavelengths) and thries to to find the     */
+/* values for the inclusion angle, focal length and detector angle that */
+/* reproduce these experimental values with the lowest deviation by     */
+/* doing a simplex minimization. Unfortunately, when trying to minimize */
+/* all three parameters data at once with only slightly noisy one runs  */
+/* into the simplex normally ends up with completely unrealistic values.*/
+/* Thus we have to minimze the three parameters individually, keeping   */
+/* both other fixed and starting with the inclusion angle, followed by  */
+/* the focal length and ending with the detector angle.                 */
+/* Input parameters:                                                    */
+/*  1. number of the grating that has been used                         */
+/*  2. array of wavelengths of the measured lines                       */
+/*  3. array of center wavelengths for the measured value               */
+/*  4. array of diffraction order for the measured values               */
+/*  5. array of measured pixel offsets (if necessary already corrected  */
+/*     for center wavelegth offsets)                                    */
+/* The following arguments are optional:                                */
+/*  6. end of fit criterion value                                       */
+/*  7. start value for fit of inclusion angle                           */
+/*  8. start value for fit of focal length                              */
+/*  9. start value for fit of detector angle                            */
+/* 10. start deviation for inclusion angle                              */
+/* 11. start deviation for focal length                                 */
+/* 12. start deviation for detector angle                               */
+/*----------------------------------------------------------------------*/
+
+Var *monochromator_calibration( Var *v )
+{
+	CALIB_PARAMS c;
+	Var *cv;
+	int acc;
+	long grating;
+	double *x = NULL, *dx;
+	double epsilon;
+	double val;
+	ssize_t i;
+
+
+	CLOBBER_PROTECT( x );
+	CLOBBER_PROTECT( v );
+
+	if ( ! exists_device( "rs_spec10" ) )
+	{
+		print( FATAL, "Function can only be used when the module for the "
+			   "Roper Scientific Spec-10 CCD camera is loaded.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	c.wavelengths = c.center_wavelengths = c.n_exp = NULL;
+	c.m = NULL;
+
+	/* Get the grating number */
+
+	grating = get_strict_long( v, "grating number" );
+
+	if ( ! spectrapro_300i.grating[ grating - 1 ].is_installed )
+	{
+		print( FATAL, "Grating #%ld isn't installed.\n", grating );
+		THROW( EXCEPTION );
+	}
+
+	v = vars_pop( v );
+
+	/* Get the array of wavelengths of the lines */
+
+	if ( ! ( v->type & ( INT_ARR | FLOAT_ARR ) ) || v->len < 4 )
+	{
+		print( FATAL, "Second argument isn't an array with at least "
+			   "4 wavelengths.\n" );
+		THROW( EXCEPTION );
+	}
+
+	TRY
+	{
+		c.num_values = v->len;
+		c.wavelengths = DOUBLE_P T_malloc( c.num_values
+										   * sizeof *c.wavelengths );
+		if ( v->type == INT_ARR )
+			for ( i = 0; i < v->len; i++ )
+				c.wavelengths[ i ] = ( double ) v->val.lpnt[ i ];
+		else
+			memcpy( c.wavelengths, v->val.dpnt,
+					c.num_values * sizeof *c.wavelengths );
+
+		if ( ( v = vars_pop( v ) ) == NULL )
+		{
+			print( FATAL, "Missing arguments.\n" );
+			THROW( EXCEPTION );
 		}
 
-		spectrapro_300i.grating[ i ].is_installed = SET;
-	}
+		/* Get the array of center wavelengths */
 
-	T_free( ( void * ) reply );
-}
-	
-
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
-
-static void spectrapro_300i_install_grating( char *part_no, long grating )
-{
-	char *buf;
-
-
-	fsc2_assert( grating >= 1 && grating <= MAX_GRATINGS );
-
-	buf = get_string( "%s %ld INSTALL", part_no, grating );
-
-	TRY
-	{
-		spectrapro_300i_send( buf );
-		T_free( buf );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( buf );
-		RETHROW( );
-	}
-}
-
-
-/*--------------------------------------------------------*/
-/* Function for commands that just get send to the device */
-/* and don't expect any replies.                          */
-/*--------------------------------------------------------*/
-
-static void spectrapro_300i_send( const char *buf )
-{
-	char *lbuf;
-	size_t len;
-	char reply[ 5 ];
-	int repeats = 100;
-
-
-	CLOBBER_PROTECT( repeats );
-
-	fsc2_assert( buf != NULL && *buf != '\0' );
-
-	lbuf = get_string( "%s\r", buf );
-	len = strlen( lbuf );
-
-	if ( ! spectrapro_300i_comm( SERIAL_WRITE, lbuf ) )
-	{
-		T_free( lbuf );
-		spectrapro_300i_comm_fail( );
-	}
-
-	/* The device always echos the command, we got to get rid of the echo */
-
-	TRY
-	{
-		if ( ! spectrapro_300i_comm( SERIAL_READ, lbuf, &len ) )
-			spectrapro_300i_comm_fail( );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( lbuf );
-		RETHROW( );
-	}
-
-	T_free( lbuf );
-
-	/* When the command just send has been executed " ok\r\n" gets returned */
-
-	while ( repeats-- >= 0 )
-	{
-		len = 5;
-		if ( spectrapro_300i_comm( SERIAL_READ, reply, &len ) )
-			break;
-		fsc2_usleep( SPECTRAPRO_300I_WAIT, UNSET );
-		stop_on_user_request( );
-	}
-
-	if ( repeats < 0 || len != 5 || strncmp( reply, " ok\r\n", 5 ) )
-		spectrapro_300i_comm_fail( );
-}
-
-
-/*---------------------------------------------------------------*/
-/* Function sends a command and returns a buffer (with a maximum */
-/* length of *len bytes) with the reply of the device.           */
-/*---------------------------------------------------------------*/
-
-static char *spectrapro_300i_talk( const char *buf, size_t len,
-								   long wait_cycles )
-{
-	char *lbuf;
-	size_t comm_len;
-
-
-	CLOBBER_PROTECT( lbuf );
-
-	fsc2_assert( buf != NULL && *buf != '\0' && len != 0 );
-
-	lbuf = get_string( "%s\r", buf );
-	comm_len = strlen( lbuf );
-
-	if ( ! spectrapro_300i_comm( SERIAL_WRITE, lbuf ) )
-	{
-		T_free( lbuf );
-		spectrapro_300i_comm_fail( );
-	}
-
-	/* The device always echos the command, we got to get rid of the echo */
-
-	TRY
-	{
-		if ( ! spectrapro_300i_comm( SERIAL_READ, lbuf, &comm_len ) )
-			spectrapro_300i_comm_fail( );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( lbuf );
-		RETHROW( );
-	}
-
-	T_free( lbuf );
-
-	/* Now we read the reply by the device, which is followed by " ok\r\n". */
-
-	fsc2_usleep( wait_cycles * SPECTRAPRO_300I_WAIT, SET );
-
-	lbuf = T_malloc( len + 6 );
-	len += 5;
-
-	TRY
-	{
-		if ( ! spectrapro_300i_comm( SERIAL_READ, lbuf, &len ) )
-			spectrapro_300i_comm_fail( );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( lbuf );
-		RETHROW( );
-	}
-
-	/* Cut off the " ok\r\n" stuff and return the buffer with the reply */
-
-	lbuf[ len ] = '\0';
-	if ( strncmp( lbuf + len - 5, " ok\r\n", 5 ) )
-	{
-		T_free( lbuf );
-		spectrapro_300i_comm_fail( );
-	}
-
-	len -= 5;
-	lbuf[ len ] = '\0';
-
-	TRY
-	{
-		T_realloc( lbuf, len + 1 );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( lbuf );
-		RETHROW( );
-	}
-
-	return lbuf;
-}
-
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-static bool spectrapro_300i_comm( int type, ... )
-{
-	va_list ap;
-	char *buf;
-	ssize_t len;
-	size_t *lptr;
-	long read_retries = 20;            /* number of times we try to read */
-
-
-	switch ( type )
-	{
-		case SERIAL_INIT :               /* open and initialize serial port */
-			/* We need exclussive access to the serial port and we also need
-			   non-blocking mode to avoid hanging indefinitely if the other
-			   side does not react. O_NOCTTY is set because the serial port
-			   should not become the controlling terminal, otherwise line
-			   noise read as a CTRL-C might kill the program. */
-
-			if ( ( spectrapro_300i.tio = fsc2_serial_open( SERIAL_PORT,
-					    DEVICE_NAME,
-						O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
-				return FAIL;
-
-			/* Switch off parity checking (8N1) and use of 2 stop bits and
-			   clear character size mask, set character size mask to CS8 and
-			   the flag for ignoring modem lines, enable reading and, finally,
-			   set the baud rate. */
-
-			spectrapro_300i.tio->c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
-			spectrapro_300i.tio->c_cflag |= CS8 | CLOCAL | CREAD;
-			cfsetispeed( spectrapro_300i.tio, SERIAL_BAUDRATE );
-			cfsetospeed( spectrapro_300i.tio, SERIAL_BAUDRATE );
-
-			fsc2_tcflush( SERIAL_PORT, TCIFLUSH );
-			fsc2_tcsetattr( SERIAL_PORT, TCSANOW, spectrapro_300i.tio );
-			break;
-
-		case SERIAL_EXIT :                    /* reset and close serial port */
-			fsc2_serial_close( SERIAL_PORT );
-			break;
-
-		case SERIAL_WRITE :
-			va_start( ap, type );
-			buf = va_arg( ap, char * );
-			va_end( ap );
-
-			len = strlen( buf );
-			if ( fsc2_serial_write( SERIAL_PORT, buf, len ) != len )
-				return FAIL;
-
-			break;
-
-		case SERIAL_READ :
-			va_start( ap, type );
-			buf = va_arg( ap, char * );
-			lptr = va_arg( ap, size_t * );
-			va_end( ap );
-
-			/* The monochromator might not be ready yet to send data, in
-			   this case we retry it a few times before giving up */
-
-			len = 1;
-			do
-			{
-				if ( len < 0 )
-				{
-					fsc2_usleep( SPECTRAPRO_300I_WAIT, SET );
-					stop_on_user_request( );
-				}
-
-				len = fsc2_serial_read( SERIAL_PORT, buf, *lptr );
-			} while ( len < 0 && errno == EAGAIN && read_retries-- > 0 );
-
-			if ( len < 0 )
-			{
-				*lptr = 0;
-				return FAIL;
-			}
-			else
-				*lptr = len;
-
-			break;
-
-		default :
-			print( FATAL, "INTERNAL ERROR detected at %s:%d.\n",
-				   __FILE__, __LINE__ );
+		if ( ! ( v->type & ( INT_ARR | FLOAT_ARR ) ) || v->len < 4 )
+		{
+			print( FATAL, "Third argument isn't an array with at least "
+				   "4 center wavelengths.\n" );
 			THROW( EXCEPTION );
+		}
+
+		if ( v->len != ( ssize_t ) c.num_values )
+		{
+			print( FATAL, "Number of wavelengths and center wavelengths "
+				   "differ.\n" );
+			THROW( EXCEPTION );
+		}
+
+		c.center_wavelengths = DOUBLE_P T_malloc( c.num_values
+											  * sizeof *c.center_wavelengths );
+
+		if ( v->type == INT_ARR )
+			for ( i = 0; i < v->len; i++ )
+				c.center_wavelengths[ i ] = ( double ) v->val.lpnt[ i ];
+		else
+			memcpy( c.center_wavelengths, v->val.dpnt,
+					c.num_values * sizeof *c.center_wavelengths );
+
+		if ( ( v = vars_pop( v ) ) == NULL )
+		{
+			print( FATAL, "Missing arguments.\n" );
+			THROW( EXCEPTION );
+		}
+
+		/* Get the array of diffraction orders */
+
+		if ( ! ( v->type & ( INT_ARR | FLOAT_ARR ) ) || v->len < 4 )
+		{
+			print( FATAL, "Fourth argument isn't an array with at least "
+				   "4 diffraction orders.\n" );
+			THROW( EXCEPTION );
+		}
+
+		if ( v->len != ( ssize_t ) c.num_values )
+		{
+			print( FATAL, "Number of wavelengths and diffraction orders "
+				   "differ.\n" );
+			THROW( EXCEPTION );
+		}
+
+		c.m = LONG_P T_malloc( c.num_values * sizeof *c.m );
+
+		if ( v->type == INT_ARR )
+			memcpy( c.m, v->val.lpnt, c.num_values * sizeof *c.m );
+		else
+			for ( i = 0; i < v->len; i++ )
+				c.m[ i ] = lrnd( v->val.dpnt[ i ] );
+
+		if ( ( v = vars_pop( v ) ) == NULL )
+		{
+			print( FATAL, "Missing arguments.\n" );
+			THROW( EXCEPTION );
+		}
+
+		/* Get the array of position offsets (in pixel) */
+
+		if ( ! ( v->type & ( INT_ARR | FLOAT_ARR ) ) || v->len < 4 )
+		{
+			print( FATAL, "Fifth argument isn't an array with at least "
+				   "4 line position offsets.\n" );
+			THROW( EXCEPTION );
+		}
+
+		if ( v->len != ( ssize_t ) c.num_values )
+		{
+			print( FATAL, "Number of wavelengths and position offsets "
+				   "differ.\n" );
+			THROW( EXCEPTION );
+		}
+
+		c.n_exp = DOUBLE_P T_malloc( c.num_values * sizeof *c.n_exp );
+
+		if ( v->type == INT_ARR )
+			for ( i = 0; i < v->len; i++ )
+				c.n_exp[ i ] = ( double ) v->val.lpnt[ i ];
+		else
+			memcpy( c.n_exp, v->val.dpnt, c.num_values * sizeof *c.n_exp );
+
+		v = vars_pop( v );
+
+		/* Get the grating constant */
+
+		c.d = 1.0 / spectrapro_300i.grating[ grating - 1 ].grooves;
+	
+		/* Get the pixel size of the camera */
+
+		if ( ! func_exists( "ccd_camera_pixel_size" ) )
+		{
+			print( FATAL, "CCD camera has no function for determining the "
+				   "pixel size.\n" );
+			THROW( EXCEPTION );
+		}
+
+		cv = func_call( func_get( "ccd_camera_pixel_size", &acc ) );
+		if ( cv->type != FLOAT_VAR || cv->val.dval <= 0.0 )
+		{
+			print( FATAL, "Function of CCD for determining the pixel size "
+				   "does not return a useful value.\n" );
+			THROW( EXCEPTION );
+		}
+
+		c.pixel_width = cv->val.dval;
+		vars_pop( cv );
+
+		/* Get two arrays, one for the parameters we want to minimize and one
+		   for the start deviations. Than either initialize them with default
+		   values or with input arguments. Make sure that the values are
+		   reasonable and none of the deviations are exactly 0. */
+
+		x = DOUBLE_P T_malloc( 6 * sizeof *x );
+		dx = x + 3;
+
+		x[ 0 ] = DEFAULT_INCLUSION_ANGLE;
+		x[ 1 ] = SPECTRAPRO_300I_FOCAL_LENGTH;
+		x[ 2 ] = DEFAULT_DETECTOR_ANGLE;
+
+		dx[ 0 ] = 0.1 * x[ 0 ];
+		dx[ 1 ] = 0.025 * x[ 1 ];
+		dx[ 2 ] = DEFAULT_DETECTOR_ANGLE_DELTA;
+
+		epsilon = DEFAULT_EPSILON;
+
+		if ( v != NULL )
+		{
+			epsilon = get_double( v, "minimization limit" );
+			if ( epsilon == 0.0 )
+				epsilon = 1.0e-12;
+		}
+
+		if ( v != NULL && ( v = vars_pop( v ) ) != NULL )
+		{
+			x[ 0 ] = get_double( v, "inclusion angle" );
+			if ( x[ 0 ] == 0.0 )
+				x[ 0 ] = 10.0 * atan( 1.0 ) / 9.0;
+		}
+
+		if ( v != NULL && ( v = vars_pop( v ) ) != NULL )
+		{
+			x[ 1 ] = get_double( v, "focal length" );
+			if ( x[ 1 ] == 0.0 )
+				x[ 1 ] = SPECTRAPRO_300I_FOCAL_LENGTH;
+		}
+
+		if ( v != NULL && ( v = vars_pop( v ) ) != NULL )
+			x[ 2 ] = get_double( v, "detector angle" );
+
+		if ( v != NULL && ( v = vars_pop( v ) ) != NULL )
+		{
+			dx[ 0 ] = get_double( v, "deviation for inclusion angle" );
+			if ( dx[ 0 ] == 0.0 )
+				dx[ 0 ] = 0.01 * x[ 0 ];
+		}
+
+		if ( v != NULL && ( v = vars_pop( v ) ) != NULL )
+		{
+			dx[ 1 ] = get_double( v, "deviation for focal length" );
+			if ( dx[ 1 ] == 0.0 )
+				dx[ 1 ] = 0.01 * x[ 1 ];
+		}
+
+		if ( v != NULL && ( v = vars_pop( v ) ) != NULL )
+		{
+			dx[ 2 ] = get_double( v, "deviation for detector angle" );
+			if ( dx[ 2 ] == 0.0 )
+				dx[ 2 ] = dx[ 2 ] = atan( 1.0 ) / 900.0;
+		}
+
+		too_many_arguments( v );
+
+//		if ( FSC2_MODE == EXPERIMENT )
+		{
+			c.opt = 0;
+			c.focal_length   = x[ 1 ];
+			c.detector_angle = x[ 2 ];
+			val = fsc2_simplex( 1, x, dx, ( void * ) &c, spectrapro_300i_min,
+								epsilon );
+
+			c.inclusion_angle = x[ 0 ];
+
+			c.opt = 1;
+			x[ 0 ] = c.focal_length;
+			dx[ 0 ] = dx[ 1 ];
+			val = fsc2_simplex( 1, x, dx, ( void * ) &c, spectrapro_300i_min,
+								epsilon );
+			c.focal_length = x[ 0 ];
+
+			c.opt = 2;
+			x[ 0 ] = x[ 2 ];
+			dx[ 0 ] = dx[ 2 ];
+			val = fsc2_simplex( 1, x, dx, ( void * ) &c, spectrapro_300i_min,
+								epsilon );
+			x[ 2 ] = x[ 0 ];
+			x[ 0 ] = c.inclusion_angle;
+			x[ 1 ] = c.focal_length;
+		}
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		if ( c.wavelengths != NULL )
+			T_free( c.wavelengths );
+		if ( c.center_wavelengths != NULL )
+			T_free( c.center_wavelengths );
+		if ( c.m != NULL )
+			T_free( c.m );
+		if ( c.n_exp != NULL )
+			T_free( c.n_exp );
+		if ( x != NULL )
+			T_free( x );
+		RETHROW( );
 	}
 
-	return OK;
-}
+	x[ 0 ] *= 45.0 / atan( 1.0 );
+	x[ 2 ] *= 45.0 / atan( 1.0 );
+	cv = vars_push( FLOAT_ARR, x, 3 );
 
+	T_free( c.wavelengths );
+	T_free( c.center_wavelengths );
+	T_free( c.m );
+	T_free( c.n_exp );
+	T_free( x );
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
-
-static void spectrapro_300i_comm_fail( void )
-{
-	print( FATAL, "Can't access the monochromator.\n" );
-	THROW( EXCEPTION );
+	return cv;
 }
 
 

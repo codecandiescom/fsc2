@@ -44,6 +44,8 @@ int is_in( const char *supplied_in, const char **alternatives, int max );
 void i2rgb( double h, int *rgb );
 void create_colors( void );
 Var *convert_to_channel_number( const char *channel_name );
+double fsc2_simplex( size_t n, double *x, double *dx, void *par,
+					 double func( double *x, void *par ), double epsilon );
 
 
 #endif  /* ! UTIL_HEADER */

@@ -71,12 +71,12 @@ TWS      [\t ,;:]+\n
 INT      [0-9]+
 EXPO     [EDed][+-]?{INT}
 FLOAT    [+-]?((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
-D        {INT}|{FLOAT}
+D        ([+-]?{INT})|{FLOAT}
 NE       N_?{INT}
 IAE      INCLUSION_ANGLE_?{INT}
 FLE      FOCAL_LENGTH_?{INT}
 DAE      DETECTOR_ANGLE_?{INT}
-DU       {INT}|{FLOAT}[\t ]+(M|k|m|u|n)?m
+DU       (([+-]?{INT})|{FLOAT})[\t ]?("M"|"k"|"m"|"u"|"n")?"m"
 
 %x      comm
 
@@ -126,8 +126,8 @@ DU       {INT}|{FLOAT}[\t ]+(M|k|m|u|n)?m
 {FLE}       return FL_ENTRY;
 {DAE}       return DA_ENTRY;
 
-{D}         return DATA_TYPE;
 {DU}        return DATA_U_TYPE;
+{D}         return DATA_TYPE;
 
 			/* dump empty line (i.e. just containing tabs and spaces) */
 {WLWS}      spectrapro_300i_Lc++;
@@ -253,8 +253,8 @@ static void spectrapro_300i_new_entry( int type, const char *calib_file )
 	long grating;
 	double value;
 	int value_type;
-	const char *type_names[ ] = { "Center offset", "Inclusion angle"
-								  "Focal length", "Detector angle" };
+	const char *type_names[ ] = { "center pixel offset", "inclusion angle",
+								  "focal length", "detector angle" };
 
 
 	if ( type < N_ENTRY && type > DA_ENTRY )
@@ -288,8 +288,9 @@ static void spectrapro_300i_new_entry( int type, const char *calib_file )
 	}
 
 	if ( spectrapro_300i_calibs[ grating ].is_calib[ type ] )
-		print( SEVERE, "%s for grating %ld defined more than once in "
-			   "calibration file '%s'.\n", type_names[ type ], calib_file );
+		print( SEVERE, "Repeated definition of %s for grating %ld at line "
+			   "%ld of calibration file '%s'.\n", type_names[ type ],
+			   grating + 1, spectrapro_300i_Lc, calib_file );
 
 	value_type = spectrapro_300i_lex( );
 
@@ -323,7 +324,7 @@ static void spectrapro_300i_new_entry( int type, const char *calib_file )
 				break;
 
 			case 'k' :
-				value *= 1.0e-3;
+				value *= 1.0e3;
 				break;
 
 			case 'm' :
@@ -344,6 +345,21 @@ static void spectrapro_300i_new_entry( int type, const char *calib_file )
 		}
 	}
 
-	spectrapro_300i_calibs[ grating ].val[ type ] = value;
+	/* Negative values for the inclusion angle or the focal length can't
+	   be right... */
+
+	if ( ( type + 1 == IA_ENTRY || type + 1 == FL_ENTRY ) && value <= 0.0 )
+	{
+		print( FATAL, "Invalid negative value for %s at line %ld in "
+			   "calibration file '%s'.\n", type_names[ type ],
+			   spectrapro_300i_Lc, calib_file );
+		THROW( EXCEPTION );
+	}
+
+	if ( type + 1 == N_ENTRY || type + 1 == FL_ENTRY )
+		spectrapro_300i_calibs[ grating ].val[ type ] = value;
+	else
+		spectrapro_300i_calibs[ grating ].val[ type ] =
+													  value * atan( 1.0 ) / 45;
 	spectrapro_300i_calibs[ grating ].is_calib[ type ] = SET;
 }

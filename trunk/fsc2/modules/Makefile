@@ -28,34 +28,35 @@ simp_modules  := User_Functions sr510 sr530 sr810 sr830 aeg_s_band        \
 				 aeg_x_band er035m er035m_s hp5340a er035m_sa er035m_sas  \
 				 bh15 keithley228a egg4402 kontron4060 lakeshore330       \
 				 pt2025 er032m ips20_4 $(s_band_list) ni6601 me6000       \
-				 thurlby330 spectrapro_300i
+				 thurlby330
 
-comp_modules  := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400  \
-				 hp8672a $(hp864_list) $(tds_list) rs_spec10
+comp_modules    := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400  \
+				   hp8672a $(hp864_list) $(tds_list) rs_spec10 spectrapro_300i
 
-dg2020_f      := dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c  \
-				 dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
-dg2020_b      := dg2020_b.c dg2020_gen_b.c dg2020_pulse_b.c dg2020_util_b.c  \
-				 dg2020_init_b.c dg2020_run_b.c dg2020_gpib_b.c
-hfs9000       := hfs9000.c hfs9000_gen.c hfs9000_pulse.c hfs9000_util.c  \
-				 hfs9000_init.c hfs9000_run.c hfs9000_gpib.c
-ep385         := ep385.c ep385_gen.c ep385_pulse.c ep385_util.c  \
-				 ep385_init.c ep385_run.c ep385_gpib.c
-rs690         := rs690.c rs690_gen.c rs690_pulse.c rs690_util.c  \
-				 rs690_init.c rs690_run.c rs690_gpib.c
-tds754a       := tds754a.c tds754a_gpib.c tds754a_util.c
-tds744a       := tds744a.c tds744a_gpib.c tds744a_util.c
-tds540        := tds540.c  tds540_gpib.c  tds540_util.c
-tds520c       := tds520c.c tds520c_gpib.c tds520c_util.c
-tds520a       := tds520a.c tds520a_gpib.c tds520a_util.c
-tds520        := tds520.c  tds520_gpib.c  tds520_util.c
-hp8647a       := hp8647a.c hp8647a_util.c hp8647a_gpib.c hp8647a_lexer.c
-hp8648b       := hp8648b.c hp8648b_util.c hp8648b_gpib.c hp8648b_lexer.c
-hp8672a       := hp8672a.c hp8672a_util.c hp8672a_gpib.c hp8672a_lexer.c
-er023m        := er023m.c  er023m_addon.c er023m_gpib.c
-lecroy9400    := lecroy9400.c lecroy9400_gpib.c  lecroy9400_util.c
-rs_spec10     := rs_spec10.c rs_spec10_int.c rs_spec10_util.c
-
+dg2020_f        := dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
+			       dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
+dg2020_b        := dg2020_b.c dg2020_gen_b.c dg2020_pulse_b.c dg2020_util_b.c \
+			       dg2020_init_b.c dg2020_run_b.c dg2020_gpib_b.c
+hfs9000         := hfs9000.c hfs9000_gen.c hfs9000_pulse.c hfs9000_util.c  \
+			       hfs9000_init.c hfs9000_run.c hfs9000_gpib.c
+ep385           := ep385.c ep385_gen.c ep385_pulse.c ep385_util.c  \
+			       ep385_init.c ep385_run.c ep385_gpib.c
+rs690           := rs690.c rs690_gen.c rs690_pulse.c rs690_util.c  \
+			       rs690_init.c rs690_run.c rs690_gpib.c
+tds754a         := tds754a.c tds754a_gpib.c tds754a_util.c
+tds744a         := tds744a.c tds744a_gpib.c tds744a_util.c
+tds540          := tds540.c  tds540_gpib.c  tds540_util.c
+tds520c         := tds520c.c tds520c_gpib.c tds520c_util.c
+tds520a         := tds520a.c tds520a_gpib.c tds520a_util.c
+tds520          := tds520.c  tds520_gpib.c  tds520_util.c
+hp8647a         := hp8647a.c hp8647a_util.c hp8647a_gpib.c hp8647a_lexer.c
+hp8648b         := hp8648b.c hp8648b_util.c hp8648b_gpib.c hp8648b_lexer.c
+hp8672a         := hp8672a.c hp8672a_util.c hp8672a_gpib.c hp8672a_lexer.c
+er023m          := er023m.c  er023m_addon.c er023m_gpib.c
+lecroy9400      := lecroy9400.c lecroy9400_gpib.c  lecroy9400_util.c
+rs_spec10       := rs_spec10.c rs_spec10_int.c rs_spec10_util.c
+spectrapro_300i := spectrapro_300i.c spectrapro_300i_ll.c  \
+				   spectrapro_300i_lexer.c
 
 src_headers   := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h
 
