@@ -348,7 +348,7 @@ Var *magnet_use_correction( Var *v )
 	else
 	{
 		keithley228a.use_correction = get_boolean( v );
-		too_many_arguments( );
+		too_many_arguments( v );
 	}
 
 	if ( FSC2_MODE == PREPARATION )
