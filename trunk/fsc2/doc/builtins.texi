@@ -52,11 +52,11 @@ used).
 The second class of functions are interaction functions, functions that
 allow to deal with additional graphical objects like buttons, sliders and
 in- and output fields. These functions control the creation, setting,
-query and deletion of these objetcts.
+query and deletion of these objects.
 
 The third class of functions are mathematical functions that one would
 expect to find in most programming languages like (i.e.@: trigonometric
-functions, logarithms etc.@:). Finally, the fourth class are auxillary
+functions, logarithms etc.@:). Finally, the fourth class are auxiliary
 functions that can't be assigned to one of the other classes and
 consists of functions for dealing with time or date issues or for
 determining the sizes of arrays and other.
@@ -68,13 +68,13 @@ determining the sizes of arrays and other.
 
 Before delving into the details of the functions for drawing measured
 data into the main display window a short explanation of the basic ideas
-probably is in order. You have to distingish between 1D- and
+probably is in order. You have to distinguish between 1D- and
 2D-display. In 1D-display to display a new data point you have to
 specify the @i{x}- and the @i{y}-coordinate of the point. The
 @i{x}-coordinate is always an integer number, where @code{1} indicates
 the left-most point in the window. For the @i{y}-coordinate you simply
 specify the measured value. To be able to draw a meaningful @i{x}-axis
-the programm needs another piece of information: the starting point of
+the program needs another piece of information: the starting point of
 the @i{x}-axis and the difference between the points drawn at the
 @i{x}-axis. For example, if you do an cw-EPR experiment, starting with a
 field of @w{3400 G} with spacing of @w{0.5 G} between the data points
@@ -86,11 +86,11 @@ point numbered @code{1} is drawn at @w{3400 G}, the point numbered
 appear at @w{3410 G}.
 
 In contrast, for a 2D-display you have to specify three coordinates for
-a new data point. Here both the @i{x}- amd @i{y}-coordinate are integers,
+a new data point. Here both the @i{x}- and @i{y}-coordinate are integers,
 both starting at @code{1}. The point with both the @i{x}- and
 @i{y}-coordinate set to @code{1} is the left-most point at the bottom of
 the window. The third coordinate is the measured value, which usually
-will be a floating point number. As already in case of 1D-displays tzhe
+will be a floating point number. As already in case of 1D-displays the
 program needs some more information to be able to draw useful axis. But
 here not only the starting point and increment for the @i{x}-axis must
 be given but also values for the @i{y}-axis.
@@ -98,7 +98,7 @@ be given but also values for the @i{y}-axis.
 Finally, another point: If you have not only one data point to draw but
 a whole array you can do this without having to draw each point on its
 own. Instead, when in the function for drawing you enter a
-(ome-dimensional) array instead of a value (as the @i{y}-coordinate for
+(one-dimensional) array instead of a value (as the @i{y}-coordinate for
 1D-display or the @i{z}-coordinate for 2D-display) all the points of the
 array will be drawn, starting at the place you specified and from there
 to the right, i.e.@: always in the @i{x}-direction.
@@ -277,7 +277,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{change_label}
 @item change_label()
 @findex change_label()
-Using this function the labels at the axis of te display window (and, if
+Using this function the labels at the axis of the display window (and, if
 shown, of the cross section window) can be changed from within as
 @acronym{EDL} program. For 1D-display it accepts up to two strings for
 the @i{x}- and @i{y}-axis labels, for 2D-display up to three, the third
@@ -292,7 +292,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{rescale}
 @item rescale()
 @findex rescale()
-In the funtion @code{init_1d()} or @code{init_2d()} the number of points
+In the function @code{init_1d()} or @code{init_2d()} the number of points
 in @i{x}- (and @i{y}-) direction can be set. If, during the experiment
 more points are displayed then set in the initialization, the scaling of
 the axis (or axis in the 2D-case) will be changed automatically. Using
@@ -353,7 +353,7 @@ But you can have not only one but as many placeholder characters in the
 characters has to match the number of variables (or data) following the
 @i{format string}. If the number of @code{#}'s and the number of
 variables to be printed doesn't fit a warning is printed. If there are
-too many @code{#}'s the superfluous ones are simply printed aout, but if
+too many @code{#}'s the superfluous ones are simply printed out, but if
 there are not enough only as many variables as there are @code{#}'s are
 printed, the remaining data are discarded.
 
@@ -465,7 +465,7 @@ argument is the expected extension of the file that was selected via the
 previous call of @code{get_file()}. And the third argument is the
 replacement for the extension of the previously selected file. If the
 second argument does not fit with the extension of the file the user had
-choosen, the new extension from the third argument is appended to the
+chosen, the new extension from the third argument is appended to the
 file name (instead of replacing the extension).
 
 A typical piece of code to open two files, the first with the extension
@@ -646,7 +646,7 @@ first argument can be a file identifier.
 The format string may contain two types of objects: ordinary characters,
 which are copied to the file, and conversion specifications, each of
 which conversion and printing of the next successive argument. Each
-cionversion specifier begins with the character @code{%} and ends with
+conversion specifier begins with the character @code{%} and ends with
 a conversion character. In between there may first a flag, which
 modifies the specification:
 @itemize
@@ -670,15 +670,15 @@ taken as the minimum field width. The converted argument will be printed
 in a field at least this wide, and wider if necessary. If the converted
 argument has fewer characters than the field width it will be padded on
 the left (or on the right, if left adjustment has been requested) to
-make up for the field with. The padding character os normally space,
-butis @code{0} if the zero padding flag is present.
+make up for the field with. The padding character normally is the space
+character except and only @code{0} if the zero padding flag is present.
 
 The next character can be a period, which separates the field width from
 the precision, followed by another number, the precision, that specifies
 the maximum number of characters to be printed from a string, or the
 number of digits to be printed after the decimal point for @code{e},
 @code{E}, or @code{f} conversion, or the number of significant digits
-for @code{g} or @code{G} conversion, or the minimum nmber of digits to
+for @code{g} or @code{G} conversion, or the minimum number of digits to
 be printed for an integer (leading @code{0}s will be added to make up
 the necessary width).
 
@@ -690,27 +690,27 @@ In contrast to the @code{printf()} format string no length modifier can
 be used - @acronym{fsc2} has no different short, long or long long
 variable types.
 
-The following table lists all conversion charatcers. If the character
-found in the format string is nopt a valid conversion specifier the
+The following table lists all conversion characters. If the character
+found in the format string is not a valid conversion specifier the
 function will abort and print an error message.
 @table @samp
 @item d, i
 Integer value, if the argument is not an integer but a floating point
 number its value is rounded to the next integer.
 @item f
-floating point value, if the argment is an integer it is converted to a
+floating point value, if the argument is an integer it is converted to a
 floating point value; decimal notation of the form @i{[-]mmm.ddd}, where
 the number of @i{d}'s is specified by the precision. The default
 precision is 6; a precision of @code{0} suppresses the decimal point
 @item e, E
-floating point value, if the argment is an integer it is converted to a
+floating point value, if the argument is an integer it is converted to a
 floating point value; decimal notation in either the form
 @w{@i{[-]mmm.dddddd}@code{e}@i{[+-]xx}} or
 @w{@i{[-]mmm.dddddd}@code{E}@i{[+-]xx}}, where the number of @i{d}'s is
 specified by the precision. The default precision is 6, a precision of
 @code{0} suppresses the decimal point.
 @item g, G
-floating point value, if the argment is an integer it is converted to a
+floating point value, if the argument is an integer it is converted to a
 floating point value; @code{%e} or @code{%E} is used if the exponent is
 less than -4 or greater than or equal to the precision, otherwise
 @code{%f} is used. Trailing zeros and a trailing decimal point are not
@@ -882,7 +882,7 @@ group of radio buttons.
 @item button_delete()
 @findex button_delete()
 Using this function one or more buttons can be deleted. It expects one
-or a list of button identifiers (separated by commata) as returned by
+or a list of button identifiers (separated by commas) as returned by
 the function @code{button_create()}.
 
 If the group leader (i.e.@: the first button) of a group of radio
@@ -899,7 +899,7 @@ deleted immediately afterwards).
 @findex button_state()
 This function returns or sets the state of a button, depending on the
 number of arguments passed to the function. The non-optional first
-argument is the identifier of the button as irt was returned by the
+argument is the identifier of the button as it was returned by the
 function @code{button_create()}. If there are no more arguments the
 state of the button is returned. There is a difference between the
 values returned for normal buttons on the one side and push and radio
@@ -940,9 +940,9 @@ The second argument must be the minimum value the slider can be adjusted
 to and the third argument is the maximum value. The minimum value must
 always be smaller than the maximum value.
 
-A fourth, optional paramter is the step size to be used, i.e.@: the
+A fourth, optional parameter is the step size to be used, i.e.@: the
 minimum increment the slider value can be changed. Of course, this value
-has to be larger than zero and smaller than the differenece between the
+has to be larger than zero and smaller than the difference between the
 minimum and maximum value of the slider.
 
 As in the case of buttons there are two more (optional) arguments, the
@@ -984,7 +984,7 @@ different types of input fields, one, that will only accept integer
 values, while the other also allows input of floating point numbers. The
 first argument of the function for creating an input field,
 @code{input_create()}, is the type of the input field. If the first
-argument is @code{"INT_INPUT"} the input field will only accept interger
+argument is @code{"INT_INPUT"} the input field will only accept integer
 numbers, while with an argument of @code{"FLOAT_INPUT"} also floating
 point numbers can be entered. (@code{"INT_INPUT"} can be replaced by the
 numerical argument @code{0} and @code{"FLOAT_INPUT"} by 1.)
@@ -996,7 +996,7 @@ initialized to @code{0}.
 
 As in the case of buttons and sliders there are two more (optional)
 arguments, the label to be shown below the input field and a help
-text. The same escape sequences as for button and lider labels and help
+text. The same escape sequences as for button and slider labels and help
 texts can be used for buttons and sliders.
 
 The final, optional field for an input object is a format string that is
@@ -1005,7 +1005,7 @@ of a C format string. It must start with @code{%}, optionally followed
 by the minimum field width, a dot, the precision and finally
 (non-optionally) either @code{f}, @code{e} or @code{g} (or @code{F},
 @code{E} or @code{G}). For more information please read the manual page
-for C's printf(3).
+for @code{C}'s @code{printf(3)}.
 
 
 @anchor{input_delete}
@@ -1035,7 +1035,7 @@ only accept integer values, while the other also allows output of
 floating point numbers. The first argument of the function for creating
 an output field, @code{output_create()}, is the type of the output
 field. If the first argument is @code{"INT_OUTPUT"} the output field
-will only show interger numbers, while with an argument of
+will only show integer numbers, while with an argument of
 @code{"FLOAT_OUTPUT"} also floating point numbers can be
 displayed. (@code{"INT_OUTPUT"} can be replaced by the numerical
 argument 2 and @code{"FLOAT_OUTPUT"} by 3.)
@@ -1047,7 +1047,7 @@ initialized to @code{0}.
 
 As in the case of buttons and sliders there are two more (optional)
 arguments, the label to be shown below the input field and a help
-text. The same escape sequences as for button and lider labels and help
+text. The same escape sequences as for button and slider labels and help
 texts can be used for buttons and sliders.
 
 The final, optional field for an output object is a format string that is
@@ -1056,7 +1056,7 @@ of a C format string. It must start with @code{%}, optionally followed
 by the minimum field width, a dot, the precision and finally
 (non-optionally) either @code{f}, @code{e} or @code{g} (or @code{F},
 @code{E} or @code{G}). For more information please read the manual page
-for C's printf(3).
+for @code{C}'s @code{printf(3)}.
 
 
 @anchor{output_delete}
@@ -1189,9 +1189,9 @@ size of the array.
 @item grandom()
 @findex grandom()
 If called without an argument the function returns one of a set of
-pseudo-randoms number with gaussian distribution, a mean of zero and a
+pseudo-random number with Gaussian distribution, a mean of zero and a
 variance of 1. If called with a non-zero, positive argument it returns
-an array of gaussian distributed random numbers where the argument
+an array of Gaussian distributed random numbers where the argument
 specifies the size of the array. These random numbers are probably
 better suited for simulating noise than the ones returned by
 @code{random()}.

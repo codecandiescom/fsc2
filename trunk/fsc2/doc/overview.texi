@@ -58,21 +58,22 @@ by writing a (usually rather small) program. @acronym{fsc2} will
 interpret this program and do the experiment accordingly. Writing a
 program may sound difficult, but the @acronym{EDL} language that is used
 to define an experiment isn't very hard to learn (it's much simpler
-than, for example, @code{C}). And when this hurdle is taken you will
-have complete control over the way the experiment will be done. Just to
-give a few very simple examples: sometimes signals are distributed over
-a large field range with nothing of interest in between, so it would be
-nice to just skip these regions. Most normal programs won't allow this
-and one has to either record also the uninteresting field regions (thus
-loosing lots of time) or to restart the experiments for each of the
-regions of interest manually. In contrast, with @acronym{fsc2} it
-shouldn't take more than a few minutes to write an @code{EDL} program
-consisting of just a few lines of code that can not only skip these
-regions but also repeat the experiment as often as needed, and if
-necessary do different numbers of accumulations of the different parts
-(if, for example, some of the signals are huge while others are hardly
-detectable above the noise floor) or with automatically changing the
-lock-in amplifiers sensitivity or time constant in between.
+than, for example, @code{C}). And when this hurdle has been taken you
+will have complete control over the way the experiment will be
+done. Just to give a few very simple examples: sometimes signals are
+distributed over a large field range with nothing of interest in
+between, so it would be nice to just skip these regions. Most normal
+programs won't allow this and one has to either record also the
+uninteresting field regions (thus loosing lots of time) or to restart
+the experiments for each of the regions of interest manually. In
+contrast, with @acronym{fsc2} it shouldn't take more than a few minutes
+to write an @code{EDL} program consisting of just a few lines of code
+that can not only skip these regions but also repeat the experiment as
+often as needed, and if necessary do different numbers of accumulations
+of the different parts (if, for example, some of the signals are huge
+while others are hardly detectable above the noise floor) or with
+automatically changing the lock-in amplifiers sensitivity or time
+constant in between.
 
 But one does not have to write new program for every experiment one is
 going to do - for the standard experiments once such a program has been
