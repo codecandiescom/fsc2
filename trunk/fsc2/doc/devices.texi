@@ -84,7 +84,7 @@ Since it is not possible to measure the field using just the magnet
 power supply it is necessary also to specify a gaussmeter to enable
 @acronym{fsc2} to control the magnet. The module name of the gaussmeter
 has to appear @b{before} the magnet module entry in the @code{DEVICES}
-section. See the next section for the implemented gaussmeters and the
+section. See the next section for the implemented gaussmeter and the
 related functions.
 
 If a magnet module is listed in the @code{DEVICES} section the program
@@ -154,7 +154,7 @@ can only be used in the @code{EXPERIMENT} section.
 @cindex Gaussmeter functions
 
 
-Currently, two types of gaussmeters are implemented, the Bruker ER035M
+Currently, two types of gaussmeter are implemented, the Bruker ER035M
 NMR gaussmeter and the Bruker BH15 hall probe field controller. The
 range of fields that can be measured with the Bruker ER035M NMR
 gaussmeter depends on the probe being used. With the F0 probe (S-band)
@@ -180,11 +180,11 @@ somewhat more precise ER035M NMR gaussmeter. If the program is correctly
 installed the appropriate module is loaded by specifying
 `@code{gaussmeter}' instead of one of the listed module names.
 
-The gaussmeters are mainly used together with the magnet power supply
+The gaussmeter are mainly used together with the magnet power supply
 and have to be specified in the @code{DEVICES} section @b{before} the
 magnet module.
 
-There are only two functions for gaussmeters, both only to be used in
+There are only two functions for gaussmeter, both only to be used in
 queries and in the @code{EXPERIMENT} section of the @acronym{EDL}
 program only.
 
@@ -379,9 +379,9 @@ query mode, i.e. without an argument.
 @findex lockin_lock_keyboard()
 Usually, during an experiment the keyboard of the lock-in amplifier is
 locked. But for situations where it would be useful to be able to control
-the lock-in also via its keyboard it can be unlocked (and also relocked)
+the lock-in also via its keyboard it can be unlocked (and also re-locked)
 from within the program. To unlock the keyboard call this function with
-an argument of @code{0}, to relock the keyboard call it again with a
+an argument of @code{0}, to re-lock the keyboard call it again with a
 non-zero argument or no argument at all.
 
 @end table
@@ -663,8 +663,8 @@ time interval.
 Usually, during an experiment the keyboard of the digitizer is
 locked. But for situations where it would be useful to be able to
 control the digitizer also via its keyboard it can be unlocked (and also
-relocked) from within the program. To unlock the keyboard call this
-function with an argument of @code{0}, to relock the keyboard call it
+re-locked) from within the program. To unlock the keyboard call this
+function with an argument of @code{0}, to re-lock the keyboard call it
 again with a non-zero argument or no argument at all.
 
 @end table
@@ -698,9 +698,9 @@ again with a non-zero argument or no argument at all.
 @findex pulser_lock_keyboard()
 Usually, during an experiment the keyboard of the pulser is locked. But
 for situations where it would be useful to be able to control the pulser
-also via its keyboard it can be unlocked (and also relocked) from within
+also via its keyboard it can be unlocked (and also re-locked) from within
 the program. To unlock the keyboard call this function with an argument
-of @code{0}, to relock the keyboard call it again with a non-zero
+of @code{0}, to re-lock the keyboard call it again with a non-zero
 argument or no argument at all.
 
 @end table
@@ -796,7 +796,7 @@ function can only be called in the @code{EXPERIMENT} section.
 @item synthesizer_use_table()
 @findex synthesizer_use_table()
 This function tells the program to also adjust the attenuation when a
-new freqency is set. To find out which attenuation has to be set for a
+new frequency is set. To find out which attenuation has to be set for a
 new frequency a table file is used. The name of this table file can be
 passed to the function as a (string) argument. If no argument is given a
 default table file is used (typically this is
@@ -829,15 +829,15 @@ be valid:
 As you see also blank lines don't matter. Finally, all lines starting
 with a hash character, `@code{#}', are treated as comments.
 
-If a frequency is used that isn't in the table the atenuation to be used
-is extrapolated from the next neighbouring frequencies. If the frequency
-isn't within the rane of frequencies covered by the table a warning is
+If a frequency is used that isn't in the table the attenuation to be used
+is extrapolated from the next neighboring frequencies. If the frequency
+isn't within the range of frequencies covered by the table a warning is
 printed and the attenuation for the nearest frequency is used.
 
 
 @item synthesizer_att_ref_freq()
 @findex synthesizer_att_ref_freq()
-When a tabe file is used there remains the question for which frequency
+When a table file is used there remains the question for which frequency
 to use the attenuation has been set e.g.@: by
 @code{synthesizer_attenuation()}. To set this reference frequency the
 function @code{synthesizer_att_ref_freq()} can be used. If the function
@@ -846,15 +846,85 @@ isn't called a frequency of @w{14 MHz} is used.
 
 @item synthesizer_modulation()
 @findex synthesizer_modulation()
+This function is used to set the type, source and amplitude of the
+modulation. There are three types of modulation FM, AM and phase
+modulation. The modulation type is specified by a string, either
+@code{"FM"}, @code{"AM"} or @code{"PHASE"}.
+
+The possible modulation sources are either external AC coupled, external
+DC coupled, internal @w{1 kHz} or internal @w{400 Hz}. For external AC
+or DC coupled modulation specify one the strings @code{"EXT AC"},
+@code{"AC"}, @code{"EXT DC"} or @code{"DC"}. For internally generated
+modulation with @w{1 kHz} or @w{400 Hz} use a string argument from the
+following list: @code{"INT 1kHz"}, @code{"INT 1 kHz"}, @code{"INT 1"},
+@code{"1kHz"}, @code{"1 kHz"}, @code{"1"}, @code{"INT 400Hz"},
+@code{"INT 400 Hz"}, @code{"INT 400"}, @code{"400Hz"}, @code{"400 Hz"}
+or @code{"400"}.
+
+Finally you may specify the modulation amplitude, which has to be a
+number (preferably a floating point number). FM modulation amplitudes
+have to be in the range between @w{0 Hz} and @w{100 kHz}, AM modulation
+amplitudes between @w{0 %} and @w{100 %} and phase modulation amplitudes
+between @w{0 degree} and @w{10 degree}.
+
+Only in the first call of the function all three arguments, i.e.@: the
+modulation type, source and amplitude, should be passed to the
+function. In further calls not all of the arguments have to be given
+again. Instead, in further calls it is sufficient to specify only for
+example a new amplitude. The same, of course, holds for the modulation
+source.
+
+If the modulation type becomes changed, the source and amplitude reverts
+to the settings that were specified in previous calls of the function
+when this modulation type was still active. I.e.@: if at first AM
+modulation using an external AC coupled source and an amplitude of
+@w{50 %} was set and then the modulation was changed to FM with
+different settings for source and amplitude, another call switching back
+to AM modulation will also restore the settings of external AC coupled
+source and @w{50 %} amplitude.
+
 
 @item synthesizer_mod_type()
 @findex synthesizer_mod_type()
+As an alternative the function @code{synthesizer_modulation()} the
+modulation type can be also set via the function
+@code{synthesizer_mod_type()}. It accepts on of the three string
+arguments @code{"FM"}, @code{"AM"} or @code{"PHASE"} (or the numbers
+@code{0} for FM, @code{1} for AM or @code{2} for phase modulation).
+
+If called with no argument it will return the currently active modulation
+type as an integer number.
+
 
 @item synthesizer_mod_source()
 @findex synthesizer_mod_source()
+If the modulation type has been set the modulation source can be set
+directly via this function. It accepts one of the following strings:
+@code{"INT 1kHz"}, @code{"INT 1 kHz"}, @code{"INT 1"},
+@code{"1kHz"}, @code{"1 kHz"}, @code{"1"}, @code{"INT 400Hz"},
+@code{"INT 400 Hz"}, @code{"INT 400"}, @code{"400Hz"}, @code{"400 Hz"}
+or @code{"400"}. Alternatively, the number @code{0} can be specified for
+external AC coupled modulation source, @code{1} for an external DC
+coupled source, @code{2} for the internally generated @w{1 kHz} source
+and @code{3} for the internal @w{400 Hz} source.
+
+If the function is called with no argument it will return the modulation
+source setting for the currently active modulation type as an integer number.
+
 
 @item synthesizer_mod_ampl()
 @findex synthesizer_mod_ampl()
+
+If the modulation type has been set this function can be used to set the
+modulation amplitude. For FM the allowed range of frequencies is from
+@w{0 Hz} to @w{100 kHz}, for AM amplitudes between @w{0 %} and @w{100 %}
+are acceptable and for phase modulation values between @w{0 degree} and
+@w{10 degree} are valid.
+
+If called with no argument, the function will return the amplitude
+setting for the currently active modulation type.
+
+
 
 @end table
 
