@@ -48,6 +48,8 @@ FOREVER {
 
 	display( I, slider_value( SID2 ) * slider_value( SID1 ) );
 	wait( 500 ms );
+
+	rescale( I );
 }
 
 ON_STOP:

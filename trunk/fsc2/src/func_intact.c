@@ -191,7 +191,7 @@ Var *f_bcreate( Var *v )
 		else
 		{
 			eprint( FATAL, "%s:%ld: Unknown button type (`%s') in function "
-					"%s().\n", Fname, Lc, Cur_Func );
+					"%s().\n", Fname, Lc, v->val.sptr, Cur_Func );
 			THROW( EXCEPTION );
 		}
 	}
@@ -511,7 +511,7 @@ Var *f_bdelete( Var *v )
 		else
 			Tool_Box->objs = io->next;
 
-		/* Delete the button (its not drawn in a test run!) */
+		/* Delete the button (it's not drawn in a test run!) */
 
 		if ( ! TEST_RUN )
 		{
@@ -2226,7 +2226,7 @@ static void recreate_Tool_Box( void )
 	else
 	{
 		needs_pos = UNSET;
-		Tool_Box->Tools = fl_bgn_form( FL_UP_BOX, 100, 100 );
+		Tool_Box->Tools = fl_bgn_form( FL_UP_BOX, 1, 1 );
 
 		if ( ! tool_has_been_shown &&
 			 * ( ( char * ) xresources[ TOOLGEOMETRY ].var ) != '\0' )
@@ -2258,11 +2258,20 @@ static void recreate_Tool_Box( void )
 
 	fl_end_form( );
 
+	printf( "last: x = %d, y = %d\n", last_io->x, last_io->y );
+
 	Tool_Box->w = last_io->x + OBJ_WIDTH + OFFSET_X0;
 	Tool_Box->h = last_io->y + OBJ_HEIGHT + OFFSET_Y0;
 
+	printf( "Tool: x = %d, y = %d\n", Tool_Box->w, Tool_Box->h );
+
 	fl_set_form_size( Tool_Box->Tools, Tool_Box->w, Tool_Box->h );
 	fl_adjust_form_size( Tool_Box->Tools );
+
+	/* This seems to be needed to get around a bug in XForms... */
+
+	for ( io = Tool_Box->objs; io != NULL; io = io->next )
+		fl_set_object_size( io->self, io->w, io->h );
 
 	if ( needs_pos )
 	{
@@ -2331,7 +2340,6 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			io->self = fl_add_button( FL_NORMAL_BUTTON, io->x, io->y,
 									  io->w, io->h, io->label );
 			fl_set_object_color( io->self, FL_MCOL, FL_GREEN );
-			fl_set_button( io->self, io->state ? 1 : 0 );
 			break;
 
 		case PUSH_BUTTON :

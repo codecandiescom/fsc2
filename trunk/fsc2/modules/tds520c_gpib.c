@@ -594,6 +594,7 @@ bool tds520c_display_channel( int channel )
 	/* Get the channels sensitivity */
 
 	tds520c_get_sens( channel );
+	tds520c.is_sens[ channel ] = SET;
 
 	/* Check if channel is already displayed */
 
@@ -813,6 +814,11 @@ bool tds520c_get_curve( int channel, WINDOW *w, double **data, long *length,
 	/* Calculate the scale factor for converting the data returned by the
 	   digitizer (2-byte integers) into real voltage levels */
 
+	if ( ! tds520c.is_sens[ channel ] || ! tds520c.lock_state )
+	{
+		tds520c_get_sens( channel );
+		tds520c.is_sens[ channel ] = SET;
+	}
 	scale = 10.24 * tds520c.sens[ channel ] / ( double ) 0xFFFF;
 
 	/* Set the data source channel (if it's not already set correctly) */ 
@@ -995,6 +1001,7 @@ bool tds520c_lock_state( bool lock )
 	sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
 	if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds520c_gpib_failure( );
+	tds520c.lock_state = lock;
 
 	return OK;
 }

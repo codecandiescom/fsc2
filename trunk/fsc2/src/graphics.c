@@ -1541,3 +1541,17 @@ void change_scale( int is_set, double *vals )
 			G.curve_2d[ i ]->rwc_delta[ Y ] = vals[ 3 ];
 	}
 }
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+void rescale( long new_nx, long new_ny )
+{
+	printf( "new_nx = %ld\n", new_nx );
+
+	if ( G.dim == 1 )
+		return;
+
+	printf( "new_ny = %ld\n", new_ny );
+}

@@ -59,7 +59,7 @@ typedef struct
 	bool is_timebase;
 
 	double sens[ MAX_CHANNELS ];
-	double is_sens[ TDS744A_CH4 - TDS744A_CH1 + 1 ];
+	double is_sens[ MAX_CHANNELS ];
 
 	double num_avg;
 	bool is_num_avg;
@@ -87,6 +87,7 @@ typedef struct
 
 	bool channels_in_use[ MAX_CHANNELS ];
 
+	bool lock_state;          // set when keyboard is locked
 } TDS744A;
 
 

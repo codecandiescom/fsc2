@@ -620,8 +620,9 @@ labels_2d:
 }
 
 
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
+/*----------------------------------------------------*/
+/* Function to change the scale during the experiment */
+/*----------------------------------------------------*/
 
 Var *f_cscale( Var *v )
 {
@@ -638,8 +639,8 @@ Var *f_cscale( Var *v )
 
 	if ( ! G.is_init )
 	{
-		eprint( WARN, "%s:%ld: Can't change scale, missing initialization.\n",
-				Fname, Lc );
+		eprint( SEVERE, "%s:%ld: Can't change scale, missing "
+				"initialization in %s().\n", Fname, Lc, Cur_Func );
 		return vars_push( INT_VAR, 0 );
 	}
 
@@ -752,6 +753,143 @@ Var *f_cscale( Var *v )
 
 	return vars_push( INT_VAR, 1 );
 }
+
+
+/*---------------------------------------------------------*/
+/* Function to change the number of points to be displayed */
+/* during the experiment.                                  */
+/*---------------------------------------------------------*/
+
+Var *f_rescale( Var *v )
+{
+	long new_nx, new_ny;
+	int shm_id;
+	long len = 0;                    /* total length of message to send */
+	void *buf;
+	void *ptr;
+	int type = D_CHANGE_POINTS;
+
+
+
+	/* No rescaling without graphics... */
+
+	if ( ! G.is_init )
+	{
+		eprint( SEVERE, "%s:%ld: Can't change number of points, missing "
+				"initialization in %s().\n", Fname, Lc, Cur_Func );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	/* Check and store the parameter */
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing parameter in call of %s().\n",
+				Fname, Lc, Cur_Func );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type & INT_VAR )
+		new_nx = v->val.lval;
+	else
+	{
+		eprint( WARN, "%s:%ld: Float number used as new number of points in "
+				"%s().\n", Fname, Lc, Cur_Func );
+		new_nx = lround( v->val.dval );
+	}
+
+	if ( new_nx < -1 )
+	{
+		eprint( FATAL, "%s:%ld: Invalid negative number of points (%ld) in "
+				"%s().\n", Fname, Lc, new_nx, Cur_Func );
+			THROW( EXCEPTION );
+	}
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		if ( G.dim == 1 )
+		{
+			eprint( FATAL, "%s:%ld: With 1D graphics only the number of "
+					"points in x-direction be changed in %s().\n",
+					Fname, Lc, Cur_Func );
+			THROW( EXCEPTION );
+		}
+
+		vars_check( v, INT_VAR | FLOAT_VAR );
+
+		if ( v->type & INT_VAR )
+			new_ny = v->val.lval;
+		else
+		{
+			eprint( WARN, "%s:%ld: Float number used as new number of points "
+					"in %s().\n", Fname, Lc, Cur_Func );
+			new_ny = lround( v->val.dval );
+		}
+
+		if ( new_ny < -1 )
+		{
+			eprint( FATAL, "%s:%ld: Invalid negative number of points (%ld) "
+					"in %s().\n", Fname, Lc, new_nx, Cur_Func );
+				THROW( EXCEPTION );
+		}
+	}
+
+
+	/* In a test run we're already done */
+
+	if ( TEST_RUN )
+		return vars_push( INT_VAR, 1 );
+
+	/* Function can only be used in experiment section */
+
+	assert( I_am == CHILD );
+
+	len =   sizeof( len )                 /* length field itself */
+		  + 2 * sizeof( int )             /* type field */
+		  + 2 * sizeof( long );           /* new number of points */
+
+	/* Now try to get a shared memory segment */
+
+	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	{
+		eprint( FATAL, "Internal communication problem at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	/* Copy the data to the segment */
+
+	ptr = buf;
+
+	memcpy( ptr, &len, sizeof( long ) );               /* total length */
+	ptr += sizeof( long );
+
+	memcpy( ptr, &type, sizeof( int ) );               /* type indicator  */
+	ptr += sizeof( int );
+
+	memcpy( ptr, &new_nx, sizeof( long ) );            /* new # of x points */
+	ptr += sizeof( long );
+
+	memcpy( ptr, &new_ny, sizeof( long ) );            /* new # of y points */
+	ptr += sizeof( long );
+
+	/* Detach from the segment with the data segment */
+
+	detach_shm( buf, NULL );
+
+	/* Wait for parent to become ready to accept new data, then store
+	   identifier and send signal to tell parent about the data */
+
+	sema_wait( semaphore );
+	Key->shm_id = shm_id;
+	Key->type = DATA;
+	kill( getppid( ), NEW_DATA );
+
+	return vars_push( INT_VAR, 1 );
+}
+
 
 /*-------------------------------------------------------------*/
 /* f_display() is used to send new data to the display system. */

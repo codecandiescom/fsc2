@@ -74,16 +74,17 @@ int tds520_init_hook( void )
 	/* Initialize some variables in the digitizers structure */
 
 	tds520.is_reacting = UNSET;
-	tds520.w = NULL;
+	tds520.w           = NULL;
 	tds520.is_timebase = UNSET;
-	tds520.is_num_avg = UNSET;
-	tds520.is_rec_len = UNSET;
+	tds520.is_num_avg  = UNSET;
+	tds520.is_rec_len  = UNSET;
 	tds520.is_trig_pos = UNSET;
 	tds520.num_windows = 0;
 	tds520.data_source = TDS520_UNDEF;
 	tds520.meas_source = TDS520_UNDEF;
+	tds520.lock_state  = UNSET;
 
-	for ( i = TDS520_CH1; i <= TDS520_CH2; i++ )
+	for ( i = TDS520_CH1; i < MAX_CHANNELS; i++ )
 		tds520.is_sens[ i ] = UNSET;
 
 	return 1;
@@ -1081,5 +1082,6 @@ Var *digitizer_lock_keyboard( Var *v )
 	if ( ! TEST_RUN )
 		tds520_lock_state( lock );
 
+	tds520.lock_state = lock;
 	return vars_push( INT_VAR, lock ? 1 : 0 );
 }

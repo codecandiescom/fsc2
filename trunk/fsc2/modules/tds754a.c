@@ -77,16 +77,17 @@ int tds754a_init_hook( void )
 	/* Initialize some variables in the digitizers structure */
 
 	tds754a.is_reacting = UNSET;
-	tds754a.w = NULL;
+	tds754a.w           = NULL;
 	tds754a.is_timebase = UNSET;
-	tds754a.is_num_avg = UNSET;
-	tds754a.is_rec_len = UNSET;
+	tds754a.is_num_avg  = UNSET;
+	tds754a.is_rec_len  = UNSET;
 	tds754a.is_trig_pos = UNSET;
 	tds754a.num_windows = 0;
 	tds754a.data_source = TDS754A_UNDEF;
 	tds754a.meas_source = TDS754A_UNDEF;
+	tds754a.lock_state  = UNSET;
 
-	for ( i = TDS754A_CH1; i <= TDS754A_CH4; i++ )
+	for ( i = TDS754A_CH1; i < MAX_CHANNELS; i++ )
 		tds754a.is_sens[ i ] = UNSET;
 
 	return 1;
@@ -1091,5 +1092,6 @@ Var *digitizer_lock_keyboard( Var *v )
 	if ( ! TEST_RUN )
 		tds754a_lock_state( lock );
 
+	tds754a.lock_state = lock;
 	return vars_push( INT_VAR, lock ? 1 : 0 );
 }

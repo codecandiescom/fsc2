@@ -123,7 +123,7 @@ static void unpack_and_accept( void *ptr )
 	nsets = *( ( int * ) ptr );
 	ptr += sizeof( int );
 
-	if ( nsets < 0 )                     /* special for clear curve commands */
+	if ( nsets < 0 )                /* special for clear curve commands etc. */
 	{
 		other_data_request( nsets, ptr );
 		return;
@@ -209,6 +209,10 @@ static void other_data_request( int type, void * ptr )
 			is_set = *( ( int * ) ptr );      /* flags */
 			ptr += sizeof( int );
 			change_scale( is_set, ( double * ) ptr );
+			break;
+
+		case D_CHANGE_POINTS :                /* rescale command */
+			rescale( * ( long * ) ptr, * ( ( long * ) ptr + 1 ) );
 			break;
 
 		default :                             /* unknown command */
