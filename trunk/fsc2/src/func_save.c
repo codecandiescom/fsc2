@@ -391,7 +391,7 @@ static int get_save_file( Var **v )
 	Var *get_file_ptr;
 	Var *file;
 	int file_num;
-	int access;
+	int acc;
 
 
 	/* If no file has been selected yet get a file and then use it exclusively
@@ -405,7 +405,7 @@ static int get_save_file( Var **v )
 
 		No_File_Numbers = UNSET;
 
-		get_file_ptr = func_get( "get_file", &access );
+		get_file_ptr = func_get( "get_file", &acc );
 		file = func_call( get_file_ptr );         /* get the file name */
 
 		No_File_Numbers = SET;

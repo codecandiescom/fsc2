@@ -1761,7 +1761,7 @@ static long vars_calc_index( Var *a, Var *v )
 	/* For slices we need another update of the index */
 
 	if ( i != a->dim && ! ( a->flags & NEED_ALLOC ) )
-		a_index = index * a->sizes[ i ];
+		a_index = a_index * a->sizes[ i ];
 
 	return a_index;
 }

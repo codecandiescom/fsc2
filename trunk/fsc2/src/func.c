@@ -321,7 +321,7 @@ Var *func_get_long( const char *name, int *acc, bool flag )
 
 static int func_cmp2( const void *a, const void *b )
 {
-	return strcmp( ( char * ) a, ( ( Func * ) b )->name );
+	return strcmp( ( const char * ) a, ( ( const Func * ) b )->name );
 }
 
 

@@ -1150,7 +1150,7 @@ Var *f_random( Var *v )
 {
 	v = v;
 
-	return vars_push( FLOAT_VAR, ( double ) random( ) / ( double ) RAND_MAX );
+	return vars_push( FLOAT_VAR, random( ) / ( double ) RAND_MAX );
 }
 
 
