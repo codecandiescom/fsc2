@@ -3,7 +3,7 @@
 #
 #  Makefile for ME-6000 and ME-6100 driver and library
 #
-#  Copyright (C) 2002-2003 Jens Thoms Toerring
+#  Copyright (C) 2002-2004 Jens Thoms Toerring
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ incl_dir  = $(prefix)/include
 
 CFLAGS    = -ggdb -O2 -Wall -Wwrite-strings -Wstrict-prototypes \
 			-Wmissing-prototypes -Wmissing-declarations -W
-LDFLAGS   = -Wl,--version-script=me6x00_lib.map
+#LDFLAGS   = -Wl,--version-script=me6x00_lib.map
 INCLUDES  = -I../driver
 
 sources   = me6x00_lib.c

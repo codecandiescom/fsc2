@@ -3,7 +3,7 @@
  
   Driver for the RULBUS EPP interface
 
-  Copyright (C) 2003 Jens Thoms Toerring
+  Copyright (C) 2003-2004 Jens Thoms Toerring
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -182,7 +182,7 @@ static int __init rulbus_init( void )
         if ( major == 0 )
                 major = res_major;
 
-        spin_lock_init( &rulbus->spinlock );
+        spin_lock_init( &rulbus.spinlock );
 
         printk( KERN_INFO RULBUS_EPP_NAME
                 ": Module successfully installed\n" );

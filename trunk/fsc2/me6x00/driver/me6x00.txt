@@ -2,8 +2,8 @@
 # $Id$
 #
 
- ME6X00 Device Driver Description
- ================================
+ME6X00 Device Driver Description
+================================
 
 The number of boards that can be used with the driver is currently
 limited to 4. But by changing 'ME6X00_MAX_BOARDS' in 'me6x00_drv.h'
