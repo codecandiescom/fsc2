@@ -72,6 +72,8 @@ void *T_realloc( void *ptr, size_t size )
 void T_free( void *ptr )
 {
 #if defined MDEBUG
+	int err;
+
 	fprintf( stderr, "free:    %p\n", ptr );
 	fflush( stderr );
 	assert( mprobe( ptr ) == MCHECK_OK );
