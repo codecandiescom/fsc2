@@ -6,18 +6,12 @@
 
 #include "fsc2.h"
 
+#include <malloc.h>
 #include <mcheck.h>
 
 
 int main( int argc, char *argv[ ] )
 {
-
-#if defined DEBUG
-	if ( mcheck( NULL ) != 0 )
-		printf( "--> mcheck did not start ! <--\n" );
-#endif
-
-
 	if ( argc < 2 )
 	{
 		printf( "Missing input file.\n" );
@@ -29,7 +23,7 @@ int main( int argc, char *argv[ ] )
 	while ( 1 )
 	{
 		split( argv[ 1 ] );
-		clear_up( );
+		clean_up( );
 	}
 
 	return EXIT_SUCCESS;
