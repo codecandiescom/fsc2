@@ -215,12 +215,6 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 				return P_TOK;
 			}
 
-
-{P}/[\t \n,;] {
-				prepslval.vptr = vars_push( INT_VAR, p_num( prepstext ) );
-				return RPP_TOK;
-			}
-
 {PS}		{   /* Phase sequence */
 				long val = 0;
 				char *cp = prepstext + prepsleng - 1;
