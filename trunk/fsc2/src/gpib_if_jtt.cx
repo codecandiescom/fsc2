@@ -637,7 +637,9 @@ int gpib_wait( int device, int mask, int *status )
 		seteuid( getuid( ) );
 	}
 
-	mask &= GPIB_TIMO | GPIB_END | GPIB_RQS | GPIB_CMPL;    /* remove invalid bits */
+    /* Only allow certain flags */
+
+	mask &= GPIB_TIMO | GPIB_END | GPIB_RQS | GPIB_CMPL;
 
 	if ( ! ( mask & GPIB_TIMO ) && timeout != TNONE )
 		gpib_timeout( device, TNONE );
