@@ -38,6 +38,7 @@ static Var *CV;
 
 
 %token SECTION_LABEL         /* new section label */
+
 %token MW_TOKEN              /* MICRO_WAVE */
 %token TWT_TOKEN             /* TRAVELING_WAVE_TUBE */
 %token TWT_GATE_TOKEN        /* TRAVELING_WAVE_TUBE_GATE */
@@ -47,6 +48,11 @@ static Var *CV;
 %token RF_GATE_TOKEN         /* RADIO_FREQUENCY_GATE */
 %token PHX_TOKEN             /* PHASE_X */
 %token PHY_TOKEN             /* PHASE_Y */
+%token OI_TOKEN              /* OTHER_1 */
+%token OII_TOKEN             /* OTHER_2 */
+%token OIII_TOKEN            /* OTHER_3 */
+%token OIV_TOKEN             /* OTHER_4 */
+
 %token POD_TOKEN             /* POD */
 %token CH_TOKEN              /* CHANNEL */
 %token DEL_TOKEN             /* DELAY */
@@ -101,17 +107,26 @@ line:    keywd pcd                    { }
 keywd:   MW_TOKEN                     { Channel_Type = PULSER_CHANNEL_MW; }
 	   | TWT_TOKEN                    { Channel_Type = PULSER_CHANNEL_TWT; }
        | TWT_GATE_TOKEN               { Channel_Type = 
-											PULSER_CHANNEL_TWT_GATE; }
+											         PULSER_CHANNEL_TWT_GATE; }
        | DET_TOKEN                    { Channel_Type = PULSER_CHANNEL_DET; }
 	   | DET_GATE_TOKEN               { Channel_Type =
-											PULSER_CHANNEL_DET_GATE; }
+											         PULSER_CHANNEL_DET_GATE; }
        | RF_TOKEN                     { Channel_Type = PULSER_CHANNEL_RF; }
 	   | RF_GATE_TOKEN                { Channel_Type =
-											PULSER_CHANNEL_RF_GATE; }
+                                                      PULSER_CHANNEL_RF_GATE; }
        | PHX_TOKEN                    { Channel_Type = 
-											PULSER_CHANNEL_PHASE_X; }
+											          PULSER_CHANNEL_PHASE_X; }
        | PHY_TOKEN                    { Channel_Type =
-											PULSER_CHANNEL_PHASE_Y; }
+											          PULSER_CHANNEL_PHASE_Y; }
+       | OI_TOKEN                     { Channel_Type =
+											          PULSER_CHANNEL_OTHER_1; }
+       | OII_TOKEN                    { Channel_Type =
+											          PULSER_CHANNEL_OTHER_2; }
+       | OIII_TOKEN                   { Channel_Type =
+											          PULSER_CHANNEL_OTHER_3; }
+       | OIV_TOKEN                    { Channel_Type =
+											          PULSER_CHANNEL_OTHER_4; }
+
 ;
 
 

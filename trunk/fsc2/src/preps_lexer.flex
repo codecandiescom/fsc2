@@ -65,6 +65,10 @@ DET         DET(ECTION)?:?
 DET_GATE    DET(ECTION)?_?G(ATE)?:?
 RF          R(ADIO)?_?F(REQUENCY)?:?
 RF_GATE     R(ADIO)?_?F(REQUENCY)?_?G(ATE)?:?
+OI          O(THER)?(_?1)?:?
+OII         O(THER)?_?2:?
+OIII        O(THER)?_?3:?
+OIV         O(THER)?_?4:?
 
 INT         [0-9]+
 EXPO        [EDed][+-]?{INT}
@@ -253,6 +257,26 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			}
 {RF_GATE}   {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_RF_GATE );
+				return VAR_REF;
+			}
+
+{OI}        {
+				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_1 );
+				return VAR_REF;
+			}
+
+{OII}        {
+				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_2 );
+				return VAR_REF;
+			}
+
+{OIII}      {
+				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_3 );
+				return VAR_REF;
+			}
+
+{OIV}       {
+				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_4 );
 				return VAR_REF;
 			}
 

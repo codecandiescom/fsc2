@@ -79,6 +79,10 @@ RF          R(ADIO)?_?F(REQUENCY)?:?
 RF_GATE     R(ADIO)?_?F(REQUENCY)?_?G(ATE)?:?
 PX          PH(ASE)?_?X:?
 PY          PH(ASE)?_?Y:?
+OI          O(THER)?(_?1)?:?
+OII         O(THER)?_?2:?
+OIII        O(THER)?_?3:?
+OIV         O(THER)?_?4:?
 
 DEL         ((D)|(DEL)|(DELAY)):?
 POD         P(OD)?
@@ -173,6 +177,14 @@ WS          [\n=: ]+
 {PX}        return PHX_TOKEN;
 
 {PY}        return PHY_TOKEN;
+
+{OI}        return OI_TOKEN;
+
+{OII}       return OII_TOKEN;
+
+{OIII}      return OIII_TOKEN;
+
+{OIV}       return OIV_TOKEN;
 
 {POD}       return POD_TOKEN;
 
