@@ -303,7 +303,7 @@ bool ep385_set_repeat_time( double rep_time )
 		}
 	}
 
-	ep385.repeat_time = lrnd( ceil( ( ep385_double2ticks( rep_time )
+	ep385.repeat_time = Ticksrnd( ceil( ( ep385_double2ticks( rep_time )
 								  - BITS_PER_MEMORY_BLOCK * MAX_MEMORY_BLOCKS )
 									/ (double ) REPEAT_TICKS ) );
 	new_rep_time = ( ep385.repeat_time * REPEAT_TICKS 

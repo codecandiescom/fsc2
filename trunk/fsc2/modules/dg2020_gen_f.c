@@ -50,13 +50,13 @@ bool dg2020_store_timebase( double timebase )
 	dg2020.timebase = timebase;
 
 	dg2020.function[ PULSER_CHANNEL_PHASE_1 ].psd =
-		       ( Ticks ) lrnd( ceil( DEFAULT_PHASE_SWITCH_DELAY / timebase ) );
+					 Ticksrnd( ceil( DEFAULT_PHASE_SWITCH_DELAY / timebase ) );
 	dg2020.function[ PULSER_CHANNEL_PHASE_2 ].psd =
-		       ( Ticks ) lrnd( ceil( DEFAULT_PHASE_SWITCH_DELAY / timebase ) );
+					 Ticksrnd( ceil( DEFAULT_PHASE_SWITCH_DELAY / timebase ) );
 
 	if ( GRACE_PERIOD != 0 )
-		dg2020.grace_period = Ticks_max( ( Ticks )
-						   lrnd( ceil( GRACE_PERIOD / dg2020.timebase ) ), 1 );
+		dg2020.grace_period =
+			Ticks_max( Ticksrnd( ceil( GRACE_PERIOD / dg2020.timebase ) ), 1 );
 	else
 		dg2020.grace_period = 0;
 
@@ -765,7 +765,7 @@ bool dg2020_set_phase_switch_delay( int func, double del_time )
 
 	dg2020.function[ func ].is_psd = SET;
 	dg2020.function[ func ].psd =
-		                  ( Ticks ) lrnd( ceil( del_time / dg2020.timebase ) );
+								Ticksrnd( ceil( del_time / dg2020.timebase ) );
 
 	return OK;
 }
@@ -798,7 +798,7 @@ bool dg2020_set_grace_period( double gp_time )
 	}
 
 	dg2020.is_grace_period = SET;
-	dg2020.grace_period = ( Ticks ) lrnd( ceil( gp_time / dg2020.timebase ) );
+	dg2020.grace_period = Ticksrnd( ceil( gp_time / dg2020.timebase ) );
 
 	return OK;
 }

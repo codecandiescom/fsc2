@@ -544,14 +544,14 @@ Var *pulser_automatic_shape_pulses( Var *v )
 		}
 		else
 			dg2020.function[ func ].right_shape_padding =
-					lrnd( ceil( AUTO_SHAPE_RIGHT_PADDING / dg2020.timebase ) );
+				Ticksrnd( ceil( AUTO_SHAPE_RIGHT_PADDING / dg2020.timebase ) );
 	}
 	else
 	{
 		dg2020.function[ func ].left_shape_padding =
-					lrnd( ceil( AUTO_SHAPE_LEFT_PADDING / dg2020.timebase ) );
+				Ticksrnd( ceil( AUTO_SHAPE_LEFT_PADDING / dg2020.timebase ) );
 		dg2020.function[ func ].right_shape_padding =
-					lrnd( ceil( AUTO_SHAPE_RIGHT_PADDING / dg2020.timebase ) );
+				Ticksrnd( ceil( AUTO_SHAPE_RIGHT_PADDING / dg2020.timebase ) );
 	}
 
 	too_many_arguments( v );
@@ -657,14 +657,14 @@ Var *pulser_automatic_twt_pulses( Var *v )
 		}
 		else
 			dg2020.function[ func ].right_twt_padding =
-					  lrnd( ceil( AUTO_TWT_RIGHT_PADDING / dg2020.timebase ) );
+				  Ticksrnd( ceil( AUTO_TWT_RIGHT_PADDING / dg2020.timebase ) );
 	}
 	else
 	{
 		dg2020.function[ func ].left_twt_padding =
-					   lrnd( ceil( AUTO_TWT_LEFT_PADDING / dg2020.timebase ) );
+				   Ticksrnd( ceil( AUTO_TWT_LEFT_PADDING / dg2020.timebase ) );
 		dg2020.function[ func ].right_twt_padding =
-					  lrnd( ceil( AUTO_TWT_RIGHT_PADDING / dg2020.timebase ) );
+				  Ticksrnd( ceil( AUTO_TWT_RIGHT_PADDING / dg2020.timebase ) );
 	}
 
 	too_many_arguments( v );

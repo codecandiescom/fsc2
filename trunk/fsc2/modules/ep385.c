@@ -186,10 +186,10 @@ int ep385_test_hook( void )
 		ep385.timebase_mode = INTERNAL;
 		ep385.timebase = FIXED_TIMEBASE;
 
-		ep385.shape_2_defense = ( Ticks )
-				 lrnd( SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE );
-		ep385.defense_2_shape = ( Ticks )
-				 lrnd( DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE );
+		ep385.shape_2_defense =
+			 Ticksrnd( SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE );
+		ep385.defense_2_shape =
+			 Ticksrnd( DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE );
 	}
 
 	if ( ep385_Pulses == NULL )
@@ -623,14 +623,14 @@ Var *pulser_automatic_shape_pulses( Var *v )
 		}
 		else
 			ep385.function[ func ].right_shape_padding =
-					 lrnd( ceil( AUTO_SHAPE_RIGHT_PADDING / ep385.timebase ) );
+				 Ticksrnd( ceil( AUTO_SHAPE_RIGHT_PADDING / ep385.timebase ) );
 	}
 	else
 	{
 		ep385.function[ func ].left_shape_padding =
-					 lrnd( ceil( AUTO_SHAPE_LEFT_PADDING / ep385.timebase ) );
+				 Ticksrnd( ceil( AUTO_SHAPE_LEFT_PADDING / ep385.timebase ) );
 		ep385.function[ func ].right_shape_padding =
-					 lrnd( ceil( AUTO_SHAPE_RIGHT_PADDING / ep385.timebase ) );
+				 Ticksrnd( ceil( AUTO_SHAPE_RIGHT_PADDING / ep385.timebase ) );
 	}
 
 	too_many_arguments( v );
@@ -736,14 +736,14 @@ Var *pulser_automatic_twt_pulses( Var *v )
 		}
 		else
 			ep385.function[ func ].right_twt_padding =
-					   lrnd( ceil( AUTO_TWT_RIGHT_PADDING / ep385.timebase ) );
+				   Ticksrnd( ceil( AUTO_TWT_RIGHT_PADDING / ep385.timebase ) );
 	}
 	else
 	{
 		ep385.function[ func ].left_twt_padding =
-						lrnd( ceil( AUTO_TWT_LEFT_PADDING / ep385.timebase ) );
+					Ticksrnd( ceil( AUTO_TWT_LEFT_PADDING / ep385.timebase ) );
 		ep385.function[ func ].right_twt_padding =
-					   lrnd( ceil( AUTO_TWT_RIGHT_PADDING / ep385.timebase ) );
+				   Ticksrnd( ceil( AUTO_TWT_RIGHT_PADDING / ep385.timebase ) );
 	}
 
 	too_many_arguments( v );

@@ -63,7 +63,7 @@ Ticks dg2020_double2ticks( double p_time )
 		THROW( EXCEPTION );
 	}
 
-	return Tickslrnd( ticks );
+	return Ticksrnd( ticks );
 }
 
 
