@@ -170,6 +170,8 @@ volatile int message_queue_low, message_queue_high;
 FILE_LIST *File_List = NULL;
 int File_List_Len = 0;
 
+TOOL_BOX *Tool_Box = NULL;
+
 
 #else   /*  ! FSC2_MAIN */
 
@@ -221,6 +223,8 @@ extern volatile int message_queue_low, message_queue_high;
 
 extern FILE_LIST *File_List;
 extern int File_List_Len;
+
+extern TOOL_BOX *Tool_Box;
 
 
 #endif
