@@ -168,7 +168,7 @@ bool run( void )
 
 	end_comm( );
 
-	fl_add_signal_callback( SIGCHLD, sigchld_handler, NULL );
+	signal( SIGCHLD, sigchld_handler );
 	run_end_of_exp_hooks( );
 	if ( need_GPIB )
 		gpib_shutdown( );
@@ -306,7 +306,7 @@ static void run_sigchld_handler( int sig_type )
 #endif
 
 	child_pid = 0;                          /* the child is dead... */
-	fl_add_signal_callback( SIGCHLD, sigchld_handler, NULL );
+	signal( SIGCHLD, sigchld_handler );
 
 	run_form->sigchld->u_ldata = ( long ) return_status;
 	fl_trigger_object( run_form->sigchld );
