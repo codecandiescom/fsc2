@@ -42,6 +42,7 @@
 * CCD Camera Functions::
 * Monochromator Functions::
 * Power Supply Functions::
+* Microwave Attenuator Functions::
 * Multi-Device Functions::
 @end menu
 @end ifinfo
@@ -2712,7 +2713,8 @@ does not accept any parameters and can only by used in the
 @cindex DAQ Functions
 Currently, there's support for digital-to-analog converter cards, the
 @strong{Meilhaus Electronic GmbH} cards ME-6000 and ME-6100, and a
-home-built DA and AD converter from the group of H.-J.@: Steinhoff.
+home-built DA and AD converter from the group of H.-J.@: Steinhoff at
+the University of Osnabrueck.
 
 The ME-6000 and ME-6100 cards have, depending on the model, either 4, 8
 or 16 output ports.Use of these cards requires that a kernel module and
@@ -3768,7 +3770,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @end table
 
 
-@node Power Supply Functions, Multi-Device Functions, Monochromator Functions, Device Functions
+@node Power Supply Functions, Microwave Attenuator Functions, Monochromator Functions, Device Functions
 @section Power Supply Functions
 @cindex Power Supply Functions
 
@@ -3885,7 +3887,111 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @end table
 
 
-@node Multi-Device Functions, , Power Supply Functions, Device Functions
+@node Microwave Attenuator Functions, Multi-Device Functions, Power Supply Functions, Device Functions
+@section Microwave Attenuator Functions
+@cindex Microwave Attenuator Functions
+
+The only currently supported computer controllable microwave attenuator
+is a home-built device from the group of H.-J.@: Steinhoff at the
+University of Osnabrueck. It works with a stepper motor controlled via
+the serial port. The module for the dvice is loaded by specifying
+@example
+hjs_attenuator
+@end example
+@noindent
+in the @code{DEVICES} section. 
+
+To load the device module a default calibration file is required that
+states which attenuation gets set for the settings of the stepper
+motor. The name of the file can be set in the configuration file for the
+module.
+
+
+@table @samp
+
+@anchor{mw_attenuator_name}
+@item mw_attenuator_name()
+@findex mw_attenuator_name()
+Returns a string with the name of the power supply being used.
+
+
+@anchor{mw_attenuator_use_table}
+@item mw_attenuator_use_table()
+@findex mw_attenuator_use_table()
+This function can be used to load a calibration table file different
+from the one loaded when the module is loaded. It expects a single
+argument, a (string) variable with the name of the table file. If no
+argument is given a default table file is reloaded (typically this is
+@file{/usr/local/lib/fsc2/hjs_attenuator.calib}, but this may depend on
+the installation of @code{fsc2}).
+
+The table file must consist of pairs of entries, an attenuation (in dB)
+and a stepper motor position. Attenuations values may be followed by an
+unit of @code{dB} or @code{db}. The entries in the file don't have to be
+sorted in any way and don't have to spaced equally. The only requirement
+is that the stepper motor settings are a monotonuously decreasing
+function of the attenuation.
+
+The items in the table file can be separated by spaces, commas,
+semicolons, colons, tabs or any combination of these characters (a unit
+will also work as a separator). Thus all the following entries would be
+valid:
+@example
+1.2 dB 2135
+1.4, 2087
+10.7 db786
+@end example
+@noindent
+As you see also blank lines don't matter. Finally, all lines starting
+with a hash character, `@code{#}', are treated as comments.
+
+If an attenuation is used that isn't in the table the stepper motor
+setting to be used is linearly interpolated from the next neighboring
+values. as long as the attenuation isn't smaller or larger than the
+minimum or maximum attenuation in the table.
+
+The function can only be used in the @code{PREPARATIONS} section of an
+@code{EDL} script.
+
+
+@anchor{mw_attenuator_initial_attenuation}
+@item mw_attenuator_initial_attenuation()
+@findex mw_attenuator_initial_attenuation()
+The module has no way to find out to find out the setting of the
+attenuation at the start of the experiment but this information is
+obviously required to change the attenuation to a new value. Thus this
+function @strong{must} be called before setting a new attenuation.  It
+expects a single argument, the current attenuation setting, which has to
+be within the range of attenuations covered by the calibration file. The
+function may not be called again (until a new experiment is started).
+
+
+@anchor{mw_attenuator_attenuation}
+@item mw_attenuator_attenuation()
+@findex mw_attenuator_attenuation()
+Thsi function can be used to query the current attenuation or set a new
+one. If called with no argument it returns the currently attenuation. If
+it is called with an argument the attenuation is set to this new value.
+The new value has to be within the range of attenuations covered by the
+calibration file either read in when the module was loaded or by a later
+invocation of the function @code{mw_attenuator_use_table()}. Attenuation
+values within this range but not listed in the table are handled by
+linear interpolation of the nearest neighboring values.
+
+Please note: it is required that the function
+@code{mw_attenuator_initial_attenuation()} has been called before the
+first invocation of this function to make the module aware about the
+setting of the attenuation when the experiment was started.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@end table
+
+
+
+@node Multi-Device Functions, , Microwave Attenuator Functions, Device Functions
 @section Multi-Device Functions
 @cindex Multi-Device Functions
 

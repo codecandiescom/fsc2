@@ -25,53 +25,56 @@
 
 @ifinfo
 @menu
-* aeg_s_band::    S-band AEG Magnet Power Supply
-* aeg_x_band::    X-band AEG Magnet Power Supply
-* bh15::          Bruker Hall Effect Field Controller BH 15
-* dg2020_b::      Sony/Tektronix Data Generator DG2020 (Berlin Version)
-* dg2020_f::      Sony/Tektronix Data Generator DG2020 (Frankfurt Version)
-* egg4402::       EG&G PARC Box-Car Integrator 4402
-* ep385::         Bruker Pulse Programmer EP385
-* er023m::        Bruker Signal Channel ER 023 M
-* er032m::        Bruker Field controller ER 032 M 
-* er035m::        Bruker NMR Gaussmeter ER 035 M (GPIB)
-* er035m_s::      Bruker NMR Gaussmeter ER 035 M (Serial)
-* er035m_sa::     Bruker NMR Gaussmeter ER 035 M (GPIB, Stand-Alone)
-* er035m_sas::    Bruker NMR Gaussmeter ER 035 M (Serial, Stand-Alone)
-* hfs9000::       Tektronix Stimulus System HFS9000 (Berlin W-Band)
-* hp5340a::       HP Frequency Counter HP5340A
-* hp8647a::       HP RF Synthesizer HP8647A
-* hp8648b::       HP RF Synthesizer HP8648B
-* hp8672a::       HP RF Synthesizer HP8672A
-* hjs_daadc::     Home-built AD and DA converter
-* ips20_4::       Oxford Magnet Sweep Power Supply IPS20-4
-* keithley228a::  Magnet Power Supply Keithley 228A (Berlin W-Band)
-* kontron4060::   Kontron 4060 Voltmeter
-* lakeshore330::  Lake Shore 330 Temperature Controller
-* lecroy9400::    LeCroy Digitizing Oscilloscope 9400
-* me6000::        Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
-* ni6601::        National Instruments 6601 GPCT card
-* pt2025::        Metrolab NMR Teslameter PT2025
-* rs_spec10::     Roper Scientific Spec-10 CCD Camera
-* rs690::         Interface Technology RS690 Word Generator (Berlin 360 GHz)
+* aeg_s_band::      S-band AEG Magnet Power Supply
+* aeg_x_band::      X-band AEG Magnet Power Supply
+* bh15::            Bruker Hall Effect Field Controller BH 15
+* dg2020_b::        Sony/Tektronix Data Generator DG2020 (Berlin Version)
+* dg2020_f::        Sony/Tektronix Data Generator DG2020 (Frankfurt Version)
+* egg4402::         EG&G PARC Box-Car Integrator 4402
+* ep385::           Bruker Pulse Programmer EP385
+* er023m::          Bruker Signal Channel ER 023 M
+* er032m::          Bruker Field controller ER 032 M 
+* er035m::          Bruker NMR Gaussmeter ER 035 M (GPIB)
+* er035m_s::        Bruker NMR Gaussmeter ER 035 M (Serial)
+* er035m_sa::       Bruker NMR Gaussmeter ER 035 M (GPIB, Stand-Alone)
+* er035m_sas::      Bruker NMR Gaussmeter ER 035 M (Serial, Stand-Alone)
+* hfs9000::         Tektronix Stimulus System HFS9000 (Berlin W-Band)
+* hp5340a::         HP Frequency Counter HP5340A
+* hp8647a::         HP RF Synthesizer HP8647A
+* hp8648b::         HP RF Synthesizer HP8648B
+* hp8672a::         HP RF Synthesizer HP8672A
+* hjs_attenuator::  Home-built microwave attenuator
+* hjs_daadc::       Home-built AD and DA converter
+* ips20_4::         Oxford Magnet Sweep Power Supply IPS20-4
+* keithley228a::    Magnet Power Supply Keithley 228A (Berlin W-Band)
+* kontron4060::     Kontron 4060 Voltmeter
+* lakeshore330::    Lake Shore 330 Temperature Controller
+* lecroy9400::      LeCroy Digitizing Oscilloscope 9400
+* me6000::          Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
+* ni6601::          National Instruments 6601 GPCT card
+* pt2025::          Metrolab NMR Teslameter PT2025
+* rs_spec10::       Roper Scientific Spec-10 CCD Camera
+* rs690::           Interface Technology RS690 Word Generator (Berlin 360 GHz)
 * s_band_magnet_broad::   S-band Magnet Power Supply (broad range)
 * s_band_magnet_narrow::  S-band Magnet Power Supply (narrow range)
 * spectrapro_300i::  Acton Research SpectraPro-300i Monochromator
-* sr510::         Stanford Research Lock-In Amplifier SR510
-* sr530::         Stanford Research Lock-In Amplifier SR530
-* sr810::         Stanford Research Lock-In Amplifier SR810
-* sr830::         Stanford Research Lock-In Amplifier SR830
-* tds520::        Tektronix Digitizing Oscilloscope TDS520
-* tds520a::       Tektronix Digitizing Oscilloscope TDS520A
-* tds520c::       Tektronix Digitizing Oscilloscope TDS520C
-* tds540::        Tektronix Digitizing Oscilloscope TDS540
-* tds744a::       Tektronix Digitizing Oscilloscope TDS744A
-* tds754a::       Tektronix Digitizing Oscilloscope TDS754A
-* thurlby330::    Thurlby & Thandar Power Supply PL330DP
-* witio_48::      Wasco WITIO-48 DIO card
+* sr510::           Stanford Research Lock-In Amplifier SR510
+* sr530::           Stanford Research Lock-In Amplifier SR530
+* sr810::           Stanford Research Lock-In Amplifier SR810
+* sr830::           Stanford Research Lock-In Amplifier SR830
+* tds520::          Tektronix Digitizing Oscilloscope TDS520
+* tds520a::         Tektronix Digitizing Oscilloscope TDS520A
+* tds520c::         Tektronix Digitizing Oscilloscope TDS520C
+* tds540::          Tektronix Digitizing Oscilloscope TDS540
+* tds744a::         Tektronix Digitizing Oscilloscope TDS744A
+* tds754a::         Tektronix Digitizing Oscilloscope TDS754A
+* thurlby330::      Thurlby & Thandar Power Supply PL330DP
+* witio_48::        Wasco WITIO-48 DIO card
 @end menu
 @end ifinfo
 
+
+@c #############################################################
 
 
 @node aeg_s_band, aeg_x_band, Device Reference, Device Reference
@@ -110,6 +113,10 @@ with @code{bh15} range is @w{-50 G} to @w{23000 G}.
 @item @code{reset_field()}            @tab @ref{reset_field}
 @end multitable
 
+
+@c #############################################################
+
+
 @node aeg_x_band, bh15, aeg_s_band, Device Reference
 @iftex
 @subheading X-band AEG Magnet Power Supply
@@ -147,6 +154,9 @@ to @w{19900 G}, with @code{bh15} range is @w{-50 G} to @w{23000 G}.
 @end multitable
 
 
+@c #############################################################
+
+
 @node bh15, dg2020_b, aeg_x_band, Device Reference
 @iftex
 @subheading Bruker Hall Effect Field Controller BH 15
@@ -176,6 +186,10 @@ measured is from @w{-50 G} to @w{23000 G}.
 @item @code{gaussmeter_resolution()}  @tab @ref{gaussmeter_resolution}
 @item @code{gaussmeter_wait()}
 @end multitable
+
+
+@c #############################################################
+
 
 @node dg2020_b, dg2020_f, bh15, Device Reference
 @iftex
@@ -239,6 +253,9 @@ for function/output channels declared as @code{INVERTED}).
 @end multitable
 
 
+@c #############################################################
+
+
 @node dg2020_f, egg4402, dg2020_b, Device Reference
 @iftex
 @subheading Sony/Tektronix Data Generator DG2020 (Frankfurt Version)
@@ -252,7 +269,8 @@ for function/output channels declared as @code{INVERTED}).
 
 @paragraphindent 0
 @strong{Description}: Sony/Tektronix Data generator DG2020, used as
-pulser for the Frankfurt S-band spectrometer.
+pulser for the S-band spectrometer in the group of T.@: Prisner at the
+J.-W.-Goethe University in Frankfurt/Main.
 
 @paragraphindent 0
 Time base: between @w{5 ns} and @w{100 ms}@*
@@ -298,6 +316,9 @@ for function/output channels declared as @code{INVERTED}).
 @end multitable
 
 
+@c #############################################################
+
+
 @node egg4402, ep385, dg2020_f, Device Reference
 @iftex
 @subheading EG&G PARC Box-Car Integrator 4402
@@ -327,6 +348,9 @@ currently supported.
 @item @code{boxcar_stop_acquisition()}   @tab @ref{boxcar_stop_acquisition}
 @item @code{boxcar_single_shot()}        @tab @ref{boxcar_single_shot}
 @end multitable
+
+
+@c #############################################################
 
 
 @node ep385, er023m, egg4402, Device Reference
@@ -378,6 +402,8 @@ Output channels: 8
 @end multitable
 
 
+@c #############################################################
+
 
 @node er023m, er032m, ep385, Device Reference
 @iftex
@@ -421,6 +447,9 @@ analog-to-digital converter.
 @end multitable
 
 
+@c #############################################################
+
+
 @node er032m, er035m, er023m, Device Reference
 @iftex
 @subheading Bruker Field controller ER 032 M
@@ -451,6 +480,9 @@ the field in older Bruker EPR spectrometers. Maximum field range is from
 @item @code{sweep_down()}    @tab @ref{sweep_down}
 @item @code{reset_field()}   @tab @ref{reset_field}
 @end multitable
+
+
+@c #############################################################
 
 
 @node er035m, er035m_s, er032m, Device Reference
@@ -488,6 +520,9 @@ range is @w{1460 G} to @w{19900 G}.
 @end multitable
 
 
+@c #############################################################
+
+
 @node er035m_s, er035m_sa, er035m, Device Reference
 @iftex
 @subheading Bruker NMR Gaussmeter ER 035 M (Serial)
@@ -523,6 +558,9 @@ range is @w{1460 G} to @w{19900 G}.
 @end multitable
 
 
+@c #############################################################
+
+
 @node er035m_sa, er035m_sas, er035m_s, Device Reference
 @iftex
 @subheading Bruker NMR Gaussmeter ER 035 M (GPIB, Stand-Alone)
@@ -556,6 +594,9 @@ the range is @w{1460 G} to @w{19900 G}.
 @end multitable
 
 
+@c #############################################################
+
+
 @node er035m_sas, hfs9000, er035m_sa, Device Reference
 @iftex
 @subheading Bruker NMR Gaussmeter ER 035 M (Serial, Stand-Alone)
@@ -585,6 +626,9 @@ the range is @w{1460 G} to @w{19900 G}.
 @item @code{gaussmeter_upper_search_limit()} @tab @ref{gaussmeter_upper_search_limit}
 @item @code{gaussmeter_lower_search_limit()} @tab @ref{gaussmeter_lower_search_limit}
 @end multitable
+
+
+@c #############################################################
 
 
 @node hfs9000, hp5340a, er035m_sas, Device Reference
@@ -636,6 +680,9 @@ Fixed length of TRIGGER_OUT pulse: @w{20 ns}
 @end multitable
 
 
+@c #############################################################
+
+
 @node hp5340a, hp8647a, hfs9000, Device Reference
 @iftex
 @subheading HP Frequency Counter HP5340A
@@ -662,6 +709,9 @@ to return the measured frequency can be used.
 @item @code{freq_counter_name_name()}           @tab @ref{freq_counter_name}
 @item @code{freq_counter_measure()}             @tab @ref{freq_counter_measure}
 @end multitable
+
+
+@c #############################################################
 
 
 @node hp8647a, hp8648b, hp5340a, Device Reference
@@ -710,6 +760,9 @@ to @w{3 db}
 @end multitable
 
 
+@c #############################################################
+
+
 @node hp8648b, hp8672a, hp8647a, Device Reference
 @iftex
 @subheading HP RF Synthesizer HP8648B
@@ -754,7 +807,10 @@ to @w{14.5 db}.
 @end multitable
 
 
-@node hp8672a, hjs_daadc, hp8648b, Device Reference
+@c #############################################################
+
+
+@node hp8672a, hjs_attenuator, hp8648b, Device Reference
 @iftex
 @subheading HP RF Synthesizer HP8672A
 @end iftex
@@ -795,7 +851,48 @@ allowed -- change the configuration file to allow higher output levels.
 @end multitable
 
 
-@node hjs_daadc, ips20_4, hp8672a, Device Reference
+@c #############################################################
+
+
+@node hjs_attenuator, hjs_daadc, hp8672a, Device Reference
+@iftex
+@subheading Home-built microwave attenuator
+@end iftex
+@ifnottex
+@section Home-built microwave attenuator
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{hjs_daadc}
+
+@paragraphindent 0
+@strong{Description}: Home-built computer controlled microwave
+attenuator from the group of H.-J.@: Steinhoff at the University of
+Osnabrueck. Works with a stepper motor to mechanically adjust a
+microwave attenuator. Requires a default calibration table file that
+gets read in when the module is loaded. The name of the file can be set
+in the configuration file for the module. During the @code{PREPARATIONS}
+section the function @code{mw_attenuator_initial_attenuation()}
+@strong{must} be called to tell the module about the initial attenuation
+setting.
+
+@paragraphindent 0
+@strong{Controlled via}: Serial port
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{mw_attenuator_name()}                @tab @ref{mw_attenuator_name}
+@item @code{mw_attenuator_use_table()}           @tab @ref{mw_attenuator_use_table}
+@item @code{mw_attenuator_initial_attenuation()} @tab @ref{mw_attenuator_initial_attenuation}
+@item @code{mw_attenuator_attenuation()}         @tab @ref{mw_attenuator_attenuation}
+@end multitable
+
+
+@c #############################################################
+
+
+@node hjs_daadc, ips20_4, hjs_attenuator, Device Reference
 @iftex
 @subheading Home-built AD and DA converter
 @end iftex
@@ -807,9 +904,9 @@ allowed -- change the configuration file to allow higher output levels.
 @strong{Module name}: @code{hjs_daadc}
 
 @paragraphindent 0
-@strong{Description}: Home-built single channel AD and DA converter
-from the group of H.-J.@: Steinhoff. Output voltage can be reduced via a
-potentiometer at the front panel.
+@strong{Description}: Home-built single channel AD and DA converter from
+the group of H.-J.@: Steinhoff at the University of Osnabrueck. Output
+voltage can be reduced via a potentiometer at the front panel.
 
 @paragraphindent 0
 @strong{Controlled via}: Serial port
@@ -822,6 +919,9 @@ potentiometer at the front panel.
 @item @code{daq_maximum_output_voltage()} @tab @ref{daq_maximum_output_voltage}
 @item @code{daq_get_voltage()}            @tab @ref{daq_get_voltage}
 @end multitable
+
+
+@c #############################################################
 
 
 @node ips20_4, keithley228a, hjs_daadc, Device Reference
@@ -860,6 +960,9 @@ temperature controller transfering data between GPIB and Oxford ISOBUS.
 @item @code{reset_field()}              @tab @ref{reset_field}
 @item @code{magnet_goto_field_on_end}   @tab @ref{magnet_goto_field_on_end}
 @end multitable
+
+
+@c #############################################################
 
 
 @node keithley228a, kontron4060, ips20_4, Device Reference
@@ -904,6 +1007,10 @@ the currents through the sweep coil, not in field units!
 @item @code{reset_field()}            @tab @ref{reset_field}
 @end multitable
 
+
+@c #############################################################
+
+
 @node kontron4060, lakeshore330, keithley228a, Device Reference
 @iftex
 @subheading Kontron 4060 Voltmeter
@@ -929,6 +1036,9 @@ the currents through the sweep coil, not in field units!
 @item @code{voltmeter_ac_measurement()}  @tab @ref{voltmeter_ac_measurement}
 @item @code{voltmeter_dc_measurement()}  @tab @ref{voltmeter_dc_measurement}
 @end multitable
+
+
+@c #############################################################
 
 
 @node lakeshore330, lecroy9400, kontron4060, Device Reference
@@ -959,6 +1069,9 @@ the temperature.
 @item @code{temp_contr_sensor_unit()}     @tab @ref{temp_contr_sensor_unit}
 @item @code{temp_contr_lock_keyboard()}   @tab @ref{temp_contr_lock_keyboard}
 @end multitable
+
+
+@c #############################################################
 
 
 @node lecroy9400, me6000, lakeshore330, Device Reference
@@ -1000,6 +1113,9 @@ channels, 2 function channels (needed for averaging).
 @end multitable
 
 
+@c #############################################################
+
+
 @node  me6000, ni6601, lecroy9400, Device Reference
 @iftex
 @subheading Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
@@ -1025,6 +1141,9 @@ library are part of the @code{fsc2} package)
 @item @code{daq_name()}                        @tab @ref{daq_name}
 @item @code{daq_set_voltage()}                 @tab @ref{daq_set_voltage}
 @end multitable
+
+
+@c #############################################################
 
 
 @node  ni6601, pt2025, me6000, Device Reference
@@ -1063,6 +1182,9 @@ library are part of the @code{fsc2} package)
 @end multitable
 
 
+@c #############################################################
+
+
 @node pt2025, rs_spec10, ni6601, Device Reference
 @iftex
 @subheading Metrolab NMR Teslameter PT2025
@@ -1091,6 +1213,9 @@ T. Measured fields are returned in Gauss, not Tesla!
 @item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
 @item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
 @end multitable
+
+
+@c #############################################################
 
 
 @node rs_spec10, rs690, pt2025, Device Reference
@@ -1128,6 +1253,9 @@ from Roper Scientific.
 @item @code{ccd_camera_pixel_size()}      @tab @ref{ccd_camera_pixel_size}
 @item @code{ccd_camera_pixel_area()}      @tab @ref{ccd_camera_pixel_area}
 @end multitable
+
+
+@c #############################################################
 
 
 @node rs690, s_band_magnet_broad, rs_spec10, Device Reference
@@ -1188,6 +1316,9 @@ the repetition time may become larger by @w{8 ns}.
 @end multitable
 
 
+@c #############################################################
+
+
 @node s_band_magnet_broad, s_band_magnet_narrow, rs690, Device Reference
 @iftex
 @subheading S-band Magnet Power Supply (broad range)
@@ -1201,7 +1332,8 @@ the repetition time may become larger by @w{8 ns}.
 
 @paragraphindent 0
 @strong{Description}: Power supply for magnet with home-built computer
-control to be used with the Frankfurt S-band spectrometer. Field range
+control to be used with the S-band spectrometer in the group of T.@:
+Prisner at the J.-W.-Goethe University in Frankfurt/Main. Field range
 is 0 G to 2047.5 G with a resolution of 0.5 G.
 
 @paragraphindent 0
@@ -1221,6 +1353,9 @@ is 0 G to 2047.5 G with a resolution of 0.5 G.
 @end multitable
 
 
+@c #############################################################
+
+
 @node s_band_magnet_narrow, spectrapro_300i, s_band_magnet_broad, Device Reference
 @iftex
 @subheading S-band Magnet Power Supply (narrow range)
@@ -1234,7 +1369,8 @@ is 0 G to 2047.5 G with a resolution of 0.5 G.
 
 @paragraphindent 0
 @strong{Description}: Power supply for magnet with home-built computer
-control to be used with Frankfurt S-band spectrometer. Field range is
+control to be used with the S-band spectrometer in the group of T.@:
+Prisner at the J.-W.-Goethe University in Frankfurt/Main. Field range is
 1070 G to 1479.5 G with a resolution of 0.1 G.
 
 @paragraphindent 0
@@ -1252,6 +1388,9 @@ control to be used with Frankfurt S-band spectrometer. Field range is
 @item @code{reset_field()}            @tab @ref{reset_field}
 @item @code{magnet_goto_field_on_end} @tab @ref{magnet_goto_field_on_end}
 @end multitable
+
+
+@c #############################################################
 
 
 @node spectrapro_300i, sr510, s_band_magnet_narrow, Device Reference
@@ -1291,6 +1430,8 @@ to 3 gratings on up to 3 turrets.
 @end multitable
 
 
+@c #############################################################
+
 
 @node sr510, sr530, spectrapro_300i, Device Reference
 @iftex
@@ -1325,6 +1466,9 @@ channel, no internal modulation, 4 ADC and 2 DAC ports.
 @end multitable
 
 
+@c #############################################################
+
+
 @node sr530, sr810, sr510, Device Reference
 @iftex
 @subheading Stanford Research Lock-In Amplifier SR530
@@ -1356,6 +1500,9 @@ channels, no internal modulation, 4 ADC and 2 DAC ports.
 @item @code{lockin_dac_voltage()}    @tab @ref{lockin_dac_voltage}
 @item @code{lockin_lock_keyboard()}  @tab @ref{lockin_lock_keyboard}
 @end multitable
+
+
+@c #############################################################
 
 
 @node sr810, sr830, sr530, Device Reference
@@ -1396,6 +1543,9 @@ channel, auto acquisition, internal modulation, 4 ADC and 4 DAC ports.
 @end multitable
 
 
+@c #############################################################
+
+
 @node sr830, tds520, sr810, Device Reference
 @iftex
 @subheading Stanford Research Lock-In Amplifier SR830
@@ -1432,6 +1582,9 @@ channels, auto acquisition, internal modulation, 4 ADC and 4 DAC ports.
 @item @code{lockin_ref_level()}         @tab @ref{lockin_ref_level}
 @item @code{lockin_lock_keyboard()}     @tab @ref{lockin_lock_keyboard}
 @end multitable
+
+
+@c #############################################################
 
 
 @node tds520, tds520a, sr830, Device Reference
@@ -1481,6 +1634,9 @@ reference channels.
 @end multitable
 
 
+@c #############################################################
+
+
 @node tds520a, tds520c, tds520, Device Reference
 @iftex
 @subheading Tektronix Digitizing Oscilloscope TDS520A
@@ -1526,6 +1682,9 @@ reference channels.
 @item @code{digitizer_run()}                 @tab @ref{digitizer_run}
 @item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard}
 @end multitable
+
+
+@c #############################################################
 
 
 @node tds520c, tds540, tds520a, Device Reference
@@ -1575,6 +1734,9 @@ reference channels.
 @end multitable
 
 
+@c #############################################################
+
+
 @node tds540, tds744a, tds520c, Device Reference
 @iftex
 @subheading Tektronix Digitizing Oscilloscope TDS540
@@ -1620,6 +1782,9 @@ only), 3 math channels and 4 reference channels.
 @item @code{digitizer_run()}                 @tab @ref{digitizer_run}
 @item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard}
 @end multitable
+
+
+@c #############################################################
 
 
 @node tds744a, tds754a, tds540, Device Reference
@@ -1669,6 +1834,9 @@ only), 3 math channels and 4 reference channels.
 @end multitable
 
 
+@c #############################################################
+
+
 @node tds754a, thurlby330, tds744a, Device Reference
 @iftex
 @subheading Tektronix Digitizing Oscilloscope TDS754A
@@ -1716,6 +1884,9 @@ only), 3 math channels and 4 reference channels.
 @end multitable
 
 
+@c #############################################################
+
+
 @node thurlby330, witio_48, tds754a, Device Reference
 @iftex
 @subheading Thurlby & Thandar Power Supply PL330DP
@@ -1747,6 +1918,9 @@ mV}, current range: @w{0 A} to @w{3 A} with resolution of @w{1 mA}.
 @item @code{powersupply_current()}        @tab @ref{powersupply_current}
 @item @code{powersupply_current_limit()}  @tab @ref{powersupply_current_limit}
 @end multitable
+
+
+@c #############################################################
 
 
 @node witio_48, ,thurlby330, Device Reference
