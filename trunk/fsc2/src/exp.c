@@ -6,12 +6,18 @@
 #include <signal.h>
 
 
-/* Number of program token structures are to be allocated for as a chunk */
+/* Number of program token structures to be allocated as a chunk */
 
 #define PRG_CHUNK_SIZE 128
 
+/* Number of tokens to be parsed befor forms are checked for user input - too
+   low a number slows down the program quite a lot and even relatively short
+   EDL files with loops may produce an appreciable number of tokens ! */
 
-static bool in_for_lex = UNSET;
+#define CHECK_FORMS_AFTER   65536
+
+
+static bool in_for_lex = UNSET;   // set while handling for loop condition part
 static long token_count;
 
 
@@ -41,6 +47,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr );
 
 
 /*-----------------------------------------------------------------------------
+
    This routine stores the experiment section of an EDL file in the form of
    tokens (together with their semantic values if there is one) as returned by
    the lexer. Thus it serves as a kind of intermediate between the lexer and
@@ -48,19 +55,19 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr );
    section may contain loops. Without an intermediate it would be rather
    difficult to run through the loops since we would have to re-read and
    re-tokenise the input file again and again, which not only would be slow
-   but also difficult since what we read as input file is actually a pipe from
-   the `cleaner'. Second, we will have to run through the experiment section
-   at least two times, first for syntax and sanity checks and then again for
-   really doing the experiment. Again, without an intermediate for storing the
-   tokenised form of the experiment section this would necessitate reading the
-   input files at least two times.
+   but also difficult since what we read is not the real EDL file(s) but via a
+   pipe after filtering by the program `fsc2_clean'. Second, we will have to
+   run through the experiment section at least two times, first for syntax and
+   sanity checks and then again for really doing the experiment. Again,
+   without an intermediate for storing the tokenised form of the experiment
+   section this would necessitate reading the input files at least two times.
 
    By having an intermediate between the lexer and the parser we avoid several
    problems. We don't have to re-read and re-tokenise the input file. We also
    can find out about loops and handle them later by simply feeding the parser
    the loop again and again. Of course, beside storing the experiment section
    in tokenised form as done by this function, we also need a routine that
-   later feeds the stored tokens to the parser(s).
+   later feeds the stored tokens to the parser(s) - exp_runlex().
 -----------------------------------------------------------------------------*/
 
 
@@ -541,10 +548,10 @@ void exp_test_run( void )
 
 			/* Give the `Stop Test' button a chance to get tested... */
 
-			if ( ! just_testing && token_count >= 65536 )
+			if ( ! just_testing && token_count >= CHECK_FORMS_AFTER )
 			{
 				fl_check_only_forms( );
-				token_count %= 65536;
+				token_count %= CHECK_FORMS_AFTER;
 
 			}
 
@@ -751,7 +758,7 @@ int conditionlex( void )
 
 			case ':' :                 /* separator in for loop condition */
 				if ( in_for_lex )
-					return 0 ;
+					return 0;
 				eprint( FATAL, "%s:%ld: Syntax error in condition at "
 						"token `:'.", Fname, Lc  );
 				THROW( EXCEPTION );
