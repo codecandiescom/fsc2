@@ -76,6 +76,7 @@ typedef struct Var_
 	struct Var_ *from;
 	struct Var_ *next;       /* next variable in list or stack */
 	struct Var_ *prev;       /* previous variable in list or stack */
+	bool is_on_stack;        /* indicates where to look for the variable */
 } Var;
 
 

@@ -315,7 +315,7 @@ Var *func_call( Var *f )
 
 	if ( f->type != FUNC )
 	{
-		eprint( FATAL, UNSET, "Internal error at at %s:%d.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -326,7 +326,7 @@ Var *func_call( Var *f )
 	
 	if ( i >= Num_Func )
 	{
-		eprint( FATAL, UNSET, "Internal error at at %s:%d.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -388,7 +388,7 @@ Var *func_call( Var *f )
 	if ( ! vars_exist( f ) )
 	{
 		if ( ! Fncts[ i ].to_be_loaded )
-			eprint( FATAL, UNSET, "Internal error at at %s:%d.\n",
+			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 					__FILE__, __LINE__ );
 		else
 			eprint( FATAL, SET, "Function %s() from module %s.so messed "
