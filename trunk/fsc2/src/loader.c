@@ -23,7 +23,7 @@ static int func_cmp( const void *a, const void *b );
 
 
 /*------------------------------------------------------------------------*/
-/* Function to be called after the DEVICES section is read in. It links   */
+/* Function to be called after the DEVICES section is read in. It loads   */
 /* the library files and tries to resolve the references to the functions */
 /* listed in `Functions' and stores pointers to the functions in `Fncts'. */
 /*------------------------------------------------------------------------*/
