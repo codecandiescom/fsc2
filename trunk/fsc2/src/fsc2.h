@@ -75,10 +75,6 @@ void sigchld_handler( int sig_type, void *data );
 #define BROWSER_MAXLINE  1024
 #define EDITOR_FAILED    123
 
-#define DO_SEND   SIGUSR1
-#define DO_QUIT   SIGUSR2
-
-
 
 
 /* Global variables */

@@ -6,31 +6,52 @@
 #include "fsc2.h"
 
 
-void reader( void )
+long reader( void *ret )
 {
 	CS header;
 	char *str;
 
 
-	if ( read( pd[ READ ], &header, sizeof( CS ) ) == 0 )
-		return;
+	read( pd[ READ ], &header, sizeof( CS ) );
 
 	switch( header.type )
 	{
 		case C_EPRINT :
-			str = T_malloc( header.data.eprint_len + 1 );
-			read( pd[ READ ], str, header.data.eprint_len );
-			str[ header.data.eprint_len ] = '\0';
-fprintf( stderr, "R: Receiving: %s", str );
-fflush( stderr );
+			str = T_malloc( header.data.len + 1 );
+			read( pd[ READ ], str, header.data.len );
+			str[ header.data.len ] = '\0';
 			eprint( NO_ERROR, "%s", str );
 			T_free( str );
-			break;
+			if ( ret != NULL )
+				*( ( char ** ) ret ) = NULL;
+			return 0;
+
+		case C_INT :
+			if ( ret != NULL )
+				*( ( int * ) ret ) = header.data.int_data;
+			return 1;
+
+		case C_LONG :
+			if ( ret != NULL )
+				*( ( long * ) ret ) = header.data.long_data;
+			return 1;
+
+		case C_FLOAT :
+			if ( ret != NULL )
+				*( ( float * ) ret ) = header.data.float_data;
+			return 1;
+
+		case C_DOUBLE :
+			if ( ret != NULL )
+				*( ( double * ) ret ) = header.data.double_data;
+			return 1;
 
 		default :
 			eprint( FATAL, "INTERNAL COMMUNICATION ERROR\n" );
 			THROW( EXCEPTION );
 	}
+
+	return 0;
 }
 
 
@@ -48,11 +69,29 @@ void writer( int type, ... )
 	{
 		case C_EPRINT :
 			str = va_arg( ap, char * );
-			header.data.eprint_len = strlen( str );
+			header.data.len = strlen( str );
 			write( pd[ WRITE ], &header, sizeof( CS ) );
 			write( pd[ WRITE ], str, strlen( str ) );
-fprintf( stderr, "W: Sending: %s", str );
-fflush( stderr );
+			break;
+
+		case C_INT :
+			header.data.int_data = va_arg( ap, int );
+			write( pd[ WRITE ], &header, sizeof( CS ) );
+			break;
+
+		case C_LONG :
+			header.data.long_data = va_arg( ap, long );
+			write( pd[ WRITE ], &header, sizeof( CS ) );
+			break;
+
+		case C_FLOAT :
+			header.data.float_data = va_arg( ap, float );
+			write( pd[ WRITE ], &header, sizeof( CS ) );
+			break;
+
+		case C_DOUBLE :
+			header.data.double_data = va_arg( ap, double );
+			write( pd[ WRITE ], &header, sizeof( CS ) );
 			break;
 
 		default :

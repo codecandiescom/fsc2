@@ -6,42 +6,30 @@ extern int prim_exp_runparse( void );     /* from prim_exp__run_parser.y */
 
 /* Routines of the main process exclusively used in this file */
 
-void new_data_handler( int sig_type, void *data );
-void quitting_handler( int sig_type, void *data );
-void run_sigchld_handler( int sig_type, void *data );
-void init_exp_grafics( void );
-FILE *get_save_file( void );
-void clear_up_after_measurement( void );
-void set_buttons( int active );
+static void new_data_handler( int sig_type, void *data );
+static void quitting_handler( int sig_type, void *data );
+static void run_sigchld_handler( int sig_type, void *data );
+static void init_exp_grafics( void );
+static FILE *get_save_file( void );
+static void clear_up_after_measurement( void );
+static void set_buttons( int active );
 
 
 /* Routines of the child process doing the measurement */
 
-void run_child( void );
-void do_send_handler( int sig_type );
-void do_quit_handler_0( int sig_type );
-void do_quit_handler_1( int sig_type );
-bool do_measurement( void );
+static void run_child( void );
+static void do_send_handler( int sig_type );
+static void do_quit_handler_0( int sig_type );
+static void do_quit_handler_1( int sig_type );
+static bool do_measurement( void );
 
 
 /* Global variables used by parent, child and signal handlers */
 
-bool is_data_saved;
-bool child_is_ready;
-FILE *tf = NULL;
-
-volatile int quitting;
-
-
-/* Signals sent by the parent and accepted by the child */
-
-#define DO_SEND   SIGUSR1
-#define DO_QUIT   SIGUSR2
-
-/* Signals sent by the child and accepted by the parent */
-
-#define NEW_DATA  SIGUSR1
-#define QUITTING  SIGUSR2
+static bool is_data_saved;
+static bool child_is_ready;
+static FILE *tf = NULL;
+static volatile int quitting;
 
 
 /*-------------------------------------------------------------------*/
