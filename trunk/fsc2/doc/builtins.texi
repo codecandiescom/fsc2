@@ -763,6 +763,14 @@ elements of an array).
 
 
 @table @samp
+@item abort()
+@anchor{abort}
+@findex abort()
+Teh function will abort the currently running program immediately, so
+it's kind of an emergency exit when nothing else will do. When called
+it displays a message box on the screen to inform the user.
+
+
 @item date()
 @anchor{date}
 @findex date()

@@ -35,19 +35,23 @@ fsc2.html: $(docs)
 ps: fsc2.ps
 
 fsc2.ps: $(docs)
-	if [ "`eval texi2dvi --help 2>/dev/null`" -a   \
+	if [ "`eval tex -help 2>/dev/null`" -a \
 		 "`eval dvips --help 2>/dev/null`" ]; then \
-		texi2dvi -c fsc2.texi; \
-		dvips fsc2.dvi;        \
+		./texi2dvi -c fsc2.texi; \
+		dvips fsc2.dvi; \
+	else \
+		echo \
+		"Can't make PS documentation, programs tex and/or dvips not found."; \
 	fi
 
 
 pdf: fsc2.pdf
 
 fsc2.pdf: $(docs)
-	if [ "`eval texi2dvi --help 2>/dev/null`" -a     \
-		 "`eval pdftex --help 2>/dev/null`" ]; then \
-		texi2dvi --pdf -c fsc2.texi; \
+	if [ "`eval pdftex --help 2>/dev/null`" ]; then \
+		./texi2dvi --pdf -c fsc2.texi; \
+	else \
+		echo "Can't make PDF documentation, program pdftex not found."; \
 	fi
 
 
