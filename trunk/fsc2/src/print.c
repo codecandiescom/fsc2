@@ -513,8 +513,8 @@ static void start_printing( FILE *fp, char *name, long what )
 		_exit( EXIT_SUCCESS );
 	}
 
-	/* If we have to print to a command it gets execv()'ed here with the
-	   standard input redirected to the temporary file */
+	/* If we have to print to a command it gets execv()'ed with the
+	   standard input redirected to read from the temporary file */
 
 	lseek( tmp_fd, 0, SEEK_SET );
 
