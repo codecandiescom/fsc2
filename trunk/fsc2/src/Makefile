@@ -18,9 +18,11 @@ headers        = ${c_sources:.c=.h} global.h
 
 ifeq ($(shell hostname -f),moebi.physik.fu-berlin.de)
 	c_sources += fsc2_rsc_lr.c
+	headers   += fsc2_rsc_lr.h
 	CFLAGS    += -DSIZE=0
 else
 	c_sources += fsc2_rsc_hr.c
+	headers   += fsc2_rsc_hr.h
 	CFLAGS    += -DSIZE=1
 endif
 
