@@ -51,8 +51,8 @@ bool hp8647a_init( const char *name )
 		if ( hp8647a.use_table )
 		{
 			att =   hp8647a.attenuation
-				  - hp8647a_get_att_from_table( hp8647a.freq )
-				  + hp8647a.att_at_ref_freq;
+				  + hp8647a_get_att_from_table( hp8647a.freq )
+				  - hp8647a.att_at_ref_freq;
 			if ( att < MAX_ATTEN )
 			{
 				eprint( SEVERE, "%s: Attenuation range is insufficient, using "
