@@ -50,7 +50,7 @@ Ticks dg2020_double2ticks( double p_time )
 		char *t = T_strdup( dg2020_ptime( p_time ) );
 		print( FATAL, "Specified time of %s is not an integer multiple of "
 			   "the pulser time base of %s.\n",
-				pulser_struct.name, t, dg2020_ptime( dg2020.timebase ) );
+			   t, dg2020_ptime( dg2020.timebase ) );
 		T_free( t );
 		THROW( EXCEPTION );
 	}
