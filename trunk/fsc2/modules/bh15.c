@@ -40,8 +40,8 @@ void bh15_exit_hook( void );
 
 Var *gaussmeter_name( Var *v );
 Var *find_field( Var *v );
-Var *field_resolution( Var *v );
-Var *field_meter_wait( Var *v );
+Var *gaussmeter_resolution( Var *v );
+Var *gaussmeter_wait( Var *v );
 
 bool is_gaussmeter = UNSET;         /* tested by magnet power supply driver */
 
@@ -246,7 +246,7 @@ void bh15_exit_hook( void )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *field_name( Var *v )
+Var *gaussmeter_name( Var *v )
 {
 	v = v;
 	return vars_push( STR_VAR, DEVICE_NAME );
@@ -266,7 +266,7 @@ Var *find_field( Var *v )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *field_resolution( Var *v )
+Var *gaussmeter_resolution( Var *v )
 {
 	v = v;
 	return vars_push( FLOAT_VAR, bh15.resolution );
@@ -276,7 +276,7 @@ Var *field_resolution( Var *v )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *field_meter_wait( Var *v )
+Var *gaussmeter_wait( Var *v )
 {
 	v = v;
 

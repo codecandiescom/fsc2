@@ -170,7 +170,7 @@ int aeg_s_band_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	if ( ! exists_function( "field_meter_wait" ) )
+	if ( ! exists_function( "gaussmeter_wait" ) )
 	{
 		eprint( FATAL, UNSET, "%s: Function needed for field measurements not "
 				"available.\n", DEVICE_NAME );
