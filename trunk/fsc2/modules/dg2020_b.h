@@ -88,9 +88,7 @@ Var *pulser_pulse_reset( Var *v );
 /* typedefs of structures needed in the module */
 
 typedef struct _F_ {
-
 	int self;                    // the functions number
-
 	bool is_used;                // set if the function has been declared in
 	                             // the ASSIGNMENTS section
 	bool is_needed;              // set if the function has been assigned
@@ -107,7 +105,6 @@ typedef struct _F_ {
 	int num_active_pulses;       // number of pulses currenty in use
 	struct _p_ **pulses;         // list of pulse pointers
 
-	bool needs_phases;           // set if phase cycling is needed
 	struct _PHS_ *phase_setup;
 	int next_phase;
 	int pc_len;                  // length of the phase cycle
@@ -126,7 +123,7 @@ typedef struct _F_ {
 	bool is_low_level;
 
 	bool *pm;
-	struct _C_ **pcm;
+	struct _C_ **pcm;            // phase matrix
 
 } FUNCTION;
 
@@ -140,6 +137,9 @@ typedef struct _P_ {
 typedef struct _C_ {
 	int self;
 	FUNCTION *function;
+	bool needs_update;
+	bool *old;
+	bool *new;
 } CHANNEL;
 
 
@@ -245,8 +245,7 @@ typedef struct _p_ {
 	bool is_old_pos;
 	bool is_old_len;
 
-	CHANNEL *channel;        // channel the pulse belongs to - only needed
-	                         // for phase pulses
+	CHANNEL **channel;
 
 	bool needs_update;       // set if the pulses properties have been changed
                              // in test run or experiment

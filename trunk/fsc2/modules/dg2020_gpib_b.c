@@ -133,7 +133,7 @@
 
 bool dg2020_init( const char *name )
 {
-	int i;
+	int i, j;
 	FUNCTION *f;
 
 
@@ -228,14 +228,13 @@ bool dg2020_init( const char *name )
 		if ( ! f->is_used )
 			continue;
 
-		dg2020_channel_assign( f->channel[ 0 ]->self, f->pod->self );
-
-		if ( f->self == PULSER_CHANNEL_PHASE_1 ||
-			 f->self == PULSER_CHANNEL_PHASE_2 )
-		{
-			dg2020_channel_assign( f->channel[ 1 ]->self, f->pod2->self );
-			f->next_phase = 2;
-		}
+		if ( f->num_pods == 1 )
+			dg2020_channel_assign( f->channel[ 0 ]->self, f->pod[ 0 ]->self );
+		else
+			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X + 1; j++ )
+				if ( f->phase_setup->is_set[ j ] )
+					dg2020_channel_assign( f->pcm[ j * f->pc_len + 0 ]->self,
+										   f->phase_setup->pod[ j ]->self );
 	}
 
 	/* Set up the pod output voltages */

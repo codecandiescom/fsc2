@@ -377,12 +377,8 @@ bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length )
 
 void dg2020_set( bool *arena, Ticks start, Ticks len, Ticks offset )
 {
-	bool *where = arena + offset + start;
-	Ticks i;
-
-
-	for ( i = 0; i < len; i++ )
-		*where++ = SET;
+	memset( ( void * ) ( arena + offset + start ),
+			( int ) SET, len * sizeof( bool ) );
 }
 
 
