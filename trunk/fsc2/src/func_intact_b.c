@@ -610,16 +610,17 @@ Var *f_bstate( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	io->state = get_boolean( v );
+	state = get_boolean( v );
 
 	/* Can't switch off a radio button that is switched on */
 
-	if ( io->type == RADIO_BUTTON && io->state == 0 &&
-		 fl_get_button( io->self ) )
+	if ( io->type == RADIO_BUTTON && state == 0 && io->state != 0 )
 	{
 		print( FATAL, "Can't switch off a RADIO_BUTTON.\n" );
 		THROW( EXCEPTION );
 	}
+
+	io->state = state;
 
 	/* If this isn't a test run set the button state */
 
