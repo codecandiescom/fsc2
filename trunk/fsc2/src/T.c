@@ -223,7 +223,7 @@ char *T_strdup( const char *str )
 		print( FATAL, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
-	strcpy( new_mem, string );
+	strcpy( new_mem, str );
 
 #if defined MDEBUG && ! defined __STRICT_ANSI__
 	if ( Internals.is_i386 )

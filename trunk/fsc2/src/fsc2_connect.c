@@ -75,12 +75,20 @@
 /* pion specific stuff */
 
 #if defined IS_STILL_LIBC1
-
 #define AF_LOCAL AF_UNIX
 typedef unsigned int socklen_t;
-
 #endif
 
+
+/* Functions and defines we can't do without but which aren't available
+   when compiling with -ansi on Linux */
+
+#if defined __STRICT_ANSI__
+#define P_tmpdir   "/tmp"
+extern int mkstemp( char *template );
+extern int fchmod( int fildes, mode_t mode );
+extern int snprintf( char *str, size_t size, const  char *format, ... );
+#endif
 
 /* FSC2_SOCKET must be identical to the definition in fsc2.h ! */
 

@@ -107,6 +107,21 @@
 #endif
 
 
+/* Functions and defines we can't do without but which aren't available
+   when compiling with -ansi on Linux */
+
+#if defined __STRICT_ANSI__
+#define P_tmpdir   "/tmp"
+extern int seteuid( uid_t euid );
+extern int setegid( gid_t egid );
+extern int vsnprintf( char *str, size_t size, const char *format, va_list ap );
+extern int mkstemp( char *template );
+extern int fchmod( int fildes, mode_t mode );
+extern int snprintf( char *str, size_t size, const  char *format, ... );
+extern int strcasecmp(const char *s1, const char *s2);
+extern int fileno( FILE *stream );
+#endif
+
 /* Some global functions */
 
 void clean_up( void );

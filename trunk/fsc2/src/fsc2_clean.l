@@ -75,6 +75,15 @@ char *prog_name;
 #endif
 
 
+/* Functions and defines we can't do without but which aren't available
+   when compiling with -ansi on Linux */
+
+#if defined __STRICT_ANSI__
+extern int seteuid( uid_t euid );
+extern int setegid( gid_t egid );
+extern int vsnprintf( char *str, size_t size, const char *format, va_list ap );
+#endif
+
 #define MAX_INCLUDE_DEPTH  16
 
 
@@ -800,8 +809,9 @@ static char *T_strdup( const char *string )
 	if ( string == NULL )
 		return NULL;
 
-	if ( ( new_mem = strdup( string ) ) == NULL )
+	if ( ( new_mem = malloc( strlen( string ) + 1 ) ) == NULL )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
+	strcpy( new_mem, string );
 
 #if defined MDEBUG
 	fprintf( stderr, "strdup:  %p (%u)\n", new_mem, strlen( string ) );
