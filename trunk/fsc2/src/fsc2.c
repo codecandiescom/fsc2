@@ -1150,14 +1150,37 @@ void clean_up( void )
 void run_help( FL_OBJECT *a, long b )
 {
 	int res;
+	int bn;
 
 
 	/* Keep the compiler happy... */
 
-	a = a;
 	b = b;
 
+	bn = fl_get_button_numb( a );
+	if ( bn != FL_SHORTCUT + 'S' && bn == FL_RIGHT_MOUSE )
+	{
+		eprint( NO_ERROR, UNSET,
+				( G_Funcs.size == LOW ) ? 
+				"@n-------------------------------------------\n" :
+				"@n-----------------------------------------------\n" );
+		eprint( NO_ERROR, UNSET,
+				"@nLeft mouse button (LMB):   Zoom after drawing box\n"
+				"@nMiddle mouse button (MMB): Move curves\n"
+				"@nRight mouse button (RMB):  Zoom in or out by moving mouse\n"
+				"@nLMB + MMB: Show data values at mouse position\n"
+				"@nLMB + RMB: Show differences of data values\n"
+				"@n<Shift> LMB: Show cross section (2D only)\n"
+				"@nLMB + MMB + <Space>: Switch between x/y cross section\n" );
+		eprint( NO_ERROR, UNSET,
+				( G_Funcs.size == LOW ) ? 
+				"@n-------------------------------------------\n" :
+				"@n-----------------------------------------------\n" );
+		return;
+	}
+
 	notify_conn( BUSY_SIGNAL );
+
 
 	/* Fork and run help browser in child process */
 
