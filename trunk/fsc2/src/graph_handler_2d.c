@@ -42,6 +42,7 @@ static bool shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv );
 static void reconfigure_window_2d( Canvas *c, int w, int h );
 static void recalc_XPoints_2d( void );
 static void make_color_scale( Canvas *c, Curve_2d *cv );
+static inline unsigned long d2color( double a );
 
 
 /*-----------------------------------------------------------*/
@@ -1935,6 +1936,30 @@ static void make_color_scale( Canvas *c, Curve_2d *cv )
 		XFillRectangle( G.d, c->pm, cv->gc, G.z_line_offset + 1,
 					   d2shrt( c->h - ( i + 1 ) * h_inc ), G.z_line_width, h );
 	}
+}
+
+
+/*--------------------------------------------------------------------------*/
+/* Returns the pixel value of an entry in XFORMs internal colour map from   */
+/* the colours set in create_colors(). For values slightly above 1 as well  */
+/* as for values just below 0 only one colour pixel value is returned while */
+/* for intermediate values one of NUM_COLORS (as defined in global.h) is    */
+/* returned, depending on the value.                                        */
+/*--------------------------------------------------------------------------*/
+
+static inline unsigned long d2color( double a )
+{
+	long c_index;
+
+
+	c_index = lrnd( a * ( NUM_COLORS - 1 ) );
+
+	if ( c_index < 0 )
+		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 );
+	else if ( c_index < NUM_COLORS )
+		return fl_get_pixel( FL_FREE_COL1 + ( unsigned int ) c_index );
+	else
+		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 1 );
 }
 
 
