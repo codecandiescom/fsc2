@@ -51,7 +51,7 @@ get_phase_cycled_area, -1, EXP;
 magnet_name, 0, ALL;            // returns the device name
 magnet_setup, 2, ALL;           // set start field and sweep step size
 magnet_fast_init, 0, ALL;       // shortens magnet setup time (X,S)
-set_field, 1, EXP;              // go to to a field value
+set_field, -1, EXP;             // go to to a field value
 get_field, 1, EXP;              // returns the current field 
 sweep_up, 0, EXP;               // sweep magnet up
 sweep_down, 0, EXP;             // sweep magnet down

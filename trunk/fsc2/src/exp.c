@@ -1600,17 +1600,26 @@ static void save_restore_variables( bool flag )
 	static Var *var_list_copy = NULL;      /* area for storing variables    */
 	static Var *old_var_list;              /* needed to satisfy my paranoia */
 	long var_count;                        /* number of variables to save   */
+	static bool exists_copy = UNSET;
 
 
 	if ( flag )
 	{
-		fsc2_assert( var_list_copy == NULL );      /* don't save twice ! */
+		fsc2_assert( ! exists_copy );      /* don't save twice ! */
+
+		if ( var_list == NULL )
+		{
+			old_var_list = var_list_copy = NULL;
+			exists_copy = SET;
+			return;
+		}
 
 		/* Count the number of variables and get memory for storing them */
 
 		for ( var_count = 0, src = var_list; src != NULL;
 			  var_count++, src = src->next )
 			;
+
 		var_list_copy = T_malloc( var_count * sizeof( Var ) );
 
 		/* Copy all of them into the backup region */
@@ -1643,11 +1652,18 @@ static void save_restore_variables( bool flag )
 		}
 
 		old_var_list = var_list;
+		exists_copy = SET;
 	}
 	else
 	{
-		fsc2_assert( var_list_copy != NULL );   /* no restore without save ! */
+		fsc2_assert( exists_copy );             /* no restore without save ! */
 		fsc2_assert( var_list == old_var_list );   /* just a bit paranoid... */
+
+		if ( var_list_copy == NULL )
+		{
+			exists_copy = UNSET;
+			return;
+		}
 
 		/* Get rid of memory for arrays that might have been changed during
 		   the test */
@@ -1672,7 +1688,7 @@ static void save_restore_variables( bool flag )
 
 		/* Deallocate memory used in arrays */
 
-		T_free( var_list_copy );
-		var_list_copy = NULL;
+		var_list_copy = T_free( var_list_copy );
+		exists_copy = UNSET;
 	}
 }
