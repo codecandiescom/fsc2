@@ -677,6 +677,8 @@ lockin_auto_setup( 1 / kd, 1 );
 
 EXPERIMENT:
 
+lockin_lock_keyboard( 0 );
+
 File = get_file( );
 IF is_file( File ) {
 	fsave( File, \"% 1st row X, all following rows Y, \"
@@ -779,6 +781,8 @@ IF is_file( File ) {
 		   J, Num_Points );
 	save_comment( File, \"% \", \"Sample:  \\nTemperature:  \\n\" );
 }
+
+set_field( start_current );
 ";
 
 	close F;
