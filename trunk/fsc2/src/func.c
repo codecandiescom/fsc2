@@ -961,7 +961,7 @@ Var *f_print( Var *v )
 	cv = v->next;
 	while ( ( ep = strstr( cp, "\x01\x01\x01\x01" ) ) != NULL )
 	{
-		if ( cv )          /* skip printing if there are not enough data */
+		if ( cv != NULL )      /* skip printing if there are not enough data */
 		{
 			switch ( cv->type )
 			{
@@ -981,7 +981,7 @@ Var *f_print( Var *v )
 					break;
 			}
 
-			cv = v->next;
+			cv = cv->next;
 		}
 
 		cp = ep + 4;
