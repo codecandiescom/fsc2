@@ -251,8 +251,8 @@ void run_test_hooks( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded && cd->driver.is_test_hook &&
 			 ! cd->driver.test_hook( ) )
-			eprint( SEVERE, "Initialisation for test run of module `%s' "
-					"failed.", cd->name );
+			eprint( SEVERE, "Initialisation of test run failed for "
+					"module `%s'.", cd->name );
 }
 
 
@@ -283,8 +283,8 @@ void run_exp_hooks( void )
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded && cd->driver.is_exp_hook &&
 			 ! cd->driver.exp_hook( ) )
-			eprint( SEVERE, "Initialisation for experiment of module `%s' "
-					"failed.", cd->name );
+			eprint( SEVERE, "Initialisation of experiment failed for "
+					"module `%s'.", cd->name );
 }
 
 
