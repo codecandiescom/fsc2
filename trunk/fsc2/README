@@ -40,7 +40,7 @@ You can download the sources for the program and the device modules from:
 The documentation in Postscript or PDF format can be downloaded from:
 
        http://www.physik.fu-berlin.de/~toerring/fsc2/fsc2.ps.gz
-       http://www.physik.fu-berlin.de/~toerring/fsc2/fsc2/fsc2.pdf
+       http://www.physik.fu-berlin.de/~toerring/fsc2/fsc2.pdf
 
 You also will find an online version of the documentation at:
 
@@ -84,14 +84,14 @@ Features
 
 * Writing new device modules (or adapting existing ones for a new device)
   shouldn't be too difficult for anyone having some experience with
-  writing programs in C. Modules for more than 30 devices are already
+  writing programs in C. Modules for about 40 differnt devices are already
   part of the package and can be used as a starting point for developing
   drivers for new devices.
 
-* fsc2 is well-documented, an 200+ page documentation in HTML, info,
-  PostScript and PDF format is part of the package, covering all aspects
-  of fsc2, i.e the graphical interface, the EDL language, device functions
-  and the writing of new device modules.
+* fsc2 is well-documented, an more than 200 page documentation in HTML,
+  info, PostScript and PDF format is part of the package, covering all
+  aspects of fsc2, i.e the graphical interface, the EDL language, device
+  functions and the writing of new device modules.
 
 * fsc2 has been extensively tested and is currently used to control seven
   EPR spectrometers and a Single Molecule spectrometer, using a broad range
@@ -142,6 +142,7 @@ Suported devices
   * Bruker Hall Effect Field Controller BH 15
   * Bruker NMR Gaussmeter ER035M (F0, F1 probe, serial port and GPIB version)
   * Metrolab NMR Teslameter PT2025
+  * Bruker NMR Gaussmeter BMN12
 
  Microwave and RF synthesizers:
 
@@ -170,7 +171,7 @@ Suported devices
 
   * Meilhaus Electronic GmbH ME-6000 and ME-6100 (Linux device driver
     comes with the package)
-  * Home-built AD and DA converter from the group of H.-J. Steinhoff
+  * Home-built AD and DA converter (H.-J. Steinhoff, University Onsabrueck)
 
  Event counter cards:
 
