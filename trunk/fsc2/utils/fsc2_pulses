@@ -592,8 +592,10 @@ sub draw_scale {
 	# to be moved to be drawn at the correct position for the scale.
 
 	my $cx = ( $self->offset - $Delay ) / $self->delta;
-	if ( $cx != int( $cx ) ) {
+	if ( $cx != int( $cx ) and $cx < 0.0 ) {
 		$cx = int( $cx ) - 1;
+	} else {
+		$cx = int( $cx );
 	}
 	$cx *= $self->delta;
 
