@@ -936,6 +936,22 @@ static bool parent_reader( CommStruct *header )
 			parent_freeze( header->data.int_data );
 			break;
 
+		case C_GETPOS :
+			TRY
+			{
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
+				pipe_read( data, ( size_t ) header->data.len );
+				exp_getpos( data, header->data.len );
+				TRY_SUCCESS;
+			}
+			OTHERWISE
+			{
+				T_free( data );
+				return FAIL;
+			}
+			T_free( data );
+			break;
+
 		case C_CLABEL :
 			TRY
 			{
@@ -1047,7 +1063,7 @@ static bool child_reader( void *ret, CommStruct *header )
 		case C_SCREATE_REPLY   : case C_SSTATE_REPLY  : case C_SCHANGED_REPLY :
 		case C_ICREATE_REPLY   : case C_ISTATE_REPLY  : case C_ICHANGED_REPLY :
 		case C_MCREATE_REPLY   : case C_MCHOICE_REPLY : case C_MCHANGED_REPLY :
-		case C_TBCHANGED_REPLY : case C_TBWAIT_REPLY  :
+		case C_TBCHANGED_REPLY : case C_TBWAIT_REPLY  : case C_GETPOS :
 			if ( ret != NULL )
 			{
 				TRY
@@ -1258,7 +1274,7 @@ bool writer( int type, ... )
 			case C_ICHANGED : case C_MCREATE  : case C_MDELETE   :
 			case C_MCHOICE  : case C_MCHANGED : case C_TBCHANGED :
 			case C_TBWAIT   : case C_ODELETE  : case C_CLABEL    :
-			case C_XABLE    :
+			case C_XABLE    : case C_GETPOS :
 				header.data.len = va_arg( ap, ptrdiff_t );
 				if ( ! pipe_write( ( char * ) &header, sizeof header ) )
 				{
@@ -1293,6 +1309,7 @@ bool writer( int type, ... )
 			case C_ICHANGED_REPLY  : case C_MCREATE_REPLY  :
 			case C_MCHOICE_REPLY   : case C_MCHANGED_REPLY :
 			case C_TBCHANGED_REPLY : case C_TBWAIT_REPLY   :
+			case C_GETPOS :
 				header.data.len = va_arg( ap, ptrdiff_t );
 
 				/* Don't try to continue writing on EPIPE (SIGPIPE is

@@ -363,7 +363,7 @@ static int hjs_daadc_in_out( int out )
 
 	/* We can always write, even if the device is switched off, because
 	   there exist no control lines, checking the return value is just
-	   cosmetics here ;-). The data from the conversion should be available
+	   cosmetics ;-). The data from the conversion should be available
 	   within 20 ms. */
 
 	if ( fsc2_serial_write( SERIAL_PORT, out_bytes, 4 ) != 4 ||
@@ -372,9 +372,10 @@ static int hjs_daadc_in_out( int out )
 
 	/* The results of the conversion by the ADC is stored in the second and
 	   third byte of the read in data in the following way: the lower 7 bits
-	   of the second byte make up the bits 4 to 10 of the result and the upper
-	   nibble of the third byte the bits 0 to 3 (the ADC has only 11 bit
-	   resolution). */
+	   of the second byte make up the bits 4 to 11 of the result and the upper
+	   nibble of the third byte the bits 0 to 3. From this value we have to
+	   subtract 2048 because a value of 0 corresponds to an input voltage
+	   of -10 V and a value of 4095 to a voltage of +10 V. */
 
 	return ( in_bytes[ 1 ] << 4 ) + ( in_bytes[ 2 ] >> 4 ) - 2048;
 }

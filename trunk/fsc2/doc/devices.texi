@@ -36,7 +36,7 @@
 * Voltmeter Functions::
 * Boxcar Integrator Functions::
 * Frequency Counter Functions::
-* DAC Functions::
+* DAQ Functions::
 * Event Counter Functions::
 * CCD Camera Functions::
 * Monochromator Functions::
@@ -2673,7 +2673,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @end table
 
 
-@node Frequency Counter Functions, DAC Functions, Boxcar Integrator Functions, Device Functions
+@node Frequency Counter Functions, DAQ Functions, Boxcar Integrator Functions, Device Functions
 @section Frequency Counter Functions
 @cindex Frequency Counter Functions
 Currently only one frequency counter is supported, the HP5340A. Because
@@ -2704,33 +2704,40 @@ does not accept any parameters and can only by used in the
 @end table
 
 
-@node DAC Functions, Event Counter Functions, Frequency Counter Functions, Device Functions
-@section DAC Functions
-@cindex DAC Functions
-Currently, there's support for one type of digital-to-analog converter
-cards, the @strong{Meilhaus Electronic GmbH} cards ME-6000 and ME-6100.
-These cards have, depending on the model, either 4, 8 or 16 output
-ports. The module for these cards is loaded by specifying
+@node DAQ Functions, Event Counter Functions, Frequency Counter Functions, Device Functions
+@section DAQ Functions
+@cindex DAQ Functions
+Currently, there's support for digital-to-analog converter cards,
+the @strong{Meilhaus Electronic GmbH} cards ME-6000 and ME-6100,
+and a home-built DA and AD converter from the group of H.-J.@: Steinhoff.
+
+The ME-6000 and ME-6100 cards have, depending on the model, either 4, 8
+or 16 output ports.Use of these cards requires that a kernel module and
+an additional library (both coming with @code{fsc2}) have been
+successfully installed.
+
+The home-built AD and DA converter has a single DA and a single AD input.
+
+The module for these devices is loaded by specifying
 @example
 me6000
+hjs_daadc
 @end example
 @noindent
 in the @code{DEVICES} section. 
 
-Use of these cards requires that a kernel module and an additional
-library (both coming with @code{fsc2}) have been successfully installed.
 
 @table @samp
 
-@anchor{dac_name}
-@item dac_name()
-@findex dac_name()
+@anchor{daq_name}
+@item daq_name()
+@findex daq_name()
 Returns a string with the name of the DAC being used.
 
 
-@anchor{dac_voltage}
-@item dac_voltage()
-@findex dac_voltage()
+@anchor{daq_set_voltage}
+@item daq_set_voltage()
+@findex daq_set_voltage()
 This function has to be used to output a voltage at one of the output
 ports. The first argument has to be the output port, specified by one of
 the symbolic values between @code{CH0} and @code{CH15} (don't try to use
@@ -2753,7 +2760,7 @@ The function can be used in the @code{EXPERIMENT} as well as in the
 @end table
 
 
-@node Event Counter Functions, CCD Camera Functions, DAC Functions, Device Functions
+@node Event Counter Functions, CCD Camera Functions, DAQ Functions, Device Functions
 @section Event Counter Functions
 @cindex Event Counter Functions
 The only currently supported event counter is the @code{National

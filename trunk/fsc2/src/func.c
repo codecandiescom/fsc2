@@ -190,6 +190,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
     { "clear_marker",        f_clearmark,       -4, ACCESS_EXP,  NULL, UNSET },
     { "clear_marker_1d",     f_clearmark_1d,    -4, ACCESS_EXP,  NULL, UNSET },
     { "clear_marker_2d",     f_clearmark_2d,    -4, ACCESS_EXP,  NULL, UNSET },
+    { "mouse_position",      f_get_pos,          0, ACCESS_EXP,  NULL, UNSET },
 	{ "end",                 f_stopsim,          0, ACCESS_EXP,  NULL, UNSET },
 	{ "abort",               f_abort,            0, ACCESS_EXP,  NULL, UNSET },
 	{ NULL,              NULL,     	         0, 0,           NULL, UNSET }

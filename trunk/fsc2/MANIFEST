@@ -3,7 +3,6 @@
 # $Id$
 #
 
-0.000000
 COPYING
 Changes
 INSTALL
@@ -12,6 +11,7 @@ Makefile
 README
 README.mail
 TODO
+xxx.dat
 
 Fcntl_Lock/Changes
 Fcntl_Lock/Fcntl_Lock.pm
@@ -65,6 +65,8 @@ config/er035m_sa.conf
 config/er035m_sas.conf
 config/gpib.conf
 config/hfs9000.conf
+config/hjs_daadc.conf
+config/hjs_daadc.conf~
 config/hp5340a.conf
 config/hp8647a.conf
 config/hp8647a.table
@@ -192,6 +194,7 @@ modules/hfs9000_init.c
 modules/hfs9000_pulse.c
 modules/hfs9000_run.c
 modules/hfs9000_util.c
+modules/hjs_daadc.c
 modules/hp5340a.c
 modules/hp864.c.tmpl
 modules/hp8647a.h

@@ -992,8 +992,8 @@ library are part of the @code{fsc2} package)
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{dac_name()}                    @tab @ref{dac_name}
-@item @code{dac_voltage()}                 @tab @ref{dac_voltage}
+@item @code{daq_name()}                        @tab @ref{daq_name}
+@item @code{daq_set_voltage()}                 @tab @ref{daq_set_voltage}
 @end multitable
 
 
