@@ -1,3 +1,4 @@
+# $Id$
 # The following variables determine where the program files will be copied to
 # by 'make install' as well as the name of the GPIB configuration and log file
 # together with its ownerships
