@@ -101,7 +101,7 @@ Var *f_int( Var *v )
 			break;
 
 		case INT_ARR :
-			new_var = vars_push( INT_ARR, v->len, v->val.lpnt );
+			new_var = vars_push( INT_ARR, v->val.lpnt, v->len );
 			new_var->flags = v->flags;
 			break;
 
@@ -169,7 +169,7 @@ Var *f_float( Var *v )
 			break;
 
 		case FLOAT_ARR :
-			new_var = vars_push( FLOAT_ARR, v->len, v->val.dpnt );
+			new_var = vars_push( FLOAT_ARR, v->val.dpnt, v->len );
 			new_var->flags = v->flags;
 			break;
 
@@ -222,7 +222,7 @@ Var *f_round( Var *v )
 			break;
 
 		case INT_ARR :
-			new_var = vars_push( INT_ARR, v->len, v->val.lpnt );
+			new_var = vars_push( INT_ARR, v->val.lpnt, v->len );
 			new_var->flags = v->flags;
 			break;
 
@@ -285,7 +285,7 @@ Var *f_floor( Var *v )
 			break;
 
 		case INT_ARR :
-			new_var = vars_push( INT_ARR, v->len, v->val.lpnt );
+			new_var = vars_push( INT_ARR, v->val.lpnt, v->len );
 			new_var->flags = v->flags;
 			break;
 
@@ -348,7 +348,7 @@ Var *f_ceil( Var *v )
 			break;
 
 		case INT_ARR :
-			new_var = vars_push( INT_ARR, v->len, v->val.lpnt );
+			new_var = vars_push( INT_ARR, v->val.lpnt, v->len );
 			new_var->flags = v->flags;
 			break;
 
