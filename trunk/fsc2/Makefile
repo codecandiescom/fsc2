@@ -315,9 +315,7 @@ mchdir           := $(fdir)/machines
 
 SHELL            := /bin/sh
 CC               := gcc
-CFLAGS           := $(OPTIMIZATION) \
-					-ggdb \
-					-Wall \
+CFLAGS           := -Wall \
 					-Wwrite-strings \
 					-Wstrict-prototypes \
 					-Wmissing-prototypes \
@@ -328,8 +326,6 @@ CFLAGS           := $(OPTIMIZATION) \
 					-Waggregate-return \
 					-Wnested-externs \
 					-Wcast-align \
-				    # -DFSC2_MDEBUG       # for built-in malloc debugging
-				    # -DNDEBUG            # switch off built-in debugging code
 				    # -Wconversion
 				    # -Wsign-compare      # missing in older gcc versions
 				    # -Wbad-function-cast # too many false positives
@@ -338,6 +334,18 @@ CFLAGS           := $(OPTIMIZATION) \
 				    # -ansi               # fails on inline/asm
 				    # -pedantic
 
+
+ifneq ($(MAKECMDGOALS),debug)
+	CFLAGS       +=	$(OPTIMIZATION)
+else
+	CFLAGS       += -O0 -DFSC2_MDEBUG     # for built-in malloc debugging
+endif
+
+ifneq ($(MAKECMDGOALS),release)
+	CFLAGS       += -ggdb
+else
+	CFLAGS       += -DNDEBUG              # switch off built-in debugging code
+endif
 
 ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
 CFLAGS           += -DLIBC_MDEBUG       # for libc memory debugging
@@ -582,14 +590,13 @@ export            # export all variables to sub-makes
 # via the Makefile in src), the HTTP server, and then the documentation and
 # some other, more or less useful stuff
 
-all:
+all release debug:
 	$(MAKE) config
 	$(MAKE) -C $(sdir) src
 	$(MAKE) -C $(sdir) modules
 	$(MAKE) http_server
 	$(MAKE) utils
 	$(MAKE) docs
-
 
 config: fsc2_config.h
 	@if [ -n "$(machine_name)" ]; then                      \
