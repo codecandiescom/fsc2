@@ -131,7 +131,7 @@ install-pion.anorg.chemie.uni-frankfurt.de:
 	rm -rf $(libdir)/dg2020.so $(libdir)/s_band.so \
 		$(libdir)/lockin.so $(libdir)/gaussmeter.so \
         $(libdir)/magnet.so $(libdir)/pulser.so \
-		(libdir)/tds520c.so
+		$(libdir)/tds520c.so
 	ln -s $(libdir)/dg2020_f.so $(libdir)/dg2020.so
 	chown fsc2.fsc2 $(libdir)/dg2020.so
 	ln -s $(libdir)/aeg_s_band.so $(libdir)/s_band.so
@@ -148,12 +148,14 @@ install-pion.anorg.chemie.uni-frankfurt.de:
 	chown fsc2.fsc2 $(libdir)/tds520c.so
 
 install-crowley.fu-berlin.de:
+	rm -rf $(libdir)/gaussmeter.so $(libdir)/synthesizer.so
 	ln -s $(libdir)/er035m_sas.so $(libdir)/gaussmeter.so
 	chown fsc2.fsc2 $(libdir)/gaussmeter.so
 	ln -s $(libdir)/hp8647a.so $(libdir)/synthesizer.so
 	chown fsc2.fsc2 $(libdir)/synthesizer.so
 
 install-moebi.fu-berlin.de:
+	rm -rf $(libdir)/pulser.so $(libdir)/magnet.so $(libdir)/gaussmeter.so
 	ln -s $(libdir)/dg2020_b.so $(libdir)/pulser.so
 	chown fsc2.fsc2 $(libdir)/pulser.so
 	ln -s $(libdir)/aeg_x_band.so $(libdir)/magnet.so
