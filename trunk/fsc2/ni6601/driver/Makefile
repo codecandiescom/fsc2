@@ -66,9 +66,9 @@ ifeq ($(NI6601_KERNEL_SOURCE),)
 		$(INSTALL) -m 644 $(MODULE) /lib/modules/`uname -r`/misc;  \
 	else                                                           \
 		if [ ! -d /lib/modules/misc ]; then                        \
-			$(INSTALL) -d 755 /lib/modules/misc;                   \
+			$(INSTALL) -m 755 -d /lib/modules/misc;                \
 		fi;                                                        \
-		cp $(MODULE) /lib/modules/misc;                            \
+		$(INSTALL) -m 644 $(MODULE) /lib/modules/misc;             \
 	fi
 endif
 	$(INSTALL) -d $(incl_dir)
