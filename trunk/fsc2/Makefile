@@ -107,7 +107,7 @@ endif
 
 .SUFFIXES:
 .SUFFIXES: .c .o .h .so .lo
-.PHONY: all clean distclean
+.PHONY: all clean distclean pack
 
 
 # default rule: make the main program, the modules and the primary lexer
@@ -198,17 +198,34 @@ tags:
 		  ${tds754a} tds754a.h ${tds520a} tds520a.h
 
 
+# make the html documentation
+
+html-docs:
+	cd doc; \
+	$(MAKE) html
+
+# make the Postscript documentation
+
+ps-docs:
+	cd doc; \
+	$(MAKE) ps
+
+
 # `clean' deletes just all the files remaining from the compilation while
 # `distclean' also removes all executables and shared libraries
 
 clean:
-	$(RM) $(RMFLAGS) *.o *.output *_parser.c *_parser.h \
-		*_lexer.c fsc2_clean.c *.lo mem
+	$(RM) $(RMFLAGS) *.o *.output *_parser.c *_parser.h *_lexer.c \
+					 fsc2_clean.c *.lo mem
 
 distclean:
 	$(MAKE) clean
-	$(RM) $(RMFLAGS) fsc2 fsc2_clean *.so TAGS
+	$(RM) $(RMFLAGS) fsc2 fsc2_clean *.so TAGS *~
+	cd doc; $(MAKE) distclean
 
+
+pack:
+	cd .; $(MAKE) distclean; cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
 
 # don't automatically delete intermediate files created by bison and flex
 

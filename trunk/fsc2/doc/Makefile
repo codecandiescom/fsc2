@@ -14,4 +14,4 @@ clean:
 	$(RM) $(RMFLAGS) fsc2.dvi
 
 distclean:
-	$(RM) $(RMFLAGS) fsc2_*.html fsc2.ps
+	$(RM) $(RMFLAGS) fsc2_*.html fsc2.ps *~

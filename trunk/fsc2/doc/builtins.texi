@@ -3,11 +3,17 @@
 @node Functions, Modules, EDL, Top
 @chapter Built-in Functions
 
+@ifinfo
+@menu
+* Output functions::        Functions for printing, drawing and storing
+* Mathematical functions::  Function for doing mathematics.
+* Auxiliary functions::     All other functions.
+@end menu
+@end ifinfo
 
-@section Built-in functions
-@cindex built-in functions
 
-@subsection Output functions
+@node Output functions, Mathematical functions, Functions, Functions
+@section Output functions
 @cindex output functions
 
 @table @samp
@@ -74,10 +80,10 @@ string}.
 Prints a @code{#}, thus switching off the special meaning of the
 @code{#} character as a placeholder for variables to be printed.
 @item \T
-While normally nothing is printed while a test of the experiment section
-of an @b{EDL} file is run, if the @i{format string} starts with this
-escape sequence the @code{print()} function will produce output even in
-the test run.
+While normally nothing is printed while a test of the
+@code{EXPERIMENT} experiment section of an @b{EDL} file is run, if the
+@i{format string} starts with this escape sequence the @code{print()}
+function will produce output even in the test run.
 @end table
 
 @item init_1d()
@@ -359,50 +365,9 @@ multi-line text. The last argument is the label string to be shown on
 top of the editor - it defaults to "Please enter a comment:".
 @end table
 
-@subsection Auxiliary functions
 
-@table @samp
-@item wait()
-@findex wait()
-Waits for the specified time. Times are always to be given in
-nanoseconds or alternatively with a unit, e.g.@: @w{100
-ms}. Unfortunately, the time resolution of @code{wait()} is in the @w{10
-ms} range and may even be less exact.
-
-@item dim()
-@findex dim()
-The function returns the dimension of the array passed to it as
-argument. I.e.@: for the array
-
-@example
-X[ 4, 2, 5 ]
-@end example
-@noindent
-it will return 3.
-
-@item size()
-@findex size()
-The function takes two arguments, an array and one of the dimensions of the
-array, and returns the size of this dimension. I.e.@: for an array defined as
-@code{X[ 4, 2, 5 ]} @code{size( X, 3 )} will return 5.
-
-@item sizes()
-@findex sizes()
-This function is similar to @code{size()} but only takes an array as
-argument an returns a new one-dimensional array with the sizes of the
-different dimensions. I.e.@:, use it the following way:
-
-@example
-X[ 4, 2, 5 ]
-Dim_X[ * ];
-
-Dim_X = size( X );
-@end example
-@end table
-
-
-
-@subsection Mathematical functions
+@node Mathematical functions, Auxliary functions, Output Functions, Functions
+@section Mathematical functions
 @cindex mathematical functions
 
 @table @samp
@@ -503,4 +468,49 @@ Returns the hyperbolic cosine of the argument.
 @findex tanh()
 Returns the hyperbolic tangent of the argument.
 
+@end table
+
+
+
+@node Auxiliary functions, , Mathematical functions, Functions
+@section Auxiliary functions
+@cindex auxiliary functions
+
+@table @samp
+@item wait()
+@findex wait()
+Waits for the specified time. Times are always to be given in seconds or
+alternatively with a unit, e.g.@: @w{100 ms}. Unfortunately, the time
+resolution of @code{wait()} is in the @w{10 ms} range and may even be
+less exact.
+
+@item dim()
+@findex dim()
+The function returns the dimension of the array passed to it as
+argument. I.e.@: for the array
+
+@example
+X[ 4, 2, 5 ]
+@end example
+@noindent
+it will return 3.
+
+@item size()
+@findex size()
+The function takes two arguments, an array and one of the dimensions of the
+array, and returns the size of this dimension. I.e.@: for an array defined as
+@code{X[ 4, 2, 5 ]} @code{size( X, 3 )} will return 5.
+
+@item sizes()
+@findex sizes()
+This function is similar to @code{size()} but only takes an array as
+argument an returns a new one-dimensional array with the sizes of the
+different dimensions. I.e.@:, use it the following way:
+
+@example
+X[ 4, 2, 5 ]
+Dim_X[ * ];
+
+Dim_X = size( X );
+@end example
 @end table
