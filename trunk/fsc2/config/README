@@ -38,7 +38,7 @@ Currently the following device type names are used:
 -  "magnet power supply"
 -  "pulser"
 -  "RF synthesizer"
--  "temperature_controller"
+-  "temperature controller"
 -  "voltmeter"
 
 
