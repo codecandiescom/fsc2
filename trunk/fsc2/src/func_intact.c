@@ -974,6 +974,10 @@ static int toolbox_close_handler( FL_FORM *a, void *b )
 
 static FL_OBJECT *append_object_to_form( IOBJECT *io, int *w, int *h )
 {
+	int old_w;
+	int old_h;
+
+
 	/* Calculate the x- and y-position of the new object */
 
 	if ( io->prev == NULL )
@@ -985,7 +989,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io, int *w, int *h )
 	{
 		if ( Toolbox->layout == VERT )
 		{
-			io->x = FI_sizes.VERT_OFFSET;
+			io->x = io->prev->x;
 			io->y = io->prev->y + io->prev->ht;
 
 			/* The vertical distance between two buttons would look too large
@@ -1004,9 +1008,11 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io, int *w, int *h )
 		else
 		{
 			io->x = io->prev->x + io->prev->wt + FI_sizes.VERT_OFFSET;
-			io->y = FI_sizes.HORI_OFFSET;
+			io->y = io->prev->y;
 		}
 	}
+
+ object_redraw:
 
 	switch ( io->type )
 	{
@@ -1055,17 +1061,48 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io, int *w, int *h )
 			break;
 	}
 
+	/* Return the maximum width and height of all objects (plus a bit for
+	   the border) */
+
+	old_w = *w;
+	old_h = *h;
+
+	*w = i_max( *w, io->x + io->wt + FI_sizes.VERT_OFFSET );
+	*h = i_max( *h, io->y + io->ht + FI_sizes.HORI_OFFSET );
+
+	/* Check that the box still fits onto the screen, otherwise try to change
+	   the layout to make it still fit. */
+
+	if ( io->prev != NULL &&
+		 ( ( Toolbox->layout == VERT && fl_scrh - *h < 30 ) ||
+		   ( Toolbox->layout == HORI && fl_scrw - *w < 30 ) ) )
+	{
+		fl_delete_object( io->self );
+		fl_free_object( io->self );
+		io->self = NULL;
+
+		*w = old_w;
+		*h = old_h;
+
+		if ( Toolbox->layout == VERT )
+		{
+			io->x = *w + 2 * FI_sizes.VERT_OFFSET;
+			io->y = FI_sizes.HORI_OFFSET;
+		}
+		else
+		{
+			io->x = FI_sizes.VERT_OFFSET;
+			io->y = *h + 2 * FI_sizes.HORI_OFFSET;
+		}
+
+		goto object_redraw;
+	}
+
 	fl_set_object_resize( io->self, FL_RESIZE_NONE );
 	fl_set_object_gravity( io->self, FL_NorthWest, FL_NoGravity );
 	fl_set_object_callback( io->self, tools_callback, 0 );
 	if ( io->help_text != NULL && *io->help_text != '\0' )
 		fl_set_object_helper( io->self, io->help_text );
-
-	/* Return the maximum width and height of all objects (plus a bit for
-	   the border) */
-
-	*w = i_max( *w, io->x + io->wt + FI_sizes.VERT_OFFSET );
-	*h = i_max( *h, io->y + io->ht + FI_sizes.HORI_OFFSET );
 
 	return io->self;
 }
@@ -1208,14 +1245,17 @@ static void radio_button_setup( IOBJECT *io )
 	}
 
 	/* In horizontal mode line up radio buttons belonging to the same
-	   group so that they appear at the same vertical position */
+	   group so that they appear at the same vertical position (unless
+	   they belong to different rows, which could happen if the toolbox
+	   got to long) */
 
 	if ( Toolbox->layout == HORI )
 		for ( nio = Toolbox->objs; nio != io; nio = nio->next )
 		{
-			if ( nio->type != RADIO_BUTTON ||
-				 nio->group != io->group )
+			if ( nio->type != RADIO_BUTTON || nio->group != io->group ||
+				 nio->y != io->y )
 				continue;
+
 			if ( io->y + ( io->ht - io->h ) / 2 >
 				 nio->y + ( nio->ht - nio->h ) / 2 )
 				fl_set_object_position( nio->self, nio->x,

@@ -1228,6 +1228,14 @@ objects can only be used during the experiment, i.e.@: the functions for
 creating, handling and deleting of objects can only be used within the
 @code{EXPERIMENT} section of the script.
 
+There are two possible layouts for the toolbox, either all elements laid
+out vertically (the default) or all side by side horizontally.  If that
+many objects are creeated that the toolbox wouldn't fit onto the screen
+anymore in vertical layout mode a new column is started automatically
+while in horizontal mode a new row. When exactly this happens depends
+(obviously) on the size of the screen, but also on details of the
+lengths of labels or the font used for labels.
+
 Please note that when the objects in the toolbox are used it usually
 isn't possible anymore to check the complete experiment before it is run
 because it is impossible to forsee which buttons, sliders or input
