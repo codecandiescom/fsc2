@@ -206,6 +206,8 @@ int ni_daq_gpct_start_gated_counter( int board, int counter,
 	a.source = gate_source;
 	a.gate = NI_DAQ_NONE;
 	a.output_polarity = NI_DAQ_NORMAL;
+	a.source_polarity = NI_DAQ_NORMAL;
+	a.gate_polarity = NI_DAQ_NORMAL;
 
 	if ( ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_GPCT, &a ) < 0 )
 	{
@@ -362,7 +364,8 @@ int ni_daq_gpct_single_pulse( int board, int counter, double duration )
 	a.source = source;
 	a.gate = NI_DAQ_NONE;
 	a.output_polarity = NI_DAQ_NORMAL;
-	a.output_state = NI_DAQ_ENABLED;
+	a.source_polarity = NI_DAQ_NORMAL;
+	a.gate_polarity = NI_DAQ_NORMAL;
 
 	if ( ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_GPCT, &a ) < 0 )
 		return ni_daq_errno = NI_DAQ_ERR_INT;
@@ -426,7 +429,8 @@ int ni_daq_gpct_continuous_pulses( int board, int counter,
 	a.source = source;
 	a.gate = NI_DAQ_NONE;
 	a.output_polarity = NI_DAQ_NORMAL;
-	a.output_state = NI_DAQ_ENABLED;
+	a.source_polarity = NI_DAQ_NORMAL;
+	a.gate_polarity = NI_DAQ_NORMAL;
 
 	if ( ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_GPCT, &a ) < 0 )
 		return ni_daq_errno = NI_DAQ_ERR_INT;
