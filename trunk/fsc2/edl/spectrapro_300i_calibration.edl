@@ -221,8 +221,7 @@ FOREVER
 
 		IF input_changed( CL ) {
 			new_val = input_value( CL );
-			IF new_val + n0[ CG ] <= 0.5 * ( W[ 1 ] + 1 ) &
-			   new_val + n0[ CG ] >= - 0.5 * ( W[ 1 ] + 1 ) {
+			IF abs( new_val + n0[ CG ] ) < 0.5 * W[ 1 ] {
 				n0[ CG ] += new_val;
 				change_scale_1d( scale[ 1 ] - n0[ CG ], scale[ 2 ] );
 			}
@@ -324,13 +323,13 @@ FOREVER
 
 		IF input_changed( LP ) {
 			new_val = input_value( LP );
-			new_val = monochromator_wavelength_to_pixel( new_val * 1 nm );
-			IF new_val <= 0.5 * ( W[ 1 ] + 1 ) &
-			   new_val >= - 0.5 * ( W[ 1 ] + 1 ) {
+			new_val = ( new_val * 1 nm - scale[ 1 ] ) / scale[ 2 ]
+					  - 0.5 * ( W[ 1 ] - 1 );
+			IF abs( new_val ) < 0.5 * W[ 1 ] {
 				lp = new_val;
 			} ELSE {
-				input_value( LP,
-							 monochromator_pixel_to_wavelength( lp ) / 1 nm );
+				input_value( LP, ( ( lp + 0.5 * ( W[ 1 ] - 1 ) ) * scale[ 2 ]
+							 + scale[ 1 ] ) / 1 nm );
 			}
 		}
 
@@ -359,11 +358,11 @@ FOREVER
 			M[ Count[ CG ] ] = Dfo;
 			px[ Count[ CG ] ] = lp;
 
-			print( "#:  # nm,  # nm,  #,  #\n", Count[ CG ],
-				   l[ Count[ CG ] ] / 1 nm, lc[ Count[ CG ] ] / 1 nm,
-				   M[ Count[ CG ] ],
-				   monochromator_pixel_to_wavelength( px[ Count[ CG ] ] )
-				   / 1 nm );
+			print( "#:  # nm,  #,  # nm,  # nm\n", Count[ CG ],
+				   l[ Count[ CG ] ] / 1 nm, M[ Count[ CG ] ],
+				   lc[ Count[ CG ] ] / 1 nm,
+				   ( ( px[ Count[ CG ] ] + 0.5 * ( W[ 1 ] - 1 ) ) * scale[ 2 ]
+				   + scale[ 1 ] ) / 1 nm );
 
 			/* If there are at least 4 data sets calculate the the new
 			   calibration data and put them into the output fields. When
@@ -383,8 +382,8 @@ FOREVER
 				monochromator_set_calibration( CG, n0[ CG ], ia, fl, da );
 				scale = monochromator_wavelength_axis( );
 				change_scale_1d( scale[ 1 ] / 1 nm, scale[ 2 ] / 1 nm );
-				input_value( LP,
-							 monochromator_pixel_to_wavelength( lp ) / 1 nm );
+				input_value( LP, ( ( lp + 0.5 * ( W[ 1 ] - 1 ) ) * scale[ 2 ]
+							 + scale[ 1 ] ) / 1 nm );
 
 				IF Count[ CG ] == 4 {
 					hide_toolbox( 1 );
@@ -424,8 +423,8 @@ FOREVER
 				monochromator_set_calibration( CG, n0[ CG ], ia, fl, da );
 				scale = monochromator_wavelength_axis( );
 				change_scale_1d( scale[ 1 ] / 1 nm, scale[ 2 ] / 1 nm );
-				input_value( LP,
-							 monochromator_pixel_to_wavelength( lp ) / 1 nm );
+				input_value( LP, ( ( lp + 0.5 * ( W[ 1 ] - 1 ) ) * scale[ 2 ]
+							 + scale[ 1 ] ) / 1 nm );
 			}
 			Count[ CG ] = 0;
 			IF size( l ) >= 4 {
@@ -458,8 +457,8 @@ FOREVER
 				monochromator_set_calibration( CG, n0[ CG ], ia, fl, da );
 				scale = monochromator_wavelength_axis( );
 				change_scale_1d( scale[ 1 ] / 1 nm, scale[ 2 ] / 1 nm );
-				input_value( LP,
-							 monochromator_pixel_to_wavelength( lp ) / 1 nm );
+				input_value( LP, ( ( lp + 0.5 * ( W[ 1 ] - 1 ) ) * scale[ 2 ]
+							 + scale[ 1 ] ) / 1 nm );
 			}
 
 			Count[ CG ] -= 1;
@@ -483,9 +482,8 @@ FOREVER
 				monochromator_set_calibration( CG, n0[ CG ], ia, fl, da );
 				scale = monochromator_wavelength_axis( );
 				change_scale_1d( scale[ 1 ] / 1 nm, scale[ 2 ] / 1 nm );
-				input_value( LP,
-							 monochromator_pixel_to_wavelength( lp ) / 1 nm );
-							  
+				input_value( LP, ( ( lp + 0.5 * ( W[ 1 ] - 1 ) ) * scale[ 2 ]
+							 + scale[ 1 ] ) / 1 nm );
 
 				output_value( IA, calib[ CG, 1 ] );
 				output_value( FL, calib[ CG, 2 ] / 1 mm );
