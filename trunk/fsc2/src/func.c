@@ -917,7 +917,7 @@ void f_wait_alarm_handler( int sig_type )
 /*-------------------------------------------------------------------------*/
 /* f_init_display() has to be called to initialize the display system. It  */
 /* expects a variable number of arguments but at least two. The first arg- */
-/* ument has to be the dimensionality, 2 or 3. The second argument is the  */
+/* ument has to be the dimensionality, 1 or 2. The second argument is the  */
 /* number of points in x-direction, and for 3D graphics the third must be  */
 /* the number of points in y-direction. If the number of points isn't      */
 /* known a 0 has to be used. Then follow optional label strings for the x- */
@@ -944,10 +944,10 @@ Var *f_init_display( Var *v )
 	else
 		dim = rnd( v->val.dval );
 
-	if ( dim < 2 || dim > 3 )
+	if ( dim < 1 || dim > 2 )
 	{
 		eprint( FATAL, "%s:%ld: Invalid display dimension (%ld) in "
-				"`init_display()', valid values are 2 or 3.\n",
+				"`init_display()', valid values are 1 or 2.\n",
 				Fname, Lc, dim );
 		THROW( EXCEPTION );
 	}
@@ -976,7 +976,7 @@ Var *f_init_display( Var *v )
 
 	v = v->next;
 
-	if ( dim == 3 )                  /* for 3D get # of points in y-direction*/
+	if ( dim == 2 )                  /* for 3D get # of points in y-direction*/
 	{
 		if ( v == NULL )
 		{
@@ -1013,7 +1013,7 @@ Var *f_init_display( Var *v )
 	else
 		l1 = NULL;
 
-	if ( v != NULL && dim == 3 )
+	if ( v != NULL && dim == 2 )
 	{
 		vars_check( v, STR_VAR );
 		l2 = v->val.sptr;

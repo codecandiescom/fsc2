@@ -37,7 +37,7 @@ void graphics_init( long dim, long nx, long ny, char *x_label, char *y_label )
 		G.x_label = get_string_copy( x_label );
 	}
 
-	if ( dim == 3 && y_label != NULL )
+	if ( dim == 2 && y_label != NULL )
 	{
 		if ( G.y_label != NULL )
 			T_free( G.y_label );
@@ -45,12 +45,6 @@ void graphics_init( long dim, long nx, long ny, char *x_label, char *y_label )
 	}
 
 	G.is_init = SET;
-/*
-	if ( dim == 2 )
-		G.data = T_malloc( 4 * nx * sizeof ( int ) );
-	else
-		G.data = T_malloc( 4 * nx * ny * sizeof( int ) );
-*/
 }
 
 
