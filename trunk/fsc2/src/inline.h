@@ -32,21 +32,118 @@
 #endif
 
 
-inline short d2shrt( double a );
-inline short i2shrt( int a );
-inline unsigned short d2ushrt( double a );
-inline unsigned short i2ushrt( int a );
-inline int i_max( int a, int b );
-inline int i_min( int a, int b );
-inline long l_max( long a, long b );
-inline long l_min( long a, long b );
-inline float f_max( float a, float b );
-inline float f_min( float  a, float  b );
-inline double d_max( double a, double b );
-inline double d_min( double a, double b );
-inline size_t s_min( size_t a, size_t b );
-inline long lrnd( double x );
-inline int irnd( double x );
+static inline short d2shrt( double a );
+static inline short i2shrt( int a );
+static inline unsigned short d2ushrt( double a );
+static inline unsigned short i2ushrt( int a );
+static inline int i_max( int a, int b );
+static inline int i_min( int a, int b );
+static inline long l_max( long a, long b );
+static inline long l_min( long a, long b );
+static inline float f_max( float a, float b );
+static inline float f_min( float  a, float  b );
+static inline double d_max( double a, double b );
+static inline double d_min( double a, double b );
+static inline size_t s_min( size_t a, size_t b );
+static inline long lrnd( double x );
+static inline int irnd( double x );
+
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
+static inline short d2shrt( double a )
+{
+	if ( a > SHRT_MAX_HALF )
+		return SHRT_MAX_HALF;
+	if ( a < SHRT_MIN_HALF )
+		return SHRT_MIN_HALF;
+
+	return ( short ) ( a < 0.0 ? ceil( a - 0.5 ) : floor( a + 0.5 ) );
+}
+
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
+static inline short i2shrt( int a )
+{
+	if ( a > SHRT_MAX_HALF )
+		return SHRT_MAX_HALF;
+	if ( a < SHRT_MIN_HALF )
+		return SHRT_MIN_HALF;
+
+	return ( short ) a;
+}
+
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
+static inline unsigned short d2ushrt( double a )
+{
+	if ( a > USHRT_MAX )
+		return USHRT_MAX;
+	if ( a < 0 )
+		return 0;
+
+	return ( unsigned short ) floor( a + 0.5 );
+}
+
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
+static inline unsigned short i2ushrt( int a )
+{
+	if ( a > USHRT_MAX )
+		return USHRT_MAX;
+	if ( a < 0 )
+		return 0;
+
+	return ( unsigned short ) a;
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
+static inline int    i_max( int    a, int    b ) { return a > b ? a : b; }
+static inline int    i_min( int    a, int    b ) { return a < b ? a : b; }
+static inline long   l_max( long   a, long   b ) { return a > b ? a : b; }
+static inline long   l_min( long   a, long   b ) { return a < b ? a : b; }
+static inline float  f_max( float  a, float  b ) { return a > b ? a : b; }
+static inline float  f_min( float  a, float  b ) { return a < b ? a : b; }
+static inline double d_max( double a, double b ) { return a > b ? a : b; }
+static inline double d_min( double a, double b ) { return a < b ? a : b; }
+static inline size_t s_min( size_t a, size_t b ) { return a < b ? a : b; }
+
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
+static inline long lrnd( double x )
+{
+	if ( x > LONG_MAX )
+		return LONG_MAX;
+	if ( x < LONG_MIN )
+		return LONG_MIN;
+
+	return ( long ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
+}
+
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
+static inline int irnd( double x )
+{
+	if ( x > INT_MAX )
+		return INT_MAX;
+	if ( x < INT_MIN )
+		return INT_MIN;
+
+	return ( int ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
+}
 
 
 #endif  /* ! INLINE_HEADER */
