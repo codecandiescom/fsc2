@@ -9,7 +9,7 @@
    be accepted as fast as possible so that the child can continue with the
    measurement immediately. The other type of messages are requests by the
    child for the parent to do some things for it, e.g. display an alert box,
-   and possibly return the users input. The protocoll for requests is quite
+   and possibly return the users input. The protocol for requests is quite
    simple - the child sends the request and waits for the answer by the
    parent, knowing exactly what kind of data to expect.
 
@@ -23,8 +23,8 @@
    flooding the parent with too many requests and data.
 
    The communication path for request type of messages is easy to implement -
-   a simple pair of pipes will do. All needed beside is a protocoll for the
-   differerent types of requests. Since requests are not really time critical
+   a simple pair of pipes will do. All needed beside is a protocol for the
+   different types of requests. Since requests are not really time critical
    the parent does not have to reply immediately and the child waits until the
    parent honors the request. Thus the way requests are handled by the parent
    is as follows: The parent catches the NEW_DATA signal and triggers an
@@ -65,21 +65,21 @@
    Thus, in the NEW_DATA signal handler the parent just copies the segment
    identifier and the type flag and, for DATA messages, raises the DO_SEND
    signal. Finally, it creates a synthetic event for the invisible button.
-   Where do the segment identifieres get stored? Together with the segment
+   Where do the segment identifiers get stored? Together with the segment
    for storing the identifiers a queue is created for storing the the
    identifiers and message type flags. The size of the queue can be rather
    limited since there is only a limited amount of shared memory
    segments. Thus this queue to has have only the maximum number of shared
    memory segments plus one entries (the extra entry is for REQUEST messages
    - there can always be only one). Beside the message queue also two
-   pointers are needed, on pointing to the oldest unhandled entry and one
+   pointers are needed, on pointing to the oldest un-handled entry and one
    just above the newest one.
 
    In the handler for the synthetically triggered, invisible button the
    parent runs through all the entries in the message queue starting with
    the oldest ones. For REQUEST type messages he reads the pipe and sends
    its reply. For DATA messages it copies the data to the appropriate places
-   and then removes the shared memory segment for euse by the child. Finally,
+   and then removes the shared memory segment for reuse by the child. Finally,
    it displays the new data.
 
    This scheme will work as long as the parent doesn't get to much behind with
@@ -89,10 +89,10 @@
    child it will sleep a short while and then retry, hoping that the parent
    removed one of the previously used segments in the mean time.
 
-   The only problem still unaddressed is data sets exceeding the maximum
+   The only problem still un-addressed is data sets exceeding the maximum
    size of a shared memory segment. But this limit seems to be rather high
    (32768 kB!), so I hope this is never going to happen...  If it should ever
-   hapen this will result in the measurement getting stopped with an
+   happen this will result in the measurement getting stopped with an
    `internal communication error'.
 
    A final problem that can't be handled by the program is what happens if the
@@ -324,7 +324,7 @@ int new_data_callback( XEvent *a, void *b )
 /* (cast to void *) in which the return value will be stored. For       */
 /* strings the calling routine has to pass a pointer to a character     */
 /* pointer, in this pointer a pointer to the return string is stored    */
-/* and the string remains usuable until the next call of reader().      */
+/* and the string remains usable until the next call of reader().       */
 /*                                                                      */
 /* On C_PROG and C_OUTPUT the parent sends the child all lines (as      */
 /* C_STR) from the main browser or the error browser, respectively,     */
@@ -645,19 +645,20 @@ static bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 
 		   The first happens on a Linux system with kernel 2.0.36 while the
 		   latter happens on a newer system, e.g. 2.2.12. On the older system
-		   this leads to trouble: While the child is waiting for data the
-		   parent first sends its data but before the child can read them the
-		   parent also sents a DO_SEND signal. This interrupts the childs
-		   read(), returning -1 with errno set to EINTR while nothing has been
-		   read yet. Alas, ignoring the -1 and restarting the read does only
-		   work if the signal is raised BEFORE the first byte has been read
-		   since nothing tells us how many bytes already have been read. To
-		   make sure (at least for the DO_SEND signal) that the signal is
-		   received before the read starts the parent sends the signal always
-		   before replying to a request. Quite another problem is the DO_QUIT
-		   signal - let's hope the read is atomic or it's never going to
-		   happen... The only real solution here would be to block all signals
-		   just before the read() and handle them directly afterwards. */
+		   this leads to trouble: After he parent sent its data and While the
+		   child is still waiting for data or has just started to read the
+		   parent also sends a DO_SEND signal. This may interrupt the child's
+		   read(), returning -1 with errno set to EINTR while nothing or not
+		   everything has been read yet. Unfortunately, ignoring the -1 and
+		   restarting the read would only work if the signal is raised BEFORE
+		   the first byte has been read by the child since nothing tells us
+		   how many bytes already have been read. To make sure (at least for
+		   the DO_SEND signal) that the signal is received before the read
+		   starts the parent sends the signal always before replying to a
+		   request. Quite another problem is the DO_QUIT signal - let's hope
+		   the read is atomic or it's never going to happen... The only real
+		   solution here would be to block all signals just before the read()
+		   and handle them directly afterwards. */
 
 		if ( bytes_read == -1 && errno == EINTR )
 			continue;
