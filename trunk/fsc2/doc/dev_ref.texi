@@ -1949,6 +1949,7 @@ library are part of the @code{fsc2} package)
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
 @item @code{dio_name()}           @tab @ref{dio_name}
+@item @code{dio_reserve_dio()}    @tab @ref{dio_reserve_dio}
 @item @code{dio_mode()}           @tab @ref{dio_mode}
 @item @code{dio_value()}          @tab @ref{dio_value}
 @end multitable

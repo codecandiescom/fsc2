@@ -383,7 +383,7 @@ This function is only defined for the Keithley power supply
 (@code{keithley228a}) and accepts not more than one argument. If it is
 called with no argument or a non-zero number or the string @code{"ON"}
 corrections are applied to reduce the effects of certain inaccuracies of
-the power supply. If called with either an agument of @code{0} or a
+the power supply. If called with either an argument of @code{0} or a
 string @code{"OFF"} the use of these corrections is switched off.  Per
 default @strong{no} corrections are used.
 
@@ -2740,6 +2740,42 @@ in the @code{DEVICES} section.
 Returns a string with the name of the DAC being used.
 
 
+@anchor{daq_reserve_dac}
+@item daq_reserve_dac()
+@findex daq_reserve_dac()
+This function can be used to reserve (or un-reserve) a DAC so that it
+can only be used with a pass-phrase. This will mainly be used by modules
+for other devices that require a DAC to keep an EDL from accdentally
+changing the output of the DAC.
+
+For the ME-6000 and ME-6100 card the function expects an output port as
+the first argument specified by one of the symbolic values between
+@code{CH0} and @code{CH15} (don't try to use simple numbers instead!).
+For the home-built AD and DA converter this argument can't be specified
+since it has only a single output.
+
+If there is no further argument (or, in the case of the home-built AD
+and DA converter, no argument) an integer is returned. If it @code{1}
+the DAC channel is reserved, if it is @code{0} the DAC channel is not
+reserved and can be used without a pass-phrase.
+
+The next argument is a string variable to be used as the pass-phrase
+in later calls of the function @code{daq_set_voltage()} and, in the
+case of the home-built AD and DA converter, the function
+@code{daq_maximum_output_voltage()}.
+
+The final argument is optional. If is not given the function will try to
+reserve the DAC channel. If called with either an argument of @code{0} or
+a string @code{"OFF"} the DAC channel is released so that it can be
+freely used again. If called with either an argument of @code{1} or
+a string @code{"ON"} the DAC channel is reserved (which is identical to
+not passing it this argument).
+
+The function returns an integer, if it is @code{1} the operation (i.e.@:
+reserving or releasing the DAC channel) succeeded, if it is @code{0} the
+operation failed.
+
+
 @anchor{daq_set_voltage}
 @item daq_set_voltage()
 @findex daq_set_voltage()
@@ -2774,6 +2810,11 @@ drop to @w{0 V} if the function @code{daq_get_voltage()} (see below)
 is called without a previous call of the function for setting an output
 voltage.
 
+Please note: if the DAC channel had previously reserved by a call of the
+function @code{daq_reserve_dac()} the pass-phrase specified in that call
+has to be passed to the function as the very first argument if you want
+to be able to change the output voltage of the DAC channel.
+
 The function can be used in the @code{EXPERIMENT} as well as in the
 @code{PREPARATIONS} section.
 
@@ -2797,8 +2838,41 @@ If this function hasn't been called the program will assume that the
 potentiometer is set to its maximum of 10 and output voltages of the
 DA converter are between @w{0 V} and @w{+10 V}.
 
+Please note: if the DAC channel had previously reserved by a call of the
+function @code{daq_reserve_dac()} the pass-phrase specified in that call
+has to be passed to the function as the very first argument if you want
+to be able to change the maximum output voltage.
+
 The function can be used in the @code{EXPERIMENT} as well as in the
 @code{PREPARATIONS} section.
+
+
+@anchor{daq_reserve_adc}
+@item daq_reserve_adc()
+@findex daq_reserve_adc()
+This function is only available for the home-built AD and DA converter
+and can be used to reserve (or un-reserve) the ADC so that it can only be
+used with a pass-phrase. This will mainly be used by modules for other
+devices that require a ADC to keep an EDL program from accidentally
+triggering an input conversion.
+
+If there is no argument an integer is returned. If it @code{1} the ADC
+is reserved, if it is @code{0} the ADC channel is not reserved and can
+be used without a pass-phrase.
+
+The first argument is a string variable to be used as the pass-phrase
+in later calls of the function @code{daq_get_voltage()}.
+
+The final argument is optional. If is not given the function will try to
+reserve the ADC channel. If called with either an argument of @code{0} or
+a string @code{"OFF"} the ADC is released so that it can be freely used
+again. If called with either an argument of @code{1} or a string
+@code{"ON"} the ADC is reserved (which is identical to not
+passing it this argument).
+
+The function returns an integer, if it is @code{1} the operation (i.e.@:
+reserving or releasing the DAC channel) succeeded, if it is @code{0} the
+operation failed.
 
 
 @anchor{daq_get_voltage}
@@ -2813,6 +2887,11 @@ function @code{daq_set_voltage()} (see above) the voltage at the output
 of the DA converter will switch to @w{0 V} automatically. So you should
 call @code{daq_set_voltage()} always before @code{daq_get_voltage()} if
 something is connected to the DA output!
+
+Note also: if the ADC had previously reserved by a call of the function
+@code{daq_reserve_adc()} the pass-phrase specified in that call has to
+be passed to the function as the very first argument if you want to be
+able to read in the voltage at the ADC.
 
 The function can be used in the @code{EXPERIMENT} section only.
 
@@ -2840,6 +2919,37 @@ library (both coming with @code{fsc2}) have been successfully installed.
 @item dio_name()
 @findex dio_name()
 Returns a string with the name of the DIO device being used.
+
+@anchor{dio_reserve_dio}
+@item dio_reserve_dio()
+@findex dio_reserve_dio()
+This function can be used to reserve (or un-reserve) a DIO so that it
+can only be used with a pass-phrase. This will mainly be used by modules
+for other devices that require a DIO to keep an EDL from accdentally
+changing the output or reading the input of the DIO.
+
+The first argument is the DIO to be reserved (or released). This must be
+either a number, @code{1} or @code{2} or, better, a symbolic name,
+@code{DIO1} or @code{DIO2}.
+
+If there is no further argument an integer is returned. If it @code{1}
+the DIO is reserved, if it is @code{0} the DIO is not reserved and can
+be used without a pass-phrase.
+
+The next argument is a string variable to be used as the pass-phrase
+in later calls of the functions @code{dio_mode()} and @code{dio_value()}.
+
+The final argument is optional. If is not given the function will try to
+reserve the DIO channel. If called with either an argument of @code{0} or
+a string @code{"OFF"} the DIO is released so that it can be freely used
+again. If called with either an argument of @code{1} or a string
+@code{"ON"} the DIO is reserved (which is identical to not passing it
+this argument).
+
+The function returns an integer, if it is @code{1} the operation (i.e.@:
+reserving or releasing the DIO) succeeded, if it is @code{0} the
+operation failed.
+
 
 @anchor{dio_mode}
 @item dio_mode()
@@ -2875,6 +2985,12 @@ the function @code{dio_value()}.
 
 If no mode is set for a DIO the mode for 24-bit input and output is used
 per default.
+
+Please note: if the DIO had previously reserved by a call of the
+function @code{dio_reserve_dio()} the pass-phrase specified in that call
+has to be passed to the function as the very first argument if you want
+to be able to change the mode of the DIO.
+
 
 
 @anchor{dio_value}
@@ -2947,6 +3063,11 @@ immediately as will trying to output too large a value during the test
 run. During the experiment a too large value will be truncated to the
 allowed range by stripping off the higher bits and an warning message is
 printed out.
+
+Please note: if the DIO had previously reserved by a call of the
+function @code{dio_reserve_dio()} the pass-phrase specified in that call
+has to be passed to the function as the very first argument if you want
+to be able to read from or write to the DIO.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -3416,7 +3537,7 @@ CCD chip.
 @anchor{ccd_camera_pixel_area}
 @item ccd_camera_pixel_area()
 @findex ccd_camera_pixel_area()
-The function accepts no aguments and returns an 1-dimensional array with
+The function accepts no arguments and returns an 1-dimensional array with
 two elements, where the first argument is the number of pixels of the
 CCD chip in the (horizintal) @i{x}-direction and the second element is
 the number of pixels in the (vertical) @i{y}-direction.
