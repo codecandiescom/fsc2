@@ -860,7 +860,7 @@ $T2H_ADDRESS .= "on <I>$T2H_TODAY</I>";
 
 $T2H_EXTRA_HEAD = '';
 
-sub T2H_DEFAULT_print_page_head
+sub T2H_DEFAULT_print_page_head    # added Content-Type JTT
 {
   my $fh = shift; 
   my $longtitle = "$T2H_THISDOC{title}: $T2H_NAME{This}";
