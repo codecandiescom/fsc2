@@ -587,8 +587,7 @@ Var *func_call( Var *f )
 			RETHROW( );
 		}
 #endif
-		while ( call_pop( ) )
-			/* empty */ ;
+		call_pop( );
 
 		for ( ap = f; ap != NULL; ap = vars_pop( ap ) )
 			/* empty */ ;
