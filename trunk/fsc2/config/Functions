@@ -288,7 +288,7 @@ ccd_camera_binning, -1, ALL;
 ccd_camera_binning_method, -1, ALL;
 ccd_camera_exposure_time, -1, ALL;
 ccd_camera_clear_cycles, -1, ALL;
-ccd_camera_get_picture, 0, EXP;
+ccd_camera_get_image, 0, EXP;
 ccd_camera_get_spectrum, 0, EXP;
 ccd_camera_temperature, -1, ALL;
 ccd_camera_pixel_size, 0, ALL;

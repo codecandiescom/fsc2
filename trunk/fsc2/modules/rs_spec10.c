@@ -441,7 +441,7 @@ Var *ccd_camera_clear_cycles( Var *v )
 /*-----------------------------------------------*/
 /*-----------------------------------------------*/
 
-Var *ccd_camera_get_picture( Var *v )
+Var *ccd_camera_get_image( Var *v )
 {
 	uns16 *frame = NULL;
 	long width, height;
