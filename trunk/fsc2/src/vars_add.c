@@ -542,7 +542,7 @@ static Var *vars_ref_add( Var *v1, Var *v2 )
 					vars_add( v1, new_var->val.vptr[ i ] );
 			else
 				for ( i = 0; i < new_var->len; i++ )
-					vars_add( v1->val.vptr[ i ], new_var ->val.vptr[ i ] );
+					vars_add( new_var->val.vptr[ i ], v1->val.vptr[ i ] );
 
 			if ( v1 != v2 )
 				vars_pop( v1 );

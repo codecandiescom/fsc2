@@ -594,8 +594,8 @@ static Var *vars_ref_sub( Var *v1, Var *v2, bool exc )
 					vars_sub_i( v1, new_var->val.vptr[ i ], exc );
 			else
 				for ( i = 0; i < new_var->len; i++ )
-					vars_sub_i( v1->val.vptr[ i ], new_var ->val.vptr[ i ],
-								exc );
+					vars_sub_i( new_var->val.vptr[ i ], v1->val.vptr[ i ],
+								! exc );
 
 			if ( v1 != v2 )
 				vars_pop( v1 );
