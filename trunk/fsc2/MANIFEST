@@ -88,6 +88,7 @@ config/lakeshore330.conf
 config/lecroy9400.conf
 config/lecroy9400_s.conf
 config/lecroy_wr2.conf
+config/Makefile
 config/me6000.conf
 config/ni6601.conf
 config/pci_mio_16e_1.conf
@@ -95,6 +96,7 @@ config/pt2025.conf
 config/rb8509.conf
 config/rb8510_0.conf
 config/rb8510_1.conf
+config/rb_pulser.cards
 config/rb_pulser.conf
 config/README
 config/rs690.conf
@@ -287,6 +289,7 @@ modules/rb_pulser.c
 modules/rb_pulser_gen.c
 modules/rb_pulser.h
 modules/rb_pulser_init.c
+modules/rb_pulser_lexer.l
 modules/rb_pulser_ll.c
 modules/rb_pulser.map
 modules/rb_pulser_pulse.c
