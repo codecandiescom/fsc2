@@ -12,12 +12,16 @@ sources        = $(bison_sources:.y=.c) $(flex_sources:.flex=.c) \
 objects        = $(sources:.c=.o)
 headers        = ${c_sources:.c=.h} global.h
 
-ifeq ($(SIZE),HI_RES)
-	c_sources += fsc2_rsc_hr.c
-	CFLAGS    += -DSIZE=1
-else
+
+# on moebi a version with low-resolution is needed - add the appropriate
+# graphics files to the c files and set the SIZE flag correctly
+
+ifeq ($(shell hostname -f),moebi.anorg.chemie.uni-frankfurt.de)
 	c_sources += fsc2_rsc_lr.c
 	CFLAGS    += -DSIZE=0
+else
+	c_sources += fsc2_rsc_hr.c
+	CFLAGS    += -DSIZE=1
 endif
 
 export headers
