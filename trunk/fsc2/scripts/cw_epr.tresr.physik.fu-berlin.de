@@ -232,7 +232,7 @@ my $f4_v = $f4->Entry( '-textvariable'    => \$phase,
 my $f4_l2 = $f4->Label( '-text'           => ' ',
                         '-width'          => 1 );
 $balloon->attach( $f4_v, '-balloonmsg'    =>
-                  "Set the lock-in amplifiers phase\n"  );
+                  "Set the lock-in amplifiers phase"  );
 $f4->pack( %fp );
 $f4_l1->pack( %wp );
 $f4_v->pack( %wp );
@@ -475,7 +475,7 @@ sub do_checks {
         return -1;
     }
 
-    if ( abs( $field_step ) > abs( $end_field - $start_field ) ) {
+    if ( abs( $end_field - $start_field ) > $ER032M_MAX_SWEEP_WIDTH ) {
         &show_message( "Sweep width is too large,\n" .
                        "maximum sweep is $ER032M_MAX_SWEEP_WIDTH G." );
         return -1;
@@ -645,36 +645,26 @@ FOR I = 1 : N_points {
 }
 ";
 
-close F;
+	close F;
 
-# Notify the user if sending the program to fsc2 failed for some reasons
+	# Notify the user if sending the program to fsc2 failed for some reasons
 
-if ( $? != 0 ) {
-    if ( $? >> 8 == 255 ) {
-        $text = "Internal error.";
-    } elsif ( $? >> 8 == 1 ) {
-        $text = "Someone else is running fsc2.";
-    } elsif ( $? >> 8 == 2 ) {
-        $text = "fsc2 is currently busy.";
-    } elsif ( $? >> 8 == 3 ) {
-        $text = "Internal error of fsc2.";
-    } elsif ( $? >> 8 == 4 ) {
-        $text = "Could not start fsc2.";
-    } else {
-        $text = "Something strange is going on here.";
-    }
-
-    &show_message( $text ) if $? >> 8 != 0;
-}
-
-
-#############################################
-
-sub show_message {
-	my $text = shift;
-
-	$mw->messageBox( '-icon' => 'error',
-					 '-type' => 'Ok',
-					 '-title' => 'Error',
-					 '-message' => $text );
+	my $text;
+	if ( $? != 0 ) {
+		 if ( $? >> 8 == 255 ) {
+			 $text = "Internal error.";
+		 } elsif ( $? >> 8 == 1 ) {
+			 $text = "Someone else is running fsc2.";
+		 } elsif ( $? >> 8 == 2 ) {
+			 $text = "fsc2 is currently busy.";
+		 } elsif ( $? >> 8 == 3 ) {
+			 $text = "Internal error of fsc2.";
+		 } elsif ( $? >> 8 == 4 ) {
+			 $text = "Could not start fsc2.";
+		 } else {
+			 $text = "Something strange is going on here.";
+		 }
+	
+		 &show_message( $text ) if $? >> 8 != 0;
+	 }
 }

@@ -295,27 +295,27 @@ if ( $no_ranges > 1 ) {
 }\n";
 }
 
-close F;
+	close F;
 
-# Notify the user if sending the program to fsc2 failed for some reasons
+	# Notify the user if sending the program to fsc2 failed for some reasons
 
-if ( $? != 0 ) {
-    if ( $? >> 8 == -1 ) {
-        $text = "Internal error.";
-    } elsif ( $? >> 8 == 1 ) {
-        $text = "Someone else is running fsc2.";
-    } elsif ( $? >> 8 == 2 ) {
-        $text = "fsc2 is currently busy.";
-    } elsif ( $? >> 8 == 3 ) {
-        $text = "Internal error of fsc2.";
-    } elsif ( $? >> 8 == 4 ) {
-        $text = "Could not start fsc2.";
-    } else {
-        $text = "Something strange is going on here.";
-    }
+	if ( $? != 0 ) {
+		if ( $? >> 8 == 255 ) {
+			$text = "Internal error.";
+		} elsif ( $? >> 8 == 1 ) {
+			$text = "Someone else is running fsc2.";
+		} elsif ( $? >> 8 == 2 ) {
+			$text = "fsc2 is currently busy.";
+		} elsif ( $? >> 8 == 3 ) {
+			$text = "Internal error of fsc2.";
+		} elsif ( $? >> 8 == 4 ) {
+			$text = "Could not start fsc2.";
+		} else {
+			$text = "Something strange is going on here.";
+		}
 
-    &show_message( $text ) if $? >> 8 != 0;
-}
+		&show_message( $text ) if $? >> 8 != 0;
+	}
 }
 
 
