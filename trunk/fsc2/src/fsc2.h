@@ -120,9 +120,6 @@ FD_fsc2 *main_form;
 FD_run *run_form;
 FD_device *device_form;
 
-char *in_file;       /* used for name of input file */
-
-
 
 
 
@@ -164,7 +161,6 @@ extern FD_fsc2 *main_form;
 extern FD_run *run_form;
 extern FD_device *device_form;
 
-extern char *in_file;       /* used for name of input file */
 
 
 #endif
