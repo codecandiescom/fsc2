@@ -63,7 +63,7 @@ int main( int argc, char *argv[ ] )
 	   feature or from the shell without any graphics stuff involved.
 	   With the option -S the program is started immediately, while with
 	   -T it is tested. If the option -s is found fsc2 will send its parent
-	   process a SIGUSR1 signal when it got started correctly . */
+	   process a SIGUSR1 signal when it got started successfully. */
 
 	if ( argc > 1 )
 	{
