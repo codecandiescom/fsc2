@@ -147,24 +147,25 @@ experiment will not crash due to a faulty @acronym{EDL} program after it
 has run for 2 hours and you have to start all over again.
 
 
-As you can already see form the example most of a @acronym{EDL} program
+As you can already see form the example most of an @acronym{EDL} program
 consists of function calls. Functions can be devided into two
 categories, built-in functions and device functions. Built-in functions
 (like @code{init_1d}, @code{display}, @code{save} and @code{wait}) are
 always available, even when there is no @code{DEVICES} section. In
-contrast, device functions are bound to certain devices and are only
-usable when the device they belong to is listed in the @code{DEVICE}
-section. For example, the functions @w{@code{lockin_sensitivity}},
-@w{@code{lockin_time_constant}} and @w{@code{lockin_get_data}} are
-obviously targeted at the lock-in amplifier and are only available when
-a lock-in is specified. Fortunately, these functions usually will be
-available for all types of lock-in amplifiers (possibly with minor
-variations) so that using a different lock-in does not require a major
-rewrite of the @acronym{EDL} program except changing its name in the
-@code{DEVICES} section.
+contrast, device functions are bound to certain devices and can only be
+called when the device they are defined for is listed in the
+@code{DEVICE} section. For example, the functions
+@w{@code{lockin_sensitivity}}, @w{@code{lockin_time_constant}} and
+@w{@code{lockin_get_data}} are obviously targeted at the lock-in
+amplifier and are only available when a lock-in amplifier module is
+specified. Fortunately, these functions usually will be available for
+all types of lock-in amplifiers (possibly with minor variations) so that
+using a different lock-in amplifier does not require a major rewrite of
+the @acronym{EDL} program except changing its name in the @code{DEVICES}
+section.
 
-To find out about all built-in and device functions, their arguments,
-the sections of and etc.@: have a look at the appropriate parts of this
+To find out about all built-in and device functions, their arguments and
+when they may be used have a look at the appropriate parts of this
 manual.
 
 
