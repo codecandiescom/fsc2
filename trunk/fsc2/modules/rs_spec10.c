@@ -195,7 +195,7 @@ Var *ccd_camera_roi( Var *v )
 	if ( v == NULL )
 		return vars_push( INT_ARR, vroi, 4 );
 
-	vars_check( v, INT_ARR | FLOAT_ARR | STRING_VAR );
+	vars_check( v, INT_ARR | FLOAT_ARR | STR_VAR );
 
 	if ( v->type == STRING_VAR )
 	{
