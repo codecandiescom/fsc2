@@ -79,7 +79,7 @@ typedef struct
     struct termios old_tio, /* serial port terminal interface structures */
                    new_tio;
 
-	bool fast_init;         /* if set do a fast initialisation */
+	bool fast_init;         /* if set do a fast initialization */
 } Magnet;
 
 
@@ -124,7 +124,7 @@ int s_band_init_hook( void )
 	}
 
 	/* We need the field meter driver called *before* the S-band driver since
-	   the field meter is needed in the initialisation of the magnet.
+	   the field meter is needed in the initialization of the magnet.
 	   Probably we should implement a solution that brings the devices into
 	   the correct sequence instead of this hack, but that's not as simple as
 	   it might look... */
@@ -231,7 +231,7 @@ int s_band_exp_hook( void )
 	magnet.max_deviation = VALUE( v );
 	vars_pop( v );
 
-	/* Try to initialise the magnet power supply controller */
+	/* Try to initialize the magnet power supply controller */
 
 	if ( ! magnet_init( ) )
 	{
@@ -582,7 +582,7 @@ Var *reset_field( Var *v )
 
 
 /*--------------------------------------------------------------------------*/
-/* magnet_init() first initialises the serial interface and then tries to   */
+/* magnet_init() first initializes the serial interface and then tries to   */
 /* figure out what's the current minimal step size is for the magnet - this */
 /* is necessary for every new sweep since the user can adjust the step size */
 /* by setting the sweep rate on the magnets front panel (s/he also might    */
@@ -879,7 +879,7 @@ void magnet_sweep( int dir )
 
 /*---------------------------------------------------------------------------*/
 /* This is the most basic routine for controlling the field - there are four */
-/* basic commands, i.e. initialising the serial interface, setting a sweep   */
+/* basic commands, i.e. initializing the serial interface, setting a sweep   */
 /* voltage, triggering a field sweep and finally resetting the serial inter- */
 /* face.                                                                     */
 /*---------------------------------------------------------------------------*/
@@ -892,7 +892,7 @@ bool magnet_do( int command )
 
 	switch ( command )
 	{
-		case SERIAL_INIT :               /* open and initialise serial port */
+		case SERIAL_INIT :               /* open and initialize serial port */
 			if ( ( magnet.fd =
 				  open( serial_port, O_WRONLY | O_NOCTTY | O_NONBLOCK ) ) < 0 )
 				return FAIL;
