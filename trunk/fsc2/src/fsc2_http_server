@@ -28,7 +28,7 @@ use IO::Socket::INET;
 use POSIX;
 
 
-# Set up PATH reduced to the strictly necessary (we're running in taint mode)
+# Set PATH to the minmum (we're running in taint mode)
 
 $ENV{ PATH } = '/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin';
 
@@ -149,7 +149,8 @@ sub serve {
 	1 while defined( $txt = <$client> ) and $txt =~ /^\r*$/o;
 	exit 0 unless defined $txt;
 
-	# Analyze the very line the client sends, stop on not well-formed requests
+	# Analyze the very line the client sends, stop immediately on not
+	# well-formed requests
 
 	illegal_request( )
 		if $txt !~ m|^\s*([^ \t]+)\s+([^ \t]+)\s+HTTP/(\d+)\.(\d+)\s*\r*$|io;
