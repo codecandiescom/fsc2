@@ -11,40 +11,44 @@ language (EDL, Experiment Description Language) and, on the other hand,
 has a strictly modular approach to handling of devices. This allows
 setting up a completely new experiment or changing an already existing
 one fast and easily without requiring any detailed knowledge of the
-internals of fsc2 or on how exactly the devices have to be controlled.
+internals of fsc2 or how exactly devices are to be controlled by the
+computer.
+
 
 Download
 --------
 
-You can download the sources for the program and the device modules from
+You can download the sources for the program and the device modules from:
 
        http://www.physik.fu-berlin.de/~toerring/fsc2.tar.gz
 
-The documentation in Postscript or PDF format is at
+The documentation in Postscript or PDF format can be downloaded from:
 
 	   http://www.physik.fu-berlin.de/~toerring/fsc2/fsc2.ps.gz
 	   http://www.physik.fu-berlin.de/~toerring/fsc2/fsc2/fsc2.pdf
 
-You will find an online version of the documentation at
+You also will find an online version of the documentation at:
 
        http://www.physik.fu-berlin.de/~toerring/fsc2
+
 
 Features
 --------
 
 * The EDL language is similar to other medium to high level languages,
   borrowing from e.g. MathLab, Fortran, C and Perl etc. Moreover, it
-  comes with a lot of functions for displaying and saving measured
-  data in completely user defined ways. Thus writing a description
-  for a new experiment or adapting an already existing EDL script
-  won't be difficult for anyone remotely acquainted with one of the
-  above mentioned programming languages.
+  comes with a lot of functions for data handling, displaying and saving
+  in completely user defined ways. Thus writing a description for a new
+  experiment or adapting an already existing EDL script won't be
+  difficult for anyone remotely acquainted with one of the above
+  mentioned programming languages.
 
 * Device are not hard-coded into fsc2. Instead, devices are dealt with
   by modules that get loaded on demand (a single instruction in an EDL
-  script). This allows e.g. to employ a different device with similar
-  functionality by usually changing not more than a single line in an
-  EDL script.
+  script). For each type of device a set of EDL functions exists to
+  set up the device and fetch measured data. This allows e.g. to employ
+  a different device with similar functionality by usually changing not
+  more than a single line in an EDL script.
 
 * fsc2 allows other programs to send it EDL scripts for execution.
   Thus one may write scripts for standard experiments that in turn
@@ -60,8 +64,7 @@ Features
   that allows the user to remotely monitor the state of an experiment.
 
 * Currently fsc2 controls devices that are either connected via the
-  serial ports or the GPIB bus. Functions for simplifying access of
-  devices using these interfaces are built into fsc2.
+  serial ports or the GPIB bus.
 
 * Writing new device modules (or adapting existing ones for a new device)
   shouldn't be too difficult for anyone having some experience with
@@ -79,39 +82,78 @@ Features
   experimental techniques.
 
 * The complete sources for the program and all device modules are available
-  under the GNU Public License (Copyleft), so they can be adapted or extended
-  to fit all special requirements.
+  under the GNU Public License, so they can be adapted or extended to fit
+  all special requirements.
+
 
 Currently suported devices
 --------------------------
 
-* Tektronix Digitizing Oscilloscopes TDS 520, 520A, 520C, 540, 744A, 754A
-* LeCroy Digitizing Oscilloscope 9400
-* Sony/Tektronix Data Generator DG2020
-* Tektronix Stimulus System HFS9003
-* Bruker EP385 Pulse Programmer
-* Interface Technology RS690 Digital Word Generator
-* Stanford Research Lock-In Amplifier SR510, SR530, SR810, SR830
-* Bruker Field controller ER032M
-* Keithley 228A (used as superconducting magnet power supply)
-* Oxford Magnet Sweep Power Supply IPS20-4
-* Bruker Hall Effect Field Controller BH 15
-* Bruker NMR Gaussmeter ER035M (F0, F1 probe, serial port and GPIB version)
-* Metrolab NMR Teslameter PT2025
-* Hewlett-Packard RF Synthesizer HP8647A
-* Hewlett-Packard RF Synthesizer HP8672A
-* Hewlett-Packard Frequency Counter HP5340A
-* Bruker Signal Channel ER023M
-* LakeShore 330 Temperature Controller
-* Kontron 4060 Voltmeter
-* EG&G PARC Box-Car Integrator 4402 (download of measured data only)
-* AEG Magnet Power Supply (home-build computer control, S-, X-Band)
+ Digitizing oscilloscopes:
+
+  * Tektronix Digitizing Oscilloscopes TDS 520
+  * Tektronix Digitizing Oscilloscopes TDS 520A
+  * Tektronix Digitizing Oscilloscopes TDS 520C
+  * Tektronix Digitizing Oscilloscopes TDS 540
+  * Tektronix Digitizing Oscilloscopes TDS 744A
+  * Tektronix Digitizing Oscilloscopes TDS 754A
+  * LeCroy Digitizing Oscilloscope 9400
+
+ Pulse generators:
+
+  * Sony/Tektronix Data Generator DG2020
+  * Tektronix Stimulus System HFS9003
+  * Bruker EP385 Pulse Programmer
+  * Interface Technology RS690 Digital Word Generator
+
+ Lock-in amplifiers:
+
+  * Stanford Research Lock-In Amplifier SR510
+  * Stanford Research Lock-In Amplifier SR530
+  * Stanford Research Lock-In Amplifier SR810
+  * Stanford Research Lock-In Amplifier SR830
+  * Bruker Signal Channel ER023M
+
+ Magnet power supplies:
+
+  * Bruker Field controller ER032M
+  * Keithley 228A (used as superconducting magnet power supply)
+  * Oxford Magnet Sweep Power Supply IPS20-4
+  * AEG Magnet Power Supply (home-build computer control, S-, X-Band)
+
+ Field meters
+
+  * Bruker Hall Effect Field Controller BH 15
+  * Bruker NMR Gaussmeter ER035M (F0, F1 probe, serial port and GPIB version)
+  * Metrolab NMR Teslameter PT2025
+
+ Microwave and RF synthesizers:
+
+  * Hewlett-Packard Synthesizer HP8647A
+  * Hewlett-Packard Synthesizer HP8672A
+
+ Freuqency counters:
+
+  * Hewlett-Packard Frequency Counter HP5340A
+
+ Temperature controllers:
+
+  * LakeShore 330 Temperature Controller
+
+ Digital voltmeters:
+
+  * Kontron 4060 Voltmeter
+
+ Box-car integrators:
+
+  * EG&G PARC Box-Car Integrator 4402 (download of measured data only)
 
 fsc2 works with three different GPIB driver/library combinations, the
 Linux Lab Project driver (http://www.llp.fu-berlin.de), the National
 Instruments driver (http://www.natinst.com) and a driver for NI PCII
 and AT-GPIB/TNT (ISA) cards I wrote and which can be downloaded from
 the same URL as fsc2, see above.
+
 
 Limitations
 -----------
