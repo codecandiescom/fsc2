@@ -39,7 +39,7 @@ struct RULBUS_DAC12_CARD {
 };
 
 
-/* Upper limit voltages the DACs can configured to */
+/* Upper limit voltages the DACs can be configured to */
 
 static double ranges[ ] = { 2000, 1000, 500, 2048, 1024, 512 };
 
@@ -116,14 +116,14 @@ int rulbus_dac12_card_init( int handle )
 	
 	switch ( i )
 	{
-		case 0 :
+		case 0 :    /* 0 V to +20 V (no bipolar variant!) */
 			if ( rulbus_card[ handle ].polar != RULBUS_UNIPOLAR )
 				return RULBUS_INV_RNG;
 			Vmin = 0.0;
 			dV = 20.0 / DAC12_RANGE;
 			break;
 
-		case 1:
+		case 1:     /* 0 V to +10.0 V   or   -10.0 V to +10.0 V */
 			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
 			{
 				Vmin = 0.0;
@@ -136,7 +136,7 @@ int rulbus_dac12_card_init( int handle )
 			}
 			break;
 
-		case 2 :
+		case 2 :    /* 0 V to +5.0 V   or   -5.0 V to +5.0 V */
 			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
 			{
 				Vmin = 0.0;
@@ -149,14 +149,14 @@ int rulbus_dac12_card_init( int handle )
 			}
 			break;
 
-		case 3 :
+		case 3 :    /* 0 V to +20.475 V (no bipolar variant!) */
 			if ( rulbus_card[ handle ].polar != RULBUS_UNIPOLAR )
 				return RULBUS_INV_RNG;
 			Vmin = 0.0;
 			dV = 5.0e-3;
 			break;
 			
-		case 4:
+		case 4:     /* 0 V to +10.2375 V   or   -10.24 V to +10.235 V */
 			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
 			{
 				Vmin = 0.0;
@@ -169,7 +169,7 @@ int rulbus_dac12_card_init( int handle )
 			}
 			break;
 
-		case 5 :
+		case 5 :    /* 0 V to +5.11875 V   or   -5.12 V to +5.1175 V */
 			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
 			{
 				Vmin = 0.0;
@@ -199,7 +199,7 @@ int rulbus_dac12_card_init( int handle )
 	tmp->Vmin = Vmin;
 	tmp->dV = dV;
 	tmp->Vmax = DAC12_RANGE * tmp->dV + tmp->Vmin;
-	tmp->v = DAC12_RANGE + 1;
+	tmp->v = DAC12_RANGE + 1;                     /* impossible value */
 
 	return RULBUS_OK;
 }
@@ -278,11 +278,12 @@ int rulbus_dac12_set_voltage( int handle, double volts )
 	if ( ( card = rulbus_dac12_card_find( handle ) ) == NULL )
 		return RULBUS_INV_HND;
 
-	if ( volts + card->dV < card->Vmin || volts - card->dV > card->Vmax )
+	if ( volts + 0.5 * card->dV < card->Vmin ||
+		 volts - 0.5 * card->dV > card->Vmax )
 		return RULBUS_INV_VLT;
 
 	val = ( unsigned short int )
-							   ceil( ( volts - card->Vmin ) / card->dV - 0.5 );
+							  floor( ( volts - card->Vmin ) / card->dV + 0.5 );
 
 	if ( card->v == val )
 		return RULBUS_OK;
