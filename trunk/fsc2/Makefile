@@ -109,7 +109,7 @@ CFLAGS           := -ggdb -O2 -I/usr/X11R6/include/X11 \
 					-Waggregate-return \
 					-Wnested-externs \
 					-Wcast-align \
-					-Wconversion
+				    # -Wconversion
 				    # -Wsign-compare      # missing in older gcc versions
 				    # -Wbad-function-cast # too many false positives
 				    # -Wcast-qual         # too many false positives
