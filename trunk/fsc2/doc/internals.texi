@@ -27,7 +27,7 @@
 In this chapter I will try to explain in some detail how @acronym{fsc2}
 does work internally. I hope that this will help especially if you try
 to write a new module for a device (or if you get upset about things
-@acronym{fsc2} does differently from the way you would like it to do).
+@acronym{fsc2} does differently from the way you would like it to).
 
 As you will already have understood @acronym{fsc2} is basically an
 interpreter for @acronym{EDL} programs. But in contrast to other
