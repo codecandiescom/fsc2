@@ -125,7 +125,7 @@ Var *f_freeze(  Var *v );
 Var *f_obj_clabel( Var * );
 Var *f_obj_xable( Var *v );
 IOBJECT *find_object_from_ID( long ID );
-void recreate_ToolBox( void );
+void recreate_Toolbox( void );
 void convert_escapes( char *str );
 void check_label( char *str );
 bool check_format_string( char *buf );
