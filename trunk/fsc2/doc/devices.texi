@@ -560,6 +560,12 @@ convert a voltage into a binary data value. The voltage resolution is
 higher for longer conversion times. Possible conversion times are
 integer multiples of @w{320 us} in the range between 10 and 9999, thus
 allowing conversion times between @code{3.2 ms} and ca.@: @code{3.2 s}.
+Unfortunately, according to my tests, for conversion times between @w{40
+ms} and @w{64 ms} the data the signal channels sends for large signal
+amplitudes are garbled. For this reason the function will not accept
+conversion times in this range but will instead set the nearest
+conversion time for which correct data are delivered.
+
 If no argument is supplied to the function the current conversion time
 is returned. If there is an argument this is used as the new conversion
 time. If the argument is not an integer multiple of @w{320 us} (within

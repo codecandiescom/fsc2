@@ -205,18 +205,40 @@ Var *lockin_ct( Var *v )
 
 	if ( ct_mult < MIN_CT_MULT )
 	{
-		eprint( SEVERE, SET, "%s: Minimum usuable conversion time multiplier "
-				"is %d, using this value instead of %ld.\n", DEVICE_NAME,
-				MIN_CT_MULT, ct_mult );
+		eprint( SEVERE, SET, "%s: Conversion time multiplier of %ld is too "
+				"low, using %ld instead in %s().\n", DEVICE_NAME,
+				ct_mult, MIN_CT_MULT, Cur_Func );
 		ct_mult = MIN_CT_MULT;
 	}
 
 	if ( ct_mult > MAX_CT_MULT )
 	{
-		eprint( FATAL, SET, "%s: Invalid conversion time multiplier %ld in "
-				"%s(), valid range is %d-%ld.\n", DEVICE_NAME, ct_mult,
-				Cur_Func, MIN_CT_MULT, MAX_CT_MULT );
-		THROW( EXCEPTION )
+		eprint( SEVERE, SET, "%s: Conversion time multiplier of %ld is too "
+				"large, using %ld instead in %s().\n", DEVICE_NAME,
+				ct_mult, MAX_CT_MULT, Cur_Func );
+		ct_mult = MAX_CT_MULT;
+	}
+
+	/* Unfortunately, conversion time multipliers between 125 and 200 lead
+	   to garbled data (at least for large signals) so we have to replace
+	   conversion time multipliers in this range by the nearest conversion
+	   time multiplier that still leads to correct data. */
+
+	if ( ct_mult >= BAD_LOW_CT_MULT && ct_mult < BAD_HIGH_CT_MULT )
+	{
+		long new_ct_mult;
+
+		if ( ( double ) BAD_LOW_CT_MULT / ( double ) CT_MULT >
+			 ( double ) CT_MULT / ( double ) BAD_HIGH_CT_MULT )
+			new_ct_mult = BAD_LOW_CT_MULT - 1;
+		else
+			new_ct_mult = BAD_HIGH_CT_MULT + 1;
+
+		eprint( SEVERE, SET, "%s: Conversion time multiplier of %ld might "
+				"result in garbled data, using %ld instead.\n", DEVICE_NAME,
+				ct_mult, new_ct_mult );
+
+		ct_mult = new_ct_mult;
 	}
 
 	too_many_arguments( v, DEVICE_NAME );

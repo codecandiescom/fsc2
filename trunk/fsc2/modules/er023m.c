@@ -530,6 +530,28 @@ Var *lockin_conversion_time( Var *v )
 		ct_mult = MAX_CT_MULT;
 	}
 
+	/* Unfortunately, conversion times between 40 ms and 64 ms lead to
+	   garbled data (at least for large signals) so we have to replace
+	   conversion times in this range by the nearest conversion time that
+	   still leads to correct data. */
+
+	if ( ct_mult >= BAD_LOW_CT_MULT && ct_mult < BAD_HIGH_CT_MULT )
+	{
+		long new_ct_mult;
+
+		if ( ( double ) BAD_LOW_CT_MULT / ( double ) CT_MULT >
+			 ( double ) CT_MULT / ( double ) BAD_HIGH_CT_MULT )
+			new_ct_mult = BAD_LOW_CT_MULT - 1;
+		else
+			new_ct_mult = BAD_HIGH_CT_MULT + 1;
+
+		eprint( SEVERE, SET, "%s: Conversion time of %.2f ms might result in "
+				"garbled data, using %.2f ms instead.\n", DEVICE_NAME,
+				1.0e3 * BASE_CT * ct_mult, 1.0e3 * BASE_CT * new_ct_mult );
+
+		ct_mult = new_ct_mult;
+	}
+
 	er023m.ct_mult = ct_mult;
 	if ( FSC2_MODE == EXPERIMENT )
 		er023m_set_ct( ct_mult );
