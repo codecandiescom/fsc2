@@ -68,7 +68,8 @@
 /******************************************************************/
 
 
-/* Create a bool type - this is stolen from gcc's stdbool.h ;-) */
+/* Create a bool type - this is stolen from gcc's stdbool.h ;-)
+   When compiling with a C++ compiler this must not be defined ! */
 
 #ifndef __cplusplus
 
