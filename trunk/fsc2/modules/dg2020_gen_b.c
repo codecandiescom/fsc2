@@ -513,7 +513,7 @@ bool dg2020_set_max_seq_len( double seq_len )
 	if ( dg2020.is_max_seq_len &&
 		 dg2020.max_seq_len != dg2020_double2ticks( seq_len ) )
 	{
-		print( FATAL, "A differrent minimum pattern length of %s has already "
+		print( FATAL, "A different minimum pattern length of %s has already "
 			   "been set.\n", dg2020_pticks( dg2020.max_seq_len ) );
 		THROW( EXCEPTION );
 	}
