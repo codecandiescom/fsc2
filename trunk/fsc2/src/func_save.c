@@ -73,6 +73,152 @@ Var *f_is_file( Var *v )
 
 
 /*---------------------------------------------------------------------------*/
+/* Function allows to get a file with a predefined name for saving data. If  */
+/* the file already exists and the user does not want it to be overwritten   */
+/* (or the file name is an empty string) the function works exactly as the   */
+/* the f_getf() function, see below.                                         */
+/* Arguments:                                                                */
+/* 1. File name                                                              */
+/* 2. Message string (optional, not allowed to start with a backslash '\'!)  */
+/* 3. Default pattern for file name (optional)                               */
+/* 4. Default directory (optional)                                           */
+/* 5. Default file name (optional)                                           */
+/* 6. Default extension to add (in case it's not already there) (optional)   */
+/*---------------------------------------------------------------------------*/
+
+Var *f_openf( Var *var )
+{
+	Var *cur;
+	int i;
+	char *fn;
+	char *m;
+	struct stat stat_buf;
+	static FILE *fp = NULL;
+	static FILE_LIST *old_File_List;
+
+
+	/* If there was a call of 'f_save()' without a previous call to 'f_getf()'
+	   then 'f_save()' already called 'f_getf()' by itself and now does not
+	   expects file identifiers anymore - in this case 'No_File_Numbers' is
+	   set. So, if we get a call to 'f_getf()' while 'No_File_Numbers' is set
+	   we must tell the user that he can't have it both ways, i.e. (s)he
+	   either has to call 'f_getf()' before any call to 'f_save()' or never. */
+
+	if ( No_File_Numbers )
+	{
+		print( FATAL, "Function can't be called if one save()-type functions "
+			   "akready has been invoked.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* During test run just do a plausibilty check of the variables and
+	   return a dummy value */
+
+	if ( Internals.mode == TEST )
+	{
+		for ( i = 0, cur = var; i < 6 && cur != NULL; i++, cur = cur->next )
+			vars_check( cur, STR_VAR );
+		return vars_push( INT_VAR, EDL.File_List_Len++ );
+	}
+
+	/* Check the arguments and supply default values if necessary */
+
+	for ( i = 0, cur = var; i < 6 && cur != NULL; i++, cur = cur->next )
+		vars_check( cur, STR_VAR );
+
+	fn = var->val.sptr;
+
+	if ( Internals.cmdline_flags & DO_CHECK )
+		goto got_file;
+
+	if ( *fn == '\0' )
+		return f_getf( var->next );
+
+	/* Now ask for confirmation if the file already exists and try to open
+	   it for writing */
+
+	if  ( 0 == stat( fn, &stat_buf ) )
+	{
+		m = get_string( "The specified file already exists:\n%s\n"
+						"\nDo you really want to overwrite it?", fn );
+		if ( 2 == show_choices( m, 2, "Yes", "No", NULL, 2 ) )
+		{
+			T_free( m );
+			return f_getf( var->next );
+		}
+		T_free( m );
+	}
+
+	if ( ( fp = fopen( fn, "w+" ) ) == NULL )
+	{
+		switch( errno )
+		{
+			case EMFILE :
+				show_message( "Sorry, you have too many open files!\n"
+							  "Please close at least one and retry." );
+				break;
+
+			case ENFILE :
+				show_message( "Sorry, system limit for open files exceeded!\n"
+							  " Please try to close some files and retry." );
+				break;
+
+			case ENOSPC :
+				show_message( "Sorry, no space left on device for more file!\n"
+							  "    Please delete some files and retry." );
+				break;
+
+			default :
+				show_message( "Sorry, can't open selected file for writing!\n"
+							  "       Please select a different file." );
+		}
+
+		return f_getf( var->next );
+	}
+
+ got_file:
+
+	/* The reallocation for the EDL.File_List may fail but we still need to
+	   close all files and get rid of memory for the file names, thus we save
+	   the current EDL.File_List before we try to reallocate */
+
+	if ( EDL.File_List )
+	{
+		old_File_List = T_malloc( EDL.File_List_Len * sizeof( FILE_LIST ) );
+		memcpy( old_File_List, EDL.File_List,
+				EDL.File_List_Len * sizeof( FILE_LIST ) );
+	}
+
+	TRY
+	{
+		EDL.File_List = T_realloc( EDL.File_List,
+							 ( EDL.File_List_Len + 1 ) * sizeof( FILE_LIST ) );
+		if ( old_File_List != NULL )
+			T_free( old_File_List );
+		TRY_SUCCESS;
+	}
+	CATCH( OUT_OF_MEMORY_EXCEPTION )
+	{
+		EDL.File_List = old_File_List;
+		THROW( EXCEPTION );
+	}
+
+	if ( Internals.cmdline_flags & DO_CHECK )
+		EDL.File_List[ EDL.File_List_Len ].fp = stdout;
+	else
+		EDL.File_List[ EDL.File_List_Len ].fp = fp;
+	EDL.File_List[ EDL.File_List_Len ].name = T_strdup( fn );
+
+	/* Switch buffering off so we're sure everything gets written to disk
+	   immediately */
+
+	setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
+
+	return vars_push( INT_VAR, EDL.File_List_Len++ );
+}
+
+
+/*---------------------------------------------------------------------------*/
 /* Function allows the user to select a file using the file selector. If the */
 /* file already exists a confirmation by the user is required. Then the file */
 /* is opened - if this fails the file selector is shown again. The FILE      */
@@ -86,11 +232,12 @@ Var *f_is_file( Var *v )
 /* 3. Default directory                                                      */
 /* 4. Default file name                                                      */
 /* 5. Default extension to add (in case it's not already there)              */
-/* Alternatively, to hardcode a file name into the EDL program only send the */
-/* file name instead of the message string, but with a backslash '\' as the  */
-/* very first character (it will be skipped and not be used as part of the   */
-/* file name). The other strings still can be set but will only be used if   */
-/* opening the file fails.                                                   */
+/*                                                                           */
+/* The old method to hardcode a file name into the EDL program by sending    */
+/* the file name instead of the message string, but with a backslash '\' as  */
+/* the very first character (that will be skipped and not be used as part of */
+/* the file name) is deprecated and shouldn't been used anymore. If an hard- */
+/* coded file name is needed, the f_openf() function should be used instead. */
 /*---------------------------------------------------------------------------*/
 
 Var *f_getf( Var *var )
@@ -118,15 +265,23 @@ Var *f_getf( Var *var )
 
 	if ( No_File_Numbers )
 	{
-		print( FATAL, "Call of get_file() after call of save()-type function "
-			   "without previous call of get_file().\n" );
+		print( FATAL, "Function can't be called if one save()-type functions "
+			   "akready has been invoked.\n" );
 		THROW( EXCEPTION );
 	}
 
-	/* While test is running just return a dummy value */
+	/* During test run just do a plausibilty check of the variables and
+	   return a dummy value */
 
 	if ( Internals.mode == TEST )
+	{
+		for ( i = 0, cur = var; i < 5 && cur != NULL; i++, cur = cur->next )
+			vars_check( cur, STR_VAR );
+		if ( i > 0 && *var->val.sptr == '\\' )
+			print( WARN, "Use of hard-coded file names is deprecated, please "
+				   "use open_file() instead.\n" );
 		return vars_push( INT_VAR, EDL.File_List_Len++ );
+	}
 
 	/* Check the arguments and supply default values if necessary */
 
@@ -142,7 +297,11 @@ Var *f_getf( Var *var )
 	/* First string is the message */
 
 	if ( s[ 0 ] != NULL && s[ 0 ][ 0 ] == '\\' )
+	{
+		print( WARN, "Use of hard-coded file names is deprecated, please use "
+			   "open_file() instead.\n" );
 		r = T_strdup( s[ 0 ] + 1 );
+	}
 
 	if ( s[ 0 ] == NULL || s[ 0 ][ 0 ] == '\0' || s[ 0 ][ 0 ] == '\\' )
 		s[ 0 ] = T_strdup( "Please select a file name:" );

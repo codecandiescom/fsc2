@@ -124,6 +124,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "int_slice",     f_islice,   	    1, ACCESS_ALL,  NULL, UNSET },
 	{ "float_slice",   f_fslice,   	    1, ACCESS_ALL,  NULL, UNSET },
 	{ "get_file",      f_getf,     	   -5, ACCESS_EXP,  NULL, UNSET },
+	{ "open_file",     f_openf,    	   -6, ACCESS_EXP,  NULL, UNSET },
 	{ "clone_file",    f_clonef,   	    3, ACCESS_EXP,  NULL, UNSET },
 	{ "save",          f_save,    INT_MIN, ACCESS_EXP,  NULL, UNSET },
 	{ "fsave",         f_fsave,   INT_MIN, ACCESS_EXP,  NULL, UNSET },

@@ -693,10 +693,17 @@ print \$fh \"";
 			if ( $$_{ type } =~ /^int|float|menu$/o ) {
 				$line =~ s/\b$$_{ name }\b/\$$$_{ name }/g;
 			} elsif ( $$_{ type } =~ /^file$/o ) {
-				if ( $line =~ /get_file\s*\(\s*$$_{ name }/ ) {
-					$line =~ s/\b$$_{ name }\b/\\\"\\\\\$$$_{ name }\\\"/g;
-				} else {
+
+				# The following is a hack that is needed for the deprecated use
+				# of hard-coded file names in the get_file() function. It only
+				# works if the first argument is on the same line as the
+				# function name. Hopefully, the this can go away when all
+				# people use the new open_file() function instead.
+
+				if ( $line !~ /get_file\s*\(\s*$$_{ name }/ ) {
 					$line =~ s/\b$$_{ name }\b/\\\"\$$$_{ name }\\\"/g;
+				} else {
+					$line =~ s/\b$$_{ name }\b/\\\"\\\\\$$$_{ name }\\\"/g;
 				}
 			}
 		}
