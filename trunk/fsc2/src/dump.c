@@ -15,6 +15,15 @@
 /* read and, for example, written into a mail.                           */
 /* This function is highly hardware depended, i.e. it will probably only */
 /* work with i386 type processors.                                       */
+/* If the macro ADDR2LINE isn't defined the function will do nothing. If */
+/* it is defined it must be the complete path to the GNU utility         */
+/* "addr2line". The best way to set it correctly is probably to have     */
+/* lines like                                                            */
+/* ADDR2LINE = $(shell which addr2line)                                  */
+/* ifneq ($(word 1,$(ADDR2LINE)),which:)                                 */
+/*     CFLAGS += -DADDR2LINE=\"$(ADDR2LINE)\"                            */
+/* endif                                                                 */
+/* in the Makefile.                                                      */
 /*-----------------------------------------------------------------------*/
 
 void DumpStack( void )

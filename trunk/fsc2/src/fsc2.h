@@ -8,22 +8,6 @@
 
 #define _GNU_SOURCE 1
 
-#if ! defined bindir
-#define bindir "./"
-#endif
-
-#if ! defined libdir
-#define libdir "./"
-#endif
-
-#if ! defined auxdir
-#define auxdir "./"
-#endif
-
-#if ! defined docdir
-#define docdir "./doc"
-#endif
-
 #define HI_RES  1
 #define LOW_RES 0
 

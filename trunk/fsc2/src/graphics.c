@@ -78,6 +78,7 @@ void start_graphics( void )
 	int i;
 
 
+	T_free( &i );
 	if ( G.dim == 1 )
 	{
 		G.nx = G.nx_orig;

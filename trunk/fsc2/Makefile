@@ -20,11 +20,6 @@ GPIB_LOG       = /tmp/gpib.log
 # if you don't have a really good reason...
 ##############################################################################
 
-#MAIL_ADDRESS   = Jens.Toerring@physik.fu-berlin.de
-MAIL_ADDRESS   = jens
-MAIL_PROGRAM   = $(shell which mail)
-ADDR2LINE      = $(shell which addr2line)
-
 SHELL          = /bin/sh
 CC             = gcc
 CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
@@ -51,6 +46,14 @@ EXEC_INSTALL   = install             # command for installing executables
 ###########     Don't change anything below this line      #################
 ########### (unless you really know what you're doing ...) #################
 ############################################################################
+
+# Set up variables with maintainer email address and the full paths for
+# the mail program 'mail' and the GNU utility 'addr2line'
+
+#MAIL_ADDRESS   = Jens.Toerring@physik.fu-berlin.de
+MAIL_ADDRESS   = jens
+MAIL_PROGRAM   = $(shell which mail)
+ADDR2LINE      = $(shell which addr2line)
 
 # Set up a make variable with the machines FQDN
 
