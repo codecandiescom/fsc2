@@ -109,7 +109,7 @@ line:    P_TOK prop
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }
          list1 ']'                 { vars_arr_lhs( $4 ); }
          ass                       { fsc2_assert( EDL.Var_Stack == NULL ); }
-       | FUNC_TOKEN '(' list2 ')'  { vars_pop( func_call( $1 ) ); }
+       | FUNC_TOKEN '(' list3 ')'  { vars_pop( func_call( $1 ) ); }
        | FUNC_TOKEN '['            { print( FATAL, "'%s' is a predefined "
 											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
@@ -168,7 +168,7 @@ expr:    INT_TOKEN unit           { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | VAR_TOKEN '['            { vars_arr_start( $1 ); }
          list1 ']'                { $$ = vars_arr_rhs( $4 ); }
          unit                     { $$ = apply_unit( $<vptr>6, $7 ); }
-       | FUNC_TOKEN '(' list2 ')' { $$ = func_call( $1 ); }
+       | FUNC_TOKEN '(' list3 ')' { $$ = func_call( $1 ); }
          unit                     { $$ = apply_unit( $<vptr>5, $6 ); }
        | VAR_REF
        | VAR_TOKEN '('            { print( FATAL, "'%s' isn't a function.\n",
@@ -217,27 +217,26 @@ unit:    /* empty */              { $$ = NULL; }
 /* list of indices for access of array element */
 
 list1:   /* empty */              { $$ = vars_push( UNDEF_VAR ); }
-	   | expr
-       | list1 ',' expr           { $$ = $3; }
+       | expr list2               { }
+;
+
+list2:   /* empty */
+       | list2 '.' expr
 ;
 
 /* list of function arguments */
 
-list2:   /* empty */
-       | ','                      { print( FATAL, "Semicolon at start of "
-										   "function argument list.\n" );
-									THROW( EXCEPTION ); }
-       | exprs
-	   | list2 ',' exprs
+list3:   /* empty */
+       | exprs list4
+;
+
+list4:   /* empty */
+       | list4 ',' exprs
 ;
 
 exprs:   expr                     { }
        | STR_TOKEN                { vars_push( STR_VAR, $1 ); }
          strs
-	   | ','                      { print( FATAL, "Two semicolons without a "
-										   "value in between in function "
-										   "argument list.\n" );
-	   								THROW( EXCEPTION ); }
 ;
 
 strs:    /* empty */

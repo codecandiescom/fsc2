@@ -102,7 +102,7 @@ static void exp_runerror( const char *s );
 
 %token E_NT_TOKEN E_UT_TOKEN E_MT_TOKEN E_T_TOKEN E_KT_TOKEN E_MGT_TOKEN
 %token E_NU_TOKEN E_UU_TOKEN E_MU_TOKEN E_KU_TOKEN E_MEG_TOKEN
-%type <vptr> expr unit line list1 list2
+%type <vptr> expr unit line list1
 
 
 
@@ -283,11 +283,11 @@ unit:    /* empty */               { $$ = NULL; }
 /* list of indices for access of an array element */
 
 list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
-	   | expr list2
+       | expr list2                { }
 ;
 
-list2:   /* empty */               { }
-       | list2 ',' expr            { $$ = $3; }
+list2:   /* empty */
+       | list2 ',' expr
 ;
 
 /* list of function arguments */

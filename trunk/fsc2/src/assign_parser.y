@@ -345,7 +345,7 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }
          list1 ']'                 { $$ = vars_arr_rhs( $4 ); }
          unit                      { $$ = apply_unit( $<vptr>6, $7 ); }
-       | FUNC_TOKEN '(' list2 ')'  { $$ = func_call( $1 ); }
+       | FUNC_TOKEN '(' list3 ')'  { $$ = func_call( $1 ); }
          unit                      { $$ = apply_unit( $<vptr>5, $6 ); }
        | VAR_REF
        | FUNC_TOKEN '['            { print( FATAL, "'%s' is a predefined "
@@ -393,18 +393,21 @@ unit:    /* empty */               { $$ = NULL; }
 
 
 list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
-	   | expr
-       | list1 ',' expr            { $$ = $3; }
+       | expr list2                { }
+;
+
+list2:   /* empty */
+       | list2 ',' expr
 ;
 
 /* list of function arguments */
 
-list2:   /* empty */
-       | exprs list3
+list3:   /* empty */
+       | exprs list4
 ;
 
-list3:   /* empty */
-       | list3 ',' exprs
+list4:   /* empty */
+       | list4 ',' exprs
 ;
 
 exprs:   expr                      { }
