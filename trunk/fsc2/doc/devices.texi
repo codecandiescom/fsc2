@@ -304,21 +304,24 @@ section.
 @section Lock-In Functions
 @cindex Lock-In Functions
 
-Modules for four types of lock-in amplifiers are implemented. All of
-them are by Stanford Research and have the model names SR510, SR530,
-SR810 and SR830. Not too surprisingly, the module names to be specified
-in the @code{DEVICES} section are
+Modules for five different lock-in amplifiers are implemented. Most are
+by Stanford Research and have the model names @strong{SR510},
+@strong{SR530}, @strong{SR810} and @strong{SR830}. The fifth is the
+@strong{ER023M Signal Channel} to be found in Bruker spectrometers of
+the ESP series. The module names to be specified in the @code{DEVICES}
+section are
 @example
 sr510
 sr530
 sr810
 sr830
+er023m
 @end example
 Because the models have different capabilities, some of the functions
 are either only defined for parts of the models or may expect slightly
 different parameters.
 
-Several of the following functions can be called bth to query the
+Several of the following functions can be called both to query the
 current settings of the lock-in amplifier and to set a new value. In the
 first case the function usually has to be called with no argument, while
 to set a parameter an argument has to be passed to the function. Because
@@ -334,8 +337,9 @@ Returns a string with the name of the lock-in amplifier being used.
 
 @item lockin_get_data()
 @findex lockin_get_data()
-This is function only for queries, i.e.@: to fetch measured values
-from the lock-in amplifier. The parameters that may be passed to the
+This is a function only to be used in queries, i.e.@: to fetch measured
+values from the lock-in amplifier. This function can only be called in
+the @code{EXPERIMENT} section. The parameters that may be passed to the
 function differ according to the model:
 @table @samp
 @item SR510
@@ -375,6 +379,10 @@ of the arguments).
 @end table
 The function can only be called in the @code{EXPERIMENT} section.
 
+@item ER023M
+No argument is allowed -- the function returns a floating point value
+in the interval between +1 and -1.
+
 
 @item lockin_get_adc_data()
 @findex lockin_get_adc_data()
@@ -382,17 +390,19 @@ The function returns the voltage at one of the ADC ports at the back
 side of the lock-in amplifier. Allowed values of the required argument
 are between @code{1} and @code{4}, corresponding to the port numbering.
 
-The function can only be called in the @code{EXPERIMENT} section.
+This function can only be used with the @strong{Stanford Research}
+lock-in amplifiers and can only be called in the @code{EXPERIMENT} section.
 
 
 @item lockin_dac_voltage()
 @findex lockin_dac_voltage()
 The function can be used to set or query the voltage at one of the DAC
-ports at the back side of the lock-in amplifier. While for the models
-SR510 and SR530 the allowed values for the required arguments are
-@code{5} or @code{6}, for the models SR810 and SR830 the values can
-range from @code{1} to @code{4}, corresponding to the different numbers
-of DAC ports and their numbering printed on the back side. If no further
+ports at the back side of the @strong{Stanford Research} lock-in
+amplifier. While for the models @strong{SR510} and @strong{SR530} the
+allowed values for the required arguments are @code{5} or @code{6}, for
+the models @strong{SR810} and @strong{SR830} the values can range from
+@code{1} to @code{4}, corresponding to the different numbers of DAC
+ports and their numbering printed on the back side. If no further
 argument is given the function returns the current voltage applied to
 the DAC port (which is automatically set to @w{0 V} at the
 initialization of the lock-in amplifier if no voltage has been set
@@ -400,9 +410,10 @@ previously in the @code{PREPARATIONS} section using this function). If a
 second argument is given the DAC will be set to the corresponding
 voltage. The function returns the voltage that has been set.
 
-For the models SR510 and SR530 this voltage has to be in the range
-between @w{-10.24 V} and @w{+10.24 V} while for the models SR810 and
-SR830 the allowed voltage range is @w{-10.5V} to @w{+10.5 V}.
+For the models @strong{SR510} and @strong{SR530} this voltage has to be
+in the range between @w{-10.24 V} and @w{+10.24 V} while for the models
+@strong{SR810} and @strong{SR830} the allowed voltage range is
+@w{-10.5V} to @w{+10.5 V}.
 
 In the @code{EXPERIMENT} section this function can only be called
 with two argument, i.e@: to set the output voltage of one of the DACs
@@ -413,9 +424,10 @@ already in the initialisation of the device.
 @findex lockin_sensitivity()
 This function can be used to query or set the sensitivity of the lock-in
 amplifier. If no argument is passed to the function the current
-sensitivity is returned. For the models SR510 and SR530 a 10 times
-higher sensitivity than the sensitivity set on the front panel is
-returned when the @code{EXPAND} button is switched on.
+sensitivity is returned. For the models @strong{SR510} and
+@strong{SR530} a 10 times higher sensitivity than the sensitivity set on
+the front panel is returned when the @code{EXPAND} button is switched
+on.
 
 When called with a second argument the corresponding sensitivity is
 set. This value has to be positive. If the argument does not coincide
@@ -423,9 +435,15 @@ with one of the possible sensitivity settings the sensitivity is set to
 the nearest available sensitivity setting and a warning is printed. The
 function will return the sensitivity that has been set.
 
-For the models SR510 and SR530 a sensitivity 10 times higher than the
-maximum sensitivity can be specified, in which case the @code{EXPAND}
-button is automatically switched on.
+For the models @strong{SR510} and @strong{SR530} a sensitivity 10 times
+higher than the maximum sensitivity can be specified, in which case the
+@code{EXPAND} button is automatically switched on.
+
+For the @strong{ER023M Signal Channel} the function does not set the
+sensitivity in units of the output voltage but sets the receiver
+gain. Valid receiver gains are in the range between @code{2.0E+1} and
+@code{1.0E+7} and in increments of @code{2 dB}.
+
 
 Before the @code{EXPERIMENT} section this function can't be called
 without an argument, i.e.@: in query mode.
@@ -441,11 +459,16 @@ constant setting fitting the argument the nearest available setting is
 used and a warning is printed. The function will return the time
 constant setting that has been set.
 
-For models SR510 and SR530 also the POST time constant is set to a value
-equal or lower than the time constant.
+For models @strong{SR510} and @strong{SR530} also the POST time constant
+is set to a value equal or lower than the time constant.
 
 Before the @code{EXPERIMENT} section this function can't be called
 as a query, i.e.@: without an argument.
+
+
+@item lockin_conversion_time()
+@findex lockin_conversion_time()
+This function only exists for the @strong{ER023M Signal Channel}. 
 
 
 @item lockin_phase()
@@ -462,24 +485,26 @@ without an argument, i.e.@: as a query.
 @item lockin_ref_freq()
 @findex lockin_ref_freq()
 The function can be used to query the modulation frequency and, for the
-models SR810 and SR830, to set the modulation frequency (both the other
-models need an external modulation frequency). If called with no argument
-the current modulation frequency is returned. If called with an argument
-(models SR810 and SR830 only) the modulation frequency is set. If the
-frequency is not within the admissible range an error message is
-printed and the experiment is stopped) - the admissible range depends on
-the harmonics setting, see the manual for more details.
+models @strong{SR810} and @strong{SR830}, to set the modulation
+frequency (both the other models need an external modulation
+frequency). If called with no argument the current modulation frequency
+is returned. If called with an argument (models @strong{SR810} and
+@strong{SR830} only) the modulation frequency is set. If the frequency
+is not within the admissible range an error message is printed and the
+experiment is stopped) - the admissible range depends on the harmonics
+setting, see the manual for more details.
 
 Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e.@: without an argument.
 
 @item lockin_ref_level()
 @findex lockin_ref_level()
-This function can be only used with the models SR810 and SR830. It
-queries (if called with no argument) or sets (if called with an
-argument) the level of the modulation frequency. The allowed levels are
-between @w{4 mV} and @w{5 V}, if the argument is not within this range
-an error message is printed and the experiment is stopped.
+This function can be only used with the models @strong{SR810} and
+@strong{SR830}. It queries (if called with no argument) or sets (if
+called with an argument) the level of the modulation frequency. The
+allowed levels are between @w{4 mV} and @w{5 V}, if the argument is not
+within this range an error message is printed and the experiment is
+stopped.
 
 Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e.@: without an argument.
