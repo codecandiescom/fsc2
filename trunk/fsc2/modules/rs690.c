@@ -38,11 +38,11 @@ static bool Is_needed = UNSET;
 static bool In_reset = UNSET;
 
 
-/*-------------------------------------------------------------------------*/
-/* This function is called directly after all modules are loaded. Its main */
-/* function is to initialize all global variables that are needed in the   */
-/* module.                                                                 */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * This function is called directly after all modules are loaded. Its main
+ * function is to initialize all global variables that are needed in the
+ * module.
+ *-------------------------------------------------------------------------*/
 
 int rs690_init_hook( void )
 {
@@ -196,8 +196,8 @@ int rs690_init_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 int rs690_test_hook( void )
 {
@@ -255,8 +255,8 @@ int rs690_test_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 int rs690_end_of_test_hook( void )
 {
@@ -376,8 +376,8 @@ int rs690_end_of_test_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 int rs690_exp_hook( void )
 {
@@ -436,8 +436,8 @@ int rs690_exp_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 int rs690_end_of_exp_hook( void )
 {
@@ -453,8 +453,8 @@ int rs690_end_of_exp_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 void rs690_exit_hook( void )
 {
@@ -512,8 +512,8 @@ void rs690_exit_hook( void )
 /*----------------------------------------------------*/
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_name( UNUSED_ARG Var_T *v )
 {
@@ -521,8 +521,8 @@ Var_T *pulser_name( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_automatic_shape_pulses( Var_T *v )
 {
@@ -640,8 +640,8 @@ Var_T *pulser_automatic_shape_pulses( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_automatic_twt_pulses( Var_T *v )
 {
@@ -759,8 +759,8 @@ Var_T *pulser_automatic_twt_pulses( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_show_pulses( UNUSED_ARG Var_T *v )
 {
@@ -771,8 +771,8 @@ Var_T *pulser_show_pulses( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_dump_pulses( UNUSED_ARG Var_T *v )
 {
@@ -783,8 +783,8 @@ Var_T *pulser_dump_pulses( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_shape_to_defense_minimum_distance( Var_T *v )
 {
@@ -814,8 +814,8 @@ Var_T *pulser_shape_to_defense_minimum_distance( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_defense_to_shape_minimum_distance( Var_T *v )
 {
@@ -844,14 +844,14 @@ Var_T *pulser_defense_to_shape_minimum_distance( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function allows to query or change the minimum allowed distance   */
-/* between automatically created TWT pulses (if the distance between */
-/* the pulses gets to short the pulses get lengthened automatically  */
-/* to avoid having to short distances between the pulses).           */
-/* In the EXPERIMENT section the new setting only gets used at the   */
-/* next call of pulser_update().                                     */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function allows to query or change the minimum allowed distance
+ * between automatically created TWT pulses (if the distance between
+ * the pulses gets to short the pulses get lengthened automatically
+ * to avoid having to short distances between the pulses).
+ * In the EXPERIMENT section the new setting only gets used at the
+ * next call of pulser_update().
+ *-------------------------------------------------------------------*/
 
 Var_T *pulser_minimum_twt_pulse_distance( Var_T *v )
 {
@@ -888,9 +888,9 @@ Var_T *pulser_minimum_twt_pulse_distance( Var_T *v )
 }
 
 
-/*---------------------------------------------*/
-/* Switches the output of the pulser on or off */
-/*---------------------------------------------*/
+/*---------------------------------------------*
+ * Switches the output of the pulser on or off
+ *---------------------------------------------*/
 
 Var_T *pulser_state( Var_T *v )
 {
@@ -910,8 +910,8 @@ Var_T *pulser_state( Var_T *v )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
 
 Var_T *pulser_channel_state( UNUSED_ARG Var_T *v )
 {
@@ -921,8 +921,8 @@ Var_T *pulser_channel_state( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_update( UNUSED_ARG Var_T *v )
 {
@@ -938,13 +938,13 @@ Var_T *pulser_update( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Public function to change the position of pulses. If called with no  */
-/* argument all active pulses that have a position change time set will */
-/* be moved, otherwise all pulses passed as arguments to the function.  */
-/* Take care: The changes will only be commited on the next call of the */
-/*            function pulser_update() !                                */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Public function to change the position of pulses. If called with no
+ * argument all active pulses that have a position change time set will
+ * be moved, otherwise all pulses passed as arguments to the function.
+ * Take care: The changes will only be commited on the next call of the
+ *            function pulser_update() !
+ *----------------------------------------------------------------------*/
 
 Var_T *pulser_shift( Var_T *v )
 {
@@ -1032,13 +1032,13 @@ Var_T *pulser_shift( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Public function for incrementing the length of pulses. If called with   */
-/* no argument all active pulses that have a length change defined are     */
-/* incremented, oltherwise all pulses passed as arguments to the function. */
-/* Take care: The changes will only be commited on the next call of the    */
-/*            function pulser_update() !                                   */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Public function for incrementing the length of pulses. If called with
+ * no argument all active pulses that have a length change defined are
+ * incremented, oltherwise all pulses passed as arguments to the function.
+ * Take care: The changes will only be commited on the next call of the
+ *            function pulser_update() !
+ *-------------------------------------------------------------------------*/
 
 Var_T *pulser_increment( Var_T *v )
 {
@@ -1128,8 +1128,8 @@ Var_T *pulser_increment( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_reset( UNUSED_ARG Var_T *v )
 {
@@ -1149,8 +1149,8 @@ Var_T *pulser_reset( UNUSED_ARG Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_pulse_reset( Var_T *v )
 {
@@ -1247,8 +1247,8 @@ Var_T *pulser_pulse_reset( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_next_phase( Var_T *v )
 {
@@ -1313,8 +1313,8 @@ Var_T *pulser_next_phase( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_phase_reset( Var_T *v )
 {
@@ -1372,8 +1372,8 @@ Var_T *pulser_phase_reset( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_lock_keyboard( Var_T *v )
 {
@@ -1395,8 +1395,8 @@ Var_T *pulser_lock_keyboard( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *pulser_command( Var_T *v )
 {
@@ -1427,19 +1427,21 @@ Var_T *pulser_command( Var_T *v )
 }
 
 
-/*------------------------------------------------*/
-/* This is basically a no-op, it just returns the */
-/* largest representable number.                  */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * This is basically a no-op, it just returns the
+ * largest representable number.
+ *------------------------------------------------*/
 
 Var_T *pulser_maximum_pattern_length( UNUSED_ARG Var_T *v )
 {
 	print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
+
 	if ( ! rs690.is_timebase )
 	{
 		print( FATAL, "No timebase has been set yet.\n ");
 		THROW( EXCEPTION );
 	}
+
 	return vars_push( FLOAT_VAR, LONG_MAX * rs690.timebase );
 }
 

@@ -40,11 +40,11 @@ static void rs690_delete_fs_successor( FS_T *n );
 
 
 
-/*-------------------------------------------------------------------------*/
-/* Function is called in the experiment after pulses have been changed to  */
-/* update the pulser accordingly. No checking has to be done except in the */
-/* test run.                                                               */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function is called in the experiment after pulses have been changed to
+ * update the pulser accordingly. No checking has to be done except in the
+ * test run.
+ *-------------------------------------------------------------------------*/
 
 bool rs690_do_update( void )
 {
@@ -72,9 +72,9 @@ bool rs690_do_update( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* This function sorts the pulses and checks that the pulses don't overlap. */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * This function sorts the pulses and checks that the pulses don't overlap.
+ *--------------------------------------------------------------------------*/
 
 static bool rs690_update_pulses( bool flag )
 {
@@ -255,9 +255,9 @@ static bool rs690_update_pulses( bool flag )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* This function simply checks that no pulses of a function overlap. */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * This function simply checks that no pulses of a function overlap.
+ *-------------------------------------------------------------------*/
 
 static void rs690_pulse_check( Function_T *f )
 {
@@ -343,18 +343,18 @@ static void rs690_pulse_check( Function_T *f )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Function checks if the distance between pulse shape pulses and defense */
-/* pulses is large enough. The minimum lengths the shape_2_defense and    */
-/* defense_2_shape members of the ep395 structure. Both are set to rather */
-/* large values at first but can be customized by calling the EDL         */
-/* functions pulser_shape_to_defense_minimum_distance() and               */
-/* pulser_defense_to_shape_minimum_distance() (names are intentionally    */
-/* that long).                                                            */
-/* The function is called only if pulse shape and defense pulses are used */
-/* and either also TWT or TWT_GATE pulses or at least one of both the     */
-/* mentioned EDL functions have been called.                              */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function checks if the distance between pulse shape pulses and defense
+ * pulses is large enough. The minimum lengths the shape_2_defense and
+ * defense_2_shape members of the ep395 structure. Both are set to rather
+ * large values at first but can be customized by calling the EDL
+ * functions pulser_shape_to_defense_minimum_distance() and
+ * pulser_defense_to_shape_minimum_distance() (names are intentionally
+ * that long).
+ * The function is called only if pulse shape and defense pulses are used
+ * and either also TWT or TWT_GATE pulses or at least one of both the
+ * mentioned EDL functions have been called.
+ *------------------------------------------------------------------------*/
 
 static void rs690_defense_shape_check( Function_T *shape )
 {
@@ -457,10 +457,10 @@ static void rs690_defense_shape_check( Function_T *shape )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Function is called after the test run and experiments to reset all the */
-/* variables describing the state of the pulser to their initial values.  */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function is called after the test run and experiments to reset all the
+ * variables describing the state of the pulser to their initial values.
+ *------------------------------------------------------------------------*/
 
 void rs690_full_reset( void )
 {
@@ -530,9 +530,9 @@ void rs690_full_reset( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Checks if shape padding can be set correctly for all pulses of a channel */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * Checks if shape padding can be set correctly for all pulses of a channel
+ *--------------------------------------------------------------------------*/
 
 void rs690_shape_padding_check_1( Channel_T *ch )
 {
@@ -579,11 +579,11 @@ void rs690_shape_padding_check_1( Channel_T *ch )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* In the shape padding checks for single channels it could not be tested */
-/* if pulses with automatic shape padding in different channels would     */
-/* overlap, which needs to be done here.                                  */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * In the shape padding checks for single channels it could not be tested
+ * if pulses with automatic shape padding in different channels would
+ * overlap, which needs to be done here.
+ *------------------------------------------------------------------------*/
 
 void rs690_shape_padding_check_2( void )
 {
@@ -651,12 +651,12 @@ void rs690_shape_padding_check_2( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Here we check that TWT pulses don't overlap (if at least one of */
-/* them has been created automatically), if necessary shortening   */
-/* or even eliminating TWT pulses, Then we again lengthen pulses   */
-/* if the time between two TWT gets too short.                     */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Here we check that TWT pulses don't overlap (if at least one of
+ * them has been created automatically), if necessary shortening
+ * or even eliminating TWT pulses, Then we again lengthen pulses
+ * if the time between two TWT gets too short.
+ *-----------------------------------------------------------------*/
 
 void rs690_twt_padding_check( Channel_T *ch )
 {
@@ -775,8 +775,8 @@ void rs690_twt_padding_check( Channel_T *ch )
 }
 
 
-/*------------------------------------------------*/
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ *------------------------------------------------*/
 
 void rs690_seq_length_check( void )
 {
@@ -874,10 +874,10 @@ void rs690_seq_length_check( void )
 }
 
 
-/*------------------------------------------------*/
-/* Function deletes a pulse and returns a pointer */
-/* to the next pulse in the pulse list.           */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * Function deletes a pulse and returns a pointer
+ * to the next pulse in the pulse list.
+ *------------------------------------------------*/
 
 Pulse_T *rs690_delete_pulse( Pulse_T *p, bool warn )
 {
@@ -979,11 +979,11 @@ Pulse_T *rs690_delete_pulse( Pulse_T *p, bool warn )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Changes the pulse pattern in all channels so that the data in the */
-/* pulser get in sync with the its internal representation.          */
-/* 'flag' is set during the test run.                                */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Changes the pulse pattern in all channels so that the data in the
+ * pulser get in sync with the its internal representation.
+ * 'flag' is set during the test run.
+ *-------------------------------------------------------------------*/
 
 static void rs690_commit( bool flag )
 {
@@ -1029,30 +1029,30 @@ static void rs690_commit( bool flag )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* We're using the pulser in timing simulator mode. In this mode each */
-/* output state of the pulser during a pulse sequence is defined by   */
-/* the data to be output during the state and the length of time the  */
-/* the data have to be output. If e.g. there is just one pulse,       */
-/* starting at a time T and with a length of L, we would have three   */
-/* output states, the first one for the time between 0 and T, a       */
-/* second one for the time between T and T and T + L (i.e. the time   */
-/* where the pulse is on) and a third one for the time after the      */
-/* pulse. More complicated pulse sequences can be split in the same   */
-/* manner, with a new output state whenever one of the pulses gets    */
-/* switched on or off.                                                */
-/* In the following an internal representation of these states gets   */
-/* created in the form of a linked list of pulser state structures of */
-/* type FS. Each of these structures has an member for its position   */
-/* and length and a set of fields that represent the data to be out-  */
-/* put (each field corresponds to a 'Field' of the pulser of which    */
-/* the individual bits can be assigned to the channels of the output  */
-/* connectors).                                                       */
-/* Things get a bit more complicated because the pulser needs a state */
-/* of zero for all channels at the start or strange things happen (i. */
-/* e. when starting the pulser but not triggering it yet all initial  */
-/* states are output for a longer time etc.)                          */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * We're using the pulser in timing simulator mode. In this mode each
+ * output state of the pulser during a pulse sequence is defined by
+ * the data to be output during the state and the length of time the
+ * the data have to be output. If e.g. there is just one pulse,
+ * starting at a time T and with a length of L, we would have three
+ * output states, the first one for the time between 0 and T, a
+ * second one for the time between T and T and T + L (i.e. the time
+ * where the pulse is on) and a third one for the time after the
+ * pulse. More complicated pulse sequences can be split in the same
+ * manner, with a new output state whenever one of the pulses gets
+ * switched on or off.
+ * In the following an internal representation of these states gets
+ * created in the form of a linked list of pulser state structures of
+ * type FS. Each of these structures has an member for its position
+ * and length and a set of fields that represent the data to be out-
+ * put (each field corresponds to a 'Field' of the pulser of which
+ * the individual bits can be assigned to the channels of the output
+ * connectors).
+ * Things get a bit more complicated because the pulser needs a state
+ * of zero for all channels at the start or strange things happen (i.
+ * e. when starting the pulser but not triggering it yet all initial
+ * states are output for a longer time etc.)
+ *--------------------------------------------------------------------*/
 
 #define START_OFFSET 1
 
@@ -1111,10 +1111,10 @@ void rs690_channel_setup( bool flag )
 }
 
 
-/*------------------------------------------------------------*/
-/* Runs over all active pulses and creates a new FS structure */
-/* for each change of the state of one of the pulses.         */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Runs over all active pulses and creates a new FS structure
+ * for each change of the state of one of the pulses.
+ *------------------------------------------------------------*/
 
 static void rs690_make_fs( FS_T *start_fs )
 {
@@ -1197,10 +1197,10 @@ static void rs690_make_fs( FS_T *start_fs )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Loops over all pulses a second time, setting the data fields of */
-/* all the FS structures to reflect the pulse states.              */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Loops over all pulses a second time, setting the data fields of
+ * all the FS structures to reflect the pulse states.
+ *-----------------------------------------------------------------*/
 
 static void rs690_populate_fs( FS_T *start_fs )
 {
@@ -1246,9 +1246,9 @@ static void rs690_populate_fs( FS_T *start_fs )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Runs through the list of FS structures and does some cosmetics */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Runs through the list of FS structures and does some cosmetics
+ *----------------------------------------------------------------*/
 
 void rs690_check_fs( void )
 {
@@ -1349,18 +1349,18 @@ void rs690_check_fs( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* The basic unit of table entries are 16 bit words, where for a time base  */
-/* of 16 ns each bit represents a channel of one of the output connectors.  */
-/* For a time base of 8 ns only 8 channels can be associated with a word,   */
-/* and first the high and then the low byte of a word is output to these 8  */
-/* channels) to be able to clock out data at a 125 MHz rate while new words */
-/* can be loaded only in 16 ns).                                            */
-/* Until now the fields in the FS structures were treated as needed for a   */
-/* 16 ns time base. But now we have adjust for structures that are only 1   */
-/* Tick long - they need to be merged with another Tick from the following  */
-/* structure.                                                               */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * The basic unit of table entries are 16 bit words, where for a time base
+ * of 16 ns each bit represents a channel of one of the output connectors.
+ * For a time base of 8 ns only 8 channels can be associated with a word,
+ * and first the high and then the low byte of a word is output to these 8
+ * channels) to be able to clock out data at a 125 MHz rate while new words
+ * can be loaded only in 16 ns).
+ * Until now the fields in the FS structures were treated as needed for a
+ * 16 ns time base. But now we have adjust for structures that are only 1
+ * Tick long - they need to be merged with another Tick from the following
+ * structure.
+ *--------------------------------------------------------------------------*/
 
 static void rs690_correct_fs_for_8ns( void )
 {
@@ -1407,18 +1407,18 @@ static void rs690_correct_fs_for_8ns( void )
 }
 
 
-/*------------------------------------------------------------------*/
-/* For a time base of 4 ns we have a similar problem as for an 8 ns */
-/* time base (see above), but it gets even a bit more complicated.  */
-/* For a 4 ns second time base each 16 bit word can be split into 4 */
-/* nibbles for 4 consecutive output states of 4 channels (you can't */
-/* have more than 4 channels per connector with a 4 ns time base to */
-/* have a clock out frequency of 125 MHz while word loading happens */
-/* at 62.5 MHz only).                                               */
-/* If the length of an FS structure is at least 4 Ticks long we do  */
-/* not have to do anything. But for shorter structures we need to   */
-/* fill it with Ticks from the following structure.                 */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * For a time base of 4 ns we have a similar problem as for an 8 ns
+ * time base (see above), but it gets even a bit more complicated.
+ * For a 4 ns second time base each 16 bit word can be split into 4
+ * nibbles for 4 consecutive output states of 4 channels (you can't
+ * have more than 4 channels per connector with a 4 ns time base to
+ * have a clock out frequency of 125 MHz while word loading happens
+ * at 62.5 MHz only).
+ * If the length of an FS structure is at least 4 Ticks long we do
+ * not have to do anything. But for shorter structures we need to
+ * fill it with Ticks from the following structure.
+ *------------------------------------------------------------------*/
 
 static void	rs690_correct_fs_for_4ns( void )
 {
@@ -1490,15 +1490,15 @@ static void	rs690_correct_fs_for_4ns( void )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Inserts a new FS structure into the linked list of FS structures */
-/* immediately after the FS structure passed to the function. The   */
-/* position mmeberof the new structure is initialized to the value  */
-/* of the second argument and the field members are set to the      */
-/* values of the rs690.default_fields array (which are the bit      */
-/* patterns one needs for no pulses at all, taking into account the */
-/* polarity of the channels).                                       */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Inserts a new FS structure into the linked list of FS structures
+ * immediately after the FS structure passed to the function. The
+ * position mmeberof the new structure is initialized to the value
+ * of the second argument and the field members are set to the
+ * values of the rs690.default_fields array (which are the bit
+ * patterns one needs for no pulses at all, taking into account the
+ * polarity of the channels).
+ *------------------------------------------------------------------*/
 
 static FS_T *rs690_insert_fs( FS_T *at, Ticks pos )
 {
@@ -1523,10 +1523,10 @@ static FS_T *rs690_insert_fs( FS_T *at, Ticks pos )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Appends a new FS structure to the end of the linked list of FS */
-/* structures. Everything else as in the previous function.       */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Appends a new FS structure to the end of the linked list of FS
+ * structures. Everything else as in the previous function.
+ *----------------------------------------------------------------*/
 
 static FS_T *rs690_append_fs( Ticks pos )
 {
@@ -1557,12 +1557,12 @@ static FS_T *rs690_append_fs( Ticks pos )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Deletes the FS structure pointed to by the next member of the FS */
-/* structure passed to the function. Take care: the number of       */
-/* structures as stored in rs690_new_fs_count or rs690.old_fs_count */
-/* does *not* get changed!                                          */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Deletes the FS structure pointed to by the next member of the FS
+ * structure passed to the function. Take care: the number of
+ * structures as stored in rs690_new_fs_count or rs690.old_fs_count
+ * does *not* get changed!
+ *------------------------------------------------------------------*/
 
 static void rs690_delete_fs_successor( FS_T *n )
 {
@@ -1577,9 +1577,9 @@ static void rs690_delete_fs_successor( FS_T *n )
 }
 
 
-/*-----------------------------------------------------*/
-/* Removes all FS structures allocated for the program */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Removes all FS structures allocated for the program
+ *-----------------------------------------------------*/
 
 void rs690_cleanup_fs( void )
 {

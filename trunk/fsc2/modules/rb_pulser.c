@@ -25,9 +25,9 @@
 #include "rb_pulser.h"
 
 
-/*--------------------------------*
- * global variables of the module
- *--------------------------------*/
+/*--------------------------------*/
+/* global variables of the module */
+/*--------------------------------*/
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;

@@ -30,11 +30,11 @@ static double rs690_fixed_timebases[ NUM_FIXED_TIMEBASES ] =
 													{ 4.0e-9, 8.0e-9, 1.6e-8 };
 
 
-/*------------------------------------------------------------------*/
-/* Function is called via the TIMEBASE command to set the timebase  */
-/* used with the pulser - got to be called first because nearly all */
-/* other functions depend on the timebase setting !                 */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function is called via the TIMEBASE command to set the timebase
+ * used with the pulser - got to be called first because nearly all
+ * other functions depend on the timebase setting !
+ *------------------------------------------------------------------*/
 
 bool rs690_store_timebase( double timebase )
 {
@@ -123,8 +123,8 @@ bool rs690_store_timebase( double timebase )
 }
 
 
-/*------------------------------------------------*/
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ *------------------------------------------------*/
 
 bool rs690_store_timebase_level( int level_type )
 {
@@ -150,9 +150,9 @@ bool rs690_store_timebase_level( int level_type )
 }
 
 
-/*------------------------------------------------*/
-/* Function for assigning a channel to a function */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * Function for assigning a channel to a function
+ *------------------------------------------------*/
 
 bool rs690_assign_channel_to_function( int function, long channel )
 {
@@ -262,10 +262,10 @@ bool rs690_assign_channel_to_function( int function, long channel )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function for setting a delay for a function - negative delays */
-/* are only possible for INTERNAL trigger mode!                  */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for setting a delay for a function - negative delays
+ * are only possible for INTERNAL trigger mode!
+ *---------------------------------------------------------------*/
 
 bool rs690_set_function_delay( int function, double delay )
 {
@@ -315,8 +315,8 @@ bool rs690_set_function_delay( int function, double delay )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 bool rs690_invert_function( int function )
 {
@@ -325,9 +325,9 @@ bool rs690_invert_function( int function )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function for setting the trigger mode, either INTERNAL or EXTERNAL */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for setting the trigger mode, either INTERNAL or EXTERNAL
+ *--------------------------------------------------------------------*/
 
 bool rs690_set_trigger_mode( int mode )
 {
@@ -355,8 +355,8 @@ bool rs690_set_trigger_mode( int mode )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 bool rs690_set_trig_in_slope( int slope )
 {
@@ -393,8 +393,8 @@ bool rs690_set_trig_in_slope( int slope )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 bool rs690_set_trig_in_level_type( double type )
 {
@@ -444,9 +444,9 @@ bool rs690_set_trig_in_level_type( double type )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function for setting the repetition time for the pulse sequences */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for setting the repetition time for the pulse sequences
+ *------------------------------------------------------------------*/
 
 bool rs690_set_repeat_time( double rep_time )
 {
@@ -527,9 +527,9 @@ bool rs690_set_repeat_time( double rep_time )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Fucntion associates a phase sequence with one of the functions */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function associates a phase sequence with one of the functions
+ *----------------------------------------------------------------*/
 
 bool rs690_set_phase_reference( int phs, int function )
 {
@@ -587,10 +587,10 @@ bool rs690_set_phase_reference( int phs, int function )
 }
 
 
-/*-------------------------------------------------------------*/
-/* This funcion gets called for setting a phase type - channel */
-/* association in a PHASE_SETUP commmand.                      */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * This funcion gets called for setting a phase type - channel
+ * association in a PHASE_SETUP commmand.
+ *-------------------------------------------------------------*/
 
 bool rs690_phase_setup_prep( int phs, int type, UNUSED_ARG int dummy,
 							 long channel )
@@ -680,10 +680,10 @@ bool rs690_phase_setup_prep( int phs, int type, UNUSED_ARG int dummy,
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function does a primary sanity check after a PHASE_SETUP command */
-/* has been parsed.                                                 */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function does a primary sanity check after a PHASE_SETUP command
+ * has been parsed.
+ *------------------------------------------------------------------*/
 
 bool rs690_phase_setup( int phs )
 {
@@ -753,10 +753,10 @@ bool rs690_phase_setup( int phs )
 }
 
 
-/*----------------------------------------------*/
-/* Function that gets called to tell the pulser */
-/* driver to keep all pulses, even unused ones. */
-/*----------------------------------------------*/
+/*----------------------------------------------*
+ * Function that gets called to tell the pulser
+ * driver to keep all pulses, even unused ones.
+ *----------------------------------------------*/
 
 bool rs690_keep_all( void )
 {

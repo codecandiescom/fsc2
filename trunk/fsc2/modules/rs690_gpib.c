@@ -48,9 +48,9 @@ static int rs690_write( int device_no, const char *s, long len );
 #endif
 
 
-/*------------------------------*/
-/* Initialization of the device */
-/*------------------------------*/
+/*------------------------------*
+ * Initialization of the device
+ *------------------------------*/
 
 #ifndef RS690_GPIB_DEBUG
 bool rs690_init( const char *name )
@@ -132,11 +132,11 @@ bool rs690_init( UNUSED_ARG const char *name )
 #endif
 
 
-/*-----------------------------------------------------------------*/
-/* Function either starts or stops the pulser outputting the pulse */
-/* sequence (when there's no external trigger we also have to      */
-/* trigger the pulser by software).                                */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function either starts or stops the pulser outputting the pulse
+ * sequence (when there's no external trigger we also have to
+ * trigger the pulser by software).
+ *-----------------------------------------------------------------*/
 
 bool rs690_run( bool state )
 {
@@ -153,9 +153,9 @@ bool rs690_run( bool state )
 }
 
 
-/*-----------------------------------------------------*/
-/* Function locks or unlocks the front panel keyboard. */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function locks or unlocks the front panel keyboard.
+ *-----------------------------------------------------*/
 
 bool rs690_lock_state( bool lock )
 {
@@ -166,26 +166,26 @@ bool rs690_lock_state( bool lock )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* The RS690 has 4 (or, when there are 2 HSM cards 8) 16-bit fields.  */
-/* Each bit of a field can be associated with one of the channels of  */
-/* the (4 or 8) output connectors (different bits of the fields can   */
-/* be assigned to the same channel!). The tables of the RS690 consist */
-/* of series of field settings, representing the voltage levels to be */
-/* output through the channels. In this function the association      */
-/* between field bits and channels of the output connectors is done.  */
-/* In the function rs690_setup_channels( ) in rs690_init.c the number */
-/* of required channels (i.e. bits in the fields) has been counted    */
-/* also determined which bit in the fields will represent a certain   */
-/* channel (taking into account that for a time base of 4 ns only 4   */
-/* the 16 bits of a field can be used and for a time base of 8 ns     */
-/* only 8). Here we now tell the pulser about all this.               */
-/* To make things simpler we only set the bits of fields really       */
-/* needed and mark fields not needed as 'OFF'. To be able to set the  */
-/* bits in a field not needed for a channel we figure out a channel   */
-/* we're not going to use anyway and assign it to all the superfluous */
-/* bits of needed fields.                                             */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * The RS690 has 4 (or, when there are 2 HSM cards 8) 16 bit fields.
+ * Each bit of a field can be associated with one of the channels of
+ * the (4 or 8) output connectors (different bits of the fields can
+ * be assigned to the same channel!). The tables of the RS690 consist
+ * of series of field settings, representing the voltage levels to be
+ * output through the channels. In this function the association
+ * between field bits and channels of the output connectors is done.
+ * In the function rs690_setup_channels( ) in rs690_init.c the number
+ * of required channels (i.e. bits in the fields) has been counted
+ * also determined which bit in the fields will represent a certain
+ * channel (taking into account that for a time base of 4 ns only 4
+ * the 16 bits of a field can be used and for a time base of 8 ns
+ * only 8). Here we now tell the pulser about all this.
+ * To make things simpler we only set the bits of fields really
+ * needed and mark fields not needed as 'OFF'. To be able to set the
+ * bits in a field not needed for a channel we figure out a channel
+ * we're not going to use anyway and assign it to all the superfluous
+ * bits of needed fields.
+ *--------------------------------------------------------------------*/
 
 static bool rs690_field_channel_setup( void )
 {
@@ -261,13 +261,13 @@ static bool rs690_field_channel_setup( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Sends all commands to the device to produce the current pulse */
-/* sequence - unless this is the very first call the amount of   */
-/* data to be send is reduced by just sending data for table     */
-/* entries and loop counters that need to be changed. This also  */
-/* includes sending only data for fields that are really used.   */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Sends all commands to the device to produce the current pulse
+ * sequence - unless this is the very first call the amount of
+ * data to be send is reduced by just sending data for table
+ * entries and loop counters that need to be changed. This also
+ * includes sending only data for fields that are really used.
+ *---------------------------------------------------------------*/
 
 bool rs690_set_channels( void )
 {
@@ -325,11 +325,11 @@ bool rs690_set_channels( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/* When no tables habe been set up yet we need to set all entries */
-/* of the table (latter we only have to send information about    */
-/* entries that need to be changed).                              */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * When no tables habe been set up yet we need to set all entries
+ * of the table (latter we only have to send information about
+ * entries that need to be changed).
+ *----------------------------------------------------------------*/
 
 static bool rs690_init_channels( void )
 {
@@ -384,10 +384,10 @@ static bool rs690_init_channels( void )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function calculates how many tables and loop repetition are */
-/* needed to produce the current pulse sequence.               */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function calculates how many tables and loop repetition are
+ * needed to produce the current pulse sequence.
+ *-------------------------------------------------------------*/
 
 static void rs690_calc_tables( void )
 {
@@ -435,12 +435,12 @@ static void rs690_calc_tables( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Utility function for constructing and sending the data for the  */
-/* individual table words.                                         */
-/* 'i' is the field number, 'k' is the word of table #1 to write   */
-/* to and 'n' points to the FS structure with the data and length. */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Utility function for constructing and sending the data for the
+ * individual table words.
+ * 'i' is the field number, 'k' is the word of table #1 to write
+ * to and 'n' points to the FS structure with the data and length.
+ *-----------------------------------------------------------------*/
 
 static void rs690_table_set( int i, int k, FS_T *n )
 {
@@ -485,9 +485,9 @@ static void rs690_table_set( int i, int k, FS_T *n )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Funcion to be called when the pulser does not react properly. */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Funcion to be called when the pulser does not react properly.
+ *---------------------------------------------------------------*/
 
 static void rs690_gpib_failure( void )
 {
@@ -497,9 +497,9 @@ static void rs690_gpib_failure( void )
 }
 
 
-/*--------------------------------------*/
-/* Function for debugging purposes only.*/
-/*--------------------------------------*/
+/*---------------------------------------*
+ * Function for debugging purposes only.
+ *---------------------------------------*/
 
 static void rs690_check( void )
 {
@@ -514,8 +514,8 @@ static void rs690_check( void )
 }
 
 
-/*--------------------------------------*/
-/*--------------------------------------*/
+/*--------------------------------------*
+ *--------------------------------------*/
 
 #ifndef RS690_GPIB_DEBUG
 static int rs690_write( int device_no, const char *s, long len )
@@ -535,8 +535,8 @@ static int rs690_write( UNUSED_ARG int device_no, UNUSED_ARG const char *s,
 #endif
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 bool rs690_command( const char *cmd )
 {
