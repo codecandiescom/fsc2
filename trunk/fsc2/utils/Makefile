@@ -29,11 +29,14 @@ edl-mod.elc: edl-mod.el
 
 install:
 	$(INSTALL) -m 755 fsc2_guify $(bindir)
+	$(INSTALL) -m 755 fsc2_pulses $(bindir)
 	$(INSTALL) -d $(emacs_dir)
 	$(INSTALL) -m 644 edl-mod.el $(emacs_dir)
 	$(INSTALL) -m 444 edl-mod.elc $(emacs_dir)
 
 uninstall:
+	-$(RM) $(RMFLAGS) $(bindir)/fsc2_guify
+	-$(RM) $(RMFLAGS) $(bindir)/fsc2_pulses
 	-$(RM) $(RMFLAGS) $(emacs_dir)/edl-mod.el
 	-$(RM) $(RMFLAGS) $(emacs_dir)/edl-mod.elc
 	-if [ -z "`ls -A $(emacs_dir)`" ]; then  \
@@ -41,4 +44,4 @@ uninstall:
 	fi
 
 distclean:
-	-$(RM) $(RMFLAGS) edl-mod.elc
+	-$(RM) $(RMFLAGS) edl-mod.elc *~

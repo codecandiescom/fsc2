@@ -173,7 +173,7 @@ sub new {
 										  '-variable' => \$self->{ 'delay' },
 										  '-command' => sub {
 											  $self->draw_scale;
-											  $self->full_redraw } );
+											  $self->redraw } );
 	$self->{ 'frame3' } = $self->{ 'frame2' }->Frame;
 	$self->{ 'step_label' } =
 		$self->{ 'frame3' }->Label( '-text' => 'Step:' );
@@ -182,14 +182,14 @@ sub new {
 									 '-width' => '1',
 									 '-command' => sub {
 										 $self->{ 'step' } = 0;
-										 $self->full_redraw } );
+										 $self->redraw } );
 	$self->{ 'step_fb' } =
 		$self->{ 'frame3' }->Button( '-text' => '<',
 									 '-width' => '1',
 									 '-command' => sub {
 										 if ( $self->{ 'step' } > 0 ) {
 											 $self->{ 'step' }--;
-											 $self->full_redraw } } );
+											 $self->redraw } } );
 	$self->{ 'step_entry' } =
 		$self->{ 'frame3' }->Entry( '-textvariable' => \$self->{ 'step' },
 									'-width' => 6,
@@ -208,14 +208,14 @@ sub new {
 										 if ( $self->{ 'step' } < 
 											  $Channels->num_steps ) {
 											 $self->{ 'step' }++;
-											 $self->full_redraw } } );
+											 $self->redraw } } );
 	$self->{ 'step_ffw' } =
 		$self->{ 'frame3' }->Button( '-text' => '>>',
 									 '-width' => '1',
 									 '-command' => sub {
 										 $self->{ 'step' } =
 											 $Channels->num_steps;
-										 $self->full_redraw } );
+										 $self->redraw } );
 	$self->{ 'close_button' } =
 		$self->{ 'frame2' }->Button( '-text' => 'Close',
 									 'command' =>
@@ -246,17 +246,17 @@ sub new {
 						 return if $self->{ 'step' } eq "";
 						 if ( $self->{ 'step' } < $Channels->num_steps ) {
 							 $self->{ 'step' }++;
-							 $self->full_redraw; } } );
+							 $self->redraw; } } );
     $self->{ 'canvas' }->CanvasBind( '<Button-4>' => sub {
 						 return if $self->{ 'step' } eq "";
 						 if ( $self->{ 'step' } < $Channels->num_steps ) {
 							 $self->{ 'step' }++;
-							 $self->full_redraw; } } );
+							 $self->redraw; } } );
     $self->{ 'top' }->bind( '<Up>' => sub {
 						 return if $self->{ 'step' } eq "";
 						 if ( $self->{ 'step' } < $Channels->num_steps ) {
 							 $self->{ 'step' }++;
-							 $self->full_redraw; } } );
+							 $self->redraw; } } );
     $self->{ 'top' }->bind( '<Shift-Up>' => sub {
 						 return if $self->{ 'step' } eq "";
 						 if ( $self->{ 'step' } < $Channels->num_steps - 9 ) {
@@ -264,23 +264,23 @@ sub new {
 						 } else {
 							 $self->{ 'step' } = $Channels->num_steps;
 						 }
-						 $self->full_redraw; } );
+						 $self->redraw; } );
 
     $self->{ 'canvas' }->CanvasBind( '<Button-3>' => sub {
 										 return if $self->{ 'step' } eq "";
 										 if ( $self->{ 'step' } > 0 ) {
 											 $self->{ 'step' }--;
-											 $self->full_redraw; } } );
+											 $self->redraw; } } );
     $self->{ 'canvas' }->CanvasBind( '<Button-5>' => sub {
 										 return if $self->{ 'step' } eq "";
 										 if ( $self->{ 'step' } > 0 ) {
 											 $self->{ 'step' }--;
-											 $self->full_redraw; } } );
+											 $self->redraw; } } );
     $self->{ 'top' }->bind( '<Down>' => sub {
 										 return if $self->{ 'step' } eq "";
 										 if ( $self->{ 'step' } > 0 ) {
 											 $self->{ 'step' }--;
-											 $self->full_redraw; } } );
+											 $self->redraw; } } );
     $self->{ 'top' }->bind( '<Shift-Down>' => sub {
 										 return if $self->{ 'step' } eq "";
 										 if ( $self->{ 'step' } >= 10 ) {
@@ -288,14 +288,14 @@ sub new {
 										 } else {
 											 $self->{ 'step' } = 0;
 										 }
-										 $self->full_redraw; } );
+										 $self->redraw; } );
 	$self->{ 'top' }->bind( '<End>' => sub {
 										 $self->{ 'step' } = 0;
-										 $self->full_redraw; } );
+										 $self->redraw; } );
 	$self->{ 'top' }->bind( '<Home>' => sub {
 										 $self->{ 'step' } =
 											 $Channels->num_steps;
-										 $self->full_redraw; } );
+										 $self->redraw; } );
 	$self->{ 'top' }->bind( '<Prior>' => sub {
 										 return if $self->{ 'step' } eq "";
 										 $self->{ 'step' } +=
@@ -304,25 +304,25 @@ sub new {
 											 $Channels->num_steps
 												 if $self->{ 'step' } >
 													 $Channels->num_steps;
-										 $self->full_redraw; } );
+										 $self->redraw; } );
 	$self->{ 'top' }->bind( '<Next>' => sub {
 										 return if $self->{ 'step' } eq "";
 										 $self->{ 'step' } -=
 											 int( 0.1 * $Channels->num_steps );
 										 $self->{ 'step' } = 0
 												 if $self->{ 'step' } < 0;
-										 $self->full_redraw; } );
+										 $self->redraw; } );
 	$self->{ 'top' }->bind( '<Control-d>' => sub {
 								              $self->{ 'delay' } ^= 1;
 											  $self->draw_scale;
-											  $self->full_redraw } );
+											  $self->redraw } );
 	$self->{ 'top' }->bind( '<Control-q>' => [ destroy => $self->{ 'top' } ] );
 	$self->{ 'step_entry' }->bind( '<Return>' => sub {
 									   return if $self->{ 'step' } eq "";
-									   $self->full_redraw; } );
+									   $self->redraw; } );
 	$self->{ 'step_entry' }->bind( '<KP_Enter>' => sub {
 									   return if $self->{ 'step' } eq "";
-									   $self->full_redraw; } );
+									   $self->redraw; } );
 
 	return $self;
 }
@@ -346,7 +346,7 @@ sub primary_draw {
 		my $x2 = 160 + $self->{ 'len' };
 		$c->create( 'line', $x1, $y, $x2, $y, '-fill' => 'white' );
 	}
-	$self->full_redraw;
+	$self->redraw;
 }
 
 #---------------------------------------------------------
@@ -413,7 +413,7 @@ sub draw_scale {
 
 #---------------------------------------------------------
 
-sub full_redraw {
+sub redraw {
 
 	my ( $self ) = shift;
 	my $c = $self->{ 'canvas' };
