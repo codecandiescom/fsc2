@@ -66,13 +66,13 @@ $mw->title( "cw_epr" );
 my $balloon = $mw->Balloon( );
 
 my $f0 = $mw->Frame( );
-my $f0_l1 = $f0->Label( '-text'         => 'Bridge:',
-						'-width'        => '20',
-						'anchor'        => 'w' );
-my $f0_m = $f0->Optionmenu( '-options'  => [ ( 'cw', 'pulsed' ) ],
-							'-width'    => 9,
-							'-variable' => \$bridge );
-$balloon->attach( $f0_m, '-balloonmsg'  => "Selects either cw bridge or\n" .
+my $f0_l1 = $f0->Label( '-text'             => 'Bridge:',
+						'-width'            => '20',
+						'anchor'            => 'w' );
+my $f0_m = $f0->Optionmenu( '-options'      => [ ( 'cw', 'pulsed' ) ],
+							'-width'        => 9,
+							'-textvariable' => \$bridge );
+$balloon->attach( $f0_m, '-balloonmsg' => "Selects either cw bridge or\n" .
                                            "bridge for pulsed experiments" );
 $f0->pack( %fp );
 $f0_l1->pack( %wp );
@@ -163,7 +163,7 @@ my $f4_l = $f4->Label( '-text'           => 'Sweep method:',
 						'anchor'         => 'w' );
 my $f4_m = $f4->Optionmenu( '-options'   => [ ( 'simple', 'tested' ) ],
 							'-width'     => 9,
-							'-variable'  => \$sweep_method,
+							'-textvariable'  => \$sweep_method,
 						    '-command'   => \&set_sweep_method );
 $balloon->attach( $f4_m, '-balloonmsg'   => "Selects either a simple sweep\n" .
 				                        "(no intermediate checks of field)\n" .
@@ -228,7 +228,7 @@ my $f8_l = $f8->Label( '-text'          => 'Lock-in amplifier:',
 my $f8_m = $f8->Optionmenu( '-options'  =>
 							[ ( 'SR510', 'SR530', 'SR810', 'SR830' ) ],
 							'-width'    => 9,
-							'-variable' => \$lockin );
+							'-textvariable' => \$lockin );
 $f8->pack( %fp );
 $f8_l->pack( %wp );
 $f8_m->pack( %wp );
@@ -244,7 +244,7 @@ my $f9_m = $f9->Optionmenu( '-options'  =>
                                 '  3 s', '  1 s', '300 ms', '100 ms', ' 30 ms',
                                 ' 10 ms', '  3 ms', '  1 ms' ) ],
 							'-width'    => 9,
-							'-variable' => \$tc );
+							'-textvariable' => \$tc );
 $f9->pack( %fp );
 $f9_l->pack( %wp );
 $f9_m->pack( %wp );
@@ -263,7 +263,7 @@ my $f10_m = $f10->Optionmenu( '-options'  =>
 								  '500 nV', '200 nV', '100 nV', ' 50 nV',
 								  ' 10 nV', '  5 nV', '  2 nV', '  1 nV' ) ],
 							  '-width'    => 9,
-							  '-variable' => \$sens );
+							  '-textvariable' => \$sens );
 $f10->pack( %fp );
 $f10_l->pack( %wp );
 $f10_m->pack( %wp );
@@ -271,7 +271,7 @@ $f10_m->pack( %wp );
 
 $mw->Optionmenu( '-options' => [ ( 'Start experiment', 'Test program',
 								   'Load into fsc2' ) ],
-				 '-variable' => \$how,
+				 '-textvariable' => \$how,
 			   )->pack( '-padx' => '3m',
 						'-pady' => '3m' );
 

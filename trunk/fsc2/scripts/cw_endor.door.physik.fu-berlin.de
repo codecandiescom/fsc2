@@ -204,7 +204,7 @@ my $f9_m = $f9->Optionmenu( '-options' =>
                                 '  3 s', '  1 s', '300 ms', '100 ms', ' 30 ms',
                                 ' 10 ms', '  3 ms', '  1 ms' ) ],
 							'-width' => 9,
-							'-variable' => \$tc );
+							'-textvariable' => \$tc );
 $f9->pack( %fp );
 $f9_l->pack( %wp );
 $f9_m->pack( %wp );
@@ -223,7 +223,7 @@ my $f10_m = $f10->Optionmenu( '-options' =>
                                 '500 nV', '200 nV', '100 nV', ' 50 nV',
                                 ' 10 nV', '  5 nV', '  2 nV', '  1 nV' ) ],
 							'-width' => 9,
-							'-variable' => \$sens );
+							'-textvariable' => \$sens );
 $f10->pack( %fp );
 $f10_l->pack( %wp );
 $f10_m->pack( %wp );
@@ -250,15 +250,21 @@ $f11->{ is_shown } = 1;
 
 $mw->Optionmenu( '-options' => [ ( 'Start program', 'Test program',
 								   'Load into fsc2' ) ],
-				 '-variable' => \$how,
-				 '-command' => \&write_out
+				 '-textvariable' => \$how
 			   )->pack( '-padx' => '3m',
 					    '-pady' => '3m' );
 
-$mw->Button( '-text' => 'Quit',
-			 '-command' => sub { &store_defs; $mw->destroy }
-		   )->pack( '-padx' => '3m',
-					'-pady' => '3m' );
+my $f12 = $mw->Frame( );
+my $f12_a = $mw->Button( '-text' => 'Apply',
+						 '-command' => \&write_out );
+my $f12_q = $mw->Button( '-text' => 'Quit',
+						 '-command' => sub { &store_defs; $mw->destroy } );
+$f12->pack( '-side' => 'top',
+			'-fill' => 'x',
+			'-padx' => '4m' );
+$f12_a->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
+$f12_q->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
+
 
 MainLoop;
 
