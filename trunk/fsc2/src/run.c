@@ -368,9 +368,517 @@ static void setup_signal_handlers( void )
 
 static void stop_while_exp_hook( FL_OBJECT *a, long b )
 {
-	a = a;
-	b = b;
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
+	EDL.do_quit = EDL.react_to_do_quit = SET;
+}
 
+
+/*------------------------------------------------------------------------*/
+/* Things that remain to be done when forking the child process failed... */
+/*------------------------------------------------------------------------*/
+
+static void fork_failure( int stored_errno )
+{
+	sigaction( SIGCHLD,  &sigchld_old_act,  NULL );
+	sigaction( QUITTING, &quitting_old_act, NULL );
+
+	switch ( stored_errno )
+	{
+		case EAGAIN :
+			eprint( FATAL, UNSET, "Not enough system resources left to run "
+					"the experiment.\n" );
+			fl_show_alert( "FATAL Error", "Not enough system resources",
+						   "left to run the experiment.", 1 );
+			break;
+
+		case ENOMEM :
+			eprint( FATAL, UNSET, "Not enough memory left to run the "
+					"experiment.\n" );
+			fl_show_alert( "FATAL Error", "Not enough memory left",
+						   "to run the experiment.", 1 );
+			break;
+
+		default :
+			if ( errno < sys_nerr )
+				eprint( FATAL, UNSET, "System error \"%s\" when trying to "
+						"start experiment.\n", sys_errlist[ errno ] );
+			else
+				eprint( FATAL, UNSET, "Unknown system error (errno = %d) "
+						"when trying to start experiment.\n", errno );
+			fl_show_alert( "FATAL Error", "System error on start of "
+						   "experiment.", NULL, 1 );
+			break;
+	}
+
+	Internals.child_pid = 0;
+	EDL.do_quit = EDL.react_to_do_quit = UNSET;
+
+	end_comm( );
+
+	run_end_of_exp_hooks( );
+
+	if ( need_GPIB )
+		gpib_shutdown( );
+	fsc2_serial_cleanup( );
+
+	Internals.mode = PREPARATION;
+
+	run_close_button_callback( NULL, 0 );
+	fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
+	fl_activate_object( GUI.main_form->run );
+}
+
+
+/*-------------------------------------------------------------------*/
+/* Checks if new errors etc. were found while running the exp_hooks. */
+/* In this case ask the user if she wants to continue - unless an    */
+/* exception was thrown.                                             */
+/*-------------------------------------------------------------------*/
+
+static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
+{
+	Compilation diff;
+	char str1[ 128 ],
+		 str2[ 128 ];
+	const char *mess = "During start of the experiment there where";
+	int i;
+
+
+	for ( i = FATAL; i < NO_ERROR; i++ )
+		diff.error[ i ] = c_all->error[ i ] - c_old->error[ i ];
+
+
+	if ( diff.error[ SEVERE ] != 0 || diff.error[ WARN ] != 0 )
+	{
+		if ( diff.error[ SEVERE ] != 0 )
+		{
+			if ( diff.error[ WARN ] != 0 )
+			{
+				sprintf( str1, "%s %d severe", mess, diff.error[ SEVERE ] );
+				sprintf( str2, "and normal %d warnings.", diff.error[ WARN ] );
+			}
+			else
+			{
+				sprintf( str1, "%s %d severe warnings.",
+						 mess, diff.error[ SEVERE ] );
+				str2[ 0 ] = '\0';
+			}
+		}
+		else
+		{
+			sprintf( str1, "%s %d warnings.", mess, diff.error[ WARN ] );
+			str2[ 0 ] = '\0';
+		}
+
+		if ( 1 == fl_show_choice( str1, str2, "Continue running the program?",
+								  2, "No", "Yes", "", 1 ) )
+			THROW( EXCEPTION );
+	}
+}
+
+
+/*---------------------------------------------------------------------*/
+/* quitting_handler() is the parents handler for the QUITTING signal   */
+/* sent by the child when it exits normally: the handler sets a global */
+/* variable and reacts by sending the child a DO_QUIT signal.          */
+/*---------------------------------------------------------------------*/
+
+static void quitting_handler( int signo )
+{
+	int errno_saved;
+
+
+	UNUSED_ARGUMENT( signo );
+	errno_saved = errno;
+	Internals.child_is_quitting = QUITTING_RAISED;
+	errno = errno_saved;
+}
+
+
+/*-------------------------------------------------------------------*/
+/* Callback function for the 'Stop' button - used to kill the child  */
+/* process. After the child is dead a different callback function is */
+/* used for this button, see run_close_button_callback().            */
+/*-------------------------------------------------------------------*/
+
+void run_stop_button_callback( FL_OBJECT *a, long b )
+{
+	int bn;
+
+
+	UNUSED_ARGUMENT( /*
+  $Id$
+
+  Copyright (C) 1999-2002 Jens Thoms Toerring
+
+  This file is part of fsc2.
+
+  Fsc2 is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2, or (at your option)
+  any later version.
+
+  Fsc2 is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with fsc2; see the file COPYING.  If not, write to
+  the Free Software Foundation, 59 Temple Place - Suite 330,
+  Boston, MA 02111-1307, USA.
+*/
+
+
+#include "fsc2.h"
+#include "serial.h"
+#include "gpib_if.h"
+
+
+extern int exp_runparse( void );              /* from exp_run_parser.y */
+extern FL_resource xresources[ ];             /* from xinit.c */
+
+
+/* Routines of the main process exclusively used in this file */
+
+static bool start_gpib( void );
+static bool no_prog_to_run( void );
+static bool init_devs_and_graphics( void );
+static void stop_while_exp_hook( FL_OBJECT *a, long b );
+static void setup_signal_handlers( void );
+static void fork_failure( int stored_errno );
+static void check_for_further_errors( Compilation *c_old, Compilation *c_all );
+static void quitting_handler( int signo	);
+static void run_sigchld_handler( int signo );
+static void set_buttons_for_run( int run_state );
+
+
+/* Routines of the child process doing the measurement */
+
+static void run_child( void );
+static void setup_child_signals( void );
+static void child_sig_handler( int signo );
+static void do_measurement( void );
+static void wait_for_confirmation( void );
+static void child_confirmation_handler( int signo );
+static void deal_with_program_tokens( void );
+
+
+/* Locally used global variables used in parent, child and signal handlers */
+
+sigjmp_buf alrm_env;
+volatile sig_atomic_t can_jmp_alrm = 0;
+static struct sigaction sigchld_old_act,
+	                    quitting_old_act;
+static volatile sig_atomic_t child_return_status;
+
+
+/*------------------------------------------------------------------*/
+/* run() starts an experiment. To do so it initialises all needed   */
+/* devices and opens a new window for displaying the measured data. */
+/* Then everything needed for the communication between parent and  */
+/* the child to be created is set up, i.e. pipes, a semaphore and a */
+/* shared memory segment for storing the type of the data and a key */
+/* for a further shared memory segment that will contain the data.  */
+/* Finally, after initializing some global variables and setting up */
+/* signal handlers used for synchronization of the processes the    */
+/* child process is started and thus the experiments begins.        */
+/*------------------------------------------------------------------*/
+
+bool run( void )
+{
+	int stored_errno;
+	sigset_t new_mask, old_mask;
+
+
+	/* We can't run more than one experiment - so quit if child_pid != 0 */
+
+	if ( Internals.child_pid != 0 )
+		return FAIL;
+
+	/* If there's no EXPERIMENT section at all (indicated by 'prg_length'
+	   being negative) we're already done */
+
+	if ( EDL.prg_length < 0 )
+		return FAIL;
+
+	/* Start the GPIB bus (and do some changes to the graphics) */
+
+	Internals.state = STATE_RUNNING;
+
+	if ( ! start_gpib( ) )
+		return FAIL;
+
+	/* If there are no commands but an EXPERIMENT section label we just run
+	   all the init hooks, then the exit hooks and are already done. */
+
+	if ( EDL.prg_token == NULL )
+		return no_prog_to_run( );
+
+	/* Initialize devices and graphics */
+
+	if ( ! init_devs_and_graphics( ) )
+		return FAIL;
+
+	/* Setup the signal handlers for signals used for communication between
+	   parent and child process and an idle callback function for displaying
+	   new data. */
+
+	setup_signal_handlers( );
+	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+
+	/* We have to be careful: When the child process gets forked it may
+	   already be finished running *before* the fork() call returns in the
+	   parent. In this case the signal handlers of the parent don't know the
+	   PID of the child process and thus won't work correctly. Therefore all
+	   the signals the child may send are blocked until we can be sure the
+	   parent has got the childs PID. */
+
+	sigemptyset( &new_mask );
+	sigaddset( &new_mask, SIGCHLD );
+	sigaddset( &new_mask, QUITTING );
+	sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+
+	/* Here the experiment starts - the child process is forked */
+
+	if ( ( Internals.child_pid = fork( ) ) == 0 )
+	{
+		if ( GUI.is_init )
+			close( ConnectionNumber( GUI.d ) );
+		sigprocmask( SIG_SETMASK, &old_mask, NULL );
+		run_child( );
+	}
+
+	stored_errno = errno;            /* stored for later examination... */
+	close_all_files( );              /* only child is going to write to them */
+
+	close( Comm.pd[ READ ] );        /* close unused ends of pipes */
+	close( Comm.pd[ 3 ] );
+	Comm.pd[ READ ] = Comm.pd[ 2 ];
+
+	if ( Internals.child_pid > 0 )   /* fork() did succeeded */
+	{
+		fl_set_idle_callback( new_data_callback, NULL );
+		sigprocmask( SIG_SETMASK, &old_mask, NULL );
+		Internals.mode = PREPARATION;
+		return OK;
+	}
+
+	/* If forking the child failed we end up here */
+
+	sigprocmask( SIG_SETMASK, &old_mask, NULL );
+	fork_failure( stored_errno );
+	return FAIL;
+}
+
+
+/*-------------------------------------------------------------------*/
+/* This function first does some smaller changes to the GUI and then */
+/* starts the GPIB bus if at least one of the devices needs it.      */
+/*-------------------------------------------------------------------*/
+
+static bool start_gpib( void )
+{
+	/* Disable some buttons and show a watch cusor */
+
+	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
+	set_buttons_for_run( 1 );
+	XFlush( fl_get_display( ) );
+
+	/* If there are devices that need the GPIB bus initialize it now */
+
+	if ( need_GPIB && gpib_init( GPIB_LOG_FILE, GPIB_LOG_LEVEL ) == FAILURE )
+	{
+		eprint( FATAL, UNSET, "Can't initialize GPIB bus: %s\n",
+				gpib_error_msg );
+		set_buttons_for_run( 0 );
+		Internals.state = STATE_IDLE;
+		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+		XFlush( fl_get_display( ) );
+		return FAIL;
+	}
+
+	return OK;
+}
+
+
+/*----------------------------------------------------------------------*/
+/* This all to be done when the experiment section does not contain any */
+/* commands: devices get initialized, again de-initialized, and then we */
+/* already return.                                                      */
+/*----------------------------------------------------------------------*/
+
+static bool no_prog_to_run( void )
+{
+	bool ret;
+
+
+	TRY
+	{
+		EDL.do_quit = UNSET;
+		EDL.react_to_do_quit = SET;
+
+		fl_set_object_callback( GUI.main_form->run, stop_while_exp_hook, 0 );
+		fl_set_object_label( GUI.main_form->run, "Stop" );
+		XFlush( fl_get_display( ) );
+
+		Internals.mode = EXPERIMENT;
+
+		experiment_time( );
+		EDL.experiment_time = 0.0;
+		vars_pop( f_dtime( NULL ) );
+
+		run_exp_hooks( );
+		ret = OK;
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		vars_del_stack( );
+		ret = FAIL;
+	}
+
+	EDL.do_quit = EDL.react_to_do_quit = UNSET;
+
+	run_end_of_exp_hooks( );
+
+	if ( need_GPIB )
+		gpib_shutdown( );
+
+	fsc2_serial_cleanup( );
+
+	Internals.mode = PREPARATION;
+
+	fl_set_object_label( GUI.main_form->run, "Start" );
+	fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+	set_buttons_for_run( 0 );
+	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+	Internals.state = STATE_IDLE;
+
+	return ret;
+}
+
+
+/*--------------------------------------------------------------------------*/
+/* Function sets a zero point for the dtime() function, runs the experiment */
+/* hooks (while still allowing the user to break in between), initializes   */
+/* the graphics and creates two pipes for two-way communication between the */
+/* parent and child process.                                                */
+/*--------------------------------------------------------------------------*/
+
+static bool init_devs_and_graphics( void )
+{
+	Compilation compile_test;
+
+
+	/* Make a copy of the errors found while compiling the program */
+
+	compile_test = EDL.compilation;
+
+	TRY
+	{
+		EDL.do_quit = UNSET;
+		EDL.react_to_do_quit = SET;
+
+		fl_set_object_callback( GUI.main_form->run, stop_while_exp_hook, 0 );
+		fl_set_object_label( GUI.main_form->run, "Stop" );
+		XFlush( fl_get_display( ) );
+
+		Internals.mode = EXPERIMENT;
+
+		experiment_time( );
+		EDL.experiment_time = 0.0;
+		vars_pop( f_dtime( NULL ) );
+
+		run_exp_hooks( );
+
+		EDL.react_to_do_quit = UNSET;
+
+		fl_deactivate_object( GUI.main_form->run );
+		fl_set_object_label( GUI.main_form->run, "Start" );
+		fl_set_object_lcol( GUI.main_form->run, FL_INACTIVE_COL );
+		fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+		XFlush( fl_get_display( ) );
+
+		check_for_further_errors( &compile_test, &EDL.compilation );
+
+		start_graphics( );
+		fl_set_object_callback( GUI.run_form->stop,
+								run_stop_button_callback, 0 );
+
+		setup_comm( );
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		EDL.do_quit = EDL.react_to_do_quit = UNSET;
+
+		end_comm( );
+
+		run_end_of_exp_hooks( );
+		vars_del_stack( );
+
+		if ( need_GPIB )
+			gpib_shutdown( );
+		fsc2_serial_cleanup( );
+
+		Internals.mode = PREPARATION;
+
+		run_close_button_callback( NULL, 0 );
+
+		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+		fl_set_object_label( GUI.main_form->run, "Start" );
+		fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+		fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
+		fl_activate_object( GUI.main_form->run );
+		XFlush( fl_get_display( ) );
+
+		return FAIL;
+	}
+
+	fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+	Internals.child_is_quitting = QUITTING_UNSET;
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------*/
+/* Sets the signal handlers for all signals used for communication */
+/* between the parent and the child process. Finally, it activates */
+/* an idle callback routine which the parent uses for accepting    */
+/* displaying of new data.                                         */
+/*-----------------------------------------------------------------*/
+
+static void setup_signal_handlers( void )
+{
+	struct sigaction sact;
+
+
+	sact.sa_handler = quitting_handler;
+	sigemptyset( &sact.sa_mask );
+	sact.sa_flags = 0;
+	sigaction( QUITTING, &sact, &quitting_old_act );
+
+	sact.sa_handler = run_sigchld_handler;
+	sigemptyset( &sact.sa_mask );
+	sact.sa_flags = 0;
+	sigaction( SIGCHLD, &sact, &sigchld_old_act );
+}
+
+
+/*-----------------------------------------------------------*/
+/* Callback handler for the main "Stop" button during device */
+/* initialization (to allow stopping the experiment already  */
+/* at this early stage).                                     */
+/*-----------------------------------------------------------*/
+
+static void stop_while_exp_hook( FL_OBJECT *a, long b )
+{
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
 	EDL.do_quit = EDL.react_to_do_quit = SET;
 }
 
@@ -508,7 +1016,516 @@ void run_stop_button_callback( FL_OBJECT *a, long b )
 	int bn;
 
 
-	b = b;
+	UNUSED_ARGUMENT( /*
+  $Id$
+
+  Copyright (C) 1999-2002 Jens Thoms Toerring
+
+  This file is part of fsc2.
+
+  Fsc2 is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2, or (at your option)
+  any later version.
+
+  Fsc2 is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with fsc2; see the file COPYING.  If not, write to
+  the Free Software Foundation, 59 Temple Place - Suite 330,
+  Boston, MA 02111-1307, USA.
+*/
+
+
+#include "fsc2.h"
+#include "serial.h"
+#include "gpib_if.h"
+
+
+extern int exp_runparse( void );              /* from exp_run_parser.y */
+extern FL_resource xresources[ ];             /* from xinit.c */
+
+
+/* Routines of the main process exclusively used in this file */
+
+static bool start_gpib( void );
+static bool no_prog_to_run( void );
+static bool init_devs_and_graphics( void );
+static void stop_while_exp_hook( FL_OBJECT *a, long b );
+static void setup_signal_handlers( void );
+static void fork_failure( int stored_errno );
+static void check_for_further_errors( Compilation *c_old, Compilation *c_all );
+static void quitting_handler( int signo	);
+static void run_sigchld_handler( int signo );
+static void set_buttons_for_run( int run_state );
+
+
+/* Routines of the child process doing the measurement */
+
+static void run_child( void );
+static void setup_child_signals( void );
+static void child_sig_handler( int signo );
+static void do_measurement( void );
+static void wait_for_confirmation( void );
+static void child_confirmation_handler( int signo );
+static void deal_with_program_tokens( void );
+
+
+/* Locally used global variables used in parent, child and signal handlers */
+
+sigjmp_buf alrm_env;
+volatile sig_atomic_t can_jmp_alrm = 0;
+static struct sigaction sigchld_old_act,
+	                    quitting_old_act;
+static volatile sig_atomic_t child_return_status;
+
+
+/*------------------------------------------------------------------*/
+/* run() starts an experiment. To do so it initialises all needed   */
+/* devices and opens a new window for displaying the measured data. */
+/* Then everything needed for the communication between parent and  */
+/* the child to be created is set up, i.e. pipes, a semaphore and a */
+/* shared memory segment for storing the type of the data and a key */
+/* for a further shared memory segment that will contain the data.  */
+/* Finally, after initializing some global variables and setting up */
+/* signal handlers used for synchronization of the processes the    */
+/* child process is started and thus the experiments begins.        */
+/*------------------------------------------------------------------*/
+
+bool run( void )
+{
+	int stored_errno;
+	sigset_t new_mask, old_mask;
+
+
+	/* We can't run more than one experiment - so quit if child_pid != 0 */
+
+	if ( Internals.child_pid != 0 )
+		return FAIL;
+
+	/* If there's no EXPERIMENT section at all (indicated by 'prg_length'
+	   being negative) we're already done */
+
+	if ( EDL.prg_length < 0 )
+		return FAIL;
+
+	/* Start the GPIB bus (and do some changes to the graphics) */
+
+	Internals.state = STATE_RUNNING;
+
+	if ( ! start_gpib( ) )
+		return FAIL;
+
+	/* If there are no commands but an EXPERIMENT section label we just run
+	   all the init hooks, then the exit hooks and are already done. */
+
+	if ( EDL.prg_token == NULL )
+		return no_prog_to_run( );
+
+	/* Initialize devices and graphics */
+
+	if ( ! init_devs_and_graphics( ) )
+		return FAIL;
+
+	/* Setup the signal handlers for signals used for communication between
+	   parent and child process and an idle callback function for displaying
+	   new data. */
+
+	setup_signal_handlers( );
+	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+
+	/* We have to be careful: When the child process gets forked it may
+	   already be finished running *before* the fork() call returns in the
+	   parent. In this case the signal handlers of the parent don't know the
+	   PID of the child process and thus won't work correctly. Therefore all
+	   the signals the child may send are blocked until we can be sure the
+	   parent has got the childs PID. */
+
+	sigemptyset( &new_mask );
+	sigaddset( &new_mask, SIGCHLD );
+	sigaddset( &new_mask, QUITTING );
+	sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+
+	/* Here the experiment starts - the child process is forked */
+
+	if ( ( Internals.child_pid = fork( ) ) == 0 )
+	{
+		if ( GUI.is_init )
+			close( ConnectionNumber( GUI.d ) );
+		sigprocmask( SIG_SETMASK, &old_mask, NULL );
+		run_child( );
+	}
+
+	stored_errno = errno;            /* stored for later examination... */
+	close_all_files( );              /* only child is going to write to them */
+
+	close( Comm.pd[ READ ] );        /* close unused ends of pipes */
+	close( Comm.pd[ 3 ] );
+	Comm.pd[ READ ] = Comm.pd[ 2 ];
+
+	if ( Internals.child_pid > 0 )   /* fork() did succeeded */
+	{
+		fl_set_idle_callback( new_data_callback, NULL );
+		sigprocmask( SIG_SETMASK, &old_mask, NULL );
+		Internals.mode = PREPARATION;
+		return OK;
+	}
+
+	/* If forking the child failed we end up here */
+
+	sigprocmask( SIG_SETMASK, &old_mask, NULL );
+	fork_failure( stored_errno );
+	return FAIL;
+}
+
+
+/*-------------------------------------------------------------------*/
+/* This function first does some smaller changes to the GUI and then */
+/* starts the GPIB bus if at least one of the devices needs it.      */
+/*-------------------------------------------------------------------*/
+
+static bool start_gpib( void )
+{
+	/* Disable some buttons and show a watch cusor */
+
+	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
+	set_buttons_for_run( 1 );
+	XFlush( fl_get_display( ) );
+
+	/* If there are devices that need the GPIB bus initialize it now */
+
+	if ( need_GPIB && gpib_init( GPIB_LOG_FILE, GPIB_LOG_LEVEL ) == FAILURE )
+	{
+		eprint( FATAL, UNSET, "Can't initialize GPIB bus: %s\n",
+				gpib_error_msg );
+		set_buttons_for_run( 0 );
+		Internals.state = STATE_IDLE;
+		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+		XFlush( fl_get_display( ) );
+		return FAIL;
+	}
+
+	return OK;
+}
+
+
+/*----------------------------------------------------------------------*/
+/* This all to be done when the experiment section does not contain any */
+/* commands: devices get initialized, again de-initialized, and then we */
+/* already return.                                                      */
+/*----------------------------------------------------------------------*/
+
+static bool no_prog_to_run( void )
+{
+	bool ret;
+
+
+	TRY
+	{
+		EDL.do_quit = UNSET;
+		EDL.react_to_do_quit = SET;
+
+		fl_set_object_callback( GUI.main_form->run, stop_while_exp_hook, 0 );
+		fl_set_object_label( GUI.main_form->run, "Stop" );
+		XFlush( fl_get_display( ) );
+
+		Internals.mode = EXPERIMENT;
+
+		experiment_time( );
+		EDL.experiment_time = 0.0;
+		vars_pop( f_dtime( NULL ) );
+
+		run_exp_hooks( );
+		ret = OK;
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		vars_del_stack( );
+		ret = FAIL;
+	}
+
+	EDL.do_quit = EDL.react_to_do_quit = UNSET;
+
+	run_end_of_exp_hooks( );
+
+	if ( need_GPIB )
+		gpib_shutdown( );
+
+	fsc2_serial_cleanup( );
+
+	Internals.mode = PREPARATION;
+
+	fl_set_object_label( GUI.main_form->run, "Start" );
+	fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+	set_buttons_for_run( 0 );
+	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+	Internals.state = STATE_IDLE;
+
+	return ret;
+}
+
+
+/*--------------------------------------------------------------------------*/
+/* Function sets a zero point for the dtime() function, runs the experiment */
+/* hooks (while still allowing the user to break in between), initializes   */
+/* the graphics and creates two pipes for two-way communication between the */
+/* parent and child process.                                                */
+/*--------------------------------------------------------------------------*/
+
+static bool init_devs_and_graphics( void )
+{
+	Compilation compile_test;
+
+
+	/* Make a copy of the errors found while compiling the program */
+
+	compile_test = EDL.compilation;
+
+	TRY
+	{
+		EDL.do_quit = UNSET;
+		EDL.react_to_do_quit = SET;
+
+		fl_set_object_callback( GUI.main_form->run, stop_while_exp_hook, 0 );
+		fl_set_object_label( GUI.main_form->run, "Stop" );
+		XFlush( fl_get_display( ) );
+
+		Internals.mode = EXPERIMENT;
+
+		experiment_time( );
+		EDL.experiment_time = 0.0;
+		vars_pop( f_dtime( NULL ) );
+
+		run_exp_hooks( );
+
+		EDL.react_to_do_quit = UNSET;
+
+		fl_deactivate_object( GUI.main_form->run );
+		fl_set_object_label( GUI.main_form->run, "Start" );
+		fl_set_object_lcol( GUI.main_form->run, FL_INACTIVE_COL );
+		fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+		XFlush( fl_get_display( ) );
+
+		check_for_further_errors( &compile_test, &EDL.compilation );
+
+		start_graphics( );
+		fl_set_object_callback( GUI.run_form->stop,
+								run_stop_button_callback, 0 );
+
+		setup_comm( );
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		EDL.do_quit = EDL.react_to_do_quit = UNSET;
+
+		end_comm( );
+
+		run_end_of_exp_hooks( );
+		vars_del_stack( );
+
+		if ( need_GPIB )
+			gpib_shutdown( );
+		fsc2_serial_cleanup( );
+
+		Internals.mode = PREPARATION;
+
+		run_close_button_callback( NULL, 0 );
+
+		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+		fl_set_object_label( GUI.main_form->run, "Start" );
+		fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+		fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
+		fl_activate_object( GUI.main_form->run );
+		XFlush( fl_get_display( ) );
+
+		return FAIL;
+	}
+
+	fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+	Internals.child_is_quitting = QUITTING_UNSET;
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------*/
+/* Sets the signal handlers for all signals used for communication */
+/* between the parent and the child process. Finally, it activates */
+/* an idle callback routine which the parent uses for accepting    */
+/* displaying of new data.                                         */
+/*-----------------------------------------------------------------*/
+
+static void setup_signal_handlers( void )
+{
+	struct sigaction sact;
+
+
+	sact.sa_handler = quitting_handler;
+	sigemptyset( &sact.sa_mask );
+	sact.sa_flags = 0;
+	sigaction( QUITTING, &sact, &quitting_old_act );
+
+	sact.sa_handler = run_sigchld_handler;
+	sigemptyset( &sact.sa_mask );
+	sact.sa_flags = 0;
+	sigaction( SIGCHLD, &sact, &sigchld_old_act );
+}
+
+
+/*-----------------------------------------------------------*/
+/* Callback handler for the main "Stop" button during device */
+/* initialization (to allow stopping the experiment already  */
+/* at this early stage).                                     */
+/*-----------------------------------------------------------*/
+
+static void stop_while_exp_hook( FL_OBJECT *a, long b )
+{
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
+	EDL.do_quit = EDL.react_to_do_quit = SET;
+}
+
+
+/*------------------------------------------------------------------------*/
+/* Things that remain to be done when forking the child process failed... */
+/*------------------------------------------------------------------------*/
+
+static void fork_failure( int stored_errno )
+{
+	sigaction( SIGCHLD,  &sigchld_old_act,  NULL );
+	sigaction( QUITTING, &quitting_old_act, NULL );
+
+	switch ( stored_errno )
+	{
+		case EAGAIN :
+			eprint( FATAL, UNSET, "Not enough system resources left to run "
+					"the experiment.\n" );
+			fl_show_alert( "FATAL Error", "Not enough system resources",
+						   "left to run the experiment.", 1 );
+			break;
+
+		case ENOMEM :
+			eprint( FATAL, UNSET, "Not enough memory left to run the "
+					"experiment.\n" );
+			fl_show_alert( "FATAL Error", "Not enough memory left",
+						   "to run the experiment.", 1 );
+			break;
+
+		default :
+			if ( errno < sys_nerr )
+				eprint( FATAL, UNSET, "System error \"%s\" when trying to "
+						"start experiment.\n", sys_errlist[ errno ] );
+			else
+				eprint( FATAL, UNSET, "Unknown system error (errno = %d) "
+						"when trying to start experiment.\n", errno );
+			fl_show_alert( "FATAL Error", "System error on start of "
+						   "experiment.", NULL, 1 );
+			break;
+	}
+
+	Internals.child_pid = 0;
+	EDL.do_quit = EDL.react_to_do_quit = UNSET;
+
+	end_comm( );
+
+	run_end_of_exp_hooks( );
+
+	if ( need_GPIB )
+		gpib_shutdown( );
+	fsc2_serial_cleanup( );
+
+	Internals.mode = PREPARATION;
+
+	run_close_button_callback( NULL, 0 );
+	fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
+	fl_activate_object( GUI.main_form->run );
+}
+
+
+/*-------------------------------------------------------------------*/
+/* Checks if new errors etc. were found while running the exp_hooks. */
+/* In this case ask the user if she wants to continue - unless an    */
+/* exception was thrown.                                             */
+/*-------------------------------------------------------------------*/
+
+static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
+{
+	Compilation diff;
+	char str1[ 128 ],
+		 str2[ 128 ];
+	const char *mess = "During start of the experiment there where";
+	int i;
+
+
+	for ( i = FATAL; i < NO_ERROR; i++ )
+		diff.error[ i ] = c_all->error[ i ] - c_old->error[ i ];
+
+
+	if ( diff.error[ SEVERE ] != 0 || diff.error[ WARN ] != 0 )
+	{
+		if ( diff.error[ SEVERE ] != 0 )
+		{
+			if ( diff.error[ WARN ] != 0 )
+			{
+				sprintf( str1, "%s %d severe", mess, diff.error[ SEVERE ] );
+				sprintf( str2, "and normal %d warnings.", diff.error[ WARN ] );
+			}
+			else
+			{
+				sprintf( str1, "%s %d severe warnings.",
+						 mess, diff.error[ SEVERE ] );
+				str2[ 0 ] = '\0';
+			}
+		}
+		else
+		{
+			sprintf( str1, "%s %d warnings.", mess, diff.error[ WARN ] );
+			str2[ 0 ] = '\0';
+		}
+
+		if ( 1 == fl_show_choice( str1, str2, "Continue running the program?",
+								  2, "No", "Yes", "", 1 ) )
+			THROW( EXCEPTION );
+	}
+}
+
+
+/*---------------------------------------------------------------------*/
+/* quitting_handler() is the parents handler for the QUITTING signal   */
+/* sent by the child when it exits normally: the handler sets a global */
+/* variable and reacts by sending the child a DO_QUIT signal.          */
+/*---------------------------------------------------------------------*/
+
+static void quitting_handler( int signo )
+{
+	int errno_saved;
+
+
+	signo = signo;
+	errno_saved = errno;
+	Internals.child_is_quitting = QUITTING_RAISED;
+	errno = errno_saved;
+}
+
+
+/*-------------------------------------------------------------------*/
+/* Callback function for the 'Stop' button - used to kill the child  */
+/* process. After the child is dead a different callback function is */
+/* used for this button, see run_close_button_callback().            */
+/*-------------------------------------------------------------------*/
+
+void run_stop_button_callback( FL_OBJECT *a, long b )
+{
+	int bn;
+
+
+	UNUSED_ARGUMENT( b );
 
 	/* Activating the Stop button when the child is already dead should
 	   not be possible, but to make real sure (in case of some real
@@ -624,7 +1641,7 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 	int state = EXIT_SUCCESS;
 
 
-	b = b;
+	UNUSED_ARGUMENT( b );
 
 	if ( Internals.child_is_quitting == QUITTING_UNSET )
 									/* missing notification by the child ? */
@@ -726,9 +1743,8 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 
 void run_close_button_callback( FL_OBJECT *a, long b )
 {
-	a = a;
-	b = b;
-
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
 	stop_graphics( );
 	set_buttons_for_run( 0 );
 	Internals.state = STATE_IDLE;

@@ -244,7 +244,7 @@ strs:    /* empty */
 
 static void prepserror ( const char *s )
 {
-	s = s;                    /* stupid but avoids compiler warning */
+	UNUSED_ARGUMENT( s );
 
 	if ( *prepstext == '\0' )
 		print( FATAL, "Unexpected end of file in PREPARATIONS section.\n" );

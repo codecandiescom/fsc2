@@ -270,7 +270,7 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 	bool active = UNSET;
 
 
-	obj = obj;
+	UNUSED_ARGUMENT( obj );
 
 	/* If the released button didn't has a meaning just remove it from the
 	   button state pattern */
@@ -505,7 +505,7 @@ static void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 	bool active = UNSET;
 
 
-	obj = obj;
+	UNUSED_ARGUMENT( obj );
 
 	/* Do event compression to avoid being flooded with motion events -
 	   instead of handling them all individually only react to the latest

@@ -472,8 +472,8 @@ void start_graphics( void )
 
 int run_form_close_handler( FL_FORM *a, void *b )
 {
-	a = a;
-	b = b;
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
 
 	if ( Internals.child_pid == 0 )          /* if child has already exited */
 		run_close_button_callback( GUI.run_form->stop, 0 );
@@ -1338,9 +1338,9 @@ void undo_button_callback( FL_OBJECT *a, long b )
 	double temp_z_factor;
 	int j;
 
-	a = a;
-	b = b;
 
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
 
 	if ( G.dim == 1 )
 	{
@@ -1432,8 +1432,8 @@ void fs_button_callback( FL_OBJECT *a, long b )
 	int i;
 
 
-	a = a;
-	b = b;
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
 
 	/* Rescaling is useless if graphic isn't initialised */
 

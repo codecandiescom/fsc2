@@ -682,8 +682,8 @@ bool dl_fsc2_rsc( void )
 
 static int main_form_close_handler( FL_FORM *a, void *b )
 {
-	a = a;
-	b = b;
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
 
 	if ( GUI.main_form->quit->active != 1 )
 		return FL_IGNORE;
@@ -764,7 +764,7 @@ static int fsc2_x_error_handler( Display *d, XErrorEvent *err )
 
 static int fsc2_xio_error_handler( Display *d )
 {
-	d = d;
+	UNUSED_ARGUMENT( d );
 	fprintf( stderr, "fsc2 (%d) killed by a fatal X error.\n", getpid( ) );
 	exit( EXIT_FAILURE );
 }

@@ -102,7 +102,7 @@ p_list:  /* empty */
 
 static void phaseserror ( const char *s )
 {
-	s = s;                    /* avoid compiler warning */
+	UNUSED_ARGUMENT( s );
 
 	if ( *phasestext == '\0' )
 		print( FATAL, "Unexpected end of file in PHASES section.\n" );

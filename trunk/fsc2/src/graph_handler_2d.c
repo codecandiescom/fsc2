@@ -289,7 +289,7 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 	bool scale_changed = UNSET;
 
 
-	obj = obj;
+	UNUSED_ARGUMENT( obj );
 
 	/* If the released button didn't has a meaning just clear it from the
 	   button state pattern and then forget about it */
@@ -509,7 +509,7 @@ static void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 	bool scale_changed = UNSET;
 
 
-	obj = obj;
+	UNUSED_ARGUMENT( obj );
 
 	if ( G.active_curve == -1 )
 		return;

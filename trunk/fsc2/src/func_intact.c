@@ -933,7 +933,7 @@ static void tools_callback( FL_OBJECT *obj, long data )
 	char obuf[ MAX_INPUT_CHARS + 1 ];
 
 
-	data = data;
+	UNUSED_ARGUMENT( data );
 
 	/* Find out which object got changed */
 

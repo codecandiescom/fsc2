@@ -54,7 +54,7 @@ void server_callback( FL_OBJECT *obj, long a )
 	char *www_help;
 
 
-	a = a;
+	UNUSED_ARGUMENT( a );
 
 	if ( fl_get_button( obj ) && Internals.http_pid >= 0 )
 	{

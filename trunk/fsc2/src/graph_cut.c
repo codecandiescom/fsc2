@@ -482,8 +482,8 @@ void G_init_cut_curve( void )
 
 static int cut_form_close_handler( FL_FORM *a, void *b )
 {
-	a = a;
-	b = b;
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
 
 	cut_close_callback( GUI.cut_form->cut_close_button, 0 );
 	return FL_IGNORE;
@@ -555,8 +555,8 @@ void cut_close_callback( FL_OBJECT *a, long b )
 	int i;
 
 
-	a = a;
-	b = b;
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
 
 	G.is_cut = is_mapped = UNSET;
 
@@ -1457,7 +1457,7 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 	bool scale_changed = UNSET;
 
 
-	obj = obj;
+	UNUSED_ARGUMENT( obj );
 
 	/* If the released button didn't has a meaning just clear it from the
 	   button state pattern and then forget about it */
@@ -1650,7 +1650,7 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 	long p_index;
 
 
-	obj = obj;
+	UNUSED_ARGUMENT( obj );
 
 	/* We do event compression to avoid being flooded with motion events -
 	   instead of handling them all individually we only react to the latest
@@ -1769,8 +1769,8 @@ void cut_undo_button_callback( FL_OBJECT *a, long b )
 	int j;
 
 
-	a = a;
-	b = b;
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
 
 	if ( CG.curve == -1 || ! CG.can_undo[ G.active_curve ] )
 		return;
@@ -1812,8 +1812,8 @@ void cut_fs_button_callback( FL_OBJECT *a, long b )
 	int state;
 
 
-	a = a;
-	b = b;
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
 
 	/* Rescaling is useless if no cut curve is shown */
 
@@ -2748,8 +2748,7 @@ void cut_clear_curve( long curve )
 
 void cut_next_index( FL_OBJECT *a, long b )
 {
-	a = a;
-
+	UNUSED_ARGUMENT( a );
 
 	switch( b )
 	{
@@ -2785,8 +2784,8 @@ void cut_change_dir( FL_OBJECT *a, long b )
 
 
 
-	a = a;
-	b = b;
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
 
 	if ( G.raw_button_state != 3 )
 		return;

@@ -331,7 +331,7 @@ void print_callback( FL_OBJECT *obj, long data )
 	const char *fn;
 
 
-	data = data;
+	UNUSED_ARGUMENT( data );
 
 	if ( obj == print_form->s2p_button )
 	{

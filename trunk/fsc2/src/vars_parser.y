@@ -210,7 +210,7 @@ exprs:   expr                      { }
 
 static void varserror ( const char *s )
 {
-	s = s;                    /* stupid but avoids compiler warning */
+	UNUSED_ARGUMENT( s );
 
 	if ( *varstext == '\0' )
 		print( FATAL, "Unexpected end of file in VARIABLES section.\n");
