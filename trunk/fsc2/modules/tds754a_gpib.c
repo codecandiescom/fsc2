@@ -14,6 +14,7 @@
 bool tds754a_init( const char *name )
 {
 	int ch;
+	double cp1, cp2;
 
 
 	if ( gpib_init_device( name, &tds754a.device ) == FAILURE )
@@ -64,6 +65,16 @@ bool tds754a_init( const char *name )
         return FAIL;
     }
 
+	/* Make sure cursor 1 is the left one */
+
+	tds754a_get_cursor_position( 1, &cp1 );
+	tds754a_get_cursor_position( 2, &cp2 );
+	if ( cp1 > cp2 )
+	{
+		tds754a_set_cursor( 1, cp2 );
+		tds754a_set_cursor( 2, cp1 );
+	}
+
     /* Switch off repetitive acquisition mode */
 
 	if ( gpib_write( tds754a.device, "ACQ:REPE OFF", 12 ) == FAILURE )
@@ -85,6 +96,8 @@ bool tds754a_init( const char *name )
 
 	if ( tds754a.is_num_avg == SET )
 		tds754a_set_num_avg( tds754a.num_avg );
+	else
+		tds754a.num_avg = tds754a_get_num_avg( );
 
 	/* Switch on all channels that have been used in the experiment section
 	   and that aren't already switched on */
@@ -103,20 +116,18 @@ bool tds754a_init( const char *name )
     }
 
     /* Now we still have to prepare the digitzer for the measurement:
-       1. set mode that digitizer stops after the number of averages set
-       2. set OPC (operation complete) bit in Device Event Status Enable
+       1. set OPC (operation complete) bit in Device Event Status Enable
           Register (DESER) -> corresponding bit in Standard Event Status
           Register (SESR) can be set
-       3. set OPC bit also in Event Status Enable Register (ESER) ->
+       2. set OPC bit also in Event Status Enable Register (ESER) ->
           ESB bit in status byte register can be set
-       4. set ESB bit in Service Request Enable Register (SRER)-> SRQ can
+       3. set ESB bit in Service Request Enable Register (SRER)-> SRQ can
           be flagged due to a set ESB-bit in Status Byte Register (SBR)
     */
 
-    if ( gpib_write( tds754a.device, "ACQ:STOPA SEQ", 13 ) == FAILURE ||
-         gpib_write( tds754a.device, "DESE 1", 6 )         == FAILURE ||
+    if ( gpib_write( tds754a.device, "DESE 1", 6 )         == FAILURE ||
          gpib_write( tds754a.device, "*ESE 1", 6 )         == FAILURE ||
-         gpib_write( tds754a.device, "*SRE 32", 7 )        == FAILURE )
+         gpib_write( tds754a.device, "*SRE 0", 7 )        == FAILURE )
     {
         gpib_local( tds754a.device );
         return FAIL;
@@ -294,6 +305,26 @@ int tds754a_get_acq_mode(void)
 }
 
 
+bool tds754a_get_cursor_position( int cur_no, double *cp )
+{
+	char cmd[ 30 ] = "CURS:VBA:POSITION";
+    char reply[ 30 ];
+    long length = 30;
+
+	assert( cur_no == 1 || cur_no == 2 );
+
+	strcat( cmd, cur_no == 1 ? "1?" : "2?" );
+    if ( gpib_write( tds754a.device, cmd, 19 ) == FAILURE ||
+         gpib_read( tds754a.device, reply, &length ) == FAILURE )
+		tds754a_gpib_failure( );
+
+    reply[ length - 1 ] = '\0';
+    *cp = T_atof( reply );
+
+	return OK;
+}
+
+
 /*----------------------------------------------------*/
 /* tds754a_get_cursor_distance() returns the distance */
 /* between the two cursors.                           */
@@ -301,24 +332,12 @@ int tds754a_get_acq_mode(void)
 
 bool tds754a_get_cursor_distance( double *cd )
 {
-    char reply[ 30 ];
-    long length = 30;
+	double cp2;
 
 
-    if ( gpib_write( tds754a.device, "CURS:VBA:POSITION2?", 19 ) == FAILURE ||
-         gpib_read( tds754a.device, reply, &length ) == FAILURE )
-		tds754a_gpib_failure( );
-
-    reply[ length - 1 ] = '\0';
-    *cd = T_atof( reply );
-
-    length = 30;
-    if ( gpib_write( tds754a.device, "CURS:VBA:POSITION1?", 19 ) == FAILURE ||
-         gpib_read( tds754a.device, reply, &length ) == FAILURE )
-		tds754a_gpib_failure( );
-
-    reply[ length - 1 ] = '\0';
-    *cd -= T_atof( reply );
+	tds754a_get_cursor_position( 1, cd );
+	tds754a_get_cursor_position( 2, &cp2 );
+    *cd -= cp2;
 
     return OK;
 }
@@ -429,7 +448,7 @@ bool tds754a_set_cursor( int cur_num, double pos )
 
     /* set cursors to specified positions */
 
-	sprintf( cmd + strlen( cmd ), "%d", cur_num );
+	sprintf( cmd + strlen( cmd ), "%d ", cur_num );
     gcvt( pos, 9, cmd + strlen( cmd ) );
     if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds754a_gpib_failure( );
@@ -579,7 +598,7 @@ bool tds754a_start_aquisition( void )
 	      the measurement is finished, this, in turn will set the ESB-bit in
           the status byte register which leads to a SRQ */
 
-    if ( ! tds754a_clear_SESR( ) ||
+    if ( // ! tds754a_clear_SESR( ) ||
          gpib_write( tds754a.device, "ACQ:STATE RUN", 13 ) == FAILURE ||
 		 gpib_write( tds754a.device, "ACQ:STOPA SEQ", 13 ) == FAILURE ||
          gpib_write( tds754a.device, "*OPC", 4 ) == FAILURE )
@@ -653,12 +672,9 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length )
 	assert( channel >= 0 && channel < TDS754A_AUX );
 
 	/* Calculate the scale factor for converting the data returned by the
-	   digitizer (2-byte integers) into real voltage levels - this still
-	   needs some changes but I don't have the manual here...
-	   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+	   digitizer (2-byte integers) into real voltage levels */
 
-	scale = 10.24 * tds754a.channel_sens[ channel ] /
-		( double ) tds754a.num_avg;        // still need maximum value...
+	scale = 10.24 * tds754a.channel_sens[ channel ] / ( double ) 0xFFFF;
 
 	/* Set the data source channel (if it's not already set correctly) */ 
 
