@@ -668,13 +668,13 @@ value passed to the function (at least if the value is reasonable). You
 should try to follow this convention if possible.
 
 Another convention I am following when inventing function names is that
-if there one can only either set a certain value for a device or one can
-only get some data from a device I always use either @code{set} or
-@code{get} in the function name. E.g.@: its not possible to send data
-values to a lockin-amplifier, thus I use the name
-@code{lockin_get_data()} (and not e.g.@: @code{lockin_data()}). In names
-for functions that can be used for setting as well as getting data of
-device I try to avoid these words.
+if one can only either set a certain value for a device or get some data
+from a device I always use either @code{set} or @code{get} in the
+function name. E.g.@: its not possible to send data values to a
+lockin-amplifier, thus I use the name @code{lockin_get_data()} (and not
+e.g.@: @code{lockin_data()}). In names for functions that can be used
+for setting as well as getting data of device I try to avoid these
+words.
 
 
 All functions to be invoked via an @code{EDL} script take their arguments
