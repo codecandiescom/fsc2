@@ -554,7 +554,7 @@ double tds520a_get_sens( int channel )
 
 	assert( channel >= 0 && channel < TDS520A_AUX1 );
 
-	stprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
+	sprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
 	if ( gpib_write( tds520a.device, cmd ) == FAILURE ||
 		 gpib_read( tds520a.device, reply, &length ) == FAILURE )
 		tds520a_gpib_failure( );
