@@ -1119,7 +1119,7 @@ static void cut_integrate_point( long p_index, double val )
 	   exceeds the borders of the canvas */
 
 	cv->xpoints[ xp_index ].y = i2shrt( G.cut_canvas.h ) - 1
-		            - d2shrt( cv->s2d[ Y ]
+							- d2shrt( cv->s2d[ Y ]
 							  * ( cv->points[ p_index ].v + cv->shift[ Y ] ) );
 
 	if ( cv->xpoints[ xp_index ].y < 0 )

@@ -664,7 +664,6 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 		cv->rw_min = rw_min;
 		cv->rw_max = rw_max;
 		cv->scale_changed = SET;
-
 	}
 
 	/* Now we're finished with rescaling and can set the new number of points
@@ -795,29 +794,31 @@ static bool incr_y( long y_index )
 	long i, j, k;
 	Curve_2d *cv;
 	Scaled_Point *sp;
+	long new_Gny = y_index + 1;
 
 
 	for ( i = 0; i < G.nc; i++ )
 	{
 		cv = G.curve_2d[ i ];
 			
-		cv->points    = T_realloc( cv->points, G.nx * ( y_index + 1 )
-								   * sizeof( Scaled_Point ) );
-		cv->xpoints   = T_realloc( cv->xpoints, G.nx * ( y_index + 1 )
-								   * sizeof( XPoint ) );
-		cv->xpoints_s = T_realloc( cv->xpoints_s, G.nx * ( y_index + 1 )
-								   * sizeof( XPoint ) );
+		cv->points = T_realloc( cv->points, G.nx * new_Gny
+											* sizeof( Scaled_Point ) );
+		cv->xpoints = T_realloc( cv->xpoints, G.nx * new_Gny
+											  * sizeof( XPoint ) );
+		cv->xpoints_s = T_realloc( cv->xpoints_s, G.nx * new_Gny
+												  * sizeof( XPoint ) );
 
-		for ( sp = cv->points +  G.ny * G.nx, j = G.ny; j <= y_index; j++ )
+		for ( sp = cv->points + G.ny * G.nx, j = G.ny; j < new_Gny; j++ )
 			for ( k = 0; k < G.nx; sp++, k++ )
 				sp->exist = UNSET;
 
 		if ( cv->is_fs )
-			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
+			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 )
+				           / ( double ) ( new_Gny - 1 );
 		cv->scale_changed = SET;
 	}
 
-	return cut_num_points_changed( Y, y_index + 1 );
+	return cut_num_points_changed( Y, new_Gny );
 }
 
 
@@ -830,6 +831,7 @@ static bool incr_x_and_y( long x_index, long len, long y_index )
 	long i, j, k;
 	Curve_2d *cv;
 	long new_Gnx = x_index + len;
+	long new_Gny = y_index + 1;
 	Scaled_Point *old_points;
 	Scaled_Point *sp;
 	bool ret = UNSET;
@@ -838,10 +840,9 @@ static bool incr_x_and_y( long x_index, long len, long y_index )
 	for ( i = 0; i < G.nc; i++ )
 	{
 		cv = G.curve_2d[ i ];
-			
+
 		old_points = cv->points;
-		cv->points = T_malloc( new_Gnx * ( y_index + 1 )
-							   * sizeof( Scaled_Point ) );
+		cv->points = T_malloc( new_Gnx * new_Gny * sizeof( Scaled_Point ) );
 
 		/* Reorganise the old elements to fit into the new array and clear
 		   the new elements in the already existing rows */
@@ -853,29 +854,30 @@ static bool incr_x_and_y( long x_index, long len, long y_index )
 				sp->exist = UNSET;
 		}
 
-		for ( ; j <= y_index; j++ )
+		for ( ; j < newGny; j++ )
 			for ( k = 0; k < new_Gnx; sp++, k++ )
 				sp->exist = UNSET;
 
 		T_free( old_points );
 
-		cv->xpoints = T_realloc( cv->xpoints, new_Gnx * ( y_index + 1 )
+		cv->xpoints = T_realloc( cv->xpoints, new_Gnx * new_Gny
 								              * sizeof( XPoint ) );
-		cv->xpoints_s = T_realloc( cv->xpoints_s, new_Gnx * ( y_index + 1 )
+		cv->xpoints_s = T_realloc( cv->xpoints_s, new_Gnx * new_Gny
 								                  * sizeof( XPoint ) );
 
 		if ( cv->is_fs )
 		{
 			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 )
 				           / ( double ) ( new_Gnx - 1 );
-			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
+			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 )
+				           / ( double ) ( new_Gny - 1 );
 		}
 
 		cv->scale_changed = SET;
 	}
 
 	ret = cut_num_points_changed( X, new_Gnx );
-	return ret || cut_num_points_changed( Y, y_index + 1 );
+	return ret || cut_num_points_changed( Y, new_Gny );
 }
 
 
