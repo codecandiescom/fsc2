@@ -202,11 +202,6 @@ int sr830_init_hook( void )
 
 int sr830_exp_hook( void )
 {
-	/* Nothing to be done yet in a test run */
-
-	if ( TEST_RUN )
-		return 1;
-
 	/* Initialize the lock-in */
 
 	memcpy( &sr830_store, &sr830, sizeof( SR830 ) );
