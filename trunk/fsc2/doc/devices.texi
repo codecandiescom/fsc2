@@ -582,8 +582,8 @@ specified) to give a visual feedback.
 The function will automatically wait until a still running acquistition
 sequence is finished before returning a curve. The data will be returned
 as an array of floating point numbers and it's the users responsibility
-to supply an array for storing the data. Usually, this will we an array
-with an unspecified number of elements.
+to supply an array for storing the data. Usually, this will be an array
+defined with an unspecified number of elements.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @acronym{EDL} file.
@@ -681,21 +681,68 @@ time interval.
 @node Synthesizer Functions, , Pulser Functions, Device Functions
 @section Synthesizer functions
 @cindex Synthesizer functions
+The only implemented synthesizer so far is the HP8647A. Its module is
+loaded by specifying
+@example
+hp8647a
+@end example
+@noindent
+in the @code{DEVICES} section.
 
 
 @table @samp
 
 @item synthesizer_state()
 @findex synthesizer_state()
+The function queries or sets the output state of the synthesizer. i.e.@:
+to switch output of RF on or off. If called to set the output state it
+accepts one argument, either a non-zero value or the string @code{"ON"}
+to switch output on, or zero or the string @code{"OFF"} to switch it
+off. The synthesizer output is never switched on automatically!
+
+Before the @code{EXPERIMENT} section this function can't be called in
+query mode, i.e. without an argument (unless the state has already been
+set by calling the function with an argument). In query mode it either
+returns either @code{1} or @code{0} to indicate the on/off state of the
+RF output.
+
 
 @item synthesizer_frequency()
 @findex synthesizer_frequency()
+The function queries or sets the RF output frequency. If called to set
+the frequency it accepts one argument, the frequency in the range
+between @w{250 kHz} and @w{1000 MHz}. The frequency set by the very
+first call of this function is also the function that is set
+automatically by a call of the function
+@code{synthesizer_reset_frequency()} (see below).
+
+Before the @code{EXPERIMENT} section this function can't be called in
+query mode, i.e. without an argument (unless the frequency has already
+been set by calling the function with an argument).
+
 
 @item synthesizer_attenuation()
 @findex synthesizer_attenuation()
+The function queries or sets the output attenuation. If called to set
+the attenuation it accepts one argument, the attenuation in the range
+between @w{+10 dB} and @w{-136 dB}.
+
+Before the @code{EXPERIMENT} section this function can't be called in
+query mode, i.e. without an argument (unless the attenuation has already
+been set by calling the function with an argument).
 
 @item synthesizer_step_frequency()
 @findex synthesizer_step_frequency()
+The function quieries or sets the RF step frequency to be used in calls
+of the functions @code{synthesizer_sweep_up()} and
+@code{synthesizer_sweep_down()} (see below). In order to set the step
+frequency it expects one argument, the step frequency in Hz. The step
+frequency can be set in the @code{PREPARATIONS} section only once, but
+it can be changed later in the @code{EXPERIMENT} section.
+
+Before the step frequency has been set by calling the function with an
+argument the query form of the function (i.e.@: calling it without an
+argument can't be used).
 
 @item synthesizer_sweep_up()
 @findex synthesizer_sweep_up()
