@@ -927,12 +927,12 @@ discussed in more detail below, i.e.@: the logical @i{and} operator,
 or `@code{~}'. Expressions containing more than one of these operators
 are always evaluated from the left to the right of the expression:
 @example
- a OR b AND c  @r{will be treated as if written as}    ( a OR b ) AND c
+ a OR b AND c  @r{will be treated as if written as}  ( a OR b ) AND c
 @end example
 @noindent
 or
 @example
- a | b & c     @r{will be treated as if written as}    ( a | b ) & c
+ a | b & c     @r{will be treated as if written as}  ( a | b ) & c
 @end example
 @noindent
 To make your intentions more clear to human readers of your

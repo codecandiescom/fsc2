@@ -109,18 +109,17 @@ Basically, the board has two clocks, a fast one running at 20 MHz and a
 slow clock, running at 200 kHz.
 
 The fast clock can be used by all subsystems (i.e. AI, AO and GPCT)
-and each subsystem can individually slow doen the clock rate it sees
+and each subsystem can individually slow down the clock rate it sees
 by a factor of 2. Thus, e.g. the AI system can use the 20 MHz clock
 while the GPCT subsystem at the same time can use the fast clock at
 half its normal rate, i.e. 10 MHz.
 
-In contrast, each subsystem gets the same rate from the slow clock,
-but this clock can also be slowed down also by a factor of 2, but
-for all subsystems at once. So, the speed of slow clock is common
-to all subsystems. Therefore it's important to take into consideration
-which speed it's currently running at when programming a subsystem,
-and when a subsystem needs to change the clock rate the programmer
-must be aware, that the change also applies to all the other subsystems.
+Also the slow clock can be slowed down by a factor of 2. But in contrast
+to the fast clock, the speed of slow clock is common to all subsystems.
+Therefore it's important to take into consideration which speed it's
+currently running at when programming a subsystem, and when a subsystem
+needs to change the clock rate the programmer must be aware, that the
+change also applies to all the other subsystems.
 
 Beside the clocks seen by the subsystem there's also a FREQ_OUT pin
 of the board that can output one of the clocks. The speed of both

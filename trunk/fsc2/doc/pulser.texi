@@ -1154,7 +1154,7 @@ FOR I = 1: Curve_length @{
         digitizer_start_acquisition( );
         area = digitizer_get_area( CH1, Window );
 
-        IF J == 1 | J == 4 @{
+        IF J == 1 OR J == 4 @{
             data += area;     // add 1st & 4th area
         @} ELSE @{
             data -= area;     // subtract 2nd & 3rd area

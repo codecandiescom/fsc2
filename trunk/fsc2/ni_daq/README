@@ -164,10 +164,10 @@ to make it work with his time resolved EPR X-band spectrometer.
 
 While National Instruments has made publically available quite an amount
 of information about register level programming of the card, some very
-important bits, especially about the MITE chip, are missing, making figuring
-out how to program it an unnecessary PITA. Thanks go to Tim Ously of
-National Instruments by at least divulging on the Comedi mailing list as
-much of the missing informations as he was able to get permission for from
-his superiors.
+important bits, especially about the MITE chip, are missing, making
+figuring out how to program it an unnecessary PITA. Thanks go to Tim Ously
+of National Instruments by divulging on the Comedi mailing list as
+much of the missing informations as he was able to get permission for
+from his superiors.
 
-    23.10.2003   Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>
+    8.3.2004   Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>

@@ -531,7 +531,7 @@ Now here is the complete @code{EDL} script:
 110 
 111   new_field = input_value( Field_In );
 112   IF new_field != last_field @{
-113     IF ( new_field >= min_field & new_field <= max_field @{
+113     IF ( new_field >= min_field AND new_field <= max_field @{
 114       field = set_field( new_field );
 115       output_field( Field_Out, field );
 116       last_field = new_field;
@@ -542,7 +542,7 @@ Now here is the complete @code{EDL} script:
 121 
 122   new_field_step = input_value( Field_Step_In );
 123   IF new_field_step != last_field_step @{
-124     IF new_field_step >= min_field_step &
+124     IF new_field_step >= min_field_step AND
 125        new_field_step <= max_field_step @{
 126       field_step = new_field_step;
 127       last_field_step = new_field_step;
