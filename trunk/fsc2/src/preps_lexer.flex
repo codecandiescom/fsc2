@@ -251,7 +251,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 				{
 					while ( isdigit( *cp ) )
 						cp--;
-					val = atol( ++cp ) - 1;
+					val = atol( ++cp );
 				}
 
 				prepslval.vptr = vars_push( INT_VAR, val );

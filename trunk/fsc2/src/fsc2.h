@@ -117,7 +117,7 @@ Pulser_Struct pulser_struct;
 
 ASSIGNMENTS assignment[ PULSER_CHANNEL_NUM_FUNC ];
 
-Phase_Sequence PSeq[ MAX_PHASE_SEQ_LEN ];
+Phase_Sequence *PSeq == NULL;
 Acquisition_Sequence ASeq[ 2 ];
 
 long Cur_Pulse = -1;
@@ -170,7 +170,7 @@ extern Pulser_Struct pulser_struct;
 
 extern ASSIGNMENTS assignment[ ];
 
-extern Phase_Sequence PSeq[ ];
+extern Phase_Sequence *PSeq;
 extern Acquisition_Sequence ASeq[ ];
 
 extern long Cur_Pulse;
