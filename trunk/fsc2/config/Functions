@@ -361,7 +361,6 @@ monochromator_start_scan, 0, EXP;
 monochromator_scan_step, 0, EXP;
 monochromator_laser_line, -1, EXP;
 monochromator_shutter_limits, -1, ALL;
-monochromator_offset, -1, EXP;
 
 
 /* Functions exported by the power supply (Thurlby&Thandar PL330DP) */
