@@ -31,11 +31,6 @@
 #define LOCKFILE "/tmp/fsc2.lock"
 
 
-/* Define the number of serial ports on the system */
-
-#define NUM_SERIAL_PORTS 2
-
-
 /* Define the default delay for phase pulses needed for phase switching 
    (used in for the Frankfurt pulser) */
 
