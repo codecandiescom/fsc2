@@ -126,7 +126,7 @@ PSD2        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?_?2:?
 
 GP          G(RACE)?_?P(ERIOD)?:?
 
-TO          TRIG((GER)?_?OUT
+TO          TRIG(GER)?_?OUT
 
 CTRL        (WHILE)|(BREAK)|(NEXT)|(IF)|(ELSE)|(REPEAT)|(FOR)
 

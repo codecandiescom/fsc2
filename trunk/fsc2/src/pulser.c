@@ -19,11 +19,7 @@
 
 void pulser_struct_init( void )
 {
-	if ( pulser_struct.name != NULL )
-	{
-		T_free( pulser_struct.name );
-		pulser_struct.name = 0;
-	}
+	pulser_struct.name = NULL;
 
 	pulser_struct.assign_function = NULL;
 	pulser_struct.assign_channel_to_function = NULL;
@@ -161,7 +157,7 @@ void p_assign_pod( long func, Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* check the variable and get its value */
+	/* Check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -176,7 +172,7 @@ void p_assign_pod( long func, Var *v )
 
 	vars_pop( v );
 
-	/* finally call the function (if it exists...) */
+	/* Finally call the function (if it exists...) */
 
 	is_pulser_func( pulser_struct.assign_function,
 					"assigning function to pod" );
@@ -200,7 +196,7 @@ void p_assign_channel( long func, Var *v )
 	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
 			func <= PULSER_CHANNEL_FUNC_MAX );
 
-	/* check the variable and get its value */
+	/* Check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -215,7 +211,7 @@ void p_assign_channel( long func, Var *v )
 
 	vars_pop( v );
 
-	/* finally call the function (if it exists...) */
+	/* Finally call the function (if it exists...) */
 
 	if ( pulser_struct.assign_channel_to_function == NULL )
 	{
