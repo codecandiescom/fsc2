@@ -59,8 +59,6 @@ EXP         ^[ \t]*EXP(ERIMENT)?:
 ON_STOP		^[ \t]*ON_STOP:
 
 
-CONT        CONT(INUE)?
-
 INT         [0-9]+
 EXPO        [EDed][+-]?{INT}
 FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
@@ -154,7 +152,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 "WHILE"     return WHILE_TOK;
 "BREAK"     return BREAK_TOK;
-{CONT}      return CONT_TOK;
+"NEXT"      return CONT_TOK;
 "IF"        return IF_TOK;
 "ELSE"      return ELSE_TOK;
 "REPEAT"    return REPEAT_TOK;
