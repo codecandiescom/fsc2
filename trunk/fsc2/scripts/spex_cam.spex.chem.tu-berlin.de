@@ -115,38 +115,49 @@ sub get_defs {
 
 	goto done_reading unless defined( $ne = <$f> ) and $ne =~ /^#/;
 	goto done_reading unless defined( $ne = <$f> )
-		and $ne =~ /^\s*([+-]\d+[+-]\d+)\s*$/;
+		and $ne =~ /^([+-]\d+[+-]\d+)$/;
+	chomp $ne;
 	$geom = $1;
 	goto done_reading unless defined( $ne = <$f> ) and
 		$ne =~ /^[+-]?(\d+)?\.?(\d+)?([Ee]\+?(\d+)?)?$/;
-	$cc_line = $ne + 0;
+	chomp $ne;
+	$cc_line = $ne;
 	goto done_reading unless defined( $ne = <$f> ) and
 		$ne =~ /^[+-]?(\d+)?\.?(\d+)?([Ee]\+?(\d+)?)?$/;
-	$mc_line = $ne + 0;
+	chomp $ne;
+	$mc_line = $ne;
 	goto done_reading unless defined( $ne = <$f> ) and
 		$ne =~ /^[+-]?(\d+)?\.?(\d+)?([Ee]\+?(\d+)?)?$/;
-	$sm_line = $ne + 0;
+	chomp $ne;
+	$sm_line = $ne;
 	goto done_reading unless defined( $ne = <$f> ) and
 		$ne =~ /^(\d+)?\.?(\d+)?([Ee]\+?(\d+)?)?$/;
-	$sm_exp_time = $ne + 0;
+	chomp $ne;
+	$sm_exp_time = $ne;
 	goto done_reading unless defined( $ne = <$f> ) and
 		$ne =~ /^(\d+)$/;
-	$sm_N_scans = $ne + 0;
+	chomp $ne;
+	$sm_N_scans = $ne;
 	goto done_reading unless defined( $ne = <$f> ) and
 		$ne =~ /^[+-]?(\d+)?\.?(\d+)?([Ee]\+?(\d+)?)?$/;
-	$mm_start = $ne + 0;
+	chomp $ne;
+	$mm_start = $ne;
 	goto done_reading unless defined( $ne = <$f> ) and
 		$ne =~ /^[+-]?(\d+)?\.?(\d+)?([Ee]\+?(\d+)?)?$/;
-	$mm_end = $ne + 0;
+	chomp $ne;
+	$mm_end = $ne;
 	goto done_reading unless defined( $ne = <$f> ) and
 		$ne =~ /^(\d+)$/;
-	$mm_overlap = $ne + 0;
+	chomp $ne;
+	$mm_overlap = $ne;
 	goto done_reading unless defined( $ne = <$f> ) and
 		$ne =~ /^(\d+)?\.?(\d+)?([Ee]\+?(\d+)?)?$/;
-	$mm_exp_time = $ne + 0;
+	chomp $ne;
+	$mm_exp_time = $ne;
 	goto done_reading unless defined( $ne = <$f> ) and
 		$ne =~ /^(\d+)$/;
-	$mm_N_scans = $ne + 0;
+	chomp $ne;
+	$mm_N_scans = $ne;
 
   done_reading:
 	close $f;
@@ -1747,8 +1758,7 @@ sub cwn_valid {
 	my ( $new, $start_button ) = @_;
     my $float_rep = '(((\d+(\.(\d+)?)?)|(\.\d+))([eE]([+-]?\d*)?)?)';
 
-	return 0 if ( ( $laser_line != 0.0 and $new !~ /^[+-]?$float_rep?$/ ) or
-				  ( $laser_line == 0.0 and $new !~ /^\+?$float_rep?$/ ) );
+	return 0 if $new !~ /^[+-]?$float_rep?$/;
 
 	check_all_parms( $start_button, $new, $$exp_time, $$N_scans );
 	return 1;
@@ -2209,8 +2219,7 @@ sub start_wn_valid {
 	my ( $new, $start_button ) = @_;
     my $float_rep = '(((\d+(\.(\d+)?)?)|(\.\d+))([eE]([+-]?\d*)?)?)';
 
-	return 0 if ( ( $laser_line != 0.0 and $new !~ /^[+-]?$float_rep?$/ ) or
-				  ( $laser_line == 0.0 and $new !~ /^\+?$float_rep?$/ ) );
+	return 0 if $new !~ /^[+-]?$float_rep?$/;
 
 	check_all_parms( $start_button, $new, $$end_wn, $$overlap,
 					 $$exp_time, $$N_scans );
@@ -2227,8 +2236,7 @@ sub end_wn_valid {
 	my ( $new, $start_button ) = @_;
     my $float_rep = '(((\d+(\.(\d+)?)?)|(\.\d+))([eE]([+-]?\d*)?)?)';
 
-	return 0 if ( ( $laser_line != 0.0 and $new !~ /^[+-]?$float_rep?$/ ) or
-				  ( $laser_line == 0.0 and $new !~ /^\+?$float_rep?$/ ) );
+	return 0 if $new !~ /^[+-]?$float_rep?$/;
 
 	check_all_parms( $start_button, $$start_wn, $new, $$overlap,
 					 $$exp_time, $$N_scans );
@@ -2342,7 +2350,7 @@ N_scans = $$N_scans;                   // number of scans
 
 width = abs( start_wn - end_wn );      // width of spectrum
 cwn = 0.5 * abs( start_wn + end_wn );  // center of spectrum
-total_start_wn = cwn - 0.5 * width;    // total width of CCD recorded spectrum
+ccd_start_wn;                          // start of CCD recorded spectrum
 step_wn;                               // wavenumber spacing between points
 N_Points;                              // points of spectrum
 Total_N_Points;                        // points of CCD recorded spectrum
@@ -2378,7 +2386,7 @@ CCD_size = ccd_camera_pixel_area( );
 ROI = ccd_camera_roi( );
 Bin = ccd_camera_binning( );
 
-Total_N_Points = ( ROI[ 3 ] - ROI[ 1 ] ) / Bin[ 1 ];
+Total_N_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / Bin[ 1 ];
 step_wn = calib[ 2 ] * Bin[ 1 ];
 
 cwn_offset = 0.5 * calib[ 2 ]
@@ -2388,38 +2396,32 @@ hide_toolbox( 1 );
 I_scan = output_create( "INT_OUTPUT", 0,
                         sprint( "Current scan (of #)", N_scans ) );
 IF laser_line != 0.0 {
-	total_start_wn = cwn - 0.5 * ( Total_N_Points - 1 ) * step_wn;
-	change_label_1d( "Wavenumbers [rel. cm^-1]", "Counts [1/s]" );
-
-	Start_Point = floor( ( start_wn - total_start_wn ) / step_wn );
-	cwn_offset -= start_wn - ( Start_Point - 1 ) * step_wn;
+	ccd_start_wn = cwn - 0.5 * ( Total_N_Points - 1 ) * step_wn;
+	Start_Point = floor( ( start_wn - ccd_start_wn ) / step_wn );
+	cwn_offset += ( start_wn - ccd_start_wn ) - Start_Point * step_wn;
 	N_Points = round( width / step_wn ) + 1;
-
 	monochromator_wavenumber( cwn + cwn_offset );
-	change_scale( start_wn, step_wn );
 
-	FOR J = 1 : N_Points {
-		wn[ J ] = total_start_wn + ( J - 1 ) * step_wn;
-	}
+	change_label_1d( "Wavenumbers [rel. cm^-1]", "Counts [1/s]" );
+	change_scale( start_wn, step_wn );
+	wn = lin_space( start_wn, start_wn + ( N_Points - 1 ) * step_wn,
+                    N_Points );
 
 	B_rel = button_create( "RADIO_BUTTON", "Relative wavenumbers" );
 	B_abs = button_create( "RADIO_BUTTON", B_rel, "Absolute wavenumbers" );
 	B_wl  = button_create( "RADIO_BUTTON", B_rel, "Wavelengths" );
 
 } ELSE {
-
-	monochromator_wavenumber( cwn - cwn_offset );
-	total_start_wn = cwn + 0.5 * ( Total_N_Points - 1 ) * step_wn;
-
-	Start_Point = floor( ( total_start_wn - start_wn ) / step_wn );
-	cwn_offset += ( Start_Point - 1 ) * step_wn - start_wn;
+	ccd_start_wn = cwn + 0.5 * ( Total_N_Points - 1 ) * step_wn;
+	Start_Point = floor( ( ccd_start_wn - start_wn ) / step_wn );
+	cwn_offset -= Start_Point * step_wn - ( ccd_start_wn - start_wn );
 	N_Points = round( width / step_wn ) + 1;
+	monochromator_wavenumber( cwn - cwn_offset );
 
 	change_label_1d( "Wavenumbers [abs. cm^-1]", "Counts [1/s]" );
 	change_scale( start_wn, - step_wn );
-	FOR J = 1 : Total_N_Points {
-		wn[ J ] = total_start_wn - ( J - 1 ) * step_wn;
-	}
+	wn = lin_space( start_wn, start_wn - ( N_Points - 1 ) * step_wn,
+                    N_Points );
 
 	B_abs = button_create( "RADIO_BUTTON", "Absolute wavenumbers" );
 	B_wl  = button_create( "RADIO_BUTTON", B_abs, "Wavelengths" );
@@ -2442,42 +2444,44 @@ FOR I = 1 : N_scans {
 
 	F_cur = clone_file( F_all, "dat", sprint( "scan_#.dat", I ) );
 	FOR J = 1 : N_Points {
-		fsave( F_cur, "# #", wn[ J ], spec[ J ] );
+		fsave( F_cur, "# #\\n", wn[ J ], spec[ J ] );
 	}
 
 	display_1d( 1, spec / exposure_time, 1,
 				1, avg_spec / ( I * exposure_time ), 2 );
 
-	IF toolbox_changed( ) {
-		IF button_state( B_eas ) {
-			end( );
-		}
+	IF ! toolbox_changed( ) {
+		NEXT;
+	}
 
-		IF button_state( B_wl ) {
-			change_label_1d( "Wavelength [nm]" );
-			IF ( laser_line != 0.0 ) {
-				change_scale_1d( 1.0e7 / ( laser_line - total_start_wn ),
-								 1.0e7 / ( laser_line - cwn ) -
-							     1.0e7 / ( laser_line - cwn + step_wn ) );
-			} ELSE {
-				change_scale_1d( 1.0e7 / total_start_wn,
-								 1.0e7 / cwn - 1.0e7 / ( cwn + step_wn ) );
-			}
-		}
+	IF button_state( B_eas ) {
+		end( );
+	}
 
-		IF button_state( B_abs ) {
-			change_label_1d( "Wavenumbers [abs. cm^-1]" );
-			IF ( laser_line != 0.0 ) {
-				change_scale( laser_line - total_start_wn, - step_wn );
-			} ELSE {
-				change_scale( total_start_wn, - step_wn );
-			}
+	IF button_state( B_wl ) {
+		change_label_1d( "Wavelength [nm]" );
+		IF ( laser_line != 0.0 ) {
+			change_scale_1d( 1.0e7 / ( laser_line - ccd_start_wn ),
+							 1.0e7 / ( laser_line - cwn ) -
+						     1.0e7 / ( laser_line - cwn + step_wn ) );
+		} ELSE {
+			change_scale_1d( 1.0e7 / ccd_start_wn,
+							 1.0e7 / cwn - 1.0e7 / ( cwn + step_wn ) );
 		}
+	}
 
-		IF laser_line != 0.0 AND button_state( B_rel ) {
-			change_label_1d( "Wavenumbers [rel. cm^-1]" );
-			change_scale( total_start_wn, step_wn );
+	IF button_state( B_abs ) {
+		change_label_1d( "Wavenumbers [abs. cm^-1]" );
+		IF ( laser_line != 0.0 ) {
+			change_scale( laser_line - ccd_start_wn, - step_wn );
+		} ELSE {
+			change_scale( ccd_start_wn, - step_wn );
 		}
+	}
+
+	IF laser_line != 0.0 AND button_state( B_rel ) {
+		change_label_1d( "Wavenumbers [rel. cm^-1]" );
+		change_scale( ccd_start_wn, step_wn );
 	}
 }
 
@@ -2491,13 +2495,15 @@ fsave( F_all, "\\# Date:               # #\\n"
               "\\# Number of scans   = #\\n",
               date( ), time( ), start_wn, ( Total_N_Points - 1 ) * calib[ 2 ],
               calib[ 2 ] *  Bin [ 1 ], exposure_time, N_scans );
+
 IF laser_line != 0.0 {
-    fsave( F_all, "\\# Laser lin         = # cm^-1\\n", laser_line );
+    fsave( F_all, "\\# Laser lin         = # cm^-1\\n\\n", laser_line );
+} ELSE {
+	fsave( F_all, "\\n" );
 }
 
 FOR J = 1 : N_Points {
-	fsave( F_all, "# #
-", wn[ J ], avg_spec[ J ] / I );
+	fsave( F_all, "# #\\n", wn[ J ], avg_spec[ J ] / I );
 }
 EOF
     close $fh;
@@ -2601,7 +2607,7 @@ CCD_size = ccd_camera_pixel_area( );
 ROI = ccd_camera_roi( );
 Bin = ccd_camera_binning( );
 
-CCD_Points = ( ROI[ 3 ] - ROI[ 1 ] ) / Bin[ 1 ];
+CCD_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / Bin[ 1 ];
 step_wn = calib[ 2 ] * Bin[ 1 ];
 
 cwn_offset = 0.5 * calib[ 2 ]
@@ -2735,39 +2741,40 @@ FOR I = 1 : N_scans {
 		cur_cwn += wn_increment;
 		cur_wn += wn_increment;
 
-		IF toolbox_changed( ) {
-			IF button_state( B_eas ) {
-				end( );
-			}
+		IF ! toolbox_changed( ) {
+			NEXT;
+		}
 
-			IF button_state( B_wl ) {
-				change_label_1d( "Wavelength [nm]" );
-				IF ( laser_line != 0.0 ) {
-					change_scale_1d( 1.0e7 / ( laser_line - start_wn ),
-									 1.0e7 / ( laser_line - start_wn ) -
-								     1.0e7 / ( laser_line - step_wn ) );
-				} ELSE {
-					change_scale_1d( 1.0e7 / start_wn,
-									 1.0e7 / start_wn - 
-									 1.0e7 / ( start_wn + step_wn ) );
-				}
-			}
+		IF button_state( B_eas ) {
+			end( );
+		}
 
-			IF button_state( B_abs ) {
-				change_label_1d( "Wavenumbers [abs. cm^-1]" );
-				IF ( laser_line != 0.0 ) {
-					change_scale( laser_line - start_wn, - step_wn );
-				} ELSE {
-					change_scale( start_wn, - step_wn );
-				}
-			}
-
-			IF laser_line != 0.0 AND button_state( B_rel ) {
-				change_label_1d( "Wavenumbers [rel. cm^-1]" );
-				change_scale( start_wn, step_wn );
+		IF button_state( B_wl ) {
+			change_label_1d( "Wavelength [nm]" );
+			IF ( laser_line != 0.0 ) {
+				change_scale_1d( 1.0e7 / ( laser_line - start_wn ),
+								 1.0e7 / ( laser_line - start_wn ) -
+							     1.0e7 / ( laser_line - step_wn ) );
+			} ELSE {
+				change_scale_1d( 1.0e7 / start_wn,
+								 1.0e7 / start_wn - 
+								 1.0e7 / ( start_wn + step_wn ) );
 			}
 		}
 
+		IF button_state( B_abs ) {
+			change_label_1d( "Wavenumbers [abs. cm^-1]" );
+			IF ( laser_line != 0.0 ) {
+				change_scale( laser_line - start_wn, - step_wn );
+			} ELSE {
+				change_scale( start_wn, - step_wn );
+			}
+		}
+
+		IF laser_line != 0.0 AND button_state( B_rel ) {
+			change_label_1d( "Wavenumbers [rel. cm^-1]" );
+			change_scale( start_wn, step_wn );
+		}
 	}
 
 	// Write whole scan to file
@@ -2808,10 +2815,11 @@ IF I > 0 {
 	              date( ), time( ), start_wn, end_wn, calib[ 2 ] *  Bin [ 1 ],
 				  exposure_time, N_scans );
 	IF laser_line != 0.0 {
-	    fsave( F_all, "\\# Laser line        = # cm^-1\\n", laser_line );
+	    fsave( F_all, "\\# Laser line        = # cm^-1\\n\\n", laser_line );
 		wn = lin_space( start_wn, start_wn + ( N_Points - 1 ) * step_wn,
 						N_Points );
 	} ELSE {
+		fsave( F_all, "\\n" );
 		wn = lin_space( start_wn, start_wn - ( N_Points - 1 ) * step_wn,
 						N_Points );
 	}
