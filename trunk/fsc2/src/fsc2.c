@@ -1043,7 +1043,7 @@ static bool display_file( char *name, FILE *fp )
 			memmove( line + 5, line, strlen( line ) + 1 );
 			line[ 0 ] = '@';
 			line[ 1 ] = 'C';
-			line[ 2 ] = '2';
+			line[ 2 ] = '4';
 			line[ 3 ] = '@';
 			line[ 4 ] = 'f';
 		}
