@@ -689,19 +689,16 @@ int gpib_write( int device, const char *buffer )
 static void gpib_write_start( const char *dev_name, const char *buffer,
 							  long length )
 {
-    long i;
-
-
     gpib_log_function_start( "gpib_write", dev_name );
 	seteuid( EUID );
     fprintf( gpib_log, "-> There are %ld bytes to be sent\n", length );
 
     if ( ll == LL_ALL )
-    {
-        for ( i = 0; i < length; ++i )
-            fputc( ( int ) buffer[ i ], gpib_log );
-        fputc( ( int) '\n', gpib_log );
+	{
+		fwrite( buffer, length, sizeof( char ), gpib_log );
+        fputc( ( int ) '\n', gpib_log );
     }
+
     fflush( gpib_log );
 	seteuid( getuid( ) );
 }
@@ -801,9 +798,8 @@ static void gpib_read_end( const char *dev_name, char *buffer, long received,
              received, expected );
 
     if ( ll == LL_ALL )
-    {
-        for ( i = 0; i < received; ++i )
-            fputc( ( int ) buffer[ i ], gpib_log );
+	{
+		fwrite( buffer, received, sizeof( char ), gpib_log );
         fputc( ( int ) '\n', gpib_log );
     }
 
