@@ -31,6 +31,20 @@ Var *P_Var;
 
 
 %token SECTION_LABEL            /* new section label */
+
+%token P_TOK                    /* pulse */
+%token F_TOK                    /* pulse function */
+%token S_TOK                    /* pulse start */
+%token L_TOK                    /* pulse length */
+%token DS_TOK                   /* pulse position change */
+%token DL_TOK                   /* pulse length change */
+%token PH_TOK                   /* phase sequence */
+%token ML_TOK                   /* maximum pulse length */
+%token RP_TOK                   /* replacement pulses */
+
+%token <lval> FUNC_TOK          /* type of function */
+
+
 %token <vptr>  VAR_TOKEN        /* variable */
 %token <vptr> FUNC_TOKEN        /* function */
 %token <lval> INT_TOKEN
@@ -67,7 +81,8 @@ input:   /* empty */
 
 /* currently only the variables related stuff */
 
-line:    VAR_TOKEN '=' expr        { vars_assign( $3, $1 );
+line:    P_TOK pprop               {}
+       | VAR_TOKEN '=' expr        { vars_assign( $3, $1 );
                                      assert( Var_Stack == NULL );
 	                                 assert( Arr_Stack == NULL ); }
        | VAR_TOKEN '['             { vars_push_astack( $1 ); }
@@ -81,6 +96,26 @@ line:    VAR_TOKEN '=' expr        { vars_assign( $3, $1 );
 											 Fname, Lc );
 	                                 THROW( VARIABLES_EXCEPTION ); }
 ;
+
+
+
+pprop:   /* empty */
+       | F_TOK sep FUNC_TOK         { pulse_set_func( Cur_Pulse, $3 ); }
+;
+
+
+sep:     /* empty */
+       | '='
+       | ':'
+;
+
+
+
+
+
+
+
+
 
 
 expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, &$1 ); }
