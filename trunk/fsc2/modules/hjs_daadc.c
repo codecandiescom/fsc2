@@ -147,7 +147,7 @@ int hjs_daadc_end_of_exp_hook( void )
 void hjs_daadc_exit_hook( void )
 {
 	/* This shouldn't be necessary, but to make 100% sure the device file
-	   is closed wedo it anyway */
+	   is closed we do it anyway */
 
 	if ( hjs_daadc.is_open )
 		fsc2_serial_close( SERIAL_PORT );
