@@ -60,9 +60,9 @@ int dg2020_b_init_hook( void )
 	/* We have to set up the global structure for the pulser, especially the
 	   pointers for the functions that will get called from pulser.c */
 
-	dg2020.needs_update = UNSET;
-	dg2020.is_running   = SET;
-	dg2020.keep_all     = UNSET;
+	dg2020.needs_update   = UNSET;
+	dg2020.is_running     = SET;
+	dg2020.keep_all       = UNSET;
 
 	pulser_struct.set_timebase = dg2020_store_timebase;
 

@@ -49,6 +49,7 @@ Var *pulser_shift( Var *v );
 Var *pulser_increment( Var *v );
 Var *pulser_pulse_reset( Var *v );
 Var *pulser_lock_keyboard( Var *v );
+Var *pulser_stop_on_update( Var *v );
 
 
 /* Definitions needed for the pulser */
@@ -185,6 +186,9 @@ typedef struct {
 
 	Ticks mem_size;          // size of the complete sequence, i.e. including
 	                         // the memory needed for padding
+
+	bool stop_on_update;     // if not set the pulser does not get stopped
+	                         // while doing an update
 } HFS9000;
 
 

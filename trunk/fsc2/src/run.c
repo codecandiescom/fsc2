@@ -128,6 +128,7 @@ bool run( void )
 		do_quit = react_to_do_quit = UNSET;
 		fl_set_object_callback( main_form->run, stop_while_exp_hook, 0 );
 
+		fl_set_object_label( main_form->run, "Stop" );
 		run_exp_hooks( );
 
 		fl_set_object_callback( main_form->run, run_file, 0 );
@@ -160,7 +161,6 @@ bool run( void )
 		return FAIL;
 	}
 
-	fl_set_object_label( main_form->run, "Start" );
 	fl_set_object_callback( main_form->run, run_file, 0 );
 
 	child_is_quitting = UNSET;

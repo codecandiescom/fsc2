@@ -61,9 +61,10 @@ int hfs9000_init_hook( void )
 	/* We have to set up the global structure for the pulser, especially the
 	   pointers for the functions that will get called from pulser.c */
 
-	hfs9000.needs_update = UNSET;
-	hfs9000.is_running   = SET;
-	hfs9000.keep_all     = UNSET;
+	hfs9000.needs_update   = UNSET;
+	hfs9000.is_running     = SET;
+	hfs9000.keep_all       = UNSET;
+	hfs9000.stop_on_update = SET;
 
 	pulser_struct.set_timebase = hfs9000_store_timebase;
 
@@ -673,4 +674,15 @@ Var *pulser_lock_keyboard( Var *v )
 	eprint( SEVERE, SET, "%s: Function `pulser_lock_keyboard' can't be "
 			"used for this device.\n", DEVICE_NAME );
 	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_stop_on_update( Var *v )
+{
+	vars_check( v, INT_VAR );
+	hfs9000.stop_on_update = v->val.lval == 0 ? UNSET : SET;
+	return vars_push( INT_VAR, ( long ) hfs9000.stop_on_update );
 }

@@ -48,7 +48,7 @@ bool hfs9000_do_update( void )
 	/* Resort the pulses,check that the new pulse settings are reasonable
 	   and finally commit all changes */
 
-	if ( hfs9000.is_running )
+	if ( hfs9000.is_running && hfs9000.stop_on_update )
 	{
 		restart = SET;
 		if ( ! TEST_RUN )

@@ -612,7 +612,7 @@ static void start_editor( void )
 
 
 	/* Try to find content of environment variable "EDITOR" - if it doesn't
-	   exist use vi as standard editor */
+	   exist use vi as the default editor */
 
 	ed = getenv( "EDITOR" );
 
@@ -675,8 +675,8 @@ static void start_editor( void )
 
 	/* Special treatment for emacs and xemacs: if emacs is called without
 	   the '-nw' option it will create its own window - so we don't embed
-	   it into a xterm - the same holds for xemacs which always creates
-	   its own window. */
+	   it into a xterm - the same holds for xemacs which, AFAIK, always
+	   creates its own window. */
 
 	final_argv = argv;
 
@@ -732,7 +732,7 @@ void test_file( FL_OBJECT *a, long b )
 
 	/* If fsc2 is too busy testing a program to react to clicks on the "Stop
 	   Test" button and the user presses the button several times strange
-	   things happen, especially the "Quit" button becoming unusable.  The
+	   things happen, especially the "Quit" button becomes unusable.  The
 	   following helps avoiding to execute the handler again while it's
 	   already running... */
 
@@ -941,16 +941,12 @@ void run_file( FL_OBJECT *a, long b )
 
 	TRY
 	{
-		fl_set_object_label( main_form->run, "Stop" );
 		run( );
 		TRY_SUCCESS;
 	}
 	CATCH( EXCEPTION )
-	{
-		fl_set_object_label( main_form->run, "Start" );
 		fl_show_alert( "Error", "Sorry, can't run the experiment.",
 					   "See browser for more information.", 1 );
-	}
 }
 
 
@@ -986,6 +982,12 @@ static bool display_file( char *name, FILE *fp )
 			case -2 :                 /* popen() failure */
 				fl_show_alert( "Error", "Can't determine length of file:",
 							   name, 1 );
+				return FAIL;
+
+			default:
+				fl_show_alert( "Error",
+							   "Unexpected error while counting lines.",
+							   "Please send a bug report.", 1 );
 				return FAIL;
 		}
 	}

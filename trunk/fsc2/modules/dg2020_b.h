@@ -54,7 +54,6 @@ Var *pulser_pulse_reset( Var *v );
 Var *pulser_lock_keyboard( Var *v );
 
 
-
 /* Definitions needed for the pulser */
 
 #define Ticks long              // for times in units of the pulsers time base
