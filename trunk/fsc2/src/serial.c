@@ -89,13 +89,13 @@ void fsc2_request_serial_port( int sn, const char *devname )
 		THROW( EXCEPTION );
 	}
 
-	Serial_Port[ sn ].is_use = SET;
+	Serial_Port[ sn ].in_use = SET;
 	Serial_Port[ sn ].devname = devname;
 	Serial_Port[ sn ].dev_file = NULL;
 
 	/* Assemble name of the device file */
 
-	for ( l = 1, snc = sn; snc /= 10, l++ )
+	for ( l = 1, snc = sn; snc /= 10; l++ )
 		;
 	Serial_Port[ sn ].dev_file = get_string( strlen( "/dev/ttyS" ) + l );
 	sprintf( Serial_Port[ sn ].dev_file, "/dev/ttyS%d", sn );
@@ -111,11 +111,11 @@ void fsc2_request_serial_port( int sn, const char *devname )
 		else
 			eprint( FATAL, UNSET, "%s: No permission to communicate via "
 					"serial port %d.\n", devname, sn );
-		lower_permssions( );
+		lower_permissions( );
 		THROW( EXCEPTION );
 	}
 
-	lower_permssions( );
+	lower_permissions( );
 #endif
 }
 
@@ -131,9 +131,9 @@ void fsc2_serial_init( void )
 
 	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
 	{
-		Serial_Port[ sn ].dev_file = NULL;
-		Serial_Port[ sn ].devname = NULL;
-		Serial_Port[ sn ].in_use = UNSET;
+		Serial_Port[ i ].dev_file = NULL;
+		Serial_Port[ i ].devname = NULL;
+		Serial_Port[ i ].in_use = UNSET;
 	}
 #endif
 }
@@ -150,10 +150,10 @@ void fsc2_serial_cleanup( void )
 
 	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
 	{
-		if ( Serial_Port[ sn ].in_use )
-			Serial_Port[ sn ].dev_file = T_free( Serial_Port[ sn ].dev_file );
-		Serial_Port[ sn ].devname = NULL;
-		Serial_Port[ sn ].in_use = UNSET;
+		if ( Serial_Port[ i ].in_use )
+			Serial_Port[ i ].dev_file = T_free( Serial_Port[ sn ].dev_file );
+		Serial_Port[ i ].devname = NULL;
+		Serial_Port[ i ].in_use = UNSET;
 	}
 #endif
 }
@@ -167,9 +167,11 @@ int fsc2_serial_open( int sn, int flags )
 	int fd;
 
 
+	/* First check if serial port has been requested */
+
 	if ( ! Serial_Port[ sn ].in_use )
 	{
-		errno = EACCESS;
+		errno = EACCES;
 		return -1;
 	}
 
