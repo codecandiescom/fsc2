@@ -65,16 +65,17 @@ rs_spec10_incl := /usr/local/include/pvcam
 #rs_spec10_incl := /usr/local/include/pvcam
 
 
-# For modules that need to be linked against special libraries please
-# define a variable here, starting with the name of the module, and
-# followed by "_libs". Assign to it the name(s) of the required
+# For modules that need to be linked against special libraries a variable
+# needs to be defined here, consisting of the name of the module followed
+# by the string "_libs". It got to be assigned the name(s) of the required
 # libraries. If a library is not in one of the standard places where the
-# linker looks for libraries (i.e. /usr/lib, /usr/local/lib) it must be
-# specified with the full, absolute path.
+# linker looks for libraries (e.g. /usr/lib, /usr/local/lib) it must be
+# specified with its absolute path.
 
 me6000_libs    := libme6x00.so
 ni6601_libs    := libni6601.so
 rs_spec10_libs := libpvcam.so
+
 
 src_headers   := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h
 
@@ -141,17 +142,18 @@ all:
 		$(RM) $(RMFLAGS) $$m.make;                                 \
 	done;
 
+
 # The following rule looks a bit complicated because we have to check if
-# some additional libraries are required by each module. These libraries
-# have to defined by a variables with the name of the module, followed
-# by the string "_libs". If no additional libraries are requires we can
-# compile the module immediately. Otherwise we've got to distinguish
-# between libraries given with a full absolute path (which are passed
-# to gcc just as they are) and libraries without a path, that are supposed
-# to be in the directories searched by the linker. For these we must
-# remove the leading "lib" and the trailing".so" extension and prepend
-# it with "-l". Before we actually use the library we check if they really
-# exist by an extra call of gcc - if it fails the module isn't created.
+# additional libraries are required by each module. These libraries have
+# to defined by a variables consisting of the name of the module and the
+# the string "_libs". If no additional libraries are requires we compile
+# the module immediately. Otherwise we've got to distinguish between
+# libraries given with an absolute path (which are passed to gcc just as
+# they are) and libraries without a path, that are supposed to be in the
+# directories searched by the linker. For these we must remove the leading
+# "lib" and the trailing".so" extension and prepend the "-l" option. Before
+# we actually use the library we check if they really exist by an extra
+# call of gcc - if it fails the module can't be created.
 
 $(simp_modules:.c=.so): %.so: %.o	
 	@if [ -z "$($(patsubst %.so,%_libs,$@))" ]; then               \
@@ -179,9 +181,10 @@ $(simp_modules:.c=.so): %.so: %.o
 	fi
 
 
-# Since some modules may require header files we need to prepend each
-# value in a variable with a name starting with the module name and
-# followed by the string "_incl" with "-I" and pass this to the compiler.
+# Since some modules may require header files for additional libraries.
+# We prepend each value in variables with a name starting with the module
+# name and followed by the string "_incl" with "-I" and pass this to the
+# compiler.
 
 $(simp_modules:.c=.o): %.o: %.c $(cdir)/%.conf $(src_headers)
 	@incl="$(foreach i,$($(patsubst %.o,%_incl,$@)),-I$(i))";      \

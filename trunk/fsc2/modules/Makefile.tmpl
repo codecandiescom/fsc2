@@ -25,8 +25,8 @@
 # Boston, MA 02111-1307, USA.
 
 
-# See the comments for the correspondig rules for simple modules
-# on why these rules have this rather complicated form.
+# See the comments for the correspondig rules for simple modules in the
+# main makefile on why these rules have this somewhat complicated form.
 
 ##.so: $(##:.c=.o)
 	@if [ -z "$($(patsubst %.so,%_libs,$@))" ]; then               \
@@ -58,10 +58,12 @@ $(##:.c=.o): %.o: %.c ##.h $(cdir)/##.conf $(src_headers)
 	echo "$(CC) $$incl $(CFLAGS) -c $(LFLAGS) $< -o $@";           \
 	$(CC) $(CFLAGS) -c $(LFLAGS) $< -o $@
 
+
 # The replacement of 'ECHO' by 'FLEX_ECHO' in the files created by flex is
-# done because 'ECHO' (that is #defined in these files) is already defined
-# in termios.h. The second replacement is for avoiding compiler warnings
-# about unitialized variables in these files.
+# done because 'ECHO' (which is #defined in these files) is already defined
+# in termios.h (which must be included for serial port support). The second
+# replacement is for avoiding compiler warnings about unitialized variables
+# in the flex generated files.
 
 %_lexer.c: %_lexer.l $(src_header)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %lexer.l,%,$<) -o$@ $<
