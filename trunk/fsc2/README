@@ -42,7 +42,7 @@ Features
 
 * Device are not hard-coded into fsc2. Instead, devices are dealt with
   by modules that get loaded on demand (a single instruction in an EDL
-  script). This allows to employ a different device with similar
+  script). This allows e.g. to employ a different device with similar
   functionality by usually changing not more than a single line in an
   EDL script.
 
@@ -67,7 +67,7 @@ Features
   shouldn't be too difficult for anyone having some experience with
   writing programs in C. About 30 modules for quite a range of devices
   are already part of the package and can be used as a starting point
-  for the development of new ones.
+  for developing drivers for new devices.
 
 * fsc2 is well-documented, an 150+ page documentation in HTML, info,
   PostScript and PDF format, covering all aspects of fsc2, i.e the
