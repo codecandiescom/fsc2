@@ -463,12 +463,7 @@ bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length )
 
 void dg2020_set( bool *arena, Ticks start, Ticks len, Ticks offset )
 {
-	if ( start + len + offset > dg2020.max_seq_len )
-	{
-		eprint( FATAL, SET, "Pulses use more memory than expected. Perhaps "
-				"you should use the MAXIMUM_PATTERN_LENGTH command.\n" );
-		THROW( EXCEPTION );
-	}
+	fsc2_assert( start + len + offset <= dg2020.max_seq_len );
 
 	memset( ( void * ) ( arena + offset + start ),
 			( int ) SET, len * sizeof( bool ) );
