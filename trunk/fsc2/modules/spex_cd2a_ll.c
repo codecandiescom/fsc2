@@ -406,7 +406,7 @@ static void spex_cd2a_print( char *mess, int digits, double val )
 
 	fsc2_assert( digits > 0 );
 
-	if ( log10( abs( fabs( val  ) ) ) < 0 )
+	if ( log10( fabs( fabs( val  ) ) ) < 0 )
 	{
 		pre_digits = 1;
 		if ( val < 0.0 )
@@ -544,7 +544,7 @@ void spex_cd2a_open( void )
 
 static size_t spex_cd2a_write( int type, const char *mess )
 {
-	unsigned char *tm;
+	unsigned char *tmx;
 	unsigned long cs = 0;
 	size_t len;
 	size_t i;
@@ -556,22 +556,22 @@ static size_t spex_cd2a_write( int type, const char *mess )
 #endif
 
 	len = strlen( mess );
-	tm = T_malloc( len + 6 );
+	tmx = UCHAR_P T_malloc( len + 6 );
 
-	tm[ 0 ] = type == PARAMETER ? STX : CAN;
+	tmx[ 0 ] = type == PARAMETER ? STX : CAN;
 	len++;
-	strcpy( tm + 1, mess );
-	tm[ len++ ] = ETX;
+	strcpy( ( char * ) ( tmx + 1 ), mess );
+	tmx[ len++ ] = ETX;
 
 	if ( spex_cd2a.use_checksum )
 	{
 		for ( i = 0; i < len; i++ )
-			cs += tm[ i ];
-		sprintf( tm + len, "%02lx", cs & 0xFF );
+			cs += tmx[ i ];
+		sprintf( ( char * ) ( tmx + len ), "%02lx", cs & 0xFF );
 		len += 2;
 	}
 
-	tm[ len++ ] = '\r';
+	tmx[ len++ ] = '\r';
 
 	/* The device don't seem to accept commands unless there's a short
 	   delay since the last transmission... */
@@ -579,14 +579,14 @@ static size_t spex_cd2a_write( int type, const char *mess )
 	if ( type == COMMAND )
 		fsc2_usleep( 10000, UNSET );
 
-	if ( ( written = fsc2_serial_write( SERIAL_PORT, tm, len, 0, UNSET ) )
+	if ( ( written = fsc2_serial_write( SERIAL_PORT, tmx, len, 0, UNSET ) )
 		 <= 0 )
 	{
-		T_free( tm );
+		T_free( tmx );
 		spex_cd2a_comm_fail( );
 	}
 
-	T_free( tm );
+	T_free( tmx );
 
 	if ( type == PARAMETER )
 		spex_cd2a_read_ack( );

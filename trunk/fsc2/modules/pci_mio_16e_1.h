@@ -35,7 +35,7 @@
 
 #ifdef __cplusplus
 #define NI_DAQ_POLARITY_P              ( NI_DAQ_POLARITY * )
-else
+#else
 #define NI_DAQ_POLARITY_P
 #endif
 
