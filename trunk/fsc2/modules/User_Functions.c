@@ -13,9 +13,9 @@ int User_Functions_end_of_exp_hook( void );
 void User_Functions_exit_hook( void );
 
 
-Var *square( Var *var );
-Var *int_slice( Var *var );
-Var *float_slice( Var *var );
+Var *square( Var *v );
+Var *int_slice( Var *v );
+Var *float_slice( Var *v );
 Var *get_phase_cycled_area_1d( Var *v );
 Var *get_phase_cycled_area_2d( Var *v );
 
@@ -71,33 +71,33 @@ void User_Functions_exit_hook( void )
 /*------------------------------------------------------------*/
 /*------------------------------------------------------------*/
 				 
-Var *square( Var *var )
+Var *square( Var *v )
 {
-	vars_check( var, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( var->type == INT_VAR )
-		return vars_push( INT_VAR, var->INT * var->INT );
+	if ( v->type == INT_VAR )
+		return vars_push( INT_VAR, v->INT * v->INT );
 	else
-		return vars_push( FLOAT_VAR, var->FLOAT * var->FLOAT );
+		return vars_push( FLOAT_VAR, v->FLOAT * v->FLOAT );
 }
 
 
 /*------------------------------------------------------------*/
 /*------------------------------------------------------------*/
 
-Var *int_slice( Var *var )
+Var *int_slice( Var *v )
 {
 	long *array;
 	long size;
 	Var *ret;
 
 
-	vars_check( var, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( var->type == INT_VAR )
-		size = var->INT;
+	if ( v->type == INT_VAR )
+		size = v->INT;
 	else
-		size = ( long ) var->FLOAT;
+		size = lround( v->FLOAT );
 
 	array = T_calloc( size, sizeof( long ) );
 	ret = vars_push( INT_TRANS_ARR, array, size );
@@ -110,19 +110,19 @@ Var *int_slice( Var *var )
 /*------------------------------------------------------------*/
 /*------------------------------------------------------------*/
 
-Var *float_slice( Var *var )
+Var *float_slice( Var *v )
 {
 	long *array;
 	long size;
 	Var *ret;
 
 
-	vars_check( var, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( var->type == INT_VAR )
-		size = var->INT;
+	if ( v->type == INT_VAR )
+		size = v->INT;
 	else
-		size = ( long ) var->FLOAT;
+		size = lround( v->FLOAT );
 
 	array = T_calloc( size, sizeof( double ) );
 	ret = vars_push( FLOAT_TRANS_ARR, array, size );
@@ -159,7 +159,6 @@ Var *get_phase_cycled_area_1d( Var *v )
 	long channel[ 2 ];
 	long num_windows;
 	long *win_list;
-	long seq_len;
 	long i, j;
 	int access;
 	double *data;
@@ -178,8 +177,6 @@ Var *get_phase_cycled_area_1d( Var *v )
 		first_time = UNSET;
 	}
 
-	seq_len = aseq->len;
-
 	/* Next step: check the parameter */
 
 	if ( v == NULL )
@@ -192,13 +189,13 @@ Var *get_phase_cycled_area_1d( Var *v )
 	/* Find out how many channels the first acquisition sequence needs - if
 	   two are needed there must be two channel arguments */
 
-	for ( i = 0; i < seq_len; i++ )
+	for ( i = 0; i < aseq->len; i++ )
 		if ( aseq->sequence[ i ] == ACQ_PLUS_B ||
 			 aseq->sequence[ i ] == ACQ_MINUS_B )
 			channels_needed = 2;
 
-	/* The first parameter must be a channel number, ask digitizer module if
-	   it really is */
+	/* The first parameter must be a channel number in any case, ask digitizer
+	   module if it really is one */
 
 	if ( ! get_channel_number( v, "get_phase_cycled_area_1d", &channel[ 0 ] ) )
 	{
@@ -233,7 +230,7 @@ Var *get_phase_cycled_area_1d( Var *v )
 			v = vars_pop( v );
 	}
 
-	/* Now we got to count the remaining arguments on the stack to find out
+	/* Now we've got to count the remaining arguments on the stack to find out
 	   how many windows there are and build up the window list */
 
 	num_windows = 1;
@@ -247,98 +244,111 @@ Var *get_phase_cycled_area_1d( Var *v )
 
 	win_list = T_malloc( num_windows * sizeof( long ) );
 
-	if ( v != NULL )
+	TRY
 	{
-		for ( i = 0; i < num_windows; i++ )
+		if ( v != NULL )
 		{
-			TRY
+			for ( i = 0; i < num_windows; i++ )
 			{
 				vars_check( v, INT_VAR | FLOAT_VAR );
-				TRY_SUCCESS;
-			}
-			CATCH( EXCEPTION )
-			{
-				T_free( win_list );
-				THROW( EXCEPTION );
-			}
 
-			if ( v->type == INT_VAR )
-				win_list[ i ] = v->val.lval;
-			else
-			{
-				eprint( WARN, "%s:%ld: get_phase_cycled_area_1d(): Floating "
-						"point value used as window number.\n", Fname, Lc );
-				win_list[ i ] = lround( v->val.dval );
-			}
+				if ( v->type == INT_VAR )
+					win_list[ i ] = v->val.lval;
+				else
+				{
+					eprint( WARN, "%s:%ld: get_phase_cycled_area_1d(): "
+							"Floating point value used as window number.\n",
+							Fname, Lc );
+					win_list[ i ] = lround( v->val.dval );
+				}
 
-			v = vars_pop( v );
+				v = vars_pop( v );
+			}
 		}
+		else
+			win_list[ 0 ] = -1;              /* No window is to be used ! */
+
+		/* Also get memory for the data */
+
+		data = T_malloc( num_windows * sizeof( double ) );
+		TRY_SUCCESS;
 	}
-	else
-		win_list[ 0 ] = -1;              /* No window is to be used ! */
+	OTHERWISE
+	{
+		T_free( win_list );
+		PASSTHROU( );
+	}
 
-	/* Also get memory for the data */
-
-	data = T_malloc( num_windows * sizeof( double ) );
 	for ( i = 0; i < num_windows; i++ )
 		data[ i ] = 0.0;
 
 	/* Now we can really start. First we reset the phase sequence, then we
-	   run through the complete phase cycle */
+	   run through the complete phase cycle. */
 
-	vars_pop( func_call( func_get( "pulser_phase_reset", &access ) ) );
-	vars_pop( func_call( func_get( "pulser_update", &access ) ) );
-
-	for ( i = 0; i < seq_len; i++ )
+	TRY
 	{
-		vars_pop( func_call( func_get( "digitizer_start_acquisition",
-									   &access) ) );
+		vars_pop( func_call( func_get( "pulser_phase_reset", &access ) ) );
+		vars_pop( func_call( func_get( "pulser_update", &access ) ) );
 
-		for ( j = 0; j < num_windows; j++ )
+		for ( i = 0; i < aseq->len; i++ )
 		{
-			/* Get pointer to the correct function */
+			vars_pop( func_call( func_get( "digitizer_start_acquisition",
+										   &access) ) );
 
-			if ( is_get_area_fast )
-				func_ptr = func_get( "digitizer_get_area_fast", &access );
-			else
-				func_ptr = func_get( "digitizer_get_area", &access );
+			for ( j = 0; j < num_windows; j++ )
+			{
+				/* Get pointer to the correct function */
 
-			/* Push the correct channel number onto the stack */
+				if ( is_get_area_fast )
+					func_ptr = func_get( "digitizer_get_area_fast", &access );
+				else
+					func_ptr = func_get( "digitizer_get_area", &access );
 
-			if ( aseq->sequence[ i ] == ACQ_PLUS_A ||
-				 aseq->sequence[ i ] == ACQ_MINUS_A )
-				vars_push( INT_VAR, channel[ 0 ] );
-			else
-				vars_push( INT_VAR, channel[ 1 ] );
+				/* Push the correct channel number onto the stack */
 
-			/* If window is to be used push its number onto stack */
+				if ( aseq->sequence[ i ] == ACQ_PLUS_A ||
+					 aseq->sequence[ i ] == ACQ_MINUS_A )
+					vars_push( INT_VAR, channel[ 0 ] );
+				else
+					vars_push( INT_VAR, channel[ 1 ] );
 
-			if ( win_list[ 0 ] != -1 )
-				vars_push( INT_VAR, win_list[ j ] );
+				/* If window is to be used push its number onto stack */
+
+				if ( win_list[ 0 ] != -1 )
+					vars_push( INT_VAR, win_list[ j ] );
 				
-			/* Finally call the function */
+				/* Finally call the function */
 
-			vn = func_call( func_ptr );
+				vn = func_call( func_ptr );
 
-			/* Now add (or subtract the result */
+				/* Now add (or subtract the result */
 
-			if ( aseq->sequence[ i ] == ACQ_PLUS_A ||
-				 aseq->sequence[ i ] == ACQ_PLUS_B )
-				data[ j ] += vn->val.dval;
-			else
-				data[ j ] -= vn->val.dval;
+				if ( aseq->sequence[ i ] == ACQ_PLUS_A ||
+					 aseq->sequence[ i ] == ACQ_PLUS_B )
+					data[ j ] += vn->val.dval;
+				else
+					data[ j ] -= vn->val.dval;
 
-			vars_pop( vn );
+				vars_pop( vn );
+			}
+
+			vars_pop( func_call( func_get( "pulser_next_phase", &access ) ) );
+			vars_pop( func_call( func_get( "pulser_update", &access ) ) );
 		}
 
-		vars_pop( func_call( func_get( "pulser_next_phase", &access ) ) );
-		vars_pop( func_call( func_get( "pulser_update", &access ) ) );
-	}
+		if ( win_list[ 0 ] == -1 || num_windows )
+			vn = vars_push( FLOAT_VAR, data[ 0 ] );
+		else
+			vn = vars_push( FLOAT_TRANS_ARR, data, aseq->len );
 
-	if ( win_list[ 0 ] == -1 || num_windows )
-		vn = vars_push( FLOAT_VAR, data[ 0 ] );
-	else
-		vn = vars_push( FLOAT_TRANS_ARR, data, seq_len );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( data );
+		T_free( win_list );
+		PASSTHROU( );
+	}
 
 	T_free( data );
 	T_free( win_list );
@@ -374,7 +384,6 @@ Var *get_phase_cycled_area_2d( Var *v )
 	long channel[ 2 ];
 	long num_windows;
 	long *win_list;
-	long seq_len;
 	long i, j;
 	int access;
 	double *data;
@@ -393,14 +402,12 @@ Var *get_phase_cycled_area_2d( Var *v )
 		first_time = UNSET;
 	}
 
-	if ( ! aseq[ 2 ]->defined )
+	if ( ! aseq[ 1 ]->defined )
 	{
 		eprint( FATAL, "%s:%ld: get_phase_cycled_area_2d(): Second "
 				"acquisition sequence (B) hasn't been defined.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
-
-	seq_len = aseq[ 1 ]->len;
 
 	/* Next step: check the parameter */
 
@@ -415,23 +422,20 @@ Var *get_phase_cycled_area_2d( Var *v )
 	   two are needed there must be two channel arguments */
 
 	need_A = need_B = UNSET;
-	for ( i = 0; i < seq_len; i++ )
-	{
-		if ( aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_A  ||
-			 aseq[ 0 ]->sequence[ i ] == ACQ_MINUS_A ||
-			 aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_A  ||
-			 aseq[ 1 ]->sequence[ i ] == ACQ_MINUS_A )
-			need_A = SET;
-		if ( aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_B  ||
-			 aseq[ 0 ]->sequence[ i ] == ACQ_MINUS_B ||
-			 aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_B  ||
-			 aseq[ 1 ]->sequence[ i ] == ACQ_MINUS_B )
-			need_B = SET;
-	}
-	channels_needed = ( need_A ^ need_B ) ? 1 : 2;
+	for ( i = 0; i < aseq[ 0 ]->len; i++ )
+		for ( j = 0; j < 2; j++ )
+		{
+			if ( aseq[ j ]->sequence[ i ] == ACQ_PLUS_A  ||
+				 aseq[ j ]->sequence[ i ] == ACQ_MINUS_A )
+				need_A = SET;
+			if ( aseq[ j ]->sequence[ i ] == ACQ_PLUS_B  ||
+				 aseq[ j ]->sequence[ i ] == ACQ_MINUS_B )
+				need_B = SET;
+		}
+	channels_needed = ( need_A && need_B ) ? 1 : 2;
 
-	/* The first parameter must be a channel number, ask digitizer module if
-	   it really is */
+	/* The first parameter must be a channel number in any case, ask digitizer
+	   module if it really is one */
 
 	if ( ! get_channel_number( v, "get_phase_cycled_area_2d", &channel[ 0 ] ) )
 	{
@@ -466,7 +470,7 @@ Var *get_phase_cycled_area_2d( Var *v )
 			v = vars_pop( v );
 	}
 
-	/* Now we got to count the remaining arguments on the stack to find out
+	/* Now we've got to count the remaining arguments on the stack to find out
 	   how many windows there are and build up the window list */
 
 	num_windows = 1;
@@ -480,19 +484,14 @@ Var *get_phase_cycled_area_2d( Var *v )
 
 	win_list = T_malloc( num_windows * sizeof( long ) );
 
-	if ( v != NULL )
+	TRY
 	{
-		for ( i = 0; i < num_windows; i++ )
+		if ( v != NULL )
 		{
-			TRY
+			for ( i = 0; i < num_windows; i++ )
 			{
 				vars_check( v, INT_VAR | FLOAT_VAR );
 				TRY_SUCCESS;
-			}
-			CATCH( EXCEPTION )
-			{
-				T_free( win_list );
-				THROW( EXCEPTION );
 			}
 
 			if ( v->type == INT_VAR )
@@ -506,83 +505,95 @@ Var *get_phase_cycled_area_2d( Var *v )
 
 			v = vars_pop( v );
 		}
+		else
+			win_list[ 0 ] = -1;              /* No window is to be used ! */
+
+		/* Also get memory for the data */
+
+		data = T_malloc( 2 * num_windows * sizeof( double ) );
+		TRY_SUCCESS;
 	}
-	else
-		win_list[ 0 ] = -1;              /* No window is to be used ! */
+	OTHERWISE
+	{
+		T_free( win_list );
+		PASSTHROU( );
+	}
 
-	/* Also get memory for the data */
-
-	data = T_malloc( 2 * num_windows * sizeof( double ) );
 	for ( i = 0; i < 2 * num_windows; i++ )
 		data[ i ] = 0.0;
 
 	/* Now we can really start. First we reset the phase sequence, then we
 	   run through the complete phase cycle */
 
-	vars_pop( func_call( func_get( "pulser_phase_reset", &access ) ) );
-	vars_pop( func_call( func_get( "pulser_update", &access ) ) );
-
-	for ( i = 0; i < seq_len; i++ )
+	TRY
 	{
-		vars_pop( func_call( func_get( "digitizer_start_acquisition",
-									   &access) ) );
+		vars_pop( func_call( func_get( "pulser_phase_reset", &access ) ) );
+		vars_pop( func_call( func_get( "pulser_update", &access ) ) );
 
-		for ( j = 0; j < num_windows; j++ )
+		for ( i = 0; i < aseq[ 0 ]->len; i++ )
 		{
-			/* Get pointer to the correct function */
+			vars_pop( func_call( func_get( "digitizer_start_acquisition",
+										   &access) ) );
 
-			if ( is_get_area_fast )
-				func_ptr = func_get( "digitizer_get_area_fast", &access );
-			else
-				func_ptr = func_get( "digitizer_get_area", &access );
-
-			/* Push the correct channel number onto the stack */
-
-			if ( aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_A ||
-				 aseq[ 0 ]->sequence[ i ] == ACQ_MINUS_A )
-				vars_push( INT_VAR, channel[ 0 ] );
-			else
-				vars_push( INT_VAR, channel[ 1 ] );
-
-			/* If window is to be used push its number onto stack */
-
-			if ( win_list[ 0 ] != -1 )
-				vars_push( INT_VAR, win_list[ j ] );
-				
-			/* Finally call the function */
-
-			vn = func_call( func_ptr );
-
-			/* Now add (or subtract the result */
-
-			if ( aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_A ||
-				 aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_B )
-				data[ 2 * j ] += vn->val.dval;
-			else
-				data[ 2 * j ] -= vn->val.dval;
-
-			/* If the second acquisition sequence uses the same digitizer
-			   channel we don't have to measure the area again... */
-
-			if ( ( ( aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_A || 
-					 aseq[ 1 ]->sequence[ i ] == ACQ_MINUS_A ) &&
-				   ( aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_A ||
-					 aseq[ 0 ]->sequence[ i ] == ACQ_MINUS_A ) ) ||
-				 ( ( aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_B ||
-					 aseq[ 1 ]->sequence[ i ] == ACQ_MINUS_B ) &&
-				   ( aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_B ||
-					 aseq[ 0 ]->sequence[ i ] == ACQ_MINUS_B ) ) )
+			for ( j = 0; j < num_windows; j++ )
 			{
-				if ( aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_A ||
-					 aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_B )
-					data[ 2 * j + 1 ] += vn->val.dval;
+				/* Get pointer to the correct function */
+
+				if ( is_get_area_fast )
+					func_ptr = func_get( "digitizer_get_area_fast", &access );
 				else
-					data[ 2 * j + 1 ] -= vn->val.dval;
+					func_ptr = func_get( "digitizer_get_area", &access );
 
-				vars_pop( vn );
-			}
-			else
-			{
+				/* Push the correct channel number onto the stack */
+
+				if ( aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_A ||
+					 aseq[ 0 ]->sequence[ i ] == ACQ_MINUS_A )
+					vars_push( INT_VAR, channel[ 0 ] );
+				else
+					vars_push( INT_VAR, channel[ 1 ] );
+
+				/* If window is to be used push its number onto stack */
+
+				if ( win_list[ 0 ] != -1 )
+					vars_push( INT_VAR, win_list[ j ] );
+
+				/* Finally call the function */
+
+				vn = func_call( func_ptr );
+
+				/* Now add (or subtract the result */
+
+				if ( aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_A ||
+					 aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_B )
+					data[ 2 * j ] += vn->val.dval;
+				else
+					data[ 2 * j ] -= vn->val.dval;
+
+				/* If the second acquisition sequence uses the same digitizer
+				   channel we don't have to measure the area again... */
+
+				if ( ( ( aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_A || 
+						 aseq[ 0 ]->sequence[ i ] == ACQ_MINUS_A ) &&
+					   ( aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_A ||
+						 aseq[ 1 ]->sequence[ i ] == ACQ_MINUS_A ) ) ||
+					 ( ( aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_B ||
+						 aseq[ 0 ]->sequence[ i ] == ACQ_MINUS_B ) &&
+					   ( aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_B ||
+						 aseq[ 1 ]->sequence[ i ] == ACQ_MINUS_B ) ) )
+				{
+					if ( aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_A ||
+						 aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_B )
+						data[ 2 * j + 1 ] += vn->val.dval;
+					else
+						data[ 2 * j + 1 ] -= vn->val.dval;
+
+					vars_pop( vn );
+					continue;
+				}
+
+				/* Otherwise we need to do a second measurement on the other
+				   channel (but using the same window) */
+
 				vars_pop( vn );
 
 				/* Get pointer to the correct function */
@@ -604,7 +615,7 @@ Var *get_phase_cycled_area_2d( Var *v )
 
 				if ( win_list[ 0 ] != -1 )
 					vars_push( INT_VAR, win_list[ j ] );
-				
+
 				/* Finally call the function */
 
 				vn = func_call( func_ptr );
@@ -619,16 +630,24 @@ Var *get_phase_cycled_area_2d( Var *v )
 
 				vars_pop( vn );
 			}
+
+			vars_pop( func_call( func_get( "pulser_next_phase", &access ) ) );
+			vars_pop( func_call( func_get( "pulser_update", &access ) ) );
 		}
 
-		vars_pop( func_call( func_get( "pulser_next_phase", &access ) ) );
-		vars_pop( func_call( func_get( "pulser_update", &access ) ) );
-	}
+		if ( win_list[ 0 ] == -1 || num_windows )
+			vn = vars_push( FLOAT_VAR, data[ 0 ] );
+		else
+			vn = vars_push( FLOAT_TRANS_ARR, data, aseq[ 0 ]->len );
 
-	if ( win_list[ 0 ] == -1 || num_windows )
-		vn = vars_push( FLOAT_VAR, data[ 0 ] );
-	else
-		vn = vars_push( FLOAT_TRANS_ARR, data, seq_len );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( data );
+		T_free( win_list );
+		PASSTHROU( );
+	}
 
 	T_free( data );
 	T_free( win_list );
