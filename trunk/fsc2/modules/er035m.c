@@ -767,7 +767,7 @@ static void er035m_set_resolution( int res_index )
 
 static bool er035m_command( const char *cmd )
 {
-	if ( gpib_write( er035m.device, cmd, strlen( cmd ) ) == FAILURE )
+	if ( gpib_write( nmr.device, cmd, strlen( cmd ) ) == FAILURE )
 		er035m_failure( );
 
 	return OK;

@@ -61,6 +61,7 @@ Var *gaussmeter_name( Var *v );
 Var *measure_field( Var *v );
 Var *gaussmeter_resolution( Var *v );
 Var *gaussmeter_probe_orientation( Var *v );
+Var *gaussmeter_command( Var *v );
 
 
 /* internally used functions */
@@ -68,6 +69,7 @@ Var *gaussmeter_probe_orientation( Var *v );
 static double er035m_sa_get_field( void );
 static int er035m_sa_get_resolution( void );
 static void er035m_sa_set_resolution( int res_index );
+static bool er035m_sa_command( const char *cmd );
 static void er035m_sa_failure( void );
 
 
@@ -529,6 +531,37 @@ Var *gaussmeter_resolution( Var *v )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *gaussmeter_command( Var *v )
+{
+	static char *cmd;
+
+
+	cmd = NULL;
+	vars_check( v, STR_VAR );
+	
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		TRY
+		{
+			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+			er035m_sa_command( cmd );
+			T_free( cmd );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( cmd );
+			RETHROW( );
+		}
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
 /*****************************************************************************/
 /*                                                                           */
 /*            internally used functions                                      */
@@ -656,6 +689,18 @@ static void er035m_sa_set_resolution( int res_index )
 
 	fsc2_usleep( ER035M_SA_WAIT, UNSET );
 
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool er035m_sa_command( const char *cmd )
+{
+	if ( gpib_write( nmr.device, cmd, strlen( cmd ) ) == FAILURE )
+		er035m_sa_failure( );
+
+	return OK;
 }
 
 
