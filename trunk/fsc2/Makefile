@@ -80,8 +80,11 @@ sources        = $(bison_sources:.y=.c) $(flex_sources:.flex=.c) \
 				 ${c_sources}
 objects        = $(sources:.c=.o)
 headers        = ${c_sources:.c=.h} global.h
-modules        = User_Functions.c sr510.c sr810.c s_band.c aeg_x_band.c \
-				 er035m.c er035m_s.c bh15.c hp8647a.c
+modules        = User_Functions.c \
+				 sr510.c sr530.c sr810.c \
+				 s_band.c aeg_x_band.c \
+				 er035m.c er035m_s.c bh15.c \
+				 hp8647a.c
 dg2020_f       = dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
 				 dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
 dg2020_b       = dg2020_b.c dg2020_gen_b.c dg2020_pulse_b.c dg2020_util_b.c \

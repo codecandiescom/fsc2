@@ -19,6 +19,7 @@ tds754a       // Tektronix digitizing oscilloscope
 tds520a       // Tektronix digitizing oscilloscope
 
 sr510         // Stanford Research lock-in amplifier
+sr530         // Stanford Research lock-in amplifier
 sr810         // Stanford Research lock-in amplifier
 
 s_band        // S-band AEG magnet power supply (Frankfurt)
