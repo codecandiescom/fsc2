@@ -445,13 +445,10 @@ hp8647a;
 sr510;
 keithley228a;\n";
 
-if ( $lockin eq "SR510" ) {
-	print F "\n";
-} else {
-	print F lc $lockin, ";\n\n";
-}
+print F lc $lockin, ";\n" unless $lockin eq "SR510";
 
-print F "VARIABLES:
+
+print F "\n\nVARIABLES:
 
 start_freq  = $start_freq MHz;
 end_freq    = $end_freq MHz;
