@@ -236,7 +236,7 @@ int func_list_parse( Func **fncts, int num_func )
 		( *fncts )[ cur ].to_be_loaded = SET;
 	}
 
-	/* Now parse file again */
+	/* Now parse the function database file again */
 
 	TRY
 	{
