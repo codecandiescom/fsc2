@@ -25,6 +25,15 @@
 */
 
 
+#if ! defined RULBUS_HEADER
+#define RULBUS_HEADER
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 /* Functions and variables for the whole library */
 
 int rulbus_open( void );
@@ -158,3 +167,11 @@ int rulbus_clock_set_frequency( int handle, int freq );
 #define RULBUS_INV_VLT  -47
 #define RULBUS_NO_EXT   -48
 #define RULBUS_TIM_OUT  -49
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+
+#endif /* ! RULBUS_HEADER */

@@ -25,6 +25,14 @@
 */
 
 
+#if ! defined RULBUS_LIB_HEADER
+#define RULBUS_LIB_HEADER
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -142,3 +150,11 @@ int rulbus_dac12_init( void );
 void rulbus_dac12_exit( void );
 int rulbus_dac12_card_init( int handle );
 void rulbus_dac12_card_exit( int handle );
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+
+#endif /* ! RULBUS_LIB_HEADER */
