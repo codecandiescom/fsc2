@@ -196,7 +196,7 @@ bool exp_layout( char *buffer, ptrdiff_t len )
 	{
 		writer( C_LAYOUT, len, buffer );
 		T_free( buffer );
-		return ( bool ) reader( NULL );
+		return reader( NULL ) ? SET : UNSET;
 	}
 	else
 	{
@@ -204,7 +204,7 @@ bool exp_layout( char *buffer, ptrdiff_t len )
 		long old_Lc = Lc;
 		Var *Func_ptr;
 		int acc;
-		void *pos;
+		char *pos;
 
 
 		/* Get variable with address of function to create a button */
@@ -220,7 +220,7 @@ bool exp_layout( char *buffer, ptrdiff_t len )
 		vars_push( INT_VAR, * ( ( long * ) pos ) );  /* get layout type */
 		pos += sizeof( long );
 
-		Fname = ( char * ) pos;                /* get current file name */
+		Fname = pos;                           /* get current file name */
 
 		/* Call the function */
 
@@ -267,7 +267,7 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
 		long val;
 		int acc;
 		long result[ 2 ];
-		void *pos;
+		char *pos;
 
 
 		/* Get variable with address of function to create a button */
@@ -288,14 +288,14 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
 			vars_push( INT_VAR, val );
 		pos += sizeof( long );
 
-		Fname = ( char * ) pos;                  /* get current file name */
-		pos += strlen( ( char * ) pos ) + 1;
+		Fname = pos;                             /* get current file name */
+		pos += strlen( pos ) + 1;
 
-		vars_push( STR_VAR, ( char * ) pos );    /* get label string */
-		pos += strlen( ( char * ) pos ) + 1;
+		vars_push( STR_VAR, pos );               /* get label string */
+		pos += strlen( pos ) + 1;
 
-		if ( *( ( char * ) pos ) != '\0' )       /* get help text */
-			vars_push( STR_VAR, ( char * ) pos );
+		if ( *pos != '\0' )                      /* get help text */
+			vars_push( STR_VAR, pos );
 
 		/* Call the function */
 
@@ -338,7 +338,7 @@ bool exp_bdelete( char *buffer, ptrdiff_t len )
 		long old_Lc = Lc;
 		Var *Func_ptr;
 		int acc;
-		void *pos;
+		char *pos;
 
 
 		/* Get variable with address of function to create a button */
@@ -354,7 +354,7 @@ bool exp_bdelete( char *buffer, ptrdiff_t len )
 		vars_push( INT_VAR, * ( ( long * ) pos ) );
 		pos += sizeof( long );
 
-		Fname = ( char * ) pos;                /* get current file name */
+		Fname = pos;                           /* get current file name */
 
 		/* Call the function */
 
@@ -395,7 +395,7 @@ long exp_bstate( char *buffer, ptrdiff_t len )
 		Var *Func_ptr;
 		Var *ret = NULL;
 		int acc;
-		void *pos;
+		char *pos;
 
 		/* Get variable with address of function to create a button */
 
@@ -415,7 +415,7 @@ long exp_bstate( char *buffer, ptrdiff_t len )
 			vars_push( INT_VAR, val );
 		pos += sizeof( long );
 
-		Fname = ( char * ) pos;                /* get current file name */
+		Fname = pos;                           /* get current file name */
 
 		/* Call the function */
 
@@ -462,7 +462,7 @@ long *exp_screate( char *buffer, ptrdiff_t len )
 		Var *ret = NULL;
 		int acc;
 		long result[ 2 ];
-		void *pos;
+		char *pos;
 
 
 		/* Get variable with address of function to create a button */
@@ -487,14 +487,14 @@ long *exp_screate( char *buffer, ptrdiff_t len )
 		vars_push( FLOAT_VAR, *( ( double * ) pos ) );
 		pos += sizeof( double );
 
-		Fname = ( char * ) pos;                  /* get current file name */
-		pos += strlen( ( char * ) pos ) + 1;
+		Fname = pos;                             /* get current file name */
+		pos += strlen( pos ) + 1;
 
-		vars_push( STR_VAR, ( char * ) pos );    /* get label string */
-		pos += strlen( ( char * ) pos ) + 1;
+		vars_push( STR_VAR, pos );               /* get label string */
+		pos += strlen( pos ) + 1;
 
-		if ( *( ( char * ) pos ) != '\0' )       /* get help text */
-			vars_push( STR_VAR, ( char * ) pos );
+		if ( *pos != '\0' )                      /* get help text */
+			vars_push( STR_VAR, pos );
 
 		/* Call the function */
 
@@ -537,7 +537,7 @@ bool exp_sdelete( char *buffer, ptrdiff_t len )
 		long old_Lc = Lc;
 		Var *Func_ptr;
 		int acc;
-		void *pos;
+		char *pos;
 
 
 		/* Get variable with address of function to create a button */
@@ -553,7 +553,7 @@ bool exp_sdelete( char *buffer, ptrdiff_t len )
 		vars_push( INT_VAR, *( ( long * ) pos ) );
 		pos += sizeof( long );
 
-		Fname = ( char * ) pos;                /* get current file name */
+		Fname = pos;                           /* get current file name */
 
 		/* Call the function */
 
