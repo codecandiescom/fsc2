@@ -701,7 +701,7 @@ double sr510_get_tc( void )
 	}
 
 	buffer[ length - 2 ] = '\0';
-	return tcs[ atoi( buffer ) - 1 ];
+	return tcs[ T_atol( buffer ) - 1 ];
 }
 
 
@@ -775,20 +775,13 @@ double sr510_get_phase( void )
 	}
 
 	buffer[ length - 2 ] = '\0';
-fprintf( stderr, "Phase = %s\n", buffer );
-
 	phase = T_atof( buffer );
 
 	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
 		phase -= 360.0;
 
-	if ( phase < 0.0 )
-	{
-		phase *= -1.0;
-		while ( phase >= 360.0 )    /* convert to 0-359 degree range */
-			phase -= 360.0;
-		phase = 360.0 - phase;
-	}
+	while ( phase < 0.0 )
+		phase += 360.0;
 
 	return phase;
 }
