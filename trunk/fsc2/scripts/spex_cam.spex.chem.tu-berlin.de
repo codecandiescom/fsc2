@@ -448,11 +448,12 @@ EOF
 		main::show_message( "Can't start fsc2" );
 		return;
 	}
+
 	$reply = <$g>;
 	close $g;
 	unlink $fn;
 
-	if ( defined $reply and $reply =~ /$Please press the "REMOTE" button/ ) {
+	if ( defined $reply and $reply =~ /^Please press the "REMOTE" button/ ) {
 		main::show_message( "Please press the \"REMOTE\" button at\n" .
 							"the console to allow computer control\n" .
 							"of the monochromator." );
@@ -503,7 +504,7 @@ EOF
 	main::show_message( "Can't set monochromators laser line" )
 		  if defined $reply;
 
-	if ( $reply =~ /$Please press the "REMOTE" button/ ) {
+	if ( $reply =~ /^Please press the "REMOTE" button/ ) {
 		main::show_message( "Please press the \"REMOTE\" button at\n" .
 							"the console to allow computer control\n" .
 							"of the monochromator." );
@@ -1673,7 +1674,7 @@ EOF
 	close $g;
 	unlink $fn;
 
-	if ( defined $reply and $reply =~ /$Please press the "REMOTE" button/ ) {
+	if ( defined $reply and $reply =~ /^Please press the "REMOTE" button/ ) {
 		main::show_message( "Please press the \"REMOTE\" button at\n" .
 							"the console to allow computer control\n" .
 							"of the monochromator." );
@@ -3440,7 +3441,7 @@ EOF
 	unlink $fn;
 
 	if ( defined $res[ 0 ] and
-		 $res[ 0 ] =~ /$Please press the "REMOTE" button/ ) {
+		 $res[ 0 ] =~ /^Please press the "REMOTE" button/ ) {
 		main::show_message( "Please press the \"REMOTE\" button at\n" .
 							"the console to allow computer control\n" .
 							"of the monochromator." );
