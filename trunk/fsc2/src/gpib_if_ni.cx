@@ -1211,21 +1211,12 @@ static void close_on_exec_hack( int *fd_list )
 
 	for ( i = 0; new_fd_list[ i ] != -1; i++ )
 	{
-		found = UNSET;
-		for ( j = 0; fd_list[ j ] != -1; j++ )
-			if ( new_fd_list[ i ] == fd_list[ j ] )
-			{
-				found = SET;
-				break;
-			}
+		for ( found = UNSET, j = 0; fd_list[ j ] != -1 && ! found; j++ )
+			found = new_fd_list[ i ] == fd_list[ j ];
 
-		if ( found )
-			continue;
-
-		if ( ( flags = fcntl( new_fd_list [ i ], F_GETFD, 0 ) ) < 0 )
-			continue;
-
-		fcntl( new_fd_list [ i ], F_SETFD, flags | FD_CLOEXEC );
+		if ( ! found &&
+			 ( flags = fcntl( new_fd_list [ i ], F_GETFD, 0 ) ) != -1 )
+			fcntl( new_fd_list [ i ], F_SETFD, flags | FD_CLOEXEC );
 	}
 
 	T_free( new_fd_list );
