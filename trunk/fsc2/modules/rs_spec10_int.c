@@ -40,8 +40,11 @@ static void rs_spec10_ccd_init( void );
 static void rs_spec10_temperature_init( void );
 
 
-/*-----------------------------------------*/
-/*-----------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Function for initializing everything related to the camera. It first */
+/* tries to find the camera, then opens the device file and finally     */
+/* initializes it and temperature control system.                       */
+/*----------------------------------------------------------------------*/
 
 void rs_spec10_init_camera( void )
 {
@@ -97,8 +100,12 @@ void rs_spec10_init_camera( void )
 }
 
 
-/*-----------------------------------------*/
-/*-----------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Function for initializing the camera. Several properties are compared */
+/* to the values from the configuration file for the module (deviations  */
+/* resulting in an exception) and then several default settings are made */
+/* and capabilities of the camera determined.                            */
+/*-----------------------------------------------------------------------*/
 
 static void rs_spec10_ccd_init( void )
 {
@@ -333,8 +340,9 @@ static void rs_spec10_ccd_init( void )
 }
 
 
-/*-----------------------------------------*/
-/*-----------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* Function for initializing the temperature control system of the camera */
+/*------------------------------------------------------------------------*/
 
 static void rs_spec10_temperature_init( void )
 {
@@ -473,7 +481,7 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 	   the program when these data files are not found. Thus we must make
 	   sure they can get loaded by temporarily switching to the directory
 	   where the files reside. Hopefully, this problem will go away in
-	   the near future... */
+	   the future versions of the library (but don't hold your breath). */
 
 	getcwd( cur_dir, PATH_MAX );
 	chdir( PVCAM_DATA_DIR );
