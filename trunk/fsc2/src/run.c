@@ -37,6 +37,7 @@ extern FL_resource xresources[ ];             /* from xinit.c */
 /* Routines of the main process exclusively used in this file */
 
 static bool start_gpib_and_rulbus( void );
+static void startup_error_while_iconified( void );
 static bool no_prog_to_run( void );
 static bool init_devs_and_graphics( void );
 static void stop_while_exp_hook( FL_OBJECT *a, long b );
@@ -100,6 +101,10 @@ bool run( void )
 		if ( Internals.cmdline_flags & DO_CHECK ||
 			 Internals.cmdline_flags & BATCH_MODE )
 			fl_trigger_object( GUI.main_form->quit );
+
+		if ( Internals.cmdline_flags & ICONIFIED_RUN )
+			startup_error_while_iconified( );
+
 		return FAIL;
 	}
 
@@ -108,18 +113,30 @@ bool run( void )
 	Internals.state = STATE_RUNNING;
 
 	if ( ! start_gpib_and_rulbus( ) )
+	{
+		if ( Internals.cmdline_flags & ICONIFIED_RUN )
+			startup_error_while_iconified( );
 		return FAIL;
+	}
 
 	/* If there are no commands but an EXPERIMENT section label we just run
 	   all the init hooks, then the exit hooks and are already done. */
 
 	if ( EDL.prg_token == NULL )
+	{
+		if ( Internals.cmdline_flags & ICONIFIED_RUN )
+			startup_error_while_iconified( );
 		return no_prog_to_run( );
+	}
 
 	/* Initialize devices and graphics */
 
 	if ( ! init_devs_and_graphics( ) )
+	{
+		if ( Internals.cmdline_flags & ICONIFIED_RUN )
+			startup_error_while_iconified( );
 		return FAIL;
+	}
 
 	/* Setup the signal handlers for signals used for communication between
 	   parent and child process and an idle callback function for displaying
@@ -171,6 +188,17 @@ bool run( void )
 	sigprocmask( SIG_SETMASK, &old_mask, NULL );
 	fork_failure( stored_errno );
 	return FAIL;
+}
+
+
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+static void startup_error_while_iconified( void )
+{
+	Internals.cmdline_flags &= ~ ICONIFIED_RUN;
+	fl_raise_form( GUI.main_form->fsc2 );
+	XMapWindow( fl_get_display( ), GUI.main_form->fsc2->window );
 }
 
 
@@ -462,6 +490,9 @@ static void fork_failure( int stored_errno )
 {
 	sigaction( SIGCHLD,  &sigchld_old_act,  NULL );
 	sigaction( QUITTING, &quitting_old_act, NULL );
+
+	if ( Internals.cmdline_flags & ICONIFIED_RUN )
+		startup_error_while_iconified( );
 
 	switch ( stored_errno )
 	{

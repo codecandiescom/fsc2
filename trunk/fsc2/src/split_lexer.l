@@ -205,6 +205,13 @@ bool scan_main( const char *name, FILE *fp )
 
 	YY_FLUSH_BUFFER;
 
+	if ( split_error != OK && Internals.cmdline_flags & ICONIFIED_RUN )
+	{
+		Internals.cmdline_flags &= ~ ICONIFIED_RUN;
+		fl_raise_form( GUI.main_form->fsc2 );
+		XMapWindow( fl_get_display( ), GUI.main_form->fsc2->window );
+	}
+
 	return split_error;
 }
 

@@ -192,6 +192,15 @@ started without the need for further user input.
 @item @option{-B}
 Starts @code{fsc2} in batch mode, see discussion above.
 
+@item @option{-I}
+
+Starts @code{fsc2} in graphics mode but with the main window being
+iconified. After a syntax check the experiment is started imediately.
+If the main window is still iconified when the experiment display
+window gets closed @code{fsc2} is also quit. On syntax or other
+errors in the @code{EDL} script the main window gets automatically
+de-iconified so that the error messages become readable.
+
 @item @option{-ng}
 Does both the test run as well as the experiment for the input
 @code{EDL} file without using any graphics. Afterwards @code{fsc2}
