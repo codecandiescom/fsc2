@@ -93,6 +93,7 @@
 #include "graph_handler_1d.h"
 #include "graph_handler_2d.h"
 #include "print.h"
+#include "interactive.h"
 
 
 /* The diverse lexers */
