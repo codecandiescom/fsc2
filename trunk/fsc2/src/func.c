@@ -15,6 +15,8 @@ typedef struct {
 } DPoint;
 
 
+static int func_cmp1( const void *a, const void *b );
+static int func_cmp2( const void *a, const void *b );
 static void f_wait_alarm_handler( int sig_type );
 static DPoint *eval_display_args( Var *v, int *npoints );
 static int get_save_file( Var **v, const char *calling_function );
@@ -99,9 +101,9 @@ Var *f_save_p(  Var *v );
 Var *f_save_o(  Var *v );
 Var *f_save_c(  Var *v );
 
+
 /* The following variables are shared with loader.c which adds further 
    functions from the loaded modules */
-
 
 int Num_Def_Func;    /* number of built-in functions */
 int Num_Func;        /* number of built-in and listed functions */
@@ -172,10 +174,11 @@ bool functions_init( void )
 	Num_Func = Num_Def_Func;
 
 	/*
-	   1. Get new memory for the functions structures and copy the built in
+	   1. Get new memory for the functions structures and copy the built-in
 	      functions into it.
 	   2. Parse the function name data base `Functions' where all additional
 	      functions have to be listed.
+	   3. Sort the functions by name so that they can be found using bsearch()
 	*/
 
 	TRY
@@ -184,6 +187,7 @@ bool functions_init( void )
 		Fncts = T_malloc( ( Num_Def_Func + 1 ) * sizeof( Func ) );
 		memcpy( Fncts, Def_Fncts, ( Num_Def_Func + 1 ) * sizeof( Func ) );
 		func_list_parse( &Fncts, Num_Def_Func, &Num_Func );
+		qsort( Fncts, Num_Func, sizeof( Func ), func_cmp1 );
    		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -193,6 +197,12 @@ bool functions_init( void )
 	}
 
 	return OK;
+}
+
+
+static int func_cmp1( const void *a, const void *b )
+{
+	return strcmp( ( ( Func * ) a )->name, ( ( Func * ) b )->name );
 }
 
 
@@ -208,11 +218,13 @@ void functions_exit( void )
 	if ( Fncts == NULL )
 		return;
 
-	/* Get rid of the structures for the functions */
+	/* Get rid of the structures for the loaded functions (but not the
+	   built-in ones) */
 
-	for ( i = Num_Def_Func; i < Num_Func; i++ )
-		if ( Fncts[ i ].name != NULL )
+	for ( i = 0; i < Num_Func; i++ )
+		if ( Fncts[ i ].to_be_loaded && Fncts[ i ].name != NULL )
 			T_free( ( char * ) Fncts[ i ].name );
+
 	T_free( Fncts );
 	Fncts = NULL;
 
@@ -237,7 +249,7 @@ Var *func_get( const char *name, int *access )
 
 Var *func_get_long( const char *name, int *access, bool flag )
 {
-	int i;
+	Func *f;
 	Var *ret;
 
 
@@ -245,30 +257,35 @@ Var *func_get_long( const char *name, int *access, bool flag )
 	   the variable stack with a pointer to the function and the number of
 	   arguments. Also copy the functions name and access flag. */
 
-	for ( i = 0; i < Num_Func; i++ )
-	{
-		if ( Fncts[ i ].name != NULL && ! strcmp( Fncts[ i ].name, name ) )
-		{
-			if ( Fncts[ i ].fnct == NULL )
-			{
-				if ( ! flag )
-				{
-					eprint( FATAL, "%s:%ld: Function `%s' has not been "
-							"loaded.\n", Fname, Lc, Fncts[ i ].name );
-					THROW( EXCEPTION );
-				}
-				return NULL;
-			}
-						
-			ret = vars_push( FUNC, Fncts[ i ].fnct );
-			ret->name = get_string_copy( name );
-			ret->dim = Fncts[ i ].nargs;
-			*access = Fncts[ i ].access_flag;
-			return ret;
-		}
-	}
+	f = bsearch( name, Fncts, Num_Func, sizeof( Func ), func_cmp2 );
 
-	return NULL;
+	if ( f == NULL )             /* function not found */
+		return NULL;
+
+	if ( f->fnct == NULL )       /* function found but not loaded */
+	{
+		if ( ! flag )            /* some callers do their own error handling */
+		{
+			eprint( FATAL, "%s:%ld: Function `%s' has not been "
+					"loaded.\n", Fname, Lc, f->name );
+			THROW( EXCEPTION );
+		}
+		else
+			return NULL;
+	}
+	
+	ret = vars_push( FUNC, f->fnct );
+	ret->name = get_string_copy( name );
+	ret->dim = f->nargs;
+	*access = f->access_flag;
+
+	return ret;
+}
+
+
+static int func_cmp2( const void *a, const void *b )
+{
+	return strcmp( ( char * ) a, ( ( Func * ) b )->name );
 }
 
 
