@@ -23,6 +23,7 @@
 
 
 #include "fsc2.h"
+#include "serial.h"
 #include "gpib_if.h"
 
 
@@ -155,11 +156,12 @@ bool run( void )
 		fl_set_object_callback( main_form->run, run_file, 0 );
 
 		run_end_of_exp_hooks( );
-
 		vars_del_stack( );             /* some stack variables might be left
 										  over when an exception got thrown */
 		if ( need_GPIB )
 			gpib_shutdown( );
+		fsc2_serial_cleanup( );
+
 		set_buttons_for_run( 1 );
 		stop_graphics( );
 		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
