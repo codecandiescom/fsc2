@@ -465,7 +465,46 @@ Var *pulser_next_phase( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_reset( Var *v )
+Var *pulser_phase_reset( Var *v )
+{
+	FUNCTION *f;
+
+
+	if ( v == NULL )
+	{
+		pulser_next_phase( vars_push( INT_VAR, 1 ) );
+		pulser_next_phase( vars_push( INT_VAR, 2 ) );
+	}
+
+	for ( ; v != NULL; v = vars_pop( v ) )
+	{
+		vars_check( v, INT_VAR );
+		if ( v->val.lval != 1 && v->val.lval != 2 )
+		{
+			eprint( FATAL, "%s:%ld: DG2020: Invalid phase number: %ld.\n",
+					Fname, Lc, v->val.lval );
+			THROW( EXCEPTION );
+		}
+
+		f = &dg2020.function[ v->val.lval == 1 ? PULSER_CHANNEL_PHASE_1 :
+							  PULSER_CHANNEL_PHASE_2 ];
+		vars_pop( v );
+
+		if ( ! dg2020_channel_assign( f->channel[ 0 ]->self, f->pod->self ) ||
+			 ! dg2020_channel_assign( f->channel[ 1 ]->self, f->pod2->self ) )
+			return vars_push( INT_VAR, 0 );
+
+		f->next_phase = 2;
+	}
+
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_pulse_reset( Var *v )
 {
 	PULSE *p;
 	bool was_active;
