@@ -49,6 +49,7 @@
 	fi
 
 $(##:.c=.o): %.o: %.c ##.h $(cdir)/##.conf $(src_headers)
+	incl="$(foreach i,$(##_incl),-I$(i))";                       \
 	$(CC) $(CFLAGS) -c $(LFLAGS) $< -o $@
 
 # The replacement of 'ECHO' by 'FLEX_ECHO' in the files created by flex is
