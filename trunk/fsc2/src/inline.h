@@ -27,6 +27,23 @@
 /* to be a good idea...                                             */
 /********************************************************************/
 
+inline void raise_permissions( void );
+inline void lower_permissions( void );
+inline short d2shrt( double a );
+inline short i2shrt( int a );
+inline unsigned short d2ushrt( double a );
+inline unsigned short i2ushrt( int a );
+inline int i_max( int a, int b );
+inline int i_min( int a, int b );
+inline long l_max( long a, long b );
+inline long l_min( long a, long b );
+inline float f_max( float a, float b );
+inline float f_min( float  a, float  b );
+inline double d_max( double a, double b );
+inline double d_min( double a, double b );
+inline size_t s_min( size_t a, size_t b );
+inline long lrnd( double x );
+inline int irnd( double x );
 
 /*---------------------------------------------------------------------*/
 /* The program starts with the EUID and EGID set to the ones of fsc2,  */
