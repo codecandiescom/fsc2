@@ -70,7 +70,7 @@ int spectrapro_300i_exp_hook( void )
 	if ( ! spectrapro_300i.is_needed )
 		return 1;
 
-	spectrapro_300i_open( );
+//	spectrapro_300i_open( );
 
 	spectrapro_300i.use_calib = 0;
 
@@ -86,7 +86,7 @@ int spectrapro_300i_end_of_exp_hook( void )
 	if ( ! spectrapro_300i.is_needed || ! spectrapro_300i.is_open )
 		return 1;
 
-	spectrapro_300i_close( );
+//	spectrapro_300i_close( );
 
 	return 1;
 }
@@ -162,10 +162,9 @@ Var *monochromator_grating( Var *v )
 	too_many_arguments( v );
 
 	if ( FSC2_MODE == EXPERIMENT )
-	{
 		spectrapro_300i_set_grating( grating );
-		spectrapro_300i.current_grating = grating - 1;
-	}
+
+	spectrapro_300i.current_grating = grating - 1;
 
 	return vars_push( INT_VAR, grating );
 }
@@ -623,6 +622,196 @@ Var *monochromator_wavelength_axis( Var * v )
 	cv->val.dpnt[ 1 ] = ( wl_hi - wl_low ) / num_pixels;
 
 	return cv;
+}
+
+
+/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+
+Var *monochromator_wavelength_to_pixel( Var *v )
+{
+	double wl;
+	double nx;
+	Var *cv;
+	long num_pixels;
+	int acc;
+
+
+	wl = get_double( v, "wavelength" );
+
+	cv = func_call( func_get( "ccd_camera_pixel_area", &acc ) );
+
+	if ( cv->type != INT_ARR ||
+		 cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
+	{
+		print( FATAL, "Function of CCD for determining the size of the chip "
+			   "does not return a useful value.\n" );
+		THROW( EXCEPTION );
+	}
+
+	num_pixels = cv->val.lpnt[ 0 ];
+	vars_pop( cv );
+
+	cv = monochromator_wavelength_axis( NULL );
+	nx = ( wl - cv->val.dpnt[ 0 ] ) / cv->val.dpnt[ 1 ]
+		 - 0.5 * ( num_pixels - 1 );
+	vars_pop( cv );
+
+	return vars_push( FLOAT_VAR, nx );
+}
+
+
+/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+
+Var *monochromator_pixel_to_wavelength( Var *v )
+{
+	double wl;
+	double nx;
+	Var *cv;
+	long num_pixels;
+	int acc;
+
+
+	nx = get_double( v, "pixel position" );
+
+	cv = func_call( func_get( "ccd_camera_pixel_area", &acc ) );
+
+	if ( cv->type != INT_ARR ||
+		 cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
+	{
+		print( FATAL, "Function of CCD for determining the size of the chip "
+			   "does not return a useful value.\n" );
+		THROW( EXCEPTION );
+	}
+
+	num_pixels = cv->val.lpnt[ 0 ];
+	vars_pop( cv );
+
+	cv = monochromator_wavelength_axis( NULL );
+	wl = ( nx + 0.5 * ( num_pixels - 1 ) ) * cv->val.dpnt[ 1 ]
+		 + cv->val.dpnt[ 0 ];
+	vars_pop( cv );
+
+	return vars_push( FLOAT_VAR, wl );
+}
+
+
+/*------------------------------------------------------------------*/
+/* Function allows to set a new calibration for one of the gratings */
+/* manually, i.e. instead of reading them from a file. It expects   */
+/* five arguments:                                                  */
+/* 1. grating number (grating must be installed)                    */
+/* 2. pixel offset                                                  */
+/* 3. inclusion angle                                               */
+/* 4. focal length                                                  */
+/* 5. detector angle                                                */
+/*------------------------------------------------------------------*/
+
+Var *monochromator_set_calibration( Var *v )
+{
+	long grating;
+	double offset;
+	double inclusion_angle;
+	double focal_length;
+	double detector_angle;
+	int i;
+
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	grating = get_strict_long( v, "grating number" );
+	if ( grating < 1 && grating > MAX_GRATINGS )
+	{
+		print( FATAL, "Invalid grating number, must be in range between "
+			   "1 and %d.\n", MAX_GRATINGS );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! spectrapro_300i.grating[ grating - 1 ].is_installed )
+	{
+		print( FATAL, "Grating #%ld isn't installed.\n", grating );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( v->type == STR_VAR )
+	{
+		if ( strcasecmp( v->val.sptr, "OFF" ) )
+		{
+			print( FATAL, "Invalid second argument.\n" );
+			THROW( EXCEPTION );
+		}
+		
+		too_many_arguments( v );
+
+		spectrapro_300i.grating[ grating - 1 ].is_calib = UNSET;
+
+		spectrapro_300i.use_calib = UNSET;
+		for ( i = 0; i < MAX_GRATINGS; i++ )
+			if ( spectrapro_300i.grating[ grating - 1 ].is_calib )
+				spectrapro_300i.use_calib = SET;
+
+		return vars_push( INT_VAR, 1 );
+	}
+
+	offset = get_double( v, "pixel offset" );
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	inclusion_angle = get_double( v, "inclusion angle" );
+	if ( inclusion_angle <= 0.0 )
+	{
+		print( FATAL, "Invalid inclusion angle.\n" );
+		THROW( EXCEPTION );
+	}
+	inclusion_angle *= atan( 1.0 ) / 45.0;
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	focal_length = get_double( v, "focal length" );
+	if ( focal_length <= 0.0 )
+	{
+		print( FATAL, "Invalid focal_length.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+	
+	detector_angle = get_double( v, "detector angle" );
+	detector_angle *= atan( 1.0 ) / 45.0;
+
+	too_many_arguments( v );
+
+	spectrapro_300i.grating[ grating - 1 ].n0 = offset;
+	spectrapro_300i.grating[ grating - 1 ].inclusion_angle = inclusion_angle;
+	spectrapro_300i.grating[ grating - 1 ].focal_length = focal_length;
+	spectrapro_300i.grating[ grating - 1 ].detector_angle = detector_angle;
+	spectrapro_300i.grating[ grating - 1 ].is_calib = SET;
+	spectrapro_300i.use_calib = SET;
+
+	return vars_push( INT_VAR, 1 );
 }
 
 
