@@ -22,17 +22,17 @@ Var *pulser_start( Var *v );
 
 /* Definitions needed for the pulser*/
 
-#define Ticks long
+#define Ticks long              // for times in units of the pulsers time base
 
 
-#define MIN_TIMEBASE            5.0e-9     /* 5 ns */
-#define MAX_TIMEBASE            0.1        /* 0.1 s */
+#define MIN_TIMEBASE            5.0e-9     // minimum pulser time base: 5 ns
+#define MAX_TIMEBASE            0.1        // maximum pulser time base: 0.1 s
 
-#define MAX_PODS                12
-#define MAX_CHANNELS            36
+#define MAX_PODS                12         // number of pods
+#define MAX_CHANNELS            36         // number of channels
 
 
-# define MIN_POD_HIGH_VOLTAGE  -2.0  /* Data for P3420 (Variable Output Pod) */
+# define MIN_POD_HIGH_VOLTAGE  -2.0     // data for P3420 (Variable Output Pod)
 # define MAX_POD_HIGH_VOLTAGE   7.0
 
 # define MIN_POD_LOW_VOLTAGE   -3.0
@@ -48,9 +48,13 @@ Var *pulser_start( Var *v );
 
 
 
-#define MIN_BLOCK_SIZE     64     /* minimum length of block */
-#define MAX_BLOCK_REPEATS  65536  /* maximum of repeats of block in sequence */
-#define MAX_PULSER_BITS    65536  /* maximum number of bits in channel */
+#define MIN_BLOCK_SIZE     64     // minimum length of a block
+#define MAX_BLOCK_REPEATS  65536  // maximum of repeats of block in sequence
+#define MAX_PULSER_BITS    65536  // maximum number of bits in channel
+
+
+#define START ( ( bool ) 0 )
+#define STOP  ( ( bool ) 1 )
 
 
 
@@ -111,15 +115,15 @@ typedef struct _C_ {
 
 typedef struct
 {
-	int device;              /* GPIB number of the device */
+	int device;              // GPIB number of the device
 
-	double timebase;
+	double timebase;         // time base of the digitizer
 	bool is_timebase;
 
-	int trig_in_mode;        /* EXTERNAL or INTERNAL */
-	int trig_in_slope;       /* only in EXTERNAL mode */
-	double trig_in_level;    /* only in EXTERNAL mode */
-	Ticks repeat_time;       /* only in INTERNAL mode */
+	int trig_in_mode;        //	EXTERNAL or INTERNAL
+	int trig_in_slope;       //	only in EXTERNAL mode
+	double trig_in_level;    //	only in EXTERNAL mode
+	Ticks repeat_time;       //	only in INTERNAL mode
 
 	bool is_trig_in_mode;
 	bool is_trig_in_slope;
@@ -130,52 +134,64 @@ typedef struct
 	POD pod[ MAX_PODS ];
 	CHANNEL channel[ MAX_CHANNELS ];
 
-	int needed_channels;
+	int needed_channels;     // number of channels that are going to be needed
+	                         // for the experiment
 
-	bool need_update;
-	bool is_running;
+	bool need_update;        // set if pulse properties have been changed in
+                             // test run or experiment
+	bool is_running;         // set if the pulser is in run mode
+
 } DG2020;
 
 
 typedef struct _p_ {
 
-	long num;
+	long num;                // number of the pulse (pulses used fro realize
+                             // phase cycling have negative, normal pulses
+	                         // positive numbers
 
 	struct _p_ *next;
 	struct _p_ *prev;
 
-	FUNCTION *function;
-	Ticks pos;
-	Ticks len;
-	Ticks dpos;
+	FUNCTION *function;      // function the pulse is associated with
+
+	Ticks pos;               // current position, length, position change and
+	Ticks len;               // length change of pulse (in units of the pulsers
+	Ticks dpos;              // time base)
 	Ticks dlen;
-	Phase_Sequence *pc;
-	Ticks maxlen;
-	long num_repl;
-	long *repl_list;
 
-	bool is_a_repl;
+	Phase_Sequence *pc;      // the pulse sequence to be used for the pulse
+	                         // (or NULL if none is to be used)
+	Ticks maxlen;            // maximum length of the pulse (only to be used
+                             // together with replacement pulses)
+	long num_repl;           // number of replacement pulses
+	long *repl_list;         // array of the numbers of the replacement pulses
 
-	bool is_function;
-	bool is_pos;
+	bool is_a_repl;          // set if the pulse is a replacement pulse
+
+	bool is_function;        // flags that are set when the corresponding
+	bool is_pos;             // property has been set
 	bool is_len;
 	bool is_dpos;
 	bool is_dlen;
 	bool is_maxlen;
 
-	Ticks initial_pos;
-	Ticks initial_len;
+	Ticks initial_pos;       // position, length, position change and length
+	Ticks initial_len;       // change at the start of the experiment
 	Ticks initial_dpos;
 	Ticks initial_dlen;
 
-	Ticks old_pos;
-	Ticks old_len;
+	Ticks old_pos;           // position and length of pulse before a change
+	Ticks old_len;           // is applied
 
-	CHANNEL **channel;           // list of channels the pulse belongs to
+	CHANNEL **channel;       // list of channels the pulse belongs to
 
-	struct _p_ *for_pulse;
+	struct _p_ *for_pulse;   // only for phase cycling pulses: the pulse the
+	                         // phase cycling pulse is used for
 
-	bool need_update;
+	bool need_update;        // set if the pulses properties have been changed
+                             // in test run or experiment
+
 } PULSE;
 
 
@@ -229,7 +245,6 @@ static PULSE *get_pulse( long pnum );
 static const char *ptime( double time );
 static const char *pticks( Ticks ticks );
 static void check_consistency( void );
-
 
 static void basic_pulse_check( void );
 static void basic_functions_check( void );

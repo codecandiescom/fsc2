@@ -19,16 +19,16 @@ static PULSE *Pulses = NULL;
 
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*---------------------------------------------------------------------------
+  This function is called directly after all modules are loaded. Its main
+  function is to initialize all global variables that are needed in the
+  module.
+---------------------------------------------------------------------------*/
 
 int dg2020_init_hook( void )
 {
 	int i;
 
-
-	dg2020.need_update = UNSET;
-	dg2020.is_running = UNSET;
 
 	/* First we test that the name entry in the pulser structure is NULL,
 	   otherwise we've got to assume, that another pulser driver has already
@@ -103,7 +103,7 @@ int dg2020_init_hook( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		dg2020.function[ i ].self = i;
+		dg2020.function[ i ].self = PULSER_CHANNEL_FUNC_MIN + i;
 		dg2020.function[ i ].is_used = UNSET;
 		dg2020.function[ i ].is_needed = UNSET;
 		dg2020.function[ i ].pod = NULL;
@@ -177,9 +177,9 @@ int dg2020_exp_hook( void )
 
 
 
-	/* Finally we start the pulser */
+	/* Finally we switch the pulser into run mode */
 
-	if ( ! dg2020_run( 1 ) )
+	if ( ! dg2020_run( START ) )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
 				"failed.\n", Fname, Lc );
@@ -2037,7 +2037,7 @@ static bool change_pulse_position( long pnum, double time )
 
 	/* stop the pulser */
 	
-	if ( ! TEST_RUN && ! dg2020_run( 0 ) )
+	if ( ! TEST_RUN && ! dg2020_run( STOP ) )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
 				"failed.\n", Fname, Lc );
@@ -2071,7 +2071,7 @@ static bool change_pulse_length( long pnum, double time )
 
 	/* stop the pulser */
 	
-	if ( ! TEST_RUN && ! dg2020_run( 0 ) )
+	if ( ! TEST_RUN && ! dg2020_run( STOP ) )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
 				"failed.\n", Fname, Lc );
@@ -2130,9 +2130,11 @@ Var *pulser_start( Var *v )
 			do_update( );
 	}
 
+	/* If we're doing a real experiment also tell the pulser to start */
+
 	if ( ! TEST_RUN )
 	{
-		if ( ! dg2020_run( 1 ) )
+		if ( ! dg2020_run( START ) )
 		{
 			eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
 					"failed.\n", Fname, Lc );
@@ -2165,6 +2167,8 @@ static void do_checks( void )
 
 static void do_update( void )
 {
+
+
 
 	/* Finally commit all changes */
 
@@ -2231,36 +2235,39 @@ static bool dg2020_init( const char *name )
     return OK;
 }
 
-/*-----------------------------------------------------------------*/
-/* dg2020_run() sets the run mode - either running or stopped - of */
-/* the the pulser after waiting for previous commands to finish.   */
-/* ->                                                              */
-/*  * state to be set - 1: START, 0: STOP                          */
-/* <-                                                              */
-/*  * 1: ok, 0: error                                              */
-/*-----------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------*/
+/* dg2020_run() sets the run mode of the the pulser - either running  */
+/* or stopped - after waiting for previous commands to finish (that's */
+/* what the "*WAI;" bit in the command is about)                      */
+/* ->                                                                 */
+/*  * state to be set: 1 = START, 0 = STOP                            */
+/* <-                                                                 */
+/*  * 1: ok, 0: error                                                 */
+/*--------------------------------------------------------------------*/
 
 static bool dg2020_run( bool flag )
 {
-	if ( flag == dg2020.is_running )
+	if ( flag == dg2020.is_running )          // if in requested state
 		return OK;
 
 	if ( gpib_write( dg2020.device, flag ? "*WAI;STAR": "*WAI;STOP", 9 )
 		 == FAILURE )
 		return FAIL;
+
 	dg2020.is_running = flag;
 	return OK;
 }
 
 
-/*-------------------------------------------------------------*/
-/* dg2020_set_timebase() sets the internal clock oscillator    */
-/* of the pulser to the specified period. There might be small */
-/* deviations (in the order of a promille) between the speci-  */
-/* fied period and the actual period.                          */
-/* <-                                                          */
-/*  * 1: ok, 0: error                                          */
-/*-------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* dg2020_set_timebase() sets the internal clock oscillator of   */
+/* othe pulser to the period specified in the pulsers structure. */
+/*  There might be minor deviations (in the order of a promille) */
+/* between the specified period and the actual period.           */
+/* <-                                                            */
+/*  * 1: ok, 0: error                                            */
+/*---------------------------------------------------------------*/
 
 static bool dg2020_set_timebase( void )
 {
@@ -2275,16 +2282,14 @@ static bool dg2020_set_timebase( void )
 }
 
 
-/*------------------------------------------------------*/
-/* dg2020_update_data() tells the pulser to update all  */
-/* channels according to the data send before - this is */
-/* necessary because we use the pulser in manual update */
-/* mode since this is faster than automatic update.     */
-/* ->                                                   */
-/*  * device number                                     */
-/* <-                                                   */
-/*  * 1: ok, 0: error                                   */
-/*------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* dg2020_update_data() tells the pulser to update all channels */
+/* according to the data it got send before - this is necessary */
+/* because the pulser is used in manual update mode which this  */
+/* is faster than automatic update.                             */
+/* <-                                                           */
+/*  * 1: ok, 0: error                                           */
+/*--------------------------------------------------------------*/
 
 static bool dg2020_update_data( void )
 {
