@@ -99,7 +99,7 @@ bool run( void )
 				  "fsc: Run" );
 	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 
-	/* Open pipe for passing data from child to parent process */
+	/* Open pipe for passing data between child and parent process */
 
     if ( pipe( pd ) != 0 )                 /* try to open pipe */
 	{
@@ -164,7 +164,6 @@ bool run( void )
 	stop_measurement( NULL, 1 );
 	is_data_saved = SET;
 	clear_up_after_measurement( );
-	child_pid = 0;
 	return FAIL;
 }
 
@@ -458,6 +457,7 @@ void clear_up_after_measurement( void )
 		fl_hide_form( run_form->run );
 
 	set_buttons( 1 );
+	child_pid = 0;
 }
 
 
@@ -597,7 +597,7 @@ void do_quit_handler_0( int sig_type )
 	kill( getppid( ), QUITTING );    /* signal parent that child is exiting */
 	while ( ! do_quit )              /* wait for acceptance of this signal  */
 		pause( );
-	_exit( return_status );
+	_exit( return_status );          /* ...and that's the end of it */
 }
 
 
@@ -605,8 +605,8 @@ void do_quit_handler_0( int sig_type )
 /* do_quit_handler_1() is the other of the two handlers for the DO_QUIT */
 /* signal sent by the parent to the child telling it to exit. It just   */
 /* sets a flag and is used while run_child() is acquiring data, when    */
-/* killing the child might lead to problems with devices expecting to   */
-/* be serviced.                                                         */
+/* killing the child immediately might lead to problems with devices    */
+/* expecting to be serviced.                                            */
 /*----------------------------------------------------------------------*/
 
 void do_quit_handler_1( int sig_type )
