@@ -167,63 +167,63 @@ const char *slash( const char *path )
 
 /*-----------------------------------------------------------------*/
 /* get_file_length() returns the number of lines in a file as well */
-/* as the number of digits in the number of lines. To do so a      */ 
-/* short awk script is used (wc can't be used since it returns a   */
-/* number of lines to short by one if the last line does not end   */
-/* with a newline char).                                           */
+/* as the number of digits in the number of lines.                 */ 
 /* ->                                                              */
 /*   * name of file                                                */
-/*   * pointer for returning number of digits of number of lines   */
+/*   * pointer for returning number of digits in number of lines   */
 /* <-                                                              */
-/*   * number of lines or -1: not enough memory, -2: popen failure */
+/*   * number of lines or -1: failed to open file                  */
 /*-----------------------------------------------------------------*/
 
-long get_file_length( char *name, int *len )
+long get_file_length( const char *name, int *len )
 {
-	char *pc;
-	FILE *pp;
-	long lc, i;
-	struct sigaction sact;
-	struct sigaction oact;
+	char *cur,
+		 *end,
+		 buffer[ 4096 ];
+	int fd;
+	long i,
+		 lines = 0;
+	bool is_char = UNSET;
+	ssize_t bytes_read;
+	
 
+	if ( ( fd = open( name, O_RDONLY ) ) < 0 )
+		 return -1;
 
-	/* Get some memory for the pipe command */
-
-	TRY
+	while ( ( bytes_read = read( fd, buffer, 4096 ) ) > 0 )
 	{
-		pc = T_malloc( 20 + strlen( name ) );
-		TRY_SUCCESS;
+		cur = buffer;
+		end = buffer + bytes_read;
+
+		while ( cur < end )
+		{
+			if ( *cur++ == '\n' )
+			{
+				lines++;
+				is_char = UNSET;
+			}
+			else
+			{
+				is_char = SET;
+				while ( *cur != '\n' && cur < end )
+					cur++;
+			}
+		}
 	}
-	OTHERWISE
-		return -1;                       /* FATAL: no memory */
 
-	/* set up pipe to 'awk' (defined via AWK_PROG) and read number of lines */
+	/* If the last line does not end with a '\n' increment line count */
 
-	sprintf( pc, "wc -l %s 2>/dev/null", name );
-	if ( ( pp = popen( pc, "r" ) ) == NULL )
-	{
-		T_free( pc );
-		return -2;                       /* popen() failed */
-	}
+	if ( is_char )
+		lines++;
 
-	fscanf( pp, "%ld", &lc );
+	close( fd );
 
-	/* Since popen() / pclose() does a wait4() but we get the still get the
-	   SIGCHLD signal we have to ignore it just here... */
+	/* Count number of digits of number of lines */
 
-	sact.sa_handler = SIG_IGN;
-	sigaction( SIGCHLD, &sact, &oact );
-	pclose( pp );
-	sigaction( SIGCHLD, &oact, NULL );
-
-	T_free( pc );
-
-	/* count number of digits of number of lines */
-
-	for ( i = lc + 1, *len = 1; ( i /= 10 ) > 0; ++( *len ) )
+	for ( i = lines, *len = 1; ( i /= 10 ) > 0; ++( *len ) )
 		;
 
-	return lc + 1;
+	return lines;
 }
 
 
@@ -657,4 +657,3 @@ inline double d_min( double a, double b ) { return a < b ? a : b; }
 
 
 inline long lround( double x ) { return ( long ) ( 2 * x ) - ( long ) x; }
-
