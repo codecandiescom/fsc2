@@ -24,7 +24,6 @@ bool tds754a_init( const char *name )
 
 	/* Set digitzer into local lockout state */
 
-	gpib_lock( tds754a.device );
     if ( gpib_write( tds754a.device, "LOC ALL", 7 ) == FAILURE )
 	{
 		gpib_local( tds754a.device );

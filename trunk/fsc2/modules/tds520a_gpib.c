@@ -24,7 +24,6 @@ bool tds520a_init( const char *name )
 
 	/* Set digitzer into local lockout state */
 
-	gpib_lock( tds520a.device );
     if ( gpib_write( tds520a.device, "LOC ALL", 7 ) == FAILURE )
 	{
 		gpib_local( tds520a.device );
