@@ -303,6 +303,7 @@ static void globals_init( const char *pname )
 	Internals.just_testing = UNSET;
 	Internals.exit_hooks_are_run = UNSET;
 	Internals.tb_wait = TB_WAIT_NOT_RUNNING;
+	Internals.rsc_handle = NULL;
 	Internals.http_server_died = UNSET;
 	Internals.conn_request = UNSET;
 	Internals.is_linux_i386 = UNSET;

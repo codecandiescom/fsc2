@@ -586,7 +586,6 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 bool dl_fsc2_rsc( void )
 {
 	char *lib_name = NULL;
-	void *handle = NULL;
 	char *ld_path;
 	char *ld = NULL;
 	char *ldc;
@@ -597,6 +596,8 @@ bool dl_fsc2_rsc( void )
 	   variable "LD_LIBRARY_PATH". If this fails (and this is not part of the
 	   testing procedure) we also try the compiled-in path to the libraries. */
 
+	Internals.rsc_handle = NULL;
+
 	if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
 	{
 		ld = T_strdup( ld_path );
@@ -604,21 +605,23 @@ bool dl_fsc2_rsc( void )
 		{
 			lib_name = get_string( "%s%sfsc2_rsc_%cr.so", ldc, slash( ldc ),
 								   GUI.G_Funcs.size == LOW ? 'l' : 'h' );
-			if ( ( handle = dlopen( lib_name, RTLD_LAZY ) ) != NULL )
+			if ( ( Internals.rsc_handle = dlopen( lib_name, RTLD_LAZY ) )
+				 != NULL )
 				break;
 			lib_name = CHAR_P T_free( lib_name );
 		}
 		T_free( ld );
 	}
 
-	if ( handle == NULL && ! ( Internals.cmdline_flags & DO_CHECK ) )
+	if ( Internals.rsc_handle == NULL &&
+		 ! ( Internals.cmdline_flags & DO_CHECK ) )
 	{
 		lib_name = get_string( "%s%sfsc2_rsc_%cr.so", libdir, slash( libdir ),
 							   GUI.G_Funcs.size == LOW ? 'l' : 'h' );
-		handle = dlopen( lib_name, RTLD_LAZY );
+		Internals.rsc_handle = dlopen( lib_name, RTLD_LAZY );
 	}
 
-	if ( handle == NULL )
+	if ( Internals.rsc_handle == NULL )
 	{
 		if ( lib_name == NULL )
 			lib_name = get_string( "fsc2_rsc_%cr.so",
@@ -629,8 +632,8 @@ bool dl_fsc2_rsc( void )
 	}
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	GUI.G_Funcs.create_form_fsc2 =
-		       ( FD_fsc2 * ( * )( void ) ) dlsym( handle, "create_form_fsc2" );
+	GUI.G_Funcs.create_form_fsc2 = ( FD_fsc2 * ( * )( void ) )
+							 dlsym( Internals.rsc_handle, "create_form_fsc2" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
@@ -639,8 +642,8 @@ bool dl_fsc2_rsc( void )
 	}
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	GUI.G_Funcs.create_form_run_1d =
-		   ( FD_run_1d * ( * )( void ) ) dlsym( handle, "create_form_run_1d" );
+	GUI.G_Funcs.create_form_run_1d = ( FD_run_1d * ( * )( void ) )
+						   dlsym( Internals.rsc_handle, "create_form_run_1d" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
@@ -649,8 +652,8 @@ bool dl_fsc2_rsc( void )
 	}
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	GUI.G_Funcs.create_form_run_2d =
-		   ( FD_run_2d * ( * )( void ) ) dlsym( handle, "create_form_run_2d" );
+	GUI.G_Funcs.create_form_run_2d = ( FD_run_2d * ( * )( void ) )
+						   dlsym( Internals.rsc_handle, "create_form_run_2d" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
@@ -660,7 +663,7 @@ bool dl_fsc2_rsc( void )
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	GUI.G_Funcs.create_form_input_form = ( FD_input_form * ( * )( void ) )
-		                             dlsym( handle, "create_form_input_form" );
+                       dlsym( Internals.rsc_handle, "create_form_input_form" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
@@ -669,8 +672,8 @@ bool dl_fsc2_rsc( void )
 	}
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	GUI.G_Funcs.create_form_print =
-		     ( FD_print * ( * )( void ) ) dlsym( handle, "create_form_print" );
+	GUI.G_Funcs.create_form_print = ( FD_print * ( * )( void ) )
+							dlsym( Internals.rsc_handle, "create_form_print" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
@@ -679,8 +682,8 @@ bool dl_fsc2_rsc( void )
 	}
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	GUI.G_Funcs.create_form_cut =
-		         ( FD_cut * ( * )( void ) ) dlsym( handle, "create_form_cut" );
+	GUI.G_Funcs.create_form_cut = ( FD_cut * ( * )( void ) )
+							  dlsym( Internals.rsc_handle, "create_form_cut" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
@@ -689,9 +692,8 @@ bool dl_fsc2_rsc( void )
 	}
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	GUI.G_Funcs.create_pc_form =
-		         ( FD_print_comment * ( * )( void ) ) dlsym( handle,
-											     "create_form_print_comment" );
+	GUI.G_Funcs.create_pc_form = ( FD_print_comment * ( * )( void ) )
+					dlsym( Internals.rsc_handle, "create_form_print_comment" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );

@@ -191,6 +191,8 @@ struct INTERNALS {
 	bool exit_hooks_are_run;     /* Set if modules exit hooks have all already
 									been run */
 
+	void *rsc_handle;            /* handle of the graphics resources library */
+
 	/* The following are flags that get set in signal handlers and when set
 	   indicate that certain actions have to be taken the idle callbacks */
 
