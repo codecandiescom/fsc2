@@ -241,19 +241,6 @@ enum {
 };
 
 
-/* Flags for type of phase handling -
-   PHASE_UNKNOWN_PROT  -> type of protocol undecided,
-   PHASE_FFM_PROT      -> Frankfurt type protocol,
-   PHASE_BLN_PROT      -> Berlin kind of protocol
-*/
-
-enum {
-	PHASE_UNKNOWN_PROT,
-	PHASE_FFM_PROT,
-	PHASE_BLN_PROT
-};
-
-
 /* Define a structure used in analyzing the input program */
 
 typedef struct
