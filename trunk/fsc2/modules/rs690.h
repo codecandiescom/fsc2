@@ -54,6 +54,7 @@ Var *pulser_cw_mode( Var *v );
 Var *pulser_update( Var *v );
 Var *pulser_shift( Var *v );
 Var *pulser_increment( Var *v );
+Var *pulser_reset( Var *v );
 Var *pulser_pulse_reset( Var *v );
 Var *pulser_next_phase( Var *v );
 Var *pulser_phase_reset( Var *v );
@@ -190,10 +191,11 @@ typedef struct _FS_ {
 
 
 typedef struct {
-	int count;
-	int len;
-	int repeat_1;
-	int repeat_2;
+	int table_loops_1;
+	int table_len_1;
+	int table_loops_2;
+	int table_loops_3;
+	int middle_loops;
 } FS_TABLE;
 
 

@@ -28,21 +28,17 @@
 static bool rs690_field_channel_setup( void );
 static bool rs690_init_channels( void );
 static void rs690_calc_tables( void );
+static void rs690_table_set( int i, int k, FS *n );
 static void rs690_gpib_failure( void );
 static void rs690_check( void );
 
 
 #define UNUSED_BIT -1
 
-/*
+
 #define gpib_write( a, b, c ) fprintf( stderr, "%s\n", ( b ) )
 #define gpib_init_device( a, b ) 1
-*/
 
-/* Multiplicator used to convert lengths of FS to output times */
-
-static long mult_array[ 3 ] = { 1, 4, 16 };
-static long mult;
 
 
 /*------------------------------*/
@@ -61,11 +57,11 @@ bool rs690_init( const char *name )
 
 	/* Try to read the device indentification string to check if the pulser
 	   responds. */
-
+/*
 	if ( gpib_write( rs690.device, "RUI!", 4 ) == FAILURE ||
 		 gpib_read( rs690.device, reply, &length ) == FAILURE )
 		rs690_gpib_failure( );
-
+*/
 	/* Disable the front panel and stop the pulser */
 
 	rs690_lock_state( SET );
@@ -112,13 +108,6 @@ bool rs690_init( const char *name )
 
 	if ( gpib_write( rs690.device, "LEG,0!", 6 ) == FAILURE )
 		rs690_gpib_failure( );
-
-	/* The length field in the FS structures is the number of Ticks but
-	   we have to send the device the time duration of a field. 'mult'
-	   is a simple multiplier used to convert between th number of Ticks
-	   and the actual lengths to be send to the device */
-
-	mult = mult_array[ rs690.timebase_type ];
 
 	/* Make the association between the fields bits and the output connector
 	   channels and initialize the sequence and tables. */
@@ -272,28 +261,38 @@ bool rs690_set_channels( void )
 	FS *n, *o;
 
 
+	rs690_calc_tables( );
+
 	if ( rs690.old_fs == NULL )
 		return rs690_init_channels( );
 
-	rs690.old_table = rs690.new_table;
-	rs690_calc_tables( );
+	/* If necessary change the main tables length */
 
-	if ( rs690.new_table.len != rs690.old_table.len )
+	if ( rs690.new_fs_count != rs690.old_fs_count )
 	{
-		sprintf( buf, "LTD,T0,%d,T1,1,T2,1!", rs690.new_table.len );
+		sprintf( buf, "LTD,T0,%d,T1,1,T2,1,T3,1!", rs690.new_fs_count );
 		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 			rs690_gpib_failure( );
 	}
 
-	if ( rs690.new_table.repeat_1 != rs690.old_table.repeat_1 ||
-		 rs690.new_table.repeat_2 != rs690.old_table.repeat_2 )
+	/* If necessary change the loop counts for the tables making up the
+	   repetition time */
+
+	if ( rs690.new_table.table_loops_1 != rs690.old_table.table_loops_1 ||
+		 rs690.new_table.table_loops_2 != rs690.old_table.table_loops_2 ||
+		 rs690.new_table.table_loops_3 != rs690.old_table.table_loops_3 ||
+		 rs690.new_table.middle_loops  != rs690.old_table.middle_loops )
 	{
-		sprintf( buf, "LOS0,%s,M1,1,T0,1,T1,%d,M2,1,T2,%d!",
+		sprintf( buf, "LOS,%s,M1,1,T0,1,T1,%d,T2,%d,M2,%d,T2,%d!",
 				 rs690.trig_in_mode == EXTERNAL ? "1" : "CONT",
-				 rs690.new_table.repeat_1, rs690.new_table.repeat_2 );
+				 rs690.new_table.table_loops_1, rs690.new_table.table_loops_2,
+				 rs690.new_table.middle_loops, rs690.new_table.table_loops_3 );
 		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 			rs690_gpib_failure( );
 	}
+
+	/* Change all fields in the main table where we need different data -
+	   of course, this only needs to be done for the fields we really use */
 
 	for ( i = 0; i <= rs690.last_used_field; i++ )
 	{
@@ -302,21 +301,13 @@ bool rs690_set_channels( void )
 		{
 			if ( o == NULL ||
 				 n->len != o->len || n->fields[ i ] != o->fields[ i ] )
-			{
-				sprintf( buf, "LDT,T0,FL%d,%d,1,%X,%ldns!",
-						 i, k, n->fields[ i ],
-						 ( n->len % MAX_TICKS_PER_ENTRY ) * mult );	
-
-				if ( gpib_write( rs690.device, buf, strlen( buf ) )
-					 == FAILURE )
-					rs690_gpib_failure( );
-			}
+				rs690_table_set( i, k, n );
 
 			if ( o != NULL )
 				o = o->next;
 		}
 	}
-
+		
 	return OK;
 }
 
@@ -329,41 +320,49 @@ bool rs690_set_channels( void )
 
 static bool rs690_init_channels( void )
 {
-	int i, j;
+	int i, j, k;
 	FS *n;
-	char buf[ 17000 ];
+	char buf[ 256 ];
 
 
-	rs690_calc_tables( );
+	/* Set up the main table for the pulse data and two more tables (each
+	   with just one word) to make up for the repetition time */
 
-	sprintf( buf, "LTD,T0,%d,T1,1,T2,1!", rs690.new_table.len );
+	sprintf( buf, "LTD,T0,%d,T1,1,T2,1,T3,1!", rs690.new_fs_count );
 	if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 		rs690_gpib_failure( );
 
-	sprintf( buf, "LOS0,%s,M1,1,T0,1,T1,%d,M2,1,T2,%d!",
+	/* Make the sequence and set the loop counts for the tables */
+
+	sprintf( buf, "LOS0,%s,M1,1,T0,1,T1,%d,T2,%d,M2,%d,T3,%d!",
 			 rs690.trig_in_mode == EXTERNAL ? "1" : "CONT",
-			 rs690.new_table.repeat_1, rs690.new_table.repeat_2 );
+			 rs690.new_table.table_loops_1, rs690.new_table.table_loops_2,
+			 rs690.new_table.middle_loops, rs690.new_table.table_loops_3 );
 	if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 		rs690_gpib_failure( );
 
 	for ( i = 0; i <= rs690.last_used_field; i++ )
 	{
-		sprintf( buf, "LDT,T0,FL%d,1,%d", i, rs690.new_table.len );
+		for ( k = 1, n = rs690.new_fs;
+			  n != NULL; n = n->next, k++ )
+			rs690_table_set( i, k, n );
 
-		for ( n = rs690.new_fs; n != NULL && n->len % MAX_TICKS_PER_ENTRY != 0;
-			  n = n->next )
-			sprintf( buf + strlen( buf ), ",%X,%ldns", n->fields[ i ],
-					 ( n->len % MAX_TICKS_PER_ENTRY ) * mult );
-
-		strcat( buf, "!" );
+		sprintf( buf, "LDT,T1,FL%d,1,1,%X,%ldns!", i,
+				 rs690_default_fields[ i ],
+				 MAX_TICKS_PER_ENTRY / 2 * ( 4L << rs690.timebase_type ) );
 
 		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 			rs690_gpib_failure( );
 
-		for ( j = 1; j <= 2; j++ )
+		/* Set up both the tables for making up the repetition count - both
+		   need to be as long as possible i.e. MAX_TICKS_PER_ENTRY long */
+
+		for ( j = 2; j <= 3; j++ )
 		{
 			sprintf( buf, "LDT,T%d,FL%d,1,1,%X,%ldns!", j, i,
-					 rs690_default_fields[ i ], MAX_TICKS_PER_ENTRY * mult );
+					 rs690_default_fields[ i ],
+					 MAX_TICKS_PER_ENTRY * ( 4 << rs690.timebase_type ) );
+
 			if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 				rs690_gpib_failure( );
 		}
@@ -383,37 +382,127 @@ static void rs690_calc_tables( void )
 	Ticks count = 0;
 
 
-	rs690.new_table.count = 1;
-	rs690.new_table.repeat_1 = 0;
-	rs690.new_table.repeat_2 = 0;
+	rs690.old_table = rs690.new_table;
 
-	if ( rs690.last_new_fs )
+	rs690.new_table.table_loops_1 = 0;
+	rs690.new_table.table_len_1 = 0;
+	rs690.new_table.table_loops_2 = 0;
+	rs690.new_table.middle_loops = 0;
+	rs690.new_table.table_loops_3 = 0;
+
+	/* If no repetition time is to be used we only have to make sure that the
+	   last FS (representing a no pulse state) to be long enough. */
+
+	if ( ! rs690.is_repeat_time )
 	{
-		count = rs690.last_new_fs->len;
-		if ( count / MAX_TICKS_PER_ENTRY <= MAX_LOOP_REPETITIONS )
-			rs690.new_table.count = 2;
-		else
-			rs690.new_table.count = 3;
+		if ( rs690.timebase_type == TIMEBASE_4_NS &&
+			 rs690.last_new_fs->len < 4 )
+			rs690.last_new_fs->len = 4;
+		else if ( rs690.timebase_type == TIMEBASE_4_NS &&
+			 rs690.last_new_fs->len & 1 )
+			rs690.last_new_fs->len = 2;
+
+		return;
 	}
 
-	if ( rs690.new_table.count == 1 )
-		rs690.new_table.len = rs690.new_fs_count;
-	else if ( rs690.new_table.count == 2 )
+	/* If the pulse sequence is that long that it's not more than 
+	   MAX_TICKS_PER_ENTRY times the time base shorter than the repetition
+	   time, the repetition time is created by the last FS. We only have to
+	   make sure it's not too short. */
+
+	if ( rs690.last_new_fs->len <= MAX_TICKS_PER_ENTRY )
 	{
-		rs690.new_table.len = rs690.new_fs_count;
-		if ( count % MAX_TICKS_PER_ENTRY == 0 )
-			rs690.new_table.len--;
-		rs690.new_table.repeat_1 = count / MAX_TICKS_PER_ENTRY;
+		if ( rs690.last_new_fs->len < ( 4 >> rs690.timebase_type ) )
+		{
+			print( WARN, "Repetition time of %s needs to be lengthened a "
+				   "bit.\n", rs690_pticks( rs690.repeat_time ) );
+			rs690.last_new_fs->len = 4 >> rs690.timebase_type;
+		}
+		return;
 	}
+
+	/* In all other cases the last FS is longer than MAX_TICKS_PER_ENTRY.
+	   We reduce the last FS's length to everything that that isn't a
+	   multiple of MAX_TICKS_PER_ENTRY (only in case this would be 0
+	   we set it to MAX_TICKS_PER_ENTRY). If we would be left with an
+	   FS that is too short we have use an additional table into which we
+	   put half a maximum length time slice and to the last FS we add
+	   half a maximum length time slice to make it long enough. */
+
+	count = rs690.last_new_fs->len;
+
+	if ( ( rs690.last_new_fs->len %= MAX_TICKS_PER_ENTRY ) == 0 )
+		rs690.last_new_fs->len = MAX_TICKS_PER_ENTRY;
+
+	if ( rs690.last_new_fs->len < ( 4 >> rs690.timebase_type ) )
+	{
+		rs690.last_new_fs->len += MAX_TICKS_PER_ENTRY / 2;
+		rs690.new_table.table_loops_1 = 1;
+		rs690.new_table.table_len_1 = MAX_TICKS_PER_ENTRY / 2;
+	}
+
+	/* The remaining time is now dalt with by a second and third additional
+	   tables, both of the maximum length time slice. The first one is the
+	   only one needed when the remaining time can be dealt with by
+	   MAX_LOOP_REPETITIONS of this second table, otherwise we also need
+	   the third one, where we also may use middle loop repetitions (but
+	   this would only be needed for the hypothetical case where a long
+	   variable can have maximum values of more than 2^31 - 1). */
+
+	count = ( count - rs690.last_new_fs->len - rs690.new_table.table_len_1 )
+			/ MAX_TICKS_PER_ENTRY;
+
+	if ( count <= MAX_LOOP_REPETITIONS )
+		rs690.new_table.table_loops_2 = count;
 	else
 	{
-		rs690.new_table.len = rs690.new_fs_count;
-		if ( count % MAX_TICKS_PER_ENTRY == 0 )
-			rs690.new_table.len--;
-		rs690.new_table.repeat_1 = ( count / MAX_TICKS_PER_ENTRY )
-								   % MAX_LOOP_REPETITIONS;
-		rs690.new_table.repeat_2 = MAX_LOOP_REPETITIONS;
+		rs690.new_table.table_loops_2 = count % MAX_LOOP_REPETITIONS;
+		rs690.new_table.table_loops_3 = MAX_LOOP_REPETITIONS;
+		rs690.new_table.middle_loops = count / MAX_LOOP_REPETITIONS;
 	}
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static void rs690_table_set( int i, int k, FS *n )
+{
+	char buf[ 256 ];
+
+
+	switch ( rs690.timebase_type )
+	{
+		case TIMEBASE_16_NS :
+			sprintf( buf, "LDT,T0,FL%d,%d,1,%X,%ldns!", i, k,
+					 n->fields[ i ] & 0xFFFF, n->len * 16 );
+			break;
+
+		case TIMEBASE_8_NS :
+			if ( n->len == 2 )
+				sprintf( buf, "LDT,T0,FL%d,%d,1,%X,8ns,%X!", i, k,
+						 ( n->fields[ i ] >> 8 ) & 0xFF,
+						 n->fields[ i ] & 0xFF );
+			else
+				sprintf( buf, "LDT,T0,FL%d,%d,1,%X,%ldns!", i, k,
+						 n->fields[ i ] & 0xFF, n->len * 8 );
+			break;
+
+		case TIMEBASE_4_NS :
+			if ( n->len == 4 )
+				sprintf( buf, "LDT,T0,FL%d,%d,1,%X,4ns,%X,%X,%X!", i, k,
+						 ( n->fields[ i ] >> 12 ) & 0xF,
+						 ( n->fields[ i ] >> 8 ) & 0xF,
+						 ( n->fields[ i ] >> 4 ) & 0xF,
+						 n->fields[ i ] & 0xF );
+			else
+				sprintf( buf, "LDT,T0,FL%d,%d,1,%X,%ldns!", i, k,
+						 n->fields[ i ] & 0xF, n->len * 4 );
+			break;
+	}
+
+	if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+		rs690_gpib_failure( );
 }
 
 

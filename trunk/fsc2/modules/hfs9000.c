@@ -752,6 +752,8 @@ Var *pulser_increment( Var *v )
 
 Var *pulser_reset( Var *v )
 {
+	v = v;
+
 	vars_pop( pulser_pulse_reset( NULL ) );
 	return vars_push( INT_VAR, 1 );
 }

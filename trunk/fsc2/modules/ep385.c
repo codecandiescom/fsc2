@@ -1293,6 +1293,28 @@ Var *pulser_increment( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
+Var *pulser_reset( Var *v )
+{
+	v = v;
+
+	if ( ep385.is_cw_mode )
+	{
+		print( FATAL, "Function can't be used in CW mode.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ep385_phs[ 0 ].function != NULL ||
+		 ep385_phs[ 1 ].function != NULL )
+		vars_pop( pulser_pulse_reset( NULL ) );
+	vars_pop( pulser_pulse_reset( NULL ) );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 Var *pulser_pulse_reset( Var *v )
 {
 	PULSE *p;
@@ -1316,7 +1338,7 @@ Var *pulser_pulse_reset( Var *v )
 	{
 		for ( p = ep385_Pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 )
-				pulser_pulse_reset( vars_push( INT_VAR, p->num ) );
+				vars_pop( pulser_pulse_reset( vars_push( INT_VAR, p->num ) ) );
 	}
 
 	/* Otherwise run through the supplied pulse list */
@@ -1415,9 +1437,6 @@ Var *pulser_next_phase( Var *v )
 
 	if ( v == NULL )
 	{
-		long res = 1;
-
-
 		if ( ep385_phs[ 0 ].function == NULL &&
 			 ep385_phs[ 1 ].function == NULL &&
 			 FSC2_MODE == TEST )
@@ -1427,10 +1446,10 @@ Var *pulser_next_phase( Var *v )
 		}
 
 		if ( ep385_phs[ 0 ].function != NULL )
-			res &= pulser_next_phase( vars_push( INT_VAR, 1 ) )->val.lval;
+			vars_pop( pulser_next_phase( vars_push( INT_VAR, 1 ) ) );
 		if ( ep385_phs[ 1 ].function != NULL )
-			res &= pulser_next_phase( vars_push( INT_VAR, 2 ) )->val.lval;
-		return vars_push( INT_VAR, res );
+			vars_pop( pulser_next_phase( vars_push( INT_VAR, 2 ) ) );
+		return vars_push( INT_VAR, 1 );
 	}
 
 	for ( ; v != NULL; v = vars_pop( v ) )
@@ -1489,9 +1508,6 @@ Var *pulser_phase_reset( Var *v )
 
 	if ( v == NULL )
 	{
-		long ret = 1;
-
-
 		if ( ep385_phs[ 0 ].function == NULL &&
 			 ep385_phs[ 1 ].function == NULL &&
 			 FSC2_MODE == TEST )
@@ -1501,10 +1517,10 @@ Var *pulser_phase_reset( Var *v )
 		}
 
 		if ( ep385_phs[ 0 ].function != NULL )
-			ret &= pulser_phase_reset( vars_push( INT_VAR, 1 ) )->val.lval;
+			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 1 ) ) );
 		if ( ep385_phs[ 1 ].function != NULL )
-			ret &= pulser_phase_reset( vars_push( INT_VAR, 2 ) )->val.lval;
-		return vars_push( INT_VAR, ret );
+			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 2 ) ) );
+		return vars_push( INT_VAR, 1 );
 	}
 
 	for ( ; v != NULL; v = vars_pop( v ) )

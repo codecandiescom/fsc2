@@ -1340,6 +1340,8 @@ Var *pulser_next_phase( Var *v )
 
 Var *pulser_reset( Var *v )
 {
+	v = v;
+
 	if ( dg2020.is_cw_mode )
 	{
 		print( FATAL, "Function can't be used in CW mode.\n" );
