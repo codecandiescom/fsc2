@@ -630,7 +630,7 @@ static void run_child( void )
 
 	/* Using a pause() here is tempting but there exists a race condition
 	   between the determination of the value of 'do_quit' and the start of
-	   pause() - and it happens... */
+	   pause() - and it gets triggered (the race condition) sometimes... */
 
 	while ( ! do_quit )                  /* wait for acceptance of signal  */
 		usleep( 50000 );
@@ -683,10 +683,10 @@ static void set_child_signals( void )
 
 /*----------------------------------------------------------------*/
 /* This is the signal handler for the signals the child receives. */
-/* There are only two that are important, SIGUSR2 (aka DO_QUIT )  */
-/* and SIGALRM. The other are either ignored or kill the child    */
-/* (but in a controlled way to allow deletion of shared memory if */
-/* the parent didn't do it as expected.                           */
+/* There are two signals used for IPC, SIGUSR2 (aka DO_QUIT ) and */
+/* SIGALRM. The other are either ignored or kill the child (but   */
+/* in a, hopefully, controlled way to allow deletion of shared    */
+/*  memory if the parent didn't do it itself.                     */
 /* There's a twist: The SIGALRM signal can only come from the     */
 /* f_wait() function (see func_util.c). Here we wait in a pause() */
 /* for SIGALRM to get a reliable timer. On the other hand, the    */
@@ -731,10 +731,9 @@ void child_sig_handler( int signo )
 				death_mail( signo );
 			}
 
-			/* Test if parent still exists and if not (i.e. the parent died
-			   without sending the child a SGTERM signal) destroy the
-			   semaphore and shared memory (as far as the child knows about
-			   it) */
+			/* Test if parent still exists - if not (i.e. if the parent died
+			   without sending a SIGTERM signal) destroy the semaphore and
+			   shared memory (as far as the child knows about it) */
 
 			if ( kill( getppid( ), 0 ) == -1 && errno == ESRCH )
 			{
@@ -749,7 +748,7 @@ void child_sig_handler( int signo )
 
 /*-------------------------------------------------------------------*/
 /* do_measurement() runs through and executes all commands. Since it */
-/* is executed by the child it's got to honor the `do_quit' flag.    */
+/* is executed by the child it has got to honor the `do_quit' flag.  */
 /*-------------------------------------------------------------------*/
 
 static void do_measurement( void )
