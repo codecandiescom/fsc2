@@ -62,10 +62,10 @@ GROUP              := uucp
 
 # Now set the system wide path for files to be included by EDL files when
 # after the '#INCLUDE' directive a file name enclosed in '<' and '>' is
-# found. This is for the case a system wide EDL files etc. has been set up
-# and from which users may use include files without going to the hassle
-# always to write out the full path. If no such repository exists its saver
-# to leave this variable undefined.
+# found. This is for the case a system wide set of EDL files etc. has been
+# set up and from which users may use include files without going to the
+# hassle always to write out the full path. If no such repository exists
+# it's save to leave this variable undefined.
 
 # DEF_INCL_DIR       := /scratch/EDL/includes
 
