@@ -38,7 +38,10 @@
 #include <termios.h>
 
 
-int fsc2_serial_open( const char *dev_name, int flags );
+void fsc2_request_serial_port( int sn, const char *devname );
+void fsc2_serial_init( void );
+void fsc2_serial_clean_up( void );
+int fsc2_serial_open( int sn, int flags );
 ssize_t fsc2_serial_write( int fd, const void *buf, size_t count );
 ssize_t fsc2_serial_read( int fd, void *buf, size_t count );
 int fsc2_serial_close( int fd );

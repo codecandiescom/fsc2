@@ -89,7 +89,6 @@ typedef struct
 
 
 static Magnet magnet;
-static char serial_port[ ] = "/dev/ttyS**";
 
 enum {
 	   SERIAL_INIT,
@@ -186,33 +185,9 @@ int aeg_x_band_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	/* Claim the serial port */
+	/* Claim the serial port (throws exception on failure) */
 
-	if ( SERIAL_PORT >= NUM_SERIAL_PORTS || SERIAL_PORT < 0 )
-	{
-		eprint( FATAL, UNSET, "%s: Serial port number %d out of valid range "
-				"(0-%d).\n", DEVICE_NAME, SERIAL_PORT, NUM_SERIAL_PORTS - 1 );
-		THROW( EXCEPTION );
-	}
-
-	if ( need_Serial_Port[ SERIAL_PORT ] )
-	{
-		eprint( FATAL, UNSET, "%s: Serial port %d (i.e. /dev/ttyS%d or COM%d) "
-				"is already in use by another device.\n", DEVICE_NAME,
-				SERIAL_PORT, SERIAL_PORT, SERIAL_PORT + 1 );
-		THROW( EXCEPTION );
-	}
-
-	need_Serial_Port[ SERIAL_PORT ] = SET;
-	if ( SERIAL_PORT < 100 )
-		snprintf( strchr( serial_port, '*' ), 3, "%d", SERIAL_PORT );
-	else
-	{
-		eprint( FATAL, UNSET, "%s: Serial port numbers %d (i.e /dev/ttyS%d or "
-				"COM%d) is too large, 99 is maximum.\n", DEVICE_NAME,
-				SERIAL_PORT, SERIAL_PORT, SERIAL_PORT + 1 );
-		THROW( EXCEPTION );
-	}
+	fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
 	magnet.is_field = UNSET;
 	magnet.is_field_step = UNSET;
@@ -1055,7 +1030,7 @@ bool magnet_do( int command )
 			   should not become the controlling terminal, otherwise line
 			   noise read as a CTRL-C might kill the program. */
 
-			if ( ( magnet.fd = fsc2_serial_open( serial_port,
+			if ( ( magnet.fd = fsc2_serial_open( SERIAL_PORT,
 							O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) < 0 )
 				return FAIL;
 

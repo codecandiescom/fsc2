@@ -166,7 +166,6 @@ long Cur_Pulse = -1;
 
 bool TEST_RUN = UNSET;       /* flag, set while EXPERIMENT section is tested */
 bool need_GPIB = UNSET;      /* flag, set if GPIB bus is needed */
-bool need_Serial_Port[ NUM_SERIAL_PORTS ];
 
 bool just_testing = UNSET;
 
@@ -239,7 +238,6 @@ extern long Cur_Pulse;
 
 extern bool TEST_RUN;
 extern bool need_GPIB;
-extern bool need_Serial_Port[ NUM_SERIAL_PORTS ];
 
 extern bool just_testing;
 

@@ -41,15 +41,132 @@
 #include "serial.h"
 
 
+#if NUM_SERIAL_PORTS > 0
+static struct {
+	bool in_use;
+	const char* devname;
+	const char* dev_file;
+} Serial_Port[ NUM_SERIAL_PORTS ];
+#endif
+
+
+
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-int fsc2_serial_open( const char *dev_name, int flags )
+void fsc2_request_serial_port( int sn, const char *devname )
+{
+#if NUM_SERIAL_PORTS < 1
+	sn = sn;
+
+	eprintf( FATAL, UNSET, "%s: Device needs serial port but fsc2 was "
+			 "not compiled with support for serial port access.\n", devname );
+	THROW( EXCEPTION );
+#else
+	int l, snc;
+
+
+	if ( sn >= NUM_SERIAL_PORTS || sn < 0 )
+	{
+		if ( NUM_SERIAL_PORTS > 1 )
+			eprint( FATAL, UNSET, "%s: Serial port number %d out of valid "
+					"range (0-%d).\n", sn, NUM_SERIAL_PORTS - 1, devname );
+		else
+			eprint( FATAL, UNSET, "%s: Serial port number %d out of valid "
+					"range (0 is allowed only).\n", sn, devname );
+		THROW( EXCEPTION );
+	}
+
+	if ( Serial_Port[ sn ].in_use )
+	{
+		eprint( FATAL, UNSET, "%s: Requested serial port %d (i.e. /dev/ttyS%d "
+				"or COM%d) is already used by device %s.\n", devname, sn, sn,
+				sn + 1, Serial_Port[ sn ].devname );
+		THROW( EXCEPTION );
+	}
+
+	Serial_Port[ sn ].is_use = SET;
+	Serial_Port[ sn ].devname = devname;
+	Serial_Port[ sn ].dev_file = NULL;
+
+	for ( l = 1, snc = sn; snc /= 10, l++ )
+		;
+	Serial_Port[ sn ].dev_file = get_string( strlen( "/dev/ttyS" ) + l );
+	sprintf( Serial_Port[ sn ].dev_file, "/dev/ttyS%d", sn );
+
+	raise_permissions( );
+	if ( access( Serial_Port[ sn ].dev_file, R_OK | W_OK) == -1 )
+	{
+		if ( errno == ENOENT )
+			eprint( FATAL, UNSET, "%s: Device file %s for serial port %d does "
+					"not exist.\n", devname, Serial_Port[ sn ].dev_file, sn );
+		else
+			eprint( FATAL, UNSET, "%s: No permission to communicate via "
+					"serial port %d.\n", devname, sn );
+		lower_permssions( );
+		THROW( EXCEPTION );
+	}
+
+	lower_permssions( );
+#endif
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+void fsc2_serial_init( void )
+{
+#if NUM_SERIAL_PORTS > 0
+	int i;
+
+
+	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
+	{
+		Serial_Port[ sn ].dev_file = NULL;
+		Serial_Port[ sn ].devname = NULL;
+		Serial_Port[ sn ].in_use = UNSET;
+	}
+#endif
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+void fsc2_serial_clean_up( void )
+{
+#if NUM_SERIAL_PORTS > 0
+	int i;
+
+
+	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
+	{
+		if ( Serial_Port[ sn ].in_use )
+			Serial_Port[ sn ].dev_file = T_free( Serial_Port[ sn ].dev_file );
+		Serial_Port[ sn ].devname = NULL;
+		Serial_Port[ sn ].in_use = UNSET;
+	}
+#endif
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+int fsc2_serial_open( int sn, int flags )
 {
 	int fd;
 
+
+	if ( ! Serial_Port[ sn ].in_use )
+	{
+		errno = EACCESS;
+		return -1;
+	}
+
 	raise_permissions( );
-	fd = open( dev_name, flags );
+	fd = open( Serial_Port[ sn ].dev_file, flags );
 	lower_permissions( );
 
 	return fd;

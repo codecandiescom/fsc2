@@ -74,8 +74,7 @@ typedef struct
 
 
 static NMR nmr;
-static char serial_port[ ] = "/dev/ttyS*";
-static char er035m_sas_eol[ ] = "\r\n";
+static const char *er035m_sas_eol = "\r\n";
 enum {
 	RES_VERY_LOW = 0,
 	RES_LOW,
@@ -144,25 +143,9 @@ int er035m_sas_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	/* Claim the serial port */
+	/* Claim the serial port (throws exception on failure) */
 
-	if ( SERIAL_PORT >= NUM_SERIAL_PORTS || SERIAL_PORT < 0 )
-	{
-		eprint( FATAL, UNSET, "%d: Serial port number %d out of valid range "
-				"(0-%d).\n", DEVICE_NAME, SERIAL_PORT, NUM_SERIAL_PORTS - 1 );
-		THROW( EXCEPTION );
-	}
-
-	if ( need_Serial_Port[ SERIAL_PORT ] )
-	{
-		eprint( FATAL, UNSET, "%s: Serial port %d (i.e. /dev/ttyS%d or COM%d) "
-				"is already in use by another device.\n", DEVICE_NAME,
-				SERIAL_PORT, SERIAL_PORT, SERIAL_PORT + 1 );
-		THROW( EXCEPTION );
-	}
-
-	need_Serial_Port[ SERIAL_PORT ] = SET;
-	*strrchr( serial_port, '*' ) = ( char ) ( SERIAL_PORT + '0' );
+	fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
 	nmr.is_needed = SET;
 	nmr.state = ER035M_SAS_UNKNOWN;
@@ -754,7 +737,7 @@ static bool er035m_sas_comm( int type, ... )
 			   should not become the controlling terminal, otherwise line
 			   noise read as a CTRL-C might kill the program. */
 
-			if ( ( nmr.fd = fsc2_serial_open( serial_port,
+			if ( ( nmr.fd = fsc2_serial_open( SERIAL_PORT,
 							  O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) < 0 )
 				return FAIL;
 

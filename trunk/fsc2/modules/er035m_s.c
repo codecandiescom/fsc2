@@ -77,8 +77,7 @@ typedef struct
 
 
 static NMR nmr;
-static char serial_port[ ] = "/dev/ttyS**";
-static char er035m_s_eol[ ] = "\r\n";
+static const char *er035m_s_eol = "\r\n";
 
 
 
@@ -163,33 +162,9 @@ int er035m_s_init_hook( void )
 		return 0;
 	}
 
-	/* Claim the serial port */
+	/* Claim the serial port (throws exception on failure) */
 
-	if ( SERIAL_PORT >= NUM_SERIAL_PORTS || SERIAL_PORT < 0 )
-	{
-		eprint( FATAL, UNSET, "ER035M_S: Serial port number %d out of valid "
-				"range (0-%d).\n", SERIAL_PORT, NUM_SERIAL_PORTS - 1 );
-		THROW( EXCEPTION );
-	}
-
-	if ( need_Serial_Port[ SERIAL_PORT ] )
-	{
-		eprint( FATAL, UNSET, "ER035M_S: Serial port %d (i.e. /dev/ttyS%d or "
-				"COM%d) is already in use by another device.\n",
-				SERIAL_PORT, SERIAL_PORT, SERIAL_PORT + 1 );
-		THROW( EXCEPTION );
-	}
-
-	need_Serial_Port[ SERIAL_PORT ] = SET;
-	if ( SERIAL_PORT < 100 )
-		snprintf( strchr( serial_port, '*' ), 3, "%d", SERIAL_PORT );
-	else
-	{
-		eprint( FATAL, UNSET, "%s: Serial port numbers %d (i.e /dev/ttyS%d or "
-				"COM%d) is too large, 99 is maximum.\n", DEVICE_NAME,
-				SERIAL_PORT, SERIAL_PORT, SERIAL_PORT + 1 );
-		THROW( EXCEPTION );
-	}
+	fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
 	nmr.is_needed = SET;
 	nmr.state = ER035M_S_UNKNOWN;
@@ -819,7 +794,7 @@ static bool er035m_s_comm( int type, ... )
 			   should not become the controlling terminal, otherwise line
 			   noise read as a CTRL-C might kill the program. */
 
-			if ( ( nmr.fd = fsc2_serial_open( serial_port,
+			if ( ( nmr.fd = fsc2_serial_open( SERIAL_PORT,
 							  O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) < 0 )
 				return FAIL;
 

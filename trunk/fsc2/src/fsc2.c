@@ -112,6 +112,10 @@ int main( int argc, char *argv[ ] )
 	EGID = getegid( );
 	lower_permissions( );
 
+	/* Setup a structure used when dealing with serial ports */
+
+	fsc2_serial_init( );
+
 	/* Initialize xforms stuff, quit on error */
 
 	if ( ! xforms_init( &argc, argv ) )
@@ -1078,8 +1082,7 @@ void clean_up( void )
 
 	delete_devices( );
 	need_GPIB = UNSET;
-	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
-		need_Serial_Port[ i ] = UNSET;
+	fsc2_serial_cleanup( );
 
 	/* Delete function list */
 
