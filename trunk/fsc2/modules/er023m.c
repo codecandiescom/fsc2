@@ -707,7 +707,7 @@ Var *lockin_harmonic( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Invalid value %d used for harmonic, valid "
 				"values are %d and %d.\n", DEVICE_NAME, ha + 1,
-				MIN_HARMONIC + 1,  MAX_HARMONIC + 1 );
+				MIN_HARMONIC + 1, MAX_HARMONIC + 1 );
 		THROW( EXCEPTION )
 	}
 
@@ -775,7 +775,7 @@ Var *lockin_resonator( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Invalid value %d used as resonator number, "
 				"valid values are %d and %d.\n", DEVICE_NAME, re + 1,
-				MIN_RESONATOR + 1,  MAX_RESONATOR + 1 );
+				MIN_RESONATOR + 1, MAX_RESONATOR + 1 );
 		THROW( EXCEPTION )
 	}
 
