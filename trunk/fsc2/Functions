@@ -16,6 +16,12 @@
 /********************************************************************/
 
 
-square, 1, ALL;               /* returns the square of a value */
-int_slice, 1, ALL;            /* creates an integer array slice */
-float_slice, 1, ALL;          /* creates an float array slice */
+square, 1, ALL;               // returns the square of a value
+int_slice, 1, ALL;            // creates an integer array slice
+float_slice, 1, ALL;          // creates an float array slice
+
+
+// Functions exported for field meters
+
+find_field, 0, EXP;
+field_meter_wait, 0, EXP;

@@ -68,7 +68,7 @@ enum {
 
 int er035m_init_hook( void )
 {
-	if ( ! exist_device( "s-band" ) && ! exist_device( "x-band" ) )
+	if ( ! exist_device( "s_band" ) && ! exist_device( "x_band" ) )
 	{
 		eprint( WARN, "Driver for Bruker ER035M gaussmeter is loaded but no "
 				"magnet driver.\n" );
@@ -149,7 +149,7 @@ try_again:
 		switch ( *bp )
 		{
 			case '0' :      /* Probe F0 is connected -> ok for S-band */
-				if ( exist_device( "s-band" ) )
+				if ( exist_device( "s_band" ) )
 					break;
 				eprint( FATAL, "Wrong field probe (F0) connected to the "
 						"Bruker ER035M NMR gaussmeter.\n" );
@@ -157,7 +157,7 @@ try_again:
 				
 
 			case '1' :      /* Probe F1 is connected -> ok for X-band*/
-				if ( exist_device( "x-band" ) )
+				if ( exist_device( "x_band" ) )
 					break;
 				eprint( FATAL, "Wrong field probe (F1) connected to the "
 						"Bruker ER035M NMR gaussmeter.\n" );
