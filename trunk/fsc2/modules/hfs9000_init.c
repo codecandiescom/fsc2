@@ -76,8 +76,13 @@ static void hfs9000_init_print( FILE *fp )
 		if ( ! f->is_needed )
 			continue;
 
-		fprintf( fp, "%s:%d %ld%s\n", f->name, f->channel->self, f->delay,
-				 f->is_inverted ? " I" : "" );
+		if ( f->channel->self == HFS9000_TRIG_OUT )
+			fprintf( fp, "%s:TRIG %ld\n", f->name, f->delay );
+		else
+			fprintf( fp, "%s:%c%c %ld%s\n", f->name,
+					 CHANNEL_LETTER( f->channel->self ),
+					 CHANNEL_NUMBER( f->channel->self ), f->delay,
+					 f->is_inverted ? " I" : "" );
 	}
 }
 

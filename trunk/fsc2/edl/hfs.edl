@@ -16,9 +16,9 @@ TRIGGER_MODE: INTERNAL;
 
 //TRIGGER_MODE: EXTERNAL, SLOPE = POS, LEVEL = 1.2 V;
 
-MICROWAVE:    CHANNEL = 1, V_H = 2 V, V_L = 0 V, DELAY = 0 ns;
-RF:           CH = 2;
-RF_GATE:      CH = 3;
+MICROWAVE:    CHANNEL = A1, V_H = 2 V, V_L = 0 V, DELAY = 0 ns;
+RF:           CH = A2;
+RF_GATE:      CH = A3;
 DETECTION:    CH = TRIGGER_OUT;
 
 
@@ -54,6 +54,7 @@ digitizer_trigger_position( 0.01 );
 digitizer_record_length( 500 );
 digitizer_num_averages( 10 );
 pulser_show_pulses( );
+pulser_dump_pulses( );
 
 
 EXPERIMENT:

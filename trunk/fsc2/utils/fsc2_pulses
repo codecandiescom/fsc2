@@ -134,9 +134,9 @@ sub read_input {
 
 		for ( my $i = 0; $i < @Function_Names; $i++ ) {
 			if ( $line =~
-				 /^($Function_Names[ $i ]):([A-H]?\d+) ([+-]?\d+)( I)?$/ ) {
-				$Channels->add_channel( \$Function_Names[ $i ], $2, $3,
-										defined $4 ? 1 : 0 );
+				 /^($Function_Names[ $i ]):((([A-H]|CH)?\d+)|TRIG) ([+-]?\d+)( I)?$/ ) {
+				$Channels->add_channel( \$Function_Names[ $i ], $2, $5,
+										defined $6 ? 1 : 0 );
 				next CHANNEL_LINE;
 			}
 		}

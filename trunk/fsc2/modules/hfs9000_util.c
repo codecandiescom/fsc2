@@ -326,7 +326,7 @@ void hfs9000_dump_channels( FILE *fp )
 			continue;
 
 		if ( f->channel->self == HFS9000_TRIG_OUT )
-			fprintf( fp, "%s:TRIG_OUT", f->name );
+			fprintf( fp, "%s:TRIG", f->name );
 		else
 			fprintf( fp, "%s:%c%c", f->name,
 					 CHANNEL_LETTER( f->channel->self ),
