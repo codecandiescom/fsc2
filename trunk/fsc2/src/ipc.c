@@ -116,7 +116,7 @@ char *attach_shm( int key )
 #endif
 		shmctl( key, IPC_RMID, NULL );       /* delete the segment */
 		lower_permissions( );
-		return ( void * ) NULL;
+		return NULL;
 	}
 
 	lower_permissions( );
