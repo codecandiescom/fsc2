@@ -1,8 +1,0 @@
-# -*-Makefile-*-
-#
-# $Id$
-
-install-dorimare.nowhere:
-	$(MAKE) $(UNINSTALL_MACHINE)
-
-uninstall-dorimare.nowhere::
