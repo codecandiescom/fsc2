@@ -541,6 +541,8 @@ void test_file( FL_OBJECT *a, long b )
 void run_file( FL_OBJECT *a, long b )
 {
 	struct stat file_stat;
+	char str1[ 128 ],
+		 str2[ 128 ];
 
 
 	a = a;
@@ -585,6 +587,37 @@ void run_file( FL_OBJECT *a, long b )
 		return;
 	}
 
+	/* If there were non-fatal errors ask user if he wants to continue */
+
+	if ( compilation.error[ SEVERE ] != 0 || compilation.error[ WARN ] != 0 )
+	{
+		if ( compilation.error[ SEVERE ] != 0 )
+		{
+			if ( compilation.error[ WARN ] != 0 )
+			{
+				sprintf( str1, "There where %d severe warnings",
+						 compilation.error[ SEVERE ] );
+				sprintf( str2, "and %d warnings.", compilation.error[ WARN ] );
+			}
+			else
+			{
+				sprintf( str1, "There where %d severe warnings.",
+						 compilation.error[ SEVERE ] );
+				str2[ 0 ] = '\0';
+			}
+		}
+		else
+		{
+			sprintf( str1, "There where %d warnings.",
+					 compilation.error[ WARN ] );
+			str2[ 0 ] = '\0';
+		}
+
+		if ( 1 == fl_show_choice( str1, str2, "Continue running the program?",
+								  2, "No", "Yes", "", 1 ) )
+			return;
+	}		
+
 	/* Finally start the experiment */
 
 	TRY
@@ -594,7 +627,7 @@ void run_file( FL_OBJECT *a, long b )
 	}
 	CATCH( EXCEPTION )
 	{
-		fl_show_alert( "Error", "Sorry, Sorry, can't run the experiment.",
+		fl_show_alert( "Error", "Sorry, can't run the experiment.",
 					   "See browser for more information.", 1 );
 	}
 }
@@ -707,7 +740,7 @@ void clean_up( void )
 	/* clear up the compilation structure */
 
 	for ( i = 0; i < 3; ++i )
-		compilation.error[ 3 ] = UNSET;
+		compilation.error[ 3 ] = 0;
 	for ( i = DEVICES_SECTION; i <= EXPERIMENT_SECTION; ++i )
 		compilation.sections[ i ] = UNSET;
 
