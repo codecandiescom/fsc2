@@ -23,7 +23,7 @@ comp_modules   = dg2020_f dg2020_b hfs9000 tds754a tds744a tds540 tds520c \
 src_headers    = $(addprefix ../src/,$(headers))
 
 CFLAGS        += -I../src
-LFLAGS         = -nostdlib -shared -fpic 
+LFLAGS         = -shared -fpic 
 
 
 .SUFFIXES:

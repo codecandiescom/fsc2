@@ -211,7 +211,8 @@ static void resolve_hook_functions( Device *dev, char *dev_name )
 			dev->driver.is_end_of_test_hook =
 				dev->driver.is_exp_hook =
 					dev->driver.is_end_of_exp_hook =
-						dev->driver.is_exit_hook = UNSET;
+						dev->driver.is_exit_hook =
+							dev->driver.exp_hook_is_run = UNSET;
 
 	/* If there is function with the name of the library file and the
 	   appended string "_init_hook" store it and set corresponding flag
@@ -503,6 +504,8 @@ void run_exp_hooks( void )
 			 ! cd->driver.exp_hook( ) )
 			eprint( SEVERE, "Initialisation of experiment failed for "
 					"module `%s'.\n", cd->name );
+		else
+			cd->driver.exp_hook_is_run = SET;
 }
 
 
@@ -516,12 +519,20 @@ void run_end_of_exp_hooks( void )
 
 
 	/* Each of the end-of-experiment hooks must be run to get all instruments
-	   back in a usable state, even if the function fails for one of them */
+	   back in a usable state, even if the function fails for one of them.
+	   The only exception are devices for which the exp-hook has not been
+	   run, probably because the exp-hook for a provious device in the list
+	   failed. */
 
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 	{
 		TRY
 		{
+			if ( ! cd->driver.exp_hook_is_run )
+				continue;
+			else
+				cd->driver.exp_hook_is_run = UNSET;
+
 			if ( cd->is_loaded && cd->driver.is_end_of_exp_hook &&
 				 ! cd->driver.end_of_exp_hook( ) )
 				eprint( SEVERE, "Resetting module `%s' after experiment "

@@ -792,7 +792,7 @@ void stop_graphics( void )
 	{
 		graphics_free( );
 
-		for ( i = X; i <= Z; i++ )
+		for ( i = X; i <= ( G.dim == 1 ? Y : Z ); i++ )
 			G.label[ i ] = T_free( G.label[ i ] );
 
 		if ( G.font )

@@ -20,6 +20,7 @@ typedef struct {
 	bool is_exp_hook;
 	int ( * end_of_exp_hook ) ( void );
 	bool is_end_of_exp_hook;
+	bool exp_hook_is_run;
 	void ( * exit_hook ) ( void );
 	bool is_exit_hook;
 } Lib_Struct;

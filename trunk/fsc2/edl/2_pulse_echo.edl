@@ -2,6 +2,7 @@ DEVICES:
 
 //er035m_s;
 //aeg_x_band;
+hp8647a;
 tds520a;
 dg2020_b;
 
@@ -37,7 +38,7 @@ DETECTION_GATE:    POD = 7,
 DETECTION:         POD = 0
 					 V_HIGH = 5 V, V_LOW = 0 V;
 
-PHASE_1_SETUP:  MW,
+PHASE_SETUP_1:  MW,
                  X: POD = 1,
                 +Y: POD = 2,
                 -X: POD = 3,
