@@ -347,7 +347,7 @@ the middle mouse button in the area of either the x- or the y-axis.
 
 Alternatively, if you have a wheel mouse and you turn the wheel within
 the x- or y-axis areas the data will be moved around on the screen in
-either the x- or the y-direction in increments of a thenth of the total
+either the x- or the y-direction in increments of a tenth of the total
 axis length.
 
 
@@ -589,7 +589,7 @@ while output objects are used to display numerical values. Both object
 types come in two variants, one that allows the input or display of
 integer values only and one for floating point numbers.
 
-Finally, there are popup-menu buttons. If clicked on a menu with two or
+Finally, there are pop-up-menu buttons. If clicked on a menu with two or
 more items to select pops up and allows the user to chose one of several
 alternatives.
 
@@ -668,7 +668,7 @@ toolbox window).
 Selects the font size to be used for sliders (in the toolbox window).
 
 @item helpFontSize
-Selects the font size to be used for the popup help texts.
+Selects the font size to be used for the pop-up help texts.
 
 @item fileselectorFontsize
 Selects the font size to be used for the file selector.
@@ -692,7 +692,7 @@ the mouse is hovering over a button for some time. If you're fed up with
 this texts popping up simply set it to @code{True}.
 
 @item httpPort
-This option tells @code{fsc2}s webserver on which port to listen for
+This option tells @code{fsc2}s web-server on which port to listen for
 incoming connections. Per default it is 8080 but using this option a
 different port (in the range between 1024 and 65535) can be set.
 
