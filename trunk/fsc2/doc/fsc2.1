@@ -1,0 +1,70 @@
+. $Id$
+.TH FSC2 1 "1 November 2000"
+.SH NAME
+fsc2 \- program for remote control of EPR spectrometer
+.SH SYNOPSIS
+.B fsc2
+[\fIOPTION\fR]... [\fIFILE\fR]...
+.SH DESCRIPTION
+.PP
+.B Fsc2
+is a program that allows to remotely control an EPR spectrometer. Its input
+is a program written in a language called
+.B EDL
+that enables the user to describe exactly how the experiment is to be done,
+which data are to be written to files and how the data are to be displayed.
+
+.B WARNING:
+A complete description of
+.B fsc2
+and the
+.B EDL
+language is much too long for a manual page. Please read the Texinfo
+or PostScript, PDF or HTML documentation installed with the program (see
+below for details).
+.SH OPTIONS
+.TP
+\fB\-t\fR FILE
+Runs a syntax check on the input file and quits. No graphic is
+used and all output is written to the controlling terminal.
+.TP
+\fB\-T\fR FILE
+Starts
+.B fsc2
+in graphics mode and immediately does a syntax check opf the input file.
+When done with the check the program waits for further commands.
+.TP
+\fB\-S\fR FILE
+Starts
+.B fsc2
+in graphics mode and immediately does a syntax check on the input file.
+If the syntax check does not fail the experiment is started without needing
+further user input.
+.TP
+\fB\-d\fR FILE
+Starts
+.B fsc2
+in graphics mode and loads the input file. The input file will be
+automatically deleted when
+.B fsc2
+is done with it, i.e. when either
+.B fsc2
+is exits or a new file is loaded. This flag is only useful for cases where
+the input file is a temporary file that needs to be deleted automatically
+when it isn't needed anymore.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Displays a very short help text and exits.
+.SH SEE ALSO
+The complete documentation for
+.B fsc2
+in PostScript, PDF and HTML format can be found in the directory
+DOCDIR. Alternatively, the command
+.IP
+.B info fsc2
+.PP
+should give you access to the manual in Texinfo format.
+.SH "REPORTING BUGS"
+Report bugs to <toerring@physik.fu-berlin.de>.
+.SH AUTHORS
+Jens Thoms Toerring <toerring@physik.fu-berlin.de>
