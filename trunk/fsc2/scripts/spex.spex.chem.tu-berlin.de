@@ -420,7 +420,7 @@ I = 1;
 I_start = 1;
 Mode = 0;
 
-B_swn, B_stsz, B_mt, B_scan, B_cwn, B_stop, B_rel, B_abs, B_clr;
+B_swn, B_goto, B_stsz, B_mt, B_scan, B_cwn, B_stop, B_rel, B_abs, B_clr;
 
 
 PREPARATIONS:
@@ -503,7 +503,7 @@ FOREVER {
 		IF button_changed( B_goto ) {
 			button_state( B_goto );
 			IF cwn != start_wn {
-				cwn = start_cwn;
+				cwn = start_wn;
 				output_value( B_cwn, Mode == 0 ? cwn : ll - cwn );
 				monochromator_wavenumber( Mode == 0 ? start_wn :
 										  ll - start_wn );
@@ -553,7 +553,7 @@ FOREVER {
 			object_enable( B_scan, "OFF" );
 			object_enable( B_stop, "ON" );
 
-			cwn = start_cwn;
+			cwn = start_wn;
 			output_value( B_cwn, Mode == 0 ? cwn : ll - cwn );
 
 			IF Mode == 0 {

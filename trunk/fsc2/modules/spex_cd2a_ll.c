@@ -1077,13 +1077,13 @@ bool spex_cd2a_read_state( void )
 							 fgetc( fp ) != '1' ) )
 						 ||
 						 ( spex_cd2a.mode == WL &&
-						   fsc2_fscanf( fp, "%lf[ \t]", val + i++ ) != 1 ||
-							 fgetc( fp ) != 'n' || fgetc( fp ) != 'm' ) ) 
-					 ) || ( i == 1 &&
-						 fsc2_fscanf( fp, "%lf[ \t]", val + i++ ) != 1 ||
-							 fgetc( fp ) != 'c' || fgetc( fp ) != 'm' ||
-							 fgetc( fp ) != '^' || fgetc( fp ) != '-' ||
-							 fgetc( fp ) != '1' ) )
+						   ( fsc2_fscanf( fp, "%lf[ \t]", val + i++ ) != 1 ||
+							 fgetc( fp ) != 'n' || fgetc( fp ) != 'm' ) ) )
+					 ) || ( i == 1 && (
+							fsc2_fscanf( fp, "%lf[ \t]", val + i++ ) != 1 ||
+							fgetc( fp ) != 'c' || fgetc( fp ) != 'm' ||
+							fgetc( fp ) != '^' || fgetc( fp ) != '-' ||
+							fgetc( fp ) != '1' ) ) )
 				{
 					print( FATAL, "Invalid calibration file '%s'.\n", fn );
 					T_free( fn );

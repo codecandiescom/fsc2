@@ -49,7 +49,7 @@
 * hjs_sfc::         Simple Field Control (HJS_SFC, Steinhoff group, Osnabrueck)
 * hjs_fc::          Field Control (HJS_FC, Steinhoff group, Osnabrueck)
 * ips20_4::         Oxford Magnet Sweep Power Supply IPS20-4
-* ips20_4::         Oxford Magnet Sweep Power Supply IPS120-10
+* ips120_10::       Oxford Magnet Sweep Power Supply IPS120-10
 * keithley228a::    Magnet Power Supply Keithley 228A (Berlin W-Band)
 * kontron4060::     Kontron 4060 Voltmeter
 * lakeshore330::    Lake Shore 330 Temperature Controller

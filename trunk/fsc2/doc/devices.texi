@@ -475,7 +475,7 @@ This function is only available for the Oxford magnet power supplies
 (@code{ips20_4} and @code{ips120_10}) to set or query the sweep rate for
 continuous sweeps.  If no argument is passed to the function the
 currently set sweep rate is returned. Otherwise a (positive) sweep rate
-in units of either @code{A/s} (for the IPS20-4) or @code{G/s) (for the
+in units of either @code{A/s} (for the IPS20-4) or @code{G/s} (for the
 IPS120_19) must be passed to the function.
 
 
