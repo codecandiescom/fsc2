@@ -685,7 +685,7 @@ else
 There are two points that need attention:
 @enumerate
 @item
-After the call to @code{vars_call()} the variable with the pointer to
+After the call to @code{func_call()} the variable with the pointer to
 the function returned by @code{func_get()}
 @findex func_get()
 , @code{func_ptr}, will
