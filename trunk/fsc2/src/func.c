@@ -191,8 +191,9 @@ bool functions_init( void )
 }
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+/* Function for qsort'ing functions according to their names */
+/*-----------------------------------------------------------*/
 
 static int func_cmp1( const void *a, const void *b )
 {
@@ -200,10 +201,10 @@ static int func_cmp1( const void *a, const void *b )
 }
 
 
-/*----------------------------------------------------*/
-/* Function gets rid of all loaded functions and also */
-/* unlinks the library files.                         */
-/*----------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Function gets rid of all loaded functions (i.e. functions from  */
+/* modules). It also closes all files opened due to user requests. */
+/*-----------------------------------------------------------------*/
 
 void functions_exit( void )
 {
@@ -245,12 +246,12 @@ Var *func_get( const char *name, int *access )
 }
 
 
-/*--------------------------------------------------------------*/
-/* This function is the one really used for finding a function  */
-/* but with an additional argument that indicates if on failure */
-/* for existing but not loaded functions an error message is    */
-/* printed and an exception is thrown or NULL is returned.      */
-/*--------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* This function is the one really used for finding a function    */
+/* but with an additional argument that indicates if on failure   */
+/* for existing but not loaded functions an error message is      */
+/* printed and an exception is thrown or simply NULL is returned. */
+/*----------------------------------------------------------------*/
 
 Var *func_get_long( const char *name, int *access, bool flag )
 {
@@ -288,8 +289,9 @@ Var *func_get_long( const char *name, int *access, bool flag )
 }
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*--------------------------------------------------*/
+/* Function for bsearch for a function by its name. */
+/*--------------------------------------------------*/
 
 static int func_cmp2( const void *a, const void *b )
 {
@@ -297,9 +299,9 @@ static int func_cmp2( const void *a, const void *b )
 }
 
 
-/*--------------------------------------------------------*/
-/* Here's the function that finally calls an EDL function */
-/*--------------------------------------------------------*/
+/*------------------------------------------------------------*/
+/* This function is called to really execute an EDL function. */
+/*------------------------------------------------------------*/
 
 Var *func_call( Var *f )
 {
@@ -381,9 +383,8 @@ Var *func_call( Var *f )
 	if ( --in_call == 0 )
 		Cur_Func = NULL;
 
-	/* Finally do a clean up, i.e. remove the variable with the function and
-	   all parameters - just keep the return value. Before starting to delete
-	   the defunct variables we do another sanity check. */
+	/* Before starting to delete the now defunct variables do another
+	   sanity check, testing that the stack didn't get corrupted. */
 
 	if ( ! vars_exist( f ) )
 	{
@@ -396,6 +397,9 @@ Var *func_call( Var *f )
 					Fncts[ i ].device->name, __FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
+
+	/* Finally do the clean up, i.e. remove the variable with the function
+	   and all parameters that survived - just keep the return value. */
 
 	for ( ap = f; ap != NULL; ap = ( ap == ret ) ? ap->next : vars_pop( ap ) )
 		;
