@@ -47,14 +47,14 @@ in the various sections. These are explained in the next sections.
 
 
 Each @b{EDL} file consists of up to 6 different sections. These are:
-@table @samp
-@item DEVICES
-@item VARIABLES
-@item ASSIGNMENTS
-@item PHASES
-@item PREPARATIONS
-@item EXPERIMENT
-@end table
+@example
+DEVICES
+VARIABLES
+ASSIGNMENTS
+PHASES
+PREPARATIONS
+EXPERIMENT
+@end example
 
 
 In an experiment you will first decide which devices you need. This
@@ -155,7 +155,7 @@ There are a few exceptions to the valid variable names because a few
 characters or character combinations are already used for physical units
 as well as combinations of these with the characters @code{n} (nano),
 @code{u} (micro), @code{m} (milli), @code{k} (kilo) and @code{M} (mega).
-These are
+Here's the complete list:
 @table @samp
 @item s
 Seconds (and @code{ns, us, ms, ks} and @code{Ms})
@@ -169,10 +169,12 @@ Volt (and @code{nV, uV, mV, kV} and @code{MV})
 Ampere (and @code{nA, uA, mA, kA} and @code{MA})
 @item Hz
 Hertz (and @code{nHz, uHz, mHz, kHz} and @code{MHz})
+@item dB
+dB (dezi-Bell)
 @end table
 
 Of course, also the reserved words can't be used as variable names. But
-they are easy to avoid, because all reserved words are spelt in capital
+they are easy to avoid, because all reserved words are spelt in all capital
 letters only.
 
 
@@ -260,9 +262,9 @@ float( 7 ) / 2 = 3.5    8 / float( 3 ) = 2.666666667
 @end example
 
 
-Beside the normal arithmetic operations there are two more operations, the
-modulo and the exponentiation. For the modulo operation the percent sign
-@code{%}
+Beside the normal arithmetic operations there are two more operations,
+the modulo function and the exponentiation. For the modulo operation the
+percent sign @code{%}
 @findex % @r{(modulo function)}
 @cindex modulo function
 is used and the result is the remainder of the division, e.g.@:
@@ -277,11 +279,12 @@ For the exponentiation the caret character @code{^} is to be used, e.g.@:
 @cindex exponentiation
 
 @example
-3^2 = 9           6.5 ^ 1.5 = 16.5718134219...
+3^2 = 9           6.5^1.5 = 16.5718134219...
 @end example
 @noindent
 As usual, non-integer exponents can only be used with non-negative bases!
 
+@b{We still need to talk about operator precedence...}
 
 
 @node Arithmetic on arrays, Arithmetic, Control structures,EDL
@@ -352,9 +355,11 @@ arrays and simple numbers, also resulting in arrays:
 @end example
 
 All the built-in arithmetic functions can be applied to arrays. In every
-case the function is applied to each element of the array, thus
-resulting in another array. For example, again using the array @code{a}
-defined above, applying the @code{sqrt()} function results in:
+case the function is applied to each element of the array, thus the
+result is another array with its elements being the results of applying
+the function to each of the input array elements. For example, again
+using the array @code{a} defined above, applying the @code{sqrt()}
+function results in:
 @example
       sqrt( a )  ->   @{ 0.7071068, 1.0, 1.1414215 @}
 @end example

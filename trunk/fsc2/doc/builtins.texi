@@ -19,7 +19,7 @@
 @table @samp
 @item print()
 @findex print()
-Function prints text into the output browser in the main form of
+This function prints text into the output browser in the main form of
 @b{fsc2}.  It needs a @i{format string}
 @cindex format string
 as its very first argument. The @i{format string} can contain any text
@@ -97,10 +97,10 @@ arguments but all of them are optional. They are:
 Number of curves to be displayed, maximum is currently set to 4. If not given
 it defaults to 1.
 @item
-Number of points, if missing or zero will be treated as unknown. Negative
-values will also be treated as unknown. If the given value is too small to
-fit the data it is adjusted automatically so that all data fit into the
-display.
+Number of points, if missing or zero will be treated as
+unknown. Negative values will also be treated as unknown. If the
+specified value turns out to be too small it is adjusted automatically
+in the experiment so that all data fit into the display.
 @item
 Start value of x-axis. If missing (or undefined, see next point) point
 numbers are printed, starting with 1 (if FORTRAN style array offsets are
