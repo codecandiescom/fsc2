@@ -563,7 +563,7 @@ bool change_xy_range_2d( Canvas *c )
 	}
 
 	if ( scale_changed )
-	recalc_XPoints_of_curve_2d( cv );
+		recalc_XPoints_of_curve_2d( cv );
 
 	return scale_changed;
 }
