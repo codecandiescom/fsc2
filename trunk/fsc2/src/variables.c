@@ -2005,7 +2005,7 @@ Var *vars_push( int type, ... )
 Var *vars_make( int type, Var *src )
 {
 	Var *nv = NULL;
-	Var **stack;
+	Var *stack;
 	ssize_t i;
 
 

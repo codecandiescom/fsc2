@@ -223,7 +223,6 @@ Var *f_print( Var *v )
 
 					default :
 						fsc2_assert( 1 == 0 );
-						break;
 				}
 
 			cv = cv->next;
@@ -424,7 +423,6 @@ Var *f_sprint( Var *v )
 
 				default :
 					fsc2_assert( 1 == 0 );
-					break;
 			}
 
 			cv = cv->next;
