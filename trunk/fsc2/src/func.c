@@ -335,6 +335,7 @@ Var *func_call( Var *f )
 
 	/* Now call the function */
 
+	Cur_Func = f->name;
 	if ( ac != 0 )
 		ret = ( *f->val.fnct )( f->next );
 	else

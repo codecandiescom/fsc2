@@ -114,7 +114,8 @@ gid_t EGID;                  /* with (should both translate to fsc2) */
 /* used in compiling and executing the user supplied program */
 
 long Lc = 0;                 /* line number in currently parsed file */
-char *Fname = NULL;          /* name of currently paresed file */
+char *Fname = NULL;          /* name of currently parsed file */
+char *Cur_Func;
 Compilation compilation;     /* structure with infos about compilation state */
 Prg_Token *prg_token = NULL; /* array with predigested program */
 long prg_length = 0;         /* number of array elements in predigested
@@ -179,6 +180,7 @@ extern gid_t EGID;
 
 extern long Lc;
 extern char *Fname;
+extern char *Cur_func;
 extern Compilation compilation;
 extern Prg_Token *prg_token;
 extern long prg_length;
