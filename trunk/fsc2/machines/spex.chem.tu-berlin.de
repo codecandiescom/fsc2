@@ -1,0 +1,11 @@
+# -*-Makefile-*-
+#
+# $Id$
+
+OWNER              := fsc2
+GROUP              := dialout
+GPIB_LIBRARY       := NONE
+NUM_SERIAL_PORTS   := 2
+SERIAL_LOCK_DIR    := /var/lock
+WITH_NI6601        := yes
+ni6601_libs        := libni6601.so
