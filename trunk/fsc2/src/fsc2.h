@@ -161,7 +161,8 @@ typedef struct {
 	bool exit_hooks_are_run;     /* Set if modules exit hooks have all already
 									been run */
 
-	void *crash_address;
+	void *crash_address;         /* stores the program counter of the place
+									where a crash happened */
 } INTERNALS;
 
 
