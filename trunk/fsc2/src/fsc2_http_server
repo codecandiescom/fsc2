@@ -40,7 +40,7 @@ my $crlf = "\r\n";     # RFC 2616 requires this as the newline
 my $has_pnmtopng;      # does the pnmtopng utility exist?
 my $has_ppmtojpeg;     # does the ppmtojpeg utility exist?
 my $fs;                # flock structure for locking of STDOUT
-my $version = 0.4;
+my $version = 0.5;
 my $hostname = `hostname -f`;
 chomp $hostname;
 
@@ -137,7 +137,7 @@ sub serve {
 
 	my $txt;
 	my %f = ( 'png' => 0, 'gif' => 0, 'jpeg' => 0 );
-	my $is_host_field = 0;
+	my $host_field = "";
 
 
 	# Make the client connection the default I/O channel and unbuffer it.
@@ -151,7 +151,7 @@ sub serve {
 	1 while defined( $txt = <$client> ) and $txt =~ /^\r*$/o;
 	exit 0 unless defined $txt;
 
-	# Analyze the very line the client sends, stop immediately on not
+	# Analyze the first line the client sends, stop immediately on not
 	# well-formed requests
 
 	illegal_request( )
@@ -160,9 +160,12 @@ sub serve {
 	my ( $req, $file, $maj, $min ) = ( $1, $2, $3, $4 );
 
 	# RFC2616 requires that we accept an absolute URI, i.e. an URI starting
-	# with http://machine_name
+	# with "http://" and the host name, we also accept numerical IP addresses
+	# and aliases.
 
 	$file =~ s|^(http://$hostname)?/||io;
+	$file =~ s|^(http://$_)?/||i for ( split /[ \t]+/, `hostname -i` );
+	$file =~ s|^(http://$_)?/||i for ( split /[ \t]+/, `hostname -a` );
 
 	# Check if client accepts PNG, GIF or JPEG files and if it sends a
 	# Host field, don't care for anything else. The client is done when it
@@ -182,7 +185,8 @@ sub serve {
 				$f{ $_ } = 1 for ( keys %f );
 			}
 		} else {
-			$is_host_field = 1;
+			$txt =~ /^Host:\s*([^\r]+)\r*$/i;
+			$host_field = $1;
 		}
 	}
 
@@ -198,7 +202,12 @@ sub serve {
 	# claiming to be HTTP/1.1 compliant
 
 	missing_host_field( $req, $maj, $min )
-		if $maj >= 1 and $min >= 1 and ! $is_host_field;
+		if $maj >= 1 and $min >= 1 and $host_field eq "";
+
+	# If we got send a host field check that it is a valid address of our
+	# machine
+
+	check_host_field( $host_field, $req, $maj, $min ) if $host_field ne "";
 
 	# Ok, now it's finally our turn to send something back to the client...
 
@@ -581,6 +590,41 @@ sub missing_host_field {
 		   	   "understand:$crlf" .
 		   	   "Client sent HTTP/1.1 request without a hostname (see " .
 			   "RFC2616 section 14.23)</P>$crlf" .
+			   "</HR><ADDRESS>fsc2 HTTP server v$version at $hostname " .
+			   "Port $port</ADDRESS>$crlf</BODY></HTML>$crlf";
+
+	print "HTTP/1.1 400 Bad Request$crlf" . def_txt( 0, $maj, $min ) .
+		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
+		  "Content-Lenght: " . length( $body ) . "$crlf$crlf";
+
+	print $body if $req =~ /^GET$/io;
+
+	close $client;
+	exit;
+}
+
+
+#########################################################
+# Checks that the Host field of the request (if there is one) is a
+# valid address of the machine we're running on.
+
+sub check_host_field {
+
+	my ( $host, $req, $maj, $min ) = @_;
+
+	$host =~ s|^$hostname$||io;
+	$host =~ s|^$_$||i for ( split /[ \t]+/, `hostname -i` );
+	$host =~ s|^$_$||i for ( split /[ \t]+/, `hostname -a` );
+
+	return if $host eq "";
+
+	my $body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">$crlf" .
+		   	   "<HTML>$crlf<HEAD>$crlf" .
+		   	   "<TITLE>400 Bad Request</TITLE>$crlf" .
+		   	   "</HEAD><BODY>$crlf" .
+		   	   "<H1>Bad Request</H1>$crlf" .
+		   	   "<P>Your browser send a Host field ($host) that isn't a " .
+			   "valid address of this server.$crlf" .
 			   "</HR><ADDRESS>fsc2 HTTP server v$version at $hostname " .
 			   "Port $port</ADDRESS>$crlf</BODY></HTML>$crlf";
 
