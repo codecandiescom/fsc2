@@ -70,7 +70,7 @@ void dg2020_basic_pulse_check( void )
 
 		if ( ! p->function->is_used )
 		{
-			eprint( FATAL, UNSET, "%s: The function `%s' of pulse %ld hasn't "
+			eprint( FATAL, UNSET, "%s: Function `%s' of pulse %ld hasn't "
 					"been declared in the ASSIGNMENTS section.\n",
 					pulser_struct.name, Function_Names[ p->function->self ],
 					p->num );
@@ -457,10 +457,9 @@ static void dg2020_distribute_channels( void )
 
 	if ( dg2020.needed_channels > MAX_CHANNELS )
 	{
-		eprint( FATAL, UNSET, "%s: Running the experiment would require %d "
-				"pulser channels but only %d are available.\n",
-				pulser_struct.name, dg2020.needed_channels,
-				( int ) MAX_CHANNELS );
+		eprint( FATAL, UNSET, "%s: Experiment would require %d pulser "
+				"channels but only %d are available.\n", pulser_struct.name,
+				dg2020.needed_channels, ( int ) MAX_CHANNELS );
 		THROW( EXCEPTION );
 	}
 
