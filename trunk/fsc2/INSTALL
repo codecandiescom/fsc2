@@ -168,10 +168,11 @@ left-padded with spaces and with a trailing newline). In this case fsc2 will
 not try to remove stale lock files and instead print an error message to the
 terminal that the lock file has to be removed manually.
 
-The WITH_HTTP_SERVER variable tells if support for the web server should be
-built into fsc2. Just comment out the line and the web server going to vanish.
-If the web server gets included the next variable, DEFAULT_HTTP_PORT, tells
-on which port the web server will listen for incoming connections by default.
+The WITH_HTTP_SERVER variable tells if support for the web server should
+be built into fsc2. Just comment out the line and the web server won't be
+available. If the web server gets included the next variable,
+DEFAULT_HTTP_PORT, determines on which port the web server will listen for
+incoming connections by default.
 
 The final variable to be set is the email address of the person that will
 receive bug reports and notifications if fsc2 crashes. Usually, you should
@@ -197,7 +198,7 @@ fail in most cases and will never create everything you'll need.
 
 If you get more than a few warnings (about problems with fsc2, not header
 files included by fsc2) during the compilation stage of the program (or
-the make process fails completely please send me an email with the output
+the make process fails completely) please send me an email with the output
 of make. You can save the output of make to a file, e.g. 'makelog', by
 running make with the command
 
@@ -229,9 +230,9 @@ This will make fsc2 run a set of EDL programs that (hopefully) test most
 of its built-in functions at least once. Be prepared for lots of windows
 popping up during the test run, displaying some rather strange graphics.
 Normally, the test should run without any errors, otherwise you probably
-should contact me and complain ;-) All these tests don't access any of the
+should contact me and complain. All these tests don't access any of the
 devices, writing a test suite for the supported devices is still on my
-to-do list...
+to-do list.
 
 Please note: If you installed the program and then decide that you don't
 like it and want to get rid of it, you can always de-install it by running
@@ -246,6 +247,7 @@ files and directories (assuming you've used the default locations, i.e.
 
 /usr/local/bin/fsc2               (file)
 /usr/local/bin/fsc2_connect       (file)
+/usr/local/bin/fsc2_guify         (file)
 /usr/local/bin/fsc2_clean         (file)
 /usr/local/bin/fsc2_test          (symbolic link)
 /usr/local/bin/fsc2_load          (symbolic link)
@@ -280,9 +282,9 @@ Just start by typing 'fsc2 edl/a.edl' or 'fsc2 edl/z.edl' (assuming you're
 still in fsc2's main directory) and click onto the "Start" button to get an
 idea about how fsc2 displays 1- and 2-dimensional data sets.
 
-             March 16, 2002               Much luck, Jens
+             June 12, 2002               Much luck, Jens
 
------------------------------------------------------------------------------
+--
        _  _____  _____
       | ||_   _||_   _|         Jens.Toerring@physik.fu-berlin.de
    _  | |  | |    | |           AG Moebius, Institut fuer Moelkuelphysik
