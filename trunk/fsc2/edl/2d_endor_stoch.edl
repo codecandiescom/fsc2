@@ -186,6 +186,12 @@ FOR I = 1 : N_steps {
 	SIndex = int( N_steps * random( ) );
 }
 
+IF is_file( F1 ) {
+	fsave( F1, "# List of frequencies in a run (in MHz)\n\n" );
+	save( F1, Stoch * 1.0e-6 );
+	fsave( F1, "\n" );
+}
+
 
 /* Now, finally, we can start the experiment */
 
@@ -213,19 +219,17 @@ IF Pretrigger != 0 {
 base_curve = ( base_curve + curve - ground ) / 2.0;
 
 
+freq = start_freq + Stoch[ 1 ] * step_freq;
+synthesizer_frequency( freq );
+digitizer_start_acquisition( );
+
 FOR J = 1 : N_runs
 {
 	print( "Starting #. run of #.\n", J, N_runs );
 
-	freq = start_freq + Stoch[ 1 ] * step_freq;
-	synthesizer_frequency( freq );
-
-    digitizer_start_acquisition( );
-
     FOR I = 1 : N_steps
     {
 		M = Stoch[ I ] + 1;
-
         Is_stored = 0;
 
         /* Get next curve from the digitizer */
@@ -247,7 +251,13 @@ FOR J = 1 : N_runs
             freq = start_freq + Stoch[ I + 1 ] * step_freq;
             synthesizer_frequency( freq );
             digitizer_start_acquisition( );
-        }
+        } ELSE {
+			freq = start_freq + Stoch[ 1 ] * step_freq;
+			synthesizer_frequency( freq );
+			IF J != N_runs {
+				digitizer_start_acquisition( );
+			}
+		}
 
         /* Add the new curve to the results from previous runs */
 
@@ -294,7 +304,7 @@ synthesizer_state( "OFF" );
 
 IF ! Is_stored {           // Check if data of last trace were stored
     I -= 1;
-    freq = start_freq + I * step_freq;
+    freq = start_freq + Stochl[ I ] * step_freq;
 }
 
 IF is_file( F2 )
@@ -306,8 +316,7 @@ IF is_file( F2 )
     }
 
     IF I < N_steps {
-        fsave( F2, "% Last run not finished, end frequency was # MHz\n",
-               freq * 1.0e-6 );
+        fsave( F2, "% Last run not finished, last index was #\n", I );
     }
     save_program( F2, "% " );
 
@@ -318,9 +327,13 @@ IF is_file( F2 )
     }
 
     freq = start_freq;
-    FOR I = 1 : End_index {
+    FOR I = 0 : ( End_index - 1 ) {
         fsave( F2, "\n% Frequency: # MHz\n\n", freq * 1.0e-6 );
         freq += step_freq;
-        save( F2, mean_curve[ I ] );
+		J = 1;
+		WHILE I != Stoch[ J ] {
+			J += 1;
+		}
+        save( F2, mean_curve[ J ] );
     }
 }
