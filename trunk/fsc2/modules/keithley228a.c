@@ -60,7 +60,7 @@ static double keithley228a_current_check( double current );
 typedef struct {
 	int device;               /* GPIB number of the device */
 
-	bool state;               /* STANDBY (0) or OPERATE (1) */
+	bool state;               /* STANDBY or OPERATE */
 
 	int lockin_dac_port;      /* number of the DAC port of the lock-in the
 								 modulation input is connected to */
@@ -673,5 +673,3 @@ static double keithley228a_current_check( double current )
 
 	return current;
 }
-
-
