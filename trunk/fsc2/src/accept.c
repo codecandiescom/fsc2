@@ -1368,7 +1368,6 @@ static bool incr_x_and_y( long x_index, long len, long y_index )
 
 
 /*
- * ---------------------------------------------------------------------------
  * Local variables:
  * tags-file-name: "../TAGS"
  * End:
