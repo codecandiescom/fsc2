@@ -32,10 +32,12 @@ aux/cursor7.xbm
 aux/cursor8.xbm
 aux/down_arrow.xbm
 aux/fsc2.eps
+aux/fsc2_favicon.xpm
 aux/fsc2.gif
 aux/fsc2.jpeg
 aux/fsc2.png
 aux/fsc2.xpm
+aux/i.png
 aux/left_arrow.xbm
 aux/na.gif
 aux/na.jpeg
@@ -142,6 +144,7 @@ doc/fsc2fig5.png
 doc/fsc2fig6.png
 doc/fsc2fig7.png
 doc/fsc2.gif
+doc/fsc2.ico
 doc/fsc2.texi
 doc/gpl.texi
 doc/GUIfy.texi
@@ -152,6 +155,7 @@ doc/http.texi
 doc/inactive.png
 doc/index.png
 doc/internals.texi
+doc/less
 doc/Makefile
 doc/modules.texi
 doc/next.png
@@ -368,6 +372,7 @@ scripts/spex_cam.spex.chem.tu-berlin.de
 scripts/spex.spex.chem.tu-berlin.de
 scripts/trepr.isaak.fu-berlin.de
 scripts/tresr.sunone.chemie.unibas.ch
+scripts/x.edl
 
 src/accept.c
 src/accept.h
