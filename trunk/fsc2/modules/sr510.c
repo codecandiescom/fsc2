@@ -189,8 +189,8 @@ Var *lockin_get_adc_data( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "sr510: Missing argument for function "
-				 "'lockin_get_adc_data'." );
+		eprint( FATAL, "%s:%ld: sr510: Missing argument for function "
+				 "'lockin_get_adc_data'.", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -206,9 +206,9 @@ Var *lockin_get_adc_data( Var *v )
 
 		if ( port < 1 || port > 4 )
 		{
-			eprint( FATAL, "sr510: Invalid ADC channel number (%ld) in call "
-					"of 'lockin_get_adc_data', valid channel are in the "
-					"range 1-4.", port );
+			eprint( FATAL, "%s:%ld: sr510: Invalid ADC channel number (%ld) "
+					"in call of 'lockin_get_adc_data', valid channel are in "
+					"the range 1-4.", %s:%ld: port );
 			THROW( EXCEPTION );
 		}
 
@@ -239,9 +239,9 @@ Var *lockin_get_adc_data( Var *v )
 
 		if ( port < 1 || port > 4 )
 		{
-			eprint( FATAL, "sr510: Invalid ADC channel number (%ld) in "
-					"call of 'lockin_get_adc_data', valid channel are in "
-					"the range 1-4.", port );
+			eprint( FATAL, "%s:%ld: sr510: Invalid ADC channel number (%ld) "
+					"in call of 'lockin_get_adc_data', valid channel are in "
+					"the range 1-4.", Fname, Lc, port );
 			T_free( voltages );
 			THROW( EXCEPTION );
 		}
@@ -288,9 +288,9 @@ Var *lockin_sensitivity( Var *v )
 		{
 			if ( I_am == PARENT )
 			{
-				eprint( FATAL, "sr510: Function `lockin_sensitivity' with no "
-						"argument can only be used in the EXPERIMENT "
-						"section." );
+				eprint( FATAL, "%s:%ld: sr510: Function `lockin_sensitivity' "
+						"with no argument can only be used in the EXPERIMENT "
+						"section.", Fname, Lc );
 				THROW( EXCEPTION );
 			}
 			return vars_push( FLOAT_VAR, sr510_get_sens( ) );
@@ -303,7 +303,8 @@ Var *lockin_sensitivity( Var *v )
 
 	if ( sens < 0.0 )
 	{
-		eprint( FATAL, "sr510: Invalid negative sensitivity." );
+		eprint( FATAL, "%s:%ld: sr510: Invalid negative sensitivity.",
+				Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -330,16 +331,16 @@ Var *lockin_sensitivity( Var *v )
 		 ! sr510.Sens_warn  )                       /* no warn message yet ? */
 	{
 		if ( sens >= 1.0e-3 )
-			eprint( WARN, "sr510: Can't set sensitivity to %.0lfmV, using "
-					"%.0lfmV instead.", sens * 1.0e3,
+			eprint( WARN, "%s:%ld: sr510: Can't set sensitivity to %.0lf mV, "
+					"using %.0lf V instead.", Fname, Lc, sens * 1.0e3,
 					slist[ Sens - 1 ] * 1.0e3 );
 		else if ( sens >= 1.0e-6 ) 
-			eprint( WARN, "sr510: Can't set sensitivity to %.0lfuV, using "
-					"%.0lfuV instead.", sens * 1.0e6,
+			eprint( WARN, "%s:%ld: sr510: Can't set sensitivity to %.0lf V, "
+					"using %.0lf uV instead.", Fname, Lc, sens * 1.0e6,
 					slist[ Sens - 1 ] * 1.0e6 );
 		else
-			eprint( WARN, "sr510: Can't set sensitivity to %.0lfnV, using "
-					"%.0lfnV instead.", sens * 1.0e9, 
+			eprint( WARN, "%s:%ld: sr510: Can't set sensitivity to %.0lf nV, "
+					"using %.0lfnV instead.", Fname, Lc, sens * 1.0e9, 
 					slist[ Sens - 1 ] * 1.0e9 );
 		sr510.Sens_warn = SET;
 	}
@@ -354,12 +355,12 @@ Var *lockin_sensitivity( Var *v )
 		if ( ! sr510.Sens_warn )                      /* no warn message yet */
 		{
 		if ( sens >= 1.0e-3 )
-			eprint( WARN, "sr510: Invalid sensitivity to %.0lfmV, using "
-					"%.0lfmV instead.", sens * 1.0e3,
+			eprint( WARN, "%s:%ld: sr510: Invalid sensitivity to %.0lf mV, "
+					"using %.0lf mV instead.", Fname, Lc, sens * 1.0e3,
 					slist[ Sens - 1 ] * 1.0e3 );
 		else
-			eprint( WARN, "sr510: Invalid sensitivity to %.0lfnV, using "
-					"%.0lfnV instead.", sens * 1.0e9, 
+			eprint( WARN, "%s:%ld: sr510: Invalid sensitivity to %.0lf nV, "
+					"using %.0lf nV instead.", Fname, Lc, sens * 1.0e9, 
 					slist[ Sens - 1 ] * 1.0e9 );
 			sr510.Sens_warn = SET;
 		}
@@ -398,9 +399,9 @@ Var *lockin_time_constant( Var *v )
 		{
 			if ( I_am == PARENT )
 			{
-				eprint( FATAL, "sr510: Function `lockin_time_constant' with "
-						"no argument can only be used in the EXPERIMENT "
-						"section." );
+				eprint( FATAL, "%s:%ld: sr510: Function `lockin_time_constant'"
+						" with no argument can only be used in the EXPERIMENT "
+						"section.", Fname, Lc );
 				THROW( EXCEPTION );
 			}
 			return vars_push( FLOAT_VAR, sr510_get_tc( ) );
@@ -413,7 +414,8 @@ Var *lockin_time_constant( Var *v )
 
 	if ( tc < 0.0 )
 	{
-		eprint( FATAL, "sr510: Invalid negative time constant." );
+		eprint( FATAL, "%s:%ld: sr510: Invalid negative time constant.",
+				Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -438,11 +440,12 @@ Var *lockin_time_constant( Var *v )
 		 ! sr510.TC_warn )                          /* no warn message yet ? */
 	{
 		if ( tc >= 1.0 )
-			eprint( WARN, "sr510: Can't set time constant to %.0lfs, using "
-					"%.0lfs instead.", tc, tcs[ TC - 1 ] );
+			eprint( WARN, "%s:%ld: sr510: Can't set time constant to %.0lf s, "
+					"using %.0lf s instead.", Fname, Lc, tc, tcs[ TC - 1 ] );
 		else
-			eprint( WARN, "sr510: Can't set time constant to %.0lfms, using "
-					"%.0lfms instead.", tc * 1.0e3, tcs[ TC - 1 ] * 1.0e3 );
+			eprint( WARN, "%s:%ld: sr510: Can't set time constant to %.0lf ms,"
+					" using %.0lf ms instead.", Fname, Lc, tc * 1.0e3,
+					tcs[ TC - 1 ] * 1.0e3 );
 		sr510.TC_warn = SET;
 	}
 	
@@ -456,11 +459,13 @@ Var *lockin_time_constant( Var *v )
 		if ( ! sr510.TC_warn )                      /* no warn message yet ? */
 		{
 			if ( tc >= 1.0 )
-				eprint( WARN, "sr510: Invalid time constant (%.0lfs), using "
-					"%.0lfs instead.", tc, tcs[ TC - 1 ] );
+				eprint( WARN, "%s:%ld: sr510: Invalid time constant of %.0lf s"
+						", using %.0lf s instead.", Fname, Lc, tc,
+						tcs[ TC - 1 ] );
 			else
-				eprint( WARN, "sr510: Invalid time constant (%.0lfms), using "
-					"%.0lfms instead.", tc * 1.0e3, tcs[ TC - 1 ] * 1.0e3 );
+				eprint( WARN, "%s:%ld: sr510: Invalid time constant of %.0lf "
+						"ms, using %.0lfms instead.", Fname, Lc, tc * 1.0e3,
+						tcs[ TC - 1 ] * 1.0e3 );
 			sr510.TC_warn = SET;
 		}
 	}
@@ -500,9 +505,9 @@ Var *lockin_phase( Var *v )
 		{
 			if ( I_am == PARENT )
 			{
-				eprint( FATAL, "sr510: Function `lockin_phase' with no "
-						"argument can only be used in the EXPERIMENT "
-						"section." );
+				eprint( FATAL, "%s:%ld: sr510: Function `lockin_phase' with "
+						"no argument can only be used in the EXPERIMENT "
+						"section.", Fname, Lc  );
 				THROW( EXCEPTION );
 			}
 			return vars_push( FLOAT_VAR, sr510_get_phase( ) );
