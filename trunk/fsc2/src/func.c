@@ -1059,7 +1059,7 @@ void f_wait_alarm_handler( int sig_type )
 Var *f_init_1d( Var *v )
 {
 	long nc = 1;
-	long n = -1;
+	long n = 0;
 	double rwc_start = 0.0,
 		   rwc_delta = 0.0;
 	char *label = NULL;
@@ -1152,8 +1152,8 @@ label_1d:
 
 Var *f_init_2d( Var *v )
 {
-	long nx = -1,
-		 ny = -1,
+	long nx = 0,
+		 ny = 0,
 		 nc = 1;
 	double rwc_x_start = 0.0,
 		   rwc_x_delta = 0.0, 
@@ -1272,7 +1272,8 @@ labels_2d:
 		}
 	}
 
-	graphics_init( 2, nc, nx, ny, 0.0, 0.0, 0.0, 0.0, l1, l2 );
+	graphics_init( 2, nc, nx, ny, rwc_x_start, rwc_x_delta,
+				   rwc_y_start, rwc_y_delta, l1, l2 );
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -1289,7 +1290,7 @@ Var *f_display( Var *v )
 	long len = 0;                    /* total length of message to send */
 	void *buf;
 	void *ptr;
-	int npoints;
+	int nsets;
 	int i;
 
 
@@ -1309,7 +1310,7 @@ Var *f_display( Var *v )
 
 	/* Check the arguments and get them into some reasonable form */
 
-	dp = eval_display_args( v, &npoints );
+	dp = eval_display_args( v, &nsets );
 
 	if ( I_am == PARENT )      /* i.e. as long as this is only a test run... */
 		return vars_push( INT_VAR, 1 );
@@ -1318,11 +1319,11 @@ Var *f_display( Var *v )
 
 	len =   4 * sizeof( char )            /* identifier 'fsc2' */
 		  + sizeof( len )                 /* length field itself */
-		  + sizeof( int )                 /* number of points to be sent */
-		  + 3 * npoints * sizeof( long )  /* x-, y-index and curve */
-		  + npoints * sizeof( int );      /* data type */
+		  + sizeof( int )                 /* number of sets to be sent */
+		  + 3 * nsets * sizeof( long )    /* x-, y-index and curve */
+		  + nsets * sizeof( int );        /* data type */
 	
-	for ( i = 0; i < npoints; i++ )
+	for ( i = 0; i < nsets; i++ )
 	{
 		switch( dp[ i ].v->type )
 		{
@@ -1395,10 +1396,10 @@ Var *f_display( Var *v )
 	memcpy( ptr, &len, sizeof( long ) );               /* total length */
 	ptr += sizeof( long );
 
-	memcpy( ptr, &npoints, sizeof( int ) );            /* # data points  */
+	memcpy( ptr, &nsets, sizeof( int ) );              /* # data sets  */
 	ptr += sizeof( int );
 
-	for ( i = 0; i < npoints; i++ )
+	for ( i = 0; i < nsets; i++ )
 	{
 		memcpy( ptr, &dp[ i ].nx, sizeof( long ) );     /* x-index */
 		ptr += sizeof( long );
@@ -1466,12 +1467,12 @@ Var *f_display( Var *v )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-DPoint *eval_display_args( Var *v, int *npoints )
+DPoint *eval_display_args( Var *v, int *nsets )
 {
 	DPoint *dp = NULL;
 
 
-	*npoints = 0;
+	*nsets = 0;
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Missing x-index in `display()'.\n",
@@ -1481,23 +1482,23 @@ DPoint *eval_display_args( Var *v, int *npoints )
 
 	do
 	{
-		/* Get (more) memory for the points */
+		/* Get (more) memory for the sets */
 
-		dp = T_realloc( dp, ( *npoints + 1 ) * sizeof( DPoint ) );
+		dp = T_realloc( dp, ( *nsets + 1 ) * sizeof( DPoint ) );
 
 		/* check and store the x-index */
 
 		vars_check( v, INT_VAR | FLOAT_VAR );
 	
 		if ( v->type == INT_VAR )
-			dp[ *npoints ].nx = v->val.lval - ARRAY_OFFSET;
+			dp[ *nsets ].nx = v->val.lval - ARRAY_OFFSET;
 		else
-			dp[ *npoints ].nx = rnd( v->val.dval - ARRAY_OFFSET );
+			dp[ *nsets ].nx = rnd( v->val.dval - ARRAY_OFFSET );
 
-		if ( dp[ *npoints ].nx < 0 )
+		if ( dp[ *nsets ].nx < 0 )
 		{
 			eprint( FATAL, "%s:%ld: Invalid x-index (%ld) in `display()'.\n",
-					Fname, Lc, dp[ *npoints ].nx + ARRAY_OFFSET );
+					Fname, Lc, dp[ *nsets ].nx + ARRAY_OFFSET );
 			THROW( EXCEPTION );
 		}
 
@@ -1517,15 +1518,15 @@ DPoint *eval_display_args( Var *v, int *npoints )
 			vars_check( v, INT_VAR | FLOAT_VAR );
 	
 			if ( v->type == INT_VAR )
-				dp[ *npoints ].ny = v->val.lval - ARRAY_OFFSET;
+				dp[ *nsets ].ny = v->val.lval - ARRAY_OFFSET;
 			else
-				dp[ *npoints ].ny = rnd( v->val.dval - ARRAY_OFFSET );
+				dp[ *nsets ].ny = rnd( v->val.dval - ARRAY_OFFSET );
 
-			if ( dp[ *npoints ].nx < 0 )
+			if ( dp[ *nsets ].nx < 0 )
 			{
 				eprint( FATAL, "%s:%ld: Invalid y-index (%ld) in "
 						"`display()'.\n",
-						Fname, Lc, dp[ *npoints ].ny + ARRAY_OFFSET );
+						Fname, Lc, dp[ *nsets ].ny + ARRAY_OFFSET );
 				THROW( EXCEPTION );
 			}
 
@@ -1544,7 +1545,7 @@ DPoint *eval_display_args( Var *v, int *npoints )
 
 		vars_check( v, INT_VAR | FLOAT_VAR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
-		dp[ *npoints ].v = v;
+		dp[ *nsets ].v = v;
 
 		v = v->next;
 
@@ -1553,28 +1554,28 @@ DPoint *eval_display_args( Var *v, int *npoints )
 
 		if ( v == NULL )
 		{
-			dp[ *npoints ].nc = 0;
-			( *npoints )++;
+			dp[ *nsets ].nc = 0;
+			( *nsets )++;
 			return dp;
 		}
 
 		vars_check( v, INT_VAR | FLOAT_VAR );
 	
 		if ( v->type == INT_VAR )
-			dp[ *npoints ].nc = v->val.lval - 1;
+			dp[ *nsets ].nc = v->val.lval - 1;
 		else
-			dp[ *npoints ].nc = rnd( v->val.dval - 1 );
+			dp[ *nsets ].nc = rnd( v->val.dval - 1 );
 
-		if ( dp[ *npoints ].nc < 0 || dp[ *npoints ].nc >= G.nc )
+		if ( dp[ *nsets ].nc < 0 || dp[ *nsets ].nc >= G.nc )
 		{
 			eprint( FATAL, "%s:%ld: Invalid curve number (%ld) in "
-					"`display()'.\n", Fname, Lc, dp[ *npoints ].nc + 1 );
+					"`display()'.\n", Fname, Lc, dp[ *nsets ].nc + 1 );
 			THROW( EXCEPTION );
 		}
 
 		v = v->next;
 
-		( *npoints )++;
+		( *nsets )++;
 	} while ( v != NULL );
 
 	return dp;
