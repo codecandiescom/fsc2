@@ -28,11 +28,10 @@ simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c          \
 				 aeg_s_band.c aeg_x_band.c er035m.c er035m_s.c hp5340a.c   \
 				 er035m_sa.c er035m_sas.c bh15.c keithley228a.c egg4402.c  \
 				 kontron4060.c lakeshore330.c pt2025.c er032m.c ips20_4.c  \
-				 $(addsuffix .c,$(s_band_list)) ni6601.c me6000.c          \
-				 rs_spec10.c
+				 $(addsuffix .c,$(s_band_list)) ni6601.c me6000.c
 
 comp_modules  := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400  \
-				 hp8672a $(hp864_list) $(tds_list)
+				 hp8672a $(hp864_list) $(tds_list) rs_spec10
 
 dg2020_f      := dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c  \
 				 dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
@@ -54,7 +53,8 @@ hp8647a       := hp8647a.c hp8647a_util.c hp8647a_gpib.c hp8647a_lexer.c
 hp8648b       := hp8648b.c hp8648b_util.c hp8648b_gpib.c hp8648b_lexer.c
 hp8672a       := hp8672a.c hp8672a_util.c hp8672a_gpib.c hp8672a_lexer.c
 er023m        := er023m.c  er023m_addon.c er023m_gpib.c
-lecroy9400    := lecroy9400.c  lecroy9400_gpib.c  lecroy9400_util.c
+lecroy9400    := lecroy9400.c lecroy9400_gpib.c  lecroy9400_util.c
+rs_spec10     := rs_spec10.c rs_spec10_int.c rs_spec10_util.c
 
 
 # For modules that require header files in non-standard places where the
