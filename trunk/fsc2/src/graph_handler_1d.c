@@ -1394,6 +1394,8 @@ void repaint_canvas_1d( Canvas *c )
 
 
 /*---------------------------------------------------------*/
+/* Function for returning th current mouse position to the */
+/* user for the EDL function mouse_position()              */
 /*---------------------------------------------------------*/
 
 int get_mouse_pos_1d( double *pa, unsigned int *keymask )
@@ -1507,8 +1509,9 @@ void fs_rescale_1d( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*---------------------------------------------------*/
+/* Function creates the axis scales for 1D displays. */
+/*---------------------------------------------------*/
 
 void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 {
