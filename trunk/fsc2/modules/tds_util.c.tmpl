@@ -97,8 +97,7 @@ void tds_tmpl_do_pre_exp_checks( void )
 		return;
 	}
 
-	/* If start position hasn't been set for all windows set it to the
-	   position of the left cursor on the digitizer screen */
+	/* Check for all windows if the position and width have been set */
 
 	if ( ! is_start )
 		for ( w = tds_tmpl.w; w != NULL; w = w->next )
@@ -841,6 +840,7 @@ void tds_tmpl_set_tracking( WINDOW *w )
 	if ( FSC2_MODE == EXPERIMENT )
 	{
 		tds_tmpl_set_track_cursors( UNSET );
+
 		if ( w != NULL )
 		{
 			tds_tmpl_set_cursor( 1, w->start );
@@ -906,23 +906,17 @@ void tds_tmpl_set_meas_window( WINDOW *w )
 
 void tds_tmpl_set_curve_window( WINDOW *w )
 {
-	tds_tmpl_set_window( w );
-
 	if ( w != NULL )
 	{
-		if ( ! tds_tmpl.snap_state )
-		{
-			tds_tmpl_set_snap( SET );
-			tds_tmpl.snap_state = SET;
-		}
+		tds_tmpl_set_window( w );
+
+		tds_tmpl_set_snap( SET );
+		tds_tmpl.snap_state = SET;
 	}
-	else
+	else if ( tds_tmpl.snap_state )
 	{
-		if ( tds_tmpl.snap_state )
-		{
-			tds_tmpl_set_snap( UNSET );
-			tds_tmpl.snap_state = UNSET;
-		}
+		tds_tmpl_set_snap( UNSET );
+		tds_tmpl.snap_state = UNSET;
 	}
 }
 
@@ -937,9 +931,6 @@ void tds_tmpl_set_curve_window( WINDOW *w )
 
 void tds_tmpl_set_window( WINDOW *w )
 {
-	if ( w == NULL )
-		return;
-
 	/* If all windows have the same width we only have to set the first
 	   cursor (and only if its not already at the correct position),
 	   otherwise we have to set both cursors */

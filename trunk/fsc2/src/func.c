@@ -506,7 +506,7 @@ CALL_STACK *call_push( Func *f, const char *device_name )
 	cs->f = f;
 	cs->dev_name = device_name;
 
-	if ( f != NULL && f->device != NULL &&
+	if ( f != NULL && f->device != NULL && f->device->generic_type != NULL &&
 		 ! strcmp( f->device->generic_type, PULSER_GENERIC_TYPE ) )
 	{
 		if ( ( t = strrchr( f->name, '#' ) ) != NULL )

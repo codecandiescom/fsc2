@@ -146,17 +146,20 @@ bool tds_tmpl_init( const char *name )
 		else
 			tds_tmpl.num_avg = tds_tmpl_get_num_avg( );
 
-		/* Count how many channels are switched on, how many are needed and
-		   how many of the needed ones are on */
+		/* Count how many live channels (that are the normal channels plus,
+		   on devices with two AUX channels, the AUX channels) are switched
+		   on, how many are needed and how many of the needed ones are on */
 
 		for ( needed_count = needed_on_count = on_count = 0, ch = 0;
 			  ch < NUM_DISPLAYABLE_CHANNELS; ch++ )
 		{
 			if ( ( tds_tmpl.channel_is_on[ ch ]
-									 = tds_tmpl_display_channel_state( ch ) ) )
+				             = tds_tmpl_display_channel_state( ch ) ) &&
+				 ch >= TDS_TMPL_CH1 && ch < NUM_NORMAL_CHANNELS )
 				on_count++;
 
-			if ( tds_tmpl.channels_in_use[ ch ] )
+			if ( tds_tmpl.channels_in_use[ ch ] &&
+				 ch <= TDS_TMPL_CH1 && ch < NUM_NORMAL_CHANNELS )
 			{
 				needed_count++;
 
@@ -178,7 +181,8 @@ bool tds_tmpl_init( const char *name )
 		{
 			while ( needed_count - needed_on_count >
 					MAX_SIMULTANEOUS_CHANNELS - on_count )
-				for ( ch = NUM_DISPLAYABLE_CHANNELS - 1; ch >= 0; ch-- )
+				for ( ch = NUM_NORMAL_CHANNELS - 1; ch >= 0; ch-- )
+				{
 					if ( ! tds_tmpl.channels_in_use[ ch ] &&
 						 tds_tmpl.channel_is_on[ ch ] )
 					{
@@ -186,12 +190,13 @@ bool tds_tmpl_init( const char *name )
 						on_count--;
 						break;
 					}
-
-			for ( ch = 0; ch < NUM_DISPLAYABLE_CHANNELS; ch++ )
-				if ( tds_tmpl.channels_in_use[ ch ] &&
-					 ! tds_tmpl.channel_is_on[ ch ] )
-					tds_tmpl_display_channel( ch, SET );
+				}
 		}
+
+		for ( ch = 0; ch < NUM_DISPLAYABLE_CHANNELS; ch++ )
+			if ( tds_tmpl.channels_in_use[ ch ] &&
+				 ! tds_tmpl.channel_is_on[ ch ] )
+				tds_tmpl_display_channel( ch, SET );
 
 		/* Switch to running until run/stop button is pressed and start
            running */
@@ -468,33 +473,10 @@ void tds_tmpl_set_trigger_channel( int ch )
 	char cmd[ 50 ];
 
 
-#if defined TDS_TMPL_AUX
-	fsc2_assert( ( ch >= TDS_TMPL_CH1 && ch < NUM_NORMAL_CHANNELS ) ||
-				 ch == TDS_TMPL_AUX || ch == TDS_TMPL_LIN );
-#endif
-#if defined TDS_TMPL_AUX1 && defined TDS_TMPL_AUX2
-	fsc2_assert( ( ch >= TDS_TMPL_CH1 && ch < NUM_NORMAL_CHANNELS ) ||
-				 ch == TDS_TMPL_AUX1 || ch == TDS_TMPL_AUX2 ||
-				 ch == TDS_TMPL_LIN );
-#endif			 
+	fsc2_assert( ch >= TDS_TMPL_CH1 && ch < NUM_NORMAL_CHANNELS );
 
 
-	switch( ch )
-	{
-#if defined TDS_TMPL_AUX1
-		case TDS_TMPL_AUX1 :
-			strcpy( cmd, "TRIG:MAI:EDGE:SOU CH3\n" );
-			break;
-#endif
-#if defined TDS_TMPL_AUX2
-		case TDS_TMPL_AUX2 :
-			strcpy( cmd, "TRIG:MAI:EDGE:SOU CH4\n" );
-			break;
-#endif
-		default :
-			sprintf( cmd, "TRIG:MAI:EDGE:SOU %s\n", Channel_Names[ ch ] );
-			break;
-	}
+	sprintf( cmd, "TRIG:MAI:EDGE:SOU %s\n", Channel_Names[ ch ] );
 
 	if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds_tmpl_gpib_failure( );
@@ -734,13 +716,13 @@ void tds_tmpl_set_sens( int channel, double sens )
 			{
 				print( FATAL, "Sensitivity of %f V for channel %s too low "
 					   "with input impedance set to  50 Ohm.\n",
-					   Channel_Names[ channel ], sens );
+					   User_Channel_Names[ channel ], sens );
 				THROW( EXCEPTION );
 			}
 
 			print( SEVERE, "Sensitivity of %f V for channel %s too low "
 				   "with input impedance set to 50 Ohm.\n",
-				   Channel_Names[ channel ], sens );
+				   User_Channel_Names[ channel ], sens );
 			return;
 		}
 	}

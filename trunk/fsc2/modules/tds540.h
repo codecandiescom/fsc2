@@ -183,6 +183,8 @@ enum {
 
 #endif
 
+#define User_Channel_Names Channel_Names
+
 
 /* Declaration of exported functions */
 

@@ -28,8 +28,8 @@
 #include "tds_tmpl.h"
 
 
-static const char device_name[ ]  = DEVICE_NAME;
-static const char generic_type[ ] = DEVICE_TYPE;
+const char device_name[ ]  = DEVICE_NAME;
+const char generic_type[ ] = DEVICE_TYPE;
 
 
 static Var *get_area( Var *v, bool use_cursor );
@@ -115,15 +115,17 @@ int tds_tmpl_end_of_test_hook( void )
 	for ( count = 0, ch = 0; ch < NUM_DISPLAYABLE_CHANNELS; ch++ )
 	{
 		tds_tmpl_stored.channels_in_use[ ch ] = tds_tmpl.channels_in_use[ ch ];
-		count++;
+		if ( tds_tmpl.channels_in_use[ ch ] &&
+			 ch >= TDS_TMPL_CH1 && ch < NUM_NORMAL_CHANNELS )
+			count++;
 	}
 
 	/* If more than MAX_SIMULTANEOUS_CHANNELS are needed we're in trouble */
 
 	if ( count > MAX_SIMULTANEOUS_CHANNELS )
 	{
-		print( FATAL, "%d channels are needed for the experiment but only "
-			   "%d can be displayed simulataneously.\n", count,
+		print( FATAL, "%d live channels are needed for the experiment but "
+			   "only %d can be displayed simulataneously.\n", count,
 			   MAX_SIMULTANEOUS_CHANNELS );
 		THROW( EXCEPTION );
 	}

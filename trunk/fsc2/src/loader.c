@@ -99,7 +99,8 @@ void load_all_drivers( void )
 
 			if ( cd->is_loaded && cd->driver.is_init_hook )
 			{
-				if ( ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+				if ( cd->generic_type != NULL &&
+					 ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
 					Cur_Pulser++;
 
 				call_push( NULL, cd->device_name );
@@ -470,7 +471,8 @@ static void resolve_generic_type( Device *dev )
 
 	Max_Devices_of_a_Kind = i_max( Max_Devices_of_a_Kind, dev->count );
 
-	if ( ! strcmp( dev->generic_type, PULSER_GENERIC_TYPE ) )
+	if ( dev->generic_type &&
+		 ! strcmp( dev->generic_type, PULSER_GENERIC_TYPE ) )
 		Num_Pulsers++;
 }
 
@@ -492,7 +494,8 @@ void run_test_hooks( void )
 		for ( cd = Device_List; cd != NULL; cd = cd->next )
 			if ( cd->is_loaded && cd->driver.is_test_hook )
 			{
-				if ( ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+				if ( cd->generic_type != NULL &&
+					 ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
 					Cur_Pulser++;
 
 				call_push( NULL, cd->device_name );
@@ -532,7 +535,8 @@ void run_end_of_test_hooks( void )
 		for ( cd = Device_List; cd != NULL; cd = cd->next )
 			if ( cd->is_loaded && cd->driver.is_end_of_test_hook )
 			{
-				if ( ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+				if ( cd->generic_type != NULL &&
+					 ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
 					Cur_Pulser++;
 
 				call_push( NULL, cd->device_name );
@@ -573,7 +577,8 @@ void run_exp_hooks( void )
 		{
 			if ( cd->is_loaded && cd->driver.is_exp_hook )
 			{
-				if ( ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+				if ( cd->generic_type != NULL &&
+					 ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
 					Cur_Pulser++;
 
 				call_push( NULL, cd->device_name );
@@ -628,7 +633,8 @@ void run_end_of_exp_hooks( void )
 
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 	{
-		if ( ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+		if ( cd->generic_type != NULL &&
+			 ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
 			Cur_Pulser++;
 
 		if ( ! cd->driver.exp_hook_is_run )
@@ -680,7 +686,8 @@ void run_exit_hooks( void )
 
 	for ( ; cd != NULL; cd = cd->prev )
 	{
-		if ( ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+		if ( cd->generic_type != NULL &&
+			 ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
 			Cur_Pulser--;
 
 		TRY

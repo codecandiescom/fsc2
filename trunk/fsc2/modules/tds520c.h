@@ -33,22 +33,22 @@
 #define TDS520C_UNDEF -1
 #define TDS520C_CH1    0
 #define TDS520C_CH2    1
-#define TDS520C_MATH1  2
-#define TDS520C_MATH2  3
-#define TDS520C_MATH3  4
-#define TDS520C_REF1   5
-#define TDS520C_REF2   6
-#define TDS520C_REF3   7
-#define TDS520C_REF4   8
-#define TDS520C_AUX1   9         /* Auxiliary (for triggger only) */
-#define TDS520C_AUX2  10         /* Auxiliary (for triggger only) */
+#define TDS520C_AUX1   2         /* Auxiliary (for triggger only) */
+#define TDS520C_AUX2   3         /* Auxiliary (for triggger only) */
+#define TDS520C_MATH1  4
+#define TDS520C_MATH2  5
+#define TDS520C_MATH3  6
+#define TDS520C_REF1   7
+#define TDS520C_REF2   8
+#define TDS520C_REF3   9
+#define TDS520C_REF4  10
 #define TDS520C_LIN   11         /* Line In (for triggger only) */
 #define MAX_CHANNELS  12
 
 
 #define NUM_NORMAL_CHANNELS       ( TDS520C_CH2 + 1 )
-#define NUM_DISPLAYABLE_CHANNELS  ( TDS520C_REF4 + 1 )
-#define MAX_SIMULTANEOUS_CHANNELS 4
+#define NUM_DISPLAYABLE_CHANNELS  ( TDS520C_AUX2 + 1 )
+#define MAX_SIMULTANEOUS_CHANNELS 2
 
 #define TDS520C_POINTS_PER_DIV 50
 
@@ -143,10 +143,15 @@ enum {
 
 	TDS520C tds520c;
 	const char *Channel_Names[ MAX_CHANNELS ] = {
-											 "CH1", "CH2",
+											 "CH1", "CH2", "CH3", "CH4",
 											 "MATH1", "MATH2", "MATH3",
 											 "REF1", "REF2", "REF3", "REF4",
-											 "AUX1", "AUX2", "LINE" };
+											 "LINE" };
+	const char *User_Channel_Names[ MAX_CHANNELS ] = {
+											 "CH1", "CH2", "AUX1", "AUX2",
+											 "MATH1", "MATH2", "MATH3",
+											 "REF1", "REF2", "REF3", "REF4",
+											 "LINE" };
 
 	/* This array must be set to the available record lengths of the digitizer
 	   and must always end with a 0 */
@@ -184,6 +189,7 @@ enum {
 
 	extern TDS520C tds520c;
 	extern const char *Channel_Names[ MAX_CHANNELS ];
+	extern const char *User_Channel_Names[ MAX_CHANNELS ];
 	extern double max_sens, min_sens_50, min_sens;
 
 #endif

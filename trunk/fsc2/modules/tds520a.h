@@ -33,22 +33,22 @@
 #define TDS520A_UNDEF -1
 #define TDS520A_CH1    0
 #define TDS520A_CH2    1
-#define TDS520A_MATH1  2
-#define TDS520A_MATH2  3
-#define TDS520A_MATH3  4
-#define TDS520A_REF1   5
-#define TDS520A_REF2   6
-#define TDS520A_REF3   7
-#define TDS520A_REF4   8
-#define TDS520A_AUX1   9         /* Auxiliary (for triggger only) */
-#define TDS520A_AUX2  10         /* Auxiliary (for triggger only) */
+#define TDS520A_AUX1   2         /* Auxiliary (for triggger only) */
+#define TDS520A_AUX2   3         /* Auxiliary (for triggger only) */
+#define TDS520A_MATH1  4
+#define TDS520A_MATH2  5
+#define TDS520A_MATH3  6
+#define TDS520A_REF1   7
+#define TDS520A_REF2   8
+#define TDS520A_REF3   9
+#define TDS520A_REF4  10
 #define TDS520A_LIN   11         /* Line In (for triggger only) */
 #define MAX_CHANNELS  12         /* number of channel names */
 
 
-#define NUM_NORMAL_CHANNELS        ( TDS520A_CH2 + 1 )
-#define NUM_DISPLAYABLE_CHANNELS  ( TDS520A_REF4 + 1 )
-#define MAX_SIMULTANEOUS_CHANNELS 4
+#define NUM_NORMAL_CHANNELS        ( TDS520A_AUX2 + 1 )
+#define NUM_DISPLAYABLE_CHANNELS   ( TDS520A_AUX2 + 1 )
+#define MAX_SIMULTANEOUS_CHANNELS  2
 
 #define TDS520A_POINTS_PER_DIV 50
 
@@ -140,10 +140,15 @@ enum {
 
 	TDS520A tds520a;
 	const char *Channel_Names[ MAX_CHANNELS ] = {
-											 "CH1", "CH2",
+											 "CH1", "CH2", "CH3", "CH4",
 											 "MATH1", "MATH2", "MATH3",
 											 "REF1", "REF2", "REF3", "REF4",
-											 "AUX1", "AUX2", "LINE" };
+											 "LINE" };
+	const char *User_Channel_Names[ MAX_CHANNELS ] = {
+ 											 "CH1", "CH2", "AUX1", "AUX2",
+											 "MATH1", "MATH2", "MATH3",
+											 "REF1", "REF2", "REF3", "REF4",
+											 "LINE" };
 
 	/* This array must be set to the available record lengths of the digitizer
 	   and must always end with a 0 */
@@ -176,7 +181,8 @@ enum {
 #else
 
 	extern TDS520A tds520a;
-	extern const char *Channel_Names[ ];
+	extern const char *Channel_Names[ MAX_CHANNELS ];
+	extern const char *User_Channel_Names[ MAX_CHANNELS ];
 
 #endif
 
