@@ -1,0 +1,80 @@
+@c $Id$
+@c
+@c Copyright (C) 2001 Jens Thoms Toerring
+@c
+@c This file is part of fsc2.
+@c
+@c Fsc2 is free software; you can redistribute it and/or modify
+@c it under the terms of the GNU General Public License as published by
+@c the Free Software Foundation; either version 2, or (at your option)
+@c any later version.
+@c
+@c Fsc2 is distributed in the hope that it will be useful,
+@c but WITHOUT ANY WARRANTY; without even the implied warranty of
+@c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+@c GNU General Public License for more details.
+@c
+@c You should have received a copy of the GNU General Public License
+@c along with fsc2; see the file COPYING.  If not, write to
+@c the Free Software Foundation, 59 Temple Place - Suite 330,
+@c Boston, MA 02111-1307, USA.
+
+
+@node Interfacing, Modules, Using Pulsers, Top
+@chapter Interfacing
+
+@c ########################################################
+
+Usually, there are a few standard experiments for which only a few
+parameter ever change. In this case it can become rather bothersome
+always to have to edit the corresponding @acronym{EDL} file just to
+change these parameters. Beside, when someone not used to @acronym{fsc2}
+and its syntax needs to do these measurements it may take too much time
+to explain it to the new user. In this case it is possible to write some
+rather simple programs that interface to @acronym{fsc2} and handle this
+automatically.
+
+What such a program has to do is to create a @acronym{EDL} file and
+send it to @acronym{fsc2}. Usually, the program will have a graphical
+frontend that allows the user to set the parameter and will then create
+the @acronym{EDL} file using these parameter. To write such a program an
+interpreted language like Tcl/Tk or Perl/Tk (or even a simple shell
+script using e.g.@ the dialog utility) will be suficient. When it is
+done all it has to do is to call one of the programs
+@example
+  fsc2_load
+  fsc2_test
+  fsc2_start
+@end example
+with the programs text as its standard input. Each of the three programs
+will either start @acronym{fsc2} or, if @acronym{fsc2} is already
+running, connect to it, and will ask @acronym{fsc2} to use the program
+text as its new input file. The difference between the three programs is
+that @code{fsc2_load} will only make @acronym{fsc2} load the program,
+@code{fsc2_test} will also tell @acronym{fsc2} to run a test on the
+input program, and @code{fsc2_start} will make @acronym{fsc2} start the
+experiment immediately (at least if the test of the @acronym{EDL} file
+was successful).
+
+When @acronym{fsc2} has accepted the @acronym{EDL} file the programs
+return immediately. Using the return value you can find out if they were
+successful. The return values have the following meaning:
+@table @samp
+@item 0 
+Everything ok, program finished succesfully
+@item -1
+An internal error as been detected, please send a bug report
+@item 1
+A different user is already running fsc2
+@item 2
+@acronym{fsc2} is busy, i.e. is already running an experiment (or a test run)
+@item 3
+Internal error in @acronym{fsc2} detected, please send a bug report
+@item 4
+@acronym{fsc2} could not be started (probably because the executable was
+not found)
+@end table
+
+Please have a look at the @code{scripts} subdirectory in the main
+directory of the package for some examples that were written in Perl,
+using Perl-Tk for the graphical user interface.
