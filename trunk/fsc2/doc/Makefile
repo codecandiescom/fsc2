@@ -15,7 +15,7 @@ info: $(docs)
 	makeinfo fsc2.texi
 
 html: $(docs)
-	./texi2html -frames -split=chapter -menu -number -sec_nav fsc2.texi
+	./texi2html -frames -split chapter -menu -number -sec_nav fsc2.texi
 
 ps: $(docs)
 	texi2dvi -c fsc2.texi
