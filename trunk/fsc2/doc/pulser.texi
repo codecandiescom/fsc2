@@ -182,16 +182,37 @@ defined:
 @item @code{DETECTION_GATE} (or @code{DETG}, @code{DET_G},
       @code{DETECTIONGATE}, @code{DETECTION_G}, @code{DETECTIONG},
       @code{DET_GATE} or @code{DETGATE})
+@item @code{DEFENSE} (of @code{DEF})
+@item @code{RADIO_FREQUENCY} (or @code{RF} or all combinations where
+      @code{RADIO} is replaced by @code{R} or @code{FREQUENCY} by either
+      @code{FREQ} or @code{F}. The underscore can also be left out)
+@item @code{RADIO_FREQUENCY_GATE} (or @code{RFG} or all combinations
+      where @code{RADIO} is replaced by @code{R}, @code{FREQUENCY} by either
+      @code{FREQ} or @code{F} or @code{GATE} by @code{G}. As usual, the
+      underscore characters can be omitted.)
+@item @code{PULSE_SHAPER} (or @code{PSH}, @code{PULSESH},
+      @code{PULSE_SH}, @code{PULSE_SHAPE}, @code{PULSESHAPE},
+      @code{PULSESHAPER}, @code{P_SH}, @code{P_SHAPE}, @code{PSHAPE},
+      @code{P_SHAPER}, @code{P_SHAPER})
+@item @code{PHASE_1} (or @code{PH_1}, @code{PH1}, @code{PHASE1} or
+      @code{PHASE} or @code{PH})
+@item @code{PHASE_2} (or @code{PH_2}, @code{PH2}, @code{PHASE2})
+@item @code{OTHER_1} (or @code{OTHER}, @code{O_1}, @code{O1}, @code{O})
+@item @code{OTHER_2} (or @code{OTHER2}, @code{O_2}, @code{O2})
+@item @code{OTHER_3} (or @code{OTHER3}, @code{O_3}, @code{O3})
+@item @code{OTHER_4} (or @code{OTHER4}, @code{O_4}, @code{O4})
 @end itemize
-@c DET         DET(ECTION)?:?
-@c DET_GATE    DET(ECTION)?_?G(ATE)?:?
-@c DEF         DEF(ENSE)?:?
-@c RF          R(ADIO)?_?F(REQ(UENCY)?)?:?
-@c RF_GATE     R(ADIO)?_?F(REQ(UENCY)?)?_?G(ATE)?:?
-@c PSH         P(ULSE)?_?SH(APE(R)?)?:?
-@c PH1         PH(ASE)?(_?1)?:?
-@c PH2         PH(ASE)?_?2:?
-@c OI          O(THER)?(_?1)?:?
-@c OII         O(THER)?_?2:?
-@c OIII        O(THER)?_?3:?
-@c OIV         O(THER)?_?4:?
+Except for @code{PHASE_1} and @code{PHASE_2} the names of the functions
+do not enforce what the channels that will become associated with them
+are really going to be used for, but it is probably a good idea not to
+use e.g. the @code{MICRO_WAVE} channel for something completely
+different or other people will have major problems understanding what
+your @acronym{EDL} program is supposed to do.
+
+Before giving an example it is important to point out that there are some
+major differences between the Sony/Tektronix DG2020 and the Tektronix
+HFS9003. The Tektronix HFS9003 is quite simple in that it has just a
+number of output channels and that's it. In contrast, the Sony/Tektronix
+DG2020 has 36 internal channels that can be mapped to what is called the
+POD, that in both cases (Frankfurt S-band and Berlin X-band
+spectrometer) has 12 output channels. 

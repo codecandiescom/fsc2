@@ -44,7 +44,7 @@ case sensitive
 keywords in Keyword are
    s, ns, us, ms, ks, Ms, G, nG, uG, mG, kG, MG, T, nT, uT, mT, kT, MT,
    V, nV, uV, mV, kV, MV, A, nA, uA, mA, kA, MA, Hz, nHz, uHz, mHz, kHz, MHz,
-   dB, ndB, udB, mdB, kdB, MdB,
+   dB, ndB, udB, mdB, kdB, MdB
 end keywords
 
 keywords in Keyword_strong are
