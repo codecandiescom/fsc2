@@ -445,7 +445,7 @@ Var *pulser_dump_pulses( Var *v )
 		if ( name == NULL || *name == '\0' )
 		{
 			T_free( name );
-			vars_push( INT_VAR, 0 );
+			return vars_push( INT_VAR, 0 );
 		}
 
 		if  ( 0 == stat( name, &stat_buf ) )
