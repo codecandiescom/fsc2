@@ -1,6 +1,6 @@
 @c $Id$
 
-@node @acronym{EDL}, Functions, Overview, Top
+@node EDL, Functions, Overview, Top
 @chapter @acronym{EDL}
 @cindex @acronym{EDL}
 
@@ -153,8 +153,8 @@ variable names are case sensitive, i.e.@: '@code{XY}', '@code{Xy}',
 The name of a variable can, in principle, consist of as many characters
 as you wish (I hope nobody is going to the extent to create a variable
 name with, say, a few hundred thousand characters just to prove me wrong
--- I tested it only with two variables with names 10000 characters long
-and differing only in the very last character @code{;-)}
+-- I tested it only with two variables with names 10000 characters long,
+differing only in the very last character @code{;-)}
 
 There are a few exceptions to the valid variable names because a few
 characters or character combinations are already used for physical units
@@ -196,6 +196,82 @@ with a upper case letter, i.e.@: A-Z, while the names of floating point
 variables start with a lower case character, i.e.@: a-z.
 
 
+@subsection Arrays
+
+
+Beside `normal' variables you can also use arrays of variables. The
+types of the arrays follow the same convention as with normal variables,
+i.e@: if the name starts with an upper case character it is an integer
+array, if it starts with a lower case character it is a floating point
+array. To define an array append the sizes of the dimensions of the
+array, separated by commata, in square brackets. E.g.
+@example
+A[ 100 ];
+b[ 4, 7, 3 ];
+@end example
+@noindent
+defines a 1-dimensional integer array @code{A} with 100 elements and a
+floationg point array @code{b} of rank 4x7x3.
+
+
+Arrays are automatically initialized with zeros for all elements. On the
+other hand, arrays can be initialized also within the @acronym{EDL} file
+by equating it to a list of values, enclosed in curly braces.
+@example
+C[ 3 ] = @{ 2, 1, -1 @};
+d[ 5 ] = @{ sqrt( 2.0 ), sqrt( 3.0 ) @};
+E[ 2, 3 ] = @{ 1, 2, 3, 4, 5, 6 @};
+@end example
+@noindent
+The first line in the example shows the standard way -- each element of
+@code{C} is initialized by an element from the list. In the second line
+there are less initializers then elements array @code{d}, and only the
+first two elements are set, i.e.@: @code{d[ 1 ]} and @code{d[ 2 ]},
+while the remaining elements are set to zero. The third examples shows
+the initialization of a multidimensional array, the elements of the
+array @code{E} being set starting with the first row and continuing to
+with the next rows until all initializers are used up. I.e.@: the array
+@code{E} will be initialized to
+@example
+E[ 1, 1 ] = 1     E[ 1, 2 ] = 2     E[ 1, 3 ] = 3
+E[ 2, 1 ] = 4     E[ 2, 2 [ = 5     E[ 2, 3 ] = 6
+@end example
+
+
+There are some situations where on can't know the size of an array
+already in the @code{VARIABLES} section. Therefor, one may also define
+arrays with the size of the last dimension remaining undefined by
+specifying a @code{*} instead of a number.
+@example
+G[ * ];
+h[ 2, * ];
+@end example
+@noindent
+This defines an 1-dimensional integer array @code{G} with a still
+undefined number of elements and a floating point matrix @code{h} with
+two rows of undefined length. The sizes of these arrays remain undefined
+until 1-dimensional arrays are assigned to them. The following
+assignment will set the length of @code{G} to 3
+@example
+G = E[ 2 ];
+@end example
+@noindent
+because the length of a row of @code{E} is three. The assignment will
+copy the elements of the second row of @code{E} to @code{G}. After this
+assignment the size of @code{G} is fixed and can't be changed anymore.
+
+In the same way the assignment
+@example
+h[ 2 ] = d;
+@end example
+@noindent
+will set the rank of @code{h} to 2x5 (because the length of @code{d} is 5).
+
+Of course, these are somewhat contrived examples, in a real experiments
+arrays with undefined sizes are usually used for storing data received
+from functions that return arrays of a size that would be difficult to
+determine before the experiment is actually started, e.g.@: curves
+fetched from a digitizing oscilloscope.
 
 @node Arithmetic, Control structures, Variables, EDL
 @section Arithmetic
@@ -393,17 +469,17 @@ right of the expression:
 
 Finally, the lowest precedence operators are the comparision operators
 (also the be discussed below in more detail), the test for equality,
-`@code{==}' (not to be confused with the assignement operator
+`@code{==}' (not to be confused with the assignment operator
 `@code{=}'), the test for inequality, `@code{!=}', and the remaining
 four comparison operators `@code{<}', `@code{<=}', `@code{>}' and
 `@code{>=}', i.e.@: @i{less than}, @i{less or equal}, @i{larger} and
 @i{larger or equal}. If more than one of these operators appears in an
 expression evaluation is done left to right.
 
-Actually, there are also the assignement operators. But these are only
+Actually, there are also the assignment operators. But these are only
 used after all of the other operators have been evaluated, so there is
 never a necessity to enclose the right hand of an equation with
-parenthesis. And since only one assignement operator is allowed in a
+parenthesis. And since only one assignment operator is allowed in a
 statement you don't have to worry about the order of evaluation.
 
 Of course, the precedence of operators and the sequence they are
@@ -487,7 +563,7 @@ function results in:
       sqrt( a )  ->   @{ 0.7071068, 1.0, 1.1414215 @}
 @end example
 
-Finally, for obvious reasons, when computed assignements are used
+Finally, for obvious reasons, when computed assignments are used
 (i.e.@: `@code{+=}', `@code{-=}', `@code{*=}', `@code{/=}', `@code{%=}'
 or `@code{^=}') the left hand side variable of an equation has to be an
 array when arithmetic with arrays is used.
@@ -572,28 +648,14 @@ following block of statements is executed.
 Here is a complete list of the comparison operators between two
 expressions (e.g.@: numbers):
 
-@quotation
-@multitable{==} { true if left hand side expression is @i{equal} to the
-right hand side expression }
-@item @code{==} @tab
-true if left hand side expression is @i{equal} to the right hand side
-expression
-@item @code{!=} @tab
-true if left and right hand side expression are @i{unequal}
-@item @code{<} @tab
-true if the left side expression is @i{less than} the
-right side expression
-@item @code{<=} @tab
-true if the left side expression is @i{less or equal} to the
-right side expression
-@item @code{>} @tab
-true if the left side expression is @i{greater than} the
-right side expression
-@item @code{>=} @tab
-true if the left side expression is @i{greater or equal} to the
-right side expression
-@end multitable
-@end quotation
+@example
+==   @r{true if left hand side is @i{equal} to right hand side}
+!=   @r{true if left and right hand side are @i{unequal}}
+<    @r{true if left side is @i{less than} right side }
+<=   @r{true if left side is @i{less or equal} to right side }
+>    @r{true if left side is @i{greater than} right side}
+>=   @r{true if left side is @i{greater or equal} to right side}
+@end example
 @cindex == (comparison operator)
 @cindex comparison operator
 @cindex != (unequality)
