@@ -76,7 +76,8 @@ rb_pulser       := rb_pulser.c rb_pulser_gen.c rb_pulser_pulse.c \
 
 
 # List of all "complicated" modules that are to be made from more than a
-# single source file (plus a header file)
+# single source file (plus a header file) and that don't need any further
+# hardware (that gets tested for below)
 
 comp_modules    := hjs_sfc
 

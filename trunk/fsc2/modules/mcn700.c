@@ -33,16 +33,30 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
+/* Some constants needed for the device */
+
+#define TEST_VOLTAGE		20.0    /* in V */
+#define TEST_CURRENT		0.001	/* in A */
+
+#define MAX_VOLTAGE			2000.0	/* in V */
+#define MIN_VOLTAGE			0.0		/* in V */
+#define VOLTAGE_RESOLUTION	1.0		/* in V */
+#define MAX_CURRENT			0.300	/* in A */
+#define MIN_CURRENT			0.000	/* in A */
+#define CURRENT_RESOLUTION	1.0e-3	/* in A */
+
+
 /* Declaration of exported functions */
 
 int mcn700_init_hook( void );
+int mcn700_test_hook( void );
 int mcn700_exp_hook( void );
 int mcn700_end_of_exp_hook( void );
  
-Var *powersupply_name( Var *v );
-Var *powersupply_voltage( Var *v );
-Var *powersupply_current( Var *v );
-Var *powersupply_command( Var *v ); 
+Var_T *powersupply_name( Var_T *v );
+Var_T *powersupply_voltage( Var_T *v );
+Var_T *powersupply_current( Var_T *v );
+Var_T *powersupply_command( Var_T *v ); 
 
 
 /* Locally used functions */
@@ -58,19 +72,10 @@ static bool mcn700_talk( const char *cmd, char *reply, long *length );
 static void mcn700_failure( void );
 
 
-#define TEST_VOLTAGE		20.0   /* in V */
-#define TEST_CURRENT		0.001	/* in A */
-
-#define MAX_VOLTAGE			2000.0	/* in V */
-#define MIN_VOLTAGE			0.0		/* in V */
-#define VOLTAGE_RESOLUTION	1.0		/* in V */
-#define MAX_CURRENT			0.300	/* in A */
-#define MIN_CURRENT			0.000	/* in A */
-#define CURRENT_RESOLUTION	1.0e-3	/* in A */
-
-
 static struct {
 	int device;
+	double test_volts;
+	double test_amps;
 } mcn700;
 
 
@@ -82,11 +87,24 @@ int mcn700_init_hook( void )
 {
 	/* Set global variable to indicate that GPIB bus is needed */
 
-	need_GPIB = SET;
+	Need_GPIB = SET;
 
 	/* Reset variables in the structure describing the state of the device */
 
 	mcn700.device = -1;
+
+	return 1;
+}
+
+
+/*---------------------------*
+ * Test hook for the module. 
+ *---------------------------*/
+
+int mcn700_test_hook( void )
+{
+	mcn700.test_volts = TEST_VOLTAGE;
+	mcn700.test_amps  = TEST_CURRENT;
 
 	return 1;
 }
@@ -133,7 +151,7 @@ int mcn700_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var *powersupply_name( Var *v )
+Var_T *powersupply_name( Var_T *v )
 {
 	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
@@ -150,7 +168,7 @@ Var *powersupply_name( Var *v )
  * "Spannungsregelung" is activated (fixed voltage mode)
  *------------------------------------------------------------------*/
 
-Var *powersupply_voltage( Var *v )
+Var_T *powersupply_voltage( Var_T *v )
 {
 	double voltage;
 
@@ -160,7 +178,7 @@ Var *powersupply_voltage( Var *v )
 	if ( v == NULL )
 	{
 		if ( FSC2_MODE == TEST )
-			return vars_push( FLOAT_VAR, TEST_VOLTAGE );
+			return vars_push( FLOAT_VAR, mcn700.test_volts );
 		return vars_push( FLOAT_VAR, mcn700_get_voltage( ) );
 	}
 
@@ -170,15 +188,18 @@ Var *powersupply_voltage( Var *v )
 
 	if ( voltage < MIN_VOLTAGE || voltage >= MAX_VOLTAGE )
 	{
-		print( FATAL, "Voltage of %.1f V is out of valid range "
+		print( FATAL, "Voltage of %.1f V is not within the valid range of "
 			   "(%.1f to %.1f V).\n", voltage, MIN_VOLTAGE, MAX_VOLTAGE );
 		THROW( EXCEPTION );
 	}
 
 	too_many_arguments( v );
 
-	if ( FSC2_MODE == TEST )
-		return vars_push( FLOAT_VAR, voltage );
+	if ( FSC2_MODE == TEST ) {
+		mcn700.test_volts =
+					 lrnd( voltage / VOLTAGE_RESOLUTION ) * VOLTAGE_RESOLUTION;
+		return vars_push( FLOAT_VAR, mcn700.test_volts );
+	}
 
 	return vars_push( FLOAT_VAR, mcn700_set_voltage( voltage ) );
 }
@@ -192,7 +213,7 @@ Var *powersupply_voltage( Var *v )
  * current that had been set due to the voltage limit).
  *---------------------------------------------------------------*/
 
-Var *powersupply_current( Var *v )
+Var_T *powersupply_current( Var_T *v )
 {
 	double current;
 
@@ -202,7 +223,7 @@ Var *powersupply_current( Var *v )
 	if ( v == NULL )
 	{
 		if ( FSC2_MODE == TEST )
-			return vars_push( FLOAT_VAR, TEST_VOLTAGE );
+			return vars_push( FLOAT_VAR, mcn700.test_amps );
 		return vars_push( FLOAT_VAR, mcn700_get_current(  ) );
 	}
 
@@ -219,8 +240,11 @@ Var *powersupply_current( Var *v )
 
 	too_many_arguments( v );
 
-	if ( FSC2_MODE == TEST )
-		return vars_push( FLOAT_VAR, current );
+	if ( FSC2_MODE == TEST ) {
+		mcn700.test_amps =
+					lrnd( current / CURRENT_RESOLUTION ) * CURRENT_RESOLUTION;
+		return vars_push( FLOAT_VAR, mcn700.test_amps );
+	}
 
 	return vars_push( FLOAT_VAR, mcn700_set_current( current ) );
 }
@@ -230,7 +254,7 @@ Var *powersupply_current( Var *v )
  * Function for sending a GPIB command directly to power supply.
  *---------------------------------------------------------------*/
 
-Var *powersupply_command( Var *v )
+Var_T *powersupply_command( Var_T *v )
 {
 	char *cmd = NULL;
 

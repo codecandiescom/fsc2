@@ -1461,7 +1461,7 @@ with @w{1 V} resolution, current range @w{0 -} @w{300 mA} with
 @c #############################################################
 
 
-@node me6000, ni6601, lecroy9400, Device Reference
+@node me6000, ni6601, mcn700, Device Reference
 @iftex
 @subheading Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
 @end iftex
