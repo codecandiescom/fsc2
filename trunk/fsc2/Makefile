@@ -370,7 +370,7 @@ ifeq ($(machine_name),crowley.none)
 	NUM_SERIAL_PORTS   := 2
 	SERIAL_LOCK_DIR    := /var/lock
 	ME6000_SUPPORT     := YES
-	NI6601_SUPPORT     := YES
+	NI6601_SUPPORT     := NO
 	INSTALL_MACHINE    := install-$(machine_name)
 	UNINSTALL_MACHINE  := uninstall-$(machine_name)
 endif
@@ -482,11 +482,11 @@ endif
 
 # If required link in the necessary libraries for ME-6000 and 6601 cards
 
-ifeq ($(WITH_ME6000),YES)
+ifeq ($(ME6000_SUPPORT),YES)
 	LIBS                 += -lme6x00
 endif
 
-ifeq ($(WITH_NI6601),YES)
+ifeq ($(NI6601_SUPPORT),YES)
 	LIBS                 += -lni6601
 endif
 

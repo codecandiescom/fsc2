@@ -123,7 +123,7 @@ int me6000_exp_hook( void )
 			break;
 
 		case ME6X00_ERR_IBN :
-			print( FATAL, "Invalid board number %d.\n", BOARD_NUMBER );
+			print( FATAL, "Invalid board number.\n" );
 			THROW( EXCEPTION );
 
 		case ME6X00_ERR_NSB:
@@ -131,13 +131,11 @@ int me6000_exp_hook( void )
 			THROW( EXCEPTION );
 
 		case ME6X00_ERR_NDF :
-			print( FATAL, "Device file for board #%d missing or "
-				   "inaccessible.\n", BOARD_NUMBER );
+			print( FATAL, "Device file for board missing or inaccessible.\n" );
 			THROW( EXCEPTION );
 
 		case ME6X00_ERR_BSY :
-			print( FATAL, "Board #%d already in use by another program.\n",
-				   BOARD_NUMBER );
+			print( FATAL, "Board already in use by another program.\n" );
 			THROW( EXCEPTION );
 
 		case ME6X00_ERR_INT :
@@ -155,14 +153,22 @@ int me6000_exp_hook( void )
 	me6000.num_dacs = num_dacs;
 
 	for ( i = 0; i < me6000.num_dacs; i++ )
+	{
 		if ( me6000.dac[ i ].is_used &&
-			 ( me6x00_voltage( BOARD_NUMBER, i, me6000.dac[ i ].volts ) < 0 ||
-			   me6x00_keep_voltage( BOARD_NUMBER, i, 1 ) < 0 ) )
+			 me6x00_voltage( BOARD_NUMBER, i, me6000.dac[ i ].volts ) < 0 )
 		{
 			print( FATAL, "Failed to set voltage for CH%d.\n", i );
 			me6x00_close( BOARD_NUMBER );
 			THROW( EXCEPTION );
 		}
+
+		if ( me6x00_keep_voltage( BOARD_NUMBER, i, 1 ) < 0 )
+		{
+			print( FATAL, "Failed to initialize board.\n" );
+			me6x00_close( BOARD_NUMBER );
+			THROW( EXCEPTION );
+		}
+	}
 
 	/* Check that in the preparations section there wasn't a request for
 	   setting a voltage for a DAC that doesn't exist */
@@ -195,7 +201,7 @@ int me6000_end_of_exp_hook( void )
 
 void me6000_exit_hook( void )
 {
-	/* This shouldn't be necessary, we just want to make 100% sure that
+	/* This shouldn't be necessary, I just want to make 100% sure that
 	   the device file for the board is really closed */
 
 	me6x00_close( BOARD_NUMBER );
@@ -281,6 +287,8 @@ Var *dac_voltage( Var *v )
 
 
 /*---------------------------------------------------------------*/
+/* Converts a channel number as we get it passed from the parser */
+/* into a real DAC number.                                       */
 /*---------------------------------------------------------------*/
 
 static int me6000_channel_number( long ch )

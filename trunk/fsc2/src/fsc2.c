@@ -1388,6 +1388,7 @@ void clean_up( void )
 		G2.label_orig[ i ] = CHAR_P T_free( G2.label_orig[ i ] );
 
 	G.is_init = UNSET;
+	G.dim = 0;
 
 	/* Clear up the compilation structure */
 

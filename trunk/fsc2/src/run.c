@@ -705,7 +705,7 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 	   handler that's responsible for closing the window. Also change the
 	   buttons label to 'Close'. */
 
-	if ( G.dim & 1 )
+	if ( G.dim & 1 || ! G.is_init )
 	{
 		fl_freeze_form( GUI.run_form_1d->run_1d );
 		fl_set_object_label( GUI.run_form_1d->stop_1d,
