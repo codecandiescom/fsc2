@@ -320,7 +320,7 @@ int gpib_init_device( const char *device_name, int *dev )
 
     cur_dev->number = gpib_find( ( char * ) device_name );
 
-    if ( gpib_status & GPIB_ERR )
+    if ( cur_dev->number < 0 || gpib_status & GPIB_ERR )
 	{
 		T_free( cur_dev->name );
 		if ( cur_dev->prev != NULL )
