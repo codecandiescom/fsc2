@@ -81,16 +81,18 @@ bool ep385_store_timebase( double timebase )
 
 bool ep385_assign_channel_to_function( int function, long channel )
 {
-	FUNCTION *f = &ep385.function[ function ];
-	CHANNEL *c = &ep385.channel[ channel - CHANNEL_OFFSET ];
+	FUNCTION *f = ep385.function + function;
+	CHANNEL *c = ep385.channel + channel;
 
 
-	channel -= CHANNEL_OFFSET;
+	fsc2_assert( function >= 0 && function < PULSER_CHANNEL_NUM_FUNC &&
+				 function != PULSER_CHANNEL_PHASE_1 &&
+				 function != PULSER_CHANNEL_PHASE_2 );
 
 	if ( channel < 0 || channel >= MAX_CHANNELS )
 	{
 		print( FATAL, "Invalid channel, valid are CH[%d-%d].\n", 
-			   CHANNEL_OFFSET, MAX_CHANNELS + CHANNEL_OFFSET - 1 );
+			   0, MAX_CHANNELS - 1 );
 		THROW( EXCEPTION );
 	}
 
@@ -101,13 +103,13 @@ bool ep385_assign_channel_to_function( int function, long channel )
 		if ( c->function->self == function )
 		{
 			print( SEVERE, "Channel %ld gets assigned more than once to "
-				   "function '%s'.\n", channel + CHANNEL_OFFSET,
+				   "function '%s'.\n", channel,
 				   Function_Names[ c->function->self ] );
 			return FAIL;
 		}
 
 		print( FATAL, "Channel %ld is already used for function '%s'.\n",
-			   channel + CHANNEL_OFFSET, Function_Names[ c->function->self ] );
+			   channel, Function_Names[ c->function->self ] );
 		THROW( EXCEPTION );
 	}
 
@@ -115,23 +117,21 @@ bool ep385_assign_channel_to_function( int function, long channel )
 
 	f->is_used = SET;
 	f->channel[ f->num_channels++ ] = c;
-
 	c->function = f;
 
 	return OK;
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function for setting a delay for a function - negative are only */
-/* possible for INTERNAL trigger mode!                             */
-/*-----------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Function for setting a delay for a function - negative delays */
+/* are only possible for INTERNAL trigger mode!                  */
+/*---------------------------------------------------------------*/
 
 bool ep385_set_function_delay( int function, double delay )
 {
 	Ticks Delay = ep385_double2ticks( delay );
 	int i;
-	FUNCTION *f;
 
 
 	if ( ep385.function[ function ].is_delay )
@@ -147,7 +147,7 @@ bool ep385_set_function_delay( int function, double delay )
 	{
 		if ( ep385.is_trig_in_mode && ep385.trig_in_mode == EXTERNAL )
 		{
-			print( FATAL, "Negative delays are invalid in EXTERNAL trigger "
+			print( FATAL, "Negative delays are impossible in EXTERNAL trigger "
 				   "mode.\n" );
 			THROW( EXCEPTION );
 		}
@@ -156,18 +156,18 @@ bool ep385_set_function_delay( int function, double delay )
 		{
 			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 			{
-				f = &ep385.function[ i ];
-				if ( ! f->is_used || i == function )
+				if ( i == function )
 					continue;
-				f->delay += ep385.neg_delay - Delay;
+				ep385.function[ i ].delay -= ep385.neg_delay + Delay;
 			}
-			ep385.neg_delay = ep385.function[ function ].delay = - Delay;
+			ep385.neg_delay = - Delay;
+			ep385.function[ function ].delay = 0;
 		}
 		else
-			ep385.function[ function ].delay = ep385.neg_delay - Delay;
+			ep385.function[ function ].delay += ep385.neg_delay + Delay;
 	}
 	else
-		ep385.function[ function ].delay = Delay - ep385.neg_delay;
+		ep385.function[ function ].delay += Delay;
 
 	ep385.function[ function ].is_used = SET;
 	ep385.function[ function ].is_delay = SET;
@@ -363,7 +363,6 @@ bool ep385_phase_setup_prep( int phs, int type, int dummy, long channel )
 	dummy = dummy;
 
 	Cur_PHS = phs;
-	channel -= CHANNEL_OFFSET;
 
 	/* Make sure the phase type is supported */
 
@@ -383,7 +382,7 @@ bool ep385_phase_setup_prep( int phs, int type, int dummy, long channel )
 
 		print( SEVERE, "Channel for controlling phase type '%s' has already "
 			   "been set to %d.\n", Phase_Types[ type ],
-			   ep385_phs[ phs ].channels[ type ]->self + CHANNEL_OFFSET );
+			   ep385_phs[ phs ].channels[ type ]->self );
 		return FAIL;
 	}
 
@@ -391,8 +390,7 @@ bool ep385_phase_setup_prep( int phs, int type, int dummy, long channel )
 
 	if ( channel < 0 || channel >= MAX_CHANNELS )
 	{
-		print( FATAL, "Invalid channel number %ld.\n",
-			   channel + CHANNEL_OFFSET );
+		print( FATAL, "Invalid channel number %ld.\n", channel );
 		THROW( EXCEPTION );
 	}
 
@@ -443,7 +441,7 @@ bool ep385_phase_setup( int phs )
 		{
 			print( FATAL, "Channel %d needed for phase '%s' is not reserved "
 				   "for function '%s'.\n",
-				   ep385_phs[ phs ].channels[ i ]->self + CHANNEL_OFFSET,
+				   ep385_phs[ phs ].channels[ i ]->self,
 				   Phase_Types[ i ], Function_Names[ f->self ] );
 			THROW( EXCEPTION );
 		}
@@ -456,8 +454,7 @@ bool ep385_phase_setup( int phs )
 				 							   ep385_phs[ phs ].channels[ j ] )
 			{
 				print( FATAL, "The same channel %d is used for phases '%s' "
-					   "and '%s'.\n",
-					   ep385_phs[ phs ].channels[ i ] + CHANNEL_OFFSET,
+					   "and '%s'.\n", ep385_phs[ phs ].channels[ i ],
 					   Phase_Types[ j ], Phase_Types[ i ] );
 				THROW( EXCEPTION );
 			}

@@ -305,7 +305,6 @@ bool ep385_change_pulse_length_change( long pnum, double p_time );
 /* Functions from ep385_init.c */
 
 void ep385_init_setup( void );
-void ep385_pulse_start_setup( void );
 
 
 /* Functions from ep385_util.c */

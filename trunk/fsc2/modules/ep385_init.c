@@ -29,6 +29,7 @@ static void ep385_basic_pulse_check( void );
 static void ep385_basic_functions_check( void );
 static void ep385_create_phase_matrix( FUNCTION *f );
 static void ep385_setup_channels( void );
+static void ep385_pulse_start_setup( void );
 static void ep385_channel_start_check( CHANNEL *ch );
 
 
@@ -125,18 +126,8 @@ static void ep385_basic_pulse_check( void )
 			THROW( EXCEPTION );
 		}
 
-		/* Check start position and pulse length */
-
 		if ( ! p->is_pos || ! p->is_len || p->len == 0 )
 			p->is_active = UNSET;
-
-		if ( p->is_pos && p->is_len && p->len != 0 &&
-			 p->pos + p->len + p->function->delay > MAX_PULSER_BITS )
-		{
-			print( FATAL, "Pulse %ld does not fit into the pulsers memory. "
-				   "You could try a longer pulser time base.\n", p->num );
-			THROW( EXCEPTION );
-		}
 
 		if ( p->is_active )
 			p->was_active = p->has_been_active = SET;
@@ -151,12 +142,13 @@ static void ep385_basic_functions_check( void )
 {
 	FUNCTION *f;
 	PULSE *p;
-	int i, j;
+	int i;
+	Ticks delay;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &ep385.function[ i ];
+		f = ep385.function + i;
 
 		/* Don't do anything if the function has never been mentioned */
 
@@ -176,29 +168,7 @@ static void ep385_basic_functions_check( void )
 				   Function_Names[ i ] );
 			f->is_used = UNSET;
 
-			if ( f->channel != NULL )
-			{
-				for ( j = 0; j < MAX_CHANNELS && f->channel[ j ] != NULL; j++ )
-				{
-					f->channel[ j ]->function = NULL;
-					f->channel[ j ] = NULL;
-				}
-				f->num_channels = 0;
-			}
-
 			continue;
-		}
-
-		/* Check that the functions delay isn't negative for external
-		   trigger mode */
-
-		if ( f->delay < 0 &&
-			 ( ep385.is_trig_in_mode || ep385.trig_in_mode == EXTERNAL ) )
-		{
-			print( FATAL, "Negative delay for function '%s' can't be used "
-				   "with external triggert mode.\n",
-				   Function_Names[ f->self ] );
-			THROW( EXCEPTION );
 		}
 
 		/* Assemble a list of all pulses assigned to the function and
@@ -222,11 +192,27 @@ static void ep385_basic_functions_check( void )
 				f->pc_len = i_max( f->pc_len, p->pc->len );
 		}
 
-		/* Create a matrix of pulse lists that contain the pulses for each
-		   combination of phase and channel */
-
-		ep385_create_phase_matrix( f );
 	}
+
+	if ( ep385.neg_delay )
+	{
+		delay = MAX_PULSER_BITS;
+
+		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+			if ( ep385.function[ i ].is_used &&
+				 delay > ep385.function[ i ].delay )
+				delay = ep385.function[ i ].delay;
+		if ( delay != 0 )
+			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+				ep385.function[ i ].delay -= delay;
+	}
+
+	/* Create a matrix of pulse lists that contain the pulses for each
+	   combination of phase and channel */
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+		if ( ep385.function[ i ].is_needed )
+			ep385_create_phase_matrix( ep385.function + i );
 }
 
 
@@ -436,9 +422,8 @@ static void ep385_setup_channels( void )
 		}
 		else
 		{
-			print( WARN, "Channel %d used for function '%s' is not used.\n",
-				   ch->self + CHANNEL_OFFSET,
-				   Function_Names[ ch->function->self ] );
+			print( WARN, "Channel %d associated with function '%s' is not "
+				   "used.\n", ch->self, Function_Names[ ch->function->self ] );
 			ch->pulse_params = ch->old_pulse_params = NULL;
 		}
 	}
@@ -448,7 +433,7 @@ static void ep385_setup_channels( void )
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
 
-void ep385_pulse_start_setup( void )
+static void ep385_pulse_start_setup( void )
 {
 	FUNCTION *f;
 	CHANNEL *ch;
@@ -457,15 +442,13 @@ void ep385_pulse_start_setup( void )
 	int i, j, m;
 
 
-	/* Sort the pulses and check that they don't overlap */
-
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &ep385.function[ i ];
+		f = ep385.function + i;
 
 		/* Nothing to be done for unused functions and the phase functions */
 
-		if ( ! f->is_used ||
+		if ( ( ! f->is_used && f->num_channels == 0 ) ||
 			 i == PULSER_CHANNEL_PHASE_1 ||
 			 i == PULSER_CHANNEL_PHASE_2 )
 			continue;
@@ -526,7 +509,7 @@ static void ep385_channel_start_check( CHANNEL *ch )
 	{
 		print( FATAL, "More than %d pulses (%d) are required on channel %d "
 			   "associated with function '%s'.\n", MAX_PULSES_PER_CHANNEL,
-			   ch->num_active_pulses, ch->self + CHANNEL_OFFSET,
+			   ch->num_active_pulses, ch->self,
 			   Function_Names[ ch->function->self ] );
 		THROW( EXCEPTION );
 	}

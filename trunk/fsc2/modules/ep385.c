@@ -201,7 +201,8 @@ int ep385_end_of_test_hook( void )
 
 int ep385_exp_hook( void )
 {
-	int i;
+	int i, j;
+	FUNCTION *f;
 
 
 	if ( ! ep385_is_needed )
@@ -216,35 +217,30 @@ int ep385_exp_hook( void )
 		THROW( EXCEPTION );
 	}
 
+	/* Channels associated with unused functions have been set to output no
+	   pulses, now we can remove the association between the function and
+	   the channel */
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = ep385.function + i;
+
+		if ( f->is_used || f->num_channels == 0 )
+			continue;
+
+		for ( j = 0; j < f->num_channels; j++ )
+		{
+			f->channel[ j ]->function = NULL;
+			f->channel[ j ] = NULL;
+		}
+
+		f->num_channels = 0;
+	}
+
 	/* Now we have to tell the pulser about all the pulses and switch on
 	   all needed channels */
 
-	if ( ! ep385.is_cw_mode )
-	{
-		ep385_do_update( );
-
-		/* Now we have to tell the pulser about all the pulses */
-/*
-		ep385_IN_SETUP = SET;
-
-		if ( ! ep385_reorganize_pulses( UNSET ) )
-		{
-			ep385_IN_SETUP = UNSET;
-			THROW( EXCEPTION );
-		}
-
-		ep385_IN_SETUP = UNSET;
-
-		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-			if ( ep385.function[ i ].is_used )
-				ep385_set_pulses( &ep385.function[ i ] );
-*/
-		/* Finally tell the pulser to update (we're always running in manual
-		   update mode) and than switch the pulser into run mode */
-
-/*		ep385_update_data( );*/
-	}
-	else
+	if ( ep385.is_cw_mode )
 		ep385_cw_setup( );
 
 	ep385_run( SET );

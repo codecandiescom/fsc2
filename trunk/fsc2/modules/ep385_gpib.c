@@ -27,8 +27,8 @@
 
 static void ep385_gpib_failure( void );
 
-#define gpib_write( a, b, c ) fprintf( stderr, "%s\n", ( b ) )
-#define gpib_init_device( a, b ) 1
+//#define gpib_write( a, b, c ) fprintf( stderr, "%s\n", ( b ) )
+//#define gpib_init_device( a, b ) 1
 
 
 /*----------------------------------------------------------------*/
@@ -122,7 +122,7 @@ bool ep385_set_channels( void )
 	{
 		f = &ep385.function[ i ];
 
-		if ( ! f->is_needed )
+		if ( ! f->is_needed && f->num_channels == 0 )
 			continue;
 
 		for ( j = 0; j < f->num_channels; j++ )
