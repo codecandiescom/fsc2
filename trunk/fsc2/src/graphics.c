@@ -50,6 +50,9 @@ static void change_label_1d( char **label );
 static void change_label_2d( char **label );
 static void rescale_1d( long new_nx );
 static void rescale_2d( long new_nx, long new_ny );
+static Pixmap dump_1d_window( void );
+static Pixmap dump_2d_window( void );
+static Pixmap dump_cut_window( void );
 
 
 static Graphics *G_stored = NULL;
@@ -464,6 +467,7 @@ void start_graphics( void )
 		redraw_all_2d( );
 
 	fl_raise_form( GUI.run_form->run );
+	G.is_fully_drawn = SET;
 }
 
 
@@ -821,8 +825,8 @@ void create_label_pixmap( Canvas *c, int coord, char *label )
 	width = XTextWidth( G.font, label, strlen( label ) ) + 10;
 	height = G.font_asc + G.font_desc + 5;
 
-	/* Create the intermediate pixmap, fill with colour of the axis canvas and
-	   draw the text */
+	/* Create the intermediate pixmap, fill with the colour of the axis canvas
+	   and draw the text */
 
     pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), width, height,
 						fl_get_canvas_depth( c->obj ) );
@@ -860,6 +864,8 @@ void stop_graphics( void )
 	int i;
 	Marker *m, *mn;
 
+
+	G.is_fully_drawn = UNSET;
 
 	if ( G.is_init )
 	{
@@ -933,6 +939,8 @@ void stop_graphics( void )
 		for ( i = X; i <= Z; i++ )
 			G.label[ i ] = NULL;
 	}
+
+	Internals.state = STATE_IDLE;
 }
 
 
@@ -2028,6 +2036,167 @@ static void rescale_2d( long new_nx, long new_ny )
 	/* Update the cut window if necessary */
 
 	redraw_all_cut_canvases( );
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+void dump_window( int type, const char *name )
+{
+	FL_IMAGE *im;
+	Pixmap pm;
+
+
+	if ( ! G.is_init || ! G.is_fully_drawn )
+		THROW( EXCEPTION );
+
+	if ( type == 1 )
+	{
+		if ( G.dim == 1 )
+			pm = dump_1d_window( );
+		else
+			pm = dump_2d_window( );
+	}
+	else
+	{
+		if ( G.is_cut )
+			THROW( EXCEPTION );
+		pm = dump_cut_window( );
+	}
+
+	if ( ( im = flimage_alloc( ) ) == NULL )
+	{
+		XFreePixmap( G.d, pm );
+		THROW( EXCEPTION );
+	}
+
+	flimage_from_pixmap( im, pm );
+
+	XFreePixmap( G.d, pm );
+
+	flimage_dump( im, name, "ppm" );
+	flimage_free( im );
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static Pixmap dump_1d_window( void )
+{
+	Pixmap pm;
+	unsigned int width, height;
+	GC gc;
+
+
+	width  = G.y_axis.w + G.canvas.w;
+	height = G.x_axis.h + G.canvas.h;
+
+    pm = XCreatePixmap( G.d, FL_ObjWin( GUI.run_form->canvas ), width, height,
+						fl_get_canvas_depth( GUI.run_form->canvas ) );
+
+	gc = XCreateGC( G.d, pm, 0, 0 );
+	XSetForeground( G.d, gc, fl_get_pixel( FL_COL1 ) );
+
+	XFillRectangle( G.d, pm, gc, 0, 0, width, height );
+	XCopyArea( G.d, G.y_axis.pm, pm, gc, 0, 0, G.y_axis.w, G.y_axis.h, 0, 0 );
+	XCopyArea( G.d, G.canvas.pm, pm, gc, 0, 0, G.canvas.w, G.canvas.h,
+			   G.y_axis.w, 0 );
+	XCopyArea( G.d, G.x_axis.pm, pm, gc, 0, 0, G.x_axis.w, G.x_axis.h,
+			   G.y_axis.w, G.canvas.h );
+
+	XSetForeground( G.d, gc, fl_get_pixel( FL_BLACK ) );
+	XDrawLine( G.d, pm, gc, G.y_axis.w - 1, G.canvas.h,
+			   G.y_axis.w - 1, height - 1 );
+
+	XFreeGC( G.d, gc );
+
+	return pm;
+} 
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static Pixmap dump_2d_window( void )
+{
+	Pixmap pm;
+	unsigned int width, height;
+	GC gc;
+
+
+	width  = G.y_axis.w + G.canvas.w + G.z_axis.w + 5;
+	height = G.z_axis.h;
+
+    pm = XCreatePixmap( G.d, FL_ObjWin( GUI.run_form->canvas ), width, height,
+						fl_get_canvas_depth( GUI.run_form->canvas ) );
+
+	gc = XCreateGC( G.d, pm, 0, 0 );
+	XSetForeground( G.d, gc, fl_get_pixel( FL_COL1 ) );
+
+	XFillRectangle( G.d, pm, gc, 0, 0, width, height );
+	XCopyArea( G.d, G.y_axis.pm, pm, gc, 0, 0, G.y_axis.w, G.y_axis.h, 0, 0 );
+	XCopyArea( G.d, G.canvas.pm, pm, gc, 0, 0, G.canvas.w, G.canvas.h,
+			   G.y_axis.w, 0 );
+	XCopyArea( G.d, G.z_axis.pm, pm, gc, 0, 0, G.z_axis.w, G.z_axis.h,
+			   G.y_axis.w + G.canvas.w + 5, 0 );
+	XCopyArea( G.d, G.x_axis.pm, pm, gc, 0, 0, G.x_axis.w, G.x_axis.h,
+			   G.y_axis.w, G.canvas.h );
+
+	XSetForeground( G.d, gc, fl_get_pixel( FL_BLACK ) );
+	XDrawLine( G.d, pm, gc, G.y_axis.w - 1, G.canvas.h,
+			   G.y_axis.w - 1, height - 1 );
+	XDrawLine( G.d, pm, gc, G.y_axis.w + G.canvas.w + 4, 0,
+			   G.y_axis.w + G.canvas.w + 4, height - 1 );
+
+	XFreeGC( G.d, gc );
+
+	return pm;
+} 
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+static Pixmap dump_cut_window( void )
+{
+	Pixmap pm;
+	unsigned int width, height;
+	GC gc;
+
+
+	width  = G.cut_y_axis.w + G.cut_canvas.w + G.cut_z_axis.w + 5;
+	height = G.cut_z_axis.h;
+
+    pm = XCreatePixmap( G.d, FL_ObjWin( GUI.cut_form->cut_canvas ),
+						width, height,
+						fl_get_canvas_depth( GUI.cut_form->cut_canvas ) );
+
+	gc = XCreateGC( G.d, pm, 0, 0 );
+	XSetForeground( G.d, gc, fl_get_pixel( FL_COL1 ) );
+
+	XFillRectangle( G.d, pm, gc, 0, 0, width, height );
+	XCopyArea( G.d, G.cut_y_axis.pm, pm, gc, 0, 0,
+			   G.cut_y_axis.w, G.cut_y_axis.h, 0, 0 );
+	XCopyArea( G.d, G.cut_canvas.pm, pm, gc, 0, 0,
+			   G.cut_canvas.w, G.cut_canvas.h, G.cut_y_axis.w, 0 );
+	XCopyArea( G.d, G.cut_z_axis.pm, pm, gc, 0, 0,
+			   G.cut_z_axis.w, G.cut_z_axis.h,
+			   G.cut_y_axis.w + G.cut_canvas.w + 5, 0 );
+	XCopyArea( G.d, G.cut_x_axis.pm, pm, gc, 0, 0,
+			   G.cut_x_axis.w, G.cut_x_axis.h,
+			   G.cut_y_axis.w, G.cut_canvas.h );
+
+	XSetForeground( G.d, gc, fl_get_pixel( FL_BLACK ) );
+	XDrawLine( G.d, pm, gc, G.y_axis.w - 1, G.canvas.h,
+			   G.y_axis.w - 1, height - 1 );
+	XDrawLine( G.d, pm, gc, G.cut_y_axis.w + G.cut_canvas.w + 4, 0,
+			   G.cut_y_axis.w + G.cut_canvas.w + 4, height - 1 );
+
+	XFreeGC( G.d, gc );
+
+	return pm;
 }
 
 

@@ -39,7 +39,7 @@ static int fsc2_xio_error_handler( Display *d );
 
 /* Some variables needed for the X resources */
 
-#define N_APP_OPT 16
+#define N_APP_OPT 17
 FL_IOPT xcntl;
 
 char xGeoStr[ 64 ], xdisplayGeoStr[ 64 ],
@@ -47,7 +47,7 @@ char xGeoStr[ 64 ], xdisplayGeoStr[ 64 ],
 	 xaxisFont[ 256 ], xsmb[ 64 ], xsizeStr[ 64 ];
 
 int xbrowserfs, xbuttonfs, xinputfs, xlabelfs, xchoicefs, xsliderfs,
-	xfileselectorfs, xhelpfs, xnocm, xnob;
+	xfileselectorfs, xhelpfs, xnocm, xnob, xport;
 
 FL_resource xresources[ N_APP_OPT ] = {
 	{ "geometry", "*.geometry", FL_STRING, xGeoStr, "", 64 },
@@ -74,6 +74,7 @@ FL_resource xresources[ N_APP_OPT ] = {
 	{ "stopMouseButton", "*.stopMouseButton", FL_STRING, &xsmb, "", 64 },
 	{ "noCrashMail", "*.noCrashMail", FL_BOOL, &xnocm, "0", sizeof( int ) },
 	{ "size", "*.size", FL_STRING, xsizeStr, "", 64 },
+    { "http_port", "*.http_port", FL_INT, &xport, "0", sizeof( int ) }
 };
 
 
@@ -107,7 +108,9 @@ bool xforms_init( int *argc, char *argv[ ] )
 	XWindowAttributes attr;
 	Window root, parent, *children;
 	unsigned int nchilds;
-
+#if defined WITH_HTTP_SERVER
+	char *www_help;
+#endif
 
 	setup_app_options( app_opt );
 
@@ -277,6 +280,22 @@ bool xforms_init( int *argc, char *argv[ ] )
 			* ( ( int * ) xresources[ SLIDERFONTSIZE ].var );
 	fl_set_defaults( FL_PDSliderFontSize, &xcntl );
 
+	/* Set the HTTP port the server is going to run on - if it has been given
+	   on the command line (or in XDefaults tec.) we take this value,
+	   otherwise we use the compiled in value, but if this also doesn't exist
+	   (or is also not within the range of non-privileged ports), we default
+	   to the alternate HTTP port of 8080. */
+
+	Internals.http_port = 8080;
+
+	if ( * ( ( int * ) xresources[ HTTPPORT ].var ) >= 1024 &&
+		 * ( ( int * ) xresources[ HTTPPORT ].var ) <= 65535 )
+		Internals.http_port = * ( ( int * ) xresources[ HTTPPORT ].var );
+#if defined DEFAULT_HTTP_PORT
+	else if ( DEFAULT_HTTP_PORT >= 1024 && DEFAULT_HTTP_PORT <= 65535 )
+		Internals.http_port = DEFAULT_HTTP_PORT;
+#endif
+
 	/* Load the functions for creating forms from the library dealing
 	   with graphics */
 
@@ -304,6 +323,14 @@ bool xforms_init( int *argc, char *argv[ ] )
 		fl_set_object_helper( GUI.main_form->quit, "Quit fsc2" );
 		fl_set_object_helper( GUI.main_form->help, "Show documentation" );
 		fl_set_object_helper( GUI.main_form->bug_report, "Mail a bug report" );
+#if defined WITH_HTTP_SERVER
+		www_help = get_string( "Run a HTTP server (on port %d)\n"
+							   "that allows to view fsc2's current\n"
+							   "state via the internet.",
+							   Internals.http_port );
+		fl_set_object_helper( GUI.main_form->server, www_help );
+		T_free( www_help );
+#endif
 	}
 
 	fl_set_browser_fontstyle( GUI.main_form->browser, FL_FIXED_STYLE );
@@ -327,6 +354,12 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 #if ! defined( MAIL_ADDRESS ) || ! defined( MAIL_PROGRAM )
 	fl_hide_object( GUI.main_form->bug_report );
+#endif
+
+	/* Don't draw a button for the HTTP server if it's not needed */
+
+#if ! defined WITH_HTTP_SERVER
+	fl_hide_object( GUI.main_form->server );
 #endif
 
 	/* Now show the form, taking user wishes about the geometry into account */
@@ -402,11 +435,16 @@ bool xforms_init( int *argc, char *argv[ ] )
 	GUI.main_form->Load->u_ldata = 0;
 	GUI.main_form->Load->u_cdata = NULL;
 
-	/* Create the forms for writing a comment (both for storing with the
-	   data and for printing) */
+	/* Create the forms for writing a comment (both the comments to be stored
+	   with the data and for printing) */
 
 	GUI.input_form = GUI.G_Funcs.create_form_input_form( );
 	GUI.print_comment = GUI.G_Funcs.create_pc_form( );
+
+	/* Unset a flag that should only be set when the display window has been
+	   drawn completely */
+
+	G.is_fully_drawn = UNSET;
 
 	return OK;
 }
@@ -498,6 +536,11 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 	app_opt[ RESOLUTION	].specifier       = T_strdup( "*.size" );
 	app_opt[ RESOLUTION	].argKind         = XrmoptionSepArg;
 	app_opt[ RESOLUTION	].value           = ( caddr_t ) NULL;
+
+	app_opt[ HTTPPORT ].option            = T_strdup( "-http_port" );
+	app_opt[ HTTPPORT ].specifier         = T_strdup( "*.http_port" );
+	app_opt[ HTTPPORT ].argKind           = XrmoptionSepArg;
+	app_opt[ HTTPPORT ].value             = ( caddr_t ) "0";
 }
 
 

@@ -165,6 +165,7 @@ typedef struct MRKR_ {
 
 typedef struct {
 	bool is_init;           /* has init_1d() or init2d() been run ? */
+	bool is_fully_drawn;
 	bool is_warn;
 	bool is_scale_set;      /* have scaling factors been calculated ? */
 	bool scale_changed;     /* have scaling factors changed ? */
@@ -284,6 +285,7 @@ void change_scale( int is_set, void *ptr );
 void change_label( char **label );
 void rescale( void *new_dims );
 void redraw_canvas_2d( Canvas *c );
+void dump_window( int type, const char *name );
 
 
 #endif   /* ! GRAPHICS_HEADER */
