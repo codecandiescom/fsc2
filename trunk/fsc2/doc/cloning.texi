@@ -73,7 +73,7 @@ Name of the device module you want to clone :  sr510
 Please enter the name for the new module    :  sr510_b
 
 Also a device name (to be used in error messages and
-possibly also in the GPIB configuration file) is needed.
+possibly in the GPIB configuration file) is needed.
 
 Please enter a new device name (the old name is SR510) :  SR510_B
 
