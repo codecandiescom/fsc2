@@ -50,8 +50,8 @@ my $auxdir = "../aux/";
 $auxdir = $ARGV[ 1 ] if defined $ARGV[ 1 ];
 
 
-# Un-buffer the (write) connection to fsc2 or it may never react to what
-# we're sending its way
+# Un-buffer the (write) connection to fsc2 (i.e. STDOUT) or it may never
+# react to what we're sending its way
 
 $| = 1;
 
@@ -59,7 +59,7 @@ $| = 1;
 # SIGPIPE signals should only come from a spawned server while it's writing,
 # thus indicating that its client died (or got too bored waiting for a reply).
 # All we can do then is to close the connection and let the serving process
-# die silently (which, in turn, is caught by the following signal handler...)
+# die silently (which, in turn, is caught by the next signal handler...)
 
 $SIG{ PIPE } = sub { close $client; exit 0 };
 
@@ -70,8 +70,8 @@ $SIG{ PIPE } = sub { close $client; exit 0 };
 $SIG{ CHLD } = sub { 1 until waitpid( -1, WNOHANG ) == -1 };
 
 
-# Check if the pnmtopng utility is available, otherwise we can't send
-# the display and cross section windows of fsc2
+# Check if the pnmtopng and/or ppmtojpg utility is available, otherwise we
+# can't send the display and cross section windows of fsc2
 
 my @a = `echo -n "P6 1 1 255\n000" | pnmtopng 2>/dev/null`;
 $has_pnmtopng = defined $a[ 0 ];
@@ -79,7 +79,8 @@ $has_pnmtopng = defined $a[ 0 ];
 @a = `echo -n "P6 1 1 255\n000" | ppmtojpeg 2>/dev/null`;
 $has_ppmtojpeg = defined $a[ 0 ];
 
-# Ok, fire up the server - isn't OOP plus helpful modules a nice thing? ;-)
+
+# Ok, fire up the server - isn't OOP plus a few helpful modules nice? ;-)
 
 my $server = IO::Socket::INET->new( LocalPort => $port,
 									Type      => SOCK_STREAM,
@@ -111,6 +112,7 @@ while ( $client = $server->accept( ) ) {
 		sleep 1;
 		redo;
 	} else {                        # fork failed badly
+		shutdown( $server, 2 );
 		exit 1;
 	}
 }
@@ -158,7 +160,7 @@ sub serve {
 
 	exit 0 unless defined $txt;
 
-	# Ok, now it's finally our turn to send something back...
+	# Ok, now it's finally our turn to send something back to the client...
 
 	if ( $file =~ m|^/(index.html*)*$|o ) {
 		serve_main( \%f );
@@ -345,10 +347,9 @@ sub serve_logo {
 		  "Connection: close$crlf" .
 		  "Expires: $edate$crlf" .
 		  "Content-Type: image/$ext$crlf" .
-		  "Content-Type: image/$ext$crlf" .
 		  "Content-Length: " . ( stat( $auxdir . $file ) )[ 7 ] . "$crlf$crlf";
-
 	print <$fh>;
+
 	close $fh;
 }
 
@@ -371,10 +372,10 @@ sub serve_pics {
 	# We need a special SIGPIPE handler here because we must remove the
 	# temporary file fsc2 created for us...
 
-	$SIG{ PIPE } = sub {  close $fh if defined $fh;
-						  unlink $file if defined $file and $file !~ /na\.png/;
-						  close $client;
-						  exit 0
+	$SIG{ PIPE } = sub { close $fh if defined $fh;
+						 unlink $file if defined $file and $file !~ /na\.png/;
+						 close $client;
+						 exit 0
 					   };
 
 	stdout_lock( 1 ) or exit 1;
@@ -399,7 +400,7 @@ sub serve_pics {
 		}
 	} elsif ( $state =~ /^0$/o ) {
 		$file = $auxdir . "na.$ext";
-		open( $fh, $file ) or return not_found( "fsc2_" . $which . $ext );
+		open( $fh, $file ) or return not_found( "fsc2_$which$ext" );
 	}
 	stdout_lock( 0 );
 
