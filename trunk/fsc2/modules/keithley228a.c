@@ -299,6 +299,10 @@ Var *magnet_name( Var *v )
 
 Var *magnet_setup( Var *v )
 {
+	double cur;
+	double cur_step;
+
+
 	/* Check that both variables are reasonable */
 
 	if ( v->next == NULL )
@@ -308,29 +312,23 @@ Var *magnet_setup( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used for magnet current in "
-				"%s().\n", DEVICE_NAME, Cur_Func );
+	cur = get_double( v, "magnet current", DEVICE_NAME );
 
-	if ( v->next == NULL )
+	if ( ( v = vars_pop( v ) ) == NULL )
 	{
 		eprint( FATAL, SET, "%s: Missing magnet current step size in call "
 				"of %s().\n", DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v->next, INT_VAR | FLOAT_VAR );
-	if ( v->next->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used for magnet current "
-				"step width in %s().\n", DEVICE_NAME, Cur_Func );
+	cur_step = get_double( v, "magnet current step width", DEVICE_NAME );
 
 	/* Check that new field value is still within bounds */
 
-	keithley228a_current_check( VALUE( v ) );
+	keithley228a_current_check( cur );
 
-	keithley228a.req_current = VALUE( v );
-	keithley228a.current_step = VALUE( v->next );
+	keithley228a.req_current = cur;
+	keithley228a.current_step = cur_step;
 	keithley228a.is_req_current = keithley228a.is_current_step = SET;
 
 	return vars_push( INT_VAR, 1 );
@@ -359,15 +357,7 @@ Var *magnet_use_dac_port( Var *v )
 	int *last_DAC_port;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == FLOAT_VAR )
-	{
-		eprint( WARN, SET, "%s: Integer value used for DAC port in %s().\n",
-				DEVICE_NAME, Cur_Func );
-		port = irnd( v->val.dval );
-	}
-	else
-		port = ( int ) v->val.lval;
+	port = ( int ) get_long( v, "DAC port", DEVICE_NAME );
 
 	if ( get_lib_symbol( keithley228a.lockin_name, "first_DAC_port",
 						 ( void ** ) &first_DAC_port ) != LIB_OK ||
@@ -399,6 +389,7 @@ Var *magnet_use_dac_port( Var *v )
 Var *set_field( Var *v )
 {
 	double new_current;
+	double cur;
 
 
 	if ( v == NULL )
@@ -408,14 +399,11 @@ Var *set_field( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used for magnet field "
-				"current in %s().\n", DEVICE_NAME, Cur_Func );
+	cur = get_double( v, "magnet field current", DEVICE_NAME );
 
 	/* Check the new current value and reduce it if necessary */
 
-	new_current = keithley228a_current_check( VALUE( v ) );
+	new_current = keithley228a_current_check( cur );
 
 	too_many_arguments( v, DEVICE_NAME );
 

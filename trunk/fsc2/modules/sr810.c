@@ -297,16 +297,7 @@ Var *lockin_get_data( Var *v )
 
 	for ( num_channels = i = 0; i < 6 && v != NULL; i++, v = vars_pop( v ) )
 	{
-		vars_check( v, INT_VAR | FLOAT_VAR );
-		if ( v->type == INT_VAR )
-			channels[ i ] = v->val.lval;
-		else
-		{
-			eprint( WARN, SET, "%s: Floating point value (parameter #%d) used "
-					"as channel number in call of %s().\n",
-					DEVICE_NAME, i + 1, Cur_Func );
-			channels[ i ] = lrnd( v->val.dval );
-		}
+		channel = get_long( v, "channel number", DEVICE_NAME );
 
 		if ( channels[ i ] < 1 || channels[ i ] > NUM_CHANNELS )
 		{
@@ -365,12 +356,7 @@ Var *lockin_get_adc_data( Var *v )
 	long port;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == FLOAT_VAR )
-		eprint( WARN, SET, "%s: Floating point number used as ADC port "
-				"number in %s().\n", DEVICE_NAME, Cur_Func );
-
-	port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
+	port = get_long( v, "ADC port number", DEVICE_NAME );
 
 	if ( port < 1 || port > NUM_ADC_PORTS )
 	{
@@ -411,12 +397,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	/* Get and check the port number */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == FLOAT_VAR )
-		eprint( WARN, SET, "%s: Floating point number used as DAC port "
-				"number in %s().\n", DEVICE_NAME, Cur_Func );
-
-	port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
+	port = get_double( v, "DAC port number", DEVICE_NAME );
 
 	if ( port < 1 || port > NUM_DAC_PORTS )
 	{
@@ -441,8 +422,8 @@ Var *lockin_dac_voltage( Var *v )
 
 	/* Get and check the voltage */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	voltage = VALUE( v );
+	voltage = get_double( v, "DAC voltage", DEVICE_NAME );
+
 	if ( voltage < DAC_MIN_VOLTAGE || voltage > DAC_MIN_VOLTAGE )
 	{
 		eprint( FATAL, SET, "%s: Invalid DAC voltage (%f V) in call of "
@@ -492,11 +473,7 @@ Var *lockin_sensitivity( Var *v )
 				return vars_push( FLOAT_VAR, sr810_get_sens( ) );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as sensitivity in %s().\n",
-				DEVICE_NAME, Cur_Func );
-	sens = VALUE( v );
+	sens = get_double( v, "sensitivity", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 	
@@ -604,11 +581,7 @@ Var *lockin_time_constant( Var *v )
 			return vars_push( FLOAT_VAR, sr810_get_tc( ) );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as time constant in "
-				"%s().\n", DEVICE_NAME, Cur_Func );
-	tc = VALUE( v );
+	tc = get_double( v, "time constant", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 	
@@ -716,11 +689,7 @@ Var *lockin_phase( Var *v )
 
 	/* Otherwise set phase to value passed to the function */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as phase in %s().\n",
-				DEVICE_NAME, Cur_Func );
-	phase = VALUE( v );
+	phase = get_double( v, "phase", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 	
@@ -766,15 +735,7 @@ Var *lockin_harmonic( Var *v )
 			return vars_push( INT_VAR, sr810_get_harmonic( ) );
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == FLOAT_VAR )
-	{
-		eprint( WARN, SET, "%s: Float value used as harmonic.\n",
-				DEVICE_NAME );
-		harm = ( long ) v->val.dval;
-	}
-	else
-		harm = v->val.lval;
+	harm = get_long( v, "harmonic", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 
@@ -850,11 +811,7 @@ Var *lockin_ref_freq( Var *v )
 				return vars_push( FLOAT_VAR, sr810_get_mod_freq( ) );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as modulation "
-				"frequency in %s().\n", DEVICE_NAME, Cur_Func );
-	freq = VALUE( v );
+	freq = get_double( v, "modulation frequency", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 	
@@ -916,11 +873,7 @@ Var *lockin_ref_level( Var *v )
 				return vars_push( FLOAT_VAR, sr810_get_mod_level( ) );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as modulation level in "
-				"%s().\n", DEVICE_NAME, Cur_Func );
-	level = VALUE( v );
+	level = get_double( v, "modulation level", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 	

@@ -185,16 +185,14 @@ Var *digitizer_define_window( Var *v )
 	{
 		/* Get the start point of the window */
 
-		vars_check( v, INT_VAR | FLOAT_VAR );
-		win_start = VALUE( v );
+		win_start = get_double( v, "window startposition", DEVICE_NAME );
 		is_win_start = SET;
 
 		/* If there's a second parameter take it to be the window width */
 
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
-			vars_check( v, INT_VAR | FLOAT_VAR );
-			win_width = VALUE( v );
+			win_width = get_double( v, "window width", DEVICE_NAME );
 
 			/* Allow window width to be zero in test run... */
 
@@ -290,8 +288,7 @@ Var *digitizer_timebase( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	timebase = VALUE( v );
+	timebase = get_double( v, "time base", DEVICE_NAME );
 
 	if ( timebase <= 0 )
 	{
@@ -406,8 +403,7 @@ Var *digitizer_sensitivity( Var *v )
 				return vars_push( FLOAT_VAR, lecroy9400.sens[ channel ] );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	sens = VALUE( v );
+	sens = get_double( v, "sensitivity", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 
@@ -541,16 +537,7 @@ Var *digitizer_averaging( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		num_avg = v->val.lval;
-	else
-	{
-		eprint( WARN, SET, "%s: Floating point number used as number "
-				"of averages in %s().\n", DEVICE_NAME, Cur_Func );
-		num_avg = lrnd( v->val.dval );
-	}
+	num_avg = get_long( v, "numberof averages", DEVICE_NAME );
 
 	if ( num_avg <= 0 )
 	{
@@ -796,8 +783,7 @@ Var *digitizer_trigger_position( Var *v )
 				return vars_push( FLOAT_VAR, lecroy9400.trig_pos );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	trig_pos = VALUE( v );
+	trig_pos = get_double( v, "trigger position", DEVICE_NAME );
 
 	if ( trig_pos < 0.0 || trig_pos > 1.0 )
 	{
