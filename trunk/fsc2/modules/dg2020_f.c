@@ -30,7 +30,7 @@ typedef struct
 	long timebase;
 } DG2020;
 
-static DG2020 dg2020;
+static DG2020 dg2020 = { 5 };
 
 
 int dg2020_init_hook( void )
@@ -72,7 +72,7 @@ Var *pulser_set_timebase( Var *v )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( VALUE( v ) <0 )
+	if ( VALUE( v ) < 0 )
 	{
 		eprint( FATAL, "dg2020: Negative time timebase for pulser.\n" );
 		THROW( EXCEPTION );
@@ -80,19 +80,20 @@ Var *pulser_set_timebase( Var *v )
 
 	if ( VALUE( v ) > DG20202_MINIMUM_TIMEBASE )
 	{
-		eprint( FATAL. "dg2020: Timebase for pulser too small, maximum is "
+		eprint( FATAL, "dg2020: Timebase for pulser too small, maximum is "
 				"%ld ns.\n", DG20202_MINIMUM_TIMEBASE );
 		THROW( EXCEPTION );
 	}
 
 	if ( VALUE( v ) > DG20202_MAXIMUM_TIMEBASE )
 	{
-		eprint( FATAL. "dg2020: Timebase for pulser too large, maximum is "
+		eprint( FATAL, "dg2020: Timebase for pulser too large, maximum is "
 				"%ld ns.\n", DG20202_MAXIMUM_TIMEBASE );
 		THROW( EXCEPTION );
 	}
 
 	dg2020.timebase = VALUE( v );
+	return vars_push( INT_VAR, 1 );
 }
 
 

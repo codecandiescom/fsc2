@@ -27,7 +27,8 @@ typedef struct
 	int device;
 	int Sens;
 	bool Sens_warn;
-	long phase;
+	double phase;
+	bool P;
 	int TC;
 	bool TC_warn;
 } SR510;
@@ -42,21 +43,20 @@ static double slist[ ] = { 5.0e-1, 2.0e-1, 1.0e-1, 5.0e-2, 2.0e-2,
 						   1.0e-2, 5.0e-3, 2.0e-3, 1.0e-3, 5.0e-4,
 						   2.0e-4, 1.0e-4, 5.0e-5, 2.0e-5, 1.0e-5,
 						   5.0e-6, 2.0e-6, 1.0e-6, 5.0e-7, 2.0e-7,
-						   1.0e-7, 5.0e-8, 2.0e-8, 1.0e-8, /* 24 entries */
-						   5.0e-9, 2.0e-9, 1.0e-9 };
+						   1.0e-7, 5.0e-8, 2.0e-8, 1.0e-8 };
 static double tcs[ ] = { 1.0e-3, 3.0e-3, 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1,
 						 1.0, 3.0, 10.0, 30.0, 100.0 };
 
 
 static bool lockin_init( const char *name, int *device );
 static double sr510_get_data( void );
-static double sr510_get_adc_data( int channel );
+static double sr510_get_adc_data( long channel );
 static double sr510_get_sens( void );
 static void sr510_set_sens( int Sens );
 static double sr510_get_tc( void );
 static void sr510_set_tc( int TC );
-static long sr510_get_phase( void );
-static long sr510_set_phase( long phase );
+static double sr510_get_phase( void );
+static double sr510_set_phase( double phase );
 
 
 
@@ -70,7 +70,7 @@ int sr510_init_hook( void )
 	sr510.name = DEVICE_NAME;
 	sr510.Sens = -1;
 	sr510.Sens_warn = UNSET;
-	sr510.phase = -1;
+	sr510.P = UNSET;
 	sr510.TC = -1;
 	sr510.TC_warn = UNSET;
 	return 1;
@@ -108,41 +108,47 @@ void sr510_exit_hook( void )
 {
 	/* Switch lock-in back to local mode */
 
+	gpib_write( sr510.device, "I0\n", 3 );
 	gpib_local( sr510.device );
 }
 
 
 /*---------------------------------------------------------------------*/
 /* This function returns either the lock-in voltage (if called with no */
-/* argument) or the voltage at one of the 6 ADCs on the backside of    */
-/* the lock-in (if called with a numeric argument between 1 and 6).    */
+/* argument) or the voltage at one of the 4 ADCs on the backside of    */
+/* the lock-in (if called with a numeric argument between 1 and 4).    */
 /* The returned value is always the voltage in V.                      */
 /*---------------------------------------------------------------------*/
 
 Var *lockin_get_data( Var *v )
 {
-	if ( TEST_RUN )
-		return vars_push( FLOAT_VAR, 0.0 );
-
 	/* If no parameter is passed to the function this means we need the
 	   lock-in voltage */
 
 	if ( v == NULL )
-		return vars_push( FLOAT_VAR, sr510_get_data( ) );
+	{
+		if ( TEST_RUN )
+			return vars_push( FLOAT_VAR, 0.0 );
+		else
+			return vars_push( FLOAT_VAR, sr510_get_data( ) );
+	}
 
-	/* Otherwise the voltage at one of the six ADC's at the backside is
+	/* Otherwise the voltage at one of the four ADC's at the backside is
 	   needed */
 
 	vars_check( v, INT_VAR );
 
-	if ( VALUE( v ) < 1 || VALUE( v ) > 6 )
+	if ( ( long ) VALUE( v ) < 1 || ( long ) VALUE( v ) > 4 )
 	{
 		eprint( FATAL, "sr510: Invalid ADC channel number (%ld), valid "
-				"channel are in the range 1 - 6.\n", VALUE( v ) );
+				"channel are in the range 1-4.\n", ( long ) VALUE( v ) );
 		THROW( EXCEPTION );
 	}
 
-	return vars_push( FLOAT_VAR, sr510_get_adc_data( rnd( VALUE( v ) ) ) );
+	if ( TEST_RUN )
+		return vars_push( FLOAT_VAR, 0.0 );
+
+	return vars_push( FLOAT_VAR, sr510_get_adc_data( ( long ) VALUE( v ) ) );
 }
 	
 
@@ -178,7 +184,7 @@ Var *lockin_sensitivity( Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	sens = ( double ) VALUE( v );
+	sens = VALUE( v );
 
 	if ( sens < 0.0 )
 	{
@@ -192,7 +198,7 @@ Var *lockin_sensitivity( Var *v )
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
 
-	for ( i = 0; i < 26; i++ )
+	for ( i = 0; i < 23; i++ )
 	{
 		if ( sens <= slist[ i ] && sens >= slist[ i + 1 ] )
 		{
@@ -228,7 +234,7 @@ Var *lockin_sensitivity( Var *v )
 		if ( sens > slist[ 0 ] )
 			Sens = 1;
 		else
-		    Sens = 27;
+		    Sens = 24;
 
 		if ( ! sr510.Sens_warn )                      /* no warn message yet */
 		{
@@ -287,7 +293,7 @@ Var *lockin_time_constant( Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	tc = ( double ) VALUE( v ) / 1.0e9;
+	tc = VALUE( v ) / 1.0e9;
 
 	if ( tc < 0.0 )
 	{
@@ -365,7 +371,7 @@ Var *lockin_time_constant( Var *v )
 
 Var *lockin_phase( Var *v )
 {
-	long phase;
+	double phase;
 
 
 	/* Without an argument just return current phase settting */
@@ -373,7 +379,7 @@ Var *lockin_phase( Var *v )
 	if ( v == 0 )
 	{
 		if ( TEST_RUN )
-			return vars_push( INT_VAR, 0 );
+			return vars_push( FLOAT_VAR, 0 );
 		else
 		{
 			if ( I_am == PARENT )
@@ -383,7 +389,7 @@ Var *lockin_phase( Var *v )
 						"section.\n" );
 				THROW( EXCEPTION );
 			}
-			return vars_push( INT_VAR, sr510_get_phase( ) );
+			return vars_push( FLOAT_VAR, sr510_get_phase( ) );
 		}
 	}
 
@@ -391,22 +397,30 @@ Var *lockin_phase( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	phase = rnd( VALUE( v ) );
-	if ( phase >= 0 )           /* convert to 0-359 degree range */
-		phase %= 360;
-	else
-		phase = 360 - ( - phase % 360 );
+	phase = VALUE( v );
+
+	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
+		phase -= 360.0;
+
+	if ( phase < 0.0 )
+	{
+		phase *= -1.0;
+		while ( phase >= 360.0 )    /* convert to 0-359 degree range */
+			phase -= 360.0;
+		phase = 360.0 - phase;
+	}
 
 	if ( TEST_RUN )
-		return vars_push( INT_VAR, phase );
+		return vars_push( FLOAT_VAR, phase );
 	else
 	{
 		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			return vars_push( INT_VAR, sr510_set_phase( phase ) );
+			return vars_push( FLOAT_VAR, sr510_set_phase( phase ) );
 		else                         /* if called in a preparation sections */ 
 		{
 			sr510.phase = phase;
-			return vars_push( INT_VAR, phase );
+			sr510.P = SET;
+			return vars_push( FLOAT_VAR, phase );
 		}
 	}
 }
@@ -437,28 +451,19 @@ bool lockin_init( const char *name, int *device )
 		 gpib_read( *device, buffer, &length ) == FAILURE )
 		return FAIL;
 
-	/* Switch both AD/DA channels (5 and 6) into AD mode */
+	/* Lock the keyboard */
 
-	length = 20;
-	if ( gpib_write( *device, "X5\n", 3 ) == FAILURE ||
-		 gpib_read( *device, buffer, &length ) == FAILURE )
-		return FAIL;
-	length = 20;
-	if ( gpib_write( *device, "X6\n", 3 ) == FAILURE ||
-		 gpib_read( *device, buffer, &length ) == FAILURE )
+	if ( gpib_write( *device, "I1\n", 3 ) == FAILURE )
 		return FAIL;
 
-	/* !!!!! shouldn't we also make sure the lockin returns the voltage and
-	   not the noise or offset? !!!!!!! */
-
-	/* If sensitivity, time constant or the phase values in 'sr510' were set
-	   in one of the preparation sections only the value to be used was stored
-	   and we have to do the actual setting now because the lock-in could not
-	   be accessed before */
+	/* If sensitivity, time constant or the phase values were set in one of
+	   the preparation sections only the value to be used was stored and we
+	   have to do the actual setting now because the lock-in could not be
+	   accessed before */
 
 	if ( sr510.Sens != -1 )
 		sr510_set_sens( sr510.Sens );
-	if ( sr510.phase != -1 )
+	if ( sr510.P == SET )
 		sr510_set_phase( sr510.phase );
 	if ( sr510.TC != -1 )
 		sr510_set_tc( sr510.TC );
@@ -495,7 +500,7 @@ double sr510_get_data( void )
 /* -> Number of the ADC channel (1-6)                       */
 /*-------------------------- -------------------------------*/
 
-double sr510_get_adc_data( int channel )
+double sr510_get_adc_data( long channel )
 {
 	char buffer[ 16 ] = "X*\n";
 	long length = 16;
@@ -522,27 +527,27 @@ double sr510_get_adc_data( int channel )
 double sr510_get_sens( void )
 {
 	char buffer[ 10 ];
-	long len = 10;
+	long length = 10;
 	double sens;
 
 	/* Ask lock-in for the sensitivity setting */
 
-	if ( gpib_write( sr510.device, "G\n", 2L ) == FAILURE ||
-		 gpib_read( sr510.device, buffer, &len ) == FAILURE )
+	if ( gpib_write( sr510.device, "G\n", 2 ) == FAILURE ||
+		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "sr510: Can't access the lock-in amplifier.\n" );
 		THROW( EXCEPTION );
 	}
 
-	buffer[ len - 2 ] = '\0';
+	buffer[ length - 2 ] = '\0';
 	sens = slist[ 24 - atoi( buffer ) ];
 
     /* Check if EXPAND is switched on - this increases the sensitivity 
 	   by a factor of 10 */
 
-	len = 10;
-	if ( gpib_write( sr510.device, "E\n", 2L ) == FAILURE ||
-		 gpib_read( sr510.device, buffer, &len ) == FAILURE )
+	length = 10;
+	if ( gpib_write( sr510.device, "E\n", 2 ) == FAILURE ||
+		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "sr510: Can't access the lock-in amplifier.\n" );
 		THROW( EXCEPTION );
@@ -566,15 +571,14 @@ double sr510_get_sens( void )
 void sr510_set_sens( int Sens )
 {
 	char buffer[10];
-	long length;
 
 
-	Sens = 24 - Sens;
+	Sens = 25 - Sens;
 
 	/* For sensitivities lower than 100 nV EXPAND has to be switched on
 	   otherwise it got to be switched off */
 
-	if ( Sens < 0 )
+	if ( Sens <= 3 )
 	{
 		if ( gpib_write( sr510.device, "E1\n", 3 ) == FAILURE )
 		{
@@ -595,7 +599,6 @@ void sr510_set_sens( int Sens )
 	/* Now set the sensitivity */
 
 	sprintf( buffer, "G%d\n", Sens );
-	length = strlen( buffer );
 
 	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
@@ -639,13 +642,10 @@ double sr510_get_tc( void )
 void sr510_set_tc( int TC )
 {
 	char buffer[10];
-	long length = 10;
 
 
-	sprintf( buffer, "T1%d\n", TC );
-	length = strlen( buffer );
-
-	if ( gpib_write( sr510.device, buffer, length ) == FAILURE )
+	sprintf( buffer, "T1,%d\n", TC );
+	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
 		eprint( FATAL, "sr510: Can't access the lock-in amplifier.\n" );
 		THROW( EXCEPTION );
@@ -679,11 +679,11 @@ void sr510_set_tc( int TC )
 /* amplifier (in degree between 0 and 359).                  */
 /*-----------------------------------------------------------*/
 
-long sr510_get_phase( void )
+double sr510_get_phase( void )
 {
-	char buffer[10];
-	long length = 10;
-	int phase;
+	char buffer[20];
+	long length = 20;
+	double phase;
 
 
 	if ( gpib_write( sr510.device, "P\n", 2L ) == FAILURE ||
@@ -694,9 +694,21 @@ long sr510_get_phase( void )
 	}
 
 	buffer[ length - 2 ] = '\0';
-	phase = atol( buffer );
-	if ( phase < 0 )
-		phase += 360;
+fprintf( stderr, "Phase = %s\n", buffer );
+
+	phase = atof( buffer );
+
+	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
+		phase -= 360.0;
+
+	if ( phase < 0.0 )
+	{
+		phase *= -1.0;
+		while ( phase >= 360.0 )    /* convert to 0-359 degree range */
+			phase -= 360.0;
+		phase = 360.0 - phase;
+	}
+
 	return phase;
 }
 
@@ -705,15 +717,13 @@ long sr510_get_phase( void )
 /* Functions sets the phase to a value between 0 and 360 degree. */
 /*---------------------------------------------------------------*/
 
-long sr510_set_phase( long phase )
+double sr510_set_phase( double phase )
 {
-	char buffer[10];
-	long length;
+	char buffer[20];
 
 
-	sprintf( buffer, "P%ld\n", phase );
-	length = strlen( buffer );
-	if ( gpib_write( sr510.device, buffer, length ) == FAILURE )
+	sprintf( buffer, "P%.2f\n", phase );
+	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
 		eprint( FATAL, "sr510: Can't access the lock-in amplifier.\n" );
 		THROW( EXCEPTION );

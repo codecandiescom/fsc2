@@ -272,8 +272,7 @@ Var *magnet_setup( Var *v )
 		{
 			eprint( FATAL, "%s:%ld: Start field (%lf G) too low for Bruker "
 					"ER035M gaussmeter, minimum is %d G.\n", Fname, Lc,
-					( double ) VALUE( v ),
-					( int ) S_BAND_WITH_ER035M_MIN_FIELD );
+					VALUE( v ), ( int ) S_BAND_WITH_ER035M_MIN_FIELD );
 			THROW( EXCEPTION );
 		}
         
@@ -281,8 +280,7 @@ Var *magnet_setup( Var *v )
 		{
 			eprint( FATAL, "%s:%ld: Start field (%lf G) too high for Bruker "
 					"ER035M gaussmeter, maximum is %d G.\n", Fname, Lc,
-					( double ) VALUE( v ),
-					( int ) S_BAND_WITH_ER035M_MAX_FIELD );
+					VALUE( v ), ( int ) S_BAND_WITH_ER035M_MAX_FIELD );
 			THROW( EXCEPTION );
 		}
 	}
@@ -293,8 +291,7 @@ Var *magnet_setup( Var *v )
 		{
 			eprint( FATAL, "%s:%ld: Start field (%lf G) too low for Bruker "
 					"BH15 field controller, minimum is %d G.\n", Fname, Lc,
-					( double ) VALUE( v ),
-					( int ) S_BAND_WITH_BH15_MIN_FIELD );
+					VALUE( v ), ( int ) S_BAND_WITH_BH15_MIN_FIELD );
 			THROW( EXCEPTION );
 		}
         
@@ -302,8 +299,7 @@ Var *magnet_setup( Var *v )
 		{
 			eprint( FATAL, "%s:%ld: Start field (%lf G) too high for Bruker "
 					"BH15 field controller, maximum is %d G.\n", Fname, Lc,
-					( double ) VALUE( v ),
-					( int ) S_BAND_WITH_BH15_MAX_FIELD );
+					VALUE( v ), ( int ) S_BAND_WITH_BH15_MAX_FIELD );
 			THROW( EXCEPTION );
 		}
 	}
@@ -311,8 +307,8 @@ Var *magnet_setup( Var *v )
 	if ( VALUE( v->next ) < S_BAND_MIN_FIELD_STEP )
 	{
 		eprint( FATAL, "%s:%ld: Field sweep step size (%lf G) too small, "
-				"minimum is %f G.\n", Fname, Lc, ( double ) VALUE( v->next ),
-				( int ) S_BAND_MIN_FIELD_STEP );
+				"minimum is %f G.\n", Fname, Lc,
+				VALUE( v->next ), ( int ) S_BAND_MIN_FIELD_STEP );
 		THROW( EXCEPTION );
 	}
 		
@@ -337,8 +333,7 @@ Var *set_field( Var *v )
 		{
 			eprint( FATAL, "%s:%ld: Field (%lf G) too low for Bruker ER035M "
 					"gaussmeter, minimum is %d G.\n", Fname, Lc,
-					( double ) VALUE( v ),
-					( int ) S_BAND_WITH_ER035M_MIN_FIELD );
+					VALUE( v ), ( int ) S_BAND_WITH_ER035M_MIN_FIELD );
 			THROW( EXCEPTION );
 		}
         
@@ -346,8 +341,7 @@ Var *set_field( Var *v )
 		{
 			eprint( FATAL, "%s:%ld: Field (%lf G) too high for Bruker ER035M "
 					"gaussmeter, maximum is %d G.\n", Fname, Lc,
-					( double ) VALUE( v ),
-					( int ) S_BAND_WITH_ER035M_MAX_FIELD );
+					VALUE( v ), ( int ) S_BAND_WITH_ER035M_MAX_FIELD );
 			THROW( EXCEPTION );
 		}
 	}
@@ -358,8 +352,7 @@ Var *set_field( Var *v )
 		{
 			eprint( FATAL, "%s:%ld: Field (%lf G) too low for Bruker BH15 "
 					"field controller, minimum is %d G.\n", Fname, Lc,
-					( double ) VALUE( v ),
-					( int ) S_BAND_WITH_BH15_MIN_FIELD );
+					VALUE( v ), ( int ) S_BAND_WITH_BH15_MIN_FIELD );
 			THROW( EXCEPTION );
 		}
         
@@ -367,8 +360,7 @@ Var *set_field( Var *v )
 		{
 			eprint( FATAL, "%s:%ld: Field (%lf G) too high for Bruker BH15 "
 					"field controller, maximum is %d G.\n", Fname, Lc,
-					( double ) VALUE( v ),
-					( int ) S_BAND_WITH_BH15_MAX_FIELD );
+					VALUE( v ), ( int ) S_BAND_WITH_BH15_MAX_FIELD );
 			THROW( EXCEPTION );
 		}
 	}
