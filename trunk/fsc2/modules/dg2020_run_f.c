@@ -31,8 +31,12 @@ void dg2020_do_update( void )
 
 	/* Finally commit all changes */
 
-	if ( ! TEST_RUN )
-		dg2020_update_data( );
+	if ( ! TEST_RUN && ! dg2020_update_data( ) )
+	{
+		eprint( FATAL, "%s: Setting the pulser failed badly.\n",
+				pulser_struct.name );
+		THROW( EXCEPTION );
+	}
 
 	dg2020.needs_update = UNSET;
 }
