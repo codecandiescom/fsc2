@@ -5,34 +5,34 @@
 
 /* 
    There are two types of messages to be exchanged between the child and the
-   parent. The first on are data to be displayed by the parent. These should
+   parent. The first one is data to be displayed by the parent. These should
    be accepted as fast as possible so that the child can continue with the
    measurement immediately. The other type of messages are requests by the
-   child for the parent to do some things for it, i.e. display an alert box
-   etc. and possibly return the user selection. The protocoll for requests is
-   quite simple - the child sends the request and waits for the answer by the
-   parent, knowing exactly what kind of data to expect.
+   child for the parent to do some things for it, e.g. display an alert box,
+   and possibly return the user selection. The protocoll for requests is
+   quite simple - the child sends the request and waits for the answer by
+   the parent, knowing exactly what kind of data to expect.
 
    The first problem to be addressed is how to make the parent aware of data
    send by the child. This is handled by two signals, DO_SEND and NEW_DATA.
    The DO_SEND signal is raised by the parent when it is prepared to accept
    data. The child always has to wait for this signal before it may send any
-   data. Then it posts its message and raises the NEW_DATA signal. Nopw the
-   parent has to accept the data and when it is done again raises the DO_SEND
-   signal. The DO_SEND signal is necessary to avoid flooding the parent with
-   requests and data.
+   data. Then it posts its message and raises the NEW_DATA signal. Now the
+   parent has to accept the data and when it is done it again raises the
+   DO_SEND signal. Using the DO_SEND signal avoids flooding the parent with
+   too many requests and data.
 
-   The request type of messages is easy to implement - a simple pair of pipes
-   will do. All needed beside is a protocoll for the differerent types of
-   requests. Since requests are not real time critical the parent does not
-   have to reply immediately and the child waits until the parent honors the
-   request. Thus the way requests are handled by the parent is simple: The
-   parent catches the signal and triggers an invisible button which in turn is
-   leads to the buttons handler function being called by the main loop of the
-   program as every other event. Then the parent reads the pipe and replys by
-   sending the answer to the request via another pipe. No synchronization is
-   needed since the child will be blocked reading the reply pipe until the
-   parent writes its answer to the pipe.
+   The request type of messages is easy to implement - a simple pair of
+   pipes will do. All needed beside is a protocoll for the differerent types
+   of requests. Since requests are not real time critical the parent does
+   not have to reply immediately and the child waits until the parent honors
+   the request. Thus the way requests are handled by the parent is simple:
+   The parent catches the signal and triggers an invisible button which in
+   turn leads to the buttons handler function being called by the main loop
+   of the program as for every other event. Then the parent reads the pipe
+   and replies by sending the answer to the request via another pipe. No
+   synchronization is needed since the child will be blocked while reading
+   the reply pipe until the parent finishes writing its answer to the pipe.
 
    The implementation for the exchange of data is a bit more complicated. Here
    the child should not be forced to wait for the parent process to finally
@@ -43,39 +43,41 @@
    to call malloc() which is, unfortunately, not reentrant. Thus, the
    alternative is to use shared memory segments.
 
-   When the child process needs to send data to the parent it gets a new
-   shared mory segment, copies the data into the segment and then sends the
-   parent the identifier of the memory segment. Within the signal handler all
-   the parent does is to store this identifier then it raises the DO_SEND
-   immediately. This way the child can continue with the measurement the
-   parent has time to handle the new data whenever it is ready to do so.
+   Thus, when the child process needs to send data to the parent it gets a
+   new shared mory segment, copies the data into the segment and then sends
+   the parent the identifier of the memory segment. Within the NEW_DATA
+   signal handler all the parent does is to store this identifier and then
+   it raises the DO_SEND immediately. This way the child can continue with
+   the measurement while the parent has time to handle the new data whenever
+   it is ready to do so.
 
-   How does the child send memory segment identifiers to the parent? This also
-   done via another shared memory segment created before the child is started
-   and not be removed until the child exits. All to be stored in this memory
-   segment is the memory segment identifier for the segment with the data and
-   the the type of the message, i.e. DATA or REQUEST. The latter has also to
-   be send because the parent wouldn't know otherwise what kind of message it
-   is going to receive.
+   How does the child send memory segment identifiers to the parent? This
+   also is done via a shared memory segment created before the child is
+   started and not removed before the child exits. All to be stored in this
+   memory segment is the memory segment identifier for the segment with the
+   data and the type of the message, i.e. DATA or REQUEST. The latter has
+   also to be send because the parent otherwise wouldn't know what kind of
+   message it is going to receive.
 
    Thus, in the NEW_DATA signal handler the parent just copies the segment
    identifier and the type flag and, for DATA messages, raises the DO_SEND
-   signal. Finaly, it creates a synthetic event for the invisible button.
-   Where do the segment identifieres get stored? Together with the segment for
-   storing the identifiers a queue is created for storing the the identifiers
-   and message type flags. The size of the queue can be rather limited since
-   there is only a limited amount of shared memory segments. Thus this queue
-   to has have only one plus the maximum number of shared memory segments
-   entries (the extra entry is for REQUEST messages - there can always only be
-   one). Beside the message queue also two pointers are needed, on pointing to
-   the oldest unhandled entry and one just above the newest one.
+   signal. Finally, it creates a synthetic event for the invisible button.
+   Where do the segment identifieres get stored? Together with the segment
+   for storing the identifiers a queue is created for storing the the
+   identifiers and message type flags. The size of the queue can be rather
+   limited since there is only a limited amount of shared memory
+   segments. Thus this queue to has have only the maximum number of shared
+   memory segments plus one entries (the extra entry is for REQUEST messages
+   - there can always be only one). Beside the message queue also two
+   pointers are needed, on pointing to the oldest unhandled entry and one
+   just above the newest one.
 
-   In the handler for the synthetically triggered, invisible button the parent
-   handles all the entries in the message queue starting with the oldest ones.
-   For REQUEST type messages he reads the pipe and sends its reply. For DATA
-   messages it copies the data to the appropriate places and then removes the
-   shared memory segment for euse by the child. Finally, it displays the new
-   data.
+   In the handler for the synthetically triggered, invisible button the
+   parent runs through all the entries in the message queue starting with
+   the oldest ones. For REQUEST type messages he reads the pipe and sends
+   its reply. For DATA messages it copies the data to the appropriate places
+   and then removes the shared memory segment for euse by the child. Finally,
+   it displays the new data.
 
    This scheme will work as long as the parent doesn't get to much behind with
    handling DATA messages. But if the parent is very busy and the child very
@@ -84,11 +86,11 @@
    child it will sleep a short while and then retry, hoping that the parent
    removed one of the previously used segments in the mean time.
 
-   The only problem still unaddressed by this scheme is data sets exceeding
-   the maximum size of a shared memory segment. But this limit seems to be
-   rather high (ipcs says 32768 kB), so I hope this never going to happen...
-   If it should ever hapen this will result in the measurement getting stopped
-   with an `internal communication error'.
+   The only problem still unaddressed is data sets exceeding the maximum
+   size of a shared memory segment. But this limit seems to be rather high
+   (32768 kB !), so I hope this never going to happen...  If it should ever
+   hapen this will result in the measurement getting stopped with an
+   `internal communication error'.
 
 */
 
@@ -98,6 +100,7 @@
 
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <sys/param.h>
 
 /* locally used routines */
 
@@ -156,7 +159,7 @@ bool setup_comm( void )
 	}
 
 	/* Finally we need a message queue where the parent stores the keys and
-	   message types it got from the child for later inspection */
+	   message types it gets from the child for later handling */
 
 	TRY
     {
@@ -168,7 +171,7 @@ bool setup_comm( void )
 		for ( i = 0; i < 4; i++ )
 			close( pd[ i ] );
 
-		shmdt( Key );
+		shmdt( ( void * ) Key );
 		shmctl( Key_Area, IPC_RMID, &shm_buf );
 		return FAIL;
 	}
@@ -200,7 +203,7 @@ void end_comm( void )
 
 	/* Detach from and remove the shared memory segment */
 
-	shmdt( Key );
+	shmdt( ( void * ) Key );
 	shmctl( Key_Area, IPC_RMID, &shm_buf );
 
 	/* Close parents side of read and write pipe */
