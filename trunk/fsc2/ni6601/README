@@ -117,8 +117,8 @@ In the 'driver' subdirectory you will find a file named 'ni6601_drv.txt',
 describing in detail which ioctl() calls that can used to deal with the
 card.
 
-In the 'lib' a file named 'ni6601_lib.txt' describes the functionality
-supplied by the library.
+In the 'lib' subdirectory a file named 'ni6601_lib.txt' describes the
+functionality supplied by the library.
 
 
-    27.2.2003   Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>
+    21.4.2003   Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>
