@@ -1369,7 +1369,7 @@ static void print_comm( FILE *fp )
 				 "(m) cw 2 mul add 0 rl\n"
 				 "0 (X) ch %d 1.65 mul 4 add mul rl\n"
 				 "(m) cw 2 mul add neg 0 rl cp\n"
-				 "gs 0.975 %s f gr s\n",
+				 "gs 0.95 %s f gr s\n",
 			 num_lines - 1, print_with_color ? "dup dup srgb" : "sgr" );
 
 	fprintf( fp, "0 0 m\n"
