@@ -240,11 +240,30 @@ as arguments, no argument at all defaults to the first curve.
 Opens a new file and returns a unique identifier for the file that can
 be stored in an integer variable and is to be used in calls to functions
 of the @code{save_xxx()}-family. If no argument is given a file selector
-is shown and lets the user choose a file. If an argument is given (that
-has to be a string!) the file with this name is opened.  If opening the
-file fails the user is asked to select a different file name.  If the
-user cancels the selection of a file (s)he is asked for confirmation
-since data may get lost.
+is shown and lets the user choose a file. If opening the selected file
+fails the user is asked to select a different file name. If the user
+cancels the selection of a file (s)he is asked for confirmation since
+data may get lost.
+
+The function accepts up to four arguments, all of them optional. The
+first one is usually the string to be printed in the file selector. If
+it is missing or is the empty string (use `@code{""}' to create an empty
+string) it defaults to `@i{Please enter a file name:}'. The second
+argument is a pattern for the file name, defaulting to `@i{*.dat}'. You
+may use all the usal wildcard characters you're used from the shell. The
+third argument is the directory the search for the file name should
+start from. Finally, as the fourth and last argument you may pass a file
+name to the function as the default file, that will appear in the entry
+for the selected file.
+
+But there's also an alternative. If the very first string (that is
+usually used for the prompt string) starts with a backslash `@code{\}'
+the following characters (i.e.@: everything except the leading
+backslash) are taken as the name of the file to be used automatically.
+The file selector will not be shown and instead the hardcoded file name
+will be used. Only if opening this file fails the remaining parameters
+will be used when asking for an alternative file (except the propmt
+string, the default will be used).
 
 If @code{get_file()} is never called, on the first call to a function
 from the @code{save_xxx()}-family the user is asked to select a file and
