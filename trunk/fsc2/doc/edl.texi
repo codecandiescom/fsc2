@@ -1096,8 +1096,8 @@ IF x > 1.0 @{
 @code{UNLESS} is identical to @code{IF} with the only exception that the
 condition is not tested for truth but for falsehood, i.e.@ while in an
 @code{IF} construct the following block of statements is executed when
-the condition tests true, in the @code{UNLESS} constructs the block is
-only executed when the condition tests false. Of course, also with the
+the condition is true, in @code{UNLESS} constructs the block is only
+executed when the condition test fails. Of course, also with the
 @code{UNLESS} an alternative can be specified with an @code{ELSE} block
 (but in contrast to @code{IF} more than one @code{ELSE} doesn't make too
 much sense).
