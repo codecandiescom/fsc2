@@ -2,6 +2,16 @@
   $Id$
 */
 
+/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+   STILL COMPLETELY UNTESTED: Handling of EXTERNAL trigger mode by setting one
+   block with "DATA:SEQ:TWAIT" for this block and running in enhanced mode. I
+   urgently need access to a real device for testing if this is the way to do
+   it - the manual is no help at all at trying to figure out what to do...
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+
+
 
 /*
   <RANT>
@@ -11,7 +21,8 @@
   bugs but also made live a hell for the programmers that have no choice but
   to try to use their piece of crap.
 
-  Here a few of the bugs as far as I found them yet:
+  Here a few of the bugs as far as I found them yet (text taken from an email
+  I sent to Tektronix/Sony):
 
   In run mode : Repeat
    When I create a data pattern starting with a high state (1) at the very
@@ -61,27 +72,27 @@
          i.e. as if it would be part of a concatenated command.
 
   Ok, so far about some real stupid fuck-ups in the firmware as well as in the
-  documentation. But these guys also obviously spend so much fucking time
-  writing a more or less completely useless user interface that thay didn't
-  had the time to implement reasonable GPIB commands. E.g., who can be that
-  stupid to write a command for setting pattern bits in a way that you have to
-  send a complete byte over the already slow enough GPIB bus just to set one
-  single bit of a pulser channel? And why is for more than 90% of the stuff
-  that you can do via the keyboard no equivalent GPIB command?
+  documentation. But these guys also obviously spend so much time writing a
+  more or less completely useless user interface that they didn't had the time
+  to implement reasonable GPIB commands. E.g., who can be that stupid to write
+  a command for setting pattern bits in a way that you have to send a complete
+  byte over the already slow enough GPIB bus just to set one single bit of a
+  pulser channel? And why isn't there for more than 90% of the stuff that you
+  can do via the keyboard an equivalent GPIB command?
 
   Ok, they implemented the possibility to simulate all the things that you can
   do via the keyboard with the "ABSTouch" command but than made it complete
   useless by not giving the programmer a chance to find out in which mode the
-  display currently is and where the cursors currently are etc...  That makes
-  writing stuff using this feature like manually setting the digitizer without
-  being able to watch the display. And even if this would be possible I really
-  don't want to sent 25 commands down the GPIB bus just to simulate the
-  complete rotation of a knobs, or 35 commands just to move the cursor from
-  channel 35 up to channel 0. Fucking idiots!
+  display is and where the cursors currently are etc...  That makes writing
+  stuff using this feature like manually setting the digitizer without being
+  able to watch the display. And even if this would be possible I really don't
+  want to sent 25 commands down the GPIB bus just to simulate a complete
+  rotation of a knobs (when you may need 20 rotations or more), or 35 commands
+  just to move the cursor from channel 35 up to channel 0. Fucking idiots!
 
   Why do they have to have a minimum block size of 64 bits? Without this
   limitation you could do a lot of things in a real nice way, but so all you
-  can do is to write a lot of bloody hacks and most things are simply
+  can do is to write a lot of bloody hacks and really cool things are simply
   impossible to do.
 
   Just another problem with the documentation: Why is there no comprehensible
@@ -94,10 +105,13 @@
   these problems they not only let you wait for eternities (in my case half a
   year) but don't answer the most important question at all (the problem with
   the 250 us/infinitely long pulses) and with lots of bullshit about the
-  others. And all this in a nearly incomprehensible english. Before that I had
+  others. And all this in a nearly incomprehensible english. Before this I had
   the impression that Tektronix's devices are quite good and especially the
   programming interface was real good but since they have been bought up by
-  Sony everything seems to go down the drain....
+  Sony much seems to have gone down the drain. Obviously, people at Sony have
+  aproblem understanding the difference between a walkman and a pulse data
+  generator...
+
   </RANT>
 
 */
@@ -446,9 +460,9 @@ bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 
 
 /*----------------------------------------------------------------*/
-/* dg2020_make_seq() creates a complete new sequence (i.e. old    */
+/* dg2020_make_seq() creates a completely new sequence (i.e. old  */
 /* sequences will be lost) consisting of 'num_blocks' blocks with */
-/* names and block repeat counts defined by the array of block    */
+/* names and block repeat counts defined by the array of BLOCK    */
 /* structures 'block'                                             */
 /* ->                                                             */
 /*  * number of blocks in sequence                                */
