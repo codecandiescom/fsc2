@@ -366,8 +366,6 @@ static void f_mdelete_parent( Var *v )
 	{
 		tool_box_delete( );
 
-		Tool_Box = TOOL_BOX_P T_free( Tool_Box );
-
 		if ( v->next != NULL )
 		{
 			print( FATAL, "Invalid menu identifier.\n" );

@@ -1421,6 +1421,11 @@ Var *f_tb_wait( Var *v )
 	struct itimerval sleepy;
 
 
+	/* The child process has it's own way of dealing with this */
+
+	if ( Internals.I_am == CHILD )
+		return f_tb_wait_child( v );
+
 	/* No tool box -> no objects -> no object state changes we could wait
 	   for... */
 
@@ -1429,11 +1434,6 @@ Var *f_tb_wait( Var *v )
 		print( FATAL, "No objects have been defined yet.\n" );
 		THROW( EXCEPTION );
 	}
-
-	/* The child process has it's own way of dealing with this */
-
-	if ( Internals.I_am == CHILD )
-		return f_tb_wait_child( v );
 
 	if ( v != NULL )
 	{
