@@ -599,7 +599,7 @@ int rulbus_rb8514_delay_set_clock_frequency( int handle, double freq )
 
 In order to be able to create delays when passed the delay time the
 library needs to know the frequency of the input clock. Therefor
-befor the function rulbus_rb8514_delay_set_delay() can be called
+before the function rulbus_rb8514_delay_set_delay() can be called
 successfully, rulbus_rb8514_delay_set_clock_frequency() must have
 been called to inform the library about the clock frequency (in Hz).
 
