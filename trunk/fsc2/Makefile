@@ -301,10 +301,10 @@ export            # export all variables to sub-makes
 # (the Makefile for modules is called via the Makefile in src)
 
 all:
-	grep '$$Id$(sdir)/Makefile $(mdir)/Makefile   \
+	grep '$$Id\: ' $(sdir)/Makefile $(mdir)/Makefile  \
 				 $(sdir)/*.[chly] $(mdir)/*.[chl] |  \
 	grep -v 'sed\|grep' |                            \
-	sed -e 's/^.*$$Id$$.*/\1/g' > version
+	sed -e 's/^.*$$Id\: \(.*\)$$.*/\1/g' > version
 	$(MAKE) -C src all
 	$(MAKE) -C utils all
 	$(MAKE) -C doc all
