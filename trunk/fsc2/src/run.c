@@ -204,6 +204,16 @@ bool run( void )
 			fl_show_alert( "FATAL Error", "Not enough memory left",
 						   "to run the experiment.", 1 );			
 			break;
+
+		default :
+			if ( errno < sys_nerr )
+				eprint( FATAL, SET, "System error \"%s\" when trying to "
+						"start experiment.\n", sys_errlist[ errno ] );
+			else
+				eprint( FATAL, SET, "Unrecognized system error (errno = %d) "
+						"when trying to start experiment.\n", errno );
+			fl_show_alert( "FATAL Error", "System error on start of "
+						   "experiment.", "", 1 );			
 	}
 
 	child_pid = 0;
