@@ -180,13 +180,13 @@ Var *lockin_get_adc_data( Var *v )
 	long port;
 
 
-	vars_check( v, INT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	/* If called with just one argument return the voltage of the
-	   addressed port */
+	if ( v->type == FLOAT_VAR )
+		eprint( WARN, "%s:%ld: sr510: Floating point number used as ADC port "
+				"number.", Fname, Lc );
 
 	port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
-	vars_pop( v );
 
 	if ( port < 1 || port > 4 )
 	{
