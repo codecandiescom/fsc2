@@ -402,8 +402,8 @@ Var *digitizer_trigger_channel( Var *v )
 
     switch ( v->val.lval )
     {
-        case TDS520A_CH1 : case TDS520A_CH2 : case TDS520A_CH3 :
-		case TDS520A_CH4 : case TDS520A_AUX : case TDS520A_LIN :
+        case TDS520A_CH1 : case TDS520A_CH2 : case TDS520A_AUX1 :
+		case TDS520A_AUX2 : case TDS520A_LIN :
 			tds520a.trigger_channel = v->val.lval;
 			if ( I_am == CHILD )
 				tds520a_set_trigger_channel( Channel_Names[ v->val.lval ] );

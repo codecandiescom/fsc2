@@ -12,22 +12,21 @@
 
 #define TDS_POINTS_PER_DIV 50
 
-#define MAX_CHANNELS  13         /* number of channel names */
+#define MAX_CHANNELS  12         /* number of channel names */
 
 #define TDS520A_UNDEF -1
 #define TDS520A_CH1    0
 #define TDS520A_CH2    1
-#define TDS520A_CH3    2
-#define TDS520A_CH4    3
-#define TDS520A_MATH1  4
-#define TDS520A_MATH2  5
-#define TDS520A_MATH3  6
-#define TDS520A_REF1   7
-#define TDS520A_REF2   8
-#define TDS520A_REF3   9
-#define TDS520A_REF4  10
-#define TDS520A_AUX   11         /* Auxiliary (for triggger only) */
-#define TDS520A_LIN   12         /* Line In (for triggger only) */
+#define TDS520A_MATH1  2
+#define TDS520A_MATH2  3
+#define TDS520A_MATH3  4
+#define TDS520A_REF1   5
+#define TDS520A_REF2   6
+#define TDS520A_REF3   7
+#define TDS520A_REF4   8
+#define TDS520A_AUX1   0         /* Auxiliary (for triggger only) */
+#define TDS520A_AUX2  10         /* Auxiliary (for triggger only) */
+#define TDS520A_LIN   11         /* Line In (for triggger only) */
 
 
 
@@ -142,10 +141,9 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length );
 #ifdef TDS520A_MAIN
 
 TDS520A tds520a;
-const char *Channel_Names[ ] = { "CH1", "CH2", "CH3", "CH4",
-								 "MATH1", "MATH2", "MATH3", "REF1",
-								 "REF2", "REF3", "REF4",
-								 "AUX", "LIN" };
+const char *Channel_Names[ ] = { "CH1", "CH2", "MATH1", "MATH2", "MATH3",
+								 "REF1", "REF2", "REF3", "REF4",
+								 "AUX1", "AUX2", "LIN" };
 
 #else
 
