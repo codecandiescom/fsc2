@@ -180,7 +180,7 @@ double hp8647a_set_attenuation( double att )
 	assert( att >= MAX_ATTEN && att <= MIN_ATTEN );
 
 	sprintf( cmd, "POW:AMPL %6.1f\n", att );
-	if ( gpib_write( hp8647a.device ) == FAILURE )
+	if ( gpib_write( hp8647a.device, cmd ) == FAILURE )
 		hp8647a_comm_failure( );
 
 	return att;
@@ -225,12 +225,12 @@ int hp8647a_set_mod_type( int type )
 	{
 		sprintf( cmd, "%s:STAT OFF\n", 
 				 types[ ( type + i ) % NUM_MOD_TYPES ] );
-		if ( gpib_write( hp8647a.device ) == FAILURE )
+		if ( gpib_write( hp8647a.device, cmd ) == FAILURE )
 			hp8647a_comm_failure( );
 	}
 
 	sprintf( cmd, "%s:STAT ON\n", types[ type ] );
-	if ( gpib_write( hp8647a.device ) == FAILURE )
+	if ( gpib_write( hp8647a.device, cmd ) == FAILURE )
 		hp8647a_comm_failure( );
 
 	return type;

@@ -1067,7 +1067,7 @@ static double sr810_get_sens( void )
 
 static void sr810_set_sens( int Sens )
 {
-	char buffer[ 20 ]";
+	char buffer[ 20 ];
 
 
 	sprintf( buffer, "SENS %d\n", Sens );

@@ -449,7 +449,7 @@ bool tds754a_set_cursor( int cur_num, double pos )
 
 bool tds754a_set_track_cursors( bool flag )
 {
-	char cmd[ 20 ] = ;
+	char cmd[ 20 ];
 
 
 	sprintf( cmd, "CURS:MODE %s\n", flag ? "TRAC" : "IND" );
