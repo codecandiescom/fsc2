@@ -6,26 +6,29 @@
 #include "fsc2.h"
 
 
-#define INCH   25.4                    /* mm in an inch */
-#define S2P          1                 /* send to printer */
-#define P2F          2                 /* print to file */
+#define INCH         25.4         /* mm in an inch */
+#define S2P          1            /* send to printer */
+#define P2F          2            /* print to file */
+
 #define A4_PAPER     0
 #define A3_PAPER     1
 #define Letter_PAPER 2
 #define Legal_PAPER  3
 
+
 FD_print *print_form;
 
-static char *cmd = NULL;
-static int print_type = S2P;
+char *cmd = NULL;                 /* for storing the last print command */
+int print_type = S2P;             /* the way to print: S2P or P2F */
 
-static int paper_type = A4_PAPER;
-static double paper_width;
-static double paper_height;
+int paper_type = A4_PAPER;
+double paper_width;
+double paper_height;
 
-static bool is_color = UNSET;
+bool print_with_color = UNSET;
 
-static double x_0, y_0, w, h;          /* position and size of the frame */
+double x_0, y_0, w, h;            /* position and size of print area */
+double margin = 25.0;             /* margin (in mm) to leave on all sides */
 
 static int get_print_file( FILE **fp, char **name );
 static void print_header( FILE *fp, char *name );
@@ -63,13 +66,13 @@ void print_1d( FL_OBJECT *obj, long data )
 
 	print_header( fp, name );
 
-	/* Set the area for the graph - on all sides leave a margin of 25 mm and
-	   20 mm for the x-axis and 25 for the y-axis labels and tick marks */
+	/* Set the area for the graph, leave a margin on all sides and,
+       additionally, 20 mm (x-axis) / 25 (y-axis) for labels and tick marks */
 
-	x_0 = 50.0;                       /* 25 mm margin & 25 mm for the y-axis */
-	y_0 = 45.0;                       /* 25 mm margin & 20 mm for the x-axis */
-	w = paper_height - 25.0 - x_0;    /* 25 mm margin */
-	h = paper_width - 25.0 - y_0;     /* 25 mm margin */
+	x_0 = margin + 25.0;              /* margin & 25 mm for the y-axis */
+	y_0 = margin + 20.0;              /* margin & 20 mm for the x-axis */
+	w = paper_height - margin - x_0;
+	h = paper_width - margin - y_0;
 
 	/* Draw the frame and the scales (just 0.5 mm outside the the area for the
        graph) */
@@ -144,10 +147,13 @@ void print_2d( FL_OBJECT *obj, long data )
 
 	print_header( fp, name );
 
-	x_0 = 55.0;
-	y_0 = 45.0;
-	w = paper_height - 25.0 - x_0;
-	h = paper_width - 25.0 - y_0;
+	/* Set the area for the graph, leave a margin on all sides and,
+       additionally, 20 mm (x-axis) / 25 (y-axis) for labels and tick marks */
+
+	x_0 = margin + 25.0;
+	y_0 = margin + 20.0;
+	w = paper_height - margin - x_0;
+	h = paper_width - margin - y_0;
 
 	/* Draw the frame and the scales */
 
@@ -251,7 +257,7 @@ int get_print_file( FILE **fp, char **name )
 		fl_deactivate_object( print_form->s2p_input );
 	}
 
-	if ( is_color )
+	if ( print_with_color )
 	{
 		fl_set_button( print_form->bw_button, 0 );
 		fl_set_button( print_form->col_button, 1 );
@@ -339,7 +345,7 @@ int get_print_file( FILE **fp, char **name )
 		CATCH( EXCEPTION )
 			return 0;
 
-		return S2P;
+		return S2P;          /* print mode is 'send to printer' */
 	}
 
 	/* In print-to-file mode ask for confirmation if the file already exists
@@ -359,7 +365,7 @@ int get_print_file( FILE **fp, char **name )
 		return 0;
 	}
 
-	return P2F;
+	return P2F;              /* print mode is 'print to file' */
 }
 
 
@@ -431,10 +437,10 @@ void print_callback( FL_OBJECT *obj, long data )
 	}
 
 	if ( obj == print_form->bw_button )
-		is_color = UNSET;
+		print_with_color = UNSET;
 
 	if ( obj == print_form->col_button )
-		is_color = SET;
+		print_with_color = SET;
 }
 
 
@@ -490,7 +496,9 @@ void print_header( FILE *fp, char *name )
 				 "/cw { gs newpath 0 0 moveto\n"
 	             "      false charpath flattenpath pathbbox\n"
 	             "      pop exch pop exch pop gr } bind def\n"
-			     "/fsc2 { gs m /Times-Roman 8 sf\n"
+			     "/fsc2 { gs /Times-Roman 6 sf\n"
+			     "        (fsc2) ch sub 6 sub exch\n"
+			     "        (fsc2) cw sub 4 sub exch m\n"
 			     "        1 -0.025 0 { sgr gs (fsc2) show gr\n"
 			     "        -0.025 0.025 rm } for\n"
 			     "        1 setgray (fsc2) show gr } bind def\n"
@@ -501,7 +509,7 @@ void print_header( FILE *fp, char *name )
 
 	fprintf( fp, "90 r\n0 %d t\n", ( int ) ( -72.0 * paper_width / INCH ) );
 	fprintf( fp, "%f %f scale\n", 72.0 / INCH, 72.0 / INCH );
-	fprintf( fp, "%f %f fsc2\n", paper_height - 18.0, paper_width - 12.0 );
+	fprintf( fp, "%f %f fsc2\n", paper_height, paper_width );
 	fprintf( fp, "/Times-Roman 4 sf\n" );
 	fprintf( fp, "5 5 m (%s %s) show\n", ctime( &d ),
 			 getpwuid( getuid( ) )->pw_name );
@@ -649,8 +657,9 @@ void eps_make_scale( FILE *fp, void *cv, int coord )
 		/* Draw the x-axis label string */
 
 		if ( G.label[ X ] != NULL )
-			fprintf( fp, "%f (%s) cw sub 25 m (%s) show\n",
-					 paper_height - 25.0, G.label[ X ], G.label[ X ] );
+			fprintf( fp, "%f (%s) cw sub %f m (%s) show\n",
+					 paper_height - margin, G.label[ X ], margin,
+					 G.label[ X ] );
 
 		y = y_0;
 
@@ -690,8 +699,8 @@ void eps_make_scale( FILE *fp, void *cv, int coord )
 		/* Draw the y-axis label string */
 
 		if ( G.label[ Y ] != NULL )
-			fprintf( fp, "gs 25 (%s) ch add %f (%s) cw sub t 90 r 0 0 m (%s) "
-					 "show gr\n", G.label[ Y ], paper_width - 25.0,
+			fprintf( fp, "gs %f (%s) ch add %f (%s) cw sub t 90 r 0 0 m (%s) "
+					 "show gr\n", margin, G.label[ Y ], paper_width - margin,
 					 G.label[ Y ], G.label[ Y ] );
 
 		x = x_0;
@@ -742,26 +751,26 @@ void eps_draw_curve_1d( FILE *fp, int i )
 	switch ( i )
 	{
 		case 0 :
-			if ( is_color )
+			if ( print_with_color )
 				fprintf( fp, "1 0 0 srgb\n" );          /* red */
 			break;
 
 		case 1 :
-			if ( is_color )
+			if ( print_with_color )
 				fprintf( fp, "0 1 0 srgb\n" );          /* green */
 			else
 				fprintf( fp, "[ 1 0.8 ] 0 sd\n" );
 			break;
 
 		case 2 :
-			if ( is_color )
+			if ( print_with_color )
 				fprintf( fp, "1 0.75 0 srgb\n" );       /* dark yellow */
 			else
 				fprintf( fp, "[ 0.001 0.5 ] 0 sd\n" );
 			break;
 
 		case 3 :
-			if ( is_color )
+			if ( print_with_color )
 				fprintf( fp, "0 0 1 srgb\n" );          /* blue */
 			else
 				fprintf( fp, "[ 0.5 0.5 0.0001 0.5 ] 0 sd\n" );
@@ -813,6 +822,8 @@ void eps_draw_contour( FILE *fp, int cn )
 
 	fprintf( fp, "gs\n" );
 
+	/* Print areas gray for which there are no data */
+
 	curp = s2d[ X ] * cv->shift[ X ];
 	if ( curp - dw > 0 )
 		fprintf( fp, "0.5 sgr\n"
@@ -853,6 +864,8 @@ void eps_draw_contour( FILE *fp, int cn )
 				 "cp fill\n",
 				 x_0, y_0 + curp + dh , w, h - ( curp + dh ), - w );
 
+	/* Now draw the data */
+
 	for ( g = 1.0, z = 0.0; z <= 1.0; g -= 0.045, z += 0.05 )
 		for ( k = 0, j = 0; j < G.ny; j++ )
 			for ( i = 0; i < G.nx; i++, k++ ) 
@@ -878,7 +891,7 @@ void eps_draw_contour( FILE *fp, int cn )
 
 					if ( ( z1 >= z && z2 < z ) || ( z1 < z && z2 >= z ) )
 					{
-						if ( is_color )
+						if ( print_with_color )
 						{
 							i2rgb( z, rgb );
 							fprintf( fp, "%f %f %f srgb ",
@@ -903,7 +916,7 @@ void eps_draw_contour( FILE *fp, int cn )
 
 					if ( ( z1 >= z && z2 < z ) || ( z1 < z && z2 >= z ) )
 					{
-						if ( is_color )
+						if ( print_with_color )
 						{
 							i2rgb( z, rgb );
 							fprintf( fp, "%f %f %f srgb ",
