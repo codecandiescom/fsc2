@@ -1768,7 +1768,7 @@ Var *f_idelete( Var *v )
 Var *f_ivalue( Var *v )
 {
 	IOBJECT *io;
-	char buf[ MAX_INPUT_CHARS ];
+	char buf[ MAX_INPUT_CHARS + 1 ];
 
 
 	/* We need at least the input objects ID */
@@ -1949,12 +1949,12 @@ Var *f_ivalue( Var *v )
 	{
 		if ( io->type == INT_INPUT )
 		{
-			snprintf( buf, MAX_INPUT_CHARS, "%ld", io->val.lval );
+			snprintf( buf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
 			fl_set_input( io->self, buf );
 		}
 		else
 		{
-			snprintf( buf, MAX_INPUT_CHARS, "%f", io->val.dval );
+			snprintf( buf, MAX_INPUT_CHARS + 1, "%f", io->val.dval );
 			fl_set_input( io->self, buf );
 		}
 	}
@@ -2121,7 +2121,7 @@ static void recreate_Tool_Box( void )
 static FL_OBJECT *append_object_to_form( IOBJECT *io )
 {
 	double prec;
-	char buf[ MAX_INPUT_CHARS ];
+	char buf[ MAX_INPUT_CHARS + 1 ];
 	IOBJECT *nio;
 
 
@@ -2232,7 +2232,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_END_CHANGED );
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
-			snprintf( buf, MAX_INPUT_CHARS, "%ld", io->val.lval );
+			snprintf( buf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
 			fl_set_input( io->self, buf );
 			break;
 
