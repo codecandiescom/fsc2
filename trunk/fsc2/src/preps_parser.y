@@ -223,8 +223,8 @@ list1:   /* empty */              { $$ = vars_push( UNDEF_VAR ); }
 	                                THROW( EXCEPTION ); }
 ;
 
-list2:   expr
-       | list2 '.' expr
+list2:   expr                     { $$ = $1; }
+       | list2 ',' expr           { $$ = $3; }
 ;
 
 l1e:     /* empty */
