@@ -176,7 +176,7 @@ FL_FORM *run_main_form;
 FD_input_form *input_form;
 FL_FORM *input_main_form;
 FD_cut *cut_form;
-FD_FORM *cut_main_form;
+FL_FORM *cut_main_form;
 
 int I_am = PARENT;
 int pd[ 4 ];                    /* pipe descriptors */
@@ -248,7 +248,7 @@ extern FL_FORM *run_main_form;
 extern FD_input_form *input_form;
 extern FL_FORM *input_main_form;
 extern FD_cut *cut_form;
-extern FD_FORM *cut_main_form;
+extern FL_FORM *cut_main_form;
 
 extern int I_am;
 extern int pd[ ];                  /* pipe descriptors */
