@@ -6,7 +6,7 @@
 #define c1_height 20
 #define c1_x_hot 4
 #define c1_y_hot 4
-static unsigned char c1_bits[ ] = {
+static unsigned char c1_bits[] = {
   0x7C, 0x00, 0x00,
   0x82, 0x00, 0x00,
   0x11, 0x01, 0x00,

@@ -199,7 +199,6 @@ void start_graphics( void )
 	/* Create the form for running experiments */
 
 	run_form = create_form_run( );
-	fl_set_button_shortcut( run_form->stop, "S", 1 );
 	fl_set_object_helper( run_form->stop, "Stop the running program" );
 
 	/* fdesign is unable to set the box type attributes for canvases... */

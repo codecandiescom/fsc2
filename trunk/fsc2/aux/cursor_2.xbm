@@ -6,7 +6,7 @@
 #define c2_height 20
 #define c2_x_hot 7
 #define c2_y_hot 11
-static unsigned char c2_bits[ ] = {
+static unsigned char c2_bits[] = {
   0x80, 0x01, 0x00,
   0x70, 0x0E, 0x00,
   0x48, 0x12, 0x00,

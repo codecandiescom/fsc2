@@ -6,7 +6,7 @@
 #define c3_height 20
 #define c3_x_hot 5
 #define c3_y_hot 5
-static unsigned char c3_bits[ ] = {
+static unsigned char c3_bits[] = {
   0xE0, 0x07, 0x00,
   0x18, 0x0F, 0x00,
   0x04, 0x14, 0x00,
