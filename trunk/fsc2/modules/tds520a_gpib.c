@@ -861,7 +861,7 @@ bool tds520a_lock_state( bool lock )
 {
 	char cmd[ 100 ];
 
-	sprintf( cmd, "LOC %s\n", lock ? "ALL" | "NON" );
+	sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
 	if ( gpib_write( tds520a.device, cmd ) == FAILURE )
 		tds520a_gpib_failure( );
 

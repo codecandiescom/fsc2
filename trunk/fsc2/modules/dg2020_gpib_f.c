@@ -971,7 +971,7 @@ bool dg2020_lock_state( bool lock )
 {
 	char cmd[ 100 ];
 
-	sprintf( cmd, "LOC %s\n", lock ? "ALL" | "NON" );
+	sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
 	if ( gpib_write( dg2020.device, cmd ) == FAILURE )
 		dg2020_gpib_failure( );
 

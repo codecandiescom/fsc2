@@ -874,7 +874,7 @@ bool tds744a_lock_state( bool lock )
 {
 	char cmd[ 100 ];
 
-	sprintf( cmd, "LOC %s\n", lock ? "ALL" | "NON" );
+	sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
 	if ( gpib_write( tds744a.device, cmd ) == FAILURE )
 		tds744a_gpib_failure( );
 
