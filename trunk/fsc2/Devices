@@ -12,6 +12,7 @@ TDS754A       // Tektronix Digitizing oscilloscope
 //TDS520C       // Tektronix Digitizing oscilloscope
 
 SR510         // Stanford Research Lock-In amplifier
+SR810         // Stanford Research Lock-In amplifier
 
 S_BAND        // S-Band magnet power supply
 
