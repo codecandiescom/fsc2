@@ -84,8 +84,7 @@ void ep385_init_setup( void )
 		}
 
 		for ( i = 0; i < MAX_CHANNELS; i++ )
-			if ( ep385.channel[ i ].pulse_params != NULL )
-				ep385.channel[ i ].pulse_params =
+			ep385.channel[ i ].pulse_params =
 					PULSE_PARAMS_P T_free( ep385.channel[ i ].pulse_params );
 
 		RETHROW( );

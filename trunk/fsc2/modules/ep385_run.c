@@ -732,8 +732,8 @@ void ep385_twt_padding_check( CHANNEL *ch )
 	{
 		if ( ! pp->pulse->right_twt_warning )
 		{
-			print( SEVERE, "Pulse #%ld too long to set right padding "
-				   "of %s.\n", pp->pulse->tp->num, ep385_pticks(
+			print( SEVERE, "Pulse #%ld too long to set right padding of %s "
+				   "for its TWT pulse.\n", pp->pulse->tp->num, ep385_pticks(
 								pp->pulse->tp->function->right_twt_padding ) );
 			pp->pulse->right_twt_warning = SET;
 		}
