@@ -33,7 +33,7 @@ my $max_reqs = 16;     # how many simultaneous requests get accepted
 my $crlf = "\r\n";     # RFC 2616 requires this as the newline
 my $has_pnmtopng;      # does the pnmtopng utility exist?
 my $has_ppmtojpeg;     # does the ppmtojpeg utility exist?
-my $version = 0.1;
+my $version = 0.2;
 
 # Check if we got a port number as the first command line argument...
 
