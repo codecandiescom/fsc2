@@ -371,11 +371,11 @@ bool raise_permissions( void )
 
 void lower_permissions( bool must_change )
 {
-	if ( ! must_change )
-		return;
-
-	seteuid( getuid( ) );
-	setegid( getgid( ) );
+	if ( must_change )
+	{
+		seteuid( getuid( ) );
+		setegid( getgid( ) );
+	}
 }
 
 /*---------------------------------------------------------------------*/

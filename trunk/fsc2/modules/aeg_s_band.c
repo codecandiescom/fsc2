@@ -1053,11 +1053,11 @@ static bool magnet_do( int command )
 			   should not become the controlling terminal, otherwise line
 			   noise read as a CTRL-C might kill the program. */
 
-			if ( ( magnet.fd = open( serial_port,
+			if ( ( magnet.fd = fsc2_serial_open( serial_port,
 							O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) < 0 )
 				return FAIL;
 
-			tcgetattr( magnet.fd, &magnet.old_tio );
+			fsc2_tcgetattr( magnet.fd, &magnet.old_tio );
 			memcpy( ( void * ) &magnet.new_tio, ( void * ) &magnet.old_tio,
 					sizeof( struct termios ) );
 
@@ -1067,15 +1067,15 @@ static bool magnet_do( int command )
 
 			magnet.new_tio.c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
 			magnet.new_tio.c_cflag |= CS8 | CRTSCTS;
-			cfsetospeed( &magnet.new_tio, SERIAL_BAUDRATE );
+			fsc2_cfsetospeed( &magnet.new_tio, SERIAL_BAUDRATE );
 
-			tcflush( magnet.fd, TCIFLUSH );
-			tcsetattr( magnet.fd, TCSANOW, &magnet.new_tio );
+			fsc2_tcflush( magnet.fd, TCIFLUSH );
+			fsc2_tcsetattr( magnet.fd, TCSANOW, &magnet.new_tio );
 			break;
 
 		case SERIAL_TRIGGER :                 /* send trigger pattern */
 			data[ 0 ] = 0x20;
-			write( magnet.fd, ( void * ) &data, 1 );
+			fsc2_serial_write( magnet.fd, ( void * ) &data, 1 );
 			usleep( SERIAL_TIME );
 			break;
 
@@ -1084,13 +1084,13 @@ static bool magnet_do( int command )
 		    data[ 0 ] = ( unsigned char ) 
 				( 0x40 | ( ( volt >> 8 ) & 0xF ) | ( ( volt >> 3 ) & 0x10 ) );
 			data[ 1 ] = ( unsigned char ) ( 0x80 | ( volt & 0x07F ) );
-			write( magnet.fd, ( void * ) &data, 2 );
+			fsc2_serial_write( magnet.fd, ( void * ) &data, 2 );
 			break;
 
 		case SERIAL_EXIT :                    /* reset and close serial port */
-			tcflush( magnet.fd, TCIFLUSH );
-			tcsetattr( magnet.fd, TCSANOW, &magnet.old_tio );
-			close( magnet.fd );
+			fsc2_tcflush( magnet.fd, TCIFLUSH );
+			fsc2_tcsetattr( magnet.fd, TCSANOW, &magnet.old_tio );
+			fsc2_serial_close( magnet.fd );
 			break;
 
 		default :

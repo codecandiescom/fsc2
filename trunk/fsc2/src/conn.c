@@ -73,8 +73,7 @@ pid_t spawn_conn( bool start_state )
 
 	listen_fd = socket( AF_LOCAL, SOCK_STREAM, 0 );
 
-	seteuid( EUID );
-	setegid( EGID );
+	raise_permissions( );
 	unlink( FSC2_SOCKET );
 	memset( &serv_addr, 0, sizeof( serv_addr ) );
 	serv_addr.sun_family = AF_LOCAL;
@@ -87,8 +86,7 @@ pid_t spawn_conn( bool start_state )
 	{
 		umask( old_mask );
 		unlink( FSC2_SOCKET );
-		seteuid( getuid( ) );
-		setegid( getgid( ) );
+		lower_permissions( SET );
 		return -1;
 	}
 
@@ -97,8 +95,7 @@ pid_t spawn_conn( bool start_state )
 	if ( listen( listen_fd, SOMAXCONN ) < 0 )
 	{
 		unlink( FSC2_SOCKET );
-		seteuid( getuid( ) );
-		setegid( getgid( ) );
+		lower_permissions( SET );
 		return -1;
 	}
 
@@ -119,9 +116,7 @@ pid_t spawn_conn( bool start_state )
 	else
 		unlink( FSC2_SOCKET );
 
-	seteuid( getuid( ) );
-	setegid( getgid( ) );
-
+	lower_permissions( SET );
 	return new_pid;
 }
 
