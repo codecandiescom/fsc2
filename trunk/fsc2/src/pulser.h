@@ -21,11 +21,14 @@ typedef struct {
 	bool ( *set_delay_function )( int function, double delay );
 	bool ( *set_function_high_level )( int function, double high_voltage );
 	bool ( *set_function_low_level )( int function, double low_voltage );
+
 	bool ( *set_timebase )( double timebase );
 	bool ( *set_trigger_mode )( int mode );
 	bool ( *set_repeat_time )( double time );
 	bool ( *set_trig_in_level )( double voltage );
 	bool ( *set_trig_in_slope )( int slope );
+
+	bool ( *set_phase_reference )( int phase, int function );
 
 	bool ( *new_pulse )( long pulse_number );
 	bool ( *set_pulse_function )( long pulse_number, int function );
@@ -76,6 +79,7 @@ void p_set_trigger_slope( Var *v );
 void p_set_trigger_level( Var *v );
 void p_set_rep_time( Var *v );
 void p_set_rep_freq( Var *v );
+void p_phase_ref( long function, int ref );
 
 long p_num( char *txt );
 void is_pulser_driver( void );

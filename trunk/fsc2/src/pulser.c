@@ -30,6 +30,7 @@ void pulser_struct_init( void )
 	pulser_struct.set_repeat_time = NULL;
 	pulser_struct.set_trig_in_level = NULL;
 	pulser_struct.set_trig_in_slope = NULL;
+	pulser_struct.set_phase_reference = NULL;
 	pulser_struct.set_pulse_function = NULL;
 	pulser_struct.set_pulse_position = NULL;
 	pulser_struct.set_pulse_length = NULL;
@@ -510,6 +511,37 @@ void p_set_rep_freq( Var *v )
 	is_pulser_func( pulser_struct.set_repeat_time,
 					"setting a repeat frequency" );
 	( *pulser_struct.set_repeat_time )( time );
+}
+
+
+/*---------------------------------------------------*/
+/* Function for setting the trigger in level voltage */
+/*---------------------------------------------------*/
+
+void p_phase_ref( long function, int ref )
+{
+	double level;
+
+
+	is_pulser_func( pulser_struct.set_phase_reference,
+					"setting a function for phase cycling" );
+
+
+	if ( func != PULSER_CHANNEL_PHASE_1 && func != PULSER_CHANNEL_PHASE_2 )
+	{
+		eprint( FATAL, "%s:%ld: A reference function can only be set for the "
+				"PHASE functions.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	if ( ref == PULSER_CHANNEL_PHASE_1 || ref = PULSER_CHANNEL_PHASE_2 )
+	{
+		eprint( FATAL, "%s:%ld: A PHASE function can't be phase cycled.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	( *pulser_struct.set_phase_reference )( ( int ) function, ref );
 }
 
 
