@@ -55,7 +55,6 @@ void pulser_struct_init( void )
 	pulser_struct.set_trig_in_impedance      = NULL;
 	pulser_struct.set_max_seq_len            = NULL;
 	pulser_struct.set_phase_reference        = NULL;
-	pulser_struct.set_grace_period           = NULL;
 	pulser_struct.set_pulse_function         = NULL;
 	pulser_struct.set_pulse_position         = NULL;
 	pulser_struct.set_pulse_length           = NULL;
@@ -72,6 +71,7 @@ void pulser_struct_init( void )
 	pulser_struct.phase_setup_prep           = NULL;
 	pulser_struct.phase_setup                = NULL;
 	pulser_struct.set_phase_switch_delay     = NULL;
+	pulser_struct.set_grace_period           = NULL;
 	pulser_struct.keep_all_pulses            = NULL;
 }
 
