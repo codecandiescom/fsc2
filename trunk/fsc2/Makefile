@@ -124,7 +124,6 @@ endif
 # Switch off all implicit rules and set suffices of file to be made by make
 
 .SUFFIXES:
-.SUFFIXES: .c .o .h .so .lo
 .PHONY: all clean distclean pack
 
 
