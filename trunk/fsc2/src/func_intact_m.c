@@ -83,7 +83,7 @@ Var *f_mcreate( Var *var )
        button - if the Toolbox doesn't exist yet we've got to create it now */
 
 	if ( Toolbox == NULL )
-		tool_box_create( VERT );
+		toolbox_create( VERT );
 
 	TRY
 	{
@@ -364,7 +364,7 @@ static void f_mdelete_parent( Var *v )
 
 	if ( Toolbox->objs == NULL )
 	{
-		tool_box_delete( );
+		toolbox_delete( );
 
 		if ( v->next != NULL )
 		{

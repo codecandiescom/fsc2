@@ -91,7 +91,7 @@ void tool_box_create( long layout )
 	if ( Toolbox != NULL )
 		return;
 
-	Toolbox                 = TOOL_BOX_P T_malloc( sizeof *Toolbox );
+	Toolbox                 = TOOLBOX_P T_malloc( sizeof *Toolbox );
 	Toolbox->layout         = layout;
 	Toolbox->Tools          = NULL;                 /* no form created yet */
 	Toolbox->objs           = NULL;                 /* and also no objects */
@@ -168,7 +168,7 @@ void tool_box_delete( void )
 		fl_free_form( Toolbox->Tools );
 	}
 
-	Toolbox = TOOL_BOX_P T_free( Toolbox );
+	Toolbox = TOOLBOX_P T_free( Toolbox );
 }
 
 
@@ -831,7 +831,7 @@ void tools_clear( void )
 	if ( Toolbox->Tools )
 		fl_free_form( Toolbox->Tools );
 
-	Toolbox = TOOL_BOX_P T_free( Toolbox );
+	Toolbox = TOOLBOX_P T_free( Toolbox );
 }
 
 

@@ -219,7 +219,7 @@ Var *f_ocreate( Var *var )
 	TRY
 	{
 		if ( Toolbox == NULL )
-			tool_box_create( VERT );
+			toolbox_create( VERT );
 
 		new_io = IOBJECT_P T_malloc( sizeof *new_io );
 
@@ -581,7 +581,7 @@ static void f_odelete_parent( Var *v )
 
 	if ( Toolbox->objs == NULL )
 	{
-		tool_box_delete( );
+		toolbox_delete( );
 
 		if ( v->next != NULL )
 		{

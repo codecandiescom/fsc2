@@ -117,8 +117,8 @@ struct TOOLBOX {
 /* exported functions */
 
 
-void tool_box_create( long layout );
-void tool_box_delete( void );
+void toolbox_create( long layout );
+void toolbox_delete( void );
 Var *f_layout(  Var *v );
 Var *f_objdel(  Var *v );
 Var *f_freeze(  Var *v );
