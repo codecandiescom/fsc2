@@ -262,7 +262,7 @@ so that all data fit into the display area.
 If you want to find out the exact values of your newly measured data
 during the experiment you have to move the mouse into the display area
 onto the point you're interested in. Now press both the left and the
-right mouse button simultaneously (or first the left one, then the
+middle mouse button simultaneously (or first the left one, then the
 middle one while keeping the left button pressed down). The cursor
 changes to a cross-hair
 @ifnotinfo
@@ -283,7 +283,9 @@ if more than one curve is displayed.
 Beside finding out the exact values of your measured data you also may
 determine differences between data points, e.g.@: to measure line widths
 or signal intensities. If you press both the left and the right mouse
-button simultaneously the cursor changes to an encircled cross-hair
+button simultaneously (or first the left mouse button an then the right
+one while keeping the left one pressed down) the cursor changes to an
+encircled cross-hair
 @ifnotinfo
 cursor, @image{cursor5,5mm,},
 @end ifnotinfo
