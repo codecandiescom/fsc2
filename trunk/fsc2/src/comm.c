@@ -351,7 +351,6 @@ bool reader( void *ret )
 {
 	CommStruct header;
 
-
 	/* Get the header - failure indicates that the child is dead */
 
 	TRY
@@ -928,7 +927,6 @@ static bool child_reader( void *ret, CommStruct *header )
 {
 	static char *retstr = NULL;
 
-
 	switch ( header->type )
 	{
 		case C_ACK :
@@ -1009,7 +1007,7 @@ static bool child_reader( void *ret, CommStruct *header )
 		case C_IDELETE_REPLY :
 		case C_MDELETE_REPLY :
 		case C_ODELETE_REPLY :
-			return header->data.long_data != 0 ? OK : FAIL;
+			return ( header->data.long_data != 0 ? OK : FAIL );
 	}
 
 	fsc2_assert( 1 == 0 );            /* this better never gets triggered... */

@@ -1518,6 +1518,22 @@ void tb_wait_handler( long ID )
 	struct itimerval sleepy;
 
 
+	/* Sometimes XForms seems to invoke this function without any obvious
+	   reason. Thus we better check that the ID we get isn't bogus... */
+
+	if ( ID != 0 && ID != -1 )
+	{
+		if ( ID < ID_OFFSET  )
+			return;
+
+		for ( io = Tool_Box->objs; io != NULL; io = io->next )
+			if ( io->ID != ID )
+				continue;
+
+		if ( io == NULL )
+			return;
+	}
+
 	/* Do nothing if the timer has expired and we arrive here from the
 	   callback for an object or the callback for the 'STOP' button (in
 	   which case we're called with an argument of -1). */
