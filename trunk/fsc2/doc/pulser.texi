@@ -682,7 +682,9 @@ PULSE_1:    FUNCTION = MICROWAVE,
 As usual, most of the keywords can be abbreviated, @code{PULSE_1:} to
 @code{PULSE1:}, @code{P_1:} or @code{P1:}, @code{FUNCTION} to either
 @code{FUNC} or @code{F}, @code{START} to @code{S}, and finally,
-@code{LENGTH} to @code{LEN} or @code{L}.
+@code{LENGTH} to @code{LEN} or @code{L}. And, of course, for numerical
+values like pulse positions and times variables, complex expressions and
+functions can be used.
 
 Pulse numbers can be choosen randomly - the only requirement is that the
 numbers are positive (including 0) and not larger than 2147483647
