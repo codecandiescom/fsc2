@@ -27,8 +27,8 @@ typedef struct {
 
 	bool active;
 
-	double s2d[ 3 ];       /* scaled to display data scale factors */
-	double shift[ 3 ];     /* offsets on scaled data */
+	double s2d[ 2 ];       /* scaled to display data scale factors */
+	double shift[ 2 ];     /* offsets on scaled data */
 
 	bool up,               /* flag, set if data don't fit into canvas */
 		 down,
@@ -42,8 +42,8 @@ typedef struct {
 
 	bool can_undo;
 
-	double old_s2d[ 3 ];
-	double old_shift[ 3 ];
+	double old_s2d[ 2 ];
+	double old_shift[ 2 ];
 
 	GC font_gc;             /* gc for font */
 } Curve_1d;
