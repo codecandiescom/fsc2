@@ -57,7 +57,7 @@ const char *witio_48_error_message( void );
 #define WITIO_48_ERR_BBS_MESS  "Board is busy"
 #define WITIO_48_ERR_BNO_MESS  "Board not open"
 #define WITIO_48_ERR_NDV_MESS  "No driver loaded for board"
-#define WITIO_48_ERR_ACS_MESS  "No permissions to open file"
+#define WITIO_48_ERR_ACS_MESS  "No permissions to open device file"
 #define WITIO_48_ERR_DFM_MESS  "Device file does not exist"
 #define WITIO_48_ERR_DFP_MESS  "Unspecified error when opening device file"
 #define WITIO_48_ERR_INT_MESS  "Internal driver or library error"

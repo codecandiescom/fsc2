@@ -93,7 +93,7 @@ const char *ni6601_error_message( void );
 #define NI6601_ERR_NDV_MESS  "No driver loaded for board"
 #define NI6601_ERR_NCB_MESS  "Neighbouring counter is busy"
 #define NI6601_ERR_ITR_MESS  "Interrupted by signal"
-#define NI6601_ERR_ACS_MESS  "No permissions to open file"
+#define NI6601_ERR_ACS_MESS  "No permissions to open device file"
 #define NI6601_ERR_DFM_MESS  "Device file does not exist"
 #define NI6601_ERR_DFP_MESS  "Unspecified error when opening device file"
 #define NI6601_ERR_INT_MESS  "Internal driver or library error"

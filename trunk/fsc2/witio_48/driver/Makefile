@@ -31,7 +31,7 @@ else
 							 echo "/lib/modules/`uname -r`/build"; \
 						 else \
 							 echo "/usr/src/linux"; \
-						 fi )
+						 fi)
 endif
 
 MODULE   = witio_48.o
