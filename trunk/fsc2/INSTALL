@@ -24,13 +24,14 @@ Optionally, you should have
  9) mail and sendmail (or similar) installed, or, if you want to use the
     built-in mail agent, the libresolv.so library is required.
 10) addr2line
-11) perl (version 5.0 or higher) with the pTk (Tk support) package
+11) perl (version 5.6 or higher) with the pTk (Tk support) package
 12) pnmtopng
 13) pnmtojpeg
 
 but if it is missing the basic functionality is still there (without mail
-and addr2line no automatic bug reports can be sent and without Perl
-and the next two utilities the built-in web server won't work)
+and addr2line no automatic bug reports can be sent and without Perl you
+won't be able to wrap a GUI around EDL scripts and the built-in web server
+won't work (which also requires the next two utilities).
 
 
 To create the complete documentation beside Perl you also need
@@ -45,8 +46,12 @@ To create the complete documentation beside Perl you also need
 20) gzip
 
 
-While fsc2 works with the older XFORMS library version 0.89, which may be
-still available in binary only form you may prefer to use the newer version
+A1) Graphics support
+--------------------
+
+Graphics in fsc2 are mostly build on top of the XFORMS package. While it
+works with the older XFORMS library version 0.89, which may be still
+available in binary only form you may prefer to use the newer version
 1.0 version which is distributed under the GPL and can be downloaded from
 
   http://savannah.nongnu.org/projects/xforms/
@@ -57,9 +62,12 @@ of the sources (but probably not the newest) can be downloaded from
   http://www.physik.fu-berlin.de/~toerring/xforms-1.0-release.tgz
 
 
-The GPIB library consists of a library and a driver to interface GPIB
-cards. You can either use the one I've written and which works, as far
-as I know, for some ISA cards with 2.0, 2.2 and 2.4 kernels and can be
+A2) GPIB support
+----------------
+
+GPIB support requires a library and a driver to interface GPIB cards to
+be installed. You can either use the one I've written and which works, as
+far as I know, for some ISA cards with 2.0, 2.2 and 2.4 kernels and can be
 downloaded from
 
   http://www.physik.fu-berlin.de/~toerring/GPIB.tar.gz
@@ -146,6 +154,34 @@ and installed before trying to compile fsc2 (unless you don't need GPIB
 support built into fsc2).
 
 
+A3) Support for other devices
+-----------------------------
+
+Devices that are controlled via the serial port are always supported (at
+least as long as the number of serial ports to be used by fsc2 isn't set
+to 0 in the configuration of fsc2, see below). As already desribed in the
+preceeding section, controlling devices via the GPIB bus requires one of
+several GPIB libraries plus the corresponding kernel driver to be installed
+correctly before an attempt is made to build fsc2.
+
+
+The same holds for several other devices that are ISA or PCI cards (or
+are controlled via an ISA or PCI card) or are controlled via the Rulbus
+(Rijksuniversiteit Leiden BUS). All of these require an additional library
+and a kernel driver to be installed prior to creating fsc2. If these come
+from the makers of the device (e.g. Roper Scientific Spec-10 CCD camera)
+please see the documentation coming with the device on how to that. For
+the other devices the sources for the libraries and kernel drivers are
+part of fsc2, see the subdirectories 'me6x00', 'ni6601', 'ni_daq',
+'rulbus' and 'witio_48'). You must create and install the libraries and
+kernel drivers before you can make fsc2. Typically, it's as easy as going
+into the subdirectory, typing "./INSTALL" and answering a few questions.
+Please refer to the documentation (README files) in these subdirectories
+for more details. After a successful installation fsc2 should be able to
+find the libraries and include support for the devices.
+
+
+
 B) Permissions
 ==============
 
@@ -156,10 +192,10 @@ possible and it should be impossible to log into this account (e.g. by
 setting its shell in /etc/passwd to /bin/false). The account shouldn't
 have root privileges! Most of the time fsc2 runs with the effective
 user ID (EUID) and effective group ID (EGID) set to the real users ID
-and group, i.e. with only the permissions of the user starting fsc2,
-but in a few places (e.g. when writing to log files, manipulating
-lock files or accessing shared memory or device files) it must revert
-back to the EUID and EGID of the fsc2 account.
+and group, i.e. with only the permissions of the user starting fsc2.
+But in a few places (e.g. when writing to log files, manipulating
+lock files or accessing shared memory or device files) it will use
+the UID and GID of the fsc2 account.
 
 
 What group the fsc2 account belongs to does not really matter. Relevant is
@@ -184,23 +220,25 @@ make all users members of the group that has access permissions.
 C) Preparing for Installation
 =============================
 
-After installing the required tools and libraries and extracting the
-archive go into the newly created directory fsc2. Now you have to set
-up fsc2 for your system and requirements. You can use two methods. You
-either edit the Makefile directly and change some variables at its top.
-Alternatvely, go into the 'machines' subdirectory and copy the file
-'template.nowhere' to a file with the fully qualified hostname of your
-machine (i.e. its full name, including the domain name) as its name.
-Now edit this file and it will automatically get evaluated during the
-make process. This is probably more convenient. When you edit the
-Makefile you will have to do it again each time you install a new
-version. In contrast the file in the 'machines' subdirectory can just
-be copied from an old installation to a new version and everything
-should stay the same.
+After installing the required tools and libraries (see above) and
+extracting the archive with the destribution of fsc2 go into the newly
+created directory fsc2. Now you have to set up fsc2 for your system
+and requirements. You can use two methods. You either edit the Makefile
+directly and change some variables at its top. Alternatvely, go into the
+'machines' subdirectory and copy the file 'template.nowhere' to a file
+with the fully qualified hostname of your machine (i.e. its full name,
+including the domain name) as its name. Now edit this file and it will
+automatically get evaluated during the make process. This is probably
+more convenient. When you edit the Makefile you will have to do it
+again each time you install a new version. In contrast the file in the
+'machines' subdirectory can just be copied from an existing installation
+to a new version and everything should stay the same.
 
 
-Now follows a description of the variables that can be set to change
-the way fsc2 is created and installed:
+Now here follows a description of the variables that can be set to change
+the way fsc2 is created and installed (which is more or less identical
+to the comments in the Makefile as well as the template for the machine
+file in the 'machine' directory):
 
 Normally, fsc2 and all auxiliary files needed will be installed below
 /usr/local (in /usr/local/bin, /usr/local/lib/fsc2, /usr/local/info
@@ -223,10 +261,11 @@ You may set the first variable, GPIB_LIBRARY either to LLP for the old
 (Linux Lab Project) library, to NI when using the National Instruments
 library or to JTT if you're using the library I wrote. If you don't want
 GPIB support you also may set this variable to NONE. In this case fsc2
-won't be able to run experiments requiring devices that are connected
+won't be able to run experiments requiring devices that are controlled
 via the GPIB bus (but you still can test such EDL programs). Use this
 option only if you either want to built a test version or if all your
-devices are controlled via the serial ports or are PCI or ISA cards.
+devices are controlled via other means (i.e via serial ports or are PCI
+or ISA cards or the Rulbus).
 
 
 If you use the National Instruments GPIB driver you can set the location
@@ -459,10 +498,10 @@ Just start by typing 'fsc2 edl/qq.edl' or 'fsc2 edl/z.edl' (assuming you're
 still in fsc2's main directory) and click on the "Start" button to get an
 idea about how fsc2 displays 1- and 2-dimensional data sets.
 
-                      August 17, 2004         Much luck, Jens
+November 14, 2004                    Much luck, Jens
+
 --
-       _  _____  _____
-      | ||_   _||_   _|         Jens.Toerring@physik.fu-berlin.de
-   _  | |  | |    | |           http://toerring.de
-  | |_| |  | |    | |           Urbanstr. 176, D-10961 Berlin
-   \___/ens|_|homs|_|oerring    +49 (0)30 692 86 27
+  \   Jens Thoms Toerring  ___  Jens.Toerring@physik.fu-berlin.de
+   \__________________________  http://www.toerring.de
+                                Urbanstr. 176, D-10961 Berlin
+                                +49 (0)30 692 86 27
