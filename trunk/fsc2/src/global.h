@@ -297,6 +297,7 @@ enum {
 
 #define INT          val.lval
 #define FLOAT        val.dval
+#define STRING       val.sptr
 #define VALUE( a )   ( ( a )->type == INT_VAR ?            \
                        ( a )->val.lval : ( a )->val.dval )
 

@@ -181,15 +181,16 @@ structure for variables:
 @example
 typedef struct Var_
 @{
-    int  type;               /* type of the variable */
+    int type;                /* type of the variable */
     union
     @{
         long    lval;        /* value of integer values */
         double  dval;        /* value of float values */
         long   *lpnt;        /* pointer to integer arrays */
         double *dpnt;        /* pointer to floating point arrays */
+        char   *sptr;        /* for string constants */
     @} val;
-    long len;                /* length of array */
+    size_t len;              /* length of array */
     struct Var_ *next;       /* next variable on stack */
 @} Var;
 @end example
@@ -344,7 +345,11 @@ variable is @code{FLOAT_VAR} you get at the data with
 @end quotation
 @noindent
 in which case you get a value of type @code{double}. Of course, you may
-also access the contents of the union directly.
+also access the contents of the union directly. Finally you may use
+@quotation
+    @code{var->STRING}@ @ @ @ (which is a macro standing for @code{var->val.sptr})
+@end quotation
+to get the address of the start of a string variable.
 
 
 @subsection Returning data from an @acronym{EDL} function

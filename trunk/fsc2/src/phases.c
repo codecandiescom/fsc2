@@ -228,7 +228,6 @@ void phases_clear( void )
 void phases_end( void )
 {
 	Phase_Sequence *p;
-	int i, j;
 
 
 	/* Return immediately if no sequences were defined at all */
