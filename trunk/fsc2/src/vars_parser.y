@@ -203,7 +203,7 @@ list2:   expr                      { $$ = $1; }
 /* list of indices for access of an array element */
 
 list3:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
-	   | list3a l3e                { }
+	   | list3a l3e                { $$ = $1; }
 	   | ','                       { print( FATAL, "Superfluous comma in "
 											"array index list.\n" );
 	                                 THROW( EXCEPTION ); }
@@ -215,8 +215,8 @@ l3e:     /* empty */
 	                                 THROW( EXCEPTION ); }
 ;
 
-list3a:   expr
-	    | list3a ',' expr
+list3a:   expr                     { $$ = $1; }
+	    | list3a ',' expr          { $$ = $3; }
 ;
 
 /* list of function arguments */
