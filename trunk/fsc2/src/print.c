@@ -185,14 +185,15 @@ void print_header( FILE *fp, char *name )
 			     "        1 setgray (fsc2) show gr } bind def\n"
 			     "%%%%EndProlog\n" );
 
-	/* Rotate and shift for landscape format */
+	/* Rotate and shift for landscape format, scale to mm units, set font
+	   and draw logo, date and user name */
 
 	fprintf( fp, "90 r\n0 %d t\n", ( int ) ( -72.0 * paper_width / INCH ) );
 	fprintf( fp, "%f %f scale\n", 72.0 / INCH, 72.0 / INCH );
+	fprintf( fp, "%f %f fsc2\n", paper_height - 18.0, paper_width - 12.0 );
 	fprintf( fp, "/Times-Roman 4 sf\n" );
 	fprintf( fp, "5 5 m (%s %s) show\n", ctime( &d ),
 			 getpwuid( getuid( ) )->pw_name );
-	fprintf( fp, "%f %f fsc2\n", paper_height - 18.0, paper_width - 12.0 );
 }
 
 
@@ -357,7 +358,7 @@ void eps_make_scale( FILE *fp, void *cv, int coord )
 				make_label_string( lstr, rwc_coarse, ( int ) mag );
 				fprintf( fp, "dup %f (%s) cw 0.5 mul sub 3 sub lt {\n",
 						 x, lstr );
-				fprintf( fp, "%f (%s) cw 0.5 mul sub %f 5 sub (%s) ch sub m "
+				fprintf( fp, "%f (%s) cw 0.5 mul sub %f 5 sub (%s) ch sub m\n"
 						 "(%s) show pop %f (%s) cw 0.5 mul add } if\n",
 						 x, lstr, y - 1.0, lstr, lstr, x, lstr );
 			}
