@@ -329,8 +329,13 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* This a somewhat simplified version of the previous function, eprint(), */
+/* mainly for writers of moduls. The only argument beside the usual ones  */
+/* one would pass to printf() and friends is the severity of the error.   */
+/* Everything else (i.e. the decision if to prepend a file name, a line   */
+/* number or a function name) is dealt with automatically.                */
+/*------------------------------------------------------------------------*/
 
 void print( int severity, const char *fmt, ... )
 {
@@ -462,11 +467,11 @@ void print( int severity, const char *fmt, ... )
 /* There can be only one instance of fsc2 running (except simple test     */
 /* runs that only do a syntax check of an EDL program). To check if there */
 /* is another instance already running a lock file is used - the file is  */
-/* created at the start of the program and a write lock is set on the     */
-/* whole length of the file. Then the PID and user name are written into  */
-/* the lock file. Thus fsc2 can find out who is currently holding the     */
-/* lock and tell the user about it. The lock automatically expires when   */
-/* fsc2 exits (on normal termination it will also delete the lock file).  */
+/* created at the start of the program, a write lock is set on the whole  */
+/* length of the file and then the PID and user name are written into the */
+/* lock file. Thus fsc2 can find out who is currently holding the lock    */
+/* and tell the user about it. The lock automatically expires when fsc2   */
+/* exits (on normal termination it will also delete the lock file).       */
 /* To make this work correctly for more then one user the lock file must  */
 /* belong to a special user (e.g. a user named `fsc2' belonging to a      */
 /* group also named `fsc2') and the program belong to this user and have  */
@@ -574,22 +579,22 @@ bool fsc2_locking( void )
 
 /*--------------------------------------------------------------------------*/
 /* Functions checks if a supplied input string is identical to one of 'max' */
-/* alternatives, pointed to by `altern', but neglecting the case of the     */
-/* characters and removing leading and trailing white space from the input  */
-/* string before the comparison. The comparison is case insensitive and the */
-/* function returns the index of the found alternative (a number between 0  */
-/* and max - 1) or -1 if none of the alternatives was identical to the      */
-/* input string.                                                            */
+/* alternatives, pointed to by `alternatives', but neglecting the case of   */
+/* the characters and removing leading and trailing white space from the    */
+/* input string before the comparison. The comparison is case insensitive   */
+/* and the function returns the index of the found alternative (a number    */
+/* between 0 and max - 1) or -1 if none of the alternatives was identical   */
+/* to the input string.                                                     */
 /*--------------------------------------------------------------------------*/
 
-int is_in( const char *supplied_in, const char **altern, int max )
+int is_in( const char *supplied_in, const char **alternatives, int max )
 {
 	char *in, *cpy;
 	const char *a;
 	int count;
 
 
-	fsc2_assert( supplied_in != NULL && altern != NULL );
+	fsc2_assert( supplied_in != NULL && alternatives != NULL );
 
 	/* Get copy of input string and get rid of leading and trailing white
 	   space */
@@ -603,7 +608,7 @@ int is_in( const char *supplied_in, const char **altern, int max )
 	/* Now check if the cleaned up input string is identical to one of the
 	   alternatives */
 
-	for ( cpy = in, a = *altern, count = 0; a && count < max;
+	for ( cpy = in, a = *alternatives, count = 0; a && count < max;
 		  count++, a += strlen( a ) + 1 )
 		if ( ! strcasecmp( in, a ) )
 			break;
@@ -654,7 +659,7 @@ void i2rgb( double h, int *rgb )
 		return;
 	}
 
-	rgb[ RED   ] = 255;           /* return creamy white for values above 1 */
+	rgb[ RED   ] = 255;  /* return a kind of creamy white for values above 1 */
 	rgb[ GREEN ] = 248;
 	rgb[ BLUE  ] = 220;
 }
@@ -691,39 +696,6 @@ void create_colors( void )
 }
 
 
-/***********************************************************************/
-/* The following functions are that short that inlining them seemed to */
-/* be a good idea...                                                   */
-/***********************************************************************/
-
-
-/*---------------------------------------------------------------------*/
-/* The program starts with the EUID and EGID set to the ones of fsc2,  */
-/* but these privileges get dropped immediately. Only for some special */
-/* actions (like dealing with shared memory and lock and log files)    */
-/* this function is called to change the EUID and EGID to the one of   */
-/* fsc2.                                                               */
-/*---------------------------------------------------------------------*/
-
-inline void raise_permissions( void )
-{
-	seteuid( EUID );
-	setegid( EGID );
-}
-
-
-/*---------------------------------------------------------------------*/
-/* This function sets the EUID and EGID to the one of the user running */
-/* the program.                                                        */
-/*---------------------------------------------------------------------*/
-
-inline void lower_permissions( void )
-{
-	seteuid( getuid( ) );
-	setegid( getgid( ) );
-}
-
-
 /*---------------------------------------------------------------*/
 /* Converts a string with a digitizer channel name into a number */
 /*---------------------------------------------------------------*/
@@ -751,6 +723,39 @@ Var *get_digitizer_channel_number( const char *channel_name )
 #endif
 
 	return vars_push( INT_VAR, channel );
+}
+
+
+/******************************************************/
+/* The following functions are that short that always */
+/* inlining them seemed to be a good idea...          */
+/******************************************************/
+
+
+/*---------------------------------------------------------------------*/
+/* The program starts with the EUID and EGID set to the ones of fsc2,  */
+/* but these privileges get dropped immediately. Only for some special */
+/* actions (like dealing with shared memory and lock and log files)    */
+/* this function is called to change the EUID and EGID to the one of   */
+/* fsc2.                                                               */
+/*---------------------------------------------------------------------*/
+
+inline void raise_permissions( void )
+{
+	seteuid( EUID );
+	setegid( EGID );
+}
+
+
+/*---------------------------------------------------------------------*/
+/* This function sets the EUID and EGID to the one of the user running */
+/* the program.                                                        */
+/*---------------------------------------------------------------------*/
+
+inline void lower_permissions( void )
+{
+	seteuid( getuid( ) );
+	setegid( getgid( ) );
 }
 
 

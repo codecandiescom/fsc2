@@ -129,7 +129,11 @@ lockin_mf, -1, ALL;             // (ER023M)
    (TDS520, TDS520A, TDS520C, TDS540, TDS744A, TDS754A, LeCroy 9400 ) */
 
 digitizer_name, 0, ALL;                 // returns the device name
-digitizer_define_window, -1, PREP;      // defines a cursor window
+digitizer_define_window, -1, ALL;       // defines a cursor window
+digitizer_change_window, -1, ALL;       // change an existing window
+digitizer_window_position, -1, ALL;     // set or get window position
+digitizer_window_width, -1, ALL;        // set or get window width
+digitizer_display_channel, 1, PREP;     //
 digitizer_timebase, -1, ALL;            // set or get the time base
 digitizer_time_per_point, 0, EXP;       // returns time per point
 digitizer_sensitivity, -1, ALL;         // set or get the sensitivity

@@ -111,6 +111,9 @@ int tds754a_init_hook( void )
 		tds754a.sens[ i ] = 1.0;
 	}
 
+	for ( i = 0; i < MAX_CHANNELS; i++ )
+		tds754a.channels_in_use[ i ] = UNSET;
+
 	tds754a_stored.w = NULL;
 
 	return 1;
@@ -127,6 +130,39 @@ int tds754a_test_hook( void )
 	   PREPARATIONS section */
 
 	tds754a_store_state( &tds754a_stored, &tds754a );
+	return 1;
+}
+
+
+/*------------------------------------------*/
+/* End of test hook function for the module */
+/*------------------------------------------*/
+
+int tds754a_end_of_test_hook( void )
+{
+	int ch; 
+	int count;
+
+
+	/* Make sure we don't forget which channels have been marked as used
+	   during the test run, they got to be switched on at the start of the
+	   experiment. */
+
+	for ( count = 0, ch = 0; ch < MAX_CHANNELS; ch++ )
+	{
+		tds754a_stored.channels_in_use[ ch ] = tds754a.channels_in_use[ ch ];
+		count++;
+	}
+
+	/* If more than MAX_DISPLAYABLE_CHANNELS are needed we're in trouble */
+
+	if ( count > MAX_DISPLAYABLE_CHANNELS )
+	{
+		print( FATAL, "More than %d channels would be needed for the "
+			   "experiment.\n", MAX_DISPLAYABLE_CHANNELS );
+		THROW( EXCEPTION );
+	}
+
 	return 1;
 }
 
@@ -208,11 +244,18 @@ Var *digitizer_define_window( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	/* During the experiment if the digitizer's keyboard isn't locked we
+	   need to reread the timebase, record length and trigger position and
+	   update and recheck the windows */
+
+	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
+		tds754a_state_check( 0.0, 0.0, 0.0 );
+
 	if ( v != NULL )
 	{
 		/* Get the start point of the window */
 
-		win_start = get_double( v, "window start position" );
+		win_start = get_double( v, "window position" );
 		is_win_start = SET;
 
 		/* If there's a second parameter take it to be the window width */
@@ -233,6 +276,13 @@ Var *digitizer_define_window( Var *v )
 
 			too_many_arguments( v );
 		}
+	}
+
+	if ( FSC2_MODE == EXPERIMENT && ( ! is_win_start || ! is_win_width ) )
+	{
+		print( FATAL, "During the experiment the position and width of a "
+			   "new window must be specified.\n" );
+		THROW( EXCEPTION );
 	}
 
 	/* Create a new window structure and append it to the list of windows */
@@ -263,7 +313,232 @@ Var *digitizer_define_window( Var *v )
 		w->width = win_width;
 	w->is_width = is_win_width;
 
+	/* Do all possible checks and, if necessary, readjust window position and
+	   width */
+
+	tds754a_window_checks( w );
+
+	/* If we're already running the experiment and only just now the very 
+	   first window gets defined we have to switch on gated measurements */
+
+	if ( FSC2_MODE == EXPERIMENT && w == tds754a.w )
+	{
+		tds754a_set_gated_meas( SET );
+		tds754a.gated_state = SET;
+	}
+
+	tds754a_set_tracking( w );
+
 	return vars_push( INT_VAR, w->num );
+}
+
+
+/*------------------------------------------------*/
+/*------------------------------------------------*/
+
+Var *digitizer_change_window( Var *v )
+{
+	WINDOW *w;
+	long win_num;
+
+
+	if ( tds754a.w == NULL )
+	{
+		print( FATAL, "No windows have been defined.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( v == NULL || v->next == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* During the experiment if the digitizer's keyboard isn't locked we
+	   need to reread the timebase, record length and trigger position and
+	   update and recheck the windws */
+
+	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
+		tds754a_state_check( 0.0, 0.0, 0.0 );
+
+	/* Figure out the window number and test if a window with this number
+	   exists at all */
+
+	win_num = get_strict_long( v, "window ID" );
+
+	for ( w = tds754a.w; w->num != win_num && w != NULL; w = w->next )
+		;
+
+	if ( w == NULL )
+	{
+		print( FATAL, "First argument is not a valid window ID.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Let a more specialized function deal with it if there's only a
+	   position argument */
+
+	if ( v->next->next == NULL )
+	{
+		vars_pop( digitizer_window_position( v ) );
+		return vars_push( INT_VAR, win_num );
+	}
+
+	w->start = get_double( v = vars_pop( v ), "window start position" );
+	w->width = get_double( v = vars_pop( v ), "window with" );
+
+	too_many_arguments( v );
+	
+	/* Do all possible checks and, if necessary, readjust window position and
+	   width */
+
+	tds754a_window_checks( w );
+	tds754a_set_tracking( w );
+
+	return vars_push( INT_VAR, win_num );
+}
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+Var *digitizer_window_position( Var *v )
+{
+	WINDOW *w;
+	long win_num;
+
+
+	if ( tds754a.w == NULL )
+	{
+		print( FATAL, "No windows have been defined.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing argument.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* During the experiment if the digitizer's keyboard isn't locked we
+	   need to reread the timebase, record length and trigger position and
+	   update and recheck the windows */
+
+	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
+		tds754a_state_check( 0.0, 0.0, 0.0 );
+
+	/* Figure out the window number and test if a window with this number
+	   exists at all */
+
+	win_num = get_strict_long( v, "window ID" );
+
+	for ( w = tds754a.w; w->num != win_num && w != NULL; w = w->next )
+		;
+
+	if ( w == NULL )
+	{
+		print( FATAL, "First argument is not a valid window ID.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+		return vars_push( FLOAT_VAR, w->start );
+
+	w->start = get_double( v, "window start position" );
+
+	too_many_arguments( v );
+
+	/* Do all possible checks and, if necessary, readjust window position and
+	   width */
+
+	tds754a_window_checks( w );
+	tds754a_set_tracking( w );
+
+	return vars_push( FLOAT_VAR, w->start );
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+Var *digitizer_window_width( Var *v )
+{
+	WINDOW *w;
+	long win_num;
+
+
+	if ( tds754a.w == NULL )
+	{
+		print( FATAL, "No windows have been defined.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing argument.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* During the experiment if the digitizer's keyboard isn't locked we
+	   need to reread the timebase, record length and trigger position and
+	   update and recheck the windows */
+
+	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
+		tds754a_state_check( 0.0, 0.0, 0.0 );
+
+	/* Figure out the window number and test if a window with this number
+	   exists at all */
+
+	win_num = get_strict_long( v, "window ID" );
+
+	for ( w = tds754a.w; w->num != win_num && w != NULL; w = w->next )
+		;
+
+	if ( w == NULL )
+	{
+		print( FATAL, "First argument is not a valid window ID.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+		return vars_push( FLOAT_VAR, w->width );
+
+	w->width = get_double( v, "window width" );
+
+	too_many_arguments( v );
+
+	/* Do all possible checks and, if necessary, readjust window position and
+	   width */
+
+	tds754a_window_checks( w );
+	tds754a_set_tracking( w );
+
+	return vars_push( FLOAT_VAR, w->width );
+}
+
+
+/*-------------------------------------------------------------------*/
+/* This function can be called during the preparation phase to tell  */
+/* the driver to switch on a certain channel and never switch it off */
+/* (even if it does not seem to be used in the experiment).          */
+/*-------------------------------------------------------------------*/
+
+Var *digitizer_display_channel( Var *v )
+{
+	long channel;
+
+
+	channel = tds754a_translate_channel( GENERAL_TO_TDS754A,
+									  get_strict_long( v, "channel number" ) );
+
+	if ( channel > MAX_CHANNELS )
+	{
+		print( FATAL, "Invalid channel number: %ld.\n",
+			   tds754a_translate_channel( TDS754A_TO_GENERAL, channel ) );
+		THROW( EXCEPTION );
+	}
+
+	tds754a.channels_in_use[ channel ] = SET;
+	return vars_push( INT_VAR, 1 );
 }
 
 
@@ -278,19 +553,27 @@ Var *digitizer_timebase( Var *v )
 	char *t;
 	
 
+	/* During the experiment if the digitizer's keyboard isn't locked we
+	   need to reread the timebase, record length and trigger position and
+	   update and recheck the windows */
+
+	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
+		tds754a_state_check( 0.0, 0.0, 0.0 );
+
 	if ( v == NULL )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( );
+				if ( ! tds754a.is_timebase )
+					no_query_possible( );
+				return vars_push( FLOAT_VAR, tds754a.timebase );
+				
 
 			case TEST :
 				return vars_push( FLOAT_VAR, tds754a.is_timebase ?
 								  tds754a.timebase : TDS754A_TEST_TIME_BASE );
 
 			case EXPERIMENT :
-				tds754a.timebase = tds754a_get_timebase( );
-				tds754a.is_timebase = SET;
 				return vars_push( FLOAT_VAR, tds754a.timebase );
 		}
 
@@ -351,11 +634,12 @@ Var *digitizer_timebase( Var *v )
 
 	too_many_arguments( v );
 
-	tds754a.timebase = tb[ TB ];
 	tds754a.is_timebase = SET;
 
 	if ( FSC2_MODE == EXPERIMENT )
-		tds754a_set_timebase( tds754a.timebase );
+		tds754a_set_timebase( tb[ TB ] );
+
+	tds754a_state_check( tb[ TB ], tds754a.rec_len, tds754a.trig_pos );
 
 	return vars_push( FLOAT_VAR, tds754a.timebase );
 }
@@ -367,6 +651,13 @@ Var *digitizer_timebase( Var *v )
 Var *digitizer_time_per_point( Var *v )
 {
 	v = v;
+
+	/* During the experiment if the digitizer's keyboard isn't locked we
+	   need to reread the timebase, record length and trigger position and
+	   update and recheck the windows */
+
+	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
+		tds754a_state_check( 0.0, 0.0, 0.0 );
 
 	return vars_push( FLOAT_VAR, tds754a.timebase / TDS754A_POINTS_PER_DIV );
 }
@@ -401,7 +692,9 @@ Var *digitizer_sensitivity( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( );
+				if ( ! tds754a.is_sens[ channel ] )
+					no_query_possible( );
+				return vars_push( FLOAT_VAR, tds754a.sens[ channel ] );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, tds754a.is_sens[ channel ] ?
@@ -423,11 +716,11 @@ Var *digitizer_sensitivity( Var *v )
 
 	too_many_arguments( v );
 
-	tds754a.sens[ channel ] = sens;
-	tds754a.is_sens[ channel ] = SET;
-
 	if ( FSC2_MODE == EXPERIMENT )
 		tds754a_set_sens( channel, sens );
+
+	tds754a.sens[ channel ] = sens;
+	tds754a.is_sens[ channel ] = SET;
 
 	return vars_push( FLOAT_VAR, tds754a.sens[ channel ] );
 }
@@ -441,11 +734,20 @@ Var *digitizer_num_averages( Var *v )
 	long num_avg;
 	
 
+	/* During the experiment if the digitizer's keyboard isn't locked we
+	   need to reread the timebase, record length and trigger position and
+	   update and recheck the windows */
+
+	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
+		tds754a_state_check( 0.0, 0.0, 0.0 );
+
 	if ( v == NULL )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( );
+				if ( ! tds754a.is_num_avg )
+					no_query_possible( );
+				return vars_push( INT_VAR, tds754a.num_avg );
 
 			case TEST :
 				return vars_push( INT_VAR, tds754a.is_num_avg ?
@@ -477,11 +779,11 @@ Var *digitizer_num_averages( Var *v )
 
 	too_many_arguments( v );
 
-	tds754a.num_avg = num_avg;
-	tds754a.is_num_avg = SET;
-
 	if ( FSC2_MODE == EXPERIMENT )
 		tds754a_set_num_avg( num_avg );
+
+	tds754a.num_avg = num_avg;
+	tds754a.is_num_avg = SET;
 
 	return vars_push( INT_VAR, tds754a.num_avg );
 }
@@ -499,24 +801,31 @@ Var *digitizer_record_length( Var *v )
 	int i;
 
 
+	/* During the experiment if the digitizer's keyboard isn't locked we
+	   need to reread the timebase, record length and trigger position and
+	   update and recheck the windows */
+
+	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
+		tds754a_state_check( 0.0, 0.0, 0.0 );
+
 	if ( v == NULL )
+	{
+
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( );
+				if ( ! tds754a.is_rec_len )
+					no_query_possible( );
+				return vars_push( INT_VAR, tds754a.rec_len );
 
 			case TEST :
 				return vars_push( INT_VAR, tds754a.is_rec_len ?
 								  tds754a.rec_len : TDS754A_TEST_REC_LEN );
 
 			case EXPERIMENT :
-				if ( ! tds754a_get_record_length( &rec_len ) )
-					tds754a_gpib_failure( );
-
-				tds754a.rec_len = rec_len;
-				tds754a.is_rec_len = SET;
 				return vars_push( INT_VAR, tds754a.rec_len );
 		}
+	}
 
 	rec_len = get_long( v, "record length" );
 
@@ -525,8 +834,15 @@ Var *digitizer_record_length( Var *v )
 	{
 		if ( record_lengths[ i ] == 0 )
 		{
-			print( FATAL, "Record length %ld too long.\n", rec_len );
-			THROW( EXCEPTION );
+			if ( FSC2_MODE == EXPERIMENT )
+			{
+				print( FATAL, "Record length %ld too long.\n", rec_len );
+				THROW( EXCEPTION );
+			}
+
+			print( SEVERE, "Record length %ld too long, using %ld instead.\n",
+				   rec_len, record_lengths[ i  - 1] );
+			rec_len = record_lengths[ i  - 1];
 		}
 
 		if ( rec_len == record_lengths[ i ] )
@@ -543,12 +859,13 @@ Var *digitizer_record_length( Var *v )
 		i++;
 	}
 
-	tds754a.rec_len = record_lengths[ i ];
 	tds754a.is_rec_len = SET;
 
-	if ( FSC2_MODE ==EXPERIMENT &&
-		 ! tds754a_set_record_length( tds754a.rec_len ) )
-		tds754a_gpib_failure( );
+	if ( FSC2_MODE == EXPERIMENT )
+		tds754a_set_record_length( record_lengths[ i ] );
+
+	tds754a_state_check( tds754a.timebase, record_lengths[ i ],
+						 tds754a.trig_pos );
 
 	return vars_push( INT_VAR, tds754a.rec_len );
 }
@@ -565,22 +882,26 @@ Var *digitizer_trigger_position( Var *v )
 	double trig_pos;
 
 
+	/* During the experiment if the digitizer's keyboard isn't locked we
+	   need to reread the timebase, record length and trigger position and
+	   update and recheck the windows */
+
+	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
+		tds754a_state_check( 0.0, 0.0, 0.0 );
+
 	if ( v == NULL )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( );
+				if ( ! tds754a.is_trig_pos )
+					no_query_possible( );
+				return vars_push( FLOAT_VAR, tds754a.trig_pos );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, tds754a.is_trig_pos ?
 								  tds754a.trig_pos : TDS754A_TEST_TRIG_POS );
 
 			case EXPERIMENT :
-				if ( ! tds754a_get_trigger_pos( &trig_pos ) )
-					tds754a_gpib_failure( );
-
-				tds754a.trig_pos = trig_pos;
-				tds754a.is_trig_pos = SET;
 				return vars_push( FLOAT_VAR, tds754a.trig_pos );
 		}
 
@@ -588,19 +909,26 @@ Var *digitizer_trigger_position( Var *v )
 
 	if ( trig_pos < 0.0 || trig_pos > 1.0 )
 	{
-		print( FATAL, "Invalid trigger position: %f, must be in interval "
-			   "[0,1].\n", trig_pos );
-		THROW( EXCEPTION );
+		if ( FSC2_MODE == EXPERIMENT )
+		{
+			print( FATAL, "Invalid trigger position %f, must be in interval "
+				   "[0,1].\n", trig_pos );
+			THROW( EXCEPTION );
+		}
+
+		print( SEVERE, "Invalid trigger position %f, using %f instead.\n",
+			   trig_pos, trig_pos < 0 ? 0.0 : 1.0 );
+		trig_pos = trig_pos < 0 ? 0.0 : 1.0;
 	}
 
 	too_many_arguments( v );
 
-	tds754a.trig_pos = trig_pos;
 	tds754a.is_trig_pos = SET;
 
-	if ( FSC2_MODE  == EXPERIMENT &&
-		 ! tds754a_set_trigger_pos( tds754a.trig_pos ) )
-		tds754a_gpib_failure( );
+	if ( FSC2_MODE  == EXPERIMENT )
+		tds754a_set_trigger_pos( trig_pos );
+
+	tds754a_state_check( tds754a.timebase, tds754a.rec_len, trig_pos );
 
 	return vars_push( FLOAT_VAR, tds754a.trig_pos );
 }
@@ -634,6 +962,7 @@ Var *digitizer_meas_channel_ok( Var *v )
 
 Var *digitizer_trigger_channel( Var *v )
 {
+	long in_channel;
 	long channel;
 
 
@@ -641,7 +970,10 @@ Var *digitizer_trigger_channel( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( );
+				if ( ! tds754a.is_trigger_channel )
+					no_query_possible( );
+				return vars_push( INT_VAR, tds754a_translate_channel(
+							   TDS754A_TO_GENERAL, tds754a.trigger_channel ) );
 
 			case TEST :
 				return vars_push( INT_VAR, tds754a_translate_channel(
@@ -654,22 +986,25 @@ Var *digitizer_trigger_channel( Var *v )
 						TDS754A_TO_GENERAL, tds754a_get_trigger_channel( ) ) );
 		}
 
-	channel = tds754a_translate_channel( GENERAL_TO_TDS754A,
-									  get_strict_long( v, "channel number" ) );
+	in_channel = get_strict_long( v, "channel number" );
+	channel = tds754a_translate_channel( GENERAL_TO_TDS754A, in_channel );
 
     switch ( channel )
     {
         case TDS754A_CH1 : case TDS754A_CH2 : case TDS754A_CH3 :
 		case TDS754A_CH4 : case TDS754A_AUX : case TDS754A_LIN :
+			if ( FSC2_MODE == EXPERIMENT )
+				tds754a_set_trigger_channel( channel );
 			tds754a.trigger_channel = channel;
 			tds754a.is_trigger_channel = SET;
-			if ( FSC2_MODE == EXPERIMENT )
-				tds754a_set_trigger_channel( Channel_Names[ channel ] );
             break;
 
 		default :
-			print( FATAL, "Channel %s can't be used as trigger channel.\n",
-				   Channel_Names[ channel ] );
+			if ( channel >= 0 && channel < NUM_CH_NAMES )
+				print( FATAL, "Channel %s can't be used as trigger channel.\n",
+					   Channel_Names[ channel ] );
+			else
+				print( FATAL, "Invalid channel number %ld.\n", in_channel );
 			THROW( EXCEPTION );
     }
 
@@ -767,6 +1102,13 @@ static Var *get_area( Var *v, bool use_cursor )
 
 	too_many_arguments( v );
 
+	/* During the experiment if the digitizer's keyboard isn't locked we
+	   need to reread the timebase, record length and trigger position and
+	   update and recheck the windows */
+
+	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
+		tds754a_state_check( 0.0, 0.0, 0.0 );
+
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   value */
 
@@ -853,6 +1195,13 @@ static Var *get_curve( Var *v, bool use_cursor )
 		w = NULL;
 
 	too_many_arguments( v );
+
+	/* During the experiment if the digitizer's keyboard isn't locked we
+	   need to reread the timebase, record length and trigger position and
+	   update and recheck the windows */
+
+	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
+		tds754a_state_check( 0.0, 0.0, 0.0 );
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   array */
@@ -953,6 +1302,13 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 		w = NULL;
 
 	too_many_arguments( v );
+
+	/* During the experiment if the digitizer's keyboard isn't locked we
+	   need to reread the timebase, record length and trigger position and
+	   update and recheck the windows */
+
+	if ( FSC2_MODE == EXPERIMENT && ! tds754a.lock_state )
+		tds754a_state_check( 0.0, 0.0, 0.0 );
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   value */

@@ -2040,7 +2040,6 @@ static double sr810_get_auto_data( int type )
 	long length = 100;
 	int channel;
 	char *ptr;
-	static bool dont = SET;
 
 
 #if 0

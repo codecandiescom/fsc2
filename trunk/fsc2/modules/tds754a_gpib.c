@@ -30,6 +30,7 @@ static double tds754a_get_area_wo_cursor( int channel, WINDOW *w );
 static double tds754a_get_amplitude_wo_cursor( int channel, WINDOW *w );
 int gpib_read_w( int device, char *buffer, long *length );
 
+static bool in_init = UNSET;
 
 
 /*-----------------------------------------------------------------*/
@@ -41,6 +42,8 @@ bool tds754a_init( const char *name )
 	double cp1, cp2;
 	char buffer[ 100 ];
 	long len = 100;
+	bool lock_state;
+	int on_count, needed_count, needed_on_count;
 
 
 	tds754a.meas_source = -1;
@@ -48,139 +51,176 @@ bool tds754a_init( const char *name )
 	if ( gpib_init_device( name, &tds754a.device ) == FAILURE )
         return FAIL;
 
-    /* Set digitizer to short form of replies */
-
-    if ( gpib_write( tds754a.device, "*CLS;:VERB OFF;:HEAD OFF\n", 25 )
-		 == FAILURE ||
-		 gpib_write( tds754a.device, "*STB?\n", 6 ) == FAILURE ||
-		 gpib_read( tds754a.device, buffer, &len ) == FAILURE )
+	in_init = SET;
+	TRY
 	{
-		gpib_local( tds754a.device );
-        return FAIL;
-	}
+		/* Lock the keyboard, at least during initialization - store the
+		   lock state the user asked for, but for the time being set it
+		   to locked. */
 
-	tds754a.is_reacting = SET;
+		if ( gpib_write( tds754a.device, "LOC ALL\n", 8 ) == FAILURE )
+			tds754a_gpib_failure( );
 
-	sprintf( buffer, "LOC %s\n", tds754a.lock_state ? "ALL" : "NON" );
-	if ( gpib_write( tds754a.device, buffer, strlen( buffer ) ) == FAILURE )
-	{
-		gpib_local( tds754a.device );
-        return FAIL;
-	}
+		lock_state = tds754a.lock_state;
+		tds754a.lock_state = SET;
 
-    /* Get record length and trigger position */
+		/* Set digitizer to short form of replies */
 
-	if ( tds754a.is_rec_len )
-	{
-		if ( ! tds754a_set_record_length( tds754a.rec_len ) )
-		{
-			gpib_local( tds754a.device );
-			return FAIL;
-		}		
-	}
-	else
-	{
-		if ( ! tds754a_get_record_length( &tds754a.rec_len ) )
-		{
-			gpib_local( tds754a.device );
-			return FAIL;
-		}
+		if ( gpib_write( tds754a.device, "*CLS;:VERB OFF;:HEAD OFF\n", 25 )
+			 == FAILURE ||
+			 gpib_write( tds754a.device, "*STB?\n", 6 ) == FAILURE ||
+			 gpib_read( tds754a.device, buffer, &len ) == FAILURE )
+			tds754a_gpib_failure( );
 
-		tds754a.is_rec_len = SET;
-	}
+		tds754a.is_reacting = SET;
 
-	if ( tds754a.is_trig_pos )
-	{
-		if ( ! tds754a_set_trigger_pos( tds754a.trig_pos ) )
-		{
-			gpib_local( tds754a.device );
-			return FAIL;
-		}
-	}
-	else
-	{
-		if ( ! tds754a_get_trigger_pos( &tds754a.trig_pos ) )
-		{
-			gpib_local( tds754a.device );
-			return FAIL;
-		}
+		/* Check if the the time base, record length and trigger position
+		   have been set during preparation, if so send them to the device,
+		   otherwise fetch them */
 
-		tds754a.is_trig_pos = SET;
-	}
+		if ( tds754a.is_timebase )
+			tds754a_set_timebase( tds754a.timebase );
+		else
+			tds754a.timebase = tds754a_get_timebase( );
 
-    /* Set format of data transfer (binary, INTEL format) */
+		if ( tds754a.is_rec_len )
+			tds754a_set_record_length( tds754a.rec_len );
+		else
+			tds754a.rec_len = tds754a_get_record_length( );
 
-    if ( gpib_write( tds754a.device, "DAT:ENC SRI;WID 2\n", 18 ) == FAILURE )
-	{
-		gpib_local( tds754a.device );
-        return FAIL;
-	}
+		if ( tds754a.is_trig_pos )
+			tds754a_set_trigger_pos( tds754a.trig_pos );
+		else
+			tds754a.trig_pos = tds754a_get_trigger_pos( );
+
+		if ( tds754a.is_trigger_channel )
+			tds754a_set_trigger_channel( tds754a.trigger_channel );
+		else
+			tds754a.trigger_channel = tds754a_get_trigger_channel( );
+			
+		/* Set format of data transfer (binary, INTEL format) */
+
+		if ( gpib_write( tds754a.device, "DAT:ENC SRI;WID 2\n", 18 )
+			 == FAILURE )
+			tds754a_gpib_failure( );
 		
-    /* Set unit for cursor setting commands to seconds, cursor types to VBAR */
+		/* Set unit for cursor setting commands to seconds and cursor types
+		   to VBAR (vertical bars)*/
 
-    if ( gpib_write( tds754a.device, "CURS:FUNC VBA;VBA:UNITS SECO\n", 29 )
-		 == FAILURE )
-    {
-        gpib_local( tds754a.device );
-        return FAIL;
-    }
+		if ( gpib_write( tds754a.device, "CURS:FUNC VBA;VBA:UNITS SECO\n", 29 )
+			 == FAILURE )
+			tds754a_gpib_failure( );
 
-	/* Make sure cursor 1 is the left one */
+		/* Make sure cursor 1 is the left one */
+		
+		cp1 = tds754a_get_cursor_position( 1 );
+		cp2 = tds754a_get_cursor_position( 2 );
 
-	tds754a_get_cursor_position( 1, &cp1 );
-	tds754a_get_cursor_position( 2, &cp2 );
-	if ( cp1 > cp2 )
-	{
-		tds754a_set_cursor( 1, cp2 );
-		tds754a_set_cursor( 2, cp1 );
-		tds754a.cursor_pos = cp2;
+		if ( cp1 > cp2 )
+		{
+			tds754a_set_cursor( 1, cp2 );
+			tds754a_set_cursor( 2, cp1 );
+			tds754a.cursor_pos = cp2;
+		}
+		else
+			tds754a.cursor_pos = cp1;
+
+		/* Switch off repetitive acquisition mode */
+
+		if ( gpib_write( tds754a.device, "ACQ:REPE OFF\n", 13 ) == FAILURE )
+			tds754a_gpib_failure( );
+
+		/* If a sensitivity has been set in the PREPARATION section set them
+           now */
+
+		for ( ch = TDS754A_CH1; ch <= TDS754A_CH4; ch++ )
+			if ( tds754a.is_sens[ ch ] )
+				tds754a_set_sens( ch, tds754a.sens[ ch ] );
+			else
+				tds754a.sens[ ch ] = tds754a_get_sens( ch );
+
+		/* If the number of averages has been set in the PREPARATIONS section
+		   send it to the digitizer now */
+
+		if ( tds754a.is_num_avg == SET )
+			tds754a_set_num_avg( tds754a.num_avg );
+		else
+			tds754a.num_avg = tds754a_get_num_avg( );
+
+		/* Switch on all channels that are needed in the experiment or have
+		   been marked by the user as needed and aren't already switched on.
+		   If necessary, switch off some channels that are not needed. First
+		   we count how many channels are currently on, how many of the needed
+		   channels are on and how many are needed at all. */
+
+		for ( needed_count = needed_on_count = on_count = 0, ch = 0;
+			  ch < MAX_CHANNELS; ch++ )
+		{
+			if ( ( tds754a.channel_is_on[ ch ]
+									  = tds754a_display_channel_state( ch ) ) )
+				on_count++;
+
+			if ( tds754a.channels_in_use[ ch ] )
+			{
+				needed_count++;
+
+				if ( tds754a.channel_is_on[ ch ] )
+					needed_on_count++;
+			}
+		}
+
+		fsc2_assert( needed_count <= 4 );                    /* paranoia.... */
+
+		/* If not all needed channels are on, but switching them all on
+		   would take more than 4 channels first switch off channels that
+		   aren't needed (beginning with the high numbered channels, i.e.
+		   first AUX, then REF channels, then MATH channels and finally
+		   real measurement channels) until all the needed channels can
+		   be switched on. */
+
+		if ( needed_count > needed_on_count )
+		{
+			while ( needed_count - needed_on_count >
+					MAX_DISPLAYABLE_CHANNELS - on_count )
+				for ( ch = MAX_CHANNELS - 1; ch >= 0; ch-- )
+					if ( ! tds754a.channels_in_use[ ch ] &&
+						 tds754a.channel_is_on[ ch ] )
+					{
+						tds754a_display_channel( ch, UNSET );
+						on_count--;
+						break;
+					}
+
+			for ( ch = 0; ch < MAX_CHANNELS; ch++ )
+				if ( tds754a.channels_in_use[ ch ] &&
+					 ! tds754a.channel_is_on[ ch ] )
+					tds754a_display_channel( ch, SET );
+		}
+
+		/* Switch to running until run/stop button is pressed and start
+           running */
+
+		if ( gpib_write( tds754a.device, "ACQ:STOPA RUNST;STATE RUN\n", 26 )
+			 == FAILURE )
+			tds754a_gpib_failure( );
+
+		/* Unlock the keyboard if the user told us so */
+
+		tds754a.lock_state = lock_state;
+
+		if ( ! tds754a.lock_state &&
+			 gpib_write( tds754a.device, "LOC NON\n", 8 ) == FAILURE )
+			tds754a_gpib_failure( );
 	}
-	else
-		tds754a.cursor_pos = cp1;
+	OTHERWISE
+	{
+		gpib_local( tds754a.device );
+		tds754a.lock_state = lock_state;
+		in_init = UNSET;
+		return FAIL;
+	}
 
-    /* Switch off repetitive acquisition mode */
-
-	if ( gpib_write( tds754a.device, "ACQ:REPE OFF\n", 13 ) == FAILURE )
-    {
-        gpib_local( tds754a.device );
-        return FAIL;
-    }
-
-	/* Check if the the time base has been set in the test run, if so send it
-	   to the device, otherwise get it */
-
-	if ( tds754a.is_timebase )
-		tds754a_set_timebase( tds754a.timebase );
-	else
-		tds754a.timebase = tds754a_get_timebase( );
-
-	/* If a sensitivity has been set in the PREPARATION section set them now */
-
-	for ( ch = TDS754A_CH1; ch <= TDS754A_CH4; ch++ )
-		if ( tds754a.is_sens[ ch ] )
-			tds754a_set_sens( ch, tds754a.sens[ ch ] );
-
-	/* If the number of averages has been set in the PREPARATIONS section send
-       it to the digitizer now */
-
-	if ( tds754a.is_num_avg == SET )
-		tds754a_set_num_avg( tds754a.num_avg );
-	else
-		tds754a.num_avg = tds754a_get_num_avg( );
-
-	/* Switch on all channels that have been used in the experiment section
-	   and that aren't already switched on */
-
-	for ( ch = 0; ch < MAX_CHANNELS; ch++ )
-		if ( tds754a.channels_in_use[ ch ] )
-			tds754a_display_channel( ch );
-
-    /* Switch to running until run/stop button is pressed and start running */
-
-    if ( gpib_write( tds754a.device, "ACQ:STOPA RUNST;STATE RUN\n", 26 )
-		 == FAILURE )
-        gpib_local( tds754a.device );
-
+	in_init = UNSET;
 	return OK;
 }
 
@@ -206,7 +246,7 @@ double tds754a_get_timebase( void )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds754a_set_timebase( double timebase )
+void tds754a_set_timebase( double timebase )
 {
 	char cmd[ 40 ] = "HOR:MAI:SCA ";
 
@@ -216,7 +256,7 @@ bool tds754a_set_timebase( double timebase )
 	if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds754a_gpib_failure( );
 
-	return OK;
+	tds754a_state_check( 0.0, 0.0, 0.0 );
 }
 
 
@@ -224,16 +264,16 @@ bool tds754a_set_timebase( double timebase )
 /* tds754a_set_record_length() sets the record length. */
 /*-----------------------------------------------------*/
 
-bool tds754a_set_record_length( long num_points )
+void tds754a_set_record_length( long num_points )
 {
     char cmd[ 100 ];
 
 
 	sprintf( cmd, "HOR:RECO %ld\n", num_points );
     if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
-        return FAIL;
+		tds754a_gpib_failure( );
 
-    return OK;
+	tds754a_state_check( 0.0, 0.0, 0.0 );
 }
 
 
@@ -241,7 +281,7 @@ bool tds754a_set_record_length( long num_points )
 /* tds754a_get_record_length() returns the current record length. */
 /*----------------------------------------------------------------*/
 
-bool tds754a_get_record_length( long *ret )
+long tds754a_get_record_length( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -250,13 +290,13 @@ bool tds754a_get_record_length( long *ret )
 
     if ( gpib_write( tds754a.device, "HOR:RECO?\n", 10 ) == FAILURE ||
          gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
-        return FAIL;
+		tds754a_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
 	while ( ! isdigit( *r ) && *r++ )
 		;
-    *ret = T_atol( r );
-    return OK;
+
+    return T_atol( r );
 }
 
 
@@ -264,16 +304,16 @@ bool tds754a_get_record_length( long *ret )
 /* tds754a_set_trigger_pos() sets the trigger position. */
 /*------------------------------------------------------*/
 
-bool tds754a_set_trigger_pos( double pos )
+void tds754a_set_trigger_pos( double pos )
 {
     char cmd[ 100 ];
 
 
 	sprintf( cmd, "HOR:TRIG:POS %f\n", 100.0 * pos );
     if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
-		return FAIL;
+		tds754a_gpib_failure( );
 
-    return OK;
+	tds754a_state_check( 0.0, 0.0, 0.0 );
 }
 
 
@@ -281,7 +321,7 @@ bool tds754a_set_trigger_pos( double pos )
 /* tds754a_get_trigger_pos() returns the current trigger position. */
 /*-----------------------------------------------------------------*/
 
-bool tds754a_get_trigger_pos( double *ret )
+double tds754a_get_trigger_pos( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -289,11 +329,10 @@ bool tds754a_get_trigger_pos( double *ret )
 
     if ( gpib_write( tds754a.device, "HOR:TRIG:POS?\n", 14 ) == FAILURE ||
          gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
-        return FAIL;
+		tds754a_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
-    *ret = 0.01 * T_atod( reply );
-    return OK;
+    return 0.01 * T_atod( reply );
 }
 
 
@@ -321,11 +360,11 @@ long tds754a_get_num_avg( void )
 }
 
 
-/*-----------------------------------------*/
-/* Function returns the number of averages */
-/*-----------------------------------------*/
+/*--------------------------------------*/
+/* Function sets the number of averages */
+/*--------------------------------------*/
 
-bool tds754a_set_num_avg( long num_avg )
+void tds754a_set_num_avg( long num_avg )
 {
 	char cmd[ 30 ];
 
@@ -336,7 +375,7 @@ bool tds754a_set_num_avg( long num_avg )
 	{
 		if ( gpib_write( tds754a.device, "ACQ:STATE STOP\n", 15 ) == FAILURE )
 			tds754a_gpib_failure( );
-		return OK;
+		return;
 	}
 
 	/* With number of acquisitions switch to sample mode, for all other numbers
@@ -359,8 +398,6 @@ bool tds754a_set_num_avg( long num_avg )
 
 	if ( gpib_write( tds754a.device, "ACQ:STATE RUN\n", 14 ) == FAILURE )
 		tds754a_gpib_failure( );
-
-	return OK;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -394,7 +431,7 @@ int tds754a_get_acq_mode( void )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds754a_get_cursor_position( int cur_no, double *cp )
+double tds754a_get_cursor_position( int cur_no )
 {
 	char cmd[ 40 ] = "CURS:VBA:POSITION";
     char reply[ 30 ];
@@ -408,9 +445,7 @@ bool tds754a_get_cursor_position( int cur_no, double *cp )
 		tds754a_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
-    *cp = T_atod( reply );
-
-	return OK;
+    return T_atod( reply );
 }
 
 
@@ -419,35 +454,26 @@ bool tds754a_get_cursor_position( int cur_no, double *cp )
 /* between the two cursors.                           */
 /*----------------------------------------------------*/
 
-bool tds754a_get_cursor_distance( double *cd )
+double tds754a_get_cursor_distance( void )
 {
-	double cp2;
-
-
-	tds754a_get_cursor_position( 1, cd );
-	tds754a_get_cursor_position( 2, &cp2 );
-    *cd -= cp2;
-
-    return OK;
+	return tds754a_get_cursor_position( 1 ) - tds754a_get_cursor_position( 2 );
 }
 
 
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds754a_set_trigger_channel( const char *name )
+void tds754a_set_trigger_channel( int channel )
 {
-	char cmd[ 40 ];
+	char cmd[ 50 ];
 
 
-	if ( strlen( name ) > 20 )
-		return FAIL;
+	fsc2_assert( ( channel >= TDS754A_CH1 && channel <= TDS754A_CH4 ) ||
+				 channel == TDS754A_AUX || channel == TDS754A_LIN );
 
-	sprintf( cmd, "TRIG:MAI:EDGE:SOU %s\n", name );
+	sprintf( cmd, "TRIG:MAI:EDGE:SOU %s\n", Channel_Names[ channel ] );
 	if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds754a_gpib_failure( );
-
-	return OK;
 }
 
 
@@ -483,7 +509,8 @@ int tds754a_get_trigger_channel( void )
 
 void tds754a_gpib_failure( void )
 {
-	print( FATAL, "Communication with device failed.\n" );
+	if ( ! in_init )
+		print( FATAL, "Communication with device failed.\n" );
 	THROW( EXCEPTION );
 }
 
@@ -493,7 +520,7 @@ void tds754a_gpib_failure( void )
 /* and thereby clears it - if this isn't done no SRQs are flagged !  */
 /*-------------------------------------------------------------------*/
 
-bool tds754a_clear_SESR( void )
+void tds754a_clear_SESR( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -502,8 +529,6 @@ bool tds754a_clear_SESR( void )
     if ( gpib_write( tds754a.device, "*ESR?\n", 6 ) == FAILURE ||
 		 gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
-
-	return OK;
 }
 
 
@@ -530,7 +555,7 @@ void tds754a_finished( void )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds754a_set_cursor( int cur_num, double pos )
+void tds754a_set_cursor( int cur_num, double pos )
 {
     char cmd[ 60 ] = "CURS:VBA:POSITION";
 
@@ -544,15 +569,13 @@ bool tds754a_set_cursor( int cur_num, double pos )
 	strcat( cmd, "\n" );
     if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds754a_gpib_failure( );
-
-	return OK;
 }
 
 
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds754a_set_track_cursors( bool flag )
+void tds754a_set_track_cursors( bool flag )
 {
 	char cmd[ 20 ];
 
@@ -560,15 +583,13 @@ bool tds754a_set_track_cursors( bool flag )
 	sprintf( cmd, "CURS:MODE %s\n", flag ? "TRAC" : "IND" );
     if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds754a_gpib_failure( );
-
-	return OK;
 }
 
 
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool tds754a_set_gated_meas( bool flag )
+void tds754a_set_gated_meas( bool flag )
 {
 	char cmd[ 20 ];
 
@@ -576,15 +597,13 @@ bool tds754a_set_gated_meas( bool flag )
 	sprintf( cmd, "MEASU:GAT %s\n", flag ? "ON" : "OFF" );
     if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds754a_gpib_failure( );
-
-	return OK;
 }
 
 
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool tds754a_set_snap( bool flag )
+void tds754a_set_snap( bool flag )
 {
 	char cmd[ 50 ];
 
@@ -600,16 +619,14 @@ bool tds754a_set_snap( bool flag )
 		if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds754a_gpib_failure( );
 	}		
-
-	return OK;
 }
 
 
-/*-------------------------------------------------*/
-/* Function switches on a channel of the digitizer */
-/*-------------------------------------------------*/
+/*--------------------------------------------*/
+/* Function tests if a channel is switched on */
+/*--------------------------------------------*/
 
-bool tds754a_display_channel( int channel )
+bool tds754a_display_channel_state( int channel )
 {
 	char cmd[ 30 ];
     char reply[ 10 ];
@@ -618,31 +635,43 @@ bool tds754a_display_channel( int channel )
 
 	fsc2_assert( channel >= TDS754A_CH1 && channel < TDS754A_AUX );
 
-	/* Get the channels sensitivity */
-
-	if ( channel >= 0 && channel <= TDS754A_CH4 )
-	{
-		tds754a_get_sens( channel );
-		tds754a.is_sens[ channel ] = SET;
-	}
-
-	/* check if channel is already displayed */
-
 	sprintf( cmd, "SEL:%s?\n", Channel_Names[ channel ] );
     if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE ||
          gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
-    /* if not switch it on */
+	return reply[ 0 ] != 0;
+}
 
-    if ( reply[ 0 ] == '0' )
+
+/*--------------------------------------------------------*/
+/* Function switches a channel of the digitizer on or off */
+/*--------------------------------------------------------*/
+
+void tds754a_display_channel( int channel, bool on_flag )
+{
+	char cmd[ 30 ];
+
+
+	fsc2_assert( channel >= TDS754A_CH1 && channel < TDS754A_AUX );
+
+	/* Get the channels sensitivity */
+
+	if ( on_flag && channel >= 0 && channel <= TDS754A_CH4 )
+	{
+		tds754a_get_sens( channel );
+		tds754a.is_sens[ channel ] = SET;
+	}
+
+    /* If it's not in the state we need switch it on or off */
+
+    if ( tds754a_display_channel_state( channel ) != on_flag )
     {
-        sprintf( cmd, "SEL:%s ON\n", Channel_Names[ channel ] );
+        sprintf( cmd, "SEL:%s %s\n", Channel_Names[ channel ],
+				 on_flag ? "ON" : "OFF" );
         if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds754a_gpib_failure( );
     }
-
-	return OK;
 }
 
 
@@ -673,7 +702,7 @@ double tds754a_get_sens( int channel )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-bool tds754a_set_sens( int channel, double sens )
+void tds754a_set_sens( int channel, double sens )
 {
     char cmd[ 40 ];
 	char reply[ 40 ];
@@ -694,10 +723,18 @@ bool tds754a_set_sens( int channel, double sens )
 
 		if ( strncmp( reply, "MEG", 3 ) )
 		{
-			print( FATAL, "Can't set sensitivity of channel %s to %f V "
+			if ( in_init )
+			{
+				print( FATAL, "Can't set sensitivity of channel %s to %f V "
+					   "while input impedance is 50 Ohm.\n",
+					   Channel_Names[ channel ], sens );
+				THROW( EXCEPTION );
+			}
+
+			print( SEVERE, "Can't set sensitivity of channel %s to %f V "
 				   "while input impedance is 50 Ohm.\n",
 				   Channel_Names[ channel ], sens );
-			THROW( EXCEPTION );
+			return;
 		}
 	}
 
@@ -706,28 +743,24 @@ bool tds754a_set_sens( int channel, double sens )
 	strcat( cmd, "\n" );
 	if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds754a_gpib_failure( );
-
-	return OK;
 }
 
 
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds754a_start_acquisition( void )
+void tds754a_start_acquisition( void )
 {
     /* Start an acquisition:
        1. clear the SESR register to allow SRQs
        2. set state to run
 	   3. set stop after sequence */
 
-    if ( ! tds754a_clear_SESR( ) ||
-         gpib_write( tds754a.device, "ACQ:STATE RUN;STOPA SEQ\n", 24 )
+
+	tds754a_clear_SESR( );
+    if ( gpib_write( tds754a.device, "ACQ:STATE RUN;STOPA SEQ\n", 24 )
 		 == FAILURE )
 		tds754a_gpib_failure( );
-
-
-	return OK;
 }
 
 
@@ -736,7 +769,7 @@ bool tds754a_start_acquisition( void )
 
 double tds754a_get_area( int channel, WINDOW *w, bool use_cursor )
 {
-	char cmd[ 50 ] = "MEASU:IMM:SOURCE ";
+	char cmd[ 50 ];
 	char reply[ 40 ];
 	long length = 40;
 
@@ -755,8 +788,7 @@ double tds754a_get_area( int channel, WINDOW *w, bool use_cursor )
 
 	if ( channel != tds754a.meas_source )
 	{
-		strcat( cmd, Channel_Names[ channel ] );
-		strcat( cmd, "\n" );
+		sprintf( cmd, "MEASU:IMM:SOURCE %s\n", Channel_Names[ channel ] );
 		if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds754a_gpib_failure( );
 		tds754a.meas_source = channel;
@@ -835,7 +867,7 @@ static double tds754a_get_area_wo_cursor( int channel, WINDOW *w )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
+void tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 						bool use_cursor )
 {
 	char cmd[ 50 ];
@@ -859,6 +891,7 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 		tds754a_get_sens( channel );
 		tds754a.is_sens[ channel ] = SET;
 	}
+
 	scale = 10.24 * tds754a.sens[ channel ] / ( double ) 0xFFFF;
 
 	/* Set the data source channel (if it's not already set correctly) */ 
@@ -879,7 +912,7 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 	{
 		sprintf( cmd, "DAT:START %ld;STOP %ld\n", 
 				 w != NULL ? w->start_num : 1,
-				 w != NULL ? w->end_num - 1 : tds754a.rec_len );
+				 w != NULL ? w->end_num : tds754a.rec_len );
 		if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds754a_gpib_failure( );
 	}
@@ -900,7 +933,7 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 	/* Calculate how long the curve (with header) is going to be and allocate
        enough memory (data are 2-byte integers) */
 
-	*length = w != NULL ? w->end_num - w->start_num : tds754a.rec_len;
+	*length = w != NULL ? w->end_num - w->start_num + 1 : tds754a.rec_len;
 	len = 2 * *length;
 	len2 = 1 + lrnd( floor( log10( len ) ) );
 	len1 = 1 + lrnd( floor( log10( len2 ) ) );
@@ -933,7 +966,6 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 		*( *data + i ) = scale * ( double ) *( ( short * ) b + i );
 
 	T_free( buffer );
-	return OK;
 }
 
 
@@ -1055,7 +1087,7 @@ void tds754a_free_running( void )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-bool tds754a_lock_state( bool lock )
+void tds754a_lock_state( bool lock )
 {
 	char cmd[ 100 ];
 	int channel;
@@ -1065,18 +1097,20 @@ bool tds754a_lock_state( bool lock )
 	   current sensitiviy settings */
 
 	if ( ! tds754a.lock_state && lock )
+	{
+		tds754a_state_check( 0.0, 0.0, 0.0 );
+
 		for ( channel = TDS754A_CH1; channel <= TDS754A_CH4; channel++ )
 		{
 			tds754a_get_sens( channel );
 			tds754a.is_sens[ channel ] = SET;
 		}
+	}
 
 	sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
 	if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds754a_gpib_failure( );
 	tds754a.lock_state = lock;
-
-	return OK;
 }
 
 

@@ -35,14 +35,13 @@ long get_file_length( const char *name, int *len );
 void eprint( int severity, bool print_fl, const char *fmt, ... );
 void print( int severity, const char *fmt, ... );
 bool fsc2_locking( void );
-int is_in( const char *supplied_in, const char **altern, int max );
+int is_in( const char *supplied_in, const char **alternatives, int max );
 void i2rgb( double h, int *rgb );
 void create_colors( void );
+Var *get_digitizer_channel_number( const char *channel_name );
 
 inline void raise_permissions( void );
 inline void lower_permissions( void );
-
-Var *get_digitizer_channel_number( const char *channel_name );
 
 inline unsigned long d2color( double a );
 

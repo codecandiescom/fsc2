@@ -44,7 +44,8 @@
 
 
 
-#define TDS754A_POINTS_PER_DIV 50
+#define TDS754A_POINTS_PER_DIV   50
+#define MAX_DISPLAYABLE_CHANNELS  4
 
 #define MAX_CHANNELS  13         /* number of channel names */
 
@@ -60,7 +61,7 @@
 #define TDS754A_REF2   8
 #define TDS754A_REF3   9
 #define TDS754A_REF4  10
-#define TDS754A_AUX   11         /* Auxiliary (for triggger only) */
+#define TDS754A_AUX   11         /* Auxiliary (for trigger only) */
 #define TDS754A_LIN   12         /* Line In (for triggger only) */
 
 
@@ -121,6 +122,7 @@ typedef struct
 	int meas_source;          // currently selected measurements source channel
 	int data_source;          // currently selected data source channel
 
+	bool channel_is_on[ MAX_CHANNELS ];
 	bool channels_in_use[ MAX_CHANNELS ];
 
 	bool lock_state;          // set if keyboard is locked
@@ -132,6 +134,7 @@ typedef struct
 
 int tds754a_init_hook( void );
 int tds754a_test_hook( void );
+int tds754a_end_of_test_hook( void );
 int tds754a_exp_hook( void );
 int tds754a_end_of_exp_hook( void );
 void tds754a_exit_hook( void );
@@ -139,6 +142,10 @@ void tds754a_exit_hook( void );
 
 Var *digitizer_name( Var *v );
 Var *digitizer_define_window( Var *v );
+Var *digitizer_change_window( Var *v );
+Var *digitizer_window_position( Var *v );
+Var *digitizer_window_width( Var *v );
+Var *digitizer_display_channel( Var *v );
 Var *digitizer_timebase( Var *v );
 Var *digitizer_time_per_point( Var *v );
 Var *digitizer_sensitivity( Var *v );
@@ -163,59 +170,66 @@ Var *digitizer_lock_keyboard( Var *v );
 const char *tds754a_ptime( double p_time );
 void tds754a_delete_windows( TDS754A *s );
 void tds754a_do_pre_exp_checks( void );
+void tds754a_window_checks( WINDOW *w );
+void tds754a_set_tracking( WINDOW *w );
 void tds754a_set_meas_window( WINDOW *w );
 void tds754a_set_curve_window( WINDOW *w );
 void tds754a_set_window( WINDOW *w );
 long tds754a_translate_channel( int dir, long channel );
 void tds754a_store_state( TDS754A *dest, TDS754A *src );
+void tds754a_state_check( double timebase, long rec_len, double trig_pos );
 
 bool tds754a_init( const char *name );
 double tds754a_get_timebase( void );
-bool tds754a_set_timebase( double timebase);
-bool tds754a_set_record_length( long num_points );
-bool tds754a_get_record_length( long *ret );
-bool tds754a_set_trigger_pos( double pos );
-bool tds754a_get_trigger_pos( double *ret );
+void tds754a_set_timebase( double timebase);
+void tds754a_set_record_length( long num_points );
+long tds754a_get_record_length( void );
+void tds754a_set_trigger_pos( double pos );
+double tds754a_get_trigger_pos( void );
 long tds754a_get_num_avg( void );
-bool tds754a_set_num_avg( long num_avg );
-int tds754a_get_acq_mode(void);
-bool tds754a_get_cursor_position( int cur_no, double *cp );
-bool tds754a_get_cursor_distance( double *cd );
-bool tds754a_set_trigger_channel( const char *name );
+void tds754a_set_num_avg( long num_avg );
+int tds754a_get_acq_mode( void );
+double tds754a_get_cursor_position( int cur_no );
+double tds754a_get_cursor_distance( void );
+void tds754a_set_trigger_channel( int channel );
 int tds754a_get_trigger_channel( void );
 void tds754a_gpib_failure( void );
-bool tds754a_clear_SESR( void );
+void tds754a_clear_SESR( void );
 void tds754a_finished( void );
-bool tds754a_set_cursor( int cur_num, double pos );
-bool tds754a_set_track_cursors( bool flag );
-bool tds754a_set_gated_meas( bool flag );
-bool tds754a_set_snap( bool flag );
-bool tds754a_display_channel( int channel );
+void tds754a_set_cursor( int cur_num, double pos );
+void tds754a_set_track_cursors( bool flag );
+void tds754a_set_gated_meas( bool flag );
+void tds754a_set_snap( bool flag );
+bool tds754a_display_channel_state( int channel );
+void tds754a_display_channel( int channel, bool on_flag );
 double tds754a_get_sens( int channel );
-bool tds754a_set_sens( int channel, double val );
-bool tds754a_start_acquisition( void );
+void tds754a_set_sens( int channel, double val );
+void tds754a_start_acquisition( void );
 double tds754a_get_area( int channel, WINDOW *w, bool use_cursor );
-bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
+void tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 						bool use_cursor );
 double tds754a_get_amplitude( int channel, WINDOW *w, bool use_cursor );
 void tds754a_free_running( void );
-bool tds754a_lock_state( bool lock );
+void tds754a_lock_state( bool lock );
 
 
+#define NUM_CH_NAMES 13
 
 #ifdef TDS754A_MAIN
 
 TDS754A tds754a;
-const char *Channel_Names[ ] = { "CH1", "CH2", "CH3", "CH4",
-								 "MATH1", "MATH2", "MATH3", "REF1",
-								 "REF2", "REF3", "REF4",
-								 "AUX", "LINE" };
+const char *Channel_Names[ NUM_CH_NAMES ] =
+										  { "CH1", "CH2", "CH3", "CH4",
+											"MATH1", "MATH2", "MATH3", "REF1",
+  											"REF2", "REF3", "REF4",
+								 			"AUX", "LINE" };
 #else
 
 extern TDS754A tds754a;
-extern const char *Channel_Names[ ];
+extern const char *Channel_Names[ NUM_CH_NAMES ];
 
 #endif
+
 
 
 enum {

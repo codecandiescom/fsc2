@@ -26,8 +26,8 @@
 
 
 static void tds754a_window_check_1( bool *is_start, bool *is_width );
-static void tds754a_window_check_2( void );
-static void tds754a_window_check_3( void );
+static void tds754a_window_check_2( WINDOW *w );
+static void tds754a_window_check_3( WINDOW *w );
 
 
 /*-----------------------------------------------------------------*/
@@ -76,21 +76,7 @@ void tds754a_do_pre_exp_checks( void )
 	WINDOW *w;
 	bool is_start, is_width;
     double width;
-	int i;
 
-
-	/* If a trigger channel has been set in the PREPARATIONS section send
-	   it to the digitizer */
-
-	if ( tds754a.is_trigger_channel )
-		tds754a_set_trigger_channel( 
-			Channel_Names[ tds754a.trigger_channel ] );
-
-	/* Switch all channels on that get used in the measurements */
-
-	for ( i = 0; i <= TDS754A_REF4; i++)
-		if ( tds754a.channels_in_use[ i ] )
-			tds754a_display_channel( i );
 
 	/* Remove all unused windows and test if for all other windows the start
 	   position and the width is set */
@@ -98,8 +84,8 @@ void tds754a_do_pre_exp_checks( void )
 	tds754a_window_check_1( &is_start, &is_width );
 
 	/* That's all if no windows have been defined we switch off gated
-	   measurement mode, i.e. all measurement operations are done on the
-	   whole curve */
+	   measurement mode, i.e. all measurement operations are automatically
+	   done on the whole curve */
 
 	if ( tds754a.w == NULL )
 	{
@@ -108,8 +94,8 @@ void tds754a_do_pre_exp_checks( void )
 		return;
 	}
 
-	/* If start position isn't set for all windows set it to the position of
-	   the left cursor */
+	/* If start position hasn't been set for all windows set it to the
+	   position of the left cursor on the digitizer screen */
 
 	if ( ! is_start )
 		for ( w = tds754a.w; w != NULL; w = w->next )
@@ -119,12 +105,12 @@ void tds754a_do_pre_exp_checks( void )
 				w->is_start = SET;
 			}
 
-	/* If not get the distance of the cursors on the digitizers screen and
-	   use it as the default width. */
+	/* If witdh hasn't been set for all windows get the distance of the
+	   cursors on the digitizer screen and use it as the default width. */
 
 	if ( ! is_width )
 	{
-		tds754a_get_cursor_distance( &width );
+		width = tds754a_get_cursor_distance( );
 
 		width = fabs( width );
 
@@ -143,11 +129,11 @@ void tds754a_do_pre_exp_checks( void )
 			}
 	}
 
-	/* Make sure the windows are ok, i.e. cursorsd can be positioned exactly
+	/* Make sure the windows are ok, i.e. cursors can be positioned exactly
 	   and are still within the range of the digitizers record length */
 
-	tds754a_window_check_2( );
-	tds754a_window_check_3( );
+	for ( w = tds754a.w; w != NULL; w = w->next )
+		tds754a_window_checks( w );
 
 	/* Now that all windows are properly set we switch on gated measurements */
 
@@ -157,22 +143,13 @@ void tds754a_do_pre_exp_checks( void )
 	/* If the widths of all windows are equal we switch on tracking cursor
 	   mode and set the cursors to the position of the first window */
 
-	if ( tds754a.is_equal_width )
-	{
-		tds754a_set_cursor( 1, tds754a.w->start );
-		tds754a_set_cursor( 2, tds754a.w->start + tds754a.w->width );
-		tds754a_set_track_cursors( SET );
-		tds754a.cursor_pos = tds754a.w->start;
-	}
-	else
-		tds754a_set_track_cursors( UNSET );
+	tds754a_set_tracking( tds754a.w );
 }
 
 
-/*---------------------------------------------------------------*/
-/* Removes unused windows and checks if for all the used windows */
-/* a width is set - this is returned to the calling function     */
-/*---------------------------------------------------------------*/
+/*------------------------------------------*/
+/* Checks if for all windows a width is set */
+/*------------------------------------------*/
 
 static void tds754a_window_check_1( bool *is_start, bool *is_width )
 {
@@ -191,143 +168,349 @@ static void tds754a_window_check_1( bool *is_start, bool *is_width )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* It's not possible to set arbitrary cursor positions and distances -  */
-/* they've got to be multiples of the smallest time resolution of the   */
-/* digitizer, which is the time base divided by TDS754A_POINTS_PER_DIV. */
-/* Rhe function tests if the requested cursor position and distance     */
-/* fit this requirement and if not the values are readjusted. While     */
-/* settings for the position and width of the window not being exact    */
-/* multiples of the resultion are probably no serious errors a window   */
-/* width of less than the resolution is a hint for a real problem. And  */
-/* while we're at it we also try to find out if all window widths are   */
-/* equal - than we can use tracking cursors.                            */
-/*----------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
 
-static void tds754a_window_check_2( void )
+void tds754a_window_checks( WINDOW *w )
 {
-	WINDOW *w;
+	tds754a_window_check_2( w );
+	tds754a_window_check_3( w );
+}
+
+
+/*---------------------------------------------------------------------*/
+/* It's not possible to set arbitrary cursor positions and distances,  */
+/* they have to be multiples of the smallest time resolution of the    */
+/* digitizer which is the time base divided by TDS754A_POINTS_PER_DIV. */
+/* The function tests if the requested cursor positions and distance   */
+/* fit these requirements and if not the values are readjusted. While  */
+/* settings for the position and width of the window not being exact   */
+/* multiples of the resultion are probably no serious errors a window  */
+/* width of less than the resolution is a hint for a real problem. And */
+/* while we're at it we also try to find out if all window widths are  */
+/* equal - than we can use tracking cursors.                           */
+/*---------------------------------------------------------------------*/
+
+static void tds754a_window_check_2( WINDOW *w )
+{
     double dcs, dcd, dtb, fac;
     long tb, cs, cd;
 	char *buffer;
 
 
-	tds754a.is_equal_width = SET;
+	/* Can't do checks if window position or digitizers timebase is unknown */
 
-	for ( w = tds754a.w; w != NULL; w = w->next )
+	if ( FSC2_MODE != EXPERIMENT &&
+		 ( ! w->is_start || ! tds754a.is_timebase ) )
+		return;
+
+	dcs = w->start;
+	dtb = tds754a.timebase;
+	fac = 1.0;
+
+	while ( ( fabs( dcs ) != 0.0 && fabs( dcs ) < 1.0 ) ||
+			fabs( dtb ) < 1.0 )
 	{
-		dcs = w->start;
-		dtb = tds754a.timebase;
-		fac = 1.0;
+		dcs *= 1000.0;
+		dtb *= 1000.0;
+		fac *= 0.001;
+	}
 
-		while ( ( fabs( dcs ) != 0.0 && fabs( dcs ) < 1.0 ) ||
-				fabs( dtb ) < 1.0 )
-		{
-			dcs *= 1000.0;
-			dtb *= 1000.0;
-			fac *= 0.001;
-		}
-		cs = lrnd( TDS754A_POINTS_PER_DIV * dcs );
-		tb = lrnd( dtb );
+	cs = lrnd( TDS754A_POINTS_PER_DIV * dcs );
+	tb = lrnd( dtb );
 
-		if ( cs % tb )        /* window start not multiple of a point ? */
-		{
-			cs = ( cs / tb ) * tb;
-			dcs = cs * fac / TDS754A_POINTS_PER_DIV;
-			buffer = T_strdup( tds754a_ptime( dcs ) );
-			print( WARN, "Start point of window %ld had to be readjusted from "
-				   "%s to %s.\n", w->num, tds754a_ptime( w->start ), buffer );
-			T_free( buffer );
-			w->start = dcs;
-		}
+	if ( cs % tb )        /* window start not multiple of a point ? */
+	{
+		cs = ( cs / tb ) * tb;
+		dcs = cs * fac / TDS754A_POINTS_PER_DIV;
+		buffer = T_strdup( tds754a_ptime( dcs ) );
+		print( WARN, "Start point of %ld. window had to be readjusted from "
+			   "%s to %s.\n", w->num + 1 - WINDOW_START_NUMBER,
+			   tds754a_ptime( w->start ), buffer );
+		T_free( buffer );
+		w->start = dcs;
+	}
 
-		dcd = w->width;
-		dtb = tds754a.timebase;
-		fac = 1.0;
+	/* Can't do further checks if window width is still unknown */
 
-		while ( fabs( dcd ) < 1.0 || fabs( dtb ) < 1.0 )
-		{
-			dcd *= 1000.0;
-			dtb *= 1000.0;
-			fac *= 0.001;
-		}
-		cd = lrnd( TDS754A_POINTS_PER_DIV * dcd );
-		tb = lrnd( dtb );
+	if ( ! w->is_width )
+		return;
 
-		if ( labs( cd ) < tb )     /* window smaller than one point ? */
-		{
-			dcd = tds754a.timebase / TDS754A_POINTS_PER_DIV;
-			buffer = T_strdup( tds754a_ptime( dcd ) );
-			print( SEVERE, "Width of window %ld had to be readjusted from %s "
-				   "to %s.\n", w->num, tds754a_ptime( w->width  ), buffer );
-			T_free( buffer );
-			w->width = dcd;
-		}
-		else if ( cd % tb )        /* window width not multiple of a point ? */
-		{
-			cd = ( cd / tb ) * tb;
-			dcd = cd * fac / TDS754A_POINTS_PER_DIV;
-			buffer = T_strdup( tds754a_ptime( dcd ) );
-			print( WARN, "Width of window %ld had to be readjusted from %s to "
-				   "%s.\n", w->num, tds754a_ptime( w->width ), buffer );
-			T_free( buffer );
-			w->width = dcd;
-		}
+	dcd = w->width;
+	dtb = tds754a.timebase;
+	fac = 1.0;
 
-		/* Check if the windows have all the same length */
+	while ( fabs( dcd ) < 1.0 || fabs( dtb ) < 1.0 )
+	{
+		dcd *= 1000.0;
+		dtb *= 1000.0;
+		fac *= 0.001;
+	}
 
-		if ( w != tds754a.w && w->width != tds754a.w->width )
-			tds754a.is_equal_width = UNSET;
+	cd = lrnd( TDS754A_POINTS_PER_DIV * dcd );
+	tb = lrnd( dtb );
+
+	if ( labs( cd ) < tb )         /* window smaller than one point ? */
+	{
+		dcd = tds754a.timebase / TDS754A_POINTS_PER_DIV;
+		buffer = T_strdup( tds754a_ptime( dcd ) );
+		print( SEVERE, "Width of %ld. window had to be readjusted from %s to "
+			   "%s.\n", w->num + 1 - WINDOW_START_NUMBER,
+			   tds754a_ptime( w->width ), buffer );
+		T_free( buffer );
+		w->width = dcd;
+	}
+	else if ( cd % tb )            /* window width not multiple of a point ? */
+	{
+		cd = ( cd / tb ) * tb;
+		dcd = cd * fac / TDS754A_POINTS_PER_DIV;
+		buffer = T_strdup( tds754a_ptime( dcd ) );
+		print( WARN, "Width of %ld. window had to be readjusted from %s to "
+			   "%s.\n", w->num + 1 - WINDOW_START_NUMBER,
+			   tds754a_ptime( w->width ), buffer );
+		T_free( buffer );
+		w->width = dcd;
 	}
 }
 
 
 /*-------------------------------------------------------------*/
-/* This function checks if the windows fit into the digitizers */
-/* measurement window and calculate the positions of the start */
+/* This function checks if the window fits into the digitizers */
+/* measurement window and calculates the position of the start */
 /* and the end of the windows in units of points.              */
 /*-------------------------------------------------------------*/
 
-static void tds754a_window_check_3( void )
+static void tds754a_window_check_3( WINDOW *w )
 {
-	WINDOW *w;
     double window;
+	char *buf1, *buf2, *buf3;
+	double start, width;
 
+
+	/* Can't do checks if timebase, record length, trigger position,
+	   window position or width is still unknown */
+
+	if ( FSC2_MODE != EXPERIMENT && 
+		 ( ! tds754a.is_timebase || ! tds754a.is_rec_len ||
+		   ! tds754a.is_trig_pos || ! w->is_start || ! w->is_width ) )
+		return;
+
+	/* Calculate the start and end position of the window in digitizer
+	   point units (take care: point numbers start with 1 and the end number
+	   is *included* when fetching a curve) */
 
     window = tds754a.timebase * tds754a.rec_len / TDS754A_POINTS_PER_DIV;
 
-    for ( w = tds754a.w; w != NULL; w = w->next )
-    {
-        if ( w->start > ( 1.0 - tds754a.trig_pos ) * window ||
-             w->start + w->width > ( 1.0 - tds754a.trig_pos ) * window ||
-             w->start < - tds754a.trig_pos * window ||
-             w->start + w->width < - tds754a.trig_pos * window )
-        {
-			print( FATAL, "Window %ld doesn't fit into current digitizer time "
-				   "range.\n", w->num );
+	w->start_num = lrnd( ( w->start + tds754a.trig_pos * window )
+						 * TDS754A_POINTS_PER_DIV / tds754a.timebase ) + 1;
+	w->end_num = lrnd( ( w->start + w->width + tds754a.trig_pos * window )
+						 * TDS754A_POINTS_PER_DIV / tds754a.timebase );
+
+	fsc2_assert( w->start_num <= w->end_num );
+
+	/* Check that window does not start too early */
+
+	if ( w->start_num < 1 )
+	{
+		if ( FSC2_MODE != EXPERIMENT )
+		{
+			print( FATAL, " %ld. window starts too early.\n",
+				   w->num + 1 - WINDOW_START_NUMBER );
 			THROW( EXCEPTION );
 		}
 
-		/* Take care: Numbers start from 1 ! */
+		/* Move the start position of the window to the first point */
 
-		w->start_num = lrnd( ( w->start + tds754a.trig_pos * window )
-							 * TDS754A_POINTS_PER_DIV / tds754a.timebase ) + 1;
-		w->end_num = lrnd( ( w->start + w->width
-							 + tds754a.trig_pos * window )
-						   * TDS754A_POINTS_PER_DIV / tds754a.timebase ) + 1;
+		w->start_num = 1;
+		start = - tds754a.trig_pos * window;
 
-		if ( w->end_num - w->start_num <= 0 )
-        {
-			print( FATAL, "Window %ld has width of less than 1 point.\n",
-				   w->num );
+		/* If the end point is still within the record length nothing more
+		   got to be done, otheriwse the window width has to be reduced */
+
+		if ( w->end_num - w->start_num + 1 <= tds754a.rec_len )
+		{
+			buf1 = T_strdup( tds754a_ptime( w->start ) );
+			print( SEVERE, "Position of %ld. window had to be shifted from "
+				   "%s to %s.\n", w->num + 1 - WINDOW_START_NUMBER, buf1,
+				   tds754a_ptime( start ) );
+			T_free( buf1 );
+
+			w->end_num = w->end_num - w->start_num + 1;
+			w->start = start;
+		}
+		else
+		{
+			w->end_num = tds754a.rec_len;
+			width = w->end_num * tds754a.timebase / TDS754A_POINTS_PER_DIV;
+
+			buf1 = T_strdup( tds754a_ptime( w->start ) );
+			buf2 = T_strdup( tds754a_ptime( w->width ) );
+			buf3 = T_strdup( tds754a_ptime( start ) );
+
+			print( SEVERE, "Position and width of %ld. window had to be "
+				   "readjusted from %s and %s to %s and %s.\n",
+				   w->num + 1 - WINDOW_START_NUMBER, buf1, buf2, buf3,
+				   tds754a_ptime( width ) );
+
+			T_free( buf3 );
+			T_free( buf2 );
+			T_free( buf1 );
+
+			w->start = start;
+			w->width = width;
+		}
+	}
+
+	/* If the start position of the window is in the correct range but
+	   the end point is too late reduce the window width (at least if we're
+	   already running the experiment */
+
+	if ( w->start_num < tds754a.rec_len && w->end_num > tds754a.rec_len )
+	{
+		if ( FSC2_MODE == EXPERIMENT )
+		{
+			print( FATAL, "Width of %ld. window is too large.\n",
+				   w->num + 1 - WINDOW_START_NUMBER );
 			THROW( EXCEPTION );
 		}
-    }
+
+		w->end_num = tds754a.rec_len;
+		width = ( tds754a.rec_len - w->start_num + 1 )
+				* tds754a.timebase / TDS754A_POINTS_PER_DIV;
+
+		buf1 = T_strdup( tds754a_ptime( w->width ) );
+		print( SEVERE, "Width of %ld. window had to be readjusted from %s to "
+			   "%s.\n", w->num + 1 - WINDOW_START_NUMBER, buf1,
+			   tds754a_ptime( width ) );
+		T_free( buf1 );
+
+		w->width = width;
+	}
+
+	/* Check that the window doesn't start too late */
+
+	if ( w->start_num > tds754a.rec_len )
+	{
+		if ( FSC2_MODE == EXPERIMENT )
+		{
+			print( FATAL, "%ld. window starts too late.\n",
+				   w->num + 1 - WINDOW_START_NUMBER );
+			THROW( EXCEPTION );
+		}
+
+		/* If the window width isn't larger than the record length shift
+		   the window start position to the latest possible point, otherwise
+		   use the whole record length */
+
+		if ( w->end_num - w->start_num + 1 <= tds754a.rec_len )
+		{
+			w->start_num = tds754a.rec_len - ( w->end_num - w->start_num );
+			start = ( w->start_num - 1 )
+					* tds754a.timebase / TDS754A_POINTS_PER_DIV
+					- tds754a.trig_pos * window;
+			w->end_num = tds754a.rec_len;
+
+			buf1 = T_strdup( tds754a_ptime( w->start ) );
+			print( SEVERE, "Position of %ld. window had to be shifted from "
+				   "%s to %s.\n", w->num + 1 - WINDOW_START_NUMBER, buf1,
+				   tds754a_ptime( start ) );
+			T_free( buf1 );
+
+			w->start = start;
+		}
+		else
+		{
+			w->start_num = 1;
+			start = - tds754a.trig_pos * window;
+			w->end_num = tds754a.rec_len;
+			width = tds754a.rec_len 
+					* tds754a.timebase / TDS754A_POINTS_PER_DIV;
+
+			buf1 = T_strdup( tds754a_ptime( w->start ) );
+			buf2 = T_strdup( tds754a_ptime( w->width ) );
+			buf3 = T_strdup( tds754a_ptime( start ) );
+
+			print( SEVERE, "Position and width of %ld. window had to be "
+				   "readjusted from %s and %s to %s and %s.\n",
+				   w->num + 1 - WINDOW_START_NUMBER, buf1, buf2, buf3,
+				   tds754a_ptime( width ) );
+
+			T_free( buf3 );
+			T_free( buf2 );
+			T_free( buf1 );
+
+			w->start = start;
+			w->width = width;
+		}
+	}
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* This function fisrt checks if all window widths are idendentical. */
+/* Then it positions the cursors at the end points of the window the */
+/* function got passed (or to both ends of the digitizers record     */
+/* length if a NULL pointer was passed to the function. Finally, it  */
+/* switches tracking cursors on or off, depending if the widths of   */
+/* all windows are equal or not.                                     */
+/*-------------------------------------------------------------------*/
+
+void tds754a_set_tracking( WINDOW *w )
+{
+	WINDOW *ww;
+	double window;
+
+
+	/* Check if we can use tracking cursors, i.e. if all window widths are
+	   equal */
+
+	tds754a.is_equal_width = SET;
+
+	if ( tds754a.w != NULL )
+		for ( ww = tds754a.w->next; ww != NULL; ww = ww->next )
+			if ( tds754a.w->width != ww->width )
+			{
+				tds754a.is_equal_width = UNSET;
+				break;
+			}
+
+	/* Set the cursor to the positions of the window we got passed as
+	   argument (switch off tracking before we do so) and then switch
+	   tracking cursors on if the window widths are all equal. */
+
+    window = tds754a.timebase * tds754a.rec_len / TDS754A_POINTS_PER_DIV;
+
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		tds754a_set_track_cursors( UNSET );
+		if ( w != NULL )
+		{
+			tds754a_set_cursor( 1, w->start );
+			tds754a_set_cursor( 2, w->start + w->width );
+		}
+		else
+		{
+			tds754a_set_cursor( 1, - tds754a.trig_pos * window );
+			tds754a_set_cursor( 2, ( 1.0 - tds754a.trig_pos ) * window );
+		}
+	}
+
+	tds754a.cursor_pos = w != NULL ? w->start : - tds754a.trig_pos * window;
+
+	if ( FSC2_MODE == EXPERIMENT )
+		tds754a_set_track_cursors( tds754a.is_equal_width );
+}
+	
+
+/*------------------------------------------------------------------*/
+/* This function is called for measurements on curves (i.e. area or */
+/* amplitude). If a window gets passed to the function the cursors  */
+/* positioned a the ends of the window and gated measurement mode   */
+/* is switched on (i.e. the device will do the calculation on the   */
+/* points between the cursors automatically), otherwise gated       */
+/* measurement mode is switched off and the device will do the      */
+/* calculation on the complete curve.                               */
+/*------------------------------------------------------------------*/
 
 void tds754a_set_meas_window( WINDOW *w )
 {
@@ -356,8 +539,12 @@ void tds754a_set_meas_window( WINDOW *w )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*----------------------------------------------------------*/
+/* This function is the equivalent to the previous function */
+/* 'tds754a_set_meas_window()' but for cases were not a     */
+/* measurement on a curve is to be done but when a curve    */
+/* is to be fetched from the digitizer.                     */
+/*----------------------------------------------------------*/
 
 void tds754a_set_curve_window( WINDOW *w )
 {
@@ -382,8 +569,13 @@ void tds754a_set_curve_window( WINDOW *w )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* This function sets the cursors to the end points of the window */
+/* it got passed as its argument. If all windows have equal width */
+/* we can be sure tracking mode has already been set and only the */
+/* first cursor must be repositioned, otherwise both cursors need */
+/* to be set.                                                     */
+/*----------------------------------------------------------------*/
 
 void tds754a_set_window( WINDOW *w )
 {
@@ -407,11 +599,17 @@ void tds754a_set_window( WINDOW *w )
 		tds754a_set_cursor( 1, w->start );
 		tds754a_set_cursor( 2, w->start + w->width );
 	}
+
+	tds754a.cursor_pos = w->start;
 }
 
 
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* The function is used to translate back and forth between the */
+/* channel numbers the way the user specifies them in the EDL   */
+/* program and the channel numbers as specified in the header   */
+/* file.                                                        */
+/*--------------------------------------------------------------*/
 
 long tds754a_translate_channel( int dir, long channel )
 {
@@ -530,8 +728,18 @@ long tds754a_translate_channel( int dir, long channel )
 }
 
 
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* During preparations section several function calls change the   */
+/* structure describing the digitzers internal state. When the     */
+/* experiment starts the digitizer has to be set up to coincide    */
+/* with this state. But during the test run as well as during      */
+/* the experiment this state description usually becomes changed.  */
+/* To be able to repeat the experiment always starting with the    */
+/* same state of the digitizer (at least as far as the user has    */
+/* defined it, the state directly before the test run or an        */
+/* experiment has to be stored and, following a test run or an     */
+/* experiment has to be reset. And that's what this function does. */
+/*-----------------------------------------------------------------*/
 
 void tds754a_store_state( TDS754A *dest, TDS754A *src )
 {
@@ -566,6 +774,139 @@ void tds754a_store_state( TDS754A *dest, TDS754A *src )
 		dw->next = NULL;
 	}
 }
+
+
+/*--------------------------------------------------------------*/
+/* Whenever the user changes timebase, record length or trigger */
+/* position either via the program or manually (if the lock of  */
+/* the keyboard is switched off) the positions of the windows   */
+/* have to be recalculated and, if necessary, readjusted.       */
+/* Unfortunately, we can't check without a lot of additional    */
+/* work if the user changes on of the parameters mentioned      */
+/* above manually. Therefor, this function should be called     */
+/* whenever a function might change, query or just rely on the  */
+/* validity of this parameters and the digitizers keyboard      */
+/* isn't locked.                                                */
+/*--------------------------------------------------------------*/
+
+void tds754a_state_check( double timebase, long rec_len, double trig_pos )
+{
+	WINDOW *w;
+	double window;
+	char *buf1, *buf2, *buf3;
+	double start, width;
+
+
+	/* During the experiment we don't care about the arguments passed to the
+	   function but ask the digitizer (and do nothing if they didn't change).
+	   During the test run or preparation we can do the checks only if the
+	   timebase, record length and trigger position have already been set. */
+
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		timebase = tds754a_get_timebase( );
+		rec_len = tds754a_get_record_length( );
+		trig_pos = tds754a_get_trigger_pos( );
+
+		if ( timebase == tds754a.timebase &&
+			 rec_len  == tds754a.rec_len  &&
+			 trig_pos == tds754a.trig_pos )
+			return;
+	}
+	else
+	{
+		if ( ! tds754a.is_timebase || ! tds754a.is_rec_len ||
+			 ! tds754a.is_trig_pos )
+			return;
+	}
+
+	/* In principle, the windows should simply stay at their positions (as
+	   the cursors do) but if the record length got smaller we have to do
+	   also some checking and, if necessary, readjustments.*/
+
+    window = timebase * rec_len / TDS754A_POINTS_PER_DIV;
+
+	for ( w = tds754a.w; w != NULL; w = w->next )
+	{
+		if ( rec_len < tds754a.rec_len )
+		{
+			/* If the start of window is still within the valid range but the
+			   end is too late reduce the length. */
+
+			if ( w->start_num < rec_len && w->end_num > rec_len )
+			{
+				w->end_num = rec_len;
+				width = ( rec_len - w->start_num + 1 )
+					    * timebase / TDS754A_POINTS_PER_DIV;
+
+				buf1 = T_strdup( tds754a_ptime( w->width ) );
+				print( SEVERE, "Width of %ld. window had to be readjusted "
+					   "from %s to %s.\n", w->num + 1 - WINDOW_START_NUMBER,
+					   buf1, tds754a_ptime( width ) );
+				T_free( buf1 );
+
+				w->width = width;
+			}
+			else if ( w->start_num > rec_len )
+			{
+				/* If the window width isn't larger than the record length
+				   shift the window start position to the latest possible
+				   point, otherwise use the whole record length */
+
+				if ( w->end_num - w->start_num + 1 <= rec_len )
+				{
+					w->start_num = rec_len - ( w->end_num - w->start_num );
+					start = ( w->start_num - 1 )
+							* timebase / TDS754A_POINTS_PER_DIV
+							- trig_pos * window;
+					w->end_num = rec_len;
+
+					buf1 = T_strdup( tds754a_ptime( w->start ) );
+					print( SEVERE, "Position of %ld. window had to be shifted "
+						   "from %s to %s.\n",
+						   w->num + 1 - WINDOW_START_NUMBER, buf1,
+						   tds754a_ptime( start ) );
+					T_free( buf1 );
+				}
+				else
+				{
+					w->start_num = 1;
+					start = - trig_pos * window;
+					w->end_num = rec_len;
+					width = rec_len * timebase / TDS754A_POINTS_PER_DIV;
+
+					buf1 = T_strdup( tds754a_ptime( w->start ) );
+					buf2 = T_strdup( tds754a_ptime( w->width ) );
+					buf3 = T_strdup( tds754a_ptime( start ) );
+
+					print( SEVERE, "Position and width of %ld. window had to "
+						   "be readjusted from %s and %s to %s and %s.\n",
+						   w->num + 1 - WINDOW_START_NUMBER, buf1, buf2, buf3,
+						   tds754a_ptime( width ) );
+
+					T_free( buf3 );
+					T_free( buf2 );
+					T_free( buf1 );
+				}
+			}
+		}
+
+		/* Recalculate the windows start time and width (we assume it just
+		   stays in exacty the same position) */
+
+		w->start = ( w->start_num - 1 ) * timebase / TDS754A_POINTS_PER_DIV
+				   - trig_pos * window;
+		w->width = ( w->end_num - 1 ) * timebase / TDS754A_POINTS_PER_DIV
+				   - trig_pos * window - w->start;
+	}
+
+	tds754a.timebase = timebase;
+	tds754a.rec_len  = rec_len;
+	tds754a.trig_pos = trig_pos;
+
+	if ( FSC2_MODE == EXPERIMENT )
+		tds754a.cursor_pos = tds754a_get_cursor_position( 1 );
+}	
 
 
 /*
