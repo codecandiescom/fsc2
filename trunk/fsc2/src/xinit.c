@@ -483,7 +483,7 @@ bool dl_fsc2_rsc( void )
 	handle = dlopen( lib_name, RTLD_NOW );
 
 	if ( handle == NULL )
-		handle = dlopen( strrchr( lib_name, '/' ) + 1, RTLD_NOW );
+		handle = dlopen( strip_path( lib_name ), RTLD_NOW );
 
 	if ( handle == NULL )
 	{

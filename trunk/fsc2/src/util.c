@@ -153,6 +153,18 @@ const char *strip_path( const char *path )
 }
 
 
+/*--------------------------------------------------------------------*/
+/* Function returns the string "/" if the string passed to it did not */
+/* end with a slash, otherwise it returns the empty string, "".       */
+/*--------------------------------------------------------------------*/
+
+
+const char *slash( const char *path )
+{
+	return path[ strlen( path ) - 1 ] != '/' ? "/" : "";
+}
+
+
 /*-----------------------------------------------------------------*/
 /* get_file_length() returns the number of lines in a file as well */
 /* as the number of digits in the number of lines. To do so a      */ 

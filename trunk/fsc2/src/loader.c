@@ -155,9 +155,7 @@ static void load_functions( Device *dev )
 	/* Assemble name of library to be loaded - this will also work for cases
 	   where the device name contains a relative path */
 
-	lib_name = get_string( "%s%s%s.so", libdir,
-						   libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "",
-						   dev->name );
+	lib_name = get_string( "%s%s%s.so", libdir, slash( libdir ), dev->name );
 
 	/* Try to open the library. If it can't be found in the place defined at
 	   compilation time give it another chance by checking the paths defined
