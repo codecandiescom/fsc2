@@ -508,7 +508,7 @@ static void dg2020_distribute_channels( void )
 
 /*--------------------------------------------------------------------------*/
 /* The phase matrix created here has as many rows as there are phase types  */
-/* (5 for the Berlin pulser) and as many columns as there are 'stages' in   */
+/* (4 for the Berlin pulser) and as many columns as there are 'stages' in   */
 /* the phase cycle. Its elements are the numbers of the channels to be used */
 /* for the corresponding phase type in the corresponding stage of the phase */
 /* cycle. As lang as there are no repetitions of the same phase pattern in  */
@@ -574,7 +574,7 @@ static void dg2020_pulse_start_setup( void )
 
 		dg2020_do_checks( f );
 
-		/* Set for each pulse the channel(s) it belongs to */
+		/* For each pulse set the channel(s) it belongs to */
 
 		for ( j = 0; j < f->num_pulses; j++ )
 		{
@@ -588,8 +588,8 @@ static void dg2020_pulse_start_setup( void )
 			else
 				for ( k = 0; k < f->pc_len; k++ )
 					f->pulses[ j ]->channel[ k ] =
-									  f->pcm[ f->pulses[ j ]->pc->sequence[ k ]
-									  * f->pc_len + k ];
+									f->pcm[   f->pulses[ j ]->pc->sequence[ k ]
+										    * f->pc_len + k ];
 		}
 	}
 
@@ -643,8 +643,13 @@ static void dg2020_pulse_start_setup( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* For functions that have more than one pod assigned to them but for   */
+/* which no phase setup was found in the EDL script a dummy phase setup */
+/* is created here: only the first of the pods found in the EDL script  */
+/* is going to be used for the pulses of this function, all other pods  */
+/* assigned to it will stay low all of the time.                        */
+/*----------------------------------------------------------------------*/
 
 static PHASE_SETUP *dg2020_create_dummy_phase_setup( FUNCTION *f )
 {
