@@ -346,8 +346,8 @@ Var *func_call( Var *f )
 
 		if ( ac > f->dim )
 		{
-			eprint( WARN, SET, "Too many arguments for function `%s'.\n",
-					f->name );
+			eprint( WARN, SET, "Too many arguments for function `%s', "
+					"discarding superfluous arguments.\n", f->name );
 
 			for ( ac = 0, ap = f->next; ac < f->dim; ++ac, ap = ap->next )
 				;
