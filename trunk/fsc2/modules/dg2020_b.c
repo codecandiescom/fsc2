@@ -228,7 +228,8 @@ int dg2020_b_exp_hook( void )
 
 	/* Now we have to tell the pulser about all the pulses */
 
-	dg2020_reorganize_pulses( UNSET );
+	if ( ! dg2020_reorganize_pulses( UNSET ) )
+		return 0;
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 		if ( dg2020.function[ i ].is_used )

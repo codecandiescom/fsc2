@@ -24,14 +24,10 @@ void dg2020_do_update( void )
 	if ( ! dg2020_is_needed )
 		return;
 
-	/* Resort the pulses and, while in a test run, we also have to check that
-	   the new pulse settings are reasonable */
+	/* Resort the pulses and check that the new pulse settings are
+	   reasonable and finally commit all changes */
 
-	dg2020_reorganize_pulses( TEST_RUN );
-
-	/* Finally commit all changes */
-
-	if ( ! TEST_RUN )
+	if ( dg2020_reorganize_pulses( TEST_RUN ) && ! TEST_RUN )
 		dg2020_update_data( );
 
 	dg2020.needs_update = UNSET;
@@ -39,14 +35,15 @@ void dg2020_do_update( void )
 
 
 /*---------------------------------------------------------------------------
-  This function sorts the pulses, and if called with 'flag' set, also checks
-  that the pulses don't overlap.
+  This function sorts the pulses and checks that the pulses don't overlap.
 ---------------------------------------------------------------------------*/
 
-void dg2020_reorganize_pulses( bool flag )
+bool dg2020_reorganize_pulses( bool flag )
 {
 	int i;
 	FUNCTION *f;
+	PULSE *p;
+	int i;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -62,16 +59,41 @@ void dg2020_reorganize_pulses( bool flag )
 			qsort( f->pulses, f->num_pulses, sizeof( PULSE * ),
 				   dg2020_start_compare );
 
-		/* Pulse positions have only to be checked in the test run, afterwards
-		   we can assume that they are ok */
+		/* Check the new pulse positions and lengths, if they're not ok stop
+		   program if it's doing the test run, while for the real run just
+		   reset the pulses to their previous positions and lengths */
 
-		if ( flag )
+		TRY
+		{
 			dg2020_do_checks( f );
+			TRY_SUCCESS;
+		}
+		CATCH( EXCEPTION )
+		{
+			if ( flag )
+				THROW( EXCEPTION );
 
-		/* send all the changes to the pulser */
+			for ( p = dg2020_Pulses; p != NULL; p = p->next )
+			{
+				p = f->pulses[ i ];
+
+				if ( p->is_old_pos )
+					p->pos = p->old_pos;
+				if ( p->is_old_len )
+					p->len = p->old_len;
+				p->is_active = IS_ACTIVE( p );
+				p->needs_update = UNSET;
+			}
+
+			return FAIL;
+		}
+
+		/* Send all the changes to the pulser */
 
 		dg2020_commit( f, flag );
 	}
+
+	return OK;
 }
 
 

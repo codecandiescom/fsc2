@@ -367,7 +367,7 @@ void dg2020_init_setup( void );
 /* Functions from dg2020_run.c */
 
 void dg2020_do_update( void );
-void dg2020_reorganize_pulses( bool flag );
+bool dg2020_reorganize_pulses( bool flag );
 void dg2020_do_checks( FUNCTION *f );
 void dg2020_full_reset( void );
 PULSE *dg2020_delete_pulse( PULSE *p );
