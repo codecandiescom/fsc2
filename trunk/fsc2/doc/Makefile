@@ -20,10 +20,13 @@
 # Boston, MA 02111-1307, USA.
 
 
-docs    := $(wildcard *.texi)
-pngs    := $(wildcard fsc2fig*.png)
-xbms    := $(wildcard $(adir)/*.xbm)
-figures := $(pngs) $(notdir $(patsubst %.xbm,%.png,$(xbms)))
+docs     := $(wildcard *.texi)
+pngs     := $(wildcard fsc2fig*.png)
+xbms     := $(wildcard $(adir)/*.xbm)
+figures  := $(pngs) $(notdir $(patsubst %.xbm,%.png,$(xbms)))
+eps_pics := $(patsubst %.png,%.eps,$(figures))
+pdf_pics := $(patsubst %.png,%.pdf,$(figures))
+
 
 all:
 	$(MAKE) man
@@ -57,8 +60,7 @@ fsc2.html: $(docs) $(figures)
 
 ps: fsc2.ps
 
-fsc2.ps: $(docs) $(patsubst %.png,%.eps,$(pngs))    \
-		 $(notdir $(patsubst %.xbm,%.eps,$(xbms)))
+fsc2.ps: $(docs) $(eps_pics)
 	@if [ "`eval tex -help 2>/dev/null`" -a         \
 		 "`eval dvips --help 2>/dev/null`" ]; then  \
 		./texi2dvi -c fsc2.texi;                    \
@@ -83,8 +85,7 @@ endif
 
 pdf: fsc2.pdf
 
-fsc2.pdf: $(docs) $(patsubst %.png,%.pdf,$(pngs))      \
-		 $(notdir $(patsubst %.xbm,%.pdf,$(xbms)))
+fsc2.pdf: $(docs) $(pdf_pics)
 	-@if [ "`eval pdftex --help 2>/dev/null`" ]; then  \
 		./texi2dvi --pdf -c fsc2.texi; \
 	else \
