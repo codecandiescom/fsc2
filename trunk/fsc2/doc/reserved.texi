@@ -6,7 +6,7 @@
 
 
 
-@multitable { @code{PREPARATIONS:} } { Starts the @code{PREPARATIONS} section and lots more of tex... }
+@multitable { @code{REPEAT_FREQUENCY} and a bit } { Starts the @code{PREPARATIONS} section and lots more of tex... }
 @item @code{A}                @tab Unit, Ampere
 @item @code{abs}              @tab Built-in function (@pxref{abs})
 @item @code{acos}             @tab Built-in function (@pxref{acos})
