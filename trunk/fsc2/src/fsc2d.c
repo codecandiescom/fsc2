@@ -84,8 +84,6 @@ int check_spawn_fsc2d( bool exclusive, FILE *in_file_fp )
 	int sock_fd;
 	char line[ MAX_LINE_LENGTH ];
 	ssize_t len;
-	long pid;
-	char *ep;
 
 
 	/* If there's no fsc2 "daemon" process running yet start one. */
