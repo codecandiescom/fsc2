@@ -476,7 +476,7 @@ export            # export all variables to sub-makes
 .PHONY: all config src modules utils docs built      \
 		install-strip install uninstall http_server  \
 		version test clean distclean                 \
-		mostlyclean tags pack MANIFEST ZIP           \
+		mostlyclean tags pack MANIFEST               \
 		me6x00 ni6601 witio_48                       \
 
 

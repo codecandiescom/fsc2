@@ -219,11 +219,12 @@ fi
 
 # Compile the library and the driver
 
-make all
+make all > makelog 2>&1
 
 if [ $? -ne 0 ]; then
     dialog --msgbox \
-"Sorry, compilation failed.\n" 5 30;
+"   Sorry, compilation failed.\n
+See \"makelog\" for the reasons.\n" 6 40;
     exit 1;
 fi
 
