@@ -517,6 +517,10 @@ bool dg2020_set_phase_reference( int phase, int function )
 	FUNCTION *p, *f;
 
 
+	/* First a sanity check... */
+
+	assert ( Cur_PHS != - 1 ? ( Cur_PHS == phase ) : 1 );
+
 	/* The phase function can't be phase cycled... */
 
 	if ( function == PULSER_CHANNEL_PHASE_1 ||
