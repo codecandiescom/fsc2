@@ -439,7 +439,7 @@ int main( int argc, char *argv[ ] )
 				"line %ld.\n", Fname, Lc );
 		exit( EXIT_FAILURE );
 	}
-	CATCH( MISPLACED SHEBANG )
+	CATCH( MISPLACED_SHEBANG )
 	{
 		printf( "\x03\n%s: `#!' must appear on first line instead of "
 				"line %ld.\n", Fname, Lc );
