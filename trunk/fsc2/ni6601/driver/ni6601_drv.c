@@ -759,7 +759,10 @@ MODULE_AUTHOR( "Jens Thoms Toerring <Jens.Toerring@physik.fu-berlin.de>" );
 MODULE_DESCRIPTION( "National Instruments 6601 GBCT board driver" );
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 10 )
+
+/* MODULE_LICENSE should be defined since at least 2.4.10 */
+
+#if defined MODULE_LICENSE
 MODULE_LICENSE( "GPL" );
 #endif
 

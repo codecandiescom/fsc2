@@ -103,7 +103,9 @@ MODULE_PARM( major, "i" );
 MODULE_PARM_DESC( major, "Major device number to use" );
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 10 )
+/* MODULE_LICENSE should be defined since at least 2.4.10 */
+
+#if defined MODULE_LICENSE
 MODULE_LICENSE( "GPL" );
 #endif
 

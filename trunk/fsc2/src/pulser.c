@@ -588,7 +588,7 @@ void p_set_trigger_mode( Var *v )
 
 	if ( mode != INTERNAL && mode != EXTERNAL )
 	{
-		print( FATAL, "Invalid trigger mode specification.\n" );
+		print( FATAL, "Invalid trigger mode.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1016,7 +1016,7 @@ void p_set( long pnum, int type, Var *v )
 	if ( dev_num == -1 )
 	{
 		print( FATAL, "Referenced pulse #%ld has not been "
-			   "defined.\n" );
+			   "defined.\n", pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -1152,8 +1152,7 @@ Var *p_get_by_num( long pnum, int type )
 
 	if ( dev_num == -1 )
 	{
-		print( FATAL, "Referenced pulse #%ld has not been "
-			   "defined.\n" );
+		print( FATAL, "Referenced pulse #%ld has not been defined.\n", pnum );
 		THROW( EXCEPTION );
 	}
 

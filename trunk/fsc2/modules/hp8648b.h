@@ -30,7 +30,7 @@
 #include "hp8648b.conf"
 
 
-#define MIN_FREQ        1.0e4            /* 10 kHz  */
+#define MIN_FREQ        9.0e3            /* 9 kHz  */
 #define MAX_FREQ        2.0e9            /* 2000 MHz */
 #define MIN_MIN_ATTEN  14.5              /* really the minimum attenuation */
 #define MAX_ATTEN      -136.0            /* -136 db  */
