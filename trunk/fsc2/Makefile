@@ -360,10 +360,10 @@ CFLAGS           := -Wall                   \
 # built-in memory debugging
 
 ifeq ($(findstring debug,$(MAKECMDGOALS)),debug)
-	CFLAGS       += -O0
-	CFLAGS       += -DFSC2_MDEBUG           # for built-in malloc debugging
+	CFLAGS += -O0
+	CFLAGS += -DFSC2_MDEBUG               # for built-in malloc debugging
 else
-	CFLAGS       +=	$(OPTIMIZATION)
+	CFLAGS += $(OPTIMIZATION)
 endif
 
 
@@ -372,11 +372,11 @@ endif
 # code and libc memory debugging (if available)
 
 ifneq ($(MAKECMDGOALS),release)
-	CFLAGS       += -ggdb
+	CFLAGS += -ggdb
 else
-	CFLAGS       += -DNDEBUG                # switch off all debugging code
+	CFLAGS += -DNDEBUG                    # switch off all debugging code
 	ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
-		CFLAGS           += -DLIBC_MDEBUG       # for libc memory debugging
+		CFLAGS += -DLIBC_MDEBUG           # for libc memory debugging
 	endif
 endif
 
@@ -385,41 +385,40 @@ endif
 # debugging options as well as libc memory debugging (if available)
 
 ifeq ($(MAKECMDGOALS),mdebug)
-	CFLAGS       += -DFSC2_MDEBUG           # for built-in malloc debugging
+	CFLAGS += -DFSC2_MDEBUG               # for built-in malloc debugging
 	ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
-		CFLAGS           += -DLIBC_MDEBUG       # for libc memory debugging
+		CFLAGS += -DLIBC_MDEBUG           # for libc memory debugging
 	endif
 endif
 
 
-INCLUDES         :=	-I$(fdir) -I$(adir) -I/usr/X11R6/include \
-					-I/usr/X11R6/include/X11 -I/usr/local/include \
+INCLUDES := -I$(fdir) -I$(adir) -I/usr/X11R6/include \
+			-I/usr/X11R6/include/X11 -I/usr/local/include \
 
-
-LFLAGS			 := $(OPT) -shared -fpic  # needed for libraries
+LFLAGS	 := $(OPT) -shared -fpic  # needed for libraries
 
 
 ifeq ($(MPATROL),YES)
-	CONFFLAGS   +:= -DMPATROL
-	LIBS         := -L/usr/local/lib -lmpatrol -lelf -L/usr/X11R6/lib -lforms \
-					-lX11 -lXpm -lm -ldl
+	CONFFLAGS := -DMPATROL
+	LIBS      := -L/usr/local/lib -lmpatrol -lelf -L/usr/X11R6/lib -lforms \
+				  -lX11 -lXpm -lm -ldl
 else
-	CONFFLAGS    :=
-	LIBS         := -L/usr/X11R6/lib -lforms -lX11 -lXpm -lm -ldl
-				    # -lmcheck   # for malloc debugging
-				    # -lefence   # to run with efence
+	CONFFLAGS :=
+	LIBS      := -L/usr/X11R6/lib -lforms -lX11 -lXpm -lm -ldl
+				 # -lmcheck   # for malloc debugging
+				 # -lefence   # to run with efence
 endif
 
-BISON            := bison
-BISONFLAGS       := -d -v -t -p
-FLEX             := flex
-FLEXFLAGS        := -B -P
-RM               := rm
-RMFLAGS          := -f
-LN               := ln
-LNFLAGS          := -s
-INSTALL          := install
-EXEC_INSTALL     := install
+BISON         := bison
+BISONFLAGS    := -d -v -t -p
+FLEX          := flex
+FLEXFLAGS     := -B -P
+RM            := rm
+RMFLAGS       := -f
+LN            := ln
+LNFLAGS       := -s
+INSTALL       := install
+EXEC_INSTALL  := install
 
 
 ############################################################################
@@ -430,7 +429,7 @@ EXEC_INSTALL     := install
 ############################################################################
 
 
-tagsfile         := $(fdir)/TAGS
+tagsfile      := $(fdir)/TAGS
 
 
 # Check that the machine has a new libc, i.e. at least version 2 (which means
@@ -447,15 +446,15 @@ endif
 # machines subdirectory are still for the old name but a symbolic link has
 # been set from the new machine name to the old one)
 
-machine_name     := $(shell                                 \
-					   mn=`hostname -f 2>/dev/null`;        \
-					   if [    -n $$mn                      \
-						    -a -L $(mchdir)/$$mn ]; then    \
-						   ls -l $(mchdir)/$$mn |           \
-						   sed 's/^.*->[ \t]\+\(.*\)/\1/';  \
-					   else                                 \
-						   echo $$mn;                       \
-					   fi; )
+machine_name  := $(shell                                 \
+					mn=`hostname -f 2>/dev/null`;        \
+					if [    -n $$mn                      \
+						 -a -L $(mchdir)/$$mn ]; then    \
+						ls -l $(mchdir)/$$mn |           \
+						sed 's/^.*->[ \t]\+\(.*\)/\1/';  \
+					else                                 \
+						echo $$mn;                       \
+					fi; )
 
 # Try to include a configuration file for machines that are listed in the
 # 'machines' subdirectory. This makes configuring a new fsc2 version for a
