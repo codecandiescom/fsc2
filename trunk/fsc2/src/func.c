@@ -1492,6 +1492,16 @@ Var *f_display( Var *v )
 					len += dp[ i ].v->from->sizes[ 0 ] * sizeof( double );
 				break;
 
+			case INT_TRANS_ARR :
+				len += sizeof( long );
+				len += dp[ i ].v->len * sizeof( long );
+				break;
+
+			case FLOAT_TRANS_ARR :
+				len += sizeof( long );
+				len += dp[ i ].v->len * sizeof( double );
+				break;
+
 			default :                   /* this better never happens... */
 				T_free( dp );
 				eprint( FATAL, "Internal communication error at %s:%d.\n",
@@ -1600,6 +1610,32 @@ Var *f_display( Var *v )
 							len * sizeof( double ) );
 					ptr += len * sizeof( double );
 				}
+				break;
+
+			case INT_TRANS_ARR :
+				*( ( int * ) ptr ) = INT_ARR;
+				ptr += sizeof( int );
+
+				len = dp[ i ].v->len;
+				memcpy( ptr, &len, sizeof( long ) );
+				ptr += sizeof( long );
+
+				memcpy( ptr, dp[ i ].v->val.lpnt,
+						len * sizeof( long ) );
+				ptr += len * sizeof( long );
+				break;
+
+			case FLOAT_TRANS_ARR :
+				*( ( int * ) ptr ) = FLOAT_ARR;
+				ptr += sizeof( int );
+
+				len = dp[ i ].v->len;
+				memcpy( ptr, &len, sizeof( long ) );
+				ptr += sizeof( long );
+
+				memcpy( ptr, dp[ i ].v->val.lpnt,
+						len * sizeof( double ) );
+				ptr += len * sizeof( double );
 				break;
 
 			default :                   /* this better never happens... */
@@ -1716,7 +1752,8 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 			THROW( EXCEPTION );
 		}
 
-		vars_check( v, INT_VAR | FLOAT_VAR | ARR_PTR | ARR_REF );
+		vars_check( v, INT_VAR | FLOAT_VAR | ARR_PTR | ARR_REF |
+					   INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
 		dp[ *nsets ].v = v;
 

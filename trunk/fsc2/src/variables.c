@@ -271,17 +271,14 @@ Var *vars_add( Var *v1, Var *v2 )
 	Var *new_var;
 
 
-	/* Make sure that `v1' and `v2' exist, are integers or float values 
-	   and have an value assigned to it */
-/*
-	vars_check( v1, INT_VAR | FLOAT_VAR );
-	vars_check( v2, INT_VAR | FLOAT_VAR );
-*/
+	/* Make sure that `v1' and `v2' exist, are integers or float values or
+	   arrays (or pointers thereto) */
 
 	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF );
+	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
 				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
-	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF |
-				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
 
 	/* Add the values while taking care to get the type right */
 
@@ -303,29 +300,22 @@ Var *vars_add( Var *v1, Var *v2 )
 			new_var = vars_add_to_float_arr( v1, v2 );
 			break;
 
+		case ARR_REF :
+			if ( v1->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
+						"on array slices.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			if ( v1->from->type == INT_ARR )
+				new_var = vars_add_to_int_arr( v1->from, v2 );
+			else
+				new_var = vars_add_to_float_arr( v1->from, v2 );
+			break;
+
 		default :
 			assert( 1 == 0 );
 	}
-/*
-
-
-	if ( v1->type == INT_VAR )
-	{
-		if ( v2->type == INT_VAR )
-			new_var = vars_push( INT_VAR, v1->val.lval + v2->val.lval );
-		else
-			new_var = vars_push( FLOAT_VAR,
-								 ( double ) v1->val.lval + v2->val.dval );
-	}
-	else
-	{
-		if ( v2->type == INT_VAR )
-			new_var = vars_push( FLOAT_VAR,
-								 v1->val.dval + ( double ) v2->val.lval );
-		else
-			new_var = vars_push( FLOAT_VAR, v1->val.dval + v2->val.dval );
-	}
-*/
 
 	/* Pop the variables from the variable stack (if they belong to it) */
 
@@ -349,29 +339,50 @@ Var *vars_sub( Var *v1, Var *v2 )
 	Var *new_var;
 
 
-	/* Make sure that `v1' and `v2' exist, are integers or float values 
-	   and have an value assigned to it */
+	/* Make sure that `v1' and `v2' exist, are integers or float values or
+	   arrays (or pointers thereto) */
 
-	vars_check( v1, INT_VAR | FLOAT_VAR );
-	vars_check( v2, INT_VAR | FLOAT_VAR );
+	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF );
+	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
 
 	/* Subtract the values while taking care to get the type right */
 
-	if ( v1->type == INT_VAR )
+	switch ( v1->type )
 	{
-		if ( v2->type == INT_VAR )
-			new_var = vars_push( INT_VAR, v1->val.lval - v2->val.lval );
-		else
-			new_var = vars_push( FLOAT_VAR,
-								 ( double ) v1->val.lval - v2->val.dval );
-	}
-	else
-	{
-		if ( v2->type == INT_VAR )
-			new_var = vars_push( FLOAT_VAR,
-								 v1->val.dval - ( double ) v2->val.lval );
-		else
-			new_var = vars_push( FLOAT_VAR, v1->val.dval - v2->val.dval );
+		case INT_VAR :
+			new_var = vars_sub_from_int_var( v1, v2 );
+			break;
+
+		case FLOAT_VAR :
+			new_var = vars_sub_from_float_var( v1, v2 );
+			break;
+			
+		case INT_ARR : case INT_TRANS_ARR :
+			new_var = vars_sub_from_int_arr( v1, v2 );
+			break;
+
+		case FLOAT_ARR : case FLOAT_TRANS_ARR :
+			new_var = vars_sub_from_float_arr( v1, v2 );
+			break;
+
+		case ARR_REF :
+			if ( v1->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
+						"on array slices.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			if ( v1->from->type == INT_ARR )
+				new_var = vars_sub_from_int_arr( v1->from, v2 );
+			else
+				new_var = vars_sub_from_float_arr( v1->from, v2 );
+			break;
+
+		default :
+			assert( 1 == 0 );
 	}
 
 	/* Pop the variables from the variable stack (if they belong to it) */
@@ -396,29 +407,50 @@ Var *vars_mult( Var *v1, Var *v2 )
 	Var *new_var;
 
 
-	/* Make sure that `v1' and `v2' exist, are integers or float values 
-	   and have an value assigned to it */
+	/* Make sure that `v1' and `v2' exist, are integers or float values or
+	   arrays (or pointers thereto) */
 
-	vars_check( v1, INT_VAR | FLOAT_VAR );
-	vars_check( v2, INT_VAR | FLOAT_VAR );
+	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF );
+	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
 
 	/* Multiply the values while taking care to get the type right */
 
-	if ( v1->type == INT_VAR )
+	switch ( v1->type )
 	{
-		if ( v2->type == INT_VAR )
-			new_var = vars_push( INT_VAR, v1->val.lval * v2->val.lval );
-		else
-			new_var = vars_push( FLOAT_VAR,
-								 ( double ) v1->val.lval * v2->val.dval );
-	}
-	else
-	{
-		if ( v2->type == INT_VAR )
-			new_var = vars_push( FLOAT_VAR,
-								 v1->val.dval * ( double ) v2->val.lval );
-		else
-			new_var = vars_push( FLOAT_VAR, v1->val.dval * v2->val.dval );
+		case INT_VAR :
+			new_var = vars_mult_by_int_var( v1, v2 );
+			break;
+
+		case FLOAT_VAR :
+			new_var = vars_mult_by_float_var( v1, v2 );
+			break;
+			
+		case INT_ARR : case INT_TRANS_ARR :
+			new_var = vars_mult_by_int_arr( v1, v2 );
+			break;
+
+		case FLOAT_ARR : case FLOAT_TRANS_ARR :
+			new_var = vars_mult_by_float_arr( v1, v2 );
+			break;
+
+		case ARR_REF :
+			if ( v1->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
+						"on array slices.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			if ( v1->from->type == INT_ARR )
+				new_var = vars_mult_by_int_arr( v1->from, v2 );
+			else
+				new_var = vars_mult_by_float_arr( v1->from, v2 );
+			break;
+
+		default :
+			assert( 1 == 0 );
 	}
 
 	/* Pop the variables from the variable stack (if they belong to it) */
@@ -443,38 +475,50 @@ Var *vars_div( Var *v1, Var *v2 )
 	Var *new_var;
 
 
-	/* Make sure that `v1' and `v2' exist, are integers or float values
-	   and have an value assigned to it */
+	/* Make sure that `v1' and `v2' exist, are integers or float values or
+	   arrays (or pointers thereto) */
 
-	vars_check( v1, INT_VAR | FLOAT_VAR );
-	vars_check( v2, INT_VAR | FLOAT_VAR );
+	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF );
+	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
-	/* Make sure the denominator is not zero */
 
-	if ( ( v2->type == INT_VAR && v2->val.lval == 0 ) ||
-		 ( v2->type == FLOAT_VAR && v2->val.dval == 0.0 ) )
+	/* Divide the values while taking care to get the type right */
+
+	switch ( v1->type )
 	{
-		eprint( FATAL, "%s:%ld: Division by zero.\n", Fname, Lc );
-		THROW( EXCEPTION );
-	}
+		case INT_VAR :
+			new_var = vars_div_of_int_var( v1, v2 );
+			break;
 
-	/* Calculate the result and it push onto the stack */
+		case FLOAT_VAR :
+			new_var = vars_div_of_float_var( v1, v2 );
+			break;
+			
+		case INT_ARR : case INT_TRANS_ARR :
+			new_var = vars_div_of_int_arr( v1, v2 );
+			break;
 
-	if ( v1->type == INT_VAR )
-	{
-		if ( v2->type == INT_VAR )
-			new_var = vars_push( INT_VAR, v1->val.lval / v2->val.lval );
-		else
-			new_var = vars_push( FLOAT_VAR,
-								 ( double ) v1->val.lval / v2->val.dval );
-	}
-	else
-	{
-		if ( v2->type == INT_VAR )
-			new_var = vars_push( FLOAT_VAR,
-								 v1->val.dval / ( double ) v2->val.lval );
-		else
-			new_var = vars_push( FLOAT_VAR, v1->val.dval / v2->val.dval );
+		case FLOAT_ARR : case FLOAT_TRANS_ARR :
+			new_var = vars_div_of_float_arr( v1, v2 );
+			break;
+
+		case ARR_REF :
+			if ( v1->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
+						"on array slices.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			if ( v1->from->type == INT_ARR )
+				new_var = vars_div_of_int_arr( v1->from, v2 );
+			else
+				new_var = vars_div_of_float_arr( v1->from, v2 );
+			break;
+
+		default :
+			assert( 1 == 0 );
 	}
 
 	/* Pop the variables from the stack */
@@ -499,39 +543,50 @@ Var *vars_mod( Var *v1, Var *v2 )
 	Var *new_var;
 
 
-	/* Make sure that `v1' and `v2' exist, are integers or float values
-	   and have an value assigned to it */
+	/* Make sure that `v1' and `v2' exist, are integers or float values or
+	   arrays (or pointers thereto) */
 
-	vars_check( v1, INT_VAR | FLOAT_VAR );
-	vars_check( v2, INT_VAR | FLOAT_VAR );
+	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF );
+	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
+				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
-	/* Make sure the second value is not zero */
 
-	if ( ( v2->type == INT_VAR && v2->val.lval == 0 ) ||
-		 ( v2->type == FLOAT_VAR && v2->val.dval == 0.0 ) )
+	/* Divide the values while taking care to get the type right */
+
+	switch ( v1->type )
 	{
-		eprint( FATAL, "%s:%ld: Modulo by zero.\n", Fname, Lc );
-		THROW( EXCEPTION );
-	}
+		case INT_VAR :
+			new_var = vars_mod_of_int_var( v1, v2 );
+			break;
 
-	/* Calculate the result and it push onto the stack */
+		case FLOAT_VAR :
+			new_var = vars_mod_of_float_var( v1, v2 );
+			break;
+			
+		case INT_ARR : case INT_TRANS_ARR :
+			new_var = vars_mod_of_int_arr( v1, v2 );
+			break;
 
-	if ( v1->type == INT_VAR )
-	{
-		if ( v2->type == INT_VAR )
-			new_var = vars_push( INT_VAR, v1->val.lval % v2->val.lval );
-		else
-			new_var = vars_push( FLOAT_VAR, fmod( ( double ) v1->val.lval,
-												  v2->val.dval ) );
-	}
-	else
-	{
-		if ( v2->type == INT_VAR )
-			new_var = vars_push( FLOAT_VAR, fmod( v1->val.dval,
-												  ( double ) v2->val.lval ) );
-		else
-			new_var = vars_push( FLOAT_VAR,
-								 fmod( v1->val.dval, v2->val.dval ) );
+		case FLOAT_ARR : case FLOAT_TRANS_ARR :
+			new_var = vars_mod_of_float_arr( v1, v2 );
+			break;
+
+		case ARR_REF :
+			if ( v1->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
+						"on array slices.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			if ( v1->from->type == INT_ARR )
+				new_var = vars_mod_of_int_arr( v1->from, v2 );
+			else
+				new_var = vars_mod_of_float_arr( v1->from, v2 );
+			break;
+
+		default :
+			assert( 1 == 0 );
 	}
 
 	/* Pop the variables from the stack */
