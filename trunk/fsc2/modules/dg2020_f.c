@@ -255,8 +255,8 @@ int dg2020_f_exp_hook( void )
 	{
 		if ( ! dg2020.function[ i ].is_used )
 			continue;
-		dg2020_set_pulses( &dg2020.function[ i ] );
-		dg2020_clear_padding_block( &dg2020.function[ i ] );
+		dg2020_set_pulses( dg2020.function + i );
+		dg2020_clear_padding_block( dg2020.function + i );
 	}
 
 	/* Finally tell the pulser to update (we're always running in manual
@@ -559,8 +559,8 @@ Var *pulser_next_phase( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		f = &dg2020.function[ phase_number == 1 ? PULSER_CHANNEL_PHASE_1 :
-							  PULSER_CHANNEL_PHASE_2 ];
+		f = dg2020.function + (phase_number == 1 ? PULSER_CHANNEL_PHASE_1 :
+							   PULSER_CHANNEL_PHASE_2 );
 
 		if ( ! f->is_used && FSC2_MODE == TEST )
 		{
@@ -625,8 +625,8 @@ Var *pulser_phase_reset( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		f = &dg2020.function[ phase_number == 1 ? PULSER_CHANNEL_PHASE_1 :
-							  PULSER_CHANNEL_PHASE_2 ];
+		f = dg2020.function + (  phase_number == 1 ? PULSER_CHANNEL_PHASE_1 :
+								 PULSER_CHANNEL_PHASE_2 );
 
 		if ( ! f->is_used && FSC2_MODE == TEST )
 		{

@@ -81,7 +81,7 @@ bool dg2020_reorganize_pulses( bool flag )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &dg2020.function[ i ];
+		f = dg2020.function + i;
 
 		/* Nothing to be done for unused functions and the phase functions */
 
@@ -655,7 +655,7 @@ void dg2020_finalize_phase_pulses( int func )
 	fsc2_assert( func == PULSER_CHANNEL_PHASE_1 ||
 				 func == PULSER_CHANNEL_PHASE_2 );
 
-	f = &dg2020.function[ func ];
+	f = dg2020.function + func;
 	if ( ! f->is_used )
 		return;
 

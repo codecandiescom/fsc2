@@ -83,7 +83,7 @@ bool hfs9000_set_pulse_function( long pnum, int function )
 {
 	PULSE *p = hfs9000_get_pulse( pnum );
 	PULSE *pl = hfs9000_Pulses;
-	FUNCTION *f = &hfs9000.function[ function ];
+	FUNCTION *f = hfs9000.function + function;
 
 
 	if ( function == PULSER_CHANNEL_PHASE_1 ||

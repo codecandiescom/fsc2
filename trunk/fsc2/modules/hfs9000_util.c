@@ -201,7 +201,7 @@ Ticks hfs9000_get_max_seq_len( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &hfs9000.function[ i ];
+		f = hfs9000.function + i;
 
 		/* Nothing to be done for unused functions and the phase functions */
 

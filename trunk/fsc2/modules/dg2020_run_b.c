@@ -73,7 +73,7 @@ bool dg2020_reorganize_pulses( bool flag )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &dg2020.function[ i ];
+		f = dg2020.function + i;
 
 		/* Nothing to be done for unused functions */
 
@@ -567,7 +567,7 @@ void dg2020_cw_setup( void )
 	FUNCTION *f;
 
 
-	f = &dg2020.function[ PULSER_CHANNEL_MW ];
+	f = dg2020.function + PULSER_CHANNEL_MW;
 	p = f->phase_setup;
 
 	/* First, all non-cw channels get associated with the first pulser channel

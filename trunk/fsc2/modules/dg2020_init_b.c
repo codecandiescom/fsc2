@@ -209,7 +209,7 @@ static void dg2020_basic_functions_check( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &dg2020.function[ i ];
+		f = dg2020.function + i;
 
 		/* Phase functions not supported in this driver... */
 
@@ -453,7 +453,7 @@ static void dg2020_distribute_channels( void )
 	dg2020.needed_channels = 0;
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &dg2020.function[ i ];
+		f = dg2020.function + i;
 		if ( ! f->is_used )
 			continue;
 		dg2020.needed_channels += f->num_needed_channels;
@@ -472,7 +472,7 @@ static void dg2020_distribute_channels( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &dg2020.function[ i ];
+		f = dg2020.function + i;
 
 		/* Don't do anything for unused functions */
 
@@ -544,7 +544,7 @@ static void dg2020_pulse_start_setup( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &dg2020.function[ i ];
+		f = dg2020.function + i;
 
 		/* Nothing to be done for unused functions and the phase functions */
 
@@ -663,7 +663,7 @@ static void dg2020_cw_init( void )
 		}
 	}
 
-	f = &dg2020.function[ PULSER_CHANNEL_MW ];
+	f = dg2020.function + PULSER_CHANNEL_MW;
 
 	/* For cw mode we need to know which pods are assigned to x, y, -x, -y
 	   and cw, i.e. a phase setup */

@@ -78,7 +78,7 @@ static bool hfs9000_update_pulses( bool flag )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &hfs9000.function[ i ];
+		f = hfs9000.function + i;
 
 		/* Nothing to be done for unused functions */
 

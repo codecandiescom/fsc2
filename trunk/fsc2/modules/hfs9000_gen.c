@@ -58,8 +58,8 @@ bool hfs9000_store_timebase( double timebase )
 
 bool hfs9000_assign_channel_to_function( int function, long channel )
 {
-	FUNCTION *f = &hfs9000.function[ function ];
-	CHANNEL *c = &hfs9000.channel[ channel ];
+	FUNCTION *f = hfs9000.function + function;
+	CHANNEL *c = hfs9000.channel + channel;
 
 
 	if ( channel != HFS9000_TRIG_OUT &&
@@ -175,7 +175,7 @@ bool hfs9000_set_function_delay( int function, double delay )
 		{
 			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 			{
-				f = &hfs9000.function[ i ];
+				f = hfs9000.function + i;
 				if ( ! f->is_used || i == function )
 					continue;
 				f->delay += hfs9000.neg_delay - Delay;
@@ -200,7 +200,7 @@ bool hfs9000_set_function_delay( int function, double delay )
 
 bool hfs9000_set_function_high_level( int function, double voltage )
 {
-	FUNCTION *f = &hfs9000.function[ function ];
+	FUNCTION *f = hfs9000.function + function;
 
 
 	if ( f->is_high_level )
@@ -244,7 +244,7 @@ bool hfs9000_set_function_high_level( int function, double voltage )
 
 bool hfs9000_set_function_low_level( int function, double voltage )
 {
-	FUNCTION *f = &hfs9000.function[ function ];
+	FUNCTION *f = hfs9000.function + function;
 
 
 	if ( f->is_low_level )

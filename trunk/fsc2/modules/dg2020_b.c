@@ -324,7 +324,7 @@ int dg2020_b_exp_hook( void )
 
 		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 			if ( dg2020.function[ i ].is_used )
-				dg2020_set_pulses( &dg2020.function[ i ] );
+				dg2020_set_pulses( dg2020.function + i );
 
 		/* Finally tell the pulser to update (we're always running in manual
 		   update mode) and than switch the pulser into run mode */

@@ -121,7 +121,7 @@ bool ep385_set_channels( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &ep385.function[ i ];
+		f = ep385.function + i;
 
 		if ( ! f->is_needed && f->num_channels == 0 )
 			continue;

@@ -60,8 +60,8 @@ bool dg2020_store_timebase( double timebase )
 
 bool dg2020_assign_function( int function, long pod )
 {
-	FUNCTION *f = &dg2020.function[ function ];
-	POD *p = &dg2020.pod[ pod ];
+	FUNCTION *f = dg2020.function + function;
+	POD *p = dg2020.pod + pod;
 
 
 	/* Check that pod number is in valid range */
@@ -114,8 +114,8 @@ bool dg2020_assign_function( int function, long pod )
 
 bool dg2020_assign_channel_to_function( int function, long channel )
 {
-	FUNCTION *f = &dg2020.function[ function ];
-	CHANNEL *c = &dg2020.channel[ channel ];
+	FUNCTION *f = dg2020.function + function;
+	CHANNEL *c = dg2020.channel + channel;
 
 
 	if ( channel < 0 || channel >= MAX_CHANNELS )
@@ -192,7 +192,7 @@ bool dg2020_set_function_delay( int function, double delay )
 		{
 			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 			{
-				f = &dg2020.function[ i ];
+				f = dg2020.function + i;
 				if ( ! f->is_used || i == function )
 					continue;
 				f->delay += dg2020.neg_delay - Delay;
@@ -553,7 +553,7 @@ bool dg2020_set_phase_reference( int phs, int function )
 		THROW( EXCEPTION );
 	}
 
-	f = &dg2020.function[ function ];
+	f = dg2020.function + function;
 
 	/* Check if a phase setup has been already assigned to the function */
 
@@ -566,7 +566,7 @@ bool dg2020_set_phase_reference( int phs, int function )
 
 	dg2020_phs[ phs ].is_defined = SET;
 	dg2020_phs[ phs ].function = f;
-	f->phase_setup = &dg2020_phs[ phs ];
+	f->phase_setup = dg2020_phs + phs;
 
 	return OK;
 }
@@ -616,7 +616,7 @@ bool dg2020_phase_setup_prep( int phs, int type, int dummy, long pod )
 	}
 
 	dg2020_phs[ phs ].is_set[ type ] = SET;
-	dg2020_phs[ phs ].pod[ type ] = &dg2020.pod[ pod ];
+	dg2020_phs[ phs ].pod[ type ] = dg2020.pod + pod;
 
 	return OK;
 }

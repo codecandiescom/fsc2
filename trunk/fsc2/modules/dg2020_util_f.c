@@ -179,7 +179,7 @@ CHANNEL *dg2020_get_next_free_channel( void )
 
 	fsc2_assert( i < MAX_CHANNELS );              /* this can't happen ;-) */
 
-	return &dg2020.channel[ i ];
+	return dg2020.channel + i;
 }
 
 
@@ -280,7 +280,7 @@ Ticks dg2020_get_max_seq_len( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &dg2020.function[ i ];
+		f = dg2020.function + i;
 
 		/* Nothing to be done for unused functions and the phase functions */
 

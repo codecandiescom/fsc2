@@ -261,7 +261,7 @@ bool dg2020_init( const char *name )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &dg2020.function[ i ];
+		f = dg2020.function + i;
 		if ( ! f->is_used )
 			continue;
 

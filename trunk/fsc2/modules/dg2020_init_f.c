@@ -97,7 +97,7 @@ static void dg2020_basic_pulse_check( void )
 		if ( ! p->is_len )
 		{
 			if ( p->is_pos &&
-				 p->function == &dg2020.function[ PULSER_CHANNEL_DET ] )
+				 p->function == dg2020.function + PULSER_CHANNEL_DET )
 			{
 				print( WARN, "Length of detection pulse #%ld is being set to "
 					   "%s.\n", p->num, dg2020_pticks( 1 ) );
@@ -172,7 +172,7 @@ static void dg2020_basic_functions_check( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &dg2020.function[ i ];
+		f = dg2020.function + i;
 
 		/* Don't do anything if the function has never been mentioned */
 
@@ -355,7 +355,7 @@ static void dg2020_basic_functions_check( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &dg2020.function[ i ];
+		f = dg2020.function + i;
 
 		if ( f->is_used )
 			continue;
@@ -405,7 +405,7 @@ static void dg2020_distribute_channels( void )
 	dg2020.needed_channels = 0;
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &dg2020.function[ i ];
+		f = dg2020.function + i;
 		if ( ! f->is_used )
 			continue;
 		dg2020.needed_channels += f->num_needed_channels;
@@ -424,7 +424,7 @@ static void dg2020_distribute_channels( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &dg2020.function[ i ];
+		f = dg2020.function + i;
 
 		/* Don't do anything for unused functions */
 
@@ -459,7 +459,7 @@ static void dg2020_pulse_start_setup( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &dg2020.function[ i ];
+		f = dg2020.function + i;
 
 		/* Nothing to be done for unused functions and the phase functions */
 

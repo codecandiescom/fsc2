@@ -126,7 +126,7 @@ static void hfs9000_basic_functions_check( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &hfs9000.function[ i ];
+		f = hfs9000.function + i;
 
 		/* Don't do anything if the function has never been mentioned */
 
@@ -180,7 +180,7 @@ static void hfs9000_pulse_start_setup( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &hfs9000.function[ i ];
+		f = hfs9000.function + i;
 
 		/* Nothing to be done for unused functions and the phase functions */
 

@@ -110,7 +110,7 @@ bool dg2020_set_pulse_function( long pnum, int function )
 		THROW( EXCEPTION );
 	}
 
-	p->function = &dg2020.function[ function ];
+	p->function = dg2020.function + function;
 	p->is_function = SET;
 	p->function->is_needed = SET;
 
