@@ -62,6 +62,8 @@
 #define TDS520_AUX2  10         /* Auxiliary (for triggger only) */
 #define TDS520_LIN   11         /* Line In (for triggger only) */
 
+#define GENERAL_TO_TDS520 0
+#define TDS520_TO_GENERAL 1
 
 /* Structure for description of a `window' on the digitizer, made up from the
    area between the pair of cursors */
@@ -133,7 +135,6 @@ Var *digitizer_define_window( Var *v );
 Var *digitizer_timebase( Var *v );
 Var *digitizer_sensitivity( Var *v );
 Var *digitizer_num_averages( Var *v );
-Var *digitizer_get_channel_number( Var *v );
 Var *digitizer_record_length( Var *v );
 Var *digitizer_trigger_position( Var *v );
 Var *digitizer_meas_channel_ok( Var *v );

@@ -53,7 +53,6 @@
 
 
 int prepslex( void );
-static Var *preps_get_channel_name( void );
 
 extern void prepsparse( void );
 
@@ -108,7 +107,7 @@ PC          PH(ASE)?_?C(YCLE)?
 
 PS          PH(ASE)?_?S(EQ(UENCE)?)?(_?[0-9]+)?
 
-CHT         ((CH1)|(CH2)|(CH3)|(CH4)|(AUX)|(AUX1)|(AUX2)|(MATH1)|(MATH2)|(MATH3)|(REF1)|(REF2)|(REF3)|(REF4)|(LIN(E)?))
+CHT         ((CH[1-4])|(AUX[12]?)|(MATH[1-3])|(REF[1-4])|(LIN(E)?)|(MEM_[CD])|(FUNC_[EF])|(EXT(10)?))
 
 
 CTRL        (WHILE)|(UNTIL)|(BREAK)|(NEXT)|(IF)|(ELSE)|(REPEAT)|(FOR)
@@ -321,7 +320,7 @@ FUNC        {IDENT}"#"[0-9]+
 
 
 {CHT}       {
-                prepslval.vptr = preps_get_channel_name( );
+                prepslval.vptr = get_digitizer_channel_number( prepstext );
                 return VAR_REF;
             }
 
@@ -486,32 +485,4 @@ int preparations_parser( FILE *in )
 	prepsparse( );
 
 	return Preps_Next_Section;
-}
-
-
-/*-------------------------------------------*/
-/*-------------------------------------------*/
-
-static Var *preps_get_channel_name( void )
-{
-	Var *func, *v;
-	int acc;
-
-
-	if ( ( func = func_get_long( "digitizer_get_channel_number",
-								 &acc, UNSET ) ) != NULL )
-	{
-		if ( ! strcmp( prepstext, "LIN" ) )
-			vars_push( STR_VAR, "LINE" );
-		else
-			vars_push( STR_VAR, prepstext );
-		v = func_call( func );
-		if ( v != NULL && v->val.lval != UNDEFINED )
-			 return v;
-	}
-
-	eprint( FATAL, SET, "Token `%s' can't be used, no digitizer module "
-			"loaded or module does not know how to interpret the token.\n",
-			prepstext );
-	THROW( EXCEPTION )
 }

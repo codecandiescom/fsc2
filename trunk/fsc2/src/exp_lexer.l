@@ -50,7 +50,6 @@
 
 
 int explex( void );
-static Var *exp_get_channel_name( void );
 
 extern Token_Val exp_val;
 
@@ -92,7 +91,7 @@ DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
 PH          PH(ASE(SEQ(UENCE)?)?)?_?([0-9])?
 
-CHT         ((CH[1-4])|(AUX[12]?)|(MATH[1-3])|(REF[1-4])|(LIN(E)?)|(MEM_?[CD])|(FUNC_?[EF])|(EXT(10)?))
+CHT         ((CH[1-4])|(AUX[12]?)|(MATH[1-3])|(REF[1-4])|(LIN(E)?)|(MEM_[CD])|(FUNC_[EF])|(EXT(10)?))
 
 WS          [\n \t]+
 
@@ -232,7 +231,7 @@ FUNC        {IDENT}"#"[0-9]+
 
 
 {CHT}       {
-                exp_val.vptr = exp_get_channel_name( );
+                exp_val.vptr = get_digitizer_channel_number( exptext );
 				return E_VAR_REF;
             }
 
@@ -395,47 +394,4 @@ int experiment_parser( FILE *in )
 	}
 
 	return Exp_Next_Section;
-}
-
-
-/*-------------------------------------------*/
-/*-------------------------------------------*/
-
-static Var *exp_get_channel_name( void )
-{
-	Var *func, *v;
-	int acc;
-	char fname[ ] = "digitizer_get_channel_number#\0xx";
-	int i;
-
-
-	for ( i = 1; i <= Max_Devices_of_a_Kind; vars_pop( v ), i++ )
-	{
-		sprintf( strrchr( fname, '#' ) + 1, "%d", i );
-	
-		if ( ( func = func_get_long( fname, &acc, UNSET ) ) != NULL )
-			break;
-
-		if ( ! strcmp( exptext, "LIN" ) )
-			vars_push( STR_VAR, "LINE" );
-		else if ( ! strcmp( exptext, "MEMC" ) )
-			vars_push( STR_VAR, "MEM_C" );
-		else if ( ! strcmp( exptext, "MEMD" ) )
-			vars_push( STR_VAR, "MEM_D" );
-		else if ( ! strcmp( exptext, "FUNCE" ) )
-			vars_push( STR_VAR, "FUNC_E" );
-		else if ( ! strcmp( exptext, "FUNC_F" ) )
-			vars_push( STR_VAR, "FUNC_F" );
-		else
-			vars_push( STR_VAR, exptext );
-		v = func_call( func );
-		if ( v != NULL && v->val.lval != UNDEFINED )
-			 return v;
-		
-	}
-
-	eprint( FATAL, SET, "Token `%s' can't be used, no digitizer modules "
-			"loaded or modules don't know how to interpret the token.\n",
-			exptext );
-	THROW( EXCEPTION )
 }

@@ -457,15 +457,15 @@ Var *digitizer_sensitivity( Var *v )
 	}
 
 	vars_check( v, INT_VAR );
+	channel = tds520_translate_channel( GENERAL_TO_TDS520, v->val.lval );
 
-	if ( v->val.lval < TDS520_CH1 || v->val.lval > TDS520_CH2 )
+	if ( channel < TDS520_CH1 || channel > TDS520_CH2 )
 	{
 		eprint( FATAL, SET, "%s: Can't set or obtain sensitivity for "
-				"specified channel.\n", DEVICE_NAME );
+				"specified channel %s.\n", DEVICE_NAME,
+				Channel_Names[ channel ] );
 		THROW( EXCEPTION )
 	}
-
-	channel = v->val.lval;
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
@@ -581,26 +581,6 @@ Var *digitizer_num_averages( Var *v )
 		tds520.is_num_avg = SET;
 
 	return vars_push( INT_VAR, tds520.num_avg );
-}
-
-
-/*-----------------------------------------------------------------------*/
-/* This is not a function that users should usually call but a function  */
-/* that allows the parser to convert symbolic channel names into numbers */
-/*-----------------------------------------------------------------------*/
-
-Var *digitizer_get_channel_number( Var *v )
-{
-	int i;
-
-
-	vars_check( v, STR_VAR );
-
-	for ( i = 0; i < MAX_CHANNELS; i++ )
-		if ( ! strcmp( v->val.sptr, Channel_Names[ i ] ) )
-			return vars_push( INT_VAR, i );
-
-	return NULL;
 }
 
 
@@ -757,9 +737,13 @@ Var *digitizer_trigger_position( Var *v )
 
 Var *digitizer_meas_channel_ok( Var *v )
 {
-	vars_check( v, INT_VAR );
+	long channel;
 
-	if ( v->val.lval < TDS520_CH1 || v->val.lval > TDS520_REF4 )
+
+	vars_check( v, INT_VAR );
+	channel = tds520_translate_channel( GENERAL_TO_TDS520, v->val.lval );
+
+	if ( channel < TDS520_CH1 || channel > TDS520_REF4 )
 		return vars_push( INT_VAR, 0 );
 	else
 		return vars_push( INT_VAR, 1 );
@@ -773,19 +757,25 @@ Var *digitizer_meas_channel_ok( Var *v )
 
 Var *digitizer_trigger_channel( Var *v )
 {
+	long channel;
+
+
 	if ( v == NULL )
 	{
 		if ( TEST_RUN )
 		{
 			if ( tds520.is_trigger_channel )
-				return vars_push( INT_VAR, tds520.trigger_channel );
+				return vars_push( INT_VAR, tds520_translate_channel(
+								 TDS520_TO_GENERAL, tds520.trigger_channel ) );
 			else
-				return vars_push( INT_VAR, TDS520_TEST_TRIG_CHANNEL );
+				return vars_push( INT_VAR, tds520_translate_channel(
+							   TDS520_TO_GENERAL, TDS520_TEST_TRIG_CHANNEL ) );
 		}
 		else if ( I_am == PARENT )
 		{
 			if ( tds520.is_trigger_channel )
-				return vars_push( INT_VAR, tds520.trigger_channel );
+				return vars_push( INT_VAR, tds520_translate_channel(
+								 TDS520_TO_GENERAL, tds520.trigger_channel ) );
 
 			eprint( FATAL, SET, "%s: Function %s() with no argument can "
 					"only be used in the EXPERIMENT section.\n",
@@ -793,25 +783,27 @@ Var *digitizer_trigger_channel( Var *v )
 			THROW( EXCEPTION )
 		}
 
-		return vars_push( tds520_get_trigger_channel( ) );
+		return vars_push( tds520_translate_channel( TDS520_TO_GENERAL,
+											 tds520_get_trigger_channel( ) ) );
 	}
 
 	vars_check( v, INT_VAR );
+	channel = tds520_translate_channel( GENERAL_TO_TDS520, v->val.lval );
 
-	if ( v->val.lval < 0 || v->val.lval >= MAX_CHANNELS )
+	if ( channel < 0 || channel >= MAX_CHANNELS )
 	{
 		eprint( FATAL, SET, "%s: Invalid trigger channel name in %s().\n",
 				DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION )
 	}
 
-    switch ( v->val.lval )
+    switch ( channel )
     {
         case TDS520_CH1 : case TDS520_CH2 : case TDS520_AUX1 :
 		case TDS520_AUX2 : case TDS520_LIN :
-			tds520.trigger_channel = v->val.lval;
+			tds520.trigger_channel = channel;
 			if ( I_am == CHILD )
-				tds520_set_trigger_channel( Channel_Names[ v->val.lval ] );
+				tds520_set_trigger_channel( Channel_Names[ channel ] );
 			if ( ! TEST_RUN )
 				tds520.is_trigger_channel = SET;
             break;
@@ -819,7 +811,7 @@ Var *digitizer_trigger_channel( Var *v )
 		default :
 			eprint( FATAL, SET, "%s: Channel %s can't be used as "
 					"trigger channel.\n", DEVICE_NAME,
-					Channel_Names[ v->val.lval ] );
+					Channel_Names[ channel ] );
 			THROW( EXCEPTION )
     }
 
@@ -867,6 +859,7 @@ static Var *get_area( Var *v, bool use_cursor )
 {
 	WINDOW *w;
 	int ch;
+	long channel;
 
 
 	/* The first variable got to be a channel number */
@@ -879,14 +872,17 @@ static Var *get_area( Var *v, bool use_cursor )
 	}
 
 	vars_check( v, INT_VAR );
+	channel = tds520_translate_channel( GENERAL_TO_TDS520, v->val.lval );
+
 	for ( ch = 0; ch <= TDS520_REF4; ch++ )
-		if ( ch == ( int ) v->val.lval )
+		if ( ch == ( int ) channel )
 			break;
 
 	if ( ch > TDS520_REF4 )
 	{
-		eprint( FATAL, SET, "%s: Invalid channel specification in %s().\n",
-				DEVICE_NAME, Cur_Func );
+		eprint( FATAL, SET, "%s: Invalid channel %s used in %s().\n",
+				DEVICE_NAME, Digitizer_Channel_Names[ v->val.lval ],
+				Cur_Func );
 		THROW( EXCEPTION )
 	}
 
@@ -909,7 +905,7 @@ static Var *get_area( Var *v, bool use_cursor )
 
 		while ( w != NULL )
 		{
-			if ( w->num == v->val.lval )
+			if ( w->num == val.lval )
 			{
 				w->is_used = SET;
 				v = vars_pop( v );
@@ -971,6 +967,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 {
 	WINDOW *w;
 	int ch, i;
+	long channel;
 	double *array;
 	long length;
 	Var *nv;
@@ -986,14 +983,17 @@ static Var *get_curve( Var *v, bool use_cursor )
 	}
 
 	vars_check( v, INT_VAR );
+	channel = tds520_translate_channel( GENERAL_TO_TDS520, v->val.lval );
+
 	for ( ch = 0; ch <= TDS520_REF4; ch++ )
-		if ( ch == ( int ) v->val.lval )
+		if ( ch == ( int ) channel )
 			break;
 
 	if ( ch > TDS520_REF4 )
 	{
-		eprint( FATAL, SET, "%s: Invalid channel specification in %s().\n",
-				DEVICE_NAME, Cur_Func );
+		eprint( FATAL, SET, "%s: Invalid channel %s used in %s().\n",
+				DEVICE_NAME, Digitizer_Channel_Names[ v->val.lval ],
+				Cur_Func );
 		THROW( EXCEPTION )
 	}
 
@@ -1105,14 +1105,17 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	}
 
 	vars_check( v, INT_VAR );
+	channel = tds520_translate_channel( GENERAL_TO_TDS520, v->val.lval );
+
 	for ( ch = 0; ch <= TDS520_REF4; ch++ )
 		if ( ch == ( int ) v->val.lval )
 			break;
 
 	if ( ch > TDS520_REF4 )
 	{
-		eprint( FATAL, SET, "%s: Invalid channel specification in %s().\n",
-				DEVICE_NAME, Cur_Func );
+		eprint( FATAL, SET, "%s: Invalid channel %s used in %s().\n",
+				DEVICE_NAME, Digitizer_Channel_Names[ v->val.lval ],
+				Cur_Func );
 		THROW( EXCEPTION )
 	}
 

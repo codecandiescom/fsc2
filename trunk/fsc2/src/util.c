@@ -594,6 +594,36 @@ inline void lower_permissions( void )
 }
 
 
+/*---------------------------------------------------------------*/
+/* Converts a string with a digitizer channel name into a number */
+/*---------------------------------------------------------------*/
+
+Var *get_digitizer_channel_number( const char *channel_name )
+{
+	long channel;
+
+
+	for ( channel = 0; channel < NUM_DIGITIZER_CHANNEL_NAMES; channel++ )
+		if ( ! strcmp( channel_name, Digitizer_Channel_Names[ channel ] ) )
+			break;
+
+	if ( channel == NUM_DIGITIZER_CHANNEL_NAMES &&
+		 ! strcmp( channel_name, "LIN" ) )
+		channel = DIGITIZER_CHANNEL_LINE;
+
+#ifndef NDEBUG
+	if ( channel == NUM_DIGITIZER_CHANNEL_NAMES )
+	{
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION )
+	}
+#endif
+
+	return vars_push( INT_VAR, channel );
+}
+
+
 /*--------------------------------------------------------------------------*/
 /* Returns the pixel value of an entry in XFORMs internal colour map from   */
 /* the colours set in create_colors(). For values slightly above 1 as well  */

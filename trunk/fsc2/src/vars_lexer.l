@@ -53,7 +53,6 @@
 
 
 int varslex( void );
-static Var *vars_get_channel_name( void );
 
 extern void varsparse( void );
 
@@ -84,7 +83,7 @@ INT         [0-9]+
 EXPO        [EDed][+-]?{INT}
 FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
-CHT         ((CH1)|(CH2)|(CH3)|(CH4)|(AUX)|(MATH1)|(MATH2)|(MATH3)|(REF1)|(REF2)|(REF3)|(REF4)|(LIN))
+CHT         ((CH[1-4])|(AUX[12]?)|(MATH[1-3])|(REF[1-4])|(LIN(E)?)|(MEM_[CD])|(FUNC_[EF])|(EXT(10)?))
 
 IDENT       [A-Za-z]+[A-Za-z0-9_]*
 FUNC        {IDENT}"#"[0-9]+
@@ -196,7 +195,7 @@ WS          [\n \t]+
             }
 
 {CHT}       {
-                varslval.vptr = vars_get_channel_name( );
+                varslval.vptr = get_digitizer_channel_number( varstext );
 				return VAR_REF;
             }
 
@@ -387,29 +386,4 @@ int variables_parser( FILE *in )
 	vars_sort( );
 
 	return Vars_Next_Section;
-}
-
-
-/*-------------------------------------------*/
-/*-------------------------------------------*/
-
-static Var *vars_get_channel_name( void )
-{
-	Var *func, *v;
-	int acc;
-
-
-	if ( ( func = func_get_long( "digitizer_get_channel_number",
-								 &acc, UNSET ) ) != NULL )
-	{
-		vars_push( STR_VAR, varstext );
-		v = func_call( func );
-		if ( v != NULL && v->val.lval != UNDEFINED )
-			 return v;
-	}
-
-	eprint( FATAL, SET, "Token `%s' can't be used, no digitizer module "
-			"loaded or module does not know how to interpret the token.\n",
-			varstext );
-	THROW( EXCEPTION )
 }

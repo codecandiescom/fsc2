@@ -41,6 +41,8 @@ void create_colors( void );
 inline void raise_permissions( void );
 inline void lower_permissions( void );
 
+Var *get_digitizer_channel_number( const char *channel_name );
+
 inline unsigned long d2color( double a );
 
 inline short  d2shrt( double a );
