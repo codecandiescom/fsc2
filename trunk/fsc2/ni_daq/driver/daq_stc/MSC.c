@@ -95,11 +95,11 @@ void MSC_reset_all( Board *board )
 	board->stc.Clock_and_FOUT &= ~ Slow_Internal_Time_Divide_By_2;
 	board->stc.Clock_and_FOUT |= 1;
 
-	board->MSC.clock = NI_DAQ_FAST_CLOCK;
+	board->MSC.clock   = NI_DAQ_FAST_CLOCK;
 	board->MSC.divider = 1;
-	board->MSC.speed = NI_DAQ_FULL_SPEED;
+	board->MSC.speed   = NI_DAQ_FULL_SPEED;
 
-	board->timebase2 = 5000;
+	board->timebase2   = 5000;
 
 	board->func->stc_writew( board, STC_Clock_and_FOUT,
 				 board->stc.Clock_and_FOUT );
@@ -461,12 +461,12 @@ static int MSC_set_speed( Board *board, unsigned int divider,
 
 	board->MSC.speed = speed;
 
-	/* Set additional divider for the clock rate */
+	/* Set additional divider for the clock rate (for a division factor
+	   of 16 all bits must be cleared) */
 
+	caf &= ~ FOUT_Divider_Field;
 	if ( divider < 16 )
 		caf |= divider & FOUT_Divider_Field;
-	else
-		caf &= ~ FOUT_Divider_Field;
 
 	board->MSC.divider = divider;
 
