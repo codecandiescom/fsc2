@@ -2112,6 +2112,11 @@ getfile_retry:
 	File_List[ File_List_Len ].fp = fp;
 	File_List[ File_List_Len ].name = r;
 
+	/* Switch buffering of so we're sure everything gets written to disk
+	   immediately */
+
+	setbuf( File_List[ File_List_Len ].fp, NULL );
+
 	return vars_push( INT_VAR, File_List_Len++ );
 }
 
@@ -2770,6 +2775,7 @@ static bool T_fprintf( int file_num, const char *fmt, ... )
 	static int size;            /* guess for number of characters needed */
 	char *p;
 	va_list ap;
+	int new_file_num;
 
 
 	size = 1024;
@@ -2821,26 +2827,12 @@ static bool T_fprintf( int file_num, const char *fmt, ... )
 			return FAIL;
 	}
 
-	/* Now we try to write the string to the file and fprintf wrote out
-	   everything also we flush the buffer. Flushing the buffer can fail for
-	   two reasons (assuming that the file is really open for writing etc.),
-	   it was either interrupted by a signal (in which case we retry) or the
-	   disk is full. If either fprintf or fflush fails, we have to assume that
-	   the disk is full. */
+	/* Now we try to write the string to the file */
 
 	if ( fprintf( File_List[ file_num ].fp, "%s", p ) == n )
 	{
-reflush:
-		if ( fflush( File_List[ file_num ].fp ) == 0 )
-		{
-			T_free( p );
-			return OK;
-		}
-		else
-		{
-			if ( errno == EINTR )    /* fflush() got interrupted by a signal */
-				goto reflush;
-		}
+		T_free( p );
+		return OK;
 	}
 
 	/* Couldn't write as many bytes as needed - disk seems to be full */
