@@ -325,7 +325,8 @@ int sr810_end_of_exp_hook( void )
 
 	if ( sr810.device >= 0 )
 	{
-		sr810_auto( 0 );
+        if ( sr810.is_auto_setup )
+			sr810_auto( 0 );
 		gpib_local( sr810.device );
 	}
 
@@ -1284,6 +1285,7 @@ static bool sr810_init( const char *name )
 	char buffer[ 20 ];
 	long length = 20;
 	int i;
+	bool is_auto_setup;
 
 
 	if ( gpib_init_device( name, &sr810.device ) == FAILURE )
@@ -1352,7 +1354,10 @@ static bool sr810_init( const char *name )
 
 	/* Stop any still running auto-acquisition and clear the internal buffer */
 
+	is_auto_setup = sr810.is_auto_setup;
+	sr810.is_auto_setup = SET;
 	sr810_auto( 0 );
+	sr810.is_auto_setup = is_auto_setup;
 
 	if ( sr810.is_auto_setup )
 	{
