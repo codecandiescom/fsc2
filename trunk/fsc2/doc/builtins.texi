@@ -437,27 +437,28 @@ checks if it is valid and if the associated file is open for writing.
 
 These functions are for creating and handling of buttons, sliders and
 input fields that allow the user to influence the experiment when it is
-already running. If they are used it is not more possible to check the
-complete experiment before it is run because it is impossible to forsee
-which buttons, sliders or input fields are used at what
+already running. If they are used it is not possible anymore to check
+the complete experiment before it is run because it is impossible to
+forsee which buttons, sliders or input fields are used at what
 moment. Therefore, these functions should only be used where it is
 really necessary, i.e.@: when trying to find the optimum parameters for
 an experiment but not in the final experiment.
 
 To display the buttons, sliders and input fields a new window is created
 on the first call of either the @code{button_create()},
-@code{slider_create()} or @code{input_create()} function. It will be
-automatically deleted when either all buttons, sliders and input fields
-are deleted again or at the end of an experiment. The functions can only
-be used within the @code{EXPERIMENT} section of the program.
+@code{slider_create()}, @code{input_create()} or @code{output_create()}
+function. It will be automatically deleted when either all buttons,
+sliders and input or output fields are deleted again or at the end of an
+experiment. These functions can only be used within the @code{EXPERIMENT}
+section of the program.
 
 When the program is tested before the experiment is started it is
 assumed that all buttons are not pressed and switched off (unless they
 have been set by the function @code{button_state()}, all sliders are
-assumed to be in the middle posiotion unless a different value has been
-set via the function @code{slider_value()} and all input fields are
-initilaized to 0 unless an initial value has been passed to the function
-@code{input_create()}.
+assumed to be in the middle position unless a different value has been
+set via the function @code{slider_value()} and all input and output
+fields are initialized to 0 unless an initial value has been passed to
+the functions @code{input_create()} or @code{output_create()}.
 
 
 @table @samp
@@ -470,6 +471,9 @@ called either with the strings @code{"VERT"}, @code{"VERTICAL"},
 @code{"HORI"} or @code{"HORIZONTAL"} (the case of the letters doesn't
 matter). The numbers @code{0} and @code{1} can be used alternatively for
 vertical or horizontal layout.
+
+Of course this function has to be called @b{before} a function to create
+an object (button, slider or in- or output field) has been invoked.
 
 
 @anchor{button_create}
@@ -484,10 +488,10 @@ group of buttons of which only one button can be switched on at once,
 i.e.@: if a radio button gets pressed all the other radio buttons
 belonging to the group become automatically unset.
 
-Normal buttons are drawn as large rectangular buttons with the label
-within the button, push buttons are drawn as squares, standing on a
-corner, that become yellow when pressed and radio buttons as round
-buttons, that become red when activated.
+Normal buttons are drawn as large rectangular boxes with the label in
+thwe middle, push buttons are drawn as squares, standing on a corner,
+that become yellow when pressed, and radio buttons as round buttons,
+that become red when activated.
 
 The first argument the function needs is the type of the button, i.e.@:
 on of the strings @code{"NORMAL_BUTTON"}, @code{"PUSH_BUTTON"} or
@@ -513,15 +517,15 @@ Both label and help text may contain some escape sequences, namely
 help text) and `@code{\\}', standing for the backslash character to
 allow a backslash in front of an `n'.
 
-All buttons start as unpressed and in the unset state.
+All buttons start in the deactivated state.
 
 
 @anchor{button_delete}
 @item button_delete()
 @findex button_delete()
 Using this function one or more buttons can be deleted. It expects one
-or more button identifiers as returned by the function
-@code{button_create()}.
+or a list of button identifiers (separated by commata) as returned by
+the function @code{button_create()}.
 
 If the group leader (i.e.@: the first button) of a group of radio
 buttons is deleted, the next button of the group becomes the new group
@@ -557,10 +561,14 @@ feedback. As the function @code{button_create()} also this function
 returns a unique integer number to be used to identify the slider.
 
 The first argument the function expects is a string, either
-@code{""NORMAL_SLIDER"} or @code{"VALUE_SLIDER"} (the case of the
-letters doesn't matter). The second argument must be the minimum value
-the slider can be adjusted to and the third argument is the maximum
-value. The minimum value must always be smaller than the maximum value.
+@code{"NORMAL_SLIDER"} or @code{"VALUE_SLIDER"} (the case of the
+letters doesn't matter). "Normal" sliders are just sliders without any
+decoration while "value" sliders have an extra field showing the current
+value set via the slider.
+
+The second argument must be the minimum value the slider can be adjusted
+to and the third argument is the maximum value. The minimum value must
+always be smaller than the maximum value.
 
 A third, optional paramter is the step size to be used, i.e.@: the
 minimum increment the slider value can be changed. Of course, this value
@@ -571,14 +579,16 @@ As in the case of buttons there are two more (optional) arguments, the
 label to be shown below the slider and a help text. The same escape
 sequences as for button labels and help texts.
 
-All sliders start of as set to the middle of the defined range.
+All sliders start of as set to the middle of the defined range. If a
+step size is given for the slider the allowed value nearest to the
+middle value is used as the sliders initial value.
 
 
 @anchor{slider_delete}
 @item slider_delete()
 @findex slider_delete()
-The function deletes on or more sliders. It expects one or more slider
-identifiers as returned by the function @code{slider_create()}.
+The function deletes on or more sliders. It expects one or a list of
+slider identifiers as returned by the function @code{slider_create()}.
 
 
 @anchor{slider_value}
@@ -587,11 +597,13 @@ identifiers as returned by the function @code{slider_create()}.
 This function returns or sets the value of a slider. The first argument
 must be a slider identifier as returned by the function
 @code{slider_create()}. If this is the only argument the value the
-slider is set to is returned. If there's a second value the slider is
-set to this value. Obviously, the value must be within the range of the
-slider as defined by the minimum and maximum value set in
+slider is currently set to is returned. If there's a second value the
+slider is set to this value. Obviously, the value must be within the
+range of the slider as defined by the minimum and maximum value set in
 @code{slider_create()}, otherwise an error message is printed and the
 slider value is set to the next value still within the allowed range.
+If a step size is set for the slider and the new value does not fit with
+the step size the nearest allowed value is set.
 
 
 @anchor{input_create}
@@ -629,9 +641,8 @@ for C's printf(3).
 @anchor{input_delete}
 @item input_delete()
 @findex input_delete()
-The function deletes on or more input field. It expects one or more
-input field identifiers as returned by the function
-@code{input_create()}.
+The function deletes on or more input field. It expects one or a list of
+input field identifiers as returned by the function @code{input_create()}.
 
 
 @anchor{input_value}
@@ -681,9 +692,8 @@ for C's printf(3).
 @anchor{output_delete}
 @item output_delete()
 @findex output_delete()
-The function deletes on or more output field. It expects one or more
-output field identifiers as returned by the function
-@code{input_create()}.
+The function deletes on or more output field. It expects one or a list of
+output field identifiers as returned by the function @code{input_create()}.
 
 
 @anchor{output_value}
