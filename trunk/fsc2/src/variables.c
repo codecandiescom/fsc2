@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.15  1999/07/20 11:23:33  jens
+   ars
+
    Revision 1.14  1999/07/19 22:25:09  jens
    *** empty log message ***
 
@@ -284,9 +287,7 @@ Var *vars_new( char *name )
 
 
 /*---------------------------------------------------------------------------*/
-/* vars_new_assign() assigns a value to a new variable - if the variable     */
-/* pointer with the value is NULL use integer type and a value of zero as    */
-/* default.                                                                  */
+/* vars_new_assign() assigns a value to a new integer or float variable.     */
 /* ATTENTION: This routine is only to be used for assignments for new vari-  */
 /*            ables, i.e. in the VARIABLES section - in other parts of the   */
 /*            program we'll have to use a modified version of this routine!  */
@@ -304,6 +305,8 @@ Var *vars_new_assign( Var *src, Var *dest )
        paranoid... */
 
 	assert( dest != NULL );
+	assert( src != NULL );
+	assert( src->type == INT_VAR || src->type == FLOAT_VAR );
 
 	/* We're still in the definition part - so assigning a new value to a
 	   variable that already has a value assigned to it is a syntax error */
@@ -320,12 +323,8 @@ Var *vars_new_assign( Var *src, Var *dest )
 
 	dest->type = IF_FUNC( dest->name[ 0 ] ) ? INT_VAR : FLOAT_VAR;
 
-	if ( src != ( Var * ) NULL && ! src->new_flag )
+	if ( ! src->new_flag )
 	{
-		/* make sure `src' has integer or float type */
-
-		assert( src->type == INT_VAR || src->type == FLOAT_VAR );
-
 		if ( dest->type == INT_VAR )
 		{
 			if ( src->type == INT_VAR )
@@ -351,9 +350,6 @@ Var *vars_new_assign( Var *src, Var *dest )
 	{
 		/* warn (and don't use it) if `src' exists but has never been assigned
 		   a value, instead assign `dest' a value of zero */
-
-		if ( src != NULL )
-			vars_warn_new( src );
 
 		if ( dest->type == INT_VAR )
 			dest->val.lval = 0;
