@@ -61,8 +61,9 @@ static double magnet_goto_field( double field );
 static bool magnet_do( int command );
 
 
-typedef struct
-{
+typedef struct MAGNET MAGNET;
+
+struct MAGNET {
 	double start_field;     /* the start field given by the user */
 	double field_step;      /* the field steps to be used */
 
@@ -79,7 +80,7 @@ typedef struct
 
 	bool is_opened;
     struct termios *tio;    /* serial port terminal interface structures */
-} MAGNET;
+};
 
 
 MAGNET magnet, magnet_saved;

@@ -106,7 +106,12 @@ enum {
 };
 
 
-typedef struct {
+typedef struct CommStruct CommStruct;
+typedef struct SLOT SLOT;
+typedef struct MESSAGE_QUEUE MESSAGE_QUEUE;
+
+
+struct CommStruct {
 	int type;
 	union {
 		ptrdiff_t len;
@@ -116,20 +121,20 @@ typedef struct {
 		double double_data;
 		long str_len[ 4 ];
 	} data;
-} CommStruct;
+};
 
 
-typedef struct {
+struct SLOT {
 	int type;
 	int shm_id;
-} SLOT;
+};
 
 
-typedef struct {
+struct MESSAGE_QUEUE {
 	int low;
 	int high;
 	SLOT slot[ QUEUE_SIZE ];
-} MESSAGE_QUEUE;
+};
 
 
 enum {

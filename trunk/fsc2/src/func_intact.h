@@ -28,12 +28,15 @@
 #include "fsc2.h"
 
 
-typedef struct IOBJECT {
+typedef struct IOBJECT IOBJECT;
+typedef struct TOOL_BOX TOOL_BOX;
 
+
+struct IOBJECT {
 	long ID;                  /* ID of object */
 	FL_OBJECT *self;
-	struct IOBJECT *prev;     /* pointer to previous object */
-	struct IOBJECT *next;     /* pointer to next object */
+	IOBJECT *prev;            /* pointer to previous object */
+	IOBJECT *next;            /* pointer to next object */
 
 	int type;                 /* object type (BUTTON, SLIDER, etc.) */
 
@@ -67,10 +70,10 @@ typedef struct IOBJECT {
 		double dval;
 	} val;
 
-} IOBJECT;
+};
 
 
-typedef struct {
+struct TOOL_BOX {
 	int layout;               /* 0 / 1 <-> vertical / horizontal */
 	bool has_been_shown;
 	FL_FORM *Tools;
@@ -78,7 +81,7 @@ typedef struct {
 		     h;
 	IOBJECT *objs;            /* linked list of objects in form */
 	long next_ID;             /* ID for next created object */
-} TOOL_BOX;
+};
 
 
 

@@ -139,7 +139,6 @@ struct PHS {                 /* needed in phase setup */
 
 
 struct FUNCTION {
-
 	int self;                  /* the functions number */
 	const char *name;
 
@@ -151,7 +150,6 @@ struct FUNCTION {
 	POD *pod;                  /* points to the pod assigned to the function */
 	POD *pod2;                 /* points to the second pod assigned to the
 								    function (phase functions only) */
-
 	PHS phs;                   /* phase functions only: how to translate
 								  phases to pod outputs */
 	bool is_phs;

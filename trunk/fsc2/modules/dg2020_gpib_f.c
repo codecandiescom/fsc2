@@ -137,14 +137,16 @@
 #include "dg2020_f.h"
 
 
-typedef struct _dg2020_store_ {
+typedef struct DG2020_STORE DG2020_STORE;
+
+struct  DG2020_STORE {
 	int channel;
 	Ticks address;
 	Ticks length;
 	int state;
-	struct _dg2020_store_ *next;
-	struct _dg2020_store_ *prev;
-} DG2020_STORE;
+	DG2020_STORE *next;
+	DG2020_STORE *prev;
+};
 
 static void dg2020_gpib_store( int channel, Ticks address, Ticks length,
 							   int state );

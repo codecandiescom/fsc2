@@ -69,14 +69,13 @@ static long thurlby330_get_channel( Var *v );
 #define CURRENT_RESOLUTION  1.0e-3  /* in A */
 
 
-typedef struct
-{
+typedef struct THURLBY330 THURLBY330;
+
+struct THURLBY330 {
 	int device;
-	int meas_type;
-} THURLBY330;
+};
 
 static THURLBY330 thurlby330;
-
 
 
 /*------------------------------------*/

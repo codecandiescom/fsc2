@@ -81,8 +81,9 @@ static bool er035m_sa_talk( const char *cmd, char *reply, long *length );
 static void er035m_sa_failure( void );
 
 
-typedef struct
-{
+typedef struct NMR NMR;
+
+struct NMR {
 	int state;
 	int device;
 	bool is_needed;
@@ -93,7 +94,7 @@ typedef struct
 	int probe_type;
 	long upper_search_limit;
 	long lower_search_limit;
-} NMR;
+};
 
 
 static NMR nmr, nmr_stored;

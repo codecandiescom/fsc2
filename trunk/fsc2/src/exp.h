@@ -80,19 +80,23 @@ typedef union {
 #define ON_STOP_TOK    3333
 
 
-typedef struct
-{
+typedef struct Simp_Var Simp_Var;
+typedef struct Prg_Token Prg_Token;
+typedef struct CB_Stack CB_Stack;
+
+
+struct Simp_Var {
 	int    type;              /* type of data */
 	long   lval;              /* for long integer data */
 	double dval;              /* for floating point data */
-} Simp_Var;
+};
 
 
-typedef struct PT {
+struct Prg_Token {
 	int       token;          /* type of current token */
 	Token_Val tv;             /* tokens value as needed by the parser */
-	struct PT *start;         /* used in IF, WHILE etc. [1] */
-	struct PT *end;           /* used in WHILE, IF etc. [2] */
+	Prg_Token *start;         /* used in IF, WHILE etc. [1] */
+	Prg_Token *end;           /* used in WHILE, IF etc. [2] */
 	union {
 		struct {
 			long max;         /* maximum counter value for REPEAT loops */
@@ -107,14 +111,14 @@ typedef struct PT {
 	long      counter;        /* counts number of loop repetitions [3] */
 	char      *Fname;         /* name of file the token was found in */
 	long      Lc;             /* number of line the token was found in */
-} Prg_Token;
+};
 
 
-typedef struct CBS {
+struct CB_Stack {
 	char *Fname;
 	long Lc;
-	struct CBS *next;
-} CB_Stack;
+	CB_Stack *next;
+};
 
 
 /*

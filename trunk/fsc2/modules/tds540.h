@@ -74,7 +74,11 @@
 /* Structure for description of a 'window' on the digitizer, made up from the
    area between a pair of cursors */
 
-typedef struct _W {
+typedef struct WINDOW WINDOW;
+typedef struct TDS540 TDS540;
+
+
+struct WINDOW {
 	long num;                   /* number of window                          */
 	double start;               /* start of window (in time units)			 */
 	double width;               /* width of window (in time units)			 */
@@ -83,13 +87,12 @@ typedef struct _W {
 	bool is_start;              /* flag, set if start of window has been set */
 	bool is_width;              /* flag, set if width of window has been set */
 	long num_points;            /* number of data points between the cursors */
-	struct _W *next;            /* pointer to next window structure			 */
-	struct _W *prev;            /* pointer to previous window structure      */
-} WINDOW;
+	WINDOW *next;               /* pointer to next window structure			 */
+	WINDOW *prev;               /* pointer to previous window structure      */
+};
 
 
-typedef struct
-{
+struct TDS540 {
 	int device;
 
 	bool is_reacting;
@@ -129,7 +132,7 @@ typedef struct
 	bool lock_state;          /* set if keyboard is locked */
 
 	bool windows_are_checked;
-} TDS540;
+};
 
 
 enum {

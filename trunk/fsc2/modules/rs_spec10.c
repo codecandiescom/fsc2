@@ -53,6 +53,9 @@ int rs_spec10_init_hook( void )
 	rs_spec10->ccd.roi[ X + 2 ] = CCD_PIXEL_WIDTH - 1;
 	rs_spec10->ccd.roi[ Y + 2 ] = CCD_PIXEL_HEIGHT - 1;
 
+	rs_spec10->ccd.max_size[ X ] = CCD_PIXEL_WIDTH;
+	rs_spec10->ccd.max_size[ Y ] = CCD_PIXEL_HEIGHT;
+
 	rs_spec10->ccd.bin[ X ] = 1;
 	rs_spec10->ccd.bin[ Y ] = 1;
 
@@ -79,9 +82,6 @@ int rs_spec10_test_hook( void )
 {
 	rs_spec10_test = rs_spec10_prep;
 	rs_spec10 = &rs_spec10_test;
-
-	rs_spec10->temp.test_min_setpoint = HUGE_VAL;
-	rs_spec10->temp.test_max_setpoint = - HUGE_VAL;
 
 	return 1;
 }
@@ -255,7 +255,7 @@ Var *ccd_camera_binning( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		if ( vbin[ i ] > ( long ) rs_spec10->ccd.max_size[ i + 2 ] + 1 )
+		if ( vbin[ i ] > ( long ) rs_spec10->ccd.max_size[ i ] + 1 )
 		{
 			print( FATAL, "%c binning value larger than CCD %c-size.\n",
 				   c[ i ], c[ i ] );
@@ -403,7 +403,7 @@ Var *ccd_camera_get_picture( Var *v )
 		{
 			cl = nv->val.vptr[ i ]->val.lpnt;
 			for ( j = 0; j < width; j++ )
-				*cl = ( long ) *cf;
+				*cl++ = ( long ) *cf++;
 		}
 	else
 	{
@@ -442,8 +442,10 @@ Var *ccd_camera_get_picture( Var *v )
 }
 
 
-/*--------------------------------------------------*/
-/*--------------------------------------------------*/
+/*------------------------------------------------------*/
+/* Function for determining the current CCD temperature */
+/* or to set a target temperature (setpoint).           */
+/*------------------------------------------------------*/
 
 Var *ccd_camera_temperature( Var *v )
 {
@@ -454,9 +456,7 @@ Var *ccd_camera_temperature( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				print( FATAL, "Temperature can only be queried during the "
-					   "experiment.\n" );
-				THROW( EXCEPTION );
+				no_query_possible( );
 
 			case TEST :
 				if ( rs_spec10->temp.is_setpoint )
@@ -468,45 +468,51 @@ Var *ccd_camera_temperature( Var *v )
 				return vars_push( FLOAT_VAR, rs_spec10_get_temperature( ) );
 		}
 
+	/* Make sure camera allows setting a setpoint (in case the call of the
+	   function has been well hidden within e.g. an IF construct, so it
+	   wasn't run already during the test run) */
+
+	if ( FSC2_MODE == EXPERIMENT &&
+		 rs_spec10->temp.acc_setpoint != ACC_READ_WRITE &&
+		 rs_spec10->temp.acc_setpoint != ACC_WRITE_ONLY )
+	{
+		print( SEVERE, "Camera does not allow setting a temperature "
+			   "setpoint.\n" );
+		return vars_push( FLOAT_VAR, 0.0 );
+	}
+
 	temp = get_double( v, "camera temperature" );
 
-	if ( FSC2_MODE != EXPERIMENT )
+	if ( lrnd( rs_spec10_k2c( temp ) * 100.0 ) >
+										  lrnd( CCD_MAX_TEMPERATURE * 100.0 ) )
 	{
-		rs_spec10->temp.setpoint = temp;
-		rs_spec10->temp.is_setpoint = SET;
-
-		if ( FSC2_MODE == TEST )
-		{
-			rs_spec10->temp.test_min_setpoint =
-							  d_min( temp, rs_spec10->temp.test_min_setpoint );
-			rs_spec10->temp.test_max_setpoint =
-							  d_max( temp, rs_spec10->temp.test_max_setpoint );
-		}
+		print( FSC2_MODE == EXPERIMENT ? SEVERE : FATAL, "Requested setpoint "
+			   "temperature of %.2f K (%.2f C) is too high, valid range is "
+			   "%.2f K (%.2f C) to %.2f K (%.2f C).\n", temp,
+			   rs_spec10_k2c( temp ), CCD_MIN_TEMPERATURE,
+			   rs_spec10_k2c( CCD_MIN_TEMPERATURE ), CCD_MAX_TEMPERATURE,
+			   rs_spec10_k2c( CCD_MAX_TEMPERATURE ) );
+		if ( FSC2_MODE != EXPERIMENT )
+			THROW( EXCEPTION );
 	}
-	else
+
+	if ( lrnd( rs_spec10_k2c( temp ) * 100.0 ) <
+										  lrnd( CCD_MIN_TEMPERATURE * 100.0 ) )
 	{
-		if ( temp < rs_spec10->temp.min )
-		{
-			print( SEVERE, "Requested temperature too low, minimum "
-				   "temperature is %.2lf K (%.2lf C), using minimum "
-				   "temerature instead.\n", rs_spec10->temp.min,
-				   rs_spec10_k2c( rs_spec10->temp.min ) );
-			temp = rs_spec10->temp.min;
-		}
-
-		if ( temp > rs_spec10->temp.max )
-		{
-			print( SEVERE, "Requested temperature too high, maximum "
-				   "temperature is %.2lf K (%.2lf C), using maximum "
-				   "temerature instead.\n", rs_spec10->temp.max,
-				   rs_spec10_k2c( rs_spec10->temp.max ) );
-			temp = rs_spec10->temp.max;
-		}
-
-		temp = rs_spec10_set_temperature( temp );
+		print( FSC2_MODE == EXPERIMENT ? SEVERE : FATAL, "Requested setpoint "
+			   "temperature of %.2f K (%.2f C) is too low, valid range is "
+			   "%.2f K (%.2f C) to %.2f K (%.2f C).\n", temp,
+			   rs_spec10_k2c( temp ), CCD_MIN_TEMPERATURE,
+			   rs_spec10_k2c( CCD_MIN_TEMPERATURE ), CCD_MAX_TEMPERATURE,
+			   rs_spec10_k2c( CCD_MAX_TEMPERATURE ) );
+		if ( FSC2_MODE != EXPERIMENT )
+			THROW( EXCEPTION );
 	}
 
 	too_many_arguments( v );
+
+	rs_spec10->temp.setpoint = temp;
+	rs_spec10->temp.is_setpoint = SET;
 
 	return vars_push( FLOAT_VAR, temp );
 }

@@ -62,12 +62,15 @@ static bool pt2025_command( const char *cmd );
 #define UNDEF_RESOLUTION            -1
 
 
-typedef struct
-{
+typedef struct PT2025 PT2025;
+
+
+struct  PT2025 {
 	int device;
 	int probe_orientation;
 	int resolution;
-} PT2025;
+};
+
 
 static PT2025 pt2025, pt2025_stored;
 

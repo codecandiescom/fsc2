@@ -116,7 +116,7 @@ static void rs_spec10_ccd_init( void )
 	rs_spec10->ccd.max_size[ Y ] = num_pix;
 
 	/* Make sure the sizes are identical to what the configuration file
-	   claims */
+	   claims, we did rely on the values during the test run */
 
 	if ( rs_spec10->ccd.max_size[ X ] != CCD_PIXEL_WIDTH ||
 		 rs_spec10->ccd.max_size[ Y ] != CCD_PIXEL_HEIGHT )
@@ -157,14 +157,10 @@ static void rs_spec10_ccd_init( void )
 							 ( void_ptr ) &set_uns32 ) )
 			rs_spec10_error_handling( );
 	}
-	else if ( acc == ACC_READ_ONLY )
-	{
-		if ( ! pl_get_param( rs_spec10->handle, PARAM_EXP_RES, ATTR_DEFAULT,
-							 ( void_ptr ) &set_uns32 ) )
-			rs_spec10_error_handling( );
-
-		fprintf( stderr, "EXP_RES = %ld\n", ( long ) set_uns32 );
-	}
+	else if ( acc == ACC_READ_ONLY &&
+			  ! pl_get_param( rs_spec10->handle, PARAM_EXP_RES, ATTR_DEFAULT,
+							  ( void_ptr ) &set_uns32 ) )
+		rs_spec10_error_handling( );
 
 //	  if ( ! pl_get_param( rs_spec10->handle, PARAM_EXP_MIN_TIME, ATTR_ACCESS,
 //						   ( void_ptr ) &ret_uns16 ) )
@@ -195,7 +191,10 @@ static void rs_spec10_temperature_init( void )
 {
 	uns16 acc;
 	int16 temp;
+	long min_temp, max_temp;
 
+
+	/* Determine if reading and setting a setpoint is possible */
 
 	if ( ! rs_spec10_param_access( PARAM_TEMP_SETPOINT, &acc ) )
 	{
@@ -205,10 +204,9 @@ static void rs_spec10_temperature_init( void )
 
 	rs_spec10->temp.acc_setpoint = acc;
 
-	/* Get maximum and minimum temperature that can be set and determine
-	   the current temperature (since the device returns all temperatures
-	   in 1/100 degree Celsius but we use Kelvin internally we need to
-	   convert the returned value) */
+	/* Get maximum and minimum temperature that can be set and check that the
+	   values in the configuration file are correct, we did rely on them in
+	   the PREAPARATIONS section and during the test run */
 
 	if ( rs_spec10->temp.acc_setpoint == ACC_READ_ONLY ||
 		 rs_spec10->temp.acc_setpoint == ACC_READ_WRITE )
@@ -216,52 +214,41 @@ static void rs_spec10_temperature_init( void )
 		if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP_SETPOINT, ATTR_MAX,
 							 ( void_ptr ) &temp ) )
 			rs_spec10_error_handling( );
-		rs_spec10->temp.max = rs_spec10_ic2k( temp );
-		 
+		max_temp = temp;
+
 		if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP_SETPOINT, ATTR_MIN,
 							 ( void_ptr ) &temp ) )
 			rs_spec10_error_handling( );
-		rs_spec10->temp.min = rs_spec10_ic2k( temp );
+		min_temp = ( long )temp;
+
+		if ( max_temp != lrnd( CCD_MAX_TEMPERATURE * 100.0 ) ||
+			 min_temp != lrnd( CCD_MIN_TEMPERATURE * 100.0 ) )
+		{
+			print( FATAL, "Configuration file for camera has invalid CCD "
+				   "temperature range, valid range is %.2f K (%.2fC) to "
+				   "%.2f K (%.2f C).\n", CCD_MIN_TEMPERATURE,
+				   rs_spec10_k2c( CCD_MIN_TEMPERATURE ), CCD_MAX_TEMPERATURE,
+				   rs_spec10_k2c( CCD_MAX_TEMPERATURE ) );
+			THROW( EXCEPTION );
+		}
 	}
 
-	/* Check if during the test run the temperature was set to a value that
-	   isn't within the allowed range */
 
-	if ( rs_spec10_test.temp.test_min_setpoint != HUGE_VAL ||
-		 rs_spec10_test.temp.test_max_setpoint != -HUGE_VAL )
+	if ( rs_spec10->temp.is_setpoint &&
+		 rs_spec10->temp.acc_setpoint != ACC_READ_WRITE &&
+		 rs_spec10->temp.acc_setpoint != ACC_WRITE_ONLY )
 	{
-		if ( rs_spec10->temp.acc_setpoint != ACC_WRITE_ONLY &&
-			 rs_spec10->temp.acc_setpoint != ACC_READ_WRITE )
-		{
-			print( FATAL, "During the test run a temperature setpoint was "
-				   "set, but camera doesn't allow to do so.\n" );
-			THROW( EXCEPTION );
-		}
-
-		if ( rs_spec10_test.temp.test_min_setpoint != HUGE_VAL &&
-			 rs_spec10_test.temp.test_min_setpoint < rs_spec10->temp.min )
-		{
-			print( FATAL, "In test run a temperature setpoint was requested "
-				   "(%.2lf K, %lf.2 C) that is too low (allowed minimum "
-				   "value is %.2lf K, %lf.2 C).\n",
-				   rs_spec10_test.temp.test_min_setpoint,
-				   rs_spec10_k2c( rs_spec10_test.temp.test_min_setpoint ),
-				   rs_spec10->temp.min, rs_spec10_k2c( rs_spec10->temp.min ) );
-			THROW( EXCEPTION );
-		}
-
-		if ( rs_spec10_test.temp.test_max_setpoint != -HUGE_VAL &&
-			 rs_spec10_test.temp.test_max_setpoint < rs_spec10->temp.max )
-		{
-			print( FATAL, "In test run a temperature setpoint was requested "
-				   "(%.2lf K, %lf.2 C) that is too high (allowed minimum "
-				   "value is %.2lf K, %lf.2 C).\n",
-				   rs_spec10_test.temp.test_max_setpoint,
-				   rs_spec10_k2c( rs_spec10_test.temp.test_max_setpoint ),
-				   rs_spec10->temp.max, rs_spec10_k2c( rs_spec10->temp.max ) );
-			THROW( EXCEPTION );
-		}
+		print( FATAL, "During the PREPARATIONS section or the test run a "
+			   "temperature setpoint was set, but camera doesn't allow to "
+			   "do so.\n" );
+		THROW( EXCEPTION );
 	}
+
+	/* Set a target temperature if this was requested in the PREPARATIONS
+	   section */
+
+	if ( rs_spec10->temp.is_setpoint )
+		rs_spec10_set_temperature( rs_spec10->temp.setpoint );
 
 	/* Check if we can read the current temperature and if yes get it */
 
@@ -272,45 +259,7 @@ static void rs_spec10_temperature_init( void )
 		THROW( EXCEPTION );
 	}
 
-	rs_spec10->temp.acc_temp = acc;
-
-	if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP, ATTR_CURRENT,
-						 ( void_ptr ) &temp ) )
-		rs_spec10_error_handling( );
-
 	rs_spec10_get_temperature( );
-
-	/* Set a target temperature if this was requested in the PREPARATIONS
-	   section */
-
-	if ( rs_spec10->temp.is_setpoint )
-	{
-		if ( rs_spec10->temp.acc_setpoint != ACC_READ_WRITE &&
-			 rs_spec10->temp.acc_setpoint != ACC_WRITE_ONLY )
-		{
-			print( FATAL, "In the PREPARATIONS section a temperature "
-				   "setpoint was set, but camera doesn't allow to do so.\n" );
-			THROW( EXCEPTION );
-		}
-
-		if ( rs_spec10->temp.setpoint < rs_spec10->temp.min )
-		{
-			print( FATAL, "Temperature setpoint requested in PREPARATIONS "
-				   "section is too low, minimum is %.2lf K (%.2lf C).\n",
-				   rs_spec10->temp.min, rs_spec10_k2c( rs_spec10->temp.min ) );
-			THROW( EXCEPTION );
-		}
-
-		if ( rs_spec10->temp.setpoint > rs_spec10->temp.max )
-		{
-			print( FATAL, "Temperature setpoint requested in PREPARATIONS "
-				   "section is too high, maximum is %.2lf K (%.2lf C).\n",
-				   rs_spec10->temp.max, rs_spec10_k2c( rs_spec10->temp.max ) );
-			THROW( EXCEPTION );
-		}
-
-		rs_spec10_set_temperature( rs_spec10->temp.setpoint );
-	}
 }
 
 
@@ -376,6 +325,7 @@ uns16 *rs_spec10_get_pic( void )
 		frame = T_malloc( ( size_t ) size );
 //		  if ( mlock( frame, size ) != 0 )
 //		  {
+//            T_free( frame );
 //			  print( FATAL, "Failure to obtain properly protected memory.\n" );
 //			  THROW( EXCEPTION );
 //		  }
@@ -408,6 +358,7 @@ uns16 *rs_spec10_get_pic( void )
 			if ( ! pl_exp_check_status( rs_spec10->handle, &status, &dummy ) )
 				rs_spec10_error_handling( );
 		} while ( status != READOUT_COMPLETE );
+		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
@@ -438,15 +389,6 @@ double rs_spec10_get_temperature( void )
 	int16 itemp;
 
 
-	/* Check that model allows query of the temperature */
-
-	if ( rs_spec10->temp.acc_setpoint != ACC_READ_ONLY &&
-		 rs_spec10->temp.acc_setpoint != ACC_READ_WRITE )
-	{
-		print( SEVERE, "Camera does not allow query of its temperature.\n" );
-		return 0.0;
-	}
-
 	/* Get the current temperature */
 
 	if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP, ATTR_CURRENT,
@@ -455,7 +397,7 @@ double rs_spec10_get_temperature( void )
 
 	/* Return current temperature, converted to Kelvin */
 
-	return rs_spec10->temp.cur = rs_spec10_ic2k( itemp );
+	return rs_spec10_ic2k( itemp );
 }
 
 
@@ -468,25 +410,14 @@ double rs_spec10_set_temperature( double temp )
 	int16 itemp;
 
 
+	itemp = rs_spec10_k2ic( temp );
+
 	/* A bit of paranoia... */
 
 	fsc2_assert( FSC2_MODE == EXPERIMENT &&
-				 temp >= rs_spec10->temp.min &&
-				 temp <= rs_spec10->temp.max );
+				 itemp <= lrnd( CCD_MAX_TEMPERATURE * 100.0 ) &&
+				 itemp >= lrnd( CCD_MIN_TEMPERATURE * 100.0 ) );
 
-	/* Check that the model allows setting a setpoint */
-
-	if ( rs_spec10->temp.acc_setpoint != ACC_READ_WRITE &&
-		 rs_spec10->temp.acc_setpoint != ACC_WRITE_ONLY )
-	{
-		print( SEVERE, "Camera does not allow setting a temperature "
-			   "setpoint.\n" );
-		return 0.0;
-	}
-
-	/* Ok, send setpoint (but in Celsius, multiplied by 100) */
-
-	itemp = rs_spec10_k2ic( temp );
 	if ( ! pl_set_param( rs_spec10->handle, PARAM_TEMP_SETPOINT, 
 						 &itemp ) )
 		rs_spec10_error_handling( );

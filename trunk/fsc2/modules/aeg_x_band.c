@@ -62,8 +62,7 @@ static void magnet_sweep( int dir );
 static bool magnet_do( int command );
 
 
-static struct
-{
+static struct {
 	double field;			/* the start field given by the user */
 	double field_step;		/* the field steps to be used */
 
@@ -86,7 +85,6 @@ static struct
 
 	bool fast_init;			/* if set do a fast initialization */
 } magnet;
-
 
 enum {
 	   SERIAL_INIT,

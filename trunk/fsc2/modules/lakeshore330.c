@@ -77,12 +77,14 @@ static bool lakeshore330_talk( const char *cmd, char *reply, long *length );
 static void lakeshore330_gpib_failure( void );
 
 
-typedef struct {
+typedef struct LAKESHORE330 LAKESHORE330;
+
+struct LAKESHORE330 {
 	int device;
 	int lock_state;
 	int sample_channel;
 	long unit;
-} LAKESHORE330;
+};
 
 
 static LAKESHORE330 lakeshore330;

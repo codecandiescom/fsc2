@@ -88,7 +88,10 @@ static void keithley228a_get_corrected_current( double c, double *psc,
 static bool keithley228a_command( const char *cmd );
 
 
-typedef struct {
+typedef struct KEITHLEY228A  KEITHLEY228A;
+
+
+struct KEITHLEY228A {
 	int device;               /* GPIB number of the device */
 	bool state;               /* STANDBY or OPERATE */
 	const char *lockin_name;  /* name of the lock-in to use */
@@ -102,10 +105,10 @@ typedef struct {
 	bool use_correction;      /* flag, set if corrections are to be applied */
 	bool use_corr_orig;
 	char *lockin_append;      /* string to append to lockin function names */
-} Keithley228a;
+};
 
 
-static Keithley228a keithley228a;
+static KEITHLEY228A keithley228a;
 
 
 

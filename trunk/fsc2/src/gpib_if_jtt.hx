@@ -47,12 +47,14 @@
 #define DMA_SIZE 64512    /* compare this with entry in /etc/gpib.conf ! */
 
 
-typedef struct GPIB_DEV {
+typedef struct GPIB_DEV GPIB_DEV;
+
+struct GPIB_DEV {
 	int number;               /* device number */
     char *name;               /* symbolic name of device */
-	struct GPIB_DEV *next;    /* pointer to next GPIB_DEV structure */
-	struct GPIB_DEV *prev;    /* pointer to previous GPIB_DEV structure */
-} GPIB_DEV;
+	GPIB_DEV *next;           /* pointer to next GPIB_DEV structure */
+	GPIB_DEV *prev;           /* pointer to previous GPIB_DEV structure */
+};
 
 
 GPIB_VARIABLE int gpib_init( const char *log_file_name, int log_level );

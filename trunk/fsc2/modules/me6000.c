@@ -62,13 +62,16 @@ Var *dac_voltage( Var *v );
 static int me6000_channel_number( long ch );
 
 
-typedef struct {
+typedef struct ME6000 ME6000;
+
+struct ME6000 {
 	int num_dacs;
 	struct {
 		bool is_used;
 		double volts;
 	} dac[ MAX_NUMBER_OF_DACS ];
-} ME6000;
+};
+
 
 ME6000 me6000, me6000_stored;
 

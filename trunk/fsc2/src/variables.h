@@ -66,8 +66,9 @@ enum {
 };
 
 
-typedef struct Var
-{
+typedef struct Var Var;
+
+struct Var {
 	char *name;                    /* name of the variable */
 	int  type;                     /* type of the variable */
 
@@ -78,7 +79,7 @@ typedef struct Var
 		long   *lpnt;              /* for integer arrays */
 		double *dpnt;              /* for double arrays */
 		char   *sptr;              /* for strings */
-		struct Var **vptr;         /* for array references */
+		Var **vptr;                /* for array references */
 		struct Func *fnct;         /* for functions */
 	} val;
 
@@ -86,11 +87,11 @@ typedef struct Var
 	ssize_t len;                   /* total len of array */
 	unsigned long flags;
 
-	struct Var *from;              /* used in pointer variables */
-	struct Var *next;              /* next variable in list or stack */
-	struct Var *prev;              /* previous variable in list or stack */
+	Var *from;                     /* used in pointer variables */
+	Var *next;                     /* next variable in list or stack */
+	Var *prev;                     /* previous variable in list or stack */
 
-} Var;
+};
 
 
 

@@ -151,8 +151,13 @@ int idle_handler( XEvent *a, void *b );
    variables (they are also declared as extern in fsc2_module.h, the header
    file the modules have to include) */
 
-typedef struct {
+typedef struct INTERNALS INTERNALS;
+typedef struct EDL_Stuff EDL_Stuff;
+typedef struct COMMUNICATION COMMUNICATION;
+typedef struct GUI_Stuff GUI_Stuff;
 
+
+struct INTERNALS {
 	uid_t EUID;                  /* User and group ID the program was */
 	gid_t EGID;				     /* started with */
 
@@ -198,11 +203,10 @@ typedef struct {
 	volatile sig_atomic_t conn_request; /* set on request from the child
 										   process dealing with external
 										   connections */
-} INTERNALS;
+};
 
 
-typedef struct {
-
+struct EDL_Stuff {
 	long Lc;                     /* Line number in currently parsed EDL file */
 	char *in_file;               /* name of input file */
 	char *Fname;                 /* Name of currently parsed EDL file */
@@ -245,11 +249,10 @@ typedef struct {
 									setup of a pulse in the PREPARATIONS
 									section */
 	double experiment_time;
-} EDL_Stuff;
+};
 
 
-typedef struct {
-
+struct COMMUNICATION {
 	int pd[ 4 ];                 /* pipe descriptors for measurement child */
 	int conn_pd[ 2 ];            /* pipe for communication child */
 	int http_pd[ 4 ];            /* pipes for HTTP server */
@@ -261,11 +264,10 @@ typedef struct {
 									child to the parent process */
 	int MQ_ID;                   /* shared memory segment ID of the message
 									queue */
-} COMMUNICATION;
+};
 
 
-typedef struct {
-
+struct GUI_Stuff {
 	bool is_init;
 	Display *d;
 
@@ -283,7 +285,7 @@ typedef struct {
 
 	int stop_button_mask;        /* Which mouse buttons to use for STOP
 									button */
-} GUI_Stuff;
+};
 
 
 /* Global variables */

@@ -59,8 +59,9 @@
 #define ADDRESS( pad, sad ) \
                            ( ( ( pad ) & 0xff ) | ( ( ( sad ) & 0xff ) << 8 ) )
 
+typedef struct GPIB_Device GPIB_Device;
 
-typedef struct {
+struct GPIB_Device {
 	int is_online;
 	int number;
     char name[ GPIB_NAME_MAX + 1 ];
@@ -70,8 +71,7 @@ typedef struct {
     int eosmode;
     int timo;
     int flags;
-} GPIB_Device;
-
+};
 
 
 /* In older versions of the GPIB driver ERR was defined but this clashes

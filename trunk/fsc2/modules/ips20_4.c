@@ -89,7 +89,11 @@ static void ips20_4_comm_failure( void );
 #define MESSAGE_AVAILABLE 0x10
 
 
-typedef struct {
+
+typedef struct  IPS20_4 IPS20_4;
+
+
+struct IPS20_4 {
 	int device;
 
 	int sweep_state;
@@ -117,8 +121,7 @@ typedef struct {
 
 	bool goto_field_on_end;
 	double final_target_current;
-
-} IPS20_4;
+};
 
 
 enum {

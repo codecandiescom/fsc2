@@ -29,10 +29,12 @@
 #include "fsc2.h"
 
 
-typedef struct {
+typedef struct FILE_LIST FILE_LIST;
+
+struct FILE_LIST {
 	FILE *fp;
 	char *name;
-} FILE_LIST;
+};
 
 
 Var *f_openf( Var *var );

@@ -72,31 +72,44 @@
 #define NUM_1D_COLS ( MAX_CURVES + 6 )
 
 
-typedef	struct {
+typedef struct Scaled_Point Scaled_Point;
+typedef struct Marker_1D Marker_1D;
+typedef struct Marker_2D Marker_2D;
+typedef struct Curve_1d Curve_1d;
+typedef struct Curve_2d Curve_2d;
+typedef struct Canvas Canvas;
+typedef struct G_Hash_Entry G_Hash_Entry;
+typedef G_Hash_Entry* G_Hash;
+typedef struct Graphics Graphics;
+typedef struct Graphics_1d Graphics_1d;
+typedef struct Graphics_2d Graphics_2d;
+
+
+struct Scaled_Point {
 	double v;               /* value of the point (in interval [0,1] */
 	bool exist;             /* set if value has been set at all */
 	long xp_ref;            /* index of the associated XPoint */
-} Scaled_Point;
+};
 
 
-typedef struct Marker_1D {
+struct Marker_1D {
 	long x_pos;
 	long color;
 	GC gc;
-	struct Marker_1D *next;
-} Marker_1D;
+	Marker_1D *next;
+};
 
 
-typedef struct Marker_2D {
+struct Marker_2D {
 	long x_pos;
 	long y_pos;
 	long color;
 	GC gc;
-	struct Marker_2D *next;
-} Marker_2D;
+	Marker_2D *next;
+};
 
 
-typedef struct {
+struct Curve_1d {
 	Scaled_Point *points;
 	XPoint *xpoints;
 	long count;             /* points in curve */
@@ -124,10 +137,10 @@ typedef struct {
 	double old_shift[ 2 ];
 
 	GC font_gc;             /* gc for font */
-} Curve_1d;
+};
 
 
-typedef struct {
+struct Curve_2d {
 	bool is_fs;
 	bool is_scale_set;
 	bool scale_changed;
@@ -173,10 +186,10 @@ typedef struct {
 	Marker_1D *cut_marker;  /* linked list of markers in cut through curve */
 
 	GC font_gc;             /* gc for font */
-} Curve_2d;
+};
 
 
-typedef struct {
+struct Canvas {
 	FL_OBJECT *obj;         /* canvas object pointer */
 	Pixmap pm;              /* pixmap for double buffering */
 	GC gc;                  /* GC for pixmap */
@@ -194,19 +207,17 @@ typedef struct {
 		         h;
 
 	GC font_gc;             /* gc for font */
-} Canvas;
+};
 
 
-typedef struct {
+struct G_Hash_Entry {
 	bool is_used;
 	FL_COLOR pixel;
 	unsigned char rgb[ 3 ];
-} G_Hash_Entry;
-
-typedef G_Hash_Entry* G_Hash;
+};
 
 
-typedef struct {
+struct Graphics {
 	bool is_init;           /* has init_1d() or init_2d() been run ? */
 	bool is_fully_drawn;
 	bool is_warn;
@@ -254,10 +265,10 @@ typedef struct {
 	G_Hash color_hash;
 	unsigned int color_hash_size;
 
-} Graphics;
+};
 
 
-typedef struct {
+struct Graphics_1d {
 
 	bool is_scale_set;      /* have scaling factors been calculated ? */
 	bool scale_changed;     /* have scaling factors changed ? */
@@ -293,10 +304,10 @@ typedef struct {
 
 	Marker_1D *marker_1d;   /* linked list of markers */
 
-} Graphics_1d;
+};
 
 
-typedef struct {
+struct Graphics_2d {
 
 	bool is_scale_set;      /* have scaling factors been calculated ? */
 	bool scale_changed;     /* have scaling factors changed ? */
@@ -344,7 +355,7 @@ typedef struct {
 	bool is_cut;            /* set when cross section window is shown */
 	int cut_select;
 
-} Graphics_2d;
+};
 
 
 #define SCALE_TICK_DIST   6     /* mean minimum distance between ticks */

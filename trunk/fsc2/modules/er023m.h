@@ -159,18 +159,21 @@ extern double ma_list[ MAX_MA_INDEX + 1 ];
 											send for a ADC data point */
 
 
-typedef struct
-{
+typedef struct CALIB CALIB;
+typedef struct ER023M ER023M;
+
+
+struct CALIB {
 	bool is_ph[ 2 ];          /* set if phase is calibrated */
 	bool is_ma;               /* set if modulation attenuation is calibrated */
 
 	int pc[ 2 ];              /* phase calibration offset */
 	int mc;                   /* modulation attenuation calibration offset */
 	double ma_fac;            /* modulation attenuation conversion factor */
-} CALIB;
+};
 
 
-typedef struct {
+struct ER023M {
 	int device;
 
 	int rg_index;         /* receiver gain index */
@@ -194,7 +197,7 @@ typedef struct {
 	bool st_is_valid;     /* when set use the stored value of the status byte,
 							 otherwise fetch from device */
 
-} ER023M;
+};
 
 
 #ifdef ER023M_MAIN

@@ -88,7 +88,11 @@
 /* Structure for description of a 'window' on the digitizer, made up from the
    area between the pair of cursors */
 
-typedef struct W_ {
+typedef struct WINDOW WINDOW;
+typedef struct LECROY9400 LECROY9400;
+
+
+struct WINDOW {
 	long num;                   /* number of window                          */
 	double start;               /* start of window (in time units)           */
 	double width;               /* width of window (in time units)           */
@@ -97,13 +101,12 @@ typedef struct W_ {
 	bool is_start;              /* flag, set if start of window has been set */
 	bool is_width;              /* flag, set if width of window has been set */
 	long num_points;            /* number of data points between the cursors */
-	struct W_ *next;            /* pointer to next window structure          */
-	struct W_ *prev;            /* pointer to previous window structure      */
-} WINDOW;
+	WINDOW *next;               /* pointer to next window structure          */
+	WINDOW *prev;               /* pointer to previous window structure      */
+};
 
 
-typedef struct
-{
+struct LECROY9400 {
 	int device;
 
 	bool is_reacting;
@@ -166,7 +169,7 @@ typedef struct
 	bool channels_in_use[ MAX_CHANNELS ];
 
 	bool lock_state;       /* set if keyboard is locked */
-} LECROY9400;
+};
 
 
 

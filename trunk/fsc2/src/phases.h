@@ -27,20 +27,23 @@
 
 #include "fsc2.h"
 
+typedef struct Phase_Sequence Phase_Sequence;
+typedef struct Acquisition_Sequence Acquisition_Sequence;
 
-typedef struct Phase_Sequence {
+
+struct Phase_Sequence {
 	long num;
 	int *sequence;                   /* array of phase types */
 	int len;                         /* length of array of phase types */
-	struct Phase_Sequence *next;
-} Phase_Sequence;
+	Phase_Sequence *next;
+};
 
 
-typedef struct {
+struct Acquisition_Sequence {
 	bool defined;                    /* is the acquisition sequence defined? */
 	int *sequence;                   /* array of acquisition types */
 	int len;                         /* length of array of acquisition types */
-} Acquisition_Sequence;
+};
 
 
 

@@ -115,8 +115,9 @@ int last_DAC_port = 4;
 
 /* Typedefs and global variables used only in this file */
 
-typedef struct
-{
+typedef struct SR810 SR810;
+
+struct SR810 {
 	int device;
 	int sens_index;
 	bool sens_warn;
@@ -142,12 +143,10 @@ typedef struct
 	long dsp_ch;
 	long data_fetched;
 	long stored_data;
+};
 
-} SR810;
 
-
-static SR810 sr810;
-static SR810 sr810_stored;
+static SR810 sr810, sr810_stored;
 
 
 #define UNDEF_SENS_INDEX -1

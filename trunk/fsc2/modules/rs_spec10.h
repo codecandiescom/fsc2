@@ -45,8 +45,9 @@
 #include "rs_spec10.conf"
 
 
-typedef struct
-{
+typedef struct RS_SPEC10 RS_SPEC10;
+
+struct RS_SPEC10 {
 	const char *dev_file;
 	int16 handle;
 	bool is_open;
@@ -64,18 +65,10 @@ typedef struct
 		uns16 acc_setpoint;       /* access flags for setpoints */
 		uns16 acc_temp;           /* access flags for temperature */
 
-		double max;               /* maximum setpoint temperature */
-		double min;               /* minimum setpoint temperature */
-
-		double cur;               /* current temperature */
-
 		double setpoint;          /* last requested setpoint */
 		bool is_setpoint;         /* has setpoint been set in PREPARATIONS ? */
-
-		double test_min_setpoint; /* maximum setpoint in TEST run */
-		double test_max_setpoint; /* minimum setpoint in TEST run */
 	} temp;
-} RS_SPEC10;
+};
 
 
 

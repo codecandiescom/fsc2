@@ -326,8 +326,9 @@ enum {
 
 /* Define a structure used in analyzing the input program */
 
-typedef struct
-{
+typedef struct Compilation Compilation;
+
+struct Compilation {
 	/* Number of errors detected during compilation (FATAL, SEVERE and WARN) */
 
 	int error[ 3 ];
@@ -336,8 +337,7 @@ typedef struct
 	   multiple instances of the same section */
 
 	bool sections[ EXPERIMENT_SECTION + 1 ];
-
-} Compilation;
+};
 
 
 /* Access directions of pipe */

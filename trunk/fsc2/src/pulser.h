@@ -27,8 +27,11 @@
 
 #include "fsc2.h"
 
+typedef struct Pulser_Struct Pulser_Struct;
+typedef struct P_List P_List;
 
-typedef struct {
+
+struct Pulser_Struct {
 	const char *name;
 	Device *device;
 
@@ -77,7 +80,7 @@ typedef struct {
 	bool ( *set_phase_switch_delay )( int function, double del_time );
 	bool ( *set_grace_period )( double gp_time );
 
-} Pulser_Struct;
+};
 
 
 enum {
@@ -90,11 +93,11 @@ enum {
 };
 
 
-typedef struct P_List {
+struct P_List {
 	long num;
 	long dev_num;
-	struct P_List *next;
-} P_List;
+	P_List *next;
+};
 
 
 void pulser_struct_init( void );

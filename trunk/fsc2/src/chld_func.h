@@ -29,13 +29,15 @@
 #include "fsc2.h"
 
 
-typedef struct {
+typedef struct INPUT_RES INPUT_RES;
+
+struct INPUT_RES {
 	int res;
 	union {
 		long lval;
 		double dval;
 	} val;
-} INPUT_RES;
+};
 
 
 void show_message( const char *str );

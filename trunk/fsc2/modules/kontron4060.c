@@ -58,11 +58,12 @@ static void kontron4060_failure( void );
 #define TEST_VOLTAGE -0.123
 
 
-typedef struct
-{
+typedef struct KONTRON4060 KONTRON4060;
+
+struct KONTRON4060 {
 	int device;
 	int meas_type;
-} KONTRON4060;
+};
 
 static KONTRON4060 kontron4060;
 

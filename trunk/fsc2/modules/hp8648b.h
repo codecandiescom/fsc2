@@ -81,14 +81,17 @@ Var *synthesizer_mod_source( Var *v );
 Var *synthesizer_command( Var *v );
 
 
-typedef struct {
+typedef struct ATT_TABLE_ENTRY ATT_TABLE_ENTRY;
+typedef struct HP8648B HP8648B;
+
+
+struct ATT_TABLE_ENTRY {
 	double freq;
 	double att;
-} ATT_TABLE_ENTRY;
+};
 
 
-typedef struct
-{
+struct HP8648B {
 	int device;
 
 	double freq;
@@ -119,8 +122,7 @@ typedef struct
 	bool mod_source_is_set[ NUM_MOD_TYPES ];
 	double mod_ampl[ NUM_MOD_TYPES ];
 	bool mod_ampl_is_set[ NUM_MOD_TYPES ];
-
-} HP8648B;
+};
 
 
 

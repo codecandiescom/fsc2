@@ -26,8 +26,12 @@
 
 #include "fsc2.h"
 
+typedef struct Lib_Struct Lib_Struct;
+typedef struct Func Func;
+typedef struct CALL_STACK CALL_STACK;
 
-typedef struct {
+
+struct Lib_Struct {
 	void *handle;
 	char *lib_name;
 	int ( * init_hook ) ( void );
@@ -43,7 +47,7 @@ typedef struct {
 	bool exp_hook_is_run;
 	void ( * exit_hook ) ( void );
 	bool is_exit_hook;
-} Lib_Struct;
+};
 
 
 #include "devices.h"
@@ -55,26 +59,24 @@ typedef struct {
    must be used, while for functions with no upper limit 'LONG_MIN' has to
    be specified. */
 
-typedef struct Func
-{
+struct Func {
 	const char *name;                 /* name of the function */
     Var * ( * fnct )( Var * );        /* pointer to the function */
 	int nargs;                        /* number of arguments */
     int access_flag;                  /* accessibility flag */
 	Device *device;                   /* handle of defining device module */
 	bool to_be_loaded;                /* set if function has to be loaded */
-} Func;
+};
 
 
-typedef struct CALL_STACK
-{
+struct CALL_STACK {
 	Func *f;
 	Device *device;
 	const char *dev_name;
 	int dev_count;
 	long Cur_Pulser;
-	struct CALL_STACK *next;
-} CALL_STACK;
+	CALL_STACK *next;
+};
 
 
 bool functions_init( void );

@@ -24,12 +24,13 @@
 #if ! defined FSC2_ASSERT_HEADER
 #define FSC2_ASSERT_HEADER
 
+typedef struct Fsc2_Assert Fsc2_Assert;
 
-typedef struct {
+struct Fsc2_Assert {
 	const char *expression;
 	int line;
 	const char *filename;
-} Fsc2_Assert;
+};
 
 
 int fsc2_assert_print( const char *expression, const char *filename,

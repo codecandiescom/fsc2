@@ -123,18 +123,25 @@ Var *pulser_command( Var *v );
 
 /* typedefs of structures needed in the module */
 
-typedef struct _F_ {
+
+typedef struct FUNCTION FUNCTION;
+typedef struct CHANNEL CHANNEL;
+typedef struct PULSE PULSE;
+typedef struct HFS9000 HFS9000;
+
+
+struct FUNCTION {
 	int self;                  /* the functions number */
 	const char *name;
 	bool is_used;              /* set if the function has been declared in
 								  the ASSIGNMENTS section */
 	bool is_needed;            /* set if the function has been assigned
 								  pulses */
-	struct _C_ *channel;       /* channel assigned to function */
+	CHANNEL *channel;          /* channel assigned to function */
 
 	int num_pulses;            /* number of pulses assigned to the function */
 	int num_active_pulses;     /* number of pulses currenty in use */
-	struct _p_ **pulses;       /* list of pulse pointers */
+	PULSE **pulses;            /* list of pulse pointers */
 
 	long max_seq_len;          /* maximum length of the pulse sequence */
 
@@ -148,21 +155,67 @@ typedef struct _F_ {
 
 	bool is_high_level;
 	bool is_low_level;
+};
 
-} FUNCTION;
 
-
-typedef struct _C_ {
+struct CHANNEL {
 	int self;
 	FUNCTION *function;
 	bool needs_update;
 	char *old_d;
 	char *new_d;
 	bool state;
-} CHANNEL;
+};
 
 
-typedef struct {
+struct PULSE {
+
+	long num;                /* (positive) number of the pulse */
+
+	bool is_active;          /* set if the pulse is really used */
+	bool was_active;
+	bool has_been_active;    /* used to find useless pulses */
+
+	PULSE *next;
+	PULSE *prev;
+
+	FUNCTION *function;      /* function the pulse is associated with */
+
+	Ticks pos;               /* current position, length, position change */
+	Ticks len;               /* and length change of pulse (in units of the */
+	Ticks dpos;              /* pulsers time base) */
+	Ticks dlen;
+
+	bool is_function;        /* flags that are set when the corresponding */
+	bool is_pos;             /* property has been set */
+	bool is_len;
+	bool is_dpos;
+	bool is_dlen;
+
+	Ticks initial_pos;       /* position, length, position change and length */
+	Ticks initial_len;       /* change at the start of the experiment */
+	Ticks initial_dpos;
+	Ticks initial_dlen;
+
+	bool initial_is_pos;     /* property has initially been set */
+	bool initial_is_len;
+	bool initial_is_dpos;
+	bool initial_is_dlen;
+
+	Ticks old_pos;           /* position and length of pulse before a change */
+	Ticks old_len;           /* is applied */
+
+	bool is_old_pos;
+	bool is_old_len;
+
+	CHANNEL *channel;
+
+	bool needs_update;       /* set if the pulses properties have been changed
+								in test run or experiment */
+};
+
+
+struct  HFS9000 {
 	int device;              /* GPIB number of the device */
 
 	double timebase;         /* time base of the digitizer */
@@ -202,54 +255,7 @@ typedef struct {
 								while doing an update */
 	FILE *dump_file;
 	FILE *show_file;
-} HFS9000;
-
-
-typedef struct _p_ {
-
-	long num;                /* (positive) number of the pulse */
-
-	bool is_active;          /* set if the pulse is really used */
-	bool was_active;
-	bool has_been_active;    /* used to find useless pulses */
-
-	struct _p_ *next;
-	struct _p_ *prev;
-
-	FUNCTION *function;      /* function the pulse is associated with */
-
-	Ticks pos;               /* current position, length, position change */
-	Ticks len;               /* and length change of pulse (in units of the */
-	Ticks dpos;              /* pulsers time base) */
-	Ticks dlen;
-
-	bool is_function;        /* flags that are set when the corresponding */
-	bool is_pos;             /* property has been set */
-	bool is_len;
-	bool is_dpos;
-	bool is_dlen;
-
-	Ticks initial_pos;       /* position, length, position change and length */
-	Ticks initial_len;       /* change at the start of the experiment */
-	Ticks initial_dpos;
-	Ticks initial_dlen;
-
-	bool initial_is_pos;     /* property has initially been set */
-	bool initial_is_len;
-	bool initial_is_dpos;
-	bool initial_is_dlen;
-
-	Ticks old_pos;           /* position and length of pulse before a change */
-	Ticks old_len;           /* is applied */
-
-	bool is_old_pos;
-	bool is_old_len;
-
-	CHANNEL *channel;
-
-	bool needs_update;       /* set if the pulses properties have been changed
-								in test run or experiment */
-} PULSE;
+};
 
 
 #if defined( HFS9000_MAIN )

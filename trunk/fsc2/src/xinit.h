@@ -26,7 +26,9 @@
 #define XINIT_HEADER
 
 
-typedef struct {
+typedef struct G_FUNCS G_FUNCS;
+
+struct G_FUNCS {
 	bool size;
 	FD_fsc2 *          ( * create_form_fsc2       ) ( void );
 	FD_run_1d *        ( * create_form_run_1d     ) ( void );
@@ -35,7 +37,7 @@ typedef struct {
 	FD_print *         ( * create_form_print      ) ( void );
 	FD_cut *           ( * create_form_cut        ) ( void );
 	FD_print_comment * ( * create_pc_form         ) ( void );
-} G_FUNCS;
+};
 
 bool xforms_init( int *argc, char *argv[ ] );
 void xforms_close( void );

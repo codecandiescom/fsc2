@@ -24,8 +24,9 @@
 
 #include "fsc2.h"
 
+typedef struct DPoint DPoint;
 
-typedef struct {
+struct DPoint {
 	long nx;
 	long ny;
 	long nc;
@@ -34,7 +35,7 @@ typedef struct {
 	long lval;
 	double dval;
 	void *ptr;
-} DPoint;
+};
 
 
 static DPoint *eval_display_args( Var *v, int dim, int *npoints );

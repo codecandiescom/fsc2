@@ -24,8 +24,9 @@
 #if ! defined GRAPH_CUT_HEADER
 #define GRAPH_CUT_HEADER
 
+typedef struct Cut_Graphics Cut_Graphics;
 
-typedef struct {
+struct Cut_Graphics {
 	int cut_dir;             /* direction of cut (i.e. X, Y) */
 	int curve;               /* number of the curve the cut comes from */
 
@@ -64,7 +65,7 @@ typedef struct {
 		         right_arrow_w,
 		         right_arrow_h;
 
-} Cut_Graphics;
+};
 
 
 #include "fsc2.h"

@@ -77,8 +77,9 @@ int last_DAC_port = 6;
 
 /* Typedefs and global variables used only in this file */
 
-typedef struct
-{
+typedef struct SR530 SR530;
+
+struct SR530 {
 	int device;
 	int sens_index;
 	bool sens_warn;
@@ -86,11 +87,10 @@ typedef struct
 	bool is_phase;
 	int tc_index;
 	double dac_voltage[ 2 ];
-} SR530;
+};
 
 
-static SR530 sr530;
-static SR530 sr530_stored;
+static SR530 sr530, sr530_stored;
 
 
 #define UNDEF_SENS_INDEX -1

@@ -51,7 +51,7 @@ double rs_spec10_c2k( double tc )
 
 int16 rs_spec10_k2ic( double tk )
 {
-	return ( int16 ) ( 100.0 * ( tk - C2K_OFFSET ) );
+	return ( int16 ) lrnd( 100.0 * ( tk - C2K_OFFSET ) );
 }
 
 
