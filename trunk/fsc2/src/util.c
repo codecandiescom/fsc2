@@ -599,10 +599,5 @@ inline double d_max( double a, double b ) { return a > b ? a : b; }
 inline double d_min( double a, double b ) { return a < b ? a : b; }
 
 
-/*-----------------------------------------------------*/
-/* This function is needed for glib versions below 2.0 */
-/*-----------------------------------------------------*/
-
-#if defined IS_STILL_LIBC1
 inline long lround( double x ) { return ( long ) ( 2 * x ) - ( long ) x; }
-#endif
+

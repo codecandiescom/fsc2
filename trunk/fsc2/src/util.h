@@ -54,12 +54,7 @@ inline float  f_min( float  a, float  b );
 inline double d_max( double a, double b );
 inline double d_min( double a, double b );
 
-
-/* Needed for glib versions below 2.0 */
-
-#if defined IS_STILL_LIBC1
 inline long lround( double x );
-#endif
 
 
 #endif  /* ! UTIL_HEADER */

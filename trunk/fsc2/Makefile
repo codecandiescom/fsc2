@@ -306,7 +306,7 @@ all:
 					 $(cdir)/Functions $(cdir)/Devices $(cdir)/*.conf |  \
 	grep -v 'sed\|grep' |                                                \
 	sed -e 's/^.*$$Id\: \(.*\) jens Exp $$.*/\1/g' |                     \
-	bzip2 -c -9 | uuencode -m - > version.ubz
+	gzip -c -9 | uuencode -m - > version.ugz
 	$(MAKE) -C src all
 	$(MAKE) -C utils all
 	$(MAKE) -C doc all
@@ -327,7 +327,7 @@ install:
 
 	$(MAKE) -C src install
 	$(MAKE) -C modules install
-	$(INSTALL) -m  644 -o $(OWNER) -g $(GROUP) version.ubz $(libdir)
+	$(INSTALL) -m  644 -o $(OWNER) -g $(GROUP) version.ugz $(libdir)
 	$(MAKE) -C utils install
 	$(MAKE) -C scripts install
 	$(MAKE) -C doc install
@@ -337,7 +337,7 @@ install:
 # How to get rid of everything that got installed
 
 uninstall:
-	-$(RM) $(RMFLAGS) $(libdir)/version.ubz
+	-$(RM) $(RMFLAGS) $(libdir)/version.ugz
 	-$(RM) $(RMFLAGS) $(libdir)/Functions
 	-$(RM) $(RMFLAGS) $(libdir)/Devices
 	-for file in $(adir)/*.xpm; do                     \
@@ -362,8 +362,8 @@ uninstall:
 # Unpacks the (local) version file and writes its content to stdout
 
 version:
-	-@if [ -e version.ubz ]; then              \
-		uudecode version.ubz | bunzip2 -c -q;  \
+	-@if [ -e version.ugz ]; then             \
+		uudecode version.ugz | gunzip -c -q;  \
 	fi
 
 # `clean' deletes all the files remaining from the compilation and needed for
@@ -380,7 +380,7 @@ distclean:
 	$(MAKE) -C modules distclean
 	$(MAKE) -C doc distclean
 	$(MAKE) -C utils distclean
-	-$(RM) $(RMFLAGS) version.ubz *~
+	-$(RM) $(RMFLAGS) version.ugz *~
 
 
 # Clean up everything for a distribution and create a zipped tarball

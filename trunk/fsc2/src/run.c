@@ -100,7 +100,7 @@ bool run( void )
 	fl_set_cursor( FL_ObjWin( main_form->run ), XC_watch );
 	XFlush( fl_get_display( ) );
 
-	/* If the devices need the GPIB bus initialise it now */
+	/* If there are devices that need the GPIB bus initialize it now */
 
 	if ( need_GPIB && gpib_init( GPIB_LOG_FILE, GPIB_LOG_LEVEL ) == FAILURE )
 	{
@@ -116,7 +116,7 @@ bool run( void )
 	memcpy( &compile_test, &compilation, sizeof( Compilation ) );
 
 	/* Set zero point for the dtime() function, run the experiment hooks,
-	   initialize the graphics, and create two pipes for two-way communication
+	   initialize the graphics and create two pipes for two-way communication
 	   between the parent and child process. */
 
 	TRY
@@ -131,6 +131,9 @@ bool run( void )
 	OTHERWISE
 	{
 		run_end_of_exp_hooks( );
+
+		vars_del_stack( );             /* some stack variables might be left
+										  over when an exception got thrown */
 		if ( need_GPIB )
 			gpib_shutdown( );
 		set_buttons_for_run( 1 );
@@ -242,7 +245,12 @@ static bool no_prog_to_be_run( void )
 		TRY_SUCCESS;
 	}
 	OTHERWISE
+	{
+		run_end_of_exp_hooks( );
+		vars_del_stack( );             /* some stack variables might be left
+										  over when an exception got thrown */
 		ret = FAIL;
+	}
 
 	run_end_of_exp_hooks( );
 	if ( need_GPIB )
@@ -476,7 +484,7 @@ void stop_measurement( FL_OBJECT *a, long b )
 
 			kill( child_pid, DO_QUIT );
 		}
-		else                             /* child has already exited */
+		else                             /* child already exited */
 		{
 			stop_graphics( );
 			set_buttons_for_run( 1 );
