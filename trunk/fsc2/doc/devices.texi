@@ -498,7 +498,7 @@ of @code{0 V}. The value can't be changed anymore after it has been used
 When called without an argument the current value of what
 the module assumes to be the field at a DAC output voltage of @code{0 V}.
 
-The function can only be used in the @code{EXPERIMENT} section.
+The function can only be used in the @code{PREPARATIONS} section.
 
 
 @anchor{magnet_slope}
@@ -515,7 +515,7 @@ When called without an argument the current value of what the module
 assumes to be the field change for a DAC output voltage change of
 @code{1 V}.
 
-The function can only be used in the @code{EXPERIMENT} section.
+The function can only be used in the @code{PREPARATIONS} section.
 
 
 @anchor{magnet_calibration_file}

@@ -56,7 +56,7 @@ get_field, 0, EXP;              // returns the current field
 reset_field, 0, EXP;            // go back to start field
 
 
-/* Functions supported by the Steinhoff magnet (hjs_sfc)
+/* Functions supported by the Steinhoff magnet (hjs_sfc) only */
 
 magnet_B0, -1, PREP;
 magnet_slope, -1, PREP;
