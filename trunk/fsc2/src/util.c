@@ -351,6 +351,34 @@ bool fsc2_locking( void )
 
 
 /*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
+bool raise_permissions( void )
+{
+	if ( geteuid( ) != EUID )
+	{
+		seteuid( EUID );
+		setegid( EGID );
+		return SET;
+	}
+
+	return UNSET;
+}
+
+
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
+void lower_permissions( bool must_change )
+{
+	if ( ! must_change )
+		return;
+
+	seteuid( getuid( ) );
+	setegid( getgid( ) );
+}
+
+/*---------------------------------------------------------------------*/
 /* Functions checks if a supplied input string is identical to one of  */
 /* `max' alternatives, pointed to by `altern', but neglecting the case */
 /* of the characters. Leading and trailing white space is removed from */

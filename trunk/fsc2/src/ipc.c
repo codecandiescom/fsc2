@@ -51,12 +51,7 @@ void *get_shm( int *shm_id, long len )
 	bool must_reset = UNSET;
 
 
-	if ( geteuid( ) != EUID )
-	{
-		seteuid( EUID );
-		setegid( EGID );
-		must_reset = SET;
-	}
+	must_reset = raise_permissions( );
 
 	while ( ( *shm_id = shmget( IPC_PRIVATE, len + 4,
 								IPC_CREAT | SHM_R | SHM_A ) ) < 0 )
@@ -65,11 +60,7 @@ void *get_shm( int *shm_id, long len )
 			usleep( 10000 );
 		else                                      /* non-recoverable failure */
 		{
-			if ( must_reset )
-			{
-				seteuid( getuid( ) );
-				setegid( getgid( ) );
-			}
+			lower_permissions( must_reset );
 			return ( void * ) -1;
 		}
 	}
@@ -79,11 +70,7 @@ void *get_shm( int *shm_id, long len )
 
 	if ( ( buf = shmat( *shm_id, NULL, 0 ) ) == ( void * ) - 1 )
 	{
-		if ( must_reset )
-		{
-			seteuid( getuid( ) );
-			setegid( getgid( ) );
-		}
+		lower_permissions( must_reset );
 		return ( void * ) -1;
 	}
 
@@ -93,12 +80,7 @@ void *get_shm( int *shm_id, long len )
 	memcpy( buf, "fsc2", 4 );                         /* magic id */
 	buf += 4;
 
-	if ( must_reset )
-	{
-		seteuid( getuid( ) );
-		setegid( getgid( ) );
-	}
-
+	lower_permissions( must_reset );
 	return buf;
 }
 
@@ -115,16 +97,12 @@ void *attach_shm( int key )
 	bool must_reset = UNSET;
 
 
-	if ( geteuid( ) != EUID )
-	{
-		seteuid( EUID );
-		setegid( EGID );
-		must_reset = SET;
-	}
+	must_reset = raise_permissions( );
 
 	if ( ( buf = shmat( key, NULL, SHM_RDONLY ) ) == ( void * ) - 1 )
 	{
 		shmctl( key, IPC_RMID, NULL );       /* delete the segment */
+		lower_permissions( must_reset );
 		if ( must_reset )
 		{
 			seteuid( getuid( ) );
@@ -133,12 +111,7 @@ void *attach_shm( int key )
 		return ( void * ) -1;
 	}
 
-	if ( must_reset )
-	{
-		seteuid( getuid( ) );
-		setegid( getgid( ) );
-	}
-
+	lower_permissions( must_reset );
 	return buf + 4;
 }
 
@@ -154,12 +127,7 @@ void detach_shm( void *buf, int *key )
 	bool must_reset = UNSET;
 
 
-	if ( geteuid( ) != EUID )
-	{
-		seteuid( EUID );
-		setegid( EGID );
-		must_reset = SET;
-	}
+	must_reset = raise_permissions( );
 	
 	shmdt( buf - 4 );
 	if ( key != NULL )
@@ -168,11 +136,7 @@ void detach_shm( void *buf, int *key )
 		*key = -1;
 	}
 
-	if ( must_reset )
-	{
-		seteuid( getuid( ) );
-		setegid( getgid( ) );
-	}
+	lower_permissions( must_reset );
 }
 
 
@@ -191,12 +155,7 @@ void delete_all_shm( void )
 	bool must_reset = UNSET;
 
 
-	if ( geteuid( ) != EUID )
-	{
-		seteuid( EUID );
-		setegid( EGID );
-		must_reset = SET;
-	}
+	must_reset = raise_permissions( );
 
 	/* If message queue exists check that all memory segments indixed in it
 	   are deleted */
@@ -216,11 +175,7 @@ void delete_all_shm( void )
 	if ( Key_ID >= 0 )
 		detach_shm( Key, &Key_ID );
 
-	if ( must_reset )
-	{
-		seteuid( getuid( ) );
-		setegid( getgid( ) );
-	}
+	lower_permissions( must_reset );
 }
 
 
@@ -305,21 +260,12 @@ int sema_create( void )
 	bool must_reset = UNSET;
 
 
-	if ( geteuid( ) != EUID )
-	{
-		seteuid( EUID );
-		setegid( EGID );
-		must_reset = SET;
-	}
+	must_reset = raise_permissions( );
 
 	if ( ( sema_id = semget( IPC_PRIVATE, 1,
 							 IPC_CREAT | IPC_EXCL | SEM_R | SEM_A ) ) < 0 )
 	{
-		if ( must_reset )
-		{
-			seteuid( getuid( ) );
-			setegid( getgid( ) );
-		}
+		lower_permissions( must_reset );
 		return -1;
 	}
 
@@ -327,19 +273,11 @@ int sema_create( void )
 	if ( ( semctl( sema_id, 0, SETVAL, sema_arg ) ) < 0 )
 	{
 		semctl( sema_id, 0, IPC_RMID, sema_arg );
-		if ( must_reset )
-		{
-			seteuid( getuid( ) );
-			setegid( getgid( ) );
-		}
+		lower_permissions( must_reset );
 		return -1;
 	}
 
-	if ( must_reset )
-	{
-		seteuid( getuid( ) );
-		setegid( getgid( ) );
-	}
+	lower_permissions( must_reset );
 	return sema_id;
 }
 
@@ -355,28 +293,15 @@ int sema_destroy( int sema_id )
 	union semun sema_arg;
 
 
-	if ( geteuid( ) != EUID )
-	{
-		seteuid( EUID );
-		setegid( EGID );
-		must_reset = SET;
-	}
+	must_reset = raise_permissions( );
 
 	if ( semctl( sema_id, 0, IPC_RMID, sema_arg ) < 0 )
 	{
-		if ( must_reset )
-		{
-			seteuid( getuid( ) );
-			setegid( getgid( ) );
-		}
+		lower_permissions( must_reset );
 		return -1;
 	}
 
-	if ( must_reset )
-	{
-		seteuid( getuid( ) );
-		setegid( getgid( ) );
-	}
+	lower_permissions( must_reset );
 	return 0;
 }
 
@@ -394,29 +319,16 @@ int sema_wait( int sema_id )
 	bool must_reset = UNSET;
 
 
-	if ( geteuid( ) != EUID )
-	{
-		seteuid( EUID );
-		setegid( EGID );
-		must_reset = SET;
-	}
+	must_reset = raise_permissions( );
 
 	while ( semop( sema_id, &wait, 1 ) < 0 )
 		if ( errno != EINTR )
 		{
-			if ( must_reset )
-			{
-				seteuid( getuid( ) );
-				setegid( getgid( ) );
-			}
+			lower_permissions( must_reset );
 			return -1;
 		}
 
-	if ( must_reset )
-	{
-		seteuid( getuid( ) );
-		setegid( getgid( ) );
-	}
+	lower_permissions( must_reset );
 	return 0;
 }
 
@@ -433,28 +345,15 @@ int sema_post( int sema_id )
 	bool must_reset = UNSET;
 
 
-	if ( geteuid( ) != EUID )
-	{
-		seteuid( EUID );
-		setegid( EGID );
-		must_reset = SET;
-	}
+	must_reset = raise_permissions( );
 
 	while ( semop( sema_id, &post, 1 ) < 0 )
 		if ( errno != EINTR )
 		{
-			if ( must_reset )
-			{
-				seteuid( getuid( ) );
-				setegid( getgid( ) );
-			}
+			lower_permissions( must_reset );
 			return -1;
 		}
 
-	if ( must_reset )
-	{
-		seteuid( getuid( ) );
-		setegid( getgid( ) );
-	}
+	lower_permissions( must_reset );
 	return 0;
 }
