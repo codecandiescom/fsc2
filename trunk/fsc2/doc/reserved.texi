@@ -7,134 +7,239 @@
 
 
 @multitable { @code{PREPARATIONS:} } { Starts the @code{PREPARATIONS} section and lots more of tex... }
-@item @code{A}             @tab Unit, Ampere
-@item @code{abs}           @tab Built-in function (@pxref{abs})
-@item @code{acos}          @tab Built-in function (@pxref{acos})
-@item @code{asin}          @tab Built-in function (@pxref{asin})
-@item @code{atan}          @tab Built-in function (@pxref{atan})
-@item @code{ASS:}          @tab Starts the @code{ASSIGNMENTS} section
-@item @code{ASSIGNMENT:}   @tab Starts the @code{ASSIGNMENTS} section
-@item @code{ASSIGNMENTS:}  @tab Starts the @code{ASSIGNMENTS} section
-@item @code{AUX}           @tab Digitizer channel name
-@item @code{AUX1}          @tab Digitizer channel name
-@item @code{AUX2}          @tab Digitizer channel name
-@item                      @tab
-@item @code{ceil}          @tab Built-in function (@pxref{ceil})
-@item @code{CH1}           @tab Digitizer channel name
-@item @code{CH2}           @tab Digitizer channel name
-@item @code{CH3}           @tab Digitizer channel name
-@item @code{CH4}           @tab Digitizer channel name
-@item @code{clear_curve}   @tab Built-in function (@pxref{clear_curve})
-@item @code{cos}           @tab Built-in function (@pxref{cos})
-@item @code{cosh}          @tab Built-in function (@pxref{cosh})
-@item                      @tab
-@item @code{date}          @tab Built-in function (@pxref{date})
-@item @code{dB}            @tab Unit, Decibel
-@item @code{DEV:}          @tab Starts the @code{DEVICES} section
-@item @code{DEVS:}         @tab Starts the @code{DEVICES} section
-@item @code{DEVICE:}       @tab Starts the @code{DEVICES} section
-@item @code{DEVICES:}      @tab Starts the @code{DEVICES} section
-@item @code{dim}           @tab Built-in function (@pxref{dim})
-@item @code{display}       @tab Built-in function (@pxref{display})
-@item                      @tab
-@item @code{EXP:}          @tab Starts the @code{EXPERIMENT} section
-@item @code{EXPERIMENT:}   @tab Starts the @code{EXPERIMENT} section
-@item                      @tab
-@item @code{float}         @tab Built-in function (@pxref{float})
-@item @code{floor}         @tab Built-in function (@pxref{floor})
-@item @code{FOR}           @tab Keyword for @code{FOR} loops
-@item @code{fsave}         @tab Built-in function (@pxref{fsave})
-@item                      @tab
-@item @code{G}             @tab Unit, Gauss
-@item @code{get_file}      @tab Built-in function (@pxref{get_file})
-@item                      @tab
-@item @code{Hz}            @tab Unit, Hertz
-@item                      @tab
-@item @code{init_1d}       @tab Built-in function (@pxref{init_1d})
-@item @code{init_2d}       @tab Built-in function (@pxref{init_2d})
-@item @code{int}           @tab Built-in function (@pxref{int})
-@item                      @tab
-@item @code{kA}            @tab Unit, Kilo-Ampere
-@item @code{kA}            @tab Unit, Kilo-Ampere
-@item @code{kG}            @tab Unit, Kilo-Gauss
-@item @code{kHz}           @tab Unit, Kilo-Hertz
-@item @code{ks}            @tab Unit, Kilo-Seconds
-@item @code{kV}            @tab Unit, Kilo-Volt
-@item                      @tab
-@item @code{LIN}           @tab Digitizer channel name
-@item                      @tab
-@item @code{MA}            @tab Unit, Mega-Ampere
-@item @code{MATH1}         @tab Digitizer channel name
-@item @code{MATH2}         @tab Digitizer channel name
-@item @code{MATH3}         @tab Digitizer channel name
-@item @code{MG}            @tab Unit, Mega-Gauss
-@item @code{MHz}           @tab Unit, Mega-Hertz
-@item @code{Ms}            @tab Unit, Mega-Seconds
-@item @code{MV}            @tab Unit, Mega-Volt
-@item @code{mA}            @tab Unit, Milli-Ampere
-@item @code{mG}            @tab Unit, Milli-Gauss
-@item @code{mHz}           @tab Unit, Milli-Hertz
-@item @code{ms}            @tab Unit, Milli-Seconds
-@item @code{mT}            @tab Unit, Milli-Tesla
-@item @code{mV}            @tab Unit, Milli-Volt
-@item                      @tab
-@item @code{nA}            @tab Unit, Nano-Ampere
-@item @code{nG}            @tab Unit, Nano-Gauss
-@item @code{nHz}           @tab Unit, Nano-Hertz
-@item @code{ns}            @tab Unit, Nano-Seconds
-@item @code{nT}            @tab Unit, Nano-Tesla
-@item @code{nV}            @tab Unit, Nano-Volt
-@item                      @tab
-@item @code{ON_STOP:}      @tab Label in @code{EXPERIMENT} section
-@item                      @tab
-@item @code{PHA:}          @tab Starts the @code{PHASES} section
-@item @code{PHAS:}         @tab Starts the @code{PHASES} section
-@item @code{PHASE:}        @tab Starts the @code{PHASES} section
-@item @code{PHASES:}       @tab Starts the @code{PHASES} section
-@item @code{PREP:}         @tab Starts the @code{PREPARATIONS} section
-@item @code{PREPS:}        @tab Starts the @code{PREPARATIONS} section
-@item @code{PREPARATION:}  @tab Starts the @code{PREPARATIONS} section
-@item @code{PREPARATIONS:} @tab Starts the @code{PREPARATIONS} section
-@item @code{print}         @tab Built-in function (@pxref{print})
-@item                      @tab
-@item @code{REPEAT}        @tab Keyword for @code{REPEAT} loops
-@item @code{random}        @tab Built-in function (@pxref{random})
-@item @code{REF1}          @tab Digitizer channel name
-@item @code{REF2}          @tab Digitizer channel name
-@item @code{REF3}          @tab Digitizer channel name
-@item @code{REF4}          @tab Digitizer channel name
-@item @code{round}         @tab Built-in function (@pxref{round})
-@item                      @tab
-@item @code{s}             @tab Unit, Seconds
-@item @code{save}          @tab Built-in function (@pxref{save})
-@item @code{save_comment}  @tab Built-in function (@pxref{save_comment})
-@item @code{save_output}   @tab Built-in function (@pxref{save_output})
-@item @code{save_program}  @tab Built-in function (@pxref{save_program})
-@item @code{set_seed}      @tab Built-in function (@pxref{set_seed})
-@item @code{sin}           @tab Built-in function (@pxref{sin})
-@item @code{sinh}          @tab Built-in function (@pxref{sinh})
-@item @code{size}          @tab Built-in function (@pxref{size})
-@item @code{sizes}         @tab Built-in function (@pxref{sizes})
-@item @code{sqrt}          @tab Built-in function (@pxref{sqrt})
-@item                      @tab
-@item @code{T}             @tab Unit, Tesla
-@item @code{tan}           @tab Built-in function (@pxref{tan})
-@item @code{tanh}          @tab Built-in function (@pxref{tanh})
-@item @code{time}          @tab Built-in function (@pxref{time})
-@item                      @tab
-@item @code{uA}            @tab Unit, Micro-Ampere
-@item @code{uG}            @tab Unit, Micro-Gauss
-@item @code{uHz}           @tab Unit, Micro-Hertz
-@item @code{us}            @tab Unit, Micro-Seconds
-@item @code{uT}            @tab Unit, Micro-Tesla
-@item @code{uV}            @tab Unit, Micro-Volt
-@item                      @tab
-@item @code{V}             @tab Unit, Volt
-@item @code{VAR:}          @tab Starts the @code{VARIABLES} section
-@item @code{VARS:}         @tab Starts the @code{VARIABLES} section
-@item @code{VARIABLE:}     @tab Starts the @code{VARIABLES} section
-@item @code{VARIABLES:}    @tab Starts the @code{VARIABLES} section
-@item                      @tab
-@item @code{wait}          @tab Built-in function (@pxref{wait})
-@item @code{WHILE}         @tab Keyword for @code{WHILE} loops
+@item @code{A}                @tab Unit, Ampere
+@item @code{abs}              @tab Built-in function (@pxref{abs})
+@item @code{acos}             @tab Built-in function (@pxref{acos})
+@item @code{asin}             @tab Built-in function (@pxref{asin})
+@item @code{atan}             @tab Built-in function (@pxref{atan})
+@item @code{ASS:}             @tab Starts the @code{ASSIGNMENTS} section
+@item @code{ASSIGNMENT:}      @tab Starts the @code{ASSIGNMENTS} section
+@item @code{ASSIGNMENTS:}     @tab Starts the @code{ASSIGNMENTS} section
+@item @code{AUX}              @tab Digitizer channel name
+@item @code{AUX1}             @tab Digitizer channel name
+@item @code{AUX2}             @tab Digitizer channel name
+@item                         @tab
+@item @code{ceil}             @tab Built-in function (@pxref{ceil})
+@item @code{CH}               @tab
+@item @code{CH1}              @tab Digitizer channel name
+@item @code{CH2}              @tab Digitizer channel name
+@item @code{CH3}              @tab Digitizer channel name
+@item @code{CH4}              @tab Digitizer channel name
+@item @code{CHANNEL}          @tab
+@item @code{clear_curve}      @tab Built-in function (@pxref{clear_curve})
+@item @code{cos}              @tab Built-in function (@pxref{cos})
+@item @code{cosh}             @tab Built-in function (@pxref{cosh})
+@item                         @tab
+@item @code{date}             @tab Built-in function (@pxref{date})
+@item @code{dB}               @tab Unit, Decibel
+@item @code{DEL}              @tab
+@item @code{DELAY}            @tab
+@item @code{DELL}             @tab
+@item @code{DEL_L}            @tab
+@item @code{DELLEN}           @tab
+@item @code{DEL_LEN}          @tab
+@item @code{DELLENGTH}        @tab
+@item @code{DEL_LENGTH}       @tab
+@item @code{DELS}             @tab
+@item @code{DEL_S}            @tab
+@item @code{DELSTART}         @tab
+@item @code{DEL_START}        @tab
+@item @code{DELTAL}           @tab
+@item @code{DELTA_L}          @tab
+@item @code{DELTALEN}         @tab
+@item @code{DELTA_LEN}        @tab
+@item @code{DELTALENGTH}      @tab
+@item @code{DELTA_LENGTH}     @tab
+@item @code{DELTASTART}       @tab
+@item @code{DELTA_START}      @tab
+@item @code{DEV:}             @tab Starts the @code{DEVICES} section
+@item @code{DEVS:}            @tab Starts the @code{DEVICES} section
+@item @code{DEVICE:}          @tab Starts the @code{DEVICES} section
+@item @code{DEVICES:}         @tab Starts the @code{DEVICES} section
+@item @code{dim}              @tab Built-in function (@pxref{dim})
+@item @code{display}          @tab Built-in function (@pxref{display})
+@item @code{DL}               @tab
+@item @code{D_L}              @tab
+@item @code{DLEN}             @tab
+@item @code{D_LEN}            @tab
+@item @code{DLENGTH}          @tab
+@item @code{D_LENGTH}         @tab
+@item @code{DS}               @tab
+@item @code{D_S}              @tab
+@item @code{DSTART}           @tab
+@item @code{D_START}          @tab
+@item                         @tab
+@item @code{EXP:}             @tab Starts the @code{EXPERIMENT} section
+@item @code{EXPERIMENT:}      @tab Starts the @code{EXPERIMENT} section
+@item @code{EXT}              @tab
+@item @code{EXTERN}           @tab
+@item @code{EXTERNAL}         @tab
+@item                         @tab
+@item @code{F}                @tab
+@item @code{float}            @tab Built-in function (@pxref{float})
+@item @code{floor}            @tab Built-in function (@pxref{floor})
+@item @code{FOR}              @tab Keyword for @code{FOR} loops
+@item @code{fsave}            @tab Built-in function (@pxref{fsave})
+@item @code{FUNC}             @tab
+@item @code{FUNCTION}         @tab
+@item                         @tab
+@item @code{G}                @tab Unit, Gauss
+@item @code{get_file}         @tab Built-in function (@pxref{get_file})
+@item                         @tab
+@item @code{H}                @tab
+@item @code{HIGH}             @tab
+@item @code{Hz}               @tab Unit, Hertz
+@item                         @tab
+@item @code{init_1d}          @tab Built-in function (@pxref{init_1d})
+@item @code{init_2d}          @tab Built-in function (@pxref{init_2d})
+@item @code{int}              @tab Built-in function (@pxref{int})
+@item @code{INT}              @tab
+@item @code{INTERN}           @tab
+@item @code{INTERNAL}         @tab
+@item @code{INV}              @tab
+@item @code{INVERT}           @tab
+@item @code{INVERTED}         @tab
+@item @code{IMP}              @tab
+@item @code{IMPEDANCE}        @tab
+@item                         @tab
+@item @code{kA}               @tab Unit, Kilo-Ampere
+@item @code{kA}               @tab Unit, Kilo-Ampere
+@item @code{kG}               @tab Unit, Kilo-Gauss
+@item @code{kHz}              @tab Unit, Kilo-Hertz
+@item @code{ks}               @tab Unit, Kilo-Seconds
+@item @code{kV}               @tab Unit, Kilo-Volt
+@item                         @tab
+@item @code{L}                @tab
+@item @code{LEN}              @tab
+@item @code{LENGTH}           @tab
+@item @code{LEV}              @tab
+@item @code{LEVEL}            @tab
+@item @code{LIN}              @tab Digitizer channel name
+@item @code{LOW}              @tab
+@item                         @tab
+@item @code{MA}               @tab Unit, Mega-Ampere
+@item @code{MATH1}            @tab Digitizer channel name
+@item @code{MATH2}            @tab Digitizer channel name
+@item @code{MATH3}            @tab Digitizer channel name
+@item @code{MG}               @tab Unit, Mega-Gauss
+@item @code{MHz}              @tab Unit, Mega-Hertz
+@item @code{Ms}               @tab Unit, Mega-Seconds
+@item @code{MV}               @tab Unit, Mega-Volt
+@item @code{mA}               @tab Unit, Milli-Ampere
+@item @code{mG}               @tab Unit, Milli-Gauss
+@item @code{mHz}              @tab Unit, Milli-Hertz
+@item @code{MODE}             @tab
+@item @code{ms}               @tab Unit, Milli-Seconds
+@item @code{mT}               @tab Unit, Milli-Tesla
+@item @code{mV}               @tab Unit, Milli-Volt
+@item                         @tab
+@item @code{nA}               @tab Unit, Nano-Ampere
+@item @code{NEG}              @tab
+@item @code{NEGATIVE}         @tab
+@item @code{nG}               @tab Unit, Nano-Gauss
+@item @code{nHz}              @tab Unit, Nano-Hertz
+@item @code{ns}               @tab Unit, Nano-Seconds
+@item @code{nT}               @tab Unit, Nano-Tesla
+@item @code{nV}               @tab Unit, Nano-Volt
+@item                         @tab
+@item @code{ON_STOP:}         @tab Label in @code{EXPERIMENT} section
+@item                         @tab
+@item @code{P}                @tab
+@item @code{P@i{[0-9]+}}      @tab
+@item @code{P_@i{[0-9]+}}     @tab
+@item @code{PHA:}             @tab Starts the @code{PHASES} section
+@item @code{PHAS:}            @tab Starts the @code{PHASES} section
+@item @code{PHASE:}           @tab Starts the @code{PHASES} section
+@item @code{PHASES:}          @tab Starts the @code{PHASES} section
+@item @code{POD}              @tab
+@item @code{POS}              @tab
+@item @code{POSITIVE}         @tab
+@item @code{PREP:}            @tab Starts the @code{PREPARATIONS} section
+@item @code{PREPS:}           @tab Starts the @code{PREPARATIONS} section
+@item @code{PREPARATION:}     @tab Starts the @code{PREPARATIONS} section
+@item @code{PREPARATIONS:}    @tab Starts the @code{PREPARATIONS} section
+@item @code{print}            @tab Built-in function (@pxref{print})
+@item @code{PULSE@i{[0-9]+}}  @tab
+@item @code{PULSE_@i{[0-9]+}} @tab
+@item                         @tab
+@item @code{REPEAT}           @tab Keyword for @code{REPEAT} loops
+@item @code{REPF}             @tab
+@item @code{REP_F}            @tab
+@item @code{REPEATF}          @tab
+@item @code{REPEAT_F}         @tab
+@item @code{REPEATFREQ}       @tab
+@item @code{REPEAT_FREQ}      @tab
+@item @code{REPEATFREQUENCY}  @tab
+@item @code{REPEAT_FREQUENCY} @tab
+@item @code{REPEATT}          @tab
+@item @code{REPEAT_T}         @tab
+@item @code{REPEATTIME}       @tab
+@item @code{REPEAT_TIME}      @tab
+@item @code{REPFREQ}          @tab
+@item @code{REP_FREQ}         @tab
+@item @code{REPFREQUENCY}     @tab
+@item @code{REP_FREQUENCY}    @tab
+@item @code{REPT}             @tab
+@item @code{REP_T}            @tab
+@item @code{REPTIME}          @tab
+@item @code{REP_TIME}         @tab
+@item @code{random}           @tab Built-in function (@pxref{random})
+@item @code{REF1}             @tab Digitizer channel name
+@item @code{REF2}             @tab Digitizer channel name
+@item @code{REF3}             @tab Digitizer channel name
+@item @code{REF4}             @tab Digitizer channel name
+@item @code{round}            @tab Built-in function (@pxref{round})
+@item                         @tab
+@item @code{S}                @tab
+@item @code{s}                @tab Unit, Seconds
+@item @code{save}             @tab Built-in function (@pxref{save})
+@item @code{save_comment}     @tab Built-in function (@pxref{save_comment})
+@item @code{save_output}      @tab Built-in function (@pxref{save_output})
+@item @code{save_program}     @tab Built-in function (@pxref{save_program})
+@item @code{set_seed}         @tab Built-in function (@pxref{set_seed})
+@item @code{sin}              @tab Built-in function (@pxref{sin})
+@item @code{sinh}             @tab Built-in function (@pxref{sinh})
+@item @code{size}             @tab Built-in function (@pxref{size})
+@item @code{sizes}            @tab Built-in function (@pxref{sizes})
+@item @code{SL}               @tab
+@item @code{SLOPE}            @tab
+@item @code{sqrt}             @tab Built-in function (@pxref{sqrt})
+@item @code{START}            @tab
+@item                         @tab
+@item @code{T}                @tab Unit, Tesla
+@item @code{tan}              @tab Built-in function (@pxref{tan})
+@item @code{tanh}             @tab Built-in function (@pxref{tanh})
+@item @code{TB}               @tab
+@item @code{T_B}              @tab
+@item @code{TBASE}            @tab
+@item @code{T_BASE}           @tab
+@item @code{time}             @tab Built-in function (@pxref{time})
+@item @code{TIMEB}            @tab
+@item @code{TIME_B}           @tab
+@item @code{TIMEBASE}         @tab
+@item @code{TIME_BASE}        @tab
+@item                         @tab
+@item @code{uA}               @tab Unit, Micro-Ampere
+@item @code{uG}               @tab Unit, Micro-Gauss
+@item @code{uHz}              @tab Unit, Micro-Hertz
+@item @code{us}               @tab Unit, Micro-Seconds
+@item @code{uT}               @tab Unit, Micro-Tesla
+@item @code{uV}               @tab Unit, Micro-Volt
+@item                         @tab
+@item @code{V}                @tab Unit, Volt
+@item @code{VAR:}             @tab Starts the @code{VARIABLES} section
+@item @code{VARS:}            @tab Starts the @code{VARIABLES} section
+@item @code{VARIABLE:}        @tab Starts the @code{VARIABLES} section
+@item @code{VARIABLES:}       @tab Starts the @code{VARIABLES} section
+@item @code{VH}               @tab
+@item @code{V_H}              @tab
+@item @code{VHIGH}            @tab
+@item @code{V_HIGH}           @tab
+@item @code{VL}               @tab
+@item @code{V_L}              @tab
+@item @code{VLOW}             @tab
+@item @code{V_LOW}            @tab
+@item                         @tab
+@item @code{wait}             @tab Built-in function (@pxref{wait})
+@item @code{WHILE}            @tab Keyword for @code{WHILE} loops
 @end multitable

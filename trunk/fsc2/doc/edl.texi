@@ -658,14 +658,6 @@ Here is a complete list of the comparison operators between two
 expressions (e.g.@: numbers):
 
 @quotation
-@multitable {@code{==}} {true if left hand side is @i{equal} to right hand side}
-@item @code{==} @tab  true if left hand side is @i{equal} to right hand side
-@item @code{!=} @tab  true if left and right hand side are @i{unequal}
-@item @code{<}  @tab  true if left side is @i{less than} right side
-@item @code{<=} @tab  true if left side is @i{less or equal} to right side
-@item @code{>}  @tab  true if left side is @i{greater than} right side
-@item @code{>=} @tab  true if left side is @i{greater or equal} to right side
-@end multitable
 @cindex == (comparison operator)
 @cindex comparison operator
 @cindex != (unequality)
@@ -678,6 +670,14 @@ expressions (e.g.@: numbers):
 @cindex larger than `>'
 @cindex >= (larger or equal)
 @cindex larger or equal `>='
+@multitable {@code{==}} {true if left hand side is @i{equal} to right hand side}
+@item @code{==} @tab  true if left hand side is @i{equal} to right hand side
+@item @code{!=} @tab  true if left and right hand side are @i{unequal}
+@item @code{<}  @tab  true if left side is @i{less than} right side
+@item @code{<=} @tab  true if left side is @i{less or equal} to right side
+@item @code{>}  @tab  true if left side is @i{greater than} right side
+@item @code{>=} @tab  true if left side is @i{greater or equal} to right side
+@end multitable
 @end quotation
 
 And here is also an example for using simple numbers in a condition,
@@ -709,13 +709,6 @@ logical @code{AND}, @code{OR} or @code{XOR} (exclusive or)
 operators. Here is a list of these operators and their meaning:
 
 @quotation
-@multitable {~} {@i{exclusive or}: true if left or right hand side expressions are true but not both}
-@item @code{!} @tab @i{not}: negates truth of an expression
-@item @code{&} @tab @i{and}: true if both left and right hand side expressions are true
-@item @code{|} @tab @i{or}: true if at least one of the left and right hand side expressions is true
-@item @code{~} @tab @i{exclusive or}: true if either left or right hand side expression is true (but not both)
-@end multitable
-@end quotation
 @cindex ! (negation operator)
 @cindex negation operator `!'
 @cindex & (logical and operator)
@@ -727,6 +720,13 @@ operators. Here is a list of these operators and their meaning:
 @cindex ~ (logical xor operator)
 @cindex xor operator `~'
 @cindex logical xor operator `~'
+@multitable {~} {@i{exclusive or}: true if left or right hand side expressions are true but not both}
+@item @code{!} @tab @i{not}: negates truth of an expression
+@item @code{&} @tab @i{and}: true if both left and right hand side expressions are true
+@item @code{|} @tab @i{or}: true if at least one of the left and right hand side expressions is true
+@item @code{~} @tab @i{exclusive or}: true if either left or right hand side expression is true (but not both)
+@end multitable
+@end quotation
 
 
 
