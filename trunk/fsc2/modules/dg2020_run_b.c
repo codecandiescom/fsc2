@@ -957,7 +957,6 @@ void dg2020_full_reset( void )
 
 		p->is_active = ( p->is_pos && p->is_len &&
 						 ( p->len > 0 || p->len == -1 ) );
-
 		p = p->next;
 	}
 
