@@ -323,7 +323,6 @@ bool ep385_do_update( void );
 void ep385_do_checks( FUNCTION *f );
 void ep385_set_pulses( FUNCTION *f );
 void ep385_full_reset( void );
-void ep385_cw_setup( void );
 
 
 /* Functions from ep385_gpib.c */

@@ -146,6 +146,9 @@ int ep385_test_hook( void )
 {
 	/* Make sure that a timebase is set (shouldn't really be needed) */
 
+	if ( ep385.is_cw_mode )
+		return 1;
+
 	if ( ! ep385.is_timebase )
 	{
 		ep385.is_timebase = SET;
@@ -190,7 +193,8 @@ int ep385_end_of_test_hook( void )
 
 	/* Reset the internal representation back to its initial state */
 
-	ep385_full_reset( );
+	if ( ! ep385.is_cw_mode )
+		ep385_full_reset( );
 
 	return 1;
 }
@@ -221,27 +225,23 @@ int ep385_exp_hook( void )
 	   pulses, now we can remove the association between the function and
 	   the channel */
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = ep385.function + i;
-
-		if ( f->is_used || f->num_channels == 0 )
-			continue;
-
-		for ( j = 0; j < f->num_channels; j++ )
+	if ( ! ep385.is_cw_mode )
+		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 		{
-			f->channel[ j ]->function = NULL;
-			f->channel[ j ] = NULL;
+			f = ep385.function + i;
+
+			if ( f->is_used || f->num_channels == 0 )
+				continue;
+
+			for ( j = 0; j < f->num_channels; j++ )
+			{
+				f->channel[ j ]->function = NULL;
+				f->channel[ j ] = NULL;
+			}
+
+			f->num_channels = 0;
 		}
 
-		f->num_channels = 0;
-	}
-
-	/* Now we have to tell the pulser about all the pulses and switch on
-	   all needed channels */
-
-	if ( ep385.is_cw_mode )
-		ep385_cw_setup( );
 
 	ep385_run( SET );
 
