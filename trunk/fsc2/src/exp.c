@@ -559,7 +559,6 @@ void exp_test_run( void )
 			{
 				fl_check_only_forms( );
 				token_count %= CHECK_FORMS_AFTER;
-
 			}
 
 			switch ( cur_prg_token->token )
