@@ -267,13 +267,19 @@ double spectrapro_300i_min( double *x, void *par )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Function tries to open the device file for the serial port the */
+/* monochromator is attached to, checks if it replies to commands */
+/* and then fetches some basic informations about the state of    */
+/* the monochromator like which gratings are installed and the    */
+/* current grating and turret.                                    */
+/*----------------------------------------------------------------*/
 
 void spectrapro_300i_open( void )
 {
 	char reply[ 100 ];
 	size_t len;
+	size_t already_read = 0;
 	int i;
 
 
@@ -283,18 +289,25 @@ void spectrapro_300i_open( void )
 		THROW( EXCEPTION );
 	}
 
+	spectrapro_300i.is_open = SET;
+
 	/* Now a quick check that we can talk to the monochromator, it should be
 	   able to send us its model string wihin one second or something is
 	   definitely hosed... */
 
-	if ( ! spectrapro_300i_comm( SERIAL_WRITE, "MODEL" ) )
+	if ( ! spectrapro_300i_comm( SERIAL_WRITE, "MODEL\r" ) )
 		spectrapro_300i_comm_fail( );
 
 	for ( i = 0; i < 10; i++ )
 	{
-		len = 100;
-		if ( spectrapro_300i_comm( SERIAL_READ, reply, &len ) && len != 0 )
-			break;
+		len = 100 - already_read;
+		if ( spectrapro_300i_comm( SERIAL_READ, reply + already_read, &len ) )
+		{
+			already_read += len;
+			if ( already_read >= 5 &&
+				 ! strncmp( reply + already_read - 5, " ok\r\n", 5 ) )
+				break;
+		}
 		fsc2_usleep( SPECTRAPRO_300I_WAIT, UNSET );
 		stop_on_user_request( );
 	}
@@ -302,25 +315,29 @@ void spectrapro_300i_open( void )
 	if ( i == 10 )
 		spectrapro_300i_comm_fail( );
 
-	spectrapro_300i.is_open = SET;
 	spectrapro_300i_get_gratings( );
 	spectrapro_300i.current_grating = spectrapro_300i_get_grating( ) - 1;
 	spectrapro_300i.turret = spectrapro_300i_get_turret( ) - 1;
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Function just closes the device file for the serial port the */
+/* monochromator is attached to.                                */
+/*--------------------------------------------------------------*/
 
 void spectrapro_300i_close( void )
 {
-	spectrapro_300i_comm( SERIAL_EXIT );
+	if ( spectrapro_300i.is_open )
+		spectrapro_300i_comm( SERIAL_EXIT );
 	spectrapro_300i.is_open = UNSET;
 }
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* Function asks the monochromator for the wavelength it */
+/* is currently set to.                                  */
+/*-------------------------------------------------------*/
 
 double spectrapro_300i_get_wavelength( void )
 {
@@ -332,8 +349,9 @@ double spectrapro_300i_get_wavelength( void )
 }
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*------------------------------------------------------*/
+/* Function sets the monochromator to a new wavelength. */
+/*------------------------------------------------------*/
 
 void spectrapro_300i_set_wavelength( double wavelength )
 {
@@ -359,8 +377,9 @@ void spectrapro_300i_set_wavelength( double wavelength )
 }
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Function asks the monochromator for the turret currently used. */
+/*----------------------------------------------------------------*/
 
 long spectrapro_300i_get_turret( void )
 {
@@ -375,8 +394,9 @@ long spectrapro_300i_get_turret( void )
 }
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Function tells the monochromator to switch to a different turret. */
+/*-------------------------------------------------------------------*/
 
 void spectrapro_300i_set_turret( long turret )
 {
@@ -386,6 +406,9 @@ void spectrapro_300i_set_turret( long turret )
 	CLOBBER_PROTECT( buf );
 
 	fsc2_assert( turret >= 1 && turret <= MAX_TURRETS );
+
+	if ( spectrapro_300i.grating.turret == turret - 1 )
+		return;
 
 	buf = get_string( "%ld TURRET", turret );
 
@@ -404,8 +427,9 @@ void spectrapro_300i_set_turret( long turret )
 }
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Function asks the monochromator for the currently used grating. */
+/*-----------------------------------------------------------------*/
 
 long spectrapro_300i_get_grating( void )
 {
@@ -420,8 +444,9 @@ long spectrapro_300i_get_grating( void )
 }
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Function tells to monochromator to switch to a different grating. */
+/*-------------------------------------------------------------------*/
 
 void spectrapro_300i_set_grating( long grating )
 {
@@ -434,6 +459,9 @@ void spectrapro_300i_set_grating( long grating )
 				 grating - spectrapro_300i.turret * 3 >= 1 &&
 				 grating - spectrapro_300i.turret * 3 <= 3 &&
 				 spectrapro_300i.grating[ grating - 1 ].is_installed );
+
+	if ( spectrapro_300i.grating.current_grating == grating - 1 )
+		return;
 
 	buf = get_string( "%ld GRATING", grating );
 
@@ -451,8 +479,11 @@ void spectrapro_300i_set_grating( long grating )
 }
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Function queries the monochromator about informations about all */
+/* installed gratings and stores the data (groove density, blaze   */
+/* information in the internal structure for the monochromator.    */
+/*-----------------------------------------------------------------*/
 
 void spectrapro_300i_get_gratings( void )
 {
@@ -600,8 +631,10 @@ void spectrapro_300i_get_gratings( void )
 }
 	
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*-----------------------------------------------------*/
+/* Function asks the monochromator for the zero offset */
+/* setting for one of the gratings.                    */
+/*-----------------------------------------------------*/
 
 long spectrapro_300i_get_offset( long grating )
 {
@@ -641,8 +674,12 @@ long spectrapro_300i_get_offset( long grating )
 }
 	
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*----------------------------------------------------------*/
+/* Function sets a new zero offset for one of the gratings, */
+/* then executes a reset and finally switches back to the   */
+/* original wavelength. The function needs quite a lot of   */
+/* time, mainly because of the required reset.              */
+/*----------------------------------------------------------*/
 
 void spectrapro_300i_set_offset( long grating, long offset )
 {
@@ -674,7 +711,7 @@ void spectrapro_300i_set_offset( long grating, long offset )
 		T_free( buf );
 		RETHROW( );
 	}
-#if 0
+
 	buf = spectrapro_300i_talk( "MONO-RESET", 4096 );
 	T_free( buf );
 
@@ -693,11 +730,12 @@ void spectrapro_300i_set_offset( long grating, long offset )
 		T_free( buf );
 		RETHROW( );
 	}
-#endif
 }
 
 
 /*--------------------------------------------------------*/
+/* Function asks the monochromator for the grating adjust */
+/* setting for one of the gratings.                       */
 /*--------------------------------------------------------*/
 
 long spectrapro_300i_get_adjust( long grating )
@@ -718,7 +756,7 @@ long spectrapro_300i_get_adjust( long grating )
 		spectrapro_300i_comm_fail( );
 	}
 
-	sp += strlen( "offset" );
+	sp += strlen( "adjust" );
 
 	for ( i = 0; i < grating; i++ )
 	{
@@ -738,8 +776,12 @@ long spectrapro_300i_get_adjust( long grating )
 }
 	
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Function sets a new grating adjust value for one of the gratings, */
+/* then executes a reset and finally switches back to the original   */
+/* wavelength. The function needs quite a lot of time, mainly        */
+/* because of the required reset.                                    */
+/*-------------------------------------------------------------------*/
 
 void spectrapro_300i_set_adjust( long grating, long adjust )
 {
@@ -768,7 +810,7 @@ void spectrapro_300i_set_adjust( long grating, long adjust )
 		T_free( buf );
 		RETHROW( );
 	}
-#if 0
+
 	buf = spectrapro_300i_talk( "MONO-RESET", 4096 );
 	T_free( buf );
 
@@ -787,12 +829,13 @@ void spectrapro_300i_set_adjust( long grating, long adjust )
 		T_free( buf );
 		RETHROW( );
 	}
-#endif
 }
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* Function installs a new grating into the non-volatile */
+/* memory of the monochromator.                          */
+/*-------------------------------------------------------*/
 
 void spectrapro_300i_install_grating( char *part_no, long grating )
 {
@@ -818,6 +861,8 @@ void spectrapro_300i_install_grating( char *part_no, long grating )
 
 
 /*--------------------------------------------------------*/
+/* Function removes an already installed grating from the */
+/* non-volatile memory of the monochromator.              */
 /*--------------------------------------------------------*/
 
 void spectrapro_300i_uninstall_grating( long grating )
@@ -870,8 +915,7 @@ void spectrapro_300i_send( const char *buf )
 
 	TRY
 	{
-		if ( ! spectrapro_300i_read( lbuf, &len ) )
-			spectrapro_300i_comm_fail( );
+		spectrapro_300i_read( lbuf, &len );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -929,8 +973,10 @@ static bool spectrapro_300i_read( char *buf, size_t *len )
 	size_t already_read = 0;
 	char *lbuf;
 	long llen = *len;
+	bool done = UNSET;
 
 
+	CLOBBER_PROTECT( done );
 	CLOBBER_PROTECT( to_fetch );
 	CLOBBER_PROTECT( already_read );
 
@@ -970,7 +1016,7 @@ static bool spectrapro_300i_read( char *buf, size_t *len )
 			spectrapro_300i_comm_fail( );
 		}
 
-		/* No end marker indicating succes can have been read yet */
+		/* No end marker indicating success can have been read yet */
 
 		if ( already_read < 4 )
 		{
@@ -989,6 +1035,7 @@ static bool spectrapro_300i_read( char *buf, size_t *len )
 			if ( already_read > 0 && buf[ already_read - 1 ] == ' ' )
 				already_read--;
 			buf[ already_read ] = '\0';
+			done = SET;
 			break;
 		}
 
@@ -1011,7 +1058,7 @@ static bool spectrapro_300i_read( char *buf, size_t *len )
 	} while ( to_fetch > 0 );
 
 	*len = already_read;
-	return to_fetch == 0;
+	return done;
 }
 
 
@@ -1042,15 +1089,11 @@ char *spectrapro_300i_talk( const char *buf, size_t len )
 		spectrapro_300i_comm_fail( );
 	}
 
-	/* The device always echos the command, we got to get rid of this echo.
-	   Here we don't expect the "ok\r\n" end indicator, so getting it would
-	   actually be an error, thus we have to expect spectrapro_300i_read()
-	   to return a status indicating failure.... */
+	/* The device always echos the command, we got to get rid of this echo. */
 
 	TRY
 	{
-		if ( spectrapro_300i_read( lbuf, &comm_len ) )
-			spectrapro_300i_comm_fail( );
+		spectrapro_300i_read( lbuf, &comm_len );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1087,8 +1130,10 @@ char *spectrapro_300i_talk( const char *buf, size_t len )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Most low level function for the communication with the monochromator */
+/* via the serial port.                                                 */
+/*----------------------------------------------------------------------*/
 
 static bool spectrapro_300i_comm( int type, ... )
 {

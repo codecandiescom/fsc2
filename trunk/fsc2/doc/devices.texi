@@ -3231,11 +3231,12 @@ Returns a string with the name of the monochromator being used.
 @anchor{monochromator_grating}
 @item monochromator_grating()
 @findex monochromator_grating()
-Function queries or sets a new grating. If called with no argument the
-function returns the number of the currently used grating (starting with
-1). If called with an integer argument the monochromator switches to the
-selected grating if it is available. The center wavelength of the
-grating remains the same as for the previous grating.
+The function queries or sets a new grating. If called with no argument
+the function returns the number of the currently used grating (an
+integer between 1 and the maximum number of installed gratings). If
+called with an integer argument the monochromator switches to the
+grating indexed by the number if it is available. The center wavelength
+the new grating is set to remains the same as for the previous grating.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -3258,8 +3259,9 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @findex monochromator_groove_density()
 If called with no argument the function returns the number of grooves
 per meter of the currently used grating. If called with an integer
-argument it returns the number of grooves per m off the grating indexed
-(starting with 1) by the number passed to it.
+argument it returns the number of grooves per m of the grating indexed
+by the number (an integer between 1 and the maximum number of installed
+gratings) passed to the function.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -3281,14 +3283,14 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @item monochromator_wavelength_axis()
 @findex monochromator_wavelength_axis()
 This function requires that the module for a CCD camera is available
-that returns information about the number of pixels and the distance
-between pixels. It then returns an array with two elements, where the
-first element is the wavelength at the leftmost pixel of the CCD chip
-and the second element is the wavelength difference between neighboring
-pixels. The function can also be called with up to two arguments, an
-integer for the grating number and the wavelength at the center of the
-chip. If these arguments aren't given, the currently used grating and
-wavelength of the monochromator is used.
+that returns information about the number of pixels of the CCD chip and
+the distance between pixels. It then returns an array with two elements,
+with the first element being the wavelength at the leftmost pixel of the
+chip and the second element being the wavelength difference between
+neighboring pixels. The function can also be called with up to two
+arguments, an integer for the grating number and the wavelength at the
+center of the chip. If these arguments aren't given, the currently used
+grating and wavelength of the monochromator are used.
 
 To be able to work the function also requires that a calibration for the
 grating has been loaded, either by calling
@@ -3298,19 +3300,19 @@ has been loaded for the grating a warning is printed and the returned
 scaling values represent pixel numbers, not wavelengths (i.e.@: both are
 values are simply 1).
 
-The function is especially meant to make it easy to obtain a wavelength
+The function is mostly meant to make it easy to obtain a wavelength
 scale to be used with the functions @code{change_scale_1d()} and
 @code{change_scale_2d()}. Please note that the wavelength difference
 between two neighboring pixels isn't really constant over the whole
-width of the chip. When you use the returned values only for the center
-of the chip, the results are in quite good agreement with the real
-wavelengths, but at the edges of the chip the accuracy deteriorates
-significantly, for example for a grating with 1200 grooves per mm the
-deviation is about @w{0.5 nm} and for gratings with lower groove
-densities the deviation gets even larger, proportional to the inverse of
-the groove density. To obtain the exact wavelength for a certain pixel
-of the chip use the function @code{monochromator_calc_wavelength()}
-discussed below.
+width of the CCD chip. When you use the returned values only for the
+center of the chip the results are in quite good an agreement with the
+real wavelengths, but for the edges of the chip the accuracy
+deteriorates significantly, for example for a grating with 1200 grooves
+per mm the deviation is about @w{0.5 nm} and for gratings with lower
+groove densities the deviation gets even larger, proportional to the
+inverse of the groove density. To obtain the exact wavelength for a
+certain pixel of the chip use the function
+@code{monochromator_calc_wavelength()} discussed below.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -3319,16 +3321,16 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_calc_wavelength}
 @item monochromator_calc_wavelength()
 @findex monochromator_calc_wavelength()
-This function requires that the module for a CCD camera is
-available that returns information about the number of pixels and the
-distance between pixels. It accepts a pixel position or an array of
+This function requires that the module for a CCD camera is available
+that returns information about the number of pixels of the CCD chip and
+the distance between pixels. It accepts a pixel position or an array of
 pixel positions on the CCD chip (relative to the left edge of the chip
 and starting with 1) and returns, depending on the type of the argument,
-either a number or an array with the exact wavelengths for these pixel
-positions. The function also accepts up to two arguments, an integer for
-the grating number and the wavelength at the center of the chip. If
+either a number or an array with the exact wavelengths for the pixel
+position(s). The function also accepts up to two arguments, an integer
+for the grating number and the wavelength at the center of the chip. If
 these arguments aren't given, the currently used grating and wavelength
-of the monochromator is used.
+of the monochromator are used.
 
 To be able to work the function also requires that a calibration for the
 grating has been loaded, either by calling
@@ -3345,27 +3347,19 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @item monochromator_load_calibration()
 @findex monochromator_load_calibration()
 The function tries to load a file with calibration data for one or more
-of the gratings. For each grating five values are required for a
+of the gratings. For each grating three values are required for a
 complete calibration.
 
-The first value is the zero wavelength offset of the grating (a number
-between in the interval @code{[-1,-1]}) designating the amount of offset
-by a monochromator specific maximum value. If the value is correct the
-zero-order maximum gets projected onto the center of the CCD chip. If
-the second value, the adjust value, is set correctly setting a
-wavelength of the monochromator results in a line of this wavelength
-appearing at the center of the CCD chip. It can be varied in the
-interval @code{[-1,1]}. The third value is the inclusion angle of the
-monochromator (in degree), the fourth the focal length of the
-monochromator (in m) and the fifth and final value is the detector angle
-(in degree), i.e.@: the angle by which the plane of the CCD chip is
-rotated out of the focal plane.
+The first value is the inclusion angle (i.e.@: the angle between the
+incident and the reflected beam for the center wavelength of the
+grating) of the monochromator (in degrees), the second the focal length
+of the monochromator (in m) and the third and final value is the
+detector angle (in degrees), i.e.@: the angle by which the plane of the
+CCD chip is rotated out of the focal plane.
 
 In the calibration file you will find lines like the following for each
 of the grating:
 @example
-INIT_OFFSET_1      =  -0.003251
-INIT_ADJUST_1      =   0.012131
 INCLUSION_ANGLE_1  =   30.3
 FOCAL_LENGTH_1     =   301.2 mm
 DETECTOR_ANGLE_1   =   0.324871
@@ -3385,18 +3379,6 @@ then recompiling the module. If an argument is passed to the function
 this must be a string with the name of a file that the program has the
 permissions to read.
 
-@strong{Please note:} Reading the calibration data from the file does
-not also send the values for the zero-offset (@code{INIT_OFFSET}) and
-the adjust value (@code{INIT_ADJUST}) to the monochromator. This action
-takes quite a long time (about half a minute) because the monochromator
-has to be reset afterwards. Thus it would not be desirable to repeat
-this procedure for each experiment. Both values are stored in
-non-volatile memory in the monochromators memory, so they also don't get
-lost when the monochromator gets switched off. Moreover, these values
-will hardly ever change as long as the monochromator doesn't get opened,
-so setting them only from time to time during calibration procedures
-should be sufficient.
-
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
@@ -3408,11 +3390,9 @@ This function allows to set calibration data for a grating directly
 instead of reading them from a file. It can also used to reset the
 calibration for a grating.
 
-The function expects 6 arguments, the grating number between 1 and the
-maximum number of installed gratings), the zero-offset and adjust value
-for the monochromator (both numbers in the interval @code{[-1,1]}), the
-inclusion angle (in degree), the focal length (in m) and the detector
-angle (in degree).
+The function expects 4 arguments, the grating number (an integer between
+1 and the maximum number of installed gratings), the inclusion angle (in
+degrees), the focal length (in m) and the detector angle (in degrees).
 
 Alternatively, to clear the calibration for a grating the function can
 also be called with two arguments, the number of the grating and the
@@ -3426,15 +3406,16 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @item monochromator_install_grating()
 @findex monochromator_install_grating()
 This function can be used to tell the monochromator about a new grating.
-It expects two arguments, the grating number (a number between 1 and the
-maximum number of installable gratings) and a string with the part
+It expects two arguments, the grating number (an integer between 1 and
+the maximum number of installable gratings) and a string with the part
 number of the newly installed grating. All part numbers are expected to
-start with a single digit, followed by a dash, the number of grooves per
-thenth of a mm, another dash and an identifier for the blaze wavelength
-or type of the grating. Thus a valid part number string would be e.g.@:
+start with a single digit, followed by a dash, a three-digit number with
+the number grooves per thenth of a mm (if necessary left-filled with
+zeros), another dash and an identifier for the blaze wavelength or type
+of the grating. Thus a valid part number string would be e.g.@:
 @code{"1-120-750"} for a grating with 1200 grooves per mm and a blazing
 wavelength of @w{750 nm}. Another possible part number string is
-@code{"1-120-HVIS"}. The total length of the string may not excceed 10
+@code{"2-030-HVIS"}. The total length of the string may not excceed 10
 characters.
 
 Alternatively, the function can also be used to tell the monochromator
@@ -3445,10 +3426,66 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@c monochromator_init_offset, -1, EXP;
-@c monochromator_init_adjust, -1, EXP;
-@c monochromator_init, -1, EXP;
+@anchor{monochromator_zero_offset}
+@item monochromator_zero_offset()
+@findex monochromator_zero_offset()
+This function allows to either query or set the zero offset of a
+grating. The zero offset is basically an angle that results from
+misalignments of the grating (and the CCD chip) and leads to the zero
+order peak not appearing exactly at the center of the CCD chip. By
+setting the zero offset value correctly this misalignments can be
+compensated for. It is expressed as a number in the interval
+@code{[-1,+1]} and the correct value can only be found experimentally.
 
+The function expects at least one argument, an integer number
+designating the grating (an integer between 1 and the maximum number of
+installed gratings). If there is no second argument the function returns
+the zero offset used for the grating. If there is a second argument
+(which must be between -1 and +1) the zero offset is set to this value.
+
+Please note: setting a zero offset takes quite a long time (about half a
+minute), mainly because the monochromator needs to be
+reset. Fortunately, setting a new zero offset is only required when
+e.g.@: the monochromator has been opened up. Since the zero offset
+values are stored in non-volatile memory of the monochomator the setting
+won't get lost when the monochromator is switched off.
+
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{monochromator_grating_adjust}
+@item monochromator_grating_adjust()
+@findex monochromator_grating_adjust()
+The value that can be queried or set by this function is used to adjust
+the angle by which the grating is rotated when moving it to a certain
+wavelength. The monochromator has a built-in default value for the ratio
+between the angle and the wavelength which can be changed by the grating
+adjust value. If this value (and also the zero offset, see above) is set
+correctly, a line will appear at the center of the CCD chip when the
+monochronator is set to the wavelength of the line.
+
+The grating adjust value is a number in the interval @code{[-1,+1]} and
+can the correct setting can only be found experimentally.
+
+The function expects at least one argument, an integer number
+designating the grating (an integer between 1 and the maximum number of
+installed gratings). If there is no second argument the function returns
+the currently used value for the grating adjust value. Otherwise the
+second argument must be a number between -1 and +1 and the grating
+adjust is set to this value.
+
+Please note: setting a grating adjust value takes quite a long time (up
+to half a minute), mainly because the monochromator needs to be
+reset. Fortunately, setting a new grating adjust value is required when
+e.g.@: the monochromator has been opened up. Since the grating adjust
+values are stored in non-volatile memory of the monochomator the setting
+won't get lost when the monochromator is switched off.
+
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
 
 @end table
 
