@@ -377,34 +377,28 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 			{
 				if ( FSC2_MODE == EXPERIMENT )
 				{
-					if ( shape_p->sp == NULL )
-						print( FATAL, "Distance between PULSE_SHAPE pulse "
-							   "#%ld and DEFENSE pulse #%ld got shorter than "
-							   "%s.\n", shape_p->num, defense_p->num,
-							   ep385_pticks( ep385.shape_2_defense ) );
-					else
-						print( FATAL, "Distance between shape pulse for pulse "
-							   "#%ld (function '%s') and DEFENSE pulse #%ld "
-							   "got shorter than %s.\n", shape_p->sp->num,
-							   shape_p->sp->function->name, defense_p->num,
-							   ep385_pticks( ep385.shape_2_defense ) );
+					print( FATAL, "Distance between PULSE_SHAPE pulse %s#%ld "
+						   "and DEFENSE pulse #%ld got shorter than %s.\n",
+						   shape_p->sp ? "for pulse " : "",
+						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+						   ep385_pticks( ep385.shape_2_defense ) );
 					THROW( EXCEPTION );
 				}
 
-				if ( ep385.shape_2_defense_too_near == 0 )
-				{
-					if ( shape_p->sp == NULL )
-						print( SEVERE, "Distance between PULSE_SHAPE pulse "
-							   "#%ld and DEFENSE pulse #%ld got shorter than "
-							   "%s.\n", shape_p->num, defense_p->num,
-							   ep385_pticks( ep385.shape_2_defense ) );
-					else
-						print( SEVERE, "Distance between shape pulse for "
-							   "pulse #%ld (function '%s') and DEFENSE pulse "
-							   "#%ld got shorter than %s.\n", shape_p->sp->num,
-							   shape_p->sp->function->name, defense_p->num,
-							   ep385_pticks( ep385.shape_2_defense ) );
-				}
+				if ( dg2020_IN_SETUP )
+					print( SEVERE, "Distance between PULSE_SHAPE pulse %s#%ld "
+						   "and DEFENSE pulse #%ld is shorter than %s.\n",
+						   shape_p->sp ? "for pulse " : "",
+						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+						   defense_p->num,
+						   ep385_pticks( ep385.shape_2_defense ) );
+				else if ( ep385.shape_2_defense_too_near == 0 )
+					print( SEVERE, "Distance between PULSE_SHAPE pulse %s#%ld "
+						   "and DEFENSE pulse #%ld got shorter than %s.\n",
+						   shape_p->sp ? "for pulse " : "",
+						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+						   defense_p->num,
+						   ep385_pticks( ep385.shape_2_defense ) );
 
 				ep385.shape_2_defense_too_near++;
 			}
@@ -415,34 +409,29 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 			{
 				if ( FSC2_MODE == EXPERIMENT )
 				{
-					if ( shape_p->sp == NULL )
-						print( FATAL, "Distance between DEFENSE pulse #%ld "
-							   "and PULSE_SHAPE pulse #%ld got shorter than "
-							   "%s.\n", defense_p->num, shape_p->num,
-							   ep385_pticks( ep385.defense_2_shape ) );
-					else
-						print( FATAL, "Distance between DEFENSE pulse #%ld "
-							   "and shape pulse for pulse #%ld (function "
-							   "'%s') got shorter than %s.\n", defense_p->num,
-							   shape_p->sp->num, shape_p->sp->function->name,
-							   ep385_pticks( ep385.defense_2_shape ) );
+					print( FATAL, "Distance between DEFENSE pulse #%ld and "
+						   "PULSE_SHAPE pulse %s#%ld got shorter than %s.\n",
+						   defense_p->num,
+						   shape_p->sp ? "for pulse " : "",
+						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+						   ep385_pticks( ep385.defense_2_shape ) );
 					THROW( EXCEPTION );
 				}
 
-				if ( ep385.defense_2_shape_too_near == 0 )
-				{
-					if ( shape_p->sp == NULL )
-						print( SEVERE, "Distance between DEFENSE pulse #%ld "
-							   "and PULSE_SHAPE pulse #%ld got shorter than "
-							   "%s.\n", defense_p->num, shape_p->num,
-							   ep385_pticks( ep385.defense_2_shape ) );
-					else
-						print( SEVERE, "Distance between DEFENSE pulse #%ld "
-							   "and shape pulse for pulse #%ld (function "
-							   "'%s') got shorter than %s.\n", defense_p->num,
-							   shape_p->sp->num, shape_p->sp->function->name,
-							   ep385_pticks( ep385.defense_2_shape ) );
-				}
+				if ( dg2020_IN_SETUP )
+					print( SEVERE, "Distance between DEFENSE pulse #%ld and "
+						   "PULSE_SHAPE pulse %s#%ld is shorter than %s.\n",
+						   defense_p->num,
+						   shape_p->sp ? "for pulse " : "",
+						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+						   ep385_pticks( ep385.defense_2_shape ) );
+				else if ( ep385.defense_2_shape_too_near == 0 )
+					print( SEVERE, "Distance between DEFENSE pulse #%ld and "
+						   "PULSE_SHAPE pulse %s#%ld got shorter than %s.\n",
+						   defense_p->num,
+						   shape_p->sp ? "for pulse " : "",
+						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+						   ep385_pticks( ep385.defense_2_shape ) );
 
 				ep385.defense_2_shape_too_near++;
 			}

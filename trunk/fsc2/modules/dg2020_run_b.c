@@ -664,29 +664,31 @@ static void dg2020_defense_shape_check( FUNCTION *shape )
 			{
 				if ( FSC2_MODE == EXPERIMENT )
 				{
-					print( FATAL, "Distance between PULSE_SHAPE pulse #%ld "
+					print( FATAL, "Distance between PULSE_SHAPE pulse %s#%ld "
 						   "and DEFENSE pulse #%ld got shorter than %s.\n",
-						   shape_p->num, defense_p->num, dg2020_ptime(
-							 dg2020_ticks2double( dg2020.shape_2_defense ) ) );
+						   shape_p->sp ? "for pulse " : "", 
+						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+						   defense_p->num,
+						   dg2020_pticks( dg2020.shape_2_defense ) );
 					THROW( EXCEPTION );
 				}
 
 				if ( dg2020_IN_SETUP )
-				{
-					print( SEVERE, "Distance between PULSE_SHAPE pulse "
+					print( SEVERE, "Distance between PULSE_SHAPE pulse %s"
 						   "#%ld and DEFENSE pulse #%ld is shorter than "
-						   "%s.\n", shape_p->num, defense_p->num,
-						   dg2020_ptime( dg2020_ticks2double(
-												  dg2020.shape_2_defense ) ) );
-				}
+						   "%s.\n", shape_p->sp ? "for pulse " : "", 
+						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+						   defense_p->num,
+						   dg2020_pticks( dg2020.shape_2_defense ) );
 				else if ( ! dg2020.shape_2_defense_too_near )
-					print( SEVERE, "Distance between PULSE_SHAPE pulse "
+					print( SEVERE, "Distance between PULSE_SHAPE pulse %s"
 						   "#%ld and DEFENSE pulse #%ld got shorter than "
-						   "%s.\n", shape_p->num, defense_p->num,
-						   dg2020_ptime( dg2020_ticks2double(
-												  dg2020.shape_2_defense ) ) );
+						   "%s.\n",
+						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+						   defense_p->num,
+						   dg2020_pticks( dg2020.shape_2_defense ) );
 				dg2020.shape_2_defense_too_near = SET;
-
 			}
 
 			if ( defense_p->pos < shape_p->pos &&
@@ -696,27 +698,30 @@ static void dg2020_defense_shape_check( FUNCTION *shape )
 				if ( FSC2_MODE == EXPERIMENT )
 				{
 					print( FATAL, "Distance between DEFENSE pulse #%ld and "
-						   "PULSE_SHAPE pulse #%ld got shorter than %s.\n",
-						   defense_p->num, shape_p->num, dg2020_ptime(
-							 dg2020_ticks2double( dg2020.defense_2_shape ) ) );
+						   "PULSE_SHAPE pulse %s#%ld got shorter than %s.\n",
+						   defense_p->num,
+						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+						   dg2020_pticks( dg2020.defense_2_shape ) );
 					THROW( EXCEPTION );
 				}
 
-				
 				if ( dg2020_IN_SETUP )
 				{
 					print( SEVERE, "Distance between DEFENSE pulse #%ld "
 						   "and PULSE_SHAPE pulse #%ld is shorter than "
-						   "%s.\n", defense_p->num, shape_p->num,
-						   dg2020_ptime( dg2020_ticks2double(
-												  dg2020.defense_2_shape ) ) );
+						   "%s.\n", defense_p->num,
+						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+						   dg2020_pticks( dg2020.defense_2_shape ) );
 				}
 				else if ( ! dg2020.defense_2_shape_too_near )
 					print( SEVERE, "Distance between DEFENSE pulse #%ld "
 						   "and PULSE_SHAPE pulse #%ld got shorter than "
-						   "%s.\n", defense_p->num, shape_p->num,
-						   dg2020_ptime( dg2020_ticks2double(
-												  dg2020.defense_2_shape ) ) );
+						   "%s.\n", defense_p->num,
+						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+						   dg2020_pticks( dg2020.defense_2_shape ) );
 				dg2020.defense_2_shape_too_near = SET;
 			}
 		}
