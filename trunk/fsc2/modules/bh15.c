@@ -60,6 +60,8 @@ typedef struct
 
 static BH15 bh15;
 
+bool is_gaussmeter = UNSET;         /* tested by magnet power supply driver */
+
 
 enum {
 	BH15_UNKNOWN = 0,
@@ -85,6 +87,8 @@ int bh15_init_hook( void )
 {
 	need_GPIB = SET;
 	bh15.name = DEVICE_NAME;
+
+	is_gaussmeter = SET;
 
 	bh15.state = BH15_UNKNOWN;
 	bh15.device = -1;
