@@ -155,6 +155,9 @@ int er035m_sa_exp_hook( void )
 
 try_again:
 
+	if ( DO_STOP )
+		THROW( USER_BREAK_EXCEPTION );
+
 	if ( gpib_write( nmr.device, "PS\r" ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", nmr.name );
@@ -380,7 +383,6 @@ Var *measure_field( Var *v )
 	if ( TEST_RUN )
 		return vars_push( FLOAT_VAR, 0.0 );
 
-
 	/* If gaussmeter is in oscillator up/down state or the state is unknown
 	   (i.e. it's standing somewhere but not searching) search for field.
 	   Starting with searching down is just as probable the wrong decision
@@ -400,6 +402,9 @@ Var *measure_field( Var *v )
 
 	while ( nmr.state != ER035M_SA_LOCKED )
 	{
+		if ( DO_STOP )
+			THROW( USER_BREAK_EXCEPTION );
+
 		/* Get status byte and check if lock was achieved */
 
 		if ( gpib_write( nmr.device, "PS\r" ) == FAILURE )
@@ -504,6 +509,9 @@ double er035m_sa_get_field( void )
 
 	do
 	{
+		if ( DO_STOP )
+			THROW( USER_BREAK_EXCEPTION );
+
 		/* Ask gaussmeter to send the current field and read result */
 
 		if ( gpib_write( nmr.device, "PF\r" ) == FAILURE )

@@ -226,6 +226,9 @@ try_again:
 
 	for ( retries = FAIL_RETRIES; ; retries-- )
 	{
+		if ( DO_STOP )
+			THROW( USER_BREAK_EXCEPTION );
+
 		if ( er035m_s_write( "PS" ) == FAIL )
 			er035_s_comm_fail( );
 		usleep( ER035M_S_WAIT );
@@ -460,6 +463,9 @@ Var *find_field( Var *v )
 
 		for ( retries = FAIL_RETRIES; ; retries-- )
 		{
+			if ( DO_STOP )
+				THROW( USER_BREAK_EXCEPTION );
+
 			if ( er035m_s_write( "PS" ) == FAIL )
 				er035_s_comm_fail( );
 			usleep( ER035M_S_WAIT );
@@ -606,6 +612,9 @@ static double er035m_s_get_field( void )
 
 		for ( retries = FAIL_RETRIES; ; retries-- )
 		{
+			if ( DO_STOP )
+				THROW( USER_BREAK_EXCEPTION );
+
 			if ( er035m_s_write( "PF" ) == FAIL )
 				er035_s_comm_fail( );
 			usleep( ER035M_S_WAIT );

@@ -657,6 +657,9 @@ try_again:
 
 	for ( i = 0; i < test_steps; ++i )
 	{
+		if ( DO_STOP )
+			THROW( USER_BREAK_EXCEPTION );
+
 		magnet_do( SERIAL_TRIGGER );
 		vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
 	}
@@ -681,6 +684,9 @@ try_again:
 
 	for ( i = 0; i < test_steps; ++i )
 	{
+		if ( DO_STOP )
+			THROW( USER_BREAK_EXCEPTION );
+
 		magnet_do( SERIAL_TRIGGER );
 		vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
 	}
@@ -771,8 +777,15 @@ bool magnet_goto_field_rec( double field, int rec )
 		magnet_do( SERIAL_VOLTAGE );
 
 		for ( i = 0; i < steps; ++i )
+		{
+			if ( DO_STOP )
+				THROW( USER_BREAK_EXCEPTION );
 			magnet_do( SERIAL_TRIGGER );
+		}
 	}
+
+	if ( DO_STOP )
+		THROW( USER_BREAK_EXCEPTION );
 
 	if ( ( magnet.step = remainder ) != 0.0 )
 	{
@@ -886,11 +899,17 @@ void magnet_sweep( int dir )
 
 		for ( i = 0; i < steps; ++i )
 		{
+			if ( DO_STOP )
+				THROW( USER_BREAK_EXCEPTION );
+
 			magnet_do( SERIAL_TRIGGER );
 			magnet.act_field += ( MAGNET_ZERO_STEP - magnet.int_step )
 			                                               * magnet.mini_step;
 		}
 	}
+
+	if ( DO_STOP )
+		THROW( USER_BREAK_EXCEPTION );
 
 	if ( ( magnet.step = remainder ) != 0.0 )
 	{

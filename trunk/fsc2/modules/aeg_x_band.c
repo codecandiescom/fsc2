@@ -660,6 +660,9 @@ try_again:
 
 	for ( i = 0; i < test_steps; ++i )
 	{
+		if ( DO_STOP )
+			THROW( USER_BREAK_EXCEPTION );
+
 		magnet_do( SERIAL_TRIGGER );
 		vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
 	}
@@ -684,6 +687,9 @@ try_again:
 
 	for ( i = 0; i < test_steps; ++i )
 	{
+		if ( DO_STOP )
+			THROW( USER_BREAK_EXCEPTION );
+
 		magnet_do( SERIAL_TRIGGER );
 		vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
 	}
@@ -751,18 +757,18 @@ bool magnet_goto_field_rec( double field, int rec )
 	int acc;
 
 
-	/* determine the field between the target field and the current field */
+	/* Determine the field between the target field and the current field */
 
 	v = func_call( func_get( "find_field", &acc ) );
 	magnet.meas_field = v->val.dval;
 	vars_pop( v );
 
-	/* calculate the number of steps we need using the smallest possible
+	/* Calculate the number of steps we need using the smallest possible
 	   field increment (i.e. 1 bit) */
 
 	mini_steps = ( field - magnet.meas_field ) / magnet.mini_step;
 
-	/* how many steps do we need using the maximum step size and how many
+	/* How many steps do we need using the maximum step size and how many
 	   steps with the minimum step size remain ? */
 
 	steps = ( int ) floor( fabs( mini_steps ) / MAGNET_MAX_STEP );
@@ -776,8 +782,16 @@ bool magnet_goto_field_rec( double field, int rec )
 		magnet_do( SERIAL_VOLTAGE );
 
 		for ( i = 0; i < steps; ++i )
+		{
+			if ( DO_STOP )
+				THROW( USER_BREAK_EXCEPTION );
+
 			magnet_do( SERIAL_TRIGGER );
+		}
 	}
+
+	if ( DO_STOP )
+		THROW( USER_BREAK_EXCEPTION );
 
 	if ( ( magnet.step = remainder ) != 0.0 )
 	{
@@ -890,11 +904,17 @@ void magnet_sweep( int dir )
 
 		for ( i = 0; i < steps; ++i )
 		{
+			if ( DO_STOP )
+				THROW( USER_BREAK_EXCEPTION );
+
 			magnet_do( SERIAL_TRIGGER );
 			magnet.act_field +=   ( MAGNET_ZERO_STEP - magnet.int_step )
 				                * magnet.mini_step;
 		}
 	}
+
+	if ( DO_STOP )
+		THROW( USER_BREAK_EXCEPTION );
 
 	if ( ( magnet.step = remainder ) != 0.0 )
 	{
