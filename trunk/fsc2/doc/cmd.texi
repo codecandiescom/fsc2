@@ -50,7 +50,7 @@ consider some possible problems:
   bus. If you try to start a second experiment which also needs devices
   controlled via the GPIB the second experiment will abort immediately.
   The same also holds for devices controlled using the serial ports or via
-  other channels like built-in PCI or ISA cards - each serial port and card
+  other channels like built-in PCI or ISA cards -- each serial port and card
   can only be accessed from a single instance of @code{fsc2} at the same
   time. What works is for example having one instance of @code{fsc2}
   control devices via the GPIB bus and the first serial port and another
@@ -63,12 +63,12 @@ consider some possible problems:
   instance exits, none of the others will take over -- you need to start a
   new instance which then is going to deal with external programs.
 @item
-  You also won't be able to run the built-in web-server for more that
+  You also won't be able to run the built-in web server for more that
   one of the instances of @code{fsc2}, at least on port 8080 the web
-  server per default is listening on. If you want the web server to run for
-  each (or at least for more than one) instance of @code{fsc2} you need to
-  specify different HTTP ports for the different instances via the
-  @code{-httpPort} option.
+  server per default is listening on. If you want the web server to be
+  able to run for each (or at least for more than one) instance of
+  @code{fsc2} you need to specify different HTTP ports for the different
+  instances via the @code{-httpPort} option.
 @end itemize
 
 @code{fsc2} can be invoked from the command line with the following
