@@ -98,15 +98,6 @@ fsc2 runs with the real users ID and group but at a few places (e.g. when
 writing to log files, creating lock files, or accessing shared memory) it
 switches back to the EUID and EGID of fsc2.
 
-The next variable that can be set is named IS_I386. Please comment out the
-line defining this variable (or simply delete the line) if you want to compile
-the program for a machine that does not use an i386 type of processor (e.g.
-on a PPC). Some routines used for debugging purposes only employ a bit of
-assembler, so they wont work on a processor with a completely different
-architecture. If the line defining the variable IS_I386 is removed these
-parts are left out of the program, but in every other respect except
-debugging capabilities fsc2 should work as on an i386 machine.
-
 The final variable to be set is the email address of the person that will
 eceive bug reports and notifications if fsc2 should crash. Usually, you
 should not change this variable except when you apply changes to the program.

@@ -74,7 +74,7 @@ void DumpStack( void )
 	struct sigaction sact;
 
 
-	if ( ! is_386 )
+	if ( ! is_i386 )
 		return;
 
 	/* Childs death signal isn't needed */

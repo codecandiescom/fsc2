@@ -93,7 +93,7 @@ int main( int argc, char *argv[ ] )
 	/* Figure out the machine type from the value returned by uname() */
 
 	if ( uname( &utsbuf ) == 0 && ! strncmp( utsbuf.machine, "i386", 4 ) )
-		is_386 = SET;
+		is_i386 = SET;
 
 	/* First we have to test for command line arguments */
 
