@@ -80,7 +80,7 @@ fsc2.pdf: $(docs) $(patsubst %.png,%.pdf,$(figures))
 	convert -compress Zip $< $@
 
 clean:
-	$(RM) $(RMFLAGS) fsc2.dvi *.log fsc2fig*.eps fsc2fig*.pdf
+	-$(RM) $(RMFLAGS) fsc2.dvi *.log fsc2fig*.eps fsc2fig*.pdf
 
 
 install:
@@ -97,7 +97,7 @@ install:
 		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.pdf $(docdir); \
 	fi
 	install-info --delete fsc2 $(infodir)/dir
-	$(RM) $(RMFLAGS) $(infodir)/fsc2.info*.gz
+	-$(RM) $(RMFLAGS) $(infodir)/fsc2.info*.gz
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.info* $(infodir)
 	gzip -9 -f $(infodir)/fsc2.info*
 	install-info $(infodir)/fsc2.info $(infodir)/dir
@@ -105,4 +105,4 @@ install:
 
 distclean:
 	$(MAKE) clean
-	$(RM) $(RMFLAGS) fsc2*.html fsc2_*.html *.ps *.eps *.pdf *.info* *~ *.gz
+	-$(RM) $(RMFLAGS) fsc2*.html fsc2_*.html *.ps *.eps *.pdf *.info* *~ *.gz

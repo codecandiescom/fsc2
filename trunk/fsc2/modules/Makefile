@@ -119,7 +119,7 @@ hp8647a_lexer.c: hp8647a_lexer.l $(src_header)
 
 
 clean:
-	$(RM) $(RMFLAGS) *.o *_lexer.c *.so TAGS *~
+	-$(RM) $(RMFLAGS) *.o *_lexer.c *.so TAGS *~
 
 
 # don't automatically delete intermediate files created by flex

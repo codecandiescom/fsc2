@@ -33,4 +33,4 @@ install:
 	$(INSTALL) -m 444 edl-mod.elc $(emacs_dir)
 
 distclean:
-	$(RM) $(RMFLAGS) edl-mod.elc
+	-$(RM) $(RMFLAGS) edl-mod.elc
