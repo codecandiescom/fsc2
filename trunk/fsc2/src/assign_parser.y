@@ -17,6 +17,8 @@ extern char *assigntext;
 /* locally used functions */
 
 int assignerror( const char *s );
+void ass_func( int function );
+void set_protocoll( long prot );
 
 /* locally used global variables */
 
@@ -25,6 +27,7 @@ static Var *CV;
 static int Cur_PHS = -1;
 static int Cur_PHST = -1;
 static long Cur_PROT = PHASE_UNKNOWN_PROT;
+static bool Func_is_set = UNSET;
 
 %}
 
@@ -121,14 +124,19 @@ input:   /* empty */
        | input line ';'            { Channel_Type = PULSER_CHANNEL_NO_TYPE;
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
+									 Func_is_set = UNSET;
                                      assert( Var_Stack == NULL ); }
        | input SECTION_LABEL       { assert( Var_Stack == NULL );
 	                                 Cur_PROT = PHASE_UNKNOWN_PROT;
+									 Func_is_set = UNSET;
 									 YYACCEPT; }
-       | input error ';'           { THROW ( SYNTAX_ERROR_EXCEPTION ); }
+       | input error ';'           { Func_is_set = UNSET;
+	                                 Cur_PROT = PHASE_UNKNOWN_PROT;
+		                             THROW ( SYNTAX_ERROR_EXCEPTION ); }
        | input ';'                 { Channel_Type = PULSER_CHANNEL_NO_TYPE;
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
+									 Func_is_set = UNSET;
                                      assert( Var_Stack == NULL ); }
 ;
 
@@ -136,133 +144,103 @@ input:   /* empty */
 /* A (non-empty) line has to start with one of the channel keywords or either
    TIMEBASE or TRIGGERMODE */
 
-line:    func pcd                  { }
-       | func pcd SECTION_LABEL    { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | func pcd error            { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | func pcd TB_TOKEN         { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | func pcd TM_TOKEN         { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | func pcd PHS_TOK          { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | func pcd PSD_TOKEN        { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | func pcd GP_TOKEN         { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | tb                        { }
-       | tb func                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | tb TM_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | tb PHS_TOK                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | tb PSD_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | tb GP_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | tm                        { }
-       | tm func                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | tm TB_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | tm PHS_TOK                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | tm PSD_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | tm GP_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | phs                       { p_phs_end( Cur_PHS ); }
-       | phs TB_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | phs TM_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | phs PSD_TOKEN             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | phs GP_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | psd                       { }
-       | psd func                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | psd TB_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | psd TM_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | psd PHS_TOK               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | psd GP_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | gp                        { }
+line:    func                      { Func_is_set = SET; }
+         pcd af
+       | tb atb
+       | tm atm
+       | phs aphs                  { p_phs_end( Cur_PHS ); }
+       | psd apsd
+       | gp agp
+;								   
+
+
+/* all the next entries are there to catch missing semicolon errors */
+
+af:    /* empty */ 
+	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+;
+
+
+atb:   /* empty */
+       | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+;
+
+
+atm:   /* empty */
+       | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+;
+
+
+aphs:  /* empty */
+       | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+;
+								   
+
+apsd:  /* empty */
+       | func                      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+;
+
+
+agp:   /* empty */
        | gp	func                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | gp	TB_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | gp	TM_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | gp	PHS_TOK                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | gp	PSD_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | gp	GP_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-;								   
-								   
-								   
-func:    MW_TOKEN                  { if ( Cur_PHS == -1 )
-	                                     Channel_Type = PULSER_CHANNEL_MW;
-                                     else
-										 p_phase_ref( Cur_PHS,
-													  PULSER_CHANNEL_MW ); }
-	   | TWT_TOKEN                 { if ( Cur_PHS == -1 )
-	                                     Channel_Type = PULSER_CHANNEL_TWT;
-                                     else
-										 p_phase_ref( Cur_PHS,
-													  PULSER_CHANNEL_TWT ); }
-       | TWT_GATE_TOKEN            { if ( Cur_PHS == -1 )
-	                                     Channel_Type =
-											 PULSER_CHANNEL_TWT_GATE;
-                                     else
-										 p_phase_ref( Cur_PHS,
-												   PULSER_CHANNEL_TWT_GATE ); }
-       | DET_TOKEN                 { if ( Cur_PHS == -1 )
-	                                     Channel_Type = PULSER_CHANNEL_DET;
-                                     else
-										 p_phase_ref( Cur_PHS,
-													  PULSER_CHANNEL_DET ); }
-	   | DET_GATE_TOKEN            { if ( Cur_PHS == -1 )
-	                                     Channel_Type =
-											 PULSER_CHANNEL_DET_GATE;
-                                     else
-										 p_phase_ref( Cur_PHS,
-												   PULSER_CHANNEL_DET_GATE ); }
-       | DEF_TOKEN                 { if ( Cur_PHS == -1 )
-	                                     Channel_Type = PULSER_CHANNEL_DEFENSE;
-                                     else
-										 p_phase_ref( Cur_PHS,
-													PULSER_CHANNEL_DEFENSE ); }
-       | RF_TOKEN                  { if ( Cur_PHS == -1 )
-	                                     Channel_Type = PULSER_CHANNEL_RF;
-                                     else
-										 p_phase_ref( Cur_PHS,
-													  PULSER_CHANNEL_RF ); }
-	   | RF_GATE_TOKEN             { if ( Cur_PHS == -1 )
-	                                     Channel_Type = PULSER_CHANNEL_RF_GATE;
-                                     else
-										 p_phase_ref( Cur_PHS,
-													PULSER_CHANNEL_RF_GATE ); }
-	   | PSH_TOKEN                 { if ( Cur_PHS == -1 )
-	                                     Channel_Type = 
-											        PULSER_CHANNEL_PULSE_SHAPE;
-                                     else
-										 p_phase_ref( Cur_PHS,
-												PULSER_CHANNEL_PULSE_SHAPE ); }
-       | PH1_TOKEN                 { if ( Cur_PHS == -1 )
-	                                     Channel_Type = PULSER_CHANNEL_PHASE_1;
-                                     else
-										 p_phase_ref( Cur_PHS,
-													PULSER_CHANNEL_PHASE_1 ); }
-       | PH2_TOKEN                 { if ( Cur_PHS == -1 )
-	                                     Channel_Type = PULSER_CHANNEL_PHASE_2;
-                                     else
-										 p_phase_ref( Cur_PHS,
-													PULSER_CHANNEL_PHASE_2 ); }
-       | OI_TOKEN                  { if ( Cur_PHS == -1 )
-	                                     Channel_Type = PULSER_CHANNEL_OTHER_1;
-                                     else
-										 p_phase_ref( Cur_PHS,
-													PULSER_CHANNEL_OTHER_1 ); }
-       | OII_TOKEN                 { if ( Cur_PHS == -1 )
-	                                     Channel_Type = PULSER_CHANNEL_OTHER_2;
-                                     else
-										 p_phase_ref( Cur_PHS,
-													PULSER_CHANNEL_OTHER_2 ); }
-       | OIII_TOKEN                { if ( Cur_PHS == -1 )
-	                                     Channel_Type = PULSER_CHANNEL_OTHER_3;
-                                     else
-										 p_phase_ref( Cur_PHS,
-													PULSER_CHANNEL_OTHER_3 ); }
-       | OIV_TOKEN                 { if ( Cur_PHS == -1 )
-	                                     Channel_Type = PULSER_CHANNEL_OTHER_4;
-                                     else
-										 p_phase_ref( Cur_PHS,
-													PULSER_CHANNEL_OTHER_4 ); }
+	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+;
+
+
+/* all the pulse function tokens */
+
+func:    MW_TOKEN                  { ass_func( PULSER_CHANNEL_MW ); }
+       | TWT_TOKEN                 { ass_func( PULSER_CHANNEL_TWT ); }
+       | TWT_GATE_TOKEN            { ass_func( PULSER_CHANNEL_TWT_GATE ); }
+       | DET_TOKEN                 { ass_func( PULSER_CHANNEL_DET ); }
+	   | DET_GATE_TOKEN            { ass_func( PULSER_CHANNEL_DET_GATE ); }
+       | DEF_TOKEN                 { ass_func( PULSER_CHANNEL_DEFENSE ); }
+       | RF_TOKEN                  { ass_func( PULSER_CHANNEL_RF ); }
+	   | RF_GATE_TOKEN             { ass_func( PULSER_CHANNEL_RF_GATE ); }
+	   | PSH_TOKEN                 { ass_func( PULSER_CHANNEL_PULSE_SHAPE ); }
+       | PH1_TOKEN                 { ass_func( PULSER_CHANNEL_PHASE_1 ); }
+       | PH2_TOKEN                 { ass_func( PULSER_CHANNEL_PHASE_2 ); }
+       | OI_TOKEN                  { ass_func( PULSER_CHANNEL_OTHER_1 ); }
+       | OII_TOKEN                 { ass_func( PULSER_CHANNEL_OTHER_2 ); }
+       | OIII_TOKEN                { ass_func( PULSER_CHANNEL_OTHER_3 ); }
+       | OIV_TOKEN                 { ass_func( PULSER_CHANNEL_OTHER_4 ); }
 ;
 
 
 /* Pod and channel assignments consists of the POD and CHANNEL keyword,
    followed by the pod or channel number(s), and, optionally, a DELAY keyword
    followed by the delay time and the INVERTED keyword. The sequence of the
-   keywords is arbitrary. The last entry is for the Franfurt version of
-   the pulser driver only. */
+   keywords is arbitrary. The last entry is for the Frankfurt version of the
+   pulser driver only. */
 
 
 pcd:    /* empty */
@@ -272,40 +250,8 @@ pcd:    /* empty */
       | pcd inv
 	  | pcd vh
       | pcd vl
-	  | pcd func2 sep2             { Cur_PROT = PHASE_FFM_PROT; }
-;
-
-
-/* These are needed for the Frankfurt version of the driver only */
-
-func2:  MW_TOKEN                   { p_phase_ref_f( Channel_Type,
-												    PULSER_CHANNEL_MW ); }
-      | TWT_TOKEN                  { p_phase_ref_f( Channel_Type,
-													PULSER_CHANNEL_TWT ); }
-      | TWT_GATE_TOKEN             { p_phase_ref_f( Channel_Type,
-												   PULSER_CHANNEL_TWT_GATE ); }
-      | DET_TOKEN                  { p_phase_ref_f( Channel_Type,
-													PULSER_CHANNEL_DET ); }
-      | DEF_TOKEN                  { p_phase_ref_f( Channel_Type,
-													PULSER_CHANNEL_DEFENSE ); }
-      | RF_TOKEN                   { p_phase_ref_f( Channel_Type,
-													PULSER_CHANNEL_RF ); }
-      | RF_GATE_TOKEN              { p_phase_ref_f( Channel_Type,
-													PULSER_CHANNEL_RF_GATE ); }
-      | PSH_TOKEN                  { p_phase_ref_f( Channel_Type,
-												PULSER_CHANNEL_PULSE_SHAPE ); }
-      | PH1_TOKEN                  { p_phase_ref_f( Channel_Type,
-												    PULSER_CHANNEL_PHASE_1 ); }
-      | PH2_TOKEN                  { p_phase_ref_f( Channel_Type,
-												    PULSER_CHANNEL_PHASE_2 ); }
-      | OI_TOKEN                   { p_phase_ref_f( Channel_Type,
-												    PULSER_CHANNEL_OTHER_1 ); }
-      | OII_TOKEN                  { p_phase_ref_f( Channel_Type,
-												    PULSER_CHANNEL_OTHER_2 ); }
-      | OIII_TOKEN                 { p_phase_ref_f( Channel_Type,
-												    PULSER_CHANNEL_OTHER_3 ); }
-      | OIV_TOKEN                  { p_phase_ref_f( Channel_Type,
-												    PULSER_CHANNEL_OTHER_4 ); }
+	  | pcd                        { set_protocoll( PHASE_FFM_PROT ); }
+        func sep2
 ;
 
 pod:    POD_TOKEN sep1
@@ -473,12 +419,14 @@ sl_val:   NEG_TOKEN                { $$ = vars_push( INT_VAR, NEGATIVE ); }
 /* Handling of PHASE_SETUP commands */
 
 phs:      PHS_TOK                  { Cur_PHS = $1;
-                                     Cur_PHST = -1; }
+                                     Cur_PHST = -1;
+                                     Func_is_set = SET; }
           phsl
 ;
 
 phsl:     /* empty */
-		| phsl func sep2
+		| phsl                     { set_protocoll( PHASE_BLN_PROT ); }
+		  func sep2
         | phsl PXY_TOK sep1        { Cur_PHST = $2; }
           phsp
 ;
@@ -487,32 +435,36 @@ phsp:    /* empty */
 		| phsp phsv  sep2          { p_phs_setup( Cur_PHS, Cur_PHST, -1, $2,
 												  Cur_PROT ); }
         | phsp POD1_TOK sep1
-		  phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST, 0, $4,
-												  PHASE_FFM_PROT ); }
+		  phsv sep2                { set_protocoll( PHASE_FFM_PROT );
+			                         p_phs_setup( Cur_PHS, Cur_PHST, 0, $4,
+												  Cur_PROT ); }
         | phsp POD2_TOK sep1
-		  phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST, 1, $4,
-												  PHASE_FFM_PROT ); }
+		  phsv sep2                { set_protocoll( PHASE_FFM_PROT );
+			                         p_phs_setup( Cur_PHS, Cur_PHST, 1, $4,
+												  Cur_PROT ); }
 		| POD_TOKEN sep1 INT_TOKEN
-          sep2                     { p_phs_setup( Cur_PHS, Cur_PHST, 0, $3,
-												  PHASE_BLN_PROT ); }
+          sep2                     { set_protocoll( PHASE_BLN_PROT );
+                                     p_phs_setup( Cur_PHS, Cur_PHST, 0, $3,
+												  Cur_PROT ); }
 ;
 
-phsv:     INT_TOKEN                { $$ = $1;
-                                     Cur_PROT = PHASE_UNKNOWN_PROT; } 
-        | ON_TOK                   { $$ = 1;
-		                             Cur_PROT = PHASE_FFM_PROT; }
-        | OFF_TOK                  { $$ = 0;
-		                             Cur_PROT = PHASE_FFM_PROT; }
+phsv:     INT_TOKEN                { $$ = $1; }
+        | ON_TOK                   { set_protocoll( PHASE_FFM_PROT );
+		                             $$ = 1;}
+        | OFF_TOK                  { set_protocoll( PHASE_FFM_PROT );
+		                             $$ = 0; }
 ;
 
-/* Handling of PHASE_SWITCH_DELAY commands */
+/* Handling of PHASE_SWITCH_DELAY commands (Frankfurt version only) */
 
-psd:      PSD_TOKEN expr           { p_set_psd( $1, $2 ); }
+psd:      PSD_TOKEN expr           { p_set_psd( $1, $2 );
+                                     set_protocoll( PHASE_FFM_PROT ); }
 ;
 
-/* Handling of GRACE_PERIOD commands */
+/* Handling of GRACE_PERIOD commands (Frankfurt version only) */
 
-gp:       GP_TOKEN expr            { p_set_gp( $2 ); }
+gp:       GP_TOKEN expr            { set_protocoll( PHASE_FFM_PROT );
+                                      p_set_gp( $2 ); }
 
 %%
 
@@ -528,4 +480,40 @@ int assignerror ( const char *s )
 		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.\n",
 				Fname, Lc, assigntext );
 	THROW( EXCEPTION );
+}
+
+
+void ass_func( int function )
+{
+	if ( ! Func_is_set )
+	{
+		Channel_Type = function;
+		return;
+	}
+
+	switch ( Cur_PROT )
+	{
+		case PHASE_FFM_PROT :
+			p_phase_ref( Cur_PROT, Channel_Type, function );
+			break;
+
+		case PHASE_BLN_PROT :
+			p_phase_ref( Cur_PROT, Cur_PHS, function );
+			break;
+
+		default :
+			assert( 1 == 0 );
+	}
+}
+
+void set_protocoll( long prot )
+{
+	if ( Cur_PROT != PHASE_UNKNOWN_PROT && Cur_PROT != prot )
+	{
+		eprint( FATAL, "%s:%ld: Mixing of Berlin and Frankfurt version "
+				"phase syntax.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	Cur_PROT = prot;
 }
