@@ -55,6 +55,12 @@ a1 = abs( a1 );
 a2 = abs( a2 );
 a3[ 1 ] = abs( a3[ 3 ] );
 
+a1 = max_of( a3[ 1 ], 2, 8.0 );
+a1 = min_of( a3[ 2 ], 2.0, 8 );
+
+A1 = max_of( A2, 2, 3423 );
+A1 = min_of( A2, -2, 3423 );
+
 a1 = mean( a2 );
 a1 = mean( a2, 5 );
 a1 = mean( a2, 2, 8 );
