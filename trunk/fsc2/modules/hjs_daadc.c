@@ -408,8 +408,8 @@ static int hjs_daadc_in_out( int out )
 
 	/* The results of the conversion by the ADC is stored in the second and
 	   third byte of the read in data in the following way: the lower 7 bits
-	   of the second byte make up the bits 4 to 11 of the result and the upper
-	   nibble of the third byte the bits 0 to 3. From this value we have to
+	   of the second byte make up the bits 11 to 4 of the result and the upper
+	   nibble of the third byte the bits 3 to 0. From this value we have to
 	   subtract 2048 because a value of 0 corresponds to an input voltage
 	   of -10 V and a value of 4095 to a voltage of +10 V. */
 
