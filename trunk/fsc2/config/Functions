@@ -381,7 +381,7 @@ mw_attenuator_initial_attenuation, 1, ALL;;
 mw_attenuator_attenuation, -1, EXP;
 
 
-/* Function exported by the chopper module (gg_chopper)
+/* Function exported by the chopper module (gg_chopper) */
 
 chopper_name, 0. ALL;
 chopper_rotation_frequency, -1, ALL;
