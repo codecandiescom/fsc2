@@ -22,6 +22,8 @@ int assignerror( const char *s );
 
 int Channel_Type;
 static Var *CV;
+int Cur_PHS;
+int Cur_PHST;
 
 %}
 
@@ -73,6 +75,10 @@ static Var *CV;
 %token REPT_TOKEN            /* REPEAT TIME */
 %token REPF_TOKEN            /* REPEAT FREQUENCY */
 
+%token <lval> PHS_TOK
+%token PX_TOK PY_TOK PMX_TOK PMY_TOK POD1_TOK POD2_TOK ON_TOK OFF_TOK
+
+
 %token <vptr> VAR_TOKEN      /* variable */
 %token <vptr> VAR_REF		 
 %token <vptr> FUNC_TOKEN     /* function */
@@ -85,7 +91,7 @@ static Var *CV;
 %token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
 %token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN
 
-%type <dval> 
+%type <lval> phsv
 %type <vptr> expr list1 unit sl_val
 
 %left AND OR XOR
@@ -94,8 +100,8 @@ static Var *CV;
 %left '+' '-'
 %left '*' '/'
 %left '%'
-%right '^'
 %left NEG
+%right '^'
 
 
 %%
@@ -103,11 +109,15 @@ static Var *CV;
 
 input:   /* empty */
        | input line ';'            { Channel_Type = PULSER_CHANNEL_NO_TYPE;
+	                                 Cur_PHS = -1;
+	                                 Cur_PHST = -1;
                                      assert( Var_Stack == NULL ); }
        | input SECTION_LABEL       { assert( Var_Stack == NULL );
 	                                 YYACCEPT; }
        | input error ';'           { THROW ( SYNTAX_ERROR_EXCEPTION ); }
        | input ';'                 { Channel_Type = PULSER_CHANNEL_NO_TYPE;
+	                                 Cur_PHS = -1;
+	                                 Cur_PHST = -1;
                                      assert( Var_Stack == NULL ); }
 ;
 
@@ -120,12 +130,20 @@ line:    func pcd                  { }
        | func pcd error            { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | func pcd TB_TOKEN         { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | func pcd TM_TOKEN         { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | func pcd PHS_TOK          { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tb                        { }
        | tb func                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tb TM_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | tb PHS_TOK                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tm                        { }
        | tm func                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tm TB_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | tm PHS_TOK                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | phs                       { p_phs_end( Cur_PHS ); }
+       | phs func                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | phs TB_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | phs TM_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+
 ;								   
 								   
 								   
@@ -296,6 +314,7 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | expr '/' expr             { $$ = vars_div( $1, $3 ); }
        | expr '%' expr             { $$ = vars_mod( $1, $3 ); }
        | expr '^' expr             { $$ = vars_pow( $1, $3 ); }
+       | '+' expr %prec NEG        { $$ = $2; }
        | '-' expr %prec NEG        { $$ = vars_negate( $2 ); }
        | '(' expr ')' unit         { $$ = apply_unit( $2, $4 ); }
 ;
@@ -385,7 +404,34 @@ sl_val:   NEG_TOKEN                { $$ = vars_push( INT_VAR, NEGATIVE ); }
 		| '+'                      { $$ = vars_push( INT_VAR, POSITIVE ); }
 ;
 
+phs:      PHS_TOK                  { Cur_PHS = $1;
+                                     Cur_PHST = -1; }
+          phsl
+;
 
+phsl:     /* empty */
+        | phsl PX_TOK              { Cur_PHST = 0; }
+		  sep1 phsvl
+        | phsl PY_TOK              { Cur_PHST = 1; }
+          sep1 phsvl
+        | phsl PMX_TOK             { Cur_PHST = 2; }
+          sep1 phsvl
+        | phsl PMY_TOK             { Cur_PHST = 3; }
+          sep1 phsvl
+;
+
+phsvl:    /* empty */
+		| phsvl phsv sep2          { p_phs_setup( Cur_PHS, Cur_PHST,
+												  -1, $2 ); }
+        | phsvl POD1_TOK sep1
+		  phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST, 0, $4 ); }
+        | phsvl POD2_TOK sep1
+		  phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST, 1, $4 ); }
+;
+
+phsv:     INT_TOKEN                { $$ = $1; }
+        | ON_TOK                   { $$ = 1; }
+        | OFF_TOK                  { $$ = 0; }
 %%
 
 

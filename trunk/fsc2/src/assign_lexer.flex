@@ -84,6 +84,18 @@ OII         O(THER)?_?2:?
 OIII        O(THER)?_?3:?
 OIV         O(THER)?_?4:?
 
+PHS1        PH(ASE)?_?1_?S(ET)?(U(P)?)?:?
+PHS2        PH(ASE)?_?2_?S(ET)?(U(P)?)?:?
+
+PX			"+"?[xX]:?
+PY			"+"?[yY]:?
+PMX			"-"[yX]:?
+PMY			"-"[yY]:?
+POD1        P(OD)?_?1
+POD2        P(OD)?_?2
+ON          ON
+OFF         OFF
+
 DEL         ((DEL)|(DELAY)):?
 POD         P(OD)?
 CH          CH(ANNEL)?
@@ -176,6 +188,26 @@ WS          [\n=: ]+
 				return SECTION_LABEL;
 			}
 
+{PHS1}		{
+				assignlval.lval = 0;
+				return PHS_TOK;
+			}
+{PHS2}		{
+				assignlval.lval = 1;
+				return PHS_TOK;
+			}
+
+{PX}		return PX_TOK;
+{PY}		return PY_TOK;
+{PMX}		return PMX_TOK;
+{PMY}		return PMY_TOK;
+
+{POD1}		return POD1_TOK;
+{POD2}		return POD2_TOK;
+
+{ON}        return ON_TOK;
+{OFF}       return OFF_TOK;
+
 {MW}        return MW_TOKEN;
 
 {TWT}       return TWT_TOKEN;
@@ -226,6 +258,8 @@ WS          [\n=: ]+
 {THRESH}    return THRESH_TOKEN;
 {REPT}      return REPT_TOKEN;
 {REPF}      return REPF_TOKEN;
+
+
 
 "\x4nunit"   return NU_TOKEN;
 "\x4uunit"   return UU_TOKEN;

@@ -125,6 +125,7 @@ expr:    E_INT_TOKEN unit         { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | expr '/' expr            { $$ = vars_div( $1, $3 ); }
        | expr '%' expr            { $$ = vars_mod( $1, $3 ); }
        | expr '^' expr            { $$ = vars_pow( $1, $3 ); }
+       | '+' expr %prec E_NEG     { $$ = $2; }
        | '-' expr %prec E_NEG     { $$ = vars_negate( $2 ); }
        | '(' expr ')' unit        { $$ = apply_unit( $2, $4 ); }
 ;
