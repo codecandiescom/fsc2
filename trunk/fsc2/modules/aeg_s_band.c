@@ -10,9 +10,8 @@
 #include <fcntl.h>
 
 
-/* definitions for serial port access */
+/* definitions for serial port access - apply changes here */
 
-#define DEVICE_NAME "S_BAND"         /* name of device */
 #define SERIAL_BAUDRATE B1200        /* baud rate of field controller */
 #define SERIAL_PORT     1            /* serial port number (i.e. COM2) */
 #define SERIAL_TIME     50000        /* time in us set at magnet front panel */
@@ -54,6 +53,8 @@ static bool magnet_do( int command );
 #define S_BAND_WITH_BH15_MIN_FIELD         -50
 #define S_BAND_WITH_BH15_MAX_FIELD         23000
 
+
+#define DEVICE_NAME "S_BAND"         /* name of device */
 
 typedef struct
 {
