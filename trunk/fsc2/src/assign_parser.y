@@ -405,7 +405,7 @@ list2:   /* empty */
 
 list3:   /* empty */
        | list3 ',' exprs
-
+;
 
 exprs:   expr                      { }
        | STR_TOKEN                 { vars_push( STR_VAR, $1 ); }

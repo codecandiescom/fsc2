@@ -290,20 +290,16 @@ list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
 /* list of function arguments */
 
 list2:   /* empty */
-       | ','                      { print( FATAL, "Semicolon at start of "
-										   "function argument list.\n" );
-									THROW( EXCEPTION ); }
-       | exprs
-	   | list2 ',' exprs
+       | exprs list3
+;
+
+list3:   /* empty */
+       | list3 ',' exprs
 ;
 
 exprs:   expr                     { }
        | E_STR_TOKEN              { vars_push( STR_VAR, $1 ); }
          strs
-	   | ','                      { print( FATAL, "Two semicolons without a "
-										   "value in between in function "
-										   "argument list.\n" );
-	   								THROW( EXCEPTION ); }
 ;
 
 strs:    /* empty */

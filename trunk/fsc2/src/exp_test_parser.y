@@ -176,7 +176,7 @@ et:      ls
 
 line:    E_VAR_TOKEN ass                              { }
        | E_VAR_TOKEN '[' list1 ']' ass                { }
-       | E_FUNC_TOKEN '(' list2 ')'                   { }
+       | E_FUNC_TOKEN '(' list3 ')'                   { }
        | E_FUNC_TOKEN '['
           { print( FATAL, "'%s' is a predefined function.\n", $1->name );
 		    THROW( EXCEPTION ); }
@@ -207,7 +207,7 @@ expr:    E_INT_TOKEN unit                { }
        | E_FLOAT_TOKEN unit              { }
        | E_VAR_TOKEN unit                { }
        | E_VAR_TOKEN '[' list1 ']' unit  { }
-       | E_FUNC_TOKEN '(' list2 ')' unit { }
+       | E_FUNC_TOKEN '(' list3 ')' unit { }
        | E_VAR_REF                       { }
        | E_FUNC_TOKEN '['         { print( FATAL, "%s' is a predefined "
 									        "function.\n", $1->name );
@@ -257,27 +257,25 @@ unit:    /* empty */
 /* list of indices of array element */
 
 list1:   /* empty */
-       | expr
-       | list1 ',' expr
+       | expr list2
 ;
+
+list2:   /* empty */
+       | list2 ',' expr
 
 /* list of function arguments */
 
-list2:   /* empty */
-       | ','                      { print( FATAL, "Semicolon at start of "
-										   "function argument list.\n" );
-									THROW( EXCEPTION ); }
-       | exprs
-       | list2 ',' exprs
+list3:   /* empty */
+       | exprs list4
+;
+
+list4:   /* empty */
+       | list4 ',' exprs
 ;
 
 exprs:   expr
        | E_STR_TOKEN
          strs
-	   | ','                      { print( FATAL, "Two semicolons without a "
-										   "value in between in function "
-										   "argument list.\n" );
-	   								THROW( EXCEPTION ); }
 ;
 
 strs:    /* empty */
