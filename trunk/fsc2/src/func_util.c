@@ -2411,7 +2411,7 @@ Var *f_is_file( Var *v )
 	}
 
     if ( v->val.lval < 0 || v->val.lval >= File_List_Len ||
-		 File_List[ file_num ].fp == NULL )
+		 File_List[ v->val.lval ].fp == NULL )
 		return vars_push( INT_VAR, 0 );
 
 	return vars_push( INT_VAR, 1 );
