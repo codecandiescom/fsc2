@@ -25,12 +25,12 @@
 #include "rb_pulser.h"
 
 
-/*------------------------------------------------------------------*/
-/* Comparison function for two pulses: returns 0 if both pulses are */
-/* inactive, -1 if only the second pulse is inactive or starts at a */
-/* later time and 1 if only the first pulse is inactive pulse or    */
-/* the second pulse starts earlier.                                 */
-/*------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Comparison function for two pulses: returns 0 if both pulses are
+ * inactive, -1 if only the second pulse is inactive or starts at a
+ * later time and 1 if only the first pulse is inactive pulse or the
+ * second pulse starts earlier.
+ *-------------------------------------------------------------------*/
 
 int rb_pulser_start_compare( const void *A, const void *B )
 {
@@ -52,10 +52,10 @@ int rb_pulser_start_compare( const void *A, const void *B )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Converts a time into the internal type of a time specification, */
-/* i.e. a integer multiple of the time base                        */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Converts a time into the internal type of a time specification,
+ * i.e. a integer multiple of the time base
+ *-----------------------------------------------------------------*/
 
 Ticks rb_pulser_double2ticks( double p_time )
 {
@@ -93,9 +93,9 @@ Ticks rb_pulser_double2ticks( double p_time )
 }
 
 
-/*-----------------------------------------------------*/
-/* Does the exact opposite of the previous function... */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Does the exact opposite of the previous function...
+ *-----------------------------------------------------*/
 
 double rb_pulser_ticks2double( Ticks ticks )
 {
@@ -104,9 +104,9 @@ double rb_pulser_ticks2double( Ticks ticks )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Returns pointer to the pulses structure if given a valid pulse number. */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Returns pointer to the pulses structure if given a valid pulse number.
+ *------------------------------------------------------------------------*/
 
 PULSE *rb_pulser_get_pulse( long pnum )
 {
@@ -136,8 +136,8 @@ PULSE *rb_pulser_get_pulse( long pnum )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 const char *rb_pulser_ptime( double p_time )
 {
@@ -156,8 +156,8 @@ const char *rb_pulser_ptime( double p_time )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 const char *rb_pulser_pticks( Ticks ticks )
 {
@@ -165,8 +165,8 @@ const char *rb_pulser_pticks( Ticks ticks )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 void rb_pulser_show_pulses( void )
 {
@@ -230,8 +230,8 @@ void rb_pulser_show_pulses( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 void rb_pulser_dump_pulses( void )
 {
@@ -306,8 +306,8 @@ void rb_pulser_dump_pulses( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 
 void rb_pulser_write_pulses( FILE *fp )
 {
@@ -331,10 +331,11 @@ void rb_pulser_write_pulses( FILE *fp )
 		for ( j = 0; j < f->num_active_pulses; j++ )
 			fprintf( fp, " %ld %ld %ld", f->pulses[ j ]->num,
 					 Ticks_rnd( f->pulses[ j ]->pos / rb_pulser.timebase ),
-					 f->pulses[ j ]->len );
-	}
+					 f->delay_card->next != NULL ? f->pulses[ j ]->len  :
+					 Ticks_rnd( f->last_pulse_len / rb_pulser.timebase ) );
 
-	fprintf( fp, "\n" );
+		fprintf( fp, "\n" );
+	}
 }
 
 

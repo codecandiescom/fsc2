@@ -25,8 +25,9 @@
 #include "rb_pulser.h"
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Function gets called when a new pulse is to be created
+ *--------------------------------------------------------*/
 
 bool rb_pulser_new_pulse( long pnum )
 {
@@ -75,16 +76,17 @@ bool rb_pulser_new_pulse( long pnum )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*---------------------------------------------*
+ * Function to set the function of a new pulse
+ *---------------------------------------------*/
 
 bool rb_pulser_set_pulse_function( long pnum, int function )
 {
 	PULSE *p = rb_pulser_get_pulse( pnum );
 
 
-	if ( function != PULSER_CHANNEL_MW ||
-		 function != PULSER_CHANNEL_RF ||
+	if ( function != PULSER_CHANNEL_MW &&
+		 function != PULSER_CHANNEL_RF &&
 		 function != PULSER_CHANNEL_DET )
 	{
 		print( FATAL, "Pulse function '%s' can't be used with this "
@@ -112,8 +114,9 @@ bool rb_pulser_set_pulse_function( long pnum, int function )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*--------------------------------------------------*
+ * Function for setting the position of a new pulse 
+ *--------------------------------------------------*/
 
 bool rb_pulser_set_pulse_position( long pnum, double p_time )
 {
@@ -143,8 +146,9 @@ bool rb_pulser_set_pulse_position( long pnum, double p_time )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*------------------------------------------------*
+ * Function for setting the length of a new pulse 
+ *------------------------------------------------*/
 
 bool rb_pulser_set_pulse_length( long pnum, double p_time )
 {
@@ -174,8 +178,9 @@ bool rb_pulser_set_pulse_length( long pnum, double p_time )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function for setting the position change of a new pulse 
+ *--------------------------------------------------------*/
 
 bool rb_pulser_set_pulse_position_change( long pnum, double p_time )
 {
@@ -205,8 +210,9 @@ bool rb_pulser_set_pulse_position_change( long pnum, double p_time )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function for setting the length change of a new pulse 
+ *-------------------------------------------------------*/
 
 bool rb_pulser_set_pulse_length_change( long pnum, double p_time )
 {
@@ -236,8 +242,9 @@ bool rb_pulser_set_pulse_length_change( long pnum, double p_time )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*------------------------------------------*
+ * Function returns the function of a pulse
+ *------------------------------------------*/
 
 bool rb_pulser_get_pulse_function( long pnum, int *function )
 {
@@ -255,8 +262,9 @@ bool rb_pulser_get_pulse_function( long pnum, int *function )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*-----------------------------------------*
+ * Function returns the postion of a pulse 
+ *-----------------------------------------*/
 
 bool rb_pulser_get_pulse_position( long pnum, double *p_time )
 {
@@ -276,8 +284,9 @@ bool rb_pulser_get_pulse_position( long pnum, double *p_time )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*----------------------------------------*
+ * Function returns the length of a pulse 
+ *----------------------------------------*/
 
 bool rb_pulser_get_pulse_length( long pnum, double *p_time )
 {
@@ -295,8 +304,9 @@ bool rb_pulser_get_pulse_length( long pnum, double *p_time )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*-------------------------------------------------*
+ * Function returns the position change of a pulse 
+ *-------------------------------------------------*/
 
 bool rb_pulser_get_pulse_position_change( long pnum, double *p_time )
 {
@@ -315,8 +325,9 @@ bool rb_pulser_get_pulse_position_change( long pnum, double *p_time )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*-----------------------------------------------*
+ * Function returns the length change of a pulse 
+ *-----------------------------------------------*/
 
 bool rb_pulser_get_pulse_length_change( long pnum, double *p_time )
 {
@@ -334,8 +345,9 @@ bool rb_pulser_get_pulse_length_change( long pnum, double *p_time )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function to change the position of a pulse during the experiment
+ *------------------------------------------------------------------*/
 
 bool rb_pulser_change_pulse_position( long pnum, double p_time )
 {
@@ -380,8 +392,9 @@ bool rb_pulser_change_pulse_position( long pnum, double p_time )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function to change the length of a pulse during the experiment
+ *----------------------------------------------------------------*/
 
 bool rb_pulser_change_pulse_length( long pnum, double p_time )
 {
@@ -432,8 +445,9 @@ bool rb_pulser_change_pulse_length( long pnum, double p_time )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function to change the position change of a pulse during the experiment
+ *-------------------------------------------------------------------------*/
 
 bool rb_pulser_change_pulse_position_change( long pnum, double p_time )
 {
@@ -453,8 +467,9 @@ bool rb_pulser_change_pulse_position_change( long pnum, double p_time )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function to change the length change of a pulse during the experiment
+ *-----------------------------------------------------------------------*/
 
 bool rb_pulser_change_pulse_length_change( long pnum, double p_time )
 {

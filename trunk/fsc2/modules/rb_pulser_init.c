@@ -31,11 +31,11 @@ static void rb_pulser_basic_functions_check( void );
 static void rb_pulser_rf_synth_init( void );
 
 
-/*-------------------------------------------------------------------*/
-/* Function does everything that needs to be done for checking and   */
-/* completing the internal representation of the pulser at the start */
-/* of a test run.                                                    */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function does everything that needs to be done for checking and
+ * completing the internal representation of the pulser at the start
+ * of a test run.
+ *-------------------------------------------------------------------*/
 
 void rb_pulser_init_setup( void )
 {
@@ -53,8 +53,8 @@ void rb_pulser_init_setup( void )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ *-------------------------------------------------------------------------*/
 
 static void rb_pulser_init_print( FILE *fp )
 {
