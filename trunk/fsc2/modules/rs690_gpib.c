@@ -34,10 +34,10 @@ static void rs690_check( void );
 
 #define UNUSED_BIT -1
 
-
+/*
 #define gpib_write( a, b, c ) fprintf( stderr, "%s\n", ( b ) )
 #define gpib_init_device( a, b ) 1
-
+*/
 
 /* Multiplicator used to convert lengths of FS to output times */
 
@@ -61,11 +61,11 @@ bool rs690_init( const char *name )
 
 	/* Try to read the device indentification string to check if the pulser
 	   responds. */
-/*
+
 	if ( gpib_write( rs690.device, "RUI!", 4 ) == FAILURE ||
 		 gpib_read( rs690.device, reply, &length ) == FAILURE )
 		rs690_gpib_failure( );
-*/
+
 	/* Disable the front panel and stop the pulser */
 
 	rs690_lock_state( SET );
@@ -113,10 +113,16 @@ bool rs690_init( const char *name )
 	if ( gpib_write( rs690.device, "LEG,0!", 6 ) == FAILURE )
 		rs690_gpib_failure( );
 
+	/* The length field in the FS structures is the number of Ticks but
+	   we have to send the device the time duration of a field. 'mult'
+	   is a simple multiplier used to convert between th number of Ticks
+	   and the actual lengths to be send to the device */
+
+	mult = mult_array[ rs690.timebase_type ];
+
 	/* Make the association between the fields bits and the output connector
 	   channels and initialize the sequence and tables. */
 
-	mult = mult_array[ rs690.timebase_type ];
 	rs690_field_channel_setup( );
 	rs690_do_update( );
 
