@@ -456,6 +456,7 @@ Var *func_call( Var *f )
 	call_pop( );
 
 #ifndef NDEBUG
+
 	/* Before starting to delete the now defunct variables do another sanity
 	   check, i.e. test that the variables stack didn't get corrupted. */
 
@@ -487,23 +488,15 @@ Var *func_call( Var *f )
 
 CALL_STACK *call_push( Func *f, const char *device_name )
 {
-	if ( Call_Stack == NULL )
-	{
-		Call_Stack = T_malloc( sizeof( CALL_STACK ) );
-		Call_Stack->next = Call_Stack->prev = NULL;
-	}
-	else
-	{
-		Call_Stack->next = T_malloc( sizeof( CALL_STACK ) );
-		Call_Stack->next->prev = Call_Stack;
-		Call_Stack = Call_Stack->next;
-		Call_Stack->next = NULL;
-	}
+	CALL_STACK *cs;
 
-	Call_Stack->f = f;
-	Call_Stack->dev_name = device_name;
 
-	return Call_Stack;
+	cs = T_malloc( sizeof( CALL_STACK ) );
+	cs->prev = Call_Stack;
+	cs->f = f;
+	cs->dev_name = device_name;
+
+	return Call_Stack = cs;
 }
 
 
@@ -512,16 +505,15 @@ CALL_STACK *call_push( Func *f, const char *device_name )
 
 CALL_STACK *call_pop( void )
 {
+	CALL_STACK *cs;
+
+
 	if ( Call_Stack == NULL )
 		return NULL;
 
-	if ( Call_Stack->prev != NULL )
-	{
-		Call_Stack = Call_Stack->prev;
-		Call_Stack->next = T_free( Call_Stack->next );
-	}
-	else
-		Call_Stack = T_free( Call_Stack );
+	cs = Call_Stack;
+	Call_Stack = cs->prev;
+	T_free( cs );
 
 	return Call_Stack;
 }

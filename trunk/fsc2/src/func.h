@@ -69,7 +69,6 @@ typedef struct CALL_STACK_
 {
 	Func *f;
 	const char *dev_name;
-	struct CALL_STACK_ *next;
 	struct CALL_STACK_ *prev;
 } CALL_STACK;
 

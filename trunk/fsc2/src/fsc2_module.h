@@ -70,8 +70,8 @@
 #endif
 
 
-#define FSC2_MODE    get_mode( )
-#define FSC2_DO_STOP get_do_stop( )
+#define FSC2_MODE get_mode( )
+#define DO_STOP   get_do_stop( )
 
 extern void show_message( const char *str );
 extern void show_alert( const char *str );
