@@ -225,7 +225,7 @@ void delete_stale_shms( void )
         if ( shm_id  < 0 )
             continue;
 
-		/* segment belongs to fsc2 ? */
+		/* Does the segment belong to fsc2 ? */
 
 		if ( shm_seg.shm_perm.uid == Internals.EUID )
 		{
