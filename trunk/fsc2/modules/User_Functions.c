@@ -46,7 +46,7 @@ static void pc_basic_check( const char *func_1, bool *is_1, const char *func_2,
 
 Var_T *get_phase_cycled_area( Var_T *v )
 {
-	if ( Acq_Seq[ 0 ].defined && Acq_Seq[ 1 ].defined )
+	if ( PA_Seq.acq_seq[ 0 ].defined && PA_Seq.acq_seq[ 1 ].defined )
 		return get_phase_cycled_area_2( v );
 	else
 		return get_phase_cycled_area_1( v );
@@ -91,10 +91,10 @@ static Var_T *get_phase_cycled_area_1( Var_T *v )
 
 	V = v;
 
-	if ( Acq_Seq[ 0 ].defined )
-		aseq = Acq_Seq;
-	else if ( Acq_Seq[ 1 ].defined )
-		aseq = Acq_Seq + 1;
+	if ( PA_Seq.acq_seq[ 0 ].defined )
+		aseq = PA_Seq.acq_seq;
+	else if ( PA_Seq.acq_seq[ 1 ].defined )
+		aseq = PA_Seq.acq_seq + 1;
 	else
 	{
 		print( FATAL, "No acquisition sequence has been defined.\n" );
@@ -304,7 +304,7 @@ static Var_T *get_phase_cycled_area_2( Var_T *v )
 	int acc;
 	double *data;
 	int channels_needed;
-	Acq_Seq_T *aseq[ ] = { Acq_Seq, Acq_Seq + 1 };
+	Acq_Seq_T *aseq[ ] = { PA_Seq.acq_seq, PA_Seq.acq_seq + 1 };
 
 
 	V = v;
@@ -642,13 +642,13 @@ static void pc_basic_check( const char *func_1, bool *is_1, const char *func_2,
 	/* We also need to check that a phase sequence and at least one
 	   acquisition sequence has been defined */
 
-	if ( Phs_Seq == NULL )
+	if ( PA_Seq.phs_seq == NULL )
 	{
 		print( FATAL, "No phase sequence has been defined.\n" );
 		THROW( EXCEPTION );
 	}
 
-	if ( ! Acq_Seq->defined )
+	if ( ! PA_Seq.acq_seq->defined )
 	{
 		print( FATAL, "First acquisition sequence (A) hasn't been "
 			   "defined.\n" );

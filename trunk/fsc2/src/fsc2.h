@@ -357,8 +357,7 @@ extern bool Need_GPIB;
 extern bool Need_RULBUS;
 #endif
 
-extern Phs_Seq_T *Phs_Seq;
-extern Acq_Seq_T Acq_Seq[ 2 ];
+extern PA_Seq_T PA_Seq;
 
 extern const char *Channel_Names[ NUM_CHANNEL_NAMES ];
 extern const char *Phase_Types[ NUM_PHASE_TYPES ];

@@ -93,11 +93,10 @@ extern int show_choices( const char *text, int numb, const char *b1,
 extern const char *show_input( const char *content, const char *label );
 
 
-/* Global variables */
+/* Global variables that must be visible for modules */
 
 extern Pulser_Struct_T *Pulser_Struct;
-extern Phs_Seq_T *Phs_Seq;
-extern Acq_Seq_T Acq_Seq[ ];
+extern PA_Seq_T PA_Seq;
 extern long Cur_Pulser;
 
 extern bool Need_GPIB;
@@ -110,7 +109,8 @@ extern const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ];
 extern const char *Phase_Types[ NUM_PHASE_TYPES ];
 
 
-/* The following must be defined after the declaration of Pulser_Struct ! */
+/* The following must be defined after the declaration of Pulser_Struct and
+   makes sure that the modules always see their own pulser structure only! */
 
 #define Pulser_Struct Pulser_Struct[ Cur_Pulser ]
 

@@ -706,7 +706,7 @@ static Phs_Seq_T *dg2020_create_dummy_phase_seq( void )
 	/* First check if there's a phase sequence consisting of just '+X' - if it
 	   does use this as the phase sequence for the pulse */
 
-	for ( np = Phs_Seq; np != NULL; np = np->next )
+	for ( np = PA_Seq.phs_seq; np != NULL; np = np->next )
 	{
 		for ( i = 0; i < np->len; i++ )
 			if ( np->sequence[ i ] != PHASE_PLUS_X )
@@ -720,20 +720,20 @@ static Phs_Seq_T *dg2020_create_dummy_phase_seq( void )
 
 	np = PHS_SEQ_P T_malloc( sizeof *np );
 
-	if ( Phs_Seq == NULL )
+	if ( PA_Seq.phs_seq == NULL )
 	{
-		Phs_Seq = np;
+		PA_Seq.phs_seq = np;
 		np->len = 1;
 		np->sequence = INT_P T_malloc( sizeof *np->sequence );
 		np->sequence[ 0 ] = PHASE_PLUS_X;
 	}
 	else
 	{
-		pn = Phs_Seq;
+		pn = PA_Seq.phs_seq;
 		while ( pn->next != NULL )
 			pn = pn->next;
 		pn->next = np;
-		np->len = Phs_Seq->len;
+		np->len = PA_Seq.phs_seq->len;
 		np->sequence = INT_P T_malloc( np->len * sizeof *np->sequence );
 		for ( i = 0; i < np->len; i++ )
 			np->sequence[ i ] = PHASE_PLUS_X;

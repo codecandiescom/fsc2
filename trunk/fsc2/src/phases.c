@@ -25,8 +25,7 @@
 #include "fsc2.h"
 
 
-Phs_Seq_T *Phs_Seq = NULL;
-Acq_Seq_T Acq_Seq[ 2 ] = { { UNSET, NULL, 0 }, { UNSET, NULL, 0 } };
+PA_Seq_T PA_Seq = { NULL, { { UNSET, NULL, 0 }, { UNSET, NULL, 0 } } };
 
 
 static long cur_aseq;
@@ -44,7 +43,7 @@ void acq_seq_start( long acq_num, long acq_type )
 
 	cur_aseq = acq_num;
 
-	if ( Acq_Seq[ acq_num ].defined )
+	if ( PA_Seq.acq_seq[ acq_num ].defined )
 	{
 		print( FATAL, "Acquisition sequence numbered %ld has already been "
 			   "defined.\n", acq_num );
@@ -53,9 +52,9 @@ void acq_seq_start( long acq_num, long acq_type )
 
 	/* Initialize the acquisition sequence */
 
-	Acq_Seq[ acq_num ].defined = SET;
-	Acq_Seq[ acq_num ].sequence =
-						 INT_P T_malloc( sizeof *Acq_Seq[ acq_num ].sequence );
+	PA_Seq.acq_seq[ acq_num ].defined = SET;
+	PA_Seq.acq_seq[ acq_num ].sequence =
+				  INT_P T_malloc( sizeof *PA_Seq.acq_seq[ acq_num ].sequence );
 
 	if ( acq_type == ACQ_PLUS_U && cur_aseq == 0 )
 		acq_type = ACQ_PLUS_A;
@@ -66,9 +65,8 @@ void acq_seq_start( long acq_num, long acq_type )
 	if ( acq_type == ACQ_MINUS_U && cur_aseq == 1 )
 		acq_type = ACQ_MINUS_B;
 
-	Acq_Seq[ acq_num ].sequence[ 0 ] = ( int ) acq_type;
-
-	Acq_Seq[ acq_num ].len = 1;
+	PA_Seq.acq_seq[ acq_num ].sequence[ 0 ] = ( int ) acq_type;
+	PA_Seq.acq_seq[ acq_num ].len = 1;
 }
 
 
@@ -97,11 +95,11 @@ void acq_seq_cont( long acq_type )
 	if ( acq_type == ACQ_MINUS_U && cur_aseq == 1 )
 		acq_type = ACQ_MINUS_B;
 
-	len = ++Acq_Seq[ cur_aseq ].len;
-	Acq_Seq[ cur_aseq ].sequence =
-				  INT_P T_realloc( Acq_Seq[ cur_aseq ].sequence,
-								   len * sizeof Acq_Seq[ cur_aseq ].sequence );
-	Acq_Seq[ cur_aseq ].sequence[ len - 1 ] = ( int ) acq_type;
+	len = ++PA_Seq.acq_seq[ cur_aseq ].len;
+	PA_Seq.acq_seq[ cur_aseq ].sequence =
+		   INT_P T_realloc( PA_Seq.acq_seq[ cur_aseq ].sequence,
+							len * sizeof PA_Seq.acq_seq[ cur_aseq ].sequence );
+	PA_Seq.acq_seq[ cur_aseq ].sequence[ len - 1 ] = ( int ) acq_type;
 }
 
 
@@ -113,7 +111,7 @@ void acq_seq_cont( long acq_type )
 
 Phs_Seq_T *phase_seq_start( long phase_seq_num )
 {
-	Phs_Seq_T *cp = Phs_Seq, *pn;
+	Phs_Seq_T *cp = PA_Seq.phs_seq, *pn;
 
 
 	fsc2_assert( phase_seq_num >= 0 );        /* again, let's be paranoid */
@@ -135,11 +133,11 @@ Phs_Seq_T *phase_seq_start( long phase_seq_num )
 
 	cp = PHS_SEQ_P T_malloc( sizeof *cp );
 
-	if ( Phs_Seq == NULL )
-		Phs_Seq = cp;
+	if ( PA_Seq.phs_seq == NULL )
+		PA_Seq.phs_seq = cp;
 	else
 	{
-		pn = Phs_Seq;
+		pn = PA_Seq.phs_seq;
 		while ( pn->next != NULL )
 			pn = pn->next;
 		pn->next = cp;
@@ -209,18 +207,19 @@ void phases_clear( void )
 
 	for ( i = 0; i < 2; i++ )
 	{
-		Acq_Seq[ i ].defined = UNSET;
-		Acq_Seq[ i ].sequence = INT_P T_free( Acq_Seq[ i ].sequence );
+		PA_Seq.acq_seq[ i ].defined = UNSET;
+		PA_Seq.acq_seq[ i ].sequence =
+								  INT_P T_free( PA_Seq.acq_seq[ i ].sequence );
 	}
 
-	for ( p = Phs_Seq; p != NULL; p = pn )
+	for ( p = PA_Seq.phs_seq; p != NULL; p = pn )
 	{
 		pn = p->next;
 		T_free( p->sequence );
 		T_free( p );
 	}
 
-	Phs_Seq = NULL;
+	PA_Seq.phs_seq = NULL;
 }
 
 
@@ -236,13 +235,15 @@ void phases_end( void )
 
 	/* Return immediately if no sequences were defined at all */
 
-	if ( ! Acq_Seq[ 0 ].defined && ! Acq_Seq[ 1 ].defined && Phs_Seq == NULL )
+	if ( ! PA_Seq.acq_seq[ 0 ].defined && ! PA_Seq.acq_seq[ 1 ].defined &&
+		 PA_Seq.phs_seq == NULL )
 		return;
 
 	/* Check that there is a phase sequence if there's a acquisition
 	   sequence */
 
-	if ( ( Acq_Seq[ 0 ].defined || Acq_Seq[ 1 ].defined ) && Phs_Seq == NULL )
+	if ( ( PA_Seq.acq_seq[ 0 ].defined || PA_Seq.acq_seq[ 1 ].defined ) &&
+		 PA_Seq.phs_seq == NULL )
 	{
 		eprint( FATAL, UNSET, "Aquisition sequence(s) defined but no phase "
 				"sequences in PHASES section.\n" );
@@ -252,13 +253,13 @@ void phases_end( void )
 	/* Return if neither phase sequences nor acquisition sequences are
 	   defined */
 
-	if ( Phs_Seq == NULL )
+	if ( PA_Seq.phs_seq == NULL )
 		return;
 
 	/* Check that the lengths of all phases sequences are identical */
 
-	for ( p = Phs_Seq->next; p != NULL; p = p->next )
-		if ( p->len != Phs_Seq->len )
+	for ( p = PA_Seq.phs_seq->next; p != NULL; p = p->next )
+		if ( p->len != PA_Seq.phs_seq->len )
 		{
 			eprint( FATAL, UNSET, "Lengths of phase sequences defined in "
 					"PHASES section differ.\n" );
@@ -267,8 +268,10 @@ void phases_end( void )
 
 	/* Check that lengths of acquisition and phase sequences are identical */
 
-	if ( ( Acq_Seq[ 0 ].defined && Acq_Seq[ 0 ].len != Phs_Seq->len ) ||
-		 ( Acq_Seq[ 1 ].defined && Acq_Seq[ 1 ].len != Phs_Seq->len ) )
+	if ( ( PA_Seq.acq_seq[ 0 ].defined &&
+		   PA_Seq.acq_seq[ 0 ].len != PA_Seq.phs_seq->len ) ||
+		 ( PA_Seq.acq_seq[ 1 ].defined &&
+		   PA_Seq.acq_seq[ 1 ].len != PA_Seq.phs_seq->len ) )
 	{
 		eprint( FATAL, UNSET, "Lengths of phase and acquisition sequences "
 				"defined in PHASES section differ.\n" );

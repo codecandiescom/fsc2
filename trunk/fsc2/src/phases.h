@@ -29,6 +29,7 @@
 
 typedef struct Phs_Seq Phs_Seq_T;
 typedef struct Acq_Seq Acq_Seq_T;
+typedef struct PA_Seq PA_Seq_T;
 
 
 struct Phs_Seq {
@@ -45,6 +46,11 @@ struct Acq_Seq {
 	int len;                         /* length of array of acquisition types */
 };
 
+
+struct PA_Seq {
+	Phs_Seq_T *phs_seq;
+	Acq_Seq_T acq_seq[ 2 ];
+};
 
 
 void phases_clear( void );
