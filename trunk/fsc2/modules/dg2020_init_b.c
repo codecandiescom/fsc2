@@ -296,10 +296,6 @@ static int dg2020_calc_channels_needed( FUNCTION *f )
 	if ( ! is_all )            /* if we needed a constant voltage */
 		num_channels++;
 
-/*!!!*/
-	printf( "Number of needed channels: %d\n", num_channels );
-/*!!!*/
-
 	return num_channels;
 }
 
