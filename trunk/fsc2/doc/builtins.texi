@@ -32,32 +32,36 @@
 @end menu
 @end ifinfo
 
-In this chapter all the functions built into @acronym{fsc2} are
-explained. These functions are available even when no device modules
-have been specified in the @code{DEVICES} section.
+In this chapter all functions built into @acronym{fsc2} are discussed in
+detail. These functions are available even when no device modules have
+been specified in the @code{DEVICES} section (or this section is
+missing). In principle, functions can be used in the @code{VARIABLES},
+@code{PREPARATIONS} and @code{EXPERIMENT} section of an @acronym{EDL}
+program. But please note that not all of the following functions can be
+used in all sections of an @acronym{EDL} program but some of them only
+in the @code{PREPARATIONS} or the @code{EXPERIMENT} section.
 
-The built-in functions can be roughly devided into four classes. The
-first class of functions are functions that are concerned with the
-output of the program, either by writing text to the browser in the
-lower half of the main window, by writing data etc.@: into files
-(including functions for specifying the files to be used) or by
-drawing the measured data onto the screen, i.e.@: the main area
-of the display window (including functions for changing the axis
-scaling and labels etc.@:).
+
+The built-in functions can be roughly divided into four classes. The
+first class of functions are functions for dealing with the output of
+the program, either by writing text to the browser in the lower half of
+the main window, by writing data etc.@: into files (including functions
+for specifying the files to be used) or by drawing the measured data
+onto the screen, i.e.@: the main area of the display window (including
+functions for changing the axis scaling and labels etc.@:).
 
 The second class of functions are interaction functions, functions that
-allow to deal with additional graphical elements like buttons, sliders and
+allow to deal with additional graphical objects like buttons, sliders and
 in- and output fields. These functions control the creation, setting,
 query and deletion of these objetcts.
 
 The third class of functions are mathematical functions that one would
-expect to find in most programming languages like. Finally, the fourth
-class are auxillary functions that can't be assigned to any of the other
-groups like functions for dealing with time or date issues or functions
-for determining the sizes of arrays.
+expect to find in most programming languages like (i.e.@: trigonometric
+functions, logarithms etc.@:). Finally, the fourth class are auxillary
+functions that can't be assigned to any of the other groups and consists
+of functions for dealing with time or date issues or for determining the
+sizes of arrays and other.
 
-Please note that not all of the following functions can be used in all
-sections of an @acronym{EDL} program but only in the experiment section.
 
 
 @node Output functions, Interaction functions, Built-in Functions, Built-in Functions
@@ -194,6 +198,9 @@ In error messages the start value and the increment of the data
 displayed at the @i{x}-axis are (in contrast to the point numbers)
 referred to as `real world coordinates'.
 
+This function can only be used in the @code{PREPARATIONS} section of an
+@acronym{EDL} program.
+
 
 @anchor{init_2d}
 @item init_2d()
@@ -243,6 +250,9 @@ init_2d( [ n_data_sets [ , n_x_points [ , n_y_points,
          ]  ]  ] [ x-label [ , y-label [ , z-label ] ] ] )
 @end example
 
+This function can only be used in the @code{PREPARATIONS} section of an
+@acronym{EDL} program.
+
 
 @anchor{display}
 @item display( )
@@ -279,6 +289,9 @@ while for 2D-experiments it is
 display( n_x_point, n_y_point, data [ , n_curve [ , ... ] ] )
 @end example
 
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} program.
+
 
 @anchor{change_scale}
 @item change_scale()
@@ -293,6 +306,9 @@ the @i{y}-increment. If one of these values should remain unchanged
 instead of a value a string (e.g.@ @code{"keep"}) can be passed as the
 argument.
 
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} program.
+
 
 @anchor{change_label}
 @item change_label()
@@ -306,6 +322,8 @@ an empty string, i.e.@ @code{""}. If no label should be drawn pass it
 a string that just contains one (or more) space characters, i.e.@:
 @code{" "}.
 
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} program.
 
 @anchor{rescale}
 @item rescale()
@@ -331,6 +349,8 @@ of points in @i{y}-direction. As in the 1D-case a @code{-1} means not to
 do any changes to the axis and @code{0} sets the number of points to the
 number of points currently displayed along this axis.
 
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} program.
 
 @anchor{clear_curve}
 @item clear_curve()
@@ -339,6 +359,8 @@ Removes one or more curves from the display. As many arguments as there
 are curves can be used. No arguments at all implies the first
 curve. Invalid arguments are discarded and an error message is printed.
 
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} program.
 
 @anchor{get_file}
 @item get_file( )
@@ -382,6 +404,9 @@ this file is used exclusively in further @code{save_xxx()}-calls.
 I.e.@: either @code{get_file()} is called before any save-operation or
 never at all!
 
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} program.
+
 
 @anchor{clone_file}
 @item clone_file( )
@@ -418,6 +443,8 @@ accidentally. If the second file already exists the user gets asked to
 select different file. The program enforces that the extension of the
 new file is identical to the one passed as the third argument.
 
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} program.
 
 @anchor{save}
 @item save()
@@ -472,6 +499,9 @@ will be printed as
 
 The function returns the total number of characters that have been written to
 the file.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} program.
 
 
 @anchor{fsave}
@@ -559,6 +589,9 @@ prints a @code{#} (this is a special escape sequence to be used with
 
 The function returns the total number of characters that have been written to
 the file.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} program.
 
 @anchor{ffsave}
 @item ffsave()
@@ -655,6 +688,9 @@ the complete list.
 The function returns the total number of characters that have been written to
 the file.
 
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} program.
+
 @anchor{save_program}
 @item save_program()
 @findex save_program()
@@ -665,6 +701,9 @@ can be a string that is prepended to each line of the program, i.e.@: a
 comment character to make other programs like @acronym{MATHLAB} or
 @acronym{octave} skip these lines.
 
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} program.
+
 
 @anchor{save_output}
 @item save_output()
@@ -672,6 +711,9 @@ comment character to make other programs like @acronym{MATHLAB} or
 This function has the same arguments as @code{save_program()} but prints
 the content of the output window (i.e.@: the bottom browser window in
 the main form) into the file.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} program.
 
 
 @anchor{save_comment}
@@ -688,6 +730,9 @@ argument is a preset string that appears in the comment editor when it is
 opened - use "@code{\n}" to separate the lines of a multi-line text. The
 last argument is the label string to be shown on top of the editor - it
 defaults to "Please enter a comment:".
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} program.
 
 
 @anchor{is_file}
@@ -728,6 +773,9 @@ assumed to be in the middle position unless a different value has been
 set via the function @code{slider_value()} and all input and output
 fields are initialized to @code{0} unless an initial value has been
 passed to the functions @code{input_create()} or @code{output_create()}.
+
+All functions of this type can only be used in the @code{EXPERIMENT}
+section of an @acronym{EDL} program.
 
 
 @table @samp
@@ -999,6 +1047,9 @@ functions @code{button_create()}, @code{slider_create()} and
 @section Mathematical functions
 @cindex mathematical functions
 
+The following mathematical function can be used in all section of an
+@acronym{EDL} program that allow the use of functions.
+
 @table @samp
 @anchor{int}
 @item int()
@@ -1195,6 +1246,9 @@ otherwise the program will be stopped immediately. This function can be
 used in the @code{EXPERIMENT} section only and not after the
 @code{ON_STOP} label.
 
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} program.
+
 
 @anchor{abort}
 @item abort()
@@ -1204,6 +1258,8 @@ is a kind of an emergency exit when nothing else will do. When called it
 displays a message box on the screen to inform the user. This function
 can only be used in the @code{EXPERIMENT} section
 
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} program.
 
 @anchor{date}
 @item date()
@@ -1227,6 +1283,9 @@ it returns the time since the start of the experiment (i.e.@: the time
 the start of the @code{EXPERIMENT} section was processed). The time
 returned by the function has micro-second resolution.
 
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} program.
+
 
 @anchor{wait}
 @item wait()
@@ -1238,6 +1297,8 @@ less precise. If the argument is negative the function will print an
 error message and return immediately. The maximum time the function
 accepts is more than 2.1 billion seconds (or about 68 years).
 
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} program.
 
 @anchor{slice}
 @item slice()
