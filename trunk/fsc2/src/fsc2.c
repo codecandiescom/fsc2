@@ -1305,9 +1305,9 @@ void main_sig_handler( int signo )
 void notify_conn( int signo )
 {
 	/* Don't send signal to the process responsible for connections if it
-	   doesn't exist (in load_file() at the very start) or when the experiment
-	   is running - in this case fsc2 is busy anyway and the connection
-	   process has already been informed about this */
+	   doesn't exist (in load_file() at the very start) or when the
+       experiment is running - in this case fsc2 is busy anyway and the
+       connection process has already been informed about this. */
 
 	if ( conn_pid <= 0 || child_pid > 0 )
 		return;
@@ -1315,7 +1315,7 @@ void notify_conn( int signo )
 	kill( conn_pid, signo );
 
 	/* Wait for reply from child but avoid waiting when it in fact already
-	   replied (as indicated by the variable) */
+	   did reply (as indicated by the variable). */
 
 	while ( ! conn_child_replied )
 		usleep( 50000 );
@@ -1379,8 +1379,8 @@ void usage( void )
 			 "  -h, --help\n"
 			 "             display this help text and exit\n\n"
 			 "For a complete documentation see either %s/fsc2.ps,\n"
-			 "%s/fsc2.pdf or %s/fsc2_frame.html\n"
-			 "or type \"info fsc2\".\n", dd, dd, dd );
+			 "%s/fsc2.pdf or %s/fsc2.html\n"
+             "or type \"info fsc2\".\n", dd, dd, dd );
 	T_free( dd );
 	exit( EXIT_SUCCESS );
 }
