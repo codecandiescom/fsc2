@@ -136,6 +136,7 @@ void free_graphics( void );
 void reconfigure_window( Canvas *c, int w, int h );
 void recalc_XPoints( void );
 void recalc_XPoints_of_curve( Curve_1d *cv );
+void redraw_all( void );
 void redraw_canvas( Canvas *c );
 void repaint_canvas( Canvas *c );
 void switch_off_special_cursors( void );
