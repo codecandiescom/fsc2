@@ -33,47 +33,47 @@ interpreter that executes a script describing the experiment in a
 language which in the following will be called @code{EDL}
 @cindex @code{EDL}
 (@b{E}xperiment @b{D}escription @b{L}anguage). Making the execution of
-the experiment completely controllable by the user via a script is quite
+the experiment completely controllable by the user via scripts is quite
 different from the approach usually taken in programs for remote
-spectrometer control which tend to have a graphical user interface where
-just the experimental parameters can be set and then one of a set of
-hard-coded experiments is started.
+spectrometer, control which tend to have a graphical user interface
+where just parameters of the experiment can be set and then one of a set
+of hard-coded experiments is started.
 
 The obvious drawback with the traditional approach is that there is
 always only a fixed set of experiments that can be done. The problems
 start when one needs to do an experiment the program was not written
-for. Either one has to find some ways to trick the program into doing
+for. One either has to find some ways to trick the program into doing
 something it wasn't intended for or, if this fails, to change the
 program itself. This not only tends to take a lot of time (especially if
 the person who wrote the program isn't around anymore) but often also
 leads to the introduction of new bugs or even the realization that the
-program has not written in a way that allows it to adapt it to the new
-requirements, in which case the old program becomes useless and has to
-be rewritten from scratch.
+program has not written in a way that allows it to be adapted to the new
+requirements, in which case the old program becomes useless and a new
+one has to be written from scratch.
 
 @code{fsc2} is different in this respect because it wasn't developed
-with a certain set of experiments in mind but is intended to make it as
-easy as possible to do all kinds of experiments. Of course, this comes
-with a small price: one has to specify clearly how the experiment is to
-be done by writing a (usually rather short) script. @code{fsc2} will
-interpret this script and do the experiment accordingly. Writing a
-script may sound difficult, but the @code{EDL} language that is used to
-define an experiment isn't very hard to learn. And when this hurdle has
-been taken you will have complete control over the way your experiment
-are done. Just to give a few trivial examples: sometimes signals are
-distributed over a large field range with nothing of interest in
-between, so it would be rather useful to skip these regions. Most normal
-programs won't allow this and one has to either record also the
-uninteresting field regions (thus losing lots of time) or to manually
-restart the experiment for each of the regions of interest. In contrast,
-with @code{fsc2} it shouldn't take more than a few minutes to write an
-@code{EDL} script consisting of just a few lines of code that can not
-only skip these regions but also repeat the experiment as often as
-needed, and if necessary do different numbers of accumulations of the
-different parts (if, for example, the signals are huge in some of the
-regions while in others they are hardly detectable above the noise
-floor) or with automatically changing the lock-in amplifiers sensitivity
-or time constant in between.
+with a certain set of experiments in mind but is intended from the start
+to make it as easy as possible to do all kinds of experiments. Of
+course, this comes with a small price: one has to specify clearly how
+the experiment is to be done by writing a (usually rather short)
+script. @code{fsc2} will interpret this script and do the experiment
+accordingly. Writing a script may sound difficult, but the @code{EDL}
+language that is used to describe an experiment isn't very hard to
+learn. And when this hurdle has been taken you will have complete
+control over the way your experiments will be done. Just to give a few
+trivial examples: sometimes signals are distributed over a large field
+range with nothing of interest in between, so it would be rather useful
+to skip these regions. Most normal programs won't allow this and one has
+to either record also the uninteresting field regions (thus losing lots
+of time) or to manually restart the experiment for each of the regions
+of interest. In contrast, with @code{fsc2} it shouldn't take more than a
+few minutes to write an @code{EDL} script, consisting of just a few
+lines of code, that can not only skip these regions but also repeat the
+experiment as often as needed, and if necessary do different numbers of
+accumulations of the different parts (if, for example, the signals are
+huge in some of the regions while in others they are hardly detectable
+above the noise floor) or with automatically changing the lock-in
+amplifiers sensitivity or time constant in between.
 
 But one does not have to write a new script for every experiment one is
 going to do -- for the standard experiments, once such a script has been
@@ -83,42 +83,43 @@ defining the parameters somewhere at the start of the script and change
 only these if necessary. If this is still too much hassle it is even
 possible to automatically create from the (slightly modified) @code{EDL}
 script a program which allows to set the parameters via a graphical user
-interface and then have the it generate the adapted @code{EDL} script
-which then is passed directly to @code{fsc2} without any further user
-interaction. Once such a program has been created the users don't even
-have to learn how to write @code{EDL} scripts and have all the
-convenience of the traditional type of programs without sacrificing the
-flexibility of @code{fsc2}. Of course, you don't have to use the
-conversion tools that adds a graphical user interface to an @code{EDL}
-script but you can also write such programs yourself using @code{fsc2}s
-built-in interface to accept @code{EDL} scripts from external sources.
+interface and then have this generate the adapted @code{EDL} script
+automatically, which then is passed directly to @code{fsc2} without any
+further user interaction. Once such a program has been created the other
+users don't even have to learn how to write @code{EDL} scripts, thus
+having all the convenience of the traditional type of programs without
+sacrificing the flexibility of @code{fsc2}. Of course, you don't have to
+use the conversion tools that adds a graphical user interface to an
+@code{EDL} script but you can also write such programs yourself using
+@code{fsc2}s built-in interface to accept @code{EDL} scripts from
+external sources.
 
-Another common problem with the traditional type of programs using of
-different devices or the integration of new ones. Usually, a fixed set
-of devices is hard-coded into the program and changing just one device
-requires a major rewrite. In contrast, @code{fsc2} has a strictly
-modular approach to the handling of devices. For each device a separate
-module exists that only gets loaded if it's listed explicitely in the
-@code{EDL} script. Thus changing the experiment to work with e.g.@: a
-different lock-in amplifier or digitizer usually doesn't require more
-than changing one line of the @code{EDL} script (at least as long as the
-devices aren't too different in their capabilities). Moreover, this is
-also a major advantage when a new device has to be integrated.  Instead
-of changing the whole program that controls the experiment only a module
-for the new device has to be written. Writing such a module does not
-even require a thorough understanding of @code{fsc2} but only some
-knowledge about a few conventions (which are explained in detail in one
-of the later parts of this manual). This also allows the module to be
-tested independently of the main program and there is no danger of
-introducing new bugs into @code{fsc2} itself.
+Another common problem with the traditional type of programs is the
+integration of new devices. Usually a fixed set of devices is hard-coded
+into the program and changing just one device requires a major
+rewrite. In contrast, @code{fsc2} has a strictly modular approach to the
+handling of devices. For each device a separate module exists that only
+gets loaded if it's listed explicitely in the @code{EDL} script. Thus
+changing the experiment to work with e.g.@: a different lock-in
+amplifier or digitizer usually doesn't require more than changing one
+line of the @code{EDL} script (at least as long as the devices aren't
+too different in their capabilities). Moreover, this is also a major
+advantage when a new device has to be integrated.  Instead of changing
+the whole program that controls the experiment only a module for the new
+device has to be written. Writing such a module does not even require a
+thorough understanding of @code{fsc2} but only knowledge about a few
+conventions (which are explained in detail in one of the later parts of
+this manual). This also allows new modules to be tested independently of
+the main program and there is no danger of introducing new bugs into
+@code{fsc2} itself.
 
 The advantages of the approach taken in writing @code{fsc2} have made it
 possible to use it successfully to control spectrometers in S-, X- and
 W-band and at 360 GHz, using completely different hardware, and for all
 kinds of experiments, ranging from cw-EPR, ENDOR, EPR on transient
 signals to experiments with pulsed microwave excitation and phase
-cycling, but e.g.@: also an spectrometer for (optical) single molecule
-spectroscopy.
+cycling, but e.g.@: also an (optical) single molecule or a Raman
+spectrometer.
 
 The manual is organized along the following lines: the next chapter
 (@pxref{GUI}) explains in detail the graphical user interface used for
