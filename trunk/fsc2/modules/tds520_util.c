@@ -60,8 +60,7 @@ void tds520_do_pre_exp_checks( void )
 	   it to the digitizer */
 
 	if ( tds520.is_trigger_channel )
-		tds520_set_trigger_channel( 
-			Channel_Names[ tds520.trigger_channel ] );
+		tds520_set_trigger_channel( Channel_Names[ tds520.trigger_channel ] );
 
 	/* Switch on all channels that are used in the measurements */
 

@@ -86,12 +86,14 @@ lockin_ref_level, -1, ALL;      // Get or set reference level (SR8x0 only)
 lockin_lock_keyboard, -1, EXP;  // Lock or unlock the keyboard
 
 
-// functions exported by the digitizer (TDS520, TDS520A, TDS744A, TDS754A)
+// Functions exported by the digitizer (TDS520, TDS520A, TDS744A, TDS754A)
 
 digitizer_define_window, -1, PREP;      // defines a cursor window
 digitizer_timebase, -1, PREP;           // set or get the time base
 digitizer_num_averages, -1, ALL;        // set or get number of averages
 digitizer_trigger_channel, 1, PREP;     // set or get trigger channel
+digitizer_record_length, -1, ALL;       // set or get record_length
+digitizer_trigger_position, -1, ALL;    // set or get trigger position
 digitizer_start_acquisition, 0, EXP;
 digitizer_get_area, -1, EXP;
 digitizer_get_area_fast, -1, EXP;
@@ -105,7 +107,7 @@ digitizer_get_channel_number, 1, ALL;   // only for internal use !
 digitizer_meas_channel_ok, 1, ALL;      // only for internal use !
 
 
-// functions exported by the rf synthesizer (HP8647A)
+// Functions exported by the rf synthesizer (HP8647A)
 
 synthesizer_state, -1, ALL;           // set/get state (ON/OFF)
 synthesizer_frequency, -1, ALL;       // set/get frequency
@@ -123,7 +125,7 @@ synthesizer_mod_source, -1, EXP;
 synthesizer_mod_ampl, -1, EXP;
 
 
-// functions exported by the boxcar (EGG4402)
+// Functions exported by the boxcar (EGG4402)
 
 boxcar_curve_length, -1, EXP;
 boxcar_get_curve, -1, EXP;
