@@ -24,7 +24,7 @@
 @chapter Modules
 @cindex modules
 
-This chapter describes how to write new modules for use with
+This chapter tries to describe how to write new modules for use with
 @acronym{fsc2}.
 
 @ifinfo
@@ -39,56 +39,65 @@ This chapter describes how to write new modules for use with
 @section What modules are good for
 
 
-Modules allow to extend the set of commands that can be used in an
-@acronym{EDL} file. Thus, drivers for new devices can be written without
-having to understand completely how the program @acronym{fsc2}
-works. It's only necessary is to be able to write functions in C for the
-communication with the new device. The only exception is some basic
-knowledge about @acronym{fsc2}'s variables. They are explained in one of
-the following sections. But modules may also be used for other purposes
-than including new devices - one might also write modules that supply
-new mathematical functions or other useful functionalities. But the
-following the discussion will concentrate on modules for new devices.
+Modules allow you to extend the set of commands that can be used in an
+@acronym{EDL} file. This is especially important if a new device needs
+to be integrated into @acronym{fsc2}. You don't have to change
+@acronym{fsc2} itself but write a new module for the new devices without
+having to understand completely how the @acronym{fsc2} works. It's only
+necessary is to be able to write functions in C for the communication
+with the new device. The only exception is some basic knowledge about
+@acronym{fsc2}'s variables. They are explained in one of the following
+sections. But modules may also be used for other purposes than including
+new devices - one might also write modules that supply new mathematical
+functions or other useful functionalities. But the following the
+discussion will mainly concentrate on modules for new devices, writing
+other modules is even simpler.
 
-But let's start with a short summary of the things a module has to do.
-Usually, a module contains just a few functions that talk to the
-device via an hardware interface, e.g.@: the GPIB bus or a serial port (or
-whatever else there might be). As an example for the following I will
-use a lock-in amplifier. Probably the most basic operation is to get
-data from the amplifier. So one will have to create a function called
-@code{lockin_get_data()}. This name will be used in the module written
-in C as well as in the @acronym{EDL} file.
+Let's start with a short summary of the things a module for a device has
+to do.  Usually, a module contains just a few functions that talk to the
+device via an hardware interface, e.g.@: the GPIB bus or a serial port
+(or whatever else there might be). As an example for the following I
+will use a lock-in amplifier. Probably the most basic operation is to
+get data from the amplifier. So one will have to create a function
+called @code{lockin_get_data()}. This name will be used in the module
+written in C as well as in the @acronym{EDL} file.
 
-Before starting to write a new module one has to decide about the name
-of the device, which will also be the name of the module. If the lock-in
+Before starting to write a new module you have to decide about the name
+for the device, which will also be the name of the module. If the lock-in
 amplifier is a @i{Stanford Research 510} model a useful name might be SR510.
 
-The new device has now to be included into the device name data base
-called @file{Devices}
+A new device has to be included into the device name data base called
+@file{Devices}
 @cindex @code{Devices} file
 , which is a simple ASCII file consisting of the names of all the
-supported devices. The entries are case-insensitive, so one might add
-`SR510', `sr510' or `Sr510' etc. Within the file C and C++ style
-comments can be used.  By adding the device name to this file you tell
-@acronym{fsc2} that there is now a module called `sr510' (take care -
-all modules are spelled with @strong{lower} case characters!). Actually,
-the file compiled from the C file defining the functions has to be
-@file{sr510.so} - that means it's a shareable library file, how to
-create it from the C file is described later.
+supported devices. It can be found in the @file{config} subdirectory of
+the source tree and usually gets installed in
+@file{/usr/local/lib/fsc2}. The entries in this file are
+case-insensitive, so you might add `SR510', `sr510' or `Sr510'
+etc. Within the file C and C++ style comments can be used.  By adding
+the device name to this file you tell @acronym{fsc2} that there is now a
+module called `sr510' (take care - all modules are spelled with
+@strong{lower} case characters!). Actually, the file compiled from the C
+file defining the functions has to be @file{sr510.so} - that means it's
+a shareable library file, how to create it from the C file is described
+later.
 
 The next thing is to append the function(s) exported by the module to
 the function data base called @file{Functions}
 @cindex @code{Functions} file
-. Here one would add a line with the name of the exported function,
-i.e.@: @code{lockin_get_data()}, followed by the number of arguments the
-function takes (or a negative number if the function takes a variable
-number of arguments). Optionally, you can add the keywords @code{ALL},
+. Also this file is located in the @file{config} subdirectory of the
+source tree and will usually be installed in
+@file{/usr/local/lib/fsc2}. Here one would add lines with the names of
+the exported function, i.e.@: @code{lockin_get_data()}, followed by the
+number of arguments the function takes (or a negative number if the
+function takes a variable number of arguments). Optionally, you can add
+the keywords @code{ALL},
 @cindex @code{ALL} (in @code{Functions} file)
 @code{EXP}
 @cindex @code{EXP} (in @code{Functions} file)
 or @code{PREP},
 @cindex @code{PREP} (in @code{Functions} file)
-where @code{ALL} means that the function can be used in any part of the
+where @code{ALL} means that the function can be used in all parts of the
 @acronym{EDL} file, while @code{EXP} tells @acronym{fsc2} to use this
 functions only during an experiment and, finally, @code{PREP} restricts
 the use of the function to the @code{PREPARATION} section of the
@@ -151,18 +160,21 @@ typedef struct Var_
 @noindent
 There are only four types of variables you have to know about:
 
-@multitable {FLOAT_TRANS_ARR} {a one-dimensional array of floating point values}
+@multitable {FLOAT_TRANS_ARR} {a one-dimensional array of floating point
+values}
 @item @code{INT_VAR} @tab a variable for integer values
 @item @code{FLOAT_VAR} @tab a variable for floating point values
 @item @code{INT_TRANS_ARR} @tab a one-dimensional array of integer values
-@item @code{FLOAT_TRANS_ARR} @tab a one-dimensional array of floating point values
+@item @code{FLOAT_TRANS_ARR} @tab a one-dimensional array of floating
+point values
 @end multitable
 
-To give you a better idea what these variables are good for let's assume that
-you want to write a function that returns the curve between the two cursor
-bars of your new LekCronix digitizer. So, you may want to write a function
-that has the two positions of the cursor bars as input parameters and returns
-the data of the curve between the cursor bars. Let's call this function
+To give you a better idea what these variables are good for let's assume
+that you want to write a function that returns the curve between the two
+cursor bars of your new LekCronix digitizer. So, you may want to write a
+function that has the two positions of the cursor bars as input
+parameters and returns the data of the curve between the cursor
+bars. Let's call this function
 
 @example
     get_curve_between_cursors( cursor_1, cursor_2 )
@@ -182,12 +194,11 @@ array of data?
 Actually, it's not too complicated. The pointer to the variable
 structure @code{var} points to the first of the two parameters. And if
 you have a look back at the typedef for @acronym{fsc2}'s variables,
-there is this @code{next} pointer. That's the key to access the next
-parameter - @code{var->next} points to next of the input parameters. If
+there is a @code{next} pointer. That is the key to access the next
+parameter -- @code{var->next} points to next of the input parameters. If
 the function expects even more arguments, @code{var->next->next}
 etc. would get you to them - that means the input variables are
 organized as a linked list:
-
 @example
     var                               pointer passed to the function
      |                                  |
@@ -210,26 +221,25 @@ function will always get exactly two. The @code{next}-pointer of the
 very last parameter will always be @code{NULL}. If the function is
 called in the @acronym{EDL} file with more variables than you declared
 it to have this will result in a warning and the superfluous variables
-will simply be discarded. But if there are not enough parameter the
-program will just print an error message and than stop (and not call
-your function). Having the parameters organized as a linked list also
-makes it easy to handle variable numbers of variables: as long as the
-@code{next}-pointer of a function argument isn't @code{NULL} there is
-still another one.
+are discarded and not passed to the function. If, on the other hand,
+there are not enough parameter the program will just print an error
+message and then stop (and not call your function). Having the
+parameters organized as a linked list also makes it easy to handle
+variable numbers of variables: as long as the @code{next}-pointer of a
+function argument isn't @code{NULL} there is still another one.
 
 @strong{One word of warning:} Never ever mess around with the @code{next}
 pointers!
 
-What @acronym{fsc2} can't do is check if the arguments it passes to your
+What @acronym{fsc2} won't do is check if the arguments it passes to your
 function have the type you expect. Lets assume that you expect two
-integer values. What you should do first is check if the parameters you
-got are really integers.  There is a function that can do it for you,
-@code{vars_check()}. 
+integer values. What you should do first is to check if the parameters
+you got are really integers. There is a function that can do this for you,
+@code{vars_check()}.
 @findex vars_check()
 All you have to do is to call @code{vars_check()}
 with the pointer to the variable and the type you expect it to have,
 e.g.@:
-
 @example
     vars_check( var, INT_VAR );
     vars_check( var->next, FLOAT_VAR );
@@ -237,10 +247,9 @@ e.g.@:
 @noindent
 If @code{vars_check()} finds that everything is ok it simply returns,
 otherwise an error message will be printed and the the program stops, so
-you don't have to care for error handling. If you're prepared to accept
+you don't have to take care of error handling. If you're prepared to accept
 integers as well as floating point data, call @code{vars_check()} instead
 with
-
 @example
     vars_check( var, INT_VAR | FLOAT_VAR );
 @end example
@@ -251,7 +260,6 @@ the bitwise inclusive OR operator @code{|} to test alternatives).
 
 Thus, a function that expects just integer arguments would probably start
 like this, just running through the linked list of parameters:
-
 @example
 Var *my_function( Var *var )
 @{
@@ -289,25 +297,27 @@ in which case you get a value of type @code{double}.
 @findex T_calloc()
 @findex T_realloc()
 @findex T_free()
+@findex T_strdup()
 
-By the way, there's a special function made for @acronym{fsc2} for allocating
-memory.  This functions does not only allocates memory but also checks
-that the allocation really returns as much memory as you asked for
-(i.e.@: if it fails it will stop the program and print an appropriate
-error message). That means that you don't have to care for error
-handling - if the function returns everything is ok, otherwise it won't
-return at all. This function is called @code{T_malloc()} (think about it
-as @i{tested malloc}). And, of course, there is also a replacement for
-@code{realloc()} and @code{calloc()}, called @code{T_realloc()} and
-@code{T_calloc()}. And, to make things complete, the replacement for
-@code{free()} is called @code{T_free()}. All four functions accept have
+By the way, there's a special function made for @acronym{fsc2} for
+allocating memory.  This functions does not only allocates memory but
+also checks that the allocation really returns as much memory as you
+asked for (i.e.@: if it fails it will stop the program and print an
+appropriate error message). That means that you don't have to care for
+error handling - if the function returns everything is ok, otherwise it
+won't return at all. This function is called @code{T_malloc()} (think
+about it as @i{tested malloc}). And, of course, there is also a
+replacement for @code{realloc()} and @code{calloc()}, called
+@code{T_realloc()} and @code{T_calloc()}. Also for duplication of
+strings you should use @code{T_strdup()} instead of the normal
+@code{strdup()}.And, to make things complete, the replacement for
+@code{free()} is called @code{T_free()}. All five functions accept 
 the same input and return values as their normal counterparts, i.e.@:
-
 @example
-     void *T_malloc( size_t size )
-     void *T_calloc( size_t nmemb, size_t size )
-     void *T_realloc( void *ptr, size_t size )
-     void  T_free( void *ptr )
+  void *T_malloc( size_t size )
+  void *T_calloc( size_t nmemb, size_t size )
+  void *T_realloc( void *ptr, size_t size )
+  void  T_free( void *ptr )
 @end example
 @noindent
 I would strongly recommend using this functions since they got built in
@@ -317,34 +327,40 @@ different topic...
 
 @subsection Returning data from an @acronym{EDL} function
 
-So, let's get back to our main theme. If your function just want's to return
-an integer or a float, things are easy, just push the value as
-
+So, let's get back to our main theme and talk about returning values
+from your module functions. If your function just wants to return an
+integer or a float, things are very easy: just call the function
+@code{vars_push()} with the type of the return value as the first and
+the value itself as the second argument, e.g.@:
 @example
-    ret_val = vars_push( INT_VAR, i_value );
+    return vars_push( INT_VAR, i_value );
 @end example
 @noindent
 or
 @example
-    ret_val = vars_push( FLOAT_VAR, f_value );
+    return vars_push( FLOAT_VAR, f_value );
 @end example
 @noindent
-where @code{i_value} is simply a @code{long int} and @code{f_value} is
-supposed to be a @code{double} value. (@w{@code{vars_push()}} is a function
-accepting a variable number of arguments, thus it's completely ok that
-for arrays it's called with three arguments while for simple numbers
-there are only two - from the very first argument, the variable type, it
-automatically knows how many and what kind of arguments it has to
-expect.)
+where @code{i_value} is a @code{long int} and @code{f_value} is
+supposed to be a @code{double} value. Of course, you don't have to use
+@code{vars_push()} in returns only, it simply returns a pointer to the
+new variable holding the value.
 
-Finally, a call to @code{vars_push()} returns the value as a variable
-pointer. And since your function is expected to always return a variable
-pointer the value returned by @code{vars_push()} is exactly what your
-function has to return itself!
+For arrays @code{vars_push()} the first argument is either
+@code{INT_TRANS_ARRAY} or @code{FLOAT_TRANS_ARRAY}, The second argument
+is a pointer to the array (i.e.@: its first argument). For creating an
+array variable it also needs a third argument, the length of the array
+(as a @code{long} integer). If you want to return an array with two
+integer arguments you would use something like
+@example
+    data[ 0 ] = 1;
+    data[ 1 ] = 2;
+    return vars_push( INT_TRANS_ARRAY, 2 );
+@end example
 
-As an example here the rather simple but complete (and tested) function
-@code{square()} that returns the square of the value passed to it:
-
+As a further example here the rather simple but complete (and tested)
+function @code{square()} that returns the square of the value passed to
+it:
 @example
 Var *square( Var *var )
 @{
@@ -371,14 +387,14 @@ Var *square( Var *var )
 @noindent
 As you see, we first check that the variable passed to the function has
 the correct type - both integer and floating point values are ok
-here. Than we've got to distinguish between both possibilities - if the
-value is an integer we create a new integer variable by calling
-@code{vars_push()} with the square of the integer value, otherwise a new
-floating point variable. Finally, we return the variable pointer
-@code{vars_push()} had delivered.
+here. Next we distinguish between both the possibilities that the value
+is either an integer or a floating point number by testing the
+@code{type} field of the variable. Then we create either a new integer
+variable by calling code{vars_push()} with the square of the integer
+value or a new floating point variable. Finally, we return the variable
+pointer @code{vars_push()} had delivered.
 
 Of course, we could also have written the function in a more compact way:
-
 @example
 Var *square( Var *var )
 @{
@@ -395,43 +411,42 @@ Var *square( Var *var )
 If your function does not has to return a value at all there are two ways to
 handle this situation. Either return a pointer to a variable with an arbitrary
 value. e.g.@: write
-
 @example
     return vars_push( INT_VAR, 0 );
 @end example
 @noindent
 or simply return a @code{NULL} pointer, i.e.@:
-
 @example
     return NULL;
 @end example
 
 
-
 Now, what if you want to write to function that returns more than one
-value? Again we look at the example function for the digitizer that has
-to return a curve as an array. Let's assume the data you received are
-stored in an array of integers called @code{data} which has @code{len}
-elements (where @code{len} is a @code{long}). Now all you've got to do
-is call the function @code{vars_push()} as
-
+value? Again we take a function for a digitizer that has to return a
+curve as an array as an example. Let's assume the data you got from the
+digitizer are stored in an array of integers called @code{data} which
+has @code{len} elements (where @code{len} is a @code{long}). Now all
+you've got to do is call the function @code{vars_push()} as
 @example
     Var *ret;
-    ret = vars_push( INT_TRANS_ARR, data, len );
+
+    ...
+
+    return vars_push( INT_TRANS_ARR, data, len );
+    T_free( data );
     return ret;
 @end example
 @noindent
 Actually, at some point of your function you may have allocated memory
 for storing the data. It is your responsibility to free this memory
 before you return from your function, @acronym{fsc2} just uses a copy of
-the data you pass to it with @code{vars_push()}. As you probably already
-have guessed, if you want to return a float array, you will have to use
+the data you pass to it using @code{vars_push()}. As you probably already
+guessed, if you want to return a float array, you will have to use
 @code{FLOAT_TRANS_ARR} instead of @code{INT_TRANS_ARR} in the call to
 @code{vars_push()}.
 
 The same method may be used if your function has to return two different
-values and both have the same type. Again an array can be returned_
-
+values and both have the same type. Again an array can be returned
 @example
 VARIABLES:
 
@@ -447,7 +462,6 @@ V2 = Dummy[ 2 ];
 @end example
 @noindent
 and the C code for function @code{my_function()} would look like
-
 @example
 Var *my_function( Var *var )
 @{
@@ -466,7 +480,6 @@ differs) is two write two functions where the first one does the
 calculations needed and stores the second value in a global
 variable. All the second function has to do is just to return the value
 of the global variable. This way, the @acronym{EDL} file might look like
-
 @example
 V1 = my_function_1( );
 v2 = my_function_2( );
@@ -496,14 +509,12 @@ Var *my_function_2( Var *v )
 
 Alternatively, you also could write the function in a way that it counts the
 number of times it has been called and returns values accordingly, e.g.@: 
-
 @example
 V1 = my_function( );
 v2 = my_function( );
 @end example
 @noindent
 with the corresponding C code
-
 @example
 Var *my_function( Var *v )
 @{
@@ -554,7 +565,6 @@ words @code{_init_hook}, @code{_test_hook}, @code{_exp_hook} and
 @code{_exit_hook}. Thus, if the new device is named `ABC123' and thus
 the module is `abc123' these functions are (together with the
 parameters):
-
 @example
     int abc123_init_hook( void )
     int abc123_test_hook( void )
@@ -621,11 +631,9 @@ Another important global variable, @code{need_GPIB}, has to be set by the
 init hook function if the hardware interface for the device controlled
 by the module is the GPIB bus. Thus, if the GPIB bus is needed, include
 a line in the init hook function similar to
-
 @example
     need_GPIB = SET;
 @end example
-@center @strong{Never ever unset this flag!}
 
 As for the case of the GPIB bus there is also a global variable for the
 serial ports. It is called @code{need_Serial_Port}. Since there may be
@@ -637,7 +645,6 @@ element has to be set to avoid other modules using the same port
 concurrently. I.e.@: a typical piece of code for the device `ABC123'
 needing the serial port number 1 (possibly labeled COM2 on the backside
 of the computer) would be
-
 @example
     if ( need_Serial_Port[ 1 ] == SET )
     @{
