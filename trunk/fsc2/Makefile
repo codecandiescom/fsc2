@@ -23,13 +23,13 @@
 # The following variables determine where the program, auxiliary files and
 # the documentation will be copied to by 'make install'.
 
-prefix           := /usr/local
-bindir           := $(prefix)/bin
-libdir           := $(prefix)/lib/fsc2
-auxdir           := $(libdir)/aux
-docdir           := $(prefix)/share/doc/fsc2
-mandir           := $(prefix)/man
-infodir          := $(prefix)/info
+prefix            := /usr/local
+bindir            := $(prefix)/bin
+libdir            := $(prefix)/lib/fsc2
+auxdir            := $(libdir)/aux
+docdir            := $(prefix)/share/doc/fsc2
+mandir            := $(prefix)/man
+infodir           := $(prefix)/info
 
 
 # Here the owner and the group of the program and all files that will be
@@ -39,8 +39,8 @@ infodir          := $(prefix)/info
 # should be one that allows access to the device files. See the longer
 # discussion in section B of the INSTALL file.
 
-OWNER            := fsc2
-GROUP            := uucp
+OWNER             := fsc2
+GROUP             := uucp
 
 
 # The next variable sets the GPIB library to use, it must be set to either
@@ -68,12 +68,12 @@ GROUP            := uucp
 # /usr/include/gpib) set the last variable GPIB_HEADER_DIR to the absolute
 # path of the directory where the header file(s) for the library reside.
 
-GPIB_LIBRARY     := JTT
-GPIB_CONF_FILE   := /etc/gpib.conf
-GPIB_LOG_FILE    := /tmp/gpib.log
-GPIB_LOG_LEVEL   := HIGH
+GPIB_LIBRARY      := JTT
+GPIB_CONF_FILE    := /etc/gpib.conf
+GPIB_LOG_FILE     := /tmp/gpib.log
+GPIB_LOG_LEVEL    := HIGH
 
-# GPIB_HEADER_DIR := /usr/include/gpib
+# GPIB_HEADER_DIR  := /usr/include/gpib
 
 
 # NUM_SERIAL_PORTS defines the number of serial ports that are available on
@@ -85,8 +85,16 @@ GPIB_LOG_LEVEL   := HIGH
 # itself or all its users must have read and write permissions for this
 # directory. Also see the longer discussion in section B of the INSTALL file.
 
-NUM_SERIAL_PORTS := 2
-SERIAL_LOCK_DIR  := /var/lock
+NUM_SERIAL_PORTS  := 2
+SERIAL_LOCK_DIR   := /var/lock
+
+
+# Comment out the next two lines if you don't want a HTTP server that allows
+# to control fsc2's current state via the internet. The default port number
+# must be between 1024 and 65535.
+
+WITH_HTTP_SERVER  := yes
+DEFAULT_HTTP_PORT := 8080
 
 
 # This last variable controls to whom mail with bug reports and crash messages
@@ -94,7 +102,7 @@ SERIAL_LOCK_DIR  := /var/lock
 # change this only if you change the program yourself (in which case sending
 # bug reports or mails about crashes to me wouldn't make too much sense).
 
-MAIL_ADDRESS     := Jens.Toerring@physik.fu-berlin.de
+MAIL_ADDRESS      := Jens.Toerring@physik.fu-berlin.de
 
 
 ##############################################################################
@@ -315,6 +323,14 @@ ifdef GPIB_LOG_FILE
 	CFLAGS += -DGPIB_LOG_FILE=\"$(GPIB_LOG_FILE)\"
 else
 	CFLAGS += -DGPIB_LOG_FILE=\"/tmp/gpib.log\"
+endif
+
+ifdef WITH_HTTP_SERVER
+ifdef DEFAULT_HTTP_PORT
+	CFLAGS += -DWITH_HTTP_SERVERS -DDEFAULT_HTTP_PORT=$(DEFAULT_HTTP_PORT)
+else
+	CFLAGS += -DWITH_HTTP_SERVER -DDEFAULT_HTTP_PORT=8080
+endif
 endif
 
 ifeq ($(GPIB_LOG_LEVEL),HIGH)
