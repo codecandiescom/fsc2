@@ -23,6 +23,7 @@
 #define HI_RES  1
 #define LOW_RES 0
 
+#define FSC2_SOCKET  "/tmp/fsc2.uds"
 
 /* inclusion system header files */
 
@@ -94,8 +95,6 @@ void main_sig_handler( int signo );
 void notify_conn( int signo );
 void usage( void );
 
-
-#define FSC2_SOCKET  "/tmp/fsc2.uds"
 
 
 #define TAB_LENGTH        4
