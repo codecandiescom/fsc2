@@ -336,6 +336,7 @@ the left, i.e.@:
 @example
  !-x    @r{will be treated as if written as}    ! ( - x )
 @end example
+@noindent
 (This is not a very useful example but here for sake of completeness.)
 
 The exponentiation operator, `@code{^}', has the next highest
@@ -360,6 +361,7 @@ more than one of these operators are evaluated left to right, i.e.
 @example
  3 * 22 / 7    @r{will be treated as if written as}    ( 3 * 22 ) / 7
 @end example
+@noindent
 (Take care: This can make a lot of a difference when e.g.@: integer
 multiplication is involved.)
 
@@ -369,6 +371,7 @@ expressions are evaluated left to right:
 @example
  13 + 4 - 5    @r{will be treated as if written as}    ( 13 + 4 ) - 5
 @end example
+@noindent
 Usually, this won't matter a lot, but if you're dealing with very large
 numbers and there's danger of an overflow to occur knowing the rules of
 evaluation can become important.
@@ -504,13 +507,16 @@ has to be enclosed in curly braces and may contain as many statements as
 needed (or still fit into the memory).
 
 
+@subsection REPEAT loops
+@cindex REPEAT loops
+
 The most simple construct is the @code{REPEAT} loop. What is needed
 following the keyword @code{REPEAT} is a number and a block with
 commands. The number should be an integer number (or an expression
 resulting in an integer).  The following block of statements will now be
 repeated as many times as specified by the number (or
 expression). Here's an example:
-@cindex REPEAT
+
 
 @example
     I = 0;
@@ -529,12 +535,16 @@ example). After the initialisation of the two variables `@code{I}' and
 repetitions. Now, in curly braces, i.e.@: between `@code{@{}' and
 `@code{@}}', follow the statements to be executed in the loop.
 
+
+@subsection WHILE loops
+@cindex WHILE loops
+
+
 Nearly as simple a construct is the @code{WHILE} loop: following the
 keyword a condition is needed first. Usually, this will be a comparison
 between two numbers, but also a simple number will suffice -- if its
 value is non-zero it will be interpreted as TRUE. Of course, the keyword
 and the condition have to be followed by a block of statements.
-@cindex WHILE
 
 Again, an example:
 
@@ -554,7 +564,8 @@ the variables `@code{I}' and `@code{Fact}' it is tested in the loop
 condition if `@code{I}' is still not larger that 6. If this is true, the
 following block of statements is executed.
 
-Here is a complete list of the comparison operators between to numbers:
+Here is a complete list of the comparison operators between two
+expressions (e.g.@: numbers):
 
 @quotation
 @multitable{==} { compare for equality (don't confuse with single
@@ -565,17 +576,17 @@ used in assignments)
 @item @code{!=} @tab
 TRUE if the numbers are unequal
 @item @code{<} @tab
-TRUE if the left side number is smaller than the
-right side number
+TRUE if the left side expression is smaller than the
+right side expression
+@item @code{<=} @tab
+TRUE if the left side expression is smaller or equal to the
+right side expression
 @item @code{>} @tab
-TRUE if the left side number is smaller or equal to the
-right side number
-@item @code{<} @tab
-TRUE if the left side number is larger than the
-right side number
+TRUE if the left side expression is larger than the
+right side expression
 @item @code{>=} @tab
-TRUE if the left side number is larger or equal to the
-right side number
+TRUE if the left side expression is larger or equal to the
+right side expression
 @end multitable
 @end quotation
 @cindex == (comparison operator)
@@ -640,6 +651,12 @@ operators. Here is a list of these operators and their meaning:
 @cindex xor operator `~'
 @cindex logical xor operator `~'
 
+
+
+@subsection FOR loops
+@cindex FOR loops
+
+
 Before the @code{WHILE} loop on often has to initialise the loop
 variables and within the statement block the loop variable has to been
 updated. In many cases (for example in both the preceeding examples) it
@@ -684,7 +701,10 @@ ones). And, of course, the loop variable don't have to be an integer
 variable!
 
 
-Finally there's the @code{IF}-@code{ELSE} construct.
+@section IF-ELSE constructs
 @cindex IF
-@cindex ELSE
+@cindex ELSE 
 @cindex IF-ELSE
+
+
+Finally there's the @code{IF}-@code{ELSE} construct.
