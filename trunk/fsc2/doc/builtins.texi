@@ -60,7 +60,7 @@ expect to find in most programming languages like (i.e.@: trigonometric
 functions, logarithms etc.@:). Finally, the fourth class are auxiliary
 functions that can't be assigned to one of the other classes and
 consists of functions for dealing with time or date issues or for
-determining the sizes of arrays and other.
+determining the sizes of arrays etc.
 
 
 @node Output functions, Interaction functions, Built-in Functions, Built-in Functions
@@ -73,56 +73,57 @@ probably is in order. You have to distinguish between 1D- and
 2D-display. In 1D-display to display a new data point you have to
 specify the @i{x}- and the @i{y}-coordinate of the point. The
 @i{x}-coordinate is always an integer number, where @code{1} indicates
-the left-most point in the window. For the @i{y}-coordinate you simply
-specify the measured value. To be able to draw a meaningful @i{x}-axis
-the program needs another piece of information: the starting point of
-the @i{x}-axis and the difference between the points drawn at the
-@i{x}-axis. For example, if you do an cw-EPR experiment, starting with a
-field of @w{3400 G} and with spacing of @w{0.5 G} between the data
-points you will have to tell the program about this in the graphic
-initialization. If you now specify, when drawing a new point, an
-@i{x}-coordinate of @code{11} the point will appear at an axis position
-of @w{3410 G} because the point numbered @code{1} is drawn at @w{3400
-G}, the point numbered @code{2} at @w{3400.5 G} etc.@:, so the point
-numbered @code{11} will appear at @w{3410 G}.
+the left-most point (@i{x}-coordinates belw @code{1} aren't allowed). As
+the @i{y}-coordinate usually simply the measured value is specified. To
+be able to draw a meaningful @i{x}-axis the program needs another piece
+of information: the starting point of the @i{x}-axis and the difference
+between the points drawn at the @i{x}-axis. For example, if you do an
+cw-EPR experiment, starting with a field of @w{3400 G} and a spacing
+of @w{0.5 G} between the data points you will have to tell the program
+about this in the graphic initialization. If you now specify, when
+drawing a new point, an @i{x}-coordinate of @code{11} the point will
+appear at an axis position of @w{3410 G} because the point numbered
+@code{1} is drawn at @w{3400 G}, the point numbered @code{2} at
+@w{3400.5 G} etc.@:, so the point numbered @code{11} will appear at
+@w{3410 G}.
 
 In contrast, for a 2D-display you have to specify three coordinates for
 a new data point. Here both the @i{x}- and @i{y}-coordinate are
 integers, both starting at @code{1}. The point with both the @i{x}- and
 @i{y}-coordinate set to @code{1} is the left-most point at the bottom of
 the window. The third coordinate is the measured value, which usually
-will be a floating point number. As already in the case of 1D-displays
-the program needs some more information to be able to draw meaningful
-axis. Here not only the starting point and increment for the @i{x}-axis
-must be given but also values for the @i{y}-axis.
+will be a floating point number. As in the case of 1D-displays also for
+2D-display the program needs additional information to be able to draw
+meaningful axis. Here not only the starting point and increment for the
+@i{x}-axis must be given but also the same information for the @i{y}-axis.
 
-Finally, another point: If you have not only one data point to draw but
-a whole array you can do this without having to draw each point on its
+Finally another point: If you have not only one data point to draw but a
+whole array you can do this without having to draw each point on its
 own. Instead, when in the function for drawing you enter a
-(one-dimensional) array instead of a value (as the @i{y}-coordinate for
-1D-display or the @i{z}-coordinate for 2D-display) all the points of the
-array will be drawn, starting at the place you specified and from there
-to the right, i.e.@: always in @i{x}-direction.
+(one-dimensional) array instead of a single value (as the
+@i{y}-coordinate for 1D-display or the @i{z}-coordinate for 2D-display)
+all the points of the array will be drawn, starting at the place you
+specified and from there to the right, i.e.@: always in @i{x}-direction.
 
 
 @table @samp
 @anchor{init_1d}
 @item init_1d()
 @findex init_1d()
-Initializes the display for one-dimensional experiments -- without a
-call to this function (or @code{init_2d()}, see below) no data can be
-displayed. The function accepts up to six arguments, all of them being
-optional. These are:
+This function initializes the display for one-dimensional experiments --
+without a call to this function (or @code{init_2d()}, see below) no data
+can be displayed. The function accepts up to six arguments, all of them
+being optional. These are:
 @enumerate
 @item
 The number of curves to be displayed, the maximum is currently 4
 curves. If not given it defaults to 1.
 @item
-Number of points, if missing, zero or negative it will be treated as
-unknown and default to 64 points. If the specified value (or the default
+The number of points, if missing, zero or negative it will be treated as
+unknown and default to 32 points. If the specified value (or the default
 value) turns out to be too small it is adjusted automatically in the
-experiment so that all data again fit into the display (as long as the
-@code{FS} button is switched on).
+experiment so that all data again will fit into the display (as long as
+the @code{FS} button is switched on).
 @item
 Start value of the @i{x}-axis. If missing (or undefined, see next point)
 point numbers are printed, starting with @code{1}.
@@ -132,9 +133,9 @@ equally spaced data). Setting it to zero implies that the start value
 and the increment are undefined and point numbers are shown
 instead. Negative increments are handled correctly.
 @item
-String variable with the label to be shown at the @i{x}-axis.
+A string variable with the label to be shown at the @i{x}-axis.
 @item
-String variable with the label to be shown at the @i{y}-axis.
+A string variable with the label to be shown at the @i{y}-axis.
 @end enumerate
 
 Formally, the function with its arguments can be written as
@@ -169,22 +170,24 @@ This function can only be used in the @code{PREPARATIONS} section of an
 @anchor{init_2d}
 @item init_2d()
 @findex init_2d()
-Initializes the display for two-dimensional experiments. The function
-accepts up to nine arguments, all of them optional. The arguments are:
+The function initializes the display for two-dimensional
+experiments. The function accepts up to nine arguments, all of them
+optional. The arguments are:
 @enumerate
 @item
 Number of data sets to be displayed, maximum is currently 4. If not
 given it defaults to 1.
 @item
 Number of points in @i{x}-direction, if missing or less than 1 it will
-be treated as unknown and default to 64. If the specified value (or the
+be treated as unknown and default to 16. If the specified value (or the
 default value) turns out to be too small it is adjusted automatically in
 the experiment so that all data fit into the display.
 @item
 Number of points in @i{y}-direction, if missing or less than 1 it will
-be treated as unknown and default to 32. If the specified or the default
+be treated as unknown and default to 16. If the specified or the default
 value turns out to be too small it is adjusted automatically in the
-experiment so that all data fit into the display.
+experiment so that all data fit into the display (at least as long as
+the @code{FS} button is switched on).
 @item
 Start value of the @i{x}-axis. If missing (or undefined, see also next
 entry) point numbers are printed, starting with @code{1}.
@@ -241,8 +244,8 @@ one data set given in the @code{display()} command the curve number
 must be specified.
 @end enumerate
 These arguments can be repeated as many times as there are data to be
-displayed simultaneously (but in this case none of the arguments may be
-left out!).
+displayed simultaneously (but in this case all of the arguments must be
+specified!).
 
 Formally, the function with its arguments can be written for 1D-experiments as
 @example
@@ -732,7 +735,7 @@ the value is computed by converting the next arguments(s), which must be
 an integer values.
 
 In contrast to the @code{printf()} format string no length modifier can
-be used - @code{fsc2} has no different short, long or long long
+be used -- @code{fsc2} has no different short, long or long long
 variable types.
 
 The following table lists all conversion characters. If the character
@@ -757,7 +760,7 @@ specified by the precision. The default precision is 6, a precision of
 @item g, G
 floating point value, if the argument is an integer it is converted to a
 floating point value; @code{%e} or @code{%E} is used if the exponent is
-less than -4 or greater than or equal to the precision, otherwise
+less than @code{-4} or greater than or equal to the precision, otherwise
 @code{%f} is used. Trailing zeros and a trailing decimal point are not
 printed.
 @item %
@@ -779,7 +782,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @item save_program()
 @findex save_program()
 This functions writes the currently run @code{EDL} program into a
-file. As usual, the first argument may be a file identifier - the same
+file. As usual, the first argument may be a file identifier -- the same
 rules apply as for @code{save()} and @code{fsave()}. The second argument
 can be a string that is prepended to each line of the program, i.e.@: a
 comment character to make other programs like @acronym{MATHLAB} or
@@ -811,8 +814,8 @@ The first argument may as usual be a file identifier (or may be missing
 if @w{@code{get_file()}} hasn't been called). The second argument is
 again a string to be prepended to each line of the comment. The third
 argument is a preset string that appears in the comment editor when it is
-opened - use "@code{\n}" to separate the lines of a multi-line text. The
-last argument is the label string to be shown on top of the editor - it
+opened -- use "@code{\n}" to separate the lines of a multi-line text. The
+last argument is the label string to be shown on top of the editor -- it
 defaults to "Please enter a comment:".
 
 This function can only be used in the @code{EXPERIMENT} section of an
