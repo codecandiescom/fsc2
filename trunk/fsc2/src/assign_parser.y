@@ -24,6 +24,7 @@ int Channel_Type;
 static Var *CV;
 int Cur_PHS;
 int Cur_PHST;
+long Cur_PROT;
 
 %}
 
@@ -82,7 +83,7 @@ int Cur_PHST;
 %token GP_TOKEN              /* GRACE_PERIOD */
 
 %token <lval> PHS_TOK PSD_TOKEN HL_TOKEN
-%token PX_TOK PY_TOK PMX_TOK PMY_TOK POD1_TOK POD2_TOK ON_TOK OFF_TOK
+%token POD1_TOK POD2_TOK ON_TOK OFF_TOK
 
 
 %token <vptr> VAR_TOKEN      /* variable */
@@ -91,6 +92,7 @@ int Cur_PHST;
 %token <lval> INT_TOKEN
 %token <dval> FLOAT_TOKEN
 %token <sptr> STR_TOKEN
+%token <lval> PXY_TOK        /* X, Y, -X, -Y, CW -- for phases */
 %token AND OR XOR NOT
 %token EQ NE LT LE GT GE
 
@@ -117,6 +119,7 @@ input:   /* empty */
        | input line ';'            { Channel_Type = PULSER_CHANNEL_NO_TYPE;
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
+									 Cur_PROT = PHASE_UNKNOWN_PROT;
                                      assert( Var_Stack == NULL ); }
        | input SECTION_LABEL       { assert( Var_Stack == NULL );
 	                                 YYACCEPT; }
@@ -124,6 +127,7 @@ input:   /* empty */
        | input ';'                 { Channel_Type = PULSER_CHANNEL_NO_TYPE;
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
+									 Cur_PROT = PHASE_UNKNOWN_PROT;
                                      assert( Var_Stack == NULL ); }
 ;
 
@@ -392,12 +396,12 @@ sep2:    /* empty */
        | ','
 ;
 
-/* handling of time base lines */
+/* handling of TIME_BASE commands */
 
 tb:      TB_TOKEN expr             { p_set_timebase( $2 ); }
 ;
 
-/* handling of trigger mode lines */
+/* handling of TRIGGER_MODE lines */
 
 tm:       TM_TOKEN tmp
 ;
@@ -414,9 +418,9 @@ tmp:      /* empty */
         | tmp REPT_TOKEN sep1
 		  expr sep2                { p_set_rep_time( $4 ); }
         | tmp REPF_TOKEN sep1
-		  expr sep2                 { p_set_rep_freq( $4 ); }
+		  expr sep2                { p_set_rep_freq( $4 ); }
         | tmp IMP_TOKEN sep1
-		  HL_TOKEN sep2             { p_set_trigger_impedance(
+		  HL_TOKEN sep2            { p_set_trigger_impedance(
 			                                      vars_push( INT_VAR, $4 ) ); }
 ;
 
@@ -434,38 +438,47 @@ sl_val:   NEG_TOKEN                { $$ = vars_push( INT_VAR, NEGATIVE ); }
 		| '+'                      { $$ = vars_push( INT_VAR, POSITIVE ); }
 ;
 
+
+/* Handling of PHASE_SETUP commands */
+
 phs:      PHS_TOK                  { Cur_PHS = $1;
-                                     Cur_PHST = -1; }
+                                     Cur_PHST = -1;
+                                     Cur_PROT = PHASE_UNKNOWN_PROT; }
           phsl
 ;
 
 phsl:     /* empty */
-        | phsl PX_TOK              { Cur_PHST = PHASE_PLUS_X; }
-		  sep1 phsvl
-        | phsl PY_TOK              { Cur_PHST = PHASE_PLUS_Y; }
-          sep1 phsvl
-        | phsl PMX_TOK             { Cur_PHST = PHASE_MINUS_X; }
-          sep1 phsvl
-        | phsl PMY_TOK             { Cur_PHST = PHASE_MINUS_Y; }
-          sep1 phsvl
+        | phsl PXY_TOK sep1        { Cur_PHST = $2; }
+          phsp sep2
 ;
 
-phsvl:    /* empty */
-		| phsvl phsv sep2          { p_phs_setup( Cur_PHS, Cur_PHST,
-												  -1, $2 ); }
-        | phsvl POD1_TOK sep1
-		  phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST, 0, $4 ); }
-        | phsvl POD2_TOK sep1
-		  phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST, 1, $4 ); }
+phsp:    /* empty */
+		| phsp phsv                { p_phs_setup( Cur_PHS, Cur_PHST, -1, $2,
+												  Cur_PROT ); }
+        | phsp POD1_TOK sep1
+		  phsv                     { p_phs_setup( Cur_PHS, Cur_PHST, 0, $4,
+												  PHASE_FFM_PROT ); }
+        | phsp POD2_TOK sep1
+		  phsv                     { p_phs_setup( Cur_PHS, Cur_PHST, 1, $4,
+												  PHASE_FFM_PROT ); }
+		| POD_TOKEN sep1 INT_TOKEN { p_phs_setup( Cur_PHS, Cur_PHST, 0, $3,
+												  PHASE_BLN_PROT ); }
 ;
 
-phsv:     INT_TOKEN                { $$ = $1; }
-        | ON_TOK                   { $$ = 1; }
-        | OFF_TOK                  { $$ = 0; }
+phsv:     INT_TOKEN                { $$ = $1;
+                                     Cur_PROT = PHASE_UNKNOWN_PROT; } 
+        | ON_TOK                   { $$ = 1;
+		                             Cur_PROT = PHASE_FFM_PROT; }
+        | OFF_TOK                  { $$ = 0;
+		                             Cur_PROT = PHASE_FFM_PROT; }
 ;
+
+/* Handling of PHASE_SWITCH_DELAY commands */
 
 psd:      PSD_TOKEN expr           { p_set_psd( $1, $2 ); }
 ;
+
+/* Handling of GRACE_PERIOD commands */
 
 gp:       GP_TOKEN expr            { p_set_gp( $2 ); }
 
