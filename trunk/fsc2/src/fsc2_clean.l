@@ -880,9 +880,9 @@ static ssize_t output( const char *fmt, ... )
 		wr = vsnprintf( c, len, fmt, ap );
 		va_end( ap );
 
-		/* Older versions of glibc return a negativ value when there wasn't
-		   enough space in the output string, newer ones return the number
-		   of chars required, not counting the trailing '\0'. */
+		/* Older versions of glibc (up to 2.0.6) return a negativ value when
+		   there wasn't enough space in the output string, newer ones return
+		   the number of characters needed, not counting the trailing '\0'. */
 
 		if ( wr >= 0 && ( size_t ) wr + 1 <= len )
 			break;
