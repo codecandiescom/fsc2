@@ -87,6 +87,8 @@ int dg2020_b_init_hook( void )
 
 	dg2020.is_timebase = UNSET;
 
+	dg2020.is_cw_mode = UNSET;
+
 	dg2020.is_trig_in_mode = UNSET;
 	dg2020.is_trig_in_slope = UNSET;
 	dg2020.is_trig_in_level = UNSET;
@@ -155,7 +157,7 @@ int dg2020_b_init_hook( void )
 
 int dg2020_b_test_hook( void )
 {
-	if ( dg2020_Pulses == NULL )
+	if ( dg2020_Pulses == NULL && ! dg2020.is_cw_mode )
 	{
 		dg2020_is_needed = UNSET;
 		eprint( WARN, "%s loaded but no pulses are defined.\n",
@@ -188,7 +190,7 @@ int dg2020_b_test_hook( void )
 
 int dg2020_b_end_of_test_hook( void )
 {
-	if ( ! dg2020_is_needed )
+	if ( ! dg2020_is_needed || dg2020.is_cw_mode )
 		return 1;
 
 	/* First we have to reset the internal representation back to its initial
@@ -226,19 +228,25 @@ int dg2020_b_exp_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	/* Now we have to tell the pulser about all the pulses */
+	if ( ! dg2020.is_cw_mode )
+	{
+		/* Now we have to tell the pulser about all the pulses */
 
-	if ( ! dg2020_reorganize_pulses( UNSET ) )
-		THROW( EXCEPTION );
+		if ( ! dg2020_reorganize_pulses( UNSET ) )
+			THROW( EXCEPTION );
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-		if ( dg2020.function[ i ].is_used )
-			dg2020_set_pulses( &dg2020.function[ i ] );
+		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+			if ( dg2020.function[ i ].is_used )
+				dg2020_set_pulses( &dg2020.function[ i ] );
 
-	/* Finally tell the pulser to update (we're always running in manual
-	   update mode) and than switch the pulser into run mode */
+		/* Finally tell the pulser to update (we're always running in manual
+		   update mode) and than switch the pulser into run mode */
 
-	dg2020_update_data( );
+		dg2020_update_data( );
+	}
+	else
+		dg2020_cw_setup( );
+
 	dg2020_run( START );
 
 	return 1;
@@ -304,6 +312,13 @@ Var *pulser_update( Var *v )
 	v = v;
 
 
+	if ( dg2020.is_cw_mode )
+	{
+		eprint( FATAL, "%s:%ld: %s: Function `pulser_update' can't be used "
+				"in CW mode.\n", Fname, Lc, pulser_struct.name );
+		THROW( EXCEPTION );
+	}
+
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1 );
 
@@ -322,6 +337,55 @@ Var *pulser_update( Var *v )
 
 
 /*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+Var *pulser_cw_mode( Var *v )
+{
+	v = v;
+
+
+	/* We can't have any pulses in cw mode */
+
+	if ( dg2020_Pulses != NULL )
+	{
+		eprint( FATAL, "%s:%ld: %s: No pulses can be used in CW mode.\n",
+				Fname, Lc, pulser_struct.name );
+		THROW( EXCEPTION );
+	}
+
+	/* We need the function MICROWAVE defined for cw mode */
+
+	if ( ! dg2020.function[ PULSER_CHANNEL_MW ].is_used )
+	{
+		eprint( FATAL, "%s:%ld: %s: Function `MICROWAVE' has not been defined "
+				"as needed for CW mode.\n", Fname, Lc, pulser_struct.name );
+		THROW( EXCEPTION );
+	}
+
+	if ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == EXTERNAL )
+	{
+		eprint( FATAL, "%s:%ld: %s: External trigger mode can't be used "
+				"in CW mode.\n", Fname, Lc, pulser_struct.name );
+		THROW( EXCEPTION );
+	}
+
+	if ( dg2020.is_repeat_time )
+	{
+		eprint( FATAL, "%s:%ld: %s: Repeat time/frequency can't be set "
+				"in CW mode.\n", Fname, Lc, pulser_struct.name );
+		THROW( EXCEPTION );
+	}
+
+	dg2020.mem_size = 128;
+	dg2020.is_cw_mode = SET;
+	dg2020.trig_in_mode = INTERNAL;
+	dg2020.is_trig_in_mode = SET;
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------------------------*/
 /* Public function to change the position of pulses. If called with no  */
 /* argument all active pulses that have a position change time set will */
 /* be moved, otherwise all pulses passed as arguments to the function.  */
@@ -333,6 +397,13 @@ Var *pulser_shift( Var *v )
 {
 	PULSE *p;
 
+
+	if ( dg2020.is_cw_mode )
+	{
+		eprint( FATAL, "%s:%ld: %s: Function `pulser_shift' can't be used in "
+				"CW mode.\n", Fname, Lc, pulser_struct.name );
+		THROW( EXCEPTION );
+	}
 
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1 );
@@ -410,6 +481,13 @@ Var *pulser_increment( Var *v )
 	PULSE *p;
 
 
+	if ( dg2020.is_cw_mode )
+	{
+		eprint( FATAL, "%s:%ld: %s: Function `pulser_increment' can't be used "
+				"in CW mode.\n", Fname, Lc, pulser_struct.name );
+		THROW( EXCEPTION );
+	}
+
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1 );
 
@@ -484,6 +562,13 @@ Var *pulser_next_phase( Var *v )
 	FUNCTION *f;
 
 
+	if ( dg2020.is_cw_mode )
+	{
+		eprint( FATAL, "%s:%ld: %s: Function `pulser_next_phase' can't be "
+				"used in CW mode.\n", Fname, Lc, pulser_struct.name );
+		THROW( EXCEPTION );
+	}
+
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1 );
 
@@ -552,6 +637,13 @@ Var *pulser_phase_reset( Var *v )
 	FUNCTION *f;
 
 
+	if ( dg2020.is_cw_mode )
+	{
+		eprint( FATAL, "%s:%ld: %s: Function `pulser_next_reset' can't be "
+				"used in CW mode.\n", Fname, Lc, pulser_struct.name );
+		THROW( EXCEPTION );
+	}
+
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1 );
 
@@ -617,6 +709,13 @@ Var *pulser_pulse_reset( Var *v )
 {
 	PULSE *p;
 
+
+	if ( dg2020.is_cw_mode )
+	{
+		eprint( FATAL, "%s:%ld: %s: Function `pulser_pulse_reset' can't be "
+				"used in CW mode.\n", Fname, Lc, pulser_struct.name );
+		THROW( EXCEPTION );
+	}
 
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1 );

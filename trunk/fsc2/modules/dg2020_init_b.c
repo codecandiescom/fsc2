@@ -14,6 +14,7 @@ static void dg2020_distribute_channels( void );
 static void dg2020_setup_phase_matrix( FUNCTION *f );
 static void dg2020_pulse_start_setup( void );
 static Phase_Sequence *dg2020_create_dummy_phase_seq( void );
+static void dg2020_cw_init( void );
 
 
 /*---------------------------------------------------------------------------
@@ -23,10 +24,15 @@ static Phase_Sequence *dg2020_create_dummy_phase_seq( void );
 
 void dg2020_init_setup( void )
 {
-	dg2020_basic_pulse_check( );
-	dg2020_basic_functions_check( );
-	dg2020_distribute_channels( );
-	dg2020_pulse_start_setup( );
+	if ( ! dg2020.is_cw_mode )
+	{
+		dg2020_basic_pulse_check( );
+		dg2020_basic_functions_check( );
+		dg2020_distribute_channels( );
+		dg2020_pulse_start_setup( );
+	}
+	else
+		dg2020_cw_init( );
 }
 
 
@@ -469,7 +475,7 @@ static void dg2020_distribute_channels( void )
 			f->channel[ f->num_channels++ ]->function = f;
 		}
 
-		if ( f->num_pods > 1 )
+		if ( f->num_pods > 1 && ! dg2020.is_cw_mode )
 			dg2020_setup_phase_matrix( f );
 	}
 }
@@ -616,4 +622,66 @@ static Phase_Sequence *dg2020_create_dummy_phase_seq( void )
 
 	np->next = NULL;
 	return np;
+}
+
+
+/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+
+static void dg2020_cw_init( void )
+{
+	int i;
+	FUNCTION *f;
+
+
+	/* Only the MICROWAVE function can be used in cw mode */
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		if ( i == PULSER_CHANNEL_MW )
+			continue;
+
+		if ( dg2020.function[ i ].is_used )
+		{
+			eprint( WARN, "%s: Function `%s' can't be used in CW mode.\n",
+					pulser_struct.name, Function_Names[ i ] );
+			dg2020.function[ i ].is_used = UNSET;
+		}
+	}
+
+	f = &dg2020.function[ PULSER_CHANNEL_MW ];
+
+	/* For cw mode we need to know which pods are assigned to x, y, -x, -y
+	   and cw, i.e. a phase setup */
+
+	if ( f->phase_setup == NULL )
+	{
+		eprint( FATAL, "%s: CW mode needs a phase setup for the function "
+				"`%s'.\n", pulser_struct.name,  Function_Names[ f->self ] );
+		THROW( EXCEPTION );
+	}
+
+	/* At least a pod for the cw channel must be set */
+
+	if ( ! f->phase_setup[ PHASE_CW ].is_set )
+	{
+		eprint( FATAL, "%s: Pod for CW channel hasn't been set in phase "
+				"setup.\n", pulser_struct.name );
+		THROW( EXCEPTION );
+	}
+
+	/* We need at least two pods, one for x, -x, y and -y and one for cw */
+
+	if ( f->num_pods <= 1 )
+	{
+		eprint( FATAL, "%s: Not enough pods (i.e. not at least 2) have been "
+				"assigned to function `%s'.\n", pulser_struct.name,
+				Function_Names[ f->self ] );
+		THROW( EXCEPTION );
+	}
+
+	/* Now get the two channels needed for the MICROWAVE function */
+
+	f->num_needed_channels = 2;
+	dg2020_distribute_channels( );
 }

@@ -126,8 +126,6 @@
 
 static bool dg2020_set_timebase( double timebase );
 static bool dg2020_set_memory_size( long mem_size );
-static bool dg2020_make_blocks( int num_blocks, BLOCK *block );
-static bool dg2020_make_seq( int num_blocks, BLOCK *block );
 static bool dg2020_set_pod_high_level( int pod, double voltage );
 static bool dg2020_set_pod_low_level( int pod, double voltage );
 static bool dg2020_set_trigger_in_level( double voltage );
@@ -193,7 +191,7 @@ bool dg2020_init( const char *name )
 
 	/* Set the time base */
 
-	if ( ! dg2020_set_timebase( dg2020.timebase ) )
+	if ( ! dg2020.is_cw_mode && ! dg2020_set_timebase( dg2020.timebase ) )
 		dg2020_gpib_failure( );
 
 	/* Set the memory size needed */
@@ -203,54 +201,64 @@ bool dg2020_init( const char *name )
 
 	/* Switch on repeat mode for INTERNAL trigger mode and enhanced mode for
 	   EXTERNAL trigger mode - in the later case also set trigger level and
-	   slope */
+	   slope. For CW mode we need enhanced mode */
 
-	if ( dg2020.trig_in_mode == INTERNAL )
+	if ( ! dg2020.is_cw_mode )
 	{
-		if ( gpib_write( dg2020.device, "MODE:STAT REP\n", 14 ) == FAILURE )
+		if ( dg2020.trig_in_mode == INTERNAL )
+		{
+			if ( gpib_write( dg2020.device, "MODE:STAT REP\n", 14 )
+				 == FAILURE )
+				dg2020_gpib_failure( );
+		}
+		else
+		{
+			if ( gpib_write( dg2020.device, "MODE:STAT ENH\n", 14 )
+				 == FAILURE )
+				dg2020_gpib_failure( );
+			if ( dg2020.is_trig_in_level )
+				dg2020_set_trigger_in_level( dg2020.trig_in_level );
+			if ( dg2020.is_trig_in_slope )
+				dg2020_set_trigger_in_slope( dg2020.trig_in_slope );
+			if ( dg2020.is_trig_in_impedance )
+				dg2020_set_trigger_in_impedance( dg2020.trig_in_impedance );
+		}
+
+		/* If additional padding is needed or trigger mode is EXTERNAL create
+		   sequence and blocks */
+
+		if ( dg2020.block[ 0 ].is_used && dg2020.block[ 1 ].is_used &&
+			 ( ! dg2020_make_blocks( 2, dg2020.block ) ||
+			   ! dg2020_make_seq( 2, dg2020.block ) ) )
 			dg2020_gpib_failure( );
+
+		if ( dg2020.block[ 0 ].is_used && ! dg2020.block[ 1 ].is_used &&
+			 ( ! dg2020_make_blocks( 1, dg2020.block ) ||
+			   ! dg2020_make_seq( 1, dg2020.block ) ) )
+			dg2020_gpib_failure( );
+
+		/* Do the assignment of channels to pods */
+
+		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+		{
+			f = &dg2020.function[ i ];
+			if ( ! f->is_used )
+				continue;
+
+			if ( f->num_pods == 1 )
+				dg2020_channel_assign( f->channel[ 0 ]->self,
+									   f->pod[ 0 ]->self );
+			else
+				for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
+					if ( f->phase_setup->is_set[ j ] )
+						dg2020_channel_assign(
+							                 f->pcm[ j * f->pc_len + 0 ]->self,
+											  f->phase_setup->pod[ j ]->self );
+		}
 	}
 	else
-	{
 		if ( gpib_write( dg2020.device, "MODE:STAT ENH\n", 14 ) == FAILURE )
 			dg2020_gpib_failure( );
-		if ( dg2020.is_trig_in_level )
-			dg2020_set_trigger_in_level( dg2020.trig_in_level );
-		if ( dg2020.is_trig_in_slope )
-			dg2020_set_trigger_in_slope( dg2020.trig_in_slope );
-		if ( dg2020.is_trig_in_impedance )
-			dg2020_set_trigger_in_impedance( dg2020.trig_in_impedance );
-	}
-
-	/* If additional padding is needed or trigger mode is EXTERNAL create
-	   sequence and blocks */
-
-	if ( dg2020.block[ 0 ].is_used && dg2020.block[ 1 ].is_used &&
-		 ( ! dg2020_make_blocks( 2, dg2020.block ) ||
-		   ! dg2020_make_seq( 2, dg2020.block ) ) )
-		dg2020_gpib_failure( );
-
-	if ( dg2020.block[ 0 ].is_used && ! dg2020.block[ 1 ].is_used &&
-		 ( ! dg2020_make_blocks( 1, dg2020.block ) ||
-		   ! dg2020_make_seq( 1, dg2020.block ) ) )
-		dg2020_gpib_failure( );
-
-	/* Do the assignement of channels to pods */
-
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = &dg2020.function[ i ];
-		if ( ! f->is_used )
-			continue;
-
-		if ( f->num_pods == 1 )
-			dg2020_channel_assign( f->channel[ 0 ]->self, f->pod[ 0 ]->self );
-		else
-			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
-				if ( f->phase_setup->is_set[ j ] )
-					dg2020_channel_assign( f->pcm[ j * f->pc_len + 0 ]->self,
-										   f->phase_setup->pod[ j ]->self );
-	}
 
 	/* Set up the pod output voltages */
 
@@ -403,7 +411,7 @@ bool dg2020_update_data( void )
 /*  * 1: ok, 0: error                                                    */
 /*-----------------------------------------------------------------------*/
 
-static bool dg2020_make_blocks( int num_blocks, BLOCK *block )
+bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 {
 	char cmd[ 1024 ] = "",
 		 dummy[ 1000 ];
@@ -448,7 +456,7 @@ static bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 /*  * 1: ok, 0: error                                             */
 /*----------------------------------------------------------------*/
 
-static bool dg2020_make_seq( int num_blocks, BLOCK *block )
+bool dg2020_make_seq( int num_blocks, BLOCK *block )
 {
 	char cmd[ 1024 ] = "",
 		 dummy[ 1024 ];
@@ -467,9 +475,10 @@ static bool dg2020_make_seq( int num_blocks, BLOCK *block )
 
 	for ( i = 1; i < num_blocks; i++ )
 	{
-		sprintf( cmd, ":DATA:SEQ:ADD %d,\"%s\",%ld,0,0,0,0\n",
-				 i, block[ i ].blk_name, block[ i ].repeat );
-
+		sprintf( cmd, ":DATA:SEQ:ADD %d,\"%s\",%ld,%c,0,0,%c\n",
+				 i, block[ i ].blk_name, block[ i ].repeat,
+				 dg2020.is_cw_mode ? '1' : '0',
+				 dg2020.is_cw_mode ? '1' : '0' );
 		if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 			dg2020_gpib_failure( );
 	}
@@ -479,8 +488,7 @@ static bool dg2020_make_seq( int num_blocks, BLOCK *block )
 	if ( dg2020.trig_in_mode == EXTERNAL &&
 		 ( gpib_write( dg2020.device, ":DATA:SEQ:REP 0,1\n", 18 ) == FAILURE ||
 		   gpib_write( dg2020.device, ":DATA:SEQ:TWAIT 0,1\n", 20 )
-		   == FAILURE )
-		)
+		   == FAILURE ) )
 		dg2020_gpib_failure( );
 
 	return OK;
@@ -492,7 +500,7 @@ static bool dg2020_make_seq( int num_blocks, BLOCK *block )
 /* in one of the channels either to high or low.       */
 /* ->                                                  */
 /*  * channel number                                   */
-/*  * start address (-1 to 0xFFFE)                      */
+/*  * start address (-1 to 0xFFFE)                     */
 /*  * length of pattern (1 to 0xFFFF)                  */
 /*    (address + length must be less or equal 0xFFFF)  */
 /*  * either 1 or 0 to set the bits to high or low     */
@@ -540,7 +548,10 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 	/* Send the command string to the pulser */
 
 	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
+	{
+		T_free( cmd );
 		dg2020_gpib_failure( );
+	}
 
 	T_free( cmd );       /* free memory used for command string */
 

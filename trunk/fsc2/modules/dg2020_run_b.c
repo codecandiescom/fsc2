@@ -455,3 +455,66 @@ void dg2020_commit( FUNCTION *f, bool flag )
 		T_free( f->channel[ i ]->old );
 	}
 }
+
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+
+void dg2020_cw_setup( void )
+{
+	int i;
+	PHASE_SETUP *p;
+	FUNCTION *f;
+
+
+	f = &dg2020.function[ PULSER_CHANNEL_MW ];
+	p = f->phase_setup;
+
+	/* First, all non-cw channels get associated with the first pulser channel
+	   and the cw channel with the second */
+
+	for ( i = 0; i < f->num_pods; i++ )
+		if ( f->pod[ i ] != p->pod[ PHASE_CW ] )
+			dg2020_channel_assign( f->channel[ 0 ]->self, f->pod[ i ]->self );
+		else
+			dg2020_channel_assign( f->channel[ 1 ]->self, f->pod[ i ]->self );
+
+	/* Now the the first channel is set to be always logical low, the second
+	   (i.e. the cw channel) to be always logical high */
+
+	if ( ! dg2020_set_constant( f->channel[ 0 ]->self, -1, 1, 0 ) ||
+		 ! dg2020_set_constant( f->channel[ 0 ]->self, 0, 127, OFF( f ) ) ||
+		 ! dg2020_set_constant( f->channel[ 1 ]->self, -1, 1, 0 ) ||
+		 ! dg2020_set_constant( f->channel[ 1 ]->self, 0, 127, ON( f ) ) )
+	{
+		eprint( FATAL, "%s: Failed to setup pulser.\n", pulser_struct.name );
+		THROW( EXCEPTION );
+	}
+
+	/* Finally, we've got to setup the blocks. The first one has not much
+	   meaning (except allowing to start with a low voltage level, while
+	   the second block is repeated infinitely. */
+
+	strcpy( dg2020.block[ 0 ].blk_name, "B0" );
+	dg2020.block[ 0 ].start = 0;
+	dg2020.block[ 0 ].repeat = 1;
+	dg2020.block[ 0 ].is_used = SET;
+
+	strcpy( dg2020.block[ 1 ].blk_name, "B1" );
+	dg2020.block[ 1 ].start = 64;
+	dg2020.block[ 1 ].repeat = 1;
+	dg2020.block[ 1 ].is_used = SET;
+
+	if ( ! dg2020_make_blocks( 2, dg2020.block ) ||
+		 ! dg2020_make_seq( 2, dg2020.block ) )
+	{
+		eprint( FATAL, "%s: Failed to setup pulser.\n", pulser_struct.name );
+		THROW( EXCEPTION );
+	}
+
+	/* Now that everything is done the pulser is told to really set the
+	   channels */
+
+	dg2020_update_data( );
+}

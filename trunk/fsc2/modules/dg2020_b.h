@@ -18,6 +18,7 @@ void dg2020_b_exit_hook( void );
 
 
 Var *pulser_update( Var *v );
+Var *pulser_cw_mode( Var *v );
 Var *pulser_shift( Var *v );
 Var *pulser_increment( Var *v );
 Var *pulser_next_phase( Var *v );
@@ -180,6 +181,8 @@ typedef struct {
 	int trig_in_impedance;   //	only in EXTERNAL mode
 	Ticks repeat_time;       //	only in INTERNAL mode
 
+	bool is_cw_mode;         // set for cw mode
+
 	bool is_trig_in_mode;
 	bool is_trig_in_slope;
 	bool is_trig_in_level;
@@ -258,7 +261,6 @@ typedef struct _p_ {
 
 	bool needs_update;       // set if the pulses properties have been changed
                              // in test run or experiment
-
 } PULSE;
 
 
@@ -368,6 +370,7 @@ void dg2020_set_pulses( FUNCTION *f );
 void dg2020_set_phase_pulses( FUNCTION *f );
 void dg2020_commit( FUNCTION * f, bool flag );
 void dg2020_commit_phases( FUNCTION * f, bool flag );
+void dg2020_cw_setup( void );
 
 
 /* Finally the functions from dg2020_gpib.c */
@@ -376,6 +379,8 @@ bool dg2020_init( const char *name );
 bool dg2020_run( bool flag );
 bool dg2020_channel_assign(  int channel, int pod );
 bool dg2020_update_data( void );
+bool dg2020_make_blocks( int num_blocks, BLOCK *block );
+bool dg2020_make_seq( int num_blocks, BLOCK *block );
 bool dg2020_set_constant( int channel, Ticks address,
 						  Ticks length, int state );
 bool dg2020_lock_state( bool lock );
