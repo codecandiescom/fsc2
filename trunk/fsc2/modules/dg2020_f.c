@@ -20,9 +20,6 @@ int dg2020_init_hook( void )
 	int i;
 
 
-	/* The very first thing we have to do in the init_hook is to set up the
-	   global structure for pulsers. */
-
 	/* First we test that the name entry in the pulser structure is NULL,
 	   otherwise we've got to assume, that another pulser driver has already
 	   been installed. */
@@ -36,6 +33,9 @@ int dg2020_init_hook( void )
 	}
 
 	pulser_struct.name = get_string_copy( "DG2020" );
+
+	/* Than we have to do in the init_hook is to set up the global structure
+	   for pulsers. */
 
 	pulser_struct.set_timebase = set_timebase;
 
@@ -69,6 +69,7 @@ int dg2020_init_hook( void )
 	pulser_struct.get_pulse_phase_cycle = get_pulse_phase_cycle;
 	pulser_struct.get_pulse_maxlen = get_pulse_maxlen;
 
+	/* Finally, we initialize variables that store the state of the pulser */
 
 	dg2020.is_timebase = UNSET;
 
@@ -102,6 +103,7 @@ int dg2020_init_hook( void )
 		dg2020.channel[ i ].function = NULL;
 
 	dg2020_is_needed = SET;
+
 	return 1;
 }
 
@@ -157,6 +159,7 @@ static bool set_timebase( double timebase )
 	{
 		char *min = get_string_copy( ptime( ( double ) MIN_TIMEBASE ) );
 		char *max = get_string_copy( ptime( ( double ) MAX_TIMEBASE ) );
+
 		eprint( FATAL, "%s:%ld: DG2020: Invalid time base of %s, valid range "
 				"is %s to %s.\n", Fname, Lc, ptime( timebase ), min, max );
 		T_free( min );
@@ -1133,7 +1136,17 @@ static void basic_pulse_check( void )
 			}
 		}
 
-		/* Check that the pulse fits into the pulsers memory */
+		/* Check that the pulse fits into the pulsers memory
+		   (If you check the following line real carefully, you will find that
+		   one less than the number of bits in the pulser channel is allowed -
+		   this is due to a bug in the pulsers firmware: if the very first bit
+		   in any of the channels is set to high the pulser outputs a pulse of
+		   250 us length before starting to output the real data in the
+		   channel, thus the first bit has always to be set to low, i.e. must
+		   be unused. But this is only the 'best' case when the pulser is used
+		   in repeat mode, in single mode setting the first bit of a channel
+		   leads to an obviously endless high pulse, while not setting the
+		   first bit keeps the pulser from working at all...) */
 
 		if ( p->pos + p->len + p->function->delay >= MAX_PULSER_BITS )
 		{
