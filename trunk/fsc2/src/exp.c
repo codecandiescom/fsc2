@@ -492,7 +492,7 @@ void prim_exp_run( void )
 		T_free( Fname );
 	Fname = NULL;
 
-	if ( prg_length == 0 )                       /* no program - no test */
+	if ( prg_length == 0 )                       /* no program no test... */
 		return;
 
 	TRY
