@@ -1735,6 +1735,55 @@ void repaint_canvas_2d( Canvas *c )
 
 
 /*---------------------------------------------------------*/
+/*---------------------------------------------------------*/
+
+int get_mouse_pos_2d( double *pa )
+{
+	Curve_2d *cv;
+	int ppos[ 2 ];
+	unsigned int keymask;
+	long a_index;
+
+
+	if ( G2.active_curve == -1 ||
+		 ! G2.curve_2d[ G2.active_curve ]->is_scale_set )
+		return 0;
+
+	fl_get_win_mouse( FL_ObjWin( G2.canvas.obj ),
+					  ppos + X, ppos + Y, &keymask );
+
+	cv = G2.curve_2d[ G2.active_curve ];
+
+	pa[ 0 ] = ( ppos[ X ] + cv->w / 2 ) / cv->s2d[ X ]  - cv->shift[ X ];
+	pa[ 1 ] = ( G2.canvas.h - 1.0 - ppos[ Y ] + cv->h / 2 )
+			  / cv->s2d[ Y ] - cv->shift[ Y ];
+
+	if ( pa[ 0 ] < 0 || floor( pa[ 0 ] ) >= G2.nx ||
+		 pa[ 1 ] < 0 || floor( pa[ 1 ] ) >= G2.ny ||
+		 ! cv->is_scale_set )
+		return 0;
+	else
+	{
+		a_index = G2.nx * lrnd( floor( pa[ 1 ] ) ) + lrnd( floor( pa[ 0 ] ) );
+
+		if ( cv->points[ a_index ].exist )
+			pa[ 2 ] = cv->rwc_start[ Z ] + cv->rwc_delta[ Z ]
+					  * cv->points[ a_index ].v;
+		else
+			return -2;
+	}
+
+	pa[ 0 ] = cv->rwc_start[ X ] + cv->rwc_delta[ X ]
+			  * ( ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ] );
+	pa[ 1 ] = cv->rwc_start[ Y ] + cv->rwc_delta[ Y ]
+			  * ( ( G2.canvas.h - 1.0 - ppos[ Y ] )
+				  / cv->s2d[ Y ] - cv->shift[ Y ] );
+
+	return 2;
+}
+
+
+/*---------------------------------------------------------*/
 /* Does a rescale of the data for 2d graphics so that all  */
 /* curves fit into the canvas and occupy the whole canvas. */
 /*---------------------------------------------------------*/

@@ -1392,6 +1392,38 @@ void repaint_canvas_1d( Canvas *c )
 
 
 /*---------------------------------------------------------*/
+/*---------------------------------------------------------*/
+
+int get_mouse_pos_1d( double *pa )
+{
+	Curve_1d *cv;
+	int i;
+	int ppos[ 2 ];
+	unsigned int keymask;
+
+
+	if ( G.coord_display != 1 || ! G1.is_scale_set )
+		return 0;
+
+	fl_get_win_mouse( FL_ObjWin( G1.canvas.obj ),
+					  ppos + X, ppos + Y, &keymask );
+
+	for ( i = 0; i < G1.nc; i++ )
+	{
+		cv = G1.curve[ i ];
+
+		pa[ 2 * i ] = G1.rwc_start[ X ] + G1.rwc_delta[ X ]
+					  * ( ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ] );
+		pa[ 2 * i + 1 ] = G1.rwc_start[ Y ] + G1.rwc_delta[ Y ]
+						  * ( ( G1.canvas.h - 1.0 - ppos[ Y ] ) /
+							  cv->s2d[ Y ] - cv->shift[ Y ] );
+	}
+
+	return 1;
+}
+
+
+/*---------------------------------------------------------*/
 /* Does a rescale of the data for 1d graphics so that all  */
 /* curves fit into the canvas and occupy the whole canvas. */
 /*---------------------------------------------------------*/

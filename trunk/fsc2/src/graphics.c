@@ -113,6 +113,8 @@ void start_graphics( void )
 
 	G.font = NULL;
 
+	G.coord_display = 0;
+
 	CG.is_shown = UNSET;
 	CG.curve = -1;
 	CG.index = 0;
