@@ -20,5 +20,5 @@ FOR I = 1 : N {
 	r2 = grandom( ) + 3.0 *
 	     ( I - N / 2 ) * exp( - ( I - N / 2 )^2 / 55.0^2 ) / 55.0;;
 	display( I, r1, 1, I, r2, 2 );
-	wait( 0.01 );
+	wait( 0.05 );
 }
