@@ -157,8 +157,6 @@ void rb_pulser_init_delay( void )
 
 	card->delay = delay;
 	card->is_active = SET;
-
-fprintf( stderr, "%d => %ld\n", card->no, card->delay );
 }
 
 
@@ -258,7 +256,6 @@ void rb_pulser_delay_card_setup( void )
 				card->delay = dT;
 				card->is_active = SET;
 				
-fprintf( stderr, "%d => %ld\n", card->no, card->delay );
 				start += card->delay * rb_pulser.timebase;
 
 				/* Some channels have no card for the pulse itself, here we
@@ -276,14 +273,11 @@ fprintf( stderr, "%d => %ld\n", card->no, card->delay );
 			if ( card->delay != p->len || ! card->was_active )
 				card->needs_update = SET;
 			card->delay = p->len;
-fprintf( stderr, "%d => %ld\n", card->no, card->delay );
 			start += card->delay * rb_pulser.timebase;
 			card->is_active = SET;
 			card = card->next;
 		}
-fprintf( stderr, "\n" );
 	}
-fprintf( stderr, "++++++++++++\n" );
 }
 
 
