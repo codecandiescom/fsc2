@@ -43,6 +43,8 @@
 
 #define NO_LOCK_BIT        0x800000UL
 
+#define DEFAULT_TEST_FIELD 3100.0
+
 
 /* The structure for the device */
 
@@ -110,8 +112,8 @@ int bnm12_init_hook( void )
 
 	if ( ( dev_num = exists_device( "witio_48" ) ) == 0 )
 	{
-		print( FATAL, "Can't find the module for the WITIO-48 DIO card - it "
-			   "must be listed before the gaussmeter.\n" );
+		print( FATAL, "Can't find the module for the WITIO-48 DIO card "
+			   "(witio_48) - it must be listed before the gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -144,6 +146,8 @@ int bnm12_init_hook( void )
 			   DIO_NUMBER );
 		THROW( EXCEPTION );
 	}
+
+	vars_pop( v );
 
 	/* Make sure "our" DIO of the WITIO-48 card is in "1x24" mode */
 
@@ -191,10 +195,10 @@ int bnm12_init_hook( void )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Just store the current resolution setting in case it gets */
-/* changed during the test run.                              */
-/*-----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+/* Just store the current settings in case they get changed */
+/* during the test run.                                     */
+/*----------------------------------------------------------*/
 
 int bnm12_test_hook( void )
 {
@@ -203,10 +207,10 @@ int bnm12_test_hook( void )
 }
 
 
-/*----------------------------------------------------------*/
-/* Restore the resolution setting to the value it had after */
-/* the executing the preparations section.                  */
-/*----------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Restore the settings back to what they were after executing */
+/* the preparations section.                                   */
+/*-------------------------------------------------------------*/
 
 int bnm12_exp_hook( void )
 {
@@ -221,7 +225,8 @@ int bnm12_exp_hook( void )
 
 void bnm12_exit_hook( void )
 {
-	T_free( bnm12.dio_value_func );
+	if ( bnm12.dio_value_func )
+		T_free( bnm12.dio_value_func );
 }
 
 
@@ -334,6 +339,9 @@ static double bnm12_get_field( void )
 	int i;
 	unsigned long fac; 
 
+
+	if ( FSC2_MODE == TEST )
+		return DEFAULT_TEST_FIELD;
 
 	/* Get a value from the gaussmeter via the WITIO-48 DIO card */
 
