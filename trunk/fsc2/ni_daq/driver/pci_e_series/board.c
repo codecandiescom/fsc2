@@ -269,7 +269,7 @@ void pci_board_irq_handling_setup( Board *board )
 
 void pci_board_reset_all( Board *board )
 {
-	/* Set uo the DACs of the board with the values stored in the EEPROM */
+	/* Set up the DACs of the board with the values stored in the EEPROM */
 
 	caldac_calibrate( board );
 
@@ -279,7 +279,7 @@ void pci_board_reset_all( Board *board )
 
 	/* Reset all subsystems */
 
-	MSC_reset_all( board );        /* should allways come first ! */
+	MSC_reset_all( board );        /* should always come first ! */
 	AI_reset_all( board );
 	AO_reset_all( board );
 	GPCT_reset_all( board );
@@ -525,7 +525,7 @@ static void pci_irq_A_handler( Board *board, u16 status )
 			board->irq_hand[ i ].raised++;
 			board->irq_hand[ i ].handler( board );
 
-			/* Acknowlegde the interrupt (but note: AI_FIFO and
+			/* Acknowledge the interrupt (but note: AI_FIFO and
 			   Pass_Thru_0 interrupts can't, the corresponding
 			   bits in the status word get reset automatically
 			   when proper actions have been taken) */
@@ -558,7 +558,7 @@ static void pci_irq_B_handler( Board *board, u16 status )
 			board->irq_hand[ i ].raised++;
 			board->irq_hand[ i ].handler( board );
 
-			/* Acknowlegde the interrupt (but note: AO_FIFO and
+			/* Acknowledge the interrupt (but note: AO_FIFO and
 			   Pass_Thru_1 interrupts can't, the corresponding
 			   bits in the status word get reset automatically
 			   when proper actions have been taken) */

@@ -78,7 +78,7 @@ void MSC_reset_all( Board *board )
 	board->func->stc_writew( board, STC_Clock_and_FOUT,
 				 board->stc.Clock_and_FOUT );
 
-	/* Enable the slow internal timebase */
+	/* Enable the slow internal time base */
 
 	board->stc.Clock_and_FOUT |= Slow_Internal_Timebase;
 
