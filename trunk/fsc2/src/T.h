@@ -12,5 +12,8 @@ void *T_malloc( size_t size );
 void *T_calloc( size_t nmemb, size_t size );
 void *T_realloc( void *ptr, size_t size );
 void T_free( void *ptr );
+long T_atol( const char *txt );
+double T_atof( const char *txt );
+
 
 #endif   /* ! T_HEADER */

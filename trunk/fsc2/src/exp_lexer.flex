@@ -159,12 +159,12 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "}"         return '}';          /* block end delimiter */
 
 {INT}       {
-				exp_val.lval = atol( exptext );
+				exp_val.lval = T_atol( exptext );
                 return E_INT_TOKEN;
             }
 
 {FLOAT}     {
-                exp_val.dval = atof( exptext );
+                exp_val.dval = T_atof( exptext );
                 return E_FLOAT_TOKEN;
             }
 

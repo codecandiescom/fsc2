@@ -141,7 +141,7 @@ WS          [\n=,:. ]+
 				{
 					while ( isdigit( *cp ) )
 						cp--;
-					phaseslval.lval = atol( ++cp );
+					phaseslval.lval = T_atol( ++cp );
 				}
 				return PS_TOKEN;
 			}

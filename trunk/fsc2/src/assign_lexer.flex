@@ -312,12 +312,12 @@ WS          [\n=: ]+
 			}
 
 {INT}       {
-            	assignlval.lval = atol( assigntext );
+            	assignlval.lval = T_atol( assigntext );
                 return INT_TOKEN;
             }
 
 {FLOAT}     {
-            	assignlval.dval = atof( assigntext );
+            	assignlval.dval = T_atof( assigntext );
                 return FLOAT_TOKEN;
             }
 

@@ -152,12 +152,12 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			}
 
 {INT}       {
-				prepslval.lval = atol( prepstext );
+				prepslval.lval = T_atol( prepstext );
                 return INT_TOKEN;
             }
 
 {FLOAT}     {
-                prepslval.dval = atof( prepstext );
+                prepslval.dval = T_atof( prepstext );
                 return FLOAT_TOKEN;
             }
 
@@ -225,7 +225,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 				{
 					while ( isdigit( *cp ) )
 						cp--;
-					val = atol( ++cp );
+					val = T_atol( ++cp );
 				}
 
 				prepslval.vptr = vars_push( INT_VAR, val );

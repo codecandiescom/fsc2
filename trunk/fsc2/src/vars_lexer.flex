@@ -175,13 +175,13 @@ WS          [\n \t]+
 
 			/* handling of integer numbers */
 {INT}       {
-				varslval.lval = atol( varstext );
+				varslval.lval = T_atol( varstext );
                 return INT_TOKEN;
             }
 
 			/* handling of floating point numbers */
 {FLOAT}     {
-                varslval.dval = atof( varstext );
+                varslval.dval = T_atof( varstext );
                 return FLOAT_TOKEN;
             }
 

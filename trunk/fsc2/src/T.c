@@ -79,3 +79,54 @@ void T_free( void *ptr )
 
 	free( ptr );
 }
+
+
+long T_atol( const char *txt )
+{
+	long ret;
+
+
+	ret = T_atol( txt );
+	if ( errno == ERANGE )
+	{
+		eprint( FATAL, "%s:%ld: Integer number out of range: "
+				"%s.\n", Fname, Lc, txt );
+		THROW( EXCEPTION );
+	}
+
+	return ret;
+}
+
+
+long T_atol( const char *txt )
+{
+	long ret;
+
+
+	ret = strtol( txt, NULL, 10 );
+	if ( errno == ERANGE )
+	{
+		eprint( FATAL, "%s:%ld: Integer number out of range: "
+				"%s.\n", Fname, Lc, txt );
+		THROW( EXCEPTION );
+	}
+
+	return ret;
+}
+
+
+double T_atof( const char *txt )
+{
+	double ret;
+
+
+	ret = strtod( txt, NULL );
+	if ( errno == ERANGE )
+	{
+		eprint( FATAL, "%s:%ld: Floating point number out of range: "
+				"%s.\n", Fname, Lc, txt );
+		THROW( EXCEPTION );
+	}
+
+	return ret;
+}

@@ -66,23 +66,12 @@ void pulser_struct_init( void )
 
 long p_num( char *txt )
 {
-	long num;
-
-
 	while ( txt != NULL && ! isdigit( *txt ) )
 		txt++;
 
 	assert( txt != NULL );          /* Paranoia ? */
 
-	num = strtol( txt, NULL, 10 );
-	if ( errno == ERANGE )
-	{
-		eprint( FATAL, "%s:%ld: Pulse number (%s) out of range.\n",
-				Fname, Lc, txt );
-		THROW( EXCEPTION );
-	}
-
-	return num;
+	return T_atol( txt );
 }
 
 
