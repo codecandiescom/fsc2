@@ -1151,7 +1151,7 @@ written to a file.
 57 save_comment( File, "% " );
 58
 59
-60 FOR I = 1 : N {
+60 FOR I = 1 : N @{
 61     digitizer_start_acquisition( );
 62     curve = digitizer_get_curve( CH1 );
 63
@@ -1164,7 +1164,7 @@ written to a file.
 70     save( File, curve );
 71
 72     field = sweep_up( );
-73 }
+73 @}
 @end example
 
 There aren't too many new things in this script. In the @code{DEVICES}
