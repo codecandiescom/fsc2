@@ -86,7 +86,7 @@ Var *get_phase_cycled_area_1d( Var *v )
 	/* The first parameter must be a channel number in any case, ask digitizer
 	   module if it really is one */
 
-	if ( ! get_channel_number( v, "get_phase_cycled_area_1d", &channel[ 0 ] ) )
+	if ( ! get_channel_number( v, "get_phase_cycled_area_1d", channel ) )
 	{
 		eprint( FATAL, "%s:%ld: get_phase_cycled_area_1d(): Invalid digitizer "
 				"channel number: %ld.\n", Fname, Lc, channel[ 0 ] );
@@ -100,7 +100,7 @@ Var *get_phase_cycled_area_1d( Var *v )
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		is_channel = get_channel_number( v , "get_phase_cycled_area_1d",
-										 &channel[ 1 ] );
+										 channel + 1 );
 
 		if ( channels_needed == 2 && ! is_channel )
 		{
@@ -326,7 +326,7 @@ Var *get_phase_cycled_area_2d( Var *v )
 	/* The first parameter must be a channel number in any case, ask digitizer
 	   module if it really is one */
 
-	if ( ! get_channel_number( v, "get_phase_cycled_area_2d", &channel[ 0 ] ) )
+	if ( ! get_channel_number( v, "get_phase_cycled_area_2d", channel ) )
 	{
 		eprint( FATAL, "%s:%ld: get_phase_cycled_area_2d(): Invalid digitizer "
 				"channel number: %ld.\n", Fname, Lc, channel[ 0 ] );
@@ -340,7 +340,7 @@ Var *get_phase_cycled_area_2d( Var *v )
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		is_channel = get_channel_number( v , "get_phase_cycled_area_2d",
-										 &channel[ 1 ] );
+										 channel + 1 );
 
 		if ( channels_needed == 2 && ! is_channel )
 		{
