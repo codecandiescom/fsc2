@@ -41,14 +41,12 @@ void rb_pulser_init( void )
 
 	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
 		if ( ( clock_card[ i ].handle =
-			   						 rulbus_card_open( clock_card[ i ].name ) )
-			 													 != RULBUS_OK )
+			   				   rulbus_card_open( clock_card[ i ].name ) ) < 0 )
 			rb_pulser_failure( SET, "Failure to initialize pulser" );
 
 	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
 		if ( ( delay_card[ i ].handle =
-			   						 rulbus_card_open( delay_card[ i ].name ) )
-			 													 != RULBUS_OK )
+							   rulbus_card_open( delay_card[ i ].name ) ) < 0 )
 			rb_pulser_failure( SET, "Failure to initialize pulser" );
 
 	/* Make sure the ERT delay card can't emit end pulses yet (which could
@@ -113,21 +111,6 @@ void rb_pulser_init( void )
 								   RULBUS_DELAY_FALLING_EDGE ) != RULBUS_OK )
 			rb_pulser_failure( SET, "Failure to initialize pulser" );
 
-	/* All cards that have a successor (execpt the ERT card, that has to
-	   wait until the pulser is "switched on") must output an end pulse */
-
-	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
-	{
-		if ( i == ERT_DELAY || ( i != RF_DELAY && ! delay_card[ i ].next ) )
-			continue;
-
-		if ( rulbus_delay_set_output_pulse( delay_card[ i ].handle,
-											RULBUS_DELAY_OUTPUT_BOTH,
-											RULBUS_DELAY_END_PULSE )
-																 != RULBUS_OK )
-			rb_pulser_failure( SET, "Failure to initialize pulser" );
-	}
-
 	/* Initialize synthesizer if it's required for RF pulses */
 
 	rb_pulser_synthesizer_init( );
@@ -146,7 +129,7 @@ static void rb_pulser_synthesizer_init( void )
 	int acc;
 
 
-	if ( ! f->is_used || ! f->pulses[ 0 ]->is_active )
+	if ( ! f->is_used )
 		return;
 
 	if ( ! rb_pulser.synth_trig_slope )
@@ -160,17 +143,6 @@ static void rb_pulser_synthesizer_init( void )
 	vars_push( STR_VAR, "POSITIVE" );
 	vars_pop( func_call( Func_ptr ) );
 
-	if ( ! rb_pulser.synth_pulse_state )
-		rb_pulser_failure( UNSET, "Function for switching synthesizer pulse "
-						   "modulation on or off is unknwon" );
-
-	if ( ( Func_ptr = func_get( rb_pulser.synth_pulse_state, &acc ) ) == NULL )
-		rb_pulser_failure( UNSET, "Function for switching synthesizer pulse "
-						   "modulation on or off is not available" );
-		
-	vars_push( STR_VAR, "ON" );
-	vars_pop( func_call( Func_ptr ) );
-
 	if ( ! rb_pulser.synth_pulse_delay )
 		rb_pulser_failure( UNSET, "Function for setting synthesizer pulse "
 						   "delay is unknwon" );
@@ -181,6 +153,19 @@ static void rb_pulser_synthesizer_init( void )
 
 	vars_push( FLOAT_VAR, 2.0e-8 );
 	vars_pop( func_call( Func_ptr ) );
+
+	if ( ! rb_pulser.synth_pulse_state )
+		rb_pulser_failure( UNSET, "Function for switching synthesizer pulse "
+						   "modulation on or off is unknwon" );
+
+	if ( ( Func_ptr = func_get( rb_pulser.synth_pulse_state, &acc ) ) == NULL )
+		rb_pulser_failure( UNSET, "Function for switching synthesizer pulse "
+						   "modulation on or off is not available" );
+		
+	vars_push( STR_VAR, f->pulses[ 0 ]->is_active ? "ON" : "OFF" );
+	vars_pop( func_call( Func_ptr ) );
+
+	f->pulses[ 0 ]->was_active = f->pulses[ 0 ]->is_active;
 }
 
 

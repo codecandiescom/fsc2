@@ -25,6 +25,7 @@
 #if ! defined RB_PULSER_HEADER
 #define RB_PULSER_HEADER
 
+
 #include "fsc2_module.h"
 
 /* Include configuration information for the device */

@@ -415,18 +415,46 @@ static void rb_pulser_rf_pulse( void )
 	int acc;
 
 
-	if ( ! f->is_used || ! p->is_active )
+	if ( ! f->is_used )
 		return;
 
-	if ( ( Func_ptr = func_get( rb_pulser.synth_pulse_width, &acc ) ) == NULL )
+	if ( p->is_active )
 	{
-		print( FATAL, "Function for setting synthesizer pulse length is not "
-			   "available.\n" );
-		THROW( EXCEPTION );
+		if ( ( Func_ptr = func_get( rb_pulser.synth_pulse_width, &acc ) )
+																	  == NULL )
+		{
+			print( FATAL, "Function for setting synthesizer pulse length is "
+				   "not available.\n" );
+			THROW( EXCEPTION );
+		}
+
+		vars_push( FLOAT_VAR, f->last_pulse_len );
+		vars_pop( func_call( Func_ptr ) );
 	}
 
-	vars_push( FLOAT_VAR, f->last_pulse_len );
-	vars_pop( func_call( Func_ptr ) );
+	/* Switch pulse modulation on or off if the pulse just became active or
+	   inactive */
+
+	if ( ( p->was_active && ! p->is_active ) ||
+		 ( ! p->was_active && p->is_active ) )
+	{
+		if ( ( Func_ptr = func_get( rb_pulser.synth_pulse_state, &acc ) )
+																	  == NULL )
+		{
+			print( FATAL, "Function for setting synthesizer pulse length is "
+				   "not available.\n" );
+			THROW( EXCEPTION );
+		}
+
+		if ( p->was_active && ! p->is_active )
+			vars_push( STR_VAR, "OFF" );
+		else
+			vars_push( STR_VAR, "ON" );
+
+		vars_pop( func_call( Func_ptr ) );
+
+		p->was_active = p->is_active;
+	}
 }
 
 

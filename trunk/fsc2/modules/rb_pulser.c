@@ -55,9 +55,7 @@ int rb_pulser_init_hook( void )
 
 	/* Set global variable to indicate that Rulbus is needed */
 
-#ifndef RB_PULSER_RULBUS_DEBUG
 	need_RULBUS = SET;
-#endif
 
 	pulser_struct.set_timebase = rb_pulser_store_timebase;
 
