@@ -169,6 +169,7 @@ void start_graphics( void )
 
 	if ( G.is_init )
 	{
+#if ( SIZE == HI_RES )
 		G.font = XLoadQueryFont( G.d, "*-lucida-bold-r-normal-sans-14-*" );
 		if ( G.font == NULL )
 			G.font = XLoadQueryFont( G.d, "lucidasanstypewriter-14" );
@@ -179,6 +180,18 @@ void start_graphics( void )
 		if ( G.font != NULL )
 			XTextExtents( G.font, "Xp", 2, &dummy, &G.font_asc, &G.font_desc,
 						  &font_prop );
+#else
+		G.font = XLoadQueryFont( G.d, "*-lucida-bold-r-normal-sans-10-*" );
+		if ( G.font == NULL )
+			G.font = XLoadQueryFont( G.d, "lucidasanstypewriter-10" );
+
+		if ( G.font == NULL )
+			G.font = XLoadQueryFont( G.d, "9x10" );
+
+		if ( G.font != NULL )
+			XTextExtents( G.font, "Xp", 2, &dummy, &G.font_asc, &G.font_desc,
+						  &font_prop );
+#endif
 
 		/* Create the canvas axes */
 		
