@@ -869,7 +869,7 @@ Var *vars_div_of_int_var( Var *v1, Var *v2 )
 	size_t elems;
 	long *lp;
 	long *v2_lpnt;
-	long *dp;
+	double *dp;
 	double *v2_dpnt;
 
 
@@ -1175,7 +1175,7 @@ Var *vars_mod_of_int_var( Var *v1, Var *v2 )
 	size_t elems;
 	long *lp;
 	long *v2_lpnt;
-	long *dp;
+	double *dp;
 	double *v2_dpnt;
 
 

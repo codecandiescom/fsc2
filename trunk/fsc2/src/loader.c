@@ -240,7 +240,8 @@ static void resolve_hook_functions( Device *dev, const char *dev_name )
 	strcpy( app, "_init_hook" );
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	dev->driver.init_hook = dlsym( dev->driver.handle, hook_func_name );
+	dev->driver.init_hook =
+		     ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_init_hook = SET;
 
@@ -249,7 +250,8 @@ static void resolve_hook_functions( Device *dev, const char *dev_name )
 	strcpy( app, "_test_hook" );
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	dev->driver.test_hook = dlsym( dev->driver.handle, hook_func_name );
+	dev->driver.test_hook =
+		     ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_test_hook = SET;
 
@@ -258,7 +260,8 @@ static void resolve_hook_functions( Device *dev, const char *dev_name )
 	strcpy( app, "_end_of_test_hook" );
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	dev->driver.end_of_test_hook = dlsym( dev->driver.handle, hook_func_name );
+	dev->driver.end_of_test_hook =
+		     ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_end_of_test_hook = SET;
 
@@ -267,7 +270,8 @@ static void resolve_hook_functions( Device *dev, const char *dev_name )
 	strcpy( app, "_exp_hook" );
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	dev->driver.exp_hook = dlsym( dev->driver.handle, hook_func_name );
+	dev->driver.exp_hook =
+		     ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_exp_hook = SET;
 
@@ -276,7 +280,8 @@ static void resolve_hook_functions( Device *dev, const char *dev_name )
 	strcpy( app, "_end_of_exp_hook" );
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	dev->driver.end_of_exp_hook = dlsym( dev->driver.handle, hook_func_name );
+	dev->driver.end_of_exp_hook =
+		     ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_end_of_exp_hook = SET;
 
@@ -285,7 +290,8 @@ static void resolve_hook_functions( Device *dev, const char *dev_name )
 	strcpy( app, "_exit_hook" );
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	dev->driver.exit_hook = dlsym( dev->driver.handle, hook_func_name );
+	dev->driver.exit_hook =
+		    ( void ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_exit_hook = SET;
 
@@ -326,9 +332,9 @@ static void resolve_functions( Device *dev )
 		   field) also add a function with '#' and the number. Otherwise
 		   append a new function */
 
-		if ( f->fnct == NULL )
+		if ( f->fnct == ( Var * ( * )( Var * ) ) 0 )
 		{
-			f->fnct = cur;
+			f->fnct = ( Var * ( * )( Var * ) ) cur;
 			f->device = dev;
 			if ( dev->count != 1 )
 			{
@@ -376,7 +382,7 @@ static void add_function( int num, void *new_func, Device *new_dev )
 	f = Fncts + Num_Func++;
 	memcpy( f, Fncts + num, sizeof( Func ) );
 	
-	f->fnct   = new_func;
+	f->fnct   = ( Var * ( * )( Var * ) ) new_func;
 	f->device = new_dev;
 	f->name = get_string( "%s#%d", Fncts[ num ].name, new_dev->count );
 }

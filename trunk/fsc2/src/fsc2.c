@@ -1106,7 +1106,7 @@ void clean_up( void )
 	/* Clear up the compilation structure */
 
 	for ( i = 0; i < 3; ++i )
-		compilation.error[ 3 ] = 0;
+		compilation.error[ i ] = 0;
 	for ( i = DEVICES_SECTION; i <= EXPERIMENT_SECTION; ++i )
 		compilation.sections[ i ] = UNSET;
 

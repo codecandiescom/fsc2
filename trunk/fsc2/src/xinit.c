@@ -78,8 +78,8 @@ FL_resource xresources[ N_APP_OPT ] = {
 
 
 static struct {
-	int WIN_MIN_WIDTH;
-	int WIN_MIN_HEIGHT;
+	unsigned int WIN_MIN_WIDTH;
+	unsigned int WIN_MIN_HEIGHT;
 	int NORMAL_FONT_SIZE;
 	int SMALL_FONT_SIZE;
 	int TOOLS_FONT_SIZE;
@@ -99,13 +99,14 @@ bool xforms_init( int *argc, char *argv[ ] )
 	FL_Coord h, H;
 	FL_Coord cx1, cy1, cw1, ch1, cx2, cy2, cw2, ch2;
 	int i;
-	int flags, wx, wy, ww, wh;
+	int flags, wx, wy;
+	unsigned int ww, wh;
 	XFontStruct *font;
 	FL_CMD_OPT app_opt[ N_APP_OPT ];
 	bool needs_pos = UNSET;
 	XWindowAttributes attr;
 	Window root, parent, *children;
-	int nchilds;
+	unsigned int nchilds;
 
 
 	setup_app_options( app_opt );
@@ -139,18 +140,18 @@ bool xforms_init( int *argc, char *argv[ ] )
 	/* Find out the resolution we're going to run in */
 
 	if ( fl_scrh >= 870 && fl_scrw >= 1152 )
-		G_Funcs.size = HIGH;
+		G_Funcs.size = ( bool ) HIGH;
 	else
-		G_Funcs.size = LOW;
+		G_Funcs.size = ( bool ) LOW;
 
 	if ( * ( ( char * ) xresources[ RESOLUTION ].var ) != '\0' )
 	{
 		if ( ! strcasecmp( ( char * ) xresources[ RESOLUTION ].var, "s" ) ||
 			 ! strcasecmp( ( char * ) xresources[ RESOLUTION ].var, "small" ) )
-			G_Funcs.size = LOW;
+			G_Funcs.size = ( bool ) LOW;
 		if ( ! strcasecmp( ( char * ) xresources[ RESOLUTION ].var, "l" ) ||
 			 ! strcasecmp( ( char * ) xresources[ RESOLUTION ].var, "large" ) )
-			G_Funcs.size = HIGH;
+			G_Funcs.size = ( bool ) HIGH;
 	}
 
 	if ( G_Funcs.size == LOW )
@@ -505,7 +506,8 @@ bool dl_fsc2_rsc( void )
 	}
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	G_Funcs.create_form_fsc2 = dlsym( handle, "create_form_fsc2" );
+	G_Funcs.create_form_fsc2 =
+		       ( FD_fsc2 * ( * )( void ) ) dlsym( handle, "create_form_fsc2" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library `%s'\n", lib_name );
@@ -514,7 +516,8 @@ bool dl_fsc2_rsc( void )
 	}
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	G_Funcs.create_form_run = dlsym( handle, "create_form_run" );
+	G_Funcs.create_form_run =
+		         ( FD_run * ( * )( void ) ) dlsym( handle, "create_form_run" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library `%s'\n", lib_name );
@@ -523,7 +526,8 @@ bool dl_fsc2_rsc( void )
 	}
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	G_Funcs.create_form_input_form = dlsym( handle, "create_form_input_form" );
+	G_Funcs.create_form_input_form = ( FD_input_form * ( * )( void ) )
+		                             dlsym( handle, "create_form_input_form" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library `%s'\n", lib_name );
@@ -532,7 +536,8 @@ bool dl_fsc2_rsc( void )
 	}
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	G_Funcs.create_form_print = dlsym( handle, "create_form_print" );
+	G_Funcs.create_form_print =
+		     ( FD_print * ( * )( void ) ) dlsym( handle, "create_form_print" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library `%s'\n", lib_name );
@@ -541,7 +546,8 @@ bool dl_fsc2_rsc( void )
 	}
 
 	dlerror( );           /* make sure it's NULL before we continue */
-	G_Funcs.create_form_cut = dlsym( handle, "create_form_cut" );
+	G_Funcs.create_form_cut =
+		         ( FD_cut * ( * )( void ) ) dlsym( handle, "create_form_cut" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library `%s'\n", lib_name );

@@ -81,7 +81,6 @@ static int start_printing( char **argv, char *name );
 
 void print_1d( FL_OBJECT *obj, long data )
 {
-	int type;
 	FILE *fp;
 	char *name = NULL;
 	int i;
@@ -91,7 +90,7 @@ void print_1d( FL_OBJECT *obj, long data )
 
 	/* Find out about the way to print and get a file, then print the header */
 
-	if ( ( type = get_print_file( &fp, &name ) ) == 0 )
+	if ( get_print_file( &fp, &name ) == 0 )
 	{
 		fl_activate_object( obj );
 		return;
@@ -163,7 +162,6 @@ void print_1d( FL_OBJECT *obj, long data )
 
 void print_2d( FL_OBJECT *obj, long data )
 {
-	int type;
 	FILE *fp;
 	char *name = NULL;
 
@@ -181,7 +179,7 @@ void print_2d( FL_OBJECT *obj, long data )
 
 	/* Find out about the way to print and get a file, then print the header */
 
-	if ( ( type = get_print_file( &fp, &name ) ) == 0 )
+	if ( get_print_file( &fp, &name ) == 0 )
 	{
 		fl_activate_object( obj );
 		return;

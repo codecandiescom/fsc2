@@ -183,7 +183,7 @@ bool scan_main( char *file )
 
 	/* Parse the predigested EDL file, i.e. what we get back from fsc2_clean */
 
-	split_error = splitlex( );
+	split_error = ( bool ) splitlex( );
 
 	pclose( splitin );
 	sigaction( SIGCHLD, &oact, NULL );
