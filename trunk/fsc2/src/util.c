@@ -242,6 +242,114 @@ void eprint( int severity, const char *fmt, ... )
 }
 
 
+void i2rgb( double h, int *rgb )
+{
+	if ( h < 0.0 )
+	{
+		rgb[ RED ] = rgb[ GREEN ] = rgb[ BLUE ] = 0;
+		return;
+	}
+
+	if ( h <= 0.3 )
+	{
+		rgb[ RED ] = 0;
+/*		rgb[ GREEN ] = ( int ) ( 255.0 * 3.333333333333 * h ); */
+		rgb[ GREEN ] = ( int ) ( 850.0 * h );
+		rgb[ BLUE ] = 255;
+		return;
+	}
+
+	if ( h <= 0.5 )
+	{
+		rgb[ RED ] = 0;
+		rgb[ GREEN ] = 255;
+/*		rgb[ BLUE ] = ( int ) ( 255.0 * ( 1.0 - 5.0 * ( h - 0.3 ) ) ); */
+		rgb[ BLUE ] = ( int ) ( 637.5 - 1275.0 * h );
+		return;
+	}
+
+	if ( h <= 0.7 )
+	{
+/*		rgb[ RED ] = ( int ) ( 255.0 * 5.0 * ( h - 0.5 ) ); */
+		rgb[ RED ] = ( int ) ( 1275.0 * h - 637.5 );
+		rgb[ GREEN ] = 255;
+		rgb[ BLUE ] = 0;
+		return;
+	}
+
+	if ( h <= 1.0 )
+	{
+		rgb[ RED ] = 255;
+/*		rgb[ GREEN ] = ( int ) ( 255.0
+                             * ( 1.0 - 3.3333333333333333 * ( h - 0.7 ) ) ); */
+		rgb[ GREEN ] = ( int ) ( 850.0 * ( 1.0 - h ) );
+		rgb[ BLUE ] = 0;
+		return;
+	}
+
+	rgb[ RED ] = rgb[ GREEN ] = rgb[ BLUE ] = 255;
+}
+
+
+/*--------------------------------------------------------------------------*/
+/* Function converts an intensity into rgb values. For values below 0 black */
+/* wil be retrned, for values above 1 white. In the interval [ 0, 1 ] rgb   */
+/* colors from blue (0.0) via cyan (0.3), green (0.5), and yellow (0.7) to  */
+/* red (1.0) are returned.                                                  */
+/*--------------------------------------------------------------------------*/
+
+#define RED   0
+#define GREEN 1
+#define BLUE  2
+
+void i22rgb( double h, int *rgb )
+{
+	if ( h < 0.0 )
+	{
+		rgb[ RED ] = rgb[ GREEN ] = rgb[ BLUE ] = 0;
+		return;
+	}
+
+	if ( h <= 1.0 / 3.0 )
+	{
+		rgb[ RED ] = 0;
+/*		rgb[ GREEN ] = ( int ) ( 255.0 * 3.333333333333 * h ); */
+		rgb[ GREEN ] = ( int ) ( 765.0 * h );
+		rgb[ BLUE ] = 255;
+		return;
+	}
+
+	if ( h <= 0.5 )
+	{
+		rgb[ RED ] = 0;
+		rgb[ GREEN ] = 255;
+/*		rgb[ BLUE ] = ( int ) ( 255.0 * ( 1.0 - 5.0 * ( h - 0.3 ) ) ); */
+		rgb[ BLUE ] = ( int ) ( 765.0 - 1530.0 * h );
+		return;
+	}
+
+	if ( h <= 2.0 / 3.0 )
+	{
+/*		rgb[ RED ] = ( int ) ( 255.0 * 5.0 * ( h - 0.5 ) ); */
+		rgb[ RED ] = ( int ) ( 1530.0 * h - 765 );
+		rgb[ GREEN ] = 255;
+		rgb[ BLUE ] = 0;
+		return;
+	}
+
+	if ( h <= 1.0 )
+	{
+		rgb[ RED ] = 255;
+/*		rgb[ GREEN ] = ( int ) ( 255.0
+                             * ( 1.0 - 3.3333333333333333 * ( h - 0.7 ) ) ); */
+		rgb[ GREEN ] = ( int ) ( 765.0 * ( 1.0 - h ) );
+		rgb[ BLUE ] = 0;
+		return;
+	}
+
+	rgb[ RED ] = rgb[ GREEN ] = rgb[ BLUE ] = 255;
+}
+
 
 /* Here some more utility functions - they are that short that inlining them
    seems to be a good idea... */
