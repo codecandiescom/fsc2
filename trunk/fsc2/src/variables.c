@@ -139,17 +139,18 @@
 
   The one exception from this scheme is that the very last dimension of an
   array can be dynamically set. This is achieved by not giving an expression
-  but a star (`*') as the very last dimension. But there are special rules for
-  dynamically sized arrays: Since their purpose is to allow storing of
-  complete curves obtained from a device the still undetermined size is only
-  finally determined by such an operation. Previous to this operation, it is
-  forbidden to either initialize arrays of this type or to assign data to its
-  elements.
+  but a star (`*') as the very last dimension. But there are special rules
+  for dynamically sized arrays: Since their purpose is to allow storing of
+  complete curves obtained from a device (where the exact length of the data
+  is not known in advance) the still undetermined size is only finally
+  determined by such an operation. Previous to this operation, it is
+  forbidden to either initialize arrays of this type or to assign data to
+  its elements.
 
   Arrays make evaluating expressions a bit more complicated - the expression
-  could be an array element with the indices in turn being array elements with
-  its indices being... So, if in the evaluation of an expression an array
-  is detected, a pointer to a new entry of the form
+  could be an array element with the indices in turn being array elements
+  with their indices being... So, if in the evaluation of an expression an
+  array element is detected, a pointer to a new entry of the form
 
   typedef struct AStack_
   {
@@ -160,15 +161,16 @@
   }
 
   is pushed onto the array stack by a call to the function vars_push_astack().
-  `var' points to the variable of the arrray, `act_entry' is zero at first
-  (we're just dealing with the very first index of the arrray) and the first
-  slot in `entries' is set to the value of the index.
+  The structure's element `var' points to the variable of the arrray,
+  `act_entry' is zero at first (we're just dealing with the very first index
+  of the arrray) and the first slot in `entries' is set to the value of the
+  index (`entries' has as many slots as te array has dimensions).
 
   If the parser finds another index, the function vars_update_astack()
-  increments `act_entry' and stores the value of the index in the next free
-  slot of `entries' (of the topmost element of the array stack). Of course,
-  some checking has to be done to make sure, that there are not more indices
-  then there are dimensions in the array.
+  increments `act_entry' and stores the value of the new index in the next
+  free slot of `entries' (of the topmost element of the array stack). Of
+  course, some checking has to be done to make sure, that there are not more
+  indices then there are dimensions in the array.
 
   Finally, when the parser finds a closing bracket, it calls vars_pop_astack()
   which pushes the array element indexed by the data in `entries' as a
