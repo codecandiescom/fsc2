@@ -24,6 +24,12 @@
 # Jens.Toerring@physik.fu-berlin.de
 
 
+SHELL   = /bin/sh
+CC      = gcc
+INSTALL = install
+RM      = -rm
+RMFLAGS = -f
+
 prefix  = $(shell if [ -e driver/autoconf.h ]; then \
                       grep NI6601_PREFIX driver/autoconf.h | \
                       sed 's/^[^\"]*\"\([^\"]*\).*$$/\1/'; \
@@ -31,13 +37,17 @@ prefix  = $(shell if [ -e driver/autoconf.h ]; then \
                       echo "/usr/local"; \
                   fi)
 
-export prefix
+export 
 
 
 .SUFFIXES:
-.PHONY: all install clean distclean
+.PHONY: all driver lib install clean distclean
 
 all:
+	$(MAKE) driver
+	$(MAKE) lib
+
+driver:
 	@if [ ! -e driver/autoconf.h ]; then \
 		echo "**********************************************"; \
 		echo "*   The file driver/autoconf.h is missing.   *"; \
@@ -46,6 +56,8 @@ all:
 		exit 2; \
 	fi
 	$(MAKE) -C driver
+
+lib:
 	$(MAKE) -C lib
 
 install:
@@ -55,8 +67,8 @@ install:
 clean:
 	$(MAKE) -C driver clean
 	$(MAKE) -C lib clean
-	rm -f *~ makelog
+	$(RM) $(RMFLAGS) *~ makelog
 
 distclean:
 	$(MAKE) clean
-	rm -f driver/autoconf.h
+	$(RM) $(RMFLAGS) driver/autoconf.h

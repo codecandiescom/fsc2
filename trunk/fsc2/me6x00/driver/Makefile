@@ -41,8 +41,6 @@ INCLUDES = -I$(KERNEL_INC)/include -I.
 
 CFLAGS   = -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes
 
-CC       = gcc
-
 incl_dir = $(prefix)/include
 
 
@@ -57,20 +55,20 @@ all:
 
 install:
 ifeq ($(ME6X00_KERNEL_SOURCE),)
-	if [ -d /lib/modules/`uname -r` ]; then                     \
-		if [ ! -d /lib/modules/`uname -r`/misc ]; then          \
-			install -m 755 -d /lib/modules/`uname -r`/misc;     \
-		fi;                                                     \
-		install -m 644 $(MODULE) /lib/modules/`uname -r`/misc;  \
-	else                                                        \
-		if [ ! -d /lib/modules/misc ]; then                     \
-			install -d 755 /lib/modules/misc;                   \
-		fi;                                                     \
-		cp $(MODULE) /lib/modules/misc;                         \
+	if [ -d /lib/modules/`uname -r` ]; then                        \
+		if [ ! -d /lib/modules/`uname -r`/misc ]; then             \
+			$(INSTALL) -m 755 -d /lib/modules/`uname -r`/misc;     \
+		fi;                                                        \
+		$(INSTALL) -m 644 $(MODULE) /lib/modules/`uname -r`/misc;  \
+	else                                                           \
+		if [ ! -d /lib/modules/misc ]; then                        \
+			$(INSTALL) -d 755 /lib/modules/misc;                   \
+		fi;                                                        \
+		cp $(MODULE) /lib/modules/misc;                            \
 	fi
 endif
-	install -d $(incl_dir)
-	install -m 644 me6x00_drv.h $(incl_dir)
+	$(INSTALL) -d $(incl_dir)
+	$(INSTALL) -m 644 me6x00_drv.h $(incl_dir)
 
 clean:
-	rm -f me6x00.o *~
+	$(RM) $(RMFLAGS) me6x00.o *~

@@ -56,11 +56,11 @@ me_test: me_test.c libme6x00.so
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< -L. -lme6x00
 
 install:
-	install -d $(lib_dir)
-	install -d $(incl_dir)
-	install -m 644 libme6x00.so $(lib_dir)
-	install -m 644 libme6x00.a  $(lib_dir)
-	install -m 644 me6x00.h $(incl_dir)
+	$(INSTALL) -d $(lib_dir)
+	$(INSTALL) -d $(incl_dir)
+	$(INSTALL) -m 644 libme6x00.so $(lib_dir)
+	$(INSTALL) -m 644 libme6x00.a  $(lib_dir)
+	$(INSTALL) -m 644 me6x00.h $(incl_dir)
 
 clean:
-	rm -f *.o me_test *.so *.a *~
+	$(RM) $(RMFLAGS) *.o me_test *.so *.a *~

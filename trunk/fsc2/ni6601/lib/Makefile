@@ -28,8 +28,6 @@
 lib_dir   = $(prefix)/lib
 incl_dir  = $(prefix)/include
 
-
-CC        = gcc
 CFLAGS    = -ggdb -O2 -Wall -Wwrite-strings -Wstrict-prototypes \
 			-Wmissing-prototypes -Wmissing-declarations -W
 LDFLAGS   = -Wl,-E
@@ -57,11 +55,11 @@ ni_test: ni_test.c libni6601.so
 	$(CC) -ggdb $(CFLAGS) $(INCLUDES) -o $@ $< -L. -lni6601
 
 install:
-	install -d $(lib_dir)
-	install -d $(incl_dir)
-	install -m 644 libni6601.so $(lib_dir)
-	install -m 644 libni6601.a  $(lib_dir)
-	install -m 644 ni6601.h $(incl_dir)
+	$(INSTALL) -d $(lib_dir)
+	$(INSTALL) -d $(incl_dir)
+	$(INSTALL) -m 644 libni6601.so $(lib_dir)
+	$(INSTALL) -m 644 libni6601.a  $(lib_dir)
+	$(INSTALL) -m 644 ni6601.h $(incl_dir)
 
 clean:
-	rm -f *.o ni_test *.so *.a *~
+	$(RM) $(RMFLAGS) *.o ni_test *.so *.a *~

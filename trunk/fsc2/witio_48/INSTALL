@@ -234,12 +234,22 @@ fi
 
 # Compile the driver and the library
 
-echo "Compiling driver and library, please wait..."
-make all > makelog 2>&1
+echo "Compiling the driver, please wait..."
+make driver > makelog 2>&1
 
 if [ $? -ne 0 ]; then
     dialog --msgbox \
-"  Sorry, compilation failed.\nSee \"makelog\" for the reasons.\n" 7 35;
+"Sorry, compiling the driver failed.\nSee \"makelog\" for the reasons.\n" 7 40;
+    exit 1;
+fi
+
+echo "Compiling the library, please wait..."
+make lib >> makelog 2>&1
+
+if [ $? -ne 0 ]; then
+    dialog --msgbox \
+"Sorry, compiling the library failed.\n\
+See \"makelog\" for the reasons.\n" 7 45;
     exit 1;
 fi
 

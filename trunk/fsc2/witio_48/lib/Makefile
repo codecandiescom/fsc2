@@ -29,7 +29,6 @@ lib_dir   = $(prefix)/lib
 incl_dir  = $(prefix)/include
 
 
-CC        = gcc
 CFLAGS    = -ggdb -O2 -Wall -Wwrite-strings -Wstrict-prototypes \
 			-Wmissing-prototypes -Wmissing-declarations -W
 LDFLAGS   = -Wl,-E
@@ -51,14 +50,14 @@ libwitio_48.a: ${sources:.c=.o} $(headers)
 	ar crs $@ ${sources:.c=.o}
 
 %.o: %.c $(headers)
-	$(CC) -ggdb $(CFLAGS) $(INCLUDES) -c -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
 install:
-	install -d $(lib_dir)
-	install -d $(incl_dir)
-	install -m 644 libwitio_48.so $(lib_dir)
-	install -m 644 libwitio_48.a  $(lib_dir)
-	install -m 644 witio_48.h $(incl_dir)
+	$(INSTALL) -d $(lib_dir)
+	$(INSTALL) -d $(incl_dir)
+	$(INSTALL) -m 644 libwitio_48.so $(lib_dir)
+	$(INSTALL) -m 644 libwitio_48.a  $(lib_dir)
+	$(INSTALL) -m 644 witio_48.h $(incl_dir)
 
 clean:
-	rm -f *.o *.so *.a *~
+	$(RM) $(RMFLAGS) *.o *.so *.a *~

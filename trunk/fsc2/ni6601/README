@@ -105,6 +105,11 @@ script:
    subdirectory. Please choose something reasonable or use the default
    '/usr/local'.
 
+When you tell the script to compile the driver and library output of
+the make process gets redirected into a file called "makelog" in the
+main directory. This is the place to look for in case compiling the
+driver or the library should fail.
+
 It is possible that after installing the libraries the linker still has
 problems finding them. In this case you may have to run 'ldconfig' to
 rebuild the linkers database of libraries.

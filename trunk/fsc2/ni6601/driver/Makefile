@@ -25,7 +25,6 @@
 # Jens.Toerring@physik.fu-berlin.de
 
 
-
 ifneq ($(NI6601_KERNEL_SOURCE),)
     KERNEL_INC = $(ME6X00_KERNEL_SOURCE)
 else
@@ -42,8 +41,6 @@ HEADERS  = ni6601_drv.h autoconf.h
 INCLUDES = -I$(KERNEL_SRC)/include -I.
 
 CFLAGS   = -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes
-
-CC       = gcc
 
 incl_dir = $(prefix)/include
 
@@ -62,20 +59,20 @@ $(MODULE): $(SOURCES:.c=.o)
 
 install:
 ifeq ($(NI6601_KERNEL_SOURCE),)
-	if [ -d /lib/modules/`uname -r` ]; then                     \
-		if [ ! -d /lib/modules/`uname -r`/misc ]; then          \
-			install -m 755 -d /lib/modules/`uname -r`/misc;     \
-		fi;                                                     \
-		install -m 644 $(MODULE) /lib/modules/`uname -r`/misc;  \
-	else                                                        \
-		if [ ! -d /lib/modules/misc ]; then                     \
-			install -d 755 /lib/modules/misc;                   \
-		fi;                                                     \
-		cp $(MODULE) /lib/modules/misc;                         \
+	if [ -d /lib/modules/`uname -r` ]; then                        \
+		if [ ! -d /lib/modules/`uname -r`/misc ]; then             \
+			$(INSTALL) -m 755 -d /lib/modules/`uname -r`/misc;     \
+		fi;                                                        \
+		$(INSTALL) -m 644 $(MODULE) /lib/modules/`uname -r`/misc;  \
+	else                                                           \
+		if [ ! -d /lib/modules/misc ]; then                        \
+			$(INSTALL) -d 755 /lib/modules/misc;                   \
+		fi;                                                        \
+		cp $(MODULE) /lib/modules/misc;                            \
 	fi
 endif
-	install -d $(incl_dir)
-	install -m 644 ni6601_drv.h $(incl_dir)
+	$(INSTALL) -d $(incl_dir)
+	$(INSTALL) -m 644 ni6601_drv.h $(incl_dir)
 
 clean:
-	rm -f *.o *~
+	$(RM) $(RMFLAGS) *.o *~
