@@ -52,7 +52,6 @@ bool hfs9000_new_pulse( long pnum )
 	cp->is_old_pos = cp->is_old_len = UNSET;
 
 	cp->channel = NULL;
-	
 	cp->needs_update = UNSET;
 	cp->has_been_active = cp->was_active = UNSET;
 
@@ -79,8 +78,8 @@ bool hfs9000_set_pulse_function( long pnum, int function )
 
 	if ( p->is_function )
 	{
-		eprint( FATAL, "%s:%ld: %s: The function of pulse %ld has already "
-				"been set to `%s'.\n", Fname, Lc, pulser_struct.name, pnum,
+		eprint( FATAL, "%s:%ld: %s: Function of pulse %ld has already been "
+				"set to `%s'.\n", Fname, Lc, pulser_struct.name, pnum,
 				Function_Names[ p->function->self ] );
 		THROW( EXCEPTION );
 	}
@@ -206,11 +205,12 @@ bool hfs9000_set_pulse_length( long pnum, double time )
 	}
 
 	if ( p->function != NULL && p->function->self == HFS9000_TRIG_OUT &&
-		 hfs9000_double2ticks( time ) > 1 )
+		 ( time > 1.01 * HFS9000_TRIG_OUT_PULSE_LEN ||
+		   time < 0.99 * HFS9000_TRIG_OUT_PULSE_LEN )
 	{
 		eprint( FATAL, "%s:%ld: %s: Length of pulse for TRIGGER_OUT can be "
 				"only either 0 or %s.\n", Fname, Lc, pulser_struct.name,
-				hfs9000_ptime( hfs9000.timebase ) );
+				hfs9000_ptime( HFS9000_TRIG_OUT_PULSE_LEN ) );
 		THROW( EXCEPTION );
 	}
 
@@ -470,11 +470,12 @@ bool hfs9000_change_pulse_length( long pnum, double time )
 	}
 
 	if ( p->function->self == HFS9000_TRIG_OUT &&
-		 hfs9000_double2ticks( time ) > 1 )
+		 ( time > 1.01 * HFS9000_TRIG_OUT_PULSE_LEN ||
+		   time < 0.99 * HFS9000_TRIG_OUT_PULSE_LEN )
 	{
 		eprint( FATAL, "%s:%ld: %s: Length of pulse for TRIGGER_OUT can only "
 				"be either 0 or %s.\n", Fname, Lc, pulser_struct.name,
-				hfs9000_ptime( hfs9000.timebase ) );
+				hfs9000_ptime( HFS9000_TRIG_OUT_PULSE_LEN ) );
 		THROW( EXCEPTION );
 	}
 
