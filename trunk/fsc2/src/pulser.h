@@ -33,6 +33,7 @@ typedef struct {
 	bool ( *set_repeat_time )( double time );
 	bool ( *set_trig_in_level )( double voltage );
 	bool ( *set_trig_in_slope )( int slope );
+	bool ( *set_trig_in_impedance )( int state );
 
 	bool ( *set_phase_reference )( int phase, int function );
 
@@ -79,6 +80,7 @@ void p_set_timebase( Var *v );
 void p_set_trigger_mode( Var *v);
 void p_set_trigger_slope( Var *v );
 void p_set_trigger_level( Var *v );
+void p_set_trigger_impedance( Var *v );
 void p_set_rep_time( Var *v );
 void p_set_rep_freq( Var *v );
 void p_phase_ref( long function, int ref );

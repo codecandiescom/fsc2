@@ -87,6 +87,13 @@ enum {
 	EXTERNAL,
 };
 
+/* definition for HIGH/LOW states */
+
+enum {
+	LOW,
+	HIGH,
+};
+
 /* some definitions used in graphic */
 
 enum {
