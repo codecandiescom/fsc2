@@ -69,6 +69,7 @@
 #include "accept.h"
 #include "graph_handler_1d.h"
 #include "graph_handler_2d.h"
+#include "print.h"
 
 
 /* The diverse lexers */

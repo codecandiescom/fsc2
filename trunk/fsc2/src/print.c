@@ -31,6 +31,7 @@ static int get_print_file( FILE **fp, char **name );
 static void print_header( FILE *fp, char *name );
 static void eps_make_scale( FILE *fp, void *cv, int coord );
 static void eps_draw_curve_1d( FILE *fp, int i );
+static void eps_draw_contour( FILE *fp, int cn );
 
 static void do_print( char *name, const char *command );
 static int start_printing( char **argv, char *name );
@@ -116,7 +117,7 @@ void print_2d( FL_OBJECT *obj, long data )
 {
 	int type;
 	FILE *fp;
-	char *name;
+	char *name = NULL;
 
 
 	data = data;
@@ -158,8 +159,13 @@ void print_2d( FL_OBJECT *obj, long data )
 	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp clip newpath\n",
 			 x_0 - 0.1, y_0 - 0.1, h + 0.2, w + 0.2, - ( h + 0.2 ) );
 
+	eps_draw_contour( fp, G.active_curve );
+
 	fprintf( fp, "showpage\n" );
 	fclose( fp );
+
+	if ( print_type == S2P )
+		do_print( name, cmd );
 
 	if ( name != NULL )
 	{
@@ -179,7 +185,7 @@ void print_2d( FL_OBJECT *obj, long data )
 int get_print_file( FILE **fp, char **name )
 {
 	FL_OBJECT *obj;
-	char filename[ ] = P_tmpdir "/fsc2XXXXXX";
+	char filename[ ] = P_tmpdir "/fsc2.eps.XXXXXX";
 	struct stat stat_buf;
 
 
@@ -420,10 +426,10 @@ void print_callback( FL_OBJECT *obj, long data )
 		return;
 	}
 
-	if ( obj = print_form->bw_button )
+	if ( obj == print_form->bw_button )
 		is_color = UNSET;
 
-	if ( obj = print_form->col_button )
+	if ( obj == print_form->col_button )
 		is_color = SET;
 }
 
@@ -472,6 +478,7 @@ void print_header( FILE *fp, char *name )
 				 "/sf { exch findfont exch scalefont setfont } bind def\n"
 			     "/gs { gsave } bind def\n"
 			     "/gr { grestore } bind def\n"
+			     "/sgr { setgray } bind def\n"
 			     "/slc { setlinecap } bind def\n"
 			     "/ch { gs newpath 0 0 moveto\n"
 			     "      false charpath flattenpath pathbbox\n"
@@ -480,7 +487,7 @@ void print_header( FILE *fp, char *name )
 	             "      false charpath flattenpath pathbbox\n"
 	             "      pop exch pop exch pop gr } bind def\n"
 			     "/fsc2 { gs m /Times-Roman 8 sf\n"
-			     "        1 -0.025 0 { setgray gs (fsc2) show gr\n"
+			     "        1 -0.025 0 { sgr gs (fsc2) show gr\n"
 			     "        -0.025 0.025 rm } for\n"
 			     "        1 setgray (fsc2) show gr } bind def\n"
 			     "%%%%EndProlog\n" );
@@ -781,6 +788,137 @@ void eps_draw_curve_1d( FILE *fp, int i )
 }
 
 
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
+void eps_draw_contour( FILE *fp, int cn )
+{
+	Curve_2d *cv = G.curve_2d[ cn ];
+	double s2d[ 2 ] = { w * cv->s2d[ X ] / G.canvas.w,
+						h * cv->s2d[ Y ] / G.canvas.h };
+	double dw = s2d[ X ] / 2,
+		   dh = s2d[ Y ] / 2;
+	double curp;
+	double z;
+	long i, j, k;
+	double z1, z2, g;
+	int rgb[ 3 ];
+
+
+	fprintf( fp, "gs\n" );
+
+	curp = s2d[ X ] * cv->shift[ X ];
+	if ( curp - dw > 0 )
+		fprintf( fp, "0.5 sgr\n"
+				 "%f %f m\n"
+				 "%f 0 rl\n"
+				 "0 %f rl\n"
+				 "%f 0 rl\n"
+				 "cp fill\n",
+				 x_0, y_0, curp - dw, h, - ( curp - dw ) );
+
+	curp = s2d[ X ] * ( G.nx - 1 + cv->shift[ X ] );
+	if ( w > curp + dw )
+		fprintf( fp, "0.5 sgr\n"
+				 "%f %f m\n"
+				 "0 %f rl\n"
+				 "%f 0 rl\n"
+				 "0 %f rl\n"
+				 "cp fill\n",
+				 x_0 + curp + dw , y_0, h, w - ( curp + dw ), - h );
+
+	curp = s2d[ Y ] * cv->shift[ Y ];
+	if ( curp - dh > 0 )
+		fprintf( fp, "0.5 sgr\n"
+				 "%f %f m\n"
+				 "%f 0 rl\n"
+				 "0 %f rl\n"
+				 "%f 0 rl cp\n"
+				 "fill\n",
+				 x_0, y_0, w, curp - dh, - w );
+
+	curp = s2d[ Y ] * ( G.ny - 1 + cv->shift[ Y ] );
+	if ( h > curp + dh )
+		fprintf( fp, "0.5 sgr\n"
+				 "%f %f m\n"
+				 "%f 0 rl\n"
+				 "0 %f rl\n"
+				 "%f 0 rl\n"
+				 "cp fill\n",
+				 x_0, y_0 + curp + dh , w, h - ( curp + dh ), - w );
+
+	for ( g = 1.0, z = 0.0; z <= 1.0; g -= 0.045, z += 0.05 )
+		for ( k = 0, j = 0; j < G.ny; j++ )
+			for ( i = 0; i < G.nx; i++, k++ ) 
+			{
+				if ( ! cv->points[ k ].exist )
+				{
+					fprintf( fp, "gs 0.5 sgr\n"
+							 "%f %f m\n"
+							 "0 %f 2 copy rl\n"
+							 "%f 0 rl\n"
+							 "neg rl cp fill gr\n",
+							 x_0 + s2d[ X ] * ( i + cv->shift[ X ] ) - dw,
+							 y_0 + s2d[ Y ] * ( j + cv->shift[ X ] ) - dh,
+							 2.0 * dh, 2.0 * dw );
+					continue;
+				}
+
+				if ( i < G.nx - 1 && cv->points[ k + 1 ].exist )
+				{
+					z1 = cv->z_factor * ( cv->points[ k ].v + cv->shift[ Z ] );
+					z2 = cv->z_factor
+						          * ( cv->points[ k + 1 ].v + cv->shift[ Z ] );
+
+					if ( ( z1 >= z && z2 < z ) || ( z1 < z && z2 >= z ) )
+					{
+						if ( is_color )
+						{
+							i2rgb( z, rgb );
+							fprintf( fp, "%f %f %f srgb ",
+									 ( double ) rgb[ RED ]   / 255.0,
+									 ( double ) rgb[ GREEN ] / 255.0,
+									 ( double ) rgb[ BLUE ]  / 255.0 );
+						}
+						else
+							fprintf( fp, "%f sgr ", g );
+						fprintf( fp, "%f %f m 0 %f rl s\n",
+								 x_0 + s2d[ X ] * ( i + cv->shift[ X ] ) + dw,
+								 y_0 + s2d[ Y ] * ( j + cv->shift[ Y ] ) - dh,
+								 2.0 * dh );
+					}
+				}
+
+				if ( j < G.ny - 1 && cv->points[ ( j + 1 ) * G.nx + i ].exist )
+				{
+					z1 = cv->z_factor * ( cv->points[ k ].v + cv->shift[ Z ] );
+					z2 = cv->z_factor * ( cv->points[ ( j + 1 ) * G.nx + i ].v
+										  + cv->shift[ Z ] );
+
+					if ( ( z1 >= z && z2 < z ) || ( z1 < z && z2 >= z ) )
+					{
+						if ( is_color )
+						{
+							i2rgb( z, rgb );
+							fprintf( fp, "%f %f %f srgb ",
+									 ( double ) rgb[ RED ]   / 255.0,
+									 ( double ) rgb[ GREEN ] / 255.0,
+									 ( double ) rgb[ BLUE ]  / 255.0 );
+						}
+						else
+							fprintf( fp, "%f sgr ", g );
+						fprintf( fp, "%f %f m %f 0 rl s\n",
+								 x_0 + s2d[ X ] * ( i + cv->shift[ X ] ) - dw,
+								 y_0 + s2d[ Y ] * ( j + cv->shift[ Y ] ) + dh,
+								 2.0 * dw );
+					}
+				}
+			}
+
+	fprintf( fp, "gr\n" );
+}
+
+
 /* Some implementation details: If we want to send data directly to the
    printer the best way would seem to be to simply create a pipe via popen()
    to lpr (or whatever the appropriate print command is) and then write the
@@ -834,29 +972,24 @@ void do_print( char *name, const char *command )
 		argv[ 0 ] = cptr = cmd_line;
 		argc = 1;
 
-		while ( 1 )
+		while ( ( cptr = strchr( cptr, ' ' ) ) != NULL )
 		{
-			cptr = strchr( cptr, '-' );
-
-			if ( cptr == NULL )         /* no (more) options */
-				break;
-
 			if ( cptr < cmd_line + 2 )
 			{
 				fl_show_alert( "Error", "Sorry, bad print command.", NULL, 1 );
 				THROW( EXCEPTION );
 			}
 
-			if ( *( cptr - 1 ) == ' ' )
+			*cptr = '\0';
+			while ( *++cptr == ' ' )
+				;
+
+			if ( *cptr != '\0' )
 			{
-				*( cptr - 1 ) = '\0';
 				argv = T_realloc( argv, ( argc + 3 ) * sizeof( char * ) );
 				argv[ argc++ ] = cptr;
 			}
-
-			if ( *++cptr == '\0' )      /* setup check for more options */
-				break;
-		}
+		};
 
 		argv[ argc++ ] = name;          /* finally, append the file name */
 		argv[ argc ] = NULL;            /* end of the argument list */
@@ -896,6 +1029,8 @@ void do_print( char *name, const char *command )
 int start_printing( char **argv, char *name )
 {
 	int status = EXIT_FAILURE;
+	char *a;
+	int i;
 
 
 	signal( SIGCHLD, SIG_IGN );  /* we don't need SIGCHLD signals */
@@ -908,7 +1043,13 @@ int start_printing( char **argv, char *name )
 
 		case 0 :                 /* the child finally execs....*/
 			if ( execvp( argv[ 0 ], argv ) < 0 )
+			{
+				fprintf( stderr, "fsc2: print command failed:" );
+				for ( i = 0, a = argv[ 0 ]; a != NULL; a = argv[ ++i ] )
+					fprintf( stderr, " %s", a );
+				fprintf( stderr, "\n" );
 				_exit( EXIT_FAILURE );
+			}
 
 		default :                /* the parent waits for the child to finish */
 			wait( &status );
