@@ -119,7 +119,7 @@ Phase_Sequence *phase_seq_start( long phase_seq_num )
 
 void phases_add_phase( Phase_Sequence *p, int phase_type )
 {
-	assert ( phase_type >= PHASE_TYPES_MAX && phase_type <= PHASE_TYPES_MAX );
+	assert ( phase_type >= PHASE_TYPES_MIN && phase_type <= PHASE_TYPES_MAX );
 
 	/* append the new phase to the sequence */
 

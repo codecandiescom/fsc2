@@ -449,19 +449,20 @@ phs:      PHS_TOK                  { Cur_PHS = $1;
 
 phsl:     /* empty */
         | phsl PXY_TOK sep1        { Cur_PHST = $2; }
-          phsp sep2
+          phsp
 ;
 
 phsp:    /* empty */
-		| phsp phsv                { p_phs_setup( Cur_PHS, Cur_PHST, -1, $2,
+		| phsp phsv  sep2          { p_phs_setup( Cur_PHS, Cur_PHST, -1, $2,
 												  Cur_PROT ); }
         | phsp POD1_TOK sep1
-		  phsv                     { p_phs_setup( Cur_PHS, Cur_PHST, 0, $4,
+		  phsv  sep2               { p_phs_setup( Cur_PHS, Cur_PHST, 0, $4,
 												  PHASE_FFM_PROT ); }
         | phsp POD2_TOK sep1
-		  phsv                     { p_phs_setup( Cur_PHS, Cur_PHST, 1, $4,
+		  phsv  sep2               { p_phs_setup( Cur_PHS, Cur_PHST, 1, $4,
 												  PHASE_FFM_PROT ); }
-		| POD_TOKEN sep1 INT_TOKEN { p_phs_setup( Cur_PHS, Cur_PHST, 0, $3,
+		| POD_TOKEN sep1 INT_TOKEN
+          sep2                     { p_phs_setup( Cur_PHS, Cur_PHST, 0, $3,
 												  PHASE_BLN_PROT ); }
 ;
 
