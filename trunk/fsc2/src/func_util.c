@@ -46,6 +46,7 @@ static bool print_array( Var *v, long cur_dim, long *start, int fid );
 static bool print_slice( Var *v, int fid );
 static void format_check( Var *v );
 static long do_printf( int file_num, Var *v );
+static void handle_escape( char *fmt_end );
 static bool print_browser( int browser, int fid, const char* comment );
 static int T_fprintf( int file_num, const char *fmt, ... );
 
@@ -2594,7 +2595,6 @@ static long do_printf( int file_num, Var *v )
 	char store;
 	int need_vars;
 	int need_type;
-	int esc_len;
 
 	
 	sptr = v->val.sptr;
@@ -2605,7 +2605,6 @@ static long do_printf( int file_num, Var *v )
 
 	TRY
 	{
-
 		/* Print everything up to the first conversion specifier */
 
 		while ( *fmt_end != '\0' )
@@ -2621,136 +2620,7 @@ static long do_printf( int file_num, Var *v )
 					break;
 			}
 			else if ( *fmt_end == '\\' )
-			{
-				switch ( *( fmt_end + 1 ) )
-				{
-					case 'a' :
-						*fmt_end = '\a';
-						memmove( fmt_end + 1, fmt_end + 2,
-								 strlen( fmt_end + 1 ) );
-						break;
-
-					case 'b' :
-						*fmt_end = '\b';
-						memmove( fmt_end + 1, fmt_end + 2,
-								 strlen( fmt_end + 1) );
-						break;
-
-					case 'f' :
-						*fmt_end = '\f';
-						memmove( fmt_end + 1, fmt_end + 2,
-								 strlen( fmt_end + 1 ) );
-						break;
-
-					case 'n' :
-						*fmt_end = '\n';
-						memmove( fmt_end + 1, fmt_end + 2,
-								 strlen( fmt_end + 1 ) );
-						break;
-
-					case 'r' :
-						*fmt_end = '\r';
-						memmove( fmt_end + 1, fmt_end + 2,
-								 strlen( fmt_end + 1 ) );
-						break;
-
-					case 't' :
-						*fmt_end = '\t';
-						memmove( fmt_end + 1, fmt_end + 2,
-								 strlen( fmt_end + 1 ) );
-						break;
-
-					case 'v' :
-						*fmt_end = '\v';
-						memmove( fmt_end + 1, fmt_end + 2,
-								 strlen( fmt_end + 1 ) );
-						break;
-
-					case '\\' :
-						*fmt_end = '\\';
-						memmove( fmt_end + 1, fmt_end + 2,
-								 strlen( fmt_end + 1 ) );
-						break;
-
-					case '\?' :
-						*fmt_end = '\?';
-						memmove( fmt_end + 1, fmt_end + 2,
-								 strlen( fmt_end + 1 ) );
-						break;
-
-					case '\'' :
-						*fmt_end = '\'';
-						memmove( fmt_end + 1, fmt_end + 2,
-								 strlen( fmt_end + 1 ) );
-						break;
-
-					case '\"' :
-						*fmt_end = '\"';
-						memmove( fmt_end + 1, fmt_end + 2,
-								 strlen( fmt_end + 1 ) );
-						break;
-
-					case 'x' :
-						if ( ! isdigit( *( fmt_end + 2 ) ) &&
-							 ( toupper( *( fmt_end + 2 ) ) < 'A' ||
-							   toupper( *( fmt_end + 2 ) ) > 'F' ) )
-						{
-							eprint( FATAL, SET, "'\\x' used with no following "
-									"hex digits in format string in %s().\n",
-									Cur_Func );
-							THROW( EXCEPTION );
-						}
-						esc_len = 1;
-						*fmt_end = isdigit( *fmt_end + 2 ) ?
-							       *fmt_end - '0' : *fmt_end - 'A' + 10;
-
-						if ( isdigit( *( fmt_end + 3 ) ) ||
-							 ( toupper( *( fmt_end + 3 ) ) >= 'A' &&
-							   toupper( *( fmt_end + 3 ) ) <= 'F' ) )
-						{
-							esc_len++;
-						    *fmt_end = *fmt_end * 16 + 
-                                       + isdigit( *fmt_end + 3 ) ?
-							             *fmt_end - '0' : *fmt_end - 'A' + 10;
-						}
-
-						memmove( fmt_end + 1, fmt_end + 2 + esc_len,
-								 strlen( fmt_end + 1 + esc_len ) );
-						break;
-
-					default :
-						if ( *( fmt_end + 1 ) < '0' || *( fmt_end + 1 ) > '7' )
-						{
-							eprint( FATAL, SET, "Unknown escape sequence "
-									"'\\%c' in format string in %s().\n",
-									Cur_Func, *( fmt_end + 1 ) );
-							THROW( EXCEPTION );
-						}
-
-						*fmt_end = *( fmt_end + 1 ) - '0';
-						esc_len = 1;
-
-						if ( *( fmt_end + 2 ) >= '0' &&
-							 *( fmt_end + 2 ) <= '7' )
-						{
-							*fmt_end = *fmt_end * 8 + *( fmt_end + 2 ) - '0';
-							esc_len = 2;
-
-							if ( *( fmt_end + 3 ) >= '0' &&
-								 *( fmt_end + 3 ) <= '7' &&
-								 *fmt_end < 0x1F )
-							{
-								*fmt_end = *fmt_end * 8
-									       + *( fmt_end + 3 ) - '0';
-								esc_len = 3;
-							}
-						}
-
-						memmove( fmt_end + 1, fmt_end + 1 + esc_len,
-								 strlen( fmt_end + esc_len ) );
-						break;
-				}
-			}
+				handle_escape( fmt_end );
 
 			fmt_end++;
 		}
@@ -2771,6 +2641,10 @@ static long do_printf( int file_num, Var *v )
 		sptr += fmt_end - fmt_start;
 		strcpy( fmt_start, sptr );
 		fmt_end = fmt_start + 1;
+
+		/* Now repeat printing starting each time with a conversion specifier
+		   and ending just before the next one until end of format string
+		   is found */
 
 		while ( 1 )
 		{
@@ -2810,8 +2684,12 @@ static long do_printf( int file_num, Var *v )
 
 			if ( *fmt_end == 'd' || *fmt_end == 'i' )
 			{
+				/* We need to print as long int, so insert a 'l' in front of
+				   the 'd' */
+
 				memmove( fmt_end + 1, fmt_end, strlen( fmt_end ) + 1 );
 				*fmt_end++ = 'l';
+
 				need_type = 1;       /* integer */
 				need_vars++;
 			}
@@ -2825,9 +2703,14 @@ static long do_printf( int file_num, Var *v )
 
 			if ( *fmt_end == 'n' )
 			{
+				/* Print the pint count as an integer */
+
 				*fmt_end = 'd';
 				need_type = 3;       /* count */
 			}
+
+			/* Now get rest of string until the next conversion specifier or
+			   the end of the format string is reached */
 
 			while ( *fmt_end != '\0' )
 			{
@@ -2842,140 +2725,7 @@ static long do_printf( int file_num, Var *v )
 						break;
 				}
 				else if ( *fmt_end == '\\' )
-				{
-					fprintf( stderr, "->%s\n", fmt_end );
-
-					switch ( *( fmt_end + 1 ) )
-					{
-						case 'a' :
-							*fmt_end = '\a';
-							memmove( fmt_end + 1, fmt_end + 2,
-									 strlen( fmt_end + 1 ) );
-							break;
-
-						case 'b' :
-							*fmt_end = '\b';
-							memmove( fmt_end + 1, fmt_end + 2,
-									 strlen( fmt_end + 1 ) );
-							break;
-
-						case 'f' :
-							*fmt_end = '\f';
-							memmove( fmt_end + 1, fmt_end + 2,
-									 strlen( fmt_end + 1 ) );
-							break;
-
-						case 'n' :
-							*fmt_end = '\n';
-							memmove( fmt_end + 1, fmt_end + 2,
-									 strlen( fmt_end + 1 ) );
-							break;
-
-						case 'r' :
-							*fmt_end = '\r';
-							memmove( fmt_end + 1, fmt_end + 2,
-									 strlen( fmt_end + 1) );
-							break;
-
-						case 't' :
-							*fmt_end = '\t';
-							memmove( fmt_end + 1, fmt_end + 2,
-									 strlen( fmt_end + 1 ) );
-							break;
-
-						case 'v' :
-							*fmt_end = '\v';
-							memmove( fmt_end + 1, fmt_end + 2,
-									 strlen( fmt_end + 1 ) );
-							break;
-
-						case '\\' :
-							*fmt_end = '\\';
-							memmove( fmt_end + 1, fmt_end + 2,
-									 strlen( fmt_end + 1 ) );
-							break;
-
-						case '\?' :
-							*fmt_end = '\?';
-							memmove( fmt_end + 1, fmt_end + 2,
-									 strlen( fmt_end + 1 ) );
-							break;
-
-						case '\'' :
-							*fmt_end = '\'';
-							memmove( fmt_end + 1, fmt_end + 2,
-									 strlen( fmt_end + 1) );
-							break;
-
-						case '\"' :
-							*fmt_end = '\"';
-							memmove( fmt_end + 1, fmt_end + 2,
-									 strlen( fmt_end + 1 ) );
-							break;
-
-						case 'x' :
-							if ( ! isdigit( *( fmt_end + 2 ) ) &&
-								 ( toupper( *( fmt_end + 2 ) ) < 'A' ||
-								   toupper( *( fmt_end + 2 ) ) > 'F' ) )
-							{
-								eprint( FATAL, SET, "'\\x' used with no "
-										"following hex digits in format "
-										"string in %s().\n", Cur_Func );
-								THROW( EXCEPTION );
-							}
-							esc_len = 1;
-							*fmt_end = isdigit( *fmt_end + 2 ) ?
-								       *fmt_end - '0' : *fmt_end - 'A' + 10;
-
-							if ( isdigit( *( fmt_end + 3 ) ) ||
-								 ( toupper( *( fmt_end + 3 ) ) >= 'A' &&
-								   toupper( *( fmt_end + 3 ) ) <= 'F' ) )
-							{
-								esc_len++;
-								*fmt_end = *fmt_end * 16 + 
-                                         + isdigit( *fmt_end + 3 ) ?
-							              *fmt_end - '0' : *fmt_end - 'A' + 10;
-							}
-
-							memmove( fmt_end + 1, fmt_end + 2 + esc_len,
-									 strlen( fmt_end + 1 + esc_len ) );
-							break;
-
-						default :
-							if ( *( fmt_end + 1 ) < '0' ||
-								 *( fmt_end + 1 ) > '7' )
-							{
-								eprint( FATAL, SET, "Unknown escape sequence "
-										"'\\%c' in format string in %s().\n",
-										Cur_Func, *( fmt_end + 1 ) );
-								THROW( EXCEPTION );
-							}
-
-							*fmt_end = *( fmt_end + 1 ) - '0';
-							esc_len = 1;
-
-							if ( *( fmt_end + 2 ) >= '0' &&
-								 *( fmt_end + 2 ) <= '7' )
-							{
-								*fmt_end = *fmt_end * 8
-									       + *( fmt_end + 2 ) - '0';
-								esc_len = 2;
-
-								if ( *( fmt_end + 3 ) >= '0' &&
-									 *( fmt_end + 3 ) <= '7' &&
-									 *fmt_end < 0x1F )
-								{
-									*fmt_end = *fmt_end * 8
-										       + *( fmt_end + 3 ) - '0';
-									esc_len = 3;
-								}
-							}
-
-							memmove( fmt_end + 1, fmt_end + 1 + esc_len,
-									 strlen( fmt_end + esc_len ) );
-							break;
-					}
-				}
+					handle_escape( fmt_end );
 
 				fmt_end++;
 			}
@@ -2983,15 +2733,10 @@ static long do_printf( int file_num, Var *v )
 			store = *fmt_end;
 			*fmt_end = '\0';
 
-			fprintf( stderr, "->%s<- %d %d\n", fmt_start, need_vars,
-					 need_type  );
-			fflush( stderr );
-
 			switch ( need_vars )
 			{
 				case 0 :
 					fsc2_assert( need_type == 3 );        /* must be a count */
-					fprintf( stderr, "count\n" );
 					count += T_fprintf( file_num, fmt_start, count );
 					break;
 
@@ -2999,25 +2744,21 @@ static long do_printf( int file_num, Var *v )
 					switch ( need_type )
 					{
 						case 0 :
-							fprintf( stderr, "string\n" );
 							count += T_fprintf( file_num, fmt_start,
 												cv->val.sptr );
 							break;
 
 						case 1 :
-							fprintf( stderr, "int\n" );
 							count += T_fprintf( file_num, fmt_start,
 												cv->val.lval );
 							break;
 
 						case 2 :
-							fprintf( stderr, "double\n" );
 							count += T_fprintf( file_num, fmt_start,
 												cv->val.dval );
 							break;
 
 						case 3 :
-							fprintf( stderr, "num count\n" );
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval, count );
 							break;
@@ -3033,28 +2774,24 @@ static long do_printf( int file_num, Var *v )
 					switch ( need_type )
 					{
 						case 0 :
-							fprintf( stderr, "num string\n" );
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
 												cv->next->val.sptr );
 							break;
 
 						case 1 :
-							fprintf( stderr, "num int\n" );
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
 												cv->next->val.lval );
 							break;
 
 						case 2 :
-							fprintf( stderr, "num double\n" );
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
 												cv->next->val.dval );
 							break;
 
 						case 3 :
-							fprintf( stderr, "num num count\n" );
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
 												( int ) cv->next->val.lval,
@@ -3072,7 +2809,6 @@ static long do_printf( int file_num, Var *v )
 					switch ( need_type )
 					{
 						case 0 :
-							fprintf( stderr, "num num string\n" );
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
 												( int ) cv->next->val.lval,
@@ -3080,7 +2816,6 @@ static long do_printf( int file_num, Var *v )
 							break;
 
 						case 1 :
-							fprintf( stderr, "num num int\n" );
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
 												( int ) cv->next->val.lval,
@@ -3088,7 +2823,6 @@ static long do_printf( int file_num, Var *v )
 							break;
 
 						case 2 :
-							fprintf( stderr, "num num double\n" );
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
 												( int ) cv->next->val.lval,
@@ -3124,6 +2858,130 @@ static long do_printf( int file_num, Var *v )
 
 	T_free( fmt_start );
 	return ( long ) count;
+}
+
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
+static void handle_escape( char *fmt_end )
+{
+	int esc_len;
+
+
+	switch ( *( fmt_end + 1 ) )
+	{
+		case 'a' :
+			*fmt_end = '\a';
+			memmove( fmt_end + 1, fmt_end + 2, strlen( fmt_end + 1 ) );
+			break;
+
+		case 'b' :
+			*fmt_end = '\b';
+			memmove( fmt_end + 1, fmt_end + 2, strlen( fmt_end + 1) );
+			break;
+
+		case 'f' :
+			*fmt_end = '\f';
+			memmove( fmt_end + 1, fmt_end + 2, strlen( fmt_end + 1 ) );
+			break;
+
+		case 'n' :
+			*fmt_end = '\n';
+			memmove( fmt_end + 1, fmt_end + 2, strlen( fmt_end + 1 ) );
+			break;
+
+		case 'r' :
+			*fmt_end = '\r';
+			memmove( fmt_end + 1, fmt_end + 2, strlen( fmt_end + 1 ) );
+			break;
+
+		case 't' :
+			*fmt_end = '\t';
+			memmove( fmt_end + 1, fmt_end + 2, strlen( fmt_end + 1 ) );
+			break;
+
+		case 'v' :
+			*fmt_end = '\v';
+			memmove( fmt_end + 1, fmt_end + 2, strlen( fmt_end + 1 ) );
+			break;
+
+		case '\\' :
+			*fmt_end = '\\';
+			memmove( fmt_end + 1, fmt_end + 2, strlen( fmt_end + 1 ) );
+			break;
+
+		case '\?' :
+			*fmt_end = '\?';
+			memmove( fmt_end + 1, fmt_end + 2, strlen( fmt_end + 1 ) );
+			break;
+
+		case '\'' :
+			*fmt_end = '\'';
+			memmove( fmt_end + 1, fmt_end + 2, strlen( fmt_end + 1 ) );
+			break;
+
+		case '\"' :
+			*fmt_end = '\"';
+			memmove( fmt_end + 1, fmt_end + 2, strlen( fmt_end + 1 ) );
+			break;
+
+		case 'x' :
+			if ( ! isdigit( *( fmt_end + 2 ) ) &&
+				 ( toupper( *( fmt_end + 2 ) ) < 'A' ||
+				   toupper( *( fmt_end + 2 ) ) > 'F' ) )
+			{
+				eprint( FATAL, SET, "'\\x' with no following hex digits in "
+						"format string in %s().\n", Cur_Func );
+				THROW( EXCEPTION );
+			}
+			esc_len = 1;
+			*fmt_end = isdigit( *fmt_end + 2 ) ?
+				*fmt_end - '0' : *fmt_end - 'A' + 10;
+
+			if ( isdigit( *( fmt_end + 3 ) ) ||
+				 ( toupper( *( fmt_end + 3 ) ) >= 'A' &&
+				   toupper( *( fmt_end + 3 ) ) <= 'F' ) )
+			{
+				esc_len++;
+				*fmt_end = *fmt_end * 16 + 
+					+ isdigit( *fmt_end + 3 ) ?
+					*fmt_end - '0' : *fmt_end - 'A' + 10;
+			}
+
+			memmove( fmt_end + 1, fmt_end + 2 + esc_len,
+					 strlen( fmt_end + 1 + esc_len ) );
+			break;
+
+		default :
+			if ( *( fmt_end + 1 ) < '0' || *( fmt_end + 1 ) > '7' )
+			{
+				eprint( FATAL, SET, "Unknown escape sequence '\\%c' in format "
+						"string in %s().\n", Cur_Func, *( fmt_end + 1 ) );
+				THROW( EXCEPTION );
+			}
+
+			*fmt_end = *( fmt_end + 1 ) - '0';
+			esc_len = 1;
+
+			if ( *( fmt_end + 2 ) >= '0' && *( fmt_end + 2 ) <= '7' )
+			{
+				*fmt_end = *fmt_end * 8 + *( fmt_end + 2 ) - '0';
+				esc_len = 2;
+
+				if ( *( fmt_end + 3 ) >= '0' && *( fmt_end + 3 ) <= '7' &&
+					 *fmt_end < 0x1F )
+				{
+					*fmt_end = *fmt_end * 8
+						+ *( fmt_end + 3 ) - '0';
+					esc_len = 3;
+				}
+			}
+
+			memmove( fmt_end + 1, fmt_end + 1 + esc_len,
+					 strlen( fmt_end + esc_len ) );
+			break;
+	}
 }
 
 
