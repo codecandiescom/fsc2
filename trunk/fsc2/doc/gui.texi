@@ -40,7 +40,7 @@
 
 Whenever you start @acronym{fsc2} you will see the following window:
 
-@image{fsc2fig1,11cm}
+@image{fsc2fig1,11cm,}
 
 The large white area in the upper halve is the browser that contains the
 text of the current @acronym{EDL} program (after you loaded it). Below
@@ -151,7 +151,7 @@ the widow title) and the test already been done. The program has written
 out some text already during the test, thus some lines are shown in the
 output browser.
 
-@image{fsc2fig2,11cm}
+@image{fsc2fig2,11cm,}
 @end ifnotinfo
 
 
@@ -176,18 +176,19 @@ experiment but two.
 @ifnotinfo
 Here's a typical example of the kind of display you get while doing an
 experiment:
-@image{fsc2fig3,11cm}
 
-The most prominent feature is the area displaying the measured data. In
-this case two different curves are displayed simultanuously (but you can
-have up to four). In this case these are data from the x- and y-channel
+@image{fsc2fig3,11cm,}
+
+The most prominent feature is the area for displaying the measured
+data. In this case two different curves are displayed simultanuously
+(but you can have up to four). They show data from the x- and y-channel
 of a lock-in amplifier while recording a cw-EPR experiment - obviously
 the lock-in's phase setting isn't optimal yet.
 
-Below and two the left of the main display area are two areas showing
-the x- and y-axis. The fact that the lines in both the axis areas are
-drawn in red indicate that the scales are valid for the first red curve
-(in this case the scales are also correct for the second green curve
+Below and to the left of this main display area are two areas showing
+the x- and y-scales. The fact that the lines in both the axis areas are
+drawn in red indicate that the scales are valid for the first (red) curve
+(in this case the scales are also correct for the second (green) curve
 because no rescaling has been done).
 
 The topmost buttons on the left side (which both are switched on) let
@@ -197,12 +198,28 @@ different sensitivity settings.
 
 The two buttons below, labeled @code{Undo} and @code{Print} allow you to
 undo the last rescaling operation or to send a snapshot of the current
-results to a printer (or, alternatively, write them to a file).
+results to a printer (or, alternatively, write it to a file).
 
 The @code{Stop} button lets you abort the currently running experiment -
 when the experiment is finished its label changes to
-@code{Close}. Finally, the button labeled @code{FS} is the @code{Full
-scale} button. While this button is active the display is resized
-automatically so that all data fit into the display area.
+@code{Close}. Finally, the button labeled @code{FS} is the "Full scale"
+button. While this button is active the display is resized automatically
+so that all data fit into the display area.
+
+
+@subsubsection Examining data
+
+If you want to find out the exact values of your newly measured data
+during the experiment you have to move the mouse into the display area
+onto the point you're interested in. Now press both the left and the
+right mouse button (or first the left one, then the middle on while
+keeping the left button pressed down). The cursor changes to a
+crosshair, @image{cursor4,2cm,} and in the upper left hand corner the
+exact coordinates of the current mouse position is shown. Because
+different curves can have a different scaling, if you have more than one
+curve displayed the coordinates in the scaling system of each curve are
+shown.
+
+
 
 @end ifnotinfo
