@@ -142,11 +142,12 @@ are
 aeg_x_band
 aeg_s_band
 er032m
+keithley228a
 @end example
 @noindent
 Because magnets hardly ever get changed (and if the program is set up
 correctly for the experiment) one can use @code{magnet} as the module
-name instead.
+name instead after a proper installation of the program.
 
 Since it is not possible for the @strong{AEG} magnets to measure the
 field using just the magnet power supply it is necessary also to specify
@@ -161,6 +162,33 @@ start of the experiment, i.e.@: it will sweep the field up and down for
 some time, please be patient. See below on how to reduce the amount of
 time spent with field calibration.
 
+The Keithley 228A power supply is used for the sweep coil of Berlin
+W-band magnet. Because there is no well-defined relationship between the
+current produced by the power supply and the total magnetic field and
+because the magnetic field can't be measured directly during
+measurements for this device the following functions expect arguments in
+current units (i.e. Ampere) instead of field units (i.e. Gauss) as the
+other devices.
+
+Because the nomal current resolution of the Keithley power supply is not
+sufficient an additional device is needed supplying DC voltages in the
+range between @w{-10 V} and @w{+10 V} to the modulation input of the
+power supply. Currently the DAC ports of one of the Stanford Research
+lock-in amplfiers (SR510, SR530, SR810 or SR830)) are used for this
+purpose. Which of the lock-ins is used can be specified during
+compilation by a corresponding entry in the configuration file for the
+Keithley driver, usually the @code{SR510} lock-in amplifier. Alternatively,
+if no lock-in has been set in the configuration file the
+@code{keithley228a} module will assume that the first lock-in listed in
+the devices section is to be used.
+
+In the configuration file it also can be defined which of the DAC ports
+of the lock-in ampliers is to be used. If not defined, port 6 will be
+used for the SR510 and SR530 and port 4 for the SR810 and SR830 lock-in
+amplifier. But there exists also a function to directly select the DAC
+port to be used, see below.
+
+
 @table @samp
 @item magnet_name()
 @findex magnet_name()
@@ -172,8 +200,9 @@ Returns a string with the name of the magnet that is being used.
 The function can be called to set the start field and the field step
 size used in sweeps. The function expects two floating point parameters,
 the start field, e.g.@: @w{0.345 T}, and the step size, e.g.@: @w{0.35
-G}. The function can only be called before the @code{EXPERIMENT} section
-starts.
+G}. Use curent instead of field units for the Keithley 228A powre supply
+@code{keithley228a}. The function can only be called before the
+@code{EXPERIMENT} section starts.
 
 @item magnet_fast_init()
 @findex magnet_fast_init()
@@ -189,10 +218,12 @@ that the parameters didn't change significantly since the last run.
 @item set_field()
 @findex set_field()
 This function expects one floating point argument for the field value
-and will set the magnetic field to this value. For the @strong{AEG}
-magnets it also accepts a second optional parameter, the maximum
-acceptable deviation of the field from the value to be set. For example
-by the call
+and will set the magnetic field to this value. For the Keithley power
+supply @code{keithley228a} specify a current value. 
+
+For the @strong{AEG} magnets the function also accepts a second optional
+parameter, the maximum acceptable deviation of the field from the value
+to be set. For example by the call
 @example
 set_field( 3421.5 G, 0.2 G );
 @end example
@@ -246,6 +277,24 @@ magnet power supply to determine the current field. In contrast, for the
 setting in Gauss. The function can only be used in the @code{EXPERIMENT}
 section.
 
+@item magnet_use_correction()
+@findex magnet_use_correction()
+This function is only defined for the Keithley power supply and accepts
+no arguments. If it is called corrections are applied to reduce
+the effects of certain inaccuracies of the power supply.
+
+
+@item magnet_use_dac_port()
+@findex magnet_use_dac_port()
+This function is only defined for the Keithley power supply and tells
+the driver which of the DAC ports of the lock-in amplifier is connected
+(following a voltage divider) to the modulation input of the power
+supply. The function expects a single integer value, the DAC port number
+to be used -- for the SR510 and SR530 this can be @code{5} or @code{6},
+while for the SR810 and SR830 all values in the range between @code{1}
+and @code{4} may be used.
+
+
 @end table
 
 
@@ -254,40 +303,47 @@ section.
 @cindex Gaussmeter Functions
 
 
-Currently, two types of gauss-meters are implemented, the Bruker ER035M
-NMR gaussmeter and the Bruker BH15 hall probe field controller. The
-range of fields that can be measured with the Bruker ER035M NMR
-gaussmeter depends on the probe being used. With the F0 probe (S-band)
-the range is @w{460 G} to @w{2390 G} while with the F1 probe (X-band) a
-range between @w{1460 G} and @w{19900 G} can be measured.  With the BH15
-field controller a range between @w{-50 G} and @w{2300 G} can be used.
+Currently, three types of gaussmeters are implemented, the Bruker ER035M
+NMR gaussmeter, the Bruker BH15 hall probe field controller and the
+Metrolab PT2025 NMR gaussmeter. The range of fields that can be measured
+with the Bruker ER035M NMR gaussmeter depends on the probe being
+used. With the F0 probe (S-band) the range is @w{460 G} to @w{2390 G}
+while with the F1 probe (X-band) a range between @w{1460 G} and @w{19900
+G} can be measured.  With the BH15 field controller a range between
+@w{-50 G} and @w{2300 G} can be used. Finally, for the Metrolab PT2025
+it is currently assumed that a probe for the field range between @w{1.5
+T} and @w{3.4 T} (W-band) is used.
 
 The modules defining the gaussmeter functions (to be listed in the
 @code{DEVICES} section) are:
 @example
 er035m
 er035m_s
+bh15
 er035m_sa
 er035m_sas
-bh15
+pt2025
 @end example
 @noindent
-The first four modules are for the ER035M NMR gaussmeter. The first and
-third one are to be used when the device is controlled via the GPIB bus
-while the second and fourth if it is connected using the serial port of
-the computer. The third and fourth module, @code{er035m_sa} and
-@code{er035m_sas}, are special in that they can't be used for field
-control (i.e@: in conjunction with a magnet module) but only to measure
-the field. If the program is correctly installed the appropriate module
-is loaded by specifying `@code{gaussmeter}' instead of one of the listed
-module names.
+The modules with names starting with @code{er035m} are for the Bruker
+ER035M NMR gaussmeter. @code{er035m} and @code{er035m_sa} are to be used
+when the device is controlled via the GPIB bus while @code{er035m_s} and
+@code{er035m_sas} expect the device to b connected to a serial port of
+the computer. The @code{bh15} module is for the Hall controller used in
+some setups. The last module, @code{pt2025}, is for the Metrolab NMR
+gaussmeter from the Berlin W-Band spectrometer.
 
-The gauss-meters are mainly used together with the magnet power supply
-and have to be specified in the @code{DEVICES} section @b{before} the
-magnet module.
+The first three gaussmeter modules, @code{er035m}, @code{er035m_s} and
+@code{bh15}, are only to be used for controlling the sweep of a magnet
+power supply. Thus only one of these gaussmeter drivers can be loaded,
+if other gaussmeters are also used, it must be the first in the
+@code{DEVICES} ection and must be specified @b{before} the magnet
+module (see above) which relies on its existence,
 
-All gaussmeter functions can only be used in queries in the
-@code{EXPERIMENT} section of the @acronym{EDL} program.
+In contrast, the three other modules, @code{er035m_sa},
+@code{er035m_sas} and @code{pt2025}, are only to be used for field
+measurements but not for direct field control.
+
 
 @table @samp
 @item gaussmeter_name()
@@ -297,7 +353,7 @@ Returns a string with the name of the gaussmeter being used.
 
 @item find_field()
 @findex find_field()
-This function is defined in the device drivers @code{er035m} and
+This function is defined in the device modules @code{er035m} and
 @code{er035m_s}. It returns the current value of the magnetic field in
 Gauss.  The function can only be called in the @code{EXPERIMENT}
 section.
@@ -305,18 +361,41 @@ section.
 
 @item gaussmeter_resolution()
 @findex gaussmeter_resolution()
-This function is defined in the device drivers @code{er035m} and
-@code{er035m_s}. It returns the resolution in Gauss used in measurements
-of the magnetic field. The function can only be called in the
-@code{EXPERIMENT} section.
+This function is defined in the device drivers for the Bruker NMR
+gaussmeters (@code{er035m}, @code{er035m_s}, @code{er035m_sa} and
+@code{er035m_sas}) and for the Metrolab NMR gaussmeter, @code{pt2025}.
+It can be used to set or query the resolution in Gauss used in
+measurements of the magnetic field.
+
+To set a resolution the values @code{0.1 G}, @code{0.01 G} and
+@code{0.001 G} can be used for the Bruker NMR gaussmeter, while for the
+Metrolab Gaussmeter only @code{0.01 G} and @code{0.001 G} are usuable.
+
+Please note that for the modules @code{er035m} and @code{er035m_s},
+i.e.@: the modules for direct field control, the resolution will be
+increased automatically from @code{0.1 G} to @code{0.01 G} at the
+initialization (i.e.@: at the very start of the experiment) unless 
+the low resolution has been set explicitely during the
+@code{PREPARATIONS} section.
 
 
 @item measure_field()
 @findex measure_field()
-This function is defined in the device drivers @code{er035m_sa} and
-@code{er035m_sas}. It measures the current field and returns the value
-in Gauss. The function can only be called in the @code{EXPERIMENT}
-section.
+This function is defined in the device drivers @code{er035m_sa},
+@code{er035m_sas} and @code{pt2025}. It measures the current field and
+returns the value in Gauss. The function can only be called in the
+@code{EXPERIMENT} section.
+
+@item gaussmeter_probe_orientation()
+@findex gaussmeter_probe_orientation()
+This function is currently implemented for the Metrolab NMR gausmeter
+@code{pt2025} only. It allows to set or query the current probe
+orientation relative to the field. To set an orientation a parameter of
+@code{1} or @code{"+"} can be used to define an orientation parallel to
+the field and an argument of @code{0} or @code{"-"} for the antiparallel
+direction. On queries the function returns either @code{1} or @code{0}.
+The function can only be called in the @code{EXPERIMENT} section for
+queries.
 
 @end table
 

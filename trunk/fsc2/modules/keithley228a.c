@@ -40,7 +40,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 static const char *lockins[ ] = { "sr510", "sr530", "sr810", "sr830", NULL };
 
 #if ! defined( LOCKIN_DAC )
-static int dac_ports[ ] = { 6,       6,       4,       4      };
+static int dac_ports[ ]       = { 6,       6,       4,       4      };
 #endif
 
 #define KEITHLEY228A_MAX_CURRENT     10.0  /* admissible current range */
@@ -139,22 +139,7 @@ int keithley228a_init_hook( void )
 	   by LOCKIN_DAC (if the number is valid) */
 
 
-#if ! defined( LOCKIN_NAME )
-	keithley228a.lockin_name = NULL;
-	for ( i = 0; lockins[ i ] != NULL; i++ )
-		if ( exists_device( lockins[ i ] ) )
-		{
-			keithley228a.lockin_name = lockins[ i ];
-			break;
-		}
-
-	if ( keithley228a.lockin_name == NULL )
-	{
-		print( FATAL, "Can't find a driver for a lock-in amplifier with a "
-			   "DAC.\n" );
-		THROW( EXCEPTION );
-	}
-#else
+#if defined( LOCKIN_NAME )
 	keithley228a.lockin_name = string_to_lower( T_strdup( LOCKIN_NAME ) );
 
 	for ( i = 0; lockins[ i ] != 0; i++ )
@@ -175,6 +160,21 @@ int keithley228a_init_hook( void )
 		
 		THROW( EXCEPTION );
 	}
+#else
+	keithley228a.lockin_name = NULL;
+	for ( i = 0; lockins[ i ] != NULL; i++ )
+		if ( exists_device( lockins[ i ] ) )
+		{
+			keithley228a.lockin_name = lockins[ i ];
+			break;
+		}
+
+	if ( keithley228a.lockin_name == NULL )
+	{
+		print( FATAL, "Can't find a driver for a lock-in amplifier with a "
+			   "DAC.\n" );
+		THROW( EXCEPTION );
+	}
 #endif
 
 	/* Now we've got to figure out what kind of string we need to append to
@@ -191,10 +191,10 @@ int keithley228a_init_hook( void )
 
 	keithley228a.lockin_dac_port = -1;
 
-#if ! defined( LOCKIN_DAC )
-	keithley228a.lockindac_port = dac_ports[ i ];
-#else
+#if defined( LOCKIN_DAC )
 	keithley228a.lockin_dac_port = LOCKIN_DAC;
+#else
+	keithley228a.lockindac_port = dac_ports[ i ];
 #endif
 
 	if ( get_lib_symbol( keithley228a.lockin_name, "first_DAC_port",

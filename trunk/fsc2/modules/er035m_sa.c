@@ -43,10 +43,21 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define ER035M_TEST_FIELD 2000.0   /* returned as current fireld in test run */
 #define ER035M_TEST_RES   0.001
 
+enum {
+	UNDEF_RES = -1,
+	LOW_RES,
+	MEDIUM_RES,
+	HIGH_RES
+};
+
+static int res_list[ 3 ] = { 0.1, 0.01, 0.001 };
+
+
 
 /* exported functions and symbols */
 
 int er035m_sa_init_hook( void );
+int er035m_sa_test_hook( void );
 int er035m_sa_exp_hook( void );
 int er035m_sa_end_of_exp_hook( void );
 void er035m_sa_exit_hook( void );
@@ -75,17 +86,7 @@ typedef struct
 } NMR;
 
 
-static NMR nmr;
-
-static int res_list[ 3 ] = { 0.1, 0.01, 0.001 };
-
-enum {
-	UNDEF_RES = -1,
-	LOW_RES,
-	MEDIUM_RES,
-	HIGH_RES
-};
-
+static NMR nmr, nmr_stored;
 
 
 /* The gaussmeter seems to be more cooperative if we wait for some time
@@ -131,14 +132,6 @@ enum {
 
 int er035m_sa_init_hook( void )
 {
-	if ( exists_device( "er035m_s" ) || exists_device( "er035m" ) ||
-		 exists_device( "er035m_sas" ) )
-	{
-		print( FATAL, "A driver for the ER035 gaussmeter is already "
-			   "loaded.\n" );
-		THROW( EXCEPTION );
-	}
-
 	need_GPIB = SET;
 	nmr.is_needed = SET;
 	nmr.name = DEVICE_NAME;
@@ -154,6 +147,16 @@ int er035m_sa_init_hook( void )
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 
+int er035m_sa_test_hook( void )
+{
+	memcpy( &nmr_stored, &nmr, sizeof( NMR ) );
+	return 1;
+}
+
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
 int er035m_sa_exp_hook( void )
 {
 	char buffer[ 21 ], *bp;
@@ -162,6 +165,8 @@ int er035m_sa_exp_hook( void )
 	Var *v;
 	int cur_res;
 
+
+	memcpy( &nmr, &nmr_stored, sizeof( NMR ) );
 
 	if ( ! nmr.is_needed )
 		return 1;

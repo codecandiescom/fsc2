@@ -92,7 +92,7 @@ int bh15_init_hook( void )
 
 	is_gaussmeter = SET;
 
-	if ( exists_device( "er035m" ) )
+	if ( exists_device( "er035m" ) || exists_device( "er035m_s" ) )
 	{
 		print( FATAL, "Driver for Bruker ER035M gaussmeter is already loaded "
 			   "- there can only be one gaussmeter.\n" );
