@@ -98,12 +98,6 @@
 
 /* Define the proper debug mode */
 
-#undef ME6X00_CALL_DEBUG           /* Debug function entry and exit       */
-#undef ME6X00_ISR_DEBUG	           /* Debug the interrupt service routine */
-#undef ME6X00_PORT_DEBUG           /* Debug port access                   */
-#undef ME6X00_DEBUG                /* General purpose debug messages      */
-
-
 #ifdef ME6X00_CALL_DEBUG
 #undef CALL_PDEBUG /* only to be sure */
 #define CALL_PDEBUG( fmt, args... ) printk(KERN_DEBUG "ME6X00: " fmt, ##args )

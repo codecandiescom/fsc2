@@ -24,15 +24,22 @@
 # Jens.Toerring@physik.fu-berlin.de
 
 
-prefix = /usr/local
+prefix  = $(shell if [ -e driver/autoconf.h ]; then grep NI6601_PREFIX driver/autoconf.h | sed -e 's/[^\"]*//' | tr -d \"; else echo "/usr/local"; fi)
 
 export prefix
 
 
 .SUFFIXES:
-.PHONY: all install clean pack
+.PHONY: all install clean distclean
 
 all:
+	@if [ ! -e driver/autoconf.h ]; then \
+		echo "**********************************************";\
+		echo "*   The file driver/autoconf.h is missing.   *"; \
+		echo "*    Please run './INSTALL' to create it.    *"; \
+		echo "**********************************************";\
+		exit 2; \
+	fi
 	$(MAKE) -C driver
 	$(MAKE) -C lib
 
@@ -43,3 +50,8 @@ install:
 clean:
 	$(MAKE) -C driver clean
 	$(MAKE) -C lib clean
+	rm -f *~
+
+distclean:
+	$(MAKE) clean
+	rm -f driver/autoconf.h

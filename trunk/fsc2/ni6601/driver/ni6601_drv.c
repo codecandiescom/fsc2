@@ -22,6 +22,7 @@
 */
 
 
+#include "autoconf.h"
 #include "ni6601_drv.h"
 
 
@@ -44,7 +45,7 @@ static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy );
 
 
 static Board boards[ NI6601_MAX_BOARDS ];
-static int major = 0;
+static int major = NI6601_MAJOR;
 static int board_count = 0;
 
 

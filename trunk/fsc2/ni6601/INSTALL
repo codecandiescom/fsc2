@@ -1,0 +1,518 @@
+#!/bin/bash
+#
+# $Id$
+#
+# Copyright (C) 2002 Jens Thoms Toerring
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# To contact the author send email to
+# Jens.Toerring@physik.fu-berlin.de
+
+
+################################################################
+#
+# Utility function
+
+function get_reply() {
+
+    test $? -eq 0 || exit 1
+    eval $1="`cat /tmp/NI6601_reply`"
+}
+
+
+################################################################
+#
+
+function do_setup() {
+
+if [ $1 -ne 1 ]; then
+	dialog --yesno \
+"     Installation of NI6601 driver and library\n\n\
+You will now be asked a few questions concerning the\n\
+default settings for the driver. If you have problems\n\
+understanding what this is all about please read the\n\
+README file.\n\n\
+             Do you want to continue?" 13 62;
+
+	test $? -eq 0 || exit 0
+fi
+
+# Ask for the major device number, it must be between 1 and 254
+# or 0 for a dynamically assigned device nuber
+
+REPEAT=1;
+while [ $REPEAT -ne 0 ]; do
+    MAJOR=0;
+    REPEAT=0;
+    dialog --inputbox "\
+Select the major device number, pick one between 1 and 254\n\
+and also compare with/usr/src/linux/Documentation/devices.txt.\n\
+Alternatively specify 0 to use a dynamically assigned major\n\
+device number." \
+    12 70 "$MAJOR" 2> /tmp/NI6601_reply
+
+    get_reply MAJOR
+    test -n $MAJOR || REPEAT=1
+    test -z `echo $MAJOR | tr -d '[:digit:]'` || REPEAT=1
+    if [ $REPEAT -eq 0 ]; then
+        test \( $MAJOR -ge 0 -a $MAJOR -le 254 \) || REPEAT=1
+    fi
+done
+
+# Ask for further compilation options
+
+dialog --yesno "Build driver with debugging code?" 6 50
+DEBUG=$?
+
+if [ $DEBUG -eq 0 ]; then
+    dbg="Yes";
+else
+    dbg="No"
+fi;
+
+# Finally get user to set the install directory
+
+PREFIX="/usr/local"
+dialog --inputbox \
+"Finally, please enter the place where to install\n\
+    the include files and the library:\n" \
+    10 58 "$PREFIX" 2> /tmp/NI6601_reply
+get_reply PREFIX
+PREFIX=${PREFIX%%/}    # strip trailing slashes
+
+# Show user the values he has selected and give him a last chance to back out
+
+dialog --yesno "\
+You selected the following settings for the driver:\n\n\
+      Major device number:     $MAJOR\n\
+      Include debbuging code:  $dbg\n\
+      Install directory:       '$PREFIX'\n\n\
+          Create 'driver/autoconf.h'?\n" 11 57
+
+return $?
+
+} # end of do_setup()
+
+
+################################################################
+#
+
+function make_auto() {
+
+echo "/* Automatically created - change carefully */" > driver/autoconf.h
+echo "" >> driver/autoconf.h
+echo "#define NI6601_MAJOR    $MAJOR" >> driver/autoconf.h
+test $DEBUG -ne 0 || echo "#define NI6601_DEBUG" >> driver/autoconf.h
+echo "#define NI6601_PREFIX   \"$PREFIX\"" >> driver/autoconf.h
+
+} # end of make_auto()
+
+
+################################################################
+#
+# Run setup of parameter until the user is satisfied
+
+function setup_loop() {
+
+    do_setup $1
+    while [ $? -ne  0 ]; do
+        do_setup 1
+    done
+
+    make_auto
+
+	# Ask user if she wants the program compiled
+
+	if [ $1 -eq 0 ]; then
+	    dialog --yesno "\
+	Created 'driver/autoconfig.h'\n\
+ Continue with compiling everything?\n\n\
+(You can return to this point anytime\n\
+	  you feel like it.)\n" 11 44
+
+	  test $? -eq 0 || exit 0
+	  fi
+
+}
+
+
+################################################################
+#
+# Function that starts the make process after some more checks
+
+function do_compile() {
+
+# Check that system headers are available
+
+if [ ! -e /lib/modules/`uname -r`/build/include \
+	 -a ! \( -e /usr/include/linux -a -e /usr/include/asm \) ]; then
+    dialog --msgbox \
+"To create the driver for NI6601 boards the system\n\
+ header files are neeed but they don't seem to be\n\
+ installed on your system, or the links pointing\n\
+   to the kernel include directory are not set\n\
+ correctly. Please also see the README file.\n\
+ Please fix this problem and then try again." 10 54;
+    exit 1;
+fi
+
+if [ ! \(     -e /lib/modules/`uname -r`/build/include/linux/autoconf.h \
+		   -o -e /usr/include/linux/autoconf.h \) \
+	 -a -z "$NI6601_KERNEL_SOURCE" ]; then
+	 dialog --msgbox \
+"To create the driver for NI6601 boards the file\n\
+/lib/modules/`uname -r`/build/include/linux/autoconf.h\n\
+or /usr/include/linux/autoconf.h (depending on how old\n\
+your kernel is) is required. This file contains vital\n\
+information about the kernel the module is intended for.\n\
+
+Alternatively, you could set the environment variable\n\
+NI6601_KERNEL_SOURCE to the location of the directory with\n\
+the kernel sources.
+
+   Unfortunately, the installation can't proceed.\n" 16 62;
+	 exit 1;
+fi
+
+if [     \(      -e /lib/modules/`uname -r`/build \
+		    -a ! -e /lib/modules/`uname -r`/build/include/linux/version.h \) \
+	 -o \(       -n "$NI6601_KERNEL_SOURCE" \
+		        -a ! -e $NI6601_KERNEL_SOURCE/include/linux/version.h \) \
+	 -o \(      -L /usr/include/linux \
+		   -a ! -e /usr/include/linux/version.h \) ]; then
+    dialog --msgbox \
+"To create the driver for NI6601 boards the file\n\
+/lib/modules/`uname -r`/build/include/linux/version.h\n\
+or /usr/include/linux/version.h (if /usr/include/linux\n\
+is a symbolic link to the linux include directory in the\n\
+kernel sources) is required. This file gets created\n\
+automatically when you run \"make dep\" in the kernel\n\
+source directory.
+
+If the environment variable NI6601_KERNEL_SOURCE points\n\
+to the kernel sources and there exists a file version.h\n\
+in \$NI6601_KERNEL_SOURCE/include/linux this will also do.\n\
+
+   Unfortunately, the installation can't proceed.\n" 17 62;
+	 exit 1;
+fi
+
+# Compile the library and the driver
+
+make all
+
+if [ $? -ne 0 ]; then
+    dialog --msgbox \
+"Sorry, compilation failed.\n" 5 30;
+    exit 1;
+fi
+
+} # end of do_compile()
+
+
+################################################################
+#
+# Does everything needed for the installation
+
+function do_install() {
+
+# Ask user if he wants to install the library, driver and include files etc.
+
+PREFIX=`grep NI6601_PREFIX driver/autoconf.h | sed -e 's/[^\"]*//' | tr -d \"`
+MAJOR=`grep NI6601_MAJOR driver/autoconf.h | awk '{print $3}'`;
+
+dialog --yesno \
+"Now we're ready to install everything. This starts with\n\
+copying the following files, if necessary creating\n\
+directories that don't exist:\n\n\
+ driver/ni6601_drv.h  => $PREFIX/include/ni6601_drv.h\n\
+ lib/ni6601.h         => $PREFIX/include/ni6601.h\n\
+ lib/libni6601.a      => $PREFIX/lib/libni6601.a\n\
+ lib/libni6601.so     => $PREFIX/lib/libni6601.so\n\
+ driver/ni6601.o      => /lib/modules/`uname -r`/misc/ni6601.o\n\n\
+		Do you want to continue ?" 15 65
+
+test $? -eq 0 || exit 0
+
+# Check that user has root privileges
+
+if [ `id -u` != "0" ]; then
+	dialog --msgbox \
+"Sorry, you need root privileges to install\n\
+ the driver and the library etc. Please\n\
+    become root and then try again.\n" 7 48
+	exit 1;
+fi
+
+# Do the basic installation (covered by makefile)
+
+test -z "$NI6601_KERNEL_SOURCE" || dialog --msgbox \
+"Please note:\n\
+  Because NI6601_KERNEL_SOURCE is set the new module\n\
+  `pwd`/driver/ni6601.o will *not* be copied to the\n\
+   appropriate module directory (which probably\n\
+  is /lib/modules/${NI6601_KERNEL_SOURCE##/}) and\n\
+     also 'makedep -a' will not be run.\n\n\
+  Only the user library will be installed." 12 58
+
+
+make install
+
+if [ $? -ne 0 ]; then
+	dialog --msgbox "Sorry, installation failed.\n" 5 30
+	exit 1
+fi
+
+# Find out if user wants to update the modules dependency file
+
+if [ -z "$NI6601_KERNEL_SOURCE" ]; then
+	dialog --yesno \
+"Do you want to update the modules dependency\n\
+file /lib/modules/`uname -r`/modules.dep using\n\
+        the command 'depmod -a'?" 8 55
+	test $? || depmod -a
+fi
+
+
+# Find out if user wants to create the device file for the board, but only if
+# the major device number isn't set to 0.
+
+if [ $MAJOR -ne 0 ]; then
+	dialog --yesno \
+"Do you want to create the device files\n\
+      /dev/ni6601_0\n\
+      /dev/ni6601_1\n\
+      /dev/ni6601_2\n\
+      /dev/ni6601_3\n\n\
+     for the board now?"  12 46
+
+	if [ $? -eq 0 ]; then
+		for i in 0 1 2 3; do
+			if [ -e /dev/ni6601_$i ]; then 
+					dialog --yesno \
+"A device file /dev/ni6601_$i already exists.\n\
+Delete existing file and replace with a new one?" 7 54;
+				if [ $? -eq 0 ]; then
+					mknod /dev/ni6601_$i c $MAJOR $i
+					chmod 666 /dev/ni6601_$i
+				fi
+			else
+				mknod /dev/ni6601_$i c $MAJOR $i
+				chmod 666 /dev/ni6601_$i
+			fi
+		done
+	fi
+
+	# Ask user if the module should be included in /etc/modules.conf (or, on
+	# older installations, in /etc/conf.modules)
+
+	MODULECONF="/etc/modules.conf";
+	if [ ! -e $MODULECONF -a -e /etc/conf.modules ]; then
+		MODULECONF="/etc/conf.modules"
+	fi
+
+	dialog --yesno \
+"  Update $MODULECONF to include the new driver?\n\
+ (Old version will be copied to $MODULECONF.bak.)" 7 62
+	test $? -ne 0 || mod_update
+
+else              # dynamically assigned major device number
+
+	# Test if the system is LSB 1.1.0 compliant
+
+	if [ ! \(    -d /etc/init.d                   	    \
+		      -a -e /lib/lsb/init-functions       	    \
+              -a -e /usr/lib/lsb/install_initd          \
+              -a -e /usr/lib/lsb/remove_initd \) ]; then
+	dialog --msgbox "\
+Sorry, your system does not seem to be LSB 1.1.0 compliant.\n\
+To have the NI6601 module loaded at boot time and device files\n\
+created automatically please change the script 'ni6601' in\n\
+the 'utils' subdirectory to fit your needs and install it\n\
+in the directory for init scripts youself." 12 70
+
+	else   # System is LSB compliant
+
+		dialog --yesno "\
+Do you want me to copy the init script 'utils/ni6601'\n\
+to the init directory '/etc/init.d' and create the\n\
+necessary runlevel links so that the NI6601 module gets\n\
+loaded at boot time and the device files are created\n\
+                 automatically?" 9 60
+
+		if [ $? -eq 0 ]; then
+			if [ -e /etc/init.d/ni6601 ]; then
+				/usr/lib/lsb/remove_initd /etc/init.d/ni6601 >/dev/null 2>&1
+				rm -f /etc/init.d/ni6601
+			fi
+			install -m 744 utils/ni6601 /etc/init.d/ni6601
+			/usr/lib/lsb/install_initd /etc/init.d/ni6601
+
+			dialog --msgbox "\
+Unless you reboot the system (which is *not* required)\n\
+please run the command\n\
+\n\
+         /etc/init.d/ni6601 start\n\
+\n\
+    to load the module and create device files." 11 56
+		fi
+	fi
+fi
+
+} # end of do_install()
+
+
+################################################################
+#
+# Removes entries for drivers with the same major number device
+# number from /etc/modules.conf (or, if this is still used,
+# /etc/conf.modules) and adds the NI6601 driver instead. The old
+# configuration file is saved with the extension .bak
+
+function mod_update() {
+
+cp $MODULECONF $MODULECONF.bak
+
+MAJOR=`grep NI6601_MAJOR driver/autoconf.h | awk '{print $3}'`
+PATTERN="^[[:space:]]*alias[[:space:]+]char-major-$MAJOR[[:space:]+]"
+LINE=`grep $PATTERN $MODULECONF`
+
+if [ $? -eq 0 ]; then
+	 grep -v $PATTERN $MODULECONF > /tmp/`basename $MODULECONF`
+	 echo "#$LINE" >> /tmp/`basename $MODULECONF`
+
+	 LINE=`grep "^[[:space:]]*options[[:space:]+]ni6601" /tmp/\`basename $MODULECONF\``;
+	 if [ $? -eq 0 ]; then
+		mv /tmp/`basename $MODULECONF` /tmp/`basename $MODULECONF`2
+		grep -v "$LINE" /tmp/`basename $MODULECONF`2 > /tmp/`basename $MODULECONF`
+		rm -f /tmp/`basename $MODULECONF`2
+		echo "#$LINE" >> /tmp/`basename $MODULECONF`
+	 fi
+
+	 mv /tmp/`basename $MODULECONF` $MODULECONF
+fi
+
+echo "alias char-major-$MAJOR ni6601" >> $MODULECONF
+}
+
+
+################################################################
+#
+# Chooses either compiling or installing (called at the start
+# when the include/autoconf.h and driver/board exist)
+
+function pref_comp() {
+
+dialog --radiolist "\
+  What do you want to do next?\n\
+   (press <Space> to select)"  \
+   10 53 2 \
+   "Setup  "  "Set the board driver parameters" "off" \
+   "Compile"  "Compile the driver and library"  "on"  \
+   2> /tmp/NI6601_reply
+
+get_reply MTYPE
+
+test $MTYPE != "Setup" || setup_loop 1
+
+} # end of pref_comp()
+
+
+################################################################
+#
+# Chooses between setup, compilation or installation (called at
+# the start when include/autoconf.h and driver/board as well as
+# the compiled library and driver exist)
+
+function pref_inst() {
+
+dialog --radiolist "\
+  What do you want to do next?\n\
+   (press <Space> to select)"  \
+   11 53 3 \
+   "Setup  "  "Set the board driver parameters" "off" \
+   "Compile"  "Compile driver and library"      "off" \
+   "Install"  "Install driver and library"      "on"  \
+   2> /tmp/NI6601_reply
+
+get_reply MTYPE
+
+case $MTYPE in
+    Setup  )
+        setup_loop 1
+        do_compile 0
+        do_install
+        ;;
+
+    Compile)
+        make clean
+        do_compile 1
+        do_install
+        ;;
+
+    Install)
+        do_install
+        ;;
+esac
+}
+
+
+################################################################
+#
+
+trap "rm -f /tmp/NI6601_reply" 0 1 2 15
+
+export DIALOGRC=./.INSTALLrc
+
+# We need dialog so check if it's available
+
+DIALOG=`which dialog`
+if [ $? -eq 1 ]; then
+    echo "Sorry, you need the 'dialog' utility to run this script!";
+    exit 1;
+fi
+
+
+# Check if this is a 2.4 kernel
+
+if [    `uname -r | cut -d'.' -f1` != "2" \
+     -o `uname -r | cut -d'.' -f2` != "4" ]; then
+    dialog --yesno \
+"This package is only tested with 2.4 kernels yet.\n\
+There may be lots of problems with other kernels.\n\n\
+           Do you want to continue?" 8 56
+    test $? -eq 0 || exit 0
+fi
+
+if [ ! -e driver/autoconf.h ]; then
+   setup_loop 0
+   do_compile 0
+   do_install
+else
+    if [ ! -e driver/ni6601.o -o ! -e lib/libni6601.a -o ! -e lib/libni6601.so ]; then
+        pref_comp
+        do_compile 0
+        do_install
+    else
+        pref_inst
+    fi
+fi
+
+dialog --msgbox "\
+Ok, you're hopefully done with creating and \n\
+installing the driver and the library." 7 50;
+
+exit 0

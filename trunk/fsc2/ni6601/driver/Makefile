@@ -26,15 +26,19 @@
 
 
 
-KERNEL_SRC = $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
-						 echo "/lib/modules/`uname -r`/build"; \
-					 else \
-						 echo "/usr/src/linux"; \
-					 fi )
+ifneq ($(NI6601_KERNEL_SOURCE),)
+    KERNEL_INC = $(ME6X00_KERNEL_SOURCE)
+else
+	KERNEL_SRC = $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
+							 echo "/lib/modules/`uname -r`/build"; \
+						 else \
+							 echo "/usr/src/linux"; \
+						 fi )
+endif
 
 MODULE   = ni6601.o
 SOURCES  = ni6601_drv.c utils.c
-HEADERS  = ni6601_drv.h
+HEADERS  = ni6601_drv.h autoconf.h
 INCLUDES = -I$(KERNEL_SRC)/include -I.
 
 CFLAGS   = -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes
@@ -56,17 +60,17 @@ $(MODULE): $(SOURCES:.c=.o)
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) $(DBGFLAGS) $(INCLUDES) -c -o $@ $<
 
-
 install:
+ifeq ($(NI6601_KERNEL_SOURCE),)
 	if [ -d /lib/modules/`uname -r` ]; then         \
 		cp $(MODULE) /lib/modules/`uname -r`/misc;  \
 	else                                            \
 		cp $(MODULE) /lib/modules/misc;             \
 	fi
 	depmod -a
+#endif
 	install -d $(incl_dir)
 	install -m 644 ni6601_drv.h $(incl_dir)
-	@echo "You probably will still have to create the device file(s)..."
 
 clean:
 	rm -f *.o *~

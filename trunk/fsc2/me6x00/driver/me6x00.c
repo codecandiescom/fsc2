@@ -112,6 +112,7 @@ MODULE_LICENSE( "GPL" );
 
 /* Include-File for the Meilhaus ME6000 and ME6100 I/O boards */
 
+#include "autoconf.h"
 #include "me6x00_drv.h"
 
 
@@ -130,9 +131,9 @@ static me6x00_info_st info_vec[ ME6X00_MAX_BOARDS ];
 static int me6x00_board_count;
 
 
-/* Major Device Number. 0 means to get it automatically from the System */
+/* Major Device Number, 0 means to get it automatically from the System */
 
-static int major = 0;
+static int major = ME6X00_MAJOR;
 
 
 /* Structure holding information about the different board types */

@@ -24,15 +24,18 @@
 # Jens.Toerring@physik.fu-berlin.de
 
 
-
-KERNEL_INC = $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
-						 echo "/lib/modules/`uname -r`/build"; \
-					 else \
-						 echo "/usr/src/linux"; \
-					 fi )
+ifneq ($(ME6X00_KERNEL_SOURCE),)
+    KERNEL_INC = $(ME6X00_KERNEL_SOURCE)
+else
+	KERNEL_INC = $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
+							 echo "/lib/modules/`uname -r`/build"; \
+						 else \
+							 echo "/usr/src/linux"; \
+						 fi )
+endif
 
 SOURCES  = me6x00.c
-HEADERS  = pci-compat.h sysdep.h me6x00_drv.h
+HEADERS  = pci-compat.h sysdep.h me6x00_drv.h autoconf.h
 INCLUDES = -I$(KERNEL_INC)/include -I.
 
 CFLAGS   = -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes
@@ -52,15 +55,16 @@ all:
 	$(CC) $(CFLAGS) $(DBGFLAGS) $(INCLUDES) -c -o $@ $<
 
 install:
+ifeq ($(ME6X00_KERNEL_SOURCE),)
 	if [ -d /lib/modules/`uname -r` ]; then        \
 		cp me6x00.o /lib/modules/`uname -r`/misc;  \
 	else                                           \
 		cp me6x00.o /lib/modules/misc;             \
 	fi
 	depmod -a
+endif
 	install -d $(incl_dir)
 	install -m 644 me6x00_drv.h $(incl_dir)
-	@echo "You probably will still have to create the device file(s)..."
 
 clean:
 	rm -f me6x00.o *~
