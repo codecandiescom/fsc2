@@ -388,6 +388,16 @@ enum {
 #define CRASH_ADDRESS_OFFSET 0x11
 
 
+/* States we can be in when the main child process raised the QUITTING
+   signal */
+
+enum {
+	QUITTING_UNSET,
+	QUITTING_RAISED,
+	QUITTING_ACCEPTED
+};
+
+
 /* The following are the states the function for waiting for an
    event from the toolbox can be in */
 
