@@ -60,6 +60,7 @@ Var *pulser_pulse_reset( Var *v );
 #define MIN_TRIG_IN_LEVEL      -5.0
 
 
+
 #define MIN_BLOCK_SIZE     64     // minimum length of a block
 #define MAX_BLOCK_REPEATS  65536  // maximum of repeats of block in sequence
 #define MAX_PULSER_BITS    65536  // maximum number of bits in channel
@@ -69,6 +70,11 @@ Var *pulser_pulse_reset( Var *v );
 #define STOP  ( ( bool ) 0 )
 
 #define MAX_PODS_PER_FUNC       5
+
+
+#define TWT_2_DEFENSE_MIN_DISTANCE 4.4e-7   // 480 ns
+#define DEFENSE_2_TWT_MIN_DISTANCE 1.0e-7
+
 
 /* A pulse is acive if it has a position and a length set and if the length
    is non-zero */
