@@ -120,7 +120,7 @@ void load_functions( Device *dev )
 	void *cur;
 
 
-	/* Put together name of library to be loaded */
+	/* Assemble name of library to be loaded */
 
 	lib_name = get_string( strlen( libdir ) + strlen( dev->name ) + 4 );
 	strcpy( lib_name, libdir );
