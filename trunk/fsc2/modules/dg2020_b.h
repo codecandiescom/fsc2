@@ -42,6 +42,8 @@ void dg2020_b_exit_hook( void );
 
 
 Var *pulser_name( Var *v );
+Var *pulser_shape_to_defense_minimum_distance( Var *v );
+Var *pulser_defense_to_shape_minimum_distance( Var *v );
 Var *pulser_state( Var *v );
 Var *pulser_channel_state( Var *v );
 Var *pulser_update( Var *v );
@@ -229,6 +231,16 @@ typedef struct {
 
 	Ticks mem_size;          /* size of the complete sequence, i.e. including
 								the memory needed for padding */
+	Ticks shape_2_defense;
+	bool is_shape_2_defense;
+	bool shape_2_defense_too_near;
+
+	Ticks defense_2_shape;
+	bool is_defense_2_shape;
+	bool defense_2_shape_too_near;
+
+	bool is_confirmation;
+
 } DG2020;
 
 

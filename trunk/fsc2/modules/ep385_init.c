@@ -26,11 +26,13 @@
 
 
 static void ep385_basic_pulse_check( void );
+static void ep385_create_shape_pulses( void );
 static void ep385_basic_functions_check( void );
 static void ep385_create_phase_matrix( FUNCTION *f );
 static void ep385_setup_channels( void );
 static void ep385_pulse_start_setup( void );
 static void ep385_channel_start_check( CHANNEL *ch );
+static void ep385_pulse_init_check( FUNCTION *f );
 static void ep385_defense_shape_init_check( FUNCTION *shape );
 
 
@@ -49,6 +51,7 @@ void ep385_init_setup( void )
 	TRY
 	{
 		ep385_basic_pulse_check( );
+		ep385_create_shape_pulses( );
 		ep385_basic_functions_check( );
 		ep385_setup_channels( );
 		ep385_pulse_start_setup( );
@@ -116,6 +119,14 @@ static void ep385_basic_pulse_check( void )
 
 		f = p->function;
 
+		if ( f->self == PULSER_CHANNEL_PULSE_SHAPE && ep385.auto_shape_pulses )
+		{
+			print( FATAL, "Pulses of function '%s' can't be used with "
+				   "automatic generation of pulse shape pulses.\n",
+				   Function_Names[ f->self ] );
+			THROW( EXCEPTION );
+		}
+
 		/* Check that there's at least one channel associated with the
 		   pulses function */
 
@@ -139,11 +150,135 @@ static void ep385_basic_pulse_check( void )
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
 
+static void ep385_create_shape_pulses( void )
+{
+	FUNCTION *spf = ep385.function + PULSER_CHANNEL_PULSE_SHAPE;
+	FUNCTION *f;
+	PULSE *np, *cp, *rp, *p1, *p2, *old_end;
+
+
+	if ( ! ep385.auto_shape_pulses )
+		return;
+
+	/* Find the end of the pulse list (to be able to add further shape
+	   pulses) */
+
+	for ( cp = np = ep385_Pulses; np != NULL; np = np->next )
+		cp = np;
+	old_end = cp;
+
+	/* Loop over all pulses */
+
+	for ( rp = ep385_Pulses; rp != NULL; rp = rp->next )
+	{
+		f = rp->function;
+
+		/* No shape pulses can be set for the PULSE_SHAPE function itself
+		   and functions that don't need shape pulses */
+
+		if ( f == spf || ! f->uses_auto_shape_pulses )
+			continue;
+
+		np = PULSE_P T_malloc( sizeof *np );
+
+		np->prev = cp;
+		cp = cp->next = np;
+
+		np->next = NULL;
+		np->pc = NULL;
+
+		np->function = spf;
+		np->is_function = SET;
+
+		/* These 'artifical' pulses get negative numbers */
+
+		np->num = ( np->prev->num >= 0 ) ? -1 : np->prev->num - 1;
+
+		np->pc = NULL;
+
+		rp->sp = np;
+		np->sp = rp;
+
+		/* The remaining properties are just exact copies of the
+		   pulse the shape pulse has to be used with */
+
+		np->is_active = rp->is_active;
+		np->was_active = rp->was_active;
+		np->has_been_active = rp->has_been_active;
+
+		np->pos = rp->pos;
+		np->len = rp->len;
+		np->dpos = rp->dpos;
+		np->dlen = rp->dlen;
+
+		np->is_pos = rp->is_pos;
+		np->is_len = rp->is_len;
+		np->is_dpos = rp->is_dpos;
+		np->is_dlen = rp->is_dlen;
+
+		np->initial_pos = rp->initial_pos;
+		np->initial_len = rp->initial_len;
+		np->initial_dpos = rp->initial_dpos;
+		np->initial_dlen = rp->initial_dlen;
+
+		np->initial_is_pos = rp->initial_is_pos;
+		np->initial_is_len = rp->initial_is_len;
+		np->initial_is_dpos = rp->initial_is_dpos;
+		np->initial_is_dlen = rp->initial_is_dlen;
+
+		np->old_pos = rp->old_pos;
+		np->old_len = rp->old_len;
+
+		np->is_old_pos = rp->is_old_pos;
+		np->is_old_len = rp->is_old_len;
+
+		np->needs_update = rp->needs_update;
+	}
+
+	if ( np != old_end )
+		spf->is_needed = SET;
+
+	/* Now after we got all the necessary shape pulses we've got to check
+	   that they don't overlap when they are for pulses of different
+	   functions (overlaps for pulses of the same function will be detected
+	   later and reproted as overlaps for the pulses they belong to) */
+
+	for ( p1 = old_end->next; p1 != NULL && p1->next != NULL; p1 = p1->next )
+	{
+		if ( ! p1->is_active )
+			continue;
+
+		for ( p2 = p1->next; p2 != NULL; p2 = p2->next )
+		{
+			if ( ! p2->is_active )
+				continue;
+
+			if ( p1->sp->function == p2->sp->function )
+				continue;
+
+			if ( p1->pos == p2->pos ||
+				 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
+				 ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
+			{
+				print( FATAL, "Shape pulses for pulse #%ld of function '%s' "
+					   "and pulse #%ld of function '%s' would overlap.\n",
+					   p1->sp->num, Function_Names[ p1->sp->function->self ],
+					   p2->sp->num, Function_Names[ p2->sp->function->self ] );
+				THROW( EXCEPTION );
+			}
+		}
+	}
+}
+
+
+/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+
 static void ep385_basic_functions_check( void )
 {
 	FUNCTION *f;
-	PULSE *p;
-	int i;
+	PULSE *p, *p1, *p2;
+	int i, j, k;
 	Ticks delay;
 
 
@@ -176,7 +311,6 @@ static void ep385_basic_functions_check( void )
 		   determine the length of the phase cycle for the function */
 
 		f->num_pulses = 0;
-
 		f->pc_len = 1;
 
 		for ( p = ep385_Pulses; p != NULL; p = p->next )
@@ -193,6 +327,33 @@ static void ep385_basic_functions_check( void )
 				f->pc_len = i_max( f->pc_len, p->pc->len );
 		}
 
+		if ( f->num_pulses > 1 && f->num_channels > 1 )
+		{
+			for ( j = 0; j < f->num_pulses - 1; j++ )
+			{
+				p1 = f->pulses[ j ];
+				if ( ! p1->is_active )
+					continue;
+
+				for ( k = j + 1; k < f->num_pulses; k++ )
+				{
+					p2 = f->pulses[ k ];
+					if ( ! p2->is_active )
+						continue;
+
+					if ( ( p1->pos == p2->pos ) ||
+						 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) 
+						 ||
+						 ( p2->pos < p1->pos && p2->pos + p2->len > p1->pos ) )
+					{
+						print( FATAL, "Pulses #%ld and #%ld of function '%s' "
+							   "overlap.\n", p1->num, p2->num,
+							   Function_Names[ f->self ] );
+						THROW( EXCEPTION );
+					}
+				}
+			}
+		}
 	}
 
 	if ( ep385.neg_delay )
@@ -441,6 +602,7 @@ static void ep385_pulse_start_setup( void )
 	PULSE **pm_entry;
 	PULSE *p;
 	int i, j, m;
+	PULSE_PARAMS *pp, *opp;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -453,6 +615,8 @@ static void ep385_pulse_start_setup( void )
 			 i == PULSER_CHANNEL_PHASE_1 ||
 			 i == PULSER_CHANNEL_PHASE_2 )
 			continue;
+
+		ep385_pulse_init_check( f );
 
 		/* Run over all channels associated with the current function and
 		   set the pulse pointers, positions and lengths for the current
@@ -476,14 +640,20 @@ static void ep385_pulse_start_setup( void )
 			for ( m = 0; ( p = pm_entry[ m ] ) != NULL; m++ )
 				if ( p->is_active )
 				{
-					ch->pulse_params[ ch->num_active_pulses ].pos =
-					ch->old_pulse_params[ ch->num_active_pulses ].pos =
-															 p->pos + f->delay;
-					ch->pulse_params[ ch->num_active_pulses ].len =
-					ch->old_pulse_params[ ch->num_active_pulses ].len = p->len;
-					ch->pulse_params[ ch->num_active_pulses ].pulse =
-					ch->old_pulse_params[ ch->num_active_pulses ].pulse = p;
-					ch->num_active_pulses++;
+					pp = ch->pulse_params + ch->num_active_pulses;
+					opp = ch->old_pulse_params + ch->num_active_pulses++;
+
+					pp->pos = opp->pos = p->pos + f->delay;
+					pp->len = pp->len = p->len;
+					pp->pulse = opp->pulse = p;
+
+					if ( p->function->self != PULSER_CHANNEL_PULSE_SHAPE &&
+						 p->function->uses_auto_shape_pulses )
+					{
+						pp->pos -= p->function->left_shape_padding;
+						pp->len +=   p->function->left_shape_padding
+								   + p->function->right_shape_padding;
+					}
 				}
 
 			ch->old_num_active_pulses = ch->num_active_pulses;
@@ -506,10 +676,6 @@ static void ep385_pulse_start_setup( void )
 
 static void ep385_channel_start_check( CHANNEL *ch )
 {
-	PULSE_PARAMS *pp;
-	int i;
-
-
 	/* Check that there aren't more pulses per channel than the pulser can
 	   deal with */
 
@@ -525,35 +691,56 @@ static void ep385_channel_start_check( CHANNEL *ch )
 	qsort( ch->pulse_params, ch->num_active_pulses,
 		   sizeof *ch->pulse_params, ep385_pulse_compare );
 
-	for ( i = 0; i < ch->num_active_pulses; i++ )
-	{
-		pp = ch->pulse_params + i;
-		if ( pp->pos + pp->len > MAX_PULSER_BITS )
-		{
-			print( FATAL, "Pulse #%ld of function '%s' does not fit into the "
-				   "pulsers memory.\n",
-				   pp->pulse->num, Function_Names[ ch->function->self ] );
-			THROW( EXCEPTION );
-		}
+	ep385_shape_padding_check( ch );
+}
 
-		if ( i == ch->num_active_pulses - 1 )
+
+/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+
+static void ep385_pulse_init_check( FUNCTION *f )
+{
+	PULSE *p1, *p2;
+	int i, j;
+
+
+	if ( f->num_pulses < 2 )
+		return;
+
+	for ( i = 0; i < f->num_pulses - 1; i++ )
+	{
+		p1 = f->pulses[ i ];
+		if ( ! p1->is_active )
 			continue;
 
-		if ( pp->pos + pp->len == ch->pulse_params[ i + 1 ].pos )
+		for ( j = i + 1; j < f->num_pulses; j++ )
 		{
-			print( FATAL, "Pulses %ld and %ld of function '%s' are not "
-				   "separated.\n", pp->pulse->num,
-				   ch->pulse_params[ i + 1 ].pulse->num,
-				   Function_Names[ ch->function->self ] );
-			THROW( EXCEPTION );
-		}
+			p2 = f->pulses[ j ];
+			if ( ! p2->is_active )
+				continue;
 
-		if ( pp->pos + pp->len > ch->pulse_params[ i + 1 ].pos )
-		{
-			print( FATAL, "Pulses %ld and %ld of function '%s' overlap.\n",
-				   pp->pulse->num, ch->pulse_params[ i + 1 ].pulse->num,
-				   Function_Names[ ch->function->self ] );
-			THROW( EXCEPTION );
+			if ( ( p1->pos == p2->pos ) ||
+				 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
+				 ( p2->pos < p1->pos && p2->pos + p2->len > p1->pos ) )
+			{
+				if ( ep385.auto_shape_pulses &&
+					 p1->function->self == PULSER_CHANNEL_PULSE_SHAPE )
+				{
+					if ( p1->function != p2->function )
+						print( FATAL, "Shape pulses for pulses #%ld function "
+							   "'%s') and #%ld (function '%s') overlap.\n",
+							   p1->sp->num,
+							   Function_Names[ p1->sp->function->self ],
+							   p2->sp->num,
+							   Function_Names[ p2->sp->function->self ] );
+				}
+				else
+					print( FATAL, "Pulses #%ld and #%ld of function '%s' "
+						   "overlap.\n", p1->num, p2->num,
+						   Function_Names[ f->self ] );
+
+				THROW( EXCEPTION );
+			}
 		}
 	}
 }
@@ -595,24 +782,44 @@ static void ep385_defense_shape_init_check( FUNCTION *shape )
 
 			if ( shape_p->pos < defense_p->pos &&
 				 shape_p->pos + shape_p->len + ep385.shape_2_defense >
-				 defense_p->pos )
+				 defense_p->pos &&
+				 ! ep385.shape_2_defense_too_near)
 			{
-				print( SEVERE, "Distance between PULSE_SHAPE pulse #%ld "
-					   "and DEFENSE pulse #%ld is shorter than %s.\n",
-					   shape_p->num, defense_p->num, ep385_ptime(
-						   ep385_ticks2double( ep385.shape_2_defense ) ) );
-				ep385.shape_2_defense_too_near = SET;
+				if ( shape_p->sp == NULL )
+					print( FATAL, "Distance between PULSE_SHAPE pulse #%ld "
+						   "and DEFENSE pulse #%ld is shorter than %s.\n",
+						   shape_p->num, defense_p->num, ep385_ptime(
+							   ep385_ticks2double( ep385.shape_2_defense ) ) );
+				else
+					print( FATAL, "Distance between shape pulse for pulse "
+						   "#%ld (function '%s') and DEFENSE pulse #%ld "
+						   "is shorter than %s.\n", shape_p->sp->num,
+						   Function_Names[ shape_p->sp->function->self ],
+						   defense_p->num, ep385_ptime( ep385_ticks2double(
+												   ep385.shape_2_defense ) ) );
 
+				ep385.shape_2_defense_too_near = SET;
 			}
 
 			if ( defense_p->pos < shape_p->pos &&
 				 defense_p->pos + defense_p->len + ep385.defense_2_shape >
-				 shape_p->pos )
+				 shape_p->pos &&
+				 ! ep385.defense_2_shape_too_near )
 			{
-				print( SEVERE, "Distance between DEFENSE pulse #%ld and "
-					   "PULSE_SHAPE pulse #%ld is shorter than %s.\n",
-					   defense_p->num, shape_p->num, ep385_ptime(
-						   ep385_ticks2double( ep385.defense_2_shape ) ) );
+				if ( shape_p->sp == NULL )
+					print( FATAL, "Distance between DEFENSE pulse #%ld and "
+						   "PULSE_SHAPE pulse #%ld is shorter than %s.\n",
+						   defense_p->num, shape_p->num, ep385_ptime(
+							   ep385_ticks2double( ep385.defense_2_shape ) ) );
+				else
+					print( FATAL, "Distance between DEFENSE pulse #%ld "
+						   "and shape pulse for pulse #%ld (function "
+						   "'%s') is shorter than %s.\n", defense_p->num,
+						   shape_p->sp->num,
+						   Function_Names[ shape_p->sp->function->self ],
+						   ep385_ptime( ep385_ticks2double(
+												   ep385.defense_2_shape ) ) );
+
 				ep385.defense_2_shape_too_near = SET;
 			}
 		}

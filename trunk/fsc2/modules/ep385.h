@@ -42,6 +42,8 @@ void ep385_exit_hook( void );
 
 
 Var *pulser_name( Var *v );
+Var *pulser_automatic_shape_pulses( Var *v );
+Var *pulser_dump_pulses( Var *v );
 Var *pulser_shape_to_defense_minimum_distance( Var *v );
 Var *pulser_defense_to_shape_minimum_distance( Var *v );
 Var *pulser_state( Var *v );
@@ -141,6 +143,11 @@ typedef struct _F_ {
 
 	Ticks delay;               /* delay for the function/channel combination */
 	bool is_delay;
+
+	bool uses_auto_shape_pulses;
+	Ticks left_shape_padding;
+	Ticks right_shape_padding;
+
 } FUNCTION;
 
 
@@ -211,6 +218,12 @@ typedef struct {
 	bool is_defense_2_shape;
 	bool defense_2_shape_too_near;
 
+	bool is_confirmation;
+
+	FILE *dump_file;
+
+	bool auto_shape_pulses;
+
 } EP385;
 
 
@@ -259,6 +272,12 @@ typedef struct _p_ {
 
 	bool needs_update;       /* set if the pulses properties have been changed
 								in test run or experiment */
+
+	bool left_warning;
+	bool right_warning;
+	struct _p_ *sp;          /* for normal pulses reference to related shape
+								pulse (if such exist), for shape pulses
+								reference to pulse it is associated with */
 } PULSE;
 
 
@@ -339,6 +358,7 @@ bool ep385_do_update( void );
 void ep385_do_checks( FUNCTION *f );
 void ep385_set_pulses( FUNCTION *f );
 void ep385_full_reset( void );
+void ep385_shape_padding_check( CHANNEL *ch );
 
 
 /* Functions from ep385_gpib.c */

@@ -40,6 +40,8 @@ const char generic_type[ ] = DEVICE_TYPE;
 int ep385_init_hook( void )
 {
 	int i, j;
+	FUNCTION *f;
+	CHANNEL *ch;
 
 
 	fsc2_assert( SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE > 0 );
@@ -119,29 +121,34 @@ int ep385_init_hook( void )
 
 	ep385.dump_file = NULL;
 
+	ep385.auto_shape_pulses = UNSET;
+
 	for ( i = 0; i < MAX_CHANNELS; i++ )
 	{
-		ep385.channel[ i ].self = i;
-		ep385.channel[ i ].function = NULL;
-		ep385.channel[ i ].pulse_params = NULL;
-		ep385.channel[ i ].num_pulses = 0;
-		ep385.channel[ i ].num_active_pulses = 0;
-		ep385.channel[ i ].needs_update = SET;
+		ch = ep385.channel + i;
+		ch->self = i;
+		ch->function = NULL;
+		ch->pulse_params = NULL;
+		ch->num_pulses = 0;
+		ch->num_active_pulses = 0;
+		ch->needs_update = SET;
 	}
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		ep385.function[ i ].self = i;
-		ep385.function[ i ].is_used = UNSET;
-		ep385.function[ i ].is_needed = UNSET;
+		f = ep385.function + i;
+		f->self = i;
+		f->is_used = UNSET;
+		f->is_needed = UNSET;
+		f->num_pulses = 0;
+		f->pulses = NULL;
+		f->pm = NULL;
+		f->delay = 0;
+		f->is_delay = UNSET;
+		f->next_phase = 0;
+		f->uses_auto_shape_pulses = UNSET;
 		for ( j = 0; j <= MAX_CHANNELS; j++ )
-			ep385.function[ i ].channel[ j ] = NULL;
-		ep385.function[ i ].num_pulses = 0;
-		ep385.function[ i ].pulses = NULL;
-		ep385.function[ i ].pm = NULL;
-		ep385.function[ i ].delay = 0;
-		ep385.function[ i ].is_delay = UNSET;
-		ep385.function[ i ].next_phase = 0;
+			f->channel[ j ] = NULL;
 	}
 
 	ep385_is_needed = SET;
@@ -182,7 +189,21 @@ int ep385_test_hook( void )
 	/* Check consistency of pulse settings and do everything to setup the
 	   pulser for the test run */
 
-	ep385_init_setup( );
+	TRY
+	{
+		ep385_init_setup( );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		if ( ep385.dump_file )
+		{
+			fclose( ep385.dump_file );
+			ep385.dump_file = NULL;
+		}
+
+		RETHROW( );
+	}
 
 	/* We need some somewhat different functions (or disable some) for
 	   setting the pulse properties */
@@ -414,6 +435,112 @@ Var *pulser_name( Var *v )
 {
 	v = v;
 	return vars_push( STR_VAR, DEVICE_NAME );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_automatic_shape_pulses( Var *v )
+{
+	long func;
+	double dl, dr;
+
+
+	/* We need at least one argument, the function shape pulse are to be
+	   created for. */
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing parameter.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Determine the function number */
+
+	func = get_strict_long( v, "pulser function" );
+
+	/* Check that the function argument is reasonable */
+
+	if ( func < 0 || func >= PULSER_CHANNEL_NUM_FUNC )
+	{
+		print( FATAL, "Invalid pulser function (%ld).\n", func );
+		THROW( EXCEPTION );
+	}
+
+	if ( func == PULSER_CHANNEL_PULSE_SHAPE ||
+		 func == PULSER_CHANNEL_PHASE_1 ||
+		 func == PULSER_CHANNEL_PHASE_2 )
+	{
+		print( FATAL, "Shape pulses can't be set for function '%s'.\n",
+			   Function_Names[ func ] );
+		THROW( EXCEPTION );
+	}
+
+	/* Check that a channel has been set for shape pulses */
+
+	if ( ep385.function[ PULSER_CHANNEL_PULSE_SHAPE ].num_channels == 0 )
+	{
+		print( FATAL, "No channel has been set for function '%s' needed for "
+			   "creating shape pulses.\n",
+			   Function_Names[ PULSER_CHANNEL_PULSE_SHAPE ] );
+		THROW( EXCEPTION );
+	}
+
+	/* Complain if automatic shape pulses have already been switched on for
+	   the function */
+
+	if ( ep385.function[ func ].uses_auto_shape_pulses )
+	{
+		print( FATAL, "Use of automatic shape pulses for function '%s' has "
+			   "already been switched on.\n", Function_Names[ func ] );
+		THROW( EXCEPTION );
+	}
+
+	ep385.auto_shape_pulses = SET;
+	ep385.function[ func ].uses_auto_shape_pulses = SET;
+
+	/* Look for left and right side padding arguments for the functions
+	   pulses */
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		dl = get_double( v, "left side shape pulse padding" );
+		if ( dl < 0 )
+		{
+			print( FATAL, "Can't use negative left side shape pulse "
+				   "padding.\n" );
+			THROW( EXCEPTION );
+		}
+		ep385.function[ func ].left_shape_padding = ep385_double2ticks( dl );
+
+		if ( ( v = vars_pop( v ) ) != NULL )
+		{
+			dr = get_double( v, "right side shape pulse padding" );
+			if ( dr < 0 )
+			{
+				print( FATAL, "Can't use negative right side shape pulse "
+					   "padding.\n" );
+				THROW( EXCEPTION );
+			}
+			ep385.function[ func ].right_shape_padding =
+													  ep385_double2ticks( dr );
+		}
+		else
+			ep385.function[ func ].right_shape_padding =
+					 lrnd( ceil( AUTO_SHAPE_RIGHT_PADDING / ep385.timebase ) );
+	}
+	else
+	{
+		ep385.function[ func ].left_shape_padding =
+					 lrnd( ceil( AUTO_SHAPE_LEFT_PADDING / ep385.timebase ) );
+		ep385.function[ func ].right_shape_padding =
+					 lrnd( ceil( AUTO_SHAPE_RIGHT_PADDING / ep385.timebase ) );
+	}
+
+	too_many_arguments( v );
+
+	return vars_push( INT_VAR, 1 );
 }
 
 
@@ -736,6 +863,17 @@ Var *pulser_shift( Var *v )
 		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 		p->needs_update = NEEDS_UPDATE( p );
 
+		/* Also shift shape pulses associated with the pulse */
+
+		if ( p->sp )
+		{
+			p->sp->pos = p->pos;
+			p->sp->old_pos = p->old_pos;
+			p->sp->is_old_pos = p->is_old_pos;
+			p->sp->has_been_active |= ( p->sp->is_active = p->is_active );
+			p->sp->needs_update = p->needs_update;
+		}
+			
 		if ( p->needs_update )
 			ep385.needs_update = SET;
 	}
@@ -814,6 +952,17 @@ Var *pulser_increment( Var *v )
 		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 		p->needs_update = NEEDS_UPDATE( p );
 
+		/* Also lengthen shape pulses associated with the pulse */
+
+		if ( p->sp )
+		{
+			p->sp->len = p->len;
+			p->sp->old_len = p->old_len;
+			p->sp->is_old_len = p->is_old_len;
+			p->sp->has_been_active |= ( p->sp->is_active = p->is_active );
+			p->sp->needs_update = p->needs_update;
+		}
+			
 		/* If the pulse was or is active we've got to update the pulser */
 
 		if ( p->needs_update )

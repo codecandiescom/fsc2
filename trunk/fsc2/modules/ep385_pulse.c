@@ -75,6 +75,10 @@ bool ep385_new_pulse( long pnum )
 	cp->needs_update = UNSET;
 	cp->has_been_active = cp->was_active = UNSET;
 
+	cp->left_warning = UNSET;
+	cp->right_warning = UNSET;
+	cp->sp = NULL;
+
 	return OK;
 }
 
@@ -514,6 +518,17 @@ bool ep385_change_pulse_position( long pnum, double p_time )
 	p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 	p->needs_update = NEEDS_UPDATE( p );
 
+	if ( p->sp != NULL )
+	{
+		p->sp->pos = new_pos;
+		p->sp->is_pos = SET;
+		p->sp->old_pos = p->old_pos;
+		p->sp->is_old_pos = p->is_old_pos;
+
+		p->sp->has_been_active |= ( p->sp->is_active = p->is_active );
+		p->sp->needs_update = p->needs_update;
+	}
+
 	if ( p->needs_update )
 		ep385.needs_update = SET;
 
@@ -574,6 +589,17 @@ bool ep385_change_pulse_length( long pnum, double p_time )
 	p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 	p->needs_update = NEEDS_UPDATE( p );
 
+	if ( p->sp != NULL )
+	{
+		p->sp->len = new_len;
+		p->sp->is_len = SET;
+		p->sp->old_len = p->old_len;
+		p->sp->is_old_len = p->is_old_len;
+
+		p->sp->has_been_active |= ( p->sp->is_active = p->is_active );
+		p->sp->needs_update = p->needs_update;
+	}
+
 	if ( p->needs_update )
 		ep385.needs_update = SET;
 
@@ -614,6 +640,12 @@ bool ep385_change_pulse_position_change( long pnum, double p_time )
 	p->dpos = new_dpos;
 	p->is_dpos = SET;
 
+	if ( p->sp != NULL )
+	{
+		p->sp->dpos = new_dpos;
+		p->sp->is_dpos = SET;
+	}
+
 	return OK;
 }
 
@@ -650,6 +682,12 @@ bool ep385_change_pulse_length_change( long pnum, double p_time )
 
 	p->dlen = new_dlen;
 	p->is_dlen = SET;
+
+	if ( p->sp != NULL )
+	{
+		p->sp->dlen = new_dlen;
+		p->sp->is_dlen = SET;
+	}
 
 	return OK;
 }

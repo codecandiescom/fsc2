@@ -85,9 +85,16 @@ bool ep385_assign_channel_to_function( int function, long channel )
 	CHANNEL *c = ep385.channel + channel;
 
 
-	fsc2_assert( function >= 0 && function < PULSER_CHANNEL_NUM_FUNC &&
-				 function != PULSER_CHANNEL_PHASE_1 &&
-				 function != PULSER_CHANNEL_PHASE_2 );
+	fsc2_assert( function >= 0 && function < PULSER_CHANNEL_NUM_FUNC );
+
+
+	if ( function == PULSER_CHANNEL_PHASE_1 ||
+		 function == PULSER_CHANNEL_PHASE_2 )
+	{
+		print( FATAL, "Phase pulse functions can't be used with this "
+			   "driver.\n" );
+		THROW( EXCEPTION );
+	}
 
 	if ( channel < 0 || channel >= MAX_CHANNELS )
 	{
@@ -110,6 +117,15 @@ bool ep385_assign_channel_to_function( int function, long channel )
 
 		print( FATAL, "Channel %ld is already used for function '%s'.\n",
 			   channel, Function_Names[ c->function->self ] );
+		THROW( EXCEPTION );
+	}
+
+	/* The PULSE_SHAPE function can only have one channel assigned to it */
+
+	if ( function == PULSER_CHANNEL_PULSE_SHAPE && f->num_channels > 0 )
+	{
+		print( FATAL, "Only one channel may be assigned to function '%s'.\n",
+			   Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
 
@@ -327,6 +343,15 @@ bool ep385_set_phase_reference( int phs, int function )
 		THROW( EXCEPTION );
 	}
 
+	/* The PULSE_SHAPE function can't be phase-cycled */
+
+	if ( function == PULSER_CHANNEL_PULSE_SHAPE )
+	{
+		print( FATAL, "Function '%s' can't be phase-cycled.\n",
+			   Function_Names[ PULSER_CHANNEL_PULSE_SHAPE ] );
+		THROW( EXCEPTION );
+	}
+
 	/* Check if a function has already been assigned to the phase setup */
 
 	if ( ep385_phs[ phs ].function != NULL )
@@ -337,7 +362,7 @@ bool ep385_set_phase_reference( int phs, int function )
 		THROW( EXCEPTION );
 	}
 
-	f = &ep385.function[ function ];
+	f = ep385.function + function;
 
 	/* Check if a phase setup has been already assigned to the function */
 
@@ -350,7 +375,7 @@ bool ep385_set_phase_reference( int phs, int function )
 
 	ep385_phs[ phs ].is_defined = SET;
 	ep385_phs[ phs ].function = f;
-	f->phase_setup = &ep385_phs[ phs ];
+	f->phase_setup = ep385_phs + phs;
 
 	return OK;
 }
@@ -402,7 +427,7 @@ bool ep385_phase_setup_prep( int phs, int type, int dummy, long channel )
 	}
 
 	ep385_phs[ phs ].is_set[ type ] = SET;
-	ep385_phs[ phs ].channels[ type ] = &ep385.channel[ channel ];
+	ep385_phs[ phs ].channels[ type ] = ep385.channel + channel;
 
 	return OK;
 }
