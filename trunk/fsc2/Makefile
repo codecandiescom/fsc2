@@ -57,7 +57,7 @@ GROUP            := fsc2
 # Finally, set the verbosity level of the GPIB logs, use HIGH, MEDIUM, LOW
 # or OFF. If not set it defaults to LOW, i.e. only errors will be logged.
 
-GPIB_LIBRARY     := NI
+GPIB_LIBRARY     := JTT
 GPIB_CONF_FILE   := /etc/gpib.conf
 GPIB_LOG_FILE    := /tmp/gpib.log
 GPIB_LOG_LEVEL   := HIGH
