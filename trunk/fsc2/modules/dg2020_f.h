@@ -3,10 +3,6 @@
 */
 
 
-#if defined MAX_DEBUG
-#define dg2020_set_constant x_define_set_constant
-#endif
-
 
 #include "fsc2.h"
 
@@ -183,6 +179,9 @@ typedef struct
 	bool is_trig_in_impedance;
 	bool is_repeat_time;
 
+	Ticks neg_delay;
+	bool is_neg_delay;       // if any of the functions has a negative delay
+
 	long max_seq_len;        // maximum length of all pulse sequences
 
 	FUNCTION function[ PULSER_CHANNEL_NUM_FUNC ];
@@ -290,7 +289,7 @@ bool dg2020_store_timebase( double timebase );
 bool dg2020_assign_function( int function, long pod );
 bool dg2020_assign_channel_to_function( int function, long channel );
 bool dg2020_invert_function( int function );
-bool dg2020_set_delay_function( int function, double delay );
+bool dg2020_set_function_delay( int function, double delay );
 bool dg2020_set_function_high_level( int function, double voltage );
 bool dg2020_set_function_low_level( int function, double voltage );
 bool dg2020_set_trigger_mode( int mode );

@@ -56,3 +56,12 @@ lockin_get_adc_data, -1, EXP;   // returns the ADC voltage(s)
 lockin_sensitivity, -1, ALL;    // gets or sets the sensitivity
 lockin_time_constant, -1, ALL;  // gets or sets the time constant
 lockin_phase, -1, ALL;          // gets or sets the phase
+
+
+// functions exported by the digitizer (TDS754A)
+
+digitizer_define_window, -1, ALL; // defines a cursor window
+digitizer_timebase, -1, ALL;      // set or get the time base
+digitizer_num_averages, -1, ALL;  // set or get number of averages
+digitizer_get_channel_number, 1, ALL;
+digitizer_set_trigger_channel, 1, ALL;

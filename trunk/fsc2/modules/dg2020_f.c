@@ -48,7 +48,7 @@ int dg2020_init_hook( void )
 	pulser_struct.assign_channel_to_function =
 		dg2020_assign_channel_to_function;
 	pulser_struct.invert_function = dg2020_invert_function;
-	pulser_struct.set_delay_function = dg2020_set_delay_function;
+	pulser_struct.set_function_delay = dg2020_set_function_delay;
 	pulser_struct.set_function_high_level = dg2020_set_function_high_level;
 	pulser_struct.set_function_low_level = dg2020_set_function_low_level;
 
@@ -88,6 +88,8 @@ int dg2020_init_hook( void )
 	dg2020.is_trig_in_slope = UNSET;
 	dg2020.is_trig_in_level = UNSET;
 	dg2020.is_repeat_time = UNSET;
+	dg2020.is_neg_delay = UNSET;
+	dg2020.neg_delay = 0;
 	dg2020.is_grace_period = UNSET;
 
 	dg2020.block[ 0 ].is_used = dg2020.block[ 1 ].is_used = UNSET;
@@ -288,6 +290,9 @@ Var *pulser_start( Var *v )
 	v = v;
 
 
+	if ( ! dg2020_is_needed )
+		return vars_push( INT_VAR, 1 );
+
 	/* Send all changes to the pulser */
 
 	if ( dg2020.needs_update )
@@ -315,6 +320,9 @@ Var *pulser_shift( Var *v )
 {
 	PULSE *p;
 
+
+	if ( ! dg2020_is_needed )
+		return vars_push( INT_VAR, 1 );
 
 	/* An empty pulse list means that we have to shift all active pulses that
 	   have a position change time value set */
@@ -393,6 +401,9 @@ Var *pulser_increment( Var *v )
 {
 	PULSE *p;
 
+
+	if ( ! dg2020_is_needed )
+		return vars_push( INT_VAR, 1 );
 
 	/* An empty pulse list means that we have to increment all active pulses
 	   that have a length change time value set */
@@ -473,6 +484,9 @@ Var *pulser_next_phase( Var *v )
 	FUNCTION *f;
 
 
+	if ( ! dg2020_is_needed )
+		return vars_push( INT_VAR, 1 );
+
 	if ( v == NULL )
 	{
 		if ( ! dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used &&
@@ -536,6 +550,9 @@ Var *pulser_phase_reset( Var *v )
 	FUNCTION *f;
 
 
+	if ( ! dg2020_is_needed )
+		return vars_push( INT_VAR, 1 );
+
 	if ( v == NULL )
 	{
 		if ( ! dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used &&
@@ -594,6 +611,9 @@ Var *pulser_pulse_reset( Var *v )
 {
 	PULSE *p;
 
+
+	if ( ! dg2020_is_needed )
+		return vars_push( INT_VAR, 1 );
 
 	/* An empty pulse list means that we have to reset all pulses (even the
        inactive ones) */
