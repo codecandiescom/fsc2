@@ -177,12 +177,12 @@ The second member, 'low_ticks', is the time between pulses, given in
 units of ticks. The smallest allowed value for 'low_ticks' is 1. The
 length of a tick depends on the input source. Usually, one of the
 internal time bases will be used. If the fast internal time base of
-20 MHz internal is used the distance td between pulses is given by
+20 MHz is used the distance 'td' between pulses is given by
 
          td = ( low_ticks + 1 ) * 50 ns
 
 with a minimum distance between pulses of 100 ns. If the slow time base
-of 100 kHz is used td is given by
+of 100 kHz is used 'td' is given by
 
          td = ( low_ticks + 1 ) * 10 us
 
@@ -194,12 +194,12 @@ The third member, 'high_ticks', is the length of the pulses, given in
 units of ticks.  The smallest allowed value for 'high_ticks' is 1. The
 length of a tick depends on the input source. Usually, one of the
 internal time bases will be used. If the fast internal time base of
-20 MHz internal is used the pulse length tp is given by
+20 MHz is used the pulse length 'tp' is given by
 
 	     tp = ( high_ticks + 1 ) * 50 ns
 
 with a minimum length of 100 ns.  If the slow time base of 100 kHz is
-used tp is given by
+used 'tp' is given by
 
          tp = ( high_ticks + 1 ) * 10 us
 
