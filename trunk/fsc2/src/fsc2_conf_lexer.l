@@ -74,3 +74,10 @@ FILE *fsc2_confin;
 <<EOF>>                       return 0;
 
 %%
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

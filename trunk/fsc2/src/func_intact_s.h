@@ -36,7 +36,7 @@ Var_T *f_svalue( Var_T *v );
 Var_T *f_schanged( Var_T *v );
 
 
-#endif   /* ! INTERACTIVE_SLIDERSS_HEADER */
+#endif   /* ! INTERACTIVE_SLIDERS_HEADER */
 
 
 /*

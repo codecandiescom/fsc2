@@ -193,10 +193,10 @@ FL_resource Xresources[ ] = {
 };
 
 
-/*-------------------------------------------------*/
-/* xforms_init() registers the program with XFORMS */
-/* and creates all the forms needed by the program.*/
-/*-------------------------------------------------*/
+/*--------------------------------------------------*
+ * xforms_init() registers the program with XFORMS
+ * and creates all the forms needed by the program.
+ *--------------------------------------------------*/
 
 bool xforms_init( int *argc, char *argv[ ] )
 {
@@ -543,9 +543,9 @@ bool xforms_init( int *argc, char *argv[ ] )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Setup the array used in handling the (remaining) command line options */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Setup the array used in handling the (remaining) command line options
+ *-----------------------------------------------------------------------*/
 
 static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 {
@@ -630,11 +630,11 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Load the appropriate shared library for creating the graphic stuff */
-/* and try to resolve the addresses of the functions for creating the */
-/* various forms.                                                     */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Load the appropriate shared library for creating the graphic stuff
+ * and try to resolve the addresses of the functions for creating the
+ * various forms.
+ *--------------------------------------------------------------------*/
 
 bool dl_fsc2_rsc( void )
 {
@@ -763,12 +763,12 @@ bool dl_fsc2_rsc( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Handler for the user clicking on the Close button of the window */
-/* decoration - this is interpreted as the user really meaning it, */
-/* i.e. even when we're in batch mode and there are still EDL      */
-/* scripts to be run quit immediately.                             */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Handler for the user clicking on the Close button of the window
+ * decoration - this is interpreted as the user really meaning it,
+ * i.e. even when we're in batch mode and there are still EDL
+ * scripts to be run quit immediately.
+ *-----------------------------------------------------------------*/
 
 static int main_form_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
 {
@@ -787,10 +787,10 @@ static int main_form_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
 }
 
 
-/*-----------------------------------------*/
-/* xforms_close() closes and deletes all   */
-/* forms previously needed by the program. */
-/*-----------------------------------------*/
+/*-----------------------------------------*
+ * xforms_close() closes and deletes all
+ * forms previously needed by the program.
+ *-----------------------------------------*/
 
 void xforms_close( void )
 {
@@ -813,10 +813,10 @@ void xforms_close( void )
 }
 
 
-/*------------------------------------------------------------*/
-/* Callback function for movements of the slider that adjusts */
-/* the sizes of the program and the error/output browser      */
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Callback function for movements of the slider that adjusts
+ * the sizes of the program and the error/output browser.
+ *------------------------------------------------------------*
 
 void win_slider_callback( FL_OBJECT *a, UNUSED_ARG long b )
 {
@@ -845,12 +845,12 @@ void win_slider_callback( FL_OBJECT *a, UNUSED_ARG long b )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function for figuring out if a window is iconified. It returns 1 if */
-/* it is, 0 if it isn't and -1 on errors. Please note that there's a   */
-/* potential race condition when immedately after this test the state  */
-/* of the window gets changed.                                         */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function for figuring out if a window is iconified. It returns 1 if
+ * it is, 0 if it isn't and -1 on errors. Please note that there's a
+ * potential race condition when immedately after this test the state
+ * of the window gets changed.
+ *---------------------------------------------------------------------*/
 
 #define WM_STATE_ELEMENTS 1
 
@@ -887,8 +887,8 @@ int is_iconic( Display *d, Window w )
 #if 0
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
 
 static int fsc2_x_error_handler( Display *d, XErrorEvent *err )
 {
@@ -902,8 +902,8 @@ static int fsc2_x_error_handler( Display *d, XErrorEvent *err )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
 
 static int fsc2_xio_error_handler( UNUSED_ARG Display *d )
 {

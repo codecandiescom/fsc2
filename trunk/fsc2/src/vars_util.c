@@ -28,10 +28,10 @@
 static Var_T *vars_str_comp( int comp_type, Var_T *v1, Var_T *v2 );
 
 
-/*---------------------------------------------------------------*/
-/* vars_negate() negates the value of a variable, an 1D array or */
-/* a complete matrix.                                            */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * vars_negate() negates the value of a variable, an 1D array or
+ * a complete matrix.
+ *---------------------------------------------------------------*/
 
 Var_T *vars_negate( Var_T *v )
 {
@@ -104,24 +104,24 @@ Var_T *vars_negate( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* vars_comp() is used for comparing the values of two variables. There are */
-/* three types of comparison - it can be tested if two variables are equal, */
-/* if the first one is less than the second or if the first is less or      */
-/* equal than the second variable (tests for greater or greater or equal    */
-/* can be done simply by switching the arguments).                          */
-/* In comparisons between floating point numbers not only the numbers are   */
-/* compared but, in order to reduce problems due to rounding errors, also   */
-/* the numbers when the last significant bit is changed (if there's a       */
-/* function in libc that allow us to do this...).                           */
-/* ->                                                                       */
-/*    * type of comparison (COMP_EQUAL, COMP_UNEQUAL, COMP_LESS,            */
-/*      COMP_LESS_EQUAL, COMP_AND, COMP_OR or COMP_XOR)                     */
-/*    * pointers to the two variables                                       */
-/* <-                                                                       */
-/*    * integer variable with value of 1 (true) or 0 (false) depending on   */
-/*      the result of the comparison                                        */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * vars_comp() is used for comparing the values of two variables. There are
+ * three types of comparison - it can be tested if two variables are equal,
+ * if the first one is less than the second or if the first is less or
+ * equal than the second variable (tests for greater or greater or equal 
+ * can be done simply by switching the arguments).
+ * In comparisons between floating point numbers not only the numbers are
+ * compared but, in order to reduce problems due to rounding errors, also
+ * the numbers when the last significant bit is changed (if there's a
+ * function in libc that allow us to do this...).
+ * ->
+ *    * type of comparison (COMP_EQUAL, COMP_UNEQUAL, COMP_LESS,
+ *      COMP_LESS_EQUAL, COMP_AND, COMP_OR or COMP_XOR)
+ *    * pointers to the two variables
+ * <-
+ *    * integer variable with value of 1 (true) or 0 (false) depending on
+ *      the result of the comparison
+ *--------------------------------------------------------------------------*/
 
 Var_T *vars_comp( int comp_type, Var_T *v1, Var_T *v2 )
 {
@@ -249,8 +249,8 @@ Var_T *vars_comp( int comp_type, Var_T *v1, Var_T *v2 )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
 
 static Var_T *vars_str_comp( int comp_type, Var_T *v1, Var_T *v2 )
 {
@@ -300,11 +300,11 @@ static Var_T *vars_str_comp( int comp_type, Var_T *v1, Var_T *v2 )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* vars_lnegate() does a logical negate of an integer or float variable, */
-/* i.e. if the variables value is zero a value of 1 is returned in a new */
-/* variable, otherwise 0.                                                */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * vars_lnegate() does a logical negate of an integer or float variable,
+ * i.e. if the variables value is zero a value of 1 is returned in a new
+ * variable, otherwise 0.
+ *-----------------------------------------------------------------------*/
 
 Var_T *vars_lnegate( Var_T *v )
 {
@@ -325,11 +325,11 @@ Var_T *vars_lnegate( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function gets called from the functions for the arithmetic operations */
-/* to make sure that arrays and matrices passed to the functions have a  */
-/* known length.                                                         */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function gets called from the functions for the arithmetic operations
+ * to make sure that arrays and matrices passed to the functions have a
+ * known length.
+ *-----------------------------------------------------------------------*/
 
 void vars_arith_len_check( Var_T *v1, Var_T *v2, const char *op )
 {
@@ -368,3 +368,10 @@ void vars_arith_len_check( Var_T *v1, Var_T *v2, const char *op )
 		THROW( EXCEPTION );
 	}
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */
