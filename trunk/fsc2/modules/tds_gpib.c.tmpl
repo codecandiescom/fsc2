@@ -472,8 +472,14 @@ void tds_tmpl_set_trigger_channel( int ch )
 	char cmd[ 50 ];
 
 
-	fsc2_assert( ch >= TDS_TMPL_CH1 && ch < NUM_NORMAL_CHANNELS );
-
+#ifdef TDS_TMPL_AUX
+	fsc2_assert( ( ch >= TDS_TMPL_CH1 && ch < NUM_NORMAL_CHANNELS ) ||
+				 ch == TDS_TMPL_AUX || ch == TDS_TMPL_LIN );
+#endif
+#ifndef TDS_TMPL_AUX
+	fsc2_assert( ( ch >= TDS_TMPL_CH1 && ch < NUM_NORMAL_CHANNELS ) ||
+				 ch == TDS_TMPL_LIN );
+#endif
 
 	sprintf( cmd, "TRIG:MAI:EDGE:SOU %s\n", Channel_Names[ ch ] );
 

@@ -828,6 +828,7 @@ static bool child_reader( void *ret, CommStruct *header )
 				}
 				else
 					strcpy( retstr, "" );
+				TRY_SUCCESS;
 			}
 			OTHERWISE
 			{

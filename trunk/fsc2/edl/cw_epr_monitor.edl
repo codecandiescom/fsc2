@@ -26,9 +26,9 @@ Sweep_State = 0;               // sweep state, 1 = up, -1 = down, 0 = stopped
 
 Cur_Acq_Rate;                  // currently setected acquisition rate menu item
 
-MAX_POINTS = 65000;            // maximum number of data points
+MAX_POINTS = 16350;            // maximum number of data points
 data[ MAX_POINTS ];            // array of data points
-I = 0;                         // count of data points
+I;                             // count of data points
 File;                          // file handler for storing data
 
 new_current;                   // current as set by user
@@ -130,6 +130,8 @@ Clear = button_create( "NORMAL_BUTTON", "Clear screen" );
 /* Now we're done with all preparations and can start to run the experiment
    within an endless loop */
 
+I = 0;
+
 FOREVER
 {
 	/* Check if the sweep up button has been pressed and we're not already	
@@ -217,12 +219,12 @@ FOREVER
 	   become meaningless stop and restart auto-acquisition to clean out the
 	   buffer. */
 
-	new_sweep_rate = input_value( Sweep_Rate );
+	new_sweep_rate = abs( input_value( Sweep_Rate ) );
 	IF abs( sweep_rate * 60.0 - new_sweep_rate ) > 0.0001
 	{
-		IF new_sweep_rate <= 1.0 & new_sweep_rate >= -1.0
+		IF new_sweep_rate <= 1.0 & new_sweep_rate >= 0.01
 		{
-			sweep_rate = magnet_sweep_rate( sweep_rate / 60.0 );
+			sweep_rate = magnet_sweep_rate( new_sweep_rate / 60.0 );
 			IF Sweep_State != STOPPED
 			{
 				lockin_auto_acquisition( SWITCH_OFF );

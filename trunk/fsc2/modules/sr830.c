@@ -137,6 +137,8 @@ typedef struct
 
 	bool is_auto_running;
 	bool is_auto_setup;
+	double auto_time;
+
 	long st_index;
 	bool set_sample_time_to_tc;
 	long dsp_ch[ DISPLAY_CHANNELS ];
@@ -213,8 +215,8 @@ static long dsp_to_symbol[ ][ DISPLAY_CHANNELS ] =
 
 static bool sr830_init( const char *name );
 static double sr830_get_data( void );
-static void sr830_get_xy_data( double *data, long *channels,
-							   int num_channels );
+static void sr830_get_xy_data( double *data, long *channels, int num_channels,
+							   bool using_dummy_data );
 static void sr830_get_xy_auto_data( double *data, long *channels,
 									int num_channels );
 static double sr830_get_adc_data( long channel );
@@ -487,7 +489,7 @@ Var *lockin_get_data( Var *v )
 		channels[ num_channels++ ] = channels[ 0 ] % NUM_DIRECT_CHANNELS + 1;
 	}
 
-	sr830_get_xy_data( data, channels, num_channels );
+	sr830_get_xy_data( data, channels, num_channels, using_dummy_channels );
 
 	if ( using_dummy_channels )
 		return vars_push( FLOAT_VAR, data[ 0 ] );
@@ -1450,7 +1452,8 @@ static double sr830_get_data( void )
 /* lockin_data() returns the measured voltage of the lock-in. */
 /*------------------------------------------------------------*/
 
-static void sr830_get_xy_data( double *data, long *channels, int num_channels )
+static void sr830_get_xy_data( double *data, long *channels, int num_channels,
+							   bool using_dummy_data )
 {
 	char cmd[ 100 ] = "SNAP?";
 	char buffer[ 200 ];
@@ -1464,6 +1467,16 @@ static void sr830_get_xy_data( double *data, long *channels, int num_channels )
 	/* Assemble the command to be send to the lock-in - if we find that
 	   one of the channel gets its data from the lock-ins internal buffer
 	   pass everything to a different function. */
+
+	if ( num_channels == 2 && using_dummy_data && sr830.is_auto_running )
+	{
+		for ( j = 0; j < DISPLAY_CHANNELS; j++ )
+			if ( channels[ 0 ] == sr830.dsp_ch[ j ] )
+			{
+				sr830_get_xy_auto_data( data, channels, 1 );
+				return;
+			}
+	}
 
 	for ( i = 0; i < num_channels; i++ )
 	{
@@ -1571,10 +1584,10 @@ static void sr830_get_xy_auto_data( double *data, long *channels,
 			} while ( cont );
 				
 
-			sr830_get_xy_data( data, new_channels, nc + 1 );
+			sr830_get_xy_data( data, new_channels, nc + 1, SET );
 		}
 		else
-			sr830_get_xy_data( data, new_channels, nc );
+			sr830_get_xy_data( data, new_channels, nc, UNSET );
 	}
 
 	/* Now also fetch the auto-data and insert them into their correct
@@ -2112,6 +2125,8 @@ static void sr830_auto( int flag )
 			sr830.data_fetched[ i ] = 0;
 		sr830.stored_data = 0;
 	}
+	else
+		sr830.auto_time = experiment_time( );
 }
 
 
@@ -2126,6 +2141,8 @@ static double sr830_get_auto_data( int type )
 	int channel;
 	int i;
 	char *ptr;
+	bool new_try = SET;
+
 
 
 	for ( channel = 0; channel < DISPLAY_CHANNELS; channel++ )
@@ -2158,21 +2175,46 @@ static double sr830_get_auto_data( int type )
 		sr830.stored_data = 0;
 	}
 
-	/* Unless we already know that there are still unfetched data poll until
-	   data are available in the buffer (the 'data_fetched' entry in the
-	   lock-in's structure tells us how many we already got, so there must be
-	   at least on more data in the buffer or we have to wait). Unless an
-	   extremely slow external trigger is used polling can take up to 16 s in
-	   the worst (but probably rather unrealistic) case. */
+	/* Unless we already know that there are still unfetched data do some
+	   polling (but see below) until data are available in the buffer (the
+	   'data_fetched' entry in the lock-in's structure tells us how many we
+	   already got, so there must be at least on more data in the buffer or we
+	   have to wait). Unless an extremely slow external trigger is used
+	   polling can take up to 16 s in the worst (but hopefully rather
+	   unrealistic) case. */
 
 	while ( sr830.stored_data <= sr830.data_fetched[ channel ] )
 	{
+		/* When we freshly arrive here we measure the time since the last call
+		   (or since the start of the auto-acquisition) and if this time is
+		   smaller than the auto-acquisition time we sleep until new data are
+		   to be expected - this way we don't have to constantly poll the
+		   lock-in (which also keeps the log file smaller ;-) */
+
+		if ( new_try )
+		{
+			double new_time, delta_time;
+
+
+			new_time = experiment_time( );
+			delta_time = new_time - sr830.auto_time;
+
+			if ( delta_time < st_list[ sr830.st_index ] )
+				usleep( floor( ( st_list[ sr830.st_index ] - delta_time )
+							   * 1000000.0 ) );
+			new_try = UNSET;
+		}
+
 		stop_on_user_request( );
 
 		length = 100;
 		if ( gpib_write( sr830.device, "SPTS?\n", 6 ) == FAILURE ||
 			 gpib_read( sr830.device, buffer, &length ) == FAILURE )
 			sr830_failure( );
+
+		/* Store the time where we received the last data item */
+
+		sr830.auto_time = experiment_time( );
 
 		buffer[ length - 1 ] = '\0';
 

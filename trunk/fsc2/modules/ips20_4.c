@@ -1276,7 +1276,6 @@ static int ips20_4_set_activity( int activity )
 
 static long ips20_4_talk( const char *message, char *reply, long length )
 {
-	unsigned char stb;
 	long len = length;
 
 
@@ -1285,7 +1284,13 @@ static long ips20_4_talk( const char *message, char *reply, long length )
 	if ( gpib_write( ips20_4.device, message, strlen( message ) ) == FAILURE )
 		ips20_4_comm_failure( );
 
+	/* Re-enable the following if you're extremely careful, but even the
+	   LabVIEW driver by Oxford doesn't use it... */
+
+#if 0
 	do {
+		unsigned char stb;
+
 		stop_on_user_request( );
 
 		usleep( 500 );
@@ -1293,10 +1298,9 @@ static long ips20_4_talk( const char *message, char *reply, long length )
 		if ( gpib_serial_poll( ips20_4.device, &stb ) == FAILURE )
 			ips20_4_comm_failure( );
 	} while ( ! ( stb & MESSAGE_AVAILABLE ) );
+#endif
 
  reread:
-
-	usleep( 100000 );
 
 	stop_on_user_request( );
 
