@@ -9,6 +9,8 @@ char *get_string_copy( const char *str )
 {
 	char *new;
 
+	if ( str == NULL )
+		return NULL;
 	new = T_malloc( ( strlen( str ) + 1 ) * sizeof( char ) );
 	strcpy( new, str );
 	return new;
@@ -26,6 +28,8 @@ char *string_to_lower( char *str )
 	char *ptr;
 
 
+	if ( str == NULL )
+		return NULL;
 	for ( ptr = str; *ptr; ptr++ )
 		if ( isupper( *ptr ) )
 			*ptr = tolower( *ptr );
