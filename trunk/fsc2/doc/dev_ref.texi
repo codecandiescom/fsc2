@@ -1598,7 +1598,7 @@ to @w{13 dB} in @w{0.1 dB} steps.
 the PVCAM library (at least version 2.6.4-2) that both are available
 from Roper Scientific.
 
-@paragrahindent 0
+@paragraphindent 0
 Note: Several important parameters of the camera need to be set in the
 configuration file to agree with the properties of the camera. There
 also can be set up that images or spectra fetched from the camera are

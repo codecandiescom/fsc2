@@ -4386,6 +4386,14 @@ installed. To to be able to work with the camera also the Linux device
 driver for the PCI board used for the communication with camera, also
 supplied by Roper Scientific, must be installed.
 
+@strong{Please note}: By setting two variables the configuration file
+the orientation of the spectra or images taken by the camera can be
+influenced. They allow to mirror the spectra or images (i.e. exchanging
+right and left side) and/or turn images upside-down. Since some
+functions assume spectra to have an increasing wavelength or relative
+wavenumber axis (or decreasing absolute wavenumber axis) this option
+can be used to satisfy the requirement.
+
 @strong{Please note}: At the start of the experiment the target
 temperature for the camera is set to the lowest possible value unless a
 target temperature is explicitely set using the function
@@ -4855,7 +4863,7 @@ arguments, an integer for the grating number and the wavelength at the
 center of the chip. If these arguments aren't given, the currently used
 grating and wavelength of the monochromator are used.
 
-For @code{SpectraPro-300i} monochromators it is required thata
+For @code{SpectraPro-300i} monochromators it is required that a
 calibration for the grating has been loaded, either by calling
 @code{monochromator_set_calibration()} or
 @code{monochromator_read_calibration()} (see below). If no calibration
@@ -4880,7 +4888,7 @@ change_scale_1d( scale[ 1 ] + 0.5 * xbin * scale[ 2 ],
                  xbin * scale[ 2 ] );
 @end example
 
-@strong{Please note}: the wavelength difference between two neighboring
+@strong{Please note}: The wavelength difference between two neighboring
 pixels isn't really constant over the whole width of the CCD chip. When
 you use the returned values only for the center of the chip the results
 are in quite good agreement with the real wavelengths, but for the edges
@@ -4890,6 +4898,10 @@ for gratings with lower groove densities the deviation gets even larger,
 proportional to the inverse of the groove density. To obtain the exact
 wavelength for a certain pixel on the chip use the function
 @code{monochromator_calc_wavelength()} discussed below.
+
+@strong{Please note}: The function assumes that the spectra taken with
+the camera show increasing wavelengths going from the left to the right
+side!
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -4902,6 +4914,10 @@ This function is similar to the function
 @code{monochromator_wavelength_axis()} but instead of returning values
 to be used for setting a wavelength axis the values are suitable for
 setting up a wavenumber axis.
+
+@strong{Please note}: The function assumes that the spectra taken with
+the camera show decreasing absolute wavenumbers and increasing relative
+wavenumbers going from the left to the right side!
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
