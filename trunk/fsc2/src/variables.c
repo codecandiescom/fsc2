@@ -610,8 +610,8 @@ Var *vars_mod( Var *v1, Var *v2 )
 Var *vars_pow( Var *v1, Var *v2 )
 {
 	Var  *new_var;
-	long ires,
-		 i;
+	long ires;
+	long i;
 
 
 	/* Make sure that `v1' and `v2' exist, are integers or float values
@@ -685,17 +685,126 @@ Var *vars_pow( Var *v1, Var *v2 )
 
 Var *vars_negate( Var *v )
 {
-	/* Make sure that `v' exists, has integer or float type and has
-	   an value assigned to it */
+	Var *new_var;
+	long i;
+	long len;
+	long *rlp;
+	double *rdp;
+	long *ilp;
+	double *idp;
+	int type;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == INT_VAR )
-		v->val.lval = - v->val.lval;
+	/* Make sure that `v' exists, has integer or float type or is an array
+	   and has an value assigned to it */
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   ARR_REF | ARR_PTR | INT_TRANS_ARR | FLOAT_TRANS_ARR );
+
+	switch( v->type )
+	{
+		case INT_VAR :
+			v->val.lval = - v->val.lval;
+			return v;
+
+		case FLOAT_VAR :
+			v->val.dval = - v->val.dval;
+			return v;
+
+		case INT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
+						"on array slices.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+
+		case FLOAT_ARR :
+			if ( v->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
+						"on array slices.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+			type = FLOAT_ARR;
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		case ARR_PTR :
+			len = v->from->sizes[ v->from->dim - 1 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = ( long * ) v->val.gptr;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = ( double * ) v->val.gptr;
+			}
+			break;
+
+		case ARR_REF :
+			if ( v->from->dim != 1 )
+			{
+				eprint( FATAL, "%s:%ld: Argument of function `int()' is "
+						"neither a number nor a 1-dimensional array.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+
+			len = v->from->sizes[ 0 ];
+			if ( v->from->type == INT_ARR )
+			{
+				type = INT_ARR;
+				ilp = v->from->val.lpnt;
+			}
+			else
+			{
+				type = FLOAT_ARR;
+				idp = v->from->val.dpnt;
+			}
+			break;
+
+		case INT_TRANS_ARR :
+			type = INT_ARR;
+			len = v->len;
+			ilp = v->val.lpnt;
+			break;
+
+		case FLOAT_TRANS_ARR :
+			len = v->len;
+			idp = v->val.dpnt;
+			break;
+
+		default :
+			assert( 1 == 0 );
+	}
+
+	if ( type == INT_ARR )
+	{
+		rlp = T_malloc( len * sizeof( long ) );
+		for ( i = 0; i < len; ilp++, i++ )
+			rlp[ i ] = - *ilp;
+		new_var = vars_push( INT_TRANS_ARR, rlp, len );
+		T_free( rlp );
+	}
 	else
-		v->val.dval = - v->val.dval;
+	{
+		rdp = T_malloc( len * sizeof( double ) );
+		for ( i = 0; i < len; idp++, i++ )
+			rlp[ i ] = - *idp;
+		new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
+		T_free( rdp );
+	}
 
-	return v;
+	vars_pop( v );
+	return new_var;
 }
 
 

@@ -949,7 +949,7 @@ Var *f_abs( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = ( long * ) v->val.gptr, len;
+				ilp = ( long * ) v->val.gptr;
 			}
 			else
 			{
@@ -970,7 +970,7 @@ Var *f_abs( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = v->from->val.lpnt, len;
+				ilp = v->from->val.lpnt;
 			}
 			else
 			{
@@ -1074,7 +1074,7 @@ Var *f_sin( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = ( long * ) v->val.gptr, len;
+				ilp = ( long * ) v->val.gptr;
 			}
 			else
 			{
@@ -1095,7 +1095,7 @@ Var *f_sin( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = v->from->val.lpnt, len;
+				ilp = v->from->val.lpnt;
 			}
 			else
 			{
@@ -1186,7 +1186,7 @@ Var *f_cos( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = ( long * ) v->val.gptr, len;
+				ilp = ( long * ) v->val.gptr;
 			}
 			else
 			{
@@ -1207,7 +1207,7 @@ Var *f_cos( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = v->from->val.lpnt, len;
+				ilp = v->from->val.lpnt;
 			}
 			else
 			{
@@ -1303,7 +1303,7 @@ Var *f_tan( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = ( long * ) v->val.gptr, len;
+				ilp = ( long * ) v->val.gptr;
 			}
 			else
 			{
@@ -1324,7 +1324,7 @@ Var *f_tan( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = v->from->val.lpnt, len;
+				ilp = v->from->val.lpnt;
 			}
 			else
 			{
@@ -1429,7 +1429,7 @@ Var *f_asin( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = ( long * ) v->val.gptr, len;
+				ilp = ( long * ) v->val.gptr;
 			}
 			else
 			{
@@ -1450,7 +1450,7 @@ Var *f_asin( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = v->from->val.lpnt, len;
+				ilp = v->from->val.lpnt;
 			}
 			else
 			{
@@ -1561,7 +1561,7 @@ Var *f_acos( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = ( long * ) v->val.gptr, len;
+				ilp = ( long * ) v->val.gptr;
 			}
 			else
 			{
@@ -1582,7 +1582,7 @@ Var *f_acos( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = v->from->val.lpnt, len;
+				ilp = v->from->val.lpnt;
 			}
 			else
 			{
@@ -1685,7 +1685,7 @@ Var *f_atan( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = ( long * ) v->val.gptr, len;
+				ilp = ( long * ) v->val.gptr;
 			}
 			else
 			{
@@ -1706,7 +1706,7 @@ Var *f_atan( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = v->from->val.lpnt, len;
+				ilp = v->from->val.lpnt;
 			}
 			else
 			{
@@ -1805,7 +1805,7 @@ Var *f_sinh( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = ( long * ) v->val.gptr, len;
+				ilp = ( long * ) v->val.gptr;
 			}
 			else
 			{
@@ -1826,7 +1826,7 @@ Var *f_sinh( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = v->from->val.lpnt, len;
+				ilp = v->from->val.lpnt;
 			}
 			else
 			{
@@ -1931,7 +1931,7 @@ Var *f_cosh( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = ( long * ) v->val.gptr, len;
+				ilp = ( long * ) v->val.gptr;
 			}
 			else
 			{
@@ -1952,7 +1952,7 @@ Var *f_cosh( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = v->from->val.lpnt, len;
+				ilp = v->from->val.lpnt;
 			}
 			else
 			{
@@ -2052,7 +2052,7 @@ Var *f_tanh( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = ( long * ) v->val.gptr, len;
+				ilp = ( long * ) v->val.gptr;
 			}
 			else
 			{
@@ -2073,7 +2073,7 @@ Var *f_tanh( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = v->from->val.lpnt, len;
+				ilp = v->from->val.lpnt;
 			}
 			else
 			{
@@ -2172,7 +2172,7 @@ Var *f_exp( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = ( long * ) v->val.gptr, len;
+				ilp = ( long * ) v->val.gptr;
 			}
 			else
 			{
@@ -2193,7 +2193,7 @@ Var *f_exp( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = v->from->val.lpnt, len;
+				ilp = v->from->val.lpnt;
 			}
 			else
 			{
@@ -2311,7 +2311,7 @@ Var *f_ln( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = ( long * ) v->val.gptr, len;
+				ilp = ( long * ) v->val.gptr;
 			}
 			else
 			{
@@ -2332,7 +2332,7 @@ Var *f_ln( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = v->from->val.lpnt, len;
+				ilp = v->from->val.lpnt;
 			}
 			else
 			{
@@ -2454,7 +2454,7 @@ Var *f_log( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = ( long * ) v->val.gptr, len;
+				ilp = ( long * ) v->val.gptr;
 			}
 			else
 			{
@@ -2475,7 +2475,7 @@ Var *f_log( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = v->from->val.lpnt, len;
+				ilp = v->from->val.lpnt;
 			}
 			else
 			{
@@ -2591,7 +2591,7 @@ Var *f_sqrt( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = ( long * ) v->val.gptr, len;
+				ilp = ( long * ) v->val.gptr;
 			}
 			else
 			{
@@ -2612,7 +2612,7 @@ Var *f_sqrt( Var *v )
 			if ( v->from->type == INT_ARR )
 			{
 				type = INT_ARR;
-				ilp = v->from->val.lpnt, len;
+				ilp = v->from->val.lpnt;
 			}
 			else
 			{
