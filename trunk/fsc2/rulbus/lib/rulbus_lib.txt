@@ -1,0 +1,480 @@
+Library for the Rulbus (Rijksuniversiteit Leiden BUS) with support
+       for the RB8509, RB8510, RB8514 and RB8515 cards
+
+  $Id$
+
+Contents:
+
+    I   Rulbus Configuration File
+	II  General Functions
+    III RB8509 (12-bit ADC) Functions
+	IV  RB8510 (12-bit DAC) Functions
+	V   RB8514 (Delay Card) Functions
+	VI  RB8515 (Clock Card) Functions
+
+======================================================================
+
+I Rulbus Configuration File
+---------------------------
+
+Before you can work with the library you must create a configuration
+file for the Rulbus. It contains informations about the device file
+used for the Rulbus interface, the racks attached to it and the
+cards sitting in these racks. Have a look at the file 'rulbus.conf'
+in the main directory of the package first, it should be nearly self-
+explaining.
+
+The configuration file may contain a line like this
+
+  file = "/dev/rulbus_epp";
+
+This tells the library to take the file '/dev/rulbus_epp' to be the
+device file for the Rulbus interface. The name of the file must be
+enclosed in single or double quotes, the equal sign and the semi-
+colon are optional. If such a line isn't in the file the library
+will use '/dev/rulbus_epp' per default.
+
+For each rack connected to the Rulbus interface that you want to use
+you need a line starting with the keyword 'rack' and followed by
+a set of further instructions enclosed in curly braces in the
+configuration file:
+
+rack {
+
+   addr = 3;
+
+	card {
+		name  = "DELAY_0";
+		type  = RB8514;
+		addr  = 0x64;
+	}
+
+	card {
+		name  = "CLOCK";
+		type  = RB8515;
+		addr  = 0x12;
+	}
+
+	card {
+		name  = "ADC12";
+		type  = RB8509;
+		addr  = 0x68;
+		nchan = 8;
+	}
+
+	card {
+		name  = "DAC12_0";
+		type  = RB8510;
+		addr  = 0x45;
+		range = 10;
+		polar = "bipolar";
+	}
+}
+
+Within the set of instructions for a rack at least a line starting with
+the keyword 'addr', followed by the Rulbus rack number, is required. The
+rack number can be given as a decimal number as well as a hexadecimal
+number (if it starts with '0x') or as a octal number (if it starts with
+a '0').
+
+Further, there may be as many entries as there are cards
+in the rack, each starting with the keyword 'card' and followed by
+a set of instructions for the card, enclosed in curly braces.
+
+For each card a unique name must be given (a string enclosed in either
+single or double quotes), following the 'name' keyword. Using this name
+the card is later going to be initialized from your program. The next
+required information is the card type, given on a line starting with
+the keyword 'type' and followed by either the type of the card, which
+currently can be either RB8509 (for the 12-bit ADC cards), RB8510 (for
+12-bit DAC cards), RB8514 (for delay cards) or RB8515 (for clock cards)
+The last bit of information that is required for all cards is the Rulbus
+base address assigned to the card, following the 'addr' keyword. You can
+use decimal numbers as well as hexadecimal numbers (if the number starts
+with '0x') and octal numbers (if it starts with a '0').
+
+For the 12-bit ADCs (RB8509) some additional information must be specified,
+the number of channels the ADC card has. This number has to follow the
+keyword 'nchan' and must be number between 1 and 16 (when less channels
+are specified than the card has higher numbered channels can't be used).
+
+The 12-bit DACs (RB8510) also requires some additional informations. This
+is the range the DAC is set to, which can be either 5 (for cards with a
+0 V to 5.12 V or -5.12 to +5.12 V), 10 (for cards with a 0 V to 10.24 V
+or a -10.24 V to +10.24 V range) or 20 (for cards with a 0 V to 20.48 V
+range), and if the cards outputs bipolar or uniploar voltages. The range
+value follows the 'range' keyword and the polarity must be given as a
+string (enclosed in either single or double quotes) following the 'polar'
+keyword. Please note that each of the two outputs of the RB8510 card need
+their own 'card' entry in the configuration file - while they sit on the
+same card they are treated as independend devices (both have a different
+Rulbus base address
+
+After having written a configuration file you usually will copy it to
+the '/etc' directory, giving it the name 'rulbus.conf'. That's where
+the library expects to find the configuration file unless you set up
+the environment variable RULBUS_CONFIG_FILE with the name of the
+configuration file that should be used by the library.
+
+
+======================================================================
+
+
+II General Functions
+--------------------
+
+The following 6 functions are general functions that aren't to be used
+for only a subset of the cards.
+
+Most of the functions described below return an integer indicating if
+the operation was successful or failed. On success RULBUS_OK (which
+is 0) is returned while on failure a negative value gets returned.
+Here is the complete list of error codes with a short explanation:
+
+	RULBUS_CFG_ACC   Not permission to open configurarion file
+	RULBUS_INV_CFG   Invalid name for configuration file
+    RULBUS_OPN_CFG   Can't open configuration file
+	RULBUS_DVF_ACC   No permission to open device file
+	RULBUS_DVF_CFG   Invalid name for device file
+	RULBUS_DVF_OPN   Can't open device file
+	RULBUS_STX_ERR   Syntax error in configuration file
+	RULBUS_NO_MEM    Running out of memory
+	RULBUS_RCK_CNT   Too many racks listed in configuration file
+	RULBUS_RCK_DUP   Duplicate rack address in configuration file
+	RULBUS_NO_RCK    Missing rack address in configuration file
+	RULBUS_INV_RCK   Invalid rack address in configuration file
+	RULBUS_DVF_CNT   More than one device file in configuration file
+	RULBUS_MAX_CRD   Too many cards in configuration file
+	RULBUS_CRD_ADD   Invalid card address in configuration file
+	RULBUS_NAM_DUP   Duplicate card name in configuration file
+	RULBUS_DUP_NAM   More than one name for a card
+	RULBUS_ADD_DUP   More than one address for a card
+	RULBUS_TYP_DUP   More than one type for a card
+	RULBUS_CHN_DUP   More than one number of channel setting
+	RULBUS_CHN_INV   Invalid number of channels for ADC12 card
+    RULBUS_MIS_CHN   Missing number of channels for ADC12 card
+	RULBUS_RNG_DUP   More than one range for card
+	RULBUS_POL_DUP   More than one polarity for card
+	RULBUS_INV_POL   Invalid polarity setting
+	RULBUS_NO_RNG    Missing range setting for DAC12 card
+    RULBUS_INV_RNG   Invalid range setting for DAC12 card
+	RULBUS_NO_POL    Missing polarity setting for DAC12 card
+	RULBUS_CRD_CNT   Too many cards for single rack
+	RULBUS_NO_CRD    No cards found in configuration file
+	RULBUS_CRD_NAM   Missing card name in configuration file
+	RULBUS_INV_TYP   Invalid card type in configuration file
+	RULBUS_ADD_CFL   Address conflict between two cards in the same rack
+	RULBUS_TYP_HND   Missing modules for card
+	RULBUS_NO_INIT   Missing intialization of Rulbus library
+	RULBUS_INV_ARG   Invalid function argument
+	RULBUS_INV_CRD   No such card
+	RULBUS_INV_HND   Invalid card handle
+	RULBUS_CRD_NOP   Card has not been opened
+	RULBUS_INV_OFF   Invalid card address offset
+	RULBUS_WRT_ERR   Write error
+	RULBUS_RD_ERR    Read error
+	RULBUS_CRD_BSY   Card is busy
+	RULBUS_INV_VLT   Voltage out of range
+
+
+----------------------------------------------------------------------
+
+int rulbus_open( void )
+
+Before anything else the RULBUS must be initialized by calling this
+function. It will try to read in the configuration file, which is
+"/etc/rulbus.conf" (unless a different name has been compiled into
+the library), but the name can be changed by setting the environment
+variable RULBUS_CONFIG_FILE. If the syntax of this file is correct
+and the contents are reasonable the function will then open the device
+file for the rulbus interface. This is usually "/dev/rulbus" (unless
+a different name has been compiled into the program) or, if set, the
+name that has been set in the configuration file.
+
+Please note that the close-on-exec flag is set for the device file
+for the interface.
+
+On success the function returns RULBUS_OK, otherwise a negative value
+indicating the reason for the failure.
+
+
+----------------------------------------------------------------------
+
+void rulbus_close( void )
+
+When done with the RULBUS this may be called to clean up. All opened
+cards are closed automatically.
+
+
+----------------------------------------------------------------------
+
+int rulbus_perror( const char *s )
+
+The function prints out a string to stderr, consisting of a string
+pased to it as the argument, a colon, a blank and a short descriptive
+text of the error encountered in the last invocation of one of the
+functions for the board, followed by a new-line. If the argument is
+NULL or an empty string the error message is printed.
+
+The function returns the number of characters printed to stderr or
+the negative value RULBUS_NO_INIT if the RULBUS isn't open (i.e.
+rulbus_open() has never called or rulbus_close() hase been called
+before this function).
+
+
+----------------------------------------------------------------------
+
+const char *rulbus_strerror( void )
+
+The function returns a string with a short descriptive text of the
+error encountered in the last invocation of one of the functions for
+the board (or "Success" if the last function call was successful).
+
+If the RULBUS isn't open (i.e. rulbus_open() has never called or
+rulbus_close() hase been called before this function) the function
+returns an empty string.
+
+
+----------------------------------------------------------------------
+
+int rulbus_card_open( const char *name )
+
+This function must be called for a card on the RULBUS before it can
+be used. It expects the name of the card (as set in the configuration
+file) as the only argument.
+
+On success the function returns a (zero or positive) integer handle,
+which has to be used in all further dealings with the device. On
+failure a negative value indicating the reason for the failure is
+returned.
+
+
+----------------------------------------------------------------------
+
+void rulbus_card_close( int handle )
+
+This function can be called to "deactivate" the card. Once it has been
+called the card can't be used anymore unless rulbus_card_open() is
+called again for the card. The function is called automatically when
+the function rulbus_close() is invoked.
+
+
+======================================================================
+
+
+III RB8509 (12-bit ADC) Functions
+---------------------------------
+
+On intitialization (when rulbus_open_card() is called) the card is
+set up to use channel 0, a gain of 1 and to use internal trigger
+mode.
+
+
+----------------------------------------------------------------------
+
+int rulbus_adc12_set_channel( int handle, int channel )
+
+This function can be called to set the the channel for which conversions
+are to be done. It must be a number between 0 and one less than the
+total number of channels (as specified in the configuration file for
+the card).
+
+On success the function returns RULBUS_OK, otherwise a negative value
+indicating the reason for the failure.
+
+
+----------------------------------------------------------------------
+
+int rulbus_adc12_set_gain( int handle, int gain )
+
+This function allows to set the gain of the card. The 'gain' argument
+can be one of the following constants
+
+	RULBUS_ADC12_GAIN_1
+	RULBUS_ADC12_GAIN_2
+	RULBUS_ADC12_GAIN_4
+	RULBUS_ADC12_GAIN_8
+
+to set the gain factor to either 1, 2, 4, or 8.
+
+On success the function returns RULBUS_OK, otherwise a negative value
+indicating the reason for the failure.
+
+
+----------------------------------------------------------------------
+
+int rulbus_adc12_set_trigger_mode( int handle, int mode )
+
+This function allows to switch between the trigger modes, In internal
+mode a conversion is triggered by software, while in external trigger
+mode a conversion is triggered by an external signal. To switch to
+internal trigger mode call the function with mode set to the constant
+RULBUS_ADC12_INT_TRIG, or use RULBUS_ADC12_EXT_TRIG to switch to
+external trigger mode.
+
+On success the function returns RULBUS_OK, otherwise a negative value
+indicating the reason for the failure.
+
+
+----------------------------------------------------------------------
+
+int rulbus_adc12_check_convert( int handle, double *volts )
+
+This function should only be used when the card is in external trigger
+mode. It checks is a conversion has already happened. If this was the
+case the function returns 1 and the measured voltage is returned via
+the 'volts' pointer. If no conversion has happened yet, 0 is returned.
+When called while the card is internal trigger mode 0 is always returned.
+On failure the function returns a negative value indicating the reason
+for the failure.
+
+
+----------------------------------------------------------------------
+
+int rulbus_adc12_convert( int handle, double *volts )
+
+This function can be used both in internal as well as external trigger
+mode. If the card is in internal trigger mode a conversion is triggered.
+When the conversion is finished the measured voltage is returned via
+the 'volts' pointer. Please note: when the card is in external trigger
+mode the function will only return when an external trigger has been
+received.
+
+On success the function returns RULBUS_OK, otherwise a negative value
+indicating the reason for the failure.
+
+
+======================================================================
+
+
+IV RB8510 (12-bit DAC) Functions
+--------------------------------
+
+int rulbus_dac12_set_voltage( int handle, double volts )
+
+Using this function you can set the output voltage of the connector
+associated with the handle you received when calling rulbus_open_card().
+Obviously, the voltage must be within the range of voltages the DAC
+can output as they were specified in the configuration file.
+
+On success the function returns RULBUS_OK, otherwise a negative value
+indicating the reason for the failure.
+
+
+======================================================================
+
+
+V RB8514 (Delay Card) Functions
+-------------------------------
+
+int rulbus_delay_set_delay( int handle, unsigned long delay )
+
+The function is for setting the number of ticks of an external clock
+during which the card will output a pulse. It must be a number between
+1 and 16777216 (2^24).
+
+On success the function returns RULBUS_OK, otherwise a negative value
+indicating the reason for the failure.
+
+
+----------------------------------------------------------------------
+
+int rulbus_delay_set_trigger( int handle, int edge )
+
+This function lets youu select if the delay is started on the raising
+or the falling edge of an external trigger. To make the card start
+on the raising edge pass it the constant RULBUS_DELAY_RAISING_EDGE
+as the second argument, otherwise RULBUS_DELAY_FALLING_EDGE.
+
+On success the function returns RULBUS_OK, otherwise a negative value
+indicating the reason for the failure.
+
+
+----------------------------------------------------------------------
+
+int rulbus_delay_set_output_pulse( int handle, int output, int type )
+
+This function allows to set if a start and/or end pulse is to be created
+at output 1 and/or 2. If the 'output' argument is RULBUS_DELAY_OUTPUT_1
+the type argument will only be applied to the setting for output 1, if
+it is RULBUS_DELAY_OUTPUT_2 'type' only applies to output 2 and if it is
+RULBUS_DELAY_OUTPUT_BOTH the 'type' argument applies to both outputs.
+
+The 'type' argument can be either the constant RULBUS_DELAY_START_PULSE,
+RULBUS_DELAY_END_PULSE or RULBUS_DELAY_PULSE_BOTH. In the first case
+only a start pulse, but no end pulse gets output, in the second case
+only an end pulse and in the third case both a start and an end pulse
+will be created on the selected output(s).
+
+On success the function returns RULBUS_OK, otherwise a negative value
+indicating the reason for the failure.
+
+
+----------------------------------------------------------------------
+
+int rulbus_delay_set_output_pulse_polarity( int handle, int type, int pol )
+
+This function lets you select the polarity of the start and/or end pulses.
+The 'type' argument are the same as for the previous function, i.e. it
+can be either 
+
+	RULBUS_DELAY_START_PULSE
+	RULBUS_DELAY_END_PULSE
+	RULBUS_DELAY_PULSE_BOTH
+
+obviously indicating for which of the pulses the 'pol' argument is to be
+applied to. The 'pol' argument determines the polarity of the selected
+pulses and can be either RULBUS_DELAY_POLARITY_POSITIVE to output a
+positive voltage for the start or end pulse, or, to create pulses with
+negative polarity, RULBUS_DELAY_POLARITY_NEGATIVE.
+
+On success the function returns RULBUS_OK, otherwise a negative value
+indicating the reason for the failure.
+
+
+----------------------------------------------------------------------
+
+int rulbus_delay_busy( int handle )
+
+This function lets you determine if the card is currently creating a
+delay. It rturns 1 in this case or 0 if the card isn't just creating
+a delay. On failure a negative value indicating the reason for the
+failure is returned.
+
+----------------------------------------------------------------------
+
+int rulbus_delay_software_start( int handle )
+
+Usually, delays get started on receipt of an external trigger. But with
+this function a delay can also be started via software.
+
+On success the function returns RULBUS_OK, otherwise a negative value
+indicating the reason for the failure.
+
+
+======================================================================
+
+
+VI RB8515 (Clock Card) Functions
+--------------------------------
+
+int rulbus_clock_set_frequency( int handle, int freq )
+
+This function lets you set the frequency of the clock card. Beside the
+handle for the card (as returned by rulbus_open_card()) the function
+expects the requested output frequency as the second argument in the
+form of one of the following constants
+
+    RULBUS_CLOCK_FREQ_OFF
+    RULBUS_CLOCK_FREQ_100Hz
+    RULBUS_CLOCK_FREQ_1kHz
+    RULBUS_CLOCK_FREQ_10kHz
+    RULBUS_CLOCK_FREQ_100kHz
+    RULBUS_CLOCK_FREQ_1MHz
+    RULBUS_CLOCK_FREQ_10MHz
+    RULBUS_CLOCK_FREQ_100MHz
+
+with hopefully obvious meanings.
+
+On success the function returns RULBUS_OK, otherwise a negative value
+indicating the reason for the failure.

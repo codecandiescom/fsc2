@@ -76,7 +76,7 @@ static const char *rulbus_errlist[ ] = {
 	"Invalid card type in configuration file",         /* RULBUS_INV_TYP */
 	NULL,									           /* RULBUS_ADD_CFL */
 	"Missing modules for card",                        /* RULBUS_TYP_HND */
-	"Missing intialization of library",                /* RULBUS_NO_INIT */
+	"Missing intialization of Rulbus library",         /* RULBUS_NO_INIT */
 	"Invalid function argument",                       /* RULBUS_INV_ARG */
 	"No such card",                                    /* RULBUS_INV_CRD */
 	"Invalid card handle",                             /* RULBUS_INV_HND */
