@@ -148,56 +148,36 @@ cond:    FOR_TOK E_VAR_TOKEN '=' expr ':' expr fi '{'
        | UNTIL_TOK expr '{'
        | IF_TOK expr '{'
        | UNLESS_TOK expr '{'
-       | ELSE_TOK '{'
-       | ELSE_TOK IF_TOK expr '{'
+       | ELSE_TOK et
        | BREAK_TOK eol
        | CONT_TOK eol
 ;
 
-line:    E_VAR_TOKEN '=' expr                         { }
-       | E_VAR_TOKEN E_PLSA expr                      { }
-       | E_VAR_TOKEN E_MINA expr                      { }
-       | E_VAR_TOKEN E_MULA expr                      { }
-       | E_VAR_TOKEN E_DIVA expr                      { }
-       | E_VAR_TOKEN E_MODA expr                      { }
-       | E_VAR_TOKEN E_EXPA expr                      { }
-       | E_VAR_TOKEN '[' list1 ']' ass                { }
-       | E_FUNC_TOKEN '(' list2 ')'                   { }
-       | E_FUNC_TOKEN '['          { eprint( FATAL, SET, "`%s' is a predefined"
-											 " function.\n", $1->name );
-	                                 THROW( EXCEPTION ); }
-       | E_PPOS '=' expr                              { }
-       | E_PPOS E_PLSA expr   						  { }
-       | E_PPOS E_MINA expr   						  { }
-       | E_PPOS E_MULA expr   						  { }
-       | E_PPOS E_DIVA expr   						  { }
-       | E_PPOS E_MODA expr   						  { }
-       | E_PPOS E_EXPA expr   						  { }
-       | E_PLEN '=' expr      						  { }
-       | E_PLEN E_PLSA expr   						  { }
-       | E_PLEN E_MINA expr   						  { }
-       | E_PLEN E_MULA expr   						  { }
-       | E_PLEN E_DIVA expr   						  { }
-       | E_PLEN E_MODA expr   						  { }
-       | E_PLEN E_EXPA expr   						  { }
-       | E_PDPOS '=' expr     						  { }
-       | E_PDPOS E_PLSA expr  						  { }
-       | E_PDPOS E_MINA expr  						  { }
-       | E_PDPOS E_MULA expr  						  { }
-       | E_PDPOS E_DIVA expr  						  { }
-       | E_PDPOS E_MODA expr  						  { }
-       | E_PDPOS E_EXPA expr  						  { }
-       | E_PDLEN '=' expr     						  { }
-       | E_PDLEN E_PLSA expr  						  { }
-       | E_PDLEN E_MINA expr  						  { }
-       | E_PDLEN E_MULA expr  						  { }
-       | E_PDLEN E_DIVA expr  						  { }
-       | E_PDLEN E_MODA expr  						  { }
-       | E_PDLEN E_EXPA expr  						  { }
-;
-
 fi:      /* empty */
 	   | ':' 
+;
+
+et:      '{'
+       | IF_TOK expr '{'
+
+
+line:    E_VAR_TOKEN ass                              { }
+       | E_VAR_TOKEN '[' list1 ']' ass                { }
+       | E_FUNC_TOKEN '(' list2 ')'                   { }
+       | E_FUNC_TOKEN '['
+          { eprint( FATAL, SET, "`%s' is a predefined function.\n", $1->name );
+		    THROW( EXCEPTION ); }
+       | E_VAR_TOKEN '('
+          { eprint( FATAL, SET, "`%s' is a variable, not a funnction.\n",
+					$1->name );
+		    THROW( EXCEPTION ); }
+       | pt ass                                       { }
+;
+
+pt:      E_PPOS
+       | E_PLEN
+       | E_PDPOS
+       | E_PDLEN
 ;
 
 ass:     '=' expr
@@ -215,35 +195,35 @@ expr:    E_INT_TOKEN unit                             { }
        | E_VAR_TOKEN '[' list1 ']' unit               { }
        | E_FUNC_TOKEN '(' list2 ')' unit              { }
        | E_VAR_REF                                    { }
-       | E_VAR_TOKEN '('           { eprint( FATAL, SET, "`%s' isn't a "
-											 "function.\n", $1->name );
-	                                 THROW( EXCEPTION ); }
        | E_FUNC_TOKEN '['          { eprint( FATAL, SET, "`%s' is a predefined"
 											 " function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
-       | E_PPOS                                       { }
-       | E_PLEN                                       { }
-       | E_PDPOS                                      { }
-       | E_PDLEN                                      { }
-       | expr E_AND expr                              { }
-       | expr E_OR expr                               { }
-       | expr E_XOR expr                              { }
-       | E_NOT expr                                   { }
-       | expr E_EQ expr                               { }
-       | expr E_NE expr                               { }
-       | expr E_LT expr                               { }
-       | expr E_GT expr                               { }
-       | expr E_LE expr                               { }
-       | expr E_GE expr                               { }
-       | expr '+' expr                                { }
-       | expr '-' expr                                { }
-       | expr '*' expr                                { }
-       | expr '/' expr                                { }
-       | expr '%' expr                                { }
-       | expr '^' expr                                { }
+       | E_VAR_TOKEN '('          { eprint( FATAL, SET, "`%s' is a variable,"
+											 " not a function.\n", $1->name );
+	                                 THROW( EXCEPTION ); }
+       | pt                                           { }
+       | bin                                          { }
        | '+' expr %prec E_NEG                         { }
        | '-' expr %prec E_NEG                         { }
        | '(' expr ')' unit                            { }
+       | E_NOT expr                                   { }
+;
+
+bin:     expr E_AND expr
+       | expr E_OR expr
+       | expr E_XOR expr
+       | expr E_EQ expr
+       | expr E_NE expr
+       | expr E_LT expr
+       | expr E_GT expr
+       | expr E_LE expr
+       | expr E_GE expr
+       | expr '+' expr
+       | expr '-' expr
+       | expr '*' expr
+       | expr '/' expr
+       | expr '%' expr
+       | expr '^' expr
 ;
 
 unit:    /* empty */
