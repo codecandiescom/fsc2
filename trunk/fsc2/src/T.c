@@ -109,6 +109,33 @@ void *T_free( void *ptr )
 /*---------------------------------------------------------------------*/
 /*---------------------------------------------------------------------*/
 
+char *T_strdup( const char *str )
+{
+	char *new_str;
+
+
+	if ( str == NULL )
+		return NULL;
+
+	if ( ( new_str = strdup( str ) ) == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Running out of memory.\n", Fname, Lc );
+		THROW( OUT_OF_MEMORY_EXCEPTION );
+	}
+
+#if defined MDEBUG
+	fprintf( stderr, "(%d) strdup:  %p (%u)\n",
+			 I_am == CHILD, mem, strlen( str ) );
+	fflush( stderr );
+#endif
+
+	return new_str;
+}
+
+
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
 long T_atol( const char *txt )
 {
 	long ret;

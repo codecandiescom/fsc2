@@ -230,7 +230,7 @@ Var *func_get_long( const char *name, int *access, bool flag )
 	}
 	
 	ret = vars_push( FUNC, f->fnct );
-	ret->name = get_string_copy( name );
+	ret->name = T_strdup( name );
 	ret->dim = f->nargs;
 	*access = f->access_flag;
 

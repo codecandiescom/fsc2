@@ -225,7 +225,7 @@ Var *f_bcreate( Var *v )
 	if ( v != NULL )
 	{
 		vars_check( v, STR_VAR );
-		label = get_string_copy( v->val.sptr );
+		label = T_strdup( v->val.sptr );
 		convert_escapes( label );
 		v = vars_pop( v );
 	}
@@ -235,7 +235,7 @@ Var *f_bcreate( Var *v )
 	if ( v != NULL )
 	{
 		vars_check( v, STR_VAR );
-		help_text = get_string_copy( v->val.sptr );
+		help_text = T_strdup( v->val.sptr );
 		convert_escapes( help_text );
 		v = vars_pop( v );
 	}
@@ -871,14 +871,14 @@ Var *f_screate( Var *v )
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check( v, STR_VAR );
-		label = get_string_copy( v->val.sptr );
+		label = T_strdup( v->val.sptr );
 		convert_escapes( label );
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check( v, STR_VAR );
-		help_text = get_string_copy( v->val.sptr );
+		help_text = T_strdup( v->val.sptr );
 		convert_escapes( help_text );
 	}
 

@@ -5,22 +5,6 @@
 #include "fsc2.h"
 
 
-/*-------------------------------------*/
-/* Function returns a copy of a string */
-/*-------------------------------------*/
-
-char *get_string_copy( const char *str )
-{
-	char *new;
-
-	if ( str == NULL )
-		return NULL;
-	new = T_malloc( ( strlen( str ) + 1 ) * sizeof( char ) );
-	strcpy( new, str );
-	return new;
-}
-
-
 /*-----------------------------------------------------------------*/
 /* Function allocates memory for a string with one extra character */
 /* for the end-of-string null-byte.                                */

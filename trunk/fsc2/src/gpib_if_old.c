@@ -314,7 +314,7 @@ int gpib_init_device( const char *device_name, int *dev )
 		cur_dev = cur_dev->next;
 	}
 
-	cur_dev->name = get_string_copy( device_name );
+	cur_dev->name = T_strdup( device_name );
 	cur_dev->next = NULL;
 
     if ( ll > LL_ERR )

@@ -143,7 +143,7 @@ WS          [\n=: ]+
 {FILE}      {
 				*( assigntext + assignleng - 1 ) = '\0';
 				T_free( Fname );
-				Fname = get_string_copy( assigntext + 2 );
+				Fname = T_strdup( assigntext + 2 );
 			}
 
 			/* handling of line number lines */

@@ -108,7 +108,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 {FILE}      {
 				*( prepstext + prepsleng - 1 ) = '\0';
 				T_free( Fname );
-				Fname = get_string_copy( prepstext + 2 );
+				Fname = T_strdup( prepstext + 2 );
 			}
 
 			/* handling of line number lines */

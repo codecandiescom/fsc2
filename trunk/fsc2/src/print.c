@@ -288,12 +288,12 @@ static int get_print_file( FILE **fp, char **name )
 		if ( fl_get_button( print_form->s2p_button ) )
 		{
 			print_type = S2P;
-			cmd = get_string_copy( fl_get_input( print_form->s2p_input ) );
+			cmd = T_strdup( fl_get_input( print_form->s2p_input ) );
 		}
 		else
 		{
 			print_type = P2F;
-			*name = get_string_copy( fl_get_input( print_form->p2f_input ) );
+			*name = T_strdup( fl_get_input( print_form->p2f_input ) );
 		}
 		TRY_SUCCESS;
 	}
@@ -338,7 +338,7 @@ static int get_print_file( FILE **fp, char **name )
 
 		TRY
 		{
-			*name = get_string_copy( filename );
+			*name = T_strdup( filename );
 			TRY_SUCCESS;
 		}
 		CATCH( EXCEPTION )
@@ -1017,7 +1017,7 @@ static void do_print( char *name, const char *command )
 
 	TRY
 	{
-		cmd_line = get_string_copy( command );
+		cmd_line = T_strdup( command );
 
 		argv = T_malloc( 3 * sizeof( char * ) );
 		argv[ 0 ] = cptr = cmd_line;

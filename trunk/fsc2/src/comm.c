@@ -315,7 +315,7 @@ long reader( void *ret )
 				str[ 0 ][ header.data.str_len[ 0 ] ] = '\0';
 			}
 			else if ( header.data.str_len[ 0 ] == 0 )
-				str[ 0 ] = get_string_copy( "" );
+				str[ 0 ] = T_strdup( "" );
 			else
 				str[ 0 ] = NULL;
 
@@ -343,7 +343,7 @@ long reader( void *ret )
 				str[ 0 ][ header.data.str_len[ 0 ] ] = '\0';
 			}
 			else if ( header.data.str_len[ 0 ] == 0 )
-				str[ 0 ] = get_string_copy( "" );
+				str[ 0 ] = T_strdup( "" );
 			else
 				str[ 0 ] = NULL;
 
@@ -373,7 +373,7 @@ long reader( void *ret )
 				str[ 0 ][ header.data.str_len[ 0 ] ] = '\0';
 			}
 			else if ( header.data.str_len[ 0 ] == 0 )
-				str[ 0 ] = get_string_copy( "" );
+				str[ 0 ] = T_strdup( "" );
 			else
 				str[ 0 ] = NULL;
 
@@ -410,7 +410,7 @@ long reader( void *ret )
 					str[ i ][ header.data.str_len[ i ] ] = '\0';
 				}
 				else if ( header.data.str_len[ i ] == 0 )
-					str[ i ] = get_string_copy( "" );
+					str[ i ] = T_strdup( "" );
 				else
 					str[ i ] = NULL;
 			}
@@ -444,7 +444,7 @@ long reader( void *ret )
 					str[ i ][ header.data.str_len[ i ] ] = '\0';
 				}
 				else if ( header.data.str_len[ i ] == 0 )
-					str[ i ] = get_string_copy( "" );
+					str[ i ] = T_strdup( "" );
 				else
 					str[ i ] = NULL;
 			}
@@ -489,7 +489,7 @@ long reader( void *ret )
 					str[ i ][ header.data.str_len[ i ] ] = '\0';
 				}
 				else if ( header.data.str_len[ i ] == 0 )
-					str[ i ] = get_string_copy( "" );
+					str[ i ] = T_strdup( "" );
 				else
 					str[ i ] = NULL;
 

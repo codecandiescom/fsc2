@@ -80,7 +80,7 @@ WS          [\n=,:. ]+
 {FILE}      {
 				*( phasestext + phasesleng - 1 ) = '\0';
 				T_free( Fname );
-				Fname = get_string_copy( phasestext + 2 );
+				Fname = T_strdup( phasestext + 2 );
 			}
 
 			/* handling of line number lines */

@@ -450,12 +450,12 @@ Var *f_init_1d( Var *v )
 labels_1d:
 
 	vars_check ( v, STR_VAR );
-	G.label[ X ] = get_string_copy( v->val.sptr );
+	G.label[ X ] = T_strdup( v->val.sptr );
 
 	if ( ( v = v->next ) != NULL )
 	{
 		vars_check ( v, STR_VAR );
-		G.label[ Y ] = get_string_copy( v->val.sptr );
+		G.label[ Y ] = T_strdup( v->val.sptr );
 	}
 
 	return vars_push( INT_VAR, 1 );
@@ -611,18 +611,18 @@ Var *f_init_2d( Var *v )
 labels_2d:
 
 	vars_check( v, STR_VAR );
-	G.label[ X ] = get_string_copy( v->val.sptr );
+	G.label[ X ] = T_strdup( v->val.sptr );
 
 	if ( ( v = v->next ) == NULL )
 		return vars_push( INT_VAR, 1 );
 
 	vars_check( v, STR_VAR );
-	G.label[ Y ] = get_string_copy( v->val.sptr );
+	G.label[ Y ] = T_strdup( v->val.sptr );
 
 	if ( ( v = v->next ) != NULL )
 	{
 		vars_check( v, STR_VAR );
-		G.label[ Z ] = get_string_copy( v->val.sptr );
+		G.label[ Z ] = T_strdup( v->val.sptr );
 	}
 
 	return vars_push( INT_VAR, 1 );
@@ -1222,19 +1222,19 @@ Var *f_getf( Var *var )
 	/* First string is the message */
 
 	if ( s[ 0 ] != NULL && s[ 0 ][ 0 ] == '\\' )
-		r = get_string_copy( s[ 0 ] + 1 );
+		r = T_strdup( s[ 0 ] + 1 );
 
 	if ( s[ 0 ] == NULL || s[ 0 ] == "" || s[ 0 ][ 0 ] == '\\' )
-		s[ 0 ] = get_string_copy( "Please enter a file name:" );
+		s[ 0 ] = T_strdup( "Please enter a file name:" );
 	else
-		s[ 0 ] = get_string_copy( s[ 0 ] );
+		s[ 0 ] = T_strdup( s[ 0 ] );
 
 	/* Second string is the is the file name pattern */
 
 	if ( s[ 1 ] == NULL || s[ 1 ] == "" )
-		s[ 1 ] = get_string_copy( "*.dat" );
+		s[ 1 ] = T_strdup( "*.dat" );
 	else
-		s[ 1 ] = get_string_copy( s[ 1 ] );
+		s[ 1 ] = T_strdup( s[ 1 ] );
 
 	/* Third string is the default directory */
 
@@ -1251,15 +1251,15 @@ Var *f_getf( Var *var )
 		} while ( s[ 2 ] == NULL && errno == ERANGE );
 
 		if ( s[ 2 ] == NULL )
-			s[ 2 ] = get_string_copy( "" );
+			s[ 2 ] = T_strdup( "" );
 	}
 	else
-		s[ 2 ] = get_string_copy( s[ 2 ] );
+		s[ 2 ] = T_strdup( s[ 2 ] );
 
 	if ( s[ 3 ] == NULL )
-		s[ 3 ] = get_string_copy( "" );
+		s[ 3 ] = T_strdup( "" );
 	else
-		s[ 3 ] = get_string_copy( s[ 3 ] );
+		s[ 3 ] = T_strdup( s[ 3 ] );
 		   
 getfile_retry:
 
@@ -1267,7 +1267,7 @@ getfile_retry:
 	   file name was passed to the routine and this is not a repeat call) */
 
 	if ( r == NULL )
-		r = get_string_copy( show_fselector( s[ 0 ], s[ 2 ], 
+		r = T_strdup( show_fselector( s[ 0 ], s[ 2 ], 
 											 s[ 1 ], s[ 3 ] ) );
 
 	if ( ( r == NULL || *r == '\0' ) &&
@@ -1977,7 +1977,7 @@ Var *f_save_c( Var *v )
 	/* Show the comment editor and get the returned contents (just one string
 	   with embedded newline chars) */
 
-	r = get_string_copy( show_input( c, l ) );
+	r = T_strdup( show_input( c, l ) );
 
 	if ( r == NULL )
 		return vars_push( INT_VAR, 1 );
@@ -2100,8 +2100,8 @@ static void T_fprintf( int file_num, const char *fmt, ... )
 
 get_repl_retry:
 
-	new_name = get_string_copy( show_fselector( "Replacement file:", NULL,
-												NULL, NULL ) );
+	new_name = T_strdup( show_fselector( "Replacement file:", NULL,
+										 NULL, NULL ) );
 
 	if ( ( new_name == NULL || *new_name == '\0' ) &&
 		 1 != show_choices( "Do you really want to stop saving data?\n"

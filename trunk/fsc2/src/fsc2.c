@@ -203,7 +203,7 @@ int main( int argc, char *argv[ ] )
 	{
 		TRY
 		{
-			in_file = get_string_copy( fname );
+			in_file = T_strdup( fname );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
@@ -453,7 +453,7 @@ void load_file( FL_OBJECT *a, long reload )
 
 			TRY
 			{
-				in_file = get_string_copy( fn );
+				in_file = T_strdup( fn );
 				TRY_SUCCESS;
 			}
 			OTHERWISE
@@ -1181,7 +1181,7 @@ static void start_help_browser( void )
 	/* If netscape isn't running start it, otherwise ask it to just open a
 	   new window */
 
-	av[ 0 ] = get_string_copy( "netscape" );
+	av[ 0 ] = T_strdup( "netscape" );
 
 	if ( system( "xwininfo -name Netscape >/dev/null 2>&1" ) )
 	{
@@ -1192,7 +1192,7 @@ static void start_help_browser( void )
 	}
 	else
 	{
-		av[ 1 ] = get_string_copy( "-remote" );
+		av[ 1 ] = T_strdup( "-remote" );
 		av[ 2 ] = get_string( 40 + strlen( docdir ) );
 		strcpy( av[ 2 ], "openURL(file:" );
 		strcat( av[ 2 ], docdir );
@@ -1266,7 +1266,7 @@ void main_sig_handler( int signo )
 			main_form->Load->u_ldata = ( long ) line[ 0 ];
 			if ( line[ 1 ] == 'd' )
 				delete_file = SET;
-			main_form->Load->u_cdata = get_string_copy( line + 2 );
+			main_form->Load->u_cdata = T_strdup( line + 2 );
 			fl_trigger_object( main_form->Load );
 			errno = errno_saved;
 			return;
@@ -1320,7 +1320,7 @@ void usage( void )
 {
 	char *dd;
 
-	dd = get_string_copy( docdir );
+	dd = T_strdup( docdir );
 	if ( dd[ strlen( dd ) - 1 ] == '/' )
 		dd[ strlen( dd ) - 1 ] = '\0';
 	fprintf( stderr, "Usage: fsc2 [OPTIONS]... [FILE]\n"

@@ -55,7 +55,7 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 {FILE}      {
 				*( splittext + splitleng - 1 ) = '\0';
 				T_free( Fname );
-				Fname = get_string_copy( splittext + 2 );
+				Fname = T_strdup( splittext + 2 );
 			}
 
 			/* handling of line number lines */

@@ -47,7 +47,7 @@ void include_handler( char *file );
 void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 			 FILE *primary_fp, FILE **fp, int *incl_depth );
 void unit_spec( char *text, int power );
-char *get_string_copy( const char *string );
+char *T_strdup( const char *string );
 char *get_string( size_t len );
 void *T_malloc( size_t size );
 void *T_calloc( size_t nmemb, size_t size );
@@ -386,7 +386,7 @@ int main( int argc, char *argv[ ] )
 	/* set the global variables and output name of input file */
 
 	printf( "\x01\n%s\n", argv[ 1 ] );
-	Fname = get_string_copy( argv[ 1 ] );
+	Fname = T_strdup( argv[ 1 ] );
 	Lc = 1;
 	Eol = SET;
 
@@ -464,7 +464,7 @@ void include_handler( char *file )
 		{
 
 			*( file + strlen( file ) - 1 ) = '\0';
-			incl_file = get_string_copy( file + 1 );
+			incl_file = T_strdup( file + 1 );
 		}
 		else
 		{
@@ -688,14 +688,20 @@ void *T_free( void *ptr )
 }
 
 
-char *get_string_copy( const char *string )
+char *T_strdup( const char *string )
 {
 	char *new;
 
 	if ( string == NULL )
 		return NULL;
-	new = get_string( strlen( string ) );
-	strcpy( new, string );
+
+	if ( ( new = strdup( string ) ) == NULL )
+		THROW( OUT_OF_MEMORY_EXCEPTION );
+
+#if defined MDEBUG
+	fprintf( stderr, "strdup:  %p (%u)\n", new, strlen( string ) );
+#endif
+
 	return new;
 }
 

@@ -120,8 +120,7 @@ void store_exp( FILE *in )
 		switch( ret )
 		{
 			case E_STR_TOKEN :
-				prg_token[ prg_length ].tv.sptr =
-					get_string_copy( exp_val.sptr );
+				prg_token[ prg_length ].tv.sptr = T_strdup( exp_val.sptr );
 				break;
 
 			case E_FUNC_TOKEN :
@@ -130,7 +129,7 @@ void store_exp( FILE *in )
 				memcpy( prg_token[ prg_length ].tv.vptr, Var_Stack,
 						sizeof( Var ) );
 				prg_token[ prg_length ].tv.vptr->name =
-					get_string_copy( Var_Stack->name );
+					                            T_strdup( Var_Stack->name );
 				vars_pop( Var_Stack );
 				break;
 
@@ -153,7 +152,7 @@ void store_exp( FILE *in )
 		if ( cur_Fname == NULL || strcmp( Fname, cur_Fname ) )
 		{
 			cur_Fname = NULL;
-			cur_Fname = get_string_copy( Fname );
+			cur_Fname = T_strdup( Fname );
 		}
 		prg_token[ prg_length ].Fname = cur_Fname;
 		prg_token[ prg_length ].Lc = Lc;
@@ -757,7 +756,7 @@ int exp_runlex( void )
 				next = ret->next;
 				prev = ret->prev;
 				memcpy( ret, cur_prg_token->tv.vptr, sizeof( Var ) );
-				ret->name = get_string_copy( ret->name );
+				ret->name = T_strdup( ret->name );
 				ret->from = from;
 				ret->next = next;
 				ret->prev = prev;
@@ -832,7 +831,7 @@ int conditionlex( void )
 				next = ret->next;
 				prev = ret->prev;
 				memcpy( ret, cur_prg_token->tv.vptr, sizeof( Var ) );
-				ret->name = get_string_copy( ret->name );
+				ret->name = T_strdup( ret->name );
 				ret->from = from;
 				ret->next = next;
 				ret->prev = prev;

@@ -39,7 +39,7 @@ void show_alert( const char *str )
 	{
 		switch_off_special_cursors( );
 
-		strc = get_string_copy( str );
+		strc = T_strdup( str );
 		strs[ 0 ] = strc;
 		if ( ( strs[ 1 ] = strchr( strs[ 0 ], '\n' ) ) != NULL )
 		{
