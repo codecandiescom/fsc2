@@ -27,7 +27,7 @@ To use the library you will have to include the header file 'me6x00.h'.
 Not all of the functions you will find in the sources of the libary are
 already working. These are especially the functions that could be used
 with ME-6100 boards only. Since I don't have such a board I have no chance
-to test such functions. Most of these functuins are marked as 'INCOMPLETE'
+to test such functions. Most of these functions are marked as 'INCOMPLETE'
 in the source and require additional code.
 
 The library currently supplies the following functions:
@@ -36,19 +36,20 @@ The library currently supplies the following functions:
 	me6x00_num_dacs()
 	me6x00_serial_number()
 	me6x00_board_info()
-	me6x00_error_message()
 	me6x00_close()
 	me6x00_keep_voltage()
 	me6x00_voltage()
 	me6x00_reset()
 	me6x00_reset_all()
 	me6x00_single()
+	me6x00_perror()
+	me6x00_strerror()
 
 
-All functions (except me6x00_error_message()) return an integer, indicating
-success or failure. On success, 'ME6X00_OK' (which is just 0) is returned.
-On failure a negative number, is returned, indicating the type of failure.
-The following values can be expected:
+All functions (except me6x00_perror()) and me6x00_strerror() return an
+integer, indicating success or failure. On success, 'ME6X00_OK' (which
+is just 0) is returned. On failure a negative number, is returned,
+indicating the type of failure. The following values can be expected:
 
     ME6X00_ERR_IBN    Invalid board number
     ME6X00_ERR_IFR    Invalid frequency
@@ -69,9 +70,22 @@ The following values can be expected:
     ME6X00_ERR_NDV    No driver loaded for board
     ME6X00_ERR_INT    Internal library error
 
-All functions except (me6x00_close(), me6x00_frequency_to_timer() and
-me6x00_error_message())  may return at least one of the following error
-codes:
+The absolute value of the error code can be used as an index into a an
+array of short descriptions of the error encountered, defined as
+
+extern const char *me6x00_errlist[ ];
+
+The length of this array is given by the (constant) global variable
+
+extern const int me6x00_nerr;
+
+i.e. the largest  message number provided by the array of error messages
+is me6x00_nerr - 1.
+
+
+All functions (except me6x00_close(), me6x00_frequency_to_timer(),
+me6x00_perror() and me6x00_strerror()) may return at least one of the
+following error codes:
 
     ME6X00_ERR_IBN    ME6X00_ERR_BSY    ME6X00_ERR_NDF
     ME6X00_ERR_ACS    ME6X00_ERR_DFP    ME6X00_ERR_NDV
@@ -88,8 +102,8 @@ or the number of installed boards minus 1, whatever is smaller.
 
 A large number of the function also expect the number of a DAC on the
 board as the second argument. Depending on the type of the board this
-must be an ineteger between 0 and 4, 0 and 8 or 0 and 15. Instead of
-a number also a symbolic name of the foem ME6X00_DACxx can be given,
+must be an integer between 0 and 4, 0 and 8 or 0 and 15. Instead of
+a number also a symbolic name of the from ME6X00_DACxx can be given,
 where xx has to be replaced by the DAC number (always two digits, so
 use ME6X00_DAC01 etc.).
 
@@ -204,17 +218,6 @@ have to copy the data to a new location.
 
 ======================================================================
 
-const char *me6x00_error_message( void )
-
-Whenever a call to one of the other functions failed an error number is
-returned. To get a very short textual description about the error this
-function can be called, returning a string with the error description.
-If the previous call to one of the other functions did not return an
-error number but ME6X00_OK the function returns an empty string.
-
-
-======================================================================
-
 int me6x00_close( int board )
 
 The function can be used to close the boards device file and thus make
@@ -300,3 +303,23 @@ volatge. For 0 a voltage of -10 V is output, while for 0xFFFF it's
    int board             Board number
    int dac               DAC number
    unsigned short val    Voltage to be output as a 16 bit value
+
+
+======================================================================
+
+int me6x00_perror( const char *s )
+
+The function prints produces a message on the standard error output,
+describing the error encountered during the last call of one of the
+me6x00_xxx() functions. First (if s is not NULL and *s is not '\0')
+the argument string s is printed, followed by a colon and a blank.
+Then follows the error message and a new-line. The function returns
+the number of printed characters.
+
+
+======================================================================
+
+const char *me6x00_strerror( void )
+
+The function returns a string with the error message for the last
+call of one of the me6x00_xxx() functions.

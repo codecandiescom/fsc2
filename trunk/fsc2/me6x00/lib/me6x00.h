@@ -43,11 +43,9 @@ int me6x00_board_type( int board, unsigned int *type );
 int me6x00_num_dacs( int board, unsigned int *num_dacs );
 int me6x00_serial_number( int board, unsigned int *serial_no );
 int me6x00_board_info( int board, me6x00_dev_info **info );
-const char *me6x00_error_message( void );
 int me6x00_close( int board );
 int me6x00_voltage( int board, int dac, double volts );
 int me6x00_keep_voltage( int board, int dac, int state );
-
 int me6x00_continuous( int board, int dac, int size, unsigned short *buf );
 int me6x00_continuous_ex( int board, int dac, int size, unsigned short *buf );
 int me6x00_reset( int board, int dac );
@@ -59,6 +57,12 @@ int me6x00_start( int board, int dac );
 int me6x00_stop( int board, int dac );
 int me6x00_stop_ex( int board, int dac );
 int me6x00_wraparound( int board, int dac, int size, unsigned short *buf );
+int me6x00_perror( const char *s );
+const char *me6x00_strerror( void );
+
+
+extern const char *me6x00_errlist[ ];
+extern const int me6x00_nerr;
 
 
 #define ME6X00_TRIGGER_TIMER     0x00
@@ -67,7 +71,6 @@ int me6x00_wraparound( int board, int dac, int size, unsigned short *buf );
 
 
 #define ME6X00_OK        0
-
 #define ME6X00_ERR_IBN  -1
 #define ME6X00_ERR_IFR  -2
 #define ME6X00_ERR_BSY  -3
@@ -85,28 +88,7 @@ int me6x00_wraparound( int board, int dac, int size, unsigned short *buf );
 #define ME6X00_ERR_ABS -15
 #define ME6X00_ERR_DFP -16
 #define ME6X00_ERR_NDV -17
-
 #define ME6X00_ERR_INT -18
-
-#define ME6X00_ERR_IBN_MESS "Invalid board number"
-#define ME6X00_ERR_IFR_MESS "Invalid frequency"
-#define ME6X00_ERR_BSY_MESS "Board is busy"
-#define ME6X00_ERR_NDF_MESS "No device file"
-#define ME6X00_ERR_ACS_MESS "No permissions to open file"
-#define ME6X00_ERR_NAP_MESS "Command can't be used with ME6X00 boards"
-#define ME6X00_ERR_DAC_MESS "Invalid DAC channel number"
-#define ME6X00_ERR_TDC_MESS "Invalid DAC channel for requested operation"
-#define ME6X00_ERR_TCK_MESS "Ticks too low (frequency too high)"
-#define ME6X00_ERR_TRG_MESS "Invalid trigger mode parameter"
-#define ME6X00_ERR_VLT_MESS "Invalid voltage"
-#define ME6X00_ERR_IBA_MESS "Invalid buffer address"
-#define ME6X00_ERR_IBS_MESS "Invalid buffer size"
-#define ME6X00_ERR_BNO_MESS "Board not open"
-#define ME6X00_ERR_ABS_MESS "Operation aborted due to signal"
-#define ME6X00_ERR_DFP_MESS "Unspecified error when opening device file"
-#define ME6X00_ERR_NDV_MESS "No driver loaded for board"
-
-#define ME6X00_ERR_INT_MESS "Internal library error"
 
 
 #ifdef __cplusplus

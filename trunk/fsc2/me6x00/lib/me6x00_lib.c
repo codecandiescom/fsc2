@@ -64,9 +64,36 @@ static int check_dac( int board, int dac, int is_me6100_special );
 #define ME6100_SPECIFIC    1
 
 
-static const char *error_message = "";
 static ME6X00_Device_Info dev_info[ ME6X00_MAX_BOARDS ];
 static me6x00_dev_info ret_info;
+
+static int me6x00_errno;
+
+const char *me6x00_errlist[ ] = {
+	"Success",                                        /* ME6X00_OK      */
+	"Invalid board number",							  /* ME6X00_ERR_IBN */
+	"Invalid frequency",							  /* ME6X00_ERR_IFR */
+	"Board is busy",								  /* ME6X00_ERR_BSY */
+	"No device file",								  /* ME6X00_ERR_NDF */
+	"No permissions to open file",					  /* ME6X00_ERR_ACS */
+	"Command can't be used with ME6X00 boards",		  /* ME6X00_ERR_NAP */
+	"Invalid DAC channel number",					  /* ME6X00_ERR_DAC */
+	"Invalid DAC channel for requested operation",	  /* ME6X00_ERR_TDC */
+	"Ticks too low (frequency too high)",			  /* ME6X00_ERR_TCK */
+	"Invalid trigger mode parameter",				  /* ME6X00_ERR_TRG */
+	"Invalid voltage",								  /* ME6X00_ERR_VLT */
+	"Invalid buffer address",						  /* ME6X00_ERR_IBA */
+	"Invalid buffer size",							  /* ME6X00_ERR_IBS */
+	"Board not open",								  /* ME6X00_ERR_BNO */
+	"Operation aborted due to signal",				  /* ME6X00_ERR_ABS */
+	"Unspecified error when opening device file",	  /* ME6X00_ERR_DFP */
+	"No driver loaded for board",					  /* ME6X00_ERR_NDV */
+	"Internal library error"						  /* ME6X00_ERR_INT */
+};
+
+const int me6x00_nerr =
+				( int ) ( sizeof me6x00_errlist / sizeof me6x00_errlist[ 0 ] );
+
 
 
 /*----------------------------------------------------------------*/
@@ -79,13 +106,8 @@ unsigned int me6x00_frequency_to_timer( double freq )
 	unsigned int ticks;
 
 
-	error_message = "";
-
 	if ( freq <= 0 || freq / ME6X00_CLOCK_FREQ > UINT_MAX )
-	{
-		error_message = ME6X00_ERR_IFR_MESS;
-		return ME6X00_ERR_IFR;
-	}
+		return me6x00_errno = ME6X00_ERR_IFR;
 
 	ticks = ME6X00_CLOCK_FREQ / freq;
 	if ( ticks < ME6X00_MIN_TICKS )
@@ -104,13 +126,11 @@ int me6x00_board_type( int board, unsigned int *type )
 	int ret;
 
 
-	error_message = "";
-
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
 
 	*type = dev_info[ board ].info.device_ID;
-	return ME6X00_OK;
+	return me6x00_errno = ME6X00_OK;
 }
 
 
@@ -123,13 +143,11 @@ int me6x00_num_dacs( int board, unsigned int *num_dacs )
 	int ret;
 
 
-	error_message = "";
-
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
 
 	*num_dacs = dev_info[ board ].num_dacs;
-	return ME6X00_OK;
+	return me6x00_errno = ME6X00_OK;
 }
 
 
@@ -143,13 +161,11 @@ int me6x00_serial_number( int board, unsigned int *serial_no )
 	int ret;
 
 
-	error_message = "";
-
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
 
 	*serial_no = dev_info[ board ].info.serial_no;
-	return ME6X00_OK;
+	return me6x00_errno = ME6X00_OK;
 }
 		
 
@@ -161,8 +177,6 @@ int me6x00_board_info( int board, me6x00_dev_info **info )
 	int ret;
 
 
-	error_message = "";
-
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
 
@@ -172,20 +186,7 @@ int me6x00_board_info( int board, me6x00_dev_info **info )
 	ret_info = dev_info[ board ].info;
 	*info = &ret_info;
 
-	return ME6X00_OK;
-}
-
-
-/*----------------------------------------------------------------*/
-/* Returns a string with a short descriptive text of the error    */
-/* encountered in the last invocation of one of the me6x000_xxx() */
-/* functions. If there were no error, i.e. the function returned  */
-/* successfully, an empty string is returned.                     */
-/*----------------------------------------------------------------*/
-
-const char *me6x00_error_message( void )
-{
-	return error_message;
+	return me6x00_errno = ME6X00_OK;
 }
 
 
@@ -196,16 +197,10 @@ const char *me6x00_error_message( void )
 int me6x00_close( int board )
 {
 	if ( board < 0 || board >= ME6X00_MAX_BOARDS )
-	{
-		error_message = ME6X00_ERR_IBN_MESS;
-		return ME6X00_ERR_IBN;
-	}
+		return me6x00_errno = ME6X00_ERR_IBN;
 
 	if ( ! dev_info[ board ].is_init )
-	{
-		error_message = ME6X00_ERR_BNO_MESS;
-		return ME6X00_ERR_BNO;
-	}
+		return me6x00_errno = ME6X00_ERR_BNO;
 
 	if ( dev_info[ board ].fd >= 0 )
 		while ( close( dev_info[ board ].fd ) == -1 && errno == EINTR )
@@ -213,7 +208,7 @@ int me6x00_close( int board )
 
 	dev_info[ board ].is_init = 0;
 
-	return ME6X00_OK;
+	return me6x00_errno = ME6X00_OK;
 }
 
 
@@ -238,8 +233,6 @@ int me6x00_keep_voltage( int board, int dac, int state )
 	me6x00_keep_st keep;
 
 
-	error_message = "";
-
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
 
@@ -253,11 +246,10 @@ int me6x00_keep_voltage( int board, int dac, int state )
 	{
 		close( dev_info[ board ].fd );
 		dev_info[ board ].fd = -1;
-		error_message = ME6X00_ERR_INT_MESS;
-		return ME6X00_ERR_INT;
+		return me6x00_errno = ME6X00_ERR_INT;
 	}
 
-	return ME6X00_OK;
+	return me6x00_errno = ME6X00_OK;
 }
 
 
@@ -271,13 +263,8 @@ int me6x00_voltage( int board, int dac, double volts )
 	unsigned short val;
 
 
-	error_message = "";
-
 	if ( volts < -10.0 || volts > 10.0 )
-	{
-		error_message = ME6X00_ERR_VLT_MESS;
-		return ME6X00_ERR_VLT;
-	}
+		return me6x00_errno = ME6X00_ERR_VLT;
 
 	val = ( volts + 10.0 ) / 20.0 * 0xFFFF;
 	return me6x00_single( board, dac, val );
@@ -293,8 +280,6 @@ int me6x00_continuous( int board, int dac, int size, unsigned short *buf )
 	int ret;
 
 
-	error_message = "";
-
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
 
@@ -302,20 +287,14 @@ int me6x00_continuous( int board, int dac, int size, unsigned short *buf )
 		return ret;
 
 	if ( ! buf )
-	{
-		error_message = ME6X00_ERR_IBA_MESS;
-		return ME6X00_ERR_IBA;
-	}
+		return me6x00_errno = ME6X00_ERR_IBA;
 
 	if ( size <= 0 || size > ME6100_MAX_BUFFER_SIZE )
-	{
-		error_message = ME6X00_ERR_IBS_MESS;
-		return ME6X00_ERR_IBS;
-	}
+		return me6x00_errno = ME6X00_ERR_IBS;
 
 	/*******/
 
-	return ME6X00_OK;
+	return me6x00_errno = ME6X00_OK;
 }
 
 
@@ -328,8 +307,6 @@ int me6x00_continuous_ex( int board, int dac, int size, unsigned short *buf )
 	int ret;
 
 
-	error_message = "";
-
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
 
@@ -337,20 +314,14 @@ int me6x00_continuous_ex( int board, int dac, int size, unsigned short *buf )
 		return ret;
 
 	if ( ! buf )
-	{
-		error_message = ME6X00_ERR_IBA_MESS;
-		return ME6X00_ERR_IBA;
-	}
+		return me6x00_errno = ME6X00_ERR_IBA;
 
 	if ( size <= 0 || size > ME6100_MAX_BUFFER_SIZE )
-	{
-		error_message = ME6X00_ERR_IBS_MESS;
-		return ME6X00_ERR_IBS;
-	}
+		return me6x00_errno = ME6X00_ERR_IBS;
 
 	/*******/
 
-	return ME6X00_OK;
+	return me6x00_errno = ME6X00_OK;
 }
 
 
@@ -368,8 +339,6 @@ int me6x00_reset( int board, int dac )
 	int ret;
 	me6x00_stasto_st conv;
 
-
-	error_message = "";
 
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
@@ -390,8 +359,7 @@ int me6x00_reset( int board, int dac )
 		{
 			close( dev_info[ board ].fd );
 			dev_info[ board ].fd = -1;
-			error_message = ME6X00_ERR_INT_MESS;
-			return ME6X00_ERR_INT;
+			return me6x00_errno = ME6X00_ERR_INT;
 		}
 	}
 
@@ -414,8 +382,6 @@ int me6x00_reset_all( int board )
 	int ret;
 
 
-	error_message = "";
-
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
 
@@ -423,11 +389,10 @@ int me6x00_reset_all( int board )
 	{
 		close( dev_info[ board ].fd );
 		dev_info[ board ].fd = -1;
-		error_message = ME6X00_ERR_INT_MESS;
-		return ME6X00_ERR_INT;
+		return me6x00_errno = ME6X00_ERR_INT;
 	}
 
-	return ME6X00_OK;
+	return me6x00_errno = ME6X00_OK;
 }
 
 
@@ -440,8 +405,6 @@ int me6x00_set_timer( int board, int dac, unsigned int ticks )
 	me6x00_timer_st timer;
 
 
-	error_message = "";
-
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
 
@@ -449,10 +412,7 @@ int me6x00_set_timer( int board, int dac, unsigned int ticks )
 		return ret;
 
 	if ( ticks < ME6X00_MIN_TICKS )
-	{
-		error_message = ME6X00_ERR_TCK_MESS;
-		return ME6X00_ERR_TCK;
-	}
+		return me6x00_errno = ME6X00_ERR_TCK;
 
 	timer.dac     = dac;
 	timer.divisor = ticks;
@@ -461,11 +421,10 @@ int me6x00_set_timer( int board, int dac, unsigned int ticks )
 	{
 		close( dev_info[ board ].fd );
 		dev_info[ board ].fd = -1;
-		error_message = ME6X00_ERR_INT_MESS;
-		return ME6X00_ERR_INT;
+		return me6x00_errno = ME6X00_ERR_INT;
 	}
 
-	return ME6X00_OK;
+	return me6x00_errno = ME6X00_OK;
 }
 
 
@@ -478,8 +437,6 @@ int me6x00_set_trigger( int board, int dac, int mode )
 	int ret;
 
 
-	error_message = "";
-
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
 
@@ -489,14 +446,11 @@ int me6x00_set_trigger( int board, int dac, int mode )
 	if ( mode != ME6X00_TRIGGER_TIMER &&
 		 mode != ME6X00_TRIGGER_EXT_LOW &&
 		 mode != ME6X00_TRIGGER_EXT_HIGH )
-	{
-		error_message = ME6X00_ERR_TRG_MESS;
-		return ME6X00_ERR_TRG;
-	}
+		return me6x00_errno = ME6X00_ERR_TRG;
 
 	/*******/
 
-	return ME6X00_OK;
+	return me6x00_errno = ME6X00_OK;
 }
 
 
@@ -509,8 +463,6 @@ int me6x00_single( int board, int dac, unsigned short val )
 	me6x00_mode_st mode;
 	me6x00_single_st single;
 
-
-	error_message = "";
 
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
@@ -531,8 +483,7 @@ int me6x00_single( int board, int dac, unsigned short val )
 		{
 			close( dev_info[ board ].fd );
 			dev_info[ board ].fd = -1;
-			error_message = ME6X00_ERR_INT_MESS;
-			return ME6X00_ERR_INT;
+			return me6x00_errno = ME6X00_ERR_INT;
 		}
 	}
 
@@ -549,11 +500,10 @@ int me6x00_single( int board, int dac, unsigned short val )
 
 		close( dev_info[ board ].fd );
 		dev_info[ board ].fd = -1;
-		error_message = ME6X00_ERR_INT_MESS;
-		return ME6X00_ERR_INT;
+		return me6x00_errno = ME6X00_ERR_INT;
 	}
 
-	return ME6X00_OK;
+	return me6x00_errno = ME6X00_OK;
 }
 
 
@@ -566,8 +516,6 @@ int me6x00_start( int board, int dac )
 	int ret;
 	me6x00_stasto_st start;
 
-
-	error_message = "";
 
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
@@ -582,11 +530,10 @@ int me6x00_start( int board, int dac )
 	{
 		close( dev_info[ board ].fd );
 		dev_info[ board ].fd = -1;
-		error_message = ME6X00_ERR_INT_MESS;
-		return ME6X00_ERR_INT;
+		return me6x00_errno = ME6X00_ERR_INT;
 	}
 
-	return ME6X00_OK;
+	return me6x00_errno = ME6X00_OK;
 }
 
 
@@ -599,8 +546,6 @@ int me6x00_stop( int board, int dac )
 	int ret;
 
 
-	error_message = "";
-
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
 
@@ -609,7 +554,7 @@ int me6x00_stop( int board, int dac )
 
 	/*******/
 
-	return ME6X00_OK;
+	return me6x00_errno = ME6X00_OK;
 }
 
 
@@ -622,8 +567,6 @@ int me6x00_stop_ex( int board, int dac )
 	int ret;
 
 
-	error_message = "";
-
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
 
@@ -632,7 +575,7 @@ int me6x00_stop_ex( int board, int dac )
 
 	/*******/
 
-	return ME6X00_OK;
+	return me6x00_errno = ME6X00_OK;
 }
 
 
@@ -645,8 +588,6 @@ int me6x00_wraparound( int board, int dac, int size, unsigned short *buf )
 	int ret;
 
 
-	error_message = "";
-
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
 
@@ -654,20 +595,14 @@ int me6x00_wraparound( int board, int dac, int size, unsigned short *buf )
 		return ret;
 
 	if ( ! buf )
-	{
-		error_message = ME6X00_ERR_IBA_MESS;
-		return ME6X00_ERR_IBA;
-	}
+		return me6x00_errno = ME6X00_ERR_IBA;
 
 	if ( size <= 0 || size > ME6X00_FIFO_SIZE )
-	{
-		error_message = ME6X00_ERR_IBS_MESS;
-		return ME6X00_ERR_IBS;
-	}
+		return me6x00_errno = ME6X00_ERR_IBS;
 
 	/*******/
 
-	return ME6X00_OK;
+	return me6x00_errno = ME6X00_OK;
 }
 
 
@@ -694,10 +629,7 @@ static int check_board( int board )
 
 
 	if ( board < 0 || board >= ME6X00_MAX_BOARDS )
-	{
-		error_message = ME6X00_ERR_IBN_MESS;
-		return ME6X00_ERR_IBN;
-	}
+		return me6x00_errno = ME6X00_ERR_IBN;
 
 	if ( ! dev_info[ board ].is_init )
 	{
@@ -711,22 +643,13 @@ static int check_board( int board )
 			switch ( errno )
 			{
 				case ENOENT :
-				{
-					error_message = ME6X00_ERR_NDF_MESS;
-					return ME6X00_ERR_NDF;
-				}
+					return me6x00_errno = ME6X00_ERR_NDF;
 
 				case EACCES :
-				{
-					error_message = ME6X00_ERR_ACS_MESS;
-					return ME6X00_ERR_ACS;
-				}
+					return me6x00_errno = ME6X00_ERR_ACS;
 
 				default :
-				{
-					error_message = ME6X00_ERR_DFP_MESS;
-					return ME6X00_ERR_DFP;
-				}
+					return me6x00_errno = ME6X00_ERR_DFP;
 			}
 
 		/* Try to open it in non-blocking mode */
@@ -737,20 +660,16 @@ static int check_board( int board )
 			switch( errno )
 			{
 				case ENODEV : case ENXIO :
-					error_message = ME6X00_ERR_NDV_MESS;
-					return ME6X00_ERR_NDV;
+					return me6x00_errno = ME6X00_ERR_NDV;
 
 				case EACCES :
-					error_message = ME6X00_ERR_ACS_MESS;
-					return ME6X00_ERR_ACS;
+					return me6x00_errno = ME6X00_ERR_ACS;
 
 				case EBUSY :
-					error_message = ME6X00_ERR_BSY_MESS;
-					return ME6X00_ERR_BSY;
+					return me6x00_errno = ME6X00_ERR_BSY;
 
 				default :
-					error_message = ME6X00_ERR_DFP_MESS;
-					return ME6X00_ERR_DFP;
+					return me6x00_errno = ME6X00_ERR_DFP;
 			}
 
 		/* This should never happen and we give up on the board... */
@@ -759,8 +678,7 @@ static int check_board( int board )
 					&dev_info[ board ].info ) < 0 )
 		{
 			close( dev_info[ board ].fd );
-			error_message = ME6X00_ERR_INT_MESS;
-			return ME6X00_ERR_INT;
+			return me6x00_errno = ME6X00_ERR_INT;
 		}
 
 		/* Set the FD_CLOEXEC bit for the device file - exec()'ed application
@@ -783,19 +701,17 @@ static int check_board( int board )
 			case 0x0F :
 				dev_info[ board ].num_dacs = 16;
 				break;
-				break;
 
 			default :
 				close( dev_info[ board ].fd );
 				dev_info[ board ].fd = -1;
-				error_message = ME6X00_ERR_INT_MESS;
-				return ME6X00_ERR_INT;
+				return me6x00_errno = ME6X00_ERR_INT;
 		}
 
 		dev_info[ board ].is_init = 1;
 	}
 
-	return ME6X00_OK;
+	return me6x00_errno = ME6X00_OK;
 }
 
 
@@ -815,24 +731,15 @@ static int check_dac( int board, int dac, int is_me6100_specific )
 	/* DACs must be in range between DAC00 and DAC15 */
 
 	if ( dac < ME6X00_DAC00 || dac > ME6X00_DAC15 )
-	{
-		error_message = ME6X00_ERR_DAC_MESS;
-		return ME6X00_ERR_DAC;
-	}
+		return me6x00_errno = ME6X00_ERR_DAC;
 
 	if ( is_me6100_specific && ! IS_ME6100( board ) )
-	{
-		error_message = ME6X00_ERR_NAP_MESS;
-		return ME6X00_ERR_NAP;
-	}
+		return me6x00_errno = ME6X00_ERR_NAP;
 
 	/* ME6100 special commands can only be used with the lowest 4 DACs */
 
 	if ( is_me6100_specific && dac > ME6X00_DAC03 )
-	{
-		error_message = ME6X00_ERR_TDC_MESS;
-		return ME6X00_ERR_TDC;
-	}
+		return me6x00_errno = ME6X00_ERR_TDC;
 
 	/* Check that the board has the requested DAC */
 
@@ -840,34 +747,55 @@ static int check_dac( int board, int dac, int is_me6100_specific )
 	{
 		case 0x04 :
 			if ( dac > ME6X00_DAC03 )
-			{
-				error_message = ME6X00_ERR_DAC_MESS;
-				return ME6X00_ERR_DAC;
-			}
+				return me6x00_errno = ME6X00_ERR_DAC;
 			break;
 
 		case 0x08 :
 			if ( dac > ME6X00_DAC07 )
-			{
-				error_message = ME6X00_ERR_DAC_MESS;
-				return ME6X00_ERR_DAC;
-			}
+				return me6x00_errno = ME6X00_ERR_DAC;
 			break;
 
 		case 0x0F :
 			if ( dac > ME6X00_DAC15 )
-			{
-				error_message = ME6X00_ERR_DAC_MESS;
-				return ME6X00_ERR_DAC;
-			}
+				return me6x00_errno = ME6X00_ERR_DAC;
 			break;
 
 		default :
 			close( dev_info[ board ].fd );
 			dev_info[ board ].fd = -1;
-			error_message = ME6X00_ERR_INT_MESS;
-			return ME6X00_ERR_INT;
+			return me6x00_errno = ME6X00_ERR_INT;
 	}
 
-	return ME6X00_OK;
+	return me6x00_errno = ME6X00_OK;
+}
+
+
+/*---------------------------------------------------------------*/
+/* Prints out a string to stderr, consisting of a user supplied  */
+/* string (the argument of the function), a colon, a blank and   */
+/* a short descriptive text of the error encountered in the last */
+/* invocation of one of the me6x00_xxx() functions, followed by  */
+/* a new-line. If the argument is NULL or an empty string only   */
+/* the error message is printed.                                 */
+/*---------------------------------------------------------------*/
+
+int me6x00_perror( const char *s )
+{
+	if ( s != NULL && *s != '\0' )
+		return fprintf( stderr, "%s: %s\n",
+						s, me6x00_errlist[ - me6x00_errno ] );
+
+	return fprintf( stderr, "%s\n", me6x00_errlist[ - me6x00_errno ] );
+}
+
+
+/*---------------------------------------------------------------*/
+/* Returns a string with a short descriptive text of the error   */
+/* encountered in the last invocation of one of the me6x00_xxx() */
+/* functions.                                                    */
+/*---------------------------------------------------------------*/
+
+const char *me6x00_strerror( void )
+{
+	return me6x00_errlist[ - me6x00_errno ];
 }
