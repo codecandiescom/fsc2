@@ -93,6 +93,13 @@ int rs_sml01_init_hook( void )
 		rs_sml01.mod_ampl_is_set[ i ] = UNSET;
 	}
 
+#if defined WITH_PULSE_MODULATION
+	rs_sml01.pulse_mode_state_is_set = UNSET;
+	rs_sml01.pulse_trig_slope_is_set = UNSET;
+	rs_sml01.pulse_width_is_set = UNSET;
+	rs_sml01.pulse_delay_is_set = UNSET;
+#endif /* WITH_PULSE_MODULATION */
+
 	return 1;
 }
 
@@ -158,6 +165,17 @@ int rs_sml01_test_hook( void )
 		rs_sml01.mod_ampl[ rs_sml01.mod_type ] = RS_SML01_TEST_MOD_AMPL;
 		rs_sml01.mod_ampl_is_set[ rs_sml01.mod_type ] = SET;
 	}
+
+#if defined WITH_PULSE_MODULATION
+	rs_sml01.pulse_mode_state = RS_SML01_TEST_PULSE_MODE_STATE;
+	rs_sml01.pulse_mode_state_is_set = SET;
+	rs_sml01.pulse_trig_slope_is_set = RS_SML01_TEST_PULSE_TRIG_SLOPE;
+	rs_sml01.pulse_trig_slope_is_set = SET;
+	rs_sml01.pulse_width = RS_SML01_TEST_PULSE_WIDTH;
+	rs_sml01.pulse_width_is_set = SET;
+	rs_sml01.pulse_delay = RS_SML_TEST_PULSE_DELAY;
+	rs_sml01.pulse_delay_is_set = SET;
+#endif /* WITH_PULSE_MODULATION */
 
 	return 1;
 }
@@ -1314,6 +1332,208 @@ Var *synthesizer_mod_ampl( Var *v )
 
 	return vars_push( FLOAT_VAR, ampl );
 }
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+#if defined WITH_PULSE_MODULATION
+
+Var *synthesizer_pulse_state( Var *v )
+{
+	bool state;
+
+
+	if ( v == NULL )
+	{
+		if ( FSC2_MODE == PREPARATION && ! rs_sml01.pulse_mode_state_is_set )
+		{
+			print( FATAL, "Pulse mode state hasn't been set yet.\n" );
+			THROW( EXCEPTION );
+		}
+
+		return vars_push( INT_VAR, ( int ) rs_sml01.pulse_mode_state );
+	}
+
+	state = get_boolean( v );
+
+	too_many_arguments( v );
+
+	if ( FSC2_MODE == EXPERIMENT )
+		rs_sml01_set_pulse_state( state );
+
+	rs_sml01.pulse_mode_state = state;
+	rs_sml01.pulse_mode_state_is_set = SET;
+
+	return vars_push( INT_VAR, ( int ) rs_sml01.pulse_mode_state );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *synthesizer_pulse_trigger_slope( Var *v )
+{
+	bool state;
+
+
+	if ( v == NULL )
+	{
+		if ( FSC2_MODE == PREPARATION && ! rs_sml01.pulse_trig_slope_is_set )
+		{
+			print( FATAL, "Pulse trigger slope hasn't been set yet.\n" );
+			THROW( EXCEPTION );
+		}
+
+		return vars_push( INT_VAR, ( int ) rs_sml01.pulse_trig_slope );
+	}
+
+	vars_check( v, STR_VAR );
+
+	if ( ! strcmp( v->val.sptr, "POS" ) ||
+		 ! strcmp( v->val.sptr, "POSITIVE" ) )
+		state = SLOPE_RAISE;
+	else if ( ! strcmp( v->val.sptr, "NEG" ) ||
+			  ! strcmp( v->val.sptr, "NEGATIVE" ) )
+		state = SLOPE_FALL;
+	else
+	{
+		print( FATAL, "Invalid argument.\n" );
+		THROW( EXCEPTION );
+	}
+
+	too_many_arguments( v );
+
+	if ( FSC2_MODE == EXPERIMENT )
+		rs_sml01_set_pulse_trig_slope( state );
+
+	rs_sml01.pulse_trig_slope = state;
+	rs_sml01.pulse_trig_slope_is_set = SET;
+
+	return vars_push( INT_VAR, ( int ) rs_sml01.pulse_trig_slope );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *synthesizer_pulse_width( Var *v )
+{
+	double width;
+	long ticks;
+
+
+	if ( v == NULL )
+	{
+		if ( FSC2_MODE == PREPARATION && ! rs_sml01.pulse_width_is_set )
+		{
+			print( FATAL, "Pulse width hasn't been set yet.\n" );
+			THROW( EXCEPTION );
+		}
+
+		return vars_push( INT_VAR, ( int ) rs_sml01.pulse_width );
+	}
+
+	width = get_double( v, "pulse width" );
+
+	if ( width < 0.0 )
+	{
+		print( FATAL, "Invalid negative pulse width.\n" );
+		THROW( EXCEPTION );
+	}
+
+	ticks = lrnd( width / MIN_PULSE_WIDTH );
+
+	if ( ticks == 0 || ticks > lrnd( MAX_PULSE_WIDTH / MIN_PULSE_WIDTH ) )
+	{
+		print( FATAL, "Invalid pulse width of %s, allowed range is %d ns "
+			   "to %.1f s\n", rs_sml01_pretty_print( width ),
+			   irnd( MIN_PULSE_WIDTH * 1.0e9 ), MIN_PULSE_WIDTH );
+		THROW( EXCEPTION );
+	}
+
+	if ( fabs( ticks * MIN_PULSE_WIDTH - width ) > 0.01 * MIN_PULSE_WIDTH )
+	{
+		char *t = T_strdup( rs_sml01_pretty_print( width ) );
+		print( SEVERE, "Pulse width of %s isn't an integer multiple of %d ns, "
+			   "changing it to %s\n", t, irnd( MIN_PULSE_WIDTH * 1.0e9 ),
+			   rs_sml01_pretty_print( ticks * MIN_PULSE_WIDTH ) );
+		T_free( t );
+		width = ticks * MIN_PULSE_WIDTH;
+	}
+
+	too_many_arguments( v );
+	
+	if ( FSC2_MODE == EXPERIMENT )
+		rs_sml01_set_pulse_width( width );
+
+	rs_sml01.pulse_width = width;
+	rs_sml01.pulse_width_is_set = SET;
+
+	return vars_push( FLOAT_VAR, width );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *synthesizer_pulse_delay( Var *v )
+{
+	double delay;
+	long ticks;
+
+
+	if ( v == NULL )
+	{
+		if ( FSC2_MODE == PREPARATION && ! rs_sml01.pulse_delay_is_set )
+		{
+			print( FATAL, "Pulse delay hasn't been set yet.\n" );
+			THROW( EXCEPTION );
+		}
+
+		return vars_push( INT_VAR, ( int ) rs_sml01.pulse_delay );
+	}
+
+	delay = get_double( v, "pulse delay" );
+
+	if ( delay < 0.0 )
+	{
+		print( FATAL, "Invalid negative pulse delay.\n" );
+		THROW( EXCEPTION );
+	}
+
+	ticks = lrnd( delay / MIN_PULSE_DELAY );
+
+	if ( ticks == 0 || ticks > lrnd( MAX_PULSE_DELAY / MIN_PULSE_DELAY ) )
+	{
+		print( FATAL, "Invalid pulse delay of %s, allowed range is %d ns "
+			   "to %.1f s\n", rs_sml01_pretty_print( delay ),
+			   irnd( MIN_PULSE_DELAY * 1.0e9 ), MIN_PULSE_DELAY );
+		THROW( EXCEPTION );
+	}
+
+	if ( fabs( ticks * MIN_PULSE_DELAY - delay ) > 0.01 * MIN_PULSE_DELAY )
+	{
+		char *t = T_strdup( rs_sml01_pretty_print( delay ) );
+		print( SEVERE, "Pulse delay of %s isn't an integer multiple of %d ns, "
+			   "changing it to %s\n", t, irnd( MIN_PULSE_DELAY * 1.0e9 ),
+			   rs_sml01_pretty_print( ticks * MIN_PULSE_DELAY ) );
+		T_free( t );
+		delay = ticks * MIN_PULSE_DELAY;
+	}
+
+	too_many_arguments( v );
+	
+	if ( FSC2_MODE == EXPERIMENT )
+		rs_sml01_set_pulse_delay( delay );
+
+	rs_sml01.pulse_delay = delay;
+	rs_sml01.pulse_delay_is_set = SET;
+
+	return vars_push( FLOAT_VAR, delay );
+}
+
+#endif /* WITH_PULSE_MODULATION */
 
 
 /*----------------------------------------------------*/

@@ -49,13 +49,28 @@
 
 #define MAX_AM_AMPL     1.0e2
 
+#define RS_SML01_TEST_RF_FREQ           1.4e7            /* 14 MHz */
+#define RS_SML01_TEST_MOD_TYPE          MOD_TYPE_FM
+#define RS_SML01_TEST_MOD_SOURCE        MOD_SOURCE_INT
+#define RS_SML01_TEST_MOD_FREQ          1.0e5            /* 100 kHz */
+#define RS_SML01_TEST_MOD_AMPL          2.5e4            /* 25 kHz */
 
-#define RS_SML01_TEST_RF_FREQ     1.4e7            /* 14 MHz */
-#define RS_SML01_TEST_MOD_TYPE    MOD_TYPE_FM
-#define RS_SML01_TEST_MOD_SOURCE  MOD_SOURCE_INT
-#define RS_SML01_TEST_MOD_FREQ    1.0e5            /* 100 kHz */
-#define RS_SML01_TEST_MOD_AMPL    2.5e4            /* 25 kHz */
+#if defined WITH_PULSE_MODULATION
 
+#define SLOPE_FALL      UNSET
+#define SLOPE_RAISE     SET
+
+#define MIN_PULSE_WIDTH 2.0e-8     /* 20 ns */
+#define MAX_PULSE_WIDTH 1.3        /* 1.3 s */
+#define MIN_PULSE_DELAY 2.0e-8     /* 20 ns */
+#define MAX_PULSE_DELAY 1.3        /* 1.3 s */
+
+#define RS_SML01_TEST_PULSE_MODE_STATE  UNSET
+#define RS_SML01_TEST_PULSE_TRIG_SLOPE  SLOPE_RAISE
+#define RS_SML01_TEST_PULSE_WIDTH       1.0e-6           /* 1 us */
+#define RS_SML_TEST_PULSE_DELAY         2.0e-8           /* 20 ns */
+
+#endif /* WITH_PULSE_MODULATION */
 
 struct MOD_RANGES {
 	double upper_limit_freq;
@@ -96,6 +111,13 @@ Var *synthesizer_mod_ampl( Var *v );
 Var *synthesizer_mod_type( Var *v );
 Var *synthesizer_mod_source( Var *v );
 Var *synthesizer_command( Var *v );
+
+#if defined WITH_PULSE_MODULATION
+Var *synthesizer_pulse_state( Var *v );
+Var *synthesizer_pulse_trigger_slope( Var *v );
+Var *synthesizer_pulse_width( Var *v );
+Var *synthesizer_pulse_delay( Var *v );
+#endif /* WITH_PULSE_MODULATION */
 
 
 typedef struct ATT_TABLE_ENTRY ATT_TABLE_ENTRY;
@@ -139,6 +161,17 @@ struct RS_SML01 {
 	bool mod_freq_is_set[ NUM_MOD_TYPES ];
 	double mod_ampl[ NUM_MOD_TYPES ];
 	bool mod_ampl_is_set[ NUM_MOD_TYPES ];
+
+#if defined WITH_PULSE_MODULATION
+	bool pulse_mode_state;            /* pulse mode on/off */
+	bool pulse_mode_state_is_set;
+	bool pulse_trig_slope;
+	bool pulse_trig_slope_is_set;
+	double pulse_width;
+	bool pulse_width_is_set;
+	double pulse_delay;
+	bool pulse_delay_is_set;
+#endif /* WITH_PULSE_MODULATION */
 };
 
 
@@ -157,6 +190,9 @@ double rs_sml01_get_att( double freq );
 unsigned int rs_sml01_get_mod_param( Var **v, double *dres, int *ires );
 void rs_sml01_check_mod_ampl( double freq );
 
+#if defined WITH_PULSE_MODULATION
+char *rs_sml01_pretty_print( double t );
+#endif
 
 /* functions defined in "rs_sml01_lexer.l" */
 
@@ -180,6 +216,13 @@ int rs_sml01_get_mod_source( int type, double *freq );
 double rs_sml01_set_mod_ampl( int type, double ampl );
 double rs_sml01_get_mod_ampl( int type );
 bool rs_sml01_command( const char *cmd );
+
+#if defined WITH_PULSE_MODULATION
+void rs_sml01_set_pulse_state( bool state );
+void rs_sml01_set_pulse_trig_slope( bool state );
+void rs_sml01_set_pulse_width( double width );
+void rs_sml01_set_pulse_delay( double delay );
+#endif /* WITH_PULSE_MODULATION */
 
 
 /*

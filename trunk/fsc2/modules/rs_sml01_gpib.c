@@ -26,6 +26,13 @@
 
 
 static void rs_sml01_initial_mod_setup( void );
+#if defined WITH_PULSE_MODULATION
+static void rs_sml01_initial_pulse_setup( void );
+static bool rs_sml01_get_pulse_state( void );
+static bool rs_sml01_get_pulse_trig_slope( void );
+static double rs_sml01_get_pulse_width( void );
+static double rs_sml01_get_pulse_delay( void );
+#endif
 static void rs_sml01_comm_failure( void );
 static void rs_sml01_check_complete( void );
 static bool rs_sml01_talk( const char *cmd, char *reply, long *length );
@@ -55,10 +62,6 @@ bool rs_sml01_init( const char *name )
 	rs_sml01_command( "POW:OFFS 0\n" );
 	rs_sml01_command( "POW:ALC ON\n" );
 	rs_sml01_command( "OUTP:AMOD AUTO\n" );
-#if defined WITH_PULSE_MODULATION
-	rs_sml01_command( "SOUR:PULM:SOUR EXT; POL NORM; STAT OFF\n" );
-	rs_sml01_command( "SOUR:PULS:SOUB OFF\n\n" );
-#endif
 
 	/* Figure out the current frequency if it's not going to be set */
 
@@ -131,6 +134,11 @@ bool rs_sml01_init( const char *name )
 	}
 
 	rs_sml01_set_frequency( rs_sml01.freq );
+
+#if defined WITH_PULSE_MODULATION
+	rs_sml01_initial_pulse_setup( );
+#endif
+
 	rs_sml01_set_output_state( rs_sml01.state );
 
 	return OK;
@@ -214,6 +222,54 @@ static void rs_sml01_initial_mod_setup( void )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
+#if defined WITH_PULSE_MODULATION
+
+static void rs_sml01_initial_pulse_setup( void )
+{
+	/* Always switch pulse source to external and polarity to normal
+	   (i.e. pulses are only created when when a trigger is received).
+	   Also switch off double pulses. */
+
+	rs_sml01_command( ":SOUR:PULM:SOUR EXT; POL NORM\n" );
+	rs_sml01_command( ":SOUR:PULS:DOUB OFF\n\n" );
+
+	if ( rs_sml01.pulse_width_is_set )
+		rs_sml01_set_pulse_width( rs_sml01.pulse_width );
+	else
+	{
+		rs_sml01.pulse_width = rs_sml01_get_pulse_width( );
+		rs_sml01.pulse_width_is_set = SET;
+	}
+		
+	if ( rs_sml01.pulse_delay_is_set )
+		rs_sml01_set_pulse_delay( rs_sml01.pulse_delay );
+	else
+	{
+		rs_sml01.pulse_delay = rs_sml01_get_pulse_delay( );
+		rs_sml01.pulse_delay_is_set = SET;
+	}
+
+	if ( rs_sml01.pulse_trig_slope_is_set )
+		rs_sml01_set_pulse_trig_slope( rs_sml01.pulse_trig_slope );
+	else
+	{
+		rs_sml01.pulse_trig_slope = rs_sml01_get_pulse_trig_slope( );
+		rs_sml01.pulse_trig_slope_is_set = SET;
+	}
+
+	if ( rs_sml01.pulse_mode_state_is_set )
+		rs_sml01_set_pulse_state( rs_sml01.pulse_mode_state );
+	else
+	{
+		rs_sml01.pulse_mode_state = rs_sml01_get_pulse_state( );
+		rs_sml01.pulse_mode_state_is_set = SET;
+	}
+}
+#endif
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
 void rs_sml01_finished( void )
 {
 	gpib_local( dev_handle );
@@ -278,6 +334,7 @@ double rs_sml01_get_frequency( void )
 
 
 	rs_sml01_talk( "FREQ:CW?\n", buffer, &length );
+	buffer[ length - 1 ] = '\0';
 	return T_atod( buffer );
 }
 
@@ -309,6 +366,7 @@ double rs_sml01_get_attenuation( void )
 	long length = 100;
 
 	rs_sml01_talk( "POW?\n", buffer, &length );
+	buffer[ length - 1 ] = '\0';
 	return T_atod( buffer );
 }
 
@@ -434,6 +492,7 @@ int rs_sml01_get_mod_source( int type, double *freq )
 		source = MOD_SOURCE_INT;
 		sprintf( cmd, "%s:INT:FREQ?\n", types[ type ] );
 		rs_sml01_talk( cmd, buffer, &length );
+		buffer[ length - 1 ] = '\0';
 		*freq = T_atod( buffer );
 	}
 	else if ( ! strncmp( buffer, "EXT", 3 ) )
@@ -500,6 +559,133 @@ double rs_sml01_get_mod_ampl( int type )
 	fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
 
 	rs_sml01_talk( cmds[ type ], buffer, &length );
+	buffer[ length - 1 ] = '\0';
+	return T_atod( buffer );
+}
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+#if defined WITH_PULSE_MODULATION
+
+void rs_sml01_set_pulse_state( bool state )
+{
+	char cmd[ 100 ] = "PULM:STAT ";
+
+	if ( state )
+		strcat( cmd, "ON\n" );
+	else
+		strcat( cmd, "OFF\n" );
+
+	rs_sml01_command( cmd );
+	rs_sml01_check_complete( );
+}
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+static bool rs_sml01_get_pulse_state( void )
+{
+	char buffer[ 20 ];
+	long length = 20;
+
+
+	rs_sml01_talk( "PULM:STAT?", buffer, &length );
+	return buffer[ 0 ] == '1';
+}
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+void rs_sml01_set_pulse_trig_slope( bool state )
+{
+	char cmd[ 100 ] = ":TRIG:PULS:SLOP ";
+
+
+	if ( state == SLOPE_RAISE )
+		strcat( cmd, "POS\n" );
+	else
+		strcat( cmd, "NEG\n" );
+
+	rs_sml01_command( cmd );
+	rs_sml01_check_complete( );
+}
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+static bool rs_sml01_get_pulse_trig_slope( void )
+{
+	char buffer[ 20 ];
+	long length = 20;
+
+
+	rs_sml01_talk( ":TRIG:PULS:SLOP?", buffer, &length );
+	return buffer[ 0 ] == 'P' ? SLOPE_RAISE : SLOPE_FALL;
+}
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+void rs_sml01_set_pulse_width( double width )
+{
+	char cmd[ 100 ];
+
+
+	sprintf( cmd, "PULS:WIDT %s\n", rs_sml01_pretty_print( width ) );
+	rs_sml01_command( cmd );
+	rs_sml01_check_complete( );
+}
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+static double rs_sml01_get_pulse_width( void )
+{
+	char buffer[ 100 ];
+	long length = 100;
+
+
+	rs_sml01_talk( "PULS:WIDT?\n", buffer, &length );
+	buffer[ length - 1 ] = '\0';
+	return T_atod( buffer );
+}
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+void rs_sml01_set_pulse_delay( double delay )
+{
+	char cmd[ 100 ];
+
+
+	sprintf( cmd, "PULS:DEL %s\n", rs_sml01_pretty_print( delay ) );
+	rs_sml01_command( cmd );
+	rs_sml01_check_complete( );
+}
+
+#endif /* WITH_PULSE_MODULATION */
+
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+static double rs_sml01_get_pulse_delay( void )
+{
+	char buffer[ 100 ];
+	long length = 100;
+
+
+	rs_sml01_talk( "PULS:DEL?\n", buffer, &length );
+	buffer[ length - 1 ] = '\0';
 	return T_atod( buffer );
 }
 
