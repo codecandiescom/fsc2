@@ -44,11 +44,12 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 	CHANNEL *c = &hfs9000.channel[ channel ];
 
 
-	if ( channel < 0 || channel >= MAX_CHANNEL )
+	if ( channel != HFS9000_TRIG_OUT && 
+		 ( channel < MIN_CHANNEL || channel > MAX_CHANNEL ) )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid channel number: %ld, valid range "
-				"is 1-%d.\n", Fname, Lc, pulser_struct.name, channel,
-				( int ) MAX_CHANNEL );
+		eprint( FATAL, "%s:%ld: %s: Invalid channel, valid are CH[%d-%d] and "
+				"TRIGGER_OUT.\n", Fname, Lc, pulser_struct.name,
+				( int ) MIN_CHANNEL, ( int ) MAX_CHANNEL );
 		THROW( EXCEPTION );
 	}
 
@@ -65,10 +66,9 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 
 		if ( f->is_high_level || f->is_low_level )
 		{
-			eprint( FATAL, "%s:%d: %s: For function `%s' a voltage level has "
-					"been set. This can't be done with TRIGER_OUT channel.\n",
-					Fname, Lc, pulser_struct.name,
-					Function_Names[ function ] );
+			eprint( FATAL, "%s:%d: %s: For function `%s', associated with "
+					"Trigger Out, no voltage levels can be set.\n", Fname, Lc,
+					pulser_struct.name, Function_Names[ function ] );
 			THROW( EXCEPTION );
 		}
 	}
@@ -79,12 +79,13 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 		{
 			if ( channel == HFS9000_TRIG_OUT )
 				eprint( SEVERE, "%s:%ld: %s: TRIGGER_OUT channel is assigned "
-						"twice to function `%s'.\n", Fname, Lc,
+						"more than once to function `%s'.\n", Fname, Lc,
 						pulser_struct.name,
 						Function_Names[ c->function->self ] );
 			else
-				eprint( SEVERE, "%s:%ld: %s: Channel %ld is assigned twice to "
-						"function `%s'.\n", Fname, Lc, pulser_struct.name,
+				eprint( SEVERE, "%s:%ld: %s: Channel %ld is assignedmore than "
+						"once to function `%s'.\n", Fname, Lc,
+						pulser_struct.name,
 						channel, Function_Names[ c->function->self ] );
 			return FAIL;
 		}
@@ -117,9 +118,9 @@ bool hfs9000_invert_function( int function )
 	if ( hfs9000.function[ function ].channel != NULL &&
 		 hfs9000.function[ function ].channel->self == HFS9000_TRIG_OUT )
 	{
-		eprint( FATAL, "%s:%ld: %s: Function `%s' is associated with "
-				"TRIGGER_OUT channel whose polarity cannot be inverted.\n",
-				Fname, Lc, pulser_struct.name, Function_Names[ function ] );
+		eprint( FATAL, "%s:%ld: %s: Polarity of function `%s' associated with "
+				"Trigger Out can't be inverted.\n", Fname,
+				Lc, pulser_struct.name, Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
 
@@ -151,7 +152,8 @@ bool hfs9000_set_function_delay( int function, double delay )
 
 	if ( Delay < 0 )
 	{
-		if ( ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode ) ||
+		if ( ( hfs9000.is_trig_in_mode &&
+			   hfs9000.trig_in_mode == EXTERNAL ) ||
 			 hfs9000.is_trig_in_slope || hfs9000.is_trig_in_level )
 		{
 			eprint( FATAL, "%s:%ld: Negative delays are invalid in EXTERNAL "
@@ -188,12 +190,22 @@ bool hfs9000_set_function_delay( int function, double delay )
 
 bool hfs9000_set_function_high_level( int function, double voltage )
 {
-	if ( hfs9000.function[ function ].channel != NULL &&
-		 hfs9000.function[ function ].channel->self == HFS9000_TRIG_OUT )
+	FUNCTION *f = &hfs9000.function[ function ];
+
+
+	if ( f->is_high_level )
 	{
-		eprint( FATAL, "%s:%ld: %s: Function `%s' is associated with "
-				"TRIGGER_OUT channel that doesn't allow setting of levels.\n",
-				Fname, Lc, pulser_struct.name, Function_Names[ function ] );
+		eprint( FATAL, "%s:%ld: %s: High level for function `%s' has already "
+				"been set.\n", Fname, Lc, pulser_struct.name,
+				Function_Names[ function ] );
+		THROW( EXCEPTION );
+	}
+
+	if ( f->channel != NULL && f->channel->self == HFS9000_TRIG_OUT )
+	{
+		eprint( FATAL, "%s:%ld: %s: Function `%s' is associated with Trigger"
+				"Out that doesn't allow setting of levels.\n", Fname, Lc,
+				pulser_struct.name, Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
 
@@ -208,13 +220,12 @@ bool hfs9000_set_function_high_level( int function, double voltage )
 		THROW( EXCEPTION );
 	}
 				
-	if ( hfs9000.function[ function ].is_low_level )
-		hfs9000_check_pod_level_diff( voltage,
-									  hfs9000.function[ function ].low_level );
+	if ( f->is_low_level )
+		hfs9000_check_pod_level_diff( voltage, f->low_level );
 
-	hfs9000.function[ function ].high_level = voltage;
-	hfs9000.function[ function ].is_high_level = SET;
-	hfs9000.function[ function ].is_used = SET;
+	f->high_level = voltage;
+	f->is_high_level = SET;
+	f->is_used = SET;
 
 	return OK;
 }
@@ -225,8 +236,18 @@ bool hfs9000_set_function_high_level( int function, double voltage )
 
 bool hfs9000_set_function_low_level( int function, double voltage )
 {
-	if ( hfs9000.function[ function ].channel != NULL &&
-		 hfs9000.function[ function ].channel->self == HFS9000_TRIG_OUT )
+	FUNCTION *f = &hfs9000.function[ function ];
+
+
+	if ( f->is_low_level )
+	{
+		eprint( FATAL, "%s:%ld: %s: Low level for function `%s' has already "
+				"been set.\n", Fname, Lc, pulser_struct.name,
+				Function_Names[ function ] );
+		THROW( EXCEPTION );
+	}
+
+	if ( f->channel != NULL && f->channel->self == HFS9000_TRIG_OUT )
 	{
 		eprint( FATAL, "%s:%ld: %s: Function `%s' is associated with "
 				"TRIGGER_OUT channel that doesn't allow setting of levels.\n",
@@ -245,13 +266,12 @@ bool hfs9000_set_function_low_level( int function, double voltage )
 		THROW( EXCEPTION );
 	}
 				
-	if ( hfs9000.function[ function ].is_high_level )
-		hfs9000_check_pod_level_diff( hfs9000.function[ function ].high_level,
-									  voltage );
+	if ( f->is_high_level )
+		hfs9000_check_pod_level_diff( f->high_level, voltage );
 
-	hfs9000.function[ function ].low_level = voltage;
-	hfs9000.function[ function ].is_low_level = SET;
-	hfs9000.function[ function ].is_used = SET;
+	f->low_level = voltage;
+	f->is_low_level = SET;
+	f->is_used = SET;
 
 	return OK;
 }
@@ -265,11 +285,10 @@ bool hfs9000_set_trigger_mode( int mode )
 	assert( mode == INTERNAL || mode == EXTERNAL );
 
 
-	if ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode != mode )
+	if ( hfs9000.is_trig_in_mode )
 	{
-		eprint( FATAL, "%s:%ld: %s: Trigger mode has already been set to "
-				"%s.\n", Fname, Lc, pulser_struct.name,
-				mode == EXTERNAL ? "INTERNAL" : "EXTERNAL" );
+		eprint( FATAL, "%s:%ld: %s: Trigger mode has already been set.\n",
+				Fname, Lc, pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
