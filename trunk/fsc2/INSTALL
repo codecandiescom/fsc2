@@ -1,3 +1,6 @@
+
+Please read the following carefully before trying to install and run fsc.
+
 A) Requirements
 ===============
 
@@ -43,10 +46,11 @@ The XFORMS library is available from e.g. (some links may be outdated)
   ftp.uni-trier.de/pub/unix/X11/xforms
 
 
-The GPIB library consists of a library and a module to interface GPIB cards.
-You can either use the one I've written (works, as ar as I know, for fsc2
-with 2.2 and 2.4 kernels and should also work with 2.0 kernels but I really
-didn't test it), the older LLP (Linux Lab Project) library to be found at
+The GPIB library consists of a library and a module to interface GPIB
+cards. You can either use the one I've written (works, as ar as I know,
+for fsc2 with 2.2 and 2.4 kernels and should also work with 2.0 kernels
+but I really didn't test it), the older LLP (Linux Lab Project) library
+to be found at
 
   http://www.llp.fu-berlin.de
 
@@ -62,7 +66,35 @@ fsc2 without having a GPIB library, but then devices controlled via the
 GPIB bus can't be used.
 
 
-B) Preparing for Installation
+B) Permissions and Related Problems
+===================================
+
+If you want to do more than just very basic tests with fsc2 you should
+create a special account for it. fsc2 needs to be installed setuid'ed,
+so for security reasons its account should have as low privileges as
+possible and should not be able to log into the system (e.g. by setting
+its shell in /etc/passwd to /bin/false) and not be installed with root
+privileges. Most of the time fsc2 runs with the effective user ID (EUID)
+and effective group ID (EGID) set to the real users ID and group but in
+a few places (e.g. when writing to log files, manipulating lock files or
+accessing shared memory or device files) it sets back the EUID and EGID
+to the one of fsc2.
+
+When deciding about the group fsc2 shall belong to I would recommend to use
+the group that has read and write access for the serial port device files,
+(/dev/ttyS* where * stands for a positive number). On most Linux systems
+I have seen this group was either 'uucp' or 'dialout'. If fsc2 belongs to
+this group it automatically has the permisssion to access these device
+files. Otherwise you will have to either change the modes of the files to
+allow access by 'other', i.e. by every account, or to make all users of
+fsc2 belong to this group (probably as one of their supplementary groups).
+
+By setting the group of the device file for the GPIB board to the group
+fsc2 belongs to also access permissions to the board don't have to be set
+to allow access by 'other' but can be restricted to this group.
+
+
+C) Preparing for Installation
 =============================
 
 After installing the required tools and libraries and extracting the
@@ -74,15 +106,9 @@ Normally, fsc2 and all auxiliary files needed will be installed below
 and /usr/local/share/doc). To change these locations edit the first lines
 of the Makefile.
 
-The next two variables OWNER and GROUP must be set to the owner of all the
-files that will be installed as well as its group. I would strongly recommend
-to create a special account and a special group for fsc2. fsc2 needs to be
-installed setuid'ed, so for security reasons this special user should have as
-low privileges as possible and should not be able to log into the system
-(e.g. by setting its shell in /etc/passwd to /bin/false). Most of the time
-fsc2 runs with the real users ID and group but at a few places (e.g. when
-writing to log files, creating lock files or accessing shared memory) it
-switches back to the EUID and EGID of fsc2.
+The next two variables, OWNER and GROUP, will be used when setting the
+owner of all the files that will be installed as well as its group. See
+the preceding section for the details.
 
 The next lines are for setting the GPIB library that you are going to use.
 You may set the first variable, GPIB_LIBRARY either to LLP for the old
@@ -104,6 +130,26 @@ to something appropriate for your setup (or even to /dev/null). You can also
 set the verbosity of the logs by changing the variable GPIB_LOG_LEVEL to
 either HIGH, MEDIUM, LOW or OFF.
 
+The next to variables, NUM_SERIAL_PORTS and SERIAL_LOCK_DIR are for handling
+of the serial ports. NUM_SERIAL_PORTS should be set to the number of serial
+ports that the computer has. If the variable is not set (or set to 0) no
+serial ports can be used.
+
+SERIAL_LOCK_DIR must be a string with the name of the directory where UUCP
+type lock files for the serial ports are created (there is a convention that
+programs opening a serial port create such a lock file that contain the
+process ID (PID) of the program as a decimal ASCII number, so that other
+programs can check if the port is already in use and by whom). Accordingto
+version 2.2 of the Filesystem Hierachy Standard this directory should be
+'/var/lock', but on old systems also '/usr/spool/locks' and '/usr/spool/uucp'
+where commonly used, so this can be adjusted via this variable. If you don't
+want lock files for the serial port to be created simply don't define this
+variable. A possible problem arises in case you use programs creating lock
+files not in the HDB UUCP format (the PID being stored in a ten byte string,
+left-padded with spaces and with a trailing newline). In this case fsc2 will
+not try to remove stale lock files and instead print an error message to the
+terminal and the lock file has to be removed manually.
+
 The final variable to be set is the email address of the person that will
 receive bug reports and notifications if fsc2 should crash. Usually, you
 should not change this variable except when you apply changes to the program.
@@ -111,7 +157,7 @@ In this case sending these kind of mails to me obviously doesn't make too
 much sense...
 
 
-C) Compiling and Installing
+D) Compiling and Installing
 ===========================
 
 Go into the main directory of the package and type 'make'. This may take
@@ -153,17 +199,6 @@ like it and want to get rid of it, you can always de-install it by running
 as long as you haven't changed the makefiles in between.
 
 
-D) Setting Device File Permissions
-==================================
-
-All users doing experiments with fsc2 need read and write access to the
-device files associated with the devices to be used. These are the serial
-ports (i.e. /dev/ttyS*) and the GPIB controller card. To be able to access
-the device files either read and write permissions must be set to 'other'
-for the device files or read and write permissions must be set for 'group'
-and all fsc2 users must be members of the groups that own the device files.
-
-
 E) Simple Tests
 ===============
 
@@ -186,6 +221,11 @@ Just start by typing 'fsc2 a.edl' or 'fsc2 z.edl' and click onto the "Start"
 button to get an idea about how fsc2 displays 1-dimensional and 2-dimensional
 data sets.
 
-                                            Have fun, Jens
+             22-8-2001             Have fun, Jens
 
-                               email: Jens.Toerring@physik.fu-berlin.de
+-----------------------------------------------------------------------------
+       _  _____  _____
+      | ||_   _||_   _|         Jens.Toerring@physik.fu-berlin.de
+   _  | |  | |    | |           AG Moebius, Institut fuer Moelkuelphysik
+  | |_| |  | |    | |           Fachbereich Physik, Freie Universitaet Berlin
+   \___/ens|_|homs|_|oerring    Tel: ++49 (0)30 838 - 53394 / FAX: - 5????
