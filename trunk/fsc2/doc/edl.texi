@@ -203,9 +203,7 @@ is simply a list of all the devices that will be used in the experiment
 (or at least the ones that are going to be controlled by the computer).
 
 Please note that the section keywords always have to be followed by a
-colon, `@code{:}'. Another important syntax element is the semicolon,
-`@code{;}', that indicates the logical end of a line of code. So, you
-also have to write a semicolon after each of the device names.
+colon, `@code{:}'.
 
 The @code{VARIABLES} section for declaring and initializing variables
 has also already been discussed in the example.
