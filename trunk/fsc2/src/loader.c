@@ -31,7 +31,7 @@ void load_all_drivers( void )
 
 
 	/* Treat "User_Functions" also as a kind of device driver and append
-	   the device structure at the end of the list of devices */
+	   the device structure to the end of the list of devices */
 
 	device_append_to_list( "User_Functions" );
 
