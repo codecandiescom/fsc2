@@ -146,7 +146,7 @@ Var *powersupply_name( Var *v )
 
 
 /*-------------------------------------------------*/
-/* Swicth on/off damping of a power supply channel */
+/* Switch on/off damping of a power supply channel */
 /*-------------------------------------------------*/
 
 Var *powersupply_damping( Var *v )
@@ -219,7 +219,7 @@ Var *powersupply_channel_state( Var *v )
 /* Function sets or returns the voltage at one of the 2 outputs. */
 /* The first argument must be the output number, either 1 or 2,  */
 /* the second the voltage in the range between 0 V and 32 V (in  */
-/* 10mV steps). If there isn't a second argument the voltage at  */
+/* 10 mV steps). If there isn't a second argument the voltage at */
 /* the outputs is returned (which may be smaller than the        */
 /* voltage that had been set due to the current limit).          */
 /*---------------------------------------------------------------*/
@@ -272,7 +272,7 @@ Var *powersupply_voltage( Var *v )
 
 /*----------------------------------------------------------------*/
 /* Function sets the voltage limit (which is identical to setting */
-/* voltage using powersupply_voltage()) when called with two      */
+/* voltage using power-supply_voltage()) when called with two     */
 /* arguments. If called with only one argument the voltage limit  */
 /* setting is returned. The initial voltage limit (i.e. when the  */
 /* module is started is 0 V.                                      */
@@ -305,7 +305,7 @@ Var *powersupply_voltage_limit( Var *v )
 	}
 
 	/* Otherwise set a new current limit (which is actually the same as
-	   setting a current with powersupply_current()) */
+	   setting a current with power-supply_current()) */
 
 	voltage = get_double( v, "voltage limit" );
 
@@ -384,7 +384,7 @@ Var *powersupply_current( Var *v )
 
 /*----------------------------------------------------------------*/
 /* Function sets the current limit (which is identical to setting */
-/* current using powersupply_current()) when called with two      */
+/* current using power-supply_current()) when called with two     */
 /* arguments. If called with only one argument the current limit  */
 /* setting is returned. The initial current limit (i.e. when the  */
 /* module is started is 0 A.                                      */
@@ -470,9 +470,9 @@ Var *powersupply_command( Var *v )
 }
 
 
-/*--------------------------------------------------------*/
-/* Internal functions for initialization of power suppply */ 
-/*--------------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* Internal functions for initialization of power-supply */ 
+/*-------------------------------------------------------*/
 
 static bool thurlby330_init( const char *name )
 {

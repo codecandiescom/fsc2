@@ -954,38 +954,38 @@ void spectrapro_300i_send( const char *buf )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function tries to read up to '*len' bytes of data into 'buf' fom the */
-/* monochromator. It recognizes the end of the data (if there are less  */
-/* than '*len' going to be send by the device) by the string " ok\r\n"  */
-/* (or, in one case "ok\r\n") when the command initializing the read    */
-/* was successful, or "?\r\n" when the command failed (probably due to  */
-/* an invalid command.                                                  */
-/* There are four cases to be considered:                               */
-/* 1. The returned string ended in "ok\r\n" or " ok\r\n". In this case  */
-/*    this part is cut of (i.e. replaced by a '\0') and the length of   */
-/*    the string ready in is returned in len (could actually be 0 when  */
-/*    the "ok\r\n" part was everything we got) and the function returns */
-/*    a status indicating success.                                      */
-/* 2. The returned string ended ended neither in " ok\r\n", "ok\r\n" or */
-/*    "?\r\n", indicating that there are more data coming. In 'len' the */
-/*    length of what we got is returned and the function returns a      */
-/*    status indicating failure. No '\0' is appended to the returned    */
-/*    string.                                                           */
-/* 3. The string we got ended in "?\r\n", in which case the function    */
-/*    throws an exception.                                              */
-/* 4. Reading from the device failed, in which case an exception is     */
-/*    thrown.                                                           */
-/* Some care has to be taken: when the input buffer 'buf' isn't large   */
-/* enough to hold the complete string the device is trying to send it   */
-/* may happen that the transmission ends within the marker indicating   */
-/* success or failure, in which case this function won't be able to     */
-/* determine if the end of a transmission has been reached. In this     */
-/* case the calling function must do the checking!                      */
-/*                                                                      */
-/* There's also another way this function can be ended: if the user hit */
-/* the "Stop" button a USER_BREAK_EXCEPTION is thrown.                  */
-/*----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Function tries to read up to '*len' bytes of data into 'buf' from the */
+/* monochromator. It recognizes the end of the data (if there are less   */
+/* than '*len' going to be send by the device) by the string " ok\r\n"   */
+/* (or, in one case "ok\r\n") when the command initializing the read     */
+/* was successful, or "?\r\n" when the command failed (probably due to   */
+/* an invalid command.                                                   */
+/* There are four cases to be considered:                                */
+/* 1. The returned string ended in "ok\r\n" or " ok\r\n". In this case   */
+/*    this part is cut of (i.e. replaced by a '\0') and the length of    */
+/*    the string ready in is returned in len (could actually be 0 when   */
+/*    the "ok\r\n" part was everything we got) and the function returns  */
+/*    a status indicating success.                                       */
+/* 2. The returned string ended ended neither in " ok\r\n", "ok\r\n" or  */
+/*    "?\r\n", indicating that there are more data coming. In 'len' the  */
+/*    length of what we got is returned and the function returns a       */
+/*    status indicating failure. No '\0' is appended to the returned     */
+/*    string.                                                            */
+/* 3. The string we got ended in "?\r\n", in which case the function     */
+/*    throws an exception.                                               */
+/* 4. Reading from the device failed, in which case an exception is      */
+/*    thrown.                                                            */
+/* Some care has to be taken: when the input buffer 'buf' isn't large    */
+/* enough to hold the complete string the device is trying to send it    */
+/* may happen that the transmission ends within the marker indicating    */
+/* success or failure, in which case this function won't be able to      */
+/* determine if the end of a transmission has been reached. In this      */
+/* case the calling function must do the checking!                       */
+/*                                                                       */
+/* There's also another way this function can be ended: if the user hit  */
+/* the "Stop" button a USER_BREAK_EXCEPTION is thrown.                   */
+/*-----------------------------------------------------------------------*/
 
 static bool spectrapro_300i_read( char *buf, size_t *len )
 {

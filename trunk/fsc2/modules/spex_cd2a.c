@@ -76,7 +76,7 @@ int spex_cd2a_init_hook( void )
 	   driven monochromators the setting of the laser line position as
 	   used in the previous invocation of the program. (The file has also
 	   to be read each time at the start of an experiment since it's
-	   contents are rewritten at the end of each exepriment.) */
+	   contents are rewritten at the end of each experiment.) */
 
 	spex_cd2a_read_state( );
 
@@ -93,7 +93,7 @@ int spex_cd2a_init_hook( void )
 		spex_cd2a.mode = WND;
 
 	/* If it's wavelength driven find out the units the controller expects
-	   (either nanometer or Angstroem) */
+	   (either nanometer or Angstrom) */
 
 	if ( spex_cd2a.mode == WL )
 	{
@@ -688,7 +688,7 @@ Var *monochromator_wavenumber( Var *v )
 
 
 /*------------------------------------------------------------------*/
-/* Function for starting a new scan: the monocromator is driven to  */
+/* Function for starting a new scan: the monochromator is driven to */
 /* the start position of the scan. If the monochromator was already */
 /* doing a scan the old scan is aborted.                            */
 /*------------------------------------------------------------------*/
@@ -790,7 +790,7 @@ Var *monochromator_scan_step( Var *v )
 /* line position and absolute wavenumbers), and all functions  */
 /* involving wavenumbers return relative positions. A laser    */
 /* line position can switched of (reverting also to use of     */
-/* absolute wavenumbers) by setting a zero or negatibe laser   */
+/* absolute wavenumbers) by setting a zero or negative laser   */
 /* line position. If called without an argument the function   */
 /* returns the current setting of the laser line position      */
 /* (always in absolute wavenumbers) or zero if no laser line   */

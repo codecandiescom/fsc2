@@ -236,7 +236,7 @@ void spex_cd2a_trigger( void )
 /* line position is set positions are taken to be absolute wave-     */
 /* numbers. But when the laser line is set positions are taken to be */
 /* relative to the laser line (i.e. position of the laser line minus */
-/* the absolute position). The only execption is when setting the    */
+/* the absolute position). The only exception is when setting the    */
 /* laser line position itself: the value passed to the device is     */
 /* always taken to be a position in  absolute wavenumbers.           */
 /* The laser line position can also be switched off (thus reverting  */
@@ -443,7 +443,7 @@ static void spex_cd2a_print( char *mess, int digits, double val )
 
 void spex_cd2a_open( void )
 {
-	/* We need exclussive access to the serial port and we also need non-
+	/* We need exclusive access to the serial port and we also need non-
 	   blocking mode to avoid hanging indefinitely if the other side does not
 	   react. O_NOCTTY is set because the serial port should not become the
 	   controlling terminal, otherwise line noise read as a CTRL-C might kill
@@ -599,10 +599,10 @@ static size_t spex_cd2a_write( int type, const char *mess )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function for reading the acknowledgement send by the device */
-/* when it received a parameter.                               */ 
-/*-------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+/* Function for reading the acknowledgment send by the device */
+/* when it received a parameter.                              */ 
+/*------------------------------------------------------------*/
 
 static void spex_cd2a_read_ack( void )
 {
@@ -651,7 +651,7 @@ static void spex_cd2a_read_ack( void )
 
 
 /*-------------------------------------------------------------*/
-/* Function for reading the acknowledgement send by the device */
+/* Function for reading the acknowledgment send by the device  */
 /* when it received a command. Most commands not only send an  */
 /* ACK/CAN sequence but also make the device transmit position */
 /* information until the command is executed. This function    */
@@ -918,7 +918,7 @@ static void spex_cd2a_wrong_data( void )
 /*-------------------------------------------------------------------------*/
 /* Function calculates the length of position messages send by the device. */
 /* The message consists at least of a status char, a char indicating the   */
-/* unit, an eigth byte long floating point number in ASCII format and a    */
+/* unit, an eighth byte long floating point number in ASCII format and a   */
 /* carriage return. When STANDARD data format is used the message starts   */
 /* with a STX char and an ETX char is send directly after tne number. If   */
 /* checksums are transmitted two additional bytes are send directly before */
@@ -955,7 +955,7 @@ static void spex_cd2a_pos_mess_check( const char *bp )
 	/* When the device is wavenumber driven it sends either a 'W' (when
 	   no laser line has been set) or a 'D' (for delta wavelength),
 	   otherwise either a 'N' or 'A', depending if it's set up to use
-	   nanometer or Angstroem units */
+	   nanometer or Angstrom units */
 	   
 	if ( ( spex_cd2a.mode == WN && *bp == 'W' ) ||
 		 ( spex_cd2a.mode == WND && *bp == 'D' ) ||
