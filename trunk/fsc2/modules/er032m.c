@@ -43,12 +43,13 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define SWA_RANGE          4096
 
 /* Defines the time before we test again if it is found that the overload
-   LED is still on */
+   LED is still on. */
 
 #define ER032M_WAIT_TIME   100000     /* in us */
 
+
 /* Define the maximum number of retries before giving up if the
-   overload LED is on */
+   overload LED is on. */
 
 #define ER032M_MAX_RETRIES   300
 
@@ -56,7 +57,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 /* When setting a new center field or sweep width the value send to the
    device is read back to check if it really got set. If the values differ
    the ER032M_MAX_SET_RETRIES times the value is again set and also checked
-   before we give up */
+   before we give up. */
 
 #define ER032M_MAX_SET_RETRIES 3
 
@@ -64,9 +65,16 @@ const char generic_type[ ] = DEVICE_TYPE;
 /* The maximum field resolution: this is, according to the manual the best
    result that can be achieved when repeatedly setting the center field and
    it doesn't seem to make sense too much sense to set a new field when the
-   difference from the current field is lower */
+   difference from the current field is lower. */
 
-#define ER032M_RESOLUTION   5.e-3
+#define ER032M_RESOLUTION   5.0e-3
+
+
+/* According to a Bruker technician the center field can only be set with a
+   resolution of 50 mG. */
+
+#define ER032M_CF_RESOLUTION 5.0e-2
+
 
 
 /* Exported functions */
@@ -140,21 +148,21 @@ static struct
 
 int er032m_init_hook( void )
 {
-	/* Set global variable to indicate that GPIB bus is needed */
+	/* Set global variable to indicate that GPIB bus is needed. */
 
 	need_GPIB = SET;
 
-	/* Initialize some variables in the magnets structure */
+	/* Initialize some variables in the magnets structure. */
 
 	magnet.device = -1;
 	magnet.is_init = UNSET;
 	magnet.is_sw = UNSET;
 
 	/* Make sure the maximum sweep width isn't larger than the difference
-	   between the maximum and minimum field */
+	   between the maximum and minimum field. */
 
-	if ( ( magnet.max_sw = ER032M_MAX_SWEEP_WIDTH ) >
-		 ER032M_MAX_FIELD - ER032M_MIN_FIELD )
+	magnet.max_sw = ER032M_MAX_SWEEP_WIDTH;
+	if ( magnet.max_sw > ER032M_MAX_FIELD - ER032M_MIN_FIELD )
 		magnet.max_sw = ER032M_MAX_FIELD - ER032M_MIN_FIELD;
 
 	return 1;
@@ -222,7 +230,8 @@ Var *magnet_setup( Var *v )
 	double field_step;
 
 
-	/* Check that both the variables are reasonable */
+	/* Check that both the variables, i.e. the start field and the field step
+       size are reasonable. */
 
 	if ( v == NULL )
 	{
@@ -298,7 +307,7 @@ Var *sweep_up( Var *v )
 									 / magnet.swa_step ) ) - SWA_RANGE / 2;
 
 			er032m_set_swa( magnet.swa -= steps );
-			er032m_set_cf( magnet.cf += steps * magnet.swa_step );
+			magnet.cf = er032m_set_cf( magnet.cf + steps * magnet.swa_step );
 		}
 
 		er032m_test_leds( );
@@ -348,7 +357,7 @@ Var *sweep_down( Var *v )
 									 / magnet.swa_step ) ) - SWA_RANGE / 2;
 
 			er032m_set_swa( magnet.swa += steps );
-			er032m_set_cf( magnet.cf -= steps * magnet.swa_step );
+			magnet.cf = er032m_set_cf( magnet.cf - steps * magnet.swa_step );
 		}
 
 		er032m_test_leds( );
@@ -473,34 +482,34 @@ static void er032m_init( void )
 		THROW( EXCEPTION );
 	}
 
-	/* Switch to computer mode */
+	/* Switch to computer mode. */
 
 	er032m_command( "CO\r" );
 
-	/* Enable Hall controller */
+	/* Enable Hall controller. */
 
 	er032m_command( "EC\r" );
 
-	/* Switch to mode 0 */
+	/* Switch to mode 0. */
 
 	er032m_command( "MO0\r" );
 
-	/* Switch off service requests */
+	/* Switch off service requests. */
 
 	er032m_command( "SR0\r" );
 
 	/* Set IM0 sweep mode (we don't use it, just to make sure we don't
-	   trigger a sweep start inadvertently) */
+	   trigger a sweep start inadvertently). */
 
 	er032m_command( "IM0\r" );
 
-	/* Check the status of the LEDs */
+	/* Check the status of the LEDs. */
 
 	er032m_test_leds( );
 
 	/* Set the start field and the field step if magnet_setup() has been
 	   called, otherwise measure current field and make CF identical to
-	   the current field */
+	   the current field. */
 
 	if ( magnet.is_init )
 		er032m_start_field( );
@@ -543,7 +552,7 @@ static void er032m_start_field( void )
 
 	/* Make sure that the sweep width isn't larger than the maximum sweep
 	   width otherwise divide it by two as often as needed and remember
-	   that have to step not by one SWA but by a power of 2 SWA's */
+	   that we now have to step not by one SWA but by a power of 2 SWAs. */
 
 	if ( magnet.sw > magnet.max_sw )
 	{
@@ -554,9 +563,9 @@ static void er032m_start_field( void )
 		magnet.step_incr *= factor;
 	}
 
-	/* Sweep range must be a multiple of 0.1 G and we adjust it silently
-	   to fit this requirement - hopefully, this isn't going to lead to
-	   any real field precision problems */
+	/* Sweep range must be a multiple of SWEEP_RANGE_RESOLUTION and we adjust
+	   it silently to fit this requirement - hopefully, this isn't going to
+	   lead to any real field precision problems. */
 
 	magnet.sw = SWEEP_RANGE_RESOLUTION *
 									lrnd( magnet.sw / SWEEP_RANGE_RESOLUTION );
@@ -565,7 +574,7 @@ static void er032m_start_field( void )
 
 	/* Make sure the sweep range is still within the allowed field range,
 	   otherwise shift the center field and calculate the SWA that's needed
-	   in this case */
+	   in this case. */
 
 	if ( magnet.cf + 0.5 * magnet.sw > ER032M_MAX_FIELD )
 	{
@@ -584,8 +593,16 @@ static void er032m_start_field( void )
 		magnet.cf += shift * magnet.swa_step;
 	}
 
+	/* The center field must be a multiple of the highest resolution it can
+	   be set with. Again, we only can hope that this isn't going to decrease
+	   the field precision too much. In the worst case we now can be off by
+	   about 0.5 * ER032M_CF_RESOLUTION. */
+
+	magnet.cf = ER032M_CF_RESOLUTION
+									* lrnd( magnet.cf / ER032M_CF_RESOLUTION );
+
 	/* Now set the new field but avoid that center field plus sweep range
-	   ever exceed the field limits (probably I'm just too paranoid) */
+	   ever exceed the field limits. */
 
 	cur_cf  = er032m_get_cf( );
 	cur_sw  = er032m_get_sw( );
@@ -649,9 +666,9 @@ static double er032m_set_field( double field )
 	fsc2_assert( field >= ER032M_MIN_FIELD && field <= ER032M_MAX_FIELD );
 
 	/* We don't try to set a new field when the change is extremely small,
-	   i.e. lower than the accuracy for setting a center field */
+	   i.e. lower than the accuracy for setting a center field. */
 
-	if ( fabs( magnet.act_field - field ) < ER032M_RESOLUTION )
+	if ( fabs( magnet.act_field - field ) <= ER032M_RESOLUTION )
 		return magnet.act_field;
 
 	if ( ! magnet.is_sw )
@@ -675,12 +692,12 @@ static double er032m_set_field( double field )
 static void er032m_change_field_and_set_sw( double field )
 {
 	/* Try to determine a sweep width so that we can set the field without
-	   changing the center field, i.e. alone by setting a SWA */
+	   changing the center field, i.e. alone by setting a SWA. */
 
 	magnet.is_sw = er032m_guess_sw( fabs( field - magnet.act_field ) );
 
-	/* If this failed we have to change the center field, otherwise
-	   we use the newly calculated sweep width */
+	/* If this fails we have to change the center field, otherwise we use the
+	   newly calculated sweep width. */
 
 	if ( ! magnet.is_sw )
 		magnet.cf = er032m_set_cf( field );
@@ -688,7 +705,7 @@ static void er032m_change_field_and_set_sw( double field )
 	{
 		magnet.swa += irnd( ( field - magnet.cf ) / magnet.swa_step );
 
-		er032m_set_sw( magnet.sw );
+		magnet.sw = er032m_set_sw( magnet.sw );
 		er032m_set_swa( magnet.swa );
 
 		er032m_test_leds( );
@@ -704,8 +721,8 @@ static void er032m_change_field_and_sw( double field )
 	int steps;
 
 
-	/* First check if the new field value can be reached (within an accuracy
-	   of 1% of the SWA step size) by setting a SWA do just this */
+	/* If the new field value can be reached (within an accuracy of 1% of the
+	   SWA step size) by setting a SWA do just this. */
 
 	steps = irnd( ( field - magnet.act_field ) / magnet.swa_step );
 
@@ -718,14 +735,14 @@ static void er032m_change_field_and_sw( double field )
 		return;
 	}
 
-	/* Try to get a new sweep width so that we can handle the sweep by setting
-	   a SWA */
+	/* Otherwise try to guess a new sweep width so that we can handle the
+	   sweep by setting a SWA. */
 
 	if ( er032m_guess_sw( fabs( field - magnet.act_field ) ) )
 	{
 		magnet.swa += irnd( ( field - magnet.cf ) / magnet.swa_step );
 
-		er032m_set_sw( magnet.sw );
+		magnet.sw = er032m_set_sw( magnet.sw );
 		er032m_set_swa( magnet.swa );
 
 		er032m_test_leds( );
@@ -734,7 +751,7 @@ static void er032m_change_field_and_sw( double field )
 
 	/* Couldn't figure out a new sweep width to use - if the new field is
 	   also not within the current sweep width all we can do is set the
-	   new field by the center field alone */
+	   new field by the center field alone. */
 
 	if ( magnet.swa + steps > MAX_SWA || magnet.swa + steps < MIN_SWA )
 	{
@@ -751,10 +768,10 @@ static void er032m_change_field_and_sw( double field )
 		return;
 	}
 
-	/* New field still within the sweep range: Try to do as much of the field
-	   change using SWA and only the rest by shifting the center field. But
-	   take care that the sweep limits remain within the maximum and minimum
-	   field boundaries. */
+	/* New field is still within the sweep range: Try to do as much of the
+	   field change using SWA and only the rest by shifting the center
+	   field. But take care that the sweep limits remain within the maximum
+	   and minimum field boundaries. */
 
 	magnet.swa += steps;
 	magnet.cf  += field - magnet.act_field - steps * magnet.swa_step;
@@ -762,7 +779,7 @@ static void er032m_change_field_and_sw( double field )
 	if ( magnet.cf + 0.5 * magnet.sw <= ER032M_MAX_FIELD &&
 		 magnet.cf - 0.5 * magnet.sw >= ER032M_MIN_FIELD )
 	{
-		er032m_set_cf( magnet.cf );
+		magnet.cf = er032m_set_cf( magnet.cf );
 		er032m_set_swa( magnet.swa );
 
 		er032m_test_leds( );
@@ -774,7 +791,7 @@ static void er032m_change_field_and_sw( double field )
 		steps = irnd( ceil( ( magnet.cf + 0.5 * magnet.sw - ER032M_MAX_FIELD )
 							/ magnet.swa_step ) );
 
-		er032m_set_cf( magnet.cf -= steps * magnet.swa_step );
+		magnet.cf = er032m_set_cf( magnet.cf - steps * magnet.swa_step );
 		er032m_set_swa( magnet.swa += steps );
 	}
 	else
@@ -782,7 +799,7 @@ static void er032m_change_field_and_sw( double field )
 		steps = irnd( ceil( ( ER032M_MIN_FIELD - magnet.cf - 0.5 * magnet.sw )
 							/ magnet.swa_step ) );
 
-		er032m_set_cf( magnet.cf += steps * magnet.swa_step );
+		magnet.cf = er032m_set_cf( magnet.cf + steps * magnet.swa_step );
 		er032m_set_swa( magnet.swa -= steps );
 	}
 
@@ -799,7 +816,7 @@ static void er032m_change_field_and_keep_sw( double field )
 
 
 	/* First check if the new field value can be reached (within an accuracy
-	   of 1% of the SWA step size) by setting a SWA do just this */
+	   of 1% of the SWA step size) by setting a SWA do just this. */
 
 	steps = irnd( ( field - magnet.act_field ) / magnet.swa_step );
 
@@ -818,7 +835,7 @@ static void er032m_change_field_and_keep_sw( double field )
 		 magnet.cf - 0.5 * magnet.sw >= ER032M_MIN_FIELD )
 	{
 
-		er032m_set_cf( magnet.cf );
+		magnet.cf = er032m_set_cf( magnet.cf );
 		er032m_set_swa( magnet.swa );
 
 		er032m_test_leds( );
@@ -830,7 +847,7 @@ static void er032m_change_field_and_keep_sw( double field )
 		steps = irnd( ( magnet.cf + 0.5 * magnet.sw - ER032M_MAX_FIELD )
 					  / magnet.swa_step );
 
-		er032m_set_cf( magnet.cf -= steps * magnet.swa_step );
+		magnet.cf = er032m_set_cf( magnet.cf - steps * magnet.swa_step );
 		er032m_set_swa( magnet.swa += steps );
 	}
 	else
@@ -838,7 +855,7 @@ static void er032m_change_field_and_keep_sw( double field )
 		steps = irnd( ( ER032M_MIN_FIELD - magnet.cf - 0.5 * magnet.sw )
 					  / magnet.swa_step );
 
-		er032m_set_cf( magnet.cf += steps * magnet.swa_step );
+		magnet.cf = er032m_set_cf( magnet.cf + steps * magnet.swa_step );
 		er032m_set_swa( magnet.swa -= steps );
 	}
 
@@ -846,13 +863,13 @@ static void er032m_change_field_and_keep_sw( double field )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* This function tries to guess from the difference between the current */
-/* center field and the target field a useful sweep range so that the   */
-/* jump can be done by setting a SWA. If it isn't possible to find such */
-/* a setting the function returns FAIL, otherwise both the entries sw,  */
-/* swa and swa_step in the magnet structure get set and OK is returned. */
-/*----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* This function tries to guess a useful sweep range from the difference */
+/* between the current center field and the target field so that the     */
+/* jump can be done by setting a SWA. If it isn't possible to find such  */
+/* a setting the function returns FAIL, otherwise both the entries sw,   */
+/* swa and swa_step in the magnet structure get set and OK is returned.  */
+/*-----------------------------------------------------------------------*/
 
 static bool er032m_guess_sw( double field_diff )
 {
@@ -862,15 +879,14 @@ static bool er032m_guess_sw( double field_diff )
 	double factor;
 
 
-
-	/* For very small or huge changes we can't deduce a sweep range */
+	/* For very small or huge changes we can't deduce a sweep range. */
 
 	if ( field_diff * SWA_RANGE < SWEEP_RANGE_RESOLUTION ||
 		 field_diff > magnet.max_sw / 2 )
 		return FAIL;
 
 	/* This also doesn't work if the center field is nearer to one of the
-	   limits than to the new field value */
+	   limits than to the new field value. */
 
 	if ( ER032M_MAX_FIELD - magnet.cf < field_diff ||
 		 magnet.cf - ER032M_MIN_FIELD < field_diff )
@@ -880,7 +896,7 @@ static bool er032m_guess_sw( double field_diff )
 	sw = SWA_RANGE * field_diff;
 
 	/* The following reduces the sweep width to the maximum possible sweep
-	   width and will always happen for field changes above ca. 3.9 G */
+	   width and will always happen for field changes above 3.90625 G. */
 
 	if ( sw > magnet.max_sw )
 	{
@@ -891,16 +907,16 @@ static bool er032m_guess_sw( double field_diff )
 	}
 
 	/* If with this corrected SWA step size the field change can't be achieved
-	   give up */
+	   give up. */
 
 	if ( swa_step * ( SWA_RANGE / 2 - 1 ) < field_diff )
 		return FAIL;
 
 	/* We also can't use a sweep range that exceeds the maximum or minimum
 	   field (keeping the center field) thus we must reduce it further as
-	   far as necessary (we already tested at the start that this wont lead
+	   far as necessary (we already tested at the start that this won't lead
 	   to a situation were the step size becomes so small that the field
-	   difference can't be adjusted anymore by setting a SWA) */
+	   difference can't be adjusted anymore by setting a SWA). */
 
 	for ( i = 1; magnet.cf + 0.5 * sw / i > ER032M_MAX_FIELD; i++ )
 		/* empty */ ;
@@ -914,7 +930,7 @@ static bool er032m_guess_sw( double field_diff )
 
 	fsc2_assert( swa_step * ( SWA_RANGE / 2 - 1 ) >= field_diff );
 
-	/* Make sweep range an integer multiple of the SWEEP_RANGE_RESOLUTION */
+	/* Make sweep range an integer multiple of the SWEEP_RANGE_RESOLUTION. */
 
 	magnet.sw = SWEEP_RANGE_RESOLUTION * lrnd( sw / SWEEP_RANGE_RESOLUTION );
 	magnet.swa_step = magnet.sw / SWA_RANGE;
@@ -960,7 +976,7 @@ static void er032m_test_leds( void )
 
 	while ( 1 )
 	{
-		stop_on_user_request( );
+		stop_on_user_request( );           /* give the user a chance to stop */
 
 		is_overload = is_remote = UNSET;
 
@@ -1002,7 +1018,7 @@ static void er032m_test_leds( void )
 		}
 
 		/* If there's no overload we're done, otherwise we retry several
-		   times before giving up */
+		   times before giving up. */
 
 		if ( ! is_overload )
 			break;
@@ -1042,6 +1058,9 @@ static double er032m_set_cf( double center_field )
 	int i;
 
 
+	center_field = ER032M_CF_RESOLUTION
+							   * lround( center_field / ER032M_CF_RESOLUTION );
+
 	fsc2_assert( center_field >= ER032M_MIN_FIELD &&
 				 center_field <= ER032M_MAX_FIELD );
 
@@ -1050,7 +1069,7 @@ static double er032m_set_cf( double center_field )
 	for ( i = ER032M_MAX_SET_RETRIES; i > 0; i-- )
 	{
 		er032m_command( buf );
-		if ( fabs( center_field - er032m_get_cf( ) ) <= 1.0e-3 )
+		if ( fabs( center_field - er032m_get_cf( ) ) < ER032M_CF_RESOLUTION )
 			break;
 	}
 
@@ -1090,12 +1109,15 @@ static double er032m_set_sw( double sweep_width )
 
 	fsc2_assert( sweep_width >= 0.0 && sweep_width <= magnet.max_sw );
 
-	sprintf( buf, "SW%.1f\r", sweep_width );
+	sweep_width = SWEEP_RANGE_RESOLUTION
+								* lrnd( sweep_width / SWEEP_RANGE_RESOLUTION );
+
+	sprintf( buf, "SW%.3f\r", sweep_width );
 
 	for ( i = ER032M_MAX_SET_RETRIES; i > 0; i-- )
 	{
 		er032m_command( buf );
-		if ( fabs( sweep_width - er032m_get_sw( ) ) <= 1.0e-3 )
+		if ( fabs( sweep_width - er032m_get_sw( ) ) < SWEEP_RANGE_RESOLUTION )
 			break;
 	}
 
