@@ -284,7 +284,7 @@ Var *lockin_get_data( Var *v )
 			return vars_push( FLOAT_VAR, sr830_get_data( ) );
 	}
 
-	for ( num_channels = i = 0; v != NULL; i++, v = vars_pop( v ) )
+	for ( num_channels = i = 0; i < 6 && v != NULL; i++, v = vars_pop( v ) )
 	{
 		vars_check( v, INT_VAR | FLOAT_VAR );
 		if ( v->type == INT_VAR )
@@ -305,6 +305,15 @@ Var *lockin_get_data( Var *v )
 		}
 
 		num_channels++;
+	}
+
+	if ( v != NULL )
+	{
+		eprint( SEVERE, SET, "%s: More than 6 parameters in call of "
+				"%s(), discarding superfluous ones.\n",
+				DEVICE_NAME, Cur_Func );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
 	}
 
 	if ( TEST_RUN )
