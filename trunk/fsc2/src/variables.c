@@ -302,7 +302,7 @@ static Var* vars_setup_new_array( Var *v, int dim )
 
 	/* Create the array as far as possible */
 
-	a->type = VAR_TYPE( a->name ) == INT_VAR ? INT_REF : FLOAT_REF;
+	a->type = VAR_TYPE( a ) == INT_VAR ? INT_REF : FLOAT_REF;
 
 	vars_arr_create( a, v->next, dim, UNSET );
 
@@ -547,9 +547,21 @@ Var *vars_init_list( Var *v, ssize_t level )
 		v->flags |= INIT_ONLY;
 
 		if ( v->type == UNDEF_VAR )
-			nv->val.vptr[ i++ ] = NULL;
+		{
+			nv->val.vptr[ i ] = vars_new( NULL );
+			nv->val.vptr[ i ]->flags |= DONT_RECURSE | INIT_ONLY;
+			nv->val.vptr[ i ]->dim = nv->dim - 1;
+			nv->val.vptr[ i ]->from = nv;
+			if ( nv->dim > 2 )
+				nv->val.vptr[ i ]->type = nv->type;
+			else
+				nv->val.vptr[ i ]->type = FLOAT_ARR;
+			nv->val.vptr[ i ]->len  = 0;
+		}
 		else
-			nv->val.vptr[ i++ ] = v;
+			nv->val.vptr[ i ] = v;
+
+		nv->val.vptr[ i++ ]->from = nv;
 	}
 
 	return nv;
@@ -868,17 +880,17 @@ static Var *vars_lhs_pointer( Var *v, int dim )
 
 			for ( i = cv->len; i <= ind; i++ )
 			{
-				cv->val.vptr[ i ] = vars_new( NULL );
-				cv->val.vptr[ i ]->from = cv;
+				cv->val.vptr[ i ]           = vars_new( NULL );
+				cv->val.vptr[ i ]->from     = cv;
 				if ( cur_dim > 1 )
 					cv->val.vptr[ i ]->type = cv->type;
 				else
 					cv->val.vptr[ i ]->type = 
 									 cv->type == INT_REF ? INT_ARR : FLOAT_ARR;
-				cv->val.vptr[ i ]->dim = cur_dim;
-				cv->val.vptr[ i ]->len = 0;
-				cv->val.vptr[ i ]->flags |= IS_DYNAMIC;
-				cv->val.vptr[ i ]->flags &= ~ NEW_VARIABLE;
+				cv->val.vptr[ i ]->dim      = cur_dim;
+				cv->val.vptr[ i ]->len      = 0;
+				cv->val.vptr[ i ]->flags   |= IS_DYNAMIC;
+				cv->val.vptr[ i ]->flags   &= ~ NEW_VARIABLE;
 			}
 
 			cv->len = ind + 1;
@@ -1136,7 +1148,7 @@ static void vars_assign_to_1d( Var *src, Var *dest )
 
 	if ( dest->type == UNDEF_VAR )
 	{
-		dest->type = VAR_TYPE( dest->name );
+		dest->type = VAR_TYPE( dest );
 		dest->flags &= ~NEW_VARIABLE;
 	}
 
@@ -1352,7 +1364,6 @@ static void vars_assign_to_nd_from_nd( Var *src, Var *dest )
 	   both arrays must be identical */
 
 	vars_size_check( src, dest );
-
 	vars_arr_assign( src, dest );
 }
 
@@ -1733,11 +1744,7 @@ Var *vars_push( int type, ... )
 		case INT_REF : case FLOAT_REF :
 			src = va_arg( ap, Var * );
 			if ( src != NULL )
-			{
-				if ( src->type == REF_PTR )
-					src = src->from;
 				vars_ref_copy( nsv, src, UNSET );
-			}
 			break;
 
 		case REF_PTR :
@@ -1969,16 +1976,6 @@ static void vars_ref_copy_create( Var *nsv, Var *src, bool exact_copy )
 
 	for ( i = 0; i < src->len; i++ )
 	{
-		/* If some of the sub-matrices of the source matrix do not exist
-		   (i.e. are still completely non-existent or have zero length )
-		   we don't create a copy... */
-
-		if ( src->val.vptr[ i ] == NULL || src->val.vptr[ i ]->len == 0 )
-		{
-			nsv->val.vptr[ i ] = NULL;
-			continue;
-		}
-
 		vd = nsv->val.vptr[ i ] = vars_new( NULL );
 		vd->from = nsv;
 		vd->flags &= ~ NEW_VARIABLE;
@@ -1986,7 +1983,6 @@ static void vars_ref_copy_create( Var *nsv, Var *src, bool exact_copy )
 			vd->flags |= IS_DYNAMIC | IS_TEMP;
 		vd->len = src->val.vptr[ i ]->len;
 		vd->type = nsv->type;
-		vd->from = nsv;
 		vd->dim = src->val.vptr[ i ]->dim;
 
 		vars_ref_copy_create( vd, src->val.vptr[ i ], exact_copy );
@@ -2241,6 +2237,9 @@ void *vars_iter( Var *v )
 
 static void *vars_get_pointer( ssize_t *iter, ssize_t depth, Var *p )
 {
+	Var *p_next;
+
+
 	/* If the index for the current dimension is too large reset it to
 	   0 and increment the index for the next higher dimension (if we're
 	   already at the top level we have returned all elements of the array
@@ -2266,7 +2265,10 @@ static void *vars_get_pointer( ssize_t *iter, ssize_t depth, Var *p )
 	else if ( p->type == FLOAT_ARR )
 		return ( void * ) ( p->val.dpnt + iter[ depth ] );
 	else
-		return vars_get_pointer( iter, ++depth, p->val.vptr[ iter[ depth ] ] );
+	{
+		p_next = p->val.vptr[ iter[ depth ] ];
+		return vars_get_pointer( iter, ++depth, p_next );
+	}
 }
 
 

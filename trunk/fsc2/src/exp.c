@@ -911,6 +911,7 @@ void exp_test_run( void )
 		tools_clear( );
 
 		EDL.Fname = NULL;
+		vars_del_stack( );
 		vars_save_restore( UNSET );
 
 		EDL.File_List_Len = old_FLL;
@@ -1317,7 +1318,7 @@ void get_for_cond( Prg_Token *cur )
 	if ( EDL.cur_prg_token->tv.vptr->type == UNDEF_VAR )
 	{
 		EDL.cur_prg_token->tv.vptr->type =
-								  VAR_TYPE( EDL.cur_prg_token->tv.vptr->name );
+										VAR_TYPE( EDL.cur_prg_token->tv.vptr );
 		EDL.cur_prg_token->tv.vptr->flags &= ~ NEW_VARIABLE;
 	}
 
