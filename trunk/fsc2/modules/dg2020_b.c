@@ -114,6 +114,8 @@ int dg2020_b_init_hook( void )
 		dg2020.function[ i ].num_channels = 0;
 		dg2020.function[ i ].num_pulses = 0;
 		dg2020.function[ i ].pulses = NULL;
+		dg2020.function[ i ].needs_phases = 0;
+		dg2020.function[ i ].phase_setup = NULL;
 		dg2020.function[ i ].next_phase = 0;
 		dg2020.function[ i ].is_inverted = UNSET;
 		dg2020.function[ i ].delay = 0;
@@ -126,6 +128,16 @@ int dg2020_b_init_hook( void )
 	{
 		dg2020.channel[ i ].self = i;
 		dg2020.channel[ i ].function = NULL;
+	}
+
+	for ( i = 0; i < 2; i++ )
+	{
+		dg2020_phs[ i ].function = NULL;
+		for ( j = 0; j < PHASE_CW - PHASE_PLUS_X; j++ )
+		{
+			dg2020_phs[ i ].is_set[ j ] = UNSET;
+			dg2020_phs[ i ].pod[ j ] = NULL;
+		}
 	}
 
 	dg2020_is_needed = SET;

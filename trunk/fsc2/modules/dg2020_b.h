@@ -108,7 +108,7 @@ typedef struct _F_ {
 	struct _p_ **pulses;         // list of pulse pointers
 
 	bool needs_phases;           // set if phase cycling is needed
-
+	struct _PHS_ *phase_setup;
 	int next_phase;
 
 	long max_seq_len;            // maximum length of the pulse sequence
@@ -146,6 +146,14 @@ typedef struct
 	Ticks start;
 	long repeat;
 } BLOCK;
+
+
+typedef struct _PHS_
+{
+	bool is_set[ PHASE_CW - PHASE_PLUS_X + 1 ];
+	POD *pod[ PHASE_CW - PHASE_PLUS_X + 1 ];
+	FUNCTION *function;
+} PHASE_SETUP;
 
 
 typedef struct
@@ -259,6 +267,7 @@ bool dg2020_is_needed = UNSET;
 DG2020 dg2020;
 PULSE *dg2020_Pulses = NULL;
 bool dg2020_IN_SETUP = UNSET;
+PHASE_SETUP dg2020_phs[ 2 ];
 
 #else
 
@@ -266,6 +275,7 @@ extern bool dg2020_is_needed;
 extern DG2020 dg2020;
 extern PULSE *dg2020_Pulses;
 extern bool dg2020_IN_SETUP;
+extern PHASE_SETUP dg2020_phs[ 2 ];
 
 #endif
 

@@ -527,7 +527,7 @@ void p_set_rep_freq( Var *v )
 	/* make sure we get a repeat time that's a multiple of 1 ns */
 
 	time = 1.0 / freq;
-	time = lround( time * 1.e9 ) * 1.e-9;
+	time = lround( time * 1.0e9 ) * 1.0e-9;
 
 	/* finally call the function (if it exists...) */
 
@@ -734,9 +734,9 @@ void p_phs_setup( int func, int type, int pod, long val, long protocol )
 }
 
 
-/*
-  We reached the end of a phase setup command...
-*/
+/*-------------------------------------------------------------------*/
+/* Function called by the parser at the end of a phase setup command */
+/*-------------------------------------------------------------------*/
 
 void p_phs_end( int func )
 {
@@ -746,11 +746,11 @@ void p_phs_end( int func )
 }
 
 
-/*
-  Function for setting the phase switch delay.
-  'func' is the phase function the data are to be used for (i.e. 0 means
-  PHASE_1, 1 means PHASE_2)
-*/
+/*----------------------------------------------------------*/
+/* Function for setting the phase switch delay.             */
+/* 'func' is the phase function the data are to be used for */
+/* (i.e. 0 means PHASE_1, 1 means PHASE_2)                  */
+/*----------------------------------------------------------*/
 
 void p_set_psd( int func, Var *v )
 {
@@ -769,9 +769,9 @@ void p_set_psd( int func, Var *v )
 }
 
 
-/*
-  Function for setting the grace period following a pulse.
-*/
+/*----------------------------------------------------------*/
+/* Function for setting the grace period following a pulse. */
+/*----------------------------------------------------------*/
 
 void p_set_gp( Var *v )
 {
