@@ -330,6 +330,15 @@ bool xforms_init( int *argc, char *argv[ ] )
 					  FL_FULLBORDER, "fsc2" );
 
 	
+	fl_deactivate_object( main_form->reload );
+	fl_set_object_lcol( main_form->reload, FL_INACTIVE_COL );
+	fl_deactivate_object( main_form->Edit );
+	fl_set_object_lcol( main_form->Edit, FL_INACTIVE_COL );
+	fl_deactivate_object( main_form->test_file );
+	fl_set_object_lcol( main_form->test_file, FL_INACTIVE_COL );
+	fl_deactivate_object( main_form->run );
+	fl_set_object_lcol( main_form->run, FL_INACTIVE_COL );
+
 	XQueryTree( fl_display, main_form->fsc2->window, &root,
 				&parent, &children, &nchilds );
 	XQueryTree( fl_display, parent, &root,

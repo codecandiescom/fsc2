@@ -544,6 +544,15 @@ void load_file( FL_OBJECT *a, long reload )
 	state = FAIL;
 	is_tested = UNSET;
 
+	fl_activate_object( main_form->reload );
+	fl_set_object_lcol( main_form->reload, FL_BLACK );
+	fl_activate_object( main_form->Edit );
+	fl_set_object_lcol( main_form->Edit, FL_BLACK );
+	fl_activate_object( main_form->test_file );
+	fl_set_object_lcol( main_form->test_file, FL_BLACK );
+	fl_activate_object( main_form->run );
+	fl_set_object_lcol( main_form->run, FL_BLACK );
+
 	/* Run all the exit hooks and reset number of compilation errors */
 
 	if ( ! exit_hooks_are_run )
