@@ -564,6 +564,38 @@ again with a non-zero argument, @code{"ON"} or no argument at all.
 This function can only be used with the @strong{Stanford Research}
 lock-in amplifiers.
 
+
+@item lockin_conversion_time()
+@findex lockin_conversion_time()
+This function exists for the @strong{Bruker ER023M} signal channel only
+and either queries or sets the time that the built-in ADC takes to
+convert a voltage into a binary data value. The voltage resolution is
+higher for longer conversion times. Possible conversion times are
+integer multiples of @w{320 us} in the range between 1 and 9999. If no
+argument is supplied to the function the current conversion time is
+returned. If there is an argument this is used as the new conversion
+time. If the argument is not an integer multiple of @w{320 us} (within
+the possible range) the nearest allowed conversion time is used.
+
+@item lockin_resonator()
+@findex lockin_resonator()
+This function exists for the @strong{Bruker ER023M} signal channel only
+and queries or returns the selected resonator. If called without an
+argument it returns either @code{1} or @code{2} for the first or second
+resonator. It accepts the same values as arguments to select a resonator.
+
+
+@item lockin_is_overload()
+@findex lockin_is_overload()
+This function exists for the @strong{Bruker ER023M} signal channel only
+and can only be used as a query, i.e.@: it does not allows arguments. It
+can be caaled before a new data value is fetched from the lock-in to
+find out if an overload has occurred while the data value was measured
+(where a return value of @code{1} indicates that an overload happened,
+otherwise @code{0} is returned). Calling this function (or fetching the
+data value) will reset the overload condition and calls of the function
+will return @code{0} as long as no further overloads occur.
+
 @end table
 
 
