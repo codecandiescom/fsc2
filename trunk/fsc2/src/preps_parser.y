@@ -182,10 +182,6 @@ expr:    INT_TOKEN unit           { if ( $2 == NULL )
 ;
 
 unit:    /* empty */               { $$ = NULL; }
-       | NS_TOKEN                  { $$ = vars_push( INT_VAR, 1L ); }
-       | US_TOKEN                  { $$ = vars_push( INT_VAR, 1000L ); }
-       | MS_TOKEN                  { $$ = vars_push( INT_VAR, 1000000L ); }
-       | S_TOKEN                   { $$ = vars_push( INT_VAR, 1000000000L ); }
        | NT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
        | UT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
        | MT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 10.0 ); }
