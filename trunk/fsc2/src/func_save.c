@@ -37,7 +37,7 @@ static int print_slice( Var *v, int fid );
 static void format_check( Var *v );
 static long do_printf( int file_num, Var *v );
 static void handle_escape( char *fmt_end );
-static bool print_browser( int browser, int fid, const char* comment );
+static int print_browser( int browser, int fid, const char* comment );
 static int T_fprintf( int file_num, const char *fmt, ... );
 
 
@@ -483,12 +483,12 @@ Var *f_save( Var *v )
 	/* Determine the file identifier */
 
 	if ( ( file_num = get_save_file( &v ) ) == -1 )
-		return vars_push( INT_VAR, -1 );
+		return vars_push( INT_VAR, 0 );
 
 	if ( v == NULL )
 	{
 		eprint( WARN, SET, "Call of %s() without data.\n", Cur_Func );
-		return vars_push( INT_VAR, -1 );
+		return vars_push( INT_VAR, 0 );
 	}
 
 	do
@@ -551,8 +551,9 @@ Var *f_save( Var *v )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Writes a complete array to a file, returns number of chars it wrote */
+/*---------------------------------------------------------------------*/
 
 static int print_array( Var *v, long cur_dim, long *start, int fid )
 {
@@ -588,8 +589,9 @@ static int print_array( Var *v, long cur_dim, long *start, int fid )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Writes an array slice to a file, returns number of chars it wrote */
+/*-------------------------------------------------------------------*/
 
 static int print_slice( Var *v, int fid )
 {
@@ -614,6 +616,7 @@ static int print_slice( Var *v, int fid )
 /* be used and no file identifier is allowed as first argument to `save()'. */
 /* This function is the formated save with the same meaning of the format   */
 /* string as in `print()'.                                                  */
+/* The function returns the number of chars it wrote to the file.           */
 /*--------------------------------------------------------------------------*/
 
 Var *f_fsave( Var *v )
@@ -628,6 +631,7 @@ Var *f_fsave( Var *v )
 	int on_stack;
 	int percs;
 	int n = 0;
+	int count = 0;
 
 
 	/* Determine the file identifier */
@@ -648,9 +652,6 @@ Var *f_fsave( Var *v )
 				Cur_Func );
 		THROW( EXCEPTION )
 	}
-
-	if ( TEST_RUN )
-		return vars_push( INT_VAR, 1 );
 
 	sptr = cp = v->val.sptr;
 
@@ -769,17 +770,17 @@ Var *f_fsave( Var *v )
 			{
 				case INT_VAR :
 					strcpy( ep, "%ld" );
-					T_fprintf( file_num, cp, cv->val.lval );
+					count += T_fprintf( file_num, cp, cv->val.lval );
 					break;
 
 				case FLOAT_VAR :
 					strcpy( ep, "%#.9g" );
-					T_fprintf( file_num, cp, cv->val.dval );
+					coutn += T_fprintf( file_num, cp, cv->val.dval );
 					break;
 
 				case STR_VAR :
 					strcpy( ep, "%s" );
-					T_fprintf( file_num, cp, cv->val.sptr );
+					count += T_fprintf( file_num, cp, cv->val.sptr );
 					break;
 
 				default :
@@ -792,23 +793,32 @@ Var *f_fsave( Var *v )
 		else
 		{
 			strcpy( ep, "#" );
-			T_fprintf( file_num, cp );
+			count += T_fprintf( file_num, cp );
 		}
 
 		cp = ep + 6;
 	}
 
-	T_fprintf( file_num, cp );
+	count += T_fprintf( file_num, cp );
 
 	/* Finally free the copy of the format string and return */
 
 	T_free( fmt );
 
-	return vars_push( INT_VAR, n );
+	return vars_push( INT_VAR, ( long ) count );
 }
 
 
 /*-------------------------------------------------------------------------*/
+/* This function writes data to a file according to a format string, which */
+/* resembles strongly the format string that printf() and friends accepts. */
+/* The only things not supported (because they don't make sense here) are  */
+/* printing of chars, unsigned quantities and pointers and pointers (i.e.  */
+/* the 'c', 'o', 'x', 'X', 'u' and 'p' conversion specifiers cannot be     */
+/* used) and no length specifiers (i.e. 'h', 'l' and 'L') are accepted.    */
+/* Everything else should work, including all escape sequences (with the   */
+/* exception of trigraph sequences).                                       */
+/* The function returns the number of chars written to the file.           */
 /*-------------------------------------------------------------------------*/
 
 Var *f_printf( Var *v )
@@ -834,7 +844,7 @@ Var *f_printf( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	/* Check that format string and arguments are ok */
+	/* Check that format string and arguments are ok, then print */
 
 	format_check( v );
 
@@ -842,8 +852,12 @@ Var *f_printf( Var *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+/* Function is used by f_printf( ) to check that the format string is well- */
+/* formed and to find out if there are at least as many arguments as needed */
+/* by the format string (if there are more a warning is printed and the     */
+/* superfluous arguments are discarded).                                    */
+/*--------------------------------------------------------------------------*/
 
 static void format_check( Var *v )
 {
@@ -857,6 +871,8 @@ static void format_check( Var *v )
 
 	while ( 1 )
 	{
+		/* Skip over everything that's not a conversion specifier */
+
 		for ( ; *sptr != '\0' && *sptr != '%'; sptr++ )
 			;
 
@@ -873,6 +889,7 @@ static void format_check( Var *v )
 		if ( *sptr == '%' )
 			continue;
 
+		/* First thing to be expected in a conversion specifier are flags */
 
 		while ( *sptr == '-' || *sptr == '+' || *sptr == ' ' ||
 				*sptr == '0' || *sptr == '#' )
@@ -885,6 +902,10 @@ static void format_check( Var *v )
 				THROW( EXCEPTION )
 			}
 		}
+
+		/* Next a minimum length and precision might follow, if one or both
+		   of these are given by a '*' we need an integer argument to
+		   specifiy the number to be used */
 
 		if ( *sptr == '*' )
 		{
@@ -943,6 +964,11 @@ static void format_check( Var *v )
 				THROW( EXCEPTION )
 			}
 		}
+
+		/* Now the conversion specifier has to follow, this can be either
+		   's', 'd', 'i', 'f', 'e', 'g', 'E', 'G', or 'n'. For 'n' no
+		   argument is needed because it just prints the number of character
+		   written up to the moment the 'n' is found in the format string. */
 
 		if ( *sptr == 's' )
 		{
@@ -1022,6 +1048,9 @@ static void format_check( Var *v )
 		THROW( EXCEPTION )
 	}
 
+	/* Check for superfluous arguments, print a warning if there are any and
+	   discard them */
+
 	if ( vptr != NULL )
 	{
 		eprint( SEVERE, SET, "More arguments than conversion specifiers found "
@@ -1032,8 +1061,12 @@ static void format_check( Var *v )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+/* This function is called by f_printf() to do the actual printing. It loops */
+/* over the format string and prints it argument by argument (unfortunately, */
+/* there's portable no way to create a variable argument list, so it must be */
+/* dobe this way). The fuinction returns the number of character written.    */
+/*---------------------------------------------------------------------------*/
 
 static long do_printf( int file_num, Var *v )
 {
@@ -1081,7 +1114,7 @@ static long do_printf( int file_num, Var *v )
 		if ( fmt_start != fmt_end )
 			count += T_fprintf( file_num, fmt_start );
 
-		if ( store == '\0' )              /* already at end ? */
+		if ( store == '\0' )                         /* already at the end ? */
 		{
 			TRY_SUCCESS;
 			T_free( fmt_start );
@@ -1092,18 +1125,23 @@ static long do_printf( int file_num, Var *v )
 		strcpy( fmt_start, sptr );
 		fmt_end = fmt_start + 1;
 
-		/* Now repeat printing starting each time with a conversion specifier
-		   and ending just before the next one until end of format string
-		   is found */
+		/* Now repeat printing. starting each time with a conversion specifier
+		   and ending just before the next one until the end of the format
+		   string has been reached */
 
 		while ( 1 )
 		{
-			need_vars = 0;
-			need_type = -1;
+			need_vars = 0;                  /* how many arguments are needed */
+			need_type = -1;                 /* type of the argument to print */
+
+			/* Skip over flags */
 
 			while ( *fmt_end == '-' || *fmt_end == '+' || *fmt_end == ' ' ||
 					*fmt_end == '0' || *fmt_end == '#' )
 				fmt_end++;
+
+			/* Deal with the minumum length and precision fields, checking
+			   if, due to a '*' an argument is needed */
 
 			if ( *fmt_end == '*' )
 			{
@@ -1126,6 +1164,8 @@ static long do_printf( int file_num, Var *v )
 						;
 			}
 
+			/* Find out about the type of the argument to be printed */
+
 			if ( *fmt_end == 's' )
 			{
 				need_type = 0;       /* string */
@@ -1134,8 +1174,8 @@ static long do_printf( int file_num, Var *v )
 
 			if ( *fmt_end == 'd' || *fmt_end == 'i' )
 			{
-				/* We need to print as long int, so insert a 'l' in front of
-				   the 'd' */
+				/* Integers are always 'long' integers, so an 'l' must be
+				   inserted in front of the 'd' or 'i' */
 
 				memmove( fmt_end + 1, fmt_end, strlen( fmt_end ) + 1 );
 				*fmt_end++ = 'l';
@@ -1153,7 +1193,7 @@ static long do_printf( int file_num, Var *v )
 
 			if ( *fmt_end == 'n' )
 			{
-				/* Print the pint count as an integer */
+				/* Print the current print count as an integer */
 
 				*fmt_end = 'd';
 				need_type = 3;       /* count */
@@ -1183,32 +1223,35 @@ static long do_printf( int file_num, Var *v )
 			store = *fmt_end;
 			*fmt_end = '\0';
 
+			/* Call the function doing the printing, supplying it with the
+			   necessary number of arguments */
+
 			switch ( need_vars )
 			{
-				case 0 :
-					fsc2_assert( need_type == 3 );        /* must be a count */
+				case 0 :                   /* zero arguments must be a count */
+					fsc2_assert( need_type == 3 );
 					count += T_fprintf( file_num, fmt_start, count );
 					break;
 
 				case 1 :
 					switch ( need_type )
 					{
-						case 0 :
+						case 0 : /* string */
 							count += T_fprintf( file_num, fmt_start,
 												cv->val.sptr );
 							break;
 
-						case 1 :
+						case 1 : /* integer */
 							count += T_fprintf( file_num, fmt_start,
 												cv->val.lval );
 							break;
 
-						case 2 :
+						case 2 : /* double */
 							count += T_fprintf( file_num, fmt_start,
 												cv->val.dval );
 							break;
 
-						case 3 :
+						case 3 : /* count */
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval, count );
 							break;
@@ -1217,31 +1260,31 @@ static long do_printf( int file_num, Var *v )
 							fsc2_assert( 1 == 0 );
 					}
 
-					cv = cv->next;
+					cv = vars_pop( cv );
 					break;
 
 				case 2 :
 					switch ( need_type )
 					{
-						case 0 :
+						case 0 : /* string */
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
 												cv->next->val.sptr );
 							break;
 
-						case 1 :
+						case 1 : /* integer */
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
 												cv->next->val.lval );
 							break;
 
-						case 2 :
+						case 2 : /* double */
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
 												cv->next->val.dval );
 							break;
 
-						case 3 :
+						case 3 : /* count */
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
 												( int ) cv->next->val.lval,
@@ -1252,27 +1295,27 @@ static long do_printf( int file_num, Var *v )
 							fsc2_assert( 1 == 0 );
 					}
 
-					cv = cv->next->next;
+					cv = vars_pop( vars_pop( cv ) );
 					break;
 
 				case 3 :
 					switch ( need_type )
 					{
-						case 0 :
+						case 0 : /* string */
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
 												( int ) cv->next->val.lval,
 												cv->next->next->val.sptr );
 							break;
 
-						case 1 :
+						case 1 : /* integer */
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
 												( int ) cv->next->val.lval,
 												cv->next->next->val.lval );
 							break;
 
-						case 2 :
+						case 2 : /* double */
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
 												( int ) cv->next->val.lval,
@@ -1283,7 +1326,7 @@ static long do_printf( int file_num, Var *v )
 							fsc2_assert( 1 == 0 );
 					}
 
-					cv = cv->next->next->next;
+					cv = vars_pop( vars_pop( vars_pop( cv ) ) );
 					break;
 
 				default :
@@ -1508,16 +1551,17 @@ Var *f_save_o( Var *v )
 /* 3. Comment string to prepend to each line                           */
 /*---------------------------------------------------------------------*/
 
-static bool print_browser( int browser, int fid, const char* comment )
+static int print_browser( int browser, int fid, const char* comment )
 {
 	char *line;
 	char *lp;
+	int count;
 
 
 	writer( browser ==  0 ? C_PROG : C_OUTPUT );
 	if ( comment == NULL )
 		comment = "";
-	T_fprintf( fid, "%s\n", comment );
+	count = T_fprintf( fid, "%s\n", comment );
 
 	while ( 1 )
 	{
@@ -1535,15 +1579,15 @@ static bool print_browser( int browser, int fid, const char* comment )
 					;
 			}
 
-			T_fprintf( fid, "%s%s\n", comment, lp );
+			count += T_fprintf( fid, "%s%s\n", comment, lp );
 		}
 		else
 			break;
 	}
 
-	T_fprintf( fid, "%s\n", comment );
+	count += T_fprintf( fid, "%s\n", comment );
 
-	return OK;
+	return count;
 }
 
 
@@ -1637,8 +1681,16 @@ Var *f_save_c( Var *v )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Function that does all the actual printing. It does a lot of tests */
+/* in order to make sure that really everything get written to a file */
+/* and tries to handle situations gracefully where there isn't enough */
+/* room left on a disk by asking for a replacement file and copying   */
+/* everything already written to the file on the full disk into the   */
+/* replacement file. The function returns the number of chars written */
+/* to the file (but not the copied bytes in case a replacement file   */
+/* had to be used).                                                   */
+/*--------------------------------------------------------------------*/
 
 static int T_fprintf( int file_num, const char *fmt, ... )
 {
