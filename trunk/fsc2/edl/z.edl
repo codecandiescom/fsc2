@@ -59,4 +59,3 @@ save_comment( "% ", "Na, was denkst\ndu über das?\n",
 			  "Ihre Meinung zählt:" );
 save_program( "# ");
 save_output( "% " );
-
