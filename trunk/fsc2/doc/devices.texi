@@ -71,7 +71,7 @@ reduces the amount of differences to be taken into account considerably.
 All the following functions may be used to control the magnetic field of
 the magnet. Currently, AEG magnets (X-band and S-band) are
 supported. The modules that have to be listed in the @code{DEVICES}
-section to load the the functions are
+section to load the functions are
 @example
 aeg_x_band
 aeg_s_band
@@ -304,7 +304,7 @@ The function can only be called in the @code{EXPERIMENT} section.
 @item lockin_dac_voltage()
 @findex lockin_dac_voltage()
 The function can be used to set or query the voltage at one of the DAC
-ports at the back side of the the lock-in amplifier. While for the
+ports at the back side of the lock-in amplifier. While for the
 models SR510 and SR530 the allowed values for the required arguments are
 5 or 6, for models SR810 and SR830 the values can range from 1 to 4,
 corresponding to the different numbers of DAC ports and their numbering
@@ -349,7 +349,7 @@ without an argument, i.e. as a query.
 The function queries or sets the time constant of the lock-in
 amplifier. If no argument is passed to the function the current time
 constant is returned. If there's an argument the time constant is set
-accordingly.  The argument has to be positive. If the there is no time
+accordingly.  The argument has to be positive. If there is no time
 constant setting fitting the argument the available nearest setting is
 used and a warning is printed. The function will return the time
 constant setting that has been set.
@@ -377,7 +377,7 @@ models SR810 and SR830, to set the reference frequency (both the other
 models need an external reference frequency). If called with no argument
 the current reference frequency is returned. If called with an argument
 (models SR810 and SR830 only) the reference frequency is set. If the
-frequency is not within the the admissible range an error message is
+frequency is not within the admissible range an error message is
 printed and the experiment is stopped) - the admissible range depends on
 the harmonics setting, see the manual for more details.
 
@@ -455,7 +455,8 @@ only if either it has been already called with an argument or in the
 @findex digitizer_trigger_channel()
 The function queries or sets the channel of the digitizing oscilloscope
 to be used as trigger input. Possible arguments or return values are,
-depending on the type of the oscilloscope:
+depending on the type of the oscilloscope (return values are always
+numeric!):
 @table @samp
 @item TDS520
 @item TDS520A
@@ -480,7 +481,7 @@ only if either it has been already called with an argument or in the
 @item digitizer_record_length()
 @findex digitizer_record_length()
 The function queries (if called with no argument) or sets (if called
-with an argument) the the length of the traces measured by the
+with an argument) the length of the traces measured by the
 digitizer. Because the digitizer only allows certain record lengths
 a value passed to the function will be rounded up to the next
 allowed value if necessary.
