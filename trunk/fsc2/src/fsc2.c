@@ -154,17 +154,6 @@ void xforms_init( int *argc, char *argv[] )
 	fl_show_form( main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
 				  FL_FULLBORDER, "fsc2" );
 
-	/* Create the form for running experiments */
-
-	run_form = create_form_run( );
-	fl_set_object_helper( run_form->stop, "Stop the running program" );
-
-	/* fdesign is unable to set the box type attributes for canvases... */
-
-	fl_set_canvas_decoration( run_form->x_axis, FL_FRAME_BOX );
-	fl_set_canvas_decoration( run_form->y_axis, FL_FRAME_BOX );
-	fl_set_canvas_decoration( run_form->canvas, FL_NO_FRAME );
-
 	/* Create the form for writing a comment */
 
 	input_form = create_form_input_form( );
@@ -546,7 +535,16 @@ void run_file( FL_OBJECT *a, long b )
 
 	/* Finally start the experiment */
 
-	run( );
+	TRY
+	{
+		run( );
+		TRY_SUCCESS;
+	}
+	CATCH( EXCEPTION )
+	{
+		fprintf( stderr, "Exception within run().\n" );
+		fflush( stderr );
+	}
 }
 
 

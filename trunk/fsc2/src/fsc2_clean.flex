@@ -18,9 +18,20 @@
 #endif
 
 
-#define FSC2_MAIN
-#define FSC_CLEAN
-#include "fsc2.h"
+#include <string.h>
+#include <stdarg.h>
+#include <assert.h>
+#include <limits.h>
+#include <math.h>
+
+#include "exceptions.h"
+#include "errno.h"
+
+typedef unsigned char bool;
+
+#define UNSET ( ( bool ) 0 )
+#define SET   ( ( bool ) 1 )
+
 
 #if defined MDEBUG
 #include <mcheck.h>
@@ -36,6 +47,12 @@ void include_handler( char *file );
 void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 			 FILE *primary_fp, FILE **fp, int *incl_depth );
 void unit_spec( char *text, int type, int power );
+char *get_string_copy( const char *string );
+char *get_string( size_t len );
+void *T_malloc( size_t size );
+void *T_calloc( size_t nmemb, size_t size );
+void *T_realloc( void *ptr, size_t size );
+void T_free( void *ptr );
 
 
 long Lc,
@@ -739,4 +756,82 @@ try_double:
 			 printf( "\x03\n%s:%ld: INTERNAL ERROR.\n", Fname, Lc );
 			 exit( EXIT_FAILURE );
 	}
+}
+
+
+void *T_malloc( size_t size )
+{
+	void *mem;
+
+
+	if ( ( mem = malloc( size ) ) == NULL )
+		THROW( OUT_OF_MEMORY_EXCEPTION );
+
+#if defined MDEBUG
+	fprintf( stderr, "malloc:  %p (%u)\n", mem, size );
+#endif
+
+	return mem;
+}
+
+
+void *T_calloc( size_t nmemb, size_t size )
+{
+	void *mem;
+
+
+	if ( ( mem = calloc( nmemb, size ) ) == NULL )
+		THROW( OUT_OF_MEMORY_EXCEPTION );
+
+#if defined MDEBUG
+	fprintf( stderr, "calloc:  %p (%u)\n", mem, nmemb * size );
+#endif
+
+	return mem;
+}
+
+
+void *T_realloc( void *ptr, size_t size )
+{
+	void *new_ptr;
+
+
+	if ( ( new_ptr = realloc( ptr, size ) ) == NULL )
+		THROW( OUT_OF_MEMORY_EXCEPTION );
+
+#if defined MDEBUG
+	fprintf( stderr, "realloc: %p -> %p (%u)\n", ptr, new_ptr, size );
+#endif
+
+	return new_ptr;
+}
+
+
+void T_free( void *ptr )
+{
+#if defined MDEBUG
+	fprintf( stderr, "free:    %p\n", ptr );
+	fflush( stderr );
+	assert( mprobe( ptr ) == MCHECK_OK );
+#endif
+
+	free( ptr );
+}
+
+
+char *get_string_copy( const char *string )
+{
+	char *new;
+
+	if ( string == NULL )
+		return NULL;
+	new = get_string( strlen( string ) );
+	strcpy( new, string );
+	return new;
+}
+
+
+char *get_string( size_t len )
+{
+	return T_malloc( ( len + 1 ) * sizeof( char ) );
 }

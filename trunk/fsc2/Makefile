@@ -98,8 +98,7 @@ mods: $(modules:.c=.so)
 	chmod 644 $@
 
 
-fsc2_clean: fsc2_clean.o exceptions.o util.o T.o util.o comm.o graphics.o \
-			chld_func.o
+fsc2_clean: fsc2_clean.o exceptions.o
 	$(CC) $(CFLAGS) -O2 -lm -o $@ $^ $(LIBS)
 
 fsc2_clean.c: fsc2_clean.flex $(header)
