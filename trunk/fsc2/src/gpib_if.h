@@ -3,8 +3,6 @@
 */
 
 /*------------------------------------------------------------------------*/
-/*                        gpib.h  (7-9-98)                                */
-/*                                                                        */
 /* Contains all declarations possibly needed by routines using the GPIB   */
 /* functions. Each of the functions returns either SUCCESS or FAILURE, in */
 /* the latter case in 'gpib_error_msg' a short text is stored explaining  */
@@ -13,6 +11,14 @@
 
 
 #include <gpib/ib.h>
+
+
+/* In older versions of the GPIB driver ERR was defined but this clashes
+   with newer kernel versions. So, if you still use an old GPIB driver
+   uncomment the following line... */
+/*
+#define IBERR ERR
+*/
 
 
 #if defined ( __GPIB__ )

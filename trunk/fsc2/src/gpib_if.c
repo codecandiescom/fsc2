@@ -169,7 +169,7 @@ int gpib_init_controller( void )
         return FAILURE;
 
     if  ( ( ibonl( controller, ON ) | ibsic( controller ) |
-            ibsre( controller, ON ) ) & ERR )
+            ibsre( controller, ON ) ) & IBERR )
           return FAILURE;
 
     return SUCCESS;
@@ -292,7 +292,7 @@ int gpib_init_device( const char *device_name, int *dev )
 
     device = ibfind( ( char * ) device_name );
 
-    if ( ! ( ibsta & ERR ) )
+    if ( ! ( ibsta & IBERR ) )
     {
         strcpy( gpib_dev_list[ device ].name, device_name );
         if ( ! gpib_get_dev_add( device ) )
@@ -302,7 +302,7 @@ int gpib_init_device( const char *device_name, int *dev )
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_init_device", device );
 
-    if ( ibsta & ERR )
+    if ( ibsta & IBERR )
     {
         sprintf( gpib_error_msg, "Can't initialise device %s, ibsta = 0x%x",
 				 device_name, ibsta );
@@ -350,7 +350,7 @@ int gpib_timeout( int period )
 
     ibtmo( controller, period );
 
-    if ( ibsta & ERR )
+    if ( ibsta & IBERR )
     {
         sprintf( gpib_error_msg, "Can't set timeout period, ibsta = 0x%x.",
 				 ibsta );
@@ -391,7 +391,7 @@ int gpib_clear_device( int device )
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_clear_device", device );
 
-    if ( ibsta & ERR )
+    if ( ibsta & IBERR )
     {
         sprintf( gpib_error_msg, "Can't clear device %s, ibsta = 0x%x",
 				 gpib_dev_list[ device ].name, ibsta );
@@ -429,7 +429,7 @@ int gpib_local( int device )
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_local", device );
 
-    if ( ibsta & ERR )
+    if ( ibsta & IBERR )
     {
         sprintf( gpib_error_msg, "Can't send 'GOTO LOCAL' message to device "
 				 "%s, ibsta = 0x%x", gpib_dev_list[ device ].name, ibsta );
@@ -467,7 +467,7 @@ int gpib_lock( int device )
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_lock", device );
 
-    if ( ibsta & ERR )
+    if ( ibsta & IBERR )
     {
         sprintf( gpib_error_msg, "Can't send 'LOCAL LOCK OUT' message to "
 				 "device %s, ibsta = 0x%x", gpib_dev_list[ device ].name,
@@ -500,7 +500,7 @@ int gpib_trigger( int device )
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_trigger", device );
 
-    if ( ibsta & ERR )
+    if ( ibsta & IBERR )
     {
         sprintf( gpib_error_msg, "Can't trigger device %s, ibsta = 0x%x",
 				 gpib_dev_list[ device ].name, ibsta );
@@ -566,7 +566,7 @@ int gpib_wait( int device, int mask, int *status )
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_wait", device );
 
-    if ( ibsta & ERR )
+    if ( ibsta & IBERR )
     {
         sprintf( gpib_error_msg, "Can't wait for device %s, ibsta = 0x%x",
 				 gpib_dev_list[ device ].name, ibsta );
@@ -612,7 +612,7 @@ int gpib_write( int device, const char *buffer, long length )
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_write", device );
 
-    if ( ibsta & ERR )
+    if ( ibsta & IBERR )
     {
         sprintf( gpib_error_msg, "Can't send data to device %s, ibsta = 0x%x",
 				 gpib_dev_list[ device ].name, ibsta );
@@ -694,7 +694,7 @@ int gpib_read( int device, char *buffer, long *length )
     if ( ll > LL_NONE )
         gpib_read_end( device, buffer, *length, expected );
 
-    if ( ibsta & ERR )
+    if ( ibsta & IBERR )
     {
         sprintf( gpib_error_msg, "Can't read data from device %s, ibsta = "
 				 "0x%x.", gpib_dev_list[ device ].name, ibsta );
@@ -719,7 +719,7 @@ void gpib_read_end( int device, char *buffer, long received, long expected )
     long i;
 
 
-    if ( ll > LL_ERR || ( ibsta & ERR ) )
+    if ( ll > LL_ERR || ( ibsta & IBERR ) )
         gpib_log_function_end( "gpib_read", device );
 
     if ( ll < LL_CE )
@@ -769,10 +769,10 @@ void gpib_log_error( const char *type )
                               0x0800, 0x0400, 0x0200, 0x0100,
                               0x0080, 0x0040, 0x0020, 0x0010,
                               0x0008, 0x0004, 0x0002, 0x0001 };
-    static char is[ 16 ][ 5 ] = {  "ERR", "TIMO",  "END", "SRQI",
-                                   "RQS",   "\b",   "\b", "CMPL",
-                                   "LOK",  "REM",  "CIC",  "ATN",
-                                   "TACS", "LACS", "DTAS", "DCAS" };
+    static char is[ 16 ][ 6 ] = {  "IBERR", "TIMO", "END",  "SRQI",
+                                   "RQS",   "\b",   "\b",   "CMPL",
+                                   "LOK",   "REM",  "CIC",  "ATN",
+                                   "TACS",  "LACS", "DTAS", "DCAS" };
     static char ie[ 24 ][ 5 ] = { "EDVR", "ECIC", "ENOL", "EADR",
                                   "EARG", "ESAC", "EABO", "ENEB",
                                   "EDMA", "EBTO", "EOIP", "ECAP",
@@ -844,7 +844,7 @@ void gpib_log_function_start( const char *function, int device )
 
 void gpib_log_function_end( const char *function, int device )
 {
-    if ( ibsta & ERR )
+    if ( ibsta & IBERR )
         gpib_log_error( function );
     else
     {
