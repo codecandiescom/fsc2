@@ -325,7 +325,7 @@ shortcut: S
 resize: FL_RESIZE_NONE
 gravity: FL_SouthWest FL_SouthWest
 name: stop
-callback: stop_measurement
+callback: run_stop_button_callback
 argument: 0
 
 --------------------

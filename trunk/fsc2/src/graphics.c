@@ -160,6 +160,8 @@ void start_graphics( void )
 
 	GUI.run_form = GUI.G_Funcs.create_form_run( );
 
+	fl_set_object_callback( GUI.run_form->stop, run_stop_button_callback, 0 );
+
 	G.font = NULL;
 
 	CG.is_shown = UNSET;
@@ -476,7 +478,7 @@ int run_form_close_handler( FL_FORM *a, void *b )
 	b = b;
 
 	if ( Internals.child_pid == 0 )          /* if child has already exited */
-		stop_measurement( GUI.run_form->stop, 0 );
+		run_close_button_callback( GUI.run_form->stop, 0 );
 	return FL_IGNORE;
 }
 
@@ -942,8 +944,6 @@ void stop_graphics( void )
 		for ( i = X; i <= Z; i++ )
 			G.label[ i ] = NULL;
 	}
-
-	Internals.state = STATE_IDLE;
 }
 
 

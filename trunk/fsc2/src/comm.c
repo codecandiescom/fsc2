@@ -256,11 +256,12 @@ int new_data_callback( XEvent *a, void *b )
 		}
 		OTHERWISE
 		{
-			/* Before killing the child test that its pid hasn't already been
-			   set to 0 (in which case we would commit suicide) and that it's
-			   still alive. The death of the child and all the necessary
-			   cleaning up is dealt with by the SIGCHLD handlers in run.c, so
-			   no need to worry about it here. */
+			/* Before killing the child on failures to get the new data test
+			   that its pid hasn't already been set to 0 (in which case we
+			   would commit suicide) and that it's still alive. The death of
+			   the child and all the necessary cleaning up is dealt with by
+			   the SIGCHLD handlers in run.c, so no need to worry about it
+			   here. */
 
 			if ( Internals.child_pid > 0 && ! kill( Internals.child_pid, 0 ) )
 				kill( Internals.child_pid, SIGTERM );

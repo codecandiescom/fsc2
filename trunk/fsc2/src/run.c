@@ -42,7 +42,6 @@ static void fork_failure( int stored_errno );
 static void check_for_further_errors( Compilation *c_old, Compilation *c_all );
 static void quitting_handler( int signo	);
 static void run_sigchld_handler( int signo );
-static void stop_measurement( int state );
 static void set_buttons_for_run( int run_state );
 
 
@@ -360,9 +359,11 @@ static void setup_signal_handlers( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Callback handler for the main "Stop" button during device initialization */
-/*--------------------------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+/* Callback handler for the main "Stop" button during device */
+/* initialization (to allow stopping the experiment already  */
+/* at tis early stage).                                      */
+/*-----------------------------------------------------------*/
 
 static void stop_while_exp_hook( FL_OBJECT *a, long b )
 {
@@ -598,52 +599,47 @@ static void run_sigchld_handler( int signo )
 /* that is triggered on the death of the child. If the child died */
 /* prematurely, i.e. without notifying the parent by a QUITTING   */
 /* signal or it signals an error via its return status an error   */
-/* message is output. Then the post-measurement clean-up is done. */
+/* message is output. Then the post-measurement clean-up is done, */
+/* i.e. the now defunct communication channels to the child are   */
+/* closed, the devices are reset and the graphic is set up to     */
+/* reflect the new state. The display window isn't yet closed,    */
+/* this is only done when the 'Stop' button, now labeled 'Close', */
+/* gets pressed.                                                  */
 /*----------------------------------------------------------------*/
 
 void run_sigchld_callback( FL_OBJECT *a, long b )
 {
-	b = b;
+	int hours, mins, secs;
+	const char *mess;
+	int state = 1;
 
+
+	b = b;
 
 	if ( ! child_is_quitting )   /* missing notification by the child ? */
 	{
-		Internals.state = STATE_WAITING;
-		fl_show_alert( "Fatal Error", "Experiment stopped prematurely.",
+		if ( ! ( Internals.cmdline_flags & DO_CHECK ) )
+		{
+			Internals.state = STATE_WAITING;
+			fl_show_alert( "Fatal Error", "Experiment stopped prematurely.",
 						   NULL, 1 );
-		Internals.state = STATE_RUNNING;
-		stop_measurement( 2 );
+		}
+		mess = "Experiment stopped prematurely after running for";
+		state = 2;
 	}
 	else if ( ! a->u_ldata )          /* return status indicates error ? */
 	{
-		Internals.state = STATE_WAITING;
-		fl_show_alert( "Fatal Error", "Experiment had to be stopped.",
-					   NULL, 1 );
-		Internals.state = STATE_RUNNING;
-		stop_measurement( 3 );
+		if ( ! ( Internals.cmdline_flags & DO_CHECK ) )
+		{
+			Internals.state = STATE_WAITING;
+			fl_show_alert( "Fatal Error", "Experiment had to be stopped.",
+						   NULL, 1 );
+		}
+		mess = "Experiment had to be stopped after running for";
+		state = 2;
 	}
 	else                              /* normal death of child */
-		stop_measurement( 1 );
-}
-
-
-/*-----------------------------------------------------------------*/
-/* stop_measurement() is the function that gets called to clean up */
-/* after an experiment is finished, i.e. it has to shutdown the    */
-/* now defunct communication channels to the child, reset the      */
-/* devices and set up the graphics to reflect the new state. It    */
-/* won't yet close the display window, this is only done when the  */
-/* now 'Close' labeled 'Stop' button is pressed.                   */
-/*-----------------------------------------------------------------*/
-
-static void stop_measurement( int state )
-{
-	int hours, mins, secs;
-	const char *mess[ 3 ] = 
-		{ "Experiment finished after running for",
-		  "Experiment stopped prematurely after running for",
-		  "Experiment had to be stopped after running for" };
-
+		mess = "Experiment finished after running for";
 
 	Internals.state = STATE_FINISHED;
 
@@ -667,59 +663,22 @@ static void stop_measurement( int state )
 		gpib_shutdown( );
 	fsc2_serial_cleanup( );
 
+	/* Print out how much time the experiment has taken */
+
 	secs  = irnd( experiment_time( ) );
 	hours = secs / 3600;
 	mins  = ( secs / 60 ) % 60;
 	secs %= 60;
 
-	switch ( state )
+	if ( hours > 0 )
+		eprint( NO_ERROR, UNSET, "%s %d h, %d m and %d s.\n",
+				mess, hours, mins, secs );
+	else
 	{
-		case 1 :
-			if ( hours > 0 )
-				eprint( NO_ERROR, UNSET, "%s %d h, %d m and %d s.\n",
-						mess[ 0 ], hours, mins, secs );
-			else
-			{
-				if ( mins > 0 )
-					eprint( NO_ERROR, UNSET, "%s %d m and %d s.\n",
-							mess[ 0 ], mins, secs );
-				else
-					eprint( NO_ERROR, UNSET, "%s %d s.\n", mess[ 0 ], secs );
-			}
-			break;
-
-		case 2 :
-			if ( hours > 0 )
-				eprint( NO_ERROR, UNSET, "%s %d h, %d m and %d s.\n",
-						mess[ 1 ], hours, mins, secs );
-			else
-			{
-				if ( mins > 0 )
-					eprint( NO_ERROR, UNSET, "%s %d m and %d s.\n",
-							mess[ 1 ], mins, secs );
-				else
-					eprint( NO_ERROR, UNSET, "%s %d s.\n", mess[ 1 ], secs );
-			}
-			break;
-
-		case 3 :
-			if ( hours > 0 )
-				eprint( NO_ERROR, UNSET, "%s %d h, %d m and %d s.\n",
-						mess[ 2 ], hours, mins, secs );
-			else
-			{
-				if ( mins > 0 )
-					eprint( NO_ERROR, UNSET, "%s %d m and %d s.\n",
-							mess[ 2 ], mins, secs );
-				else
-					eprint( NO_ERROR, UNSET, "%s %d s.\n", mess[ 2 ], secs );
-			}
-			break;
-
-#if ! defined NDEBUG
-		default :                  /* we should never get here... */
-			fsc2_assert( 1 == 0 );
-#endif
+		if ( mins > 0 )
+			eprint( NO_ERROR, UNSET, "%s %d m and %d s.\n", mess, mins, secs );
+		else
+			eprint( NO_ERROR, UNSET, "%s %d s.\n", mess, secs );
 	}
 
 	/* Reenable the stop button (which was disabled when the DO_QUIT
@@ -865,7 +824,7 @@ static void run_child( void )
 	}
 #endif
 
-	/* Initialization is finished and child can start doing its real work */
+	/* Initialization is done and the child can start doing its real work */
 
 	TRY
 	{

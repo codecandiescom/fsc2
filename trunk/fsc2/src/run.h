@@ -45,6 +45,8 @@
 
 
 bool run( void );
+void run_stop_button_callback( FL_OBJECT *a, long b );
+void run_close_button_callback( FL_OBJECT *a, long b );
 
 
 #endif  /* ! RUN_HEADER */
