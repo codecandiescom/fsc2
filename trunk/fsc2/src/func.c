@@ -266,7 +266,6 @@ Var *func_get( const char *name, int *access )
 Var *func_call( Var *f )
 {
 	Var *ap;
-	Var *apn;
 	Var *ret;
 	int ac;
 	int i;

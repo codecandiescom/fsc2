@@ -851,7 +851,7 @@ Var *vars_pop( Var *v )
 
 
 	if ( v == NULL )
-		return;
+		return NULL;
 
 	/* Figure out if 'v' is on the stack */
 
