@@ -1354,9 +1354,9 @@ Var *f_svalue( Var *v )
 }
 
 
-/*----------------------------*/
-/* Creates a new input object */
-/*----------------------------*/
+/*--------------------------------------*/
+/* Creates a new input or output object */
+/*--------------------------------------*/
 
 Var *f_icreate( Var *v )
 {
@@ -1369,7 +1369,7 @@ Var *f_icreate( Var *v )
 	double dval = 0.0;
 
 
-	/* At least the type of the input object must be specified */
+	/* At least the type of the input or output object must be specified */
 
 	if ( v == NULL )
 	{
@@ -1378,8 +1378,8 @@ Var *f_icreate( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* First argument must be type of input object ("INT_INPUT" or
-	   "FLOAT_INPUT", "INT_OUTPUT", "FLOAT_OUTPUT" or 0, 1, 2, or 3) */
+	/* First argument must be type of "INT_INPUT", "FLOAT_INPUT",
+	   "INT_OUTPUT" or "FLOAT_OUTPUT" or 0, 1, 2, or 3 */
 
 	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
@@ -1422,7 +1422,8 @@ Var *f_icreate( Var *v )
 
 	v = vars_pop( v );
 
-	/* Next argument could be a value to be set in the input object */
+	/* Next argument could be a value to be set in the input or output
+	   object */
 
 	if ( v != NULL && v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -1510,7 +1511,7 @@ Var *f_icreate( Var *v )
 		memcpy( pos, &Lc, sizeof( long ) );     /* current line number */
 		pos += sizeof( long );
 
-		memcpy( pos, &type, sizeof( long ) );   /* input object type */
+		memcpy( pos, &type, sizeof( long ) );   /* object type */
 		pos += sizeof( long );
 
 		if ( type == INT_INPUT || type == INT_OUTPUT )
@@ -1549,9 +1550,10 @@ Var *f_icreate( Var *v )
 			*( ( char * ) pos++ ) = '\0';
 
 
-		/* Pass buffer to parent and ask it to create the input object. It
-		   returns a buffer with two longs, the first one indicating success
-		   or failure (1 or 0), the second being the input objects ID */
+		/* Pass buffer to parent and ask it to create the input or input
+		   object. It returns a buffer with two longs, the first one
+		   indicating success or failure (1 or 0), the second being the
+		   objects ID */
 
 		result = exp_icreate( buffer, ( long ) ( pos - buffer ) );
 
@@ -1607,7 +1609,7 @@ Var *f_icreate( Var *v )
 	new_io->label = label;
 	new_io->help_text = help_text;
 
-	/* If this isn't just a test run really draw the new input object */
+	/* If this isn't just a test run really draw the new object */
 
 	if ( ! TEST_RUN )
 		recreate_Tool_Box( );
@@ -1616,10 +1618,10 @@ Var *f_icreate( Var *v )
 }
 
 
-/*--------------------------------------------*/
-/* Deletes one or more input objects.         */
-/* Parameter are one or more input object IDs */
-/*--------------------------------------------*/
+/*----------------------------------------------*/
+/* Deletes one or more input or output objects. */
+/* Parameter are one or more object IDs         */
+/*----------------------------------------------*/
 
 Var *f_idelete( Var *v )
 {
@@ -1635,7 +1637,7 @@ Var *f_idelete( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* Loop over all input object numbers */
+	/* Loop over all object numbers */
 
 	while ( v != NULL )
 	{
@@ -1670,7 +1672,7 @@ Var *f_idelete( Var *v )
 
 			memcpy( pos, &Lc, sizeof( long ) );       /* current line number */
 			pos += sizeof( long );
-			memcpy( pos, &v->val.lval, sizeof( long ) );  /* input object ID */
+			memcpy( pos, &v->val.lval, sizeof( long ) );  /* object ID */
 			pos += sizeof( long );
 			if ( Fname )
 			{
@@ -1682,7 +1684,7 @@ Var *f_idelete( Var *v )
 
 			v = vars_pop( v );
 
-			/* Ask parent to delete the input object, bomb out on failure */
+			/* Ask parent to delete the object, bomb out on failure */
 
 			if ( ! exp_idelete( buffer, ( long ) ( pos - buffer ) ) )
 				THROW( EXCEPTION );
@@ -1690,12 +1692,12 @@ Var *f_idelete( Var *v )
 			continue;
 		}
 
-		/* No tool box -> no input objects -> no input objects to delete... */
+		/* No tool box -> no objects -> no objects to delete... */
 
 		if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 		{
-			eprint( FATAL, "%s:%ld: No input objects have been defined yet.\n",
-					Fname, Lc );
+			eprint( FATAL, "%s:%ld: No input or output objects have been "
+					"defined yet.\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
 
@@ -1711,7 +1713,7 @@ Var *f_idelete( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		/* Remove input object from the linked list */
+		/* Remove object from the linked list */
 
 		if ( io->next != NULL )
 			io->next->prev = io->prev;
@@ -1720,7 +1722,7 @@ Var *f_idelete( Var *v )
 		else
 			Tool_Box->objs = io->next;
 
-		/* Delete the input object (its not drawn in a test run!) */
+		/* Delete the object (its not drawn in a test run!) */
 
 		if ( ! TEST_RUN )
 		{
@@ -1760,7 +1762,7 @@ Var *f_idelete( Var *v )
 	if ( I_am == CHILD || TEST_RUN || ! Tool_Box )
 		return vars_push( INT_VAR, 1 );
 
-	/* Redraw the form without the deleted input objects */
+	/* Redraw the form without the deleted objects */
 
 	recreate_Tool_Box( );
 
@@ -1768,9 +1770,9 @@ Var *f_idelete( Var *v )
 }
 
 
-/*------------------------------------------------*/
-/* Sets or returns the content of an input object */
-/*------------------------------------------------*/
+/*----------------------------------------------------------*/
+/* Sets or returns the content of an input or output object */
+/*----------------------------------------------------------*/
 
 Var *f_ivalue( Var *v )
 {
@@ -1778,7 +1780,7 @@ Var *f_ivalue( Var *v )
 	char buf[ MAX_INPUT_CHARS + 1 ];
 
 
-	/* We need at least the input objects ID */
+	/* We need at least the objects ID */
 
 	if ( v == NULL )
 	{
@@ -1788,7 +1790,7 @@ Var *f_ivalue( Var *v )
 	}
 
 	/* Again, the child has to pass the arguments to the parent and ask it
-	   to set or return the input objects value */
+	   to set or return the objects value */
 
 	if ( I_am == CHILD )
 	{
@@ -1811,7 +1813,7 @@ Var *f_ivalue( Var *v )
 		}
 		ID = v->val.lval;
 		
-		/* Another argument means that the input objects value is to be set */
+		/* Another argument means that the objects value is to be set */
 
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
@@ -1855,7 +1857,7 @@ Var *f_ivalue( Var *v )
 		memcpy( pos, &state, sizeof( long ) );  /* needs input setting ? */
 		pos += sizeof( long );
 
-		if ( state <= 1 )                       /* new input object value */
+		if ( state <= 1 )                       /* new object value */
 		{
 			memcpy( pos, &lval, sizeof( long ) );
 			pos += sizeof( long );
@@ -1878,7 +1880,7 @@ Var *f_ivalue( Var *v )
 		   to an INPUT_RES structure, where the res entry indicates failure
 		   (negative value) and the type of the returned value (0 is integer,
 		   positive non-zero is float), and the second entry is a union for
-		   the return value, i.e. the input objects value. */
+		   the return value, i.e. the objects value. */
 
 		input_res = exp_istate( buffer, ( long ) ( pos - buffer ) );
 
