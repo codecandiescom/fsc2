@@ -216,6 +216,12 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	setup_app_options( app_opt );
 
+	/* Overwrite the shells LANG environment variable - some versions of
+	   XForms use that and then mess around with the locale settings in
+	   unpleasant ways... */
+
+	setenv( "LANG", "C", 1 );
+
 	if ( ( display = fl_initialize( argc, argv, "Fsc2", app_opt, N_APP_OPT ) )
 		 == NULL )
 		return FAIL;
@@ -227,12 +233,6 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	if ( ( flags = fcntl( ConnectionNumber( display ), F_GETFD, 0 ) ) >= 0 )
 		fcntl( ConnectionNumber( display ), F_SETFD, flags | FD_CLOEXEC );
-
-	/* xforms sets the locale to the one set in the environment variables. But
-	   we need at least the "normal" formatting of numeric values, otherwise
-	   functions like strtod() work not as expected. */
-
-	setlocale( LC_NUMERIC, "C" );
 
 	/* We also must keep the main window from always becoming the topmost
 	   window at the most inconvenient moments... */
