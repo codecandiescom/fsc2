@@ -375,6 +375,8 @@ all:
 		grep -v 'sed\|grep' |                                            \
 			sed -e 's/^.*$$Id\: \(.*\) jens Exp $$.*/\1/g' |             \
 				gzip -c -9 | uuencode - > version.ugz
+	$(MAKE) -C src gpib_setup
+	$(MAKE) tags
 	$(MAKE) -C src all
 	$(MAKE) -C utils all
 	$(MAKE) -C doc all
@@ -458,7 +460,7 @@ distclean:
 # Create a tags file to be used with emacs or vi
 
 tags:
-	find . -name "*.[chly]" -print | etags -o $(tagsfile) -
+	-find . -name "*.[chly]" -print | etags -o $(tagsfile) -
 
 
 # Clean up everything for a distribution and create a zipped tarball

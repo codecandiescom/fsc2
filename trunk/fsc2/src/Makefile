@@ -39,25 +39,17 @@ export headers        # export list of header files to the modules Makefile
 
 
 .SUFFIXES:
-.PHONY:    all modules res gpib clean distclean
+.PHONY:    all modules res gpib_setup clean distclean
 
 
-# Default target - make only if GPIB_LIBRARY is set correctly
+# Default target
 
 all:
-	@if [ -n "$(GPIB_LIBRARY)"                                  \
-		  -a \(    "$(GPIB_LIBRARY)" = "old"                    \
-			    -o "$(GPIB_LIBRARY)" = "ni"                     \
-			    -o "$(GPIB_LIBRARY)" = "jtt"                    \
-			    -o "$(GPIB_LIBRARY)" = "none" \) ]; then        \
-		$(MAKE) gpib fsc2_rsc_lr.so fsc2_rsc_hr.so;             \
-		$(MAKE) fsc2 fsc2_clean fsc2_connect modules;           \
-	else                                                        \
-		echo "****************************************";        \
-		echo "*   Make not correctly configured!     *";        \
-		echo "****************************************";        \
-		exit 2;                                                 \
-	fi
+	$(MAKE) fsc2_rsc_lr.so fsc2_rsc_hr.so;
+	$(MAKE) fsc2
+	$(MAKE) fsc2_clean
+	$(MAKE) fsc2_connect
+	$(MAKE) modules;
 
 
 # Make the main program from the c, flex and bison source files
@@ -84,7 +76,7 @@ modules:
 	mv -f $@.x $@
 
 
-# Make the primary lexer (which does a cleanup of the input file)
+# Make the primary lexer (which does the cleanup of the input EDL files)
 
 fsc2_clean: fsc2_clean.o exceptions.o
 	$(CC) -o $@ $^ -lm
@@ -117,29 +109,40 @@ $(resources:.fd=.o): %.o: %.c %.h
 # When using the NI library also the parser and lexer for the GPIB
 # configuration file are needed.
 
-gpib:
-	if [ ! -e gpib_if.c -o ! -e gpib_if.h                       \
-		  -o gpib_if_$(GPIB_LIBRARY).c -nt gpib_if.c            \
-		  -o gpib_if_$(GPIB_LIBRARY).h -nt gpib_if.h            \
-		  -o ! gpib_if_$(GPIB_LIBRARY).c -ef gpib_if.c          \
-		  -o ! gpib_if_$(GPIB_LIBRARY).h -ef gpib_if.h ]; then  \
-		$(RM) $(RMFLAGS) gpib_if.[ch];                          \
-		$(LN) $(LNFLAGS) gpib_if_$(GPIB_LIBRARY).c gpib_if.c;   \
-		$(LN) $(LNFLAGS) gpib_if_$(GPIB_LIBRARY).h gpib_if.h;   \
-	fi;                                                         \
-	if [ "$(GPIB_LIBRARY)" = "ni" ]; then                       \
-		if [ ! -e gpib_lexer.l                                  \
-	    	  -o gpib_lexer.ll -nt gpib_lexer.l                 \
-			  -o ! gpib_lexer.ll -ef gpib_lexer.l ]; then       \
-			$(RM) $(RMFLAGS) gpib_lexer.l;                      \
-			$(LN) $(LNFLAGS) gpib_lexer.ll gpib_lexer.l;        \
-		fi;                                                     \
-		if [ ! -e gpib_parser.y                                 \
-	    	  -o gpip_parser.yy -nt gpib_parser.y               \
-			  -o ! gpib_parser.yy -ef gpib_parser.y ]; then     \
-			$(RM) $(RMFLAGS) gpib_parser.y;                     \
-			$(LN) $(LNFLAGS) gpib_parser.yy gpib_parser.y;      \
-		fi;                                                     \
+gpib_setup:
+	@if [ -n "$(GPIB_LIBRARY)"                                         \
+		  -a \(    "$(GPIB_LIBRARY)" = "old"                           \
+			    -o "$(GPIB_LIBRARY)" = "ni"                            \
+			    -o "$(GPIB_LIBRARY)" = "jtt"                           \
+			    -o "$(GPIB_LIBRARY)" = "none" \) ]; then               \
+		if [ ! -e gpib_if.c -o ! -e gpib_if.h                          \
+			  -o gpib_if_$(GPIB_LIBRARY).cx -nt gpib_if.c              \
+			  -o gpib_if_$(GPIB_LIBRARY).hx -nt gpib_if.h              \
+			  -o ! gpib_if_$(GPIB_LIBRARY).cx -ef gpib_if.c            \
+			  -o ! gpib_if_$(GPIB_LIBRARY).hx -ef gpib_if.h ]; then    \
+			$(RM) $(RMFLAGS) gpib_if.[ch];                             \
+			$(LN) $(LNFLAGS) gpib_if_$(GPIB_LIBRARY).cx gpib_if.c;     \
+			$(LN) $(LNFLAGS) gpib_if_$(GPIB_LIBRARY).hx gpib_if.h;     \
+		fi;                                                            \
+		if [ "$(GPIB_LIBRARY)" = "ni" ]; then                          \
+			if [ ! -e gpib_lexer.l                                     \
+				  -o gpib_ni_lexer.lx -nt gpib_lexer.l                 \
+				  -o ! gpib_ni_lexer.lx -ef gpib_lexer.l ]; then       \
+				$(RM) $(RMFLAGS) gpib_lexer.l;                         \
+				$(LN) $(LNFLAGS) gpib_ni_lexer.lx gpib_lexer.l;        \
+			fi;                                                        \
+			if [ ! -e gpib_parser.y                                    \
+				  -o gpip_ni_parser.yx -nt gpib_parser.y               \
+				  -o ! gpib_ni_parser.yx -ef gpib_parser.y ]; then     \
+				$(RM) $(RMFLAGS) gpib_parser.y;                        \
+				$(LN) $(LNFLAGS) gpib_ni_parser.yx gpib_parser.y;      \
+			fi;                                                        \
+		fi;                                                            \
+	else                                                               \
+		echo "****************************************";               \
+		echo "*   Make not correctly configured!     *";               \
+		echo "****************************************";               \
+		exit 2;                                                        \
 	fi
 
 
