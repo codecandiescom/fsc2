@@ -192,7 +192,7 @@ static void rs690_create_shape_pulses( void )
 	PULSE *np, *cp, *rp, *p1, *p2, *old_end;
 
 
-	if ( ! rs690.auto_shape_pulses )
+	if ( ! rs690.auto_shape_pulses || rs690_Pulses == NULL )
 		return;
 
 	/* Find the end of the pulse list (to be able to add further shape
@@ -319,7 +319,7 @@ static void rs690_create_twt_pulses( void )
 	PULSE *np, *cp, *rp, *old_end;
 
 
-	if ( ! rs690.auto_twt_pulses )
+	if ( ! rs690.auto_twt_pulses || rs690_Pulses == NULL )
 		return;
 
 	/* Find the end of the pulse list (to be able to add further TWT

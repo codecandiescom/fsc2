@@ -43,9 +43,6 @@ bool ep385_do_update( void )
 	bool state;
 
 
-	if ( ! ep385_is_needed )
-		return OK;
-
 	/* Resort the pulses, check that the new pulse settings are reasonable
 	   and finally commit all changes */
 
@@ -243,7 +240,12 @@ static bool ep385_update_pulses( bool flag )
 
 	ep385_shape_padding_check_2( );
 
-	if ( ep385.needs_update )
+	/* Now really send the new pulse settings to the device - an update is
+	   also required if no pulses have been defined, because in this case
+	   we only will come to this place when the pulser is initialized and
+	   then we need to set up the empty channels */
+
+	if ( ep385.needs_update || ! ep385_is_needed )
 		ep385_commit( flag );
 
 	return OK;

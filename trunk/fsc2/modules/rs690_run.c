@@ -52,9 +52,6 @@ bool rs690_do_update( void )
 	bool state;
 
 
-	if ( ! rs690_is_needed )
-		return OK;
-
 	/* Resort the pulses, check that the new pulse settings are reasonable
 	   and finally commit all changes */
 

@@ -512,9 +512,6 @@ int dg2020_b_end_of_exp_hook( void )
 	int i;
 
 
-	if ( ! dg2020_is_needed )
-		return 1;
-
 	dg2020_run( STOP );
 	gpib_local( dg2020.device );
 
@@ -538,9 +535,6 @@ void dg2020_b_exit_hook( void )
 	FUNCTION *f;
 	int i;
 
-
-	if ( ! dg2020_is_needed )
-		return;
 
 	/* Free all memory allocated within the module */
 

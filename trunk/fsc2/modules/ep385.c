@@ -201,13 +201,6 @@ int ep385_test_hook( void )
 		ep385.minimum_twt_pulse_distance = Ticksrnd( tmp );
 	}
 
-	if ( ep385_Pulses == NULL )
-	{
-		ep385_is_needed = UNSET;
-		print( WARN, "Driver loaded but no pulses are defined.\n" );
-		return 1;
-	}
-
 	/* Check consistency of pulse settings and do everything to setup the
 	   pulser for the test run */
 
@@ -247,6 +240,9 @@ int ep385_test_hook( void )
 											ep385_change_pulse_position_change;
 	pulser_struct.set_pulse_length_change = ep385_change_pulse_length_change;
 
+	if ( ep385_Pulses == NULL )
+		ep385_is_needed = UNSET;
+
 	return 1;
 }
 
@@ -272,9 +268,6 @@ int ep385_end_of_test_hook( void )
 		fclose( ep385.show_file );
 		ep385.show_file = NULL;
 	}
-
-	if ( ! ep385_is_needed )
-		return 1;
 
 	/* Check that TWT duty cycle isn't exceeded due to excessive length of
 	   TWT and TWT_GATE pulses */
@@ -412,9 +405,6 @@ int ep385_end_of_test_hook( void )
 
 int ep385_exp_hook( void )
 {
-	if ( ! ep385_is_needed )
-		return 1;
-
 	/* Extra safety net: If the minimum distances between shape and defense
 	   pulses have been changed by calling the appropriate functions ask
 	   the user the first time the experiment gets started if (s)he is 100%
@@ -473,9 +463,6 @@ int ep385_exp_hook( void )
 
 int ep385_end_of_exp_hook( void )
 {
-	if ( ! ep385_is_needed )
-		return 1;
-
 	ep385_run( UNSET );
 	gpib_local( ep385.device );
 
@@ -504,9 +491,6 @@ void ep385_exit_hook( void )
 		fclose( ep385.show_file );
 		ep385.show_file = NULL;
 	}
-
-	if ( ! ep385_is_needed )
-		return;
 
 	/* Free all memory that may have been allocated for the module */
 

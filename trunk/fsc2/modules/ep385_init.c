@@ -137,12 +137,6 @@ static void ep385_basic_pulse_check( void )
 	FUNCTION *f;
 
 
-	if ( ep385_Pulses == NULL )
-	{
-		print( SEVERE, "No pulses have been defined.\n" );
-		return;
-	}
-
 	for ( p = ep385_Pulses; p != NULL; p = p->next )
 	{
 		p->is_active = SET;
@@ -187,7 +181,7 @@ static void ep385_create_shape_pulses( void )
 	PULSE *np, *cp, *rp, *p1, *p2, *old_end;
 
 
-	if ( ! ep385.auto_shape_pulses )
+	if ( ! ep385.auto_shape_pulses || ep385_Pulses == NULL )
 		return;
 
 	/* Find the end of the pulse list (to be able to add further shape
@@ -314,7 +308,7 @@ static void ep385_create_twt_pulses( void )
 	PULSE *np, *cp, *rp, *old_end;
 
 
-	if ( ! ep385.auto_twt_pulses )
+	if ( ! ep385.auto_twt_pulses || ep385_Pulses == NULL )
 		return;
 
 	/* Find the end of the pulse list (to be able to add further TWT
