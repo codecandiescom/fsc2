@@ -138,8 +138,8 @@ SERIAL_LOCK_DIR   := /var/lock
 # You must make sure that the library for the card is already installed if
 # you want to build fsc2 with support for the card.
 
-# WITH_ME6000     := yes
-# me6000_libs     := libme6x00.so
+WITH_ME6000     := yes
+me6000_libs     := libme6x00.so
 
 
 # The next two lines must be uncommented if you want support for the Wasco
@@ -149,8 +149,8 @@ SERIAL_LOCK_DIR   := /var/lock
 # that the library for the card is already installed if you want to build
 # fsc2 with support for the card.
 
-# WITH_WITIO_48   := yes
-# witio_48_libs   := libwitio_48.so
+WITH_WITIO_48   := yes
+witio_48_libs   := libwitio_48.so
 
 
 # The follwoing three lines must be uncommented when you want support for the
@@ -185,12 +185,15 @@ DEFAULT_HTTP_PORT := 8080
 
 
 # Normally, fsc2 will use the systems 'mail' command when it needs to send
-# emails. On systems where no MTA (mail transfer agent) like sendmail is
-# installed a rudimentary mail agent built into fsc2 can be used instead.
-# If you want to use fsc2s mail agent (e.g. because sendmail can't be used
-# on your machine) uncomment the following line.
+# emails. This requires that a mail transport agent like sendmail is installed
+# on the system (i.e. sendmail or a similar program is installed, but not
+# necessarily be running, waiting for incoming connections). Otherwise, when
+# no MTA is installed a somewhat rudimentary mail transfer agent built into
+# fsc2 can be used instead. If you want to use fsc2s mail transfer agent (e.g.
+# because sendmail isn't installed on your machine) uncomment the following
+# line.
 
-# USE_FSC2_MAIL_AGENT = yes
+USE_FSC2_MTA = yes
 
 
 # This last variable controls to whom emails with bug reports and about
@@ -373,11 +376,6 @@ ifdef GPIB_HEADER_DIR
 	INCLUDES += -I$(GPIB_HEADER_DIR)
 endif
 
-ifdef MAIL_ADDRESS
-	CONFFLAGS += -DMAIL_ADDRESS=\"$(MAIL_ADDRESS)\"
-endif
-
-
 ifndef OWNER
 	OWNER = fsc2
 endif
@@ -417,14 +415,21 @@ ifndef NO_MAIL
 	endif
 endif
 
-# IF USE_FSC2_MAIL_AGENT has not been define also create a variable with
-# the full name of the 'mail' program - if it can't be found default to
-# using the built-in mail agent. 
 
-ifndef USE_FSC2_MAIL_AGENT
-	MAIL_PROGRAM  := $(shell which mail)
-	ifneq ($(word 1,$(MAIL_PROGRAM)),which:)
-		CONFFLAGS += -DMAIL_PROGRAM=\"$(MAIL_PROGRAM)\"
+# IF USE_FSC2_MTA has not been define also create a variable with the full
+# name of the 'mail' program. Otherwise we need the libresolv.so library
+# for the built-in mail transport agent.
+
+ifdef MAIL_ADDRESS
+	CONFFLAGS         += -DMAIL_ADDRESS=\"$(MAIL_ADDRESS)\"
+	ifndef USE_FSC2_MTA
+		MAIL_PROGRAM  := $(shell which mail)
+		ifneq ($(word 1,$(MAIL_PROGRAM)),which:)
+			CONFFLAGS += -DMAIL_PROGRAM=\"$(MAIL_PROGRAM)\"
+		endif
+	else
+		LIBS          += -lresolv
+		CONFFLAGS     += -DUSE_FSC2_MTA
 	endif
 endif
 
