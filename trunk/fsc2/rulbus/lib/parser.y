@@ -193,7 +193,8 @@ static int set_name( const char *name )
 	if ( rulbus_card[ rulbus_num_cards - 1 ].name != NULL )
 		return RULBUS_DUP_NAM;
 
-	if ( rulbus_card[ rulbus_num_cards - 1 ].name = strdup( name ) == NULL )
+	if ( ( rulbus_card[ rulbus_num_cards - 1 ].name = strdup( name ) )
+		 															  == NULL )
 		return RULBUS_NO_MEM;
 
 	strcpy( rulbus_card[ rulbus_num_cards - 1 ].name, name );

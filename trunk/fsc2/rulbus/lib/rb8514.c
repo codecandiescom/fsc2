@@ -176,7 +176,7 @@ int rulbus_delay_set_delay( int handle, unsigned long delay )
 		return RULBUS_INV_HND;
 
 	if ( delay > RULBUS_DELAY_CARD_MAX )
-		return RULBUS_INV_DEL;
+		return RULBUS_INV_ARG;
 
 	if ( delay == card->delay )
 		return RULBUS_OK;
@@ -195,7 +195,6 @@ int rulbus_delay_set_delay( int handle, unsigned long delay )
 	}
 
 	card->delay = delay;
-
 	return RULBUS_OK;
 }
 
@@ -208,7 +207,7 @@ int rulbus_delay_set_delay( int handle, unsigned long delay )
 int rulbus_delay_set_trigger( int handle, int edge )
 {
 	RULBUS_DELAY_CARD *card;
-	unsigned ctrl;
+	unsigned char ctrl;
 
 
 	if ( ( card = rulbus_delay_card_find( handle ) ) == NULL )
@@ -228,6 +227,7 @@ int rulbus_delay_set_trigger( int handle, int edge )
 	if ( ctrl == card->ctrl )
 		return RULBUS_OK;
 
+	card->ctrl = ctrl;
 	return rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 );
 }
 
@@ -240,7 +240,7 @@ int rulbus_delay_set_trigger( int handle, int edge )
 int rulbus_delay_set_output_pulse( int handle, int output, int type )
 {
 	RULBUS_DELAY_CARD *card;
-	unsigned ctrl;
+	unsigned char ctrl;
 
 
 	if ( ( card = rulbus_delay_card_find( handle ) ) == NULL )
@@ -275,6 +275,7 @@ int rulbus_delay_set_output_pulse( int handle, int output, int type )
 	if ( ctrl == card->ctrl )
 		return RULBUS_OK;
 
+	card->ctrl = ctrl;
 	return rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 );
 }
 
@@ -287,7 +288,7 @@ int rulbus_delay_set_output_pulse( int handle, int output, int type )
 int rulbus_delay_set_output_pulse_polarity( int handle, int type, int pol )
 {
 	RULBUS_DELAY_CARD *card;
-	unsigned ctrl;
+	unsigned char ctrl;
 
 
 	if ( ( card = rulbus_delay_card_find( handle ) ) == NULL )
@@ -321,6 +322,7 @@ int rulbus_delay_set_output_pulse_polarity( int handle, int type, int pol )
 	if ( ctrl == card->ctrl )
 		return RULBUS_OK;
 
+	card->ctrl = ctrl;
 	return rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 );
 }
 

@@ -62,8 +62,7 @@ int rulbus_delay_software_start( int handle );
 #define RULBUS_DELAY_POLARITY_POSITIVE 1
 
 
-
-/* Functions and definitions for the card card module (RB8515) */
+/* Functions and definitions for the clock card module (RB8515) */
 
 int rulbus_clock_set_frequency( int handle, int freq );
 
@@ -75,6 +74,13 @@ int rulbus_clock_set_frequency( int handle, int freq );
 #define RULBUS_CLOCK_FREQ_1MHz      5
 #define RULBUS_CLOCK_FREQ_10MHz     6
 #define RULBUS_CLOCK_FREQ_100MHz    7
+
+
+/* Functions for the 12-bit ADC card module (RB8509) */
+
+int rulbus_adc12_set_channel( int handle, int channel );
+int rulbus_adc12_set_gain( int handle, int gain );
+int rulbus_adc12_convert( int handle, double *volts );
 
 
 /* Error codes of the library */
@@ -94,7 +100,7 @@ int rulbus_clock_set_frequency( int handle, int freq );
 #define RULBUS_TYP_DUP  -12
 #define RULBUS_CRD_ADD  -13
 #define RULBUS_NAM_DUP  -14
-#define RULBUS_CRD_NAM  -15
+#define RULBUS_DUP_NAM  -15
 #define RULBUS_CRD_CNT  -16
 #define RULBUS_NO_CRD   -17
 #define RULBUS_CRD_NAM  -18
@@ -110,4 +116,3 @@ int rulbus_clock_set_frequency( int handle, int freq );
 #define RULBUS_WRT_ERR  -28
 #define RULBUS_RD_ERR   -29
 #define RULBUS_CRD_BSY  -30
-#define RULBUS_INV_DEL  -31
