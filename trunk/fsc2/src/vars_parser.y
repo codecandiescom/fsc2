@@ -299,7 +299,7 @@ aitem:   expr                      { $$ = $1; }
 /* list of indices for access of an array element */
 
 list3:   /* empty */               { if ( ! dont_exec )
-	                                     $$ = vars_push( UNDEF_VAR ) };
+	                                     $$ = vars_push( UNDEF_VAR ) }
        | l3e                       { if ( ! dont_exec )
 	                                     $$ = $1; }
 ;

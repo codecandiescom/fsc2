@@ -47,6 +47,8 @@ struct Lib_Struct {
 	bool exp_hook_is_run;
 	void ( * exit_hook ) ( void );
 	bool is_exit_hook;
+	void ( * child_exit_hook ) ( void );
+	bool is_child_exit_hook;
 };
 
 

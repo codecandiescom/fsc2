@@ -36,6 +36,7 @@ void run_end_of_test_hooks( void );
 void run_exp_hooks( void );
 void run_end_of_exp_hooks( void );
 void run_exit_hooks( void );
+void run_child_exit_hooks( void );
 int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr );
 int get_lib_number( const char *name );
 void unload_device( Device *dev );

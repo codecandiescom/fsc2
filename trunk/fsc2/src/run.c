@@ -897,6 +897,8 @@ static void run_child( void )
 	OTHERWISE                            /* catch all exceptions */
 		child_return_status = FAIL;
 
+	run_child_exit_hooks( );
+
 	close( Comm.pd[ READ ] );            /* close read end of pipe */
 	close( Comm.pd[ WRITE ] );           /* close also write end of pipe */
 

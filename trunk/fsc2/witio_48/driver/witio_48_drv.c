@@ -829,12 +829,13 @@ static void witio_48_16_8_dio_in( WITIO_48_DATA *data )
 
 /*--------------------------------------------------------------*/
 /* Calculates the value that needs to be written to the control */
-/* register for one of the DIOs and writes it to the register.  */
+/* register for one of the DIOs and writes it to the register   */
+/* (always with mode ("Betriebsart") 0).                        */
 /*--------------------------------------------------------------*/
 
 #define READ_A        0x10
 #define READ_B        0x02
-#define READ_C_UPPER  0x04
+#define READ_C_UPPER  0x08
 #define READ_C_LOWER  0x01
 
 static void witio_48_set_crtl( int dio )

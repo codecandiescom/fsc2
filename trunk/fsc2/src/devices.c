@@ -238,7 +238,7 @@ void device_append_to_list( const char *dev_name )
 	cd->next = NULL;
 	cd->count = 1;
 
-	/* Initialize members of the driver member */
+	/* Initialize members of the driver structure */
 
 	cd->driver.handle = NULL;
 	cd->driver.is_init_hook =

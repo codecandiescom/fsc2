@@ -340,12 +340,19 @@ void store_exp( FILE *in )
 		EDL.prg_length++;
 	}
 
-	/* Now that we know how many tokens thee are cut back the length of the
-       array for tokens to the required length */
+	/* Now that we know how many tokens there are cut back the length of the
+       array for tokens to the required length (if there are no program
+	   tokens at all return immediately, there's nothing to be checked). */
 
-	EDL.prg_token = PRG_TOKEN_P T_realloc( EDL.prg_token,
-										   EDL.prg_length
-										   * sizeof *EDL.prg_token );
+	if ( EDL.prg_length > 0 )
+		EDL.prg_token = PRG_TOKEN_P T_realloc( EDL.prg_token,
+											   EDL.prg_length
+											   * sizeof *EDL.prg_token );
+	else
+	{
+		EDL.prg_token = PRG_TOKEN_P T_free( EDL.prg_token );
+		return;
+	}
 
 	/* Check that all parentheses and braces are balanced */
 
