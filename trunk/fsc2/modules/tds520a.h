@@ -28,7 +28,7 @@
 
 /* Include configuration information for the device */
 
-#include "tds520.conf"
+#include "tds520a.conf"
 
 
 

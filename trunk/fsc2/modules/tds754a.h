@@ -27,8 +27,11 @@
 #include "gpib_if.h"
 
 
+/* Include configuration information for the device */
 
-#define DEVICE_NAME "TDS754A"      /* compare entry in /etc/gpib.conf ! */
+#include "tds754a.conf"
+
+
 
 #define TDS_POINTS_PER_DIV 50
 
