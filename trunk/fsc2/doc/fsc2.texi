@@ -84,6 +84,7 @@ devices to be used in the experiment.
 * Modules::                 How to create new modules.
 * Interfacing::             Accessing fsc2 from other programs
 * Reserved Words::          List of all reserved words.
+* Acknowledgments::         The title says it all...
 * Copying::                 The GNU General Public License
 * Index::                   List of all indexed words.
 @end menu
@@ -103,6 +104,7 @@ devices to be used in the experiment.
 @include modules.texi
 @include interfacing.texi
 @include reserved.texi
+@include ack.texi
 @include gpl.texi
 
 @node Index, , , Top
