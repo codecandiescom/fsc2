@@ -758,8 +758,8 @@ static Var *vars_init_elements( Var *a, Var *v )
 /* left hand side of an EDL statement onto the stack. Depending on what */
 /* the left hand side evaluates to this is either a variable of INT_PTR */
 /* or FLOAT_PTR type (when a singe element of an array or matrix is     */
-/* addressed) or of type REF_PTR (if the LHS resolves to an array or    */
-/* (sub-) matrix).                                                      */
+/* addressed) or of type REF_PTR (if the LHS resolves to a simple array */
+/* or (sub-) matrix but the indices do not involve ranges).             */
 /*----------------------------------------------------------------------*/
 
 static Var *vars_lhs_pointer( Var *v, int dim )
@@ -830,10 +830,16 @@ static Var *vars_lhs_sub_pointer( Var *v, int dim, int range_count )
 		THROW( EXCEPTION );
 	}
 
+	/* Call the function that determines the indexed subarray - that's only
+	   necessary because we need to make sure that the array sizes are large
+	   enough, the returned pointer is of no interest */
+
 	if ( v->val.lval >= 0 )
 		vars_pop( vars_lhs_simple_pointer( a, a, v, a->dim ) );
 	else
 		vars_pop( vars_lhs_range_pointer( a, a, v, a->dim ) );
+
+	/* Create a variable of type SUB_REF_PTR instead */
 
 	sv = vars_push( SUB_REF_PTR, dim + range_count );
 	sv->from = a;
@@ -845,8 +851,10 @@ static Var *vars_lhs_sub_pointer( Var *v, int dim, int range_count )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Function to be called when a simple index (not part of a range) */
+/* is found on the stack.                                          */
+/*-----------------------------------------------------------------*/
 
 static Var *vars_lhs_simple_pointer( Var *a, Var *cv, Var *v, int dim )
 {
@@ -937,25 +945,35 @@ static Var *vars_lhs_simple_pointer( Var *a, Var *cv, Var *v, int dim )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Function to be called when a range (consisting of first a negative */
+/* and a positive value) is found on the stack.                       */
+/*--------------------------------------------------------------------*/
 
 static Var *vars_lhs_range_pointer( Var *a, Var *cv, Var *v, int dim )
 {
 	ssize_t i, range_start, range_end;
 
 
+	/* Determine start and end of range */
+
 	range_start = - v->val.lval - 1;
 	v = v->next;
 	range_end = v->val.lval;
 	v = v->next;
+
+	/* If the indexed range is larger than the (currently treated) array but
+	   the array has a fixed size we need to give up */
 
 	if ( ! ( cv->flags & IS_DYNAMIC ) && range_end >= cv->len )
 	{
 		print( FATAL, "Invalid range for array '%s'.\n", a->name );
 		THROW( EXCEPTION );
 	}
-	else if ( range_end >= cv->len )
+
+	/* Otherwise extend its size as necessary */
+
+	if ( range_end >= cv->len )
 	{
 		if ( dim > 1 )
 		{
@@ -1003,6 +1021,8 @@ static Var *vars_lhs_range_pointer( Var *a, Var *cv, Var *v, int dim )
 
 		cv->len = range_end + 1;
 	}
+
+	/* These return values are never going to be used... */
 
 	if ( v == NULL )
 		return vars_push( INT_VAR, 0 );
