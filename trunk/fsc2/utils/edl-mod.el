@@ -142,12 +142,13 @@
 	 "PHA\\(SE\\)?S?:"
 	 "PREP\\(ARATION\\)?S?:"
 	 "EXP\\(ERIMENT\\)?:"
+	 "ON_STOP:"
 	 )
   )
 
 
 (defvar edl-unit-keywords
-  "\\(\\B\\|\\<\\)\\(n\\|u\\|m\\|k\\|M\\)?\\(s\\|G\\|T\\|V\\|A\\|db\\|Hz\\)\\>" )
+  "\\(\\[0-9\\]\\|\\<\\)\\(n\\|u\\|m\\|k\\|M\\)?\\(s\\|G\\|T\\|V\\|A\\|db\\|Hz\\)\\>" )
 
 
 (defvar edl-font-lock-keywords

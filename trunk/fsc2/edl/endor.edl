@@ -20,6 +20,7 @@ N_runs      = 20;
 
 I = 0;
 J;
+K = 1;
 
 N_points = int( ( end_freq - start_freq ) / step_freq ) + 1;
 data[ N_points ];
@@ -29,7 +30,6 @@ File_1, File_2;
 
 PREPARATIONS:
 
-
 synthesizer_use_table( );
 synthesizer_attenuation( attenuation );
 synthesizer_att_ref_freq( 14 MHz );
@@ -37,13 +37,13 @@ synthesizer_frequency( start_freq );
 synthesizer_modulation( "FM", "EXT DC", mod_ampl );
 
 init_1d( 2, N_points, start_freq * 1e-6, step_freq * 1e-6,
-	 "Frequency / MHz", "Signal / V" ); 
+		 "Frequency / MHz", "Signal / V" ); 
 
 
 EXPERIMENT:
 
-File_1=get_file( "File for storing all runs:" );
-File_2=get_file( "File for storing final result:" );
+File_1 = get_file( "File for storing all runs:" );
+File_2 = get_file( "File for storing final result:" );
 
 lockin_ref_freq( mod_freq );
 lockin_ref_level( 1 V );
@@ -67,6 +67,7 @@ FOR I = 1 : N_runs {
 
 	save( File_1, data );
 	mean += data;
+	K = I;
     synthesizer_frequency( start_freq );
 }
 
@@ -76,10 +77,11 @@ synthesizer_state( 0 );
 
 IF I > 0 {
 	save_program( File_2, "% " );
-	fsave( "%\n% Sens: # V, TC = # s, Phase = #\n% Mod_Freq = # kHz, Mod_Ampl = # kHz\n%\n"
-			lockin_sensitiviy( ), tc, lockin_phase( ),
+	fsave( File_2, "%\n% Sens: # V, TC = # s, Phase = #\n" +
+		   "% Mod_Freq = # kHz, Mod_Ampl = # kHz\n%\n",
+		   lockin_sensitivity( ), tc, lockin_phase( ),
 			mod_freq * 1e-3, mod_ampl * 1e-3 );
-	save_comment( "% " );
+	save_comment( File_2, "% " );
 	fsave( File_2, "%\n" );
-	save( File_2, mean / ( I - 1 ) );
+	save( File_2, mean / K );
 }
