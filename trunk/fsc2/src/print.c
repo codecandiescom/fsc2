@@ -50,7 +50,6 @@ void print_1d( FL_OBJECT *obj, long data )
 
 	data = data;
 
-
 	fl_deactivate_object( obj );
 
 	/* Find out about the way to print and get a file, then print the header */
