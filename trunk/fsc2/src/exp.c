@@ -75,7 +75,7 @@ void store_exp( FILE *in )
 		   But there are a few exceptions: For strings we need also a copy of
 		   the string since it's not persistent. Function tokens and also
 		   variable references just push their data onto the variable stack,
-		   so we have to move them from the stack into the token structure */
+		   so we have to copy them from the stack into the token structure */
 
 		switch( ret )
 		{
@@ -105,8 +105,8 @@ void store_exp( FILE *in )
 						sizeof( Token_Val ) );
 		}
 
-		/* If the file name changed get a copy of the new name. Then set
-		   pointer in structure to file name and copy curent line number. */
+		/* If the file name changed get a copy of the new file name. Then set
+		   pointer in structure to file name and copy current line number. */
 
 		if ( cur_Fname == NULL || strcmp( Fname, cur_Fname ) )
 			cur_Fname = get_string_copy( Fname );
@@ -145,8 +145,8 @@ void forget_prg( void )
 		return;
 	}
 
-	/* get the address where the first file names is stored and free the
-	   string */
+	/* get the address in the first token where the file names is stored and
+	   free the string */
 
 	cur_Fname = prg_token[ 0 ].Fname;
 	free( cur_Fname );
@@ -202,15 +202,6 @@ void prim_loop_setup( void )
 				break;
 		}
 	}
-
-	/* break's still have stored a reference to the while or repeat they
-       belong to, change this to a reference to the statement following the
-       while or repeat block */
-
-	for ( i = 0; i < prg_length; ++i )
-		if ( prg_token[ i ].token == BREAK_TOK )
-			prg_token[ i ].end = prg_token[ i ].end->end;
-
 }
 
 
@@ -234,12 +225,11 @@ void setup_while_or_repeat( int type, long *pos )
 		THROW( BLOCK_ERROR_EXCEPTION );
 	}
 
-	/* Look for the start and end of the while or repeat block beginning with
-	   the first token after the while or repeat. Handle nested while, repeat
-	   or if tokens by calling the appropriate function recursively. break and
-	   continue tokens store a pointer to the block header, i.e. the while or
-	   repeat token (for break tokens the pointers later will be changed to
-	   point to the first statement following the block) */
+	/* Look for the start and end of the while, repeat or for block
+	   beginning with the first token after the while, repeat or for. Handle
+	   nested while, repeat, for or if tokens by calling the appropriate
+	   setup functions recursively. break and continue tokens store in `start'
+	   a pointer to the block header, i.e. the while, repeat or for token. */
 
 	for ( ; i < prg_length; i++ )
 	{
@@ -254,7 +244,7 @@ void setup_while_or_repeat( int type, long *pos )
 				break;
 
 			case BREAK_TOK :
-				prg_token[ i ].end = cur;
+				prg_token[ i ].start = cur;
 				break;
 
 			case IF_TOK :
@@ -344,7 +334,7 @@ void setup_if_else( int type, long *pos, Prg_Token *cur_wr )
 							prg_token[ i ].Lc );
 					THROW( BLOCK_ERROR_EXCEPTION );
 				}
-				prg_token[ i ].end = cur_wr;
+				prg_token[ i ].start = cur_wr;
 				break;
 
 			case IF_TOK :
@@ -498,7 +488,7 @@ void prim_exp_run( void )
 				break;
 
 			case BREAK_TOK :
-				cur_prg_token = cur_prg_token->end;
+				cur_prg_token = cur_prg_token->start->end;
 				break;
 
 			case CONT_TOK :
@@ -987,7 +977,7 @@ bool test_for_cond( Prg_Token *cur )
 	bool sign = UNSET;
 
 
-	/* If this isn't the very first call increment the loop variable */
+	/* If this isn't the very first call, increment the loop variable */
 
 	if ( cur->counter != 0 )
 	{
@@ -1056,27 +1046,56 @@ bool test_for_cond( Prg_Token *cur )
 }
 
 
+/*--------------------------------------------------------------------------*/
+/* Functions saves or restores all variables depending on `flag'. If `flag' */
+/* is set the variables are saved, otherwise they are copied back from the  */
+/* backup into the normal variables space. Don't use the saved variables -  */
+/* the internal pointers are not adjusted. Currently, for string variables  */
+/* the string is not saved but just the pointer to the string but since the */
+/* are never changed this shouldn't be a problem.                           */
+/* Never ever change the memory locations of the variables in between !!!   */
+/*--------------------------------------------------------------------------*/
+
 void save_restore_variables( bool flag )
 {
+	static long var_count = 0;
 	Var *cv;
-	long num_v;
+	Var *cb;
+	static Var *paranoia;
 
-	/* count the number of variables */
-
-	for ( num_v = 0, cv = var_list; cv != NULL; num_v++, cv = cv->next )
-		;
-
-	/* save or restore all variables */
 
 	if ( flag )
 	{
-		var_list_copy = T_malloc( num_v * sizeof( Var ) );
-		memcpy( var_list_copy, var_list, num_v * sizeof( Var ) );
+		assert( var_list_copy == NULL );
+
+		/* count the number of variables and get memory for storing them */
+
+		if ( var_count == 0 )
+			for ( var_count = 0, cv = var_list; cv != NULL;
+				  var_count++, cv = cv->next )
+				;
+		var_list_copy = T_malloc( var_count * sizeof( Var ) );
+
+		/* copy all of them into the backup region */
+
+		for ( cv = var_list, cb = var_list_copy; cv != NULL;
+			  cb++, cv = cv->next )
+			memcpy( cb, cv, sizeof( Var ) );
+
+		paranoia = var_list;
 	}
 	else
 	{
-		memcpy( var_list, var_list_copy, num_v * sizeof( Var ) );
+		assert( var_list_copy != NULL );
+		assert( var_list == paranoia );
+
+		/* copy all backuped variables back into their former positions */
+
+		for ( cv = var_list, cb = var_list_copy; cv != NULL;
+			  cb++, cv = cv->next )
+			memcpy( cv, cb, sizeof( Var ) );
 		free( var_list_copy );
+		var_list_copy = NULL;
 	}
 }
 
@@ -1122,8 +1141,8 @@ void loop_dbg( void )
 				break;
 
 			case BREAK_TOK :
-				printf( "%d: CONTINUE, end = %d\n",
-						cur - prg_token, cur->end - prg_token );
+				printf( "%d: CONTINUE, start = %d\n",
+						cur - prg_token, cur->start - prg_token );
 				break;
 
 			case IF_TOK :
