@@ -30,12 +30,10 @@
 
 %{
 
-#include "fsc2.h"
 #include "hp8647a.h"
 
 
 #define YY_NO_TOP_STATE        /* no need for function yy_top_state( ) */
-
 
 #define IS_FREQ 1
 #define IS_ATT  2

@@ -21,16 +21,6 @@
   Boston, MA 02111-1307, USA.
 */
 
-/*
-  PLEASE NOTE: This file should only be included when access to a serial
-               port is needed. Unfortunately, some of the definitions in
-               <termios.h> conflict with definitions in the files created
-               by flex (actually just one definition, ECHO), so including
-			   this file everywhere results in several compiler warnings.
-			   While these do not indicate a serious problem it's simply
-			   ugly and might lead to confusion.
-*/
-
 
 #if ! defined SERIAL_HEADER
 #define SERIAL_HEADER

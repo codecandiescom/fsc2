@@ -32,10 +32,13 @@
 $(##:.c=.o): %.o: %.c ##.h $(cdir)/##.conf $(src_headers)
 	$(CC) $(CFLAGS) -c $(LFLAGS) $< -o $@
 
+# The replacement of 'ECHO' by 'FLEX_ECHO' in the files created by flex is
+# done because 'ECHO' (that is #defined in these files) is already defined
+# in termios.h. The second replacement is for avoiding compiler warnings
+# about unitialized variables in these files.
+
 %_lexer.c: %_lexer.l $(src_header)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %lexer.l,%,$<) -o$@ $<
 	sed -e 's/\bECHO\b/FLEX_ECHO/g' $@ > $@.x
-	mv -f $@.x $@
 	sed -e 's/register char \*yy_cp, \*yy_bp;/\
-			register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
-	mv -f $@.x $@
+			register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@.x > $@
