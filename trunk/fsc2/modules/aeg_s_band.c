@@ -39,7 +39,6 @@ int aeg_s_band_init_hook( void );
 int aeg_s_band_test_hook( void );
 int aeg_s_band_exp_hook( void );
 int aeg_s_band_end_of_exp_hook( void );
-void aeg_s_band_exit_hook( void );
 
 Var *magnet_name( Var *v );
 Var *magnet_setup( Var *v );
@@ -254,16 +253,6 @@ int aeg_s_band_end_of_exp_hook( void )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Just make sure the connection to the power supply is really closed */
-/*--------------------------------------------------------------------*/
-
-void aeg_s_band_exit_hook( void )
-{
-	aeg_s_band_end_of_exp_hook( );
-}
-
-
 /******************************************************/
 /*                                                    */
 /*      exported functions, i.e. EDL functions        */
@@ -274,9 +263,8 @@ void aeg_s_band_exit_hook( void )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *magnet_name( Var *v )
+Var *magnet_name( UNUSED_ARG Var *v )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
