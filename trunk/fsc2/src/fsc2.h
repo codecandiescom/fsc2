@@ -308,7 +308,7 @@ const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ] =
               "OTHER_3",
               "OTHER_4" };
 
-const char *Phase_Types[ PHASE_TYPES_MAX ] = { "+X", "-X", "+Y", "-Y", "CW" };
+const char *Phase_Types[ NUM_PHASE_TYPES ] = { "+X", "-X", "+Y", "-Y", "CW" };
 
 
 #else   /*  ! FSC2_MAIN */
@@ -330,7 +330,7 @@ extern long Cur_Pulser;
 
 extern const char *Digitizer_Channel_Names[ NUM_DIGITIZER_CHANNEL_NAMES ];
 extern const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ];
-extern const char *Phase_Types[ PHASE_TYPES_MAX ];
+extern const char *Phase_Types[ NUM_PHASE_TYPES ];
 
 
 #endif

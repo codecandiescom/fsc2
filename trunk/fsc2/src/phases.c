@@ -149,17 +149,16 @@ Phase_Sequence *phase_seq_start( long phase_seq_num )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Called for each element in a list of phases for a phase sequence */
-/* ->                                                               */
-/*    * pointer to phase sequence                                   */
-/*    * either PHASE_PLUS_X, PHASE_MINUS_X, PHASE_PLUS_Y,           */
-/*	    PHASE_MINUS_Y or PHASE_CW                                   */
-/*------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Called for each element in a list of phases for a phase sequence  */
+/* ->                                                                */
+/* * pointer to phase sequence                                       */
+/* * either PHASE_PLUS_X, PHASE_MINUS_X, PHASE_PLUS_Y, PHASE_MINUS_Y */
+/*-------------------------------------------------------------------*/
 
 void phases_add_phase( Phase_Sequence *p, int phase_type )
 {
-	fsc2_assert ( phase_type >= 0 && phase_type < PHASE_TYPES_MAX );
+	fsc2_assert ( phase_type >= 0 && phase_type < NUM_PHASE_TYPES );
 
 	/* Append the new phase to the sequence */
 

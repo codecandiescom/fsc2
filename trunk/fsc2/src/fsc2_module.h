@@ -96,7 +96,7 @@ extern bool need_GPIB;
 
 extern const char *Digitizer_Channel_Names[ NUM_DIGITIZER_CHANNEL_NAMES ];
 extern const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ];
-extern const char *Phase_Types[ PHASE_TYPES_MAX ];
+extern const char *Phase_Types[ NUM_PHASE_TYPES ];
 
 
 /* The following must be defined after the declaration of pulser_struct ! */

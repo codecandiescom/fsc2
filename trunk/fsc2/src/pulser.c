@@ -1302,7 +1302,7 @@ void p_phs_setup( int func, int type, int pod, long val, bool is_pod )
 
 	/* A few sanity checks before we call the pulsers handler function */
 
-	fsc2_assert( type >= 0 && type < PHASE_TYPES_MAX );
+	fsc2_assert( type >= 0 && type < NUM_PHASE_TYPES );
 	fsc2_assert( func == 0 || func == 1 );       /* phase function correct ? */
 
 	/* Let's check if the pulser supports the function needed */
