@@ -131,6 +131,15 @@ static void hfs9000_basic_functions_check( void )
 
 			continue;
 		}
+
+		if ( f->delay < 0 &&
+			 ( hfs9000.is_trig_in_mode || hfs9000.trig_in_mode == EXTERNAL ) )
+		{
+			eprint( FATAL, "%s: Negative delay for function `%s' can't be "
+					"used with external triggert mode.\n", pulser_struct.name,
+					Function_Names[ f->self ] );
+			THROW( EXCEPTION );
+		}
 	}
 }
 

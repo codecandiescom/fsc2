@@ -156,7 +156,7 @@ bool hfs9000_init( const char *name )
 			continue;
 
 		sprintf( cmd, "PGENA:CH%1d:SIGN %s\n", i,
-				 hfs9000_names[ hfs9000.channel[ i ].function->self ] );
+				 hfs9000_fnames[ hfs9000.channel[ i ].function->self ] );
 		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 			hfs9000_gpib_failure( );
 	}
@@ -168,7 +168,7 @@ bool hfs9000_init( const char *name )
 		if ( ! hfs9000.channel[ i ].function->is_used )
 			continue;
 
-		sprintf( cmd, "PGENA:CH%1d:OUTP %s",
+		sprintf( cmd, "PGENA:CH%1d:OUTP %s", i,
 				 hfs9000.channel[ i ].function->is_used ? "ON" : "OFF" );
 		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 			hfs9000_gpib_failure( );
@@ -182,9 +182,9 @@ bool hfs9000_init( const char *name )
 
 /*-------------------------------------------------------------------*/
 /* Sets up the way the pulser runs. If the pulser is to run without  */
-/* on external trigger in event it is switched to ABURST mode (i.e.  */
+/* an external trigger in event it is switched to ABURST mode (i.e.  */
 /* the pulse sequence is repeated automatically with a delay for the */
-/* re-arm time of ca. 15 us. If the pulser has to react to trigger   */
+/* re-arm time of ca. 15 us). If the pulser has to react to trigger  */
 /* in events it is run in BURST mode, i.e. the pulse sequence is     */
 /* output after a trigger in event. In this case also the parameter  */
 /* for the trigger in are set. Because there's a delay of ca. 130 ns */
@@ -196,6 +196,7 @@ bool hfs9000_init( const char *name )
 static void hfs9000_setup_trig_in( void )
 {
 	char cmd[ 100 ];
+	int i;
 
 
 	if ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL )
@@ -229,7 +230,7 @@ static void hfs9000_setup_trig_in( void )
 		if ( hfs9000.is_trig_in_level )
 		{
 			strcpy( cmd, "TBAS:TIN:LEV " );
-			gcvt( hfs9000.trig_in_level, 8, command + strlen( cmd ));
+			gcvt( hfs9000.trig_in_level, 8, cmd + strlen( cmd ) );
 			if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 				hfs9000_gpib_failure( );
 		}
@@ -252,6 +253,40 @@ static void hfs9000_setup_trig_in( void )
 			if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 				hfs9000_gpib_failure( );
 		}
+	}
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+void hfs9000_set_constant( int channel, Ticks start, Ticks length, int state )
+{
+	char cmd[ 100 ];
+
+
+	sprintf( cmd, "PGENA:CH%1d:BDATA:FILL %ld,%ld,%s\n",
+			 channel, start, length, state ? "#HFF" : "0" );
+	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
+		hfs9000_gpib_failure( );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+void hfs9000_set_trig_out_pulse( void )
+{
+	FUNCTION *f = hfs9000.channel[ HFS9000_TRIG_OUT ].function;
+	PULSE *p = f->pulses[ 0 ];
+	char cmd[ 100 ];
+
+
+	if ( p->is_active )
+	{
+		sprintf( cmd, "TBAS:TOUT:PER %ld", p->pos + f->delay );
+		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
+			hfs9000_gpib_failure( );
 	}
 }
 
