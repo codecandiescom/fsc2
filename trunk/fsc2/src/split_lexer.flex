@@ -1,3 +1,13 @@
+/*
+   $Id$
+
+   $Log$
+   Revision 1.3  1999/07/16 22:55:39  jens
+   Mostly just cosmetic changes.
+
+*/
+
+
 /**********************************************/
 /* This is the main lexer for EDL input files */
 /**********************************************/
