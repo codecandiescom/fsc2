@@ -150,7 +150,7 @@ int tds754a_exp_hook( void )
 	tds754a_store.is_equal_width = tds754a.is_equal_width;
 
 	tds754a_store.is_timebase    = tds754a.is_timebase;
-	tds754a_store.timebase       = tds754a.is_timebase;
+	tds754a_store.timebase       = tds754a.timebase;
 
 	tds754a_store.is_num_avg     = tds754a.is_num_avg;
 	tds754a_store.num_avg        = tds754a.num_avg;

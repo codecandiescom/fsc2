@@ -146,7 +146,7 @@ int tds520a_exp_hook( void )
 	tds520a_store.is_equal_width = tds520a.is_equal_width;
 
 	tds520a_store.is_timebase    = tds520a.is_timebase;
-	tds520a_store.timebase       = tds520a.is_timebase;
+	tds520a_store.timebase       = tds520a.timebase;
 
 	tds520a_store.is_num_avg     = tds520a.is_num_avg;
 	tds520a_store.num_avg        = tds520a.num_avg;

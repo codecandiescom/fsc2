@@ -1,3 +1,4 @@
+
 /*
   $Id$
 
@@ -150,7 +151,7 @@ int tds744a_exp_hook( void )
 	tds744a_store.is_equal_width = tds744a.is_equal_width;
 
 	tds744a_store.is_timebase    = tds744a.is_timebase;
-	tds744a_store.timebase       = tds744a.is_timebase;
+	tds744a_store.timebase       = tds744a.timebase;
 
 	tds744a_store.is_num_avg     = tds744a.is_num_avg;
 	tds744a_store.num_avg        = tds744a.num_avg;

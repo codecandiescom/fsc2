@@ -147,7 +147,7 @@ int tds540_exp_hook( void )
 	tds540_store.is_equal_width = tds540.is_equal_width;
 
 	tds540_store.is_timebase    = tds540.is_timebase;
-	tds540_store.timebase       = tds540.is_timebase;
+	tds540_store.timebase       = tds540.timebase;
 
 	tds540_store.is_num_avg     = tds540.is_num_avg;
 	tds540_store.num_avg        = tds540.num_avg;

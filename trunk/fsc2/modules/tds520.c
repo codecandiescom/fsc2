@@ -142,7 +142,7 @@ int tds520_exp_hook( void )
 	   we need this when starting the same experiment again... */
 
 	tds520_store.is_timebase = tds520.is_timebase;
-	tds520_store.timebase    = tds520.is_timebase;
+	tds520_store.timebase    = tds520.timebase;
 
 	tds520_store.is_num_avg  = tds520.is_num_avg;
 	tds520_store.num_avg     = tds520.num_avg;
