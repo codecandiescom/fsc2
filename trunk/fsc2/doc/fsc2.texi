@@ -25,7 +25,7 @@
 
 @setfilename fsc2.info
 @settitle fsc2
-@set lastupdate October 25, 2001
+@set lastupdate October 28, 2001
 @iftex
 @afourpaper
 @end iftex
@@ -48,7 +48,7 @@
 @sp 1
 @center @email{Jens.Toerring@@physik.fu-berlin.de}
 @sp 16
-@center Copyright @copyright{} 1999-2001 Jens Thoms T@"orring
+@center Copyright @copyright{} 1999--2001 Jens Thoms T@"orring
 @end titlepage
 
 
