@@ -318,7 +318,8 @@ static int do_send( const char *rec_host, const char *to,
 
 	while ( fgets( line, MAX_LINE_LENGTH, fp ) != NULL )
 	{
-		/* Send an additional dot before lines starting with a dot */
+		/* Send an additional dot before lines starting with a dot (see
+		   RFC 821, section 4.5.2, for why this needs to be done) */
 
 		if ( line[ 0 ] == '.' && writen( mfd, ".", 1 ) < 1 )
 		{
