@@ -88,7 +88,12 @@ UNIT     "G"
 \n			hjs_sfc_Lc++;
 
 			/* handling of EOF within a comment -> fatal error */
-<<EOF>>		THROW( EOF_IN_COMMENT_EXCEPTION );
+<<EOF>> 	{
+				print( FATAL, "End of calibration file '%s' detected within a "
+					   "comment.\n", hjs_sfc.calib_file );
+				fclose( hjs_sfc_in );
+				THROW( EXCEPTION );
+			}
 
 			/* end of comment but not end of line */
 {EREM1}		yy_pop_state( );
@@ -100,7 +105,13 @@ UNIT     "G"
 			}
 } /* end of <comm> */
 
-{EREM1}     THROW( DANGLING_END_OF_COMMENT );
+{EREM1}     {
+				print( FATAL, "End of comment indicator (\"*/\") without "
+					   "previous start of comment in calibration file '%s' "
+					   "at line %ld.\n", hjs_sfc.calib_file, hjs_sfc_Lc );
+				fclose( hjs_sfc_in );
+				THROW( EXCEPTION );
+			}
 
 			/* dump empty line (i.e. just containing tabs and spaces) */
 {WLWS}      hjs_sfc_Lc++;
@@ -119,8 +130,12 @@ UNIT     "G"
 
 <<EOF>>		return 0;
 
-.           THROW( INVALID_INPUT_EXCEPTION );
-
+.           {
+				print( FATAL, "Invalid input in calibration file '%s' at "
+					   "line %ld.\n", hjs_sfc.calib_file, hjs_sfc_Lc );
+				fclose( hjs_sfc_in );
+				THROW( EXCEPTION );
+			}
 
 		/*----------------------*/
 %%		/*     END OF RULES     */
@@ -174,25 +189,38 @@ void hjs_sfc_read_calibration( void )
 
 	hjs_sfc_Lc = 1;
 
-	num_entries = 0;
-
-	while ( hjs_sfc_lex( ) != 0 )
-	{
-		if ( ++num_entries > 2 )
+	for ( num_entries = 0; hjs_sfc_lex( ) != 0; num_entries++ )
+		switch ( num_entries )
 		{
-			print( FATAL, "Too many entries in configuration file '%s'.\n",
-				   hjs_sfc.calib_file );
-			fclose( hjs_sfc_in );
-			THROW( EXCEPTION );
+			case 0 :
+				hjs_sfc.B0V = T_atod( hjs_sfc_text );
+				break;
+
+			case 1 :
+				hjs_sfc.slope = 0.1 * ( T_atod( hjs_sfc_text ) - hjs_sfc.B0V );
+				break;
+
+			default :
+				print( FATAL, "Too many entries in configuration file '%s'.\n",
+					   hjs_sfc.calib_file );
+				fclose( hjs_sfc_in );
+				THROW( EXCEPTION );
 		}
 
-		if ( num_entries == 1 )
-			hjs_sfc.B0V = T_atod( hjs_sfc_text );
-		else
-			hjs_sfc.slope = ( T_atod( hjs_sfc_text ) - hjs_sfc.B0V ) / 10.0;
+	fclose( hjs_sfc_in );
+
+	/* Check that there were exactly two entries int the calibration file */
+
+	if ( num_entries < 2 )
+	{
+		print( FATAL, "Calibration file '%s' contains %s, but both the field "
+			   "at the minimum and maximum DAC output voltage is required.\n",
+			   hjs_sfc.calib_file, num_entries ? "only one entry" :
+			   "no entries" );
+		THROW( EXCEPTION );
 	}
 
-	fclose( hjs_sfc_in );
+	/* Check that the entries weren't completely bogus */
 
 	if ( hjs_sfc.B0V < 0.0 )
 	{

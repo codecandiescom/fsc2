@@ -140,7 +140,7 @@ int hjs_sfc_test_hook( void )
 
 	hjs_sfc_read_calibration( );
 
-	/* If manget_setup() had been called we couldn't check if the field
+	/* When manget_setup() had been called we couldn't check if the field
 	   was within the allowed range because we need the information from
 	   the calibration file to do so. So do the check now if necessary. */
 
@@ -459,7 +459,7 @@ Var *magnet_calibration_file( Var *v )
 
 	if ( hjs_sfc.calib_file != NULL )
 	{
-		print( SEVERE, "Calibration file has already been set, keeping as "
+		print( SEVERE, "A Calibration file has already been read, keeping as "
 			   "'%s'.\n", hjs_sfc.calib_file );
 		return vars_push( STR_VAR, hjs_sfc.calib_file );
 	}

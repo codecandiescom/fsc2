@@ -108,7 +108,10 @@ static struct HJS_FC {
 
 /* Field value that will be returned during a test run */
 
-#define HJS_TEST_FIELD      3300.0
+#define HJS_FC_TEST_FIELD      3300.0
+
+#define HJS_FC_TEST_B0V        2900.0
+#define HJS_FC_TEST_SLOPE        50.0
 
 
 /*-------------------------------------------*/
@@ -139,6 +142,9 @@ int hjs_fc_init_hook( void )
 	CLOBBER_PROTECT( func );
 
 	/* Set the default values for the structure for the device */
+
+	hjs_fc.B0V = HJS_FC_TEST_B0V;
+	hjs_fc.slope = HJS_FC_TEST_SLOPE;
 
 	hjs_fc.min_test_field = HUGE_VAL;
 	hjs_fc.max_test_field = - HUGE_VAL;
@@ -261,7 +267,7 @@ int hjs_fc_test_hook( void )
 	if ( hjs_fc.is_field )
 		hjs_fc.target_field = hjs_fc.act_field = hjs_fc.field;
 	else
-		hjs_fc.target_field = hjs_fc.act_field = HJS_TEST_FIELD;
+		hjs_fc.target_field = hjs_fc.act_field = HJS_FC_TEST_FIELD;
 
 	return 1;
 }
@@ -297,7 +303,7 @@ int hjs_fc_exp_hook( void )
 	OTHERWISE
 	{
 		hjs_fc_child_exit_hook( );
-		THROW( EXCEPTION );
+		RETHROW( );
 	}
 
 	/* If we found in the test run that the requested field is going to
@@ -695,9 +701,6 @@ static double hjs_fc_set_field( double field, double error_margin )
 	double mini_step;
 
 
-	if ( FSC2_MODE == TEST )
-		return field;
-
 	if ( error_margin < 0.2 )
 		error_margin = 0.2;
 /*
@@ -734,8 +737,13 @@ static double hjs_fc_set_field( double field, double error_margin )
 				cur_volts = v_step;
 
 			hjs_fc_set_dac( cur_volts );
+			hjs_fc.cur_volts = cur_volts;
 
-			hjs_fc.cur_volts = v_step;
+			if ( FSC2_MODE == TEST )
+			{
+				hjs_fc.cur_volts = v_step;
+				break;
+			}
 
 			fsc2_usleep( 20000, UNSET );
 			stop_on_user_request( );
@@ -744,10 +752,7 @@ static double hjs_fc_set_field( double field, double error_margin )
 		cur_field = hjs_fc_get_field( );
 
 		if ( FSC2_MODE == TEST )
-		{
 			cur_field = field;
-			break;
-		}
 
 	} while ( lrnd( 10.0 * fabs( cur_field - field ) ) >
 			  lrnd( 10.0 * error_margin ) );
@@ -771,10 +776,12 @@ static double hjs_fc_sweep_to( double new_field )
 
 	if ( FSC2_MODE == TEST )
 		return new_field;
+
 /*
 	mini_step = 0.1 * MAX_SWEEP_SPEED * ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE )
 				/ ( hjs_fc.B_max - hjs_fc.B_min );
 */
+
 	mini_step = ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) / 4095.0;
 
 	/* Set the DAC voltage for the new field */
@@ -857,7 +864,7 @@ static double hjs_fc_get_field( void )
 	if ( repeat_count >= MAX_GET_FIELD_RETRIES )
 	{
 		print( FATAL, "Impossible to get a consistent field reading.\n" );
-		return FAIL;
+		THROW( EXCEPTION );
 	}
 
 	return 0.1 * cur_field;
