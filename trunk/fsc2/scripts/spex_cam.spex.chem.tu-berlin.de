@@ -3653,13 +3653,16 @@ EOF
 			Next_X = CCD_Points - Overlap_Points + 1;
 		} ELSE {
 			K = 1;
+
+			spec -= min;
+
 			FOR L = Next_X : Next_X + Overlap_Points - 1 {
-				scan[ L ] = ( spec[ K ] + scan[ L ] - min ) / 2;
+				scan[ L ] = ( spec[ K ] + scan[ L ] ) / 2;
 				K += 1;
 			}
 
 			FOR K = K : CCD_Points {
-				scan[ L ] = spec[ K ] - min;
+				scan[ L ] = spec[ K ];
 				L += 1;
 			}
 
@@ -3668,7 +3671,7 @@ EOF
 			new_min = min_of( scan );
 			IF new_min < 0 {
 				scan -= new_min;
-				min -= new_min;
+				min += new_min;
 			}
 
 			display_1d( 1, slice( scan, 1, Next_X + CCD_Points - 1 ), 1 );
