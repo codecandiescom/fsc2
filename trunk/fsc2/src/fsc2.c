@@ -27,7 +27,7 @@
 #include "fsc2.h"
 
 
-#if defined FSC2_MDEBUG
+#if defined( FSC2_MDEBUG ) || defined( LIBC_MDEBUG )
 #include <mcheck.h>
 #endif
 
@@ -64,7 +64,6 @@ static void set_main_signals( void );
 static void conn_request_handler( void );
 
 
-
 /**************************/
 /*     Here we go...      */
 /**************************/
@@ -74,12 +73,16 @@ int main( int argc, char *argv[ ] )
 	char *fname = NULL;
 
 
-#if defined FSC2_MDEBUG
+#if defined( FSC2_MDEBUG ) || defined( LIBC_MDEBUG )
 	if ( mcheck( NULL ) != 0 )
 	{
 		fprintf( stderr, "Can't start mcheck() !\n" );
 		return EXIT_FAILURE;
 	}
+#endif
+
+#if defined LIBC_MDEBUG
+	mtrace( );
 #endif
 
 	/* As the very first action the effective UID and GID gets stored and

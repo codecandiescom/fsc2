@@ -1372,7 +1372,7 @@ void stop_graphics( void )
 	{
 		if ( G2.curve_2d[ i ] == NULL )
 			break;
-;
+
 		for ( m2 = G2.curve_2d[ i ]->marker_2d; m2 != NULL; m = mn )
 		{
 			XFreeGC( G.d, m2->gc );
