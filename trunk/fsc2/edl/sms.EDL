@@ -1,0 +1,283 @@
+=== VX_MIN float [ -2.5 : 2.5 ] [ -2.5 ] "Minimum x-voltage:" "V"
+=== VX_MAX float [ -2.5 : 2.5 ] [  2.5 ] "Maximum x-voltage:" "V"
+=== VY_MIN float [ -2.5 : 2.5 ] [ -2.5 ] "Minimum y-voltage:" "V"
+=== VY_MAX float [ -2.5 : 2.5 ] [  2.5 ] "Maximum y-voltage:" "V"
+=== NX     int   [ 2 : ] [ 101 ] "Points in x-direction"
+=== NY     int   [ 2 : ] [ 101 ] "Points in y-direction"
+=== TAU    float [ 1e-4 : 214748.0 ] [ 100.0 ] "Count time" "ms"
+
+DEVICES:
+
+//me6000;
+//ni6601;
+
+
+VARIABLES:
+
+=== if ( VX_MIN < VX_MAX )
+vx_min = VX_MIN V;
+vx_max = VX_MAX V;
+=== elsif ( VX_MIN > VX_MAX )
+vx_min = VX_MAX V;
+vx_max = VX_MIN V;
+=== else
+vx_min = -2.5 V;
+vx_max =  2.5 V;
+=== endif
+
+=== if ( VY_MIN < VY_MAX )
+vy_min = VY_MIN V;
+vy_max = VY_MAX V;
+=== elsif ( VY_MIN > VY_MAX )
+vy_min = VY_MAX V;
+vy_max = VY_MIN V;
+=== else
+vy_min = -2.5 V;
+vy_max =  2.5 V;
+=== endif
+
+Nx     = NX;
+Ny     = NY;
+
+tau    = TAU ms;
+
+N_disp = ceil( 30 s / tau ) + 1;
+
+dvx    = ( vx_max - vx_min ) / ( Nx - 1 );
+dvy    = ( vy_max - vy_min ) / ( Ny - 1 );
+
+vx = vx_min,
+vy = vy_min;
+I, J;
+count[ Nx ];
+I_start, I_end, I_step;
+File;
+
+STOP_QUIT,
+STOP_SAVE;
+LEFT_ARR,
+RIGHT_ARR,
+UP_ARR,
+DOWN_ARR,
+COUNT,
+VX,
+VY,
+DVX,
+DVY,
+RESET;
+
+Cnt;
+
+new;
+dvx_0 = dvx;
+dvy_0 = dvy;
+
+
+PREPARATIONS:
+
+init_2d( 1, Nx, Ny, vx_min, dvx, vy_min, dvy, "Vertical mirror voltage [V]",
+		 "Horizontal mirror voltage [V]", "Count rate [1/s]" );
+init_1d( 1, N_disp, -tau * ( N_disp - 1 ), tau, "Time [s]",
+		 "Count rate [1/s]" );
+display_mode( "SLIDING", N_disp );
+
+
+EXPERIMENT:
+
+File = get_file( );
+
+//dac_voltage( CH9, vx_min );
+//dac_voltage( CH1, vy_min );
+
+FOR J = 1 : Ny {
+
+	IF J % 2 {
+		I_start = 1;
+		I_end = Nx;
+		I_step = 1;
+	} ELSE {
+		I_start = Nx;
+		I_end = 1;
+		I_step = -1;
+	}
+
+	count = 0;
+
+	FOR I = I_start : I_end : I_step {
+//		count[ I ] = counter_timed_count( CH0, tau ) / tau;
+		count[ I ] = abs( grandom( ) ) / tau;
+		IF random( ) > 0.975 {
+			count[ I ] += 15 / tau;
+		}
+		display_1d( 1, count[ I ] );
+		display_2d( I, J, count[ I ] );
+		IF I != I_end {
+			vx += I_step * dvx;
+//			dac_voltage( CH9, vx );
+		}
+		wait( tau );
+	}
+
+	save( File, count );
+	fsave( File, "\n" );
+
+	IF J != Ny {
+		vy += dvy;
+//		dac_voltage( CH0, vy );
+	}
+}
+
+
+ON_STOP:
+
+I = round( ( vx - vx_min ) / dvx ) + 1;
+J = round( ( vy - vy_min ) / dvy ) + 1;
+
+draw_marker_2d( I, J, 1, "WHITE" );
+
+
+COUNT = output_create( "FLOAT_OUTPUT", 0, "Current count rate (1/s)" );
+VX = input_create( "FLOAT_INPUT", vx, "Horizontal voltage [V]" );
+VY = input_create( "FLOAT_INPUT", vy, "Vertical voltage [V]" );
+DVX = input_create( "FLOAT_INPUT", dvx, "Horizontal step voltage [V]" );
+DVY = input_create( "FLOAT_INPUT", dvy, "Vertical step voltage [V]" );
+RESET = button_create( "NORMAL_BUTTON", "Voltage Reset" );
+
+LEFT_ARR = button_create( "NORMAL_BUTTON", "@#<-" );
+RIGHT_ARR = button_create( "NORMAL_BUTTON", "@#->" );
+UP_ARR = button_create( "NORMAL_BUTTON", "@#8->" );
+DOWN_ARR = button_create( "NORMAL_BUTTON", "@#2->" );
+
+STOP_QUIT = button_create( "NORMAL_BUTTON", "Stop" );
+STOP_SAVE = button_create( "NORMAL_BUTTON", "Stop (save)" );
+
+
+FOREVER {
+
+//	count[ 1 ] = counter_timed_count( CH0, tau ) / tau;
+	count[ 1 ] = abs( grandom( ) ) / tau;
+	count[ 1 ] += random( ) > 0.975 ? 15 / tau : 0.0;
+
+	display_1d( 1, count[ 1 ] );
+	output_value( COUNT, count[ 1 ] );
+	IF ! toolbox_changed( ) {
+		wait( tau );
+		NEXT;
+	}
+
+	IF button_state( STOP_QUIT ) {
+		BREAK;
+	}
+
+	IF button_state( STOP_SAVE ) {
+//		dac_voltage( CH9, -2.5 V );
+//		dac_voltage( CH0, -2.5 V );
+		BREAK;
+	}
+
+	Cnt = button_state( LEFT_ARR );
+	IF Cnt {
+		vx -= Cnt * abs( dvx );
+		IF vx < vx_min {
+			vx = vx_max;
+		}
+
+//		dac_voltage( CH9, vx );
+		draw_marker_2d( I, J, 1, "DELETE" );
+		I = round( ( vx - vx_min ) / dvx_0 ) + 1;
+		draw_marker_2d( I, J, 1, "WHITE" );
+		input_value( VX, vx );
+	}
+
+	Cnt = button_state( RIGHT_ARR );
+	IF Cnt {
+		vx += Cnt * dvx;
+		IF vx > vx_max {
+			vx = vx_min;
+		}
+
+//		dac_voltage( CH9, vx );
+		draw_marker_2d( I, J, 1, "DELETE" );
+		I = round( ( vx - vx_min ) / dvx_0 ) + 1;
+		draw_marker_2d( I, J, 1, "WHITE" );
+		input_value( VX, vx );
+	}
+
+	Cnt = button_state( UP_ARR );
+	IF Cnt {
+		vy += Cnt * abs( dvy );
+		IF vy > vy_max {
+			vy = vy_min;
+		}
+
+//		dac_voltage( CH0, vy );
+		draw_marker_2d( I, J, 1, "DELETE" );
+		J = round( ( vy - vy_min ) / dvy_0 ) + 1;
+		draw_marker_2d( I, J, 1, "WHITE" );
+		input_value( VY, vy );
+	}
+
+	Cnt = button_state( DOWN_ARR );
+	IF Cnt {
+		vy -= Cnt * abs( dvy );
+		IF vy < vy_min {
+			vy = vx_max;
+		}
+
+//		dac_voltage( CH0, vy );
+		draw_marker_2d( I, J, 1, "DELETE" );
+		J = round( ( vy - vy_min ) / dvy_0 ) + 1;
+		draw_marker_2d( I, J, 1, "WHITE" );
+		input_value( VY, vy );
+	}
+
+	IF toolbox_changed( VX ) {
+		new = input_value( VX );
+		IF new < vx_min | new > vx_max {
+			input_value( VX, vx );
+		} ELSE {
+			vx = new;
+//			dac_voltage( CH9, vx );
+			draw_marker_2d( I, J, 1, "DELETE" );
+			I = round( ( vx - vx_min ) / dvx_0 ) + 1;
+			draw_marker_2d( I, J, 1, "WHITE" );
+		}
+	}
+
+	IF toolbox_changed( VY ) {
+		new = input_value( VY );
+		IF new < vy_min | new > vy_max {
+			input_value( VY, vy );
+		} ELSE {
+			vy = new;
+//			dac_voltage( CH0, vy );
+			draw_marker_2d( I, J, 1, "DELETE" );
+			J = round( ( vy - vy_min ) / dvy_0 ) + 1;
+			draw_marker_2d( I, J, 1, "WHITE" );
+		}
+	}
+
+	IF toolbox_changed( DVX ) {
+		new = input_value( DVX );
+		dvy = new <= 0.0 | new > dvx_0 ? input_value( DVX, dvx ) : new;
+	}			
+
+	IF toolbox_changed( DVY ) {
+		new = input_value( DVY );
+		dvy = new <= 0.0 | new > dvx_0 ? input_value( DVY, dvy ) : new;
+	}			
+
+	IF button_state( RESET ) {
+		dvx = dvx_0;
+		vx = vx_min + ( I - 1 ) * dvx;
+		input_value( VX, vx );
+		input_value( DVX, dvx );
+//		dac_voltage( CH9, vx );
+
+		dvy = dvy_0;
+		vy = vy_min + ( J - 1 ) * dvy;
+		input_value( VY, vy );
+		input_value( DVY, dvy );
+//		dac_voltage( CH0, vy );
+	}
+}
