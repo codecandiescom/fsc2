@@ -126,27 +126,27 @@ expr:    E_INT_TOKEN unit         { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | expr '%' expr            { $$ = vars_mod( $1, $3 ); }
        | expr '^' expr            { $$ = vars_pow( $1, $3 ); }
        | '-' expr %prec E_NEG     { $$ = vars_negate( $2 ); }
-       | '(' expr ')' unit        { $$ = vars_mult( $2, $4 ); }
+       | '(' expr ')' unit        { $$ = appy_unit( $2, $4 ); }
 ;
 
-unit:    /* empty */               { $$ = NULL; }
-       | E_NT_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
-       | E_UT_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
-       | E_MT_TOKEN                { $$ = vars_push( INT_VAR, 10); }
-       | E_T_TOKEN                 { $$ = vars_push( INT_VAR, 10000 ); }
-       | E_NU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
-       | E_UU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
-       | E_MU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | E_KU_TOKEN                { $$ = vars_push( INT_VAR, 1000 ); }
-       | E_MEG_TOKEN               { $$ = vars_push( INT_VAR, 1000000 ); }
+unit:    /* empty */              { $$ = NULL; }
+       | E_NT_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
+       | E_UT_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
+       | E_MT_TOKEN               { $$ = vars_push( INT_VAR, 10); }
+       | E_T_TOKEN                { $$ = vars_push( INT_VAR, 10000 ); }
+       | E_NU_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
+       | E_UU_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
+       | E_MU_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
+       | E_KU_TOKEN               { $$ = vars_push( INT_VAR, 1000 ); }
+       | E_MEG_TOKEN              { $$ = vars_push( INT_VAR, 1000000 ); }
 ;
 
 
 /* list of indices for access of an array element */
 
-list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
-	   | expr                      { $$ = $1; }
-       | list1 ',' expr            { $$ = $3; }
+list1:   /* empty */              { $$ = vars_push( UNDEF_VAR ); }
+	   | expr                     { $$ = $1; }
+       | list1 ',' expr           { $$ = $3; }
 ;
 
 /* list of function arguments */
@@ -156,8 +156,8 @@ list2:   /* empty */
 	   | list2 ',' exprs
 ;
 
-exprs:   expr                      { }
-       | E_STR_TOKEN               { vars_push( STR_VAR, $1 ); }
+exprs:   expr                     { }
+       | E_STR_TOKEN              { vars_push( STR_VAR, $1 ); }
 ;
 
 
