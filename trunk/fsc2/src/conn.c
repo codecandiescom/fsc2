@@ -32,9 +32,6 @@ static void conn_sig_handler( int signo );
 
 static volatile bool is_busy;
 
-extern volatile sig_atomic_t conn_child_replied;
-
-
 /* Stuff needed if we're still running an old libc */
 
 #if defined IS_STILL_LIBC1
@@ -116,9 +113,9 @@ pid_t spawn_conn( bool start_state, FILE *in_file_fp )
 	if ( new_pid >= 0 )
 	{
 		close( Comm.conn_pd[ WRITE ] );
-		while ( ! conn_child_replied )
+		while ( ! Internals.conn_child_replied )
 			fsc2_usleep( 50000, SET );
-		conn_child_replied = UNSET;
+		Internals.conn_child_replied = UNSET;
 	}
 	else
 		unlink( FSC2_SOCKET );

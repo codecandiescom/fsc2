@@ -49,7 +49,6 @@ static volatile sig_atomic_t fsc2_death = 0;
 
 extern FL_resource xresources[ ];    /* from xinit.c */
 extern const char *prog_name;
-extern volatile sig_atomic_t conn_child_replied;
 
 
 /* Locally used functions */
@@ -289,6 +288,7 @@ static void globals_init( const char *pname )
 	Internals.http_server_died = UNSET;
 	Internals.conn_request = UNSET;
 	Internals.is_linux_i386 = UNSET;
+	Internals.conn_child_replied = UNSET;
 	Internals.title = NULL;
 
 	/* Figure out if the machine has an INTEL i386 type processor and we're
@@ -1926,7 +1926,7 @@ void main_sig_handler( int signo )
 			return;
 
 		case SIGUSR2 :
-			conn_child_replied = SET;
+			Internals.conn_child_replied = SET;
 			return;
 
 		case SIGALRM :
@@ -1996,9 +1996,9 @@ void notify_conn( int signo )
 	/* Wait for reply from child but avoid waiting when it in fact already
 	   did reply (as indicated by the variable). */
 
-	while ( ! conn_child_replied )
+	while ( ! Internals.conn_child_replied )
 		fsc2_usleep( 50000, SET );
-	conn_child_replied = UNSET;
+	Internals.conn_child_replied = UNSET;
 }
 
 

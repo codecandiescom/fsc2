@@ -160,7 +160,7 @@ typedef struct GUI_Stuff GUI_Stuff;
 
 
 struct INTERNALS {
-	uid_t EUID;                  /* User and group ID the program was */
+	uid_t EUID;                  /* user and group ID the program got */
 	gid_t EGID;				     /* started with */
 
 	pid_t fsc2_clean_pid;
@@ -175,22 +175,22 @@ struct INTERNALS {
 									to allow viewing fsc2's state */
 	int http_port;               /* port the http server is running on */
 
-	bool is_linux_i386;          /* Set if running Linux on i386 processors */
+	bool is_linux_i386;          /* set if running Linux on i386 processors */
 
-	int cmdline_flags;           /* Stores command line options */
+	int cmdline_flags;           /* stores command line options */
 
-	long num_test_runs;          /* Number of test runs with '-X' flag */
-	long check_return;           /* Result of check run, 1 is ok */
+	long num_test_runs;          /* number of test runs with '-X' flag */
+	long check_return;           /* result of check run, 1 is ok */
 
-	int I_am;                    /* Indicates if we're running the parent
+	int I_am;                    /* indicates if we're running the parent
 									or the child process (it's either set to
 									PARENT or to CHILD) */
 	int state;
-	int mode;                    /* The mode fsc2 is currently running in,
+	int mode;                    /* the mode fsc2 is currently running in,
 									either PREPARATION, TEST or EXPERIMENT */
-	bool in_hook;                /* Set while module hook functions are run */
+	bool in_hook;                /* set while module hook functions are run */
 
-	bool just_testing;           /* Set if only syntax check is to be done */
+	bool just_testing;           /* set if only syntax check is to be done */
 
 	bool exit_hooks_are_run;     /* Set if modules exit hooks have all already
 									been run */
@@ -200,7 +200,7 @@ struct INTERNALS {
 	/* The following are flags that get set in signal handlers and when set
 	   indicate that certain actions have to be taken the idle callbacks */
 
-	volatile sig_atomic_t child_is_quitting; /* Set when the child is done */
+	volatile sig_atomic_t child_is_quitting; /* set when the child is done */
 
 	volatile sig_atomic_t tb_wait; /* set if the child is waiting for the
 									  change of the state of an object in the
@@ -211,50 +211,52 @@ struct INTERNALS {
 	volatile sig_atomic_t conn_request; /* set on request from the child
 										   process dealing with external
 										   connections */
+	volatile sig_atomic_t conn_child_replied;
+
 	char *title;                 /* string with title of the main window */
 };
 
 
 struct EDL_Stuff {
-	long Lc;                     /* Line number in currently parsed EDL file */
+	long Lc;                     /* line number in currently parsed EDL file */
 	char *in_file;               /* name of input file */
-	char *Fname;                 /* Name of currently parsed EDL file */
+	char *Fname;                 /* name of currently parsed EDL file */
 
-	CALL_STACK *Call_Stack;      /* Stack for storing some kind of frame
+	CALL_STACK *Call_Stack;      /* stack for storing some kind of frame
 									information during nested EDL function
 									calls */
-	Compilation compilation;     /* Structure with infos about compilation
+	Compilation compilation;     /* structure with infos about compilation
 									states and errors (see also global.h) */
-	Prg_Token *prg_token;        /* Array of predigested program tokens */
+	Prg_Token *prg_token;        /* array of predigested program tokens */
 
-	long prg_length;             /* Number of array elements in predigested
+	long prg_length;             /* number of array elements in predigested
 									program (negative value indicates that
 									there is no EXPERIMENT section, not even
 									an EXPERIMENT label) */
-	Prg_Token *cur_prg_token;    /* Pointer to the currently handled element in
+	Prg_Token *cur_prg_token;    /* pointer to the currently handled element in
 									the array of predigested program tokens */
 	long On_Stop_Pos;            /* Index of the ON_STOP command in the array
 									of predigested program tokens (negative
 									value indicates that there is no ON_STOP
 									label) */
-	Var *Var_List;               /* List of all user declared EDL variables */
+	Var *Var_List;               /* list of all user declared EDL variables */
 	Var *Var_Stack;              /* Stack of variables used in the evaluation
 									of expressions and function calls */
-	volatile sig_atomic_t do_quit;  /* Becomes set when a running EDL program
+	volatile sig_atomic_t do_quit;  /* becomes set when a running EDL program
 									has to be stopped (because STOP button
 									has been pressed) */
-	volatile sig_atomic_t react_to_do_quit;  /* Is set when program should not
+	volatile sig_atomic_t react_to_do_quit;  /* is set when program should not
 									react to the STOP button anymore (after the
 									ON_STOP label has been processed) */
-	FILE_LIST *File_List;        /* List of all files the user opened */
-	int File_List_Len;           /* Length of this file list */
+	FILE_LIST *File_List;        /* list of all files the user opened */
+	int File_List_Len;           /* length of this file list */
 
     Device *Device_List;
     Device_Name *Device_Name_List;
 
     long Num_Pulsers;
 
-	long Cur_Pulse;              /* Number of the current pulse during the
+	long Cur_Pulse;              /* number of the current pulse during the
 									setup of a pulse in the PREPARATIONS
 									section */
 	double experiment_time;
@@ -266,9 +268,9 @@ struct COMMUNICATION {
 	int conn_pd[ 2 ];            /* pipe for communication child */
 	int http_pd[ 4 ];            /* pipes for HTTP server */
 
-	int mq_semaphore;            /* Semaphore for message queue */
+	int mq_semaphore;            /* semaphore for message queue */
 
-	MESSAGE_QUEUE *MQ;           /* The message queue for data send from the
+	MESSAGE_QUEUE *MQ;           /* the message queue for data send from the
 									child to the parent process */
 	int MQ_ID;                   /* shared memory segment ID of the message
 									queue */
@@ -288,10 +290,10 @@ struct GUI_Stuff {
 	FD_cut *cut_form;
 	FD_print_comment *print_comment;
 
-	int border_offset_x;         /* Width and height of window left and */
+	int border_offset_x;         /* width and height of window left and */
 	int border_offset_y;         /* top border */
 
-	int stop_button_mask;        /* Which mouse buttons to use for STOP
+	int stop_button_mask;        /* which mouse buttons to use for STOP
 									button */
 };
 
