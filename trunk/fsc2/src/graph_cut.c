@@ -1386,13 +1386,11 @@ static void cut_make_scale( Canvas *c, int coord )
 
 		triangle[ 0 ].x = x - LONG_TICK_LEN - 3;
 		if ( CG.cut_dir == X )
-			triangle[ 0 ].y = G.cut_z_axis.h - 1
-				              - ( ( double ) CG.index / ( double ) ( G.nx - 1 )
-								  * G.cut_z_axis.h );
+			triangle[ 0 ].y = d2shrt( ( G.cut_z_axis.h - 1 ) *
+					 ( 1.0 - ( double ) CG.index / ( double ) ( G.nx - 1 ) ) );
 		else
-			triangle[ 0 ].y = G.cut_z_axis.h - 1
-				              - ( ( double ) CG.index / ( double ) ( G.ny - 1 )
-								  * G.cut_z_axis.h );
+			triangle[ 0 ].y = d2shrt( ( G.cut_z_axis.h - 1 ) *
+					 ( 1.0 - ( double ) CG.index / ( double ) ( G.ny - 1 ) ) );
 		triangle[ 1 ].x = - ( Z_SCALE_OFFSET - LONG_TICK_LEN - 10 );
 		triangle[ 1 ].y = - LONG_TICK_LEN / 3;
 		triangle[ 2 ].x = 0;
