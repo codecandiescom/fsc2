@@ -7,7 +7,8 @@ dg2020_f       = dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
 				 dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
 dg2020_b       = dg2020_b.c dg2020_gen_b.c dg2020_pulse_b.c dg2020_util_b.c \
 				 dg2020_init_b.c dg2020_run_b.c dg2020_gpib_b.c
-hfs9000        = hfs9000.c hfs9000_gen.c hfs9000_pulse.c hfs9000_util.c
+hfs9000        = hfs9000.c hfs9000_gen.c hfs9000_pulse.c hfs9000_util.c \
+				 hfs9000_gpib.c
 tds754a        = tds754a.c tds754a_gpib.c tds754a_util.c
 tds744a        = tds744a.c tds744a_gpib.c tds744a_util.c
 tds520a        = tds520a.c tds520a_gpib.c tds520a_util.c
