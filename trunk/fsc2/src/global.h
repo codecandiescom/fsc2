@@ -29,7 +29,7 @@
    pulse sequence. Define GRACE_PERIOD as 0 to switch off setting of a grace
    period. */
 
-#define GRACE_PERIOD 1e-7                  /* 100 ns */
+#define GRACE_PERIOD 1e-8                  /* 10 ns */
 
 
 /* Define number of colors to be used in 2D graphics - must be less than
