@@ -86,7 +86,7 @@ static Var *get_phase_cycled_area_1( Var *v )
 	static long num_windows;
 	long *win_list;
 	long i, j;
-	int access;
+	int acc;
 	double *data;
 	int channels_needed = 1;
 	static Acquisition_Sequence *aseq;
@@ -215,22 +215,22 @@ static Var *get_phase_cycled_area_1( Var *v )
 
 	TRY
 	{
-		vars_pop( func_call( func_get( "pulser_phase_reset", &access ) ) );
-		vars_pop( func_call( func_get( "pulser_update", &access ) ) );
+		vars_pop( func_call( func_get( "pulser_phase_reset", &acc ) ) );
+		vars_pop( func_call( func_get( "pulser_update", &acc ) ) );
 
 		for ( i = 0; i < aseq->len; i++ )
 		{
 			vars_pop( func_call( func_get( "digitizer_start_acquisition",
-										   &access) ) );
+										   &acc) ) );
 
 			for ( j = 0; j < num_windows; j++ )
 			{
 				/* Get pointer to the correct function */
 
 				if ( is_get_area_fast )
-					func_ptr = func_get( "digitizer_get_area_fast", &access );
+					func_ptr = func_get( "digitizer_get_area_fast", &acc );
 				else
-					func_ptr = func_get( "digitizer_get_area", &access );
+					func_ptr = func_get( "digitizer_get_area", &acc );
 
 				/* Push the correct channel number onto the stack */
 
@@ -260,8 +260,8 @@ static Var *get_phase_cycled_area_1( Var *v )
 				vars_pop( vn );
 			}
 
-			vars_pop( func_call( func_get( "pulser_next_phase", &access ) ) );
-			vars_pop( func_call( func_get( "pulser_update", &access ) ) );
+			vars_pop( func_call( func_get( "pulser_next_phase", &acc ) ) );
+			vars_pop( func_call( func_get( "pulser_update", &acc ) ) );
 		}
 
 		if ( win_list[ 0 ] == -1 || num_windows == 1 )
@@ -314,7 +314,7 @@ static Var *get_phase_cycled_area_2( Var *v )
 	static long num_windows;
 	long *win_list;
 	long i, j;
-	int access;
+	int acc;
 	double *data;
 	int channels_needed;
 	Acquisition_Sequence *aseq[ ] = { ASeq, ASeq + 1 };
@@ -455,22 +455,22 @@ static Var *get_phase_cycled_area_2( Var *v )
 
 	TRY
 	{
-		vars_pop( func_call( func_get( "pulser_phase_reset", &access ) ) );
-		vars_pop( func_call( func_get( "pulser_update", &access ) ) );
+		vars_pop( func_call( func_get( "pulser_phase_reset", &acc ) ) );
+		vars_pop( func_call( func_get( "pulser_update", &acc ) ) );
 
 		for ( i = 0; i < aseq[ 0 ]->len; i++ )
 		{
 			vars_pop( func_call( func_get( "digitizer_start_acquisition",
-										   &access) ) );
+										   &acc ) ) );
 
 			for ( j = 0; j < num_windows; j++ )
 			{
 				/* Get pointer to the correct function */
 
 				if ( is_get_area_fast )
-					func_ptr = func_get( "digitizer_get_area_fast", &access );
+					func_ptr = func_get( "digitizer_get_area_fast", &acc );
 				else
-					func_ptr = func_get( "digitizer_get_area", &access );
+					func_ptr = func_get( "digitizer_get_area", &acc );
 
 				/* Push the correct channel number onto the stack */
 
@@ -527,9 +527,9 @@ static Var *get_phase_cycled_area_2( Var *v )
 				/* Get pointer to the correct function */
 
 				if ( is_get_area_fast )
-					func_ptr = func_get( "digitizer_get_area_fast", &access );
+					func_ptr = func_get( "digitizer_get_area_fast", &acc );
 				else
-					func_ptr = func_get( "digitizer_get_area", &access );
+					func_ptr = func_get( "digitizer_get_area", &acc );
 
 				/* Push the correct channel number onto the stack */
 
@@ -559,8 +559,8 @@ static Var *get_phase_cycled_area_2( Var *v )
 				vars_pop( vn );
 			}
 
-			vars_pop( func_call( func_get( "pulser_next_phase", &access ) ) );
-			vars_pop( func_call( func_get( "pulser_update", &access ) ) );
+			vars_pop( func_call( func_get( "pulser_next_phase", &acc ) ) );
+			vars_pop( func_call( func_get( "pulser_update", &acc ) ) );
 		}
 
 		if ( win_list[ 0 ] == -1 || num_windows == 1 )
@@ -595,7 +595,7 @@ static bool get_channel_number( Var *v, const char *func_name, long *channel )
 	Var *func_ptr;
 	Var *vn;
 	bool result;
-	int access;
+	int acc;
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -609,7 +609,7 @@ static bool get_channel_number( Var *v, const char *func_name, long *channel )
 		*channel = lround( v->val.dval );
 	}
 
-	if ( ( func_ptr = func_get( "digitizer_meas_channel_ok", &access ) )
+	if ( ( func_ptr = func_get( "digitizer_meas_channel_ok", &acc ) )
 		 == NULL )
 	{
 		eprint( FATAL, SET, "%s(): Digitizer module does not supply needed "

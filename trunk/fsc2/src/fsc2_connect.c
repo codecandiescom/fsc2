@@ -90,9 +90,9 @@ typedef unsigned int socklen_t;
 
 void make_tmp_file( char *fname );
 int open_socket( const char *fname );
-void start_fsc2( const char *pname, const char *fname );
+void start_fsc2( char *pname, char *fname );
 void sig_handler( int signo );
-void contact_fsc2( int sock_fd, const char *pname, const char *fname );
+void contact_fsc2( int sock_fd, char *pname, char *fname );
 void clean_up( const char *fname, int sock_fd, int ret_val );
 ssize_t writen( int fd, const void *vptr, size_t n );
 ssize_t read_line( int fd, void *vptr, size_t max_len );
@@ -214,12 +214,13 @@ int open_socket( const char *fname )
 /*-----------------------------------------------------------*/
 /*-----------------------------------------------------------*/
 
-void start_fsc2( const char *pname, const char *fname )
+void start_fsc2( char *pname, char *fname )
 {
 	char *av[ 6 ] = { NULL, NULL, NULL, NULL, NULL, NULL };
 	int ac = 0;
 	char *prog_name;
 	pid_t new_pid;
+	char flags[ 4 ][ 9 ] = { "--delete", "-s", "-S", "-T" };
 
 
 	if ( ( av[ 0 ] = malloc( ( bindir ? strlen( bindir ) + 1 : 0 ) + 6 ) )
@@ -235,18 +236,18 @@ void start_fsc2( const char *pname, const char *fname )
 		strcat( av[ 0 ], "/" );
 	strcat( av[ ac++ ], "fsc2" );
 
-	av[ ac++ ] = ( char * ) "--delete";
-	av[ ac++ ] = ( char * ) "-s";
+	av[ ac++ ] = flags[ 0 ];
+	av[ ac++ ] = flags[ 1 ];
 
 	if ( ( prog_name = strrchr( pname, '/' ) ) != NULL )
 		prog_name++;
 	else
-		prog_name = ( char * ) pname;
+		prog_name = pname;
 
 	if ( ! strcmp( prog_name, "fsc2_start" ) )
-		av[ ac++ ] = ( char * ) "-S";
+		av[ ac++ ] = flags[ 2 ];
 	else if ( ! strcmp( prog_name, "fsc2_test" ) )
-		av[ ac++ ] = ( char * ) "-T";
+		av[ ac++ ] = flags[ 3 ];
 	else if ( strcmp( prog_name, "fsc2_load" ) &&
 			  strcmp( prog_name, "fsc2_connect" ) )
 	{
@@ -255,7 +256,7 @@ void start_fsc2( const char *pname, const char *fname )
 		exit( -1 );
 	}
 
-	av[ ac++ ] = ( char * ) fname;
+	av[ ac++ ] = fname;
 
 	signal( SIGUSR1, sig_handler );
 	signal( SIGCHLD, sig_handler );
@@ -304,7 +305,7 @@ void sig_handler( int signo )
 /*-----------------------------------------------------------*/
 /*-----------------------------------------------------------*/
 
-void contact_fsc2( int sock_fd, const char *pname, const char *fname )
+void contact_fsc2( int sock_fd, char *pname, char *fname )
 {
 	char line[ MAXLINE ];
 	ssize_t count;
@@ -339,7 +340,7 @@ void contact_fsc2( int sock_fd, const char *pname, const char *fname )
 	if ( ( prog_name = strrchr( pname, '/' ) ) != NULL )
 		prog_name++;
 	else
-		prog_name = ( char * ) pname;
+		prog_name = pname;
 	strcpy( line, " d\n" );
 
 	if ( ! strcmp( prog_name, "fsc2_start" ) )
