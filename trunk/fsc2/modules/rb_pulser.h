@@ -108,6 +108,7 @@ struct RULBUS_CLOCK_CARD {
 
 struct RULBUS_DELAY_CARD {
 	const char *name;
+	int no;
 	int handle;
 	Ticks delay;
 	RULBUS_DELAY_CARD *prev;

@@ -113,7 +113,6 @@ void rb_pulser_init_delay( void )
 {
 	FUNCTION *f = rb_pulser.function + PULSER_CHANNEL_MW;
 	PULSE *p = f->pulses[ 0 ];
-	PULSE *cp;
 	double pos, shift;
 	Ticks delay;
 	RULBUS_DELAY_CARD *card = delay_card + INIT_DELAY;
@@ -134,7 +133,7 @@ void rb_pulser_init_delay( void )
 		return;
 	}
 
-	pos = p->pos + p->function->delay - 2 * MIN_DELAY;
+	pos = p->pos + p->function->delay * rb_pulser.timebase - 2 * MIN_DELAY;
 
 	if ( pos < 0.0 )
 	{
@@ -146,20 +145,20 @@ void rb_pulser_init_delay( void )
 
 	if ( fabs( shift ) > PRECISION * rb_pulser.timebase )
 	{
-		print( SEVERE, "Position of first MW pulse can't be realized, "
-			   "must shift all pulses by %s.\n", rb_pulser_ptime( shift ) );
-
-		for ( cp = rb_pulser_Pulses; cp != NULL; cp = cp->next )
-			cp->pos += shift;
+		print( SEVERE, "Position of first MW pulse not possible, must shift "
+			   "it by %s.\n", rb_pulser_ptime( shift ) );
+		pos += shift;
 	}
 
-	delay = Ticks_rnd( p->pos / rb_pulser.timebase );
+	delay = Ticks_rnd( pos / rb_pulser.timebase );
 
 	if( card->delay != delay || ! card->was_active )
 		card->needs_update = SET;
 
 	card->delay = delay;
 	card->is_active = SET;
+
+fprintf( stderr, "%d => %ld\n", card->no, card->delay );
 }
 
 
@@ -168,12 +167,12 @@ void rb_pulser_init_delay( void )
 
 void rb_pulser_delay_card_setup( void )
 {
-	RULBUS_DELAY_CARD *card, *cc;
+	RULBUS_DELAY_CARD *card;
 	FUNCTION *f;
 	PULSE *p;
-	double start, delta, shift;
+	volatile double start, delta, shift;
 	Ticks dT;
-	int i, j, k;
+	int i, j;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -193,6 +192,9 @@ void rb_pulser_delay_card_setup( void )
 
 		/* Loop over all active pulses of the function (which are already
 		   ordered by start position */
+
+		start =   delay_card[ INIT_DELAY ].delay * rb_pulser.timebase
+			    + MIN_DELAY;
 
 		for ( card = f->delay_card, j = 0; j < f->num_active_pulses; j++ )
 		{
@@ -214,17 +216,17 @@ void rb_pulser_delay_card_setup( void )
 			if ( f->self != PULSER_CHANNEL_MW ||
 				 ( f->self == PULSER_CHANNEL_MW && j != 0 ) )
 			{
-				/* Find out the first possible moment the pulse could start
-				   at */
+				/* Find out the first possible moment the following pulse
+				   could start at - if there's no following delay card
+				   creating the pulse we must not include the delay for this
+				   non-existent card. But, on the other hand, for the RF
+				   channel we have to include the intrinsic delay of the
+				   synthesizer creating the pulse... */
 
-				for ( cc = card; cc != NULL; cc = cc->prev )
-					start = cc->delay * rb_pulser.timebase + MIN_DELAY;
-				start += 2 * MIN_DELAY;
-
-				/* The synthesizer adds another intrinsic delay of about 50 ns
-				   for the RF channel */
-
-				if ( f->self == PULSER_CHANNEL_RF )
+				start += MIN_DELAY;
+				if ( card->next != NULL )
+					start += MIN_DELAY;
+				else if ( f->self == PULSER_CHANNEL_RF )
 					start += SYNTHESIZER_DELAY;
 
 				/* Check that the pulse doesn't start earlier */
@@ -243,32 +245,22 @@ void rb_pulser_delay_card_setup( void )
 					THROW( EXCEPTION );
 				}
 
-				/* Now calculate how we have to set up the card, if necessary
-				   shift the pulse position */
-
-				delta -= MIN_DELAY;
-
-				if ( f->self == PULSER_CHANNEL_RF )
-					delta -= SYNTHESIZER_DELAY;
-
 				dT = Ticks_rnd( delta / rb_pulser.timebase );
 				shift = dT * rb_pulser.timebase - delta;
 			
 				if ( fabs( shift ) > PRECISION * rb_pulser.timebase )
-				{
 					print( SEVERE, "Position of pulse #%ld of function '%s' "
-						   "can't be realized, must shift it (and following "
-						   "pulses) by %s.\n", rb_pulser_ptime( shift ) );
-
-					for ( k = j; j < f->num_active_pulses; k++ )
-						f->pulses[ k ]->pos += shift;
-				}
+						   "not possible, must shift it by %s.\n", p->num,
+						   f->name, rb_pulser_ptime( shift ) );
 
 				if ( card->delay != dT || ! card->was_active )
 					card->needs_update = SET;
 				card->delay = dT;
 				card->is_active = SET;
 				
+fprintf( stderr, "%d => %ld\n", card->no, card->delay );
+				start += card->delay * rb_pulser.timebase;
+
 				/* Some channels have no card for the pulse itself, here we
 				   just store the length and lets deal with this later */
 
@@ -278,14 +270,20 @@ void rb_pulser_delay_card_setup( void )
 					continue;
 				}
 			}
+			else
+				start += MIN_DELAY;
 
 			if ( card->delay != p->len || ! card->was_active )
 				card->needs_update = SET;
 			card->delay = p->len;
+fprintf( stderr, "%d => %ld\n", card->no, card->delay );
+			start += card->delay * rb_pulser.timebase;
 			card->is_active = SET;
 			card = card->next;
 		}
+fprintf( stderr, "\n" );
 	}
+fprintf( stderr, "++++++++++++\n" );
 }
 
 
