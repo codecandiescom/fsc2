@@ -190,10 +190,27 @@ uninstall:
 	fi
 
 
+# How to create a separate packages of the HTML documentation
+
+html_pack:
+	-$(RM) $(RMFLAGS) fsc2_html/*
+	-rmdir fsc2_html
+	if [ ! -e fsc2_html ]; then                        \
+		mkdir fsc2_html;                               \
+	fi
+	cp -f *.html *.png fsc2.gif fsc2.css fsc2_html
+	cd fsc2_html;                                      \
+	ln -s fsc2.html index.html;                        \
+	cd ..;                                             \
+	tar -c fsc2_html | gzip -c -9 > fsc2_html.tar.gz
+	-$(RM) $(RMFLAGS) fsc2_html/*
+	-rmdir fsc2_html
+
+
 # How to clean up the mess we created
 
 clean:
-	-$(RM) $(RMFLAGS) fsc2.dvi *.log fsc2fig*.eps fsc2fig*.pdf
+	-$(RM) $(RMFLAGS) fsc2.dvi *.log fsc2fig*.eps fsc2fig*.pdf fsc2_html.tar.gz
 
 distclean:
 	$(MAKE) clean
