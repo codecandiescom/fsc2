@@ -697,6 +697,12 @@ void clean_up( void )
 
 	forget_prg( );
 
+	/* delete all data buffers used for drawing */
+
+	delete_all_data_buffers( );
+
+	/* unset used flags for all serial ports */
+
 	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
 		need_Serial_Port[ i ] = UNSET;
 }
