@@ -4,8 +4,8 @@ About fsc2
 fsc2 is a program for controlling spectrometers.
 
 Programs for controlling spectrometers are usually home-written and
-often restricted to doing a certain set of experiments with a fixed
-hardware base. In contrast, fsc2 is much more flexible because, on
+often restricted to doing a certain set of experiments and a fixed
+set of devices. In contrast, fsc2 is much more flexible because, on
 the one hand, it interprets a rather simple but powerful scripting
 language (EDL, Experiment Description Language) and, on the other hand,
 has a strictly modular approach to handling of devices. This allows
