@@ -41,8 +41,6 @@ static bool display_file( char *name, FILE *fp );
 
 int main( int argc, char *argv[ ] )
 {
-	FL_OBJECT *obj;
-
 
 #if defined MDEBUG
 	if ( mcheck( NULL ) != 0 )
@@ -92,10 +90,8 @@ int main( int argc, char *argv[ ] )
 
 	/* Loop until quit button is pressed and there is no experiment running */
 
-	do
-	{
-		obj = fl_do_forms( );
-	} while ( obj != main_form->quit || fl_form_is_visible( run_form->run ) );
+	while ( fl_do_forms( ) != main_form->quit )
+		;
 
 	/* Do everything necessary to end program */
 
@@ -174,10 +170,6 @@ void xforms_init( int *argc, char *argv[] )
 
 void xforms_close( void )
 {
-	if ( fl_form_is_visible( run_form->run ) )
-		fl_hide_form( run_form->run );
-	fl_free_form( run_form->run );
-
 	if ( fl_form_is_visible( main_form->fsc2 ) )
 		fl_hide_form( main_form->fsc2 );
 	fl_free_form( main_form->fsc2 );
@@ -422,7 +414,8 @@ void test_file( FL_OBJECT *a, long b )
 	{
 		user_break = SET;
 		delete_devices( );                       /* run the exit hooks ! */
-		eprint( FATAL, "Program test aborted, received user break.\n" );
+		eprint( FATAL, "Program test aborted, received user break at "
+				"%s:%ld.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 

@@ -536,6 +536,9 @@ void exp_test_run( void )
 				cur_prg_token < prg_token + prg_length )
 		{
 			token_count++;
+
+			/* Give the `Stop Test' button a chance to get tested... */
+
 			if ( ! just_testing && token_count % 256 == 0 )
 				fl_check_only_forms( );
 
@@ -660,8 +663,6 @@ int exp_runlex( void )
 	if ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
 	{
 		token_count++;
-		if ( TEST_RUN && ! just_testing && token_count % 512 == 0 )
-			fl_check_only_forms( );
 
 		Fname = cur_prg_token->Fname;
 		Lc = cur_prg_token->Lc;
@@ -733,6 +734,8 @@ int conditionlex( void )
 
 	if ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
 	{
+		token_count++;
+
 		Fname = cur_prg_token->Fname;
 		Lc = cur_prg_token->Lc;
 
@@ -917,7 +920,7 @@ void get_for_cond( Prg_Token *cur )
 		cur_prg_token->tv.vptr->flags &= ~ NEW_VARIABLE;
 	}
 
-	/* Make sure loop variable is either integer or float */
+	/* Make sure the loop variable is either an integer or a float */
 
 	if ( ! ( cur_prg_token->tv.vptr->type & ( INT_VAR | FLOAT_VAR ) ) )
 	{
@@ -927,24 +930,24 @@ void get_for_cond( Prg_Token *cur )
 		THROW( EXCEPTION );
 	}
 
-	/* store pointer to loop variable */
+	/* Store pointer to loop variable */
 
 	cur->count.forl.act = cur_prg_token->tv.vptr;
 
 	/* Now get start value to be assigned to loop variable */
 
-	cur_prg_token +=2;                  /* skip variable and `=' token */
-	in_for_lex = SET;                   /* allow `:' as separator */
-	conditionparse( );                  /* get start value */
-	assert( Var_Stack->next == NULL );  /* Paranoia as usual... */
+	cur_prg_token +=2;                    /* skip variable and `=' token */
+	in_for_lex = SET;                     /* allow `:' as separator */
+	conditionparse( );                    /* get start value */
+	assert( Var_Stack->next == NULL );    /* Paranoia as usual... */
 
-	/* Make sure there is at least one more token for the end loop value */
+	/* Make sure there is at least one more token, i.e. the loop's end value */
 
 	if ( cur_prg_token->token != ':' )
 	{
 		cur++;
 		in_for_lex = UNSET;
-		eprint( FATAL, "%s:%ld: Missing end value for FOR loop.\n",
+		eprint( FATAL, "%s:%ld: Missing end value in FOR loop.\n",
 				cur->Fname, cur->Lc );
 		THROW( EXCEPTION );
 	}
@@ -996,7 +999,7 @@ void get_for_cond( Prg_Token *cur )
 	{
 		cur++;
 		in_for_lex = UNSET;
-		eprint( FATAL, "%s:%ld: Invalid end value for FOR loop.\n",
+		eprint( FATAL, "%s:%ld: Invalid end value in FOR loop.\n",
 				cur->Fname, cur->Lc );
 		THROW( EXCEPTION );
 	}
@@ -1007,7 +1010,7 @@ void get_for_cond( Prg_Token *cur )
 	{
 		cur++;
 		in_for_lex = UNSET;
-		eprint( FATAL, "%s:%ld: End value of FOR loop is floating point "
+		eprint( FATAL, "%s:%ld: End value in FOR loop is floating point "
 				"value while loop variable is an integer.\n",
 				cur->Fname, cur->Lc );
 		THROW( EXCEPTION );
@@ -1039,14 +1042,14 @@ void get_for_cond( Prg_Token *cur )
 		}
 
 	}
-	else                                    /* get for loop incr value */
+	else                                        /* get for loop increment */
 	{	
-		cur_prg_token++;                      /* skip the `:' */
-		conditionparse( );                    /* get end value */
+		cur_prg_token++;                        /* skip the `:' */
+		conditionparse( );                      /* get end value */
 		in_for_lex = UNSET;
-		assert( Var_Stack->next == NULL );    /* Paranoia as usual... */
+		assert( Var_Stack->next == NULL );      /* Paranoia as usual... */
 
-		/* Make sure increment is either inetger or float */
+		/* Make sure the increment is either an integer or a float */
 
 		if ( ! ( Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
@@ -1056,7 +1059,7 @@ void get_for_cond( Prg_Token *cur )
 			THROW( EXCEPTION );
 		}
 
-		/* If loop variable is integer `incr' must also be integer */
+		/* If loop variable is an integer, `incr' must also be integer */
 
 		if ( cur->count.forl.act->type == INT_VAR &&
 			 Var_Stack->type == FLOAT_VAR )
@@ -1071,14 +1074,14 @@ void get_for_cond( Prg_Token *cur )
 
 		cur->count.forl.incr.type = Var_Stack->type;
 
-		/* Check that increent isn't zero */
+		/* Check that increment isn't zero */
 
 		if ( Var_Stack->type == INT_VAR )
 		{
 			if ( Var_Stack->val.lval == 0 )
 			{
 				cur++;
-				eprint( FATAL, "%s:%ld: Zero increment for FOR loop.\n",
+				eprint( FATAL, "%s:%ld: Zero increment in FOR loop.\n",
 						cur->Fname, cur->Lc );
 				THROW( EXCEPTION );
 			}
@@ -1127,7 +1130,7 @@ bool test_for_cond( Prg_Token *cur )
 				       cur->count.forl.incr.lval : cur->count.forl.incr.dval );
 	}
 
-	/* get sign of increment */
+	/* Get sign of increment */
 	
 	if ( ( cur->count.forl.incr.type == INT_VAR &&
 		   cur->count.forl.incr.lval < 0 ) ||
@@ -1208,14 +1211,14 @@ void save_restore_variables( bool flag )
 	{
 		assert( var_list_copy == NULL );          /* don't save twice ! */
 
-		/* count the number of variables and get memory for storing them */
+		/* Count the number of variables and get memory for storing them */
 
 		for ( var_count = 0, src = var_list; src != NULL;
 			  var_count++, src = src->next )
 			;
 		var_list_copy = T_malloc( var_count * sizeof( Var ) );
 
-		/* copy all of them into the backup region */
+		/* Copy all of them into the backup region */
 
 		for ( src = var_list, cpy = var_list_copy; src != NULL;
 			  cpy++, src = src->next )
@@ -1247,10 +1250,10 @@ void save_restore_variables( bool flag )
 	}
 	else
 	{
-		assert( var_list_copy != NULL );    /* don't restore without save ! */
-		assert( var_list == old_var_list );       /* just a bit paranoid... */
+		assert( var_list_copy != NULL );     /* don't restore without save ! */
+		assert( var_list == old_var_list );  /* just being a bit paranoid... */
 
-		/* get rid of memory for arrays that might have been changed during
+		/* Get rid of memory for arrays that might have been changed during
 		   the test */
 
 		for ( cpy = var_list; cpy != NULL; cpy = cpy->next )
@@ -1269,7 +1272,7 @@ void save_restore_variables( bool flag )
 			  cpy = src->next, src++  )
 			memcpy( cpy, src, sizeof( Var ) );
 
-		/* deallocate memory used in arrays */
+		/* Deallocate memory used in arrays */
 
 		T_free( var_list_copy );
 		var_list_copy = NULL;
