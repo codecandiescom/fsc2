@@ -74,7 +74,7 @@ new_data = tds754a_get_curve( 1 );        // get curve from channel 1
 @noindent
 and then changing dozens of references to the TDS754A oscilloscope in
 each and every @code{EDL} script when someone else needs your
-oscilloscope for just a few days and you have to do with the TDS520
+oscilloscope for a few days and you have to do with the TDS520
 oscilloscope in between.
 
 Of course, using generic functions is not the silver bullet for all
@@ -120,7 +120,7 @@ the first digitizer, but that's optional.)
 
 In situations where only the module of the second of two similar devices
 defines a function (e.g.@: because the first device doesn't has the
-necessary capability) the function can be used with and without
+necessary capabilities) the function can be used with and without
 appending the @code{"#2"} to the function name. To remind you about this
 a short message is printed out when the module gets loaded.
 
@@ -165,10 +165,6 @@ measurement)
 @item hjs_fc
 Pseudo-device for magnet control in the Osnabrueck group
 @end table
-@noindent
-Because magnets hardly ever get changed (and if @code{fsc2} is set up
-correctly for the spectrometer) one can use @code{magnet} as the module
-name instead.
 
 Since it is not possible for the @strong{AEG} magnets to measure the
 field using just the magnet power supply it is necessary also to specify
@@ -178,11 +174,12 @@ in the @code{DEVICES} section. See the next section for the implemented
 gaussmeter and the related functions.
 
 All magnet power supplies (except the one used with the Oxford magnet
-for the @w{360 GHz} spectrometer) don't do continuous sweeps but instead
-the field current is stepped. Thus not sweep rates are used but field
-(or current, see below) step sizes are needed in defining a sweep. The
-only exception is the power supply for the Oxford magnet, here only
-continuous sweeps can be done and sweep rates must be specified.
+for the @w{360 GHz} spectrometer) don't do continuous sweeps but the
+field current is stepped instead. Thus many of the functions discussed
+in the following don't expect sweep rates are but field (or current, see
+below) step sizes for defining a sweep. The only exception is the power
+supply for the Oxford magnet, here only continuous sweeps can be done
+and sweep rates must be specified.
 
 If an @strong{AEG} magnet module is listed in the @code{DEVICES} section
 the program will try to calibrate the field sweep parameters at the
