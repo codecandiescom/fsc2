@@ -3203,12 +3203,97 @@ is used in conjunction with the Spec-10 CCD camera by Roper Scientific.
 @findex monochromator_name()
 Returns a string with the name of the monochromator being used.
 
-@c monochromator_turret, -1, EXP;            // set/query current turret
-@c monochromator_grating, -1, EXP;           // set/query current grating
-@c monochromator_wavelength, -1, EXP;        // set/query wavelength
+
+@anchor{monochromator_grating}
+@item monochromator_grating()
+@findex monochromator_grating()
+Function queries or sets a new grating. If called with no argument the
+function returns the number of the currently used grating (starting with
+1). If called with an integer argument the monochromator switches to the
+selected grating if it is available. The center wavelength of the
+grating remains the same as for the previous grating.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor {monochromator_wavelength}
+@item monochromator_wavelength()
+@findex monochromator_wavelength()
+If called with no argument the function returns the current center
+wavelength (in m) of the grating. If called with an argument the grating
+is moved to the specified center wavelength (which must be between @w{0
+nm} and @w{1400 nm}.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+@anchor{monochromator_groove_density}
+@item monochromator_groove_density()
+@findex monochromator_groove_density()
+If called with no argument the function returns the number of grooves
+(per meter) of the currently used grating. If called with an integer
+argument it returns the number of grooves (per m) off the grating
+indexed by this number (starting with 1).
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{monochromator_turret}
+@item monochromator_turret()
+@findex monochromator_turret()
+If called with no argument the function returns the number of the
+currently used turret of the monochromator (an integer number starting
+at 1). If called with an integer argument it switches the monochromator
+to the indexed turret.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{monochromator_wavelength_axis}
+@item monochromator_wavelength_axis()
+@findex monochromator_wavelength_axis()
+This function requires that also the module for a CCD camera is
+available that returns information about the number of pixels and the
+distance between pixels. It then returns an array with two elements,
+where the first element is the wavelength at the leftmost pixel of the
+CCD chip and the second element is the wavelength difference between
+neighboring pixels. The function also accepts up to two arguments, an
+integer for the grating number and the wavelength at the center of the
+chip. If these arguments aren't given, the currently used grating and
+the wavelength of the monochromator is used.
+
+To be able to work the function requires that a calibration for the
+grating has been loaded, either by calling
+@code{monochromator_set_calibration()} or
+@code{monochromator_read_calibration()} (see below). If no calibration
+has been loaded for the grating a warning is printed and both elements of
+the array get set to @code{1}.
+
+Please note, that in reality the wavelength difference at two
+neighboring pixels isn't constant over the whole width of the chip. When
+you use the returned values for the center of the chip, the results for
+are in quite good agreement with the real wavelengths, but at the edges
+of the chip the accuracy deteriorates, for a grating with 1200 grooves
+per mm the deviation is about @w{0.5 nm} and for gratings with lower
+groove densities the deviations get larger proportional to the inverse
+of the groove density. To obtain the exact wavelength for a certain
+pixel of the chip use the function
+@code{monochromator_calc_wavelength()} discussed below.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{monochromator_calc_wavelength}
+@item monochromator_calc_wavelength()
+@findex monochromator_calc_wavelength()
+
+
+
 @c monochromator_install_grating, 2, EXP;    // install new grating
-@c monochromator_groove_density, 1, EXP;     // get groove density of grating
-@c monochromator_wavelength_axis, -1, EXP;   // caclulate wavelength axis
 @c monochromator_set_calibration, -1, EXP;   // manually set calibration
 @c monochromator_load_calibration, -1, EXP;  // read in calibration file
 @c monochromator_init_offset, -1, EXP;
