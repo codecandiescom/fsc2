@@ -1,0 +1,326 @@
+/*
+    EDL program for time-resolved ENDOR on transient radicals
+
+    $Id$
+*/
+    
+
+DEVICES:
+
+hp8647a;                     // RF synthesizer
+tds520;                      // digitizer
+er035m_sas;                  // gauss meter
+
+
+VARIABLES:
+
+start_freq  = 10.5 MHz;
+end_freq    = 23.0 MHz;
+step_freq   =   50 kHz;          
+
+attenuation =  -5.5 dB;
+
+N_runs      = 20;            // how many times to repeat the whole experiment
+N_averages  = 50;            // number of averages per frequency point
+
+window_start = 3 us;         // start of integration window (after trigger)
+window_width = 5 us;         // width of integration window
+
+
+
+/***********************************************/
+/* Values that usually don't need changes      */
+/***********************************************/
+
+Channel = CH1;               // input channel of the digitizer
+
+window_start_2 = 0;           // start of second integration window, if zero
+                              // window starts window_width seconds before
+                              // end of trace 
+
+/***********************************************/
+/* Nothing needs to be changed below this line */
+/***********************************************/
+
+
+freq = start_freq;
+
+N_steps = round( ( end_freq - start_freq ) / step_freq ) + 1;
+
+curve[ * ];                      // for new raw data
+mean_curve[ N_steps, * ];        // complete field of averaged data
+base_curve[ * ];                 // averaged baseline curve
+Pretrigger;
+ground = 0.0;
+mean_ground[ N_steps ];
+
+Rec_len;                         // number of points of trace
+trig_pos;                        // position od trigger in data set (range 0-1)
+time_base;                       // time base of digitizer (in s)
+time_res;                        // digitizer time resolution (in ns)
+
+min_time, max_time;              // first / last point (in ns)
+start_time, end_time;            // intergation window start / end pos. (in ns)
+Start_pos_1, Start_pos_2, Width;
+N_base_curves;
+integ, base_int;
+integral;
+
+I, J, K, M;                      // counters
+
+F1, F2, F3;                      // file handlers
+
+End_index;
+Is_stored = 0;
+
+Stoch[ N_steps ];
+Set[ N_steps ];
+SIndex;
+
+
+PREPARATIONS:
+
+synthesizer_use_table( );//"table_big.dat" );
+synthesizer_attenuation( attenuation );
+synthesizer_frequency( start_freq );
+synthesizer_att_ref_freq( 14 MHz );
+synthesizer_modulation( "OFF" );
+
+digitizer_num_averages( N_averages );
+
+init_2d( 3, 0, N_steps, 0, 0, start_freq * 1.0e-6, step_freq * 1.0e-6,
+         "Time / us", "Radio frequency / MHz", "Signal / mV" );
+
+EXPERIMENT:
+
+synthesizer_state( "ON" );
+
+/* Get the digitizers record length, trigger position and time base to be able
+   to readjust the RF scale and to find out how many points we have before the
+   laser starts - these points are used to get rid of changing 'zero levels' */
+
+Rec_len   = digitizer_record_length( );
+trig_pos  = digitizer_trigger_position( );
+time_base = digitizer_timebase( );
+
+time_res  = time_base * 1.0e9 / 50.0;
+
+min_time = - trig_pos * Rec_len * time_res;
+max_time   = min_time + Rec_len * time_res;
+
+Pretrigger = int( 0.9 * trig_pos * Rec_len );
+change_scale( min_time * 1.0e-3, time_res * 1.0e-3 );
+
+/* Get a file for storing all data */
+
+F1 = get_file( "File for storing complete data sets:" );
+F2 = get_file( "File for storing averaged data sets:" );
+
+IF is_file( F2 ) {
+    fsave( F2, "% Start frequency  = # MHz\n", start_freq * 1.0e-6 );
+    fsave( F2, "% End frequency    = # MHz\n", end_freq * 1.0e-6 );
+    fsave( F2, "% Step frequency   = # kHz\n", step_freq * 1.0e-3 );
+    fsave( F2, "% Attenuation      = # dB\n", attenuation );
+    fsave( F2, "% Record length    = #\n", Rec_len );
+    fsave( F2, "% Trigger position = #\n", int( trig_pos * Rec_len ) );
+    fsave( F2, "% Time base        = # ns\n", time_base * 1.0e-9 );
+    fsave( F2, "%Sensitivity       = # mV\n",
+           1.0e3 * digitizer_sensitivity( Channel ) );
+    fsave( F2, "% Field            = # G\n", measure_field( ) );
+    save_comment( F2, "% ", "Sample: \nMicrowave frequency: \n"
+                  "Microwave power: \nTemperature: \n" );
+}
+
+/* Set the integration window limits */
+
+Start_pos_1 = int( trig_pos * Rec_len + 0.02 * window_start / time_base ) + 1;
+IF Start_pos_1 < 1 {
+	print( "Integration window starts too early.\n" );
+	abort( );
+}
+IF Start_pos_1 > Rec_len {
+	print( "Integration window starts too late.\n" );
+	abort( );
+}
+
+Width = int( 50 * window_width / time_base );
+IF Width < 1 {
+	Width = 1;
+}
+IF Start_pos_1 + Width > Rec_len {
+	print( "Integration window is too long.\n" );
+	abort( );
+}
+
+IF window_start_2 == 0.0 {
+	Start_pos_2 = Rec_len - Width + 1;
+} ELSE {
+	Start_pos_2 = int(   trig_pos * Rec_len
+					   + 0.02 * window_start_2 / time_base ) + 1;
+	IF Start_pos_2 < 1 {
+		print( "Second integration window starts too early.\n" );
+		abort( );
+	}
+	IF ( Start_pos_2 > Rec_len {
+		print( "Second integration window starts too late.\n" );
+		abort( );
+	}
+	IF Start_pos_2 + Width > Rec_len {
+		print( "Second integration window is too long.\n" );
+		abort( );
+	}
+}
+
+
+/* Set up the array of random indices - when done the array 'Stoch' contains
+   all number between 0 and (N_steps-1) in random order */
+
+set_seed( );
+SIndex = floor( N_steps * random( ) );
+FOR I = 1 : N_steps {
+	WHILE Set[ SIndex + 1 ] != 0 {
+		SIndex = ( SIndex + 1 ) % N_steps;
+	}
+	Set[ SIndex + 1 ] = 1;
+	Stoch[ I ] = SIndex;
+	SIndex = int( N_steps * random( ) );
+}
+
+
+/* Now, finally, we can start the experiment */
+
+/* Get the mean of the curve at the start and the end frequency to
+   be used for baseline correction */
+
+synthesizer_frequency( start_freq );
+digitizer_start_acquisition( );
+curve = digitizer_get_curve_fast( Channel );
+IF Pretrigger != 0 {
+	ground = mean( curve, 1, Pretrigger );
+} ELSE {
+	ground = 0;
+}
+base_curve = curve - ground;
+
+synthesizer_frequency( end_freq );
+digitizer_start_acquisition( );
+curve = digitizer_get_curve_fast( Channel );
+IF Pretrigger != 0 {
+	ground = mean( curve, 1, Pretrigger );
+} ELSE {
+	ground = 0;
+}
+base_curve = ( base_curve + curve - ground ) / 2.0;
+
+
+FOR J = 1 : N_runs
+{
+	print( "Starting #. run of #.\n", J, N_runs );
+
+	freq = start_freq + Stoch[ 1 ] * step_freq;
+	synthesizer_frequency( freq );
+
+    digitizer_start_acquisition( );
+
+    FOR I = 1 : N_steps
+    {
+		M = Stoch[ I ] + 1;
+
+        Is_stored = 0;
+
+        /* Get next curve from the digitizer */
+
+        curve = digitizer_get_curve_fast( Channel );
+
+        /* Write the new date to file */
+
+        IF is_file( F1 ) {
+            fsave( F1, "% #. run, frequency = # MHz\n\n", J, freq * 1.0e-6 );
+            save( F1, curve );
+        }
+
+        /* If this wasn't the very last curve of the run set the new frequency
+           and already start the next masurement, so we're not loosing time 
+           doing all the graphics */
+
+        IF I != N_steps {
+            freq = start_freq + Stoch[ I + 1 ] * step_freq;
+            synthesizer_frequency( freq );
+            digitizer_start_acquisition( );
+        }
+
+        /* Add the new curve to the results from previous runs */
+
+		IF J == 1 {
+		    mean_curve[ M ] = curve;
+		} ELSE {
+	        mean_curve[ M ] = ( ( J - 1 ) * mean_curve[ M ] + curve ) / J;
+		}
+        Is_stored = 1;
+
+        /* Calculate the mean of the data before the trigger which is used
+		   later to get rid of changes of the 'zero level' */
+
+        IF Pretrigger != 0 {
+            ground = mean( curve, 1, Pretrigger );
+            mean_ground[ M ] = ( ( J - 1 ) * mean_ground[ M ] + ground ) / J;
+        } ELSE {
+			ground = mean_ground[ M ] = 0;
+		}
+
+        /* Calculate the integration window and the cleaned up curve (now
+		   using 'curve' for temporary storage) */
+
+        integral = 1.0e3 * (   mean( mean_curve[ M ], Start_pos_1, Width )
+		                     - mean( mean_curve[ M ], Start_pos_2, Width ) );
+        curve = 1.0e3 * ( mean_curve[ M ] - base_curve - mean_ground[ M ] );
+
+        /* Display the new data */
+
+        display( 1, M, 1.0e3 * mean_curve[ M ], 1,
+                 1, M, curve, 2,
+                 1, M, integral, 3 );
+    }
+}
+
+
+/* Post-experiment stuff */
+
+ON_STOP:
+
+synthesizer_state( "OFF" );
+
+/* Save the averaged data if a file has been selected */
+
+IF ! Is_stored {           // Check if data of last trace were stored
+    I -= 1;
+    freq = start_freq + I * step_freq;
+}
+
+IF is_file( F2 )
+{
+    IF J < N_runs {
+        fsave( F2, "% Number of runs: #\n", J );
+    } ELSE {
+        fsave( F2, "% Number of runs: #\n", N_runs );
+    }
+
+    IF I < N_steps {
+        fsave( F2, "% Last run not finished, end frequency was # MHz\n",
+               freq * 1.0e-6 );
+    }
+    save_program( F2, "% " );
+
+    IF J == 1 & I < N_steps {
+        End_index = I;
+    } ELSE {
+        End_index = N_steps;
+    }
+
+    freq = start_freq;
+    FOR I = 1 : End_index {
+        fsave( F2, "\n% Frequency: # MHz\n\n", freq * 1.0e-6 );
+        freq += step_freq;
+        save( F2, mean_curve[ I ] );
+    }
+}
