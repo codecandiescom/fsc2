@@ -418,6 +418,3 @@ static int check_board( void )
 
 	return WITIO_48_OK;
 }
-
-    return WITIO_48_OK;
-}
