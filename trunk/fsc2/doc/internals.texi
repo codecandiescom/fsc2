@@ -1542,13 +1542,14 @@ When the child needs to send data to the parent (there's no sending of
 data from the parent to the child that isn't initialized by the child)
 it sets the @code{type} field of the @code{SLOT} structure indexed by
 the @code{high} marker (which it increments when the message has been
-assembled) to the value @code{DATA}. It then creates a new shared memory
-segment for the data and then puts the key of this shared memory segment
-into the @code{shm_id} field of the slot. Whenever it has time the
-parent checks the values of the @code{high} and the @code{low} marker
-and, if they are different, deal with the new data, afterwards
-incrementing the @code{low} marker. Both markers wrap around when they
-reach the number of avalailable @code{SLOT} structures.
+assembled) to the values @code{DATA_1D} or @code{DATA_2D}. It then
+creates a new shared memory segment for the data and then puts the key
+of this shared memory segment into the @code{shm_id} field of the
+slot. Whenever it has time the parent checks the values of the
+@code{high} and the @code{low} marker and, if they are different, deal
+with the new data, afterwards incrementing the @code{low} marker. Both
+markers wrap around when they reach the number of avalailable
+@code{SLOT} structures.
 
 
 To keep the child process from sending more messages than there are free
@@ -1601,23 +1602,119 @@ The child process will have itself initialized in the mean time in the
 function @code{run_child()} in @file{run.c}. It closes the ends of pipes
 it doesn't need anymore and sets up its own signal handlers. Then its
 main work starts. It then invokes the function @code{do_measurement()}
-where it, ust as already described above for the test run, starts
-interpreting the stored tokens from the @code{EXPERIMENT} section of the
-@code{EDL} script. Again. for tokens not involved with flow control it
-starts the parser created from @file{exp_parser.y}. This will in turn
-request new tokens, which it gets delivered from the array of stored
-tokens, and executes the code associated with the sequences of tokens.
-Only flow control tokens are treated differently, for handling of the
-tokens in conditions the parser generated from @file{condition_parser.y}
-is invoked temporarily, and the code in
-@code{deal_with_program_tokens()} takes care that the program is running
-according to the flow control tokens. The only real difference to the
-test run is that we now also have to make sure that when the child
-process gets a @code{SIGUSR2} signal, indicating that the parent tells
-it to stop the experiment, the @code{EDL} code folllowing the
-@code{ON_STOP} label is executed immediately and then the child process
-exits.
+where, just as already described above for the test run, the stored
+tokens from the @code{EXPERIMENT} section of the @code{EDL} script get
+interpreted. Again for tokens not involved with flow control the parser
+created from @file{exp_parser.y} is used. This will in turn get new
+tokens delivered from the array of stored tokens by the function
+@code{exp_runlex()} in @file{exp.c} (the same already used in the test
+run), executing the code associated with the sequences of tokens. And
+again tokens for flow control are not dealt with by the parser but by
+the code in @code{deal_with_program_tokens()}.
 
 
+The most notable differences to the test run is that the member
+@code{mode} of the global structure @code{Internals} is now set to a
+value of @code{EXPERIMENT}, which is tested all over the program anf the
+modules, either directly or via the macro @code{FSC2_MODE}. The other
+difference is that now it is always tested if the child process got a
+signal from the parent process, telling it to quit (this happend if the
+member @code{do_quit} of the global structure @code{EDL} is set).  In
+this case the flow of control has to be transfered immediately (or, to
+be precise, immediately after the parser has interpreted the current
+statement) to the code following after the @code{ON_STOP} label.
 
-That's how far I got yet, the sequel is coming soon, stay tuned ;-)
+
+When all the code from the @code{EDL} script has been executed the
+function @code{do_measurement()} returns to @code{run_child()}.  Here
+the child exit hook functions in all modules is executed.  These
+functions are run within the context of the child process and shouldn't
+be confused with the exit hook functions that are executed in the
+context of the parent process when the module gets unloaded.  Then the
+child process sends the parent a signal to inform it that it's going to
+exit and does so after waiting for the parent to send it another signal.
+
+
+After this tour the force throught the childs code lets take a closer
+look at the interactions between the child and the parent. Most
+important is, of course, the exchange of data between the child and
+parent. We already mentioned above how this is done, i.e.@: via a shared
+memory segment or a set of pipes. Now lets investigate the way data and
+requests are formated a bit further.
+
+
+As already has been mentioned, every data exchange is triggered by the
+child process, which puts a @code{SLOT} structure in to the message
+queue, residing the in shared memory, and increments the @code{high}
+marker of the message queue. The @code{type} member of the @code{SLOT}
+structure is set to either @code{DATA_1D}, @code{DATA_2D} or
+@code{REQUEST}. Messages of type @code{DATA_1D} and @code{DATA_2D} are
+messages related to drawing new data on the screen, either in the window
+for for one- or two-dimensional data. Messages of @code{REQUEST} are
+messages that ask the parent to do something on behalf of the child
+process (e.g.@: asking the user to enter a file name, click on the
+button in an alert message, create, modify or delete an element in the
+tool box etc.) and will always be replied to by the parent.
+
+In the @code{accept_new_data()} function new messages of the types
+@code{DATA_1D} and @code{DATA_2D} are taken from the message queue and
+the corresponding functions get called. Because a message can consist of
+more than one set of data (e.g.@: when in the @code{EDL} function
+@code{display_1d()} new data are to be drawn for more than one curve,
+there would be one set for each curve). Thus the first bit of
+information in the data set in shared memory and indexed by the key
+(member @code{shm_id}) in the @code{SLOT} structure is the number of
+data sets. Should this number be negative it means that the message
+isn't meant for the @code{EDL} functions @code{display_1d()} or
+@code{display_2d()} (i.e.@: the functions for drawing new data on the
+screen) but for one of the functions @code{clear_curve()},
+@code{change_scale()}, @code{change_label()}, @code{rescale()},
+@code{draw_marker()}, @code{clear_marker()} or @code{display_mode()}
+(either the 1D or 2D version of the function, depending if the data type
+was @code{DATA_1D} or @code{DATA_2D}). The messages are dealt with in
+the function @code{other_data_request()} in @file{accept.c}, which then
+calls the appropriate functions in the parts of the program responsible
+for graphics (which are @file{graphics.c}, @file{graph_handler_1d.c},
+@file{graph_handler_2d.c} and @file{graph_cut.c}).
+
+
+In contrast, for data packages with a positive number of sets, the
+functions @code{accept_1d_data()} or @code{accept_2d_data()} (also in
+@file{accept.c}) get invoked for each of the data sets. It s the
+resonsibility of these functions to insert the new data into the
+internal structures maintained by the program for the data currently
+displayed. When the functions are done with a data set these internal
+structures must be in a state that the next redraw of the canvas for
+displaying the data will result in the new data becoming displayed
+correctly. Explaining this in detail would require to also explain the
+whole concept of the graphics in @code{fsc2}, which I am not going to do
+here. If you want to know more about it you will find the source code
+associated with graphics in the already mentioned files
+@file{graphics.c}, @file{graph_handler_1d.c}, @file{graph_handler_2d.c}
+and @file{graph_cut.c}.
+
+
+Now to the handling of requests: when in @code{accept_new_data()} a
+message with this type gets found contol is passed back to its calling
+function, @code{new_data_handler()} in @file{comm.c}, which teh invokes
+@code{reader()}. Within this function the parent process reads on its
+side of the pipe to the child process. The child process will write a
+structure of type @code{CommStruct} (see @file{comm.h}) to the pipe.
+This structure contains a @code{type} field and a union, which in some
+cases might already contain all information associated with the request.
+Otherwise, the child will also have to send further data via the pipe to
+the parent. The layout of these additional data depends strongly on the
+type of the request and you will have to look up the functions that
+initialize the request to find out more about it.
+
+
+Writing of the data to the pipe is done by the child via the
+@code{writer()} function in @file{comm.c}. When the child process has
+successfully written its data to the pipe it must wait for the parent to
+reply by listening on its read side of the pipe by calling
+@code{reader()}. In the mean time the parent will execute whatever
+actions associated with a request and then call @code{writer()} to send
+back either just an acknowledgment or a set of data to the child process
+waiting in @code{reader()} for the reply.
+
+
