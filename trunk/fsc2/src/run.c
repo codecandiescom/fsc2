@@ -27,6 +27,9 @@
 #include "serial.h"
 #include "gpib_if.h"
 
+#if defined WITH_RULBUS
+#include <rulbus.h>
+#endif
 
 extern int exp_runparse( void );              /* from exp_run_parser.y */
 extern int exp_runparser_init( void );        /* from exp_run_parser.y */
