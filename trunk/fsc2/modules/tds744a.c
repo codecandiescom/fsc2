@@ -930,7 +930,10 @@ static Var *get_curve( Var *v, bool use_cursor )
 		return nv;
 	}
 
-	length = TEST_REC_LEN;
+	if ( tds744a.is_rec_len  )
+		length = tds744a.rec_len;
+	else
+		length = TEST_REC_LEN;
 	array = T_malloc( length * sizeof( double ) );
 	for ( i = 0; i < length; i++ )
 		array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );

@@ -22,7 +22,8 @@ static const char *lockins[ ] = { "sr510", "sr530", "sr810", "sr830", NULL };
 static       int dac_ports[ ] = { 6,       6,       4,       4      };
 
 
-#define V_TO_A_FACTOR	      -97.5   /* Conversion factor of voltage at DAC */
+//#define V_TO_A_FACTOR	      -97.5   /* Conversion factor of voltage at DAC */
+#define V_TO_A_FACTOR	      -95.2   /* Conversion factor of voltage at DAC */
 
 
 
@@ -694,7 +695,21 @@ static double keithley228a_set_current( double new_current )
 	{
 		if ( fabs( new_current ) >= 0.04 )
 		{
-			power_supply_current = 1.0e-2 * lround( 1.e2 * new_current );
+			if ( new_current >= 0.0)
+			{
+				power_supply_current = 1.0e-2 * floor( 1.0e2 * new_current );
+				if ( fabs( power_supply_current - new_current ) >
+					                                          9.9999999999e-3 )
+					power_supply_current += 1.0e-2;
+			}
+			else
+			{
+				power_supply_current = 1.0e-2 * ceil( 1.0e2 * new_current );
+				if (fabs( power_supply_current - new_current ) >
+					                                          9.9999999999E-3 )
+					power_supply_current -= 1.0e-2;
+			}
+
 			dac_volts = V_TO_A_FACTOR
 				        * fabs( power_supply_current - new_current );
 		}
@@ -860,7 +875,19 @@ static void keithley228a_get_corrected_current( double c, double *psc,
 
 	 if ( fabs( c ) >= 0.04 )
 	 {
-		 *psc = 1.0e-2 * lround( 1.0e2 * c );
+		 if ( c >= 0.0)
+		 {
+			 *psc = 1.0e-2 * floor( 1.0e2 * c );
+			 if ( fabs( *psc - c ) > 9.9999999999e-3)
+				 *psc += 1.0e-2;
+		 }
+		 else
+		 {
+			 *psc = 1.0e-2 * ceil( 1.0e2 * c );
+			 if ( fabs( *psc - c ) > 9.9999999999e-3 )
+				 *psc -= 1.0e-2;
+		 }
+
 		 *dacv = V_TO_A_FACTOR * fabs( *psc - c );
 	 }
 	 else
