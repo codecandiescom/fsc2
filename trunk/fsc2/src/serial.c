@@ -309,12 +309,29 @@ void fsc2_serial_close( int sn )
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Function for sending data via one of the serial ports. It expects */
+/* 5 arguments, first the number of the serial port, then a buffer   */
+/* with the data and its length, a timeout in us we are supposed to  */
+/* wait for data to become writeable to the serial port and finally  */
+/* a flag that tells if the function is to return immediately if a   */
+/* signal is received before any data could be send.                 */
+/* If the timeout value in 'us_wait' is zero the function won't wait */
+/* for the serial port to become ready for writing, if it's negative */
+/* the the function potentially will wait indefinitely long.         */
+/* The function returns the number of written bytes or -1 when an    */
+/* error happened. A value of 0 is returned when no data could be    */
+/* written, possibly because a signal was received before writing    */
+/* started.                                                          */
+/*-------------------------------------------------------------------*/
 
-ssize_t fsc2_serial_write( int sn, const void *buf, size_t count )
+ssize_t fsc2_serial_write( int sn, const void *buf, size_t count,
+						   long us_wait, bool quit_on_signal )
 {
 	ssize_t write_count;
+	fd_set wrds;
+	struct timeval timeout;
+	struct timeval before, after;
 
 
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
@@ -324,7 +341,55 @@ ssize_t fsc2_serial_write( int sn, const void *buf, size_t count )
 	}
 
 	raise_permissions( );
-	write_count =  write( Serial_Port[ sn ].fd, buf, count );
+
+	if ( us_wait != 0 )
+	{
+		FD_ZERO( &wrds );
+		FD_SET( Serial_Port[ sn ].fd, &wrds );
+
+	write_retry:
+
+		if ( us_wait > 0 )
+		{
+			timeout.tv_sec  = us_wait / 1000000;
+			timeout.tv_usec = us_wait % 1000000;
+		}
+
+		gettimeofday( &before, NULL );
+
+		switch ( select( Serial_Port[ sn ].fd + 1, NULL, &wrds, NULL,
+						 us_wait > 0 ? &timeout : NULL ) )
+		{
+			case -1 :
+				if ( errno != EINTR )
+				{
+					lower_permissions( );
+					return -1;
+				}
+
+				if ( ! quit_on_signal )
+				{
+					gettimeofday( &after, NULL );
+					us_wait -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
+							   - ( before.tv_sec * 1000000 - before.tv_usec );
+					if ( us_wait > 0 )
+						goto write_retry;
+				}
+				/* fall through */
+
+			case 0 :
+				lower_permissions( );
+				return 0;
+		}
+	}
+
+	while ( ( write_count = write( Serial_Port[ sn ].fd, buf, count ) ) < 0 
+			&& errno == EINTR && ! quit_on_signal )
+		/* empty */ ;
+
+	if ( write_count < 0 && errno == EINTR )
+		write_count = 0;
+
 	lower_permissions( );
 
 	return write_count;
@@ -342,7 +407,8 @@ ssize_t fsc2_serial_write( int sn, const void *buf, size_t count )
 /* for data to appear on the serial port, when it is negative the      */
 /* function waits indefinitely long for data.                          */
 /* The function returns the number of read in data or -1 when an error */
-/* happened.                                                           */
+/* happened. A value of 0 is returned when no data could be read in,   */
+/* possibly because a signal was received before reading started.      */
 /*---------------------------------------------------------------------*/
 
 ssize_t fsc2_serial_read( int sn, void *buf, size_t count,
@@ -352,6 +418,7 @@ ssize_t fsc2_serial_read( int sn, void *buf, size_t count,
 	fd_set rfds;
 	struct timeval timeout;
 	struct timeval before, after;
+
 
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
 	{
@@ -371,8 +438,11 @@ ssize_t fsc2_serial_read( int sn, void *buf, size_t count,
 
 	read_retry:
 
-		timeout.tv_sec  = us_wait / 1000000;
-		timeout.tv_usec = us_wait % 1000000;
+		if ( us_wait > 0 )
+		{
+			timeout.tv_sec  = us_wait / 1000000;
+			timeout.tv_usec = us_wait % 1000000;
+		}
 
 		gettimeofday( &before, NULL );
 
@@ -380,29 +450,35 @@ ssize_t fsc2_serial_read( int sn, void *buf, size_t count,
 						 us_wait > 0 ? &timeout : NULL ) )
 		{
 			case -1 :
-				if ( errno == ENOMEM )
-					print( FATAL, "Not enough memory while reading on serial "
-						   "port.\n" );
+				if ( errno != EINTR )
+				{
+					lower_permissions( );
+					return -1;
+				}
 
-				if ( errno == EINTR && ! quit_on_signal )
+				if ( ! quit_on_signal )
 				{
 					gettimeofday( &after, NULL );
 					us_wait -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
 							   - ( before.tv_sec * 1000000 - before.tv_usec );
-					goto read_retry;
+					if ( us_wait > 0 )
+						goto read_retry;
 				}
 				/* fall through */
 
 			case 0 :
 				lower_permissions( );
-				return -1;
+				return 0;
 		}
 	}
 
-	while ( ( read_count = read( Serial_Port[ sn ].fd, buf, count ) ) == -1 
+	while ( ( read_count = read( Serial_Port[ sn ].fd, buf, count ) ) < 0 
 			&& errno == EINTR && ! quit_on_signal )
 		/* empty */ ;
 		
+	if ( read_count < 0 && errno == EINTR )
+		read_count = 0;
+
 	lower_permissions( );
 
 	return read_count;

@@ -67,7 +67,6 @@ config/hjs_attenuator.calib
 config/hjs_attenuator.conf
 config/hjs_daadc.conf
 config/hjs_fc.conf
-config/hjs_fc.conf~
 config/hjs_sfc.conf
 config/hp5340a.conf
 config/hp8647a.conf
@@ -468,19 +467,14 @@ witio_48/INSTALL
 witio_48/Makefile
 witio_48/README
 
-witio_48/driver/autoconf.h
 witio_48/driver/Makefile
 witio_48/driver/witio_48_drv.c
 witio_48/driver/witio_48_drv.h
 witio_48/driver/witio_48_drv.txt
-witio_48/driver/witio_48.o
 
-witio_48/lib/libwitio_48.a
-witio_48/lib/libwitio_48.so
 witio_48/lib/Makefile
 witio_48/lib/witio_48.h
 witio_48/lib/witio_48_lib.c
-witio_48/lib/witio_48_lib.o
 witio_48/lib/witio_48_lib.txt
 
 witio_48/utils/witio_48

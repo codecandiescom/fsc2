@@ -675,8 +675,9 @@ ifdef WITH_HTTP_SERVER
 endif
 	$(MAKE) -C $(udir) distclean
 	-$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog fsc2_config.h *~
-	$(MAKE) -C me6x00 clean
-	$(MAKE) -C ni6601 clean
+	$(MAKE) -C me6x00 distclean
+	$(MAKE) -C ni6601 distclean
+	$(MAKE) -C witio_48 distclean
 
 mostlyclean:
 	$(MAKE) -C $(sdir) distclean

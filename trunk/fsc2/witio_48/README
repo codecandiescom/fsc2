@@ -101,12 +101,11 @@ script:
    script and install it as well as the links in the runlevel directories
    manually.)
 
-2. Debugging code: When debugging code is included into the driver internal
-   function calls as well as some additional information will be added to
-   the kernel messages (e.g. '/var/log/messages' or '/var/log/debug' on some
-   systems). That can be a lot of data, so please use it only when you want
-   to debug the module and check regularly that your root file system isn't
-   running out of space!
+2. Debugging code: When debugging code is included into the driver additional
+   messages are written to the kernel log file(s) (e.g. '/var/log/messages'
+   or '/var/log/debug' on some systems) on errors instead of just returning
+   an error number via 'errno'. This may help narrowing done the exact
+   location and reason of the error.
 
 3. Installation directory: Include files will be installed in the 'include'
    subdirectory of the install directory, the library in the 'lib'

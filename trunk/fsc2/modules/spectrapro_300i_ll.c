@@ -1202,7 +1202,7 @@ static bool spectrapro_300i_comm( int type, ... )
 			va_end( ap );
 
 			len = strlen( buf );
-			if ( fsc2_serial_write( SERIAL_PORT, buf, len ) != len )
+			if ( fsc2_serial_write( SERIAL_PORT, buf, len, 0, UNSET ) != len )
 				return FAIL;
 			break;
 

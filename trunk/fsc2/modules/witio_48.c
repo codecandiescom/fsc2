@@ -284,9 +284,17 @@ Var *dio_mode( Var *v )
 	}
 
 	if ( v->type == STR_VAR )
+	{
 		pass = v->val.sptr;
+		if ( v->next == NULL )
+		{
+			print( FATAL, "Missing argument(s).\n" );
+			THROW( EXCEPTION );
+		}
+		v = v->next;
+	}
 
-	dio = get_strict_long( v->next, "DIO number" ) - 1;
+	dio = get_strict_long( v, "DIO number" ) - 1;
 
 	if ( dio < 0 || dio > 1 )
 	{
@@ -310,9 +318,6 @@ Var *dio_mode( Var *v )
 			THROW( EXCEPTION );
 		}
 	}
-
-	if ( pass )
-		v = vars_pop( v );
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
@@ -384,9 +389,17 @@ Var *dio_value( Var *v )
 	}
 
 	if ( v->type == STR_VAR )
+	{
 		pass = v->val.sptr;
+		if ( v->next == NULL )
+		{
+			print( FATAL, "Missing arguments.\n" );
+			THROW( EXCEPTION );
+		}
+		v = v->next;
+	}
 
-	dio = get_strict_long( v->next, "DIO number" ) - 1;
+	dio = get_strict_long( v, "DIO number" ) - 1;
 
 	if ( dio < 0 || dio > 1 )
 	{
@@ -410,9 +423,6 @@ Var *dio_value( Var *v )
 			THROW( EXCEPTION );
 		}
 	}
-
-	if ( pass )
-		v = vars_pop( v );
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
@@ -534,7 +544,7 @@ static void check_ret( int ret_val )
 	if ( ret_val == WITIO_48_OK )
 		return;
 
-	print( FATAL, "%s.\n", witio_48_error_message );
+	print( FATAL, "%s.\n", witio_48_error_message( ) );
 	THROW( EXCEPTION );
 }
 

@@ -1035,7 +1035,7 @@ bool magnet_do( int command )
 
 		case SERIAL_TRIGGER :				  /* send trigger pattern */
 			data[ 0 ] = 0x20;
-			fsc2_serial_write( SERIAL_PORT, data, 1 );
+			fsc2_serial_write( SERIAL_PORT, data, 1, 0, SET );
 			fsc2_usleep( SERIAL_TIME, UNSET );
 			break;
 
@@ -1044,7 +1044,7 @@ bool magnet_do( int command )
 			data[ 0 ] = ( unsigned char )
 				( 0x40 | ( ( volt >> 8 ) & 0xF ) | ( ( volt >> 3 ) & 0x10 ) );
 			data[ 1 ] = ( unsigned char ) ( 0x80 | ( volt & 0x07F ) );
-			fsc2_serial_write( SERIAL_PORT, data, 2 );
+			fsc2_serial_write( SERIAL_PORT, data, 2, 0, SET );
 			break;
 
 		case SERIAL_EXIT :					  /* reset and close serial port */

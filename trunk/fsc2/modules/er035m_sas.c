@@ -246,7 +246,6 @@ try_again:
 
 		if ( er035m_sas_write( "PS" ) == FAIL )
 			er035m_sas_comm_fail( );
-		fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
 		length = 20;
 		if ( er035m_sas_read( buffer, &length ) == OK )
@@ -453,10 +452,9 @@ Var *measure_field( Var *v )
 
 			if ( er035m_sas_write( "PS" ) == FAIL )
 				er035m_sas_comm_fail( );
-			fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
 			length = 20;
-			if ( er035m_sas_read( buffer, &length ) == FAIL )
+			if ( er035m_sas_read( buffer, &length ) == OK )
 				break;
 
 			if ( retries <= 0 )
@@ -783,7 +781,6 @@ static double er035m_sas_get_field( void )
 
 			if ( er035m_sas_write( "PF" ) == FAIL )
 				er035m_sas_comm_fail( );
-			fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
 			length = 20;
 			if ( er035m_sas_read( buffer, &length ) == OK )
@@ -848,8 +845,6 @@ static int er035m_sas_get_resolution( void )
 		if ( er035m_sas_write( "RS" ) == FAIL )
 			er035m_sas_comm_fail( );
 
-		fsc2_usleep( ER035M_SAS_WAIT, UNSET );
-
 		length = 20;
 		if ( er035m_sas_read( buffer, &length ) == OK )
 			break;
@@ -912,8 +907,6 @@ static long er035m_sas_get_upper_search_limit( void )
 		if ( er035m_sas_write( "UL" ) == FAIL )
 			er035m_sas_comm_fail( );
 
-		fsc2_usleep( ER035M_SAS_WAIT, UNSET );
-
 		length = 20;
 		if ( er035m_sas_read( buffer, &length ) == OK )
 			break;
@@ -953,8 +946,6 @@ static long er035m_sas_get_lower_search_limit( void )
 
 		if ( er035m_sas_write( "LL" ) == FAIL )
 			er035m_sas_comm_fail( );
-
-		fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
 		length = 20;
 		if ( er035m_sas_read( buffer, &length ) == OK )
@@ -1167,8 +1158,12 @@ static bool er035m_sas_comm( int type, ... )
 			va_end( ap );
 
 			len = strlen( buf );
-			if ( fsc2_serial_write( SERIAL_PORT, buf, len ) != len )
+			if ( fsc2_serial_write( SERIAL_PORT, buf, len, 0, SET ) != len )
+			{
+				if ( len == 0 )
+					stop_on_user_request( );
 				return FAIL;
+			}
 			break;
 
 		case SERIAL_READ :
@@ -1180,11 +1175,12 @@ static bool er035m_sas_comm( int type, ... )
 			/* Try to read from the gaussmeter, give it up to 2 seconds time
 			   to respond */
 
-			len = fsc2_serial_read( SERIAL_PORT, buf, *lptr,
-									10 * ER035M_SAS_WAIT, UNSET );
-
-			if ( len <= 0 )
+			if ( ( len = fsc2_serial_read( SERIAL_PORT, buf, *lptr,
+										 10 * ER035M_SAS_WAIT, UNSET ) ) <= 0 )
 			{
+				if ( len == 0 )
+					stop_on_user_request( );
+
 				*lptr = 0;
 				return FAIL;
 			}

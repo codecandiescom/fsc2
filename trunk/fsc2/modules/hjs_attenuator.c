@@ -365,7 +365,8 @@ static void hjs_attenuator_set_attenuation( long new_step )
 	cmd = get_string( "@01\n@0A %+ld,300\n", steps );
 	len = ( ssize_t ) strlen( cmd );
 
-	if ( fsc2_serial_write( SERIAL_PORT, cmd, ( size_t ) len ) != len )
+	if ( fsc2_serial_write( SERIAL_PORT, cmd, ( size_t ) len,
+							0, UNSET ) != len )
 	{
 		T_free( cmd );
 		hjs_attenuator_comm_failure( );
@@ -386,12 +387,14 @@ static void hjs_attenuator_set_attenuation( long new_step )
     if ( steps < 0 )
 		return;
 
-	if ( fsc2_serial_write( SERIAL_PORT, "@01\n@0A +50,100\n", 16 ) != 16 )
+	if ( fsc2_serial_write( SERIAL_PORT, "@01\n@0A +50,100\n", 16,
+							0, UNSET ) != 16 )
 		hjs_attenuator_comm_failure( );
 
 	fsc2_usleep( 50 * HJS_ATTENTUATOR_WAIT_PER_STEP, UNSET );
 
-	if ( fsc2_serial_write( SERIAL_PORT, "@01\n@0A -50,300\n", 16 ) != 16 )
+	if ( fsc2_serial_write( SERIAL_PORT, "@01\n@0A -50,300\n", 16,
+							0, UNSET ) != 16 )
 		hjs_attenuator_comm_failure( );
 
 	fsc2_usleep( 50 * HJS_ATTENTUATOR_WAIT_PER_STEP, UNSET );

@@ -629,7 +629,7 @@ static bool magnet_do( int command )
 				  ( ( magnet.DAC_value >> 3 ) & 0x10 ) );
 			data[ 1 ] = ( unsigned char ) ( 0x80 |
 											( magnet.DAC_value & 0x07F ) );
-			fsc2_serial_write( SERIAL_PORT, data, 2 );
+			fsc2_serial_write( SERIAL_PORT, data, 2, 0, SET );
 			break;
 
 		case SERIAL_EXIT :                    /* reset and close serial port */

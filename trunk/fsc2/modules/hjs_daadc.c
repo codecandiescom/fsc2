@@ -66,8 +66,6 @@ static int hjs_daadc_in_out( int out );
 static void hjs_daadc_comm_failure( void );
 
 
-typedef struct HJS_DAADC HJS_DAADC;
-
 struct HJS_DAADC {
 	bool is_open;
     struct termios *tio;    /* serial port terminal interface structure */
@@ -81,8 +79,7 @@ struct HJS_DAADC {
 	char *adc_reserved_by;
 };
 
-
-HJS_DAADC hjs_daadc, hjs_daadc_stored;
+struct HJS_DAADC hjs_daadc, hjs_daadc_stored;
 
 
 /*------------------------------------------------------*/
@@ -626,7 +623,7 @@ static int hjs_daadc_in_out( int out )
 	   cosmetics ;-). The data from the ADC should have arrived within
 	   20 ms. */
 
-	if ( fsc2_serial_write( SERIAL_PORT, out_bytes, 4 ) != 4 ||
+	if ( fsc2_serial_write( SERIAL_PORT, out_bytes, 4, 0, UNSET ) != 4 ||
 		 fsc2_serial_read( SERIAL_PORT, in_bytes, 4, 20000, UNSET ) != 4 )
 		hjs_daadc_comm_failure( );
 
