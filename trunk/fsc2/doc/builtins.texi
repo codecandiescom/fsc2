@@ -485,9 +485,9 @@ function will use its first argument as a file name and try to open this
 file. If the file already exists (or can't be opened)  a warning will be
 shown and,on user request will show up a file selector to allow
 selecting a different file, just as the @code{get_file()}. Thus the
-arguments that the function accets are identical to the ones of
+arguments that the function accepts are identical to the ones of
 @code{get_file()} with the only exception that the first argument is an
-additional string for the file name.
+additional argument woth a string for the file name.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.
