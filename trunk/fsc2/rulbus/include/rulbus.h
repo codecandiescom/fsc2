@@ -100,7 +100,7 @@ int rulbus_clock_set_frequency( int handle, int freq );
 #define RULBUS_CLOCK_FREQ_1MHz      5
 #define RULBUS_CLOCK_FREQ_10MHz     6
 #define RULBUS_CLOCK_FREQ_100MHz    7
-,a
+
 
 /* Error codes of the library */
 
