@@ -231,7 +231,7 @@ void sr510_exit_hook( void )
 
 Var *lockin_name( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 

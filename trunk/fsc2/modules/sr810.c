@@ -358,7 +358,7 @@ void sr810_exit_hook( void )
 
 Var *lockin_name( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -897,8 +897,7 @@ Var *lockin_harmonic( Var *v )
 
 Var *lockin_ref_mode( Var *v )
 {
-	v = v;
-
+	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_MODE == TEST )
 		return vars_push( INT_VAR, SR810_TEST_MOD_MODE );
@@ -1198,7 +1197,7 @@ Var *lockin_get_sample_time( Var *v )
 	double tc;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	st_index = sr810.st_index;
 
