@@ -11,8 +11,10 @@
 
 #define DEVICE_NAME "SR810"
 
-#define NUM_ADC_PORTS 4
-#define NUM_DAC_PORTS 4
+#define NUM_ADC_PORTS     4
+#define NUM_DAC_PORTS     4
+#define DAC_MAX_VOLTAGE   10.5
+#define DAC_MIN_VOLTAGE  -10.5
 
 
 /* declaration of exported functions */
@@ -24,6 +26,7 @@ void sr810_exit_hook( void );
 
 Var *lockin_get_data( Var *v );
 Var *lockin_get_adc_data( Var *v );
+Var *lockin_set_dac_data( Var *v );
 Var *lockin_sensitivity( Var *v );
 Var *lockin_time_constant( Var *v );
 Var *lockin_phase( Var *v );
@@ -58,11 +61,14 @@ static double tcs[ ] = { 1.0e-5, 3.0e-5, 1.0e-4, 3.0e-4, 1.0e-3, 3.0e-3,
 						 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1, 1.0, 3.0, 1.0e1,
 						 3.0e1, 1.0e2, 3.0e2, 1.0e3, 3.0e3, 1.0e4, 3.0e4 };
 
-/* declaration of all functions used only in this file */
 
-static bool lockin_init( const char *name );
+/* declaration of all functions used only within this file */
+
+static bool sr810_init( const char *name );
 static double sr810_get_data( void );
+static void sr810_get_xy_data( double data[ 2 ] );
 static double sr810_get_adc_data( long channel );
+static void sr810_set_dac_data( long channel, double voltage );
 static double sr810_get_sens( void );
 static void sr810_set_sens( int Sens );
 static double sr810_get_tc( void );
@@ -111,7 +117,7 @@ int sr810_exp_hook( void )
 
 	/* Initialize the lock-in */
 
-	if ( ! lockin_init( DEVICE_NAME ) )
+	if ( ! sr810_init( DEVICE_NAME ) )
 	{
 		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
 		THROW( EXCEPTION );
@@ -148,117 +154,116 @@ void sr810_exit_hook( void )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function returns the lock-in voltage. Returned value is the voltage */
-/* in V, with the range depending on the current sensitivity setting.  */
-/*---------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Function returns the lock-in voltage(s). If called without an   */
+/* argument the value is the X channel voltage is returned, other- */
+/* wise a transient array is returned with the voltages of the X   */
+/* and Y channel. All voltages are in in V, the range depending on */
+/* the current sensitivity setting.                                */
+/*-----------------------------------------------------------------*/
 
 Var *lockin_get_data( Var *v )
 {
-	v = v;
-
-	if ( TEST_RUN )                  /* return dummy value in test run */
-		return vars_push( FLOAT_VAR, 0.0 );
-	else
-		return vars_push( FLOAT_VAR, sr810_get_data( ) );
-}
-
-
-/*-----------------------------------------------------------------*/
-/* Function returns the voltage at one or more of the 4 ADC ports  */
-/* on the backside of the lock-in amplifier. The argument(s) must  */
-/* be integers between 1 and 4.                                    */
-/* There are two different ways to call this function:             */
-/* 1. If called with a single integer argument the voltage of the  */
-/*    corresponding ADC port is returned.                          */
-/* 2. If called with a list of integer arguments an array with the */
-/*    voltages of all the corresponding ports is returned.         */
-/* Returned values are in the interval [ -10.24V, +10.24V ].       */
-/*-----------------------------------------------------------------*/
-
-Var *lockin_get_adc_data( Var *v )
-{
-	long num_args, i, port;
-	double *voltages;
-	Var *cv, *vn;
+	Var *nv;
+	double data[ 2 ] = { 0.0, 0.0 };
 
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "sr810: Missing argument for function "
-				 "'lockin_get_adc_data'." );
+		if ( TEST_RUN )                  /* return dummy value in test run */
+			return vars_push( FLOAT_VAR, 0.0 );
+		else
+			return vars_push( FLOAT_VAR, sr810_get_data( ) );
+	}
+
+	if ( ! TEST_RUN )                  /* return dummy value in test run */
+		sr810_get_xy_data( data );
+
+	nv = vars_push( FLOAT_TRANS_ARR, data, 2 );
+	return nv;
+}
+
+
+/*---------------------------------------------------------------*/
+/* Function returns the voltage at one of the 4 ADC ports on the */
+/* backside of the lock-in amplifier. The argument must be an    */
+/* integers between 1 and 4.                                     */
+/* Returned values are in the interval [ -10.5 V, +10.5 V ].     */
+/*---------------------------------------------------------------*/
+
+Var *lockin_get_adc_data( Var *v )
+{
+	long port;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == FLOAT_VAR )
+		eprint( WARN, "%s:%ld: sr810: Floating point number used as ADC port "
+				"number.", Fname, Lc );
+
+	port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
+
+	if ( port < 1 || port > NUM_ADC_PORTS )
+	{
+		eprint( FATAL, "%s:%ld: sr810: Invalid ADC channel number (%ld) in "
+				"call of 'lockin_get_adc_data', valid channel are in the "
+				"range 1-%d.", Fname, Lc, port, NUM_ADC_PORTS );
 		THROW( EXCEPTION );
 	}
 
-	vars_check( v, INT_VAR );
+	if ( TEST_RUN )                  /* return dummy value in test run */
+		return vars_push( FLOAT_VAR, 0.0 );
 
-	/* If called with just one argument return the voltage of the
-	   addressed port */
+	return vars_push( FLOAT_VAR, sr810_get_adc_data( port ) );
+}
 
-	if ( v->next == NULL )
+
+/*------------------------------------------------------------*/
+/* Fnction sets the voltage at one of the 4 DAC ports on the  */
+/* backside of the lock-in amplifier. The first argument must */
+/* be an integers between 1 and 4, the second the voltage in  */
+/* the range between -10.5 V and +10.5 V.                     */
+/*------------------------------------------------------------*/
+
+Var *lockin_set_dac_data( Var *v )
+{
+	long port;
+	double voltage;
+
+
+	/* Get and check the port number */
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == FLOAT_VAR )
+		eprint( WARN, "%s:%ld: sr810: Floating point number used as DAC port "
+				"number.", Fname, Lc );
+
+	port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
+	if ( port < 1 || port > NUM_DAC_PORTS )
 	{
-		port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
-		vars_pop( v );
-
-		if ( port < 1 || port > NUM_ADC_PORTS )
-		{
-			eprint( FATAL, "sr810: Invalid ADC channel number (%ld) in call "
-					"of 'lockin_get_adc_data', valid channel are in the "
-					"range 1-%d.", port, NUM_ADC_PORTS );
-			THROW( EXCEPTION );
-		}
-
-		if ( TEST_RUN )                  /* return dummy value in test run */
-			return vars_push( FLOAT_VAR, 0.0 );
-
-		return vars_push( FLOAT_VAR, sr810_get_adc_data( port ) );
+		eprint( FATAL, "%s:%ld: sr810: Invalid DAC channel number (%ld) in "
+				"call of 'lockin_set_dac_data', valid channel are in the "
+				"range 1-%d.", Fname, Lc, port, NUM_DAC_PORTS );
+		THROW( EXCEPTION );
 	}
 
-	/* If function is called with a list of port numbers the voltage for each
-	   of them is fetched and the results are returned as an float array */
+	/* Get and check the voltage */
 
-	/* count number of arguments and check them */
-	
-	for ( cv = v->next, num_args = 1; cv != NULL;
-		  cv = cv->next, num_args++ )
-		vars_check( cv, INT_VAR );
-		
-	/* get memory for storing the voltages */
-
-	voltages = T_malloc( num_args * sizeof( double ) );
-
-	/* get voltage from each of the ports in the list */
-
-	for ( i = 0; v != NULL; i++, v = vn )
+	vars_check( v->next, INT_VAR | FLOAT_VAR );
+	voltage = VALUE( v->next );
+	if ( voltage < DAC_MIN_VOLTAGE || voltage > DAC_MIN_VOLTAGE )
 	{
-		port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
-
-		if ( port < 1 || port > NUM_ADC_PORTS )
-		{
-			eprint( FATAL, "sr810: Invalid ADC channel number (%ld) in "
-					"call of 'lockin_get_adc_data', valid channel are in "
-					"the range 1-%d.", port, NUM_ADC_PORTS );
-			T_free( voltages );
-			THROW( EXCEPTION );
-		}
-
-		if ( TEST_RUN )
-			voltages[ i ] = 0.0;      /* return dummy value in test run */
-		else
-			voltages[ i ] = sr810_get_adc_data( port );
-
-		vn = v->next;
-		vars_pop( v );
+		eprint( FATAL, "%s:%ld: sr810: Invalid DAC voltage (%f V) in call of "
+				"'lockin_set_dac_data', valid range is between %f V and "
+				"%f V.", Fname, Lc, DAC_MIN_VOLTAGE, DAC_MAX_VOLTAGE );
+		THROW( EXCEPTION );
 	}
 
-	/* push the array of results onto the variable stack */
+	if ( TEST_RUN )                  /* return dummy value in test run */
+		return vars_push( FLOAT_VAR, 0.0 );
 
-	cv = vars_push( FLOAT_TRANS_ARR, voltages, num_args );
-
-	/* finally free array of voltages and return the stack variable */
-
-	T_free( voltages );
-	return cv;
+	sr810_set_dac_data( port, voltage );
+	return vars_push( FLOAT_VAR, voltage );
 }
 
 
@@ -283,9 +288,9 @@ Var *lockin_sensitivity( Var *v )
 		{
 			if ( I_am == PARENT )
 			{
-				eprint( FATAL, "sr810: Function `lockin_sensitivity' with no "
-						"argument can only be used in the EXPERIMENT "
-						"section." );
+				eprint( FATAL, "%s:%ld: sr810: Function `lockin_sensitivity' "
+						"with no argument can only be used in the EXPERIMENT "
+						"section.", Fname, Lc );
 				THROW( EXCEPTION );
 			}
 			return vars_push( FLOAT_VAR, sr810_get_sens( ) );
@@ -298,7 +303,8 @@ Var *lockin_sensitivity( Var *v )
 
 	if ( sens < 0.0 )
 	{
-		eprint( FATAL, "sr810: Invalid negative sensitivity." );
+		eprint( FATAL, "%s:%ld: sr810: Invalid negative sensitivity.",
+				Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -308,54 +314,50 @@ Var *lockin_sensitivity( Var *v )
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
 
-	for ( i = 0; i < 23; i++ )
-	{
-		if ( sens <= slist[ i ] && sens >= slist[ i + 1 ] )
+	for ( i = 0; i < 25; i++ )
+		if ( sens >= slist[ i ] && sens <= slist[ i + 1 ] )
 		{
-			if ( slist[ i ] / sens < sens / slist[ i + 1 ] )
-				Sens = i + 1;
-			else
-				Sens = i + 2;
+			Sens = i +
+				   ( ( slist[ i ] / sens > sens / slist[ i + 1 ] ) ? 0 : 1 );
 			break;
 		}
-	}
 
-	if ( Sens > 0 &&                                   /* value found ? */
-		 fabs( sens - slist[ Sens - 1 ] ) > sens * 1.0e-2 && /* error > 1% ? */
-		 ! sr810.Sens_warn  )                       /* no warn message yet ? */
+	if ( Sens >= 0 &&                                    /* value found ? */
+		 fabs( sens - slist[ Sens ] ) > sens * 1.0e-2 && /* error > 1% ? */
+		 ! sr810.Sens_warn  )                            /* no warning yet ? */
 	{
 		if ( sens >= 1.0e-3 )
-			eprint( WARN, "sr810: Can't set sensitivity to %.0lfmV, using "
-					"%.0lfmV instead.", sens * 1.0e3,
-					slist[ Sens - 1 ] * 1.0e3 );
+			eprint( WARN, "%s:%ld: sr810: Can't set sensitivity to %.0lf mV, "
+					"using %.0lf mV instead.", Fname, Lc, sens * 1.0e3,
+					slist[ Sens ] * 1.0e3 );
 		else if ( sens >= 1.0e-6 ) 
-			eprint( WARN, "sr810: Can't set sensitivity to %.0lfuV, using "
-					"%.0lfuV instead.", sens * 1.0e6,
-					slist[ Sens - 1 ] * 1.0e6 );
+			eprint( WARN, "%s:%ld: sr810: Can't set sensitivity to %.0lf uV, "
+					"using %.0lfuV instead.", Fname, Lc, sens * 1.0e6,
+					slist[ Sens ] * 1.0e6 );
 		else
-			eprint( WARN, "sr810: Can't set sensitivity to %.0lfnV, using "
-					"%.0lfnV instead.", sens * 1.0e9, 
-					slist[ Sens - 1 ] * 1.0e9 );
+			eprint( WARN, "%s:%ld: sr810: Can't set sensitivity to %.0lf nV, "
+					"using %.0lfnV instead.", Fname, Lc, sens * 1.0e9,
+					slist[ Sens ] * 1.0e9 );
 		sr810.Sens_warn = SET;
 	}
 
 	if ( Sens < 0 )                                   /* not found yet ? */
 	{
-		if ( sens > slist[ 0 ] )
-			Sens = 1;
+		if ( sens < slist[ 0 ] )
+			Sens = 0;
 		else
-		    Sens = 24;
+		    Sens = 26;
 
 		if ( ! sr810.Sens_warn )                      /* no warn message yet */
 		{
-		if ( sens >= 1.0e-3 )
-			eprint( WARN, "sr810: Invalid sensitivity to %.0lfmV, using "
-					"%.0lfmV instead.", sens * 1.0e3,
-					slist[ Sens - 1 ] * 1.0e3 );
-		else
-			eprint( WARN, "sr810: Invalid sensitivity to %.0lfnV, using "
-					"%.0lfnV instead.", sens * 1.0e9, 
-					slist[ Sens - 1 ] * 1.0e9 );
+			if ( sens >= 1.0 )
+				eprint( WARN, "%s:%ld: sr810: Sensitivity of %.0lf V is too "
+						"low, using %.0lf V instead.", Fname, Lc,
+						sens * 1.0e3, slist[ Sens ] * 1.0e3 );
+			else
+				eprint( WARN, "%s:%ld: sr810: Sensitivity of %.0lf nV is too "
+						"high, using %.0lf nV instead.", Fname, Lc,
+						sens * 1.0e9, slist[ Sens ] * 1.0e9 );
 			sr810.Sens_warn = SET;
 		}
 	}
@@ -368,7 +370,7 @@ Var *lockin_sensitivity( Var *v )
 			sr810.Sens = Sens;
 	}
 	
-	return vars_push( FLOAT_VAR, slist[ Sens - 1 ] );
+	return vars_push( FLOAT_VAR, slist[ Sens ] );
 }
 
 
@@ -393,9 +395,9 @@ Var *lockin_time_constant( Var *v )
 		{
 			if ( I_am == PARENT )
 			{
-				eprint( FATAL, "sr810: Function `lockin_time_constant' with "
-						"no argument can only be used in the EXPERIMENT "
-						"section." );
+				eprint( FATAL, "%s:%ld: sr810: Function `lockin_time_constant'"
+						" with no argument can only be used in the EXPERIMENT "
+						"section.", Fname, Lc );
 				THROW( EXCEPTION );
 			}
 			return vars_push( FLOAT_VAR, sr810_get_tc( ) );
@@ -403,12 +405,13 @@ Var *lockin_time_constant( Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	tc = VALUE( v ) / 1.0e9;
+	tc = VALUE( v );
 	vars_pop( v );
 
 	if ( tc < 0.0 )
 	{
-		eprint( FATAL, "sr810: Invalid negative time constant." );
+		eprint( FATAL, "%s:%ld: sr810: Invalid negative time constant.",
+				Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -418,44 +421,52 @@ Var *lockin_time_constant( Var *v )
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
 	
-	for ( i = 0; i < 10; i++ )
+	for ( i = 0; i < 18; i++ )
 		if ( tc >= tcs[ i ] && tc <= tcs[ i + 1 ] )
 		{
-			if ( tc / tcs[ i ] < tcs[ i + 1 ] / tc )
-				TC = i + 1;
-			else
-				TC = i + 2;
+			TC = i + ( ( tc / tcs[ i ] < tcs[ i + 1 ] / tc ) ? 0 : 1 );
 			break;
 		}
 
-	if ( TC > 0 &&                                    /* value found ? */
-		 fabs( tc - tcs[ TC - 1 ] ) > tc * 1.0e-2 &&  /* error > 1% ? */
-		 ! sr810.TC_warn )                          /* no warn message yet ? */
+	if ( TC >= 0 &&                                 /* value found ? */
+		 fabs( tc - tcs[ TC ] ) > tc * 1.0e-2 &&    /* error > 1% ? */
+		 ! sr810.TC_warn )                          /* no warning yet ? */
 	{
-		if ( tc >= 1.0 )
-			eprint( WARN, "sr810: Can't set time constant to %.0lfs, using "
-					"%.0lfs instead.", tc, tcs[ TC - 1 ] );
+		if ( tc > 1.0e3 )
+			eprint( WARN, "%s:%ld: sr810: Can't set time constant to %.0lf ks,"
+					" using %.0lf ks instead.", Fname, Lc, tc * 1.0e-3,
+					tcs[ TC ] );
+		else if ( tc > 1.0 )
+			eprint( WARN, "%s:%ld: sr810: Can't set time constant to %.0lf s, "
+					"using %.0lf s instead.", Fname, Lc, tc, tcs[ TC ] );
+		else if ( tc > 1.0e-3 )
+			eprint( WARN, "%s:%ld: sr810: Can't set time constant to %.0lf ms,"
+					" using %.0lf ms instead.", Fname, Lc, tc * 1.0e3,
+					tcs[ TC ] * 1.0e3 );
 		else
-			eprint( WARN, "sr810: Can't set time constant to %.0lfms, using "
-					"%.0lfms instead.", tc * 1.0e3, tcs[ TC - 1 ] * 1.0e3 );
+			eprint( WARN, "%s:%ld: sr810: Can't set time constant to %.0lf us,"
+					" using %.0lf us instead.", Fname, Lc, tc * 1.0e6,
+					tcs[ TC ] * 1.0e6 );
 		sr810.TC_warn = SET;
 	}
 	
 	if ( TC < 0 )                                  /* not found yet ? */
 	{
 		if ( tc < tcs[ 0 ] )
-			TC = 1;
+			TC = 0;
 		else
-			TC = 11;
+			TC = 19;
 
 		if ( ! sr810.TC_warn )                      /* no warn message yet ? */
 		{
-			if ( tc >= 1.0 )
-				eprint( WARN, "sr810: Invalid time constant (%.0lfs), using "
-					"%.0lfs instead.", tc, tcs[ TC - 1 ] );
+			if ( tc >= 3.0e4 )
+				eprint( WARN, "%s:%ld: sr810: Time constant of %.0lf ks is too"
+						" large, using %.0lf ks instead.", Fname, Lc,
+						tc * 1.0e-3, tcs[ TC ] * 1.0e-3 );
 			else
-				eprint( WARN, "sr810: Invalid time constant (%.0lfms), using "
-					"%.0lfms instead.", tc * 1.0e3, tcs[ TC - 1 ] * 1.0e3 );
+				eprint( WARN, "%s:%ld: sr810: Time constant of %.0lf us is too"
+						" small, using %.0lf us instead.", Fname, Lc,
+						tc * 1.0e6, tcs[ TC ] * 1.0e6 );
 			sr810.TC_warn = SET;
 		}
 	}
@@ -468,7 +479,7 @@ Var *lockin_time_constant( Var *v )
 			sr810.TC = TC;
 	}
 	
-	return vars_push( FLOAT_VAR, tcs[ TC - 1 ] );
+	return vars_push( FLOAT_VAR, tcs[ TC ] );
 }
 
 
@@ -495,9 +506,9 @@ Var *lockin_phase( Var *v )
 		{
 			if ( I_am == PARENT )
 			{
-				eprint( FATAL, "sr810: Function `lockin_phase' with no "
-						"argument can only be used in the EXPERIMENT "
-						"section." );
+				eprint( FATAL, "%s:%ld: sr810: Function `lockin_phase' with "
+						"no argument can only be used in the EXPERIMENT "
+						"section.", Fname, Lc );
 				THROW( EXCEPTION );
 			}
 			return vars_push( FLOAT_VAR, sr810_get_phase( ) );
@@ -547,7 +558,7 @@ Var *lockin_phase( Var *v )
 /* it can be accessed by asking it to send its status byte.         */
 /*------------------------------------------------------------------*/
 
-bool lockin_init( const char *name )
+static bool sr810_init( const char *name )
 {
 	char buffer[ 20 ];
 	long length = 20;
@@ -586,17 +597,17 @@ bool lockin_init( const char *name )
 }
 
 
-/*------------------------------------------------------------*/
-/* lockin_data() returns the measured voltage of the lock-in. */
-/*------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* lockin_get_data() returns the measured voltage of the lock-in. */
+/*----------------------------------------------------------------*/
 
-double sr810_get_data( void )
+static double sr810_get_data( void )
 {
-	char buffer[ 20 ];
-	long length = 20;
+	char buffer[ 50 ] = "OUTP?1";
+	long length = 50;
 
 
-	if ( gpib_write( sr810.device, "Q\n", 2 ) == FAILURE ||
+	if ( gpib_write( sr810.device, buffer, 6 ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
@@ -608,18 +619,53 @@ double sr810_get_data( void )
 }
 
 
+/*------------------------------------------------------------*/
+/* lockin_data() returns the measured voltage of the lock-in. */
+/*------------------------------------------------------------*/
+
+static void sr810_get_xy_data( double data[ 2 ] )
+{
+	char buffer[ 100 ] = "SNAP?1,2";
+	long length = 100;
+	char *d2;
+
+
+	if ( gpib_write( sr810.device, buffer, 8 ) == FAILURE ||
+		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
+	{
+		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
+		THROW( EXCEPTION );
+	}
+
+	buffer[ length - 1 ] = '\0';
+	d2 = strchr( buffer, ',' );
+	if ( d2 == NULL )
+	{
+		eprint( FATAL, "sr810: Lock-in amplifier does not react properly." );
+		THROW( EXCEPTION );
+	}
+
+	*d2 = '\0';
+	data[ 0 ] = T_atof( buffer );
+	data[ 1 ] = T_atof( d2 + 1 );
+}
+
+
+
+
 /*----------------------------------------------------------*/
 /* lockin_get_adc() returns the value of the voltage at one */
 /* of the 4 ADC ports.                                      */
 /* -> Number of the ADC channel (1-4)                       */
 /*-------------------------- -------------------------------*/
 
-double sr810_get_adc_data( long channel )
+static double sr810_get_adc_data( long channel )
 {
 	char buffer[ 16 ] = "OAUX? *";
 	long length = 16;
 
 
+	assert( channel >= 1 && channel <= 4 );
 	buffer[ 6 ] = ( char ) channel + '0';
 
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE ||
@@ -634,11 +680,33 @@ double sr810_get_adc_data( long channel )
 }
 
 
+/*--------------------------------------------------------------*/
+/* lockin_set_dac() sets the voltage at one of the 4 DAC ports. */
+/* -> Number of the DAC channel (1-4)                           */
+/* -> Voltage to be set (-10.5 V - +10.5 V)                     */
+/*-------------------------- -----------------------------------*/
+
+static void sr810_set_dac_data( long channel, double voltage )
+{
+	char buffer [ 40 ] = "AUXV ";
+
+	assert( channel >= 1 && channel <= 4 );
+	assert( voltage >= -10.5 && voltage <= 10.5 );
+
+	sprintf( buffer + 5, "%ld,%f", channel, voltage );
+
+	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
+	{
+		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
+		THROW( EXCEPTION );
+	}
+}
+
 /*-----------------------------------------------------------------------*/
 /* Function determines the sensitivity setting of the lock-in amplifier. */
 /*-----------------------------------------------------------------------*/
 
-double sr810_get_sens( void )
+static double sr810_get_sens( void )
 {
 	char buffer[ 20 ];
 	long length = 20;
@@ -662,48 +730,17 @@ double sr810_get_sens( void )
 
 /*----------------------------------------------------------------------*/
 /* Function sets the sensitivity of the lock-in amplifier to one of the */
-/* valid values. The parameter can be in the range from 1 to 27,  where */
-/* 1 is 0.5 V and 27 is 10 nV - these and the other values in between   */
-/* are listed in the global array 'slist' at the start of the file. To  */
-/* achieve sensitivities below 100 nV EXPAND has to switched on.        */
+/* valid values. The parameter can be in the range from 0 to 26,  where */
+/* 0 is 2 nV and 26 is 1 V - these and the other values in between are  */
+/* listed in the global array 'slist' at the start of the file.         */
 /*----------------------------------------------------------------------*/
 
-void sr810_set_sens( int Sens )
+static void sr810_set_sens( int Sens )
 {
-	char buffer[10];
+	char buffer[ 10 ] = "SENS ";
 
 
-	/* Coding of sensitivity commands work just the other way round as
-	   in the list of sensitivities 'slist', i.e. 1 stands for the highest
-	   sensitivity (10nV) and 24 for the lowest (500mV) */
-
-	Sens = 25 - Sens;
-
-	/* For sensitivities lower than 100 nV EXPAND has to be switched on
-	   otherwise it got to be switched off */
-
-	if ( Sens <= 3 )
-	{
-		if ( gpib_write( sr810.device, "E1\n", 3 ) == FAILURE )
-		{
-			eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
-			THROW( EXCEPTION );
-		}
-		Sens += 3;
-	}
-	else
-	{
-		if ( gpib_write( sr810.device, "E0\n", 3 ) == FAILURE )
-		{
-			eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
-			THROW( EXCEPTION );
-		}
-	}
-
-	/* Now set the sensitivity */
-
-	sprintf( buffer, "G%d\n", Sens );
-
+	sprintf( buffer + 5, "%d", Sens );
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
 		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
@@ -718,7 +755,7 @@ void sr810_set_sens( int Sens )
 /* the start of the file.                                               */
 /*----------------------------------------------------------------------*/
 
-double sr810_get_tc( void )
+static double sr810_get_tc( void )
 {
 	char buffer[ 10 ];
 	long length = 10;
@@ -736,44 +773,20 @@ double sr810_get_tc( void )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Fuunction sets the time constant (plus the post time constant) to one   */
-/* of the valid values. The parameter can be in the range from 1 to 11,    */
-/* where 1 is 1 ms and 11 is 100 s - these and the other values in between */
-/* are listed in the global array 'tcs' (cf. start of file)                */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Fuunction sets the time constant to one of the valid values. The  */
+/* parameter can be in the range from 0 to 19, where 0 is 10 us and  */
+/* 19 is 30 ks - these and the other values in between are listed in */
+/* the global array 'tcs' (cf. start of file)                        */
+/*-------------------------------------------------------------------*/
 
-void sr810_set_tc( int TC )
+static void sr810_set_tc( int TC )
 {
-	char buffer[ 10 ];
+	char buffer[ 10 ] = "OFLT ";
 
 
-	sprintf( buffer, "T1,%d\n", TC );
+	sprintf( buffer + 5, "%d", TC );
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
-	{
-		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
-		THROW( EXCEPTION );
-	}
-
-	/* Also set the POST time constant where 'T2,0' switches it off, 'T2,1'
-	   sets it to 100ms and 'T1,2' to 1s */
-
-	/* Recheck this in the manual !!!!!!!!!! */
-
-	if ( TC <= 4 && gpib_write( sr810.device, "T2,0\n", 5 ) == FAILURE )
-	{
-		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
-		THROW( EXCEPTION );
-	}
-
-	if ( TC > 4 && TC <= 6 &&
-		 gpib_write( sr810.device, "T2,1\n", 5 ) == FAILURE )
-	{
-		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
-		THROW( EXCEPTION );
-	}
-
-	if ( TC > 6 && gpib_write( sr810.device, "T2,2\n", 5 ) == FAILURE )
 	{
 		eprint( FATAL, "sr810: Can't access the lock-in amplifier." );
 		THROW( EXCEPTION );
@@ -786,9 +799,9 @@ void sr810_set_tc( int TC )
 /* amplifier (in degree between 0 and 359).                  */
 /*-----------------------------------------------------------*/
 
-double sr810_get_phase( void )
+static double sr810_get_phase( void )
 {
-	char buffer[20];
+	char buffer[ 20 ];
 	long length = 20;
 	double phase;
 
@@ -822,7 +835,7 @@ double sr810_get_phase( void )
 /* Functions sets the phase to a value between 0 and 360 degree. */
 /*---------------------------------------------------------------*/
 
-double sr810_set_phase( double phase )
+static double sr810_set_phase( double phase )
 {
 	char buffer[ 20 ];
 
