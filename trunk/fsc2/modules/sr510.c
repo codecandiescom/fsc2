@@ -79,6 +79,7 @@ static double sr510_get_phase( void );
 static double sr510_set_phase( double phase );
 static double sr510_get_ref_freq( void );
 static double sr510_set_dac_voltage( long channel, double voltage );
+static void sr510_lock_state( bool lock );
 
 
 

@@ -80,6 +80,7 @@ static double sr530_get_phase( void );
 static double sr530_set_phase( double phase );
 static double sr530_get_ref_freq( void );
 static double sr530_set_dac_voltage( long channel, double voltage );
+static void sr530_lock_state( bool lock );
 
 
 
@@ -1087,7 +1088,7 @@ static double sr530_set_dac_voltage( long channel, double voltage )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-void sr530_lock_state( bool lock )
+static void sr530_lock_state( bool lock )
 {
 	char cmd[ 100 ];
 
