@@ -270,14 +270,15 @@ Var *vars_new( char *name )
 Var *vars_add( Var *v1, Var *v2 )
 {
 	Var *new_var;
+	char *new_str;
 
 
 	/* Make sure that `v1' and `v2' exist, are integers or float values or
 	   arrays (or pointers thereto) */
 
-	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | 
+	vars_check( v1, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | STR_VAR |
 				    INT_TRANS_ARR | FLOAT_TRANS_ARR | ARR_REF | ARR_PTR );
-	vars_check( v2, INT_VAR | FLOAT_VAR | ARR_REF | ARR_PTR |
+	vars_check( v2, INT_VAR | FLOAT_VAR | STR_VAR | ARR_REF | ARR_PTR |
 				    INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
 
@@ -289,6 +290,22 @@ Var *vars_add( Var *v1, Var *v2 )
 
 	switch ( v1->type )
 	{
+		case STR_VAR :
+			if ( v2->type != STR_VAR )
+			{
+				eprint( FATAL, "%s:%ld: Can't add string to a number.\n",
+						Fname, Lc );
+				THROW( EXCEPTION );
+			}
+
+			new_str = T_malloc( strlen( v1->val.sptr )
+								+ strlen( v2->val.sptr ) + 1 );
+			strcpy( new_str, v1->val.sptr );
+			strcat( new_str, v2->val.sptr );
+			new_var = vars_push( STR_VAR, new_str );
+			T_free( new_str );
+			break;
+
 		case INT_VAR :
 			new_var = vars_add_to_int_var( v1, v2 );
 			break;
