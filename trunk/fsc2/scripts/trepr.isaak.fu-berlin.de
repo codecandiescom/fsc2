@@ -572,7 +572,7 @@ min_time;
 
 File;
 Pretrigger;
-ground;
+ground = 0.0;
 
 
 PREPARATIONS:
