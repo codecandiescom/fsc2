@@ -8,7 +8,7 @@
 
 
 
-#define DEVICE_NAME "SR510"    /* name, compare /etc/gpib.conf */
+#define DEVICE_NAME "STANFORD_SR510"    /* name, compare /etc/gpib.conf */
 
 
 int sr510_init_hook( void );
