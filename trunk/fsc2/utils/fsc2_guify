@@ -70,8 +70,8 @@ while ( <$if> ) {
         next;
     }
 
-    # If the line ends in a backslash append the next line to it (which
-	# then also must be a line starting with the 'guify' marker)
+    # If a line starting with a 'guify' marker ends in a backslash append the
+	# next line to it (which then also must start with the marker)
 
     my $cur_line = $_;
     $lino = $.;
@@ -146,9 +146,9 @@ die "Unbalanced if-endif construct(s)\n" if $if_level > 0;
 print STDERR "Warning: No variables found in input\n" if @vars == 0;
 
 # Set values for variables that don't have been assigned a default value.
-# For ints and floats use the mean of maximum and minimum value are given,
-# the limit when only one is given or 0 when none is set. For menus use
-# the first entry and switch off buttons by default.
+# For ints and floats use the mean of the minimum and maximum value if both
+# are given, the limit when only one is given or 0 when none is set. For
+# menus use the first entry and switch off buttons by default.
 
 for ( @vars ) {
     if ( exists $$_{ value } and defined $$_{ value } ) {
@@ -191,6 +191,9 @@ if ( $ARGV[ 1 ] ) {
 
 select $of;
 write_script( );
+
+close $if if $ARGV[ 0 ];
+close $of if $ARGV[ 1 ];
 
 # Finally make the new script executable (unless we're writing to STDOUT)
 
@@ -695,7 +698,7 @@ sub write_out {
 EOT
 
 	# The user may change variables from within the conditions. We must
-	# avoid that these changes "bubble up" to the rest of the script and
+	# avoid that these changes become visible in the rest of the script and
     # therefore use variables local to the current function.
 
 	print "    my \$$$_{ name } = \$$$_{ name }\{ value \};\n" for ( @vars );
@@ -717,6 +720,7 @@ EOT
 
     for ( @lines ) {
         my $line = $$_{ line };
+
         if ( $line =~ /$guify_entry/o ) {
             chomp $line;
             $line =~ /$guify_entry(if|else|elsif|endif)\s*(.*?)\s*$/;
@@ -748,18 +752,22 @@ EOT
 
     print \$fh \"";
             }
+
             next;
         }
+
         $line =~ s/\\/\\\\/g;
         $line =~ s/\"/\\\"/g;
         $line =~ s{\$}{\\\$}g;
+
         for ( @vars ) {
-            if ( $$_{ type } =~ /^int|float|menu$/o ) {
+            if ( $$_{ type } =~ /^int|float|menu|button$/o ) {
                 $line =~ s/\b$$_{ name }\b/\$$$_{ name }/g;
             } elsif ( $$_{ type } =~ /^file$/o ) {
 				$line =~ s/\b$$_{ name }\b/\\\"\$$$_{ name }\\\"/g;
             }
         }
+
         print $line;
     }
 
