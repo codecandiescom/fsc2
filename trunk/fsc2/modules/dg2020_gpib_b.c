@@ -163,12 +163,12 @@ bool dg2020_init( const char *name )
 
 	/* Delete all blocks */
 
-	if ( gpib_write( dg2020.device, "DATA:BLOC:DEL:ALL", 17 ) == FAILURE )
+	if ( gpib_write( dg2020.device, ":DATA:BLOC:DEL:ALL", 18 ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	/* Remove all sequence definitions */
 
-	if ( gpib_write( dg2020.device, "DATA:SEQ:DEL:ALL", 16 ) == FAILURE )
+	if ( gpib_write( dg2020.device, ":DATA:SEQ:DEL:ALL", 17 ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	/* Switch to manual update mode */
@@ -319,13 +319,13 @@ bool dg2020_set_timebase( double timebase )
 
 bool dg2020_set_memory_size( long mem_size )
 {
-	char cmd[ 20 ] = "DATA:MSIZ ";
+	char cmd[ 20 ] = ":DATA:MSIZ ";
 
 
 	if ( mem_size < 64 || mem_size > MAX_PULSER_BITS )
 		return FAIL;
 
-	sprintf( cmd + strlen( cmd ), "%ld\n", mem_size );
+	sprintf( cmd + strlen( cmd ), "%ld", mem_size );
 	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
 
@@ -373,7 +373,7 @@ bool dg2020_channel_assign( int channel, int pod )
 
 bool dg2020_update_data( void )
 {
-	if ( gpib_write( dg2020.device, "DATA:UPD", 8 ) == FAILURE )
+	if ( gpib_write( dg2020.device, ":DATA:UPD", 9 ) == FAILURE )
 		dg2020_gpib_failure( );
 
 	return OK;
@@ -441,7 +441,7 @@ bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 	l = strlen( dummy );
 	sprintf( dummy, "%ld", l );
 	l = strlen( dummy );
-	sprintf( cmd, "DATA:BLOC:DEF #%ld%s", l, dummy );
+	sprintf( cmd, ":DATA:BLOC:DEF #%ld%s", l, dummy );
 	sprintf( cmd + strlen( cmd ), "%ld,%s",
 			 block[ 0 ].start, block[ 0 ].blk_name );
 
@@ -450,7 +450,7 @@ bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 
 	for ( i = 1; i < num_blocks; ++i )
 	{
-		sprintf( cmd, "DATA:BLOC:ADD %ld,\"%s\"",
+		sprintf( cmd, ":DATA:BLOC:ADD %ld,\"%s\"",
 				 block[ i ].start, block[ i ].blk_name );
 		if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 			dg2020_gpib_failure( );
@@ -487,7 +487,7 @@ bool dg2020_make_seq( int num_blocks, BLOCK *block )
 	l = strlen( cmd );
 	sprintf( dummy, "%ld", l - 1 );
 	l = strlen( dummy );
-	sprintf( cmd, "DATA:SEQ:DEF #%ld%s", l, dummy );
+	sprintf( cmd, ":DATA:SEQ:DEF #%ld%s", l, dummy );
 
 	for ( i = 0; i < num_blocks; ++i )
 		sprintf( cmd + strlen( cmd ), "%s,%ld,0,0,0,0\n",
@@ -500,8 +500,8 @@ bool dg2020_make_seq( int num_blocks, BLOCK *block )
 	/* For external trigger mode set trigger wait for first (and only) block */
 
 	if ( dg2020.trig_in_mode == EXTERNAL &&
-		 ( gpib_write( dg2020.device, "DATA:SEQ:REP 0,1", 16 ) == FAILURE ||
-		   gpib_write( dg2020.device, "DATA:SEQ:TWAIT 0,1", 18 ) == FAILURE )
+		 ( gpib_write( dg2020.device, ":DATA:SEQ:REP 0,1", 17 ) == FAILURE ||
+		   gpib_write( dg2020.device, ":DATA:SEQ:TWAIT 0,1", 19 ) == FAILURE )
 		)
 		dg2020_gpib_failure( );
 

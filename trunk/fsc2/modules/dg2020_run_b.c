@@ -50,13 +50,14 @@ void dg2020_reorganize_pulses( bool flag )
 	{
 		f = &dg2020.function[ i ];
 
-		/* Nothing to be done for unused functions and the phase functions */
+		/* Nothing to be done for unused functions */
 
 		if ( ! f->is_used )
 			continue;
 
-		qsort( f->pulses, f->num_pulses, sizeof( PULSE * ),
-			   dg2020_start_compare );
+		if ( f->num_pulses > 1 )
+			qsort( f->pulses, f->num_pulses, sizeof( PULSE * ),
+				   dg2020_start_compare );
 
 		/* Pulse positions have only to be checked in the test run, afterwards
 		   we can assume that they are ok */
@@ -378,26 +379,4 @@ void dg2020_commit( FUNCTION * f, bool flag )
 		f->channel[ i ]->needs_update = UNSET;
 		T_free( f->channel[ i ]->old );
 	}
-}
-
-
-/*-----------------------------------------------------------------------------
-  Sets the additional bock used for maintaining the requested repetion time
-  to the low state
------------------------------------------------------------------------------*/
-
-void dg2020_clear_padding_block( FUNCTION *f )
-{
-	int i;
-
-
-	if ( ! f->is_used ||
-		 ! dg2020.block[ 1 ].is_used )
-		return;
-
-	for ( i = 0; i < f->num_channels; i++ )
-		dg2020_set_constant( f->channel[ i ]->self,
-							 dg2020.block[ 1 ].start - 1,
-							 dg2020.mem_size - dg2020.block[ 1 ].start,
-							 OFF( f ) );
 }

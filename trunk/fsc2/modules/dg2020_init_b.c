@@ -586,7 +586,7 @@ static void dg2020_pulse_start_setup( void )
 				f->pulses[ j ]->channel[ k ] = NULL;
 
 			if ( f->num_needed_channels == 1 )
-				f->pulses[ j ]->channel[ k ] = f->channel[ 0 ];
+				f->pulses[ j ]->channel[ 0 ] = f->channel[ 0 ];
 			else
 				for ( k = 0; k < f->pc_len; k++ )
 					f->pulses[ j ]->channel[ k ] =

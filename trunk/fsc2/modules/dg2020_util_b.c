@@ -367,7 +367,7 @@ bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length )
 	/* Set up the command string */
 
 	sprintf( dummy, "%ld", length );
-	sprintf( *cmd, ";DATA:PATT:BIT %d,%ld,%ld,#%ld%s", channel,
+	sprintf( *cmd, ":DATA:PATT:BIT %d,%ld,%ld,#%ld%s", channel,
 			 ( long ) address, ( long ) length, ( long ) strlen( dummy ),
 			 dummy );
 

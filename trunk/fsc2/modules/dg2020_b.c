@@ -180,11 +180,6 @@ int dg2020_b_test_hook( void )
 		dg2020_change_pulse_position_change;
 	pulser_struct.set_pulse_length_change = dg2020_change_pulse_length_change;
 
-
-/*!!!*/
-//	THROW( EXCEPTION );
-/*!!!*/
-
 	return 1;
 }
 
@@ -237,12 +232,8 @@ int dg2020_b_exp_hook( void )
 	dg2020_reorganize_pulses( UNSET );
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		if ( ! dg2020.function[ i ].is_used )
-			continue;
-		dg2020_set_pulses( &dg2020.function[ i ] );
-		dg2020_clear_padding_block( &dg2020.function[ i ] );
-	}
+		if ( dg2020.function[ i ].is_used )
+			dg2020_set_pulses( &dg2020.function[ i ] );
 
 	/* Finally tell the pulser to update (we're always running in manual
 	   update mode) and than switch the pulser into run mode */
@@ -549,7 +540,7 @@ Var *pulser_next_phase( Var *v )
 
 		if ( ! TEST_RUN )
 		{
-			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X + 1; j++ )
+			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
 				if ( f->phase_setup->is_set[ j ] &&
 					 ! dg2020_channel_assign( 
 						 f->pcm[ j * f->pc_len + f->next_phase ]->self,
