@@ -7,17 +7,12 @@
 #define FSC2_GLOBAL
 
 
-/* make bool synonymous to unsigned char */
-
-typedef  unsigned char  bool;
-
-
 /* Define the name of fsc2's lock file */
 
 #define LOCKFILE "/tmp/fsc2.lock"
 
 
-/* Defines the number of serial ports on the system */
+/* Define the number of serial ports on the system */
 
 #define NUM_SERIAL_PORTS 2
 
@@ -33,10 +28,26 @@ typedef  unsigned char  bool;
 #define MAX_PHASE_SEQ_LEN  12    
 
 
-/* Define number of colors to be used in 2D graphics (must be less than
-   FL_MAX_COLORS - FL_FREE_COL1 + 3, i.e. not more than about 1005 */
+/* Define number of colors to be used in 2D graphics - must be less than
+   FL_MAX_COLORS - FL_FREE_COL1 + 3, i.e. not more than about 1005. On
+   the other hand, the sum of all colors shouldn't exceed the number of
+   colors available on the system (and should leave some color slots for
+   other processes, so don't ask for more than about the half of the
+   number of available colors...) */
 
 #define NUM_COLORS 128
+
+
+
+/******************************************************************/
+/* The following definitions are for internal use in the program, */
+/* so don't change them if not really necessary                   */
+/******************************************************************/
+
+
+/* make bool synonymous to unsigned char */
+
+typedef  unsigned char  bool;
 
 
 /* Define some useful abbreviations - never ever change these ! */
@@ -72,7 +83,6 @@ enum {
 };
 
 
-
 /* Define the different section types */
 
 enum {
@@ -86,9 +96,7 @@ enum {
 };
 
 
-
 /* Define the different functions pulses can have */
-
 
 enum {
 	PULSER_CHANNEL_NO_TYPE = -1,
@@ -114,7 +122,6 @@ enum {
                       ( PULSER_CHANNEL_FUNC_MAX - PULSER_CHANNEL_FUNC_MIN + 1)
 
 
-
 /* Define access types for functions in certain sections */
 
 enum {
@@ -122,7 +129,6 @@ enum {
 	  ACCESS_PREP,
 	  ACCESS_ALL
 };
-
 
 
 /* Define the types of phases used in phase cycling */
