@@ -164,69 +164,26 @@ void DumpStack( void )
 		   running ADDR2LINE to convert it into function name, source file
 		   and line number. (This fails for programs competely stripped of
 		   all debugging information.) If the address indicates that the
-		   error hapened in loaded library we try at least to figure out
-		   if it comes from a device module ad we print the offset in the
+		   error hapened in a loaded library we try at least to figure out
+		   if it comes from a device module and print the offset in the
 		   library, which we then can later check with addr2line. */
 
-		next_addr = ( long ) * ( EBP + 1 );
+		sprintf( buf, "%p\n", ( void * ) * ( EBP + 1 ) );
+		write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
 
-		if ( next_addr < LIBRARY_OFFSET )
-		{
-			sprintf( buf, "%p\n", next_addr );
-			write( pipe_fd[ DUMP_PARENT_WRITE ], buf, next_addr );
+		sprintf( buf, "#%-3d %-10p  ", k++, ( void * ) * ( EBP + 1 ) );
+		write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
 
-			sprintf( buf, "#%-3d %-10p  ", k, ( void * ) * ( EBP + 1 ) );
-			write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
+		/* Copy ADDR2LINE's reply to the answer pipe */
 
-			/* Copy ADDR2LINE's reply to the answer pipe */
+		while ( read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) == 1 && c != '\n' )
+			write( answer_fd[ DUMP_ANSWER_WRITE ], &c, 1 );
 
-			while ( read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) == 1 &&
-					c != '\n' )
-				write( answer_fd[ DUMP_ANSWER_WRITE ], &c, 1 );
+		write( answer_fd[ DUMP_ANSWER_WRITE ], "() in ", 6 );
 
-			write( answer_fd[ DUMP_ANSWER_WRITE ], "() in ", 6 );
-
-			while ( read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) == 1 &&
-					c != '\n' )
-				write( answer_fd[ DUMP_ANSWER_WRITE ], &c, 1 );
-			write( answer_fd[ DUMP_ANSWER_WRITE ], "\n", 1 );
-		}
-		else
-		{
-			/* Find last device module, assuming that the later a library
-			   got loaded the higher its adress is */
-
-			for ( cd = EDL.Device_List; cd != NULL && cd->next ! NULL;
-				  cd = cd->next )
-				/* empty */ ;
-
-			/* Now loo*/
-
-			while ( cd != NULL )
-			{
-				if ( ( long ) * ( char * ) cd->driver.handle > next_addr < 0 )
-				{
-					sprintf( buf, "#%-3d %-10p  in library", k, next_addr
-							 - ( long ) * ( char * ) cd->driver.handle );
-					write( answer_fd[ DUMP_ANSWER_WRITE ], buf,
-						   strlen( buf ) );
-					write( answer_fd[ DUMP_ANSWER_WRITE ], cd->driver.lib_name,
-						   strlen( cd->driver.lib_name ) );
-					write( answer_fd[ DUMP_ANSWER_WRITE ], "\n", 1 );
-					break;
-				}
-
-				cd = cd->prev;
-			}
-
-			if ( cd == NULL )
-			{
-				sprintf( buf, "#%-3d %-10p  ?\n", k, next_addr );
-				write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
-			}
-		}
-
-		k++;
+		while ( read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) == 1 && c != '\n' )
+			write( answer_fd[ DUMP_ANSWER_WRITE ], &c, 1 );
+		write( answer_fd[ DUMP_ANSWER_WRITE ], "\n", 1 );
 
 		/* Get value of ebp register for the next higher level stackframe */
 
