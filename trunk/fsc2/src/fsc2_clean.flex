@@ -76,7 +76,7 @@ IFNE    [^"<\t \n]*\n?
 EXIT    ^[ \t]*#exit
 QUIT    ^[ \t]*#quit
 
-KEEP    [^\t" \n(\/*),;:=%\^]+
+KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 
 
 %x      str
@@ -87,6 +87,9 @@ KEEP    [^\t" \n(\/*),;:=%\^]+
 		/*---------------*/
 %%		/*     RULES     */
 		/*---------------*/
+
+
+
 
 
 			/* handling of string constants (use only in print() function) */
