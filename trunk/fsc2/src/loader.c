@@ -199,9 +199,7 @@ static void load_functions( Device *dev )
 
 
 	/* Try to open the library for the device. We first try to find it in
-	   directories defined by the environment variable "LD_LIBRARY_PATH".
-	   If this fails (and this is not part of the testing procedure) we
-	   also try the compiled-in path to the libraries. */
+	   directories defined by the environment variable "LD_LIBRARY_PATH". */
 
 	if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
 	{
@@ -217,11 +215,12 @@ static void load_functions( Device *dev )
 		T_free( ld );
 	}
 
-	/* If this didn't work out now try it the normal way (unless in DO_CHECK
-	   mode), where we look into the compile in library path or, if the device
-	   name starts with an absolute path, we use this path (this happens when
-	   the device is specified using an alternative name and we thus had to
-	   follow a symbolic link). */
+	/* If this didn't work try it the normal way using the compiled in library
+	   path or, if the device name starts with an absolute path, using this
+	   path (this my happen when the device is specified using an alternative
+	   name and thus we have to follow a symbolic link). The exception is when
+	   the DO_CHECK flag is defined, where the compiled in path (or everything
+	   except what is defined in LD_LIBRARY_PATH) is *not* what we want... */
 
 	if ( dev->driver.handle == NULL &&
 		 ! ( Internals.cmdline_flags & DO_CHECK ) )
