@@ -91,6 +91,15 @@ Exception_Types get_exception_type( const char *file, int line );
 
 #define OTHERWISE    else
 
+/* Automatic variables might not be restored after a lonjmp() when they were
+   stored in a register. But we can keep the compiler putting a variable in
+   a register by taking its address. We also do some dummy stuff with the
+   variable to keep the compiler from complaining about statements with no
+   effect, which we would get when the statement would consist of just
+   taking the address of the variable. */
+
+#define CLOBBER_PROTECT( a )  do { if ( ( &a ) ) ( a ) = ( a ); } while( 0 )
+
 
 #endif  /* ! EXCEPTIONS_HEADER */
 

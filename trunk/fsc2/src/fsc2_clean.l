@@ -30,13 +30,6 @@
 
 %{
 
-/* If not defined set default directory for include files */
-
-#if ! defined DEF_INCL_DIR
-#define DEF_INCL_DIR libdir
-#endif
-
-
 #include <string.h>
 #include <stdarg.h>
 #include <assert.h>
@@ -68,12 +61,12 @@ typedef enum
 
 #include "exceptions.h"
 
-char *prog_name;
-
-
 #if defined MDEBUG
 #include <mcheck.h>
 #endif
+
+
+char *prog_name;
 
 
 /* Functions and defines we can't do without but which aren't available
@@ -423,13 +416,16 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 
 int main( int argc, char *argv[ ] )
 {
+	struct passwd *pwe;
+
+
 #if defined MDEBUG
 	mcheck( NULL );
 #endif
 
-	prog_name = argv[ 0 ];
-
 	lower_permissions( );
+
+	prog_name = argv[ 0 ];
 
 	if ( argc < 2 )
 	{
@@ -458,10 +454,21 @@ int main( int argc, char *argv[ ] )
 			return EXIT_FAILURE;
 		}
 
-		/* Set the global variables and output name of input file */
+		/* Analyze name of input file - if it starts with "~/" expand it
+		   to the name of the home directory of the user. */
 
 		output( "\x01\n%s\n", argv[ 1 ] );
-		Fname = T_strdup( argv[ 1 ] );
+
+		if ( argv[ 1 ][ 0 ] == '~' && argv[ 1 ][ 1 ] == '/' )
+		{
+			pwe = getpwuid( getuid( ) );
+			Fname = CHAR_P T_malloc(   strlen( pwe->pw_dir )
+									 + strlen( argv[ 1 ] ) );
+			strcpy( Fname, pwe->pw_dir );
+			strcat( Fname, &argv[ 1 ][ 1 ] );
+		}
+		else
+			Fname = T_strdup( argv[ 1 ] );
 	}
 	else
 	{
@@ -554,19 +561,38 @@ static void include_handler( char *file )
 		if ( file[ 0 ] == '"' )
 		{
 			*( file + strlen( file ) - 1 ) = '\0';
-			if ( file[ 1 ] != '~' )
+
+			/* If the include file name is an absolute path or if we don't
+			   know where the EDL script we're currently reading (i.e. its
+			   name does not start with an absolute file name) we take the
+			   include file name as it is. If it starts with "~/" we replace
+			   it by the home directory of the user. In all other cases we
+			   prepend the path of the current file to the include files
+			   name. */
+
+			if ( file[ 1 ] == '/' || Fname[ 0 ] != '/' )
 				incl_file = T_strdup( file + 1 );
-			else
+			else if ( file[ 1 ] == '~' && file[ 2 ] == '/' )
 			{
 				pwe = getpwuid( getuid( ) );
 				incl_file = CHAR_P T_malloc(   strlen( pwe->pw_dir ) 
-											 + strlen( file ) );
+											 + strlen( file ) - 1 );
 				strcpy( incl_file, pwe->pw_dir );
 				strcat( incl_file, file + 2 );
+			}
+			else
+			{
+				incl_file = T_strdup( Fname );
+				*strrchr( incl_file, '/' ) = '\0';
+				incl_file = CHAR_P T_realloc( incl_file, strlen( incl_file )
+											  + strlen( file ) + 1 );
+				strcat( incl_file, "/" );
+				strcat( incl_file, file + 1 );
 			}
 		}
 		else
 		{
+#if defined DEF_INCL_DIR
 			*( file + strlen( file ) - 1 ) = '\0';
 			incl_file = CHAR_P T_malloc(   strlen( file )
 										 + strlen( DEF_INCL_DIR ) + 2 );
@@ -574,7 +600,13 @@ static void include_handler( char *file )
 			if ( incl_file[ strlen( incl_file ) - 1 ] != '/' )
 				strcat( incl_file, "/" );
 			strcat( incl_file, file + 1 );
+#else
+			output( "\x03\n%s:%ld: No default directory has been compiled "
+					"into fsc2 for EDL include files.\n", Fname, Lc );
+			exit( EXIT_FAILURE );
+#endif
 		}
+
 
 		/* The same holds for the case that the file can't be opened. */
 
@@ -892,7 +924,7 @@ static ssize_t output( const char *fmt, ... )
 
 static void usage( void )
 {
-	fprintf( stderr, "Usage: fsc2_clean\n"
+	fprintf( stderr, "Usage: fsc2_clean [ filename ]\n"
 			 "This program predigests EDL files and is only meant for\n"
 			 "internal use by fsc2(1). But since you're already here:\n"
 			 "fsc2_clean expects input (i.e. an EDL programs) on STDIN\n"
@@ -901,8 +933,8 @@ static void usage( void )
 			 "further EDL files (so fsc2 has only to deal with a flat\n"
 			 "and simple input stream) and also already may detect some\n"
 			 "flaws in an EDL file. If you want to see what fsc2 really\n"
-			 "thinks your EDL file is try\n\n"
-			 "    fsc2_clean my_program.edl < my_program.edl\n\n"
+			 "sees of your EDL file try\n\n"
+			 "    fsc2_clean `pwd`/my_program.edl < my_program.edl\n\n"
 			 "(but be prepared to get some non-printable character).\n"
 			 "If it gets passed a file name as the only argument this\n"
 			 "name is used in error messages. When called with an argument\n"

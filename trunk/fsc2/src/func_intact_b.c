@@ -43,19 +43,21 @@ static Var *f_bchanged_child( Var *v );
 
 Var *f_bcreate( Var *var )
 {
-	static Var *v;
-	static long type;
-	static long coll;
-	static char *label;
-	static char *help_text;
-	static IOBJECT *new_io;
+	Var *v = var;
+	long type;
+	long coll = 1;
+	char *label = NULL;
+	char *help_text = NULL;
+	IOBJECT *new_io = NULL;
 	IOBJECT *ioi, *cio;
 
 
-	v = var;
-	coll = -1;
-	label = help_text = NULL;
-	new_io = NULL;
+	CLOBBER_PROTECT( v );
+	CLOBBER_PROTECT( type );
+	CLOBBER_PROTECT( coll );
+	CLOBBER_PROTECT( label );
+	CLOBBER_PROTECT( help_text );
+	CLOBBER_PROTECT( new_io );
 
 	/* At least the type of the button must be specified */
 

@@ -43,24 +43,25 @@ static Var *f_ochanged_child( Var *v );
 
 Var *f_ocreate( Var *var )
 {
-	static Var *v;
-	static long type;
-	static char *label;
-	static char *help_text;
-	static char *form_str;
-	static IOBJECT *new_io;
+	Var *v = var;
+	long type;
+	char *label = NULL;
+	char *help_text = NULL;
+	char *form_str = NULL;
+	IOBJECT *new_io = NULL;
 	IOBJECT *ioi;
-	static long lval;
-	static double dval;
+	long lval = 0;
+	double dval = 0.0;
 
 
-	v = var;
-	label = NULL;
-	help_text = NULL;
-	form_str = NULL;
-	new_io = NULL;
-	lval = 0;
-	dval = 0.0;
+	CLOBBER_PROTECT( v );
+	CLOBBER_PROTECT( type );
+	CLOBBER_PROTECT( label );
+	CLOBBER_PROTECT( help_text );
+	CLOBBER_PROTECT( form_str );
+	CLOBBER_PROTECT( new_io );
+	CLOBBER_PROTECT( lval );
+	CLOBBER_PROTECT( dval );
 
 	/* At least the type of the input or output object must be specified */
 

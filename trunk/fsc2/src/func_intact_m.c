@@ -43,17 +43,19 @@ static Var *f_mchanged_child( Var *v );
 
 Var *f_mcreate( Var *var )
 {
-	static Var *v;
+	Var *v = var;
 	Var *lv;
-	static long num_strs;
+	long num_strs = 0;
 	size_t len = 0;
-	static IOBJECT *new_io;
-	static IOBJECT *ioi;
+	IOBJECT *new_io = NULL;
+	IOBJECT *ioi;
 	long i;
 
 
-	v = var;
-	num_strs = 0;
+	CLOBBER_PROTECT( v );
+	CLOBBER_PROTECT( num_strs );
+	CLOBBER_PROTECT( new_io );
+	CLOBBER_PROTECT( ioi );
 
 	/* At least a label and two menu entries must be specified */
 
@@ -82,8 +84,6 @@ Var *f_mcreate( Var *var )
 
 	if ( Tool_Box == NULL )
 		tool_box_create( VERT );
-
-	new_io = NULL;
 
 	TRY
 	{

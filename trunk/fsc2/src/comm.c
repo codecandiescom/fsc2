@@ -378,10 +378,10 @@ static bool parent_reader( CommStruct *header )
 	char *str[ 4 ] = { NULL, NULL, NULL, NULL };
 	int i;
 	int n1, n2;
-	static char *data;
+	char *data = NULL;
 
 
-	data = NULL;
+	CLOBBER_PROTECT( data );
 
 	switch ( header->type )
 	{
@@ -929,7 +929,10 @@ static bool parent_reader( CommStruct *header )
 
 static bool child_reader( void *ret, CommStruct *header )
 {
-	static char *retstr = NULL;
+	char *retstr = NULL;
+
+
+	CLOBBER_PROTECT( retstr );
 
 	switch ( header->type )
 	{

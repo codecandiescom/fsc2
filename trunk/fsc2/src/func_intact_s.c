@@ -44,20 +44,24 @@ static Var *f_schanged_child( Var *v );
 
 Var *f_screate( Var *var )
 {
-	static Var *v;
-	static IOBJECT *new_io;
+	Var *v = var;
+	IOBJECT *new_io = NULL;
 	IOBJECT *ioi;
-	static long type;
-	static double start_val, end_val;
-	static double step;
-	static char *label = NULL;
-	static char *help_text = NULL;
+	long type;
+	double start_val, end_val;
+	double step 0.0;
+	char *label = NULL;
+	char *help_text = NULL;
 
 
-	v = var;
-	new_io = NULL;
-	step = 0.0;
-	label = help_text = NULL;
+	CLOBBER_PROTECT( v );
+	CLOBBER_PROTECT( new_io );
+	CLOBBER_PROTECT( type );
+	CLOBBER_PROTECT( start_val );
+	CLOBBER_PROTECT( end_val );
+	CLOBBER_PROTECT( step );
+	CLOBBER_PROTECT( label );
+	CLOBBER_PROTECT( help_text );
 
 	/* We need at least the type of the slider and the minimum and maximum
 	   value */

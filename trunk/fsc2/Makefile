@@ -50,6 +50,16 @@ OWNER             := fsc2
 GROUP             := uucp
 
 
+# Now set the system wide path for files to be included by EDL files when
+# after the '#INCLUDE' directive a file name enclosed in '<' and '>' is
+# found. This is for the case a system wide EDL files etc. has been set up
+# and from which users may use include files without going to the hassle
+# always to write out the full path. If no such repository exists its save
+# to leave this variable undefined.
+
+# DEF_INCL_DIR      := /scratch/EDL/includes
+
+
 # The next variable defines the GPIB library to use, it must be set to either
 # 'LLP' for the LLP library, 'NI' for the National Instruments library or
 # 'JTT' for the library written by me. Alternatively, if no GPIB support is
@@ -460,6 +470,11 @@ endif
 
 ifndef OWNER
 	OWNER = fsc2
+endif
+
+
+ifdef DEF_INCL_DIR
+	CONFFLAGS += -DDEF_INCL_DIR=$(DEF_INCL_DIR)
 endif
 
 

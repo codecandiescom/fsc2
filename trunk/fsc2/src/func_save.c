@@ -38,7 +38,8 @@ static void ff_format_check( Var *v );
 static long do_printf( long file_num, Var *v );
 static long print_browser( int browser, int fid, const char* comment );
 static long T_fprintf( long fn, const char *fmt, ... );
-static long print_include( int fid, char *cp, const char *comment );
+static long print_include( int fid, char *cp, const char *comment,
+						   const char *cur_file );
 
 
 /*----------------------------------------------------------------*/
@@ -74,9 +75,12 @@ Var *f_openf( Var *var )
 	char *fn;
 	char *m;
 	struct stat stat_buf;
-	static FILE *fp = NULL;
-	static FILE_LIST *old_File_List;
+	FILE *fp = NULL;
+	FILE_LIST *old_File_List;
 
+
+	CLOBBER_PROTECT( fp );
+	CLOBBER_PROTECT( old_File_List );
 
 	/* If there was a call of 'f_save()' without a previous call to 'f_getf()'
 	   then 'f_save()' already called 'f_getf()' by itself and now does not
@@ -221,16 +225,17 @@ Var *f_getf( Var *var )
 	Var *cur;
 	int i;
 	char *s[ 5 ] = { NULL, NULL, NULL, NULL, NULL };
-	static FILE *fp;
+	FILE *fp;
 	size_t len;
 	struct stat stat_buf;
-	static char *r = NULL;
+	char *r = NULL;
 	char *new_r, *m;
-	static FILE_LIST *old_File_List;
+	FILE_LIST *old_File_List = NULL;
 
 
-	r = NULL;
-	old_File_List = NULL;
+	CLOBBER_PROTECT( fp );
+	CLOBBER_PROTECT( r );
+	CLOBBER_PROTECT( old_File_List );
 
 	/* If there was a call of 'f_save()' without a previous call to 'f_getf()'
 	   then 'f_save()' already called 'f_getf()' by itself and now does not
@@ -769,7 +774,7 @@ Var *f_fsave( Var *v )
 
 	f_format_check( v );
 
-	return vars_push( INT_VAR, ( long ) do_printf( file_num, v ) );
+	return vars_push( INT_VAR, do_printf( file_num, v ) );
 }
 
 
@@ -1135,21 +1140,26 @@ static void ff_format_check( Var *v )
 
 static long do_printf( long file_num, Var *v )
 {
-	static char *fmt_start,
-		        *fmt_end,
-		        *sptr;
-	static Var *cv;
-	static long count;
+	char *fmt_start,
+	     *fmt_end,
+	     *sptr;
+	Var *cv;
+	long count = 0;
 	char store;
 	int need_vars;
 	int need_type;
 
 
+	CLOBBER_PROTECT( fmt_start );
+	CLOBBER_PROTECT( fmt_end );
+	CLOBBER_PROTECT( sptr );
+	CLOBBER_PROTECT( cv );
+	CLOBBER_PROTECT( count );
+
 	sptr = v->val.sptr;
 	fmt_start = fmt_end = CHAR_P T_malloc( strlen( sptr ) + 2 );
 	strcpy( fmt_start, sptr );
 	cv = v->next;
-	count = 0;
 
 	TRY
 	{
@@ -1527,8 +1537,9 @@ static long print_browser( int browser, int fid, const char* comment )
 					cp++;
 				if ( ! strncmp( cp, "#INCLUDE", 8 ) )
 				{
-					count += T_fprintf( fid, "%s%s\n", comment, lp );
-					count += print_include( fid, cp + 8, comment );
+					count += T_fprintf( fid, "%s// %s\n", comment, lp );
+					count += print_include( fid, cp + 8, comment,
+											EDL.in_file );
 					continue;
 				}
 			}
@@ -1558,44 +1569,112 @@ static long print_browser( int browser, int fid, const char* comment )
 
 #define PRINT_BUF_SIZE 1025
 
-static long print_include( int fid, char *cp, const char *comment )
+static long print_include( int fid, char *cp, const char *comment,
+						   const char *cur_file )
 {
 	char delim;
-	static char *ncp;
 	char *ep;
-	static FILE *finc;
+	FILE *finc = NULL;
 	char buf[ PRINT_BUF_SIZE ];
 	static long count;
+	char *file_name = NULL;
+	struct passwd *pwe;
 
 
-	ncp = cp;
-	count = 0L;
+	CLOBBER_PROTECT( delim );
+	CLOBBER_PROTECT( file_name );
+	CLOBBER_PROTECT( cp );
+
+	if ( ! strcmp( cur_file, EDL.in_file ) )
+		 count = 0L;
 
 	/* Skip leading white space */
 
-	while ( *ncp == ' ' || *ncp == '\t' )
-		ncp++;
+	while ( *cp == ' ' || *cp == '\t' )
+		cp++;
 
 	/* Try to extract the file name */
 
-	ep = ncp++;
+	ep = cp++;
 	delim = *ep++;
-	if ( delim == '<' )
+
+	if ( delim != '"' && delim != '<' )
+		return count;
+	else if ( delim == '<' )
 		delim = '>';
+
 	while ( *ep != '\0' && *ep != delim )
 		ep++;
 
 	/* Give up when no file name could be extracted */
 
 	if ( *ep == '\0' || ( delim != '"' && delim != '>' ) )
-		return 0L;
+		return count;
 
 	*ep = '\0';
 
+	/* Now adorn the file name with the required path. If the include file is
+	   enclosed in '<' and '>' we try to use the system wide default include
+	   directory (if it is defined, otherwise we give up). If its included
+	   in double quotes we check if the name starts with a '/', indicating
+	   an absolute path, in which case we take it. If it starts with "~/"
+	   the '~' gets replaced by the users home directory. If we find only
+	   a name or a relative path we prepend the name of the directory the
+	   EDL file is from in which we found the '#INCLUDE' directive. */
+	   
+	TRY
+	{
+		if ( delim == '"' )
+		{
+			if ( *cp == '/' )
+				file_name = T_strdup( cp );
+			else if ( *cp == '~' && cp[ 1 ] == '/' )
+			{
+				pwe = getpwuid( getuid( ) );
+				file_name = CHAR_P T_malloc(   strlen( pwe->pw_dir ) 
+											 + strlen( cp ) );
+				strcpy( file_name, pwe->pw_dir );
+				strcat( file_name, cp + 1 );
+			}
+			else
+			{
+				file_name = T_strdup( cur_file );
+				*strrchr( file_name, '/' ) = '\0';
+				file_name = CHAR_P T_realloc( file_name, strlen( file_name )
+											  + strlen( cp ) + 2 );
+				strcat( file_name, "/" );
+				strcat( file_name, cp );
+			}
+
+		}
+		else
+		{
+#if defined DEF_INCL_DIR
+			file_name = CHAR_P T_malloc(   strlen( cp )
+										 + strlen( DEF_INCL_DIR ) + 3 );
+			strcpy( file_name, DEF_INCL_DIR );
+			if ( file_name[ strlen( file_name ) - 1 ] != '/' )
+				strcat( file_name, "/" );
+			strcat( file_name, cp );
+#else
+			return count;
+#endif
+		}
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( file_name );
+		return count;
+	}
+
 	/* Try to open the include file, give up on failure */
 
-	if ( ( finc = fopen( ncp, "r" ) ) == NULL )
-		return 0L;
+	if ( ( finc = fopen( file_name, "r" ) ) == NULL )
+	{
+		T_free( file_name );
+		return count;
+	}
 
 	/* Now print the include file, taking care of include files within the
 	   include file - the limitation within fsc2_clean to a maximum of
@@ -1603,8 +1682,8 @@ static long print_include( int fid, char *cp, const char *comment )
 
 	TRY
 	{
-		count = T_fprintf( fid, "%s//--- %s - start -----------------\n",
-						   comment, ncp );
+		count = T_fprintf( fid, "%s// --- %c%s%c starts here --------------\n",
+						   comment, delim == '"' ? '"' : '<', cp, delim );
 
 		while ( fgets( buf, PRINT_BUF_SIZE, finc ) != NULL )
 		{
@@ -1615,22 +1694,23 @@ static long print_include( int fid, char *cp, const char *comment )
 				ep++;
 
 			if ( ! strncmp( ep, "#INCLUDE", 8 ) )
-				count += print_include( fid, ep + 8, comment );
+				count += print_include( fid, ep + 8, comment, file_name );
 		}
 
+		count = T_fprintf( fid, "%s// --- %c%s%c ends here ----------------\n",
+						   comment, delim == '"' ? '"' : '<', cp, delim );
 		fclose( finc );
 
-		return count += T_fprintf( fid,
-								   "%s//--- %s - end ------------------\n",
-								   comment, ncp );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
 		fclose( finc );
+		T_free( file_name );
 		RETHROW( );
 	}
 
+	T_free( file_name );
 	return count;
 }
 
@@ -1740,9 +1820,9 @@ Var *f_save_c( Var *v )
 static long T_fprintf( long fn, const char *fmt, ... )
 {
 	long n;                     /* number of bytes we need to write */
-	static size_t size;         /* guess for number of characters needed */
-	static char *p;
-	static long file_num;
+	size_t size = 1024;         /* guess for number of characters needed */
+	char *p;
+	long file_num = fn;
 	va_list ap;
 	char *new_name;
 	FILE *new_fp;
@@ -1753,7 +1833,9 @@ static long T_fprintf( long fn, const char *fmt, ... )
 	long count;
 
 
-	file_num = fn;
+	CLOBBER_PROTECT( size );
+	CLOBBER_PROTECT( p );
+	CLOBBER_PROTECT( file_num );
 
 	/* If the file has been closed because of insufficient space and no
        replacement file has been given just don't print */
@@ -1775,8 +1857,6 @@ static long T_fprintf( long fn, const char *fmt, ... )
 	}
 
 	file_num -= FILE_NUMBER_OFFSET;
-
-	size = 1024;
 
 	/* First we've got to find out how many characters we need to write out */
 
