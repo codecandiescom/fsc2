@@ -111,6 +111,7 @@
 @item @code{INVERTED}         @tab
 @item @code{IMP}              @tab
 @item @code{IMPEDANCE}        @tab
+@item @code{is_file}          @tab Built-in function (@pxref{is_file})
 @item                         @tab
 @item @code{kA}               @tab Unit, Kilo-Ampere
 @item @code{kA}               @tab Unit, Kilo-Ampere
