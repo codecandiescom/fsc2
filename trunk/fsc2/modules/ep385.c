@@ -46,14 +46,13 @@ int ep385_init_hook( void )
 	pulser_struct.has_pods = UNSET;
 
 	/* Set global variable to indicate that GPIB bus is needed */
-
+/*
 	need_GPIB = SET;
-
+*/
 	/* We have to set up the global structure for the pulser, especially the
 	   pointers for the functions that will get called from pulser.c */
 
-	ep385.needs_update = UNSET;
-	ep385.is_running   = SET;
+	ep385.needs_update = SET;
 	ep385.keep_all     = UNSET;
 	ep385.is_cw_mode   = UNSET;
 
@@ -100,22 +99,22 @@ int ep385_init_hook( void )
 
 	/* Finally, we initialize variables that store the state of the pulser */
 
-	ep385.is_timebase = UNSET;
-	ep385.timebase_mode = EXTERNAL;
 	ep385.is_trig_in_mode = UNSET;
 	ep385.is_repeat_time = UNSET;
 	ep385.is_neg_delay = UNSET;
 	ep385.neg_delay = 0;
+	ep385.is_running = SET;
+	ep385.is_timebase = UNSET;
+	ep385.timebase_mode = EXTERNAL;
 
 	for ( i = 0; i < MAX_CHANNELS; i++ )
 	{
 		ep385.channel[ i ].self = i;
 		ep385.channel[ i ].function = NULL;
-		ep385.channel[ i ].state = SET;
 		ep385.channel[ i ].pulse_params = NULL;
 		ep385.channel[ i ].num_pulses = 0;
 		ep385.channel[ i ].num_active_pulses = 0;
-
+		ep385.channel[ i ].needs_update = SET;
 	}
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -221,6 +220,8 @@ int ep385_exp_hook( void )
 
 	if ( ! ep385.is_cw_mode )
 	{
+		ep385_do_update( );
+
 		/* Now we have to tell the pulser about all the pulses */
 /*
 		ep385_IN_SETUP = SET;
@@ -263,7 +264,7 @@ int ep385_end_of_exp_hook( void )
 		return 1;
 
 	gpib_write( ep385.device, cmd, strlen( cmd ) );
-	ep385_run( ep385.has_been_running );
+	ep385_run( UNSET );
 	gpib_local( ep385.device );
 
 	return 1;
@@ -341,72 +342,27 @@ Var *pulser_state( Var *v )
 
 
 	if ( v == NULL )
-		return vars_push( INT_VAR, ( long ) ep385.is_running );
+		return vars_push( INT_VAR, 1 );
 
 	state = get_boolean( v );
 
 	if ( FSC2_MODE != EXPERIMENT )
-		return vars_push( INT_VAR, ( long ) ( ep385.is_running = state ) );
+		return vars_push( INT_VAR, 1 );
 
 	ep385_run( state );
-	return vars_push( INT_VAR, ( long ) ep385.is_running );
+	return vars_push( INT_VAR, state  );
 }
 
 
 /*------------------------------------------------------------*/
-/* Switches an individual channel of the pulser on or off or, */
-/* if called with just one argument, returns the state.       */
 /*------------------------------------------------------------*/
 
 Var *pulser_channel_state( Var *v )
 {
-	int channel;
-	bool state;
-
-
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
-
-	channel = get_strict_long( v, "pulser channel" ) - CHANNEL_OFFSET;
-
-	if ( channel < 0 || channel >= MAX_CHANNELS )
-	{
-		print( FATAL, "Invalid channel parameter.\n" );
-		THROW( EXCEPTION );
-	}
-
-	v = vars_pop( v );
-	if ( v == NULL )
-		return vars_push( INT_VAR,
-						  ( long ) ( ep385.channel[ channel ].state ?
-									 1 : 0 ) );
-
-	if ( v->type == INT_VAR )
-		state = v->val.lval != 0 ? SET : UNSET;
-	else if ( v->type == FLOAT_VAR )
-		state = v->val.dval != 0.0 ? SET : UNSET;
-	else
-	{
-		if ( ! strcasecmp( v->val.sptr, "OFF" ) )
-			 state = UNSET;
-		else if ( ! strcasecmp( v->val.sptr, "ON" ) )
-			state = SET;
-		else
-		{
-			print( FATAL, "Invalid argument.\n" );
-			THROW( EXCEPTION );
-		}
-	}
-
-	ep385.channel[ channel].state = state;
-
-	if ( FSC2_MODE == EXPERIMENT )
-		ep385_set_channel_state( channel, state );
-
-	return vars_push( INT_VAR, ( long ) state );
+	v = v;
+	print( SEVERE, "Individual channels can't be switched on or off for "
+		   "this device.\n" );
+	return vars_push( INT_VAR, 0 );
 }
 
 
