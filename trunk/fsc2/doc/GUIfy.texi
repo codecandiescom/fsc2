@@ -566,20 +566,20 @@ The success (or reason of failure if you're unlucky) can be determined
 from the return value:
 @table @samp
 @item 0
-Everything ok, program finished successfully
+Everything's ok, program finished successfully.
 @item -1
 An internal error has been detected in the program handling the
-connection to @code{fsc2} (please send a bug report)
+connection to @code{fsc2} (please send a bug report).
 @item 1
-A different user is already running fsc2
+A different user is already running fsc2.
 @item 2
 @code{fsc2} is busy, i.e.@: it's already running an experiment
-(or a test run)
+or a test run.
 @item 3
-Internal error in @code{fsc2} detected (please send a bug report)
+Internal error in @code{fsc2} detected (please send a bug report).
 @item 4
-@code{fsc2} could not be started (probably because its
-executable could not found)
+@code{fsc2} could not be started (probably because its executable could
+not found).
 @end table
 
 Using these programs you are able to send @code{EDL} programs to
