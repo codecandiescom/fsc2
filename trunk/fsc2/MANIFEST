@@ -11,7 +11,6 @@ Makefile
 README
 README.mail
 TODO
-todo
 
 Fcntl_Lock/Changes
 Fcntl_Lock/Fcntl_Lock.pm
@@ -83,6 +82,7 @@ config/rs690.conf
 config/rs_spec10.conf
 config/s_band_magnet_broad.conf
 config/s_band_magnet_narrow.conf
+config/spectrapro_300i.calib
 config/spectrapro_300i.conf
 config/sr510.conf
 config/sr530.conf
@@ -100,6 +100,7 @@ doc/GUIfy.texi
 doc/Makefile
 doc/ack.texi
 doc/back.png
+doc/background.gif
 doc/builtins.texi
 doc/cloning.texi
 doc/cmd.texi
@@ -111,6 +112,7 @@ doc/examples.texi
 doc/forward.png
 doc/fsc2.1
 doc/fsc2.css
+doc/fsc2.gif
 doc/fsc2.texi
 doc/fsc2fig1.png
 doc/fsc2fig2.png
@@ -226,6 +228,9 @@ modules/rs_spec10_int.c
 modules/rs_spec10_util.c
 modules/s_band_magnet.c.tmpl
 modules/spectrapro_300i.c
+modules/spectrapro_300i.h
+modules/spectrapro_300i_lexer.l
+modules/spectrapro_300i_ll.c
 modules/sr510.c
 modules/sr530.c
 modules/sr810.c
@@ -335,12 +340,13 @@ src/graphics.c
 src/graphics.h
 src/http.c
 src/http.h
-src/inline.c
 src/inline.h
 src/ipc.c
 src/ipc.h
 src/loader.c
 src/loader.h
+src/mail.c
+src/mial
 src/module_util.c
 src/module_util.h
 src/phases.c
@@ -436,6 +442,6 @@ ni6601/lib/Makefile
 ni6601/lib/ni6601.h
 ni6601/lib/ni6601_lib.c
 ni6601/lib/ni6601_lib.txt
-ni6601/lib/ni_test.c
 
 ni6601/utils/ni6601
+ni6601/utils/ni_test.c

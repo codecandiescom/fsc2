@@ -148,8 +148,7 @@ struct Curve_2d {
 	bool is_scale_set;
 
 	Scaled_Point *points;
-	XPoint *xpoints,
-		   *xpoints_s;
+	XPoint *xpoints;
 	long count;             /* points in curve */
 
 	bool needs_recalc;

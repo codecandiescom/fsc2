@@ -1,7 +1,7 @@
 VARS:
 
-N = 100;
-M = 100;
+N = 500;
+M = 500;
 K;
 
 
@@ -13,7 +13,8 @@ EXP:
 
 set_seed( 23423 );
 
-FOR K = 1:10000 {
-	display( ceil( N * random( ) ), ceil( M * random( ) ), random( ) );
+FOREVER {// K = 1:10000 {
+	display( ceil( N * random( ) ), ceil( M * random( ) ), random( ), 1,
+			 ceil( N * random( ) ), ceil( M * random( ) ), random( ), 2 );
 	wait( 150 ms );
 }

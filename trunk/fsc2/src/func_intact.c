@@ -950,7 +950,7 @@ static int tool_box_close_handler( FL_FORM *a, void *b )
 /*---------------------------------------------------------------------*/
 /* Function appends an object to the tool box. In vertical layout mode */
 /* it will be drawn at the bottom of the tool box, in horizontal mode  */
-/* to thr right of the other objects.                                  */
+/* to the right of the other objects.                                  */
 /*---------------------------------------------------------------------*/
 
 static FL_OBJECT *append_object_to_form( IOBJECT *io )
