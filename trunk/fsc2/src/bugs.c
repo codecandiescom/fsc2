@@ -17,6 +17,8 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	FILE *tmp;
 	int tmp_fd;
 	char filename[ ] = P_tmpdir "/fsc2XXXXXX";
+	char cur_line[ FL_BROWSER_LINELENGTH ];
+	char *clp;
 	int lines;
 	int i;
 	char *cmd, *user = NULL;
@@ -62,7 +64,14 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	fprintf( tmp, "Content of program browser:\n\n" );
 	lines = fl_get_browser_maxline( main_form->browser );
 	for ( i = 1; i <= lines; i++ )
-		fprintf( tmp, "%s\n", fl_get_browser_line( main_form->browser, i ) );
+	{
+		strcpy( cur_line, fl_get_browser_line( main_form->browser, i ) );
+		clp = cur_line;
+		if ( *clp == '@' )
+			while ( *clp++ != 'f' )
+				;
+		fprintf( tmp, "%s\n", clp );
+	}
 	fprintf( tmp, "--------------------------------------------------\n\n" );
 
 	fprintf( tmp, "Content of output browser:\n\n" );
@@ -197,6 +206,14 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	{
 		cmd = get_string( 4 + strlen( ed ) + strlen( filename ) );
 		strcpy( cmd, ed );
+
+		/* If the EDITOR environment variable contains the '-nw' option
+		   get rid of it - we need a new window! */
+
+		if ( ( clp = strstr( cmd, "-nw" ) ) != NULL && clp - 1 > cmd &&
+			 isblank( *( clp - 1 ) ) &&
+			 ( *( clp + 3 ) == '\0' || isblank( *( clp + 3 ) ) ) )
+			strcpy( clp, clp + 3 );
 	}
 	
 	strcat( cmd, " +6 " );         /* does this work with all editors ? */
