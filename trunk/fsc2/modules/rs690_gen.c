@@ -439,9 +439,9 @@ bool rs690_set_phase_reference( int phs, int function )
 
 	if ( f->phase_setup != NULL )
 	{
-		print( SEVERE, "Phase setup for function %s has already been done.\n",
+		print( FATAL, "Phase setup for function %s has already been done.\n",
 			   f->name );
-		return FAIL;
+		THROW( EXCEPTION );
 	}
 
 	rs690_phs[ phs ].is_defined = SET;
