@@ -267,10 +267,10 @@ void new_data_callback( FL_OBJECT *a, long b )
 /* that contains at least information about the type of message. Many   */
 /* of the messages can only be read by the parent. These are:           */
 /* C_EPRINT, C_SHOW_MESSAGE, C_SHOW_ALERT, C_SHOW_CHOICES,              */
-/* C_SHOW_FSELECTOR, C_PROG and C_OUTPUT.                               */
+/* C_SHOW_FSELECTOR, C_PROG, C_OUTPUT and C_CLEAR_CURVE.                */
 /* These are the implemented requests.                                  */
 /* The remaining types are used for passing the replies to the request  */
-/* back to the child process. THese are also the ones where a return    */
+/* back to the child process. These are the only ones where a return    */
 /* value is be needed. Since the child child itself triggered the reply */
 /* by its request it also knows what type of return it has to expect    */
 /* and thus has to pass a pointer to a variable of the appropriate type */
@@ -502,6 +502,18 @@ long reader( void *ret )
 			/* send string from input form to child */
 
 			writer( C_STR, show_input( str[ 0 ], str[ 1 ] ) );
+			retval = 0;
+			break;
+
+		case C_CLEAR_CURVE :
+			assert( I_am == PARENT );       /* only to be read by the parent */
+
+			kill( child_pid, DO_SEND );
+
+			/* Clear the curve with the number from the headers `data.len'
+			   entry */
+
+			clear_curve( header.data.len );
 			retval = 0;
 			break;
 
@@ -829,6 +841,16 @@ void writer( int type, ... )
 			for ( i = 0; i < 2; i++ )
 				if ( header.data.str_len[ i ] > 0 )
 					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
+			break;
+
+		case C_CLEAR_CURVE :
+			assert( I_am == CHILD );      /* only to be written by the child */
+
+			/* Put the curve number on the headers `data.len' entry and send
+			   REQUEST to the parent */
+
+			header.data.len = va_arg( ap, long );
+			write( pd[ WRITE ], &header, sizeof( CS ) );
 			break;
 
 		case C_STR :
