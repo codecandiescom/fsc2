@@ -53,7 +53,7 @@ enum {
 };
 
 
-int    ps2n( char *txt );
+int    get_pulse_num( char *txt );
 Pulse *pulse_new( char *txt );
 Pulse *pulse_find( int num );
 Var   *pulse_get_prop( char *txt, int type );

@@ -226,8 +226,8 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 					return P_TOK;
 				}
 
-				prepslval.vptr =
-				              vars_push( INT_VAR, ( long ) ps2n( prepstext ) );
+				prepslval.vptr = vars_push( INT_VAR,
+										 ( long ) get_pulse_num( prepstext ) );
 				return( RPP_TOK );
 			}
 
