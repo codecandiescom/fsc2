@@ -39,7 +39,7 @@ FOR I = 1 : M {
 wait( 1 s );
 clear_marker( );
 
-WHILE  d > 2 {
+WHILE  d > sqrt( 2 ) {
 	FOR I = 1 : 4 {
 		f[ I ] += v;
 		K = round( f[ I ] + 1 );
