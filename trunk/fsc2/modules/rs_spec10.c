@@ -505,12 +505,13 @@ Var *ccd_camera_get_picture( Var *v )
 
 		nv = vars_push_matrix( INT_REF, 2, height, width );
 
-		/* There is a bug in the PVCAM library: For some parallel hardware
-		   binning sizes the library needs two more bytes than would be
-		   required to hold all points (when stored as 2-byte values). In
-		   these cases the very first element of the returned array contains
-		   a bogus value and the real data seem to start only at the second
-		   element. This hack tries to avoid this problem.*/
+		/* There is a bug (or undocumented feature :-) in the PVCAM library:
+		   For some parallel hardware binning sizes the library needs two more
+		   bytes than would be required to hold all points (when stored as
+		   2-byte values). In these cases the very first element of the
+		   returned array contains a bogus value and the real data seem to
+		   start only at the second element. This hack tries to avoid the
+		   problem.*/
 
 		cf = frame + size / sizeof *frame - width;
 
@@ -683,12 +684,13 @@ Var *ccd_camera_get_spectrum( Var *v )
 
 		nv = vars_push( INT_ARR, NULL, width );
 
-		/* There is a bug in the PVCAM library: For some parallel hardware
-		   binning sizes the library needs two more bytes than would be
-		   required to hold all points (when stored as 2-byte values). In
-		   these cases the very first element of the returned array contains
-		   a bogus value and the real data seem to start only at the second
-		   element. This hack tries to avoid this problem.*/
+		/* There is a bug (or undocumented feature :-) in the PVCAM library:
+		   For some parallel hardware binning sizes the library needs two more
+		   bytes than would be required to hold all points (when stored as
+		   2-byte values). In these cases the very first element of the
+		   returned array contains a bogus value and the real data seem to
+		   start only at the second element. This hack tries to avoid the
+		   problem.*/
 
 		cf = frame + size / sizeof *frame - width;
 
